@@ -213,31 +213,16 @@ private:
     //!@name Private Members
     //@{
 
-    boost::shared_ptr< MapEpetra > M_mapWithoutMesh;
-    vectorPtr_Type M_uk;
-    vectorPtr_Type M_velImplicit;
-    vectorPtr_Type M_vectorMeshMovement;
-    bool M_domainVelImplicit;
-    bool M_convectiveTermDer;
-    UInt M_interface;
-    matrixPtr_Type M_meshBlock;
+    boost::shared_ptr<MapEpetra>         M_mapWithoutMesh;
+    //This vector is used in the shapeDerivatives method since a
+    //copy of the solution at the current iteration k is necessary
+    vectorPtr_Type                       M_uk;
+    UInt                                 M_interface;
+    matrixPtr_Type                       M_meshBlock;
     FSIOperator::fluidPtr_Type::value_type::matrixPtr_Type M_shapeDerivativesBlock;
-    matrixPtr_Type M_solidDerBlock;
-
-<<<<<<< HEAD
+    matrixPtr_Type                       M_solidDerBlock;
+    //std::vector<fluidBchandlerPtr_Type>    M_BChsLin;
     //@}
-=======
-       boost::shared_ptr<MapEpetra>         M_mapWithoutMesh;
-       //This vector is used in the shapeDerivatives method since a
-       //copy of the solution at the current iteration k is necessary
-       vectorPtr_Type                       M_uk;
-       UInt                                 M_interface;
-       matrixPtr_Type                       M_meshBlock;
-       FSIOperator::fluidPtr_Type::value_type::matrixPtr_Type M_shapeDerivativesBlock;
-       matrixPtr_Type                       M_solidDerBlock;
-       //std::vector<fluidBchandlerPtr_Type>    M_BChsLin;
-       //@}
->>>>>>> restoringFIinClassMonolithicGI
 
     //! Factory method
     static FSIOperator* instantiate()

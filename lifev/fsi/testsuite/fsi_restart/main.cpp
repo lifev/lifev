@@ -300,7 +300,7 @@ public:
 
         vectorPtr_Type solution ( new vector_Type( (*M_fsi->FSIOper()->couplingVariableMap()) ) );
 
-        *solution = M_fsi->FSIOper()->extrapolation( *solution );
+        M_fsi->FSIOper()->extrapolation( *solution );
 
         //Initialize the exporters
         M_fsi->FSIOper()->exportSolidDisplacement(*M_solidDisp);//    displacement(), M_offset);
@@ -320,7 +320,7 @@ public:
             boost::timer _timer;
             FC0.renewParameters( *M_fsi, 3 );
 
-            *solution = M_fsi->FSIOper()->extrapolation( *solution );
+            M_fsi->FSIOper()->extrapolation( *solution );
 
             M_fsi->iterate( solution );
 
@@ -331,7 +331,7 @@ public:
             }
             else
             {
-                M_fsi->FSIOper()->setSolution( *solution );
+                M_fsi->FSIOper()->updateSolution( *solution );
             }
 
             if(iter%M_saveEvery==0)

@@ -297,7 +297,7 @@ public:
 
 		vectorPtr_Type solution ( new vector_Type( (*M_fsi->FSIOper()->couplingVariableMap()) ) );
 
-		*solution = M_fsi->FSIOper()->extrapolation( *solution );
+		M_fsi->FSIOper()->extrapolation( *solution );
 
 		for ( ; M_data->dataFluid()->dataTime()->canAdvance(); M_data->dataFluid()->dataTime()->updateTime(),M_data->dataSolid()->dataTime()->updateTime(), ++iter)
 		{
@@ -343,7 +343,7 @@ public:
 			}
 
 			// This is just the previous solution. Should use the extrapolation from time advance
-			*solution = M_fsi->FSIOper()->extrapolation( *solution );
+			M_fsi->FSIOper()->extrapolation( *solution );
 
 			M_fsi->iterate( solution );
 
