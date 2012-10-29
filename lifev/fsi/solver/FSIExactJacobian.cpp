@@ -308,20 +308,20 @@ void FSIExactJacobian::eval(const vector_Type& _disp,
         if ( iter==0 || !this->M_data->dataFluid()->isSemiImplicit() )
         {
             *M_beta *= 0.;
-            vector_Type meshDisp( M_meshMotion->disp(), Repeated );
 
             if( iter==0 )
             {
                 M_ALETimeAdvance->updateRHSFirstDerivative(M_data->dataFluid()->dataTime()->timeStep());
-                M_ALETimeAdvance->shiftRight(meshDisp);
-                M_ALETimeAdvance->extrapolation(meshDisp);//closer initial solution
+                M_ALETimeAdvance->shiftRight(M_meshMotion->disp());
+                M_ALETimeAdvance->extrapolation(M_meshMotion->disp());//closer initial solution
             }
             else
             {
-                M_ALETimeAdvance->setSolution(meshDisp);
+                M_ALETimeAdvance->setSolution(M_meshMotion->disp());
             }
 
-            this->moveMesh(meshDisp);
+            vector_Type meshDispRepeated( M_meshMotion->disp(), Repeated );
+            this->moveMesh(meshDispRepeated);
             vector_Type vel ( this->M_ALETimeAdvance->velocity( ) );
             transferMeshMotionOnFluid( vel, veloFluidMesh() );
             M_fluidTimeAdvance->extrapolation(*M_beta);//explicit

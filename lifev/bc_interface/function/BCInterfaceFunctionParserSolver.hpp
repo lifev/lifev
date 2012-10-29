@@ -496,32 +496,32 @@ BCInterfaceFunctionParserSolver< FSIOperator >::updatePhysicalSolverVariables()
             break;
 
         case f_flux:
-	
-       	    if ( M_physicalSolver->isFluid() )	    
+
+               if ( M_physicalSolver->isFluid() )
             {
 #ifdef HAVE_LIFEV_DEBUG
             debugStream( 5023 ) << "                                              f_flux(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->fluid().flux( M_flag ) << "\n";
 
 #endif
-	        setVariable( "f_flux", 0.0 );
+            setVariable( "f_flux", 0.0 );
             }
-       	    else
-       	    {
+            else
+            {
 #ifdef HAVE_LIFEV_DEBUG
-                Debug( 5023 ) << "                                              f_flux(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->fluid().flux( M_flag, M_physicalSolver->solution() ) << "\n";
+                Debug( 5023 ) << "                                              f_flux(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->fluid().flux( M_flag, *M_physicalSolver->fluid().solution() ) << "\n";
 #endif
-                setVariable( "f_flux", M_physicalSolver->fluid().flux( M_flag, M_physicalSolver->solution() ) );
-       	    }
+                setVariable( "f_flux", M_physicalSolver->fluid().flux( M_flag, *M_physicalSolver->fluid().solution() ) );
+            }
 
             break;
 
         case f_pressure:
 
 #ifdef HAVE_LIFEV_DEBUG
-            debugStream( 5023 ) << "                                              f_pressure(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->fluid().pressure( M_flag ) << "\n";
+            debugStream( 5023 ) << "                                              f_pressure(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->fluid().pressure( M_flag, *M_physicalSolver->fluid().solution() ) << "\n";
 #endif
 
-            setVariable( "f_pressure", M_physicalSolver->fluid().pressure( M_flag, M_physicalSolver->solution() ) );
+            setVariable( "f_pressure", M_physicalSolver->fluid().pressure( M_flag, *M_physicalSolver->fluid().solution() ) );
 
             break;
 

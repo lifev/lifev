@@ -168,6 +168,7 @@ public:
     //! @name Get Methods
     //@{
     vector_Type const& disp()     const {return *M_disp;}
+    vector_Type& disp()                 {return *M_disp;}
 
     MapEpetra const& getMap() const { return M_localMap; }
 

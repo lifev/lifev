@@ -580,9 +580,6 @@ public:
 
             std::cout << "[fsi_run] Iteration " << _i << " was done in : " << _timer.elapsed() << "\n";
 
-            std::cout << "solution norm " << _i << " : "
-                      << M_fsi->displacement().norm2() << "\n";
-
             // CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
             checkResult( M_data->dataFluid()->dataTime()->time() );
         }

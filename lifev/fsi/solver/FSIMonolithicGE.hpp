@@ -73,7 +73,7 @@ namespace LifeV
  MonolithicBlockComposedNN, MonolithicBlockComposedDNND.
  */
    typedef FactorySingleton<Factory<FSIOperator, std::string> >                    FSIFactory_Type;
-	class FSIMonolithicGE : public FSIMonolithic
+    class FSIMonolithicGE : public FSIMonolithic
 {
 public:
 
@@ -144,10 +144,17 @@ public:
     //@{
 
     //! Gets the solution
-    const vector_Type& solution() const { return M_fluidTimeAdvance->singleElement(0); }
+    LIFEV_DEPRECATED( const vector_Type& solution() const )
+    {
+        if ( M_epetraWorldComm->MyPID() == 0 )
+        {
+            std::cerr << std::endl << "Warning: FSIMonolithic::solution() is deprecated!" << std::endl
+                                   << "         You should not access the solution inside FSIOperator or FSIMonolithic!" << std::endl;
+        }
 
-    //! Gets the solution ptr
-    vector_Type* solutionPtr() { return M_fluidTimeAdvance->stencil()[0]; }
+        return  M_fluidTimeAdvance->singleElement(0);
+    }
+
     //@}
 
 

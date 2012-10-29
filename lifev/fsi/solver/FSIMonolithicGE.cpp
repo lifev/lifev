@@ -124,22 +124,22 @@ FSIMonolithicGE::evalResidual( vector_Type&       res,
         // Update displacement
 
         M_beta.reset(new vector_Type(M_uFESpace->map()));
-        vector_Type meshDisp( M_meshMotion->disp(), Repeated );
 
-        this->moveMesh(meshDisp);//initialize the mesh position with the total displacement
+        this->moveMesh(M_meshMotion->disp());//initialize the mesh position with the total displacement
 
         if( iter==0 )
         {
             M_ALETimeAdvance->updateRHSFirstDerivative(M_data->dataFluid()->dataTime()->timeStep());
-            M_ALETimeAdvance->shiftRight(meshDisp);
-            M_ALETimeAdvance->extrapolation(meshDisp);//closer initial solution
+            M_ALETimeAdvance->shiftRight(M_meshMotion->disp());
+            M_ALETimeAdvance->extrapolation(M_meshMotion->disp());//closer initial solution
         }
         else
         {
-            M_ALETimeAdvance->setSolution(meshDisp);
+            M_ALETimeAdvance->setSolution(M_meshMotion->disp());
         }
 
-        this->moveMesh(meshDisp);//initialize the mesh position with the total displacement
+        vector_Type meshDispRepeated( M_meshMotion->disp(), Repeated );
+        this->moveMesh(meshDispRepeated);
         vector_Type vel ( this->M_ALETimeAdvance->velocity( ), Repeated );
         vector_Type fluid(this->M_uFESpace->map());
         interpolateVelocity( vel, fluid );

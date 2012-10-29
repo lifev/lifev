@@ -341,14 +341,16 @@ public:
         }
         if (M_data->method().compare("monolithicGI"))
         {
-            M_fsi->FSIOper()->iterateMesh(M_fsi->displacement());
+            vectorPtr_Type solution ( new vector_Type( (*M_fsi->FSIOper()->couplingVariableMap()) ) );
+            M_fsi->FSIOper()->extrapolation( *solution );
+            M_fsi->FSIOper()->iterateMesh(*solution);
 
-            M_solidDisp->subset(M_fsi->displacement(), offset);
+            M_solidDisp->subset(*solution, offset);
             //            M_solidVel->subset(M_fsi->FSIOper()->solid().velocity(), offset);
 //             *M_solidDisp *= 1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataFluid()->dataTime()->getTimeStep());
 //             *M_solidVel  *= 1/(M_fsi->FSIOper()->solid().rescaleFactor()*M_data->dataFluid()->dataTime()->getTimeStep());
 
-            *M_velAndPressure = M_fsi->displacement();
+            *M_velAndPressure = *solution;
             M_exporterSolid->postProcess( M_data->dataFluid()->dataTime()->time() );
             *M_fluidDisp      = M_fsi->FSIOper()->meshMotion().disp();
             M_exporterFluid->postProcess( M_data->dataFluid()->dataTime()->time() );

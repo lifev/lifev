@@ -350,7 +350,7 @@ public:
      */
     void exportSolidDisplacement( vector_Type& solidDisplacement )
     {
-        solidDisplacement.subset( solution(), M_offset);
+        solidDisplacement.subset( M_fluidTimeAdvance->singleElement(0), M_offset );
         solidDisplacement *= M_solid->rescaleFactor();
     }
 
@@ -392,13 +392,7 @@ public:
 
     //! get the solution vector
     virtual const vector_Type& solution() const = 0;
-
-    //! get the solution vector
-    virtual vector_Type* solutionPtr() = 0;
-
-    //! set the BCs, this method when the boundary conditions  are changed during the simulation
-    //! resets the vector of shared pointers to the boundary conditions in the operator and preconditioner
-
+    
     //@}
 
 
@@ -452,13 +446,13 @@ protected:
         this->M_fluidTimeAdvance->shiftRight(solution);
         if(M_data->dataFluid()->conservativeFormulation())
             this->M_fluidMassTimeAdvance->shiftRight(M_fluid->matrixMass()*solution);
-        this->M_solidTimeAdvance->shiftRight(solution);	
+        this->M_solidTimeAdvance->shiftRight(solution);
     }
 
     //! Constructs the solid FESpace
     /**
        Creates the solid FESpace with an unpartitioned mesh, necessary step to create the dof interconnections
-       at the interface. The solid FESpace will be reset in variablesInit using the partitioned mesh.
+       at the interface. The solid FESpace will be reset in variablesInit using the partitioned mesh.export
        If the interface map is created offline this method is never called.
        \param dOrder: discretization order
      */

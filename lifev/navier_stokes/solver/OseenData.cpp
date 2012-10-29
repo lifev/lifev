@@ -105,7 +105,7 @@ OseenData::OseenData( const OseenData& oseenData ) :
         M_ZSectionFinal                    ( oseenData.M_ZSectionFinal ),
         M_NbPolygonEdges                   ( oseenData.M_NbPolygonEdges ),
         M_stabilizationList                ( oseenData.M_stabilizationList ),
-        M_conservativeFormulation          ( true )
+        M_conservativeFormulation          ( false )
 {
 }
 
