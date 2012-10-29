@@ -61,11 +61,6 @@ void FSIMonolithicGE::setupFluidSolid( UInt const fluxes )
                                               *M_monolithicMap,
                                               fluxes));
 
-    //             if (isLinearFluid())// to be implemented
-    //                 M_fluidLin.reset(new FSIOperator::fluidlin_raw_type(dataFluid(),
-    //                                                                    *M_uFESpace,
-    //                                                                    *M_pFESpace,
-    //                                                                    *M_epetraComm));
     M_rhs.reset(new vector_Type(*this->M_monolithicMap));
     M_rhsFull.reset(new vector_Type(*this->M_monolithicMap));
     M_beta.reset  (new vector_Type(M_uFESpace->map()));
@@ -79,11 +74,6 @@ void FSIMonolithicGE::setupFluidSolid( UInt const fluxes )
                    M_offset
                   );
 
-    //             if (isLinearSolid())// to be implemented with the offset
-    //                 M_solidLin.reset(new FSIOperator::solidlin_raw_type(dataSolid(),
-    //                                                                    *M_dFESpace,
-    //
-    //                                                      *M_epetraComm));
 }
 
 
