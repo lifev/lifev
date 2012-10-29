@@ -310,8 +310,8 @@ Structure::run3d()
     if (verbose) std::cout << std::endl;
 
     //Geometrical Infos on the sphere
-    Vector3D center(0.0, 10.0, 10.0);
-    Real     radius(0.6);
+    Vector3D center(0.0, 0.55, 8.0);
+    Real     radius(0.7);
 
     //Count how many volumes are in the sphere
     //Create the Predicate

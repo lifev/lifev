@@ -18,12 +18,8 @@
 
 
 [exporter]
-type       = hdf5
-nameFile   = try
-modifiedMesh = damaged.mesh
-multimesh  = false
-start      = 0
-save       = 1
+modifiedMesh = modifiedMesh.mesh
+
 
 [importer]
 restart      = none
