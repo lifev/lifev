@@ -38,7 +38,7 @@
 
 
 #include <lifev/core/LifeV.hpp>
-#include <lifev/eta/array/MatrixSmall.hpp>
+#include <lifev/core/array/MatrixSmall.hpp>
 #include <lifev/eta/expression/ExpressionExtract1.hpp>
 #include <lifev/eta/expression/EvaluationMatrix.hpp>
 #include <lifev/eta/array/OperationSmallExtract.hpp>

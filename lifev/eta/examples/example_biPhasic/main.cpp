@@ -65,7 +65,7 @@
 
 #include <lifev/core/fem/BCHandler.hpp>
 #include <lifev/core/fem/BCManage.hpp>
-#include <lifev/core/fem/ETFESpace.hpp>
+#include <lifev/eta/fem/ETFESpace.hpp>
 
 #include <lifev/core/fem/GradientRecovery.hpp>
 

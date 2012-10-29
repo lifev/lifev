@@ -15,6 +15,7 @@ SET(expression_HEADERS
 	expression/EvaluationInterpolateGradient.hpp
 	expression/EvaluationInterpolateValue.hpp
 	expression/EvaluationMeas.hpp
+	expression/EvaluationOuterProduct.hpp
 	expression/EvaluationPhiI.hpp
 	expression/EvaluationPhiJ.hpp
 	expression/EvaluationPosition.hpp
@@ -41,6 +42,7 @@ SET(expression_HEADERS
 	expression/ExpressionInterpolateGradient.hpp
 	expression/ExpressionInterpolateValue.hpp
 	expression/ExpressionMeas.hpp
+	expression/ExpressionOuterProduct.hpp
 	expression/ExpressionPhiI.hpp
 	expression/ExpressionPhiJ.hpp
 	expression/ExpressionPosition.hpp

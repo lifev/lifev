@@ -38,7 +38,7 @@
 
 #include <lifev/core/LifeV.hpp>
 
-#include <lifev/eta/array/MatrixSmall.hpp>
+#include <lifev/core/array/MatrixSmall.hpp>
 
 // LifeV namespace.
 namespace LifeV

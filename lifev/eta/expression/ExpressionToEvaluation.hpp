@@ -52,6 +52,7 @@
 #include <lifev/eta/expression/ExpressionExtract1.hpp>
 #include <lifev/eta/expression/ExpressionExtract2.hpp>
 #include <lifev/eta/expression/ExpressionTranspose.hpp>
+#include <lifev/eta/expression/ExpressionOuterProduct.hpp>
 
 #include <lifev/eta/expression/ExpressionScalar.hpp>
 #include <lifev/eta/expression/ExpressionVector.hpp>
@@ -86,6 +87,7 @@
 #include <lifev/eta/expression/EvaluationExtract1.hpp>
 #include <lifev/eta/expression/EvaluationExtract2.hpp>
 #include <lifev/eta/expression/EvaluationTranspose.hpp>
+#include <lifev/eta/expression/EvaluationOuterProduct.hpp>
 
 #include <lifev/eta/expression/EvaluationScalar.hpp>
 #include <lifev/eta/expression/EvaluationVector.hpp>
@@ -281,6 +283,17 @@ private:
 	~ExpressionToEvaluation();
 };
 
+// Specialized for matrix
+template<UInt testDim, UInt solutionDim, UInt spaceDim, UInt MatrixDim1, UInt MatrixDim2>
+class ExpressionToEvaluation<ExpressionMatrix<MatrixDim1, MatrixDim2>,testDim,solutionDim,spaceDim>
+{
+public:
+  typedef EvaluationMatrix<MatrixDim1, MatrixDim2> evaluation_Type;
+private:
+	ExpressionToEvaluation();
+	~ExpressionToEvaluation();
+};
+
 // Specialized for an interpolated value
 template<typename MeshType, typename MapType, UInt FESpaceDim, UInt FEFieldDim, UInt testDim, UInt solutionDim, UInt spaceDim>
 class ExpressionToEvaluation<
@@ -397,6 +410,20 @@ public:
 private:
 	ExpressionToEvaluation();
 	~ExpressionToEvaluation();
+};
+
+// Specialized for a vector product multiplication
+template<typename ExpressionL, typename ExpressionR, UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation<ExpressionOuterProduct<ExpressionL,ExpressionR>,testDim,solutionDim,spaceDim>
+{
+public:
+    typedef EvaluationOuterProduct<
+                typename ExpressionToEvaluation<ExpressionL,testDim,solutionDim,spaceDim>::evaluation_Type
+               ,typename ExpressionToEvaluation<ExpressionR,testDim,solutionDim,spaceDim>::evaluation_Type
+            > evaluation_Type;
+private:
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
 };
 
 // Specialized for a element-wise multiplication

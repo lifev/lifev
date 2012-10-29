@@ -251,7 +251,7 @@ public:
         return (tmp /= factor);
     }
 
-    //! Operator / (division by scalar)
+    //! Operator * (division by scalar)
    MatrixSmall<Dim1, Dim2> operator* ( Real const & factor ) const
    {
        MatrixSmall<Dim1, Dim2> tmp ( *this );
@@ -274,7 +274,7 @@ public:
     //const OpIndexReturnType operator[] ( UInt const & i ) const
     OpIndexReturnType operator[] ( UInt const & i ) const
     {
-        return ((const_cast<MatrixSmall<Dim1, Dim2>&>(*this))[i]);
+         return ((const_cast<MatrixSmall<Dim1, Dim2>&>(*this))[i]);
     }
 
     //! Operator []

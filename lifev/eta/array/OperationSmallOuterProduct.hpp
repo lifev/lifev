@@ -33,8 +33,8 @@
      @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
  */
 
-#ifndef OPERATION_SMALL_EMULT_HPP
-#define OPERATION_SMALL_EMULT_HPP
+#ifndef OPERATION_SMALL_OUTERPRODUCT_HPP
+#define OPERATION_SMALL_OUTERPRODUCT_HPP
 
 #include <lifev/core/LifeV.hpp>
 
@@ -44,7 +44,7 @@
 // LifeV namespace.
 namespace LifeV
 {
-//! class OperationSmallEmult  Class containing information about the element-wise multiplication product operation between Small* classes.
+//! class OperationSmallOuterProduct  Class containing information about the element-wise multiplication product operation between Small* classes.
 /*!
   @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
 
@@ -58,32 +58,33 @@ namespace LifeV
 */
 
 template <typename LeftOperand, typename RightOperand>
-class OperationSmallEmult
+class OperationSmallOuterProduct
 {
 private:
 	//! @name Constructors and destructors
     //@{
 
 	//! No default constructor
-	OperationSmallEmult();
+	OperationSmallOuterProduct();
 
 	//! No destructor
-	~OperationSmallEmult();
+	~OperationSmallOuterProduct();
 
 	//@}
+
 };
 
 //! \cond
 
-template <UInt Dim1, UInt Dim2>
-class OperationSmallEmult< MatrixSmall<Dim1, Dim2> , MatrixSmall<Dim1, Dim2> >
+template <UInt Dim1>
+class OperationSmallOuterProduct< VectorSmall<Dim1> , VectorSmall<Dim1> >
 {
 public:
 
     //! @name Public Types
     //@{
 
-	typedef MatrixSmall<Dim1, Dim2> result_Type;
+	typedef MatrixSmall<Dim1, Dim1> result_Type;
 
 	//@}
 
@@ -92,10 +93,10 @@ private:
     //@{
 
 	//! No default constructor
-	OperationSmallEmult();
+	OperationSmallOuterProduct();
 
 	//! No destructor
-	~OperationSmallEmult();
+	~OperationSmallOuterProduct();
 
 	//@}
 };

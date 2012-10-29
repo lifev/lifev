@@ -39,7 +39,8 @@
 
 #include <lifev/core/LifeV.hpp>
 #include <lifev/eta/fem/ETCurrentFE.hpp>
-#include <lifev/eta/array/MatrixSmall.hpp>
+#include <lifev/core/array/MatrixSmall.hpp>
+#include <lifev/core/array/VectorSmall.hpp>
 
 namespace LifeV {
 
