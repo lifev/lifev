@@ -105,7 +105,7 @@ FSIMonolithicGE::evalResidual( vector_Type&       res,
                             const UInt          iter )
 {
 
-    if ((iter==0)|| !this->M_data->dataFluid()->isSemiImplicit())
+    if (iter==0)
     {
 
         // Solve HE
@@ -113,29 +113,22 @@ FSIMonolithicGE::evalResidual( vector_Type&       res,
 
         // Update displacement
 
-        M_beta.reset(new vector_Type(M_uFESpace->map()));
-
-        this->moveMesh(M_meshMotion->disp());//initialize the mesh position with the total displacement
-
-        if( iter==0 )
-        {
-            M_ALETimeAdvance->updateRHSFirstDerivative(M_data->dataFluid()->dataTime()->timeStep());
-            M_ALETimeAdvance->shiftRight(M_meshMotion->disp());
-            M_ALETimeAdvance->extrapolation(M_meshMotion->disp());//closer initial solution
-        }
-        else
-        {
-            M_ALETimeAdvance->setSolution(M_meshMotion->disp());
-        }
+        M_ALETimeAdvance->updateRHSFirstDerivative(M_data->dataFluid()->dataTime()->timeStep());
+        M_ALETimeAdvance->shiftRight(M_meshMotion->disp());
+        M_ALETimeAdvance->extrapolation(M_meshMotion->disp());//closer initial solution
 
         vector_Type meshDispRepeated( M_meshMotion->disp(), Repeated );
         this->moveMesh(meshDispRepeated);
-        vector_Type vel ( this->M_ALETimeAdvance->velocity( ), Repeated );
-        vector_Type fluid(this->M_uFESpace->map());
-        interpolateVelocity( vel, fluid );
-        M_fluidTimeAdvance->extrapolation(*M_beta);//explicit
-        *M_beta -= fluid;//implicit
 
+        //here should use extrapolationFirstDerivative instead of velocity
+        vector_Type meshVelocityRepeated ( this->M_ALETimeAdvance->velocity( ), Repeated );
+        vector_Type interpolatedMeshVelocity(this->M_uFESpace->map());
+
+        interpolateVelocity( meshVelocityRepeated, interpolatedMeshVelocity );
+        M_fluidTimeAdvance->extrapolation(*M_beta);
+        *M_beta -= interpolatedMeshVelocity; // convective term, u^* - w^*
+
+        // in MonolithicGI here it used M_uk, which comes from disp
         assembleSolidBlock(iter, M_fluidTimeAdvance->singleElement(0));
         assembleFluidBlock(iter, M_fluidTimeAdvance->singleElement(0));
         *M_rhsFull = *M_rhs;
