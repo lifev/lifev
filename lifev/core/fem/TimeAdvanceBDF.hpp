@@ -653,9 +653,7 @@ template<typename feVectorType>
 feVectorType
 TimeAdvanceBDF<feVectorType>::acceleration() const
 {
-  return (*this->M_unknowns[0])
-    * this->M_xi[ 0 ]/(this->M_timeStep*this->M_timeStep);
-  -  ( *this->M_rhsContribution[1] );
+  return (*this->M_unknowns[0]) * this->M_xi[ 0 ]/(this->M_timeStep*this->M_timeStep) -  ( *this->M_rhsContribution[1] );
 }
 
 
