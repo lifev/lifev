@@ -85,11 +85,12 @@ const QuadratureRule quadRuleNode1pt( pt_node_1pt,
  *
  *=======================================================================*/
 //! total number of quadrature rules on segments
-const size_t NB_QUAD_RULE_SEG = 3;
+const size_t NB_QUAD_RULE_SEG = 4;
 //! id of the quadrature rules on segments
 const size_t QUAD_RULE_SEG_1PT = 1;
 const size_t QUAD_RULE_SEG_2PT = 2;
 const size_t QUAD_RULE_SEG_3PT = 3;
+const size_t QUAD_RULE_SEG_4PT = 4;
 //----------------------------------------------------------------------
 
 static const QuadraturePoint pt_seg_1pt[ 1 ] =
@@ -126,6 +127,23 @@ static const QuadraturePoint pt_seg_3pt[ 3 ] =
 const QuadratureRule quadRuleSeg3pt( pt_seg_3pt,
                                QUAD_RULE_SEG_3PT,
                                "Gauss Legendre 3 points on a segment", LINE, 3, 5 );
+//----------------------------------------------------------------------
+const Real q4ptx1 = (1. - sqrt((3.-2.*sqrt(6./5.))/7.)) / 2., q4ptw1 = 0.5*(18.+sqrt(30))/36.;
+const Real q4ptx2 = (1. + sqrt((3.-2.*sqrt(6./5.))/7.)) / 2., q4ptw2 = 0.5*(18.+sqrt(30))/36.;
+const Real q4ptx3 = (1. - sqrt((3.+2.*sqrt(6./5.))/7.)) / 2., q4ptw3 = 0.5*(18.-sqrt(30))/36.;
+const Real q4ptx4 = (1. + sqrt((3.+2.*sqrt(6./5.))/7.)) / 2., q4ptw4 = 0.5*(18.-sqrt(30))/36.;
+
+static const QuadraturePoint pt_seg_4pt[ 4 ] =
+{
+    QuadraturePoint( q4ptx1, q4ptw1 ),
+    QuadraturePoint( q4ptx2, q4ptw2 ),
+    QuadraturePoint( q4ptx3, q4ptw3 ),
+    QuadraturePoint( q4ptx4, q4ptw4 )
+};
+
+const QuadratureRule quadRuleSeg4pt( pt_seg_4pt,
+                               QUAD_RULE_SEG_4PT,
+                               "Gauss Legendre 4 points on a segment", LINE, 4, 7 );
 /*----------------------------------------------------------------------
   Set of all quadrature rules on segments
   ----------------------------------------------------------------------*/
@@ -133,7 +151,8 @@ static const QuadratureRule quad_rule_seg[ NB_QUAD_RULE_SEG ] =
 {
     quadRuleSeg1pt,
     quadRuleSeg2pt,
-    quadRuleSeg3pt
+    quadRuleSeg3pt,
+    quadRuleSeg4pt
 };
 /*======================================================================
  *
@@ -247,11 +266,12 @@ static const QuadratureRule quad_rule_tria[ NB_QUAD_RULE_TRIA ] =
  *
  *=======================================================================*/
 //! total number of quadrature rules in 2D on quadrangle
-#define NB_QUAD_RULE_QUAD 3
+#define NB_QUAD_RULE_QUAD 4
 //! id of the quadrature rules on quadrangles
 #define QUAD_RULE_QUAD_1PT     1
 #define QUAD_RULE_QUAD_4PT     2
 #define QUAD_RULE_QUAD_9PT     3
+#define QUAD_RULE_QUAD_16PT    4
 //----------------------------------------------------------------------
 
 static const QuadraturePoint pt_quad_1pt[ 1 ] =
@@ -291,6 +311,32 @@ static const QuadraturePoint pt_quad_9pt[ 9 ] =
 const QuadratureRule quadRuleQuad9pt( pt_quad_9pt,
                                 QUAD_RULE_QUAD_9PT,
                                 "Quadrature rule 9 points on a quadrangle", QUAD, 9, 5 );
+//----------------------------------------------------------------------
+// 4 points Integration rule for quadrangle
+
+static const QuadraturePoint pt_quad_16pt[ 16 ] =
+{
+    QuadraturePoint( q4ptx1, q4ptx1, q4ptw1 * q4ptw1 ),
+    QuadraturePoint( q4ptx2, q4ptx1, q4ptw2 * q4ptw1 ),
+    QuadraturePoint( q4ptx3, q4ptx1, q4ptw3 * q4ptw1 ),
+    QuadraturePoint( q4ptx4, q4ptx1, q4ptw4 * q4ptw1 ),
+    QuadraturePoint( q4ptx1, q4ptx2, q4ptw1 * q4ptw2 ),
+    QuadraturePoint( q4ptx2, q4ptx2, q4ptw2 * q4ptw2 ),
+    QuadraturePoint( q4ptx3, q4ptx2, q4ptw3 * q4ptw2 ),
+    QuadraturePoint( q4ptx4, q4ptx2, q4ptw4 * q4ptw2 ),
+    QuadraturePoint( q4ptx1, q4ptx3, q4ptw1 * q4ptw3 ),
+    QuadraturePoint( q4ptx2, q4ptx3, q4ptw2 * q4ptw3 ),
+    QuadraturePoint( q4ptx3, q4ptx3, q4ptw3 * q4ptw3 ),
+    QuadraturePoint( q4ptx4, q4ptx3, q4ptw4 * q4ptw3 ),
+    QuadraturePoint( q4ptx1, q4ptx4, q4ptw1 * q4ptw4 ),
+    QuadraturePoint( q4ptx2, q4ptx4, q4ptw2 * q4ptw4 ),
+    QuadraturePoint( q4ptx3, q4ptx4, q4ptw3 * q4ptw4 ),
+    QuadraturePoint( q4ptx4, q4ptx4, q4ptw4 * q4ptw4 )
+};
+
+const QuadratureRule quadRuleQuad16pt( pt_quad_16pt,
+                                QUAD_RULE_QUAD_16PT,
+                                "Quadrature rule 16 points on a quadrangle", QUAD, 16, 5 );
 /*----------------------------------------------------------------------
   Set of all quadrature rules on quadrangle
   ----------------------------------------------------------------------*/
@@ -298,7 +344,8 @@ static const QuadratureRule quad_rule_quad[ NB_QUAD_RULE_QUAD ] =
 {
     quadRuleQuad1pt,
     quadRuleQuad4pt,
-    quadRuleQuad9pt
+    quadRuleQuad9pt,
+    quadRuleQuad16pt
 };
 //----------------------------------------------------------------------
 /*======================================================================
@@ -600,6 +647,12 @@ const GeometricMap geoLinearSeg( "Linear mapping on a segment", LINE,
                            refcoor_P1_1D,
                            &geoLinearNode );
 
+const GeometricMap geoQuadraticSeg( "Quadratic mapping on a segment", LINE,
+                           3, 1,
+                           fct_P2_1D, derfct_P2_1D, der2fct_P2_1D,
+                           refcoor_P2_1D,
+                           &geoLinearNode );
+
 const GeometricMap geoLinearTria( "Linear mapping on a triangle", TRIANGLE,
                             3, 2,
                             fct_P1_2D, derfct_P1_2D, der2fct_P1_2D,
@@ -612,6 +665,12 @@ const GeometricMap geoBilinearQuad( "Bilinear mapping on a quadrangle", QUAD,
                               refcoor_Q1_2D,
                               &geoLinearSeg );
 
+const GeometricMap geoBiquadraticQuad( "Biquadratic mapping on a quadrangle", QUAD,
+                              9, 2,
+                              fct_Q2_2D, derfct_Q2_2D, der2fct_Q2_2D,
+                              refcoor_Q2_2D,
+                              &geoQuadraticSeg );
+
 const GeometricMap geoLinearTetra( "Linear mapping on a tetraedra", TETRA,
                              4, 3,
                              fct_P1_3D, derfct_P1_3D, der2fct_P1_3D,
@@ -623,8 +682,6 @@ const GeometricMap geoBilinearHexa( "Bilinear mapping on an hexaedra", HEXA,
                               fct_Q1_3D, derfct_Q1_3D, der2fct_Q1_3D,
                               refcoor_Q1_3D,
                               &geoBilinearQuad );
-
-
 
 //======================================================================
 //

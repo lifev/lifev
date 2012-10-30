@@ -340,6 +340,9 @@ public:
     //! Export the Processor ID as P0 variable
     virtual void exportPID( boost::shared_ptr<MeshType> mesh, boost::shared_ptr<Epetra_Comm> comm );
 
+    //! Export the region marker ID as P0 variable
+    void exportRegionMarkerID ( boost::shared_ptr<MeshType> mesh, boost::shared_ptr<Epetra_Comm> comm  );
+
     //! Export entity flags
     virtual void exportFlags( boost::shared_ptr<MeshType> mesh, boost::shared_ptr<Epetra_Comm> comm, flag_Type const & flag = EntityFlags::ALL );
 
@@ -682,20 +685,19 @@ void Exporter<MeshType>::exportPID( boost::shared_ptr<MeshType> mesh, boost::sha
             refFEPtr = &feSegP0;
             break;
         default:
-            ASSERT ( 0, "Dimension not supported " );
+            ERROR_MSG ( "Dimension not supported " );
     }
 
     // Useless quadrature rule
-    const QuadratureRule & qR   = quadRuleDummy;
-    const QuadratureRule & bdQr = quadRuleDummy;
+    const QuadratureRule & dummyQR = quadRuleDummy;
 
-    feSpacePtr_Type PID_FESpacePtr( new feSpace_Type( mesh, *refFEPtr, qR, bdQr, 1, comm ) );
+    feSpacePtr_Type PID_FESpacePtr( new feSpace_Type( mesh, *refFEPtr, dummyQR, dummyQR, 1, comm ) );
 
     vectorPtr_Type PIDData ( new vector_Type ( PID_FESpacePtr->map() ) );
 
     for ( UInt iElem( 0 ); iElem < mesh->numElements(); ++iElem )
     {
-        ID globalElem = PID_FESpacePtr->mesh()->element(iElem).id();
+        const ID globalElem = mesh->element(iElem).id();
         (*PIDData)[ globalElem ] = comm->MyPID();
     }
 
@@ -707,6 +709,55 @@ void Exporter<MeshType>::exportPID( boost::shared_ptr<MeshType> mesh, boost::sha
                  exporterData_Type::SteadyRegime,
                  exporterData_Type::Cell );
 }
+
+// Export the region marker ID as P0 variable
+template <typename MeshType>
+void Exporter<MeshType>::exportRegionMarkerID( boost::shared_ptr<MeshType> mesh, boost::shared_ptr<Epetra_Comm> comm )
+{
+    // TODO: use FESpace M_spacemap for generality
+    const ReferenceFE* refFEPtr;
+
+    // Need a factory!!!!
+    // @todo Need a factory!
+    switch ( MeshType::S_geoDimensions )
+    {
+        case 3:
+            refFEPtr = &feTetraP0;
+            break;
+        case 2:
+            refFEPtr = &feTriaP0;
+            break;
+        case 1:
+            refFEPtr = &feSegP0;
+            break;
+        default:
+            ERROR_MSG ( "Dimension not supported " );
+    }
+
+    // Useless quadrature rule
+    const QuadratureRule & dummyQR = quadRuleDummy;
+
+    const feSpacePtr_Type regionMarkerID_FESpacePtr( new feSpace_Type( mesh, *refFEPtr,
+                                                                       dummyQR, dummyQR,
+                                                                       1, comm ) );
+
+    vectorPtr_Type regionMarkerIDData ( new vector_Type ( regionMarkerID_FESpacePtr->map() ) );
+
+    for ( UInt iElem( 0 ); iElem < mesh->numElements(); ++iElem )
+    {
+        const ID globalElem = mesh->element(iElem).id();
+        (*regionMarkerIDData)[ globalElem ] = mesh->element(iElem).markerID();
+    }
+
+    addVariable( exporterData_Type::ScalarField,
+                 "regionMarkerID",
+                 regionMarkerID_FESpacePtr,
+                 regionMarkerIDData,
+                 0,
+                 exporterData_Type::SteadyRegime,
+                 exporterData_Type::Cell );
+
+} // exportRegionMarkerID
 
 template <typename MeshType>
 void Exporter<MeshType>::computePostfix()
