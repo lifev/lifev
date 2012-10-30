@@ -147,7 +147,7 @@ public:
                  UInt               nbDof,
                  UInt               nbCoor,
                  const UInt&        numberBoundaryFE,
-                 const CurrentBoundaryFE*  boundaryFEList,
+                 const CurrentBoundaryFE**  boundaryFEList,
                  const Real*        refCoor,
                  DofPatternType     patternType = STANDARD_PATTERN );
 
@@ -164,7 +164,7 @@ public:
     const CurrentBoundaryFE& operator[] ( const ID& i ) const
     {
         ASSERT_BD( i < static_cast<ID>( M_numberBoundaryFE ) );
-        return M_boundaryFEList[ i ];
+        return (*M_boundaryFEList)[ i ];
     }
 
     //@}
@@ -197,7 +197,7 @@ private:
         or edges (2D), of the RefHybridFE element. The boundary elements of a reference
         element are not in general reference elements themselves, that is why
         we use here the CurrentBoundaryFE rather that ReferenceFE. */
-    const CurrentBoundaryFE* M_boundaryFEList;
+    const CurrentBoundaryFE** M_boundaryFEList;
 };
 
 

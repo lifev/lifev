@@ -4101,9 +4101,9 @@ static const CurrentBoundaryFE BdFE_RT0_HYB_TRIA_2( feSegP0, geoLinearSeg, quadR
 static const CurrentBoundaryFE BdFE_RT0_HYB_TRIA_3( feSegP0, geoLinearSeg, quadRuleSeg1pt,
                                                         refcoor_HYB_TRIA_SEG_3, 2 );
 
-static const CurrentBoundaryFE HybRT0TriaList[ NB_BDFE_RT0_HYB_TRIA ] =
+static const CurrentBoundaryFE* HybRT0TriaList[ NB_BDFE_RT0_HYB_TRIA ] =
 {
-    BdFE_RT0_HYB_TRIA_1, BdFE_RT0_HYB_TRIA_2, BdFE_RT0_HYB_TRIA_3
+    &BdFE_RT0_HYB_TRIA_1, &BdFE_RT0_HYB_TRIA_2, &BdFE_RT0_HYB_TRIA_3
 };
 
 static const CurrentBoundaryFE BdFE_RT0_HYB_TRIA_VdotN_1( feSegP0, geoLinearSeg, quadRuleSeg1pt,
@@ -4113,9 +4113,9 @@ static const CurrentBoundaryFE BdFE_RT0_HYB_TRIA_VdotN_2( feSegP0, geoLinearSeg,
 static const CurrentBoundaryFE BdFE_RT0_HYB_TRIA_VdotN_3( feSegP0, geoLinearSeg, quadRuleSeg1pt,
                                                               refcoor_HYB_TRIA_SEG_3, 2, 1. );
 
-static const CurrentBoundaryFE HybRT0TriaVdotNList[ NB_BDFE_RT0_HYB_TRIA ] =
+static const CurrentBoundaryFE* HybRT0TriaVdotNList[ NB_BDFE_RT0_HYB_TRIA ] =
 {
-    BdFE_RT0_HYB_TRIA_VdotN_1, BdFE_RT0_HYB_TRIA_VdotN_2, BdFE_RT0_HYB_TRIA_VdotN_3
+    &BdFE_RT0_HYB_TRIA_VdotN_1, &BdFE_RT0_HYB_TRIA_VdotN_2, &BdFE_RT0_HYB_TRIA_VdotN_3
 };
 
 const ReferenceFEHybrid feTriaRT0Hyb ( "Hybrid RT0 elements on a triangle", FE_RT0_HYB_TRIA_2D, TRIANGLE,
@@ -4174,11 +4174,11 @@ static const CurrentBoundaryFE BdFE_RT0_HYB_HEXA_5( feQuadQ0, geoBilinearQuad, q
 static const CurrentBoundaryFE BdFE_RT0_HYB_HEXA_6( feQuadQ0, geoBilinearQuad, quadRuleQuad1pt,
                                              refcoor_HYB_HEXA_FACE_6, 5 );
 
-static const CurrentBoundaryFE HybRT0HexaList[ NB_BDFE_HYB_HEXA ] =
+static const CurrentBoundaryFE* HybRT0HexaList[ NB_BDFE_HYB_HEXA ] =
 {
-    BdFE_RT0_HYB_HEXA_1, BdFE_RT0_HYB_HEXA_2,
-    BdFE_RT0_HYB_HEXA_3, BdFE_RT0_HYB_HEXA_4,
-    BdFE_RT0_HYB_HEXA_5, BdFE_RT0_HYB_HEXA_6
+    &BdFE_RT0_HYB_HEXA_1, &BdFE_RT0_HYB_HEXA_2,
+    &BdFE_RT0_HYB_HEXA_3, &BdFE_RT0_HYB_HEXA_4,
+    &BdFE_RT0_HYB_HEXA_5, &BdFE_RT0_HYB_HEXA_6
 };
 
 //const RefHybridFE feHexaRT0Hyb(NB_BDFE_HYB_HEXA,HybRT0HexaList,"Hybrid RT0 elements on a hexaedra",
@@ -4197,11 +4197,11 @@ static const CurrentBoundaryFE BdFE_RT0_HYB_HEXA_VdotN_5( feQuadQ0, geoBilinearQ
 static const CurrentBoundaryFE BdFE_RT0_HYB_HEXA_VdotN_6( feQuadQ0, geoBilinearQuad, quadRuleQuad1pt,
                                                    refcoor_HYB_HEXA_FACE_6, 5, 1. );
 
-static const CurrentBoundaryFE HybRT0HexaVdotNList[ NB_BDFE_HYB_HEXA ] =
+static const CurrentBoundaryFE* HybRT0HexaVdotNList[ NB_BDFE_HYB_HEXA ] =
 {
-    BdFE_RT0_HYB_HEXA_VdotN_1, BdFE_RT0_HYB_HEXA_VdotN_2,
-    BdFE_RT0_HYB_HEXA_VdotN_3, BdFE_RT0_HYB_HEXA_VdotN_4,
-    BdFE_RT0_HYB_HEXA_VdotN_5, BdFE_RT0_HYB_HEXA_VdotN_6
+    &BdFE_RT0_HYB_HEXA_VdotN_1, &BdFE_RT0_HYB_HEXA_VdotN_2,
+    &BdFE_RT0_HYB_HEXA_VdotN_3, &BdFE_RT0_HYB_HEXA_VdotN_4,
+    &BdFE_RT0_HYB_HEXA_VdotN_5, &BdFE_RT0_HYB_HEXA_VdotN_6
 };
 
 const ReferenceFEHybrid feHexaRT0Hyb( "Hybrid RT0 elements on a hexaedra", FE_RT0_HYB_HEXA_3D, HEXA,
@@ -4257,10 +4257,10 @@ static const CurrentBoundaryFE BdFE_RT0_HYB_TETRA_3( feTriaP0, geoLinearTria, qu
 static const CurrentBoundaryFE BdFE_RT0_HYB_TETRA_4( feTriaP0, geoLinearTria, quadRuleTria1pt,
                                               refcoor_HYB_TETRA_FACE_4, 3 );
 
-static const CurrentBoundaryFE HybRT0TetraList[ NB_BDFE_RT0_HYB_TETRA ] =
+static const CurrentBoundaryFE* HybRT0TetraList[ NB_BDFE_RT0_HYB_TETRA ] =
 {
-    BdFE_RT0_HYB_TETRA_1, BdFE_RT0_HYB_TETRA_2,
-    BdFE_RT0_HYB_TETRA_3, BdFE_RT0_HYB_TETRA_4
+    &BdFE_RT0_HYB_TETRA_1, &BdFE_RT0_HYB_TETRA_2,
+    &BdFE_RT0_HYB_TETRA_3, &BdFE_RT0_HYB_TETRA_4
 };
 
 /*const RefHybridFE feTetraRT0Hyb (NB_BDFE_RT0_HYB_TETRA,HybRT0TetraList,"Hybrid RT0 elements on a tetrahedron",
@@ -4277,10 +4277,10 @@ static const CurrentBoundaryFE BdFE_RT0_HYB_TETRA_VdotN_3( feTriaP0, geoLinearTr
 static const CurrentBoundaryFE BdFE_RT0_HYB_TETRA_VdotN_4( feTriaP0, geoLinearTria, quadRuleTria1pt,
                                                     refcoor_HYB_TETRA_FACE_4, 3, 2. );
 
-static const CurrentBoundaryFE HybRT0TetraVdotNList[ NB_BDFE_RT0_HYB_TETRA ] =
+static const CurrentBoundaryFE* HybRT0TetraVdotNList[ NB_BDFE_RT0_HYB_TETRA ] =
 {
-    BdFE_RT0_HYB_TETRA_VdotN_1, BdFE_RT0_HYB_TETRA_VdotN_2,
-    BdFE_RT0_HYB_TETRA_VdotN_3, BdFE_RT0_HYB_TETRA_VdotN_4
+    &BdFE_RT0_HYB_TETRA_VdotN_1, &BdFE_RT0_HYB_TETRA_VdotN_2,
+    &BdFE_RT0_HYB_TETRA_VdotN_3, &BdFE_RT0_HYB_TETRA_VdotN_4
 };
 
 const ReferenceFEHybrid feTetraRT0Hyb ( "Hybrid RT0 elements on a tetrahedron", FE_RT0_HYB_TETRA_3D, TETRA,
