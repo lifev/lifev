@@ -481,7 +481,7 @@ public:
       @param column Column index of the value to be added
       @param localValue Value to be added to the coefficient
      */
-    void addToCoefficient( UInt row, UInt column, DataType localValue );
+    void addToCoefficient( UInt const row, UInt const column, DataType const localValue );
 
     //! If set true, transpose of this operator will be applied.
     /*!
@@ -1426,7 +1426,7 @@ setCoefficient( UInt row, UInt column, DataType localValue )
 
 template <typename DataType>
 void MatrixEpetra<DataType>::
-addToCoefficient( UInt row, UInt column, DataType localValue )
+addToCoefficient( UInt const row, UInt const column, DataType const localValue )
 {
 
     Int irow = static_cast<Int>(row);
