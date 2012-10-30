@@ -428,7 +428,7 @@ private:
         if ( sameAs(time,0.005) && sameAs(dispNorm, 0.0995918, relTol) )  return;
         if ( sameAs(time,0.006) && sameAs(dispNorm, 0.0751478, relTol) ) return;
 
-        throw Problem::RESULT_CHANGED_EXCEPTION(time);
+        throw RESULT_CHANGED_EXCEPTION(time);
 
     }
 
