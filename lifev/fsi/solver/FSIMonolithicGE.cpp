@@ -194,6 +194,17 @@ void FSIMonolithicGE::applyBoundaryConditions( )
          //M_monolithicMatrix->matrix()->spy("M");
 }
 
+void FSIMonolithicGE::updateSolution( const vector_Type& solution )
+{
+   super_Type::updateSolution( solution );
+
+   //This updateRHSFirstDerivative has to be done before the shiftRight
+   //In fact it updates the right hand side of the velocity using the
+   //previous times. The method velocity() uses it and then, the compuation
+   //of the velocity is done using the current time and the previous times.
+   M_ALETimeAdvance->updateRHSFirstDerivative( M_data->dataFluid()->dataTime()->timeStep() );
+   M_ALETimeAdvance->shiftRight( this->M_meshMotion->disp() );
+}
 
 
 // ===================================================
