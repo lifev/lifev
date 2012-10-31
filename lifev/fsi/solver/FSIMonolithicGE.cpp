@@ -105,6 +105,8 @@ FSIMonolithicGE::evalResidual( vector_Type&       res,
                             const UInt          iter )
 {
 
+    // disp is already "extrapolated", the main is doing it.
+
     if (iter==0)
     {
 
@@ -114,14 +116,15 @@ FSIMonolithicGE::evalResidual( vector_Type&       res,
         // Update displacement
 
         M_ALETimeAdvance->updateRHSFirstDerivative(M_data->dataFluid()->dataTime()->timeStep());
-        M_ALETimeAdvance->shiftRight(M_meshMotion->disp());
-        M_ALETimeAdvance->extrapolation(M_meshMotion->disp());//closer initial solution
+
+        // the shift-right has be called in updateSolution! It is already there
+        //M_ALETimeAdvance->shiftRight(M_meshMotion->disp());
 
         vector_Type meshDispRepeated( M_meshMotion->disp(), Repeated );
         this->moveMesh(meshDispRepeated);
 
         //here should use extrapolationFirstDerivative instead of velocity
-        vector_Type meshVelocityRepeated ( this->M_ALETimeAdvance->velocity( ), Repeated );
+        vector_Type meshVelocityRepeated ( this->M_ALETimeAdvance->nextVelocity(  M_meshMotion->disp() ), Repeated );
         vector_Type interpolatedMeshVelocity(this->M_uFESpace->map());
 
         interpolateVelocity( meshVelocityRepeated, interpolatedMeshVelocity );
