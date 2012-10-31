@@ -117,9 +117,6 @@ FSIMonolithicGE::evalResidual( vector_Type&       res,
 
         M_ALETimeAdvance->updateRHSFirstDerivative(M_data->dataFluid()->dataTime()->timeStep());
 
-        // the shift-right has be called in updateSolution! It is already there
-        //M_ALETimeAdvance->shiftRight(M_meshMotion->disp());
-
         vector_Type meshDispRepeated( M_meshMotion->disp(), Repeated );
         this->moveMesh(meshDispRepeated);
 
