@@ -47,6 +47,8 @@
 
 #include <limits>
 
+#include <lifev/core/LifeV.hpp>
+
 namespace LifeV
 {
 //! Implementation of Brent's method for root finding.
