@@ -382,7 +382,18 @@ public:
     this method is used for example in FSI to return the value of solid
     in the internal loop
   */
-  feVectorType  velocity(const  feVector_Type& u) const;
+  feVectorType velocity(const  feVector_Type& u) const;
+
+
+  //! Return the velocity based on given vector on the next time step
+    /*!
+      @param newEntry unk  to compute the current velocity;
+      @returns the velocity associated to \f$u\f$
+      this method is used for example in FSI to return the current mesh velocity
+      besed on the currently computed mesh displacement
+    */
+    feVectorType nextVelocity( feVectorType const& newEntry ) const;
+
 
   //!Return the current acceleration
   virtual feVectorType acceleration() const=0;
@@ -600,7 +611,7 @@ inline const feVectorType&
 TimeAdvance<feVectorType>::singleElement( const UInt& i) const
 {
   ASSERT( i < M_size,
-	  "Error there isn't unk(i), i must be shorter than M_size" );
+      "Error there isn't unk(i), i must be shorter than M_size" );
 
   return *M_unknowns[i];
 }
@@ -614,6 +625,16 @@ TimeAdvance<feVectorType>::velocity( const feVector_Type& u ) const
     vel  -= (*this->M_rhsContribution[ 0 ]);
     return vel;
 }
+
+template<typename feVectorType>
+feVectorType
+TimeAdvance<feVectorType>::nextVelocity(feVectorType const& newEntry) const
+{
+  return (newEntry)
+    * this->M_alpha[ 0 ] / this->M_timeStep
+    -  (this->M_alpha[ 1 ] / M_timeStep) * *this->M_unknowns[ 0 ];
+}
+
 
 template<typename feVectorType>
 feVectorType
