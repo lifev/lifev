@@ -104,14 +104,14 @@ FSIMonolithicGE::evalResidual( vector_Type&       res,
                             const vector_Type& disp,
                             const UInt          iter )
 {
-
+    // disp here is the current solution guess (u,p,ds)
     // disp is already "extrapolated", the main is doing it.
 
     if (iter==0)
     {
 
         // Solve HE
-        iterateMesh(disp);
+        this->iterateMesh(disp);
 
         // Update displacement
 
@@ -125,12 +125,13 @@ FSIMonolithicGE::evalResidual( vector_Type&       res,
         vector_Type interpolatedMeshVelocity(this->M_uFESpace->map());
 
         interpolateVelocity( meshVelocityRepeated, interpolatedMeshVelocity );
+        // maybe we should use disp here too...
         M_fluidTimeAdvance->extrapolation(*M_beta);
         *M_beta -= interpolatedMeshVelocity; // convective term, u^* - w^*
 
         // in MonolithicGI here it used M_uk, which comes from disp
-        assembleSolidBlock(iter, M_fluidTimeAdvance->singleElement(0));
-        assembleFluidBlock(iter, M_fluidTimeAdvance->singleElement(0));
+        assembleSolidBlock(iter, disp);
+        assembleFluidBlock(iter, disp);
         *M_rhsFull = *M_rhs;
 
         applyBoundaryConditions();
