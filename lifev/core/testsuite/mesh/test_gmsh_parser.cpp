@@ -95,7 +95,7 @@ struct tester
       return false;
     
     // Convert the mesh
-    boost::shared_ptr<mesh_t> mesh (new mesh_t(*comm));
+    boost::shared_ptr<mesh_t> mesh (new mesh_t(comm));
     LifeV::convertBareMesh (baremesh, *mesh, true);
     
     // Partitioning (if possible)

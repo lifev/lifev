@@ -335,7 +335,7 @@ template<typename MeshType>
 void LifeV::PartitionIO<MeshType>::read(meshPtr_Type& meshPart)
 {
     meshPart.reset();
-    M_meshPartIn.reset(new mesh_Type( *M_comm ) );
+    M_meshPartIn.reset(new mesh_Type( M_comm ) );
 
     openHDF5File();
     readStats();

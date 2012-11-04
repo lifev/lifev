@@ -124,7 +124,7 @@ int main(int argc, char** argv)
     bareMesh_Type bareMesh;
     MeshIO::ReadINRIAMeshFile( bareMesh, fname, m );
 
-    mesh_Type aMesh( *comm );
+    mesh_Type aMesh( comm );
     convertBareMesh ( bareMesh, aMesh );
 
     std::cout << " **********************************************************" << std::endl;

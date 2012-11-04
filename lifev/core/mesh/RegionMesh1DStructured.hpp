@@ -80,7 +80,7 @@ void regularMesh1D( MeshType& mesh,
 {
     typedef MeshType mesh_Type;
 
-    if ( verbose && mesh.comm().MyPID() == 0 )
+    if ( verbose && mesh.comm()->MyPID() == 0 )
     {
         std::cout << "Building 1d mesh" << std::endl;
     }

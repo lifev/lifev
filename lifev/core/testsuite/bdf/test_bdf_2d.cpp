@@ -158,11 +158,11 @@ void test_bdf::run()
     //Mesh stuff
     Members->comm->Barrier();
     MeshData meshData(dataFile, ("bdf/" + discretization_section).c_str());
-    boost::shared_ptr<regionMesh> fullMeshPtr( new regionMesh( *( Members->comm ) ) );
+    boost::shared_ptr<regionMesh> fullMeshPtr( new regionMesh( Members->comm ) );
     readMesh(*fullMeshPtr,meshData);
     boost::shared_ptr<regionMesh> meshPtr;
     {
-        MeshPartitioner<regionMesh> meshPart( fullMeshPtr, Members->comm);
+        MeshPartitioner<regionMesh> meshPart( fullMeshPtr, Members->comm );
         meshPtr = meshPart.meshPartition();
     }
 

@@ -189,7 +189,7 @@ int main( int argc, char** argv )
     const UInt numMeshElem = 3;
 
     // init mesh
-    meshPtr_Type mesh( new mesh_Type( *comm ) );
+    meshPtr_Type mesh( new mesh_Type( comm ) );
 
     // build 2D mesh on the unit square
     regularMesh2D( *mesh,

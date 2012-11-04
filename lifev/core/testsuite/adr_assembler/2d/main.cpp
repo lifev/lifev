@@ -153,7 +153,7 @@ main( int argc, char** argv )
 
     if (verbose) std::cout << " -- Reading the mesh ... " << std::flush;
     MeshData meshData(dataFile, "mesh");
-    boost::shared_ptr< mesh_Type > fullMeshPtr( new mesh_Type( *Comm ) );
+    boost::shared_ptr< mesh_Type > fullMeshPtr( new mesh_Type( Comm ) );
 
     // Select if the mesh is structured or not
     if ( meshData.meshType() != "structured" )
