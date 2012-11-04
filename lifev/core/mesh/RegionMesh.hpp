@@ -263,6 +263,9 @@ public:
     //! Return the communicator
     commPtr_Type comm() const;
 
+    //! Setter for the communicator
+    void setComm( commPtr_Type const & comm );
+
     /** @} */ // End of group Utilities
 
     /** @name Switches Methods
@@ -3639,6 +3642,12 @@ inline typename RegionMesh<GeoShapeType, MCType>::commPtr_Type
 RegionMesh<GeoShapeType, MCType>::comm() const
 {
     return this->M_comm;
+}
+
+template <typename GeoShapeType, typename MCType>
+void inline RegionMesh<GeoShapeType, MCType>::setComm( commPtr_Type const & comm )
+{
+    M_comm = comm;
 }
 
 } // End of namespace LifeV
