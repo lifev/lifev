@@ -89,6 +89,7 @@ BDF_order       = 1
 [../space_discretization]
 mesh_dir  = ./
 mesh_file = tube20.mesh
+mesh_type = .mesh
 vel_order       = P1            # P1, P1Bubble, P2
 press_order     = P1            # P1, P2
 stiff_strain    = true
@@ -137,6 +138,7 @@ BDF_order       = 1
 [../space_discretization]
 mesh_dir  = ./ #test_tubes/  # the directory where the mesh file is
 mesh_file = vessel20.mesh  # mesh file
+mesh_type = .mesh
 order     = P1
 
 
