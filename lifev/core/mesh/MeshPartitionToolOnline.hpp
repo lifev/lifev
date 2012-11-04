@@ -99,9 +99,9 @@ public:
     /*!
      * TODO: Write description
     */
-    MeshPartitionToolOnline (meshPtr_Type& mesh,
-                             boost::shared_ptr<Epetra_Comm>& comm,
-                             Teuchos::ParameterList& parameters);
+    MeshPartitionToolOnline (const meshPtr_Type& mesh,
+                             const boost::shared_ptr<Epetra_Comm>& comm,
+                             const Teuchos::ParameterList& parameters);
 
     //! Empty destructor
     virtual ~MeshPartitionToolOnline() {}
@@ -147,6 +147,7 @@ public:
     //@{
     //! Return a shared pointer to the mesh partition
     const meshPtr_Type& meshPartition() const {return M_meshPartition;}
+    meshPtr_Type& meshPartition() {return M_meshPartition;}
     //! Return a reference to M_ghostDataMap
     const GhostEntityDataMap_Type&  ghostDataMap() const {return M_ghostDataMap;}
     //@}
@@ -233,9 +234,9 @@ private:
 // =================================
 
 template<typename MeshType, template <typename> class GraphPartitionToolType>
-MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::MeshPartitionToolOnline(meshPtr_Type& mesh,
-                                                                                   boost::shared_ptr<Epetra_Comm>& comm,
-                                                                                   Teuchos::ParameterList& parameters) :
+MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::MeshPartitionToolOnline(const meshPtr_Type& mesh,
+                                                                                   const boost::shared_ptr<Epetra_Comm>& comm,
+                                                                                   const Teuchos::ParameterList& parameters) :
     M_comm(comm),
     M_myPID(M_comm->MyPID()),
     M_parameters(parameters),
