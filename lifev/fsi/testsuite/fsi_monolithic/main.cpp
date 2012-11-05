@@ -347,15 +347,9 @@ public:
 
 			M_fsi->iterate( solution );
 
-			if(M_data->method().compare("monolithicGI") == 0)
-			{
-                // shift_right of the solution of all the time advance classes in the FSIOperator
-                M_fsi->FSIOper()->updateSolution( *solution );
-            }
-			else //Case when monolithicGE is used
-			{
-				M_fsi->FSIOper()->updateSolution( *solution );
-			}
+			// shift_right of the solution of all the time advance classes in the FSIOperator
+			M_fsi->FSIOper()->updateSolution( *solution );
+
 			M_fsi->FSIOper()->displayer().leaderPrintMax("[fsi_run] Iteration ", iter);
 			M_fsi->FSIOper()->displayer().leaderPrintMax(" was done in : ", _timer.elapsed());
 
