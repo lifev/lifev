@@ -61,11 +61,6 @@ void FSIMonolithicGE::setupFluidSolid( UInt const fluxes )
                                               *M_monolithicMap,
                                               fluxes));
 
-    //             if (isLinearFluid())// to be implemented
-    //                 M_fluidLin.reset(new FSIOperator::fluidlin_raw_type(dataFluid(),
-    //                                                                    *M_uFESpace,
-    //                                                                    *M_pFESpace,
-    //                                                                    *M_epetraComm));
     M_rhs.reset(new vector_Type(*this->M_monolithicMap));
     M_rhsFull.reset(new vector_Type(*this->M_monolithicMap));
     M_beta.reset  (new vector_Type(M_uFESpace->map()));
@@ -79,11 +74,6 @@ void FSIMonolithicGE::setupFluidSolid( UInt const fluxes )
                    M_offset
                   );
 
-    //             if (isLinearSolid())// to be implemented with the offset
-    //                 M_solidLin.reset(new FSIOperator::solidlin_raw_type(dataSolid(),
-    //                                                                    *M_dFESpace,
-    //
-    //                                                      *M_epetraComm));
 }
 
 
@@ -114,40 +104,34 @@ FSIMonolithicGE::evalResidual( vector_Type&       res,
                             const vector_Type& disp,
                             const UInt          iter )
 {
+    // disp here is the current solution guess (u,p,ds)
+    // disp is already "extrapolated", the main is doing it.
 
-    if ((iter==0)|| !this->M_data->dataFluid()->isSemiImplicit())
+    if (iter==0)
     {
 
         // Solve HE
-        iterateMesh(disp);
+        this->iterateMesh(disp);
 
         // Update displacement
 
-        M_beta.reset(new vector_Type(M_uFESpace->map()));
-
-        this->moveMesh(M_meshMotion->disp());//initialize the mesh position with the total displacement
-
-        if( iter==0 )
-        {
-            M_ALETimeAdvance->updateRHSFirstDerivative(M_data->dataFluid()->dataTime()->timeStep());
-            M_ALETimeAdvance->shiftRight(M_meshMotion->disp());
-            M_ALETimeAdvance->extrapolation(M_meshMotion->disp());//closer initial solution
-        }
-        else
-        {
-            M_ALETimeAdvance->setSolution(M_meshMotion->disp());
-        }
+        M_ALETimeAdvance->updateRHSFirstDerivative(M_data->dataFluid()->dataTime()->timeStep());
 
         vector_Type meshDispRepeated( M_meshMotion->disp(), Repeated );
         this->moveMesh(meshDispRepeated);
-        vector_Type vel ( this->M_ALETimeAdvance->velocity( ), Repeated );
-        vector_Type fluid(this->M_uFESpace->map());
-        interpolateVelocity( vel, fluid );
-        M_fluidTimeAdvance->extrapolation(*M_beta);//explicit
-        *M_beta -= fluid;//implicit
 
-        assembleSolidBlock(iter, M_fluidTimeAdvance->singleElement(0));
-        assembleFluidBlock(iter, M_fluidTimeAdvance->singleElement(0));
+        //here should use extrapolationFirstDerivative instead of velocity
+        vector_Type meshVelocityRepeated ( this->M_ALETimeAdvance->nextVelocity(  M_meshMotion->disp() ), Repeated );
+        vector_Type interpolatedMeshVelocity(this->M_uFESpace->map());
+
+        interpolateVelocity( meshVelocityRepeated, interpolatedMeshVelocity );
+        // maybe we should use disp here too...
+        M_fluidTimeAdvance->extrapolation(*M_beta);
+        *M_beta -= interpolatedMeshVelocity; // convective term, u^* - w^*
+
+        // in MonolithicGI here it used M_uk, which comes from disp
+        assembleSolidBlock(iter, disp);
+        assembleFluidBlock(iter, disp);
         *M_rhsFull = *M_rhs;
 
         applyBoundaryConditions();
@@ -211,6 +195,17 @@ void FSIMonolithicGE::applyBoundaryConditions( )
          //M_monolithicMatrix->matrix()->spy("M");
 }
 
+void FSIMonolithicGE::updateSolution( const vector_Type& solution )
+{
+   super_Type::updateSolution( solution );
+
+   //This updateRHSFirstDerivative has to be done before the shiftRight
+   //In fact it updates the right hand side of the velocity using the
+   //previous times. The method velocity() uses it and then, the compuation
+   //of the velocity is done using the current time and the previous times.
+   M_ALETimeAdvance->updateRHSFirstDerivative( M_data->dataFluid()->dataTime()->timeStep() );
+   M_ALETimeAdvance->shiftRight( this->M_meshMotion->disp() );
+}
 
 
 // ===================================================
