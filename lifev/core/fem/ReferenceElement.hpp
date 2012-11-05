@@ -39,19 +39,9 @@
 #ifndef REFELE_H
 #define REFELE_H 1
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-
-#include <boost/numeric/ublas/vector.hpp>
-
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
-
-
 #include <lifev/core/LifeV.hpp>
 
 #include <lifev/core/mesh/ElementShapes.hpp>
-
 
 namespace LifeV
 {

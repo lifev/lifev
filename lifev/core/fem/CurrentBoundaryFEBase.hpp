@@ -39,16 +39,6 @@
 #ifndef _StaticBDFE_H
 #define _StaticBDFE_H
 
-#include <vector>
-
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-
-#include <boost/numeric/ublas/vector.hpp>
-
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
-
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/fem/GeometricMap.hpp>
 #include <lifev/core/fem/ReferenceFE.hpp>

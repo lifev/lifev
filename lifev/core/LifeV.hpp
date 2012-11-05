@@ -95,6 +95,20 @@
 #include <iosfwd>
 #include <string>
 #include <limits>
+#include <set>
+#include <list>
+#include <map>
+#include <vector>
+
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+#include <boost/shared_ptr.hpp>
+#include <boost/numeric/ublas/vector.hpp>
+#include <boost/function.hpp>
+
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
 
 // deprecated attribute for LifeV functions
 // the macro is needed to avoid problems with compilers other than gcc

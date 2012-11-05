@@ -40,7 +40,6 @@
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-#include <boost/numeric/ublas/vector.hpp>
 
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI

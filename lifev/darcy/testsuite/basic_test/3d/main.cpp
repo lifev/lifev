@@ -32,11 +32,9 @@ Simple Darcy test with Dirichlet, Neumann and Robin boundary conditions
 
 
 /**
-    @file
-    @author Alessio Fumagalli <alessio.fumagalli@mail.polimi.it>
-    @author Anna Scotti <anna.scotti@mail.polimi.it>
-
-   @date 2012-03-30
+   @file main.hpp
+   @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
+   @date 2012-06-13
 */
 
 
@@ -81,7 +79,7 @@ static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ))
 // ===================================================
 //! Main
 // ===================================================
-int main(int argc, char** argv)
+int main(int argc, char* argv[])
 {
 
 #ifdef HAVE_MPI
@@ -91,22 +89,24 @@ int main(int argc, char** argv)
 #endif
 
     // Error known
-    const LifeV::Real errorKnown( 0.02524839561357813 );
+    const LifeV::Real errorKnown( 0.3382684999388553 );
 
-    // Tolerance between the error and the errorKnown
-    const LifeV::Real tolerance( 1e-8 );
+    // Tolerance between the error and the error known
+    const LifeV::Real tolerance( 1e-10 );
 
-    darcy Darcy( argc, argv );
+    darcy_linear Darcy( argc, argv );
 
     // Error of the problem
     const LifeV::Real error = Darcy.run();
-    const bool unsuccess=std::fabs( error - errorKnown ) > tolerance;
+    const bool unsuccess = std::fabs ( error - errorKnown ) > tolerance;
 
 #ifdef HAVE_MPI
+
     MPI_Finalize();
+
 #endif
 
-    if (unsuccess)
+    if ( unsuccess )
     {
         return ( EXIT_FAILURE );
     }
@@ -115,4 +115,3 @@ int main(int argc, char** argv)
         return ( EXIT_SUCCESS );
     }
 }
-

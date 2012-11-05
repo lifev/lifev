@@ -1,9 +1,9 @@
 SET(solver_HEADERS
-  solver/DarcySolver.hpp
-  solver/DarcyData.hpp
-  solver/DarcySolverNonLinear.hpp
+  solver/DarcySolverLinear.hpp
   solver/DarcySolverTransient.hpp
+  solver/DarcySolverNonLinear.hpp
   solver/DarcySolverTransientNonLinear.hpp
+  solver/DarcyData.hpp
 CACHE INTERNAL "")
 
 SET(solver_SOURCES

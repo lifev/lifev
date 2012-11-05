@@ -38,13 +38,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <cstring>
 #include <errno.h>
 #include <fstream>
-#include <iostream>
 #include <iterator>
-#include <list>
-#include <map>
-#include <sstream>
-#include <string>
-#include <vector>
 
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"

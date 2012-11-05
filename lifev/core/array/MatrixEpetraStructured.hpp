@@ -36,7 +36,8 @@
 #ifndef _MATRIXEPETRASTRUCTURED_HPP_
 #define _MATRIXEPETRASTRUCTURED_HPP_
 
-#include <boost/shared_ptr.hpp>
+#include <lifev/core/LifeV.hpp>
+
 #include <lifev/core/array/MapEpetra.hpp>
 #include <lifev/core/array/MapVector.hpp>
 #include <lifev/core/array/MatrixEpetra.hpp>
