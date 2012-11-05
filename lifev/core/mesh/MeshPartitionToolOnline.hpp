@@ -93,7 +93,7 @@ public:
     //! \name Constructors & Destructors
     //@{
     //! Default empty constructor
-    MeshPartitionToolOnline() {}
+    MeshPartitionToolOnline();
 
     //! Constructor
     /*!
@@ -234,11 +234,35 @@ private:
 // =================================
 
 template<typename MeshType, template <typename> class GraphPartitionToolType>
+MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::MeshPartitionToolOnline() :
+    M_comm(),
+    M_myPID(),
+    M_nBoundaryVertices(0),
+    M_nBoundaryRidges(0),
+    M_nBoundaryFacets(0),
+    M_elementVertices(0),
+    M_elementFacets(0),
+    M_elementRidges(0),
+    M_facetVertices(0),
+    M_parameters(),
+    M_originalMesh(),
+    M_meshPartition(),
+    M_graphPartitionTool()
+{}
+
+template<typename MeshType, template <typename> class GraphPartitionToolType>
 MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::MeshPartitionToolOnline(const meshPtr_Type& mesh,
                                                                                    const boost::shared_ptr<Epetra_Comm>& comm,
                                                                                    const Teuchos::ParameterList& parameters) :
     M_comm(comm),
     M_myPID(M_comm->MyPID()),
+    M_nBoundaryVertices(0),
+    M_nBoundaryRidges(0),
+    M_nBoundaryFacets(0),
+    M_elementVertices(0),
+    M_elementFacets(0),
+    M_elementRidges(0),
+    M_facetVertices(0),
     M_parameters(parameters),
     M_originalMesh(mesh),
     M_meshPartition(new MeshType),
@@ -283,10 +307,6 @@ void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::buildMeshPartiti
     constructVertices();
     constructElements();
     constructRidges();
-
-    // new faces can be built only after all local volumes are complete in order to get proper ghost faces data
-    M_comm->Barrier();
-
     constructFacets();
 
     finalSetup();
@@ -547,37 +567,6 @@ void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::constructFacets(
         {
             // set the flag for faces on the subdomain border
             pf->setFlag( EntityFlags::SUBDOMAIN_INTERFACE );
-
-            // build GhostEntityData
-            GhostEntityData ghostFace;
-            ghostFace.localFacetId = pf->localId();
-
-            // TODO: make this work. Zoltan's DD didn't cut it. Find another way.
-            //// // set the ghostElem to be searched on other subdomains
-            //// ID ghostElem = ( localElem1 == NotAnId ) ? elem1 : elem2;
-            //// // find which process holds the facing element
-            //// Int ghostProc ( M_me );
-            //// for ( Int proc = 0; proc < M_comm->NumProc(); proc++ )
-            //// {
-            ////     if ( proc != M_me )
-            ////     {
-            ////         std::vector<Int>::const_iterator ghostIt =
-            ////                         std::find ( (*M_elementDomains)[ proc ].begin(), (*M_elementDomains)[ proc ].end(), ghostElem );
-            ////         if ( ghostIt != ( (*M_elementDomains)[ proc ] ).end() )
-            ////         {
-            ////             // we have found the proc storing the element
-            ////             ghostProc = proc;
-            ////             // we can get its local id
-            ////             ghostFace.ghostElementLocalId = *ghostIt;
-            ////             // TODO: the local face id is the same of the original mesh ?!
-            ////             ghostFace.ghostElementPosition = M_originalMesh->face(*is).secondAdjacentElementPosition();
-            ////             break;
-            ////         }
-            ////     }
-            //// }
-            //// // check that the ghost element is found on another proc ( this test is acceptable only for online partitioning )
-            //// ASSERT ( ghostProc != M_me || M_serialMode, "ghost face not found" );
-            //// M_ghostDataMap[ ghostProc ].push_back( ghostFace );
         }
 
         ASSERT((localElem1 != NotAnId)||(localElem2 != NotAnId),"A hanging face in mesh partitioner!");

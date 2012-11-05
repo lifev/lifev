@@ -95,7 +95,7 @@ public:
     //! @name Constructor & Destructor
     //@{
     //! Empty Constructor
-    GraphPartitionTool() {}
+    GraphPartitionTool();
 
     //! Constructor taking the original mesh, the MPI comm and parameters
     /*!
@@ -252,6 +252,20 @@ private:
 // =================================
 // Constructors and Destructor
 // =================================
+
+template<typename MeshType>
+GraphPartitionTool<MeshType>::GraphPartitionTool() :
+    M_comm(),
+    M_myPID(),
+    M_numProcessors(),
+    M_numPartitions(0),
+    M_numPartitionsPerProcessor(0),
+    M_myFirstPartition(0),
+    M_myLastPartition(0),
+    M_parameters(),
+    M_mesh(),
+    M_zoltanStruct(0)
+{}
 
 template<typename MeshType>
 GraphPartitionTool<MeshType>::GraphPartitionTool(meshPtr_Type& mesh,
@@ -515,6 +529,7 @@ void GraphPartitionTool<MeshType>::buildGraph()
         break;
     default:
         numNeighbours = 0;
+        break;
     }
 
     UInt numElementFaces = MeshType::elementShape_Type::S_numFaces;
