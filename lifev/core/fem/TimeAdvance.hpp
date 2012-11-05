@@ -188,11 +188,23 @@ public:
 
   //! Update the right hand side \f$ f_V \f$ of the time derivative formula
   /*!
-    Sets and Returns the right hand side \f$ f_V \f$ of the time derivative formula
+    Returns the right hand side \f$ f_V \f$ of the time derivative formula
+    @param timeStep defines the time step
+    @param rhsContribution on input: a copy the first vector for the RHS contribution,
+    usually M_unknown[0].
+    On output: the new RHS contribution
+    @param shift how much shift the stored solutions. usually zero, but can be 1.
+    @return  rhsV the first order Rhs
+  */
+  virtual  void RHSFirstDerivative(const Real& timeStep, feVectorType& rhsContribution, int const shift = 0 ) const = 0;
+
+  //! Update the right hand side \f$ f_V \f$ of the time derivative formula
+  /*!
+    Sets the right hand side \f$ f_V \f$ of the time derivative formula
     @param timeStep defined the  time step need to compute the
     @return  rhsV the first order Rhs
   */
-  virtual  void updateRHSFirstDerivative(const Real& timeStep = 1 )  = 0;
+  void updateRHSFirstDerivative(const Real& timeStep = 1 );
 
   //! Update the right hand side \f$ f_W \f$ of the time derivative formula
   /*!
@@ -367,8 +379,13 @@ public:
 
   void setSolution( const feVector_Type& solution )
   {
-    delete M_unknowns[0];
-    M_unknowns[0]= new feVector_Type(solution);
+      // why don't we just do
+      if (M_unknowns[0] != NULL )
+          *M_unknowns[0]= solution;
+      else
+          M_unknowns[0]= new feVector_Type(solution);
+    //delete M_unknowns[0];
+    //M_unknowns[0]= new feVector_Type(solution);
   }
 
 
@@ -382,7 +399,18 @@ public:
     this method is used for example in FSI to return the value of solid
     in the internal loop
   */
-  feVectorType  velocity(const  feVector_Type& u) const;
+  feVectorType velocity(const  feVector_Type& u) const;
+
+
+  //! Return the velocity based on given vector on the next time step
+    /*!
+      @param newEntry unk  to compute the current velocity;
+      @returns the velocity associated to \f$u\f$
+      this method is used for example in FSI to return the current mesh velocity
+      besed on the currently computed mesh displacement
+    */
+    feVectorType nextVelocity( feVectorType const& newEntry ) const;
+
 
   //!Return the current acceleration
   virtual feVectorType acceleration() const=0;
@@ -504,13 +532,29 @@ TimeAdvance<feVectorType>::
 updateRHSContribution(const Real& timeStep )
 {
   //! update rhsContribution  of the first Derivative
-  this->updateRHSFirstDerivative( timeStep);
+  this->updateRHSFirstDerivative( timeStep );
 
   //! update rhsContribution  of the second Derivative
   if( M_orderDerivative == 2 )
     this->updateRHSSecondDerivative( timeStep );
 }
 
+
+template<typename feVectorType>
+void
+TimeAdvance<feVectorType>::updateRHSFirstDerivative(const Real& timeStep )
+{
+    feVectorContainerPtrIterate_Type it  = this->M_rhsContribution.begin();
+
+    //feVector_Type fv ( *this->M_unknowns[ 0 ] );
+    if (*it == NULL)
+        *it = new feVector_Type(*this->M_unknowns[ 0 ]);
+    else
+        **it = *this->M_unknowns[ 0 ];
+
+    this->RHSFirstDerivative( timeStep, **it );
+
+}
 
 template<typename feVectorType>
 void
@@ -600,7 +644,7 @@ inline const feVectorType&
 TimeAdvance<feVectorType>::singleElement( const UInt& i) const
 {
   ASSERT( i < M_size,
-	  "Error there isn't unk(i), i must be shorter than M_size" );
+      "Error there isn't unk(i), i must be shorter than M_size" );
 
   return *M_unknowns[i];
 }
@@ -614,6 +658,16 @@ TimeAdvance<feVectorType>::velocity( const feVector_Type& u ) const
     vel  -= (*this->M_rhsContribution[ 0 ]);
     return vel;
 }
+
+template<typename feVectorType>
+feVectorType
+TimeAdvance<feVectorType>::nextVelocity(feVectorType const& newEntry) const
+{
+    feVectorType rhsContribution(*this->M_unknowns[0]);
+    this->RHSFirstDerivative(M_timeStep, rhsContribution,1);
+    return newEntry * this->M_alpha[ 0 ] / this->M_timeStep -  rhsContribution;
+}
+
 
 template<typename feVectorType>
 feVectorType

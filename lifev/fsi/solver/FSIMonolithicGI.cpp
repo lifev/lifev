@@ -115,7 +115,9 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
                                const vector_Type& disp,
                                const UInt          iter )
 {
-    res *= 0.;//this is important. Don't remove it!
+    // disp here is the current solution guess (u,p,ds,df)
+
+    res = 0.;//this is important. Don't remove it!
 
     M_uk.reset(new vector_Type( disp ));
 
@@ -123,10 +125,16 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
     UInt offset( M_solidAndFluidDim + nDimensions*M_interface );
 
     vectorPtr_Type meshDisp( new vector_Type(M_mmFESpace->map()) );
-    vectorPtr_Type meshVel( new vector_Type(M_mmFESpace->map()) );
     vectorPtr_Type mmRep( new vector_Type(M_mmFESpace->map(), Repeated ));
-    meshDisp->subset(disp, offset); //if the conv. term is to be condidered implicitly
 
+    meshDisp->subset(disp, offset); //if the conv. term is to be condidered implicitly
+    mmRep = meshDisp;
+    moveMesh( *mmRep );
+
+    /* Here there is something conceptually wrong:
+    - the velocity of the mesh has to be computed by considering the current mesh
+    - setSolution should not be called.
+    Indeed: at iter == 0 we shall do as in GE. Then without extrapolations
     if ( iter == 0 )
     {
         //In the case of iteration 0, we have to use the previous meshDispl
@@ -138,21 +146,20 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
         M_ALETimeAdvance->setSolution( *meshDisp );
         *mmRep = *meshDisp;
     }
-    *meshVel = M_ALETimeAdvance->velocity();
-    moveMesh( *mmRep );
+    */
 
-    *mmRep = *meshVel * ( -1. );
-    interpolateVelocity( *mmRep,
-                         *M_beta );
+     //here should use extrapolationFirstDerivative instead of velocity
+     vector_Type meshVelocityRepeated ( this->M_ALETimeAdvance->nextVelocity( *meshDisp ), Repeated );
+     vector_Type interpolatedMeshVelocity(this->M_uFESpace->map());
 
-    vectorPtr_Type fluid( new vector_Type( M_uFESpace->map() ) );
+     interpolateVelocity( meshVelocityRepeated, interpolatedMeshVelocity );
 
-    fluid->subset( disp,0 );
+     vectorPtr_Type fluid( new vector_Type( M_uFESpace->map() ) );
+     M_beta->subset( disp,0 );
+     *M_beta -= interpolatedMeshVelocity; // convective term, u^(n+1) - w^(n+1)
 
-    *M_beta += *fluid; /*M_un or disp, it could be also M_uk in a FP strategy*/
-
-    assembleSolidBlock( iter, *M_uk );
-    assembleFluidBlock( iter, *M_uk );
+    assembleSolidBlock( iter, disp );
+    assembleFluidBlock( iter, disp );
     assembleMeshBlock( iter );
 
     *M_rhsFull = *M_rhs;

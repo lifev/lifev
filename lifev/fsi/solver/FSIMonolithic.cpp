@@ -199,7 +199,7 @@ FSIMonolithic::setupFluidSolid( UInt const fluxes )
 
     //the map for the interface coupling matrices should be done with respect to the coarser mesh.
     M_monolithicMatrix->numerationInterface(M_numerationInterface);
-    M_beta.reset  (new vector_Type(/*M_monolithicMap*/M_uFESpace->map()));
+    M_beta.reset  (new vector_Type(M_uFESpace->map()));
 
     M_offset = M_uFESpace->dof().numTotalDof()*nDimensions + fluxes +  M_pFESpace->dof().numTotalDof();
     M_solidAndFluidDim= M_offset + M_dFESpace->dof().numTotalDof()*nDimensions;

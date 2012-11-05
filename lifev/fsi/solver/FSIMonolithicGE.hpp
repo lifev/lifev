@@ -137,6 +137,9 @@ public:
     //! Applies the bounsary conditions to the matrix
     void applyBoundaryConditions();
 
+
+    void updateSolution( const vector_Type& solution );
+
     //@}
 
 
