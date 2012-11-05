@@ -256,8 +256,8 @@ private:
 template<typename MeshType>
 GraphPartitionTool<MeshType>::GraphPartitionTool() :
     M_comm(),
-    M_myPID(),
-    M_numProcessors(),
+    M_myPID(0),
+    M_numProcessors(0),
     M_numPartitions(0),
     M_numPartitionsPerProcessor(0),
     M_myFirstPartition(0),
@@ -274,8 +274,13 @@ GraphPartitionTool<MeshType>::GraphPartitionTool(meshPtr_Type& mesh,
     M_comm(comm),
     M_myPID(M_comm->MyPID()),
     M_numProcessors(M_comm->NumProc()),
+    M_numPartitions(0),
+    M_numPartitionsPerProcessor(0),
+    M_myFirstPartition(0),
+    M_myLastPartition(0),
     M_parameters(),
-    M_mesh(mesh)
+    M_mesh(mesh),
+    M_zoltanStruct(0)
 {
     setParameters(parameters);
 }
