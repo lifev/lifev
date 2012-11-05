@@ -730,11 +730,14 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnElementsP0
     }
 
     // add all facing elements
-    std::vector<ID> facesOnSubdInt = M_localMesh->facetList().extractElementsWithFlag(
-                    EntityFlags::SUBDOMAIN_INTERFACE, &Flag::testOneSet );
-    for ( ID faceId = 0; faceId < facesOnSubdInt.size(); faceId++ )
+    typedef typename mesh_Type::facet_Type const * facetPtr_Type;
+    std::vector<facetPtr_Type>
+            facetsOnSubdInt = M_localMesh->facetList().extractElementsWithFlag(
+                EntityFlags::SUBDOMAIN_INTERFACE, &Flag::testOneSet );
+    for ( typename std::vector<facetPtr_Type>::const_iterator facetIt = facetsOnSubdInt.begin();
+          facetIt != facetsOnSubdInt.end(); ++facetIt )
     {
-        map.insert( M_localMesh->facet( facesOnSubdInt [ faceId ] ).secondAdjacentElementIdentity() );
+        map.insert( (*facetIt)->secondAdjacentElementIdentity() );
     }
 
     // convert unique list to vector to assure continuity in memorization
