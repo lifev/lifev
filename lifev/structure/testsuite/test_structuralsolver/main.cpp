@@ -25,8 +25,14 @@
 //@HEADER
 /**
    \file main.cpp
-   \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
-   \date 2005-04-16
+
+   This test is the case of traction of a cube. It does not use the symmetry BCs
+   This test uses the FESpace which is the standard in LifeV and the ETFESpace
+   The FESpace is used for the BCs of Neumann type since in the ET branch there
+   is not the integration over the boundary faces.
+
+   \author Paolo Tricerri <paolo.tricerri@epfl.ch>
+   \date 1861-03-17
  */
 #undef HAVE_HDF5
 #ifdef TWODIM
@@ -53,8 +59,6 @@
 #include <lifev/core/algorithm/PreconditionerIfpack.hpp>
 #include <lifev/core/algorithm/PreconditionerML.hpp>
 
-
-//Include fils which were in the structure.cpp file
 #include <lifev/core/array/MapEpetra.hpp>
 
 #include <lifev/core/fem/TimeAdvance.hpp>
@@ -78,6 +82,9 @@
 #include <lifev/core/filter/ExporterHDF5.hpp>
 #endif
 #include <lifev/core/filter/ExporterEmpty.hpp>
+
+//Includes for the Expression Template
+#include <lifev/eta/fem/ETFESpace.hpp>
 
 #include <iostream>
 
@@ -232,8 +239,14 @@ void
 Structure::run3d()
 {
     typedef StructuralOperator< RegionMesh<LinearTetra> >::vector_Type  vector_Type;
-    typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
-    typedef boost::shared_ptr< TimeAdvance< vector_Type > >       timeAdvance_type;
+    typedef boost::shared_ptr<vector_Type>                              vectorPtr_Type;
+    typedef boost::shared_ptr< TimeAdvance< vector_Type > >             timeAdvance_Type;
+    typedef FESpace< RegionMesh<LinearTetra>, MapEpetra >               solidFESpace_Type;
+    typedef boost::shared_ptr<solidFESpace_Type>                        solidFESpacePtr_Type;
+
+    typedef ETFESpace< RegionMesh<LinearTetra>, MapEpetra, 3, 3 >       solidETFESpace_Type;
+    typedef boost::shared_ptr<solidETFESpace_Type>                      solidETFESpacePtr_Type;
+
 
     bool verbose = (parameters->comm->MyPID() == 0);
 
@@ -256,18 +269,15 @@ Structure::run3d()
 
     std::string dOrder =  dataFile( "solid/space_discretization/order", "P1");
 
-    typedef FESpace< RegionMesh<LinearTetra>, MapEpetra > solidFESpace_type;
-    typedef boost::shared_ptr<solidFESpace_type> solidFESpace_ptrtype;
-    solidFESpace_ptrtype dFESpace( new solidFESpace_type(meshPart,dOrder,3,parameters->comm) );
+    //Mainly used for BCs assembling (Neumann type)
+    solidFESpacePtr_Type dFESpace( new solidFESpace_Type(meshPart,dOrder,3,parameters->comm) );
+    solidETFESpacePtr_Type dETFESpace( new solidETFESpace_Type(meshPart,&(dFESpace->refFE()),&(dFESpace->fe().geoMap()), parameters->comm) );
+
     if (verbose) std::cout << std::endl;
-
-    //MapEpetra structMap(dFESpace->refFE(), meshPart, parameters->comm);
-
-    //MapEpetra fullMap;
 
     std::string timeAdvanceMethod =  dataFile( "solid/time_discretization/method", "Newmark");
 
-    timeAdvance_type  timeAdvance( TimeAdvanceFactory::instance().createObject( timeAdvanceMethod ) );
+    timeAdvance_Type  timeAdvance( TimeAdvanceFactory::instance().createObject( timeAdvanceMethod ) );
 
     UInt OrderDev = 2;
 
@@ -280,13 +290,6 @@ Structure::run3d()
 
     timeAdvance->setTimeStep(dataStructure->dataTime()->timeStep());
     timeAdvance->showMe();
-
-    /*
-    for (UInt ii = 0; ii < nDimensions; ++ii)
-    {
-        fullMap += structMap;
-    }
-    */
 
     //! #################################################################################
     //! BOUNDARY CONDITIONS
@@ -307,27 +310,13 @@ Structure::run3d()
     BCh->addBC("EdgesIn",      40,  Essential, Component, zero,    compx);
     //! =================================================================================
 
-    //! =================================================================================
-    //! BC for StructuredCube4_simmetry.mesh
-    //! =================================================================================
-    /*
-    BCh->addBC("surf5",    5,   EssentialVertices,    Component, Homogeneous, compz);
-    BCh->addBC("line10",   10,  EssentialVertices,    Component, Homogeneous, compxz);
-    BCh->addBC("line20",   20,  EssentialVertices,    Component, Homogeneous, compxy);
-    BCh->addBC("line30",   30,  EssentialVertices,    Component, Homogeneous, compyz);
-    BCh->addBC("line40",   40,  EssentialVertices,    Component, Homogeneous, compy);
-    BCh->addBC("line50",   50,  EssentialVertices,    Component, Homogeneous, compz);
-    BCh->addBC("point100", 100, EssentialVertices,    Full,      Homogeneous, 3);
-    */
-    //! =================================================================================
-    //! #################################################################################
-
     //! 1. Constructor of the structuralSolver
     StructuralOperator< RegionMesh<LinearTetra> > solid;
 
     //! 2. Setup of the structuralSolver
     solid.setup(dataStructure,
                 dFESpace,
+                dETFESpace,
                 BCh,
                 parameters->comm);
 

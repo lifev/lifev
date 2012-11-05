@@ -38,7 +38,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef _STRUCTURALOPERATOR_H_
 #define _STRUCTURALOPERATOR_H_ 1
 
-                                       //#include<boost/scoped_ptr.hpp>
+//#include<boost/scoped_ptr.hpp>
 
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -70,9 +70,14 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/structure/solver/VenantKirchhoffElasticData.hpp>
 #include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
 
+//ET includes
+#include <lifev/eta/fem/ETFESpace.hpp>
+#include <lifev/eta/expression/Integrate.hpp>
 
 namespace LifeV
 {
+
+using namespace ExpressionAssembly;
 
 template < typename MeshEntityType,
            typename ComparisonPolicyType = boost::function2<bool,
@@ -91,10 +96,10 @@ public:
 
     bool operator()( const meshEntity_Type & entity ) const
     {
-      //Extract the flag from the mesh entity
-      UInt flagChecked = entity.markerID();
+        //Extract the flag from the mesh entity
+        UInt flagChecked = entity.markerID();
 
-      return M_policy( flagChecked, M_reference );
+        return M_policy( flagChecked, M_reference );
     }
 
 private:
@@ -111,48 +116,55 @@ private:
 
 */
 template <typename Mesh,
-           typename SolverType = LifeV::SolverAztecOO >
+          typename SolverType = LifeV::SolverAztecOO >
 
 class StructuralOperator
 {
 public:
 
-  //!@name Type definitions
-  //@{
-  typedef Real ( *function ) ( const Real&, const Real&, const Real&, const Real&, const ID& );
-  typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> source_Type;
+    //!@name Type definitions
+    //@{
+    typedef Real ( *function ) ( const Real&, const Real&, const Real&, const Real&, const ID& );
+    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> source_Type;
 
-  typedef StructuralConstitutiveLaw<Mesh>               material_Type;
-  typedef boost::shared_ptr<material_Type>              materialPtr_Type;
+    typedef StructuralConstitutiveLaw<Mesh>               material_Type;
+    typedef boost::shared_ptr<material_Type>              materialPtr_Type;
 
-  typedef BCHandler                                     bcHandlerRaw_Type;
-  typedef boost::shared_ptr<bcHandlerRaw_Type>          bcHandler_Type;
+    typedef BCHandler                                     bcHandlerRaw_Type;
+    typedef boost::shared_ptr<bcHandlerRaw_Type>          bcHandler_Type;
 
-  typedef SolverType                                    solver_Type;
+    typedef SolverType                                    solver_Type;
 
-  typedef typename solver_Type::matrix_type             matrix_Type;
-  typedef boost::shared_ptr<matrix_Type>                matrixPtr_Type;
-  typedef typename solver_Type::vector_type             vector_Type;
-  typedef boost::shared_ptr<vector_Type>                vectorPtr_Type;
+    typedef typename solver_Type::matrix_type             matrix_Type;
+    typedef boost::shared_ptr<matrix_Type>                matrixPtr_Type;
+    typedef typename solver_Type::vector_type             vector_Type;
+    typedef boost::shared_ptr<vector_Type>                vectorPtr_Type;
 
-  typedef typename SolverType::prec_raw_type            precRaw_Type;
-  typedef typename SolverType::prec_type                prec_Type;
+    typedef typename SolverType::prec_raw_type            precRaw_Type;
+    typedef typename SolverType::prec_type                prec_Type;
 
-  typedef VenantKirchhoffElasticData                    data_Type;
+    typedef VenantKirchhoffElasticData                    data_Type;
 
-  typedef RegionMesh<LinearTetra >                      mesh_Type;
-  typedef std::vector< mesh_Type::element_Type const *> vectorVolumes_Type;
+    typedef RegionMesh<LinearTetra >                      mesh_Type;
+    typedef std::vector< mesh_Type::element_Type const *> vectorVolumes_Type;
 
-  typedef std::map< UInt, vectorVolumes_Type>           mapMarkerVolumes_Type;
-  typedef boost::shared_ptr<mapMarkerVolumes_Type>      mapMarkerVolumesPtr_Type;
+    typedef std::map< UInt, vectorVolumes_Type>           mapMarkerVolumes_Type;
+    typedef boost::shared_ptr<mapMarkerVolumes_Type>      mapMarkerVolumesPtr_Type;
 
-  typedef typename mesh_Type::element_Type                        meshEntity_Type;
+    typedef typename mesh_Type::element_Type                        meshEntity_Type;
 
-  typedef typename boost::function2<bool, const UInt, const UInt> comparisonPolicy_Type;
+    typedef typename boost::function2<bool, const UInt, const UInt> comparisonPolicy_Type;
 
-  typedef MarkerSelector<meshEntity_Type, comparisonPolicy_Type> markerSelector_Type;
-  typedef boost::scoped_ptr<markerSelector_Type>          markerSelectorPtr_Type;
-  //@}
+    typedef MarkerSelector<meshEntity_Type, comparisonPolicy_Type> markerSelector_Type;
+    typedef boost::scoped_ptr<markerSelector_Type>          markerSelectorPtr_Type;
+
+    typedef ETFESpace< RegionMesh<LinearTetra>, MapEpetra, 3, 3 >  ETFESpace_Type;
+    typedef boost::shared_ptr<ETFESpace_Type>                      ETFESpacePtr_Type;
+
+    typedef FESpace< RegionMesh<LinearTetra>, MapEpetra >          FESpace_Type;
+    typedef boost::shared_ptr<FESpace_Type>                        FESpacePtr_Type;
+
+    //@}
 
 
     //! @name Constructor & Destructor
@@ -175,7 +187,8 @@ public:
       \param comm the Epetra Comunicator
     */
     void setup( boost::shared_ptr<data_Type> data,
-                const boost::shared_ptr< FESpace<Mesh, MapEpetra> >&   FESpace,
+                const FESpacePtr_Type   FESpace,
+                const ETFESpacePtr_Type   ETFESpace,
                 bcHandler_Type&       BCh,
                 boost::shared_ptr<Epetra_Comm>&     comm
                 );
@@ -186,7 +199,8 @@ public:
       \param comm the Epetra Comunicator
     */
     void setup( boost::shared_ptr<data_Type> data,
-                const boost::shared_ptr< FESpace<Mesh, MapEpetra> >&   FESpace,
+                const FESpacePtr_Type   FESpace,
+                const ETFESpacePtr_Type   ETFESpace,
                 boost::shared_ptr<Epetra_Comm>&     comm
                 );
 
@@ -198,7 +212,8 @@ public:
       \param offset the offset parameter
     */
     void setup( boost::shared_ptr<data_Type> data,
-                const boost::shared_ptr< FESpace<Mesh, MapEpetra> >&   dFESpace,
+                const FESpacePtr_Type   dFESpace,
+                const ETFESpacePtr_Type   ETFESpace,
                 boost::shared_ptr<Epetra_Comm>&     comm,
                 const boost::shared_ptr<const MapEpetra>&       monolithicMap,
                 UInt       offset=0
@@ -427,7 +442,10 @@ public:
     matrixPtr_Type const massMatrix() const {return M_massMatrix; }
 
     //! Get the FESpace object
-    FESpace<Mesh, MapEpetra>& dFESpace() {return M_FESpace;}
+    FESpace_Type& dFESpace() {return M_FESpace;}
+
+    //! Get the ETFESpace object
+    ETFESpace_Type& ETFESpace() {return M_ETFESpace;}
 
     //! Get the bCHandler object
     bcHandler_Type const & bcHandler() const {return M_BCh;}
@@ -527,9 +545,11 @@ protected:
 
     boost::shared_ptr<data_Type>         M_data;
 
-    boost::shared_ptr<FESpace<Mesh, MapEpetra> >      M_FESpace;
+    FESpacePtr_Type                      M_FESpace;
 
-    boost::shared_ptr<const Displayer>         M_Displayer;
+    ETFESpacePtr_Type                    M_ETFESpace;
+
+    boost::shared_ptr<const Displayer>   M_Displayer;
 
     Int                                  M_me;
 
@@ -614,6 +634,7 @@ template <typename Mesh, typename SolverType>
 StructuralOperator<Mesh, SolverType>::StructuralOperator( ):
     M_data                       ( ),
     M_FESpace                    ( ),
+    M_ETFESpace                  ( ),
     M_Displayer                  ( ),
     M_me                         ( 0 ),
     M_linearSolver               ( ),
@@ -644,21 +665,23 @@ StructuralOperator<Mesh, SolverType>::StructuralOperator( ):
 template <typename Mesh, typename SolverType>
 void
 StructuralOperator<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>          data,
-                                          const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
-                                          bcHandler_Type&                    BCh,
-                                          boost::shared_ptr<Epetra_Comm>&   comm)
+                                            const FESpacePtr_Type dFESpace,
+                                            const ETFESpacePtr_Type ETFESpace,
+                                            bcHandler_Type&                    BCh,
+                                            boost::shared_ptr<Epetra_Comm>&   comm)
 {
-    setup(data, dFESpace, comm);
+    setup(data, dFESpace, ETFESpace, comm);
     M_BCh = BCh;
 }
 
 template <typename Mesh, typename SolverType>
 void
 StructuralOperator<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        data,
-                                          const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
-                                          boost::shared_ptr<Epetra_Comm>&     comm)
+                                            const FESpacePtr_Type dFESpace,
+                                            const ETFESpacePtr_Type ETFESpace,
+                                            boost::shared_ptr<Epetra_Comm>&     comm)
 {
-    setup( data, dFESpace, comm, dFESpace->mapPtr(), (UInt)0 );
+    setup( data, dFESpace, ETFESpace, comm, dFESpace->mapPtr(), (UInt)0 );
 
     M_rhs.reset                        ( new vector_Type(*M_localMap));
     M_rhsNoBC.reset                    ( new vector_Type(*M_localMap));
@@ -672,13 +695,15 @@ StructuralOperator<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        
 template <typename Mesh, typename SolverType>
 void
 StructuralOperator<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        data,
-                                          const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
-                                          boost::shared_ptr<Epetra_Comm>&     comm,
-                                          const boost::shared_ptr<const MapEpetra>&  monolithicMap,
-                                          UInt                                offset)
+                                            const FESpacePtr_Type dFESpace,
+                                            const ETFESpacePtr_Type ETFESpace,
+                                            boost::shared_ptr<Epetra_Comm>&     comm,
+                                            const boost::shared_ptr<const MapEpetra>&  monolithicMap,
+                                            UInt                                offset)
 {
     M_data                            = data;
     M_FESpace                         = dFESpace;
+    M_ETFESpace                       = ETFESpace;
     M_Displayer.reset                 (new Displayer(comm));
     M_me                              = comm->MyPID();
     M_elmatM.reset                    ( new MatrixElemental( M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
@@ -705,35 +730,35 @@ StructuralOperator<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        
 template <typename Mesh, typename SolverType>
 void StructuralOperator<Mesh, SolverType>::setupMapMarkersVolumes( void )
 {
- 
-  this->M_Displayer->leaderPrint(" S-  Building the map between volumesMarkers <--> volumes \n");
 
-  //We first loop over the vector of the material_flags
-  for (  UInt i(0); i < M_data->vectorFlags().size(); i++ )
+    this->M_Displayer->leaderPrint(" S-  Building the map between volumesMarkers <--> volumes \n");
+
+    //We first loop over the vector of the material_flags
+    for (  UInt i(0); i < M_data->vectorFlags().size(); i++ )
     {
 
-      //Create the functor to extract volumes
-      markerSelectorPtr_Type ref( new markerSelector_Type(M_data->vectorFlags()[i]) );
+        //Create the functor to extract volumes
+        markerSelectorPtr_Type ref( new markerSelector_Type(M_data->vectorFlags()[i]) );
 
-      //Number of volumes with the current marker
-      UInt numExtractedVolumes = this->M_FESpace->mesh()->elementList().countAccordingToPredicate( *ref );
+        //Number of volumes with the current marker
+        UInt numExtractedVolumes = this->M_FESpace->mesh()->elementList().countAccordingToPredicate( *ref );
 
-      this->M_Displayer->leaderPrint(" Current marker: ", M_data->vectorFlags()[i]);
-      this->M_Displayer->leaderPrint(" \n");
-      this->M_Displayer->leaderPrint(" Number of volumes:", numExtractedVolumes);
-      this->M_Displayer->leaderPrint(" \n");
+        this->M_Displayer->leaderPrint(" Current marker: ", M_data->vectorFlags()[i]);
+        this->M_Displayer->leaderPrint(" \n");
+        this->M_Displayer->leaderPrint(" Number of volumes:", numExtractedVolumes);
+        this->M_Displayer->leaderPrint(" \n");
 
-      //Vector large enough to contain the number of volumes with the current marker
-      vectorVolumes_Type extractedVolumes( numExtractedVolumes );
+        //Vector large enough to contain the number of volumes with the current marker
+        vectorVolumes_Type extractedVolumes( numExtractedVolumes );
 
-      //Extracting the volumes
-      extractedVolumes = this->M_FESpace->mesh()->elementList().extractAccordingToPredicate( *ref );
+        //Extracting the volumes
+        extractedVolumes = this->M_FESpace->mesh()->elementList().extractAccordingToPredicate( *ref );
 
-      //Insert the correspondande Marker <--> List of Volumes inside the map
-      M_mapMarkersVolumes->insert( pair<UInt, vectorVolumes_Type> (M_data->vectorFlags()[i], extractedVolumes) ) ;
+        //Insert the correspondande Marker <--> List of Volumes inside the map
+        M_mapMarkersVolumes->insert( pair<UInt, vectorVolumes_Type> (M_data->vectorFlags()[i], extractedVolumes) ) ;
 
-      //Cleaning the vector
-      extractedVolumes.clear();
+        //Cleaning the vector
+        extractedVolumes.clear();
 
     }
 }
@@ -789,7 +814,7 @@ void StructuralOperator<Mesh, SolverType>::updateSourceTerm( source_Type const& 
         for ( UInt ic = 0; ic < nc; ++ic )
         {
             compute_vec( source, M_elvec, M_FESpace->fe(),  M_data->dataTime()->time(), ic ); // compute local vector
-            assembleVector( *rhs, M_elvec, M_FESpace->fe(), M_FESpace->dof(), ic, ic*M_FESpace->getDim() ); // assemble local vector into global one
+            assembleVector( *rhs, M_elvec, M_FESpace->fe(), M_FESpace->dof(), ic, ic*M_FESpace->fieldDim() ); // assemble local vector into global one
         }
     }
     M_rhsNoBC +=rhs;
@@ -827,28 +852,16 @@ StructuralOperator<Mesh, SolverType>::computeMassMatrix( const Real factor)
     UInt nc = nDimensions;
     const Real factorMassMatrix = factor * M_data->rho();
 
-    //! Elementary computation and matrix assembling
-    //! Loop on elements
-    for ( UInt i = 0; i < M_FESpace->mesh()->numVolumes(); i++ )
-    {
+    //Assembling using the Expression Template
+    //At the moment, that the ET is not the standard, when the integration is
+    //performed the quadrature rule set in FESpace is used.
+    //Otherwhise, one can set his preferred quadrature rule for the integrals.
 
-        M_FESpace->fe().updateFirstDerivQuadPt( M_FESpace->mesh()->volumeList( i ) );
-
-        M_elmatM->zero();
-
-        // mass
-        // The method mass is implemented in AssemblyElemental.cpp
-	mass( factorMassMatrix , *M_elmatM, M_FESpace->fe(), 0, 0, nDimensions );
-
-        //! assembling
-        for ( UInt ic = 0; ic < nc; ic++ )
-        {
-            //mass
-            assembleMatrix( *M_massMatrix, *M_elmatM, M_FESpace->fe(), M_FESpace->dof(),ic,ic, M_offset +  ic*totalDof, M_offset +  ic*totalDof);
-        }
-    }
-
-    //getComunicator()->Barrier();
+    integrate( elements(M_ETFESpace->mesh()),
+               M_FESpace->qr(),
+               M_ETFESpace,
+               M_ETFESpace,
+               value(factorMassMatrix) *  dot( phi_i , phi_j ) ) >> M_massMatrix;
 
     M_massMatrix->globalAssemble();
 
@@ -1001,7 +1014,7 @@ StructuralOperator<Mesh, SolverType>::evalResidual( vector_Type &residual, const
         *M_rhs=*M_rhsNoBC;
         residual = *M_massMatrix * solution;
         residual += *M_material->stiffVector();
-    vector_Type solRep(solution, Repeated);
+        vector_Type solRep(solution, Repeated);
         bcManageResidual( residual, *M_rhs, solRep, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(), M_data->dataTime()->time(), 1.0 );
         residual -= *M_rhs;
         chrono.stop();
@@ -1070,12 +1083,12 @@ StructuralOperator<Mesh, SolverType>::evalConstraintTensor()
         Real s      = 0;
         Real volume = M_FESpace->fe().detJac(0);
 
-        for ( Int ig = 0; ig < M_FESpace->fe().nbQuadPt; ++ig )
+        for ( Int ig = 0; ig < M_FESpace->fe().nbQuadPt(); ++ig )
         {
             for ( Int k = 0; k < M_FESpace->fe().nbFEDof(); ++k )
             {
                 Int i    = M_FESpace->fe().patternFirst(k);
-                Int idof = M_FESpace->dof().localToGlobal(M_FESpace->fe().currentLocalId(), i + 1);
+                Int idof = M_FESpace->dof().localToGlobalMap(M_FESpace->fe().currentLocalId(), i + 1);
 
                 s+= (2*M_data->mu(1) + M_data->lambda(1))*
                     M_FESpace->fe().weightDet( ig )*
@@ -1099,19 +1112,19 @@ StructuralOperator<Mesh, SolverType>::evalConstraintTensor()
         for ( Int k = 0; k < M_FESpace->fe().nbFEDof(); ++k )
         {
             Int i    = M_FESpace->fe().patternFirst(k);
-            Int idof = M_FESpace->dof().localToGlobal(M_FESpace->fe().currentLocalId(), i + 1);
+            Int idof = M_FESpace->dof().localToGlobalMap(M_FESpace->fe().currentLocalId(), i + 1);
 
             (*M_sxx)[idof] += s/M_FESpace->fe().detJac(0);
         }
 
         s = 0;
 
-        for ( Int ig = 0; ig < M_FESpace->fe().nbQuadPt; ++ig )
+        for ( Int ig = 0; ig < M_FESpace->fe().nbQuadPt(); ++ig )
         {
             for ( Int k = 0; k < M_FESpace->fe().nbFEDof(); ++k )
             {
                 Int i    = M_FESpace->fe().patternFirst(k);
-                Int idof = M_FESpace->dof().localToGlobal(M_FESpace->fe().currentLocalId(), i + 1);
+                Int idof = M_FESpace->dof().localToGlobalMap(M_FESpace->fe().currentLocalId(), i + 1);
 
                 s += M_data->lambda(1)*
                     M_FESpace->fe().weightDet( ig )*
@@ -1136,7 +1149,7 @@ StructuralOperator<Mesh, SolverType>::evalConstraintTensor()
         for ( Int k = 0; k < M_FESpace->fe().nbFEDof(); ++k )
         {
             Int i    = M_FESpace->fe().patternFirst(k);
-            Int idof = M_FESpace->dof().localToGlobal(M_FESpace->fe().currentLocalId(), i + 1);
+            Int idof = M_FESpace->dof().localToGlobalMap(M_FESpace->fe().currentLocalId(), i + 1);
 
             (*M_syy)[idof] += s/volume;
         }
@@ -1144,12 +1157,12 @@ StructuralOperator<Mesh, SolverType>::evalConstraintTensor()
 
         s = 0;
 
-        for ( Int ig = 0; ig < M_FESpace->fe().nbQuadPt; ++ig )
+        for ( Int ig = 0; ig < M_FESpace->fe().nbQuadPt(); ++ig )
         {
             for ( Int k = 0; k < M_FESpace->fe().nbFEDof(); ++k )
             {
                 Int i    = M_FESpace->fe().patternFirst(k);
-                Int idof = M_FESpace->dof().localToGlobal(M_FESpace->fe().currentLocalId(), i + 1);
+                Int idof = M_FESpace->dof().localToGlobalMap(M_FESpace->fe().currentLocalId(), i + 1);
 
                 s += M_data->lambda(1)*
                     M_FESpace->fe().weightDet( ig )*
@@ -1173,7 +1186,7 @@ StructuralOperator<Mesh, SolverType>::evalConstraintTensor()
         for ( Int k = 0; k < M_FESpace->fe().nbFEDof(); ++k )
         {
             Int i    = M_FESpace->fe().patternFirst(k);
-            Int idof = M_FESpace->dof().localToGlobal(M_FESpace->fe().currentLocalId(), i + 1);
+            Int idof = M_FESpace->dof().localToGlobalMap(M_FESpace->fe().currentLocalId(), i + 1);
 
             (*M_szz)[idof] += s/M_FESpace->fe().detJac(0);
         }
@@ -1330,25 +1343,25 @@ solveJacobian(vector_Type&           step,
 
     M_linearSolver->solveSystem( res, step, matrFull );
 
-//     matrFull->spy("J");
-//     M_material->stiffMatrix()->spy("S");
-//     M_systemMatrix->spy("M");
+    //     matrFull->spy("J");
+    //     M_material->stiffMatrix()->spy("S");
+    //     M_systemMatrix->spy("M");
     chrono.stop();
 }
 
 template<typename Mesh, typename SolverType>
 void StructuralOperator<Mesh, SolverType>::apply( const vector_Type& sol, vector_Type& res) const
 {
-  M_material->apply(sol, res, M_mapMarkersVolumes);
+    M_material->apply(sol, res, M_mapMarkersVolumes);
     res += (*M_massMatrix)*sol;
 }
 
 template<typename Mesh, typename SolverType>
 void
 StructuralOperator<Mesh, SolverType>::applyBoundaryConditions( matrix_Type&        matrix,
-                                                             vector_Type&        rhs,
-                                                             bcHandler_Type&     BCh,
-                                                             UInt                offset)
+                                                               vector_Type&        rhs,
+                                                               bcHandler_Type&     BCh,
+                                                               UInt                offset)
 {
     // BC manage for the velocity
     if (offset)
