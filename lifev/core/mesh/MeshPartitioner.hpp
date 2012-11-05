@@ -236,11 +236,10 @@ public:
     //! Return a pointer to M_elementDomains
     const graphPtr_Type&     elementDomains()       const {return M_elementDomains;}
     graphPtr_Type&           elementDomains()             {return M_elementDomains;}
-    //! Return the communicator of the mesh
-    boost::shared_ptr<Epetra_Comm> comm() const { return M_comm; }
-    //! Return a reference to M_ghostDataMap
-    const GhostEntityDataMap_Type&  ghostDataMap() const {return M_ghostDataMap;}
-
+    //! Return a pointer to the communicator M_comm
+    const boost::shared_ptr<Epetra_Comm> & comm()   const { return M_comm; }
+    //! Return the ghost data
+    const GhostEntityDataMap_Type & ghostDataMap()  const { return M_ghostDataMap; }
     //@}
 
     //! @name Set methos
@@ -338,6 +337,12 @@ private:
       M_meshPartitions.
     */
     void constructFacets();
+    //! Mark ghost entities
+    /*!
+      mark all elements and points that are connected to SUBDOMAIN_INTERFACE flagged points
+      as GHOST_ENTITY
+    */
+    void markGhostEntities();
     //! Final setup of local mesh
     /*!
       Updates the partitioned mesh object data members after adding the mesh
@@ -473,7 +478,8 @@ doPartition ( meshPtr_Type &mesh, boost::shared_ptr<Epetra_Comm>& comm,
 
     M_me = M_comm->MyPID();
 
-    meshPtr_Type newMesh ( new MeshType );
+    meshPtr_Type newMesh ( new MeshType( comm ) );
+    newMesh->setIsPartitioned( true );
     M_meshPartitions.reset ( new partMesh_Type( M_numPartitions, newMesh ) );
     newMesh.reset();
 
@@ -498,7 +504,8 @@ void MeshPartitioner<MeshType>::setup(UInt numPartitions, boost::shared_ptr<Epet
     meshPtr_Type newMesh;
     for (UInt i = 0; i < M_numPartitions; ++i)
     {
-        newMesh.reset(new MeshType);
+        newMesh.reset( new MeshType( comm ) );
+        newMesh->setIsPartitioned( true );
         M_meshPartitions->push_back(newMesh);
     }
     newMesh.reset();
@@ -605,6 +612,11 @@ void MeshPartitioner<MeshType>::doPartitionMesh()
     // faces construction
     // ******************
     constructFacets();
+
+    // ******************
+    // mark ghost entities
+    // ******************
+    markGhostEntities();
 
     // ******************
     // final setup
@@ -1186,13 +1198,11 @@ void MeshPartitioner<MeshType>::constructNodes()
         // in this loop inode is the local numbering of the points
         for (it = M_localNodes[i].begin(); it != M_localNodes[i].end(); ++it, ++inode)
         {
-            typename MeshType::point_Type point = 0;
-
             // create a boundary point in the local mesh, if needed
             bool boundary = M_originalMesh->isBoundaryPoint(*it);
             M_nBoundaryPoints[i] += boundary;
 
-            pp = &(*M_meshPartitions)[i]->addPoint(boundary);
+            pp = &(*M_meshPartitions)[i]->addPoint( boundary, false );
             *pp = M_originalMesh->point( *it );
 
             pp->setLocalId( inode );
@@ -1520,6 +1530,42 @@ void MeshPartitioner<MeshType>::constructFacets()
 }
 
 template<typename MeshType>
+void MeshPartitioner<MeshType>::markGhostEntities()
+{
+    // TODO to be removed
+    /*
+    for (UInt i = 0; i < M_numPartitions; ++i)
+    {
+        // loop on all elements to find which one has a point on the subdomain interface
+        for ( UInt kVol = 0; kVol < (*M_meshPartitions)[i]->volumeList.size(); kVol++ )
+        {
+            typename mesh_Type::volume_Type & volume = (*M_meshPartitions)[i]->volumeList[ kVol ];
+            bool connectedToSubdomainInterface ( false );
+            // check if this volume is connected to a point on SUBDOMAIN_INTERFACE
+            for ( UInt jPoint = 0; jPoint < MeshType::volume_Type::S_numLocalPoints; jPoint++ )
+            {
+                if ( Flag::testOneSet( volume.point ( jPoint ).flag(), EntityFlags::SUBDOMAIN_INTERFACE ) )
+                {
+                    connectedToSubdomainInterface = true; break;
+                }
+            }
+
+            // flag all points (not flagged as SUBDOMAIN_INTERFACE) and the volume as GHOST_ENTITY
+            if ( connectedToSubdomainInterface )
+            {
+                volume.setFlag ( EntityFlags::GHOST_ENTITY );
+                for ( UInt jPoint = 0; jPoint < MeshType::volume_Type::S_numLocalPoints; jPoint++ )
+                {
+                    if ( !Flag::testOneSet( volume.point ( jPoint ).flag(), EntityFlags::SUBDOMAIN_INTERFACE ) )
+                        (*M_meshPartitions)[i]->point( volume.point ( jPoint ).localId() ).setFlag ( EntityFlags::GHOST_ENTITY );
+                }
+            }
+        }
+    }
+    */
+}
+
+template<typename MeshType>
 void MeshPartitioner<MeshType>::finalSetup()
 {
     for (UInt i = 0; i < M_numPartitions; ++i)
@@ -1540,7 +1586,7 @@ void MeshPartitioner<MeshType>::finalSetup()
         (*M_meshPartitions)[i]->setMaxNumGlobalFacets  (M_originalMesh->numFacets());
 
         (*M_meshPartitions)[i]->setMaxNumGlobalElements(M_originalMesh->numElements());
-        (*M_meshPartitions)[i]->setnumBoundaryFacets    (M_nBoundaryFacets[i]);
+        (*M_meshPartitions)[i]->setNumBoundaryFacets    (M_nBoundaryFacets[i]);
 
         (*M_meshPartitions)[i]->setNumBPoints   (M_nBoundaryPoints[i]);
         (*M_meshPartitions)[i]->setNumBoundaryRidges    (M_nBoundaryRidges[i]);

@@ -42,7 +42,7 @@
 
 
 #include <Epetra_ConfigDefs.h>
-#ifdef EPETRA_MPI
+#ifdef HAVE_MPI
 #include <mpi.h>
 #include <Epetra_MpiComm.h>
 #else

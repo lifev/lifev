@@ -67,10 +67,10 @@ markerID_Type regularMeshPointPosition2D( const UInt& i_x,
     INTERNAL = 0;
 
     // Edges
-    BOTTOMEDGE  =  1;
-    TOPEDGE     =  2;
-    RIGHTEDGE   =  4;
-    LEFTEDGE    =  8;
+    LEFTEDGE     =  8;
+    BOTTOMEDGE   =  1;
+    TOPEDGE      =  2;
+    RIGHTEDGE    =  4;
 
     // Corners
     BOTTOMLEFTCORNER   = 9;

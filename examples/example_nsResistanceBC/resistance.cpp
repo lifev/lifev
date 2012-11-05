@@ -219,7 +219,11 @@ ResistanceProblem::run()
     boost::shared_ptr<mesh_Type > fullMeshPtr (new mesh_Type);
     readMesh(*fullMeshPtr, meshData);
 
-    MeshPartitioner< mesh_Type >   meshPart(fullMeshPtr, d->comm);
+    boost::shared_ptr<mesh_Type > localMeshPtr;
+    {
+        MeshPartitioner< mesh_Type >   meshPart(fullMeshPtr, d->comm);
+        localMeshPtr = meshPart.meshPartition();
+    }
 
     std::string uOrder =  dataFile( "fluid/discretization/vel_order", "P1");
 
@@ -268,7 +272,7 @@ ResistanceProblem::run()
 
     if (verbose)
         std::cout << "Building the velocity FE space ... " << std::flush;
-    feSpacePtr_Type uFESpacePtr( new feSpace_Type( meshPart,
+    feSpacePtr_Type uFESpacePtr( new feSpace_Type( localMeshPtr,
                                                    *refFE_vel,
                                                    *qR_vel,
                                                    *bdQr_vel,
@@ -281,7 +285,7 @@ ResistanceProblem::run()
     if (verbose)
         std::cout << "Building the pressure FE space ... " << std::flush;
 
-    feSpacePtr_Type pFESpacePtr( new feSpace_Type( meshPart,
+    feSpacePtr_Type pFESpacePtr( new feSpace_Type( localMeshPtr,
                                                    *refFE_press,
                                                    *qR_press,
                                                    *bdQr_press,
@@ -309,9 +313,9 @@ ResistanceProblem::run()
 
 
 #ifdef HAVE_HDF5
-    ExporterHDF5<mesh_Type > ensight( dataFile, meshPart.meshPartition(), "resistance", d->comm->MyPID());
+    ExporterHDF5<mesh_Type > ensight( dataFile, localMeshPtr, "resistance", d->comm->MyPID());
 #else
-    Ensight<mesh_Type > ensight( dataFile, meshPart.meshPartition(), "resistance", d->comm->MyPID());
+    Ensight<mesh_Type > ensight( dataFile, localMeshPtr, "resistance", d->comm->MyPID());
 #endif
 
     vectorPtr_Type velAndPressure ( new vector_Type(*fluid.solution(), ensight.mapType() ) );

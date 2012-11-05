@@ -6,3 +6,4 @@
 [./space_discretization]
 mesh_dir = './'
 mesh_file = hexahexa_4x4x4.mesh
+mesh_type = .mesh

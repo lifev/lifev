@@ -58,7 +58,6 @@
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-#include <lifev/core/fem/ReferenceFE.hpp>
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/array/EnumMapEpetra.hpp>
 #include <lifev/core/array/MapVector.hpp>

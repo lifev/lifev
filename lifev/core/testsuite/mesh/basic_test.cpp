@@ -48,6 +48,9 @@
 #include <Epetra_ConfigDefs.h>
 #ifdef HAVE_MPI
 #include <mpi.h>
+#include <Epetra_MpiComm.h>
+#else
+#include <Epetra_SerialComm.h>
 #endif
 
 //Tell the compiler to restore the warning previously silented
@@ -80,7 +83,7 @@ class ResetFlag
 public:
     void operator()(meshEntity &m){
         m.replaceFlag(LifeV::EntityFlags::DEFAULT);
-        m.setMarker(0);
+        m.setMarkerID(0);
     }
 };
 
@@ -89,6 +92,9 @@ int main(int argc, char** argv)
 #ifdef HAVE_MPI
     MPI_Init(&argc, &argv);
     std::cout << "MPI Initialization" << std::endl;
+    boost::shared_ptr<Epetra_Comm> comm( new Epetra_MpiComm( MPI_COMM_WORLD ) );
+#else
+    boost::shared_ptr<Epetra_Comm> comm( new Epetra_SerialComm );
 #endif
 
 
@@ -103,7 +109,7 @@ int main(int argc, char** argv)
     ofstream ofile(outfile.c_str());
     if (ofile.fail()) {cerr<<" Error: Cannot creat output file"<<endl; abort();}
 
-    RegionMesh<LinearTetra> aMesh;
+    RegionMesh<LinearTetra> aMesh( comm );
     typedef RegionMesh<LinearTetra> mesh_Type;
     //    aMesh.test3DBuilder();
     //    aMesh.readMppFile(mystream, id, m);
@@ -177,7 +183,7 @@ int main(int argc, char** argv)
     setBoundaryPointsMarker(aMesh, ofile,cerr, true);
     cerr<<endl;
     dummyVect disp(3*aMesh.numPoints());
-    MeshUtility::MeshTransformer<mesh_Type, mesh_Type::MarkerCommon > transformer(aMesh);
+    MeshUtility::MeshTransformer<mesh_Type> transformer(aMesh);
     transformer.moveMesh(disp,3);
     MeshUtility::MeshStatistics::meshSize sizes= MeshUtility::MeshStatistics::computeSize(aMesh);
     cerr<<"Hmin ="<< sizes.minH<<" Hmax="<<sizes.maxH<<std::endl;
@@ -202,22 +208,22 @@ int main(int argc, char** argv)
                     aMesh.faceList.countElementsWithFlag(EntityFlags::CUTTED,&Flag::testOneSet)<<std::endl;
     // Reset all flags to default
     aMesh.edgeList.changeAccordingToFunctor(ResetFlag<mesh_Type::edge_Type>());
-    aMesh.edge(0).setMarker(10);
-    aMesh.edge(5).setMarker(10);
-    aMesh.edge(10).setMarker(15);
+    aMesh.edge(0).setMarkerID(10);
+    aMesh.edge(5).setMarkerID(10);
+    aMesh.edge(10).setMarkerID(15);
     vector<ID> watermarks(2);
     watermarks[0]=10;
     watermarks[1]=15;
     // change flags according to marker iD
-    SetFlagAccordingToWatermarks<mesh_Type::edge_Type> changeFlags(EntityFlags::CUTTED,watermarks);
+    SetFlagAccordingToWatermarks changeFlags(EntityFlags::CUTTED,watermarks);
     aMesh.edgeList.changeAccordingToFunctor(changeFlags);
-    cout<<"Number of cutted edges (should be 3) "<<
-                     aMesh.edgeList.countElementsWithFlag(EntityFlags::CUTTED,&Flag::testOneSet)<<std::endl;
-    aMesh.edgeList.changeAccordingToFunctor(ResetFlag<mesh_Type::edge_Type>());
-    aMesh.edge(0).setMarker(10);
-    aMesh.edge(5).setMarker(12);
-    aMesh.edge(10).setMarker(15);
-    SetFlagAccordingToMarkerRanges<mesh_Type::edge_Type > changer(&Flag::turnOn); //I may use the default constructor
+    std::cout << "Number of cutted edges (should be 3) "
+              << aMesh.edgeList.countElementsWithFlag(EntityFlags::CUTTED,&Flag::testOneSet) << std::endl;
+    aMesh.edgeList.changeAccordingToFunctor( ResetFlag<mesh_Type::edge_Type>() );
+    aMesh.edge(0).setMarkerID(10);
+    aMesh.edge(5).setMarkerID(12);
+    aMesh.edge(10).setMarkerID(15);
+    SetFlagAccordingToMarkerRanges changer( &Flag::turnOn ); //I may use the default constructor
     changer.insert(std::make_pair(10,12),EntityFlags::INTERNAL_INTERFACE);
     changer.insert(std::make_pair(15,18),EntityFlags::CUTTED);
     aMesh.edgeList.changeAccordingToFunctor(changer);
@@ -226,6 +232,8 @@ int main(int argc, char** argv)
     cout<<"Number of internal interface edges (should be 2) "<<
                       aMesh.edgeList.countElementsWithFlag(EntityFlags::INTERNAL_INTERFACE,&Flag::testOneSet)<<std::endl;
 
+    SetFlagAccordingToWatermark<std::equal_to<markerID_Type> > changer2(EntityFlags::INTERNAL_INTERFACE,12000,Flag::turnOn);
+    aMesh.faceList.changeAccordingToFunctor(changer2);
 
 #ifdef HAVE_MPI
     MPI_Finalize();

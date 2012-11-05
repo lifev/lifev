@@ -105,19 +105,19 @@ public:
       \param ord_bdf order of the bdf time advancing scheme and incremental pressure approach (default: Backward Euler)
     */
 
-    FESpace( MeshPartitioner<MeshType>& mesh,
-             const ReferenceFE&         refFE,
-             const QuadratureRule&      Qr,
-             const QuadratureRule&      bdQr,
-             const Int                  fDim,
-             const commPtr_Type&        commptr
-           );
+    LIFEV_DEPRECATED ( FESpace( MeshPartitioner<MeshType>& mesh,
+                                const ReferenceFE&         refFE,
+                                const QuadratureRule&      Qr,
+                                const QuadratureRule&      bdQr,
+                                const Int                  fDim,
+                                const commPtr_Type&        commptr
+                                ) );
 
-    FESpace( MeshPartitioner<MeshType>& mesh,
-             const std::string&         space,
-             const Int                  fDim,
-             const commPtr_Type&        commptr
-           );
+    LIFEV_DEPRECATED ( FESpace( MeshPartitioner<MeshType>& mesh,
+                                const std::string&         space,
+                                const Int                  fDim,
+                                const commPtr_Type&        commptr
+                                ) );
 
     FESpace( meshPtr_Type            mesh,
              const ReferenceFE&      refFE,
@@ -1650,7 +1650,6 @@ createMap(const commPtr_Type& commptr)
 {
     // Against dummies
     ASSERT_PRE(this->M_dof->numTotalDof()>0," Cannot create FeSpace with no degrees of freedom");
-
     // get globalElements list from DOF
     std::vector<Int> myGlobalElements( this->M_dof->globalElements( *this->M_mesh ) );
     // Create the map

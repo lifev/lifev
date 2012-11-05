@@ -6,12 +6,15 @@ SET(filter_HEADERS
   filter/HDF5IO.hpp
   filter/Exporter.hpp
   filter/ImporterMesh3D.hpp
+  filter/ConvertBareMesh.hpp
   filter/Importer.hpp
   filter/ExporterEmpty.hpp
   filter/ExporterVTK.hpp
   filter/ExporterHDF5.hpp
   filter/ImporterMesh2D.hpp
   filter/PartitionIO.hpp
+  filter/ParserGmsh.hpp
+  filter/ParserINRIAMesh.hpp
 CACHE INTERNAL "")
 
 SET(filter_SOURCES

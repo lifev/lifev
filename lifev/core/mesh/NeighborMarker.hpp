@@ -49,7 +49,7 @@ namespace LifeV
 /*! This class extends the default marker adding containers to store all adjacency informations.
  */
 
-template <typename FlagPolicy = EntityFlagStandardPolicy>
+template <typename FlagPolicy = MarkerIDStandardPolicy>
 class NeighborMarker: public Marker<FlagPolicy>
 {
 public:
@@ -105,7 +105,7 @@ public:
 };
 
 //! The NeighborMarkerCommon: uses all defaults except for Points
-typedef NeighborMarkerCommon<EntityFlagStandardPolicy> neighborMarkerCommon_Type;
+typedef NeighborMarkerCommon<MarkerIDStandardPolicy> neighborMarkerCommon_Type;
 
 //! this routine generates node neighbors for the given mesh
 /*! the routine assumes that the mesh is not yet partitioned or reordered 
