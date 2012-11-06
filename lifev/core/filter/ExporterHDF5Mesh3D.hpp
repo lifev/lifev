@@ -519,7 +519,7 @@ typename ExporterHDF5Mesh3D<MeshType>::meshPtr_Type ExporterHDF5Mesh3D<MeshType>
 
     for (Int j = 0; j < numPoints; ++j)
     {
-        pp = &(tempMesh->addPoint(bool(pointBoundaryFlags[j])));
+        pp = &(tempMesh->addPoint(false,false));
         pp->setMarkerID(pointMarkers[j]);
         pp->setFlag(pointFlags[j]);
         pp->x() = pointCoordinates[0][j];

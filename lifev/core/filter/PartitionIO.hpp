@@ -36,19 +36,18 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef PARTITION_IO_H_
 #define PARTITION_IO_H_
 
+#include <Epetra_config.h>
+
 #ifdef HAVE_HDF5
 #ifdef HAVE_MPI
-
-#include <algorithm>
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-#include <Epetra_config.h>
+#include <mpi.h>
 
-#include <hdf5.h>
-
+#include <boost/shared_ptr.hpp>
 #include <Epetra_MpiComm.h>
 
 //Tell the compiler to restore the warning previously silented
@@ -56,6 +55,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include<lifev/core/LifeV.hpp>
+
 #include <lifev/core/filter/HDF5IO.hpp>
 
 namespace LifeV {
@@ -326,7 +326,7 @@ template<typename MeshType>
 void LifeV::PartitionIO<MeshType>::read(meshPtr_Type& meshPart)
 {
     meshPart.reset();
-    M_meshPartIn.reset(new mesh_Type( M_comm ) );
+    M_meshPartIn.reset(new mesh_Type( M_comm ));
 
     M_HDF5IO.openFile(M_fileName, M_comm, true);
     readStats();
@@ -338,27 +338,6 @@ void LifeV::PartitionIO<MeshType>::read(meshPtr_Type& meshPart)
 
     meshPart = M_meshPartIn;
     M_meshPartIn.reset();
-}
-
-template<typename MeshType>
-void LifeV::PartitionIO<MeshType>::createHDF5File()
-{
-    hid_t plistId;
-    MPI_Comm comm;
-    boost::shared_ptr<Epetra_MpiComm> tempComm =
-            boost::dynamic_pointer_cast<Epetra_MpiComm>(M_comm);
-    ASSERT( tempComm, "Error: the casting of M_comm has failed" );
-    comm = tempComm->Comm();
-    MPI_Info info = MPI_INFO_NULL;
-
-    // Set up file access property list with parallel I/O access
-    plistId = H5Pcreate(H5P_FILE_ACCESS);
-    H5Pset_fapl_mpio(plistId, comm, info);
-
-    // Create a new file collectively and release property list identifier.
-    M_fileId = H5Fcreate(M_fileName.c_str(), H5F_ACC_TRUNC,
-                         H5P_DEFAULT, plistId);
-    H5Pclose(plistId);
 }
 
 template<typename MeshType>
@@ -822,7 +801,7 @@ void LifeV::PartitionIO<MeshType>::readPoints()
     if (! M_transposeInFile) {
         for (UInt j = 0; j < M_numPoints; ++j)
         {
-            pp = &( M_meshPartIn->addPoint( false, false ) );
+            pp = &(M_meshPartIn->addPoint(false,false));
             pp->replaceFlag(
                     static_cast<flag_Type>(M_uintBuffer[2 * stride + j]));
             pp->setMarkerID(M_uintBuffer[j]);
@@ -834,7 +813,7 @@ void LifeV::PartitionIO<MeshType>::readPoints()
     } else {
         for (UInt j = 0; j < M_numPoints; ++j)
         {
-            pp = &( M_meshPartIn->addPoint( false, false ) );
+            pp = &(M_meshPartIn->addPoint(false,false));
             pp->replaceFlag(
                     static_cast<flag_Type>(M_uintBuffer[stride * j + 2]));
             pp->setMarkerID(M_uintBuffer[stride * j]);
