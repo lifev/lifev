@@ -3,7 +3,7 @@
 *******************************************************************************
 
 Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
-Copyright (C) 2010, 2011 EPFL, Politecnico di Milano, Emory University
+Copyright (C) 2010, 2011, 2012 EPFL, Politecnico di Milano, Emory University
 
 This file is part of LifeV.
 
@@ -75,19 +75,20 @@ namespace LifeV
   Based on this information, the mesh partition tool builds the mesh objects
   corresponding to the new partitions.
 */
-template<typename MeshType, template <typename> class GraphPartitionToolType>
+template<typename MeshType, template <typename> class GraphCutterType>
 class MeshPartitionToolOnline
 {
 public:
     //! @name Public Types
     //@{
     typedef MeshType mesh_Type;
-    typedef GraphPartitionToolType<MeshType>               graphPartitionTool_Type;
-    typedef boost::shared_ptr<mesh_Type>                   meshPtr_Type;
+    typedef GraphCutterType<MeshType>     graphPartitionTool_Type;
+    typedef boost::shared_ptr<mesh_Type>         meshPtr_Type;
     //! Container for the ghost data
-    typedef std::vector <GhostEntityData>                  GhostEntityDataContainer_Type;
+    typedef std::vector <GhostEntityData>        GhostEntityDataContainer_Type;
     //! Map processor -> container for the ghost data
-    typedef std::map <UInt, GhostEntityDataContainer_Type> GhostEntityDataMap_Type;
+    typedef std::map <UInt,
+    			      GhostEntityDataContainer_Type> GhostEntityDataMap_Type;
     //@}
 
     //! \name Constructors & Destructors
@@ -131,8 +132,8 @@ public:
 
     //! Releases the original unpartitioned mesh
     /*!
-      Releases the unpartitioned mesh so that it can be deleted, freeing A LOT of memory
-      in some cases.
+      Releases the unpartitioned mesh so that it can be deleted, freeing
+      A LOT of memory in some cases.
     */
     void releaseUnpartitionedMesh() {M_originalMesh.reset();}
 
@@ -149,7 +150,10 @@ public:
     const meshPtr_Type& meshPartition() const {return M_meshPartition;}
     meshPtr_Type& meshPartition() {return M_meshPartition;}
     //! Return a reference to M_ghostDataMap
-    const GhostEntityDataMap_Type&  ghostDataMap() const {return M_ghostDataMap;}
+    const GhostEntityDataMap_Type&  ghostDataMap() const
+    {
+    	return M_ghostDataMap;
+    }
     //@}
 
 private:
@@ -174,8 +178,8 @@ private:
     void constructVertices();
     //! Construct volumes
     /*!
-      Adds volumes to the partitioned mesh object. Updates M_globalToLocalElement,
-      M_meshPartition.
+      Adds volumes to the partitioned mesh object.
+      Updates M_globalToLocalElement, M_meshPartition.
     */
     void constructElements();
     //! Construct edges
@@ -233,8 +237,8 @@ private:
 // Constructors and destructor
 // =================================
 
-template<typename MeshType, template <typename> class GraphPartitionToolType>
-MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::MeshPartitionToolOnline() :
+template<typename MeshType, template <typename> class GraphCutterType>
+MeshPartitionToolOnline<MeshType, GraphCutterType>::MeshPartitionToolOnline() :
     M_comm(),
     M_myPID(),
     M_nBoundaryVertices(0),
@@ -250,10 +254,11 @@ MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::MeshPartitionToolOnli
     M_graphPartitionTool()
 {}
 
-template<typename MeshType, template <typename> class GraphPartitionToolType>
-MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::MeshPartitionToolOnline(const meshPtr_Type& mesh,
-                                                                                   const boost::shared_ptr<Epetra_Comm>& comm,
-                                                                                   const Teuchos::ParameterList& parameters) :
+template<typename MeshType, template <typename> class GraphCutterType>
+MeshPartitionToolOnline<MeshType, GraphCutterType>::MeshPartitionToolOnline(
+		const meshPtr_Type& mesh,
+        const boost::shared_ptr<Epetra_Comm>& comm,
+        const Teuchos::ParameterList& parameters) :
     M_comm(comm),
     M_myPID(M_comm->MyPID()),
     M_nBoundaryVertices(0),
@@ -266,7 +271,9 @@ MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::MeshPartitionToolOnli
     M_parameters(parameters),
     M_originalMesh(mesh),
     M_meshPartition(new MeshType),
-    M_graphPartitionTool(new graphPartitionTool_Type(M_originalMesh, M_comm, M_parameters))
+    M_graphPartitionTool(new graphPartitionTool_Type(M_originalMesh,
+    												 M_comm,
+    												 M_parameters))
 {
     run();
 }
@@ -275,28 +282,32 @@ MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::MeshPartitionToolOnli
 // Public methods
 // =================================
 
-template<typename MeshType, template <typename> class GraphPartitionToolType>
-void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::setup(meshPtr_Type& mesh,
-                                                                      boost::shared_ptr<Epetra_Comm>& comm,
-                                                                      Teuchos::ParameterList& parameters)
+template<typename MeshType, template <typename> class GraphCutterType>
+void
+MeshPartitionToolOnline<MeshType, GraphCutterType>::setup(
+		meshPtr_Type& mesh,
+        boost::shared_ptr<Epetra_Comm>& comm,
+        Teuchos::ParameterList& parameters)
 {
     M_comm = comm;
     M_myPID = M_comm->MyPID();
     M_parameters = parameters;
     M_originalMesh = mesh;
     M_meshPartition.reset(new mesh_Type);
-    M_graphPartitionTool.reset(new graphPartitionTool_Type(M_originalMesh, M_comm, M_parameters));
+    M_graphPartitionTool.reset(new graphPartitionTool_Type(M_originalMesh,
+    													   M_comm,
+    													   M_parameters));
 }
 
-template<typename MeshType, template <typename> class GraphPartitionToolType>
-void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::partitionGraph()
+template<typename MeshType, template <typename> class GraphCutterType>
+void MeshPartitionToolOnline<MeshType, GraphCutterType>::partitionGraph()
 {
     M_graphPartitionTool->run();
     M_myElements = M_graphPartitionTool->getPartition(M_myPID);
 }
 
-template<typename MeshType, template <typename> class GraphPartitionToolType>
-void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::buildMeshPartition()
+template<typename MeshType, template <typename> class GraphCutterType>
+void MeshPartitionToolOnline<MeshType, GraphCutterType>::buildMeshPartition()
 {
     M_elementVertices = MeshType::elementShape_Type::S_numVertices;
     M_elementFacets = MeshType::elementShape_Type::S_numFacets;
@@ -312,8 +323,8 @@ void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::buildMeshPartiti
     finalSetup();
 }
 
-template<typename MeshType, template <typename> class GraphPartitionToolType>
-void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::run()
+template<typename MeshType, template <typename> class GraphCutterType>
+void MeshPartitionToolOnline<MeshType, GraphCutterType>::run()
 {
     partitionGraph();
     buildMeshPartition();
@@ -323,8 +334,10 @@ void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::run()
     M_graphPartitionTool.reset();
 }
 
-template<typename MeshType, template <typename> class GraphPartitionToolType>
-void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::showMe(std::ostream& output) const
+template<typename MeshType, template <typename> class GraphCutterType>
+void
+MeshPartitionToolOnline<MeshType,
+						GraphCutterType>::showMe(std::ostream& output) const
 {
     std::cout << "Sorry, this method is not implemented, yet." << std::endl
               << "We appreciate your interest." << std::endl
@@ -335,8 +348,8 @@ void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::showMe(std::ostr
 // Private methods
 // =================================
 
-template<typename MeshType, template <typename> class GraphPartitionToolType>
-void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::constructLocalMesh()
+template<typename MeshType, template <typename> class GraphCutterType>
+void MeshPartitionToolOnline<MeshType, GraphCutterType>::constructLocalMesh()
 {
     if (!M_myPID)
     {
@@ -365,13 +378,15 @@ void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::constructLocalMe
             inode = M_originalMesh->volume(ielem).point(ii).id();
             im    = M_globalToLocalVertex.find(inode);
 
-            // if the node is not yet present in the list of local nodes, then add it
+            // if the node is not yet present in the list of local nodes,
+            // then add it
             if (im == M_globalToLocalVertex.end())
             {
                 M_globalToLocalVertex.insert(std::make_pair(inode, count));
                 ++count;
                 // store here the global numbering of the node
-                M_localVertices.push_back(M_originalMesh->volume(ielem).point(ii).id());
+                M_localVertices.push_back(
+                		M_originalMesh->volume(ielem).point(ii).id());
             }
         }
 
@@ -391,8 +406,8 @@ void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::constructLocalMe
     }
 }
 
-template<typename MeshType, template <typename> class GraphPartitionToolType>
-void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::constructVertices()
+template<typename MeshType, template <typename> class GraphCutterType>
+void MeshPartitionToolOnline<MeshType, GraphCutterType>::constructVertices()
 {
     UInt inode;
     std::vector<Int>::iterator it;
@@ -400,14 +415,17 @@ void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::constructVertice
     M_nBoundaryVertices = 0;
     M_meshPartition->pointList.reserve(M_localVertices.size());
     // guessing how many boundary points on this processor.
-    M_meshPartition->_bPoints.reserve(M_originalMesh->numBPoints() * M_localVertices.size() /
-                                      M_originalMesh->numBPoints());
+    M_meshPartition->_bPoints.reserve(M_originalMesh->numBPoints()
+    							      * M_localVertices.size()
+    							      / M_originalMesh->numBPoints()
+    							      );
     inode = 0;
     typename MeshType::point_Type *pp = 0;
 
     // loop in the list of local nodes:
     // in this loop inode is the local numbering of the points
-    for (it = M_localVertices.begin(); it != M_localVertices.end(); ++it, ++inode)
+    for (it = M_localVertices.begin();
+    	 it != M_localVertices.end(); ++it, ++inode)
     {
         typename MeshType::point_Type point = 0;
 
@@ -425,8 +443,8 @@ void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::constructVertice
     }
 }
 
-template<typename MeshType, template <typename> class GraphPartitionToolType>
-void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::constructElements()
+template<typename MeshType, template <typename> class GraphCutterType>
+void MeshPartitionToolOnline<MeshType, GraphCutterType>::constructElements()
 {
     Int count;
     std::map<Int, Int>::iterator im;
@@ -441,13 +459,15 @@ void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::constructElement
     // loop in the list of local elements
     // CAREFUL! in this loop inode is the global numbering of the points
     // We insert the local numbering of the nodes in the local volume list
-    for (it = M_localElements.begin(); it != M_localElements.end(); ++it, ++count)
+    for (it = M_localElements.begin();
+		 it != M_localElements.end(); ++it, ++count)
     {
         pv = &(M_meshPartition->addVolume());
         *pv = M_originalMesh->volume( *it );
         pv->setLocalId( count );
 
-        M_globalToLocalElement.insert(std::make_pair( pv->id(), pv->localId() ) );
+        M_globalToLocalElement.insert(std::make_pair(pv->id(),
+        											 pv->localId() ) );
 
         for (ID id = 0; id < M_elementVertices; ++id)
         {
@@ -461,8 +481,8 @@ void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::constructElement
     }
 }
 
-template<typename MeshType, template <typename> class GraphPartitionToolType>
-void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::constructRidges()
+template<typename MeshType, template <typename> class GraphCutterType>
+void MeshPartitionToolOnline<MeshType, GraphCutterType>::constructRidges()
 {
     Int count;
     std::map<Int, Int>::iterator im;
@@ -503,8 +523,8 @@ void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::constructRidges(
     }
 }
 
-template<typename MeshType, template <typename> class GraphPartitionToolType>
-void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::constructFacets()
+template<typename MeshType, template <typename> class GraphCutterType>
+void MeshPartitionToolOnline<MeshType, GraphCutterType>::constructFacets()
 {
     Int count;
     std::map<Int, Int>::iterator im;
@@ -569,12 +589,14 @@ void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::constructFacets(
             pf->setFlag( EntityFlags::SUBDOMAIN_INTERFACE );
         }
 
-        ASSERT((localElem1 != NotAnId)||(localElem2 != NotAnId),"A hanging face in mesh partitioner!");
+        ASSERT((localElem1 != NotAnId)||(localElem2 != NotAnId),
+			   "A hanging face in mesh partitioner!");
 
         if (localElem1 == NotAnId)
          {
              pf->firstAdjacentElementIdentity()  = localElem2;
-             pf->firstAdjacentElementPosition()  = M_originalMesh->face(*is).secondAdjacentElementPosition();
+             pf->firstAdjacentElementPosition()
+				 = M_originalMesh->face(*is).secondAdjacentElementPosition();
              pf->secondAdjacentElementIdentity() = NotAnId;
              pf->secondAdjacentElementPosition() = NotAnId;
              pf->reversePoints();
@@ -582,15 +604,19 @@ void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::constructFacets(
         else
         {
             pf->firstAdjacentElementIdentity()  = localElem1;
-            pf->firstAdjacentElementPosition()  = M_originalMesh->face(*is).firstAdjacentElementPosition();
+            pf->firstAdjacentElementPosition()
+				= M_originalMesh->face(*is).firstAdjacentElementPosition();
             pf->secondAdjacentElementIdentity() = localElem2;
-            pf->secondAdjacentElementPosition() =
-                            localElem2 != NotAnId ?
-                                                   M_originalMesh->face(*is).secondAdjacentElementPosition():
-                                                   NotAnId;
+            pf->secondAdjacentElementPosition()
+				= localElem2 != NotAnId
+						?
+					M_originalMesh->face(*is).secondAdjacentElementPosition()
+						:
+					NotAnId;
         }
 
-        for (ID id = 0; id < M_originalMesh->face(*is).S_numLocalVertices; ++id)
+        for (ID id = 0;
+			 id < M_originalMesh->face(*is).S_numLocalVertices; ++id)
         {
             inode = pf->point(id).id();
             im = M_globalToLocalVertex.find(inode);
@@ -601,8 +627,8 @@ void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::constructFacets(
     M_meshPartition->setLinkSwitch("FACETS_HAVE_ADIACENCY");
 }
 
-template<typename MeshType, template <typename> class GraphPartitionToolType>
-void MeshPartitionToolOnline<MeshType, GraphPartitionToolType>::finalSetup()
+template<typename MeshType, template <typename> class GraphCutterType>
+void MeshPartitionToolOnline<MeshType, GraphCutterType>::finalSetup()
 {
     UInt nVolumes = M_localElements.size();
     UInt nNodes   = M_localVertices.size();
