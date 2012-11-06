@@ -151,9 +151,11 @@ public:
     map_Type & ghostMapOnEdges( UInt overlap );
 
     //! create ghost map
+    // ghostMapOnElementsCommonFacet
     map_Type & ghostMapOnElementsP0();
 
     //! create ghost map
+    // ghostMapOnElementsCommonNodes
     map_Type & ghostMapOnElementsP1( UInt overlap );
 
     //! fill entityPID
@@ -787,18 +789,21 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnElementsP1
     }
 
     // add all elements with a node on SUBDOMAIN_INTERFACE
-    std::vector<ID> pointsOnSubdInt = M_localMesh->pointList.extractElementsWithFlag(
-                    EntityFlags::SUBDOMAIN_INTERFACE, &Flag::testOneSet );
+    typedef typename mesh_Type::point_Type const * pointPtr_Type;
+    std::vector<pointPtr_Type>
+            pointsOnSubdInt = M_localMesh->pointList.extractElementsWithFlag(
+                EntityFlags::SUBDOMAIN_INTERFACE, &Flag::testOneSet );
     // must work on global IDs since added elements are not on localMesh
+    std::vector<ID> pointIDOnSubdInt( pointsOnSubdInt.size() );
     for ( UInt i = 0; i < pointsOnSubdInt.size(); i++)
-        pointsOnSubdInt[i] = M_localMesh->pointList( pointsOnSubdInt[i] ).id();
+        pointIDOnSubdInt[i] = pointsOnSubdInt[i]->id();
 
     std::vector<ID> addedPoints;
 
     for ( UInt n = 0; n < overlap; n++ )
     {
-        for ( std::vector<ID>::const_iterator globalId = pointsOnSubdInt.begin();
-                        globalId != pointsOnSubdInt.end(); ++globalId )
+        for ( std::vector<ID>::const_iterator globalId = pointIDOnSubdInt.begin();
+                        globalId != pointIDOnSubdInt.end(); ++globalId )
         {
             // iterate on each node neighborhood
             for ( neighbors_Type::const_iterator neighborIt = M_nodeElementNeighborsList[ *globalId ].begin();
@@ -817,7 +822,7 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnElementsP1
             }
         }
         // TODO: this must be done only if overlap > 1
-        pointsOnSubdInt = addedPoints;
+        pointIDOnSubdInt = addedPoints;
     }
 
     // convert unique list to vector to assure continuity in memorization
