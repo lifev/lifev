@@ -17,6 +17,9 @@ SET(mesh_HEADERS
   mesh/RegionMesh1DBuilders.hpp
   mesh/MeshChecks.hpp
   mesh/MeshElementMarked.hpp
+  mesh/GhostEntityData.hpp
+  mesh/GraphCutter.hpp
+  mesh/MeshPartitionToolOnline.hpp
   mesh/RegionMesh2DStructured.hpp
 CACHE INTERNAL "")
 
