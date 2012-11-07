@@ -56,7 +56,6 @@
 #include <lifev/core/mesh/MeshElementMarked.hpp>
 #include <lifev/core/util/LifeDebug.hpp>
 #include <lifev/core/fem/DOF.hpp>
-#include <lifev/core/mesh/RegionMesh.hpp>
 #include <lifev/core/mesh/GhostEntityData.hpp>
 #include <lifev/core/mesh/MeshEntity.hpp>
 

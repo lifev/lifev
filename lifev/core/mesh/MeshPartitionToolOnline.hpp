@@ -55,10 +55,10 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-#include <life/lifecore/LifeV.hpp>
-#include <life/lifefem/DOF.hpp>
-#include <life/lifemesh/RegionMesh.hpp>
-#include <life/lifemesh/GhostEntityData.hpp>
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/fem/DOF.hpp>
+#include <lifev/core/mesh/RegionMesh.hpp>
+#include <lifev/core/mesh/GhostEntityData.hpp>
 
 namespace LifeV
 {
