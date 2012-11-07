@@ -162,6 +162,8 @@ void regularMesh1D( MeshType& mesh,
     }
     mesh.setNumEdges(mesh.edgeList.size() );
     mesh.setMaxNumGlobalEdges(mesh.edgeList.size() );
+
+    mesh.updateElementFacets( true, false, mesh.pointList.size() );
 } // regularMesh1D
 
 } // Namespace LifeV
