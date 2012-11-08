@@ -31,7 +31,7 @@
     @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
     @date 28-06-2012
 
-    In this first tutorial, we assemble the matrix 
+    In this first tutorial, we assemble the matrix
     associated to a scalar laplacian problem. The basics
     of the ETA module are explained and are pushed further
     in the next tutorials.
@@ -145,7 +145,7 @@ int main( int argc, char** argv )
 
     const UInt Nelements(10);
 
-    boost::shared_ptr< mesh_Type > fullMeshPtr(new mesh_Type);
+    boost::shared_ptr< mesh_Type > fullMeshPtr(new mesh_Type( *Comm ) );
 
     regularMesh3D( *fullMeshPtr, 1, Nelements, Nelements, Nelements, false,
                    2.0,   2.0,   2.0,
@@ -162,7 +162,7 @@ int main( int argc, char** argv )
 // We define now the ETFESpace that we need for the assembly.
 // Remark that we use a shared pointer because other structures
 // will require this ETFESpace to be alive. We can also observe
-// that the ETFESpace has more template parameters than the 
+// that the ETFESpace has more template parameters than the
 // classical FESpace (this is the main difference). The 3
 // indicates that the problem is in 3D while the 1 indicate that
 // the unknown is scalar.
@@ -185,11 +185,11 @@ int main( int argc, char** argv )
 // ---------------------------------------------------------------
 
     if (verbose) std::cout << " -- Defining the matrix ... " << std::flush;
-   
+
     boost::shared_ptr<matrix_Type> systemMatrix (new matrix_Type( uSpace->map() ));
 
     *systemMatrix *=0.0;
-    
+
     if (verbose) std::cout << " done! " << std::endl;
 
 
@@ -221,29 +221,29 @@ int main( int argc, char** argv )
 //
 // The second argument is simply the quadrature rule to be used.
 //
-// The third argument is the finite element space of the test 
+// The third argument is the finite element space of the test
 // functions.
 //
 // The fourth argument is the finite element space of the trial
 // functions (those used to represent the solution).
 //
 // The last argument is the expression to be integrated, i.e.
-// that represents the weak formulation of the problem. The 
+// that represents the weak formulation of the problem. The
 // keyword phi_i stands for a generic test function and phi_j
 // a generic trial function. The function grad applied to them
 // indicates that the gradient is considered and the dot function
 // indicates a dot product between the two gradients. The
 // expression to be integrated is then the dot product between
 // the gradient of the test function and the gradient of the trial
-// function. This corresponds to the left hand side of the weak 
+// function. This corresponds to the left hand side of the weak
 // formulation of the Laplace problem.
 //
-// Finally, the operator >> indicates that the result of the 
+// Finally, the operator >> indicates that the result of the
 // integration must be added to the systemMatrix.
 // ---------------------------------------------------------------
 
         integrate(  elements(uSpace->mesh()),
-                    quadRuleTetra4pt, 
+                    quadRuleTetra4pt,
                     uSpace,
                     uSpace,
                     dot( grad(phi_i) , grad(phi_j) )
@@ -293,7 +293,7 @@ int main( int argc, char** argv )
     Real matrixNormDiff(std::abs(matrixNorm-3.2));
 
     if (verbose) std::cout << " Error : " << matrixNormDiff << std::endl;
-    
+
     Real testTolerance(1e-10);
 
     if ( matrixNormDiff < testTolerance )
@@ -301,7 +301,7 @@ int main( int argc, char** argv )
         return( EXIT_SUCCESS );
     }
     return ( EXIT_FAILURE );
-    
+
 }
 
 
