@@ -428,7 +428,7 @@ DarcySolverTransientNonLinear < MeshType >::
 setup ()
 {
     // Call the DarcySolverLinear setup method for setting up the linear solver and preconditioner.
-    darcySolverNonLinear_Type::setup ();
+    darcySolverLinear_Type::setup ();
 
     // Call the DarcySolverTransient setup method for setting up the time data.
     darcySolverTransient_Type::setupTime ();
