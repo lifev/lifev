@@ -449,6 +449,16 @@ protected:
         this->M_solidTimeAdvance->shiftRight(solution);
     }
 
+    //! Set vectors for restart
+    /*!
+     *  Set vectors for restart
+     */
+    virtual void setVectorInStencilALE( const vectorPtr_Type& vel, 
+					const vectorPtr_Type& pressure,
+					const vectorPtr_Type& solidDisp,
+					const vectorPtr_Type& fluidDisp,
+					const UInt iter) {}
+
     //! Constructs the solid FESpace
     /**
        Creates the solid FESpace with an unpartitioned mesh, necessary step to create the dof interconnections
