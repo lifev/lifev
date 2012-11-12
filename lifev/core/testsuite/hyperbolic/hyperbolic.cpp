@@ -387,11 +387,9 @@ hyperbolic::run()
 
     // Partition the mesh using ParMetis
     boost::shared_ptr<RegionMesh> meshPtr;
-    MeshPartitioner<RegionMesh>::GhostEntityDataMap_Type ghostDataMap;
     {
         MeshPartitioner< RegionMesh >  meshPart( fullMeshPtr, Members->comm );
         meshPtr = meshPart.meshPartition();
-        ghostDataMap = meshPart.ghostDataMap();
     }
 
     // Stop chronoReadAndPartitionMesh
@@ -617,9 +615,6 @@ hyperbolic::run()
 
         // Start chronoTimeStep for measure the time for the current time step
         chronoTimeStep.start();
-
-        // update ghost values from neighboring processes
-        hyperbolicSolver.updateGhostValues( ghostDataMap );
 
         // Check if the time step is consistent, i.e. if innerTimeStep + currentTime < endTime.
         if ( dataHyperbolic.dataTime()->isLastTimeStep() )
