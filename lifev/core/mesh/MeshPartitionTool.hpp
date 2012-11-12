@@ -57,7 +57,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/fem/DOF.hpp>
 #include <lifev/core/mesh/RegionMesh.hpp>
-#include <lifev/core/mesh/GhostEntityData.hpp>
+//#include <lifev/core/mesh/GhostEntityData.hpp>
 
 namespace LifeV
 {
@@ -74,9 +74,10 @@ namespace LifeV
   Based on this information, the mesh partition tool builds the mesh objects
   corresponding to the new partitions.
 */
-template<typename MeshType, template <typename> class GraphCutterType,
+template<typename MeshType,
+		 template <typename> class GraphCutterType,
 		 template <typename> class MeshPartBuilderType >
-class MeshPartitionToolOnline
+class MeshPartitionTool
 {
 public:
     //! @name Public Types
@@ -86,27 +87,26 @@ public:
     typedef MeshPartBuilderType<MeshType>        meshPartBuilder_Type;
     typedef boost::shared_ptr<mesh_Type>         meshPtr_Type;
     //! Container for the ghost data
-    typedef std::vector <GhostEntityData>        GhostEntityDataContainer_Type;
+    //typedef std::vector <GhostEntityData>        GhostEntityDataContainer_Type;
     //! Map processor -> container for the ghost data
-    typedef std::map <UInt,
-    			      GhostEntityDataContainer_Type> GhostEntityDataMap_Type;
+    //typedef std::map <UInt, GhostEntityDataContainer_Type> GhostEntityDataMap_Type;
     //@}
 
     //! \name Constructors & Destructors
     //@{
     //! Default empty constructor
-    MeshPartitionToolOnline();
+    MeshPartitionTool();
 
     //! Constructor
     /*!
      * TODO: Write description
     */
-    MeshPartitionToolOnline (const meshPtr_Type& mesh,
+    MeshPartitionTool (const meshPtr_Type& mesh,
                              const boost::shared_ptr<Epetra_Comm>& comm,
                              const Teuchos::ParameterList& parameters);
 
     //! Empty destructor
-    ~MeshPartitionToolOnline() {}
+    ~MeshPartitionTool() {}
     //@}
 
     //! \name Public Methods
@@ -118,25 +118,6 @@ public:
     void setup(meshPtr_Type& mesh,
                boost::shared_ptr<Epetra_Comm>& comm,
                Teuchos::ParameterList& parameters);
-
-    //! Executes the graph partitioning
-    /*!
-      Executes the graph partitioning
-    */
-    void partitionGraph();
-
-    //! Builds the mesh object corresponding to the partition
-    /*!
-      Builds the mesh object corresponding to the partition
-    */
-    void buildMeshPartition();
-
-    //! Releases the original unpartitioned mesh
-    /*!
-      Releases the unpartitioned mesh so that it can be deleted, freeing
-      A LOT of memory in some cases.
-    */
-    void releaseUnpartitionedMesh() {M_originalMesh.reset();}
 
     //! This method performs all the steps for the mesh and graph partitioning
     void run();
@@ -151,16 +132,16 @@ public:
     const meshPtr_Type& meshPartition() const {return M_meshPartition;}
     meshPtr_Type& meshPartition() {return M_meshPartition;}
     //! Return a reference to M_ghostDataMap
-    const GhostEntityDataMap_Type&  ghostDataMap() const
-    {
-    	return M_ghostDataMap;
-    }
+    //const GhostEntityDataMap_Type&  ghostDataMap() const
+    //{
+    //	return M_ghostDataMap;
+    //}
     //@}
 
 private:
     // Private copy constructor and assignment operator are disabled
-    MeshPartitionToolOnline(const MeshPartitionToolOnline&);
-    MeshPartitionToolOnline& operator=(const MeshPartitionToolOnline&);
+    MeshPartitionTool(const MeshPartitionTool&);
+    MeshPartitionTool& operator=(const MeshPartitionTool&);
 
     //! Private Data Members
     //@{
@@ -172,7 +153,7 @@ private:
     meshPtr_Type                               M_meshPartition;
     boost::shared_ptr<graphCutter_Type>        M_graphCutter;
     boost::shared_ptr<meshPartBuilder_Type>    M_meshPartBuilder;
-    GhostEntityDataMap_Type                    M_ghostDataMap;
+    //GhostEntityDataMap_Type                    M_ghostDataMap;
     //@}
 }; // class MeshPartitionToolOnline
 
@@ -184,10 +165,12 @@ private:
 // Constructors and destructor
 // =================================
 
-template<typename MeshType, template <typename> class GraphCutterType,
+template<typename MeshType,
+		 template <typename> class GraphCutterType,
 		 template <typename> class MeshPartBuilderType>
-MeshPartitionToolOnline<MeshType, GraphCutterType,
-					    MeshPartBuilderType>::MeshPartitionToolOnline() :
+MeshPartitionTool<MeshType,
+				  GraphCutterType,
+				  MeshPartBuilderType>::MeshPartitionTool() :
     M_comm(),
     M_myPID(),
     M_parameters(),
@@ -197,10 +180,12 @@ MeshPartitionToolOnline<MeshType, GraphCutterType,
     M_meshPartBuilder()
 {}
 
-template<typename MeshType, template <typename> class GraphCutterType,
+template<typename MeshType,
+		 template <typename> class GraphCutterType,
 		 template <typename> class MeshPartBuilderType>
-MeshPartitionToolOnline<MeshType, GraphCutterType,
-						MeshPartBuilderType>::MeshPartitionToolOnline(
+MeshPartitionTool<MeshType,
+				  GraphCutterType,
+				  MeshPartBuilderType>::MeshPartitionTool(
 		const meshPtr_Type& mesh,
         const boost::shared_ptr<Epetra_Comm>& comm,
         const Teuchos::ParameterList& parameters) :
@@ -219,11 +204,13 @@ MeshPartitionToolOnline<MeshType, GraphCutterType,
 // Public methods
 // =================================
 
-template<typename MeshType, template <typename> class GraphCutterType,
+template<typename MeshType,
+		 template <typename> class GraphCutterType,
 		 template <typename> class MeshPartBuilderType>
 void
-MeshPartitionToolOnline<MeshType, GraphCutterType,
-						MeshPartBuilderType>::setup(
+MeshPartitionTool<MeshType,
+				  GraphCutterType,
+				  MeshPartBuilderType>::setup(
 		meshPtr_Type& mesh,
         boost::shared_ptr<Epetra_Comm>& comm,
         Teuchos::ParameterList& parameters)
@@ -238,38 +225,26 @@ MeshPartitionToolOnline<MeshType, GraphCutterType,
     M_meshPartBuilder.reset(new meshPartBuilder_Type(M_originalMesh, M_comm));
 }
 
-template<typename MeshType, template <typename> class GraphCutterType,
+template<typename MeshType,
+		 template <typename> class GraphCutterType,
 		 template <typename> class MeshPartBuilderType>
-void MeshPartitionToolOnline<MeshType, GraphCutterType,
-							 MeshPartBuilderType>::partitionGraph()
-{
-    M_graphCutter->run();
-    M_myElements = M_graphCutter->getPartition(M_myPID);
-}
-
-template<typename MeshType, template <typename> class GraphCutterType,
-		 template <typename> class MeshPartBuilderType>
-void MeshPartitionToolOnline<MeshType, GraphCutterType,
-							 MeshPartBuilderType>::buildMeshPartition()
-{
-	M_meshPartBuilder->run(M_meshPartition, M_myElements);
-}
-
-template<typename MeshType, template <typename> class GraphCutterType,
-		 template <typename> class MeshPartBuilderType>
-void MeshPartitionToolOnline<MeshType, GraphCutterType,
-							 MeshPartBuilderType>::run()
+void MeshPartitionTool<MeshType,
+					   GraphCutterType,
+					   MeshPartBuilderType>::run()
 {
 	if (!M_myPID)
 	{
 		std::cout << "Partitioning mesh graph ..." << std::endl;
 	}
-    partitionGraph();
+    M_graphCutter->run();
+    M_myElements = M_graphCutter->getPartition(M_myPID);
+
 	if (!M_myPID)
 	{
 		std::cout << "Building mesh parts ..." << std::endl;
 	}
-    buildMeshPartition();
+	M_meshPartBuilder->run(M_meshPartition, M_myElements);
+
 	if (!M_myPID)
 	{
 		std::cout << "Mesh partition complete." << std::endl;
@@ -279,14 +254,16 @@ void MeshPartitionToolOnline<MeshType, GraphCutterType,
     // Destroy the mesh part builder to clear memory
     M_meshPartBuilder.reset();
     // Release the pointer to the original uncut mesh
-    releaseUnpartitionedMesh();
+    M_originalMesh.reset();
 }
 
-template<typename MeshType, template <typename> class GraphCutterType,
+template<typename MeshType,
+		 template <typename> class GraphCutterType,
 		 template <typename> class MeshPartBuilderType>
 void
-MeshPartitionToolOnline<MeshType, GraphCutterType,
-						MeshPartBuilderType>::showMe(std::ostream& output) const
+MeshPartitionTool<MeshType,
+				  GraphCutterType,
+				  MeshPartBuilderType>::showMe(std::ostream& output) const
 {
     std::cout << "Sorry, this method is not implemented, yet." << std::endl
               << "We appreciate your interest." << std::endl
