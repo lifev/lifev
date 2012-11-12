@@ -102,8 +102,9 @@ public:
      * TODO: Write description
     */
     MeshPartitionTool (const meshPtr_Type& mesh,
-                             const boost::shared_ptr<Epetra_Comm>& comm,
-                             const Teuchos::ParameterList& parameters);
+                       const boost::shared_ptr<Epetra_Comm>& comm,
+                       const Teuchos::ParameterList parameters
+                       	   	   	   = Teuchos::ParameterList());
 
     //! Empty destructor
     ~MeshPartitionTool() {}
@@ -129,8 +130,8 @@ public:
     //! \name Get Methods
     //@{
     //! Return a shared pointer to the mesh partition
-    const meshPtr_Type& meshPartition() const {return M_meshPartition;}
-    meshPtr_Type& meshPartition() {return M_meshPartition;}
+    const meshPtr_Type& meshPart() const {return M_meshPart;}
+    meshPtr_Type& meshPart() {return M_meshPart;}
     //! Return a reference to M_ghostDataMap
     //const GhostEntityDataMap_Type&  ghostDataMap() const
     //{
@@ -150,7 +151,7 @@ private:
     boost::shared_ptr<std::vector<Int> >       M_myElements;
     Teuchos::ParameterList                     M_parameters;
     meshPtr_Type                               M_originalMesh;
-    meshPtr_Type                               M_meshPartition;
+    meshPtr_Type                               M_meshPart;
     boost::shared_ptr<graphCutter_Type>        M_graphCutter;
     boost::shared_ptr<meshPartBuilder_Type>    M_meshPartBuilder;
     //GhostEntityDataMap_Type                    M_ghostDataMap;
@@ -175,7 +176,7 @@ MeshPartitionTool<MeshType,
     M_myPID(),
     M_parameters(),
     M_originalMesh(),
-    M_meshPartition(),
+    M_meshPart(),
     M_graphCutter(),
     M_meshPartBuilder()
 {}
@@ -188,12 +189,12 @@ MeshPartitionTool<MeshType,
 				  MeshPartBuilderType>::MeshPartitionTool(
 		const meshPtr_Type& mesh,
         const boost::shared_ptr<Epetra_Comm>& comm,
-        const Teuchos::ParameterList& parameters) :
+        const Teuchos::ParameterList parameters) :
     M_comm(comm),
     M_myPID(M_comm->MyPID()),
     M_parameters(parameters),
     M_originalMesh(mesh),
-    M_meshPartition(new MeshType),
+    M_meshPart(new MeshType),
     M_graphCutter(new graphCutter_Type(M_originalMesh, M_comm, M_parameters)),
 	M_meshPartBuilder(new meshPartBuilder_Type(M_originalMesh, M_comm))
 {
@@ -219,7 +220,7 @@ MeshPartitionTool<MeshType,
     M_myPID = M_comm->MyPID();
     M_parameters = parameters;
     M_originalMesh = mesh;
-    M_meshPartition.reset(new mesh_Type);
+    M_meshPart.reset(new mesh_Type);
     M_graphCutter.reset(new graphCutter_Type(M_originalMesh, M_comm,
     										 M_parameters));
     M_meshPartBuilder.reset(new meshPartBuilder_Type(M_originalMesh, M_comm));
@@ -243,7 +244,7 @@ void MeshPartitionTool<MeshType,
 	{
 		std::cout << "Building mesh parts ..." << std::endl;
 	}
-	M_meshPartBuilder->run(M_meshPartition, M_myElements);
+	M_meshPartBuilder->run(M_meshPart, M_myElements);
 
 	if (!M_myPID)
 	{
