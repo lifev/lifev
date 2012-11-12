@@ -88,8 +88,8 @@ Real epsilon(1);
 
 Real exactSolution( const Real& /* t */, const Real& x, const Real& /* y */, const Real& /* z */ , const ID& /* i */ )
 {
-    Real seps(sqrt(epsilon));
-    return  exp(seps*x)/(exp(seps)-exp(-seps));
+    Real seps(s td::sqrt(epsilon) );
+    return  std::exp(seps*x) / (std::exp(seps) - std::exp(-seps));
 }
 #endif
 
@@ -98,7 +98,7 @@ Real epsilon(1);
 
 Real exactSolution( const Real& /* t */, const Real& x, const Real& /* y */, const Real& /* z */, const ID& /* i */ )
 {
-    return  (exp(x/epsilon) - 1 )/( exp(1/epsilon) - 1);
+    return  ( std::exp(x/epsilon) - 1 ) / ( std::exp(1/epsilon) - 1 );
 }
 
 Real betaFct( const Real& /* t */, const Real& /* x */, const Real& /* y */, const Real& /* z */, const ID& i )
@@ -112,13 +112,13 @@ Real epsilon(1);
 
 Real exactSolution( const Real& /* t */, const Real& x, const Real& y, const Real& /* z */, const ID& /* i */ )
 {
-    return  sin(x)+y*y/2;
+    return  std::sin(x)+y*y/2;
 }
 
 
 Real fRhs( const Real& /* t */, const Real& x, const Real& /* y */, const Real& /* z */ , const ID& /* i */ )
 {
-    return  sin(x)-1;
+    return  std::sin(x)-1;
 }
 #endif
 
