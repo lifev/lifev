@@ -628,7 +628,7 @@ void Problem::checkResultGCE(const LifeV::Real& time)
 
   //Extract the previous solution
   LifeV::Real dispNorm=M_fsi->displacement().norm2();
-  if (time==0.006 &&      (dispNorm-139804)/dispNorm * (dispNorm-139804)/dispNorm < 1e-5) resultCorrect(time);
-  else if (time==0.007 && (dispNorm-106386)/dispNorm * (dispNorm-106386)/dispNorm < 1e-5) resultCorrect(time);
-  else if (time==0.008 && (dispNorm-99162)/dispNorm * (dispNorm-99162)/dispNorm < 1e-5) resultCorrect(time);
+  if (time==0.003 &&      (dispNorm-139804)/dispNorm * (dispNorm-139804)/dispNorm < 1e-5) resultCorrect(time);
+  else if (time==0.004 && (dispNorm-106386)/dispNorm * (dispNorm-106386)/dispNorm < 1e-5) resultCorrect(time);
+  else if (time==0.005 && (dispNorm-99162)/dispNorm * (dispNorm-99162)/dispNorm < 1e-5) resultCorrect(time);
 }
