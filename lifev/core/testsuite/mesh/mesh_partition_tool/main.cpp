@@ -1,0 +1,307 @@
+//@HEADER
+/*
+*******************************************************************************
+
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+
+    This file is part of LifeV.
+
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
+*/
+//@HEADER
+
+/*!
+    @file
+    @brief
+
+    @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+    @date 08-10-2010
+ */
+
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+#include <Epetra_ConfigDefs.h>
+#ifdef EPETRA_MPI
+#include <mpi.h>
+#include <Epetra_MpiComm.h>
+#else
+#include <Epetra_SerialComm.h>
+#endif
+
+#include <Teuchos_ParameterList.hpp>
+
+//Tell the compiler to restore the warning previously silented
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
+
+#include <lifev/core/LifeV.hpp>
+
+
+#include <lifev/core/algorithm/PreconditionerIfpack.hpp>
+#include <lifev/core/algorithm/PreconditionerML.hpp>
+
+#include <lifev/core/algorithm/SolverAztecOO.hpp>
+
+#include <lifev/core/array/MatrixEpetra.hpp>
+
+#include <lifev/core/fem/FESpace.hpp>
+#include <lifev/core/fem/BCManage.hpp>
+
+#include <lifev/core/mesh/MeshPartitionTool.hpp>
+#include <lifev/core/mesh/GraphCutter.hpp>
+#include <lifev/core/mesh/MeshPartBuilder.hpp>
+
+#include <lifev/core/mesh/RegionMesh3DStructured.hpp>
+#include <lifev/core/mesh/RegionMesh.hpp>
+
+#include <lifev/core/solver/ADRAssembler.hpp>
+#include <lifev/core/mesh/MeshData.hpp>
+
+using namespace LifeV;
+
+Real epsilon(1);
+
+Real exactSolution( const Real& /* t */, const Real& x, const Real& y, const Real& z , const ID& /* i */ )
+{
+    return  sin(x+y)+z*z/2;
+}
+
+
+Real fRhs( const Real& /* t */, const Real& x, const Real& y, const Real& /* z */ , const ID& /* i */ )
+{
+    return  2*sin(x+y)-1;
+}
+
+typedef RegionMesh<LinearTetra> mesh_Type;
+typedef MatrixEpetra<Real> matrix_Type;
+typedef VectorEpetra vector_Type;
+typedef FESpace<mesh_Type, MapEpetra> feSpace_Type;
+typedef boost::shared_ptr<feSpace_Type> feSpacePtr_Type;
+typedef MeshPartitionTool<mesh_Type,
+						  GraphCutter,
+						  MeshPartBuilder> meshCutter_Type;
+
+int
+main( int argc, char** argv )
+{
+
+#ifdef HAVE_MPI
+    MPI_Init(&argc, &argv);
+    boost::shared_ptr<Epetra_Comm> Comm(new Epetra_MpiComm(MPI_COMM_WORLD));
+#else
+    boost::shared_ptr<Epetra_Comm> Comm(new Epetra_SerialComm);
+#endif
+
+    const bool verbose(Comm->MyPID()==0);
+
+// Read first the data needed
+
+    if (verbose) std::cout << " -- Reading the data ... " << std::flush;
+    GetPot dataFile( "data" );
+    if (verbose) std::cout << " done ! " << std::endl;
+
+    const UInt Nelements(dataFile("mesh/nelements",10));
+    if (verbose) std::cout << " ---> Number of elements : " << Nelements << std::endl;
+
+// Build and partition the mesh
+
+    if (verbose) std::cout << " -- Building the mesh ... " << std::flush;
+    boost::shared_ptr< mesh_Type > fullMeshPtr(new RegionMesh<LinearTetra>);
+    regularMesh3D( *fullMeshPtr, 1, Nelements, Nelements, Nelements, false,
+                   2.0,   2.0,   2.0,
+                   -1.0,  -1.0,  -1.0);
+    if (verbose) std::cout << " done ! " << std::endl;
+
+    if (verbose) std::cout << " -- Partitioning the mesh ... " << std::flush;
+    meshCutter_Type   meshPart(fullMeshPtr, Comm);
+    if (verbose) std::cout << " done ! " << std::endl;
+
+    if (verbose) std::cout << " -- Freeing the global mesh ... " << std::flush;
+    fullMeshPtr.reset();
+    if (verbose) std::cout << " done ! " << std::endl;
+
+// Build the FESpaces
+
+    if (verbose) std::cout << " -- Building FESpaces ... " << std::flush;
+    std::string uOrder("P1");
+    std::string bOrder("P1");
+    boost::shared_ptr<FESpace<mesh_Type,
+    						  MapEpetra> >
+    	uFESpace(new FESpace<mesh_Type,
+    						 MapEpetra>(meshPart.meshPart(),
+    								 	uOrder,
+    								 	1,
+    								 	Comm));
+
+    boost::shared_ptr<FESpace<mesh_Type,
+    						  MapEpetra> >
+    	betaFESpace(new FESpace<mesh_Type,
+    							MapEpetra>(meshPart.meshPart(),
+    									   bOrder,
+    									   3,
+    									   Comm));
+
+    if (verbose) std::cout << " done ! " << std::endl;
+    if (verbose) std::cout << " ---> Dofs: " << uFESpace->dof().numTotalDof() << std::endl;
+
+// Build the assembler and the matrices
+
+    if (verbose) std::cout << " -- Building assembler ... " << std::flush;
+    ADRAssembler<mesh_Type,matrix_Type,vector_Type> adrAssembler;
+    if (verbose) std::cout << " done! " << std::endl;
+
+    if (verbose) std::cout << " -- Setting up assembler ... " << std::flush;
+    adrAssembler.setup(uFESpace,betaFESpace);
+    if (verbose) std::cout << " done! " << std::endl;
+
+    if (verbose) std::cout << " -- Defining the matrix ... " << std::flush;
+    boost::shared_ptr<matrix_Type> systemMatrix(new matrix_Type( uFESpace->map() ));
+    *systemMatrix *=0.0;
+    if (verbose) std::cout << " done! " << std::endl;
+
+// Perform the assembly of the matrix
+
+    if (verbose) std::cout << " -- Adding the diffusion ... " << std::flush;
+    adrAssembler.addDiffusion(systemMatrix,epsilon);
+    if (verbose) std::cout << " done! " << std::endl;
+    if (verbose) std::cout << " Time needed : " << adrAssembler.diffusionAssemblyChrono().diffCumul() << std::endl;
+
+    if (verbose) std::cout << " -- Closing the matrix ... " << std::flush;
+    systemMatrix->globalAssemble();
+    if (verbose) std::cout << " done ! " << std::endl;
+
+    Real matrixNorm(systemMatrix->norm1());
+    if (verbose) std::cout << " ---> Norm 1 : " << matrixNorm << std::endl;
+    if ( std::fabs(matrixNorm - 1.68421 ) > 1e-3)
+    {
+        std::cout << " <!> Matrix has changed !!! <!> " << std::endl;
+        return EXIT_FAILURE;
+    }
+
+// Definition and assembly of the RHS
+
+    if (verbose) std::cout << " -- Building the RHS ... " << std::flush;
+    //vector_Type rhs(uFESpace->map(),Unique);
+    vector_Type rhs(uFESpace->map(),Repeated);
+    rhs*=0.0;
+
+    vector_Type fInterpolated(uFESpace->map(),Repeated);
+    fInterpolated*=0.0;
+    uFESpace->interpolate( static_cast<feSpace_Type::function_Type>( fRhs ), fInterpolated, 0.0 );
+    adrAssembler.addMassRhs(rhs,fInterpolated);
+    rhs.globalAssemble();
+
+    if (verbose) std::cout << " done ! " << std::endl;
+
+// Definition and application of the BCs
+
+    if (verbose) std::cout << " -- Building the BCHandler ... " << std::flush;
+    BCHandler bchandler;
+    BCFunctionBase BCu( exactSolution );
+    bchandler.addBC("Dirichlet",1,Essential,Full,BCu,1);
+    for (UInt i(2); i<=6; ++i)
+    {
+        bchandler.addBC("Dirichlet",i,Essential,Full,BCu,1);
+    }
+    if (verbose) std::cout << " done ! " << std::endl;
+
+    if (verbose) std::cout << " -- Updating the BCs ... " << std::flush;
+    bchandler.bcUpdate(*uFESpace->mesh(),uFESpace->feBd(),uFESpace->dof());
+    if (verbose) std::cout << " done ! " << std::endl;
+
+    if (verbose) std::cout << " -- Applying the BCs ... " << std::flush;
+    vector_Type rhsBC(rhs,Unique);
+    bcManage(*systemMatrix,rhsBC,*uFESpace->mesh(),uFESpace->dof(),bchandler,uFESpace->feBd(),1.0,0.0);
+    rhs = rhsBC;
+    if (verbose) std::cout << " done ! " << std::endl;
+
+// Definition of the solver
+
+//    Teuchos::RCP< Teuchos::ParameterList > belosList2 = Teuchos::rcp ( new Teuchos::ParameterList );
+//    belosList2 = Teuchos::getParametersFromXmlFile( "SolverParamList2.xml" );
+//
+//    LinearSolver linearSolver2;
+//    linearSolver2.setCommunicator( Comm );
+//    linearSolver2.setParameters( *belosList2 );
+//    linearSolver2.setPreconditioner( precPtr );
+//    if( verbose ) std::cout << "done" << std::endl;
+//    linearSolver2.showMe();
+
+    if (verbose) std::cout << " -- Building the solver ... " << std::flush;
+    SolverAztecOO linearSolver;
+    if (verbose) std::cout << " done ! " << std::endl;
+
+    if (verbose) std::cout << " -- Setting up the solver ... " << std::flush;
+    linearSolver.setDataFromGetPot(dataFile,"solver");
+    linearSolver.setupPreconditioner(dataFile,"prec");
+    if (verbose) std::cout << " done ! " << std::endl;
+
+    if (verbose) std::cout << " -- Setting matrix in the solver ... " << std::flush;
+    linearSolver.setMatrix(*systemMatrix);
+    if (verbose) std::cout << " done ! " << std::endl;
+
+    linearSolver.setCommunicator(Comm);
+
+// Definition of the solution
+
+    if (verbose) std::cout << " -- Defining the solution ... " << std::flush;
+    vector_Type solution(uFESpace->map(),Unique);
+    solution*=0.0;
+    if (verbose) std::cout << " done ! " << std::endl;
+
+// Solve the solution
+
+    if (verbose) std::cout << " -- Solving the system ... " << std::flush;
+    linearSolver.solveSystem(rhsBC,solution,systemMatrix);
+    if (verbose) std::cout << " done ! " << std::endl;
+
+// Error computation
+
+    if (verbose) std::cout << " -- Computing the error ... " << std::flush;
+    vector_Type solutionErr(solution);
+    solutionErr*=0.0;
+    uFESpace->interpolate( static_cast<feSpace_Type::function_Type>( exactSolution ), solutionErr, 0.0 );
+    solutionErr-=solution;
+    solutionErr.abs();
+    Real l2error(uFESpace->l2Error(exactSolution,vector_Type(solution,Repeated),0.0));
+    if (verbose) std::cout << " -- done ! " << std::endl;
+    if (verbose) std::cout << " ---> Norm L2  : " << l2error << std::endl;
+    Real linferror( solutionErr.normInf());
+    if (verbose) std::cout << " ---> Norm Inf : " << linferror << std::endl;
+
+
+    if (l2error > 0.0055)
+    {
+        std::cout << " <!> Solution has changed !!! <!> " << std::endl;
+        return EXIT_FAILURE;
+    }
+    if (linferror > 0.0046)
+    {
+        std::cout << " <!> Solution has changed !!! <!> " << std::endl;
+        return EXIT_FAILURE;
+    }
+
+#ifdef HAVE_MPI
+    MPI_Finalize();
+#endif
+
+    return( EXIT_SUCCESS );
+}
+
+

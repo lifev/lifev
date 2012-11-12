@@ -22,3 +22,4 @@ TRIBITS_COPY_FILES_TO_BINARY_DIR(mesh_testmesh
   SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/core/data/mesh/mesh++
 )
 
+ADD_SUBDIRECTORY(mesh_partition_tool)
