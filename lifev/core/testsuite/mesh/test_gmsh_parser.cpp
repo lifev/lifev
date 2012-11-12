@@ -120,7 +120,7 @@ int main (int argc, char* argv[])
   // Parse command-line
   if (argc < 5)
   {
-    std::cout << "Usage: " << argv[0] << " [file1] [file2] [file3] [file4]" << std::endl;
+    std::cout << "Usage: " << argv[0] << " [mesh_1D_P1] [mesh_2D_Q2] [mesh_3D_P1] [mesh_3D_Q2]" << std::endl;
     return EXIT_SUCCESS;
   }
 
