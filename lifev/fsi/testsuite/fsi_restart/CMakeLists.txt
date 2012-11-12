@@ -17,6 +17,12 @@ TRIBITS_COPY_FILES_TO_BINARY_DIR(data_test_restartFSI
   CREATE_SYMLINK
 )
 
+TRIBITS_COPY_FILES_TO_BINARY_DIR(dataGCE_test_restartFSI
+  SOURCE_FILES dataGCE
+  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
+  CREATE_SYMLINK
+)
+
 TRIBITS_COPY_FILES_TO_BINARY_DIR(vessel20.mesh_test_restartFSI
   SOURCE_FILES vessel20.mesh
   SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/fsi/data/mesh/inria/
@@ -48,4 +54,11 @@ TRIBITS_COPY_FILES_TO_BINARY_DIR(dataFileSolidH5
   SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/fsi/testsuite/fsi_restart/
 )
 
+TRIBITS_ADD_TEST(
+  restartFSI
+  NAME restartFSIGCE
+  ARGS "-f dataGCE"
+  NUM_MPI_PROCS 2
+  COMM serial mpi
+  )
 

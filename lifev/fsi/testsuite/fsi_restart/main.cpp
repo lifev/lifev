@@ -471,7 +471,6 @@ void Problem::restartFSI(  GetPot const& data_file)
     std::string const loadInitSol      = data_file( "importer/initSol", "00000");
     std::string const loadInitSolFD    = data_file("importer/initSolFD","-1");
     std::string iterationString;
-    std::string iterationStringCopy ;
 
     M_Tstart  = data_file( "fluid/time_discretization/initialtime", 0.);
 
@@ -512,18 +511,10 @@ void Problem::restartFSI(  GetPot const& data_file)
 
     //It should work just initializing the timeAdvance classes
     //Three stencils are needed (Fluid-Structure-Geometric)
-    vectorPtr_Type fluidSol         (new vector_Type(*M_fsi->FSIOper()->couplingVariableMap(), LifeV::Unique));
-    vectorPtr_Type initFluid        (new vector_Type(*M_fsi->FSIOper()->couplingVariableMap(), LifeV::Unique, Zero));
-    vectorPtr_Type HarmonicSol      (new vector_Type(*M_fsi->FSIOper()->couplingVariableMap(), LifeV::Unique, Zero));
-    vectorPtr_Type structureSol     (new vector_Type(*M_fsi->FSIOper()->couplingVariableMap(), LifeV::Unique, Zero));
-    vectorPtr_Type temporarySol     (new vector_Type(*M_fsi->FSIOper()->couplingVariableMap(), LifeV::Unique, Zero));
-
     vectorPtr_Type vel           (new vector_Type(M_fsi->FSIOper()->uFESpace().map(), LifeV::Unique));
     vectorPtr_Type pressure      (new vector_Type(M_fsi->FSIOper()->pFESpace().map(), LifeV::Unique));
     vectorPtr_Type solidDisp     (new vector_Type(M_fsi->FSIOper()->dFESpace().map(), LifeV::Unique));
     vectorPtr_Type fluidDisp     (new vector_Type(M_fsi->FSIOper()->mmFESpace().map(), LifeV::Unique));
-
-    vectorPtr_Type firstFluidDisp(new vector_Type(M_fsi->FSIOper()->mmFESpace().map(), LifeV::Unique));
 
     //The hypothesis used for this method is that the three TimeAdvance classes have the same size
     iterationString = loadInitSol;
@@ -556,10 +547,10 @@ void Problem::restartFSI(  GetPot const& data_file)
 	M_importerSolid->readVariable(initSolSolidDisp);  //Solid d
 	M_importerFluid->readVariable(initSolFluidDisp);  //Fluid df
 
-	// std::cout << "Norm of the vel " << vel->norm2() << std::endl;
-	// std::cout << "Norm of the pressure " << pressure->norm2() << std::endl;
-	// std::cout << "Norm of the solid " << solidDisp->norm2() << std::endl;
-	// std::cout << "Norm of the df " << fluidDisp->norm2() << std::endl;
+	std::cout << "Norm of the vel " << vel->norm2() << std::endl;
+	std::cout << "Norm of the pressure " << pressure->norm2() << std::endl;
+	std::cout << "Norm of the solid " << solidDisp->norm2() << std::endl;
+	std::cout << "Norm of the df " << fluidDisp->norm2() << std::endl;
 
 	//We send the vectors to the FSIMonolithic class using the interface of FSIOper
 	M_fsi->FSIOper()->setVectorInStencils(vel, pressure, solidDisp, fluidDisp, iterInit )
@@ -572,9 +563,6 @@ void Problem::restartFSI(  GetPot const& data_file)
 	iter.fill( '0' );
 	iter << std::setw(5) << ( iterations );
 	iterationString=iter.str();
-
-	iterationStringCopy = iterationString;
-
       }
 
     //Reading another vector for the solidTimeAdvance since its BDF has the same order
@@ -590,14 +578,16 @@ void Problem::restartFSI(  GetPot const& data_file)
     vectorPtr_Type vectorMonolithicSolidDisplacement(new vector_Type(*M_fsi->FSIOper()->couplingVariableMap(), Unique, Zero) );
     *vectorMonolithicSolidDisplacement *= 0.0;
 
-    //This dynamic cast is ugly but it's the only wat to understand where the read vector can be put.
+    //This dynamic cast is ugly but it's the only way to understand where the read vector can be put.
     UInt offset=dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->offset();
     vectorMonolithicSolidDisplacement->subset( *solidDisp, solidDisp->map(), (UInt)0, offset);
     *vectorMonolithicSolidDisplacement *= 1.0 / (M_fsi->FSIOper()->solid().rescaleFactor());
 
     vector_Type* normalPointerToSolidVector( new vector_Type(*vectorMonolithicSolidDisplacement) );
     (M_fsi->FSIOper()->solidTimeAdvance()->stencil()).push_back( normalPointerToSolidVector );
+   
 
+    
     //Set the initialRHS for the TimeAdvance classes
     vector_Type zeroFluidSolid(*M_fsi->FSIOper()->couplingVariableMap(), LifeV::Unique, Zero);
     vector_Type zeroALE(M_fsi->FSIOper()->mmFESpace().map(), LifeV::Unique, Zero);
