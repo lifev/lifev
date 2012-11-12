@@ -865,10 +865,10 @@ Vector PostProcessingBoundary<MeshType>::normal( const markerID_Type& flag, UInt
     M_epetraMapPtr->comm().SumAll( &normalScatter(2), &normal(2), 1 );
 
     // Scale normal to unity length
-    Real nn = sqrt( normal(0) * normal(0) + normal(1) * normal(1) + normal(2) * normal(2) );
+    Real nn = std::sqrt( normal(0) * normal(0) + normal(1) * normal(1) + normal(2) * normal(2) );
 
 #ifdef DEBUG
-    if ( abs( nn ) < 1e-6 )
+    if ( std::fabs( nn ) < 1e-6 )
     {
         debugStream( 5000 ) << "Approximate surface normal could not be reliably computed.\n";
         debugStream( 5000 ) << "Modulus of the integrated normal vector was: " << nn  << "\n";
