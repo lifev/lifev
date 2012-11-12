@@ -361,6 +361,9 @@ public:
     Int globalAssemble( const boost::shared_ptr<const MapEpetra> & domainMap,
                         const boost::shared_ptr<const MapEpetra> & rangeMap );
 
+    //! Fill complete of a square matrix with default domain and range map
+    Int fillComplete();
+
     //! insert the given value into the diagonal
     /*!
       Pay intention that this will add values to the diagonal,
@@ -1323,6 +1326,18 @@ Int MatrixEpetra<DataType>::globalAssemble()
     M_domainMap = M_map;
     M_rangeMap  = M_map;
     return  M_epetraCrs->GlobalAssemble();
+}
+
+template <typename DataType>
+Int MatrixEpetra<DataType>::fillComplete()
+{
+    if ( !M_epetraCrs->Filled() )
+    {
+        insertZeroDiagonal();
+    }
+    M_domainMap = M_map;
+    M_rangeMap  = M_map;
+    return  M_epetraCrs->FillComplete();
 }
 
 template <typename DataType>
