@@ -137,6 +137,15 @@ public:
     //! Applies the bounsary conditions to the matrix
     void applyBoundaryConditions();
 
+      //! Set vectors for restart
+    /*!
+     *  Set vectors for restart
+     */
+    void setVectorInStencils( const vectorPtr_Type& vel,
+			      const vectorPtr_Type& pressure,
+			      const vectorPtr_Type& solidDisp,
+			      const vectorPtr_Type& fluidDisp,
+			      const UInt iter);
 
     void updateSolution( const vector_Type& solution );
 
