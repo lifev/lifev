@@ -45,6 +45,8 @@
 #endif
 
 #include <Teuchos_ParameterList.hpp>
+#include <Teuchos_XMLParameterListHelpers.hpp>
+#include <Teuchos_RCP.hpp>
 
 //Tell the compiler to restore the warning previously silented
 #pragma GCC diagnostic warning "-Wunused-variable"
@@ -54,9 +56,8 @@
 
 
 #include <lifev/core/algorithm/PreconditionerIfpack.hpp>
-#include <lifev/core/algorithm/PreconditionerML.hpp>
 
-#include <lifev/core/algorithm/SolverAztecOO.hpp>
+#include <lifev/core/algorithm/LinearSolver.hpp>
 
 #include <lifev/core/array/MatrixEpetra.hpp>
 
@@ -129,7 +130,9 @@ main( int argc, char** argv )
     if (verbose) std::cout << " done ! " << std::endl;
 
     if (verbose) std::cout << " -- Partitioning the mesh ... " << std::flush;
-    meshCutter_Type   meshPart(fullMeshPtr, Comm);
+    Teuchos::ParameterList meshParameters;
+    meshParameters.set("num_partitions", Comm->NumProc(), "");
+    meshCutter_Type   meshPart(fullMeshPtr, Comm, meshParameters);
     if (verbose) std::cout << " done ! " << std::endl;
 
     if (verbose) std::cout << " -- Freeing the global mesh ... " << std::flush;
@@ -226,9 +229,10 @@ main( int argc, char** argv )
     if (verbose) std::cout << " done ! " << std::endl;
 
     if (verbose) std::cout << " -- Applying the BCs ... " << std::flush;
-    vector_Type rhsBC(rhs,Unique);
-    bcManage(*systemMatrix,rhsBC,*uFESpace->mesh(),uFESpace->dof(),bchandler,uFESpace->feBd(),1.0,0.0);
-    rhs = rhsBC;
+    boost::shared_ptr<vector_Type>
+    		rhsBC(new vector_Type(rhs,Unique));
+    bcManage(*systemMatrix, *rhsBC,*uFESpace->mesh(),uFESpace->dof(),bchandler,uFESpace->feBd(),1.0,0.0);
+    rhs = *rhsBC;
     if (verbose) std::cout << " done ! " << std::endl;
 
 // Definition of the solver
@@ -244,16 +248,21 @@ main( int argc, char** argv )
 //    linearSolver2.showMe();
 
     if (verbose) std::cout << " -- Building the solver ... " << std::flush;
-    SolverAztecOO linearSolver;
+    LinearSolver linearSolver;
     if (verbose) std::cout << " done ! " << std::endl;
 
     if (verbose) std::cout << " -- Setting up the solver ... " << std::flush;
-    linearSolver.setDataFromGetPot(dataFile,"solver");
-    linearSolver.setupPreconditioner(dataFile,"prec");
+    Teuchos::RCP<Teuchos::ParameterList>
+    		solverParam = Teuchos::rcp(new Teuchos::ParameterList);
+    solverParam = Teuchos::getParametersFromXmlFile( "SolverParamList.xml" );
+    linearSolver.setCommunicator( Comm );
+    linearSolver.setParameters( *solverParam );
+    linearSolver.setPreconditionerFromGetPot(dataFile,"prec");
     if (verbose) std::cout << " done ! " << std::endl;
 
     if (verbose) std::cout << " -- Setting matrix in the solver ... " << std::flush;
-    linearSolver.setMatrix(*systemMatrix);
+    linearSolver.setOperator(systemMatrix);
+    linearSolver.setRightHandSide(rhsBC);
     if (verbose) std::cout << " done ! " << std::endl;
 
     linearSolver.setCommunicator(Comm);
@@ -261,25 +270,26 @@ main( int argc, char** argv )
 // Definition of the solution
 
     if (verbose) std::cout << " -- Defining the solution ... " << std::flush;
-    vector_Type solution(uFESpace->map(),Unique);
-    solution*=0.0;
+    boost::shared_ptr<vector_Type>
+    		solution(new vector_Type(uFESpace->map(),Unique));
+    *(solution) *= 0.0;
     if (verbose) std::cout << " done ! " << std::endl;
 
 // Solve the solution
 
     if (verbose) std::cout << " -- Solving the system ... " << std::flush;
-    linearSolver.solveSystem(rhsBC,solution,systemMatrix);
+    linearSolver.solve(solution);
     if (verbose) std::cout << " done ! " << std::endl;
 
 // Error computation
 
     if (verbose) std::cout << " -- Computing the error ... " << std::flush;
-    vector_Type solutionErr(solution);
+    vector_Type solutionErr(*solution);
     solutionErr*=0.0;
     uFESpace->interpolate( static_cast<feSpace_Type::function_Type>( exactSolution ), solutionErr, 0.0 );
-    solutionErr-=solution;
+    solutionErr-= *solution;
     solutionErr.abs();
-    Real l2error(uFESpace->l2Error(exactSolution,vector_Type(solution,Repeated),0.0));
+    Real l2error(uFESpace->l2Error(exactSolution,vector_Type(*solution,Repeated),0.0));
     if (verbose) std::cout << " -- done ! " << std::endl;
     if (verbose) std::cout << " ---> Norm L2  : " << l2error << std::endl;
     Real linferror( solutionErr.normInf());
