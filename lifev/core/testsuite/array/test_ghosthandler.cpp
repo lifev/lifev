@@ -71,8 +71,8 @@ int main( int argc, char* argv[] )
     // this brace is important to destroy the Epetra_Comm object before calling MPI_Finalize
     {
 
-    typedef RegionMesh<LinearTriangle,neighborMarkerCommon_Type> RegionMesh;
-    typedef FESpace< RegionMesh, MapEpetra > feSpace_Type;
+    typedef RegionMesh<LinearTriangle,neighborMarkerCommon_Type> mesh_Type;
+    typedef FESpace< mesh_Type, MapEpetra > feSpace_Type;
     typedef boost::shared_ptr< feSpace_Type > feSpacePtr_Type;
 
     LifeChrono chronoTotal;
@@ -116,7 +116,7 @@ int main( int argc, char* argv[] )
     meshData.setup( dataFile, "space_discretization" );
 
     // Create the mesh
-    boost::shared_ptr<RegionMesh> fullMeshPtr( new RegionMesh );
+    boost::shared_ptr<mesh_Type> fullMeshPtr( new mesh_Type( comm ) );
 
     // Set up the mesh
     readMesh( *fullMeshPtr, meshData );
@@ -125,7 +125,11 @@ int main( int argc, char* argv[] )
 //    createNodeNeighbors ( *fullMeshPtr );
 
     // Partition the mesh using ParMetis
-    MeshPartitioner< RegionMesh >  meshPart( fullMeshPtr, comm );
+    boost::shared_ptr<mesh_Type> meshPtr( new mesh_Type( comm ) );
+    {
+        MeshPartitioner< mesh_Type >  meshPart( fullMeshPtr, comm );
+        meshPtr = meshPart.meshPartition();
+    }
 
     // Stop chronoReadAndPartitionMesh
     chronoMesh.stop();
@@ -136,7 +140,7 @@ int main( int argc, char* argv[] )
     // Start chronoGhost for measure the total time for GhostHandler routines
     chronoGhost.start();
 
-    feSpacePtr_Type feSpaceP1( new feSpace_Type( meshPart,
+    feSpacePtr_Type feSpaceP1( new feSpace_Type( meshPtr,
                                                  feTriaP1,
                                                  quadRuleTria4pt,
                                                  quadRuleSeg2pt,
@@ -150,7 +154,7 @@ int main( int argc, char* argv[] )
     fileOut << "|/  |/  |/  |/  |" << std::endl;
     fileOut << "0---1---2---3---4" << std::endl;
 
-    GhostHandler<RegionMesh> ghostP1 ( fullMeshPtr, meshPart.meshPartition(), feSpaceP1->mapPtr(), comm );
+    GhostHandler<mesh_Type> ghostP1 ( fullMeshPtr, meshPtr, feSpaceP1->mapPtr(), comm );
 
     ghostP1.setUp();
 
@@ -206,7 +210,7 @@ int main( int argc, char* argv[] )
     if( mapP1Overlap.map( Repeated )->NumMyElements() != 10 )
         return 1;
 
-    feSpacePtr_Type feSpaceP0( new feSpace_Type( meshPart,
+    feSpacePtr_Type feSpaceP0( new feSpace_Type( meshPtr,
                                                  feTriaP0,
                                                  quadRuleTria1pt,
                                                  quadRuleSeg1pt,
@@ -220,7 +224,7 @@ int main( int argc, char* argv[] )
     fileOut << "|/ 0|/ 2|/ 4|/ 6|" << std::endl;
     fileOut << "+---+---+---+---+" << std::endl;
 
-    GhostHandler<RegionMesh> ghostP0 ( fullMeshPtr, meshPart.meshPartition(), feSpaceP0->mapPtr(), comm );
+    GhostHandler<mesh_Type> ghostP0 ( fullMeshPtr, meshPtr, feSpaceP0->mapPtr(), comm );
 
     ghostP0.setUp();
 
@@ -289,7 +293,7 @@ int main( int argc, char* argv[] )
     // The leader process print chronoGhost
     if ( isLeader ) std::cout << "  C- Time for ghost " << chronoGhost.diff() << std::endl;
 
-    boost::shared_ptr< Exporter< RegionMesh > > exporter;
+    boost::shared_ptr< Exporter< mesh_Type > > exporter;
 
     // Type of the exporter
     std::string const exporterType =  dataFile( "exporter/type", "ensight" );
@@ -297,42 +301,42 @@ int main( int argc, char* argv[] )
     // Choose the exporter
 #ifdef HAVE_HDF5
     if ( exporterType.compare( "hdf5" ) == 0 )
-        exporter.reset( new ExporterHDF5< RegionMesh > ( dataFile, dataFile( "exporter/file_name", "GH" ) ) );
+        exporter.reset( new ExporterHDF5< mesh_Type > ( dataFile, dataFile( "exporter/file_name", "GH" ) ) );
     else
 #endif
     {
         if ( exporterType.compare("none") == 0 )
         {
-            exporter.reset( new ExporterEmpty< RegionMesh > ( dataFile, dataFile( "exporter/file_name", "GH" ) ) );
+            exporter.reset( new ExporterEmpty< mesh_Type > ( dataFile, dataFile( "exporter/file_name", "GH" ) ) );
         }
         else
         {
-            exporter.reset( new ExporterEnsight< RegionMesh > ( dataFile, dataFile( "exporter/file_name", "GH" ) ) );
+            exporter.reset( new ExporterEnsight< mesh_Type > ( dataFile, dataFile( "exporter/file_name", "GH" ) ) );
         }
     }
 
     // Set directory where to save the solution
     exporter->setPostDir( dataFile( "exporter/folder", "./" ) );
-    exporter->setMeshProcId( meshPart.meshPartition(), comm->MyPID() );
+    exporter->setMeshProcId( meshPtr, comm->MyPID() );
 
     // Export the partitioning
-    exporter->exportPID( meshPart.meshPartition(), comm );
+    exporter->exportPID( meshPtr, comm );
 
     // Add the solution to the exporter
-    exporter->addVariable( ExporterData<RegionMesh>::ScalarField,
+    exporter->addVariable( ExporterData<mesh_Type>::ScalarField,
                            "MapP1", feSpaceP1,
                            vP1,
                            static_cast<UInt>( 0 ),
-                           ExporterData<RegionMesh>::SteadyRegime,
-                           ExporterData<RegionMesh>::Node );
+                           ExporterData<mesh_Type>::SteadyRegime,
+                           ExporterData<mesh_Type>::Node );
 
     // Add the solution to the exporter
-    exporter->addVariable( ExporterData<RegionMesh>::ScalarField,
+    exporter->addVariable( ExporterData<mesh_Type>::ScalarField,
                            "MapP0", feSpaceP0,
                            vP0,
                            static_cast<UInt>( 0 ),
-                           ExporterData<RegionMesh>::SteadyRegime,
-                           ExporterData<RegionMesh>::Cell );
+                           ExporterData<mesh_Type>::SteadyRegime,
+                           ExporterData<mesh_Type>::Cell );
 
     // Save the initial solution into the exporter
     exporter->postProcess( 0 );
