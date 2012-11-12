@@ -156,6 +156,12 @@ public:
      */
     MatrixEpetra& operator += ( const MatrixEpetra& matrix );
 
+    //! Subtraction operator
+    /*!
+      @param matrix matrix to be subtracted to the current matrix
+     */
+    MatrixEpetra& operator -= ( const MatrixEpetra& matrix );
+
     //! Assignment operator
     /*!
       @param matrix matrix to be assigned to the current matrix
@@ -647,6 +653,15 @@ MatrixEpetra<DataType>&
 MatrixEpetra<DataType>::operator += ( const MatrixEpetra& matrix )
 {
     EpetraExt::MatrixMatrix::Add( *matrix.matrixPtr(), false, 1., *this->matrixPtr(), 1. );
+
+    return *this;
+}
+
+template <typename DataType>
+MatrixEpetra<DataType>&
+MatrixEpetra<DataType>::operator -= ( const MatrixEpetra& matrix )
+{
+    EpetraExt::MatrixMatrix::Add( *matrix.matrixPtr(), false, 1., *this->matrixPtr(), -1. );
 
     return *this;
 }
