@@ -1691,58 +1691,31 @@ void MeshPartitioner<MeshType>::markEntityOwnership()
             for( UInt e = 0; e < (*M_meshPartitions)[ i ]->numElements(); e++ )
             {
                 typename MeshType::element_Type & element = (*M_meshPartitions)[ i ]->element( e );
-                if( M_entityPID[ 0 ][ element.id() ] == static_cast<UInt>( M_me ) ) element.setFlag( EntityFlags::OWNED );
+                if( M_entityPID[ 0 ][ element.id() ] != static_cast<UInt>( M_me ) ) element.unSetFlag( EntityFlags::OWNED );
             }
 
             for( UInt f = 0; f < (*M_meshPartitions)[ i ]->numFacets(); f++ )
             {
                 typename MeshType::facet_Type & facet = (*M_meshPartitions)[ i ]->facet( f );
-                if( M_entityPID[ 1 ][ facet.id() ] == static_cast<UInt>( M_me ) ) facet.setFlag( EntityFlags::OWNED );
+                if( M_entityPID[ 1 ][ facet.id() ] != static_cast<UInt>( M_me ) ) facet.unSetFlag( EntityFlags::OWNED );
             }
 
             for( UInt r = 0; r < (*M_meshPartitions)[ i ]->numRidges(); r++ )
             {
                 typename MeshType::ridge_Type & ridge = (*M_meshPartitions)[ i ]->ridge( r );
-                if( M_entityPID[ 2 ][ ridge.id() ] == static_cast<UInt>( M_me ) ) ridge.setFlag( EntityFlags::OWNED );
+                if( M_entityPID[ 2 ][ ridge.id() ] != static_cast<UInt>( M_me ) ) ridge.unSetFlag( EntityFlags::OWNED );
             }
 
             for( UInt p = 0; p < (*M_meshPartitions)[ i ]->numPoints(); p++ )
             {
                 typename MeshType::point_Type & point = (*M_meshPartitions)[ i ]->point( p );
-                if( M_entityPID[ 3 ][ point.id() ] == static_cast<UInt>( M_me ) ) point.setFlag( EntityFlags::OWNED );
+                if( M_entityPID[ 3 ][ point.id() ] != static_cast<UInt>( M_me ) ) point.unSetFlag( EntityFlags::OWNED );
             }
         }
         clearVector( M_entityPID[ 0 ] );
         clearVector( M_entityPID[ 1 ] );
         clearVector( M_entityPID[ 2 ] );
         clearVector( M_entityPID[ 3 ] );
-    }
-    else
-    {
-        // mark all partition entities as owned entities (parallel assembly)
-        for (UInt i = 0; i < M_numPartitions; ++i)
-        {
-            for( UInt e = 0; e < (*M_meshPartitions)[ i ]->numElements(); e++ )
-            {
-                typename MeshType::element_Type & element = (*M_meshPartitions)[ i ]->element( e );
-                element.setFlag( EntityFlags::OWNED );
-            }
-            for( UInt f = 0; f < (*M_meshPartitions)[ i ]->numFacets(); f++ )
-            {
-                typename MeshType::facet_Type & facet = (*M_meshPartitions)[ i ]->facet( f );
-                facet.setFlag( EntityFlags::OWNED );
-            }
-            for( UInt r = 0; r < (*M_meshPartitions)[ i ]->numRidges(); r++ )
-            {
-                typename MeshType::ridge_Type & ridge = (*M_meshPartitions)[ i ]->ridge( r );
-                ridge.setFlag( EntityFlags::OWNED );
-            }
-            for( UInt p = 0; p < (*M_meshPartitions)[ i ]->numPoints(); p++ )
-            {
-                typename MeshType::point_Type & point = (*M_meshPartitions)[ i ]->point( p );
-                point.setFlag( EntityFlags::OWNED );
-            }
-        }
     }
 }
 
