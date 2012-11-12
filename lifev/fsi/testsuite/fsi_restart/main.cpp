@@ -325,14 +325,7 @@ public:
             M_fsi->iterate( solution );
 
             // Saving the solution
-            if( M_data->method().compare("monolithicGI") == 0 )
-            {
-                M_fsi->FSIOper()->updateSolution( *solution );
-            }
-            else
-            {
-                M_fsi->FSIOper()->updateSolution( *solution );
-            }
+	    M_fsi->FSIOper()->updateSolution( *solution );
 
             if(iter%M_saveEvery==0)
             {
@@ -347,7 +340,10 @@ public:
             std::cout << "solution norm at time: " <<  M_data->dataFluid()->dataTime()->time() << "(iter" << iter << ") : "
                       << M_fsi->displacement().norm2() << "\n";
 
-            checkResult(M_data->dataFluid()->dataTime()->time());
+	    if( M_data->method().compare("monolithicGI") == 0 )
+	       checkResultGI(M_data->dataFluid()->dataTime()->time());
+	    else
+	      checkResultGCE(M_data->dataFluid()->dataTime()->time());
 
 
         }
@@ -362,7 +358,8 @@ public:
 private:
 
     void restartFSI(  GetPot const& data_file);
-    void checkResult(const LifeV::Real& time);
+    void checkResultGI(const LifeV::Real& time);
+    void checkResultGCE(const LifeV::Real& time);
 
     fsi_solver_ptr M_fsi;
     dataPtr_Type   M_data;
@@ -616,12 +613,22 @@ void Problem::restartFSI(  GetPot const& data_file)
 }
 
 
-void Problem::checkResult(const LifeV::Real& time)
+void Problem::checkResultGI(const LifeV::Real& time)
 {
 
   //Extract the previous solution
   LifeV::Real dispNorm=M_fsi->displacement().norm2();
-  if (time==0.006 &&      (dispNorm-100221)/dispNorm * (dispNorm-100221)/dispNorm < 1e-5) resultCorrect(time);
-  else if (time==0.007 && (dispNorm-94940.1)/dispNorm * (dispNorm-94940.1)/dispNorm < 1e-5) resultCorrect(time);
-  else if (time==0.008 && (dispNorm-91910.8)/dispNorm * (dispNorm-91910.8)/dispNorm < 1e-5) resultCorrect(time);
+  if (time==0.003 &&      (dispNorm-158013)/dispNorm * (dispNorm-158013)/dispNorm < 1e-5) resultCorrect(time);
+  else if (time==0.004 && (dispNorm-118882)/dispNorm * (dispNorm-118882)/dispNorm < 1e-5) resultCorrect(time);
+  else if (time==0.005 && (dispNorm-106540)/dispNorm * (dispNorm-106540)/dispNorm < 1e-5) resultCorrect(time);
+}
+
+void Problem::checkResultGCE(const LifeV::Real& time)
+{
+
+  //Extract the previous solution
+  LifeV::Real dispNorm=M_fsi->displacement().norm2();
+  if (time==0.006 &&      (dispNorm-139804)/dispNorm * (dispNorm-139804)/dispNorm < 1e-5) resultCorrect(time);
+  else if (time==0.007 && (dispNorm-106386)/dispNorm * (dispNorm-106386)/dispNorm < 1e-5) resultCorrect(time);
+  else if (time==0.008 && (dispNorm-99162)/dispNorm * (dispNorm-99162)/dispNorm < 1e-5) resultCorrect(time);
 }
