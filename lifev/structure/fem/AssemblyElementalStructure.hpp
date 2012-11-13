@@ -367,9 +367,13 @@ namespace LifeV
   @param invariants vector of invariants of C
   @param tensorF deformation gradient tensor
  */
-  void computeInvariantsRightCauchyGreenTensor(std::vector<LifeV::Real>& invariants, 
+  void computeInvariantsRightCauchyGreenTensor(std::vector<LifeV::Real>& invariants,
 					       const Epetra_SerialDenseMatrix& tensorF,
 					       Epetra_SerialDenseMatrix& cofactorF);
+
+  void computeInvariantsRightCauchyGreenTensor(std::vector<LifeV::Real>& invariants,
+					       const Epetra_SerialDenseMatrix& tensorF);
+
 
 /*!
   This function computes the Cauchy stress tensor given the detF, first Piola Kirchhoff and tensorF

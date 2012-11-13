@@ -31,9 +31,9 @@
  *  @version 1.0
  *  @date 01-01-2010
  *  @author Paolo Tricerri
- * 
+ *
  *  @maintainer  Paolo Tricerri <paolo.tricerri@epfl.ch>
- *  
+ *
  */
 
 #ifndef _WALLTENSION_H_
@@ -165,7 +165,7 @@ public:
 
     //! Analyze Tensions: This method computes the Cauchy stress tensor and its principal values. It uses the displacement vector that has to be set
     /*!
-      \param NONE FESpace<Mesh, MapEpetra>& copyFESpace 
+      \param NONE FESpace<Mesh, MapEpetra>& copyFESpace
     */
     virtual void analyzeTensions( );
 
@@ -208,7 +208,7 @@ public:
 
   //! Get the pointer to the FESpace object
   boost::shared_ptr<FESpace<Mesh, MapEpetra> > dFESpacePtr()  {return M_FESpace;}
-  
+
   //! Get the displacement solution
   solutionVect_Type displacement() {return *M_displ;}
 
@@ -230,49 +230,49 @@ protected:
 
 //! @name Protected methods
 //@{
-  
+
   //! computeDeformation: This method computes the tensor F given the displacement on the element.
   /*!
     \param NONE
   */
   void computeDisplacementGradient( solutionVectPtr_Type grDisplX,
 				    solutionVectPtr_Type grDisplY,
-				    solutionVectPtr_Type grDisplZ);    
+				    solutionVectPtr_Type grDisplZ);
 
   //! reconstructElementaryVector: This method applies a reconstruction procedure on the elvec that is passed
   /*!
     \param elvecTens VectorElemental over which the reconstruction is applied
   */
-  void reconstructElementaryVector( VectorElemental& elVecSigma, solutionVect_Type& patchArea, UInt nVol );    
+  void reconstructElementaryVector( VectorElemental& elVecSigma, solutionVect_Type& patchArea, UInt nVol );
 
   //! constructPatchAreaVector: This method build the patch area vector used in the reconstruction process
   /*!
     \param NONE
   */
-  void constructPatchAreaVector( solutionVect_Type& patchArea );    
+  void constructPatchAreaVector( solutionVect_Type& patchArea );
 
   //! orderEigenvalues it puts in an increasing order the eigenvalues
   /*!
     \param std::vector of the real part of the eigenvalues that has been found
   */
-  void orderEigenvalues( std::vector<Real>& eigenvaluesR );    
+  void orderEigenvalues( std::vector<Real>& eigenvaluesR );
 
   //! constructGlobalStressVector: This method construct the vectors \sigma_{.,i} for i=x,y,z to have for each DOF the tensor \sigma
   /*!
     \param NONE
   */
-  void constructGlobalStressVector( solutionVect_Type& sigmaX, solutionVect_Type& sigmaY, solutionVect_Type& sigmaZ );    
+  void constructGlobalStressVector( solutionVect_Type& sigmaX, solutionVect_Type& sigmaY, solutionVect_Type& sigmaZ );
 
-    
+
 //@}
 
 //! @name Protected members
 //@{
-    
+
     boost::shared_ptr<FESpace<Mesh, MapEpetra> >   M_FESpace;
 
     boost::shared_ptr<const MapEpetra>             M_localMap;
-    
+
     //! Elementary matrix for the tensor F
     matrixPtr_Type                                 M_deformationF;
 
@@ -316,7 +316,7 @@ protected:
 
     //! Vector for the eigenvalues of the Cauchy stress tensor
     solutionVectPtr_Type                            M_globalEigen;
-  
+
     //! The Offset parameter
     UInt                                           M_offset;
 
@@ -358,8 +358,8 @@ WallTensionEstimator<Mesh>::WallTensionEstimator( ):
     M_cofactorF                  ( ),
     M_firstPiola                 ( ),
     M_invariants                 ( ),
-    M_eigenvaluesR               ( ),   
-    M_eigenvaluesI               ( ),   
+    M_eigenvaluesR               ( ),
+    M_eigenvaluesI               ( ),
     M_displ                      ( ),
     M_globalEigen                ( ),
     // M_displX                     ( ),
@@ -371,7 +371,7 @@ WallTensionEstimator<Mesh>::WallTensionEstimator( ):
     // M_elVecTens                  ( ),
     M_material                   ( )
 {
-  
+
 }
 
 
@@ -380,13 +380,13 @@ WallTensionEstimator<Mesh>::WallTensionEstimator( ):
 // Public Methods
 //===================================
 template <typename Mesh>
-void 
+void
 WallTensionEstimator<Mesh >::setup( const dataPtr_Type& dataMaterial,
 				    const analysisDataPtr_Type& tensionData,
 				    const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
 				    boost::shared_ptr<Epetra_Comm>&     comm,
 				    UInt marker)
-  
+
 {
 
   // Data classes & Volumes markers
@@ -429,8 +429,8 @@ WallTensionEstimator<Mesh >::setup( const dataPtr_Type& dataMaterial,
 
 
 template <typename Mesh>
-void 
-WallTensionEstimator<Mesh >::analyzeTensions( )   
+void
+WallTensionEstimator<Mesh >::analyzeTensions( )
 {
 
   *M_globalEigen *= 0.0;
@@ -440,15 +440,15 @@ WallTensionEstimator<Mesh >::analyzeTensions( )
     analyzeTensionsRecoveryEigenvalues();
   else
     analyzeTensionsRecoveryCauchyStresses();
-    
+
 }
 
 
 template <typename Mesh>
-void 
+void
 WallTensionEstimator<Mesh >::analyzeTensionsRecoveryDisplacement( void )
 {
-  
+
   solutionVectPtr_Type grDisplX( new solutionVect_Type(*M_localMap) );
   solutionVectPtr_Type grDisplY( new solutionVect_Type(*M_localMap) );
   solutionVectPtr_Type grDisplZ( new solutionVect_Type(*M_localMap) );
@@ -464,9 +464,9 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryDisplacement( void )
   // this->M_displayer->leaderPrint(" \n*********************************\n  ");
   // this->M_displayer->leaderPrint("   Norm of the gradient with respect to z ", grDisplZ->norm2() );
 
-  //For each of the DOF, the Cauchy tensor is computed. 
+  //For each of the DOF, the Cauchy tensor is computed.
   //Therefore the tensor C,P, \sigma are computed for each DOF
-  UInt dim = M_FESpace->dim();  
+  UInt dim = M_FESpace->dim();
 
   LifeChrono chrono;
 
@@ -477,12 +477,12 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryDisplacement( void )
   chrono.start();
 
   for ( UInt iDOF = 0; iDOF <( UInt ) this->M_FESpace->dof().numTotalDof(); iDOF++ )
-    {      
-      
+    {
+
       if ( M_displ->blockMap().LID(iDOF) != -1 ) // The Global ID is on the calling processors
 	{
-	  std::vector<LifeV::Real> dX(3,0.0); 
-	  std::vector<LifeV::Real> dY(3,0.0); 
+	  std::vector<LifeV::Real> dX(3,0.0);
+	  std::vector<LifeV::Real> dY(3,0.0);
 	  std::vector<LifeV::Real> dZ(3,0.0);
 
 	  //Reinitialization of matrices and arrays
@@ -493,31 +493,31 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryDisplacement( void )
 
 	  //Extracting the gradient of U on the current DOF
 	  for ( UInt iComp = 0; iComp < this->M_FESpace->fieldDim(); ++iComp )
-	    {		    
-	      Int LIDid = M_displ->blockMap().LID(iDOF + iComp * dim + M_offset); 
-	      Int GIDid = M_displ->blockMap().GID(LIDid); 
+	    {
+	      Int LIDid = M_displ->blockMap().LID(iDOF + iComp * dim + M_offset);
+	      Int GIDid = M_displ->blockMap().GID(LIDid);
 	      dX[iComp] = (*grDisplX)(GIDid); // (d_xX,d_yX,d_zX)
 	      dY[iComp] = (*grDisplY)(GIDid); // (d_xY,d_yY,d_zY)
 	      dZ[iComp] = (*grDisplZ)(GIDid); // (d_xZ,d_yZ,d_zZ)
 	    }
-	  	      
+
 	  //Fill the matrix F
 	  for( UInt icoor = 0; icoor < M_FESpace->fieldDim(); icoor++ )
 	    {
 	      (*M_deformationF)(icoor,0)=dX[icoor];
 	      (*M_deformationF)(icoor,1)=dY[icoor];
 	      (*M_deformationF)(icoor,2)=dZ[icoor];
-	  
+
 	      (*M_deformationF)(icoor,icoor) += 1.0;
 	    }
-	  
+
 	  //Compute the rightCauchyC tensor
-	  AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor(M_invariants, *M_deformationF, *M_cofactorF);	 
-      
+	  AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor(M_invariants, *M_deformationF, *M_cofactorF);
+
 	  LifeV::Real sumI(0);
 	  for( UInt i(0); i < M_invariants.size(); i++ )
 	    sumI += M_invariants[i];
-      
+
 	  //Compute the first Piola-Kirchhoff tensor
 	  M_material->computeLocalFirstPiolaKirchhoffTensor(*M_firstPiola, *M_deformationF, *M_cofactorF, M_invariants, M_marker);
 
@@ -526,24 +526,24 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryDisplacement( void )
 
 	  //Compute the eigenvalue
 	  AssemblyElementalStructure::computeEigenvalues(*M_sigma, M_eigenvaluesR, M_eigenvaluesI);
-      
+
 	  //The Cauchy tensor is symmetric and therefore, the eigenvalues are real
-	  //Check on the imaginary part of eigen values given by the Lapack method 
+	  //Check on the imaginary part of eigen values given by the Lapack method
 	  Real sum(0);
 	  for( int i=0; i < M_eigenvaluesI.size(); i++ )
 	    sum += std::abs(M_eigenvaluesI[i]);
 	  ASSERT_PRE( sum < 1e-6 , "The eigenvalues of the Cauchy stress tensors have to be real!" );
-	  
+
 	  orderEigenvalues( M_eigenvaluesR );
 
 	  //Save the eigenvalues in the global vector
 	  for( UInt icoor = 0; icoor < this->M_FESpace->fieldDim(); ++icoor )
 	    {
-	      Int LIDid = M_displ->blockMap().LID(iDOF + icoor * dim + M_offset); 
-	      Int GIDid = M_displ->blockMap().GID(LIDid); 
+	      Int LIDid = M_displ->blockMap().LID(iDOF + icoor * dim + M_offset);
+	      Int GIDid = M_displ->blockMap().GID(LIDid);
 	      (*M_globalEigen)(GIDid) = M_eigenvaluesR[icoor];
 	    }
-	
+
 	}
     }
 
@@ -553,7 +553,7 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryDisplacement( void )
 }
 
 template <typename Mesh>
-void 
+void
 WallTensionEstimator<Mesh >::computeDisplacementGradient( solutionVectPtr_Type grDisplX,
 							  solutionVectPtr_Type grDisplY,
 							  solutionVectPtr_Type grDisplZ)
@@ -570,10 +570,10 @@ WallTensionEstimator<Mesh >::computeDisplacementGradient( solutionVectPtr_Type g
   //Compute the gradient along Z of the displacement field
   *grDisplZ = M_FESpace->gradientRecovery(*M_displ, 2);
 
-}  
+}
 
 template <typename Mesh>
-void 
+void
 WallTensionEstimator<Mesh >::analyzeTensionsRecoveryEigenvalues( void )
 {
 
@@ -583,7 +583,7 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryEigenvalues( void )
   patchArea *= 0.0;
 
   constructPatchAreaVector( patchArea );
-  
+
   //Before assembling the reconstruction process is done
   solutionVect_Type patchAreaR(patchArea,Repeated);
 
@@ -656,19 +656,19 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryEigenvalues( void )
 	  M_cofactorF->Scale(0.0);
 
 	  //Compute the rightCauchyC tensor
-	  AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor(M_invariants, vectorDeformationF[nDOF], *M_cofactorF);	  
+	  AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor(M_invariants, vectorDeformationF[nDOF], *M_cofactorF);
 
 	  //Compute the first Piola-Kirchhoff tensor
 	  M_material->computeLocalFirstPiolaKirchhoffTensor(*M_firstPiola, vectorDeformationF[nDOF], *M_cofactorF, M_invariants, M_marker);
 
 	  //Compute the Cauchy tensor
 	  AssemblyElementalStructure::computeCauchyStressTensor(*M_sigma, *M_firstPiola, M_invariants[3], vectorDeformationF[nDOF]);
-	 
+
 	  //Compute the eigenvalue
 	  AssemblyElementalStructure::computeEigenvalues(*M_sigma, M_eigenvaluesR, M_eigenvaluesI);
 
 	  //The Cauchy tensor is symmetric and therefore, the eigenvalues are real
-	  //Check on the imaginary part of eigen values given by the Lapack method 
+	  //Check on the imaginary part of eigen values given by the Lapack method
 	  Real sum(0);
 	  for( int i=0; i < M_eigenvaluesI.size(); i++ )
 	    sum += std::abs(M_eigenvaluesI[i]);
@@ -689,7 +689,7 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryEigenvalues( void )
       for ( UInt ic = 0; ic < this->M_FESpace->fieldDim(); ++ic )
 	  assembleVector(*M_globalEigen, elVecTens, M_FESpace->fe(), M_FESpace->dof(), ic, this->M_offset +  ic*totalDof );
     }
-  
+
   M_globalEigen->globalAssemble();
 
   chrono.stop();
@@ -703,7 +703,7 @@ WallTensionEstimator<Mesh >::constructPatchAreaVector( solutionVect_Type& patchA
 
   solutionVect_Type patchAreaR(*M_displ,Repeated);
   patchAreaR *= 0.0;
-  
+
   Real refElemArea(0); //area of reference element
   UInt totalDof = M_FESpace->dof().numTotalDof();
   //compute the area of reference element
@@ -728,8 +728,8 @@ WallTensionEstimator<Mesh >::constructPatchAreaVector( solutionVect_Type& patchA
   // Loop over the cells
   for (UInt iterElement(0); iterElement< totalNumberVolumes; iterElement++)
     {
-      interpCFE.update(M_FESpace->mesh()->volumeList( iterElement ), UPDATE_WDET );      
-      
+      interpCFE.update(M_FESpace->mesh()->volumeList( iterElement ), UPDATE_WDET );
+
       for (UInt iterDof(0); iterDof < numberLocalDof; iterDof++)
         {
 	  for (UInt iDim(0); iDim < M_FESpace->fieldDim(); ++iDim)
@@ -745,7 +745,7 @@ WallTensionEstimator<Mesh >::constructPatchAreaVector( solutionVect_Type& patchA
   patchArea.add(final);
 
 }
-	 
+
 
 template <typename Mesh>
 void WallTensionEstimator<Mesh >::orderEigenvalues( std::vector<Real>& eigenvaluesR )
@@ -773,26 +773,26 @@ void WallTensionEstimator<Mesh >::orderEigenvalues( std::vector<Real>& eigenvalu
 }
 
 template <typename Mesh>
-void 
+void
 WallTensionEstimator<Mesh >::analyzeTensionsRecoveryCauchyStresses( void )
 {
 
   LifeChrono chrono;
 
   chrono.start();
-  UInt dim = M_FESpace->dim();  
-  
+  UInt dim = M_FESpace->dim();
+
   //Construction of the global tensionsVector
   solutionVectPtr_Type sigmaX( new solutionVect_Type(*M_localMap) );
   solutionVectPtr_Type sigmaY( new solutionVect_Type(*M_localMap) );
   solutionVectPtr_Type sigmaZ( new solutionVect_Type(*M_localMap) );
-  
+
   constructGlobalStressVector(*sigmaX,*sigmaY,*sigmaZ);
 
 
   for ( UInt iDOF = 0; iDOF <( UInt ) this->M_FESpace->dof().numTotalDof(); iDOF++ )
-    {      
-      
+    {
+
       if ( M_displ->blockMap().LID(iDOF) != -1 ) // The Global ID is on the calling processors
 	{
 
@@ -800,9 +800,9 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryCauchyStresses( void )
 
 	  //Extracting the gradient of U on the current DOF
 	  for ( UInt iComp = 0; iComp < this->M_FESpace->fieldDim(); ++iComp )
-	    {		    
-	      Int LIDid = M_displ->blockMap().LID(iDOF + iComp * dim + M_offset); 
-	      Int GIDid = M_displ->blockMap().GID(LIDid); 
+	    {
+	      Int LIDid = M_displ->blockMap().LID(iDOF + iComp * dim + M_offset);
+	      Int GIDid = M_displ->blockMap().GID(LIDid);
 	      (*M_sigma)(iComp,0) = (*sigmaX)(GIDid); // (d_xX,d_yX,d_zX)
 	      (*M_sigma)(iComp,1) = (*sigmaY)(GIDid); // (d_xY,d_yY,d_zY)
 	      (*M_sigma)(iComp,2) = (*sigmaZ)(GIDid); // (d_xZ,d_yZ,d_zZ)
@@ -812,7 +812,7 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryCauchyStresses( void )
 	  AssemblyElementalStructure::computeEigenvalues(*M_sigma, M_eigenvaluesR, M_eigenvaluesI);
 
 	  //The Cauchy tensor is symmetric and therefore, the eigenvalues are real
-	  //Check on the imaginary part of eigen values given by the Lapack method 
+	  //Check on the imaginary part of eigen values given by the Lapack method
 	  Real sum(0);
 	  for( int i=0; i < M_eigenvaluesI.size(); i++ )
 	    sum += std::abs(M_eigenvaluesI[i]);
@@ -823,21 +823,21 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryCauchyStresses( void )
 	  //Save the eigenvalues in the global vector
 	  for( UInt icoor = 0; icoor < this->M_FESpace->fieldDim(); ++icoor )
 	    {
-	      Int LIDid = M_displ->blockMap().LID(iDOF + icoor * dim + M_offset); 
-	      Int GIDid = M_displ->blockMap().GID(LIDid); 
+	      Int LIDid = M_displ->blockMap().LID(iDOF + icoor * dim + M_offset);
+	      Int GIDid = M_displ->blockMap().GID(LIDid);
 	      (*M_globalEigen)(GIDid) = M_eigenvaluesR[icoor];
 	    }
-	
+
 	}
     }
 
   chrono.stop();
   this->M_displayer->leaderPrint("Analysis done in: ", chrono.diff());
-	 
+
 }
 
 template <typename Mesh>
-void 
+void
 WallTensionEstimator<Mesh >::constructGlobalStressVector( solutionVect_Type& sigmaX, solutionVect_Type& sigmaY, solutionVect_Type& sigmaZ )
 {
 
@@ -853,7 +853,7 @@ WallTensionEstimator<Mesh >::constructGlobalStressVector( solutionVect_Type& sig
   patchArea *= 0.0;
 
   constructPatchAreaVector( patchArea );
-  
+
   //Before assembling the reconstruction process is done
   solutionVect_Type patchAreaR(patchArea,Repeated);
 
@@ -893,7 +893,7 @@ WallTensionEstimator<Mesh >::constructGlobalStressVector( solutionVect_Type& sig
   for ( UInt i = 0; i < M_FESpace->mesh()->numVolumes(); ++i )
     {
       M_FESpace->fe().updateFirstDerivQuadPt( M_FESpace->mesh()->volumeList( i ) );
-      
+
       elVecSigmaX.zero();
       elVecSigmaY.zero();
       elVecSigmaZ.zero();
@@ -927,7 +927,7 @@ WallTensionEstimator<Mesh >::constructGlobalStressVector( solutionVect_Type& sig
 	  M_cofactorF->Scale(0.0);
 
 	  //Compute the rightCauchyC tensor
-	  AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor(M_invariants, vectorDeformationF[nDOF], *M_cofactorF);	  
+	  AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor(M_invariants, vectorDeformationF[nDOF], *M_cofactorF);
 
 	  //Compute the first Piola-Kirchhoff tensor
 	  M_material->computeLocalFirstPiolaKirchhoffTensor(*M_firstPiola, vectorDeformationF[nDOF], *M_cofactorF, M_invariants, M_marker);
@@ -966,11 +966,11 @@ WallTensionEstimator<Mesh >::constructGlobalStressVector( solutionVect_Type& sig
   sigmaX.globalAssemble();
   sigmaY.globalAssemble();
   sigmaZ.globalAssemble();
-}    
+}
 
 template <typename Mesh>
-void 
-WallTensionEstimator<Mesh >::reconstructElementaryVector( VectorElemental& elVecSigma, 
+void
+WallTensionEstimator<Mesh >::reconstructElementaryVector( VectorElemental& elVecSigma,
 							  solutionVect_Type& patchArea,
 							  UInt nVol )
 {
@@ -988,10 +988,10 @@ WallTensionEstimator<Mesh >::reconstructElementaryVector( VectorElemental& elVec
 	{
 	  ID globalDofID(M_FESpace->dof().localToGlobalMap(eleID,iDof) + icoor * M_FESpace->dof().numTotalDof());
 
-	  elVecSigma[iloc + icoor * M_FESpace->fe().nbFEDof()] *= ( measure / patchArea[globalDofID] ); 
+	  elVecSigma[iloc + icoor * M_FESpace->fe().nbFEDof()] *= ( measure / patchArea[globalDofID] );
 	}
 
-    }     
+    }
 }
 
 }

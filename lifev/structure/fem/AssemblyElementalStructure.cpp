@@ -89,7 +89,7 @@ void computeLocalDeformationGradient (const VectorElemental& uk_loc, std::vector
 		s = 0.0;
 		for (Int i = 0; i < static_cast<Int> (fe.nbFEDof()); i++ )
 		  {
-		    //  \grad u^k at a quadrature poInt 
+		    //  \grad u^k at a quadrature poInt
 		    s += fe.phiDer( i, jcoor, k ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ];
 		  }
 		tensorF[k]( icoor, jcoor ) = s;
@@ -117,7 +117,7 @@ void computeLocalDeformationGradientWithoutIdentity (const VectorElemental& uk_l
 		s = 0.0;
 		for (Int i = 0; i < static_cast<Int> (fe.nbFEDof()); i++ )
 		  {
-		    //  \grad u^k at a quadrature poInt 
+		    //  \grad u^k at a quadrature poInt
 		    s += fe.phiDer( i, jcoor, k ) * uk_loc.vec() [ i + icoor * fe.nbFEDof() ];
 		  }
 		tensorF[k]( icoor, jcoor ) = s;
@@ -1382,19 +1382,19 @@ void computeLocalDeformationGradientWithoutIdentity (const VectorElemental& uk_l
 //! ***********************************************************************************************
 
 //! Computation of the Right Cauchy Green tensor given the tensor F.
-void computeInvariantsRightCauchyGreenTensor(std::vector<LifeV::Real>& invariants, 
+void computeInvariantsRightCauchyGreenTensor(std::vector<LifeV::Real>& invariants,
 					     const Epetra_SerialDenseMatrix& tensorF,
-					     Epetra_SerialDenseMatrix& cofactorF) 
+					     Epetra_SerialDenseMatrix& cofactorF)
 {
-  
-  //Computation of the invariants 
+
+  //Computation of the invariants
   //At the moment, only the first one is really computed.
   //The others are not still used in the constitutive laws
 
   Real C11(0);
   Real C22(0);
   Real C33(0);
-  
+
   //It is not rescaled by the determinant. It is done inside the method to compute the local Piola
   //cofactorF.Scale(invariants[3]);
 
@@ -1416,17 +1416,30 @@ void computeInvariantsRightCauchyGreenTensor(std::vector<LifeV::Real>& invariant
   cofactorF( 1 , 2 ) = - ( tensorF(0,0)*tensorF(2,1) - tensorF(2,0)*tensorF(0,1) );
   cofactorF( 2 , 0 ) =   ( tensorF(0,1)*tensorF(1,2) - tensorF(0,2)*tensorF(1,1) );
   cofactorF( 2 , 1 ) = - ( tensorF(0,0)*tensorF(1,2) - tensorF(0,2)*tensorF(1,0) );
-  cofactorF( 2 , 2 ) =   ( tensorF(0,0)*tensorF(1,1) - tensorF(1,0)*tensorF(0,1) );  
-  
+  cofactorF( 2 , 2 ) =   ( tensorF(0,0)*tensorF(1,1) - tensorF(1,0)*tensorF(0,1) );
+
   cofactorF.Scale(1/invariants[3]);
 }
+
+//! Computation of the Right Cauchy Green tensor given the tensor F.
+void computeInvariantsRightCauchyGreenTensor(std::vector<LifeV::Real>& invariants,
+                                             const Epetra_SerialDenseMatrix& tensorF)
+{
+
+    invariants[0]=0.0; //First invariant C
+    invariants[1]=0.0; //Second invariant C
+    invariants[2]=0.0; //Third invariant C
+    invariants[3]=tensorF(0,0) * ( tensorF(1,1)*tensorF(2,2) - tensorF(1,2)*tensorF(2,1) ) - tensorF(0,1) * ( tensorF(1,0)*tensorF(2,2) - tensorF(1,2)*tensorF(2,0) ) + tensorF(0,2) * ( tensorF(1,0)*tensorF(2,1) - tensorF(1,1)*tensorF(2,0) ); //Determinant F
+
+}
+
 
 void computeCauchyStressTensor(Epetra_SerialDenseMatrix& cauchy,
 			       Epetra_SerialDenseMatrix& firstPiola,
 			       LifeV::Real det,
 			       Epetra_SerialDenseMatrix& tensorF)
 {
-  
+
   firstPiola.Scale( 1/det );
   cauchy.Multiply('N','T',1.0,firstPiola,tensorF,0.0);
 
@@ -1449,10 +1462,10 @@ void computeEigenvalues(const Epetra_SerialDenseMatrix& cauchy,
 
   //Size of the matrix
   Int Dim = cauchy.RowDim();
-  
+
   //Arrays to store eigenvalues (their number = nDimensions)
-  double WR[nDimensions]; 
-  double WI[nDimensions]; 
+  double WR[nDimensions];
+  double WI[nDimensions];
 
   //Number of eigenvectors
   Int LDVR = nDimensions;
@@ -1463,20 +1476,20 @@ void computeEigenvalues(const Epetra_SerialDenseMatrix& cauchy,
 
   double VR[length];
   double VL[length];
-  
+
   Int LWORK = 9;
   Int INFO = 0;
 
-  double WORK[LWORK]; 
+  double WORK[LWORK];
 
-  double A[length]; 
+  double A[length];
 
   for (UInt i(0); i< nDimensions; i++)
       for (UInt j(0);j<nDimensions; j++)
 	A[nDimensions * i + j] = cauchy(i,j);
 
   lapack.GEEV(JOBVL, JOBVR, Dim, A /*cauchy*/, Dim, &WR[0], &WI[0], VL, LDVL, VR, LDVR, WORK, LWORK, &INFO);
-  ASSERT_PRE( !INFO, "Calculation of the Eigenvalues failed!!!" ); 
+  ASSERT_PRE( !INFO, "Calculation of the Eigenvalues failed!!!" );
 
   for( UInt i(0); i < nDimensions; i++ )
     {

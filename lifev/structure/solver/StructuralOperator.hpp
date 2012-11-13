@@ -26,7 +26,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 /*!
  *  @file
- *  @brief This file contains solvers for different materials. 
+ *  @brief This file contains solvers for different materials.
 *
 *  @version 1.0
 *  @date 01-01-2010
@@ -62,6 +62,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/core/fem/Assembly.hpp>
 #include <lifev/core/fem/BCManage.hpp>
 #include <lifev/core/fem/FESpace.hpp>
+
 #include <lifev/core/mesh/MeshEntityContainer.hpp>
 
 #include <lifev/core/algorithm/SolverAztecOO.hpp>
@@ -69,6 +70,10 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <lifev/structure/solver/VenantKirchhoffElasticData.hpp>
 #include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
+
+#ifdef COMPUTATION_JACOBIAN
+#include <Epetra_SerialDenseMatrix.h>
+#endif
 
 
 namespace LifeV
@@ -117,41 +122,48 @@ class StructuralOperator
 {
 public:
 
-  //!@name Type definitions
-  //@{
-  typedef Real ( *function ) ( const Real&, const Real&, const Real&, const Real&, const ID& );
-  typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> source_Type;
+    //!@name Type definitions
+    //@{
+    typedef Real ( *function ) ( const Real&, const Real&, const Real&, const Real&, const ID& );
+    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> source_Type;
 
-  typedef StructuralConstitutiveLaw<Mesh>               material_Type;
-  typedef boost::shared_ptr<material_Type>              materialPtr_Type;
+    typedef StructuralConstitutiveLaw<Mesh>               material_Type;
+    typedef boost::shared_ptr<material_Type>              materialPtr_Type;
 
-  typedef BCHandler                                     bcHandlerRaw_Type;
-  typedef boost::shared_ptr<bcHandlerRaw_Type>          bcHandler_Type;
+    typedef BCHandler                                     bcHandlerRaw_Type;
+    typedef boost::shared_ptr<bcHandlerRaw_Type>          bcHandler_Type;
 
-  typedef SolverType                                    solver_Type;
+    typedef SolverType                                    solver_Type;
 
-  typedef typename solver_Type::matrix_type             matrix_Type;
-  typedef boost::shared_ptr<matrix_Type>                matrixPtr_Type;
-  typedef typename solver_Type::vector_type             vector_Type;
-  typedef boost::shared_ptr<vector_Type>                vectorPtr_Type;
+    typedef typename solver_Type::matrix_type             matrix_Type;
+    typedef boost::shared_ptr<matrix_Type>                matrixPtr_Type;
+    typedef typename solver_Type::vector_type             vector_Type;
+    typedef boost::shared_ptr<vector_Type>                vectorPtr_Type;
 
-  typedef typename SolverType::prec_raw_type            precRaw_Type;
-  typedef typename SolverType::prec_type                prec_Type;
+    typedef typename SolverType::prec_raw_type            precRaw_Type;
+    typedef typename SolverType::prec_type                prec_Type;
 
-  typedef VenantKirchhoffElasticData                    data_Type;
+    typedef VenantKirchhoffElasticData                    data_Type;
 
-  typedef RegionMesh<LinearTetra >                      mesh_Type;
-  typedef std::vector< mesh_Type::element_Type const *> vectorVolumes_Type;
+    typedef RegionMesh<LinearTetra >                      mesh_Type;
+    typedef std::vector< mesh_Type::element_Type const *> vectorVolumes_Type;
 
-  typedef std::map< UInt, vectorVolumes_Type>           mapMarkerVolumes_Type;
-  typedef boost::shared_ptr<mapMarkerVolumes_Type>      mapMarkerVolumesPtr_Type;
+    typedef std::map< UInt, vectorVolumes_Type>           mapMarkerVolumes_Type;
+    typedef boost::shared_ptr<mapMarkerVolumes_Type>      mapMarkerVolumesPtr_Type;
 
-  typedef typename mesh_Type::element_Type                        meshEntity_Type;
+    typedef typename mesh_Type::element_Type                        meshEntity_Type;
 
-  typedef typename boost::function2<bool, const UInt, const UInt> comparisonPolicy_Type;
+    typedef typename boost::function2<bool, const UInt, const UInt> comparisonPolicy_Type;
 
-  typedef MarkerSelector<meshEntity_Type, comparisonPolicy_Type> markerSelector_Type;
-  typedef boost::scoped_ptr<markerSelector_Type>          markerSelectorPtr_Type;
+    typedef MarkerSelector<meshEntity_Type, comparisonPolicy_Type> markerSelector_Type;
+    typedef boost::scoped_ptr<markerSelector_Type>          markerSelectorPtr_Type;
+
+#ifdef COMPUTATION_JACOBIAN
+    typedef Epetra_SerialDenseMatrix                     matrixSerialDense_Type;
+    typedef boost::shared_ptr<matrixSerialDense_Type>    matrixSerialDensePtr_Type;
+    typedef std::vector<LifeV::Real>                     vectorInvariants_Type;
+    typedef boost::shared_ptr<vectorInvariants_Type>     vectorInvariantsPtr_Type;
+#endif
   //@}
 
 
@@ -378,6 +390,16 @@ public:
     */
     void computeMatrix( matrixPtr_Type& stiff, const vector_Type& sol, Real const& factor );
 
+
+#ifdef COMPUTATION_JACOBIAN
+    //! compute the value of the determinant of F in all the volumes of the mesh
+    /*!
+      \param displacement the solution at a certain time
+      \return the vector with the values for J
+    */
+    void jacobianDistribution( vectorPtr_Type displacement, vector_Type& jacobianDistribution );
+#endif
+
     //void updateMatrix(matrix_Type & bigMatrixStokes);// used for monolithic
     //void updateCoupling(matrix_Type couplingMatrix);// used for monolithic
 
@@ -528,6 +550,22 @@ protected:
 
     //!Protected Members
 
+#ifdef COMPUTATION_JACOBIAN
+    //! constructPatchAreaVector: This method build the patch area vector used in the reconstruction process
+    /*!
+      \param NONE
+    */
+    void constructPatchAreaVector( vector_Type& patchArea, const vector_Type& solution );
+
+
+    //! reconstructElementaryVector: This method applies a reconstruction procedure on the elvec that is passed
+    /*!
+      \param elvecTens VectorElemental over which the reconstruction is applied
+    */
+    void reconstructElementaryVector( VectorElemental& elVecSigma, vector_Type& patchArea, UInt nVol );
+#endif
+
+
     boost::shared_ptr<data_Type>         M_data;
 
     boost::shared_ptr<FESpace<Mesh, MapEpetra> >      M_FESpace;
@@ -608,6 +646,12 @@ protected:
     //! Map between markers and volumes on the mesh
     mapMarkerVolumesPtr_Type             M_mapMarkersVolumes;
 
+#ifdef COMPUTATION_JACOBIAN
+    //! Elementary matrix for the tensor F
+    matrixSerialDensePtr_Type            M_deformationF;
+    vectorInvariants_Type                M_invariants;
+#endif
+
 };
 
 //====================================
@@ -666,7 +710,7 @@ StructuralOperator<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        
     setup( data, dFESpace, comm, dFESpace->mapPtr(), (UInt)0 );
 
     M_rhs.reset                        ( new vector_Type(*M_localMap));
-    M_rhsCopy.reset                        ( new vector_Type(*M_localMap));
+    M_rhsCopy.reset                    ( new vector_Type(*M_localMap));
     M_rhsNoBC.reset                    ( new vector_Type(*M_localMap));
     M_sxx.reset                        ( new vector_Type(*M_localMap) );
     M_syy.reset                        ( new vector_Type(*M_localMap) );
@@ -711,7 +755,7 @@ StructuralOperator<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        
 template <typename Mesh, typename SolverType>
 void StructuralOperator<Mesh, SolverType>::setupMapMarkersVolumes( void )
 {
- 
+
   this->M_Displayer->leaderPrint(" S-  Building the map between volumesMarkers <--> volumes \n");
 
   //We first loop over the vector of the material_flags
@@ -743,9 +787,6 @@ void StructuralOperator<Mesh, SolverType>::setupMapMarkersVolumes( void )
 
     }
 }
-
-
-
 
 template <typename Mesh, typename SolverType>
 void StructuralOperator<Mesh, SolverType>::updateSystem( void )
@@ -965,6 +1006,188 @@ void StructuralOperator<Mesh, SolverType>::computeMatrix( matrixPtr_Type& stiff,
     M_Displayer->leaderPrintMax("done in ", chrono.diff() );
 }
 
+#ifdef COMPUTATION_JACOBIAN
+
+template <typename Mesh, typename SolverType>
+void StructuralOperator<Mesh, SolverType>::jacobianDistribution( vectorPtr_Type displacement, vector_Type& jacobianDistribution )
+{
+    M_Displayer->leaderPrint( " Computing the jacobian for all the volumes ... \t\t\t");
+
+    vector_Type vectorJacobian(*displacement);
+    vectorJacobian *= 0.0;
+
+    LifeChrono chrono;
+    chrono.start();
+
+    //construct a vector to store the are
+    vector_Type patchArea(*displacement,Unique,Add);
+    patchArea *= 0.0;
+
+    constructPatchAreaVector( patchArea );
+
+    //Before assembling the reconstruction process is done
+    vector_Type patchAreaR(patchArea,Repeated);
+
+
+    //Loop over the volumes to compute J = det(F)
+    //Inside the loop, the determinant is store in the appropriate positions
+    vector_Type dRep(*displacement, Repeated);
+    UInt totalDof = M_FESpace->dof().numTotalDof();
+    VectorElemental dk_loc( M_FESpace->fe().nbFEDof(), this->M_FESpace->fieldDim() );
+    VectorElemental elVecDet( M_FESpace->fe().nbFEDof(), this->M_FESpace->fieldDim() );
+
+    //Building fake quadrature rules to compute the deformation gradient F at the nodes
+    QuadratureRule fakeQuadratureRule;
+
+    Real refElemArea(0); //area of reference element
+    //compute the area of reference element
+    for(UInt iq=0; iq< M_FESpace->qr().nbQuadPt(); iq++)
+        refElemArea += M_FESpace->qr().weight(iq);
+
+    Real wQuad(refElemArea/M_FESpace->refFE().nbDof());
+
+    //Setting the quadrature Points = DOFs of the element and weight = 1
+    std::vector<GeoVector> coords = M_FESpace->refFE().refCoor();
+    std::vector<Real> weights(M_FESpace->fe().nbFEDof(), wQuad);
+    fakeQuadratureRule.setDimensionShape ( shapeDimension(M_FESpace->refFE().shape()), M_FESpace->refFE().shape() );
+    fakeQuadratureRule.setPoints(coords,weights);
+
+    //Set the new quadrature rule
+    M_FESpace->setQuadRule(fakeQuadratureRule);
+
+    //Vectors for the deformation tensor
+    std::vector<matrix_Type> vectorDeformationF(M_FESpace->fe().nbFEDof(),*M_deformationF);
+
+    //Loop over the volumes. No markerIDs are necessary on this loop for J = det(F)
+    for ( UInt i = 0; i < M_FESpace->mesh()->numVolumes(); ++i )
+    {
+        M_FESpace->fe().updateFirstDerivQuadPt( M_FESpace->mesh()->volumeList( i ) );
+
+        UInt eleID = M_FESpace->fe().currentLocalId();
+
+        //Extracting the local displacement
+        for ( UInt iNode = 0; iNode < ( UInt ) M_FESpace->fe().nbFEDof(); iNode++ )
+        {
+            UInt  iloc = M_FESpace->fe().patternFirst( iNode );
+
+            for ( UInt iComp = 0; iComp < this->M_FESpace->fieldDim(); ++iComp )
+            {
+                UInt ig = M_FESpace->dof().localToGlobalMap( eleID, iloc ) + iComp*M_FESpace->dim() + this->M_offset;
+                dk_loc[iloc + iComp*M_FESpace->fe().nbFEDof()] = dRep[ig];
+            }
+        }
+
+        //computing the tensor F
+        AssemblyElementalStructure::computeLocalDeformationGradient( dk_loc, vectorDeformationF, M_FESpace->fe() );
+
+        //computing the determinant
+        AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor( M_invariants, *M_deformationF );
+
+        //Assembling elemental vector
+        for( UInt nDOF=0; nDOF < ( UInt ) M_FESpace->fe().nbFEDof(); nDOF++ )
+        {
+            UInt  iloc = M_FESpace->fe().patternFirst( nDOF );
+
+            (elVecDet)[ iloc ] = M_invariants[3];
+            (elVecDet)[ iloc + M_FESpace->fe().nbFEDof() ] = 0.0;
+            (elVecDet)[ iloc + 2 * M_FESpace->fe().nbFEDof() ] = 0.0;
+        }
+
+        //multiplying it for the patch area
+        reconstructElementaryVector( elVecDet, patchAreaR, i );
+
+        //assembling it into the global vector
+        for ( UInt ic = 0; ic < this->M_FESpace->fieldDim(); ++ic )
+        {
+            assembleVector(vectorJacobian, elVecDet, M_FESpace->fe(), M_FESpace->dof(), ic, this->M_offset +  ic*totalDof );
+        }
+
+    }
+
+    chrono.stop();
+    M_Displayer->leaderPrintMax("done in ", chrono.diff() );
+
+    jacobianDistribution = vectorJacobian;
+}
+
+
+template <typename Mesh, typename SolverType>
+void StructuralOperator<Mesh,SolverType >::constructPatchAreaVector( vector_Type & patchArea,
+                                                                     const vector_Type& solution )
+{
+
+  vector_Type patchAreaR(solution,Repeated);
+  patchAreaR *= 0.0;
+
+  Real refElemArea(0); //area of reference element
+  UInt totalDof = M_FESpace->dof().numTotalDof();
+  //compute the area of reference element
+  for(UInt iq=0; iq< M_FESpace->qr().nbQuadPt(); iq++)
+    refElemArea += M_FESpace->qr().weight(iq);
+
+  // Define a special quadrature rule for the interpolation
+  QuadratureRule interpQuad;
+  interpQuad.setDimensionShape(shapeDimension(M_FESpace->refFE().shape()), M_FESpace->refFE().shape());
+  Real wQuad(refElemArea/M_FESpace->refFE().nbDof());
+
+  for (UInt i(0); i< M_FESpace->refFE().nbDof(); ++i) //nbRefCoor
+    {
+      interpQuad.addPoint(QuadraturePoint(M_FESpace->refFE().xi(i),M_FESpace->refFE().eta(i),M_FESpace->refFE().zeta(i),wQuad));
+    }
+
+  UInt totalNumberVolumes(M_FESpace->mesh()->numVolumes());
+  UInt numberLocalDof(M_FESpace->dof().numLocalDof());
+
+  CurrentFE interpCFE(M_FESpace->refFE(),getGeometricMap(*(M_FESpace->mesh()) ),interpQuad);
+
+  // Loop over the cells
+  for (UInt iterElement(0); iterElement< totalNumberVolumes; iterElement++)
+    {
+      interpCFE.update(M_FESpace->mesh()->volumeList( iterElement ), UPDATE_WDET );
+
+      for (UInt iterDof(0); iterDof < numberLocalDof; iterDof++)
+        {
+	  for (UInt iDim(0); iDim < M_FESpace->fieldDim(); ++iDim)
+            {
+	      ID globalDofID(M_FESpace->dof().localToGlobalMap(iterElement,iterDof) + iDim * totalDof);
+	      patchAreaR[globalDofID] += interpCFE.measure();
+            }
+        }
+    }
+
+  vector_Type final(patchAreaR,Unique,Add);
+
+  patchArea.add(final);
+
+}
+
+template <typename Mesh, typename SolverType>
+void
+StructuralOperator<Mesh,SolverType >::reconstructElementaryVector( VectorElemental& elVecDet,
+                                                        vector_Type& patchArea,
+                                                        UInt nVol )
+{
+    //UpdateElement Infos
+    //M_FESpace->fe().updateFirstDerivQuadPt( M_FESpace->mesh()->volumeList( nVol ) );
+
+    Real measure = M_FESpace->fe().measure();
+    UInt eleID = M_FESpace->fe().currentLocalId();
+
+    for (UInt iDof=0; iDof < M_FESpace->fe().nbFEDof(); iDof++)
+    {
+        UInt  iloc = M_FESpace->fe().patternFirst( iDof );
+
+        for( UInt icoor=0;  icoor < M_FESpace->fieldDim(); icoor++ )
+        {
+            ID globalDofID(M_FESpace->dof().localToGlobalMap(eleID,iDof) + icoor * M_FESpace->dof().numTotalDof());
+
+            elVecDet[iloc + icoor * M_FESpace->fe().nbFEDof()] *= ( measure / patchArea[globalDofID] );
+        }
+
+    }
+}
+
+#endif
 
 template <typename Mesh, typename SolverType>
 void
