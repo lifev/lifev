@@ -333,36 +333,32 @@ public:
     LifeV::UInt sizeTA(M_fsi->FSIOper()->solidTimeAdvance()->size());
     LifeV::UInt tol(sizeTA + M_tolSave);
 
-
-	LifeV::UInt tol(sizeTA + M_tolSave);
-	LifeV::UInt iter = 1;
-
-        for ( ; M_data->dataFluid()->dataTime()->canAdvance(); iter++)
-      {
+    for ( ; M_data->dataFluid()->dataTime()->canAdvance(); iter++)
+    {
         M_data->dataFluid()->dataTime()->updateTime();
         M_data->dataSolid()->dataTime()->updateTime();
         M_data->timeDataALE()->updateTime();
 
-            FC2.renewParameters( *M_fsi, 2 );
+        FC2.renewParameters( *M_fsi, 2 );
 
-            boost::timer _timer;
+        boost::timer _timer;
 
 
-            M_fsi->iterate();
+        M_fsi->iterate();
 
         r = iter%M_saveEvery;
         d = iter - r;
 
         if ( (iter - d) <= tol || ( (std::floor(d/M_saveEvery) + 1)*M_saveEvery - iter ) <= tol )
-          {
-        *M_fluidDisp      = M_fsi->FSIOper()->meshDisp();
-        M_fsi->FSIOper()->exportSolidDisplacement(*M_solidDisp);//    displacement(), M_offset);
-        //M_fsi->FSIOper()->exportSolidVelocity(*M_solidVel);//    displacement(), M_offset);
-        M_fsi->FSIOper()->exportFluidVelocityAndPressure(*M_velAndPressure);
+        {
+            *M_fluidDisp      = M_fsi->FSIOper()->meshDisp();
+            M_fsi->FSIOper()->exportSolidDisplacement(*M_solidDisp);//    displacement(), M_offset);
+            //M_fsi->FSIOper()->exportSolidVelocity(*M_solidVel);//    displacement(), M_offset);
+            M_fsi->FSIOper()->exportFluidVelocityAndPressure(*M_velAndPressure);
 
-        M_exporterSolid->postProcess( M_data->dataFluid()->dataTime()->time() );
-        M_exporterFluid->postProcess( M_data->dataFluid()->dataTime()->time() );
-          }
+            M_exporterSolid->postProcess( M_data->dataFluid()->dataTime()->time() );
+            M_exporterFluid->postProcess( M_data->dataFluid()->dataTime()->time() );
+        }
 
             std::cout << "[fsi_run] Iteration " << iter << " was done in : "
                       << _timer.elapsed() << "\n";
@@ -370,24 +366,10 @@ public:
 
             std::cout << "solution norm " << iter << " : "
                       << M_fsi->displacement().norm2() << "\n";
-    /*
-        if (M_data->method().compare("monolithicGI"))
-        {
-            M_fsi->FSIOper()->iterateMesh(M_fsi->displacement());
-
-            M_solidDisp->subset(M_fsi->displacement(), offset);
-            //M_solidVel->subset(M_fsi->FSIOper()->solid().getVelocity(), offset);
-
-            *M_velAndPressure = M_fsi->displacement();
-            M_exporterSolid->postProcess( M_data->dataFluid()->dataTime()->time() );
-            *M_fluidDisp      = M_fsi->FSIOper()->meshMotion().disp();
-            M_exporterFluid->postProcess( M_data->dataFluid()->dataTime()->time() );
-        }
-    */
-
         std::cout << "Total computation time = "
                   << _overall_timer.elapsed() << "s" << "\n";
 
+    }
     }
 
 private:
@@ -425,14 +407,6 @@ private:
 
     vectorPtr_Type M_WS;
 
-    struct RESULT_CHANGED_EXCEPTION
-    {
-public:
-        RESULT_CHANGED_EXCEPTION(LifeV::Real time)
-        {
-            std::cout<<"Some modifications led to changes in the l2 norm of the solution at time"<<time<<std::endl;
-        }
-    };
 };
 
 struct FSIChecker
@@ -852,30 +826,5 @@ void Problem::initialize(std::string& /*loadInitSol*/,  GetPot const& data_file)
     //removed
     //M_fsi->initialize(initSol);
     //endOfRemove
-}
-
-void Problem::checkGCEResult(const LifeV::Real& time)
-{
-    vector_Type previousSolution;
-    M_fsi->FSIOper()->extrapolation( previousSolution );
-    LifeV::Real dispNorm=previousSolution.norm2();
-    if (time==0.000 && (dispNorm-834634)     /dispNorm*(dispNorm-834634)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-    else if (time==0.001 && (dispNorm-1.15328e+06)     /dispNorm*(dispNorm-1.15328e+06)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-    else if (time==0.002 && (dispNorm-943681)/dispNorm*(dispNorm-943681)/dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-    else if (time==0.003 && (dispNorm-825984)     /dispNorm*(dispNorm-825984)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-    else if (time==0.004 && (dispNorm-815018)     /dispNorm*(dispNorm-815018)     /dispNorm>1e-5) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-}
-
-
-void Problem::checkCEResult(const LifeV::Real& time)
-{
-    vector_Type previousSolution;
-    M_fsi->FSIOper()->extrapolation( previousSolution );
-    LifeV::Real dispNorm=previousSolution.norm2();
-    if (time==0.000 && (dispNorm-772280)/dispNorm*(dispNorm-772280)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-    else if (time==0.001 && (dispNorm-1.12286e+06)/dispNorm*(dispNorm-1.12286e+06)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-    else if (time==0.002 && (dispNorm-943697)/dispNorm*(dispNorm-943697)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-    else if (time==0.003 && (dispNorm-836363)/dispNorm*(dispNorm-836363)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
-    else if (time==0.004 && (dispNorm-819303)/dispNorm*(dispNorm-819303)/dispNorm>1e-3) throw Problem::RESULT_CHANGED_EXCEPTION(time);
 }
 
