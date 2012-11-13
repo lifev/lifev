@@ -232,6 +232,13 @@ protected:
                   const bool useTranspose = false,
                   const bool buildPreconditioner = true );
 
+    int pushBack( operatorPtr_Type embeddedOperator,
+                  const VectorBlockStructure& blockStructure,
+                  const UInt& blockIndex,
+                  const MapEpetra& fullMap,
+                  const bool useInverse,
+                  const bool useTranspose );
+
     //@}
 
     boost::shared_ptr<Epetra_Comm> M_comm;

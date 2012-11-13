@@ -249,4 +249,26 @@ PreconditionerComposition::pushBack( matrixPtr_Type embeddedA,
     return EXIT_SUCCESS;
 }
 
+int
+PreconditionerComposition::pushBack( operatorPtr_Type embeddedOperator,
+                                     const VectorBlockStructure& blockStructure,
+                                     const UInt& blockIndex,
+                                     const MapEpetra& fullMap,
+                                     const bool useInverse,
+                                     const bool useTranspose )
+{
+    // Wrap the preconditioner in a ConfinedOperator
+    Operators::ConfinedOperator* confinedOperator = new Operators::ConfinedOperator( M_comm );
+    confinedOperator->setOperator( embeddedOperator );
+    confinedOperator->setFullMap( fullMap );
+    confinedOperator->setBlockStructure( blockStructure );
+    confinedOperator->setBlockIndex( blockIndex );
+    operatorPtr_Type oper( confinedOperator );
+
+    // Add the operator
+    M_prec->push_back( oper,useInverse, useTranspose );
+
+    return EXIT_SUCCESS;
+}
+
 } // Namespace LifeV
