@@ -195,6 +195,56 @@ void FSIMonolithicGE::applyBoundaryConditions( )
          //M_monolithicMatrix->matrix()->spy("M");
 }
 
+void FSIMonolithicGE::setVectorInStencils( const vectorPtr_Type& vel,
+					   const vectorPtr_Type& pressure,
+					   const vectorPtr_Type& solidDisp,
+					   const vectorPtr_Type& fluidDisp,
+					   const UInt iter)
+{
+    //The fluid and solid TimeAdvance classes have a stencil of dimension
+    //as big as the coupled problem.
+
+    //Fluid Problem
+    vectorPtr_Type vectorMonolithicFluidVelocity(new vector_Type(*M_monolithicMap, Unique, Zero) );
+    vectorPtr_Type vectorMonolithicFluidPressure(new vector_Type(*M_monolithicMap, Unique, Zero) );
+
+    *vectorMonolithicFluidVelocity *= 0.0;
+    *vectorMonolithicFluidPressure *= 0.0;
+
+    vectorMonolithicFluidVelocity->subset(*vel, vel->map(), UInt(0), UInt(0)) ;
+    vectorMonolithicFluidPressure->subset( *pressure, pressure->map(), UInt(0), (UInt)3 * M_uFESpace->dof().numTotalDof() );
+
+    *vectorMonolithicFluidVelocity += *vectorMonolithicFluidPressure;
+
+    //ALE problem
+    //The shared_pointer for the vectors has to be trasformed into a pointer to VectorEpetra
+    //That is the type of pointers that are used in TimeAdvance
+    vector_Type* normalPointerToALEVector( new vector_Type(*fluidDisp) );
+    (M_ALETimeAdvance->stencil()).push_back( normalPointerToALEVector );
+
+    M_ALETimeAdvance->spyStateVector();
+
+    //Solid problem
+    vectorPtr_Type vectorMonolithicSolidDisplacement(new vector_Type(*M_monolithicMap, Unique, Zero) );
+    *vectorMonolithicSolidDisplacement *=0.0;
+    vectorMonolithicSolidDisplacement->subset( *solidDisp, solidDisp->map(), (UInt)0, M_offset);
+    *vectorMonolithicSolidDisplacement *= 1.0 / M_solid->rescaleFactor();
+
+    if( !iter )
+      {
+	//We sum the vector in the first element of fluidtimeAdvance
+	*vectorMonolithicFluidVelocity += *vectorMonolithicSolidDisplacement;
+      }
+
+    vector_Type* normalPointerToSolidVector( new vector_Type(*vectorMonolithicSolidDisplacement) );
+    (M_solidTimeAdvance->stencil()).push_back( normalPointerToSolidVector );
+
+    vector_Type* normalPointerToFluidVector( new vector_Type(*vectorMonolithicFluidVelocity) );
+    (M_fluidTimeAdvance->stencil()).push_back( normalPointerToFluidVector );
+
+
+}
+
 void FSIMonolithicGE::updateSolution( const vector_Type& solution )
 {
    super_Type::updateSolution( solution );

@@ -274,6 +274,16 @@ public:
      */
     virtual void updateSolution( const vector_Type& solution );
 
+    //! Set vectors for restart
+    /*!
+     *  Set vectors for restart
+     */
+    virtual void setVectorInStencils( const vectorPtr_Type& vel,
+				      const vectorPtr_Type& pressure,
+				      const vectorPtr_Type& solidDisp,
+				      const vectorPtr_Type& fluidDisp,
+				      const UInt iter) {}
+
     //! Initializes all the quantities using functions
     /*!
      * calls the initialize methods for the subproblems. The mesh velocity is used to compute the convective term in the fluid equations
