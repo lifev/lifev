@@ -3,7 +3,7 @@ INCLUDE(TribitsAddExecutableAndTest)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
 
 TRIBITS_ADD_EXECUTABLE_AND_TEST(
-  restartFSIGI
+  restartFSI
   SOURCES main.cpp ud_functions.cpp flowConditions.cpp
   NAME restartFSIGI
   ARGS "-f dataCE"
@@ -34,7 +34,7 @@ TRIBITS_COPY_FILES_TO_BINARY_DIR(tube20.mesh_test_restartFSI
 )
 
 TRIBITS_ADD_TEST(
-  restartFSIGCE
+  restartFSI
   NAME restartFSIGCE
   ARGS "-f dataGCE"
   NUM_MPI_PROCS 2
