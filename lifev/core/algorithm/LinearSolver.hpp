@@ -246,6 +246,12 @@ public:
      */
     void setPreconditioner( operatorPtr_Type preconditionerPtr );
 
+    //! Method to set a matrix on which the preconditioner should be created
+    /*!
+      @param baseMatrixPtr  matrix on which the preconditioner should be created
+     */
+    void setBaseMatrixForPreconditioner( matrixPtr_Type baseMatrixPtr );
+
     //! Method to setup the solver using Teuchos::ParameterList
     /*!
       @param list Teuchos::ParameterList object
