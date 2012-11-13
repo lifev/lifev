@@ -39,12 +39,11 @@
 #ifndef _DATAADR_H_
 #define _DATAADR_H_
 
-#include <lifev/core/filter/GetPot.hpp>
 #include <lifev/core/LifeV.hpp>
+
+#include <lifev/core/filter/GetPot.hpp>
 #include <lifev/core/fem/TimeData.hpp>
 #include <lifev/core/util/StringData.hpp>
-
-#include <boost/shared_ptr.hpp>
 
 namespace LifeV
 {

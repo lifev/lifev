@@ -9,3 +9,4 @@
 #cmakedefine LIFEV_HAS_ONEDFSI
 #cmakedefine LIFEV_HAS_ZERODIMENSIONAL
 #cmakedefine LIFEV_HAS_DUMMY
+#cmakedefine H5_USE_16_API

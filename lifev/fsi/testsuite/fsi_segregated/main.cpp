@@ -210,7 +210,7 @@ public:
         VenantKirchhoffSolver< FSIOperator::mesh_Type, SolverAztecOO >::StructureSolverFactory::instance().registerProduct( "linearVenantKirchhof", &createLinearStructure );
         //        VenantKirchhofSolver< FSIOperator::mesh_Type, SolverAztecOO >::StructureSolverFactory::instance().registerProduct( "nonLinearVenantKirchhof", &createNonLinearStructure );
 
-        Debug( 10000 ) << "Setting up data from GetPot \n";
+        debugStream( 10000 ) << "Setting up data from GetPot \n";
         GetPot dataFile( dataFileName );
         M_data = dataPtr_Type( new data_Type() );
         M_data->setup( dataFile );
@@ -218,20 +218,20 @@ public:
         M_data->showMe();
         MPI_Barrier( MPI_COMM_WORLD );
 
-        Debug( 10000 ) << "creating FSISolver with operator :  " << method << "\n";
+        debugStream( 10000 ) << "creating FSISolver with operator :  " << method << "\n";
         M_fsi = fsi_solver_ptr( new FSISolver( ) );
         M_fsi->setData( M_data );
         M_fsi->FSIOper()->setDataFile( dataFile ); //TO BE REMOVED!
         MPI_Barrier( MPI_COMM_WORLD );
 
         // Setting FESpace and DOF
-        Debug( 10000 ) << "Setting up the FESpace and DOF \n";
+        debugStream( 10000 ) << "Setting up the FESpace and DOF \n";
         M_fsi->FSIOper( )->partitionMeshes( );
         M_fsi->FSIOper()->setupFEspace();
         M_fsi->FSIOper()->setupDOF();
         MPI_Barrier( MPI_COMM_WORLD );
 
-        Debug( 10000 ) << "Setting up the BC \n";
+        debugStream( 10000 ) << "Setting up the BC \n";
         M_fsi->setFluidBC(BCh_fluid(*M_fsi->FSIOper()));
         M_fsi->setHarmonicExtensionBC( BCh_harmonicExtension(*M_fsi->FSIOper()));
         M_fsi->setSolidBC(BCh_solid(*M_fsi->FSIOper()));
@@ -243,7 +243,7 @@ public:
 
         MPI_Barrier( MPI_COMM_WORLD );
 
-        Debug( 10000 ) << "Setting up the problem \n";
+        debugStream( 10000 ) << "Setting up the problem \n";
         M_fsi->setup( );
 
         //M_fsi->resetFSISolvers();
@@ -253,7 +253,7 @@ public:
         std::string const exporterType =  dataFile( "exporter/type", "hdf5");
         std::string const exporterName =  dataFile( "exporter/name", "fixedPt");
 
-        Debug( 10000 ) << "Setting up ExporterEnsight \n";
+        debugStream( 10000 ) << "Setting up ExporterEnsight \n";
         if ( M_fsi->isFluid() )
         {
 #ifdef HAVE_HDF5
@@ -428,7 +428,7 @@ private:
         if ( sameAs(time,0.005) && sameAs(dispNorm, 0.0995918, relTol) )  return;
         if ( sameAs(time,0.006) && sameAs(dispNorm, 0.0751478, relTol) ) return;
 
-        throw Problem::RESULT_CHANGED_EXCEPTION(time);
+        throw RESULT_CHANGED_EXCEPTION(time);
 
     }
 
@@ -523,20 +523,20 @@ int main( int argc, char** argv )
         const bool check = command_line.search(2, "-c", "--check");
         if (check)
         {
-            Debug( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+            debugStream( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
             FSIChecker _ej_check( dataFile, "exactJacobian" );
 
             _ej_check();
 
-            Debug( 10000 ) << "_ej_disp size : "  << static_cast<Real> (_ej_check.disp.size()) << "\n";
-            Debug( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
-            Debug( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+            debugStream( 10000 ) << "_ej_disp size : "  << static_cast<Real> (_ej_check.disp.size()) << "\n";
+            debugStream( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+            debugStream( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
             FSIChecker _sp_check( dataFile, "steklovPoincare" );
 
             _sp_check();
 
-            Debug( 10000 ) << "_fp_disp size : "  << static_cast<Real> (_sp_check.disp.size()) << "\n";
-            Debug( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
+            debugStream( 10000 ) << "_fp_disp size : "  << static_cast<Real> (_sp_check.disp.size()) << "\n";
+            debugStream( 10000 ) << "++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++\n";
 
             Real norm1 = norm_2( _ej_check.disp - _sp_check.disp );
 

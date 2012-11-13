@@ -41,16 +41,14 @@
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-#include <string>
-#include <iostream>
 #include <stdexcept>
 #include <sstream>
-#include <boost/numeric/ublas/vector.hpp>
 
 // Tell the compiler to restore the warning previously silented
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
+#include <lifev/core/LifeV.hpp>
 #include <lifev/core/util/Factory.hpp>
 #include <lifev/core/util/FactorySingleton.hpp>
 #include <lifev/core/array/VectorEpetra.hpp>

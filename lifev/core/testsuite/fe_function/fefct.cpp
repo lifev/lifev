@@ -227,7 +227,7 @@ fefct::run()
 
     // Define the dummy element and coordinate for the evaluation of the function
     UInt iElem = 0;
-    std::vector<Real> point(3,0);
+    Vector3D point;
 
     // Compute the error
     Real error = 0;

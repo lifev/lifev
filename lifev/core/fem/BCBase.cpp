@@ -550,7 +550,7 @@ BCBase::showMe( bool verbose, std::ostream & out ) const
         unsigned int count( 0 ), lines( 10 );
         out << "IDs in list";
         for ( std::vector<boost::shared_ptr<BCIdentifierBase> >::const_iterator i = M_idVector.begin();
-                i != M_idVector.end(); i++ )
+                i != M_idVector.end(); ++i )
         {
             if ( count++ % lines == 0 )
             {
@@ -626,9 +626,9 @@ Real BCBase::operator() ( const Real& t, const Real& x, const Real& y,
                           const Real& z, const ID& iComponent, const Real& u ) const
 {
     /* is there a better way ? */
-    Debug(800)<<"debug800 in BCBase::operator(6x)\n";
+    debugStream(800)<<"debug800 in BCBase::operator(6x)\n";
     return M_bcFunctionFEVectorDependent->operator()(t,x, y, z, iComponent, u);
-    Debug(800)<<"debug800 out BCBase::operator(6x)\n";
+    debugStream(800)<<"debug800 out BCBase::operator(6x)\n";
 }
 
 Real BCBase::operator() ( const ID& iDof, const ID& iComponent ) const

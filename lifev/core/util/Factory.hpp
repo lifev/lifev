@@ -40,15 +40,14 @@
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-#include <map>
 #include <stdexcept>
-#include <string>
 
-#include <boost/function.hpp>
 #include <boost/bind.hpp>
 
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
+
+#include <lifev/core/LifeV.hpp>
 
 #include <lifev/core/util/LifeDebug.hpp>
 #include <lifev/core/util/FactoryTypeInfo.hpp>
@@ -151,7 +150,7 @@ public:
     bool registerProduct( const identifier_Type& id, creator_Type creator )
     {
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 2200 ) << "Registered type with id : " << id << "\n";
+        debugStream( 2200 ) << "Registered type with id : " << id << "\n";
 #endif
         return M_associations.insert( typename productId_Type::value_type( id, creator ) ).second;
     }
@@ -166,7 +165,7 @@ public:
     bool unregisterProduct( const identifier_Type& id )
     {
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 2200 ) << "Unregistered type with id : " << id << "\n";
+        debugStream( 2200 ) << "Unregistered type with id : " << id << "\n";
 #endif
         return M_associations.erase( id ) == 1;
     }
@@ -185,12 +184,12 @@ public:
         if (i != M_associations.end())
         {
 #ifdef HAVE_LIFEV_DEBUG
-            Debug ( 2200 ) << "Creating type with id : " << id << "\n";
+            debugStream ( 2200 ) << "Creating type with id : " << id << "\n";
 #endif
             return (i->second)();
         }
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 2200 ) << "Unknown type with id : " << id << "\n";
+        debugStream( 2200 ) << "Unknown type with id : " << id << "\n";
 #endif
         return super::onUnknownType( id );
     }
@@ -210,12 +209,12 @@ public:
         if ( i != M_associations.end() )
         {
 #ifdef HAVE_LIFEV_DEBUG
-            Debug ( 2200 ) << "Creating type with id : " << enum2String( id, map ) << "\n";
+            debugStream ( 2200 ) << "Creating type with id : " << enum2String( id, map ) << "\n";
 #endif
             return (i->second)();
         }
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 2200 ) << "Unknown type with id : " << enum2String( id, map ) << "\n";
+        debugStream( 2200 ) << "Unknown type with id : " << enum2String( id, map ) << "\n";
 #endif
         return super::onUnknownType( enum2String( id, map ) );
     }

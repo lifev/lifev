@@ -46,9 +46,9 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 LinearSolver::LinearSolver() :
-		M_operator             (),
-		M_matrix               (),
-		M_baseMatrixForPreconditioner(),
+        M_operator             (),
+        M_matrix               (),
+        M_baseMatrixForPreconditioner(),
         M_preconditioner       (),
         M_preconditionerOperator(),
         M_solverType           ( UndefinedSolver ),
@@ -68,9 +68,9 @@ LinearSolver::LinearSolver() :
 }
 
 LinearSolver::LinearSolver( const boost::shared_ptr<Epetra_Comm> commPtr ) :
-		M_operator             (),
-		M_matrix               (),
-		M_baseMatrixForPreconditioner(),
+        M_operator             (),
+        M_matrix               (),
+        M_baseMatrixForPreconditioner(),
         M_preconditioner       (),
         M_preconditionerOperator(),
         M_solverType           ( UndefinedSolver ),
@@ -125,11 +125,12 @@ LinearSolver::solve( vectorPtr_Type solutionPtr )
     // Reset status informations
     bool failure = false;
     this->resetStatus();
-	M_solverOperator->resetStatus();
+    M_solverOperator->resetStatus();
 
     // Solve the linear system
     LifeChrono chrono;
     chrono.start();
+
     M_solverOperator->ApplyInverse( M_rhs->epetraVector(), solutionPtr->epetraVector() );
     M_converged         = M_solverOperator->hasConverged();
     M_lossOfPrecision   = M_solverOperator->isLossOfAccuracyDetected();
@@ -143,8 +144,8 @@ LinearSolver::solve( vectorPtr_Type solutionPtr )
     // This is done only if the preconditioner has not been
     // already recomputed and if it is a LifeV preconditioner.
     if( M_converged != SolverOperator_Type::yes
-    	 && retry
-    	 && M_preconditioner )
+         && retry
+         && M_preconditioner )
     {
         M_displayer->leaderPrint( "SLV-  Iterative solver failed, numiter = " , numIters, "\n" );
         M_displayer->leaderPrint( "SLV-  retrying:\n" );
@@ -251,30 +252,30 @@ LinearSolver::buildPreconditioner()
 
     if( M_preconditioner )
     {
-    	if( M_matrix.get() == 0 )
-    	{
-    		M_displayer->leaderPrint( "SLV-  ERROR: LinearSolver requires a matrix to build the preconditioner!\n" );
-    		exit( 1 );
-    	}
-    	else
-    	{
-			chrono.start();
-			if( !M_silent ) M_displayer->leaderPrint( "SLV-  Computing the preconditioner...\n" );
-			if ( M_baseMatrixForPreconditioner.get() == 0 )
-			{
-				if( !M_silent ) M_displayer->leaderPrint( "SLV-  Build the preconditioner using the problem matrix\n" );
-				M_preconditioner->buildPreconditioner( M_matrix );
-			}
-			else
-			{
-				if( !M_silent ) M_displayer->leaderPrint( "SLV-  Build the preconditioner using the base matrix provided\n" );
-				M_preconditioner->buildPreconditioner( M_baseMatrixForPreconditioner );
-			}
-			condest = M_preconditioner->condest();
-			chrono.stop();
-			if( !M_silent ) M_displayer->leaderPrintMax( "SLV-  Preconditioner computed in " , chrono.diff(), " s." );
-			if( !M_silent ) M_displayer->leaderPrint( "SLV-  Estimated condition number               " , condest, "\n" );
-    	}
+        if( M_matrix.get() == 0 )
+        {
+            M_displayer->leaderPrint( "SLV-  ERROR: LinearSolver requires a matrix to build the preconditioner!\n" );
+            exit( 1 );
+        }
+        else
+        {
+            chrono.start();
+            if( !M_silent ) M_displayer->leaderPrint( "SLV-  Computing the preconditioner...\n" );
+            if ( M_baseMatrixForPreconditioner.get() == 0 )
+            {
+                if( !M_silent ) M_displayer->leaderPrint( "SLV-  Build the preconditioner using the problem matrix\n" );
+                M_preconditioner->buildPreconditioner( M_matrix );
+            }
+            else
+            {
+                if( !M_silent ) M_displayer->leaderPrint( "SLV-  Build the preconditioner using the base matrix provided\n" );
+                M_preconditioner->buildPreconditioner( M_baseMatrixForPreconditioner );
+            }
+            condest = M_preconditioner->condest();
+            chrono.stop();
+            if( !M_silent ) M_displayer->leaderPrintMax( "SLV-  Preconditioner computed in " , chrono.diff(), " s." );
+            if( !M_silent ) M_displayer->leaderPrint( "SLV-  Estimated condition number               " , condest, "\n" );
+        }
     }
 }
 
@@ -290,8 +291,8 @@ LinearSolver::resetPreconditioner()
 bool
 LinearSolver::isPreconditionerSet() const
 {
-	if( M_preconditionerOperator )
-		return true;
+    if( M_preconditionerOperator )
+        return true;
 
     return M_preconditioner.get() != 0 && M_preconditioner->preconditionerCreated();
 }
@@ -311,7 +312,7 @@ LinearSolver::showMe( std::ostream& output ) const
     {
         output << "Solver parameters list:" << std::endl;
         output << "-----------------------------" << std::endl;
-        output << M_parameterList << endl;
+        output << M_parameterList << std::endl;
         output << "-----------------------------" << std::endl;
     }
 }
@@ -375,21 +376,21 @@ LinearSolver::setCommunicator( const boost::shared_ptr<Epetra_Comm> commPtr )
 
 void LinearSolver::setOperator( matrixPtr_Type matrixPtr )
 {
-	M_operator = matrixPtr->matrixPtr();
+    M_operator = matrixPtr->matrixPtr();
     M_matrix = matrixPtr;
 }
 
 void
 LinearSolver::setOperator( operatorPtr_Type operPtr )
 {
-	M_matrix.reset();
-	M_operator = operPtr;
+    M_matrix.reset();
+    M_operator = operPtr;
 }
 
 void
 LinearSolver::setRightHandSide( const vectorPtr_Type rhsPtr )
 {
-	M_rhs = rhsPtr;
+    M_rhs = rhsPtr;
 }
 
 void
@@ -424,11 +425,11 @@ LinearSolver::setParameters( const Teuchos::ParameterList& list )
     std::string solverName = M_parameterList.get<std::string>( "Solver Type" );
     if( solverName == "Belos" )
     {
-    	M_solverType = Belos;
+        M_solverType = Belos;
     }
     else if( solverName == "AztecOO" )
     {
-    	M_solverType = AztecOO;
+        M_solverType = AztecOO;
     }
 
     M_reusePreconditioner  = M_parameterList.get( "Reuse Preconditioner"     , false );
@@ -459,7 +460,7 @@ LinearSolver::setQuitOnFailure( const bool enable )
 void
 LinearSolver::setTolerance( const Real& tolerance )
 {
-	M_tolerance = tolerance;
+    M_tolerance = tolerance;
 }
 
 // ===================================================

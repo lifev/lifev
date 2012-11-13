@@ -39,9 +39,7 @@
 #ifndef BCFUNCTION_H
 #define BCFUNCTION_H 1
 
-#include <boost/function.hpp>
-#include <boost/shared_ptr.hpp>
-
+#include <lifev/core/LifeV.hpp>
 
 namespace LifeV
 {

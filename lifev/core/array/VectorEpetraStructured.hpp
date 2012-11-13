@@ -43,7 +43,6 @@
 #include <lifev/core/array/VectorBlockStructure.hpp>
 #include <lifev/core/array/VectorEpetraStructuredView.hpp>
 
-#include <boost/shared_ptr.hpp>
 
 namespace LifeV {
 

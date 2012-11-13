@@ -60,6 +60,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
+#include <lifev/core/LifeV.hpp>
 #include <lifev/core/algorithm/PreconditionerIfpack.hpp>
 #include <lifev/core/algorithm/SolverAztecOO.hpp>
 #include <lifev/core/array/MatrixEpetra.hpp>
@@ -92,6 +93,11 @@ Real fRhs(const Real& /* t */,
 typedef RegionMesh<LinearTetra> mesh_Type;
 typedef MatrixEpetra<Real> matrix_Type;
 typedef VectorEpetra vector_Type;
+typedef boost::function< Real( Real const &,
+                               Real const &,
+                               Real const &,
+                               Real const &,
+                               UInt const & ) > function_Type;
 
 #endif /* HAVE_MPI */
 #endif /* HAVE_HDF5 */
@@ -190,7 +196,7 @@ main( int argc, char** argv )
 
     vector_Type fInterpolated(uFESpace->map(), Repeated);
     fInterpolated *= 0.0;
-    uFESpace->interpolate(fRhs, fInterpolated, 0.0);
+    uFESpace->interpolate( static_cast<function_Type>( fRhs ), fInterpolated, 0.0);
     adrAssembler.addMassRhs(rhs, fInterpolated);
     rhs.globalAssemble();
 
@@ -255,7 +261,7 @@ main( int argc, char** argv )
     if (verbose) std::cout << " -- Computing the error ... " << std::flush;
     vector_Type solutionErr(solution);
     solutionErr *= 0.0;
-    uFESpace->interpolate(exactSolution, solutionErr, 0.0);
+    uFESpace->interpolate( static_cast<function_Type>( exactSolution ), solutionErr, 0.0);
     solutionErr -= solution;
     solutionErr.abs();
     Real l2error(uFESpace->l2Error(exactSolution,

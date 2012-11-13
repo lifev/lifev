@@ -36,43 +36,26 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef PARTITION_IO_H_
 #define PARTITION_IO_H_
 
-#include<lifev/core/LifeV.hpp>
-
-#include <Epetra_config.h>
-
 #ifdef HAVE_HDF5
 #ifdef HAVE_MPI
 
 #include <algorithm>
-#include <string>
-#include <vector>
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-#include <mpi.h>
-
-#ifndef H5Dcreate_vers
-#define H5Dcreate_vers 2
-#endif
-
-#ifndef H5Dopen_vers
-#define H5Dopen_vers 2
-#endif
-
-#ifndef H5Gcreate_vers
-#define H5Gcreate_vers 2
-#endif
+#include <Epetra_config.h>
 
 #include <hdf5.h>
 
-#include <boost/shared_ptr.hpp>
 #include <Epetra_MpiComm.h>
 
 //Tell the compiler to restore the warning previously silented
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
+
+#include<lifev/core/LifeV.hpp>
 
 namespace LifeV {
 
@@ -402,8 +385,14 @@ void LifeV::PartitionIO<MeshType>::writeStats()
         currentSpaceDims[1] = M_numParts;
     }
     hid_t filespace = H5Screate_simple(2, currentSpaceDims, currentSpaceDims);
+
+#ifdef H5_USE_16_API
+    hid_t intDataset = H5Dcreate(M_fileId, "stats", H5T_STD_U32BE, filespace,
+                                 H5P_DEFAULT);
+#else
     hid_t intDataset = H5Dcreate(M_fileId, "stats", H5T_STD_U32BE, filespace,
                                  H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+#endif
 
     hsize_t currentCount[2];
     if (! M_transposeInFile) {
@@ -479,12 +468,20 @@ void LifeV::PartitionIO<MeshType>::writePoints()
         currentSpaceDims[1] = 3 * M_numParts;
     }
     hid_t filespace = H5Screate_simple(2, currentSpaceDims, currentSpaceDims);
+
+#ifdef H5_USE_16_API
     hid_t intDataset = H5Dcreate(M_fileId, "point_ids", H5T_STD_U32BE,
-                                 filespace, H5P_DEFAULT, H5P_DEFAULT,
-                                 H5P_DEFAULT);
+                                 filespace, H5P_DEFAULT);
+    hid_t realDataset = H5Dcreate(M_fileId, "point_coords", H5T_IEEE_F64BE,
+                                  filespace, H5P_DEFAULT);
+#else
     hid_t realDataset = H5Dcreate(M_fileId, "point_coords", H5T_IEEE_F64BE,
                                   filespace, H5P_DEFAULT, H5P_DEFAULT,
                                   H5P_DEFAULT);
+    hid_t intDataset = H5Dcreate(M_fileId, "point_ids", H5T_STD_U32BE,
+                                 filespace, H5P_DEFAULT, H5P_DEFAULT,
+                                 H5P_DEFAULT);
+#endif
 
     hsize_t currentCount[2];
     if (! M_transposeInFile) {
@@ -570,8 +567,13 @@ void LifeV::PartitionIO<MeshType>::writeEdges()
         currentSpaceDims[1] = 5 * M_numParts;
     }
     hid_t filespace = H5Screate_simple(2, currentSpaceDims, currentSpaceDims);
+#ifdef H5_USE_16_API
+    hid_t dataset = H5Dcreate(M_fileId, "edges", H5T_STD_U32BE, filespace,
+                              H5P_DEFAULT);
+#else
     hid_t dataset = H5Dcreate(M_fileId, "edges", H5T_STD_U32BE, filespace,
                               H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+#endif
 
     hsize_t currentCount[2];
     if (! M_transposeInFile) {
@@ -647,8 +649,13 @@ void LifeV::PartitionIO<MeshType>::writeFaces()
         currentSpaceDims[1] = (7 + M_faceNodes) * M_numParts;
     }
     hid_t filespace = H5Screate_simple(2, currentSpaceDims, currentSpaceDims);
+#ifdef H5_USE_16_API
+    hid_t dataset = H5Dcreate(M_fileId, "faces", H5T_STD_U32BE, filespace,
+                              H5P_DEFAULT);
+#else
     hid_t dataset = H5Dcreate(M_fileId, "faces", H5T_STD_U32BE, filespace,
                               H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+#endif
 
     hsize_t currentCount[2];
     if (! M_transposeInFile) {
@@ -745,8 +752,13 @@ void LifeV::PartitionIO<MeshType>::writeElements()
         currentSpaceDims[1] = (3 + M_elementNodes) * M_numParts;
     }
     hid_t filespace = H5Screate_simple(2, currentSpaceDims, currentSpaceDims);
+#ifdef H5_USE_16_API
+    hid_t dataset = H5Dcreate(M_fileId, "elements", H5T_STD_U32BE, filespace, 
+                              H5P_DEFAULT);
+#else
     hid_t dataset = H5Dcreate(M_fileId, "elements", H5T_STD_U32BE, filespace,
                               H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+#endif
 
     hsize_t currentCount[2];
     if (! M_transposeInFile) {
@@ -848,7 +860,11 @@ void LifeV::PartitionIO<MeshType>::readStats()
     // Write mesh partition stats (N = number of parts)
     // This is an N x 15 table of int
     hsize_t currentSpaceDims[2];
+#ifdef H5_USE_16_API
+    hid_t intDataset = H5Dopen(M_fileId, "stats");
+#else
     hid_t intDataset = H5Dopen(M_fileId, "stats", H5P_DEFAULT);
+#endif
     hid_t filespace = H5Dget_space(intDataset);
     H5Sget_simple_extent_dims(filespace, currentSpaceDims, NULL);
 
@@ -921,8 +937,13 @@ void LifeV::PartitionIO<MeshType>::readPoints()
     // There are two tables: a (3 * N) x max_num_points table of int and
     // a (3 * N) x max_num_points table of real
     hsize_t currentSpaceDims[2];
+#ifdef H5_USE_16_API
+    hid_t intDataset = H5Dopen(M_fileId, "point_ids");
+    hid_t realDataset = H5Dopen(M_fileId, "point_coords");
+#else
     hid_t intDataset = H5Dopen(M_fileId, "point_ids", H5P_DEFAULT);
     hid_t realDataset = H5Dopen(M_fileId, "point_coords", H5P_DEFAULT);
+#endif
 
     hid_t filespace = H5Dget_space(intDataset);
     H5Sget_simple_extent_dims(filespace, currentSpaceDims, NULL);
@@ -1005,7 +1026,11 @@ void LifeV::PartitionIO<MeshType>::readEdges()
     // Read mesh edges (N = number of parts)
     // Read a (5 * N) x max_num_edges table of int and
     hsize_t currentSpaceDims[2];
+#ifdef H5_USE_16_API
+    hid_t intDataset = H5Dopen(M_fileId, "edges");
+#else
     hid_t intDataset = H5Dopen(M_fileId, "edges", H5P_DEFAULT);
+#endif
 
     hid_t filespace = H5Dget_space(intDataset);
     H5Sget_simple_extent_dims(filespace, currentSpaceDims, NULL);
@@ -1079,7 +1104,11 @@ void LifeV::PartitionIO<MeshType>::readFaces()
     // read mesh faces (N = number of parts)
     // Read a ((7 + num_face_points) * N) x max_num_faces table of int
     hsize_t currentSpaceDims[2];
+#ifdef H5_USE_16_API
+    hid_t intDataset = H5Dopen(M_fileId, "faces");
+#else
     hid_t intDataset = H5Dopen(M_fileId, "faces", H5P_DEFAULT);
+#endif
 
     hid_t filespace = H5Dget_space(intDataset);
     H5Sget_simple_extent_dims(filespace, currentSpaceDims, NULL);
@@ -1180,7 +1209,11 @@ void LifeV::PartitionIO<MeshType>::readElements()
     // Read mesh elements (N = number of parts)
     // Read a ((3 + num_element_points) * N) x max_num_elements table of int
     hsize_t currentSpaceDims[2];
+#ifdef H5_USE_16_API
+    hid_t uintDataset = H5Dopen(M_fileId, "elements");
+#else
     hid_t uintDataset = H5Dopen(M_fileId, "elements", H5P_DEFAULT);
+#endif
 
     hid_t filespace = H5Dget_space(uintDataset);
     H5Sget_simple_extent_dims(filespace, currentSpaceDims, NULL);

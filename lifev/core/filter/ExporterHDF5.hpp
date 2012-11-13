@@ -37,19 +37,13 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef EXPORTER_HDF5_H
 #define EXPORTER_HDF5_H 1
 
-
-#include <lifev/core/LifeV.hpp>
-
 #ifndef HAVE_HDF5
 
 #warning warning you should reconfigure with --with-hdf5=... flag
 
 #else
 
-#include <map>
 #include <sstream>
-#include <string>
-#include <vector>
 
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -61,13 +55,13 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <Epetra_MultiVector.h>
 #include <boost/algorithm/string.hpp>
 #include <boost/shared_array.hpp>
-#include <boost/shared_ptr.hpp>
 
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-#include <lifev/core/array/MapEpetra.hpp>
 #include <lifev/core/LifeV.hpp>
+
+#include <lifev/core/array/MapEpetra.hpp>
 #include <lifev/core/util/StringUtility.hpp>
 #include <lifev/core/fem/ReferenceFE.hpp>
 #include <lifev/core/fem/ReferenceFEScalar.hpp>

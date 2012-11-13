@@ -40,8 +40,6 @@
 #ifndef COMPOSEDPRECONDITIONER_HPP
 #define COMPOSEDPRECONDITIONER_HPP
 
-#include <boost/shared_ptr.hpp>
-#include <vector>
 
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"

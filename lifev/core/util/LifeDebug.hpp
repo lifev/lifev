@@ -39,7 +39,8 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <cstdio>
 #include <iosfwd>
 #include <sstream>
-#include <string>
+
+#include <lifev/core/LifeV.hpp>
 
 namespace LifeV
 {
@@ -151,11 +152,13 @@ inline NdebugStream& endl( NdebugStream& s )   { return s; }
 inline NdebugStream& flush( NdebugStream& s )    { return s; }
 
 #ifndef NDEBUG_OLD
-DebugStream Debug( int area = 0, DebugStream::stprintf = 0 );
-DebugStream Debug( bool cond, int area = 0, DebugStream::stprintf = 0 );
+DebugStream debugStream( int area = 0, DebugStream::stprintf = 0 );
+DebugStream debugStream( bool cond, int area = 0, DebugStream::stprintf = 0 );
+LIFEV_DEPRECATED( DebugStream Debug( int area = 0, DebugStream::stprintf func = 0 ) );
+LIFEV_DEPRECATED( DebugStream Debug( bool cond, int area = 0, DebugStream::stprintf func = 0 ) );
 #else
-#define Debug Ndebug
-inline NdebugStream Ndebug( int = 0, NdebugStream::stprintf = &printf ) { return NdebugStream(); }
+#define debugStream noDebugStream
+inline NdebugStream noDebugStream( int = 0, NdebugStream::stprintf = &printf ) { return NdebugStream(); }
 #endif
 
 DebugStream Warning( int area = 0 );

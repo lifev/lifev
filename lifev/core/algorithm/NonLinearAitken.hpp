@@ -43,10 +43,7 @@
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-#include <cstdlib>
-
 #include <boost/array.hpp>
-#include <boost/shared_ptr.hpp>
 
 // Tell the compiler to restore the warning previously silented
 #pragma GCC diagnostic warning "-Wunused-variable"
@@ -289,7 +286,7 @@ NonLinearAitken< VectorType >::computeDeltaLambdaFSI( const vector_Type& solutio
         M_oldResidualFluid.reset( new vector_Type( residualFluid) );
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug(7020) << "NonLinearAitken: omegaFluid = " << M_defaultOmegaFluid << " omegaSolid = " << M_defaultOmegaSolid << "\n";
+        debugStream(7020) << "NonLinearAitken: omegaFluid = " << M_defaultOmegaFluid << " omegaSolid = " << M_defaultOmegaSolid << "\n";
 #endif
         return M_defaultOmegaFluid * residualFluid + M_defaultOmegaSolid * residualSolid;
     }
@@ -324,7 +321,7 @@ NonLinearAitken< VectorType >::computeDeltaLambdaFSI( const vector_Type& solutio
         else if ( std::fabs( a22 ) == 0. )
         {
 #ifdef HAVE_LIFEV_DEBUG
-            Debug(7020) << "NonLinearAitken:  a22 = " << std::fabs(a22) << "\n";
+            debugStream(7020) << "NonLinearAitken:  a22 = " << std::fabs(a22) << "\n";
 #endif
             omegaFluid = -b1 / a11;
             omegaSolid = 0.;
@@ -332,17 +329,17 @@ NonLinearAitken< VectorType >::computeDeltaLambdaFSI( const vector_Type& solutio
         else if ( std::fabs(a11) == 0. )
         {
 #ifdef HAVE_LIFEV_DEBUG
-            Debug(7020) << "NonLinearAitken:  a11 = " << std::fabs(a11) << "\n";
+            debugStream(7020) << "NonLinearAitken:  a11 = " << std::fabs(a11) << "\n";
 #endif
             omegaFluid = 0.;
             omegaSolid = -b2 / a22;
         }
 #ifdef HAVE_LIFEV_DEBUG
         else
-            Debug(7020) << "NonLinearAitken: Failure: Det=0!!" << std::fabs(det) << "\n";
+            debugStream(7020) << "NonLinearAitken: Failure: Det=0!!" << std::fabs(det) << "\n";
 
-        Debug(7020) << " --------------- NonLinearAitken: \n";
-        Debug(7020) << " omegaSolid = " << omegaSolid << " omegaFluid = " << omegaFluid << "\n";
+        debugStream(7020) << " --------------- NonLinearAitken: \n";
+        debugStream(7020) << " omegaSolid = " << omegaSolid << " omegaFluid = " << omegaFluid << "\n";
 #endif
 
         *M_oldSolution = solution;
@@ -367,7 +364,7 @@ NonLinearAitken< VectorType >::computeDeltaLambdaScalar( const vector_Type& solu
         M_oldResidualFluid.reset( new vector_Type( residual ) );
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug(7020) << "NonLinearAitken: omega = " << M_defaultOmegaFluid << "\n";
+        debugStream(7020) << "NonLinearAitken: omega = " << M_defaultOmegaFluid << "\n";
 #endif
 
         return M_defaultOmegaFluid * residual;
@@ -402,7 +399,7 @@ NonLinearAitken< VectorType >::computeDeltaLambdaScalar( const vector_Type& solu
     checkRange(omega);
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug(7020) << "NonLinearAitken: omega = " << omega << "\n";
+    debugStream(7020) << "NonLinearAitken: omega = " << omega << "\n";
 #endif
 
     return omega * residual;
@@ -422,7 +419,7 @@ NonLinearAitken< VectorType >::computeDeltaLambdaVector( const vector_Type& solu
         M_oldResidualFluid.reset( new vector_Type( residual ) );
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug(7020) << "NonLinearAitken: omega = " << M_defaultOmegaFluid << "\n";
+        debugStream(7020) << "NonLinearAitken: omega = " << M_defaultOmegaFluid << "\n";
 #endif
 
         return M_defaultOmegaFluid * residual;
@@ -462,7 +459,7 @@ NonLinearAitken< VectorType >::computeDeltaLambdaVector( const vector_Type& solu
         checkRange(omega[i]);
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug(7020) << "NonLinearAitken: omega = " << "\n";
+    debugStream(7020) << "NonLinearAitken: omega = " << "\n";
     omega.showMe();
 #endif
 
@@ -486,7 +483,7 @@ NonLinearAitken< VectorType >::computeDeltaLambdaVectorBlock( const vector_Type&
         M_oldResidualFluid.reset( new vector_Type( residual ) );
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug(7020) << "NonLinearAitken: omega = " << M_defaultOmegaFluid << "\n";
+        debugStream(7020) << "NonLinearAitken: omega = " << M_defaultOmegaFluid << "\n";
 #endif
 
         return M_defaultOmegaFluid * residual;
@@ -538,7 +535,7 @@ NonLinearAitken< VectorType >::computeDeltaLambdaVectorBlock( const vector_Type&
     }
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug(7020) << "NonLinearAitken: omega = " << "\n";
+    debugStream(7020) << "NonLinearAitken: omega = " << "\n";
     omega.ShowMe();
 #endif
 

@@ -96,7 +96,7 @@ ExampleClass::methodOne( first_Type&  inputVariableOne,
 {
     // Example of debug
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 0000 ) << "ExampleClass::methodOne inputVariableOne = " << inputVariableOne << " inputVariableTwo = " << inputVariableTwo << "\n";
+    debugStream( 0000 ) << "ExampleClass::methodOne inputVariableOne = " << inputVariableOne << " inputVariableTwo = " << inputVariableTwo << "\n";
 #endif
 
     //Do something

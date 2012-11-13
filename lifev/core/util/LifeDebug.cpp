@@ -38,13 +38,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <cstring>
 #include <errno.h>
 #include <fstream>
-#include <iostream>
 #include <iterator>
-#include <list>
-#include <map>
-#include <sstream>
-#include <string>
-#include <vector>
 
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -357,12 +351,24 @@ void DebugStream::detachAll()
 DebugStream
 Debug( int area, DebugStream::stprintf func )
 {
+    return debugStream( area, func );
+}
+
+DebugStream
+debugStream( int area, DebugStream::stprintf func )
+{
     DebugStream s( area, DEBUG_INFO );
     s.setFlush( func );
     return s;
 }
 
-DebugStream Debug( bool cond, int area, DebugStream::stprintf /*func*/ )
+DebugStream
+Debug( bool cond, int area, DebugStream::stprintf func )
+{
+    return debugStream( cond, area, func );
+}
+
+DebugStream debugStream( bool cond, int area, DebugStream::stprintf /*func*/ )
 {
     if ( cond )
         return DebugStream( area, DEBUG_INFO );
@@ -387,13 +393,13 @@ DebugStream Warning( bool cond, int area )
 
 DebugStream Error( int area )
 {
-    //Debug () << LBacktrace() << "\n";
+    //debugStream () << LBacktrace() << "\n";
     return DebugStream( "ERROR: ", area, DEBUG_ERROR );
 }
 
 DebugStream Error( bool cond, int area )
 {
-    //Debug () << LBacktrace() << "\n";
+    //debugStream () << LBacktrace() << "\n";
     if ( cond )
         return DebugStream( "ERROR: ", area, DEBUG_ERROR );
     else

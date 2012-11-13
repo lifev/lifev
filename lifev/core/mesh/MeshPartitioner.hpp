@@ -40,16 +40,11 @@
 #define MESH_PARTITIONER_H 1
 
 #include <fstream>
-#include <iostream>
-#include <set>
 #include <sstream>
-#include <string>
-#include <vector>
 
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-#include <boost/shared_ptr.hpp>
 #include <parmetis.h>
 #include <Epetra_MpiComm.h>
 
@@ -1483,11 +1478,11 @@ void MeshPartitioner<MeshType>::finalSetup()
 #ifdef HAVE_LIFEV_DEBUG
         if (M_serialMode)
         {
-            Debug(4000) << "Created local mesh number " << i << "\n";
+            debugStream(4000) << "Created local mesh number " << i << "\n";
         }
         else
         {
-            Debug(4000) << "Rank " << M_me << " created local mesh.\n";
+            debugStream(4000) << "Rank " << M_me << " created local mesh.\n";
         }
 #endif
     }
@@ -1533,7 +1528,7 @@ void MeshPartitioner<MeshType>::execute()
     ////////////////// END OF SOLID PARTITION PART /////////////////////
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug(4000) << M_me << " has " << (*M_elementDomains)[M_me].size() << " elements.\n";
+    debugStream(4000) << M_me << " has " << (*M_elementDomains)[M_me].size() << " elements.\n";
 #endif
 
     doPartitionMesh();
