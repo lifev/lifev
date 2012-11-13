@@ -39,8 +39,6 @@
 #ifndef _SIMPLEARRAY_HH_
 #define _SIMPLEARRAY_HH_
 
-#include <cstdlib>
-#include <vector>
 #include <lifev/core/LifeV.hpp>
 
 namespace LifeV

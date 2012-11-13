@@ -41,8 +41,6 @@
 #ifndef BCIDENTIFIER_H
 #define BCIDENTIFIER_H 1
 
-#include <iostream>
-#include <boost/shared_ptr.hpp>
 #include <lifev/core/LifeV.hpp>
 
 namespace LifeV {

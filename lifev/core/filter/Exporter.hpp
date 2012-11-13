@@ -44,24 +44,13 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #define EXPORTER_H 1
 
 #include <fstream>
-#include <iostream>
-#include <list>
-#include <map>
-#include <set>
 #include <sstream>
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-
-#include <boost/shared_ptr.hpp>
-
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
+#include <lifev/core/LifeV.hpp>
 
 #include <lifev/core/array/VectorEpetra.hpp>
 #include <lifev/core/filter/GetPot.hpp>
 #include <lifev/core/util/LifeChrono.hpp>
-#include <lifev/core/LifeV.hpp>
 #include <lifev/core/fem/FESpace.hpp>
 #include <lifev/core/mesh/MarkerDefinitions.hpp>
 

@@ -298,8 +298,8 @@ void BCDataInterpolator::solveInterpolationSystem()
 
     if (reciprocalCond < 1e-6)
     {
-        Debug( 5000 ) << "Radial basis interpolation matrix is ill-conditioned.\n";
-        Debug( 5000 ) << "Estimated reciprocal of condition number: " << reciprocalCond << "\n";
+        debugStream( 5000 ) << "Radial basis interpolation matrix is ill-conditioned.\n";
+        debugStream( 5000 ) << "Estimated reciprocal of condition number: " << reciprocalCond << "\n";
     }
 #endif
 

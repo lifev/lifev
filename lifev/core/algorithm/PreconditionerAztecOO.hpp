@@ -91,9 +91,6 @@ public:
     //! Reset the preconditioner
     void resetPreconditioner();
 
-    //! Return true if the AztecOO preconditioner is set
-    bool isPreconditionerSet() const { return M_preconditionerCreated; }
-
     //! Create the list of parameters of the preconditioner
     /*!
       @param list A Parameter list to be filled

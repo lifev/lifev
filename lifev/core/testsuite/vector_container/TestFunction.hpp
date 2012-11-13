@@ -41,7 +41,6 @@
 #include <iomanip>
 #include <string>
 
-#include <boost/shared_ptr.hpp>
 
 // Tell the compiler to restore the warning previously silented
 #pragma GCC diagnostic warning "-Wunused-variable"

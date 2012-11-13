@@ -38,7 +38,6 @@
 #ifndef _EPETRAPRECONDITIONER_HPP_
 #define _EPETRAPRECONDITIONER_HPP_
 
-#include <boost/shared_ptr.hpp>
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -49,6 +48,8 @@
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
+
+#include <lifev/core/LifeV.hpp>
 
 #include <lifev/core/util/Factory.hpp>
 #include <lifev/core/util/FactorySingleton.hpp>
@@ -208,9 +209,6 @@ public:
 
     //! Return true if the preconditioner has been created
     const bool& preconditionerCreated();
-
-    //! Return true if the preconditioner is set
-    virtual bool isPreconditionerSet() const = 0;
 
     //! Return a raw pointer on the preconditioner
     virtual prec_raw_type* preconditioner() = 0;

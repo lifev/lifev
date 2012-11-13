@@ -532,31 +532,31 @@ void StabilizationIP<MeshType, DofType>::apply( MatrixType& matrix,  const Vecto
     chronoAssembly.stop();
     if (verbose)
     {
-        Debug(7101) << "\n";
-        Debug(7101) << static_cast<UInt>(state.blockMap().Comm().MyPID())
+        debugStream(7101) << "\n";
+        debugStream(7101) << static_cast<UInt>(state.blockMap().Comm().MyPID())
         <<  "  .   Updating of element   done in "
         << chronoUpdate.diffCumul()   << " s." << "\n";
-        Debug(7101) << "   .   Determination of beta done in "
+        debugStream(7101) << "   .   Determination of beta done in "
         << chronoBeta.diffCumul()     << " s." << "\n";
-        Debug(7101) << "   .   Element computations  done in "
+        debugStream(7101) << "   .   Element computations  done in "
         << chronoElemComp.diffCumul() << " s." << "\n";
-        Debug(7101) << "   .   chrono 1              done in "
+        debugStream(7101) << "   .   chrono 1              done in "
         << chronoAssembly1.diffCumul() << " s." << "\n";
-        Debug(7101) << "   .   chrono 2              done in "
+        debugStream(7101) << "   .   chrono 2              done in "
         << chronoAssembly2.diffCumul() << " s." << "\n";
-        Debug(7101) << "   .   chrono 3              done in "
+        debugStream(7101) << "   .   chrono 3              done in "
         << chronoAssembly3.diffCumul() << " s." << "\n";
-        Debug(7101) << "   .   chrono 4              done in "
+        debugStream(7101) << "   .   chrono 4              done in "
         << chronoAssembly4.diffCumul() << " s." << "\n";
-        Debug(7101) << "   .   chrono 5              done in "
+        debugStream(7101) << "   .   chrono 5              done in "
         << chronoAssembly5.diffCumul() << " s." << "\n";
-        Debug(7101) << "   .   chrono 6              done in "
+        debugStream(7101) << "   .   chrono 6              done in "
         << chronoAssembly6.diffCumul() << " s." << "\n";
-        Debug(7101) << "   .   chrono 7              done in "
+        debugStream(7101) << "   .   chrono 7              done in "
         << chronoAssembly7.diffCumul() << " s." << "\n";
-        Debug(7101) << "   .   chrono 8              done in "
+        debugStream(7101) << "   .   chrono 8              done in "
         << chronoAssembly8.diffCumul() << " s." << "\n";
-        Debug(7101) << "   .   total                                   "
+        debugStream(7101) << "   .   total                                   "
         << chronoAssembly.diffCumul() << " s."
         << " myFacets = " << myFacets << "\n";
     }

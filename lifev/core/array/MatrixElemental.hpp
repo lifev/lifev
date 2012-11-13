@@ -35,7 +35,6 @@
 
 #ifndef _ELEMMAT_H_INCLUDED
 #define _ELEMMAT_H_INCLUDED
-#include <vector>
 
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/array/RNM.hpp>

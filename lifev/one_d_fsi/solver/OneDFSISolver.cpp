@@ -861,7 +861,7 @@ OneDFSISolver::inertialFlowRateCorrection( const vector_Type& flux )
         assembleMatrix( stiffRHS, elmatStiffRHS, M_feSpacePtr->fe(), M_feSpacePtr->dof(), 0, 0, 0, 0 );
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 6310 ) << "\n\tm = "           << m << "\n\t_coeffMass = "  << coeffMass << "\n\t_coeffStiff = " << coeffStiff << "\n";
+        debugStream( 6310 ) << "\n\tm = "           << m << "\n\t_coeffMass = "  << coeffMass << "\n\t_coeffStiff = " << coeffStiff << "\n";
 #endif
     } // end loop on elements
 
@@ -963,27 +963,27 @@ OneDFSISolver::longitudinalFlowRateCorrection()
         // d3 A (xi)/ dz3 = (1/h^3) * ( -A(xi-2) + 2A(xi-1) - 2A(xi+1) + A(xi+2) )
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 6310 ) << "\ninode = " << iNode << "\n";
+        debugStream( 6310 ) << "\ninode = " << iNode << "\n";
 #endif
         if (iNode<2)
         { // backward differentiation
             f( iNode ) = - g( iNode ) + g( iNode+3 ) - 3 * g( iNode+2 ) + 3 * g( iNode+1 );
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 6310 ) << "\n\tbackward differentiation = " << coeffMassLHS << "\n";
+            debugStream( 6310 ) << "\n\tbackward differentiation = " << coeffMassLHS << "\n";
 #endif
         }
         else if (iNode>M_feSpacePtr->mesh()->numEdges()-2)
         { // forward differentiation
             f( iNode ) = g( iNode ) - g( iNode-3 ) + 3 * g( iNode-2 ) - 3 * g( iNode-1 );
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 6310 ) << "\n\forward differentiation = " << coeffMassLHS << "\n";
+            debugStream( 6310 ) << "\n\forward differentiation = " << coeffMassLHS << "\n";
 #endif
         }
         else
         { // central differentiation
             f( iNode ) = - g( iNode - 2 ) + 2 * g( iNode-1 ) - 2 * g( iNode+1 ) + g( iNode+2 );
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 6310 ) << "\n\tcentral differentiation = " << coeffMassLHS << "\n";
+            debugStream( 6310 ) << "\n\tcentral differentiation = " << coeffMassLHS << "\n";
 #endif
         }
 
@@ -1002,8 +1002,8 @@ OneDFSISolver::longitudinalFlowRateCorrection()
         assembleMatrix( massRHS, elmatMassRHS, M_feSpacePtr->fe(), M_feSpacePtr->dof() , 0, 0, 0, 0 );
 
 #ifdef HAVE_LIFEV_DEBUG
-        Debug( 6310 ) << "\n\t_coeffMassLHS = " << coeffMassLHS << "\n";
-        Debug( 6310 ) << "\n\t_coeffMassRHS = " << coeffMassRHS << "\n";
+        debugStream( 6310 ) << "\n\t_coeffMassLHS = " << coeffMassLHS << "\n";
+        debugStream( 6310 ) << "\n\t_coeffMassRHS = " << coeffMassRHS << "\n";
 #endif
     } // end loop on elements
 

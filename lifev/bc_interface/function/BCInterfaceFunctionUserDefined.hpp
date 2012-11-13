@@ -252,7 +252,7 @@ BCInterfaceFunctionUserDefined< PhysicalSolverType >::BCInterfaceFunctionUserDef
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5026 ) << "BCInterfaceFunctionUserDefined::BCInterfaceFunctionUserDefined()" << "\n";
+    debugStream( 5026 ) << "BCInterfaceFunctionUserDefined::BCInterfaceFunctionUserDefined()" << "\n";
 #endif
 
 }

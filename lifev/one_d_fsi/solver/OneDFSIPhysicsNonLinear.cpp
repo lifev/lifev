@@ -97,11 +97,11 @@ OneDFSIPhysicsNonLinear::fromPToW( const Real& P, const Real& W, const ID& iW, c
               * ( std::sqrt( P / M_dataPtr->beta0( iNode ) + 1 ) - 1 ) );
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug(6320) << "[OneDFSIModel_Physics_NonLinear::W_fromP] "
+    debugStream(6320) << "[OneDFSIModel_Physics_NonLinear::W_fromP] "
     << "SQRTchi4overbeta1 = " << SQRTchi4overbeta1
     << ", beta0beta1overrho = " << SQRTbeta0beta1overrho
     << ", pow( ( P / M_dataPtr->beta0( iNode ) + 1 ), 0.5 ) = " << std::sqrt( ( P / M_dataPtr->beta0( iNode ) + 1 ) ) << "\n";
-    Debug(6320) << "[OneDFSIModel_Physics_NonLinear::W_fromP] add term = " << add << "\n";
+    debugStream(6320) << "[OneDFSIModel_Physics_NonLinear::W_fromP] add term = " << add << "\n";
 #endif
 
     if ( iW == 0 )
@@ -142,7 +142,7 @@ OneDFSIPhysicsNonLinear::fromQToW( const Real& Q, const Real& W_tn, const Real& 
     df_k += f_k;
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug(6320) << "[OneDFSIModel_Physics_NonLinear::W_fromQ] "
+    debugStream(6320) << "[OneDFSIModel_Physics_NonLinear::W_fromQ] "
     << "K0 = " << K0
     << ", K1 = " << K1
     << ", tau_k = " << tau_k << "\n";
