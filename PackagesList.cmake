@@ -84,6 +84,7 @@ SET( LifeV_PACKAGES_AND_DIRS_AND_CLASSIFICATIONS
   OneDFSI               lifev/one_d_fsi                   PS
   ZeroDimensional       lifev/zero_dimensional            EX
   Dummy                 lifev/dummy                       EX
+  ETA                   lifev/eta                         EX
 )
 
 
