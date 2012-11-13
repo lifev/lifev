@@ -57,8 +57,8 @@ void copyBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
                  const MatrixEpetraStructuredView<DataType>& destBlock )
 {
     // BLOCK COMPATIBILITY TEST
-	ASSERT( srcBlock.numRows() == destBlock.numRows(), "The two blocks must have the same number of rows" );
-	ASSERT( srcBlock.numColumns() == destBlock.numColumns(), "The two blocks must have the same number of columns" );
+	ASSERT( srcBlock.numRows() <= destBlock.numRows(), "The destination block can not contain all the rows of the source block" );
+	ASSERT( srcBlock.numColumns() <= destBlock.numColumns(), "The destination block can not contain all the columns of the source block" );
 
     // BLOCK PTR TEST
 	ASSERT( srcBlock.matrixPtr() != 0 , "The source block does not have a valid pointer" );
@@ -888,6 +888,59 @@ void createMatrixFromBlock ( boost::shared_ptr< MatrixEpetraStructuredView<DataT
                              bool closeMatrix=true )
 {
     createMatrixFromBlock( *srcBlock, destMatrix, rowMap, closeMatrix );
+}
+
+//! Create a new matrix from the block specified (for rectangle matrix)
+/*!
+  @param srcBlock Source block
+  @param dstMatrix Pointer to be initialized with a new matrix
+  @param domainMap domain map. The column map will be defined in MatrixEpetraStructured<DataType>::GlobalAssemble(...,...)
+  @param rangeMap range map. The column map will be defined in MatrixEpetraStructured<DataType>::GlobalAssemble(...,...)
+  @param closeMatrix If closeMatrix is equal to true, globalAssemble will be called.
+  @warning This method is only intended to be used with square blocks!
+*/
+template< typename DataType>
+void createMatrixFromBlock ( const MatrixEpetraStructuredView<DataType>& srcBlock,
+                             boost::shared_ptr<MatrixEpetraStructured<DataType> >& destMatrix,
+                             boost::shared_ptr<MapEpetra> domainMap,
+                             boost::shared_ptr<MapEpetra> rangeMap,
+                             bool closeMatrix=true )
+{
+
+
+    // Create destination matrix
+    if( domainMap->mapSize() > rangeMap->mapSize() )
+        destMatrix.reset( new MatrixEpetraStructured<DataType>( *domainMap, srcBlock.matrixPtr()->meanNumEntries() ) );
+    else
+        destMatrix.reset( new MatrixEpetraStructured<DataType>( *rangeMap, srcBlock.matrixPtr()->meanNumEntries() ) );
+
+    // Copy the entries
+    copyBlock( srcBlock, *( destMatrix->block( 0, 0 ) ) );
+
+    // Close the matrix if requested
+    if( closeMatrix )
+    {
+        destMatrix->globalAssemble( domainMap, rangeMap );
+    }
+}
+
+//! Create a new matrix from the block specified
+/*!
+  @param srcBlock Source block
+  @param dstMatrix Pointer to be initialized with a new matrix
+  @param domainMap domain map. The column map will be defined in MatrixEpetraStructured<DataType>::GlobalAssemble(...,...)
+  @param rangeMap range map. The column map will be defined in MatrixEpetraStructured<DataType>::GlobalAssemble(...,...)
+  @param closeMatrix If closeMatrix is equal to true, globalAssemble will be called.
+  @warning This method is only intended to be used with square blocks!
+*/
+template< typename DataType>
+void createMatrixFromBlock ( boost::shared_ptr< MatrixEpetraStructuredView<DataType> > srcBlock,
+                             boost::shared_ptr<MatrixEpetraStructured<DataType> >& destMatrix,
+                             boost::shared_ptr<MapEpetra> domainMap,
+                             boost::shared_ptr<MapEpetra> rangeMap,
+                             bool closeMatrix=true )
+{
+    createMatrixFromBlock( *srcBlock, destMatrix, domainMap, rangeMap, closeMatrix );
 }
 
 //! Create a block view using an unstructured matrix and block structure informations

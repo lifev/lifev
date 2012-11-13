@@ -411,6 +411,12 @@ LinearSolver::setPreconditioner( operatorPtr_Type preconditionerPtr )
 }
 
 void
+LinearSolver::setBaseMatrixForPreconditioner( matrixPtr_Type baseMatrixPtr )
+{
+    M_baseMatrixForPreconditioner = baseMatrixPtr;
+}
+
+void
 LinearSolver::setParameters( const Teuchos::ParameterList& list )
 {
     M_parameterList.setParameters( list );
