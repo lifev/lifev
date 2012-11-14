@@ -1180,7 +1180,6 @@ bool rearrangeFaces( MeshType & mesh,
     typename faceContainer_Type::iterator faceContainerIterator;
     temporaryFaceContainer_Type *         boundaryFaceContainerPtr;
     temporaryFaceContainer_Type::iterator boundaryFaceContainerIterator;
-    std::pair<ID, ID>                     volumeIdToLocalFaceIdPair;
     UInt                                  numInternalFaces;
     bool                                  externalContainerIsProvided( false );
 
