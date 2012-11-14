@@ -2,23 +2,23 @@
 /*
 *******************************************************************************
 
-    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
-    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+Copyright (C) 2010, 2011, 2012 EPFL, Politecnico di Milano, Emory University
 
-    This file is part of LifeV.
+This file is part of LifeV.
 
-    LifeV is free software; you can redistribute it and/or modify
-    it under the terms of the GNU Lesser General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+LifeV is free software; you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
 
-    LifeV is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-    Lesser General Public License for more details.
+LifeV is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+Lesser General Public License for more details.
 
-    You should have received a copy of the GNU Lesser General Public License
-    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+You should have received a copy of the GNU Lesser General Public License
+along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 *******************************************************************************
 */
@@ -26,10 +26,10 @@
 
 /*!
     @file
-    @brief
+    @brief Test for the MeshPartitionTool class
 
-    @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
-    @date 08-10-2010
+    @author Radu Popescu <radu.popescu@epfl.ch>
+    @date 14-11-2012
  */
 
 // Tell the compiler to ignore specific kind of warnings:
@@ -54,9 +54,7 @@
 
 #include <lifev/core/LifeV.hpp>
 
-
 #include <lifev/core/algorithm/PreconditionerIfpack.hpp>
-
 #include <lifev/core/algorithm/LinearSolver.hpp>
 
 #include <lifev/core/array/MatrixEpetra.hpp>
@@ -67,24 +65,31 @@
 #include <lifev/core/mesh/MeshPartitionTool.hpp>
 #include <lifev/core/mesh/GraphCutter.hpp>
 #include <lifev/core/mesh/MeshPartBuilder.hpp>
-
 #include <lifev/core/mesh/RegionMesh3DStructured.hpp>
 #include <lifev/core/mesh/RegionMesh.hpp>
+#include <lifev/core/mesh/MeshData.hpp>
 
 #include <lifev/core/solver/ADRAssembler.hpp>
-#include <lifev/core/mesh/MeshData.hpp>
 
 using namespace LifeV;
 
 Real epsilon(1);
 
-Real exactSolution( const Real& /* t */, const Real& x, const Real& y, const Real& z , const ID& /* i */ )
+Real exactSolution(const Real& /* t */,
+				   const Real& x,
+				   const Real& y,
+				   const Real& z,
+				   const ID& /* i */)
 {
     return  sin(x+y)+z*z/2;
 }
 
 
-Real fRhs( const Real& /* t */, const Real& x, const Real& y, const Real& /* z */ , const ID& /* i */ )
+Real fRhs(const Real& /* t */,
+		  const Real& x,
+		  const Real& y,
+		  const Real& /* z */,
+		  const ID& /* i */)
 {
     return  2*sin(x+y)-1;
 }
@@ -118,7 +123,8 @@ main( int argc, char** argv )
     if (verbose) std::cout << " done ! " << std::endl;
 
     const UInt Nelements(dataFile("mesh/nelements",10));
-    if (verbose) std::cout << " ---> Number of elements : " << Nelements << std::endl;
+    if (verbose) std::cout << " ---> Number of elements : "
+    					   << Nelements << std::endl;
 
 // Build and partition the mesh
 
@@ -161,7 +167,8 @@ main( int argc, char** argv )
     									   Comm));
 
     if (verbose) std::cout << " done ! " << std::endl;
-    if (verbose) std::cout << " ---> Dofs: " << uFESpace->dof().numTotalDof() << std::endl;
+    if (verbose) std::cout << " ---> Dofs: "
+    					   << uFESpace->dof().numTotalDof() << std::endl;
 
 // Build the assembler and the matrices
 
@@ -174,7 +181,8 @@ main( int argc, char** argv )
     if (verbose) std::cout << " done! " << std::endl;
 
     if (verbose) std::cout << " -- Defining the matrix ... " << std::flush;
-    boost::shared_ptr<matrix_Type> systemMatrix(new matrix_Type( uFESpace->map() ));
+    boost::shared_ptr<matrix_Type>
+    		systemMatrix(new matrix_Type(uFESpace->map()));
     *systemMatrix *=0.0;
     if (verbose) std::cout << " done! " << std::endl;
 
@@ -183,7 +191,9 @@ main( int argc, char** argv )
     if (verbose) std::cout << " -- Adding the diffusion ... " << std::flush;
     adrAssembler.addDiffusion(systemMatrix,epsilon);
     if (verbose) std::cout << " done! " << std::endl;
-    if (verbose) std::cout << " Time needed : " << adrAssembler.diffusionAssemblyChrono().diffCumul() << std::endl;
+    if (verbose) std::cout << " Time needed : "
+    					   << adrAssembler.diffusionAssemblyChrono().diffCumul()
+    					   << std::endl;
 
     if (verbose) std::cout << " -- Closing the matrix ... " << std::flush;
     systemMatrix->globalAssemble();
@@ -206,7 +216,8 @@ main( int argc, char** argv )
 
     vector_Type fInterpolated(uFESpace->map(),Repeated);
     fInterpolated*=0.0;
-    uFESpace->interpolate( static_cast<feSpace_Type::function_Type>( fRhs ), fInterpolated, 0.0 );
+    uFESpace->interpolate(static_cast<feSpace_Type::function_Type>(fRhs),
+    					  fInterpolated, 0.0);
     adrAssembler.addMassRhs(rhs,fInterpolated);
     rhs.globalAssemble();
 
@@ -231,21 +242,12 @@ main( int argc, char** argv )
     if (verbose) std::cout << " -- Applying the BCs ... " << std::flush;
     boost::shared_ptr<vector_Type>
     		rhsBC(new vector_Type(rhs,Unique));
-    bcManage(*systemMatrix, *rhsBC,*uFESpace->mesh(),uFESpace->dof(),bchandler,uFESpace->feBd(),1.0,0.0);
+    bcManage(*systemMatrix, *rhsBC,*uFESpace->mesh(),
+    		 uFESpace->dof(),bchandler,uFESpace->feBd(),1.0,0.0);
     rhs = *rhsBC;
     if (verbose) std::cout << " done ! " << std::endl;
 
 // Definition of the solver
-
-//    Teuchos::RCP< Teuchos::ParameterList > belosList2 = Teuchos::rcp ( new Teuchos::ParameterList );
-//    belosList2 = Teuchos::getParametersFromXmlFile( "SolverParamList2.xml" );
-//
-//    LinearSolver linearSolver2;
-//    linearSolver2.setCommunicator( Comm );
-//    linearSolver2.setParameters( *belosList2 );
-//    linearSolver2.setPreconditioner( precPtr );
-//    if( verbose ) std::cout << "done" << std::endl;
-//    linearSolver2.showMe();
 
     if (verbose) std::cout << " -- Building the solver ... " << std::flush;
     LinearSolver linearSolver;
@@ -260,7 +262,8 @@ main( int argc, char** argv )
     linearSolver.setPreconditionerFromGetPot(dataFile,"prec");
     if (verbose) std::cout << " done ! " << std::endl;
 
-    if (verbose) std::cout << " -- Setting matrix in the solver ... " << std::flush;
+    if (verbose) std::cout << " -- Setting matrix in the solver ... "
+    					   << std::flush;
     linearSolver.setOperator(systemMatrix);
     linearSolver.setRightHandSide(rhsBC);
     if (verbose) std::cout << " done ! " << std::endl;
@@ -286,10 +289,13 @@ main( int argc, char** argv )
     if (verbose) std::cout << " -- Computing the error ... " << std::flush;
     vector_Type solutionErr(*solution);
     solutionErr*=0.0;
-    uFESpace->interpolate( static_cast<feSpace_Type::function_Type>( exactSolution ), solutionErr, 0.0 );
+    uFESpace->interpolate(
+    		static_cast<feSpace_Type::function_Type>( exactSolution ),
+    		solutionErr, 0.0);
     solutionErr-= *solution;
     solutionErr.abs();
-    Real l2error(uFESpace->l2Error(exactSolution,vector_Type(*solution,Repeated),0.0));
+    Real l2error(uFESpace->l2Error(exactSolution,
+    							   vector_Type(*solution,Repeated),0.0));
     if (verbose) std::cout << " -- done ! " << std::endl;
     if (verbose) std::cout << " ---> Norm L2  : " << l2error << std::endl;
     Real linferror( solutionErr.normInf());
