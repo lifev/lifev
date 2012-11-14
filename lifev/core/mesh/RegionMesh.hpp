@@ -249,7 +249,7 @@ public:
      *  @return Severity level. If different from 0 the mesh has problem. If positive the problems are such that the mesh may not
      *  work in any case. If less than zero it may work in some cases.
      */
-    int check( int level = 0, bool const fix = false, bool verbose = true, std::ostream & out = std::cerr );
+    Int check( Int level = 0, bool const fix = false, bool verbose = true, std::ostream & out = std::cerr );
 
     //! Display local to global mapping.
     /**
@@ -1369,11 +1369,11 @@ public:
 
     //! List of points
     /**
-     *  @param fct Function of three double arguments.
+     *  @param fct Function of three Real arguments.
      *  @param list_pts List of Points.
      *  @todo Move away, this can be done using the utility of the list of pts
      */
-    void getListOfPoints( bool ( *fct ) ( double, double, double ), std::vector<UInt>& list_pts );
+    void getListOfPoints( bool ( *fct ) ( Real, Real, Real ), std::vector<UInt>& list_pts );
 
     /** @} */ // End of group Points Methods
 
@@ -2874,11 +2874,11 @@ RegionMesh<GeoShapeType, MCType>::showMe( bool verbose, std::ostream & out ) con
 
 
 template <typename GeoShapeType, typename MCType>
-inline int
-RegionMesh<GeoShapeType, MCType>::check( int level, bool const fix, bool verb, std::ostream & out )
+inline Int
+RegionMesh<GeoShapeType, MCType>::check( Int level, bool const fix, bool verb, std::ostream & out )
 {
     verb = verb && ( M_comm->MyPID() == 0 );
-    int severity = 0;
+    Int severity = 0;
     Switch testsw;
     if ( verb )
     {
@@ -3617,7 +3617,7 @@ RegionMesh<GeoShapeType, MCType>::cleanElementRidges()
 template <typename GeoShapeType, typename MCType>
 inline void
 RegionMesh<GeoShapeType, MCType>::
-getListOfPoints( bool ( *fct ) ( double, double, double ), std::vector<UInt>& list_pts )
+getListOfPoints( bool ( *fct ) ( Real, Real, Real ), std::vector<UInt>& list_pts )
 {
     for ( UInt i = 0; i < M_numPoints; i++ )
     {
