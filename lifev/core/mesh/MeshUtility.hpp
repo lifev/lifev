@@ -2580,7 +2580,7 @@ void MeshTransformer<REGIONMESH, RMTYPE >::transformMesh( const function& meshMa
 template <typename REGIONMESH>
 MeshStatistics::meshSize MeshStatistics::computeSize(REGIONMESH const & mesh)
 {
-    const double bignumber=std::numeric_limits<double>::max();
+    const Real bignumber=std::numeric_limits<Real>::max();
     Real MaxH(0), MinH(bignumber), MeanH(0);
     Real deltaX(0), deltaY(0), deltaZ(0), sum(0);
     typedef typename REGIONMESH::edges_Type edges_Type;
