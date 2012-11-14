@@ -96,10 +96,6 @@ public:
     //@}
 
     //! @name Constructor & Destructor
-    //@{
-    //! Empty Constructor
-    GraphCutterZoltan();
-
     //! Constructor taking the original mesh, the MPI comm and parameters
     /*!
         This constructor can be used to build the object and perform the
@@ -119,16 +115,8 @@ public:
     virtual ~GraphCutterZoltan() {}
     //@}
 
-    //! @name Methods
+    //! @name Public methods
     //@{
-    //! Configure the object (used with empty constructor)
-    void setup(meshPtr_Type& mesh,
-               commPtr_Type& comm,
-               pList_Type& parameters);
-
-    //! Set values for all the parameters, with default values where needed
-    void setParameters(pList_Type& parameters);
-
     //! Performs the graph partitioning
     void run();
     //@}
@@ -207,6 +195,12 @@ public:
                               int *sizes, int *idx, char *buf, int *ierr);
 
 private:
+    //! @name Private methods
+    //@{
+    //! Set values for all the parameters, with default values where needed
+    void setParameters(pList_Type& parameters);
+    //@}
+
     // Private copy constructor and assignment operator are disabled
     GraphCutterZoltan(const GraphCutterZoltan&);
     GraphCutterZoltan& operator=(const GraphCutterZoltan&);
@@ -238,7 +232,6 @@ private:
     Int                                        M_numPartitionsPerProcessor;
     Int                                        M_myFirstPartition;
     Int                                        M_myLastPartition;
-    std::string                                M_topology;
     std::vector<Int>                           M_indexBounds;
     pList_Type                                 M_parameters;
     meshPtr_Type                               M_mesh;
@@ -263,20 +256,6 @@ private:
 // =================================
 
 template<typename MeshType>
-GraphCutterZoltan<MeshType>::GraphCutterZoltan() :
-    M_comm(),
-    M_myPID(0),
-    M_numProcessors(0),
-    M_numPartitions(0),
-    M_numPartitionsPerProcessor(0),
-    M_myFirstPartition(0),
-    M_myLastPartition(0),
-    M_parameters(),
-    M_mesh(),
-    M_zoltanStruct(0)
-{}
-
-template<typename MeshType>
 GraphCutterZoltan<MeshType>::GraphCutterZoltan(meshPtr_Type& mesh,
                                    	   	   	   commPtr_Type& comm,
 											   pList_Type& parameters) :
@@ -295,31 +274,25 @@ GraphCutterZoltan<MeshType>::GraphCutterZoltan(meshPtr_Type& mesh,
 }
 
 template<typename MeshType>
-void GraphCutterZoltan<MeshType>::setup(meshPtr_Type& mesh,
-                                  	    commPtr_Type& comm,
-                                  	    pList_Type& parameters)
-{
-    M_comm = comm;
-    M_myPID = M_comm->MyPID();
-    M_numProcessors = M_comm->NumProc();
-    M_mesh = mesh;
-
-    setParameters(parameters);
-}
-
-template<typename MeshType>
 void GraphCutterZoltan<MeshType>::setParameters(pList_Type& parameters)
 {
     // Here put some default values for the parameters and then import
     // the user supplied list, overwriting the corresponding parameters
-    M_parameters.set("num_partitions", static_cast<Int>(M_comm->NumProc()), "");
-    M_parameters.set("topology", "1", "");
+    M_parameters.set("num_partitions", static_cast<Int>(M_comm->NumProc()),
+    				 "The desired number of partitions");
+    M_parameters.set("topology", "1",
+    				 "The topology of the mesh partition process.");
+    M_parameters.set("debug_level", 0, "Verbosity of Zoltan");
+    M_parameters.set("hier_debug_level", 0, "Verbosity (hier. partition)");
+    M_parameters.set("lb_method", "GRAPH",
+    				 "Graph partition method: GRAPH or HIER");
+    M_parameters.set("lb_approach", "PARTITION",
+    				 "Partition approach: PARTITION or REPARTITION");
 
     M_parameters.setParameters(parameters);
 
     M_numPartitions = M_parameters.get<Int>("num_partitions");
     M_numPartitionsPerProcessor = M_numPartitions / M_numProcessors;
-    M_topology = M_parameters.get<std::string>("topology");
 }
 
 template<typename MeshType>
@@ -401,9 +374,6 @@ void GraphCutterZoltan<MeshType>::getNeighbourList(void *data,
 {
     GraphCutterZoltan<MeshType>* object = (GraphCutterZoltan<MeshType>*) data;
 
-    const std::vector<Int>& elementList = object->elementList();
-    const Int numStoredElements = object->numStoredElements();
-
     std::vector<Int>::const_iterator iter;
     int pos = 0;
     for (int element = 0; element < num_obj; ++element) {
@@ -411,15 +381,14 @@ void GraphCutterZoltan<MeshType>::getNeighbourList(void *data,
         for (int k = 0; k < num_edges[element]; ++k) {
             nborGID[pos] = *iter;
             int pid = 0;
-            // TODO: do a binary search here for speed
             for (int i = 0; i < object->numProcessors(); ++i) {
-                if ((*iter >= static_cast<Int>(elementList[0])) &&
-                    (*iter <= static_cast<Int>(elementList[numStoredElements
-                                                           - 1])
-                    		)) {
-                    pid = i;
-                    break;
-                }
+            	UInt ie = *iter;
+            	if (ie >= object->firstIndex(i)
+					&&
+					ie <= object->lastIndex(i)) {
+            		pid = i;
+            		break;
+            	}
             }
             nborProc[pos] = pid;
             ++pos;
@@ -642,10 +611,22 @@ void GraphCutterZoltan<MeshType>::partitionGraph()
     Zoltan_Initialize(argc, &argv, &ver);
     M_zoltanStruct = Zoltan_Create(mpiComm->Comm());
 
-    // Check these parameters. It may be wiser not to hard-code anything
-    Zoltan_Set_Param(M_zoltanStruct, "DEBUG_LEVEL", "0");
-    Zoltan_Set_Param(M_zoltanStruct, "HIER_DEBUG_LEVEL", "0");
-    Zoltan_Set_Param(M_zoltanStruct, "LB_METHOD", "HIER");
+    int debug_level = M_parameters.get<int>("debug_level");
+    int hier_debug_level = M_parameters.get<int>("hier_debug_level");
+    Zoltan_Set_Param(M_zoltanStruct,
+    				 "DEBUG_LEVEL",
+    				 boost::lexical_cast<std::string>(debug_level).c_str());
+
+    Zoltan_Set_Param(M_zoltanStruct,
+    				 "HIER_DEBUG_LEVEL",
+				 boost::lexical_cast<std::string>(hier_debug_level).c_str());
+
+    Zoltan_Set_Param(M_zoltanStruct, "LB_METHOD",
+			 	 	 M_parameters.get<std::string>("lb_method").c_str());
+
+    Zoltan_Set_Param(M_zoltanStruct, "LB_APPROACH",
+    				 M_parameters.get<std::string>("lb_approach").c_str());
+
     Zoltan_Set_Param(M_zoltanStruct, "HIER_ASSIST", "1");
     Zoltan_Set_Param(M_zoltanStruct, "NUM_GID_ENTRIES", "1"); 
     Zoltan_Set_Param(M_zoltanStruct, "NUM_LID_ENTRIES", "1");
