@@ -108,27 +108,10 @@ filename   = solid  # name of the postprocessed file
 [../] # solid
 [../] # exporter
 
-* #importer details
-[importer]
-initSol=00005             # label of the solution from which we want to start (5 digits by convention)
-initSolFD=00006           # label of the fluid displacement solution from which we want to start (may be important e.g. if we want to restart with GI from a GE simulation)
-type       = hdf5         # format of the imported solution
-##restartType=restartFSI
-
-** #importer for the fluid
-[./fluid]
-filename   = fluidImp     # name of the imported solution
-
-** #importer for the solid
-[../solid]
-filename   = solidImp     # name of the imported solution
-
 * #Fluid data
 [fluid]
 useShapeDerivatives           = false # tells if the shape derivatives are neglected or not in the Jacobian matrix
 semiImplicit                  = true # tells if we advance in time after the first nonlinear iteration or not
-domainVelImplicit             = false  # tells if the domain vel is to be considered implicitly in the convective term
-convectiveImplicit            = false  # tells if the velocity is to be considered implicitly in the convective term
 conservativeFormulation       = false  # tells if the conservative or non conservative formulation is used
 
 ** #Physical quantities
@@ -268,47 +251,6 @@ alphas = 0.5 # parameters for Robin-Robin DDBlock preconditioner
 [../Composed]
 list                = 'Ifpack Ifpack' # either Ifpack, ML, PCD, ...
 sections            = 'Ifpack1 Ifpack2'
-*** #PCD preconditioner
-[../PCD1]
-
- pressure_boundary_conditions        = neumann_to_dirichlet
- set_Ap_boundary_conditions          = true
- set_Fp_boundary_conditions          = true
- pressure_laplacian_operator         = standard
- use_lumped_pressure_mass            = true
-
-**** #options for the PCD
- [./subprecs]
- pressure_laplacian_prec = Ifpack
- pressure_laplacian_prec_data_section = Ifpack
- fluid_prec = Ifpack
- fluid_prec_data_section = Ifpack
- pressure_mass_prec = Ifpack
- pressure_mass_prec_data_section = Ifpack
-
-[../]
-
-*** #PCD preconditioner
-[../PCD2] #this is the "subsection" in PreconditionerPCD.cpp
-displayList = false
-pressure_boundary_conditions         = neumann_to_dirichlet
-set_Ap_boundary_conditions           = true
-set_Fp_boundary_conditions           = true
-pressure_laplacian_operator          = standard
-use_lumped_pressure_mass             = true
-use_StiffStrain                      = true
-enable_transient                     = true
-
-**** #options for the PCD
-[./subprecs]
-fluid_prec                           = ML
-fluid_prec_data_section              = DD2Levels2 #linear_system/prec
-pressure_laplacian_prec              = ML
-pressure_laplacian_prec_data_section = PCDLaplacian #linear_system/prec
-pressure_mass_prec                   = ML
-pressure_mass_prec_data_section      = DD2Levels2 #linear_system/prec
-[../]
-
 
 *** #set of options for ML preconditioner
 [../ML1] # preconditioner for the first factor in case our choice was ML
@@ -578,14 +520,6 @@ solvertype = Amesos_Umfpack
 [../] # ifpack
 [../] # prec
 
-* #Obsolete section
-[jacobian]
-
-solver   = gmres;
-poly_ord = 5;
-kspace   = 40;
-conv     = rhs;
-
 * #eigensolver section, used when we want to compute the singular values of the preconditioned FSI system (see in FSIMonolithic.cpp)
 [eigensolver]
 
@@ -597,128 +531,3 @@ tol = 1e-5;
 which = ML
 neval = 5
 
-* #preconditioner perameters that can be used for the blocks in the aPCD preconditioner
-** 2 level DD Preconditioner
-[DD2Levels]
-displayList                 = false
-  [./ML]
-  default_parameter_list  = DD
-  max_levels              = 2
-  inc_or_dec              = increasing
-    [./smoother]
-    type                    = IFPACK
-    pre_or_post             = pre
-    ifpack_overlap          = 0
-    [../coarse]
-    type                    = Gauss-Seidel
-    sweeps                  = 1
-    pre_or_post             = both
-    [../aggregation]
-    type                    = Zoltan #METIS
-    nodes_per_aggregate     = 200
-   - #available smoother types:
-       # "Aztec"
-       # "IFPACK"
-       # "Jacobi"
-       # "ML symmetric Gauss-Seidel"
-       # "symmetric Gauss-Seidel"
-       # "ML Gauss-Seidel"
-       # "Gauss-Seidel"
-       # "block Gauss-Seidel"
-       # "symmetric block Gauss-Seidel"
-       # "Chebyshev"
-       # "MLS"
-       # "Hiptmair"
-       # "Amesos-KLU"
-       # "Amesos-Superlu"
-       # "Amesos-UMFPACK"
-       # "Amesos-Superludist"
-       # "Amesos-MUMPS"
-       # "user-defined"
-       # "SuperLU"
-       # "IFPACK-Chebyshev"
-       # "self"
-       # "do-nothing"
-       # "IC"
-       # "ICT"
-       # "ILU"
-       # "ILUT"
-       # "Block Chebyshev"
-       # "IFPACK-Block Chebyshev"
-  [../]
-[../]
-
-** other 2 levels DD preconditioner
-[DD2Levels2]
-displayList                 = false
-  [./ML]
-  default_parameter_list  = DD
-  max_levels              = 2
-  inc_or_dec              = increasing
-    [./smoother]
-    type                    = IFPACK
-    pre_or_post             = pre
-    ifpack_overlap          = 2
-    ifpack_type            = Amesos #SORa
-    sweeps                  = 1
-    [../coarse]
-    type                    = IFPACK
-    sweeps                  = 1
-    pre_or_post             = both
-    [../aggregation]
-    type                    = METIS
-    nodes_per_aggregate     = 200
-  [../]
- [../Ifpack]
- prectype        = Amesos
- overlap         = 2
-
- [./fact]
- level-of-fill                 = 10
- ilut_level-of-fill            = 4
- drop_tolerance                = 1.e-10
- relax_value                   = 0
-
- [../amesos]
- solvertype = Amesos_KLU
-
- [../]
-[../]
-
-** AMG preconditioner effective for the Laplacian
-[PCDLaplacian]
-displayList                 = false
-  [./ML]
-  default_parameter_list  = SA
-  inc_or_dec              = increasing
-    [./smoother]
-    type                    = 'symmetric Gauss-Seidel'
-    pre_or_post             = pre
-    sweeps                  = 4
-    ifpack_overlap          = 2
-    [../coarse]
-    type                    = Amesos-KLU
-    max_size                = 500
-    [../aggregation]
-    ## Uncoupled-MIS (Default)
-    threshold     = 0.01
-  [../]
-[../]
-
-** Ifpack Additive Schwarz preconditioner
-[Ifpack]
-[./ifpack]
-prectype        = Amesos
-overlap         = 4
-
-[./fact]
-level-of-fill                 = 10
-ilut_level-of-fill            = 4
-drop_tolerance                = 1.e-10
-relax_value                   = 0
-
-[../amesos]
-solvertype = Amesos_Umfpack
-
-[../] # ifpack
-[../]
