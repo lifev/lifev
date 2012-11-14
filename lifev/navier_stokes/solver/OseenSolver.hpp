@@ -356,6 +356,42 @@ public:
      */
     Real pressure( const markerID_Type& flag );
 
+    //! Compute the mean normal stress on a boundary face with given flag and a given solution
+    /*!
+        @param  flag Flag of the boundary face
+        @param bcHandler BChandler containing the boundary conditions of the problem.
+        @param  solution Vector containing the solution of the problem
+                         (and also the Lagrange multipliers at the end).
+        @return mean normal stress
+     */
+    Real meanNormalStress( const markerID_Type& flag, bcHandler_Type& bcHandler, const vector_Type& solution );
+
+    //! Compute the mean normal stress on a boundary face with given flag
+    /*!
+        @param flag Flag of the boundary face
+        @param bcHandler BChandler containing the boundary conditions of the problem.
+        @return mean normal stress
+     */
+    Real meanNormalStress( const markerID_Type& flag, bcHandler_Type& bcHandler );
+
+    //! Compute the mean total normal stress on a boundary face with given flag and a given solution
+    /*!
+        @param  flag Flag of the boundary face
+        @param bcHandler BChandler containing the boundary conditions of the problem.
+        @param  solution Vector containing the solution of the problem
+                         (and also the Lagrange multipliers at the end).
+        @return mean normal stress
+     */
+    Real meanTotalNormalStress( const markerID_Type& flag, bcHandler_Type& bcHandler, const vector_Type& solution );
+
+    //! Compute the mean total normal stress on a boundary face with given flag
+    /*!
+        @param flag Flag of the boundary face
+        @param bcHandler BChandler containing the boundary conditions of the problem.
+        @return mean normal stress
+     */
+    Real meanTotalNormalStress( const markerID_Type& flag, bcHandler_Type& bcHandler );
+
     //! Get the Lagrange multiplier related to a flux imposed on a given part of the boundary
     /*!
         @param flag      Flag of the boundary face associated with the flux
@@ -1757,8 +1793,40 @@ OseenSolver<MeshType, SolverType>::pressure(const markerID_Type& flag,
 
 template<typename MeshType, typename SolverType>
 Real
-OseenSolver<MeshType, SolverType>::lagrangeMultiplier( const markerID_Type& flag,
-                                                 bcHandler_Type& bcHandler )
+OseenSolver<MeshType, SolverType>::meanNormalStress( const markerID_Type& flag, bcHandler_Type& bcHandler )
+{
+    return meanNormalStress( flag, bcHandler, *M_solution );
+}
+
+template<typename MeshType, typename SolverType>
+Real
+OseenSolver<MeshType, SolverType>::meanNormalStress(const markerID_Type& flag, bcHandler_Type& bcHandler, const vector_Type& solution )
+{
+    if ( bcHandler.findBCWithFlag( flag ).type() == Flux )
+        return -lagrangeMultiplier( flag, bcHandler, solution );
+    else
+        return -pressure( flag, solution ); // TODO: This is an approximation of the stress as the pressure.
+                                            // A proper method should be coded in the PostprocessingBoundary class
+                                            // to compute the exact mean normal stress
+}
+
+template<typename MeshType, typename SolverType>
+Real
+OseenSolver<MeshType, SolverType>::meanTotalNormalStress( const markerID_Type& flag, bcHandler_Type& bcHandler )
+{
+    return meanTotalNormalStress( flag, bcHandler, *M_solution );
+}
+
+template<typename MeshType, typename SolverType>
+Real
+OseenSolver<MeshType, SolverType>::meanTotalNormalStress(const markerID_Type& flag, bcHandler_Type& bcHandler, const vector_Type& solution )
+{
+    return meanNormalStress( flag, bcHandler, solution ) - kineticEnergy( flag, solution );
+}
+
+template<typename MeshType, typename SolverType>
+Real
+OseenSolver<MeshType, SolverType>::lagrangeMultiplier( const markerID_Type& flag, bcHandler_Type& bcHandler )
 {
     return lagrangeMultiplier( flag, bcHandler, *M_solution );
 }
@@ -1766,8 +1834,8 @@ OseenSolver<MeshType, SolverType>::lagrangeMultiplier( const markerID_Type& flag
 template<typename MeshType, typename SolverType>
 Real
 OseenSolver<MeshType, SolverType>::lagrangeMultiplier( const markerID_Type&  flag,
-                                                 bcHandler_Type& bcHandler,
-                                                 const vector_Type& solution )
+                                                             bcHandler_Type& bcHandler,
+                                                       const vector_Type& solution )
 {
     // Create a list of Flux bcName_Type ??
     std::vector< bcName_Type > fluxBCVector = bcHandler.findAllBCWithType( Flux );
