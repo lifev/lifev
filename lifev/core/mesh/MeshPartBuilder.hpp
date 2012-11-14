@@ -54,7 +54,13 @@ namespace LifeV
   @brief Class that builds a mesh part, after the graph has been partitioned
   @author Radu Popescu radu.popescu@epfl.ch
 
-  TODO: write class description
+  This class is used as a component for the MeshPartitionTool class. When an
+  object of class MeshPartBuilder is instantiated it holds pointer to the
+  global uncut mesh.
+
+  The only public method that this class implements is a run method, which
+  takes a vector of element IDs which corespond to a mesh part and builds
+  a RegionMesh object with this elements.
 */
 template<typename MeshType>
 class MeshPartBuilder
@@ -71,10 +77,12 @@ public:
 
     //! Constructor
     /*!
-     * TODO: Write description
+     * Constructor which takes a pointer to a RegionMesh object, the uncut
+     * mesh
+     *
+     * \param mesh - shared pointer to the global uncut mesh
     */
-    MeshPartBuilder(const meshPtr_Type& mesh,
-					const boost::shared_ptr<Epetra_Comm>& comm);
+    MeshPartBuilder(const meshPtr_Type& mesh);
 
     //! Empty destructor
     ~MeshPartBuilder() {}
@@ -82,7 +90,15 @@ public:
 
     //! \name Public Methods
     //@{
-    //! This method performs all the steps for the mesh and graph partitioning
+    //! Run part builder
+    /*!
+     * This method performs all the steps for the mesh and graph partitioning
+     *
+     * \param meshPart - shared pointer to a RegionMesh object which will
+     * 					 contain the mesh part
+     * \param elementList - shared pointer to a vector of int, representing the
+     * 						element IDs associated with this mesh part
+     */
     void run(const meshPtr_Type& meshPart,
     		 const boost::shared_ptr<std::vector<Int> > elementList);
     //@}
@@ -158,8 +174,7 @@ private:
 // IMPLEMENTATION
 
 template<typename MeshType>
-MeshPartBuilder<MeshType>::MeshPartBuilder(
-		const meshPtr_Type& mesh, const boost::shared_ptr<Epetra_Comm>& comm)
+MeshPartBuilder<MeshType>::MeshPartBuilder(const meshPtr_Type& mesh)
 	: M_nBoundaryVertices(0),
 	  M_nBoundaryRidges(0),
 	  M_nBoundaryFacets(0),
