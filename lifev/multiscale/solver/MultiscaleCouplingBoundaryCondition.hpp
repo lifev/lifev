@@ -185,12 +185,13 @@ inline void
 MultiscaleCouplingBoundaryCondition::applyBoundaryConditions0D( const UInt& i )
 {
     boost::shared_ptr< ModelType > model = multiscaleDynamicCast< ModelType >( M_models[i] );
+    multiscaleID_Type flag( model->boundaryFlag( M_boundaryIDs[i] ) );
 
     for ( UInt j( 0 ); j < M_listSize; ++j )
     {
         model->bcInterface().readBC( M_fileName, "boundary_conditions/", M_list[j] );
 
-        model->bcInterface().dataContainer().setFlag( M_flags[i] );
+        model->bcInterface().dataContainer().setFlag( flag );
 
         model->bcInterface().insertBC();
     }
@@ -201,12 +202,13 @@ inline void
 MultiscaleCouplingBoundaryCondition::applyBoundaryConditions1D( const UInt& i )
 {
     boost::shared_ptr< ModelType > model = multiscaleDynamicCast< ModelType >( M_models[i] );
+    multiscaleID_Type flag( model->boundaryFlag( M_boundaryIDs[i] ) );
 
     for ( UInt j( 0 ); j < M_listSize; ++j )
     {
         model->bcInterface().readBC( M_fileName, "boundary_conditions/", M_list[j] );
 
-        model->bcInterface().dataContainer().setSide( (M_flags[i] == 0) ? OneDFSI::left : OneDFSI::right );
+        model->bcInterface().dataContainer().setSide( ( flag == 0 ) ? OneDFSI::left : OneDFSI::right );
 
         model->bcInterface().insertBC();
     }
@@ -217,13 +219,14 @@ inline void
 MultiscaleCouplingBoundaryCondition::applyBoundaryConditions3D( const UInt& i )
 {
     boost::shared_ptr< ModelType > model = multiscaleDynamicCast< ModelType >( M_models[i] );
+    multiscaleID_Type flag( model->boundaryFlag( M_boundaryIDs[i] ) );
 
     for ( UInt j( 0 ); j < M_listSize; ++j )
     {
         model->bcInterface().readBC( M_fileName, "boundary_conditions/", M_list[j] );
 
-        model->bcInterface().dataContainer().setName( "CouplingBC_Model_" + number2string( model->ID() ) + "_Flag_" + number2string( M_flags[i] ) + "_" + M_list[j] );
-        model->bcInterface().dataContainer().setFlag( M_flags[i] );
+        model->bcInterface().dataContainer().setName( "CouplingBC_Model_" + number2string( model->ID() ) + "_BoundaryID_" + number2string( M_boundaryIDs[i] ) + "_" + M_list[j] );
+        model->bcInterface().dataContainer().setFlag( flag );
 
         model->bcInterface().insertBC();
     }

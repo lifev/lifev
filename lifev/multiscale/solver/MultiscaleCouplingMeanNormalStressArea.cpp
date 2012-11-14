@@ -96,7 +96,7 @@ MultiscaleCouplingMeanNormalStressArea::setupCoupling()
                 if ( M_models[i]->type() == FSI3D )
                 {
                     M_localCouplingFunctions.push_back( MultiscaleCouplingFunction( this, 2 ) );
-                    multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->imposeBoundaryArea( M_flags[i], boost::bind( &MultiscaleCouplingFunction::function, M_localCouplingFunctions.back(), _1, _2, _3, _4, _5 ) );
+                    multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->imposeBoundaryArea( M_boundaryIDs[i], boost::bind( &MultiscaleCouplingFunction::function, M_localCouplingFunctions.back(), _1, _2, _3, _4, _5 ) );
 
                     break;
                 }
@@ -119,7 +119,7 @@ MultiscaleCouplingMeanNormalStressArea::initializeCouplingVariables()
     {
         if ( myModel( i ) )
         {
-            Real myValue = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryFlowRate( M_flags[i] );
+            Real myValue = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryFlowRate( M_boundaryIDs[i] );
             if ( isModelLeaderProcess( i ) )
                 localSum = myValue;
         }
@@ -137,7 +137,7 @@ MultiscaleCouplingMeanNormalStressArea::initializeCouplingVariables()
     for ( UInt i( 0 ); i < modelsNumber(); ++i )
         if ( myModel( i ) )
         {
-            Real myValue = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryStress( M_flags[i] );
+            Real myValue = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryStress( M_boundaryIDs[i] );
             if ( isModelLeaderProcess( i ) )
                 localSum += myValue;
         }
@@ -169,7 +169,7 @@ MultiscaleCouplingMeanNormalStressArea::exportCouplingResiduals( multiscaleVecto
         for ( UInt i( 0 ); i < M_flowRateInterfaces; ++i )
             if ( myModel( i ) )
             {
-                Real myValueStress = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryStress( M_flags[i] );
+                Real myValueStress = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryStress( M_boundaryIDs[i] );
                 if ( isModelLeaderProcess( i ) )
                 {
                     ( *M_localCouplingResiduals )[0]  += localCouplingVariables( 0 )[i];
@@ -180,7 +180,7 @@ MultiscaleCouplingMeanNormalStressArea::exportCouplingResiduals( multiscaleVecto
         for ( UInt i( M_flowRateInterfaces ); i < modelsNumber(); ++i )
             if ( myModel( i ) )
             {
-                Real myValueFlowRate = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryFlowRate( M_flags[i] );
+                Real myValueFlowRate = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryFlowRate( M_boundaryIDs[i] );
                 if ( isModelLeaderProcess( i ) )
                 {
                     ( *M_localCouplingResiduals )[0]  += myValueFlowRate;
@@ -265,12 +265,12 @@ MultiscaleCouplingMeanNormalStressArea::insertJacobianDeltaCoefficients( multisc
         if ( modelLocalID >= M_flowRateInterfaces )
         {
             row = M_couplingVariablesOffset;
-            coefficient = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[modelLocalID] )->boundaryDeltaFlowRate( M_flags[modelLocalID], solveLinearSystem );
+            coefficient = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[modelLocalID] )->boundaryDeltaFlowRate( M_boundaryIDs[modelLocalID], solveLinearSystem );
         }
         else
         {
             row = M_couplingVariablesOffset + 1 + modelLocalID;
-            coefficient = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[modelLocalID] )->boundaryDeltaStress( M_flags[modelLocalID], solveLinearSystem );
+            coefficient = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[modelLocalID] )->boundaryDeltaStress( M_boundaryIDs[modelLocalID], solveLinearSystem );
         }
 
         // Add the coefficient to the matrix

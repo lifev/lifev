@@ -80,91 +80,91 @@ public:
 
     //! Impose the flow rate on a specific interface of the model
     /*!
-     * @param flag flag of the boundary interface
+     * @param boundaryID ID of the boundary interface
      * @param function boundary condition function
      */
-    virtual void imposeBoundaryFlowRate( const bcFlag_Type& flag, const function_Type& function ) = 0;
+    virtual void imposeBoundaryFlowRate( const multiscaleID_Type& boundaryID, const function_Type& function ) = 0;
 
     //! Impose the integral of the mean normal stress on a specific boundary interface of the model
     /*!
-     * @param flag flag of the boundary interface
+     * @param boundaryID ID of the boundary interface
      * @param function boundary condition function
      */
-    virtual void imposeBoundaryStress( const bcFlag_Type& flag, const function_Type& function ) = 0;
+    virtual void imposeBoundaryStress( const multiscaleID_Type& boundaryID, const function_Type& function ) = 0;
 
     //! Impose the integral of the mean total normal stress on a specific boundary interface of the model
     /*!
-     * @param flag flag of the boundary interface
+     * @param boundaryID ID of the boundary interface
      * @param function boundary condition function
      */
-    virtual void imposeBoundaryTotalStress( const bcFlag_Type& flag, const function_Type& function ) = 0;
+    virtual void imposeBoundaryTotalStress( const multiscaleID_Type& boundaryID, const function_Type& function ) = 0;
 
     //! Impose the area on a specific boundary interface of the model
     /*!
-     * @param flag flag of the boundary interface
+     * @param boundaryID ID of the boundary interface
      * @param function boundary condition function
      */
-    virtual void imposeBoundaryArea( const bcFlag_Type& flag, const function_Type& function ) = 0;
+    virtual void imposeBoundaryArea( const multiscaleID_Type& boundaryID, const function_Type& function ) = 0;
 
     //! Get the flow rate on a specific boundary interface of the model
     /*!
-     * @param flag flag of the boundary interface
+     * @param boundaryID ID of the boundary interface
      * @return flow rate value
      */
-    virtual Real boundaryFlowRate( const bcFlag_Type& flag ) const = 0;
+    virtual Real boundaryFlowRate( const multiscaleID_Type& boundaryID ) const = 0;
 
     //! Get the integral of the mean normal stress on a specific boundary interface of the model
     /*!
-     * @param flag flag of the boundary interface
+     * @param boundaryID ID of the boundary interface
      * @return mean normal stress value
      */
-    virtual Real boundaryStress( const bcFlag_Type& flag ) const = 0;
+    virtual Real boundaryStress( const multiscaleID_Type& boundaryID ) const = 0;
 
     //! Get the integral of the mean total normal stress on a specific boundary interface of the model
     /*!
-     * @param flag flag of the boundary interface
+     * @param boundaryID ID of the boundary interface
      * @return mean total normal stress value
      */
-    virtual Real boundaryTotalStress( const bcFlag_Type& flag ) const = 0;
+    virtual Real boundaryTotalStress( const multiscaleID_Type& boundaryID ) const = 0;
 
     //! Get the area on a specific boundary interface of the model
     /*!
-     * @param flag flag of the boundary interface
+     * @param boundaryID ID of the boundary interface
      * @return area value
      */
-    virtual Real boundaryArea( const bcFlag_Type& flag ) const = 0;
+    virtual Real boundaryArea( const multiscaleID_Type& boundaryID ) const = 0;
 
     //! Get the variation of the flow rate (on a specific boundary interface) using the linear model
     /*!
-     * @param flag flag of the boundary interface
+     * @param boundaryID ID of the boundary interface
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      * @return variation of the flow rate
      */
-    virtual Real boundaryDeltaFlowRate( const bcFlag_Type& flag, bool& solveLinearSystem ) = 0;
+    virtual Real boundaryDeltaFlowRate( const multiscaleID_Type& boundaryID, bool& solveLinearSystem ) = 0;
 
     //! Get the variation of the integral of the mean normal stress (on a specific boundary interface) using the linear model
     /*!
-     * @param flag flag of the boundary interface
+     * @param boundaryID ID of the boundary interface
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      * @return variation of the mean normal stress
      */
-    virtual Real boundaryDeltaStress( const bcFlag_Type& flag, bool& solveLinearSystem ) = 0;
+    virtual Real boundaryDeltaStress( const multiscaleID_Type& boundaryID, bool& solveLinearSystem ) = 0;
 
     //! Get the variation of the integral of the mean total normal stress (on a specific boundary interface) using the linear model
     /*!
-     * @param flag flag of the boundary interface
+     * @param boundaryID ID of the boundary interface
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      * @return variation of the mean total normal stress
      */
-    virtual Real boundaryDeltaTotalStress( const bcFlag_Type& flag, bool& solveLinearSystem ) = 0;
+    virtual Real boundaryDeltaTotalStress( const multiscaleID_Type& boundaryID, bool& solveLinearSystem ) = 0;
 
     //! Get the variation of the integral of the area (on a specific boundary interface) using the linear model
     /*!
-     * @param flag flag of the boundary interface
+     * @param boundaryID ID of the boundary interface
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      * @return variation of the area
      */
-    virtual Real boundaryDeltaArea( const bcFlag_Type& flag, bool& solveLinearSystem ) = 0;
+    virtual Real boundaryDeltaArea( const multiscaleID_Type& boundaryID, bool& solveLinearSystem ) = 0;
 
     //@}
 

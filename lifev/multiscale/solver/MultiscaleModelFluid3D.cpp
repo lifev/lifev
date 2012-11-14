@@ -355,46 +355,45 @@ MultiscaleModelFluid3D::checkSolution() const
 // MultiscaleInterfaceFluid Methods
 // ===================================================
 void
-MultiscaleModelFluid3D::imposeBoundaryFlowRate( const bcFlag_Type& flag, const function_Type& function )
+MultiscaleModelFluid3D::imposeBoundaryFlowRate( const multiscaleID_Type& boundaryID, const function_Type& function )
 {
     BCFunctionBase base;
     base.setFunction( function );
 
-    M_bc->handler()->addBC( "CouplingFlowRate_Model_" + number2string( M_ID ) + "_Flag_" + number2string( flag ), flag, Flux, Full, base, 3 );
+    M_bc->handler()->addBC( "CouplingFlowRate_Model_" + number2string( M_ID ) + "_BoundaryID_" + number2string( boundaryID ), boundaryFlag( boundaryID ), Flux, Full, base, 3 );
 }
 
 void
-MultiscaleModelFluid3D::imposeBoundaryStress( const bcFlag_Type& flag, const function_Type& function )
+MultiscaleModelFluid3D::imposeBoundaryStress( const multiscaleID_Type& boundaryID, const function_Type& function )
 {
     BCFunctionBase base;
     base.setFunction( function );
 
-    M_bc->handler()->addBC( "CouplingStress_Model_" + number2string( M_ID ) + "_Flag_" + number2string( flag ), flag, Natural, Normal, base );
+    M_bc->handler()->addBC( "CouplingStress_Model_" + number2string( M_ID ) + "_BoundaryID_" + number2string( boundaryID ), boundaryFlag( boundaryID ), Natural, Normal, base );
 }
 
 Real
-MultiscaleModelFluid3D::boundaryDeltaFlowRate( const bcFlag_Type& flag, bool& solveLinearSystem )
+MultiscaleModelFluid3D::boundaryDeltaFlowRate( const multiscaleID_Type& boundaryID, bool& solveLinearSystem )
 {
     solveLinearModel( solveLinearSystem );
 
-    return M_fluid->getLinearFlux( flag );
+    return M_fluid->getLinearFlux( boundaryFlag( boundaryID ) );
 }
 
 Real
-MultiscaleModelFluid3D::boundaryDeltaStress( const bcFlag_Type& flag, bool& solveLinearSystem )
+MultiscaleModelFluid3D::boundaryDeltaStress( const multiscaleID_Type& boundaryID, bool& solveLinearSystem )
 {
     solveLinearModel( solveLinearSystem );
 
-    if ( M_linearBC->findBCWithFlag( flag ).type() == Flux )
-        return -M_fluid->getLinearLagrangeMultiplier( flag, *M_linearBC );
-    else
-        return -M_fluid->getLinearPressure( flag );
+    return M_fluid->linearMeanNormalStress( boundaryFlag( boundaryID ), *M_linearBC );
 }
 
 Real
-MultiscaleModelFluid3D::boundaryDeltaTotalStress( const bcFlag_Type& flag, bool& solveLinearSystem )
+MultiscaleModelFluid3D::boundaryDeltaTotalStress( const multiscaleID_Type& boundaryID, bool& solveLinearSystem )
 {
-    return boundaryDeltaStress( flag, solveLinearSystem ) - M_fluid->linearKineticEnergy( flag );
+    solveLinearModel( solveLinearSystem );
+
+    return M_fluid->linearMeanTotalNormalStress( boundaryFlag( boundaryID ), *M_linearBC );
 }
 
 // ===================================================
@@ -406,24 +405,6 @@ MultiscaleModelFluid3D::setSolution( const fluidVectorPtr_Type& solution )
     M_solution = solution;
 
     M_fluid->initialize( *M_solution );
-}
-
-// ===================================================
-// Get Methods
-// ===================================================
-Real
-MultiscaleModelFluid3D::boundaryPressure( const bcFlag_Type& flag ) const
-{
-    if ( M_bc->handler()->findBCWithFlag( flag ).type() == Flux )
-        return M_fluid->lagrangeMultiplier( flag, *M_bc->handler() );
-    else
-        return M_fluid->pressure( flag );
-}
-
-Real
-MultiscaleModelFluid3D::boundaryTotalPressure( const bcFlag_Type& flag ) const
-{
-    return boundaryPressure( flag ) + M_fluid->kineticEnergy( flag );
 }
 
 // ===================================================
@@ -696,7 +677,7 @@ MultiscaleModelFluid3D::imposePerturbation()
             BCFunctionBase bcBaseDeltaOne;
             bcBaseDeltaOne.setFunction( boost::bind( &MultiscaleModelFluid3D::bcFunctionDeltaOne, this, _1, _2, _3, _4, _5 ) );
 
-            M_linearBC->findBCWithFlag( ( *i )->flag( ( *i )->modelGlobalToLocalID( M_ID ) ) ).setBCFunction( bcBaseDeltaOne );
+            M_linearBC->findBCWithFlag( boundaryFlag( ( *i )->boundaryID( ( *i )->modelGlobalToLocalID( M_ID ) ) ) ).setBCFunction( bcBaseDeltaOne );
 
             break;
         }
@@ -716,7 +697,7 @@ MultiscaleModelFluid3D::resetPerturbation()
             BCFunctionBase bcBaseDeltaZero;
             bcBaseDeltaZero.setFunction( boost::bind( &MultiscaleModelFluid3D::bcFunctionDeltaZero, this, _1, _2, _3, _4, _5 ) );
 
-            M_linearBC->findBCWithFlag( ( *i )->flag( ( *i )->modelGlobalToLocalID( M_ID ) ) ).setBCFunction( bcBaseDeltaZero );
+            M_linearBC->findBCWithFlag( boundaryFlag( ( *i )->boundaryID( ( *i )->modelGlobalToLocalID( M_ID ) ) ) ).setBCFunction( bcBaseDeltaZero );
 
             break;
         }

@@ -234,21 +234,21 @@ MultiscaleModelWindkessel0D::checkSolution() const
 // MultiscaleInterfaceFluid Methods
 // ===================================================
 void
-MultiscaleModelWindkessel0D::imposeBoundaryFlowRate( const bcFlag_Type& flag, const function_Type& function )
+MultiscaleModelWindkessel0D::imposeBoundaryFlowRate( const multiscaleID_Type& boundaryID, const function_Type& function )
 {
-    M_bc->handler()->setBC( flag, Current, boost::bind( function, _1, _1, _1, _1, _1 ) );
+    M_bc->handler()->setBC( boundaryFlag( boundaryID ), Current, boost::bind( function, _1, _1, _1, _1, _1 ) );
 }
 
 void
-MultiscaleModelWindkessel0D::imposeBoundaryStress( const bcFlag_Type& flag, const function_Type& function )
+MultiscaleModelWindkessel0D::imposeBoundaryStress( const multiscaleID_Type& boundaryID, const function_Type& function )
 {
-    M_bc->handler()->setBC( flag, Voltage, boost::bind( function, _1, _1, _1, _1, _1 ) );
+    M_bc->handler()->setBC( boundaryFlag( boundaryID ), Voltage, boost::bind( function, _1, _1, _1, _1, _1 ) );
 }
 
 Real
-MultiscaleModelWindkessel0D::boundaryDeltaFlowRate( const bcFlag_Type& flag, bool& solveLinearSystem )
+MultiscaleModelWindkessel0D::boundaryDeltaFlowRate( const multiscaleID_Type& boundaryID, bool& solveLinearSystem )
 {
-    if ( flag == 1 )
+    if ( boundaryFlag( boundaryID ) == 1 )
         return 0;
 
     solveLinearModel( solveLinearSystem );
@@ -257,9 +257,9 @@ MultiscaleModelWindkessel0D::boundaryDeltaFlowRate( const bcFlag_Type& flag, boo
 }
 
 Real
-MultiscaleModelWindkessel0D::boundaryDeltaStress( const bcFlag_Type& flag, bool& solveLinearSystem )
+MultiscaleModelWindkessel0D::boundaryDeltaStress( const multiscaleID_Type& boundaryID, bool& solveLinearSystem )
 {
-    if ( flag == 1 )
+    if ( boundaryFlag( boundaryID ) == 1 )
         return 0;
 
     solveLinearModel( solveLinearSystem );
@@ -452,7 +452,7 @@ MultiscaleModelWindkessel0D::solveLinearModel( bool& solveLinearSystem )
         break;
     }
 
-    //This flag avoid recomputation of the same system
+    // This flag avoid recomputation of the same system
     solveLinearSystem = false;
 }
 

@@ -353,29 +353,29 @@ MultiscaleModel1D::checkSolution() const
 // MultiscaleInterfaceFluid Methods
 // ===================================================
 void
-MultiscaleModel1D::imposeBoundaryFlowRate( const bcFlag_Type& flag, const function_Type& function )
+MultiscaleModel1D::imposeBoundaryFlowRate( const multiscaleID_Type& boundaryID, const function_Type& function )
 {
     OneDFSIFunction base;
     base.setFunction( boost::bind( function, _1, _1, _1, _1, _1 ) );
 
-    M_bc->handler()->setBC( flagConverter( flag ), OneDFSI::first, OneDFSI::Q, base );
+    M_bc->handler()->setBC( flagConverter( boundaryID ), OneDFSI::first, OneDFSI::Q, base );
 }
 
 void
-MultiscaleModel1D::imposeBoundaryStress( const bcFlag_Type& flag, const function_Type& function )
+MultiscaleModel1D::imposeBoundaryStress( const multiscaleID_Type& boundaryID, const function_Type& function )
 {
     OneDFSIFunction base;
     base.setFunction( boost::bind( function, _1, _1, _1, _1, _1 ) );
 
-    M_bc->handler()->setBC( flagConverter( flag ), OneDFSI::first, OneDFSI::S, base );
+    M_bc->handler()->setBC( flagConverter( boundaryID ), OneDFSI::first, OneDFSI::S, base );
 }
 
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE
 
 Real
-MultiscaleModel1D::boundaryDeltaFlowRate( const bcFlag_Type& flag, bool& solveLinearSystem )
+MultiscaleModel1D::boundaryDeltaFlowRate( const multiscaleID_Type& boundaryID, bool& solveLinearSystem )
 {
-    bcSide_Type bcSide = flagConverter( flag );
+    bcSide_Type bcSide = flagConverter( boundaryID );
 
     solveLinearModel( solveLinearSystem );
 
@@ -383,7 +383,7 @@ MultiscaleModel1D::boundaryDeltaFlowRate( const bcFlag_Type& flag, bool& solveLi
     Real Qdelta = M_solver->boundaryValue( *M_linearSolution, OneDFSI::Q, bcSide );
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MultiscaleModel1D::boundaryDeltaFlowRate( flag, solveLinearSystem ) \n";
+    Debug( 8130 ) << "MultiscaleModel1D::boundaryDeltaFlowRate( boundaryID, solveLinearSystem ) \n";
     Debug( 8130 ) << "Q:          " << Q << "\n";
     Debug( 8130 ) << "Qdelta:     " << Qdelta << "\n";
 #endif
@@ -393,9 +393,9 @@ MultiscaleModel1D::boundaryDeltaFlowRate( const bcFlag_Type& flag, bool& solveLi
 }
 
 Real
-MultiscaleModel1D::boundaryDeltaStress( const bcFlag_Type& flag, bool& solveLinearSystem )
+MultiscaleModel1D::boundaryDeltaStress( const multiscaleID_Type& boundaryID, bool& solveLinearSystem )
 {
-    bcSide_Type bcSide = flagConverter( flag );
+    bcSide_Type bcSide = flagConverter( boundaryID );
 
     solveLinearModel( solveLinearSystem );
 
@@ -403,7 +403,7 @@ MultiscaleModel1D::boundaryDeltaStress( const bcFlag_Type& flag, bool& solveLine
     Real Sdelta = M_solver->boundaryValue( *M_linearSolution, OneDFSI::S, bcSide );
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MultiscaleModel1D::boundaryDeltaStress( flag, solveLinearSystem ) \n";
+    Debug( 8130 ) << "MultiscaleModel1D::boundaryDeltaStress( boundaryID, solveLinearSystem ) \n";
     Debug( 8130 ) << "S:          " << S <<  "\n";
     Debug( 8130 ) << "Sdelta:     " << Sdelta <<  "\n";
 #endif
@@ -412,9 +412,9 @@ MultiscaleModel1D::boundaryDeltaStress( const bcFlag_Type& flag, bool& solveLine
 }
 
 Real
-MultiscaleModel1D::boundaryDeltaTotalStress( const bcFlag_Type& flag, bool& solveLinearSystem )
+MultiscaleModel1D::boundaryDeltaTotalStress( const multiscaleID_Type& boundaryID, bool& solveLinearSystem )
 {
-    bcSide_Type bcSide = flagConverter( flag );
+    bcSide_Type bcSide = flagConverter( boundaryID );
 
     solveLinearModel( solveLinearSystem );
 
@@ -422,7 +422,7 @@ MultiscaleModel1D::boundaryDeltaTotalStress( const bcFlag_Type& flag, bool& solv
     Real Tdelta = M_solver->boundaryValue( *M_linearSolution, OneDFSI::T, bcSide );
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MultiscaleModel1D::boundaryDeltaTotalStress( flag, solveLinearSystem ) \n";
+    Debug( 8130 ) << "MultiscaleModel1D::boundaryDeltaTotalStress( boundaryID, solveLinearSystem ) \n";
     Debug( 8130 ) << "T:          " << T <<  "\n";
     Debug( 8130 ) << "Tdelta:     " << Tdelta <<  "\n";
 #endif
@@ -431,9 +431,9 @@ MultiscaleModel1D::boundaryDeltaTotalStress( const bcFlag_Type& flag, bool& solv
 }
 
 Real
-MultiscaleModel1D::boundaryDeltaArea( const bcFlag_Type& flag, bool& solveLinearSystem )
+MultiscaleModel1D::boundaryDeltaArea( const multiscaleID_Type& boundaryID, bool& solveLinearSystem )
 {
-    bcSide_Type bcSide = flagConverter( flag );
+    bcSide_Type bcSide = flagConverter( boundaryID );
 
     solveLinearModel( solveLinearSystem );
 
@@ -441,7 +441,7 @@ MultiscaleModel1D::boundaryDeltaArea( const bcFlag_Type& flag, bool& solveLinear
     Real Adelta = M_solver->boundaryValue( *M_linearSolution, OneDFSI::A, bcSide );
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MultiscaleModel1D::boundaryDeltaArea( flag, solveLinearSystem ) \n";
+    Debug( 8130 ) << "MultiscaleModel1D::boundaryDeltaArea( boundaryID, solveLinearSystem ) \n";
     Debug( 8130 ) << "A:          " << A <<  "\n";
     Debug( 8130 ) << "Adelta:     " << Adelta <<  "\n";
 #endif
@@ -452,27 +452,27 @@ MultiscaleModel1D::boundaryDeltaArea( const bcFlag_Type& flag, bool& solveLinear
 #else
 
 Real
-MultiscaleModel1D::boundaryDeltaFlowRate( const bcFlag_Type& flag, bool& /*solveLinearSystem*/ )
+MultiscaleModel1D::boundaryDeltaFlowRate( const multiscaleID_Type& boundaryID, bool& /*solveLinearSystem*/ )
 {
-    return tangentProblem( flagConverter( flag ), OneDFSI::Q );
+    return tangentProblem( flagConverter( boundaryID ), OneDFSI::Q );
 }
 
 Real
-MultiscaleModel1D::boundaryDeltaStress( const bcFlag_Type& flag, bool& /*solveLinearSystem*/ )
+MultiscaleModel1D::boundaryDeltaStress( const multiscaleID_Type& boundaryID, bool& /*solveLinearSystem*/ )
 {
-    return tangentProblem( flagConverter( flag ), OneDFSI::S );
+    return tangentProblem( flagConverter( boundaryID ), OneDFSI::S );
 }
 
 Real
-MultiscaleModel1D::boundaryDeltaTotalStress( const bcFlag_Type& flag, bool& /*solveLinearSystem*/ )
+MultiscaleModel1D::boundaryDeltaTotalStress( const multiscaleID_Type& boundaryID, bool& /*solveLinearSystem*/ )
 {
-    return tangentProblem( flagConverter( flag ), OneDFSI::T );
+    return tangentProblem( flagConverter( boundaryID ), OneDFSI::T );
 }
 
 Real
-MultiscaleModel1D::boundaryDeltaArea( const bcFlag_Type& flag, bool& /*solveLinearSystem*/ )
+MultiscaleModel1D::boundaryDeltaArea( const multiscaleID_Type& boundaryID, bool& /*solveLinearSystem*/ )
 {
-    return tangentProblem( flagConverter( flag ), OneDFSI::A );
+    return tangentProblem( flagConverter( boundaryID ), OneDFSI::A );
 }
 
 #endif
@@ -772,7 +772,7 @@ MultiscaleModel1D::imposePerturbation()
         if ( ( *i )->isPerturbed() )
         {
             // Find the side to perturb and apply the perturbation
-            M_bcDeltaSide = flagConverter( ( *i )->flag( ( *i )->modelGlobalToLocalID( M_ID ) ) );
+            M_bcDeltaSide = flagConverter( ( *i )->boundaryID( ( *i )->modelGlobalToLocalID( M_ID ) ) );
             M_linearBC->bc( M_bcDeltaSide )->setBCFunction( OneDFSI::first, M_bcBaseDelta );
 
             // Compute the range
@@ -877,7 +877,7 @@ MultiscaleModel1D::tangentProblem( const bcSide_Type& bcOutputSide, const bcType
         if ( ( *i )->isPerturbed() )
         {
             // Find the perturbed side
-            bcSide_Type bcSide = flagConverter( ( *i )->flag( ( *i )->modelGlobalToLocalID( M_ID ) ) );
+            bcSide_Type bcSide = flagConverter( ( *i )->boundaryID( ( *i )->modelGlobalToLocalID( M_ID ) ) );
 
             // Perturbation has no effect on the other sides (which also means that dQ/dQ and dP/dP are always zero)
             if ( bcSide != bcOutputSide )

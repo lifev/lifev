@@ -234,7 +234,7 @@ public:
     /*!
      * @param modelsNumber number of models coupled by this coupling
      */
-    void setModelsNumber( const UInt& modelsNumber ) { M_models.resize( modelsNumber ); M_flags.resize( modelsNumber ); }
+    void setModelsNumber( const UInt& modelsNumber ) { M_models.resize( modelsNumber ); M_boundaryIDs.resize( modelsNumber ); }
 
     //! Add a pointer to one of the models to be coupled
     /*!
@@ -243,19 +243,12 @@ public:
      */
     void setModel( const UInt& localModelID, const multiscaleModelPtr_Type& model ) { M_models[localModelID] = model; }
 
-    //! Add a flag to one of the models to be coupled
+    //! Set the boundary ID of one of the coupled models
     /*!
-     * @param localModelID local model ID
-     * @param flag flag of the model
+     * @param modelLocalID model local ID
+     * @param boundaryID boundary ID of the model
      */
-    void setFlag( const UInt& localModelID, const bcFlag_Type& flag ) { M_flags[localModelID] = flag ; }
-
-    //! Add a flag to one of the models to be coupled using the corresponding model flag.
-    /*!
-     * @param localModelID local model ID
-     * @param flagID get from the model the flag with this flagID
-     */
-    void setFlagFromModel( const UInt& localModelID, const UInt& modelFlagNumber );
+    void setBoundaryID( const UInt& modelLocalID, const multiscaleID_Type& boundaryLocalID ) { M_boundaryIDs[modelLocalID] = boundaryLocalID; }
 
     //! Setup the global data of the coupling.
     /*!
@@ -311,17 +304,17 @@ public:
 
     //! Get the model connected by the coupling through local ID
     /*!
-     * @param LocalID local ID of the model
+     * @param localModelID local ID of the model
      * @return Pointer to the model
      */
-    multiscaleModelPtr_Type model( const UInt& localID ) const { return M_models[localID]; }
+    multiscaleModelPtr_Type model( const UInt& localModelID ) const { return M_models[localModelID]; }
 
     //! Get the model connected by the coupling through local ID
     /*!
-     * @param LocalID local ID of the model
-     * @return Coupling flag of the model
+     * @param localModelID local ID of the model
+     * @return boundary ID of the model
      */
-    const bcFlag_Type& flag( const UInt& localID ) const { return M_flags[localID]; }
+    const multiscaleID_Type& boundaryID( const UInt& localModelID ) const { return M_boundaryIDs[localModelID]; }
 
     //! Get the number of the coupling variables
     /*!
@@ -436,7 +429,7 @@ protected:
 
     multiscaleModelsContainer_Type       M_models;
     std::string                          M_couplingName;
-    std::vector< bcFlag_Type >           M_flags;
+    multiscaleIDContainer_Type           M_boundaryIDs;
 
     multiscaleDataPtr_Type               M_globalData;
 

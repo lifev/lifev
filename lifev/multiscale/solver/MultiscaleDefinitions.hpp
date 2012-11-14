@@ -151,7 +151,8 @@ class MultiscaleModel;
 class MultiscaleCoupling;
 
 // Type definitions
-typedef markerID_Type                                                            bcFlag_Type;
+typedef flag_Type                                                                multiscaleID_Type;
+typedef std::vector< flag_Type >                                                 multiscaleIDContainer_Type;
 
 typedef Displayer::commPtr_Type                                                  multiscaleCommPtr_Type;
 

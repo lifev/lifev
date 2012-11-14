@@ -122,8 +122,8 @@ MultiscaleModelMultiscale::setupData( const std::string& fileName )
 
     boost::array< Real, NDIM > geometryScale, geometryRotate, geometryTranslate;
 
-    std::vector< UInt > modelsIDVector;
-    std::vector< UInt > flagsIDVector;
+    multiscaleIDContainer_Type modelsIDVector;
+    multiscaleIDContainer_Type boundaryIDVector;
 
     // Open file
     GetPot dataFile( fileName );
@@ -219,18 +219,18 @@ MultiscaleModelMultiscale::setupData( const std::string& fileName )
         M_couplingsList[fileCouplingsLine]->setCommunicator( M_comm );
 
         string2numbersVector< UInt > ( dataFile( "Problem/couplings", "undefined", fileCouplingsLine * couplingsColumnsNumber + 3 ), modelsIDVector );
-        string2numbersVector< UInt > ( dataFile( "Problem/couplings", "undefined", fileCouplingsLine * couplingsColumnsNumber + 4 ), flagsIDVector );
+        string2numbersVector< UInt > ( dataFile( "Problem/couplings", "undefined", fileCouplingsLine * couplingsColumnsNumber + 4 ), boundaryIDVector );
 
         M_couplingsList[fileCouplingsLine]->setModelsNumber( modelsIDVector.size() );
         for ( UInt j( 0 ); j < modelsIDVector.size(); ++j )
             if ( M_commManager.myModel( modelsIDVector[j] ) )
             {
                 M_couplingsList[fileCouplingsLine]->setModel( j, M_modelsList[modelsIDMap[modelsIDVector[j]]] );
-                M_couplingsList[fileCouplingsLine]->setFlagFromModel( j, flagsIDVector[j] );
+                M_couplingsList[fileCouplingsLine]->setBoundaryID( j, boundaryIDVector[j] );
                 M_modelsList[modelsIDMap[modelsIDVector[j]]]->addCoupling( M_couplingsList[fileCouplingsLine] );
             }
         modelsIDVector.clear();
-        flagsIDVector.clear();
+        boundaryIDVector.clear();
 
         M_couplingsList[fileCouplingsLine]->setGlobalData( M_globalData );
         M_couplingsList[fileCouplingsLine]->setupData( path + enum2String( coupling, multiscaleCouplingsMap ) + "/"

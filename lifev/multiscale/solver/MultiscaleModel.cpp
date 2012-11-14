@@ -51,7 +51,7 @@ MultiscaleModel::MultiscaleModel() :
         M_type              (),
         M_couplings         (),
         M_modelName         (),
-        M_flags             (),
+        M_boundaryFlags     (),
         M_globalData        (),
         M_geometryScale     (),
         M_geometryRotate    (),
@@ -90,9 +90,9 @@ MultiscaleModel::setupData( const std::string& fileName )
 
     // Read flags
     UInt componentSize = dataFile.vector_variable_size( "Multiscale/couplingFlags" );
-    M_flags.reserve( componentSize );
+    M_boundaryFlags.reserve( componentSize );
     for ( UInt j( 0 ); j < componentSize; ++j )
-        M_flags.push_back( dataFile( "Multiscale/couplingFlags", 0, j ) );
+        M_boundaryFlags.push_back( dataFile( "Multiscale/couplingFlags", 0, j ) );
 }
 
 void
@@ -113,7 +113,7 @@ MultiscaleModel::showMe()
     std::cout << std::endl;
     std::cout << "Flags list          = ";
     for ( UInt i( 0 ); i < couplingsNumber(); ++i )
-        std::cout << M_flags[i] << " ";
+        std::cout << M_boundaryFlags[i] << " ";
     std::cout << std::endl << std::endl;
 
     std::cout << "Geometry scale      = ";
@@ -135,8 +135,8 @@ MultiscaleModel::showMe()
 // ===================================================
 void
 MultiscaleModel::setGeometry( const boost::array< Real, NDIM >& scale,
-                               const boost::array< Real, NDIM >& rotate,
-                               const boost::array< Real, NDIM >& translate )
+                              const boost::array< Real, NDIM >& rotate,
+                              const boost::array< Real, NDIM >& translate )
 {
 
 #ifdef HAVE_LIFEV_DEBUG

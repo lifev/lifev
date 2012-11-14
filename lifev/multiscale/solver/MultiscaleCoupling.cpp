@@ -51,7 +51,7 @@ MultiscaleCoupling::MultiscaleCoupling() :
         M_type                        (),
         M_models                      (),
         M_couplingName                (),
-        M_flags                       (),
+        M_boundaryIDs            (),
         M_globalData                  (),
         M_couplingVariablesNumber     ( 0 ),
         M_couplingVariablesOffset     ( 0 ),
@@ -243,9 +243,9 @@ MultiscaleCoupling::saveSolution()
         for ( UInt i( 0 ); i < modelsNumber(); ++i )
             if ( myModel( i ) )
             {
-                Real flowRate    ( multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryFlowRate( M_flags[i] ) );
-                Real stress      ( multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryStress( M_flags[i] ) );
-                Real totalStress ( multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryTotalStress( M_flags[i] ) );
+                Real flowRate    ( multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryFlowRate( M_boundaryIDs[i] ) );
+                Real stress      ( multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryStress( M_boundaryIDs[i] ) );
+                Real totalStress ( multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryTotalStress( M_boundaryIDs[i] ) );
 
                 if ( isModelLeaderProcess( i ) )
                 {
@@ -262,7 +262,7 @@ MultiscaleCoupling::saveSolution()
                         output << "% Coupling Type: " << enum2String( M_type, multiscaleCouplingsMap ) << std::endl;
                         output << "% Coupling Name: " << M_couplingName << std::endl;
                         output << "% Model:         " << number2string( M_models[i]->ID() ) << std::endl;
-                        output << "% Flag:          " << number2string( M_flags[i] ) << std::endl << std::endl;
+                        output << "% Boundary Flag: " << number2string( M_models[i]->boundaryFlag( M_boundaryIDs[i] ) ) << std::endl << std::endl;
                         output << "% TIME                     FLOW RATE                STRESS                   TOTAL STRESS" << std::endl;
                     }
                     else
@@ -301,7 +301,7 @@ MultiscaleCoupling::showMe()
         std::cout << "Flags list          = ";
         for ( UInt i( 0 ); i < modelsNumber(); ++i )
             if ( myModel( i ) )
-                std::cout << M_flags[i] << " ";
+                std::cout << M_boundaryIDs[i] << " ";
         std::cout << std::endl << std::endl;
     }
 }
@@ -309,12 +309,6 @@ MultiscaleCoupling::showMe()
 // ===================================================
 // Get Methods
 // ===================================================
-void
-MultiscaleCoupling::setFlagFromModel( const UInt& localModelID, const UInt& modelFlagNumber )
-{
-    M_flags[localModelID] = M_models[localModelID]->flag( modelFlagNumber );
-}
-
 UInt
 MultiscaleCoupling::modelGlobalToLocalID( const UInt& ID ) const
 {

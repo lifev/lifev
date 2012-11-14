@@ -354,16 +354,16 @@ MultiscaleModelFSI3D::checkSolution() const
 // MultiscaleInterfaceFluid Methods
 // ===================================================
 void
-MultiscaleModelFSI3D::imposeBoundaryFlowRate( const bcFlag_Type& flag, const function_Type& function )
+MultiscaleModelFSI3D::imposeBoundaryFlowRate( const multiscaleID_Type& boundaryID, const function_Type& function )
 {
     BCFunctionBase base;
     base.setFunction( function );
 
-    M_fluidBC->handler()->addBC( "CouplingFlowRate_Model_" + number2string( M_ID ) + "_Flag_" + number2string( flag ), flag, Flux, Full, base, 3 );
+    M_fluidBC->handler()->addBC( "CouplingFlowRate_Model_" + number2string( M_ID ) + "_BoundaryID_" + number2string( boundaryID ), boundaryFlag( boundaryID ), Flux, Full, base, 3 );
 }
 
 void
-MultiscaleModelFSI3D::imposeBoundaryStress( const bcFlag_Type& flag, const function_Type& function )
+MultiscaleModelFSI3D::imposeBoundaryStress( const multiscaleID_Type& boundaryID, const function_Type& function )
 {
     BCFunctionBase base;
 #ifdef FSI_WITH_EXTERNALPRESSURE
@@ -373,69 +373,87 @@ MultiscaleModelFSI3D::imposeBoundaryStress( const bcFlag_Type& flag, const funct
     M_stressCouplingFunction.push_back( couplingFunction );
     base.setFunction( boost::bind( &FSI3DCouplingFunction::function, M_stressCouplingFunction.back(), _1, _2, _3, _4, _5 ) );
 #endif
-    M_fluidBC->handler()->addBC( "CouplingStress_Model_" + number2string( M_ID ) + "_Flag_" + number2string( flag ), flag, Natural, Normal, base );
+    M_fluidBC->handler()->addBC( "CouplingStress_Model_" + number2string( M_ID ) + "_BoundaryID_" + number2string( boundaryID ), boundaryFlag( boundaryID ), Natural, Normal, base );
 
 #ifdef FSI_WITH_BOUNDARYAREA
     for ( boundaryAreaFunctionsContainerIterator_Type i = M_boundaryAreaFunctions.begin(); i < M_boundaryAreaFunctions.end(); ++i )
-        if ( ( *i )->fluidFlag() == flag )
+        if ( ( *i )->fluidFlag() == boundaryFlag( boundaryID ) )
         {
             ( *i )->setFunctionStress( function );
             return;
         }
     if ( M_comm->MyPID() == 0 )
-        std::cerr << "!!! WARNING: No function assigned at flag: " << flag << " !!!" << std::endl;
+        std::cerr << "!!! WARNING: No function assigned at boundaryFlag: " << boundaryFlag( boundaryID ) << " !!!" << std::endl;
 #endif
 }
 
 Real
-MultiscaleModelFSI3D::boundaryDeltaFlowRate( const bcFlag_Type& flag, bool& solveLinearSystem )
+MultiscaleModelFSI3D::boundaryStress( const multiscaleID_Type& boundaryID ) const
 {
-    solveLinearModel( solveLinearSystem );
-
-    return M_FSIoperator->fluid().flux( flag, *M_linearSolution );
+#ifdef FSI_WITH_EXTERNALPRESSURE
+    return M_FSIoperator->fluid().meanNormalStress( boundaryFlag( boundaryID ), *M_fluidBC->handler(), M_FSIoperator->solution() );
+#else
+    return M_FSIoperator->fluid().meanNormalStress( boundaryFlag( boundaryID ), *M_fluidBC->handler(), M_FSIoperator->solution() ) + M_externalPressureScalar;
+#endif
 }
 
 Real
-MultiscaleModelFSI3D::boundaryDeltaStress( const bcFlag_Type& flag, bool& solveLinearSystem )
+MultiscaleModelFSI3D::boundaryTotalStress( const multiscaleID_Type& boundaryID ) const
 {
-    solveLinearModel( solveLinearSystem );
-
-    if ( M_linearBC->findBCWithFlag( flag ).type() == Flux )
-        return -M_FSIoperator->fluid().lagrangeMultiplier( flag, *M_linearBC, *M_linearSolution );
-    else
-        return -M_FSIoperator->fluid().pressure( flag, *M_linearSolution );
+#ifdef FSI_WITH_EXTERNALPRESSURE
+    return M_FSIoperator->fluid().meanTotalNormalStress( boundaryFlag( boundaryID ), *M_fluidBC->handler(), M_FSIoperator->solution() );
+#else
+    return M_FSIoperator->fluid().meanTotalNormalStress( boundaryFlag( boundaryID ), *M_fluidBC->handler(), M_FSIoperator->solution() ) + M_externalPressureScalar;
+#endif
 }
 
 Real
-MultiscaleModelFSI3D::boundaryDeltaTotalStress( const bcFlag_Type& flag, bool& solveLinearSystem )
+MultiscaleModelFSI3D::boundaryDeltaFlowRate( const multiscaleID_Type& boundaryID, bool& solveLinearSystem )
 {
-    return boundaryDeltaStress( flag, solveLinearSystem ) - M_FSIoperator->fluid().linearKineticEnergy( flag, *M_fluidVelocityAndPressure, *M_linearSolution );
+    solveLinearModel( solveLinearSystem );
+
+    return M_FSIoperator->fluid().flux( boundaryFlag( boundaryID ), *M_linearSolution );
+}
+
+Real
+MultiscaleModelFSI3D::boundaryDeltaStress( const multiscaleID_Type& boundaryID, bool& solveLinearSystem )
+{
+    solveLinearModel( solveLinearSystem );
+
+    return M_FSIoperator->fluid().linearMeanNormalStress( boundaryFlag( boundaryID ), *M_linearBC, *M_linearSolution );
+}
+
+Real
+MultiscaleModelFSI3D::boundaryDeltaTotalStress( const multiscaleID_Type& boundaryID, bool& solveLinearSystem )
+{
+    solveLinearModel( solveLinearSystem );
+
+    return M_FSIoperator->fluid().linearMeanTotalNormalStress( boundaryFlag( boundaryID ), *M_linearBC, *M_fluidVelocityAndPressure, *M_linearSolution );
 }
 
 // ===================================================
 // Get Methods
 // ===================================================
 Real
-MultiscaleModelFSI3D::boundaryPressure( const bcFlag_Type& flag ) const
+MultiscaleModelFSI3D::boundaryPressure( const multiscaleID_Type& boundaryID ) const
 {
-    if ( M_fluidBC->handler()->findBCWithFlag( flag ).type() == Flux )
 #ifdef FSI_WITH_EXTERNALPRESSURE
-        return M_FSIoperator->fluid().lagrangeMultiplier( flag, *M_fluidBC->handler(), *M_stateVariable );
+    return M_FSIoperator->fluid().pressure( boundaryFlag( boundaryID ), *M_stateVariable );
 #else
-        return M_FSIoperator->fluid().lagrangeMultiplier( flag, *M_fluidBC->handler(), *M_stateVariable ) + M_externalPressureScalar;
-#endif
-    else
-#ifdef FSI_WITH_EXTERNALPRESSURE
-        return M_FSIoperator->fluid().pressure( flag, *M_stateVariable );
-#else
-        return M_FSIoperator->fluid().pressure( flag, *M_stateVariable ) + M_externalPressureScalar;
+    return M_FSIoperator->fluid().pressure( boundaryFlag( boundaryID ), *M_stateVariable ) + M_externalPressureScalar;
 #endif
 }
 
 Real
-MultiscaleModelFSI3D::boundaryTotalPressure( const bcFlag_Type& flag ) const
+MultiscaleModelFSI3D::boundaryTotalPressure( const multiscaleID_Type& boundaryID ) const
 {
-    return boundaryPressure( flag ) + M_FSIoperator->fluid().kineticEnergy( flag, M_FSIoperator->solution() );
+#ifdef FSI_WITH_EXTERNALPRESSURE
+    return M_FSIoperator->fluid().pressure( boundaryFlag( boundaryID ), M_FSIoperator->solution() )
+         + M_FSIoperator->fluid().kineticEnergy( boundaryFlag( boundaryID ), M_FSIoperator->solution() );
+#else
+    return M_FSIoperator->fluid().pressure( boundaryFlag( boundaryID ), M_FSIoperator->solution() )
+         + M_FSIoperator->fluid().kineticEnergy( boundaryFlag( boundaryID ), M_FSIoperator->solution() ) + M_externalPressureScalar;
+#endif
 }
 
 Real
@@ -683,7 +701,7 @@ MultiscaleModelFSI3D::setupBC( const std::string& fileName )
         // Add boundary condition to solid bcHandler
         BCFunctionBase bcBase;
         bcBase.setFunction( boost::bind( &FSI3DBoundaryAreaFunction::function, M_boundaryAreaFunctions.back(), _1, _2, _3, _4, _5 ) );
-        M_solidBC->addBC( "BoundaryArea_Flag_" + number2string( boundaryAreaFunction->solidFlag() ), boundaryAreaFunction->solidFlag(), EssentialEdges, Full, bcBase, 3 );
+        M_solidBC->addBC( "BoundaryArea_BoundaryID_" + number2string( boundaryAreaFunction->solidFlag() ), boundaryAreaFunction->solidFlag(), EssentialEdges, Full, bcBase, 3 );
     }
 #endif
 }
@@ -861,7 +879,7 @@ MultiscaleModelFSI3D::imposePerturbation()
             BCFunctionBase bcBaseDeltaOne;
             bcBaseDeltaOne.setFunction( boost::bind( &MultiscaleModelFSI3D::bcFunctionDeltaOne, this, _1, _2, _3, _4, _5 ) );
 
-            M_linearBC->findBCWithFlag( ( *i )->flag( ( *i )->modelGlobalToLocalID( M_ID ) ) ).setBCFunction( bcBaseDeltaOne );
+            M_linearBC->findBCWithFlag( boundaryFlag( ( *i )->boundaryID( ( *i )->modelGlobalToLocalID( M_ID ) ) ) ).setBCFunction( bcBaseDeltaOne );
 
             break;
         }
@@ -881,7 +899,7 @@ MultiscaleModelFSI3D::resetPerturbation()
             BCFunctionBase bcBaseDeltaZero;
             bcBaseDeltaZero.setFunction( boost::bind( &MultiscaleModelFSI3D::bcFunctionDeltaZero, this, _1, _2, _3, _4, _5 ) );
 
-            M_linearBC->findBCWithFlag( ( *i )->flag( ( *i )->modelGlobalToLocalID( M_ID ) ) ).setBCFunction( bcBaseDeltaZero );
+            M_linearBC->findBCWithFlag( boundaryFlag( ( *i )->boundaryID( ( *i )->modelGlobalToLocalID( M_ID ) ) ) ).setBCFunction( bcBaseDeltaZero );
 
             break;
         }
