@@ -23,6 +23,13 @@ multimesh  = false
 start      = 0
 save       = 1
 
+[importer]
+restart      = none
+type         = hdf5 #ensight 			# hdf5 (if library compiled with hdf5 support) or ensight
+filename     = structure
+iteration   = 00000
+time        = 4.0
+
 [solid]
 
 [./physics]
@@ -47,19 +54,6 @@ BDF_order   	= 2
 mesh_dir  	= ./
 mesh_file 	= cubeY4.mesh
 order     	= P1
-
-[../analysis]
-nameFile                = structure
-nameField               = displacement
-recoveryVariable        = displacement
-typeFile                = hdf5
-analysisType            = istant
-start                   = 3.8
-end                     = 3.8
-iterationStart          = 00038 #Number of iteration
-iterationEnd            = 00038
-
-
 
 [../miscellaneous]
 factor    	= 1

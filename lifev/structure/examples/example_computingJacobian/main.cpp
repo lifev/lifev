@@ -57,15 +57,14 @@
 #include <lifev/core/mesh/MeshPartitioner.hpp>
 
 #include <lifev/structure/solver/VenantKirchhoffElasticData.hpp>
-
 #include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
+#include <lifev/structure/solver/StructuralOperator.hpp>
+
+//Not Used
 #include <lifev/structure/solver/VenantKirchhoffMaterialLinear.hpp>
 #include <lifev/structure/solver/VenantKirchhoffMaterialNonLinear.hpp>
 #include <lifev/structure/solver/NeoHookeanMaterialNonLinear.hpp>
 #include <lifev/structure/solver/ExponentialMaterialNonLinear.hpp>
-
-#include <lifev/structure/solver/WallTensionEstimator.hpp>
-#include <lifev/structure/solver/WallTensionEstimatorData.hpp>
 
 #include <lifev/core/filter/ExporterEnsight.hpp>
 #ifdef HAVE_HDF5
@@ -107,7 +106,7 @@ public:
     typedef LifeV::RegionMesh<LinearTetra>                              mesh_Type;
 
     // Filters
-    typedef typename LifeV::Exporter<mesh_Type  >                                filter_Type;
+    typedef typename LifeV::Exporter<mesh_Type  >                       filter_Type;
     typedef boost::shared_ptr< LifeV::Exporter<mesh_Type  > >           filterPtr_Type;
 
     typedef LifeV::ExporterEmpty<mesh_Type >                            emptyFilter_Type;
@@ -138,10 +137,6 @@ public:
     {
         run3d();
     }
-    void CheckResultDisplacement(const Real tensNorm);
-    void CheckResultEigenvalues(const Real tensNorm);
-    void CheckResultTensions(const Real tensNorm);
-    void resultChanged( void );
     //@}
 
 protected:
@@ -232,7 +227,7 @@ void
 Structure::run3d()
 {
     // General typedefs
-    typedef WallTensionEstimator< mesh_Type >::solutionVect_Type  vector_Type;
+    typedef typename StructuralOperator<mesh_Type >::vector_Type vector_Type;
     typedef boost::shared_ptr<vector_Type>                        vectorPtr_Type;
     typedef FESpace< mesh_Type, MapEpetra >                       solidFESpace_Type;
     typedef boost::shared_ptr<solidFESpace_Type>                  solidFESpacePtr_Type;
@@ -242,15 +237,9 @@ Structure::run3d()
 
     //! dataElasticStructure for parameters
     GetPot dataFile( parameters->data_file_name.c_str() );
-
     boost::shared_ptr<VenantKirchhoffElasticData> dataStructure(new VenantKirchhoffElasticData( ));
     dataStructure->setup(dataFile);
 
-    //! Parameters for the analysis
-    boost::shared_ptr<WallTensionEstimatorData> tensionData(new WallTensionEstimatorData( ));
-    tensionData->setup(dataFile);
-
-    tensionData->showMe();
     //! Read and partition mesh
     MeshData             meshData;
     meshData.setup(dataFile, "solid/space_discretization");
@@ -263,27 +252,25 @@ Structure::run3d()
     //! Functional spaces - needed for the computations of the gradients
     std::string dOrder =  dataFile( "solid/space_discretization/order", "P1");
     solidFESpacePtr_Type dFESpace( new solidFESpace_Type(meshPart,dOrder,3,parameters->comm) );
-    solidFESpacePtr_Type copyFESpace( new solidFESpace_Type(meshPart,dOrder,3,parameters->comm) );
+
     //    solidFESpace_Type copyFESpace(meshPart,dOrder,3,parameters->comm);
     if (verbose) std::cout << std::endl;
 
-
-    //! Setting the marker for the volumes
-    UInt marker = dataFile( "solid/physics/material_flag", 1);
-
     //! 1. Constructor of the class to compute the tensions
-    boost::shared_ptr<WallTensionEstimator< mesh_Type > >  solid( new WallTensionEstimator< mesh_Type >() );
+    StructuralOperator<RegionMesh<LinearTetra> >  solid;
+
+    //! face BChandler object
+    boost::shared_ptr<BCHandler> BCh( new BCHandler() );
 
     //! 2. Its setup
-    solid->setup(dataStructure,
-                 tensionData,
+    solid.setup(dataStructure,
                  dFESpace,
-                 parameters->comm,
-                 marker);
+                 BCh,
+                 parameters->comm);
 
     //! 3. Creation of the importers to read the displacement field
-    std::string const filename    = tensionData->nameFile();
-    std::string const importerType =  tensionData->typeFile();
+    std::string const filename    = dataFile( "importer/filename", "structure");
+    std::string const importerType = dataFile( "importer/type", "hdf5");
 
     std::string iterationString; //useful to iterate over the strings
 
@@ -303,24 +290,23 @@ Structure::run3d()
     {
         if (importerType.compare("none") == 0)
         {
-            M_importer.reset( new emptyFilter_Type( dataFile, solid->dFESpace().mesh(), "solid", solid->dFESpace().map().comm().MyPID() ) );
+            M_importer.reset( new emptyFilter_Type( dataFile, dFESpace->mesh(), "solid", dFESpace->map().comm().MyPID() ) );
         }
         else
         {
             M_importer.reset( new ensightFilter_Type( dataFile, filename ) );
         }
     }
-    M_importer->setMeshProcId(solid->dFESpace().mesh(), solid->dFESpace().map().comm().MyPID());
+    M_importer->setMeshProcId(dFESpace->mesh(), dFESpace->map().comm().MyPID());
 
     // The vector where the solution will be stored
-    vectorPtr_Type solidDisp (new vector_Type(solid->dFESpace().map(),M_importer->mapType() ));
-
+    vectorPtr_Type solidDisp (new vector_Type(dFESpace->map(), LifeV::Unique ));
 
     //! 6. Post-processing setting
     boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporter;
 
     std::string const exporterType =  dataFile( "exporter/type", "hdf5");
-    std::string const nameExporter =  dataFile( "exporter/name", "tensions");
+    std::string const nameExporter =  dataFile( "exporter/name", "jacobian");
 
 #ifdef HAVE_HDF5
     if (exporterType.compare("hdf5") == 0)
@@ -341,45 +327,12 @@ Structure::run3d()
         }
     }
 
-    M_exporter->setMeshProcId(solid->dFESpace().mesh(), solid->dFESpace().map().comm().MyPID());
+    M_exporter->setMeshProcId(dFESpace->mesh(), dFESpace->map().comm().MyPID());
 
-    vectorPtr_Type solidTensions ( new vector_Type(solid->principalStresses(),  M_exporter->mapType() ) );
+    vectorPtr_Type jacobianVector ( new vector_Type(solid.displacement(),  LifeV::Unique ) );
 
-    M_exporter->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "vonMises", dFESpace, solidTensions, UInt(0) );
+    M_exporter->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "determinantF", dFESpace, jacobianVector, UInt(0) );
     M_exporter->postProcess( 0.0 );
-
-
-    // //Post processing for the displacement gradient
-    // boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterX;
-    // boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterY;
-    // boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterZ;
-
-    // //Setting pointers
-    // exporterX.reset( new ExporterHDF5<RegionMesh<LinearTetra> > ( dataFile, "gradX" ) );
-    // exporterY.reset( new ExporterHDF5<RegionMesh<LinearTetra> > ( dataFile, "gradY" ) );
-    // exporterZ.reset( new ExporterHDF5<RegionMesh<LinearTetra> > ( dataFile, "gradZ" ) );
-
-    // exporterX->setMeshProcId(solid->dFESpace().mesh(), solid->dFESpace().map().comm().MyPID());
-    // exporterY->setMeshProcId(solid->dFESpace().mesh(), solid->dFESpace().map().comm().MyPID());
-    // exporterZ->setMeshProcId(solid->dFESpace().mesh(), solid->dFESpace().map().comm().MyPID());
-
-    // //Defining the vectors
-    // vectorPtr_Type gradX ( new vector_Type(solid->gradientX(),  M_exporter->mapType() ) );
-    // vectorPtr_Type gradY ( new vector_Type(solid->gradientY(),  M_exporter->mapType() ) );
-    // vectorPtr_Type gradZ ( new vector_Type(solid->gradientZ(),  M_exporter->mapType() ) );
-
-    // //Adding variable
-    // exporterX->addVariable( ExporterData<mesh_Type >::VectorField, "gradX", solid->dFESpacePtr(),
-    // 			   gradX, UInt(0) );
-    // exporterY->addVariable( ExporterData<mesh_Type >::VectorField, "gradY", solid->dFESpacePtr(),
-    // 			   gradY, UInt(0) );
-    // exporterZ->addVariable( ExporterData<mesh_Type >::VectorField, "gradZ", solid->dFESpacePtr(),
-    // 			   gradZ, UInt(0) );
-
-    // exporterX->postProcess( 0.0 );
-    // exporterY->postProcess( 0.0 );
-    // exporterZ->postProcess( 0.0 );
-
 
     //! =================================================================================
     //! Analysis - Istant or Interval
@@ -389,115 +342,38 @@ Structure::run3d()
 
     //! 5. For each interval, the analysis is performed
     LifeV::Real dt =  dataFile( "solid/time_discretization/timestep", 0.0);
-    std::string const nameField =  dataFile( "solid/analysis/nameField", "NO_DEFAULT_VALUE");
+    std::string const nameField =  dataFile( "importer/nameField", "displacement");
 
-    if( !tensionData->analysisType().compare("istant") )
-    {
-        //Get the iteration number
-        iterationString = tensionData->iterStart(0);
-        LifeV::Real startTime = tensionData->initialTime(0);
+    //Get the iteration number
+    iterationString = dataFile("importer/iteration","00000");
+    LifeV::Real time = dataFile("importer/time",1.0);
 
-        /*!Definition of the ExporterData, used to load the solution inside the previously defined vectors*/
-        LifeV::ExporterData<mesh_Type> solutionDispl  (LifeV::ExporterData<mesh_Type>::VectorField, nameField + "." + iterationString, solid->dFESpacePtr(), solidDisp, UInt(0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
+    /*!Definition of the ExporterData, used to load the solution inside the previously defined vectors*/
+    LifeV::ExporterData<mesh_Type> solutionDispl  (LifeV::ExporterData<mesh_Type>::VectorField, nameField + "." + iterationString, dFESpace, solidDisp, UInt(0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
 
-        //Read the variable
-        M_importer->readVariable(solutionDispl);
-        M_importer->closeFile();
+    //Read the variable
+    M_importer->readVariable(solutionDispl);
+    M_importer->closeFile();
 
+    //Set the current solution as the displacement vector to use
+    solid.jacobianDistribution( solidDisp, *jacobianVector);
 
-        //Create and exporter to check importing
-        // std::string expVerFile = "verificationDisplExporter";
-        // LifeV::ExporterHDF5<RegionMesh<LinearTetra> > exporter( dataFile, meshPart.meshPartition(), expVerFile, parameters->comm->MyPID());
-        // vectorPtr_Type vectVer ( new vector_Type(solid->displacement(),  exporter.mapType() ) );
+    //Extracting the tensions
+    std::cout << std::endl;
+    std::cout << "Norm of the J = det(F) : " << jacobianVector->norm2() << std::endl;
 
-        // exporter.addVariable( ExporterData<mesh_Type >::VectorField, "displVer", solid->dFESpacePtr(),
-        // 		      vectVer, UInt(0) );
+    M_exporter->postProcess( time );
 
-        // exporter.postProcess(0.0);
-        // *vectVer = *solidDisp;
-        // exporter.postProcess(startTime);
+    if (verbose ) std::cout << "Analysis Completed!" << std::endl;
 
-
-        //Set the current solution as the displacement vector to use
-        solid->setDisplacement(*solidDisp);
-
-        std::cout << "The norm of the set displacement, at time " << startTime << ", is: "<< solid->displacement().norm2() << std::endl;
-
-        //Perform the analysis
-        solid->analyzeTensions();
-
-        //Extracting the gradient
-        // *gradX = solid->gradientX();
-        // *gradY = solid->gradientY();
-        // *gradZ = solid->gradientZ();
-
-        // exporterX->postProcess( startTime );
-        // exporterY->postProcess( startTime );
-        // exporterZ->postProcess( startTime );
-
-        //Extracting the tensions
-        std::cout << std::endl;
-        std::cout << "Norm of the tension vector: " << solid->principalStresses().norm2() << std::endl;
-
-        *solidTensions = solid->principalStresses();
-        M_exporter->postProcess( startTime );
-
-        if (verbose ) std::cout << "Analysis Completed!" << std::endl;
-
-        ///////// CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
-        if ( !tensionData->recoveryVariable().compare("displacement")  )
-            CheckResultDisplacement( solid->principalStresses().norm2()  );
-        else if ( !tensionData->recoveryVariable().compare("eigenvalues") )
-            CheckResultEigenvalues( solid->principalStresses().norm2() );
-        else
-            CheckResultTensions( solid->principalStresses().norm2()  );
-
-        ///////// END OF CHECK
-
-        //Closing files
-        M_exporter->closeFile();
-        // exporterX->closeFile();
-        // exporterY->closeFile();
-        // exporterZ->closeFile();
-        // exporter.closeFile();
-
-
-    }
-    else
-    {
-        std::cout << "we are still working idiot! " << std::endl;
-    }
+    //Closing files
+    M_exporter->closeFile();
 
     if (verbose ) std::cout << "finished" << std::endl;
 
     MPI_Barrier(MPI_COMM_WORLD);
     //!---------------------------------------------.-----------------------------------------------------
 }
-
-void Structure::CheckResultDisplacement(const Real tensNorm)
-{
-    if( ( (std::fabs(tensNorm-4.67086e6)/4.67086e6) <=1e-5 ) )
-        this->resultChanged( );
-}
-
-void Structure::CheckResultEigenvalues(const Real tensNorm)
-{
-    if( ( (std::fabs(tensNorm-4.67086e6) / 4.67086e6)<=1e-5 ) )
-        this->resultChanged( );
-}
-
-void Structure::CheckResultTensions(const Real tensNorm)
-{
-    if( ( ( std::fabs(tensNorm-4.67086e6) / 4.67086e6) <=1e-5 ) )
-        this->resultChanged( );
-}
-
-void Structure::resultChanged( void )
-{
-    std::cout << "Correct Result after the Analysis" << std::endl;
-    returnValue = EXIT_SUCCESS;
-}
-
 
 int
 main( int argc, char** argv )

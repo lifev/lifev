@@ -685,8 +685,13 @@ StructuralOperator<Mesh, SolverType>::StructuralOperator( ):
     M_offset                     ( 0 ),
     M_rescaleFactor              ( 1. ),
     M_material                   ( ),
+#ifdef COMPUTATION_JACOBIAN
+    M_deformationF               ( ),
+    M_invariants                 ( ),
+#endif
     M_mapMarkersVolumes          ( )
 {
+
     //    M_Displayer->leaderPrint("I am in the constructor for the solver");
 }
 
@@ -1013,7 +1018,10 @@ void StructuralOperator<Mesh, SolverType>::jacobianDistribution( vectorPtr_Type 
 {
     M_Displayer->leaderPrint( " Computing the jacobian for all the volumes ... \t\t\t");
 
-    vector_Type vectorJacobian(*displacement);
+    //Initialization of the deformationF matrix
+    M_deformationF.reset  ( new matrixSerialDense_Type( M_FESpace->fieldDim(), M_FESpace->fieldDim() ) );
+
+    vector_Type vectorJacobian( jacobianDistribution );
     vectorJacobian *= 0.0;
 
     LifeChrono chrono;
@@ -1023,7 +1031,7 @@ void StructuralOperator<Mesh, SolverType>::jacobianDistribution( vectorPtr_Type 
     vector_Type patchArea(*displacement,Unique,Add);
     patchArea *= 0.0;
 
-    constructPatchAreaVector( patchArea );
+    constructPatchAreaVector( patchArea, *displacement );
 
     //Before assembling the reconstruction process is done
     vector_Type patchAreaR(patchArea,Repeated);
@@ -1055,12 +1063,16 @@ void StructuralOperator<Mesh, SolverType>::jacobianDistribution( vectorPtr_Type 
     //Set the new quadrature rule
     M_FESpace->setQuadRule(fakeQuadratureRule);
 
-    //Vectors for the deformation tensor
-    std::vector<matrix_Type> vectorDeformationF(M_FESpace->fe().nbFEDof(),*M_deformationF);
 
     //Loop over the volumes. No markerIDs are necessary on this loop for J = det(F)
     for ( UInt i = 0; i < M_FESpace->mesh()->numVolumes(); ++i )
     {
+
+        //Vectors for the deformation tensor
+        std::vector<matrixSerialDense_Type> vectorDeformationF(M_FESpace->fe().nbFEDof(),*M_deformationF);
+        M_invariants.resize   ( M_FESpace->fieldDim() + 1 );
+
+
         M_FESpace->fe().updateFirstDerivQuadPt( M_FESpace->mesh()->volumeList( i ) );
 
         UInt eleID = M_FESpace->fe().currentLocalId();
@@ -1080,17 +1092,20 @@ void StructuralOperator<Mesh, SolverType>::jacobianDistribution( vectorPtr_Type 
         //computing the tensor F
         AssemblyElementalStructure::computeLocalDeformationGradient( dk_loc, vectorDeformationF, M_FESpace->fe() );
 
-        //computing the determinant
-        AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor( M_invariants, *M_deformationF );
 
-        //Assembling elemental vector
+        //Cycle over the nDofs/element
         for( UInt nDOF=0; nDOF < ( UInt ) M_FESpace->fe().nbFEDof(); nDOF++ )
         {
             UInt  iloc = M_FESpace->fe().patternFirst( nDOF );
 
+            //computing the determinant
+            AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor( M_invariants, vectorDeformationF[nDOF] );
+
+            //Assembling elemental vector
             (elVecDet)[ iloc ] = M_invariants[3];
             (elVecDet)[ iloc + M_FESpace->fe().nbFEDof() ] = 0.0;
             (elVecDet)[ iloc + 2 * M_FESpace->fe().nbFEDof() ] = 0.0;
+
         }
 
         //multiplying it for the patch area
@@ -1102,7 +1117,12 @@ void StructuralOperator<Mesh, SolverType>::jacobianDistribution( vectorPtr_Type 
             assembleVector(vectorJacobian, elVecDet, M_FESpace->fe(), M_FESpace->dof(), ic, this->M_offset +  ic*totalDof );
         }
 
+        vectorDeformationF.clear();
+        M_invariants.clear();
+
     }
+
+    vectorJacobian.globalAssemble();
 
     chrono.stop();
     M_Displayer->leaderPrintMax("done in ", chrono.diff() );
