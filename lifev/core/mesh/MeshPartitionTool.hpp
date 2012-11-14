@@ -26,7 +26,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 /*!
   @file
-  @brief Class that does mesh partitioning with flexible graph partitioning
+  @brief Class that does flexible mesh partitioning
 
   @date 16-11-2011
   @author Radu Popescu <radu.popescu@epfl.ch>
@@ -63,16 +63,15 @@ namespace LifeV
 {
 
 /*!
-  @brief Class that does mesh partitioning with flexible graph partitioning
+  @brief Class that does flexible mesh partitioning
   @author Radu Popescu radu.popescu@epfl.ch
 
-  This class implements the partitioning of a global mesh using a chosen
-  graph partitioning tool. In this way, all the graph operations are
-  abstracted. The graph partitioning tool is a member of this class and
-  receives the global mesh, computing the redistribution of element GID
-  across the given number of partitions.
-  Based on this information, the mesh partition tool builds the mesh objects
-  corresponding to the new partitions.
+  This class implements the partitioning of a global mesh and allows choosing
+  the graph partitioning tool and the method to build the mesh parts.
+
+  The class template has three parameters: the mesh type, the graph partitioner
+  and the mesh part builder. The last two parameters are also class templates,
+  parameterized on the mesh type.
 */
 template<typename MeshType,
 		 template <typename> class GraphCutterType,
@@ -94,12 +93,19 @@ public:
 
     //! \name Constructors & Destructors
     //@{
-    //! Default empty constructor
-    MeshPartitionTool();
-
     //! Constructor
     /*!
-     * TODO: Write description
+     * The constructor takes as parameters the global uncut mesh, the Epetra
+     * comm of the group or processes involved in the mesh partition process
+     * and a Teuchos parameter list.
+     *
+     * After initializing the object, the constructor will call the private
+     * run() method and perform the mesh partition
+     *
+     * \param mesh - shared pointer to the global uncut mesh
+     * \param comm - shared pointer to the Epetra comm object containing the
+     * 				 processes involved in the mesh partition process
+     * \param parameters - Teuchos parameter list
     */
     MeshPartitionTool (const meshPtr_Type& mesh,
                        const boost::shared_ptr<Epetra_Comm>& comm,
@@ -111,26 +117,15 @@ public:
     //@}
 
     //! \name Public Methods
-    //@{
-    //! Configures the mesh partitioning tool
-    /*!
-     * TODO: Write description
-    */
-    void setup(meshPtr_Type& mesh,
-               boost::shared_ptr<Epetra_Comm>& comm,
-               Teuchos::ParameterList& parameters);
-
-    //! This method performs all the steps for the mesh and graph partitioning
-    void run();
-
     //! Prints information about the state (data) of the object
     void showMe(std::ostream& output = std::cout) const;
     //@}
 
     //! \name Get Methods
     //@{
-    //! Return a shared pointer to the mesh partition
+    //! Return a shared pointer to the mesh part (const version)
     const meshPtr_Type& meshPart() const {return M_meshPart;}
+    //! Return a shared pointer to the mesh part (non const version)
     meshPtr_Type& meshPart() {return M_meshPart;}
     //! Return a reference to M_ghostDataMap
     //const GhostEntityDataMap_Type&  ghostDataMap() const
@@ -140,6 +135,12 @@ public:
     //@}
 
 private:
+    //! \name Private methods
+    //@{
+    //! This method performs all the steps for the mesh and graph partitioning
+    void run();
+    //@}
+
     // Private copy constructor and assignment operator are disabled
     MeshPartitionTool(const MeshPartitionTool&);
     MeshPartitionTool& operator=(const MeshPartitionTool&);
@@ -171,21 +172,6 @@ template<typename MeshType,
 		 template <typename> class MeshPartBuilderType>
 MeshPartitionTool<MeshType,
 				  GraphCutterType,
-				  MeshPartBuilderType>::MeshPartitionTool() :
-    M_comm(),
-    M_myPID(),
-    M_parameters(),
-    M_originalMesh(),
-    M_meshPart(),
-    M_graphCutter(),
-    M_meshPartBuilder()
-{}
-
-template<typename MeshType,
-		 template <typename> class GraphCutterType,
-		 template <typename> class MeshPartBuilderType>
-MeshPartitionTool<MeshType,
-				  GraphCutterType,
 				  MeshPartBuilderType>::MeshPartitionTool(
 		const meshPtr_Type& mesh,
         const boost::shared_ptr<Epetra_Comm>& comm,
@@ -196,7 +182,7 @@ MeshPartitionTool<MeshType,
     M_originalMesh(mesh),
     M_meshPart(new MeshType),
     M_graphCutter(new graphCutter_Type(M_originalMesh, M_comm, M_parameters)),
-	M_meshPartBuilder(new meshPartBuilder_Type(M_originalMesh, M_comm))
+	M_meshPartBuilder(new meshPartBuilder_Type(M_originalMesh))
 {
     run();
 }
@@ -204,27 +190,6 @@ MeshPartitionTool<MeshType,
 // =================================
 // Public methods
 // =================================
-
-template<typename MeshType,
-		 template <typename> class GraphCutterType,
-		 template <typename> class MeshPartBuilderType>
-void
-MeshPartitionTool<MeshType,
-				  GraphCutterType,
-				  MeshPartBuilderType>::setup(
-		meshPtr_Type& mesh,
-        boost::shared_ptr<Epetra_Comm>& comm,
-        Teuchos::ParameterList& parameters)
-{
-    M_comm = comm;
-    M_myPID = M_comm->MyPID();
-    M_parameters = parameters;
-    M_originalMesh = mesh;
-    M_meshPart.reset(new mesh_Type);
-    M_graphCutter.reset(new graphCutter_Type(M_originalMesh, M_comm,
-    										 M_parameters));
-    M_meshPartBuilder.reset(new meshPartBuilder_Type(M_originalMesh, M_comm));
-}
 
 template<typename MeshType,
 		 template <typename> class GraphCutterType,
