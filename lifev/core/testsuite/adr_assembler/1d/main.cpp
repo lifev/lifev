@@ -126,7 +126,7 @@ main( int argc, char* argv[] )
 
     if (verbose) std::cout << " -- Reading the mesh ... " << std::flush;
     MeshData meshData(dataFile, "mesh");
-    boost::shared_ptr< mesh_Type > meshPtr( new mesh_Type( *Comm ) );
+    boost::shared_ptr< mesh_Type > meshPtr( new mesh_Type( Comm ) );
 
     // Set up the structured mesh
     regularMesh1D( *meshPtr, 0,

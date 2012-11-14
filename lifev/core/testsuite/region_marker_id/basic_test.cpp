@@ -91,7 +91,7 @@ int main(int argc, char* argv[])
     typedef boost::shared_ptr< mesh_Type > meshPtr_Type;
 
     // Create the mesh.
-    meshPtr_Type mesh( new mesh_Type ( *comm ) );
+    meshPtr_Type mesh( new mesh_Type ( comm ) );
 
     // Fill the mesh with a structured mesh.
     regularMesh2D ( *mesh, 0, 8, 11 );

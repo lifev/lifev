@@ -185,7 +185,7 @@ public:
 
     /** @} */ // End of group Geometric Element Container Types
 
-
+    typedef boost::shared_ptr<Epetra_Comm> commPtr_Type;
 
     /** @name Constructors & Destructor
      *  Default and Copy Constructor for the class.
@@ -193,13 +193,20 @@ public:
      */
 
     //! Default constructor
-    explicit RegionMesh( const Epetra_Comm & comm );
+    RegionMesh();
 
-    //! Default constructor
+    //! Constructor
     /**
-     *  @param id marker of the RegionMesh
+     *  @param comm communicator to manage output
      */
-    RegionMesh( UInt id, const Epetra_Comm & comm );
+    explicit RegionMesh( commPtr_Type const & comm );
+
+    //! Constructor
+    /**
+     *  @param comm communicator to manage output
+     *  @param id markerId of the RegionMesh
+     */
+    RegionMesh( UInt id, commPtr_Type const & comm );
 
     //! Destructor
     virtual ~RegionMesh();
@@ -254,7 +261,10 @@ public:
     inline MeshUtility::MeshTransformer<RegionMesh<geoShape_Type, markerCommon_Type>, markerCommon_Type > & meshTransformer();
 
     //! Return the communicator
-    const Epetra_Comm & comm() const;
+    commPtr_Type comm() const;
+
+    //! Setter for the communicator
+    void setComm( commPtr_Type const & comm );
 
     /** @} */ // End of group Utilities
 
@@ -1921,7 +1931,7 @@ private:
     MeshUtility::MeshTransformer<RegionMesh<geoShape_Type, markerCommon_Type>, markerCommon_Type > M_meshTransformer;
 
     // communicator
-    Epetra_Comm const & M_comm;
+    commPtr_Type M_comm;
 
     //used to select the correct method specialization
     geoDim_Type M_geoDim;
@@ -2175,7 +2185,27 @@ private:
 void set_switches_for_regionmesh( Switch & sw );
 
 template <typename GeoShapeType, typename MCType>
-inline RegionMesh<GeoShapeType, MCType>::RegionMesh( Epetra_Comm const & comm ):
+inline RegionMesh<GeoShapeType, MCType>::RegionMesh():
+    MeshEntity(),
+    switches(),
+    M_numVolumes( 0 ),
+    M_numVertices( 0 ),
+    M_numBVertices( 0 ),
+    M_numPoints( 0 ),
+    M_numBPoints( 0 ),
+    M_numFaces( 0 ),
+    M_numBFaces( 0 ),
+    M_numEdges( 0 ),
+    M_numBEdges( 0 ),
+    M_isPartitioned( false ),
+    M_meshTransformer( *this ),
+    M_comm()
+{
+    set_switches_for_regionmesh( switches );
+}
+
+template <typename GeoShapeType, typename MCType>
+inline RegionMesh<GeoShapeType, MCType>::RegionMesh( commPtr_Type const & comm ):
     MeshEntity(),
     switches(),
     M_numVolumes( 0 ),
@@ -2196,7 +2226,7 @@ inline RegionMesh<GeoShapeType, MCType>::RegionMesh( Epetra_Comm const & comm ):
 
 
 template <typename GeoShapeType, typename MCType>
-inline RegionMesh<GeoShapeType, MCType>::RegionMesh( UInt id, Epetra_Comm const & comm ) :
+inline RegionMesh<GeoShapeType, MCType>::RegionMesh( UInt id, commPtr_Type const & comm ) :
     MeshEntity( id ),
     switches(),
     M_numVolumes( 0 ),
@@ -2847,7 +2877,7 @@ template <typename GeoShapeType, typename MCType>
 inline int
 RegionMesh<GeoShapeType, MCType>::check( int level, bool const fix, bool verb, std::ostream & out )
 {
-    verb = verb && ( M_comm.MyPID() == 0 );
+    verb = verb && ( M_comm->MyPID() == 0 );
     int severity = 0;
     Switch testsw;
     if ( verb )
@@ -3212,7 +3242,7 @@ template <typename GeoShapeType, typename MCType>
 void
 RegionMesh<GeoShapeType, MCType>::updateElementRidges(threeD_Type, bool ce, bool verb, UInt ee, bool renumber )
 {
-    bool verbose = verb && ( M_comm.MyPID() == 0 );
+    bool verbose = verb && ( M_comm->MyPID() == 0 );
 
     if(S_geoDimensions != 3)
     {
@@ -3384,7 +3414,7 @@ template <typename GeoShapeType, typename MCType>
 void
 RegionMesh<GeoShapeType, MCType>::updateElementFacets( bool cf, bool verbose, UInt ef )
 {
-    verbose = verbose && ( M_comm.MyPID() == 0 );
+    verbose = verbose && ( M_comm->MyPID() == 0 );
 
     typedef BareEntitySelector<typename facetShape_Type::BasRefSha> bareEntitySelector_Type;
     typedef typename bareEntitySelector_Type::bareEntity_Type bareFacet_type;
@@ -3608,10 +3638,16 @@ RegionMesh<GeoShapeType, MCType>::meshTransformer()
 }
 
 template <typename GeoShapeType, typename MCType>
-inline Epetra_Comm const &
+inline typename RegionMesh<GeoShapeType, MCType>::commPtr_Type
 RegionMesh<GeoShapeType, MCType>::comm() const
 {
     return this->M_comm;
+}
+
+template <typename GeoShapeType, typename MCType>
+void inline RegionMesh<GeoShapeType, MCType>::setComm( commPtr_Type const & comm )
+{
+    M_comm = comm;
 }
 
 } // End of namespace LifeV

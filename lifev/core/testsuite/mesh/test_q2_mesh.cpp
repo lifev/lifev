@@ -75,7 +75,7 @@ struct tester
       return false;
 
     // Convert the mesh
-    boost::shared_ptr<mesh_t> mesh (new mesh_t(*comm));
+    boost::shared_ptr<mesh_t> mesh (new mesh_t(comm));
     LifeV::convertBareMesh (baremesh, *mesh, true);
 
     // The current finite element
@@ -115,7 +115,7 @@ int main (int argc, char* argv[])
   // Parse command-line
   if (argc < 3)
   {
-    std::cout << "Usage: " << argv[0] << " [file1] [file2]" << std::endl;
+    std::cout << "Usage: " << argv[0] << " [mesh_2D_Q1] [mesh_2D_Q2]" << std::endl;
     return EXIT_SUCCESS;
   }
 

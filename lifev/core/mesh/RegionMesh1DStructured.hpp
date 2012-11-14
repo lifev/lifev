@@ -80,7 +80,7 @@ void regularMesh1D( MeshType& mesh,
 {
     typedef MeshType mesh_Type;
 
-    if ( verbose && mesh.comm().MyPID() == 0 )
+    if ( verbose && mesh.comm()->MyPID() == 0 )
     {
         std::cout << "Building 1d mesh" << std::endl;
     }
@@ -162,6 +162,8 @@ void regularMesh1D( MeshType& mesh,
     }
     mesh.setNumEdges(mesh.edgeList.size() );
     mesh.setMaxNumGlobalEdges(mesh.edgeList.size() );
+
+    mesh.updateElementFacets( true, false, mesh.pointList.size() );
 } // regularMesh1D
 
 } // Namespace LifeV

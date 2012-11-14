@@ -192,17 +192,12 @@ namespace LifeV
           // Endianness
           if (is_binary)
           {
-            // Check if system is little-endian
-            unsigned char a[2] = { 1, 0 };
-            bool is_sys_little = (*(short *) a == 1);
-            
-            // Type of int in the file is suppose to be 32bit
-            // Sadly gmsh doesn't specify this, it's just int.
-            char one[sizeof(gmsh_int_t)];
-            ifile.read(one, sizeof(gmsh_int_t));
+            // Check file endianness
+            union { gmsh_int_t i; char c[sizeof(gmsh_int_t)]; } one;
+            ifile.read(one.c, sizeof(gmsh_int_t));
             ifile.ignore(1);
-            is_differ_endian = !(is_sys_little && (*(gmsh_int_t*) &one) == 1);
-            
+            is_differ_endian = (one.i != 1);
+            // Check if system is little-endian
             if (is_differ_endian)
             {
               std::cerr << "[ERROR:GmshIO] Different endianness of system"

@@ -109,7 +109,7 @@ int main(int argc, char** argv)
     ofstream ofile(outfile.c_str());
     if (ofile.fail()) {cerr<<" Error: Cannot creat output file"<<endl; abort();}
 
-    RegionMesh<LinearTetra> aMesh( *comm );
+    RegionMesh<LinearTetra> aMesh( comm );
     typedef RegionMesh<LinearTetra> mesh_Type;
     //    aMesh.test3DBuilder();
     //    aMesh.readMppFile(mystream, id, m);
