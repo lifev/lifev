@@ -62,6 +62,8 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/core/fem/FESpace.hpp>
 #include <lifev/core/fem/BCManage.hpp>
 
+#include <lifev/core/filter/ExporterEnsight.hpp>
+
 #include <lifev/core/mesh/MeshPartitionTool.hpp>
 #include <lifev/core/mesh/GraphCutterZoltan.hpp>
 #include <lifev/core/mesh/MeshPartBuilder.hpp>
@@ -126,6 +128,12 @@ main( int argc, char** argv )
     if (verbose) std::cout << " ---> Number of elements : "
     					   << Nelements << std::endl;
 
+    const std::string zoltan_lb_method = dataFile("mesh/zoltan_lb_method",
+    											  "GRAPH");
+    const int zoltan_debug_level = dataFile("mesh/zoltan_debug_level", 0);
+    const int zoltan_hier_debug_level
+    		= dataFile("mesh/zoltan_hier_debug_level", 0);
+
 // Build and partition the mesh
 
     if (verbose) std::cout << " -- Building the mesh ... " << std::flush;
@@ -138,6 +146,9 @@ main( int argc, char** argv )
     if (verbose) std::cout << " -- Partitioning the mesh ... " << std::flush;
     Teuchos::ParameterList meshParameters;
     meshParameters.set("num_partitions", Comm->NumProc(), "");
+    meshParameters.set("lb_method", zoltan_lb_method, "");
+    meshParameters.set("debug_level", zoltan_debug_level, "");
+    meshParameters.set("hier_debug_level", zoltan_hier_debug_level, "");
     meshCutter_Type   meshPart(fullMeshPtr, Comm, meshParameters);
     if (verbose) std::cout << " done ! " << std::endl;
 
@@ -313,6 +324,23 @@ main( int argc, char** argv )
         return EXIT_FAILURE;
     }
 
+    if (verbose) std::cout << " -- Defining the exporter ... " << std::flush;
+    ExporterEnsight<mesh_Type> exporter ( dataFile, meshPart.meshPart(), "solution", Comm->MyPID()) ;
+    if (verbose) std::cout << " done ! " << std::endl;
+
+    if (verbose) std::cout << " -- Defining the exported quantities ... " << std::flush;
+    boost::shared_ptr<vector_Type> solutionPtr (new vector_Type(*solution,Repeated));
+    boost::shared_ptr<vector_Type> solutionErrPtr (new vector_Type(solutionErr,Repeated));
+    if (verbose) std::cout << " done ! " << std::endl;
+
+    if (verbose) std::cout << " -- Updating the exporter ... " << std::flush;
+    exporter.addVariable( ExporterData<mesh_Type>::ScalarField, "solution", uFESpace, solutionPtr, UInt(0) );
+    exporter.addVariable( ExporterData<mesh_Type>::ScalarField, "error", uFESpace, solutionErrPtr, UInt(0) );
+    if (verbose) std::cout << " done ! " << std::endl;
+
+    if (verbose) std::cout << " -- Exporting ... " << std::flush;
+    exporter.postProcess(0);
+    if (verbose) std::cout << " done ! " << std::endl;
     if (verbose) std::cout << "End Result: TEST PASSED" << std::endl;
 
 #ifdef HAVE_MPI

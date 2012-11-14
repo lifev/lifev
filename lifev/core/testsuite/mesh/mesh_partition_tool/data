@@ -15,6 +15,9 @@
 [mesh]
 
 nelements = 19
+zoltan_lb_method = GRAPH # GRAPH or HIER
+zoltan_debug_level = 0
+zoltan_hier_debug_level = 0
 
 [../exporter]
 
