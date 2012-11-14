@@ -63,7 +63,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/core/fem/BCManage.hpp>
 
 #include <lifev/core/mesh/MeshPartitionTool.hpp>
-#include <lifev/core/mesh/GraphCutter.hpp>
+#include <lifev/core/mesh/GraphCutterZoltan.hpp>
 #include <lifev/core/mesh/MeshPartBuilder.hpp>
 #include <lifev/core/mesh/RegionMesh3DStructured.hpp>
 #include <lifev/core/mesh/RegionMesh.hpp>
