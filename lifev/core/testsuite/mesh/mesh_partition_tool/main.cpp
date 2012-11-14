@@ -100,7 +100,7 @@ typedef VectorEpetra vector_Type;
 typedef FESpace<mesh_Type, MapEpetra> feSpace_Type;
 typedef boost::shared_ptr<feSpace_Type> feSpacePtr_Type;
 typedef MeshPartitionTool<mesh_Type,
-						  GraphCutter,
+						  GraphCutterZoltan,
 						  MeshPartBuilder> meshCutter_Type;
 
 int

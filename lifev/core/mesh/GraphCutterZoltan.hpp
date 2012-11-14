@@ -81,11 +81,13 @@ struct TransportBuffer
     More on class functionality to follow. Stay tuned...
  */
 template<typename MeshType>
-class GraphCutter
+class GraphCutterZoltan
 {
 public:
     //! @name Public Types
     //@{
+	typedef Teuchos::ParameterList                          pList_Type;
+	typedef boost::shared_ptr<Epetra_Comm>                  commPtr_Type;
     typedef MeshType                                        mesh_Type;
     typedef boost::shared_ptr<mesh_Type>                    meshPtr_Type;
     typedef std::map<Int, std::vector<Int> >                internalTable_Type;
@@ -96,7 +98,7 @@ public:
     //! @name Constructor & Destructor
     //@{
     //! Empty Constructor
-    GraphCutter();
+    GraphCutterZoltan();
 
     //! Constructor taking the original mesh, the MPI comm and parameters
     /*!
@@ -109,23 +111,23 @@ public:
         @param parameters The Teuchos parameter list which contains the
                           partitioning parameters
      */
-    GraphCutter(meshPtr_Type& mesh,
-                       boost::shared_ptr<Epetra_Comm>& comm,
-                       Teuchos::ParameterList& parameters);
+    GraphCutterZoltan(meshPtr_Type& mesh,
+                       commPtr_Type& comm,
+                       pList_Type& parameters);
 
     //! Destructor
-    virtual ~GraphCutter() {}
+    virtual ~GraphCutterZoltan() {}
     //@}
 
     //! @name Methods
     //@{
     //! Configure the object (used with empty constructor)
     void setup(meshPtr_Type& mesh,
-               boost::shared_ptr<Epetra_Comm>& comm,
-               Teuchos::ParameterList& parameters);
+               commPtr_Type& comm,
+               pList_Type& parameters);
 
     //! Set values for all the parameters, with default values where needed
-    void setParameters(Teuchos::ParameterList& parameters);
+    void setParameters(pList_Type& parameters);
 
     //! Performs the graph partitioning
     void run();
@@ -206,8 +208,8 @@ public:
 
 private:
     // Private copy constructor and assignment operator are disabled
-    GraphCutter(const GraphCutter&);
-    GraphCutter& operator=(const GraphCutter&);
+    GraphCutterZoltan(const GraphCutterZoltan&);
+    GraphCutterZoltan& operator=(const GraphCutterZoltan&);
 
     //! @name Private Methods
     //@{
@@ -229,7 +231,7 @@ private:
     void partitionGraph();
     //@}
  
-    boost::shared_ptr<Epetra_Comm>             M_comm;
+    commPtr_Type             				   M_comm;
     Int                                        M_myPID;
     Int                                        M_numProcessors;
     Int                                        M_numPartitions;
@@ -238,7 +240,7 @@ private:
     Int                                        M_myLastPartition;
     std::string                                M_topology;
     std::vector<Int>                           M_indexBounds;
-    Teuchos::ParameterList                     M_parameters;
+    pList_Type                                 M_parameters;
     meshPtr_Type                               M_mesh;
     exportTable_Type                           M_partitionTable;
     internalTable_Type                         M_graph;
@@ -261,7 +263,7 @@ private:
 // =================================
 
 template<typename MeshType>
-GraphCutter<MeshType>::GraphCutter() :
+GraphCutterZoltan<MeshType>::GraphCutterZoltan() :
     M_comm(),
     M_myPID(0),
     M_numProcessors(0),
@@ -275,9 +277,9 @@ GraphCutter<MeshType>::GraphCutter() :
 {}
 
 template<typename MeshType>
-GraphCutter<MeshType>::GraphCutter(meshPtr_Type& mesh,
-                                   boost::shared_ptr<Epetra_Comm>& comm,
-                                   Teuchos::ParameterList& parameters) :
+GraphCutterZoltan<MeshType>::GraphCutterZoltan(meshPtr_Type& mesh,
+                                   	   	   	   commPtr_Type& comm,
+											   pList_Type& parameters) :
     M_comm(comm),
     M_myPID(M_comm->MyPID()),
     M_numProcessors(M_comm->NumProc()),
@@ -293,9 +295,9 @@ GraphCutter<MeshType>::GraphCutter(meshPtr_Type& mesh,
 }
 
 template<typename MeshType>
-void GraphCutter<MeshType>::setup(meshPtr_Type& mesh,
-                                  boost::shared_ptr<Epetra_Comm>& comm,
-                                  Teuchos::ParameterList& parameters)
+void GraphCutterZoltan<MeshType>::setup(meshPtr_Type& mesh,
+                                  	    commPtr_Type& comm,
+                                  	    pList_Type& parameters)
 {
     M_comm = comm;
     M_myPID = M_comm->MyPID();
@@ -306,7 +308,7 @@ void GraphCutter<MeshType>::setup(meshPtr_Type& mesh,
 }
 
 template<typename MeshType>
-void GraphCutter<MeshType>::setParameters(Teuchos::ParameterList& parameters)
+void GraphCutterZoltan<MeshType>::setParameters(pList_Type& parameters)
 {
     // Here put some default values for the parameters and then import
     // the user supplied list, overwriting the corresponding parameters
@@ -321,7 +323,7 @@ void GraphCutter<MeshType>::setParameters(Teuchos::ParameterList& parameters)
 }
 
 template<typename MeshType>
-void GraphCutter<MeshType>::run()
+void GraphCutterZoltan<MeshType>::run()
 { 
     distributePartitions();
     buildGraph();
@@ -333,25 +335,25 @@ void GraphCutter<MeshType>::run()
 // =================
 
 template<typename MeshType>
-int GraphCutter<MeshType>::getNumElements(void *data, int *ierr)
+int GraphCutterZoltan<MeshType>::getNumElements(void *data, int *ierr)
 {
-    GraphCutter<MeshType>* object = (GraphCutter<MeshType>*) data;
+    GraphCutterZoltan<MeshType>* object = (GraphCutterZoltan<MeshType>*) data;
 
     *ierr = ZOLTAN_OK;
     return object->numStoredElements();
 }
 
 template<typename MeshType>
-void GraphCutter<MeshType>::getElementList(void *data,
-										   int /*sizeGID*/,
-										   int /*sizeLID*/,
-                                           ZOLTAN_ID_PTR globalID,
-                                           ZOLTAN_ID_PTR localID,
-                                           int /*wgt_dim*/,
-                                           float* /*obj_wgts*/,
-                                           int *ierr)
+void GraphCutterZoltan<MeshType>::getElementList(void *data,
+										   	     int /*sizeGID*/,
+										   	     int /*sizeLID*/,
+										   	     ZOLTAN_ID_PTR globalID,
+										   	     ZOLTAN_ID_PTR localID,
+										   	     int /*wgt_dim*/,
+										   	     float* /*obj_wgts*/,
+										   	     int *ierr)
 {
-    GraphCutter<MeshType>* object = (GraphCutter<MeshType>*) data;
+    GraphCutterZoltan<MeshType>* object = (GraphCutterZoltan<MeshType>*) data;
 
     UInt k = 0;
     for (UInt i = 0; i < object->numStoredElements(); ++i) {
@@ -364,16 +366,16 @@ void GraphCutter<MeshType>::getElementList(void *data,
 }
 
 template<typename MeshType>
-void GraphCutter<MeshType>::getNumNeighboursList(void *data,
-												 int /*sizeGID*/,
-												 int /*sizeLID*/,
-                                                 int num_obj,
-                                                 ZOLTAN_ID_PTR globalID,
-                                                 ZOLTAN_ID_PTR /*localID*/,
-                                                 int *numEdges,
-                                                 int *ierr)
+void GraphCutterZoltan<MeshType>::getNumNeighboursList(void *data,
+												 	   int /*sizeGID*/,
+												 	   int /*sizeLID*/,
+												 	   int num_obj,
+												 	   ZOLTAN_ID_PTR globalID,
+												 	   ZOLTAN_ID_PTR /*lID*/,
+												 	   int *numEdges,
+												 	   int *ierr)
 {
-    GraphCutter<MeshType>* object = (GraphCutter<MeshType>*) data;
+    GraphCutterZoltan<MeshType>* object = (GraphCutterZoltan<MeshType>*) data;
 
     for (int element = 0; element < num_obj; ++element) {
         numEdges[element]
@@ -384,20 +386,20 @@ void GraphCutter<MeshType>::getNumNeighboursList(void *data,
 }
 
 template<typename MeshType>
-void GraphCutter<MeshType>::getNeighbourList(void *data,
-											 int /*sizeGID*/,
-											 int /*sizeLID*/,
-                                             int num_obj,
-                                             ZOLTAN_ID_PTR globalID,
-                                             ZOLTAN_ID_PTR /*localID*/,
-                                             int *num_edges,
-                                             ZOLTAN_ID_PTR nborGID,
-                                             int *nborProc,
-                                             int /*wgt_dim*/,
-                                             float* /*ewgts*/,
-                                             int *ierr)
+void GraphCutterZoltan<MeshType>::getNeighbourList(void *data,
+											 	   int /*sizeGID*/,
+											 	   int /*sizeLID*/,
+											 	   int num_obj,
+											 	   ZOLTAN_ID_PTR globalID,
+											 	   ZOLTAN_ID_PTR /*localID*/,
+											 	   int *num_edges,
+											 	   ZOLTAN_ID_PTR nborGID,
+											 	   int *nborProc,
+											 	   int /*wgt_dim*/,
+											 	   float* /*ewgts*/,
+											 	   int *ierr)
 {
-    GraphCutter<MeshType>* object = (GraphCutter<MeshType>*) data;
+    GraphCutterZoltan<MeshType>* object = (GraphCutterZoltan<MeshType>*) data;
 
     const std::vector<Int>& elementList = object->elementList();
     const Int numStoredElements = object->numStoredElements();
@@ -429,14 +431,10 @@ void GraphCutter<MeshType>::getNeighbourList(void *data,
 }
 
 template<typename MeshType>
-void GraphCutter<MeshType>::getTransferObjectSizes(void* /*data*/,
-												   int /*num_gid_entries*/,
-                                                   int /*num_lid_entries*/,
-                                                   int num_ids,
-                                                   ZOLTAN_ID_PTR /*global_ids*/,
-                                                   ZOLTAN_ID_PTR /*local_ids*/,
-                                                   int* sizes,
-                                                   int *ierr)
+void GraphCutterZoltan<MeshType>::getTransferObjectSizes(
+		void* /*data*/, int /*num_gid_entries*/, int /*num_lid_entries*/,
+		int num_ids, ZOLTAN_ID_PTR /*global_ids*/, ZOLTAN_ID_PTR /*local_ids*/,
+		int* sizes, int *ierr)
 {
     int sizeOfBuffer = sizeof(TransportBuffer);
     for (int i = 0; i < num_ids; ++i) {
@@ -447,19 +445,19 @@ void GraphCutter<MeshType>::getTransferObjectSizes(void* /*data*/,
 }
 
 template<typename MeshType>
-void GraphCutter<MeshType>::packObjects(void *data,
-										int /*num_gid_entries*/,
-                                        int /*num_lid_entries*/,
-                                        int num_ids,
-                                        ZOLTAN_ID_PTR global_ids,
-                                        ZOLTAN_ID_PTR local_ids,
-                                        int *dest,
-                                        int* /*sizes*/,
-                                        int *idx,
-                                        char *buf,
-                                        int *ierr)
+void GraphCutterZoltan<MeshType>::packObjects(void *data,
+											  int /*num_gid_entries*/,
+											  int /*num_lid_entries*/,
+											  int num_ids,
+											  ZOLTAN_ID_PTR global_ids,
+											  ZOLTAN_ID_PTR local_ids,
+											  int *dest,
+											  int* /*sizes*/,
+											  int *idx,
+											  char *buf,
+											  int *ierr)
 {
-    GraphCutter<MeshType>* object = (GraphCutter<MeshType>*) data;
+    GraphCutterZoltan<MeshType>* object = (GraphCutterZoltan<MeshType>*) data;
 
     // Pack gids and part numbers in the buffer
     for (int i = 0; i < num_ids; ++i) {
@@ -477,16 +475,16 @@ void GraphCutter<MeshType>::packObjects(void *data,
 }
 
 template<typename MeshType>
-void GraphCutter<MeshType>::unpackObjects(void *data,
-										  int /*num_gid_entries*/,
-                                          int num_ids,
-                                          ZOLTAN_ID_PTR /*global_ids*/,
-                                          int* /*sizes*/,
-                                          int *idx,
-                                          char *buf,
-                                          int *ierr)
+void GraphCutterZoltan<MeshType>::unpackObjects(void *data,
+												int /*num_gid_entries*/,
+												int num_ids,
+												ZOLTAN_ID_PTR /*global_ids*/,
+												int* /*sizes*/,
+												int *idx,
+												char *buf,
+												int *ierr)
 {
-    GraphCutter<MeshType>* object = (GraphCutter<MeshType>*) data;
+    GraphCutterZoltan<MeshType>* object = (GraphCutterZoltan<MeshType>*) data;
 
     // Unpack gids and part numbers from the buffer
     for (int i = 0; i < num_ids; ++i) {
@@ -503,7 +501,7 @@ void GraphCutter<MeshType>::unpackObjects(void *data,
 // =======================
 
 template<typename MeshType>
-void GraphCutter<MeshType>::distributePartitions()
+void GraphCutterZoltan<MeshType>::distributePartitions()
 {
     // The algorithm to distribute partitions isn't clever at all.
     // We assume the number of partitions is a multiple of the
@@ -518,7 +516,7 @@ void GraphCutter<MeshType>::distributePartitions()
 }
 
 template<typename MeshType>
-void GraphCutter<MeshType>::buildGraph()
+void GraphCutterZoltan<MeshType>::buildGraph()
 {
     // This next part computes the first and last element global index
     // that the processor has to handle and makes a local vector of
@@ -597,10 +595,10 @@ void GraphCutter<MeshType>::buildGraph()
 }
 
 template<typename MeshType>
-void GraphCutter<MeshType>::localMigrate(int numExport,
-                                                ZOLTAN_ID_PTR exportLocalGids,
-                                                int* exportProcs,
-                                                int* exportToPart)
+void GraphCutterZoltan<MeshType>::localMigrate(int numExport,
+                                               ZOLTAN_ID_PTR exportLocalGids,
+                                               int* exportProcs,
+                                               int* exportToPart)
 {
     for (int i = 0; i < numExport; ++i) {
         if (exportProcs[i] == M_myPID) {
@@ -613,7 +611,7 @@ void GraphCutter<MeshType>::localMigrate(int numExport,
 }
 
 template<typename MeshType>
-void GraphCutter<MeshType>::buildPartitionTable()
+void GraphCutterZoltan<MeshType>::buildPartitionTable()
 {
     for (exportTable_Type::iterator it = M_partitionTable.begin();
          it != M_partitionTable.end(); ++it) {
@@ -633,7 +631,7 @@ void GraphCutter<MeshType>::buildPartitionTable()
 }
 
 template<typename MeshType>
-void GraphCutter<MeshType>::partitionGraph()
+void GraphCutterZoltan<MeshType>::partitionGraph()
 {
     int argc = 1;
     char* argv;
@@ -669,25 +667,25 @@ void GraphCutter<MeshType>::partitionGraph()
     					(M_numPartitionsPerProcessor)).c_str());
 
     Zoltan_Set_Num_Obj_Fn(M_zoltanStruct,
-    					  GraphCutter::getNumElements,
+    					  GraphCutterZoltan::getNumElements,
     					  this);
     Zoltan_Set_Obj_List_Fn(M_zoltanStruct,
-    					   GraphCutter::getElementList,
+    					   GraphCutterZoltan::getElementList,
     					   this);
     Zoltan_Set_Num_Edges_Multi_Fn(M_zoltanStruct,
-    					   	   	  GraphCutter::getNumNeighboursList,
+    					   	   	  GraphCutterZoltan::getNumNeighboursList,
     					   	   	  this);
     Zoltan_Set_Edge_List_Multi_Fn(M_zoltanStruct,
-    					   	   	  GraphCutter::getNeighbourList,
+    					   	   	  GraphCutterZoltan::getNeighbourList,
     					   	   	  this);
     Zoltan_Set_Obj_Size_Multi_Fn(M_zoltanStruct,
-    					   	     GraphCutter::getTransferObjectSizes,
+    					   	     GraphCutterZoltan::getTransferObjectSizes,
     					   	     this);
     Zoltan_Set_Pack_Obj_Multi_Fn(M_zoltanStruct,
-    							 GraphCutter::packObjects,
+    							 GraphCutterZoltan::packObjects,
     							 this);
     Zoltan_Set_Unpack_Obj_Multi_Fn(M_zoltanStruct,
-    							   GraphCutter::unpackObjects,
+    							   GraphCutterZoltan::unpackObjects,
     							   this);
 
     int changes, numGidEntries, numLidEntries, numImport, numExport;
