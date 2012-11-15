@@ -802,6 +802,12 @@ MultiscaleModel1D::imposePerturbation()
 
                 break;
 
+            case OneDFSI::T:
+
+                //M_bcDelta = M_data->jacobianPerturbationTotalStress();
+
+                break;
+
             default:
 
                 std::cout << "Warning: bcType \"" << M_bcDeltaType << "\"not available!" << std::endl;

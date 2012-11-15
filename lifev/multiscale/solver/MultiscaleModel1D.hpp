@@ -310,17 +310,15 @@ public:
 
     //! Get the density on a specific boundary face of the model
     /*!
-     * @param boundaryID ID of the boundary interface
      * @return density value
      */
-    Real boundaryDensity( const multiscaleID_Type& /*boundaryID*/) const { return M_data->densityRho(); }
+    Real boundaryDensity() const { return M_data->densityRho(); }
 
     //! Get the viscosity on a specific boundary face of the model
     /*!
-     * @param boundaryID ID of the boundary interface
      * @return viscosity value
      */
-    Real boundaryViscosity( const multiscaleID_Type& /*boundaryID*/) const { return M_data->viscosity(); }
+    Real boundaryViscosity() const { return M_data->viscosity(); }
 
     //! Get the integral of the pressure (on a specific boundary face)
     /*!

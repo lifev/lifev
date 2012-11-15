@@ -133,6 +133,14 @@ public:
     //@}
 
 
+    //! @name MultiscaleInterfaceFluid Methods
+    //@{
+
+    //TODO These methods should be implemented after deriving from MultiscaleInterfaceFluid
+
+    //@}
+
+
     //! @name Get Methods
     //@{
 

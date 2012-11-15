@@ -303,7 +303,7 @@ protected:
 
     multiscaleCouplingsContainer_Type    M_couplings;          // Container for the couplings
     std::string                          M_modelName;          // Name of the model
-    multiscaleIDContainer_Type           M_boundaryFlags;              // Free flags, available for the couplings
+    multiscaleIDContainer_Type           M_boundaryFlags;      // Free flags, available for the couplings
 
     multiscaleDataPtr_Type               M_globalData;         // GlobalDataContainer
 

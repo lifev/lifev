@@ -152,7 +152,8 @@ class MultiscaleCoupling;
 
 // Type definitions
 typedef flag_Type                                                                multiscaleID_Type;
-typedef std::vector< flag_Type >                                                 multiscaleIDContainer_Type;
+typedef std::vector< multiscaleID_Type >                                         multiscaleIDContainer_Type;
+typedef multiscaleIDContainer_Type::const_iterator                               multiscaleIDContainerConstIterator_Type;
 
 typedef Displayer::commPtr_Type                                                  multiscaleCommPtr_Type;
 

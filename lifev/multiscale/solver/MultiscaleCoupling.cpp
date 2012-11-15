@@ -243,9 +243,10 @@ MultiscaleCoupling::saveSolution()
         for ( UInt i( 0 ); i < modelsNumber(); ++i )
             if ( myModel( i ) )
             {
-                Real flowRate    ( multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryFlowRate( M_boundaryIDs[i] ) );
-                Real stress      ( multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryStress( M_boundaryIDs[i] ) );
-                Real totalStress ( multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryTotalStress( M_boundaryIDs[i] ) );
+                Real flowRate   ( multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryFlowRate( M_boundaryIDs[i] ) );
+                Real stress     ( multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryStress( M_boundaryIDs[i] ) );
+                Real totalStress( multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryTotalStress( M_boundaryIDs[i] ) );
+                Real area       ( multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryArea( M_boundaryIDs[i] ) );
 
                 if ( isModelLeaderProcess( i ) )
                 {
@@ -263,13 +264,13 @@ MultiscaleCoupling::saveSolution()
                         output << "% Coupling Name: " << M_couplingName << std::endl;
                         output << "% Model:         " << number2string( M_models[i]->ID() ) << std::endl;
                         output << "% Boundary Flag: " << number2string( M_models[i]->boundaryFlag( M_boundaryIDs[i] ) ) << std::endl << std::endl;
-                        output << "% TIME                     FLOW RATE                STRESS                   TOTAL STRESS" << std::endl;
+                        output << "% TIME                     FLOW RATE                STRESS                   TOTAL STRESS             AREA" << std::endl;
                     }
                     else
                     {
                         output.open( filename.c_str(), std::ios::app );
                     }
-                    output << "  " << M_globalData->dataTime()->time() << "    " << flowRate << "    " << stress << "    " << totalStress << std::endl;
+                    output << "  " << M_globalData->dataTime()->time() << "    " << flowRate << "    " << stress << "    " << totalStress << "    " << area << std::endl;
                     output.close();
                 }
             }

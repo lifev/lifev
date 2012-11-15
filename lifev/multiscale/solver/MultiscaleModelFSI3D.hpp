@@ -38,14 +38,13 @@
 #ifndef MultiscaleModelFSI3D_H
 #define MultiscaleModelFSI3D_H 1
 
-// If the following macro is defined, the pressure inside the FSI model
+// TODO Remove this macro
+#define FSI_WITH_BOUNDARYAREA
+
+// If the following macro is defined, the pressure inside the 3-D FSI model
 // is initialized to the external pressure. Otherwise, the external pressure
 // is applied just as an offset at the interfaces.
 //#define FSI_WITH_EXTERNALPRESSURE
-
-// If the following macro is defined, the boundary area can be set
-// from data file.
-#define FSI_WITH_BOUNDARYAREA
 
 // LifeV includes
 #include <lifev/core/filter/ExporterEnsight.hpp>
@@ -77,7 +76,7 @@ namespace Multiscale
 
 #ifndef FSI_WITH_EXTERNALPRESSURE
 // Forward declaration
-class FSI3DCouplingFunction;
+class FSI3DBoundaryStressFunction;
 #endif
 
 #ifdef FSI_WITH_BOUNDARYAREA
@@ -98,45 +97,45 @@ public:
     //! @name Public Types
     //@{
 
-    typedef FSIMonolithic                              FSIOperator_Type;
-    typedef boost::shared_ptr< FSIOperator_Type>       FSIOperatorPtr_Type;
+    typedef FSIMonolithic                                    FSIOperator_Type;
+    typedef boost::shared_ptr< FSIOperator_Type>             FSIOperatorPtr_Type;
 
-    typedef FSIOperator::data_Type                     data_Type;
-    typedef FSIOperator::dataPtr_Type                  dataPtr_Type;
+    typedef FSIOperator::data_Type                           data_Type;
+    typedef FSIOperator::dataPtr_Type                        dataPtr_Type;
 
-    typedef FSIOperator::mesh_Type                     mesh_Type;
+    typedef FSIOperator::mesh_Type                           mesh_Type;
 
-    typedef FSIOperator::fluid_Type                    fluid_Type;
-    typedef FSIOperator::solid_Type                    solid_Type;
+    typedef FSIOperator::fluid_Type                          fluid_Type;
+    typedef FSIOperator::solid_Type                          solid_Type;
 
-    typedef FSIOperator::vector_Type                   vector_Type;
-    typedef FSIOperator::vectorPtr_Type                vectorPtr_Type;
+    typedef FSIOperator::vector_Type                         vector_Type;
+    typedef FSIOperator::vectorPtr_Type                      vectorPtr_Type;
 
-    typedef Exporter< mesh_Type >                      IOFile_Type;
-    typedef boost::shared_ptr< IOFile_Type >           IOFilePtr_Type;
-    typedef ExporterData< mesh_Type >                  IOData_Type;
+    typedef Exporter< mesh_Type >                            IOFile_Type;
+    typedef boost::shared_ptr< IOFile_Type >                 IOFilePtr_Type;
+    typedef ExporterData< mesh_Type >                        IOData_Type;
 
-    typedef ExporterEnsight< mesh_Type >               ensightIOFile_Type;
+    typedef ExporterEnsight< mesh_Type >                     ensightIOFile_Type;
 #ifdef HAVE_HDF5
-    typedef ExporterHDF5< mesh_Type >                  hdf5IOFile_Type;
+    typedef ExporterHDF5< mesh_Type >                        hdf5IOFile_Type;
 #endif
 
-    typedef BCHandler                                  bc_Type;
-    typedef boost::shared_ptr< bc_Type >               bcPtr_Type;
-    typedef BCInterface3D< bc_Type, FSIOperator >      bcInterface_Type;
-    typedef boost::shared_ptr< bcInterface_Type >      bcInterfacePtr_Type;
+    typedef BCHandler                                        bc_Type;
+    typedef boost::shared_ptr< bc_Type >                     bcPtr_Type;
+    typedef BCInterface3D< bc_Type, FSIOperator >            bcInterface_Type;
+    typedef boost::shared_ptr< bcInterface_Type >            bcInterfacePtr_Type;
 
 #ifndef FSI_WITH_EXTERNALPRESSURE
-    typedef FSI3DCouplingFunction                      couplingFunction_Type;
-    typedef boost::shared_ptr< couplingFunction_Type > couplingFunctionPtr_Type;
-    typedef std::vector< couplingFunctionPtr_Type >    couplingFunctionsContainer_Type;
+    typedef FSI3DBoundaryStressFunction                      boundaryStressFunction_Type;
+    typedef boost::shared_ptr< boundaryStressFunction_Type > boundaryStressFunctionPtr_Type;
+    typedef std::vector< boundaryStressFunctionPtr_Type >    boundaryStressFunctionContainer_Type;
 #endif
 
 #ifdef FSI_WITH_BOUNDARYAREA
-    typedef FSI3DBoundaryAreaFunction                      boundaryAreaFunction_Type;
-    typedef boost::shared_ptr< boundaryAreaFunction_Type > boundaryAreaFunctionPtr_Type;
-    typedef std::vector< boundaryAreaFunctionPtr_Type >    boundaryAreaFunctionsContainer_Type;
-    typedef boundaryAreaFunctionsContainer_Type::iterator  boundaryAreaFunctionsContainerIterator_Type;
+    typedef FSI3DBoundaryAreaFunction                        boundaryAreaFunction_Type;
+    typedef boost::shared_ptr< boundaryAreaFunction_Type >   boundaryAreaFunctionPtr_Type;
+    typedef std::vector< boundaryAreaFunctionPtr_Type >      boundaryAreaFunctionsContainer_Type;
+    typedef boundaryAreaFunctionsContainer_Type::iterator    boundaryAreaFunctionsContainerIterator_Type;
 #endif
 
     //@}
@@ -230,10 +229,7 @@ public:
      * @param boundaryID ID of the boundary interface
      * @param function boundary condition function
      */
-    void imposeBoundaryArea( const multiscaleID_Type& /*boundaryID*/, const function_Type& /*function*/ )
-    {
-        multiscaleErrorCheck( ModelInterface, "Invalid interface [Area] for model type [" + enum2String( M_type, multiscaleModelsMap ) +"]", M_comm->MyPID() == 0 );
-    }
+    void imposeBoundaryArea( const multiscaleID_Type& boundaryID, const function_Type& function );
 
     //! Get the flow rate on a specific boundary interface of the model
     /*!
@@ -304,18 +300,6 @@ public:
     //! @name Get Methods
     //@{
 
-    //! Get the FSI3D data container
-    /*!
-     * @return FSI3D data container
-     */
-    const dataPtr_Type& data() const { return M_data; }
-
-    //! Get the FSI3D operator
-    /*!
-     * @return FSI3D operator
-     */
-    const FSIOperatorPtr_Type& solver() const { return M_FSIoperator; }
-
     //! Get the FSI3D fluid bcHandler
     /*!
      * @return FSI3D fluid bcHandler
@@ -336,17 +320,15 @@ public:
 
     //! Get the density on a specific boundary face of the model
     /*!
-     * @param boundaryID ID of the boundary interface
      * @return density value
      */
-    Real boundaryDensity( const multiscaleID_Type& /*boundaryID*/) const { return M_FSIoperator->dataFluid()->density(); }
+    Real boundaryDensity() const { return M_FSIoperator->dataFluid()->density(); }
 
     //! Get the viscosity on a specific boundary face of the model
     /*!
-     * @param boundaryID ID of the boundary interface
      * @return viscosity value
      */
-    Real boundaryViscosity( const multiscaleID_Type& /*boundaryID*/) const { return M_FSIoperator->dataFluid()->viscosity(); }
+    Real boundaryViscosity() const { return M_FSIoperator->dataFluid()->viscosity(); }
 
     //! Get the integral of the pressure (on a specific boundary face)
     /*!
@@ -367,6 +349,18 @@ public:
      * @return external pressure value
      */
     Real externalPressure() const;
+
+    //! Get the FSI3D data container
+    /*!
+     * @return FSI3D data container
+     */
+    const dataPtr_Type& data() const { return M_data; }
+
+    //! Get the FSI3D operator
+    /*!
+     * @return FSI3D operator
+     */
+    const FSIOperatorPtr_Type& solver() const { return M_FSIoperator; }
 
     //@}
 
@@ -447,7 +441,7 @@ private:
 
 #ifndef FSI_WITH_EXTERNALPRESSURE
     // Stress coupling function container
-    couplingFunctionsContainer_Type        M_stressCouplingFunction;
+    boundaryStressFunctionContainer_Type   M_stressCouplingFunction;
 
     // Scalar external pressure
     Real                                   M_externalPressureScalar;
@@ -456,6 +450,10 @@ private:
 #ifdef FSI_WITH_BOUNDARYAREA
     // Boundary area coupling function container
     boundaryAreaFunctionsContainer_Type    M_boundaryAreaFunctions;
+
+    // Free flags, available for the couplings
+    multiscaleIDContainer_Type             M_boundaryFlagsArea;
+
 #endif
 
     // Post processing members
@@ -484,14 +482,14 @@ private:
 
 #ifndef FSI_WITH_EXTERNALPRESSURE
 
-//! FSI3DCouplingFunction - The FSI3D coupling function
+//! FSI3DBoundaryStressFunction - The FSI3D coupling function
 /*!
  *  @author Cristiano Malossi
  *
  *  This simple class provides the implementation for the BC function used by the FSI3D model
  *  in order to apply an offset to the coupling quantity (e.g.: to remove the wall pressure).
  */
-class FSI3DCouplingFunction
+class FSI3DBoundaryStressFunction
 {
 public:
 
@@ -511,10 +509,10 @@ public:
      * @param couplingFunction original coupling function
      * @param delta delta to be applied
      */
-    explicit FSI3DCouplingFunction( const function_Type& couplingFunction, const Real& delta ) : M_couplingFunction( couplingFunction ), M_delta( delta ) {}
+    explicit FSI3DBoundaryStressFunction( const function_Type& couplingFunction, const Real& delta ) : M_couplingFunction( couplingFunction ), M_delta( delta ) {}
 
     //! Destructor
-    virtual ~FSI3DCouplingFunction() {}
+    virtual ~FSI3DBoundaryStressFunction() {}
 
     //@}
 
@@ -538,11 +536,11 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    FSI3DCouplingFunction();
+    FSI3DBoundaryStressFunction();
 
-    FSI3DCouplingFunction( const MultiscaleCoupling& coupling );
+    FSI3DBoundaryStressFunction( const MultiscaleCoupling& coupling );
 
-    FSI3DCouplingFunction& operator=( const MultiscaleCoupling& coupling );
+    FSI3DBoundaryStressFunction& operator=( const MultiscaleCoupling& coupling );
 
     //@}
 
@@ -579,7 +577,16 @@ public:
     //@{
 
     //! Constructor
-    explicit FSI3DBoundaryAreaFunction() : M_functionStressSet( false ), M_functionScaleFactorSet( false ) {}
+    explicit FSI3DBoundaryAreaFunction() :
+        M_FSI3D           (),
+        M_fluidFlag       (),
+        M_referenceArea   (),
+        M_geometricCenter (),
+        M_n               (),
+        M_t1              (),
+        M_t2              (),
+        M_function        ()
+        {}
 
     //! Destructor
     virtual ~FSI3DBoundaryAreaFunction() { /* M_FSI3D is deleted outside */ }
@@ -594,29 +601,37 @@ public:
     /*!
      * @return evaluation of the function
      */
-    Real function( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const UInt& id )
+    Real function( const Real& t, const Real& x, const Real& y, const Real& z, const UInt& id )
     {
-        // Compute the rhs
+        // Compute scale factor
+        Real scaleFactor ( std::sqrt( M_function( t, x, y, z, id ) / M_referenceArea ) - 1);
+
+        // Compute the RHS
         boost::array< Real, 3 > rhs;
         rhs[0] = 0;
-        rhs[1] = M_scaleFactor * ( ( x - M_geometricCenter[0] ) * M_t1[0] + ( y - M_geometricCenter[1] ) * M_t1[1] + ( z - M_geometricCenter[2] ) * M_t1[2] );
-        rhs[2] = M_scaleFactor * ( ( x - M_geometricCenter[0] ) * M_t2[0] + ( y - M_geometricCenter[1] ) * M_t2[1] + ( z - M_geometricCenter[2] ) * M_t2[2] );
+        rhs[1] = scaleFactor * ( ( x - M_geometricCenter[0] ) * M_t1[0] + ( y - M_geometricCenter[1] ) * M_t1[1] + ( z - M_geometricCenter[2] ) * M_t1[2] );
+        rhs[2] = scaleFactor * ( ( x - M_geometricCenter[0] ) * M_t2[0] + ( y - M_geometricCenter[1] ) * M_t2[1] + ( z - M_geometricCenter[2] ) * M_t2[2] );
 
-        // Compute displacement
-        Real determinant = M_n[0] * ( M_t1[1] * M_t2[2] - M_t1[2] * M_t2[1] ) + M_n[1] * ( M_t1[2] * M_t2[0] - M_t1[0] * M_t2[2] ) + M_n[2] * ( M_t1[0] * M_t2[1] - M_t1[1] * M_t2[0] );
+        // Compute the displacement
+        Real determinant = M_n[0] * ( M_t1[1] * M_t2[2] - M_t1[2] * M_t2[1] )
+                         + M_n[1] * ( M_t1[2] * M_t2[0] - M_t1[0] * M_t2[2] )
+                         + M_n[2] * ( M_t1[0] * M_t2[1] - M_t1[1] * M_t2[0] );
         switch ( id )
         {
         case 0:
-            return -( rhs[0] * ( M_t1[2] * M_t2[1] - M_t1[1] * M_t2[2] ) + rhs[1] * ( M_n[1] * M_t2[2] - M_n[2] * M_t2[1] ) + rhs[2] * ( M_n[2] * M_t1[1] - M_n[1] * M_t1[2] ) )
-                   / ( determinant * M_FSI3D->globalData()->dataTime()->timeStep() );
+            return -( rhs[0] * ( M_t1[2] * M_t2[1] - M_t1[1] * M_t2[2] )
+                    + rhs[1] * ( M_n[1]  * M_t2[2] - M_n[2]  * M_t2[1] )
+                    + rhs[2] * ( M_n[2]  * M_t1[1] - M_n[1]  * M_t1[2] ) ) / ( determinant * M_FSI3D->globalData()->dataTime()->timeStep() );
 
         case 1:
-            return  ( rhs[0] * ( M_t1[2] * M_t2[0] - M_t1[0] * M_t2[2] ) + rhs[1] * ( M_n[0] * M_t2[2] - M_n[2] * M_t2[0] ) + rhs[2] * ( M_n[2] * M_t1[0] - M_n[0] * M_t1[2] ) )
-                   / ( determinant * M_FSI3D->globalData()->dataTime()->timeStep() );
+            return  ( rhs[0] * ( M_t1[2] * M_t2[0] - M_t1[0] * M_t2[2] )
+                    + rhs[1] * ( M_n[0]  * M_t2[2] - M_n[2]  * M_t2[0] )
+                    + rhs[2] * ( M_n[2]  * M_t1[0] - M_n[0]  * M_t1[2] ) ) / ( determinant * M_FSI3D->globalData()->dataTime()->timeStep() );
 
         case 2:
-            return -( rhs[0] * ( M_t1[1] * M_t2[0] - M_t1[0] * M_t2[1] ) + rhs[1] * ( M_n[0] * M_t2[1] - M_n[1] * M_t2[0] ) + rhs[2] * ( M_n[1] * M_t1[0] - M_n[0] * M_t1[1] ) )
-                   / ( determinant * M_FSI3D->globalData()->dataTime()->timeStep() );
+            return -( rhs[0] * ( M_t1[1] * M_t2[0] - M_t1[0] * M_t2[1] )
+                    + rhs[1] * ( M_n[0]  * M_t2[1] - M_n[1]  * M_t2[0] )
+                    + rhs[2] * ( M_n[1]  * M_t1[0] - M_n[0]  * M_t1[1] ) ) / ( determinant * M_FSI3D->globalData()->dataTime()->timeStep() );
 
         default:
 
@@ -628,7 +643,7 @@ public:
     void setup()
     {
         // Compute reference area
-        M_referenceArea = M_FSI3D->boundaryArea( M_fluidFlag );
+        M_referenceArea = M_FSI3D->solver()->fluid().area( M_fluidFlag );
 
         // Compute normal
         Vector normal = M_FSI3D->solver()->fluid().normal( M_fluidFlag );
@@ -647,37 +662,8 @@ public:
         M_geometricCenter[1] = geometricCenter[1];
         M_geometricCenter[2] = geometricCenter[2];
 
-        // Initialize scale factor
-        M_scaleFactor = 0;
-
         // ShowMe
         showMe();
-    }
-
-    //! Update the scale factor
-    void updateScaleFactor()
-    {
-        if ( M_functionScaleFactorSet )
-            M_scaleFactor = M_functionScaleFactor( M_FSI3D->globalData()->dataTime()->time(), 0, 0, 0, 0 );
-        else
-        {
-            // Compute delta pressure
-            Real deltaP( 0 );
-            if ( M_functionStressSet )
-            {
-                deltaP = -M_functionStress( M_FSI3D->globalData()->dataTime()->time(), 0, 0, 0, 0 ) - M_FSI3D->globalData()->solidExternalPressure();
-            }
-            else
-            {
-                deltaP = M_FSI3D->boundaryPressure( M_fluidFlag ) - M_FSI3D->externalPressure();
-            }
-
-            // Compute area with 1D elastic law (from pressure and assuming beta1 = 0.5)
-            Real area = M_referenceArea * ( deltaP / M_beta + 1 ) * ( deltaP / M_beta + 1 );
-
-            // Compute scale factor
-            M_scaleFactor = std::sqrt( area / M_referenceArea ) - 1; // Note that M_scaleFactor = deltaP / M_beta
-        }
     }
 
     //! ShowMe
@@ -686,48 +672,11 @@ public:
         if ( M_FSI3D->communicator()->MyPID() == 0 )
         {
             std::cout << "Fluid flag          = " << M_fluidFlag << std::endl
-                      << "Solid flag          = " << M_solidFlag << std::endl
                       << "Reference area      = " << M_referenceArea << std::endl
                       << "Geometric center    = " << M_geometricCenter[0] << " " << M_geometricCenter[1] << " " << M_geometricCenter[2] << std::endl
                       << "Normal              = " << M_n[0] << " " << M_n[1] << " " << M_n[2] << std::endl
                       << "Tangent 1           = " << M_t1[0] << " " << M_t1[1] << " " << M_t1[2] << std::endl
-                      << "Tangent 2           = " << M_t2[0] << " " << M_t2[1] << " " << M_t2[2] << std::endl
-                      << "Beta                = " << M_beta << std::endl
-                      << "Function stress set = " << M_functionStressSet << std::endl
-                      << "Function scale set  = " << M_functionScaleFactorSet << std::endl
-                      << "Scale factor        = " << M_scaleFactor << std::endl << std::endl;
-        }
-    }
-
-    //! Save to file
-    void save()
-    {
-        if ( M_FSI3D->communicator()->MyPID() == 0 )
-        {
-            std::ofstream output;
-            output << std::scientific << std::setprecision( 15 );
-
-            std::string filename = multiscaleProblemFolder + multiscaleProblemPrefix + "_Area_Model_" + number2string( M_FSI3D->ID() )
-                                                                                     + "_Flag_" + number2string( M_fluidFlag )
-                                                                                     + "_" + number2string( multiscaleProblemStep ) + ".mfile";
-
-            if ( M_FSI3D->globalData()->dataTime()->isFirstTimeStep() || ( multiscaleProblemStep > 0 && M_FSI3D->globalData()->dataTime()->isFirstNTimeStep( multiscaleSaveEachNTimeSteps ) ) )
-            {
-                output.open( filename.c_str(), std::ios::trunc );
-                output << "% Model:         " << number2string( M_FSI3D->ID() ) << std::endl;
-                output << "% Reference A:   " << number2string( M_referenceArea ) << std::endl;
-                output << "% Fluid flag:    " << number2string( M_fluidFlag ) << std::endl;
-                output << "% Solid flag:    " << number2string( M_solidFlag ) << std::endl << std::endl;
-                output << "% TIME                     AREA                     SCALE FACTOR" << std::endl;
-            }
-            else
-            {
-                output.open( filename.c_str(), std::ios::app );
-            }
-
-            Real area = ( M_scaleFactor + 1 ) * ( M_scaleFactor + 1 ) * M_referenceArea;
-            output << "  " << M_FSI3D->globalData()->dataTime()->time() << "    " << area << "    " << M_scaleFactor << std::endl;
-            output.close();
+                      << "Tangent 2           = " << M_t2[0] << " " << M_t2[1] << " " << M_t2[2] << std::endl << std::endl;
         }
     }
 
@@ -749,12 +698,6 @@ public:
      */
     void setFluidFlag( const multiscaleID_Type& flag ) { M_fluidFlag = flag; }
 
-    //! Set the solid flag of the boundary
-    /*!
-     * @param flag flag of the solid boundary
-     */
-    void setSolidFlag( const multiscaleID_Type& flag ) { M_solidFlag = flag; }
-
     //! Set the reference area the fluid boundary
     /*!
      * @param referenceArea reference area of the fluid boundary
@@ -773,41 +716,11 @@ public:
      */
     void setNormal( const boost::array< Real, 3 >& normal ) { M_n = normal; setupTangent(); }
 
-    //! Set the elastic coefficient of the near 1-D model
+    //! Set the area function
     /*!
-     * @param beta elastic coefficient beta of the near 1-D model
+     * @param function area function
      */
-    void setBeta( const Real& beta ) { M_beta = beta; }
-
-    //! Set the stress function from the coupling conditions
-    /*!
-     * @param stress function from the coupling condition
-     */
-    void setFunctionStress( const function_Type& functionStress ) { M_functionStress = functionStress; M_functionStressSet = true; }
-
-    //! Set the scale factor function
-    /*!
-     * @param functionScaleFactor scale factor function
-     */
-    void setFunctionScaleFactor( const function_Type& functionScaleFactor ) { M_functionScaleFactor = functionScaleFactor; M_functionScaleFactorSet = true; }
-
-    //@}
-
-
-    //! @name Get methods
-    //@{
-
-    //! Get the flag of the fluid boundary
-    /*!
-     * @return flag of the fluid boundary
-     */
-    const multiscaleID_Type& fluidFlag() { return M_fluidFlag; }
-
-    //! Get the flag of the solid boundary
-    /*!
-     * @return flag of the solid boundary
-     */
-    const multiscaleID_Type& solidFlag() { return M_solidFlag; }
+    void setFunction( const function_Type& function ) { M_function = function; }
 
     //@}
 
@@ -851,18 +764,12 @@ private:
 
     const MultiscaleModelFSI3D*       M_FSI3D;             // A pointer to the model class
     multiscaleID_Type                 M_fluidFlag;         // Boundary flag
-    multiscaleID_Type                 M_solidFlag;         // Boundary flag
     Real                              M_referenceArea;     // Reference area
     boost::array< Real, 3 >           M_geometricCenter;   // Geometric center
     boost::array< Real, 3 >           M_n;                 // Normal direction
     boost::array< Real, 3 >           M_t1;                // Tangential direction 1
     boost::array< Real, 3 >           M_t2;                // Tangential direction 2
-    Real                              M_beta;              // Beta coefficient
-    Real                              M_scaleFactor;       // Scale factor
-    bool                              M_functionStressSet; // Tells if the function pressure has been set
-    function_Type                     M_functionStress;    // Function
-    bool                              M_functionScaleFactorSet; // Tells if the function scale factor has been set
-    function_Type                     M_functionScaleFactor;    // Function scale factor
+    function_Type                     M_function;          // Function scale factor
 };
 
 #endif

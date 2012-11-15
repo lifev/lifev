@@ -60,6 +60,7 @@ MultiscaleModelFSI3D::MultiscaleModelFSI3D() :
 #endif
 #ifdef FSI_WITH_BOUNDARYAREA
         M_boundaryAreaFunctions        (),
+        M_boundaryFlagsArea            (),
 #endif
         M_fluidVelocity                (),
         M_fluidPressure                (),
@@ -143,6 +144,12 @@ MultiscaleModelFSI3D::setupData( const std::string& fileName )
         setupExporter( M_exporterSolid, dataFile, "_Solid" );
         setupImporter( M_importerSolid, dataFile, "_Solid" );
     }
+
+#ifdef FSI_WITH_BOUNDARYAREA
+    M_boundaryFlagsArea.reserve( M_boundaryFlags.size() );
+    for ( UInt j( 0 ); j < M_boundaryFlags.size(); ++j )
+        M_boundaryFlagsArea.push_back( dataFile( "Multiscale/couplingFlagsArea", 0, j ) );
+#endif
 }
 
 void
@@ -178,6 +185,7 @@ MultiscaleModelFSI3D::setupModel()
     M_FSIoperator->setupSystem();
 
 #ifdef FSI_WITH_BOUNDARYAREA
+    // Setup the boundary area functions
     for ( boundaryAreaFunctionsContainerIterator_Type i = M_boundaryAreaFunctions.begin(); i < M_boundaryAreaFunctions.end(); ++i )
         ( *i )->setup();
 #endif
@@ -312,11 +320,6 @@ MultiscaleModelFSI3D::saveSolution()
     }
 #endif
 
-#ifdef FSI_WITH_BOUNDARYAREA
-    for ( boundaryAreaFunctionsContainerIterator_Type i = M_boundaryAreaFunctions.begin(); i < M_boundaryAreaFunctions.end(); ++i )
-        ( *i )->save();
-#endif
-
 }
 
 void
@@ -358,7 +361,6 @@ MultiscaleModelFSI3D::imposeBoundaryFlowRate( const multiscaleID_Type& boundaryI
 {
     BCFunctionBase base;
     base.setFunction( function );
-
     M_fluidBC->handler()->addBC( "CouplingFlowRate_Model_" + number2string( M_ID ) + "_BoundaryID_" + number2string( boundaryID ), boundaryFlag( boundaryID ), Flux, Full, base, 3 );
 }
 
@@ -369,21 +371,27 @@ MultiscaleModelFSI3D::imposeBoundaryStress( const multiscaleID_Type& boundaryID,
 #ifdef FSI_WITH_EXTERNALPRESSURE
     base.setFunction( function );
 #else
-    couplingFunctionPtr_Type couplingFunction( new couplingFunction_Type( function, M_data->dataSolid()->externalPressure()) );
+    boundaryStressFunctionPtr_Type couplingFunction( new boundaryStressFunction_Type( function, M_data->dataSolid()->externalPressure()) );
     M_stressCouplingFunction.push_back( couplingFunction );
-    base.setFunction( boost::bind( &FSI3DCouplingFunction::function, M_stressCouplingFunction.back(), _1, _2, _3, _4, _5 ) );
+    base.setFunction( boost::bind( &FSI3DBoundaryStressFunction::function, M_stressCouplingFunction.back(), _1, _2, _3, _4, _5 ) );
 #endif
     M_fluidBC->handler()->addBC( "CouplingStress_Model_" + number2string( M_ID ) + "_BoundaryID_" + number2string( boundaryID ), boundaryFlag( boundaryID ), Natural, Normal, base );
+}
 
+void
+MultiscaleModelFSI3D::imposeBoundaryArea( const multiscaleID_Type& boundaryID, const function_Type& function )
+{
 #ifdef FSI_WITH_BOUNDARYAREA
-    for ( boundaryAreaFunctionsContainerIterator_Type i = M_boundaryAreaFunctions.begin(); i < M_boundaryAreaFunctions.end(); ++i )
-        if ( ( *i )->fluidFlag() == boundaryFlag( boundaryID ) )
-        {
-            ( *i )->setFunctionStress( function );
-            return;
-        }
-    if ( M_comm->MyPID() == 0 )
-        std::cerr << "!!! WARNING: No function assigned at boundaryFlag: " << boundaryFlag( boundaryID ) << " !!!" << std::endl;
+    boundaryAreaFunctionPtr_Type boundaryAreaFunction( new boundaryAreaFunction_Type() );
+    boundaryAreaFunction->setModel( this );
+    boundaryAreaFunction->setFluidFlag( boundaryFlag( boundaryID ) );
+    boundaryAreaFunction->setFunction( function);
+
+    M_boundaryAreaFunctions.push_back( boundaryAreaFunction );
+
+    BCFunctionBase base;
+    base.setFunction( boost::bind( &FSI3DBoundaryAreaFunction::function, M_boundaryAreaFunctions.back(), _1, _2, _3, _4, _5 ) );
+    M_solidBC->addBC( "BoundaryArea_BoundaryID_" + number2string( boundaryID ), M_boundaryFlagsArea[boundaryID], EssentialEdges, Full, base, 3 );
 #endif
 }
 
@@ -671,39 +679,6 @@ MultiscaleModelFSI3D::setupBC( const std::string& fileName )
 
         M_FSIoperator->setSolidBC( M_solidBC->handler() );
     }
-
-#ifdef FSI_WITH_BOUNDARYAREA
-    GetPot dataFile( fileName );
-
-    UInt scaledAreaColumnsNumber = 3.0;
-    UInt scaledAreaLinesNumber   = dataFile.vector_variable_size( "solid/scaledAreaSolidRing/data" ) / scaledAreaColumnsNumber;
-
-    for ( UInt fileScaledAreaLine( 0 ); fileScaledAreaLine < scaledAreaLinesNumber; ++fileScaledAreaLine )
-    {
-        boundaryAreaFunctionPtr_Type boundaryAreaFunction( new boundaryAreaFunction_Type() );
-
-        boundaryAreaFunction->setModel( this );
-        boundaryAreaFunction->setFluidFlag( dataFile( "solid/scaledAreaSolidRing/data", 1, fileScaledAreaLine * scaledAreaColumnsNumber ) );
-        boundaryAreaFunction->setSolidFlag( dataFile( "solid/scaledAreaSolidRing/data", 1, fileScaledAreaLine * scaledAreaColumnsNumber + 1 ) );
-        boundaryAreaFunction->setBeta(      dataFile( "solid/scaledAreaSolidRing/data", 1., fileScaledAreaLine * scaledAreaColumnsNumber + 2 ) );
-
-        M_boundaryAreaFunctions.push_back( boundaryAreaFunction );
-
-        // TODO: This part of the code is not general! ---------------------------------------------------------
-        // It assumes that we have put an area BC with flag = fluidFlag + 5000.
-        for ( bc_Type::bcBaseIterator_Type i = M_solidBC->handler()->begin(); i != M_solidBC->handler()->end(); ++i )
-            if ( i->flag() == ( boundaryAreaFunction->fluidFlag() + 5000 ) )
-            {
-                boundaryAreaFunction->setFunctionScaleFactor( i->pointerToFunctor()->Function() );
-            }
-        // -----------------------------------------------------------------------------------------------------
-
-        // Add boundary condition to solid bcHandler
-        BCFunctionBase bcBase;
-        bcBase.setFunction( boost::bind( &FSI3DBoundaryAreaFunction::function, M_boundaryAreaFunctions.back(), _1, _2, _3, _4, _5 ) );
-        M_solidBC->addBC( "BoundaryArea_BoundaryID_" + number2string( boundaryAreaFunction->solidFlag() ), boundaryAreaFunction->solidFlag(), EssentialEdges, Full, bcBase, 3 );
-    }
-#endif
 }
 
 void
