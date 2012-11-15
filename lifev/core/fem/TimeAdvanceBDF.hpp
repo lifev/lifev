@@ -150,55 +150,56 @@ public:
 
   //!@name Public Types
   //@{
-  
+
   //! class super
   typedef TimeAdvance< feVectorType >                    super;
   //! type of template
   typedef typename super::feVector_Type                  feVector_Type;
-  
+
   //! container of feVector
   typedef typename super::feVectorContainer_Type         feVectorContainer_Type;
-  
+
   //! container of pointer of feVector;
   typedef typename super::feVectorContainerPtr_Type      feVectorContainerPtr_Type;
-  
+
   //! iterator;
   typedef typename feVectorContainerPtr_Type::iterator   feVectorContainerPtrIterate_Type;
-  
+
   //! container of pointer of feVector;
   typedef typename super::feVectorSharedPtrContainer_Type        feVectorSharedPtrContainer_Type;
-  
+
   //@}
-  
+
   //! @name Constructor & Destructor
   //@{
-  
+
   //! Empty  Constructor
-  
+
   TimeAdvanceBDF();
-  
+
   //! Destructor
   virtual ~TimeAdvanceBDF() {}
-  
+
   //@}
-  
+
   //! @name Methods
   //@{
-  
+
   //!Update the state vector
   /*! Update the vectors of the previous time steps by shifting on the right  the old values.
     @param solution current (new) value of the state vector
   */
   void shiftRight(const feVector_Type&  solution );
-  
+
+
   //! Update the right hand side \f$ f_V \f$ of the time derivative formula
   /*!
-    Set and Return the right hand side \f$ f_V \f$ of the time derivative formula
+    Return the right hand side \f$ f_V \f$ of the time derivative formula
     @param timeStep defined the  time step need to compute the
     @returns rhsV
   */
-  void updateRHSFirstDerivative(const Real& timeStep = 1 );
-  
+  void RHSFirstDerivative(const Real& timeStep, feVectorType& rhsContribution, int const shift = 0 ) const;
+
   //! Update the right hand side \f$ f_W \f$ of the time derivative formula
   /*!
     Sets and Returns the right hand side \f$ f_W \f$ of the time derivative formula
@@ -206,14 +207,14 @@ public:
     @returns rhsW
   */
   void updateRHSSecondDerivative(const Real& timeStep = 1 );
-  
+
   //!Show the properties  of temporal scheme
   void showMe(std::ostream& output = std::cout ) const;
   //@}
-  
+
   //!@name Set Methods
   //@{
-  
+
   //! Initialize the parameters of time advance scheme
   /*!
     Initialize parameters of time advance scheme;
@@ -221,7 +222,7 @@ public:
     @param  orderDerivative  define the order of derivate;
   */
   void setup ( const UInt& order, const UInt& orderDerivative = 1 );
-  
+
   //! Initialize the parameters of time advance scheme used in TimeAdvanceNewmark
   /*!
     @note: this setup does not run for BDF class;
@@ -230,7 +231,7 @@ public:
   {
     ERROR_MSG("use setup for TimeAdvanceNewmark but the time advance scheme is BDF");
   }
-  
+
   //! Initialize the StateVector
   /*!
     Initialize all the entries of the unknown vector to be derived with the vector x0 (duplicated).
@@ -238,44 +239,44 @@ public:
     @param x0 is the initial unk;
   */
   void setInitialCondition( const feVector_Type& x0);
-  
+
   //! Initialize the StateVector used in TimeAdvanceNewmark
   void setInitialCondition(const feVector_Type&/* x0*/, const feVector_Type& /*v0*/ )
   {
-    ERROR_MSG( "this method  is not yet implemented" ); 
+    ERROR_MSG( "this method  is not yet implemented" );
   }
-  
+
   //! Initialize the StateVector used in TimeAdvanceNewmark
   void setInitialCondition(const feVector_Type& /*x0*/, const feVector_Type& /*v0*/, const feVector_Type& /* w0*/ )
   {
     ERROR_MSG( "this method  is not yet implemented" );
   }
-  
+
   //! Initialize all the entries of the unknown vector to be derived with a
   /*! set of vectors x0
     @note: this is taken as a copy (not a reference), since x0 is resized inside the method.
   */
   void setInitialCondition(const feVectorSharedPtrContainer_Type& x0 );
-  
+
   //@}
-  
+
   //!@name Get Methods
   //@{
-  
+
   //!Return the \f$i\f$-th coefficient of the unk's extrapolation
   /*!
     @param \f$i\f$ index of  extrapolation coefficient
     @returns beta
   */
     inline Real coefficientExtrapolation(const UInt& i ) const;
-  
+
   //! Return the \f$i\f$-th coefficient of the velocity's extrapolation
   /*!
     @param \f$i\f$ index of velocity's extrapolation  coefficient
     @returns betaFirstDerivative
   */
   inline Real coefficientExtrapolationFirstDerivative(const UInt& i ) const;
-  
+
   //! Compute the polynomial extrapolation of solution
   /*!
     Compute the polynomial extrapolation approximation of order \f$n-1\f$ of
@@ -283,22 +284,22 @@ public:
   */
 
   void extrapolation(feVector_Type& extrapolation) const;
-  
+
   //! Compute the polynomial extrapolation of velocity
   /*!
     Compute the polynomial extrapolation approximation of order \f$n-1\f$ of
     \f$u^{n+1}\f$ defined by the n stored state vectors
   */
   void extrapolationFirstDerivative(feVector_Type& extrapolation) const;
-  
+
   //! Return the current velocity
   feVectorType velocity()  const;
-  
+
   //!Return the current acceleration
   feVectorType acceleration() const;
-  
+
   //@}
-  
+
 };
 
 // ===================================================
@@ -339,22 +340,17 @@ TimeAdvanceBDF<feVectorType>::shiftRight(feVector_Type const&  solution )
 
 template<typename feVectorType>
 void
-TimeAdvanceBDF<feVectorType>::updateRHSFirstDerivative(const Real& timeStep )
+TimeAdvanceBDF<feVectorType>::RHSFirstDerivative(const Real& timeStep, feVectorType& rhsContribution, int const shift ) const
 {
-    feVectorContainerPtrIterate_Type it  = this->M_rhsContribution.begin();
 
-    //feVector_Type fv ( *this->M_unknowns[ 0 ] );
-
-    *it = new feVector_Type(*this->M_unknowns[ 0 ]*(this->M_alpha[ 1 ] / timeStep));
+    rhsContribution *= (this->M_alpha[ 1 ] / timeStep);
 
     for ( UInt i = 1; i < this->M_order; ++i )
     {
-        **it += (this->M_alpha[ i + 1 ] / timeStep) * *this->M_unknowns[ i ];
+        rhsContribution += (this->M_alpha[ i + 1 ] / timeStep) * *this->M_unknowns[ i-shift ];
     }
-
-    //*it = new feVector_Type( fv );
-    //return fv;
 }
+
 
 template<typename feVectorType>
 void
@@ -616,30 +612,30 @@ TimeAdvanceBDF<feVectorType>::coefficientExtrapolationFirstDerivative (const UIn
 	  "Error in specification of the time derivative coefficient for the BDF formula (out of range error)" );
   return this->M_betaFirstDerivative[ i ];
 }
-  
+
 template<typename feVectorType>
 void
 TimeAdvanceBDF<feVectorType>::extrapolation(feVector_Type& extrapolation) const
 {
   extrapolation = this->M_beta[ 0 ]*(*this->M_unknowns[ 0 ]);
-  
+
   for ( UInt i = 1; i < this->M_order; ++i )
     extrapolation += this->M_beta[ i ] * (*this->M_unknowns[ i ]);
 }
-  
+
 template<typename feVectorType>
 void
 TimeAdvanceBDF<feVectorType>::extrapolationFirstDerivative(feVector_Type& extrapolation) const
 {
   ASSERT ( this->M_orderDerivative == 2,
 	   "extrapolationFirstDerivative: this method must be used with the second order problem." )
-    
+
     extrapolation = this->M_betaFirstDerivative[ 0 ]*(*this->M_unknowns[ 0 ]);
-  
+
   for ( UInt i = 1; i < this->M_order; ++i )
     extrapolation += this->M_betaFirstDerivative[ i ] * (*this->M_unknowns[ i ]);
 }
-  
+
 template<typename feVectorType>
 feVectorType
 TimeAdvanceBDF<feVectorType>::velocity() const
@@ -653,9 +649,7 @@ template<typename feVectorType>
 feVectorType
 TimeAdvanceBDF<feVectorType>::acceleration() const
 {
-  return (*this->M_unknowns[0])
-    * this->M_xi[ 0 ]/(this->M_timeStep*this->M_timeStep);
-  -  ( *this->M_rhsContribution[1] );
+  return (*this->M_unknowns[0]) * this->M_xi[ 0 ]/(this->M_timeStep*this->M_timeStep) -  ( *this->M_rhsContribution[1] );
 }
 
 
@@ -671,7 +665,7 @@ namespace
 {
 static bool registerBDF = TimeAdvanceFactory::instance().registerProduct( "BDF",  &createBDF );
 }
-  
+
 }  //Namespace LifeV
 
 #endif  /*TIMEADVANCEBDF */

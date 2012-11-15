@@ -550,7 +550,7 @@ BCBase::showMe( bool verbose, std::ostream & out ) const
         unsigned int count( 0 ), lines( 10 );
         out << "IDs in list";
         for ( std::vector<boost::shared_ptr<BCIdentifierBase> >::const_iterator i = M_idVector.begin();
-                i != M_idVector.end(); i++ )
+                i != M_idVector.end(); ++i )
         {
             if ( count++ % lines == 0 )
             {

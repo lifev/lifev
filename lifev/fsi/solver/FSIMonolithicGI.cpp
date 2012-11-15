@@ -115,18 +115,25 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
                                const vector_Type& disp,
                                const UInt          iter )
 {
-    res *= 0.;//this is important. Don't remove it!
+    // disp here is the current solution guess (u,p,ds,df)
+
+    res = 0.;//this is important. Don't remove it!
 
     M_uk.reset(new vector_Type( disp ));
-
 
     UInt offset( M_solidAndFluidDim + nDimensions*M_interface );
 
     vectorPtr_Type meshDisp( new vector_Type(M_mmFESpace->map()) );
-    vectorPtr_Type meshVel( new vector_Type(M_mmFESpace->map()) );
     vectorPtr_Type mmRep( new vector_Type(M_mmFESpace->map(), Repeated ));
-    meshDisp->subset(disp, offset); //if the conv. term is to be condidered implicitly
 
+    meshDisp->subset(disp, offset); //if the conv. term is to be condidered implicitly
+    mmRep = meshDisp;
+    moveMesh( *mmRep );
+
+    /* Here there is something conceptually wrong:
+    - the velocity of the mesh has to be computed by considering the current mesh
+    - setSolution should not be called.
+    Indeed: at iter == 0 we shall do as in GE. Then without extrapolations
     if ( iter == 0 )
     {
         //In the case of iteration 0, we have to use the previous meshDispl
@@ -138,21 +145,20 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
         M_ALETimeAdvance->setSolution( *meshDisp );
         *mmRep = *meshDisp;
     }
-    *meshVel = M_ALETimeAdvance->velocity();
-    moveMesh( *mmRep );
+    */
 
-    *mmRep = *meshVel * ( -1. );
-    interpolateVelocity( *mmRep,
-                         *M_beta );
+     //here should use extrapolationFirstDerivative instead of velocity
+     vector_Type meshVelocityRepeated ( this->M_ALETimeAdvance->nextVelocity( *meshDisp ), Repeated );
+     vector_Type interpolatedMeshVelocity(this->M_uFESpace->map());
 
-    vectorPtr_Type fluid( new vector_Type( M_uFESpace->map() ) );
+     interpolateVelocity( meshVelocityRepeated, interpolatedMeshVelocity );
 
-    fluid->subset( disp,0 );
+     vectorPtr_Type fluid( new vector_Type( M_uFESpace->map() ) );
+     M_beta->subset( disp,0 );
+     *M_beta -= interpolatedMeshVelocity; // convective term, u^(n+1) - w^(n+1)
 
-    *M_beta += *fluid; /*M_un or disp, it could be also M_uk in a FP strategy*/
-
-    assembleSolidBlock( iter, *M_uk );
-    assembleFluidBlock( iter, *M_uk );
+    assembleSolidBlock( iter, disp );
+    assembleFluidBlock( iter, disp );
     assembleMeshBlock( iter );
 
     *M_rhsFull = *M_rhs;
@@ -246,6 +252,74 @@ void FSIMonolithicGI::applyBoundaryConditions()
 
     M_monolithicMatrix->applyBoundaryConditions(dataFluid()->dataTime()->time(), M_rhsFull);
 }
+
+void FSIMonolithicGI::setVectorInStencils( const vectorPtr_Type& vel,
+					   const vectorPtr_Type& pressure,
+					   const vectorPtr_Type& solidDisp,
+					   const vectorPtr_Type& fluidDisp,
+					   const UInt iter)
+{
+    //The fluid and solid TimeAdvance classes have a stencil of dimension
+    //as big as the coupled problem.
+
+    //Fluid Problem
+    vectorPtr_Type vectorMonolithicFluidVelocity(new vector_Type(*M_monolithicMap, Unique, Zero) );
+    vectorPtr_Type vectorMonolithicFluidPressure(new vector_Type(*M_monolithicMap, Unique, Zero) );
+
+    *vectorMonolithicFluidVelocity *= 0.0;
+    *vectorMonolithicFluidPressure *= 0.0;
+
+    vectorMonolithicFluidVelocity->subset(*vel, vel->map(), UInt(0), UInt(0)) ;
+    vectorMonolithicFluidPressure->subset( *pressure, pressure->map(), UInt(0), (UInt)3 * M_uFESpace->dof().numTotalDof() );
+
+    *vectorMonolithicFluidVelocity += *vectorMonolithicFluidPressure;
+
+    //ALE problem
+    //Note: at iter =0 the solution has to be put in fluidTimeAdvance->stencil()->M_unknown[0]
+    //      since that vector stores the solution and it has to be used in the Newton method
+
+    if( !iter )
+      {
+	vectorPtr_Type harmonicSolutionRestartTime(new vector_Type( *M_monolithicMap, Unique, Zero ) );
+
+	*harmonicSolutionRestartTime *= 0.0;
+
+	UInt givenOffset( M_solidAndFluidDim + nDimensions*M_interface );
+	harmonicSolutionRestartTime->subset(*fluidDisp, fluidDisp->map(), (UInt)0, givenOffset );
+
+	//We sum the vector in the first element of fluidtimeAdvance
+	*vectorMonolithicFluidVelocity += *harmonicSolutionRestartTime;
+      }
+
+    //The shared_pointer for the vectors has to be trasformed into a pointer to VectorEpetra
+    //That is the type of pointers that are used in TimeAdvance
+    vector_Type* normalPointerToALEVector( new vector_Type(*fluidDisp) );
+    (M_ALETimeAdvance->stencil()).push_back( normalPointerToALEVector );
+
+    //Solid problem
+    vectorPtr_Type vectorMonolithicSolidDisplacement(new vector_Type(*M_monolithicMap, Unique, Zero) );
+    *vectorMonolithicSolidDisplacement *=0.0;
+    vectorMonolithicSolidDisplacement->subset( *solidDisp, solidDisp->map(), (UInt)0, M_offset);
+    *vectorMonolithicSolidDisplacement *= 1.0 / M_solid->rescaleFactor();
+
+    if( !iter )
+      {
+	//We sum the vector in the first element of fluidtimeAdvance
+	*vectorMonolithicFluidVelocity += *vectorMonolithicSolidDisplacement;
+      }
+
+    vector_Type* normalPointerToSolidVector( new vector_Type(*vectorMonolithicSolidDisplacement) );
+    (M_solidTimeAdvance->stencil()).push_back( normalPointerToSolidVector );
+
+    vector_Type* normalPointerToFluidVector( new vector_Type(*vectorMonolithicFluidVelocity) );
+    (M_fluidTimeAdvance->stencil()).push_back( normalPointerToFluidVector );
+
+
+    // std::cout << "norm of the first solutions" << vectorMonolithicFluidVelocity->norm2() << std::endl;
+    // std::string fileName="monolithicGI";
+    // vectorMonolithicFluidVelocity->spy(fileName);
+}
+
 
 
 //============ Protected Methods ===================

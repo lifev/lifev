@@ -481,7 +481,7 @@ public:
       @param column Column index of the value to be added
       @param localValue Value to be added to the coefficient
      */
-    void addToCoefficient( UInt row, UInt column, DataType localValue );
+    void addToCoefficient( UInt const row, UInt const column, DataType const localValue );
 
     //! If set true, transpose of this operator will be applied.
     /*!
@@ -857,7 +857,7 @@ boost::shared_ptr<MatrixEpetra<DataType> > MatrixEpetra<DataType>::transpose( )
     boost::shared_ptr<MatrixEpetra<DataType> > transposedMatrix(new MatrixEpetra<DataType>(*M_domainMap));
     transposedMatrix->globalAssemble(M_rangeMap,M_domainMap);
     transposedMatrix->matrixPtr() = transposedFE;
-    
+
     return transposedMatrix;
 }
 
@@ -1426,20 +1426,22 @@ setCoefficient( UInt row, UInt column, DataType localValue )
 
 template <typename DataType>
 void MatrixEpetra<DataType>::
-addToCoefficient( UInt row, UInt column, DataType localValue )
+addToCoefficient( UInt const row, UInt const column, DataType const localValue )
 {
 
-    Int irow(    row );
-    Int icol( column );
-    Int ierr;
+    Int irow = static_cast<Int>(row);
+    Int icol = static_cast<Int>(column);
 
-    if ( M_epetraCrs->Filled() )
-        ierr = M_epetraCrs->SumIntoGlobalValues( 1, &irow, 1, &icol, &localValue );
-    else
-        ierr = M_epetraCrs->InsertGlobalValues( 1, &irow, 1, &icol, &localValue );
+    Int ierr = ( M_epetraCrs->Filled() )   ?
+                    M_epetraCrs->SumIntoGlobalValues( 1, &irow, 1, &icol, &localValue )
+                    :
+                    M_epetraCrs->InsertGlobalValues( 1, &irow, 1, &icol, &localValue );
 
-    if ( ierr < 0 ) std::cerr << " error in matrix insertion [addToCoefficient] " << ierr
-                    << " when inserting " << localValue << " in (" << irow << ", " << icol << ")" << std::endl;
+    std::stringstream errorMessage;
+    errorMessage << " error in matrix insertion [addToCoefficient] " << ierr
+                 << " when inserting " << localValue << " in (" << irow << ", " << icol << ")" << std::endl;
+    ASSERT( ierr >= 0, errorMessage.str() );
+
 }
 
 template <typename DataType>
@@ -1449,17 +1451,18 @@ addToCoefficients( Int const numRows, Int const numColumns,
                    DataType* const* const localValues,
                    Int format )
 {
-    Int ierr;
+    Int ierr = ( M_epetraCrs->Filled() ) ?
+                    M_epetraCrs->SumIntoGlobalValues( numRows, &rowIndices[0], numColumns,
+                                                      &columnIndices[0], localValues, format )
+                    :
+                    M_epetraCrs->InsertGlobalValues( numRows, &rowIndices[0], numColumns,
+                                                     &columnIndices[0], localValues, format );
 
-    if ( M_epetraCrs->Filled() )
-        ierr = M_epetraCrs->SumIntoGlobalValues( numRows, &rowIndices[0], numColumns,
-                                                    &columnIndices[0], localValues, format );
-    else
-        ierr = M_epetraCrs->InsertGlobalValues( numRows, &rowIndices[0], numColumns,
-                                                        &columnIndices[0], localValues, format );
+    std::stringstream errorMessage;
+    errorMessage << " error in matrix insertion [addToCoefficients] " << ierr
+                 << " when inserting in (" << rowIndices[0] << ", " << columnIndices[0] << ")" << std::endl;
+    ASSERT( ierr >= 0, errorMessage.str() );
 
-    if ( ierr < 0 ) std::cerr << " error in matrix insertion [addToCoefficients] " << ierr
-                    << " when inserting in (" << rowIndices[0] << ", " << columnIndices[0] << ")" << std::endl;
 }
 
 // ===================================================

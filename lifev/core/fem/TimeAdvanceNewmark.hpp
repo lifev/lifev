@@ -172,10 +172,11 @@ public:
 
   //! Update the right hand side \f$ f_V \f$ of the time derivative formula
   /*!
-    Set and Return the right hand side \f$ f_V \f$ of the time derivative formula
+    Return the right hand side \f$ f_V \f$ of the time derivative formula
     @param timeStep defined the  time step need to compute the
+    @returns rhsV
   */
-  void updateRHSFirstDerivative(const Real& timeStep = 1 );
+  void RHSFirstDerivative(const Real& timeStep, feVectorType& rhsContribution, int const shift = 0 ) const;
 
   //! Update the right hand side \f$ f_W \f$ of the time derivative formula
   /*!
@@ -356,16 +357,17 @@ void TimeAdvanceNewmark <feVectorType>::shiftRight(const feVector_Type& solution
 template<typename feVectorType>
 //const feVector_Type&
 void
-TimeAdvanceNewmark<feVectorType>::updateRHSFirstDerivative(const Real& timeStep )
+TimeAdvanceNewmark<feVectorType>::RHSFirstDerivative(const Real& timeStep, feVectorType& rhsContribution, int const shift ) const
 {
-  feVectorContainerPtrIterate_Type it  =  this->M_rhsContribution.begin();
+    rhsContribution *=  (this->M_alpha[ 1 ] / timeStep) ;
 
-  *it = new feVector_Type(*this->M_unknowns[0]);
+    Real timeStepPower(1.); // was: std::pow( timeStep, static_cast<Real>(i - 1 ) )
 
-  **it *=  this->M_alpha[ 1 ] / timeStep ;
-
-  for (UInt i= 1; i  < this->M_firstOrderDerivativeSize; ++i )
-    **it += ( this->M_alpha[ i+1 ] * std::pow( timeStep, static_cast<Real>(i - 1 ) ) ) *  (* this->M_unknowns[ i ]);
+    for (UInt i= 1; i  < this->M_firstOrderDerivativeSize; ++i )
+    {
+        rhsContribution += ( this->M_alpha[ i+1 ] * timeStepPower ) *  (* this->M_unknowns[ i-shift ]);
+        timeStepPower *= timeStep;
+    }
 }
 
 template<typename feVectorType>
