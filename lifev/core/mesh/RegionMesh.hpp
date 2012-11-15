@@ -1542,6 +1542,12 @@ public:
      */
     UInt maxNumElements() const {return maxNumVolumes( M_geoDim );}
 
+    //! Set counter of elements.
+    /**
+     *  @param n Number of elements.
+     */
+    void setNumElements( UInt const n ) {setNumElements( M_geoDim, n );}
+
     //! Changes Current capacity of the container of elements.
     /**
      *  Changes Current capacity of the container of elements (Optionally sets internal counter).
@@ -1980,6 +1986,11 @@ private:
     UInt maxNumElements(threeD_Type) const {return maxNumVolumes();}
     UInt maxNumElements(twoD_Type) const {return maxNumFaces();}
     UInt maxNumElements(oneD_Type) const {return maxNumEdges();}
+
+    //! Set counter of elements.
+    void setNumElements( threeD_Type, UInt const n ) {setNumVolumes( n );}
+    void setNumElements( twoD_Type, UInt const n ) {setNumFaces( n );}
+    void setNumElements( oneD_Type, UInt const n ) {setNumEdges( n );}
 
     //! Changes Current capacity of the container of elements.
     void setMaxNumElements   ( threeD_Type, UInt const n, bool const setcounter = false ) {setMaxNumVolumes( n, setcounter);}
