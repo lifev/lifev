@@ -137,7 +137,7 @@ MultiscaleCouplingMeanNormalStressArea::initializeCouplingVariables()
     for ( UInt i( 0 ); i < modelsNumber(); ++i )
         if ( myModel( i ) )
         {
-            Real myValue = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryStress( M_boundaryIDs[i] );
+            Real myValue = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryMeanNormalStress( M_boundaryIDs[i] );
             if ( isModelLeaderProcess( i ) )
                 localSum += myValue;
         }
@@ -169,7 +169,7 @@ MultiscaleCouplingMeanNormalStressArea::exportCouplingResiduals( multiscaleVecto
         for ( UInt i( 0 ); i < M_flowRateInterfaces; ++i )
             if ( myModel( i ) )
             {
-                Real myValueStress = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryStress( M_boundaryIDs[i] );
+                Real myValueStress = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryMeanNormalStress( M_boundaryIDs[i] );
                 if ( isModelLeaderProcess( i ) )
                 {
                     ( *M_localCouplingResiduals )[0]  += localCouplingVariables( 0 )[i];
@@ -270,7 +270,7 @@ MultiscaleCouplingMeanNormalStressArea::insertJacobianDeltaCoefficients( multisc
         else
         {
             row = M_couplingVariablesOffset + 1 + modelLocalID;
-            coefficient = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[modelLocalID] )->boundaryDeltaStress( M_boundaryIDs[modelLocalID], solveLinearSystem );
+            coefficient = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[modelLocalID] )->boundaryDeltaMeanNormalStress( M_boundaryIDs[modelLocalID], solveLinearSystem );
         }
 
         // Add the coefficient to the matrix

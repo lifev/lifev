@@ -90,14 +90,14 @@ public:
      * @param boundaryID ID of the boundary interface
      * @param function boundary condition function
      */
-    virtual void imposeBoundaryStress( const multiscaleID_Type& boundaryID, const function_Type& function ) = 0;
+    virtual void imposeBoundaryMeanNormalStress( const multiscaleID_Type& boundaryID, const function_Type& function ) = 0;
 
     //! Impose the integral of the mean total normal stress on a specific boundary interface of the model
     /*!
      * @param boundaryID ID of the boundary interface
      * @param function boundary condition function
      */
-    virtual void imposeBoundaryTotalStress( const multiscaleID_Type& boundaryID, const function_Type& function ) = 0;
+    virtual void imposeBoundaryMeanTotalNormalStress( const multiscaleID_Type& boundaryID, const function_Type& function ) = 0;
 
     //! Impose the area on a specific boundary interface of the model
     /*!
@@ -118,14 +118,14 @@ public:
      * @param boundaryID ID of the boundary interface
      * @return mean normal stress value
      */
-    virtual Real boundaryStress( const multiscaleID_Type& boundaryID ) const = 0;
+    virtual Real boundaryMeanNormalStress( const multiscaleID_Type& boundaryID ) const = 0;
 
     //! Get the integral of the mean total normal stress on a specific boundary interface of the model
     /*!
      * @param boundaryID ID of the boundary interface
      * @return mean total normal stress value
      */
-    virtual Real boundaryTotalStress( const multiscaleID_Type& boundaryID ) const = 0;
+    virtual Real boundaryMeanTotalNormalStress( const multiscaleID_Type& boundaryID ) const = 0;
 
     //! Get the area on a specific boundary interface of the model
     /*!
@@ -148,7 +148,7 @@ public:
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      * @return variation of the mean normal stress
      */
-    virtual Real boundaryDeltaStress( const multiscaleID_Type& boundaryID, bool& solveLinearSystem ) = 0;
+    virtual Real boundaryDeltaMeanNormalStress( const multiscaleID_Type& boundaryID, bool& solveLinearSystem ) = 0;
 
     //! Get the variation of the integral of the mean total normal stress (on a specific boundary interface) using the linear model
     /*!
@@ -156,7 +156,7 @@ public:
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      * @return variation of the mean total normal stress
      */
-    virtual Real boundaryDeltaTotalStress( const multiscaleID_Type& boundaryID, bool& solveLinearSystem ) = 0;
+    virtual Real boundaryDeltaMeanTotalNormalStress( const multiscaleID_Type& boundaryID, bool& solveLinearSystem ) = 0;
 
     //! Get the variation of the integral of the area (on a specific boundary interface) using the linear model
     /*!

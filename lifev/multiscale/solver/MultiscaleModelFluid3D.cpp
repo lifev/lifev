@@ -364,7 +364,7 @@ MultiscaleModelFluid3D::imposeBoundaryFlowRate( const multiscaleID_Type& boundar
 }
 
 void
-MultiscaleModelFluid3D::imposeBoundaryStress( const multiscaleID_Type& boundaryID, const function_Type& function )
+MultiscaleModelFluid3D::imposeBoundaryMeanNormalStress( const multiscaleID_Type& boundaryID, const function_Type& function )
 {
     BCFunctionBase base;
     base.setFunction( function );
@@ -381,7 +381,7 @@ MultiscaleModelFluid3D::boundaryDeltaFlowRate( const multiscaleID_Type& boundary
 }
 
 Real
-MultiscaleModelFluid3D::boundaryDeltaStress( const multiscaleID_Type& boundaryID, bool& solveLinearSystem )
+MultiscaleModelFluid3D::boundaryDeltaMeanNormalStress( const multiscaleID_Type& boundaryID, bool& solveLinearSystem )
 {
     solveLinearModel( solveLinearSystem );
 
@@ -389,7 +389,7 @@ MultiscaleModelFluid3D::boundaryDeltaStress( const multiscaleID_Type& boundaryID
 }
 
 Real
-MultiscaleModelFluid3D::boundaryDeltaTotalStress( const multiscaleID_Type& boundaryID, bool& solveLinearSystem )
+MultiscaleModelFluid3D::boundaryDeltaMeanTotalNormalStress( const multiscaleID_Type& boundaryID, bool& solveLinearSystem )
 {
     solveLinearModel( solveLinearSystem );
 

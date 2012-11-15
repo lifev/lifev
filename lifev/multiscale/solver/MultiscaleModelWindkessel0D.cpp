@@ -240,7 +240,7 @@ MultiscaleModelWindkessel0D::imposeBoundaryFlowRate( const multiscaleID_Type& bo
 }
 
 void
-MultiscaleModelWindkessel0D::imposeBoundaryStress( const multiscaleID_Type& boundaryID, const function_Type& function )
+MultiscaleModelWindkessel0D::imposeBoundaryMeanNormalStress( const multiscaleID_Type& boundaryID, const function_Type& function )
 {
     M_bc->handler()->setBC( boundaryFlag( boundaryID ), Voltage, boost::bind( function, _1, _1, _1, _1, _1 ) );
 }
@@ -257,7 +257,7 @@ MultiscaleModelWindkessel0D::boundaryDeltaFlowRate( const multiscaleID_Type& bou
 }
 
 Real
-MultiscaleModelWindkessel0D::boundaryDeltaStress( const multiscaleID_Type& boundaryID, bool& solveLinearSystem )
+MultiscaleModelWindkessel0D::boundaryDeltaMeanNormalStress( const multiscaleID_Type& boundaryID, bool& solveLinearSystem )
 {
     if ( boundaryFlag( boundaryID ) == 1 )
         return 0;

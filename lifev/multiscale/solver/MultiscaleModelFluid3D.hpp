@@ -175,7 +175,7 @@ public:
      * @param boundaryID ID of the boundary interface
      * @param function boundary condition function
      */
-    void imposeBoundaryStress( const multiscaleID_Type& boundaryID, const function_Type& function );
+    void imposeBoundaryMeanNormalStress( const multiscaleID_Type& boundaryID, const function_Type& function );
 
     //! Impose the integral of the mean total normal stress on a specific boundary interface of the model
     /*!
@@ -184,7 +184,7 @@ public:
      * @param boundaryID ID of the boundary interface
      * @param function boundary condition function
      */
-    void imposeBoundaryTotalStress( const multiscaleID_Type& /*boundaryID*/, const function_Type& /*function*/ )
+    void imposeBoundaryMeanTotalNormalStress( const multiscaleID_Type& /*boundaryID*/, const function_Type& /*function*/ )
     {
         multiscaleErrorCheck( ModelInterface, "Invalid interface [MeanTotalNormalStress] for model type [" + enum2String( M_type, multiscaleModelsMap ) +"]", M_comm->MyPID() == 0 );
     }
@@ -213,14 +213,14 @@ public:
      * @param boundaryID ID of the boundary interface
      * @return mean normal stress value
      */
-    Real boundaryStress( const multiscaleID_Type& boundaryID ) const { return M_fluid->meanNormalStress( boundaryFlag( boundaryID ), *M_bc->handler() ); }
+    Real boundaryMeanNormalStress( const multiscaleID_Type& boundaryID ) const { return M_fluid->meanNormalStress( boundaryFlag( boundaryID ), *M_bc->handler() ); }
 
     //! Get the integral of the mean total normal stress on a specific boundary interface of the model
     /*!
      * @param boundaryID ID of the boundary interface
      * @return mean total normal stress value
      */
-    Real boundaryTotalStress( const multiscaleID_Type& boundaryID ) const { return M_fluid->meanTotalNormalStress( boundaryFlag( boundaryID ), *M_bc->handler() ); }
+    Real boundaryMeanTotalNormalStress( const multiscaleID_Type& boundaryID ) const { return M_fluid->meanTotalNormalStress( boundaryFlag( boundaryID ), *M_bc->handler() ); }
 
     //! Get the area on a specific boundary interface of the model
     /*!
@@ -245,7 +245,7 @@ public:
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      * @return variation of the mean normal stress
      */
-    Real boundaryDeltaStress( const multiscaleID_Type& boundaryID, bool& solveLinearSystem );
+    Real boundaryDeltaMeanNormalStress( const multiscaleID_Type& boundaryID, bool& solveLinearSystem );
 
     //! Get the variation of the integral of the mean total normal stress (on a specific boundary interface) using the linear model
     /*!
@@ -253,7 +253,7 @@ public:
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      * @return variation of the mean total normal stress
      */
-    Real boundaryDeltaTotalStress( const multiscaleID_Type& boundaryID, bool& solveLinearSystem );
+    Real boundaryDeltaMeanTotalNormalStress( const multiscaleID_Type& boundaryID, bool& solveLinearSystem );
 
     //! Get the variation of the integral of the area (on a specific boundary interface) using the linear model
     /*!

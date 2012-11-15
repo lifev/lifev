@@ -159,7 +159,7 @@ MultiscaleCouplingMeanNormalStressValve::updateCoupling()
 
         if ( myModel( 1 ) )
         {
-            Real myValue = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[1] )->boundaryStress( M_boundaryIDs[1] );
+            Real myValue = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[1] )->boundaryMeanNormalStress( M_boundaryIDs[1] );
             if ( isModelLeaderProcess( 1 ) )
                 localSum = myValue;
         }
@@ -169,7 +169,7 @@ MultiscaleCouplingMeanNormalStressValve::updateCoupling()
 
         if ( myModel( 0 ) )
         {
-            Real myValue = globalSum - multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[0] )->boundaryStress( M_boundaryIDs[0] );
+            Real myValue = globalSum - multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[0] )->boundaryMeanNormalStress( M_boundaryIDs[0] );
             if ( isModelLeaderProcess( 0 ) && myValue > 0 )
             {
                 std::cout << " MS-  Opening the valve at coupling " << M_ID << std::endl;

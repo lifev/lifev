@@ -362,7 +362,7 @@ MultiscaleModel1D::imposeBoundaryFlowRate( const multiscaleID_Type& boundaryID, 
 }
 
 void
-MultiscaleModel1D::imposeBoundaryStress( const multiscaleID_Type& boundaryID, const function_Type& function )
+MultiscaleModel1D::imposeBoundaryMeanNormalStress( const multiscaleID_Type& boundaryID, const function_Type& function )
 {
     OneDFSIFunction base;
     base.setFunction( boost::bind( function, _1, _1, _1, _1, _1 ) );
@@ -393,7 +393,7 @@ MultiscaleModel1D::boundaryDeltaFlowRate( const multiscaleID_Type& boundaryID, b
 }
 
 Real
-MultiscaleModel1D::boundaryDeltaStress( const multiscaleID_Type& boundaryID, bool& solveLinearSystem )
+MultiscaleModel1D::boundaryDeltaMeanNormalStress( const multiscaleID_Type& boundaryID, bool& solveLinearSystem )
 {
     bcSide_Type bcSide = flagConverter( boundaryID );
 
@@ -412,7 +412,7 @@ MultiscaleModel1D::boundaryDeltaStress( const multiscaleID_Type& boundaryID, boo
 }
 
 Real
-MultiscaleModel1D::boundaryDeltaTotalStress( const multiscaleID_Type& boundaryID, bool& solveLinearSystem )
+MultiscaleModel1D::boundaryDeltaMeanTotalNormalStress( const multiscaleID_Type& boundaryID, bool& solveLinearSystem )
 {
     bcSide_Type bcSide = flagConverter( boundaryID );
 
@@ -458,13 +458,13 @@ MultiscaleModel1D::boundaryDeltaFlowRate( const multiscaleID_Type& boundaryID, b
 }
 
 Real
-MultiscaleModel1D::boundaryDeltaStress( const multiscaleID_Type& boundaryID, bool& /*solveLinearSystem*/ )
+MultiscaleModel1D::boundaryDeltaMeanNormalStress( const multiscaleID_Type& boundaryID, bool& /*solveLinearSystem*/ )
 {
     return tangentProblem( flagConverter( boundaryID ), OneDFSI::S );
 }
 
 Real
-MultiscaleModel1D::boundaryDeltaTotalStress( const multiscaleID_Type& boundaryID, bool& /*solveLinearSystem*/ )
+MultiscaleModel1D::boundaryDeltaMeanTotalNormalStress( const multiscaleID_Type& boundaryID, bool& /*solveLinearSystem*/ )
 {
     return tangentProblem( flagConverter( boundaryID ), OneDFSI::T );
 }

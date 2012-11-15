@@ -365,7 +365,7 @@ MultiscaleModelFSI3D::imposeBoundaryFlowRate( const multiscaleID_Type& boundaryI
 }
 
 void
-MultiscaleModelFSI3D::imposeBoundaryStress( const multiscaleID_Type& boundaryID, const function_Type& function )
+MultiscaleModelFSI3D::imposeBoundaryMeanNormalStress( const multiscaleID_Type& boundaryID, const function_Type& function )
 {
     BCFunctionBase base;
 #ifdef FSI_WITH_EXTERNALPRESSURE
@@ -396,7 +396,7 @@ MultiscaleModelFSI3D::imposeBoundaryArea( const multiscaleID_Type& boundaryID, c
 }
 
 Real
-MultiscaleModelFSI3D::boundaryStress( const multiscaleID_Type& boundaryID ) const
+MultiscaleModelFSI3D::boundaryMeanNormalStress( const multiscaleID_Type& boundaryID ) const
 {
 #ifdef FSI_WITH_EXTERNALPRESSURE
     return M_FSIoperator->fluid().meanNormalStress( boundaryFlag( boundaryID ), *M_fluidBC->handler(), M_FSIoperator->solution() );
@@ -406,7 +406,7 @@ MultiscaleModelFSI3D::boundaryStress( const multiscaleID_Type& boundaryID ) cons
 }
 
 Real
-MultiscaleModelFSI3D::boundaryTotalStress( const multiscaleID_Type& boundaryID ) const
+MultiscaleModelFSI3D::boundaryMeanTotalNormalStress( const multiscaleID_Type& boundaryID ) const
 {
 #ifdef FSI_WITH_EXTERNALPRESSURE
     return M_FSIoperator->fluid().meanTotalNormalStress( boundaryFlag( boundaryID ), *M_fluidBC->handler(), M_FSIoperator->solution() );
@@ -424,7 +424,7 @@ MultiscaleModelFSI3D::boundaryDeltaFlowRate( const multiscaleID_Type& boundaryID
 }
 
 Real
-MultiscaleModelFSI3D::boundaryDeltaStress( const multiscaleID_Type& boundaryID, bool& solveLinearSystem )
+MultiscaleModelFSI3D::boundaryDeltaMeanNormalStress( const multiscaleID_Type& boundaryID, bool& solveLinearSystem )
 {
     solveLinearModel( solveLinearSystem );
 
@@ -432,7 +432,7 @@ MultiscaleModelFSI3D::boundaryDeltaStress( const multiscaleID_Type& boundaryID, 
 }
 
 Real
-MultiscaleModelFSI3D::boundaryDeltaTotalStress( const multiscaleID_Type& boundaryID, bool& solveLinearSystem )
+MultiscaleModelFSI3D::boundaryDeltaMeanTotalNormalStress( const multiscaleID_Type& boundaryID, bool& solveLinearSystem )
 {
     solveLinearModel( solveLinearSystem );
 
