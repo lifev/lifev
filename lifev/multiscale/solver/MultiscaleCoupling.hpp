@@ -119,11 +119,8 @@ public:
      */
     virtual void updateCoupling() = 0;
 
-    //! Export the values of the local coupling residuals into a global vector
-    /*!
-     * @param couplingResiduals Global vector of variables
-     */
-    virtual void exportCouplingResiduals( multiscaleVector_Type& couplingResiduals ) = 0;
+    //! Compute the values of the local coupling residuals
+    virtual void computeCouplingResiduals() = 0;
 
     //! Check if the topology is changed
     /*!
@@ -182,6 +179,12 @@ public:
      * @param couplingVariables Global vector of coupling variables
      */
     void exportCouplingVariables( multiscaleVector_Type& couplingVariables ) { exportCouplingVector( couplingVariables, localCouplingVariables( 0 ), Zero ); }
+
+    //! Export the values of the coupling variables
+    /*!
+     * @param couplingVariables Global vector of coupling variables
+     */
+    void exportCouplingResiduals( multiscaleVector_Type& couplingResiduals ) { exportCouplingVector( couplingResiduals, *M_localCouplingResiduals, Add ); }
 
     //! Extrapolate the values of the coupling variables for the next time step
     void extrapolateCouplingVariables();

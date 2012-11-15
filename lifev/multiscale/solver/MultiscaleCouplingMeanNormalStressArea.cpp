@@ -77,25 +77,25 @@ MultiscaleCouplingMeanNormalStressArea::setupCoupling()
     Debug( 8230 ) << "MultiscaleCouplingMeanNormalStressArea::setupCoupling() \n";
 #endif
 
+    super_Type::setupCoupling();
+
     // Preliminary checks
     if ( myModelsNumber() > 0 )
     {
         if ( modelsNumber() > 2 )
-            std::cout << "!!! WARNING: MultiscaleCouplingMeanNormalStressArea does not work with more than two models !!!" << std::endl;
+            std::cerr << "!!! ERROR: MultiscaleCouplingMeanNormalStressArea does not work with more than two models !!!" << std::endl;
 
         //TODO: add a check on the type of the two models: they must be a FSI3D and a 1D model.
     }
 
-    super_Type::setupCoupling();
-
     if ( myModelsNumber() > 0 )
     {
-        // Impose area boundary conditions
+        // Impose area boundary condition on the FSI3D model
         for ( UInt i( 0 ); i < 2; ++i )
             if ( myModel( i ) )
                 if ( M_models[i]->type() == FSI3D )
                 {
-                    M_localCouplingFunctions.push_back( MultiscaleCouplingFunction( this, 2 ) );
+                    M_localCouplingFunctions.push_back( MultiscaleCouplingFunction( this, M_flowRateInterfaces + 1 ) );
                     multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->imposeBoundaryArea( M_boundaryIDs[i], boost::bind( &MultiscaleCouplingFunction::function, M_localCouplingFunctions.back(), _1, _2, _3, _4, _5 ) );
 
                     break;
@@ -111,40 +111,24 @@ MultiscaleCouplingMeanNormalStressArea::initializeCouplingVariables()
     Debug( 8230 ) << "MultiscaleCouplingMeanNormalStressArea::initializeCouplingVariables() \n";
 #endif
 
-    // Compute the flow rate coupling variables on the first M_flowRateInterfaces models
+    super_Type::initializeCouplingVariables();
+
+    // Local variables initialization
     Real localSum( 0 );
     Real globalSum( 0 );
 
-    for ( UInt i( 0 ); i < M_flowRateInterfaces; ++i )
-    {
+    // Compute the area coupling variable as an average of the two areas
+    for ( UInt i( 0 ); i < 2; ++i )
         if ( myModel( i ) )
         {
-            Real myValue = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryFlowRate( M_boundaryIDs[i] );
-            if ( isModelLeaderProcess( i ) )
-                localSum = myValue;
-        }
-
-        // We use the SumAll() instead of the Broadcast() because this way we don't need the id of the leader process.
-        M_comm->SumAll( &localSum, &globalSum, 1 );
-        if ( myModelsNumber() > 0 )
-            localCouplingVariables( 0 )[i] = globalSum;
-
-        localSum  = 0;
-        globalSum = 0;
-    }
-
-    // Compute the mean normal stress coupling variable as an average of all the stresses
-    for ( UInt i( 0 ); i < modelsNumber(); ++i )
-        if ( myModel( i ) )
-        {
-            Real myValue = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryMeanNormalStress( M_boundaryIDs[i] );
+            Real myValue = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryArea( M_boundaryIDs[i] );
             if ( isModelLeaderProcess( i ) )
                 localSum += myValue;
         }
 
     M_comm->SumAll( &localSum, &globalSum, 1 );
     if ( myModelsNumber() > 0 )
-        localCouplingVariables( 0 )[M_flowRateInterfaces] = globalSum / modelsNumber();
+        localCouplingVariables( 0 )[M_flowRateInterfaces + 1] = globalSum / 2;
 
 #ifdef HAVE_LIFEV_DEBUG
     for ( UInt i( 0 ); i < M_couplingVariablesNumber; ++i )
@@ -154,41 +138,29 @@ MultiscaleCouplingMeanNormalStressArea::initializeCouplingVariables()
 }
 
 void
-MultiscaleCouplingMeanNormalStressArea::exportCouplingResiduals( multiscaleVector_Type& couplingResiduals )
+MultiscaleCouplingMeanNormalStressArea::computeCouplingResiduals()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8230 ) << "MultiscaleCouplingMeanNormalStressArea::exportCouplingResiduals()  \n";
+    Debug( 8230 ) << "MultiscaleCouplingMeanNormalStressArea::computeCouplingResiduals()  \n";
 #endif
 
-    // Reset coupling residual
-    *M_localCouplingResiduals = 0.;
+    super_Type::computeCouplingResiduals();
 
     if ( myModelsNumber() > 0 )
     {
-        for ( UInt i( 0 ); i < M_flowRateInterfaces; ++i )
+        // Impose area boundary condition on the FSI3D model
+        for ( UInt i( 0 ); i < 2; ++i )
             if ( myModel( i ) )
-            {
-                Real myValueStress = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryMeanNormalStress( M_boundaryIDs[i] );
-                if ( isModelLeaderProcess( i ) )
+                if ( M_models[i]->type() == OneDimensional )
                 {
-                    ( *M_localCouplingResiduals )[0]  += localCouplingVariables( 0 )[i];
-                    ( *M_localCouplingResiduals )[i+1] = myValueStress - localCouplingVariables( 0 )[M_flowRateInterfaces];
+                    Real myValueArea = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryArea( M_boundaryIDs[i] );
+                    if ( isModelLeaderProcess( i ) )
+                    {
+                        ( *M_localCouplingResiduals )[0]  = myValueArea - localCouplingVariables( 0 )[M_flowRateInterfaces+1];
+                    }
                 }
-            }
-
-        for ( UInt i( M_flowRateInterfaces ); i < modelsNumber(); ++i )
-            if ( myModel( i ) )
-            {
-                Real myValueFlowRate = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryFlowRate( M_boundaryIDs[i] );
-                if ( isModelLeaderProcess( i ) )
-                {
-                    ( *M_localCouplingResiduals )[0]  += myValueFlowRate;
-                }
-            }
     }
-
-    exportCouplingVector( couplingResiduals, *M_localCouplingResiduals );
 
 #ifdef HAVE_LIFEV_DEBUG
     for ( UInt i( 0 ); i < M_couplingVariablesNumber; ++i )

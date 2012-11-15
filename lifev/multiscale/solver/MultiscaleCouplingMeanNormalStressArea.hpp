@@ -87,11 +87,8 @@ public:
     //! Initialize the values of the coupling variables
     void initializeCouplingVariables();
 
-    //! Update the values of the coupling residuals
-    /*!
-     * @param couplingResiduals Global vector of variables
-     */
-    void exportCouplingResiduals( multiscaleVector_Type& couplingResiduals );
+    //! Compute the local coupling residuals vector
+    void computeCouplingResiduals();
 
     //@}
 

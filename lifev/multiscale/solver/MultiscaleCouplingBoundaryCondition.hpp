@@ -100,11 +100,8 @@ public:
      */
     void updateCoupling() {};
 
-    //! Export the values of the local coupling residuals into a global vector (DO NOTHING)
-    /*!
-     * @param couplingResiduals Global vector of variables
-     */
-    void exportCouplingResiduals( multiscaleVector_Type& /*couplingResiduals*/ ) {}
+    //! Compute the local coupling residuals vector
+    void computeCouplingResiduals() {}
 
     //@}
 

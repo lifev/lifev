@@ -194,20 +194,17 @@ MultiscaleCouplingMeanNormalStressValve::updateCoupling()
 }
 
 void
-MultiscaleCouplingMeanNormalStressValve::exportCouplingResiduals( multiscaleVector_Type& couplingResiduals )
+MultiscaleCouplingMeanNormalStressValve::computeCouplingResiduals()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8240 ) << "MultiscaleCouplingMeanNormalStressValve::exportCouplingResiduals()  \n";
+    Debug( 8240 ) << "MultiscaleCouplingMeanNormalStressValve::computeCouplingResiduals()  \n";
 #endif
 
     if ( M_valveIsOpen )
-        super_Type::exportCouplingResiduals( couplingResiduals );
+        super_Type::computeCouplingResiduals();
     else
-    {
         *M_localCouplingResiduals = 0.;
-        exportCouplingVector( couplingResiduals, *M_localCouplingResiduals );
-    }
 
 #ifdef HAVE_LIFEV_DEBUG
     for ( UInt i( 0 ); i < M_couplingVariablesNumber; ++i )

@@ -148,11 +148,11 @@ MultiscaleCouplingMeanNormalStress::initializeCouplingVariables()
 }
 
 void
-MultiscaleCouplingMeanNormalStress::exportCouplingResiduals( multiscaleVector_Type& couplingResiduals )
+MultiscaleCouplingMeanNormalStress::computeCouplingResiduals()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8220 ) << "MultiscaleCouplingMeanNormalStress::exportCouplingResiduals()  \n";
+    Debug( 8220 ) << "MultiscaleCouplingMeanNormalStress::computeCouplingResiduals()  \n";
 #endif
 
     // Reset coupling residual
@@ -181,8 +181,6 @@ MultiscaleCouplingMeanNormalStress::exportCouplingResiduals( multiscaleVector_Ty
                 }
             }
     }
-
-    exportCouplingVector( couplingResiduals, *M_localCouplingResiduals );
 
 #ifdef HAVE_LIFEV_DEBUG
     for ( UInt i( 0 ); i < M_couplingVariablesNumber; ++i )

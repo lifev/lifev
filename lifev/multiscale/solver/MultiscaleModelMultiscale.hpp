@@ -133,7 +133,10 @@ public:
     //! Export the values of the coupling variables
     void exportCouplingVariables( multiscaleVector_Type& couplingVariables );
 
-    //! Export the values of the coupling residuals
+    //! Compute the values of the interface residuals
+    void computeCouplingResiduals();
+
+    //! Export the values of the interface residuals
     void exportCouplingResiduals( multiscaleVector_Type& couplingResiduals );
 
     //! Export the Jacobian matrix

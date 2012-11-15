@@ -114,8 +114,13 @@ MultiscaleAlgorithm::showMe()
 Real
 MultiscaleAlgorithm::computeResidual() const
 {
-    // Compute computeResidual
+    // Compute interface residual
+    M_multiscale->computeCouplingResiduals();
+
+    // Export interface residual
     M_multiscale->exportCouplingResiduals( *M_couplingResiduals );
+
+    // Norm2 of the interface residual
     return M_couplingResiduals->norm2();
 }
 
