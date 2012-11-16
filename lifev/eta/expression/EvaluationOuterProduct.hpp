@@ -182,22 +182,22 @@ public:
     return_Type value_q(const UInt& q) const
     {
         return  M_evaluationL.value_q(q).outerProduct( M_evaluationR.value_q(q) );
-	ASSERT ( false , "This method returns only matrices");
+	//ASSERT ( false , "This method returns only matrices");
     }
 
     //! Getter for the value for a vector
-    return_Type value_qi(const UInt& q, const UInt& /*i*/) const
+    return_Type value_qi(const UInt& q, const UInt& i) const
     {
-        return  M_evaluationL.value_q(q).outerProduct( M_evaluationR.value_q(q) );
+        return  M_evaluationL.value_qi(q,i).outerProduct( M_evaluationR.value_qi(q,i) );
 	//ASSERT ( false , "This method returns only matrices");
 
     }
 
     //! Getter for the value for a matrix
-    return_Type value_qij(const UInt& q, const UInt& /*i*/, const UInt& /*j*/) const
+    return_Type value_qij(const UInt& q, const UInt& i, const UInt& j) const
     {
         //ASSERT ( false , "This method is NOT implemented for matrices");
-        return  M_evaluationL.value_q(q).outerProduct( M_evaluationR.value_q(q) );
+        return  M_evaluationL.value_qij(q,i,j).outerProduct( M_evaluationR.value_qij(q,i,j) );
     }
 
     //@}
