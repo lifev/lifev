@@ -200,7 +200,7 @@ MultiscaleCouplingMeanNormalStress::exportListOfPerturbedModels( const UInt& loc
     Debug( 8220 ) << "MultiscaleCouplingMeanNormalStress::exportListOfPerturbedModels( localCouplingVariableID ) \n";
 #endif
 
-    if ( localCouplingVariableID < M_couplingVariablesNumber - 1 )
+    if ( localCouplingVariableID < M_flowRateInterfaces )
     {
         if ( myModel(localCouplingVariableID) )
         {
