@@ -107,25 +107,15 @@ public:
 
 private:
 
-    //! @name Unimplemented Methods
-    //@{
-
-    MultiscaleCouplingBoundaryCondition( const MultiscaleCouplingBoundaryCondition& coupling );
-
-    MultiscaleCouplingBoundaryCondition& operator=( const MultiscaleCouplingBoundaryCondition& coupling );
-
-    //@}
-
-
     //! @name Private Multiscale PhysicalCoupling Implementation
     //@{
 
-    //! Build the list of models affected by the perturbation of a local coupling variable
+    //! Build the list of models affected by the perturbation of a local coupling variable (DO NOTHING)
     /*!
-     * @param localCouplingVariableID local coupling variable (perturbed)
-     * @return list of models affected by the perturbation
+     * @param localCouplingVariableID id of the perturbed local coupling variable
+     * @param perturbedModelsList list of models affected by the perturbation
      */
-    multiscaleModelsContainer_Type listOfPerturbedModels( const UInt& /*localCouplingVariableID*/ );
+    void exportListOfPerturbedModels( const UInt& /*localCouplingVariableID*/, multiscaleModelsContainer_Type& /*perturbedModelsList*/ ) {}
 
     //! Insert constant coefficients into the Jacobian matrix (DO NOTHING)
     /*!
@@ -159,6 +149,16 @@ private:
     //! Apply the boundary condition to the specific 3D model
     template< class ModelType >
     void applyBoundaryConditions3D( const UInt& i );
+
+    //@}
+
+
+    //! @name Unimplemented Methods
+    //@{
+
+    MultiscaleCouplingBoundaryCondition( const MultiscaleCouplingBoundaryCondition& coupling );
+
+    MultiscaleCouplingBoundaryCondition& operator=( const MultiscaleCouplingBoundaryCondition& coupling );
 
     //@}
 

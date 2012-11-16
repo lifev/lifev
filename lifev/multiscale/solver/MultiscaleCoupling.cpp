@@ -51,7 +51,7 @@ MultiscaleCoupling::MultiscaleCoupling() :
         M_type                        (),
         M_models                      (),
         M_couplingName                (),
-        M_boundaryIDs            (),
+        M_boundaryIDs                 (),
         M_globalData                  (),
         M_couplingVariablesNumber     ( 0 ),
         M_couplingVariablesOffset     ( 0 ),
@@ -212,7 +212,8 @@ MultiscaleCoupling::exportJacobian( multiscaleMatrix_Type& jacobian )
         for ( UInt column(M_couplingVariablesOffset) ; M_perturbedCoupling < static_cast< Int > ( M_couplingVariablesNumber ); ++M_perturbedCoupling, ++column )
         {
             // Build the list of models affected by the perturbation of the variable associated with this column
-            perturbedModelsList = listOfPerturbedModels( M_perturbedCoupling );
+            perturbedModelsList.clear();
+            exportListOfPerturbedModels( M_perturbedCoupling, perturbedModelsList );
 
             // Loop on all the models, that are influenced by the perturbation of the coupling variable
             for ( multiscaleModelsContainerIterator_Type j = perturbedModelsList.begin() ; j < perturbedModelsList.end() ; ++j )

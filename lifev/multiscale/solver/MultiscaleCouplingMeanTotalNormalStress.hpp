@@ -97,25 +97,15 @@ public:
 
 private:
 
-    //! @name Unimplemented Methods
-    //@{
-
-    MultiscaleCouplingMeanTotalNormalStress( const MultiscaleCouplingMeanTotalNormalStress& coupling );
-
-    MultiscaleCouplingMeanTotalNormalStress& operator=( const MultiscaleCouplingMeanTotalNormalStress& coupling );
-
-    //@}
-
-
     //! @name Private Multiscale PhysicalCoupling Implementation
     //@{
 
     //! Build the list of models affected by the perturbation of a local coupling variable
     /*!
-     * @param localCouplingVariableID local coupling variable (perturbed)
-     * @return list of models affected by the perturbation
+     * @param localCouplingVariableID id of the perturbed local coupling variable
+     * @param perturbedModelsList list of models affected by the perturbation
      */
-    multiscaleModelsContainer_Type listOfPerturbedModels( const UInt& localCouplingVariableID );
+    void exportListOfPerturbedModels( const UInt& localCouplingVariableID, multiscaleModelsContainer_Type& perturbedModelsList );
 
     //! Insert constant coefficients into the Jacobian matrix
     /*!
@@ -131,6 +121,15 @@ private:
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      */
     void insertJacobianDeltaCoefficients( multiscaleMatrix_Type& jacobian, const UInt& column, const UInt& ID, bool& solveLinearSystem );
+
+    //@}
+
+    //! @name Unimplemented Methods
+    //@{
+
+    MultiscaleCouplingMeanTotalNormalStress( const MultiscaleCouplingMeanTotalNormalStress& coupling );
+
+    MultiscaleCouplingMeanTotalNormalStress& operator=( const MultiscaleCouplingMeanTotalNormalStress& coupling );
 
     //@}
 };

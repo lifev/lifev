@@ -80,11 +80,11 @@ public:
     //! @name Multiscale PhysicalCoupling Implementation
     //@{
 
-    //! Initialize the values of the coupling variables
-    void initializeCouplingVariables();
-
     //! Setup the coupling
     void setupCoupling();
+
+    //! Initialize the values of the coupling variables
+    void initializeCouplingVariables();
 
     //! Update the coupling
     /*!
@@ -107,16 +107,6 @@ public:
 
 private:
 
-    //! @name Unimplemented Methods
-    //@{
-
-    MultiscaleCouplingMeanNormalStressValve( const MultiscaleCouplingMeanNormalStressValve& coupling );
-
-    MultiscaleCouplingMeanNormalStressValve& operator=( const MultiscaleCouplingMeanNormalStressValve& coupling );
-
-    //@}
-
-
     //! @name Private Multiscale PhysicalCoupling Implementation
     //@{
 
@@ -134,6 +124,16 @@ private:
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      */
     void insertJacobianDeltaCoefficients( multiscaleMatrix_Type& jacobian, const UInt& column, const UInt& ID, bool& solveLinearSystem );
+
+    //@}
+
+
+    //! @name Unimplemented Methods
+    //@{
+
+    MultiscaleCouplingMeanNormalStressValve( const MultiscaleCouplingMeanNormalStressValve& coupling );
+
+    MultiscaleCouplingMeanNormalStressValve& operator=( const MultiscaleCouplingMeanNormalStressValve& coupling );
 
     //@}
 

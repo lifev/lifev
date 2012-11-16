@@ -361,9 +361,9 @@ protected:
     //! Build the list of models affected by the perturbation of the local coupling variable
     /*!
      * @param localCouplingVariableID local coupling variable (perturbed)
-     * @return list of models affected by the perturbation of the given coupling variable
+     * @param perturbedModelsList list of models affected by the perturbation of the given coupling variable
      */
-    virtual multiscaleModelsContainer_Type listOfPerturbedModels( const UInt& localCouplingVariableID ) = 0;
+    virtual void exportListOfPerturbedModels( const UInt& localCouplingVariableID, multiscaleModelsContainer_Type& perturbedModelsList ) = 0;
 
     //! Insert constant coefficients into the Jacobian matrix
     /*!

@@ -194,23 +194,20 @@ MultiscaleCouplingMeanTotalNormalStress::computeCouplingResiduals()
 // ===================================================
 // Private MultiscaleCoupling Implementation
 // ===================================================
-multiscaleModelsContainer_Type
-MultiscaleCouplingMeanTotalNormalStress::listOfPerturbedModels( const UInt& localCouplingVariableID )
+void
+MultiscaleCouplingMeanTotalNormalStress::exportListOfPerturbedModels( const UInt& localCouplingVariableID, multiscaleModelsContainer_Type& perturbedModelsList )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8250 ) << "MultiscaleCouplingMeanTotalNormalStress::listOfPerturbedModels( localCouplingVariableID ) \n";
+    Debug( 8250 ) << "MultiscaleCouplingMeanTotalNormalStress::exportListOfPerturbedModels( localCouplingVariableID ) \n";
 #endif
 
-    multiscaleModelsContainer_Type perturbedModelsList(0);
-
-    if ( localCouplingVariableID < M_couplingVariablesNumber - 1 )
+    if ( localCouplingVariableID < modelsNumber() )
         if ( myModel(localCouplingVariableID) )
         {
             perturbedModelsList.reserve( 1 );
             perturbedModelsList.push_back( M_models[localCouplingVariableID] );
         }
-    return perturbedModelsList;
 }
 
 void

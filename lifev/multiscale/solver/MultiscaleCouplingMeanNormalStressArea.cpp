@@ -172,33 +172,23 @@ MultiscaleCouplingMeanNormalStressArea::computeCouplingResiduals()
 // ===================================================
 // Private MultiscaleCoupling Implementation
 // ===================================================
-multiscaleModelsContainer_Type
-MultiscaleCouplingMeanNormalStressArea::listOfPerturbedModels( const UInt& localCouplingVariableID )
+void
+MultiscaleCouplingMeanNormalStressArea::exportListOfPerturbedModels( const UInt& localCouplingVariableID, multiscaleModelsContainer_Type& perturbedModelsList )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8230 ) << "MultiscaleCouplingMeanNormalStressArea::listOfPerturbedModels( localCouplingVariableID ) \n";
+    Debug( 8230 ) << "MultiscaleCouplingMeanNormalStressArea::exportListOfPerturbedModels( localCouplingVariableID ) \n";
 #endif
 
-    multiscaleModelsContainer_Type perturbedModelsList(0);
-
-    if ( localCouplingVariableID < M_couplingVariablesNumber - 1 )
+    if ( localCouplingVariableID == M_flowRateInterfaces + 1 )
     {
-        if ( myModel(localCouplingVariableID) )
-        {
-            perturbedModelsList.reserve( 1 );
-            perturbedModelsList.push_back( M_models[localCouplingVariableID] );
-        }
+        for ( UInt i( 0 ); i < 2; ++i )
+            if ( myModel( i ) )
+                if ( M_models[i]->type() == FSI3D )
+                    perturbedModelsList.push_back( M_models[i] );
     }
     else
-    {
-        perturbedModelsList.reserve( modelsNumber() - M_flowRateInterfaces );
-        for ( UInt i( M_flowRateInterfaces ); i < modelsNumber(); ++i )
-            if ( myModel( i ) )
-                perturbedModelsList.push_back( M_models[i] );
-    }
-
-    return perturbedModelsList;
+        super_Type::exportListOfPerturbedModels( localCouplingVariableID, perturbedModelsList );
 }
 
 void
@@ -209,14 +199,12 @@ MultiscaleCouplingMeanNormalStressArea::insertJacobianConstantCoefficients( mult
     Debug( 8230 ) << "MultiscaleCouplingMeanNormalStressArea::insertJacobianConstantCoefficients( jacobian )  \n";
 #endif
 
+    super_Type::insertJacobianConstantCoefficients( jacobian );
+
     // The constant coefficients are added by the leader process of model 0.
     if ( myModel( 0 ) )
         if ( isModelLeaderProcess( 0 ) )
-            for ( UInt i( 0 ); i < M_flowRateInterfaces; ++i )
-            {
-                jacobian.addToCoefficient( M_couplingVariablesOffset,     M_couplingVariablesOffset + i,                     1 );
-                jacobian.addToCoefficient( M_couplingVariablesOffset+1+i, M_couplingVariablesOffset + M_flowRateInterfaces, -1 );
-            }
+            jacobian.addToCoefficient( M_couplingVariablesOffset + M_flowRateInterfaces + 1, M_couplingVariablesOffset + M_flowRateInterfaces + 1, -1 );
 }
 
 void
@@ -227,34 +215,29 @@ MultiscaleCouplingMeanNormalStressArea::insertJacobianDeltaCoefficients( multisc
     Debug( 8230 ) << "MultiscaleCouplingMeanNormalStressArea::insertJacobianDeltaCoefficients( jacobian, column, ID, solveLinearSystem )  \n";
 #endif
 
+    super_Type::insertJacobianDeltaCoefficients( jacobian, column, ID, solveLinearSystem );
+
     // Model global to local conversion
     UInt modelLocalID = modelGlobalToLocalID( ID );
     if ( myModel( modelLocalID ) )
-    {
-        Real row( 0 );
-        Real coefficient( 0 );
+        if ( M_models[modelLocalID]->type() == OneDimensional )
+        {
+            Real row( 0 );
+            Real coefficient( 0 );
 
-        if ( modelLocalID >= M_flowRateInterfaces )
-        {
-            row = M_couplingVariablesOffset;
-            coefficient = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[modelLocalID] )->boundaryDeltaFlowRate( M_boundaryIDs[modelLocalID], solveLinearSystem );
-        }
-        else
-        {
-            row = M_couplingVariablesOffset + 1 + modelLocalID;
-            coefficient = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[modelLocalID] )->boundaryDeltaMeanNormalStress( M_boundaryIDs[modelLocalID], solveLinearSystem );
-        }
+            row = M_couplingVariablesOffset + M_flowRateInterfaces + 1;
+            coefficient = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[modelLocalID] )->boundaryDeltaArea( M_boundaryIDs[modelLocalID], solveLinearSystem );
 
-        // Add the coefficient to the matrix
-        if ( isModelLeaderProcess( modelLocalID ) )
-        {
-            jacobian.addToCoefficient( row, column, coefficient );
+            // Add the coefficient to the matrix
+            if ( isModelLeaderProcess( modelLocalID ) )
+            {
+                jacobian.addToCoefficient( row, column, coefficient );
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 8230 ) << "J(" << row << "," << column << ") = " << coefficient << "\n";
+                Debug( 8230 ) << "J(" << row << "," << column << ") = " << coefficient << "\n";
 #endif
+            }
         }
-    }
 
 }
 

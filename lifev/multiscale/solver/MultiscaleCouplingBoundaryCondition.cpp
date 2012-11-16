@@ -150,21 +150,5 @@ MultiscaleCouplingBoundaryCondition::setupCoupling()
     }
 }
 
-// ===================================================
-// Private Multiscale PhysicalCoupling Implementation
-// ===================================================
-multiscaleModelsContainer_Type
-MultiscaleCouplingBoundaryCondition::listOfPerturbedModels( const UInt& /*localCouplingVariableID*/ )
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    Debug( 8210 ) << "MultiscaleCouplingBoundaryCondition::listOfPerturbedModels() \n";
-#endif
-
-    multiscaleModelsContainer_Type emptyList;
-
-    return emptyList;
-}
-
 } // Namespace Multiscale
 } // Namespace LifeV
