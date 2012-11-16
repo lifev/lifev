@@ -509,7 +509,7 @@ public:
      * @param couplingFunction original coupling function
      * @param delta delta to be applied
      */
-    explicit FSI3DBoundaryStressFunction( const function_Type& couplingFunction, const Real& delta ) : M_couplingFunction( couplingFunction ), M_delta( delta ) {}
+    explicit FSI3DBoundaryStressFunction() : M_function(), M_delta() {}
 
     //! Destructor
     virtual ~FSI3DBoundaryStressFunction() {}
@@ -526,8 +526,26 @@ public:
      */
     Real function( const Real& t, const Real& x, const Real& y, const Real& z, const UInt& id )
     {
-        return M_couplingFunction( t, x, y, z, id ) + M_delta;
+        return M_function( t, x, y, z, id ) + M_delta;
     }
+
+    //@}
+
+
+    //! @name Set methods
+    //@{
+
+    //! Set the offset to be applied to the boundary condition
+    /*!
+     * @param delta offset to be applied to the boundary condition
+     */
+    void setDelta( const Real& delta ) { M_delta = delta; }
+
+    //! Set the area function
+    /*!
+     * @param function area function
+     */
+    void setFunction( const function_Type& function ) { M_function = function; }
 
     //@}
 
@@ -538,13 +556,13 @@ private:
 
     FSI3DBoundaryStressFunction();
 
-    FSI3DBoundaryStressFunction( const MultiscaleCoupling& coupling );
+    FSI3DBoundaryStressFunction( const FSI3DBoundaryStressFunction& boundaryFunction );
 
-    FSI3DBoundaryStressFunction& operator=( const MultiscaleCoupling& coupling );
+    FSI3DBoundaryStressFunction& operator=( const FSI3DBoundaryStressFunction& boundaryFunction );
 
     //@}
 
-    function_Type                          M_couplingFunction;
+    function_Type                          M_function;
     Real                                   M_delta;
 };
 
@@ -577,15 +595,15 @@ public:
     //@{
 
     //! Constructor
-    explicit FSI3DBoundaryAreaFunction() :
-        M_FSI3D           (),
-        M_fluidFlag       (),
+    explicit FSI3DBoundaryAreaFunction( const function_Type& couplingFunction, const multiscaleID_Type& flag, const MultiscaleModelFSI3D* modelFSI3D ) :
+        M_FSI3D           ( modelFSI3D ),
+        M_fluidFlag       ( flag ),
         M_referenceArea   (),
         M_geometricCenter (),
         M_n               (),
         M_t1              (),
         M_t2              (),
-        M_function        ()
+        M_function        ( couplingFunction )
         {}
 
     //! Destructor
@@ -729,9 +747,11 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    FSI3DBoundaryAreaFunction( const MultiscaleCoupling& coupling );
+    FSI3DBoundaryAreaFunction();
 
-    FSI3DBoundaryAreaFunction& operator=( const MultiscaleCoupling& coupling );
+    FSI3DBoundaryAreaFunction( const FSI3DBoundaryAreaFunction& boundaryFunction );
+
+    FSI3DBoundaryAreaFunction& operator=( const FSI3DBoundaryAreaFunction& boundaryFunction );
 
     //@}
 

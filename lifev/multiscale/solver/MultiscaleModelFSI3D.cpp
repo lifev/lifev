@@ -148,7 +148,7 @@ MultiscaleModelFSI3D::setupData( const std::string& fileName )
 #ifdef FSI_WITH_BOUNDARYAREA
     M_boundaryFlagsArea.reserve( M_boundaryFlags.size() );
     for ( UInt j( 0 ); j < M_boundaryFlags.size(); ++j )
-        M_boundaryFlagsArea.push_back( dataFile( "Multiscale/couplingFlagsArea", 0, j ) );
+        M_boundaryFlagsArea.push_back( dataFile( "Multiscale/couplingAreaFlags", 0, j ) );
 #endif
 }
 
@@ -371,11 +371,15 @@ MultiscaleModelFSI3D::imposeBoundaryMeanNormalStress( const multiscaleID_Type& b
 #ifdef FSI_WITH_EXTERNALPRESSURE
     base.setFunction( function );
 #else
-    boundaryStressFunctionPtr_Type couplingFunction( new boundaryStressFunction_Type( function, M_data->dataSolid()->externalPressure()) );
-    M_stressCouplingFunction.push_back( couplingFunction );
+    boundaryStressFunctionPtr_Type boundaryStressFunction( new boundaryStressFunction_Type() );
+    boundaryStressFunction->setDelta( M_data->dataSolid()->externalPressure() );
+    boundaryStressFunction->setFunction( function);
+
+    M_stressCouplingFunction.push_back( boundaryStressFunction );
+
     base.setFunction( boost::bind( &FSI3DBoundaryStressFunction::function, M_stressCouplingFunction.back(), _1, _2, _3, _4, _5 ) );
 #endif
-    M_fluidBC->handler()->addBC( "CouplingStress_Model_" + number2string( M_ID ) + "_BoundaryID_" + number2string( boundaryID ), boundaryFlag( boundaryID ), Natural, Normal, base );
+    M_fluidBC->handler()->addBC( "BoundaryStress_Model_" + number2string( M_ID ) + "_BoundaryID_" + number2string( boundaryID ), boundaryFlag( boundaryID ), Natural, Normal, base );
 }
 
 void
@@ -391,7 +395,7 @@ MultiscaleModelFSI3D::imposeBoundaryArea( const multiscaleID_Type& boundaryID, c
 
     BCFunctionBase base;
     base.setFunction( boost::bind( &FSI3DBoundaryAreaFunction::function, M_boundaryAreaFunctions.back(), _1, _2, _3, _4, _5 ) );
-    M_solidBC->addBC( "BoundaryArea_BoundaryID_" + number2string( boundaryID ), M_boundaryFlagsArea[boundaryID], EssentialEdges, Full, base, 3 );
+    M_solidBC->handler()->addBC( "BoundaryArea_Model_" + number2string( M_ID ) + "_BoundaryID_" + number2string( boundaryID ), M_boundaryFlagsArea[boundaryID], EssentialEdges, Full, base, 3 );
 #endif
 }
 
