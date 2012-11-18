@@ -145,7 +145,7 @@ private:
     // Tree to compute the values for the assembly
 	evaluation_Type M_evaluation;
 
-	ETCurrentFE<3,1>* M_globalCFE;
+	ETCurrentFE<MeshType::S_geoDimensions,1>* M_globalCFE;
 };
 
 
@@ -164,11 +164,20 @@ IntegrateValueElement(const boost::shared_ptr<MeshType>& mesh,
                       const ExpressionType& expression)
 	:	M_mesh(mesh),
 		M_quadrature(quadrature),
-		M_evaluation(expression),
+		M_evaluation(expression)
 
-		M_globalCFE(new ETCurrentFE<3,1>(feTetraP0,geometricMapFromMesh<MeshType>(),quadrature))
+		//M_globalCFE(new ETCurrentFE<3,1>(feTetraP0,geometricMapFromMesh<MeshType>(),quadrature))
 
 {
+    switch (MeshType::S_geoDimensions)
+    {
+        case 1:
+            M_globalCFE=new ETCurrentFE<MeshType::S_geoDimensions,1>(feSegP0,geometricMapFromMesh<MeshType>(),quadrature);
+        case 2:
+            M_globalCFE=new ETCurrentFE<MeshType::S_geoDimensions,1>(feTriaP0,geometricMapFromMesh<MeshType>(),quadrature);
+        case 3:
+            M_globalCFE=new ETCurrentFE<MeshType::S_geoDimensions,1>(feTetraP0,geometricMapFromMesh<MeshType>(),quadrature);
+    }
     M_evaluation.setQuadrature(quadrature);
     M_evaluation.setGlobalCFE(M_globalCFE);
 }
@@ -179,11 +188,20 @@ IntegrateValueElement < MeshType, ExpressionType>::
 IntegrateValueElement( const IntegrateValueElement < MeshType, ExpressionType> & integrator)
 	:	M_mesh(integrator.M_mesh),
 		M_quadrature(integrator.M_quadrature),
-		M_evaluation(integrator.M_evaluation),
+		M_evaluation(integrator.M_evaluation)
 
-	  	M_globalCFE(new ETCurrentFE<3,1>(feTetraP0,geometricMapFromMesh<MeshType>(),M_quadrature))
+	  	//M_globalCFE(new ETCurrentFE<3,1>(feTetraP0,geometricMapFromMesh<MeshType>(),M_quadrature))
 
 {
+    switch (MeshType::S_geoDimensions)
+    {
+        case 1:
+            M_globalCFE=new ETCurrentFE<MeshType::S_geoDimensions,1>(feSegP0,geometricMapFromMesh<MeshType>(),M_quadrature);
+        case 2:
+            M_globalCFE=new ETCurrentFE<MeshType::S_geoDimensions,1>(feTriaP0,geometricMapFromMesh<MeshType>(),M_quadrature);
+        case 3:
+            M_globalCFE=new ETCurrentFE<MeshType::S_geoDimensions,1>(feTetraP0,geometricMapFromMesh<MeshType>(),M_quadrature);
+    }
     M_evaluation.setQuadrature(M_quadrature);
     M_evaluation.setGlobalCFE(M_globalCFE);
 }

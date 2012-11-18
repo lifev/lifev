@@ -182,9 +182,9 @@ private:
 	evaluation_Type M_evaluation;
 
 
-	ETCurrentFE<3,1>* M_globalCFE;
-	ETCurrentFE<3,TestSpaceType::S_fieldDim>* M_testCFE;
-	ETCurrentFE<3,SolutionSpaceType::S_fieldDim>* M_solutionCFE;
+	ETCurrentFE<MeshType::S_geoDimensions,1>* M_globalCFE;
+	ETCurrentFE<TestSpaceType::S_spaceDim,TestSpaceType::S_fieldDim>* M_testCFE;
+	ETCurrentFE<SolutionSpaceType::S_spaceDim,SolutionSpaceType::S_fieldDim>* M_solutionCFE;
 
 	ETMatrixElemental M_elementalMatrix;
 };
@@ -211,13 +211,22 @@ IntegrateMatrixElement(const boost::shared_ptr<MeshType>& mesh,
         M_solutionSpace(solutionSpace),
         M_evaluation(expression),
 
-        M_globalCFE(new ETCurrentFE<3,1>(feTetraP0,geometricMapFromMesh<MeshType>(),quadrature)),
-        M_testCFE(new ETCurrentFE<3,TestSpaceType::S_fieldDim>(testSpace->refFE(),testSpace->geoMap(),quadrature)),
-        M_solutionCFE(new ETCurrentFE<3,SolutionSpaceType::S_fieldDim>(solutionSpace->refFE(),testSpace->geoMap(),quadrature)),
+        //M_globalCFE(new ETCurrentFE<SolutionSpaceType::S_spaceDim,1>(feTetraP0,geometricMapFromMesh<MeshType>(),quadrature)),
+        M_testCFE(new ETCurrentFE<TestSpaceType::S_spaceDim,TestSpaceType::S_fieldDim>(testSpace->refFE(),testSpace->geoMap(),quadrature)),
+        M_solutionCFE(new ETCurrentFE<SolutionSpaceType::S_spaceDim,SolutionSpaceType::S_fieldDim>(solutionSpace->refFE(),testSpace->geoMap(),quadrature)),
 
         M_elementalMatrix(TestSpaceType::S_fieldDim*testSpace->refFE().nbDof(),
                           SolutionSpaceType::S_fieldDim*solutionSpace->refFE().nbDof())
 {
+    switch (MeshType::S_geoDimensions)
+    {
+        case 1:
+            M_globalCFE=new ETCurrentFE<MeshType::S_geoDimensions,1>(feSegP0,geometricMapFromMesh<MeshType>(),quadrature);
+        case 2:
+            M_globalCFE=new ETCurrentFE<MeshType::S_geoDimensions,1>(feTriaP0,geometricMapFromMesh<MeshType>(),quadrature);
+        case 3:
+            M_globalCFE=new ETCurrentFE<MeshType::S_geoDimensions,1>(feTetraP0,geometricMapFromMesh<MeshType>(),quadrature);
+    }
     M_evaluation.setQuadrature(quadrature);
     M_evaluation.setGlobalCFE(M_globalCFE);
     M_evaluation.setTestCFE(M_testCFE);
@@ -233,12 +242,21 @@ IntegrateMatrixElement(const IntegrateMatrixElement<MeshType,TestSpaceType,Solut
         M_solutionSpace(integrator.M_solutionSpace),
         M_evaluation(integrator.M_evaluation),
 
-        M_globalCFE(new ETCurrentFE<3,1>(feTetraP0,geometricMapFromMesh<MeshType>(),M_quadrature)),
-        M_testCFE(new ETCurrentFE<3,TestSpaceType::S_fieldDim>(M_testSpace->refFE(), M_testSpace->geoMap(),M_quadrature)),
-        M_solutionCFE(new ETCurrentFE<3,SolutionSpaceType::S_fieldDim>(M_solutionSpace->refFE(), M_solutionSpace->geoMap(),M_quadrature)),
+        //M_globalCFE(new ETCurrentFE<SolutionSpaceType::S_spaceDim,1>(feTetraP0,geometricMapFromMesh<MeshType>(),M_quadrature)),
+        M_testCFE(new ETCurrentFE<TestSpaceType::S_spaceDim,TestSpaceType::S_fieldDim>(M_testSpace->refFE(), M_testSpace->geoMap(),M_quadrature)),
+        M_solutionCFE(new ETCurrentFE<SolutionSpaceType::S_spaceDim,SolutionSpaceType::S_fieldDim>(M_solutionSpace->refFE(), M_solutionSpace->geoMap(),M_quadrature)),
 
         M_elementalMatrix(integrator.M_elementalMatrix)
 {
+    switch (MeshType::S_geoDimensions)
+    {
+        case 1:
+            M_globalCFE=new ETCurrentFE<MeshType::S_geoDimensions,1>(feSegP0,geometricMapFromMesh<MeshType>(),M_quadrature);
+        case 2:
+            M_globalCFE=new ETCurrentFE<MeshType::S_geoDimensions,1>(feTriaP0,geometricMapFromMesh<MeshType>(),M_quadrature);
+        case 3:
+            M_globalCFE=new ETCurrentFE<MeshType::S_geoDimensions,1>(feTetraP0,geometricMapFromMesh<MeshType>(),M_quadrature);
+    }
     M_evaluation.setQuadrature(M_quadrature);
     M_evaluation.setGlobalCFE(M_globalCFE);
     M_evaluation.setTestCFE(M_testCFE);
