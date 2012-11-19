@@ -78,7 +78,7 @@ public:
 	typedef typename ExpressionToEvaluation< ExpressionType,
                                              TestSpaceType::S_fieldDim,
                                              SolutionSpaceType::S_fieldDim,
-                                             3>::evaluation_Type  evaluation_Type;
+                                             MeshType::S_geoDimensions>::evaluation_Type  evaluation_Type;
 
     //@}
 
@@ -222,10 +222,13 @@ IntegrateMatrixElement(const boost::shared_ptr<MeshType>& mesh,
     {
         case 1:
             M_globalCFE=new ETCurrentFE<MeshType::S_geoDimensions,1>(feSegP0,geometricMapFromMesh<MeshType>(),quadrature);
+            break;
         case 2:
             M_globalCFE=new ETCurrentFE<MeshType::S_geoDimensions,1>(feTriaP0,geometricMapFromMesh<MeshType>(),quadrature);
+            break;
         case 3:
             M_globalCFE=new ETCurrentFE<MeshType::S_geoDimensions,1>(feTetraP0,geometricMapFromMesh<MeshType>(),quadrature);
+            break;
     }
     M_evaluation.setQuadrature(quadrature);
     M_evaluation.setGlobalCFE(M_globalCFE);
@@ -252,10 +255,13 @@ IntegrateMatrixElement(const IntegrateMatrixElement<MeshType,TestSpaceType,Solut
     {
         case 1:
             M_globalCFE=new ETCurrentFE<MeshType::S_geoDimensions,1>(feSegP0,geometricMapFromMesh<MeshType>(),M_quadrature);
+            break;
         case 2:
             M_globalCFE=new ETCurrentFE<MeshType::S_geoDimensions,1>(feTriaP0,geometricMapFromMesh<MeshType>(),M_quadrature);
+            break;
         case 3:
             M_globalCFE=new ETCurrentFE<MeshType::S_geoDimensions,1>(feTetraP0,geometricMapFromMesh<MeshType>(),M_quadrature);
+            break;
     }
     M_evaluation.setQuadrature(M_quadrature);
     M_evaluation.setGlobalCFE(M_globalCFE);
