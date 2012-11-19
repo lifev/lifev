@@ -51,6 +51,8 @@ AztecooOperator::AztecooOperator():
 int
 AztecooOperator::doApplyInverse( const vector_Type& X, vector_Type& Y ) const
 {
+    M_numIterations = 0;
+
 	vector_Type Xcopy( X );
 	Y.PutScalar( 0.0 );
 	if( M_tolerance > 0 )
@@ -70,8 +72,20 @@ AztecooOperator::doApplyInverse( const vector_Type& X, vector_Type& Y ) const
 	// Solving the system
 	int retValue = M_linSolver->Iterate(maxIter, tol);
 
+    /* try to solve again (reason may be:
+      -2 "Aztec status AZ_breakdown: numerical breakdown"
+      -3 "Aztec status AZ_loss: loss of precision"
+      -4 "Aztec status AZ_ill_cond: GMRES hessenberg ill-conditioned"
+      This method was used in the old AztecOO solver.
+    */
+    if ( retValue <= -2 )
+    {
+        M_numIterations += M_linSolver->NumIters();
+        retValue = M_linSolver->Iterate(maxIter, tol);
+    }
+
 	// Update the number of performed iterations
-	M_numIterations = M_linSolver->NumIters();
+	M_numIterations += M_linSolver->NumIters();
 
 	// Update of the status
 	Real status[AZ_STATUS_SIZE];

@@ -250,7 +250,7 @@ LinearSolver::buildPreconditioner()
     LifeChrono chrono;
     Real condest( -1 );
 
-    if( M_preconditioner && !M_preconditioner->preconditionerCreated() )
+    if( M_preconditioner )
     {
         if( M_matrix.get() == 0 )
         {
