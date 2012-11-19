@@ -201,8 +201,21 @@ PreconditionerComposition::pushBack( matrixPtr_Type A,
 }
 
 int
+PreconditionerComposition::pushBack( operatorPtr_Type oper,
+                                     const bool useInverse,
+                                     const bool useTranspose,
+                                     matrixPtr_Type baseMatrix )
+{
+    if( baseMatrix.get() != 0 )
+        M_precBaseOperators.push_back( baseMatrix );
+    M_prec->push_back( oper, useInverse, useTranspose );
+
+    return EXIT_SUCCESS;
+}
+
+int
 PreconditionerComposition::pushBack( matrixPtr_Type A,
-                                     superPtr_Type& preconditioner,
+                                     superPtr_Type preconditioner,
                                      const bool useInverse,
                                      const bool useTranspose )
 {
@@ -217,7 +230,7 @@ PreconditionerComposition::pushBack( matrixPtr_Type A,
 
 int
 PreconditionerComposition::pushBack( matrixPtr_Type embeddedA,
-                                     superPtr_Type& preconditioner,
+                                     superPtr_Type preconditioner,
                                      const VectorBlockStructure& blockStructure,
                                      const UInt& blockIndex,
                                      const MapEpetra& fullMap,
@@ -244,7 +257,7 @@ PreconditionerComposition::pushBack( matrixPtr_Type embeddedA,
     operatorPtr_Type oper( confinedOperator );
 
     // Add the operator
-    M_prec->push_back( oper,useInverse, useTranspose );
+    M_prec->push_back( oper, useInverse, useTranspose );
 
     return EXIT_SUCCESS;
 }
@@ -266,7 +279,7 @@ PreconditionerComposition::pushBack( operatorPtr_Type embeddedOperator,
     operatorPtr_Type oper( confinedOperator );
 
     // Add the operator
-    M_prec->push_back( oper,useInverse, useTranspose );
+    M_prec->push_back( oper, useInverse, useTranspose );
 
     return EXIT_SUCCESS;
 }

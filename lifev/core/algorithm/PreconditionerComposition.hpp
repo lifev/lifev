@@ -216,15 +216,20 @@ protected:
                   const bool useInverse   = false,
                   const bool useTranspose = false );
 
+    int pushBack( operatorPtr_Type oper,
+                  const bool useInverse     = false,
+                  const bool useTranspose   = false,
+                  matrixPtr_Type baseMatrix = matrixPtr_Type() );
+
     //! Use a preconditioner to build the inverse of A and add it to the right of the composition
     int pushBack( matrixPtr_Type A,
-                  superPtr_Type& preconditioner,
+                  superPtr_Type preconditioner,
                   const bool useInverse   = false,
                   const bool useTranspose = false );
 
     //! Use a preconditioner to build the inverse of A and add it to the right of the composition
     int pushBack( matrixPtr_Type embeddedA,
-                  superPtr_Type& preconditioner,
+                  superPtr_Type preconditioner,
                   const VectorBlockStructure& blockStructure,
                   const UInt& blockIndex,
                   const MapEpetra& fullMap,
