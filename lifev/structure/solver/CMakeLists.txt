@@ -1,9 +1,6 @@
 SET(solver_HEADERS
   solver/VenantKirchhoffViscoelasticData.hpp
   solver/VenantKirchhoffElasticData.hpp
-  solver/VenantKirchhoffSolverLinear.hpp
-  solver/VenantKirchhoffElasticHandler.hpp
-  solver/VenantKirchhoffSolver.hpp
   solver/VenantKirchhoffViscoelasticSolver.hpp
   solver/StructuralConstitutiveLaw.hpp
   solver/StructuralOperator.hpp
