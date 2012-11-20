@@ -11,6 +11,7 @@ SET(solver_HEADERS
   solver/ExponentialMaterialNonLinear.hpp
   solver/VenantKirchhoffMaterialLinear.hpp
   solver/VenantKirchhoffMaterialNonLinear.hpp
+  solver/VenantKirchhoffMaterialNonLinearPenalized.hpp
   solver/WallTensionEstimator.hpp
   solver/WallTensionEstimatorData.hpp
 CACHE INTERNAL "")
