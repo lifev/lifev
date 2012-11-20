@@ -271,7 +271,7 @@ private:
 	vector_Type M_vector;
 
 	QuadratureRule* M_quadrature;
-	ETCurrentFE<3,1> M_currentFE;
+	ETCurrentFE<SpaceDim,1> M_currentFE;
 
 	std::vector<return_Type> M_interpolatedValues;
 };
@@ -487,7 +487,7 @@ private:
 	QuadratureRule* M_quadrature;
 
     //! Structure for the computations
-	ETCurrentFE<3,1> M_currentFE;
+	ETCurrentFE<SpaceDim,1> M_currentFE;
 
     //! Storage for the temporary values
 	std::vector<return_Type> M_interpolatedValues;

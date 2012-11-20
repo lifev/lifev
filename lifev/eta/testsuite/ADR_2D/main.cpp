@@ -63,6 +63,7 @@
 
 #include <lifev/core/mesh/MeshPartitioner.hpp>
 #include <lifev/core/mesh/RegionMesh2DStructured.hpp>
+#include <lifev/core/mesh/RegionMesh1DBuilders.hpp>
 #include <lifev/core/mesh/RegionMesh.hpp>
 
 #include <lifev/core/array/MatrixEpetra.hpp>
@@ -146,7 +147,7 @@ int main( int argc, char** argv )
 
     regularMesh2D( *fullMeshPtr, 0, Nelements, Nelements, false,
                    2.0,   2.0,
-                   -1.0,  -1.0);
+                   -0.0,  -0.0);
 
     MeshPartitioner< mesh_Type >   meshPart(fullMeshPtr, Comm);std::cout<<"MeshDim: "<<mesh_Type::S_geoDimensions<<std::endl;
 
@@ -185,7 +186,7 @@ int main( int argc, char** argv )
         ( new FESpace< mesh_Type, MapEpetra >(meshPart,uOrder, 1, Comm));
 
     boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > betaSpace
-        ( new FESpace< mesh_Type, MapEpetra >(meshPart,bOrder, 3, Comm));
+        ( new FESpace< mesh_Type, MapEpetra >(meshPart,bOrder, 2, Comm));
 
     if (verbose) std::cout << " done ! " << std::endl;
     if (verbose) std::cout << " ---> Dofs: " << uSpace->dof().numTotalDof() << std::endl;
@@ -195,8 +196,8 @@ int main( int argc, char** argv )
     boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 2, 1 > > ETuSpace
         ( new ETFESpace< mesh_Type, MapEpetra, 2, 1 >(meshPart,&(uSpace->refFE()),&(uSpace->fe().geoMap()), Comm));
 
-    boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 2, 3 > > ETbetaSpace
-        ( new ETFESpace< mesh_Type, MapEpetra, 2, 3 >(meshPart,&(betaSpace->refFE()),&(betaSpace->fe().geoMap()), Comm));
+    boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 2, 2 > > ETbetaSpace
+        ( new ETFESpace< mesh_Type, MapEpetra, 2, 2 >(meshPart,&(betaSpace->refFE()),&(betaSpace->fe().geoMap()), Comm));
 
     if (verbose) std::cout << " done ! " << std::endl;
     if (verbose) std::cout << " ---> Dofs: " << ETuSpace->dof().numTotalDof() << std::endl;
@@ -265,7 +266,7 @@ int main( int argc, char** argv )
 
     adrAssembler.addDiffusion(systemMatrix,1.0);
 
-    //adrAssembler.addAdvection(systemMatrix,beta);
+    adrAssembler.addAdvection(systemMatrix,beta);
 
     adrAssembler.addMass(systemMatrix,2.0);
 
@@ -314,11 +315,12 @@ int main( int argc, char** argv )
                    ETuSpace,
 
                    dot( grad(phi_i) , grad(phi_j) )
-                   //+ dot( dot( grad(phi_j) , value(ETbetaSpace,beta)) , phi_i)
+                   +dot( grad(phi_j) , value(ETbetaSpace,beta))*phi_i
                    + 2.0* phi_i*phi_j
                    
                    )
             >> ETsystemMatrix;
+
     }
 
     ETChrono.stop();
@@ -347,9 +349,8 @@ int main( int argc, char** argv )
 
     systemMatrix->globalAssemble();
     ETsystemMatrix->globalAssemble();
-
+    
     if (verbose) std::cout << " done ! " << std::endl;
-
 
 // ---------------------------------------------------------------
 // We compute now the matrix of the difference and finally the 

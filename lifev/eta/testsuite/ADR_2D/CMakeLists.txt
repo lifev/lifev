@@ -7,6 +7,6 @@ TRIBITS_ADD_EXECUTABLE_AND_TEST(
   ETA_ADR_2D
   SOURCES main.cpp
   ARGS -c
-  NUM_MPI_PROCS 2
+  NUM_MPI_PROCS 1
   COMM serial mpi
   )

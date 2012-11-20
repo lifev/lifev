@@ -1074,10 +1074,10 @@ updateInverseJacobian(const UInt& iQuadPt)
 
     Real det= M_detJacobian[iQuadPt];
 
-    M_tInverseJacobian[iQuadPt][0][0] =  M_jacobian[iQuadPt][0][0] / det;
-    M_tInverseJacobian[iQuadPt][1][0] = -M_jacobian[iQuadPt][1][0] / det;
-    M_tInverseJacobian[iQuadPt][0][1] = -M_jacobian[iQuadPt][0][1] / det;
-    M_tInverseJacobian[iQuadPt][1][1] =  M_jacobian[iQuadPt][1][1] / det;
+    M_tInverseJacobian[iQuadPt][0][0] =  M_jacobian[iQuadPt][1][1] / det;
+    M_tInverseJacobian[iQuadPt][1][0] = -M_jacobian[iQuadPt][0][1] / det;
+    M_tInverseJacobian[iQuadPt][0][1] = -M_jacobian[iQuadPt][1][0] / det;
+    M_tInverseJacobian[iQuadPt][1][1] =  M_jacobian[iQuadPt][0][0] / det;
 }
 
 template<>
@@ -1264,6 +1264,7 @@ updateMeasure()
 /*
  * Including header for ETCurrentFE for fieldDim=3
  */
+#include "ETCurrentFE_FD2.hpp"
 #include "ETCurrentFE_FD3.hpp"
 
 #endif /* ETCURRENTFE_HPP */
