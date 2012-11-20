@@ -157,7 +157,7 @@ MultiscaleCouplingMeanNormalStressArea::computeCouplingResiduals()
                     Real myValueArea = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryArea( M_boundaryIDs[i] );
                     if ( isModelLeaderProcess( i ) )
                     {
-                        ( *M_localCouplingResiduals )[0]  = myValueArea - localCouplingVariables( 0 )[M_flowRateInterfaces+1];
+                        ( *M_localCouplingResiduals )[M_flowRateInterfaces+1]  = myValueArea - localCouplingVariables( 0 )[M_flowRateInterfaces+1];
                     }
                 }
     }
