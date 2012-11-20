@@ -26,7 +26,6 @@
 
 
 #include <lifev/core/LifeV.hpp>
-#include <lifev/structure/solver/VenantKirchhoffSolver.hpp>
 
 #include <lifev/fsi/solver/FSIMonolithicGI.hpp>
 #include <lifev/fsi/solver/MonolithicBlockComposedDN.hpp>
