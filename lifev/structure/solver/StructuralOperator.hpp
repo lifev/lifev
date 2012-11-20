@@ -67,7 +67,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/core/algorithm/SolverAztecOO.hpp>
 #include <lifev/core/algorithm/NonLinearRichardson.hpp>
 
-#include <lifev/structure/solver/VenantKirchhoffElasticData.hpp>
+#include <lifev/structure/solver/StructuralConstitutiveLawData.hpp>
 #include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
 
 
@@ -138,7 +138,7 @@ public:
   typedef typename SolverType::prec_raw_type            precRaw_Type;
   typedef typename SolverType::prec_type                prec_Type;
 
-  typedef VenantKirchhoffElasticData                    data_Type;
+  typedef StructuralConstitutiveLawData                 data_Type;
 
   typedef RegionMesh<LinearTetra >                      mesh_Type;
   typedef std::vector< mesh_Type::element_Type const *> vectorVolumes_Type;
