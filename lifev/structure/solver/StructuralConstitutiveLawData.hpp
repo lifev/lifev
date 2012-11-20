@@ -40,8 +40,8 @@
  *  @maintainer  Paolo Tricerri <paolo.tricerri@epfl.ch>
  */
 
-#ifndef VenantKirchhoffElasticData_H
-#define VenantKirchhoffElasticData_H
+#ifndef StructuralConstitutiveLawData_H
+#define StructuralConstitutiveLawData_H
 
 #include <string>
 #include <iostream>
@@ -59,7 +59,7 @@ namespace LifeV
 {
 
 //! DataElasticStructure - Data container for solid problems with elastic structure
-class VenantKirchhoffElasticData
+class StructuralConstitutiveLawData
 {
 public:
 
@@ -83,13 +83,13 @@ public:
     //@{
 
     //! Empty Constructor
-    VenantKirchhoffElasticData();
+    StructuralConstitutiveLawData();
 
     //! Copy constructor
     /*!
-     * @param VenantKirchhoffElasticData - VenantKirchhoffElasticData
+     * @param StructuralConstitutiveLawData - StructuralConstitutiveLawData
      */
-    VenantKirchhoffElasticData( const VenantKirchhoffElasticData& venantKirchhoffElasticData );
+    StructuralConstitutiveLawData( const StructuralConstitutiveLawData& structuralConstitutiveLawData );
 
     //@}
 
@@ -99,9 +99,9 @@ public:
 
     //! Operator=
     /*!
-     * @param VenantKirchhoffElasticData - VenantKirchhoffElasticData
+     * @param StructuralConstitutiveLawData - StructuralConstitutiveLawData
      */
-    VenantKirchhoffElasticData& operator=( const VenantKirchhoffElasticData& venantKirchhoffElasticData );
+    StructuralConstitutiveLawData& operator=( const StructuralConstitutiveLawData& structuralConstitutiveLawData );
 
     //@}
 
@@ -344,4 +344,4 @@ private:
 
 } // end namespace LifeV
 
-#endif // VenantKirchhoffElasticData_H
+#endif // StructuralConstitutiveLawData_H

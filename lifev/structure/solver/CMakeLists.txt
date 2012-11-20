@@ -1,6 +1,6 @@
 SET(solver_HEADERS
   solver/VenantKirchhoffViscoelasticData.hpp
-  solver/VenantKirchhoffElasticData.hpp
+  solver/StructuralConstitutiveLawData.hpp
   solver/VenantKirchhoffViscoelasticSolver.hpp
   solver/StructuralConstitutiveLaw.hpp
   solver/StructuralOperator.hpp
@@ -15,7 +15,7 @@ CACHE INTERNAL "")
 
 SET(solver_SOURCES
   solver/VenantKirchhoffViscoelasticData.cpp
-  solver/VenantKirchhoffElasticData.cpp
+  solver/StructuralConstitutiveLawData.cpp
   solver/WallTensionEstimatorData.cpp
 CACHE INTERNAL "")
 

@@ -68,7 +68,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/core/algorithm/SolverAztecOO.hpp>
 #include <lifev/core/algorithm/NonLinearRichardson.hpp>
 
-#include <lifev/structure/solver/VenantKirchhoffElasticData.hpp>
+#include <lifev/structure/solver/StructuralConstitutiveLawData.hpp>
 #include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
 
 #ifdef COMPUTATION_JACOBIAN
@@ -147,6 +147,9 @@ public:
 
     typedef RegionMesh<LinearTetra >                      mesh_Type;
     typedef std::vector< mesh_Type::element_Type const *> vectorVolumes_Type;
+
+    typedef StructuralConstitutiveLawData                 data_Type;
+
 
     typedef std::map< UInt, vectorVolumes_Type>           mapMarkerVolumes_Type;
     typedef boost::shared_ptr<mapMarkerVolumes_Type>      mapMarkerVolumesPtr_Type;
@@ -1300,8 +1303,8 @@ StructuralOperator<Mesh, SolverType>::evalResidual( vector_Type &residual, const
 
 	    // std::string nameFile="residualAfterBC";
 	    // M_rhs->spy(nameFile);
-	    int n;
-	    std::cin >> n;
+	    // int n;
+	    // std::cin >> n;
 
         }
 

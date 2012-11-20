@@ -58,7 +58,7 @@ class NeoHookeanMaterialNonLinear :
     public:
     typedef StructuralConstitutiveLaw<Mesh>                 super;
 
-    typedef VenantKirchhoffElasticData               data_Type;
+    typedef StructuralConstitutiveLawData            data_Type;
 
     typedef typename super::vector_Type              vector_Type;
     typedef typename super::matrix_Type              matrix_Type;

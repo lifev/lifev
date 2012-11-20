@@ -43,7 +43,7 @@
  *  @maintainer  Paolo Tricerri <paolo.tricerri@epfl.ch>
  */
 
-#include <lifev/structure/solver/VenantKirchhoffElasticData.hpp>
+#include <lifev/structure/solver/StructuralConstitutiveLawData.hpp>
 
 namespace LifeV
 {
@@ -51,7 +51,7 @@ namespace LifeV
 //=====================================================
 // Constructors
 //=====================================================
-VenantKirchhoffElasticData::VenantKirchhoffElasticData():
+StructuralConstitutiveLawData::StructuralConstitutiveLawData():
         M_time                             ( ),
         M_timeAdvance                      ( ),
         M_density                          ( ),
@@ -69,46 +69,46 @@ VenantKirchhoffElasticData::VenantKirchhoffElasticData():
 {
 }
 
-VenantKirchhoffElasticData::VenantKirchhoffElasticData( const VenantKirchhoffElasticData& venantKirchhoffElasticData ):
-        M_time                             ( venantKirchhoffElasticData.M_time ),
-        M_timeAdvance                      ( venantKirchhoffElasticData.M_timeAdvance ),
-        M_density                          ( venantKirchhoffElasticData.M_density ),
-        M_thickness                        ( venantKirchhoffElasticData.M_thickness ),
-        M_externalPressure                 ( venantKirchhoffElasticData.M_externalPressure ),
-        M_materialsFlagSet                 ( venantKirchhoffElasticData.M_materialsFlagSet ),
-        M_poisson                          ( venantKirchhoffElasticData.M_poisson ),
-        M_young                            ( venantKirchhoffElasticData.M_young ),
-        M_bulk                             ( venantKirchhoffElasticData.M_bulk ),
-        M_alpha                            ( venantKirchhoffElasticData.M_alpha ),
-        M_gamma                            ( venantKirchhoffElasticData.M_gamma ),
-        M_order                            ( venantKirchhoffElasticData.M_order ),
-        M_verbose                          ( venantKirchhoffElasticData.M_verbose ),
-	M_vectorMaterialFlags              ( venantKirchhoffElasticData.M_vectorMaterialFlags )
+StructuralConstitutiveLawData::StructuralConstitutiveLawData( const StructuralConstitutiveLawData& structuralConstitutiveLawData ):
+        M_time                             ( structuralConstitutiveLawData.M_time ),
+        M_timeAdvance                      ( structuralConstitutiveLawData.M_timeAdvance ),
+        M_density                          ( structuralConstitutiveLawData.M_density ),
+        M_thickness                        ( structuralConstitutiveLawData.M_thickness ),
+        M_externalPressure                 ( structuralConstitutiveLawData.M_externalPressure ),
+        M_materialsFlagSet                 ( structuralConstitutiveLawData.M_materialsFlagSet ),
+        M_poisson                          ( structuralConstitutiveLawData.M_poisson ),
+        M_young                            ( structuralConstitutiveLawData.M_young ),
+        M_bulk                             ( structuralConstitutiveLawData.M_bulk ),
+        M_alpha                            ( structuralConstitutiveLawData.M_alpha ),
+        M_gamma                            ( structuralConstitutiveLawData.M_gamma ),
+        M_order                            ( structuralConstitutiveLawData.M_order ),
+        M_verbose                          ( structuralConstitutiveLawData.M_verbose ),
+	M_vectorMaterialFlags              ( structuralConstitutiveLawData.M_vectorMaterialFlags )
 {
 }
 
 // ===================================================
 // Operators
 // ===================================================
-VenantKirchhoffElasticData&
-VenantKirchhoffElasticData::operator=( const VenantKirchhoffElasticData& venantKirchhoffElasticData )
+StructuralConstitutiveLawData&
+StructuralConstitutiveLawData::operator=( const StructuralConstitutiveLawData& structuralConstitutiveLawData )
 {
-    if ( this != &venantKirchhoffElasticData )
+    if ( this != &structuralConstitutiveLawData )
     {
-        M_time                             = venantKirchhoffElasticData.M_time;
-        M_timeAdvance                      = venantKirchhoffElasticData.M_timeAdvance;
-        M_density                          = venantKirchhoffElasticData.M_density;
-        M_thickness                        = venantKirchhoffElasticData.M_thickness;
-        M_externalPressure                 = venantKirchhoffElasticData.M_externalPressure;
-        M_materialsFlagSet                 = venantKirchhoffElasticData.M_materialsFlagSet;
-        M_poisson                          = venantKirchhoffElasticData.M_poisson;
-        M_young                            = venantKirchhoffElasticData.M_young;
-        M_bulk                             = venantKirchhoffElasticData.M_bulk;
-        M_alpha                            = venantKirchhoffElasticData.M_alpha;
-        M_gamma                            = venantKirchhoffElasticData.M_gamma;
-        M_order                            = venantKirchhoffElasticData.M_order;
-        M_verbose                          = venantKirchhoffElasticData.M_verbose;
-        M_vectorMaterialFlags              = venantKirchhoffElasticData.M_vectorMaterialFlags;
+        M_time                             = structuralConstitutiveLawData.M_time;
+        M_timeAdvance                      = structuralConstitutiveLawData.M_timeAdvance;
+        M_density                          = structuralConstitutiveLawData.M_density;
+        M_thickness                        = structuralConstitutiveLawData.M_thickness;
+        M_externalPressure                 = structuralConstitutiveLawData.M_externalPressure;
+        M_materialsFlagSet                 = structuralConstitutiveLawData.M_materialsFlagSet;
+        M_poisson                          = structuralConstitutiveLawData.M_poisson;
+        M_young                            = structuralConstitutiveLawData.M_young;
+        M_bulk                             = structuralConstitutiveLawData.M_bulk;
+        M_alpha                            = structuralConstitutiveLawData.M_alpha;
+        M_gamma                            = structuralConstitutiveLawData.M_gamma;
+        M_order                            = structuralConstitutiveLawData.M_order;
+        M_verbose                          = structuralConstitutiveLawData.M_verbose;
+        M_vectorMaterialFlags              = structuralConstitutiveLawData.M_vectorMaterialFlags;
     }
 
     return *this;
@@ -118,7 +118,7 @@ VenantKirchhoffElasticData::operator=( const VenantKirchhoffElasticData& venantK
 // Methods
 // ===================================================
 void
-VenantKirchhoffElasticData::setup( const GetPot& dataFile, const std::string& section )
+StructuralConstitutiveLawData::setup( const GetPot& dataFile, const std::string& section )
 {
     // If data time has not been set
     if ( !M_time.get() )
@@ -186,7 +186,7 @@ VenantKirchhoffElasticData::setup( const GetPot& dataFile, const std::string& se
 }
 
 void
-VenantKirchhoffElasticData::showMe( std::ostream& output ) const
+StructuralConstitutiveLawData::showMe( std::ostream& output ) const
 {
     // physics
     output << "\n*** Values for data [solid/physics]\n\n";
@@ -234,7 +234,7 @@ VenantKirchhoffElasticData::showMe( std::ostream& output ) const
 // Get Method
 // ===================================================
 Real
-VenantKirchhoffElasticData::poisson( const UInt& material ) const
+StructuralConstitutiveLawData::poisson( const UInt& material ) const
 {
     materialContainer_Type::const_iterator IT;
 
@@ -253,7 +253,7 @@ VenantKirchhoffElasticData::poisson( const UInt& material ) const
 }
 
 Real
-VenantKirchhoffElasticData::young( const UInt& material ) const
+StructuralConstitutiveLawData::young( const UInt& material ) const
 {
     materialContainer_Type::const_iterator IT;
     if ( M_materialsFlagSet )
@@ -271,7 +271,7 @@ VenantKirchhoffElasticData::young( const UInt& material ) const
 }
 
 Real
-VenantKirchhoffElasticData::bulk( const UInt& material ) const
+StructuralConstitutiveLawData::bulk( const UInt& material ) const
 {
     materialContainer_Type::const_iterator IT;
     if ( M_materialsFlagSet )
@@ -289,7 +289,7 @@ VenantKirchhoffElasticData::bulk( const UInt& material ) const
 }
 
 Real
-VenantKirchhoffElasticData::alpha( const UInt& material ) const
+StructuralConstitutiveLawData::alpha( const UInt& material ) const
 {
     materialContainer_Type::const_iterator IT;
     if ( M_materialsFlagSet )
@@ -307,7 +307,7 @@ VenantKirchhoffElasticData::alpha( const UInt& material ) const
 }
 
 Real
-VenantKirchhoffElasticData::gamma( const UInt& material ) const
+StructuralConstitutiveLawData::gamma( const UInt& material ) const
 {
     materialContainer_Type::const_iterator IT;
     if ( M_materialsFlagSet )
@@ -326,7 +326,7 @@ VenantKirchhoffElasticData::gamma( const UInt& material ) const
 
 
 Real
-VenantKirchhoffElasticData::lambda( const UInt& material ) const
+StructuralConstitutiveLawData::lambda( const UInt& material ) const
 {
     Real youngC, poissonC;
 
@@ -337,7 +337,7 @@ VenantKirchhoffElasticData::lambda( const UInt& material ) const
 }
 
 Real
-VenantKirchhoffElasticData::mu( const UInt& material ) const
+StructuralConstitutiveLawData::mu( const UInt& material ) const
 {
     Real youngC, poissonC;
 
