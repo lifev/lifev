@@ -24,7 +24,7 @@
 */
 //@HEADER
 /**
-   @file ETA_ADR2DTest.cpp
+   @file ETA_VectorialADR2DTest.cpp
    @author L. Pasquale <lgpasquale@gmail.com>
    @date 2012-11-20
  */
@@ -33,7 +33,7 @@
 //! Includes
 // ===================================================
 
-#include "ETA_ADR2DTest.hpp"
+#include "ETA_VectorialADR2DTest.hpp"
 
 #include <lifev/eta/fem/ETFESpace.hpp>
 #include <lifev/eta/expression/Integrate.hpp>
@@ -74,17 +74,11 @@ Real betaFct( const Real& /* t */, const Real& /* x */, const Real& /* y */, con
     return 0;
 }
 
-Real fRhs( const Real& /* t */, const Real& /*x*/, const Real& /*y*/, const Real& /* z */ , const ID& /* i */ )
-{
-    return  2;
-}
-
-
 // ===================================================
 //!                  Constructors
 // ===================================================
 
-ETA_ADR2DTest::ETA_ADR2DTest ()
+ETA_VectorialADR2DTest::ETA_VectorialADR2DTest ()
 {
 
 #ifdef EPETRA_MPI
@@ -100,7 +94,7 @@ ETA_ADR2DTest::ETA_ADR2DTest ()
 // ===================================================
 
 Real
-ETA_ADR2DTest::run()
+ETA_VectorialADR2DTest::run()
 {
     bool verbose(M_comm->MyPID()==0);
 // ---------------------------------------------------------------
@@ -140,7 +134,7 @@ ETA_ADR2DTest::run()
     std::string bOrder("P1");
 
     boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > uSpace
-        ( new FESpace< mesh_Type, MapEpetra >(meshPart,uOrder, 1, M_comm));
+        ( new FESpace< mesh_Type, MapEpetra >(meshPart,uOrder, 2, M_comm));
 
     boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > betaSpace
         ( new FESpace< mesh_Type, MapEpetra >(meshPart,bOrder, 2, M_comm));
@@ -150,8 +144,8 @@ ETA_ADR2DTest::run()
 
     if (verbose) std::cout << " -- Building ETFESpaces ... " << std::flush;
 
-    boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 2, 1 > > ETuSpace
-        ( new ETFESpace< mesh_Type, MapEpetra, 2, 1 >(meshPart,&(uSpace->refFE()),&(uSpace->fe().geoMap()), M_comm));
+    boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 2, 2 > > ETuSpace
+        ( new ETFESpace< mesh_Type, MapEpetra, 2, 2 >(meshPart,&(uSpace->refFE()),&(uSpace->fe().geoMap()), M_comm));
 
     boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 2, 2 > > ETbetaSpace
         ( new ETFESpace< mesh_Type, MapEpetra, 2, 2 >(meshPart,&(betaSpace->refFE()),&(betaSpace->fe().geoMap()), M_comm));
@@ -189,21 +183,6 @@ ETA_ADR2DTest::run()
 
     if (verbose) std::cout << " done! " << std::endl;
 
-// ---------------------------------------------------------------
-// Definition of the RHS
-
-    if (verbose) std::cout << " -- Defining and interpolating the RHS ... " << std::flush;
-
-    vector_Type rhs(uSpace->map(),Repeated);
-    rhs*=0.0;
-    vector_Type ETrhs(uSpace->map(),Repeated);
-    ETrhs*=0.0;
-
-    vector_Type fInterpolated(uSpace->map(),Repeated);
-    fInterpolated*=0.0;
-    uSpace->interpolate( fRhs , fInterpolated, 0.0 );
-
-    if (verbose) std::cout << " done! " << std::endl;
 
 // ---------------------------------------------------------------
 // We come now to the assembly itself. We start with the classical
@@ -217,8 +196,6 @@ ETA_ADR2DTest::run()
 // - a laplacian term
 // - an advection term
 // - a reaction term (with coefficient 2.0), aka mass term.
-//
-// We also assemble the RHS
 // ---------------------------------------------------------------
 
     LifeChrono StdChrono;
@@ -235,8 +212,6 @@ ETA_ADR2DTest::run()
     adrAssembler.addAdvection(systemMatrix,beta);
 
     adrAssembler.addMass(systemMatrix,2.0);
-
-    adrAssembler.addMassRhs(rhs,fInterpolated);
 
     StdChrono.stop();
 
@@ -267,20 +242,11 @@ ETA_ADR2DTest::run()
                    ETuSpace,
 
                    dot( grad(phi_i) , grad(phi_j) )
-                   +dot( grad(phi_j) , value(ETbetaSpace,beta))*phi_i
-                   + 2.0* phi_i*phi_j
+                   +dot( grad(phi_j) * value(ETbetaSpace,beta), phi_i)
+                   + 2.0*dot(phi_i,phi_j)
                    
                    )
             >> ETsystemMatrix;
-
-        integrate( elements(ETuSpace->mesh()),
-                   uSpace->qr(),
-                   ETuSpace,
-
-                   value(ETuSpace,fInterpolated)*phi_i
-                   
-                   )
-            >> ETrhs;
 
     }
 
@@ -295,13 +261,10 @@ ETA_ADR2DTest::run()
 // that aim, we need to finalize both matrices.
 // ---------------------------------------------------------------
 
-    if (verbose) std::cout << " -- Closing the matrices and vectors... " << std::flush;
+    if (verbose) std::cout << " -- Closing the matrices ... " << std::flush;
 
     systemMatrix->globalAssemble();
     ETsystemMatrix->globalAssemble();
-    
-    rhs.globalAssemble();
-    ETrhs.globalAssemble();
     
     if (verbose) std::cout << " done ! " << std::endl;
 
@@ -323,36 +286,17 @@ ETA_ADR2DTest::run()
 
     Real errorNorm( checkMatrix->normInf() );
 
-
-// ---------------------------------------------------------------
-// Finally, we check that the two right hand sides are similar
-// with the two assembly procedures. We also check that the two
-// integrals correspond to their exact values.
-// ---------------------------------------------------------------
-
-    vector_Type checkRhs(ETuSpace->map(),Repeated);
-    checkRhs=0.0;
-
-    checkRhs += rhs;
-    checkRhs -= ETrhs;
-
-    checkRhs.globalAssemble();
-
-    vector_Type checkRhsUnique(checkRhs, Unique);
-
-    Real errorRhsNorm( checkRhsUnique.normInf() );
-
     if (verbose) std::cout << " done ! " << std::endl;
 
+
+
+// ---------------------------------------------------------------
+// We finally display the error norm and compare with the
+// tolerance of the test.
+// ---------------------------------------------------------------
+
     if (verbose) std::cout << " Matrix Error : " << errorNorm << std::endl;
-    if (verbose) std::cout << " Rhs error : " << errorRhsNorm << std::endl;
 
-
-// ---------------------------------------------------------------
-// Finally we return the maximum of the two errors
-// ---------------------------------------------------------------
-
-
-    return std::max(errorNorm,errorRhsNorm);
+    return errorNorm;
 
 } // run

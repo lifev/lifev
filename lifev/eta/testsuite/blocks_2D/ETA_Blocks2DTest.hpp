@@ -24,13 +24,13 @@
 */
 //@HEADER
 /**
-   @file ETA_ADR2DTest.cpp
+   @file ETA_Blocks2DTest.cpp
    @author L. Pasquale <lgpasquale@gmail.com>
    @date 2012-11-20
 */
 
-#ifndef __ETA_ADR2DTEST_H
-#define __ETA_ADR2DTEST_H 1
+#ifndef __ETA_ABLOCKS2DTEST_H
+#define __ETA_ABLOCKS2DTEST_H 1
 
 
 // Tell the compiler to ignore specific kind of warnings:
@@ -58,17 +58,12 @@
 #include <lifev/core/array/MatrixEpetra.hpp>
 #include <lifev/core/array/VectorEpetra.hpp>
 
+#include <lifev/core/array/MatrixEpetraStructured.hpp>
+#include <lifev/core/array/VectorEpetraStructured.hpp>
+
 #include <boost/shared_ptr.hpp>
 
-
-// ---------------------------------------------------------------
-// We include two additional files which are useful to make the
-// assembly using the "classical way". We also include a file to
-// monitor the different timings.
-// ---------------------------------------------------------------
-
 #include <lifev/core/fem/FESpace.hpp>
-#include <lifev/core/solver/ADRAssembler.hpp>
 
 #include <lifev/core/util/LifeChrono.hpp>
 
@@ -79,21 +74,21 @@
 // ---------------------------------------------------------------
 
 /*!
-    @class ETA_ADR2DTest
-    @brief Simple ETA test to compare ETA to ADRAssembly in a 2D space
+    @class ETA_Blocks2DTest
+    @brief Simple ETA test to compute a block matrix associated to the Stokes problem
 
     @author L. Pasquale <lgpasquale@gmail.com>
 
-    This test computes the matrix associated to the advection-diffusion-reaction problem: \n
+    This test computes the matrix and teh RHS vector associated to the Stokes problem: \n
     \f$
-        -\alpha \delta u + \beta \cdot \nabla u +\gamma u = f
+        \left\{\begin{array}{ll}
+        - \delta u + \nabla p = f \\
+        \nabla \cdot u=0  
+    \end{array}\right. \mathrm{in} (-1,1)\mathrm{x}(-1,1)
     \f$ \n
-    with \f$\alpha=1\f$, \f$\beta=\left(\begin{array}{c}1\\0\end{array}\right)\f$, \f$\gamma=2\f$, \f$f=2\f$ and \f$u\f$ a scalar field \n
-    The domain is the square (-1,1)x(-1,1). \n
-    The matrix and the vector for the RHS are first assembled using the class ADRAssembler and then the ExpressionAssembly::integrate function of the ETA module. \n
-    if the two matrices (and vectors) are assembled correctly, they should be almost exactly the same. \n
+    with \f$u\f$ a scalar field approximated with P2 functions and p approximated with P1 \n
 */
-class ETA_ADR2DTest
+class ETA_Blocks2DTest
 //     :
 //     public LifeV::Application
 {
@@ -104,11 +99,11 @@ public:
     //@{
 
     //! Constructor
-    ETA_ADR2DTest ();
+    ETA_Blocks2DTest ();
 
 
     //! Destructor
-    ~ETA_ADR2DTest () {}
+    ~ETA_Blocks2DTest () {}
 
     //@}
 
@@ -117,7 +112,7 @@ public:
     //@{
 
     //! To lunch the simulation
-    LifeV::Real run();
+    std::vector<LifeV::Real> run();
 
     //@}
 
@@ -128,4 +123,4 @@ private:
 
 };
 
-#endif /* __ETA_ADR2DTEST_H */
+#endif /* __ETA_ABLOCKS2DTEST_H */

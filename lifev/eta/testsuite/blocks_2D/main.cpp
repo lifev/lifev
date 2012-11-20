@@ -26,7 +26,7 @@
 
 /* ========================================================
 
-Simple ETA test to compare ETA to ADRAssembly in a 2D space
+Simple ETA test to compute a block matrix associated to the Stokes problem
 
 */
 
@@ -44,7 +44,7 @@ Simple ETA test to compare ETA to ADRAssembly in a 2D space
 
 #include <lifev/core/LifeV.hpp>
 
-#include "ETA_ADR2DTest.hpp"
+#include "ETA_Blocks2DTest.hpp"
 
 
 // ===================================================
@@ -66,14 +66,20 @@ int main(int argc, char* argv[])
 #endif
     bool verbose(Comm->MyPID()==0);
 
+    // Known errors
+    const LifeV::Real knownMatrixError( 4.55 );
+    const LifeV::Real knownRhsError( 0.0192705923625467 );
+    
+    
     // Tolerance
     const LifeV::Real tolerance( 1e-10 );
 
-    ETA_ADR2DTest eta_adr2DTest;
+    ETA_Blocks2DTest eta_blocks2DTest;
 
     // Error of the problem
-    const LifeV::Real error = eta_adr2DTest.run();
-    const bool unsuccess = std::fabs ( error ) > tolerance;
+    const std::vector<Real> errors = eta_blocks2DTest.run();
+    const bool unsuccess = ( std::abs(errors[0]-knownMatrixError) > tolerance ||
+                            std::abs(errors[1]-knownRhsError) > tolerance);
     
     if (unsuccess)
     {

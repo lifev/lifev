@@ -44,7 +44,7 @@ Simple ETA test to compare ETA to ADRAssembly in a 2D space
 
 #include <lifev/core/LifeV.hpp>
 
-#include "ETA_ADR2DTest.hpp"
+#include "ETA_VectorialADR2DTest.hpp"
 
 
 // ===================================================
@@ -69,10 +69,10 @@ int main(int argc, char* argv[])
     // Tolerance
     const LifeV::Real tolerance( 1e-10 );
 
-    ETA_ADR2DTest eta_adr2DTest;
+    ETA_VectorialADR2DTest eta_vectorialADR2DTest;
 
     // Error of the problem
-    const LifeV::Real error = eta_adr2DTest.run();
+    const LifeV::Real error = eta_vectorialADR2DTest.run();
     const bool unsuccess = std::fabs ( error ) > tolerance;
     
     if (unsuccess)

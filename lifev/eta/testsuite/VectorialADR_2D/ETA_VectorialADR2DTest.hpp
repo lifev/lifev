@@ -24,13 +24,13 @@
 */
 //@HEADER
 /**
-   @file ETA_ADR2DTest.cpp
+   @file ETA_VectorialADR2DTest.cpp
    @author L. Pasquale <lgpasquale@gmail.com>
    @date 2012-11-20
 */
 
-#ifndef __ETA_ADR2DTEST_H
-#define __ETA_ADR2DTEST_H 1
+#ifndef __ETA_VECTORIALADR2DTEST_H
+#define __ETA_VECTORIALADR2DTEST_H 1
 
 
 // Tell the compiler to ignore specific kind of warnings:
@@ -79,21 +79,21 @@
 // ---------------------------------------------------------------
 
 /*!
-    @class ETA_ADR2DTest
-    @brief Simple ETA test to compare ETA to ADRAssembly in a 2D space
+    @class ETA_VectorialADR2DTest
+    @brief Simple ETA test to compare ETA to ADRAssembly in a 2D space with a 2D solution
 
     @author L. Pasquale <lgpasquale@gmail.com>
 
-    This test computes the matrix associated to the advection-diffusion-reaction problem: \n
+    This test computes the matrix associated to the advection-diffusion-reaction linear operator: \n
     \f$
-        -\alpha \delta u + \beta \cdot \nabla u +\gamma u = f
+        Lu=-\alpha \delta u + \beta \cdot \nabla u +\gamma u
     \f$ \n
-    with \f$\alpha=1\f$, \f$\beta=\left(\begin{array}{c}1\\0\end{array}\right)\f$, \f$\gamma=2\f$, \f$f=2\f$ and \f$u\f$ a scalar field \n
+    with \f$\alpha=1\f$, \f$\beta=\left(\begin{array}{c}1\\0\end{array}\right)\f$, \f$\gamma=2\f$ and \f$u\f$ a 2D field \n
     The domain is the square (-1,1)x(-1,1). \n
-    The matrix and the vector for the RHS are first assembled using the class ADRAssembler and then the ExpressionAssembly::integrate function of the ETA module. \n
-    if the two matrices (and vectors) are assembled correctly, they should be almost exactly the same. \n
+    The matrix is first assembled using the class ADRAssembler and then the ExpressionAssembly::integrate function of the ETA module. \n
+    if the two matrices are assembled correctly, they should be almost exactly the same. \n
 */
-class ETA_ADR2DTest
+class ETA_VectorialADR2DTest
 //     :
 //     public LifeV::Application
 {
@@ -104,11 +104,11 @@ public:
     //@{
 
     //! Constructor
-    ETA_ADR2DTest ();
+    ETA_VectorialADR2DTest ();
 
 
     //! Destructor
-    ~ETA_ADR2DTest () {}
+    ~ETA_VectorialADR2DTest () {}
 
     //@}
 
@@ -128,4 +128,4 @@ private:
 
 };
 
-#endif /* __ETA_ADR2DTEST_H */
+#endif /* __ETA_VECTORIALADR2DTEST_H */
