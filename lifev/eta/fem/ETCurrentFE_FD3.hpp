@@ -51,7 +51,7 @@ private:
     typedef VectorSmall< 3 > array1D_Return_Type;
 
     // Matrix return type for dphi
-    typedef MatrixSmall< spaceDim, 3 > matrix_Return_Type;
+    typedef MatrixSmall< 3, spaceDim > matrix_Return_Type;
 
     //Private typedefs for the 2D array of vector
     typedef std::vector< std::vector< array1D_Return_Type > > array2D_vector_Type;
