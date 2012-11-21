@@ -138,7 +138,7 @@ MultiscaleCouplingMeanTotalNormalStress::initializeCouplingVariables()
 
     M_comm->SumAll( &localSum, &globalSum, 1 );
     if ( myModelsNumber() > 0 )
-        localCouplingVariables( 0 )[M_couplingVariablesNumber-1] = globalSum / modelsNumber();
+        localCouplingVariables( 0 )[modelsNumber()] = globalSum / modelsNumber();
 
 #ifdef HAVE_LIFEV_DEBUG
     for ( UInt i( 0 ); i < M_couplingVariablesNumber; ++i )
@@ -167,7 +167,7 @@ MultiscaleCouplingMeanTotalNormalStress::computeCouplingResiduals()
                 if ( isModelLeaderProcess( i ) )
                 {
                     ( *M_localCouplingResiduals )[0]  += localCouplingVariables( 0 )[i];
-                    ( *M_localCouplingResiduals )[i+1] = myValueTotalStress - localCouplingVariables( 0 )[M_couplingVariablesNumber-1];
+                    ( *M_localCouplingResiduals )[i+1] = myValueTotalStress - localCouplingVariables( 0 )[modelsNumber()];
                 }
             }
 
@@ -179,7 +179,7 @@ MultiscaleCouplingMeanTotalNormalStress::computeCouplingResiduals()
                 if ( isModelLeaderProcess( i ) )
                 {
                     ( *M_localCouplingResiduals )[0]  += myValueFlowRate;
-                    ( *M_localCouplingResiduals )[i+1] = myValueTotalStress - localCouplingVariables( 0 )[M_couplingVariablesNumber-1];
+                    ( *M_localCouplingResiduals )[i+1] = myValueTotalStress - localCouplingVariables( 0 )[modelsNumber()];
                 }
             }
     }
@@ -225,7 +225,7 @@ MultiscaleCouplingMeanTotalNormalStress::insertJacobianConstantCoefficients( mul
             {
                 if ( i < M_flowRateInterfaces )
                     jacobian.addToCoefficient( M_couplingVariablesOffset,     M_couplingVariablesOffset + i,                     1 );
-                jacobian.addToCoefficient( M_couplingVariablesOffset+1+i, M_couplingVariablesOffset + M_couplingVariablesNumber - 1, -1 );
+                jacobian.addToCoefficient( M_couplingVariablesOffset + 1 + i, M_couplingVariablesOffset + modelsNumber(), -1 );
             }
 }
 

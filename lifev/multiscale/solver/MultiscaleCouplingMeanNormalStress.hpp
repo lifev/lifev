@@ -76,7 +76,7 @@ public:
     //@{
 
     //! Setup the coupling variables number.
-    void setupCouplingVariablesNumber();
+    virtual void setupCouplingVariablesNumber();
 
     //! Setup the coupling
     virtual void setupCoupling();
