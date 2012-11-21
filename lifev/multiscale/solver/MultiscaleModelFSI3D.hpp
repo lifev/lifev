@@ -453,6 +453,7 @@ private:
 
     // Free flags, available for the couplings
     multiscaleIDContainer_Type             M_boundaryFlagsArea;
+    std::vector< bool >                    M_boundaryFlagsAreaPerturbed;
 
 #endif
 
@@ -472,8 +473,9 @@ private:
     bcInterfacePtr_Type                    M_solidBC;
     bcInterfacePtr_Type                    M_harmonicExtensionBC;
 
-    // Linear Fluid problem
-    bcPtr_Type                             M_linearBC;
+    // Linear problem
+    bcPtr_Type                             M_linearFluidBC;
+    bcPtr_Type                             M_linearSolidBC;
     vectorPtr_Type                         M_linearRHS;
     vectorPtr_Type                         M_linearSolution;
 };
@@ -554,8 +556,6 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    FSI3DBoundaryStressFunction();
-
     FSI3DBoundaryStressFunction( const FSI3DBoundaryStressFunction& boundaryFunction );
 
     FSI3DBoundaryStressFunction& operator=( const FSI3DBoundaryStressFunction& boundaryFunction );
@@ -595,15 +595,15 @@ public:
     //@{
 
     //! Constructor
-    explicit FSI3DBoundaryAreaFunction( const function_Type& couplingFunction, const multiscaleID_Type& flag, const MultiscaleModelFSI3D* modelFSI3D ) :
-        M_FSI3D           ( modelFSI3D ),
-        M_fluidFlag       ( flag ),
+    explicit FSI3DBoundaryAreaFunction() :
+        M_FSI3D           (),
+        M_fluidFlag       (),
         M_referenceArea   (),
         M_geometricCenter (),
         M_n               (),
         M_t1              (),
         M_t2              (),
-        M_function        ( couplingFunction )
+        M_function        ()
         {}
 
     //! Destructor
@@ -615,46 +615,22 @@ public:
     //! @name Methods
     //@{
 
-    //! Evaluate the coupling quantity
+    //! Evaluate the displacement of a point
     /*!
-     * @return evaluation of the function
+     * @return displacement of a point
      */
     Real function( const Real& t, const Real& x, const Real& y, const Real& z, const UInt& id )
     {
-        // Compute scale factor
-        Real scaleFactor ( std::sqrt( M_function( t, x, y, z, id ) / M_referenceArea ) - 1);
+        return displacement( std::sqrt( M_function( t, x, y, z, id ) / M_referenceArea ) - 1, x , y, z, id );
+    }
 
-        // Compute the RHS
-        boost::array< Real, 3 > rhs;
-        rhs[0] = 0;
-        rhs[1] = scaleFactor * ( ( x - M_geometricCenter[0] ) * M_t1[0] + ( y - M_geometricCenter[1] ) * M_t1[1] + ( z - M_geometricCenter[2] ) * M_t1[2] );
-        rhs[2] = scaleFactor * ( ( x - M_geometricCenter[0] ) * M_t2[0] + ( y - M_geometricCenter[1] ) * M_t2[1] + ( z - M_geometricCenter[2] ) * M_t2[2] );
-
-        // Compute the displacement
-        Real determinant = M_n[0] * ( M_t1[1] * M_t2[2] - M_t1[2] * M_t2[1] )
-                         + M_n[1] * ( M_t1[2] * M_t2[0] - M_t1[0] * M_t2[2] )
-                         + M_n[2] * ( M_t1[0] * M_t2[1] - M_t1[1] * M_t2[0] );
-        switch ( id )
-        {
-        case 0:
-            return -( rhs[0] * ( M_t1[2] * M_t2[1] - M_t1[1] * M_t2[2] )
-                    + rhs[1] * ( M_n[1]  * M_t2[2] - M_n[2]  * M_t2[1] )
-                    + rhs[2] * ( M_n[2]  * M_t1[1] - M_n[1]  * M_t1[2] ) ) / ( determinant * M_FSI3D->globalData()->dataTime()->timeStep() );
-
-        case 1:
-            return  ( rhs[0] * ( M_t1[2] * M_t2[0] - M_t1[0] * M_t2[2] )
-                    + rhs[1] * ( M_n[0]  * M_t2[2] - M_n[2]  * M_t2[0] )
-                    + rhs[2] * ( M_n[2]  * M_t1[0] - M_n[0]  * M_t1[2] ) ) / ( determinant * M_FSI3D->globalData()->dataTime()->timeStep() );
-
-        case 2:
-            return -( rhs[0] * ( M_t1[1] * M_t2[0] - M_t1[0] * M_t2[1] )
-                    + rhs[1] * ( M_n[0]  * M_t2[1] - M_n[1]  * M_t2[0] )
-                    + rhs[2] * ( M_n[1]  * M_t1[0] - M_n[0]  * M_t1[1] ) ) / ( determinant * M_FSI3D->globalData()->dataTime()->timeStep() );
-
-        default:
-
-            return 0.;
-        }
+    //! Evaluate the displacement of a point when solving the tangent problem
+    /*!
+     * @return displacement of a point
+     */
+    Real functionLinear( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const UInt& id )
+    {
+        return displacement( std::sqrt( 1. / M_referenceArea ) - 1, x , y, z, id );
     }
 
     //! Setup main quantities
@@ -742,12 +718,21 @@ public:
 
     //@}
 
+    //! @name Get methods
+    //@{
+
+    //! Get the fluid flag of the boundary
+    /*!
+     * @return flag of the fluid boundary
+     */
+    const multiscaleID_Type& fluidFlag() const { return M_fluidFlag; }
+
+    //@}
+
 private:
 
     //! @name Unimplemented Methods
     //@{
-
-    FSI3DBoundaryAreaFunction();
 
     FSI3DBoundaryAreaFunction( const FSI3DBoundaryAreaFunction& boundaryFunction );
 
@@ -777,6 +762,50 @@ private:
         M_t2[0] = M_n[1] * M_t1[2] - M_n[2] * M_t1[1];
         M_t2[1] = M_n[2] * M_t1[0] - M_n[0] * M_t1[2];
         M_t2[2] = M_n[0] * M_t1[1] - M_n[1] * M_t1[0];
+    }
+
+    //! Evaluate the displacement of a point given the scale factor
+    /*!
+     * @param scale factor
+     * @param x x-coordinate of the point
+     * @param y y-coordinate of the point
+     * @param z z-coordinate of the point
+     * @param id id of the component
+     * @return displacement of a point
+     */
+    Real displacement( const Real& scaleFactor, const Real& x, const Real& y, const Real& z, const UInt& id )
+    {
+        // Compute the RHS
+        boost::array< Real, 3 > rhs;
+        rhs[0] = 0;
+        rhs[1] = scaleFactor * ( ( x - M_geometricCenter[0] ) * M_t1[0] + ( y - M_geometricCenter[1] ) * M_t1[1] + ( z - M_geometricCenter[2] ) * M_t1[2] );
+        rhs[2] = scaleFactor * ( ( x - M_geometricCenter[0] ) * M_t2[0] + ( y - M_geometricCenter[1] ) * M_t2[1] + ( z - M_geometricCenter[2] ) * M_t2[2] );
+
+        // Compute the displacement
+        Real determinant = M_n[0] * ( M_t1[1] * M_t2[2] - M_t1[2] * M_t2[1] )
+                         + M_n[1] * ( M_t1[2] * M_t2[0] - M_t1[0] * M_t2[2] )
+                         + M_n[2] * ( M_t1[0] * M_t2[1] - M_t1[1] * M_t2[0] );
+        switch ( id )
+        {
+        case 0:
+            return -( rhs[0] * ( M_t1[2] * M_t2[1] - M_t1[1] * M_t2[2] )
+                    + rhs[1] * ( M_n[1]  * M_t2[2] - M_n[2]  * M_t2[1] )
+                    + rhs[2] * ( M_n[2]  * M_t1[1] - M_n[1]  * M_t1[2] ) ) / ( determinant * M_FSI3D->globalData()->dataTime()->timeStep() );
+
+        case 1:
+            return  ( rhs[0] * ( M_t1[2] * M_t2[0] - M_t1[0] * M_t2[2] )
+                    + rhs[1] * ( M_n[0]  * M_t2[2] - M_n[2]  * M_t2[0] )
+                    + rhs[2] * ( M_n[2]  * M_t1[0] - M_n[0]  * M_t1[2] ) ) / ( determinant * M_FSI3D->globalData()->dataTime()->timeStep() );
+
+        case 2:
+            return -( rhs[0] * ( M_t1[1] * M_t2[0] - M_t1[0] * M_t2[1] )
+                    + rhs[1] * ( M_n[0]  * M_t2[1] - M_n[1]  * M_t2[0] )
+                    + rhs[2] * ( M_n[1]  * M_t1[0] - M_n[0]  * M_t1[1] ) ) / ( determinant * M_FSI3D->globalData()->dataTime()->timeStep() );
+
+        default:
+
+            return 0.;
+        }
     }
 
     //@}

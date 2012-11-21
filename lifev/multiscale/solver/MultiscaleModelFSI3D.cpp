@@ -71,7 +71,8 @@ MultiscaleModelFSI3D::MultiscaleModelFSI3D() :
         M_fluidBC                      ( new bcInterface_Type() ),
         M_solidBC                      ( new bcInterface_Type() ),
         M_harmonicExtensionBC          ( new bcInterface_Type() ),
-        M_linearBC                     (),
+        M_linearFluidBC                (),
+        M_linearSolidBC                (),
         M_linearRHS                    (),
         M_linearSolution               ()
 {
@@ -147,8 +148,12 @@ MultiscaleModelFSI3D::setupData( const std::string& fileName )
 
 #ifdef FSI_WITH_BOUNDARYAREA
     M_boundaryFlagsArea.reserve( M_boundaryFlags.size() );
+    M_boundaryFlagsAreaPerturbed.reserve( M_boundaryFlags.size() );
     for ( UInt j( 0 ); j < M_boundaryFlags.size(); ++j )
+    {
         M_boundaryFlagsArea.push_back( dataFile( "Multiscale/couplingAreaFlags", 0, j ) );
+        M_boundaryFlagsAreaPerturbed.push_back( false );
+    }
 #endif
 }
 
@@ -281,6 +286,11 @@ MultiscaleModelFSI3D::solveModel()
     // a more proper implementation.
     M_FSIoperator->precPtrView()->setRecompute( 1, false );
     M_nonLinearRichardsonIteration = 1;
+
+#ifdef FSI_WITH_BOUNDARYAREA
+    for ( UInt j( 0 ); j < M_boundaryFlagsAreaPerturbed.size(); ++j )
+        M_boundaryFlagsAreaPerturbed[j] = false;
+#endif
 }
 
 void
@@ -432,7 +442,7 @@ MultiscaleModelFSI3D::boundaryDeltaMeanNormalStress( const multiscaleID_Type& bo
 {
     solveLinearModel( solveLinearSystem );
 
-    return M_FSIoperator->fluid().linearMeanNormalStress( boundaryFlag( boundaryID ), *M_linearBC, *M_linearSolution );
+    return M_FSIoperator->fluid().linearMeanNormalStress( boundaryFlag( boundaryID ), *M_linearFluidBC, *M_linearSolution );
 }
 
 Real
@@ -440,7 +450,7 @@ MultiscaleModelFSI3D::boundaryDeltaMeanTotalNormalStress( const multiscaleID_Typ
 {
     solveLinearModel( solveLinearSystem );
 
-    return M_FSIoperator->fluid().linearMeanTotalNormalStress( boundaryFlag( boundaryID ), *M_linearBC, *M_fluidVelocityAndPressure, *M_linearSolution );
+    return M_FSIoperator->fluid().linearMeanTotalNormalStress( boundaryFlag( boundaryID ), *M_linearFluidBC, *M_fluidVelocityAndPressure, *M_linearSolution );
 }
 
 // ===================================================
@@ -792,13 +802,17 @@ MultiscaleModelFSI3D::setupLinearModel()
 #endif
 
     // The linear BCHandler is a copy of the original BCHandler with all BCFunctions giving zero
-    M_linearBC.reset( new bc_Type( *M_fluidBC->handler() ) );
+    M_linearFluidBC.reset( new bc_Type( *M_fluidBC->handler() ) );
+    M_linearSolidBC.reset( new bc_Type( *M_solidBC->handler() ) );
 
     // Set all the BCFunctions to zero
     BCFunctionBase bcBaseDeltaZero;
     bcBaseDeltaZero.setFunction( boost::bind( &MultiscaleModelFSI3D::bcFunctionDeltaZero, this, _1, _2, _3, _4, _5 ) );
 
-    for ( bc_Type::bcBaseIterator_Type i = M_linearBC->begin() ; i != M_linearBC->end() ; ++i )
+    for ( bc_Type::bcBaseIterator_Type i = M_linearFluidBC->begin() ; i != M_linearFluidBC->end() ; ++i )
+        i->setBCFunction( bcBaseDeltaZero );
+
+    for ( bc_Type::bcBaseIterator_Type i = M_linearSolidBC->begin() ; i != M_linearSolidBC->end() ; ++i )
         i->setBCFunction( bcBaseDeltaZero );
 
     // Setup linear solution & the RHS
@@ -816,7 +830,7 @@ MultiscaleModelFSI3D::updateLinearModel()
 
     //Create the RHS
     *M_linearRHS *= 0;
-    M_FSIoperator->bcManageVectorRHS( M_linearBC, *M_linearRHS );
+    M_FSIoperator->bcManageVectorRHS( M_linearFluidBC, M_linearSolidBC, *M_linearRHS );
 }
 
 void
@@ -856,9 +870,22 @@ MultiscaleModelFSI3D::imposePerturbation()
         if ( ( *i )->isPerturbed() )
         {
             BCFunctionBase bcBaseDeltaOne;
-            bcBaseDeltaOne.setFunction( boost::bind( &MultiscaleModelFSI3D::bcFunctionDeltaOne, this, _1, _2, _3, _4, _5 ) );
 
-            M_linearBC->findBCWithFlag( boundaryFlag( ( *i )->boundaryID( ( *i )->modelGlobalToLocalID( M_ID ) ) ) ).setBCFunction( bcBaseDeltaOne );
+            multiscaleID_Type boundaryID( ( *i )->boundaryID( ( *i )->modelGlobalToLocalID( M_ID ) ) );
+            if ( M_boundaryFlagsAreaPerturbed[boundaryID] == true )
+            {
+                for ( boundaryAreaFunctionsContainerIterator_Type j = M_boundaryAreaFunctions.begin(); j < M_boundaryAreaFunctions.end(); ++j )
+                    if ( ( *j )->fluidFlag() == boundaryFlag( boundaryID ) )
+                    {
+                        bcBaseDeltaOne.setFunction( boost::bind( &FSI3DBoundaryAreaFunction::functionLinear, *j, _1, _2, _3, _4, _5 ) );
+                        M_linearSolidBC->findBCWithFlag( M_boundaryFlagsArea[boundaryID] ).setBCFunction( bcBaseDeltaOne );
+                    }
+            }
+            else
+            {
+                bcBaseDeltaOne.setFunction( boost::bind( &MultiscaleModelFSI3D::bcFunctionDeltaOne, this, _1, _2, _3, _4, _5 ) );
+                M_linearFluidBC->findBCWithFlag( boundaryFlag( boundaryID ) ).setBCFunction( bcBaseDeltaOne );
+            }
 
             break;
         }
@@ -878,7 +905,16 @@ MultiscaleModelFSI3D::resetPerturbation()
             BCFunctionBase bcBaseDeltaZero;
             bcBaseDeltaZero.setFunction( boost::bind( &MultiscaleModelFSI3D::bcFunctionDeltaZero, this, _1, _2, _3, _4, _5 ) );
 
-            M_linearBC->findBCWithFlag( boundaryFlag( ( *i )->boundaryID( ( *i )->modelGlobalToLocalID( M_ID ) ) ) ).setBCFunction( bcBaseDeltaZero );
+            multiscaleID_Type boundaryID( ( *i )->boundaryID( ( *i )->modelGlobalToLocalID( M_ID ) ) );
+            if ( M_boundaryFlagsAreaPerturbed[boundaryID] == true )
+            {
+                M_linearSolidBC->findBCWithFlag( M_boundaryFlagsArea[boundaryID] ).setBCFunction( bcBaseDeltaZero );
+            }
+            else
+            {
+                M_linearFluidBC->findBCWithFlag( boundaryFlag( boundaryID ) ).setBCFunction( bcBaseDeltaZero );
+                M_boundaryFlagsAreaPerturbed[boundaryID] = true;
+            }
 
             break;
         }
