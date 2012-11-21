@@ -395,11 +395,11 @@ public:
      */
     void transferInterfaceOnSolid( const vector_Type& _vec1, vector_Type& _vec2 );
 
-    //! calls bcManage for a vector
-    /**
-       calls bcManage for the vector rhs and the BCHandler bch
+    //! Update the RHS on the base of the fluid and solid BC
+    /*!
+     *  This method is used by the Multiscale to update the RHS vector for the nonlinear subiterations.
      */
-    void bcManageVectorRHS( const fluidBchandlerPtr_Type& bch, vector_Type& rhs );
+    void bcManageVectorRHS( const fluidBchandlerPtr_Type& bch, const solidBchandlerPtr_Type& bcHandlerSolid, vector_Type& rhs );
 
     //! Method to set the Robin vector coefficient of the Robin--Neumann coupling scheme (as a constant vector vector)
     void setAlphaf() { M_alphaF->epetraVector().PutScalar( M_alphaFCoef ); }
