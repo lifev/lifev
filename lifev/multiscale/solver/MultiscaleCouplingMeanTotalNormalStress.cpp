@@ -139,12 +139,6 @@ MultiscaleCouplingMeanTotalNormalStress::initializeCouplingVariables()
     M_comm->SumAll( &localSum, &globalSum, 1 );
     if ( myModelsNumber() > 0 )
         localCouplingVariables( 0 )[modelsNumber()] = globalSum / modelsNumber();
-
-#ifdef HAVE_LIFEV_DEBUG
-    for ( UInt i( 0 ); i < M_couplingVariablesNumber; ++i )
-        Debug( 8250 ) << "C(" << M_couplingVariablesOffset + i << ") = " << localCouplingVariables( 0 )[i]  << "\n";
-#endif
-
 }
 
 void
@@ -183,12 +177,6 @@ MultiscaleCouplingMeanTotalNormalStress::computeCouplingResiduals()
                 }
             }
     }
-
-#ifdef HAVE_LIFEV_DEBUG
-    for ( UInt i( 0 ); i < M_couplingVariablesNumber; ++i )
-        Debug( 8250 ) << "R(" << M_couplingVariablesOffset + i << ") = " << ( *M_localCouplingResiduals )[i]  << "\n";
-#endif
-
 }
 
 // ===================================================

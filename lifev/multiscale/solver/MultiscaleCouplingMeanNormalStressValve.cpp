@@ -205,12 +205,6 @@ MultiscaleCouplingMeanNormalStressValve::computeCouplingResiduals()
         super_Type::computeCouplingResiduals();
     else
         *M_localCouplingResiduals = 0.;
-
-#ifdef HAVE_LIFEV_DEBUG
-    for ( UInt i( 0 ); i < M_couplingVariablesNumber; ++i )
-        Debug( 8240 ) << "R(" << M_couplingVariablesOffset + i << ") = " << ( *M_localCouplingResiduals )[i]  << "\n";
-#endif
-
 }
 
 // ===================================================

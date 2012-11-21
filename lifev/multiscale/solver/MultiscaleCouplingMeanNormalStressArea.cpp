@@ -129,12 +129,6 @@ MultiscaleCouplingMeanNormalStressArea::initializeCouplingVariables()
     M_comm->SumAll( &localSum, &globalSum, 1 );
     if ( myModelsNumber() > 0 )
         localCouplingVariables( 0 )[M_flowRateInterfaces + 1] = globalSum / 2;
-
-#ifdef HAVE_LIFEV_DEBUG
-    for ( UInt i( 0 ); i < M_couplingVariablesNumber; ++i )
-        Debug( 8230 ) << "C(" << M_couplingVariablesOffset + i << ") = " << localCouplingVariables( 0 )[i]  << "\n";
-#endif
-
 }
 
 void
@@ -161,12 +155,6 @@ MultiscaleCouplingMeanNormalStressArea::computeCouplingResiduals()
                     }
                 }
     }
-
-#ifdef HAVE_LIFEV_DEBUG
-    for ( UInt i( 0 ); i < M_couplingVariablesNumber; ++i )
-        Debug( 8230 ) << "R(" << M_couplingVariablesOffset + i << ") = " << ( *M_localCouplingResiduals )[i]  << "\n";
-#endif
-
 }
 
 // ===================================================

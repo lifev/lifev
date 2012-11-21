@@ -214,6 +214,12 @@ public:
     //! Display some information about the coupling
     void showMe();
 
+    //! Display the local residuals vector
+    void showMeResiduals() const;
+
+    //! Display the local coupling variables
+    void showMeCouplingVariables() const;
+
     //! Clear the list of pointers to the models.
     /*!
      *  This method has to be called before the automatic destructor, in order

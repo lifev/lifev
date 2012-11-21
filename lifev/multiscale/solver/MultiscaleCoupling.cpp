@@ -308,6 +308,28 @@ MultiscaleCoupling::showMe()
     }
 }
 
+void
+MultiscaleCoupling::showMeResiduals() const
+{
+    if ( myModel( 0 ) )
+        if ( isModelLeaderProcess( 0 ) )
+        {
+            for ( UInt i( 0 ); i < M_couplingVariablesNumber; ++i )
+                std::cout << "R(" << M_couplingVariablesOffset + i << ") = " << ( *M_localCouplingResiduals )[i] << std::endl;
+        }
+}
+
+void
+MultiscaleCoupling::showMeCouplingVariables() const
+{
+    if ( myModel( 0 ) )
+        if ( isModelLeaderProcess( 0 ) )
+        {
+            for ( UInt i( 0 ); i < M_couplingVariablesNumber; ++i )
+                std::cout << "C(" << M_couplingVariablesOffset + i << ") = " << localCouplingVariables( 0 )[i] << std::endl;
+        }
+}
+
 // ===================================================
 // Get Methods
 // ===================================================
