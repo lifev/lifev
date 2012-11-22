@@ -14,7 +14,7 @@
 ###################################################################################################
 
 [Multiscale]
-modelName        = FSI3D_Cylinder_tube20_MonolithicGE
+modelName        = FSI3D_Cylinder_tube20_MonolithicGCE
 modelType        = FSI3D
 couplingFlags    = '2 3'
 
@@ -32,22 +32,22 @@ type             = hdf5
 
 
 [problem]
-method      = monolithicGI # monolithicGE, monolithicGI
+method      = monolithicGE # monolithicGE, monolithicGI
 
-blockOper   = AdditiveSchwarzGI # AdditiveSchwarz   AdditiveSchwarzRN
-                                AdditiveSchwarzGI AdditiveSchwarzRNGI
+blockOper   = AdditiveSchwarz   # AdditiveSchwarz   AdditiveSchwarzRN
+                                  AdditiveSchwarzGI AdditiveSchwarzRNGI
 
-DDBlockPrec = ComposedDN2GI # OPTIONS:
-                         #AdditiveSchwarz: monolithic A-S preconditioner,
-                         #AdditiveSchwarzGI: monolithic A-S preconditioner,
-                         #ComposedDN: modular Dirichlet-Neumann preconditioner
-                         #ComposedDN2: modular Dirichlet-Neumann preconditioner
-                         #ComposedNN: modular Neumann-Neumann + Dirichlet-Dirichlet preconditioner
-                         #ComposedDNND: modular Dirichlet-Neumann + Neumann-Dirichlet preconditioner
-                         #ComposedDNGI: modular preconditioner for the geometric implicit, split in 3 factors
-                         #ComposedDN2GI: modular preconditioner for the geometric implicit, split in 3 factors
-                         #ComposedDNDGI: under testing, do not use
-                         #ComposedDND2DGI: under testing, do not use
+DDBlockPrec = ComposedDN   # OPTIONS:
+                           #AdditiveSchwarz: monolithic A-S preconditioner,
+                           #AdditiveSchwarzGI: monolithic A-S preconditioner,
+                           #ComposedDN: modular Dirichlet-Neumann preconditioner
+                           #ComposedDN2: modular Dirichlet-Neumann preconditioner
+                           #ComposedNN: modular Neumann-Neumann + Dirichlet-Dirichlet preconditioner
+                           #ComposedDNND: modular Dirichlet-Neumann + Neumann-Dirichlet preconditioner
+                           #ComposedDNGI: modular preconditioner for the geometric implicit, split in 3 factors
+                           #ComposedDN2GI: modular preconditioner for the geometric implicit, split in 3 factors
+                           #ComposedDNDGI: under testing, do not use
+                           #ComposedDND2DGI: under testing, do not use
 
 
 reducedFluid = 0    # 0 = exact, 1 = inexact
@@ -69,9 +69,6 @@ solidMeshPartitioned = none
 
 [fluid]
 useShapeDerivatives     = false
-domainVelImplicit       = false  # tells if the domain vel is to be considered implicitly in the convective term
-convectiveImplicit      = false  # tells if the velocity is to be considered implicitly in the convective term
-semiImplicit            = true   # tells if we advance in time after the first nonlinear iteration or not
 conservativeFormulation = false  # tells if the conservative or non conservative formulation is used
 
     [./physics] # Defined here only if different from the one in the main file.
@@ -88,7 +85,7 @@ conservativeFormulation = false  # tells if the conservative or non conservative
 
     [../space_discretization]
     mesh_dir        = ./Mesh/
-    mesh_file       = tube20.mesh      #  1050 Vertex
+    mesh_file       = tube20.mesh      # mesh name
     mesh_type       = .mesh
     verbose         = 0                # verbose during mesh-reading
 
@@ -102,7 +99,6 @@ conservativeFormulation = false  # tells if the conservative or non conservative
 
     [../miscellaneous]
     verbose   = 0
-    velname   = vel
     steady    = 0
     factor    = 1
 
@@ -114,28 +110,19 @@ conservativeFormulation = false  # tells if the conservative or non conservative
     max_iter_reuse  = 100
     reuse           = true
 
-    #[../valuespersection]
-    #computeMeanValuesPerSection    = 0
-    #nb_z_section                   = 2
-    #tol_section                    = 2e-2
-    #x_section_frontier             = .0
-    #z_section_init                 = -1.0
-    #z_section_final                = .0
-    #nb_polygon_edges               = 10
-
     [../boundary_conditions]
     list = ' '
     #list = 'InFlowEdge OutFlowEdge'
 
         [./InFlowEdge]
-        type            = Essential
+        type            = EssentialEdge
         flag            = 20
         mode            = Full
         component       = 3
         function        = 0
 
         [../OutFlowEdge]
-        type            = Essential
+        type            = EssentialEdge
         flag            = 30
         mode            = Full
         component       = 3
@@ -149,10 +136,10 @@ conservativeFormulation = false  # tells if the conservative or non conservative
 
 [solid]
 useExactJacobian = true # always false for linear structure model. Otherwise it allows to chose beween an exact-inexact Newton scheme
-rescaleFactor    = 1.0 # this factor can be used to rescale the structure block
+rescaleFactor    = 1.0  # this factor can be used to rescale the structure block
 
     [./physics]
-    solidType = linearVenantKirchhoff # linearVenantKirchhoff, nonLinearVenantKirchhoff, exponential, neoHookean
+    solidType        = linearVenantKirchhoff # linearVenantKirchhoff, nonLinearVenantKirchhoff, exponential, neoHookean
     material_flag    = 1
     #externalPressure = 0
     #density          = 1.2
@@ -172,18 +159,14 @@ rescaleFactor    = 1.0 # this factor can be used to rescale the structure block
 
     [../space_discretization]
     mesh_dir         = ./Mesh/
-    mesh_file        = vessel20.mesh  # mesh file
+    mesh_file        = vessel20.mesh    # mesh name
     order            = P1
     mesh_faces       = all              # update all faces elements
     mesh_edges       = all              # update all faces elements
 
     [../miscellaneous]
-    verbose    = 0
-
-    [../newton]
-    maxiter    = 1
-    abstol     = 1.e-8
-    linesearch = 0
+    verbose          = 0
+    depname          = dep
 
     [../boundary_conditions]
     #list = ' '                                                                         # Free dispacement
@@ -207,14 +190,14 @@ rescaleFactor    = 1.0 # this factor can be used to rescale the structure block
         function   = 0
 
         [../TopEdge]
-        type       = Essential
+        type       = EssentialEdge
         flag       = 20
         mode       = Full
         component  = 3
         function   = 0
 
         [../BaseEdge]
-        type       = Essential
+        type       = EssentialEdge
         flag       = 30
         mode       = Full
         component  = 3
@@ -292,11 +275,76 @@ tolerance       =  0   # how far points are to be considered the same on the int
     #rhoInf           = 1
     #typeOfGeneralizedAlpha = HHT
 
+    [../solver]                        # Solver Parameters
+    solver          = gmres
+    scaling         = none
+    output          = none # all none
+    conv            = rhs
+    max_iter        = 500
+    reuse           = true
+    max_iter_reuse  = 500
+    kspace          = 500
+    tol             = 1.e-9
+
+    [../prec]
+    #prectype                = AztecOO
+    prectype                = Ifpack
+    displayList             = false
+
+        [./AztecOO]
+        precond             = 'dom_decomp'
+        prec_calc           = calc
+        reorder             = 1
+        keep_info           = 1
+        overlap             = 1
+        subdomain_solve     = ILUT
+        ilut_fill           = 4
+        drop                = 1.e-5
+
+        [../ifpack]
+        overlap             = 2
+        prectype            = Amesos # Amesos (does a local LU factorization), ILUT (not ILU)
+
+            [./relaxation]
+            type                   = Jacobi
+            sweeps                 = 1
+            damping_factor         = 1.
+            min_diagonal_value     = 0
+            zero_starting_solution = true
+
+            [../partitioner]
+            type                   = metis
+            overlap                = 2
+            local_parts            = 1
+            root_node              = 0
+            use_symmetric_graph    = true
+
+            [../amesos]
+            solvertype             = Amesos_Umfpack # Amesos_KLU or Amesos_Umfpack
+
+            [../fact]
+            level-of-fill          = 10
+            ilut_level-of-fill     = 4
+            absolute_threshold     = 0
+            relative_threshold     = 1
+            relax_value            = 0
+            drop_tolerance         = 1.e-10
+
+            [../schwarz]
+            combine_mode           = 0             # 0=Add, 1=Zero, 2=Insert, 3=Average, 4=AbsMax
+            compute_condest        = true
+            reordering_type        = none          #none, metis, rcm
+            filter_singletons      = true
+
+            [../]
+
+        [../]
+
     [../boundary_conditions]
-    list = ' '                                               # Free dispacement
-    #list = 'Top_NoDisplacementOnZ Base_NoDisplacementOnZ'    # Free dispacement on XY
-    #list = 'Top TopEdge'                                     # Fixed displacement
-    #list = 'Top TopEdge Base BaseEdge NoInterface'           # Test
+    #list = 'Interface'                                              # Free dispacement
+    list = 'Top_NoDisplacementOnZ Base_NoDisplacementOnZ Interface' # Free dispacement on XY
+    #list = 'Top TopEdge Interface'                                  # Fixed displacement
+    #list = 'Top TopEdge Base BaseEdge NoInterface'                  # Test
 
         [./Top]
         type       = Essential
@@ -371,12 +419,11 @@ tolerance       =  0   # how far points are to be considered the same on the int
     reuse           = true
     max_iter_reuse  = 500
     kspace          = 500
-    tol             = 1.e-13
+    tol             = 1.e-9
 
     [../prec]
-    #prectype                = AztecOO
     reuse                   = false
-    prectype                = Composed
+    prectype                = Composed #AztecOO
     displayList             = false
 
         [./robin]
@@ -384,8 +431,8 @@ tolerance       =  0   # how far points are to be considered the same on the int
         alphas = 0.5 # parameters for Robin-Robin DDBlock preconditioner
 
         [../Composed]
-        list                = 'Ifpack Ifpack Ifpack'
-        sections            = 'ifpack ifpack ifpack'
+        list                = 'Ifpack Ifpack'
+        sections            = 'ifpack ifpack'
 
         [../AztecOO]
         precond             = 'dom_decomp'
@@ -446,14 +493,3 @@ tolerance       =  0   # how far points are to be considered the same on the int
         [../]
 
     [../]
-
-
-
-[eigensolver]
-nevec        = 10
-block_size   = 1;
-max_blocks   = 1000;
-max_restarts = 1000;
-tol          = 1e-5;
-which        = ML
-neval        = 5
