@@ -80,7 +80,7 @@
 
 /*!
     @class ETA_InterpolateGradient2DTest
-    @brief Simple ETA to check the evaluation of a gradient interpolation
+    @brief Simple ETA to check the evaluation of a gradient interpolation and the use of SmallMatrix costants in expressions
 
     @author L. Pasquale <lgpasquale@gmail.com>
 

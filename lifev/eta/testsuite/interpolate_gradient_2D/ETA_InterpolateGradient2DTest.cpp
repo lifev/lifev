@@ -161,15 +161,11 @@ ETA_InterpolateGradient2DTest::run()
 // and variable used to store the result of the integration
 // ---------------------------------------------------------------
 
-    //MatrixSmall<2,2> gradient;
-    //gradient(0,0)=1;
-    //gradient(0,1)=0;
-    //gradient(1,0)=0;
-    //gradient(1,1)=2;
-
-    VectorSmall<2> vector11;
-    vector11[0]=1;
-    vector11[1]=1;
+    MatrixSmall<2,2> identityMatrix;
+    identityMatrix(0,0)=1;
+    identityMatrix(0,1)=0;
+    identityMatrix(1,0)=0;
+    identityMatrix(1,1)=1;
 
     Real ETintegral(0);
 
@@ -192,7 +188,7 @@ ETA_InterpolateGradient2DTest::run()
         integrate( elements(ETuSpace->mesh()),
                    uSpace->qr(),
 
-                   dot( grad(ETuSpace,uInterpolatedRepeated)*value(vector11) , value(vector11))
+                   dot( grad(ETuSpace,uInterpolatedRepeated) , value(identityMatrix))
                    
                    )
             >> ETintegral;

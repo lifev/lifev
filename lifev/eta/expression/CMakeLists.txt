@@ -10,6 +10,7 @@ SET(expression_HEADERS
 	expression/EvaluationHK.hpp
 	expression/EvaluationInterpolateGradient.hpp
 	expression/EvaluationInterpolateValue.hpp
+	expression/EvaluationMatrix.hpp
 	expression/EvaluationMeas.hpp
 	expression/EvaluationPhiI.hpp
 	expression/EvaluationPhiJ.hpp
@@ -30,6 +31,7 @@ SET(expression_HEADERS
 	expression/ExpressionHK.hpp
 	expression/ExpressionInterpolateGradient.hpp
 	expression/ExpressionInterpolateValue.hpp
+	expression/ExpressionMatrix.hpp
 	expression/ExpressionMeas.hpp
 	expression/ExpressionPhiI.hpp
 	expression/ExpressionPhiJ.hpp
