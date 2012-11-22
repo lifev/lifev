@@ -292,18 +292,22 @@ public:
     //! Getter for the derivatives of the basis function in the quadrature nodes (current element)
     /*!
       @param i The index of the basis function
+      @param iCoor The vector component of which we want the derivative (0, 1, ..., fieldDim)
       @param dxi The direction of the derivative required (0 for d/dx, 1 for d/dy...)
       @param q The index of the quadrature node
       @return The vector<3> of the ith basis function derived w.r. to dxi, in the qth quadrature node.
      */
-    const array1D_Return_Type& dphi(const UInt& i, const UInt& dxi, const UInt& q) const
+    //const array1D_Return_Type& dphi(const UInt& i, const UInt& dxi, const UInt& q) const
+    const Real& dphi(const UInt& i, const UInt& iCoor, const UInt& dxi, const UInt& q) const
     {
         ASSERT( M_isDphiUpdated, "Derivative of the basis functions have not been updated");
         ASSERT( i < fieldDim*M_nbFEDof, "No basis function with this index");
+        ASSERT( iCoor < fieldDim, "No such coordinate index");
         ASSERT( dxi < spaceDim, "No such coordinate index");
         ASSERT( q < M_nbQuadPt,"No quadrature point with this index");
 
-        return M_dphi[q][i][dxi];
+        //return M_dphi[q][i][dxi];
+        return M_dphi[q][i][iCoor][dxi];
     }
 
     //! Getter for the divergence of the basis functions in the quadrature nodes in the current element
@@ -1254,7 +1258,7 @@ void ETCurrentFE< spaceDim, fieldDim >::updateDivergence( const UInt& iQuadPt )
 
     Real partialSum( 0.0 );
 
-    for ( UInt iDof( 0 ); iDof < 3*M_nbFEDof; ++iDof )
+    for ( UInt iDof( 0 ); iDof < fieldDim*M_nbFEDof; ++iDof )
     {
         partialSum = 0.0;
         for ( UInt iCoor( 0 ); iCoor < S_spaceDimension; ++iCoor )

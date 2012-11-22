@@ -24,7 +24,7 @@
 */
 //@HEADER
 /**
-   @file ETA_VectorialADR2DTest.cpp
+   @file ETA_InterpolateGradient2DTest.cpp
    @author L. Pasquale <lgpasquale@gmail.com>
    @date 2012-11-20
  */
@@ -33,7 +33,7 @@
 //! Includes
 // ===================================================
 
-#include "ETA_VectorialADR2DTest.hpp"
+#include "ETA_InterpolateGradient2DTest.hpp"
 
 #include <lifev/eta/fem/ETFESpace.hpp>
 #include <lifev/eta/expression/Integrate.hpp>
@@ -54,31 +54,30 @@ typedef RegionMesh<LinearTriangle> mesh_Type;
 typedef MatrixEpetra<Real> matrix_Type;
 typedef VectorEpetra vector_Type;
 
-// ---------------------------------------------------------------
-// We define then a function, which represents a velocity field,
-// of magnitude 1 in the y direction (supposing an (x,y)
-// reference frame).
-// ---------------------------------------------------------------
-
-
 // ===================================================
 //!                   Functions
 // ===================================================
 
-Real betaFct( const Real& /* t */, const Real& /* x */, const Real& /* y */, const Real& /* z */, const ID& i )
+// ---------------------------------------------------------------
+// We define then a function whose gradient is
+// (1 0)
+// (0 2)
+// ---------------------------------------------------------------
+
+Real uFct( const Real& /* t */, const Real&  x , const Real&  y , const Real& /* z */, const ID& i )
 {
-    if (i == 1)
+    if (i == 0)
     {
-        return 1;
+        return x;
     }
-    return 0;
+    return 2*y;
 }
 
 // ===================================================
 //!                  Constructors
 // ===================================================
 
-ETA_VectorialADR2DTest::ETA_VectorialADR2DTest ()
+ETA_InterpolateGradient2DTest::ETA_InterpolateGradient2DTest ()
 {
 
 #ifdef EPETRA_MPI
@@ -94,7 +93,7 @@ ETA_VectorialADR2DTest::ETA_VectorialADR2DTest ()
 // ===================================================
 
 Real
-ETA_VectorialADR2DTest::run()
+ETA_InterpolateGradient2DTest::run()
 {
     bool verbose(M_comm->MyPID()==0);
 // ---------------------------------------------------------------
@@ -110,7 +109,7 @@ ETA_VectorialADR2DTest::run()
 
     regularMesh2D( *fullMeshPtr, 0, Nelements, Nelements, false,
                    2.0,   2.0,
-                   -0.0,  -0.0);
+                   -1.0,  -1.0);
 
     MeshPartitioner< mesh_Type >   meshPart(fullMeshPtr, M_comm);
 
@@ -120,24 +119,16 @@ ETA_VectorialADR2DTest::run()
 
 
 // ---------------------------------------------------------------
-// We start by defining the finite element spaces. We use the type
-// FESpace for the classical way and copy it in an ETFESpace for
-// the ET assembly.
-//
-// In the end, both solution spaces display their respective
-// number of degrees of freedom, which must be the same.
+// We start by defining the finite element spaces. We still need
+// a FESpace because ETFESpace is still lacking some methods
 // ---------------------------------------------------------------
 
     if (verbose) std::cout << " -- Building FESpaces ... " << std::flush;
 
     std::string uOrder("P1");
-    std::string bOrder("P1");
 
     boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > uSpace
         ( new FESpace< mesh_Type, MapEpetra >(meshPart,uOrder, 2, M_comm));
-
-    boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > betaSpace
-        ( new FESpace< mesh_Type, MapEpetra >(meshPart,bOrder, 2, M_comm));
 
     if (verbose) std::cout << " done ! " << std::endl;
     if (verbose) std::cout << " ---> Dofs: " << uSpace->dof().numTotalDof() << std::endl;
@@ -146,9 +137,6 @@ ETA_VectorialADR2DTest::run()
 
     boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 2, 2 > > ETuSpace
         ( new ETFESpace< mesh_Type, MapEpetra, 2, 2 >(meshPart,&(uSpace->refFE()),&(uSpace->fe().geoMap()), M_comm));
-
-    boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 2, 2 > > ETbetaSpace
-        ( new ETFESpace< mesh_Type, MapEpetra, 2, 2 >(meshPart,&(betaSpace->refFE()),&(betaSpace->fe().geoMap()), M_comm));
 
     if (verbose) std::cout << " done ! " << std::endl;
     if (verbose) std::cout << " ---> Dofs: " << ETuSpace->dof().numTotalDof() << std::endl;
@@ -159,72 +147,37 @@ ETA_VectorialADR2DTest::run()
 // This is performed with the classical FESpace only.
 // ---------------------------------------------------------------
 
-    if (verbose) std::cout << " -- Interpolating the advection field ... " << std::flush;
+    if (verbose) std::cout << " -- Interpolating the solution field ... " << std::flush;
 
-    vector_Type beta(betaSpace->map(),Repeated);
-    betaSpace->interpolate(betaFct,beta,0.0);
-
+    vector_Type uInterpolated(uSpace->map(),Unique);
+    uSpace->interpolate(uFct,uInterpolated,0.0);
+    vector_Type uInterpolatedRepeated(uInterpolated,Repeated);
+    
     if (verbose) std::cout << " done! " << std::endl;
 
 
 // ---------------------------------------------------------------
-// We build now two matrices, one for each assembly procedure in
-// order to compare them in the end. There is no difference in the
-// construction of the matrices.
+// We build define the SmallVector used to extract the trace
+// and variable used to store the result of the integration
 // ---------------------------------------------------------------
 
-    if (verbose) std::cout << " -- Defining the matrices ... " << std::flush;
+    //MatrixSmall<2,2> gradient;
+    //gradient(0,0)=1;
+    //gradient(0,1)=0;
+    //gradient(1,0)=0;
+    //gradient(1,1)=2;
 
-    boost::shared_ptr<matrix_Type> systemMatrix(new matrix_Type( uSpace->map() ));
-    *systemMatrix *=0.0;
+    VectorSmall<2> vector11;
+    vector11[0]=1;
+    vector11[1]=1;
 
-    boost::shared_ptr<matrix_Type> ETsystemMatrix(new matrix_Type( ETuSpace->map() ));
-    *ETsystemMatrix *=0.0;
+    Real ETintegral(0);
 
     if (verbose) std::cout << " done! " << std::endl;
 
-
 // ---------------------------------------------------------------
-// We come now to the assembly itself. We start with the classical
-// way, which consists in instentiating an ADRAssembler and call
-// the different methods from that class.
-//
-// Using a LifeChrono, we monitor the time required for the
-// assembly.
-//
-// The terms assembled correspond, in the order of appearance, to
-// - a laplacian term
-// - an advection term
-// - a reaction term (with coefficient 2.0), aka mass term.
-// ---------------------------------------------------------------
-
-    LifeChrono StdChrono;
-    StdChrono.start();
-
-    if (verbose) std::cout << " -- Classical assembly ... " << std::flush;
-
-    ADRAssembler<mesh_Type,matrix_Type,vector_Type> adrAssembler;
-
-    adrAssembler.setup(uSpace,betaSpace);
-
-    adrAssembler.addDiffusion(systemMatrix,1.0);
-
-    adrAssembler.addAdvection(systemMatrix,beta);
-
-    adrAssembler.addMass(systemMatrix,2.0);
-
-    StdChrono.stop();
-
-    if (verbose) std::cout << " done ! " << std::endl;
-    if (verbose) std::cout << " Time : " << StdChrono.diff() << std::endl;
-
-
-// ---------------------------------------------------------------
-// We perform now the same assembly with the ET assembly and still
-// monitor the timings required.
+// We integrate on the domain the gradient trace (1+2 in this case)
 // 
-// Remark also that the Real constants and VectorSmall constants
-// can be used directly in the expressions to integrate.
 // ---------------------------------------------------------------
 
     LifeChrono ETChrono;
@@ -238,15 +191,11 @@ ETA_VectorialADR2DTest::run()
 
         integrate( elements(ETuSpace->mesh()),
                    uSpace->qr(),
-                   ETuSpace,
-                   ETuSpace,
 
-                   dot( grad(phi_i) , grad(phi_j) )
-                   +dot( grad(phi_j) * value(ETbetaSpace,beta), phi_i)
-                   + 2.0*dot(phi_i,phi_j)
+                   dot( grad(ETuSpace,uInterpolatedRepeated)*value(vector11) , value(vector11))
                    
                    )
-            >> ETsystemMatrix;
+            >> ETintegral;
 
     }
 
@@ -261,42 +210,28 @@ ETA_VectorialADR2DTest::run()
 // that aim, we need to finalize both matrices.
 // ---------------------------------------------------------------
 
-    if (verbose) std::cout << " -- Closing the matrices ... " << std::flush;
+    if (verbose) std::cout << " -- Broadcasting and summing integrals across processes ... " << std::flush;
 
-    systemMatrix->globalAssemble();
-    ETsystemMatrix->globalAssemble();
-    
+    Real globalIntegral(0.0);
+
+    M_comm->Barrier();
+    M_comm->SumAll(&ETintegral, &globalIntegral, 1);
+
     if (verbose) std::cout << " done ! " << std::endl;
 
 // ---------------------------------------------------------------
-// We compute now the matrix of the difference and finally the 
-// norm of the difference. This should be very low if the two
-// matrices are identical.
+// We now compute the error as the difference the integral
+// computed and the exact value expected (3*4=12)
 // ---------------------------------------------------------------
 
     if (verbose) std::cout << " -- Computing the error ... " << std::flush;
+    
+    Real error=std::abs(globalIntegral-12.0);
 
-    boost::shared_ptr<matrix_Type> checkMatrix(new matrix_Type( ETuSpace->map()));
-    *checkMatrix *=0.0;
-
-    *checkMatrix += *systemMatrix;
-    *checkMatrix += (*ETsystemMatrix)*(-1);
-
-    checkMatrix->globalAssemble();
-
-    Real errorNorm( checkMatrix->normInf() );
+    if (verbose) std::cout << "Error: " << error << std::endl;
 
     if (verbose) std::cout << " done ! " << std::endl;
 
-
-
-// ---------------------------------------------------------------
-// We finally display the error norm and compare with the
-// tolerance of the test.
-// ---------------------------------------------------------------
-
-    if (verbose) std::cout << " Matrix Error : " << errorNorm << std::endl;
-
-    return errorNorm;
+    return error;
 
 } // run

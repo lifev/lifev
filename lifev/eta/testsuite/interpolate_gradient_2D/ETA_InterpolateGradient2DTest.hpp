@@ -24,13 +24,13 @@
 */
 //@HEADER
 /**
-   @file ETA_VectorialADR2DTest.cpp
+   @file ETA_InterpolateGradient2DTest.cpp
    @author L. Pasquale <lgpasquale@gmail.com>
    @date 2012-11-20
 */
 
-#ifndef __ETA_VECTORIALADR2DTEST_H
-#define __ETA_VECTORIALADR2DTEST_H 1
+#ifndef __ETA_INTERPOALTEGRADIENT2DTEST_H
+#define __ETA_INTERPOALTEGRADIENT2DTEST_H 1
 
 
 // Tell the compiler to ignore specific kind of warnings:
@@ -79,21 +79,14 @@
 // ---------------------------------------------------------------
 
 /*!
-    @class ETA_VectorialADR2DTest
-    @brief Simple ETA test to compare ETA to ADRAssembly in a 2D space with a 2D solution
+    @class ETA_InterpolateGradient2DTest
+    @brief Simple ETA to check the evaluation of a gradient interpolation
 
     @author L. Pasquale <lgpasquale@gmail.com>
 
-    This test computes the matrix associated to the advection-diffusion-reaction linear operator: \n
-    \f$
-        Lu=-\alpha \delta u + \beta \cdot \nabla u +\gamma u
-    \f$ \n
-    with \f$\alpha=1\f$, \f$\beta=\left(\begin{array}{c}1\\0\end{array}\right)\f$, \f$\gamma=2\f$ and \f$u\f$ a 2D field \n
-    The domain is the square (-1,1)x(-1,1). \n
-    The matrix is first assembled using the class ADRAssembler and then the ExpressionAssembly::integrate function of the ETA module. \n
-    if the two matrices are assembled correctly, they should be almost exactly the same. \n
+    This test integrates the trace of the gradient of \f$u=\left(\begin{array}{c} x \\ 2y \end{array}\right)\f$ on the domain (-1,1)x(-1,1) and compares it to its expected value (12)
 */
-class ETA_VectorialADR2DTest
+class ETA_InterpolateGradient2DTest
 //     :
 //     public LifeV::Application
 {
@@ -104,11 +97,11 @@ public:
     //@{
 
     //! Constructor
-    ETA_VectorialADR2DTest ();
+    ETA_InterpolateGradient2DTest ();
 
 
     //! Destructor
-    ~ETA_VectorialADR2DTest () {}
+    ~ETA_InterpolateGradient2DTest () {}
 
     //@}
 
@@ -128,4 +121,4 @@ private:
 
 };
 
-#endif /* __ETA_VECTORIALADR2DTEST_H */
+#endif /* __ETA_INTERPOALTEGRADIENT2DTEST_H */

@@ -82,7 +82,7 @@ public:
 	typedef MatrixSmall<FieldDim,SpaceDim> return_Type;
 
     //! Type of the FESpace to be used in this class
-	typedef ETFESpace<MeshType,MapType,SpaceDim,1> fespace_Type;
+	typedef ETFESpace<MeshType,MapType,SpaceDim,FieldDim> fespace_Type;
 
     //! Type of the pointer on the FESpace
 	typedef boost::shared_ptr<fespace_Type> fespacePtr_Type;
@@ -158,20 +158,15 @@ public:
 		{
 			for (UInt q(0); q< M_quadrature->nbQuadPt(); ++q)
 			{
-				UInt globalID(M_fespace->dof().localToGlobalMap(iElement,i));
-
                 for (UInt iDim(0); iDim<SpaceDim; ++iDim)
                 {
-                    //M_interpolatedGradients[q][iDim] +=
-                        //M_currentFE.dphi(i,iDim,q)
-                        //* M_vector[globalID];
                     for (UInt jDim(0); jDim<FieldDim; ++jDim)
                     {
                         UInt globalID(M_fespace->dof().localToGlobalMap(iElement,i)
                                      + jDim*M_fespace->dof().numTotalDof());
     
                         M_interpolatedGradients[q][jDim][iDim] +=
-                            M_currentFE.dphi(i,jDim,q)[iDim]
+                            M_currentFE.dphi(jDim*M_currentFE.nbFEDof()+i,jDim,iDim,q)
                             * M_vector[globalID];
                     }
                 }
@@ -284,7 +279,7 @@ private:
 	QuadratureRule* M_quadrature;
 
     //! Structure for the computations
-	ETCurrentFE<SpaceDim,1> M_currentFE;
+	ETCurrentFE<SpaceDim,FieldDim> M_currentFE;
 
     //! Storage for the temporary values
 	std::vector<return_Type> M_interpolatedGradients;
