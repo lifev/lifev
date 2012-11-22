@@ -601,10 +601,176 @@ void stiff_Jac_P1iso_Exp_6term( Real coef, Real coefExp, const boost::multi_arra
 void source_P1iso_VKPenalized( Real lambda, Real mu, const boost::multi_array<Real,3 >& FkMinusTransposed, const boost::multi_array<Real,3 >& Fk, const std::vector<Real>& Ic_isok, const std::vector<Real>& Ic_k, VectorElemental& elvec, const CurrentFE& fe );
 
 
+//! Methdos for the Jacobian of the St. Venant-Kirchhoff Penalized law.
 
+//! Elementary first nonlinear isochoric Jacobian matrix for VK-Penalized model (see the reference)
+/*!
+  This function assembles the local first nonlinear isochoric Jacobian matrix for VK-Penalized model.
+
+  @param lambda the first Lame coefficient
+  @param FkMinusTransposed The matrix F^-T
+  @param Fk The deformation gradient that depends on the local displacement uk_loc
+  @param Jk The determinant of the deformation gradient F that depends on the local displacement uk_loc (remark: the nonlinear vector depends on current displacement)
+  @param elmat The elementary matrix of the current volume
+  @param fe The current finite element
+*/
+void stiff_Jac_P1iso_VKPenalized_1term( Real coeff, const boost::multi_array<Real,3 >& FkMinusTransposed, const boost::multi_array<Real,3 >& Fk, const std::vector<Real>& Jk, MatrixElemental& elmat, const CurrentFE& fe );
+
+//! Elementary third nonlinear isochoric Jacobian matrix for VK-Penalized model (see the reference)
+/*!
+  This function assembles the local third nonlinear isochoric Jacobian matrix for VK-Penalized model.
+
+  @param coef lambda / 2 where lambda is the first Lame constant
+  @param FKMinusTransposed The matrix F^-T
+  @param Jk The determinant of the deformation gradient F that depends on the local displacement uk_loc (remark: the nonlinear vector depends on current displacement)
+  @param Ic_k The first invariant of the right Cauchy-Green tensor C
+  @param elmat The elementary matrix of the current volume
+  @param fe The current finite element
+*/
+void stiff_Jac_P1iso_VKPenalized_2term( Real coef, const boost::multi_array<Real,3 >& FkMinusTransposed, const std::vector<Real>& Jk, const std::vector<Real>& Ic_k, MatrixElemental& elmat, const CurrentFE& fe );
+
+
+//! Elementary second nonlinear isochoric Jacobian matrix for VK-Penalized model (see the reference)
+/*!
+  This function assembles the local second nonlinear isochoric Jacobian matrix for VK-Penalized model.
+
+  @param coef (lambda/2) where lambda is the first Lame coefficient
+  @param Fk The deformation gradient that depends on the local displacement uk_loc
+  @param Jk The determinant of the deformation gradient F that depends on the local displacement uk_loc (remark: the nonlinear vector depends on current displacement)
+  @param elmat The elementary matrix of the current volume
+  @param fe The current finite element
+*/
+void stiff_Jac_P1iso_VKPenalized_3term( Real coef, const boost::multi_array<Real,3 >& Fk, const std::vector<Real>& Jk, MatrixElemental& elmat, const CurrentFE& fe );
+
+//! Elementary fourth nonlinear isochoric Jacobian matrix for VK-Penalized model (see the reference)
+/*!
+  This function assembles the local fourth nonlinear isochoric Jacobian matrix for VK-Penalized model.
+
+  @param coef (lambda/2) where lamba is the first Lame coefficient
+  @param FkMinusTransposed The tensor F^-T
+  @param Fk The deformation gradient that depends on the local displacement uk_loc
+  @param Jk The determinant of the deformation gradient F that depends on the local displacement uk_loc (remark: the nonlinear vector depends on current displacement)
+  @param Ic_k The first invariant of the right Cauchy-Green tensor C
+  @param elmat The elementary matrix of the current volume
+  @param fe The current finite element
+*/
+void stiff_Jac_P1iso_VKPenalized_4term( Real coef, const boost::multi_array<Real,3 >& FkMinusTransposed, const boost::multi_array<Real,3 >& Fk,const std::vector<Real>& Jk, const std::vector<Real>& Ic_k, MatrixElemental& elmat, const CurrentFE& fe );
+
+//! Elementary fifth nonlinear isochoric Jacobian matrix for VK-Penalized model (see the reference)
+/*!
+  This function assembles the local fifth nonlinear isochoric Jacobian matrix for VK-Penalized model.
+
+  @param coef lambda first lame coefficient
+  @param coef2 mu shear modulus
+  @param Ic_isok The first invariant of the isochoric part of the right Cauchy-Green tensor C
+  @param elmat The elementary matrix of the current volume
+  @param fe The current finite element
+*/
+void stiff_Jac_P1iso_VKPenalized_5term( Real coef, Real coef2, const std::vector<Real>& Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
+
+//! Elementary sixth nonlinear isochoric Jacobian matrix for VK-Penalized model (see the reference)
+/*!
+  This function assembles the local sixth nonlinear isochoric Jacobian matrix for VK-Penalized model.
+
+  @param coef lambda first Lame coefficient
+  @param coef2 mu sheat modulus
+  @param Ic_k The first invariant of the right Cauchy-Green tensor C
+  @param Fk The deformation gradient that depends on the local displacement uk_loc
+  @param elmat The elementary matrix of the current volume
+  @param fe The current finite element
+*/
+void stiff_Jac_P1iso_VKPenalized_6term( Real coef, Real coef2, const std::vector<Real>& Ic_isok, const boost::multi_array<Real,3 >& Fk, const boost::multi_array<Real,3 >& FkMinusTransposed, MatrixElemental& elmat, const CurrentFE& fe );
+
+
+//! Elementary seventh  nonlinear isochoric Jacobian matrix for VK-Penalized model (see the reference)
+/*!
+  This function assembles the local seventh nonlinear isochoric Jacobian matrix for VK-Penalized model.
+
+  @param coef lambda the first Lame coefficient
+  @param coef2 mu the shear modulus
+  @param FkMinusTransposed The tensor F^-T
+  @param Ic_isok The first invariant of the isochoric part of the right Cauchy-Green tensor C
+  @param Ic_k The first invariant of the right Cauchy-Green tensor C
+  @param elmat The elementary matrix of the current volume
+  @param fe The current finite element
+*/
+void stiff_Jac_P1iso_VKPenalized_7term( Real coef, Real coef2, const boost::multi_array<Real,3 >& FkMinusTransposed, const std::vector<Real>& Ic_isok, const std::vector<Real>& Ic_k, MatrixElemental& elmat, const CurrentFE& fe );
+
+//! Elementary eigth nonlinear isochoric Jacobian matrix for VK-Penalized model (see the reference)
+/*!
+  This function assembles the local eigth nonlinear isochoric Jacobian matrix for VK-Penalized model.
+
+  @param coef mu the shear modulus
+  @param Ck The right Cauchy-Green tensor C
+  @param elmat The elementary matrix of the current volume
+  @param fe The current finite element
+*/
+void stiff_Jac_P1iso_VKPenalized_8term( Real coef, const std::vector<Real>& Jack_k, const boost::multi_array<Real,3 >& Ck, MatrixElemental& elmat, const CurrentFE& fe );
+
+//! Elementary sixth nonlinear isochoric Jacobian matrix for VK-Penalized model (see the reference)
+/*!
+  This function assembles the local sixth nonlinear isochoric Jacobian matrix for VK-Penalized model.
+
+  @param coef mu the shear modulus
+  @param Jk The determinant of the deformation gradient F that depends on the local displacement uk_loc (remark: the nonlinear vector depends on current displacement)
+  @param Fk The deformation tensor
+  @param elmat The elementary matrix of the current volume
+  @param fe The current finite element
+*/
+void stiff_Jac_P1iso_VKPenalized_9term( Real coef, const std::vector<Real>& Jk, const boost::multi_array<Real,3 >& Fk, MatrixElemental& elmat, const CurrentFE& fe );
+
+//! Elementary tenth nonlinear isochoric Jacobian matrix for VK-Penalized model (see the reference)
+/*!
+  This function assembles the local tenth nonlinear isochoric Jacobian matrix for VK-Penalized model.
+
+  @param coef mu the shear modulus
+  @param Jk The determinant of the deformation gradient F that depends on the local displacement uk_loc (remark: the nonlinear vector depends on current displacement)
+  @param Fk The deformation tensor
+  @param elmat The elementary matrix of the current volume
+  @param fe The current finite element
+*/
+void stiff_Jac_P1iso_VKPenalized_10term( Real coef, const std::vector<Real>& Jk, const boost::multi_array<Real,3 >& Fk, MatrixElemental& elmat, const CurrentFE& fe );
+
+//! Elementary eleventh nonlinear isochoric Jacobian matrix for VK-Penalized model (see the reference)
+/*!
+  This function assembles the local eleventh nonlinear isochoric Jacobian matrix for VK-Penalized model.
+
+  @param coef mu the shear modulus
+  @param Jk The determinant of the deformation gradient F that depends on the local displacement uk_loc (remark: the nonlinear vector depends on current displacement)
+  @param Ic_isok The first invariant of the right Cauchy-Green tensor C^2
+  @param FkMinusTransposed The cofactor of the deformation gradient F that depends on the local displacement uk_loc (remark: the nonlinear vector depends on current displacement)
+  @param elmat The elementary matrix of the current volume
+  @param fe The current finite element
+*/
+void stiff_Jac_P1iso_VKPenalized_11term( Real coef, const std::vector<Real>& Jk, const std::vector<Real>& Ic_kSquared,  const boost::multi_array<Real,3 >& FkMinusTransposed, MatrixElemental& elmat, const CurrentFE& fe );
+
+//! Elementary twelveth nonlinear isochoric Jacobian matrix for VK-Penalized model (see the reference)
+/*!
+  This function assembles the local twelveth nonlinear isochoric Jacobian matrix for VK-Penalized model.
+
+  @param coef mu the shear modulus
+  @param Jk The determinant of the deformation gradient F that depends on the local displacement uk_loc (remark: the nonlinear vector depends on current displacement)
+  @param Ck The first invariant of the right Cauchy-Green tensor C^2
+  @param Fk The deformation gradient matrix
+  @param FkMinusTransposed The cofactor of the deformation gradient F that depends on the local displacement uk_loc (remark: the nonlinear vector depends on current displacement)
+  @param elmat The elementary matrix of the current volume
+  @param fe The current finite element
+*/
+void stiff_Jac_P1iso_VKPenalized_12term( Real coef, const std::vector<Real>& Jk, const boost::multi_array<Real,3 >& Ck, const boost::multi_array<Real,3 >& Fk, const boost::multi_array<Real,3 >& FkMinusTransposed, MatrixElemental& elmat, const CurrentFE& fe );
+
+//! Elementary thirteenth nonlinear isochoric Jacobian matrix for VK-Penalized model (see the reference)
+/*!
+  This function assembles the local thirteenth nonlinear isochoric Jacobian matrix for VK-Penalized model.
+
+  @param coef mu the shear modulus
+  @param Jk The determinant of the deformation gradient F that depends on the local displacement uk_loc (remark: the nonlinear vector depends on current displacement)
+  @param Ck The first invariant of the right Cauchy-Green tensor C^2
+  @param FkMinusTransposed The cofactor of the deformation gradient F that depends on the local displacement uk_loc (remark: the nonlinear vector depends on current displacement)
+  @param elmat The elementary matrix of the current volume
+  @param fe The current finite element
+*/
+void stiff_Jac_P1iso_VKPenalized_13term( Real coef, const std::vector<Real>& Jk, const boost::multi_array<Real,3 >& Ck, const boost::multi_array<Real,3 >& FkMinusTransposed, MatrixElemental& elmat, const CurrentFE& fe );
 
 } //! End namespace AssemblyElementalStructure
-
-
 } //! End namespace LifeV
 #endif
