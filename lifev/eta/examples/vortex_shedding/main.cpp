@@ -29,9 +29,8 @@
     @brief
 
     @author Toni Lassila <toni.lassila@epfl.ch>
-    @author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
     @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
-    @date 13-11-2012
+    @date 23-11-2012
  */
 
 // Tell the compiler to ignore specific kind of warnings:
@@ -74,6 +73,10 @@
 #include <lifev/core/filter/ExporterHDF5.hpp>
 #include <lifev/core/fem/TimeAdvanceBDF.hpp>
 
+#include <lifev/navier_stokes/solver/StabilizationIP.hpp>
+#include <lifev/core/fem/Assembly.hpp>
+#include <lifev/core/fem/AssemblyElemental.hpp>
+
 using namespace LifeV;
 
 namespace
@@ -83,6 +86,7 @@ enum DiffusionType{ViscousStress, StiffStrain};
 enum MeshType{RegularMesh, File};
 enum InitType{Interpolation, Projection};
 enum ConvectionType{Explicit, SemiImplicit};
+enum StabilizationType{None, VMS, IP};
 
 typedef RegionMesh<LinearTetra> mesh_Type;
 typedef MatrixEpetra<Real> matrix_Type;
@@ -227,13 +231,13 @@ main( int argc, char** argv )
     // *****************************
 
     // Physical quantity (corresponds to Re = 100)
-    const Real viscosity      = 0.01;
+    const Real viscosity      = 0.01/5;
     const Real density        = 1.0;
 
     // Time discretization
     const Real initialTime    = 0.0;
     const Real endTime        = 100.0;
-    const Real timestep       = 1e-2;
+    const Real timestep       = 1e-1;
 
     // Space discretization
     const UInt numDimensions  = 3;
@@ -241,15 +245,12 @@ main( int argc, char** argv )
     // Time discretization
     UInt BDFOrder = 2;
 
+    // Stabilization method
+    const StabilizationType stabilizationMethod = VMS;
+
     // Numerical scheme
-    const DiffusionType diffusionType   = StiffStrain;
     const InitType initializationMethod = Interpolation;
     const ConvectionType convectionTerm = SemiImplicit;
-
-    // Stabilization parameters for SUPG
-    Real NSSupg(1e-3);  // 1e-3
-    Real NSPspg(1e-3);  // 1e-3
-    Real NSdivdiv(5e-2); // 5e-2
 
     // +-----------------------------------------------+
     // |               Loading the mesh                |
@@ -337,11 +338,6 @@ main( int argc, char** argv )
     // +-----------------------------------------------+
     if (verbose) std::cout << std::endl << "[Matrices Assembly]" << std::endl;
 
-    //if (verbose) std::cout << "Setting up assembler... " << std::flush;
-    //OseenAssembler<mesh_Type,matrix_Type,vector_Type> oseenAssembler;
-    //oseenAssembler.setup(uFESpace,pFESpace);
-    if (verbose) std::cout << "done" << std::endl;
-
     if (verbose) std::cout << "Defining the matrices... " << std::flush;
 
     // Initialize the full matrix, the nonconvective part, and the mass matrix (for time advancing)
@@ -364,13 +360,13 @@ main( int argc, char** argv )
 
         using namespace ExpressionAssembly;
 
+        // Use of stiff-strain formulation due to stabilization is mandatory
         integrate(
                         elements(ETuFESpace->mesh()), // Mesh
                         uFESpace->qr(), // QR
                         ETuFESpace,
                         ETuFESpace,
-                        // NS
-                        viscosity * dot(grad(phi_i),grad(phi_j))
+                        0.5 * viscosity * dot(grad(phi_i) + transpose(grad(phi_i)), grad(phi_j) + transpose(grad(phi_j)))
         )
         >> baseMatrix->block(0,0);
 
@@ -379,7 +375,7 @@ main( int argc, char** argv )
                         uFESpace->qr(), // QR
                         ETuFESpace,
                         ETpFESpace,
-                        value(-1.0)*phi_j*div(phi_i)
+                        value(-1.0) * phi_j * div(phi_i)
         )
         >> baseMatrix->block(0,1);
 
@@ -389,7 +385,7 @@ main( int argc, char** argv )
                         uFESpace->qr(), // QR
                         ETpFESpace,
                         ETuFESpace,
-                        phi_i*div(phi_j)
+                        phi_i * div(phi_j)
         )
         >> baseMatrix->block(1,0);
 
@@ -399,7 +395,7 @@ main( int argc, char** argv )
                         ETuFESpace,
                         ETuFESpace,
                         // NS
-                        dot(phi_i,phi_j)
+                        dot(phi_i, phi_j)
         )
         >> massMatrix->block(0,0);
     }
@@ -432,7 +428,10 @@ main( int argc, char** argv )
     if (verbose) std::cout<< std::endl << "[Initialization of the simulation]" << std::endl;
     if (verbose) std::cout << "Creation of vectors... " << std::flush;
     vectorPtr_Type rhs;
+    vectorPtr_Type prevRhs;
+
     rhs.reset(new vector_Type(solutionMap,Unique));
+    prevRhs.reset(new vector_Type(solutionMap,Unique));
 
     vectorPtr_Type velocityExtrapolated;
     velocityExtrapolated.reset(new vector_Type(solutionMap,Repeated));
@@ -443,10 +442,17 @@ main( int argc, char** argv )
     velocity.reset(new vector_Type(uFESpace->map(),Unique));
 
     vectorPtr_Type pressure;
+    vectorPtr_Type prevPressure;
     pressure.reset(new vector_Type(pFESpace->map(),Unique));
+    prevPressure.reset(new vector_Type(pFESpace->map(),Unique));
 
     vectorPtr_Type solution;
+    vectorPtr_Type prevSolution;
+    vectorPtr_Type prevSolutionTimeDerivative;
+
     solution.reset(new vector_Type(solutionMap,Unique));
+    prevSolution.reset(new vector_Type(solutionMap,Unique));
+    prevSolutionTimeDerivative.reset(new vector_Type(solutionMap,Unique));
     if (verbose) std::cout << "done" << std::endl;
 
     if (verbose) std::cout << "Computing the initial solution ... " << std::endl;
@@ -465,6 +471,10 @@ main( int argc, char** argv )
     *pressure *= 0;
 
     *solution *= 0;
+    *prevRhs  *= 0.;
+    *prevSolutionTimeDerivative *= 0.;
+    *prevSolution *= 0;
+
     bdf.setInitialCondition( *solution );
 
     // Initial solution (interpolation or projection)
@@ -487,7 +497,6 @@ main( int argc, char** argv )
 
             if(convectionTerm == SemiImplicit)
             {
-                //oseenAssembler.addConvection(*systemMatrix,1.0,*solution);
                 convMatrix.reset(new matrix_block_type( solutionMap ));
 
                 // Perform the assembly of the convection matrix with ETA
@@ -500,7 +509,7 @@ main( int argc, char** argv )
                                     uFESpace->qr(), // QR
                                     ETuFESpace,
                                     ETuFESpace,
-                                    dot(grad(phi_j)*value(ETuFESpace, *solution),phi_i)
+                                    dot(grad(phi_j) * value(ETuFESpace, *velocityExtrapolated), phi_i)
                     )
                     >> convMatrix->block(0,0);
                 }
@@ -523,66 +532,8 @@ main( int argc, char** argv )
                 }*/
             }
 
-            /* Stabilization Macros for the stabilization terms (later add the ones coming from VMS) */
-
-#define SUPG_TEST   value(NSSupg)   * h_K * (grad(phi_i) * eval(normalize, value(ETuFESpace, *velocityExtrapolated)))
-#define PSPG_TEST   value(NSPspg)   * h_K * grad(phi_i)
-#define DIVDIV_TEST value(NSdivdiv) * h_K * div(phi_i)
-
             boost::shared_ptr<matrix_block_type> stabMatrix(new matrix_block_type( ETuFESpace->map() | ETpFESpace->map() ));
             *stabMatrix *= 0;
-
-            double alpha = bdf.coefficientFirstDerivative( 0 ) / timestep;
-            *velocityExtrapolated = bdf.extrapolation( );
-
-            // Assemble the SUPG stabilization terms
-            {
-
-                boost::shared_ptr<NormalizeFct> normalize(new NormalizeFct);
-
-                using namespace ExpressionAssembly;
-
-                integrate(
-                                elements(ETuFESpace->mesh()), // Mesh
-                                uFESpace->qr(), // QR
-                                ETuFESpace,
-                                ETuFESpace,
-                                DIVDIV_TEST * div(phi_j)
-                                + dot(grad(phi_j) * value(ETuFESpace, *velocityExtrapolated) * density + value(alpha) * density * phi_j, SUPG_TEST)
-                )
-                >> stabMatrix->block(0,0);
-
-                integrate(
-                                elements(ETuFESpace->mesh()), // Mesh
-                                uFESpace->qr(), // QR
-                                ETuFESpace,
-                                ETpFESpace,
-                                dot(grad(phi_j), SUPG_TEST)
-                )
-                >> stabMatrix->block(0,1);
-
-
-                integrate(
-                                elements(ETuFESpace->mesh()), // Mesh
-                                uFESpace->qr(), // QR
-                                ETpFESpace,
-                                ETuFESpace,
-                                dot(grad(phi_j) * value(ETuFESpace, *velocityExtrapolated) * density + value(alpha) * density * phi_j, PSPG_TEST)
-                )
-                >> stabMatrix->block(1,0);
-
-
-                integrate(
-                                elements(ETuFESpace->mesh()), // Mesh
-                                uFESpace->qr(), // QR
-                                ETpFESpace,
-                                ETpFESpace,
-                                dot(grad(phi_j), PSPG_TEST)
-                )
-                >> stabMatrix->block(1,1);
-
-            }
-
             stabMatrix->globalAssemble();
             *systemMatrix += *stabMatrix;
 
@@ -644,7 +595,7 @@ main( int argc, char** argv )
 
         if (verbose) std::cout << "Updating the system... " << std::flush;
         bdf.updateRHSContribution( timestep );
-        *rhs  = *massMatrix*bdf.rhsContributionFirstDerivative();
+        *rhs  = *massMatrix * bdf.rhsContributionFirstDerivative();
 
         systemMatrix.reset(new matrix_block_type( solutionMap ));
         double alpha = bdf.coefficientFirstDerivative( 0 ) / timestep;
@@ -666,7 +617,7 @@ main( int argc, char** argv )
                                 uFESpace->qr(), // QR
                                 ETuFESpace,
                                 ETuFESpace,
-                                dot(grad(phi_j)*value(ETuFESpace, *velocityExtrapolated),phi_i)
+                                dot(grad(phi_j) * value(ETuFESpace, *velocityExtrapolated), phi_i)
                 )
                 >> convMatrix->block(0,0);
             }
@@ -690,37 +641,89 @@ main( int argc, char** argv )
             }*/
         }
 
-        // Assemble the SUPG stabilization terms
+        // Assemble the stabilization terms
+
+        // Stabilization parameters for SUPG/PSPG/LSIC/VMS/LES
+        Real TauM(1e-3); // 1e-3
+        Real TauC(5e-2); // 5e-2
+
+        /* Stabilization Macros for the stabilization terms (later add the ones coming from VMS) */
+
+#define SUPG_TEST    value(TauM) * h_K * (grad(phi_i) * value(ETuFESpace, *velocityExtrapolated))
+#define VMS_TEST     value(TauM) * h_K * (transpose(grad(phi_i)) * value(ETuFESpace, *velocityExtrapolated))
+#define PSPG_TEST    value(TauM) * h_K * grad(phi_i)
+#define DIVDIV_TEST  value(TauC) * h_K * div(phi_i)
+
+#define RES_MOMENTUM grad(phi_j) * value(ETuFESpace, *velocityExtrapolated) * density + value(alpha) * density * phi_j
+#define RES_MASS     div(phi_j)
+#define RES_PRESSURE grad(phi_j)
+
+#define RESIDUAL_EXPLICIT value(TauM) * h_K * value(ETuFESpace, *residualVector)
 
         boost::shared_ptr<matrix_block_type> stabMatrix(new matrix_block_type( ETuFESpace->map() | ETpFESpace->map() ));
+        boost::shared_ptr<matrix_block_type> residualMatrix(new matrix_block_type( ETuFESpace->map() | ETpFESpace->map() ));
         vector_block_type NSRhs( ETuFESpace->map() | ETpFESpace->map(), Repeated );
+        vectorPtr_Type residualVector;
+        residualVector.reset(new vector_Type(solutionMap,Unique));
 
-        *stabMatrix *= 0;
+        *stabMatrix     *= 0;
+        *residualMatrix *= 0;
+        *residualVector *= 0;
         NSRhs *= 0.0;
+
+        if (stabilizationMethod == VMS)
         {
 
             boost::shared_ptr<NormalizeFct> normalize(new NormalizeFct);
 
             using namespace ExpressionAssembly;
 
-            // Stabilization, SUPG and DIV/DIV (1) and (2)
+            // Residual computation
             integrate(
                             elements(ETuFESpace->mesh()),
                             uFESpace->qr(),
                             ETuFESpace,
                             ETuFESpace,
-                            div(phi_j) * DIVDIV_TEST // OK
-                            + dot(grad(phi_j) * value(ETuFESpace, *velocityExtrapolated) * density + value(alpha) * density * phi_j, SUPG_TEST) // OK
+                            dot(RES_MOMENTUM, phi_i)
             )
-            >> stabMatrix->block(0,0);
+            >> residualMatrix->block(0,0);
 
-            // Stabilization, SUPG (3)
             integrate(
                             elements(ETuFESpace->mesh()),
                             uFESpace->qr(),
                             ETuFESpace,
                             ETpFESpace,
-                            dot(grad(phi_j), SUPG_TEST) // OK
+                            dot(RES_PRESSURE, phi_i)
+            )
+            >> residualMatrix->block(0,1);
+
+            // Assemble the system matrix used for the residual computation
+            residualMatrix->globalAssemble();
+            bcManage(*residualMatrix, *prevRhs, *uFESpace->mesh(),uFESpace->dof(),bcHandler,uFESpace->feBd(),1.0,currentTime);
+
+            // Compute the residual from the previous time step for the turbulence terms
+            *residualVector = *prevRhs - (*residualMatrix * (*prevSolution));
+
+            // Stabilization, SUPG and DIV/DIV (1) and (2), VMS
+            integrate(
+                            elements(ETuFESpace->mesh()),
+                            uFESpace->qr(),
+                            ETuFESpace,
+                            ETuFESpace,
+                            RES_MASS * DIVDIV_TEST // OK
+                            + dot(RES_MOMENTUM, SUPG_TEST) // OK
+                            + dot(RES_MOMENTUM, VMS_TEST) // OK
+            )
+            >> stabMatrix->block(0,0);
+
+            // Stabilization, SUPG (3), VMS
+            integrate(
+                            elements(ETuFESpace->mesh()),
+                            uFESpace->qr(),
+                            ETuFESpace,
+                            ETpFESpace,
+                            dot(RES_PRESSURE, SUPG_TEST) // OK
+                            + dot(RES_PRESSURE, VMS_TEST)
             )
             >> stabMatrix->block(0,1);
 
@@ -731,7 +734,7 @@ main( int argc, char** argv )
                             uFESpace->qr(),
                             ETpFESpace,
                             ETuFESpace,
-                            dot(grad(phi_j) * value(ETuFESpace, *velocityExtrapolated) * density + value(alpha) * density * phi_j, PSPG_TEST) // OK
+                            dot(RES_MOMENTUM, PSPG_TEST) // OK
             )
             >> stabMatrix->block(1,0);
 
@@ -741,10 +744,26 @@ main( int argc, char** argv )
                             uFESpace->qr(),
                             ETpFESpace,
                             ETpFESpace,
-                            dot(grad(phi_j), PSPG_TEST)
+                            dot(RES_PRESSURE, PSPG_TEST) // OK
             )
             >> stabMatrix->block(1,1);
 
+
+            stabMatrix->globalAssemble();
+            *systemMatrix += *stabMatrix;
+        }
+        else if (stabilizationMethod == IP)
+        {
+            details::StabilizationIP<mesh_Type, DOF> M_ipStabilization;
+            M_ipStabilization.setFeSpaceVelocity( *uFESpace );
+            M_ipStabilization.setViscosity( viscosity );
+
+            // Parameters from J. Michalik
+            M_ipStabilization.setGammaBeta ( 0.1 );
+            M_ipStabilization.setGammaDiv  ( 0.1 );
+            M_ipStabilization.setGammaPress( 0.1 );
+
+            M_ipStabilization.apply( *stabMatrix, *velocityExtrapolated, false );
             stabMatrix->globalAssemble();
             *systemMatrix += *stabMatrix;
         }
@@ -752,17 +771,20 @@ main( int argc, char** argv )
         // Now we can assemble the consistency terms on the RHS
 
         if (verbose) std::cout << "done" << std::endl;
-        {
 
+        if (stabilizationMethod == VMS)
+        {
             boost::shared_ptr<NormalizeFct> normalize(new NormalizeFct);
 
             using namespace ExpressionAssembly;
-            // RHS, consistency term for SUPG (6)
+            // RHS, consistency term for SUPG (6) and turbulence model (8)
             integrate(
                             elements(ETuFESpace->mesh()),
                             uFESpace->qr(),
                             ETuFESpace,
-                            dot(density * value(ETuFESpace, *rhs), SUPG_TEST)
+                            dot(value(ETuFESpace, *rhs), SUPG_TEST)
+                            + dot(value(ETuFESpace, *rhs), VMS_TEST)
+                            + dot(grad(phi_i), outerProduct( RESIDUAL_EXPLICIT, RESIDUAL_EXPLICIT )) // Explicit turbulence model
             )
             >> NSRhs.block(0);
 
@@ -771,14 +793,14 @@ main( int argc, char** argv )
                             elements(ETuFESpace->mesh()),
                             pFESpace->qr(),
                             ETpFESpace,
-                            dot(density * value(ETuFESpace, *rhs), PSPG_TEST)
+                            dot(value(ETuFESpace, *rhs), PSPG_TEST)
             )
             >> NSRhs.block(1);
 
-        }
 
-        vector_block_type NSRhsUnique( NSRhs, Unique );
-        *rhs += NSRhsUnique;
+            vector_block_type NSRhsUnique( NSRhs, Unique );
+            *rhs += NSRhsUnique;
+        }
         if (verbose) std::cout << "done" << std::endl;
 
         // RHS has to assembled next
@@ -800,6 +822,10 @@ main( int argc, char** argv )
 
         // Exporting the solution
         exporter.postProcess( currentTime );
+
+        // Store previous solution, its time derivative and the RHS for the explicit turbulence model
+        *prevSolution               = *solution;
+        *prevRhs                    = *rhs;
 
         iterChrono.stop();
         if (verbose) std::cout << "Iteration time: " << iterChrono.diff() << " s." << std::endl;
