@@ -225,6 +225,7 @@ protected:
     //! Local tensors initialization
     boost::shared_ptr<boost::multi_array<Real, 3> > M_Fk;
     boost::shared_ptr<boost::multi_array<Real, 3> > M_FkMinusTransposed;
+    boost::shared_ptr<boost::multi_array<Real, 3> > M_CofFk;
     boost::shared_ptr<boost::multi_array<Real, 3> > M_Ck;
     boost::shared_ptr<boost::multi_array<Real, 3> > M_FkCk;
 
@@ -264,8 +265,9 @@ VenantKirchhoffMaterialNonLinearPenalized<Mesh>::~VenantKirchhoffMaterialNonLine
 template <typename Mesh>
 void
 VenantKirchhoffMaterialNonLinearPenalized<Mesh>::setup( const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
-                                           const boost::shared_ptr<const MapEpetra>&            monolithicMap,
-                                           const UInt                                           offset, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer  )
+                                                        const boost::shared_ptr<const MapEpetra>&            monolithicMap,
+                                                        const UInt  offset,
+                                                        const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer  )
 {
     this->M_displayer = displayer;
     this->M_dataMaterial  = dataMaterial;
@@ -283,6 +285,7 @@ VenantKirchhoffMaterialNonLinearPenalized<Mesh>::setup( const boost::shared_ptr<
 
     //! Local tensors initilization
     M_Fk.reset ( new boost::multi_array<Real, 3>(boost::extents[nDimensions][nDimensions][dFESpace->fe().nbQuadPt()]) );
+    M_CofFk.reset ( new boost::multi_array<Real, 3>(boost::extents[nDimensions][nDimensions][dFESpace->fe().nbQuadPt()]) );
     M_FkMinusTransposed.reset ( new boost::multi_array<Real, 3>(boost::extents[nDimensions][nDimensions][dFESpace->fe().nbQuadPt()]) );
     M_Ck.reset ( new boost::multi_array<Real, 3>(boost::extents[nDimensions][nDimensions][dFESpace->fe().nbQuadPt()]) );
     M_FkCk.reset ( new boost::multi_array<Real, 3>(boost::extents[nDimensions][nDimensions][dFESpace->fe().nbQuadPt()]) );
@@ -329,9 +332,9 @@ void VenantKirchhoffMaterialNonLinearPenalized<Mesh>::updateJacobianMatrix( cons
 
 
 template <typename Mesh>
-void VenantKirchhoffMaterialNonLinearPenalized<Mesh>::updateNonLinearJacobianTerms( matrixPtr_Type&         jacobian,
+void VenantKirchhoffMaterialNonLinearPenalized<Mesh>::updateNonLinearJacobianTerms( matrixPtr_Type&        jacobian,
                                                                                     const vector_Type&     disp,
-                                                                                    const dataPtr_Type&     dataMaterial,
+                                                                                    const dataPtr_Type&    dataMaterial,
                                                                                     const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
                                                                                     const displayerPtr_Type& displayer )
 {
@@ -380,7 +383,7 @@ void VenantKirchhoffMaterialNonLinearPenalized<Mesh>::updateNonLinearJacobianTer
             this->M_elmatK->zero();
 
             //! Computes F, Cof(F), J = det(F), Tr(C)
-            computeKinematicsVariables( dk_loc );
+            this->computeKinematicsVariables( dk_loc );
 
             //! Stiffness for non-linear terms of the VK-Penalized model
             /*!
@@ -389,50 +392,59 @@ void VenantKirchhoffMaterialNonLinearPenalized<Mesh>::updateNonLinearJacobianTer
 
             //! VOLUMETRIC PART
             //! 1. Stiffness matrix: int { 1/2 * bulk * ( 2 - 1/J + 1/J^2 ) * ( CofF : \nabla \delta ) (CofF : \nabla v) }
-            AssemblyElementalStructure::stiff_Jac_Pvol_1term( 0.5 *  bulk, (*M_FkMinusTransposed), (*M_Jack), *this->M_elmatK, this->M_FESpace->fe() );
+            AssemblyElementalStructure::stiff_Jac_Pvol_1term( 0.5 *  bulk, (*M_CofFk), (*M_Jack), *this->M_elmatK, this->M_FESpace->fe() );
 
             //! 2. Stiffness matrix: int { 1/2 * bulk * ( 1/J- 1 - log(J)/J^2 ) * ( CofF1 [\nabla \delta]^t CofF ) : \nabla v }
-            AssemblyElementalStructure::stiff_Jac_Pvol_2term( 0.5 *  bulk, (*M_FkMinusTransposed), (*M_Jack), *this->M_elmatK, this->M_FESpace->fe() );
+            AssemblyElementalStructure::stiff_Jac_Pvol_2term( 0.5 *  bulk, (*M_CofFk), (*M_Jack), *this->M_elmatK, this->M_FESpace->fe() );
 
             //! ISOCHORIC PART
-            //! 1. Stiffness matrix : int { (lambda / 2) * ( (-2/3) * J^(-2/3) * F^-T:\nabla \delta ) * ( F : \nabla \v ) }
-            AssemblyElementalStructure::stiff_Jac_P1iso_VKPenalized_1term( ( lambda / 2.0 ), (*M_FkMinusTransposed), (*M_Fk), (*M_Jack), *this->M_elmatK, this->M_FESpace->fe() );
+            //! 1. Stiffness matrix : int { (lambda / 2) * ( (-2/3) * Ic_k * J^(-2/3) * F^-T:\nabla \delta ) * ( F : \nabla \v ) }
+            AssemblyElementalStructure::stiff_Jac_P1iso_VKPenalized_1term( ( lambda / 2.0 ), (*M_FkMinusTransposed), (*M_Fk), (*M_Jack), (*M_trCk),  *this->M_elmatK, this->M_FESpace->fe() );
 
-            //! 2. Stiffness matrix : int { (lambda / 2) * ( ( 2/9 ) * J^(-2/3) * Ic ) * ( F^-T : \nabla \delta ) ( F^-T : \nabla \v ) }
+            //! 2. Stiffness matrix : int { (lambda / 2) * ( ( 2/9 ) * J^(-2/3) * Ic_k^2 ) * ( F^-T : \nabla \delta ) ( F^-T : \nabla \v ) }
             AssemblyElementalStructure::stiff_Jac_P1iso_VKPenalized_2term( ( lambda / 2.0 ), (*M_FkMinusTransposed), (*M_Jack), (*M_trCk), *this->M_elmatK, this->M_FESpace->fe() );
 
-            //! 3. Stiffness matrix : int { (lambda/2) * ( 2 * J^(-2/3) * F : \nabla \delta ) * ( F : \nabla v) }
+            //! 3. Stiffness matrix : int { (lambda / 2) * ( 2 * J^(-2/3) * F^T : \nabla \delta ) * ( F : \nabla v) }
             AssemblyElementalStructure::stiff_Jac_P1iso_VKPenalized_3term( ( lambda / 2.0 ), (*M_Fk), (*M_Jack), *this->M_elmatK, this->M_FESpace->fe() );
 
-            //! 4. Stiffness matrix : int { (lambda/2) * ( -2.0/3.0 * J^(-2/3) * Ic_k ) * ( F : \nabla \delta ) ( F^-T : \nabla \v ) }
+            //! 4. Stiffness matrix : int { (lambda / 2) * ( -2.0/3.0 * J^(-2/3) * Ic_k ) * ( F^T : \nabla \delta ) * ( F^-T : \nabla \v ) }
             AssemblyElementalStructure::stiff_Jac_P1iso_VKPenalized_4term( ( lambda / 2.0 ), (*M_FkMinusTransposed), (*M_Fk), (*M_Jack), (*M_trCk), *this->M_elmatK, this->M_FESpace->fe() );
 
             //! 5. Stiffness matrix : int { ( (lambda/2) * Ic_isok - ( (3/2)*lambda + mu ) ) * \nabla \delta : \nabla v }
             AssemblyElementalStructure::stiff_Jac_P1iso_VKPenalized_5term( lambda, mu, (*M_trCisok), *this->M_elmatK, this->M_FESpace->fe() );
 
-            //! 6. Stiffness matrix : int { ( (lambda/2) * Ic_isok - ( (3/2)*lambda + mu ) ) * ( (-2/3) * ( F :\nabla \delta ) * ( F : \nabla v ) }
+            //! 6. Stiffness matrix : int { ( (lambda/2) * Ic_isok - ( (3/2)*lambda + mu ) ) * ( (-2/3) * ( F^T :\nabla \delta ) ) * ( F^-T : \nabla v ) }
             AssemblyElementalStructure::stiff_Jac_P1iso_VKPenalized_6term( lambda, mu, (*M_trCisok), (*M_Fk), (*M_FkMinusTransposed), *this->M_elmatK, this->M_FESpace->fe() );
 
-            //! 7. Stiffness matrix : int { ( (lambda/2) * Ic_isok - ( (3/2)*lambda + mu ) ) * ( (1/3) * Ic_k * ( F^-T \nabla \delta^T F-T ) : \nabla v  }
+            //! 7. Stiffness matrix : int { ( (lambda/2) * Ic_isok - ( (3/2)*lambda + mu ) ) * ( (-1/3) * Ic_k * ( F^-T \nabla \delta^T F-T ) : \nabla v  }
             AssemblyElementalStructure::stiff_Jac_P1iso_VKPenalized_7term( lambda, mu, (*M_FkMinusTransposed), (*M_trCisok), (*M_trCk), *this->M_elmatK, this->M_FESpace->fe() );
 
-            //! 8. Stiffness matrix : int { ( mu * J^(-2/3) ) * ( \nabla \delta * C ) : \nabla v  }
-            AssemblyElementalStructure::stiff_Jac_P1iso_VKPenalized_8term( mu, (*M_Jack), (*M_Ck), *this->M_elmatK, this->M_FESpace->fe() );
 
-            //! 9. Stiffness matrix : int { ( mu * J^(-2/3) ) * (F [\nabla \delta]^T F ) : \nabla \v  }
-            AssemblyElementalStructure::stiff_Jac_P1iso_VKPenalized_9term( mu, (*M_Jack), (*M_Fk), *this->M_elmatK, this->M_FESpace->fe() );
+            //! 8. Stiffness matrix : int { ( -2.0/3.0) * ( mu * J^(-2/3) ) * ( F^-T: \grad \delta ) * ( F C ) : \nabla v  }
+            AssemblyElementalStructure::stiff_Jac_P1iso_VKPenalized_8term( mu, (*M_Jack), (*M_FkMinusTransposed), (*M_FkCk), *this->M_elmatK, this->M_FESpace->fe() );
 
-            //! 10. Stiffness matrix : int  { ( mu * J^(-2/3) ) * (F * F^T * [\nabla \delta] ) : \nabla \v }
-            AssemblyElementalStructure::stiff_Jac_P1iso_VKPenalized_10term( mu, (*M_Jack), (*M_Fk), *this->M_elmatK, this->M_FESpace->fe() );
+            //! 9. Stiffness matrix : int { ( 2.0/9.0) * ( mu * J^(-2/3) ) Ic_kSquared * (F^-T : \grad \delta ) * F^-T : \nabla \v  }
+            AssemblyElementalStructure::stiff_Jac_P1iso_VKPenalized_9term( mu, (*M_Jack), (*M_trCkSquared), (*M_FkMinusTransposed), *this->M_elmatK, this->M_FESpace->fe() );
 
-            //! 11. Stiffness matrix : int {  ( mu * J^(-2/3) ) * ( (1/3) *  Ic_SquaredK * ( F^-T [\nabla \delta ]^T F^-T) : \nabla v ) }
-            AssemblyElementalStructure::stiff_Jac_P1iso_VKPenalized_11term( mu, (*M_Jack), (*M_trCkSquared), (*M_FkMinusTransposed), *this->M_elmatK, this->M_FESpace->fe() );
 
-            //! 12. Stiffness matrix : int {  ( mu * J^(-2/3) ) * ( (-2.0/3.0) * ( Ck : ( [\nabla \delta]^T * Fk ) ) * F^-T : \nabla v ) }
-            AssemblyElementalStructure::stiff_Jac_P1iso_VKPenalized_12term( mu, (*M_Jack), (*M_Ck), (*M_Fk), (*M_FkMinusTransposed), *this->M_elmatK, this->M_FESpace->fe() );
 
-            //! 13. Stiffness matrix : int {  ( mu * J^(-2/3) ) * ( (-2.0/3.0) * ( Ck : ( Fk^-T * \nabla \delta ) ) * F^-T : \nabla v ) }
-            AssemblyElementalStructure::stiff_Jac_P1iso_VKPenalized_13term( mu, (*M_Jack), (*M_Ck), (*M_Fk), (*M_FkMinusTransposed), *this->M_elmatK, this->M_FESpace->fe() );
+            //! 10. Stiffness matrix : int { ( mu * J^(-2/3) ) * ( \nabla \delta * C ) : \nabla v  }
+            AssemblyElementalStructure::stiff_Jac_P1iso_VKPenalized_10term( mu, (*M_Jack), (*M_Ck), *this->M_elmatK, this->M_FESpace->fe() );
+
+            //! 11. Stiffness matrix : int { ( mu * J^(-2/3) ) * (F [\nabla \delta]^T F ) : \nabla \v  }
+            AssemblyElementalStructure::stiff_Jac_P1iso_VKPenalized_11term( mu, (*M_Jack), (*M_Fk), *this->M_elmatK, this->M_FESpace->fe() );
+
+            //! 12. Stiffness matrix : int  { ( mu * J^(-2/3) ) * (F * F^T * [\nabla \delta] ) : \nabla \v }
+            AssemblyElementalStructure::stiff_Jac_P1iso_VKPenalized_12term( mu, (*M_Jack), (*M_Fk), *this->M_elmatK, this->M_FESpace->fe() );
+
+            //! 13. Stiffness matrix : int {  ( mu * J^(-2/3) ) * ( (1/3) *  Ic_SquaredK * ( F^-T [\nabla \delta ]^T F^-T) : \nabla v ) }
+            AssemblyElementalStructure::stiff_Jac_P1iso_VKPenalized_13term( mu, (*M_Jack), (*M_trCkSquared), (*M_FkMinusTransposed), *this->M_elmatK, this->M_FESpace->fe() );
+
+            //! 14. Stiffness matrix : int {  ( mu * J^(-2/3) ) * ( (-2.0/3.0) * ( Ck : ( [\nabla \delta]^T * Fk ) ) * F^-T : \nabla v ) }
+            AssemblyElementalStructure::stiff_Jac_P1iso_VKPenalized_14term( mu, (*M_Jack), (*M_Ck), (*M_Fk), (*M_FkMinusTransposed), *this->M_elmatK, this->M_FESpace->fe() );
+
+            //! 15. Stiffness matrix : int {  ( mu * J^(-2/3) ) * ( (-2.0/3.0) * ( Ck : ( Fk^T * \nabla \delta ) ) * F^-T : \nabla v ) }
+            AssemblyElementalStructure::stiff_Jac_P1iso_VKPenalized_15term( mu, (*M_Jack), (*M_Ck), (*M_Fk), (*M_FkMinusTransposed), *this->M_elmatK, this->M_FESpace->fe() );
 
 
             //! assembling
@@ -513,7 +525,7 @@ void VenantKirchhoffMaterialNonLinearPenalized<Mesh>::computeStiffness( const ve
             /*!
               Source term Pvol: int { bulk /2* (J1^2 - J1  + log(J1) ) * 1/J1 * (CofF1 : \nabla v) }
             */
-            AssemblyElementalStructure::source_Pvol( 0.5 * bulk, (*M_FkMinusTransposed), (*M_Jack), *this->M_elvecK,  this->M_FESpace->fe() );
+            AssemblyElementalStructure::source_Pvol( 0.5 * bulk, (*M_CofFk), (*M_Jack), *this->M_elvecK,  this->M_FESpace->fe() );
 
             //! Isochoric part
             /*!
@@ -524,7 +536,7 @@ void VenantKirchhoffMaterialNonLinearPenalized<Mesh>::computeStiffness( const ve
 
             //! Isochoric part second term
             /*!
-              Source term P2iso_VKPenalized: int { ( mu * Jk )*
+              Source term P2iso_VKPenalized: int { ( mu * Jk^(-2.0/3.0) )*
               ( (F*C : \nabla v) - 1/3 * (Ic_squared) * (F1^-T : \nabla v) ) }
             */
             AssemblyElementalStructure::source_P2iso_VKPenalized( mu, (*M_FkMinusTransposed), (*M_FkCk), (*M_trCkSquared),(*M_Jack), *this->M_elvecK, this->M_FESpace->fe() );
@@ -614,6 +626,16 @@ void VenantKirchhoffMaterialNonLinearPenalized<Mesh>::computeKinematicsVariables
         (*M_FkMinusTransposed)[ 2 ][ 0 ][ ig ] =   ( b*f - c*e ) / ( (*M_Jack)[ig] );
         (*M_FkMinusTransposed)[ 2 ][ 1 ][ ig ] = - ( a*f - c*d ) / ( (*M_Jack)[ig] );
         (*M_FkMinusTransposed)[ 2 ][ 2 ][ ig ] =   ( a*e - d*b ) / ( (*M_Jack)[ig] );
+
+        (*M_CofFk)[ 0 ][ 0 ][ ig ] =   ( e*i - f*h );
+        (*M_CofFk)[ 0 ][ 1 ][ ig ] = - ( d*i - g*f );
+        (*M_CofFk)[ 0 ][ 2 ][ ig ] =   ( d*h - e*g );
+        (*M_CofFk)[ 1 ][ 0 ][ ig ] = - ( b*i - c*h );
+        (*M_CofFk)[ 1 ][ 1 ][ ig ] =   ( a*i - c*g );
+        (*M_CofFk)[ 1 ][ 2 ][ ig ] = - ( a*h - g*b );
+        (*M_CofFk)[ 2 ][ 0 ][ ig ] =   ( b*f - c*e );
+        (*M_CofFk)[ 2 ][ 1 ][ ig ] = - ( a*f - c*d );
+        (*M_CofFk)[ 2 ][ 2 ][ ig ] =   ( a*e - d*b );
     }
 
     //! Compute the tensor C
@@ -649,6 +671,7 @@ void VenantKirchhoffMaterialNonLinearPenalized<Mesh>::computeKinematicsVariables
                 sum +=  (*M_Ck)[ i ][ j ][ ig ] * (*M_Ck)[ i ][ j ][ ig ];
             }
         }
+
         (*M_trCk)[ ig ] = s;
         (*M_trCkSquared)[ ig ] = sum;
     }
@@ -656,7 +679,7 @@ void VenantKirchhoffMaterialNonLinearPenalized<Mesh>::computeKinematicsVariables
     for ( UInt ig = 0; ig <  this->M_FESpace->fe().nbQuadPt(); ig++ )
     {
         //! trace of deviatoric C
-        (*M_trCisok)[ ig ] =  pow((*M_Jack)[ ig ], -2./3.) * (*M_trCk)[ ig ];
+        (*M_trCisok)[ ig ] =  pow((*M_Jack)[ ig ], -2.0/3.0) * (*M_trCk)[ ig ];
     }
 
     //! Compute the product FC
@@ -676,7 +699,7 @@ void VenantKirchhoffMaterialNonLinearPenalized<Mesh>::computeKinematicsVariables
         }
     }
 
-
+    //std::cout << "Computed the kinematic variables" << std::endl;
 }
 
 template <typename Mesh>
@@ -744,9 +767,10 @@ inline StructuralConstitutiveLaw<Mesh>* createVenantKirchhoffMaterialNonLinearPe
 
 namespace
 {
-static bool registerVKP = StructuralConstitutiveLaw<LifeV::RegionMesh<LinearTetra> >::StructureMaterialFactory::instance().registerProduct( "nonlinearVenantKirchhoffPenalized", &createVenantKirchhoffMaterialNonLinearPenalized<LifeV::RegionMesh<LinearTetra> > );
+static bool registerVKP = StructuralConstitutiveLaw<LifeV::RegionMesh<LinearTetra> >::StructureMaterialFactory::instance().registerProduct( "nonLinearVenantKirchhoffPenalized", &createVenantKirchhoffMaterialNonLinearPenalized<LifeV::RegionMesh<LinearTetra> > );
 }
 
 } //Namespace LifeV
 
 #endif /* __VENANTKIRCHHOFFPENALIZED_H */
+

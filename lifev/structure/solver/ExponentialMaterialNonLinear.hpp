@@ -76,7 +76,7 @@ class ExponentialMaterialNonLinear : public StructuralConstitutiveLaw<Mesh>
 
     typedef KNMK<Real>                      KNMK_Type;
     typedef boost::shared_ptr<KNMK_Type>         KNMKPtr_Type;
-  
+
     typedef typename super::mapMarkerVolumesPtr_Type mapMarkerVolumesPtr_Type;
     typedef typename super::mapMarkerVolumes_Type mapMarkerVolumes_Type;
     typedef typename mapMarkerVolumes_Type::const_iterator mapIterator_Type;
@@ -105,7 +105,7 @@ class ExponentialMaterialNonLinear : public StructuralConstitutiveLaw<Mesh>
       \param offset: the offset parameter used assembling the matrices
     */
     void setup( const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
-            const boost::shared_ptr<const MapEpetra>&  monolithicMap,
+                const boost::shared_ptr<const MapEpetra>&  monolithicMap,
                 const UInt offset, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer );
 
 
@@ -113,7 +113,7 @@ class ExponentialMaterialNonLinear : public StructuralConstitutiveLaw<Mesh>
     /*!
       \param dataMaterial the class with Material properties data
     */
-  void computeLinearStiff( dataPtr_Type& /*dataMaterial*/, const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/ );
+    void computeLinearStiff( dataPtr_Type& /*dataMaterial*/, const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/ );
 
 
     //! Updates the Jacobian matrix in StructualSolver::updateJacobian
@@ -124,7 +124,7 @@ class ExponentialMaterialNonLinear : public StructuralConstitutiveLaw<Mesh>
     */
     void updateJacobianMatrix( const vector_Type& disp,
                                const dataPtr_Type& dataMaterial,
-			       const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                               const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
                                const displayerPtr_Type& displayer );
 
 
@@ -138,7 +138,7 @@ class ExponentialMaterialNonLinear : public StructuralConstitutiveLaw<Mesh>
     void updateNonLinearJacobianTerms( matrixPtr_Type& jacobian,
                                        const vector_Type& /*disp*/,
                                        const dataPtr_Type& /*dataMaterial*/,
-				       const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
+                                       const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
                                        const displayerPtr_Type& /*displayer*/ );
 
 
@@ -150,7 +150,7 @@ class ExponentialMaterialNonLinear : public StructuralConstitutiveLaw<Mesh>
       \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
-  void computeStiffness( const vector_Type& sol, Real factor, const dataPtr_Type& dataMaterial, const mapMarkerVolumesPtr_Type mapsMarkerVolumes, const displayerPtr_Type& displayer );
+    void computeStiffness( const vector_Type& sol, Real factor, const dataPtr_Type& dataMaterial, const mapMarkerVolumesPtr_Type mapsMarkerVolumes, const displayerPtr_Type& displayer );
 
 
     //! Computes the new Stiffness vector for Neo-Hookean and Exponential materials in StructuralSolver given a certain displacement field.
@@ -162,10 +162,10 @@ class ExponentialMaterialNonLinear : public StructuralConstitutiveLaw<Mesh>
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
     void computeVector( const vector_Type& sol,
-			Real factor,
-			const dataPtr_Type& dataMaterial,
-			const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
-			const displayerPtr_Type& displayer );
+                        Real factor,
+                        const dataPtr_Type& dataMaterial,
+                        const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                        const displayerPtr_Type& displayer );
 
 
     //! Computes the deformation gradient F, the cofactor matrix Cof(F), the determinant of F (J = det(F)), the trace of right Cauchy-Green tensor tr(C)
@@ -183,22 +183,22 @@ class ExponentialMaterialNonLinear : public StructuralConstitutiveLaw<Mesh>
 
     //! ShowMe method of the class (saved on a file the stiffness vector and the jacobian)
     void showMe( std::string const& fileNameVectStiff,
-         std::string const& fileNameJacobain );
+                 std::string const& fileNameJacobain );
 
     //! Compute the First Piola Kirchhoff Tensor
-    /*! 
+    /*!
        \param firstPiola Epetra_SerialDenseMatrix that has to be filled
-       \param tensorF Epetra_SerialDenseMatrix the deformation gradient 
-       \param cofactorF Epetra_SerialDenseMatrix cofactor of F 
+       \param tensorF Epetra_SerialDenseMatrix the deformation gradient
+       \param cofactorF Epetra_SerialDenseMatrix cofactor of F
        \param invariants std::vector with the invariants of C and the detF
        \param material UInt number to get the material parameteres form the VenantElasticData class
     */
     void computeLocalFirstPiolaKirchhoffTensor( Epetra_SerialDenseMatrix& firstPiola,
-						const Epetra_SerialDenseMatrix& tensorF,
-						const Epetra_SerialDenseMatrix& cofactorF,
-						const std::vector<Real>& invariants,
-						const UInt marker);
- 
+                                                const Epetra_SerialDenseMatrix& tensorF,
+                                                const Epetra_SerialDenseMatrix& cofactorF,
+                                                const std::vector<Real>& invariants,
+                                                const UInt marker);
+
 
 //@}
 
@@ -370,11 +370,11 @@ void ExponentialMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matrixPtr
 	    this->M_FESpace->fe().updateFirstDerivQuadPt( *(it->second[j]) );
 
 	    UInt eleID = this->M_FESpace->fe().currentLocalId();
-	    
+
 	    for ( UInt iNode = 0; iNode < ( UInt ) this->M_FESpace->fe().nbFEDof(); iNode++ )
 	      {
 		UInt  iloc = this->M_FESpace->fe().patternFirst( iNode );
-		
+
 		for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
 		  {
 		    UInt ig = this->M_FESpace->dof().localToGlobalMap( eleID, iloc ) + iComp*this->M_FESpace->dim() + this->M_offset;
@@ -583,7 +583,7 @@ void ExponentialMaterialNonLinear<Mesh>::computeKinematicsVariables( const Vecto
     //! determinant of deformation gradient Fk
     (*M_Jack)[ig] = a*( e*i - f*h ) - b*( d*i - f*g ) + c*( d*h - e*g );
 
-    ASSERT_PRE((*M_Jack)[ig] > 0, "Negative Jacobian. Error!" ); 
+    ASSERT_PRE((*M_Jack)[ig] > 0, "Negative Jacobian. Error!" );
 
     (*M_CofFk)[ 0 ][ 0 ][ ig ] =   ( e*i - f*h );
     (*M_CofFk)[ 0 ][ 1 ][ ig ] = - ( d*i - g*f );

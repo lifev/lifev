@@ -1527,9 +1527,9 @@ void  source_P1iso_VKPenalized( Real             lambda,
             {
                 for( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
                 {
-                    s += (  ( lambda/2.0 ) * Ic_isok[ ig ] - ( (3.0/2.0)* lambda + mu ) ) *
-                            (Fk[ icoor ][  k ][ ig ] - 1.0/3.0  * Ic_k[ ig ] *
-                             FkMinusTransposed[ icoor ][ k ][ ig ] )* fe.phiDer( i, k, ig ) * fe.weightDet( ig );
+                    s +=( ( lambda/2.0 ) * Ic_isok[ ig ] - ((3.0/2.0)* lambda + mu ) ) *
+                        (Fk[ icoor ][  k ][ ig ] - (1.0/3.0) * Ic_k[ ig ] *
+                         FkMinusTransposed[ icoor ][ k ][ ig ] )* fe.phiDer( i, k, ig ) * fe.weightDet( ig );
 
                 }
             }
@@ -1539,7 +1539,7 @@ void  source_P1iso_VKPenalized( Real             lambda,
 }
 
 
-// Source term : Int { ( mu * Jk  ( (F*C : \nabla v) - 1/3 * (Ic_Squared) * (F^-T : \nabla v) ) }
+// Source term : Int { ( 2 * mu * Jk^(-2.0/3.0) ) * ( (F*C : \nabla v) - 1/3 * (Ic_Squared) * (F^-T : \nabla v) ) }
 void  source_P2iso_VKPenalized( Real             mu,
                                 const boost::multi_array<Real,3 >& FkMinusTransposed,
                                 const boost::multi_array<Real,3 >& FkCk,
@@ -1561,7 +1561,7 @@ void  source_P2iso_VKPenalized( Real             mu,
             {
                 for( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
                 {
-                    s += ( mu * Jk[ ig ] ) * (FkCk[ icoor ][  k ][ ig ] - 1.0/3.0  * Ic_Squared[ ig ] *
+                    s += ( mu * std::pow( Jk[ ig ], (-2.0/3.0) ) ) * (FkCk[ icoor ][  k ][ ig ] - (1.0/3.0)  * Ic_Squared[ ig ] *
                          FkMinusTransposed[ icoor ][ k ][ ig ] )* fe.phiDer( i, k, ig ) * fe.weightDet( ig );
                 }
             }
@@ -1572,13 +1572,14 @@ void  source_P2iso_VKPenalized( Real             mu,
 
 //! Jacobian matrix of the first Piola-Kirchhoff tensor for the VK Penalized law
 
-//! 1. Stiffness term : int { (lambda / 2) * ( (-2/3) * J^(-2/3) * F^-T:\nabla \delta ) * ( F : \nabla \v ) }
-void  stiff_Jac_P1iso_Exp_1term( Real             coeff,
-                                 const boost::multi_array<Real,3 >& FkMinusTransposed,
-                                 const boost::multi_array<Real,3 >& Fk,
-                                 const std::vector<Real>&   Jk ,
-                                 MatrixElemental&         elmat,
-                                 const CurrentFE& fe )
+//! 1. Stiffness term : int { (lambda / 2) * ( (-2/3) * Ic_k * J^(-2/3) * F^-T:\nabla \delta ) * ( F : \nabla \v ) }
+void  stiff_Jac_P1iso_VKPenalized_1term( Real             coeff,
+                                         const boost::multi_array<Real,3 >& FkMinusTransposed,
+                                         const boost::multi_array<Real,3 >& Fk,
+                                         const std::vector<Real>&   Jk ,
+                                         const std::vector<Real>&   Ic_k ,
+                                         MatrixElemental&         elmat,
+                                         const CurrentFE& fe )
 {
     Real s;
 
@@ -1598,7 +1599,7 @@ void  stiff_Jac_P1iso_Exp_1term( Real             coeff,
                         {
                             for( UInt ig = 0;ig < fe.nbQuadPt(); ++ig )
                             {
-                                s += ( -2.0/3.0 ) * pow( Jk[ig], -2.0/3.0 ) *
+                                s += ( -2.0/3.0 ) * Ic_k[ ig ] * pow( Jk[ig], -2.0/3.0 ) *
                                     FkMinusTransposed[ jcoor ][ k ][ ig ] * fe.phiDer( j, k, ig ) *
                                     Fk[ icoor ][ l ][ ig ] * fe.phiDer( i, l, ig ) * fe.weightDet( ig );
                             }
@@ -1611,7 +1612,7 @@ void  stiff_Jac_P1iso_Exp_1term( Real             coeff,
 	}
 }
 
-//! 3. Stiffness term: int { (lambda / 2) * ( ( 2/9 ) * J^(-2/3) * Ic ) * ( F^-T : \nabla \delta ) ( F^-T : \nabla \v ) }
+//! 3. Stiffness term: int { (lambda / 2) * ( ( 2/9 ) * J^(-2/3) * Ic_k^2 ) * ( F^-T : \nabla \delta ) ( F^-T : \nabla \v ) }
 void  stiff_Jac_P1iso_VKPenalized_2term( Real coef,
                                          const boost::multi_array<Real,3 >& FkMinusTransposed,
                                          const std::vector<Real>&   Jk,
@@ -1637,7 +1638,7 @@ void  stiff_Jac_P1iso_VKPenalized_2term( Real coef,
                         {
                             for( UInt ig = 0;ig < fe.nbQuadPt(); ++ig )
                             {
-                                s += ( 2.0 / 9.0 ) * std::pow( Jk[ig], -2.0/3.0 ) * Ic_k[ig] *
+                                s += ( ( 2.0 / 9.0 ) * std::pow( Jk[ig], -2.0/3.0 ) * Ic_k[ig] * Ic_k[ig] ) *
                                     FkMinusTransposed[ jcoor ][ l ][ ig ] * fe.phiDer( j, l, ig ) *
                                     FkMinusTransposed[ icoor ][ k ][ ig ] * fe.phiDer( i, k, ig ) * fe.weightDet( ig );
                             }
@@ -1650,7 +1651,7 @@ void  stiff_Jac_P1iso_VKPenalized_2term( Real coef,
 	}
 }
 
-//! 2. Stiffness term : Int { coeff * ( 2 * J^(-2/3) ) * ( F : \nabla \delta ) ( F : \nabla \v )}
+//! 2. Stiffness term : Int { coeff * ( 2 * J^(-2/3) ) * ( F^T : \nabla \delta ) ( F : \nabla \v )}
 void  stiff_Jac_P1iso_VKPenalized_3term( Real             coef,
                                          const boost::multi_array<Real,3 >& Fk,
                                          const std::vector<Real>&   Jk,
@@ -1675,8 +1676,8 @@ void  stiff_Jac_P1iso_VKPenalized_3term( Real             coef,
                         {
                             for( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
                             {
-                                s += 2 * pow( Jk[ig], -2.0/3.0 ) *
-                                    Fk[ jcoor ][ l ][ ig ] * fe.phiDer( j, l, ig ) *
+                                s += 2.0 * pow( Jk[ig], -2.0/3.0 ) *
+                                    Fk[ l ][ jcoor ][ ig ] * fe.phiDer( j, l, ig ) *
                                     Fk[ icoor ][ k ][ ig ] * fe.phiDer( i, k, ig ) * fe.weightDet( ig );
                             }
                         }
@@ -1688,7 +1689,7 @@ void  stiff_Jac_P1iso_VKPenalized_3term( Real             coef,
 	}
 }
 
-//! 4. Stiffness term: int { (lambda/2) * ( -2.0/3.0 * J^(-2/3) * Ic_k ) * ( F : \nabla \delta ) ( F^-T : \nabla \v ) }
+//! 4. Stiffness term: int { (lambda/2) * ( -2.0/3.0 * J^(-2/3) * Ic_k ) * ( F^T : \nabla \delta ) ( F^-T : \nabla \v ) }
 void  stiff_Jac_P1iso_VKPenalized_4term( Real coef,
                                          const boost::multi_array<Real,3 >& FkMinusTransposed,
                                          const boost::multi_array<Real,3 >& Fk,
@@ -1716,7 +1717,7 @@ void  stiff_Jac_P1iso_VKPenalized_4term( Real coef,
                             for( UInt ig = 0;ig < fe.nbQuadPt(); ++ig )
                             {
                                 s += ( ( -2.0/3.0 ) * pow( Jk[ig], -2.0/3.0 ) * Ic_k[ig] ) *
-                                    Fk[ jcoor ][ k ][ ig ]  * fe.phiDer( j, k, ig ) *
+                                    Fk[ k ][ jcoor ][ ig ]  * fe.phiDer( j, k, ig ) *
                                     FkMinusTransposed[ icoor ][ l ][ ig ] *  fe.phiDer( i, l, ig ) * fe.weightDet( ig );
                             }
                         }
@@ -1728,7 +1729,7 @@ void  stiff_Jac_P1iso_VKPenalized_4term( Real coef,
 	}
 }
 
-//! 5. Stiffness term : int {  (lambda/2) * Ic_isok - ( (3/2)*lambda + mu ) * \nabla \delta : \nabla v }
+//! 5. Stiffness term : int {  ( (lambda/2) * Ic_isok - ( (3/2)*lambda + mu ) ) * \nabla \delta : \nabla v }
 void  stiff_Jac_P1iso_VKPenalized_5term( Real             coef,
                                          Real             coef2,
                                          const std::vector<Real>&   Ic_isok,
@@ -1763,7 +1764,7 @@ void  stiff_Jac_P1iso_VKPenalized_5term( Real             coef,
 	}
 }
 
-//! 4. Stiffness term: Int { -2.0/3.0 * coef * J^(-5/3) * exp( coefExp*( Ic_iso - 3) ) * ( 1. + coefExp * Ic_iso )( F : \nabla \delta ) ( CofF : \nabla \v ) }
+//! 6. Stiffness term: int { ( (lambda/2) * Ic_isok - ( (3/2)*lambda + mu ) ) * ( (-2/3) * ( F^T :\nabla \delta ) ) * ( F^-T : \nabla v ) }
 void  stiff_Jac_P1iso_VKPenalized_6term( Real coef, Real  coef2,
                                          const std::vector<Real>&   Ic_isok,
                                          const boost::multi_array<Real,3 >& Fk,
@@ -1789,8 +1790,8 @@ void  stiff_Jac_P1iso_VKPenalized_6term( Real coef, Real  coef2,
                         {
                             for( UInt ig = 0;ig < fe.nbQuadPt(); ++ig )
                             {
-                                s += ( (coef/2.0) * Ic_isok[ ig ] - ( (3.0/2.0) * coef + coef2 ) ) *
-                                    Fk[ jcoor ][ k ][ ig ]  * fe.phiDer( j, k, ig ) *
+                                s += (-2.0/3.0) * ( (coef/2.0) * Ic_isok[ ig ] - ( (3.0/2.0) * coef + coef2 ) ) *
+                                    Fk[ k ][ jcoor ][ ig ]  * fe.phiDer( j, k, ig ) *
                                     FkMinusTransposed[ icoor ][ l ][ ig ] *  fe.phiDer( i, l, ig ) * fe.weightDet( ig );
                             }
                         }
@@ -1802,7 +1803,7 @@ void  stiff_Jac_P1iso_VKPenalized_6term( Real coef, Real  coef2,
 	}
 }
 
-//! 7. Stiffness term : int { ( (lambda/2) * Ic_isok - ( (3/2)*lambda + mu ) ) * ( (1/3) * Ic_k * ( F^-T \nabla \delta^T F-T ) : \nabla v  }
+//! 7. Stiffness term : int { ( (lambda/2) * Ic_isok - ( (3/2)*lambda + mu ) ) * ( (-1/3) * Ic_k * ( F^-T \nabla \delta^T F-T ) : \nabla v  }
 void  stiff_Jac_P1iso_VKPenalized_7term( Real             coef,
                                          Real             coef2,
                                          const boost::multi_array<Real,3 >& FkMinusTransposed,
@@ -1829,7 +1830,7 @@ void  stiff_Jac_P1iso_VKPenalized_7term( Real             coef,
                         {
                             for( UInt ig = 0;ig < fe.nbQuadPt(); ++ig )
                             {
-                                s += ( (coef/2.0) * Ic_isok[ ig ] - ( (3.0/2.0) * coef + coef2 ) ) * ( (1.0/3.0) * Ic_k[ ig ] ) *
+                                s += ( (coef/2.0) * Ic_isok[ ig ] - ( (3.0/2.0) * coef + coef2 ) ) * ( (-1.0/3.0) * Ic_k[ ig ] ) *
                                     FkMinusTransposed[ icoor ][ l ][ ig ] * fe.phiDer( j, l, ig ) *
                                     FkMinusTransposed[ jcoor ][ k ][ ig ] * fe.phiDer( i, k, ig ) * fe.weightDet( ig );
                             }
@@ -1843,8 +1844,88 @@ void  stiff_Jac_P1iso_VKPenalized_7term( Real             coef,
 }
 
 
-//! 8. Stiffness term : int { ( mu * J^(-2/3) ) * ( \nabla \delta * C ) : \nabla v  }
-void  stiff_Jac_P1iso_VKPenalized_8term( Real             coef,
+//! 8. Stiffness term : int { ( -2.0/3.0) * ( mu * J^(-2/3) ) * ( F^-T: \grad \delta ) * ( F C ) : \nabla v  }
+void  stiff_Jac_P1iso_VKPenalized_8term( Real coef, const std::vector<Real>& Jack_k,
+                                         const boost::multi_array<Real,3 >& FkMinusTransposed,
+                                         const boost::multi_array<Real,3 >& FkCk,
+                                         MatrixElemental& elmat,
+                                         const CurrentFE& fe )
+{
+    Real s;
+
+    for( UInt icoor = 0; icoor < nDimensions; ++icoor )
+	{
+        for( UInt jcoor = 0; jcoor < nDimensions; ++jcoor )
+	    {
+            MatrixElemental::matrix_view mat = elmat.block( icoor, jcoor );
+            for( UInt i = 0; i < fe.nbFEDof(); ++i )
+            {
+                for( UInt j = 0; j < fe.nbFEDof(); ++j )
+                {
+                    s = 0.0;
+                    for( UInt l = 0; l < nDimensions; ++l )
+                    {
+                        for( UInt k = 0; k < nDimensions; ++k )
+                        {
+                            for( UInt ig = 0;ig < fe.nbQuadPt(); ++ig )
+                            {
+                                s += (-2.0/3.0) * ( coef * std::pow( Jack_k[ ig ], (-2.0/3.0) ) ) *
+                                    FkMinusTransposed[ jcoor ][ k ][ ig ]  * fe.phiDer( j, k, ig ) *
+                                    FkCk[ icoor ][ l ][ ig ] *  fe.phiDer( i, l, ig ) * fe.weightDet( ig );
+                            }
+                        }
+                    }
+                    mat( i, j ) += s;
+                }
+            }
+	    }
+	}
+}
+
+
+//! 8. Stiffness term : int { ( 2.0/9.0) * ( mu * J^(-2/3) ) Ic_kSquared * (F^-T : \grad \delta ) * F^-T : \nabla \v  }
+void  stiff_Jac_P1iso_VKPenalized_9term( Real coef, const std::vector<Real>& Jack_k,
+                                         const std::vector<Real>& Ic_kSquared,
+                                         const boost::multi_array<Real,3 >& FkMinusTransposed,
+                                         MatrixElemental& elmat,
+                                         const CurrentFE& fe )
+{
+    Real s;
+
+    for( UInt icoor = 0; icoor < nDimensions; ++icoor )
+	{
+        for( UInt jcoor = 0; jcoor < nDimensions; ++jcoor )
+	    {
+            MatrixElemental::matrix_view mat = elmat.block( icoor, jcoor );
+            for( UInt i = 0; i < fe.nbFEDof(); ++i )
+            {
+                for( UInt j = 0; j < fe.nbFEDof(); ++j )
+                {
+                    s = 0.0;
+                    for( UInt l = 0; l < nDimensions; ++l )
+                    {
+                        for( UInt k = 0; k < nDimensions; ++k )
+                        {
+                            for( UInt ig = 0;ig < fe.nbQuadPt(); ++ig )
+                            {
+                                s += ( (2.0/9.0) * ( coef * std::pow( Jack_k[ ig ], (-2.0/3.0) ) ) * Ic_kSquared[ ig ] ) *
+                                    FkMinusTransposed[ jcoor ][ k ][ ig ]  * fe.phiDer( j, k, ig ) *
+                                    FkMinusTransposed[ icoor ][ l ][ ig ] *  fe.phiDer( i, l, ig ) * fe.weightDet( ig );
+                            }
+                        }
+                    }
+                    mat( i, j ) += s;
+                }
+            }
+	    }
+	}
+}
+
+
+
+
+//! 10. Stiffness term : int { ( mu * J^(-2/3) ) * ( \nabla \delta * C ) : \nabla v  }
+void  stiff_Jac_P1iso_VKPenalized_10term( Real             coef,
                                          const std::vector<Real>&   Jack_k,
                                          const boost::multi_array<Real,3 >& Ck,
                                          MatrixElemental&         elmat,
@@ -1881,7 +1962,7 @@ void  stiff_Jac_P1iso_VKPenalized_8term( Real             coef,
 }
 
 //! 6. Stiffness term : int { ( mu * J^(-2/3) ) * (F [\nabla \delta]^T F ) : \nabla \v  }
-void  stiff_Jac_P1iso_VKPenalized_9term( Real             coef,
+void  stiff_Jac_P1iso_VKPenalized_11term( Real             coef,
                                          const std::vector<Real>&   Jk,
                                          const boost::multi_array<Real,3 >& Fk,
                                          MatrixElemental&         elmat,
@@ -1919,7 +2000,7 @@ void  stiff_Jac_P1iso_VKPenalized_9term( Real             coef,
 }
 
 //! 6. Stiffness term : int { ( mu * J^(-2/3) ) * (F * F^T * [\nabla \delta] ) : \nabla \v  }
-void  stiff_Jac_P1iso_VKPenalized_10term( Real             coef,
+void  stiff_Jac_P1iso_VKPenalized_12term( Real             coef,
                                           const std::vector<Real>&   Jk,
                                           const boost::multi_array<Real,3 >& Fk,
                                           MatrixElemental&         elmat,
@@ -1957,7 +2038,7 @@ void  stiff_Jac_P1iso_VKPenalized_10term( Real             coef,
 }
 
 //! 11. Stiffness term : int {  ( mu * J^(-2/3) * ( (1/3) *  Ic_SquaredK * ( F^-T [\nabla \delta ]^T F^-T) : \nabla v ) }
-void  stiff_Jac_P1iso_VKPenalized_11term( Real             coef,
+void  stiff_Jac_P1iso_VKPenalized_13term( Real             coef,
                                           const std::vector<Real>&   Jk,
                                           const std::vector<Real>&   Ic_kSquared,
                                           const boost::multi_array<Real,3 >& FkMinusTransposed,
@@ -1996,7 +2077,7 @@ void  stiff_Jac_P1iso_VKPenalized_11term( Real             coef,
 }
 
 //! 12. Stiffness term : int {  ( mu * J^(-2/3) ) * ( (-2.0/3.0) * ( Ck : ( [\nabla \delta]^T * Fk ) ) * F^-T : \nabla v ) }
-void  stiff_Jac_P1iso_VKPenalized_12term( Real             coef,
+void  stiff_Jac_P1iso_VKPenalized_14term( Real             coef,
                                           const std::vector<Real>&   Jk,
                                           const boost::multi_array<Real,3 >& Ck,
                                           const boost::multi_array<Real,3 >& Fk,
@@ -2038,10 +2119,11 @@ void  stiff_Jac_P1iso_VKPenalized_12term( Real             coef,
 	}
 }
 
-//! 13. Stiffness term : int {  ( mu * J^(-2/3) ) * ( (-2.0/3.0) * ( Ck : ( Fk^-T * [\nabla \delta] ) ) * Fk^-T : \nabla v ) }
-void  stiff_Jac_P1iso_VKPenalized_13term( Real             coef,
+//! 13. Stiffness term : int {  ( mu * J^(-2/3) ) * ( (-2.0/3.0) * ( Ck : ( Fk^T * [\nabla \delta] ) ) * Fk^-T : \nabla v ) }
+void  stiff_Jac_P1iso_VKPenalized_15term( Real             coef,
                                           const std::vector<Real>&   Jk,
                                           const boost::multi_array<Real,3 >& Ck,
+                                          const boost::multi_array<Real,3 >& Fk,
                                           const boost::multi_array<Real,3 >& FkMinusTransposed,
                                           MatrixElemental&         elmat,
                                           const CurrentFE& fe )
@@ -2067,7 +2149,7 @@ void  stiff_Jac_P1iso_VKPenalized_13term( Real             coef,
                                 for( UInt ig = 0;ig < fe.nbQuadPt(); ++ig )
                                 {
                                     s += ( std::pow( Jk[ig], (-2.0/3.0) ) ) * ( -2.0 / 3.0 ) *
-                                        Ck[ p ][ l ][ ig ] * fe.phiDer( j, p, ig ) * FkMinusTransposed[ p ][ jcoor ][ ig ] *
+                                        Ck[ p ][ l ][ ig ] * fe.phiDer( j, p, ig ) * Fk[ jcoor ][ p ][ ig ] *
                                         FkMinusTransposed[ icoor ][ k ][ ig ] * fe.phiDer( i, k, ig ) * fe.weightDet( ig );
                                 }
                             }

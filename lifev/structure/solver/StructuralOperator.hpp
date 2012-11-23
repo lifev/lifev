@@ -1253,7 +1253,7 @@ StructuralOperator<Mesh, SolverType>::evalResidual( vector_Type &residual, const
         chrono.stop();
         M_Displayer->leaderPrintMax("done in ", chrono.diff() );
     }
-    else //NH and Exp
+    else // cases: NH, Exp, VK-Penalized
     {
         chrono.start();
         *M_rhs=*M_rhsNoBC;
@@ -1281,7 +1281,7 @@ StructuralOperator<Mesh, SolverType>::evalResidualDisplacement( const vector_Typ
         M_residual_d.reset(new vector_Type( *M_systemMatrix * solution ));
         *M_residual_d -= *M_rhsNoBC;
     }
-    else
+    else //Cases: NH, Exp, VK-Penalized
     {
         M_residual_d.reset(new vector_Type( *M_material->stiffVector() ));
         *M_residual_d -= *M_rhsNoBC;
