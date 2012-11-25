@@ -111,6 +111,13 @@ readINRIAMeshFileHead( std::ifstream          & myStream,
 {
     const int idOffset = 1; //IDs in INRIA files start from 1
 
+    numberVertices = 0;
+    numberBoundaryVertices = 0;
+    numberBoundaryFaces = 0;
+    numberBoundaryEdges = 0;
+    numberVolumes = 0;
+    numberStoredFaces =0;
+
     std::string line;
 
     Real x, y, z;
@@ -332,7 +339,7 @@ ReadINRIAMeshFile( BareMesh<GeoShape> & bareMesh,
       std::cout << "Reading INRIA mesh file" << fileName << std::endl;
   }
 
-  if ( ! readINRIAMeshFileHead( hstream, numberVertices, numberBoundaryVertices,
+  if ( ! MeshIO::readINRIAMeshFileHead( hstream, numberVertices, numberBoundaryVertices,
                                 numberBoundaryFaces, numberBoundaryEdges,
                                 numberVolumes, numberStoredFaces, shape, iSelect) )
   {
@@ -380,8 +387,6 @@ ReadINRIAMeshFile( BareMesh<GeoShape> & bareMesh,
 
           numberPoints         = numberVertices;
           numberBoundaryPoints = numberBoundaryVertices;
-          numberBoundaryEdges  = ( Int ( numberBoundaryVertices + numberBoundaryFaces - Int( 2 ) ) > 0 ?
-                                       ( numberBoundaryVertices + numberBoundaryFaces - 2 ) : 0 );
       }
       else
       {
