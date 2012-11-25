@@ -201,7 +201,9 @@ namespace LifeV
       static bool check(RegionMesh<S, MC>& mesh, bool verbose)
       {
         Switch sw;
-        return checkMesh3D(mesh, sw, true, verbose);
+        std::stringstream discardedLog;
+        std::ostream& oStr = verbose ? std::cout : discardedLog;
+        return checkMesh3D(mesh, sw, true, verbose,oStr,std::cerr,oStr);
       }
 
     };
