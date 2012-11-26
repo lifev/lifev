@@ -3098,7 +3098,8 @@ inline
 void
 RegionMesh<GeoShapeType, MCType>::setLinkSwitch( std::string const & _s )
 {
-    ASSERT0( switches.set( _s ), std::stringstream( "Switch named " + _s + " is not allowed" ).str().c_str() );
+	bool check = switches.set( _s );
+    ASSERT0( check, std::stringstream( "Switch named " + _s + " is not allowed" ).str().c_str() );
 }
 
 template <typename GeoShapeType, typename MCType>
@@ -3106,7 +3107,8 @@ inline
 void
 RegionMesh<GeoShapeType, MCType>::unsetLinkSwitch( std::string const & _s )
 {
-    ASSERT0( switches.unset( _s ), std::stringstream( "Switch named " + _s + " is not allowed" ).str().c_str() );
+	bool check = switches.unset( _s );
+    ASSERT0( check, std::stringstream( "Switch named " + _s + " is not allowed" ).str().c_str() );
 }
 
 template <typename GeoShapeType, typename MCType>
@@ -3264,7 +3266,7 @@ RegionMesh<GeoShapeType, MCType>::updateElementRidges(threeD_Type, bool ce, bool
     // this is ok for domains with at most 1 hole!
 
     if (verbose)
-        std::cout << "     Updating element edges ... " << std::flush;
+        std::cout << "     Updating element ridges ... " << std::flush;
 
     renumber=renumber && ce && !  this->ridgeList().empty();
     if ( ce && ee == 0 )
@@ -3462,7 +3464,7 @@ RegionMesh<GeoShapeType, MCType>::updateElementFacets( bool cf, bool verbose, UI
     GeoShapeType ele;
     // If we have all facets and the facets store all adjacency info
     // everything is easier
-    if ( (facetList().size() == numFacets()) & getLinkSwitch( "FACETS_HAVE_ADIACENCY" ) & getLinkSwitch( "HAS_ALL_FACETS" ) )
+    if ( (facetList().size() == numFacets()) && getLinkSwitch( "FACETS_HAVE_ADIACENCY" ) && getLinkSwitch( "HAS_ALL_FACETS" ) )
     {
         for ( typename facets_Type::iterator itf = facetList().begin(); itf != facetList().end(); ++itf )
         {
