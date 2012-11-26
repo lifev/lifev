@@ -54,10 +54,14 @@ CurrentBoundaryFE::CurrentBoundaryFE(const ReferenceFE& refFE, const GeometricMa
     M_tangents              (boost::extents[M_nbCoor][nDimensions][M_nbQuadPt]),
     M_normal                (boost::extents[nDimensions][M_nbQuadPt]),
     M_metric                (boost::extents[M_nbCoor][M_nbCoor][M_nbQuadPt]),
+    M_detMetric             (boost::extents[M_nbQuadPt]),
+    M_inverseMetric         (boost::extents[M_nbCoor][M_nbCoor][M_nbQuadPt]),
     M_wRootDetMetric        (boost::extents[M_nbQuadPt]),
     M_tangentsUpdated       (false),
     M_normalUpdated         (false),
     M_metricUpdated         (false),
+    M_detMetricUpdated      (false),
+    M_inverseMetricUpdated  (false),
     M_wRootDetMetricUpdated (false)
 {
     // Nothing to be done here
@@ -69,10 +73,14 @@ CurrentBoundaryFE::CurrentBoundaryFE(const ReferenceFE& refFE, const GeometricMa
     M_tangents              (boost::extents[M_nbCoor][nDimensions][M_nbQuadPt]),
     M_normal                (boost::extents[nDimensions][M_nbQuadPt]),
     M_metric                (boost::extents[M_nbCoor][M_nbCoor][M_nbQuadPt]),
+    M_detMetric             (boost::extents[M_nbQuadPt]),
+    M_inverseMetric         (boost::extents[M_nbCoor][M_nbCoor][M_nbQuadPt]),
     M_wRootDetMetric        (boost::extents[M_nbQuadPt]),
     M_tangentsUpdated       (false),
     M_normalUpdated         (false),
     M_metricUpdated         (false),
+    M_detMetricUpdated      (false),
+    M_inverseMetricUpdated  (false),
     M_wRootDetMetricUpdated (false)
 {
     // Nothing to be done here
@@ -86,10 +94,14 @@ CurrentBoundaryFE::CurrentBoundaryFE(const ReferenceFE& refFE, const GeometricMa
     M_tangents              (boost::extents[M_nbCoor][nDimensions][M_nbQuadPt]),
     M_normal                (boost::extents[nDimensions][M_nbQuadPt]),
     M_metric                (boost::extents[M_nbCoor][M_nbCoor][M_nbQuadPt]),
+    M_detMetric             (boost::extents[M_nbQuadPt]),
+    M_inverseMetric         (boost::extents[M_nbCoor][M_nbCoor][M_nbQuadPt]),
     M_wRootDetMetric        (boost::extents[M_nbQuadPt]),
-    M_tangentsUpdated       (true),
-    M_normalUpdated         (true),
+    M_tangentsUpdated       (false),
+    M_normalUpdated         (false),
     M_metricUpdated         (false),
+    M_detMetricUpdated      (false),
+    M_inverseMetricUpdated  (false),
     M_wRootDetMetricUpdated (false)
 {
     M_currentId = currentId;
@@ -116,6 +128,8 @@ CurrentBoundaryFE::CurrentBoundaryFE(const ReferenceFE& refFE, const GeometricMa
     computeTangents();
     computeNormal();
     computeMetric();
+    computeDetMetric();
+    computeInverseMetric();
     computeWRootDetMetric();
 }
 
@@ -125,10 +139,14 @@ CurrentBoundaryFE::CurrentBoundaryFE(const CurrentBoundaryFE& bdFE) :
     M_tangents              (bdFE.M_tangents),
     M_normal                (bdFE.M_normal),
     M_metric                (bdFE.M_metric),
+    M_detMetric             (bdFE.M_detMetric),
+    M_inverseMetric         (bdFE.M_inverseMetric),
     M_wRootDetMetric        (bdFE.M_wRootDetMetric),
     M_tangentsUpdated       (bdFE.M_tangentsUpdated),
     M_normalUpdated         (bdFE.M_normalUpdated),
     M_metricUpdated         (bdFE.M_metricUpdated),
+    M_detMetricUpdated      (bdFE.M_detMetricUpdated),
+    M_inverseMetricUpdated  (bdFE.M_inverseMetricUpdated),
     M_wRootDetMetricUpdated (bdFE.M_wRootDetMetricUpdated)
 {
     M_currentId = bdFE.M_currentId;
@@ -153,7 +171,7 @@ void CurrentBoundaryFE::coorMap(Real& x, Real& y, Real& z, Real xi, Real eta) co
 
 Real CurrentBoundaryFE::measure() const
 {
-    ASSERT(M_wRootDetMetricUpdated,"Weighted metric determinant is not updated!");
+    ASSERT(M_wRootDetMetricUpdated,"Weighted root of metric determinant is not updated!");
 
     Real meas = 0.0;
     for (UInt quadNode(0); quadNode<M_nbQuadPt; ++quadNode)
@@ -183,6 +201,18 @@ void CurrentBoundaryFE::update(const std::vector<std::vector<Real> >& pts, flag_
         computeMetric();
     };
 
+    M_detMetricUpdated = false;
+    if ( (upFlag & UPDATE_ONLY_DET_METRIC) != 0)
+    {
+        computeDetMetric();
+    };
+
+    M_inverseMetricUpdated = false;
+    if ( (upFlag& UPDATE_ONLY_INV_METRIC) != 0)
+    {
+        computeInverseMetric();
+    };
+
     M_wRootDetMetricUpdated = false;
     if ( (upFlag & UPDATE_ONLY_W_ROOT_DET_METRIC) != 0)
     {
@@ -196,7 +226,7 @@ void CurrentBoundaryFE::update(const std::vector<std::vector<Real> >& pts, flag_
 
 void CurrentBoundaryFE::computeTangents()
 {
-    ASSERT(M_cellNodesUpdated,"Missing update: cellNodes");
+    ASSERT(M_cellNodesUpdated,"Missing update: cellNodes\n");
     ASSERT(M_dphiGeometricMapUpdated,"Missing update: dphiGeometricMap");
 
     for (UInt iq(0); iq<M_nbQuadPt; ++iq)
@@ -213,7 +243,7 @@ void CurrentBoundaryFE::computeTangents()
 
 void CurrentBoundaryFE::computeNormal()
 {
-    ASSERT(M_tangentsUpdated,"Missing update: tangents");
+    ASSERT(M_tangentsUpdated,"Missing update: tangents\n");
 
     Real norm, n1, n2;
 
@@ -258,7 +288,7 @@ void CurrentBoundaryFE::computeNormal()
 
 void CurrentBoundaryFE::computeMetric()
 {
-    ASSERT(M_tangentsUpdated,"Missing update: tangents");
+    ASSERT(M_tangentsUpdated,"Missing update: tangents\n");
 
     for (UInt iq(0); iq<M_nbQuadPt; ++iq)
         for (UInt iTangent(0); iTangent<M_nbCoor; ++iTangent)
@@ -281,25 +311,62 @@ void CurrentBoundaryFE::computeMetric()
     M_metricUpdated = true;
 }
 
-void CurrentBoundaryFE::computeWRootDetMetric()
+void CurrentBoundaryFE::computeDetMetric()
 {
-    ASSERT(M_metricUpdated,"Missing update: metric");
+    ASSERT(M_metricUpdated,"Missing update: metric\n");
 
     for (UInt iq(0); iq<M_nbQuadPt; ++iq)
     {
-        M_wRootDetMetric[iq] = 0.0;
         switch(M_nbCoor)
         {
             case 1:
-                M_wRootDetMetric[iq] = std::sqrt(M_metric[0][0][iq])*M_quadRule->weight(iq);
+                M_detMetric[iq] = M_metric[0][0][iq];
                 break;
             case 2:
-                M_wRootDetMetric[iq] = std::sqrt(M_metric[0][0][iq]*M_metric[1][1][iq]-M_metric[0][1][iq]*M_metric[1][0][iq])*M_quadRule->weight(iq);
+                M_detMetric[iq] = M_metric[0][0][iq]*M_metric[1][1][iq]-M_metric[0][1][iq]*M_metric[1][0][iq];
                 break;
             default:
-                ASSERT(0,"No rule to compute determinant of the metric for this dimension.");
+                ASSERT(0,"No rule to compute determinant of the metric for this dimension.\n");
         }
     }
+    M_detMetricUpdated = true;
+}
+
+void CurrentBoundaryFE::computeInverseMetric()
+{
+    ASSERT(M_metricUpdated,"Missing update: metric\n");
+    ASSERT(M_detMetricUpdated,"Missing update: detMetric\n");
+
+    for (UInt iq(0); iq<M_nbQuadPt; ++iq)
+    {
+        switch(M_nbCoor)
+        {
+            case 1:
+                M_inverseMetric[0][0][iq] = 1./M_metric[0][0][iq];
+                break;
+            case 2:
+                // Diagonal part: switch the two diagonal entries and divide by determinant
+                M_inverseMetric[0][0][iq] = M_metric[1][1][iq]/M_detMetric[iq];
+                M_inverseMetric[1][1][iq] = M_metric[0][0][iq]/M_detMetric[iq];
+
+                // Extradiagonal part: change sign and divide by determinant (matrix is symmetric, so do it once)
+                M_inverseMetric[0][1][iq] = M_inverseMetric[1][0][iq] = - M_metric[0][1][iq]/M_detMetric[iq];
+                break;
+            default:
+                ASSERT(0,"No rule to compute the inverse of the metric for this dimension.\n");
+        }
+    }
+
+    M_inverseMetricUpdated = true;
+}
+
+void CurrentBoundaryFE::computeWRootDetMetric()
+{
+    ASSERT(M_metricUpdated,"Missing update: metric\n");
+    ASSERT(M_detMetricUpdated,"Missing update: detMetric\n");
+
+    for (UInt iq(0); iq<M_nbQuadPt; ++iq)
+        M_wRootDetMetric[iq] = std::sqrt(M_detMetric[iq])*M_quadRule->weight(iq);
 
     M_wRootDetMetricUpdated = true;
 }

@@ -56,7 +56,9 @@ namespace LifeV
 const flag_Type UPDATE_ONLY_TANGENTS(16384);
 const flag_Type UPDATE_ONLY_NORMALS(32768);
 const flag_Type UPDATE_ONLY_METRIC(65536);
-const flag_Type UPDATE_ONLY_W_ROOT_DET_METRIC(131072);
+const flag_Type UPDATE_ONLY_DET_METRIC(131072);
+const flag_Type UPDATE_ONLY_INV_METRIC(262144);
+const flag_Type UPDATE_ONLY_W_ROOT_DET_METRIC(524288);
 
 const flag_Type UPDATE_TANGENTS(UPDATE_ONLY_TANGENTS
                                 |UPDATE_ONLY_CELL_NODES);
@@ -66,8 +68,12 @@ const flag_Type UPDATE_NORMALS(UPDATE_ONLY_NORMALS
 const flag_Type UPDATE_METRIC(UPDATE_ONLY_METRIC
                               |UPDATE_ONLY_TANGENTS
                               |UPDATE_ONLY_CELL_NODES);
+const flag_Type UPDATE_INV_METRIC(UPDATE_ONLY_INV_METRIC
+                                  |UPDATE_ONLY_METRIC
+                                  |UPDATE_ONLY_DET_METRIC);
 const flag_Type UPDATE_W_ROOT_DET_METRIC(UPDATE_ONLY_W_ROOT_DET_METRIC
                                          |UPDATE_ONLY_METRIC
+                                         |UPDATE_ONLY_DET_METRIC
                                          |UPDATE_ONLY_TANGENTS
                                          |UPDATE_ONLY_CELL_NODES);
 
@@ -142,22 +148,36 @@ public:
     //! Values of the tangents on the quadrature points
     Real tangent (UInt tangent, UInt coordinate, UInt quadNode) const
     {
-        ASSERT(M_tangentsUpdated,"Tangents are not updated!");
+        ASSERT(M_tangentsUpdated,"Tangents are not updated!\n");
         return M_tangents[tangent][coordinate][quadNode];
     }
 
     //! Values of the normal on the quadrature points
     Real normal (UInt coordinate, UInt quadNode) const
     {
-        ASSERT(M_normalUpdated,"Normals are not updated!");
+        ASSERT(M_normalUpdated,"Normals are not updated!\n");
         return M_normal[coordinate][quadNode];
     }
 
     //! Metric tensor on the quadrature points
     Real metric (UInt iCoor, UInt jCoor, UInt quadNode) const
     {
-        ASSERT(M_metricUpdated,"Metric is not updated!");
+        ASSERT(M_metricUpdated,"Metric is not updated!\n");
         return M_metric[iCoor][jCoor][quadNode];
+    }
+
+    //! Determinant of the metric tensor on the quadrature points
+    Real detMetric (UInt quadNode)
+    {
+        ASSERT(M_detMetricUpdated,"Determinant of the metric is not updated!\n");
+        return M_detMetric[quadNode];
+    }
+
+    //! Inverse of the metric tensor on the quadrature points
+    Real inverseMetric (UInt iCoor, UInt jCoor, UInt quadNode) const
+    {
+        ASSERT(M_inverseMetricUpdated,"Inverse metric is not updated!\n");
+        return M_inverseMetric[iCoor][jCoor][quadNode];
     }
 
     //! Square root of the determinant of the metric times the weight on the quadrature points
@@ -178,6 +198,12 @@ protected:
     //! Computes the metric in the quadrature nodes
     void computeMetric ();
 
+    //! Computes the determinant of the metric tensor in the quadrature nodes
+    void computeDetMetric ();
+
+    //! Computes the inverse of the metric tensor in the quadrature nodes
+    void computeInverseMetric ();
+
     //! Computes the square root of the determinant of the metric times the weight in the quadrature nodes
     void computeWRootDetMetric ();
 
@@ -188,12 +214,16 @@ protected:
     boost::multi_array<Real,3> M_tangents;
     boost::multi_array<Real,2> M_normal;
     boost::multi_array<Real,3> M_metric;
+    boost::multi_array<Real,1> M_detMetric;
+    boost::multi_array<Real,3> M_inverseMetric;
     boost::multi_array<Real,1> M_wRootDetMetric;
 
     //! Check variables
     bool M_tangentsUpdated;
     bool M_normalUpdated;
     bool M_metricUpdated;
+    bool M_detMetricUpdated;
+    bool M_inverseMetricUpdated;
     bool M_wRootDetMetricUpdated;
 };
 
