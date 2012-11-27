@@ -134,8 +134,8 @@ class VenantKirchhoffMaterialNonLinear :
       \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
-  void computeStiffness( const vector_Type& sol, Real factor, 
-			 const dataPtr_Type& dataMaterial, 
+  void computeStiffness( const vector_Type& sol, Real factor,
+			 const dataPtr_Type& dataMaterial,
 			 const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
 			 const displayerPtr_Type& displayer );
 
@@ -147,7 +147,7 @@ class VenantKirchhoffMaterialNonLinear :
       \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
-  void computeNonLinearMatrix( matrixPtr_Type& stiff, const vector_Type& sol, Real factor, 
+  void computeNonLinearMatrix( matrixPtr_Type& stiff, const vector_Type& sol, Real factor,
 			       const dataPtr_Type& dataMaterial, const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
 			       const displayerPtr_Type& displayer );
 
@@ -155,10 +155,10 @@ class VenantKirchhoffMaterialNonLinear :
     void computeKinematicsVariables( const VectorElemental& /*dk_loc*/ ){}
 
     //! Compute the First Piola Kirchhoff Tensor
-    /*! 
+    /*!
        \param firstPiola Epetra_SerialDenseMatrix that has to be filled
-       \param tensorF Epetra_SerialDenseMatrix the deformation gradient 
-       \param cofactorF Epetra_SerialDenseMatrix cofactor of F 
+       \param tensorF Epetra_SerialDenseMatrix the deformation gradient
+       \param cofactorF Epetra_SerialDenseMatrix cofactor of F
        \param invariants std::vector with the invariants of C and the detF
        \param material UInt number to get the material parameteres form the VenantElasticData class
     */
@@ -167,7 +167,7 @@ class VenantKirchhoffMaterialNonLinear :
 						const Epetra_SerialDenseMatrix& cofactorF,
 						const std::vector<Real>& invariants,
 						const UInt marker);
- 
+
 
   //@}
 
@@ -230,7 +230,7 @@ template <typename Mesh>
 void VenantKirchhoffMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matrixPtr_Type& jacobian,
                                                                            const  vector_Type& disp,
                                                                            const dataPtr_Type& dataMaterial,
-									   const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                                                                           const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
                                                                            const displayerPtr_Type& displayer )
 {
       displayer->leaderPrint("   NonLin S-  Updating non linear terms in the Jacobian Matrix (in updateJacobian)");
@@ -258,7 +258,7 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matri
 	  for ( UInt j(0); j < it->second.size(); j++ )
 	    {
 	      this->M_FESpace->fe().updateFirstDerivQuadPt( *(it->second[j]) );
-	  
+
 	      this->M_elmatK->zero();
 
 
@@ -375,7 +375,7 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::computeNonLinearMatrix(matrixPtr_Ty
 
     for( it = (*mapsMarkerVolumes).begin(); it != (*mapsMarkerVolumes).end(); it++ )
       {
-	  
+
 	//Given the marker pointed by the iterator, let's extract the material parameters
 	UInt marker = it->first;
 
