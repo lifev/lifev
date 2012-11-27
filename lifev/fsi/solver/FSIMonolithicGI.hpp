@@ -150,11 +150,8 @@ public:
     /*!
      *  Set vectors for restart
      */
-    void setVectorInStencils( const vectorPtr_Type& vel,
-			      const vectorPtr_Type& pressure,
-			      const vectorPtr_Type& solidDisp,
-			      const vectorPtr_Type& fluidDisp,
-			      const UInt iter);
+    void setALEVectorInStencil(const vectorPtr_Type& fluidDisp,
+				const UInt iter);
 
 
     //!@name Get Methods

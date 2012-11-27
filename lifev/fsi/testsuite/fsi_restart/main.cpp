@@ -571,36 +571,9 @@ void Problem::restartFSI(  GetPot const& data_file)
 
     M_importerSolid->readVariable(initSolSolidDisp);  //Solid d
 
-    //Solid problem
-    vectorPtr_Type vectorMonolithicSolidDisplacement(new vector_Type(*M_fsi->FSIOper()->couplingVariableMap(), Unique, Zero) );
-    *vectorMonolithicSolidDisplacement *= 0.0;
+    M_fsi->FSIOper()->setSolidVectorInStencil( solidDisp, iterInit );
 
-    //This dynamic cast is ugly but it's the only way to understand where the read vector can be put.
-    UInt offset=dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->offset();
-    vectorMonolithicSolidDisplacement->subset( *solidDisp, solidDisp->map(), (UInt)0, offset);
-    *vectorMonolithicSolidDisplacement *= 1.0 / (M_fsi->FSIOper()->solid().rescaleFactor());
-
-    vector_Type* normalPointerToSolidVector( new vector_Type(*vectorMonolithicSolidDisplacement) );
-    (M_fsi->FSIOper()->solidTimeAdvance()->stencil()).push_back( normalPointerToSolidVector );
-   
-
-    
-    //Set the initialRHS for the TimeAdvance classes
-    vector_Type zeroFluidSolid(*M_fsi->FSIOper()->couplingVariableMap(), LifeV::Unique, Zero);
-    vector_Type zeroALE(M_fsi->FSIOper()->mmFESpace().map(), LifeV::Unique, Zero);
-
-    zeroFluidSolid *= 0.0;
-    zeroALE *= 0.0;
-
-    M_fsi->FSIOper()->fluidTimeAdvance()->setInitialRHS(zeroFluidSolid);
-    M_fsi->FSIOper()->solidTimeAdvance()->setInitialRHS(zeroFluidSolid);
-    M_fsi->FSIOper()->ALETimeAdvance()->setInitialRHS(zeroALE);
-
-    //This updates at the current value (the one when the simulation was stopped) the RHScontribution
-    //of the first derivative which is use to compute the velocity in TimeAdvance::velocity().
-    //Please note that, even if it is ugly, at this stage, the fluidTimeAdvance is leading the Time Discretization
-    //and this is why there  is the dataFluid class to get the dt.
-    M_fsi->FSIOper()->ALETimeAdvance()->updateRHSFirstDerivative( M_data->dataFluid()->dataTime()->timeStep() );
+    M_fsi->FSIOper()->finalizeRestart();
 
     //This are used to export the loaded solution to check it is correct.
     M_velAndPressure.reset( new vector_Type( M_fsi->FSIOper()->fluid().getMap(), M_importerFluid->mapType() ));
@@ -610,6 +583,7 @@ void Problem::restartFSI(  GetPot const& data_file)
     M_fluidDisp.reset     ( new vector_Type( *fluidDisp, M_importerFluid->mapType() ));
 
     M_solidDisp.reset     ( new vector_Type( *solidDisp, M_importerSolid->mapType() ));
+
 }
 
 
