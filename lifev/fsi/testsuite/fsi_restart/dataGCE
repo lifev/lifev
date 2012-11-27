@@ -125,7 +125,6 @@ type       = hdf5         # format of the imported solution
 * #Fluid data
 [fluid]
 useShapeDerivatives           = false # tells if the shape derivatives are neglected or not in the Jacobian matrix
-semiImplicit                  = true # tells if we advance in time after the first nonlinear iteration or not
 conservativeFormulation       = false  # tells if the conservative or non conservative formulation is used
 
 ** #Physical quantities
