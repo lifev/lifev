@@ -120,6 +120,13 @@ public:
      */
     void updateSystem();
 
+    //! Set vectors for restart
+    /*!
+     *  Set vectors for restart
+     */
+    void setALEVectorInStencil(const vectorPtr_Type& fluidDisp,
+				const UInt iter);
+
     /**
        evaluates the residual Ax-b
        \param res: output
@@ -141,11 +148,8 @@ public:
     /*!
      *  Set vectors for restart
      */
-    void setVectorInStencils( const vectorPtr_Type& vel,
-			      const vectorPtr_Type& pressure,
-			      const vectorPtr_Type& solidDisp,
-			      const vectorPtr_Type& fluidDisp,
-			      const UInt iter);
+    void setALEVectorInStencils( const vectorPtr_Type& fluidDisp,
+				 const UInt iter);
 
     void updateSolution( const vector_Type& solution );
 

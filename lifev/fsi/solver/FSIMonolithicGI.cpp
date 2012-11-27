@@ -252,26 +252,9 @@ void FSIMonolithicGI::applyBoundaryConditions()
     M_monolithicMatrix->applyBoundaryConditions(dataFluid()->dataTime()->time(), M_rhsFull);
 }
 
-void FSIMonolithicGI::setVectorInStencils( const vectorPtr_Type& vel,
-					   const vectorPtr_Type& pressure,
-					   const vectorPtr_Type& solidDisp,
-					   const vectorPtr_Type& fluidDisp,
-					   const UInt iter)
+void FSIMonolithicGI::setALEVectorInStencil( const vectorPtr_Type& fluidDisp,
+					      const UInt iter)
 {
-    //The fluid and solid TimeAdvance classes have a stencil of dimension
-    //as big as the coupled problem.
-
-    //Fluid Problem
-    vectorPtr_Type vectorMonolithicFluidVelocity(new vector_Type(*M_monolithicMap, Unique, Zero) );
-    vectorPtr_Type vectorMonolithicFluidPressure(new vector_Type(*M_monolithicMap, Unique, Zero) );
-
-    *vectorMonolithicFluidVelocity *= 0.0;
-    *vectorMonolithicFluidPressure *= 0.0;
-
-    vectorMonolithicFluidVelocity->subset(*vel, vel->map(), UInt(0), UInt(0)) ;
-    vectorMonolithicFluidPressure->subset( *pressure, pressure->map(), UInt(0), (UInt)3 * M_uFESpace->dof().numTotalDof() );
-
-    *vectorMonolithicFluidVelocity += *vectorMonolithicFluidPressure;
 
     //ALE problem
     //Note: at iter =0 the solution has to be put in fluidTimeAdvance->stencil()->M_unknown[0]
@@ -287,36 +270,13 @@ void FSIMonolithicGI::setVectorInStencils( const vectorPtr_Type& vel,
 	harmonicSolutionRestartTime->subset(*fluidDisp, fluidDisp->map(), (UInt)0, givenOffset );
 
 	//We sum the vector in the first element of fluidtimeAdvance
-	*vectorMonolithicFluidVelocity += *harmonicSolutionRestartTime;
+	*( M_fluidTimeAdvance->stencil()[0] ) += *harmonicSolutionRestartTime;
       }
 
     //The shared_pointer for the vectors has to be trasformed into a pointer to VectorEpetra
     //That is the type of pointers that are used in TimeAdvance
     vector_Type* normalPointerToALEVector( new vector_Type(*fluidDisp) );
     (M_ALETimeAdvance->stencil()).push_back( normalPointerToALEVector );
-
-    //Solid problem
-    vectorPtr_Type vectorMonolithicSolidDisplacement(new vector_Type(*M_monolithicMap, Unique, Zero) );
-    *vectorMonolithicSolidDisplacement *=0.0;
-    vectorMonolithicSolidDisplacement->subset( *solidDisp, solidDisp->map(), (UInt)0, M_offset);
-    *vectorMonolithicSolidDisplacement *= 1.0 / M_solid->rescaleFactor();
-
-    if( !iter )
-      {
-	//We sum the vector in the first element of fluidtimeAdvance
-	*vectorMonolithicFluidVelocity += *vectorMonolithicSolidDisplacement;
-      }
-
-    vector_Type* normalPointerToSolidVector( new vector_Type(*vectorMonolithicSolidDisplacement) );
-    (M_solidTimeAdvance->stencil()).push_back( normalPointerToSolidVector );
-
-    vector_Type* normalPointerToFluidVector( new vector_Type(*vectorMonolithicFluidVelocity) );
-    (M_fluidTimeAdvance->stencil()).push_back( normalPointerToFluidVector );
-
-
-    // std::cout << "norm of the first solutions" << vectorMonolithicFluidVelocity->norm2() << std::endl;
-    // std::string fileName="monolithicGI";
-    // vectorMonolithicFluidVelocity->spy(fileName);
 }
 
 

@@ -453,11 +453,24 @@ protected:
     /*!
      *  Set vectors for restart
      */
-    virtual void setVectorInStencils( const vectorPtr_Type& vel, 
-					const vectorPtr_Type& pressure,
-					const vectorPtr_Type& solidDisp,
-					const vectorPtr_Type& fluidDisp,
+    void setVectorInStencils( const vectorPtr_Type& vel, 
+				      const vectorPtr_Type& pressure,
+				      const vectorPtr_Type& solidDisp,
+				      const vectorPtr_Type& fluidDisp,
+				      const UInt iter);
+
+  void setFluidVectorInStencil( const vectorPtr_Type& vel,
+				  const vectorPtr_Type& pressure,
+				  const UInt iter);
+  
+    void setSolidVectorInStencil( const vectorPtr_Type& solidDisp,
+				  const UInt iter);
+
+    virtual void setALEVectorInStencil( const vectorPtr_Type& fluidDisp,
 					const UInt iter) = 0;
+
+    void finalizeRestart( );
+
 
     //! Constructs the solid FESpace
     /**

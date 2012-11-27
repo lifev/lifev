@@ -433,6 +433,85 @@ updateSolidSystem( vectorPtr_Type & rhsFluidCoupling )
     // (both the matrix and the vector does not contain a NaN before the multiplication..)
 }
 
+void FSIMonolithic::setVectorInStencils( const vectorPtr_Type& vel, 
+					 const vectorPtr_Type& pressure,
+					 const vectorPtr_Type& solidDisp,
+					 const vectorPtr_Type& fluidDisp,
+					 const UInt iter)
+{
+  setFluidVectorInStencil(vel, pressure, iter);
+  setSolidVectorInStencil(solidDisp, iter);
+  setALEVectorInStencil(fluidDisp, iter);
+
+}
+
+
+void FSIMonolithic::setFluidVectorInStencil( const vectorPtr_Type& vel,
+					     const vectorPtr_Type& pressure,
+					     const UInt iter) 
+{
+
+    //The fluid and solid TimeAdvance classes have a stencil of dimension
+    //as big as the coupled problem.
+
+    //Fluid Problem
+    vectorPtr_Type vectorMonolithicFluidVelocity(new vector_Type(*M_monolithicMap, Unique, Zero) );
+    vectorPtr_Type vectorMonolithicFluidPressure(new vector_Type(*M_monolithicMap, Unique, Zero) );
+
+    *vectorMonolithicFluidVelocity *= 0.0;
+    *vectorMonolithicFluidPressure *= 0.0;
+
+    vectorMonolithicFluidVelocity->subset(*vel, vel->map(), UInt(0), UInt(0)) ;
+    vectorMonolithicFluidPressure->subset( *pressure, pressure->map(), UInt(0), (UInt)3 * M_uFESpace->dof().numTotalDof() );
+
+    *vectorMonolithicFluidVelocity += *vectorMonolithicFluidPressure;
+
+    vector_Type* normalPointerToFluidVector( new vector_Type(*vectorMonolithicFluidVelocity) );
+    (M_fluidTimeAdvance->stencil()).push_back( normalPointerToFluidVector );
+}
+
+
+void FSIMonolithic::setSolidVectorInStencil( const vectorPtr_Type& solidDisp,
+					     const UInt iter) 
+{
+    //Solid problem
+    vectorPtr_Type vectorMonolithicSolidDisplacement(new vector_Type(*M_monolithicMap, Unique, Zero) );
+    *vectorMonolithicSolidDisplacement *=0.0;
+    vectorMonolithicSolidDisplacement->subset( *solidDisp, solidDisp->map(), (UInt)0, M_offset);
+    *vectorMonolithicSolidDisplacement *= 1.0 / M_solid->rescaleFactor();
+
+    if( !iter )
+      {
+	//We sum the vector in the first element of fluidtimeAdvance
+	*( M_fluidTimeAdvance->stencil()[0] ) += *vectorMonolithicSolidDisplacement;
+      }
+
+    vector_Type* normalPointerToSolidVector( new vector_Type(*vectorMonolithicSolidDisplacement) );
+    (M_solidTimeAdvance->stencil()).push_back( normalPointerToSolidVector );
+
+}
+
+void FSIMonolithic::finalizeRestart( ) 
+{
+    //Set the initialRHS for the TimeAdvance classes
+    vector_Type zeroFluidSolid(*M_monolithicMap, Unique, Zero);
+    vector_Type zeroALE(M_mmFESpace->map(), Unique, Zero);
+
+    zeroFluidSolid *= 0.0;
+    zeroALE *= 0.0;
+
+    M_fluidTimeAdvance->setInitialRHS(zeroFluidSolid);
+    M_solidTimeAdvance->setInitialRHS(zeroFluidSolid);
+    M_ALETimeAdvance->setInitialRHS(zeroALE);
+
+    //This updates at the current value (the one when the simulation was stopped) the RHScontribution
+    //of the first derivative which is use to compute the velocity in TimeAdvance::velocity().
+    //Please note that, even if it is ugly, at this stage, the fluidTimeAdvance is leading the Time Discretization
+    //and this is why there  is the dataFluid class to get the dt.
+    M_ALETimeAdvance->updateRHSFirstDerivative( M_data->dataFluid()->dataTime()->timeStep() );
+}
+
+
 void
 FSIMonolithic::
 diagonalScale(vector_Type& rhs, matrixPtr_Type matrFull)
