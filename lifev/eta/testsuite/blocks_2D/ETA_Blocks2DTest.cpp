@@ -226,7 +226,7 @@ ETA_Blocks2DTest::run()
 
     fInterpolated*=0.0;
 
-    uSpace->interpolate(forceFct,fInterpolated,0.0);
+    uSpace->interpolate(static_cast<FESpace< mesh_Type, MapEpetra >::function_Type>(forceFct),fInterpolated,0.0);
 
     blockVector_Type ETrhs(ETuSpace->map() | ETpSpace->map() ,Repeated);
     ETrhs*=0.0;

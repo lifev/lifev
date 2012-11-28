@@ -218,7 +218,7 @@ int main( int argc, char** argv )
     if (verbose) std::cout << " -- Interpolating the advection field ... " << std::flush;
 
     vector_Type beta(betaSpace->map(),Repeated);
-    betaSpace->interpolate(betaFct,beta,0.0);
+    betaSpace->interpolate(static_cast<FESpace< mesh_Type, MapEpetra >::function_Type>(betaFct),beta,0.0);
 
     if (verbose) std::cout << " done! " << std::endl;
 

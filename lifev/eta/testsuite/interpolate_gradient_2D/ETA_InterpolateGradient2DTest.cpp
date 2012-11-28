@@ -150,7 +150,7 @@ ETA_InterpolateGradient2DTest::run()
     if (verbose) std::cout << " -- Interpolating the solution field ... " << std::flush;
 
     vector_Type uInterpolated(uSpace->map(),Unique);
-    uSpace->interpolate(uFct,uInterpolated,0.0);
+    uSpace->interpolate(static_cast<FESpace< mesh_Type, MapEpetra >::function_Type>(uFct),uInterpolated,0.0);
     vector_Type uInterpolatedRepeated(uInterpolated,Repeated);
     
     if (verbose) std::cout << " done! " << std::endl;

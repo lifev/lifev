@@ -249,7 +249,7 @@ int main( int argc, char** argv )
 
     fInterpolated*=0.0;
 
-    uSpace->interpolate(fFct,fInterpolated,0.0);
+    uSpace->interpolate(static_cast<FESpace< mesh_Type, MapEpetra >::function_Type>(fFct),fInterpolated,0.0);
 
     vector_Type rhsET(ETuSpace->map(),Repeated);
     rhsET*=0.0;
