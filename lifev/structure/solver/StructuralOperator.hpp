@@ -150,6 +150,7 @@ public:
 
     typedef std::map< UInt, vectorVolumes_Type>           mapMarkerVolumes_Type;
     typedef boost::shared_ptr<mapMarkerVolumes_Type>      mapMarkerVolumesPtr_Type;
+    typedef mapMarkerVolumes_Type::const_iterator         mapIterator_Type;
 
     typedef typename mesh_Type::element_Type                        meshEntity_Type;
 
@@ -398,6 +399,16 @@ public:
       \return the vector with the values for J
     */
     void jacobianDistribution( vectorPtr_Type displacement, vector_Type& jacobianDistribution );
+#endif
+
+
+#ifdef COLORING_MESH
+    //! compute the value of the determinant of F in all the volumes of the mesh
+    /*!
+      \param displacement the solution at a certain time
+      \return the vector with the values for J
+    */
+    void colorMesh( vector_Type& meshColors );
 #endif
 
     //void updateMatrix(matrix_Type & bigMatrixStokes);// used for monolithic
@@ -1205,6 +1216,50 @@ StructuralOperator<Mesh,SolverType >::reconstructElementaryVector( VectorElement
         }
 
     }
+}
+
+#endif
+
+
+#ifdef COLORING_MESH
+template <typename Mesh, typename SolverType>
+void StructuralOperator<Mesh, SolverType>::colorMesh( vector_Type& meshColors )
+{
+    UInt totalDof = this->M_FESpace->dof().numTotalDof();
+
+    mapIterator_Type it;
+
+    for( it = (*M_mapMarkersVolumes).begin(); it != (*M_mapMarkersVolumes).end(); it++ )
+      {
+
+          //Given the marker pointed by the iterator, let's extract the material parameters
+          UInt marker = it->first;
+
+          for ( UInt j(0); j < it->second.size(); j++ )
+          {
+              this->M_FESpace->fe().updateFirstDerivQuadPt( *(it->second[j]) );
+
+              UInt eleID = this->M_FESpace->fe().currentLocalId();
+
+              for ( UInt iNode = 0; iNode < ( UInt ) this->M_FESpace->fe().nbFEDof(); iNode++ )
+              {
+                  UInt  iloc = this->M_FESpace->fe().patternFirst( iNode );
+
+                  //Extract the global ID of the x-component of the field
+                  UInt globalIDofDOF = this->M_FESpace->dof().localToGlobalMap( eleID, iloc );
+
+                  if ( meshColors.blockMap().LID(globalIDofDOF) != -1 ) // The Global ID is on the calling processors
+                  {
+                      Int LIDid = meshColors.blockMap().LID( globalIDofDOF );
+                      Int GIDid = meshColors.blockMap().GID( LIDid );
+                      meshColors[ GIDid ] = marker;
+
+                  }
+
+              }
+          }
+
+      }
 }
 
 #endif

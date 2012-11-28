@@ -330,8 +330,12 @@ Structure::run3d()
     M_exporter->setMeshProcId(dFESpace->mesh(), dFESpace->map().comm().MyPID());
 
     vectorPtr_Type jacobianVector ( new vector_Type(solid.displacement(),  LifeV::Unique ) );
+    vectorPtr_Type meshColors ( new vector_Type(solid.displacement(),  LifeV::Unique ) );
 
     M_exporter->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "determinantF", dFESpace, jacobianVector, UInt(0) );
+    M_exporter->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "colors", dFESpace, meshColors, UInt(0) );
+    M_exporter->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "displacementField", dFESpace, solidDisp, UInt(0) );
+
     M_exporter->postProcess( 0.0 );
 
     //! =================================================================================
@@ -357,6 +361,9 @@ Structure::run3d()
 
     //Set the current solution as the displacement vector to use
     solid.jacobianDistribution( solidDisp, *jacobianVector);
+
+    //color the mesh according to the marker of the volume
+    solid.colorMesh( *meshColors );
 
     //Extracting the tensions
     std::cout << std::endl;
