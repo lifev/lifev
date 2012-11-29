@@ -354,7 +354,7 @@ int main( int argc, char** argv )
 							   << std::flush;
 		ExporterEnsight<mesh_Type>
 				exporter(dataFile, meshPartZoltan.meshPart(),
-						 "solution", Comm->MyPID()) ;
+						 "solution_zoltan", Comm->MyPID()) ;
 		if (verbose) std::cout << " done ! " << std::endl;
 
 		if (verbose) std::cout << " -- Defining the exported quantities ... "
@@ -564,7 +564,7 @@ int main( int argc, char** argv )
 							   << std::flush;
 		ExporterEnsight<mesh_Type>
 				exporter(dataFile, meshPartParMETIS.meshPart(),
-						 "solution", Comm->MyPID());
+						 "solution_parmetis", Comm->MyPID());
 		if (verbose) std::cout << " done ! " << std::endl;
 
 		if (verbose) std::cout << " -- Defining the exported quantities ... "
