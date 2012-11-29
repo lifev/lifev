@@ -1528,8 +1528,7 @@ void  source_P1iso_VKPenalized( Real             lambda,
                 for( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
                 {
                     s +=( ( lambda/2.0 ) * Ic_isok[ ig ] - ((3.0/2.0)* lambda + mu ) ) *
-                        (Fk[ icoor ][  k ][ ig ] - (1.0/3.0) * Ic_k[ ig ] *
-                         FkMinusTransposed[ icoor ][ k ][ ig ] )* fe.phiDer( i, k, ig ) * fe.weightDet( ig );
+                        (Fk[ icoor ][  k ][ ig ] - (1.0/3.0) * Ic_k[ ig ] * FkMinusTransposed[ icoor ][ k ][ ig ] ) * fe.phiDer( i, k, ig ) * fe.weightDet( ig );
 
                 }
             }
@@ -1600,8 +1599,8 @@ void  stiff_Jac_P1iso_VKPenalized_1term( Real             coeff,
                             for( UInt ig = 0;ig < fe.nbQuadPt(); ++ig )
                             {
                                 s += ( -2.0/3.0 ) * Ic_k[ ig ] * pow( Jk[ig], -(2.0/3.0) ) *
-                                    FkMinusTransposed[ jcoor ][ k ][ ig ] * fe.phiDer( j, k, ig ) *
-                                    Fk[ icoor ][ l ][ ig ] * fe.phiDer( i, l, ig ) * fe.weightDet( ig );
+                                    fe.phiDer( i, l, ig ) * Fk[ icoor ][ l ][ ig ] *
+                                    FkMinusTransposed[ jcoor ][ k ][ ig ] * fe.phiDer( j, k, ig ) * fe.weightDet( ig );
                             }
                         }
                     }
@@ -1639,8 +1638,8 @@ void  stiff_Jac_P1iso_VKPenalized_2term( Real coef,
                             for( UInt ig = 0;ig < fe.nbQuadPt(); ++ig )
                             {
                                 s += ( ( 2.0 / 9.0 ) * std::pow( Jk[ig], -2.0/3.0 ) * Ic_k[ig] * Ic_k[ig] ) *
-                                    FkMinusTransposed[ jcoor ][ l ][ ig ] * fe.phiDer( j, l, ig ) *
-                                    FkMinusTransposed[ icoor ][ k ][ ig ] * fe.phiDer( i, k, ig ) * fe.weightDet( ig );
+                                    FkMinusTransposed[ icoor ][ l ][ ig ] * fe.phiDer( i, l, ig ) *
+                                    FkMinusTransposed[ jcoor ][ k ][ ig ] * fe.phiDer( j, k, ig ) * fe.weightDet( ig );
                             }
                         }
                     }
@@ -1676,9 +1675,9 @@ void  stiff_Jac_P1iso_VKPenalized_3term( Real             coef,
                         {
                             for( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
                             {
-                                s += ( 2.0 * pow( Jk[ig], (-2.0/3.0) ) *
-                                       Fk[ jcoor ][ l ][ ig ] * fe.phiDer( j, l, ig ) ) *
-                                       Fk[ icoor ][ k ][ ig ] * fe.phiDer( i, k, ig ) * fe.weightDet( ig );
+                                s +=  2.0 * pow( Jk[ig], (-2.0/3.0) ) *
+                                    fe.phiDer( i, l, ig ) * Fk[ icoor ][ l ][ ig ] *
+                                    Fk[ jcoor ][ k ][ ig ] * fe.phiDer( j, k, ig ) * fe.weightDet( ig );
                             }
                         }
                     }
@@ -1717,8 +1716,8 @@ void  stiff_Jac_P1iso_VKPenalized_4term( Real coef,
                             for( UInt ig = 0;ig < fe.nbQuadPt(); ++ig )
                             {
                                 s += ( ( -2.0/3.0 ) * std::pow( Jk[ig], (-2.0/3.0) ) * Ic_k[ig] ) *
-                                    Fk[ jcoor ][ k ][ ig ]  * fe.phiDer( j, k, ig ) *
-                                    FkMinusTransposed[ icoor ][ l ][ ig ] *  fe.phiDer( i, l, ig ) * fe.weightDet( ig );
+                                    fe.phiDer( i, l, ig ) * FkMinusTransposed[ icoor ][ l ][ ig ] *
+                                    Fk[ jcoor ][ k ][ ig ]  * fe.phiDer( j, k, ig ) * fe.weightDet( ig );
                             }
                         }
                     }
@@ -1791,8 +1790,8 @@ void  stiff_Jac_P1iso_VKPenalized_6term( Real coef, Real  secondCoef,
                             for( UInt ig = 0;ig < fe.nbQuadPt(); ++ig )
                             {
                                 s += (-2.0/3.0) * ( (coef/2.0) * Ic_isok[ ig ] - ( (3.0/2.0) * coef + secondCoef ) ) *
-                                    Fk[ jcoor ][ k ][ ig ]  * fe.phiDer( j, k, ig ) *
-                                    FkMinusTransposed[ icoor ][ l ][ ig ] *  fe.phiDer( i, l, ig ) * fe.weightDet( ig );
+                                    fe.phiDer( i, l, ig ) * FkMinusTransposed[ icoor ][ l ][ ig ] *
+                                    Fk[ jcoor ][ k ][ ig ]  * fe.phiDer( j, k, ig ) * fe.weightDet( ig );
                             }
                         }
                     }
@@ -1909,8 +1908,8 @@ void  stiff_Jac_P1iso_VKPenalized_9term( Real coef, const std::vector<Real>& Jac
                             for( UInt ig = 0;ig < fe.nbQuadPt(); ++ig )
                             {
                                 s += ( (2.0/9.0) * std::pow( Jack_k[ ig ], (-2.0/3.0) )  * Ic_kSquared[ ig ] ) *
-                                    FkMinusTransposed[ jcoor ][ l ][ ig ]  * fe.phiDer( j, l, ig ) *
-                                    FkMinusTransposed[ icoor ][ k ][ ig ] *  fe.phiDer( i, k, ig ) * fe.weightDet( ig );
+                                    FkMinusTransposed[ jcoor ][ k ][ ig ]  * fe.phiDer( j, k, ig ) *
+                                    FkMinusTransposed[ icoor ][ l ][ ig ] *  fe.phiDer( i, l, ig ) * fe.weightDet( ig );
                             }
                         }
                     }
@@ -1946,7 +1945,7 @@ void  stiff_Jac_P1iso_VKPenalized_10term( Real             coef,
                     for( UInt ig = 0;ig < fe.nbQuadPt(); ++ig )
                     {
                         s += std::pow( Jack_k[ ig ], (-2.0/3.0) ) *
-                            Ck[ k ][ p ][ ig ] * fe.phiDer( i, p, ig ) * fe.phiDer( j, k, ig ) *  fe.weightDet( ig );
+                            fe.phiDer( i, k, ig ) * fe.phiDer( j, p, ig ) *  Ck[ p ][ k ][ ig ] * fe.weightDet( ig );
                     }
                 }
             }
@@ -2105,8 +2104,8 @@ void  stiff_Jac_P1iso_VKPenalized_14term( Real             coef,
                             for( UInt ig = 0;ig < fe.nbQuadPt(); ++ig )
                             {
                                 s += ( std::pow( Jk[ig], (-2.0/3.0) ) ) * ( -4.0 / 3.0 ) *
-                                    FkCk[ jcoor ][ k ][ ig ] * fe.phiDer( j, k, ig ) *
-                                    FkMinusTransposed[ icoor ][ l ][ ig ] * fe.phiDer( i, l, ig ) * fe.weightDet( ig );
+                                    fe.phiDer( i, l, ig ) * FkMinusTransposed[ icoor ][ l ][ ig ] *
+                                    ( FkCk[ jcoor ][ k ][ ig ] * fe.phiDer( j, k, ig ) ) * fe.weightDet( ig );
                             }
                         }
                     }

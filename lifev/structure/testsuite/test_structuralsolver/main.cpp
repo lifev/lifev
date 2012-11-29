@@ -86,7 +86,7 @@
 using namespace LifeV;
 
 int returnValue = EXIT_FAILURE;
-enum TimeScheme { BDF_ORDER_ONE = 1, BDF_ORDER_TWO, BDF_ORDER_THREE };
+enum TimeScheme { BDF_ORDER_ONE = 1, BDF_ORDER_TWO = 2, BDF_ORDER_THREE = 3 };
 
 namespace
 {
@@ -182,7 +182,7 @@ static Real bcZero(const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, con
 
 static Real bcNonZero(const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
 {
-    return  30000.;
+    return  30;
 }
 
 };
@@ -357,7 +357,6 @@ Structure::run3d()
     vectorPtr_Type vel (new vector_Type(solid.displacement(), Unique));
     vectorPtr_Type acc (new vector_Type(solid.displacement(), Unique));
 
-    if (verbose) std::cout << "S- initialization ... ";
     //Initialization of TimeAdvance
     std::string const restart =  dataFile( "importer/restart", "none");
     std::vector<vectorPtr_Type> solutionStencil;
@@ -443,6 +442,8 @@ Structure::run3d()
     }
     else
     {
+        if (verbose) std::cout << "S- initialization ... ";
+
         std::vector<vectorPtr_Type> uv0;
 
         if (timeAdvanceMethod =="Newmark")
