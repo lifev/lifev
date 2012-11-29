@@ -148,6 +148,9 @@ private:
       Updates M_meshPartition.
     */
     void finalSetup();
+
+    //! Resets the MeshPartBuilder object to the initial state
+    void reset();
     //@}
 
     //! Private Data Members
@@ -177,10 +180,10 @@ MeshPartBuilder<MeshType>::MeshPartBuilder(const meshPtr_Type& mesh)
 	: M_nBoundaryVertices(0),
 	  M_nBoundaryRidges(0),
 	  M_nBoundaryFacets(0),
-	  M_elementVertices(0),
-	  M_elementFacets(0),
-	  M_elementRidges(0),
-	  M_facetVertices(0),
+	  M_elementVertices(MeshType::elementShape_Type::S_numVertices),
+	  M_elementFacets(MeshType::elementShape_Type::S_numFacets),
+	  M_elementRidges(MeshType::elementShape_Type::S_numRidges),
+	  M_facetVertices(MeshType::facetShape_Type::S_numVertices),
 	  M_originalMesh(mesh),
 	  M_meshPart()
 {}
@@ -191,11 +194,6 @@ void MeshPartBuilder<MeshType>::run(const meshPtr_Type& meshPart,
 {
 	M_meshPart = meshPart;
 
-    M_elementVertices = MeshType::elementShape_Type::S_numVertices;
-    M_elementFacets = MeshType::elementShape_Type::S_numFacets;
-    M_elementRidges = MeshType::elementShape_Type::S_numRidges;
-    M_facetVertices    = MeshType::facetShape_Type::S_numVertices;
-
     constructLocalMesh(elementList);
     constructVertices();
     constructElements();
@@ -203,6 +201,8 @@ void MeshPartBuilder<MeshType>::run(const meshPtr_Type& meshPart,
     constructFacets();
 
     finalSetup();
+
+    reset();
 }
 
 template<typename MeshType>
@@ -509,6 +509,21 @@ void MeshPartBuilder<MeshType>::finalSetup()
     M_meshPart->updateElementEdges();
 
     M_meshPart->updateElementFaces();
+}
+
+template<typename MeshType>
+void MeshPartBuilder<MeshType>::reset()
+{
+	M_nBoundaryVertices = 0;
+	M_nBoundaryRidges = 0;
+	M_nBoundaryFacets = 0;
+
+	M_localVertices.resize(0);
+	M_localRidges.clear();
+	M_localFacets.clear();
+	M_localElements.resize(0);
+	M_globalToLocalVertex.clear();
+	M_globalToLocalElement.clear();
 }
 
 }// namespace LifeV
