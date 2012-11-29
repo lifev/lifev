@@ -85,6 +85,8 @@ public:
     typedef GraphCutterType<MeshType>            graphCutter_Type;
     typedef MeshPartBuilderType<MeshType>        meshPartBuilder_Type;
     typedef boost::shared_ptr<mesh_Type>         meshPtr_Type;
+    typedef std::vector<meshPtr_Type>            partMesh_Type;
+    typedef boost::shared_ptr<partMesh_Type>     partMeshPtr_Type;
     //! Container for the ghost data
     //typedef std::vector <GhostEntityData>        GhostEntityDataContainer_Type;
     //! Map processor -> container for the ghost data
@@ -123,10 +125,15 @@ public:
 
     //! \name Get Methods
     //@{
-    //! Return a shared pointer to the mesh part (const version)
+    //! Return the succeess state of the partitioning (true || false)
+    bool success() const { return M_success; }
+    //! Return a shared pointer to the mesh part (online mode, const ver.)
     const meshPtr_Type& meshPart() const {return M_meshPart;}
-    //! Return a shared pointer to the mesh part (non const version)
-    meshPtr_Type& meshPart() {return M_meshPart;}
+    //! Return a shared pointer to the mesh parts
+    /*!
+     * Return a shared pointer to the mesh parts on offline partition (const)
+     */
+    const partMeshPtr_Type& allMeshParts() const {return M_allMeshParts;}
     //! Return a reference to M_ghostDataMap
     //const GhostEntityDataMap_Type&  ghostDataMap() const
     //{
@@ -149,12 +156,13 @@ private:
     //@{
     boost::shared_ptr<Epetra_Comm>             M_comm;
     Int                                        M_myPID;
-    boost::shared_ptr<std::vector<Int> >       M_myElements;
     Teuchos::ParameterList                     M_parameters;
     meshPtr_Type                               M_originalMesh;
     meshPtr_Type                               M_meshPart;
+    partMeshPtr_Type                           M_allMeshParts;
     boost::shared_ptr<graphCutter_Type>        M_graphCutter;
     boost::shared_ptr<meshPartBuilder_Type>    M_meshPartBuilder;
+    bool                                       M_success;
     //GhostEntityDataMap_Type                    M_ghostDataMap;
     //@}
 }; // class MeshPartitionToolOnline
@@ -180,9 +188,11 @@ MeshPartitionTool<MeshType,
     M_myPID(M_comm->MyPID()),
     M_parameters(parameters),
     M_originalMesh(mesh),
-    M_meshPart(new MeshType),
+    M_meshPart(),
+    M_allMeshParts(),
     M_graphCutter(new graphCutter_Type(M_originalMesh, M_comm, M_parameters)),
-	M_meshPartBuilder(new meshPartBuilder_Type(M_originalMesh))
+	M_meshPartBuilder(new meshPartBuilder_Type(M_originalMesh)),
+	M_success(false)
 {
     run();
 }
@@ -203,13 +213,37 @@ void MeshPartitionTool<MeshType,
 		std::cout << "Partitioning mesh graph ..." << std::endl;
 	}
     M_graphCutter->run();
-    M_myElements = M_graphCutter->getPartition(M_myPID);
 
 	if (!M_myPID)
 	{
 		std::cout << "Building mesh parts ..." << std::endl;
 	}
-	M_meshPartBuilder->run(M_meshPart, M_myElements);
+
+	bool offlineMode = M_parameters.get<bool>("offline_mode", false);
+	if (! offlineMode) {
+		// Online partitioning
+		M_meshPart.reset(new mesh_Type);
+	    const std::vector<Int>& myElements = M_graphCutter->getPart(M_myPID);
+		M_meshPartBuilder->run(M_meshPart, myElements);
+	} else {
+		// Offline partitioning
+		if (M_comm->NumProc() != 1) {
+			if (!M_myPID) {
+				std::cout << "Offline partition must be done in serial."
+						  << std::endl;
+			}
+		} else {
+			Int numParts = M_parameters.get<int>("num_parts");
+			M_allMeshParts.reset(new partMesh_Type(numParts));
+			for (Int curPart = 0; curPart < numParts; ++curPart) {
+				M_allMeshParts->at(curPart).reset(new mesh_Type);
+			    const std::vector<Int>& curElements
+			    		= M_graphCutter->getPart(curPart);
+				M_meshPartBuilder->run(M_allMeshParts->at(curPart),
+									   curElements);
+			}
+		}
+	}
 
 	if (!M_myPID)
 	{
@@ -221,6 +255,9 @@ void MeshPartitionTool<MeshType,
     M_meshPartBuilder.reset();
     // Release the pointer to the original uncut mesh
     M_originalMesh.reset();
+
+    // Mark the partition as successful
+    M_success = true;
 }
 
 template<typename MeshType,
