@@ -15,7 +15,6 @@
 [test]
     num_parts = 3
     hdf5_file_name = cube.h5
-    io_class = new # old or new
 
 [mesh]
 

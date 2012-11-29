@@ -58,15 +58,22 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
+#include <lifev/core/filter/GetPot.hpp>
 #include <lifev/core/mesh/MeshPartitioner.hpp>
+#include <lifev/core/mesh/MeshPartitionTool.hpp>
+#include <lifev/core/mesh/GraphCutterParMETIS.hpp>
+#include <lifev/core/mesh/MeshPartBuilder.hpp>
 #include <lifev/core/filter/PartitionIO.hpp>
-#include <lifev/core/filter/ExporterHDF5Mesh3D.hpp>
 #include <lifev/core/mesh/RegionMesh3DStructured.hpp>
 
 using namespace LifeV;
 
 #endif /* HAVE_MPI */
 #endif /* HAVE_HDF5 */
+
+typedef MeshPartitionTool<RegionMesh<LinearTetra>,
+						  GraphCutterParMETIS,
+						  MeshPartBuilder> meshCutterParMETIS_Type;
 
 int main(int argc, char** argv)
 {
@@ -82,7 +89,7 @@ int main(int argc, char** argv)
     	std::cout << "This test needs to be run "
     			  << "with a single process. Aborting."
     			  << std::endl;
-    	return(EXIT_FAILURE);
+    	return EXIT_FAILURE;
     }
 
     GetPot commandLine(argc, argv);
@@ -90,9 +97,8 @@ int main(int argc, char** argv)
     GetPot dataFile(dataFileName);
 
     const UInt numElements(dataFile("mesh/nelements",10));
-    const UInt numParts(dataFile("test/num_parts", 4));
+    const Int numParts(dataFile("test/num_parts", 3));
     const std::string partsFileName(dataFile("test/hdf5_file_name", "cube.h5"));
-    const std::string ioClass(dataFile("test/io_class", "new"));
 
     std::cout << "Number of elements in mesh: " << numElements << std::endl;
     std::cout << "Number of parts: " << numParts << std::endl;
@@ -102,32 +108,21 @@ int main(int argc, char** argv)
 	regularMesh3D(*fullMeshPtr, 1, numElements, numElements, numElements,
 				  false, 2.0, 2.0, 2.0, -1.0, -1.0, -1.0);
 
-    MeshPartitioner<mesh_Type> meshPart;
-    meshPart.setup(numParts, comm);
+	Teuchos::ParameterList meshParameters;
+    meshParameters.set("num_parts", numParts, "");
+    meshParameters.set("offline_mode", true, "");
+	meshCutterParMETIS_Type meshCutter(fullMeshPtr, comm, meshParameters);
+	if (! meshCutter.success()) {
+		std::cout << "Mesh partition failed.";
+		return EXIT_FAILURE;
+	}
 
-    meshPart.attachUnpartitionedMesh(fullMeshPtr);
-    meshPart.doPartitionGraph();
-    meshPart.doPartitionMesh();
-
-    // Release the original mesh from the MeshPartitioner object and
     // delete the RegionMesh object
-    meshPart.releaseUnpartitionedMesh();
     fullMeshPtr.reset();
 
     // Write mesh parts to HDF5 container
-    if (! ioClass.compare("old")) {
-        ExporterHDF5Mesh3D<mesh_Type> HDF5Output(dataFile,
-        										 meshPart.meshPartition(),
-        										 partsFileName,
-        										 comm->MyPID());
-    	HDF5Output.addPartitionGraph(meshPart.elementDomains(), comm);
-    	HDF5Output.addMeshPartitionAll(meshPart.meshPartitions(), comm);
-    	HDF5Output.postProcess(0);
-    	HDF5Output.closeFile();
-    } else {
-    	PartitionIO<mesh_Type> partitionIO(partsFileName, comm);
-    	partitionIO.write(meshPart.meshPartitions());
-    }
+	PartitionIO<mesh_Type> partitionIO(partsFileName, comm);
+	partitionIO.write(meshCutter.allMeshParts());
 
     MPI_Finalize();
 
@@ -140,5 +135,5 @@ int main(int argc, char** argv)
 	return(EXIT_FAILURE);
 #endif /* HAVE_HDF5 */
 
-    return(EXIT_SUCCESS);
+    return EXIT_SUCCESS;
 }
