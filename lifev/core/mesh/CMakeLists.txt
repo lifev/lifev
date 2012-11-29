@@ -19,6 +19,7 @@ SET(mesh_HEADERS
   mesh/MeshElementMarked.hpp
   mesh/GhostEntityData.hpp
   mesh/GraphCutterZoltan.hpp
+  mesh/GraphCutterParMETIS.hpp
   mesh/MeshPartitionTool.hpp
   mesh/MeshPartBuilder.hpp
   mesh/RegionMesh2DStructured.hpp
