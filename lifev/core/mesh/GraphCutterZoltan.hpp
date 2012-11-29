@@ -3,7 +3,7 @@
 *******************************************************************************
 
     Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
-    Copyright (C) 2010, 2011 EPFL, Politecnico di Milano, Emory University
+    Copyright (C) 2010, 2011, 2012 EPFL, Politecnico di Milano, Emory University
 
     This file is part of LifeV.
 
@@ -26,14 +26,15 @@
 
 /*!
     @file
-    @brief Class that partitions the graph associated with a mesh
+    @brief Class that partitions the graph associated with a mesh.
+    	   Uses the Zoltan graph processing library
 
     @date 17-11-2011
     @author Radu Popescu <radu.popescu@epfl.ch>
  */
 
-#ifndef GRAPH_PARTITION_TOOL_H
-#define GRAPH_PARTITION_TOOL_H 1
+#ifndef GRAPH_PARTITION_TOOL_ZOLTAN_H
+#define GRAPH_PARTITION_TOOL_ZOLTAN_H 1
 
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -71,12 +72,11 @@ struct TransportBuffer
     with a mesh. This class builds the dual graph of the mesh, partitions
     it according to a set of parameters and the stores the partitioning
     in a table (vector of vectors).
-    At the end of the partitioning process, each vector will contain the
-    GID of the elements in a partition.
+    At the end of the partition process, each vector will contain the
+    GID of the elements in a part.
 
-    While this class can be used stand-alone, it is contained inside the
-    MeshPartitionTool class and used automatically during the mesh
-    partitioning process.
+    While this class can be used stand-alone, it is used automatically by the
+    MeshPartitionTool class during the mesh partition process.
 
     More on class functionality to follow. Stay tuned...
  */
@@ -90,9 +90,7 @@ public:
 	typedef boost::shared_ptr<Epetra_Comm>                  commPtr_Type;
     typedef MeshType                                        mesh_Type;
     typedef boost::shared_ptr<mesh_Type>                    meshPtr_Type;
-    typedef std::map<Int, std::vector<Int> >                internalTable_Type;
-    typedef std::map<Int,
-    				 boost::shared_ptr<std::vector<Int> > > exportTable_Type;
+    typedef std::map<Int, std::vector<Int> >                table_Type;
     //@}
 
     //! @name Constructor & Destructor
@@ -112,7 +110,7 @@ public:
                        pList_Type& parameters);
 
     //! Destructor
-    virtual ~GraphCutterZoltan() {}
+    ~GraphCutterZoltan() {}
     //@}
 
     //! @name Public methods
@@ -123,8 +121,8 @@ public:
 
     //! @name Get Methods
     //@{
-    //! Get a pointer to one of the partitions
-    const boost::shared_ptr<std::vector<Int> >& getPartition(const UInt i) const
+    //! Get a pointer to one of the parts
+    const std::vector<Int>& getPart(const UInt i) const
 	{
     	return M_partitionTable.find(i)->second;
 	}
@@ -142,7 +140,7 @@ public:
     Int lastIndex(const Int i) const {return M_indexBounds[i + 1] - 1;}
 
     //! The internally stored dual graph of the mesh
-    const internalTable_Type& graph() const {return M_graph;}
+    const table_Type& graph() const {return M_graph;}
 
     //! The vector of stored element GIDs
     const std::vector<Int>& elementList() const {return M_elementList;}
@@ -228,15 +226,15 @@ private:
     commPtr_Type             				   M_comm;
     Int                                        M_myPID;
     Int                                        M_numProcessors;
-    Int                                        M_numPartitions;
-    Int                                        M_numPartitionsPerProcessor;
-    Int                                        M_myFirstPartition;
-    Int                                        M_myLastPartition;
+    Int                                        M_numParts;
+    Int                                        M_numPartsPerProcessor;
+    Int                                        M_myFirstPart;
+    Int                                        M_myLastPart;
     std::vector<Int>                           M_indexBounds;
     pList_Type                                 M_parameters;
     meshPtr_Type                               M_mesh;
-    exportTable_Type                           M_partitionTable;
-    internalTable_Type                         M_graph;
+    table_Type                           	   M_partitionTable;
+    table_Type                         		   M_graph;
     // TODO: possible improvement (memory-wise) is to implement a bidirectional
     // map instead of using these two vectors and M_partitionTable
     // MeshPartitionTool expects a partition-to-element map, while in the graph
@@ -262,10 +260,10 @@ GraphCutterZoltan<MeshType>::GraphCutterZoltan(meshPtr_Type& mesh,
     M_comm(comm),
     M_myPID(M_comm->MyPID()),
     M_numProcessors(M_comm->NumProc()),
-    M_numPartitions(0),
-    M_numPartitionsPerProcessor(0),
-    M_myFirstPartition(0),
-    M_myLastPartition(0),
+    M_numParts(0),
+    M_numPartsPerProcessor(0),
+    M_myFirstPart(0),
+    M_myLastPart(0),
     M_parameters(),
     M_mesh(mesh),
     M_zoltanStruct(0)
@@ -278,8 +276,8 @@ void GraphCutterZoltan<MeshType>::setParameters(pList_Type& parameters)
 {
     // Here put some default values for the parameters and then import
     // the user supplied list, overwriting the corresponding parameters
-    M_parameters.set("num_partitions", static_cast<Int>(M_comm->NumProc()),
-    				 "The desired number of partitions");
+    M_parameters.set("num_parts", static_cast<Int>(M_comm->NumProc()),
+    				 "The desired number of parts");
     M_parameters.set("topology", "1",
     				 "The topology of the mesh partition process.");
     M_parameters.set("debug_level", 0, "Verbosity of Zoltan");
@@ -291,8 +289,8 @@ void GraphCutterZoltan<MeshType>::setParameters(pList_Type& parameters)
 
     M_parameters.setParameters(parameters);
 
-    M_numPartitions = M_parameters.get<Int>("num_partitions");
-    M_numPartitionsPerProcessor = M_numPartitions / M_numProcessors;
+    M_numParts = M_parameters.get<Int>("num_parts");
+    M_numPartsPerProcessor = M_numParts / M_numProcessors;
 }
 
 template<typename MeshType>
@@ -476,11 +474,11 @@ void GraphCutterZoltan<MeshType>::distributePartitions()
     // We assume the number of partitions is a multiple of the
     // number of processes.
 
-    M_myFirstPartition = M_myPID * M_numPartitionsPerProcessor;
-    M_myLastPartition = (M_myPID + 1) * M_numPartitionsPerProcessor - 1;
+    M_myFirstPart = M_myPID * M_numPartsPerProcessor;
+    M_myLastPart = (M_myPID + 1) * M_numPartsPerProcessor - 1;
 
-    for (Int i = M_myFirstPartition; i <= M_myLastPartition; ++i) {
-        M_partitionTable[i].reset(new std::vector<Int>);
+    for (Int i = M_myFirstPart; i <= M_myLastPart; ++i) {
+        M_partitionTable[i].resize(0);
     }
 }
 
@@ -511,17 +509,17 @@ void GraphCutterZoltan<MeshType>::buildGraph()
     M_elementParts.resize(numStoredElements());
 
     k = numStoredElements();
-    std::vector<Int> partitionBounds(M_numPartitionsPerProcessor + 1);
+    std::vector<Int> partitionBounds(M_numPartsPerProcessor + 1);
     partitionBounds[0] = 0;
-    for (Int i = 0; i < M_numPartitionsPerProcessor; ++i) {
-        UInt l = k / (M_numPartitionsPerProcessor - i);
+    for (Int i = 0; i < M_numPartsPerProcessor; ++i) {
+        UInt l = k / (M_numPartsPerProcessor - i);
         partitionBounds[i + 1] = partitionBounds[i] + l;
         k -= l;
     }
-    for (Int i = 0; i < M_numPartitionsPerProcessor; ++i) {
+    for (Int i = 0; i < M_numPartsPerProcessor; ++i) {
         for (Int lid = partitionBounds[i];
 			 lid < partitionBounds[i + 1]; ++lid) {
-            M_elementParts[lid] = M_myFirstPartition + i;
+            M_elementParts[lid] = M_myFirstPart + i;
         }
     }
 
@@ -582,20 +580,20 @@ void GraphCutterZoltan<MeshType>::localMigrate(int numExport,
 template<typename MeshType>
 void GraphCutterZoltan<MeshType>::buildPartitionTable()
 {
-    for (exportTable_Type::iterator it = M_partitionTable.begin();
+    for (table_Type::iterator it = M_partitionTable.begin();
          it != M_partitionTable.end(); ++it) {
-        it->second->reserve(numStoredElements() / M_numPartitionsPerProcessor);
+        it->second.reserve(numStoredElements() / M_numPartsPerProcessor);
     }
 
     for (UInt i = 0; i < numStoredElements(); ++i) {
         // We marked elements that were moved to a different processor with -1
         if (static_cast<Int>(M_elementList[i]) != -1) {
-            M_partitionTable[M_elementParts[i]]->push_back(M_elementList[i]);
+            M_partitionTable[M_elementParts[i]].push_back(M_elementList[i]);
         }
     }
-    for (exportTable_Type::iterator it = M_partitionTable.begin();
+    for (table_Type::iterator it = M_partitionTable.begin();
          it != M_partitionTable.end(); ++it) {
-        std::sort(it->second->begin(), it->second->end());
+        std::sort(it->second.begin(), it->second.end());
     }
 }
 
@@ -642,10 +640,10 @@ void GraphCutterZoltan<MeshType>::partitionGraph()
                      M_parameters.get<std::string>("topology").c_str());
     Zoltan_Set_Param(M_zoltanStruct, "NUM_GLOBAL_PARTS",
                      (boost::lexical_cast<std::string>
-    					(M_numPartitions)).c_str());
+    					(M_numParts)).c_str());
     Zoltan_Set_Param(M_zoltanStruct, "NUM_LOCAL_PARTS",
                      (boost::lexical_cast<std::string>
-    					(M_numPartitionsPerProcessor)).c_str());
+    					(M_numPartsPerProcessor)).c_str());
 
     Zoltan_Set_Num_Obj_Fn(M_zoltanStruct,
     					  GraphCutterZoltan::getNumElements,
@@ -728,4 +726,4 @@ void GraphCutterZoltan<MeshType>::partitionGraph()
 
 } // Namespace LifeV
 
-#endif // GRAPH_PARTITION_TOOL_H
+#endif // GRAPH_PARTITION_TOOL_ZOLTAN_H

@@ -100,7 +100,7 @@ public:
      * 						element IDs associated with this mesh part
      */
     void run(const meshPtr_Type& meshPart,
-    		 const boost::shared_ptr<std::vector<Int> > elementList);
+    		 const std::vector<Int>& elementList);
     //@}
 
     //! \name Get Methods
@@ -116,7 +116,7 @@ private:
       Updates M_localVertices, M_localRidges, M_localFacets, M_localElements,
       M_globalToLocalVertex.
     */
-    void constructLocalMesh();
+    void constructLocalMesh(const std::vector<Int>& elementList);
     //! Construct nodes
     /*!
       Adds nodes to the partitioned mesh object. Updates M_nBoundaryVertices,
@@ -165,7 +165,6 @@ private:
     std::vector<Int>                           M_localElements;
     std::map<Int, Int>                         M_globalToLocalVertex;
     std::map<Int, Int>                         M_globalToLocalElement;
-    boost::shared_ptr<std::vector<Int> >       M_elementList;
     meshPtr_Type                               M_originalMesh;
     meshPtr_Type                               M_meshPart;
     //@}
@@ -182,25 +181,22 @@ MeshPartBuilder<MeshType>::MeshPartBuilder(const meshPtr_Type& mesh)
 	  M_elementFacets(0),
 	  M_elementRidges(0),
 	  M_facetVertices(0),
-	  M_elementList(),
 	  M_originalMesh(mesh),
 	  M_meshPart()
 {}
 
 template<typename MeshType>
-void MeshPartBuilder<MeshType>::run(
-		const meshPtr_Type& meshPart,
-		const boost::shared_ptr<std::vector<Int> > elementList)
+void MeshPartBuilder<MeshType>::run(const meshPtr_Type& meshPart,
+									const std::vector<Int>& elementList)
 {
 	M_meshPart = meshPart;
-	M_elementList = elementList;
 
     M_elementVertices = MeshType::elementShape_Type::S_numVertices;
     M_elementFacets = MeshType::elementShape_Type::S_numFacets;
     M_elementRidges = MeshType::elementShape_Type::S_numRidges;
     M_facetVertices    = MeshType::facetShape_Type::S_numVertices;
 
-    constructLocalMesh();
+    constructLocalMesh(elementList);
     constructVertices();
     constructElements();
     constructRidges();
@@ -210,7 +206,8 @@ void MeshPartBuilder<MeshType>::run(
 }
 
 template<typename MeshType>
-void MeshPartBuilder<MeshType>::constructLocalMesh()
+void MeshPartBuilder<MeshType>::constructLocalMesh(
+		const std::vector<Int>& elementList)
 {
     std::map<Int, Int>::iterator  im;
     std::set<Int>::iterator       is;
@@ -222,10 +219,9 @@ void MeshPartBuilder<MeshType>::constructLocalMesh()
     count = 0;
     // cycle on local element's ID
 
-    const std::vector<Int>& myElements = *M_elementList;
-    for (UInt jj = 0; jj < myElements.size(); ++jj)
+    for (UInt jj = 0; jj < elementList.size(); ++jj)
     {
-        ielem = myElements[jj];
+        ielem = elementList[jj];
         M_localElements.push_back(ielem);
 
         // cycle on element's nodes
