@@ -598,7 +598,7 @@ void stiff_Jac_P1iso_Exp_6term( Real coef, Real coefExp, const boost::multi_arra
   @param elvec The elementary vector of the current volume
   @param fe The current finite element
 */
-void source_P1iso_VKPenalized( Real lambda, Real mu, const boost::multi_array<Real,3 >& FkMinusTransposed, const boost::multi_array<Real,3 >& Fk, const std::vector<Real>& Ic_isok, const std::vector<Real>& Ic_k, VectorElemental& elvec, const CurrentFE& fe );
+void source_P1iso_VKPenalized( Real lambda, Real mu, const boost::multi_array<Real,3 >& FkMinusTransposed, const boost::multi_array<Real,3 >& Fk, const std::vector<Real>& Ic_isok, const std::vector<Real>& Ic_k, const std::vector<Real>& Jack_k, VectorElemental& elvec, const CurrentFE& fe );
 
 //! Elementary nonlinear isochoric stiffness vector for St. Venant-Kirchhoff Penalized model
 /*!
@@ -616,6 +616,19 @@ void  source_P2iso_VKPenalized( Real mu, const boost::multi_array<Real,3 >& FkMi
 
 
 //! Methdos for the Jacobian of the St. Venant-Kirchhoff Penalized law.
+//! Elementary first nonlinear isochoric Jacobian matrix for VK-Penalized model (see the reference)
+/*!
+  This function assembles the local first nonlinear isochoric Jacobian matrix for VK-Penalized model.
+
+  @param lambda the first Lame coefficient
+  @param FkMinusTransposed The matrix F^-T
+  @param Fk The deformation gradient that depends on the local displacement uk_loc
+  @param Jk The determinant of the deformation gradient F that depends on the local displacement uk_loc (remark: the nonlinear vector depends on current displacement)
+  @param Ic_k The trace of C
+  @param elmat The elementary matrix of the current volume
+  @param fe The current finite element
+*/
+void stiff_Jac_P1iso_VKPenalized_0term( Real lambda, Real mu, const boost::multi_array<Real,3 >& FkMinusTransposed, const boost::multi_array<Real,3 >& Fk, const std::vector<Real>& Jk, const std::vector<Real>& Ic_k, const std::vector<Real>& IcIso_k, MatrixElemental& elmat, const CurrentFE& fe );
 
 //! Elementary first nonlinear isochoric Jacobian matrix for VK-Penalized model (see the reference)
 /*!
@@ -681,7 +694,7 @@ void stiff_Jac_P1iso_VKPenalized_4term( Real coef, const boost::multi_array<Real
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_Jac_P1iso_VKPenalized_5term( Real coef, Real secondCoef, const std::vector<Real>& Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_Jac_P1iso_VKPenalized_5term( Real coef, Real secondCoef, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
 
 //! Elementary sixth nonlinear isochoric Jacobian matrix for VK-Penalized model (see the reference)
 /*!
@@ -694,7 +707,7 @@ void stiff_Jac_P1iso_VKPenalized_5term( Real coef, Real secondCoef, const std::v
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_Jac_P1iso_VKPenalized_6term( Real coef, Real secondCoef, const std::vector<Real>& Ic_isok, const boost::multi_array<Real,3 >& Fk, const boost::multi_array<Real,3 >& FkMinusTransposed, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_Jac_P1iso_VKPenalized_6term( Real coef, Real secondCoef, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, const boost::multi_array<Real,3 >& Fk, const boost::multi_array<Real,3 >& FkMinusTransposed, MatrixElemental& elmat, const CurrentFE& fe );
 
 
 //! Elementary seventh  nonlinear isochoric Jacobian matrix for VK-Penalized model (see the reference)
@@ -709,7 +722,7 @@ void stiff_Jac_P1iso_VKPenalized_6term( Real coef, Real secondCoef, const std::v
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_Jac_P1iso_VKPenalized_7term( Real coef, Real secondCoef, const boost::multi_array<Real,3 >& FkMinusTransposed, const std::vector<Real>& Ic_isok, const std::vector<Real>& Ic_k, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_Jac_P1iso_VKPenalized_7term( Real coef, Real secondCoef, const boost::multi_array<Real,3 >& FkMinusTransposed, const std::vector<Real>& Ic_isok, const std::vector<Real>& Ic_k, const std::vector<Real>& Jk, MatrixElemental& elmat, const CurrentFE& fe );
 
 //! Elementary seventh  nonlinear isochoric Jacobian matrix for VK-Penalized model (see the reference)
 /*!
