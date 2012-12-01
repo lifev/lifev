@@ -182,7 +182,7 @@ static Real bcZero(const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, con
 
 static Real bcNonZero(const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
 {
-    return  30;
+    return  300.;
 }
 
 };
@@ -476,13 +476,16 @@ Structure::run3d()
     if (verbose ) std::cout << "ok." << std::endl;
 
     boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporter;
+    boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterCheck;
 
     std::string const exporterType =  dataFile( "exporter/type", "ensight");
     std::string const exporterName =  dataFile( "exporter/name", "structure");
+    std::string const exporterCheckName =  dataFile( "exporter/nameCheck", "verifyVectors");
 #ifdef HAVE_HDF5
     if (exporterType.compare("hdf5") == 0)
     {
       exporter.reset( new ExporterHDF5<RegionMesh<LinearTetra> > ( dataFile, exporterName ) );
+      exporterCheck.reset( new ExporterHDF5<RegionMesh<LinearTetra> > ( dataFile, exporterCheckName ) );
     }
     else
 #endif
@@ -499,17 +502,26 @@ Structure::run3d()
     }
 
     exporter->setPostDir( "./" );
+    exporterCheck->setPostDir( "./" );
     exporter->setMeshProcId( meshPart.meshPartition(), parameters->comm->MyPID() );
+    exporterCheck->setMeshProcId( meshPart.meshPartition(), parameters->comm->MyPID() );
 
     vectorPtr_Type solidDisp ( new vector_Type(solid.displacement(),  exporter->mapType() ) );
     vectorPtr_Type solidVel  ( new vector_Type(solid.displacement(),  exporter->mapType() ) );
     vectorPtr_Type solidAcc  ( new vector_Type(solid.displacement(),  exporter->mapType() ) );
 
+    vectorPtr_Type rhsCopy ( new vector_Type(solid.displacement(),  exporterCheck->mapType() ) );
+    vectorPtr_Type residualCopy ( new vector_Type(solid.displacement(),  exporterCheck->mapType() ) );
+
     exporter->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "displacement", dFESpace, solidDisp, UInt(0) );
     exporter->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "velocity",     dFESpace, solidVel,  UInt(0) );
     exporter->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "acceleration", dFESpace, solidAcc,  UInt(0) );
 
+    exporterCheck->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "rhs", dFESpace, rhsCopy,  UInt(0) );
+    exporterCheck->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "residual", dFESpace, residualCopy,  UInt(0) );
+
     exporter->postProcess( 0 );
+    exporterCheck->postProcess( 0 );
 
     /*
     //!--------------------------------------------------------------------------------------------
@@ -580,7 +592,12 @@ Structure::run3d()
       *solidVel  = timeAdvance->velocity();
       *solidAcc  = timeAdvance->acceleration();
 
+
+      *rhsCopy = solid.rhsCopy();
+      *residualCopy = solid.residualCopy();
+
       exporter->postProcess( dataStructure->dataTime()->time() );
+      exporterCheck->postProcess( dataStructure->dataTime()->time() );
 
       /* This part lets to save the displacement at one point of the mesh and to check the result
 	 w.r.t. manufactured solution.
