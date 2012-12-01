@@ -485,7 +485,8 @@ public:
     vectorPtr_Type& rhsWithoutBC() { return M_rhsNoBC; }
 
     //! Get the right hand. The member rhsCopy is used for Debug purposes!
-    vector_Type& rhs() { return *M_rhsCopy; }
+    vector_Type& rhsCopy() { return *M_rhsCopy; }
+    vector_Type& residualCopy() { return *M_residualCopy; }
 
     //! Get the comunicator object
     boost::shared_ptr<Epetra_Comm> const& comunicator() const {return M_Displayer->comm();}
@@ -599,6 +600,7 @@ protected:
     //! right  hand  side displacement
     vectorPtr_Type                       M_rhs;
     vectorPtr_Type                       M_rhsCopy;
+    vectorPtr_Type                       M_residualCopy;
 
     //! right  hand  side velocity
     //  vectorPtr_Type                       M_rhsW;
@@ -680,6 +682,7 @@ StructuralOperator<Mesh, SolverType>::StructuralOperator( ):
     M_disp                       ( ),
     M_rhsNoBC                    ( ),
     M_rhsCopy                    ( ),
+    M_residualCopy               ( ),
     M_residual_d                 ( ),
     M_sxx                        (/*M_localMap*/),//useless
     M_syy                        (/*M_localMap*/),//useless
@@ -727,6 +730,7 @@ StructuralOperator<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        
 
     M_rhs.reset                        ( new vector_Type(*M_localMap));
     M_rhsCopy.reset                    ( new vector_Type(*M_localMap));
+    M_residualCopy.reset               ( new vector_Type(*M_localMap));
     M_rhsNoBC.reset                    ( new vector_Type(*M_localMap));
     M_sxx.reset                        ( new vector_Type(*M_localMap) );
     M_syy.reset                        ( new vector_Type(*M_localMap) );
@@ -1319,6 +1323,12 @@ StructuralOperator<Mesh, SolverType>::evalResidual( vector_Type &residual, const
         residual -= *M_rhs;
         chrono.stop();
         M_Displayer->leaderPrintMax("done in ", chrono.diff() );
+    }
+
+    if( iter == 0 )
+    {
+        *M_residualCopy = residual;
+        M_rhsCopy = M_rhs;
     }
 }
 
