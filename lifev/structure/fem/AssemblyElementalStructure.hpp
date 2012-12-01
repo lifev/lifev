@@ -802,6 +802,9 @@ void stiff_Jac_P1iso_VKPenalized_12term( Real coef, const std::vector<Real>& Jk,
 */
 void stiff_Jac_P1iso_VKPenalized_13term( Real coef, const std::vector<Real>& Jk, const std::vector<Real>& Ic_kSquared,  const boost::multi_array<Real,3 >& FkMinusTransposed, MatrixElemental& elmat, const CurrentFE& fe );
 
+
+void stiff_Jac_P1iso_VKPenalized_Tryterm( Real coef, const std::vector<Real>& Jk, const std::vector<Real>& Ic_kSquared, const boost::multi_array<Real,3 >& Fk, const boost::multi_array<Real,3 >& FkMinusTransposed, MatrixElemental& elmat, const CurrentFE& fe );
+
 //! Elementary twelveth nonlinear isochoric Jacobian matrix for VK-Penalized model (see the reference)
 /*!
   This function assembles the local twelveth nonlinear isochoric Jacobian matrix for VK-Penalized model.
@@ -828,6 +831,15 @@ void stiff_Jac_P1iso_VKPenalized_14term( Real coef, const std::vector<Real>& Jk,
   @param fe The current finite element
 */
 void stiff_Jac_P1iso_VKPenalized_15term( Real coef, const std::vector<Real>& Jk, const boost::multi_array<Real,3 >& Ck, const boost::multi_array<Real,3 >& Fk, const boost::multi_array<Real,3 >& FkMinusTransposed, MatrixElemental& elmat, const CurrentFE& fe );
+
+
+void  source_PLawDebug( Real mu, const std::vector<Real>& Jk, const std::vector<Real>& trCk, const boost::multi_array<Real,3 >& Fk, const boost::multi_array<Real,3 >& FkCk,  VectorElemental& elvec, const CurrentFE& fe );
+
+void stiff_jac_lawDebug1( Real coef, const std::vector<Real>& Jk, const boost::multi_array<Real,3 >& Ck, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_jac_lawDebug2( Real coef, const std::vector<Real>& Jk, const boost::multi_array<Real,3 >& Fk, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_jac_lawDebug3( Real coef, const std::vector<Real>& Jk, const boost::multi_array<Real,3 >& Fk, MatrixElemental& elmat, const CurrentFE& fe );
+
+
 
 } //! End namespace AssemblyElementalStructure
 } //! End namespace LifeV
