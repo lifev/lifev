@@ -67,8 +67,8 @@ namespace LifeV
           // Update mesh containers
           mesh.setMaxNumPoints(numberPoints, true);
           mesh.setMaxNumGlobalPoints(numberPoints);
-          mesh.setNumVertices(numberPoints);
-          mesh.setNumGlobalVertices(numberPoints);
+          //mesh.setNumVertices(numberPoints);
+          //mesh.setNumGlobalVertices(numberPoints);
           // I have no information on boundary points in general.
           // MeshCheck will handle it.
           mesh.setNumBPoints(0);
