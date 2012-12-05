@@ -277,21 +277,17 @@ public:
     /*!
      *  Set vectors for restart
      */
-    virtual void setVectorInStencils( const vectorPtr_Type& vel,
-				      const vectorPtr_Type& pressure,
-				      const vectorPtr_Type& solidDisp,
-				      const vectorPtr_Type& fluidDisp,
-				      const UInt iter) {}
+    virtual void setVectorInStencils( const vectorPtr_Type& /*vel*/,
+                      const vectorPtr_Type& /*pressure*/,
+                      const vectorPtr_Type& /*solidDisp*/,
+                      const vectorPtr_Type& /*fluidDisp*/,
+                      const UInt /*iter*/) {}
 
-    virtual void setFluidVectorInStencil( const vectorPtr_Type& vel,
-					   const vectorPtr_Type& pressure,
-					   const UInt iter) {}
+    virtual void setFluidVectorInStencil( const vectorPtr_Type& /*vel*/, const vectorPtr_Type& /*pressure*/, const UInt /*iter*/) {}
 
-    virtual void setSolidVectorInStencil( const vectorPtr_Type& solidDisp,
-					  const UInt iter) {}
+    virtual void setSolidVectorInStencil( const vectorPtr_Type& /*solidDisp*/, const UInt /*iter*/) {}
 
-    virtual void setALEVectorInStencil( const vectorPtr_Type& fluidDisp,
-					const UInt iter) {}
+    virtual void setALEVectorInStencil( const vectorPtr_Type& /*fluidDisp*/, const UInt /*iter*/) {}
 
     virtual void finalizeRestart( ) {}
 
@@ -624,13 +620,11 @@ public:
      */
     virtual void exportSolidDisplacement( vector_Type& solidDisplacement ) { solidDisplacement = M_solid->displacement(); }
 
-
     //! Export the solid velocity by copying it to an external vector
     /*!
      * @param solidVelocity vector to be filled with the solid velocity
      */
     virtual void exportSolidVelocity( vector_Type& solidVelocity ) { solidVelocity = M_solidTimeAdvance->velocity(); }
-
 
     //! Export the solid acceleration by copying it to an external vector
     /*!
@@ -638,15 +632,23 @@ public:
      */
     virtual void exportSolidAcceleration( vector_Type& solidAcc ) { solidAcc = M_solidTimeAdvance->acceleration(); }
 
+    //! Export the fluid velocity by copying it to an external vector
+    /*!
+     * @param fluidVelocity vector to be filled with the fluid velocity
+     */
+    virtual void exportFluidVelocity( vector_Type& fluidVelocity ) { fluidVelocity = *M_fluid->solution(); }
 
-    //! Getter for the right hand side
+    //! Export the fluid pressure by copying it to an external vector
+    /*!
+     * @param fluidPressure vector to be filled with the fluid pressure
+     */
+    virtual void exportFluidPressure( vector_Type& fluidPressure ) { fluidPressure = *M_fluid->solution(); }
 
     //! Export the fluid velocity and pressure by copying it to an external vector
     /*!
      * @param fluidVelocityAndPressure vector to be filled with the fluid velocity and pressure
      */
     virtual void exportFluidVelocityAndPressure( vector_Type& fluidVelocityAndPressure ) { fluidVelocityAndPressure = *M_fluid->solution(); }
-
 
     //! Export the fluid displacement by copying it to an external vector
     /*!

@@ -124,8 +124,7 @@ public:
     /*!
      *  Set vectors for restart
      */
-    void setALEVectorInStencil(const vectorPtr_Type& fluidDisp,
-				const UInt iter);
+    void setALEVectorInStencil(const vectorPtr_Type& fluidDisp, const UInt iter);
 
     /**
        evaluates the residual Ax-b
@@ -143,13 +142,6 @@ public:
 
     //! Applies the bounsary conditions to the matrix
     void applyBoundaryConditions();
-
-      //! Set vectors for restart
-    /*!
-     *  Set vectors for restart
-     */
-    void setALEVectorInStencils( const vectorPtr_Type& fluidDisp,
-				 const UInt iter);
 
     void updateSolution( const vector_Type& solution );
 
@@ -194,6 +186,12 @@ public:
 
     static bool S_register;
 };
+
+//! Factory create function
+inline FSIMonolithic* createFSIMonolithicGE()
+{
+    return new FSIMonolithicGE();
+}
 
 } // Namespace LifeV
 

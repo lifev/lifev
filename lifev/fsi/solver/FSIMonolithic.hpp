@@ -101,14 +101,17 @@ public:
 
     //!@name Typedefs
     //@{
-    typedef FSIOperator                                           super_Type;
-    typedef FSIOperator::fluidPtr_Type::value_type::matrix_Type   matrix_Type;
-    typedef boost::shared_ptr<matrix_Type>                        matrixPtr_Type;
-    typedef MonolithicBlock                                       prec_Type;
-    typedef boost::shared_ptr<prec_Type>                          precPtr_Type;
-    typedef MonolithicBlockMatrix                                 blockMatrix_Type;
-    typedef boost::shared_ptr<blockMatrix_Type>                   blockMatrixPtr_Type;
-    typedef SolverAztecOO                                         solver_Type;
+
+    typedef FSIOperator                                               super_Type;
+    typedef FSIOperator::fluidPtr_Type::value_type::matrix_Type       matrix_Type;
+    typedef boost::shared_ptr<matrix_Type>                            matrixPtr_Type;
+    typedef MonolithicBlock                                           prec_Type;
+    typedef boost::shared_ptr<prec_Type>                              precPtr_Type;
+    typedef MonolithicBlockMatrix                                     blockMatrix_Type;
+    typedef boost::shared_ptr<blockMatrix_Type>                       blockMatrixPtr_Type;
+    typedef FactorySingleton< Factory< FSIMonolithic, std::string > > factory_Type;
+    typedef SolverAztecOO                                             solver_Type;
+
     //@}
 
     // constructors
@@ -376,6 +379,18 @@ public:
         solidAcceleration *= M_solid->rescaleFactor();
     }
 
+    //! Export the fluid velocity by copying it to an external vector
+    /*!
+     * @param fluidVelocity vector to be filled with the fluid velocity
+     */
+    void exportFluidVelocity( vector_Type& fluidVelocity ) { fluidVelocity.subset( M_fluidTimeAdvance->singleElement(0), 0 ); }
+
+    //! Export the fluid pressure by copying it to an external vector
+    /*!
+     * @param fluidPressure vector to be filled with the fluid pressure
+     */
+    void exportFluidPressure( vector_Type& fluidPressure ) { fluidPressure.subset( M_fluidTimeAdvance->singleElement(0), static_cast<UInt> (3 * M_uFESpace->dof().numTotalDof() ) ); }
+
     //! Gets the fluid and pressure
     /**
        fills an input vector with the fluid and pressure from the solution M_un.
@@ -392,7 +407,44 @@ public:
 
     //! get the solution vector
     virtual const vector_Type& solution() const = 0;
-    
+
+    //! Update the solution after NonLinearRichardson is called.
+    /*!
+     *  Here it is used also to update the velocity for the post-processing.
+     */
+    virtual void updateSolution( const vector_Type& solution )
+    {
+        this->M_fluidTimeAdvance->shiftRight(solution);
+        if(M_data->dataFluid()->conservativeFormulation())
+            this->M_fluidMassTimeAdvance->shiftRight(M_fluid->matrixMass()*solution);
+        this->M_solidTimeAdvance->shiftRight(solution);
+    }
+
+    //! Updates the right hand side
+    /**
+       Adds to the rhs the fluid time discretization terms
+       \todo this should be handled externally
+     */
+    void updateRHS();
+
+    //! Set vectors for restart
+    /*!
+     *  Set vectors for restart
+     */
+    void setVectorInStencils( const vectorPtr_Type& vel,
+                      const vectorPtr_Type& pressure,
+                      const vectorPtr_Type& solidDisp,
+                      const vectorPtr_Type& fluidDisp,
+                      const UInt iter);
+
+    void setFluidVectorInStencil( const vectorPtr_Type& vel, const vectorPtr_Type& pressure, const UInt iter);
+
+    void setSolidVectorInStencil( const vectorPtr_Type& solidDisp, const UInt iter);
+
+    virtual void setALEVectorInStencil( const vectorPtr_Type& fluidDisp, const UInt iter) = 0;
+
+    void finalizeRestart();
+
     //@}
 
 
@@ -437,40 +489,6 @@ protected:
        \param matrFull: the output matrix*/
     void diagonalScale(vector_Type& rhs, matrixPtr_Type matrFull);
 
-    //! Update the solution after NonLinearRichardson is called.
-    /*!
-     *  Here it is used also to update the velocity for the post-processing.
-     */
-    virtual void updateSolution( const vector_Type& solution )
-    {
-        this->M_fluidTimeAdvance->shiftRight(solution);
-        if(M_data->dataFluid()->conservativeFormulation())
-            this->M_fluidMassTimeAdvance->shiftRight(M_fluid->matrixMass()*solution);
-        this->M_solidTimeAdvance->shiftRight(solution);
-    }
-
-    //! Set vectors for restart
-    /*!
-     *  Set vectors for restart
-     */
-    void setVectorInStencils( const vectorPtr_Type& vel, 
-				      const vectorPtr_Type& pressure,
-				      const vectorPtr_Type& solidDisp,
-				      const vectorPtr_Type& fluidDisp,
-				      const UInt iter);
-
-  void setFluidVectorInStencil( const vectorPtr_Type& vel,
-				  const vectorPtr_Type& pressure,
-				  const UInt iter);
-  
-    void setSolidVectorInStencil( const vectorPtr_Type& solidDisp,
-				  const UInt iter);
-
-    virtual void setALEVectorInStencil( const vectorPtr_Type& fluidDisp,
-					const UInt iter) = 0;
-
-    void finalizeRestart( );
-
 
     //! Constructs the solid FESpace
     /**
@@ -506,13 +524,6 @@ protected:
       \param solution: current solution, used for the time advance implementation, and thus for the update of the right hand side
      */
     void assembleFluidBlock(UInt iter, const vector_Type& solution);
-
-    //! Updates the right hand side
-    /**
-       Adds to the rhs the fluid time discretization terms
-       \todo this should be handled externally
-     */
-    void updateRHS();
 
     //! Checks if the flux bcs changed during the simulation, e.g. if a flux b.c. has been changed to Natural
     //! (this can be useful when modeling valves)
