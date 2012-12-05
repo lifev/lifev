@@ -50,7 +50,7 @@
 #include <lifev/core/algorithm/NonLinearRichardson.hpp>
 #include <lifev/bc_interface/fem/BCInterface3D.hpp>
 
-#include <lifev/fsi/solver/FSIOperator.hpp>
+#include <lifev/fsi/solver/FSIMonolithic.hpp>
 #include <lifev/fsi/solver/FSIMonolithicGE.hpp>
 #include <lifev/fsi/solver/FSIMonolithicGI.hpp>
 
@@ -87,7 +87,7 @@ public:
     //! @name Public Types
     //@{
 
-    typedef FSIOperator                                FSIOperator_Type;
+    typedef FSIMonolithic                              FSIOperator_Type;
     typedef boost::shared_ptr< FSIOperator_Type>       FSIOperatorPtr_Type;
 
     typedef FSIOperator::data_Type                     data_Type;
@@ -305,6 +305,9 @@ private:
     void setExporterFluid( const IOFilePtr_Type& exporter );
     void setExporterSolid( const IOFilePtr_Type& exporter );
 
+    void exportFluidSolution();
+    void exportSolidSolution();
+
     //! Setup the linear model
     void setupLinearModel();
 
@@ -347,11 +350,9 @@ private:
     Real                                   M_externalPressureScalar;
 #endif
 
-    // Vectorial external pressure
-    vectorPtr_Type                         M_externalPressureVector;
-
     // Post processing members
-    vectorPtr_Type                         M_fluidVelocityAndPressure;
+    vectorPtr_Type                         M_fluidVelocity;
+    vectorPtr_Type                         M_fluidPressure;
     vectorPtr_Type                         M_fluidDisplacement;
     vectorPtr_Type                         M_solidVelocity;
     vectorPtr_Type                         M_solidDisplacement;
