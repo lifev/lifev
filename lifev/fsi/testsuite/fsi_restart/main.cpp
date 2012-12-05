@@ -189,8 +189,9 @@ public:
             M_fsi->FSIOper( )->setupDOF( );
         }
 
+#ifdef DEBUG
         Debug( 10000 ) << "Setting up the FESpace and DOF \n";
-
+#endif
         MPI_Barrier( MPI_COMM_WORLD );
 
 #ifdef DEBUG
