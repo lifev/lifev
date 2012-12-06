@@ -752,14 +752,14 @@ BCInterfaceFunctionParserSolver< OseenSolverShapeDerivative< RegionMesh< LinearT
 template< >
 inline void
 #ifdef MULTISCALE_IS_IN_LIFEV
-BCInterfaceFunctionParserSolver< Multiscale::MultiscaleData >::updatePhysicalSolverVariables()
+BCInterfaceFunctionParserSolver< Multiscale::MultiscaleGlobalData >::updatePhysicalSolverVariables()
 #else
 BCInterfaceFunctionParserSolver< ZeroDimensionalTemporaryData >::updatePhysicalSolverVariables()
 #endif
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 5023 ) << "BCInterfaceFunctionSolver<MultiscaleData>::updatePhysicalSolverVariables" << "\n";
+    debugStream( 5023 ) << "BCInterfaceFunctionSolver<MultiscaleGlobalData>::updatePhysicalSolverVariables" << "\n";
 #endif
 
     // Create/Update variables
@@ -806,7 +806,7 @@ BCInterfaceFunctionParserSolver< ZeroDimensionalTemporaryData >::updatePhysicalS
 
         default:
 
-            switchErrorMessage( "MultiscaleData" );
+            switchErrorMessage( "MultiscaleGlobalData" );
 
             break;
         }
@@ -943,14 +943,14 @@ BCInterfaceFunctionParserSolver< OseenSolverShapeDerivative< RegionMesh< LinearT
 template< >
 inline void
 #ifdef MULTISCALE_IS_IN_LIFEV
-BCInterfaceFunctionParserSolver< Multiscale::MultiscaleData >::createAccessList( const BCInterfaceData& data )
+BCInterfaceFunctionParserSolver< Multiscale::MultiscaleGlobalData >::createAccessList( const BCInterfaceData& data )
 #else
 BCInterfaceFunctionParserSolver< ZeroDimensionalTemporaryData >::createAccessList( const BCInterfaceData& data )
 #endif
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 5023 ) << "BCInterfaceFunctionSolver<MultiscaleData>::createAccessList( data )" << "\n";
+    debugStream( 5023 ) << "BCInterfaceFunctionSolver<MultiscaleGlobalData>::createAccessList( data )" << "\n";
 #endif
 
     std::map< std::string, physicalSolverList > mapList;
