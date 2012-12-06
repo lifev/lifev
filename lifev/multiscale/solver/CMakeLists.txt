@@ -12,14 +12,14 @@ SET(solver_HEADERS
   solver/MultiscaleCouplingMeanNormalStressValve.hpp
   solver/MultiscaleCouplingMeanTotalNormalStress.hpp
   solver/MultiscaleCouplingMeanTotalNormalStressArea.hpp
-  solver/MultiscaleData.hpp
+  solver/MultiscaleGlobalData.hpp
   solver/MultiscaleDefinitions.hpp
-  solver/MultiscaleInterfaceFluid.hpp
+  solver/MultiscaleInterface.hpp
   solver/MultiscaleModel.hpp
   solver/MultiscaleModel0D.hpp
-  solver/MultiscaleModel1D.hpp
   solver/MultiscaleModelFluid3D.hpp
   solver/MultiscaleModelFSI3D.hpp
+  solver/MultiscaleModelFSI1D.hpp
   solver/MultiscaleModelWindkessel0D.hpp
   solver/MultiscaleModelMultiscale.hpp
   solver/MultiscaleSolver.hpp
@@ -39,12 +39,12 @@ SET(solver_SOURCES
   solver/MultiscaleCouplingMeanNormalStressValve.cpp
   solver/MultiscaleCouplingMeanTotalNormalStress.cpp
   solver/MultiscaleCouplingMeanTotalNormalStressArea.cpp
-  solver/MultiscaleData.cpp
+  solver/MultiscaleGlobalData.cpp
   solver/MultiscaleModel.cpp
   solver/MultiscaleModel0D.cpp
-  solver/MultiscaleModel1D.cpp
   solver/MultiscaleModelFluid3D.cpp
   solver/MultiscaleModelFSI3D.cpp
+  solver/MultiscaleModelFSI1D.cpp
   solver/MultiscaleModelWindkessel0D.cpp
   solver/MultiscaleModelMultiscale.cpp
   solver/MultiscaleSolver.cpp
