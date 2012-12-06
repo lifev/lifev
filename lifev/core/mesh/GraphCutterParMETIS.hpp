@@ -74,10 +74,12 @@ class GraphCutterParMETIS
 public:
     //! @name Public Types
     //@{
-	typedef Teuchos::ParameterList                          pList_Type;
-	typedef boost::shared_ptr<Epetra_Comm>                  commPtr_Type;
-    typedef MeshType                                        mesh_Type;
-    typedef boost::shared_ptr<mesh_Type>                    meshPtr_Type;
+	typedef Teuchos::ParameterList                 pList_Type;
+	typedef boost::shared_ptr<Epetra_Comm>         commPtr_Type;
+    typedef MeshType                               mesh_Type;
+    typedef boost::shared_ptr<mesh_Type>           meshPtr_Type;
+    typedef std::vector<
+    		boost::shared_ptr<std::vector<Int> > > vertexPartition_Type;
     //@}
 
     //! @name Constructor & Destructor
@@ -93,8 +95,8 @@ public:
                           partitioning parameters
      */
     GraphCutterParMETIS(meshPtr_Type& mesh,
-                       commPtr_Type& comm,
-                       pList_Type& parameters);
+                        commPtr_Type& comm,
+                        pList_Type& parameters);
 
     //! Destructor
     ~GraphCutterParMETIS() {}
@@ -103,7 +105,7 @@ public:
     //! @name Public methods
     //@{
     //! Performs the graph partitioning
-    int run();
+    Int run();
     //@}
 
     //! @name Get Methods
@@ -111,7 +113,7 @@ public:
     //! Get a pointer to one of the partitions
     const std::vector<Int>& getPart(const UInt i) const
 	{
-    	return M_vertexPartition[i];
+    	return *(M_vertexPartition[i]);
 	}
     //@}
 
@@ -122,15 +124,15 @@ private:
     void setParameters(pList_Type& parameters);
 
     //! Perform a flat, non-hierarchical partition
-    int partitionFlat();
+    Int partitionFlat();
 
     //! Perform a hierarchical (2-level) partition
-    int partitionHierarchical();
+    Int partitionHierarchical();
 
     //! Perform a partitioning on a given subset of elements
-    int partitionSubGraph(const std::vector<Int>& vertexList,
-    					  const int numParts,
-    					  std::vector<std::vector<Int> >& vertexPartition);
+    Int partitionSubGraph(const std::vector<Int>& vertexList,
+    					  const Int numParts,
+    					  vertexPartition_Type& vertexPartition);
     //@}
 
     // Private copy constructor and assignment operator are disabled
@@ -141,19 +143,19 @@ private:
     //@{
     //@}
  
-    commPtr_Type             				   M_comm;
-    Int                                        M_myPID;
-    Int                                        M_numProcessors;
-    Int                                        M_numParts;
-    bool									   M_hierarchical;
-    Int										   M_topology;
-    pList_Type                                 M_parameters;
-    meshPtr_Type                               M_mesh;
-    UInt                                 	   M_elementVertices;
-    UInt                                       M_elementFacets;
-    UInt                                       M_elementRidges;
-    UInt                                       M_facetVertices;
-    std::vector<std::vector<Int> >			   M_vertexPartition;
+    commPtr_Type             				           M_comm;
+    Int                                                M_myPID;
+    Int                                                M_numProcessors;
+    Int                                                M_numParts;
+    bool									           M_hierarchical;
+    Int										           M_topology;
+    pList_Type                                         M_parameters;
+    meshPtr_Type                                       M_mesh;
+    UInt                                 	           M_elementVertices;
+    UInt                                               M_elementFacets;
+    UInt                                               M_elementRidges;
+    UInt                                               M_facetVertices;
+    vertexPartition_Type                               M_vertexPartition;
 };
 
 //
@@ -198,7 +200,7 @@ void GraphCutterParMETIS<MeshType>::setParameters(pList_Type& parameters)
 }
 
 template<typename MeshType>
-int GraphCutterParMETIS<MeshType>::run()
+Int GraphCutterParMETIS<MeshType>::run()
 {
 	// Initialization
     /*
@@ -213,8 +215,8 @@ int GraphCutterParMETIS<MeshType>::run()
     M_elementRidges   = MeshType::elementShape_Type::S_numRidges;
     M_facetVertices   = MeshType::facetShape_Type::S_numVertices;
 
-    int error;
-    if (! M_hierarchical) {
+    Int error;
+    if ((! M_hierarchical) || (M_topology == 1)) {
     	error = partitionFlat();
     } else {
     	error = partitionHierarchical();
@@ -224,13 +226,10 @@ int GraphCutterParMETIS<MeshType>::run()
 }
 
 template<typename MeshType>
-int GraphCutterParMETIS<MeshType>::partitionFlat()
+Int GraphCutterParMETIS<MeshType>::partitionFlat()
 {
-	int error = 0;
-
 	// In this case we want to partition the entire graph
 	Int numVertices = M_mesh->numElements();
-	Int numParts = M_numProcessors;
 
 	// The vector contains the global IDs of the vertices in the graph
 	std::vector<Int> vertexList(numVertices);
@@ -238,18 +237,15 @@ int GraphCutterParMETIS<MeshType>::partitionFlat()
 		vertexList[i] = i;
 	}
 
-	// Resize the container that will hold the partition
-	M_vertexPartition.resize(numParts);
-
 	// Call the partitionSubGraph method on the vertexList that was
 	// prepared
-	partitionSubGraph(vertexList, numParts, M_vertexPartition);
+	partitionSubGraph(vertexList, M_numParts, M_vertexPartition);
 
-    return error;
+    return 0;
 }
 
 template<typename MeshType>
-int GraphCutterParMETIS<MeshType>::partitionHierarchical()
+Int GraphCutterParMETIS<MeshType>::partitionHierarchical()
 {
 	if (M_numProcessors != 1) {
 		if (! M_myPID) {
@@ -258,19 +254,58 @@ int GraphCutterParMETIS<MeshType>::partitionHierarchical()
 		}
 		return 1;
 	}
+	if (M_numParts % M_topology != 0) {
+		if (! M_myPID) {
+			std::cout << "Hierarchical partitioning can only be performed if "
+					  << "the number of mesh parts is a multiple of the"
+					  << " topology parameter." << std::endl;
+		}
+		return 2;
+	}
+
+	// First step is to partition the graph into the number of subdomains
+	Int numSubdomains = M_numParts / M_topology;
+	Int numVertices = M_mesh->numElements();
+
+	// The vector contains the global IDs of the vertices in the graph
+	std::vector<Int> vertexList(numVertices);
+	for (Int i = 0; i < numVertices; ++i) {
+		vertexList[i] = i;
+	}
+
+	vertexPartition_Type tempVertexPartition(numSubdomains);
+
+	/*
+	 * After calling partitionSubGraph, tempVertexPartition will contain
+	 * numSubdomains vectors with the graph vertices of each subdomain
+	 */
+	partitionSubGraph(vertexList, numSubdomains, tempVertexPartition);
+
+	/*
+	 * Step two is to partition each subdomain into the number of sub parts
+	 * denoted by the M_topology parameter
+	 */
+	M_vertexPartition.resize(M_numParts);
+	Int currentPart = 0;
+	for (Int i = 0; i < numSubdomains; ++i) {
+		vertexPartition_Type subdomainParts;
+		partitionSubGraph(*(tempVertexPartition[i]), M_topology,
+						  subdomainParts);
+		for (Int j = 0; j < M_topology; ++j) {
+			M_vertexPartition[currentPart++] = subdomainParts[j];
+		}
+	}
+
+	return 0;
 }
 
 template<typename MeshType>
-int GraphCutterParMETIS<MeshType>::partitionSubGraph(
+Int GraphCutterParMETIS<MeshType>::partitionSubGraph(
 		const std::vector<Int>& vertexList,
-		const int numParts,
-		std::vector<std::vector<Int> >& vertexPartition)
+		const Int numParts,
+		vertexPartition_Type& vertexPartition)
 {
 	// Distribute elements
-    // ParMETIS is able to work in parallel: how many processors does it have
-    // at hand?
-    M_myPID = M_comm->MyPID();
-
     UInt k = vertexList.size();
 
     // CAREFUL: ParMetis works on a graph abstraction.
@@ -320,7 +355,6 @@ int GraphCutterParMETIS<MeshType>::partitionSubGraph(
 
     UInt sum = 0;
 
-    // TODO: Make the conversion from lid to gid in this loop
     for (UInt lid = localStart; lid < localEnd; ++lid)
     {
         for (UInt ifacet = 0; ifacet < M_elementFacets; ++ifacet)
@@ -334,6 +368,7 @@ int GraphCutterParMETIS<MeshType>::partitionSubGraph(
             {
                 elem = M_mesh->facet(facet).secondAdjacentElementIdentity();
             }
+            // TODO: this is extremely slow; find another way to do this
             std::vector<Int>::const_iterator it = std::find(vertexList.begin(),
             												vertexList.end(),
             												elem);
@@ -406,11 +441,10 @@ int GraphCutterParMETIS<MeshType>::partitionSubGraph(
                          &graphVertexLocations[localStart],
                          &MPIcomm);
 
-    M_comm->Barrier();
-
     // distribute the resulting partitioning stored in M_graphVertexLocations
     // to all processors
     if (M_numProcessors != 1) {
+        M_comm->Barrier();
 		for (Int proc = 0; proc < M_numProcessors; proc++)
 		{
 			UInt procStart  = vertexDistribution[proc];
@@ -422,11 +456,17 @@ int GraphCutterParMETIS<MeshType>::partitionSubGraph(
     }
 
     // cycling on locally stored vertices
+    vertexPartition.resize(numParts);
+    for (UInt i = 0; i < numParts; ++i) {
+    	vertexPartition[i].reset(new std::vector<Int>(0));
+    }
     for (UInt ii = 0; ii < graphVertexLocations.size(); ++ii)
     {
         // here we are associating the vertex global ID to the subdomain ID
-        vertexPartition[graphVertexLocations[ii]].push_back(vertexList[ii]);
+        vertexPartition[graphVertexLocations[ii]]->push_back(vertexList[ii]);
     }
+
+    return 0;
 }
 
 } // Namespace LifeV

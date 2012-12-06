@@ -59,7 +59,6 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/filter/GetPot.hpp>
-#include <lifev/core/mesh/MeshPartitioner.hpp>
 #include <lifev/core/mesh/MeshPartitionTool.hpp>
 #include <lifev/core/mesh/GraphCutterParMETIS.hpp>
 #include <lifev/core/mesh/MeshPartBuilder.hpp>
@@ -98,6 +97,9 @@ int main(int argc, char** argv)
 
     const UInt numElements(dataFile("mesh/nelements",10));
     const Int numParts(dataFile("test/num_parts", 3));
+    const bool hierarchical(dataFile("test/hierarchical", false));
+    const std::string topology(dataFile("test/topology", "1"));
+
     const std::string partsFileName(dataFile("test/hdf5_file_name", "cube.h5"));
 
     std::cout << "Number of elements in mesh: " << numElements << std::endl;
@@ -111,6 +113,8 @@ int main(int argc, char** argv)
 	Teuchos::ParameterList meshParameters;
     meshParameters.set("num_parts", numParts, "");
     meshParameters.set("offline_mode", true, "");
+    meshParameters.set("hierarchical", hierarchical, "");
+    meshParameters.set("topology", topology, "");
 	meshCutterParMETIS_Type meshCutter(fullMeshPtr, comm, meshParameters);
 	if (! meshCutter.success()) {
 		std::cout << "Mesh partition failed.";

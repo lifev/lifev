@@ -240,7 +240,7 @@ void MeshPartitionTool<MeshType,
 						  << std::endl;
 			}
 		} else {
-			Int numParts = M_parameters.get<int>("num_parts");
+			Int numParts = M_parameters.get<Int>("num_parts");
 			M_allMeshParts.reset(new partMesh_Type(numParts));
 			for (Int curPart = 0; curPart < numParts; ++curPart) {
 				M_allMeshParts->at(curPart).reset(new mesh_Type);
