@@ -188,6 +188,18 @@ public:
      */
     const Real& solidYoungModulus() const { return M_solidYoungModulus; }
 
+    //! Get the global resistance scaling factor.
+    /*!
+     * @return resistance scaling factor.
+     */
+    const Real& scalingFactorResistance() const { return M_scalingFactorResistance; }
+
+    //! Get the global compliance scaling factor.
+    /*!
+     * @return compliance scaling factor.
+     */
+    const Real& scalingFactorCompliance() const { return M_scalingFactorCompliance; }
+
     //@}
 
 private:
@@ -203,6 +215,9 @@ private:
     Real                                M_solidPoissonCoefficient;
 //    Real                                M_structureThickness;
     Real                                M_solidYoungModulus;
+
+    Real                                M_scalingFactorResistance;
+    Real                                M_scalingFactorCompliance;
 
 };
 

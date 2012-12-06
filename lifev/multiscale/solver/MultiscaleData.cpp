@@ -53,7 +53,9 @@ MultiscaleData::MultiscaleData() :
         M_solidDensity                  (),
         M_solidPoissonCoefficient       (),
         //M_solidThickness                (),
-        M_solidYoungModulus             ()
+        M_solidYoungModulus             (),
+        M_scalingFactorResistance       (),
+        M_scalingFactorCompliance       ()
 {
 }
 
@@ -66,7 +68,9 @@ MultiscaleData::MultiscaleData( const MultiscaleData& data ) :
         M_solidDensity                  ( data.M_solidDensity ),
         M_solidPoissonCoefficient       ( data.M_solidPoissonCoefficient ),
         //M_solidThickness                ( data.M_solidThickness ),
-        M_solidYoungModulus             ( data.M_solidYoungModulus )
+        M_solidYoungModulus             ( data.M_solidYoungModulus ),
+        M_scalingFactorResistance       ( data.M_scalingFactorResistance ),
+        M_scalingFactorCompliance       ( data.M_scalingFactorCompliance )
 {
 }
 
@@ -87,6 +91,8 @@ MultiscaleData::operator=( const MultiscaleData& data )
         M_solidPoissonCoefficient       = data.M_solidPoissonCoefficient;
         //M_solidThickness                = data.M_solidThickness;
         M_solidYoungModulus             = data.M_solidYoungModulus;
+        M_scalingFactorResistance       = data.M_scalingFactorResistance;
+        M_scalingFactorCompliance       = data.M_scalingFactorCompliance;
     }
 
     return *this;
@@ -107,6 +113,8 @@ MultiscaleData::readData( const GetPot& dataFile )
     M_solidPoissonCoefficient       = dataFile( "Physics/SolidPoissonCoefficient", 0. );
     //M_solidThickness                = dataFile( "Physics/SolidThickness", 0. );
     M_solidYoungModulus             = dataFile( "Physics/SolidYoungModulus", 0. );
+    M_scalingFactorResistance       = dataFile( "Physics/ScalingFactorResistance", 1. );
+    M_scalingFactorCompliance       = dataFile( "Physics/ScalingFactorCompliance", 1. );
 }
 
 void
@@ -121,6 +129,9 @@ MultiscaleData::showMe()
               << "Solid Poisson coefficient     = " << M_solidPoissonCoefficient << std::endl
               //<< "Solid Thickness               = " << M_solidThickness << std::endl
               << "Solid Young modulus           = " << M_solidYoungModulus << std::endl << std::endl;
+
+    std::cout << "Resistance scaling factor     = " << M_scalingFactorResistance << std::endl
+              << "Compliance scaling factor     = " << M_scalingFactorCompliance << std::endl << std::endl;
 
     std::cout << "Initial time                  = " << M_timeData->initialTime() << std::endl
               << "End time                      = " << M_timeData->endTime() << std::endl

@@ -87,9 +87,13 @@ MultiscaleModelWindkessel0D::setupData( const std::string& fileName )
 
     GetPot dataFile( fileName );
 
-    M_resistance1       = dataFile( "Coefficients/Resistance1"     , 1.0 );
-    M_resistance2       = dataFile( "Coefficients/Resistance2"     , 1.0 );
-    M_capacitance       = dataFile( "Coefficients/Capacitance"     , 1.0 );
+    // R1, R2, and C can have global scaling factors applied to them, these are overridden by local scaling factors
+    Real resistanceScalingFactor = dataFile( "ScalingFactors/Resistance", M_globalData->scalingFactorResistance() );
+    Real complianceScalingFactor = dataFile( "ScalingFactors/Compliance", M_globalData->scalingFactorCompliance() );
+
+    M_resistance1       = dataFile( "Coefficients/Resistance1"     , 1.0 ) * resistanceScalingFactor;
+    M_resistance2       = dataFile( "Coefficients/Resistance2"     , 1.0 ) * resistanceScalingFactor;
+    M_capacitance       = dataFile( "Coefficients/Capacitance"     , 1.0 ) * complianceScalingFactor;
 
     if ( M_globalData.get() )
         setupGlobalData( fileName );
