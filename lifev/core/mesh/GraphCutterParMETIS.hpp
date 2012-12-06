@@ -42,6 +42,7 @@
 #include <algorithm>
 #include <boost/shared_ptr.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/bimap.hpp>
 #include <Epetra_Comm.h>
 #include <Teuchos_ParameterList.hpp>
 #include <parmetis.h>
@@ -80,6 +81,8 @@ public:
     typedef boost::shared_ptr<mesh_Type>           meshPtr_Type;
     typedef std::vector<
     		boost::shared_ptr<std::vector<Int> > > vertexPartition_Type;
+    typedef boost::bimap<UInt, UInt>                 biMap_Type;
+    typedef biMap_Type::value_type                 biMapValue_Type;
     //@}
 
     //! @name Constructor & Destructor
@@ -130,7 +133,7 @@ private:
     Int partitionHierarchical();
 
     //! Perform a partitioning on a given subset of elements
-    Int partitionSubGraph(const std::vector<Int>& vertexList,
+    Int partitionSubGraph(const biMap_Type& vertexMap,
     					  const Int numParts,
     					  vertexPartition_Type& vertexPartition);
     //@}
@@ -231,15 +234,17 @@ Int GraphCutterParMETIS<MeshType>::partitionFlat()
 	// In this case we want to partition the entire graph
 	Int numVertices = M_mesh->numElements();
 
-	// The vector contains the global IDs of the vertices in the graph
-	std::vector<Int> vertexList(numVertices);
-	for (Int i = 0; i < numVertices; ++i) {
-		vertexList[i] = i;
+	// We need to build a bidirectional map between local and global IDs
+	// vertexMap.left is the local-to-global map and vertexMap.right is
+	// the global-to-local map
+	biMap_Type vertexMap;
+	for (UInt i = 0; i < numVertices; ++i) {
+		vertexMap.insert(biMapValue_Type(i, i));
 	}
 
 	// Call the partitionSubGraph method on the vertexList that was
 	// prepared
-	partitionSubGraph(vertexList, M_numParts, M_vertexPartition);
+	partitionSubGraph(vertexMap, M_numParts, M_vertexPartition);
 
     return 0;
 }
@@ -268,9 +273,9 @@ Int GraphCutterParMETIS<MeshType>::partitionHierarchical()
 	Int numVertices = M_mesh->numElements();
 
 	// The vector contains the global IDs of the vertices in the graph
-	std::vector<Int> vertexList(numVertices);
+	std::vector<Int> vertexMap(numVertices);
 	for (Int i = 0; i < numVertices; ++i) {
-		vertexList[i] = i;
+		vertexMap[i] = i;
 	}
 
 	vertexPartition_Type tempVertexPartition(numSubdomains);
@@ -279,7 +284,7 @@ Int GraphCutterParMETIS<MeshType>::partitionHierarchical()
 	 * After calling partitionSubGraph, tempVertexPartition will contain
 	 * numSubdomains vectors with the graph vertices of each subdomain
 	 */
-	partitionSubGraph(vertexList, numSubdomains, tempVertexPartition);
+	//partitionSubGraph(vertexMap, numSubdomains, tempVertexPartition);
 
 	/*
 	 * Step two is to partition each subdomain into the number of sub parts
@@ -289,8 +294,8 @@ Int GraphCutterParMETIS<MeshType>::partitionHierarchical()
 	Int currentPart = 0;
 	for (Int i = 0; i < numSubdomains; ++i) {
 		vertexPartition_Type subdomainParts;
-		partitionSubGraph(*(tempVertexPartition[i]), M_topology,
-						  subdomainParts);
+//		partitionSubGraph(*(tempVertexPartition[i]), M_topology,
+//						  subdomainParts);
 		for (Int j = 0; j < M_topology; ++j) {
 			M_vertexPartition[currentPart++] = subdomainParts[j];
 		}
@@ -301,12 +306,12 @@ Int GraphCutterParMETIS<MeshType>::partitionHierarchical()
 
 template<typename MeshType>
 Int GraphCutterParMETIS<MeshType>::partitionSubGraph(
-		const std::vector<Int>& vertexList,
+		const biMap_Type& vertexMap,
 		const Int numParts,
 		vertexPartition_Type& vertexPartition)
 {
 	// Distribute elements
-    UInt k = vertexList.size();
+    UInt k = vertexMap.size();
 
     // CAREFUL: ParMetis works on a graph abstraction.
     // A graph is built over the data structure to be split, each vertex being
@@ -359,7 +364,7 @@ Int GraphCutterParMETIS<MeshType>::partitionSubGraph(
     {
         for (UInt ifacet = 0; ifacet < M_elementFacets; ++ifacet)
         {
-        	UInt gid = vertexList[lid];
+        	UInt gid = vertexMap.left.at(lid);
             // global ID of the ifacet-th facet in element ie
             UInt facet = M_mesh->localFacetId(gid, ifacet);
             // first adjacent element to face "facet"
@@ -368,16 +373,15 @@ Int GraphCutterParMETIS<MeshType>::partitionSubGraph(
             {
                 elem = M_mesh->facet(facet).secondAdjacentElementIdentity();
             }
-            // TODO: this is extremely slow; find another way to do this
-            std::vector<Int>::const_iterator it = std::find(vertexList.begin(),
-            												vertexList.end(),
-            												elem);
-            bool inSubGraph = (vertexList.end() != it);
+            biMap_Type::right_const_iterator it = vertexMap.right.find(elem);
+
+            bool inSubGraph = (vertexMap.right.end() != it);
             if ((elem != NotAnId) && (inSubGraph))
             {
                 // this is the list of adjacency
                 // for each graph vertex, push back the ID of its neighbors
-                adjacencyGraphValues.push_back(it - vertexList.begin());
+                //adjacencyGraphValues.push_back(it - vertexMap.right.begin());
+                adjacencyGraphValues.push_back(it->second);
                 ++sum;
             }
         }
@@ -463,7 +467,7 @@ Int GraphCutterParMETIS<MeshType>::partitionSubGraph(
     for (UInt ii = 0; ii < graphVertexLocations.size(); ++ii)
     {
         // here we are associating the vertex global ID to the subdomain ID
-        vertexPartition[graphVertexLocations[ii]]->push_back(vertexList[ii]);
+        vertexPartition[graphVertexLocations[ii]]->push_back(vertexMap.left.at(ii));
     }
 
     return 0;
