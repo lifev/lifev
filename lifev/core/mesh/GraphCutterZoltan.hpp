@@ -116,7 +116,7 @@ public:
     //! @name Public methods
     //@{
     //! Performs the graph partitioning
-    void run();
+    int run();
     //@}
 
     //! @name Get Methods
@@ -294,11 +294,13 @@ void GraphCutterZoltan<MeshType>::setParameters(pList_Type& parameters)
 }
 
 template<typename MeshType>
-void GraphCutterZoltan<MeshType>::run()
+int GraphCutterZoltan<MeshType>::run()
 { 
     distributePartitions();
     buildGraph();
     partitionGraph();
+
+    return 0;
 }
 
 // =================

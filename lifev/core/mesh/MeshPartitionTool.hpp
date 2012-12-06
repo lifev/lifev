@@ -212,7 +212,11 @@ void MeshPartitionTool<MeshType,
 	{
 		std::cout << "Partitioning mesh graph ..." << std::endl;
 	}
-    M_graphCutter->run();
+	// If the graph partitioning failed, just abort the mesh partitioning.
+	// MeshPartitionTool::success() will return false.
+    if (M_graphCutter->run()) {
+    	return;
+    }
 
 	if (!M_myPID)
 	{
@@ -225,6 +229,9 @@ void MeshPartitionTool<MeshType,
 		M_meshPart.reset(new mesh_Type);
 	    const std::vector<Int>& myElements = M_graphCutter->getPart(M_myPID);
 		M_meshPartBuilder->run(M_meshPart, myElements);
+
+	    // Mark the partition as successful
+	    M_success = true;
 	} else {
 		// Offline partitioning
 		if (M_comm->NumProc() != 1) {
@@ -241,6 +248,9 @@ void MeshPartitionTool<MeshType,
 			    		= M_graphCutter->getPart(curPart);
 				M_meshPartBuilder->run(M_allMeshParts->at(curPart),
 									   curElements);
+
+			    // Mark the partition as successful
+			    M_success = true;
 			}
 		}
 	}
@@ -255,9 +265,6 @@ void MeshPartitionTool<MeshType,
     M_meshPartBuilder.reset();
     // Release the pointer to the original uncut mesh
     M_originalMesh.reset();
-
-    // Mark the partition as successful
-    M_success = true;
 }
 
 template<typename MeshType,
