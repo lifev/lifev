@@ -345,7 +345,7 @@ TimeAdvanceNewmark<feVectorType>::updateRHSFirstDerivative(const Real& timeStep 
     fv *=  this->M_alpha[ 1 ] / timeStep ;
 
     for (UInt i= 1; i  < this->M_firstOrderDerivateSize; ++i )
-        fv += ( this->M_alpha[ i+1 ] * pow( timeStep, static_cast<Real>(i - 1 ) ) ) *  (* this->M_unknowns[ i ]);
+        fv += ( this->M_alpha[ i+1 ] * std::pow( timeStep, static_cast<Real>(i - 1 ) ) ) *  (* this->M_unknowns[ i ]);
 
     *it = new feVectorType(fv);
 
@@ -364,7 +364,7 @@ TimeAdvanceNewmark<feVectorType>::updateRHSSecondDerivative(const Real& timeStep
 
     for ( UInt i = 1;  i < this->M_secondOrderDerivateSize; ++i )
 
-      fw += ( this->M_xi[ i+1 ] * pow(timeStep, static_cast<Real>(i - 2) ) ) * ( *this->M_unknowns[ i ]);
+      fw += ( this->M_xi[ i+1 ] * std::pow(timeStep, static_cast<Real>(i - 2) ) ) * ( *this->M_unknowns[ i ]);
 
     *it = new feVectorType(fw);
 
@@ -617,14 +617,14 @@ Real
 TimeAdvanceNewmark<feVectorType>::coefficientExtrapolation(const UInt& i) const
 {
   ASSERT ( i <  3 ,  "coeff_der i must equal 0 or 1 because U^*= U^n + timeStep*V^n + timeStep^2 / 2 W^n");
-  return  this->M_beta(i)*pow( this->M_timeStep, static_cast<Real>(i) );
+  return  this->M_beta(i)*std::pow( this->M_timeStep, static_cast<Real>(i) );
 }
 
 template<typename feVectorType>
 Real
 TimeAdvanceNewmark<feVectorType>::coefficientExtrapolationVelocity(const UInt& i ) const
 {
- return  this->M_betaVelocity(i)*pow( this->M_timeStep, static_cast<Real>(i));
+ return  this->M_betaVelocity(i)*std::pow( this->M_timeStep, static_cast<Real>(i));
 }
 
 template<typename feVectorType>

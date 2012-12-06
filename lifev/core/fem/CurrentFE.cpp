@@ -621,7 +621,7 @@ Real CurrentFE::diameter2() const
                 d = d*d;
                 s += d;
             }
-            s = sqrt(s);
+            s = std::sqrt(s);
             if ( s > h )
             {
                 h = s;

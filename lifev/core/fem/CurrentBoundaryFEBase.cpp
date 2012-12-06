@@ -315,7 +315,7 @@ void CurrentBoundaryFEBase::computeMeasureNormal()
         {
             n1 = M_tangent( int(0), int(1), int(ig) );
             n2 = - M_tangent( int(0), int(0), int(ig) );
-            norm = sqrt( n1 * n1 + n2 * n2 );
+            norm = std::sqrt( n1 * n1 + n2 * n2 );
             M_normal( UInt(0), ig ) = n1 / norm;
             M_normal( UInt(1), ig ) = n2 / norm;
         }
@@ -331,7 +331,7 @@ void CurrentBoundaryFEBase::computeMeasureNormal()
                 - M_tangent( int(0), int(0), int(ig) ) * M_tangent( int(1), int(2), int(ig) );
             n3 = M_tangent( int(0), int(0), int(ig) ) * M_tangent( int(1), int(1), int(ig) )
                 - M_tangent( int(0), int(1), int(ig) ) * M_tangent( int(1), int(0), int(ig) );
-            norm = sqrt( n1 * n1 + n2 * n2 + n3 * n3 );
+            norm = std::sqrt( n1 * n1 + n2 * n2 + n3 * n3 );
             M_normal( UInt(0), ig ) = n1 / norm;
             M_normal( UInt(1), ig ) = n2 / norm;
             M_normal( UInt(2), ig ) = n3 / norm;
