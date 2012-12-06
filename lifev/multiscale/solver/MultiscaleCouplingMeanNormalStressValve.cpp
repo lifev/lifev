@@ -52,7 +52,7 @@ MultiscaleCouplingMeanNormalStressValve::MultiscaleCouplingMeanNormalStressValve
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8240 ) << "MultiscaleCouplingMeanNormalStressValve::MultiscaleCouplingMeanNormalStressValve() \n";
+    debugStream( 8240 ) << "MultiscaleCouplingMeanNormalStressValve::MultiscaleCouplingMeanNormalStressValve() \n";
 #endif
 
     M_type = MeanNormalStressValve;
@@ -66,7 +66,7 @@ MultiscaleCouplingMeanNormalStressValve::setupCoupling()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8240 ) << "MultiscaleCouplingMeanNormalStressValve::setupCoupling() \n";
+    debugStream( 8240 ) << "MultiscaleCouplingMeanNormalStressValve::setupCoupling() \n";
 #endif
 
     super_Type::setupCoupling();
@@ -86,7 +86,7 @@ MultiscaleCouplingMeanNormalStressValve::initializeCouplingVariables()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8240 ) << "MultiscaleCouplingMeanNormalStressValve::initializeCouplingVariables() \n";
+    debugStream( 8240 ) << "MultiscaleCouplingMeanNormalStressValve::initializeCouplingVariables() \n";
 #endif
 
     super_Type::initializeCouplingVariables();
@@ -131,7 +131,7 @@ MultiscaleCouplingMeanNormalStressValve::updateCoupling()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8240 ) << "MultiscaleCouplingMeanNormalStressValve::updateCoupling() \n";
+    debugStream( 8240 ) << "MultiscaleCouplingMeanNormalStressValve::updateCoupling() \n";
 #endif
 
     super_Type::updateCoupling();
@@ -198,7 +198,7 @@ MultiscaleCouplingMeanNormalStressValve::computeCouplingResiduals()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8240 ) << "MultiscaleCouplingMeanNormalStressValve::computeCouplingResiduals()  \n";
+    debugStream( 8240 ) << "MultiscaleCouplingMeanNormalStressValve::computeCouplingResiduals()  \n";
 #endif
 
     if ( M_valveIsOpen )
@@ -215,7 +215,7 @@ MultiscaleCouplingMeanNormalStressValve::insertJacobianConstantCoefficients( mul
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8240 ) << "MultiscaleCouplingMeanNormalStressValve::insertJacobianConstantCoefficients( jacobian )  \n";
+    debugStream( 8240 ) << "MultiscaleCouplingMeanNormalStressValve::insertJacobianConstantCoefficients( jacobian )  \n";
 #endif
 
     if ( M_valveIsOpen )
@@ -240,7 +240,7 @@ MultiscaleCouplingMeanNormalStressValve::insertJacobianDeltaCoefficients( multis
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8240 ) << "MultiscaleCouplingMeanNormalStressValve::insertJacobianDeltaCoefficients( jacobian, column, ID, solveLinearSystem )  \n";
+    debugStream( 8240 ) << "MultiscaleCouplingMeanNormalStressValve::insertJacobianDeltaCoefficients( jacobian, column, ID, solveLinearSystem )  \n";
 #endif
 
     if ( M_valveIsOpen )

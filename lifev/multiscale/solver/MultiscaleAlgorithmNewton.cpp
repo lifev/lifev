@@ -51,7 +51,7 @@ MultiscaleAlgorithmNewton::MultiscaleAlgorithmNewton() :
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8013 ) << "MultiscaleAlgorithmNewton::MultiscaleAlgorithmNewton() \n";
+    debugStream( 8013 ) << "MultiscaleAlgorithmNewton::MultiscaleAlgorithmNewton() \n";
 #endif
 
     M_type = Newton;
@@ -65,7 +65,7 @@ MultiscaleAlgorithmNewton::setupData( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8013 ) << "MultiscaleAlgorithmNewton::setupData( fileName ) \n";
+    debugStream( 8013 ) << "MultiscaleAlgorithmNewton::setupData( fileName ) \n";
 #endif
 
     // Read parameters
@@ -86,7 +86,7 @@ MultiscaleAlgorithmNewton::subIterate()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8013 ) << "MultiscaleAlgorithmNewton::subIterate() \n";
+    debugStream( 8013 ) << "MultiscaleAlgorithmNewton::subIterate() \n";
 #endif
 
     multiscaleAlgorithm_Type::subIterate();

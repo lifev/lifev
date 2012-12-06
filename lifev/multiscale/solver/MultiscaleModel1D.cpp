@@ -81,7 +81,7 @@ MultiscaleModel1D::MultiscaleModel1D() :
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MultiscaleModel1D::MultiscaleModel1D() \n";
+    debugStream( 8130 ) << "MultiscaleModel1D::MultiscaleModel1D() \n";
 #endif
 
     M_type = OneDimensional;
@@ -108,7 +108,7 @@ MultiscaleModel1D::setupData( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MultiscaleModel1D::setupData( fileName ) \n";
+    debugStream( 8130 ) << "MultiscaleModel1D::setupData( fileName ) \n";
 #endif
 
     multiscaleModel_Type::setupData( fileName );
@@ -180,7 +180,7 @@ MultiscaleModel1D::setupModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MultiscaleModel1D::setupModel() \n";
+    debugStream( 8130 ) << "MultiscaleModel1D::setupModel() \n";
 #endif
 
     //FEspace
@@ -238,7 +238,7 @@ MultiscaleModel1D::buildModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MultiscaleModel1D::buildModel() \n";
+    debugStream( 8130 ) << "MultiscaleModel1D::buildModel() \n";
 #endif
 
     // Display data
@@ -262,7 +262,7 @@ MultiscaleModel1D::updateModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MultiscaleModel1D::updateModel() \n";
+    debugStream( 8130 ) << "MultiscaleModel1D::updateModel() \n";
 #endif
 
     // Update previous solution
@@ -280,7 +280,7 @@ MultiscaleModel1D::solveModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MultiscaleModel1D::solveModel() \n";
+    debugStream( 8130 ) << "MultiscaleModel1D::solveModel() \n";
 #endif
 
     displayModelStatus( "Solve" );
@@ -298,7 +298,7 @@ MultiscaleModel1D::updateSolution()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MultiscaleModel1D::updateSolution() \n";
+    debugStream( 8130 ) << "MultiscaleModel1D::updateSolution() \n";
 #endif
 
 }
@@ -308,7 +308,7 @@ MultiscaleModel1D::saveSolution()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MultiscaleModel1D::saveSolution() \n";
+    debugStream( 8130 ) << "MultiscaleModel1D::saveSolution() \n";
 #endif
 
     // Update exporter solution removing ghost nodes
@@ -383,9 +383,9 @@ MultiscaleModel1D::boundaryDeltaFlowRate( const multiscaleID_Type& boundaryID, b
     Real Qdelta = M_solver->boundaryValue( *M_linearSolution, OneDFSI::Q, bcSide );
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MultiscaleModel1D::boundaryDeltaFlowRate( boundaryID, solveLinearSystem ) \n";
-    Debug( 8130 ) << "Q:          " << Q << "\n";
-    Debug( 8130 ) << "Qdelta:     " << Qdelta << "\n";
+    debugStream( 8130 ) << "MultiscaleModel1D::boundaryDeltaFlowRate( boundaryID, solveLinearSystem ) \n";
+    debugStream( 8130 ) << "Q:          " << Q << "\n";
+    debugStream( 8130 ) << "Qdelta:     " << Qdelta << "\n";
 #endif
 
     return (Qdelta - Q) / M_bcDelta;
@@ -403,9 +403,9 @@ MultiscaleModel1D::boundaryDeltaMeanNormalStress( const multiscaleID_Type& bound
     Real Sdelta = M_solver->boundaryValue( *M_linearSolution, OneDFSI::S, bcSide );
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MultiscaleModel1D::boundaryDeltaStress( boundaryID, solveLinearSystem ) \n";
-    Debug( 8130 ) << "S:          " << S <<  "\n";
-    Debug( 8130 ) << "Sdelta:     " << Sdelta <<  "\n";
+    debugStream( 8130 ) << "MultiscaleModel1D::boundaryDeltaStress( boundaryID, solveLinearSystem ) \n";
+    debugStream( 8130 ) << "S:          " << S <<  "\n";
+    debugStream( 8130 ) << "Sdelta:     " << Sdelta <<  "\n";
 #endif
 
     return (Sdelta - S) / M_bcDelta;
@@ -422,9 +422,9 @@ MultiscaleModel1D::boundaryDeltaMeanTotalNormalStress( const multiscaleID_Type& 
     Real Tdelta = M_solver->boundaryValue( *M_linearSolution, OneDFSI::T, bcSide );
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MultiscaleModel1D::boundaryDeltaTotalStress( boundaryID, solveLinearSystem ) \n";
-    Debug( 8130 ) << "T:          " << T <<  "\n";
-    Debug( 8130 ) << "Tdelta:     " << Tdelta <<  "\n";
+    debugStream( 8130 ) << "MultiscaleModel1D::boundaryDeltaTotalStress( boundaryID, solveLinearSystem ) \n";
+    debugStream( 8130 ) << "T:          " << T <<  "\n";
+    debugStream( 8130 ) << "Tdelta:     " << Tdelta <<  "\n";
 #endif
 
     return (Tdelta - T) / M_bcDelta;
@@ -441,9 +441,9 @@ MultiscaleModel1D::boundaryDeltaArea( const multiscaleID_Type& boundaryID, bool&
     Real Adelta = M_solver->boundaryValue( *M_linearSolution, OneDFSI::A, bcSide );
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MultiscaleModel1D::boundaryDeltaArea( boundaryID, solveLinearSystem ) \n";
-    Debug( 8130 ) << "A:          " << A <<  "\n";
-    Debug( 8130 ) << "Adelta:     " << Adelta <<  "\n";
+    debugStream( 8130 ) << "MultiscaleModel1D::boundaryDeltaArea( boundaryID, solveLinearSystem ) \n";
+    debugStream( 8130 ) << "A:          " << A <<  "\n";
+    debugStream( 8130 ) << "Adelta:     " << Adelta <<  "\n";
 #endif
 
     return (Adelta - A) / M_bcDelta;
@@ -485,7 +485,7 @@ MultiscaleModel1D::setupGlobalData( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MultiscaleModel1D::setupGlobalData( fileName ) \n";
+    debugStream( 8130 ) << "MultiscaleModel1D::setupGlobalData( fileName ) \n";
 #endif
 
     GetPot dataFile( fileName );
@@ -518,7 +518,7 @@ MultiscaleModel1D::initializeSolution()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MultiscaleModel1D::initializeSolution() \n";
+    debugStream( 8130 ) << "MultiscaleModel1D::initializeSolution() \n";
 #endif
 
     if ( multiscaleProblemStep > 0 )
@@ -564,7 +564,7 @@ MultiscaleModel1D::setupFESpace()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MultiscaleModel1D::setupFEspace() \n";
+    debugStream( 8130 ) << "MultiscaleModel1D::setupFEspace() \n";
 #endif
 
     //Transform mesh
@@ -605,7 +605,7 @@ MultiscaleModel1D::copySolution( const solution_Type& solution1, solution_Type& 
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MultiscaleModel1D::copySolution( solution1, solution2 ) \n";
+    debugStream( 8130 ) << "MultiscaleModel1D::copySolution( solution1, solution2 ) \n";
 #endif
 
     for ( solutionConstIterator_Type i = solution2.begin() ; i != solution2.end() ; ++i )
@@ -618,7 +618,7 @@ MultiscaleModel1D::updateBCPhysicalSolverVariables()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MultiscaleModel1D::updateBCPhysicalSolverVariables() \n";
+    debugStream( 8130 ) << "MultiscaleModel1D::updateBCPhysicalSolverVariables() \n";
 #endif
 
     // Update BCInterface solver variables
@@ -630,7 +630,7 @@ MultiscaleModel1D::solve( bc_Type& bc, solution_Type& solution, const std::strin
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MultiscaleModel1D::solve() \n";
+    debugStream( 8130 ) << "MultiscaleModel1D::solve() \n";
 #endif
 
     // Re-initialize solution
@@ -694,7 +694,7 @@ MultiscaleModel1D::setupLinearModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MultiscaleModel1D::setupLinearModel( ) \n";
+    debugStream( 8130 ) << "MultiscaleModel1D::setupLinearModel( ) \n";
 #endif
 
     // Define bcFunction for linear problem
@@ -743,7 +743,7 @@ MultiscaleModel1D::solveLinearModel( bool& solveLinearSystem )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MultiscaleModel1D::solveLinearModel() \n";
+    debugStream( 8130 ) << "MultiscaleModel1D::solveLinearModel() \n";
 #endif
 
     if ( !solveLinearSystem )
@@ -765,7 +765,7 @@ MultiscaleModel1D::imposePerturbation()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MultiscaleModel1D::imposePerturbation() \n";
+    debugStream( 8130 ) << "MultiscaleModel1D::imposePerturbation() \n";
 #endif
 
     for ( multiscaleCouplingsContainerConstIterator_Type i = M_couplings.begin(); i < M_couplings.end(); ++i )
@@ -819,7 +819,7 @@ MultiscaleModel1D::imposePerturbation()
         }
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "BCDelta:    " << M_bcDelta << "\n";
+    debugStream( 8130 ) << "BCDelta:    " << M_bcDelta << "\n";
 #endif
 
 }
@@ -829,7 +829,7 @@ MultiscaleModel1D::resetPerturbation()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MultiscaleModel1D::resetPerturbation() \n";
+    debugStream( 8130 ) << "MultiscaleModel1D::resetPerturbation() \n";
 #endif
 
     M_linearBC->bc( M_bcDeltaSide )->setBCFunction( OneDFSI::first, M_bc->handler()->bc( M_bcDeltaSide )->bcFunction( OneDFSI::first ) );
@@ -873,7 +873,7 @@ MultiscaleModel1D::tangentProblem( const bcSide_Type& bcOutputSide, const bcType
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8130 ) << "MultiscaleModel1D::tangentProblem( bcOutputSide, bcOutputType ) \n";
+    debugStream( 8130 ) << "MultiscaleModel1D::tangentProblem( bcOutputSide, bcOutputType ) \n";
 #endif
 
     displayModelStatus( "Solve linear" );

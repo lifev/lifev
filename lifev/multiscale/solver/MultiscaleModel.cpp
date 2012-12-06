@@ -60,7 +60,7 @@ MultiscaleModel::MultiscaleModel() :
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8100 ) << "MultiscaleModel::MultiscaleModel() \n";
+    debugStream( 8100 ) << "MultiscaleModel::MultiscaleModel() \n";
 #endif
 
     //Initialization of geometry arrays
@@ -80,7 +80,7 @@ MultiscaleModel::setupData( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8100 ) << "MultiscaleModel::SetupData( fileName ) \n";
+    debugStream( 8100 ) << "MultiscaleModel::SetupData( fileName ) \n";
 #endif
 
     GetPot dataFile( fileName );
@@ -140,7 +140,7 @@ MultiscaleModel::setGeometry( const boost::array< Real, NDIM >& scale,
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8100 ) << "MultiscaleModel::SetGeometry( scale, rotate, translate ) \n";
+    debugStream( 8100 ) << "MultiscaleModel::SetGeometry( scale, rotate, translate ) \n";
 #endif
 
     M_geometryScale     = scale;

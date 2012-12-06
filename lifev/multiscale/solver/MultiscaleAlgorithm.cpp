@@ -58,7 +58,7 @@ MultiscaleAlgorithm::MultiscaleAlgorithm() :
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8010 ) << "MultiscaleAlgorithm::MultiscaleAlgorithm() \n";
+    debugStream( 8010 ) << "MultiscaleAlgorithm::MultiscaleAlgorithm() \n";
 #endif
 
 }
@@ -71,7 +71,7 @@ MultiscaleAlgorithm::setupAlgorithm()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8010 ) << "MultiscaleAlgorithm::setMultiscaleProblem( multiscale ) \n";
+    debugStream( 8010 ) << "MultiscaleAlgorithm::setMultiscaleProblem( multiscale ) \n";
 #endif
 
     // Build coupling variables and residuals vectors
@@ -88,7 +88,7 @@ MultiscaleAlgorithm::subIterate()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8010 ) << "MultiscaleAlgorithm::subIterate() \n";
+    debugStream( 8010 ) << "MultiscaleAlgorithm::subIterate() \n";
 #endif
 
     // Algorithm Type

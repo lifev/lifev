@@ -49,7 +49,7 @@ MultiscaleCouplingMeanTotalNormalStress::MultiscaleCouplingMeanTotalNormalStress
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8250 ) << "MultiscaleCouplingMeanTotalNormalStress::MultiscaleCouplingMeanTotalNormalStress() \n";
+    debugStream( 8250 ) << "MultiscaleCouplingMeanTotalNormalStress::MultiscaleCouplingMeanTotalNormalStress() \n";
 #endif
 
     M_type = MeanTotalNormalStress;
@@ -63,7 +63,7 @@ MultiscaleCouplingMeanTotalNormalStress::setupCouplingVariablesNumber()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8250 ) << "MultiscaleCouplingMeanTotalNormalStress::setupCouplingVariablesNumber() \n";
+    debugStream( 8250 ) << "MultiscaleCouplingMeanTotalNormalStress::setupCouplingVariablesNumber() \n";
 #endif
 
     M_couplingVariablesNumber = modelsNumber() + 1;
@@ -74,7 +74,7 @@ MultiscaleCouplingMeanTotalNormalStress::setupCoupling()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8250 ) << "MultiscaleCouplingMeanTotalNormalStress::setupCoupling() \n";
+    debugStream( 8250 ) << "MultiscaleCouplingMeanTotalNormalStress::setupCoupling() \n";
 #endif
 
     if ( myModelsNumber() > 0 )
@@ -97,7 +97,7 @@ MultiscaleCouplingMeanTotalNormalStress::initializeCouplingVariables()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8250 ) << "MultiscaleCouplingMeanTotalNormalStress::initializeCouplingVariables() \n";
+    debugStream( 8250 ) << "MultiscaleCouplingMeanTotalNormalStress::initializeCouplingVariables() \n";
 #endif
 
     // Compute the flow rate and mean normal stress coupling variables
@@ -146,7 +146,7 @@ MultiscaleCouplingMeanTotalNormalStress::computeCouplingResiduals()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8250 ) << "MultiscaleCouplingMeanTotalNormalStress::computeCouplingResiduals()  \n";
+    debugStream( 8250 ) << "MultiscaleCouplingMeanTotalNormalStress::computeCouplingResiduals()  \n";
 #endif
 
     // Reset coupling residual
@@ -187,7 +187,7 @@ MultiscaleCouplingMeanTotalNormalStress::exportListOfPerturbedModels( const UInt
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8250 ) << "MultiscaleCouplingMeanTotalNormalStress::exportListOfPerturbedModels( localCouplingVariableID ) \n";
+    debugStream( 8250 ) << "MultiscaleCouplingMeanTotalNormalStress::exportListOfPerturbedModels( localCouplingVariableID ) \n";
 #endif
 
     if ( localCouplingVariableID < modelsNumber() )
@@ -203,7 +203,7 @@ MultiscaleCouplingMeanTotalNormalStress::insertJacobianConstantCoefficients( mul
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8250 ) << "MultiscaleCouplingMeanTotalNormalStress::insertJacobianConstantCoefficients( jacobian )  \n";
+    debugStream( 8250 ) << "MultiscaleCouplingMeanTotalNormalStress::insertJacobianConstantCoefficients( jacobian )  \n";
 #endif
 
     // The constant coefficients are added by the leader process of model 0.
@@ -222,7 +222,7 @@ MultiscaleCouplingMeanTotalNormalStress::insertJacobianDeltaCoefficients( multis
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8250 ) << "MultiscaleCouplingMeanTotalNormalStress::insertJacobianDeltaCoefficients( jacobian, column, ID, solveLinearSystem )  \n";
+    debugStream( 8250 ) << "MultiscaleCouplingMeanTotalNormalStress::insertJacobianDeltaCoefficients( jacobian, column, ID, solveLinearSystem )  \n";
 #endif
 
     // Model global to local conversion
@@ -242,7 +242,7 @@ MultiscaleCouplingMeanTotalNormalStress::insertJacobianDeltaCoefficients( multis
             jacobian.addToCoefficient( row, column, coefficient );
 
 #ifdef HAVE_LIFEV_DEBUG
-            Debug( 8250 ) << "J(" << row << "," << column << ") = " << coefficient << "\n";
+            debugStream( 8250 ) << "J(" << row << "," << column << ") = " << coefficient << "\n";
 #endif
         }
 
@@ -258,7 +258,7 @@ MultiscaleCouplingMeanTotalNormalStress::insertJacobianDeltaCoefficients( multis
                 jacobian.addToCoefficient( row, column, coefficient );
 
 #ifdef HAVE_LIFEV_DEBUG
-                Debug( 8250 ) << "J(" << row << "," << column << ") = " << coefficient << "\n";
+                debugStream( 8250 ) << "J(" << row << "," << column << ") = " << coefficient << "\n";
 #endif
             }
         }

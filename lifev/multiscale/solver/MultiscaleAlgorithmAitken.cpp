@@ -52,7 +52,7 @@ MultiscaleAlgorithmAitken::MultiscaleAlgorithmAitken() :
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8011 ) << "MultiscaleAlgorithmAitken::MultiscaleAlgorithmAitken() \n";
+    debugStream( 8011 ) << "MultiscaleAlgorithmAitken::MultiscaleAlgorithmAitken() \n";
 #endif
 
     M_type = Aitken;
@@ -71,7 +71,7 @@ MultiscaleAlgorithmAitken::setupData( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8011 ) << "MultiscaleAlgorithmAitken::setupData( fileName ) \n";
+    debugStream( 8011 ) << "MultiscaleAlgorithmAitken::setupData( fileName ) \n";
 #endif
 
     // Read parameters
@@ -88,7 +88,7 @@ MultiscaleAlgorithmAitken::subIterate()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8011 ) << "MultiscaleAlgorithmAitken::subIterate() \n";
+    debugStream( 8011 ) << "MultiscaleAlgorithmAitken::subIterate() \n";
 #endif
 
     multiscaleAlgorithm_Type::subIterate();

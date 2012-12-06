@@ -66,7 +66,7 @@ MultiscaleModelWindkessel0D::MultiscaleModelWindkessel0D() :
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8150 ) << "MultiscaleModelWindkessel0D::MultiscaleModelWindkessel0D() \n";
+    debugStream( 8150 ) << "MultiscaleModelWindkessel0D::MultiscaleModelWindkessel0D() \n";
 #endif
 
     M_type = Windkessel0D;
@@ -80,7 +80,7 @@ MultiscaleModelWindkessel0D::setupData( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8150 ) << "MultiscaleModelWindkessel0D::setupData( fileName ) \n";
+    debugStream( 8150 ) << "MultiscaleModelWindkessel0D::setupData( fileName ) \n";
 #endif
 
     multiscaleModel_Type::setupData( fileName );
@@ -106,7 +106,7 @@ MultiscaleModelWindkessel0D::setupModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8150 ) << "MultiscaleModelWindkessel0D::setupModel() \n";
+    debugStream( 8150 ) << "MultiscaleModelWindkessel0D::setupModel() \n";
 #endif
 
     initializeSolution();
@@ -128,7 +128,7 @@ MultiscaleModelWindkessel0D::buildModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8150 ) << "MultiscaleModelWindkessel0D::buildModel() \n";
+    debugStream( 8150 ) << "MultiscaleModelWindkessel0D::buildModel() \n";
 #endif
 
     updateModel();
@@ -139,7 +139,7 @@ MultiscaleModelWindkessel0D::updateModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8150 ) << "MultiscaleModelWindkessel0D::updateModel() \n";
+    debugStream( 8150 ) << "MultiscaleModelWindkessel0D::updateModel() \n";
 #endif
 
     M_pressureLeft_tn = M_pressureLeft;
@@ -156,7 +156,7 @@ MultiscaleModelWindkessel0D::solveModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8150 ) << "MultiscaleModelWindkessel0D::solveModel() \n";
+    debugStream( 8150 ) << "MultiscaleModelWindkessel0D::solveModel() \n";
 #endif
 
     displayModelStatus( "Solve" );
@@ -190,7 +190,7 @@ MultiscaleModelWindkessel0D::updateSolution()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8150 ) << "MultiscaleModelWindkessel0D::updateSolution() \n";
+    debugStream( 8150 ) << "MultiscaleModelWindkessel0D::updateSolution() \n";
 #endif
 
 }
@@ -200,7 +200,7 @@ MultiscaleModelWindkessel0D::saveSolution()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8150 ) << "MultiscaleModelWindkessel0D::saveSolution() \n";
+    debugStream( 8150 ) << "MultiscaleModelWindkessel0D::saveSolution() \n";
 #endif
 
     M_outputFile << "    " << M_globalData->dataTime()->time()
@@ -284,7 +284,7 @@ MultiscaleModelWindkessel0D::initializeSolution()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8150 ) << "MultiscaleModelWindkessel0D::initializeSolution() \n";
+    debugStream( 8150 ) << "MultiscaleModelWindkessel0D::initializeSolution() \n";
 #endif
 
     if ( multiscaleProblemStep > 0 )
@@ -360,7 +360,7 @@ MultiscaleModelWindkessel0D::setupExporterImporter()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8150 ) << "MultiscaleModelWindkessel0D::setupExporterImporter() \n";
+    debugStream( 8150 ) << "MultiscaleModelWindkessel0D::setupExporterImporter() \n";
 #endif
 
     std::string file = multiscaleProblemFolder + multiscaleProblemPrefix + "_Model_" + number2string( M_ID ) + "_" + number2string( multiscaleProblemStep ) + ".mfile";
@@ -374,7 +374,7 @@ Real
 MultiscaleModelWindkessel0D::solveForFlowRate()
 {
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8150 ) << "MultiscaleModelWindkessel0D::solveForFlowRate() \n";
+    debugStream( 8150 ) << "MultiscaleModelWindkessel0D::solveForFlowRate() \n";
 #endif
 
     if ( std::abs( M_capacitance ) < 1e-14 )
@@ -397,7 +397,7 @@ Real
 MultiscaleModelWindkessel0D::solveForPressure()
 {
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8150 ) << "MultiscaleModelWindkessel0D::solveForPressure() \n";
+    debugStream( 8150 ) << "MultiscaleModelWindkessel0D::solveForPressure() \n";
 #endif
 
     if ( std::abs( M_capacitance ) < 1e-14 )
@@ -421,7 +421,7 @@ MultiscaleModelWindkessel0D::solveLinearModel( bool& solveLinearSystem )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8150 ) << "MultiscaleModelWindkessel0D::solveLinearModel() \n";
+    debugStream( 8150 ) << "MultiscaleModelWindkessel0D::solveLinearModel() \n";
 #endif
 
     if ( !solveLinearSystem )
@@ -460,7 +460,7 @@ Real
 MultiscaleModelWindkessel0D::tangentSolveForFlowRate()
 {
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8150 ) << "MultiscaleModelWindkessel0D::tangentSolveForFlowRate() \n";
+    debugStream( 8150 ) << "MultiscaleModelWindkessel0D::tangentSolveForFlowRate() \n";
 #endif
 
     if ( std::abs( M_capacitance ) < 1e-14 )
@@ -481,7 +481,7 @@ Real
 MultiscaleModelWindkessel0D::tangentSolveForPressure()
 {
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8150 ) << "MultiscaleModelWindkessel0D::tangentSolveForPressure() \n";
+    debugStream( 8150 ) << "MultiscaleModelWindkessel0D::tangentSolveForPressure() \n";
 #endif
 
     if ( std::abs( M_capacitance ) < 1e-14 )

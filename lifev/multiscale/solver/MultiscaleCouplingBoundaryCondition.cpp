@@ -52,7 +52,7 @@ MultiscaleCouplingBoundaryCondition::MultiscaleCouplingBoundaryCondition() :
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8210 ) << "MultiscaleCouplingBoundaryCondition::MultiscaleCouplingBoundaryCondition() \n";
+    debugStream( 8210 ) << "MultiscaleCouplingBoundaryCondition::MultiscaleCouplingBoundaryCondition() \n";
 #endif
 
     M_type = BoundaryCondition;
@@ -66,7 +66,7 @@ MultiscaleCouplingBoundaryCondition::setupData( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8210 ) << "MultiscaleCouplingBoundaryCondition::setupData() \n";
+    debugStream( 8210 ) << "MultiscaleCouplingBoundaryCondition::setupData() \n";
 #endif
 
     multiscaleCoupling_Type::setupData( fileName );
@@ -90,7 +90,7 @@ MultiscaleCouplingBoundaryCondition::setupCouplingVariablesNumber()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8210 ) << "MultiscaleCouplingBoundaryCondition::setupCouplingVariablesNumber() \n";
+    debugStream( 8210 ) << "MultiscaleCouplingBoundaryCondition::setupCouplingVariablesNumber() \n";
 #endif
 
     M_couplingVariablesNumber = 0;
@@ -101,7 +101,7 @@ MultiscaleCouplingBoundaryCondition::setupCoupling()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8210 ) << "MultiscaleCouplingBoundaryCondition::setupCoupling() \n";
+    debugStream( 8210 ) << "MultiscaleCouplingBoundaryCondition::setupCoupling() \n";
 #endif
 
     if ( myModelsNumber() > 0 )

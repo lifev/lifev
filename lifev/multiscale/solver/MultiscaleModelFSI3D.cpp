@@ -78,7 +78,7 @@ MultiscaleModelFSI3D::MultiscaleModelFSI3D() :
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8140 ) << "MultiscaleModelFSI3D::MultiscaleModelFSI3D() \n";
+    debugStream( 8140 ) << "MultiscaleModelFSI3D::MultiscaleModelFSI3D() \n";
 #endif
 
     M_type = FSI3D;
@@ -109,7 +109,7 @@ MultiscaleModelFSI3D::setupData( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8140 ) << "MultiscaleModelFSI3D::setupData( fileName ) \n";
+    debugStream( 8140 ) << "MultiscaleModelFSI3D::setupData( fileName ) \n";
 #endif
 
     multiscaleModel_Type::setupData( fileName );
@@ -162,7 +162,7 @@ MultiscaleModelFSI3D::setupModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8140 ) << "MultiscaleModelFSI3D::setupProblem() \n";
+    debugStream( 8140 ) << "MultiscaleModelFSI3D::setupProblem() \n";
 #endif
 
     // Mesh transformation (before partitioning, ideally should be done after for scalability)
@@ -214,7 +214,7 @@ MultiscaleModelFSI3D::buildModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8140 ) << "MultiscaleModelFSI3D::buildModel() \n";
+    debugStream( 8140 ) << "MultiscaleModelFSI3D::buildModel() \n";
 #endif
 
     // Display data
@@ -233,7 +233,7 @@ MultiscaleModelFSI3D::updateModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8140 ) << "MultiscaleModelFSI3D::updateModel() \n";
+    debugStream( 8140 ) << "MultiscaleModelFSI3D::updateModel() \n";
 #endif
 
     // Update BCInterface solver variables
@@ -254,7 +254,7 @@ MultiscaleModelFSI3D::solveModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8140 ) << "MultiscaleModelFSI3D::solveModel() \n";
+    debugStream( 8140 ) << "MultiscaleModelFSI3D::solveModel() \n";
 #endif
 
     displayModelStatus( "Solve" );
@@ -298,7 +298,7 @@ MultiscaleModelFSI3D::updateSolution()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8140 ) << "MultiscaleModelFSI3D::updateSolution() \n";
+    debugStream( 8140 ) << "MultiscaleModelFSI3D::updateSolution() \n";
 #endif
 
     M_FSIoperator->updateSolution( *M_stateVariable );
@@ -309,7 +309,7 @@ MultiscaleModelFSI3D::saveSolution()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8140 ) << "MultiscaleModelFSI3D::saveSolution() \n";
+    debugStream( 8140 ) << "MultiscaleModelFSI3D::saveSolution() \n";
 #endif
 
     exportFluidSolution();
@@ -534,7 +534,7 @@ MultiscaleModelFSI3D::initializeSolution()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8140 ) << "MultiscaleModelFSI3D::initializeSolution() \n";
+    debugStream( 8140 ) << "MultiscaleModelFSI3D::initializeSolution() \n";
 #endif
 
     // Initialize the external pressure vector
@@ -798,7 +798,7 @@ MultiscaleModelFSI3D::setupLinearModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8140 ) << "MultiscaleModelFSI3D::setupLinearModel() \n";
+    debugStream( 8140 ) << "MultiscaleModelFSI3D::setupLinearModel() \n";
 #endif
 
     // The linear BCHandler is a copy of the original BCHandler with all BCFunctions giving zero
@@ -825,7 +825,7 @@ MultiscaleModelFSI3D::updateLinearModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8140 ) << "MultiscaleModelFSI3D::updateLinearModel() \n";
+    debugStream( 8140 ) << "MultiscaleModelFSI3D::updateLinearModel() \n";
 #endif
 
     //Create the RHS
@@ -838,7 +838,7 @@ MultiscaleModelFSI3D::solveLinearModel( bool& solveLinearSystem )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8140 ) << "MultiscaleModelFSI3D::solveLinearModel() \n";
+    debugStream( 8140 ) << "MultiscaleModelFSI3D::solveLinearModel() \n";
 #endif
 
     if ( !solveLinearSystem )
@@ -863,7 +863,7 @@ MultiscaleModelFSI3D::imposePerturbation()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8140 ) << "MultiscaleModelFSI3D::imposePerturbation() \n";
+    debugStream( 8140 ) << "MultiscaleModelFSI3D::imposePerturbation() \n";
 #endif
 
     for ( multiscaleCouplingsContainerConstIterator_Type i = M_couplings.begin(); i < M_couplings.end(); ++i )
@@ -896,7 +896,7 @@ MultiscaleModelFSI3D::resetPerturbation()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8140 ) << "MultiscaleModelFSI3D::resetPerturbation() \n";
+    debugStream( 8140 ) << "MultiscaleModelFSI3D::resetPerturbation() \n";
 #endif
 
     for ( multiscaleCouplingsContainerConstIterator_Type i = M_couplings.begin(); i < M_couplings.end(); ++i )

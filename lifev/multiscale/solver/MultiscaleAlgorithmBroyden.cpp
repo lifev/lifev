@@ -58,7 +58,7 @@ MultiscaleAlgorithmBroyden::MultiscaleAlgorithmBroyden() :
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8014 ) << "MultiscaleAlgorithmBroyden::MultiscaleAlgorithmBroyden() \n";
+    debugStream( 8014 ) << "MultiscaleAlgorithmBroyden::MultiscaleAlgorithmBroyden() \n";
 #endif
 
     M_type = Broyden;
@@ -72,7 +72,7 @@ MultiscaleAlgorithmBroyden::setupData( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8014 ) << "MultiscaleAlgorithmBroyden::setupData( fileName ) \n";
+    debugStream( 8014 ) << "MultiscaleAlgorithmBroyden::setupData( fileName ) \n";
 #endif
 
     // Read parameters
@@ -93,7 +93,7 @@ MultiscaleAlgorithmBroyden::setupAlgorithm()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8014 ) << "MultiscaleAlgorithmBroyden::setupAlgorithm() \n";
+    debugStream( 8014 ) << "MultiscaleAlgorithmBroyden::setupAlgorithm() \n";
 #endif
 
     multiscaleAlgorithm_Type::setupAlgorithm();
@@ -114,7 +114,7 @@ MultiscaleAlgorithmBroyden::subIterate()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8014 ) << "MultiscaleAlgorithmBroyden::subIterate() \n";
+    debugStream( 8014 ) << "MultiscaleAlgorithmBroyden::subIterate() \n";
 #endif
 
     multiscaleAlgorithm_Type::subIterate();

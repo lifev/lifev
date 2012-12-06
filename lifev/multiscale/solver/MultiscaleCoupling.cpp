@@ -65,7 +65,7 @@ MultiscaleCoupling::MultiscaleCoupling() :
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8200 ) << "MultiscaleCoupling::MultiscaleCoupling() \n";
+    debugStream( 8200 ) << "MultiscaleCoupling::MultiscaleCoupling() \n";
 #endif
 
 }
@@ -78,7 +78,7 @@ MultiscaleCoupling::setupData( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8200 ) << "MultiscaleCoupling::setupData( fileName ) \n";
+    debugStream( 8200 ) << "MultiscaleCoupling::setupData( fileName ) \n";
 #endif
 
     GetPot dataFile( fileName );
@@ -119,7 +119,7 @@ MultiscaleCoupling::createCouplingMap( MapEpetra& couplingMap )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8200 ) << "MultiscaleCoupling::createCouplingMap( couplingMap ) \n";
+    debugStream( 8200 ) << "MultiscaleCoupling::createCouplingMap( couplingMap ) \n";
 #endif
 
     M_couplingVariablesOffset = couplingMap.map( Unique )->NumGlobalElements();
@@ -132,7 +132,7 @@ MultiscaleCoupling::extrapolateCouplingVariables()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8200 ) << "MultiscaleCoupling::extrapolateCouplingVariables() \n";
+    debugStream( 8200 ) << "MultiscaleCoupling::extrapolateCouplingVariables() \n";
 #endif
 
     if ( myModelsNumber() > 0 )
@@ -157,7 +157,7 @@ MultiscaleCoupling::extrapolateCouplingVariables()
 
 #ifdef HAVE_LIFEV_DEBUG
         for ( UInt i( 0 ); i < M_couplingVariablesNumber; ++i )
-            Debug( 8200 ) << "C(" << M_couplingVariablesOffset + i << ") = " << ( localCouplingVariables( 0 ) )[i]  << "\n";
+            debugStream( 8200 ) << "C(" << M_couplingVariablesOffset + i << ") = " << ( localCouplingVariables( 0 ) )[i]  << "\n";
 #endif
     }
 }
@@ -193,7 +193,7 @@ MultiscaleCoupling::exportJacobian( multiscaleMatrix_Type& jacobian )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8200 ) << "MultiscaleCoupling::exportJacobian( jacobian ) \n";
+    debugStream( 8200 ) << "MultiscaleCoupling::exportJacobian( jacobian ) \n";
 #endif
 
     if ( myModelsNumber() > 0 )
@@ -236,7 +236,7 @@ MultiscaleCoupling::saveSolution()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8200 ) << "MultiscaleCoupling::saveSolution() \n";
+    debugStream( 8200 ) << "MultiscaleCoupling::saveSolution() \n";
 #endif
 
     if ( myModelsNumber() > 0 )

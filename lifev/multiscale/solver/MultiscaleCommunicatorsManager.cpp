@@ -55,7 +55,7 @@ MultiscaleCommunicatorsManager::MultiscaleCommunicatorsManager() :
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8005 ) << "MultiscaleCommunicatorsManager::MultiscaleCommunicatorsManager() \n";
+    debugStream( 8005 ) << "MultiscaleCommunicatorsManager::MultiscaleCommunicatorsManager() \n";
 #endif
 
 }
@@ -68,7 +68,7 @@ MultiscaleCommunicatorsManager::splitCommunicator()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8005 ) << "MultiscaleCommunicatorsManager::splitCommunicator() \n";
+    debugStream( 8005 ) << "MultiscaleCommunicatorsManager::splitCommunicator() \n";
 #endif
 
     // Preliminaries
@@ -203,7 +203,7 @@ MultiscaleCommunicatorsManager::parallelProcessesDistribution( std::vector<Real>
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8005 ) << "MultiscaleCommunicatorsManager::parallelProcessesDistribution() \n";
+    debugStream( 8005 ) << "MultiscaleCommunicatorsManager::parallelProcessesDistribution() \n";
 #endif
 
     // Preliminary distribution
@@ -369,7 +369,7 @@ MultiscaleCommunicatorsManager::parallelProcessesAssignment( std::vector< std::v
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8005 ) << "MultiscaleCommunicatorsManager::parallelProcessesAssignment() \n";
+    debugStream( 8005 ) << "MultiscaleCommunicatorsManager::parallelProcessesAssignment() \n";
 #endif
 
     // Initialize the vector

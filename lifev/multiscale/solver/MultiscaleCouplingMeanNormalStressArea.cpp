@@ -49,7 +49,7 @@ MultiscaleCouplingMeanNormalStressArea::MultiscaleCouplingMeanNormalStressArea()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8230 ) << "MultiscaleCouplingMeanNormalStressArea::MultiscaleCouplingMeanNormalStressArea() \n";
+    debugStream( 8230 ) << "MultiscaleCouplingMeanNormalStressArea::MultiscaleCouplingMeanNormalStressArea() \n";
 #endif
 
     M_type = MeanNormalStressArea;
@@ -63,7 +63,7 @@ MultiscaleCouplingMeanNormalStressArea::setupCouplingVariablesNumber()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8230 ) << "MultiscaleCouplingMeanNormalStressArea::setupCouplingVariablesNumber() \n";
+    debugStream( 8230 ) << "MultiscaleCouplingMeanNormalStressArea::setupCouplingVariablesNumber() \n";
 #endif
 
     M_couplingVariablesNumber = M_flowRateInterfaces + 1 + 1;
@@ -74,7 +74,7 @@ MultiscaleCouplingMeanNormalStressArea::setupCoupling()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8230 ) << "MultiscaleCouplingMeanNormalStressArea::setupCoupling() \n";
+    debugStream( 8230 ) << "MultiscaleCouplingMeanNormalStressArea::setupCoupling() \n";
 #endif
 
     super_Type::setupCoupling();
@@ -108,7 +108,7 @@ MultiscaleCouplingMeanNormalStressArea::initializeCouplingVariables()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8230 ) << "MultiscaleCouplingMeanNormalStressArea::initializeCouplingVariables() \n";
+    debugStream( 8230 ) << "MultiscaleCouplingMeanNormalStressArea::initializeCouplingVariables() \n";
 #endif
 
     super_Type::initializeCouplingVariables();
@@ -136,7 +136,7 @@ MultiscaleCouplingMeanNormalStressArea::computeCouplingResiduals()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8230 ) << "MultiscaleCouplingMeanNormalStressArea::computeCouplingResiduals()  \n";
+    debugStream( 8230 ) << "MultiscaleCouplingMeanNormalStressArea::computeCouplingResiduals()  \n";
 #endif
 
     super_Type::computeCouplingResiduals();
@@ -165,7 +165,7 @@ MultiscaleCouplingMeanNormalStressArea::exportListOfPerturbedModels( const UInt&
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8230 ) << "MultiscaleCouplingMeanNormalStressArea::exportListOfPerturbedModels( localCouplingVariableID ) \n";
+    debugStream( 8230 ) << "MultiscaleCouplingMeanNormalStressArea::exportListOfPerturbedModels( localCouplingVariableID ) \n";
 #endif
 
     if ( localCouplingVariableID == M_flowRateInterfaces + 1 )
@@ -184,7 +184,7 @@ MultiscaleCouplingMeanNormalStressArea::insertJacobianConstantCoefficients( mult
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8230 ) << "MultiscaleCouplingMeanNormalStressArea::insertJacobianConstantCoefficients( jacobian )  \n";
+    debugStream( 8230 ) << "MultiscaleCouplingMeanNormalStressArea::insertJacobianConstantCoefficients( jacobian )  \n";
 #endif
 
     super_Type::insertJacobianConstantCoefficients( jacobian );
@@ -200,7 +200,7 @@ MultiscaleCouplingMeanNormalStressArea::insertJacobianDeltaCoefficients( multisc
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8230 ) << "MultiscaleCouplingMeanNormalStressArea::insertJacobianDeltaCoefficients( jacobian, column, ID, solveLinearSystem )  \n";
+    debugStream( 8230 ) << "MultiscaleCouplingMeanNormalStressArea::insertJacobianDeltaCoefficients( jacobian, column, ID, solveLinearSystem )  \n";
 #endif
 
     super_Type::insertJacobianDeltaCoefficients( jacobian, column, ID, solveLinearSystem );
@@ -222,7 +222,7 @@ MultiscaleCouplingMeanNormalStressArea::insertJacobianDeltaCoefficients( multisc
                 jacobian.addToCoefficient( row, column, coefficient );
 
 #ifdef HAVE_LIFEV_DEBUG
-                Debug( 8230 ) << "J(" << row << "," << column << ") = " << coefficient << "\n";
+                debugStream( 8230 ) << "J(" << row << "," << column << ") = " << coefficient << "\n";
 #endif
             }
         }

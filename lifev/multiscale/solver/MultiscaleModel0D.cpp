@@ -53,7 +53,7 @@ MultiscaleModel0D::MultiscaleModel0D():
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8160 ) << "MultiscaleModel0D::MultiscaleModel0D() \n";
+    debugStream( 8160 ) << "MultiscaleModel0D::MultiscaleModel0D() \n";
 #endif
 
     M_type = ZeroDimensional;
@@ -67,7 +67,7 @@ MultiscaleModel0D::setupData( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8160 ) << "MultiscaleModel0D::setupData( fileName ) \n";
+    debugStream( 8160 ) << "MultiscaleModel0D::setupData( fileName ) \n";
 #endif
 
     GetPot dataFile( fileName );
@@ -92,7 +92,7 @@ MultiscaleModel0D::setupModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8160 ) << "MultiscaleModel0D::setupModel() \n";
+    debugStream( 8160 ) << "MultiscaleModel0D::setupModel() \n";
 #endif
 
     M_data->initializeSolution();
@@ -103,7 +103,7 @@ MultiscaleModel0D::buildModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8160 ) << "MultiscaleModel0D::buildModel() \n";
+    debugStream( 8160 ) << "MultiscaleModel0D::buildModel() \n";
 #endif
 
 }
@@ -113,7 +113,7 @@ MultiscaleModel0D::updateModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8160 ) << "MultiscaleModel0D::updateModel() \n";
+    debugStream( 8160 ) << "MultiscaleModel0D::updateModel() \n";
 #endif
 
 }
@@ -123,7 +123,7 @@ MultiscaleModel0D::solveModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8160 ) << "MultiscaleModel0D::solveModel() \n";
+    debugStream( 8160 ) << "MultiscaleModel0D::solveModel() \n";
 #endif
 
 // The 0D solver requires Rythmos/NOX/Thyra for now
@@ -138,7 +138,7 @@ MultiscaleModel0D::updateSolution()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8160 ) << "MultiscaleModel0D::updateSolution() \n";
+    debugStream( 8160 ) << "MultiscaleModel0D::updateSolution() \n";
 #endif
 
 }
@@ -148,7 +148,7 @@ MultiscaleModel0D::saveSolution()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8160 ) << "MultiscaleModel0D::saveSolution() \n";
+    debugStream( 8160 ) << "MultiscaleModel0D::saveSolution() \n";
 #endif
 
     M_data->saveSolution();
@@ -181,7 +181,7 @@ MultiscaleModel0D::setupGlobalData( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8160 ) << "MultiscaleModel0D::setupGlobalData( fileName ) \n";
+    debugStream( 8160 ) << "MultiscaleModel0D::setupGlobalData( fileName ) \n";
 #endif
 
     GetPot dataFile( fileName );

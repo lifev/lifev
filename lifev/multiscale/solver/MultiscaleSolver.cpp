@@ -58,7 +58,7 @@ MultiscaleSolver::MultiscaleSolver() :
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8000 ) << "MultiscaleSolver::MultiscaleSolver() \n";
+    debugStream( 8000 ) << "MultiscaleSolver::MultiscaleSolver() \n";
 #endif
 
     //Define the maps of Multiscale objects
@@ -81,7 +81,7 @@ MultiscaleSolver::setupProblem( const std::string& fileName, const std::string& 
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8000 ) << "MultiscaleSolver::setupData( fileName, problemFolder ) \n";
+    debugStream( 8000 ) << "MultiscaleSolver::setupData( fileName, problemFolder ) \n";
 #endif
 
     // Load data file
@@ -133,7 +133,7 @@ MultiscaleSolver::solveProblem( const Real& referenceSolution )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8000 ) << "MultiscaleSolver::solveProblem() \n";
+    debugStream( 8000 ) << "MultiscaleSolver::solveProblem() \n";
 #endif
 
     // Chrono definitions

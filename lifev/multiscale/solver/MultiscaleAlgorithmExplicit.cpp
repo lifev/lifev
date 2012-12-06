@@ -49,7 +49,7 @@ MultiscaleAlgorithmExplicit::MultiscaleAlgorithmExplicit() :
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8011 ) << "MultiscaleAlgorithmExplicit::MultiscaleAlgorithmExplicit() \n";
+    debugStream( 8011 ) << "MultiscaleAlgorithmExplicit::MultiscaleAlgorithmExplicit() \n";
 #endif
 
     M_type = Explicit;
@@ -63,7 +63,7 @@ MultiscaleAlgorithmExplicit::setupData( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 8013 ) << "MultiscaleAlgorithmNewton::setupData( fileName ) \n";
+    debugStream( 8013 ) << "MultiscaleAlgorithmNewton::setupData( fileName ) \n";
 #endif
 
     // Read parameters
