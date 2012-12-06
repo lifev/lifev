@@ -57,9 +57,9 @@
  *  Algorithms available:
  *  <ol>
  *      <li> Aitken
+ *      <li> Broyden
  *      <li> Explicit
  *      <li> Newton
- *      <li> Broyden
  *  </ol>
  */
 
