@@ -46,7 +46,7 @@
 #include <lifev/multiscale/solver/MultiscaleModel.hpp>
 #include <lifev/multiscale/solver/MultiscaleModelFluid3D.hpp>
 #include <lifev/multiscale/solver/MultiscaleModelFSI3D.hpp>
-#include <lifev/multiscale/solver/MultiscaleModel1D.hpp>
+#include <lifev/multiscale/solver/MultiscaleModelFSI1D.hpp>
 #include <lifev/multiscale/solver/MultiscaleModelWindkessel0D.hpp>
 #include <lifev/multiscale/solver/MultiscaleModel0D.hpp>
 

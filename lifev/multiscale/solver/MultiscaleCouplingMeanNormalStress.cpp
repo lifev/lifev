@@ -84,7 +84,7 @@ MultiscaleCouplingMeanNormalStress::setupCoupling()
             if ( myModel( i ) )
             {
                 M_localCouplingFunctions.push_back( MultiscaleCouplingFunction( this, i ) );
-                multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->imposeBoundaryFlowRate( M_boundaryIDs[i], boost::bind( &MultiscaleCouplingFunction::function, M_localCouplingFunctions.back(), _1, _2, _3, _4, _5 ) );
+                multiscaleDynamicCast< MultiscaleInterface >( M_models[i] )->imposeBoundaryFlowRate( M_boundaryIDs[i], boost::bind( &MultiscaleCouplingFunction::function, M_localCouplingFunctions.back(), _1, _2, _3, _4, _5 ) );
             }
 
         // Impose stress boundary conditions
@@ -92,7 +92,7 @@ MultiscaleCouplingMeanNormalStress::setupCoupling()
             if ( myModel( i ) )
             {
                 M_localCouplingFunctions.push_back( MultiscaleCouplingFunction( this, M_flowRateInterfaces ) );
-                multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->imposeBoundaryMeanNormalStress( M_boundaryIDs[i], boost::bind( &MultiscaleCouplingFunction::function, M_localCouplingFunctions.back(), _1, _2, _3, _4, _5 ) );
+                multiscaleDynamicCast< MultiscaleInterface >( M_models[i] )->imposeBoundaryMeanNormalStress( M_boundaryIDs[i], boost::bind( &MultiscaleCouplingFunction::function, M_localCouplingFunctions.back(), _1, _2, _3, _4, _5 ) );
             }
     }
 }
@@ -113,7 +113,7 @@ MultiscaleCouplingMeanNormalStress::initializeCouplingVariables()
     {
         if ( myModel( i ) )
         {
-            Real myValue = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryFlowRate( M_boundaryIDs[i] );
+            Real myValue = multiscaleDynamicCast< MultiscaleInterface >( M_models[i] )->boundaryFlowRate( M_boundaryIDs[i] );
             if ( isModelLeaderProcess( i ) )
                 localSum = myValue;
         }
@@ -131,7 +131,7 @@ MultiscaleCouplingMeanNormalStress::initializeCouplingVariables()
     for ( UInt i( 0 ); i < modelsNumber(); ++i )
         if ( myModel( i ) )
         {
-            Real myValue = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryMeanNormalStress( M_boundaryIDs[i] );
+            Real myValue = multiscaleDynamicCast< MultiscaleInterface >( M_models[i] )->boundaryMeanNormalStress( M_boundaryIDs[i] );
             if ( isModelLeaderProcess( i ) )
                 localSum += myValue;
         }
@@ -157,7 +157,7 @@ MultiscaleCouplingMeanNormalStress::computeCouplingResiduals()
         for ( UInt i( 0 ); i < M_flowRateInterfaces; ++i )
             if ( myModel( i ) )
             {
-                Real myValueStress = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryMeanNormalStress( M_boundaryIDs[i] );
+                Real myValueStress = multiscaleDynamicCast< MultiscaleInterface >( M_models[i] )->boundaryMeanNormalStress( M_boundaryIDs[i] );
                 if ( isModelLeaderProcess( i ) )
                 {
                     ( *M_localCouplingResiduals )[0]  += localCouplingVariables( 0 )[i];
@@ -168,7 +168,7 @@ MultiscaleCouplingMeanNormalStress::computeCouplingResiduals()
         for ( UInt i( M_flowRateInterfaces ); i < modelsNumber(); ++i )
             if ( myModel( i ) )
             {
-                Real myValueFlowRate = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryFlowRate( M_boundaryIDs[i] );
+                Real myValueFlowRate = multiscaleDynamicCast< MultiscaleInterface >( M_models[i] )->boundaryFlowRate( M_boundaryIDs[i] );
                 if ( isModelLeaderProcess( i ) )
                 {
                     ( *M_localCouplingResiduals )[0]  += myValueFlowRate;
@@ -241,12 +241,12 @@ MultiscaleCouplingMeanNormalStress::insertJacobianDeltaCoefficients( multiscaleM
         if ( modelLocalID >= M_flowRateInterfaces )
         {
             row = M_couplingVariablesOffset;
-            coefficient = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[modelLocalID] )->boundaryDeltaFlowRate( M_boundaryIDs[modelLocalID], solveLinearSystem );
+            coefficient = multiscaleDynamicCast< MultiscaleInterface >( M_models[modelLocalID] )->boundaryDeltaFlowRate( M_boundaryIDs[modelLocalID], solveLinearSystem );
         }
         else
         {
             row = M_couplingVariablesOffset + 1 + modelLocalID;
-            coefficient = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[modelLocalID] )->boundaryDeltaMeanNormalStress( M_boundaryIDs[modelLocalID], solveLinearSystem );
+            coefficient = multiscaleDynamicCast< MultiscaleInterface >( M_models[modelLocalID] )->boundaryDeltaMeanNormalStress( M_boundaryIDs[modelLocalID], solveLinearSystem );
         }
 
         // Add the coefficient to the matrix

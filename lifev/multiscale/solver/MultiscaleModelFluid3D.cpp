@@ -46,7 +46,7 @@ namespace Multiscale
 // ===================================================
 MultiscaleModelFluid3D::MultiscaleModelFluid3D() :
         multiscaleModel_Type           (),
-        MultiscaleInterfaceFluid       (),
+        MultiscaleInterface            (),
         M_exporter                     (),
         M_importer                     (),
         M_fileName                     (),
@@ -352,7 +352,7 @@ MultiscaleModelFluid3D::checkSolution() const
 }
 
 // ===================================================
-// MultiscaleInterfaceFluid Methods
+// MultiscaleInterface Methods
 // ===================================================
 void
 MultiscaleModelFluid3D::imposeBoundaryFlowRate( const multiscaleID_Type& boundaryID, const function_Type& function )

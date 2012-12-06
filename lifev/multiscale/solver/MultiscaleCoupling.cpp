@@ -244,10 +244,10 @@ MultiscaleCoupling::saveSolution()
         for ( UInt i( 0 ); i < modelsNumber(); ++i )
             if ( myModel( i ) )
             {
-                Real flowRate   ( multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryFlowRate( M_boundaryIDs[i] ) );
-                Real stress     ( multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryMeanNormalStress( M_boundaryIDs[i] ) );
-                Real totalStress( multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryMeanTotalNormalStress( M_boundaryIDs[i] ) );
-                Real area       ( multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryArea( M_boundaryIDs[i] ) );
+                Real flowRate   ( multiscaleDynamicCast< MultiscaleInterface >( M_models[i] )->boundaryFlowRate( M_boundaryIDs[i] ) );
+                Real stress     ( multiscaleDynamicCast< MultiscaleInterface >( M_models[i] )->boundaryMeanNormalStress( M_boundaryIDs[i] ) );
+                Real totalStress( multiscaleDynamicCast< MultiscaleInterface >( M_models[i] )->boundaryMeanTotalNormalStress( M_boundaryIDs[i] ) );
+                Real area       ( multiscaleDynamicCast< MultiscaleInterface >( M_models[i] )->boundaryArea( M_boundaryIDs[i] ) );
 
                 if ( isModelLeaderProcess( i ) )
                 {

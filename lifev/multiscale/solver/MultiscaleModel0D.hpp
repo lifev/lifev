@@ -70,7 +70,7 @@ public:
 
     typedef ZeroDimensionalBCHandler                                        bc_Type;
     typedef boost::shared_ptr< bc_Type >                                    bcPtr_Type;
-    typedef BCInterface0D< bc_Type, MultiscaleData >                        bcInterface_Type;
+    typedef BCInterface0D< bc_Type, MultiscaleGlobalData >                  bcInterface_Type;
     typedef boost::shared_ptr< bcInterface_Type >                           bcInterfacePtr_Type;
 
     typedef ZeroDimensionalData                                             data_Type;
@@ -133,10 +133,10 @@ public:
     //@}
 
 
-    //! @name MultiscaleInterfaceFluid Methods
+    //! @name MultiscaleInterface Methods
     //@{
 
-    //TODO These methods should be implemented after deriving from MultiscaleInterfaceFluid
+    //TODO These methods should be implemented after deriving from MultiscaleInterface
 
     //@}
 

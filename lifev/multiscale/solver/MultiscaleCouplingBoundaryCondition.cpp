@@ -125,7 +125,7 @@ MultiscaleCouplingBoundaryCondition::setupCoupling()
 
                 case OneDimensional:
 
-                    applyBoundaryConditions1D< MultiscaleModel1D > ( i );
+                    applyBoundaryConditions1D< MultiscaleModelFSI1D > ( i );
 
                     break;
 

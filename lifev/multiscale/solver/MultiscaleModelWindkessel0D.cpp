@@ -47,7 +47,7 @@ namespace Multiscale
 // ===================================================
 MultiscaleModelWindkessel0D::MultiscaleModelWindkessel0D() :
         multiscaleModel_Type           (),
-        MultiscaleInterfaceFluid       (),
+        MultiscaleInterface            (),
         M_outputFile                   (),
         M_bc                           ( new bcInterface_Type() ),
 #ifndef MULTISCALE_IS_IN_LIFE
@@ -235,7 +235,7 @@ MultiscaleModelWindkessel0D::checkSolution() const
 }
 
 // ===================================================
-// MultiscaleInterfaceFluid Methods
+// MultiscaleInterface Methods
 // ===================================================
 void
 MultiscaleModelWindkessel0D::imposeBoundaryFlowRate( const multiscaleID_Type& boundaryID, const function_Type& function )

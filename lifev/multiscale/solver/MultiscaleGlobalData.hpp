@@ -34,8 +34,8 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef MultiscaleData_H
-#define MultiscaleData_H 1
+#ifndef MultiscaleGlobalData_H
+#define MultiscaleGlobalData_H 1
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -57,22 +57,24 @@ namespace LifeV
 namespace Multiscale
 {
 
-//! MultiscaleData - Global data container for the physical quantities of the problem
+//! MultiscaleGlobalData - Global data container for the physical quantities of the problem
 /*!
  *  @author Cristiano Malossi
  *
- *  Up to now, the container contains:
+ *  At the present time the global container has the following parameters:
  *  <ul>
  *      <li> Fluid density
  *      <li> Fluid viscosity
  *      <li> Fluid venous pressure
  *      <li> Solid external pressure
  *      <li> Solid density
- *      <li> Solid Young modulus
- *      <li> Solid Poisson coefficient
+ *      <li> Solid Young's modulus
+ *      <li> Solid Poisson's ratio
+ *      <li> ScalingFactor Resistance
+ *      <li> ScalingFactor Compliance
  *  </ul>
  */
-class MultiscaleData
+class MultiscaleGlobalData
 {
 public:
 
@@ -89,16 +91,16 @@ public:
     //@{
 
     //! Constructor
-    explicit MultiscaleData();
+    explicit MultiscaleGlobalData();
 
     //! Copy constructor
     /*!
-     * @param PhysicalData MultiscaleData
+     * @param PhysicalData MultiscaleGlobalData
      */
-    explicit MultiscaleData( const MultiscaleData& data );
+    explicit MultiscaleGlobalData( const MultiscaleGlobalData& data );
 
     //! Destructor
-    virtual ~MultiscaleData() {}
+    virtual ~MultiscaleGlobalData() {}
 
     //@}
 
@@ -108,10 +110,10 @@ public:
 
     //! Operator=
     /*!
-     * @param PhysicalData MultiscaleData
+     * @param PhysicalData MultiscaleGlobalData
      * @return reference to a copy of the class
      */
-    MultiscaleData& operator=( const MultiscaleData& data );
+    MultiscaleGlobalData& operator=( const MultiscaleGlobalData& data );
 
     //@}
 
@@ -224,4 +226,4 @@ private:
 } // Namespace Multiscale
 } // Namespace LifeV
 
-#endif /* MultiscaleData_H */
+#endif /* MultiscaleGlobalData_H */

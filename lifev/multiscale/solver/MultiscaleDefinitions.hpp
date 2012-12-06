@@ -69,7 +69,7 @@
 #include <lifev/core/array/VectorEpetra.hpp>
 #include <lifev/core/array/MatrixEpetra.hpp>
 
-#include <lifev/multiscale/solver/MultiscaleData.hpp>
+#include <lifev/multiscale/solver/MultiscaleGlobalData.hpp>
 
 namespace LifeV
 {
@@ -186,7 +186,7 @@ typedef std::vector< multiscaleCouplingPtr_Type >                               
 typedef multiscaleCouplingsContainer_Type::iterator                              multiscaleCouplingsContainerIterator_Type;
 typedef multiscaleCouplingsContainer_Type::const_iterator                        multiscaleCouplingsContainerConstIterator_Type;
 
-typedef MultiscaleData                                                           multiscaleData_Type;
+typedef MultiscaleGlobalData                                                     multiscaleData_Type;
 typedef boost::shared_ptr< multiscaleData_Type >                                 multiscaleDataPtr_Type;
 
 // ===================================================

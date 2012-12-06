@@ -48,7 +48,9 @@
 // can chose to prescribe it through an essential BC (a given velocity profile).
 //#define FSI_WITHOUT_VELOCITYPROFILE
 
-// TODO Remove this macro
+// This macro now serves just to easily identify the part of the code where the
+// methods needed for coupling the area are called. Apart from that, it is useless,
+// and in the future can be removed.
 #define FSI_WITH_BOUNDARYAREA
 
 // LifeV includes
@@ -72,7 +74,7 @@
 
 // Mathcard includes
 #include <lifev/multiscale/solver/MultiscaleModel.hpp>
-#include <lifev/multiscale/solver/MultiscaleInterfaceFluid.hpp>
+#include <lifev/multiscale/solver/MultiscaleInterface.hpp>
 
 namespace LifeV
 {
@@ -100,7 +102,7 @@ class FSI3DBoundaryAreaFunction;
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 class MultiscaleModelFSI3D: public virtual multiscaleModel_Type,
-                            public virtual MultiscaleInterfaceFluid
+                            public virtual MultiscaleInterface
 {
 public:
 
@@ -224,7 +226,7 @@ public:
     //@}
 
 
-    //! @name MultiscaleInterfaceFluid Methods
+    //! @name MultiscaleInterface Methods
     //@{
 
     //! Impose the flow rate on a specific interface of the model
@@ -536,7 +538,7 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef MultiscaleInterfaceFluid::function_Type function_Type;
+    typedef MultiscaleInterface::function_Type function_Type;
 
     //@}
 
@@ -621,7 +623,7 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef MultiscaleInterfaceFluid::function_Type function_Type;
+    typedef MultiscaleInterface::function_Type function_Type;
 
     typedef MultiscaleModelFSI3D::FSI3DBoundaryFlowRate_Type FSI3DBoundaryFlowRate_Type;
 
@@ -849,7 +851,7 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef MultiscaleInterfaceFluid::function_Type function_Type;
+    typedef MultiscaleInterface::function_Type function_Type;
 
     //@}
 

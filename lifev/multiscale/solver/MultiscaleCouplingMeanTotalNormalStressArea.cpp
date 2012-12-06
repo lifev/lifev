@@ -96,7 +96,7 @@ MultiscaleCouplingMeanTotalNormalStressArea::setupCoupling()
                 if ( M_models[i]->type() == FSI3D )
                 {
                     M_localCouplingFunctions.push_back( MultiscaleCouplingFunction( this, 3 ) );
-                    multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->imposeBoundaryArea( M_boundaryIDs[i], boost::bind( &MultiscaleCouplingFunction::function, M_localCouplingFunctions.back(), _1, _2, _3, _4, _5 ) );
+                    multiscaleDynamicCast< MultiscaleInterface >( M_models[i] )->imposeBoundaryArea( M_boundaryIDs[i], boost::bind( &MultiscaleCouplingFunction::function, M_localCouplingFunctions.back(), _1, _2, _3, _4, _5 ) );
 
                     break;
                 }
@@ -121,7 +121,7 @@ MultiscaleCouplingMeanTotalNormalStressArea::initializeCouplingVariables()
     for ( UInt i( 0 ); i < 2; ++i )
         if ( myModel( i ) )
         {
-            Real myValue = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryArea( M_boundaryIDs[i] );
+            Real myValue = multiscaleDynamicCast< MultiscaleInterface >( M_models[i] )->boundaryArea( M_boundaryIDs[i] );
             if ( isModelLeaderProcess( i ) )
                 localSum += myValue;
         }
@@ -148,7 +148,7 @@ MultiscaleCouplingMeanTotalNormalStressArea::computeCouplingResiduals()
             if ( myModel( i ) )
                 if ( M_models[i]->type() == OneDimensional )
                 {
-                    Real myValueArea = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[i] )->boundaryArea( M_boundaryIDs[i] );
+                    Real myValueArea = multiscaleDynamicCast< MultiscaleInterface >( M_models[i] )->boundaryArea( M_boundaryIDs[i] );
                     if ( isModelLeaderProcess( i ) )
                     {
                         ( *M_localCouplingResiduals )[3]  = myValueArea - localCouplingVariables( 0 )[3];
@@ -214,7 +214,7 @@ MultiscaleCouplingMeanTotalNormalStressArea::insertJacobianDeltaCoefficients( mu
             Real coefficient( 0 );
 
             row = M_couplingVariablesOffset + 3;
-            coefficient = multiscaleDynamicCast< MultiscaleInterfaceFluid >( M_models[modelLocalID] )->boundaryDeltaArea( M_boundaryIDs[modelLocalID], solveLinearSystem );
+            coefficient = multiscaleDynamicCast< MultiscaleInterface >( M_models[modelLocalID] )->boundaryDeltaArea( M_boundaryIDs[modelLocalID], solveLinearSystem );
 
             // Add the coefficient to the matrix
             if ( isModelLeaderProcess( modelLocalID ) )

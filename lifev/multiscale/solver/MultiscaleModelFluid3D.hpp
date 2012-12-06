@@ -55,7 +55,7 @@
 // Mathcard includes
 
 #include <lifev/multiscale/solver/MultiscaleModel.hpp>
-#include <lifev/multiscale/solver/MultiscaleInterfaceFluid.hpp>
+#include <lifev/multiscale/solver/MultiscaleInterface.hpp>
 
 namespace LifeV
 {
@@ -70,7 +70,7 @@ namespace Multiscale
  *  for 3D Fluid problem (in particular Oseen with Shape Derivatives).
  */
 class MultiscaleModelFluid3D: public virtual multiscaleModel_Type,
-                              public virtual MultiscaleInterfaceFluid
+                              public virtual MultiscaleInterface
 {
 public:
 
@@ -160,7 +160,7 @@ public:
     //@}
 
 
-    //! @name MultiscaleInterfaceFluid Methods
+    //! @name MultiscaleInterface Methods
     //@{
 
     //! Impose the flow rate on a specific interface of the model

@@ -43,7 +43,7 @@
 
 // Mathcard includes
 #include <lifev/multiscale/solver/MultiscaleModel.hpp>
-#include <lifev/multiscale/solver/MultiscaleInterfaceFluid.hpp>
+#include <lifev/multiscale/solver/MultiscaleInterface.hpp>
 
 namespace LifeV
 {
@@ -58,7 +58,7 @@ namespace Multiscale
  *  for 0D problems.
  */
 class MultiscaleModelWindkessel0D: public virtual multiscaleModel_Type,
-                                   public virtual MultiscaleInterfaceFluid
+                                   public virtual MultiscaleInterface
 {
 public:
 
@@ -69,7 +69,7 @@ public:
     typedef boost::shared_ptr< bc_Type >                                    bcPtr_Type;
 
 #ifdef MULTISCALE_IS_IN_LIFE
-    typedef BCInterface0D< bc_Type, MultiscaleData >                        bcInterface_Type;
+    typedef BCInterface0D< bc_Type, MultiscaleGlobalData >                  bcInterface_Type;
 #else
     typedef ZeroDimensionalTemporaryData                                    temporaryData_Type;
     typedef boost::shared_ptr< temporaryData_Type >                         temporaryDataPtr_Type;
@@ -132,7 +132,7 @@ public:
     //@}
 
 
-    //! @name MultiscaleInterfaceFluid Methods
+    //! @name MultiscaleInterface Methods
     //@{
 
     //! Impose the flow rate on a specific interface of the model

@@ -34,8 +34,8 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef MultiscaleInterfaceFluid_H
-#define MultiscaleInterfaceFluid_H 1
+#ifndef MultiscaleInterface_H
+#define MultiscaleInterface_H 1
 
 #include <lifev/multiscale/solver/MultiscaleDefinitions.hpp>
 
@@ -44,14 +44,14 @@ namespace LifeV
 namespace Multiscale
 {
 
-//! MultiscaleInterfaceFluid - The multiscale interface for fluid problems
+//! MultiscaleInterface - The multiscale interface for fluid problems
 /*!
  *  @author Cristiano Malossi
  *
- *  The MultiscaleInterfaceFluid class provides a general and abstract interface for the
+ *  The MultiscaleInterface class provides a general and abstract interface for the
  *  coupling of fluid problems.
  */
-class MultiscaleInterfaceFluid
+class MultiscaleInterface
 {
 public:
 
@@ -67,10 +67,10 @@ public:
     //@{
 
     //! The main constructor.
-    explicit MultiscaleInterfaceFluid() {}
+    explicit MultiscaleInterface() {}
 
     //! Destructor
-    virtual ~MultiscaleInterfaceFluid() {}
+    virtual ~MultiscaleInterface() {}
 
     //@}
 
@@ -173,9 +173,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    MultiscaleInterfaceFluid( const MultiscaleInterfaceFluid& interface );
+    MultiscaleInterface( const MultiscaleInterface& interface );
 
-    MultiscaleInterfaceFluid& operator=( const MultiscaleInterfaceFluid& interface );
+    MultiscaleInterface& operator=( const MultiscaleInterface& interface );
 
     //@}
 };
@@ -183,4 +183,4 @@ private:
 } // Namespace multiscale
 } // Namespace LifeV
 
-#endif /* MultiscaleInterfaceFluid_H */
+#endif /* MultiscaleInterface_H */

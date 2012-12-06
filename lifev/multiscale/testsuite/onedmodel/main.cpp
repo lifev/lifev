@@ -65,7 +65,7 @@
 // Mathcard includes
 #include <lifev/one_d_fsi/fem/OneDFSIBCHandler.hpp>
 #include <lifev/one_d_fsi/solver/OneDFSISolver.hpp>
-#include <lifev/multiscale/solver/MultiscaleModel1D.hpp>
+#include <lifev/multiscale/solver/MultiscaleModelFSI1D.hpp>
 
 #include "ud_functions.hpp"
 
@@ -116,11 +116,11 @@ Int main(Int argc, char** argv)
     // *********************************
     // Useful typedefs
     // *********************************
-    typedef MultiscaleModel1D::physics_Type          physics_Type;
-    typedef MultiscaleModel1D::flux_Type             flux_Type;
-    typedef MultiscaleModel1D::source_Type           source_Type;
+    typedef MultiscaleModelFSI1D::physics_Type       physics_Type;
+    typedef MultiscaleModelFSI1D::flux_Type          flux_Type;
+    typedef MultiscaleModelFSI1D::source_Type        source_Type;
 
-    typedef MultiscaleModel1D::bc_Type               bc_Type;
+    typedef MultiscaleModelFSI1D::bc_Type            bc_Type;
     typedef bc_Type::bcFunction_Type                 bcFunction_Type;
 
     // *********************************
@@ -137,7 +137,7 @@ Int main(Int argc, char** argv)
     // *********************************
     // Build the 1D model
     // *********************************
-    MultiscaleModel1D oneDModel;
+    MultiscaleModelFSI1D oneDModel;
     oneDModel.setCommunicator( comm );
 
     // Scale, Rotate, Translate 1D (if necessary)
@@ -259,12 +259,12 @@ Int main(Int argc, char** argv)
 
         if (ok)
         {
-            std::cout << "Test succesful" << std::endl;
+            std::cout << "Test successful" << std::endl;
             return 0;
         }
         else
         {
-            std::cout << "Test unseccesful" << std::endl;
+            std::cout << "Test unsuccessful" << std::endl;
             return -1;
         }
     }

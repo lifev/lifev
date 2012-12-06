@@ -34,7 +34,7 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <lifev/multiscale/solver/MultiscaleData.hpp>
+#include <lifev/multiscale/solver/MultiscaleGlobalData.hpp>
 
 namespace LifeV
 {
@@ -44,7 +44,7 @@ namespace Multiscale
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-MultiscaleData::MultiscaleData() :
+MultiscaleGlobalData::MultiscaleGlobalData() :
         M_timeData                      (),
         M_fluidDensity                  (),
         M_fluidViscosity                (),
@@ -59,7 +59,7 @@ MultiscaleData::MultiscaleData() :
 {
 }
 
-MultiscaleData::MultiscaleData( const MultiscaleData& data ) :
+MultiscaleGlobalData::MultiscaleGlobalData( const MultiscaleGlobalData& data ) :
         M_timeData                      ( data.M_timeData ),
         M_fluidDensity                  ( data.M_fluidDensity ),
         M_fluidViscosity                ( data.M_fluidViscosity ),
@@ -77,8 +77,8 @@ MultiscaleData::MultiscaleData( const MultiscaleData& data ) :
 // ===================================================
 // Operators
 // ===================================================
-MultiscaleData&
-MultiscaleData::operator=( const MultiscaleData& data )
+MultiscaleGlobalData&
+MultiscaleGlobalData::operator=( const MultiscaleGlobalData& data )
 {
     if ( this != &data )
     {
@@ -102,7 +102,7 @@ MultiscaleData::operator=( const MultiscaleData& data )
 // Methods
 // ===================================================
 void
-MultiscaleData::readData( const GetPot& dataFile )
+MultiscaleGlobalData::readData( const GetPot& dataFile )
 {
     M_timeData.reset( new time_Type( dataFile, "Solver/time_discretization" ) );
     M_fluidDensity                  = dataFile( "Physics/FluidDensity", 0. );
@@ -118,7 +118,7 @@ MultiscaleData::readData( const GetPot& dataFile )
 }
 
 void
-MultiscaleData::showMe()
+MultiscaleGlobalData::showMe()
 {
     std::cout << "Fluid density                 = " << M_fluidDensity << std::endl
               << "Fluid viscosity               = " << M_fluidViscosity << std::endl

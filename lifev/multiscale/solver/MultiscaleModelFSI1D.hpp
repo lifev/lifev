@@ -39,8 +39,8 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef MultiscaleModel1D_H
-#define MultiscaleModel1D_H 1
+#ifndef MultiscaleModelFSI1D_H
+#define MultiscaleModelFSI1D_H 1
 
 // Jacobian coefficient approximation
 #define JACOBIAN_WITH_FINITEDIFFERENCE
@@ -67,22 +67,22 @@
 
 // Mathcard includes
 #include <lifev/multiscale/solver/MultiscaleModel.hpp>
-#include <lifev/multiscale/solver/MultiscaleInterfaceFluid.hpp>
+#include <lifev/multiscale/solver/MultiscaleInterface.hpp>
 
 namespace LifeV
 {
 namespace Multiscale
 {
 
-//! MultiscaleModel1D - Multiscale model for 1D Fluid simulations
+//! MultiscaleModelFSI1D - Multiscale model for 1D Fluid simulations
 /*!
  *  @author Gilles Fourestey, Cristiano Malossi
  *
- *  The MultiscaleModel1D class is an implementation of the multiscaleModel_Type
+ *  The MultiscaleModelFSI1D class is an implementation of the multiscaleModel_Type
  *  for 1D Fluid problem.
  */
-class MultiscaleModel1D: public virtual multiscaleModel_Type,
-                         public virtual MultiscaleInterfaceFluid
+class MultiscaleModelFSI1D: public virtual multiscaleModel_Type,
+                         public virtual MultiscaleInterface
 {
 public:
 
@@ -136,10 +136,10 @@ public:
     //@{
 
     //! Constructor
-    explicit MultiscaleModel1D();
+    explicit MultiscaleModelFSI1D();
 
     //! Destructor
-    virtual ~MultiscaleModel1D() {}
+    virtual ~MultiscaleModelFSI1D() {}
 
     //@}
 
@@ -184,7 +184,7 @@ public:
     //@}
 
 
-    //! @name MultiscaleInterfaceFluid Methods
+    //! @name MultiscaleInterface Methods
     //@{
 
 
@@ -383,9 +383,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    MultiscaleModel1D( const MultiscaleModel1D& model );
+    MultiscaleModelFSI1D( const MultiscaleModelFSI1D& model );
 
-    MultiscaleModel1D& operator=( const MultiscaleModel1D& model );
+    MultiscaleModelFSI1D& operator=( const MultiscaleModelFSI1D& model );
 
     //@}
 
@@ -529,10 +529,10 @@ private:
 //! Factory create function
 inline multiscaleModel_Type* createMultiscaleModelOneDimensional()
 {
-    return new MultiscaleModel1D();
+    return new MultiscaleModelFSI1D();
 }
 
 } // Namespace multiscale
 } // Namespace LifeV
 
-#endif /* MultiscaleModel1D_H */
+#endif /* MultiscaleModelFSI1D_H */

@@ -38,7 +38,7 @@
 #define MultiscaleModel_H 1
 
 #include <lifev/multiscale/solver/MultiscaleDefinitions.hpp>
-#include <lifev/multiscale/solver/MultiscaleData.hpp>
+#include <lifev/multiscale/solver/MultiscaleGlobalData.hpp>
 #include <lifev/multiscale/solver/MultiscaleCoupling.hpp>
 
 
