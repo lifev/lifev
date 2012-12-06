@@ -38,13 +38,18 @@
 #ifndef MultiscaleModelFSI3D_H
 #define MultiscaleModelFSI3D_H 1
 
-// TODO Remove this macro
-#define FSI_WITH_BOUNDARYAREA
-
 // If the following macro is defined, the pressure inside the 3-D FSI model
 // is initialized to the external pressure. Otherwise, the external pressure
 // is applied just as an offset at the interfaces.
 //#define FSI_WITH_EXTERNALPRESSURE
+
+// If the following macro is defined, any flow rate BC is prescribed in the
+// classical way, i.e., weakly through a Lagrange multiplier. Otherwise, the user
+// can chose to prescribe it through an essential BC (a given velocity profile).
+//#define FSI_WITHOUT_VELOCITYPROFILE
+
+// TODO Remove this macro
+#define FSI_WITH_BOUNDARYAREA
 
 // LifeV includes
 #include <lifev/core/filter/ExporterEnsight.hpp>
@@ -79,6 +84,11 @@ namespace Multiscale
 class FSI3DBoundaryStressFunction;
 #endif
 
+#ifndef FSI_WITHOUT_VELOCITYPROFILE
+// Forward declaration
+class FSI3DBoundaryFlowRateFunction;
+#endif
+
 #ifdef FSI_WITH_BOUNDARYAREA
 // Forward declaration
 class FSI3DBoundaryAreaFunction;
@@ -97,45 +107,66 @@ public:
     //! @name Public Types
     //@{
 
-    typedef FSIMonolithic                                    FSIOperator_Type;
-    typedef boost::shared_ptr< FSIOperator_Type>             FSIOperatorPtr_Type;
+    typedef FSIMonolithic                                      FSIOperator_Type;
+    typedef boost::shared_ptr< FSIOperator_Type>               FSIOperatorPtr_Type;
 
-    typedef FSIOperator::data_Type                           data_Type;
-    typedef FSIOperator::dataPtr_Type                        dataPtr_Type;
+    typedef FSIOperator::data_Type                             data_Type;
+    typedef FSIOperator::dataPtr_Type                          dataPtr_Type;
 
-    typedef FSIOperator::mesh_Type                           mesh_Type;
+    typedef FSIOperator::mesh_Type                             mesh_Type;
 
-    typedef FSIOperator::fluid_Type                          fluid_Type;
-    typedef FSIOperator::solid_Type                          solid_Type;
+    typedef FSIOperator::fluid_Type                            fluid_Type;
+    typedef FSIOperator::solid_Type                            solid_Type;
 
-    typedef FSIOperator::vector_Type                         vector_Type;
-    typedef FSIOperator::vectorPtr_Type                      vectorPtr_Type;
+    typedef FSIOperator::vector_Type                           vector_Type;
+    typedef FSIOperator::vectorPtr_Type                        vectorPtr_Type;
 
-    typedef Exporter< mesh_Type >                            IOFile_Type;
-    typedef boost::shared_ptr< IOFile_Type >                 IOFilePtr_Type;
-    typedef ExporterData< mesh_Type >                        IOData_Type;
+    typedef Exporter< mesh_Type >                              IOFile_Type;
+    typedef boost::shared_ptr< IOFile_Type >                   IOFilePtr_Type;
+    typedef ExporterData< mesh_Type >                          IOData_Type;
 
-    typedef ExporterEnsight< mesh_Type >                     ensightIOFile_Type;
+    typedef ExporterEnsight< mesh_Type >                       ensightIOFile_Type;
 #ifdef HAVE_HDF5
-    typedef ExporterHDF5< mesh_Type >                        hdf5IOFile_Type;
+    typedef ExporterHDF5< mesh_Type >                          hdf5IOFile_Type;
 #endif
 
-    typedef BCHandler                                        bc_Type;
-    typedef boost::shared_ptr< bc_Type >                     bcPtr_Type;
-    typedef BCInterface3D< bc_Type, FSIOperator >            bcInterface_Type;
-    typedef boost::shared_ptr< bcInterface_Type >            bcInterfacePtr_Type;
+    typedef BCHandler                                          bc_Type;
+    typedef boost::shared_ptr< bc_Type >                       bcPtr_Type;
+    typedef BCInterface3D< bc_Type, FSIOperator >              bcInterface_Type;
+    typedef boost::shared_ptr< bcInterface_Type >              bcInterfacePtr_Type;
 
 #ifndef FSI_WITH_EXTERNALPRESSURE
-    typedef FSI3DBoundaryStressFunction                      boundaryStressFunction_Type;
-    typedef boost::shared_ptr< boundaryStressFunction_Type > boundaryStressFunctionPtr_Type;
-    typedef std::vector< boundaryStressFunctionPtr_Type >    boundaryStressFunctionContainer_Type;
+    typedef FSI3DBoundaryStressFunction                        boundaryStressFunction_Type;
+    typedef boost::shared_ptr< boundaryStressFunction_Type >   boundaryStressFunctionPtr_Type;
+    typedef std::vector< boundaryStressFunctionPtr_Type >      boundaryStressFunctionContainer_Type;
+#endif
+
+#ifndef FSI_WITHOUT_VELOCITYPROFILE
+
+    /*! @enum FSI3DBoundaryFlowRate_Type
+    */
+    enum FSI3DBoundaryFlowRate_Type
+    {
+        Weak,     /*!< always impose flow rate weakly (DEFAULT) */
+        Semiweak, /*!< impose essential when flow rate = 0, otherwise impose flow rate weakly */
+        Strong    /*!< always impose essential with user prescribed velocity profile */
+    };
+
+    typedef std::vector< FSI3DBoundaryFlowRate_Type >          boundaryFlowRateTypeContainer_Type;
+
+    typedef std::map< multiscaleID_Type, FSI3DBoundaryFlowRate_Type > boundaryFlowRateMap_Type;
+
+    typedef FSI3DBoundaryFlowRateFunction                      boundaryFlowRateFunction_Type;
+    typedef boost::shared_ptr< boundaryFlowRateFunction_Type > boundaryFlowRateFunctionPtr_Type;
+    typedef std::vector< boundaryFlowRateFunctionPtr_Type >    boundaryFlowRateFunctionsContainer_Type;
+    typedef boundaryFlowRateFunctionsContainer_Type::iterator  boundaryFlowRateFunctionsContainerIterator_Type;
 #endif
 
 #ifdef FSI_WITH_BOUNDARYAREA
-    typedef FSI3DBoundaryAreaFunction                        boundaryAreaFunction_Type;
-    typedef boost::shared_ptr< boundaryAreaFunction_Type >   boundaryAreaFunctionPtr_Type;
-    typedef std::vector< boundaryAreaFunctionPtr_Type >      boundaryAreaFunctionsContainer_Type;
-    typedef boundaryAreaFunctionsContainer_Type::iterator    boundaryAreaFunctionsContainerIterator_Type;
+    typedef FSI3DBoundaryAreaFunction                          boundaryAreaFunction_Type;
+    typedef boost::shared_ptr< boundaryAreaFunction_Type >     boundaryAreaFunctionPtr_Type;
+    typedef std::vector< boundaryAreaFunctionPtr_Type >        boundaryAreaFunctionsContainer_Type;
+    typedef boundaryAreaFunctionsContainer_Type::iterator      boundaryAreaFunctionsContainerIterator_Type;
 #endif
 
     //@}
@@ -426,35 +457,42 @@ private:
     //@}
 
     // Operator
-    FSIOperatorPtr_Type                    M_FSIoperator;
+    FSIOperatorPtr_Type                     M_FSIoperator;
 
     // Data
-    dataPtr_Type                           M_data;
+    dataPtr_Type                            M_data;
 
     // Exporters
-    IOFilePtr_Type                         M_exporterFluid;
-    IOFilePtr_Type                         M_exporterSolid;
+    IOFilePtr_Type                          M_exporterFluid;
+    IOFilePtr_Type                          M_exporterSolid;
 
     // Importers
-    IOFilePtr_Type                         M_importerFluid;
-    IOFilePtr_Type                         M_importerSolid;
+    IOFilePtr_Type                          M_importerFluid;
+    IOFilePtr_Type                          M_importerSolid;
 
 #ifndef FSI_WITH_EXTERNALPRESSURE
     // Stress coupling function container
-    boundaryStressFunctionContainer_Type   M_stressCouplingFunction;
+    boundaryStressFunctionContainer_Type    M_boundaryStressFunctions;
 
     // Scalar external pressure
-    Real                                   M_externalPressureScalar;
+    Real                                    M_externalPressureScalar;
+#endif
+
+#ifndef FSI_WITHOUT_VELOCITYPROFILE
+    // Flow rate coupling function container
+    boundaryFlowRateFunctionsContainer_Type M_boundaryFlowRateFunctions;
+
+    // Flow rate type container
+    boundaryFlowRateTypeContainer_Type      M_boundaryFlowRateType;
 #endif
 
 #ifdef FSI_WITH_BOUNDARYAREA
     // Boundary area coupling function container
-    boundaryAreaFunctionsContainer_Type    M_boundaryAreaFunctions;
+    boundaryAreaFunctionsContainer_Type     M_boundaryAreaFunctions;
 
     // Free flags, available for the couplings
-    multiscaleIDContainer_Type             M_boundaryFlagsArea;
-    std::vector< bool >                    M_boundaryFlagsAreaPerturbed;
-
+    multiscaleIDContainer_Type              M_boundaryFlagsArea;
+    std::vector< bool >                     M_boundaryFlagsAreaPerturbed;
 #endif
 
     // Post processing members
@@ -507,10 +545,6 @@ public:
     //@{
 
     //! Constructor
-    /*!
-     * @param couplingFunction original coupling function
-     * @param delta delta to be applied
-     */
     explicit FSI3DBoundaryStressFunction() : M_function(), M_delta() {}
 
     //! Destructor
@@ -564,6 +598,235 @@ private:
 
     function_Type                          M_function;
     Real                                   M_delta;
+};
+
+#endif
+
+
+
+#ifndef FSI_WITHOUT_VELOCITYPROFILE
+
+//! FSI3DBoundaryFlowRateFunction - The FSI3D coupling function
+/*!
+ *  @author Cristiano Malossi
+ *  @author Toni Lassila
+ *
+ *  This simple class provides the implementation for the BC function used by the FSI3D model
+ *  in order to convert the given flow rate to a velocity profile.
+ */
+class FSI3DBoundaryFlowRateFunction
+{
+public:
+
+    //! @name Type definitions
+    //@{
+
+    typedef MultiscaleInterfaceFluid::function_Type function_Type;
+
+    typedef MultiscaleModelFSI3D::FSI3DBoundaryFlowRate_Type FSI3DBoundaryFlowRate_Type;
+
+    //@}
+
+
+    //! @name Constructors & Destructor
+    //@{
+
+    //! Constructor
+    explicit FSI3DBoundaryFlowRateFunction() :
+        M_FSI3D                (),
+        M_function             (),
+        M_fluidFlag            (),
+        M_boundaryFlowRateType (),
+        M_n                    (),
+        M_area                 (),
+        M_flowRateIsZero       ()
+        {}
+
+    //! Destructor
+    virtual ~FSI3DBoundaryFlowRateFunction() { /* M_FSI3D is deleted outside */ }
+
+    //@}
+
+
+    //! @name Methods
+    //@{
+
+    //! Update function parameters
+    /*!
+     *  Instead of evaluating all the parameters at each call, we update them once at each time step.
+     */
+    void updateParameters()
+    {
+        // Updating the area
+        M_area = M_FSI3D->solver()->fluid().area( M_fluidFlag );
+
+        // Updating the BC
+        switch ( M_boundaryFlowRateType )
+        {
+            case MultiscaleModelFSI3D::Strong:
+            {
+                // Update the approximate surface normal direction for this b.c.
+                useNormalDirectionFlow( M_FSI3D->bcHandlerFluid().findBCWithFlag( M_fluidFlag ) );
+
+                break;
+            }
+            case MultiscaleModelFSI3D::Semiweak:
+            {
+                // Check if the flow rate is (almost) zero and impose b.c. accordingly:
+                // we use a cutoff to determine when the coupled flow rate is sufficiently small
+                M_flowRateIsZero = ( std::abs( M_function( M_FSI3D->data()->dataFluid()->dataTime()->time(), 0.0, 0.0, 0.0, 0 ) ) < 1e-8 );
+
+                BCFunctionBase base;
+                if ( M_flowRateIsZero )
+                {
+                    // Impose essential Dirichlet
+                    M_FSI3D->bcHandlerFluid().modifyBC( M_fluidFlag, Essential );
+
+                    /* In case of essential b.c. we must take care of the Lagrange multiplier, otherwise the global
+                       system will be singular. For now we circumvent the problem by setting the corresponding diagonal
+                       element to zero, i.e., the Lagrange multiplier is retained but becomes trivial. */
+                }
+                else
+                {
+                    // Impose weakly the flow rate
+                    M_FSI3D->bcHandlerFluid().modifyBC( M_fluidFlag, Flux );
+                }
+
+                break;
+            }
+            case MultiscaleModelFSI3D::Weak:
+
+                std::cerr << "!!! ERROR: in case Weak option has been selected, this class should not be instantiated at all !!!" << std::endl;
+                break;
+
+            default:
+
+                break;
+        }
+    }
+
+    //! Evaluate the coupling quantity
+    /*!
+     *  For now, we impose a flat profile in the normal direction.
+     *  TODO: In the future, this method can be extended in order to prescribe some "predefined" velocity profile
+     *  such as Poiseuille, Womersley, etc...
+     *
+     *  @return evaluation of the function
+     */
+    Real function( const Real& t, const Real& x, const Real& y, const Real& z, const UInt& id )
+    {
+        /* CAUTION: Here lies a possible bug. The flat profile is assumed to extend to the boundary of the
+         * surface patch, but if the user specific explicitly a no-slip condition on the ring then an error
+         * of order h will be made in the flow rate coupling equations. The proper implementation is to
+         * make no assumptions but to integrate the effective flow profile across the surface patch and use
+         * that value for the scaling. That way it is always mesh-independent. */
+
+        if ( M_boundaryFlowRateType == MultiscaleModelFSI3D::Semiweak && M_flowRateIsZero )
+            return 0;
+
+        Real flowRate = M_function( t, x, y, z, id );
+        Real meanVelocity = flowRate / M_area;
+
+        return meanVelocity * M_n[id];
+    }
+
+    //@}
+
+
+    //! @name Set Methods
+    //@{
+
+    //! Set the FSI3D model
+    /*!
+     * @param modelFSI3D a pointer to the FSI3D model
+     */
+    void setModel( MultiscaleModelFSI3D* modelFSI3D ) { M_FSI3D = modelFSI3D; }
+
+    //! Set the fluid flag of the boundary
+    /*!
+     * @param flag flag of the fluid boundary
+     */
+    void setFluidFlag( const multiscaleID_Type& flag ) { M_fluidFlag = flag; }
+
+    //! Set the outgoing normal of the fluid boundary
+    /*!
+     * @param normal outgoing normal of the fluid boundary
+     */
+    void setNormal( const boost::array< Real, 3 >& normal ) { M_n = normal; }
+
+    //! Set the area function
+    /*!
+     * @param function area function
+     */
+    void setFunction( const function_Type& function ) { M_function = function; }
+
+    //! Set the boundary flow rate type
+    /*!
+     * @param boundaryFlowRateType boundary flow rate type
+     */
+    void setBoundaryFlowRateType( const FSI3DBoundaryFlowRate_Type& boundaryFlowRateType ) { M_boundaryFlowRateType = boundaryFlowRateType; }
+
+    //@}
+
+
+    //! @name Get methods
+    //@{
+
+    //! Get the fluid flag of the boundary
+    /*!
+     * @return flag of the fluid boundary
+     */
+    const multiscaleID_Type& fluidFlag() const { return M_fluidFlag; }
+
+    //! Get the boundary flow rate type
+    /*!
+     * @return boundary flow rate type
+     */
+    const FSI3DBoundaryFlowRate_Type& boundaryFlowRateType() const { return M_boundaryFlowRateType; }
+
+    //@}
+
+
+private:
+
+    //! @name Unimplemented Methods
+    //@{
+
+    FSI3DBoundaryFlowRateFunction( const FSI3DBoundaryFlowRateFunction& boundaryFunction );
+
+    FSI3DBoundaryFlowRateFunction& operator=( const FSI3DBoundaryFlowRateFunction& boundaryFunction );
+
+    //@}
+
+    //! @name Private Methods
+    //@{
+
+    //! Impose a flow in the outgoing normal direction.
+    void useNormalDirectionFlow( const BCBase& boundaryID )
+    {
+        // Use the PostProcessingBoundary utility class to extract the surface normals
+        PostProcessingBoundary<MultiscaleModelFSI3D::mesh_Type> normalExtraction( M_FSI3D->solver()->uFESpacePtr()->mesh(),
+                                                                                  &(M_FSI3D->solver()->uFESpacePtr()->feBd()),
+                                                                                  &(M_FSI3D->solver()->uFESpacePtr()->dof()),
+                                                                                  M_FSI3D->solver()->uFESpacePtr()->map() );
+
+        Vector approxNormal = normalExtraction.normal( boundaryID.flag() );
+
+        // Take the first surface normal direction
+        M_n[0] = approxNormal[0];
+        M_n[1] = approxNormal[1];
+        M_n[2] = approxNormal[2];
+    }
+
+    //@}
+
+    MultiscaleModelFSI3D*                          M_FSI3D;
+    function_Type                                  M_function;
+    multiscaleID_Type                              M_fluidFlag;
+    FSI3DBoundaryFlowRate_Type                     M_boundaryFlowRateType;
+    boost::array< Real, 3 >                        M_n;
+    Real                                           M_area;
+    bool                                           M_flowRateIsZero;
 };
 
 #endif
@@ -822,6 +1085,8 @@ private:
 };
 
 #endif
+
+
 
 //! Factory create function
 inline multiscaleModel_Type* createMultiscaleModelFSI3D()

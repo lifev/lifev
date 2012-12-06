@@ -55,8 +55,12 @@ MultiscaleModelFSI3D::MultiscaleModelFSI3D() :
         M_importerFluid                (),
         M_importerSolid                (),
 #ifndef FSI_WITH_EXTERNALPRESSURE
-        M_stressCouplingFunction       (),
+        M_boundaryStressFunctions      (),
         M_externalPressureScalar       (),
+#endif
+#ifndef FSI_WITHOUT_VELOCITYPROFILE
+        M_boundaryFlowRateFunctions    (),
+        M_boundaryFlowRateType         (),
 #endif
 #ifdef FSI_WITH_BOUNDARYAREA
         M_boundaryAreaFunctions        (),
@@ -146,6 +150,17 @@ MultiscaleModelFSI3D::setupData( const std::string& fileName )
         setupImporter( M_importerSolid, dataFile, "_Solid" );
     }
 
+#ifndef FSI_WITHOUT_VELOCITYPROFILE
+    std::map< std::string, FSI3DBoundaryFlowRate_Type > boundaryFlowRateMap;
+    boundaryFlowRateMap["Weak"]     = Weak;
+    boundaryFlowRateMap["Semiweak"] = Semiweak;
+    boundaryFlowRateMap["Strong"]   = Strong;
+
+    M_boundaryFlowRateType.reserve( M_boundaryFlags.size() );
+    for ( UInt j( 0 ); j < M_boundaryFlags.size(); ++j )
+        M_boundaryFlowRateType[j] = boundaryFlowRateMap[dataFile( "Multiscale/flowRateCouplingType", "Weak", j )];
+#endif
+
 #ifdef FSI_WITH_BOUNDARYAREA
     M_boundaryFlagsArea.reserve( M_boundaryFlags.size() );
     M_boundaryFlagsAreaPerturbed.reserve( M_boundaryFlags.size() );
@@ -221,11 +236,11 @@ MultiscaleModelFSI3D::buildModel()
 //    if ( M_comm->MyPID() == 0 )
 //        M_data->showMe();
 
-    // Update BCInterface solver variables
-    updateBC();
-
     M_FSIoperator->buildSystem();
     M_FSIoperator->updateSystem();
+
+    // Update BCInterface solver variables
+    updateBC();
 }
 
 void
@@ -236,11 +251,11 @@ MultiscaleModelFSI3D::updateModel()
     debugStream( 8140 ) << "MultiscaleModelFSI3D::updateModel() \n";
 #endif
 
-    // Update BCInterface solver variables
-    updateBC();
-
     // Update System
     M_FSIoperator->updateSystem();
+
+    // Update BCInterface solver variables
+    updateBC();
 
     // TODO This is a workaround of Paolo Crosetto to make it possible to perform subiterations
     // in the multiscale when using 3D FSI models. In the future this should be replaced with
@@ -370,8 +385,54 @@ void
 MultiscaleModelFSI3D::imposeBoundaryFlowRate( const multiscaleID_Type& boundaryID, const function_Type& function )
 {
     BCFunctionBase base;
+
+#ifndef FSI_WITHOUT_VELOCITYPROFILE
+    switch ( M_boundaryFlowRateType[boundaryID] )
+    {
+        case Strong:
+        {
+            boundaryFlowRateFunctionPtr_Type boundaryFlowRateFunction( new boundaryFlowRateFunction_Type() );
+            boundaryFlowRateFunction->setModel( this );
+            boundaryFlowRateFunction->setFluidFlag( boundaryFlag( boundaryID ) );
+            boundaryFlowRateFunction->setFunction( function);
+            boundaryFlowRateFunction->setBoundaryFlowRateType( Strong );
+
+            M_boundaryFlowRateFunctions.push_back( boundaryFlowRateFunction );
+
+            base.setFunction( boost::bind( &FSI3DBoundaryFlowRateFunction::function, M_boundaryFlowRateFunctions.back(), _1, _2, _3, _4, _5 ) );
+            M_fluidBC->handler()->addBC( "CouplingFlowRate_Model_" + number2string( M_ID ) + "_BoundaryID_" + number2string( boundaryID ), boundaryFlag( boundaryID ), EssentialVertices, Full, base, 3 );
+
+            break;
+        }
+        case Semiweak:
+        {
+            // TODO: implementation is still required for the switching of the boundary condition.
+            // Possible idea: we can use the same function and change just the type of BC inside the BCHandler from Flux to Essential.
+            boundaryFlowRateFunctionPtr_Type boundaryFlowRateFunction( new boundaryFlowRateFunction_Type() );
+            boundaryFlowRateFunction->setModel( this );
+            boundaryFlowRateFunction->setFluidFlag( boundaryFlag( boundaryID ) );
+            boundaryFlowRateFunction->setFunction( function);
+            boundaryFlowRateFunction->setBoundaryFlowRateType( Semiweak );
+
+            M_boundaryFlowRateFunctions.push_back( boundaryFlowRateFunction );
+
+            base.setFunction( boost::bind( &FSI3DBoundaryFlowRateFunction::function, M_boundaryFlowRateFunctions.back(), _1, _2, _3, _4, _5 ) );
+            M_fluidBC->handler()->addBC( "CouplingFlowRate_Model_" + number2string( M_ID ) + "_BoundaryID_" + number2string( boundaryID ), boundaryFlag( boundaryID ), Flux, Full, base, 3 );
+
+            break;
+        }
+        case Weak:
+        default:
+
+            base.setFunction( function );
+            M_fluidBC->handler()->addBC( "CouplingFlowRate_Model_" + number2string( M_ID ) + "_BoundaryID_" + number2string( boundaryID ), boundaryFlag( boundaryID ), Flux, Full, base, 3 );
+
+            break;
+    }
+#else
     base.setFunction( function );
     M_fluidBC->handler()->addBC( "CouplingFlowRate_Model_" + number2string( M_ID ) + "_BoundaryID_" + number2string( boundaryID ), boundaryFlag( boundaryID ), Flux, Full, base, 3 );
+#endif
 }
 
 void
@@ -385,9 +446,9 @@ MultiscaleModelFSI3D::imposeBoundaryMeanNormalStress( const multiscaleID_Type& b
     boundaryStressFunction->setDelta( M_data->dataSolid()->externalPressure() );
     boundaryStressFunction->setFunction( function);
 
-    M_stressCouplingFunction.push_back( boundaryStressFunction );
+    M_boundaryStressFunctions.push_back( boundaryStressFunction );
 
-    base.setFunction( boost::bind( &FSI3DBoundaryStressFunction::function, M_stressCouplingFunction.back(), _1, _2, _3, _4, _5 ) );
+    base.setFunction( boost::bind( &FSI3DBoundaryStressFunction::function, M_boundaryStressFunctions.back(), _1, _2, _3, _4, _5 ) );
 #endif
     M_fluidBC->handler()->addBC( "BoundaryStress_Model_" + number2string( M_ID ) + "_BoundaryID_" + number2string( boundaryID ), boundaryFlag( boundaryID ), Natural, Normal, base );
 }
@@ -698,6 +759,11 @@ MultiscaleModelFSI3D::setupBC( const std::string& fileName )
 void
 MultiscaleModelFSI3D::updateBC()
 {
+#ifndef FSI_WITHOUT_VELOCITYPROFILE
+    for ( boundaryFlowRateFunctionsContainerIterator_Type i = M_boundaryFlowRateFunctions.begin() ; i != M_boundaryFlowRateFunctions.end() ; ++i )
+        ( *i )->updateParameters();
+#endif
+
     if ( M_FSIoperator->isFluid() )
     {
         M_fluidBC->updatePhysicalSolverVariables();
