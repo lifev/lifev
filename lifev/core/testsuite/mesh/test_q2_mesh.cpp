@@ -68,15 +68,17 @@ struct tester
                             const reffem_t& reffem,
                             const geomap_t& geomap,
                             comm_t comm)
-  {
+  {  
+    bool ilead = (comm->MyPID() == 0);
+
     baremesh_t baremesh;
 
-    if (!LifeV::MeshIO::ReadGmshFile(filename, baremesh, 1, true))
+    if (!LifeV::MeshIO::ReadGmshFile(filename, baremesh, 1, ilead))
       return false;
 
     // Convert the mesh
     boost::shared_ptr<mesh_t> mesh (new mesh_t(comm));
-    LifeV::convertBareMesh (baremesh, *mesh, true);
+    LifeV::convertBareMesh (baremesh, *mesh, ilead);
 
     // The current finite element
     LifeV::CurrentFE curFE (reffem, geomap, LifeV::quadRuleQuad4pt);
