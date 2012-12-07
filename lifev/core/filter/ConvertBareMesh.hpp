@@ -64,6 +64,8 @@ namespace LifeV
                     << std::endl;
         {
           UInt numberPoints = baremesh.points.numberOfColumns();
+
+          mesh.setIsPartitioned(baremesh.isPartitioned);
           // Update mesh containers
           mesh.setMaxNumPoints(numberPoints, true);
           mesh.setMaxNumGlobalPoints(numberPoints);
@@ -81,7 +83,7 @@ namespace LifeV
             p.y() = baremesh.points(1, i);
             p.z() = baremesh.points(2, i);
             // Marker
-            p.setId(i);
+            p.setId(baremesh.pointIDs[i]);
             p.setMarkerID(baremesh.pointMarkers[i]);
           }
         }
@@ -101,7 +103,7 @@ namespace LifeV
           {
             // Add the element
             element_t& e = mesh.addElement();
-            e.setId(i);
+            e.setId(baremesh.elementIDs[i]);
             e.setMarkerID(baremesh.elementMarkers[i]);
             // Points
             for (UInt j = 0; j < element_t::S_numPoints; ++j)
@@ -154,7 +156,7 @@ namespace LifeV
         {
           // Add the facet
           facet_t& f = mesh.addFacet(false);
-          f.setId(i);
+          f.setId(baremesh.facetIDs[i]);
           f.setMarkerID(baremesh.facetMarkers[i]);
           // Points
           for (UInt j = 0; j < facet_t::S_numPoints; ++j)
@@ -186,7 +188,7 @@ namespace LifeV
         {
           // Add the facet
           ridge_t& r = mesh.addRidge(false);
-          r.setId(i);
+          r.setId(baremesh.ridgeIDs[i]);
           r.setMarkerID(baremesh.ridgeMarkers[i]);
           // Points
           for (UInt j = 0; j < ridge_t::S_numPoints; ++j)

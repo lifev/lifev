@@ -405,16 +405,20 @@ ReadINRIAMeshFile( BareMesh<GeoShape> & bareMesh,
   bareMesh.numBoundaryPoints = numberBoundaryPoints;
   bareMesh.points.reshape( 3, numberPoints );
   bareMesh.pointMarkers.resize( numberPoints );
+  bareMesh.pointIDs.resize( numberPoints );
 
   bareMesh.ridges.reshape    ( GeoShape::GeoBShape::GeoBShape::S_numPoints, numberBoundaryEdges );
   bareMesh.ridgeMarkers.resize( numberBoundaryEdges );
+  bareMesh.ridgeIDs.resize( numberBoundaryEdges );
 
   bareMesh.numBoundaryFacets = numberBoundaryFaces;
   bareMesh.facets.reshape( GeoShape::GeoBShape::S_numPoints, numberStoredFaces );
   bareMesh.facetMarkers.resize( numberStoredFaces );
+  bareMesh.facetIDs.resize( numberStoredFaces );
 
   bareMesh.elements.reshape( GeoShape::S_numPoints, numberVolumes );
   bareMesh.elementMarkers.resize( numberVolumes );
+  bareMesh.elementIDs.resize( numberVolumes );
 
   bareMesh.regionMarkerID = regionFlag;
 
@@ -447,6 +451,7 @@ ReadINRIAMeshFile( BareMesh<GeoShape> & bareMesh,
               bareMesh.points( 1, i ) = y;
               bareMesh.points( 2, i ) = z;
               bareMesh.pointMarkers[ i ] = ibc;
+              bareMesh.pointIDs[i] = i;
           }
           done++;
 
@@ -470,6 +475,7 @@ ReadINRIAMeshFile( BareMesh<GeoShape> & bareMesh,
               }
               myStream >> ibc;
               bareMesh.facetMarkers[ i ] = ibc;
+              bareMesh.facetIDs[ i ] = i;
           }
 
           oStr << "Boundary faces read " << std::endl;
@@ -490,6 +496,7 @@ ReadINRIAMeshFile( BareMesh<GeoShape> & bareMesh,
               }
               myStream >> ibc;
               bareMesh.ridgeMarkers[ i ] = ibc;
+              bareMesh.ridgeIDs[ i ] = i;
           }
           oStr << "Boundary edges read " << std::endl;
           done++;
@@ -510,6 +517,7 @@ ReadINRIAMeshFile( BareMesh<GeoShape> & bareMesh,
               }
               myStream >> ibc;
               bareMesh.elementMarkers[ i ] = ibc;
+              bareMesh.elementIDs[ i ] = i;
               count++;
           }
           oStr << count << " Volume elements read" << std::endl;
