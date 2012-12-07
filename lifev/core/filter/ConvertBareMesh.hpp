@@ -59,23 +59,22 @@ namespace LifeV
         // ============
         // begin.POINTS
         // ============
-        if (verbose)
-          std::cout << "[INFO:convertBareMesh] Updating points"
-                    << std::endl;
         {
           UInt numberPoints = baremesh.points.numberOfColumns();
           // Update mesh containers
           mesh.setMaxNumPoints(numberPoints, true);
           mesh.setMaxNumGlobalPoints(numberPoints);
-          //mesh.setNumVertices(numberPoints);
-          //mesh.setNumGlobalVertices(numberPoints);
-          // I have no information on boundary points in general.
-          // MeshCheck will handle it.
+          // I will set vertices later
+          mesh.setNumVertices(0);
+          mesh.setNumGlobalVertices(0);
+          // I have no information on boundary points in general
           mesh.setNumBPoints(0);
+          mesh.setNumBVertices(0);
           // Add the points
           for (UInt i = 0; i < numberPoints; ++i)
           {
-            point_t& p = mesh.addPoint(false, true);
+            // Add a generic point (vertex selection is made later)
+            point_t& p = mesh.addPoint(false, false);
             // Coordinates
             p.x() = baremesh.points(0, i);
             p.y() = baremesh.points(1, i);
@@ -85,18 +84,19 @@ namespace LifeV
             p.setMarkerID(baremesh.pointMarkers[i]);
           }
         }
+        if (verbose)
+          std::cout << "[INFO:convertBareMesh] Added "
+                    << mesh.numPoints() << " marked points." << std::endl;
 
         // ==============
         // begin.ELEMENTS
         // ==============
-        if (verbose)
-          std::cout << "[INFO:convertBareMesh] Updating elements"
-                    << std::endl;
         {
           // Update containers
           UInt numberElements = baremesh.elements.numberOfColumns();
           mesh.setMaxNumGlobalElements (numberElements);
           mesh.setMaxNumElements (numberElements, true);
+          mesh.setNumElements(numberElements);
           for (UInt i = 0; i < numberElements; ++i)
           {
             // Add the element
@@ -108,18 +108,32 @@ namespace LifeV
             {
               UInt pid = baremesh.elements(j, i);
               e.setPoint(j, mesh.point(pid));
+              // Mark vertices
+              if (j < element_t::S_numVertices)
+                mesh.pointList(pid).setFlag(LifeV::EntityFlags::VERTEX);
             }
           }
+          // Update number of vertices
+          UInt numVertices = mesh.pointList.countElementsWithFlag(
+                LifeV::EntityFlags::VERTEX,
+                &LifeV::Flag::testAllSet);
+          mesh.setNumVertices(numVertices);
         }
+        if (verbose)
+          std::cout << "[INFO:convertBareMesh] Added "
+                    << mesh.numElements() << " marked elements." << "\n"
+                    << "[INFO:convertBareMesh] Found "
+                    << mesh.numVertices() << " vertices." << std::endl;
 
         // Set the region marker
         mesh.setMarkerID(baremesh.regionMarkerID);
         mesh.setId(baremesh.regionMarkerID);
 
+        // dimension specific entities
         convert_spec<S::S_nDimensions>::add_facets(baremesh, mesh, verbose);
-
         convert_spec<S::S_nDimensions>::add_ridges(baremesh, mesh, verbose);
 
+        // discard baremesh
         baremesh.clear();
 
         return convert_spec<S::S_nDimensions>::check(mesh, verbose);
