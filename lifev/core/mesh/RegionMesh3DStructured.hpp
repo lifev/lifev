@@ -576,6 +576,7 @@ void regularMesh3D( RegionMesh<GeoShape,MC>& mesh,
 
     // Build the boundary faces (ONLY!)
     oStr << "building the boundary faces...";
+    UInt faceCount = 0;
     // Faces l_x x l_y
     for ( UInt j(0); j<m_y; ++j )
     {
@@ -598,6 +599,7 @@ void regularMesh3D( RegionMesh<GeoShape,MC>& mesh,
                 // Face 1 bottom - marker = 5
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(5);
+                facePtr->setId( faceCount++ );
                 facePtr->setPoint( 0, mesh.point(P0) );
                 facePtr->setPoint( 1, mesh.point(P3) );
                 facePtr->setPoint( 2, mesh.point(P1) );
@@ -605,6 +607,7 @@ void regularMesh3D( RegionMesh<GeoShape,MC>& mesh,
                 // Face 2 bottom
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(5);
+                facePtr->setId( faceCount++ );
                 facePtr->setPoint( 0, mesh.point(P0) );
                 facePtr->setPoint( 1, mesh.point(P2) );
                 facePtr->setPoint( 2, mesh.point(P3) );
@@ -614,6 +617,7 @@ void regularMesh3D( RegionMesh<GeoShape,MC>& mesh,
                 // Face 1 bottom - marker = 5
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(5);
+                facePtr->setId( faceCount++ );
                 facePtr->setPoint( 0, mesh.point(P0) );
                 facePtr->setPoint( 1, mesh.point(P2) );
                 facePtr->setPoint( 2, mesh.point(P1) );
@@ -621,6 +625,7 @@ void regularMesh3D( RegionMesh<GeoShape,MC>& mesh,
                 // Face 2 bottom
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(5);
+                facePtr->setId( faceCount++ );
                 facePtr->setPoint( 0, mesh.point(P1) );
                 facePtr->setPoint( 1, mesh.point(P2) );
                 facePtr->setPoint( 2, mesh.point(P3) );
@@ -643,6 +648,7 @@ void regularMesh3D( RegionMesh<GeoShape,MC>& mesh,
                 // Face 1 top - marker = 6
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(6);
+                facePtr->setId( faceCount++ );
                 facePtr->setPoint( 0, mesh.point(P0) );
                 facePtr->setPoint( 1, mesh.point(P1) );
                 facePtr->setPoint( 2, mesh.point(P3) );
@@ -650,6 +656,7 @@ void regularMesh3D( RegionMesh<GeoShape,MC>& mesh,
                 // Face 2 top
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(6);
+                facePtr->setId( faceCount++ );
                 facePtr->setPoint( 0, mesh.point(P0) );
                 facePtr->setPoint( 1, mesh.point(P3) );
                 facePtr->setPoint( 2, mesh.point(P2) );
@@ -659,6 +666,7 @@ void regularMesh3D( RegionMesh<GeoShape,MC>& mesh,
                 // Face 1 top - marker = 6
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(6);
+                facePtr->setId( faceCount++ );
                 facePtr->setPoint( 0, mesh.point(P0) );
                 facePtr->setPoint( 1, mesh.point(P1) );
                 facePtr->setPoint( 2, mesh.point(P2) );
@@ -666,6 +674,7 @@ void regularMesh3D( RegionMesh<GeoShape,MC>& mesh,
                 // Face 2 top
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(6);
+                facePtr->setId( faceCount++ );
                 facePtr->setPoint( 0, mesh.point(P1) );
                 facePtr->setPoint( 1, mesh.point(P3) );
                 facePtr->setPoint( 2, mesh.point(P2) );
@@ -692,6 +701,7 @@ void regularMesh3D( RegionMesh<GeoShape,MC>& mesh,
                 // Face 1 front - marker = 1
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(1);
+                facePtr->setId( faceCount++ );
                 facePtr->setPoint( 0, mesh.point(P0) );
                 facePtr->setPoint( 1, mesh.point(P1) );
                 facePtr->setPoint( 2, mesh.point(P3) );
@@ -699,6 +709,7 @@ void regularMesh3D( RegionMesh<GeoShape,MC>& mesh,
                 // Face 2 front
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(1);
+                facePtr->setId( faceCount++ );
                 facePtr->setPoint( 0, mesh.point(P0) );
                 facePtr->setPoint( 1, mesh.point(P3) );
                 facePtr->setPoint( 2, mesh.point(P2) );
@@ -708,6 +719,7 @@ void regularMesh3D( RegionMesh<GeoShape,MC>& mesh,
                 // Face 1 front - marker = 1
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(1);
+                facePtr->setId( faceCount++ );
                 facePtr->setPoint( 0, mesh.point(P0) );
                 facePtr->setPoint( 1, mesh.point(P1) );
                 facePtr->setPoint( 2, mesh.point(P2) );
@@ -715,6 +727,7 @@ void regularMesh3D( RegionMesh<GeoShape,MC>& mesh,
                 // Face 2 front
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(1);
+                facePtr->setId( faceCount++ );
                 facePtr->setPoint( 0, mesh.point(P1) );
                 facePtr->setPoint( 1, mesh.point(P3) );
                 facePtr->setPoint( 2, mesh.point(P2) );
@@ -735,6 +748,7 @@ void regularMesh3D( RegionMesh<GeoShape,MC>& mesh,
                 // Face 1 back - marker = 3
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(3);
+                facePtr->setId( faceCount++ );
                 facePtr->setPoint( 0, mesh.point(P0) );
                 facePtr->setPoint( 1, mesh.point(P2) );
                 facePtr->setPoint( 2, mesh.point(P3) );
@@ -742,6 +756,7 @@ void regularMesh3D( RegionMesh<GeoShape,MC>& mesh,
                 // Face 2 back
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(3);
+                facePtr->setId( faceCount++ );
                 facePtr->setPoint( 0, mesh.point(P0) );
                 facePtr->setPoint( 1, mesh.point(P3) );
                 facePtr->setPoint( 2, mesh.point(P1) );
@@ -751,6 +766,7 @@ void regularMesh3D( RegionMesh<GeoShape,MC>& mesh,
                 // Face 1 back - marker = 3
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(3);
+                facePtr->setId( faceCount++ );
                 facePtr->setPoint( 0, mesh.point(P0) );
                 facePtr->setPoint( 1, mesh.point(P2) );
                 facePtr->setPoint( 2, mesh.point(P1) );
@@ -758,6 +774,7 @@ void regularMesh3D( RegionMesh<GeoShape,MC>& mesh,
                 // Face 2 back
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(3);
+                facePtr->setId( faceCount++ );
                 facePtr->setPoint( 0, mesh.point(P1) );
                 facePtr->setPoint( 1, mesh.point(P2) );
                 facePtr->setPoint( 2, mesh.point(P3) );
@@ -786,6 +803,7 @@ void regularMesh3D( RegionMesh<GeoShape,MC>& mesh,
                 // Face 1 left - marker = 4
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(4);
+                facePtr->setId( faceCount++ );
                 facePtr->setPoint( 0, mesh.point(P0) );
                 facePtr->setPoint( 1, mesh.point(P2) );
                 facePtr->setPoint( 2, mesh.point(P3) );
@@ -793,6 +811,7 @@ void regularMesh3D( RegionMesh<GeoShape,MC>& mesh,
                 // Face 2 left
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(4);
+                facePtr->setId( faceCount++ );
                 facePtr->setPoint( 0, mesh.point(P0) );
                 facePtr->setPoint( 1, mesh.point(P3) );
                 facePtr->setPoint( 2, mesh.point(P1) );
@@ -802,6 +821,7 @@ void regularMesh3D( RegionMesh<GeoShape,MC>& mesh,
                 // Face 1 left - marker = 4
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(4);
+                facePtr->setId( faceCount++ );
                 facePtr->setPoint( 0, mesh.point(P0) );
                 facePtr->setPoint( 1, mesh.point(P2) );
                 facePtr->setPoint( 2, mesh.point(P1) );
@@ -809,6 +829,7 @@ void regularMesh3D( RegionMesh<GeoShape,MC>& mesh,
                 // Face 2 left
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(4);
+                facePtr->setId( faceCount++ );
                 facePtr->setPoint( 0, mesh.point(P1) );
                 facePtr->setPoint( 1, mesh.point(P2) );
                 facePtr->setPoint( 2, mesh.point(P3) );
@@ -831,6 +852,7 @@ void regularMesh3D( RegionMesh<GeoShape,MC>& mesh,
                 // Face 1 right - marker = 2
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(2);
+                facePtr->setId( faceCount++ );
                 facePtr->setPoint( 0, mesh.point(P0) );
                 facePtr->setPoint( 1, mesh.point(P3) );
                 facePtr->setPoint( 2, mesh.point(P2) );
@@ -838,6 +860,7 @@ void regularMesh3D( RegionMesh<GeoShape,MC>& mesh,
                 // Face 2 right
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(2);
+                facePtr->setId( faceCount++ );
                 facePtr->setPoint( 0, mesh.point(P0) );
                 facePtr->setPoint( 1, mesh.point(P1) );
                 facePtr->setPoint( 2, mesh.point(P3) );
@@ -847,6 +870,7 @@ void regularMesh3D( RegionMesh<GeoShape,MC>& mesh,
                 // Face 1 right - marker = 2
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(2);
+                facePtr->setId( faceCount++ );
                 facePtr->setPoint( 0, mesh.point(P0) );
                 facePtr->setPoint( 1, mesh.point(P1) );
                 facePtr->setPoint( 2, mesh.point(P2) );
@@ -854,6 +878,7 @@ void regularMesh3D( RegionMesh<GeoShape,MC>& mesh,
                 // Face 2 right
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(2);
+                facePtr->setId( faceCount++ );
                 facePtr->setPoint( 0, mesh.point(P1) );
                 facePtr->setPoint( 1, mesh.point(P3) );
                 facePtr->setPoint( 2, mesh.point(P2) );
