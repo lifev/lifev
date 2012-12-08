@@ -5,7 +5,6 @@ SET(filter_HEADERS
   filter/GetPot.hpp
   filter/Exporter.hpp
   filter/ImporterMesh3D.hpp
-  filter/ConvertBareMesh.hpp
   filter/Importer.hpp
   filter/ExporterEmpty.hpp
   filter/ExporterVTK.hpp

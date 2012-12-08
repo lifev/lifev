@@ -54,7 +54,7 @@
 #include <lifev/core/filter/ImporterMesh3D.hpp>
 #include <lifev/core/mesh/RegionMesh3DStructured.hpp>
 #include <lifev/core/filter/ParserINRIAMesh.hpp>
-#include <lifev/core/filter/ConvertBareMesh.hpp>
+#include <lifev/core/mesh/ConvertBareMesh.hpp>
 
 namespace LifeV
 {

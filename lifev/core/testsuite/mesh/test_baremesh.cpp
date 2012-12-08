@@ -65,7 +65,7 @@
 #include <lifev/core/mesh/BareMesh.hpp>
 
 #include <lifev/core/filter/ParserINRIAMesh.hpp>
-#include <lifev/core/filter/ConvertBareMesh.hpp>
+#include <lifev/core/mesh/ConvertBareMesh.hpp>
 #include <lifev/core/array/MapEpetra.hpp>
 
 // A dummy class to imitate a VectorEpetra

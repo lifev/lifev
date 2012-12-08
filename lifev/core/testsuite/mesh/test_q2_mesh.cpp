@@ -42,7 +42,7 @@
 
 #include <lifev/core/LifeV.cpp>
 #include <lifev/core/filter/ParserGmsh.hpp>
-#include <lifev/core/filter/ConvertBareMesh.hpp>
+#include <lifev/core/mesh/ConvertBareMesh.hpp>
 
 #include <lifev/core/fem/GeometricMap.hpp>
 #include <lifev/core/fem/ReferenceFEScalar.hpp>
