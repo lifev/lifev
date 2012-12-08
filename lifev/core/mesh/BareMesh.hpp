@@ -77,7 +77,7 @@ struct BareMesh
 };
 
 template <typename GeoShapeType>
-BareMesh<GeoShapeType>::BareMesh() : isPartitioned(false) {};
+BareMesh<GeoShapeType>::BareMesh() : isPartitioned(false) {}
 
 template <typename GeoShapeType>
 void BareMesh<GeoShapeType>::clear()
