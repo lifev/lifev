@@ -207,11 +207,11 @@ struct Cylinder::Private
         {
             if ( centered )
             {
-                return Um_3d() * (H+y)*(H-y) * (H+z)*(H-z) / pow(H,4);
+                return Um_3d() * (H+y)*(H-y) * (H+z)*(H-z) / std::pow(H,4);
             }
             else
             {
-                return 16 * Um_3d() * y * z * (H-y) * (H-z) / pow(H,4);
+                return 16 * Um_3d() * y * z * (H-y) * (H-z) / std::pow(H,4);
             }
         }
         else
