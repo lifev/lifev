@@ -60,6 +60,34 @@ namespace LifeV
         // begin.POINTS
         // ============
         {
+
+          //make sure global id are stored when the mesh is unpartitioned
+          if(!baremesh.isPartitioned)
+		  {
+			  if(baremesh.pointIDs.size()==0){
+				  baremesh.pointIDs.resize(baremesh.points.numberOfColumns());
+				  for (UInt i = 0; i < baremesh.points.numberOfColumns(); ++i)
+					  baremesh.pointIDs[i]=i;
+			  }
+			  if(baremesh.ridgeIDs.size()==0){
+				  baremesh.ridgeIDs.resize(baremesh.ridges.numberOfColumns());
+				  for (UInt i = 0; i < baremesh.ridges.numberOfColumns(); ++i)
+					  baremesh.ridgeIDs[i]=i;
+			  }
+			  if(baremesh.facetIDs.size()==0){
+				  baremesh.facetIDs.resize(baremesh.facets.numberOfColumns());
+				  for (UInt i = 0; i < baremesh.facets.numberOfColumns(); ++i)
+					  baremesh.facetIDs[i]=i;
+			  }
+			  if(baremesh.elementIDs.size()==0){
+				  baremesh.elementIDs.resize(baremesh.elements.numberOfColumns());
+				  for (UInt i = 0; i < baremesh.elements.numberOfColumns(); ++i)
+					  baremesh.elementIDs[i]=i;
+			  }
+		  }
+
+
+
           UInt numberPoints = baremesh.points.numberOfColumns();
 
           mesh.setIsPartitioned(baremesh.isPartitioned);
