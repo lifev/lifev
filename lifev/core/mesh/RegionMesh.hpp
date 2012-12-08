@@ -3100,6 +3100,7 @@ RegionMesh<GeoShapeType, MCType>::setLinkSwitch( std::string const & _s )
 {
 	bool check = switches.set( _s );
     ASSERT0( check, std::stringstream( "Switch named " + _s + " is not allowed" ).str().c_str() );
+    LIFEV_UNUSED( check );
 }
 
 template <typename GeoShapeType, typename MCType>
@@ -3109,6 +3110,7 @@ RegionMesh<GeoShapeType, MCType>::unsetLinkSwitch( std::string const & _s )
 {
 	bool check = switches.unset( _s );
     ASSERT0( check, std::stringstream( "Switch named " + _s + " is not allowed" ).str().c_str() );
+    LIFEV_UNUSED( check );
 }
 
 template <typename GeoShapeType, typename MCType>
