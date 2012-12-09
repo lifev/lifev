@@ -625,7 +625,7 @@ NavierStokes<MeshType, Problem>::run()
             // +-----------------------------------------------+
             if (verbose) std::cout << "[Loading the mesh]" << std::endl;
 
-            boost::shared_ptr<mesh_Type > fullMeshPtr(new mesh_Type);
+            boost::shared_ptr<mesh_Type > fullMeshPtr( new mesh_Type( M_data->comm ) );
 
             Int geoDimensions = mesh_Type::S_geoDimensions;
             // Building the mesh from the source
@@ -658,7 +658,11 @@ NavierStokes<MeshType, Problem>::run()
             }
 
             if (verbose) std::cout << "Partitioning the mesh ... " << std::flush;
-            MeshPartitioner< mesh_Type >   meshPart(fullMeshPtr, M_data->comm);
+            boost::shared_ptr<mesh_Type > localMeshPtr;
+            {
+                MeshPartitioner< mesh_Type >   meshPart(fullMeshPtr, M_data->comm);
+                localMeshPtr = meshPart.meshPartition();
+            }
             fullMeshPtr.reset(); //Freeing the global mesh to save memory
 
             // +-----------------------------------------------+
@@ -673,12 +677,12 @@ NavierStokes<MeshType, Problem>::run()
 
             if (verbose) std::cout << "Building the velocity FE space ... " << std::flush;
             feSpacePtr_Type uFESpace;
-            uFESpace.reset(new feSpace_Type(meshPart, uOrder, geoDimensions, M_data->comm));
+            uFESpace.reset(new feSpace_Type(localMeshPtr, uOrder, geoDimensions, M_data->comm));
             if (verbose) std::cout << "ok." << std::endl;
 
             if (verbose) std::cout << "Building the pressure FE space ... " << std::flush;
             feSpacePtr_Type pFESpace;
-            pFESpace.reset(new feSpace_Type(meshPart, pOrder, 1, M_data->comm));
+            pFESpace.reset(new feSpace_Type(localMeshPtr, pOrder, 1, M_data->comm));
             if (verbose) std::cout << "ok." << std::endl;
 
             UInt totalVelDof   = uFESpace->dof().numTotalDof();
@@ -715,7 +719,7 @@ NavierStokes<MeshType, Problem>::run()
             }
 
             // If we change the FE we have to update the BCHandler (internal data)
-            bcH.bcUpdate( *meshPart.meshPartition(), uFESpace->feBd(), uFESpace->dof());
+            bcH.bcUpdate( *localMeshPtr, uFESpace->feBd(), uFESpace->dof());
 
             // +-----------------------------------------------+
             // |             Creating the problem              |
@@ -855,18 +859,18 @@ NavierStokes<MeshType, Problem>::run()
             {
                 exporter.reset( new ExporterHDF5<mesh_Type > ( dataFile, M_outputName ) );
                 exporter->setPostDir( "./" ); // This is a test to see if M_post_dir is working
-                exporter->setMeshProcId( meshPart.meshPartition(), M_data->comm->MyPID() );
+                exporter->setMeshProcId( localMeshPtr, M_data->comm->MyPID() );
             }
             else
 #endif
             {
                 if (exporterType.compare("none") == 0)
                 {
-                    exporter.reset( new ExporterEmpty<mesh_Type > ( dataFile, meshPart.meshPartition(), M_outputName, M_data->comm->MyPID()) );
+                    exporter.reset( new ExporterEmpty<mesh_Type > ( dataFile, localMeshPtr, M_outputName, M_data->comm->MyPID()) );
                 }
                 else
                 {
-                    exporter.reset( new ExporterEnsight<mesh_Type > ( dataFile, meshPart.meshPartition(), M_outputName, M_data->comm->MyPID()) );
+                    exporter.reset( new ExporterEnsight<mesh_Type > ( dataFile, localMeshPtr, M_outputName, M_data->comm->MyPID()) );
                 }
             }
 

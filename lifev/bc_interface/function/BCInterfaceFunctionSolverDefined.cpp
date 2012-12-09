@@ -112,14 +112,14 @@ BCInterfaceFunctionSolverDefined< FSIOperator >::updatePhysicalSolverVariables()
         Real t( M_physicalSolver->dataSolid()->getdataTime()->time() );
         Real timeStep( M_physicalSolver->dataSolid()->getdataTime()->timeStep() );
 
-        Int verticesGlobalNumber( M_physicalSolver->solidMeshPart().meshPartition()->numGlobalVertices() );
-        for ( UInt i(0) ; i < M_physicalSolver->solidMeshPart().meshPartition()->numVertices() ; ++i )
+        Int verticesGlobalNumber( M_physicalSolver->solidLocalMesh().numGlobalVertices() );
+        for ( UInt i(0) ; i < M_physicalSolver->solidLocalMesh().numVertices() ; ++i )
         {
-            gid = M_physicalSolver->solidMeshPart().meshPartition()->meshTransformer().pointInitial( i ).id();
+            gid = M_physicalSolver->solidLocalMesh().meshTransformer().pointInitial( i ).id();
 
-            x   = M_physicalSolver->solidMeshPart().meshPartition()->meshTransformer().pointInitial( i ).x();
-            y   = M_physicalSolver->solidMeshPart().meshPartition()->meshTransformer().pointInitial( i ).y();
-            z   = M_physicalSolver->solidMeshPart().meshPartition()->meshTransformer().pointInitial( i ).z();
+            x   = M_physicalSolver->solidLocalMesh().meshTransformer().pointInitial( i ).x();
+            y   = M_physicalSolver->solidLocalMesh().meshTransformer().pointInitial( i ).y();
+            z   = M_physicalSolver->solidLocalMesh().meshTransformer().pointInitial( i ).z();
 
             alpha = M_vectorFunctionRobin[0]->functionTimeSpace( t, x, y, z, 0 );
             beta  = M_vectorFunctionRobin[1]->functionTimeSpace( t, x, y, z, 0 );

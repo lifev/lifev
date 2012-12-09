@@ -718,7 +718,7 @@ VenantKirchhoffSolver<Mesh, SolverType>::buildSystem(matrixPtr_Type massStiff, c
 
 
       // stiffness
-      UInt marker = M_FESpace->mesh()->volumeList( i ).marker();
+      UInt marker = M_FESpace->mesh()->volumeList( i ).markerID();
       stiff_strain(     M_data->getMu(marker), *M_elmatK, M_FESpace->fe() );
       stiff_div   ( 0.5*M_data->getLambda(marker), *M_elmatK, M_FESpace->fe() );
 
@@ -901,7 +901,7 @@ VenantKirchhoffSolver<Mesh, SolverType>::evalConstraintTensor()
       //UInt elem = M_FESpace->mesh()->volumeList( ielem ).id();
       M_FESpace->fe().updateFirstDerivQuadPt( M_FESpace->mesh()->volumeList( ielem ) );
 
-      //int    marker = M_FESpace->mesh()->volumeList( ielem ).marker();
+      //int    marker = M_FESpace->mesh()->volumeList( ielem ).markerID();
       Real s      = 0;
       Real volume = M_FESpace->fe().detJac(0);
 

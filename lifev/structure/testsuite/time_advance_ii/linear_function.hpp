@@ -43,18 +43,18 @@ class AnalyticalSol
 public:
     inline Real operator()(Real t, Real x,Real y,Real z, UInt /*ic*/=0) const
     {
-        return exp(-sin(Pi/2*t))*(x+y+z);
+        return std::exp(-std::sin(Pi/2*t))*(x+y+z);
     }
     inline Real grad(UInt icoor, Real t , Real , Real , Real , UInt /*ic*/=0) const
     {
         switch (icoor)
         {
         case 1: // der_x
-            return exp(-sin(Pi/2*t));
+            return std::exp(-std::sin(Pi/2*t));
         case 2: // der_y
-            return exp(-sin(Pi/2*t));
+            return std::exp(-std::sin(Pi/2*t));
         case 3: // der_z
-            return exp(-sin(Pi/2*t));
+            return std::exp(-std::sin(Pi/2*t));
         default:
             return 0;
         }
@@ -68,7 +68,7 @@ Real uexact( const Real&  t ,
              const Real& z,
              const ID&  )
 {
-    return exp(-sin(Pi/2*t))*(x+y+z);
+    return std::exp(-std::sin(Pi/2*t))*(x+y+z);
 }
 
 
@@ -78,7 +78,7 @@ Real source_in( const Real&  t ,
                 const Real& z,
                 const ID&  )
 {
-    return Pi2/4*( sin(Pi/2*t)+cos(Pi/2*t)*cos(Pi/2*t) )*exp(-sin(Pi/2*t))*(x+y+z);
+    return Pi2/4*( std::sin(Pi/2*t)+std::cos(Pi/2*t)*std::cos(Pi/2*t) )*std::exp(-std::sin(Pi/2*t))*(x+y+z);
 }
 
 
@@ -97,7 +97,7 @@ Real v0( const Real&  t ,
          const Real& z,
          const ID&  )
 {
-    return -Pi/2*cos(Pi/2*t)*exp(-sin(Pi/2*t))*(x+y+z);
+    return -Pi/2*std::cos(Pi/2*t)*std::exp(-std::sin(Pi/2*t))*(x+y+z);
 }
 
 Real a0( const Real&  t ,
@@ -106,7 +106,7 @@ Real a0( const Real&  t ,
          const Real& z,
          const ID&  )
 {
-    return Pi2/4*( sin(Pi/2*t)+cos(Pi/2*t)*cos(Pi/2*t) )*exp(-sin(Pi/2*t))*(x+y+z);
+    return Pi2/4*( std::sin(Pi/2*t)+std::cos(Pi/2*t)*std::cos(Pi/2*t) )*std::exp(-std::sin(Pi/2*t))*(x+y+z);
 }
 
 Real UOne( const Real& /* t */,
