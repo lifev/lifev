@@ -57,6 +57,8 @@ struct BareMesh
     ReferenceShapes refShape;
     ReferenceShapes bRefShape;
     UInt numBoundaryPoints;
+    UInt numVertices;
+    UInt numBoundaryVertices;
     bool isPartitioned;
     ArraySimple<Real> points;
     std::vector<ID> pointMarkers;
