@@ -639,7 +639,7 @@ ExporterVTK<MeshType>::composeDataArrayStream(const exporterData_Type& dvar,
     std::stringstream nComponents;
     nComponents << dvar.fieldDim();
 
-    int32_type sizeOfFloat;
+    int32_type sizeOfFloat = 4;
     std::string floatTypeString;
     switch( M_floatPrecision )
     {
