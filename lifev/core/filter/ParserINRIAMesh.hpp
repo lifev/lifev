@@ -367,7 +367,6 @@ ReadINRIAMeshFile( BareMesh<GeoShape> & bareMesh,
   // Be a little verbose
   switch ( shape )
   {
-
   case HEXA:
       ASSERT_PRE0( GeoShape::S_numPoints == 8, "Sorry I can read only linear Hexa meshes" );
       if ( verbose ) std::cout << "Linear Hexa mesh" << std::endl;
@@ -398,6 +397,8 @@ ReadINRIAMeshFile( BareMesh<GeoShape> & bareMesh,
 
   // Set all basic data structure
   bareMesh.numBoundaryPoints = numberBoundaryPoints;
+  bareMesh.numVertices = numberVertices;
+  bareMesh.numBoundaryVertices = numberBoundaryVertices;
   bareMesh.points.reshape( 3, numberPoints );
   bareMesh.pointMarkers.resize( numberPoints );
   bareMesh.pointIDs.resize( numberPoints );

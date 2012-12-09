@@ -95,12 +95,10 @@ struct converter
             // Update mesh containers
             mesh.setMaxNumPoints(numberPoints, true);
             mesh.setMaxNumGlobalPoints(numberPoints);
-            // I will set vertices later
-            mesh.setNumVertices(0);
-            mesh.setNumGlobalVertices(0);
-            // I have no information on boundary points in general
-            mesh.setNumBPoints(0);
-            mesh.setNumBVertices(0);
+            mesh.setNumVertices( baremesh.numVertices );
+            mesh.setNumGlobalVertices( baremesh.numVertices );
+            mesh.setNumBPoints( baremesh.numBoundaryPoints );
+            mesh.setNumBVertices( baremesh.numBoundaryVertices );
             // Add the points
             for (UInt i = 0; i < numberPoints; ++i)
             {
