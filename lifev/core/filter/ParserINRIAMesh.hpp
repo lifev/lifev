@@ -361,42 +361,37 @@ ReadINRIAMeshFile( BareMesh<GeoShape> & bareMesh,
 
   ASSERT_PRE0( GeoShape::S_shape == shape, "INRIA Mesh file and mesh element shape is not consistent" );
 
+  numberPoints         =  numberVertices;
+  numberBoundaryPoints = numberBoundaryVertices;
+
   // Be a little verbose
   switch ( shape )
   {
 
   case HEXA:
-      ASSERT_PRE0( GeoShape::S_numPoints == 8, "Sorry I can read only bilinear Hexa meshes" );
+      ASSERT_PRE0( GeoShape::S_numPoints == 8, "Sorry I can read only linear Hexa meshes" );
       if ( verbose ) std::cout << "Linear Hexa mesh" << std::endl;
-      numberPoints         =  numberVertices;
-      numberBoundaryPoints = numberBoundaryVertices;
       faceName = "Quadrilaterals";
       volumeName = "Hexahedra";
       break;
 
   case TETRA:
-      if ( GeoShape::S_numPoints == 6 )
-      {
-          if ( verbose ) std::cout << "Quadratic Tetra mesh (from linear geometry)" << std::endl;
-          numberPoints         = numberVertices + numberEdges;
-          numberBoundaryPoints = numberBoundaryVertices + numberBoundaryEdges;
-      }
-      else if ( GeoShape::S_numPoints == 4 )
+      if( GeoShape::S_numPoints == 4 )
       {
           if ( verbose ) std::cout << "Linear Tetra Mesh" << std::endl;
-
-          numberPoints         = numberVertices;
-          numberBoundaryPoints = numberBoundaryVertices;
+      }
+      else if( GeoShape::S_numPoints == 10 )
+      {
+          if ( verbose ) std::cout << "Quadratic Tetra mesh (from linear geometry)" << std::endl;
+          numberPoints         += numberEdges;
+          numberBoundaryPoints += numberBoundaryEdges;
       }
       else
-      {
-          ASSERT( 0, "mesh type not supported" );
-      }
+          ERROR_MSG( "mesh type not supported" );
 
       faceName = "Triangles";
       volumeName = "Tetrahedra";
       break;
-
   default:
       ERROR_MSG( "Current version of INRIA Mesh file reader only accepts TETRA and HEXA" );
   }
