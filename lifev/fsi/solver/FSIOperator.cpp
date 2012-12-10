@@ -988,6 +988,15 @@ FSIOperator::transferInterfaceOnSolid(const vector_Type& _vec1, vector_Type& _ve
 }
 
 void
+FSIOperator::bcManageVectorRHS( const fluidBchandlerPtr_Type& bcHandlerFluid, vector_Type& rhs )
+{
+    if ( !bcHandlerFluid->bcUpdateDone() || M_fluid->recomputeMatrix() )
+        bcHandlerFluid->bcUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
+
+    bcManageRhs( rhs, *M_uFESpace->mesh(), M_uFESpace->dof(),  *bcHandlerFluid, M_uFESpace->feBd(), 0., 1. );
+}
+
+void
 FSIOperator::bcManageVectorRHS( const fluidBchandlerPtr_Type& bcHandlerFluid, const solidBchandlerPtr_Type& bcHandlerSolid, vector_Type& rhs )
 {
     if ( !bcHandlerFluid->bcUpdateDone() || M_fluid->recomputeMatrix() )
