@@ -43,6 +43,7 @@ zeta                    = 1 #1
 BDF_order               = 2
 
 [../space_discretization]
+mesh_type = .mesh
 mesh_dir  = ./     # the directory where the mesh file is
 mesh_file = StructuredCube4.mesh  #StructuredCube8.mesh StructuredCube16.mesh StructuredCube32.mesh  # mesh file
 order     = P1

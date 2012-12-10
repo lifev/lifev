@@ -75,7 +75,7 @@ public:
 };
 
 //! The simplest MarkerCommon: uses all defaults
-typedef MarkerCommon<EntityFlagStandardPolicy> defaultMarkerCommon_Type;
+typedef MarkerCommon<MarkerIDStandardPolicy> defaultMarkerCommon_Type;
 
 } // Namespace LifeV
 

@@ -106,7 +106,7 @@ int main(int argc, char** argv)
     std::cout << "Number of parts: " << numParts << std::endl;
     std::cout << "Name of HDF5 container: " << partsFileName << std::endl;
 
-	boost::shared_ptr<mesh_Type> fullMeshPtr(new mesh_Type);
+    boost::shared_ptr<mesh_Type> fullMeshPtr(new mesh_Type( comm ) );
 	regularMesh3D(*fullMeshPtr, 1, numElements, numElements, numElements,
 				  false, 2.0, 2.0, 2.0, -1.0, -1.0, -1.0);
 
