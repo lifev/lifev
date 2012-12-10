@@ -469,19 +469,20 @@ public:
 		zero();
 
 		M_currentFE.update(M_fespace->mesh()->element(iElement), ET_UPDATE_DPHI);
+		Real nbFEDof(M_fespace->refFE().nbDof());
 
-		for (UInt i(0); i< M_fespace->refFE().nbDof(); ++i)
+		for (UInt i(0); i< nbFEDof; ++i)
 		{
-		    for (UInt iField(0); iField<3; ++iField)
+		    for (UInt q(0); q< M_quadrature->nbQuadPt(); ++q)
 		    {
-
-		        for (UInt q(0); q< M_quadrature->nbQuadPt(); ++q)
-		        {
-			  UInt globalID(M_fespace->dof().localToGlobalMap(iElement,i) + iField * M_fespace->dof().numTotalDof() );
+			for (UInt iField(0); iField<3; ++iField)
+			{
+			    UInt globalID(M_fespace->dof().localToGlobalMap(iElement,i) + iField * M_fespace->dof().numTotalDof() );
 			    
 			    for (UInt iDim(0); iDim<3; ++iDim)
 			    {
-			      M_interpolatedGradients[q][iField][iDim] += M_currentFE.dphi(i,iDim,q)[iField] * M_vector[globalID];
+				M_interpolatedGradients[q][iField][iDim] += M_currentFE.dphi(i+iField*nbFEDof,iField,q)[iDim] * M_vector[globalID];
+				//M_interpolatedGradients[q] += M_currentFE->M_dphi[q][i] * M_vector[globalID];
 			    }
 			}
 		    }

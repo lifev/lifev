@@ -212,58 +212,58 @@ void AssemblyElementalBoundary<GeoShapeType>::divDivBoundary(MatrixElemental& lo
     UInt iDofE, jDofE;
 
 
-    // Assemble the local diffusion
-    for (UInt iterFDim(0); iterFDim<fieldDim; ++iterFDim)
-    {
-        // Extract the view of the matrix
-        MatrixElemental::matrix_view localView = localLB.block(iterFDim,iterFDim);
+    // // Assemble the local diffusion
+    // for (UInt iterFDim(0); iterFDim<fieldDim; ++iterFDim)
+    // {
+    //     // Extract the view of the matrix
+    //     MatrixElemental::matrix_view localView = localLB.block(iterFDim,iterFDim);
 
-        // Loop over the basis functions
-        for (UInt iDofFace(0); iDofFace < nbFEDof ; ++iDofFace)
-        {
-	    iDofE = geoShape_Type::faceToPoint( LBCFEID, iDofFace ); // local vertex number (in element)
+    //     // Loop over the basis functions
+    //     for (UInt iDofFace(0); iDofFace < nbFEDof ; ++iDofFace)
+    //     {
+    // 	    iDofE = geoShape_Type::faceToPoint( LBCFEID, iDofFace ); // local vertex number (in element)
 
-            // Build the local matrix only where needed:
-            // Lower triangular + diagonal parts
-            for (UInt jDofFace(0); jDofFace <= iDofFace; ++jDofFace)
-            {
-                localValue = 0.0;
+    //         // Build the local matrix only where needed:
+    //         // Lower triangular + diagonal parts
+    //         for (UInt jDofFace(0); jDofFace <= iDofFace; ++jDofFace)
+    //         {
+    //             localValue = 0.0;
 
-		jDofE = geoShape_Type::faceToPoint( LBCFEID, jDofFace ); // local vertex number (in element)
+    // 		jDofE = geoShape_Type::faceToPoint( LBCFEID, jDofFace ); // local vertex number (in element)
 
-                //Loop on the quadrature nodes
-                for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
-                {
+    //             //Loop on the quadrature nodes
+    //             for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
+    //             {
 
-		    normalGradj = 0;
-		    normalGradi = 0;
+    // 		    normalGradj = 0;
+    // 		    normalGradi = 0;
 		  
-		    for ( int iDim = 0; iDim < 3; ++iDim )
-		    {
-		        normalGradi += LBCFE.dphi( iDofE, iDim, iQuadPt ) * LBCBdFE.normal( iDim, iQuadPt);
-		        normalGradj += LBCFE.dphi( jDofE, iDim, iQuadPt ) * LBCBdFE.normal( iDim, iQuadPt);
-		    }
+    // 		    for ( int iDim = 0; iDim < 3; ++iDim )
+    // 		    {
+    // 		        normalGradi += LBCFE.dphi( iDofE, iDim, iQuadPt ) * LBCBdFE.normal( iDim, iQuadPt);
+    // 		        normalGradj += LBCFE.dphi( jDofE, iDim, iQuadPt ) * LBCBdFE.normal( iDim, iQuadPt);
+    // 		    }
 		    
                                     
-		    localValue += ( LBCFE.dphi(iDofE,iterFDim,iQuadPt) - 
-				               normalGradi * LBCBdFE.normal( iterFDim, iQuadPt) )
-			           * ( LBCFE.dphi(jDofE,iterFDim,iQuadPt)- 
-				               normalGradj * LBCBdFE.normal( iterFDim, iQuadPt)  )
-                                      * LBCBdFE.weightMeas(iQuadPt);
-                }
+    // 		    localValue += ( LBCFE.dphi(iDofE,iterFDim,iQuadPt) - 
+    // 				               normalGradi * LBCBdFE.normal( iterFDim, iQuadPt) )
+    // 			           * ( LBCFE.dphi(jDofE,iterFDim,iQuadPt)- 
+    // 				               normalGradj * LBCBdFE.normal( iterFDim, iQuadPt)  )
+    //                                   * LBCBdFE.weightMeas(iQuadPt);
+    //             }
 
-                localValue*=coefficient;
+    //             localValue*=coefficient;
 
-                // Add on the local matrix
-                localView(iDofE,jDofE)+=localValue;
+    //             // Add on the local matrix
+    //             localView(iDofE,jDofE)+=localValue;
 
-                if (iDofFace != jDofFace)
-                {
-                    localView(jDofE,iDofE)+=localValue;
-                }
-            }
-        }
-    }
+    //             if (iDofFace != jDofFace)
+    //             {
+    //                 localView(jDofE,iDofE)+=localValue;
+    //             }
+    //         }
+    //     }
+    // }
 
     for ( UInt iFDim (0); iFDim < fieldDim; ++iFDim )
     {
@@ -410,12 +410,12 @@ void AssemblyElementalBoundary<GeoShapeType>::stiffStrainBoundary(MatrixElementa
 		  
 		        for ( int iDim = 0; iDim < 3; ++iDim )
 		        {
-		            normalGradi += LBCFE.dphi( iDofE, iDim, iQuadPt ) * LBCBdFE.normal( iDim, iQuadPt );  
-			    normalGradj += LBCFE.dphi( jDofE, iDim, iQuadPt ) * LBCBdFE.normal( iDim, iQuadPt );  
+		            normalGradi += LBCFE.dphi( jDofE, iDim, iQuadPt ) * LBCBdFE.normal( iDim, iQuadPt );  
+			    normalGradj += LBCFE.dphi( iDofE, iDim, iQuadPt ) * LBCBdFE.normal( iDim, iQuadPt );  
 		        }
 			
-		        localValue += ( LBCFE.dphi(iDofE,iFDim,iQuadPt)- normalGradi * LBCBdFE.normal( iFDim, iQuadPt) )
-			              * ( LBCFE.dphi(jDofE,jFDim,iQuadPt)- normalGradj * LBCBdFE.normal( jFDim, iQuadPt) )
+		        localValue += ( LBCFE.dphi(jDofE,iFDim,iQuadPt)- normalGradi * LBCBdFE.normal( iFDim, iQuadPt) )
+			              * ( LBCFE.dphi(iDofE,jFDim,iQuadPt)- normalGradj * LBCBdFE.normal( jFDim, iQuadPt) )
                                       * LBCBdFE.weightMeas(iQuadPt);
 		    }
 
