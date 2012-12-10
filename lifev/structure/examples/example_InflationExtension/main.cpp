@@ -76,6 +76,7 @@ each time step
 #include <lifev/structure/solver/VenantKirchhoffMaterialNonLinear.hpp>
 #include <lifev/structure/solver/NeoHookeanMaterialNonLinear.hpp>
 #include <lifev/structure/solver/ExponentialMaterialNonLinear.hpp>
+#include <lifev/structure/solver/VenantKirchhoffMaterialNonLinearPenalized.hpp>
 
 #include <lifev/core/filter/Exporter.hpp>
 #include <lifev/core/filter/ExporterEnsight.hpp>
@@ -354,11 +355,12 @@ Structure::run3d()
     //Condition for Extension
     BCh->addBC("EdgesIn",      60,  Essential, Component, zero, compz);
     BCh->addBC("EdgesIn",      70,  Essential, Component, zero, compz);
-    BCh->addBC("EdgesIn",      30,  Essential, Component, zero, compy);
     BCh->addBC("EdgesIn",      40,  Natural, Full, zero, 3);
     BCh->addBC("EdgesIn",      200,  Natural,   Full, pressure, 3);
-    BCh->addBC("EdgesIn",      50,  Essential, Component, zero, compx);
 
+    //BCs for quarter
+    BCh->addBC("EdgesIn",      50,  Essential, Component, zero, compx);
+    BCh->addBC("EdgesIn",      30,  Essential, Component, zero, compy);
     //! 1. Constructor of the structuralSolver
     StructuralOperator< RegionMesh<LinearTetra> > solid;
 

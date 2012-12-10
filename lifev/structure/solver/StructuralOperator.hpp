@@ -933,8 +933,8 @@ StructuralOperator<Mesh, SolverType>::iterate( bcHandler_Type& bch )
 
     M_BCh = bch;
 
-    Real abstol  = 1.e-6;
-    Real reltol  = 1.e-6;
+    Real abstol  = 1.e-8;
+    Real reltol  = 1.e-8;
     UInt maxiter = 20;
     Real etamax  = 1e-7;
     Int NonLinearLineSearch = 0;

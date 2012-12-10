@@ -1611,8 +1611,6 @@ void  stiff_Jac_P1iso_VKPenalized_0term( Real             lambda, Real mu,
 	}
 }
 
-
-
 //! 1. Stiffness term :int{ J^(-2/3) * (lambda / 2) * ( (-2/3) * Ic_k * J^(-2/3) * F^-T:\nabla \delta ) * ( F : \nabla \v )}
 void  stiff_Jac_P1iso_VKPenalized_1term( Real             coeff,
                                          const boost::multi_array<Real,3 >& FkMinusTransposed,
@@ -1886,7 +1884,6 @@ void  stiff_Jac_P1iso_VKPenalized_7term( Real             coef,
 	    }
 	}
 }
-
 
 //! 8. Stiffness term : int { ( -4.0/3.0) * ( mu * J^(-4/3) ) * ( F^-T: \grad \delta ) * ( F C ) : \nabla v  }
 void  stiff_Jac_P1iso_VKPenalized_8term( Real coef, const std::vector<Real>& Jack_k,
