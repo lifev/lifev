@@ -169,25 +169,44 @@ public:
     template< typename VectorType >
     Real flux( const VectorType& vectorField, const markerID_Type& flag, UInt feSpace = 0, UInt nDim = nDimensions );
 
-    /*! Compute the kinetic energy on a boundary face.
+    /*! Compute the kinetic normal stress (i.e., the normal stress due to the kinetic energy) on a boundary face.
      *
+     *  @see \cite BlancoMalossi2012 \cite Malossi-Thesis
      *  @ingroup boundary_methods
-     *  This method computes the kinetic energy on a boundary section "flag"
+     *
+     *  This method computes the following quantity:
+     *
+     *  \f[
+     *  \mathcal{K} = \frac{1}{2}\rho_\textrm{F}\frac{1}{\left|\Gamma^t_{\textrm{F},j}\right|}\displaystyle\int_{\Gamma^t_{\textrm{F},j}}\left({\mathbf{u}}_\textrm{F} \mathbf{\cdot} {\mathbf{n}}_\textrm{F}\right)^2  \textrm{d} \Gamma
+     *  \f]
      *
      *  @param velocity velocity
      *  @param density density of the fluid
      *  @param flag the flag of the boundary face
      *  @param feSpace the FE space
      *  @param nDim the dimension size
-     *  @return the kinetic energy
+     *  @return the kinetic normal stress
      */
     template< typename VectorType >
-    Real kineticEnergy( const VectorType& velocity, const Real& density, const markerID_Type& flag, UInt feSpace = 0, UInt nDim = nDimensions );
+    Real kineticNormalStress( const VectorType& velocity, const Real& density, const markerID_Type& flag, UInt feSpace = 0, UInt nDim = nDimensions );
 
-    /*! Compute the kinetic energy derivative on a boundary face.
+    /*! Compute the derivative of the kinetic normal stress (i.e., the derivative of the normal stress due to the kinetic energy) on a boundary face.
      *
+     *  @see \cite BlancoMalossi2012 \cite Malossi-Thesis
      *  @ingroup boundary_methods
-     *  This method computes the kinetic energy derivative on a boundary section "flag"
+     *
+     *  This method computes the following quantity:
+     *
+     *  \f[
+     *  \begin{array}{r@{\,\,}c@{\,\,}l@{\qquad}l}
+     *  \textrm{D}\mathcal{K} &=&\displaystyle\frac{1}{2}\rho_\textrm{F} \displaystyle\frac{1}{{\left|\Gamma^t_{\textrm{F},j_1}\right|}^2}
+     *  \left(\displaystyle\int_{\Gamma^t_{\textrm{F},j_1}}{\mathbf\nabla}_\Gamma \mathbf \cdot \delta {\mathbf d}_\textrm{F}  \textrm{d} \Gamma\right)
+     *  \left(\displaystyle\int_{\Gamma^t_{\textrm{F},j_1}}{\left({\mathbf u}_\textrm{F} \mathbf \cdot {\mathbf n}_\textrm{F}\right)}^2  \textrm{d} \Gamma \right) \\[4ex]
+     *  &-&\displaystyle\frac{1}{2}\rho_\textrm{F}\displaystyle\frac{1}{\left|\Gamma^t_{\textrm{F},j_1}\right|}
+     *  \left(\displaystyle\int_{\Gamma^t_{\textrm{F},j_1}}2({\mathbf u}_\textrm{F}\mathbf \cdot {\mathbf n}_\textrm{F})\left(\delta {\mathbf u}_\textrm{F} \mathbf \cdot {\mathbf n}_\textrm{F}\right)  \textrm{d} \Gamma
+     *  +\displaystyle\int_{\Gamma^t_{\textrm{F},j_1}}\left({\mathbf\nabla}_\Gamma \mathbf \cdot \delta {\mathbf d}_\textrm{F}\right)\left({\mathbf u}_\textrm{F} \mathbf \cdot {\mathbf n}_\textrm{F}\right)^2  \textrm{d} \Gamma \right)
+     *  \end{array}
+     *  \f]
      *
      *  @param velocity velocity
      *  @param velocityDerivative velocity derivative
@@ -195,10 +214,10 @@ public:
      *  @param flag the flag of the boundary face
      *  @param feSpace the FE space
      *  @param nDim the dimension size
-     *  @return the kinetic energy
+     *  @return the kinetic normal stress derivative
      */
     template< typename VectorType >
-    Real kineticEnergyDerivative( const VectorType& velocity, const VectorType& velocityDerivative, const Real& density, const markerID_Type& flag, UInt feSpace = 0, UInt nDim = nDimensions );
+    Real kineticNormalStressDerivative( const VectorType& velocity, const VectorType& velocityDerivative, const Real& density, const markerID_Type& flag, UInt feSpace = 0, UInt nDim = nDimensions );
 
     /*!
        This method computes the average value of a field on the boundary section "flag"
@@ -753,10 +772,10 @@ Real PostProcessingBoundary<MeshType>::flux( const VectorType& field, const mark
 
 template<typename MeshType>
 template<typename VectorType>
-Real PostProcessingBoundary<MeshType>::kineticEnergy( const VectorType& velocity, const Real& density, const markerID_Type& flag, UInt feSpace, UInt /*nDim*/ )
+Real PostProcessingBoundary<MeshType>::kineticNormalStress( const VectorType& velocity, const Real& density, const markerID_Type& flag, UInt feSpace, UInt /*nDim*/ )
 {
     // Each processor computes the quantities across his own flagged facets
-    Real kineticEnergyScatter(0.0), kineticEnergy(0.0);
+    Real kineticNormalStressScatter(0.0), kineticNormalStress(0.0);
     Real areaScatter(0.0), area(0.0);
     Real temp(0.0);
 
@@ -794,29 +813,29 @@ Real PostProcessingBoundary<MeshType>::kineticEnergy( const VectorType& velocity
                      + velocity[1*M_numTotalDofVector[feSpace]+dofGlobalId] * faceNormal[1]  // u_y * n_y
                      + velocity[2*M_numTotalDofVector[feSpace]+dofGlobalId] * faceNormal[2]; // u_z * n_z
 
-                kineticEnergyScatter += M_currentBdFEPtrVector[feSpace]->weightMeas(iq)
-                                      * M_currentBdFEPtrVector[feSpace]->phi(Int(iDof),iq)
-                                      * temp * temp;
+                kineticNormalStressScatter += M_currentBdFEPtrVector[feSpace]->weightMeas(iq)
+                                            * M_currentBdFEPtrVector[feSpace]->phi(Int(iDof),iq)
+                                            * temp * temp;
                 }
         }
     }
 
     // Reducing per-processor values
     M_epetraMapPtr->comm().SumAll( &areaScatter, &area, 1 );
-    M_epetraMapPtr->comm().SumAll( &kineticEnergyScatter, &kineticEnergy, 1 );
+    M_epetraMapPtr->comm().SumAll( &kineticNormalStressScatter, &kineticNormalStress, 1 );
 
-    return 0.5 * density * kineticEnergy / area;
+    return 0.5 * density * kineticNormalStress / area;
 }
 
 template<typename MeshType>
 template<typename VectorType>
-Real PostProcessingBoundary<MeshType>::kineticEnergyDerivative( const VectorType& velocity, const VectorType& velocityDerivative,
+Real PostProcessingBoundary<MeshType>::kineticNormalStressDerivative( const VectorType& velocity, const VectorType& velocityDerivative,
                                                                 const Real& density, const markerID_Type& flag, UInt feSpace, UInt /*nDim*/ )
 {
     //TODO The two terms which depend on the displacement of the fluid have still to be coded
 
     // Each processor computes the quantities across his own flagged facets
-    Real kineticEnergyScatter(0.0), kineticEnergy(0.0);
+    Real kineticNormalStressScatter(0.0), kineticNormalStress(0.0);
     Real areaScatter(0.0), area(0.0);
     Real temp(0.0);
 
@@ -861,18 +880,18 @@ Real PostProcessingBoundary<MeshType>::kineticEnergyDerivative( const VectorType
                      + velocityDerivative[2*M_numTotalDofVector[feSpace]+dofGlobalId] * faceNormal[2]  // du_z * n_z
                        );
 
-                kineticEnergyScatter += M_currentBdFEPtrVector[feSpace]->weightMeas(iq)
-                                      * M_currentBdFEPtrVector[feSpace]->phi(Int(iDof),iq)
-                                      * temp;
+                kineticNormalStressScatter += M_currentBdFEPtrVector[feSpace]->weightMeas(iq)
+                                            * M_currentBdFEPtrVector[feSpace]->phi(Int(iDof),iq)
+                                            * temp;
                 }
         }
     }
 
     // Reducing per-processor values
     M_epetraMapPtr->comm().SumAll( &areaScatter, &area, 1 );
-    M_epetraMapPtr->comm().SumAll( &kineticEnergyScatter, &kineticEnergy, 1 );
+    M_epetraMapPtr->comm().SumAll( &kineticNormalStressScatter, &kineticNormalStress, 1 );
 
-    return density * kineticEnergy / area;
+    return density * kineticNormalStress / area;
 }
 
 // Average value of field on facets with a certain marker
@@ -938,7 +957,7 @@ Vector PostProcessingBoundary<MeshType>::average( const VectorType& field, const
                     localFieldVector[iDof] = field[iComponent*M_numTotalDofVector[feSpace]+dofGlobalId];
 
                     localField[iComponent] += M_currentBdFEPtrVector[feSpace]->weightMeas(iq)
-                                    * localFieldVector[iDof] * M_currentBdFEPtrVector[feSpace]->phi(Int(iDof),iq);
+                                            * localFieldVector[iDof] * M_currentBdFEPtrVector[feSpace]->phi(Int(iDof),iq);
                 }
             }
             // Computing the field integral over the boundary facets
