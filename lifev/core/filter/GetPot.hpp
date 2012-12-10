@@ -2221,7 +2221,7 @@ GetPot::__DBE_expand(const std::string expr)
         STRING_VECTOR::const_iterator it = A.begin();
         double result = __convert_to_type(*it++, 0.0);
         for (; it != A.end(); ++it)
-            result = pow(result, __convert_to_type(*it, 0.0));
+            result = std::pow(result, __convert_to_type(*it, 0.0));
         return __double2string(result);
     }
 

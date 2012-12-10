@@ -120,6 +120,13 @@
 #define LIFEV_DEPRECATED( func ) func
 #endif
 
+// macro to avoid warning in opt mode for variables that are only needed for
+// dbg mode
+// note: these problems arise when there is no clear separation between a
+// function that does some work and return some state, so it should be
+// avoided as much as possible.
+#define LIFEV_UNUSED(x) ((void)x)
+
 #include <lifev/core/util/LifeAssert.hpp>
 
 namespace LifeV

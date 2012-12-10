@@ -240,9 +240,11 @@ namespace LifeV
     \sigma_K^{n+1} = -A^{-1} \left( B p_K^{n+1} + C \lambda_K^{n+1} \right) \,.
     \end{array}
     \f]
-    @note In the code we do not use the matrix \f$ H \f$ and the vector \f$ G \f$, because all the boundary
-    @note The initial time is not fix at zero.
-    conditions are imposed via BCHandler class.
+    @note In the code we do not use the matrix \f$ H \f$ and the vector \f$ G \f$,
+    because all the boundary conditions are imposed via BCHandler class.
+    @note The initial time is not fixed at zero.
+    @note Example of usage can be found in darcy_nonlinear and darcy_linear.
+    Coupled with an hyperbolic solver in impes.
     @todo Insert any scientific publications that use this solver.
 */
 template < typename MeshType >

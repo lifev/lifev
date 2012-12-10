@@ -108,7 +108,7 @@ private:
     commPtr_Type                                             M_commPtr;
     LifeV::Displayer                                         M_displayer;
     GetPot                                                   M_dataFile;
-    boost::shared_ptr< LifeV::MeshPartitioner< mesh_Type > > M_meshPartPtr;
+    boost::shared_ptr< mesh_Type >                           M_meshPtr;
     LifeV::TimeData                                          M_timeData;
 
     feSpacePtr_Type                                          M_vectorFESpacePtr;
@@ -195,7 +195,7 @@ TestImportExport::buildMesh()
     // +-----------------------------------------------+
     M_displayer.leaderPrint( "[Building the mesh]\n" );
     chrono.start();
-    boost::shared_ptr< mesh_Type > fullMeshPtr(new mesh_Type);
+    boost::shared_ptr< mesh_Type > fullMeshPtr( new mesh_Type( M_commPtr ) );
 
     if( M_dataFile("space_discretization/mesh_from_file", false) )
     {
@@ -211,9 +211,11 @@ TestImportExport::buildMesh()
         regularMesh3D(*fullMeshPtr, 0, nEl, nEl, nEl);
     }
     // Split the mesh between processors
-    M_meshPartPtr.reset( new MeshPartitioner< mesh_Type >( fullMeshPtr, M_commPtr ) );
+    MeshPartitioner<mesh_Type> meshPart( fullMeshPtr, M_commPtr );
+    // Get the mesh for the current partition
+    M_meshPtr = meshPart.meshPartition();
     // Release the original mesh from the MeshPartitioner object and delete the RegionMesh3D object
-    M_meshPartPtr->releaseUnpartitionedMesh();
+    meshPart.releaseUnpartitionedMesh();
     fullMeshPtr.reset();
 
     chrono.stop();
@@ -239,7 +241,7 @@ TestImportExport::buildFESpaces()
 
     M_displayer.leaderPrint( "\t-o Building the vector FE space...\n" );
 
-    M_vectorFESpacePtr.reset( new feSpace_Type(*M_meshPartPtr, vectorFE, nDimensions, M_commPtr) );
+    M_vectorFESpacePtr.reset( new feSpace_Type( M_meshPtr, vectorFE, nDimensions, M_commPtr ) );
 
     M_displayer.leaderPrint( "\t\t...ok.\n" );
 
@@ -248,7 +250,7 @@ TestImportExport::buildFESpaces()
 
     M_displayer.leaderPrint( "\t-o Building the scalar FE space...\n" );
 
-    M_scalarFESpacePtr.reset( new feSpace_Type(*M_meshPartPtr, scalarFE, 1, M_commPtr) );
+    M_scalarFESpacePtr.reset( new feSpace_Type( M_meshPtr, scalarFE, 1, M_commPtr ) );
 
     M_displayer.leaderPrint( "\t\t...ok.\n" );
 
@@ -283,7 +285,7 @@ TestImportExport::buildExporter( boost::shared_ptr< ExporterType >& exporterPtr,
     exporterPtr.reset( new ExporterType ( M_dataFile, prefix ) );
 
     //exporterPtr->setPostDir( "./" );
-    exporterPtr->setMeshProcId( M_meshPartPtr->meshPartition(), M_commPtr->MyPID() );
+    exporterPtr->setMeshProcId( M_meshPtr, M_commPtr->MyPID() );
     chrono.stop();
     M_displayer.leaderPrint( "[...done in ", chrono.diff(), "s]\n" );
 
@@ -381,15 +383,18 @@ TestImportExport::exportLoop( const boost::shared_ptr< ImporterType > & importer
 
     ASSERT( M_vectorImportedPtr.size() + M_scalarImportedPtr.size(), "There's no data on which to work!" )
 
+    const UInt vectorImportedPtrSize = M_vectorImportedPtr.size();
+    const UInt scalarImportedPtrSize = M_scalarImportedPtr.size();
+
     // Set up the EXPORTER
-    for( UInt iVec(0); iVec < M_vectorImportedPtr.size(); ++iVec )
+    for( UInt iVec(0); iVec < vectorImportedPtrSize; ++iVec )
     {
         M_vectorInterpolantPtr[iVec].reset(
                         new Exporter<mesh_Type >::vector_Type   ( M_vectorFESpacePtr->map(), Repeated ) );
         exporterPtr->addVariable( ExporterData<mesh_Type>::VectorField, M_vectorName[iVec],
                                   M_vectorFESpacePtr, M_vectorInterpolantPtr[iVec], UInt(0) );
     }
-    for( UInt iScal(0); iScal < M_scalarImportedPtr.size(); ++iScal )
+    for( UInt iScal(0); iScal < scalarImportedPtrSize; ++iScal )
     {
         M_scalarInterpolantPtr[iScal].reset(
                         new Exporter<mesh_Type >::vector_Type   ( M_scalarFESpacePtr->map(), Repeated ) );
@@ -408,9 +413,9 @@ TestImportExport::exportLoop( const boost::shared_ptr< ImporterType > & importer
         M_displayer.leaderPrint( "[t = ", M_timeData.time(), " s.]\n" );
 
         // Computation of the interpolation
-        if( M_vectorImportedPtr.size() )
+        if( vectorImportedPtrSize )
             M_vectorFESpacePtr->interpolate( static_cast<function_Type>( problem_Type::uexact ), *M_vectorInterpolantPtr[0], M_timeData.time() );
-        if( M_scalarImportedPtr.size() )
+        if( scalarImportedPtrSize )
             M_scalarFESpacePtr->interpolate( static_cast<function_Type>( problem_Type::pexact ), *M_scalarInterpolantPtr[0], M_timeData.time() );
 
         // Exporting the solution
@@ -425,16 +430,16 @@ TestImportExport::exportLoop( const boost::shared_ptr< ImporterType > & importer
     for ( ; M_timeData.canAdvance(); M_timeData.updateTime() )
     {
         // Computation of the interpolation
-        if( M_vectorImportedPtr.size() )
+        if( vectorImportedPtrSize )
             M_vectorFESpacePtr->interpolate( static_cast<function_Type>( problem_Type::uexact ), *M_vectorInterpolantPtr[0], M_timeData.time() );
-        if( M_scalarImportedPtr.size() )
+        if( scalarImportedPtrSize )
             M_scalarFESpacePtr->interpolate( static_cast<function_Type>( problem_Type::pexact ), *M_scalarInterpolantPtr[0], M_timeData.time() );
 
         // Importing the solution
         importerPtr->import( M_timeData.time() );
 
         Real maxDiff(1.e6);
-        if( M_vectorImportedPtr.size() )
+        if( vectorImportedPtrSize )
         {
             vectorDiff = *M_vectorInterpolantPtr[0];
             vectorDiff += (-*M_vectorImportedPtr[0]);
@@ -445,7 +450,7 @@ TestImportExport::exportLoop( const boost::shared_ptr< ImporterType > & importer
 
             M_displayer.leaderPrint( "[vectorDiff.normInf() = ", vectorDiff.normInf(), "]\n" );
         }
-        if( M_scalarImportedPtr.size() )
+        if( scalarImportedPtrSize )
         {
             scalarDiff = *M_scalarInterpolantPtr[0];
             scalarDiff += (-*M_scalarImportedPtr[0]);

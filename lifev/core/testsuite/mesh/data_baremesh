@@ -1,0 +1,16 @@
+###################################################################################################
+#
+#                       This file is part of the LifeV Applications                        
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University      
+#
+#      Author(s): Antonio Cervone <ant.cervone@gmail.com>
+#           Date: 13-09-2011
+#  License Terms: GNU LGPL
+#
+###################################################################################################
+### DATA FILE #####################################################################################
+###################################################################################################
+
+mesh_dir   = './'                   # the directory where the mesh file is
+mesh_file  = 'cartesian_cube8.mesh' # mesh file

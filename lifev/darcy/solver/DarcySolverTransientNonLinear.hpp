@@ -252,6 +252,8 @@ namespace LifeV
     \f]
     @note In the code we do not use the matrix \f$ H \f$ and the vector \f$ G \f$, because all the boundary
     conditions are imposed via BCHandler class.
+    @note Example of usage can be found in darcy_nonlinear and darcy_linear.
+    Coupled with an hyperbolic solver in impes.
     @todo Insert any scientific publications that use this solver.
 */
 template < typename MeshType >
@@ -428,7 +430,7 @@ DarcySolverTransientNonLinear < MeshType >::
 setup ()
 {
     // Call the DarcySolverLinear setup method for setting up the linear solver and preconditioner.
-    darcySolverNonLinear_Type::setup ();
+    darcySolverLinear_Type::setup ();
 
     // Call the DarcySolverTransient setup method for setting up the time data.
     darcySolverTransient_Type::setupTime ();

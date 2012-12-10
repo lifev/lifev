@@ -188,11 +188,10 @@ MatrixEpetraStructured<DataType>::MatrixEpetraStructured(const MapEpetra& map, i
 
 template <typename DataType>
 MatrixEpetraStructured<DataType>::MatrixEpetraStructured( const MapVector<MapEpetra>& vector, int numEntries):
-    MatrixEpetra<DataType>( typename MatrixEpetra<DataType>::matrix_ptrtype())
+    MatrixEpetra<DataType>( vector.totalMap(), numEntries )
 {
 	ASSERT( vector.nbMap() > 0 ,"Map vector empty, impossible to construct a MatrixBlockMonolithicEpetra!");
 
-	MapEpetra myMap(vector.totalMap());
 	M_blockNumRows.push_back(vector.mapSize(0));
 	M_blockNumColumns.push_back(vector.mapSize(0));
 	M_blockFirstRows.push_back(0);
@@ -211,9 +210,6 @@ MatrixEpetraStructured<DataType>::MatrixEpetraStructured( const MapVector<MapEpe
 		totalRows+= vector.mapSize(i);
 		totalColumns+= vector.mapSize(i);
 	}
-
-	this->mapPtr().reset(new MapEpetra(myMap));
-	this->matrixPtr().reset( new typename MatrixEpetra<DataType>::matrix_type( Copy, *myMap.map( Unique ), numEntries, false));
 }
 
 

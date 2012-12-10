@@ -37,12 +37,12 @@ const Real Pi = 3.14159265358979323846264338328;
 
 Real KimMoin::uexact( const Real& t, const Real& x, const Real& y, const Real& /*z*/, const ID& i)
 {
-    Real e = exp(-8*Pi*Pi*a*a*nu*t);
+    Real e = std::exp(-8*Pi*Pi*a*a*nu*t);
     switch(i) {
         case 0:  //u_1
-            return -cos(2*Pi*a*x)*sin(2*Pi*a*y)*e;
+            return -std::cos(2*Pi*a*x)*std::sin(2*Pi*a*y)*e;
         case 1:  //u_2
-            return sin(2*Pi*a*x)*cos(2*Pi*a*y)*e;
+            return std::sin(2*Pi*a*x)*std::cos(2*Pi*a*y)*e;
         default:
             exit(1);
     }
@@ -52,8 +52,8 @@ Real KimMoin::uexact( const Real& t, const Real& x, const Real& y, const Real& /
 
 Real KimMoin::pexact( const Real& t, const Real& x, const Real& y, const Real& /*z*/, const ID& /* i */ )
 {
-    Real e2 = rho * exp(-16*a*a*Pi*Pi*nu*t);
-    return -(cos(4*Pi*a*x)+cos(4*Pi*a*y))*e2/4;
+    Real e2 = rho * std::exp(-16*a*a*Pi*Pi*nu*t);
+    return -(std::cos(4*Pi*a*x)+std::cos(4*Pi*a*y))*e2/4;
 }
 
 Real KimMoin::uderexact( const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
@@ -63,23 +63,23 @@ Real KimMoin::uderexact( const Real& t, const Real& x, const Real& y, const Real
 
 Real KimMoin::grad_u( const UInt& icoor, const Real& t, const Real& x, const Real& y, const Real& /*z*/, const ID& i )
 {
-    Real e = exp(-8*Pi*Pi*a*a*nu*t);
+    Real e = std::exp(-8*Pi*Pi*a*a*nu*t);
     switch(icoor) {
         case 0:    // u_x
             switch(i) {
                     case 0:
-                        return 2*Pi*e*a*sin(2*Pi*a*x)*sin(2*Pi*a*y);
+                        return 2*Pi*e*a*std::sin(2*Pi*a*x)*std::sin(2*Pi*a*y);
                     case 1:
-                        return 2*Pi*e*a*cos(2*Pi*a*x)*cos(2*Pi*a*y);
+                        return 2*Pi*e*a*std::cos(2*Pi*a*x)*std::cos(2*Pi*a*y);
                     default:
                         exit(1);
              }
         case 1:   // u_y
             switch(i) {
                     case 0:
-                        return -2*Pi*e*a*cos(2*Pi*a*x)*cos(2*Pi*a*y);
+                        return -2*Pi*e*a*std::cos(2*Pi*a*x)*std::cos(2*Pi*a*y);
                     case 1:
-                        return -2*Pi*e*a*sin(2*Pi*a*x)*sin(2*Pi*a*y);
+                        return -2*Pi*e*a*std::sin(2*Pi*a*x)*std::sin(2*Pi*a*y);
                     default:
                         exit(1);
             }

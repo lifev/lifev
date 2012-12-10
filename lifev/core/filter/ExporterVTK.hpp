@@ -179,9 +179,9 @@ public:
     virtual void import(const Real& Tstart);
 
     //! temporary: the method should work form the Exporter class
-    void exportPID ( MeshPartitioner<mesh_Type> const & /*meshPart*/ )
+    void exportPID( boost::shared_ptr<MeshType> /*mesh*/, boost::shared_ptr<Epetra_Comm> /*comm*/ )
     {
-        std::cerr << "  X-  exportPID is not working with VTK" << std::endl;
+        std::cerr << "  X-  exportPID is not working with VTK (missing P0 element support)" << std::endl;
     }
 
     //! Set data from file.
@@ -639,7 +639,7 @@ ExporterVTK<MeshType>::composeDataArrayStream(const exporterData_Type& dvar,
     std::stringstream nComponents;
     nComponents << dvar.fieldDim();
 
-    int32_type sizeOfFloat;
+    int32_type sizeOfFloat = 4;
     std::string floatTypeString;
     switch( M_floatPrecision )
     {

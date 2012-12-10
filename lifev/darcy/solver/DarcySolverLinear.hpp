@@ -239,6 +239,8 @@ namespace LifeV
     \f]
     @note In the code we do not use the matrix \f$ H \f$ and the vector \f$ G \f$, because all the boundary
     conditions are imposed via BCHandler class.
+    @note Example of usage can be found in darcy_nonlinear and darcy_linear.
+    Coupled with an hyperbolic solver in impes.
     @todo Insert any scientific publications that use this solver.
     @bug If the save flag for the exporter is setted to 0 the program fails.
 */
@@ -598,7 +600,7 @@ public:
     /*!
       @return Reference of the shared pointer of the communicator of the problem.
     */
-    commPtr_Type & getCommPtr ()
+    const commPtr_Type& getCommPtr () const
     {
         return M_displayer->comm();
     }
