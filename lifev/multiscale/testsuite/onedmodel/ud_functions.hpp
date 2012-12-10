@@ -588,7 +588,9 @@ PressureRamp::operator()( const Real& time )
                   << " period = " << M_duration << " pos = " << ipos << std::endl;
     }
 
-    Debug( 6030 ) << "[PressureRamp::evaluate] imposed pressure = " << P << "\n";
+#ifdef HAVE_LIFEV_DEBUG
+    debugStream( 6030 ) << "[PressureRamp::evaluate] imposed pressure = " << P << "\n";
+#endif
 
     return P;
 }
