@@ -118,6 +118,7 @@ public:
 
     //! Return if it is the N time step with respect to the current initial time
     /*!
+     * Note that this method assumes a uniform time stepping.
      * @param n time step number
      * @return true if time - (n - 1) * timeStep == initialTime, false viceversa
      */
