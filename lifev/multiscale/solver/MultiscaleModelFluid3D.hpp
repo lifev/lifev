@@ -313,7 +313,7 @@ public:
      * @param boundaryID ID of the boundary interface
      * @return total pressure value
      */
-    Real boundaryTotalPressure( const multiscaleID_Type& boundaryID ) const { return M_fluid->pressure( boundaryFlag( boundaryID ) ) + M_fluid->kineticEnergy( boundaryFlag( boundaryID ) ); }
+    Real boundaryTotalPressure( const multiscaleID_Type& boundaryID ) const { return M_fluid->pressure( boundaryFlag( boundaryID ) ) + M_fluid->kineticNormalStress( boundaryFlag( boundaryID ) ); }
 
     //! Get the data container
     /*!

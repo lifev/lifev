@@ -532,10 +532,10 @@ MultiscaleModelFSI3D::boundaryTotalPressure( const multiscaleID_Type& boundaryID
 {
 #ifdef FSI_WITH_EXTERNALPRESSURE
     return M_FSIoperator->fluid().pressure( boundaryFlag( boundaryID ), M_FSIoperator->solution() )
-         + M_FSIoperator->fluid().kineticEnergy( boundaryFlag( boundaryID ), M_FSIoperator->solution() );
+         + M_FSIoperator->fluid().kineticNormalStress( boundaryFlag( boundaryID ), M_FSIoperator->solution() );
 #else
     return M_FSIoperator->fluid().pressure( boundaryFlag( boundaryID ), M_FSIoperator->solution() )
-         + M_FSIoperator->fluid().kineticEnergy( boundaryFlag( boundaryID ), M_FSIoperator->solution() ) + M_externalPressureScalar;
+         + M_FSIoperator->fluid().kineticNormalStress( boundaryFlag( boundaryID ), M_FSIoperator->solution() ) + M_externalPressureScalar;
 #endif
 }
 

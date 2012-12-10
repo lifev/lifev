@@ -377,7 +377,7 @@ MultiscaleModelFluid3D::boundaryDeltaFlowRate( const multiscaleID_Type& boundary
 {
     solveLinearModel( solveLinearSystem );
 
-    return M_fluid->getLinearFlux( boundaryFlag( boundaryID ) );
+    return M_fluid->linearFlux( boundaryFlag( boundaryID ) );
 }
 
 Real
