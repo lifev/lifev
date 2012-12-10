@@ -47,7 +47,7 @@
   <li> a flag identifying a specific part of the mesh boundary,
 
   <li> a type (Natural, Robin, Flux, Resistance,
-	Essential, EssentialEdges, EssentialVertices),
+    Essential, EssentialEdges, EssentialVertices),
 
   <li> a mode of implementation (Scalar, Full, Component, Normal,
      Tangential, Resistance, Directional),
@@ -64,44 +64,49 @@
 #ifndef BCBASE_H
 #define BCBASE_H
 
-#include <lifev/core/fem/BCIdentifier.hpp>
+#include <lifev/core/LifeV.hpp>
+
+#include <lifev/core/util/LifeDebug.hpp>
+
+#include <lifev/core/array/VectorEpetra.hpp>
+
 #include <lifev/core/mesh/MarkerDefinitions.hpp>
+
+#include <lifev/core/fem/BCIdentifier.hpp>
 #include <lifev/core/fem/DOF.hpp>
 #include <lifev/core/fem/CurrentFE.hpp>
 #include <lifev/core/fem/CurrentBoundaryFE.hpp>
-
 #include <lifev/core/fem/BCVector.hpp>
 #include <lifev/core/fem/BCFunction.hpp>
-#include <lifev/core/array/VectorEpetra.hpp>
 
 
 namespace LifeV
 {
 
 /*! @enum bcType_Type
-	Boundary condition basic types: Natural, Robin, Flux, Resistance, Periodic, Essential, EssentialEdges, EssentialVertices
+    Boundary condition basic types: Natural, Robin, Flux, Resistance, Periodic, Essential, EssentialEdges, EssentialVertices
  */
 enum bcType_Type
 {
-    Natural, 			/*!< Neumann boundary conditions */
-    Robin, 				/*!< Robin boundary conditions */
-    Flux, 				/*!< Flux boundary conditions */
-    Resistance,			/*!< Resistance boundary conditions */
-    Essential, 			/*!< Dirichlet boundary conditions */
-    EssentialEdges, 	/*!< Dirichlet boundary conditions on edges */
-    EssentialVertices 	/*!< Dirichlet boundary conditions on vertices */
+    Natural,            /*!< Neumann boundary conditions */
+    Robin,              /*!< Robin boundary conditions */
+    Flux,               /*!< Flux boundary conditions */
+    Resistance,         /*!< Resistance boundary conditions */
+    Essential,          /*!< Dirichlet boundary conditions */
+    EssentialEdges,     /*!< Dirichlet boundary conditions on edges */
+    EssentialVertices   /*!< Dirichlet boundary conditions on vertices */
 };
 
 /*! @enum bcMode_Type
-  	Type for boundary conditions application modes
+    Type for boundary conditions application modes
  */
 enum bcMode_Type
 {
-    Scalar, 	/*!< To be used for scalar problems */
-    Full, 		/*!< To be used for vector problems, when the boundary condition involves all components*/
-    Component, 	/*!< To be used for vector problems, when the boundary condition DOESN'T involve all components*/
-    Normal, 	/*!< To be used for vector problems, when the boundary condition involve the normal component*/
-    Tangential,	/*!< To be used for vector problems, when the boundary condition involve the tangential component*/
+    Scalar,     /*!< To be used for scalar problems */
+    Full,       /*!< To be used for vector problems, when the boundary condition involves all components*/
+    Component,  /*!< To be used for vector problems, when the boundary condition DOESN'T involve all components*/
+    Normal,     /*!< To be used for vector problems, when the boundary condition involve the normal component*/
+    Tangential, /*!< To be used for vector problems, when the boundary condition involve the tangential component*/
     Directional /*!< To be used for vector problems, when the boundary condition involve a specific direction*/
 };
 
@@ -331,8 +336,8 @@ public:
     //@{
     //! Returns the index of the component of the solution associated to the iComponent-th component prescribed in the boundary condition at hand
     /*!
-    	Example: the solution has 4 components and we prescribe a boundary condition on component 0 and 3.
-    	Then, component(1) returns 3, since 3 is the index of the 2nd BC prescribed.
+        Example: the solution has 4 components and we prescribe a boundary condition on component 0 and 3.
+        Then, component(1) returns 3, since 3 is the index of the 2nd BC prescribed.
 
        @param iComponent the "local" component
        @return the index of the component of the solution associated to the iComponent-th component prescribed in the boundary condition at hand
@@ -604,7 +609,7 @@ public:
     //@}
 private:
 
-    std::string                           M_name; 	//!< name of the boundary condition
+    std::string                           M_name;   //!< name of the boundary condition
 
     bcFlag_Type                       M_flag;  //!< flag identifying a specific part of the mesh boundary
 
@@ -612,13 +617,13 @@ private:
 
     bcMode_Type                                M_mode;  //!< the boundary condition mode of application
 
-    bcComponentsVec_Type                       M_components;		//! the list of components involved in this BC
+    bcComponentsVec_Type                       M_components;        //! the list of components involved in this BC
 
     boost::shared_ptr<BCFunctionBase>     M_bcFunction;   //!< Pointer to a user defined BC function
 
     boost::shared_ptr<BCFunctionUDepBase> M_bcFunctionFEVectorDependent; //!< Pointer to a user defined BC function (depending on a generic FE vector)
 
-    boost::shared_ptr<BCVectorBase >      M_bcVector;   	//!< Pointer to a user given BC vector
+    boost::shared_ptr<BCVectorBase >      M_bcVector;       //!< Pointer to a user given BC vector
 
     bool                                  M_isStored_BcVector; //! True if a FE BCVector has been provided
 

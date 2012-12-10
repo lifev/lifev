@@ -309,17 +309,21 @@ Cylinder::run()
     boost::shared_ptr<mesh_Type > fullMeshPtr(new mesh_Type);
     readMesh(*fullMeshPtr, meshData);
 
-    MeshPartitioner< mesh_Type >   meshPart(fullMeshPtr, d->comm);
+    boost::shared_pt<mesh_Type> localMeshPtr;
+    {
+        MeshPartitioner< mesh_Type >   meshPart(fullMeshPtr, d->comm);
+        localMeshPtr = meshPart.meshPartition();
+    }
 
     if (verbose) std::cout << std::endl;
     if (verbose) std::cout << "    Time discretization order " << oseenData->dataTime()->orderBDF() << std::endl;
 
-    //oseenData->meshData()->setMesh(meshPart.mesh());
+    //oseenData->meshData()->setMesh(localMeshPtr);
 
     if (verbose)
         std::cout << "Building the velocity FE space ... " << std::flush;
     std::string uOrder =  dataFile( "fluid/space_discretization/vel_order", "P1");
-    feSpacePtr_Type uFESpacePtr( new feSpace_Type(meshPart,uOrder,3,d->comm) );
+    feSpacePtr_Type uFESpacePtr( new feSpace_Type(localMeshPtr,uOrder,3,d->comm) );
 
     if (verbose)
         std::cout << "ok." << std::endl;
@@ -327,7 +331,7 @@ Cylinder::run()
     if (verbose)
         std::cout << "Building the pressure FE space ... " << std::flush;
     std::string pOrder =  dataFile( "fluid/space_discretization/press_order", "P1");
-    feSpacePtr_Type pFESpacePtr( new feSpace_Type(meshPart,pOrder,1,d->comm) );
+    feSpacePtr_Type pFESpacePtr( new feSpace_Type(localMeshPtr,pOrder,1,d->comm) );
 
     if (verbose)
         std::cout << "ok." << std::endl;
@@ -451,7 +455,7 @@ Cylinder::run()
 
     fluid.resetPreconditioner();
 
-    ExporterEnsight<mesh_Type > ensight( dataFile, meshPart.meshPartition(), "cylinder", d->comm->MyPID());
+    ExporterEnsight<mesh_Type > ensight( dataFile, localMeshPtr, "cylinder", d->comm->MyPID());
 
     vectorPtr_Type velAndPressure ( new vector_Type(*fluid.solution(), Repeated ) );
 

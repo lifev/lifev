@@ -802,27 +802,25 @@ void LifeV::PartitionIO<MeshType>::readPoints()
     if (! M_transposeInFile) {
         for (UInt j = 0; j < M_numPoints; ++j)
         {
-            pp = &(M_meshPartIn->addPoint(false));
+            pp = &( M_meshPartIn->addPoint( false, false ) );
             pp->replaceFlag(
                     static_cast<flag_Type>(M_uintBuffer[2 * stride + j]));
-            pp->setMarker(M_uintBuffer[j]);
+            pp->setMarkerID(M_uintBuffer[j]);
             pp->x() = M_realBuffer[j];
             pp->y() = M_realBuffer[stride + j];
             pp->z() = M_realBuffer[2 * stride + j];
-            pp->setLocalId(j);
             pp->setId(M_uintBuffer[stride + j]);
         }
     } else {
         for (UInt j = 0; j < M_numPoints; ++j)
         {
-            pp = &(M_meshPartIn->addPoint(false));
+            pp = &( M_meshPartIn->addPoint( false, false ) );
             pp->replaceFlag(
                     static_cast<flag_Type>(M_uintBuffer[stride * j + 2]));
-            pp->setMarker(M_uintBuffer[stride * j]);
+            pp->setMarkerID(M_uintBuffer[stride * j]);
             pp->x() = M_realBuffer[stride * j];
             pp->y() = M_realBuffer[stride * j + 1];
             pp->z() = M_realBuffer[stride * j + 2];
-            pp->setLocalId(j);
             pp->setId(M_uintBuffer[stride * j + 1]);
         }
     }
@@ -869,11 +867,10 @@ void LifeV::PartitionIO<MeshType>::readEdges()
             pe = &(M_meshPartIn->addEdge(false));
             pe->replaceFlag(
                     static_cast<flag_Type>(M_uintBuffer[4 * stride + j]));
-            pe->setLocalId(j);
             pe->setId(M_uintBuffer[3 * stride + j]);
             pe->setPoint(0, M_meshPartIn->point(M_uintBuffer[j]));
             pe->setPoint(1, M_meshPartIn->point(M_uintBuffer[stride +j]));
-            pe->setMarker(M_uintBuffer[2 * stride + j]);
+            pe->setMarkerID(M_uintBuffer[2 * stride + j]);
         }
     } else {
         for (UInt j = 0; j < M_numEdges; ++j)
@@ -881,11 +878,10 @@ void LifeV::PartitionIO<MeshType>::readEdges()
             pe = &(M_meshPartIn->addEdge(false));
             pe->replaceFlag(
                     static_cast<flag_Type>(M_uintBuffer[stride * j + 4]));
-            pe->setLocalId(j);
             pe->setId(M_uintBuffer[stride * j + 3]);
             pe->setPoint(0, M_meshPartIn->point(M_uintBuffer[stride * j]));
             pe->setPoint(1, M_meshPartIn->point(M_uintBuffer[stride * j + 1]));
-            pe->setMarker(M_uintBuffer[stride * j + 2]);
+            pe->setMarkerID(M_uintBuffer[stride * j + 2]);
         }
     }
 }
@@ -931,7 +927,6 @@ void LifeV::PartitionIO<MeshType>::readFaces()
             pf->replaceFlag(
                     static_cast<flag_Type>(M_uintBuffer[(6 + M_faceNodes)
                                                        * stride + j]));
-            pf->setLocalId(j);
             pf->setId(M_uintBuffer[(M_faceNodes + 1) * stride + j]);
             pf->firstAdjacentElementIdentity() =
                     M_uintBuffer[(M_faceNodes + 2) * stride + j];
@@ -941,7 +936,7 @@ void LifeV::PartitionIO<MeshType>::readFaces()
                     M_uintBuffer[(M_faceNodes + 4) * stride + j];
             pf->secondAdjacentElementPosition() =
                     M_uintBuffer[(M_faceNodes + 5) * stride + j];
-            pf->setMarker(M_uintBuffer[M_faceNodes * stride + j]);
+            pf->setMarkerID(M_uintBuffer[M_faceNodes * stride + j]);
             for (UInt k = 0; k < M_faceNodes; ++k)
             {
                 pf->setPoint(k, M_meshPartIn->point(
@@ -955,7 +950,6 @@ void LifeV::PartitionIO<MeshType>::readFaces()
             pf->replaceFlag(
                     static_cast<flag_Type>(M_uintBuffer[stride * j
                                                        + M_faceNodes + 6]));
-            pf->setLocalId(j);
             pf->setId(M_uintBuffer[stride * j + M_faceNodes + 1]);
             pf->firstAdjacentElementIdentity() =
                     M_uintBuffer[stride * j + M_faceNodes + 2];
@@ -965,7 +959,7 @@ void LifeV::PartitionIO<MeshType>::readFaces()
                     M_uintBuffer[stride * j + M_faceNodes + 4];
             pf->secondAdjacentElementPosition() =
                     M_uintBuffer[stride * j + M_faceNodes + 5];
-            pf->setMarker(M_uintBuffer[(7 + M_faceNodes) * j + M_faceNodes]);
+            pf->setMarkerID(M_uintBuffer[(7 + M_faceNodes) * j + M_faceNodes]);
             for (UInt k = 0; k < M_faceNodes; ++k)
             {
                 pf->setPoint(k, M_meshPartIn->point(
