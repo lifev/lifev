@@ -134,11 +134,13 @@ private:
 
 extern const GeometricMap geoLinearNode;
 extern const GeometricMap geoLinearSeg;
+extern const GeometricMap geoQuadraticSeg;
 extern const GeometricMap geoLinearTria;
 extern const GeometricMap geoBilinearQuad;
+extern const GeometricMap geoBiquadraticQuad;
 extern const GeometricMap geoLinearTetra;
 extern const GeometricMap geoBilinearHexa;
-
+extern const GeometricMap geoBiquadraticHexa;
 
 // ----
 

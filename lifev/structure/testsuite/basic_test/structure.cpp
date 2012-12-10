@@ -182,11 +182,14 @@ Structure::run3d()
     MeshData             meshData;
     meshData.setup(dataFile, "solid/space_discretization");
 
-    boost::shared_ptr<mesh_Type > fullMeshPtr(new mesh_Type);
+    boost::shared_ptr<mesh_Type > fullMeshPtr( new mesh_Type( parameters->comm ) );
     readMesh(*fullMeshPtr, meshData);
 
-
-    MeshPartitioner< mesh_Type > meshPart( fullMeshPtr, parameters->comm );
+    boost::shared_ptr<mesh_Type > localMeshPtr;
+    {
+        MeshPartitioner< mesh_Type > meshPart( fullMeshPtr, parameters->comm );
+        localMeshPtr = meshPart.meshPartition();
+    }
 
 //    meshPart.rebuildMesh();
 
@@ -198,7 +201,7 @@ Structure::run3d()
 
     typedef FESpace< mesh_Type, MapEpetra > solidFESpace_type;
     typedef boost::shared_ptr<solidFESpace_type> solidFESpace_ptrtype;
-    solidFESpace_ptrtype dFESpace( new solidFESpace_type(meshPart,dOrder,3,parameters->comm) );
+    solidFESpace_ptrtype dFESpace( new solidFESpace_type(localMeshPtr,dOrder,3,parameters->comm) );
     if (verbose) std::cout << std::endl;
 
     VenantKirchhoffSolverLinear< mesh_Type > solid;
@@ -254,16 +257,16 @@ Structure::run3d()
     {
         if (exporterType.compare("none") == 0)
         {
-            exporter.reset( new ExporterEmpty<mesh_Type > ( dataFile, meshPart.meshPartition(), "structure", parameters->comm->MyPID()) );
+            exporter.reset( new ExporterEmpty<mesh_Type > ( dataFile, localMeshPtr, "structure", parameters->comm->MyPID()) );
         }
         else
         {
-            exporter.reset( new ExporterEnsight<mesh_Type > ( dataFile, meshPart.meshPartition(), "structure", parameters->comm->MyPID()) );
+            exporter.reset( new ExporterEnsight<mesh_Type > ( dataFile, localMeshPtr, "structure", parameters->comm->MyPID()) );
         }
     }
 
     exporter->setPostDir( "./" ); // This is a test to see if M_post_dir is working
-    exporter->setMeshProcId( meshPart.meshPartition(), parameters->comm->MyPID() );
+    exporter->setMeshProcId( localMeshPtr, parameters->comm->MyPID() );
 
     vectorPtr_Type solidDisp ( new vector_Type(solid.getDisplacement(), exporter->mapType() ) );
     vectorPtr_Type solidVel  ( new vector_Type(solid.getVelocity(),  exporter->mapType() ) );

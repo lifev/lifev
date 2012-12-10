@@ -133,7 +133,7 @@ EnsightToHdf5::run()
     MeshData meshData;
     meshData.setup(dataFile, "fluid/space_discretization");
 
-    boost::shared_ptr<mesh_Type > fullMeshPtr(new mesh_Type);
+    boost::shared_ptr<mesh_Type > fullMeshPtr(new mesh_Type ( d->comm ) );
     readMesh(*fullMeshPtr, meshData);
 
     // writeMesh("test.mesh", *fullMeshPtr);
@@ -154,31 +154,35 @@ EnsightToHdf5::run()
     geometryTranslate[1] = dataFile( "fluid/space_discretization/transform", 0., 7);
     geometryTranslate[2] = dataFile( "fluid/space_discretization/transform", 0., 8);
 
-    MeshUtility::MeshTransformer<mesh_Type, mesh_Type::MarkerCommon > _transformMesh(*fullMeshPtr);
+    MeshUtility::MeshTransformer<mesh_Type, mesh_Type::markerCommon_Type > _transformMesh(*fullMeshPtr);
     _transformMesh.transformMesh( geometryScale, geometryRotate, geometryTranslate );
 
-    MeshPartitioner< mesh_Type >   meshPart(fullMeshPtr, d->comm);
+    boost::shared_ptr<mesh_Type > meshPtr;
+    {
+        MeshPartitioner< mesh_Type >   meshPart(fullMeshPtr, d->comm);
+        meshPtr = meshPart.meshPartition();
+    }
 
     std::string uOrder =  dataFile( "fluid/space_discretization/vel_order", "P1");
     std::string pOrder =  dataFile( "fluid/space_discretization/press_order", "P1");
 
-    //oseenData->meshData()->setMesh(meshPart.mesh());
+    //oseenData->meshData()->setMesh(meshPtr);
 
     if (verbose) std::cout << "Building the velocity FE space ... " << std::flush;
 
-    feSpacePtr_Type uFESpacePtr( new feSpace_Type(meshPart,uOrder,3,d->comm) );
+    feSpacePtr_Type uFESpacePtr( new feSpace_Type(meshPtr,uOrder,3,d->comm) );
 
     if (verbose) std::cout << "ok." << std::endl;
 
     if (verbose) std::cout << "Building the pressure FE space ... " << std::flush;
 
-    feSpacePtr_Type pFESpacePtr( new feSpace_Type( meshPart,pOrder,1,d->comm ) );
+    feSpacePtr_Type pFESpacePtr( new feSpace_Type( meshPtr,pOrder,1,d->comm ) );
 
     if (verbose) std::cout << "ok." << std::endl;
 
     if (verbose) std::cout << "Building the P0 pressure FE space ... " << std::flush;
 
-    feSpacePtr_Type p0FESpacePtr( new feSpace_Type( meshPart, feTetraP0, quadRuleTetra1pt,
+    feSpacePtr_Type p0FESpacePtr( new feSpace_Type( meshPtr, feTetraP0, quadRuleTetra1pt,
                                                     quadRuleTria1pt, 1,d->comm ) );
 
     if (verbose) std::cout << "ok." << std::endl;
@@ -229,7 +233,7 @@ EnsightToHdf5::run()
         exporter.reset( new ExporterEnsight<mesh_Type > ( dataFile, exporterName ) );
 
     exporter->setPostDir( exportDir ); // This is a test to see if M_post_dir is working
-    exporter->setMeshProcId( meshPart.meshPartition(), d->comm->MyPID() );
+    exporter->setMeshProcId( meshPtr, d->comm->MyPID() );
 
 #ifdef HAVE_HDF5
     if (importerType.compare("hdf5") == 0)
@@ -240,7 +244,7 @@ EnsightToHdf5::run()
 
     // todo this will not work with the ExporterEnsight filter (it uses M_importDir, a private variable)
     importer->setPostDir( importDir ); // This is a test to see if M_post_dir is working
-    importer->setMeshProcId( meshPart.meshPartition(), d->comm->MyPID() );
+    importer->setMeshProcId( meshPtr, d->comm->MyPID() );
 
     vectorPtr_Type velAndPressureExport ( new vector_Type(*fluid.solution(), exporter->mapType() ) );
     vectorPtr_Type velAndPressureImport ( new vector_Type(*fluid.solution(), importer->mapType() ) );
