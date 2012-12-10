@@ -33,7 +33,7 @@ save       = 1
 
     [../space_discretization]
     mesh_dir        = ./Mesh/
-    mesh_file       = flow_square.mesh
+    mesh_file       = flow_square_2.mesh
     mesh_type       = .mesh
 
     verbose         = 0             # verbose during mesh-reading
