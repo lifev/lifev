@@ -391,7 +391,7 @@ addTo(MatrixType& mat)
     for (UInt iFace(0); iFace< nbBoundaryFaces; ++iFace)
     {
         // Check the identifier
-        if ( M_mesh->face(iFace).marker() != M_boundaryId )
+        if ( M_mesh->face(iFace).markerID() != M_boundaryId )
         {
             continue;
         }
