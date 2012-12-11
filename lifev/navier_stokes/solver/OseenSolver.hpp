@@ -402,6 +402,10 @@ public:
      *  \left(\sigma_\textrm{F} \mathbf{\cdot} \mathbf{n}_\textrm{F}\right) \mathbf{\cdot} \mathbf{n}_\textrm{F} \: \textrm{d} \Gamma
      *  \f]
      *
+     *  TODO The current version returns the exact mean normal stress if a flow rate boundary condition is imposed on the chosen boundary face.
+     *  On the contrary, if other boundary conditions are applied, the mean normal stress is approximated with the mean pressure, which is a
+     *  reasonable approximation for several applications.
+     *
      *  @param flag Flag of the boundary face
      *  @param bcHandler BChandler containing the boundary conditions of the problem.
      *  @return mean normal stress
@@ -419,6 +423,10 @@ public:
      *  \left(\sigma_\textrm{F} \mathbf{\cdot} \mathbf{n}_\textrm{F}\right) \mathbf{\cdot} \mathbf{n}_\textrm{F} \: \textrm{d} \Gamma
      *  - \frac{1}{2}\rho_\textrm{F}\frac{1}{\left|\Gamma^t_{\textrm{F},j}\right|}\displaystyle\int_{\Gamma^t_{\textrm{F},j}}\left(\mathbf{u}_\textrm{F} \mathbf{\cdot} \mathbf{n}_\textrm{F}\right)^2 \: \textrm{d} \Gamma
      *  \f]
+     *
+     *  TODO The current version returns the exact mean normal stress if a flow rate boundary condition is imposed on the chosen boundary face.
+     *  On the contrary, if other boundary conditions are applied, the mean normal stress is approximated with the mean pressure, which is a
+     *  reasonable approximation for several applications.
      *
      *  @param flag Flag of the boundary face
      *  @param bcHandler BChandler containing the boundary conditions of the problem.
@@ -1859,9 +1867,14 @@ OseenSolver<MeshType, SolverType>::meanNormalStress(const markerID_Type& flag, b
     if ( bcHandler.findBCWithFlag( flag ).type() == Flux )
         return -lagrangeMultiplier( flag, bcHandler, solution );
     else
-        return -pressure( flag, solution ); // TODO: This is an approximation of the stress as the pressure.
+    {
+#ifdef HAVE_LIFEV_DEBUG
+        std::cout << " !!! WARNING - OseenSolver::meanNormalStress( flag, bcHandler, solution) is returning an approximation" << std::endl;
+#endif
+        return -pressure( flag, solution ); // TODO: This is an approximation of the mean normal stress as the pressure.
                                             // A proper method should be coded in the PostprocessingBoundary class
-                                            // to compute the exact mean normal stress
+                                            // to compute the exact mean normal stress.
+    }
 }
 
 template<typename MeshType, typename SolverType>
