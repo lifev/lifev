@@ -433,7 +433,7 @@ updateSolidSystem( vectorPtr_Type & rhsFluidCoupling )
     // (both the matrix and the vector does not contain a NaN before the multiplication..)
 }
 
-void FSIMonolithic::setVectorInStencils( const vectorPtr_Type& vel, 
+void FSIMonolithic::setVectorInStencils( const vectorPtr_Type& vel,
 					 const vectorPtr_Type& pressure,
 					 const vectorPtr_Type& solidDisp,
 					 const vectorPtr_Type& fluidDisp,
@@ -447,8 +447,8 @@ void FSIMonolithic::setVectorInStencils( const vectorPtr_Type& vel,
 
 
 void FSIMonolithic::setFluidVectorInStencil( const vectorPtr_Type& vel,
-					     const vectorPtr_Type& pressure,
-					     const UInt iter) 
+                                             const vectorPtr_Type& pressure,
+                                             const UInt iter)
 {
 
     //The fluid and solid TimeAdvance classes have a stencil of dimension
@@ -472,7 +472,7 @@ void FSIMonolithic::setFluidVectorInStencil( const vectorPtr_Type& vel,
 
 
 void FSIMonolithic::setSolidVectorInStencil( const vectorPtr_Type& solidDisp,
-					     const UInt iter) 
+                                             const UInt iter)
 {
     //Solid problem
     vectorPtr_Type vectorMonolithicSolidDisplacement(new vector_Type(*M_monolithicMap, Unique, Zero) );
@@ -491,7 +491,7 @@ void FSIMonolithic::setSolidVectorInStencil( const vectorPtr_Type& solidDisp,
 
 }
 
-void FSIMonolithic::finalizeRestart( ) 
+void FSIMonolithic::finalizeRestart( )
 {
     //Set the initialRHS for the TimeAdvance classes
     vector_Type zeroFluidSolid(*M_monolithicMap, Unique, Zero);

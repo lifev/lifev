@@ -507,66 +507,72 @@ void Problem::restartFSI(  GetPot const& data_file)
     //Performing a cycle of the size of the timeAdvance classes for each problem
     //The size of TimeAdvanceClass depends on the order of the BDF (data file)
 
-    //It should work just initializing the timeAdvance classes
-    //Three stencils are needed (Fluid-Structure-Geometric)
-    vectorPtr_Type vel           (new vector_Type(M_fsi->FSIOper()->uFESpace().map(), LifeV::Unique));
-    vectorPtr_Type pressure      (new vector_Type(M_fsi->FSIOper()->pFESpace().map(), LifeV::Unique));
-    vectorPtr_Type solidDisp     (new vector_Type(M_fsi->FSIOper()->dFESpace().map(), LifeV::Unique));
-    vectorPtr_Type fluidDisp     (new vector_Type(M_fsi->FSIOper()->mmFESpace().map(), LifeV::Unique));
-
     //The hypothesis used for this method is that the three TimeAdvance classes have the same size
     iterationString = loadInitSol;
 
     UInt iterInit;
 
+    vectorPtr_Type vel;
+    vectorPtr_Type pressure;
+    vectorPtr_Type solidDisp;
+    vectorPtr_Type fluidDisp;
+
     for(iterInit = 0; iterInit<M_fsi->FSIOper()->fluidTimeAdvance()->size(); iterInit++ )
       {
 
-	//First the three fields are read at the same time
-	//Creating the exporter data for the fields
-	//Fluid
-	LifeV::ExporterData<mesh_Type> initSolFluidVel   (LifeV::ExporterData<mesh_Type>::VectorField, std::string("f-velocity."+iterationString), M_fsi->FSIOper()->uFESpacePtr(), vel, UInt(0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
-	LifeV::ExporterData<mesh_Type> initSolFluidPress (LifeV::ExporterData<mesh_Type>::ScalarField, std::string("f-pressure."+iterationString), M_fsi->FSIOper()->pFESpacePtr(), pressure, UInt(0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
+          //It should work just initializing the timeAdvance classes
+          //Three stencils are needed (Fluid-Structure-Geometric)
+          vel.reset(new vector_Type(M_fsi->FSIOper()->uFESpace().map(), LifeV::Unique));
+          pressure.reset(new vector_Type(M_fsi->FSIOper()->pFESpace().map(), LifeV::Unique));
+          solidDisp.reset(new vector_Type(M_fsi->FSIOper()->dFESpace().map(), LifeV::Unique));
+          fluidDisp.reset(new vector_Type(M_fsi->FSIOper()->mmFESpace().map(), LifeV::Unique));
 
-	//Structure
-	LifeV::ExporterData<mesh_Type> initSolSolidDisp  (LifeV::ExporterData<mesh_Type>::VectorField,"s-displacement."+iterationString, M_fsi->FSIOper()->dFESpacePtr(), solidDisp, UInt(0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
-	//ALE
-	LifeV::ExporterData<mesh_Type> initSolFluidDisp  (LifeV::ExporterData<mesh_Type>::VectorField, "f-displacement."+iterationString, M_fsi->FSIOper()->mmFESpacePtr(), fluidDisp, UInt(0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
+          //First the three fields are read at the same time
+          //Creating the exporter data for the fields
+          //Fluid
+          LifeV::ExporterData<mesh_Type> initSolFluidVel   (LifeV::ExporterData<mesh_Type>::VectorField, std::string("f-velocity."+iterationString), M_fsi->FSIOper()->uFESpacePtr(), vel, UInt(0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
+          LifeV::ExporterData<mesh_Type> initSolFluidPress (LifeV::ExporterData<mesh_Type>::ScalarField, std::string("f-pressure."+iterationString), M_fsi->FSIOper()->pFESpacePtr(), pressure, UInt(0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
 
-	//Initialization of the vectors used to read
-	*vel *= 0.0;
-	*pressure *= 0.0;
-	*solidDisp *= 0.0;
-	*fluidDisp *= 0.0;
+          //Structure
+          LifeV::ExporterData<mesh_Type> initSolSolidDisp  (LifeV::ExporterData<mesh_Type>::VectorField,"s-displacement."+iterationString, M_fsi->FSIOper()->dFESpacePtr(), solidDisp, UInt(0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
+          //ALE
+          LifeV::ExporterData<mesh_Type> initSolFluidDisp  (LifeV::ExporterData<mesh_Type>::VectorField, "f-displacement."+iterationString, M_fsi->FSIOper()->mmFESpacePtr(), fluidDisp, UInt(0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
 
-	//load of the solutions
-	M_importerFluid->readVariable(initSolFluidVel);   //Fluid u
-	M_importerFluid->readVariable(initSolFluidPress); //Fluid p
-	M_importerSolid->readVariable(initSolSolidDisp);  //Solid d
-	M_importerFluid->readVariable(initSolFluidDisp);  //Fluid df
+          //Initialization of the vectors used to read
+          *vel *= 0.0;
+          *pressure *= 0.0;
+          *solidDisp *= 0.0;
+          *fluidDisp *= 0.0;
 
-	std::cout << "Norm of the vel " << vel->norm2() << std::endl;
-	std::cout << "Norm of the pressure " << pressure->norm2() << std::endl;
-	std::cout << "Norm of the solid " << solidDisp->norm2() << std::endl;
-	std::cout << "Norm of the df " << fluidDisp->norm2() << std::endl;
+          //load of the solutions
+          M_importerFluid->readVariable(initSolFluidVel);   //Fluid u
+          M_importerFluid->readVariable(initSolFluidPress); //Fluid p
+          M_importerSolid->readVariable(initSolSolidDisp);  //Solid d
+          M_importerFluid->readVariable(initSolFluidDisp);  //Fluid df
 
-	//We send the vectors to the FSIMonolithic class using the interface of FSIOper
-	M_fsi->FSIOper()->setVectorInStencils(vel, pressure, solidDisp, fluidDisp, iterInit )
+          std::cout << "Norm of the vel " << vel->norm2() << std::endl;
+          std::cout << "Norm of the pressure " << pressure->norm2() << std::endl;
+          std::cout << "Norm of the solid " << solidDisp->norm2() << std::endl;
+          std::cout << "Norm of the df " << fluidDisp->norm2() << std::endl;
+
+          //We send the vectors to the FSIMonolithic class using the interface of FSIOper
+          M_fsi->FSIOper()->setVectorInStencils(vel, pressure, solidDisp, fluidDisp, iterInit )
 ;
-	//Updating string name
-	int iterations = std::atoi(iterationString.c_str());
-	iterations--;
+          //Updating string name
+          int iterations = std::atoi(iterationString.c_str());
+          iterations--;
 
-	std::ostringstream iter;
-	iter.fill( '0' );
-	iter << std::setw(5) << ( iterations );
-	iterationString=iter.str();
+          std::ostringstream iter;
+          iter.fill( '0' );
+          iter << std::setw(5) << ( iterations );
+          iterationString=iter.str();
       }
 
     //Reading another vector for the solidTimeAdvance since its BDF has the same order
     //as the other ones but since the orderDerivative = 2, the size of the stencil is
     //orderBDF + 1
 
+    solidDisp.reset(new vector_Type(M_fsi->FSIOper()->dFESpace().map(), LifeV::Unique));
     *solidDisp *= 0.0;
     LifeV::ExporterData<mesh_Type> initSolSolidDisp  (LifeV::ExporterData<mesh_Type>::VectorField,"s-displacement."+iterationString, M_fsi->FSIOper()->dFESpacePtr(), solidDisp, UInt(0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
 
@@ -577,6 +583,9 @@ void Problem::restartFSI(  GetPot const& data_file)
     M_fsi->FSIOper()->finalizeRestart();
 
     //This are used to export the loaded solution to check it is correct.
+    vel.reset(new vector_Type(M_fsi->FSIOper()->uFESpace().map(), LifeV::Unique));
+    pressure.reset(new vector_Type(M_fsi->FSIOper()->pFESpace().map(), LifeV::Unique));
+    fluidDisp.reset(new vector_Type(M_fsi->FSIOper()->mmFESpace().map(), LifeV::Unique));
     M_velAndPressure.reset( new vector_Type( M_fsi->FSIOper()->fluid().getMap(), M_importerFluid->mapType() ));
     M_velAndPressure->subset(*pressure, pressure->map(), UInt(0), (UInt)3*M_fsi->FSIOper()->uFESpace().dof().numTotalDof());
     *M_velAndPressure += *vel;
