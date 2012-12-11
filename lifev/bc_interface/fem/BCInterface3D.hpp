@@ -385,43 +385,6 @@ BCInterface3D< BcHandler, PhysicalSolverType >::setPhysicalSolver( const boost::
             ( *i )->assignFunction( base );
             addBcToHandler( base );
         }
-
-        // Switch to know the type of base (TODO Fix a problem with this implementation)
-/*        switch ( ( *i )->baseType() )
-        {
-        case BASEFunction3D:
-        {
-            BCFunctionBase base;
-
-            ( *i )->assignFunction( base );
-            addBcToHandler( base );
-
-            return;
-        }
-        case BASEVector3D:
-        {
-            BCVector base;
-
-            ( *i )->assignFunction( base );
-            addBcToHandler( base );
-
-            return;
-        }
-        case BASEVectorInterface3D:
-        {
-            BCVectorInterface base;
-
-            ( *i )->assignFunction( base );
-            addBcToHandler( base );
-
-            return;
-        }
-        default:
-
-            std::cout << " !!! Error: " << ( *i )->baseType() << " is not available as a base !!!" << std::endl;
-
-            return;
-        }*/
     }
 }
 
