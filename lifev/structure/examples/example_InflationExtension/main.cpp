@@ -29,7 +29,8 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 
 Attention: At the moment the restart works only if the solution is saved at
-each time step
+each time step and with the BDF method!!
+
 \date 2005-04-16
 */
 #undef HAVE_HDF5
