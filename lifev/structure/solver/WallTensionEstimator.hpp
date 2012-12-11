@@ -78,7 +78,7 @@
 
 // Structure module include
 #include <lifev/structure/fem/AssemblyElementalStructure.hpp>
-#include <lifev/structure/solver/VenantKirchhoffElasticData.hpp>
+#include <lifev/structure/solver/StructuralConstitutiveLawData.hpp>
 #include <lifev/structure/solver/WallTensionEstimatorData.hpp>
 #include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
 
@@ -108,7 +108,7 @@ public:
 //@{
 
     // Data classes
-    typedef VenantKirchhoffElasticData                    data_Type;
+    typedef StructuralConstitutiveLawData                 data_Type;
     typedef WallTensionEstimatorData                      analysisData_Type;
     typedef typename boost::shared_ptr<data_Type>         dataPtr_Type;
     typedef typename boost::shared_ptr<analysisData_Type> analysisDataPtr_Type;

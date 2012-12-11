@@ -68,7 +68,7 @@ each time step
 #include <lifev/core/mesh/MeshData.hpp>
 #include <lifev/core/mesh/MeshPartitioner.hpp>
 
-#include <lifev/structure/solver/VenantKirchhoffElasticData.hpp>
+#include <lifev/structure/solver/StructuralConstitutiveLawData.hpp>
 
 #include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
 #include <lifev/structure/solver/StructuralOperator.hpp>
@@ -86,6 +86,7 @@ each time step
 #include <lifev/core/filter/ExporterEmpty.hpp>
 
 #include <iostream>
+#include <sstream>
 
 
 using namespace LifeV;
@@ -216,15 +217,15 @@ struct Structure::Private
     static Real bcPressure(const Real& t, const Real&  x, const Real& y, const Real& /*Z*/, const ID& i)
     {
         Real radius = 0.5;
-        Real pressure = 5000;
+        Real pressure = 20000*t;
         //3000/(2*0.5*40*3.1415962);
         switch (i)
         {
         case 0:
-            return  pressure * std::fabs( ( x / radius ) );
+            return  pressure *  ( x / radius );
             break;
         case 1:
-            return  pressure * std::fabs( ( y / radius ) );
+            return  pressure *  ( y / radius );
             break;
         case 2:
             return 0.0;
@@ -302,7 +303,7 @@ Structure::run3d()
     //! dataElasticStructure
     GetPot dataFile( parameters->data_file_name.c_str() );
 
-    boost::shared_ptr<VenantKirchhoffElasticData> dataStructure(new VenantKirchhoffElasticData( ));
+    boost::shared_ptr<StructuralConstitutiveLawData> dataStructure(new StructuralConstitutiveLawData( ));
     dataStructure->setup(dataFile);
 
     MeshData             meshData;
@@ -353,14 +354,14 @@ Structure::run3d()
     //! BC for StructuredCube4_test_structuralsolver.mesh
     //! =================================================================================
     //Condition for Extension
-    BCh->addBC("EdgesIn",      60,  Essential, Component, zero, compz);
-    BCh->addBC("EdgesIn",      70,  Essential, Component, zero, compz);
+    BCh->addBC("EdgesIn",      60,  Essential, Full, zero, 3);
+    BCh->addBC("EdgesIn",      70,  Essential, Full, zero, 3);
     BCh->addBC("EdgesIn",      40,  Natural, Full, zero, 3);
     BCh->addBC("EdgesIn",      200,  Natural,   Full, pressure, 3);
 
     //BCs for quarter
-    BCh->addBC("EdgesIn",      50,  Essential, Component, zero, compx);
-    BCh->addBC("EdgesIn",      30,  Essential, Component, zero, compy);
+    //BCh->addBC("EdgesIn",      50,  Essential, Component, zero, compx);
+    //BCh->addBC("EdgesIn",      30,  Essential, Component, zero, compy);
     //! 1. Constructor of the structuralSolver
     StructuralOperator< RegionMesh<LinearTetra> > solid;
 
@@ -374,7 +375,7 @@ Structure::run3d()
     solid.setDataFromGetPot(dataFile);
 
     //! 4. Building system using TimeAdvance class
-    double timeAdvanceCoefficient = timeAdvance->coefficientSecondDerivative( 0 ) / (dataStructure->dataTime()->timeStep()*dataStructure->dataTime()->timeStep());
+    Real timeAdvanceCoefficient = timeAdvance->coefficientSecondDerivative( 0 ) / (dataStructure->dataTime()->timeStep()*dataStructure->dataTime()->timeStep());
     solid.buildSystem(timeAdvanceCoefficient);
 
     if (verbose) std::cout << "S- initialization ... ";
@@ -382,6 +383,7 @@ Structure::run3d()
     //Initialization of TimeAdvance
     std::string const restart =  dataFile( "importer/restart", "none");
     std::vector<vectorPtr_Type> solutionStencil;
+    solutionStencil.resize( timeAdvance->size() );
 
     if( restart.compare( "none" ) )
     {
@@ -426,6 +428,9 @@ Structure::run3d()
         iterationString = initialLoaded;
         for(UInt iterInit=0; iterInit < timeAdvance->size(); iterInit++ )
         {
+            std::cout << "new iterationString" << iterationString << std::endl;
+
+            solidDisp.reset( new vector_Type(solid.displacement(),  Unique ) );
             *solidDisp *= 0.0;
 
             LifeV::ExporterData<mesh_Type> solidDataReader (LifeV::ExporterData<mesh_Type>::VectorField, std::string("displacement."+iterationString), dFESpace, solidDisp, UInt(0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
@@ -439,7 +444,7 @@ Structure::run3d()
             // *vectVer = *solidDisp;
             // exporter.postProcess( currentLoading );
 
-            solutionStencil.push_back( solidDisp );
+            solutionStencil[ iterInit ] = solidDisp;
 
             //initializing the displacement field in the StructuralSolver class with the first solution
             if( !iterInit )
@@ -454,12 +459,15 @@ Structure::run3d()
             iter << std::setw(5) << ( iterations );
             iterationString=iter.str();
 
+
+
         }
 
         importerSolid->closeFile();
 
         //Putting the vector in the TimeAdvance Stencil
         timeAdvance->setInitialCondition(solutionStencil);
+
     }
     else //Initialize with zero vectors
     {
@@ -467,18 +475,8 @@ Structure::run3d()
         std::cout << "Starting from scratch" << std::endl;
         vectorPtr_Type disp(new vector_Type(solid.displacement(), Unique) );
 
-        if (timeAdvanceMethod =="Newmark")
-        {
-            solutionStencil.push_back(disp);
-            solutionStencil.push_back(disp);
-            solutionStencil.push_back(disp);
-        }
-
-        if (timeAdvanceMethod =="BDF")
-        {
-            for ( UInt previousPass=0; previousPass < dataStructure->dataTimeAdvance()->orderBDF() ; previousPass++)
-                solutionStencil.push_back(disp);
-        }
+        for ( UInt previousPass=0; previousPass < timeAdvance->size() ; previousPass++)
+            solutionStencil[ previousPass ] = disp;
 
         timeAdvance->setInitialCondition(solutionStencil);
 
@@ -539,7 +537,7 @@ Structure::run3d()
 
     //exporterCheck->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "rhs", dFESpace, rhsVector,  UInt(0) );
 
-    exporterSolid->postProcess( 0 );
+    exporterSolid->postProcess( dataStructure->dataTime()->time() );
     //exporterCheck->postProcess( 0 );
 
     //!--------------------------------------------------------------------------------------------
@@ -573,7 +571,7 @@ Structure::run3d()
         *rhs += *solid.massMatrix() *timeAdvance->rhsContributionSecondDerivative()/timeAdvanceCoefficient;
 
         std::cout << "Norm of the rhsNoBC: " << (*rhs).norm2() << std::endl;
-        //solid.setRightHandSide( *rhs );
+        solid.setRightHandSide( *rhs );
 
         //! 7. Iterate --> Calling Newton
         solid.iterate( BCh );
@@ -584,14 +582,17 @@ Structure::run3d()
         *solidVel  = timeAdvance->velocity();
         *solidAcc  = timeAdvance->acceleration();
 
+        Real normVect;
+        normVect =  solid.displacement().norm2();
+        std::cout << "The norm 2 of the displacement field is: "<< normVect << std::endl;
+        std::cout << "The norm 2 of the velocity field is: "<< timeAdvance->velocity().norm2() << std::endl;
+        std::cout << "The norm 2 of the acceleration field is: "<< timeAdvance->acceleration().norm2() << std::endl;
+
         //*rhsVector = solid.rhs();
 
         exporterSolid->postProcess( time );
         //exporterCheck->postProcess( time );
 
-        Real normVect;
-        normVect =  solid.displacement().norm2();
-        std::cout << "The norm 2 of the displacement field is: "<< normVect << std::endl;
 
 
         //!--------------------------------------------------------------------------------------------------

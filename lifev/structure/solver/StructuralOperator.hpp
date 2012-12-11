@@ -143,13 +143,10 @@ public:
     typedef typename SolverType::prec_raw_type            precRaw_Type;
     typedef typename SolverType::prec_type                prec_Type;
 
-    typedef VenantKirchhoffElasticData                    data_Type;
+    typedef StructuralConstitutiveLawData                 data_Type;
 
     typedef RegionMesh<LinearTetra >                      mesh_Type;
     typedef std::vector< mesh_Type::element_Type const *> vectorVolumes_Type;
-
-    typedef StructuralConstitutiveLawData                 data_Type;
-
 
     typedef std::map< UInt, vectorVolumes_Type>           mapMarkerVolumes_Type;
     typedef boost::shared_ptr<mapMarkerVolumes_Type>      mapMarkerVolumesPtr_Type;

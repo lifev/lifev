@@ -31,9 +31,9 @@
  *  @version 1.0
  *  @date 01-01-2010
  *  @author Paolo Tricerri
- * 
+ *
  *  @maintainer  Paolo Tricerri <paolo.tricerri@epfl.ch>
- *  
+ *
  */
 
 #ifndef _WALLTENSIONCYLINDRICAL_H_
@@ -78,7 +78,7 @@
 
 // Structure module include
 #include <lifev/structure/fem/AssemblyElementalStructure.hpp>
-#include <lifev/structure/solver/VenantKirchhoffElasticData.hpp>
+#include <lifev/structure/solver/StructuralConstitutiveLawData.hpp>
 #include <lifev/structure/solver/WallTensionEstimatorData.hpp>
 #include <lifev/structure/solver/StructuralMaterial.hpp>
 
@@ -112,7 +112,7 @@ public:
     typedef WallTensionEstimator<Mesh>                    super;
 
 
-    typedef VenantKirchhoffElasticData                    data_Type;
+    typedef StructuralConstitutiveLawData                    data_Type;
     typedef WallTensionEstimatorData                      analysisData_Type;
     typedef typename boost::shared_ptr<data_Type>         dataPtr_Type;
     typedef typename boost::shared_ptr<analysisData_Type> analysisDataPtr_Type;
@@ -169,7 +169,7 @@ public:
 
     //! Analyze Tensions: This method computes the Cauchy stress tensor and its principal values. It uses the displacement vector that has to be set
     /*!
-      \param NONE FESpace<Mesh, MapEpetra>& copyFESpace 
+      \param NONE FESpace<Mesh, MapEpetra>& copyFESpace
     */
     void analyzeTensions( );
 
@@ -193,7 +193,7 @@ public:
 
 //! @name Set Methods
 //@{
- 
+
 //@}
 
 
@@ -222,13 +222,13 @@ protected:
   /*!
     \param NONE
   */
-  void constructGlobalStressVector( solutionVect_Type& sigmaX, solutionVect_Type& sigmaY, solutionVect_Type& sigmaZ );    
+  void constructGlobalStressVector( solutionVect_Type& sigmaX, solutionVect_Type& sigmaY, solutionVect_Type& sigmaZ );
 
 //@}
 
 //! @name Protected members
 //@{
-        
+
 
 
     //! Elementary matrix for the tensor F
@@ -249,7 +249,7 @@ WallTensionEstimatorCylindricalCoordinates<Mesh>::WallTensionEstimatorCylindrica
   super( ),
   M_deformationCylindricalF( )
 {
-  
+
 }
 
 
@@ -258,20 +258,20 @@ WallTensionEstimatorCylindricalCoordinates<Mesh>::WallTensionEstimatorCylindrica
 // Public Methods
 //===================================
 template <typename Mesh>
-void 
+void
 WallTensionEstimatorCylindricalCoordinates<Mesh >::setup( const dataPtr_Type& dataMaterial,
 				    const analysisDataPtr_Type& tensionData,
 				    const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
 				    boost::shared_ptr<Epetra_Comm>&     comm,
 				    UInt marker)
-  
+
 {
   super::setup(dataMaterial, tensionData, dFESpace, comm, marker);
   M_deformationCylindricalF.reset  ( new matrix_Type( this->M_FESpace->fieldDim(), this->M_FESpace->fieldDim() ) );
 }
 
 template <typename Mesh>
-void 
+void
 WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensions( void )
 {
   *(this->M_globalEigen) *= 0.0;
@@ -284,7 +284,7 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensions( void )
 }
 
 template <typename Mesh>
-void 
+void
 WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensionsRecoveryDisplacementCylindrical( void )
 {
 
@@ -293,7 +293,7 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensionsRecoveryDispla
   this->M_displayer->leaderPrint(" \n*********************************\n  ");
   this->M_displayer->leaderPrint("   Performing the analysis recovering the displacement..., ", this->M_dataMaterial->solidType() );
   this->M_displayer->leaderPrint(" \n*********************************\n  ");
-  
+
   solutionVectPtr_Type grDisplX( new solutionVect_Type(*(this->M_localMap) ) );
   solutionVectPtr_Type grDisplY( new solutionVect_Type(*(this->M_localMap) ) );
   solutionVectPtr_Type grDisplZ( new solutionVect_Type(*(this->M_localMap) ) );
@@ -306,9 +306,9 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensionsRecoveryDispla
   solutionVect_Type grZRep(*grDisplZ, Repeated);
   solutionVect_Type dRep(*(this->M_displ), Repeated);
 
-  //For each of the DOF, the Cauchy tensor is computed. 
+  //For each of the DOF, the Cauchy tensor is computed.
   //Therefore the tensor C,P, \sigma are computed for each DOF
-  UInt dim = this->M_FESpace->dim();  
+  UInt dim = this->M_FESpace->dim();
 
   chrono.start();
 
@@ -338,14 +338,14 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensionsRecoveryDispla
 	      dZ[iComp] = grZRep[ig]; // (d_xZ,d_yZ,d_zZ)
 	      localDisplacement[iComp] = dRep[ig]; // (u_X,u_Y,u_Z)
 	    }
-	
+
 	  //Reinitialization of matrices and arrays
 	  ( *(this->M_deformationF) ).Scale(0.0);
 	  ( *M_deformationCylindricalF ).Scale(0.0);
 	  ( *(this->M_cofactorF) ).Scale(0.0);
 	  ( *(this->M_firstPiola) ).Scale(0.0);
 	  ( *(this->M_sigma) ).Scale(0.0);
-	  
+
 	  //Moving to cylindrical coordinates
 	  moveToCylindricalCoordinates(*(this->M_deformationF) , localDisplacement, iloc, *M_deformationCylindricalF );
 
@@ -354,12 +354,12 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensionsRecoveryDispla
 	    (*M_deformationCylindricalF )(icoor,icoor) += 1.0;
 
 	  //Compute the rightCauchyC tensor
-	  AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor(this->M_invariants, *M_deformationCylindricalF, *(this->M_cofactorF) );	 
-      
+	  AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor(this->M_invariants, *M_deformationCylindricalF, *(this->M_cofactorF) );
+
 	  LifeV::Real sumI(0);
 	  for( UInt i(0); i < this->M_invariants.size(); i++ )
 	    sumI += this->M_invariants[i];
-      
+
 	  //Compute the first Piola-Kirchhoff tensor
 	  this->M_material->computeLocalFirstPiolaKirchhoffTensor(*(this->M_firstPiola), *M_deformationCylindricalF, *(this->M_cofactorF), this->M_invariants, this->M_marker);
 
@@ -368,24 +368,24 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensionsRecoveryDispla
 
 	  //Compute the eigenvalue
 	  AssemblyElementalStructure::computeEigenvalues(*(this->M_sigma), this->M_eigenvaluesR, this->M_eigenvaluesI);
-      
+
 	  //The Cauchy tensor is symmetric and therefore, the eigenvalues are real
-	  //Check on the imaginary part of eigen values given by the Lapack method 
+	  //Check on the imaginary part of eigen values given by the Lapack method
 	  Real sum(0);
 	  for( int i=0; i < this->M_eigenvaluesI.size(); i++ )
 	    sum += std::abs(this->M_eigenvaluesI[i]);
 	  ASSERT_PRE( sum < 1e-6 , "The eigenvalues of the Cauchy stress tensors have to be real!" );
-	  
+
 	  super::orderEigenvalues( this->M_eigenvaluesR );
 
 	  //Save the eigenvalues in the global vector
 	  for( UInt icoor = 0; icoor < this->M_FESpace->fieldDim(); ++icoor )
 	    {
 	      UInt ig = this->M_FESpace->dof().localToGlobalMap( eleID, iloc ) + iComp * this->M_FESpace->dim() + this->M_offset;
-	      Int LIDid = this->M_displ->blockMap().LID(ig); 
+	      Int LIDid = this->M_displ->blockMap().LID(ig);
 	      if( this->M_globalEigen->blockMap().LID(ig) != -1  )
 		{
-		  Int GIDid = this->M_globalEigen->blockMap().GID(LIDid); 
+		  Int GIDid = this->M_globalEigen->blockMap().GID(LIDid);
 		  (*(this->M_globalEigen))(ig) = this->M_eigenvaluesR[icoor];
 		}
 	    }
@@ -399,7 +399,7 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensionsRecoveryDispla
 
 
 template <typename Mesh>
-void 
+void
 WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensionsRecoveryEigenvaluesCylindrical( void )
 {
 
@@ -413,7 +413,7 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensionsRecoveryEigenv
   patchArea *= 0.0;
 
   super::constructPatchAreaVector( patchArea );
-  
+
   //Before assembling the reconstruction process is done
   solutionVect_Type patchAreaR(patchArea,Repeated);
 
@@ -487,25 +487,25 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensionsRecoveryEigenv
 	  M_deformationCylindricalF->Scale(0.0);
 
 	  moveToCylindricalCoordinates(vectorDeformationF[nDOF], localDisplacement, iloc, *M_deformationCylindricalF);
-	  
+
 	  //Adding the identity tensor
 	  for( UInt icoor = 0; icoor < this->M_FESpace->fieldDim(); icoor++ )
 	    (*M_deformationCylindricalF)(icoor,icoor) += 1.0;
 
 	  //Compute the rightCauchyC tensor
-	  AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor(this->M_invariants, *M_deformationCylindricalF, *(this->M_cofactorF) );	  
+	  AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor(this->M_invariants, *M_deformationCylindricalF, *(this->M_cofactorF) );
 
 	  //Compute the first Piola-Kirchhoff tensor
 	  this->M_material->computeLocalFirstPiolaKirchhoffTensor(*(this->M_firstPiola), *M_deformationCylindricalF, *(this->M_cofactorF), this->M_invariants, this->M_marker);
 
 	  //Compute the Cauchy tensor
 	  AssemblyElementalStructure::computeCauchyStressTensor(*(this->M_sigma), *(this->M_firstPiola), this->M_invariants[3], *M_deformationCylindricalF);
-	 
+
 	  //Compute the eigenvalue
 	  AssemblyElementalStructure::computeEigenvalues(*(this->M_sigma), this->M_eigenvaluesR, this->M_eigenvaluesI);
 
 	  //The Cauchy tensor is symmetric and therefore, the eigenvalues are real
-	  //Check on the imaginary part of eigen values given by the Lapack method 
+	  //Check on the imaginary part of eigen values given by the Lapack method
 	  Real sum(0);
 	  for( int i=0; i < this->M_eigenvaluesI.size(); i++ )
 	    sum += std::abs(this->M_eigenvaluesI[i]);
@@ -526,7 +526,7 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensionsRecoveryEigenv
       for ( UInt ic = 0; ic < this->M_FESpace->fieldDim(); ++ic )
 	assembleVector(*(this->M_globalEigen), elVecTens, this->M_FESpace->fe(), this->M_FESpace->dof(), ic, this->M_offset +  ic*totalDof );
     }
-  
+
   this->M_globalEigen->globalAssemble();
 
   chrono.stop();
@@ -534,26 +534,26 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensionsRecoveryEigenv
 }
 
 template <typename Mesh>
-void 
+void
 WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensionsRecoveryCauchyStressesCylindrical( void )
 {
 
   LifeChrono chrono;
 
   chrono.start();
-  UInt dim = this->M_FESpace->dim();  
-  
+  UInt dim = this->M_FESpace->dim();
+
   //Construction of the global tensionsVector
   solutionVectPtr_Type sigmaX( new solutionVect_Type(*(this->M_localMap) ) );
   solutionVectPtr_Type sigmaY( new solutionVect_Type(*(this->M_localMap) ) );
   solutionVectPtr_Type sigmaZ( new solutionVect_Type(*(this->M_localMap) ) );
-  
+
   constructGlobalStressVector(*sigmaX,*sigmaY,*sigmaZ);
 
 
   for ( UInt iDOF = 0; iDOF <( UInt ) this->M_FESpace->dof().numTotalDof(); iDOF++ )
-    {      
-      
+    {
+
       if ( this->M_displ->blockMap().LID(iDOF) != -1 ) // The Global ID is on the calling processors
 	{
 
@@ -561,9 +561,9 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensionsRecoveryCauchy
 
 	  //Extracting the gradient of U on the current DOF
 	  for ( UInt iComp = 0; iComp < this->M_FESpace->fieldDim(); ++iComp )
-	    {		    
-	      Int LIDid = this->M_displ->blockMap().LID(iDOF + iComp * dim + this->M_offset); 
-	      Int GIDid = this->M_displ->blockMap().GID(LIDid); 
+	    {
+	      Int LIDid = this->M_displ->blockMap().LID(iDOF + iComp * dim + this->M_offset);
+	      Int GIDid = this->M_displ->blockMap().GID(LIDid);
 	      (*(this->M_sigma))(iComp,0) = (*sigmaX)(GIDid); // (d_xX,d_yX,d_zX)
 	      (*(this->M_sigma))(iComp,1) = (*sigmaY)(GIDid); // (d_xY,d_yY,d_zY)
 	      (*(this->M_sigma))(iComp,2) = (*sigmaZ)(GIDid); // (d_xZ,d_yZ,d_zZ)
@@ -573,7 +573,7 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensionsRecoveryCauchy
 	  AssemblyElementalStructure::computeEigenvalues(*(this->M_sigma), this->M_eigenvaluesR, this->M_eigenvaluesI);
 
 	  //The Cauchy tensor is symmetric and therefore, the eigenvalues are real
-	  //Check on the imaginary part of eigen values given by the Lapack method 
+	  //Check on the imaginary part of eigen values given by the Lapack method
 	  Real sum(0);
 	  for( int i=0; i < this->M_eigenvaluesI.size(); i++ )
 	    sum += std::abs(this->M_eigenvaluesI[i]);
@@ -584,21 +584,21 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensionsRecoveryCauchy
 	  //Save the eigenvalues in the global vector
 	  for( UInt icoor = 0; icoor < this->M_FESpace->fieldDim(); ++icoor )
 	    {
-	      Int LIDid = this->M_displ->blockMap().LID(iDOF + icoor * dim + this->M_offset); 
-	      Int GIDid = this->M_displ->blockMap().GID(LIDid); 
+	      Int LIDid = this->M_displ->blockMap().LID(iDOF + icoor * dim + this->M_offset);
+	      Int GIDid = this->M_displ->blockMap().GID(LIDid);
 	      (*(this->M_globalEigen))(GIDid) = this->M_eigenvaluesR[icoor];
 	    }
-	
+
 	}
     }
 
   chrono.stop();
   this->M_displayer->leaderPrint("Analysis done in: ", chrono.diff());
-	 
+
 }
 
 template <typename Mesh>
-void 
+void
 WallTensionEstimatorCylindricalCoordinates<Mesh >::constructGlobalStressVector( solutionVect_Type& sigmaX, solutionVect_Type& sigmaY, solutionVect_Type& sigmaZ )
 {
 
@@ -614,7 +614,7 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::constructGlobalStressVector( 
   patchArea *= 0.0;
 
   super::constructPatchAreaVector( patchArea );
-  
+
   //Before assembling the reconstruction process is done
   solutionVect_Type patchAreaR(patchArea,Repeated);
 
@@ -654,7 +654,7 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::constructGlobalStressVector( 
   for ( UInt i = 0; i < this->M_FESpace->mesh()->numVolumes(); ++i )
     {
       this->M_FESpace->fe().updateFirstDerivQuadPt( this->M_FESpace->mesh()->volumeList( i ) );
-      
+
       elVecSigmaX.zero();
       elVecSigmaY.zero();
       elVecSigmaZ.zero();
@@ -694,14 +694,14 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::constructGlobalStressVector( 
 	  this->M_deformationCylindricalF->Scale(0.0);
 
 	  moveToCylindricalCoordinates(vectorDeformationF[nDOF], localDisplacement, iloc, *M_deformationCylindricalF);
-	  
+
 	  //Adding the identity tensor
 	  for( UInt icoor = 0; icoor < this->M_FESpace->fieldDim(); icoor++ )
 	    (*M_deformationCylindricalF)(icoor,icoor) += 1.0;
 
 
 	  //Compute the rightCauchyC tensor
-	  AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor(this->M_invariants, *M_deformationCylindricalF, *(this->M_cofactorF) );	  
+	  AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor(this->M_invariants, *M_deformationCylindricalF, *(this->M_cofactorF) );
 
 	  //Compute the first Piola-Kirchhoff tensor
 	  this->M_material->computeLocalFirstPiolaKirchhoffTensor(*(this->M_firstPiola), *M_deformationCylindricalF, *(this->M_cofactorF), this->M_invariants, this->M_marker);
@@ -740,10 +740,10 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::constructGlobalStressVector( 
   sigmaX.globalAssemble();
   sigmaY.globalAssemble();
   sigmaZ.globalAssemble();
-}    
+}
 
 template <typename Mesh>
-void 
+void
 WallTensionEstimatorCylindricalCoordinates<Mesh >::moveToCylindricalCoordinates( Epetra_SerialDenseMatrix& deformationF,
 										 std::vector<LifeV::Real>& localDisplacement,
 										 UInt iloc,
@@ -765,8 +765,8 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::moveToCylindricalCoordinates(
   this->M_FESpace->coorMap(x,y,z,xi,eta,zeta);
 
   // Defining the new variables
-  Real radius= std::sqrt( x*x + y*y  ); 
-  Real theta= std::atan( y / x ); 
+  Real radius= std::sqrt( x*x + y*y  );
+  Real theta= std::atan( y / x );
 
   //Filling the change of variable Matrix and its derivative with respect to theta
   changeOfVariableMatrix(0,0) =   std::cos(theta);
@@ -792,7 +792,7 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::moveToCylindricalCoordinates(
 
   //Definition of the tensor that stores the gradient of (x,y,z) w.r.t. (r,\theta,zeta)
   tensorChangeOfVariable(0,0) =   std::cos(theta);
-  tensorChangeOfVariable(0,1) = - ( radius *std::sin(theta) );  
+  tensorChangeOfVariable(0,1) = - ( radius *std::sin(theta) );
   tensorChangeOfVariable(0,2) =   0.0;
   tensorChangeOfVariable(1,0) =   std::sin(theta);
   tensorChangeOfVariable(1,1) =   radius * std::cos(theta);
@@ -824,7 +824,7 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::moveToCylindricalCoordinates(
                                   + thetaDerivativeChangeOfVariableMatrix(2,1)*localDisplacement[1]
                                   + thetaDerivativeChangeOfVariableMatrix(2,2)*localDisplacement[2];
 
-  
+
 }
 
 }

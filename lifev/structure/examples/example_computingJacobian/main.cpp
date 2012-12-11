@@ -56,7 +56,7 @@
 #include <lifev/core/mesh/MeshData.hpp>
 #include <lifev/core/mesh/MeshPartitioner.hpp>
 
-#include <lifev/structure/solver/VenantKirchhoffElasticData.hpp>
+#include <lifev/structure/solver/StructuralConstitutiveLawData.hpp>
 #include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
 #include <lifev/structure/solver/StructuralOperator.hpp>
 
@@ -237,7 +237,7 @@ Structure::run3d()
 
     //! dataElasticStructure for parameters
     GetPot dataFile( parameters->data_file_name.c_str() );
-    boost::shared_ptr<VenantKirchhoffElasticData> dataStructure(new VenantKirchhoffElasticData( ));
+    boost::shared_ptr<StructuralConstitutiveLawData> dataStructure(new StructuralConstitutiveLawData( ));
     dataStructure->setup(dataFile);
 
     //! Read and partition mesh
