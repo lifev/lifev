@@ -50,7 +50,7 @@ each time step and with the BDF method!!
 #include <Epetra_SerialComm.h>
 #endif
 
-                                       //Tell the compiler to restore the warning previously silented
+//Tell the compiler to restore the warning previously silented
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
@@ -58,8 +58,7 @@ each time step and with the BDF method!!
 #include <lifev/core/algorithm/PreconditionerIfpack.hpp>
 #include <lifev/core/algorithm/PreconditionerML.hpp>
 
-
-                                       //Include fils which were in the structure.cpp file
+//Include fils which were in the structure.cpp file
 #include <lifev/core/array/MapEpetra.hpp>
 
 #include <lifev/core/fem/TimeAdvance.hpp>
@@ -126,7 +125,7 @@ class Structure
 public:
 
     typedef RegionMesh<LifeV::LinearTetra >                       mesh_Type;
-    typedef StructuralOperator<mesh_Type >::vector_Type             vector_Type;
+    typedef StructuralOperator<mesh_Type >::vector_Type           vector_Type;
     typedef boost::shared_ptr<vector_Type>                        vectorPtr_Type;
     typedef boost::shared_ptr< TimeAdvance< vector_Type > >       timeAdvance_type;
 
@@ -460,8 +459,6 @@ Structure::run3d()
             iter << std::setw(5) << ( iterations );
             iterationString=iter.str();
 
-
-
         }
 
         importerSolid->closeFile();
@@ -583,11 +580,11 @@ Structure::run3d()
         *solidVel  = timeAdvance->velocity();
         *solidAcc  = timeAdvance->acceleration();
 
-        Real normVect;
-        normVect =  solid.displacement().norm2();
-        std::cout << "The norm 2 of the displacement field is: "<< normVect << std::endl;
-        std::cout << "The norm 2 of the velocity field is: "<< timeAdvance->velocity().norm2() << std::endl;
-        std::cout << "The norm 2 of the acceleration field is: "<< timeAdvance->acceleration().norm2() << std::endl;
+        // Real normVect;
+        // normVect =  solid.displacement().norm2();
+        // std::cout << "The norm 2 of the displacement field is: "<< normVect << std::endl;
+        // std::cout << "The norm 2 of the velocity field is: "<< timeAdvance->velocity().norm2() << std::endl;
+        // std::cout << "The norm 2 of the acceleration field is: "<< timeAdvance->acceleration().norm2() << std::endl;
 
         //*rhsVector = solid.rhs();
 
