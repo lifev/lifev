@@ -116,14 +116,6 @@ public:
      */
     bool isFirstTimeStep() { return round( M_time ) == round( M_initialTime ); }
 
-    //! Return if it is the N time step with respect to the current initial time
-    /*!
-     * Note that this method assumes a uniform time stepping.
-     * @param n time step number
-     * @return true if time - (n - 1) * timeStep == initialTime, false viceversa
-     */
-    bool isFirstNTimeStep( const UInt& n ) { return round( M_time - (n - 1) * M_timeStep ) == round( M_initialTime ); }
-
     //! Return if it is the last time step
     /*!
      * @return true if time + timestep > endTime, false viceversa.
@@ -137,7 +129,15 @@ public:
     void showMe( std::ostream& output = std::cout ) const;
 
     //@}
-
+    
+    
+    //! @name Utility methods
+    //@{
+    
+    Real round( const Real& n, const Int& decimal=10 ) const;
+    
+    //@}
+    
 
     //! @name Set Methods
     //@{
