@@ -12,7 +12,7 @@
 
 [Multiscale] ######################################################################################
 ###################################################################################################
-modelName        = 'Rhombus (OneDimensional, MeanNormalStress)'
+modelName        = 'Rhombus (FSI1D, MeanNormalStress)'
 modelType        = Multiscale
 couplingFlags    = ' '
 
@@ -30,13 +30,13 @@ algorithm = '       Broyden             Default'
 # List of models ##################################################################################
 ########### ID #### Type ############## File (without .dat) #######################################
 models = '
-            0       OneDimensional      Cylinder_5x10
-            1       OneDimensional      Cylinder_5x10
-            2       OneDimensional      Cylinder_5x10
-            3       OneDimensional      Cylinder_5x10
-            4       OneDimensional      Cylinder_5x10
-            5       OneDimensional      Cylinder_5x10
-            6       OneDimensional      Cylinder_5x10
+            0       FSI1D               Cylinder_5x10
+            1       FSI1D               Cylinder_5x10
+            2       FSI1D               Cylinder_5x10
+            3       FSI1D               Cylinder_5x10
+            4       FSI1D               Cylinder_5x10
+            5       FSI1D               Cylinder_5x10
+            6       FSI1D               Cylinder_5x10
          '
 ###################################################################################################
 

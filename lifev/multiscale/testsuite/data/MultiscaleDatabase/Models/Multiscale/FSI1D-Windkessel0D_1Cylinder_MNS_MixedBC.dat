@@ -12,7 +12,7 @@
 
 [Multiscale] ######################################################################################
 ###################################################################################################
-modelName        = '1 Cylinder + 1 Windkessel terminal (OneDimensional-Windkessel0D, FlowRateStress)'
+modelName        = 'One Cylinder + One windkessel terminal (FSI1D-Windkessel0D, MeanNormalStress)'
 modelType        = Multiscale
 couplingFlags    = ' '
 
@@ -30,7 +30,7 @@ algorithm = '       Broyden             Default'
 # List of models ##################################################################################
 ########### ID #### Type ############## File (without .dat) #######################################
 models = '
-            1       OneDimensional      Cylinder_5x10
+            1       FSI1D               Cylinder_5x10
             2       Windkessel0D        Test
          '
 ###################################################################################################
