@@ -305,7 +305,7 @@ ExponentialMaterialNonLinear<Mesh>::setup( const boost::shared_ptr< FESpace<Mesh
 template <typename Mesh>
 void ExponentialMaterialNonLinear<Mesh>::computeLinearStiff(dataPtr_Type& /*dataMaterial*/, const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/)
 {
-    //! Empty method for neo-hookean material
+    //! Empty method for exponential material
 }
 
 

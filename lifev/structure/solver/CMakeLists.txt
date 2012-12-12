@@ -6,6 +6,7 @@ SET(solver_HEADERS
   solver/StructuralOperator.hpp
   solver/NeoHookeanMaterialNonLinear.hpp
   solver/ExponentialMaterialNonLinear.hpp
+  solver/SecondOrderExponentialMaterialNonLinear.hpp
   solver/VenantKirchhoffMaterialLinear.hpp
   solver/VenantKirchhoffMaterialNonLinear.hpp
   solver/VenantKirchhoffMaterialNonLinearPenalized.hpp

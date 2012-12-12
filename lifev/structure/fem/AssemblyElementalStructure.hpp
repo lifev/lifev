@@ -819,6 +819,101 @@ void stiff_Jac_P1iso_VKPenalized_Tryterm( Real coef, const std::vector<Real>& Jk
 */
 void stiff_Jac_P1iso_VKPenalized_14term( Real coef, const std::vector<Real>& Jk, const boost::multi_array<Real,3 >& FkCk, const boost::multi_array<Real,3 >& FkMinusTransposed, MatrixElemental& elmat, const CurrentFE& fe );
 
+
+//! Methods for second order exponential law
+//! Methods for the first Piola-Kirchhoff tensor
+
+void source_P1iso_SecondOrderExp( Real coef, Real coefExp, const boost::multi_array<Real,3 > CofFk, const boost::multi_array<Real,3 > Fk, const std::vector<Real>& Jk, const std::vector<Real>& trCisok,  VectorElemental& elvec, const CurrentFE& fe );
+
+//! Methods for the Jacobian matrix
+//! Elementary first nonlinear isochoric Jacobian matrix for Second Order Exponential model (see the reference)
+/*!
+  This function assembles the local first nonlinear isochoric Jacobian matrix for Exponential model.
+
+  @param coef The pre-exponential coefficient
+  @param coefExp The expoenential coefficient
+  @param CofFk The cofactor of the deformation gradient F that depends on the local displacement uk_loc (remark: the nonlinear vector depends on current displacement)
+  @param Fk The deformation gradient that depends on the local displacement uk_loc
+  @param Jk The determinant of the deformation gradient F that depends on the local displacement uk_loc (remark: the nonlinear vector depends on current displacement)
+  @param Ic_isok The first invariant of the isochoric part of the right Cauchy-Green tensor C
+  @param elmat The elementary matrix of the current volume
+  @param fe The current finite element
+*/
+void stiff_Jac_P1iso_SecondOrderExp_1term( Real coef, Real coefExp, const boost::multi_array<Real,3 >& CofFk, const boost::multi_array<Real,3 >& Fk, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
+
+
+//! Elementary second nonlinear isochoric Jacobian matrix for Second Order Exponential model (see the reference)
+/*!
+  This function assembles the local second nonlinear isochoric Jacobian matrix for Exponential model.
+
+  @param coef The pre-exponential coefficient
+  @param coefExp The expoenential coefficient
+  @param Fk The deformation gradient that depends on the local displacement uk_loc
+  @param Jk The determinant of the deformation gradient F that depends on the local displacement uk_loc (remark: the nonlinear vector depends on current displacement)
+  @param Ic_isok The first invariant of the isochoric part of the right Cauchy-Green tensor C
+  @param elmat The elementary matrix of the current volume
+  @param fe The current finite element
+*/
+void stiff_Jac_P1iso_SecondOrderExp_2term( Real coef, Real coefExp, const boost::multi_array<Real,3 >& Fk, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
+
+//! Elementary third nonlinear isochoric Jacobian matrix for Second Order Exponential model (see the reference)
+/*!
+  This function assembles the local third nonlinear isochoric Jacobian matrix for Second Order Exponential model.
+
+  @param coef The pre-exponential coefficient
+  @param coefExp The expoenential coefficient
+  @param CofFk The cofactor of the deformation gradient F that depends on the local displacement uk_loc (remark: the nonlinear vector depends on current displacement)
+  @param Jk The determinant of the deformation gradient F that depends on the local displacement uk_loc (remark: the nonlinear vector depends on current displacement)
+  @param Ic_isok The first invariant of the isochoric part of the right Cauchy-Green tensor C
+  @param elmat The elementary matrix of the current volume
+  @param fe The current finite element
+*/
+void stiff_Jac_P1iso_SecondOrderExp_3term( Real coef, Real coefExp, const boost::multi_array<Real,3 >& CofFk, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
+
+
+//! Elementary fourth nonlinear isochoric Jacobian matrix for Second Order Exponential model (see the reference)
+/*!
+  This function assembles the local fourth nonlinear isochoric Jacobian matrix for Second Order Exponential model.
+
+  @param coef The pre-exponential coefficient
+  @param coefExp The expoenential coefficient
+  @param CofFk The cofactor of the deformation gradient F that depends on the local displacement uk_loc (remark: the nonlinear vector depends on current displacement)
+  @param Fk The deformation gradient that depends on the local displacement uk_loc
+  @param Jk The determinant of the deformation gradient F that depends on the local displacement uk_loc (remark: the nonlinear vector depends on current displacement)
+  @param Ic_isok The first invariant of the isochoric part of the right Cauchy-Green tensor C
+  @param Ic_k The first invariant of the isochoric part of the right Cauchy-Green tensor C
+  @param elmat The elementary matrix of the current volume
+  @param fe The current finite element
+*/
+void stiff_Jac_P1iso_SeconOrderExp_4term( Real coef, Real coefExp, const boost::multi_array<Real,3 >& CofFk, const boost::multi_array<Real,3 >& Fk,const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, const std::vector<Real>& Ic_k, MatrixElemental& elmat, const CurrentFE& fe );
+
+//! Elementary fifth nonlinear isochoric Jacobian matrix for Second Order Exponential model (see the reference)
+/*!
+  This function assembles the local fifth nonlinear isochoric Jacobian matrix for Second Order Exponential model.
+
+  @param coef The pre-exponential coefficient
+  @param coefExp The expoenential coefficient
+  @param Jk The determinant of the deformation gradient F that depends on the local displacement uk_loc (remark: the nonlinear vector depends on current displacement)
+  @param Ic_isok The first invariant of the isochoric part of the right Cauchy-Green tensor C
+  @param elmat The elementary matrix of the current volume
+  @param fe The current finite element
+*/
+void stiff_Jac_P1iso_SecondOrderExp_5term( Real coef, Real coefExp, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
+
+//! Elementary sixth nonlinear isochoric Jacobian matrix for Second Order Exponential model (see the reference)
+/*!
+  This function assembles the local sixth nonlinear isochoric Jacobian matrix for Second Order Exponential model.
+
+  @param coef The pre-exponential coefficient
+  @param coefExp The expoenential coefficient
+  @param CofFk The cofactor of the deformation gradient F that depends on the local displacement uk_loc (remark: the nonlinear vector depends on current displacement)
+  @param Jk The determinant of the deformation gradient F that depends on the local displacement uk_loc (remark: the nonlinear vector depends on current displacement)
+  @param Ic_isok The first invariant of the isochoric part of the right Cauchy-Green tensor C
+  @param elmat The elementary matrix of the current volume
+  @param fe The current finite element
+*/
+void stiff_Jac_P1iso_SecondOrderExp_6term( Real coef, Real coefExp, const boost::multi_array<Real,3 >& CofFk, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
+
 } //! End namespace AssemblyElementalStructure
 } //! End namespace LifeV
 #endif
