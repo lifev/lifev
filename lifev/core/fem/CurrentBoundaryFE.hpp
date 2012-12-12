@@ -245,7 +245,7 @@ Real CurrentBoundaryFE::normalIntegral(const FunctorType& f) const
     Real result = 0.0;
 
     Real tmp;
-    Real returnValues[M_nbCoor+1];
+    Real* returnValues = new Real[M_nbCoor+1];
     for (UInt iq(0); iq<M_nbQuadPt; ++iq)
     {
         tmp = 0;
@@ -254,6 +254,7 @@ Real CurrentBoundaryFE::normalIntegral(const FunctorType& f) const
             tmp += returnValues[iCoor]*M_normal[iCoor][iq];
         result += tmp*M_wRootDetMetric[iq];
     }
+    delete[] returnValues;
     return result;
 }
 
