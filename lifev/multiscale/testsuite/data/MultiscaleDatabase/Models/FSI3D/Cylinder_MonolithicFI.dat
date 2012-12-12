@@ -10,13 +10,12 @@
 #  License Terms: GNU LGPL
 #
 ###################################################################################################
-### MODEL: FSI3D - Cylinder #######################################################################
-###################################################################################################
 
 [Multiscale]
-modelName        = FSI3D_Cylinder_tube20_MonolithicFI
-modelType        = FSI3D
-couplingFlags    = '2 3'
+modelName         = FSI3D_Cylinder_MonolithicFI
+modelType         = FSI3D
+couplingFlags     = '2 3'
+couplingAreaFlags = '20 30'
 
 
 
@@ -85,7 +84,7 @@ conservativeFormulation = false  # tells if the conservative or non conservative
 
     [../space_discretization]
     mesh_dir        = ./Mesh/
-    mesh_file       = tube20.mesh      # mesh name
+    mesh_file       = tube_fluid.mesh
     mesh_type       = .mesh
     verbose         = 0                # verbose during mesh-reading
 
@@ -159,8 +158,8 @@ rescaleFactor    = 1.0  # this factor can be used to rescale the structure block
 
     [../space_discretization]
     mesh_dir         = ./Mesh/
-    mesh_file        = vessel20.mesh    # mesh name
-    mesh_type        = .mesh
+    mesh_file        = tube_solid.mesh  # mesh file
+    mesh_type       = .mesh
     order            = P1
     mesh_faces       = all              # update all faces elements
     mesh_edges       = all              # update all faces elements
@@ -232,13 +231,13 @@ rescaleFactor    = 1.0  # this factor can be used to rescale the structure block
 
         [../OuterWall_ReferencePressure]
         type       = Natural
-        flag       = 10
+        flag       = 1000
         mode       = Normal
         functionSolver = '-s_externalPressure'
 
         [../OuterWall_Robin]
         type       = Robin
-        flag       = 10
+        flag       = 1000
         mode       = Full
         component  = 3
         functionSD = RobinWall
@@ -260,8 +259,8 @@ rescaleFactor    = 1.0  # this factor can be used to rescale the structure block
 
 
 [interface] # mesh dependent flags for the interface.
-fluid_flag      =  1   # default: 1
-solid_flag      =  1   # default: 1
+fluid_flag      =  100 # default: 1
+solid_flag      =  100 # default: 1
 tolerance       =  0   # how far points are to be considered the same on the interface
 
 
@@ -312,14 +311,14 @@ tolerance       =  0   # how far points are to be considered the same on the int
 
         [../Interface]
         type       = Essential
-        flag       = 1
+        flag       = 100
         mode       = Full
         component  = 3
         functionSD = StructureDispToHarmonicExtension
 
         [../NoInterface]
         type       = Essential
-        flag       = 1
+        flag       = 100
         mode       = Full
         component  = 3
         function   = 0

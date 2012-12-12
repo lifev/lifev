@@ -9,8 +9,6 @@
 #  License Terms: GNU LGPL
 #
 ###################################################################################################
-### MODEL: Fluid3D - Cylinder #####################################################################
-###################################################################################################
 
 [Multiscale]
 modelName        = Fluid3D_Cylinder
@@ -43,11 +41,7 @@ diagonalBlockPrec   = false
 
     [../space_discretization]
     mesh_dir        = ./Mesh/
-    mesh_file       = tube20.mesh      #  1050 Vertex
-    #mesh_file       = tube2x4x20.mesh  #  1785 Vertex
-    #mesh_file       = tube40.mesh      # 9486 Vertex
-    #mesh_file       = tube60.mesh      # 25063 Vertex
-    #mesh_file       = tube80.mesh      # 71820 Vertex
+    mesh_file       = tube_fluid.mesh
     mesh_type       = .mesh
     verbose         = 0                # verbose during mesh-reading
 
@@ -156,20 +150,20 @@ diagonalBlockPrec   = false
 
         [./Wall]
         type       = Essential
-        flag       = 1
+        flag       = 100
         mode       = Full
         component  = 3
         function   = 0
 
         [../InletRing]
-        type       = Essential
+        type       = EssentialVertices
         flag       = 20
         mode       = Full
         component  = 3
         function   = 0
 
         [../OutletRing]
-        type       = Essential
+        type       = EssentialVertices
         flag       = 30
         mode       = Full
         component  = 3

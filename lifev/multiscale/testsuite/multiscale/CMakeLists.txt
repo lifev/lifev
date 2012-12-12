@@ -4,16 +4,19 @@ INCLUDE(TribitsAddExecutableAndTest)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
 
 TRIBITS_ADD_EXECUTABLE(
-  BasicTest
-  NAME BasicTest
+  Framework
+  NAME Framework
   SOURCES main.cpp
   )
 
 TRIBITS_ADD_TEST(
-  BasicTest
-  POSTFIX_AND_ARGS_0 Fluid3D -s 1 -f MultiscaleDatabase/Test_Fluid3D.dat -c 1.8919584275659009 -o test_Fluid3D
-  POSTFIX_AND_ARGS_1 1D      -s 1 -f MultiscaleDatabase/Test_1D.dat      -c 88.582269095417459 -o test_1D
-  POSTFIX_AND_ARGS_2 FSI3D   -s 1 -f MultiscaleDatabase/Test_FSI3D.dat   -c 12.555989657007325 -o test_FSI3D
+  Framework
+  POSTFIX_AND_ARGS_0 Windkessel0D       -s 1 -f MultiscaleDatabase/Test_Windkessel0D.dat              -c 105330.10083689842 -o Test_0
+  POSTFIX_AND_ARGS_1 Fluid3D_MTNS       -s 1 -f MultiscaleDatabase/Test_Fluid3D.dat                   -c 267617.11076639243 -o Test_1
+  POSTFIX_AND_ARGS_2 FSI1D_MNS          -s 1 -f MultiscaleDatabase/Test_FSI1D.dat                     -c 1281.4882585623886 -o Test_2
+  POSTFIX_AND_ARGS_3 FSI3D_MTNS         -s 1 -f MultiscaleDatabase/Test_FSI3D.dat                     -c 12.555989657007325 -o Test_3
+  POSTFIX_AND_ARGS_4 1D-FSI3D-1D_MNSA   -s 1 -f MultiscaleDatabase/Test_FSI1D-FSI3D-FSI1D.dat         -c 1094.0066804501862 -o Test_4
+  POSTFIX_AND_ARGS_5 Restart            -s 1 -f MultiscaleDatabase/Test_FSI1D-FSI3D-FSI1D_Restart.dat -c 356.33525545161291 -o Test_4
   NUM_MPI_PROCS 4
   COMM mpi
   )

@@ -9,12 +9,10 @@
 #  License Terms: GNU LGPL
 #
 ###################################################################################################
-### MULTISCALE: Main data file for the automatic check of the FLUID3D Model #######################
-###################################################################################################
 
 [Problem] #########################################################################################
 ProblemType = Multiscale
-ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Fluid3D_Rhombus-tube20_F-FS-S
+ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Fluid3D_Rhombus_MTNS_MixedBC
 
 [Solver] ##########################################################################################
 ###################################################################################################
@@ -28,9 +26,9 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Fluid3D_Rhombus-tube20_F-FS
     SaveEach                   = 1          # time steps
 
     [../time_discretization]
-    initialtime                = 0.0    # [s]
-    endtime                    = 1.0    # [s]
-    timestep                   = 1.0    # [s]
+    initialtime                = 0.0   # [s]
+    endtime                    = 1.0   # [s]
+    timestep                   = 1.0   # [s]
 
     [../]
 
@@ -38,6 +36,6 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/Fluid3D_Rhombus-tube20_F-FS
 
 [Physics] #########################################################################################
 ###################################################################################################
-FluidDensity                = 1.0           # density        [g/cm^3]
-FluidViscosity              = 1.005309649148734e-06 # viscosity      [g/cm/s]
+FluidDensity                = 1.0                   # density        [g/cm^3]
+FluidViscosity              = 1.005309649148734e-01 # viscosity      [g/cm/s]
 ###################################################################################################
