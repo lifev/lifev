@@ -92,9 +92,9 @@ enum algorithms_Type
 enum models_Type
 {
     Fluid3D,                /*!< Fluid (Oseen) 3D model */
+    FSI1D,                  /*!< 1D model */
     FSI3D,                  /*!< FSI 3D model */
     Multiscale,             /*!< Multiscale model */
-    OneDimensional,         /*!< 1D model */
     Windkessel0D,           /*!< Windkessel0D model */
     ZeroDimensional         /*!< 0D model */
 };
@@ -198,9 +198,9 @@ inline void
 multiscaleMapsDefinition()
 {
     multiscaleModelsMap["Fluid3D"]         = Fluid3D;
+    multiscaleModelsMap["FSI1D"]           = FSI1D;
     multiscaleModelsMap["FSI3D"]           = FSI3D;
     multiscaleModelsMap["Multiscale"]      = Multiscale;
-    multiscaleModelsMap["OneDimensional"]  = OneDimensional;
     multiscaleModelsMap["Windkessel0D"]    = Windkessel0D;
     multiscaleModelsMap["ZeroDimensional"] = ZeroDimensional;
 

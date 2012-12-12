@@ -527,7 +527,7 @@ private:
 };
 
 //! Factory create function
-inline multiscaleModel_Type* createMultiscaleModelOneDimensional()
+inline multiscaleModel_Type* createMultiscaleModelFSI1D()
 {
     return new MultiscaleModelFSI1D();
 }

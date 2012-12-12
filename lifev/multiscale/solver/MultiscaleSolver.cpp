@@ -67,8 +67,8 @@ MultiscaleSolver::MultiscaleSolver() :
     //Register the available models
     multiscaleModelFactory_Type::instance().registerProduct( Fluid3D,         &createMultiscaleModelFluid3D );
     multiscaleModelFactory_Type::instance().registerProduct( FSI3D,           &createMultiscaleModelFSI3D );
+    multiscaleModelFactory_Type::instance().registerProduct( FSI1D,           &createMultiscaleModelFSI1D );
     multiscaleModelFactory_Type::instance().registerProduct( Multiscale,      &createMultiscaleModelMultiscale );
-    multiscaleModelFactory_Type::instance().registerProduct( OneDimensional,  &createMultiscaleModelOneDimensional );
     multiscaleModelFactory_Type::instance().registerProduct( Windkessel0D,    &createMultiscaleModelWindkessel0D );
     multiscaleModelFactory_Type::instance().registerProduct( ZeroDimensional, &createMultiscaleModelZeroDimensional );
 }

@@ -146,7 +146,7 @@ MultiscaleCouplingMeanTotalNormalStressArea::computeCouplingResiduals()
         // Impose area boundary condition on the FSI3D model
         for ( UInt i( 0 ); i < 2; ++i )
             if ( myModel( i ) )
-                if ( M_models[i]->type() == OneDimensional )
+                if ( M_models[i]->type() == FSI1D )
                 {
                     Real myValueArea = multiscaleDynamicCast< MultiscaleInterface >( M_models[i] )->boundaryArea( M_boundaryIDs[i] );
                     if ( isModelLeaderProcess( i ) )
@@ -208,7 +208,7 @@ MultiscaleCouplingMeanTotalNormalStressArea::insertJacobianDeltaCoefficients( mu
     // Model global to local conversion
     UInt modelLocalID = modelGlobalToLocalID( ID );
     if ( myModel( modelLocalID ) )
-        if ( M_models[modelLocalID]->type() == OneDimensional )
+        if ( M_models[modelLocalID]->type() == FSI1D )
         {
             Real row( 0 );
             Real coefficient( 0 );

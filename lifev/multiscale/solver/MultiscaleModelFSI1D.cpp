@@ -84,7 +84,7 @@ MultiscaleModelFSI1D::MultiscaleModelFSI1D() :
     debugStream( 8130 ) << "MultiscaleModelFSI1D::MultiscaleModelFSI1D() \n";
 #endif
 
-    M_type = OneDimensional;
+    M_type = FSI1D;
 
     //Define the maps of the OneDFSIModel objects
     OneDFSI::mapsDefinition();
