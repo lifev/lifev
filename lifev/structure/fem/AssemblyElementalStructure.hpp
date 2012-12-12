@@ -822,8 +822,7 @@ void stiff_Jac_P1iso_VKPenalized_14term( Real coef, const std::vector<Real>& Jk,
 
 //! Methods for second order exponential law
 //! Methods for the first Piola-Kirchhoff tensor
-
-void source_P1iso_SecondOrderExp( Real coef, Real coefExp, const boost::multi_array<Real,3 > CofFk, const boost::multi_array<Real,3 > Fk, const std::vector<Real>& Jk, const std::vector<Real>& trCisok,  VectorElemental& elvec, const CurrentFE& fe );
+void source_P1iso_SecondOrderExponential( Real coef, Real coefExp, const boost::multi_array<Real,3 >& CofFk, const boost::multi_array<Real,3 >& Fk, const std::vector<Real>& Jk, const std::vector<Real>& trCisok, VectorElemental& elvec, const CurrentFE& fe );
 
 //! Methods for the Jacobian matrix
 //! Elementary first nonlinear isochoric Jacobian matrix for Second Order Exponential model (see the reference)
@@ -885,7 +884,7 @@ void stiff_Jac_P1iso_SecondOrderExp_3term( Real coef, Real coefExp, const boost:
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_Jac_P1iso_SeconOrderExp_4term( Real coef, Real coefExp, const boost::multi_array<Real,3 >& CofFk, const boost::multi_array<Real,3 >& Fk,const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, const std::vector<Real>& Ic_k, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_Jac_P1iso_SecondOrderExp_4term( Real coef, Real coefExp, const boost::multi_array<Real,3 >& CofFk, const boost::multi_array<Real,3 >& Fk,const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, const std::vector<Real>& Ic_k, MatrixElemental& elmat, const CurrentFE& fe );
 
 //! Elementary fifth nonlinear isochoric Jacobian matrix for Second Order Exponential model (see the reference)
 /*!

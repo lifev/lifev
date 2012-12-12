@@ -35,12 +35,11 @@
  *  @maintainer  Paolo Tricerri      <paolo.tricerri@epfl.ch>
  */
 
-#ifndef _EXPONENTIALMATERIAL_H_
-#define _EXPONENTIALMATERIAL_H_
+#ifndef _SECONDORDEREXPONENTIALMATERIAL_H_
+#define _SECONDORDEREXPONENTIALMATERIAL_H_
 
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-
 
 #include <lifev/structure/solver/ExponentialMaterialNonLinear.hpp>
 
@@ -474,7 +473,7 @@ void SecondOrderExponentialMaterialNonLinear<Mesh>::computeStiffness( const vect
               Source term P1iso_Exp: int { 2 * alpha * ( Ic1_iso - 3 ) * exp(gamma *(  Ic1_iso -3 )^2) *
               ( J1^(-2/3)* (F1 : \nabla v) - 1/3 * (Ic1_iso / J1) * (CofF1 : \nabla v) ) }
             */
-            AssemblyElementalStructure::source_P1iso_SecondOrderExp( alpha, gamma, (*M_CofFk), (*M_Fk), (*M_Jack), (*M_trCisok), (*M_trCk), *this->M_elvecK, this->M_FESpace->fe() );
+            AssemblyElementalStructure::source_P1iso_SecondOrderExponential( 2.0 * alpha, gamma, (*M_CofFk), (*M_Fk), (*M_Jack), (*M_trCisok), *this->M_elvecK, this->M_FESpace->fe() );
 
             for ( UInt ic = 0; ic < nDimensions; ++ic )
             {
@@ -626,4 +625,4 @@ static bool registerSOEXP = StructuralConstitutiveLaw<LifeV::RegionMesh<LinearTe
 
 } //Namespace LifeV
 
-#endif /* __EXPONENTIALMATERIAL_H */
+#endif /* __SECONDORDEREXPONENTIALMATERIAL_H */

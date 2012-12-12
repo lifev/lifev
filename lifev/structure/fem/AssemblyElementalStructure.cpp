@@ -2199,21 +2199,19 @@ void  stiff_Jac_P1iso_VKPenalized_14term( Real             coef,
 //! END OF VENANT-KIRCHHOFF PENALIZED MODEL
 //! ***********************************************************************************************
 
-
 //! ***********************************************************************************************
 //! SECOND ORDER EXPONENTIAL MODEL
 //! ***********************************************************************************************
 //! Methods for the Second Order Exponential law
 //! Assemble the first Piola-Kirchhoff tensor
 //int { 2 * alpha * ( Ic1_iso - 3 ) * exp(gamma *(  Ic1_iso -3 )^2) * ( J1^(-2/3)* (F1 : \nabla v) - 1/3 * (Ic1_iso / J1) * (CofF1 : \nabla v) ) }
-void  source_P1iso_SecondOrderExp( Real             coef,
-                                   Real             coefExp,
-                                   const boost::multi_array<Real,3 >& CofFk,
-                                   const boost::multi_array<Real,3 >& Fk,
-                                   const std::vector<Real>&   Jk,
-                                   const std::vector<Real>&   Ic_isok,
-                                   VectorElemental& elvec,
-                                   const CurrentFE& fe )
+void  source_P1iso_SecondOrderExponential( Real coef, Real coefExp,
+                                           const boost::multi_array<Real,3 >& CofFk,
+                                           const boost::multi_array<Real,3 >& Fk,
+                                           const std::vector<Real>&   Jk,
+                                           const std::vector<Real>&   Ic_isok,
+                                           VectorElemental& elvec,
+                                           const CurrentFE& fe )
 {
 
     Real s;
@@ -2228,8 +2226,8 @@ void  source_P1iso_SecondOrderExp( Real             coef,
             {
                 for( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
                 {
-                    s += 2 * coef * ( Ic_isok[ ig ] - 3.0 ) * std::exp( coefExp * ( Ic_isok[ ig ] - 3.0 ) * ( Ic_isok[ ig ] - 3.0 ) ) *
-                        (pow( Jk[ ig ], (-2.0/3.0) ) * Fk[ icoor ][  k ][ ig ] -
+                    s += ( Ic_isok[ ig ] - 3.0 ) * std::exp( coefExp * ( Ic_isok[ ig ] - 3.0 ) * (Ic_isok[ ig ] - 3.0)) *
+                        (std::pow( Jk[ ig ], (-2.0/3.0) ) * Fk[ icoor ][  k ][ ig ] -
                          1.0/3.0 * ( 1/Jk[ ig ] ) * Ic_isok[ ig ] *
                          CofFk[ icoor ][ k ][ ig ] )* fe.phiDer( i, k, ig ) * fe.weightDet( ig );
 
@@ -2454,7 +2452,7 @@ void  stiff_Jac_P1iso_SecondOrderExp_5term( Real             coef,
 
 //! 6. Stiffness term : Int { 1.0/3.0 * coef * J^(-2) * Ic_iso *  exp(coefExp( Ic_iso - 3)) * (CofF [\nabla \delta]^t CofF ) : \nabla \v }
 void  stiff_Jac_P1iso_SecondOrderExp_6term( Real             coef,
-                                            Real             coefExp,
+                                           Real             coefExp,
                                             const boost::multi_array<Real,3 >& CofFk,
                                             const std::vector<Real>&   Jk,
                                             const std::vector<Real>&   Ic_isok,
@@ -2496,7 +2494,6 @@ void  stiff_Jac_P1iso_SecondOrderExp_6term( Real             coef,
 //! ***********************************************************************************************
 //! END OF SECOND ORDER EXPONENTIAL MODEL
 //! ***********************************************************************************************
-
 
 } //! End namespace AssemblyElementalStructure
 
