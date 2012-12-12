@@ -326,7 +326,7 @@ public:
             M_fsi->iterate( solution );
 
             // Saving the solution
-	    M_fsi->FSIOper()->updateSolution( *solution );
+            M_fsi->FSIOper()->updateSolution( *solution );
 
             if(iter%M_saveEvery==0)
             {
@@ -340,6 +340,12 @@ public:
 
             std::cout << "solution norm at time: " <<  M_data->dataFluid()->dataTime()->time() << "(iter" << iter << ") : "
                       << M_fsi->displacement().norm2() << "\n";
+
+            // if( M_data->dataFluid()->dataTime()->time() == 0.005 )
+            // {
+            //     M_fsi->FSIOper()->ALETimeAdvance()->spyStateVector();
+            //     M_fsi->FSIOper()->ALETimeAdvance()->spyRHS();
+            // }
 
 	    if( M_data->method().compare("monolithicGI") == 0 )
 	       checkResultGI(M_data->dataFluid()->dataTime()->time());
@@ -593,6 +599,9 @@ void Problem::restartFSI(  GetPot const& data_file)
     M_fluidDisp.reset     ( new vector_Type( *fluidDisp, M_importerFluid->mapType() ));
 
     M_solidDisp.reset     ( new vector_Type( *solidDisp, M_importerSolid->mapType() ));
+
+    M_fsi->FSIOper()->ALETimeAdvance()->spyStateVector();
+    M_fsi->FSIOper()->ALETimeAdvance()->spyRHS();
 
 }
 

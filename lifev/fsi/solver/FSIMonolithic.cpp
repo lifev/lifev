@@ -509,6 +509,8 @@ void FSIMonolithic::finalizeRestart( )
     //Please note that, even if it is ugly, at this stage, the fluidTimeAdvance is leading the Time Discretization
     //and this is why there  is the dataFluid class to get the dt.
     M_ALETimeAdvance->updateRHSFirstDerivative( M_data->dataFluid()->dataTime()->timeStep() );
+    M_solidTimeAdvance->updateRHSContribution( M_data->dataFluid()->dataTime()->timeStep() );
+    M_fluidTimeAdvance->updateRHSContribution( M_data->dataFluid()->dataTime()->timeStep() );
 }
 
 
