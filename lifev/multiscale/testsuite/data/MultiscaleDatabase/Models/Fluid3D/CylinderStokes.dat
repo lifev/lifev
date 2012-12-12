@@ -13,7 +13,7 @@
 ###################################################################################################
 
 [Multiscale]
-modelName        = Fluid3D_Cylinder_tube20
+modelName        = Fluid3D_CylinderStokes
 modelType        = Fluid3D
 couplingFlags    = '2 3'
 
@@ -61,7 +61,7 @@ diagonalBlockPrec   = false
     stabilization   = 'ip'             # "none": none, "ip": Interior Penalty, "sd":Stream-line diffusion
 
     [../miscellaneous]
-    Stokes          = false            # Solve a Stokes problem
+    Stokes          = true             # Solve a Stokes problem
     SubITMax        = 0                # Maximum number of iterations
     Tolerance       = 1e-6             # Tolerance
     Omega           = 0.001            # Relaxation parameter
