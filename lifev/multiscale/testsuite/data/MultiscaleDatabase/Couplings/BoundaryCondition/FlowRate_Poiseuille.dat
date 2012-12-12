@@ -9,14 +9,12 @@
 #  License Terms: GNU LGPL
 #
 ###################################################################################################
-### COUPLING: BoundaryCondition - Cylinder Poiseuille Flux ########################################
-###################################################################################################
 
 [Multiscale]
 couplingName    = BoundaryCondition_FlowRate_Poiseuille
 
 [boundary_conditions]
-list = 'FlowRate_Poiseuille'  # Poiseuille Flux
+list = 'FlowRate_Poiseuille'  # Poiseuille Flow Rate
 
     [./FlowRate_Poiseuille]
     type                = Flux

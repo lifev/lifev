@@ -9,8 +9,6 @@
 #  License Terms: GNU LGPL
 #
 ###################################################################################################
-### COUPLING: BoundaryCondition - Pressure Dynamic ################################################
-###################################################################################################
 
 [Multiscale]
 couplingName    = BoundaryCondition_PressureDynamic
@@ -21,7 +19,7 @@ list = 'PressureDynamic'
     [./PressureDynamic]
     type                = Natural
     mode                = Normal
-    functionFile        = physicalFunctions/SmoothTrapezoidalProfile.dat[C]
+    functionFile        = FunctionsDatabase/SmoothTrapezoidalProfile.dat[C]
 
     # Additional parameters for 1D BC
     quantity            = S

@@ -9,14 +9,12 @@
 #  License Terms: GNU LGPL
 #
 ###################################################################################################
-### COUPLING: BoundaryCondition - No Flux #########################################################
-###################################################################################################
 
 [Multiscale]
 couplingName    = BoundaryCondition_FlowRate_Zero
 
 [boundary_conditions]
-list = 'FlowRate_Zero'  # Unitary Flux
+list = 'FlowRate_Zero'  # Unitary Flow Rate
 
     [./FlowRate_Zero]
     type                = Flux

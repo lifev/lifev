@@ -9,8 +9,6 @@
 #  License Terms: GNU LGPL
 #
 ###################################################################################################
-### COUPLING: BoundaryCondition - Sinusoidal Flux (single Wave) ###################################
-###################################################################################################
 
 [Multiscale]
 couplingName    = BoundaryCondition_FlowRate_SinusoidalWave

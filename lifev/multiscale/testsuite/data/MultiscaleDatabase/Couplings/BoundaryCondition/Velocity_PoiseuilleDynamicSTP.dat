@@ -9,8 +9,6 @@
 #  License Terms: GNU LGPL
 #
 ###################################################################################################
-### COUPLING: BoundaryCondition - Poiseuille Velocity Dynamic #####################################
-###################################################################################################
 
 [Multiscale]
 couplingName    = BoundaryCondition_Velocity_PoiseuilleDynamic
@@ -29,7 +27,7 @@ list = 'ZPoiseuilleDynamic'
     type                = Essential
     mode                = Component
     component           = 2
-    #functionFile        = physicalFunctions/SmoothTrapezoidalProfile.dat[A]
-    functionFileSolver  = physicalFunctions/SmoothTrapezoidalProfile.dat[A]
+    #functionFile        = FunctionsDatabase/SmoothTrapezoidalProfile.dat[A]
+    functionFileSolver  = FunctionsDatabase/SmoothTrapezoidalProfile.dat[A]
 
     [../]

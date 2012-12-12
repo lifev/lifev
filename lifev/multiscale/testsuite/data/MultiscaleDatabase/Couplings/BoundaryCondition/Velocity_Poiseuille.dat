@@ -9,8 +9,6 @@
 #  License Terms: GNU LGPL
 #
 ###################################################################################################
-### COUPLING: BoundaryCondition - Poiseuille Velocity #############################################
-###################################################################################################
 
 [Multiscale]
 couplingName    = BoundaryCondition_Velocity_Poiseuille

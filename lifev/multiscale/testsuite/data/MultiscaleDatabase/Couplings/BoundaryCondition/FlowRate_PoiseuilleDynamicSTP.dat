@@ -9,8 +9,6 @@
 #  License Terms: GNU LGPL
 #
 ###################################################################################################
-### COUPLING: BoundaryCondition - Poiseuille Flux Dynamic #########################################
-###################################################################################################
 
 [Multiscale]
 couplingName    = BoundaryCondition_FlowRate_PoiseuilleDynamicSTP
@@ -22,8 +20,8 @@ list = 'FlowRate_PoiseuilleDynamic'
     type                = Flux
     mode                = Full
     component           = 3
-    functionFile        = physicalFunctions/SmoothTrapezoidalProfile.dat[B]
-    #functionFileSolver  = physicalFunctions/SmoothTrapezoidalProfile.dat[B]
+    functionFile        = FunctionsDatabase/SmoothTrapezoidalPoiseuilleProfile.dat[B]
+    #functionFileSolver  = FunctionsDatabase/SmoothTrapezoidalPoiseuilleProfile.dat[B]
 
     # Additional parameters for 1D BC
     quantity            = Q

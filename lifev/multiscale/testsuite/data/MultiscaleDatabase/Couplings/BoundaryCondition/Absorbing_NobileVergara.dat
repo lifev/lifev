@@ -9,8 +9,6 @@
 #  License Terms: GNU LGPL
 #
 ###################################################################################################
-### COUPLING: BoundaryCondition - Absorbing (Nobile-Vergara) ######################################
-###################################################################################################
 
 [Multiscale]
 couplingName    = BoundaryCondition_Absorbing_NobileVergara

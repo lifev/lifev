@@ -9,21 +9,19 @@
 #  License Terms: GNU LGPL
 #
 ###################################################################################################
-### COUPLING: BoundaryCondition - Carotid bifurcation Flux ########################################
-###################################################################################################
 
 [Multiscale]
-couplingName    = BoundaryCondition_CarotidBifurcationFlux
+couplingName    = BoundaryCondition_FlowRate_CarotidBifurcation
 
 [boundary_conditions]
-list = 'CarotidBifurcationFlux'
+list = 'FlowRate_CarotidBifurcation'
 
-    [./CarotidBifurcationFlux]
+    [./FlowRate_CarotidBifurcation]
     type                = Flux
     mode                = Full
     component           = 3
-    functionFile        = physicalFunctions/CarotidBifurcationPhysicalFlux.dat[A] #Physiological
-    #functionFile        = physicalFunctions/CarotidBifurcationPhysicalFlux.dat[B] #Approximate
+    functionFile        = FunctionsDatabase/FlowRate_CarotidBifurcation.dat[A] #Physiological
+    #functionFile        = FunctionsDatabase/FlowRate_CarotidBifurcation.dat[B] #Approximate
 
     # Additional parameters for 1D BC
     quantity            = Q

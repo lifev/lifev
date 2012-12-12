@@ -27,7 +27,7 @@ TRIBITS_COPY_FILES_TO_BINARY_DIR(MS_mesh
 
 TRIBITS_COPY_FILES_TO_BINARY_DIR(MS_functions_database
   CREATE_SYMLINK
-  SOURCE_FILES physicalFunctions MultiscaleDatabase
+  SOURCE_FILES FunctionsDatabase MultiscaleDatabase
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../data
 )
 
