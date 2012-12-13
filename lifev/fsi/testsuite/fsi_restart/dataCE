@@ -111,7 +111,7 @@ nRestart   = 0
 * #importer details
 [importer]
 restartFSI = true
-initSol = 00002             # label of the solution from which we want to start (5 digits by convention)
+initSol = 00005             # label of the solution from which we want to start (5 digits by convention)
 type       = hdf5         # format of the imported solution
 
 
@@ -136,10 +136,10 @@ conservativeFormulation       = false  # tells if the conservative or non conser
 ** #time discretization
    [../time_discretization]
    method          = BDF         # can be BDF, Generalized alpha in the future
-   initialtime        = 0.002
-   endtime            = 0.004
+   initialtime        = 0.005
+   endtime            = 0.008
    timestep        = 0.001
-   BDF_order        = 1   # can go up to 5
+   BDF_order        = 2   # can go up to 5
 ##theta           = 0.5
 ##gamma            = 0.5
 ##rhoInf          = 1
@@ -203,10 +203,10 @@ rescaleFactor    = 1.    # this factor can be used to rescale the structure bloc
 ** #time discretization
    [../time_discretization]
    method          = BDF # Newmark or BDF (generalized alpha in the future)
-   initialtime        = 0.002
-   endtime            = 0.004
+   initialtime        = 0.005
+   endtime            = 0.008
    timestep        = 0.001
-   BDF_order        = 1
+   BDF_order        = 2
 ##theta           = 0.25
 ##gamma           = 0.5
 ##rhoInf          = 1
@@ -235,7 +235,7 @@ rescaleFactor    = 1.    # this factor can be used to rescale the structure bloc
    poly_ord        = 5
    kspace          = 200         # Krylov space maximum dimension
    tol             = 1.e-6         # Tolerance for the linear system
-   
+
 *** #aztecoo linear solver section
     [./aztecoo]
     reordering         = 1            # rcm
@@ -489,10 +489,10 @@ rescaleFactor    = 1.    # this factor can be used to rescale the structure bloc
 ** #time discretization (used only for the calculation/extrapolation of the domain velocity)
    [./time_discretization]
    method          = BDF
-   initialtime        = 0.002
-   endtime            = 0.004
+   initialtime        = 0.005
+   endtime            = 0.008
    timestep        = 0.001
-   BDF_order        = 1
+   BDF_order        = 2
 ##theta           = 0.5
 ##gamma            = 0.5
 ##rhoInf          = 1
