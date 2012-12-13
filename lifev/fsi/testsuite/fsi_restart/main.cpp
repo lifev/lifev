@@ -323,21 +323,6 @@ public:
 
             M_fsi->FSIOper()->extrapolation( *solution );
 
-            if( M_data->dataFluid()->dataTime()->time() == 0.006 )
-            {
-                solution->spy("checkVector");
-                std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
-                std::cout << "saved the Solution right now!!!" << std::endl;
-                std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
-                //M_fsi->FSIOper()->solidTimeAdvance()->spyStateVector();
-                //M_fsi->FSIOper()->solidTimeAdvance()->spyRHS();
-
-                //return 0;
-            }
-
-
-
-
             M_fsi->iterate( solution );
 
             // Saving the solution
@@ -498,6 +483,13 @@ void Problem::restartFSI(  GetPot const& data_file)
     std::cout << "For the fluid disp is    : " << loadInitSolFD << std::endl;
     std::cout << "Starting time            : " << M_Tstart << std::endl;
 
+    //At the moment the restart works only if BDF methods are used in time.
+    // For Newmark method a almost new implementation is needed
+
+    std::string methodFluid = data_file( "fluid/time_discretization/method", "Newmark");
+    std::string methodSolid = data_file( "solid/time_discretization/method", "Newmark");
+    std::string methodALE = data_file( "mesh_motion/time_discretization/method", "Newmark");
+
 #ifdef HAVE_HDF5
     if (importerType.compare("hdf5") == 0)
       {
@@ -616,7 +608,7 @@ void Problem::restartFSI(  GetPot const& data_file)
         std::cout << "Norm of the df " << fluidDisp->norm2() << std::endl;
 
         //Setting the vector in the stencil
-        M_fsi->FSIOper()->setALEVectorInStencil( fluidDisp, iterInit );
+        M_fsi->FSIOper()->setALEVectorInStencil( fluidDisp, iterInit, false );
 
         //Updating string name
         int iterations = std::atoi(iterationString.c_str());
@@ -693,6 +685,13 @@ void Problem::readLastVectorALETimeAdvance( vectorPtr_Type fluidDisp,
 
     //Output
     std::cout << "Norm of the df " << fluidDisp->norm2() << std::endl;
+
+    //This is ugly but it's the only way I have figured out at the moment
+    if( M_data->method().compare("monolithicGI") == 0 )
+    {
+        //Don't be scared by the ten. The goal of 10 is just to make the first if fail
+        M_fsi->FSIOper()->setALEVectorInStencil( fluidDisp, 10, true );
+    }
 
     //Setting the vector in the stencil
     M_fsi->FSIOper()->ALETimeAdvance()->shiftRight( *fluidDisp );
