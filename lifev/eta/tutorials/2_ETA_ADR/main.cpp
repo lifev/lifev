@@ -96,7 +96,7 @@ using namespace LifeV;
 typedef RegionMesh<LinearTetra> mesh_Type;
 typedef MatrixEpetra<Real> matrix_Type;
 typedef VectorEpetra vector_Type;
-
+typedef FESpace<mesh_Type, MapEpetra>::function_Type function_Type;
 
 // ---------------------------------------------------------------
 // We define then a function, which represents a velocity field,
@@ -105,7 +105,7 @@ typedef VectorEpetra vector_Type;
 // ---------------------------------------------------------------
 
 
-Real betaFct( const Real& /* t */, const Real& /* x */, const Real& /* y */, const Real& /* z */, const ID& i )
+Real betaFctRaw( const Real& /* t */, const Real& /* x */, const Real& /* y */, const Real& /* z */, const ID& i )
 {
     if (i == 1)
     {
@@ -113,6 +113,8 @@ Real betaFct( const Real& /* t */, const Real& /* x */, const Real& /* y */, con
     }
     return 0;
 }
+function_Type betaFct(betaFctRaw);
+
 
 
 // ---------------------------------------------------------------
