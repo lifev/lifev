@@ -41,18 +41,18 @@
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-#include <lifev/structure/solver/ExponentialMaterialNonLinear.hpp>
+#include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
 
 namespace LifeV
 {
 template <typename Mesh>
-class SecondOrderExponentialMaterialNonLinear : public ExponentialMaterialNonLinear<Mesh>
+class SecondOrderExponentialMaterialNonLinear : public StructuralConstitutiveLaw<Mesh>
 {
 //!@name Type definitions
 //@{
 
     public:
-    typedef ExponentialMaterialNonLinear<Mesh>       super;
+    typedef StructuralConstitutiveLaw<Mesh>       super;
 
     typedef typename super::data_Type                data_Type;
 
@@ -235,7 +235,11 @@ protected:
 
 template <typename Mesh>
 SecondOrderExponentialMaterialNonLinear<Mesh>::SecondOrderExponentialMaterialNonLinear():
-    super     ( )
+    super     ( ),
+    M_elvecK             ( ),
+    M_elmatK                    ( ),
+    M_stiff                     ( ),
+    M_FirstPiolaKStress        ( )
 {
 }
 
@@ -258,7 +262,28 @@ SecondOrderExponentialMaterialNonLinear<Mesh>::setup( const boost::shared_ptr< F
                                                       const UInt                                           offset, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer  )
 {
 
-    super::setup(dFESpace, monolithicMap, offset, dataMaterial, displayer);
+    this->M_displayer = displayer;
+    this->M_dataMaterial  = dataMaterial;
+    //    std::cout<<"I am setting up the Material"<<std::endl;
+
+    this->M_FESpace                     = dFESpace;
+    this->M_localMap                    = monolithicMap;
+    this->M_offset                      = offset;
+
+    M_stiff.reset                     ( new vector_Type(*this->M_localMap) );
+
+    M_FirstPiolaKStress.reset        ( new vector_Type(*this->M_localMap) );
+    M_elvecK.reset            ( new VectorElemental (this->M_FESpace->fe().nbFEDof(), nDimensions) );
+    this->M_elmatK.reset                ( new MatrixElemental( this->M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
+
+    //! Local tensors initilization
+    M_Fk.reset ( new boost::multi_array<Real, 3>(boost::extents[nDimensions][nDimensions][dFESpace->fe().nbQuadPt()]) );
+    M_CofFk.reset ( new boost::multi_array<Real, 3>(boost::extents[nDimensions][nDimensions][dFESpace->fe().nbQuadPt()]) );
+
+    M_Jack.reset ( new std::vector<Real>(dFESpace->fe().nbQuadPt(),0.0) );
+    M_trCisok.reset ( new std::vector<Real>(dFESpace->fe().nbQuadPt(),0.0) );
+    M_trCk.reset ( new std::vector<Real>(dFESpace->fe().nbQuadPt(),0.0) );
+
 }
 
 
