@@ -278,16 +278,16 @@ public:
      *  Set vectors for restart
      */
     virtual void setVectorInStencils( const vectorPtr_Type& /*vel*/,
-                      const vectorPtr_Type& /*pressure*/,
-                      const vectorPtr_Type& /*solidDisp*/,
-                      const vectorPtr_Type& /*fluidDisp*/,
-                      const UInt /*iter*/) {}
+                                      const vectorPtr_Type& /*pressure*/,
+                                      const vectorPtr_Type& /*solidDisp*/,
+                                      //                      const vectorPtr_Type& /*fluidDisp*/,
+                                      const UInt /*iter*/) {}
 
     virtual void setFluidVectorInStencil( const vectorPtr_Type& /*vel*/, const vectorPtr_Type& /*pressure*/, const UInt /*iter*/) {}
 
     virtual void setSolidVectorInStencil( const vectorPtr_Type& /*solidDisp*/, const UInt /*iter*/) {}
 
-    virtual void setALEVectorInStencil( const vectorPtr_Type& /*fluidDisp*/, const UInt /*iter*/) {}
+    virtual void setALEVectorInStencil( const vectorPtr_Type& /*fluidDisp*/, const UInt /*iter*/, const bool /*lastVector*/ ) {}
 
     virtual void finalizeRestart( ) {}
 

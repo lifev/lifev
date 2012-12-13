@@ -124,7 +124,7 @@ public:
     /*!
      *  Set vectors for restart
      */
-    void setALEVectorInStencil(const vectorPtr_Type& fluidDisp, const UInt iter);
+    void setALEVectorInStencil(const vectorPtr_Type& fluidDisp, const UInt iter,const bool /*lastVector*/);
 
     /**
        evaluates the residual Ax-b
