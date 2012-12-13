@@ -48,6 +48,10 @@ namespace Multiscale
 /*!
  *  @author Cristiano Malossi
  *
+ *  @see Full description of the Geometrical Multiscale Framework: \cite Malossi-Thesis
+ *  @see Methodology: \cite Malossi2011Algorithms \cite Malossi2011Algorithms1D \cite Malossi2011Algorithms3D1DFSI \cite BlancoMalossi2012
+ *  @see Applications: \cite Malossi2011Algorithms3D1DFSIAortaIliac \cite LassilaMalossi2012IdealLeftVentricle \cite BonnemainMalossi2012LVAD
+ *
  *  The MultiscaleCouplingMeanTotalNormalStressArea class is an implementation of the multiscaleCoupling_Type
  *  for applying mean normal stress with area coupling conditions to the models interfaces.
  */
