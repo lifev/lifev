@@ -262,15 +262,15 @@ void FSIMonolithicGI::setALEVectorInStencil( const vectorPtr_Type& fluidDisp,
 
     if( !iter )
       {
-	vectorPtr_Type harmonicSolutionRestartTime(new vector_Type( *M_monolithicMap, Unique, Zero ) );
+          vectorPtr_Type harmonicSolutionRestartTime(new vector_Type( *M_monolithicMap, Unique, Zero ) );
 
-	*harmonicSolutionRestartTime *= 0.0;
+          *harmonicSolutionRestartTime *= 0.0;
 
-	UInt givenOffset( M_solidAndFluidDim + nDimensions*M_interface );
-	harmonicSolutionRestartTime->subset(*fluidDisp, fluidDisp->map(), (UInt)0, givenOffset );
+          UInt givenOffset( M_solidAndFluidDim + nDimensions*M_interface );
+          harmonicSolutionRestartTime->subset(*fluidDisp, fluidDisp->map(), (UInt)0, givenOffset );
 
 	//We sum the vector in the first element of fluidtimeAdvance
-	*( M_fluidTimeAdvance->stencil()[0] ) += *harmonicSolutionRestartTime;
+          *( M_fluidTimeAdvance->stencil()[0] ) += *harmonicSolutionRestartTime;
       }
 
     //The shared_pointer for the vectors has to be trasformed into a pointer to VectorEpetra

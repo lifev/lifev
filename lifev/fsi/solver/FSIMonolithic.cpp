@@ -434,14 +434,14 @@ updateSolidSystem( vectorPtr_Type & rhsFluidCoupling )
 }
 
 void FSIMonolithic::setVectorInStencils( const vectorPtr_Type& vel,
-					 const vectorPtr_Type& pressure,
-					 const vectorPtr_Type& solidDisp,
-					 const vectorPtr_Type& fluidDisp,
-					 const UInt iter)
+                                         const vectorPtr_Type& pressure,
+                                         const vectorPtr_Type& solidDisp,
+                                         //const vectorPtr_Type& fluidDisp,
+                                         const UInt iter)
 {
   setFluidVectorInStencil(vel, pressure, iter);
   setSolidVectorInStencil(solidDisp, iter);
-  setALEVectorInStencil(fluidDisp, iter);
+  //  setALEVectorInStencil(fluidDisp, iter);
 
 }
 
@@ -508,9 +508,9 @@ void FSIMonolithic::finalizeRestart( )
     //of the first derivative which is use to compute the velocity in TimeAdvance::velocity().
     //Please note that, even if it is ugly, at this stage, the fluidTimeAdvance is leading the Time Discretization
     //and this is why there  is the dataFluid class to get the dt.
-    M_ALETimeAdvance->updateRHSFirstDerivative( M_data->dataFluid()->dataTime()->timeStep() );
-    M_solidTimeAdvance->updateRHSContribution( M_data->dataFluid()->dataTime()->timeStep() );
-    M_fluidTimeAdvance->updateRHSContribution( M_data->dataFluid()->dataTime()->timeStep() );
+    //M_ALETimeAdvance->updateRHSFirstDerivative( M_data->dataFluid()->dataTime()->timeStep() );
+    // M_solidTimeAdvance->updateRHSContribution( M_data->dataFluid()->dataTime()->timeStep() );
+    // M_fluidTimeAdvance->updateRHSContribution( M_data->dataFluid()->dataTime()->timeStep() );
 }
 
 
