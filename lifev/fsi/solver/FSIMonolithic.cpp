@@ -480,11 +480,11 @@ void FSIMonolithic::setSolidVectorInStencil( const vectorPtr_Type& solidDisp,
     vectorMonolithicSolidDisplacement->subset( *solidDisp, solidDisp->map(), (UInt)0, M_offset);
     *vectorMonolithicSolidDisplacement *= 1.0 / M_solid->rescaleFactor();
 
-    if( !iter )
-      {
-	//We sum the vector in the first element of fluidtimeAdvance
-	*( M_fluidTimeAdvance->stencil()[0] ) += *vectorMonolithicSolidDisplacement;
-      }
+    //The fluid timeAdvance has size = orderBDF because it is seen as an equation frist order in time.
+    //We need to add the solidVector to the fluidVector in the fluid TimeAdvance because we have the
+    //extrapolation on it.
+    if( iter <= M_fluidTimeAdvance->size()-1 )
+        *( M_fluidTimeAdvance->stencil()[ iter ] ) += *vectorMonolithicSolidDisplacement;
 
     vector_Type* normalPointerToSolidVector( new vector_Type(*vectorMonolithicSolidDisplacement) );
     (M_solidTimeAdvance->stencil()).push_back( normalPointerToSolidVector );
@@ -508,9 +508,7 @@ void FSIMonolithic::finalizeRestart( )
     //of the first derivative which is use to compute the velocity in TimeAdvance::velocity().
     //Please note that, even if it is ugly, at this stage, the fluidTimeAdvance is leading the Time Discretization
     //and this is why there  is the dataFluid class to get the dt.
-    //M_ALETimeAdvance->updateRHSFirstDerivative( M_data->dataFluid()->dataTime()->timeStep() );
-    // M_solidTimeAdvance->updateRHSContribution( M_data->dataFluid()->dataTime()->timeStep() );
-    // M_fluidTimeAdvance->updateRHSContribution( M_data->dataFluid()->dataTime()->timeStep() );
+    M_ALETimeAdvance->updateRHSFirstDerivative( M_data->dataFluid()->dataTime()->timeStep() );
 }
 
 

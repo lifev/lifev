@@ -323,6 +323,21 @@ public:
 
             M_fsi->FSIOper()->extrapolation( *solution );
 
+            if( M_data->dataFluid()->dataTime()->time() == 0.006 )
+            {
+                solution->spy("checkVector");
+                std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+                std::cout << "saved the Solution right now!!!" << std::endl;
+                std::cout << "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" << std::endl;
+                //M_fsi->FSIOper()->solidTimeAdvance()->spyStateVector();
+                //M_fsi->FSIOper()->solidTimeAdvance()->spyRHS();
+
+                //return 0;
+            }
+
+
+
+
             M_fsi->iterate( solution );
 
             // Saving the solution
@@ -341,11 +356,6 @@ public:
             std::cout << "solution norm at time: " <<  M_data->dataFluid()->dataTime()->time() << "(iter" << iter << ") : "
                       << M_fsi->displacement().norm2() << "\n";
 
-            // if( M_data->dataFluid()->dataTime()->time() == 0.005 )
-            // {
-            //     M_fsi->FSIOper()->ALETimeAdvance()->spyStateVector();
-            //     M_fsi->FSIOper()->ALETimeAdvance()->spyRHS();
-            // }
 
 	    if( M_data->method().compare("monolithicGI") == 0 )
 	       checkResultGI(M_data->dataFluid()->dataTime()->time());
@@ -365,6 +375,9 @@ public:
 private:
 
     void restartFSI(  GetPot const& data_file);
+    //Methods to conclude the reading for restart
+    void readLastVectorSolidTimeAdvance( vectorPtr_Type fluidDisp, const LifeV::UInt iterInit, std::string iterationString);
+    void readLastVectorALETimeAdvance( vectorPtr_Type fluidDisp, const std::string loadInitSol);
     void checkResultGI(const LifeV::Real& time);
     void checkResultGCE(const LifeV::Real& time);
 
@@ -568,17 +581,7 @@ void Problem::restartFSI(  GetPot const& data_file)
           iterationString=iter.str();
       }
 
-    //Reading another vector for the solidTimeAdvance since its BDF has the same order
-    //as the other ones but since the orderDerivative = 2, the size of the stencil is
-    //orderBDF + 1
-
-    solidDisp.reset(new vector_Type(M_fsi->FSIOper()->dFESpace().map(), LifeV::Unique));
-    *solidDisp *= 0.0;
-    LifeV::ExporterData<mesh_Type> initSolSolidDisp  (LifeV::ExporterData<mesh_Type>::VectorField,"s-displacement."+iterationString, M_fsi->FSIOper()->dFESpacePtr(), solidDisp, UInt(0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
-
-    M_importerSolid->readVariable(initSolSolidDisp);  //Solid d
-
-    M_fsi->FSIOper()->setSolidVectorInStencil( solidDisp, iterInit );
+    readLastVectorSolidTimeAdvance( solidDisp, iterInit, iterationString );
 
     //For the ALE timeAdvance, one should be careful on the vectors that are used
     //to compute the RHSFirstDerivative. That is why we first load the stencil using previous
@@ -628,32 +631,8 @@ void Problem::restartFSI(  GetPot const& data_file)
     //Initializing the vector for the RHS terms of the formulas
     M_fsi->FSIOper()->finalizeRestart();
 
-    //Let's update the RHSFirstDerivative to have the correct RHS for the velocity
-    M_fsi->FSIOper()->ALETimeAdvance()->updateRHSFirstDerivative( M_data->dataFluid()->dataTime()->timeStep() );
-
-    //We still need to load the last vector for ALE
-    iterationString = loadInitSol;
-    fluidDisp.reset(new vector_Type(M_fsi->FSIOper()->mmFESpace().map(), LifeV::Unique));
-
-    //Setting the exporterData to read: ALE problem
-    LifeV::ExporterData<mesh_Type> initSolFluidDisp  (LifeV::ExporterData<mesh_Type>::VectorField, "f-displacement."+iterationString, M_fsi->FSIOper()->mmFESpacePtr(), fluidDisp, UInt(0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
-
-    //Initializing
-    *fluidDisp *= 0.0;
-
-    //Reading
-    M_importerFluid->readVariable(initSolFluidDisp);  //Fluid df
-
-    //Output
-    std::cout << "Norm of the df " << fluidDisp->norm2() << std::endl;
-
-    //Setting the vector in the stencil
-    M_fsi->FSIOper()->ALETimeAdvance()->shiftRight( *fluidDisp );
-
-    //Check purposes
-    M_fsi->FSIOper()->ALETimeAdvance()->spyStateVector();
-    M_fsi->FSIOper()->ALETimeAdvance()->spyRHS();
-
+    //Need to read still one vector and shiftright it.
+    readLastVectorALETimeAdvance( fluidDisp, loadInitSol );
 
     //This are used to export the loaded solution to check it is correct.
     vel.reset(new vector_Type(M_fsi->FSIOper()->uFESpace().map(), LifeV::Unique));
@@ -670,6 +649,54 @@ void Problem::restartFSI(  GetPot const& data_file)
 
 }
 
+void Problem::readLastVectorSolidTimeAdvance( vectorPtr_Type solidDisp,
+                                              LifeV::UInt iterInit,
+                                              std::string iterationString)
+{
+    using namespace LifeV;
+
+    typedef FSIOperator::mesh_Type        mesh_Type;
+
+    //Reading another vector for the solidTimeAdvance since its BDF has the same order
+    //as the other ones but since the orderDerivative = 2, the size of the stencil is
+    //orderBDF + 1
+
+    solidDisp.reset(new vector_Type(M_fsi->FSIOper()->dFESpace().map(), LifeV::Unique));
+    *solidDisp *= 0.0;
+    LifeV::ExporterData<mesh_Type> initSolSolidDisp  (LifeV::ExporterData<mesh_Type>::VectorField,"s-displacement."+iterationString, M_fsi->FSIOper()->dFESpacePtr(), solidDisp, UInt(0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
+
+    M_importerSolid->readVariable(initSolSolidDisp);  //Solid d
+
+    M_fsi->FSIOper()->setSolidVectorInStencil( solidDisp, iterInit );
+}
+
+
+void Problem::readLastVectorALETimeAdvance( vectorPtr_Type fluidDisp,
+                                            const std::string loadInitSol)
+{
+    using namespace LifeV;
+
+    typedef FSIOperator::mesh_Type        mesh_Type;
+
+    //We still need to load the last vector for ALE
+    std::string iterationString = loadInitSol;
+    fluidDisp.reset(new vector_Type(M_fsi->FSIOper()->mmFESpace().map(), LifeV::Unique));
+
+    //Setting the exporterData to read: ALE problem
+    LifeV::ExporterData<mesh_Type> initSolFluidDisp  (LifeV::ExporterData<mesh_Type>::VectorField, "f-displacement."+iterationString, M_fsi->FSIOper()->mmFESpacePtr(), fluidDisp, UInt(0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
+
+    //Initializing
+    *fluidDisp *= 0.0;
+
+    //Reading
+    M_importerFluid->readVariable(initSolFluidDisp);  //Fluid df
+
+    //Output
+    std::cout << "Norm of the df " << fluidDisp->norm2() << std::endl;
+
+    //Setting the vector in the stencil
+    M_fsi->FSIOper()->ALETimeAdvance()->shiftRight( *fluidDisp );
+}
 
 void Problem::checkResultGI(const LifeV::Real& time)
 {
