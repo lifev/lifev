@@ -287,7 +287,7 @@ public:
 
     virtual void setSolidVectorInStencil( const vectorPtr_Type& /*solidDisp*/, const UInt /*iter*/) {}
 
-    virtual void setALEVectorInStencil( const vectorPtr_Type& /*fluidDisp*/, const UInt /*iter*/) {}
+    virtual void setALEVectorInStencil( const vectorPtr_Type& /*fluidDisp*/, const UInt /*iter*/, const bool /*lastVector*/ ) {}
 
     virtual void finalizeRestart( ) {}
 

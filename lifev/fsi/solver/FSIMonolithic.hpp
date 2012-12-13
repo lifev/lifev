@@ -441,7 +441,7 @@ public:
 
     void setSolidVectorInStencil( const vectorPtr_Type& solidDisp, const UInt iter);
 
-    virtual void setALEVectorInStencil( const vectorPtr_Type& fluidDisp, const UInt iter) = 0;
+    virtual void setALEVectorInStencil( const vectorPtr_Type& fluidDisp, const UInt iter,const bool lastVector) = 0;
 
     void finalizeRestart();
 

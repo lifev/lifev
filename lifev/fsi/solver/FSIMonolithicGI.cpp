@@ -253,14 +253,14 @@ void FSIMonolithicGI::applyBoundaryConditions()
 }
 
 void FSIMonolithicGI::setALEVectorInStencil( const vectorPtr_Type& fluidDisp,
-					      const UInt iter)
+                                             const UInt iter,
+                                             const bool lastVector)
 {
 
-    //ALE problem
-    //Note: at iter =0 the solution has to be put in fluidTimeAdvance->stencil()->M_unknown[0]
-    //      since that vector stores the solution and it has to be used in the Newton method
-
-    if( !iter )
+    //The fluid timeAdvance has size = orderBDF because it is seen as an equation frist order in time.
+    //We need to add the solidVector to the fluidVector in the fluid TimeAdvance because we have the
+    //extrapolation on it.
+    if( ( iter < M_fluidTimeAdvance->size() - 1 ) && !lastVector )
       {
           vectorPtr_Type harmonicSolutionRestartTime(new vector_Type( *M_monolithicMap, Unique, Zero ) );
 
@@ -269,14 +269,29 @@ void FSIMonolithicGI::setALEVectorInStencil( const vectorPtr_Type& fluidDisp,
           UInt givenOffset( M_solidAndFluidDim + nDimensions*M_interface );
           harmonicSolutionRestartTime->subset(*fluidDisp, fluidDisp->map(), (UInt)0, givenOffset );
 
-	//We sum the vector in the first element of fluidtimeAdvance
-          *( M_fluidTimeAdvance->stencil()[0] ) += *harmonicSolutionRestartTime;
+          //We sum the vector in the first element of fluidtimeAdvance
+        *( M_fluidTimeAdvance->stencil()[ iter + 1 ] ) += *harmonicSolutionRestartTime;
       }
 
-    //The shared_pointer for the vectors has to be trasformed into a pointer to VectorEpetra
-    //That is the type of pointers that are used in TimeAdvance
-    vector_Type* normalPointerToALEVector( new vector_Type(*fluidDisp) );
-    (M_ALETimeAdvance->stencil()).push_back( normalPointerToALEVector );
+    if( !lastVector )
+    {
+        //The shared_pointer for the vectors has to be trasformed into a pointer to VectorEpetra
+        //That is the type of pointers that are used in TimeAdvance
+        vector_Type* normalPointerToALEVector( new vector_Type(*fluidDisp) );
+        (M_ALETimeAdvance->stencil()).push_back( normalPointerToALEVector );
+    }
+    else
+    {
+        vectorPtr_Type harmonicSolutionRestartTime(new vector_Type( *M_monolithicMap, Unique, Zero ) );
+
+        *harmonicSolutionRestartTime *= 0.0;
+
+        UInt givenOffset( M_solidAndFluidDim + nDimensions*M_interface );
+        harmonicSolutionRestartTime->subset(*fluidDisp, fluidDisp->map(), (UInt)0, givenOffset );
+
+        //We sum the vector in the first element of fluidtimeAdvance
+        *( M_fluidTimeAdvance->stencil()[ 0 ] ) += *harmonicSolutionRestartTime;
+    }
 }
 
 
