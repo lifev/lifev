@@ -160,6 +160,7 @@ rescaleFactor    = 1.0  # this factor can be used to rescale the structure block
     [../space_discretization]
     mesh_dir         = ./Mesh/
     mesh_file        = vessel20.mesh    # mesh name
+    mesh_type       = .mesh
     order            = P1
     mesh_faces       = all              # update all faces elements
     mesh_edges       = all              # update all faces elements
