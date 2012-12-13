@@ -183,7 +183,7 @@ static Real bcZero(const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, con
 
 static Real bcNonZero(const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
 {
-    return  3000000.;
+    return  30000.;
 }
 
 };
@@ -529,33 +529,33 @@ Structure::run3d()
     //! MATLAB FILE WITH DISPLACEMENT OF A CHOSEN POINT
     //!--------------------------------------------------------------------------------------------
     cout.precision(16);
-    ofstream file_comp( "Displacement_components_NL.m" );
-    if ( !file_comp )
-    {
-      std::cout <<" Unable to open file! You need to specify the output folder in the data file " << std::endl;
-    }
+    // ofstream file_comp( "Displacement_components_NL.m" );
+    // if ( !file_comp )
+    // {
+    //   std::cout <<" Unable to open file! You need to specify the output folder in the data file " << std::endl;
+    // }
 
-    int IDPoint = 618; // StructuredCube4
-    //int IDPoint = 401; // StructuredCube8
-    //int IDPoint = 2593; // StructuredCube16
+    // int IDPoint = 618; // StructuredCube4
+    // //int IDPoint = 401; // StructuredCube8
+    // //int IDPoint = 2593; // StructuredCube16
 
-    //int IDPoint = 74;// cube4x4.mesh
-    //int IDPoint = 315;// cube8x8.mesh
-    //int IDPoint = 1526;// cube16x16.mesh
+    // //int IDPoint = 74;// cube4x4.mesh
+    // //int IDPoint = 315;// cube8x8.mesh
+    // //int IDPoint = 1526;// cube16x16.mesh
 
-    file_comp << " % TEST NONLINEAR ELASTICITY" << endl;
-    file_comp << " % Displacement components of ID node  " << IDPoint << " :" << endl;
-    file_comp << " % Each row is a time step" << endl;
-    file_comp << " % First column = comp x, second = comp y and third = comp z. " << endl;
-    file_comp <<  endl;
-    file_comp << " SolidDisp_NL = [ " ;
+    // file_comp << " % TEST NONLINEAR ELASTICITY" << endl;
+    // file_comp << " % Displacement components of ID node  " << IDPoint << " :" << endl;
+    // file_comp << " % Each row is a time step" << endl;
+    // file_comp << " % First column = comp x, second = comp y and third = comp z. " << endl;
+    // file_comp <<  endl;
+    // file_comp << " SolidDisp_NL = [ " ;
 
-    for ( UInt k = IDPoint - 1; k <= solid.displacement().size() - 1; k = k + solid.displacement().size()/nDimensions )
-    {
-    file_comp<< solid.displacement()[ k ] << " ";
-    }
+    // for ( UInt k = IDPoint - 1; k <= solid.displacement().size() - 1; k = k + solid.displacement().size()/nDimensions )
+    // {
+    // file_comp<< solid.displacement()[ k ] << " ";
+    // }
 
-    file_comp<< endl;
+    // file_comp<< endl;
 
     //!--------------------------------------------------------------------------------------------
     //!The update of the RHS is done by the TimeAdvance class
@@ -600,21 +600,21 @@ Structure::run3d()
       exporter->postProcess( dataStructure->dataTime()->time() );
       exporterCheck->postProcess( dataStructure->dataTime()->time() );
 
-      // This part lets to save the displacement at one point of the mesh and to check the result
-      //  w.r.t. manufactured solution.
-      //!--------------------------------------------------------------------------------------------------
-      //! MATLAB FILE WITH DISPLACEMENT OF A CHOOSEN POINT
-	  //!--------------------------------------------------------------------------------------------------
-      cout <<"*******  DISPLACEMENT COMPONENTS of ID node "<< IDPoint << " *******"<< std::endl;
-      for ( UInt k = IDPoint - 1 ; k <= solid.displacement().size() - 1; k = k + solid.displacement().size()/nDimensions )
-      {
-          file_comp<< solid.displacement()[ k ] << " ";
-          cout.precision(16);
-          cout <<"*********************************************************"<< std::endl;
-          cout <<" solid.disp()[ "<< k <<" ] = "<<  solid.displacement()[ k ]  << std::endl;
-          cout <<"*********************************************************"<< std::endl;
-      }
-      file_comp<< endl;
+      // // This part lets to save the displacement at one point of the mesh and to check the result
+      // //  w.r.t. manufactured solution.
+      // //!--------------------------------------------------------------------------------------------------
+      // //! MATLAB FILE WITH DISPLACEMENT OF A CHOOSEN POINT
+	  // //!--------------------------------------------------------------------------------------------------
+      // cout <<"*******  DISPLACEMENT COMPONENTS of ID node "<< IDPoint << " *******"<< std::endl;
+      // for ( UInt k = IDPoint - 1 ; k <= solid.displacement().size() - 1; k = k + solid.displacement().size()/nDimensions )
+      // {
+      //     file_comp<< solid.displacement()[ k ] << " ";
+      //     cout.precision(16);
+      //     cout <<"*********************************************************"<< std::endl;
+      //     cout <<" solid.disp()[ "<< k <<" ] = "<<  solid.displacement()[ k ]  << std::endl;
+      //     cout <<"*********************************************************"<< std::endl;
+      // }
+      // file_comp<< endl;
 
 
       Real normVect;
