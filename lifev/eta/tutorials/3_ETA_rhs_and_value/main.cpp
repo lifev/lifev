@@ -187,7 +187,7 @@ int main( int argc, char** argv )
 
     fInterpolated=0.0;
 
-    uSpace->interpolate(static_cast<FESpace< mesh_Type, MapEpetra >::function_Type>(fRhs),fInterpolated,0.0);
+    uSpace->interpolate(fRhs,fInterpolated,0.0);
 
     vector_Type rhs(uSpace->map(),Repeated);
 
@@ -298,7 +298,7 @@ int main( int argc, char** argv )
 
     gInterpolated=0.0;
 
-    uSpace->interpolate(static_cast<FESpace< mesh_Type, MapEpetra >::function_Type>(g),gInterpolated,0.0);
+    uSpace->interpolate(g,gInterpolated,0.0);
 
     Real localIntegralg(0.0);
 
