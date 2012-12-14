@@ -394,7 +394,7 @@ void SecondOrderExponentialMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms
 
             //! 2. Stiffness matrix : int { 4 * alpha * J^(-2/3) * exp( gamma*( Ic_iso - 3)^2 ) * ( J^(-2./3.0) + 2 * gamma * (Ic_isoK - 3 )^2 ) *
             //!             ( F : \nabla \delta ) ( F : \nabla \v ) }
-            AssemblyElementalStructure::stiff_Jac_P1iso_SecondOrderExp_2term( 4.0 * alpha, gamma, (*M_Fk), (*M_Jack), (*M_trCisok), *this->M_elmatK, this->M_FESpace->fe() );
+            //AssemblyElementalStructure::stiff_Jac_P1iso_SecondOrderExp_2term( 4.0 * alpha, gamma, (*M_Fk), (*M_Jack), (*M_trCisok), *this->M_elmatK, this->M_FESpace->fe() );
 
             //! 3. Stiffness matrix :
             //!int { ( 4.0/9.0 *  alpha * J^-2 *  exp( gamma*( Ic_iso - 3)^2 ) * ( Ic_isoK + 2 * gamma * (Ic_isoK - 3)^2 * Ic_isoK + (Ic_isoK - 3) ) ) *
