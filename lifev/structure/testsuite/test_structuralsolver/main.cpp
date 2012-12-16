@@ -28,7 +28,7 @@
    \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
    \date 2005-04-16
  */
-#undef HAVE_HDF5
+
 #ifdef TWODIM
 #error test_structure cannot be compiled in 2D
 #endif
