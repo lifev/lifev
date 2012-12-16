@@ -40,3 +40,45 @@ TRIBITS_ADD_TEST(
   NUM_MPI_PROCS 2
   COMM serial mpi
   )
+
+TRIBITS_COPY_FILES_TO_BINARY_DIR(dataFileFluidXMFGI
+  SOURCE_FILES fluidGI.xmf
+  SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/fsi/testsuite/fsi_restart/
+)
+
+TRIBITS_COPY_FILES_TO_BINARY_DIR(dataFileFluidH5GI
+  SOURCE_FILES fluidGI.h5
+  SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/fsi/testsuite/fsi_restart/
+)
+
+
+TRIBITS_COPY_FILES_TO_BINARY_DIR(dataFileSolidXMFGCE
+  SOURCE_FILES solidGCE.xmf
+  SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/fsi/testsuite/fsi_restart/
+)
+
+TRIBITS_COPY_FILES_TO_BINARY_DIR(dataFileSolidH5GCE
+  SOURCE_FILES solidGCE.h5
+  SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/fsi/testsuite/fsi_restart/
+)
+
+TRIBITS_COPY_FILES_TO_BINARY_DIR(dataFileFluidXMFGCE
+  SOURCE_FILES fluidGCE.xmf
+  SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/fsi/testsuite/fsi_restart/
+)
+
+TRIBITS_COPY_FILES_TO_BINARY_DIR(dataFileFluidH5GCE
+  SOURCE_FILES fluidGCE.h5
+  SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/fsi/testsuite/fsi_restart/
+)
+
+
+TRIBITS_COPY_FILES_TO_BINARY_DIR(dataFileSolidXMFGI
+  SOURCE_FILES solidGI.xmf
+  SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/fsi/testsuite/fsi_restart/
+)
+
+TRIBITS_COPY_FILES_TO_BINARY_DIR(dataFileSolidH5GI
+  SOURCE_FILES solidGI.h5
+  SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/fsi/testsuite/fsi_restart/
+)

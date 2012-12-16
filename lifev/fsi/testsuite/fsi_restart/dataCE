@@ -94,9 +94,9 @@ multimesh  = false   # actually we export also the displacement
 start      = 0       # the starting iteration counter
 save       = 1       # boolean
 saveEvery  = 1       # save every "saveEvery" iterations
-tolSave    = 2
+tolSave    = 2       # this is useful to have enough savings to restart a simulation using high order BDFs
 type       = hdf5    # format of the exported solution (ensight, hdf5, vtk)
-nRestart   = 0
+
 
 ** #exporter for the fluid
    [./fluid]
@@ -135,15 +135,11 @@ conservativeFormulation       = false  # tells if the conservative or non conser
 
 ** #time discretization
    [../time_discretization]
-   method          = BDF         # can be BDF, Generalized alpha in the future
+   method          = BDF
    initialtime        = 0.005
-   endtime            = 0.008
+   endtime            = 0.007
    timestep        = 0.001
    BDF_order        = 2   # can go up to 5
-##theta           = 0.5
-##gamma            = 0.5
-##rhoInf          = 1
-##typeOfGeneralizedAlpha            = HHT
 
 ** #space discretization
    [../space_discretization]
@@ -202,15 +198,11 @@ rescaleFactor    = 1.    # this factor can be used to rescale the structure bloc
 
 ** #time discretization
    [../time_discretization]
-   method          = BDF # Newmark or BDF (generalized alpha in the future)
+   method          = BDF
    initialtime        = 0.005
-   endtime            = 0.008
+   endtime            = 0.007
    timestep        = 0.001
    BDF_order        = 2
-##theta           = 0.25
-##gamma           = 0.5
-##rhoInf          = 1
-##typeOfGeneralizedAlpha            = HHT
 
 ** #space discretization
    [../space_discretization]
@@ -490,13 +482,9 @@ rescaleFactor    = 1.    # this factor can be used to rescale the structure bloc
    [./time_discretization]
    method          = BDF
    initialtime        = 0.005
-   endtime            = 0.008
+   endtime            = 0.007
    timestep        = 0.001
    BDF_order        = 2
-##theta           = 0.5
-##gamma            = 0.5
-##rhoInf          = 1
-##typeOfGeneralizedAlpha            = HHT
 
 * #eigensolver section, used when we want to compute the singular values of the preconditioned FSI system (see in FSIMonolithic.cpp)
 [eigensolver]

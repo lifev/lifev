@@ -28,6 +28,9 @@
     @file
     @brief
 
+    * The time discretization is carried out using BDF methods of order 2. At the moment, even is the Newmark method is available
+    * for the temporal discretization of the single problems( e.g. in test_structuralsolver), it cannot be used in the FSI framework
+    * since the class TimeAdvanceNewmark is not registered as one of the possible instances of the abstrac class TimeAdvance.
     @author
     @date 00-00-0000
 */
@@ -137,7 +140,7 @@ public:
         Real area0    = 0.7854;
         //Real area0    = M_oper.fluid().area(3);
         Real area    = area0;
-    UInt flag       = 1;
+        UInt flag       = M_oper.dataSolid()->vectorFlags()[0];
 
         Real beta    = M_oper.solid().thickness()*M_oper.solid().young( flag ) /
                     (1 - M_oper.solid().poisson(  flag )*M_oper.solid().poisson( flag )) * PI/area0;
@@ -598,12 +601,9 @@ private:
 
         const LifeV::Real relTol(5e-3);
 
-        if ( sameAs(time,0) && sameAs(dispNorm, 0.032280, relTol) ) return;
-        if ( sameAs(time,0.001) && sameAs(dispNorm, 0.0506147,   relTol) )  return;
-        if ( sameAs(time,0.002) && sameAs(dispNorm, 0.0619394,  relTol) )  return;
-        // if ( sameAs(time,0.004) && sameAs(dispNorm, 0.107976,  relTol) )  return;
-        // if ( sameAs(time,0.005) && sameAs(dispNorm, 0.0995918, relTol) )  return;
-        // if ( sameAs(time,0.006) && sameAs(dispNorm, 0.0751478, relTol) ) return;
+        if ( sameAs(time,0) && sameAs(dispNorm, 0.0474091, relTol) ) return;
+        if ( sameAs(time,0.001) && sameAs(dispNorm, 0.0564487,   relTol) )  return;
+        if ( sameAs(time,0.002) && sameAs(dispNorm, 0.0618011,  relTol) )  return;
 
         throw RESULT_CHANGED_EXCEPTION(time);
 

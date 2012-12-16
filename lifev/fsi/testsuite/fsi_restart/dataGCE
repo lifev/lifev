@@ -94,9 +94,8 @@ multimesh  = false   # actually we export also the displacement
 start      = 0       # the starting iteration counter
 save       = 1       # boolean
 saveEvery  = 1       # save every "saveEvery" iterations
-tolSave    = 2
+tolSave    = 2       # this is useful to have enough savings to restart a simulation using high order BDFs
 type       = hdf5    # format of the exported solution (ensight, hdf5, vtk)
-nRestart   = 0
 
 ** #exporter for the fluid
    [./fluid]
@@ -134,15 +133,11 @@ conservativeFormulation       = false  # tells if the conservative or non conser
 
 ** #time discretization
    [../time_discretization]
-   method          = BDF         # can be BDF, Generalized alpha in the future
+   method          = BDF
    initialtime        = 0.005
-   endtime            = 0.009
+   endtime            = 0.007
    timestep        = 0.001
    BDF_order        = 2   # can go up to 5
-##theta           = 0.5
-##gamma            = 0.5
-##rhoInf          = 1
-##typeOfGeneralizedAlpha            = HHT
 
 ** #space discretization
    [../space_discretization]
@@ -188,10 +183,8 @@ rescaleFactor    = 1.    # this factor can be used to rescale the structure bloc
 
 ** # physical data for the solid
    [./physics]
-
-   solidType = linearVenantKirchhoff
-## available choices: exponential, neoHookean, nonLinearVenantKirchhoff, linearVenantKirchhoff
-   material_flag = 1                #the mesh flag of the structure volume
+   solidType = linearVenantKirchhoff ## available choices: exponential, neoHookean, nonLinearVenantKirchhoff, linearVenantKirchhoff
+   material_flag = 1                 #the mesh flag of the structure volume
    density   = 1.2
    young     = 4.0E6
    poisson   = 0.45
@@ -203,13 +196,9 @@ rescaleFactor    = 1.    # this factor can be used to rescale the structure bloc
    [../time_discretization]
    method          = BDF # Newmark or BDF (generalized alpha in the future)
    initialtime        = 0.005
-   endtime            = 0.009
+   endtime            = 0.007
    timestep        = 0.001
    BDF_order        = 2
-##theta           = 0.25
-##gamma           = 0.5
-##rhoInf          = 1
-##typeOfGeneralizedAlpha            = HHT
 
 ** #space discretization
    [../space_discretization]
@@ -501,13 +490,9 @@ rescaleFactor    = 1.    # this factor can be used to rescale the structure bloc
    [../time_discretization]
    method          = BDF
    initialtime        = 0.005
-   endtime            = 0.009
+   endtime            = 0.007
    timestep        = 0.001
    BDF_order        = 2
-##theta           = 0.5
-##gamma            = 0.5
-##rhoInf          = 1
-##typeOfGeneralizedAlpha            = HHT
 
 ** #preconditioner (used only in the GE case, when this problem is considered separately)
    [../prec]
