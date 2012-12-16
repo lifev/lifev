@@ -203,6 +203,7 @@ rescaleFactor    = 1.    # this factor can be used to rescale the structure bloc
 
 ** #space discretization
    [../space_discretization]
+   mesh_type = .mesh
    mesh_dir  = ./ #test_tubes/  # the directory where the mesh file is
    mesh_file = vessel20.mesh  # mesh file
    order     = P1 #P1 or P2

@@ -46,6 +46,7 @@ zeta        		= 0.75
 BDF_order   		= 2
 
 [../space_discretization]
+mesh_type = .mesh
 mesh_dir  		= ./
 mesh_file 		= StructuredCube4_test_structuralsolver.mesh
 order     		= P1
@@ -59,7 +60,7 @@ maxiter 		= 1
 reltol  		= 1.e-7
 
 [../solver]
-solver          	= gmres 
+solver          	= gmres
 scaling         	= none
 output          	= all 		# none, all
 conv            	= rhs

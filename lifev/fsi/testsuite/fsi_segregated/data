@@ -88,6 +88,7 @@ reuse      = true
 max_iter_reuse = 100
 
 [../space_discretization]
+mesh_type = .mesh
 mesh_dir  = ./ # the directory where the mesh file is
 mesh_file = tube20.mesh #carotid_fluid.mesh #tube_curve20.mesh  # mesh file
 stiff_strain=true
@@ -220,6 +221,7 @@ BDF_order       = 2
 
 
 [../space_discretization]
+mesh_type = .mesh
 mesh_dir  = ./  # the directory where the mesh file is
 mesh_file = vessel20.mesh #carotid_solid.mesh #vessel_curve20.mesh  # mesh
 order     = P1
