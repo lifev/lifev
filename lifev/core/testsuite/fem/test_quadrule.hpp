@@ -71,7 +71,7 @@ template<typename Mesh>
 bool quad_check_doe(const ReferenceFE &refFE, const GeometricMap & geoMap, const container_Type &allQuad, std::string output_file)
 {
     boost::shared_ptr<Epetra_Comm> dummyComm( new Epetra_SerialComm );
-    Mesh aMesh( *dummyComm );
+    Mesh aMesh( dummyComm );
     UInt nEl(1);
     regularMesh3D( aMesh, 1, nEl, nEl, nEl);
 
@@ -112,7 +112,7 @@ bool quad_check_doe(const ReferenceFE &refFE, const GeometricMap & geoMap, const
             // Check for Quadrature Rule Errors
             if (fct.degree(fun) <= allQuad[nqr]->degreeOfExactness())
             {
-                if (fabs(err)<1e-9)
+                if (std::fabs(err)<1e-9)
                 {
                     check = true;
                     ofile<<fct.name(fun)<<" \t passed \t ("<<err<<")"<<std::endl;
@@ -142,7 +142,7 @@ bool quad_check_cr( const ReferenceFE &refFE, const GeometricMap & geoMap, const
     Vector h(nrefine);
 
     for (int i=0; i<nrefine; ++i)
-        h(i) = pow(.5,i);
+        h(i) = std::pow(.5,i);
 
     int nquadrule = allQuad.size();
     boost::numeric::ublas::matrix<double> err(nrefine,nquadrule+1);
@@ -150,8 +150,8 @@ bool quad_check_cr( const ReferenceFE &refFE, const GeometricMap & geoMap, const
     for (int iref = 0; iref<nrefine; ++iref)
     {
 
-        Mesh aMesh( *dummyComm );
-        UInt nEl( pow(2.0,static_cast<double>(iref) ) );
+        Mesh aMesh( dummyComm );
+        UInt nEl( std::pow(2.0,static_cast<double>(iref) ) );
         regularMesh3D( aMesh, 1, nEl, nEl, nEl);
 
         err(iref,0) = h(iref);
@@ -176,7 +176,7 @@ bool quad_check_cr( const ReferenceFE &refFE, const GeometricMap & geoMap, const
                 }
                 integral+=s;
             }
-            err(iref,iqr+1) = fabs(integral-fct.ex_int(fun));
+            err(iref,iqr+1) = std::fabs(integral-fct.ex_int(fun));
 
 
         }//end for on qr

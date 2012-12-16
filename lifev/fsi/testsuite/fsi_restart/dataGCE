@@ -141,6 +141,7 @@ conservativeFormulation       = false  # tells if the conservative or non conser
 
 ** #space discretization
    [../space_discretization]
+   mesh_type = .mesh
    mesh_dir  = ./
    mesh_file = tube20.mesh # bypass_fluid_coarse_BL_2vols.mesh
    mesh_order     = P1                  # order for the geometry problem, P1 or P2

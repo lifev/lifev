@@ -456,7 +456,7 @@ HeartFunctors::setReducedConductivityCylinder( const Real& x,
                       (                             M_cylinderC * M_cylinderB ) * ( M_cylinderY - y ) ) /
                     (   M_cylinderA * M_cylinderA + M_cylinderB * M_cylinderB + M_cylinderC * M_cylinderC );
 
-        distance2 = pow(distanceX,2) + pow(distanceY,2) + pow(distanceZ,2);
+        distance2 = std::pow(distanceX,2) + std::pow(distanceY,2) + std::pow(distanceZ,2);
 
         if ( ( distance2 < M_cylinderR * M_cylinderR ) && ( x < M_maximumCylinderX ) && ( x > M_minimumCylinderX ) )
         {

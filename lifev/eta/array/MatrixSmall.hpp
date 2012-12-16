@@ -373,11 +373,11 @@ public:
     //! @name Output stream operator overload
     //@{
     friend ostream & operator<< ( ostream & out, MatrixSmall<Dim1, Dim2> const & matrix ) {
-        out << "(" << endl ;
+        out << "(" << std::endl ;
         for ( UInt i = 0; i < Dim1; i++ ) {
             for ( UInt j = 0; j < Dim2; j++ )
                 out << matrix.M_coords[i][j] << " ";
-            out << endl;
+            out << std::endl;
         }
         out << ")";
         return (out);

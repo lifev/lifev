@@ -60,10 +60,12 @@
 #include <lifev/core/filter/GetPot.hpp>
 
 #include <lifev/core/mesh/MarkerDefinitions.hpp>
-#include <lifev/core/filter/ImporterMesh3DNew.hpp>
+
 #include <lifev/core/mesh/RegionMesh.hpp>
 #include <lifev/core/mesh/BareMesh.hpp>
-#include <lifev/core/mesh/MeshElementBare.hpp>
+
+#include <lifev/core/filter/ParserINRIAMesh.hpp>
+#include <lifev/core/mesh/ConvertBareMesh.hpp>
 #include <lifev/core/array/MapEpetra.hpp>
 
 // A dummy class to imitate a VectorEpetra
@@ -117,9 +119,9 @@ int main(int argc, char** argv)
     ID m=1;
 
     bareMesh_Type bareMesh;
-    readINRIAMeshFile( bareMesh, fname, m );
+    MeshIO::ReadINRIAMeshFile( bareMesh, fname, m );
 
-    mesh_Type aMesh( *comm );
+    mesh_Type aMesh( comm );
     convertBareMesh ( bareMesh, aMesh );
 
     std::cout << " **********************************************************" << std::endl;

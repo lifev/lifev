@@ -157,13 +157,11 @@ FSIOperator::~FSIOperator()
 void
 FSIOperator::setDataFile( const GetPot& dataFile )
 {
-
     M_fluidMesh.reset( new mesh_Type( *M_epetraComm ) );
-
     M_meshDataFluid->setup(dataFile, "fluid/space_discretization");
     readMesh(*M_fluidMesh, *M_meshDataFluid);
 
-    M_solidMesh.reset(new mesh_Type( *M_epetraComm ) );
+    M_solidMesh.reset(new mesh_Type( M_epetraComm ) );
     M_meshDataSolid->setup(dataFile, "solid/space_discretization");
     readMesh(*M_solidMesh, *M_meshDataSolid);
 

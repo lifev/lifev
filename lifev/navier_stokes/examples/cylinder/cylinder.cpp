@@ -207,11 +207,11 @@ struct Cylinder::Private
         {
             if ( centered )
             {
-                return Um_3d() * (H+y)*(H-y) * (H+z)*(H-z) / pow(H,4);
+                return Um_3d() * (H+y)*(H-y) * (H+z)*(H-z) / std::pow(H,4);
             }
             else
             {
-                return 16 * Um_3d() * y * z * (H-y) * (H-z) / pow(H,4);
+                return 16 * Um_3d() * y * z * (H-y) * (H-z) / std::pow(H,4);
             }
         }
         else
@@ -403,7 +403,7 @@ Cylinder::run()
     MeshData meshData;
     meshData.setup(dataFile, "fluid/space_discretization");
 
-    boost::shared_ptr<mesh_Type> fullMeshPtr ( new mesh_Type( *d->comm ) );
+    boost::shared_ptr<mesh_Type> fullMeshPtr ( new mesh_Type( d->comm ) );
     readMesh(*fullMeshPtr, meshData);
 
     boost::shared_ptr<mesh_Type> meshPtr;

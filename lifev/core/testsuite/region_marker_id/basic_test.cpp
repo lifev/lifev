@@ -61,6 +61,12 @@
 #include <lifev/core/mesh/RegionMesh2DStructured.hpp>
 #include <lifev/core/mesh/MeshUtility.hpp>
 
+#ifdef HAVE_HDF5
+#include <lifev/core/filter/ExporterHDF5.hpp>
+#else
+#include <lifev/core/filter/ExporterEmpty.hpp>
+#endif
+
 using namespace LifeV;
 
 UInt colour_fun ( const Vector3D& barycentre )
@@ -81,23 +87,43 @@ int main(int argc, char* argv[])
     boost::shared_ptr<Epetra_Comm> comm( new Epetra_SerialComm );
 #endif
 
-
     typedef RegionMesh<LinearTriangle> mesh_Type;
+    typedef boost::shared_ptr< mesh_Type > meshPtr_Type;
 
     // Create the mesh.
-    mesh_Type mesh( *comm );
+    meshPtr_Type mesh( new mesh_Type ( comm ) );
 
     // Fill the mesh with a structured mesh.
-    regularMesh2D ( mesh, 0, 8, 11 );
+    regularMesh2D ( *mesh, 0, 8, 11 );
 
     // Colour the mesh according to a function.
-    MeshUtility::assignRegionMarkerID ( mesh, colour_fun );
+    MeshUtility::assignRegionMarkerID ( *mesh, colour_fun );
 
     // Count the number of elements with colour 2
-    const UInt colourElements = mesh.elementList().countElementsWithMarkerID( 2, std::equal_to<markerID_Type>() );
+    const UInt colourElements = mesh->elementList().countElementsWithMarkerID( 2, std::equal_to<markerID_Type>() );
 
     // Number of elements with colour 2
     const UInt exactNumber = 44;
+
+    { // Needed to correctly destroy the exporterHDF5
+
+    // Set the exporter for the mesh region.
+#ifdef HAVE_HDF5
+    ExporterHDF5< mesh_Type > exporter;
+#else
+    ExporterEmpty< mesh_Type > exporter;
+#endif
+
+    // Set the mesh.
+    exporter.setMeshProcId( mesh, comm->MyPID() );
+
+    // Export the region marker ID.
+    exporter.exportRegionMarkerID( mesh, comm );
+
+    // Do the export.
+    exporter.postProcess( 0 );
+
+    } // Needed to correctly destroy the exporterHDF5
 
 #ifdef HAVE_MPI
     MPI_Finalize();
@@ -112,4 +138,3 @@ int main(int argc, char* argv[])
         return( EXIT_FAILURE );
     }
 }
-

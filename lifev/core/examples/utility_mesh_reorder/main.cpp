@@ -69,7 +69,7 @@ int main(int argc, char** argv)
     mesh_data.setup(data_file, "space_discretization");
 
     boost::shared_ptr<Epetra_Comm> uselessComm(new Epetra_MpiComm(MPI_COMM_WORLD));
-    boost::shared_ptr<RegionMesh<LinearTetra> > mesh(new RegionMesh<LinearTetra>(*uselessComm) );
+    boost::shared_ptr<RegionMesh<LinearTetra> > mesh(new RegionMesh<LinearTetra>( uselessComm) );
 
     readMesh(*mesh, mesh_data);
 
@@ -117,7 +117,7 @@ int main(int argc, char** argv)
         mesh_data2.setup(data_file, "second_mesh/space_discretization");
 
         boost::shared_ptr<RegionMesh<LinearTetra> > mesh2;
-        mesh2.reset(new RegionMesh<LinearTetra>(*uselessComm));
+        mesh2.reset(new RegionMesh<LinearTetra>(uselessComm));
 
         readMesh(*mesh2, mesh_data2);
 
