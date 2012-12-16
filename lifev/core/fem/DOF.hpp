@@ -359,11 +359,13 @@ void DOF::update( MeshType& mesh )
                 for ( l = 0; l < nbLocalDofPerPeak; ++l )//for each degree of freedom per vertex
                 {
                     // label of the ith point of the mesh element
-                    M_localToGlobal( lc++, ie ) = gcount +  pID * nbLocalDofPerPeak + l;
-               }
+                    UInt dof = gcount +  pID * nbLocalDofPerPeak + l;
+                    ASSERT( dof != NotAnId, "the dof is not properly set" );
+                    M_localToGlobal( lc++, ie ) = dof;
+                }
             }
         }
-        
+
     // Ridge Based DOFs
     gcount += nbLocalDofPerPeak * nbGlobalPeaks;//dof per vertex * total # vertices
     lcount = nbLocalDofPerPeak * M_nbLocalPeaks;
@@ -377,15 +379,19 @@ void DOF::update( MeshType& mesh )
             {
                 UInt rID = mesh.ridge(mesh.localRidgeId(ie, i)).id();
                 for ( l = 0; l < nbLocalDofPerRidge; ++l )
-                    M_localToGlobal( lc++, ie ) = gcount + rID * nbLocalDofPerRidge + l;
+                {
+                    UInt dof = gcount +  rID * nbLocalDofPerRidge + l;
+                    ASSERT( dof != NotAnId, "the dof is not properly set" );
+                    M_localToGlobal( lc++, ie ) = dof;
+                }
             }
         }
 
-    //Facet based DOFs    
+    //Facet based DOFs
     gcount += nbGlobalRidges * nbLocalDofPerRidge;
     lcount += nbLocalDofPerRidge * M_nbLocalRidges;
     M_dofPositionByEntity[ 2 ] = gcount;
-    
+
     if ( nbLocalDofPerFacet > 0 )
         for ( ie = 0; ie < M_numElement; ++ie )
         {
@@ -395,14 +401,18 @@ void DOF::update( MeshType& mesh )
             {
                 UInt fID = mesh.facet( mesh.localFacetId( ie, i ) ).id();
                 for ( l = 0; l < nbLocalDofPerFacet; ++l )
-                    M_localToGlobal( lc++, ie ) = gcount + fID * nbLocalDofPerFacet + l;
+                {
+                    UInt dof = gcount +  fID * nbLocalDofPerFacet + l;
+                    ASSERT( dof != NotAnId, "the dof is not properly set" );
+                    M_localToGlobal( lc++, ie ) = dof;
+                }
             }
         }
-        
+
     // Element  Based DOFs
     gcount += nbGlobalFacets * nbLocalDofPerFacet;
     lcount += nbLocalDofPerFacet * M_nbLocalFacets;
- 
+
     M_dofPositionByEntity[ 3 ] = gcount;
     if ( nbLocalDofPerElement > 0 )
         for ( ie = 0; ie < M_numElement; ++ie )
@@ -410,8 +420,12 @@ void DOF::update( MeshType& mesh )
             lc = lcount;
             ID eID = mesh.element( ie ).id();
             for ( l = 0; l < nbLocalDofPerElement; ++l )
-                M_localToGlobal( lc++, ie ) = gcount +  eID * nbLocalDofPerElement + l;
-       }
+            {
+                UInt dof = gcount +  eID * nbLocalDofPerElement + l;
+                ASSERT( dof != NotAnId, "the dof is not properly set" );
+                M_localToGlobal( lc++, ie ) = dof;
+            }
+        }
     gcount += nbGlobalElements * nbLocalDofPerElement;
     M_dofPositionByEntity[ 4 ] = gcount;
 

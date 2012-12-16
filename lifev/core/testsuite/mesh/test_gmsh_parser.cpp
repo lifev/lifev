@@ -37,7 +37,7 @@
 #include <lifev/core/LifeV.cpp>
 #include <lifev/core/mesh/MeshPartitioner.hpp>
 #include <lifev/core/filter/ParserGmsh.hpp>
-#include <lifev/core/filter/ConvertBareMesh.hpp>
+#include <lifev/core/mesh/ConvertBareMesh.hpp>
 
 #include <cstdlib>
 #include <iostream>

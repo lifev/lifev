@@ -57,30 +57,45 @@ struct BareMesh
     ReferenceShapes refShape;
     ReferenceShapes bRefShape;
     UInt numBoundaryPoints;
+    UInt numVertices;
+    UInt numBoundaryVertices;
+    bool isPartitioned;
     ArraySimple<Real> points;
     std::vector<ID> pointMarkers;
+    std::vector<ID> pointIDs;
     ArraySimple<UInt> ridges;
     std::vector<ID> ridgeMarkers;
+    std::vector<ID> ridgeIDs;
     UInt numBoundaryFacets;
     ArraySimple<UInt> facets;
     std::vector<ID> facetMarkers;
+    std::vector<ID> facetIDs;
     ArraySimple<UInt> elements;
     std::vector<ID> elementMarkers;
+    std::vector<ID> elementIDs;
 
+    BareMesh();
     void clear();
 };
+
+template <typename GeoShapeType>
+BareMesh<GeoShapeType>::BareMesh() : isPartitioned(false) {}
 
 template <typename GeoShapeType>
 void BareMesh<GeoShapeType>::clear()
 {
     clearVector ( points );
     clearVector ( pointMarkers );
+    clearVector ( pointIDs );
     clearVector ( ridges );
     clearVector ( ridgeMarkers );
+    clearVector ( ridgeIDs );
     clearVector ( facets );
     clearVector ( facetMarkers );
+    clearVector ( facetIDs );
     clearVector ( elements );
     clearVector ( elementMarkers );
+    clearVector ( elementIDs );
 }
 
 }

@@ -1080,7 +1080,6 @@ void MeshPartitioner<MeshType>::constructLocalMesh()
     }
 
     std::map<Int, Int>::iterator  im;
-    std::set<Int>::iterator       is;
 
     Int count = 0;
     UInt ielem;
