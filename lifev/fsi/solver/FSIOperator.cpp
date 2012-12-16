@@ -536,7 +536,6 @@ FSIOperator::updateSystem()
 {
     if ( this->isFluid() )
     {
-      // M_fluidTimeAdvance->shiftRight( *M_fluid->solution() );
       M_ALETimeAdvance->updateRHSContribution(M_data->dataFluid()->dataTime()->timeStep() );
       M_fluidTimeAdvance->updateRHSContribution(M_data->dataFluid()->dataTime()->timeStep() );
 
@@ -658,12 +657,6 @@ FSIOperator::setupTimeAdvance( const dataFile_Type& dataFile )
       if(M_data->dataFluid()->conservativeFormulation())
 	M_fluidMassTimeAdvance->setup( M_data->dataFluid()->dataTimeAdvance()->orderBDF(), 1 );
     }
-     /*
-      if (M_fluidTimeAdvanceMethod =="GeneralizedAlpha")
-    {
-      M_fluidTimeAdvance->setup(M_data->dataFluid()->dataTime()->rhoInf() , 1,M_data->dataFluid()->dataTime()->typeOfGeneralizedAlpha() );
-    }
-    */
       M_ALETimeAdvance.reset( TimeAdvanceFactory::instance().createObject( M_ALETimeAdvanceMethod ) );
 
       if (M_ALETimeAdvanceMethod =="Newmark")
@@ -671,10 +664,6 @@ FSIOperator::setupTimeAdvance( const dataFile_Type& dataFile )
 
       if (M_ALETimeAdvanceMethod =="BDF")
           M_ALETimeAdvance->setup( M_data->timeAdvanceDataALE()->orderBDF(), 1 );
-      /*
-        if (M_ALETimeAdvanceMethod =="GeneralizedAlpha")
-           M_ALETimeAdvance->setup( M_data->timeMeshMotionRhoInf(), 2, M_data->timeMeshMotionTypeeOfGeneralizedAlpha() );
-      */
 
       M_fluidTimeAdvance->setTimeStep( M_data->dataFluid()->dataTime()->timeStep());
       if(M_data->dataFluid()->conservativeFormulation())
@@ -706,10 +695,6 @@ FSIOperator::setupTimeAdvance( const dataFile_Type& dataFile )
 
       if (M_solidTimeAdvanceMethod =="BDF")
     M_solidTimeAdvance->setup( order , 2);
-     /*
-      if (M_solidTimeAdvanceMethod =="GeneralizedAlpha")
-           M_solidTimeAdvance->setup( rhoInfty, 2, type );
-     */
 
       M_solidTimeAdvance->setTimeStep( M_data->dataSolid()->dataTime()->timeStep());
       if(this->isLeader())
@@ -717,7 +702,7 @@ FSIOperator::setupTimeAdvance( const dataFile_Type& dataFile )
       M_solidTimeAdvance->showMe();
     }
     }
-//  M_epetraWorldComm->Barrier();
+
  }
 // ===================================================
 //  Public Methods
@@ -755,7 +740,6 @@ FSIOperator::initializeFluid( const vector_Type& velAndPressure,
                               const vector_Type& displacement )
 {
     this->fluid().initialize( velAndPressure );
-    //this->meshMotion().initialize( displacement );
     this->moveMesh( displacement);
 }
 

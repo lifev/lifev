@@ -35,11 +35,11 @@
  *
  * Monolithic problem. Features:
  * - fullMonolithic (CE):
- *  -# solution with exact Newton (semiImplicit = false, useShapeDerivatives = true, domainVelImplicit = false, convectiveTermDer = false)
- *  -# solution with quasi Newton (semiImplicit = false, useShapeDerivatives = false, domainVelImplicit = false, convectiveTermDer = false)
+ *  -# solution with exact Newton (semiImplicit = false, useShapeDerivatives = true, conservativeFormulation = false)
+ *  -# solution with quasi Newton (semiImplicit = false, useShapeDerivatives = false, conservativeFormulation = false)
  *  -# preconditioner choice: see the classes Monolithic and fullMonolithic
  * - Monolithic (GCE):
- *  -# solution extrapolating the fluid domain (semiImplicit = true, useShapeDerivatives = false, domainVelImplicit = false, convectiveTermDer = false)
+ *  -# solution extrapolating the fluid domain (semiImplicit = true, useShapeDerivatives = false, conservativeFormulation = false)
  *  -# preconditioner choice: see the classes Monolithic and fullMonolithic
  * - boundary conditions:
  *  -# Neumann
@@ -67,6 +67,8 @@
  * The time discretization is carried out using BDF methods of order 2. At the moment, even is the Newmark method is available
  * for the temporal discretization of the single problems( e.g. in test_structuralsolver), it cannot be used in the FSI framework
  * since the class TimeAdvanceNewmark is not registered as one of the possible instances of the abstrac class TimeAdvance.
+ *
+ * This test loads an FSI simulation (done using the FSIMonolithic) and it restarts it.
  */
 
 // Tell the compiler to ignore specific kind of warnings:

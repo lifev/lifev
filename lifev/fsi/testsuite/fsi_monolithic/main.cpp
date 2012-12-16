@@ -35,11 +35,11 @@
  *
  * Monolithic problem. Features:
  * - fullMonolithic (CE):
- *  -# solution with exact Newton (semiImplicit = false, useShapeDerivatives = true, domainVelImplicit = false, convectiveTermDer = false)
- *  -# solution with quasi Newton (semiImplicit = false, useShapeDerivatives = false, domainVelImplicit = false, convectiveTermDer = false)
+ *  -# solution with exact Newton (semiImplicit = false, useShapeDerivatives = true, conservativeFormulation = false)
+ *  -# solution with quasi Newton (semiImplicit = false, useShapeDerivatives = true, conservativeFormulation = false)
  *  -# preconditioner choice: see the classes Monolithic and fullMonolithic
  * - Monolithic (GCE):
- *  -# solution extrapolating the fluid domain (semiImplicit = true, useShapeDerivatives = false, domainVelImplicit = false, convectiveTermDer = false)
+ *  -# solution extrapolating the fluid domain (semiImplicit = false, useShapeDerivatives = true, conservativeFormulation = false)
  *  -# preconditioner choice: see the classes Monolithic and fullMonolithic
  * - boundary conditions:
  *  -# Neumann

@@ -355,9 +355,6 @@ public:
      */
     void initializeSolid( vectorPtr_Type displacement, vectorPtr_Type velocity );
 
-    //!\todo{kill this method}
-    //void updateJacobian ( const vector_Type& sol, const int& iter );
-
     //!moves the mesh using the solution of the harmonic extension equation
     /**
        \param disp displacement of the mesh, must be the difference between the current solution of the HE problem and the one at the previous time step.

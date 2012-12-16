@@ -103,7 +103,7 @@ public:
     /**
      Sets the parameters read from data file
      */
-    void setUp( const GetPot& dataFile );
+    void setup( const GetPot& dataFile );
 
     //! initializes the fluid and mesh problems, creates the map of the global matrix
     void setupFluidSolid( UInt const fluxes );

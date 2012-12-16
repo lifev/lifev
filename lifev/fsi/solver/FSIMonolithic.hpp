@@ -158,7 +158,7 @@ public:
     /**
        sets some parameters specific to the FSIMonolithic class
      */
-    virtual void setUp( const GetPot& dataFile );
+    virtual void setup( const GetPot& dataFile );
 
     //! builds the global Epetra map
     /**
