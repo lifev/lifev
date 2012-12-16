@@ -32,7 +32,6 @@
  *  @date 01-10-2003
  *  @author M.A. Fernandez
  *
- *  @version 1.18
  *  @date 10-06-2010
  *  @author Cristiano Malossi
  *

@@ -26,19 +26,21 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 /*!
  *  @file
- *  @brief This file contains solvers for different materials. WARNING!!!!This is the most important issue related with this class. At the moment, the BC are applied on the matrix and on rhsNoBc for VK models but for NH and EXP they are applied on the residual directly. This does not work for nonhomogeneus Dirichlet conditions!!
-*
-*  @version 1.0
-*  @date 01-01-2010
-*  @author Paolo Tricerri
-*
-*  @maintainer  Paolo Tricerri <paolo.tricerri@epfl.ch>
+ *  @brief This file contains solvers for different materials.
+ *  @warning: This is the most important issue related with this class.
+ *  At the moment, the BC are applied on the matrix and on rhsNoBc for VK models
+ *  but for NH and EXP they are applied on the residual directly. This does
+ *  not work for nonhomogeneus Dirichlet conditions!!
+ *
+ *  @version 1.0
+ *  @date 01-01-2010
+ *  @author Paolo Tricerri
+ *
+ *  @maintainer  Paolo Tricerri <paolo.tricerri@epfl.ch>
 */
 
 #ifndef _STRUCTURALOPERATOR_H_
 #define _STRUCTURALOPERATOR_H_ 1
-
-                                       //#include<boost/scoped_ptr.hpp>
 
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -117,42 +119,42 @@ class StructuralOperator
 {
 public:
 
-  //!@name Type definitions
-  //@{
-  typedef Real ( *function ) ( const Real&, const Real&, const Real&, const Real&, const ID& );
-  typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> source_Type;
+    //!@name Type definitions
+    //@{
+    typedef Real ( *function ) ( const Real&, const Real&, const Real&, const Real&, const ID& );
+    typedef boost::function<Real ( const Real&, const Real&, const Real&, const Real&, const ID& )> source_Type;
 
-  typedef StructuralConstitutiveLaw<Mesh>               material_Type;
-  typedef boost::shared_ptr<material_Type>              materialPtr_Type;
+    typedef StructuralConstitutiveLaw<Mesh>               material_Type;
+    typedef boost::shared_ptr<material_Type>              materialPtr_Type;
 
-  typedef BCHandler                                     bcHandlerRaw_Type;
-  typedef boost::shared_ptr<bcHandlerRaw_Type>          bcHandler_Type;
+    typedef BCHandler                                     bcHandlerRaw_Type;
+    typedef boost::shared_ptr<bcHandlerRaw_Type>          bcHandler_Type;
 
-  typedef SolverType                                    solver_Type;
+    typedef SolverType                                    solver_Type;
 
-  typedef typename solver_Type::matrix_type             matrix_Type;
-  typedef boost::shared_ptr<matrix_Type>                matrixPtr_Type;
-  typedef typename solver_Type::vector_type             vector_Type;
-  typedef boost::shared_ptr<vector_Type>                vectorPtr_Type;
+    typedef typename solver_Type::matrix_type             matrix_Type;
+    typedef boost::shared_ptr<matrix_Type>                matrixPtr_Type;
+    typedef typename solver_Type::vector_type             vector_Type;
+    typedef boost::shared_ptr<vector_Type>                vectorPtr_Type;
 
-  typedef typename SolverType::prec_raw_type            precRaw_Type;
-  typedef typename SolverType::prec_type                prec_Type;
+    typedef typename SolverType::prec_raw_type            precRaw_Type;
+    typedef typename SolverType::prec_type                prec_Type;
 
-  typedef StructuralConstitutiveLawData                 data_Type;
+    typedef StructuralConstitutiveLawData                 data_Type;
 
-  typedef RegionMesh<LinearTetra >                      mesh_Type;
-  typedef std::vector< mesh_Type::element_Type const *> vectorVolumes_Type;
+    typedef RegionMesh<LinearTetra >                      mesh_Type;
+    typedef std::vector< mesh_Type::element_Type const *> vectorVolumes_Type;
 
-  typedef std::map< UInt, vectorVolumes_Type>           mapMarkerVolumes_Type;
-  typedef boost::shared_ptr<mapMarkerVolumes_Type>      mapMarkerVolumesPtr_Type;
+    typedef std::map< UInt, vectorVolumes_Type>           mapMarkerVolumes_Type;
+    typedef boost::shared_ptr<mapMarkerVolumes_Type>      mapMarkerVolumesPtr_Type;
 
-  typedef typename mesh_Type::element_Type                        meshEntity_Type;
+    typedef typename mesh_Type::element_Type                        meshEntity_Type;
 
-  typedef typename boost::function2<bool, const UInt, const UInt> comparisonPolicy_Type;
+    typedef typename boost::function2<bool, const UInt, const UInt> comparisonPolicy_Type;
 
-  typedef MarkerSelector<meshEntity_Type, comparisonPolicy_Type> markerSelector_Type;
-  typedef boost::scoped_ptr<markerSelector_Type>          markerSelectorPtr_Type;
-  //@}
+    typedef MarkerSelector<meshEntity_Type, comparisonPolicy_Type> markerSelector_Type;
+    typedef boost::scoped_ptr<markerSelector_Type>          markerSelectorPtr_Type;
+    //@}
 
 
     //! @name Constructor & Destructor
@@ -705,7 +707,7 @@ StructuralOperator<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        
 template <typename Mesh, typename SolverType>
 void StructuralOperator<Mesh, SolverType>::setupMapMarkersVolumes( void )
 {
- 
+
   this->M_Displayer->leaderPrint(" S-  Building the map between volumesMarkers <--> volumes \n");
 
   //We first loop over the vector of the material_flags
@@ -927,14 +929,9 @@ void
 StructuralOperator<Mesh, SolverType>::showMe( std::ostream& c  ) const
 {
     c << "\n*** StructuralOperator::showMe method" << std::endl;
-    c << "****** Data of the Material************" << std::endl;
-    c << "Thickness:    " << M_data->thickness() << std::endl;
-    c << "Density:      " << M_data->rho() << std::endl;
-    c << "Young:        " << M_data->young(1) << std::endl;
-    c << "Poisson:      " << M_data->poisson(1) << std::endl;
-    //  c << "Theta:        " << M_theta << std::endl;
-    //  c << "Zeta:         " << M_zeta << std::endl;
-    c << "***************************************" << std::endl;
+
+    M_data->showMe( c );
+
 }
 
 template <typename Mesh, typename SolverType>
