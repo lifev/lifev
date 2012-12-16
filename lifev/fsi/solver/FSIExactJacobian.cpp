@@ -112,7 +112,7 @@ void  FSIExactJacobian::solveLinearFluid()
     dispFluidDomain.setCombineMode(Zero);
     vector_Type dispFluidMesh(this->derVeloFluidMesh().map(), Repeated);
 //if statement: in order not to iterate the mesh for each linear residual calculation, needed just for exact Jac case.
-    if (false && this->M_data->dataFluid()->isSemiImplicit()==true)// not working in parallel
+    if (false && this->M_data->dataFluid()->isSemiImplicit()==true)
     {//to be corrected: up to now also in the semi implicit case the harmonic extension eq.
         //is solved at each GMRES iteration
 

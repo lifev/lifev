@@ -35,11 +35,11 @@
  *
  * Monolithic problem. Features:
  * - fullMonolithic (CE):
- *  -# solution with exact Newton (semiImplicit = false, useShapeDerivatives = true, domainVelImplicit = false, convectiveTermDer = false)
- *  -# solution with quasi Newton (semiImplicit = false, useShapeDerivatives = false, domainVelImplicit = false, convectiveTermDer = false)
+ *  -# solution with exact Newton (semiImplicit = false, useShapeDerivatives = true, conservativeFormulation = false)
+ *  -# solution with quasi Newton (semiImplicit = false, useShapeDerivatives = false, conservativeFormulation = false)
  *  -# preconditioner choice: see the classes Monolithic and fullMonolithic
  * - Monolithic (GCE):
- *  -# solution extrapolating the fluid domain (semiImplicit = true, useShapeDerivatives = false, domainVelImplicit = false, convectiveTermDer = false)
+ *  -# solution extrapolating the fluid domain (semiImplicit = true, useShapeDerivatives = false, conservativeFormulation = false)
  *  -# preconditioner choice: see the classes Monolithic and fullMonolithic
  * - boundary conditions:
  *  -# Neumann
@@ -64,6 +64,11 @@
  * This test implements an inlet flux bundary condition for the first three time steps, then at the fourth time step
  * the inlet boundary condition is replaced by a Neumann one (this mechanism is useful to implement rudimental valves).
  * The outflow boundary condition is of absorbing type. At the outer wall for the structure a Robin condition is imposed.
+ * The time discretization is carried out using BDF methods of order 2. At the moment, even is the Newmark method is available
+ * for the temporal discretization of the single problems( e.g. in test_structuralsolver), it cannot be used in the FSI framework
+ * since the class TimeAdvanceNewmark is not registered as one of the possible instances of the abstrac class TimeAdvance.
+ *
+ * This test loads an FSI simulation (done using the FSIMonolithic) and it restarts it.
  */
 
 // Tell the compiler to ignore specific kind of warnings:
@@ -171,8 +176,7 @@ public:
 #ifdef HAVE_HDF5
         if ( fluidMeshPartitioned.compare( "none" ) )
         {
-            FSIOperator::meshFilter_Type fluidMeshFilter( data_file, fluidMeshPartitioned );
-            fluidMeshFilter.setComm( M_fsi->FSIOper()->worldComm() );
+            FSIOperator::meshFilter_Type fluidMeshFilter( data_file, fluidMeshPartitioned );            fluidMeshFilter.setComm( M_fsi->FSIOper()->worldComm() );
             FSIOperator::meshFilter_Type solidMeshFilter( data_file, solidMeshPartitioned );
             solidMeshFilter.setComm( M_fsi->FSIOper( )->worldComm( ) );
             M_fsi->FSIOper( )->partitionMeshes( fluidMeshFilter, solidMeshFilter );
@@ -342,10 +346,10 @@ public:
                       << M_fsi->displacement().norm2() << "\n";
 
 
-	    if( M_data->method().compare("monolithicGI") == 0 )
-	       checkResultGI(M_data->dataFluid()->dataTime()->time());
-	    else
-	      checkResultGCE(M_data->dataFluid()->dataTime()->time());
+	     if( M_data->method().compare("monolithicGI") == 0 )
+             checkResultGI(M_data->dataFluid()->dataTime()->time());
+	     else
+             checkResultGCE(M_data->dataFluid()->dataTime()->time());
 
 
         }
@@ -702,9 +706,9 @@ void Problem::checkResultGI(const LifeV::Real& time)
 
   //Extract the previous solution
   LifeV::Real dispNorm=M_fsi->displacement().norm2();
-  if (time==0.003 &&      (dispNorm-158013)/dispNorm * (dispNorm-158013)/dispNorm < 1e-5) resultCorrect(time);
-  else if (time==0.004 && (dispNorm-118882)/dispNorm * (dispNorm-118882)/dispNorm < 1e-5) resultCorrect(time);
-  else if (time==0.005 && (dispNorm-106540)/dispNorm * (dispNorm-106540)/dispNorm < 1e-5) resultCorrect(time);
+  if (time==0.006 &&      ( (dispNorm-120614)/dispNorm * (dispNorm-120614)/dispNorm < 1e-5 ) ) resultCorrect(time);
+  else if (time==0.007 && ( (dispNorm-116469)/dispNorm * (dispNorm-116469)/dispNorm < 1e-5 ) ) resultCorrect(time);
+  else if (time==0.008 && ( (dispNorm-112765)/dispNorm * (dispNorm-112765)/dispNorm < 1e-5 ) ) resultCorrect(time);
 }
 
 void Problem::checkResultGCE(const LifeV::Real& time)
@@ -712,7 +716,7 @@ void Problem::checkResultGCE(const LifeV::Real& time)
 
   //Extract the previous solution
   LifeV::Real dispNorm=M_fsi->displacement().norm2();
-  if (time==0.003 &&      (dispNorm-139804)/dispNorm * (dispNorm-139804)/dispNorm < 1e-5) resultCorrect(time);
-  else if (time==0.004 && (dispNorm-106386)/dispNorm * (dispNorm-106386)/dispNorm < 1e-5) resultCorrect(time);
-  else if (time==0.005 && (dispNorm-99162)/dispNorm * (dispNorm-99162)/dispNorm < 1e-5) resultCorrect(time);
+  if (time==0.006 &&      (dispNorm-120293)/dispNorm * (dispNorm-120293)/dispNorm < 1e-5) resultCorrect(time);
+  else if (time==0.007 && (dispNorm-116022)/dispNorm * (dispNorm-116022)/dispNorm < 1e-5) resultCorrect(time);
+  else if (time==0.008 && (dispNorm-112186)/dispNorm * (dispNorm-112186)/dispNorm < 1e-5) resultCorrect(time);
 }

@@ -31,10 +31,10 @@ updateEvery = 1
 linesearch = 0
 # NonLinearRichardson: stop_tol  = abstol + reltol*normRes;
 
-abstol = 0.  
-reltol = 1.e-5 
-etamax = 1.e-8 # tolerance of the interface problem (GMRES), # if semiImplicit, set etamax = 1.e-10, 
-       	       #else (e.g.)  etamax = 1.e-3 
+abstol = 0.
+reltol = 1.e-5
+etamax = 1.e-8 # tolerance of the interface problem (GMRES), # if semiImplicit, set etamax = 1.e-10,
+       	       #else (e.g.)  etamax = 1.e-3
 	       #IMPORTANT: etamax < abstol + reltol*res
 semiImplicit = 1
 maxSubIter = 100 #monolithic = 0
@@ -75,7 +75,7 @@ initialtime		= 0.
 endtime			= 0.002
 timestep		= 0.001
 method                  = BDF
-BDF_order		= 1
+BDF_order		= 2
 
 
 
@@ -206,7 +206,6 @@ filter_singletons      = false
 [./physics]
 material_flag   = '1' # '1 2'
 solidType       = linearVenantKirchhoff
-material_flag   = 1 # '1 2'
 young           = 4.0E6 #,1.9E9
 poisson         = 0.45 #,0.30
 density         = 1.2					# density
@@ -215,7 +214,7 @@ thickness	= 0.1
 [../time_discretization]
 timestep        = 0.001
 method          = BDF
-BDF_order       = 1
+BDF_order       = 2
 #theta           = 0.25
 #gamma           = 0.5
 
@@ -278,7 +277,7 @@ solvertype      = Amesos_Umfpack
 [../time_discretization]
 timestep        = 0.001
 method          = BDF
-BDF_order		= 1
+BDF_order		= 2
 theta           = 0.25
 gamma           = 0.5
 

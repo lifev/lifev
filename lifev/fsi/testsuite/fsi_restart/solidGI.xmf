@@ -367,6 +367,186 @@
 
     </Grid>
 
+<!-- Time 0.006 Iteration 00006 -->
+    <Grid Name="Mesh 0.006">
+      <Time TimeType="Single" Value="0.006" />
+      <Topology
+         Type="Tetrahedron"
+         NumberOfElements="4800"
+         BaseOffset="0">
+         <DataStructure Format="HDF"
+                        Dimensions="4800 4"
+                        DataType="Int"
+                        Precision="8">
+             solidGI.h5:/Connections/Values
+         </DataStructure>
+      </Topology>
+      <Geometry Type="X_Y_Z">
+         <DataStructure Format="HDF"
+                        Dimensions="1260"
+                        DataType="Float"
+                        Precision="8">
+             solidGI.h5:/PointsX/Values
+         </DataStructure>
+         <DataStructure Format="HDF"
+                        Dimensions="1260"
+                        DataType="Float"
+                        Precision="8">
+             solidGI.h5:/PointsY/Values
+         </DataStructure>
+         <DataStructure Format="HDF"
+                        Dimensions="1260"
+                        DataType="Float"
+                        Precision="8">
+             solidGI.h5:/PointsZ/Values
+         </DataStructure>
+      </Geometry>
+
+
+      <Attribute
+         Type="Vector"
+         Center="Node"
+         Name="s-displacement">
+         <DataStructure ItemType="HyperSlab"
+                        Dimensions="1260 3"
+                        Type="HyperSlab">
+           <DataStructure  Dimensions="3 2"
+                           Format="XML">
+               0    0
+               1    1
+               1260 3
+           </DataStructure>
+           <DataStructure  Format="HDF"
+                           Dimensions="1260 3"
+                           DataType="Float"
+                           Precision="8">
+               solidGI.h5:/s-displacement.00006/Values
+           </DataStructure>
+         </DataStructure>
+      </Attribute>
+
+    </Grid>
+
+<!-- Time 0.007 Iteration 00007 -->
+    <Grid Name="Mesh 0.007">
+      <Time TimeType="Single" Value="0.007" />
+      <Topology
+         Type="Tetrahedron"
+         NumberOfElements="4800"
+         BaseOffset="0">
+         <DataStructure Format="HDF"
+                        Dimensions="4800 4"
+                        DataType="Int"
+                        Precision="8">
+             solidGI.h5:/Connections/Values
+         </DataStructure>
+      </Topology>
+      <Geometry Type="X_Y_Z">
+         <DataStructure Format="HDF"
+                        Dimensions="1260"
+                        DataType="Float"
+                        Precision="8">
+             solidGI.h5:/PointsX/Values
+         </DataStructure>
+         <DataStructure Format="HDF"
+                        Dimensions="1260"
+                        DataType="Float"
+                        Precision="8">
+             solidGI.h5:/PointsY/Values
+         </DataStructure>
+         <DataStructure Format="HDF"
+                        Dimensions="1260"
+                        DataType="Float"
+                        Precision="8">
+             solidGI.h5:/PointsZ/Values
+         </DataStructure>
+      </Geometry>
+
+
+      <Attribute
+         Type="Vector"
+         Center="Node"
+         Name="s-displacement">
+         <DataStructure ItemType="HyperSlab"
+                        Dimensions="1260 3"
+                        Type="HyperSlab">
+           <DataStructure  Dimensions="3 2"
+                           Format="XML">
+               0    0
+               1    1
+               1260 3
+           </DataStructure>
+           <DataStructure  Format="HDF"
+                           Dimensions="1260 3"
+                           DataType="Float"
+                           Precision="8">
+               solidGI.h5:/s-displacement.00007/Values
+           </DataStructure>
+         </DataStructure>
+      </Attribute>
+
+    </Grid>
+
+<!-- Time 0.008 Iteration 00008 -->
+    <Grid Name="Mesh 0.008">
+      <Time TimeType="Single" Value="0.008" />
+      <Topology
+         Type="Tetrahedron"
+         NumberOfElements="4800"
+         BaseOffset="0">
+         <DataStructure Format="HDF"
+                        Dimensions="4800 4"
+                        DataType="Int"
+                        Precision="8">
+             solidGI.h5:/Connections/Values
+         </DataStructure>
+      </Topology>
+      <Geometry Type="X_Y_Z">
+         <DataStructure Format="HDF"
+                        Dimensions="1260"
+                        DataType="Float"
+                        Precision="8">
+             solidGI.h5:/PointsX/Values
+         </DataStructure>
+         <DataStructure Format="HDF"
+                        Dimensions="1260"
+                        DataType="Float"
+                        Precision="8">
+             solidGI.h5:/PointsY/Values
+         </DataStructure>
+         <DataStructure Format="HDF"
+                        Dimensions="1260"
+                        DataType="Float"
+                        Precision="8">
+             solidGI.h5:/PointsZ/Values
+         </DataStructure>
+      </Geometry>
+
+
+      <Attribute
+         Type="Vector"
+         Center="Node"
+         Name="s-displacement">
+         <DataStructure ItemType="HyperSlab"
+                        Dimensions="1260 3"
+                        Type="HyperSlab">
+           <DataStructure  Dimensions="3 2"
+                           Format="XML">
+               0    0
+               1    1
+               1260 3
+           </DataStructure>
+           <DataStructure  Format="HDF"
+                           Dimensions="1260 3"
+                           DataType="Float"
+                           Precision="8">
+               solidGI.h5:/s-displacement.00008/Values
+           </DataStructure>
+         </DataStructure>
+      </Attribute>
+
+    </Grid>
+
 
     </Grid>
 
