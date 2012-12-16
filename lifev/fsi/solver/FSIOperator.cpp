@@ -115,9 +115,9 @@ FSIOperator::FSIOperator():
     M_lambda                             ( ),
     M_lambdaDot                          ( ),
     M_rhs                                ( ),
-    M_Alphaf                             ( ), //vector_Type, for alphaf robin
-    M_AlphafCoef                         ( 0 ),
-    M_betamedio                          ( ),
+    M_alphaF                             ( ), //vector_Type, for alphaf robin
+    M_alphaFCoef                         ( 0 ),
+    M_betaMean                           ( ),
     M_epetraComm                         ( ),
     M_epetraWorldComm                    ( ),
     //begin of private members
@@ -1002,10 +1002,10 @@ void
 FSIOperator::setAlphafCoef( )
 {
     Real h=0.1, R=0.5;
-    M_AlphafCoef  =  M_ALETimeAdvance->coefficientSecondDerivative( 0 )*(this->dataSolid()->rho()*h)/this->dataFluid()->dataTime()->timeStep();
-    M_AlphafCoef += h*M_data->dataSolid()->young(1)*this->dataFluid()->dataTime()->timeStep() /
+    M_alphaFCoef  =  M_ALETimeAdvance->coefficientSecondDerivative( 0 )*(this->dataSolid()->rho()*h)/this->dataFluid()->dataTime()->timeStep();
+    M_alphaFCoef += h*M_data->dataSolid()->young(1)*this->dataFluid()->dataTime()->timeStep() /
       (pow(R,2) *(1-pow(M_data->dataSolid()->poisson(1),2)));
-    M_AlphafCoef /= M_ALETimeAdvance->coefficientFirstDerivative( 0 );
+    M_alphaFCoef /= M_ALETimeAdvance->coefficientFirstDerivative( 0 );
 }
 
 void
@@ -1014,11 +1014,11 @@ FSIOperator::setStructureToFluidParameters()
     this->setAlphafCoef();
     this->setAlphaf();
 
-    if (M_Alphaf.get()==0)
+    if (M_alphaF.get()==0)
     {
         this->setAlphafCoef();
-        M_bcvStructureToFluid->setRobinCoeff(M_AlphafCoef);
-        M_bcvStructureToFluid->setBetaCoeff(M_AlphafCoef);
+        M_bcvStructureToFluid->setRobinCoeff(M_alphaFCoef);
+        M_bcvStructureToFluid->setBetaCoeff(M_alphaFCoef);
     }
     else
     {
@@ -1263,7 +1263,7 @@ FSIOperator::setAlphafbcf( const bcFunction_Type& alphafbcf )
 {
     vector_Type vec( M_fluid->velocityFESpace().map());
     M_fluid->velocityFESpace().interpolate( static_cast<FESpace<mesh_Type, MapEpetra>::function_Type>( alphafbcf ), vec, 0.0);
-    *M_Alphaf = vec ;
+    *M_alphaF = vec ;
 }
 
 
@@ -1414,7 +1414,7 @@ FSIOperator::variablesInit( const std::string& /*dOrder*/ )
     {
         M_dispFluidMeshOld.reset( new vector_Type(M_uFESpace->map(), Repeated) );
         M_veloFluidMesh.reset   ( new vector_Type(M_uFESpace->map(), Repeated) );
-        M_Alphaf.reset          ( new vector_Type(M_uFESpace->map(), Repeated));
+        M_alphaF.reset          ( new vector_Type(M_uFESpace->map(), Repeated));
 
         if ( M_linearFluid )
             M_derVeloFluidMesh.reset( new vector_Type(this->M_uFESpace->map(), Repeated) );

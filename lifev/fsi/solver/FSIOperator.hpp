@@ -380,7 +380,6 @@ public:
      */
     void transferFluidOnInterface( const vector_Type& _vec1, vector_Type& _vec2 );
 
-    //works in serial but no yet in parallel
     void transferSolidOnFluid( const vector_Type& _vec1, vector_Type& _vec2 );
 
     //!Method to import an VectorEpetra defined on the solid map (i.e. with the solid numeration of the dofs) to the interface
@@ -403,7 +402,7 @@ public:
     void bcManageVectorRHS( const fluidBchandlerPtr_Type& bch, vector_Type& rhs );
 
     //! Method to set the Robin vector coefficient of the Robin--Neumann coupling scheme (as a constant vector vector)
-    void setAlphaf() { M_Alphaf->epetraVector().PutScalar( M_AlphafCoef ); }
+    void setAlphaf() { M_alphaF->epetraVector().PutScalar( M_alphaFCoef ); }
     //! Method to compute the scalar coefficient \f$\alpha\f$ of the Robin--Neumann coupling scheme
     void setAlphafCoef();
     //! Method calling setAlphaf and setAlphafCoef
@@ -471,7 +470,7 @@ public:
     const vector_Type& minusSigmaFluidRepeated()                  const { return *M_minusSigmaFluidRepeated; }
 
     //!coefficient for the Robin--Neumann coupling scheme
-    vector_Type&       Alphaf()                                   const { return *M_Alphaf;}
+    vector_Type&       Alphaf()                                   const { return *M_alphaF;}
 
     commPtr_Type worldComm()                                      const { return M_epetraWorldComm; }
 
@@ -908,11 +907,11 @@ protected:
 
 
     vectorPtr_Type                    M_rhs;
-    vectorPtr_Type                    M_Alphaf;
+    vectorPtr_Type                    M_alphaF;
 
-    Real                                              M_AlphafCoef;
+    Real                                              M_alphaFCoef;
     //\todo{try to set as deprecated}
-    Real                                              M_betamedio;
+    Real                                              M_betaMean;
 
     commPtr_Type                                      M_epetraComm;
     commPtr_Type                                      M_epetraWorldComm;
