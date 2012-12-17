@@ -503,7 +503,7 @@ void
 MultiscaleModelFluid3D::setupMesh()
 {
     //Read fluid mesh from file
-    boost::shared_ptr< mesh_Type > fluidMesh( new mesh_Type( *M_comm ) );
+    boost::shared_ptr< mesh_Type > fluidMesh( new mesh_Type( M_comm ) );
     readMesh( *fluidMesh, *M_meshData );
 
     //Transform mesh
@@ -575,8 +575,8 @@ MultiscaleModelFluid3D::setupFEspace()
         exit( EXIT_FAILURE );
     }
 
-    M_uFESpace.reset( new FESpace_Type( *M_mesh, *u_refFE, *u_qR, *u_bdQr, 3, M_comm ) );
-    M_pFESpace.reset( new FESpace_Type( *M_mesh, *p_refFE, *p_qR, *p_bdQr, 1, M_comm ) );
+    M_uFESpace.reset( new FESpace_Type( M_mesh->meshPartition(), *u_refFE, *u_qR, *u_bdQr, 3, M_comm ) );
+    M_pFESpace.reset( new FESpace_Type( M_mesh->meshPartition(), *p_refFE, *p_qR, *p_bdQr, 1, M_comm ) );
 }
 
 void
