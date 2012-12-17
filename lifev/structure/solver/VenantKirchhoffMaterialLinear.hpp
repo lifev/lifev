@@ -155,7 +155,7 @@ class VenantKirchhoffMaterialLinear :
     //! Get the Stiffness vector
   vectorPtr_Type const stiffVector() const { vectorPtr_Type zero( new vector_Type()); return zero;}
 
-  void apply( const vector_Type& sol, vector_Type& res, const mapMarkerVolumesPtr_Type mapsMarkerVolumes) {res += *M_stiff*sol;}
+  void apply( const vector_Type& sol, vector_Type& res, const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/) {res += *M_stiff*sol;}
 
     //@}
 
