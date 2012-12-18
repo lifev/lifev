@@ -157,8 +157,8 @@ MultiscaleModelFSI3D::setupModel()
     M_FSIoperator->partitionMeshes();
 
     // Mesh transformation (after partitioning - not working for solid)
-    M_FSIoperator->fluidMeshPart().meshPartition()->meshTransformer().transformMesh( M_geometryScale, M_geometryRotate, M_geometryTranslate );
-    //M_FSIoperator->solidMeshPart().meshPartition()->transformMesh( M_geometryScale, M_geometryRotate, M_geometryTranslate );
+    M_FSIoperator->fluidLocalMesh().meshTransformer().transformMesh( M_geometryScale, M_geometryRotate, M_geometryTranslate );
+    //M_FSIoperator->solidLocalMesh().meshTransformer()->transformMesh( M_geometryScale, M_geometryRotate, M_geometryTranslate );
 
     // Setup FEspace & DOF
     M_FSIoperator->setupFEspace();
