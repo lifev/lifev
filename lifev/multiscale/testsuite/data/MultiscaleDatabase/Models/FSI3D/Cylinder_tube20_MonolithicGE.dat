@@ -160,6 +160,7 @@ semiImplicit        = true   # tells if we advance in time after the first nonli
     [../space_discretization]
     mesh_dir         = ./Mesh/
     mesh_file        = vessel20.mesh  # mesh file
+    mesh_type       = .mesh
     order            = P1
 
     [../miscellaneous]
