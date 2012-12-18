@@ -123,10 +123,10 @@ class SecondOrderExponentialMaterialNonLinear : public StructuralConstitutiveLaw
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
     void updateNonLinearJacobianTerms( matrixPtr_Type& jacobian,
-                                       const vector_Type& /*disp*/,
-                                       const dataPtr_Type& /*dataMaterial*/,
-                                       const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
-                                       const displayerPtr_Type& /*displayer*/ );
+                                       const vector_Type& disp,
+                                       const dataPtr_Type& dataMaterial,
+                                       const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                                       const displayerPtr_Type& displayer );
 
 
     //! Interface method to compute the new Stiffness matrix in StructuralSolver::evalResidual and in
@@ -394,7 +394,7 @@ void SecondOrderExponentialMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms
 
             //! 2. Stiffness matrix : int { 4 * alpha * J^(-2/3) * exp( gamma*( Ic_iso - 3)^2 ) * ( J^(-2./3.0) + 2 * gamma * (Ic_isoK - 3 )^2 ) *
             //!             ( F : \nabla \delta ) ( F : \nabla \v ) }
-            //AssemblyElementalStructure::stiff_Jac_P1iso_SecondOrderExp_2term( 4.0 * alpha, gamma, (*M_Fk), (*M_Jack), (*M_trCisok), *this->M_elmatK, this->M_FESpace->fe() );
+            AssemblyElementalStructure::stiff_Jac_P1iso_SecondOrderExp_2term( 4.0 * alpha, gamma, (*M_Fk), (*M_Jack), (*M_trCisok), *this->M_elmatK, this->M_FESpace->fe() );
 
             //! 3. Stiffness matrix :
             //!int { ( 4.0/9.0 *  alpha * J^-2 *  exp( gamma*( Ic_iso - 3)^2 ) * ( Ic_isoK + 2 * gamma * (Ic_isoK - 3)^2 * Ic_isoK + (Ic_isoK - 3) ) ) *
@@ -404,7 +404,7 @@ void SecondOrderExponentialMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms
             //! 4. Stiffness matrix :
             //! int { (-4.0/3.0 *  alpha * J^(-5/3) * exp( gamma*( Ic_iso - 3)*( Ic_iso - 3) ) * ( Ic_isoK + 2*gamma*(Ic_isok - 3)Ic + 1) ) *
             //!       ( F : \nabla \delta ) ( CofF : \nabla \v ) }
-            AssemblyElementalStructure::stiff_Jac_P1iso_SecondOrderExp_4term( (-4.0/3.0) * alpha, gamma, (*M_CofFk), (*M_Fk), (*M_Jack), (*M_trCk), (*M_trCisok), *this->M_elmatK, this->M_FESpace->fe() );
+            AssemblyElementalStructure::stiff_Jac_P1iso_SecondOrderExp_4term( (-4.0/3.0) * alpha, gamma, (*M_CofFk), (*M_Fk), (*M_Jack), (*M_trCisok), (*M_trCisok), *this->M_elmatK, this->M_FESpace->fe() );
 
             //! 5. Stiffness matrix : int { (2 * alpha * J^(-2/3) * exp( gamma*( Ic_iso - 3)*( Ic_iso - 3))*(Ic_iso - 3) ) * (\nabla \delta: \nabla \v)}
             AssemblyElementalStructure::stiff_Jac_P1iso_SecondOrderExp_5term( 2.0 * alpha, gamma, (*M_Jack), (*M_trCisok), *this->M_elmatK, this->M_FESpace->fe() );

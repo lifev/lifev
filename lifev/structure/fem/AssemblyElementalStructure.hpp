@@ -802,9 +802,6 @@ void stiff_Jac_P1iso_VKPenalized_12term( Real coef, const std::vector<Real>& Jk,
 */
 void stiff_Jac_P1iso_VKPenalized_13term( Real coef, const std::vector<Real>& Jk, const std::vector<Real>& Ic_kSquared,  const boost::multi_array<Real,3 >& FkMinusTransposed, MatrixElemental& elmat, const CurrentFE& fe );
 
-
-void stiff_Jac_P1iso_VKPenalized_Tryterm( Real coef, const std::vector<Real>& Jk, const std::vector<Real>& Ic_kSquared, const boost::multi_array<Real,3 >& Fk, const boost::multi_array<Real,3 >& FkMinusTransposed, MatrixElemental& elmat, const CurrentFE& fe );
-
 //! Elementary twelveth nonlinear isochoric Jacobian matrix for VK-Penalized model (see the reference)
 /*!
   This function assembles the local twelveth nonlinear isochoric Jacobian matrix for VK-Penalized model.

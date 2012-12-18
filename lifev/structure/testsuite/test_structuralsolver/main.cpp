@@ -176,15 +176,36 @@ struct Structure::Private
 
     boost::shared_ptr<Epetra_Comm>     comm;
 
-static Real bcZero(const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
-{
-    return  0.;
-}
+    static Real bcZero(const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
+    {
+        return  0.;
+    }
 
-static Real bcNonZero(const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
-{
-    return  30000.;
-}
+    static Real bcNonZero(const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
+    {
+        return  2.1523e+01;
+    }
+
+    static Real d0(const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
+    {
+        switch (i)
+        {
+        case 0:
+            return (1/std::sqrt(3)) * ( x - 0.5 );
+            break;
+        case 1:
+            return 3 * y;
+            break;
+        case 2:
+            return -(1/std::sqrt(3)) * ( z +0.5);
+            break;
+        default:
+            ERROR_MSG("This entry is not allowed: ud_functions.hpp");
+            return 0.;
+            break;
+        }
+    }
+
 
 };
 
@@ -406,6 +427,7 @@ Structure::run3d()
         iterationString = initialLoaded;
         for(UInt iterInit=0; iterInit < timeAdvance->size(); iterInit++ )
         {
+            solidDisp.reset(new vector_Type(dFESpace->map(),importerSolid->mapType() ));
             *solidDisp *= 0.0;
 
             LifeV::ExporterData<mesh_Type> solidDataReader (LifeV::ExporterData<mesh_Type>::VectorField, std::string("displacement."+iterationString), dFESpace, solidDisp, UInt(0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
@@ -454,6 +476,9 @@ Structure::run3d()
             uv0.push_back(acc);
         }
 
+        vectorPtr_Type initialDisplacement(new vector_Type(solid.displacement(), Unique) );
+        dFESpace->interpolate( static_cast<solidFESpace_type::function_Type>( Private::d0 ), *initialDisplacement, 0.0 );
+
         if (timeAdvanceMethod =="BDF")
         {
             Real tZero = dataStructure->dataTime()->initialTime();
@@ -462,7 +487,8 @@ Structure::run3d()
             {
                 Real previousTimeStep = tZero - previousPass*dt;
                 std::cout<<"BDF " <<previousTimeStep<<"\n";
-                uv0.push_back(disp);
+                //uv0.push_back(disp);
+                uv0.push_back(initialDisplacement);
             }
         }
 
@@ -471,6 +497,24 @@ Structure::run3d()
         timeAdvance->setTimeStep( dt );
 
         timeAdvance->updateRHSContribution( dt );
+        //In the case of non-zero displacement
+        solid.initialize( initialDisplacement );
+
+        //Let's verify that the set displacement is the one I expect
+        //Creation of Exporter to check the loaded solution (working only for HDF5)
+        std::string expVerFile = "verificationDisplExporter";
+        LifeV::ExporterHDF5<RegionMesh<LinearTetra> > exporter( dataFile, meshPart.meshPartition(), expVerFile, parameters->comm->MyPID());
+        vectorPtr_Type vectVer ( new vector_Type(solid.displacement(),  LifeV::Unique ) );
+
+        exporter.addVariable( ExporterData<mesh_Type >::VectorField, "displVer", dFESpace, vectVer, UInt(0) );
+
+        exporter.postProcess(0.0);
+
+        *vectVer = *initialDisplacement;
+        exporter.postProcess( 1.0 );
+
+
+
     }
     MPI_Barrier(MPI_COMM_WORLD);
 
@@ -574,9 +618,9 @@ Structure::run3d()
 
       if (verbose)
         {
-	  std::cout << std::endl;
-	  std::cout << "S- Now we are at time " << dataStructure->dataTime()->time() << " s." << std::endl;
-	}
+            std::cout << std::endl;
+            std::cout << "S- Now we are at time " << dataStructure->dataTime()->time() << " s." << std::endl;
+        }
 
       //! 6. Updating right-hand side
       *rhs *=0;

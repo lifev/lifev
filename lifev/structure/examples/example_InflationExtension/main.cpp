@@ -38,7 +38,7 @@ each time step and with the BDF method!!
 #error test_structure cannot be compiled in 2D
 #endif
 
-                                       // Tell the compiler to ignore specific kind of warnings:
+// Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
