@@ -23,12 +23,12 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/FSI3D_1Cylinder
 
     [../Output]
     ProblemPrefix              = Multiscale # Problem prefix
-    SaveEach                   = 5          # time steps
+    SaveEach                   = 1          # time steps
 
     [../time_discretization]
     initialtime                = 0.0       # [s]
     endtime                    = 0.05      # [s]
-    timestep                   = 0.0001    # [s]
+    timestep                   = 0.001     # [s]
 
     [../]
 
@@ -38,8 +38,8 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/FSI3D_1Cylinder
 ###################################################################################################
 FluidDensity                = 1.04          # density         [g/cm^3]
 FluidViscosity              = 0.035         # viscosity       [g/cm/s]
-FluidVenousPressure         = 6.6661195E+03 # ven. pressure   [g/cm/s^2 - dyne/cm^2]
-SolidExternalPressure       = 1E+05         # ref. pressure   [g/cm/s^2 - dyne/cm^2]
+FluidVenousPressure         = 0.0           # ven. pressure   [g/cm/s^2 - dyne/cm^2]
+SolidExternalPressure       = 0.0           # ref. pressure   [g/cm/s^2 - dyne/cm^2]
 SolidDensity                = 1.0           # density         [g/cm^3]
 SolidPoissonCoefficient     = 0.48          # Poisson's ratio []
 SolidYoungModulus           = 3.00E6        # Young's modulus [g/cm/s^2 - dyne/cm^2]
