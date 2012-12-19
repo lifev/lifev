@@ -19,7 +19,7 @@ through BCInterface.
 SIMULATION RUNNING:
 To run a simulation type in a shell:
 
-./Multiscale_BasicTest.exe -f MultiscaleDatabase/*.dat
+./Multiscale_Framework.exe -f MultiscaleDatabase/*.dat
 
 where the * should be replaced with the name of the file to be loaded.
 
