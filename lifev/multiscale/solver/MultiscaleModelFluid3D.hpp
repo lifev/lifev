@@ -41,11 +41,7 @@
 // LifeV includes
 #include <lifev/core/mesh/MeshPartitioner.hpp>
 #include <lifev/core/mesh/RegionMesh.hpp>
-<<<<<<< HEAD:lifev/multiscale/solver/MultiscaleModelFluid3D.hpp
 #include <lifev/navier_stokes/solver/OseenData.hpp>
-=======
-#include <life/lifesolver/OseenData.hpp>
->>>>>>> Updating headers for core module:lifemc/lifesolver/MultiscaleModelFluid3D.hpp
 #include <lifev/core/mesh/MeshData.hpp>
 #include <lifev/bc_interface/fem/BCInterface3D.hpp>
 #include <lifev/core/fem/FESpace.hpp>
