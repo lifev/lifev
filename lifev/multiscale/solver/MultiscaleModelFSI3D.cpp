@@ -511,7 +511,7 @@ MultiscaleModelFSI3D::boundaryDeltaMeanTotalNormalStress( const multiscaleID_Typ
 {
     solveLinearModel( solveLinearSystem );
 
-    return M_FSIoperator->fluid().linearMeanTotalNormalStress( boundaryFlag( boundaryID ), *M_linearFluidBC, *M_fluidVelocityAndPressure, *M_linearSolution );
+    return M_FSIoperator->fluid().linearMeanTotalNormalStress( boundaryFlag( boundaryID ), *M_linearFluidBC, *M_stateVariable, *M_linearSolution );
 }
 
 // ===================================================

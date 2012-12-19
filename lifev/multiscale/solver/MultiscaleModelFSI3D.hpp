@@ -274,7 +274,7 @@ public:
      * @param boundaryID ID of the boundary interface
      * @return flow rate value
      */
-    Real boundaryFlowRate( const multiscaleID_Type& boundaryID ) const { return M_FSIoperator->fluid().flux( flag, *M_stateVariable ); }
+    Real boundaryFlowRate( const multiscaleID_Type& boundaryID ) const { return M_FSIoperator->fluid().flux( boundaryFlag( boundaryID ), *M_stateVariable ); }
 
     //! Get the integral of the mean normal stress on a specific boundary interface of the model
     /*!
