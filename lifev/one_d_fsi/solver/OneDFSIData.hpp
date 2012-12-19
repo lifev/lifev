@@ -165,7 +165,7 @@ public:
      * @param dataFile GetPot dataFile
      * @return section section in the dataFile
      */
-    void oldStyleSetup( const GetPot& dataFile, const std::string& section = "1dnetwork" );
+    void LIFEV_DEPRECATED( oldStyleSetup( const GetPot& dataFile, const std::string& section = "1dnetwork" ) );
 
     //! Update all the physical coefficients
     /*!
