@@ -474,9 +474,9 @@ Real
 MultiscaleModelFSI3D::boundaryMeanNormalStress( const multiscaleID_Type& boundaryID ) const
 {
 #ifdef FSI_WITH_EXTERNALPRESSURE
-    return M_FSIoperator->fluid().meanNormalStress( boundaryFlag( boundaryID ), *M_fluidBC->handler(), M_FSIoperator->solution() );
+    return M_FSIoperator->fluid().meanNormalStress( boundaryFlag( boundaryID ), *M_fluidBC->handler(), *M_stateVariable );
 #else
-    return M_FSIoperator->fluid().meanNormalStress( boundaryFlag( boundaryID ), *M_fluidBC->handler(), M_FSIoperator->solution() ) + M_externalPressureScalar;
+    return M_FSIoperator->fluid().meanNormalStress( boundaryFlag( boundaryID ), *M_fluidBC->handler(), *M_stateVariable ) + M_externalPressureScalar;
 #endif
 }
 
@@ -484,9 +484,9 @@ Real
 MultiscaleModelFSI3D::boundaryMeanTotalNormalStress( const multiscaleID_Type& boundaryID ) const
 {
 #ifdef FSI_WITH_EXTERNALPRESSURE
-    return M_FSIoperator->fluid().meanTotalNormalStress( boundaryFlag( boundaryID ), *M_fluidBC->handler(), M_FSIoperator->solution() );
+    return M_FSIoperator->fluid().meanTotalNormalStress( boundaryFlag( boundaryID ), *M_fluidBC->handler(), *M_stateVariable );
 #else
-    return M_FSIoperator->fluid().meanTotalNormalStress( boundaryFlag( boundaryID ), *M_fluidBC->handler(), M_FSIoperator->solution() ) + M_externalPressureScalar;
+    return M_FSIoperator->fluid().meanTotalNormalStress( boundaryFlag( boundaryID ), *M_fluidBC->handler(), *M_stateVariable ) + M_externalPressureScalar;
 #endif
 }
 
@@ -531,11 +531,11 @@ Real
 MultiscaleModelFSI3D::boundaryTotalPressure( const multiscaleID_Type& boundaryID ) const
 {
 #ifdef FSI_WITH_EXTERNALPRESSURE
-    return M_FSIoperator->fluid().pressure( boundaryFlag( boundaryID ), M_FSIoperator->solution() )
-         + M_FSIoperator->fluid().kineticNormalStress( boundaryFlag( boundaryID ), M_FSIoperator->solution() );
+    return M_FSIoperator->fluid().pressure( boundaryFlag( boundaryID ), *M_stateVariable )
+         + M_FSIoperator->fluid().kineticNormalStress( boundaryFlag( boundaryID ), *M_stateVariable );
 #else
-    return M_FSIoperator->fluid().pressure( boundaryFlag( boundaryID ), M_FSIoperator->solution() )
-         + M_FSIoperator->fluid().kineticNormalStress( boundaryFlag( boundaryID ), M_FSIoperator->solution() ) + M_externalPressureScalar;
+    return M_FSIoperator->fluid().pressure( boundaryFlag( boundaryID ), *M_stateVariable )
+         + M_FSIoperator->fluid().kineticNormalStress( boundaryFlag( boundaryID ), *M_stateVariable ) + M_externalPressureScalar;
 #endif
 }
 
