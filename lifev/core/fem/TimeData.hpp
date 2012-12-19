@@ -129,15 +129,15 @@ public:
     void showMe( std::ostream& output = std::cout ) const;
 
     //@}
-    
-    
+
+
     //! @name Utility methods
     //@{
-    
+
     Real round( const Real& n, const Int& decimal=10 ) const;
-    
+
     //@}
-    
+
 
     //! @name Set Methods
     //@{
@@ -249,8 +249,6 @@ public:
   //@}
 
 private:
-
-    Real round( const Real& n, const Int& decimal=10 ) const;
 
     //! initial time
     Real                    M_initialTime;
