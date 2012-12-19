@@ -162,7 +162,7 @@ MultiscaleModel1D::setupData( const std::string& fileName )
 
 #ifdef HAVE_HDF5
     M_exporterMesh->setComm( M_comm );
-    regularMesh1D( *M_exporterMesh, 0, M_data->numberOfElements(), false, M_data->length(), M_data->length() );
+    regularMesh1D( *M_exporterMesh, 1, M_data->numberOfElements(), false, M_data->length(), 0 );
 
     M_exporter->setDataFromGetPot( dataFile );
     M_exporter->setPrefix( multiscaleProblemPrefix + "_Model_" + number2string( M_ID ) + "_" + number2string( multiscaleProblemStep ) );
