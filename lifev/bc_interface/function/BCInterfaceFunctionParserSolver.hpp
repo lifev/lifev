@@ -46,61 +46,14 @@
 // OneDFSI includes
 #include <lifev/one_d_fsi/solver/OneDFSISolver.hpp>
 
+// Multiscale includes
+#include <lifev/multiscale/solver/MultiscaleGlobalData.hpp>
+
 // BCInterface includes
 #include <lifev/bc_interface/function/BCInterfaceFunctionParser.hpp>
 
 namespace LifeV
 {
-
-#ifndef MULTISCALE_IS_IN_LIFEV
-//! ZeroDimensionalData - Temporary data container for ZeroDimensionalModels until they are defined only in LifeV
-/*!
- * This class will be removed when the Multiscale framework will be ported in LifeV
- */
-class ZeroDimensionalTemporaryData
-{
-public:
-
-    //! @name Constructors & Destructor
-    //@{
-
-    //! Constructor
-    explicit ZeroDimensionalTemporaryData() : M_fluidVenousPressure() {}
-
-    //! Destructor
-    virtual ~ZeroDimensionalTemporaryData() {}
-
-    //@}
-
-
-    //! @name Set Methods
-    //@{
-
-    //! Set the global fluid venous pressure.
-    /*!
-     * @return venous pressure of the fluid.
-     */
-    void setFluidVenousPressure( const Real& fluidVenousPressure ) { M_fluidVenousPressure = fluidVenousPressure; }
-
-    //@}
-
-
-    //! @name Get Methods
-    //@{
-
-    //! Get the global fluid venous pressure.
-    /*!
-     * @return venous pressure of the fluid.
-     */
-    const Real& fluidVenousPressure() const { return M_fluidVenousPressure; }
-
-    //@}
-
-private:
-
-    Real                                M_fluidVenousPressure;
-};
-#endif
 
 //! BCInterfaceFunctionParserSolver - LifeV boundary condition function file wrapper for \c BCInterface
 /*!
@@ -751,11 +704,7 @@ BCInterfaceFunctionParserSolver< OseenSolverShapeDerivative< RegionMesh< LinearT
 
 template< >
 inline void
-#ifdef MULTISCALE_IS_IN_LIFEV
 BCInterfaceFunctionParserSolver< Multiscale::MultiscaleGlobalData >::updatePhysicalSolverVariables()
-#else
-BCInterfaceFunctionParserSolver< ZeroDimensionalTemporaryData >::updatePhysicalSolverVariables()
-#endif
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -767,7 +716,6 @@ BCInterfaceFunctionParserSolver< ZeroDimensionalTemporaryData >::updatePhysicalS
         switch ( *j )
         {
         // f_ -> FLUID
-#ifdef MULTISCALE_IS_IN_LIFEV
         case f_timeStep:
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -794,7 +742,7 @@ BCInterfaceFunctionParserSolver< ZeroDimensionalTemporaryData >::updatePhysicalS
             setVariable( "f_viscosity", M_physicalSolver->fluidViscosity() );
 
             break;
-#endif
+
         case f_venousPressure:
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -942,11 +890,7 @@ BCInterfaceFunctionParserSolver< OseenSolverShapeDerivative< RegionMesh< LinearT
 
 template< >
 inline void
-#ifdef MULTISCALE_IS_IN_LIFEV
 BCInterfaceFunctionParserSolver< Multiscale::MultiscaleGlobalData >::createAccessList( const BCInterfaceData& data )
-#else
-BCInterfaceFunctionParserSolver< ZeroDimensionalTemporaryData >::createAccessList( const BCInterfaceData& data )
-#endif
 {
 
 #ifdef HAVE_LIFEV_DEBUG

@@ -85,15 +85,6 @@ namespace LifeV
  *  All the parameters are case sensitive.
  *
  *  See \c BCInterface base class for more details.
- *
- *  <b>TODO LIST</b>
- *  Due to the splitting of BCInterface between LifeV and Mathcard there are some legacy that we cannot
- *  remove now. Here there is a list of think that should be done before porting the code to LifeV in
- *  order to remove these legacies:
- *
- *  <ol>
- *      <li> remove the legacy in LifeV and Mathcard marked with the MULTISCALE_IS_IN_LIFEV macro;
- *  </ol>
  */
 template< class BcHandler, class PhysicalSolverType >
 class BCInterface0D : public virtual BCInterface< BcHandler, PhysicalSolverType >

@@ -72,13 +72,7 @@ public:
     typedef ZeroDimensionalBCHandler                                        bc_Type;
     typedef boost::shared_ptr< bc_Type >                                    bcPtr_Type;
 
-#ifdef MULTISCALE_IS_IN_LIFE
     typedef BCInterface0D< bc_Type, MultiscaleGlobalData >                  bcInterface_Type;
-#else
-    typedef ZeroDimensionalTemporaryData                                    temporaryData_Type;
-    typedef boost::shared_ptr< temporaryData_Type >                         temporaryDataPtr_Type;
-    typedef BCInterface0D< bc_Type, temporaryData_Type >                    bcInterface_Type;
-#endif
     typedef boost::shared_ptr< bcInterface_Type >                           bcInterfacePtr_Type;
 
     //@}
@@ -334,9 +328,6 @@ private:
     std::ofstream          M_outputFile;
 
     bcInterfacePtr_Type    M_bc;
-#ifndef MULTISCALE_IS_IN_LIFE
-    temporaryDataPtr_Type  M_temporaryData;
-#endif
 
     Real                   M_pressureLeft_tn;  // pressure left (P1) @ t=t(n)
     Real                   M_flowRateLeft_tn;  // flowRate left (Q1) @ t=t(n)
