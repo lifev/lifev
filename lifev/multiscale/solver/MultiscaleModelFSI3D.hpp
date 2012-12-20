@@ -1060,17 +1060,17 @@ private:
         case 0:
             return -( rhs[0] * ( M_t1[2] * M_t2[1] - M_t1[1] * M_t2[2] )
                     + rhs[1] * ( M_n[1]  * M_t2[2] - M_n[2]  * M_t2[1] )
-                    + rhs[2] * ( M_n[2]  * M_t1[1] - M_n[1]  * M_t1[2] ) ) / ( determinant * M_FSI3D->globalData()->dataTime()->timeStep() );
+                    + rhs[2] * ( M_n[2]  * M_t1[1] - M_n[1]  * M_t1[2] ) ) / determinant;
 
         case 1:
             return  ( rhs[0] * ( M_t1[2] * M_t2[0] - M_t1[0] * M_t2[2] )
                     + rhs[1] * ( M_n[0]  * M_t2[2] - M_n[2]  * M_t2[0] )
-                    + rhs[2] * ( M_n[2]  * M_t1[0] - M_n[0]  * M_t1[2] ) ) / ( determinant * M_FSI3D->globalData()->dataTime()->timeStep() );
+                    + rhs[2] * ( M_n[2]  * M_t1[0] - M_n[0]  * M_t1[2] ) ) / determinant;
 
         case 2:
             return -( rhs[0] * ( M_t1[1] * M_t2[0] - M_t1[0] * M_t2[1] )
                     + rhs[1] * ( M_n[0]  * M_t2[1] - M_n[1]  * M_t2[0] )
-                    + rhs[2] * ( M_n[1]  * M_t1[0] - M_n[0]  * M_t1[1] ) ) / ( determinant * M_FSI3D->globalData()->dataTime()->timeStep() );
+                    + rhs[2] * ( M_n[1]  * M_t1[0] - M_n[0]  * M_t1[1] ) ) / determinant;
 
         default:
 
