@@ -38,10 +38,8 @@
 #ifndef MultiscaleModelWindkessel0D_H
 #define MultiscaleModelWindkessel0D_H 1
 
-// LifeV includes
 #include <lifev/bc_interface/fem/BCInterface0D.hpp>
 
-// Mathcard includes
 #include <lifev/multiscale/solver/MultiscaleModel.hpp>
 #include <lifev/multiscale/solver/MultiscaleInterface.hpp>
 

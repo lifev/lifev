@@ -53,7 +53,6 @@
 // and in the future can be removed.
 #define FSI_WITH_BOUNDARYAREA
 
-// LifeV includes
 #include <lifev/core/filter/ExporterEnsight.hpp>
 #ifdef HAVE_HDF5
 #include <lifev/core/filter/ExporterHDF5.hpp>
@@ -72,7 +71,6 @@
 #include <lifev/fsi/solver/MonolithicBlockComposedNN.hpp>
 #include <lifev/fsi/solver/MonolithicBlockComposedDNND.hpp>
 
-// Mathcard includes
 #include <lifev/multiscale/solver/MultiscaleModel.hpp>
 #include <lifev/multiscale/solver/MultiscaleInterface.hpp>
 

@@ -48,7 +48,6 @@
 // Matlab post-processing
 #define HAVE_MATLAB_POSTPROCESSING 1
 
-// LifeV includes
 #include <lifev/one_d_fsi/fem/OneDFSIBCHandler.hpp>
 #include <lifev/one_d_fsi/solver/OneDFSIPhysicsLinear.hpp>
 #include <lifev/one_d_fsi/solver/OneDFSIPhysicsNonLinear.hpp>
@@ -65,7 +64,6 @@
 #include <lifev/core/filter/ExporterHDF5.hpp>
 #endif
 
-// Mathcard includes
 #include <lifev/multiscale/solver/MultiscaleModel.hpp>
 #include <lifev/multiscale/solver/MultiscaleInterface.hpp>
 

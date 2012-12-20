@@ -38,7 +38,6 @@
 #ifndef MultiscaleModelFluid3D_H
 #define MultiscaleModelFluid3D_H 1
 
-// LifeV includes
 #include <lifev/core/mesh/MeshPartitioner.hpp>
 #include <lifev/core/mesh/RegionMesh.hpp>
 #include <lifev/navier_stokes/solver/OseenData.hpp>
@@ -51,8 +50,6 @@
 #include <lifev/core/filter/ExporterHDF5.hpp>
 #endif
 #include <lifev/navier_stokes/solver/OseenSolverShapeDerivative.hpp>
-
-// Mathcard includes
 
 #include <lifev/multiscale/solver/MultiscaleModel.hpp>
 #include <lifev/multiscale/solver/MultiscaleInterface.hpp>
