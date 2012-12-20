@@ -1,0 +1,29 @@
+###################################################################################################
+#
+#                       This file is part of the LifeV Library
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+#
+#      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
+#           Date: 2011-03-10
+#  License Terms: GNU LGPL
+#
+###################################################################################################
+
+[Multiscale]
+couplingName    = BoundaryCondition_Area_One
+
+[boundary_conditions]
+list = 'Area_One'  # Unitary Area
+
+    [./Area_One]
+    type                = Natural
+    mode                = Full
+    component           = 3
+    function            = '1'
+
+    # Additional parameters for 1D BC
+    quantity            = A
+    line                = first
+
+    [../]
