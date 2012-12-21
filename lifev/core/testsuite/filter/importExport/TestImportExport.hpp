@@ -195,7 +195,7 @@ TestImportExport::buildMesh()
     // +-----------------------------------------------+
     M_displayer.leaderPrint( "[Building the mesh]\n" );
     chrono.start();
-    boost::shared_ptr< mesh_Type > fullMeshPtr( new mesh_Type( *M_commPtr ) );
+    boost::shared_ptr< mesh_Type > fullMeshPtr( new mesh_Type( M_commPtr ) );
 
     if( M_dataFile("space_discretization/mesh_from_file", false) )
     {

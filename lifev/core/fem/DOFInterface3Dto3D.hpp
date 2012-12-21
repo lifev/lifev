@@ -549,11 +549,6 @@ void DOFInterface3Dto3D::updateDofConnections( const Mesh& mesh1, const DOF& dof
     // Loop on facets at the interface (matching facets)
     for ( Iterator i = M_facetToFacetConnectionList.begin(); i != M_facetToFacetConnectionList.end(); ++i )
     {
-// <<<<<<< HEAD
-// =======
-//     	if ( flag3 != 0 && Int(mesh1.boundaryFacet(i->first).markerID()) != *flag3) continue;
-
-// >>>>>>> RegionMesh_part2
         feBd1.update( mesh1.boundaryFacet( i->first ) );  // Updating facet information on mesh1
         feBd2.update( mesh2.boundaryFacet( i->second ) );  // Updating facet information on mesh2
 
@@ -562,7 +557,7 @@ void DOFInterface3Dto3D::updateDofConnections( const Mesh& mesh1, const DOF& dof
 
         for (ID lDof1 = 0; lDof1 < localToGlobalMapOnBFacet1.size(); lDof1++)
 		{
-		  if ( flag3 != 0 && mesh1.boundaryFacet(i->first).point(lDof1).markerID() == *flag3) 
+		  if ( flag3 != 0 && mesh1.boundaryFacet(i->first).point(lDof1).markerID() == *flag3)
 		    continue;
 		  ID gDof1 = localToGlobalMapOnBFacet1[lDof1];
 		  feBd1.coorMap( p1[0], p1[1], p1[2], feBd1.refFE.xi( lDof1 ), feBd1.refFE.eta( lDof1 ) ); // Nodal coordinates on the current facet (mesh1)

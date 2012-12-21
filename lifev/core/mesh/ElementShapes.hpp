@@ -154,6 +154,13 @@ public:
     static const UInt S_numFacets             = 0;     //!< Number of facets
     static const UInt S_numRidges             = 0;     //!< Number of ridges
     static const UInt S_numPeaks              = 0;     //!< Number of peaks
+
+    //! @return the local ID of the j-th point of the i-th edge
+    static ID edgeToPoint( ID const& /*iEdge*/, ID const& /*jPoint*/ )
+    {
+        ERROR_MSG ( "edgeToPoint not implemented for geo Point elements." );
+        return static_cast<ID>(0);
+    }
 };
 
 
@@ -180,6 +187,12 @@ public:
     static ID facetToRidge( ID const& /*iFacet*/, ID const& /*jRidge*/ ) {return NotAnId;}
 
     static ID facetToPeak( ID const& /*iFacet*/, ID const& /*jPeak*/ ) {return NotAnId;}
+
+    static std::pair<ID, bool> faceToEdge( ID const& /*iFace*/, ID const& /*jEdge*/ )
+    {
+        ERROR_MSG ( "FaceToEdge not implemented for geo Line elements." );
+        return std::make_pair( static_cast<ID>(0), true );
+    }
 };
 
 

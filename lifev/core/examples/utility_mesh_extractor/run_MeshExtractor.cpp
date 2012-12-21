@@ -20,13 +20,13 @@
 
 #include "MeshExtractor.hpp"
 
-int run(GetPot & dataFile, bool verbose, boost::shared_ptr<Epetra_Comm>& comm)
+int run(GetPot & dataFile, bool /*verbose*/, boost::shared_ptr<Epetra_Comm>& comm)
 {
     using namespace LifeV;
     typedef RegionMesh<LinearTetra> mesh_Type;
     typedef RegionMesh<LinearTriangle> mesh2d_Type;
 
-    LifeChrono chrono;
+    // LifeChrono chrono;
 
     std::string mesh_section("mesh");
     //FIXME At the moment we can extract only one marker at a time.
@@ -43,7 +43,7 @@ int run(GetPot & dataFile, bool verbose, boost::shared_ptr<Epetra_Comm>& comm)
     boost::shared_ptr<mesh_Type> mesh;
     boost::shared_ptr< MeshPartitioner<mesh_Type> > meshPart;
     MeshData meshData(dataFile, mesh_section);
-    mesh.reset( new mesh_Type( *comm ) );
+    mesh.reset( new mesh_Type( comm ) );
     readMesh(*mesh, meshData);
 
     //Extract the 2d mesh from the boundary with a given marker

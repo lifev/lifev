@@ -87,6 +87,7 @@ using namespace LifeV;
 typedef RegionMesh<LinearTetra> mesh_Type;
 typedef MatrixEpetra<Real> matrix_Type;
 typedef VectorEpetra vector_Type;
+typedef FESpace<mesh_Type, MapEpetra>::function_Type function_Type;
 
 
 // ---------------------------------------------------------------
@@ -94,10 +95,11 @@ typedef VectorEpetra vector_Type;
 // right hand side that we will consider.
 // ---------------------------------------------------------------
 
-Real fFct( const Real& /* t */, const Real& x, const Real& /* y */, const Real& /* z */, const ID& /*i*/ )
+Real fFctRaw( const Real& /* t */, const Real& x, const Real& /* y */, const Real& /* z */, const ID& /*i*/ )
 {
     return std::sin(x);
 }
+function_Type fFct(fFctRaw);
 
 // ---------------------------------------------------------------
 // To use the functors, we need to define new classes, which are

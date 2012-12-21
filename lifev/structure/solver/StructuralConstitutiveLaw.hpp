@@ -71,7 +71,7 @@
 
 #include <lifev/core/algorithm/SolverAztecOO.hpp>
 
-#include <lifev/structure/solver/VenantKirchhoffElasticData.hpp>
+#include <lifev/structure/solver/StructuralConstitutiveLawData.hpp>
 
 namespace LifeV
 {
@@ -90,7 +90,7 @@ public:
 //!@name Type definitions
 //@{
 
-  typedef VenantKirchhoffElasticData             data_Type;
+  typedef StructuralConstitutiveLawData          data_Type;
 
   typedef typename LifeV::SolverAztecOO          solver_Type;
 

@@ -500,7 +500,7 @@ void RogersMcCulloch<Mesh, SolverType>::computeIonicCurrent(  Real Capacitance,
 {
 	Real u_ig, w_ig;
 
-	Real G1 = this->M_data.RMCParameterC1() / this->M_data.RMCTimeUnit() / pow(this->M_data.RMCPotentialAmplitude(),2.0);
+	Real G1 = this->M_data.RMCParameterC1() / this->M_data.RMCTimeUnit() / std::pow(this->M_data.RMCPotentialAmplitude(),2.0);
 	Real G2 = this->M_data.RMCParameterC2() / this->M_data.RMCTimeUnit();
 
         for ( UInt ig = 0; ig < uFESpace.fe().nbQuadPt();ig++ )
@@ -660,12 +660,12 @@ LuoRudy( const data_Type& dataType,
 			M_F(96485.33838), //% coulumbs/mole
 			M_permeabilityRatio(0.01833), //% Na/K permeability ratio
 			M_c(1.), //% membrane capacitance set as 1 mui-F/cm^2
-			M_Ena(1000. * (M_R * M_temperature / M_F ) * log(M_Na0 / M_Nai) ),
-			M_Gk(0.282 * sqrt(M_K0 / 5.4)),
-			M_Ek(1000. * (M_R * M_temperature / M_F) * log((M_K0 + M_permeabilityRatio * M_Na0)
+			M_Ena(1000. * (M_R * M_temperature / M_F ) * std::log(M_Na0 / M_Nai) ),
+			M_Gk(0.282 * std::sqrt(M_K0 / 5.4)),
+			M_Ek(1000. * (M_R * M_temperature / M_F) * std::log((M_K0 + M_permeabilityRatio * M_Na0)
                                                            / (M_Ki + M_permeabilityRatio * M_Nai))),
-			M_Gk1(0.6047 * sqrt(M_K0 / 5.4)),
-			M_Ek1(1000.* (M_R * M_temperature / M_F)* log(M_K0 / M_Ki)),
+			M_Gk1(0.6047 * std::sqrt(M_K0 / 5.4)),
+			M_Ek1(1000.* (M_R * M_temperature / M_F)* std::log(M_K0 / M_Ki)),
 			M_Ekp(M_Ek1),
 			M_vectorExponentialh(HeartIonicSolver<Mesh, SolverType>::M_localMap),
 			M_vectorExponentialj(HeartIonicSolver<Mesh, SolverType>::M_localMap),
@@ -728,7 +728,7 @@ void LuoRudy<Mesh, SolverType>::solveIonicModel( const vector_Type& u, const Rea
 		Int ig=u.blockMap().MyGlobalElements()[i];
 		Real u_ig=u[ig];
 		computeODECoefficients(u_ig);
-        M_Esi = 7.7 - 13.0287 * log(M_solutionGatingCa[ig]);
+        M_Esi = 7.7 - 13.0287 * std::log(M_solutionGatingCa[ig]);
 		//fast sodium current
 		M_Ina = 23.* M_solutionGatingM[ig] * M_solutionGatingM[ig] * M_solutionGatingM[ig] * M_solutionGatingH[ig] * M_solutionGatingJ[ig] * (u_ig - M_Ena);
 		//slow inward current
@@ -753,22 +753,22 @@ void LuoRudy<Mesh, SolverType>::solveIonicModel( const vector_Type& u, const Rea
                                                   M_Ina + M_Islow + M_Ik + M_Ik1t);
 		M_vectorExponentialh.epetraVector().ReplaceGlobalValue(ig,
                                                                   0,
-                                                                  exp(-timeStep / M_tauh));
+                                                                  std::exp(-timeStep / M_tauh));
 		M_vectorExponentialj.epetraVector().ReplaceGlobalValue(ig,
                                                                   0,
-                                                                  exp(-timeStep / M_tauj));
+                                                                  std::exp(-timeStep / M_tauj));
 		M_vectorExponentialm.epetraVector().ReplaceGlobalValue(ig,
                                                                   0,
-                                                                  exp(-timeStep / M_taum));
+                                                                  std::exp(-timeStep / M_taum));
 		M_vectorExponentiald.epetraVector().ReplaceGlobalValue(ig,
                                                                   0,
-                                                                  exp(-timeStep / M_taud));
+                                                                  std::exp(-timeStep / M_taud));
 		M_vectorExponentialf.epetraVector().ReplaceGlobalValue(ig,
                                                                   0,
-                                                                  exp(-timeStep / M_tauf));
+                                                                  std::exp(-timeStep / M_tauf));
 		M_vectorExponentialX.epetraVector().ReplaceGlobalValue(ig,
                                                                   0,
-                                                                  exp(-timeStep / M_tauX));
+                                                                  std::exp(-timeStep / M_tauX));
 		M_vectorInfimumh.epetraVector().ReplaceGlobalValue(ig,
                                                               0,
                                                               M_hinf);
@@ -868,40 +868,40 @@ void LuoRudy<Mesh, SolverType>::computeODECoefficients( const Real& u_ig )
     if (u_ig >= -40.)
     {
         M_ah=0.;
-        M_bh = 1. / (0.13 * (1. + exp( (u_ig + 10.66) / (-11.1) )));
+        M_bh = 1. / (0.13 * (1. + std::exp( (u_ig + 10.66) / (-11.1) )));
         M_aj=0.;
-        M_bj = 0.3 * exp(-2.535e-7 * u_ig) / (1. + exp(-0.1 * (u_ig + 32.)));
+        M_bj = 0.3 * std::exp(-2.535e-7 * u_ig) / (1. + std::exp(-0.1 * (u_ig + 32.)));
     }
     else
     {
-        M_ah = 0.135 * exp((80. + u_ig) / -6.8);
-        M_bh = 3.56 * exp(0.079 *u_ig) + 3.1e5 * exp(0.35 * u_ig);
-        M_aj = (-1.2714e5 * exp(0.2444 * u_ig)-3.474e-5 * exp(-0.04391 * u_ig))*
-            (u_ig + 37.78) / (1 + exp(0.311 * (u_ig + 79.23)));
-        M_bj = 0.1212 * exp(-0.01052 * u_ig) / (1. + exp(-0.1378 * (u_ig + 40.14)));
+        M_ah = 0.135 * std::exp((80. + u_ig) / -6.8);
+        M_bh = 3.56 * std::exp(0.079 *u_ig) + 3.1e5 * std::exp(0.35 * u_ig);
+        M_aj = (-1.2714e5 * std::exp(0.2444 * u_ig)-3.474e-5 * std::exp(-0.04391 * u_ig))*
+            (u_ig + 37.78) / (1 + std::exp(0.311 * (u_ig + 79.23)));
+        M_bj = 0.1212 * std::exp(-0.01052 * u_ig) / (1. + std::exp(-0.1378 * (u_ig + 40.14)));
     }
-    M_am = 0.32 * (u_ig + 47.13) / (1. - exp(-0.1 * (u_ig + 47.13)));
-    M_bm = 0.08*exp(-u_ig/11.);
+    M_am = 0.32 * (u_ig + 47.13) / (1. - std::exp(-0.1 * (u_ig + 47.13)));
+    M_bm = 0.08 * std::exp(-u_ig/11.);
 
     //slow inward current
-    M_ad = 0.095 * exp(-0.01 *(u_ig - 5.)) / (1. + exp(-0.072*(u_ig - 5.)));
-    M_bd = 0.07  * exp(-0.017*(u_ig + 44.))/ (1. + exp( 0.05 *(u_ig + 44.)));
-    M_af = 0.012 * exp(-0.008*(u_ig + 28.))/ (1. + exp( 0.15 *(u_ig + 28.)));
-    M_bf = 0.0065* exp(-0.02 *(u_ig + 30.))/ (1. + exp( -0.2 *(u_ig + 30.)));
+    M_ad = 0.095 * std::exp(-0.01 *(u_ig - 5.)) / (1. + std::exp(-0.072*(u_ig - 5.)));
+    M_bd = 0.07  * std::exp(-0.017*(u_ig + 44.))/ (1. + std::exp( 0.05 *(u_ig + 44.)));
+    M_af = 0.012 * std::exp(-0.008*(u_ig + 28.))/ (1. + std::exp( 0.15 *(u_ig + 28.)));
+    M_bf = 0.0065* std::exp(-0.02 *(u_ig + 30.))/ (1. + std::exp( -0.2 *(u_ig + 30.)));
 
     //Time dependent potassium outward current
-    M_aX = 0.0005 * exp(0.083 * (u_ig +50.)) / (1. + exp(0.057 * (u_ig + 50.)));
-    M_bX = 0.0013 * exp(-0.06 * (u_ig +20.)) / (1. + exp(-0.04 * (u_ig + 20.)));
+    M_aX = 0.0005 * std::exp(0.083 * (u_ig +50.)) / (1. + std::exp(0.057 * (u_ig + 50.)));
+    M_bX = 0.0013 * std::exp(-0.06 * (u_ig +20.)) / (1. + std::exp(-0.04 * (u_ig + 20.)));
 
     if(u_ig<=-100)
         M_xii = 1.;
     else
-        M_xii = 2.837 * (exp (0.04 * (u_ig + 77.)) -1.) / ((u_ig + 77.) * exp(0.04 * (u_ig + 35.)));
-    M_ak1 = 1.02 / (1. + exp(0.2385 * (u_ig - M_Ek1 - 59.215)));
-    M_bk1 = (0.49124 * exp(0.08032 * (u_ig - M_Ek1 + 5.476)) +
-             exp(0.06175 * (u_ig - M_Ek1 - 594.31))) / (1. + exp(-0.5143 * (u_ig - M_Ek1 + 4.753)));
+        M_xii = 2.837 * (std::exp (0.04 * (u_ig + 77.)) -1.) / ((u_ig + 77.) * std::exp(0.04 * (u_ig + 35.)));
+    M_ak1 = 1.02 / (1. + std::exp(0.2385 * (u_ig - M_Ek1 - 59.215)));
+    M_bk1 = (0.49124 * std::exp(0.08032 * (u_ig - M_Ek1 + 5.476)) +
+             std::exp(0.06175 * (u_ig - M_Ek1 - 594.31))) / (1. + std::exp(-0.5143 * (u_ig - M_Ek1 + 4.753)));
     //Plateau potassium outward current
-    M_Kp = 1. / (1. + exp((7.488 - u_ig) / 5.98));
+    M_Kp = 1. / (1. + std::exp((7.488 - u_ig) / 5.98));
 
     M_K1inf = M_ak1 / (M_ak1 + M_bk1);
     M_hinf = M_ah   / (M_ah  + M_bh);

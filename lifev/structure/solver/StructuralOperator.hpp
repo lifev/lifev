@@ -26,19 +26,21 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 /*!
  *  @file
- *  @brief This file contains solvers for different materials. WARNING!!!!This is the most important issue related with this class. At the moment, the BC are applied on the matrix and on rhsNoBc for VK models but for NH and EXP they are applied on the residual directly. This does not work for nonhomogeneus Dirichlet conditions!!
-*
-*  @version 1.0
-*  @date 01-01-2010
-*  @author Paolo Tricerri
-*
-*  @maintainer  Paolo Tricerri <paolo.tricerri@epfl.ch>
+ *  @brief This file contains solvers for different materials.
+ *  @warning: This is the most important issue related with this class.
+ *  At the moment, the BC are applied on the matrix and on rhsNoBc for VK models
+ *  but for NH and EXP they are applied on the residual directly. This does
+ *  not work for nonhomogeneus Dirichlet conditions!!
+ *
+ *  @version 1.0
+ *  @date 01-01-2010
+ *  @author Paolo Tricerri
+ *
+ *  @maintainer  Paolo Tricerri <paolo.tricerri@epfl.ch>
 */
 
 #ifndef _STRUCTURALOPERATOR_H_
 #define _STRUCTURALOPERATOR_H_ 1
-
-//#include<boost/scoped_ptr.hpp>
 
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -67,7 +69,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/core/algorithm/SolverAztecOO.hpp>
 #include <lifev/core/algorithm/NonLinearRichardson.hpp>
 
-#include <lifev/structure/solver/VenantKirchhoffElasticData.hpp>
+#include <lifev/structure/solver/StructuralConstitutiveLawData.hpp>
 #include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
 
 //ET includes
@@ -163,7 +165,6 @@ public:
 
     typedef FESpace< RegionMesh<LinearTetra>, MapEpetra >          FESpace_Type;
     typedef boost::shared_ptr<FESpace_Type>                        FESpacePtr_Type;
-
     //@}
 
 
@@ -940,14 +941,9 @@ void
 StructuralOperator<Mesh, SolverType>::showMe( std::ostream& c  ) const
 {
     c << "\n*** StructuralOperator::showMe method" << std::endl;
-    c << "****** Data of the Material************" << std::endl;
-    c << "Thickness:    " << M_data->thickness() << std::endl;
-    c << "Density:      " << M_data->rho() << std::endl;
-    c << "Young:        " << M_data->young(1) << std::endl;
-    c << "Poisson:      " << M_data->poisson(1) << std::endl;
-    //  c << "Theta:        " << M_theta << std::endl;
-    //  c << "Zeta:         " << M_zeta << std::endl;
-    c << "***************************************" << std::endl;
+
+    M_data->showMe( c );
+
 }
 
 template <typename Mesh, typename SolverType>

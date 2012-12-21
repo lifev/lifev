@@ -195,6 +195,17 @@ void FSIMonolithicGE::applyBoundaryConditions( )
          //M_monolithicMatrix->matrix()->spy("M");
 }
 
+void FSIMonolithicGE::setALEVectorInStencil(const vectorPtr_Type& fluidDisp, const UInt /*iter*/,const bool /*lastVector*/)
+{
+
+    //ALE problem
+    //The shared_pointer for the vectors has to be trasformed into a pointer to VectorEpetra
+    //That is the type of pointers that are used in TimeAdvance
+    vector_Type* normalPointerToALEVector( new vector_Type(*fluidDisp) );
+    (M_ALETimeAdvance->stencil()).push_back( normalPointerToALEVector );
+
+}
+
 void FSIMonolithicGE::updateSolution( const vector_Type& solution )
 {
    super_Type::updateSolution( solution );

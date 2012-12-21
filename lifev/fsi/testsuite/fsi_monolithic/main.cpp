@@ -35,11 +35,11 @@
  *
  * Monolithic problem. Features:
  * - fullMonolithic (CE):
- *  -# solution with exact Newton (semiImplicit = false, useShapeDerivatives = true, domainVelImplicit = false, convectiveTermDer = false)
- *  -# solution with quasi Newton (semiImplicit = false, useShapeDerivatives = false, domainVelImplicit = false, convectiveTermDer = false)
+ *  -# solution with exact Newton (semiImplicit = false, useShapeDerivatives = true, conservativeFormulation = false)
+ *  -# solution with quasi Newton (semiImplicit = false, useShapeDerivatives = true, conservativeFormulation = false)
  *  -# preconditioner choice: see the classes Monolithic and fullMonolithic
  * - Monolithic (GCE):
- *  -# solution extrapolating the fluid domain (semiImplicit = true, useShapeDerivatives = false, domainVelImplicit = false, convectiveTermDer = false)
+ *  -# solution extrapolating the fluid domain (semiImplicit = false, useShapeDerivatives = true, conservativeFormulation = false)
  *  -# preconditioner choice: see the classes Monolithic and fullMonolithic
  * - boundary conditions:
  *  -# Neumann
@@ -64,6 +64,9 @@
  * This test implements an inlet flux bundary condition for the first three time steps, then at the fourth time step
  * the inlet boundary condition is replaced by a Neumann one (this mechanism is useful to implement rudimental valves).
  * The outflow boundary condition is of absorbing type. At the outer wall for the structure a Robin condition is imposed.
+ * The time discretization is carried out using BDF methods of order 2. At the moment, even is the Newmark method is available
+ * for the temporal discretization of the single problems( e.g. in test_structuralsolver), it cannot be used in the FSI framework
+ * since the class TimeAdvanceNewmark is not registered as one of the possible instances of the abstrac class TimeAdvance.
  */
 
 // Tell the compiler to ignore specific kind of warnings:
@@ -347,15 +350,9 @@ public:
 
 			M_fsi->iterate( solution );
 
-			if(M_data->method().compare("monolithicGI") == 0)
-			{
-                // shift_right of the solution of all the time advance classes in the FSIOperator
-                M_fsi->FSIOper()->updateSolution( *solution );
-            }
-			else //Case when monolithicGE is used
-			{
-				M_fsi->FSIOper()->updateSolution( *solution );
-			}
+			// shift_right of the solution of all the time advance classes in the FSIOperator
+			M_fsi->FSIOper()->updateSolution( *solution );
+
 			M_fsi->FSIOper()->displayer().leaderPrintMax("[fsi_run] Iteration ", iter);
 			M_fsi->FSIOper()->displayer().leaderPrintMax(" was done in : ", _timer.elapsed());
 
@@ -363,10 +360,10 @@ public:
 					<< M_fsi->displacement().norm2() << "\n";
 
 			//     ///////// CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
-			 if (!M_data->method().compare("monolithicGI"))
-			 	checkCEResult(M_data->dataFluid()->dataTime()->time());
-			 else
-			 	checkGCEResult(M_data->dataFluid()->dataTime()->time());
+			  if (!M_data->method().compare("monolithicGI"))
+                  checkCEResult(M_data->dataFluid()->dataTime()->time());
+              else
+                  checkGCEResult(M_data->dataFluid()->dataTime()->time());
 
 		}
 
@@ -480,20 +477,21 @@ int main(int argc, char** argv)
 void Problem::checkCEResult(const LifeV::Real& time)
 {
 	LifeV::Real dispNorm=M_fsi->displacement().norm2();
-	if (time==0.000 && (dispNorm-114908)/dispNorm*(dispNorm-114908)/dispNorm<1e-5) Problem::resultCorrect(time);
-	else if (time==0.001 && (dispNorm-143981)/dispNorm*(dispNorm-143981)/dispNorm<1e-5)  Problem::resultCorrect(time);
-	else if (time==0.002 && (dispNorm-97513.4)/dispNorm*(dispNorm-97513.4)/dispNorm<1e-5)  Problem::resultCorrect(time);
-	else if (time==0.003 && (dispNorm-90963.4)/dispNorm*(dispNorm-90963.4)/dispNorm<1e-5)  Problem::resultCorrect(time);
-	else if (time==0.004 && (dispNorm-85451.2)/dispNorm*(dispNorm-85451.2)/dispNorm<1e-5)  Problem::resultCorrect(time);
+    if (time==0.000 && (dispNorm-106344)/dispNorm*(dispNorm-106344)/dispNorm<1e-3) Problem::resultCorrect(time);
+    else if (time==0.001 && (dispNorm-147017)/dispNorm*(dispNorm-147017)/dispNorm<1e-3) Problem::resultCorrect(time);
+    else if (time==0.002 && (dispNorm-108341)/dispNorm*(dispNorm-108341)/dispNorm<1e-3) Problem::resultCorrect(time);
+    else if (time==0.003 && (dispNorm-106092)/dispNorm*(dispNorm-106092)/dispNorm<1e-3) Problem::resultCorrect(time);
+    else if (time==0.004 && (dispNorm-105614)/dispNorm*(dispNorm-105614)/dispNorm<1e-3) Problem::resultCorrect(time);
+
 }
 
 
 void Problem::checkGCEResult(const LifeV::Real& time)
 {
     LifeV::Real dispNorm=M_fsi->displacement().norm2();
-    if (time==0.000 && (dispNorm-106856)/dispNorm*(dispNorm-106856)/dispNorm<1e-3) Problem::resultCorrect(time);
-    else if (time==0.001 && (dispNorm-114222)/dispNorm*(dispNorm-114222)/dispNorm<1e-3) Problem::resultCorrect(time);
-    else if (time==0.002 && (dispNorm-86107)/dispNorm*(dispNorm-86107)/dispNorm<1e-3) Problem::resultCorrect(time);
-    else if (time==0.003 && (dispNorm-80013)/dispNorm*(dispNorm-80013)/dispNorm<1e-3) Problem::resultCorrect(time);
-    else if (time==0.004 && (dispNorm-74586)/dispNorm*(dispNorm-74586)/dispNorm<1e-3) Problem::resultCorrect(time);
+	if (time==0.000 && (dispNorm-110316)/dispNorm*(dispNorm-110316)/dispNorm<1e-5) Problem::resultCorrect(time);
+	else if (time==0.001 && (dispNorm-99468.8)/dispNorm*(dispNorm-99468.8)/dispNorm<1e-5)  Problem::resultCorrect(time);
+	else if (time==0.002 && (dispNorm-90957)/dispNorm*(dispNorm-90957)/dispNorm<1e-5)  Problem::resultCorrect(time);
+	else if (time==0.003 && (dispNorm-90070.5)/dispNorm*(dispNorm-90070.5)/dispNorm<1e-5)  Problem::resultCorrect(time);
+	else if (time==0.004 && (dispNorm-88162.4)/dispNorm*(dispNorm-88162.4)/dispNorm<1e-5)  Problem::resultCorrect(time);
 }

@@ -103,7 +103,7 @@ public:
     /**
      Sets the parameters read from data file
      */
-    void setUp( const GetPot& dataFile );
+    void setup( const GetPot& dataFile );
 
     //! initializes the fluid and mesh problems, creates the map of the global matrix
     void setupFluidSolid( UInt const fluxes );
@@ -126,24 +126,33 @@ public:
      also the right hand side.
      */
     void applyBoundaryConditions();
-       void updateSolution( const vector_Type& solution )
+
+    void updateSolution( const vector_Type& solution )
        {
-       	  super_Type::updateSolution( solution );
+           super_Type::updateSolution( solution );
 
-          //The size of the vectors for the ALE is = dimension of the ALE problem
-          //To do the shift right we first need to extract the fluid displacement
-          //And then push it into the ALE timeAdvance class.
-	      vectorPtr_Type displacementToSave( new vector_Type(M_mmFESpace->map()) );
-	      UInt offset( M_solidAndFluidDim + nDimensions*M_interface );
-	      displacementToSave->subset(solution, offset);
+           //The size of the vectors for the ALE is = dimension of the ALE problem
+           //To do the shift right we first need to extract the fluid displacement
+           //And then push it into the ALE timeAdvance class.
+           vectorPtr_Type displacementToSave( new vector_Type(M_mmFESpace->map()) );
+           UInt offset( M_solidAndFluidDim + nDimensions*M_interface );
+           displacementToSave->subset(solution, offset);
 
-          //This updateRHSFirstDerivative has to be done before the shiftRight
-          //In fact it updates the right hand side of the velocity using the
-          //previous times. The method velocity() uses it and then, the compuation
-          //of the velocity is done using the current time and the previous times.
-          M_ALETimeAdvance->updateRHSFirstDerivative( M_data->dataFluid()->dataTime()->timeStep() );
-	      M_ALETimeAdvance->shiftRight( *displacementToSave );
+           //This updateRHSFirstDerivative has to be done before the shiftRight
+           //In fact it updates the right hand side of the velocity using the
+           //previous times. The method velocity() uses it and then, the compuation
+           //of the velocity is done using the current time and the previous times.
+           M_ALETimeAdvance->updateRHSFirstDerivative( M_data->dataFluid()->dataTime()->timeStep() );
+           M_ALETimeAdvance->shiftRight( *displacementToSave );
        }
+
+    //! Set vectors for restart
+    /*!
+     *  Set vectors for restart
+     */
+    void setALEVectorInStencil(const vectorPtr_Type& fluidDisp,
+                               const UInt iter,
+                               const bool lastVector);
 
 
     //!@name Get Methods
@@ -231,6 +240,12 @@ private:
     }
 
 };
+
+//! Factory create function
+inline FSIMonolithic* createFSIMonolithicGI()
+{
+    return new FSIMonolithicGI();
+}
 
 }
 #endif

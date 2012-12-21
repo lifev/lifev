@@ -112,8 +112,6 @@ FSIMonolithic::setupDOF( void )
 
     createInterfaceMaps(M_dofStructureToFluid/*HarmonicExtension*/->localDofMap());
 
-    //M_fluidMeshPart->releaseUnpartitionedMesh();
-    //M_solidMeshPart->releaseUnpartitionedMesh();
     M_fluidMesh.reset();
     M_solidMesh.reset();
 }
@@ -130,11 +128,11 @@ void
 FSIMonolithic::setupSystem( )
 {
     M_fluid->setUp( M_dataFile );
-    setUp( M_dataFile );
+    setup( M_dataFile );
 }
 
 void
-FSIMonolithic::setUp( const GetPot& dataFile )
+FSIMonolithic::setup( const GetPot& dataFile )
 {
 
     M_linearSolver.reset(new solver_Type(M_epetraComm));
@@ -225,10 +223,6 @@ FSIMonolithic::monolithicToInterface(vector_Type& lambdaSolid, const vector_Type
         lambdaSolid = lambdaSolidUn;
         return;
     }
-    /* UInt MyOffset(M_uFESpace->map().getMap(Unique)->NumMyElements()+M_pFESpace->map().getMap(Unique)->NumMyElements());
-       vector_Type subDisp(this->M_dFESpace->map(), Unique);
-       subDisp.mySubset(disp, MyOffset);
-       lambdaSolid=subDisp;*/
 
     MapEpetra subMap(*disp.map().map(Unique), M_offset,disp.map().map(Unique)->NumGlobalElements() );
     vector_Type subDisp(subMap, Unique);
@@ -375,7 +369,6 @@ FSIMonolithic::couplingRhs(vectorPtr_Type rhs) // not working with non-matching 
 {
     std::map<ID, ID> const& localDofMap = M_dofStructureToFluid->localDofMap();
     std::map<ID, ID>::const_iterator ITrow;
-    //    UInt solidDim=M_dFESpace->map().getMap(Unique)->NumGlobalElements()/nDimensions;
 
     vector_Type rhsStructureVelocity(M_solidTimeAdvance->rhsContributionFirstDerivative()*M_solid->rescaleFactor(), Unique);
     vector_Type lambda(*M_interfaceMap, Unique);
@@ -383,7 +376,6 @@ FSIMonolithic::couplingRhs(vectorPtr_Type rhs) // not working with non-matching 
     this->monolithicToInterface(lambda, rhsStructureVelocity);
 
     UInt interface(M_monolithicMatrix->interface());
-    //Real rescale(M_solid->rescaleFactor());
     UInt totalDofs(M_dFESpace->dof().numTotalDof());
 
 
@@ -432,6 +424,85 @@ updateSolidSystem( vectorPtr_Type & rhsFluidCoupling )
     // TODO NOTE: this mass * vector multiplication in serial may lead to a NaN for unclear reasons
     // (both the matrix and the vector does not contain a NaN before the multiplication..)
 }
+
+void FSIMonolithic::setVectorInStencils( const vectorPtr_Type& vel,
+                                         const vectorPtr_Type& pressure,
+                                         const vectorPtr_Type& solidDisp,
+                                         //const vectorPtr_Type& fluidDisp,
+                                         const UInt iter)
+{
+  setFluidVectorInStencil(vel, pressure, iter);
+  setSolidVectorInStencil(solidDisp, iter);
+  //  setALEVectorInStencil(fluidDisp, iter);
+
+}
+
+
+void FSIMonolithic::setFluidVectorInStencil( const vectorPtr_Type& vel,
+                                             const vectorPtr_Type& pressure,
+                                             const UInt iter)
+{
+
+    //The fluid and solid TimeAdvance classes have a stencil of dimension
+    //as big as the coupled problem.
+
+    //Fluid Problem
+    vectorPtr_Type vectorMonolithicFluidVelocity(new vector_Type(*M_monolithicMap, Unique, Zero) );
+    vectorPtr_Type vectorMonolithicFluidPressure(new vector_Type(*M_monolithicMap, Unique, Zero) );
+
+    *vectorMonolithicFluidVelocity *= 0.0;
+    *vectorMonolithicFluidPressure *= 0.0;
+
+    vectorMonolithicFluidVelocity->subset(*vel, vel->map(), UInt(0), UInt(0)) ;
+    vectorMonolithicFluidPressure->subset( *pressure, pressure->map(), UInt(0), (UInt)3 * M_uFESpace->dof().numTotalDof() );
+
+    *vectorMonolithicFluidVelocity += *vectorMonolithicFluidPressure;
+
+    vector_Type* normalPointerToFluidVector( new vector_Type(*vectorMonolithicFluidVelocity) );
+    (M_fluidTimeAdvance->stencil()).push_back( normalPointerToFluidVector );
+}
+
+
+void FSIMonolithic::setSolidVectorInStencil( const vectorPtr_Type& solidDisp,
+                                             const UInt iter)
+{
+    //Solid problem
+    vectorPtr_Type vectorMonolithicSolidDisplacement(new vector_Type(*M_monolithicMap, Unique, Zero) );
+    *vectorMonolithicSolidDisplacement *=0.0;
+    vectorMonolithicSolidDisplacement->subset( *solidDisp, solidDisp->map(), (UInt)0, M_offset);
+    *vectorMonolithicSolidDisplacement *= 1.0 / M_solid->rescaleFactor();
+
+    //The fluid timeAdvance has size = orderBDF because it is seen as an equation frist order in time.
+    //We need to add the solidVector to the fluidVector in the fluid TimeAdvance because we have the
+    //extrapolation on it.
+    if( iter <= M_fluidTimeAdvance->size()-1 )
+        *( M_fluidTimeAdvance->stencil()[ iter ] ) += *vectorMonolithicSolidDisplacement;
+
+    vector_Type* normalPointerToSolidVector( new vector_Type(*vectorMonolithicSolidDisplacement) );
+    (M_solidTimeAdvance->stencil()).push_back( normalPointerToSolidVector );
+
+}
+
+void FSIMonolithic::finalizeRestart( )
+{
+    //Set the initialRHS for the TimeAdvance classes
+    vector_Type zeroFluidSolid(*M_monolithicMap, Unique, Zero);
+    vector_Type zeroALE(M_mmFESpace->map(), Unique, Zero);
+
+    zeroFluidSolid *= 0.0;
+    zeroALE *= 0.0;
+
+    M_fluidTimeAdvance->setInitialRHS(zeroFluidSolid);
+    M_solidTimeAdvance->setInitialRHS(zeroFluidSolid);
+    M_ALETimeAdvance->setInitialRHS(zeroALE);
+
+    //This updates at the current value (the one when the simulation was stopped) the RHScontribution
+    //of the first derivative which is use to compute the velocity in TimeAdvance::velocity().
+    //Please note that, even if it is ugly, at this stage, the fluidTimeAdvance is leading the Time Discretization
+    //and this is why there  is the dataFluid class to get the dt.
+    M_ALETimeAdvance->updateRHSFirstDerivative( M_data->dataFluid()->dataTime()->timeStep() );
+}
+
 
 void
 FSIMonolithic::
@@ -527,8 +598,6 @@ FSIMonolithic::assembleSolidBlock( UInt iter, const vector_Type& solution )
         *M_solidBlockPrec *= M_solid->rescaleFactor();
     }
 
-    //     M_solidBlockPrec.reset( new matrix_Type( *M_monolithicMap, 1 ) );
-    //     *M_solidBlockPrec += *M_solidBlock;
 }
 
 void
@@ -537,10 +606,11 @@ FSIMonolithic::assembleFluidBlock(UInt iter, const vector_Type& solution)
     M_fluidBlock.reset(new  FSIOperator::fluidPtr_Type::value_type::matrix_Type(*M_monolithicMap));
 
     Real alpha = M_fluidTimeAdvance->coefficientFirstDerivative( 0 )/M_data->dataFluid()->dataTime()->timeStep();//mesh velocity w
-    // if(!M_data->dataFluid()->conservativeFormulation())
-    //   {
+
+    //This line is based on the hypothesis that the conservativeFormulation flag is set on FALSE
     M_fluid->updateSystem(alpha,*this->M_beta, *this->M_rhs, M_fluidBlock, solution );
-    //   }
+
+    //This in the case of conservativeFormulation == true
     // else
     //   if (! M_fluid->matrixMassPtr().get() )
     // 	M_fluid->buildSystem( );
@@ -550,12 +620,13 @@ FSIMonolithic::assembleFluidBlock(UInt iter, const vector_Type& solution)
         M_resetPrec=true;
         M_fluidTimeAdvance->updateRHSContribution( M_data->dataFluid()->dataTime()->timeStep() );
         if(!M_data->dataFluid()->conservativeFormulation())
-            *M_rhs += M_fluid->matrixMass()*(M_fluidTimeAdvance->rhsContributionFirstDerivative());//(M_bdf->rhsContributionFirstDerivative()) ;
+            *M_rhs += M_fluid->matrixMass()*(M_fluidTimeAdvance->rhsContributionFirstDerivative());
         else
-            *M_rhs += (M_fluidMassTimeAdvance->rhsContributionFirstDerivative());//(M_bdf->rhsContributionFirstDerivative()) ;
+            *M_rhs += (M_fluidMassTimeAdvance->rhsContributionFirstDerivative());
         couplingRhs(M_rhs/*, M_fluidTimeAdvance->stencil()[0]*/);
     }
     //the conservative formulation as it is now is of order 1. To have higher order (TODO) we need to store the mass matrices computed at the previous time steps.
+    //At the moment, the flag conservativeFormulation should be always kept on FALSE
     if(M_data->dataFluid()->conservativeFormulation())
         M_fluid->updateSystem(alpha,*this->M_beta, *this->M_rhs, M_fluidBlock, solution );
     this->M_fluid->updateStabilization(*M_fluidBlock);
@@ -627,7 +698,6 @@ FSIMonolithic::checkIfChangedFluxBC( precPtr_Type oper )
     UInt nfluxes(M_BChs[1]->numberOfBCWithType(Flux));
     if(M_fluxes != nfluxes)
     {
-        //std::vector<bcName_Type> names = M_BChs[1]->findAllBCWithType(Flux);
         for (UInt i=0; i<M_fluxes; ++i)
         {
             const BCBase* bc (M_BChs[1]->findBCWithName(M_BCFluxNames[i]));

@@ -115,9 +115,9 @@ FSIOperator::FSIOperator():
     M_lambda                             ( ),
     M_lambdaDot                          ( ),
     M_rhs                                ( ),
-    M_Alphaf                             ( ), //vector_Type, for alphaf robin
-    M_AlphafCoef                         ( 0 ),
-    M_betamedio                          ( ),
+    M_alphaF                             ( ), //vector_Type, for alphaf robin
+    M_alphaFCoef                         ( 0 ),
+    M_betaMean                           ( ),
     M_epetraComm                         ( ),
     M_epetraWorldComm                    ( ),
     //begin of private members
@@ -157,13 +157,11 @@ FSIOperator::~FSIOperator()
 void
 FSIOperator::setDataFile( const GetPot& dataFile )
 {
-
-    M_fluidMesh.reset( new mesh_Type( *M_epetraComm ) );
-
+    M_fluidMesh.reset( new mesh_Type( M_epetraComm ) );
     M_meshDataFluid->setup(dataFile, "fluid/space_discretization");
     readMesh(*M_fluidMesh, *M_meshDataFluid);
 
-    M_solidMesh.reset(new mesh_Type( *M_epetraComm ) );
+    M_solidMesh.reset(new mesh_Type( M_epetraComm ) );
     M_meshDataSolid->setup(dataFile, "solid/space_discretization");
     readMesh(*M_solidMesh, *M_meshDataSolid);
 
@@ -536,7 +534,6 @@ FSIOperator::updateSystem()
 {
     if ( this->isFluid() )
     {
-      // M_fluidTimeAdvance->shiftRight( *M_fluid->solution() );
       M_ALETimeAdvance->updateRHSContribution(M_data->dataFluid()->dataTime()->timeStep() );
       M_fluidTimeAdvance->updateRHSContribution(M_data->dataFluid()->dataTime()->timeStep() );
 
@@ -658,12 +655,6 @@ FSIOperator::setupTimeAdvance( const dataFile_Type& dataFile )
       if(M_data->dataFluid()->conservativeFormulation())
 	M_fluidMassTimeAdvance->setup( M_data->dataFluid()->dataTimeAdvance()->orderBDF(), 1 );
     }
-     /*
-      if (M_fluidTimeAdvanceMethod =="GeneralizedAlpha")
-    {
-      M_fluidTimeAdvance->setup(M_data->dataFluid()->dataTime()->rhoInf() , 1,M_data->dataFluid()->dataTime()->typeOfGeneralizedAlpha() );
-    }
-    */
       M_ALETimeAdvance.reset( TimeAdvanceFactory::instance().createObject( M_ALETimeAdvanceMethod ) );
 
       if (M_ALETimeAdvanceMethod =="Newmark")
@@ -671,10 +662,6 @@ FSIOperator::setupTimeAdvance( const dataFile_Type& dataFile )
 
       if (M_ALETimeAdvanceMethod =="BDF")
           M_ALETimeAdvance->setup( M_data->timeAdvanceDataALE()->orderBDF(), 1 );
-      /*
-        if (M_ALETimeAdvanceMethod =="GeneralizedAlpha")
-           M_ALETimeAdvance->setup( M_data->timeMeshMotionRhoInf(), 2, M_data->timeMeshMotionTypeeOfGeneralizedAlpha() );
-      */
 
       M_fluidTimeAdvance->setTimeStep( M_data->dataFluid()->dataTime()->timeStep());
       if(M_data->dataFluid()->conservativeFormulation())
@@ -706,10 +693,6 @@ FSIOperator::setupTimeAdvance( const dataFile_Type& dataFile )
 
       if (M_solidTimeAdvanceMethod =="BDF")
     M_solidTimeAdvance->setup( order , 2);
-     /*
-      if (M_solidTimeAdvanceMethod =="GeneralizedAlpha")
-           M_solidTimeAdvance->setup( rhoInfty, 2, type );
-     */
 
       M_solidTimeAdvance->setTimeStep( M_data->dataSolid()->dataTime()->timeStep());
       if(this->isLeader())
@@ -717,7 +700,7 @@ FSIOperator::setupTimeAdvance( const dataFile_Type& dataFile )
       M_solidTimeAdvance->showMe();
     }
     }
-//  M_epetraWorldComm->Barrier();
+
  }
 // ===================================================
 //  Public Methods
@@ -755,7 +738,6 @@ FSIOperator::initializeFluid( const vector_Type& velAndPressure,
                               const vector_Type& displacement )
 {
     this->fluid().initialize( velAndPressure );
-    //this->meshMotion().initialize( displacement );
     this->moveMesh( displacement);
 }
 
@@ -1018,10 +1000,10 @@ void
 FSIOperator::setAlphafCoef( )
 {
     Real h=0.1, R=0.5;
-    M_AlphafCoef  =  M_ALETimeAdvance->coefficientSecondDerivative( 0 )*(this->dataSolid()->rho()*h)/this->dataFluid()->dataTime()->timeStep();
-    M_AlphafCoef += h*M_data->dataSolid()->young(1)*this->dataFluid()->dataTime()->timeStep() /
+    M_alphaFCoef  =  M_ALETimeAdvance->coefficientSecondDerivative( 0 )*(this->dataSolid()->rho()*h)/this->dataFluid()->dataTime()->timeStep();
+    M_alphaFCoef += h*M_data->dataSolid()->young(1)*this->dataFluid()->dataTime()->timeStep() /
       (pow(R,2) *(1-pow(M_data->dataSolid()->poisson(1),2)));
-    M_AlphafCoef /= M_ALETimeAdvance->coefficientFirstDerivative( 0 );
+    M_alphaFCoef /= M_ALETimeAdvance->coefficientFirstDerivative( 0 );
 }
 
 void
@@ -1030,11 +1012,11 @@ FSIOperator::setStructureToFluidParameters()
     this->setAlphafCoef();
     this->setAlphaf();
 
-    if (M_Alphaf.get()==0)
+    if (M_alphaF.get()==0)
     {
         this->setAlphafCoef();
-        M_bcvStructureToFluid->setRobinCoeff(M_AlphafCoef);
-        M_bcvStructureToFluid->setBetaCoeff(M_AlphafCoef);
+        M_bcvStructureToFluid->setRobinCoeff(M_alphaFCoef);
+        M_bcvStructureToFluid->setBetaCoeff(M_alphaFCoef);
     }
     else
     {
@@ -1279,7 +1261,7 @@ FSIOperator::setAlphafbcf( const bcFunction_Type& alphafbcf )
 {
     vector_Type vec( M_fluid->velocityFESpace().map());
     M_fluid->velocityFESpace().interpolate( static_cast<FESpace<mesh_Type, MapEpetra>::function_Type>( alphafbcf ), vec, 0.0);
-    *M_Alphaf = vec ;
+    *M_alphaF = vec ;
 }
 
 
@@ -1430,7 +1412,7 @@ FSIOperator::variablesInit( const std::string& /*dOrder*/ )
     {
         M_dispFluidMeshOld.reset( new vector_Type(M_uFESpace->map(), Repeated) );
         M_veloFluidMesh.reset   ( new vector_Type(M_uFESpace->map(), Repeated) );
-        M_Alphaf.reset          ( new vector_Type(M_uFESpace->map(), Repeated));
+        M_alphaF.reset          ( new vector_Type(M_uFESpace->map(), Repeated));
 
         if ( M_linearFluid )
             M_derVeloFluidMesh.reset( new vector_Type(this->M_uFESpace->map(), Repeated) );

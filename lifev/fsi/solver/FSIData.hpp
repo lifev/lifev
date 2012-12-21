@@ -40,7 +40,7 @@
 #define FSIDATA_H
 
 #include <lifev/navier_stokes/solver/OseenData.hpp>
-#include <lifev/structure/solver/VenantKirchhoffElasticData.hpp>
+#include <lifev/structure/solver/StructuralConstitutiveLawData.hpp>
 
 #include <boost/array.hpp>
 #include <boost/scoped_ptr.hpp>
@@ -63,7 +63,7 @@ public:
     typedef OseenData                               dataFluid_Type;
     typedef boost::shared_ptr< dataFluid_Type >     dataFluidPtr_Type;
 
-    typedef VenantKirchhoffElasticData              dataSolid_Type;
+    typedef StructuralConstitutiveLawData           dataSolid_Type;
     typedef boost::shared_ptr< dataSolid_Type >     dataSolidPtr_Type;
 
     typedef dataFluid_Type::time_Type               time_Type;

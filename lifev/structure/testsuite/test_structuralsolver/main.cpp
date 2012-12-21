@@ -34,7 +34,7 @@
    \author Paolo Tricerri <paolo.tricerri@epfl.ch>
    \date 1861-03-17
  */
-#undef HAVE_HDF5
+
 #ifdef TWODIM
 #error test_structure cannot be compiled in 2D
 #endif
@@ -68,7 +68,7 @@
 #include <lifev/core/mesh/MeshData.hpp>
 #include <lifev/core/mesh/MeshPartitioner.hpp>
 
-#include <lifev/structure/solver/VenantKirchhoffElasticData.hpp>
+#include <lifev/structure/solver/StructuralConstitutiveLawData.hpp>
 
 #include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
 #include <lifev/structure/solver/StructuralOperator.hpp>
@@ -256,13 +256,13 @@ Structure::run3d()
     //! dataElasticStructure
     GetPot dataFile( parameters->data_file_name.c_str() );
 
-    boost::shared_ptr<VenantKirchhoffElasticData> dataStructure(new VenantKirchhoffElasticData( ));
+    boost::shared_ptr<StructuralConstitutiveLawData> dataStructure(new StructuralConstitutiveLawData( ));
     dataStructure->setup(dataFile);
 
     MeshData             meshData;
     meshData.setup(dataFile, "solid/space_discretization");
 
-    boost::shared_ptr<RegionMesh<LinearTetra> > fullMeshPtr(new RegionMesh<LinearTetra>( *( parameters->comm ) ));
+    boost::shared_ptr<RegionMesh<LinearTetra> > fullMeshPtr(new RegionMesh<LinearTetra>(  parameters->comm  ));
     readMesh(*fullMeshPtr, meshData);
 
     MeshPartitioner< RegionMesh<LinearTetra> > meshPart( fullMeshPtr, parameters->comm );

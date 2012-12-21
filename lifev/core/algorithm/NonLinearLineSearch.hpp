@@ -264,7 +264,7 @@ Int NonLinearLineSearchCubic( Fct& f, VectorType& residual, VectorType& sol, Vec
             if ( ( std::fabs( a ) > std::numeric_limits<Real>::min() ) &&
                     ( disc > std::numeric_limits<Real>::min() )
                )
-                lambdaTemporary = ( - b + sqrt( disc ) ) / ( 3. * a );
+                lambdaTemporary = ( - b + std::sqrt( disc ) ) / ( 3. * a );
             else
                 lambdaTemporary = slope * lambda2 / ( 2. * g1 ) ;
             if ( lambdaTemporary >= sigma1 * lambda )

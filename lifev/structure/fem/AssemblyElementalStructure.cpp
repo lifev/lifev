@@ -1149,7 +1149,7 @@ namespace LifeV
 			    {
 			      for( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
 				{
-				  s += pow( Jk[ig], -4/3 ) * exp( coefExp*(  Ic_isok[ig] -3  ) ) *
+				  s += pow( Jk[ig], -4.0/3.0 ) * exp( coefExp*(  Ic_isok[ig] -3  ) ) *
                                     Fk[ jcoor ][ l ][ ig ] * fe.phiDer( j, l, ig ) *
                                     Fk[ icoor ][ k ][ ig ] * fe.phiDer( i, k, ig ) * fe.weightDet( ig );
 				}
@@ -1264,7 +1264,7 @@ namespace LifeV
 		{
 		  for( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
 		    {
-		      s += pow(Jk[ig], -2/3) * exp( coefExp*( Ic_isok[ig] -3  ) ) *
+		      s += pow(Jk[ig], -2.0/3.0) * exp( coefExp*( Ic_isok[ig] -3  ) ) *
                         fe.phiDer( i, k, ig ) *  fe.phiDer( j, k, ig ) * fe.weightDet( ig );
 		    }
 	    	}

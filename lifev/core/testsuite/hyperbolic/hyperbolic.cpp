@@ -73,7 +73,7 @@ Real analyticalSolution( const Real& t,
     ///   return 1;
     //else
     //   return 0;
-    return 20.*exp( -( pow( x*cos(2.*Pi*t) + y*sin(2.*Pi*t), 2.) + pow( - x*sin(2.*Pi*t) + y*cos(2.*Pi*t), 2. ) ) );
+    return 20.*std::exp( -( std::pow( x*std::cos(2.*Pi*t) + y*std::sin(2.*Pi*t), 2.) + std::pow( - x*std::sin(2.*Pi*t) + y*std::cos(2.*Pi*t), 2. ) ) );
 }
 
 // Physical flux function
@@ -380,7 +380,7 @@ hyperbolic::run()
     meshData.setup( dataFile,  Members->discretization_section + "/space_discretization");
 
     // Create the mesh
-    boost::shared_ptr<RegionMesh> fullMeshPtr( new RegionMesh( *( Members->comm ) ) );
+    boost::shared_ptr<RegionMesh> fullMeshPtr( new RegionMesh( Members->comm ) );
 
     // Set up the mesh
     readMesh( *fullMeshPtr, meshData );
