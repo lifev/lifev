@@ -48,26 +48,23 @@ namespace LifeV
 namespace ExpressionAssembly
 {
 
-template <typename MeshType>
+template <typename MeshType, typename FunctorType>
 class RequestLoopVolumeID
 {
 public:
-
-    typedef typename MeshType::element_Type             elementMesh_Type;
-    typedef std::vector<elementMesh_Type const* >       vectorVolumes_Type;
-    typedef boost::shared_ptr<vectorVolumes_Type>       vectorVolumesPtr_Type;
 
     //! @name Constructors & Destructor
     //@{
 
     //! Simple constructor with a shared_ptr on the mesh
-	RequestLoopVolumeID(const vectorVolumes_Type& elementList)
-        : M_selectedVolumes( elementList )
+	RequestLoopVolumeID(const boost::shared_ptr<MeshType>& mesh,
+                        const boost::shared_ptr<FunctorType>& selector)
+        : M_mesh( mesh ), M_functorSelection( selector )
     {}
 
     //! Copy constructor
 	RequestLoopVolumeID(const RequestLoopVolumeID& loop)
-        : M_selectedVolumes(loop.M_selectedVolumes)
+    : M_mesh(loop.M_mesh), M_functorSelection( loop.M_functorSelection )
     {}
 
     //@}
@@ -77,7 +74,10 @@ public:
     //@{
 
     //! Getter for the mesh pointer
-	const vectorVolumes_Type& selectedVolumes() const { return M_selectedVolumes; }
+	const boost::shared_ptr<MeshType>& mesh() const { return M_mesh; }
+
+    //! Getter for the identifier
+    const boost::shared_ptr<FunctorType>& functorSelection() const { return M_functorSelection; }
 
     //@}
 
@@ -92,8 +92,12 @@ private:
 
     //@}
 
-    // Pointer on the list of the volumes
-	vectorVolumesPtr_Type M_selectedVolumes;
+    // Pointer on the mesh
+	boost::shared_ptr<MeshType> M_mesh;
+
+    // Pointer on the mesh
+	boost::shared_ptr<FunctorType> M_functorSelection;
+
 
 };
 
@@ -114,11 +118,12 @@ private:
     <i>MeshType</i>: See in LifeV::RequestLoopElement
 
  */
-template< typename MeshType >
-RequestLoopVolumeID<MeshType>
-integrationOverSelectedVolumes(const typename RequestLoopVolumeID<MeshType>::vectorVolumes_Type& elementList)
+template< typename MeshType, typename FunctorType >
+RequestLoopVolumeID<MeshType, FunctorType>
+integrationOverSelectedVolumes(const boost::shared_ptr<MeshType>& mesh,
+                               const boost::shared_ptr<FunctorType>& functorSelection)
 {
-	return RequestLoopVolumeID<MeshType>( elementList );
+	return RequestLoopVolumeID<MeshType, FunctorType>( mesh, functorSelection );
 };
 
 

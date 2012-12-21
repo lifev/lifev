@@ -43,6 +43,37 @@
 
 namespace LifeV
 {
+//Functor to select volumes
+template < typename MeshEntityType,
+           typename ComparisonPolicyType = boost::function2<bool,
+                                                            const UInt,
+                                                            const UInt > >
+class MarkerFunctor
+{
+public:
+    typedef MeshEntityType       meshEntity_Type;
+    typedef ComparisonPolicyType comparisonPolicy_Type;
+
+    MarkerFunctor( const UInt materialFlagReference,
+                    comparisonPolicy_Type const & policy = std::equal_to<UInt>() )
+        : M_reference( materialFlagReference ),
+          M_policy( policy ) {}
+
+    bool operator()( const meshEntity_Type & entity ) const
+    {
+        //Extract the flag from the mesh entity
+        UInt flagChecked = entity.markerID();
+
+        return M_policy( flagChecked, M_reference );
+    }
+
+private:
+    const UInt M_reference;
+    const comparisonPolicy_Type M_policy;
+
+}; // Marker selector
+
+
 template <typename Mesh>
 class VenantKirchhoffMaterialLinear :
         public StructuralConstitutiveLaw<Mesh>
@@ -67,6 +98,11 @@ class VenantKirchhoffMaterialLinear :
     typedef typename super::mapMarkerVolumes_Type mapMarkerVolumes_Type;
     typedef typename mapMarkerVolumes_Type::const_iterator mapIterator_Type;
 
+    typedef typename super::FESpacePtr_Type          FESpacePtr_Type;
+    typedef typename super::ETFESpacePtr_Type        ETFESpacePtr_Type;
+
+    typedef MarkerFunctor<Mesh::element_Type, boost::function2<bool,const UInt,const UInt> >     markerFunctor_Type;
+    typedef boost::shared_ptr<markerFunctor_Type>                      markerFunctorPtr_Type;
 
  //@}
 
@@ -87,8 +123,9 @@ class VenantKirchhoffMaterialLinear :
     \param monolithicMap: the MapEpetra
     \param offset: the offset parameter used assembling the matrices
   */
-  void setup(const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
-	     const boost::shared_ptr<const MapEpetra>&  monolithicMap,
+  void setup(const FESpacePtr_Type dFESpace,
+             const ETFESpacePtr_Type ETFESpace,
+             const boost::shared_ptr<const MapEpetra>&  monolithicMap,
              const UInt offset, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer
                );
 
@@ -171,6 +208,8 @@ protected:
   //! Matrix Kl: stiffness linear
   matrixPtr_Type                                 M_stiff;
 
+  markerFunctorPtr_Type                          M_markerFunctorPtr;
+
 };
 
 template <typename Mesh>
@@ -178,7 +217,8 @@ VenantKirchhoffMaterialLinear<Mesh>::VenantKirchhoffMaterialLinear():
     super             ( ),
     M_elmatK                     ( ),
     M_linearStiff                ( ),
-    M_stiff                      ( )
+    M_stiff                      ( ),
+    M_markerFunctorPtr           ( )
 {
 }
 
@@ -189,7 +229,8 @@ VenantKirchhoffMaterialLinear<Mesh>::~VenantKirchhoffMaterialLinear()
 
 template <typename Mesh>
 void
-VenantKirchhoffMaterialLinear<Mesh>::setup(const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
+VenantKirchhoffMaterialLinear<Mesh>::setup(const FESpacePtr_Type dFESpace,
+                                           const ETFESpacePtr_Type ETFESpace,
                                            const boost::shared_ptr<const MapEpetra>&  monolithicMap,
                                            const UInt offset, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer
                 )
@@ -200,6 +241,7 @@ VenantKirchhoffMaterialLinear<Mesh>::setup(const boost::shared_ptr< FESpace<Mesh
     //    std::cout<<"I am setting up the Material "<<std::endl;
 
     this->M_FESpace                       = dFESpace;
+    this->M_ETFESpace                     = ETFESpace;
     this->M_elmatK.reset                  (new MatrixElemental( this->M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
     this->M_localMap                      = monolithicMap;
     this->M_linearStiff.reset             (new matrix_Type(*this->M_localMap));
@@ -210,6 +252,8 @@ template <typename Mesh>
 void VenantKirchhoffMaterialLinear<Mesh>::computeLinearStiff(dataPtr_Type& dataMaterial, const mapMarkerVolumesPtr_Type mapsMarkerVolumes)
 {
   //  std::cout<<"compute LinearStiff Matrix start\n";
+    //to assemble with ET
+    using namespace ExpressionAssembly;
 
     UInt totalDof = this->M_FESpace->dof().numTotalDof();
     // Number of displacement components
@@ -218,53 +262,62 @@ void VenantKirchhoffMaterialLinear<Mesh>::computeLinearStiff(dataPtr_Type& dataM
     //Compute the linear part of the Stiffness Matrix.
     //In the case of Linear Material it is the Stiffness Matrix.
     //In the case of NonLinear Materials it must be added of the non linear part.
-    
+
     mapIterator_Type it;
 
     for( it = (*mapsMarkerVolumes).begin(); it != (*mapsMarkerVolumes).end(); it++ )
-      {
+    {
 
-	//Given the marker pointed by the iterator, let's extract the material parameters
-	UInt marker = it->first;
+        //Given the marker pointed by the iterator, let's extract the material parameters
+        UInt marker = it->first;
 
-	Real mu = dataMaterial->mu(marker);
-	Real lambda = dataMaterial->lambda(marker);
-    
-	//Given the parameters I loop over the volumes with that marker
-	for ( UInt j(0); j < it->second.size(); j++ )
-	  {
-	    this->M_FESpace->fe().updateFirstDerivQuadPt( *(it->second[j]) );
+        this->M_markerFunctorPtr.reset( new markerFunctor_Type(marker) );
 
-	    this->M_elmatK->zero();
+        Real mu = dataMaterial->mu(marker);
+        Real lambda = dataMaterial->lambda(marker);
 
-	    //These methods are implemented in AssemblyElemental.cpp
-	    //They have been kept in AssemblyElemental in order to avoid repetitions
-	    stiff_strain( 2*mu, *this->M_elmatK, this->M_FESpace->fe() );// here in the previous version was 1. (instead of 2.)
-	    stiff_div   ( lambda, *this->M_elmatK, this->M_FESpace->fe() );// here in the previous version was 0.5 (instead of 1.)
-
-	    //this->M_elmatK->showMe();
-
-	    // assembling
-	    for ( UInt ic = 0; ic < nc; ic++ )
-	      {
-		for ( UInt jc = 0; jc < nc; jc++ )
-		  {
-		    assembleMatrix( *this->M_linearStiff, *this->M_elmatK, this->M_FESpace->fe(), this->M_FESpace->fe(), this->M_FESpace->dof(), this->M_FESpace->dof(),  ic,  jc,  this->M_offset +ic*totalDof, this->M_offset + jc*totalDof );
-
-		  }
-	      }   
+        integrate( integrationOverSelectedVolumes( this->M_FESpace->mesh(), M_markerFunctorPtr ) ,
+                   this->M_FESpace->qr(),
+                   this->M_ETFESpace,
+                   this->M_ETFESpace,
+                   value(lambda) * div(phi_i) * div(phi_j)  ) >> M_linearStiff;
 
 
-	  }
+        //Given the parameters I loop over the volumes with that marker
+        for ( UInt j(0); j < it->second.size(); j++ )
+        {
+            this->M_FESpace->fe().updateFirstDerivQuadPt( *(it->second[j]) );
 
-      }
-    
+            this->M_elmatK->zero();
+
+            //These methods are implemented in AssemblyElemental.cpp
+            //They have been kept in AssemblyElemental in order to avoid repetitions
+            stiff_strain( 2*mu, *this->M_elmatK, this->M_FESpace->fe() );// here in the previous version was 1. (instead of 2.)
+            //stiff_div   ( lambda, *this->M_elmatK, this->M_FESpace->fe() );// here in the previous version was 0.5 (instead of 1.)
+
+            //this->M_elmatK->showMe();
+
+            // assembling
+            for ( UInt ic = 0; ic < nc; ic++ )
+            {
+                for ( UInt jc = 0; jc < nc; jc++ )
+                {
+                    assembleMatrix( *this->M_linearStiff, *this->M_elmatK, this->M_FESpace->fe(), this->M_FESpace->fe(), this->M_FESpace->dof(), this->M_FESpace->dof(),  ic,  jc,  this->M_offset +ic*totalDof, this->M_offset + jc*totalDof );
+
+                }
+            }
+
+
+        }
+
+    }
+
     this->M_linearStiff->globalAssemble();
 
     //Initialization of the pointer M_stiff to what is pointed by M_linearStiff
     this->M_stiff = this->M_linearStiff;
     //   std::cout<<"compute LinearStiff Matrix end\n";
-   this->M_jacobian = this->M_linearStiff;
+    this->M_jacobian = this->M_linearStiff;
 }
 
 

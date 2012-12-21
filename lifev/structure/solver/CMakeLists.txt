@@ -4,10 +4,7 @@ SET(solver_HEADERS
   solver/VenantKirchhoffViscoelasticSolver.hpp
   solver/StructuralConstitutiveLaw.hpp
   solver/StructuralOperator.hpp
-  solver/NeoHookeanMaterialNonLinear.hpp
-  solver/ExponentialMaterialNonLinear.hpp
   solver/VenantKirchhoffMaterialLinear.hpp
-  solver/VenantKirchhoffMaterialNonLinear.hpp
 CACHE INTERNAL "")
 
 SET(solver_SOURCES

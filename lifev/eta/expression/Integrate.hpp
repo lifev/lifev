@@ -39,12 +39,17 @@
 #include <lifev/core/LifeV.hpp>
 
 #include <lifev/eta/expression/RequestLoopElement.hpp>
+#include <lifev/eta/expression/RequestLoopVolumeID.hpp>
 
 #include <lifev/core/fem/QuadratureRule.hpp>
 
 #include <lifev/eta/expression/IntegrateMatrixElement.hpp>
 #include <lifev/eta/expression/IntegrateVectorElement.hpp>
 #include <lifev/eta/expression/IntegrateValueElement.hpp>
+
+//Integration over portions of the domain
+#include <lifev/eta/expression/IntegrateMatrixVolumeID.hpp>
+//#include <lifev/eta/expression/IntegrateVectorVolumeID.hpp>
 
 #include <boost/shared_ptr.hpp>
 
@@ -69,10 +74,10 @@ namespace ExpressionAssembly{
 template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
 IntegrateMatrixElement<MeshType,TestSpaceType,SolutionSpaceType,ExpressionType>
 integrate( const RequestLoopElement<MeshType>& request,
-			const QuadratureRule& quadrature,
-			const boost::shared_ptr<TestSpaceType>& testSpace,
-			const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
-			const ExpressionType& expression)
+           const QuadratureRule& quadrature,
+           const boost::shared_ptr<TestSpaceType>& testSpace,
+           const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
+           const ExpressionType& expression)
 {
 	return IntegrateMatrixElement<MeshType,TestSpaceType,SolutionSpaceType,ExpressionType>
 		(request.mesh(),quadrature,testSpace,solutionSpace,expression);
@@ -114,6 +119,41 @@ integrate( const RequestLoopElement<MeshType>& request,
 	return IntegrateValueElement<MeshType,ExpressionType>
 		(request.mesh(),quadrature,expression);
 }
+
+// =============================================================
+// Methods to integrate over a portion of the mesh
+// =============================================================
+template < typename MeshType, typename FunctorType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
+IntegrateMatrixVolumeID<MeshType, FunctorType, TestSpaceType,SolutionSpaceType,ExpressionType>
+integrate( const RequestLoopVolumeID<MeshType,FunctorType >& request,
+           const QuadratureRule& quadrature,
+           const boost::shared_ptr<TestSpaceType>& testSpace,
+           const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
+           const ExpressionType& expression)
+{
+	return IntegrateMatrixVolumeID<MeshType,FunctorType,TestSpaceType,SolutionSpaceType,ExpressionType>
+		(request.mesh(),request.functorSelection(),quadrature,testSpace,solutionSpace,expression);
+}
+
+//! Integrate function for vectorial expressions
+/*!
+  @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+
+  This class is an helper function to instantiate the class
+  for performing an integration, here to assemble a vector
+  with a loop on the elements.
+ */
+// template < typename MeshType, typename FunctorType, typename TestSpaceType, typename ExpressionType>
+// IntegrateVectorVolumeID<MeshType,FunctorType,TestSpaceType,ExpressionType>
+// integrate( const RequestLoopVolumeID<MeshType,FunctorType >& request,
+//            const QuadratureRule& quadrature,
+//            const boost::shared_ptr<TestSpaceType>& testSpace,
+//            const ExpressionType& expression)
+// {
+// 	return IntegrateVectorVolumeID<MeshType,FunctorType, TestSpaceType,ExpressionType>
+// 		(request.mesh(),request.functorSelection(),quadrature,testSpace,expression);
+// }
+
 
 
 } // Namespace ExpressionAssembly

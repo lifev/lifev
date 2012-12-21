@@ -145,7 +145,7 @@ public:
     typedef typename SolverType::prec_raw_type            precRaw_Type;
     typedef typename SolverType::prec_type                prec_Type;
 
-    typedef VenantKirchhoffElasticData                    data_Type;
+    typedef StructuralConstitutiveLawData                data_Type;
 
     typedef RegionMesh<LinearTetra >                      mesh_Type;
     typedef std::vector< mesh_Type::element_Type const *> vectorVolumes_Type;
@@ -716,7 +716,7 @@ StructuralOperator<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        
     M_offset                          = offset;
 
     M_material.reset( material_Type::StructureMaterialFactory::instance().createObject( M_data->solidType() ) );
-    M_material->setup( dFESpace,M_localMap,M_offset, M_data, M_Displayer );
+    M_material->setup( dFESpace, ETFESpace, M_localMap,M_offset, M_data, M_Displayer );
 
     if ( M_data->verbose() )
     {
@@ -847,6 +847,8 @@ template <typename Mesh, typename SolverType>
 void
 StructuralOperator<Mesh, SolverType>::computeMassMatrix( const Real factor)
 {
+    using namespace ExpressionAssembly;
+
     UInt totalDof = M_FESpace->dof().numTotalDof();
 
     //! Number of displacement components

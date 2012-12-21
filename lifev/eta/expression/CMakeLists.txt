@@ -41,9 +41,11 @@ SET(expression_HEADERS
 	expression/ExpressionVector.hpp
 	expression/Integrate.hpp
 	expression/IntegrateMatrixElement.hpp
+	expression/IntegrateMatrixVolumeID.hpp
 	expression/IntegrateValueElement.hpp
 	expression/IntegrateVectorElement.hpp
 	expression/RequestLoopElement.hpp
+	expression/RequestLoopVolumeID.hpp
 CACHE INTERNAL "")
 
 SET(expression_SOURCES ""

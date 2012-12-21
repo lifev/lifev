@@ -73,6 +73,10 @@
 
 #include <lifev/structure/solver/StructuralConstitutiveLawData.hpp>
 
+//ET include for assemblings
+#include <lifev/eta/fem/ETFESpace.hpp>
+#include <lifev/eta/expression/Integrate.hpp>
+
 namespace LifeV
 {
 /*!
@@ -87,31 +91,35 @@ class StructuralConstitutiveLaw
 {
 public:
 
-//!@name Type definitions
-//@{
+    //!@name Type definitions
+    //@{
+    typedef StructuralConstitutiveLawData          data_Type;
 
-  typedef StructuralConstitutiveLawData          data_Type;
+    typedef typename LifeV::SolverAztecOO          solver_Type;
 
-  typedef typename LifeV::SolverAztecOO          solver_Type;
+    typedef typename solver_Type::matrix_type      matrix_Type;
+    typedef boost::shared_ptr<matrix_Type>         matrixPtr_Type;
+    typedef typename solver_Type::vector_type      vector_Type;
+    typedef boost::shared_ptr<vector_Type>         vectorPtr_Type;
 
-  typedef typename solver_Type::matrix_type      matrix_Type;
-  typedef boost::shared_ptr<matrix_Type>         matrixPtr_Type;
-  typedef typename solver_Type::vector_type      vector_Type;
-  typedef boost::shared_ptr<vector_Type>         vectorPtr_Type;
+    typedef typename boost::shared_ptr<data_Type>  dataPtr_Type;
+    typedef typename boost::shared_ptr<const Displayer>    displayerPtr_Type;
 
-  typedef typename boost::shared_ptr<data_Type>  dataPtr_Type;
-  typedef typename boost::shared_ptr<const Displayer>    displayerPtr_Type;
+    typedef FactorySingleton<Factory<StructuralConstitutiveLaw<Mesh>,std::string> >  StructureMaterialFactory;
 
-  typedef FactorySingleton<Factory<StructuralConstitutiveLaw<Mesh>,std::string> >  StructureMaterialFactory;
+    typedef RegionMesh<LinearTetra >                      mesh_Type;
+    typedef std::vector< mesh_Type::element_Type const *> vectorVolumes_Type;
 
-  typedef RegionMesh<LinearTetra >                      mesh_Type;
-  typedef std::vector< mesh_Type::element_Type const *> vectorVolumes_Type;
+    typedef std::map< UInt, vectorVolumes_Type>           mapMarkerVolumes_Type;
+    typedef boost::shared_ptr<mapMarkerVolumes_Type>      mapMarkerVolumesPtr_Type;
 
-  typedef std::map< UInt, vectorVolumes_Type>           mapMarkerVolumes_Type;
-  typedef boost::shared_ptr<mapMarkerVolumes_Type>      mapMarkerVolumesPtr_Type;
+    typedef ETFESpace< RegionMesh<LinearTetra>, MapEpetra, 3, 3 >  ETFESpace_Type;
+    typedef boost::shared_ptr<ETFESpace_Type>                      ETFESpacePtr_Type;
 
+    typedef FESpace< RegionMesh<LinearTetra>, MapEpetra >          FESpace_Type;
+    typedef boost::shared_ptr<FESpace_Type>                        FESpacePtr_Type;
 
-//@}
+    //@}
 
 
 
@@ -135,7 +143,8 @@ public:
       \param monolithicMap: the MapEpetra
       \param offset: the offset parameter used assembling the matrices
     */
-    virtual void setup( const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
+    virtual void setup( const FESpacePtr_Type dFESpace,
+                        const ETFESpacePtr_Type ETFESpace,
                         const boost::shared_ptr<const MapEpetra>&   monolithicMap,
                         const UInt offset, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer  )=0;
 
@@ -197,7 +206,7 @@ public:
   MapEpetra   const& map()     const { return *M_localMap; }
 
   //! Get the FESpace object
-  FESpace<Mesh, MapEpetra>& dFESpace()  {return M_FESpace;}
+  FESpace_Type& dFESpace()  {return M_FESpace;}
 
   //! Get the Stiffness matrix
   matrixPtr_Type const jacobian()    const {return M_jacobian; }
@@ -216,7 +225,9 @@ protected:
 
     //!Protected Members
 
-    boost::shared_ptr<FESpace<Mesh, MapEpetra> >   M_FESpace;
+    FESpacePtr_Type                                M_FESpace;
+
+    ETFESpacePtr_Type                              M_ETFESpace;
 
     boost::shared_ptr<const MapEpetra>             M_localMap;
 
@@ -242,6 +253,7 @@ protected:
 template <typename Mesh>
 StructuralConstitutiveLaw<Mesh>::StructuralConstitutiveLaw( ):
     M_FESpace                    ( ),
+    M_ETFESpace                  ( ),
     M_localMap                   ( ),
     M_jacobian                   ( ),
     M_offset                     ( 0 )

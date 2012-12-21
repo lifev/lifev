@@ -66,7 +66,7 @@ namespace ExpressionAssembly
   using the Evaluation corresponding to the Expression (this convertion is done
   within a typedef).
  */
-template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
+template < typename MeshType, typename FunctorType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
 class IntegrateMatrixVolumeID
 {
 public:
@@ -91,14 +91,15 @@ public:
     //@{
 
     //! Full data constructor
-	IntegrateMatrixVolumeID(const vectorVolumes_Type& selectedList,
+	IntegrateMatrixVolumeID(const boost::shared_ptr<MeshType>& mesh,
+                            const boost::shared_ptr<FunctorType>& functorSelection,
                             const QuadratureRule& quadrature,
                             const boost::shared_ptr<TestSpaceType>& testSpace,
                             const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
                             const ExpressionType& expression);
 
     //! Copy constructor
-	IntegrateMatrixVolumeID( const IntegrateMatrixVolumeID < MeshType, TestSpaceType, SolutionSpaceType, ExpressionType> & integrator);
+	IntegrateMatrixVolumeID( const IntegrateMatrixVolumeID < MeshType, FunctorType, TestSpaceType, SolutionSpaceType, ExpressionType> & integrator);
 
     //! Destructor
     ~IntegrateMatrixVolumeID();
@@ -163,8 +164,10 @@ private:
     //@}
 
     // Pointer on the mesh
-	vectorVolumesPtr_Type M_selectedList;
+	boost::shared_ptr<MeshType> M_mesh;
 
+    // Pointer to the selectionObject
+    boost::shared_ptr<FunctorType> M_functorSelection;
     // Quadrature to be used
 	QuadratureRule M_quadrature;
 
@@ -191,14 +194,16 @@ private:
 // Constructors & Destructor
 // ===================================================
 
-template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
-IntegrateMatrixVolumeID<MeshType,TestSpaceType,SolutionSpaceType,ExpressionType>::
-IntegrateMatrixVolumeID(const vectorVolumes_Type& selectedList,
+template < typename MeshType, typename FunctorType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
+IntegrateMatrixVolumeID<MeshType,FunctorType,TestSpaceType,SolutionSpaceType,ExpressionType>::
+IntegrateMatrixVolumeID(const boost::shared_ptr<MeshType>& mesh,
+                        const boost::shared_ptr<FunctorType>& functorSelection,
                         const QuadratureRule& quadrature,
                         const boost::shared_ptr<TestSpaceType>& testSpace,
                         const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
                         const ExpressionType& expression)
-    :	M_selectedList( new vectorVolumes_Type(selectedList) ),
+    :	M_mesh( mesh ),
+        M_functorSelection( functorSelection ),
         M_quadrature(quadrature),
         M_testSpace(testSpace),
         M_solutionSpace(solutionSpace),
@@ -217,10 +222,11 @@ IntegrateMatrixVolumeID(const vectorVolumes_Type& selectedList,
     M_evaluation.setSolutionCFE(M_solutionCFE);
 }
 
-template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
-IntegrateMatrixVolumeID<MeshType,TestSpaceType,SolutionSpaceType,ExpressionType>::
-IntegrateMatrixVolumeID(const IntegrateMatrixVolumeID<MeshType,TestSpaceType,SolutionSpaceType,ExpressionType>& integrator)
-    :	M_selectedList(integrator.M_selectedList),
+template < typename MeshType, typename FunctorType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
+IntegrateMatrixVolumeID<MeshType,FunctorType, TestSpaceType,SolutionSpaceType,ExpressionType>::
+IntegrateMatrixVolumeID(const IntegrateMatrixVolumeID<MeshType, FunctorType,TestSpaceType,SolutionSpaceType,ExpressionType>& integrator)
+    :	M_mesh(integrator.M_mesh),
+        M_functorSelection(integrator.M_functorSelection),
         M_quadrature(integrator.M_quadrature),
         M_testSpace(integrator.M_testSpace),
         M_solutionSpace(integrator.M_solutionSpace),
@@ -238,8 +244,8 @@ IntegrateMatrixVolumeID(const IntegrateMatrixVolumeID<MeshType,TestSpaceType,Sol
     M_evaluation.setSolutionCFE(M_solutionCFE);
 }
 
-template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
-IntegrateMatrixVolumeID<MeshType,TestSpaceType,SolutionSpaceType,ExpressionType>::
+template < typename MeshType, typename FunctorType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
+IntegrateMatrixVolumeID<MeshType,FunctorType,TestSpaceType,SolutionSpaceType,ExpressionType>::
 ~IntegrateMatrixVolumeID()
 {
     delete M_globalCFE;
@@ -251,9 +257,9 @@ IntegrateMatrixVolumeID<MeshType,TestSpaceType,SolutionSpaceType,ExpressionType>
 // Methods
 // ===================================================
 
-template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
+template < typename MeshType, typename FunctorType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
 void
-IntegrateMatrixVolumeID<MeshType,TestSpaceType,SolutionSpaceType,ExpressionType>::
+IntegrateMatrixVolumeID<MeshType,FunctorType, TestSpaceType,SolutionSpaceType,ExpressionType>::
 check(std::ostream& out)
 {
     out << " Checking the integration : " << std::endl;
@@ -265,14 +271,24 @@ check(std::ostream& out)
 }
 
 
-template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
+template < typename MeshType, typename FunctorType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
 template <typename MatrixType>
 void
-IntegrateMatrixVolumeID<MeshType,TestSpaceType,SolutionSpaceType,ExpressionType>::
+IntegrateMatrixVolumeID<MeshType, FunctorType, TestSpaceType,SolutionSpaceType,ExpressionType>::
 addTo(MatrixType& mat)
 {
+
+    //First: extract the list of volumes over which we integrate according to the
+    //       functor that is received
+
+    UInt numExtractedVolumes = this->M_mesh->elementList().countAccordingToPredicate( *(this->M_functorSelection) );
+    vectorVolumes_Type extractedVolumes( numExtractedVolumes );
+
+    //Extracting the volumes
+    extractedVolumes = this->M_mesh->elementList().extractAccordingToPredicate( *(this->M_functorSelection) );
+
     //number of volumes
-    UInt nbElements( M_selectedList-> size() );
+    UInt nbElements( extractedVolumes.size() );
     UInt nbQuadPt(M_quadrature.nbQuadPt());
     UInt nbTestDof(M_testSpace->refFE().nbDof());
     UInt nbSolutionDof(M_solutionSpace->refFE().nbDof());
@@ -283,9 +299,9 @@ addTo(MatrixType& mat)
         M_elementalMatrix.zero();
 
         // Update the currentFEs need to access to the current element of the loop
-        M_globalCFE->update(*( *M_selectedList[iElement] ) ,evaluation_Type::S_globalUpdateFlag | ET_UPDATE_WDET);
-        M_testCFE->update(*( *M_selectedList[iElement] ),evaluation_Type::S_testUpdateFlag);
-        M_solutionCFE->update(*( *M_selectedList[iElement] ),evaluation_Type::S_solutionUpdateFlag);
+        M_globalCFE->update( *extractedVolumes[iElement] ,evaluation_Type::S_globalUpdateFlag | ET_UPDATE_WDET);
+        M_testCFE->update( *extractedVolumes[iElement] ,evaluation_Type::S_testUpdateFlag);
+        M_solutionCFE->update( *extractedVolumes[iElement] ,evaluation_Type::S_solutionUpdateFlag);
 
         // Update the evaluation
         M_evaluation.update(iElement);
