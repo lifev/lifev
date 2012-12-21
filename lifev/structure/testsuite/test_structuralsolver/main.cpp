@@ -183,7 +183,7 @@ struct Structure::Private
 
     static Real bcNonZero(const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
     {
-        return  2.1523e+01;
+        return  300.0;
     }
 
     static Real d0(const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
@@ -191,13 +191,13 @@ struct Structure::Private
         switch (i)
         {
         case 0:
-            return (1/std::sqrt(3)) * ( x - 0.5 );
+            return - 0.01846 * ( x - 0.5 );
             break;
         case 1:
-            return 3 * y;
+            return ( 0.07755/ 2 ) * y;
             break;
         case 2:
-            return -(1/std::sqrt(3)) * ( z +0.5);
+            return - 0.01846 * ( z + 0.5);
             break;
         default:
             ERROR_MSG("This entry is not allowed: ud_functions.hpp");
@@ -301,6 +301,8 @@ Structure::run3d()
 
     std::string timeAdvanceMethod =  dataFile( "solid/time_discretization/method", "Newmark");
 
+    std::cout << "Method: " << timeAdvanceMethod << std::endl;
+
     timeAdvance_type  timeAdvance( TimeAdvanceFactory::instance().createObject( timeAdvanceMethod ) );
 
     UInt OrderDev = 2;
@@ -315,12 +317,6 @@ Structure::run3d()
     timeAdvance->setTimeStep(dataStructure->dataTime()->timeStep());
     timeAdvance->showMe();
 
-    /*
-    for (UInt ii = 0; ii < nDimensions; ++ii)
-    {
-        fullMap += structMap;
-    }
-    */
 
     //! #################################################################################
     //! BOUNDARY CONDITIONS
@@ -483,7 +479,7 @@ Structure::run3d()
         {
             Real tZero = dataStructure->dataTime()->initialTime();
 
-            for ( UInt previousPass=0; previousPass < dataStructure->dataTimeAdvance()->orderBDF() ; previousPass++)
+            for ( UInt previousPass=0; previousPass < timeAdvance->size() ; previousPass++)
             {
                 Real previousTimeStep = tZero - previousPass*dt;
                 std::cout<<"BDF " <<previousTimeStep<<"\n";
@@ -508,6 +504,7 @@ Structure::run3d()
 
         exporter.addVariable( ExporterData<mesh_Type >::VectorField, "displVer", dFESpace, vectVer, UInt(0) );
 
+        //Let's get the initial displacement and velocity
         exporter.postProcess(0.0);
 
         *vectVer = *initialDisplacement;
@@ -564,6 +561,11 @@ Structure::run3d()
 
     exporterCheck->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "rhs", dFESpace, rhsCopy,  UInt(0) );
     exporterCheck->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "residual", dFESpace, residualCopy,  UInt(0) );
+
+    //Let's get the initial quantities
+    *solidDisp = solid.displacement();
+    *solidVel = timeAdvance->velocity();
+    *solidAcc = timeAdvance->acceleration();
 
     exporter->postProcess( 0 );
     exporterCheck->postProcess( 0 );
