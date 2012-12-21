@@ -76,8 +76,8 @@ public:
 
     //! Type of the Evaluation
 	typedef typename ExpressionToEvaluation< ExpressionType,
-                                             TestSpaceType::S_fieldDim,
-                                             SolutionSpaceType::S_fieldDim,
+                                             TestSpaceType::field_dim,
+                                             SolutionSpaceType::field_dim,
                                              3>::evaluation_Type evaluation_Type;
 
     typedef typename MeshType::element_Type       elementMesh_Type;
@@ -179,8 +179,8 @@ private:
 	evaluation_Type M_evaluation;
 
 	ETCurrentFE<3,1>* M_globalCFE;
-	ETCurrentFE<3,TestSpaceType::S_fieldDim>* M_testCFE;
-	ETCurrentFE<3,SolutionSpaceType::S_fieldDim>* M_solutionCFE;
+	ETCurrentFE<3,TestSpaceType::field_dim>* M_testCFE;
+	ETCurrentFE<3,SolutionSpaceType::field_dim>* M_solutionCFE;
 
     ETMatrixElemental M_elementalMatrix;
 };
@@ -210,11 +210,11 @@ IntegrateMatrixVolumeID(const boost::shared_ptr<MeshType>& mesh,
         M_evaluation(expression),
 
         M_globalCFE(new ETCurrentFE<3,1>(feTetraP0,geometricMapFromMesh<MeshType>(),quadrature)),
-        M_testCFE(new ETCurrentFE<3,TestSpaceType::S_fieldDim>(testSpace->refFE(),testSpace->geoMap(),quadrature)),
-        M_solutionCFE(new ETCurrentFE<3,SolutionSpaceType::S_fieldDim>(solutionSpace->refFE(),testSpace->geoMap(),quadrature)),
+        M_testCFE(new ETCurrentFE<3,TestSpaceType::field_dim>(testSpace->refFE(),testSpace->geoMap(),quadrature)),
+        M_solutionCFE(new ETCurrentFE<3,SolutionSpaceType::field_dim>(solutionSpace->refFE(),testSpace->geoMap(),quadrature)),
 
-        M_elementalMatrix(TestSpaceType::S_fieldDim*testSpace->refFE().nbDof(),
-                          SolutionSpaceType::S_fieldDim*solutionSpace->refFE().nbDof())
+        M_elementalMatrix(TestSpaceType::field_dim*testSpace->refFE().nbDof(),
+                          SolutionSpaceType::field_dim*solutionSpace->refFE().nbDof())
 {
     M_evaluation.setQuadrature(quadrature);
     M_evaluation.setGlobalCFE(M_globalCFE);
@@ -233,8 +233,8 @@ IntegrateMatrixVolumeID(const IntegrateMatrixVolumeID<MeshType, FunctorType,Test
         M_evaluation(integrator.M_evaluation),
 
         M_globalCFE(new ETCurrentFE<3,1>(feTetraP0,geometricMapFromMesh<MeshType>(),M_quadrature)),
-        M_testCFE(new ETCurrentFE<3,TestSpaceType::S_fieldDim>(M_testSpace->refFE(), M_testSpace->geoMap(),M_quadrature)),
-        M_solutionCFE(new ETCurrentFE<3,SolutionSpaceType::S_fieldDim>(M_solutionSpace->refFE(), M_solutionSpace->geoMap(),M_quadrature)),
+        M_testCFE(new ETCurrentFE<3,TestSpaceType::field_dim>(M_testSpace->refFE(), M_testSpace->geoMap(),M_quadrature)),
+        M_solutionCFE(new ETCurrentFE<3,SolutionSpaceType::field_dim>(M_solutionSpace->refFE(), M_solutionSpace->geoMap(),M_quadrature)),
 
         M_elementalMatrix(integrator.M_elementalMatrix)
 {
@@ -308,9 +308,9 @@ addTo(MatrixType& mat)
 
         // Loop on the blocks
 
-        for (UInt iblock(0); iblock < TestSpaceType::S_fieldDim; ++iblock)
+        for (UInt iblock(0); iblock < TestSpaceType::field_dim; ++iblock)
         {
-            for (UInt jblock(0); jblock < SolutionSpaceType::S_fieldDim; ++jblock)
+            for (UInt jblock(0); jblock < SolutionSpaceType::field_dim; ++jblock)
             {
 
                 // Set the row global indices in the local matrix

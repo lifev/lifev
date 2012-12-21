@@ -814,7 +814,7 @@ void StructuralOperator<Mesh, SolverType>::updateSourceTerm( source_Type const& 
 
         for ( UInt ic = 0; ic < nc; ++ic )
         {
-            compute_vec( source, M_elvec, M_FESpace->fe(),  M_data->dataTime()->time(), ic ); // compute local vector
+            //compute_vec( source, M_elvec, M_FESpace->fe(),  M_data->dataTime()->time(), ic ); // compute local vector
             assembleVector( *rhs, M_elvec, M_FESpace->fe(), M_FESpace->dof(), ic, ic*M_FESpace->fieldDim() ); // assemble local vector into global one
         }
     }

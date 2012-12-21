@@ -101,7 +101,7 @@ class VenantKirchhoffMaterialLinear :
     typedef typename super::FESpacePtr_Type          FESpacePtr_Type;
     typedef typename super::ETFESpacePtr_Type        ETFESpacePtr_Type;
 
-    typedef MarkerFunctor<Mesh::element_Type, boost::function2<bool,const UInt,const UInt> >     markerFunctor_Type;
+    typedef MarkerFunctor<typename Mesh::element_Type, boost::function2<bool,const UInt,const UInt> >     markerFunctor_Type;
     typedef boost::shared_ptr<markerFunctor_Type>                      markerFunctorPtr_Type;
 
  //@}
