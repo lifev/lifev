@@ -1250,6 +1250,7 @@ bcEssentialManage( MatrixType& matrix,
     {
         // bcType has been changed Flux -> Essential, need to diagonalize also the Lagrange multiplier
        idDofVec.push_back(offset + boundaryCond.offset());
+       datumVec.push_back( 0. );
     }
 
     // Modifying matrix and right hand side
