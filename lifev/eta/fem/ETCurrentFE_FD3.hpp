@@ -1,4 +1,5 @@
-#include <lifev/eta/array/MatrixSmall.hpp>
+#include <lifev/core/array/MatrixSmall.hpp>
+#include <lifev/core/array/VectorSmall.hpp>
 
 namespace LifeV {
 
@@ -840,6 +841,8 @@ updateJacobian(const UInt& iQuadPt)
     }
 }
 
+
+/*MOVED TO THE .cpp FILE!!
 // Full specialization for the computation of the determinant
 template<>
 void
@@ -971,7 +974,7 @@ updateInverseJacobian(const UInt& iQuadPt)
 
     M_tInverseJacobian[iQuadPt][2][2] = ( M_jacobian[iQuadPt][0][0] * M_jacobian[iQuadPt][1][1]
                                           -M_jacobian[iQuadPt][0][1] * M_jacobian[iQuadPt][1][0])/det;
-}
+}*/
 
 template< UInt spaceDim >
 void ETCurrentFE< spaceDim, 3 >::updateWDet( const UInt& iQuadPt )

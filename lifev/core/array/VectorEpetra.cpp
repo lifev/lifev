@@ -110,7 +110,7 @@ VectorEpetra::VectorEpetra( const VectorEpetra& vector, const MapEpetraType& map
         return;
     }
 
-    *this *= 0.; // because of a buggy behaviour in case of multidefined indeces.
+    *this = 0.; // because of a buggy behaviour in case of multidefined indeces.
 
     switch (M_mapType)
     {
@@ -755,13 +755,21 @@ VectorEpetra::norm1() const
 void
 VectorEpetra::norm1( Real* result ) const
 {
-    M_epetraVector->Norm1(result);
+    this->norm1(*result);
 }
 
 void
 VectorEpetra::norm1( Real& result ) const
 {
+
+    if (this->mapType() == Repeated)
+    {
+        VectorEpetra vUnique(*this, Unique, M_combineMode);
+        vUnique.norm1( &result );
+	return;
+    }
     M_epetraVector->Norm1(&result);
+
 }
 
 Real
@@ -775,12 +783,19 @@ VectorEpetra::norm2() const
 void
 VectorEpetra::norm2( Real* result ) const
 {
-    M_epetraVector->Norm2(result);
+    this->norm2(*result);
 }
 
 void
 VectorEpetra::norm2( Real& result ) const
 {
+    if (this->mapType() == Repeated)
+    {
+        VectorEpetra vUnique(*this, Unique, M_combineMode);
+        vUnique.norm2( &result );
+	return;
+    }
+
     M_epetraVector->Norm2( &result );
 }
 
@@ -927,6 +942,14 @@ void VectorEpetra::showMe( std::ostream& output ) const
     const Real* Values = redVec.epetraVector()[0];
     for ( Int i = 0; i < redVec.M_epetraVector->GlobalLength () ; ++i )
         output << Values[i] << std::endl;
+}
+
+void VectorEpetra::apply(const boost::function1<Real,Real>& f)
+{
+    Int i, j;
+    for ( i=0; i < M_epetraVector->NumVectors(); ++i )
+        for ( j=0; j < M_epetraVector->MyLength(); ++j )
+            (*M_epetraVector)[i][j] = f((*M_epetraVector)[i][j]);
 }
 
 

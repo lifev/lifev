@@ -649,6 +649,8 @@ public:
      */
     void showMe( std::ostream& output = std::cout ) const;
 
+    void apply(const boost::function1<Real,Real>& f);
+
     //@}
 
 

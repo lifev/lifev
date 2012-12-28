@@ -48,9 +48,15 @@
 #include <lifev/eta/expression/ExpressionProduct.hpp>
 #include <lifev/eta/expression/ExpressionDot.hpp>
 #include <lifev/eta/expression/ExpressionDivision.hpp>
+#include <lifev/eta/expression/ExpressionEmult.hpp>
+#include <lifev/eta/expression/ExpressionExtract1.hpp>
+#include <lifev/eta/expression/ExpressionExtract2.hpp>
+#include <lifev/eta/expression/ExpressionTranspose.hpp>
+#include <lifev/eta/expression/ExpressionOuterProduct.hpp>
 
 #include <lifev/eta/expression/ExpressionScalar.hpp>
 #include <lifev/eta/expression/ExpressionVector.hpp>
+#include <lifev/eta/expression/ExpressionMatrix.hpp>
 
 #include <lifev/eta/expression/ExpressionInterpolateValue.hpp>
 #include <lifev/eta/expression/ExpressionInterpolateGradient.hpp>
@@ -60,6 +66,10 @@
 #include <lifev/eta/expression/ExpressionHK.hpp>
 #include <lifev/eta/expression/ExpressionMeas.hpp>
 #include <lifev/eta/expression/ExpressionPosition.hpp>
+#include <lifev/eta/expression/ExpressionNormal.hpp>
+
+#include <lifev/eta/expression/ExpressionIfCrossed.hpp>
+
 
 #include <lifev/eta/expression/EvaluationPhiI.hpp>
 #include <lifev/eta/expression/EvaluationPhiJ.hpp>
@@ -73,9 +83,15 @@
 #include <lifev/eta/expression/EvaluationProduct.hpp>
 #include <lifev/eta/expression/EvaluationDot.hpp>
 #include <lifev/eta/expression/EvaluationDivision.hpp>
+#include <lifev/eta/expression/EvaluationEmult.hpp>
+#include <lifev/eta/expression/EvaluationExtract1.hpp>
+#include <lifev/eta/expression/EvaluationExtract2.hpp>
+#include <lifev/eta/expression/EvaluationTranspose.hpp>
+#include <lifev/eta/expression/EvaluationOuterProduct.hpp>
 
 #include <lifev/eta/expression/EvaluationScalar.hpp>
 #include <lifev/eta/expression/EvaluationVector.hpp>
+#include <lifev/eta/expression/EvaluationMatrix.hpp>
 
 #include <lifev/eta/expression/EvaluationInterpolateValue.hpp>
 #include <lifev/eta/expression/EvaluationInterpolateGradient.hpp>
@@ -85,6 +101,9 @@
 #include <lifev/eta/expression/EvaluationHK.hpp>
 #include <lifev/eta/expression/EvaluationMeas.hpp>
 #include <lifev/eta/expression/EvaluationPosition.hpp>
+#include <lifev/eta/expression/EvaluationNormal.hpp>
+
+#include <lifev/eta/expression/EvaluationIfCrossed.hpp>
 
 namespace LifeV
 {
@@ -122,6 +141,42 @@ private:
 };
 
 // \cond
+
+// Specialized for Extract1
+template<typename Expression, UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation<
+    ExpressionExtract1<Expression>
+    ,testDim
+    ,solutionDim
+    ,spaceDim>
+{
+public:
+    typedef EvaluationExtract1<
+                    typename ExpressionToEvaluation<Expression,testDim,solutionDim,spaceDim>::evaluation_Type
+                    > evaluation_Type;
+private:
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
+};
+
+
+// Specialized for Extract2
+template<typename Expression, UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation<
+    ExpressionExtract2<Expression>
+    ,testDim
+    ,solutionDim
+    ,spaceDim>
+{
+public:
+    typedef EvaluationExtract2<
+                    typename ExpressionToEvaluation<Expression,testDim,solutionDim,spaceDim>::evaluation_Type
+                    > evaluation_Type;
+private:
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
+    };
+
 // Specialized for phi_i
 template<UInt testDim, UInt solutionDim, UInt spaceDim>
 class ExpressionToEvaluation<ExpressionPhiI,testDim,solutionDim,spaceDim>
@@ -188,6 +243,24 @@ private:
 	~ExpressionToEvaluation();
 };
 
+  // Specialized for transpose
+template<typename Expression, UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation<
+    ExpressionTranspose<Expression>
+    ,testDim
+    ,solutionDim
+    ,spaceDim>
+{
+public:
+    typedef EvaluationTranspose<
+                    typename ExpressionToEvaluation<Expression,testDim,solutionDim,spaceDim>::evaluation_Type
+                    > evaluation_Type;
+private:
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
+    };
+
+
 // Specialized for scalar
 template<UInt testDim, UInt solutionDim, UInt spaceDim>
 class ExpressionToEvaluation<ExpressionScalar,testDim,solutionDim,spaceDim>
@@ -205,6 +278,17 @@ class ExpressionToEvaluation<ExpressionVector<VectorDim>,testDim,solutionDim,spa
 {
 public:
 	typedef EvaluationVector<VectorDim> evaluation_Type;
+private:
+	ExpressionToEvaluation();
+	~ExpressionToEvaluation();
+};
+
+// Specialized for matrix
+template<UInt testDim, UInt solutionDim, UInt spaceDim, UInt MatrixDim1, UInt MatrixDim2>
+class ExpressionToEvaluation<ExpressionMatrix<MatrixDim1, MatrixDim2>,testDim,solutionDim,spaceDim>
+{
+public:
+  typedef EvaluationMatrix<MatrixDim1, MatrixDim2> evaluation_Type;
 private:
 	ExpressionToEvaluation();
 	~ExpressionToEvaluation();
@@ -328,6 +412,34 @@ private:
 	~ExpressionToEvaluation();
 };
 
+// Specialized for a vector product multiplication
+template<typename ExpressionL, typename ExpressionR, UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation<ExpressionOuterProduct<ExpressionL,ExpressionR>,testDim,solutionDim,spaceDim>
+{
+public:
+    typedef EvaluationOuterProduct<
+                typename ExpressionToEvaluation<ExpressionL,testDim,solutionDim,spaceDim>::evaluation_Type
+               ,typename ExpressionToEvaluation<ExpressionR,testDim,solutionDim,spaceDim>::evaluation_Type
+            > evaluation_Type;
+private:
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
+};
+
+// Specialized for a element-wise multiplication
+template<typename ExpressionL, typename ExpressionR, UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation<ExpressionEmult<ExpressionL,ExpressionR>,testDim,solutionDim,spaceDim>
+{
+public:
+    typedef EvaluationEmult<
+                typename ExpressionToEvaluation<ExpressionL,testDim,solutionDim,spaceDim>::evaluation_Type
+               ,typename ExpressionToEvaluation<ExpressionR,testDim,solutionDim,spaceDim>::evaluation_Type
+            > evaluation_Type;
+private:
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
+    };
+
 // Specialized for a division
 template<typename ExpressionL, typename ExpressionR, UInt testDim, UInt solutionDim, UInt spaceDim>
 class ExpressionToEvaluation<ExpressionDivision<ExpressionL,ExpressionR>,testDim,solutionDim,spaceDim>
@@ -374,6 +486,29 @@ private:
 	ExpressionToEvaluation();
 	~ExpressionToEvaluation();
 };
+
+// Specialized for the normal
+template<UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation<ExpressionNormal,testDim,solutionDim,spaceDim>
+{
+public:
+	typedef EvaluationNormal<spaceDim> evaluation_Type;
+private:
+	ExpressionToEvaluation();
+	~ExpressionToEvaluation();
+};
+
+template<typename MeshType, typename MapType, UInt FESpaceDim, UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation<
+ExpressionIfCrossed<MeshType,MapType,FESpaceDim>,testDim,solutionDim,spaceDim>
+{
+public:
+	typedef EvaluationIfCrossed<MeshType,MapType,FESpaceDim> evaluation_Type;
+private:
+	ExpressionToEvaluation();
+	~ExpressionToEvaluation();
+};
+
 
 
 // \endcond

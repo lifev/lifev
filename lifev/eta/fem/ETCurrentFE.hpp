@@ -65,6 +65,7 @@ namespace ExpressionAssembly
    but is required for some earlier standards. So, better to
    have them.
 */
+
 template <UInt dim>
 class EvaluationPhiI;
 
@@ -989,7 +990,9 @@ updateJacobian(const UInt& iQuadPt)
     }
 }
 
-// Full specialization for the computation of the determinant
+//MOVED TO THE .cpp FILE!!!!
+
+/*// Full specialization for the computation of the determinant
 template<>
 void
 ETCurrentFE<1,1>::
@@ -1120,7 +1123,7 @@ updateInverseJacobian(const UInt& iQuadPt)
 
     M_tInverseJacobian[iQuadPt][2][2] = ( M_jacobian[iQuadPt][0][0] * M_jacobian[iQuadPt][1][1]
                                           -M_jacobian[iQuadPt][0][1] * M_jacobian[iQuadPt][1][0])/det;
-}
+}*/
 
 template< UInt spaceDim>
 void
