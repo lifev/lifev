@@ -282,32 +282,12 @@ void VenantKirchhoffMaterialLinear<Mesh>::computeLinearStiff(dataPtr_Type& dataM
                    this->M_ETFESpace,
                    value(lambda) * div(phi_i) * div(phi_j)  ) >> M_linearStiff;
 
-        //Given the parameters I loop over the volumes with that marker
-        for ( UInt j(0); j < it->second.size(); j++ )
-        {
-            this->M_FESpace->fe().updateFirstDerivQuadPt( *(it->second[j]) );
-
-            this->M_elmatK->zero();
-
-            //These methods are implemented in AssemblyElemental.cpp
-            //They have been kept in AssemblyElemental in order to avoid repetitions
-            stiff_strain( 2*mu, *this->M_elmatK, this->M_FESpace->fe() );// here in the previous version was 1. (instead of 2.)
-            //stiff_div   ( lambda, *this->M_elmatK, this->M_FESpace->fe() );// here in the previous version was 0.5 (instead of 1.)
-
-            //this->M_elmatK->showMe();
-
-            // assembling
-            for ( UInt ic = 0; ic < nc; ic++ )
-            {
-                for ( UInt jc = 0; jc < nc; jc++ )
-                {
-                    assembleMatrix( *this->M_linearStiff, *this->M_elmatK, this->M_FESpace->fe(), this->M_FESpace->fe(), this->M_FESpace->dof(), this->M_FESpace->dof(),  ic,  jc,  this->M_offset +ic*totalDof, this->M_offset + jc*totalDof );
-
-                }
-            }
-
-
-        }
+        integrate( integrationOverSelectedVolumes( this->M_FESpace->mesh(), M_markerFunctorPtr ) ,
+                   this->M_FESpace->qr(),
+                   this->M_ETFESpace,
+                   this->M_ETFESpace,
+                   value(mu) * dot( grad(phi_i) + transpose(grad(phi_i)) , grad(phi_j) )  ) >> M_linearStiff;
+        // }
 
     }
 
