@@ -124,11 +124,11 @@ Real zeroFunction(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const
 Real inflowFunction(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
 {
     if (i == 0)
-    {	
+    {
         Real ux = 1; // flat velocity profile
         return (1 * ux * t/0.5 * (t < 0.5) + 1 * ux * (t > 0.5));
-    } 
-    else 
+    }
+    else
     {
         return 0;
     }
@@ -604,7 +604,7 @@ main( int argc, char** argv )
 
         if(convectionTerm == SemiImplicit)
         {
-            *velocityExtrapolated = bdf.extrapolation( ); // Extrapolation for the convective term
+            bdf.extrapolation( *velocityExtrapolated ); // Extrapolation for the convective term
             convMatrix.reset(new matrix_block_type( solutionMap ));
 
             // Perform the assembly of the convection matrix with ETA

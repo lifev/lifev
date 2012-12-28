@@ -282,7 +282,6 @@ void VenantKirchhoffMaterialLinear<Mesh>::computeLinearStiff(dataPtr_Type& dataM
                    this->M_ETFESpace,
                    value(lambda) * div(phi_i) * div(phi_j)  ) >> M_linearStiff;
 
-
         //Given the parameters I loop over the volumes with that marker
         for ( UInt j(0); j < it->second.size(); j++ )
         {

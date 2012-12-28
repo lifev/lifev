@@ -584,14 +584,14 @@ if (verbose) std::cout << " Building EA FESpaces  " << std::endl;
 if (verbose) std::cout << " Initial conditions " << std::endl;
 
 	vector_type LSSolution(ETlsFESpace->map(),Unique);
-	lsFESpace->interpolate(initLSFct,LSSolution,0.0);
+	lsFESpace->interpolate(static_cast<FESpace< mesh_Type, MapEpetra >::function_Type>(initLSFct),LSSolution,0.0);
 
     vector_type LSSolutionOld(LSSolution,Repeated);
     vector_type HJSolutionOld(LSSolution,Repeated);
     vector_type HJProjSolution(LSSolution,Repeated);
 
     vector_type velocitySolution(ETuFESpace->map(),Unique);
-    uFESpace->interpolate(initVelocity,velocitySolution,0.0);
+    uFESpace->interpolate(static_cast<FESpace< mesh_Type, MapEpetra >::function_Type>(initVelocity),velocitySolution,0.0);
 
     vector_type velocitySolutionOld(velocitySolution,Repeated);
 #ifdef BDF2_TIME
@@ -708,12 +708,12 @@ if (verbose) std::cout << "[Navier-Stokes] Assembling the matrix ... " << std::f
              boost::shared_ptr<DensityFct> density(new DensityFct);
              boost::shared_ptr<ViscosityFct> viscosity(new ViscosityFct);
              boost::shared_ptr<NormalizeFct> normalize(new NormalizeFct);
-	     
+
              using namespace ExpressionAssembly;
 
              integrate(
-                 elements(ETuFESpace->mesh()), // Mesh	
-	 
+                 elements(ETuFESpace->mesh()), // Mesh
+
                  adapt(ETlsFESpace,LSSolutionOld, uFESpace->qr()), // QR
 
                  ETuFESpace,
@@ -893,9 +893,9 @@ if (verbose) std::cout << "[Navier-Stokes] Lifting the pressure ... " << std::fl
              vector_type N1(GradientRecovery::ZZGradient(ETlsFESpace,LSSolutionOld,1),Repeated);
              vector_type N2(GradientRecovery::ZZGradient(ETlsFESpace,LSSolutionOld,2),Repeated);
 
-             vector_type f0(ETlsFESpace->map(),Unique); lsFESpace->interpolate(volumeForce0,f0,currentTime);
-             vector_type f1(ETlsFESpace->map(),Unique); lsFESpace->interpolate(volumeForce1,f1,currentTime);
-             vector_type f2(ETlsFESpace->map(),Unique); lsFESpace->interpolate(volumeForce2,f2,currentTime);
+             vector_type f0(ETlsFESpace->map(),Unique); lsFESpace->interpolate(static_cast<FESpace< mesh_Type, MapEpetra >::function_Type>(volumeForce0),f0,currentTime);
+             vector_type f1(ETlsFESpace->map(),Unique); lsFESpace->interpolate(static_cast<FESpace< mesh_Type, MapEpetra >::function_Type>(volumeForce1),f1,currentTime);
+             vector_type f2(ETlsFESpace->map(),Unique); lsFESpace->interpolate(static_cast<FESpace< mesh_Type, MapEpetra >::function_Type>(volumeForce2),f2,currentTime);
 
              vector_type gn( (densityPlus - densityMinus)*( N0*f0 + N1*f1 + N2*f2 ), Repeated);
              vector_type nNorm(( N0*N0 + N1*N1 + N2*N2 ), Repeated);
@@ -942,7 +942,7 @@ if (verbose) std::cout << "[Navier-Stokes] Assembling the rhs ... " << std::flus
          ChronoItem.start();
 
          vector_type forceRhs(ETuFESpace->map(),Unique);
-         uFESpace->interpolate(volumeForce,forceRhs,currentTime);
+         uFESpace->interpolate(static_cast<FESpace< mesh_Type, MapEpetra >::function_Type>(volumeForce),forceRhs,currentTime);
 
 
          vector_block_type NSRhs( ETuFESpace->map() | ETpFESpace->map() ,Repeated );
@@ -1095,7 +1095,7 @@ if (verbose) std::cout << "[Navier-Stokes] Solving the system " << std::endl;
 
 
          NSSolver.setMatrix(*NSMatrix);
-	
+
 	boost::shared_ptr<matrix_type> NSMatrixNoBlock(new matrix_type( NSMatrix->matrixPtr() ));
 
          NSSolver.solveSystem(NSRhsUnique,NSSolution,NSMatrixNoBlock);

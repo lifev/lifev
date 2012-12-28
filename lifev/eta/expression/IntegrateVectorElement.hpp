@@ -216,8 +216,8 @@ IntegrateVectorElement( const IntegrateVectorElement < MeshType, TestSpaceType, 
 	  	M_globalCFE_std(new ETCurrentFE<3,1>(feTetraP0,geometricMapFromMesh<MeshType>(),integrator.M_qrAdapter.standardQR())),
 	  	M_globalCFE_adapted(new ETCurrentFE<3,1>(feTetraP0,geometricMapFromMesh<MeshType>(),integrator.M_qrAdapter.standardQR())),
 
-		M_testCFE_std(new ETCurrentFE<3,TestSpaceType::field_Dim>(M_testSpace->refFE(), M_testSpace->geoMap(),integrator.M_qrAdapter.standardQR())),
-		M_testCFE_adapted(new ETCurrentFE<3,TestSpaceType::field_Dim>(M_testSpace->refFE(), M_testSpace->geoMap(),integrator.M_qrAdapter.standardQR())),
+		M_testCFE_std(new ETCurrentFE<3,TestSpaceType::field_dim>(M_testSpace->refFE(), M_testSpace->geoMap(),integrator.M_qrAdapter.standardQR())),
+		M_testCFE_adapted(new ETCurrentFE<3,TestSpaceType::field_dim>(M_testSpace->refFE(), M_testSpace->geoMap(),integrator.M_qrAdapter.standardQR())),
 
 		M_elementalVector(integrator.M_elementalVector)
 {
@@ -343,7 +343,7 @@ addTo(VectorType& vec)
             M_evaluation.update(iElement);
 
             // Loop on the blocks
-            for (UInt iblock(0); iblock < TestSpaceType::S_fieldDim; ++iblock)
+            for (UInt iblock(0); iblock < TestSpaceType::field_dim; ++iblock)
             {
                 // Set the row global indices in the local vector
                 for (UInt i(0); i<nbTestDof; ++i)

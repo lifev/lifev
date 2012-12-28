@@ -169,16 +169,29 @@ integrate( const RequestLoopElement<MeshType>& request,
 // Methods to integrate over a portion of the mesh
 // =============================================================
 template < typename MeshType, typename FunctorType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
-IntegrateMatrixVolumeID<MeshType, FunctorType, TestSpaceType,SolutionSpaceType,ExpressionType>
+IntegrateMatrixVolumeID<MeshType,FunctorType, TestSpaceType,SolutionSpaceType,ExpressionType,QRAdapterNeverAdapt>
 integrate( const RequestLoopVolumeID<MeshType,FunctorType >& request,
            const QuadratureRule& quadrature,
            const boost::shared_ptr<TestSpaceType>& testSpace,
            const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
            const ExpressionType& expression)
 {
-	return IntegrateMatrixVolumeID<MeshType,FunctorType,TestSpaceType,SolutionSpaceType,ExpressionType>
-		(request.mesh(),request.functorSelection(),quadrature,testSpace,solutionSpace,expression);
+	return IntegrateMatrixVolumeID<MeshType,FunctorType,TestSpaceType,SolutionSpaceType,ExpressionType,QRAdapterNeverAdapt>
+		(request.mesh(),request.functorSelection(),QRAdapterNeverAdapt(quadrature),testSpace,solutionSpace,expression);
 }
+
+template < typename MeshType,  typename FunctorType,typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType, typename QRAdapterType>
+IntegrateMatrixVolumeID<MeshType, FunctorType, TestSpaceType,SolutionSpaceType,ExpressionType,QRAdapterType>
+integrate( const RequestLoopVolumeID<MeshType,FunctorType >& request,
+           const QRAdapterBase<QRAdapterType>& qrAdapter,
+           const boost::shared_ptr<TestSpaceType>& testSpace,
+           const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
+           const ExpressionType& expression)
+{
+	return IntegrateMatrixVolumeID<MeshType,FunctorType,TestSpaceType,SolutionSpaceType,ExpressionType,QRAdapterType>
+		(request.mesh(),request.functorSelection(),qrAdapter.implementation(),testSpace,solutionSpace,expression);
+}
+
 
 //! Integrate function for vectorial expressions
 /*!

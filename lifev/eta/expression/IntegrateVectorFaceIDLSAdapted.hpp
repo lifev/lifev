@@ -83,7 +83,7 @@ public:
 
     //! Type of the Evaluation
 	typedef typename ExpressionToEvaluation< ExpressionType,
-                                             TestSpaceType::S_fieldDim,
+                                             TestSpaceType::field_dim,
                                              0,
                                              3>::evaluation_Type evaluation_Type;
 
@@ -184,7 +184,7 @@ private:
 	evaluation_Type M_evaluation;
 
     std::vector<ETCurrentBDFE<3>*> M_globalCFE;
-    std::vector<ETCurrentFE<3,TestSpaceType::S_fieldDim>*> M_testCFE;
+    std::vector<ETCurrentFE<3,TestSpaceType::field_dim>*> M_testCFE;
 
     ETVectorElemental M_elementalVector;
 };
@@ -218,13 +218,13 @@ IntegrateVectorFaceIDLSAdapted(const boost::shared_ptr<MeshType>& mesh,
 		M_globalCFE(4),
 		M_testCFE(4),
 
-        M_elementalVector(TestSpaceType::S_fieldDim*testSpace->refFE().nbDof())
+        M_elementalVector(TestSpaceType::field_dim*testSpace->refFE().nbDof())
 {
     for (UInt i(0); i<4; ++i)
     {
         M_globalCFE[i]=new ETCurrentBDFE<3>(geometricMapFromMesh<MeshType>()
                                             ,M_qrAdapter.adaptedBdQR(i));
-        M_testCFE[i]=new ETCurrentFE<3,TestSpaceType::S_fieldDim>(testSpace->refFE()
+        M_testCFE[i]=new ETCurrentFE<3,TestSpaceType::field_dim>(testSpace->refFE()
                                                                   ,testSpace->geoMap()
                                                                   ,M_qrAdapter.adaptedBdQR(i));
     }
@@ -279,7 +279,7 @@ IntegrateVectorFaceIDLSAdapted( const IntegrateVectorFaceIDLSAdapted < MeshType,
     {
         M_globalCFE[i]=new ETCurrentBDFE<3>(geometricMapFromMesh<MeshType>()
                                             ,M_qrAdapter.adaptedBdQR(i));
-        M_testCFE[i]=new ETCurrentFE<3,TestSpaceType::S_fieldDim>(M_testSpace->refFE()
+        M_testCFE[i]=new ETCurrentFE<3,TestSpaceType::field_dim>(M_testSpace->refFE()
                                                                   ,M_testSpace->geoMap()
                                                                   ,M_qrAdapter.adaptedBdQR(i));
     }
@@ -401,7 +401,7 @@ addTo(VectorType& vec)
         M_evaluation.update(adjacentElementID);
 
         // Loop on the blocks
-        for (UInt iblock(0); iblock < TestSpaceType::S_fieldDim; ++iblock)
+        for (UInt iblock(0); iblock < TestSpaceType::field_dim; ++iblock)
         {
 
             // Set the row global indices in the local matrix

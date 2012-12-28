@@ -403,9 +403,9 @@ addTo(MatrixType& mat)
 
             // Loop on the blocks
 
-            for (UInt iblock(0); iblock < TestSpaceType::S_fieldDim; ++iblock)
+            for (UInt iblock(0); iblock < TestSpaceType::field_dim; ++iblock)
             {
-                for (UInt jblock(0); jblock < SolutionSpaceType::S_fieldDim; ++jblock)
+                for (UInt jblock(0); jblock < SolutionSpaceType::field_dim; ++jblock)
                 {
 
                     // Set the row global indices in the local matrix
