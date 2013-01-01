@@ -156,13 +156,13 @@ public:
         M_data->showMe();
 
 #ifdef DEBUG
-        Debug( 10000 ) << "creating FSISolver with operator :  " << method << "\n";
+        debugStream( 10000 ) << "creating FSISolver with operator :  " << method << "\n";
 #endif
         M_fsi = fsi_solver_ptr( new FSISolver( ) );
         MPI_Barrier( MPI_COMM_WORLD );
 
 #ifdef DEBUG
-        Debug( 10000 ) << "Setting up data from GetPot \n";
+        debugStream( 10000 ) << "Setting up data from GetPot \n";
 #endif
         M_fsi->setData( M_data );
         M_fsi->FSIOper()->setDataFile( data_file ); //TO BE REMOVED!
@@ -193,12 +193,12 @@ public:
             M_fsi->FSIOper( )->setupDOF( );
         }
 
-        Debug( 10000 ) << "Setting up the FESpace and DOF \n";
+        debugStream( 10000 ) << "Setting up the FESpace and DOF \n";
 
         MPI_Barrier( MPI_COMM_WORLD );
 
 #ifdef DEBUG
-        Debug( 10000 ) << "Setting up the BC \n";
+        debugStream( 10000 ) << "Setting up the BC \n";
 #endif
         M_fsi->setFluidBC( BCh_monolithicFlux( true ) );
         M_fsi->setSolidBC( BCh_monolithicSolid( *M_fsi->FSIOper( ) ) );
@@ -209,7 +209,7 @@ public:
         M_fsi->setHarmonicExtensionBC( BCh_harmonicExtension( *M_fsi->FSIOper( ) ) );
 
 #ifdef DEBUG
-        Debug( 10000 ) << "BC set\n";
+        debugStream( 10000 ) << "BC set\n";
 #endif
 
         std::string const exporterType =  data_file( "exporter/type", "ensight" );

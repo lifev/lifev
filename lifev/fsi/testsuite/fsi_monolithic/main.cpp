@@ -195,12 +195,12 @@ public:
             M_fsi->FSIOper( )->setupDOF( );
         }
 
-        Debug( 10000 ) << "Setting up the FESpace and DOF \n";
+        debugStream( 10000 ) << "Setting up the FESpace and DOF \n";
 
         MPI_Barrier( MPI_COMM_WORLD );
 
 #ifdef DEBUG
-        Debug( 10000 ) << "Setting up the BC \n";
+        debugStream( 10000 ) << "Setting up the BC \n";
 #endif
         M_fsi->setFluidBC( BCh_monolithicFlux( true ) );
         M_fsi->setSolidBC( BCh_monolithicSolid( *M_fsi->FSIOper( ) ) );
@@ -213,7 +213,7 @@ public:
         dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->mergeBCHandlers();
 
 #ifdef DEBUG
-        Debug( 10000 ) << "BC set\n";
+        debugStream( 10000 ) << "BC set\n";
 #endif
 
         std::string const exporterType =  data_file( "exporter/type", "ensight" );
