@@ -53,6 +53,7 @@
 
 //Integration over portions of the domain
 #include <lifev/eta/expression/IntegrateMatrixVolumeID.hpp>
+#include <lifev/eta/expression/IntegrateVectorVolumeID.hpp>
 #include <lifev/eta/expression/IntegrateVectorFaceID.hpp>
 #include <lifev/eta/expression/IntegrateMatrixFaceID.hpp>
 
@@ -192,28 +193,27 @@ integrate( const RequestLoopVolumeID<MeshType,FunctorType >& request,
 		(request.mesh(),request.functorSelection(),qrAdapter.implementation(),testSpace,solutionSpace,expression);
 }
 
+template < typename MeshType, typename FunctorType, typename TestSpaceType, typename ExpressionType>
+IntegrateVectorVolumeID<MeshType,FunctorType, TestSpaceType,ExpressionType,QRAdapterNeverAdapt>
+integrate( const RequestLoopVolumeID<MeshType,FunctorType >& request,
+           const QuadratureRule& quadrature,
+           const boost::shared_ptr<TestSpaceType>& testSpace,
+           const ExpressionType& expression)
+{
+	return IntegrateVectorVolumeID<MeshType,FunctorType,TestSpaceType, ExpressionType, QRAdapterNeverAdapt>
+		(request.mesh(),request.functorSelection(),QRAdapterNeverAdapt(quadrature),testSpace,expression);
+}
 
-//! Integrate function for vectorial expressions
-/*!
-  @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
-
-  This class is an helper function to instantiate the class
-  for performing an integration, here to assemble a vector
-  with a loop on the elements.
- */
-// template < typename MeshType, typename FunctorType, typename TestSpaceType, typename ExpressionType>
-// IntegrateVectorVolumeID<MeshType,FunctorType,TestSpaceType,ExpressionType>
-// integrate( const RequestLoopVolumeID<MeshType,FunctorType >& request,
-//            const QuadratureRule& quadrature,
-//            const boost::shared_ptr<TestSpaceType>& testSpace,
-//            const ExpressionType& expression)
-// {
-// 	return IntegrateVectorVolumeID<MeshType,FunctorType, TestSpaceType,ExpressionType>
-// 		(request.mesh(),request.functorSelection(),quadrature,testSpace,expression);
-// }
-
-
-
+template < typename MeshType,  typename FunctorType,typename TestSpaceType, typename ExpressionType, typename QRAdapterType>
+IntegrateVectorVolumeID<MeshType, FunctorType, TestSpaceType, ExpressionType, QRAdapterType>
+integrate( const RequestLoopVolumeID<MeshType,FunctorType >& request,
+           const QRAdapterBase<QRAdapterType>& qrAdapter,
+           const boost::shared_ptr<TestSpaceType>& testSpace,
+           const ExpressionType& expression)
+{
+	return IntegrateVectorVolumeID<MeshType,FunctorType,TestSpaceType,ExpressionType,QRAdapterType>
+		(request.mesh(),request.functorSelection(),qrAdapter.implementation(),testSpace,expression);
+}
 
 /* Integration on the boundary of the domain */
 

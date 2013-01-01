@@ -62,6 +62,7 @@ SET(expression_HEADERS
 	expression/IntegrateValueElement.hpp
 	expression/IntegrateValueElementLSAdapted.hpp
 	expression/IntegrateVectorElement.hpp
+	expression/IntegrateVectorVolumeID.hpp
 	expression/IntegrateVectorElementLSAdapted.hpp
 	expression/IntegrateVectorFaceID.hpp
 	expression/IntegrateVectorFaceIDLSAdapted.hpp
