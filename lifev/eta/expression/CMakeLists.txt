@@ -25,6 +25,7 @@ SET(expression_HEADERS
 	expression/EvaluationSubstraction.hpp
 	expression/EvaluationTranspose.hpp
 	expression/EvaluationVector.hpp
+	expression/EvaluationDeformationGradient.hpp
 	expression/ExpressionAddition.hpp
 	expression/ExpressionBase.hpp
 	expression/ExpressionDivI.hpp
@@ -53,6 +54,7 @@ SET(expression_HEADERS
 	expression/ExpressionTranspose.hpp
 	expression/ExpressionToEvaluation.hpp
 	expression/ExpressionVector.hpp
+	expression/ExpressionDeformationGradient.hpp
 	expression/Integrate.hpp
 	expression/IntegrateMatrixElement.hpp
 	expression/IntegrateMatrixVolumeID.hpp
