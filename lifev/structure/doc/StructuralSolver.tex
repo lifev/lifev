@@ -45,8 +45,8 @@ colortbl, supertabular} \usepackage{subfigure} \usepackage{epstopdf}
 % tikz \usepackage{tikz} \usetikzlibrary{mindmap,trees}
 \usetikzlibrary{arrows,decorations.pathmorphing,backgrounds,fit,positioning,shapes.symbols,chains}
 \usetikzlibrary{calc,trees,positioning,arrows,chains,shapes.geometric,%
-decorations.pathreplacing,decorations.pathmorphing,shapes,%
-matrix,shapes.symbols}
+  decorations.pathreplacing,decorations.pathmorphing,shapes,%
+  matrix,shapes.symbols}
 
 
 % acronyms \usepackage{acronym}
@@ -57,27 +57,27 @@ matrix,shapes.symbols}
 \usepackage{fancyhdr} \usepackage{etex} \usepackage{epstopdf}
 
 % X Quartapelle
-%\renewcommand{\theequation}{\thechapter.\arabic{equation}}
-%\newcommand{\clearemptydoublepage}{\newpage{\pagestyle{empty}\cleardoublepage}}
+% \renewcommand{\theequation}{\thechapter.\arabic{equation}}
+% \newcommand{\clearemptydoublepage}{\newpage{\pagestyle{empty}\cleardoublepage}}
 \renewcommand{\headrulewidth}{0.3pt}
 \renewcommand{\footrulewidth}{0.3pt}
 \newcommand{\virgolette}[1]{``#1''}
 
-%Mathematical Operator \newcommand{\WE}{\mathcal{W} }
+% Mathematical Operator \newcommand{\WE}{\mathcal{W} }
 \newcommand{\W}{$\mathcal{W}$ } \newcommand{\LE}{\mathcal{L}}
 \newcommand{\Lne}{$\mathcal{L}$ }
 \newcommand{\delOp}{\widehat{\boldsymbol{\nabla}}}
 \newcommand{\diver}[1]{\text{Div}\big(#1\big) }
 \newcommand{\invariants}{$\big(I_{\C},II_{\C},III_{\C}\big)$ }
 
-%Eucledian spaces \newcommand{\Real}{$\mathbb{R}^3$ }
+% Eucledian spaces \newcommand{\Real}{$\mathbb{R}^3$ }
 \newcommand{\RN}{\mathbb{R}^{N_h} }
 
-%Lagrangian and Eulerian displacements
+% Lagrangian and Eulerian displacements
 \newcommand{\displL}{\widehat{\underline{\eta}}}
 \newcommand{\displE}{\underline{\eta}}
 
-%Discrete displacement, velocity and acceleration %The fist command is
+% Discrete displacement, velocity and acceleration %The fist command is
 to reuse the same already existing formula
 \newcommand{\Spost}{\widehat{\underline{\Lambda}}}
 \newcommand{\GradSpost}{\delOp\delta\Spost}
@@ -85,39 +85,39 @@ to reuse the same already existing formula
 \newcommand{\velVect}{\widehat{\underline{W}}}
 \newcommand{\acc}{\widehat{\underline{A}}}
 
-%Stiffness Vectors, discretized system
+% Stiffness Vectors, discretized system
 \newcommand{\StiffVect}{\underline{K}(\vectL)}
 \newcommand{\StiffDiscr}[1]{\underline{K}(\vectL^{#1}) }
 
-%Lagrangian velocity \newcommand{\velL}{\widehat{\underline{v}} }
+% Lagrangian velocity \newcommand{\velL}{\widehat{\underline{v}} }
 \newcommand{\velE}{\underline{v}} %Test function (velocity)
 \newcommand{\velwE}{\widehat{\underline{w}}}
 
-%Programming names \newcommand{\SSol}{\textit{Structural Solver} }
+% Programming names \newcommand{\SSol}{\textit{Structural Solver} }
 \newcommand{\SSolNC}{Structural Solver }
 \newcommand{\LV}{\texttt{LifeV} } \newcommand{\tPC}[1]{\texttt{#1} }
 \newcommand{\AES}{AssemblyElementalStructure }
 \newcommand{\tSS}{\textit{test\_structuralsolver} }
 
-%Reference and Current Configuration
+% Reference and Current Configuration
 \newcommand{\RefCon}{$\mathcal{B}_0$ }
 \newcommand{\CurCon}{$\mathcal{B}(t)$}
 \newcommand{\RefConE}{\mathcal{B}_0 }
 \newcommand{\CurConE}{\mathcal{B}(t) }
 
-%Position in the reference and current configuration
+% Position in the reference and current configuration
 \newcommand{\posE}{\underline{X} } \newcommand{\nposE}{\underline{x} }
 \newcommand{\pos}{$\underline{X}$ } \newcommand{\npos}{$\underline{x}$
 }
 
-%Tensors and matrices \newcommand{\F}{\textbf{F} }
+% Tensors and matrices \newcommand{\F}{\textbf{F} }
 \newcommand{\cofF}{\text{Cof}\textbf{F} } \newcommand{\T}{\textbf{T} }
 \newcommand{\D}{\textbf{D} } \newcommand{\C}{\textbf{C} }
 \newcommand{\Cbar}{\bar{\textbf{C}} } \newcommand{\I}{\textbf{I} }
 \newcommand{\mass}{\textbf{M} } \newcommand{\Piola}{\textbf{P} }
 \newcommand{\Et}{\textbf{E} }
 
-%Expression for the Exponential-Material
+% Expression for the Exponential-Material
 \newcommand{\term}{e^{\gamma\left(I_{\C}-3\right)}}
 
 \newtheorem{weak}{Weak-formulation}[chapter]
@@ -140,13 +140,13 @@ users to plug different constitutive laws into the conservation
 equation of linear momentum in a flexible way.\\ In this report, we
 aim to:
 \begin{itemize}
-  \item present the architecture of the StructuralSolver;
-  \item give a detailed description of the constitutive laws
-implemented;
-  \item show the usage of \textit{test\_structuralsolver} that has
-been developed and, to conclude, present the validation of the
-implemented laws, with respect to analytical and semianalytical
-solutions;
+\item present the architecture of the StructuralSolver;
+\item give a detailed description of the constitutive laws
+  implemented;
+\item show the usage of \textit{test\_structuralsolver} that has
+  been developed and, to conclude, present the validation of the
+  implemented laws, with respect to analytical and semianalytical
+  solutions;
 \end{itemize} This document is divided in different sections. The
 first one briefly introduces the continuum mechanics theory behind the
 formulation of the conservation equation of linear momentum. After
