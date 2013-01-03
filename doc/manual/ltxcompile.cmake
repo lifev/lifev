@@ -14,13 +14,13 @@ showlog(){
 }
 trap "showlog" 1 2 3 4 5 6 7 8 9 10 11
 
-export TEXINPUTS=$srcdir:$top_srcdir/doc/tex//:$TEXINPUTS 
-export BIBINPUTS=$BIBINPUTS:$srcdir:$top_srcdir/doc/tex//:$BIBINPUTS 
+export TEXINPUTS=@CMAKE_CURRENT_SOURCE_DIR@:@CMAKE_SOURCE_DIR@/doc/tex//:$TEXINPUTS
+export BIBINPUTS=@CMAKE_CURRENT_SOURCE_DIR@:@CMAKE_SOURCE_DIR@/doc/tex//:$BIBINPUTS
 
 echo export TEXINPUTS=$TEXINPUTS | tee $logfile
 echo export BIBINPUTS=$BIBINPUTS | tee -a $logfile
 
-prefix=`basename $1 .tex` 
+prefix=`basename $1 .tex`
 
 #ltxcmdlines="--interaction nonstopmode --file-line-error-style"
 ltxcmdlines="--interaction nonstopmode"
@@ -33,3 +33,4 @@ makeindex $prefix             | tee -a $logfile
 pdflatex $ltxcmdlines $prefix | tee -a $logfile
 pdflatex $ltxcmdlines $prefix | tee -a $logfile
 
+rm -f $prefix.aux $prefix.bbl $prefix.blg $prefix.log $prefix.out
