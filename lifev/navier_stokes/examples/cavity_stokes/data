@@ -19,6 +19,7 @@ save       = 1
     [../space_discretization]
     mesh_dir		= ./
     mesh_file       = cube4x4.mesh
+    mesh_type       = '.mesh'
 
     verbose         = 0
     linearized      = 0
