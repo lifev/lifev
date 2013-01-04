@@ -17,8 +17,8 @@ configuration \RefCon and the one delimited by the solid line is the
 current configuration \CurCon. The portion of the boundary $\Gamma _D$
 is where Dirichlet boundary conditions are applied and $\Gamma_{N_i}$
 ($i=1,2$) are the portions of $\partial \RefConE$ where Neumann
-boundary conditions are applied. It is worth to note that the
-mathematical structural dynamic problem is defined on \RefCon since
+boundary conditions are applied. It is worth noting that the
+mathematical structural dynamics problem is defined on \RefCon since
 \eqref{eq::ConLinMom-Diff} has been written in the Lagrangian
 framework.
 
@@ -29,7 +29,8 @@ framework.
 \end{figure}
 
 The differential problem is:
-\begin{equation} \left\{
+\begin{equation}
+  \left\{
     \begin{array}{lllllll} \displaystyle
       \rho_0\frac{\partial^2\displL}{\partial
         t^2}=\rho_0\underline{b}+\text{Div}(\Piola) & \text{on} \quad \RefConE
@@ -41,15 +42,19 @@ The differential problem is:
       \Gamma_{N_2}, \quad t>0.\\
     \end{array}\right.
   \label{eq::MathProb}
-\end{equation} If we consider the equation of motion in
+\end{equation}
+If we consider the equation of motion in
 \eqref{eq::MathProb}, multiply it by an arbitrary velocity field
 $\velwE$ and integrate the equation on \RefCon, we get:
-\begin{equation} \displaystyle \int_{\RefConE}\rho_0\frac{\partial^2
+\begin{equation}
+  \displaystyle
+  \int_{\RefConE}\rho_0\frac{\partial^2
     \displL}{\partial t^2}\cdot\velwE\quad d\RefConE =
   \int_{\RefConE}\diver{(\Piola(\displL)}\cdot\velwE\quad d\RefConE +
   \int_{\RefConE}\rho_0\underline{b}\cdot\velwE\quad d\RefConE
   \label{eq::firstIntegral}
-\end{equation} Applying the divergence theorem to the first integral
+\end{equation}
+Applying the divergence theorem to the first integral
 at the right hand side and taking into account the boundary conditions
 in \eqref{eq::MathProb} the integral relation
 \eqref{eq::firstIntegral} becomes:
@@ -63,7 +68,8 @@ in \eqref{eq::MathProb} the integral relation
     \int_{\RefConE}\rho_0 \underline{b}\cdot\velwE\quad d\RefConE
   \end{array}
   \label{eq::secondIntegral}
-\end{equation} which can be written in this form,
+\end{equation}
+which can be written in this form,
 \begin{equation}
   \begin{array}{lll} & \displaystyle
     \int_{\RefConE}\rho_0\frac{\partial^2 \displL}{\partial
@@ -74,17 +80,20 @@ in \eqref{eq::MathProb} the integral relation
     \int_{\RefConE}\rho_0 \underline{b}\cdot\velwE\quad d\RefConE,
   \end{array}
   \label{eq::secondIntegral}
-\end{equation} having used the identity $\delOp\velwE = \dot{\F}$. The
+\end{equation}
+having used the identity $\delOp\velwE = \dot{\F}$. The
 second term at the left hand side strictly depends on the adopted
 constitutive law. The reinterpretation of the arbitrary velocity
 $\velwE$ as a test function provides the weak formulation of the
 problem \eqref{eq::MathProb}.\\ Let $V$ be the following space of the
 vector fields,
 \begin{equation}
-  V(\RefConE)=\left\{\phi\in\left[H_{\Gamma_D}^1(\RefConE)\right]^3\right\}=\left\{\phi\in\left[H_{0}^1(\RefConE)\right]^3
+  V(\RefConE)=\left\{\phi\in\left[H_{\Gamma_D}^1(\RefConE)\right]^3\right\} =
+  \left\{\phi\in\left[H_{0}^1(\RefConE)\right]^3
     s.t. \quad \phi=0 \quad\text{on}\quad\Gamma_D\right\}
   \label{eq::TestSpace}
-\end{equation} the weak formulation is:\\ \\ \textit{Find
+\end{equation}
+the weak formulation is:\\ \\ \textit{Find
   $\displL=\displL(\posE,t)\in V$ such that $\displL(0)=\displL_0$,
   $\velL(0)=\velL_0$ and} :
 \begin{equation}
@@ -97,26 +106,31 @@ vector fields,
     d\RefConE \qquad \forall \phi\in V, \quad \forall t>0.
   \end{array}
   \label{eq::WF}
-\end{equation} For the case with non-homogeneous Dirichlet boundary
+\end{equation}
+For the case with non-homogeneous Dirichlet boundary
 conditions, the interested reader may refer to \cite{Hughes}.
 
 \subsection{Discrete weak formulation}
 \label{sct-DiscreteWF} The discrete weak formulation is obtained by
 considering a conforming triangulation ($T_h$) of the domain \RefCon,
-which leads to an approximation of it $\RefConE^h$, and by considering
+which leads to an approximation $\RefConE^h$, and by considering
 a subspace $V_h\subseteq V$ of finite dimension. This subspace is
-composed by the piecewise continuous polynomial functions over
+composed by the continuous, piecewise polynomial functions over
 $\RefConE^h$, in formulae:
-\begin{equation} Q_h(T_h)=\left\{\phi_h \in C^0(\RefConE^h),
+\begin{equation}
+  Q_h(T_h)=\left\{\phi_h \in C^0(\RefConE^h),
     \phi_{h|K} \in \mathbb{P}^N\big(K\big), \forall K \in T_h\right\},
   \label{eq::SpaceDiscrete}
-\end{equation} where $K$ is an element of the triangulation $T_h$. The
+\end{equation}
+where $K$ is an element of the triangulation $T_h$. The
 discrete functional space to approximate the solution of the
-structural mechanic problem is
+structural mechanics problem is
 $V_h=\left[Q_h(T_h)\right]^3$. Moreover, any function $\phi_h\in V_h$
 has to satisfy:
-\begin{displaymath} \phi_h=0 \qquad \text{on}\quad\Gamma_D.
-\end{displaymath} The discrete formulation follows directly from the
+\begin{displaymath}
+  \phi_h=0 \qquad \text{on}\quad\Gamma_D.
+\end{displaymath}
+The discrete formulation follows directly from the
 continuous one (Eq. \eqref{eq::WF}),\\ \textit{Find
   $\displL_h=\displL_h(\posE,t)\in V_h(\RefConE^h)$ such that
   $\displL(0)=\displL_{0h}$, $\velL(0)=\velL_{0h}$ and} :
@@ -131,23 +145,28 @@ continuous one (Eq. \eqref{eq::WF}),\\ \textit{Find
     \qquad \forall \phi_h\in V_h, \quad \forall t>0.
   \end{array}
   \label{eq::DWF}
-\end{equation} The functions
-$\displL_{0h}$,$\velL_{0h}$,$\underline{t}_{0h}$,$\underline{b}_h$ are
+\end{equation}
+The functions
+$\displL_{0h}$, $\velL_{0h}$, $\underline{t}_{0h}$, $\underline{b}_h$ are
 suitable approximations of the initial and boundary data in $V_h$.\\
 As it is usually done in the finite element method, we consider a
 basis $\left\{\Phi_h\right\}_{i=1}^{N_h}$ where $N_h=\text{dim}V_h$
 and the solution $\displL_h$ will be given by:
-\begin{equation} \displaystyle \displL_h(\posE,t)=
+\begin{equation}
+  \displaystyle \displL_h(\posE,t)=
   \sum_{i=1}^{N_h}\displL_h^i(t)\Phi_i(\posE).
   \label{eq::DiscreteSolution}
-\end{equation} Introducing \eqref{eq::DiscreteSolution} in
+\end{equation}
+Introducing \eqref{eq::DiscreteSolution} in
 \eqref{eq::DWF} we get the algebraic system:
-\begin{equation} \mass\frac{\partial^2\vectL}{\partial t^2}+\StiffVect
+\begin{equation}
+  \mass\frac{\partial^2\vectL}{\partial t^2}+\StiffVect
   = \underline{f},
   \label{eq::GeneralSystem}
-\end{equation} where $\vectL \in \RN$ is the vector of the nodal
+\end{equation}
+where $\vectL \in \RN$ is the vector of the nodal
 displacement $\left\{\displL_h^i(t)\right\}_{i=1}^{N_h}$. It is worth
-to note that equation \eqref{eq::GeneralSystem} is still continuous in
+noting that equation \eqref{eq::GeneralSystem} is still continuous in
 time and it must be discretized properly. The different terms in
 \eqref{eq::GeneralSystem} are:
 \begin{itemize}
@@ -156,12 +175,14 @@ time and it must be discretized properly. The different terms in
 \item[]
 \item $\StiffVect$: the stiffness vector defined as: $\displaystyle
   \left(\StiffVect\right)_{j=1\ldots
-    N_h}=\int_{\RefConE^h}\Piola\left(\sum_{i=1}^{N_h}\displL_h^i(t)\Phi_i(\posE)\right):\delOp\Phi_j\quad
+    N_h}=\int_{\RefConE^h}\Piola\left(\sum_{i=1}^{N_h}\displL_h^i(t)
+    \Phi_i(\posE)\right):\delOp\Phi_j\quad
   d \RefConE^h$;
 \item[]
 \item $\underline{f}$ is the forcing term defined as: $\displaystyle
   (\underline{f})_{j=1\ldots
-    N_h}=\int_{\RefConE^h}\sum_{i=1}^{N_h}t_{0i}\Phi_i\Phi_j+b_i\Phi_i\Phi_j\quad
+    N_h}=\int_{\RefConE^h}\sum_{i=1}^{N_h}t_{0i}\Phi_i\Phi_j+b_i\Phi_i\Phi_j
+    \quad
   d\RefConE^h$.
 \end{itemize} The algebraic system \eqref{eq::GeneralSystem} is
 nonlinear in the variable $\vectL$ and the Newton method is used to
@@ -175,21 +196,24 @@ carried out by another class implemented in \LV, called
 to the documentation of that class. In the following we will describe
 the linearization of the nonlinear problem \eqref{eq::GeneralSystem}
 at each time step. We suppose that the displacement field is known at
-a certain time $t=n$ is called it $\vectL^n$. Moreover, let us suppose
+a certain time $t=n$ and it is called it $\vectL^n$. Moreover, let us suppose
 that the corresponding velocity and acceleration fields ($\velVect^n$
 and $\acc^n$ respectively) have been computed according to the time
 marching procedure used. We want to compute the displacement vector at
 time $t=n+1$. The general form of the nonlinear algebraic problem is
 \begin{equation}
-  \xi\mass\vectL^{n+1}+\StiffDiscr{n+1}=\underline{G}\left(\underline{f}^{n+1},\vectL^n,\velVect^n,\acc^n\right),
+  \xi\mass\vectL^{n+1}+\StiffDiscr{n+1}=\underline{G}\left(\underline{f}^{n+1},
+  \vectL^n,\velVect^n,\acc^n\right),
   \label{eq::SystemN}
-\end{equation} where $\xi$ is related with the time marching procedure
+\end{equation}
+where $\xi$ is related to the time marching procedure
 and $\underline{G}$ is the right hand side of \eqref{eq::SystemN}. Let
-us define and operator $\LE:\RN\to\RN$ as:
+us define an operator $\LE:\RN\to\RN$ as:
 \begin{equation}
   \LE:\quad\xi\mass\vectL^{n+1}+\StiffDiscr{n+1}-\underline{G}.
   \label{eq::NonLinearOperator}
-\end{equation} According to \eqref{eq::NonLinearOperator}, finding
+\end{equation}
+According to \eqref{eq::NonLinearOperator}, finding
 $\vectL^{n+1}:\LE\left(\vectL^{n+1}\right)=0$ is equivalent to solve
 \eqref{eq::SystemN}. We apply the Newton method to find the roots of
 \Lne. Doing this, the unknown of the problem at each Newton iteration
@@ -211,21 +235,25 @@ time-step), iterate for $k$ = 1, 2, ...  until convergence:
   \label{RichardsonI}
 \end{equation}
 
-and set $\vectL^{n+1} = \vectL^{k+1}$.  The test for convergence is
+and finally set $\vectL^{n+1} = \vectL^{k+1}$.  The test for convergence is
 the infinity norm of the residual. In particular, defining a tolerance
 $\varepsilon_{R}$ = $\overline{\varepsilon_{R_{abs}}}$ +
 $\mid{\LE(\vectL^{0})}\mid\overline{\varepsilon_{R_{rel}}}$ the
 stopping criterion for the Newton method is the following:
 
 \begin{equation}
-  \parallel{\LE(\vectL^{k})}\parallel_{\text{L}^{\infty}(\widehat{\Omega})}\,\,<\,\,\varepsilon_{R}\,.
-\end{equation} From the mathematical point of view, the Jacobian of
-\Lne is computed using the Gateaux derivatives. It can be shown (see
+  \parallel{\LE(\vectL^{k})}\parallel_{\text{L}^{\infty}(\widehat{\Omega})}\,\,
+  <\,\,\varepsilon_{R}\,.
+\end{equation}
+From the mathematical point of view, the Jacobian of
+\Lne{} is computed using the Gateaux derivatives. It can be shown (see
 \cite{Deluca} for details) that:
 \begin{equation}
-  \text{D}\LE(\vectL^{k})\delta\vectL^{k}=\left[\xi\mass+\text{D}\StiffDiscr{k}\right]\delta\vectL^{k}.
+  \text{D}\LE(\vectL^{k})\delta\vectL^{k}=\left[\xi\mass+\text{D}\StiffDiscr{k}
+  \right]\delta\vectL^{k}.
   \label{eq::GeneralJacobian}
-\end{equation} From the equation above, it is clear that the main
+\end{equation}
+From the equation above, it is clear that the main
 issue related to the computation of the Jacobian of the operator \Lne
 is the computation of the second term in parentesis. In particular, in
 \cite{Deluca} it is shown that
@@ -233,7 +261,8 @@ is the computation of the second term in parentesis. In particular, in
   \int_{\RefConE^h}D\Piola\left(\vectL^{k}\right)\delta\vectL^{k}:\delOp\Phi
   d\RefConE^h,
   \label{eq::LinearizationK}
-\end{equation} where $\Phi$ is a generic function in $V_h$.\\ In the
+\end{equation}
+where $\Phi$ is a generic function in $V_h$.\\ In the
 following subsections, the exact expression of the terms
 $D\Piola\left(\vectL^{k}\right)\delta\vectL^{k}$ for all the four
 structural models described in Section \ref{sct-Constitutive} is
@@ -241,7 +270,7 @@ reported. For detailed comparisons, the reader may refer to
 \cite{Deluca}.
 
 \subsubsection{St. Venant-Kirchhoff and Linear Elastic models}
-Recalling the definition \eqref{eq::SVK-P-displ} of \Piola in the case
+Recalling the definition \eqref{eq::SVK-P-displ} of \Piola{} in the case
 of the St. Venant-Kirchhoff model, its Jacobian is
 \begin{equation}
   \begin{array}{lllllllllll} \displaystyle
@@ -266,7 +295,8 @@ of the St. Venant-Kirchhoff model, its Jacobian is
     \mu\delOp\Spost(\delOp\Spost)^{\text{T}}\delOp\delta\Spost.
   \end{array}
   \label{eq::SVK-Jacobian}
-\end{equation} The replacement of \eqref{eq::SVK-Jacobian} in
+\end{equation}
+The replacement of \eqref{eq::SVK-Jacobian} in
 \eqref{eq::LinearizationK} provides the linearization of the stress
 tensor needed in \eqref{eq::GeneralJacobian}. For the linear elastic
 model, the first Piola-Kirchhoff tensor is a linear tensorial function
@@ -274,15 +304,17 @@ of the displacement field and, for this reason, its Jacobian is equal
 to the tensor itself (Eq. \eqref{eq::LE-P}).
 
 \subsubsection{Neohookean model} In the case of Neohookean materials,
-the tensor \Piola is the sum of the isochoric and volumetric
-part. Because of the presence of $\F^{-T}$ in the expression of \Piola
+the tensor \Piola{} is the sum of the isochoric and volumetric
+part. Because of the presence of $\F^{-T}$ in the expression of \Piola{}
 (Eq. \eqref{eq::NH-P}), its Jacobian will be computed in terms of
-$\F,\cofF$, where \cofF is the cofactor matrix of \F (defined as
+$\F,\cofF$, where \cofF{} is the cofactor matrix of \F{} (defined as
 $\cofF=J\F^{-T}$, where $J=\text{det}\F$). Because of the linearity of
 the Gateaux derivative operator,
 \begin{equation}
-  \text{D}\Piola(\F)[\GradSpost]=\Piola_{isochoric}(\F)[\GradSpost]+\Piola_{volumetric}(\F)[\GradSpost].
-\end{equation} The firs term is:
+  \text{D}\Piola(\F)[\GradSpost]=\Piola_{isochoric}(\F)[\GradSpost]+
+  \Piola_{volumetric}(\F)[\GradSpost].
+\end{equation}
+The firs term is:
 \begin{equation}
   \begin{array}{llllllllllll}
     \text{D}\Piola_{isochoric}(\F)[\GradSpost] = & \displaystyle
@@ -294,16 +326,19 @@ the Gateaux derivative operator,
     \displaystyle + \frac{\mu}{3}J^{-2}I_{\C}\cofF\GradSpost^T\cofF.
   \end{array}
   \label{eq::IsoPartDP-neo}
-\end{equation} The volumetric term is:
+\end{equation}
+The volumetric term is:
 \begin{equation}
   \begin{array}{lll} \text{D}\Piola_{volumetric}(\F)[\delta\Spost] = &
     \displaystyle +
-    \frac{\kappa}{2}\left(2J^2-J+1\right)\left[\F^{-T}:\GradSpost\right]\F^{-T}\\
+    \frac{\kappa}{2}\left(2J^2-J+1\right)\left[\F^{-T}:\GradSpost\right]
+    \F^{-T}\\
     \\ & \displaystyle +
-    \frac{\kappa}{2}\left(J-J^2-\text{ln}(J)\right)\F^{-T}\GradSpost^T\F^{-T}. \\
+    \frac{\kappa}{2}\left(J-J^2-\text{ln}(J)\right)\F^{-T}\GradSpost^T\F^{-T}.\\
   \end{array}
   \label{eq::VolPartDP-neo}
-\end{equation} In the previous formulae $\mu$ and $\kappa$ are the
+\end{equation}
+In the previous formulae $\mu$ and $\kappa$ are the
 shear and bulk modulus respectively.
 
 \subsubsection{Exponential model} In this case, the same approach
@@ -323,7 +358,8 @@ isochoric part becomes:
     \frac{\alpha}{3}\term J^{-2}I_{\C}\cofF\GradSpost^T\cofF.
   \end{array}
   \label{eq::IsoPartDP-exp}
-\end{equation} The volumetric part is the same as
+\end{equation}
+The volumetric part is the same as
 \eqref{eq::VolPartDP-neo} since the Neohookean and Exponential models
 have the same volumteric term
 (Eq. \eqref{eq::NH-P}-\eqref{eq::EXP-P}).
