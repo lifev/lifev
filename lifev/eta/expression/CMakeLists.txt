@@ -25,6 +25,7 @@ SET(expression_HEADERS
 	expression/EvaluationSubstraction.hpp
 	expression/EvaluationTranspose.hpp
 	expression/EvaluationDeterminant.hpp
+	expression/EvaluationTrace.hpp
 	expression/EvaluationVector.hpp
 	expression/EvaluationDeformationGradient.hpp
 	expression/ExpressionAddition.hpp
@@ -54,6 +55,7 @@ SET(expression_HEADERS
 	expression/ExpressionSubstraction.hpp
 	expression/ExpressionTranspose.hpp
 	expression/ExpressionDeterminant.hpp
+	expression/ExpressionTrace.hpp
 	expression/ExpressionToEvaluation.hpp
 	expression/ExpressionVector.hpp
 	expression/ExpressionDeformationGradient.hpp

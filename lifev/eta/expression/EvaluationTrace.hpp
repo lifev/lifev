@@ -33,15 +33,15 @@
      @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
  */
 
-#ifndef EVALUTATION_DETERMINANT_HPP
-#define EVALUTATION_DETERMINANT_HPP
+#ifndef EVALUTATION_TRACE_HPP
+#define EVALUTATION_TRACE_HPP
 
 
 #include <lifev/core/LifeV.hpp>
 
-#include <lifev/eta/array/OperationSmallDeterminant.hpp>
+#include <lifev/eta/array/OperationSmallTrace.hpp>
 
-#include <lifev/eta/expression/ExpressionDeterminant.hpp>
+#include <lifev/eta/expression/ExpressionTrace.hpp>
 
 #include <lifev/core/fem/QuadratureRule.hpp>
 
@@ -61,7 +61,7 @@ namespace ExpressionAssembly
   required to work within the Evaluation trees.
  */
 template <typename EvaluationType>
-class EvaluationDeterminant
+class EvaluationTrace
 {
 public:
 
@@ -73,7 +73,7 @@ public:
 //	typedef typename EvaluationType::return_Type return_Type;
 
     //! Type of the value returned by this class
-	typedef typename OperationSmallDeterminant< typename EvaluationType::return_Type >::result_Type return_Type;
+	typedef typename OperationSmallTrace< typename EvaluationType::return_Type >::result_Type return_Type;
 
     //@}
 
@@ -97,18 +97,18 @@ public:
     //@{
 
 	//! Copy constructor
-	EvaluationDeterminant(const EvaluationDeterminant& eval)
+	EvaluationTrace(const EvaluationTrace& eval)
 		: M_evaluation(eval.M_evaluation)
     {}
 
 	//! Constructor from the corresponding expression
 	template< typename Expression>
-	explicit EvaluationDeterminant(const ExpressionDeterminant<Expression>& expression)
+	explicit EvaluationTrace(const ExpressionTrace<Expression>& expression)
 		: M_evaluation(expression.exprEx())
     {}
 
     //! Destructor
-    ~EvaluationDeterminant()
+    ~EvaluationTrace()
     {}
 
     //@}
@@ -171,19 +171,19 @@ public:
     //! Getter for a value
 	return_Type value_q(const UInt& q) const
     {
-        return M_evaluation.value_q(q).determinant();
+        return M_evaluation.value_q(q).trace();
     }
 
     //! Getter for the value for a vector
 	return_Type value_qi(const UInt& q, const UInt& i) const
     {
-	    return M_evaluation.value_qi(q,i).determinant();
+	    return M_evaluation.value_qi(q,i).trace();
     }
 
     //! Getter for the value for a matrix
 	return_Type value_qij(const UInt& q, const UInt& i, const UInt& j) const
     {
-        return M_evaluation.value_qij(q,i,j).determinant();
+        return M_evaluation.value_qij(q,i,j).trace();
     }
 
     //@}
@@ -194,7 +194,7 @@ private:
     //@{
 
 	//! No default
-	EvaluationDeterminant();
+	EvaluationTrace();
 
     //@}
 
@@ -204,15 +204,15 @@ private:
 
 
 template< typename EvaluationType >
-const flag_Type EvaluationDeterminant<EvaluationType>::S_globalUpdateFlag
+const flag_Type EvaluationTrace<EvaluationType>::S_globalUpdateFlag
  = EvaluationType::S_globalUpdateFlag;
 
 template< typename EvaluationType >
-const flag_Type EvaluationDeterminant<EvaluationType>::S_testUpdateFlag
+const flag_Type EvaluationTrace<EvaluationType>::S_testUpdateFlag
  = EvaluationType::S_testUpdateFlag;
 
 template< typename EvaluationType >
-const flag_Type EvaluationDeterminant<EvaluationType>::S_solutionUpdateFlag
+const flag_Type EvaluationTrace<EvaluationType>::S_solutionUpdateFlag
  = EvaluationType::S_solutionUpdateFlag;
 
 } // Namespace ExpressionAssembly

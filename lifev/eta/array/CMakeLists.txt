@@ -11,6 +11,7 @@ SET(array_HEADERS
   array/OperationSmallSubstraction.hpp
   array/OperationSmallTranspose.hpp
   array/OperationSmallDeterminant.hpp
+  array/OperationSmallTrace.hpp
 CACHE INTERNAL "")
 
 SET(array_SOURCES ""
