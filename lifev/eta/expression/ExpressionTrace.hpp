@@ -159,7 +159,7 @@ template< UInt Dim1, UInt Dim2>
 ExpressionTrace<ExpressionMatrix<Dim1, Dim2> >
 trace(const MatrixSmall<Dim1, Dim2>& m)
 {
-    return ExpressionTrace<ExpressionMatrix<Dim2, Dim1> >(ExpressionMatrix<Dim1, Dim2>(m));
+    return ExpressionTrace<ExpressionMatrix<Dim1, Dim2> >(ExpressionMatrix<Dim1, Dim2>(m));
 };
 
 

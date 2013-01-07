@@ -33,8 +33,8 @@
     @date 08-2012
  */
 
-#ifndef EXPRESSION_DETERMINANT_HPP
-#define EXPRESSION_DETERMINANT_HPP
+#ifndef EXPRESSION_MINUSTRANSPOSED_HPP
+#define EXPRESSION_MINUSTRANSPOSED_HPP
 
 #include <lifev/core/LifeV.hpp>
 
@@ -64,7 +64,7 @@ namespace ExpressionAssembly
 
 */
 template <typename ExpressionType>
-class ExpressionDeterminant : public ExpressionBase< ExpressionDeterminant<ExpressionType> >
+class ExpressionMinusTransposed : public ExpressionBase< ExpressionMinusTransposed<ExpressionType> >
 {
 public:
 
@@ -72,7 +72,7 @@ public:
     //@{
 
     // No real need, just for ease of coding
-	typedef ExpressionBase< ExpressionDeterminant <ExpressionType> > base_Type;
+	typedef ExpressionBase< ExpressionMinusTransposed <ExpressionType> > base_Type;
 
     //@}
 
@@ -81,15 +81,15 @@ public:
     //@{
 
     //! Full constructor
-	ExpressionDeterminant(const ExpressionType& expr)
+	ExpressionMinusTransposed(const ExpressionType& expr)
 	: base_Type(), M_expr(expr) {}
 
     //! Copy constructor
-	ExpressionDeterminant(const ExpressionDeterminant<ExpressionType>& expression)
+	ExpressionMinusTransposed(const ExpressionMinusTransposed<ExpressionType>& expression)
 	 : base_Type(), M_expr(expression.M_expr) {}
 
     //! Destructor
-    ~ExpressionDeterminant(){}
+    ~ExpressionMinusTransposed(){}
 
     //@}
 
@@ -119,7 +119,7 @@ private:
     //@{
 
     //! No default constructor
-	ExpressionDeterminant();
+	ExpressionMinusTransposed();
 
     //@}
 
@@ -129,7 +129,7 @@ private:
 };
 
 
-// transpose  The generic function for the determinant of an expression.
+// transpose  The generic function for the transpose of an expression.
 /*!
   @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
 
@@ -139,27 +139,27 @@ private:
 
   <b> Template parameters </b>
 
-  <i>ExpressionType</i>: The expression of which we compute the determinant
+  <i>ExpressionType</i>: The expression to be transposed.
 
   <b> Template requirements </b>
 
-  <i>ExpressionType</i>: Same as in LifeV::ExpressionDeterminant
+  <i>ExpressionType</i>: Same as in LifeV::ExpressionMinusTransposed
 
 */
 template< typename ExpressionType >
-ExpressionDeterminant<ExpressionType>
-det(const ExpressionBase<ExpressionType>& expr)
+ExpressionMinusTransposed<ExpressionType>
+minusT(const ExpressionBase<ExpressionType>& expr)
 {
-	return ExpressionDeterminant<ExpressionType>(expr.cast());
+	return ExpressionMinusTransposed<ExpressionType>(expr.cast());
 };
 
 
 // Specialization for the matricial constants
 template< UInt Dim1, UInt Dim2>
-ExpressionDeterminant<ExpressionMatrix<Dim1, Dim2> >
-det(const MatrixSmall<Dim1, Dim2>& m)
+ExpressionMinusTransposed<ExpressionMatrix<Dim1, Dim2> >
+minusT(const MatrixSmall<Dim1, Dim2>& m)
 {
-    return ExpressionDeterminant<ExpressionMatrix<Dim1, Dim2> >(ExpressionMatrix<Dim1, Dim2>(m));
+    return ExpressionMinusTransposed<ExpressionMatrix<Dim1, Dim2> >(ExpressionMatrix<Dim1, Dim2>(m));
 };
 
 

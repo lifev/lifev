@@ -46,6 +46,7 @@
 #include <lifev/eta/expression/ExpressionAddition.hpp>
 #include <lifev/eta/expression/ExpressionSubstraction.hpp>
 #include <lifev/eta/expression/ExpressionProduct.hpp>
+#include <lifev/eta/expression/ExpressionPower.hpp>
 #include <lifev/eta/expression/ExpressionDot.hpp>
 #include <lifev/eta/expression/ExpressionDivision.hpp>
 #include <lifev/eta/expression/ExpressionEmult.hpp>
@@ -84,6 +85,7 @@
 #include <lifev/eta/expression/EvaluationAddition.hpp>
 #include <lifev/eta/expression/EvaluationSubstraction.hpp>
 #include <lifev/eta/expression/EvaluationProduct.hpp>
+#include <lifev/eta/expression/EvaluationPower.hpp>
 #include <lifev/eta/expression/EvaluationDot.hpp>
 #include <lifev/eta/expression/EvaluationDivision.hpp>
 #include <lifev/eta/expression/EvaluationEmult.hpp>
@@ -435,6 +437,20 @@ public:
 	typedef EvaluationProduct<
 				typename ExpressionToEvaluation<ExpressionL,testDim,solutionDim,spaceDim>::evaluation_Type
 			   ,typename ExpressionToEvaluation<ExpressionR,testDim,solutionDim,spaceDim>::evaluation_Type
+			> evaluation_Type;
+private:
+	ExpressionToEvaluation();
+	~ExpressionToEvaluation();
+};
+
+
+// Specialized for a power
+template<typename ExpressionBase, UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation<ExpressionPower<ExpressionBase>,testDim,solutionDim,spaceDim>
+{
+public:
+	typedef EvaluationPower<
+				typename ExpressionToEvaluation<ExpressionBase,testDim,solutionDim,spaceDim>::evaluation_Type
 			> evaluation_Type;
 private:
 	ExpressionToEvaluation();

@@ -23,14 +23,14 @@ License along with this library; if not, see <http://www.gnu.org/licenses/>
 
 *******************************************************************************
 */
-					 //@HEADER
+//@HEADER
 
-					 /*!
-					  *      @file
-					  @brief This file contains a simple matrix class
+/*!
+ *      @file
+        @brief This file contains a simple matrix class
 
-					  @contributor Ivan Kuraj <ivan.kuraj@epfl.ch>
-					 */
+	    @contributor Ivan Kuraj <ivan.kuraj@epfl.ch>
+*/
 
 #ifndef _MATRIXSMALL_H_
 #define _MATRIXSMALL_H_ 1
@@ -433,6 +433,82 @@ namespace LifeV
 
         return det;
 	}
+
+    //! Cofactor of a matrix
+    //! In this class the cofactor is computed explicitly
+    //! for matrices of dimensions 1 2 3
+	/*!
+	  @return determinant of the matrix
+	*/
+    MatrixSmall<Dim1,Dim2> cofactor() const
+	{
+        ASSERT( Dim2 == Dim1, "The cofactor is defined only for squared matrices!");
+
+        //Create the matrix to store the cofactor
+        //In this case it is a copy of the current matrix
+        MatrixSmall<Dim1,Dim2> cofactor(*this);
+
+        switch ( Dim1 )
+        {
+        case 1:
+            {
+                cofactor( 0,0 ) = 1.0;
+            }
+        case 2:
+            {
+                cofactor(0,0) =   *this(1,1);
+                cofactor(0,1) = - *this(0,1);
+                cofactor(1,0) = - *this(1,0);
+                cofactor(1,1) =   *this(0,0);
+
+            }
+        case 3:
+            {
+
+                cofactor( 0,0 ) =   *this(1,1) * *this(2,2) - *this(1,2) * *this(2,1);
+                cofactor( 0,1 ) = -(*this(1,0) * *this(2,2) - *this(1,2) * *this(2,0));
+                cofactor( 0,2 ) =   *this(1,0) * *this(2,1) - *this(1,1) * *this(2,0);
+                cofactor( 1,0 ) = -(*this(0,1) * *this(2,2) - *this(0,2) * *this(2,1));
+                cofactor( 1,1 ) =   *this(0,0) * *this(2,2) - *this(0,2) * *this(2,0);
+                cofactor( 1,2 ) = -(*this(0,0) * *this(2,1) - *this(2,0) * *this(0,1));
+                cofactor( 2,0 ) =   *this(0,1) * *this(1,2) - *this(0,2) * *this(1,1);
+                cofactor( 2,1 ) = -(*this(0,0) * *this(1,2) - *this(0,2) * *this(1,0));
+                cofactor( 2,2 ) =   *this(0,0) * *this(1,1) - *this(1,0) * *this(0,1);
+            }
+        default:
+            ERROR_MSG("The cofactor for matrices is implemented for Dim1 = Dim2 < 3!");
+            break;
+        }
+
+        return cofactor;
+	}
+
+
+    //! This method
+    //! In this method, which is based on cofactor and determinant,
+    //! given a matrix, its inverse transposed is computed explicitly
+    //! for matrices of dimensions 1 2 3
+    //! This method is mainly used for structural problems.
+	/*!
+	  @return determinant of the matrix
+	*/
+    MatrixSmall<Dim1,Dim2> minusTransposed() const
+	{
+        ASSERT( Dim2 == Dim1, "This method is based on the cofactor and determinant methods which are defined only for squared matrices!");
+
+        //Create the matrix to store the cofactor
+        //In this case it is a copy of the current matrix
+        MatrixSmall<Dim1,Dim2> minusT(*this);
+        Real det(0);
+
+        minusT = (*this).cofactor();
+        det = (*this).determinant();
+
+        minusT *= 1.0 / det;
+
+        return minusT;
+	}
+
 
 	Real trace() const
 	{
