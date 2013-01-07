@@ -276,7 +276,7 @@ namespace LifeV
 	    MatrixSmall<Dim1,Dim1> resultMatrix;
 	    for ( UInt i = 0; i < Dim1; i++ ) {
 		for ( UInt j = 0; j < Dim1; j++ )
-		    {    
+		    {
 			resultMatrix[i][j] = 0;
 			for ( UInt k = 0; k < Dim2; k++ )
 			    resultMatrix[i][j] +=(*this)[i][k]*matrix[k][j];
@@ -386,7 +386,7 @@ namespace LifeV
         {
             return( M_coords[i][j] );
         }
-    
+
 	//! Transpose of a matrix
 	/*!
 	  @return transposed matrix
@@ -400,6 +400,52 @@ namespace LifeV
 
 	    return (resultantMatrix);
 	}
+
+    //! Determinant of a matrix
+    //! In this class the determinant is computed explicitly
+    //! for matrices of dimensions 1 2 3
+	/*!
+	  @return determinant of the matrix
+	*/
+	Real determinant() const
+	{
+        ASSERT( Dim2 == Dim1, "The determinat is defined only for squared matrices!");
+
+        Real det(0);
+
+        switch ( Dim1 )
+        {
+        case 1:
+            det = M_coords[ 1 ][ 1 ];
+            break;
+        case 2:
+            det = M_coords[ 1 ][ 1 ] * M_coords[ 2 ][ 2 ] - M_coord[ 1 ][ 2 ] * M_coords[ 2 ][ 1 ];
+            break;
+        case 3:
+            det = M_coords[ 1 ][ 1 ] * ( M_coords[ 2 ][ 2 ] * M_coord[ 3 ][ 3 ] - M_coords[ 2 ][ 3 ] * M_coords[ 3 ][ 2 ] )
+                - M_coords[ 1 ][ 2 ] * ( M_coords[ 2 ][ 1 ] * M_coord[ 3 ][ 1 ] - M_coords[ 2 ][ 3 ] * M_coords[ 3 ][ 1 ] )
+                + M_coords[ 1 ][ 3 ] * ( M_coords[ 2 ][ 1 ] * M_coord[ 3 ][ 2 ] - M_coords[ 2 ][ 2 ] * M_coords[ 3 ][ 1 ] );
+            break;
+        default:
+            ERROR_MSG("The determinat for matrices is implemented for Dim1 = Dim2 < 3!");
+            break;
+        }
+
+        return det;
+	}
+
+	Real trace() const
+	{
+        ASSERT( Dim2 == Dim1, "The trace is defined only for squared matrices!");
+
+        Real trace(0);
+
+        for( UInt i(0); i<Dim1; i++ )
+            trace += M_coords[ i ][ i ];
+
+        return trace;
+	}
+
 
 	//! Norm value
 	/*!

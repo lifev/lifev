@@ -101,6 +101,7 @@ public:
 		:
         M_fespace( eval.M_fespace ),
         M_displacement( eval.M_displacement, Repeated ),
+        M_offset(eval.M_offset),
         M_quadrature(0),
         M_currentFE(eval.M_currentFE),
 		M_F(eval.M_F)
@@ -117,6 +118,7 @@ public:
         M_fespace( expression.fespace() ),
         M_displacement( expression.vector() ),
         M_offset( expression.offset() ),
+        M_quadrature(0),
         M_currentFE(M_fespace->refFE(),M_fespace->geoMap()),
         M_F( )
     {}

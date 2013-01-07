@@ -33,8 +33,8 @@
     @date 08-2012
  */
 
-#ifndef EXPRESSION_DEFORMATIONGRADIENTE_HPP
-#define EXPRESSION_DEFORMATIONGRADIENTE_HPP
+#ifndef EXPRESSION_DEFORMATIONGRADIENT_HPP
+#define EXPRESSION_DEFORMATIONGRADIENT_HPP
 
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/array/VectorEpetra.hpp>
