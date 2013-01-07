@@ -52,6 +52,7 @@
 #include <lifev/eta/expression/ExpressionExtract1.hpp>
 #include <lifev/eta/expression/ExpressionExtract2.hpp>
 #include <lifev/eta/expression/ExpressionTranspose.hpp>
+#include <lifev/eta/expression/ExpressionDeterminant.hpp>
 #include <lifev/eta/expression/ExpressionOuterProduct.hpp>
 
 #include <lifev/eta/expression/ExpressionScalar.hpp>
@@ -88,6 +89,7 @@
 #include <lifev/eta/expression/EvaluationExtract1.hpp>
 #include <lifev/eta/expression/EvaluationExtract2.hpp>
 #include <lifev/eta/expression/EvaluationTranspose.hpp>
+#include <lifev/eta/expression/EvaluationDeterminant.hpp>
 #include <lifev/eta/expression/EvaluationOuterProduct.hpp>
 
 #include <lifev/eta/expression/EvaluationScalar.hpp>
@@ -256,6 +258,24 @@ class ExpressionToEvaluation<
 {
 public:
     typedef EvaluationTranspose<
+                    typename ExpressionToEvaluation<Expression,testDim,solutionDim,spaceDim>::evaluation_Type
+                    > evaluation_Type;
+private:
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
+    };
+
+
+  // Specialized for determinant
+template<typename Expression, UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation<
+    ExpressionDeterminant<Expression>
+    ,testDim
+    ,solutionDim
+    ,spaceDim>
+{
+public:
+    typedef EvaluationDeterminant<
                     typename ExpressionToEvaluation<Expression,testDim,solutionDim,spaceDim>::evaluation_Type
                     > evaluation_Type;
 private:

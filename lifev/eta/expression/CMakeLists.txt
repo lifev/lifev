@@ -24,6 +24,7 @@ SET(expression_HEADERS
 	expression/EvaluationScalar.hpp
 	expression/EvaluationSubstraction.hpp
 	expression/EvaluationTranspose.hpp
+	expression/EvaluationDeterminant.hpp
 	expression/EvaluationVector.hpp
 	expression/EvaluationDeformationGradient.hpp
 	expression/ExpressionAddition.hpp
@@ -52,6 +53,7 @@ SET(expression_HEADERS
 	expression/ExpressionScalar.hpp
 	expression/ExpressionSubstraction.hpp
 	expression/ExpressionTranspose.hpp
+	expression/ExpressionDeterminant.hpp
 	expression/ExpressionToEvaluation.hpp
 	expression/ExpressionVector.hpp
 	expression/ExpressionDeformationGradient.hpp

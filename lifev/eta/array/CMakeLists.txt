@@ -10,6 +10,7 @@ SET(array_HEADERS
   array/OperationSmallProduct.hpp
   array/OperationSmallSubstraction.hpp
   array/OperationSmallTranspose.hpp
+  array/OperationSmallDeterminant.hpp
 CACHE INTERNAL "")
 
 SET(array_SOURCES ""
