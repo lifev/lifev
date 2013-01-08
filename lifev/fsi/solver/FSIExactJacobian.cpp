@@ -322,7 +322,7 @@ void FSIExactJacobian::eval(const vector_Type& _disp,
 
             vector_Type meshDispRepeated( M_meshMotion->disp(), Repeated );
             this->moveMesh(meshDispRepeated);
-            vector_Type vel ( this->M_ALETimeAdvance->velocity( ) );
+            vector_Type vel ( this->M_ALETimeAdvance->firstDerivative( ) );
             transferMeshMotionOnFluid( vel, veloFluidMesh() );
             M_fluidTimeAdvance->extrapolation(*M_beta);//explicit
             *M_beta -= veloFluidMesh();//implicit
@@ -402,7 +402,7 @@ void FSIExactJacobian::eval(const vector_Type& _disp,
     if (this->isSolid())
     {
         this->transferSolidOnInterface(this->M_solid->displacement(),     lambdaSolidUnique);
-        this->transferSolidOnInterface( this->M_solidTimeAdvance->velocity( this->M_solid->displacement()), lambdaDotSolidUnique );
+        this->transferSolidOnInterface( this->M_solidTimeAdvance->firstDerivative( this->M_solid->displacement()), lambdaDotSolidUnique );
         this->transferSolidOnInterface(this->M_solid->residual(), sigmaSolidUnique);
     }
 

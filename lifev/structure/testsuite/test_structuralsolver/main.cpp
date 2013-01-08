@@ -486,8 +486,8 @@ Structure::run3d()
       timeAdvance->shiftRight( solid.displacement() );
 
       *solidDisp = solid.displacement();
-      *solidVel  = timeAdvance->velocity();
-      *solidAcc  = timeAdvance->acceleration();
+      *solidVel  = timeAdvance->firstDerivative();
+      *solidAcc  = timeAdvance->secondDerivative();
 
       exporter->postProcess( dataStructure->dataTime()->time() );
 
