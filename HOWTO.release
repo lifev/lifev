@@ -5,16 +5,19 @@ HOWTO to make a release X_Y_Z
 
 (this is a preliminary version for git)
 
+git remote add github git@github.com:lifev/lifev.git
+
+
    cd top_srcdir
 
-1- tag master with the tag LIFEV_X_2Y_Z
-   git tag LIFEV_X_2Y_Z
+1- update Version.cmake
 
-   git push --tags
+2- update NEWS
 
-2- update Version.cmake
-
-3- update NEWS
+3- tag master with the tag RELEASE_X_Y_Z
+   git tag  RELEASE_3_2_0
+   git push github  RELEASE_3_2_0
+   git push origin  RELEASE_3_2_0
 
 4- add news on cmcsforge.epfl.ch and www.lifev.org
 
