@@ -102,7 +102,8 @@ public:
     //! Updates the Jacobian matrix in StructualSolver::updateJacobian
     /*!
       \param disp: solution at the k-th iteration of NonLinearRichardson Method
-      \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
+      \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get
+                           the material coefficients (e.g. Young modulus, Poisson ratio..)
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
     void updateJacobianMatrix( const vector_Type& disp,
@@ -114,7 +115,8 @@ public:
     /*!
       \param stiff: stiffness matrix provided from outside
       \param disp: solution at the k-th iteration of NonLinearRichardson Method
-      \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
+      \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get
+                           the material coefficients (e.g. Young modulus, Poisson ratio..)
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
     void updateNonLinearJacobianTerms(  matrixPtr_Type& jacobian,
@@ -128,13 +130,15 @@ public:
     /*!
       \param sol:  the solution vector
       \param factor: scaling factor used in FSI
-      \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
+      \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the
+        material coefficients (e.g. Young modulus, Poisson ratio..)
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
 
-    void computeStiffness( const vector_Type& sol, Real factor, const dataPtr_Type& dataMaterial, const mapMarkerVolumesPtr_Type mapsMarkerVolumes, const displayerPtr_Type& displayer );
+    void computeStiffness( const vector_Type& sol, Real factor, const dataPtr_Type& dataMaterial,
+                           const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                           const displayerPtr_Type& displayer );
 
-    //! Missing Documentation!!!
     void computeKinematicsVariables( const VectorElemental& /*dk_loc*/ ){}
 
     //! ShowMe method of the class (saved on a file the two matrices)
@@ -155,7 +159,8 @@ public:
     //! Get the Stiffness vector
     vectorPtr_Type const stiffVector() const { vectorPtr_Type zero( new vector_Type()); return zero;}
 
-    void apply( const vector_Type& sol, vector_Type& res, const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/) {res += *M_stiff*sol;}
+    void apply( const vector_Type& sol, vector_Type& res,
+                const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/) {res += *M_stiff*sol;}
 
     //@}
 
@@ -207,7 +212,8 @@ VenantKirchhoffMaterialLinear<Mesh>::setup(const boost::shared_ptr< FESpace<Mesh
 }
 
 template <typename Mesh>
-void VenantKirchhoffMaterialLinear<Mesh>::computeLinearStiff(dataPtr_Type& dataMaterial, const mapMarkerVolumesPtr_Type mapsMarkerVolumes)
+void VenantKirchhoffMaterialLinear<Mesh>::computeLinearStiff(dataPtr_Type& dataMaterial,
+                                                             const mapMarkerVolumesPtr_Type mapsMarkerVolumes)
 {
     //  std::cout<<"compute LinearStiff Matrix start\n";
 
@@ -249,7 +255,14 @@ void VenantKirchhoffMaterialLinear<Mesh>::computeLinearStiff(dataPtr_Type& dataM
             {
                 for ( UInt jc = 0; jc < nc; jc++ )
                 {
-                    assembleMatrix( *this->M_linearStiff, *this->M_elmatK, this->M_FESpace->fe(), this->M_FESpace->fe(), this->M_FESpace->dof(), this->M_FESpace->dof(),  ic,  jc,  this->M_offset +ic*totalDof, this->M_offset + jc*totalDof );
+                    assembleMatrix( *this->M_linearStiff,
+                                    *this->M_elmatK,
+                                    this->M_FESpace->fe(),
+                                    this->M_FESpace->fe(),
+                                    this->M_FESpace->dof(),
+                                    this->M_FESpace->dof(),
+                                    ic,  jc,
+                                    this->M_offset +ic*totalDof, this->M_offset + jc*totalDof );
 
                 }
             }

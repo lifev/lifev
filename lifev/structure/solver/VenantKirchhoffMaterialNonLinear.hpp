@@ -64,11 +64,6 @@ public:
     typedef typename super::matrixPtr_Type           matrixPtr_Type;
     typedef typename super::dataPtr_Type             dataPtr_Type;
     typedef typename super::displayerPtr_Type        displayerPtr_Type;
-    //     typedef typename boost::shared_ptr<data_Type>    dataPtr_Type;
-    //     typedef typename boost::scoped_ptr<Displayer>    displayerPtr_Type;
-
-    typedef KNMK<Real> 				     KNMK_Type;
-    typedef boost::shared_ptr<KNMK_Type>	     KNMKPtr_Type;
 
     typedef typename super::mapMarkerVolumesPtr_Type mapMarkerVolumesPtr_Type;
     typedef typename super::mapIterator_Type mapIterator_Type;
@@ -94,19 +89,22 @@ public:
     */
     void setup(const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
                const boost::shared_ptr<const MapEpetra>&  monolithicMap,
-               const UInt offset, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer
+               const UInt offset, const dataPtr_Type& dataMaterial,
+               const displayerPtr_Type& displayer
                );
 
     //! Compute the linear part Stiffness matrix in StructuralSolver::buildSystem()
     /*!
       \param dataMaterial the class with Material properties data
     */
-    void computeLinearStiffMatrix( dataPtr_Type& dataMaterial, const mapMarkerVolumesPtr_Type mapsMarkerVolumes );
+    void computeLinearStiffMatrix( dataPtr_Type& dataMaterial,
+                                   const mapMarkerVolumesPtr_Type mapsMarkerVolumes );
 
     //! Updates the Jacobian matrix
     /*!
       \param disp: solution at the k-th iteration of NonLinearRichardson Method
-      \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
+      \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get
+                           the material coefficients (e.g. Young modulus, Poisson ratio..)
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
     void updateJacobianMatrix( const vector_Type& disp,
@@ -117,7 +115,8 @@ public:
     /*!
       \param stiff: stiffness matrix provided from outside
       \param disp: solution at the k-th iteration of NonLinearRichardson Method
-      \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
+      \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get
+                           the material coefficients (e.g. Young modulus, Poisson ratio..)
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
     void updateNonLinearJacobianTerms(  matrixPtr_Type& stiff,
@@ -131,7 +130,8 @@ public:
     /*!
       \param sol:  the solution vector
       \param factor: scaling factor used in FSI
-      \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
+      \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get
+                           the material coefficients (e.g. Young modulus, Poisson ratio..)
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
     void computeStiffness( const vector_Type& sol, Real factor,
@@ -139,8 +139,10 @@ public:
                            const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
                            const displayerPtr_Type& displayer );
 
-    //! Computes the nonlinear part of Stiffness matrix in StructuralSolver given a certain displacement field. This function is used both in StructuralSolver::evalResidual and in
-    //! StructuralSolver::updateSystem since the matrix is the expression of the matrix is the same. This is virtual and not pure virtual since in the linear St. Venant-Kirchhoff law it is not needed.
+    //! Computes the nonlinear part of Stiffness matrix in StructuralSolver given a certain
+    //! displacement field. This function is used both in StructuralSolver::evalResidual and in
+    //! StructuralSolver::updateSystem since the matrix is the expression of the matrix is the same.
+    //! This is virtual and not pure virtual since in the linear St. Venant-Kirchhoff law it is not needed.
     /*!
       \param sol:  the solution vector
       \param factor: scaling factor used in FSI
@@ -151,7 +153,6 @@ public:
                                  const dataPtr_Type& dataMaterial, const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
                                  const displayerPtr_Type& displayer );
 
-    //! Missing Documentation !!!
     void computeKinematicsVariables( const VectorElemental& /*dk_loc*/ ){}
 
     //@}
@@ -189,7 +190,8 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::setup(const boost::shared_ptr< FESp
 
 
 template <typename Mesh>
-void VenantKirchhoffMaterialNonLinear<Mesh>::computeLinearStiffMatrix(dataPtr_Type& dataMaterial, const mapMarkerVolumesPtr_Type mapsMarkerVolumes)
+void VenantKirchhoffMaterialNonLinear<Mesh>::computeLinearStiffMatrix(dataPtr_Type& dataMaterial,
+                                                                      const mapMarkerVolumesPtr_Type mapsMarkerVolumes)
 {
     super::computeLinearStiffMatrix(dataMaterial, mapsMarkerVolumes);
 }
@@ -311,7 +313,12 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matri
             // assembling
             for ( UInt ic = 0; ic < nc; ++ic )
                 for ( UInt jc = 0; jc < nc; jc++ )
-                    assembleMatrix( *jacobian, *this->M_elmatK, this->M_FESpace->fe(), this->M_FESpace->dof(), ic, jc, this->M_offset +  ic*totalDof, this->M_offset + jc*totalDof );
+                    assembleMatrix( *jacobian,
+                                    *this->M_elmatK,
+                                    this->M_FESpace->fe(),
+                                    this->M_FESpace->dof(),
+                                    ic, jc,
+                                    this->M_offset +  ic*totalDof, this->M_offset + jc*totalDof );
 	    }
 	}
 
@@ -415,7 +422,12 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::computeNonLinearMatrix(matrixPtr_Ty
                 // stiff is the nonlinear matrix of the bilinear form
                 for ( UInt jc = 0; jc < nDimensions; jc++ )
 
-                    assembleMatrix( *stiff, *this->M_elmatK, this->M_FESpace->fe(), this->M_FESpace->dof(), ic, jc, this->M_offset +  ic*totalDof, this->M_offset +  jc*totalDof);
+                    assembleMatrix( *stiff,
+                                    *this->M_elmatK,
+                                    this->M_FESpace->fe(),
+                                    this->M_FESpace->dof(),
+                                    ic, jc,
+                                    this->M_offset +  ic*totalDof, this->M_offset +  jc*totalDof);
             }
 
         }
