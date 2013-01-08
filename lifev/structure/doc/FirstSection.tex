@@ -52,7 +52,7 @@ defined as:
 \end{equation}
 where the symbol $\delOp$ indicates that the
 derivatives are computed with respect to the coordinates in the
-reference configuration. In addition, the tensor \F allows defining
+reference configuration. In addition, the tensor \F{} allows defining
 other classical tensorial quantities, like the right Cauchy-Green and
 Green-Lagrange tensors, to quantify the stretches and strains during
 the deformation.\\
@@ -71,7 +71,8 @@ surface of the body,
 \end{equation}
 where $\rho$ is the density of the material in the
 current configuration (and it is related to its counterpart in \RefCon
-thanks to $\rho=J\rho_0$) and $\velE$ is the Eulerian velocity. The
+thanks to $\rho=J\rho_0$, where $J$ is the determinant of the deformation
+gradient \F) and $\velE$ is the Eulerian velocity. The
 vector $\underline{b}$ is the body force per unit of mass,
 $\underline{t}=\underline{t}(\nposE,t, \underline{n})$ is the surface
 force acting on the body in the current configuration per unit area of
@@ -114,14 +115,12 @@ is:
 \begin{equation}
   \rho_0\frac{\partial^2\displL}{\partial
     t^2}=\rho_0\underline{b}+\text{Div}(\Piola) \qquad \forall \posE
-  \subseteq \RefConE, \quad t>0.
+  \subseteq \RefConE, \quad t>0,
   \label{eq::ConLinMom-Diff}
 \end{equation}
-When initial and boundary conditions are added to
-Eq. \eqref{eq::ConLinMom-Diff} the mathematical problem associated to
-\eqref{eq::ConLinMom-Diff} of structural mechanics is
-defined. Subsequentely, this problem is characterized by specifying a
-particular constitutive law for the Cauchy stress tensor.
+which is then augmented with proper initial and boundary conditions.
+Subsequentely, the mechanical behaviour of the material is characterized
+by specifying a particular constitutive law for the Cauchy stress tensor.
 
 \subsection{Constitutive laws}
 \label{sct-Constitutive} Equation \eqref{eq::ConLinMom-Diff} must be
@@ -193,7 +192,8 @@ simulations:
 \begin{itemize}
 \item by using high Poisson ratios for the first two
   models\footnote{The choice of high Poisson ratios may be critical in
-    terms of a well-known problem: locking.}
+    terms of a well-known problem: locking [T. Hughes, \textit{The finite element method:
+        Linear Static and Dynamic Finite Element Analysis} - Englewood Cliffs - NJ : Prentice-Hall, 1987  ]}
 \item by recovering the common multiplicative decomposition of the
   deformation gradient \F into an isochoric and volumetric part for the
   second two (see \cite{BonetWood}).
