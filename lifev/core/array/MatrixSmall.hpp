@@ -422,9 +422,10 @@ namespace LifeV
             det = M_coords[ 1 ][ 1 ] * M_coords[ 2 ][ 2 ] - M_coords[ 1 ][ 2 ] * M_coords[ 2 ][ 1 ];
             break;
         case 3:
-            det = M_coords[ 1 ][ 1 ] * ( M_coords[ 2 ][ 2 ] * M_coords[ 3 ][ 3 ] - M_coords[ 2 ][ 3 ] * M_coords[ 3 ][ 2 ] )
-                - M_coords[ 1 ][ 2 ] * ( M_coords[ 2 ][ 1 ] * M_coords[ 3 ][ 3 ] - M_coords[ 2 ][ 3 ] * M_coords[ 3 ][ 1 ] )
-                + M_coords[ 1 ][ 3 ] * ( M_coords[ 2 ][ 1 ] * M_coords[ 3 ][ 2 ] - M_coords[ 2 ][ 2 ] * M_coords[ 3 ][ 1 ] );
+            det = M_coords[ 0 ][ 0 ] * ( M_coords[ 1 ][ 1 ] * M_coords[ 2 ][ 2 ] - M_coords[ 1 ][ 2 ] * M_coords[ 2 ][ 1 ] )
+                - M_coords[ 0 ][ 1 ] * ( M_coords[ 1 ][ 0 ] * M_coords[ 2 ][ 2 ] - M_coords[ 1 ][ 2 ] * M_coords[ 2 ][ 0 ] )
+                + M_coords[ 0 ][ 2 ] * ( M_coords[ 1 ][ 0 ] * M_coords[ 2 ][ 1 ] - M_coords[ 1 ][ 1 ] * M_coords[ 2 ][ 0 ] );
+
             break;
         default:
             ERROR_MSG("The determinat for matrices is implemented for Dim1 = Dim2 < 3!");

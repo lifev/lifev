@@ -486,6 +486,17 @@ void ExponentialMaterialNonLinear<Mesh>::computeStiffness( const vector_Type& so
           identity(1,0) = 0.0; identity(1,1) = 1.0; identity(1,2) = 0.0;
           identity(2,0) = 0.0; identity(2,1) = 0.0; identity(2,2) = 1.0;
 
+          // matrixSmall_Type Try;
+          // Try(0,0) = 2.0; Try(0,1) = 3.0; Try(0,2) = 6.0;
+          // Try(1,0) = 12.0; Try(1,1) = 1.0; Try(1,2) = 58.0;
+          // Try(2,0) = 7.0; Try(2,1) = 8.0; Try(2,2) = 87.0;
+
+          // matrixSmall_Type TryMinusT;
+          // TryMinusT = Try.minusTransposed();
+
+          // std::cout << "Determinant of the original matrix "<< Try.determinant() << std::endl;
+          // TryMinusT.showMe();
+
           //Computation of the volumetric part
           integrate( integrationOverSelectedVolumes( this->M_FESpace->mesh(), this->M_markerFunctorPtr ) ,
                      this->M_FESpace->qr(),
