@@ -76,8 +76,6 @@
 
 #include <lifev/eta/expression/ExpressionIfCrossed.hpp>
 
-//#include <lifev/eta/expression/ExpressionDeformationGradient.hpp>
-
 #include <lifev/eta/expression/EvaluationPhiI.hpp>
 #include <lifev/eta/expression/EvaluationPhiJ.hpp>
 #include <lifev/eta/expression/EvaluationDphiI.hpp>
@@ -117,9 +115,6 @@
 #include <lifev/eta/expression/EvaluationNormal.hpp>
 
 #include <lifev/eta/expression/EvaluationIfCrossed.hpp>
-
-
-//#include <lifev/eta/expression/EvaluationDeformationGradient.hpp>
 
 namespace LifeV
 {
@@ -605,21 +600,6 @@ private:
 	ExpressionToEvaluation();
 	~ExpressionToEvaluation();
 };
-
-//   // Specialized for deformation gradient
-// template<typename MeshType, typename MapType, UInt FESpaceDim, UInt testDim, UInt solutionDim, UInt spaceDim>
-// class ExpressionToEvaluation<
-//     ExpressionDeformationGradient<MeshType, MapType, FESpaceDim>
-//     ,testDim
-//     ,solutionDim
-//     ,spaceDim>
-// {
-// public:
-//     typedef EvaluationDeformationGradient<MeshType, MapType, FESpaceDim> evaluation_Type;
-// private:
-//     ExpressionToEvaluation();
-//     ~ExpressionToEvaluation();
-//     };
 
 // \endcond
 

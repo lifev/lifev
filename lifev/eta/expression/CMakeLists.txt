@@ -29,7 +29,6 @@ SET(expression_HEADERS
 	expression/EvaluationDeterminant.hpp
 	expression/EvaluationTrace.hpp
 	expression/EvaluationVector.hpp
-	expression/EvaluationDeformationGradient.hpp
 	expression/ExpressionAddition.hpp
 	expression/ExpressionBase.hpp
 	expression/ExpressionDivI.hpp
@@ -62,7 +61,6 @@ SET(expression_HEADERS
 	expression/ExpressionTrace.hpp
 	expression/ExpressionToEvaluation.hpp
 	expression/ExpressionVector.hpp
-	expression/ExpressionDeformationGradient.hpp
 	expression/Integrate.hpp
 	expression/IntegrateMatrixElement.hpp
 	expression/IntegrateMatrixVolumeID.hpp
