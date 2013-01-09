@@ -423,7 +423,7 @@ namespace LifeV
             break;
         case 3:
             det = M_coords[ 1 ][ 1 ] * ( M_coords[ 2 ][ 2 ] * M_coords[ 3 ][ 3 ] - M_coords[ 2 ][ 3 ] * M_coords[ 3 ][ 2 ] )
-                - M_coords[ 1 ][ 2 ] * ( M_coords[ 2 ][ 1 ] * M_coords[ 3 ][ 1 ] - M_coords[ 2 ][ 3 ] * M_coords[ 3 ][ 1 ] )
+                - M_coords[ 1 ][ 2 ] * ( M_coords[ 2 ][ 1 ] * M_coords[ 3 ][ 3 ] - M_coords[ 2 ][ 3 ] * M_coords[ 3 ][ 1 ] )
                 + M_coords[ 1 ][ 3 ] * ( M_coords[ 2 ][ 1 ] * M_coords[ 3 ][ 2 ] - M_coords[ 2 ][ 2 ] * M_coords[ 3 ][ 1 ] );
             break;
         default:
@@ -451,30 +451,25 @@ namespace LifeV
         switch ( Dim1 )
         {
         case 1:
-            {
-                cofactor( 0,0 ) = 1.0;
-            }
+            cofactor[ 0][0 ] = 1.0;
+            break;
         case 2:
-            {
-                cofactor(0,0) =   *this(1,1);
-                cofactor(0,1) = - *this(0,1);
-                cofactor(1,0) = - *this(1,0);
-                cofactor(1,1) =   *this(0,0);
-
-            }
+            cofactor[0][0] =   M_coords[1][1];
+            cofactor[0][1] = - M_coords[0][1];
+            cofactor[1][0] = - M_coords[1][0];
+            cofactor[1][1] =   M_coords[0][0];
+            break;
         case 3:
-            {
-
-                cofactor( 0,0 ) =   *this(1,1) * *this(2,2) - *this(1,2) * *this(2,1);
-                cofactor( 0,1 ) = -(*this(1,0) * *this(2,2) - *this(1,2) * *this(2,0));
-                cofactor( 0,2 ) =   *this(1,0) * *this(2,1) - *this(1,1) * *this(2,0);
-                cofactor( 1,0 ) = -(*this(0,1) * *this(2,2) - *this(0,2) * *this(2,1));
-                cofactor( 1,1 ) =   *this(0,0) * *this(2,2) - *this(0,2) * *this(2,0);
-                cofactor( 1,2 ) = -(*this(0,0) * *this(2,1) - *this(2,0) * *this(0,1));
-                cofactor( 2,0 ) =   *this(0,1) * *this(1,2) - *this(0,2) * *this(1,1);
-                cofactor( 2,1 ) = -(*this(0,0) * *this(1,2) - *this(0,2) * *this(1,0));
-                cofactor( 2,2 ) =   *this(0,0) * *this(1,1) - *this(1,0) * *this(0,1);
-            }
+            cofactor[ 0][0 ] =   M_coords[1][1] * M_coords[2][2] - M_coords[1][2] * M_coords[2][1];
+            cofactor[ 0][1 ] = -(M_coords[1][0] * M_coords[2][2] - M_coords[1][2] * M_coords[2][0]);
+            cofactor[ 0][2 ] =   M_coords[1][0] * M_coords[2][1] - M_coords[1][1] * M_coords[2][0];
+            cofactor[ 1][0 ] = -(M_coords[0][1] * M_coords[2][2] - M_coords[0][2] * M_coords[2][1]);
+            cofactor[ 1][1 ] =   M_coords[0][0] * M_coords[2][2] - M_coords[0][2] * M_coords[2][0];
+            cofactor[ 1][2 ] = -(M_coords[0][0] * M_coords[2][1] - M_coords[2][0] * M_coords[0][1]);
+            cofactor[ 2][0 ] =   M_coords[0][1] * M_coords[1][2] - M_coords[0][2] * M_coords[1][1];
+            cofactor[ 2][1 ] = -(M_coords[0][0] * M_coords[1][2] - M_coords[0][2] * M_coords[1][0]);
+            cofactor[ 2][2 ] =   M_coords[0][0] * M_coords[1][1] - M_coords[1][0] * M_coords[0][1];
+            break;
         default:
             ERROR_MSG("The cofactor for matrices is implemented for Dim1 = Dim2 < 3!");
             break;
@@ -482,6 +477,21 @@ namespace LifeV
 
         return cofactor;
 	}
+
+	//! Plot the Matrix
+	/*!
+	  @return void
+	*/
+    void showMe() const
+        {
+            for( Int i=0; i < Dim1; i++ )
+            {
+                for( Int j=0; j < Dim2; j++ )
+                {
+                    std::cout << "M_coords[ " << i << " ][ " << j << " ]= " << M_coords[i][j] << std::endl;
+                }
+            }
+        }
 
 
     //! This method
@@ -499,10 +509,11 @@ namespace LifeV
         //Create the matrix to store the cofactor
         //In this case it is a copy of the current matrix
         MatrixSmall<Dim1,Dim2> minusT(*this);
+
         Real det(0);
 
-        minusT = (*this).cofactor();
-        det = (*this).determinant();
+        minusT = this->cofactor();
+        det = this->determinant();
 
         minusT *= 1.0 / det;
 
@@ -592,6 +603,7 @@ namespace LifeV
 		    tmp.M_coords[ i ][ j ] = coords[ i ][ j ];
 	    return (tmp);
 	}
+
 	//@}
 	//
     private:

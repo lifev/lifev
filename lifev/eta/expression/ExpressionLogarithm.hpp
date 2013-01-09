@@ -33,8 +33,8 @@
     @date 07-2011
  */
 
-#ifndef EXPRESSION_POWER_HPP
-#define EXPRESSION_POWER_HPP
+#ifndef EXPRESSION_LOGARITHM_HPP
+#define EXPRESSION_LOGARITHM_HPP
 
 #include <lifev/core/LifeV.hpp>
 
@@ -48,7 +48,7 @@ namespace LifeV
 namespace ExpressionAssembly
 {
 
-//! class ExpressionPower  Class for representing a product between two expressions.
+//! class ExpressionLogarithm  Class for representing a product between two expressions.
 /*!
   @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
 
@@ -68,7 +68,7 @@ namespace ExpressionAssembly
 
 */
 template <typename BaseExpressionType>
-class ExpressionPower : public ExpressionBase< ExpressionPower<BaseExpressionType> >
+class ExpressionLogarithm : public ExpressionBase< ExpressionLogarithm<BaseExpressionType> >
 {
 public:
 
@@ -76,7 +76,7 @@ public:
     //@{
 
     // No direct use, just ease of coding
-	typedef ExpressionBase< ExpressionPower <BaseExpressionType> > base_Type;
+	typedef ExpressionBase< ExpressionLogarithm <BaseExpressionType> > base_Type;
 
     //@}
 
@@ -84,15 +84,15 @@ public:
     //@{
 
     //! Full constructor using the two expressions
-	ExpressionPower(const BaseExpressionType& l, const Real exponent)
-	: base_Type(), M_l(l), M_exponent(exponent) {}
+	ExpressionLogarithm(const BaseExpressionType& l)
+	: base_Type(), M_l(l) {}
 
     //! Copy constructor
-	ExpressionPower(const ExpressionPower<BaseExpressionType>& expression)
-	 : base_Type(), M_l(expression.M_l), M_exponent(expression.M_exponent) {}
+	ExpressionLogarithm(const ExpressionLogarithm<BaseExpressionType>& expression)
+	 : base_Type(), M_l(expression.M_l) {}
 
     //! Destructor
-    ~ExpressionPower(){}
+    ~ExpressionLogarithm(){}
 
     //@}
 
@@ -102,7 +102,7 @@ public:
 
     //! Display method
 	static void display(std::ostream& out= std::cout)
-    { BaseExpressionType::display(out); out << " ^ ";}
+    { out << "Expression Logarithm of: ";BaseExpressionType::display(out);}
 
     //@}
 
@@ -112,10 +112,6 @@ public:
 
     //! Getter for the left hand side
 	const BaseExpressionType& base() const {return M_l;}
-
-    //! Getter for the right hand side
-	const Real& exponent() const {return M_exponent;}
-
     //@}
 
 private:
@@ -123,16 +119,13 @@ private:
     //! @name Private Methods
     //@{
 
-	ExpressionPower();
+	ExpressionLogarithm();
 
 	//@}
 
 
     // Left hand side
     BaseExpressionType M_l;
-
-    // Right hand side
-	Real M_exponent;
 };
 
 
@@ -160,18 +153,18 @@ private:
 
 // "Specialization" for the case of a scalar
 template< typename  ExpressionType>
-ExpressionPower<ExpressionDeterminant<ExpressionType> >
-pow(const ExpressionBase<ExpressionDeterminant<ExpressionType> >& l, const Real& r)
+ExpressionLogarithm<ExpressionDeterminant<ExpressionType> >
+log(const ExpressionBase<ExpressionDeterminant<ExpressionType> >& l)
 {
-    return ExpressionPower<ExpressionDeterminant<ExpressionType> >(l.cast(),r);
+    return ExpressionLogarithm<ExpressionDeterminant<ExpressionType> >(l.cast());
 }
 
 // "Specialization" for the case of a scalar
 template< typename  ExpressionType>
-ExpressionPower<ExpressionTrace<ExpressionType> >
-pow(const ExpressionBase<ExpressionTrace<ExpressionType> >& l, const Real& r)
+ExpressionLogarithm<ExpressionTrace<ExpressionType> >
+log(const ExpressionBase<ExpressionTrace<ExpressionType> >& l)
 {
-    return ExpressionPower<ExpressionTrace<ExpressionType> >(l.cast(),r);
+    return ExpressionLogarithm<ExpressionTrace<ExpressionType> >(l.cast());
 }
 
 

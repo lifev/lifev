@@ -33,14 +33,14 @@
      @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
  */
 
-#ifndef EVALUTATION_POWER_HPP
-#define EVALUTATION_POWER_HPP
+#ifndef EVALUTATION_LOGARITHM_HPP
+#define EVALUTATION_LOGARITHM_HPP
 
 #include <lifev/core/LifeV.hpp>
 
-#include <lifev/eta/array/OperationSmallPower.hpp>
+#include <lifev/eta/array/OperationSmallLogarithm.hpp>
 
-#include <lifev/eta/expression/ExpressionPower.hpp>
+#include <lifev/eta/expression/ExpressionLogarithm.hpp>
 
 #include <lifev/core/fem/QuadratureRule.hpp>
 
@@ -60,20 +60,18 @@ namespace ExpressionAssembly
   required to work within the Evaluation trees.
  */
 template <typename EvaluationBaseType>
-class EvaluationPower
+class EvaluationLogarithm
 {
 public:
 
 	//! @name Public Types
     //@{
 
-    //! Type of the value returned by the left operand
+    // //! Type of the value returned by the left operand
 	// typedef typename EvaluationBaseType::return_Type Basereturn_Type;
-    // typedef Real exponentType;
 
     //! Type of the value returned by this class
-	//typedef typename OperationSmallProduct<Basereturn_Type,exponentType>::result_Type return_Type;
-    typedef Real return_Type;
+	typedef Real return_Type;
 
     //@}
 
@@ -97,20 +95,18 @@ public:
     //@{
 
 	//! Copy constructor
-	EvaluationPower(const EvaluationPower& eval)
-		: M_evaluationBase(eval.M_evaluationBase),
-          M_exponent(eval.M_exponent)
+	EvaluationLogarithm(const EvaluationLogarithm& eval)
+		: M_evaluationBase(eval.M_evaluationBase)
     {}
 
 	//! Constructor from the corresponding expression
 	template <typename BaseExpressionType>
-	explicit EvaluationPower(const ExpressionPower<BaseExpressionType>& expression)
-		: M_evaluationBase(expression.base()),
-          M_exponent(expression.exponent())
+	explicit EvaluationLogarithm(const ExpressionLogarithm<BaseExpressionType>& expression)
+		: M_evaluationBase(expression.base())
     {}
 
     //! Destructor
-    ~EvaluationPower(){}
+    ~EvaluationLogarithm(){}
 
     //@}
 
@@ -127,7 +123,7 @@ public:
     //! Display method
 	static void display(ostream& out = std::cout )
 	{
-        EvaluationBaseType::display(out); out << " ^ ";
+        out << "Logarithm"; EvaluationBaseType::display(out);
     }
 
     //@}
@@ -172,19 +168,19 @@ public:
 	//! Getter a value
 	return_Type value_q(const UInt& q) const
     {
-        return std::pow(M_evaluationBase.value_q(q), M_exponent);
+        return std::log(M_evaluationBase.value_q(q));
     }
 
     //! Getter for the value for a vector
     return_Type value_qi(const UInt& q, const UInt& i) const
     {
-        return std::pow(M_evaluationBase.value_qi(q,i),M_exponent);
+        return std::log(M_evaluationBase.value_qi(q,i));
     }
 
     //! Getter for the value for a matrix
 	return_Type value_qij(const UInt& q, const UInt& i, const UInt& j) const
     {
-        return std::pow(M_evaluationBase.value_qij(q,i,j),M_exponent);
+        return std::log(M_evaluationBase.value_qij(q,i,j));
     }
 
     //@}
@@ -195,25 +191,24 @@ private:
     //@{
 
 	//! No empty constructor
-	EvaluationPower();
+	EvaluationLogarithm();
 
     //@}
 
 	//! Internal storage
 	EvaluationBaseType M_evaluationBase;
-    Real M_exponent;
 };
 
 template< typename EvaluationBaseType>
-const flag_Type EvaluationPower<EvaluationBaseType>::S_globalUpdateFlag
+const flag_Type EvaluationLogarithm<EvaluationBaseType>::S_globalUpdateFlag
  = EvaluationBaseType::S_globalUpdateFlag;
 
 template< typename EvaluationBaseType>
-const flag_Type EvaluationPower<EvaluationBaseType>::S_testUpdateFlag
+const flag_Type EvaluationLogarithm<EvaluationBaseType>::S_testUpdateFlag
  = EvaluationBaseType::S_testUpdateFlag;
 
 template< typename EvaluationBaseType>
-const flag_Type EvaluationPower<EvaluationBaseType>::S_solutionUpdateFlag
+const flag_Type EvaluationLogarithm<EvaluationBaseType>::S_solutionUpdateFlag
  = EvaluationBaseType::S_solutionUpdateFlag;
 
 } // Namespace ExpressionAssembly

@@ -33,13 +33,13 @@
      @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
  */
 
-#ifndef EVALUTATION_TRANSPOSE_HPP
-#define EVALUTATION_TRANSPOSE_HPP
+#ifndef EVALUTATION_MINUSTRANSPOSE_HPP
+#define EVALUTATION_MINUSTRANSPOSE_HPP
 
 
 #include <lifev/core/LifeV.hpp>
 
-#include <lifev/eta/array/OperationSmallMinusTransposed.hpp>
+#include <lifev/eta/array/OperationSmallMinusTranspose.hpp>
 
 #include <lifev/eta/expression/ExpressionMinusTransposed.hpp>
 
@@ -73,7 +73,7 @@ public:
 //	typedef typename EvaluationType::return_Type return_Type;
 
     //! Type of the value returned by this class
-	typedef typename OperationSmallMinusTransposed< typename EvaluationType::return_Type >::result_Type return_Type;
+	typedef typename OperationSmallMinusTranspose< typename EvaluationType::return_Type >::result_Type return_Type;
 
     //@}
 

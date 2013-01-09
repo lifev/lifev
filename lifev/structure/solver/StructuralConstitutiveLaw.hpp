@@ -79,6 +79,37 @@
 
 namespace LifeV
 {
+//Functor to select volumes
+template < typename MeshEntityType,
+           typename ComparisonPolicyType = boost::function2<bool,
+                                                            const UInt,
+                                                            const UInt > >
+class MarkerFunctor
+{
+public:
+    typedef MeshEntityType       meshEntity_Type;
+    typedef ComparisonPolicyType comparisonPolicy_Type;
+
+    MarkerFunctor( const UInt materialFlagReference,
+                    comparisonPolicy_Type const & policy = std::equal_to<UInt>() )
+        : M_reference( materialFlagReference ),
+          M_policy( policy ) {}
+
+    bool operator()( const meshEntity_Type & entity ) const
+    {
+        //Extract the flag from the mesh entity
+        UInt flagChecked = entity.markerID();
+
+        return M_policy( flagChecked, M_reference );
+    }
+
+private:
+    const UInt M_reference;
+    const comparisonPolicy_Type M_policy;
+
+}; // Marker selector
+
+
 /*!
   \class StructuralConstitutiveLaw
   \brief
@@ -118,6 +149,9 @@ public:
 
     typedef FESpace< RegionMesh<LinearTetra>, MapEpetra >          FESpace_Type;
     typedef boost::shared_ptr<FESpace_Type>                        FESpacePtr_Type;
+
+    typedef MarkerFunctor<typename Mesh::element_Type, boost::function2<bool,const UInt,const UInt> >     markerFunctor_Type;
+    typedef boost::shared_ptr<markerFunctor_Type>                      markerFunctorPtr_Type;
 
     //@}
 
@@ -244,6 +278,7 @@ protected:
 
     displayerPtr_Type                              M_displayer;
 
+    markerFunctorPtr_Type                          M_markerFunctorPtr;
 };
 
 //=====================================
@@ -256,7 +291,8 @@ StructuralConstitutiveLaw<Mesh>::StructuralConstitutiveLaw( ):
     M_ETFESpace                  ( ),
     M_localMap                   ( ),
     M_jacobian                   ( ),
-    M_offset                     ( 0 )
+    M_offset                     ( 0 ),
+    M_markerFunctorPtr           ( )
 {
   //    std::cout << "I am in the constructor of StructuralConstitutiveLaw" << std::endl;
 }

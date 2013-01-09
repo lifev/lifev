@@ -43,36 +43,6 @@
 
 namespace LifeV
 {
-//Functor to select volumes
-template < typename MeshEntityType,
-           typename ComparisonPolicyType = boost::function2<bool,
-                                                            const UInt,
-                                                            const UInt > >
-class MarkerFunctor
-{
-public:
-    typedef MeshEntityType       meshEntity_Type;
-    typedef ComparisonPolicyType comparisonPolicy_Type;
-
-    MarkerFunctor( const UInt materialFlagReference,
-                    comparisonPolicy_Type const & policy = std::equal_to<UInt>() )
-        : M_reference( materialFlagReference ),
-          M_policy( policy ) {}
-
-    bool operator()( const meshEntity_Type & entity ) const
-    {
-        //Extract the flag from the mesh entity
-        UInt flagChecked = entity.markerID();
-
-        return M_policy( flagChecked, M_reference );
-    }
-
-private:
-    const UInt M_reference;
-    const comparisonPolicy_Type M_policy;
-
-}; // Marker selector
-
 
 template <typename Mesh>
 class VenantKirchhoffMaterialLinear :
@@ -101,8 +71,8 @@ class VenantKirchhoffMaterialLinear :
     typedef typename super::FESpacePtr_Type          FESpacePtr_Type;
     typedef typename super::ETFESpacePtr_Type        ETFESpacePtr_Type;
 
-    typedef MarkerFunctor<typename Mesh::element_Type, boost::function2<bool,const UInt,const UInt> >     markerFunctor_Type;
-    typedef boost::shared_ptr<markerFunctor_Type>                      markerFunctorPtr_Type;
+    typedef typename super::markerFunctor_Type                markerFunctor_Type;
+    typedef typename super::markerFunctorPtr_Type             markerFunctorPtr_Type;
 
  //@}
 
@@ -144,7 +114,7 @@ class VenantKirchhoffMaterialLinear :
     */
     void updateJacobianMatrix( const vector_Type& disp,
                                const dataPtr_Type& dataMaterial,
-			       const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                               const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
                                const displayerPtr_Type& displayer);
 
     //! Updates the nonlinear terms in the Jacobian matrix in StructualSolver::updateJacobian
@@ -208,8 +178,6 @@ protected:
   //! Matrix Kl: stiffness linear
   matrixPtr_Type                                 M_stiff;
 
-  markerFunctorPtr_Type                          M_markerFunctorPtr;
-
 };
 
 template <typename Mesh>
@@ -217,8 +185,7 @@ VenantKirchhoffMaterialLinear<Mesh>::VenantKirchhoffMaterialLinear():
     super             ( ),
     M_elmatK                     ( ),
     M_linearStiff                ( ),
-    M_stiff                      ( ),
-    M_markerFunctorPtr           ( )
+    M_stiff                      ( )
 {
 }
 
@@ -276,13 +243,13 @@ void VenantKirchhoffMaterialLinear<Mesh>::computeLinearStiff(dataPtr_Type& dataM
         Real mu = dataMaterial->mu(marker);
         Real lambda = dataMaterial->lambda(marker);
 
-        integrate( integrationOverSelectedVolumes( this->M_FESpace->mesh(), M_markerFunctorPtr ) ,
+        integrate( integrationOverSelectedVolumes( this->M_FESpace->mesh(), this->M_markerFunctorPtr ) ,
                    this->M_FESpace->qr(),
                    this->M_ETFESpace,
                    this->M_ETFESpace,
                    value(lambda) * div(phi_i) * div(phi_j)  ) >> M_linearStiff;
 
-        integrate( integrationOverSelectedVolumes( this->M_FESpace->mesh(), M_markerFunctorPtr ) ,
+        integrate( integrationOverSelectedVolumes( this->M_FESpace->mesh(), this->M_markerFunctorPtr ) ,
                    this->M_FESpace->qr(),
                    this->M_ETFESpace,
                    this->M_ETFESpace,
