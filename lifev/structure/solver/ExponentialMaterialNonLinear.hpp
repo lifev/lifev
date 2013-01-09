@@ -464,38 +464,11 @@ void ExponentialMaterialNonLinear<Mesh>::computeStiffness( const vector_Type& so
           Real alpha = dataMaterial->alpha(marker);
           Real gamma = dataMaterial->gamma(marker);
 
-          // //Create the identity
-          // std::vector<Real> firstRow(3);
-          // std::vector<Real> secondRow(3);
-          // std::vector<Real> thirdRow(3);
-
-          // firstRow[ 0 ] = 1.0; firstRow[ 1 ] = 0.0; firstRow[ 2 ] = 0.0;
-          // secondRow[ 0 ] = 0.0; secondRow[ 1 ] = 1.0; secondRow[ 2 ] = 0.0;
-          // thirdRow[ 0 ] = 1.0; thirdRow[ 1 ] = 0.0; thirdRow[ 2 ] = 1.0;
-
-          // std::vector<std::vector<Real> > matrixIdentity(3);
-
-          // matrixIdentity[0] = firstRow;
-          // matrixIdentity[1] = secondRow;
-          // matrixIdentity[2] = thirdRow;
-
-          // matrixSmall_Type identity(matrixIdentity);
-
+          //Create the indentity for F
           matrixSmall_Type identity;
           identity(0,0) = 1.0; identity(0,1) = 0.0; identity(0,2) = 0.0;
           identity(1,0) = 0.0; identity(1,1) = 1.0; identity(1,2) = 0.0;
           identity(2,0) = 0.0; identity(2,1) = 0.0; identity(2,2) = 1.0;
-
-          // matrixSmall_Type Try;
-          // Try(0,0) = 2.0; Try(0,1) = 3.0; Try(0,2) = 6.0;
-          // Try(1,0) = 12.0; Try(1,1) = 1.0; Try(1,2) = 58.0;
-          // Try(2,0) = 7.0; Try(2,1) = 8.0; Try(2,2) = 87.0;
-
-          // matrixSmall_Type TryMinusT;
-          // TryMinusT = Try.minusTransposed();
-
-          // std::cout << "Determinant of the original matrix "<< Try.determinant() << std::endl;
-          // TryMinusT.showMe();
 
           //Computation of the volumetric part
           integrate( integrationOverSelectedVolumes( this->M_FESpace->mesh(), this->M_markerFunctorPtr ) ,
