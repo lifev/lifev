@@ -52,6 +52,7 @@
 #include <lifev/eta/expression/ExpressionProduct.hpp>
 #include <lifev/eta/expression/ExpressionPower.hpp>
 #include <lifev/eta/expression/ExpressionLogarithm.hpp>
+#include <lifev/eta/expression/ExpressionExponential.hpp>
 #include <lifev/eta/expression/ExpressionDot.hpp>
 #include <lifev/eta/expression/ExpressionDivision.hpp>
 #include <lifev/eta/expression/ExpressionEmult.hpp>
@@ -92,6 +93,7 @@
 #include <lifev/eta/expression/EvaluationProduct.hpp>
 #include <lifev/eta/expression/EvaluationPower.hpp>
 #include <lifev/eta/expression/EvaluationLogarithm.hpp>
+#include <lifev/eta/expression/EvaluationExponential.hpp>
 #include <lifev/eta/expression/EvaluationDot.hpp>
 #include <lifev/eta/expression/EvaluationDivision.hpp>
 #include <lifev/eta/expression/EvaluationEmult.hpp>
@@ -483,6 +485,19 @@ class ExpressionToEvaluation<ExpressionLogarithm<ExpressionBase>,testDim,solutio
 {
 public:
 	typedef EvaluationLogarithm<
+    typename ExpressionToEvaluation<ExpressionBase,testDim,solutionDim,spaceDim>::evaluation_Type
+    > evaluation_Type;
+private:
+	ExpressionToEvaluation();
+	~ExpressionToEvaluation();
+};
+
+// Specialized for a exponential
+template<typename ExpressionBase, UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation<ExpressionExponential<ExpressionBase>,testDim,solutionDim,spaceDim>
+{
+public:
+	typedef EvaluationExponential<
     typename ExpressionToEvaluation<ExpressionBase,testDim,solutionDim,spaceDim>::evaluation_Type
     > evaluation_Type;
 private:

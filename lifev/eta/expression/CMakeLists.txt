@@ -22,6 +22,7 @@ SET(expression_HEADERS
 	expression/EvaluationProduct.hpp
 	expression/EvaluationPower.hpp
 	expression/EvaluationLogarithm.hpp
+	expression/EvaluationExponential.hpp
 	expression/EvaluationNormal.hpp
 	expression/EvaluationScalar.hpp
 	expression/EvaluationSubstraction.hpp
@@ -54,6 +55,7 @@ SET(expression_HEADERS
 	expression/ExpressionProduct.hpp
 	expression/ExpressionPower.hpp
 	expression/ExpressionLogarithm.hpp
+	expression/ExpressionExponential.hpp
 	expression/ExpressionScalar.hpp
 	expression/ExpressionSubstraction.hpp
 	expression/ExpressionTranspose.hpp
