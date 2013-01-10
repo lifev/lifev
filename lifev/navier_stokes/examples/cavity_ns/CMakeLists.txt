@@ -21,7 +21,7 @@ TRIBITS_COPY_FILES_TO_BINARY_DIR(
 
 # Access the mesh
 TRIBITS_COPY_FILES_TO_BINARY_DIR(
-  meshes_cavity_stokes_test
+  meshes_cavity_ns_test
   SOURCE_FILES cube4x4.mesh
   SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/core/data/mesh/freefem/
 )
