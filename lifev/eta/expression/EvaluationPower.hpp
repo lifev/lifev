@@ -68,12 +68,11 @@ public:
     //@{
 
     //! Type of the value returned by the left operand
-	// typedef typename EvaluationBaseType::return_Type Basereturn_Type;
-    // typedef Real exponentType;
+    typedef typename EvaluationBaseType::return_Type BaseReturn_Type;
+    typedef Real exponentType;
 
     //! Type of the value returned by this class
-	//typedef typename OperationSmallProduct<Basereturn_Type,exponentType>::result_Type return_Type;
-    typedef Real return_Type;
+	typedef typename OperationSmallPower<BaseReturn_Type,exponentType>::result_Type return_Type;
 
     //@}
 

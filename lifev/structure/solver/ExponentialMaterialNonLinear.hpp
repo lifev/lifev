@@ -45,7 +45,6 @@
 
 
 #include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
-#include <lifev/core/array/MatrixSmall.hpp>
 
 namespace LifeV
 {
@@ -437,6 +436,18 @@ void ExponentialMaterialNonLinear<Mesh>::computeStiffness( const vector_Type& so
     //To assemle with ET
     using namespace ExpressionAssembly;
 
+    //Create the indentity for F
+    matrixSmall_Type identity;
+    identity(0,0) = 1.0; identity(0,1) = 0.0; identity(0,2) = 0.0;
+    identity(1,0) = 0.0; identity(1,1) = 1.0; identity(1,2) = 0.0;
+    identity(2,0) = 0.0; identity(2,1) = 0.0; identity(2,2) = 1.0;
+
+
+    //Macros to make the assembly more readable
+#define F ( grad( this->M_ETFESpace, sol) + value(identity) )
+#define J det( F )
+#define F_T  minusT(F)
+
     this->M_stiff.reset(new vector_Type(*this->M_localMap));
 
     displayer->leaderPrint(" \n*********************************\n  ");
@@ -464,37 +475,39 @@ void ExponentialMaterialNonLinear<Mesh>::computeStiffness( const vector_Type& so
           Real alpha = dataMaterial->alpha(marker);
           Real gamma = dataMaterial->gamma(marker);
 
-          //Create the indentity for F
-          matrixSmall_Type identity;
-          identity(0,0) = 1.0; identity(0,1) = 0.0; identity(0,2) = 0.0;
-          identity(1,0) = 0.0; identity(1,1) = 1.0; identity(1,2) = 0.0;
-          identity(2,0) = 0.0; identity(2,1) = 0.0; identity(2,2) = 1.0;
-
           //Computation of the volumetric part
           integrate( integrationOverSelectedVolumes( this->M_FESpace->mesh(), this->M_markerFunctorPtr ) ,
                      this->M_FESpace->qr(),
                      this->M_ETFESpace,
-                     value(bulk / 2.0)  * ( pow(det(grad(this->M_ETFESpace,sol) + value(identity)),2.0) - det(grad(this->M_ETFESpace,sol) + value(identity)) + log(det(grad(this->M_ETFESpace,sol) + value(identity)))) * dot(  minusT( grad(this->M_ETFESpace,sol) + value(identity) ), grad(phi_i) )
+                     value(bulk / 2.0)  * ( pow( J ,2.0) - J + log(J)) * dot(  F_T, grad(phi_i) )
                      ) >> this->M_stiff;
 
-          for ( UInt j(0); j < it->second.size(); j++ )
-          {
-              this->M_FESpace->fe().updateFirstDerivQuadPt( *(it->second[j]) );
+          // //Computation of the isochoric part
+          // integrate( integrationOverSelectedVolumes( this->M_FESpace->mesh(), this->M_markerFunctorPtr ) ,
+          //            this->M_FESpace->qr(),
+          //            this->M_ETFESpace,
+          //            value(alpha) * pow(J,-2.0/3.0) * exp( value(gamma)*( TRCBAR - value(3.0) ) )  *  (dot( F + value(-1.0/3.0) * I_C * F_T,grad(phi_i) ) )
+          //            ) >> this->M_stiff;
 
-              UInt eleID = this->M_FESpace->fe().currentLocalId();
 
-              for ( UInt iNode = 0 ; iNode < ( UInt ) this->M_FESpace->fe().nbFEDof() ; iNode++ )
-              {
-              UInt  iloc = this->M_FESpace->fe().patternFirst( iNode );
+          	for ( UInt j(0); j < it->second.size(); j++ )
+	  {
+	    this->M_FESpace->fe().updateFirstDerivQuadPt( *(it->second[j]) );
 
-              for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
-              {
-                  UInt ig = this->M_FESpace->dof().localToGlobalMap( eleID, iloc ) + iComp*dim + this->M_offset;
-                  dk_loc[ iloc + iComp*this->M_FESpace->fe().nbFEDof() ] = dRep[ig];
-              }
-              }
+	    UInt eleID = this->M_FESpace->fe().currentLocalId();
 
-              this->M_elvecK->zero();
+	    for ( UInt iNode = 0 ; iNode < ( UInt ) this->M_FESpace->fe().nbFEDof() ; iNode++ )
+	      {
+		UInt  iloc = this->M_FESpace->fe().patternFirst( iNode );
+
+		for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
+		  {
+		    UInt ig = this->M_FESpace->dof().localToGlobalMap( eleID, iloc ) + iComp*dim + this->M_offset;
+		    dk_loc[ iloc + iComp*this->M_FESpace->fe().nbFEDof() ] = dRep[ig];
+		  }
+	      }
+
+	    this->M_elvecK->zero();
 
 	    this->computeKinematicsVariables( dk_loc );
 
@@ -521,9 +534,11 @@ void ExponentialMaterialNonLinear<Mesh>::computeStiffness( const vector_Type& so
 		  M_elvecK is assemble into *vec_stiff vector that is recall
 		  from updateSystem(matrix_ptrtype& mat_stiff, vector_ptr_type& vec_stiff)
 		*/
-              assembleVector( *this->M_stiff, *this->M_elvecK, this->M_FESpace->fe(), this->M_FESpace->dof(), ic, this->M_offset +  ic*totalDof );
+		assembleVector( *this->M_stiff, *this->M_elvecK, this->M_FESpace->fe(), this->M_FESpace->dof(), ic, this->M_offset +  ic*totalDof );
 	      }
 	  }
+
+
       }
 
     this->M_stiff->globalAssemble();

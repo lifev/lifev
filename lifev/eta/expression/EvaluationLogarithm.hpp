@@ -68,10 +68,10 @@ public:
     //@{
 
     // //! Type of the value returned by the left operand
-	// typedef typename EvaluationBaseType::return_Type Basereturn_Type;
+	 typedef typename EvaluationBaseType::return_Type BaseReturn_Type;
 
     //! Type of the value returned by this class
-	typedef Real return_Type;
+    typedef typename OperationSmallLogarithm<BaseReturn_Type>::result_Type return_Type;
 
     //@}
 

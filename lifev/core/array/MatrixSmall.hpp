@@ -416,10 +416,10 @@ namespace LifeV
         switch ( Dim1 )
         {
         case 1:
-            det = M_coords[ 1 ][ 1 ];
+            det = M_coords[ 0 ][ 0 ];
             break;
         case 2:
-            det = M_coords[ 1 ][ 1 ] * M_coords[ 2 ][ 2 ] - M_coords[ 1 ][ 2 ] * M_coords[ 2 ][ 1 ];
+            det = M_coords[ 0 ][ 0 ] * M_coords[ 1 ][ 1 ] - M_coords[ 0 ][ 1 ] * M_coords[ 1 ][ 0 ];
             break;
         case 3:
             det = M_coords[ 0 ][ 0 ] * ( M_coords[ 1 ][ 1 ] * M_coords[ 2 ][ 2 ] - M_coords[ 1 ][ 2 ] * M_coords[ 2 ][ 1 ] )

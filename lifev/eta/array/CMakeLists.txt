@@ -11,6 +11,8 @@ SET(array_HEADERS
   array/OperationSmallSubstraction.hpp
   array/OperationSmallTranspose.hpp
   array/OperationSmallMinusTranspose.hpp
+  array/OperationSmallLogarithm.hpp
+  array/OperationSmallExponential.hpp
   array/OperationSmallDeterminant.hpp
   array/OperationSmallTrace.hpp
   array/OperationSmallPower.hpp

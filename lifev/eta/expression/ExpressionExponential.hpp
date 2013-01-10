@@ -151,20 +151,11 @@ private:
 
 */
 
-// "Specialization" for the case of a scalar
 template< typename  ExpressionType>
-ExpressionExponential<ExpressionDeterminant<ExpressionType> >
-exp(const ExpressionBase<ExpressionDeterminant<ExpressionType> >& l)
+ExpressionExponential<ExpressionType>
+exp(const ExpressionBase<ExpressionType>& l)
 {
-    return ExpressionExponential<ExpressionDeterminant<ExpressionType> >(l.cast());
-}
-
-// "Specialization" for the case of a scalar
-template< typename  ExpressionType>
-ExpressionExponential<ExpressionTrace<ExpressionType> >
-exp(const ExpressionBase<ExpressionTrace<ExpressionType> >& l)
-{
-    return ExpressionExponential<ExpressionTrace<ExpressionType> >(l.cast());
+    return ExpressionExponential<ExpressionType >(l.cast());
 }
 
 

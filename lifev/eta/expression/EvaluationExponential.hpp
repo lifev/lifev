@@ -38,6 +38,8 @@
 
 #include <lifev/core/LifeV.hpp>
 
+#include <lifev/eta/array/OperationSmallExponential.hpp>
+
 #include <lifev/eta/expression/ExpressionExponential.hpp>
 
 #include <lifev/core/fem/QuadratureRule.hpp>
@@ -66,10 +68,10 @@ public:
     //@{
 
     // //! Type of the value returned by the left operand
-	// typedef typename EvaluationBaseType::return_Type Basereturn_Type;
+    typedef typename EvaluationBaseType::return_Type BaseReturn_Type;
 
     //! Type of the value returned by this class
-	typedef Real return_Type;
+	typedef typename OperationSmallExponential<BaseReturn_Type>::result_Type return_Type;
 
     //@}
 

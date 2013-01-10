@@ -33,8 +33,8 @@
      @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
  */
 
-#ifndef OPERATION_SMALL_LOGARITHM_HPP
-#define OPERATION_SMALL_LOGARITHM_HPP
+#ifndef OPERATION_SMALL_EXPONENTIAL_HPP
+#define OPERATION_SMALL_EXPONENTIAL_HPP
 
 #include <lifev/core/LifeV.hpp>
 
@@ -60,18 +60,18 @@ namespace LifeV
   the LifeV::Real type.
 
 */
-template <typename Base>
-class OperationSmallLogarithm
+template <typename Argument>
+class OperationSmallExponential
 {
 private:
 	//! @name Constructors and destructors
     //@{
 
 	//! No default constructor
-	OperationSmallLogarithm();
+	OperationSmallExponential();
 
 	//! No destructor
-	~OperationSmallLogarithm();
+	~OperationSmallExponential();
 
 	//@}
 };
@@ -79,7 +79,7 @@ private:
 //! \cond
 
 template <>
-class OperationSmallLogarithm<Real>
+class OperationSmallExponential<Real>
 {
 public:
 
@@ -95,10 +95,10 @@ private:
     //@{
 
 	//! No default constructor
-	OperationSmallLogarithm();
+	OperationSmallExponential();
 
 	//! No destructor
-	~OperationSmallLogarithm();
+	~OperationSmallExponential();
 
 	//@}
 };

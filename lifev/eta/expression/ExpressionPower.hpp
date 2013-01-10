@@ -158,20 +158,11 @@ private:
 
 */
 
-// "Specialization" for the case of a scalar
 template< typename  ExpressionType>
-ExpressionPower<ExpressionDeterminant<ExpressionType> >
-pow(const ExpressionBase<ExpressionDeterminant<ExpressionType> >& l, const Real& r)
+ExpressionPower<ExpressionType>
+pow(const ExpressionBase<ExpressionType>& l, const Real& r)
 {
-    return ExpressionPower<ExpressionDeterminant<ExpressionType> >(l.cast(),r);
-}
-
-// "Specialization" for the case of a scalar
-template< typename  ExpressionType>
-ExpressionPower<ExpressionTrace<ExpressionType> >
-pow(const ExpressionBase<ExpressionTrace<ExpressionType> >& l, const Real& r)
-{
-    return ExpressionPower<ExpressionTrace<ExpressionType> >(l.cast(),r);
+    return ExpressionPower<ExpressionType>(l.cast(),r);
 }
 
 
