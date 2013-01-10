@@ -1,5 +1,6 @@
 
 INCLUDE(TribitsAddExecutable)
+INCLUDE(TribitsCopyFilesToBinaryDir)
 
 # Make sure the compiler can find include files
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
