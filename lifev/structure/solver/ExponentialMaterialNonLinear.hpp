@@ -321,7 +321,7 @@ template <typename Mesh>
 void ExponentialMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matrixPtr_Type&         jacobian,
                                                                        const vector_Type&     disp,
                                                                        const dataPtr_Type&     dataMaterial,
-								       const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                                                                       const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
                                                                        const displayerPtr_Type& displayer )
 {
     displayer->leaderPrint("   Non-Linear S-  updating non linear terms in the Jacobian Matrix (Exponential)");
@@ -345,11 +345,42 @@ void ExponentialMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matrixPtr
         //Given the marker pointed by the iterator, let's extract the material parameters
         UInt marker = it->first;
 
+        this->M_markerFunctorPtr.reset( new markerFunctor_Type(marker) );
+
         Real bulk = dataMaterial->bulk(marker);
         Real alpha = dataMaterial->alpha(marker);
         Real gamma = dataMaterial->gamma(marker);
 
+        //Create the indentity for F
+        matrixSmall_Type identity;
+        identity(0,0) = 1.0; identity(0,1) = 0.0; identity(0,2) = 0.0;
+        identity(1,0) = 0.0; identity(1,1) = 1.0; identity(1,2) = 0.0;
+        identity(2,0) = 0.0; identity(2,1) = 0.0; identity(2,2) = 1.0;
 
+        //Macros to make the assembly more readable
+#define F ( grad( this->M_ETFESpace,  disp) + value(identity) )
+#define J det( F )
+#define F_T  minusT(F)
+#define RIGHTCAUCHYGREEN transpose(F) * F
+#define IC trace( RIGHTCAUCHYGREEN )
+#define ISOCHORICTRACE pow( J, (-2.0/3.0) ) * IC
+
+
+        //Assembling Volumetric Part
+        integrate( integrationOverSelectedVolumes( this->M_FESpace->mesh(), this->M_markerFunctorPtr ) ,
+                   this->M_FESpace->qr(),
+                   this->M_ETFESpace,
+                   this->M_ETFESpace,
+                   value( bulk / 2.0 ) * ( value(2.0)*pow(J, 2.0) - J + value(1.0) ) * dot( F_T, grad(phi_j) ) * dot( F_T, grad(phi_i) )
+                   ) >> jacobian;
+
+
+        // integrate( integrationOverSelectedVolumes( this->M_FESpace->mesh(), this->M_markerFunctorPtr ) ,
+        //            this->M_FESpace->qr(),
+        //            this->M_ETFESpace,
+        //            this->M_ETFESpace,
+        //            value( - bulk / 2.0 ) * ( pow(J,2.0) - J + log(J) ) * dot( F_T * transpose(grad(phi_j)) * F_T,  grad(phi_i) )
+        //            ) >> jacobian;
 
         for ( UInt j(0); j < it->second.size(); j++ )
         {
@@ -380,7 +411,7 @@ void ExponentialMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matrixPtr
 
 	    //! VOLUMETRIC PART
 	    //! 1. Stiffness matrix: int { 1/2 * bulk * ( 2 - 1/J + 1/J^2 ) * ( CofF : \nabla \delta ) (CofF : \nabla v) }
-	    AssemblyElementalStructure::stiff_Jac_Pvol_1term( 0.5 *  bulk, (*M_CofFk), (*M_Jack), *this->M_elmatK, this->M_FESpace->fe() );
+	    //AssemblyElementalStructure::stiff_Jac_Pvol_1term( 0.5 *  bulk, (*M_CofFk), (*M_Jack), *this->M_elmatK, this->M_FESpace->fe() );
 
 	    //! 2. Stiffness matrix: int { 1/2 * bulk * ( 1/J- 1 - log(J)/J^2 ) * ( CofF1 [\nabla \delta]^t CofF ) : \nabla v }
 	    AssemblyElementalStructure::stiff_Jac_Pvol_2term( 0.5 *  bulk, (*M_CofFk), (*M_Jack), *this->M_elmatK, this->M_FESpace->fe() );
@@ -447,6 +478,9 @@ void ExponentialMaterialNonLinear<Mesh>::computeStiffness( const vector_Type& so
 #define F ( grad( this->M_ETFESpace, sol) + value(identity) )
 #define J det( F )
 #define F_T  minusT(F)
+#define RIGHTCAUCHYGREEN transpose(F) * F
+#define IC trace( RIGHTCAUCHYGREEN )
+#define ISOCHORICTRACE pow( J, (-2.0/3.0) ) * IC
 
     this->M_stiff.reset(new vector_Type(*this->M_localMap));
 
@@ -486,7 +520,7 @@ void ExponentialMaterialNonLinear<Mesh>::computeStiffness( const vector_Type& so
           // integrate( integrationOverSelectedVolumes( this->M_FESpace->mesh(), this->M_markerFunctorPtr ) ,
           //            this->M_FESpace->qr(),
           //            this->M_ETFESpace,
-          //            value(alpha) * pow(J,-2.0/3.0) * exp( value(gamma)*( TRCBAR - value(3.0) ) )  *  (dot( F + value(-1.0/3.0) * I_C * F_T,grad(phi_i) ) )
+          //            value(alpha) * pow(J,-2.0/3.0) * exp( value(gamma)*( pow(J,-2.0/3.0) * trace( transpose(F) * F )  - value(3.0) ) )  *  (dot( F - value(1.0/3.0) * trace( transpose(F) * F ) * F_T,grad(phi_i) ) )
           //            ) >> this->M_stiff;
 
 
@@ -498,13 +532,13 @@ void ExponentialMaterialNonLinear<Mesh>::computeStiffness( const vector_Type& so
 
 	    for ( UInt iNode = 0 ; iNode < ( UInt ) this->M_FESpace->fe().nbFEDof() ; iNode++ )
 	      {
-		UInt  iloc = this->M_FESpace->fe().patternFirst( iNode );
+	    UInt  iloc = this->M_FESpace->fe().patternFirst( iNode );
 
-		for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
-		  {
-		    UInt ig = this->M_FESpace->dof().localToGlobalMap( eleID, iloc ) + iComp*dim + this->M_offset;
-		    dk_loc[ iloc + iComp*this->M_FESpace->fe().nbFEDof() ] = dRep[ig];
-		  }
+	    for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
+	      {
+	        UInt ig = this->M_FESpace->dof().localToGlobalMap( eleID, iloc ) + iComp*dim + this->M_offset;
+	        dk_loc[ iloc + iComp*this->M_FESpace->fe().nbFEDof() ] = dRep[ig];
+	      }
 	      }
 
 	    this->M_elvecK->zero();
@@ -530,11 +564,11 @@ void ExponentialMaterialNonLinear<Mesh>::computeStiffness( const vector_Type& so
 
 	    for ( UInt ic = 0; ic < nDimensions; ++ic )
 	      {
-		/*!
-		  M_elvecK is assemble into *vec_stiff vector that is recall
-		  from updateSystem(matrix_ptrtype& mat_stiff, vector_ptr_type& vec_stiff)
-		*/
-		assembleVector( *this->M_stiff, *this->M_elvecK, this->M_FESpace->fe(), this->M_FESpace->dof(), ic, this->M_offset +  ic*totalDof );
+	    /*!
+	      M_elvecK is assemble into *vec_stiff vector that is recall
+	      from updateSystem(matrix_ptrtype& mat_stiff, vector_ptr_type& vec_stiff)
+	    */
+	    assembleVector( *this->M_stiff, *this->M_elvecK, this->M_FESpace->fe(), this->M_FESpace->dof(), ic, this->M_offset +  ic*totalDof );
 	      }
 	  }
 

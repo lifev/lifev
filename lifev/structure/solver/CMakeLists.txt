@@ -5,6 +5,7 @@ SET(solver_HEADERS
   solver/StructuralConstitutiveLaw.hpp
   solver/StructuralOperator.hpp
   solver/VenantKirchhoffMaterialLinear.hpp
+  solver/ExponentialMaterialNonLinear.hpp
 CACHE INTERNAL "")
 
 SET(solver_SOURCES

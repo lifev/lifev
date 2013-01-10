@@ -253,7 +253,7 @@ void VenantKirchhoffMaterialLinear<Mesh>::computeLinearStiff(dataPtr_Type& dataM
                    this->M_FESpace->qr(),
                    this->M_ETFESpace,
                    this->M_ETFESpace,
-                   value(mu) * dot( grad(phi_i) + transpose(grad(phi_i)) , grad(phi_j) )  ) >> M_linearStiff;
+                   value( mu ) * dot( grad(phi_j) + transpose(grad(phi_j)) , grad(phi_i) + transpose(grad(phi_i)) )  ) >> M_linearStiff;
         // }
 
     }
