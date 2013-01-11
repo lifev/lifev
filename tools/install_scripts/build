@@ -1,0 +1,54 @@
+#! /bin/bash
+#
+# author: Antonio Cervone <ant.cervone@gmail.com>
+# date:   30-08-2012
+#
+
+# list of packages
+# the key should be:
+# - INSTALL : the package will be installed by this script
+# - YES     : the package is already installed in the system, and its paths
+#             must be specified in the following variables
+# - NO      : the package will not be used
+# BEWARE! some packages are required and cannot be set to NO!!
+
+source libpath
+
+package_install=()
+package_yes=()
+package_no=()
+
+for pack in "${package_array[@]}"; do
+  if [ "${!pack}" == "INSTALL" ]; then
+    echo "$pack will be installed"
+    package_install=( ${package_install[@]} $pack )
+  elif [ "${!pack}" == "YES" ]; then
+    echo "$pack is already installed"
+    package_yes=( ${package_yes[@]} $pack )
+  elif [ "${!pack}" == "NO" ]; then
+    echo "$pack will not be used"
+    package_no=( ${package_no[@]} $pack )
+  fi
+
+#  pack_bin=${pack}_bin
+#  pack_include=${pack}_include
+#  pack_lib=${pack}_lib
+#  echo ${!pack_include}
+#  echo
+done
+
+echo
+echo "following packages will be installed:"
+echo ${package_install[@]}
+
+echo
+echo "following packages are already installed: "
+echo ${package_yes[@]}
+
+echo
+echo "following packages will not be used:"
+echo ${package_no[@]}
+
+pushd lib >/dev/null
+source pkgbuild ${package_install[@]}
+popd >/dev/null

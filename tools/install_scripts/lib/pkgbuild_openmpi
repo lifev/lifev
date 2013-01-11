@@ -1,0 +1,45 @@
+#! /bin/bash
+#
+# author: Antonio Cervone <ant.cervone@gmail.com>
+# date:   11-12-2012
+#
+
+# Use the new mpi compiler
+export mpi=YES
+export mpi_base=${install_dir}
+export mpi_bin=${mpi_base}/bin
+
+ver="1.6.3"
+
+download_openmpi() {
+    wget http://www.open-mpi.org/software/ompi/v1.6/downloads/openmpi-${ver}.tar.bz2
+}
+
+unpack_openmpi() {
+    tar xjf openmpi-${ver}.tar.bz2
+}
+
+build_openmpi() {
+
+    ${src_dir}/openmpi-${ver}/configure \
+        --prefix=${install_dir} \
+        --enable-mpi-cxx \
+        --enable-static \
+        --with-threads=posix \
+        --enable-mpi-threads \
+        --enable-smp-locks \
+        --enable-pretty-print-stacktrace \
+        --without-slurm \
+        --without-tm \
+        --enable-mca-no-build="ras_tm,pls_tm" \
+        CC=${clang_bin}/clang \
+        CXX=${clang_bin}/clang++ \
+        LDFLAGS='-Wl,-z,noexecstack' || return 1
+
+    make -j${NUM_PROC}
+
+}
+
+install_openmpi() {
+    make -j${NUM_PROC} install
+}
