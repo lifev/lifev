@@ -157,19 +157,19 @@ public:
 
 
 
-//! @name Constructor &  Deconstructor
-//@{
+    //! @name Constructor &  Deconstructor
+    //@{
 
-  StructuralConstitutiveLaw();
+    StructuralConstitutiveLaw();
 
-  virtual ~StructuralConstitutiveLaw() {}
+    virtual ~StructuralConstitutiveLaw() {}
 
-//@}
+    //@}
 
 
 
-//!@name Methods
-//@{
+    //!@name Methods
+    //@{
 
     //! Setup the created object of the class StructuralConstitutiveLaw
     /*!
@@ -180,70 +180,80 @@ public:
     virtual void setup( const FESpacePtr_Type dFESpace,
                         const ETFESpacePtr_Type ETFESpace,
                         const boost::shared_ptr<const MapEpetra>&   monolithicMap,
-                        const UInt offset, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer  )=0;
+                        const UInt offset, const dataPtr_Type& dataMaterial,
+                        const displayerPtr_Type& displayer  )=0;
 
 
     //! Computes the linear part of the stiffness matrix StructuralSolver::buildSystem
     /*!
       \param dataMaterial the class with Material properties data
     */
-  virtual  void computeLinearStiff( dataPtr_Type& dataMaterial, const mapMarkerVolumesPtr_Type mapsMarkerVolumes  ) = 0;
+    virtual  void computeLinearStiff( dataPtr_Type& dataMaterial,
+                                      const mapMarkerVolumesPtr_Type mapsMarkerVolumes  ) = 0;
 
     //! Updates the Jacobian matrix in StructuralSolver::updateJacobian
     /*!
       \param disp: solution at the k-th iteration of NonLinearRichardson Method
-      \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
+      \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the
+                           material coefficients (e.g. Young modulus, Poisson ratio..)
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
-  virtual  void updateJacobianMatrix( const vector_Type& disp, const dataPtr_Type& dataMaterial, const mapMarkerVolumesPtr_Type mapsMarkerVolumes, const displayerPtr_Type& displayer ) = 0;
+    virtual  void updateJacobianMatrix( const vector_Type& disp, const dataPtr_Type& dataMaterial,
+                                        const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                                        const displayerPtr_Type& displayer ) = 0;
 
-    //! Computes the new Stiffness matrix in StructuralSolver given a certain displacement field. This function is used both in StructuralSolver::evalResidual and in
+    //! Computes the new Stiffness matrix in StructuralSolver given a certain displacement field.
+    //! This function is used both in StructuralSolver::evalResidual and in
     //! StructuralSolver::updateSystem since the matrix is the expression of the matrix is the same.
     //!This is virtual and not pure virtual since in the linear St. Venant-Kirchhoff law it is not needed.
     /*!
       \param sol:  the solution vector
       \param factor: scaling factor used in FSI
-      \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
+      \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the
+                           material coefficients (e.g. Young modulus, Poisson ratio..)
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
-  virtual  void computeStiffness( const vector_Type& sol, Real factor, const dataPtr_Type& dataMaterial, const mapMarkerVolumesPtr_Type mapsMarkerVolumes, const displayerPtr_Type& displayer ) = 0;
+    virtual  void computeStiffness( const vector_Type& sol, Real factor, const dataPtr_Type& dataMaterial,
+                                    const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                                    const displayerPtr_Type& displayer ) = 0;
 
 
-    //! Computes the deformation Gradient F, the cofactor of F Cof(F), the determinant of F J = det(F), the trace of C Tr(C).
+    //! Computes the deformation Gradient F, the cofactor of F Cof(F),
+    //! the determinant of F J = det(F), the trace of C Tr(C).
     /*!
       \param dk_loc: local displacement vector
     */
     virtual  void computeKinematicsVariables( const VectorElemental& dk_loc ) = 0;
 
 
-  //! Output of the class
-  /*!
-    \param fileNamelinearStiff the filename where to apply the spy method for the linear part of the Stiffness matrix
-    \param fileNameStiff the filename where to apply the spy method for the Stiffness matrix
-  */
-  virtual void showMe( std::string const& fileNameStiff, std::string const& fileNameJacobian ) = 0;
+    //! Output of the class
+    /*!
+      \param fileNamelinearStiff the filename where to apply the spy method for the linear part of the Stiffness matrix
+      \param fileNameStiff the filename where to apply the spy method for the Stiffness matrix
+    */
+    virtual void showMe( std::string const& fileNameStiff, std::string const& fileNameJacobian ) = 0;
 
 
-//! @name Set Methods
-//@{
+    //! @name Set Methods
+    //@{
 
     //No set Methods
 
-//@}
+    //@}
 
 
-//! @name Get Methods
-//@{
+    //! @name Get Methods
+    //@{
 
-  //! Getters
-  //! Get the Epetramap
-  MapEpetra   const& map()     const { return *M_localMap; }
+    //! Getters
+    //! Get the Epetramap
+    MapEpetra   const& map()     const { return *M_localMap; }
 
-  //! Get the FESpace object
-  FESpace_Type& dFESpace()  {return M_FESpace;}
+    //! Get the FESpace object
+    FESpace_Type& dFESpace()  {return M_FESpace;}
 
-  //! Get the Stiffness matrix
-  matrixPtr_Type const jacobian()    const {return M_jacobian; }
+    //! Get the Stiffness matrix
+    matrixPtr_Type const jacobian()    const {return M_jacobian; }
 
     //! Get the Stiffness matrix
     virtual matrixPtr_Type const stiffMatrix() const = 0;
@@ -251,9 +261,10 @@ public:
     //! Get the Stiffness matrix
     virtual vectorPtr_Type const stiffVector() const = 0;
 
-  virtual void apply( const vector_Type& sol, vector_Type& res, const mapMarkerVolumesPtr_Type mapsMarkerVolumes) =0;
+    virtual void apply( const vector_Type& sol, vector_Type& res,
+                        const mapMarkerVolumesPtr_Type mapsMarkerVolumes) =0;
 
-//@}
+    //@}
 
 protected:
 
@@ -294,7 +305,7 @@ StructuralConstitutiveLaw<Mesh>::StructuralConstitutiveLaw( ):
     M_offset                     ( 0 ),
     M_markerFunctorPtr           ( )
 {
-  //    std::cout << "I am in the constructor of StructuralConstitutiveLaw" << std::endl;
+    //    std::cout << "I am in the constructor of StructuralConstitutiveLaw" << std::endl;
 }
 
 }

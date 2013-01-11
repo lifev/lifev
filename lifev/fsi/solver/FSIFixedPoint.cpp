@@ -194,7 +194,7 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
          *M_beta += *this->M_fluid->solution();
 
 	vector_Type  meshVelocity( M_meshMotion->disp(), Repeated );
-	meshVelocity = M_ALETimeAdvance->velocity(meshDisp);//implicit treatment of w (because I already did the shiftRight)
+	meshVelocity = M_ALETimeAdvance->firstDerivative(meshDisp);//implicit treatment of w (because I already did the shiftRight)
 	this->transferMeshMotionOnFluid(meshVelocity,
 					this->veloFluidMesh());
 
@@ -261,7 +261,7 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
     {
         this->M_solid->iterate( M_BCh_d );
         this->transferSolidOnInterface(this->M_solid->displacement(),     lambdaSolidUnique);
-	this->transferSolidOnInterface( M_solidTimeAdvance->velocity( this->solid().displacement()), lambdaDotSolidUnique );
+	this->transferSolidOnInterface( M_solidTimeAdvance->firstDerivative( this->solid().displacement()), lambdaDotSolidUnique );
         this->transferSolidOnInterface(this->M_solid->residual(), sigmaSolidUnique);
     }
 

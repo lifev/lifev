@@ -608,7 +608,7 @@ public:
     virtual void getSolidDisp( vector_Type& soliddisp )                 { soliddisp = M_solid->displacement(); }
 
     //! gets the solid velocity by copy
-    virtual void getSolidVel( vector_Type& solidvel )                   { solidvel = M_solidTimeAdvance->velocity(); }
+    virtual void getSolidVel( vector_Type& solidvel )                   { solidvel = M_solidTimeAdvance->firstDerivative(); }
 
     //! Export the solid displacement by copying it to an external vector
     /*!
@@ -620,13 +620,13 @@ public:
     /*!
      * @param solidVelocity vector to be filled with the solid velocity
      */
-    virtual void exportSolidVelocity( vector_Type& solidVelocity ) { solidVelocity = M_solidTimeAdvance->velocity(); }
+    virtual void exportSolidVelocity( vector_Type& solidVelocity ) { solidVelocity = M_solidTimeAdvance->firstDerivative(); }
 
     //! Export the solid acceleration by copying it to an external vector
     /*!
      * @param solidAcc vector to be filled with the solid acceleration
      */
-    virtual void exportSolidAcceleration( vector_Type& solidAcc ) { solidAcc = M_solidTimeAdvance->acceleration(); }
+    virtual void exportSolidAcceleration( vector_Type& solidAcc ) { solidAcc = M_solidTimeAdvance->secondDerivative(); }
 
     //! Export the fluid velocity by copying it to an external vector
     /*!

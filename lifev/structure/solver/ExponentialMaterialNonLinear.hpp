@@ -54,7 +54,7 @@ class ExponentialMaterialNonLinear : public StructuralConstitutiveLaw<Mesh>
     //!@name Type definitions
     //@{
 
-    public:
+public:
     typedef StructuralConstitutiveLaw<Mesh>                 super;
 
     typedef typename super::data_Type                data_Type;
@@ -82,19 +82,19 @@ class ExponentialMaterialNonLinear : public StructuralConstitutiveLaw<Mesh>
 
 
 
-//! @name Constructor &  Destructor
-//@{
+    //! @name Constructor &  Destructor
+    //@{
 
     ExponentialMaterialNonLinear();
 
     virtual  ~ExponentialMaterialNonLinear();
 
-//@}
+    //@}
 
 
 
-//!@name Methods
-//@{
+    //!@name Methods
+    //@{
 
     //! Setup the created object of the class StructuralConstitutiveLaw
     /*!
@@ -118,7 +118,8 @@ class ExponentialMaterialNonLinear : public StructuralConstitutiveLaw<Mesh>
     //! Updates the Jacobian matrix in StructualSolver::updateJacobian
     /*!
       \param disp: solution at the k-th iteration of NonLinearRichardson Method
-      \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
+      \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get
+                           the material coefficients (e.g. Young modulus, Poisson ratio..)
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
     void updateJacobianMatrix( const vector_Type& disp,
@@ -131,7 +132,8 @@ class ExponentialMaterialNonLinear : public StructuralConstitutiveLaw<Mesh>
     /*!
       \param stiff: stiffness matrix provided from outside
       \param disp: solution at the k-th iteration of NonLinearRichardson Method
-      \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
+      \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get
+                           the material coefficients (e.g. Young modulus, Poisson ratio..)
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
     void updateNonLinearJacobianTerms( matrixPtr_Type& jacobian,
@@ -146,18 +148,22 @@ class ExponentialMaterialNonLinear : public StructuralConstitutiveLaw<Mesh>
     /*!
       \param sol:  the solution vector
       \param factor: scaling factor used in FSI
-      \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
+      \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the
+                           material coefficients (e.g. Young modulus, Poisson ratio..)
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
-  void computeStiffness( const vector_Type& disp, Real factor, const dataPtr_Type& dataMaterial, const mapMarkerVolumesPtr_Type mapsMarkerVolumes, const displayerPtr_Type& displayer );
+    void computeStiffness( const vector_Type& disp, Real factor, const dataPtr_Type& dataMaterial, const mapMarkerVolumesPtr_Type mapsMarkerVolumes, const displayerPtr_Type& displayer );
 
 
-    //! Computes the new Stiffness vector for Neo-Hookean and Exponential materials in StructuralSolver given a certain displacement field.
-    //! This function is used both in StructuralSolver::evalResidual and in StructuralSolver::updateSystem since the matrix is the expression of the matrix is the same.
+    //! Computes the new Stiffness vector for Neo-Hookean and Exponential materials in StructuralSolver
+    //! given a certain displacement field.
+    //! This function is used both in StructuralSolver::evalResidual and in StructuralSolver::updateSystem
+    //! since the matrix is the expression of the matrix is the same.
     /*!
       \param sol:  the solution vector
       \param factor: scaling factor used in FSI
-      \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
+      \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get
+                           the material coefficients (e.g. Young modulus, Poisson ratio..)
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
     void computeVector( const vector_Type& sol,
@@ -167,7 +173,8 @@ class ExponentialMaterialNonLinear : public StructuralConstitutiveLaw<Mesh>
                         const displayerPtr_Type& displayer );
 
 
-    //! Computes the deformation gradient F, the cofactor matrix Cof(F), the determinant of F (J = det(F)), the trace of right Cauchy-Green tensor tr(C)
+    //! Computes the deformation gradient F, the cofactor matrix Cof(F),
+    //! the determinant of F (J = det(F)), the trace of right Cauchy-Green tensor tr(C)
     //! This function is used in StructuralConstitutiveLaw::computeStiffness
     /*!
       \param dk_loc: the elemental displacement
@@ -176,33 +183,26 @@ class ExponentialMaterialNonLinear : public StructuralConstitutiveLaw<Mesh>
     {
     }
 
-
-    //! Computes the deformation Gradient F, the cofactor of F Cof(F), the determinant of F J = det(F), the trace of C Tr(C).
-    /*!
-      \param dk_loc: local displacement vector
-    */
-    //void computeStress( const vector_Type& sol );
-
-
     //! ShowMe method of the class (saved on a file the stiffness vector and the jacobian)
     void showMe( std::string const& fileNameVectStiff,
                  std::string const& fileNameJacobain );
 
-//@}
+    //@}
 
-//! @name Get Methods
-//@{
+    //! @name Get Methods
+    //@{
 
     //! Get the Stiffness matrix
-  matrixPtr_Type const stiffMatrix() const { return super::M_jacobian; }
+    matrixPtr_Type const stiffMatrix() const { return super::M_jacobian; }
 
 
     //! Get the stiffness vector
     vectorPtr_Type const stiffVector() const {return M_stiff; }
 
-  void apply( const vector_Type& sol, vector_Type& res, const mapMarkerVolumesPtr_Type mapsMarkerVolumes) ;
+    void apply( const vector_Type& sol, vector_Type& res,
+                const mapMarkerVolumesPtr_Type mapsMarkerVolumes) ;
 
-//@}
+    //@}
 
 
 
@@ -263,9 +263,10 @@ ExponentialMaterialNonLinear<Mesh>::setup( const FESpacePtr_Type dFESpace,
 }
 
 template <typename Mesh>
-void ExponentialMaterialNonLinear<Mesh>::computeLinearStiff(dataPtr_Type& /*dataMaterial*/, const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/)
+void ExponentialMaterialNonLinear<Mesh>::computeLinearStiff(dataPtr_Type& /*dataMaterial*/,
+                                                            const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/)
 {
-    //! Empty method for neo-hookean material
+    //! Empty method for exponential material
 }
 
 
@@ -275,7 +276,7 @@ void ExponentialMaterialNonLinear<Mesh>::computeLinearStiff(dataPtr_Type& /*data
 template <typename Mesh>
 void ExponentialMaterialNonLinear<Mesh>::updateJacobianMatrix( const vector_Type&       disp,
                                                                const dataPtr_Type&      dataMaterial,
-							       const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                                                               const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
                                                                const displayerPtr_Type& displayer )
 {
     this->M_jacobian.reset(new matrix_Type(*this->M_localMap));
@@ -310,7 +311,6 @@ void ExponentialMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matrixPtr
 
     for( it = (*mapsMarkerVolumes).begin(); it != (*mapsMarkerVolumes).end(); it++ )
     {
-
         //Given the marker pointed by the iterator, let's extract the material parameters
         UInt marker = it->first;
 
@@ -405,6 +405,7 @@ void ExponentialMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matrixPtr
                    value((1.0/3.0) * alpha) * ICbar * exp( value( gamma ) * ( ICbar - value(3.0) )) *
                    dot( F_T * transpose(grad(phi_j)) * F_T , grad(phi_i) )
                    ) >> jacobian;
+
     }
 }
 
@@ -428,12 +429,12 @@ void ExponentialMaterialNonLinear<Mesh>::computeStiffness( const vector_Type& di
     mapIterator_Type it;
 
     for( it = (*mapsMarkerVolumes).begin(); it != (*mapsMarkerVolumes).end(); it++ )
-      {
+    {
 
-          //Given the marker pointed by the iterator, let's extract the material parameters
-          UInt marker = it->first;
+        //Given the marker pointed by the iterator, let's extract the material parameters
+        UInt marker = it->first;
 
-          this->M_markerFunctorPtr.reset( new markerFunctor_Type(marker) );
+        this->M_markerFunctorPtr.reset( new markerFunctor_Type(marker) );
 
           Real bulk = dataMaterial->bulk(marker);
           Real alpha = dataMaterial->alpha(marker);
@@ -461,7 +462,7 @@ void ExponentialMaterialNonLinear<Mesh>::computeStiffness( const vector_Type& di
 
 template <typename Mesh>
 void ExponentialMaterialNonLinear<Mesh>::showMe( std::string const& fileNameStiff,
-                         std::string const& fileNameJacobian )
+                                                 std::string const& fileNameJacobian )
 {
     this->M_stiff->spy(fileNameStiff);
     this->M_jacobian->spy(fileNameJacobian);
@@ -469,9 +470,10 @@ void ExponentialMaterialNonLinear<Mesh>::showMe( std::string const& fileNameStif
 
 
 template <typename Mesh>
-void ExponentialMaterialNonLinear<Mesh>::apply( const vector_Type& sol, vector_Type& res, const mapMarkerVolumesPtr_Type mapsMarkerVolumes )
+void ExponentialMaterialNonLinear<Mesh>::apply( const vector_Type& sol,
+                                                vector_Type& res, const mapMarkerVolumesPtr_Type mapsMarkerVolumes )
 {
-  computeStiffness(sol, 0, this->M_dataMaterial, mapsMarkerVolumes, this->M_displayer);
+    computeStiffness(sol, 0, this->M_dataMaterial, mapsMarkerVolumes, this->M_displayer);
     res += *M_stiff;
 }
 

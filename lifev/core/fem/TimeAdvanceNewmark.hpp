@@ -279,13 +279,13 @@ public:
   void extrapolationFirstDerivative(feVector_Type& extrapolation) const;
 
   //! Return the current velocity
-  feVector_Type velocity()  const
+  feVector_Type firstDerivative()  const
   {
     return( *this->M_unknowns[1]);
   }
 
   //!Return the current acceleration
-  feVector_Type acceleration() const
+  feVector_Type secondDerivative() const
   {
     return  *this->M_unknowns[2];
   }

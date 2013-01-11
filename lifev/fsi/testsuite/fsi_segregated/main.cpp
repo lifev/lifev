@@ -576,7 +576,7 @@ public:
           {
                 *M_solidDisp = M_fsi->FSIOper()->solid().displacement();
         // *M_solidVel = M_fsi->FSIOper()->solid().velocity();
-        *M_solidVel = M_fsi->FSIOper()->solidTimeAdvance()->velocity();
+        *M_solidVel = M_fsi->FSIOper()->solidTimeAdvance()->firstDerivative();
 
                 M_exporterSolid->postProcess( M_data->dataFluid()->dataTime()->time() );
             }
