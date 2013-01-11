@@ -218,7 +218,7 @@ main( int argc, char** argv )
     // +-----------------------------------------------+
     if (verbose) std::cout << std::endl << "[Loading the mesh]" << std::endl;
 
-    boost::shared_ptr<RegionMesh<LinearTetra> > fullMeshPtr( new RegionMesh<LinearTetra>( *Comm ) );
+    boost::shared_ptr<RegionMesh<LinearTetra> > fullMeshPtr( new RegionMesh<LinearTetra>( Comm ) );
 
     // Building the mesh from the source
     if(meshSource == RegularMesh)

@@ -204,12 +204,12 @@ public:
       }
 
 
-    Debug( 10000 ) << "Setting up the FESpace and DOF \n";
+    debugStream( 10000 ) << "Setting up the FESpace and DOF \n";
 
     MPI_Barrier( MPI_COMM_WORLD );
 
 #ifdef DEBUG
-    Debug( 10000 ) << "Setting up the BC \n";
+    debugStream( 10000 ) << "Setting up the BC \n";
 #endif
     M_fsi->setFluidBC( BCh_steadyMonolithicFlux( true ) );
     M_fsi->setSolidBC( BCh_steadyMonolithicSolid( *M_fsi->FSIOper( ) ) );
@@ -223,7 +223,7 @@ public:
 
 
 #ifdef DEBUG
-    Debug( 10000 ) << "BC set\n";
+    debugStream( 10000 ) << "BC set\n";
 #endif
 
     std::string const exporterType =  data_file( "exporter/type", "ensight" );
@@ -433,12 +433,12 @@ public:
       }
 
 
-    Debug( 10000 ) << "Setting up the FESpace and DOF \n";
+    debugStream( 10000 ) << "Setting up the FESpace and DOF \n";
 
     MPI_Barrier( MPI_COMM_WORLD );
 
 #ifdef DEBUG
-    Debug( 10000 ) << "Setting up the BC \n";
+    debugStream( 10000 ) << "Setting up the BC \n";
 #endif
     M_fsi->setFluidBC( BCh_monolithicFlux( true ) );
     M_fsi->setSolidBC( BCh_monolithicSolid( *M_fsi->FSIOper( ) ) );
@@ -450,7 +450,7 @@ public:
     M_fsi->setHarmonicExtensionBC( BCh_harmonicExtension( *M_fsi->FSIOper( ) ) );
 
 #ifdef DEBUG
-    Debug( 10000 ) << "BC set\n";
+    debugStream( 10000 ) << "BC set\n";
 #endif
 
     std::string const exporterType =  data_file( "exporter/type", "ensight" );

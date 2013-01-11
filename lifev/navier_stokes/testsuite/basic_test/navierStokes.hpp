@@ -42,7 +42,7 @@
 #include <lifev/core/mesh/MeshData.hpp>
 #include <lifev/navier_stokes/solver/OseenData.hpp>
 #include <lifev/core/fem/FESpace.hpp>
-#include <lifev/core/fem/TimeAdvanceBDFNavierStokes.hpp>
+#include <lifev/navier_stokes/fem/TimeAdvanceBDFNavierStokes.hpp>
 #include <lifev/core/filter/ExporterEnsight.hpp>
 #include <lifev/core/filter/ExporterHDF5.hpp>
 #include <lifev/core/filter/ExporterEmpty.hpp>
@@ -625,7 +625,7 @@ NavierStokes<MeshType, Problem>::run()
             // +-----------------------------------------------+
             if (verbose) std::cout << "[Loading the mesh]" << std::endl;
 
-            boost::shared_ptr<mesh_Type > fullMeshPtr( new mesh_Type( *( M_data->comm ) ) );
+            boost::shared_ptr<mesh_Type > fullMeshPtr( new mesh_Type( M_data->comm ) );
 
             Int geoDimensions = mesh_Type::S_geoDimensions;
             // Building the mesh from the source

@@ -508,7 +508,7 @@ BCInterfaceFunctionParserSolver< FSIOperator >::updatePhysicalSolverVariables()
             else
             {
 #ifdef HAVE_LIFEV_DEBUG
-                Debug( 5023 ) << "                                              f_flux(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->fluid().flux( M_flag, *M_physicalSolver->fluid().solution() ) << "\n";
+                debugStream( 5023 ) << "                                              f_flux(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->fluid().flux( M_flag, *M_physicalSolver->fluid().solution() ) << "\n";
 #endif
                 setVariable( "f_flux", M_physicalSolver->fluid().flux( M_flag, *M_physicalSolver->fluid().solution() ) );
             }

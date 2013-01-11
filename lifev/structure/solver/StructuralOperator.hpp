@@ -27,18 +27,20 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 /*!
  *  @file
  *  @brief This file contains solvers for different materials.
-*
-*  @version 1.0
-*  @date 01-01-2010
-*  @author Paolo Tricerri
-*
-*  @maintainer  Paolo Tricerri <paolo.tricerri@epfl.ch>
+ *  @warning: This is the most important issue related with this class.
+ *  At the moment, the BC are applied on the matrix and on rhsNoBc for VK models
+ *  but for NH and EXP they are applied on the residual directly. This does
+ *  not work for nonhomogeneus Dirichlet conditions!!
+ *
+ *  @version 1.0
+ *  @date 01-01-2010
+ *  @author Paolo Tricerri
+ *
+ *  @maintainer  Paolo Tricerri <paolo.tricerri@epfl.ch>
 */
 
 #ifndef _STRUCTURALOPERATOR_H_
 #define _STRUCTURALOPERATOR_H_ 1
-
-//#include<boost/scoped_ptr.hpp>
 
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -96,10 +98,10 @@ public:
 
     bool operator()( const meshEntity_Type & entity ) const
     {
-      //Extract the flag from the mesh entity
-      UInt flagChecked = entity.markerID();
+        //Extract the flag from the mesh entity
+        UInt flagChecked = entity.markerID();
 
-      return M_policy( flagChecked, M_reference );
+        return M_policy( flagChecked, M_reference );
     }
 
 private:
@@ -116,7 +118,7 @@ private:
 
 */
 template <typename Mesh,
-           typename SolverType = LifeV::SolverAztecOO >
+          typename SolverType = LifeV::SolverAztecOO >
 
 class StructuralOperator
 {
@@ -125,6 +127,7 @@ public:
     //!@name Type definitions
     //@{
     typedef Real ( *function ) ( const Real&, const Real&, const Real&, const Real&, const ID& );
+
     typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> source_Type;
 
     typedef StructuralConstitutiveLaw<Mesh>               material_Type;
@@ -166,7 +169,6 @@ public:
     typedef boost::shared_ptr<vectorInvariants_Type>     vectorInvariantsPtr_Type;
 #endif
   //@}
-
 
     //! @name Constructor & Destructor
     //@{
@@ -712,9 +714,9 @@ StructuralOperator<Mesh, SolverType>::StructuralOperator( ):
 template <typename Mesh, typename SolverType>
 void
 StructuralOperator<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>          data,
-                                          const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
-                                          bcHandler_Type&                    BCh,
-                                          boost::shared_ptr<Epetra_Comm>&   comm)
+                                            const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
+                                            bcHandler_Type&                    BCh,
+                                            boost::shared_ptr<Epetra_Comm>&   comm)
 {
     setup(data, dFESpace, comm);
     M_BCh = BCh;
@@ -723,8 +725,8 @@ StructuralOperator<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        
 template <typename Mesh, typename SolverType>
 void
 StructuralOperator<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        data,
-                                          const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
-                                          boost::shared_ptr<Epetra_Comm>&     comm)
+                                            const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
+                                            boost::shared_ptr<Epetra_Comm>&     comm)
 {
     setup( data, dFESpace, comm, dFESpace->mapPtr(), (UInt)0 );
 
@@ -742,10 +744,10 @@ StructuralOperator<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        
 template <typename Mesh, typename SolverType>
 void
 StructuralOperator<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        data,
-                                          const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
-                                          boost::shared_ptr<Epetra_Comm>&     comm,
-                                          const boost::shared_ptr<const MapEpetra>&  monolithicMap,
-                                          UInt                                offset)
+                                            const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
+                                            boost::shared_ptr<Epetra_Comm>&     comm,
+                                            const boost::shared_ptr<const MapEpetra>&  monolithicMap,
+                                            UInt                                offset)
 {
     M_data                            = data;
     M_FESpace                         = dFESpace;
@@ -776,34 +778,34 @@ template <typename Mesh, typename SolverType>
 void StructuralOperator<Mesh, SolverType>::setupMapMarkersVolumes( void )
 {
 
-  this->M_Displayer->leaderPrint(" S-  Building the map between volumesMarkers <--> volumes \n");
+    this->M_Displayer->leaderPrint(" S-  Building the map between volumesMarkers <--> volumes \n");
 
-  //We first loop over the vector of the material_flags
-  for (  UInt i(0); i < M_data->vectorFlags().size(); i++ )
+    //We first loop over the vector of the material_flags
+    for (  UInt i(0); i < M_data->vectorFlags().size(); i++ )
     {
 
-      //Create the functor to extract volumes
-      markerSelectorPtr_Type ref( new markerSelector_Type(M_data->vectorFlags()[i]) );
+        //Create the functor to extract volumes
+        markerSelectorPtr_Type ref( new markerSelector_Type(M_data->vectorFlags()[i]) );
 
-      //Number of volumes with the current marker
-      UInt numExtractedVolumes = this->M_FESpace->mesh()->elementList().countAccordingToPredicate( *ref );
+        //Number of volumes with the current marker
+        UInt numExtractedVolumes = this->M_FESpace->mesh()->elementList().countAccordingToPredicate( *ref );
 
-      this->M_Displayer->leaderPrint(" Current marker: ", M_data->vectorFlags()[i]);
-      this->M_Displayer->leaderPrint(" \n");
-      this->M_Displayer->leaderPrint(" Number of volumes:", numExtractedVolumes);
-      this->M_Displayer->leaderPrint(" \n");
+        this->M_Displayer->leaderPrint(" Current marker: ", M_data->vectorFlags()[i]);
+        this->M_Displayer->leaderPrint(" \n");
+        this->M_Displayer->leaderPrint(" Number of volumes:", numExtractedVolumes);
+        this->M_Displayer->leaderPrint(" \n");
 
-      //Vector large enough to contain the number of volumes with the current marker
-      vectorVolumes_Type extractedVolumes( numExtractedVolumes );
+        //Vector large enough to contain the number of volumes with the current marker
+        vectorVolumes_Type extractedVolumes( numExtractedVolumes );
 
-      //Extracting the volumes
-      extractedVolumes = this->M_FESpace->mesh()->elementList().extractAccordingToPredicate( *ref );
+        //Extracting the volumes
+        extractedVolumes = this->M_FESpace->mesh()->elementList().extractAccordingToPredicate( *ref );
 
-      //Insert the correspondande Marker <--> List of Volumes inside the map
-      M_mapMarkersVolumes->insert( pair<UInt, vectorVolumes_Type> (M_data->vectorFlags()[i], extractedVolumes) ) ;
+        //Insert the correspondande Marker <--> List of Volumes inside the map
+        M_mapMarkersVolumes->insert( pair<UInt, vectorVolumes_Type> (M_data->vectorFlags()[i], extractedVolumes) ) ;
 
-      //Cleaning the vector
-      extractedVolumes.clear();
+        //Cleaning the vector
+        extractedVolumes.clear();
 
     }
 }
@@ -905,7 +907,7 @@ StructuralOperator<Mesh, SolverType>::computeMassMatrix( const Real factor)
 
         // mass
         // The method mass is implemented in AssemblyElemental.cpp
-	mass( factorMassMatrix , *M_elmatM, M_FESpace->fe(), 0, 0, nDimensions );
+        mass( factorMassMatrix , *M_elmatM, M_FESpace->fe(), 0, 0, nDimensions );
 
         //! assembling
         for ( UInt ic = 0; ic < nc; ic++ )
@@ -994,14 +996,9 @@ void
 StructuralOperator<Mesh, SolverType>::showMe( std::ostream& c  ) const
 {
     c << "\n*** StructuralOperator::showMe method" << std::endl;
-    c << "****** Data of the Material************" << std::endl;
-    c << "Thickness:    " << M_data->thickness() << std::endl;
-    c << "Density:      " << M_data->rho() << std::endl;
-    c << "Young:        " << M_data->young(1) << std::endl;
-    c << "Poisson:      " << M_data->poisson(1) << std::endl;
-    //  c << "Theta:        " << M_theta << std::endl;
-    //  c << "Zeta:         " << M_zeta << std::endl;
-    c << "***************************************" << std::endl;
+
+    M_data->showMe( c );
+
 }
 
 template <typename Mesh, typename SolverType>
@@ -1318,7 +1315,7 @@ StructuralOperator<Mesh, SolverType>::evalResidual( vector_Type &residual, const
         *M_rhs=*M_rhsNoBC;
         residual = *M_massMatrix * solution;
         residual += *M_material->stiffVector();
-    vector_Type solRep(solution, Repeated);
+        vector_Type solRep(solution, Repeated);
         bcManageResidual( residual, *M_rhs, solRep, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(), M_data->dataTime()->time(), 1.0 );
         residual -= *M_rhs;
         chrono.stop();
@@ -1652,25 +1649,25 @@ solveJacobian(vector_Type&           step,
 
     M_linearSolver->solveSystem( res, step, matrFull );
 
-//     matrFull->spy("J");
-//     M_material->stiffMatrix()->spy("S");
-//     M_systemMatrix->spy("M");
+    //     matrFull->spy("J");
+    //     M_material->stiffMatrix()->spy("S");
+    //     M_systemMatrix->spy("M");
     chrono.stop();
 }
 
 template<typename Mesh, typename SolverType>
 void StructuralOperator<Mesh, SolverType>::apply( const vector_Type& sol, vector_Type& res) const
 {
-  M_material->apply(sol, res, M_mapMarkersVolumes);
+    M_material->apply(sol, res, M_mapMarkersVolumes);
     res += (*M_massMatrix)*sol;
 }
 
 template<typename Mesh, typename SolverType>
 void
 StructuralOperator<Mesh, SolverType>::applyBoundaryConditions( matrix_Type&        matrix,
-                                                             vector_Type&        rhs,
-                                                             bcHandler_Type&     BCh,
-                                                             UInt                offset)
+                                                               vector_Type&        rhs,
+                                                               bcHandler_Type&     BCh,
+                                                               UInt                offset)
 {
     // BC manage for the velocity
     if (offset)

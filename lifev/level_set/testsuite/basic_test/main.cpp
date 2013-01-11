@@ -123,7 +123,7 @@ main( int argc, char** argv )
 // Build and partition the mesh
 
     if (verbose) std::cout << " -- Building the mesh ... " << std::flush;
-    boost::shared_ptr< mesh_Type > fullMeshPtr( new RegionMesh<LinearTetra>( *Comm ) );
+    boost::shared_ptr< mesh_Type > fullMeshPtr( new RegionMesh<LinearTetra>( Comm ) );
     regularMesh3D( *fullMeshPtr, 1, Nelements, Nelements, Nelements, false,
                    2.0,   2.0,   2.0,
                    -1.0,  -1.0,  -1.0);

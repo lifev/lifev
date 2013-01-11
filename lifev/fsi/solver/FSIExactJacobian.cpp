@@ -112,7 +112,7 @@ void  FSIExactJacobian::solveLinearFluid()
     dispFluidDomain.setCombineMode(Zero);
     vector_Type dispFluidMesh(this->derVeloFluidMesh().map(), Repeated);
 //if statement: in order not to iterate the mesh for each linear residual calculation, needed just for exact Jac case.
-    if (false && this->M_data->dataFluid()->isSemiImplicit()==true)// not working in parallel
+    if (false && this->M_data->dataFluid()->isSemiImplicit()==true)
     {//to be corrected: up to now also in the semi implicit case the harmonic extension eq.
         //is solved at each GMRES iteration
 
@@ -322,7 +322,7 @@ void FSIExactJacobian::eval(const vector_Type& _disp,
 
             vector_Type meshDispRepeated( M_meshMotion->disp(), Repeated );
             this->moveMesh(meshDispRepeated);
-            vector_Type vel ( this->M_ALETimeAdvance->velocity( ) );
+            vector_Type vel ( this->M_ALETimeAdvance->firstDerivative( ) );
             transferMeshMotionOnFluid( vel, veloFluidMesh() );
             M_fluidTimeAdvance->extrapolation(*M_beta);//explicit
             *M_beta -= veloFluidMesh();//implicit
@@ -402,7 +402,7 @@ void FSIExactJacobian::eval(const vector_Type& _disp,
     if (this->isSolid())
     {
         this->transferSolidOnInterface(this->M_solid->displacement(),     lambdaSolidUnique);
-        this->transferSolidOnInterface( this->M_solidTimeAdvance->velocity( this->M_solid->displacement()), lambdaDotSolidUnique );
+        this->transferSolidOnInterface( this->M_solidTimeAdvance->firstDerivative( this->M_solid->displacement()), lambdaDotSolidUnique );
         this->transferSolidOnInterface(this->M_solid->residual(), sigmaSolidUnique);
     }
 

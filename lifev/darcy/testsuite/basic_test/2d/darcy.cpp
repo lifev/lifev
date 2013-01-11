@@ -171,7 +171,7 @@ darcy_nonlinear::run()
     meshData.setup( dataFile,  Members->discretization_section + "/space_discretization");
 
     // Create the the mesh
-    regionMeshPtr_Type fullMeshPtr( new regionMesh_Type( *Members->comm ) );
+    regionMeshPtr_Type fullMeshPtr( new regionMesh_Type( Members->comm ) );
 
     // Select if the mesh is structured or not
     if ( meshData.meshType() != "structured" )

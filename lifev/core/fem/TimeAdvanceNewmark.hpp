@@ -279,13 +279,13 @@ public:
   void extrapolationFirstDerivative(feVector_Type& extrapolation) const;
 
   //! Return the current velocity
-  feVector_Type velocity()  const
+  feVector_Type firstDerivative()  const
   {
     return( *this->M_unknowns[1]);
   }
 
   //!Return the current acceleration
-  feVector_Type acceleration() const
+  feVector_Type secondDerivative() const
   {
     return  *this->M_unknowns[2];
   }
@@ -355,7 +355,6 @@ void TimeAdvanceNewmark <feVectorType>::shiftRight(const feVector_Type& solution
 }
 
 template<typename feVectorType>
-//const feVector_Type&
 void
 TimeAdvanceNewmark<feVectorType>::RHSFirstDerivative(const Real& timeStep, feVectorType& rhsContribution, int const shift ) const
 {
@@ -381,7 +380,6 @@ TimeAdvanceNewmark<feVectorType>::updateRHSSecondDerivative(const Real& timeStep
   **it *=  this->M_xi[ 1 ] /(timeStep * timeStep) ;
 
   for ( UInt i = 1;  i < this->M_secondOrderDerivativeSize; ++i )
-
     **it += ( this->M_xi[ i+1 ] * std::pow(timeStep, static_cast<Real>(i - 2) ) ) * ( *this->M_unknowns[ i ]);
 }
 
@@ -624,6 +622,7 @@ Real
 TimeAdvanceNewmark<feVectorType>::coefficientExtrapolation(const UInt& i) const
 {
   ASSERT ( i <  3 ,  "coeff_der i must equal 0 or 1 because U^*= U^n + timeStep*V^n + timeStep^2 / 2 W^n");
+
   switch (i)
   {
   case 0:
@@ -636,24 +635,23 @@ TimeAdvanceNewmark<feVectorType>::coefficientExtrapolation(const UInt& i) const
 	  ERROR_MSG ("coeff_der i must equal 0 or 1 because U^*= U^n + timeStep*V^n + timeStep^2 / 2 W^n");
   }
   return 1;
-
 }
 
 template<typename feVectorType>
 Real
 TimeAdvanceNewmark<feVectorType>::coefficientExtrapolationFirstDerivative(const UInt& i ) const
 {
-	  switch (i)
-	  {
-	  case 0:
-		  return this->M_betaFirstDerivative(i);
-	  case 1:
-		  return this->M_betaFirstDerivative(i)*this->M_timeStep;
-	  case 2:
-		  return this->M_betaFirstDerivative(i)*this->M_timeStep*this->M_timeStep;
-	  default:
-		  ERROR_MSG ("coeff_der i must equal 0 or 1 because U^*= U^n + timeStep*V^n + timeStep^2 / 2 W^n");
-	  }
+    switch (i)
+    {
+    case 0:
+        return this->M_betaFirstDerivative(i);
+    case 1:
+        return this->M_betaFirstDerivative(i)*this->M_timeStep;
+    case 2:
+        return this->M_betaFirstDerivative(i)*this->M_timeStep*this->M_timeStep;
+    default:
+        ERROR_MSG ("coeff_der i must equal 0 or 1 because U^*= U^n + timeStep*V^n + timeStep^2 / 2 W^n");
+    }
 	  return 1;
 }
 

@@ -294,7 +294,7 @@ showMe( bool verbose, std::ostream & out ) const
     if ( verbose )
     {
         out << " POINTS INFORMATION" << std::endl << std::endl;
-        for ( unsigned i = 0 ; i < GeoShape::S_numVertices; i++ )
+        for ( UInt i = 0 ; i < GeoShape::S_numVertices; i++ )
         {
             out << "POINT ID. " << i << std::endl;
             out << point( i ).showMe( verbose, out );

@@ -57,7 +57,7 @@
 #include <lifev/core/filter/ExporterHDF5.hpp>
 #include <lifev/core/fem/ReferenceFE.hpp>
 #include <lifev/core/fem/QuadratureRule.hpp>
-#include <lifev/core/fem/TimeAdvanceBDFNavierStokes.hpp>
+#include <lifev/navier_stokes/fem/TimeAdvanceBDFNavierStokes.hpp>
 #include <lifev/navier_stokes/solver/OseenSolver.hpp>
 #include <lifev/navier_stokes/solver/OseenData.hpp>
 
@@ -133,7 +133,7 @@ EnsightToHdf5::run()
     MeshData meshData;
     meshData.setup(dataFile, "fluid/space_discretization");
 
-    boost::shared_ptr<mesh_Type > fullMeshPtr(new mesh_Type ( *( d->comm ) ) );
+    boost::shared_ptr<mesh_Type > fullMeshPtr(new mesh_Type ( d->comm ) );
     readMesh(*fullMeshPtr, meshData);
 
     // writeMesh("test.mesh", *fullMeshPtr);
@@ -154,7 +154,7 @@ EnsightToHdf5::run()
     geometryTranslate[1] = dataFile( "fluid/space_discretization/transform", 0., 7);
     geometryTranslate[2] = dataFile( "fluid/space_discretization/transform", 0., 8);
 
-    MeshUtility::MeshTransformer<mesh_Type, mesh_Type::MarkerCommon > _transformMesh(*fullMeshPtr);
+    MeshUtility::MeshTransformer<mesh_Type, mesh_Type::markerCommon_Type > _transformMesh(*fullMeshPtr);
     _transformMesh.transformMesh( geometryScale, geometryRotate, geometryTranslate );
 
     boost::shared_ptr<mesh_Type > meshPtr;

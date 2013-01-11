@@ -320,7 +320,7 @@ bool checkMesh3D( RegionMesh & mesh,
                   std::ostream & err = std::cerr,
                   std::ostream & clog = std::clog )
 {
-    verbose = verbose && ( mesh.comm().MyPID() );
+    verbose = verbose && ( mesh.comm()->MyPID() == 0 );
     typedef typename RegionMesh::point_Type point_Type;
 
     if ( mesh.storedPoints() == 0 )

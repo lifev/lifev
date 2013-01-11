@@ -191,7 +191,7 @@ problem::run()
     MeshData             meshData;
     meshData.setup(dataFile, "problem/space_discretization");
 
-    boost::shared_ptr<mesh_Type > fullMeshPtr( new mesh_Type( *( members->comm ) ) );
+    boost::shared_ptr<mesh_Type > fullMeshPtr( new mesh_Type( members->comm ) );
     readMesh(*fullMeshPtr, meshData);
 
     boost::shared_ptr<mesh_Type > localMeshPtr;
@@ -386,8 +386,8 @@ problem::run()
     feSpace->interpolate( static_cast<FESpace_type::function_Type>( a0 ),     *wExact, 0 );
 
     *U = timeAdvance->solution();
-    *V = timeAdvance->velocity();
-    *W = timeAdvance->acceleration();
+    *V = timeAdvance->firstDerivative();
+    *W = timeAdvance->secondDerivative();
 
 
     exporter->postProcess( 0 );
@@ -429,8 +429,8 @@ problem::run()
         feSpace->interpolate( static_cast<FESpace_type::function_Type>( a0 ),     *wExact, time );
 
         *U =  timeAdvance->solution();
-        *V = timeAdvance->velocity();
-        *W = timeAdvance->acceleration();
+        *V = timeAdvance->firstDerivative();
+        *W = timeAdvance->secondDerivative();
 
         //postProcess
         exporter->postProcess( time );

@@ -910,11 +910,11 @@ FESpace<MeshType, MapType>::l20Error( const function_Type& fexact,
     sumExact1 = recvbuff[3];
     sumExact2 = recvbuff[4];
 
-    Real absError = sqrt( normU - meanU*meanU/mass );
+    Real absError = std::sqrt( normU - meanU*meanU/mass );
 
     if (relError)
     {
-        Real normExact = sqrt( sumExact2 - sumExact1*sumExact1/mass );
+        Real normExact = std::sqrt( sumExact2 - sumExact1*sumExact1/mass );
         *relError = absError / normExact;
     }
     return absError;
@@ -966,10 +966,10 @@ FESpace<MeshType, MapType>::l2Error( const function_Type&    fexact,
 
     if (relError)
     {
-        *relError = sqrt( normU / sumExact );
+        *relError = std::sqrt( normU / sumExact );
     }
 
-    return sqrt( normU );
+    return std::sqrt( normU );
 }
 
 template <typename MeshType, typename MapType>
@@ -996,7 +996,7 @@ FESpace<MeshType, MapType>::l2NormFunction( const function& f, const Real time)
 
     sumExact    = recvbuff[0];
 
-    return sqrt( sumExact );
+    return std::sqrt( sumExact );
 
 }
 
@@ -1110,11 +1110,11 @@ FESpace<MeshType, MapType>::h1Error( const function&    fexact,
 
     if (relError)
     {
-        *relError = sqrt( normU / sumExact );
+        *relError = std::sqrt( normU / sumExact );
     }
 //     }
 
-    return sqrt( normU );
+    return std::sqrt( normU );
 }
 
 // Warning! When using this function in parallel, the vector vec HAS TO BE REPEATED!
@@ -1143,7 +1143,7 @@ FESpace<MeshType, MapType>::l2Norm( const vector_type& vec)
 
     norm    = recvbuff[0];
 
-    return sqrt( norm );
+    return std::sqrt( norm );
 
 }
 
@@ -1174,7 +1174,7 @@ FESpace<MeshType, MapType>::h1Norm(const vector_type& vec)
 
     norm    = recvbuff[0];
 
-    return sqrt( norm );
+    return std::sqrt( norm );
 
 }
 

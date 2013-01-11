@@ -15,30 +15,30 @@ namespace LifeV
 
 template<typename geoShape_Type>
 RegionMesh< typename RegionMesh<geoShape_Type>::facetShape_Type >  * extractBoundaryMesh(const RegionMesh<geoShape_Type> & mesh3D,
-															const UInt & boundaryFaceMarker, const std::list<UInt> & otherBoundaryFaceMarkerList)
+                                                            const UInt & boundaryFaceMarker, const std::list<UInt> & otherBoundaryFaceMarkerList)
 {
-	//(0) Some useful typedefs
-	typedef RegionMesh<geoShape_Type>  mesh_Type;
-	typedef typename mesh_Type::facetShape_Type facetShape_Type;
-	typedef typename mesh_Type::facet_Type facet_Type;
-	typedef typename mesh_Type::ridge_Type ridge_Type;
-	typedef RegionMesh<facetShape_Type> boundaryRegionMesh_Type;
+    //(0) Some useful typedefs
+    typedef RegionMesh<geoShape_Type>  mesh_Type;
+    typedef typename mesh_Type::facetShape_Type facetShape_Type;
+    typedef typename mesh_Type::facet_Type facet_Type;
+    typedef typename mesh_Type::ridge_Type ridge_Type;
+    typedef RegionMesh<facetShape_Type> boundaryRegionMesh_Type;
 
-	//(1) Extract the list of faces with marker boundaryFaceMarker.
-	std::vector<facet_Type const *> boundaryFaces;
-	Predicates::EntityMarkerIDInterrogator<facet_Type> predicator(boundaryFaceMarker);
+    //(1) Extract the list of faces with marker boundaryFaceMarker.
+    std::vector<facet_Type const *> boundaryFaces;
+    Predicates::EntityMarkerIDInterrogator<facet_Type> predicator(boundaryFaceMarker);
     boundaryFaces = mesh3D.faceList.extractAccordingToPredicate(predicator);
 
     //(2) Extract the list of points
     std::map<UInt,UInt> vertexIdMap, inverseVertexIdMap; // vertexIdMap[PointIdIn3DMesh] = NewPointIdIn2DMesh
     for( typename std::vector<facet_Type const*>::iterator it(boundaryFaces.begin()); it != boundaryFaces.end(); ++it )
     {
-    	for(UInt i(0); i < boundaryRegionMesh_Type::face_Type::S_numPoints; ++i)
-    	{
-    		UInt originalId = (*it)->point(i).id();
-    		vertexIdMap.insert(std::pair<UInt, UInt>(originalId, vertexIdMap.size()));
-    		inverseVertexIdMap.insert(std::pair<UInt, UInt>(inverseVertexIdMap.size(),originalId));
-    	}
+        for(UInt i(0); i < boundaryRegionMesh_Type::face_Type::S_numPoints; ++i)
+        {
+            UInt originalId = (*it)->point(i).id();
+            vertexIdMap.insert(std::pair<UInt, UInt>(originalId, vertexIdMap.size()));
+            inverseVertexIdMap.insert(std::pair<UInt, UInt>(inverseVertexIdMap.size(),originalId));
+        }
     }
 
     //(3) Extract the list of points shared between the side I want to extract and its neighbor sides
@@ -46,20 +46,20 @@ RegionMesh< typename RegionMesh<geoShape_Type>::facetShape_Type >  * extractBoun
     //boundaryPointsOnEdges[PointIdIn3DMesh] = marker_of_the_other_side_who_shares_the_point
     for(std::list<UInt>::const_iterator it(otherBoundaryFaceMarkerList.begin()); it != otherBoundaryFaceMarkerList.end(); ++it)
     {
-    	UInt marker = *it;
-		Predicates::EntityMarkerIDInterrogator<facet_Type> predicator(marker);
-		std::vector<facet_Type const *> otherboundaryFaces;
-		otherboundaryFaces = ( mesh3D.faceList.extractAccordingToPredicate(predicator) );
-		std::cout<<"Extract "<< otherboundaryFaces.size()<<" bd faces on Marker" << marker << "\n";
-	    for( typename std::vector<facet_Type const *>::iterator it1(otherboundaryFaces.begin()); it1 != otherboundaryFaces.end(); ++it1 )
-	    {
-	    	for(UInt i(0); i < boundaryRegionMesh_Type::face_Type::S_numPoints; ++i)
-	    	{
-	    		UInt originalId = (*it1)->point(i).id();
-	    		if(vertexIdMap.count(originalId))
-	    			boundaryPointsOnEdges.insert(std::pair<UInt, UInt>(originalId, marker));
-	    	}
-	    }
+        UInt marker = *it;
+        Predicates::EntityMarkerIDInterrogator<facet_Type> predicator(marker);
+        std::vector<facet_Type const *> otherboundaryFaces;
+        otherboundaryFaces = ( mesh3D.faceList.extractAccordingToPredicate(predicator) );
+        std::cout<<"Extract "<< otherboundaryFaces.size()<<" bd faces on Marker" << marker << "\n";
+        for( typename std::vector<facet_Type const *>::iterator it1(otherboundaryFaces.begin()); it1 != otherboundaryFaces.end(); ++it1 )
+        {
+            for(UInt i(0); i < boundaryRegionMesh_Type::face_Type::S_numPoints; ++i)
+            {
+                UInt originalId = (*it1)->point(i).id();
+                if(vertexIdMap.count(originalId))
+                    boundaryPointsOnEdges.insert(std::pair<UInt, UInt>(originalId, marker));
+            }
+        }
     }
 
     //(4) Allocate memory for the new mesh
@@ -70,9 +70,9 @@ RegionMesh< typename RegionMesh<geoShape_Type>::facetShape_Type >  * extractBoun
 
     UInt __nv(vertexIdMap.size()), __ne(boundaryPointsOnEdges.size() ), __nt(boundaryFaces.size());
 
-    Debug(8000) << "number of vertices: "<< __nv << "\n";
-    Debug(8000) << "number of edges: "<< __ne << "\n";
-    Debug(8000) << "number of triangles: "<< __nt << "\n";
+    debugStream(8000) << "number of vertices: "<< __nv << "\n";
+    debugStream(8000) << "number of edges: "<< __ne << "\n";
+    debugStream(8000) << "number of triangles: "<< __nt << "\n";
 
     //(5) Dump the BoundaryPoints coordinates and marker in a std::vector
     std::vector<Real> __x(3*__nv);
@@ -85,23 +85,23 @@ RegionMesh< typename RegionMesh<geoShape_Type>::facetShape_Type >  * extractBoun
     // reading vertices
     for ( std::map<UInt,UInt>::iterator it(vertexIdMap.begin()); it!=vertexIdMap.end(); ++it)
     {
-    	UInt pointId(it->second);
-    	for(UInt icoor(0); icoor < 3; ++icoor)
-    	{
-    		__x[3*pointId + icoor] = mesh3D.point(it->first).coordinatesArray()[icoor];
-    	}
+        UInt pointId(it->second);
+        for(UInt icoor(0); icoor < 3; ++icoor)
+        {
+            __x[3*pointId + icoor] = mesh3D.point(it->first).coordinatesArray()[icoor];
+        }
 
-    	if( boundaryPointsOnEdges.count(it->first))
-    	{
-    		__whichboundary[ pointId ] = boundaryPointsOnEdges[it->first];
-    		__isonboundary[ pointId ] = true;
-    		__nbv                += 1;
-    	}
-    	else
-    	{
-    		__whichboundary[ pointId ] = 0;
-    		__isonboundary[ pointId ] = false;
-    	}
+        if( boundaryPointsOnEdges.count(it->first))
+        {
+            __whichboundary[ pointId ] = boundaryPointsOnEdges[it->first];
+            __isonboundary[ pointId ] = true;
+            __nbv                += 1;
+        }
+        else
+        {
+            __whichboundary[ pointId ] = 0;
+            __isonboundary[ pointId ] = false;
+        }
     }
 
     //(5) Dump the (2D) element connectivity and markers in a std::vector
@@ -114,11 +114,11 @@ RegionMesh< typename RegionMesh<geoShape_Type>::facetShape_Type >  * extractBoun
     UInt nTotalEdges(0);
     for ( typename std::vector<facet_Type const *>::iterator it(boundaryFaces.begin()); it!=boundaryFaces.end(); ++it, ++counter )
     {
-    	for(UInt i(0); i < boundaryRegionMesh_Type::face_Type::S_numPoints; ++i)
-    	{
-    		UInt originalId = (*it)->point(i).id();
-    		__triangle_nodes[ boundaryRegionMesh_Type::face_Type::S_numPoints * counter + i] = vertexIdMap[originalId];
-    	}
+        for(UInt i(0); i < boundaryRegionMesh_Type::face_Type::S_numPoints; ++i)
+        {
+            UInt originalId = (*it)->point(i).id();
+            __triangle_nodes[ boundaryRegionMesh_Type::face_Type::S_numPoints * counter + i] = vertexIdMap[originalId];
+        }
 
         std::pair<UInt, bool> _check;
 
@@ -129,30 +129,30 @@ RegionMesh< typename RegionMesh<geoShape_Type>::facetShape_Type >  * extractBoun
         _edge                             = makeBareEdge( i1, i2 );
         _check                            = _be.addIfNotThere( _edge.first );
         if(!_check.second)
-        	_be.deleteIfThere( _edge.first );
+            _be.deleteIfThere( _edge.first );
         else
-        	++nTotalEdges;
+            ++nTotalEdges;
 
         _edge                             = makeBareEdge( i2, i3 );
         _check                            = _be.addIfNotThere( _edge.first );
         if(!_check.second)
-        	_be.deleteIfThere( _edge.first );
+            _be.deleteIfThere( _edge.first );
         else
-        	++nTotalEdges;
+            ++nTotalEdges;
 
         _edge                             = makeBareEdge( i3, i1 );
         _check                            = _be.addIfNotThere( _edge.first );
         if(!_check.second)
-        	_be.deleteIfThere( _edge.first );
+            _be.deleteIfThere( _edge.first );
         else
-        	++nTotalEdges;
+            ++nTotalEdges;
 
         __triangle_label[ counter ] = 1;
 
     }
 
-    Debug(8000)<<"Found "<< _be.size() << " boundary edges \n";
-    Debug(8000)<<"Found "<< nTotalEdges - _be.size() << " internal edges \n";
+    debugStream(8000)<<"Found "<< _be.size() << " boundary edges \n";
+    debugStream(8000)<<"Found "<< nTotalEdges - _be.size() << " internal edges \n";
     __ne = _be.size();
 
     //(6) Dump the (1D) boundary facet connectivity and markers in a std::vector
@@ -163,12 +163,12 @@ RegionMesh< typename RegionMesh<geoShape_Type>::facetShape_Type >  * extractBoun
 
     for(MeshElementBareHandler<BareEdge>::iterator it(_be.begin()); it!=_be.end(); ++it)
     {
-    		BareEdge edge(it->first);
-    		UInt first2dId  = edge.first;
-    		UInt second2dId = edge.second;
-    		__edge_nodes.push_back(first2dId);
-    		__edge_nodes.push_back(second2dId);
-    		__edge_label.push_back( boundaryFaceMarker );
+            BareEdge edge(it->first);
+            UInt first2dId  = edge.first;
+            UInt second2dId = edge.second;
+            __edge_nodes.push_back(first2dId);
+            __edge_nodes.push_back(second2dId);
+            __edge_label.push_back( boundaryFaceMarker );
     }
 
     // (7) Set mesh properties
@@ -195,11 +195,11 @@ RegionMesh< typename RegionMesh<geoShape_Type>::facetShape_Type >  * extractBoun
     mesh2D->numBVertices()      = __nbv;
     mesh2D->setNumBPoints( mesh2D->numBVertices() );
 
-    Debug(8000) << "number of points : " << mesh2D->numPoints() << "\n";
-    Debug(8000) << "number of edges : " << mesh2D->numEdges() << "\n";
-    Debug(8000) << "number of boundary edges : "<< mesh2D->numBEdges() << "\n";
-    Debug(8000) << "number of vertices : " << mesh2D->numVertices() << "\n";
-    Debug(8000) << "number of boundary vertices : " << mesh2D->numBVertices() << "\n";
+    debugStream(8000) << "number of points : " << mesh2D->numPoints() << "\n";
+    debugStream(8000) << "number of edges : " << mesh2D->numEdges() << "\n";
+    debugStream(8000) << "number of boundary edges : "<< mesh2D->numBEdges() << "\n";
+    debugStream(8000) << "number of vertices : " << mesh2D->numVertices() << "\n";
+    debugStream(8000) << "number of boundary vertices : " << mesh2D->numBVertices() << "\n";
 
     // (8) Fill in the mesh
     // add points to the mesh

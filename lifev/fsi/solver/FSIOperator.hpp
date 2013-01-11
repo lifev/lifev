@@ -277,21 +277,17 @@ public:
     /*!
      *  Set vectors for restart
      */
-    virtual void setVectorInStencils( const vectorPtr_Type& vel,
-				      const vectorPtr_Type& pressure,
-				      const vectorPtr_Type& solidDisp,
-				      const vectorPtr_Type& fluidDisp,
-				      const UInt iter) {}
+    virtual void setVectorInStencils( const vectorPtr_Type& /*vel*/,
+                                      const vectorPtr_Type& /*pressure*/,
+                                      const vectorPtr_Type& /*solidDisp*/,
+                                      //                      const vectorPtr_Type& /*fluidDisp*/,
+                                      const UInt /*iter*/) {}
 
-    virtual void setFluidVectorInStencil( const vectorPtr_Type& vel,
-					   const vectorPtr_Type& pressure,
-					   const UInt iter) {}
+    virtual void setFluidVectorInStencil( const vectorPtr_Type& /*vel*/, const vectorPtr_Type& /*pressure*/, const UInt /*iter*/) {}
 
-    virtual void setSolidVectorInStencil( const vectorPtr_Type& solidDisp,
-					  const UInt iter) {}
+    virtual void setSolidVectorInStencil( const vectorPtr_Type& /*solidDisp*/, const UInt /*iter*/) {}
 
-    virtual void setALEVectorInStencil( const vectorPtr_Type& fluidDisp,
-					const UInt iter) {}
+    virtual void setALEVectorInStencil( const vectorPtr_Type& /*fluidDisp*/, const UInt /*iter*/, const bool /*lastVector*/ ) {}
 
     virtual void finalizeRestart( ) {}
 
@@ -359,9 +355,6 @@ public:
      */
     void initializeSolid( vectorPtr_Type displacement, vectorPtr_Type velocity );
 
-    //!\todo{kill this method}
-    //void updateJacobian ( const vector_Type& sol, const int& iter );
-
     //!moves the mesh using the solution of the harmonic extension equation
     /**
        \param disp displacement of the mesh, must be the difference between the current solution of the HE problem and the one at the previous time step.
@@ -387,7 +380,6 @@ public:
      */
     void transferFluidOnInterface( const vector_Type& _vec1, vector_Type& _vec2 );
 
-    //works in serial but no yet in parallel
     void transferSolidOnFluid( const vector_Type& _vec1, vector_Type& _vec2 );
 
     //!Method to import an VectorEpetra defined on the solid map (i.e. with the solid numeration of the dofs) to the interface
@@ -410,7 +402,7 @@ public:
     void bcManageVectorRHS( const fluidBchandlerPtr_Type& bch, vector_Type& rhs );
 
     //! Method to set the Robin vector coefficient of the Robin--Neumann coupling scheme (as a constant vector vector)
-    void setAlphaf() { M_Alphaf->epetraVector().PutScalar( M_AlphafCoef ); }
+    void setAlphaf() { M_alphaF->epetraVector().PutScalar( M_alphaFCoef ); }
     //! Method to compute the scalar coefficient \f$\alpha\f$ of the Robin--Neumann coupling scheme
     void setAlphafCoef();
     //! Method calling setAlphaf and setAlphafCoef
@@ -478,7 +470,7 @@ public:
     const vector_Type& minusSigmaFluidRepeated()                  const { return *M_minusSigmaFluidRepeated; }
 
     //!coefficient for the Robin--Neumann coupling scheme
-    vector_Type&       Alphaf()                                   const { return *M_Alphaf;}
+    vector_Type&       Alphaf()                                   const { return *M_alphaF;}
 
     commPtr_Type worldComm()                                      const { return M_epetraWorldComm; }
 
@@ -616,7 +608,7 @@ public:
     virtual void getSolidDisp( vector_Type& soliddisp )                 { soliddisp = M_solid->displacement(); }
 
     //! gets the solid velocity by copy
-    virtual void getSolidVel( vector_Type& solidvel )                   { solidvel = M_solidTimeAdvance->velocity(); }
+    virtual void getSolidVel( vector_Type& solidvel )                   { solidvel = M_solidTimeAdvance->firstDerivative(); }
 
     //! Export the solid displacement by copying it to an external vector
     /*!
@@ -624,29 +616,35 @@ public:
      */
     virtual void exportSolidDisplacement( vector_Type& solidDisplacement ) { solidDisplacement = M_solid->displacement(); }
 
-
     //! Export the solid velocity by copying it to an external vector
     /*!
      * @param solidVelocity vector to be filled with the solid velocity
      */
-    virtual void exportSolidVelocity( vector_Type& solidVelocity ) { solidVelocity = M_solidTimeAdvance->velocity(); }
-
+    virtual void exportSolidVelocity( vector_Type& solidVelocity ) { solidVelocity = M_solidTimeAdvance->firstDerivative(); }
 
     //! Export the solid acceleration by copying it to an external vector
     /*!
      * @param solidAcc vector to be filled with the solid acceleration
      */
-    virtual void exportSolidAcceleration( vector_Type& solidAcc ) { solidAcc = M_solidTimeAdvance->acceleration(); }
+    virtual void exportSolidAcceleration( vector_Type& solidAcc ) { solidAcc = M_solidTimeAdvance->secondDerivative(); }
 
+    //! Export the fluid velocity by copying it to an external vector
+    /*!
+     * @param fluidVelocity vector to be filled with the fluid velocity
+     */
+    virtual void exportFluidVelocity( vector_Type& fluidVelocity ) { fluidVelocity = *M_fluid->solution(); }
 
-    //! Getter for the right hand side
+    //! Export the fluid pressure by copying it to an external vector
+    /*!
+     * @param fluidPressure vector to be filled with the fluid pressure
+     */
+    virtual void exportFluidPressure( vector_Type& fluidPressure ) { fluidPressure = *M_fluid->solution(); }
 
     //! Export the fluid velocity and pressure by copying it to an external vector
     /*!
      * @param fluidVelocityAndPressure vector to be filled with the fluid velocity and pressure
      */
     virtual void exportFluidVelocityAndPressure( vector_Type& fluidVelocityAndPressure ) { fluidVelocityAndPressure = *M_fluid->solution(); }
-
 
     //! Export the fluid displacement by copying it to an external vector
     /*!
@@ -909,11 +907,11 @@ protected:
 
 
     vectorPtr_Type                    M_rhs;
-    vectorPtr_Type                    M_Alphaf;
+    vectorPtr_Type                    M_alphaF;
 
-    Real                                              M_AlphafCoef;
+    Real                                              M_alphaFCoef;
     //\todo{try to set as deprecated}
-    Real                                              M_betamedio;
+    Real                                              M_betaMean;
 
     commPtr_Type                                      M_epetraComm;
     commPtr_Type                                      M_epetraWorldComm;

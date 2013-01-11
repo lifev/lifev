@@ -28,7 +28,7 @@
    \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
    \date 2005-04-16
  */
-#undef HAVE_HDF5
+
 #ifdef TWODIM
 #error test_structure cannot be compiled in 2D
 #endif
@@ -283,7 +283,7 @@ Structure::run3d()
     MeshData             meshData;
     meshData.setup(dataFile, "solid/space_discretization");
 
-    boost::shared_ptr<RegionMesh<LinearTetra> > fullMeshPtr(new RegionMesh<LinearTetra>( *( parameters->comm ) ));
+    boost::shared_ptr<RegionMesh<LinearTetra> > fullMeshPtr(new RegionMesh<LinearTetra>(  parameters->comm  ));
     readMesh(*fullMeshPtr, meshData);
 
     MeshPartitioner< RegionMesh<LinearTetra> > meshPart( fullMeshPtr, parameters->comm );
@@ -564,8 +564,8 @@ Structure::run3d()
 
     //Let's get the initial quantities
     *solidDisp = solid.displacement();
-    *solidVel = timeAdvance->velocity();
-    *solidAcc = timeAdvance->acceleration();
+    *solidVel = timeAdvance->firstDerivative();
+    *solidAcc = timeAdvance->secondDerivative();
 
     exporter->postProcess( 0 );
     exporterCheck->postProcess( 0 );
@@ -636,8 +636,8 @@ Structure::run3d()
       timeAdvance->shiftRight( solid.displacement() );
 
       *solidDisp = solid.displacement();
-      *solidVel  = timeAdvance->velocity();
-      *solidAcc  = timeAdvance->acceleration();
+      *solidVel  = timeAdvance->firstDerivative();
+      *solidAcc  = timeAdvance->secondDerivative();
 
 
       *rhsCopy = solid.rhsCopy();

@@ -61,8 +61,6 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <boost/shared_ptr.hpp>
-#include <boost/numeric/ublas/vector.hpp>
-#include <boost/numeric/ublas/matrix.hpp>
 
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
@@ -339,8 +337,6 @@ void stiff_Jac_Pvol_1term( Real coef, const boost::multi_array<Real,3 >& CofFk, 
 */
 void stiff_Jac_Pvol_2term( Real coef, const boost::multi_array<Real,3 >& CofFk, const std::vector<Real>& Jk, MatrixElemental& elmat, const CurrentFE& fe );
 
-
-
 //! METHODS FOR NEO-HOOKEAN MODEL
 //! Methods for the isochoric part of the stiffness vector
 
@@ -390,14 +386,12 @@ void computeCauchyStressTensor(Epetra_SerialDenseMatrix& cauchy,
 
 /*!
   This function computes the eigenvalues of \sigma
-
   @param cauchy Cauchy stress tensor
   @param eigenvalues vector of principal tensions
 */
 void computeEigenvalues(const Epetra_SerialDenseMatrix& cauchy,
                         std::vector<LifeV::Real>& eigenvaluesR,
                         std::vector<LifeV::Real>& eigenvaluesI);
-
 
 //! Methods for the isochoric part of the Jacobian matrix
 
@@ -413,7 +407,6 @@ void computeEigenvalues(const Epetra_SerialDenseMatrix& cauchy,
   @param fe The current finite element
 */
 void stiff_Jac_P1iso_NH_1term( Real coef, const boost::multi_array<Real,3 >& CofFk, const boost::multi_array<Real,3 >& Fk, const std::vector<Real>& Jk, MatrixElemental& elmat, const CurrentFE& fe );
-
 
 //! Elementary second nonlinear isochoric Jacobian matrix for Neo-Hookean model (see the reference)
 /*!
@@ -468,8 +461,6 @@ void stiff_Jac_P1iso_NH_4term( Real coef, const boost::multi_array<Real,3 >& Cof
   @param fe The current finite element
 */
 void stiff_Jac_P1iso_NH_5term( Real coef, const boost::multi_array<Real,3 >& CofFk, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
-
-
 
 //! METHODS FOR EXPONENTIAL MODEL
 //! Methods for the isochoric part of the stiffness vector
@@ -552,7 +543,6 @@ void stiff_Jac_P1iso_Exp_3term( Real coef, Real coefExp, const boost::multi_arra
 */
 void stiff_Jac_P1iso_Exp_4term( Real coef, Real coefExp, const boost::multi_array<Real,3 >& CofFk, const boost::multi_array<Real,3 >& Fk,const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
 
-
 //! Elementary fifth nonlinear isochoric Jacobian matrix for Exponential model (see the reference)
 /*!
   This function assembles the local fifth nonlinear isochoric Jacobian matrix for Exponential model.
@@ -565,7 +555,6 @@ void stiff_Jac_P1iso_Exp_4term( Real coef, Real coefExp, const boost::multi_arra
   @param fe The current finite element
 */
 void stiff_Jac_P1iso_Exp_5term( Real coef, Real coefExp, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
-
 
 //! Elementary sixth nonlinear isochoric Jacobian matrix for Exponential model (see the reference)
 /*!
@@ -580,7 +569,6 @@ void stiff_Jac_P1iso_Exp_5term( Real coef, Real coefExp, const std::vector<Real>
   @param fe The current finite element
 */
 void stiff_Jac_P1iso_Exp_6term( Real coef, Real coefExp, const boost::multi_array<Real,3 >& CofFk, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
-
 
 //! METHOD FOR THE ST. VENANT-KIRCHHOFF LAW IN THE ISOCHORIC AND VOLUMETRIC DECOUPLED VERSION
 //! This law uses, for the volumetric part, the one used by the exponential and neohookean model.
@@ -816,7 +804,6 @@ void stiff_Jac_P1iso_VKPenalized_13term( Real coef, const std::vector<Real>& Jk,
 */
 void stiff_Jac_P1iso_VKPenalized_14term( Real coef, const std::vector<Real>& Jk, const boost::multi_array<Real,3 >& FkCk, const boost::multi_array<Real,3 >& FkMinusTransposed, MatrixElemental& elmat, const CurrentFE& fe );
 
-
 //! Methods for second order exponential law
 //! Methods for the first Piola-Kirchhoff tensor
 void source_P1iso_SecondOrderExponential( Real coef, Real coefExp, const boost::multi_array<Real,3 >& CofFk, const boost::multi_array<Real,3 >& Fk, const std::vector<Real>& Jk, const std::vector<Real>& trCisok, VectorElemental& elvec, const CurrentFE& fe );
@@ -866,7 +853,6 @@ void stiff_Jac_P1iso_SecondOrderExp_2term( Real coef, Real coefExp, const boost:
 */
 void stiff_Jac_P1iso_SecondOrderExp_3term( Real coef, Real coefExp, const boost::multi_array<Real,3 >& CofFk, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
 
-
 //! Elementary fourth nonlinear isochoric Jacobian matrix for Second Order Exponential model (see the reference)
 /*!
   This function assembles the local fourth nonlinear isochoric Jacobian matrix for Second Order Exponential model.
@@ -911,5 +897,6 @@ void stiff_Jac_P1iso_SecondOrderExp_5term( Real coef, Real coefExp, const std::v
 void stiff_Jac_P1iso_SecondOrderExp_6term( Real coef, Real coefExp, const boost::multi_array<Real,3 >& CofFk, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
 
 } //! End namespace AssemblyElementalStructure
+
 } //! End namespace LifeV
 #endif

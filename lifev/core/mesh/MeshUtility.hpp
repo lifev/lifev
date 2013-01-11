@@ -811,7 +811,7 @@ void
 setBoundaryEdgesMarker( MeshType & mesh, std::ostream & logStream = std::cout,
                         std::ostream & /*errorStream*/ = std::cerr, bool verbose = true )
 {
-    verbose = verbose && ( mesh.comm().MyPID() == 0 );
+    verbose = verbose && ( mesh.comm()->MyPID() == 0 );
 
     typename MeshType::edge_Type * edgePtr = 0;
     UInt                  counter( 0 );
@@ -859,7 +859,7 @@ void
 setBoundaryFacesMarker( MeshType & mesh, std::ostream & logStream = std::cout,
                         std::ostream & /*errorStream*/ = std::cerr, bool verbose = true )
 {
-    verbose = verbose && ( mesh.comm().MyPID() == 0 );
+    verbose = verbose && ( mesh.comm()->MyPID() == 0 );
 
     typename MeshType::face_Type * facePtr = 0;
     UInt                  counter( 0 );
@@ -909,7 +909,7 @@ void
 setBoundaryPointsMarker( MeshType & mesh, std::ostream & logStream = std::cout,
                          std::ostream& /*errorStream*/ = std::cerr, bool verbose = false )
 {
-    verbose = verbose && ( mesh.comm().MyPID() == 0 );
+    verbose = verbose && ( mesh.comm()->MyPID() == 0 );
 
     // First looks at points whose marker has already been set
     std::vector<bool> isDefinedPointMarker( mesh.storedPoints(), false );
@@ -1074,7 +1074,7 @@ void
 fixBoundaryPoints( MeshType & mesh, std::ostream & logStream = std::cout,
                    std::ostream & /* errorStream */ = std::cerr, bool verbose = true )
 {
-    verbose = verbose && ( mesh.comm().MyPID() == 0 );
+    verbose = verbose && ( mesh.comm()->MyPID() == 0 );
 
     ASSERT_PRE( mesh.numPoints() > 0, "The point list should not be empty" );
     ASSERT_PRE( mesh.numBFaces() > 0,
@@ -1171,7 +1171,7 @@ bool rearrangeFaces( MeshType & mesh,
                        bool verbose = false,
                        temporaryFaceContainer_Type * externalFaceContainer = 0 )
 {
-    verbose = verbose && ( mesh.comm().MyPID() == 0 );
+    verbose = verbose && ( mesh.comm()->MyPID() == 0 );
     typedef typename MeshType::faces_Type faceContainer_Type;
     typedef typename MeshType::face_Type face_Type;
 
@@ -1180,7 +1180,6 @@ bool rearrangeFaces( MeshType & mesh,
     typename faceContainer_Type::iterator faceContainerIterator;
     temporaryFaceContainer_Type *         boundaryFaceContainerPtr;
     temporaryFaceContainer_Type::iterator boundaryFaceContainerIterator;
-    std::pair<ID, ID>                     volumeIdToLocalFaceIdPair;
     UInt                                  numInternalFaces;
     bool                                  externalContainerIsProvided( false );
 
@@ -1319,7 +1318,7 @@ bool fixBoundaryFaces( MeshType & mesh,
                        bool verbose = false,
                        temporaryFaceContainer_Type * externalFaceContainer = 0 )
 {
-    verbose = verbose && ( mesh.comm().MyPID() == 0 );
+    verbose = verbose && ( mesh.comm()->MyPID() == 0 );
     typedef typename MeshType::volumes_Type volumeContainer_Type;
     typedef typename MeshType::volume_Type volume_Type;
     typedef typename MeshType::faces_Type faceContainer_Type;
@@ -1547,7 +1546,7 @@ bool buildFaces( MeshType & mesh,
                  bool verbose = false,
                  temporaryFaceContainer_Type * externalFaceContainer = 0 )
 {
-    verbose = verbose && ( mesh.comm().MyPID() == 0 );
+    verbose = verbose && ( mesh.comm()->MyPID() == 0 );
     UInt                                  point1Id, point2Id, point3Id, point4Id;
     typename MeshType::elementShape_Type   volumeShape;
     typedef typename MeshType::volumes_Type    volumeContainer_Type;
@@ -1886,7 +1885,7 @@ bool buildEdges( MeshType & mesh,
                  bool verbose = false,
                  temporaryEdgeContainer_Type * externalEdgeContainer = 0 )
 {
-    verbose = verbose && ( mesh.comm().MyPID() == 0 );
+    verbose = verbose && ( mesh.comm()->MyPID() == 0 );
     typedef typename MeshType::volumes_Type volumeContainer_Type;
     typedef typename MeshType::faces_Type faceContainer_Type;
     typedef typename MeshType::volume_Type volume_Type;
@@ -2104,7 +2103,7 @@ template <typename MeshType>
 void
 p2MeshFromP1Data( MeshType & mesh, std::ostream & logStream = std::cout )
 {
-    bool verbose ( mesh.comm().MyPID() == 0 );
+    bool verbose ( mesh.comm()->MyPID() == 0 );
 
     typedef typename MeshType::elementShape_Type  GeoShape;
     typedef typename MeshType::facetShape_Type GeoBShape;
@@ -2287,7 +2286,7 @@ p2MeshFromP1Data( MeshType & mesh, std::ostream & logStream = std::cout )
  * @date 2 August 2011
  */
 //
-template <typename REGIONMESH, typename RMTYPE=typename REGIONMESH::MarkerCommon >
+template <typename REGIONMESH, typename RMTYPE=typename REGIONMESH::markerCommon_Type >
 class MeshTransformer{
 public:
     /** the constructor may take a reference to the mesh to be manipulated */
@@ -2498,27 +2497,27 @@ void MeshTransformer<REGIONMESH, RMTYPE >::transformMesh( const VECTOR& scale, c
     R1(0,1) =  0.;
     R1(0,2) =  0.;
     R1(1,0) =  0.;
-    R1(1,1) =  cos(rotate[0]);
-    R1(1,2) = -sin(rotate[0]);
+    R1(1,1) =  std::cos(rotate[0]);
+    R1(1,2) = -std::sin(rotate[0]);
     R1(2,0) =  0.;
-    R1(2,1) =  sin(rotate[0]);
-    R1(2,2) =  cos(rotate[0]);
+    R1(2,1) =  std::sin(rotate[0]);
+    R1(2,2) =  std::cos(rotate[0]);
 
-    R2(0,0) =  cos(rotate[1]);
+    R2(0,0) =  std::cos(rotate[1]);
     R2(0,1) =  0.;
-    R2(0,2) =  sin(rotate[1]);
+    R2(0,2) =  std::sin(rotate[1]);
     R2(1,0) =  0.;
     R2(1,1) =  1.;
     R2(1,2) = 0.;
-    R2(2,0) = -sin(rotate[1]);
+    R2(2,0) = -std::sin(rotate[1]);
     R2(2,1) =  0.;
-    R2(2,2) =  cos(rotate[1]);
+    R2(2,2) =  std::cos(rotate[1]);
 
-    R3(0,0) =  cos(rotate[2]);
-    R3(0,1) = -sin(rotate[2]);
+    R3(0,0) =  std::cos(rotate[2]);
+    R3(0,1) = -std::sin(rotate[2]);
     R3(0,2) = 0.;
-    R3(1,0) =  sin(rotate[2]);
-    R3(1,1) =  cos(rotate[2]);
+    R3(1,0) =  std::sin(rotate[2]);
+    R3(1,1) =  std::cos(rotate[2]);
     R3(1,2) = 0.;
     R3(2,0) =  0;
     R3(2,1) =  0.;
@@ -2580,7 +2579,7 @@ void MeshTransformer<REGIONMESH, RMTYPE >::transformMesh( const function& meshMa
 template <typename REGIONMESH>
 MeshStatistics::meshSize MeshStatistics::computeSize(REGIONMESH const & mesh)
 {
-    const double bignumber=std::numeric_limits<double>::max();
+    const Real bignumber=std::numeric_limits<Real>::max();
     Real MaxH(0), MinH(bignumber), MeanH(0);
     Real deltaX(0), deltaY(0), deltaZ(0), sum(0);
     typedef typename REGIONMESH::edges_Type edges_Type;

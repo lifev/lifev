@@ -164,7 +164,7 @@ FSIData::setup( const GetPot& dataFile, const std::string& section )
     vertexFlag               = dataFile( "interface/structure_vertex_flag", -1 );
     if (vertexFlag >= 0)
         M_structureInterfaceVertexFlag.reset( new Int const ( vertexFlag ) );
-    
+
     M_interfaceTolerance = dataFile( "interface/tolerance",      0. );
 
     M_restartTimeStep  = dataFile( "importer/restart_timestep",      0. );

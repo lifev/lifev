@@ -51,7 +51,7 @@ namespace LifeV
 MeshData::MeshData( ):
         M_meshDir  ( "./" ),
         M_meshFile ( "mesh.mesh" ),
-        M_meshType ( ".mesh" ),
+        M_meshType ( "structured" ),
         M_order ( "P1" ),
         M_verbose   ( false )
 {}
@@ -82,7 +82,7 @@ MeshData::setup( const GetPot& dataFile, const std::string& section )
 {
     M_meshDir  = dataFile( ( section + "/mesh_dir"  ).data(), "./" );
     M_meshFile = dataFile( ( section + "/mesh_file" ).data(), "mesh.mesh" );
-    M_meshType = dataFile( ( section + "/mesh_type" ).data(), ".mesh" );
+    M_meshType = dataFile( ( section + "/mesh_type" ).data(), "structured" );
     M_order    = dataFile( ( section + "/mesh_order"   ).data(), "P1" );
     M_verbose   = dataFile( ( section + "/verbose"   ).data(), false );
 }

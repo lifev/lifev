@@ -51,9 +51,9 @@ FSIMonolithicGI::FSIMonolithicGI() :
 // ===================================================
 //  Public Methods
 // ===================================================
-void FSIMonolithicGI::setUp( const GetPot& dataFile )
+void FSIMonolithicGI::setup( const GetPot& dataFile )
 {
-    super_Type::setUp( dataFile );
+    super_Type::setup( dataFile );
 }
 
 void FSIMonolithicGI::setupFluidSolid( UInt const fluxes )
@@ -63,12 +63,6 @@ void FSIMonolithicGI::setupFluidSolid( UInt const fluxes )
     M_mapWithoutMesh.reset( new MapEpetra( *M_monolithicMap ) );
 
     *M_monolithicMap += M_mmFESpace->map();
-    /* OBSOLETE
-       if(M_data->dataFluid()->useShapeDerivatives())
-       {
-       M_epetraOper.reset( new Epetra_FullMonolithic(this));
-       M_solid->setOperator(*M_epetraOper);
-       }*/
 
     M_interface=M_monolithicMatrix->interface();
 
@@ -129,32 +123,15 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
     mmRep = meshDisp;
     moveMesh( *mmRep );
 
-    /* Here there is something conceptually wrong:
-    - the velocity of the mesh has to be computed by considering the current mesh
-    - setSolution should not be called.
-    Indeed: at iter == 0 we shall do as in GE. Then without extrapolations
-    if ( iter == 0 )
-    {
-        //In the case of iteration 0, we have to use the previous meshDispl
-        //to compute the vector to move the mesh
-        M_ALETimeAdvance->extrapolation( *mmRep );
-    }
-    else
-    {
-        M_ALETimeAdvance->setSolution( *meshDisp );
-        *mmRep = *meshDisp;
-    }
-    */
+    //here should use extrapolationFirstDerivative instead of velocity
+    vector_Type meshVelocityRepeated ( this->M_ALETimeAdvance->nextFirstDerivative( *meshDisp ), Repeated );
+    vector_Type interpolatedMeshVelocity(this->M_uFESpace->map());
 
-     //here should use extrapolationFirstDerivative instead of velocity
-     vector_Type meshVelocityRepeated ( this->M_ALETimeAdvance->nextVelocity( *meshDisp ), Repeated );
-     vector_Type interpolatedMeshVelocity(this->M_uFESpace->map());
+    interpolateVelocity( meshVelocityRepeated, interpolatedMeshVelocity );
 
-     interpolateVelocity( meshVelocityRepeated, interpolatedMeshVelocity );
-
-     vectorPtr_Type fluid( new vector_Type( M_uFESpace->map() ) );
-     M_beta->subset( disp,0 );
-     *M_beta -= interpolatedMeshVelocity; // convective term, u^(n+1) - w^(n+1)
+    vectorPtr_Type fluid( new vector_Type( M_uFESpace->map() ) );
+    M_beta->subset( disp,0 );
+    *M_beta -= interpolatedMeshVelocity; // convective term, u^(n+1) - w^(n+1)
 
     assembleSolidBlock( iter, disp );
     assembleFluidBlock( iter, disp );
@@ -200,7 +177,6 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
         applyBoundaryConditions();
 
     M_monolithicMatrix->GlobalAssemble();
-    //M_monolithicMatrix->matrix()->spy("FMFI");
 
     super_Type::evalResidual( disp, M_rhsFull, res, false );
 
@@ -253,30 +229,46 @@ void FSIMonolithicGI::applyBoundaryConditions()
 }
 
 void FSIMonolithicGI::setALEVectorInStencil( const vectorPtr_Type& fluidDisp,
-					      const UInt iter)
+                                             const UInt iter,
+                                             const bool lastVector)
 {
 
-    //ALE problem
-    //Note: at iter =0 the solution has to be put in fluidTimeAdvance->stencil()->M_unknown[0]
-    //      since that vector stores the solution and it has to be used in the Newton method
-
-    if( !iter )
+    //The fluid timeAdvance has size = orderBDF because it is seen as an equation frist order in time.
+    //We need to add the solidVector to the fluidVector in the fluid TimeAdvance because we have the
+    //extrapolation on it.
+    if( ( iter < M_fluidTimeAdvance->size() - 1 ) && !lastVector )
       {
-	vectorPtr_Type harmonicSolutionRestartTime(new vector_Type( *M_monolithicMap, Unique, Zero ) );
+          vectorPtr_Type harmonicSolutionRestartTime(new vector_Type( *M_monolithicMap, Unique, Zero ) );
 
-	*harmonicSolutionRestartTime *= 0.0;
+          *harmonicSolutionRestartTime *= 0.0;
 
-	UInt givenOffset( M_solidAndFluidDim + nDimensions*M_interface );
-	harmonicSolutionRestartTime->subset(*fluidDisp, fluidDisp->map(), (UInt)0, givenOffset );
+          UInt givenOffset( M_solidAndFluidDim + nDimensions*M_interface );
+          harmonicSolutionRestartTime->subset(*fluidDisp, fluidDisp->map(), (UInt)0, givenOffset );
 
-	//We sum the vector in the first element of fluidtimeAdvance
-	*( M_fluidTimeAdvance->stencil()[0] ) += *harmonicSolutionRestartTime;
+          //We sum the vector in the first element of fluidtimeAdvance
+        *( M_fluidTimeAdvance->stencil()[ iter + 1 ] ) += *harmonicSolutionRestartTime;
       }
 
-    //The shared_pointer for the vectors has to be trasformed into a pointer to VectorEpetra
-    //That is the type of pointers that are used in TimeAdvance
-    vector_Type* normalPointerToALEVector( new vector_Type(*fluidDisp) );
-    (M_ALETimeAdvance->stencil()).push_back( normalPointerToALEVector );
+    if( !lastVector )
+    {
+        //The shared_pointer for the vectors has to be trasformed into a pointer to VectorEpetra
+        //That is the type of pointers that are used in TimeAdvance
+        vector_Type* normalPointerToALEVector( new vector_Type(*fluidDisp) );
+        (M_ALETimeAdvance->stencil()).push_back( normalPointerToALEVector );
+    }
+    else
+    {
+        vectorPtr_Type harmonicSolutionRestartTime(new vector_Type( *M_monolithicMap, Unique, Zero ) );
+
+        *harmonicSolutionRestartTime *= 0.0;
+
+        UInt givenOffset( M_solidAndFluidDim + nDimensions*M_interface );
+        harmonicSolutionRestartTime->subset(*fluidDisp, fluidDisp->map(), (UInt)0, givenOffset );
+
+        //We sum the vector in the first element of fluidtimeAdvance
+        *( M_fluidTimeAdvance->stencil()[ 0 ] ) += *harmonicSolutionRestartTime;
+    }
+
 }
 
 
@@ -292,14 +284,14 @@ void FSIMonolithicGI::setupBlockPrec()
     if ( M_data->dataSolid()->getUseExactJacobian() && ( M_data->dataSolid()->solidType().compare( "exponential" )
                     && M_data->dataSolid()->solidType().compare( "neoHookean" ) ) )
     {
-        M_solid->material()->updateJacobianMatrix( *M_uk * M_solid->rescaleFactor()/**M_data->dataFluid()->dataTime()->timeStep()*/,
+        M_solid->material()->updateJacobianMatrix( *M_uk * M_solid->rescaleFactor(),
                                                    dataSolid(),
-						   M_solid->mapMarkersVolumes(),
+                                                   M_solid->mapMarkersVolumes(),
                                                    M_solid->displayerPtr() ); // computing the derivatives if nonlinear (comment this for inexact Newton);
         M_solidBlockPrec.reset( new matrix_Type( *M_monolithicMap,
                                                  1 ) );
         *M_solidBlockPrec += *M_solid->massMatrix();
-        *M_solidBlockPrec += *M_solid->material()->jacobian(); //stiffMatrix();
+        *M_solidBlockPrec += *M_solid->material()->jacobian();
         M_solidBlockPrec->globalAssemble();
         *M_solidBlockPrec *= M_solid->rescaleFactor();
 
@@ -336,7 +328,6 @@ void FSIMonolithicGI::setupBlockPrec()
 
         M_monolithicMatrix->applyBoundaryConditions( dataFluid()->dataTime()->time() );
         M_monolithicMatrix->GlobalAssemble();
-        // M_monolithicMatrix->matrix()->spy("jacobian");
     }
 
     super_Type::setupBlockPrec();
@@ -378,22 +369,20 @@ void FSIMonolithicGI::shapeDerivatives( FSIOperator::fluidPtr_Type::value_type::
 
     vectorPtr_Type meshVelRep( new vector_Type( M_mmFESpace->map(), Repeated ) );
 
-    *meshVelRep = M_ALETimeAdvance->velocity();
+    *meshVelRep = M_ALETimeAdvance->firstDerivative();
 
-    // if ( M_convectiveTermDer )
-    // {
-        un.subset( *M_uk, 0 );
-    // }
-    // else
-        // M_fluidTimeAdvance->extrapolation( un );
+    //When this class is used, the convective term is used implictly
+    un.subset( *M_uk, 0 );
 
     uk.subset( *M_uk, 0 );
     vector_Type veloFluidMesh( M_uFESpace->map(), Repeated );
     this->transferMeshMotionOnFluid( *meshVelRep, veloFluidMesh );
 
+    //The last two flags are consistent with the currect interface.
+    //When this class is used, they should not be changed.
     M_fluid->updateShapeDerivatives( *sdMatrix, alpha,
-                                     un,//un if !M_convectiveTermDer, otherwise uk
-                                     uk,//uk
+                                     un,
+                                     uk,
                                      veloFluidMesh, //(xk-xn)/dt (FI), or (xn-xn-1)/dt (CE)//Repeated
                                      M_solidAndFluidDim + M_interface * nDimensions,
                                      *M_uFESpace,

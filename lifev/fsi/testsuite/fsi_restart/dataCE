@@ -94,9 +94,9 @@ multimesh  = false   # actually we export also the displacement
 start      = 0       # the starting iteration counter
 save       = 1       # boolean
 saveEvery  = 1       # save every "saveEvery" iterations
-tolSave    = 2
+tolSave    = 2       # this is useful to have enough savings to restart a simulation using high order BDFs
 type       = hdf5    # format of the exported solution (ensight, hdf5, vtk)
-nRestart   = 0
+
 
 ** #exporter for the fluid
    [./fluid]
@@ -111,7 +111,7 @@ nRestart   = 0
 * #importer details
 [importer]
 restartFSI = true
-initSol = 00002             # label of the solution from which we want to start (5 digits by convention)
+initSol = 00005             # label of the solution from which we want to start (5 digits by convention)
 type       = hdf5         # format of the imported solution
 
 
@@ -135,18 +135,15 @@ conservativeFormulation       = false  # tells if the conservative or non conser
 
 ** #time discretization
    [../time_discretization]
-   method          = BDF         # can be BDF, Generalized alpha in the future
-   initialtime        = 0.002
-   endtime            = 0.004
+   method          = BDF
+   initialtime        = 0.005
+   endtime            = 0.007
    timestep        = 0.001
-   BDF_order        = 1   # can go up to 5
-##theta           = 0.5
-##gamma            = 0.5
-##rhoInf          = 1
-##typeOfGeneralizedAlpha            = HHT
+   BDF_order        = 2   # can go up to 5
 
 ** #space discretization
    [../space_discretization]
+   mesh_type = .mesh
    mesh_dir  = ./
    mesh_file = tube20.mesh # bypass_fluid_coarse_BL_2vols.mesh
    mesh_order     = P1                  # order for the geometry problem, P1 or P2
@@ -202,18 +199,15 @@ rescaleFactor    = 1.    # this factor can be used to rescale the structure bloc
 
 ** #time discretization
    [../time_discretization]
-   method          = BDF # Newmark or BDF (generalized alpha in the future)
-   initialtime        = 0.002
-   endtime            = 0.004
+   method          = BDF
+   initialtime        = 0.005
+   endtime            = 0.007
    timestep        = 0.001
-   BDF_order        = 1
-##theta           = 0.25
-##gamma           = 0.5
-##rhoInf          = 1
-##typeOfGeneralizedAlpha            = HHT
+   BDF_order        = 2
 
 ** #space discretization
    [../space_discretization]
+   mesh_type = .mesh
    mesh_dir  = ./ #test_tubes/  # the directory where the mesh file is
    mesh_file = vessel20.mesh # mesh file
    order     = P1 #P1 or P2
@@ -235,7 +229,7 @@ rescaleFactor    = 1.    # this factor can be used to rescale the structure bloc
    poly_ord        = 5
    kspace          = 200         # Krylov space maximum dimension
    tol             = 1.e-6         # Tolerance for the linear system
-   
+
 *** #aztecoo linear solver section
     [./aztecoo]
     reordering         = 1            # rcm
@@ -489,14 +483,10 @@ rescaleFactor    = 1.    # this factor can be used to rescale the structure bloc
 ** #time discretization (used only for the calculation/extrapolation of the domain velocity)
    [./time_discretization]
    method          = BDF
-   initialtime        = 0.002
-   endtime            = 0.004
+   initialtime        = 0.005
+   endtime            = 0.007
    timestep        = 0.001
-   BDF_order        = 1
-##theta           = 0.5
-##gamma            = 0.5
-##rhoInf          = 1
-##typeOfGeneralizedAlpha            = HHT
+   BDF_order        = 2
 
 * #eigensolver section, used when we want to compute the singular values of the preconditioned FSI system (see in FSIMonolithic.cpp)
 [eigensolver]

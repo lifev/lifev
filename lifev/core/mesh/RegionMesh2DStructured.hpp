@@ -105,10 +105,10 @@ markerID_Type regularMeshPointPosition2D( const UInt& i_x,
   </ul>
   For the edges the labels are:
   <ul>
-  <li> BOTTOM = 1, i.e. \f$ x = 0 \f$ </li>
-  <li> LEFT = 2, i.e. \f$ y = 0 \f$ </li>
-  <li> TOP = 3, i.e. \f$ x = 1 \f$ </li>
-  <li> RIGHT = 4, i.e. \f$ y = 1 \f$ </li>
+  <li> LEFT    = 1, i.e. \f$ x = 0 \f$ </li>
+  <li> BOTTOM  = 2, i.e. \f$ y = 0 \f$ </li>
+  <li> RIGHT   = 3, i.e. \f$ x = 1 \f$ </li>
+  <li> TOP     = 4, i.e. \f$ y = 1 \f$ </li>
   </ul>
 
   @param mesh The mesh that we want to generate
@@ -121,8 +121,8 @@ markerID_Type regularMeshPointPosition2D( const UInt& i_x,
   @param t_x translation of the mesh along the x-axis
   @param t_y translation of the mesh along the y-axis
 */
-template <typename MC>
-void regularMesh2D( RegionMesh < LinearTriangle, MC >& mesh,
+template <typename MeshType>
+void regularMesh2D( MeshType& mesh,
                     markerID_Type regionFlag,
                     const UInt& m_x,
                     const UInt& m_y,
@@ -132,9 +132,12 @@ void regularMesh2D( RegionMesh < LinearTriangle, MC >& mesh,
                     const Real& t_x = 0.0,
                     const Real& t_y = 0.0 )
 {
+    typedef MeshType mesh_Type;
+    typedef typename mesh_Type::geoShape_Type geoShape_Type;
 
-    typedef LinearTriangle geoShape_Type;
-    typedef RegionMesh < geoShape_Type, MC > mesh_Type;
+    ASSERT( ( geoShape_Type::S_shape == TRIANGLE )
+            || ( geoShape_Type::S_shape == QUAD ),
+            "Type of 2d structured mesh not available." );
 
     // discretization
     const Real dx( l_x / m_x );
