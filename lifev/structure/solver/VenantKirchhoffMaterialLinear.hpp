@@ -74,6 +74,8 @@ class VenantKirchhoffMaterialLinear :
     typedef typename super::markerFunctor_Type                markerFunctor_Type;
     typedef typename super::markerFunctorPtr_Type             markerFunctorPtr_Type;
 
+    typedef MatrixSmall<3,3>                         matrixSmall_Type;
+
  //@}
 
  //! @name Constructor &  Destructor
@@ -127,7 +129,7 @@ class VenantKirchhoffMaterialLinear :
     void updateNonLinearJacobianTerms(  matrixPtr_Type& jacobian,
                                         const vector_Type& /*disp*/,
                                         const dataPtr_Type& /*dataMaterial*/,
-					const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
+                                        const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
                                         const displayerPtr_Type& /*displayer*/);
 
     //! Interface method to compute the new Stiffness matrix in StructuralSolver::evalResidual and in
@@ -200,7 +202,7 @@ VenantKirchhoffMaterialLinear<Mesh>::setup(const FESpacePtr_Type dFESpace,
                                            const ETFESpacePtr_Type ETFESpace,
                                            const boost::shared_ptr<const MapEpetra>&  monolithicMap,
                                            const UInt offset, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer
-                )
+                                           )
 {
     this->M_displayer = displayer;
     this->M_dataMaterial  = dataMaterial;
@@ -220,7 +222,7 @@ void VenantKirchhoffMaterialLinear<Mesh>::computeLinearStiff(dataPtr_Type& dataM
 {
   //  std::cout<<"compute LinearStiff Matrix start\n";
     //to assemble with ET
-    using namespace ExpressionAssembly;
+    //using namespace ExpressionAssembly;
 
     UInt totalDof = this->M_FESpace->dof().numTotalDof();
     // Number of displacement components
@@ -232,37 +234,45 @@ void VenantKirchhoffMaterialLinear<Mesh>::computeLinearStiff(dataPtr_Type& dataM
 
     mapIterator_Type it;
 
+    //Create the indentity for F
+    matrixSmall_Type identity;
+    identity(0,0) = 1.0; identity(0,1) = 0.0; identity(0,2) = 0.0;
+    identity(1,0) = 0.0; identity(1,1) = 1.0; identity(1,2) = 0.0;
+    identity(2,0) = 0.0; identity(2,1) = 0.0; identity(2,2) = 1.0;
+
     for( it = (*mapsMarkerVolumes).begin(); it != (*mapsMarkerVolumes).end(); it++ )
     {
 
         //Given the marker pointed by the iterator, let's extract the material parameters
         UInt marker = it->first;
+        *(this->M_linearStiff) *= 0.0;
 
         this->M_markerFunctorPtr.reset( new markerFunctor_Type(marker) );
 
-        Real mu = dataMaterial->mu(marker);
-        Real lambda = dataMaterial->lambda(marker);
+        Real mu = dataMaterial->mu( marker );
+        Real lambda = dataMaterial->lambda( marker );
 
         integrate( integrationOverSelectedVolumes( this->M_FESpace->mesh(), this->M_markerFunctorPtr ) ,
                    this->M_FESpace->qr(),
                    this->M_ETFESpace,
                    this->M_ETFESpace,
-                   value(lambda) * div(phi_i) * div(phi_j)  ) >> M_linearStiff;
+                   value(lambda) * dot( value(identity), grad( phi_i) ) * dot( value(identity), grad ( phi_j ) )
+                   ) >> M_linearStiff;
 
         integrate( integrationOverSelectedVolumes( this->M_FESpace->mesh(), this->M_markerFunctorPtr ) ,
                    this->M_FESpace->qr(),
                    this->M_ETFESpace,
                    this->M_ETFESpace,
-                   value( mu ) * dot( grad(phi_j) + transpose(grad(phi_j)) , grad(phi_i) + transpose(grad(phi_i)) )  ) >> M_linearStiff;
-        // }
-
+                   value( mu ) * dot( (grad(phi_j) + transpose(grad(phi_j)) ), grad(phi_i))
+                   ) >> M_linearStiff;
     }
 
     this->M_linearStiff->globalAssemble();
+    // std::string nameFile = "nameMatrix";
+    // this->M_linearStiff->spy(nameFile);
 
     //Initialization of the pointer M_stiff to what is pointed by M_linearStiff
     this->M_stiff = this->M_linearStiff;
-    //   std::cout<<"compute LinearStiff Matrix end\n";
     this->M_jacobian = this->M_linearStiff;
 }
 
