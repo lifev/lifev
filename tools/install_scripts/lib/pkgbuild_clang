@@ -1,0 +1,50 @@
+#! /bin/bash
+#
+# author: Antonio Cervone <ant.cervone@gmail.com>
+# date:   11-12-2012
+#
+
+ver="3.1"
+
+download_clang() {
+    wget http://llvm.org/releases/${ver}/llvm-${ver}.src.tar.gz
+    wget http://llvm.org/releases/${ver}/clang-${ver}.src.tar.gz
+    wget http://llvm.org/releases/${ver}/compiler-rt-${ver}.src.tar.gz
+}
+
+unpack_clang() {
+    tar xzf llvm-${ver}.src.tar.gz
+    tar xzf clang-${ver}.src.tar.gz
+    mv clang-${ver}.src llvm-${ver}.src/tools/clang
+    tar xzf compiler-rt-${ver}.src.tar.gz
+    mv compiler-rt-${ver}.src llvm-${ver}.src/projects/compiler-rt
+}
+
+build_clang() {
+
+# due to a bug in the compiler-rt package we need to add a fake CmakeLists.txt
+    touch ${src_dir}/llvm-${ver}.src/projects/compiler-rt/test/CMakeLists.txt
+
+    rm -f CMakeCache.txt
+    rm -fr CMakeFiles
+
+    ${cmake_bin}/cmake \
+        -D CMAKE_BUILD_TYPE:STRING="Release" \
+        -D CMAKE_INSTALL_PREFIX:PATH=${install_dir} \
+        \
+        ${src_dir}/llvm-${ver}.src
+
+#        -D LLVM_ENABLE_FFI:BOOL=ON \
+#        \
+#        -D FFI_INCLUDE_DIR:PATH="/usr/include/i386-linux-gnu" \
+#        -D FFI_LIBRARY_DIR:PATH="/usr/lib/i386-linux-gnu" \
+#        \
+
+  make -j${NUM_PROC}
+
+}
+
+install_clang() {
+  make -j${NUM_PROC} install
+}
+
