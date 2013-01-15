@@ -1,0 +1,48 @@
+#! /bin/bash
+#
+# author: Davide baroli <davide.baroli@gmail.com>
+# date:   13-12-2012
+#
+
+ver='2012.1'
+
+download_qhull() {
+  wget "http://www.qhull.org/download/qhull-${ver}-src.tgz"
+}
+
+unpack_qhull() { 
+  tar xzf qhull-${ver}-src.tgz
+}
+
+build_qhull() {  
+  pushd ${src_dir}/qhull-${ver}
+    config/bootstrap.sh --prefix=${install_dir} \
+      --parallel=${NUM_PROC}
+  popd
+
+  if [[ "${CARCH}" == "x86_64" ]]; then
+    EXTRAOPTS="-DCMAKE_CXX_FLAGS=-fPIC -DCMAKE_C_FLAGS=-fPIC"
+  fi
+    
+  rm -f CMakeCache.txt
+  rm -rf CMakeFiles
+
+  ${cmake_bin}/cmake \
+    -DCMAKE_INSTALL_PREFIX=${install_dir} \
+    $EXTRAOPTS  \
+    \
+    ${src_dir}/qhull-$ver
+  
+  make -j$NUM_PROC
+}
+
+install_qhull() {
+  make -j$NUM_PROC install
+}
+
+
+
+
+
+
+
