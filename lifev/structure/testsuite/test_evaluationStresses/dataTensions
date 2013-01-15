@@ -44,6 +44,7 @@ zeta        	= 0.75
 BDF_order   	= 2
 
 [../space_discretization]
+mesh_type = .mesh
 mesh_dir  	= ./
 mesh_file 	= cubeY4.mesh
 order     	= P1

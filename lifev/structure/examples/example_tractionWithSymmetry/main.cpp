@@ -472,8 +472,8 @@ Structure::run3d()
             uv0.push_back(acc);
         }
 
-        // vectorPtr_Type initialDisplacement(new vector_Type(solid.displacement(), Unique) );
-        // dFESpace->interpolate( static_cast<solidFESpace_type::function_Type>( Private::d0 ), *initialDisplacement, 0.0 );
+        vectorPtr_Type initialDisplacement(new vector_Type(solid.displacement(), Unique) );
+        dFESpace->interpolate( static_cast<solidFESpace_type::function_Type>( Private::d0 ), *initialDisplacement, 0.0 );
 
         if (timeAdvanceMethod =="BDF")
         {
@@ -483,8 +483,8 @@ Structure::run3d()
             {
                 Real previousTimeStep = tZero - previousPass*dt;
                 std::cout<<"BDF " <<previousTimeStep<<"\n";
-                uv0.push_back(disp);
-                //uv0.push_back(initialDisplacement);
+                //uv0.push_back(disp);
+                uv0.push_back(initialDisplacement);
             }
         }
 
@@ -494,8 +494,8 @@ Structure::run3d()
 
         timeAdvance->updateRHSContribution( dt );
         //In the case of non-zero displacement
-        solid.initialize( disp );
-        //solid.initialize( initialDisplacement );
+        //solid.initialize( disp );
+        solid.initialize( initialDisplacement );
         //Let's verify that the set displacement is the one I expect
         //Creation of Exporter to check the loaded solution (working only for HDF5)
         std::string expVerFile = "verificationDisplExporter";
@@ -507,7 +507,7 @@ Structure::run3d()
         //Let's get the initial displacement and velocity
         exporter.postProcess(0.0);
 
-        *vectVer = *disp; //initialDisplacement;
+        *vectVer = *initialDisplacement;
         exporter.postProcess( 1.0 );
 
 
