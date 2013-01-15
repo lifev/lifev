@@ -61,6 +61,10 @@
 
 #include <lifev/core/solver/ADRAssembler.hpp>
 
+#ifdef HAVE_HDF5
+#include <lifev/core/filter/ExporterHDF5.hpp>
+#endif
+
 using namespace LifeV;
 
 
@@ -70,7 +74,6 @@ Real exactSolution( const Real& /* t */, const Real& x, const Real& y, const Rea
 {
     return  sin( x ) + y * y / 2.;
 }
-
 
 Real fRhs( const Real& /* t */, const Real& x, const Real& /* y */, const Real& /* z */ , const ID& /* i */ )
 {
@@ -270,6 +273,13 @@ main( int argc, char** argv )
         {
             return EXIT_FAILURE;
         }
+
+        // test exporting of a repeated mesh
+#ifdef HAVE_HDF5
+        ExporterHDF5<mesh_Type> exporter( dataFile, localMeshR, "pid", comm->MyPID());
+        exporter.exportPID( localMeshR, comm, true );
+        exporter.postProcess( 0. );
+#endif
     }
 
 #ifdef HAVE_MPI
