@@ -183,7 +183,7 @@ struct Structure::Private
 
     static Real bcNonZero(const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
     {
-        return  300.0;
+        return  300000.0;
     }
 
     static Real d0(const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
@@ -493,6 +493,7 @@ Structure::run3d()
         timeAdvance->setTimeStep( dt );
 
         timeAdvance->updateRHSContribution( dt );
+
         //In the case of non-zero displacement
         //solid.initialize( disp );
         solid.initialize( initialDisplacement );
