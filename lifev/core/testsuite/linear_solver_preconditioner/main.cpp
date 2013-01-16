@@ -309,7 +309,7 @@ main( int argc, char** argv )
 
     if( linearSolver.numIterations() != 3 || precRawPtr->solverPtr()->numIterations() != 5 )
     {
-        if( verbose ) std::cout << "The difference between the two solutions is too large." << std::endl;
+        if( verbose ) std::cout << "The number of iterations has changed." << std::endl;
         if( verbose ) std::cout << "Test status: FAILED" << std::endl;
         return( EXIT_FAILURE );
     }
