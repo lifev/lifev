@@ -183,7 +183,7 @@ struct Structure::Private
 
     static Real bcNonZero(const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
     {
-        return  300000.0;
+        return  3000000.0;
     }
 
     static Real d0(const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
@@ -483,8 +483,8 @@ Structure::run3d()
             {
                 Real previousTimeStep = tZero - previousPass*dt;
                 std::cout<<"BDF " <<previousTimeStep<<"\n";
-                //uv0.push_back(disp);
-                uv0.push_back(initialDisplacement);
+                uv0.push_back(disp);
+                //uv0.push_back(initialDisplacement);
             }
         }
 
@@ -495,8 +495,8 @@ Structure::run3d()
         timeAdvance->updateRHSContribution( dt );
 
         //In the case of non-zero displacement
-        //solid.initialize( disp );
-        solid.initialize( initialDisplacement );
+        solid.initialize( disp );
+        //solid.initialize( initialDisplacement );
         //Let's verify that the set displacement is the one I expect
         //Creation of Exporter to check the loaded solution (working only for HDF5)
         std::string expVerFile = "verificationDisplExporter";
@@ -508,7 +508,7 @@ Structure::run3d()
         //Let's get the initial displacement and velocity
         exporter.postProcess(0.0);
 
-        *vectVer = *initialDisplacement;
+        *vectVer = *disp; //initialDisplacement;
         exporter.postProcess( 1.0 );
 
 
