@@ -2243,7 +2243,8 @@ void  stiff_Jac_P1iso_SecondOrderExp_1term( Real             coef,
 	}
 }
 
-//! 2. Stiffness term : Int { 4 * coef * J^(-2/3) * exp( coefExp*( Ic_iso - 3)*( Ic_iso - 3) ) * ( J^(-2.0/3.0) + 2 * coefExp * (Ic_isoK - 3)^2 ) * ( F : \nabla \delta ) ( F : \nabla \v )}
+//! 2. Stiffness term : Int { 4 * coef * J^(-4/3) * exp( coefExp*( Ic_iso - 3)*( Ic_iso - 3) ) *
+//!                          ( 1.0 + 2 * coefExp * (Ic_isoK - 3)^2 ) * ( F : \nabla \delta ) ( F : \nabla \v )}
 // When the method is called, the coef parameter stores already 4 * alpha. This is why it is used at the end.
 void  stiff_Jac_P1iso_SecondOrderExp_2term( Real             coef,
                                             Real             coefExp,
@@ -2315,7 +2316,7 @@ void  stiff_Jac_P1iso_SecondOrderExp_3term( Real coef, Real  coefExp,
                             for( UInt ig = 0;ig < fe.nbQuadPt(); ++ig )
                             {
                                 s +=( ( 1/(Jk[ig]*Jk[ig]) )* Ic_isok[ig] * exp( coefExp * (Ic_isok[ig] - 3.0) * (Ic_isok[ig] - 3.0) ) ) *
-                                    ( (Ic_isok[ig] - 3.0) * ( 1.0 + 2.0 * coefExp * (Ic_isok[ig] - 3.0) * Ic_isok[ig] ) + Ic_isok[ig] )*
+                                    ( (Ic_isok[ig] - 3.0) * ( 1.0 + 2.0 * coefExp * (Ic_isok[ig] - 3.0) * Ic_isok[ig] ) + Ic_isok[ig] ) *
                                     CofFk[ icoor ][ l ][ ig ] * fe.phiDer( i, l, ig ) *
                                     CofFk[ jcoor ][ k ][ ig ] * fe.phiDer( j, k, ig ) * fe.weightDet( ig );
                             }
@@ -2330,7 +2331,7 @@ void  stiff_Jac_P1iso_SecondOrderExp_3term( Real coef, Real  coefExp,
 
 
 //! 4. Stiffness term:
-//Int { (-4.0/3.0 *  alpha * J^(-5/3) * exp( gamma*( Ic_iso - 3)*( Ic_iso - 3) ) * ( Ic_isoK + 2*gamma*(Ic_isok - 3)Ic + 1) ) *
+//Int { (-4.0/3.0 *  alpha * J^(-5/3) * exp( gamma*( Ic_iso - 3)*( Ic_iso - 3) ) * ( Ic_isoK + ( Ic_isok - 3.0 ) * (2*gamma*(Ic_isok - 3)Ic + 1) ) *
 //      ( F : \nabla \delta ) ( CofF : \nabla \v ) }
 // As in other methods, the coef that is passed is -4.0/3.0 * alpha.
 void  stiff_Jac_P1iso_SecondOrderExp_4term( Real coef, Real  coefExp,
@@ -2411,7 +2412,7 @@ void  stiff_Jac_P1iso_SecondOrderExp_5term( Real             coef,
 	}
 }
 
-//! 6. Stiffness term : Int { 1.0/3.0 * coef * J^(-2) * Ic_iso *  exp(coefExp( Ic_iso - 3)) * (CofF [\nabla \delta]^t CofF ) : \nabla \v }
+//! 6. Stiffness term : Int { 2.0/3.0 * coef * J^(-2) * Ic_iso *  exp(coefExp( Ic_iso - 3)) * (CofF [\nabla \delta]^t CofF ) : \nabla \v }
 void  stiff_Jac_P1iso_SecondOrderExp_6term( Real             coef,
                                             Real             coefExp,
                                             const boost::multi_array<Real,3 >& CofFk,
@@ -2442,9 +2443,6 @@ void  stiff_Jac_P1iso_SecondOrderExp_6term( Real             coef,
                                     exp( coefExp * (Ic_isok[ig] - 3.0) * (Ic_isok[ig] - 3.0) ) * Ic_isok[ig]*
                                     fe.phiDer( j, l, ig ) * CofFk[ icoor ][ l ][ ig ] *
                                     fe.phiDer( i, k, ig ) * CofFk[ jcoor ][ k ][ ig ] *  fe.weightDet( ig );
-
-// * ( Ic_isok[ig] - 3 ) *
-//                                        exp( coefExp*(Ic_isok[ig] -3)*(Ic_isok[ig] -3) )
                             }
                         }
                     }
