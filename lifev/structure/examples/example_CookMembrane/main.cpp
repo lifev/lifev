@@ -331,7 +331,7 @@ Structure::run3d()
     MeshData             meshData;
     meshData.setup(dataFile, "solid/space_discretization");
 
-    boost::shared_ptr<RegionMesh<LinearTetra> > fullMeshPtr(new RegionMesh<LinearTetra>( *( parameters->comm ) ));
+    boost::shared_ptr<RegionMesh<LinearTetra> > fullMeshPtr(new RegionMesh<LinearTetra>( ( parameters->comm ) ));
     readMesh(*fullMeshPtr, meshData);
 
     fullMeshPtr->showMe( );
@@ -666,8 +666,8 @@ Structure::run3d()
             timeAdvance->shiftRight( solid.displacement() );
 
             *solidDisp = solid.displacement();
-            *solidVel  = timeAdvance->velocity();
-            *solidAcc  = timeAdvance->acceleration();
+            *solidVel  = timeAdvance->firstDerivative();
+            *solidAcc  = timeAdvance->secondDerivative();
             //*rhsVector = solid.rhs();
 
             // if( dataStructure->order().compare("P2") == 0 )
