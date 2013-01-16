@@ -84,7 +84,7 @@ class PostProcessingBoundary
     typedef typename elementGeometricShape_Type::GeoBShape   facetGeometricShape_Type;
     typedef MeshType                                         mesh_Type;
     typedef boost::shared_ptr<MeshType>                      meshPtr_Type;
-    typedef CurrentBoundaryFE*                               currentBdFEPtr_Type;
+    typedef CurrentFEManifold*                               currentBdFEPtr_Type;
     typedef DOF*                                             dofPtr_Type;
     //@}
 

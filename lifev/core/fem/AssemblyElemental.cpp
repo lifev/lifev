@@ -1173,7 +1173,7 @@ void ipstab_grad ( const Real         coef,
                    MatrixElemental&           elmat,
                    const CurrentFE&   fe1,
                    const CurrentFE&   fe2,
-                   const CurrentBoundaryFE& bdfe,
+                   const CurrentFEManifold& bdfe,
                    int iblock, int jblock )
 {
     /*
@@ -1274,7 +1274,7 @@ void ipstab_grad ( const Real         coef,
                    MatrixElemental&           elmat,
                    const CurrentFE&   fe1,
                    const CurrentFE&   fe2,
-                   const CurrentBoundaryFE& bdfe,
+                   const CurrentFEManifold& bdfe,
                    int iblock, int jblock,
                    int nb )
 {
@@ -1382,7 +1382,7 @@ void ipstab_bgrad ( const Real         coef,
                     const CurrentFE&   fe1,
                     const CurrentFE&   fe2,
                     const VectorElemental&     beta,
-                    const CurrentBoundaryFE& bdfe,
+                    const CurrentFEManifold& bdfe,
                     int iblock, int jblock,
                     int nb )
 {
@@ -1512,7 +1512,7 @@ void ipstab_bgrad ( const Real         coef,
 
 
 void ipstab_div ( const Real coef, MatrixElemental& elmat, const CurrentFE& fe1, const CurrentFE& fe2,
-                  const CurrentBoundaryFE& bdfe, int iblock, int jblock )
+                  const CurrentFEManifold& bdfe, int iblock, int jblock )
 {
     /*
       Interior penalty stabilization: coef*\int_{face} div u . div v
@@ -1604,7 +1604,7 @@ void ipstab_div ( const Real coef, MatrixElemental& elmat, const CurrentFE& fe1,
 
 void ipstab_bagrad ( const Real coef, MatrixElemental& elmat,
                      const CurrentFE& fe1, const CurrentFE& fe2,
-                     const VectorElemental& beta, const CurrentBoundaryFE& bdfe,
+                     const VectorElemental& beta, const CurrentFEManifold& bdfe,
                      int iblock, int jblock )
 {
 
@@ -1731,7 +1731,7 @@ void ipstab_bagrad ( const Real         coef,
                      const CurrentFE&   fe2,
                      const CurrentFE&   fe3,
                      const VectorElemental&     beta,
-                     const CurrentBoundaryFE& bdfe,
+                     const CurrentFEManifold& bdfe,
                      int iblock, int    jblock )
 {
 
@@ -5140,9 +5140,9 @@ void TP_VdotN_Hdiv ( Real coef, MatrixElemental& elmat, const ReferenceFEHybrid&
     for ( UInt nf (0); nf < hybridFE.numberBoundaryFE(); ++nf )
     {
         // Take the staticBdFE of the hybrid finite element.
-        const CurrentBoundaryFE& boundaryElementHybridFE ( hybridFE[ nf ] );
+        const CurrentFEManifold& boundaryElementHybridFE ( hybridFE[ nf ] );
         // Take the staticBdFE of the Hdiv function dot product outward unit normal.
-        const CurrentBoundaryFE& boundaryElementDualDotNFE ( dualDotNFE[ nf ] );
+        const CurrentFEManifold& boundaryElementDualDotNFE ( dualDotNFE[ nf ] );
         nbnode = boundaryElementHybridFE.nbFEDof();
 
         // Loop over all the the degrees of freedom of the dual dot normal variable.
@@ -5179,7 +5179,7 @@ void TP_TP_Hdiv ( Real coef, MatrixElemental& elmat, const ReferenceFEHybrid& hy
     for ( UInt nf (0); nf < hybridFE.numberBoundaryFE(); ++nf )
     {
         // Take the staticBdFE of the hybrid finite element.
-        const CurrentBoundaryFE& boundaryElementHybridFE ( hybridFE[ nf ] );
+        const CurrentFEManifold& boundaryElementHybridFE ( hybridFE[ nf ] );
         nbnode = boundaryElementHybridFE.nbFEDof();
 
         // Loop over all the degrees of freedom of the first hybrid variable.

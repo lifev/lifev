@@ -344,7 +344,7 @@ public:
       @param dof Container of the local to global map of DOF id
     */
     template <typename Mesh>
-    void bcUpdate ( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const DOF& dof );
+    void bcUpdate ( Mesh& mesh, CurrentFEManifold& boundaryFE, const DOF& dof );
 
     //! Merges the boundary condition bcHandler (with its offset) with the stored one
     /*!
@@ -549,7 +549,7 @@ private:
 // ===================================================
 template <typename Mesh>
 void
-BCHandler::bcUpdate ( Mesh& mesh, CurrentBoundaryFE& boundaryFE, const DOF& dof )
+BCHandler::bcUpdate ( Mesh& mesh, CurrentFEManifold& boundaryFE, const DOF& dof )
 {
     typedef typename Mesh::elementShape_Type geoShape_Type;
     typedef typename geoShape_Type::GeoBShape geoBShape_Type;

@@ -26,7 +26,7 @@
 
 /*!
     @file
-    @brief  A class for static boundary finite element
+    @brief  A class for a finite element living on a manifold
 
     @author Jean-Frederic Gerbeau
             Vincent Martin
@@ -37,11 +37,11 @@
 
     @contributor Luca Bertagna <lbertag@emory.edu>
     @contributor Samuel Quinodoz <samuel.quinodoz@epfl.ch>
-    @mantainer Samuel Quinodoz <samuel.quinodoz@epfl.ch>
+    @mantainer Luca Bertagna <lbertag@emory.edu>
  */
 
-#ifndef CURRENT_BOUNDARY_FE_HPP
-#define CURRENT_BOUNDARY_FE_HPP 1
+#ifndef CURRENT_FE_MANIFOLD_HPP
+#define CURRENT_FE_MANIFOLD_HPP 1
 
 #include <boost/multi_array.hpp>
 #include <lifev/core/fem/CurrentFE.hpp>
@@ -78,59 +78,92 @@ const flag_Type UPDATE_W_ROOT_DET_METRIC (UPDATE_ONLY_W_ROOT_DET_METRIC
                                           | UPDATE_ONLY_CELL_NODES);
 
 /*!
-  \class CurrentBoundaryFE
-  \brief A class for static boundary finite element
+  \class CurrentFEManifold
+  \brief A class for a finite element on a manifold
 
   This class inherits from CurrentFE and adds some functionality related
-  to the boundary, like normals, tangents, etc.
+  to the manifold, like normals, tangents, etc.
 */
 
-class CurrentBoundaryFE : public CurrentFE
+class CurrentFEManifold : public CurrentFE
 {
 
 public:
     //! @name Constructor(s) & Destructor
     //@{
-    CurrentBoundaryFE (const ReferenceFE& refFE, const GeometricMap& geoMap);
 
-    CurrentBoundaryFE (const ReferenceFE& refFE, const GeometricMap& geoMap, const QuadratureRule& qr);
+    //! Constructor without quadrature specification
+    /*!
+      If you use this constructor, you have to use the method CurrentFE::setQuadRule before
+      using any update method!
 
-    //! new optionnal argument for hybrid hdiv fe invArea
-    CurrentBoundaryFE (const ReferenceFE& refFE, const GeometricMap& geoMap, const QuadratureRule& qr,
+      @param refFE Reference finite element used
+      @param geoMap Geometric mapping used
+     */
+    CurrentFEManifold (const ReferenceFE& refFE, const GeometricMap& geoMap);
+
+    //! Full constructor with default quadrature
+    /*!
+      @param refFE Reference finite element used
+      @param geoMap Geometric mapping used
+      @param qr Quadrature rule for the computations
+     */
+    CurrentFEManifold (const ReferenceFE& refFE, const GeometricMap& geoMap, const QuadratureRule& qr);
+
+    //! Constructor used to create a static reference FE for hybrid elements
+    CurrentFEManifold (const ReferenceFE& refFE, const GeometricMap& geoMap, const QuadratureRule& qr,
                        const Real* refCoor, UInt currentId, Real invArea = 1. );
 
-    //! Needed in FEDefinition while creating hybrid refFE (otherwise linker complains about missing base class copy constructor)
-    CurrentBoundaryFE (const CurrentBoundaryFE& bdFE);
+    //! Copy constructor
+    CurrentFEManifold (const CurrentFEManifold& feManifold);
 
-    virtual ~CurrentBoundaryFE ();
+    // Virtual destructor (does not do anything)
+    virtual ~CurrentFEManifold () {}
     //@}
 
     //! @name Methods
     //@{
 
     using CurrentFE::update;
+
+    //! Update method using only point coordinates.
     /*!
         Overrides the method of base class CurrentFE. Actually, it calls the method of the base
         class and then performs some extra updates if upFlag contains also some boundary updates
+        @param pts The coordinates of the points defining the current element
+        @ upFlag   The update flag which determines what kind of update has to be done (see top of the file)
      */
     virtual void update (const std::vector<std::vector<Real> >& pts, flag_Type upFlag);
 
+    //! Maps a point from the reference element to the current element
     /*!
       return the coordinate (x,y,z)= F(xi,eta), (F: geo mappping)
-      where (xi,eta) are the coor in the ref element
-      and   (x,y,z) the coor in the current element
+      where (xi,eta) are the coordinates in the reference element
+      and (x,y,z) are the coor in the current element
       (if the code is compiled in 2D mode then z=0 and eta is disgarded)
     */
     void coorMap (Real& x, Real& y, Real& z, Real xi, Real eta) const;
 
-    //! Overrides the corresponding method in the mother class
+    //! Compute the measure of the current element
+    /*!
+       Overrides the corresponding method in the mother class
+     */
     Real measure () const;
 
-    //! Compute the integral of f over the current boundary element
+    //! Compute the integral of a function f over the current boundary element
+    /*!
+        @param f The function to be integrated. It must have the signature
+                 Real f(Real x, Real y, Real z)
+     */
     template <typename FunctorType>
     Real integral (const FunctorType& f) const;
 
-    //! Compute the integral of a <f,n> over the current boundary element
+    //! Compute the integral of the normal component of a vector function f over the current boundary element
+    /*!
+        @param f The function to be integrated. It must have the signature
+                 void f(Real x, Real y, Real z, Real* result)
+                 where result is an array of size equal to the dimension of the ambient space (already created)
+     */
     template <typename FunctorType>
     Real normalIntegral (const FunctorType& f) const;
     //@}
@@ -228,7 +261,7 @@ protected:
 };
 
 template <typename FunctorType>
-Real CurrentBoundaryFE::integral (const FunctorType& f) const
+Real CurrentFEManifold::integral (const FunctorType& f) const
 {
     ASSERT_PRE (M_quadNodesUpdated && M_wRootDetMetricUpdated, "Error! Quadrature nodes and Jacobian Determinant have not been updated yet.\n");
     Real result = 0.0;
@@ -241,7 +274,7 @@ Real CurrentBoundaryFE::integral (const FunctorType& f) const
 }
 
 template <typename FunctorType>
-Real CurrentBoundaryFE::normalIntegral (const FunctorType& f) const
+Real CurrentFEManifold::normalIntegral (const FunctorType& f) const
 {
     ASSERT_PRE (M_quadNodesUpdated && M_normalUpdated && M_wRootDetMetricUpdated, "Error! Normal and Jacobian Determinant have not been updated yet.\n");
     Real result = 0.0;
@@ -264,4 +297,4 @@ Real CurrentBoundaryFE::normalIntegral (const FunctorType& f) const
 
 } // Namespace LifeV
 
-#endif // CURRENT_BOUNDARY_FE_HPP
+#endif // CURRENT_FE_MANIFOLD_HPP

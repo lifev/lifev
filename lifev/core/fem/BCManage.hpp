@@ -71,7 +71,7 @@ bcManage ( MatrixType& matrix,
            MeshType const& mesh,
            DOF const& dof,
            BCHandler const& bcHandler,
-           CurrentBoundaryFE& currentBdFE,
+           CurrentFEManifold& currentBdFE,
            DataType const& diagonalizeCoef,
            DataType const& time = 0 );
 
@@ -99,7 +99,7 @@ bcManage ( Real (*mu) (Real time, Real x, Real y, Real z, Real u),
            const MeshType& mesh,
            const DOF& dof,
            const BCHandler& bcHandler,
-           CurrentBoundaryFE& currentBdFE,
+           CurrentFEManifold& currentBdFE,
            const DataType diagonalizeCoef,
            const DataType& time,
            VectorType& feVec );
@@ -120,13 +120,13 @@ bcManage ( Real (*mu) (Real time, Real x, Real y, Real z, Real u),
  */
 template <typename MatrixType, typename MeshType, typename DataType>
 void
-bcManageMatrix ( MatrixType&      matrix,
-                 const MeshType&  mesh,
-                 const DOF&       dof,
-                 const BCHandler& bcHandler,
-                 CurrentBoundaryFE&     currentBdFE,
-                 const DataType&  diagonalizeCoef,
-                 const DataType&  time = 0 );
+bcManageMatrix ( MatrixType&        matrix,
+                 const MeshType&    mesh,
+                 const DOF&         dof,
+                 const BCHandler&   bcHandler,
+                 CurrentFEManifold& currentBdFE,
+                 const DataType&    diagonalizeCoef,
+                 const DataType&    time = 0 );
 
 
 
@@ -149,7 +149,7 @@ bcManageVector ( VectorType&      rightHandSide,
                  const MeshType&  mesh,
                  const DOF&       dof,
                  const BCHandler& bcHandler,
-                 CurrentBoundaryFE&     currentBdFE,
+                 CurrentFEManifold&     currentBdFE,
                  const DataType&  time,
                  const DataType&  diagonalizeCoef );
 
@@ -171,7 +171,7 @@ bcManageRhs ( VectorType&      rightHandSide,
               const MeshType&  mesh,
               const DOF&       dof,
               const BCHandler& bcHandler,
-              CurrentBoundaryFE&     currentBdFE,
+              CurrentFEManifold&     currentBdFE,
               const DataType&  diagonalizeCoef,
               const DataType&  time );
 
@@ -263,7 +263,7 @@ bcEssentialManage ( MatrixType& matrix,
                     const MeshType& /*mesh*/,
                     const DOF& dof,
                     const BCBase& boundaryCond,
-                    const CurrentBoundaryFE& /*currentBdFE*/,
+                    const CurrentFEManifold& /*currentBdFE*/,
                     const DataType& diagonalizeCoef,
                     const DataType& time,
                     UInt offset );
@@ -291,7 +291,7 @@ bcEssentialManageUDep ( MatrixType& matrix,
                         const MeshType& /*mesh*/,
                         const DOF& dof,
                         const BCBase& boundaryCond,
-                        const CurrentBoundaryFE& /*currentBdFE*/,
+                        const CurrentFEManifold& /*currentBdFE*/,
                         const DataType& diagonalizeCoef,
                         const DataType& time,
                         const VectorType& feVec ,
@@ -423,7 +423,6 @@ bcManageMtimeUDep ( MatrixType& matrix,
 // @{
 // ===================================================
 
-
 //! Prescribe Natural boundary condition
 /*!
  * The right hand side is modified to take into account the Natural boundary condition
@@ -441,7 +440,7 @@ bcNaturalManage ( VectorType& rightHandSide,
                   const MeshType& mesh,
                   const DOF& dof, const
                   BCBase& boundaryCond,
-                  CurrentBoundaryFE& currentBdFE,
+                  CurrentFEManifold& currentBdFE,
                   const DataType& time,
                   UInt offset );
 
@@ -467,19 +466,17 @@ bcNaturalManageUDep ( Real (*mu) (Real time, Real x, Real y, Real z, Real u),
                       const MeshType& mesh,
                       const DOF& dof,
                       const BCBase& boundaryCond,
-                      CurrentBoundaryFE& currentBdFE,
+                      CurrentFEManifold& currentBdFE,
                       const DataType& time,
                       const VectorType& feVec,
                       UInt offset );
 
 // @}
 
-
 // ===================================================
 //! @name Robin BC
 // @{
 // ===================================================
-
 
 //! Prescribe Robin boundary condition
 /*!
@@ -500,7 +497,7 @@ bcRobinManage ( MatrixType& matrix,
                 const MeshType& mesh,
                 const DOF& dof,
                 const BCBase& boundaryCond,
-                CurrentBoundaryFE& currentBdFE,
+                CurrentFEManifold& currentBdFE,
                 const DataType& time,
                 UInt offset );
 
@@ -522,7 +519,7 @@ bcRobinManageMatrix ( MatrixType& matrix,
                       const MeshType& mesh,
                       const DOF& dof,
                       const BCBase& boundaryCond,
-                      CurrentBoundaryFE& currentBdFE,
+                      CurrentFEManifold& currentBdFE,
                       const DataType& time,
                       UInt offset );
 
@@ -551,7 +548,7 @@ bcRobinManageResidual ( VectorType& residual,
                         const MeshType& mesh,
                         const DOF& dof,
                         const BCBase& boundaryCond,
-                        CurrentBoundaryFE& currentBdFE,
+                        CurrentFEManifold& currentBdFE,
                         const DataType& time,
                         UInt offset );
 
@@ -573,18 +570,16 @@ bcRobinManageVector ( VectorType& rightHandSide,
                       const MeshType& mesh,
                       const DOF& dof,
                       const BCBase& boundaryCond,
-                      CurrentBoundaryFE& currentBdFE,
+                      CurrentFEManifold& currentBdFE,
                       const DataType& time,
                       UInt offset );
 
 // @}
 
-
 // ===================================================
 //!@name Flux BC
 //@{
 // ===================================================
-
 
 //! Prescribe Flux boundary condition only on the matrix
 /*!
@@ -608,7 +603,7 @@ bcFluxManage ( MatrixType&     matrix,
                const MeshType& mesh,
                const DOF&      dof,
                const BCBase&   boundaryCond,
-               CurrentBoundaryFE&    currentBdFE,
+               CurrentFEManifold&    currentBdFE,
                const DataType& time,
                UInt            offset);
 
@@ -624,8 +619,7 @@ bcFluxManage ( MatrixType&     matrix,
  * @param time The time
  * @param offset The boundary condition offset
  */
-template < typename VectorType,
-         typename DataType >
+template < typename VectorType, typename DataType >
 void
 bcFluxManageVector (
     VectorType&    rightHandSide,
@@ -653,7 +647,7 @@ bcFluxManageMatrix ( MatrixType&     matrix,
                      const MeshType& mesh,
                      const DOF&      dof,
                      const BCBase&   boundaryCond,
-                     CurrentBoundaryFE&    currentBdFE,
+                     CurrentFEManifold&    currentBdFE,
                      const DataType& /*time*/,
                      UInt            offset );
 
@@ -681,18 +675,15 @@ bcFluxManageResidual ( VectorType&     residual,
                        const MeshType& mesh,
                        const DOF&      dof,
                        const BCBase&   boundaryCond,
-                       CurrentBoundaryFE&    currentBdFE,
+                       CurrentFEManifold&    currentBdFE,
                        const DataType& /*time*/,
                        UInt            offset );
 // @}
-
-
 
 // ===================================================
 //!@name Resistance BC
 // @{
 // ===================================================
-
 
 //! Prescribe Resistance boundary condition
 /*!
@@ -712,7 +703,7 @@ bcResistanceManage ( MatrixType& matrix,
                      const MeshType& mesh,
                      const DOF& dof,
                      const BCBase& boundaryCond,
-                     CurrentBoundaryFE& currentBdFE,
+                     CurrentFEManifold& currentBdFE,
                      const DataType& /*time*/,
                      UInt offset );
 template <typename VectorType, typename DataType, typename MeshType>
@@ -721,7 +712,7 @@ bcResistanceManageVector ( VectorType& rightHandSide,
                            const MeshType& mesh,
                            const DOF& dof,
                            const BCBase& boundaryCond,
-                           CurrentBoundaryFE& currentBdFE,
+                           CurrentFEManifold& currentBdFE,
                            const DataType& /*time*/,
                            UInt offset );
 template <typename MatrixType, typename DataType, typename MeshType>
@@ -730,18 +721,11 @@ bcResistanceManageMatrix ( MatrixType& matrix,
                            const MeshType& mesh,
                            const DOF& dof,
                            const BCBase& boundaryCond,
-                           CurrentBoundaryFE& currentBdFE,
+                           CurrentFEManifold& currentBdFE,
                            const DataType& /*time*/,
                            UInt offset );
 
 // @}
-
-
-
-
-
-
-
 
 // ===================================================
 // Implementation
@@ -759,16 +743,14 @@ bcManage ( MatrixType& matrix,
            MeshType const& mesh,
            DOF const& dof,
            BCHandler const& bcHandler,
-           CurrentBoundaryFE& currentBdFE,
+           CurrentFEManifold& currentBdFE,
            DataType const& diagonalizeCoef,
            DataType const& time )
 {
 
     bool globalassemble = false;
 
-
     BCManageNormal<MatrixType> bcManageNormal;
-
 
     // Loop on boundary conditions
     for ( ID i = 0; i < bcHandler.size(); ++i )
@@ -811,7 +793,7 @@ bcManage ( MatrixType& matrix,
     }
 
     //Build the internal structure, if needed
-    bcManageNormal.build (mesh, dof, currentBdFE, matrix, bcHandler.offset(), rightHandSide.mapPtr()->commPtr() );
+    bcManageNormal.build (mesh, dof, currentBdFE, matrix.map(), bcHandler.offset() );
     bcManageNormal.exportToParaview ("normalAndTangents");
 
     //Applying the basis change, if needed
@@ -841,8 +823,6 @@ bcManage ( MatrixType& matrix,
     bcManageNormal.bcShiftToCartesianCoordSystem (matrix, rightHandSide);
 }
 
-
-
 template <typename MatrixType, typename VectorType, typename MeshType, typename DataType>
 void
 bcManage ( Real (*mu) (Real time, Real x, Real y, Real z, Real u),
@@ -851,7 +831,7 @@ bcManage ( Real (*mu) (Real time, Real x, Real y, Real z, Real u),
            const MeshType& mesh,
            const DOF& dof,
            const BCHandler& bcHandler,
-           CurrentBoundaryFE& currentBdFE,
+           CurrentFEManifold& currentBdFE,
            const DataType diagonalizeCoef,
            const DataType& time,
            VectorType& feVec )
@@ -934,14 +914,13 @@ bcManage ( Real (*mu) (Real time, Real x, Real y, Real z, Real u),
     }
 }
 
-
 template <typename MatrixType, typename MeshType, typename DataType>
 void
 bcManageMatrix ( MatrixType&      matrix,
                  const MeshType&  mesh,
                  const DOF&       dof,
                  const BCHandler& bcHandler,
-                 CurrentBoundaryFE&     currentBdFE,
+                 CurrentFEManifold&     currentBdFE,
                  const DataType&  diagonalizeCoef,
                  const DataType&  time )
 {
@@ -1011,14 +990,13 @@ bcManageMatrix ( MatrixType&      matrix,
     }
 }
 
-
 template <typename VectorType, typename MeshType, typename DataType>
 void
 bcManageVector ( VectorType&      rightHandSide,
                  const MeshType&  mesh,
                  const DOF&       dof,
                  const BCHandler& bcHandler,
-                 CurrentBoundaryFE&     currentBdFE,
+                 CurrentFEManifold&     currentBdFE,
                  const DataType&  time,
                  const DataType&  diagonalizeCoef )
 {
@@ -1037,7 +1015,7 @@ bcManageRhs ( VectorType&      rightHandSide,
               const MeshType&  mesh,
               const DOF&       dof,
               const BCHandler& bcHandler,
-              CurrentBoundaryFE&     currentBdFE,
+              CurrentFEManifold&     currentBdFE,
               const DataType&  diagonalizeCoef,
               const DataType&  time )
 {
@@ -1085,7 +1063,7 @@ bcManageResidual ( VectorType&                     res,
                    const MeshType&  mesh,
                    const DOF&       dof,
                    const BCHandler& bcHandler,
-                   CurrentBoundaryFE&     currentBdFE,
+                   CurrentFEManifold&     currentBdFE,
                    const DataType&  time,
                    const DataType&  diagonalizeCoef )
 {
@@ -1180,8 +1158,6 @@ bcManageRhs ( VectorType&                     rightHandSide,
 
 }
 
-
-
 // ===================================================
 // Essential BC
 // ===================================================
@@ -1193,7 +1169,7 @@ bcEssentialManage ( MatrixType& matrix,
                     const MeshType& /*mesh*/,
                     const DOF& dof,
                     const BCBase& boundaryCond,
-                    const CurrentBoundaryFE& /*currentBdFE*/,
+                    const CurrentFEManifold& /*currentBdFE*/,
                     const DataType& diagonalizeCoef,
                     const DataType& time,
                     UInt offset )
@@ -1281,7 +1257,7 @@ bcEssentialManageUDep ( MatrixType& matrix,
                         const MeshType& /*mesh*/,
                         const DOF& dof,
                         const BCBase& boundaryCond,
-                        const CurrentBoundaryFE& /*currentBdFE*/,
+                        const CurrentFEManifold& /*currentBdFE*/,
                         const DataType& diagonalizeCoef,
                         const DataType& time,
                         const VectorType& feVec ,
@@ -1446,7 +1422,6 @@ bcEssentialManageRhs ( VectorType&     rightHandSide,
     }
 
 }
-
 
 template <typename VectorType, typename DataType>
 void
@@ -1614,14 +1589,13 @@ bcEssentialManageResidual (VectorType&     res,
 // Natural BC
 // ===================================================
 
-
 template <typename VectorType, typename MeshType, typename DataType>
 void
 bcNaturalManage ( VectorType& rightHandSide,
                   const MeshType& mesh,
                   const DOF& dof, const
                   BCBase& boundaryCond,
-                  CurrentBoundaryFE& currentBdFE,
+                  CurrentFEManifold& currentBdFE,
                   const DataType& time,
                   UInt offset )
 {
@@ -1845,8 +1819,6 @@ bcNaturalManage ( VectorType& rightHandSide,
     }
 } // bcNaturalManage
 
-
-
 template <typename VectorType, typename MeshType, typename DataType>
 void
 bcNaturalManageUDep ( Real (*mu) (Real time, Real x, Real y, Real z, Real u),
@@ -1854,7 +1826,7 @@ bcNaturalManageUDep ( Real (*mu) (Real time, Real x, Real y, Real z, Real u),
                       const MeshType& mesh,
                       const DOF& dof,
                       const BCBase& boundaryCond,
-                      CurrentBoundaryFE& currentBdFE,
+                      CurrentFEManifold& currentBdFE,
                       const DataType& time,
                       const VectorType& feVec,
                       UInt offset )
@@ -1949,13 +1921,9 @@ bcNaturalManageUDep ( Real (*mu) (Real time, Real x, Real y, Real z, Real u),
     }
 }
 
-
-
-
 // ===================================================
 // Robin BC
 // ===================================================
-
 
 template <typename MatrixType, typename VectorType, typename DataType, typename MeshType>
 void
@@ -1964,7 +1932,7 @@ bcRobinManage ( MatrixType& matrix,
                 const MeshType& mesh,
                 const DOF& dof,
                 const BCBase& boundaryCond,
-                CurrentBoundaryFE& currentBdFE,
+                CurrentFEManifold& currentBdFE,
                 const DataType& time,
                 UInt offset )
 {
@@ -1979,7 +1947,7 @@ bcRobinManageMatrix ( MatrixType& matrix,
                       const MeshType& mesh,
                       const DOF& dof,
                       const BCBase& boundaryCond,
-                      CurrentBoundaryFE& currentBdFE,
+                      CurrentFEManifold& currentBdFE,
                       const DataType& time,
                       UInt offset )
 {
@@ -2193,15 +2161,13 @@ bcRobinManageMatrix ( MatrixType& matrix,
     }
 }   //bcRobinManageMatrix
 
-
-
 template <typename VectorType, typename DataType, typename MeshType>
 void
 bcRobinManageVector ( VectorType& rightHandSide,
                       const MeshType& mesh,
                       const DOF& dof,
                       const BCBase& boundaryCond,
-                      CurrentBoundaryFE& currentBdFE,
+                      CurrentFEManifold& currentBdFE,
                       const DataType& time,
                       UInt offset )
 {
@@ -2339,7 +2305,7 @@ void bcRobinManageResidual ( VectorType& residual,
                              const MeshType& mesh,
                              const DOF& dof,
                              const BCBase& boundaryCond,
-                             CurrentBoundaryFE& currentBdFE,
+                             CurrentFEManifold& currentBdFE,
                              const DataType& time,
                              UInt offset )
 {
@@ -2386,7 +2352,7 @@ bcFluxManage ( MatrixType&     matrix,
                const MeshType& mesh,
                const DOF&      dof,
                const BCBase&   boundaryCond,
-               CurrentBoundaryFE&    currentBdFE,
+               CurrentFEManifold&    currentBdFE,
                const DataType& time,
                UInt            offset)
 
@@ -2418,7 +2384,7 @@ bcFluxManageMatrix ( MatrixType&     matrix,
                      const MeshType& mesh,
                      const DOF&      dof,
                      const BCBase&   boundaryCond,
-                     CurrentBoundaryFE&    currentBdFE,
+                     CurrentFEManifold&    currentBdFE,
                      const DataType& /*time*/,
                      UInt            offset )
 {
@@ -2486,7 +2452,7 @@ bcFluxManageResidual ( VectorType&      residual,
                        const MeshType&  mesh,
                        const DOF&       dof,
                        const BCBase&    boundaryCond,
-                       CurrentBoundaryFE&    currentBdFE,
+                       CurrentFEManifold&    currentBdFE,
                        const DataType&  time,
                        UInt             offset )
 {
@@ -2520,7 +2486,7 @@ bcResistanceManage ( MatrixType& matrix,
                      const MeshType& mesh,
                      const DOF& dof,
                      const BCBase& boundaryCond,
-                     CurrentBoundaryFE& currentBdFE,
+                     CurrentFEManifold& currentBdFE,
                      const DataType& time,
                      UInt offset )
 {
@@ -2528,14 +2494,13 @@ bcResistanceManage ( MatrixType& matrix,
     bcResistanceManageVector ( rightHandSide, mesh, dof, boundaryCond, currentBdFE, time, offset );
 } //bcResistanceManage
 
-
 template <typename VectorType, typename DataType, typename MeshType>
 void
 bcResistanceManageVector ( VectorType& rightHandSide,
                            const MeshType& mesh,
                            const DOF& dof,
                            const BCBase& boundaryCond,
-                           CurrentBoundaryFE& currentBdFE,
+                           CurrentFEManifold& currentBdFE,
                            const DataType& /*time*/,
                            UInt offset )
 {
@@ -2609,14 +2574,13 @@ bcResistanceManageVector ( VectorType& rightHandSide,
     }
 } //bcResistanceManageVector
 
-
 template <typename MatrixType, typename DataType, typename MeshType>
 void
 bcResistanceManageMatrix ( MatrixType& matrix,
                            const MeshType& mesh,
                            const DOF& dof,
                            const BCBase& boundaryCond,
-                           CurrentBoundaryFE& currentBdFE,
+                           CurrentFEManifold& currentBdFE,
                            const DataType& /*time*/,
                            UInt offset )
 {

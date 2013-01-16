@@ -4151,26 +4151,26 @@ const ReferenceFEHdiv feTetraRT0 ( "Lagrange RT0 on a tetraedra", FE_RT0_TETRA_3
 
 //! Total number of Boundary elements for the hybrid MFE for TRIA (= Number of faces. common for RT0,RT1...)
 #define NB_BDFE_RT0_HYB_TRIA 3
-static const CurrentBoundaryFE BdFE_RT0_HYB_TRIA_1 ( feSegP0, geoLinearSeg, quadRuleSeg1pt,
+static const CurrentFEManifold BdFE_RT0_HYB_TRIA_1 ( feSegP0, geoLinearSeg, quadRuleSeg1pt,
                                                      refcoor_HYB_TRIA_SEG_1, 0 );
-static const CurrentBoundaryFE BdFE_RT0_HYB_TRIA_2 ( feSegP0, geoLinearSeg, quadRuleSeg1pt,
+static const CurrentFEManifold BdFE_RT0_HYB_TRIA_2 ( feSegP0, geoLinearSeg, quadRuleSeg1pt,
                                                      refcoor_HYB_TRIA_SEG_2, 1 );
-static const CurrentBoundaryFE BdFE_RT0_HYB_TRIA_3 ( feSegP0, geoLinearSeg, quadRuleSeg1pt,
+static const CurrentFEManifold BdFE_RT0_HYB_TRIA_3 ( feSegP0, geoLinearSeg, quadRuleSeg1pt,
                                                      refcoor_HYB_TRIA_SEG_3, 2 );
 
-static const CurrentBoundaryFE* HybRT0TriaList[ NB_BDFE_RT0_HYB_TRIA ] =
+static const CurrentFEManifold* HybRT0TriaList[ NB_BDFE_RT0_HYB_TRIA ] =
 {
     &BdFE_RT0_HYB_TRIA_1, &BdFE_RT0_HYB_TRIA_2, &BdFE_RT0_HYB_TRIA_3
 };
 
-static const CurrentBoundaryFE BdFE_RT0_HYB_TRIA_VdotN_1 ( feSegP0, geoLinearSeg, quadRuleSeg1pt,
+static const CurrentFEManifold BdFE_RT0_HYB_TRIA_VdotN_1 ( feSegP0, geoLinearSeg, quadRuleSeg1pt,
                                                            refcoor_HYB_TRIA_SEG_1, 0, 1. );
-static const CurrentBoundaryFE BdFE_RT0_HYB_TRIA_VdotN_2 ( feSegP0, geoLinearSeg, quadRuleSeg1pt,
+static const CurrentFEManifold BdFE_RT0_HYB_TRIA_VdotN_2 ( feSegP0, geoLinearSeg, quadRuleSeg1pt,
                                                            refcoor_HYB_TRIA_SEG_2, 1, 1. / std::sqrt ( 2. ) );
-static const CurrentBoundaryFE BdFE_RT0_HYB_TRIA_VdotN_3 ( feSegP0, geoLinearSeg, quadRuleSeg1pt,
+static const CurrentFEManifold BdFE_RT0_HYB_TRIA_VdotN_3 ( feSegP0, geoLinearSeg, quadRuleSeg1pt,
                                                            refcoor_HYB_TRIA_SEG_3, 2, 1. );
 
-static const CurrentBoundaryFE* HybRT0TriaVdotNList[ NB_BDFE_RT0_HYB_TRIA ] =
+static const CurrentFEManifold* HybRT0TriaVdotNList[ NB_BDFE_RT0_HYB_TRIA ] =
 {
     &BdFE_RT0_HYB_TRIA_VdotN_1, &BdFE_RT0_HYB_TRIA_VdotN_2, &BdFE_RT0_HYB_TRIA_VdotN_3
 };
@@ -4218,20 +4218,20 @@ const ReferenceFEHybrid feTriaRT0VdotNHyb ( "Hybrid RT0 elements on a triangle",
 
 //! Total number of Boundary elements for the hybrid MFE for HEXA (= Number of faces, common for RT0,RT1...)
 #define NB_BDFE_HYB_HEXA 6
-static const CurrentBoundaryFE BdFE_RT0_HYB_HEXA_1 ( feQuadQ0, geoBilinearQuad, quadRuleQuad1pt,
+static const CurrentFEManifold BdFE_RT0_HYB_HEXA_1 ( feQuadQ0, geoBilinearQuad, quadRuleQuad1pt,
                                                      refcoor_HYB_HEXA_FACE_1, 0 );
-static const CurrentBoundaryFE BdFE_RT0_HYB_HEXA_2 ( feQuadQ0, geoBilinearQuad, quadRuleQuad1pt,
+static const CurrentFEManifold BdFE_RT0_HYB_HEXA_2 ( feQuadQ0, geoBilinearQuad, quadRuleQuad1pt,
                                                      refcoor_HYB_HEXA_FACE_2, 1 );
-static const CurrentBoundaryFE BdFE_RT0_HYB_HEXA_3 ( feQuadQ0, geoBilinearQuad, quadRuleQuad1pt,
+static const CurrentFEManifold BdFE_RT0_HYB_HEXA_3 ( feQuadQ0, geoBilinearQuad, quadRuleQuad1pt,
                                                      refcoor_HYB_HEXA_FACE_3, 2 );
-static const CurrentBoundaryFE BdFE_RT0_HYB_HEXA_4 ( feQuadQ0, geoBilinearQuad, quadRuleQuad1pt,
+static const CurrentFEManifold BdFE_RT0_HYB_HEXA_4 ( feQuadQ0, geoBilinearQuad, quadRuleQuad1pt,
                                                      refcoor_HYB_HEXA_FACE_4, 3 );
-static const CurrentBoundaryFE BdFE_RT0_HYB_HEXA_5 ( feQuadQ0, geoBilinearQuad, quadRuleQuad1pt,
+static const CurrentFEManifold BdFE_RT0_HYB_HEXA_5 ( feQuadQ0, geoBilinearQuad, quadRuleQuad1pt,
                                                      refcoor_HYB_HEXA_FACE_5, 4 );
-static const CurrentBoundaryFE BdFE_RT0_HYB_HEXA_6 ( feQuadQ0, geoBilinearQuad, quadRuleQuad1pt,
+static const CurrentFEManifold BdFE_RT0_HYB_HEXA_6 ( feQuadQ0, geoBilinearQuad, quadRuleQuad1pt,
                                                      refcoor_HYB_HEXA_FACE_6, 5 );
 
-static const CurrentBoundaryFE* HybRT0HexaList[ NB_BDFE_HYB_HEXA ] =
+static const CurrentFEManifold* HybRT0HexaList[ NB_BDFE_HYB_HEXA ] =
 {
     &BdFE_RT0_HYB_HEXA_1, &BdFE_RT0_HYB_HEXA_2,
     &BdFE_RT0_HYB_HEXA_3, &BdFE_RT0_HYB_HEXA_4,
@@ -4241,20 +4241,20 @@ static const CurrentBoundaryFE* HybRT0HexaList[ NB_BDFE_HYB_HEXA ] =
 //const RefHybridFE feHexaRT0Hyb(NB_BDFE_HYB_HEXA,HybRT0HexaList,"Hybrid RT0 elements on a hexaedra",
 //         FE_RT0_HYB_HEXA_3D, HEXA, 0,0,1,0,6,3,
 //         refcoor_RT0HYB_HEXA,STANDARD_PATTERN);
-static const CurrentBoundaryFE BdFE_RT0_HYB_HEXA_VdotN_1 ( feQuadQ0, geoBilinearQuad, quadRuleQuad1pt,
+static const CurrentFEManifold BdFE_RT0_HYB_HEXA_VdotN_1 ( feQuadQ0, geoBilinearQuad, quadRuleQuad1pt,
                                                            refcoor_HYB_HEXA_FACE_1, 0, 1. );
-static const CurrentBoundaryFE BdFE_RT0_HYB_HEXA_VdotN_2 ( feQuadQ0, geoBilinearQuad, quadRuleQuad1pt,
+static const CurrentFEManifold BdFE_RT0_HYB_HEXA_VdotN_2 ( feQuadQ0, geoBilinearQuad, quadRuleQuad1pt,
                                                            refcoor_HYB_HEXA_FACE_2, 1, 1. );
-static const CurrentBoundaryFE BdFE_RT0_HYB_HEXA_VdotN_3 ( feQuadQ0, geoBilinearQuad, quadRuleQuad1pt,
+static const CurrentFEManifold BdFE_RT0_HYB_HEXA_VdotN_3 ( feQuadQ0, geoBilinearQuad, quadRuleQuad1pt,
                                                            refcoor_HYB_HEXA_FACE_3, 2, 1. );
-static const CurrentBoundaryFE BdFE_RT0_HYB_HEXA_VdotN_4 ( feQuadQ0, geoBilinearQuad, quadRuleQuad1pt,
+static const CurrentFEManifold BdFE_RT0_HYB_HEXA_VdotN_4 ( feQuadQ0, geoBilinearQuad, quadRuleQuad1pt,
                                                            refcoor_HYB_HEXA_FACE_4, 3, 1. );
-static const CurrentBoundaryFE BdFE_RT0_HYB_HEXA_VdotN_5 ( feQuadQ0, geoBilinearQuad, quadRuleQuad1pt,
+static const CurrentFEManifold BdFE_RT0_HYB_HEXA_VdotN_5 ( feQuadQ0, geoBilinearQuad, quadRuleQuad1pt,
                                                            refcoor_HYB_HEXA_FACE_5, 4, 1. );
-static const CurrentBoundaryFE BdFE_RT0_HYB_HEXA_VdotN_6 ( feQuadQ0, geoBilinearQuad, quadRuleQuad1pt,
+static const CurrentFEManifold BdFE_RT0_HYB_HEXA_VdotN_6 ( feQuadQ0, geoBilinearQuad, quadRuleQuad1pt,
                                                            refcoor_HYB_HEXA_FACE_6, 5, 1. );
 
-static const CurrentBoundaryFE* HybRT0HexaVdotNList[ NB_BDFE_HYB_HEXA ] =
+static const CurrentFEManifold* HybRT0HexaVdotNList[ NB_BDFE_HYB_HEXA ] =
 {
     &BdFE_RT0_HYB_HEXA_VdotN_1, &BdFE_RT0_HYB_HEXA_VdotN_2,
     &BdFE_RT0_HYB_HEXA_VdotN_3, &BdFE_RT0_HYB_HEXA_VdotN_4,
@@ -4305,16 +4305,16 @@ SEE ElementShapes.cc   for the ORIENTATION CONVENTIONS
 
 //! Total number of Boundary elements for the hybrid MFE for TETRA (= Number of faces. common for RT0,RT1...)
 #define NB_BDFE_RT0_HYB_TETRA 4
-static const CurrentBoundaryFE BdFE_RT0_HYB_TETRA_1 ( feTriaP0, geoLinearTria, quadRuleTria1pt,
+static const CurrentFEManifold BdFE_RT0_HYB_TETRA_1 ( feTriaP0, geoLinearTria, quadRuleTria1pt,
                                                       refcoor_HYB_TETRA_FACE_1, 0 );
-static const CurrentBoundaryFE BdFE_RT0_HYB_TETRA_2 ( feTriaP0, geoLinearTria, quadRuleTria1pt,
+static const CurrentFEManifold BdFE_RT0_HYB_TETRA_2 ( feTriaP0, geoLinearTria, quadRuleTria1pt,
                                                       refcoor_HYB_TETRA_FACE_2, 1 );
-static const CurrentBoundaryFE BdFE_RT0_HYB_TETRA_3 ( feTriaP0, geoLinearTria, quadRuleTria1pt,
+static const CurrentFEManifold BdFE_RT0_HYB_TETRA_3 ( feTriaP0, geoLinearTria, quadRuleTria1pt,
                                                       refcoor_HYB_TETRA_FACE_3, 2 );
-static const CurrentBoundaryFE BdFE_RT0_HYB_TETRA_4 ( feTriaP0, geoLinearTria, quadRuleTria1pt,
+static const CurrentFEManifold BdFE_RT0_HYB_TETRA_4 ( feTriaP0, geoLinearTria, quadRuleTria1pt,
                                                       refcoor_HYB_TETRA_FACE_4, 3 );
 
-static const CurrentBoundaryFE* HybRT0TetraList[ NB_BDFE_RT0_HYB_TETRA ] =
+static const CurrentFEManifold* HybRT0TetraList[ NB_BDFE_RT0_HYB_TETRA ] =
 {
     &BdFE_RT0_HYB_TETRA_1, &BdFE_RT0_HYB_TETRA_2,
     &BdFE_RT0_HYB_TETRA_3, &BdFE_RT0_HYB_TETRA_4
@@ -4325,16 +4325,16 @@ static const CurrentBoundaryFE* HybRT0TetraList[ NB_BDFE_RT0_HYB_TETRA ] =
     refcoor_RT0HYB_TETRA,STANDARD_PATTERN);*/
 
 
-static const CurrentBoundaryFE BdFE_RT0_HYB_TETRA_VdotN_1 ( feTriaP0, geoLinearTria, quadRuleTria1pt,
+static const CurrentFEManifold BdFE_RT0_HYB_TETRA_VdotN_1 ( feTriaP0, geoLinearTria, quadRuleTria1pt,
                                                             refcoor_HYB_TETRA_FACE_1, 0, 2. );
-static const CurrentBoundaryFE BdFE_RT0_HYB_TETRA_VdotN_2 ( feTriaP0, geoLinearTria, quadRuleTria1pt,
+static const CurrentFEManifold BdFE_RT0_HYB_TETRA_VdotN_2 ( feTriaP0, geoLinearTria, quadRuleTria1pt,
                                                             refcoor_HYB_TETRA_FACE_2, 1, 2. );
-static const CurrentBoundaryFE BdFE_RT0_HYB_TETRA_VdotN_3 ( feTriaP0, geoLinearTria, quadRuleTria1pt,
+static const CurrentFEManifold BdFE_RT0_HYB_TETRA_VdotN_3 ( feTriaP0, geoLinearTria, quadRuleTria1pt,
                                                             refcoor_HYB_TETRA_FACE_3, 2, 2. / std::sqrt ( 3. ) );
-static const CurrentBoundaryFE BdFE_RT0_HYB_TETRA_VdotN_4 ( feTriaP0, geoLinearTria, quadRuleTria1pt,
+static const CurrentFEManifold BdFE_RT0_HYB_TETRA_VdotN_4 ( feTriaP0, geoLinearTria, quadRuleTria1pt,
                                                             refcoor_HYB_TETRA_FACE_4, 3, 2. );
 
-static const CurrentBoundaryFE* HybRT0TetraVdotNList[ NB_BDFE_RT0_HYB_TETRA ] =
+static const CurrentFEManifold* HybRT0TetraVdotNList[ NB_BDFE_RT0_HYB_TETRA ] =
 {
     &BdFE_RT0_HYB_TETRA_VdotN_1, &BdFE_RT0_HYB_TETRA_VdotN_2,
     &BdFE_RT0_HYB_TETRA_VdotN_3, &BdFE_RT0_HYB_TETRA_VdotN_4
@@ -4350,5 +4350,3 @@ const ReferenceFEHybrid feTetraRT0VdotNHyb ( "Hybrid RT0 elements on a tetrahedr
 
 
 }
-
-

@@ -124,7 +124,7 @@ public:
         @param offset The boundary condition offset
         @param commPtr pointer to Epetra_Comm object
      */
-    void build (const DOF& dof, CurrentBoundaryFE& currentBdFE, matrix_Type& systemMatrix, UInt offset, MapEpetra::comm_ptrtype& commPtr);
+    void build (const DOF& dof, CurrentFEManifold& currentBdFE, matrix_Type& systemMatrix, UInt offset, MapEpetra::comm_ptrtype& commPtr);
 
     //! Build the rotation matrix
     /*!
@@ -137,7 +137,7 @@ public:
         @param commPtr pointer to Epetra_Comm object
      */
     template<typename MeshType>
-    void build (const MeshType& mesh, const DOF& dof, CurrentBoundaryFE& currentBdFE, matrix_Type& systemMatrix, UInt offset, MapEpetra::comm_ptrtype& commPtr);
+    void build (const MeshType& mesh, const DOF& dof, CurrentFEManifold& currentBdFE, const MapEpetra& map, UInt offset);
 
     //! This function modify the system matrix to apply a change of basis from the Cartesian coordinate system to the local coordinate system given by tangents and normals to the boundary
     /*!
@@ -171,7 +171,7 @@ public:
         @param mesh The mesh
      */
     template <typename VectorType, typename MeshType>
-    void computeIntegratedNormals (const DOF& dof, CurrentBoundaryFE& currentBdFE, VectorType& normals,  const MeshType& mesh);
+    void computeIntegratedNormals (const DOF& dof, CurrentFEManifold& currentBdFE, VectorType& normals,  const MeshType& mesh);
 
     //! Export in the vtk format the tangential and normal vectors (t1, t2, n) for each DOF on the domain boundary
     /*!
@@ -215,7 +215,7 @@ private:
         @param currentBdFE the current boundary finite element
      */
     template<typename MeshType>
-    void M_calculateNormals (const MeshType& mesh, const DOF& dof, CurrentBoundaryFE& currentBdFE);
+    void M_calculateNormals (const MeshType& mesh, const DOF& dof, CurrentFEManifold& currentBdFE);
 
     //! Store in *M_normalPtr the versors given by the user
     /*!
@@ -231,14 +231,15 @@ private:
         @param systemMatrix the matrix of the problem
         @param offset that will be used if there is more than one unknown to recover the global ID
      */
-    void M_buildRotationMatrix (matrix_Type& systemMatrix, UInt offset = 0);
+    void M_buildRotationMatrix (const MapEpetra& map, UInt offset);
     //@}
 
     //! true when there are stored normals
     bool          M_dataBuilt;
 
-    //! Shared pointer to the rotation matrix
+    //! Shared pointer to the rotation matrix and its transpose
     matrixPtr_Type M_rotationMatrixPtr;
+    matrixPtr_Type M_rotationMatrixTransposePtr;
 
     //! Shared pointer to the local Map
     epetraMapPtr_Type M_localMapEpetraPtr;
@@ -368,7 +369,7 @@ void BCManageNormal<MatrixType>::init (const BCBase& boundaryCondition, const Re
 
 template<typename MatrixType>
 template<typename MeshType>
-void BCManageNormal<MatrixType>::build (const MeshType& mesh, const DOF& dof, CurrentBoundaryFE& currentBdFE, MatrixType& systemMatrix, UInt offset, MapEpetra::comm_ptrtype& commPtr)
+void BCManageNormal<MatrixType>::build (const MeshType& mesh, const DOF& dof, CurrentFEManifold& currentBdFE, const MapEpetra& map, UInt offset)
 {
     if (M_dataBuilt)
     {
@@ -404,7 +405,7 @@ void BCManageNormal<MatrixType>::build (const MeshType& mesh, const DOF& dof, Cu
             ++i;
         }
 
-        M_localMapEpetraPtr.reset ( new MapEpetra (-1, 3 * nbPoints, &idList[0], commPtr) );
+        M_localMapEpetraPtr.reset ( new MapEpetra (-1, 3 * nbPoints, &idList[0], map.commPtr() ) );
 
         //-----------------------------------------------------
         // STEP 2: Compute normals and tangents
@@ -415,7 +416,7 @@ void BCManageNormal<MatrixType>::build (const MeshType& mesh, const DOF& dof, Cu
         //this is used only for exporting the normals in vtk format.. should be put elsewhere?
         M_calculateCoordinates (mesh);
         M_calculateTangentVectors();
-        M_buildRotationMatrix (systemMatrix, offset);
+        M_buildRotationMatrix (map, offset);
     }
 }
 
@@ -433,7 +434,7 @@ void BCManageNormal<MatrixType>::bcShiftToNormalTangentialCoordSystem (matrix_Ty
 
         //A = C*Rt"
         matrix_Type D (systemMatrix.map(), systemMatrix.meanNumEntries() );
-        C.multiply (false, *M_rotationMatrixPtr, true, D);
+        C.multiply (false, *M_rotationMatrixTransposePtr, false, D);
         systemMatrix.swapCrsMatrix (D);
 
         //b = R*b
@@ -450,7 +451,7 @@ void BCManageNormal<MatrixType>::bcShiftToCartesianCoordSystem (matrix_Type& sys
     {
         // C = Rt*A;
         matrix_Type C (systemMatrix.map(), systemMatrix.meanNumEntries() );
-        M_rotationMatrixPtr->multiply (true, systemMatrix, false, C);
+        M_rotationMatrixTransposePtr->multiply (false, systemMatrix, false, C);
 
         // A = C*R";
         matrix_Type D (systemMatrix.map(), systemMatrix.meanNumEntries() );
@@ -459,19 +460,18 @@ void BCManageNormal<MatrixType>::bcShiftToCartesianCoordSystem (matrix_Type& sys
 
         // b = Rt*b;
         VectorType c (rightHandSide);
-        M_rotationMatrixPtr->multiply (true, c, rightHandSide);
+        M_rotationMatrixTransposePtr->multiply (false, c, rightHandSide);
     }
 }
 
 template<typename MatrixType>
 template<typename VectorType, typename MeshType>
-void BCManageNormal<MatrixType>::computeIntegratedNormals (const DOF& dof, CurrentBoundaryFE& currentBdFE, VectorType& normals,  const MeshType& mesh)
+void BCManageNormal<MatrixType>::computeIntegratedNormals (const DOF& dof, CurrentFEManifold& currentBdFE, VectorType& normals,  const MeshType& mesh)
 {
 
     //-----------------------------------------------------
     // STEP 1: Calculating the normals
     //-----------------------------------------------------
-
 
     VectorType repNormals (normals.map(), Repeated);
     //Loop on the Faces
@@ -700,7 +700,7 @@ void BCManageNormal<MatrixType>::M_addVersor (const ID& idof, const Real& vx, co
 
 template< typename MatrixType>
 template< typename MeshType>
-void BCManageNormal< MatrixType>::M_calculateNormals (const MeshType& mesh, const DOF& dof, CurrentBoundaryFE& currentBdFE)
+void BCManageNormal< MatrixType>::M_calculateNormals (const MeshType& mesh, const DOF& dof, CurrentFEManifold& currentBdFE)
 {
     //-----------------------------------------------------
     // STEP 1: Calculating the normals
@@ -709,7 +709,6 @@ void BCManageNormal< MatrixType>::M_calculateNormals (const MeshType& mesh, cons
     M_normalPtr.reset ( new VectorEpetra (*M_localMapEpetraPtr, Repeated) );
     //(*M_normalPtr)*=0;
     computeIntegratedNormals (dof, currentBdFE, *M_normalPtr, mesh);
-
 
     //-----------------------------------------------------
     // STEP 4: Cleaning the memory
@@ -849,15 +848,14 @@ void BCManageNormal<MatrixType>::M_calculateTangentVectors()
     }
 }
 
-
 template<typename MatrixType>
-void BCManageNormal<MatrixType>::M_buildRotationMatrix (matrix_Type& systemMatrix, UInt offset)
+void BCManageNormal<MatrixType>::M_buildRotationMatrix (const MapEpetra& map, UInt offset)
 {
     //Initialization of the map to store the normal vectors
     std::map< ID, std::vector< Real > >::iterator mapIt;
 
     //Creating the matrix
-    M_rotationMatrixPtr.reset ( new matrix_Type (systemMatrix.map(), systemMatrix.meanNumEntries() ) );
+    M_rotationMatrixPtr.reset ( new matrix_Type(map, 3) );
 
     //Adding one to the diagonal
     M_rotationMatrixPtr->insertOneDiagonal();
@@ -942,6 +940,7 @@ void BCManageNormal<MatrixType>::M_buildRotationMatrix (matrix_Type& systemMatri
     }
 
     M_rotationMatrixPtr->globalAssemble();
+    M_rotationMatrixTransposePtr = M_rotationMatrixPtr->transpose();
 }
 
 } //end of namespace LifeV

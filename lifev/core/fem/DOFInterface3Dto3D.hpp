@@ -49,7 +49,7 @@
 #include <lifev/core/fem/DOFInterface.hpp>
 #include <lifev/core/fem/ReferenceFE.hpp>
 #include <lifev/core/fem/DOF.hpp>
-#include <lifev/core/fem/CurrentBoundaryFE.hpp>
+#include <lifev/core/fem/CurrentFEManifold.hpp>
 #include <lifev/core/util/LifeChrono.hpp>
 
 namespace LifeV
@@ -564,8 +564,8 @@ template <typename Mesh>
 void DOFInterface3Dto3D::updateDofConnections ( const Mesh& mesh1, const DOF& dof1,
                                                 const Mesh& mesh2, const DOF& dof2, const Real& tol, const fct& coupled, Int const* const flag3)
 {
-    CurrentBoundaryFE feBd1 ( M_refFE1->boundaryFE(), getGeometricMap ( mesh1 ).boundaryMap() );
-    CurrentBoundaryFE feBd2 ( M_refFE2->boundaryFE(), getGeometricMap ( mesh2 ).boundaryMap() );
+    CurrentFEManifold feBd1 ( M_refFE1->boundaryFE(), getGeometricMap ( mesh1 ).boundaryMap() );
+    CurrentFEManifold feBd2 ( M_refFE2->boundaryFE(), getGeometricMap ( mesh2 ).boundaryMap() );
 
     std::vector<Real> p1 ( nDimensions ), p2 ( nDimensions );
 

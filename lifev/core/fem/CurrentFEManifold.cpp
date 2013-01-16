@@ -24,22 +24,7 @@
 */
 //@HEADER
 
-/*!
-    @file
-    @brief  A class for static boundary finite element
-
-    @author Jean-Frederic Gerbeau
-            Vincent Martin
-    @date 00-09-2002
-
-    @refactoring Luca Bertagna <lbertag@emory.edu>
-    @date Sept 2012
-
-    @contributor Samuel Quinodoz <samuel.quinodoz@epfl.ch>
-    @mantainer Samuel Quinodoz <samuel.quinodoz@epfl.ch>
- */
-
-#include <lifev/core/fem/CurrentBoundaryFE.hpp>
+#include <lifev/core/fem/CurrentFEManifold.hpp>
 
 namespace LifeV
 {
@@ -48,7 +33,7 @@ namespace LifeV
 //               Constructor(s) & Destructor           //
 // =================================================== //
 
-CurrentBoundaryFE::CurrentBoundaryFE (const ReferenceFE& refFE, const GeometricMap& geoMap, const QuadratureRule& qr ) :
+CurrentFEManifold::CurrentFEManifold (const ReferenceFE& refFE, const GeometricMap& geoMap, const QuadratureRule& qr ) :
     CurrentFE               (refFE, geoMap, qr),
     M_phiGeo                (boost::extents[M_nbGeoNode][M_nbQuadPt]),
     M_tangents              (boost::extents[M_nbCoor][nDimensions][M_nbQuadPt]),
@@ -67,7 +52,7 @@ CurrentBoundaryFE::CurrentBoundaryFE (const ReferenceFE& refFE, const GeometricM
     // Nothing to be done here
 }
 
-CurrentBoundaryFE::CurrentBoundaryFE (const ReferenceFE& refFE, const GeometricMap& geoMap) :
+CurrentFEManifold::CurrentFEManifold (const ReferenceFE& refFE, const GeometricMap& geoMap) :
     CurrentFE         (refFE, geoMap),
     M_phiGeo                (boost::extents[M_nbGeoNode][M_nbQuadPt]),
     M_tangents              (boost::extents[M_nbCoor][nDimensions][M_nbQuadPt]),
@@ -86,7 +71,7 @@ CurrentBoundaryFE::CurrentBoundaryFE (const ReferenceFE& refFE, const GeometricM
     // Nothing to be done here
 }
 
-CurrentBoundaryFE::CurrentBoundaryFE (const ReferenceFE& refFE, const GeometricMap& geoMap,
+CurrentFEManifold::CurrentFEManifold (const ReferenceFE& refFE, const GeometricMap& geoMap,
                                       const QuadratureRule& qr, const Real* refCoor,
                                       UInt currentId, Real invArea ) :
     CurrentFE               (refFE, geoMap, qr),
@@ -139,7 +124,7 @@ CurrentBoundaryFE::CurrentBoundaryFE (const ReferenceFE& refFE, const GeometricM
     computeWRootDetMetric();
 }
 
-CurrentBoundaryFE::CurrentBoundaryFE (const CurrentBoundaryFE& bdFE) :
+CurrentFEManifold::CurrentFEManifold (const CurrentFEManifold& bdFE) :
     CurrentFE               (bdFE),
     M_phiGeo                (bdFE.M_phiGeo),
     M_tangents              (bdFE.M_tangents),
@@ -163,21 +148,16 @@ CurrentBoundaryFE::CurrentBoundaryFE (const CurrentBoundaryFE& bdFE) :
     }
 }
 
-CurrentBoundaryFE::~CurrentBoundaryFE()
-{
-    // Nothing to be done here
-}
-
 // =================================================== //
 //                        Methods                      //
 // =================================================== //
 
-void CurrentBoundaryFE::coorMap (Real& x, Real& y, Real& z, Real xi, Real eta) const
+void CurrentFEManifold::coorMap (Real& x, Real& y, Real& z, Real xi, Real eta) const
 {
     CurrentFE::coorMap (x, y, z, xi, eta, 0.);
 }
 
-Real CurrentBoundaryFE::measure() const
+Real CurrentFEManifold::measure() const
 {
     ASSERT (M_wRootDetMetricUpdated, "Weighted root of metric determinant is not updated!");
 
@@ -189,7 +169,7 @@ Real CurrentBoundaryFE::measure() const
     return meas;
 }
 
-void CurrentBoundaryFE::update (const std::vector<std::vector<Real> >& pts, flag_Type upFlag)
+void CurrentFEManifold::update (const std::vector<std::vector<Real> >& pts, flag_Type upFlag)
 {
     CurrentFE::update (pts, upFlag);
 
@@ -234,7 +214,7 @@ void CurrentBoundaryFE::update (const std::vector<std::vector<Real> >& pts, flag
 //                Protected Methods                //
 // =============================================== //
 
-void CurrentBoundaryFE::computeTangents()
+void CurrentFEManifold::computeTangents()
 {
     ASSERT (M_cellNodesUpdated, "Missing update: cellNodes\n");
     ASSERT (M_dphiGeometricMapUpdated, "Missing update: dphiGeometricMap");
@@ -253,7 +233,7 @@ void CurrentBoundaryFE::computeTangents()
     M_tangentsUpdated = true;
 }
 
-void CurrentBoundaryFE::computeNormal()
+void CurrentFEManifold::computeNormal()
 {
     ASSERT (M_tangentsUpdated, "Missing update: tangents\n");
 
@@ -298,7 +278,7 @@ void CurrentBoundaryFE::computeNormal()
     M_normalUpdated = true;
 }
 
-void CurrentBoundaryFE::computeMetric()
+void CurrentFEManifold::computeMetric()
 {
     ASSERT (M_tangentsUpdated, "Missing update: tangents\n");
 
@@ -327,7 +307,7 @@ void CurrentBoundaryFE::computeMetric()
     M_metricUpdated = true;
 }
 
-void CurrentBoundaryFE::computeDetMetric()
+void CurrentFEManifold::computeDetMetric()
 {
     ASSERT (M_metricUpdated, "Missing update: metric\n");
 
@@ -348,7 +328,7 @@ void CurrentBoundaryFE::computeDetMetric()
     M_detMetricUpdated = true;
 }
 
-void CurrentBoundaryFE::computeInverseMetric()
+void CurrentFEManifold::computeInverseMetric()
 {
     ASSERT (M_metricUpdated, "Missing update: metric\n");
     ASSERT (M_detMetricUpdated, "Missing update: detMetric\n");
@@ -376,7 +356,7 @@ void CurrentBoundaryFE::computeInverseMetric()
     M_inverseMetricUpdated = true;
 }
 
-void CurrentBoundaryFE::computeWRootDetMetric()
+void CurrentFEManifold::computeWRootDetMetric()
 {
     ASSERT (M_metricUpdated, "Missing update: metric\n");
     ASSERT (M_detMetricUpdated, "Missing update: detMetric\n");
