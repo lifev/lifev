@@ -1,0 +1,44 @@
+# +-----------------------------------------------+
+# |      LinearSolverPreconditioner test          |
+# +-----------------------------------------------+
+#
+# +-----------------------------------------------+
+# |           Author: Gwenol Grandperrin          |
+# |             Date: 2013-01-16                  |
+# +-----------------------------------------------+
+
+[finite_element]
+    velocity                    = P2
+
+[mesh]
+    num_elements                = 10
+
+[exporter]
+    type                        = hdf5 # hdf5 (if library compiled with hdf5 support) or ensight
+    multimesh                   = false
+    start                       = 0
+    save                        = 1
+
+[prec/LinearSolver] # using Laplacian
+    displayList                 = false
+    [./LinearSolver]
+        parameters_file         = PrecSolverParamList.xml
+        
+[prec/Laplacian]            
+    displayList                 = false
+
+    [./ML]
+        default_parameter_list  = SA
+        inc_or_dec              = increasing
+
+        [./smoother]
+            type                = 'symmetric Gauss-Seidel'
+            pre_or_post         = both
+
+        [../coarse]
+            type                = Amesos-KLU
+            max_size            = 500
+
+        [../aggregation]
+            threshold           = 0.01
+
