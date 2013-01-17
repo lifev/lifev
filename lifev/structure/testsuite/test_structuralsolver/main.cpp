@@ -72,6 +72,7 @@
 #include <lifev/structure/solver/VenantKirchhoffMaterialNonLinear.hpp>
 #include <lifev/structure/solver/NeoHookeanMaterialNonLinear.hpp>
 #include <lifev/structure/solver/ExponentialMaterialNonLinear.hpp>
+#include <lifev/structure/solver/VenantKirchhoffMaterialNonLinearPenalized.hpp>
 
 #include <lifev/core/filter/ExporterEnsight.hpp>
 #ifdef HAVE_HDF5
@@ -136,6 +137,7 @@ public:
     }
     void CheckResultLE(const Real& dispNorm, const Real& time);
     void CheckResultSVK(const Real& dispNorm, const Real& time);
+    void CheckResultSVKPenalized(const Real& dispNorm, const Real& time);
     void CheckResultEXP(const Real& dispNorm, const Real& time);
     void CheckResultNH(const Real& dispNorm, const Real& time);
     void resultChanged(Real time);
@@ -517,6 +519,8 @@ Structure::run3d()
           CheckResultLE(normVect, dataStructure->dataTime()->time() );
         else if (!dataStructure->solidType().compare("nonLinearVenantKirchhoff"))
           CheckResultSVK(normVect, dataStructure->dataTime()->time() );
+        else if (!dataStructure->solidType().compare("nonLinearVenantKirchhoffPenalized"))
+          CheckResultSVKPenalized(normVect, dataStructure->dataTime()->time() );
         else if (!dataStructure->solidType().compare("exponential"))
           CheckResultEXP(normVect, dataStructure->dataTime()->time() );
         else
@@ -554,6 +558,17 @@ void Structure::CheckResultSVK(const Real& dispNorm,const Real& time)
     if ( time == 0.3  && std::fabs(dispNorm-0.263350)<=1e-5 )
         this->resultChanged(time);
     if ( time == 0.4  && std::fabs(dispNorm-0.263351)<=1e-5 )
+        this->resultChanged(time);
+}
+void Structure::CheckResultSVKPenalized(const Real& dispNorm,const Real& time)
+{
+    if ( time == 0.1  && std::fabs(dispNorm-0.254316)<=1e-5 )
+        this->resultChanged(time);
+    if ( time == 0.2  && std::fabs(dispNorm-0.254322)<=1e-5 )
+        this->resultChanged(time);
+    if ( time == 0.3  && std::fabs(dispNorm-0.254317)<=1e-5 )
+        this->resultChanged(time);
+    if ( time == 0.4  && std::fabs(dispNorm-0.254318)<=1e-5 )
         this->resultChanged(time);
 }
 void Structure::CheckResultEXP(const Real& dispNorm,const Real& time)
