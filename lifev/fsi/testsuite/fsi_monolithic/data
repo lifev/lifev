@@ -90,6 +90,7 @@ BDF_order		= 1
 [../space_discretization]
 mesh_dir  = ./Mesh/
 mesh_file = tube20.mesh # bypass_fluid_coarse_BL_2vols.mesh
+mesh_type = .mesh
 order     = P1
 vel_order       = P1            # P1, P1Bubble, P2
 press_order     = P1            # P1, P2
@@ -145,6 +146,7 @@ BDF_order		= 1
 [../space_discretization]
 mesh_dir  = ./Mesh/ #test_tubes/  # the directory where the mesh file is
 mesh_file = vessel20.mesh #bypass_solid_coarse_BL_2vols.mesh  # mesh file
+mesh_type = .mesh
 order     = P1
 
 

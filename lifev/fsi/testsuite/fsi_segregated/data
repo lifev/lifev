@@ -92,6 +92,7 @@ mesh_dir  = ./ # the directory where the mesh file is
 #mesh_file = stent-fluid-coarse.mesh  # mesh file
 mesh_file = tube20.mesh  # mesh file
 #mesh_file = tube.mesh  # mesh file
+mesh_type = .mesh
 
 vel_order		= P1		# P1, P1Bubble, P2
 press_order		= P1			# P1, P2
@@ -223,6 +224,7 @@ mesh_dir  = ./  # the directory where the mesh file is
 #mesh_file = stent-solid-coarse.mesh  # mesh file
 mesh_file = vessel20.mesh  # mesh file
 #mesh_file = vessel.mesh  # mesh file
+mesh_type = .mesh
 order     = P1
 
 [../miscellaneous]

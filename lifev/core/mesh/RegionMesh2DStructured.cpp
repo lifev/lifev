@@ -67,10 +67,10 @@ markerID_Type regularMeshPointPosition2D( const UInt& i_x,
     INTERNAL = 0;
 
     // Edges
-    BOTTOMEDGE  =  1;
-    LEFTEDGE    =  2;
-    RIGHTEDGE   =  4;
-    TOPEDGE     =  8;
+    LEFTEDGE     =  8;
+    BOTTOMEDGE   =  1;
+    TOPEDGE      =  2;
+    RIGHTEDGE    =  4;
 
     // Corners
     BOTTOMLEFTCORNER   = 9;
@@ -87,11 +87,11 @@ markerID_Type regularMeshPointPosition2D( const UInt& i_x,
         case 1:
             return Structured2DLabel::BOTTOM;
         case 2:
-            return Structured2DLabel::LEFT;
+            return Structured2DLabel::TOP;
         case 4:
             return Structured2DLabel::RIGHT;
         case 8:
-            return Structured2DLabel::TOP;
+            return Structured2DLabel::LEFT;
         // We are on a corner
         case 5:
             return Structured2DLabel::BOTTOM_RIGHT;

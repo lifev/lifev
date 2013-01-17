@@ -168,7 +168,7 @@ main( int argc, char** argv )
     // +-----------------------------------------------+
     if( verbose ) std::cout << std::endl << "[Loading the mesh]" << std::endl;
 
-    meshPtr_Type fullMeshPtr( new mesh_Type );
+    meshPtr_Type fullMeshPtr( new mesh_Type( Comm ) );
     const UInt & geoDim = static_cast<UInt>( mesh_Type::S_geoDimensions );
 
 
@@ -186,7 +186,11 @@ main( int argc, char** argv )
 
     if( verbose ) std::cout << "Mesh size  : " << MeshUtility::MeshStatistics::computeSize( *fullMeshPtr ).maxH << std::endl;
     if( verbose ) std::cout << "Partitioning the mesh ... " << std::endl;
-    MeshPartitioner< mesh_Type >   meshPart( fullMeshPtr, Comm );
+    meshPtr_Type meshPtr;
+    {
+        MeshPartitioner< mesh_Type > meshPart( fullMeshPtr, Comm );
+        meshPtr = meshPart.meshPartition();
+    }
     fullMeshPtr.reset(); //Freeing the global mesh to save memory
 
     // +-----------------------------------------------+
@@ -196,7 +200,7 @@ main( int argc, char** argv )
     if( verbose ) std::cout << "FE for the velocity: " << uOrder << std::endl;
 
     if( verbose ) std::cout << "Building the velocity FE space ... " << std::flush;
-    fespacePtr_Type uFESpace( new fespace_Type( meshPart, uOrder, geoDim, Comm ) );
+    fespacePtr_Type uFESpace( new fespace_Type( meshPtr, uOrder, geoDim, Comm ) );
     if( verbose ) std::cout << "ok." << std::endl;
 
     // Pressure offset in the vector

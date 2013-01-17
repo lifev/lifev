@@ -1586,7 +1586,7 @@ void ipstab_bagrad( const Real coef, MatrixElemental& elmat,
                 sum2 += betaLoc * betaLoc;
             }
         }
-        ba2[ ig ] = sum2 == 0 ? 0 : sum1 * sum1 / pow( sum2, 0.5 );
+        ba2[ ig ] = sum2 == 0 ? 0 : sum1 * sum1 / std::pow( sum2, 0.5 );
     }
 
     for ( UInt ig = 0; ig < bdfe.nbQuadPt(); ++ig )
@@ -4288,7 +4288,7 @@ void choldc( KNM<Real> &a, KN<Real> &p )
                 sum -= a( i, k ) * a( j, k );
             if ( i == j )
             {
-                p( i ) = sqrt( sum );
+                p( i ) = std::sqrt( sum );
             }
             else
                 a( j, i ) = sum / p( i );
