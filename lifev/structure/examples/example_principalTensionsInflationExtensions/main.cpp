@@ -64,7 +64,7 @@
 #include <lifev/structure/solver/NeoHookeanMaterialNonLinear.hpp>
 #include <lifev/structure/solver/ExponentialMaterialNonLinear.hpp>
 
-#include <lifev/structure/solver/WallTensionEstimator.hpp>
+#include <lifev/structure/solver/WallTensionEstimatorCylindricalCoordinates.hpp>
 #include <lifev/structure/solver/WallTensionEstimatorData.hpp>
 
 #include <lifev/core/filter/ExporterEnsight.hpp>
@@ -104,45 +104,41 @@ class Structure
 {
 public:
 
-  typedef LifeV::RegionMesh<LinearTetra>                              mesh_Type;
+    typedef LifeV::RegionMesh<LinearTetra>                              mesh_Type;
 
-  // Filters
-  typedef typename LifeV::Exporter<mesh_Type  >                                filter_Type;
-  typedef boost::shared_ptr< LifeV::Exporter<mesh_Type  > >           filterPtr_Type;
-    
-  typedef LifeV::ExporterEmpty<mesh_Type >                            emptyFilter_Type;
-  typedef boost::shared_ptr<emptyFilter_Type>                         emptyFilterPtr_Type;                         
-  typedef LifeV::ExporterEnsight<mesh_Type >                          ensightFilter_Type;
-  typedef boost::shared_ptr<ensightFilter_Type>                       ensightFilterPtr_Type;
+    // Filters
+    typedef typename LifeV::Exporter<mesh_Type  >                                filter_Type;
+    typedef boost::shared_ptr< LifeV::Exporter<mesh_Type  > >           filterPtr_Type;
+
+    typedef LifeV::ExporterEmpty<mesh_Type >                            emptyFilter_Type;
+    typedef boost::shared_ptr<emptyFilter_Type>                         emptyFilterPtr_Type;
+    typedef LifeV::ExporterEnsight<mesh_Type >                          ensightFilter_Type;
+    typedef boost::shared_ptr<ensightFilter_Type>                       ensightFilterPtr_Type;
 
 #ifdef HAVE_HDF5
-  typedef LifeV::ExporterHDF5<mesh_Type >                             hdf5Filter_Type;
-  typedef boost::shared_ptr<hdf5Filter_Type>                          hdf5FilterPtr_Type;
+    typedef LifeV::ExporterHDF5<mesh_Type >                             hdf5Filter_Type;
+    typedef boost::shared_ptr<hdf5Filter_Type>                          hdf5FilterPtr_Type;
 #endif
 
 
 
-/** @name Constructors, destructor
- */
-//@{
+    /** @name Constructors, destructor
+     */
+    //@{
     Structure( int                                   argc,
                char**                                argv,
                boost::shared_ptr<Epetra_Comm>        structComm );
 
     ~Structure()
     {}
-//@}
+    //@}
 
-//@{
+    //@{
     void run()
     {
         run3d();
     }
-    void CheckResultDisplacement(const Real tensNorm);
-    void CheckResultEigenvalues(const Real tensNorm);
-    void CheckResultTensions(const Real tensNorm);
-    void resultChanged( void );
-//@}
+    //@}
 
 protected:
 
@@ -170,11 +166,11 @@ private:
 struct Structure::Private
 {
     Private() :
-            rho(1), 
-	    poisson(1), 
-	    young(1), 
-	    bulk(1), 
-	    alpha(1), 
+        rho(1),
+	    poisson(1),
+	    young(1),
+	    bulk(1),
+	    alpha(1),
 	    gamma(1)
     {}
     typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> fct_type;
@@ -232,10 +228,10 @@ void
 Structure::run3d()
 {
     // General typedefs
-    typedef WallTensionEstimator< mesh_Type >::solutionVect_Type  vector_Type;
+    typedef WallTensionEstimatorCylindricalCoordinates< mesh_Type >::solutionVect_Type  vector_Type;
     typedef boost::shared_ptr<vector_Type>                        vectorPtr_Type;
     typedef FESpace< mesh_Type, MapEpetra >                       solidFESpace_Type;
-    typedef boost::shared_ptr<solidFESpace_Type>                  solidFESpacePtr_Type;    
+    typedef boost::shared_ptr<solidFESpace_Type>                  solidFESpacePtr_Type;
 
 
     bool verbose = (parameters->comm->MyPID() == 0);
@@ -272,22 +268,23 @@ Structure::run3d()
     UInt marker = dataFile( "solid/physics/material_flag", 1);
 
     //! 1. Constructor of the class to compute the tensions
-    boost::shared_ptr<WallTensionEstimator< mesh_Type > >  solid( new WallTensionEstimator< mesh_Type >() );
+    boost::shared_ptr<WallTensionEstimatorCylindricalCoordinates< mesh_Type > >
+        solid( new WallTensionEstimatorCylindricalCoordinates< mesh_Type >() );
 
     //! 2. Its setup
     solid->setup(dataStructure,
-    		tensionData,
-                dFESpace,
-                parameters->comm,
-		marker);
-    
+                 tensionData,
+                 dFESpace,
+                 parameters->comm,
+                 marker);
+
     //! 3. Creation of the importers to read the displacement field
     std::string const filename    = tensionData->nameFile();
     std::string const importerType =  tensionData->typeFile();
 
     std::string iterationString; //useful to iterate over the strings
 
-    if (verbose) 
+    if (verbose)
       {
 	std::cout << "The filename is    : " << filename << std::endl;
 	std::cout << "The importerType is: " << importerType << std::endl;
@@ -295,21 +292,21 @@ Structure::run3d()
 
 #ifdef HAVE_HDF5
     if (importerType.compare("hdf5") == 0)
-      {
-	M_importer.reset( new hdf5Filter_Type(dataFile, filename));
-      }
+    {
+        M_importer.reset( new hdf5Filter_Type(dataFile, filename));
+    }
     else
 #endif
-      {
-	if (importerType.compare("none") == 0)
-	  {
-	    M_importer.reset( new emptyFilter_Type( dataFile, solid->dFESpace().mesh(), "solid", solid->dFESpace().map().comm().MyPID() ) );
-	  }
-	else
-	  {
-	    M_importer.reset( new ensightFilter_Type( dataFile, filename ) );
-	  }
-      }
+    {
+        if (importerType.compare("none") == 0)
+        {
+            M_importer.reset( new emptyFilter_Type( dataFile, solid->dFESpace().mesh(), "solid", solid->dFESpace().map().comm().MyPID() ) );
+        }
+        else
+        {
+            M_importer.reset( new ensightFilter_Type( dataFile, filename ) );
+        }
+    }
     M_importer->setMeshProcId(solid->dFESpace().mesh(), solid->dFESpace().map().comm().MyPID());
 
     // The vector where the solution will be stored
@@ -318,27 +315,27 @@ Structure::run3d()
 
     //! 6. Post-processing setting
     boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporter;
- 
+
     std::string const exporterType =  dataFile( "exporter/type", "hdf5");
     std::string const nameExporter =  dataFile( "exporter/name", "tensions");
 
 #ifdef HAVE_HDF5
     if (exporterType.compare("hdf5") == 0)
     {
-      M_exporter.reset( new hdf5Filter_Type ( dataFile, nameExporter ) ); 
+        M_exporter.reset( new hdf5Filter_Type ( dataFile, nameExporter ) );
     }
     else
 #endif
     {
         if (exporterType.compare("none") == 0)
-	{
-	  M_exporter.reset( new emptyFilter_Type( dataFile, meshPart.meshPartition(), nameExporter, parameters->comm->MyPID() ) ) ;
-	}
+        {
+            M_exporter.reset( new emptyFilter_Type( dataFile, meshPart.meshPartition(), nameExporter, parameters->comm->MyPID() ) ) ;
+        }
 
         else
         {
-	  M_exporter.reset( new ensightFilter_Type( dataFile, meshPart.meshPartition(), nameExporter, parameters->comm->MyPID()) ) ;
-	}
+            M_exporter.reset( new ensightFilter_Type( dataFile, meshPart.meshPartition(), nameExporter, parameters->comm->MyPID()) ) ;
+        }
     }
 
     M_exporter->setMeshProcId(solid->dFESpace().mesh(), solid->dFESpace().map().comm().MyPID());
@@ -348,7 +345,7 @@ Structure::run3d()
     M_exporter->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "vonMises", dFESpace, solidTensions, UInt(0) );
     M_exporter->postProcess( 0.0 );
 
-    
+
     // //Post processing for the displacement gradient
     // boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterX;
     // boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterY;
@@ -379,125 +376,90 @@ Structure::run3d()
     // exporterX->postProcess( 0.0 );
     // exporterY->postProcess( 0.0 );
     // exporterZ->postProcess( 0.0 );
-    
-    
+
+
     //! =================================================================================
     //! Analysis - Istant or Interval
     //! =================================================================================
 
-    MPI_Barrier(MPI_COMM_WORLD);    
+    MPI_Barrier(MPI_COMM_WORLD);
 
     //! 5. For each interval, the analysis is performed
-    LifeV::Real dt =  dataFile( "solid/time_discretization/timestep", 0.0);    
-    std::string const nameField =  dataFile( "solid/analysis/nameField", "NO_DEFAULT_VALUE");    
+    LifeV::Real dt =  dataFile( "solid/time_discretization/timestep", 0.0);
+    std::string const nameField =  dataFile( "solid/analysis/nameField", "NO_DEFAULT_VALUE");
 
     if( !tensionData->analysisType().compare("istant") )
-      {
-	//Get the iteration number
-	iterationString = tensionData->iterStart(0);
-	LifeV::Real startTime = tensionData->initialTime(0);
-	
-	/*!Definition of the ExporterData, used to load the solution inside the previously defined vectors*/
-	LifeV::ExporterData<mesh_Type> solutionDispl  (LifeV::ExporterData<mesh_Type>::VectorField, nameField + "." + iterationString, solid->dFESpacePtr(), solidDisp, UInt(0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );	
-	
-	//Read the variable
-	M_importer->readVariable(solutionDispl);
-	M_importer->closeFile();
+    {
+        //Get the iteration number
+        iterationString = tensionData->iterStart(0);
+        LifeV::Real startTime = tensionData->initialTime(0);
 
-	
-	//Create and exporter to check importing
-	// std::string expVerFile = "verificationDisplExporter";
-	// LifeV::ExporterHDF5<RegionMesh<LinearTetra> > exporter( dataFile, meshPart.meshPartition(), expVerFile, parameters->comm->MyPID());
+        /*!Definition of the ExporterData, used to load the solution inside the previously defined vectors*/
+        LifeV::ExporterData<mesh_Type> solutionDispl  (LifeV::ExporterData<mesh_Type>::VectorField, nameField + "." + iterationString, solid->dFESpacePtr(), solidDisp, UInt(0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
+
+        //Read the variable
+        M_importer->readVariable(solutionDispl);
+        M_importer->closeFile();
+
+
+        //Create and exporter to check importing
+        // std::string expVerFile = "verificationDisplExporter";
+        // LifeV::ExporterHDF5<RegionMesh<LinearTetra> > exporter( dataFile, meshPart.meshPartition(), expVerFile, parameters->comm->MyPID());
         // vectorPtr_Type vectVer ( new vector_Type(solid->displacement(),  exporter.mapType() ) );
-	    
+
         // exporter.addVariable( ExporterData<mesh_Type >::VectorField, "displVer", solid->dFESpacePtr(),
-	// 		      vectVer, UInt(0) );
+        // 		      vectVer, UInt(0) );
 
-	// exporter.postProcess(0.0);
-	// *vectVer = *solidDisp;
-	// exporter.postProcess(startTime);
+        // exporter.postProcess(0.0);
+        // *vectVer = *solidDisp;
+        // exporter.postProcess(startTime);
 
 
-	//Set the current solution as the displacement vector to use
-	solid->setDisplacement(*solidDisp);
+        //Set the current solution as the displacement vector to use
+        solid->setDisplacement(*solidDisp);
 
-	std::cout << "The norm of the set displacement, at time " << startTime << ", is: "<< solid->displacement().norm2() << std::endl;
+        std::cout << "The norm of the set displacement, at time " << startTime << ", is: "<< solid->displacement().norm2() << std::endl;
 
-	//Perform the analysis
-	solid->analyzeTensions();
-	
-	//Extracting the gradient
-	// *gradX = solid->gradientX();
-	// *gradY = solid->gradientY();
-	// *gradZ = solid->gradientZ();
+        //Perform the analysis
+        solid->analyzeTensions();
 
-	// exporterX->postProcess( startTime );
-	// exporterY->postProcess( startTime );
-	// exporterZ->postProcess( startTime );
-			
-	//Extracting the tensions
-	std::cout << std::endl;
-	std::cout << "Norm of the tension vector: " << solid->principalStresses().norm2() << std::endl;
+        //Extracting the gradient
+        // *gradX = solid->gradientX();
+        // *gradY = solid->gradientY();
+        // *gradZ = solid->gradientZ();
 
-	*solidTensions = solid->principalStresses();
-	M_exporter->postProcess( startTime );
+        // exporterX->postProcess( startTime );
+        // exporterY->postProcess( startTime );
+        // exporterZ->postProcess( startTime );
 
-	if (verbose ) std::cout << "Analysis Completed!" << std::endl;
+        //Extracting the tensions
+        std::cout << std::endl;
+        std::cout << "Norm of the tension vector: " << solid->principalStresses().norm2() << std::endl;
 
-    ///////// CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
-        if ( !tensionData->recoveryVariable().compare("displacement")  )
-          CheckResultDisplacement( solid->principalStresses().norm2()  );
-        else if ( !tensionData->recoveryVariable().compare("eigenvalues") )
-          CheckResultEigenvalues( solid->principalStresses().norm2() );
-        else
-          CheckResultTensions( solid->principalStresses().norm2()  );
+        *solidTensions = solid->principalStresses();
+        M_exporter->postProcess( startTime );
 
-    ///////// END OF CHECK
+        if (verbose ) std::cout << "Analysis Completed!" << std::endl;
 
-	//Closing files
-	M_exporter->closeFile();	
-	// exporterX->closeFile();
-	// exporterY->closeFile();
-	// exporterZ->closeFile();
-	// exporter.closeFile();
-	
+        //Closing files
+        M_exporter->closeFile();
+        // exporterX->closeFile();
+        // exporterY->closeFile();
+        // exporterZ->closeFile();
+        // exporter.closeFile();
 
-      }
+
+    }
     else
-      {	
-	std::cout << "we are still working idiot! " << std::endl;
-      }
+    {
+        std::cout << "we are still working idiot! " << std::endl;
+    }
 
     if (verbose ) std::cout << "finished" << std::endl;
-        
+
     MPI_Barrier(MPI_COMM_WORLD);
     //!---------------------------------------------.-----------------------------------------------------
 }
-
-void Structure::CheckResultDisplacement(const Real tensNorm)
-{
-  if( ( (std::fabs(tensNorm-4.67086e6)/4.67086e6) <=1e-5 ) )
-        this->resultChanged( );
-}
-
-void Structure::CheckResultEigenvalues(const Real tensNorm)
-{
-  if( ( (std::fabs(tensNorm-4.67086e6) / 4.67086e6)<=1e-5 ) )
-        this->resultChanged( );
-}
-
-void Structure::CheckResultTensions(const Real tensNorm)
-{
-  if( ( ( std::fabs(tensNorm-4.67086e6) / 4.67086e6) <=1e-5 ) )
-        this->resultChanged( );
-}
-
-void Structure::resultChanged( void )
-{
-  std::cout << "Correct Result after the Analysis" << std::endl;
-  returnValue = EXIT_SUCCESS;
-}
-
 
 int
 main( int argc, char** argv )

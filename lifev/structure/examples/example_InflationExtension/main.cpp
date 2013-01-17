@@ -217,21 +217,24 @@ struct Structure::Private
     static Real bcPressure(const Real& t, const Real&  x, const Real& y, const Real& /*Z*/, const ID& i)
     {
         Real radius = 0.5;
-        Real pressure = 20000*t;
-        //3000/(2*0.5*40*3.1415962);
-        switch (i)
-        {
-        case 0:
-            return  pressure *  ( x / radius );
-            break;
-        case 1:
-            return  pressure *  ( y / radius );
-            break;
-        case 2:
-            return 0.0;
-            break;
+        Real pressure = 20000;
 
+        if( t >= 0.0 )
+        {
+            switch (i)
+            {
+            case 0:
+                return  pressure *  ( x / radius );
+                break;
+            case 1:
+                return  pressure *  ( y / radius );
+                break;
+            case 2:
+                return 0.0;
+                break;
+            }
         }
+
         return 0;
 
     }
@@ -347,21 +350,33 @@ Structure::run3d()
     BCFunctionBase zero(Private::bcZero);
     BCFunctionBase nonZero(Private::bcNonZero);
     BCFunctionBase pressure(Private::bcPressure);
-    BCFunctionBase pressureNormal(Private::pressureUsingNormal);
+    // BCFunctionBase pressureNormal(Private::pressureUsingNormal);
 
 
     //! =================================================================================
     //! BC for StructuredCube4_test_structuralsolver.mesh
     //! =================================================================================
-    //Condition for Extension
-    BCh->addBC("EdgesIn",      60,  Essential, Full, zero, 3);
-    BCh->addBC("EdgesIn",      70,  Essential, Full, zero, 3);
-    BCh->addBC("EdgesIn",      40,  Natural, Full, zero, 3);
-    BCh->addBC("EdgesIn",      200,  Natural,   Full, pressure, 3);
+    //Condition for Inflation
+    BCh->addBC("EdgesIn",      200, Natural,  Full, pressure, 3);
+    BCh->addBC("EdgesIn",      40,  Natural,  Full, zero, 3);
+    BCh->addBC("EdgesIn",      70,  Essential,   Component, zero, compz);
+    BCh->addBC("EdgesIn",      60,  Essential, Component, zero, compz);
 
     //BCs for quarter
-    //BCh->addBC("EdgesIn",      50,  Essential, Component, zero, compx);
-    //BCh->addBC("EdgesIn",      30,  Essential, Component, zero, compy);
+    BCh->addBC("EdgesIn",      50,  Essential, Component, zero, compx);
+    BCh->addBC("EdgesIn",      30,  Essential, Component, zero, compy);
+
+    // //Condition for Extension
+    // BCh->addBC("EdgesIn",      200, Natural,  Full, zero, 3);
+    // BCh->addBC("EdgesIn",      40,  Natural,  Full, zero, 3);
+    // BCh->addBC("EdgesIn",      70,  Natural,   Component, nonZero, compz);
+    // BCh->addBC("EdgesIn",      60,  Essential, Component, zero, compz);
+
+    // //BCs for quarter
+    // BCh->addBC("EdgesIn",      50,  Essential, Component, zero, compx);
+    // BCh->addBC("EdgesIn",      30,  Essential, Component, zero, compy);
+
+
     //! 1. Constructor of the structuralSolver
     StructuralOperator< RegionMesh<LinearTetra> > solid;
 
@@ -478,6 +493,8 @@ Structure::run3d()
 
         timeAdvance->setInitialCondition(solutionStencil);
 
+        //It is automatically done actually. It's clearer if specified.
+        solid.initialize( disp );
     }
 
 
@@ -496,18 +513,18 @@ Structure::run3d()
 
     boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterSolid;
 
-    //boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterCheck;
+    boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterCheck;
 
 
     std::string const exporterType =  dataFile( "exporter/type", "ensight");
     std::string const exportFileName = dataFile( "exporter/nameFile", "structure");
 
-    //std::string const exportCheckName = "checkExporter";
+    std::string const exportCheckName = "checkExporter";
 #ifdef HAVE_HDF5
     if (exporterType.compare("hdf5") == 0)
     {
         exporterSolid.reset( new hdf5Filter_Type ( dataFile, exportFileName ) );
-        //exporterCheck.reset( new hdf5Filter_Type ( dataFile, exportCheckName ) ); //The check is done in hdf5 for sake of brevity.
+        exporterCheck.reset( new hdf5Filter_Type ( dataFile, exportCheckName ) ); //The check is done in hdf5 for sake of brevity.
     }
 
     else
@@ -521,22 +538,22 @@ Structure::run3d()
 
     exporterSolid->setPostDir( "./" );
     exporterSolid->setMeshProcId( meshPart.meshPartition(), parameters->comm->MyPID() );
-    //exporterCheck->setMeshProcId( meshPart.meshPartition(), parameters->comm->MyPID() );
+    exporterCheck->setMeshProcId( meshPart.meshPartition(), parameters->comm->MyPID() );
 
     vectorPtr_Type solidDisp ( new vector_Type(solid.displacement(),  Unique ) );
     vectorPtr_Type solidVel  ( new vector_Type(solid.displacement(),  Unique ) );
     vectorPtr_Type solidAcc  ( new vector_Type(solid.displacement(),  Unique ) );
 
-    //vectorPtr_Type rhsVector ( new vector_Type(solid.rhs(),  Unique ) );
+    vectorPtr_Type rhsVector ( new vector_Type(solid.rhsCopy(),  Unique ) );
 
     exporterSolid->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "displacement", dFESpace, solidDisp, UInt(0) );
     exporterSolid->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "velocity",     dFESpace, solidVel,  UInt(0) );
     exporterSolid->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "acceleration", dFESpace, solidAcc,  UInt(0) );
 
-    //exporterCheck->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "rhs", dFESpace, rhsVector,  UInt(0) );
-
-    exporterSolid->postProcess( dataStructure->dataTime()->time() );
-    //exporterCheck->postProcess( 0 );
+    exporterCheck->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "rhs", dFESpace, rhsVector,  UInt(0) );
+    * solidDisp = solid.displacement();
+    *solidVel = timeAdvance->firstDerivative();
+    *solidAcc = timeAdvance->secondDerivative();
 
     //!--------------------------------------------------------------------------------------------
     //!The update of the RHS is done by the TimeAdvance class
@@ -550,11 +567,15 @@ Structure::run3d()
     Real dt = dataStructure->dataTime()->timeStep();
     Real T  = dataStructure->dataTime()->endTime();
 
+    exporterSolid->postProcess( dataStructure->dataTime()->initialTime() );
+    exporterCheck->postProcess( 0 );
+
     //! =============================================================================
     //! Temporal loop
     //! =============================================================================
     for (Real time = initialTime + dt; time <= T; time += dt)
     {
+        std::cout << "time: " << time << std::endl;
         dataStructure->dataTime()->setTime(time);
 
         if (verbose)
@@ -586,12 +607,10 @@ Structure::run3d()
         // std::cout << "The norm 2 of the velocity field is: "<< timeAdvance->velocity().norm2() << std::endl;
         // std::cout << "The norm 2 of the acceleration field is: "<< timeAdvance->acceleration().norm2() << std::endl;
 
-        //*rhsVector = solid.rhs();
+        *rhsVector = solid.rhsCopy();
 
         exporterSolid->postProcess( time );
-        //exporterCheck->postProcess( time );
-
-
+        exporterCheck->postProcess( time );
 
         //!--------------------------------------------------------------------------------------------------
 
@@ -599,7 +618,7 @@ Structure::run3d()
     }
 
     exporterSolid->closeFile();
-    //exporterCheck->closeFile();
+    exporterCheck->closeFile();
 }
 
 

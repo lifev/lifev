@@ -20,16 +20,16 @@
 [exporter]
 type       = hdf5 #ensight 			# hdf5 (if library compiled with hdf5 support) or ensight
 multimesh  = false
-nameFile   = restarted
+nameFile   = soleInflation
 start      = 0
 save       = 1
 
 [importer]
-restart      = yes
+restart      = none
 type         = hdf5 #ensight 			# hdf5 (if library compiled with hdf5 support) or ensight
-filename     = structure
-initialSol   = 00010
-initialTime  = 1.0
+filename     = extension
+initialSol   = 00029
+initialTime  = 2.9
 
 [solid]
 
@@ -38,23 +38,22 @@ density   	= 1.2
 material_flag = 1
 young     	= 5.e+6
 poisson   	= 0.45
-bulk		= 1.3333e+6
+bulk		= 1.3333e+8
 alpha 		= 2.684564e+6
 gamma		= 1.0
-solidType 	= linearVenantKirchhoff		# linearVenantKirchhoff / nonLinearVenantKirchhoff / neoHookean / expoenential
+solidType 	= exponential		# linearVenantKirchhoff / nonLinearVenantKirchhoff / neoHookean / expoenential
 
 [../time_discretization]
-initialtime 	= 1.0
-endtime     	= 1.5
-timestep    	= 0.1
-theta       	= 0.35
-gamma        	= 0.75
 method          = BDF
+initialtime 	= 0.0
+endtime     	= 6.0
+timestep    	= 0.1
 BDF_order   	= 2
 
 [../space_discretization]
+mesh_type   = .mesh
 mesh_dir  	= ./
-mesh_file 	= structureCoarseMesh.mesh
+mesh_file 	= validationWTEC.mesh
 order     	= P1
 
 
