@@ -1,5 +1,13 @@
 # -*- readme-debian -*-
 
+LifeV 3.2.0:
+============
+* New modular structure and configuration using CMake similar to Trilinos
+
+* Distribution through GitHub
+
+New features are not described here for brevity.
+
 LifeV  2.2.0:
 =============
 
