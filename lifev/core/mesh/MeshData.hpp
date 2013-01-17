@@ -53,6 +53,8 @@
 #include <lifev/core/mesh/RegionMesh.hpp>
 #include <lifev/core/filter/ImporterMesh3D.hpp>
 #include <lifev/core/mesh/RegionMesh3DStructured.hpp>
+#include <lifev/core/filter/ParserINRIAMesh.hpp>
+#include <lifev/core/mesh/ConvertBareMesh.hpp>
 
 namespace LifeV
 {
@@ -170,7 +172,12 @@ void readMesh( RegionMesh<GEOSHAPE, MC>& mesh, const MeshData& data )
     bool updateEdgesAndFaces(true);
 
     if ( data.meshType() == ".mesh" )
-        readINRIAMeshFile( mesh, data.meshDir() + data.meshFile(), 1, data.verbose() );
+    {
+    	BareMesh<GEOSHAPE> bareMesh;
+       	MeshIO::ReadINRIAMeshFile( bareMesh, data.meshDir() + data.meshFile(), 1, data.verbose() );
+    	convertBareMesh ( bareMesh, mesh );
+    //	readINRIAMeshFile( mesh, data.meshDir() + data.meshFile(), 1, data.verbose() );
+    }
     else if ( data.meshType() == ".m++" )
         readMppFile( mesh, data.meshDir() + data.meshFile(), 1, data.verbose() );
     else if ( data.meshType() == ".msh" )

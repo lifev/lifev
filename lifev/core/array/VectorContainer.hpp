@@ -42,6 +42,9 @@
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/util/LifeDebug.hpp>
 
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/util/LifeDebug.hpp>
+
 namespace LifeV
 {
 
