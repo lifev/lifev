@@ -104,8 +104,8 @@ class WallTensionEstimator
 {
 public:
 
-//!@name Type definitions
-//@{
+    //!@name Type definitions
+    //@{
 
     // Data classes
     typedef StructuralConstitutiveLawData                 data_Type;
@@ -131,22 +131,22 @@ public:
     typedef StructuralConstitutiveLaw<Mesh>                material_Type;
     typedef boost::shared_ptr<material_Type>               materialPtr_Type;
 
-//@}
+    //@}
 
 
-//! @name Constructor &  Deconstructor
-//@{
+    //! @name Constructor &  Deconstructor
+    //@{
 
-  WallTensionEstimator();
+    WallTensionEstimator();
 
-  virtual ~WallTensionEstimator() {};
+    virtual ~WallTensionEstimator() {};
 
-//@}
+    //@}
 
 
 
-//!@name Methods
-//@{
+    //!@name Methods
+    //@{
 
     //! Setup the created object of the class WallTensionEstimator
     /*!
@@ -156,10 +156,10 @@ public:
       \param displayer: the displayer object
     */
     void setup( const dataPtr_Type& dataMaterial,
-		const analysisDataPtr_Type& tensionData,
-	        const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
-		boost::shared_ptr<Epetra_Comm>&     comm,
-		UInt marker);
+                const analysisDataPtr_Type& tensionData,
+                const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
+                boost::shared_ptr<Epetra_Comm>&     comm,
+                UInt marker);
 
 
 
@@ -187,87 +187,87 @@ public:
     */
     void analyzeTensionsRecoveryCauchyStresses( void );
 
-//! @name Set Methods
-//@{
+    //! @name Set Methods
+    //@{
 
-     //! Set the displacement vector
-     void setDisplacement(solutionVect_Type& displVect) {*M_displ = displVect;}
+    //! Set the displacement vector
+    void setDisplacement(solutionVect_Type& displVect) {*M_displ = displVect;}
 
-//@}
+    //@}
 
 
-//! @name Get Methods
-//@{
+    //! @name Get Methods
+    //@{
 
-  //! Getters
-  //! Get the Epetramap
-  MapEpetra   const& map()     const { return *M_localMap; }
+    //! Getters
+    //! Get the Epetramap
+    MapEpetra   const& map()     const { return *M_localMap; }
 
-  //! Get the FESpace object
-  FESpace<Mesh, MapEpetra>& dFESpace()  {return *M_FESpace;}
+    //! Get the FESpace object
+    FESpace<Mesh, MapEpetra>& dFESpace()  {return *M_FESpace;}
 
-  //! Get the pointer to the FESpace object
-  boost::shared_ptr<FESpace<Mesh, MapEpetra> > dFESpacePtr()  {return M_FESpace;}
+    //! Get the pointer to the FESpace object
+    boost::shared_ptr<FESpace<Mesh, MapEpetra> > dFESpacePtr()  {return M_FESpace;}
 
-  //! Get the displacement solution
-  solutionVect_Type displacement() {return *M_displ;}
+    //! Get the displacement solution
+    solutionVect_Type displacement() {return *M_displ;}
 
-  //Getters initially used for debug to check the gradient of the displacement
-  // //! Get the displacement solution
-  // solutionVect_Type gradientX() {return *M_displX;}
-  // solutionVect_Type gradientY() {return *M_displY;}
-  // solutionVect_Type gradientZ() {return *M_displZ;}
+    //Getters initially used for debug to check the gradient of the displacement
+    // //! Get the displacement solution
+    // solutionVect_Type gradientX() {return *M_displX;}
+    // solutionVect_Type gradientY() {return *M_displY;}
+    // solutionVect_Type gradientZ() {return *M_displZ;}
 
-  // solutionVect_Type sigmaX() {return *M_sigmaX;}
-  // solutionVect_Type sigmaY() {return *M_sigmaY;}
-  // solutionVect_Type sigmaZ() {return *M_sigmaZ;}
+    // solutionVect_Type sigmaX() {return *M_sigmaX;}
+    // solutionVect_Type sigmaY() {return *M_sigmaY;}
+    // solutionVect_Type sigmaZ() {return *M_sigmaZ;}
 
-  //! Get the global vector for the eigenvalues
-  solutionVect_Type principalStresses() {return *M_globalEigen;}
-//@}
+    //! Get the global vector for the eigenvalues
+    solutionVect_Type principalStresses() {return *M_globalEigen;}
+    //@}
 
 protected:
 
-//! @name Protected methods
-//@{
+    //! @name Protected methods
+    //@{
 
-  //! computeDeformation: This method computes the tensor F given the displacement on the element.
-  /*!
-    \param NONE
-  */
-  void computeDisplacementGradient( solutionVectPtr_Type grDisplX,
-				    solutionVectPtr_Type grDisplY,
-				    solutionVectPtr_Type grDisplZ);
+    //! computeDeformation: This method computes the tensor F given the displacement on the element.
+    /*!
+      \param NONE
+    */
+    void computeDisplacementGradient( solutionVectPtr_Type grDisplX,
+                                      solutionVectPtr_Type grDisplY,
+                                      solutionVectPtr_Type grDisplZ);
 
-  //! reconstructElementaryVector: This method applies a reconstruction procedure on the elvec that is passed
-  /*!
-    \param elvecTens VectorElemental over which the reconstruction is applied
-  */
-  void reconstructElementaryVector( VectorElemental& elVecSigma, solutionVect_Type& patchArea, UInt nVol );
+    //! reconstructElementaryVector: This method applies a reconstruction procedure on the elvec that is passed
+    /*!
+      \param elvecTens VectorElemental over which the reconstruction is applied
+    */
+    void reconstructElementaryVector( VectorElemental& elVecSigma, solutionVect_Type& patchArea, UInt nVol );
 
-  //! constructPatchAreaVector: This method build the patch area vector used in the reconstruction process
-  /*!
-    \param NONE
-  */
-  void constructPatchAreaVector( solutionVect_Type& patchArea );
+    //! constructPatchAreaVector: This method build the patch area vector used in the reconstruction process
+    /*!
+      \param NONE
+    */
+    void constructPatchAreaVector( solutionVect_Type& patchArea );
 
-  //! orderEigenvalues it puts in an increasing order the eigenvalues
-  /*!
-    \param std::vector of the real part of the eigenvalues that has been found
-  */
-  void orderEigenvalues( std::vector<Real>& eigenvaluesR );
+    //! orderEigenvalues it puts in an increasing order the eigenvalues
+    /*!
+      \param std::vector of the real part of the eigenvalues that has been found
+    */
+    void orderEigenvalues( std::vector<Real>& eigenvaluesR );
 
-  //! constructGlobalStressVector: This method construct the vectors \sigma_{.,i} for i=x,y,z to have for each DOF the tensor \sigma
-  /*!
-    \param NONE
-  */
-  void constructGlobalStressVector( solutionVect_Type& sigmaX, solutionVect_Type& sigmaY, solutionVect_Type& sigmaZ );
+    //! constructGlobalStressVector: This method construct the vectors \sigma_{.,i} for i=x,y,z to have for each DOF the tensor \sigma
+    /*!
+      \param NONE
+    */
+    void constructGlobalStressVector( solutionVect_Type& sigmaX, solutionVect_Type& sigmaY, solutionVect_Type& sigmaZ );
 
 
-//@}
+    //@}
 
-//! @name Protected members
-//@{
+    //! @name Protected members
+    //@{
 
     boost::shared_ptr<FESpace<Mesh, MapEpetra> >   M_FESpace;
 
@@ -334,7 +334,7 @@ protected:
 
     //! Material class
     materialPtr_Type                               M_material;
-//@}
+    //@}
 
 
 
@@ -382,48 +382,48 @@ WallTensionEstimator<Mesh>::WallTensionEstimator( ):
 template <typename Mesh>
 void
 WallTensionEstimator<Mesh >::setup( const dataPtr_Type& dataMaterial,
-				    const analysisDataPtr_Type& tensionData,
-				    const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
-				    boost::shared_ptr<Epetra_Comm>&     comm,
-				    UInt marker)
+                                    const analysisDataPtr_Type& tensionData,
+                                    const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
+                                    boost::shared_ptr<Epetra_Comm>&     comm,
+                                    UInt marker)
 
 {
 
-  // Data classes & Volumes markers
-  M_dataMaterial = dataMaterial;
-  M_analysisData = tensionData;
-  M_marker = marker;
+    // Data classes & Volumes markers
+    M_dataMaterial = dataMaterial;
+    M_analysisData = tensionData;
+    M_marker = marker;
 
-  // FESpace and EpetraMap
-  M_FESpace      = dFESpace;
-  M_localMap     = dFESpace->mapPtr();
+    // FESpace and EpetraMap
+    M_FESpace      = dFESpace;
+    M_localMap     = dFESpace->mapPtr();
 
-  // Displayer
-  M_displayer.reset    (new Displayer(comm));
+    // Displayer
+    M_displayer.reset    (new Displayer(comm));
 
-  // Vector and Tensors
-  M_sigma.reset         ( new matrix_Type( M_FESpace->fieldDim(), M_FESpace->fieldDim() ) );
-  M_deformationF.reset  ( new matrix_Type( M_FESpace->fieldDim(), M_FESpace->fieldDim() ) );
-  M_cofactorF.reset     ( new matrix_Type( M_FESpace->fieldDim(), M_FESpace->fieldDim() ) );
-  M_firstPiola.reset    ( new matrix_Type( M_FESpace->fieldDim(), M_FESpace->fieldDim() ) );
-  M_displ.reset         ( new solutionVect_Type(*M_localMap) );
-  // M_displX.reset        ( new solutionVect_Type(*M_localMap) );
-  // M_displY.reset        ( new solutionVect_Type(*M_localMap) );
-  // M_displZ.reset        ( new solutionVect_Type(*M_localMap) );
+    // Vector and Tensors
+    M_sigma.reset         ( new matrix_Type( M_FESpace->fieldDim(), M_FESpace->fieldDim() ) );
+    M_deformationF.reset  ( new matrix_Type( M_FESpace->fieldDim(), M_FESpace->fieldDim() ) );
+    M_cofactorF.reset     ( new matrix_Type( M_FESpace->fieldDim(), M_FESpace->fieldDim() ) );
+    M_firstPiola.reset    ( new matrix_Type( M_FESpace->fieldDim(), M_FESpace->fieldDim() ) );
+    M_displ.reset         ( new solutionVect_Type(*M_localMap) );
+    // M_displX.reset        ( new solutionVect_Type(*M_localMap) );
+    // M_displY.reset        ( new solutionVect_Type(*M_localMap) );
+    // M_displZ.reset        ( new solutionVect_Type(*M_localMap) );
 
-  // M_sigmaX.reset        ( new solutionVect_Type(*M_localMap) );
-  // M_sigmaY.reset        ( new solutionVect_Type(*M_localMap) );
-  // M_sigmaZ.reset        ( new solutionVect_Type(*M_localMap) );
-  // M_elVecTens.reset     ( new VectorElemental(this->M_FESpace->fe().nbFEDof(), this->M_FESpace->fieldDim()) );
+    // M_sigmaX.reset        ( new solutionVect_Type(*M_localMap) );
+    // M_sigmaY.reset        ( new solutionVect_Type(*M_localMap) );
+    // M_sigmaZ.reset        ( new solutionVect_Type(*M_localMap) );
+    // M_elVecTens.reset     ( new VectorElemental(this->M_FESpace->fe().nbFEDof(), this->M_FESpace->fieldDim()) );
 
-  M_globalEigen.reset   ( new solutionVect_Type(*M_localMap) );
-  M_invariants.resize   ( M_FESpace->fieldDim() + 1 );
-  M_eigenvaluesR.resize ( M_FESpace->fieldDim() );
-  M_eigenvaluesI.resize ( M_FESpace->fieldDim() );
+    M_globalEigen.reset   ( new solutionVect_Type(*M_localMap) );
+    M_invariants.resize   ( M_FESpace->fieldDim() + 1 );
+    M_eigenvaluesR.resize ( M_FESpace->fieldDim() );
+    M_eigenvaluesI.resize ( M_FESpace->fieldDim() );
 
-  // Materials
-  M_material.reset( material_Type::StructureMaterialFactory::instance().createObject( M_dataMaterial->solidType() ) );
-  M_material->setup( dFESpace,M_localMap,M_offset, M_dataMaterial, M_displayer );
+    // Materials
+    M_material.reset( material_Type::StructureMaterialFactory::instance().createObject( M_dataMaterial->solidType() ) );
+    M_material->setup( dFESpace,M_localMap,M_offset, M_dataMaterial, M_displayer );
 }
 
 
@@ -433,13 +433,13 @@ void
 WallTensionEstimator<Mesh >::analyzeTensions( )
 {
 
-  *M_globalEigen *= 0.0;
-  if ( !M_analysisData->recoveryVariable().compare("displacement") )
-    analyzeTensionsRecoveryDisplacement();
-  else if ( !M_analysisData->recoveryVariable().compare("eigenvalues") )
-    analyzeTensionsRecoveryEigenvalues();
-  else
-    analyzeTensionsRecoveryCauchyStresses();
+    *M_globalEigen *= 0.0;
+    if ( !M_analysisData->recoveryVariable().compare("displacement") )
+        analyzeTensionsRecoveryDisplacement();
+    else if ( !M_analysisData->recoveryVariable().compare("eigenvalues") )
+        analyzeTensionsRecoveryEigenvalues();
+    else
+        analyzeTensionsRecoveryCauchyStresses();
 
 }
 
@@ -449,126 +449,126 @@ void
 WallTensionEstimator<Mesh >::analyzeTensionsRecoveryDisplacement( void )
 {
 
-  solutionVectPtr_Type grDisplX( new solutionVect_Type(*M_localMap) );
-  solutionVectPtr_Type grDisplY( new solutionVect_Type(*M_localMap) );
-  solutionVectPtr_Type grDisplZ( new solutionVect_Type(*M_localMap) );
+    solutionVectPtr_Type grDisplX( new solutionVect_Type(*M_localMap) );
+    solutionVectPtr_Type grDisplY( new solutionVect_Type(*M_localMap) );
+    solutionVectPtr_Type grDisplZ( new solutionVect_Type(*M_localMap) );
 
-  //Compute the deformation gradient tensor F of the displ field
-  computeDisplacementGradient( grDisplX, grDisplY, grDisplZ);
+    //Compute the deformation gradient tensor F of the displ field
+    computeDisplacementGradient( grDisplX, grDisplY, grDisplZ);
 
-  //Initially used for debug
-  // this->M_displayer->leaderPrint(" \n*********************************\n  ");
-  // this->M_displayer->leaderPrint("   Norm of the gradient with respect to x ", grDisplX->norm2() );
-  // this->M_displayer->leaderPrint(" \n*********************************\n  ");
-  // this->M_displayer->leaderPrint("   Norm of the gradient with respect to y ", grDisplY->norm2() );
-  // this->M_displayer->leaderPrint(" \n*********************************\n  ");
-  // this->M_displayer->leaderPrint("   Norm of the gradient with respect to z ", grDisplZ->norm2() );
+    //Initially used for debug
+    // this->M_displayer->leaderPrint(" \n*********************************\n  ");
+    // this->M_displayer->leaderPrint("   Norm of the gradient with respect to x ", grDisplX->norm2() );
+    // this->M_displayer->leaderPrint(" \n*********************************\n  ");
+    // this->M_displayer->leaderPrint("   Norm of the gradient with respect to y ", grDisplY->norm2() );
+    // this->M_displayer->leaderPrint(" \n*********************************\n  ");
+    // this->M_displayer->leaderPrint("   Norm of the gradient with respect to z ", grDisplZ->norm2() );
 
-  //For each of the DOF, the Cauchy tensor is computed.
-  //Therefore the tensor C,P, \sigma are computed for each DOF
-  UInt dim = M_FESpace->dim();
+    //For each of the DOF, the Cauchy tensor is computed.
+    //Therefore the tensor C,P, \sigma are computed for each DOF
+    UInt dim = M_FESpace->dim();
 
-  LifeChrono chrono;
+    LifeChrono chrono;
 
-  this->M_displayer->leaderPrint(" \n*********************************\n  ");
-  this->M_displayer->leaderPrint("   Performing the analysis recovering the displacement..., ", M_dataMaterial->solidType() );
-  this->M_displayer->leaderPrint(" \n*********************************\n  ");
+    this->M_displayer->leaderPrint(" \n*********************************\n  ");
+    this->M_displayer->leaderPrint("   Performing the analysis recovering the displacement..., ", M_dataMaterial->solidType() );
+    this->M_displayer->leaderPrint(" \n*********************************\n  ");
 
-  chrono.start();
+    chrono.start();
 
-  for ( UInt iDOF = 0; iDOF <( UInt ) this->M_FESpace->dof().numTotalDof(); iDOF++ )
+    for ( UInt iDOF = 0; iDOF <( UInt ) this->M_FESpace->dof().numTotalDof(); iDOF++ )
     {
 
-      if ( M_displ->blockMap().LID(iDOF) != -1 ) // The Global ID is on the calling processors
-	{
-	  std::vector<LifeV::Real> dX(3,0.0);
-	  std::vector<LifeV::Real> dY(3,0.0);
-	  std::vector<LifeV::Real> dZ(3,0.0);
+        if ( M_displ->blockMap().LID(iDOF) != -1 ) // The Global ID is on the calling processors
+        {
+            std::vector<LifeV::Real> dX(3,0.0);
+            std::vector<LifeV::Real> dY(3,0.0);
+            std::vector<LifeV::Real> dZ(3,0.0);
 
-	  //Reinitialization of matrices and arrays
-	  (*M_deformationF).Scale(0.0);
-	  (*M_cofactorF).Scale(0.0);
-	  (*M_firstPiola).Scale(0.0);
-	  (*M_sigma).Scale(0.0);
+            //Reinitialization of matrices and arrays
+            (*M_deformationF).Scale(0.0);
+            (*M_cofactorF).Scale(0.0);
+            (*M_firstPiola).Scale(0.0);
+            (*M_sigma).Scale(0.0);
 
-	  //Extracting the gradient of U on the current DOF
-	  for ( UInt iComp = 0; iComp < this->M_FESpace->fieldDim(); ++iComp )
-	    {
-	      Int LIDid = M_displ->blockMap().LID(iDOF + iComp * dim + M_offset);
-	      Int GIDid = M_displ->blockMap().GID(LIDid);
-	      dX[iComp] = (*grDisplX)(GIDid); // (d_xX,d_yX,d_zX)
-	      dY[iComp] = (*grDisplY)(GIDid); // (d_xY,d_yY,d_zY)
-	      dZ[iComp] = (*grDisplZ)(GIDid); // (d_xZ,d_yZ,d_zZ)
-	    }
+            //Extracting the gradient of U on the current DOF
+            for ( UInt iComp = 0; iComp < this->M_FESpace->fieldDim(); ++iComp )
+            {
+                Int LIDid = M_displ->blockMap().LID(iDOF + iComp * dim + M_offset);
+                Int GIDid = M_displ->blockMap().GID(LIDid);
+                dX[iComp] = (*grDisplX)(GIDid); // (d_xX,d_yX,d_zX)
+                dY[iComp] = (*grDisplY)(GIDid); // (d_xY,d_yY,d_zY)
+                dZ[iComp] = (*grDisplZ)(GIDid); // (d_xZ,d_yZ,d_zZ)
+            }
 
-	  //Fill the matrix F
-	  for( UInt icoor = 0; icoor < M_FESpace->fieldDim(); icoor++ )
-	    {
-	      (*M_deformationF)(icoor,0)=dX[icoor];
-	      (*M_deformationF)(icoor,1)=dY[icoor];
-	      (*M_deformationF)(icoor,2)=dZ[icoor];
+            //Fill the matrix F
+            for( UInt icoor = 0; icoor < M_FESpace->fieldDim(); icoor++ )
+            {
+                (*M_deformationF)(icoor,0)=dX[icoor];
+                (*M_deformationF)(icoor,1)=dY[icoor];
+                (*M_deformationF)(icoor,2)=dZ[icoor];
 
-	      (*M_deformationF)(icoor,icoor) += 1.0;
-	    }
+                (*M_deformationF)(icoor,icoor) += 1.0;
+            }
 
-	  //Compute the rightCauchyC tensor
-	  AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor(M_invariants, *M_deformationF, *M_cofactorF);
+            //Compute the rightCauchyC tensor
+            AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor(M_invariants, *M_deformationF, *M_cofactorF);
 
-	  LifeV::Real sumI(0);
-	  for( UInt i(0); i < M_invariants.size(); i++ )
-	    sumI += M_invariants[i];
+            // LifeV::Real sumI(0);
+            // for( UInt i(0); i < M_invariants.size(); i++ )
+            //     sumI += M_invariants[i];
 
-	  //Compute the first Piola-Kirchhoff tensor
-	  M_material->computeLocalFirstPiolaKirchhoffTensor(*M_firstPiola, *M_deformationF, *M_cofactorF, M_invariants, M_marker);
+            //Compute the first Piola-Kirchhoff tensor
+            M_material->computeLocalFirstPiolaKirchhoffTensor(*M_firstPiola, *M_deformationF, *M_cofactorF, M_invariants, M_marker);
 
-	  //Compute the Cauchy tensor
-	  AssemblyElementalStructure::computeCauchyStressTensor(*M_sigma, *M_firstPiola, M_invariants[3], *M_deformationF);
+            //Compute the Cauchy tensor
+            AssemblyElementalStructure::computeCauchyStressTensor(*M_sigma, *M_firstPiola, M_invariants[3], *M_deformationF);
 
-	  //Compute the eigenvalue
-	  AssemblyElementalStructure::computeEigenvalues(*M_sigma, M_eigenvaluesR, M_eigenvaluesI);
+            //Compute the eigenvalue
+            AssemblyElementalStructure::computeEigenvalues(*M_sigma, M_eigenvaluesR, M_eigenvaluesI);
 
-	  //The Cauchy tensor is symmetric and therefore, the eigenvalues are real
-	  //Check on the imaginary part of eigen values given by the Lapack method
-	  Real sum(0);
-	  for( int i=0; i < M_eigenvaluesI.size(); i++ )
-	    sum += std::abs(M_eigenvaluesI[i]);
-	  ASSERT_PRE( sum < 1e-6 , "The eigenvalues of the Cauchy stress tensors have to be real!" );
+            //The Cauchy tensor is symmetric and therefore, the eigenvalues are real
+            //Check on the imaginary part of eigen values given by the Lapack method
+            Real sum(0);
+            for( int i=0; i < M_eigenvaluesI.size(); i++ )
+                sum += std::abs(M_eigenvaluesI[i]);
+            ASSERT_PRE( sum < 1e-6 , "The eigenvalues of the Cauchy stress tensors have to be real!" );
 
-	  orderEigenvalues( M_eigenvaluesR );
+            orderEigenvalues( M_eigenvaluesR );
 
-	  //Save the eigenvalues in the global vector
-	  for( UInt icoor = 0; icoor < this->M_FESpace->fieldDim(); ++icoor )
-	    {
-	      Int LIDid = M_displ->blockMap().LID(iDOF + icoor * dim + M_offset);
-	      Int GIDid = M_displ->blockMap().GID(LIDid);
-	      (*M_globalEigen)(GIDid) = M_eigenvaluesR[icoor];
-	    }
+            //Save the eigenvalues in the global vector
+            for( UInt icoor = 0; icoor < this->M_FESpace->fieldDim(); ++icoor )
+            {
+                Int LIDid = M_displ->blockMap().LID(iDOF + icoor * dim + M_offset);
+                Int GIDid = M_displ->blockMap().GID(LIDid);
+                (*M_globalEigen)(GIDid) = M_eigenvaluesR[icoor];
+            }
 
-	}
+        }
     }
 
-  chrono.stop();
-  this->M_displayer->leaderPrint("Analysis done in: ", chrono.diff());
+    chrono.stop();
+    this->M_displayer->leaderPrint("Analysis done in: ", chrono.diff());
 
 }
 
 template <typename Mesh>
 void
 WallTensionEstimator<Mesh >::computeDisplacementGradient( solutionVectPtr_Type grDisplX,
-							  solutionVectPtr_Type grDisplY,
-							  solutionVectPtr_Type grDisplZ)
+                                                          solutionVectPtr_Type grDisplY,
+                                                          solutionVectPtr_Type grDisplZ)
 {
-  //The map of the displacement field is not transformed in a Repeated map
-  //because it is done inside the gradientRecovery method
+    //The map of the displacement field is not transformed in a Repeated map
+    //because it is done inside the gradientRecovery method
 
-  //Compute the gradient along X of the displacement field
-  *grDisplX = M_FESpace->gradientRecovery(*M_displ, 0);
+    //Compute the gradient along X of the displacement field
+    *grDisplX = M_FESpace->gradientRecovery(*M_displ, 0);
 
-  //Compute the gradient along Y of the displacement field
-  *grDisplY = M_FESpace->gradientRecovery(*M_displ, 1);
+    //Compute the gradient along Y of the displacement field
+    *grDisplY = M_FESpace->gradientRecovery(*M_displ, 1);
 
-  //Compute the gradient along Z of the displacement field
-  *grDisplZ = M_FESpace->gradientRecovery(*M_displ, 2);
+    //Compute the gradient along Z of the displacement field
+    *grDisplZ = M_FESpace->gradientRecovery(*M_displ, 2);
 
 }
 
@@ -577,123 +577,123 @@ void
 WallTensionEstimator<Mesh >::analyzeTensionsRecoveryEigenvalues( void )
 {
 
-  LifeChrono chrono;
+    LifeChrono chrono;
 
-  solutionVect_Type patchArea(*M_displ,Unique,Add);
-  patchArea *= 0.0;
+    solutionVect_Type patchArea(*M_displ,Unique,Add);
+    patchArea *= 0.0;
 
-  constructPatchAreaVector( patchArea );
+    constructPatchAreaVector( patchArea );
 
-  //Before assembling the reconstruction process is done
-  solutionVect_Type patchAreaR(patchArea,Repeated);
+    //Before assembling the reconstruction process is done
+    solutionVect_Type patchAreaR(patchArea,Repeated);
 
-  QuadratureRule fakeQuadratureRule;
+    QuadratureRule fakeQuadratureRule;
 
-  Real refElemArea(0); //area of reference element
-  //compute the area of reference element
-  for(UInt iq=0; iq< M_FESpace->qr().nbQuadPt(); iq++)
-    refElemArea += M_FESpace->qr().weight(iq);
+    Real refElemArea(0); //area of reference element
+    //compute the area of reference element
+    for(UInt iq=0; iq< M_FESpace->qr().nbQuadPt(); iq++)
+        refElemArea += M_FESpace->qr().weight(iq);
 
-  Real wQuad(refElemArea/M_FESpace->refFE().nbDof());
+    Real wQuad(refElemArea/M_FESpace->refFE().nbDof());
 
-  //Setting the quadrature Points = DOFs of the element and weight = 1
-  std::vector<GeoVector> coords = M_FESpace->refFE().refCoor();
-  std::vector<Real> weights(M_FESpace->fe().nbFEDof(), wQuad);
-  fakeQuadratureRule.setDimensionShape ( shapeDimension(M_FESpace->refFE().shape()), M_FESpace->refFE().shape() );
-  fakeQuadratureRule.setPoints(coords,weights);
+    //Setting the quadrature Points = DOFs of the element and weight = 1
+    std::vector<GeoVector> coords = M_FESpace->refFE().refCoor();
+    std::vector<Real> weights(M_FESpace->fe().nbFEDof(), wQuad);
+    fakeQuadratureRule.setDimensionShape ( shapeDimension(M_FESpace->refFE().shape()), M_FESpace->refFE().shape() );
+    fakeQuadratureRule.setPoints(coords,weights);
 
-  //Set the new quadrature rule
-  M_FESpace->setQuadRule(fakeQuadratureRule);
+    //Set the new quadrature rule
+    M_FESpace->setQuadRule(fakeQuadratureRule);
 
-  this->M_displayer->leaderPrint(" \n*********************************\n  ");
-  this->M_displayer->leaderPrint("   Performing the analysis recovering the tensions..., ", M_dataMaterial->solidType() );
-  this->M_displayer->leaderPrint(" \n*********************************\n  ");
+    this->M_displayer->leaderPrint(" \n*********************************\n  ");
+    this->M_displayer->leaderPrint("   Performing the analysis recovering the tensions..., ", M_dataMaterial->solidType() );
+    this->M_displayer->leaderPrint(" \n*********************************\n  ");
 
-  UInt totalDof = M_FESpace->dof().numTotalDof();
-  VectorElemental dk_loc(M_FESpace->fe().nbFEDof(), this->M_FESpace->fieldDim());
+    UInt totalDof = M_FESpace->dof().numTotalDof();
+    VectorElemental dk_loc(M_FESpace->fe().nbFEDof(), this->M_FESpace->fieldDim());
 
-  //Vectors for the deformation tensor
-  std::vector<matrix_Type> vectorDeformationF(M_FESpace->fe().nbFEDof(),*M_deformationF);
-  //Copying the displacement field into a vector with repeated map for parallel computations
-  solutionVect_Type dRep(*M_displ, Repeated);
+    //Vectors for the deformation tensor
+    std::vector<matrix_Type> vectorDeformationF(M_FESpace->fe().nbFEDof(),*M_deformationF);
+    //Copying the displacement field into a vector with repeated map for parallel computations
+    solutionVect_Type dRep(*M_displ, Repeated);
 
-  VectorElemental elVecTens(this->M_FESpace->fe().nbFEDof(), this->M_FESpace->fieldDim());
+    VectorElemental elVecTens(this->M_FESpace->fe().nbFEDof(), this->M_FESpace->fieldDim());
 
-  chrono.start();
+    chrono.start();
 
-  //Loop on each volume
-  for ( UInt i = 0; i < M_FESpace->mesh()->numVolumes(); ++i )
+    //Loop on each volume
+    for ( UInt i = 0; i < M_FESpace->mesh()->numVolumes(); ++i )
     {
-      M_FESpace->fe().updateFirstDerivQuadPt( M_FESpace->mesh()->volumeList( i ) );
-      elVecTens.zero();
+        M_FESpace->fe().updateFirstDerivQuadPt( M_FESpace->mesh()->volumeList( i ) );
+        elVecTens.zero();
 
-      M_marker = M_FESpace->mesh()->volumeList( i ).markerID();
+        M_marker = M_FESpace->mesh()->volumeList( i ).markerID();
 
-      UInt eleID = M_FESpace->fe().currentLocalId();
+        UInt eleID = M_FESpace->fe().currentLocalId();
 
-      //Extracting the local displacement
-      for ( UInt iNode = 0; iNode < ( UInt ) M_FESpace->fe().nbFEDof(); iNode++ )
-	{
-	  UInt  iloc = M_FESpace->fe().patternFirst( iNode );
+        //Extracting the local displacement
+        for ( UInt iNode = 0; iNode < ( UInt ) M_FESpace->fe().nbFEDof(); iNode++ )
+        {
+            UInt  iloc = M_FESpace->fe().patternFirst( iNode );
 
-	  for ( UInt iComp = 0; iComp < this->M_FESpace->fieldDim(); ++iComp )
-	    {
-	      UInt ig = M_FESpace->dof().localToGlobalMap( eleID, iloc ) + iComp*M_FESpace->dim() + this->M_offset;
-	      dk_loc[iloc + iComp*M_FESpace->fe().nbFEDof()] = dRep[ig];
-	    }
-	}
+            for ( UInt iComp = 0; iComp < this->M_FESpace->fieldDim(); ++iComp )
+            {
+                UInt ig = M_FESpace->dof().localToGlobalMap( eleID, iloc ) + iComp*M_FESpace->dim() + this->M_offset;
+                dk_loc[iloc + iComp*M_FESpace->fe().nbFEDof()] = dRep[ig];
+            }
+        }
 
-      //Compute the element tensor F
-      AssemblyElementalStructure::computeLocalDeformationGradient( dk_loc, vectorDeformationF, M_FESpace->fe() );
+        //Compute the element tensor F
+        AssemblyElementalStructure::computeLocalDeformationGradient( dk_loc, vectorDeformationF, M_FESpace->fe() );
 
-      //Compute the local vector of the principal stresses
-      for( UInt nDOF=0; nDOF < ( UInt ) M_FESpace->fe().nbFEDof(); nDOF++ )
-	{
-	  UInt  iloc = M_FESpace->fe().patternFirst( nDOF );
+        //Compute the local vector of the principal stresses
+        for( UInt nDOF=0; nDOF < ( UInt ) M_FESpace->fe().nbFEDof(); nDOF++ )
+        {
+            UInt  iloc = M_FESpace->fe().patternFirst( nDOF );
 
-	  M_sigma->Scale(0.0);
-	  M_firstPiola->Scale(0.0);
-	  M_cofactorF->Scale(0.0);
+            M_sigma->Scale(0.0);
+            M_firstPiola->Scale(0.0);
+            M_cofactorF->Scale(0.0);
 
-	  //Compute the rightCauchyC tensor
-	  AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor(M_invariants, vectorDeformationF[nDOF], *M_cofactorF);
+            //Compute the rightCauchyC tensor
+            AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor(M_invariants, vectorDeformationF[nDOF], *M_cofactorF);
 
-	  //Compute the first Piola-Kirchhoff tensor
-	  M_material->computeLocalFirstPiolaKirchhoffTensor(*M_firstPiola, vectorDeformationF[nDOF], *M_cofactorF, M_invariants, M_marker);
+            //Compute the first Piola-Kirchhoff tensor
+            M_material->computeLocalFirstPiolaKirchhoffTensor(*M_firstPiola, vectorDeformationF[nDOF], *M_cofactorF, M_invariants, M_marker);
 
-	  //Compute the Cauchy tensor
-	  AssemblyElementalStructure::computeCauchyStressTensor(*M_sigma, *M_firstPiola, M_invariants[3], vectorDeformationF[nDOF]);
+            //Compute the Cauchy tensor
+            AssemblyElementalStructure::computeCauchyStressTensor(*M_sigma, *M_firstPiola, M_invariants[3], vectorDeformationF[nDOF]);
 
-	  //Compute the eigenvalue
-	  AssemblyElementalStructure::computeEigenvalues(*M_sigma, M_eigenvaluesR, M_eigenvaluesI);
+            //Compute the eigenvalue
+            AssemblyElementalStructure::computeEigenvalues(*M_sigma, M_eigenvaluesR, M_eigenvaluesI);
 
-	  //The Cauchy tensor is symmetric and therefore, the eigenvalues are real
-	  //Check on the imaginary part of eigen values given by the Lapack method
-	  Real sum(0);
-	  for( int i=0; i < M_eigenvaluesI.size(); i++ )
-	    sum += std::abs(M_eigenvaluesI[i]);
-	  ASSERT_PRE( sum < 1e-6 , "The eigenvalues of the Cauchy stress tensors have to be real!" );
+            //The Cauchy tensor is symmetric and therefore, the eigenvalues are real
+            //Check on the imaginary part of eigen values given by the Lapack method
+            Real sum(0);
+            for( int i=0; i < M_eigenvaluesI.size(); i++ )
+                sum += std::abs(M_eigenvaluesI[i]);
+            ASSERT_PRE( sum < 1e-6 , "The eigenvalues of the Cauchy stress tensors have to be real!" );
 
-	  orderEigenvalues( M_eigenvaluesR );
+            orderEigenvalues( M_eigenvaluesR );
 
-	  //Assembling the local vector
-	  for ( int coor=0; coor < M_eigenvaluesR.size(); coor++ )
-	    {
-	      elVecTens[iloc + coor*M_FESpace->fe().nbFEDof()] = M_eigenvaluesR[coor];
-	    }
-	}
+            //Assembling the local vector
+            for ( int coor=0; coor < M_eigenvaluesR.size(); coor++ )
+            {
+                elVecTens[iloc + coor*M_FESpace->fe().nbFEDof()] = M_eigenvaluesR[coor];
+            }
+        }
 
-      reconstructElementaryVector( elVecTens, patchAreaR, i );
+        reconstructElementaryVector( elVecTens, patchAreaR, i );
 
-      //Assembling the local into global vector
-      for ( UInt ic = 0; ic < this->M_FESpace->fieldDim(); ++ic )
-	  assembleVector(*M_globalEigen, elVecTens, M_FESpace->fe(), M_FESpace->dof(), ic, this->M_offset +  ic*totalDof );
+        //Assembling the local into global vector
+        for ( UInt ic = 0; ic < this->M_FESpace->fieldDim(); ++ic )
+            assembleVector(*M_globalEigen, elVecTens, M_FESpace->fe(), M_FESpace->dof(), ic, this->M_offset +  ic*totalDof );
     }
 
-  M_globalEigen->globalAssemble();
+    M_globalEigen->globalAssemble();
 
-  chrono.stop();
-  this->M_displayer->leaderPrint("Analysis done in: ", chrono.diff());
+    chrono.stop();
+    this->M_displayer->leaderPrint("Analysis done in: ", chrono.diff());
 }
 
 template <typename Mesh>
@@ -701,48 +701,48 @@ void
 WallTensionEstimator<Mesh >::constructPatchAreaVector( solutionVect_Type& patchArea )
 {
 
-  solutionVect_Type patchAreaR(*M_displ,Repeated);
-  patchAreaR *= 0.0;
+    solutionVect_Type patchAreaR(*M_displ,Repeated);
+    patchAreaR *= 0.0;
 
-  Real refElemArea(0); //area of reference element
-  UInt totalDof = M_FESpace->dof().numTotalDof();
-  //compute the area of reference element
-  for(UInt iq=0; iq< M_FESpace->qr().nbQuadPt(); iq++)
-    refElemArea += M_FESpace->qr().weight(iq);
+    Real refElemArea(0); //area of reference element
+    UInt totalDof = M_FESpace->dof().numTotalDof();
+    //compute the area of reference element
+    for(UInt iq=0; iq< M_FESpace->qr().nbQuadPt(); iq++)
+        refElemArea += M_FESpace->qr().weight(iq);
 
-  // Define a special quadrature rule for the interpolation
-  QuadratureRule interpQuad;
-  interpQuad.setDimensionShape(shapeDimension(M_FESpace->refFE().shape()), M_FESpace->refFE().shape());
-  Real wQuad(refElemArea/M_FESpace->refFE().nbDof());
+    // Define a special quadrature rule for the interpolation
+    QuadratureRule interpQuad;
+    interpQuad.setDimensionShape(shapeDimension(M_FESpace->refFE().shape()), M_FESpace->refFE().shape());
+    Real wQuad(refElemArea/M_FESpace->refFE().nbDof());
 
-  for (UInt i(0); i< M_FESpace->refFE().nbDof(); ++i) //nbRefCoor
+    for (UInt i(0); i< M_FESpace->refFE().nbDof(); ++i) //nbRefCoor
     {
-      interpQuad.addPoint(QuadraturePoint(M_FESpace->refFE().xi(i),M_FESpace->refFE().eta(i),M_FESpace->refFE().zeta(i),wQuad));
+        interpQuad.addPoint(QuadraturePoint(M_FESpace->refFE().xi(i),M_FESpace->refFE().eta(i),M_FESpace->refFE().zeta(i),wQuad));
     }
 
-  UInt totalNumberVolumes(M_FESpace->mesh()->numVolumes());
-  UInt numberLocalDof(M_FESpace->dof().numLocalDof());
+    UInt totalNumberVolumes(M_FESpace->mesh()->numVolumes());
+    UInt numberLocalDof(M_FESpace->dof().numLocalDof());
 
-  CurrentFE interpCFE(M_FESpace->refFE(),getGeometricMap(*(M_FESpace->mesh()) ),interpQuad);
+    CurrentFE interpCFE(M_FESpace->refFE(),getGeometricMap(*(M_FESpace->mesh()) ),interpQuad);
 
-  // Loop over the cells
-  for (UInt iterElement(0); iterElement< totalNumberVolumes; iterElement++)
+    // Loop over the cells
+    for (UInt iterElement(0); iterElement< totalNumberVolumes; iterElement++)
     {
-      interpCFE.update(M_FESpace->mesh()->volumeList( iterElement ), UPDATE_WDET );
+        interpCFE.update(M_FESpace->mesh()->volumeList( iterElement ), UPDATE_WDET );
 
-      for (UInt iterDof(0); iterDof < numberLocalDof; iterDof++)
+        for (UInt iterDof(0); iterDof < numberLocalDof; iterDof++)
         {
-	  for (UInt iDim(0); iDim < M_FESpace->fieldDim(); ++iDim)
+            for (UInt iDim(0); iDim < M_FESpace->fieldDim(); ++iDim)
             {
-	      ID globalDofID(M_FESpace->dof().localToGlobalMap(iterElement,iterDof) + iDim * totalDof);
-	      patchAreaR[globalDofID] += interpCFE.measure();
+                ID globalDofID(M_FESpace->dof().localToGlobalMap(iterElement,iterDof) + iDim * totalDof);
+                patchAreaR[globalDofID] += interpCFE.measure();
             }
         }
     }
 
-  solutionVect_Type final(patchAreaR,Unique,Add);
+    solutionVect_Type final(patchAreaR,Unique,Add);
 
-  patchArea.add(final);
+    patchArea.add(final);
 
 }
 
@@ -750,25 +750,25 @@ WallTensionEstimator<Mesh >::constructPatchAreaVector( solutionVect_Type& patchA
 template <typename Mesh>
 void WallTensionEstimator<Mesh >::orderEigenvalues( std::vector<Real>& eigenvaluesR )
 {
-  //The number of elements is 3. Thefore, a simple bubble scheme is implemented.
+    //The number of elements is 3. Thefore, a simple bubble scheme is implemented.
 
-  int ordered = 0;
+    int ordered = 0;
 
-  do
+    do
     {
-      ordered = 0;
-      for( UInt i(0); i < eigenvaluesR.size()-1; i++ )
-	{
-	  if( eigenvaluesR[i] > eigenvaluesR[i+1] )
-	    {
-	      Real tmp = eigenvaluesR[i];
-	      eigenvaluesR[i] = eigenvaluesR[i+1];
-	      eigenvaluesR[i+1] = tmp;
-	      ordered = 1;
-	    }
-	}
+        ordered = 0;
+        for( UInt i(0); i < eigenvaluesR.size()-1; i++ )
+        {
+            if( eigenvaluesR[i] > eigenvaluesR[i+1] )
+            {
+                Real tmp = eigenvaluesR[i];
+                eigenvaluesR[i] = eigenvaluesR[i+1];
+                eigenvaluesR[i+1] = tmp;
+                ordered = 1;
+            }
+        }
     }
-  while( ordered );
+    while( ordered );
 
 }
 
@@ -777,62 +777,62 @@ void
 WallTensionEstimator<Mesh >::analyzeTensionsRecoveryCauchyStresses( void )
 {
 
-  LifeChrono chrono;
+    LifeChrono chrono;
 
-  chrono.start();
-  UInt dim = M_FESpace->dim();
+    chrono.start();
+    UInt dim = M_FESpace->dim();
 
-  //Construction of the global tensionsVector
-  solutionVectPtr_Type sigmaX( new solutionVect_Type(*M_localMap) );
-  solutionVectPtr_Type sigmaY( new solutionVect_Type(*M_localMap) );
-  solutionVectPtr_Type sigmaZ( new solutionVect_Type(*M_localMap) );
+    //Construction of the global tensionsVector
+    solutionVectPtr_Type sigmaX( new solutionVect_Type(*M_localMap) );
+    solutionVectPtr_Type sigmaY( new solutionVect_Type(*M_localMap) );
+    solutionVectPtr_Type sigmaZ( new solutionVect_Type(*M_localMap) );
 
-  constructGlobalStressVector(*sigmaX,*sigmaY,*sigmaZ);
+    constructGlobalStressVector(*sigmaX,*sigmaY,*sigmaZ);
 
 
-  for ( UInt iDOF = 0; iDOF <( UInt ) this->M_FESpace->dof().numTotalDof(); iDOF++ )
+    for ( UInt iDOF = 0; iDOF <( UInt ) this->M_FESpace->dof().numTotalDof(); iDOF++ )
     {
 
-      if ( M_displ->blockMap().LID(iDOF) != -1 ) // The Global ID is on the calling processors
-	{
+        if ( M_displ->blockMap().LID(iDOF) != -1 ) // The Global ID is on the calling processors
+        {
 
-	  (*M_sigma).Scale(0.0);
+            (*M_sigma).Scale(0.0);
 
-	  //Extracting the gradient of U on the current DOF
-	  for ( UInt iComp = 0; iComp < this->M_FESpace->fieldDim(); ++iComp )
-	    {
-	      Int LIDid = M_displ->blockMap().LID(iDOF + iComp * dim + M_offset);
-	      Int GIDid = M_displ->blockMap().GID(LIDid);
-	      (*M_sigma)(iComp,0) = (*sigmaX)(GIDid); // (d_xX,d_yX,d_zX)
-	      (*M_sigma)(iComp,1) = (*sigmaY)(GIDid); // (d_xY,d_yY,d_zY)
-	      (*M_sigma)(iComp,2) = (*sigmaZ)(GIDid); // (d_xZ,d_yZ,d_zZ)
-	    }
+            //Extracting the gradient of U on the current DOF
+            for ( UInt iComp = 0; iComp < this->M_FESpace->fieldDim(); ++iComp )
+            {
+                Int LIDid = M_displ->blockMap().LID(iDOF + iComp * dim + M_offset);
+                Int GIDid = M_displ->blockMap().GID(LIDid);
+                (*M_sigma)(iComp,0) = (*sigmaX)(GIDid); // (d_xX,d_yX,d_zX)
+                (*M_sigma)(iComp,1) = (*sigmaY)(GIDid); // (d_xY,d_yY,d_zY)
+                (*M_sigma)(iComp,2) = (*sigmaZ)(GIDid); // (d_xZ,d_yZ,d_zZ)
+            }
 
-	  //Compute the eigenvalue
-	  AssemblyElementalStructure::computeEigenvalues(*M_sigma, M_eigenvaluesR, M_eigenvaluesI);
+            //Compute the eigenvalue
+            AssemblyElementalStructure::computeEigenvalues(*M_sigma, M_eigenvaluesR, M_eigenvaluesI);
 
-	  //The Cauchy tensor is symmetric and therefore, the eigenvalues are real
-	  //Check on the imaginary part of eigen values given by the Lapack method
-	  Real sum(0);
-	  for( int i=0; i < M_eigenvaluesI.size(); i++ )
-	    sum += std::abs(M_eigenvaluesI[i]);
-	  ASSERT_PRE( sum < 1e-6 , "The eigenvalues of the Cauchy stress tensors have to be real!" );
+            //The Cauchy tensor is symmetric and therefore, the eigenvalues are real
+            //Check on the imaginary part of eigen values given by the Lapack method
+            Real sum(0);
+            for( int i=0; i < M_eigenvaluesI.size(); i++ )
+                sum += std::abs(M_eigenvaluesI[i]);
+            ASSERT_PRE( sum < 1e-6 , "The eigenvalues of the Cauchy stress tensors have to be real!" );
 
-	  orderEigenvalues( M_eigenvaluesR );
+            orderEigenvalues( M_eigenvaluesR );
 
-	  //Save the eigenvalues in the global vector
-	  for( UInt icoor = 0; icoor < this->M_FESpace->fieldDim(); ++icoor )
-	    {
-	      Int LIDid = M_displ->blockMap().LID(iDOF + icoor * dim + M_offset);
-	      Int GIDid = M_displ->blockMap().GID(LIDid);
-	      (*M_globalEigen)(GIDid) = M_eigenvaluesR[icoor];
-	    }
+            //Save the eigenvalues in the global vector
+            for( UInt icoor = 0; icoor < this->M_FESpace->fieldDim(); ++icoor )
+            {
+                Int LIDid = M_displ->blockMap().LID(iDOF + icoor * dim + M_offset);
+                Int GIDid = M_displ->blockMap().GID(LIDid);
+                (*M_globalEigen)(GIDid) = M_eigenvaluesR[icoor];
+            }
 
-	}
+        }
     }
 
-  chrono.stop();
-  this->M_displayer->leaderPrint("Analysis done in: ", chrono.diff());
+    chrono.stop();
+    this->M_displayer->leaderPrint("Analysis done in: ", chrono.diff());
 
 }
 
@@ -841,155 +841,155 @@ void
 WallTensionEstimator<Mesh >::constructGlobalStressVector( solutionVect_Type& sigmaX, solutionVect_Type& sigmaY, solutionVect_Type& sigmaZ )
 {
 
-  //Creating the local stress tensors
-  VectorElemental elVecSigmaX(this->M_FESpace->fe().nbFEDof(), this->M_FESpace->fieldDim());
-  VectorElemental elVecSigmaY(this->M_FESpace->fe().nbFEDof(), this->M_FESpace->fieldDim());
-  VectorElemental elVecSigmaZ(this->M_FESpace->fe().nbFEDof(), this->M_FESpace->fieldDim());
+    //Creating the local stress tensors
+    VectorElemental elVecSigmaX(this->M_FESpace->fe().nbFEDof(), this->M_FESpace->fieldDim());
+    VectorElemental elVecSigmaY(this->M_FESpace->fe().nbFEDof(), this->M_FESpace->fieldDim());
+    VectorElemental elVecSigmaZ(this->M_FESpace->fe().nbFEDof(), this->M_FESpace->fieldDim());
 
-  LifeChrono chrono;
+    LifeChrono chrono;
 
-  //Constructing the patch area vector for reconstruction purposes
-  solutionVect_Type patchArea(*M_displ,Unique,Add);
-  patchArea *= 0.0;
+    //Constructing the patch area vector for reconstruction purposes
+    solutionVect_Type patchArea(*M_displ,Unique,Add);
+    patchArea *= 0.0;
 
-  constructPatchAreaVector( patchArea );
+    constructPatchAreaVector( patchArea );
 
-  //Before assembling the reconstruction process is done
-  solutionVect_Type patchAreaR(patchArea,Repeated);
+    //Before assembling the reconstruction process is done
+    solutionVect_Type patchAreaR(patchArea,Repeated);
 
-  QuadratureRule fakeQuadratureRule;
+    QuadratureRule fakeQuadratureRule;
 
-  Real refElemArea(0); //area of reference element
-  //compute the area of reference element
-  for(UInt iq=0; iq< M_FESpace->qr().nbQuadPt(); iq++)
-    refElemArea += M_FESpace->qr().weight(iq);
+    Real refElemArea(0); //area of reference element
+    //compute the area of reference element
+    for(UInt iq=0; iq< M_FESpace->qr().nbQuadPt(); iq++)
+        refElemArea += M_FESpace->qr().weight(iq);
 
-  Real wQuad(refElemArea/M_FESpace->refFE().nbDof());
+    Real wQuad(refElemArea/M_FESpace->refFE().nbDof());
 
-  //Setting the quadrature Points = DOFs of the element and weight = 1
-  std::vector<GeoVector> coords = M_FESpace->refFE().refCoor();
-  std::vector<Real> weights(M_FESpace->fe().nbFEDof(), wQuad);
-  fakeQuadratureRule.setDimensionShape ( shapeDimension(M_FESpace->refFE().shape()), M_FESpace->refFE().shape() );
-  fakeQuadratureRule.setPoints(coords,weights);
+    //Setting the quadrature Points = DOFs of the element and weight = 1
+    std::vector<GeoVector> coords = M_FESpace->refFE().refCoor();
+    std::vector<Real> weights(M_FESpace->fe().nbFEDof(), wQuad);
+    fakeQuadratureRule.setDimensionShape ( shapeDimension(M_FESpace->refFE().shape()), M_FESpace->refFE().shape() );
+    fakeQuadratureRule.setPoints(coords,weights);
 
-  //Set the new quadrature rule
-  M_FESpace->setQuadRule(fakeQuadratureRule);
+    //Set the new quadrature rule
+    M_FESpace->setQuadRule(fakeQuadratureRule);
 
-  this->M_displayer->leaderPrint(" \n*********************************\n  ");
-  this->M_displayer->leaderPrint("   Performing the analysis recovering the Cauchy stresses..., ", M_dataMaterial->solidType() );
-  this->M_displayer->leaderPrint(" \n*********************************\n  ");
+    this->M_displayer->leaderPrint(" \n*********************************\n  ");
+    this->M_displayer->leaderPrint("   Performing the analysis recovering the Cauchy stresses..., ", M_dataMaterial->solidType() );
+    this->M_displayer->leaderPrint(" \n*********************************\n  ");
 
-  UInt totalDof = M_FESpace->dof().numTotalDof();
-  VectorElemental dk_loc(M_FESpace->fe().nbFEDof(), this->M_FESpace->fieldDim());
+    UInt totalDof = M_FESpace->dof().numTotalDof();
+    VectorElemental dk_loc(M_FESpace->fe().nbFEDof(), this->M_FESpace->fieldDim());
 
-  //Vectors for the deformation tensor
-  std::vector<matrix_Type> vectorDeformationF(M_FESpace->fe().nbFEDof(),*M_deformationF);
-  //Copying the displacement field into a vector with repeated map for parallel computations
-  solutionVect_Type dRep(*M_displ, Repeated);
+    //Vectors for the deformation tensor
+    std::vector<matrix_Type> vectorDeformationF(M_FESpace->fe().nbFEDof(),*M_deformationF);
+    //Copying the displacement field into a vector with repeated map for parallel computations
+    solutionVect_Type dRep(*M_displ, Repeated);
 
-  chrono.start();
+    chrono.start();
 
-  //Loop on each volume
-  for ( UInt i = 0; i < M_FESpace->mesh()->numVolumes(); ++i )
+    //Loop on each volume
+    for ( UInt i = 0; i < M_FESpace->mesh()->numVolumes(); ++i )
     {
-      M_FESpace->fe().updateFirstDerivQuadPt( M_FESpace->mesh()->volumeList( i ) );
+        M_FESpace->fe().updateFirstDerivQuadPt( M_FESpace->mesh()->volumeList( i ) );
 
-      elVecSigmaX.zero();
-      elVecSigmaY.zero();
-      elVecSigmaZ.zero();
+        elVecSigmaX.zero();
+        elVecSigmaY.zero();
+        elVecSigmaZ.zero();
 
-      M_marker = M_FESpace->mesh()->volumeList( i ).markerID();
+        M_marker = M_FESpace->mesh()->volumeList( i ).markerID();
 
-      UInt eleID = M_FESpace->fe().currentLocalId();
+        UInt eleID = M_FESpace->fe().currentLocalId();
 
-      //Extracting the local displacement
-      for ( UInt iNode = 0; iNode < ( UInt ) M_FESpace->fe().nbFEDof(); iNode++ )
-	{
-	  UInt  iloc = M_FESpace->fe().patternFirst( iNode );
+        //Extracting the local displacement
+        for ( UInt iNode = 0; iNode < ( UInt ) M_FESpace->fe().nbFEDof(); iNode++ )
+        {
+            UInt  iloc = M_FESpace->fe().patternFirst( iNode );
 
-	  for ( UInt iComp = 0; iComp < this->M_FESpace->fieldDim(); ++iComp )
-	    {
-	      UInt ig = M_FESpace->dof().localToGlobalMap( eleID, iloc ) + iComp*M_FESpace->dim() + this->M_offset;
-	      dk_loc[iloc + iComp*M_FESpace->fe().nbFEDof()] = dRep[ig];
-	    }
-	}
+            for ( UInt iComp = 0; iComp < this->M_FESpace->fieldDim(); ++iComp )
+            {
+                UInt ig = M_FESpace->dof().localToGlobalMap( eleID, iloc ) + iComp*M_FESpace->dim() + this->M_offset;
+                dk_loc[iloc + iComp*M_FESpace->fe().nbFEDof()] = dRep[ig];
+            }
+        }
 
-      //Compute the element tensor F
-      AssemblyElementalStructure::computeLocalDeformationGradient( dk_loc, vectorDeformationF, M_FESpace->fe() );
+        //Compute the element tensor F
+        AssemblyElementalStructure::computeLocalDeformationGradient( dk_loc, vectorDeformationF, M_FESpace->fe() );
 
-      //Compute the local vector of the principal stresses
-      for( UInt nDOF=0; nDOF < ( UInt ) M_FESpace->fe().nbFEDof(); nDOF++ )
-	{
-	  UInt  iloc = M_FESpace->fe().patternFirst( nDOF );
+        //Compute the local vector of the principal stresses
+        for( UInt nDOF=0; nDOF < ( UInt ) M_FESpace->fe().nbFEDof(); nDOF++ )
+        {
+            UInt  iloc = M_FESpace->fe().patternFirst( nDOF );
 
-	  M_sigma->Scale(0.0);
-	  M_firstPiola->Scale(0.0);
-	  M_cofactorF->Scale(0.0);
+            M_sigma->Scale(0.0);
+            M_firstPiola->Scale(0.0);
+            M_cofactorF->Scale(0.0);
 
-	  //Compute the rightCauchyC tensor
-	  AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor(M_invariants, vectorDeformationF[nDOF], *M_cofactorF);
+            //Compute the rightCauchyC tensor
+            AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor(M_invariants, vectorDeformationF[nDOF], *M_cofactorF);
 
-	  //Compute the first Piola-Kirchhoff tensor
-	  M_material->computeLocalFirstPiolaKirchhoffTensor(*M_firstPiola, vectorDeformationF[nDOF], *M_cofactorF, M_invariants, M_marker);
+            //Compute the first Piola-Kirchhoff tensor
+            M_material->computeLocalFirstPiolaKirchhoffTensor(*M_firstPiola, vectorDeformationF[nDOF], *M_cofactorF, M_invariants, M_marker);
 
-	  //Compute the Cauchy tensor
-	  AssemblyElementalStructure::computeCauchyStressTensor(*M_sigma, *M_firstPiola, M_invariants[3], vectorDeformationF[nDOF]);
+            //Compute the Cauchy tensor
+            AssemblyElementalStructure::computeCauchyStressTensor(*M_sigma, *M_firstPiola, M_invariants[3], vectorDeformationF[nDOF]);
 
-	  //Assembling the local vectors for local tensions Component X
-	  for ( int coor=0; coor < this->M_FESpace->fieldDim(); coor++ )
-	      (elVecSigmaX)[iloc + coor*M_FESpace->fe().nbFEDof()] = (*M_sigma)(coor,0);
+            //Assembling the local vectors for local tensions Component X
+            for ( int coor=0; coor < this->M_FESpace->fieldDim(); coor++ )
+                (elVecSigmaX)[iloc + coor*M_FESpace->fe().nbFEDof()] = (*M_sigma)(coor,0);
 
-	  //Assembling the local vectors for local tensions Component Y
-	  for ( int coor=0; coor < this->M_FESpace->fieldDim(); coor++ )
-	      (elVecSigmaY)[iloc + coor*M_FESpace->fe().nbFEDof()] = (*M_sigma)(coor,1);
+            //Assembling the local vectors for local tensions Component Y
+            for ( int coor=0; coor < this->M_FESpace->fieldDim(); coor++ )
+                (elVecSigmaY)[iloc + coor*M_FESpace->fe().nbFEDof()] = (*M_sigma)(coor,1);
 
-	  //Assembling the local vectors for local tensions Component Z
-	  for ( int coor=0; coor < this->M_FESpace->fieldDim(); coor++ )
-	      (elVecSigmaZ)[iloc + coor*M_FESpace->fe().nbFEDof()] = (*M_sigma)(coor,2);
+            //Assembling the local vectors for local tensions Component Z
+            for ( int coor=0; coor < this->M_FESpace->fieldDim(); coor++ )
+                (elVecSigmaZ)[iloc + coor*M_FESpace->fe().nbFEDof()] = (*M_sigma)(coor,2);
 
-	}
+        }
 
-      reconstructElementaryVector( elVecSigmaX, patchAreaR, i );
-      reconstructElementaryVector( elVecSigmaY, patchAreaR, i );
-      reconstructElementaryVector( elVecSigmaZ, patchAreaR, i );
+        reconstructElementaryVector( elVecSigmaX, patchAreaR, i );
+        reconstructElementaryVector( elVecSigmaY, patchAreaR, i );
+        reconstructElementaryVector( elVecSigmaZ, patchAreaR, i );
 
-      //Assembling the three elemental vector in the three global
-      for ( UInt ic = 0; ic < this->M_FESpace->fieldDim(); ++ic )
-	{
-	  assembleVector(sigmaX, elVecSigmaX, M_FESpace->fe(), M_FESpace->dof(), ic, this->M_offset +  ic*totalDof );
-	  assembleVector(sigmaY, elVecSigmaY, M_FESpace->fe(), M_FESpace->dof(), ic, this->M_offset +  ic*totalDof );
-	  assembleVector(sigmaZ, elVecSigmaZ, M_FESpace->fe(), M_FESpace->dof(), ic, this->M_offset +  ic*totalDof );
-	}
+        //Assembling the three elemental vector in the three global
+        for ( UInt ic = 0; ic < this->M_FESpace->fieldDim(); ++ic )
+        {
+            assembleVector(sigmaX, elVecSigmaX, M_FESpace->fe(), M_FESpace->dof(), ic, this->M_offset +  ic*totalDof );
+            assembleVector(sigmaY, elVecSigmaY, M_FESpace->fe(), M_FESpace->dof(), ic, this->M_offset +  ic*totalDof );
+            assembleVector(sigmaZ, elVecSigmaZ, M_FESpace->fe(), M_FESpace->dof(), ic, this->M_offset +  ic*totalDof );
+        }
     }
 
 
-  sigmaX.globalAssemble();
-  sigmaY.globalAssemble();
-  sigmaZ.globalAssemble();
+    sigmaX.globalAssemble();
+    sigmaY.globalAssemble();
+    sigmaZ.globalAssemble();
 }
 
 template <typename Mesh>
 void
 WallTensionEstimator<Mesh >::reconstructElementaryVector( VectorElemental& elVecSigma,
-							  solutionVect_Type& patchArea,
-							  UInt nVol )
+                                                          solutionVect_Type& patchArea,
+                                                          UInt nVol )
 {
-  //UpdateElement Infos
-  //M_FESpace->fe().updateFirstDerivQuadPt( M_FESpace->mesh()->volumeList( nVol ) );
+    //UpdateElement Infos
+    //M_FESpace->fe().updateFirstDerivQuadPt( M_FESpace->mesh()->volumeList( nVol ) );
 
-  Real measure = M_FESpace->fe().measure();
-  UInt eleID = M_FESpace->fe().currentLocalId();
+    Real measure = M_FESpace->fe().measure();
+    UInt eleID = M_FESpace->fe().currentLocalId();
 
-  for (UInt iDof=0; iDof < M_FESpace->fe().nbFEDof(); iDof++)
+    for (UInt iDof=0; iDof < M_FESpace->fe().nbFEDof(); iDof++)
     {
-      UInt  iloc = M_FESpace->fe().patternFirst( iDof );
+        UInt  iloc = M_FESpace->fe().patternFirst( iDof );
 
-      for( UInt icoor=0;  icoor < M_FESpace->fieldDim(); icoor++ )
-	{
-	  ID globalDofID(M_FESpace->dof().localToGlobalMap(eleID,iDof) + icoor * M_FESpace->dof().numTotalDof());
+        for( UInt icoor=0;  icoor < M_FESpace->fieldDim(); icoor++ )
+        {
+            ID globalDofID(M_FESpace->dof().localToGlobalMap(eleID,iDof) + icoor * M_FESpace->dof().numTotalDof());
 
-	  elVecSigma[iloc + icoor * M_FESpace->fe().nbFEDof()] *= ( measure / patchArea[globalDofID] );
-	}
+            elVecSigma[iloc + icoor * M_FESpace->fe().nbFEDof()] *= ( measure / patchArea[globalDofID] );
+        }
 
     }
 }
