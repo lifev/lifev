@@ -378,6 +378,7 @@ Structure::run3d()
     //Initialization of TimeAdvance
     std::string const restart =  dataFile( "importer/restart", "none");
     std::vector<vectorPtr_Type> solutionStencil;
+    solutionStencil.resize( timeAdvance->size() );
 
     boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > importerSolid;
     if( restart.compare( "none" ) )
@@ -437,8 +438,8 @@ Structure::run3d()
             // *vectVer = *solidDisp;
             // exporter.postProcess( currentLoading );
 
-            solutionStencil.push_back( solidDisp );
-
+            //solutionStencil.push_back( solidDisp );
+            solutionStencil[ iterInit ] = solidDisp;
             //initializing the displacement field in the StructuralSolver class with the first solution
             if( !iterInit )
                 solid.initialize( solidDisp );
