@@ -1,0 +1,72 @@
+#! /bin/bash
+#
+# author: Alessio Fumagalli <alessio.fumagalli@mail.polimi.it>
+# date:   27-03-2012
+#
+
+ver='3.4.0'
+
+download_suitesparse() {
+  wget "http://www.cise.ufl.edu/research/sparse/SuiteSparse/SuiteSparse-${ver}.tar.gz"
+}
+
+unpack_suitesparse() {
+  tar xzf SuiteSparse-${ver}.tar.gz
+}
+
+build_suitesparse() {
+  # Configure and make
+  cd ${src_dir}/SuiteSparse
+  sed -e 's/(METIS_PATH)\/Lib/(METIS_PATH)/g' -i CHOLMOD/Lib/Makefile
+  sed -e 's/(METIS_PATH)\/Lib/(METIS_PATH)/g' -i CHOLMOD/Tcov/Makefile
+  _blas="-lblas"
+  if [ "${blas_name}" != "" ]; then
+    _blas="${blas_lib}/${blas_name}"
+  fi
+
+  _lapack="-llapack"
+  if [ "${lapack_name}" != "" ]; then
+    _lapack="${lapack_lib}/${lapack_name}"
+  fi
+
+  # Configure
+  cat > UFconfig/UFconfig.mk <<EOF
+CPLUSPLUS = ${mpi_bin}/mpicxx
+RANLIB = ranlib
+AR = ar cr
+RM = rm -f
+MV = mv -f
+LIB = -lm
+MEX =
+MAKE = make
+BLAS = $_blas
+LAPACK = $_lapack
+METIS_PATH = ${parmetis_include}/metis
+METIS = -L${parmetis_lib} -lmetis
+UMFPACK_CONFIG =
+CHOLMOD_CONFIG =
+SPQR_CONFIG =
+TBB =
+RTLIB =
+CC = ${mpi_bin}/mpicc
+F77 = ${mpi_bin}/mpif90
+F77FLAGS = $FFLAGS -m64 -fPIC
+CFLAGS = $CFLAGS -fexceptions -m64 -fPIC -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE
+CLEAN = *.o *.obj *.ln *.bb *.bbg *.da *.tcov *.gcov gmon.out *.bak *.d *.gcda *.gcno
+XERBLA =
+EOF
+
+  make clean
+  make library
+}
+
+install_suitesparse() {
+  # Installing
+  install -m 775 -d ${install_dir}/{lib,include}
+  install -m 664 {CAMD,COLAMD,LDL,CHOLMOD,SPQR,CXSparse,KLU,BTF,UMFPACK,CCOLAMD,AMD}/Include/*.h \
+    "${install_dir}/include" || return 1;
+  install -m 664 {CAMD,COLAMD,LDL,CHOLMOD,SPQR,CXSparse,KLU,BTF,UMFPACK,CCOLAMD,AMD}/Lib/*.a \
+    "${install_dir}/lib" || return 1;
+  install -m 664 UFconfig/UFconfig.h ${install_dir}/include || return 1;
+}
+
