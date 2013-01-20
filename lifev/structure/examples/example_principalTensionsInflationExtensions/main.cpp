@@ -56,7 +56,7 @@
 #include <lifev/core/mesh/MeshData.hpp>
 #include <lifev/core/mesh/MeshPartitioner.hpp>
 
-#include <lifev/structure/solver/VenantKirchhoffElasticData.hpp>
+#include <lifev/structure/solver/StructuralConstitutiveLawData.hpp>
 
 #include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
 #include <lifev/structure/solver/VenantKirchhoffMaterialLinear.hpp>
@@ -239,7 +239,7 @@ Structure::run3d()
     //! dataElasticStructure for parameters
     GetPot dataFile( parameters->data_file_name.c_str() );
 
-    boost::shared_ptr<VenantKirchhoffElasticData> dataStructure(new VenantKirchhoffElasticData( ));
+    boost::shared_ptr<StructuralConstitutiveLawData> dataStructure(new StructuralConstitutiveLawData( ));
     dataStructure->setup(dataFile);
 
     //! Parameters for the analysis
@@ -251,7 +251,7 @@ Structure::run3d()
     MeshData             meshData;
     meshData.setup(dataFile, "solid/space_discretization");
 
-    boost::shared_ptr<mesh_Type > fullMeshPtr( new RegionMesh<LinearTetra>( *( parameters->comm ) ) );
+    boost::shared_ptr<mesh_Type > fullMeshPtr( new RegionMesh<LinearTetra>( ( parameters->comm ) ) );
     readMesh(*fullMeshPtr, meshData);
 
     MeshPartitioner< mesh_Type > meshPart( fullMeshPtr, parameters->comm );

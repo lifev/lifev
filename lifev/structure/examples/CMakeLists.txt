@@ -8,4 +8,5 @@ ADD_SUBDIRECTORIES(
   example_CookMembrane
   example_creatingDamagedZone
   example_tractionWithSymmetry
+  example_principalTensionsInflationExtensions
 )
