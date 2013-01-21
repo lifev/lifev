@@ -124,6 +124,12 @@ FSIData::operator=( const FSIData& FSIData )
 void
 FSIData::setup( const GetPot& dataFile, const std::string& section )
 {
+    if ( !M_timeALE.get() )
+        M_timeALE.reset( new time_Type( dataFile, "mesh_motion/time_discretization" ) );
+
+    if ( !M_timeAdvanceALE.get() )
+        M_timeAdvanceALE.reset( new timeAdvance_Type( dataFile, "mesh_motion/time_discretization" ) );
+
     M_dataFluid->setup( dataFile );
     M_dataSolid->setup( dataFile );
 
@@ -140,8 +146,8 @@ FSIData::setup( const GetPot& dataFile, const std::string& section )
 
     // Problem - FixPoint / EJ
     M_defaultOmega = dataFile( ( section + "/defOmega" ).data(), 0.001);
-    M_rangeOmega[0] = dataFile( ( section + "/defOmega" ).data(), std::fabs( M_defaultOmega )*1024., 0);
-    M_rangeOmega[1] = dataFile( ( section + "/defOmega" ).data(), std::fabs( M_defaultOmega )/1024., 1);
+    M_rangeOmega[0] = dataFile( ( section + "/defOmega" ).data(), std::fabs( M_defaultOmega )/**1024.*/, 0);
+    M_rangeOmega[1] = dataFile( ( section + "/defOmega" ).data(), std::fabs( M_defaultOmega )/*/1024.*/, 1);
     M_updateEvery = dataFile( ( section + "/updateEvery" ).data(), 1);
 
     // Interface

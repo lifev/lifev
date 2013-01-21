@@ -497,21 +497,31 @@ BCInterfaceFunctionParserSolver< FSIOperator >::updatePhysicalSolverVariables()
 
         case f_flux:
 
+               if ( M_physicalSolver->isFluid() )
+            {
 #ifdef HAVE_LIFEV_DEBUG
             debugStream( 5023 ) << "                                              f_flux(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->fluid().flux( M_flag ) << "\n";
-#endif
 
-            setVariable( "f_flux", M_physicalSolver->fluid().flux( M_flag, *M_physicalSolver->un() ) );
+#endif
+            setVariable( "f_flux", 0.0 );
+            }
+            else
+            {
+#ifdef HAVE_LIFEV_DEBUG
+                debugStream( 5023 ) << "                                              f_flux(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->fluid().flux( M_flag, *M_physicalSolver->fluid().solution() ) << "\n";
+#endif
+                setVariable( "f_flux", M_physicalSolver->fluid().flux( M_flag, *M_physicalSolver->fluid().solution() ) );
+            }
 
             break;
 
         case f_pressure:
 
 #ifdef HAVE_LIFEV_DEBUG
-            debugStream( 5023 ) << "                                              f_pressure(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->fluid().pressure( M_flag ) << "\n";
+            debugStream( 5023 ) << "                                              f_pressure(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->fluid().pressure( M_flag, *M_physicalSolver->fluid().solution() ) << "\n";
 #endif
 
-            setVariable( "f_pressure", M_physicalSolver->fluid().pressure( M_flag, *M_physicalSolver->un() ) );
+            setVariable( "f_pressure", M_physicalSolver->fluid().pressure( M_flag, *M_physicalSolver->fluid().solution() ) );
 
             break;
 
@@ -528,40 +538,40 @@ BCInterfaceFunctionParserSolver< FSIOperator >::updatePhysicalSolverVariables()
         case s_density:
 
 #ifdef HAVE_LIFEV_DEBUG
-            debugStream( 5023 ) << "                                              s_density: " << M_physicalSolver->solid().getRho() << "\n";
+            debugStream( 5023 ) << "                                              s_density: " << M_physicalSolver->solid().rho() << "\n";
 #endif
 
-            setVariable( "s_density", M_physicalSolver->solid().getRho() );
+            setVariable( "s_density", M_physicalSolver->solid().rho() );
 
             break;
 
         case s_poisson:
 
 #ifdef HAVE_LIFEV_DEBUG
-            debugStream( 5023 ) << "                                              s_poisson: " << M_physicalSolver->solid().getPoisson() << "\n";
+            debugStream( 5023 ) << "                                              s_poisson: " << M_physicalSolver->solid().poisson() << "\n";
 #endif
 
-            setVariable( "s_poisson", M_physicalSolver->solid().getPoisson() );
+            setVariable( "s_poisson", M_physicalSolver->solid().poisson(1) );
 
             break;
 
         case s_thickness:
 
 #ifdef HAVE_LIFEV_DEBUG
-            debugStream( 5023 ) << "                                              s_thickness: " << M_physicalSolver->solid().getThickness() << "\n";
+            debugStream( 5023 ) << "                                              s_thickness: " << M_physicalSolver->solid().thickness() << "\n";
 #endif
 
-            setVariable( "s_thickness", M_physicalSolver->solid().getThickness() );
+            setVariable( "s_thickness", M_physicalSolver->solid().thickness() );
 
             break;
 
         case s_young:
 
 #ifdef HAVE_LIFEV_DEBUG
-            debugStream( 5023 ) << "                                              s_young: " << M_physicalSolver->solid().getYoung() << "\n";
+            debugStream( 5023 ) << "                                              s_young: " << M_physicalSolver->solid().young() << "\n";
 #endif
 
-            setVariable( "s_young", M_physicalSolver->solid().getYoung() );
+            setVariable( "s_young", M_physicalSolver->solid().young(1) );
 
             break;
 

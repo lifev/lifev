@@ -1,10 +1,10 @@
 ###################################################################################################
 #
-#                       This file is part of the LifeV Applications                        
+#                       This file is part of the LifeV Applications
 #                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
-#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University      
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
 #
-#      Author(s): 
+#      Author(s):
 #           Date: 00-00-0000
 #  License Terms: GNU LGPL
 #
@@ -31,16 +31,13 @@ updateEvery = 1
 linesearch = 0
 # NonLinearRichardson: stop_tol  = abstol + reltol*normRes;
 
-abstol     = 0.
-reltol     = 1.e-5
-etamax     = 1.e-8 # tolerance of the interface problem (GMRES),
-                    # if semiImplicit, set   etamax = 1.e-10,
-                    # else (e.g.)            etamax = 1.e-3
-                    #IMPORTANT: etamax < abstol + reltol*res
-semiImplicit = false # (only valid for method = exactJacobian or monolithic).
-maxSubIter = 100
-#monolithic = 0
-
+abstol = 0.
+reltol = 1.e-5
+etamax = 1.e-8 # tolerance of the interface problem (GMRES), # if semiImplicit, set etamax = 1.e-10,
+       	       #else (e.g.)  etamax = 1.e-3
+	       #IMPORTANT: etamax < abstol + reltol*res
+semiImplicit = 1
+maxSubIter = 100 #monolithic = 0
 
 restart    = false   # restart the computations (see also importer)
 #restart    = true
@@ -55,10 +52,9 @@ tolerance       =  0 # how far points are to be considered the same on the inter
 
 [exporter]
 multimesh  = false  # actually we export also the displacement
-start      = 0
-#start      = 4
+start      = 0 #start      = 4
 save       = 1
-type       = ensight
+type       = hdf5
 [./fluid]
 filename   = fluid
 [../solid]
@@ -66,8 +62,9 @@ filename = solid
 
 [fluid]
 
-useShapeDerivatives = true
-absorbing_bc		= true
+useShapeDerivatives = false
+absorbing_bc	    = true
+semiImplicit = false
 
 [./physics]
 density   = 1.0               # density
@@ -75,25 +72,26 @@ viscosity = 0.03              # viscosity
 
 [../time_discretization]
 initialtime		= 0.
-endtime			= 0.003
+endtime			= 0.002
 timestep		= 0.001
-BDF_order		= 1
+method                  = BDF
+BDF_order		= 2
+
+
 
 # end of fluid preconditioner parameters
 [../ipstab]
 gammaBeta  = 1
 gammaDiv   = 0.2
-gammaPress = 0.2
+gammaPress = 0.05
 reuse      = true
 max_iter_reuse = 100
 
 [../space_discretization]
-mesh_dir  = ./ # the directory where the mesh file is
-#mesh_file = stent-fluid-coarse.mesh  # mesh file
-mesh_file = tube20.mesh  # mesh file
-#mesh_file = tube.mesh  # mesh file
 mesh_type = .mesh
-
+mesh_dir  = ./ # the directory where the mesh file is
+mesh_file = tube20.mesh #carotid_fluid.mesh #tube_curve20.mesh  # mesh file
+stiff_strain=true
 vel_order		= P1		# P1, P1Bubble, P2
 press_order		= P1			# P1, P2
 
@@ -109,10 +107,10 @@ solver          = gmres
 scaling         = none
 output          = all  #none
 conv            = rhs
-max_iter        = 100
+max_iter        = 200
 reuse           = true
 max_iter_reuse  = 101
-kspace          = 100
+kspace          = 200
 tol             = 1.e-10    # AztecOO tolerance
 
 [../prec]
@@ -120,7 +118,7 @@ prectype        = Ifpack
 displayList     = true
 
 [./ifpack]
-prectype               = Amesos    # Amesos (does a local LU factorization), ILUT (not ILU)
+prectype        = Amesos    # Amesos (does a local LU factorization), ILUT (not ILU)
 overlap         = 2
 
 [./relaxation]
@@ -132,7 +130,7 @@ zero_starting_solution = true
 
 [../partitioner]
 type                   = metis
-#overlap                = 0
+#overlap               = 0
 local_parts            = 1
 root_node              = 0
 use_symmetric_graph    = true
@@ -170,7 +168,7 @@ filter_singletons      = false
   displayList     = false
 
     [./ifpack]
-    prectype               = Amesos    # Amesos (does a local LU factorization), ILUT (not ILU)
+    prectype        = Amesos   # Amesos (does a local LU factorization), ILUT (not ILU)
     overlap         = 2
 
       [./relaxation]
@@ -182,7 +180,7 @@ filter_singletons      = false
 
       [../partitioner]
       type                   = metis
-      #overlap                = 0
+      #overlap               = 0
       local_parts            = 1
       root_node              = 0
       use_symmetric_graph    = true
@@ -208,23 +206,24 @@ filter_singletons      = false
 
 [./physics]
 material_flag   = '1' # '1 2'
-solidType = linearVenantKirchhof
-material_flag   = 1 # '1 2'
-young           = 3.0E6 #,1.9E9
-poisson         = 0.30 #,0.30
-
+solidType       = linearVenantKirchhoff
+young           = 4.0E6 #,1.9E9
+poisson         = 0.45 #,0.30
 density         = 1.2					# density
-thickness		= 0.1
+thickness	= 0.1
 
 [../time_discretization]
-timestep		= 0.001
+timestep        = 0.001
+method          = BDF
+BDF_order       = 2
+#theta           = 0.25
+#gamma           = 0.5
+
 
 [../space_discretization]
-mesh_dir  = ./  # the directory where the mesh file is
-#mesh_file = stent-solid-coarse.mesh  # mesh file
-mesh_file = vessel20.mesh  # mesh file
-#mesh_file = vessel.mesh  # mesh file
 mesh_type = .mesh
+mesh_dir  = ./  # the directory where the mesh file is
+mesh_file = vessel20.mesh #carotid_solid.mesh #vessel_curve20.mesh  # mesh
 order     = P1
 
 [../miscellaneous]
@@ -275,6 +274,15 @@ solvertype      = Amesos_Umfpack
   max_iter_reuse  = 101
   kspace          = 100
   tol             = 1.e-5    # AztecOO tolerance
+
+
+[../time_discretization]
+timestep        = 0.001
+method          = BDF
+BDF_order		= 2
+theta           = 0.25
+gamma           = 0.5
+
 
   [../prec] #see http://trilinos.sandia.gov/packages/docs/r8.0/packages/ifpack/doc/html/ifp_ilu.html
   prectype        = Ifpack

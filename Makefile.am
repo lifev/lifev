@@ -95,6 +95,7 @@ $(top_srcdir)/acinclude.m4:
 	@echo 'm4_include([admin/lifev_default_paths.m4])'>>acinclude.m4
 	@echo 'm4_include([admin/ax_create_pkgconfig_info.m4])'>>acinclude.m4
 	@echo 'm4_include([admin/lifev_create_subdirlist.m4])'>>acinclude.m4
+	@echo 'm4_include([admin/ac_check_hypre.m4])'>>acinclude.m4
 
 
 $(top_srcdir)/Makefile.headers:
