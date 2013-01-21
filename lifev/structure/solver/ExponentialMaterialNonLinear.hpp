@@ -661,10 +661,10 @@ void ExponentialMaterialNonLinear<Mesh>::apply( const vector_Type& sol,
 
 template <typename Mesh>
 void ExponentialMaterialNonLinear<Mesh>::computeLocalFirstPiolaKirchhoffTensor( Epetra_SerialDenseMatrix& firstPiola,
-										const Epetra_SerialDenseMatrix& tensorF,
-										const Epetra_SerialDenseMatrix& cofactorF,
-										const std::vector<Real>& invariants,
-										const UInt marker)
+                                                                                const Epetra_SerialDenseMatrix& tensorF,
+                                                                                const Epetra_SerialDenseMatrix& cofactorF,
+                                                                                const std::vector<Real>& invariants,
+                                                                                const UInt marker)
 {
 
   //Get the material parameters
