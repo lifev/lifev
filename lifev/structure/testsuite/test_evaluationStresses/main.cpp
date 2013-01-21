@@ -349,36 +349,36 @@ Structure::run3d()
     M_exporter->postProcess( 0.0 );
 
 
-    // //Post processing for the displacement gradient
-    // boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterX;
-    // boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterY;
-    // boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterZ;
+    //Post processing for the displacement gradient
+    boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterX;
+    boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterY;
+    boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterZ;
 
-    // //Setting pointers
-    // exporterX.reset( new ExporterHDF5<RegionMesh<LinearTetra> > ( dataFile, "gradX" ) );
-    // exporterY.reset( new ExporterHDF5<RegionMesh<LinearTetra> > ( dataFile, "gradY" ) );
-    // exporterZ.reset( new ExporterHDF5<RegionMesh<LinearTetra> > ( dataFile, "gradZ" ) );
+    //Setting pointers
+    exporterX.reset( new ExporterHDF5<RegionMesh<LinearTetra> > ( dataFile, "gradX" ) );
+    exporterY.reset( new ExporterHDF5<RegionMesh<LinearTetra> > ( dataFile, "gradY" ) );
+    exporterZ.reset( new ExporterHDF5<RegionMesh<LinearTetra> > ( dataFile, "gradZ" ) );
 
-    // exporterX->setMeshProcId(solid->dFESpace().mesh(), solid->dFESpace().map().comm().MyPID());
-    // exporterY->setMeshProcId(solid->dFESpace().mesh(), solid->dFESpace().map().comm().MyPID());
-    // exporterZ->setMeshProcId(solid->dFESpace().mesh(), solid->dFESpace().map().comm().MyPID());
+    exporterX->setMeshProcId(solid->dFESpace().mesh(), solid->dFESpace().map().comm().MyPID());
+    exporterY->setMeshProcId(solid->dFESpace().mesh(), solid->dFESpace().map().comm().MyPID());
+    exporterZ->setMeshProcId(solid->dFESpace().mesh(), solid->dFESpace().map().comm().MyPID());
 
-    // //Defining the vectors
-    // vectorPtr_Type gradX ( new vector_Type(solid->gradientX(),  M_exporter->mapType() ) );
-    // vectorPtr_Type gradY ( new vector_Type(solid->gradientY(),  M_exporter->mapType() ) );
-    // vectorPtr_Type gradZ ( new vector_Type(solid->gradientZ(),  M_exporter->mapType() ) );
+    //Defining the vectors
+    vectorPtr_Type gradX ( new vector_Type(solid->gradientX(),  M_exporter->mapType() ) );
+    vectorPtr_Type gradY ( new vector_Type(solid->gradientY(),  M_exporter->mapType() ) );
+    vectorPtr_Type gradZ ( new vector_Type(solid->gradientZ(),  M_exporter->mapType() ) );
 
-    // //Adding variable
-    // exporterX->addVariable( ExporterData<mesh_Type >::VectorField, "gradX", solid->dFESpacePtr(),
-    // 			   gradX, UInt(0) );
-    // exporterY->addVariable( ExporterData<mesh_Type >::VectorField, "gradY", solid->dFESpacePtr(),
-    // 			   gradY, UInt(0) );
-    // exporterZ->addVariable( ExporterData<mesh_Type >::VectorField, "gradZ", solid->dFESpacePtr(),
-    // 			   gradZ, UInt(0) );
+    //Adding variable
+    exporterX->addVariable( ExporterData<mesh_Type >::VectorField, "gradX", solid->dFESpacePtr(),
+    			   gradX, UInt(0) );
+    exporterY->addVariable( ExporterData<mesh_Type >::VectorField, "gradY", solid->dFESpacePtr(),
+    			   gradY, UInt(0) );
+    exporterZ->addVariable( ExporterData<mesh_Type >::VectorField, "gradZ", solid->dFESpacePtr(),
+    			   gradZ, UInt(0) );
 
-    // exporterX->postProcess( 0.0 );
-    // exporterY->postProcess( 0.0 );
-    // exporterZ->postProcess( 0.0 );
+    exporterX->postProcess( 0.0 );
+    exporterY->postProcess( 0.0 );
+    exporterZ->postProcess( 0.0 );
 
 
     //! =================================================================================
@@ -406,16 +406,16 @@ Structure::run3d()
 
 
         //Create and exporter to check importing
-        // std::string expVerFile = "verificationDisplExporter";
-        // LifeV::ExporterHDF5<RegionMesh<LinearTetra> > exporter( dataFile, meshPart.meshPartition(), expVerFile, parameters->comm->MyPID());
-        // vectorPtr_Type vectVer ( new vector_Type(solid->displacement(),  exporter.mapType() ) );
+        std::string expVerFile = "verificationDisplExporter";
+        LifeV::ExporterHDF5<RegionMesh<LinearTetra> > exporter( dataFile, meshPart.meshPartition(), expVerFile, parameters->comm->MyPID());
+        vectorPtr_Type vectVer ( new vector_Type(solid->displacement(),  exporter.mapType() ) );
 
-        // exporter.addVariable( ExporterData<mesh_Type >::VectorField, "displVer", solid->dFESpacePtr(),
-        // 		      vectVer, UInt(0) );
+        exporter.addVariable( ExporterData<mesh_Type >::VectorField, "displVer", solid->dFESpacePtr(),
+        		      vectVer, UInt(0) );
 
-        // exporter.postProcess(0.0);
-        // *vectVer = *solidDisp;
-        // exporter.postProcess(startTime);
+        exporter.postProcess(0.0);
+        *vectVer = *solidDisp;
+        exporter.postProcess(startTime);
 
 
         //Set the current solution as the displacement vector to use
@@ -427,13 +427,13 @@ Structure::run3d()
         solid->analyzeTensions();
 
         //Extracting the gradient
-        // *gradX = solid->gradientX();
-        // *gradY = solid->gradientY();
-        // *gradZ = solid->gradientZ();
+        *gradX = solid->gradientX();
+        *gradY = solid->gradientY();
+        *gradZ = solid->gradientZ();
 
-        // exporterX->postProcess( startTime );
-        // exporterY->postProcess( startTime );
-        // exporterZ->postProcess( startTime );
+        exporterX->postProcess( startTime );
+        exporterY->postProcess( startTime );
+        exporterZ->postProcess( startTime );
 
         //Extracting the tensions
         std::cout << std::endl;
@@ -456,10 +456,10 @@ Structure::run3d()
 
         //Closing files
         M_exporter->closeFile();
-        // exporterX->closeFile();
-        // exporterY->closeFile();
-        // exporterZ->closeFile();
-        // exporter.closeFile();
+        exporterX->closeFile();
+        exporterY->closeFile();
+        exporterZ->closeFile();
+        exporter.closeFile();
 
 
     }

@@ -61,7 +61,6 @@
 #include <lifev/core/array/MatrixEpetra.hpp>
 #include <lifev/core/array/VectorEpetra.hpp>
 
-
 #include <lifev/core/fem/Assembly.hpp>
 #include <lifev/core/fem/AssemblyElemental.hpp>
 #include <lifev/core/fem/FESpace.hpp>
@@ -79,14 +78,9 @@
 // Structure module include
 #include <lifev/structure/fem/AssemblyElementalStructure.hpp>
 #include <lifev/structure/solver/StructuralConstitutiveLawData.hpp>
-#include <lifev/structure/solver/WallTensionEstimatorData.hpp>
-#include <lifev/structure/solver/StructuralConstitutiveLawData.hpp>
 
-//Materials
-// #include <lifev/structure/solver/VenantKirchhoffMaterialLinear.hpp>
-// #include <lifev/structure/solver/VenantKirchhoffMaterialNonLinear.hpp>
-// #include <lifev/structure/solver/ExponentialMaterialNonLinear.hpp>
-// #include <lifev/structure/solver/NeoHookeanMaterialNonLinear.hpp>
+//Mother class
+#include <lifev/structure/solver/WallTensionEstimatorData.hpp>
 #include <lifev/structure/solver/WallTensionEstimator.hpp>
 
 namespace LifeV
@@ -314,13 +308,14 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensionsRecoveryDispla
     for ( UInt i = 0; i < this->M_FESpace->mesh()->numVolumes(); ++i )
     {
 
+        //Setup quantities
+        this->M_FESpace->fe().updateFirstDerivQuadPt( this->M_FESpace->mesh()->volumeList( i ) );
+        UInt eleID = this->M_FESpace->fe().currentLocalId();
         this->M_marker = this->M_FESpace->mesh()->volumeList( i ).markerID();
 
         //store the local \grad(u)
         matrix_Type gradientDispl( this->M_FESpace->fieldDim(), this->M_FESpace->fieldDim() );
         gradientDispl.Scale( 0.0 );
-
-        UInt eleID = this->M_FESpace->fe().currentLocalId();
 
         //Extracting the local displacement
         for ( UInt iNode = 0; iNode < ( UInt ) this->M_FESpace->fe().nbFEDof(); iNode++ )
@@ -347,10 +342,6 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensionsRecoveryDispla
             //Compute the rightCauchyC tensor
             AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor(this->M_invariants, *M_deformationCylindricalF, *(this->M_cofactorF) );
 
-            // LifeV::Real sumI(0);
-            // for( UInt i(0); i < this->M_invariants.size(); i++ )
-            //     sumI += this->M_invariants[i];
-
             //Compute the first Piola-Kirchhoff tensor
             this->M_material->computeLocalFirstPiolaKirchhoffTensor(*(this->M_firstPiola), *M_deformationCylindricalF, *(this->M_cofactorF), this->M_invariants, this->M_marker);
 
@@ -364,22 +355,25 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensionsRecoveryDispla
             //Check on the imaginary part of eigen values given by the Lapack method
             Real sum(0);
             for( int i=0; i < this->M_eigenvaluesI.size(); i++ )
-                sum += std::abs(this->M_eigenvaluesI[i]);
+                sum += std::abs( this->M_eigenvaluesI[i] );
 
-            ASSERT_PRE( sum < 1e-6 , "The eigenvalues of the Cauchy stress tensors have to be real!" );
+            ASSERT( sum < 1e-6 , "The eigenvalues of the Cauchy stress tensors have to be real!" );
 
             super::orderEigenvalues( this->M_eigenvaluesR );
+
+            std::cout << "Saving eigenvalues"<< i << std::endl;
 
             //Save the eigenvalues in the global vector
             for( UInt icoor = 0; icoor < this->M_FESpace->fieldDim(); ++icoor )
             {
                 UInt ig = this->M_FESpace->dof().localToGlobalMap( eleID, iloc ) + iComp * this->M_FESpace->dim() + this->M_offset;
-                Int LIDid = this->M_displ->blockMap().LID(ig);
-                if( this->M_globalEigen->blockMap().LID(ig) != -1  )
-                {
-                    Int GIDid = this->M_globalEigen->blockMap().GID(LIDid);
                     (*(this->M_globalEigen))(ig) = this->M_eigenvaluesR[icoor];
-                }
+                // Int LIDid = this->M_displ->blockMap().LID(ig);
+                // if( this->M_globalEigen->blockMap().LID(ig) != -1  )
+                // {
+                //     Int GIDid = this->M_globalEigen->blockMap().GID(LIDid);
+
+                // }
             }
         }
     }
@@ -761,7 +755,7 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::moveToCylindricalCoordinates(
     (*M_changeOfVariableMatrix)(2,2) =   1.0;
 
     //Move to cylindrical gradient at the DOF
-    deformationCylindricalF.Multiply('N','T',1.0, *M_changeOfVariableMatrix, gradientDispl,0.0 );
+    deformationCylindricalF.Multiply('N','T',1.0, gradientDispl, *M_changeOfVariableMatrix, 0.0 );
 
     //Add the identity
     for( Int icoor(0); icoor < this->M_FESpace->fieldDim(); icoor++ )
