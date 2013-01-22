@@ -279,8 +279,6 @@ void MeshPartBuilder<MeshType>::constructVertices()
     for (it = M_localVertices.begin();
     	 it != M_localVertices.end(); ++it, ++inode)
     {
-        typename MeshType::point_Type point = 0;
-
         // create a boundary point in the local mesh, if needed
         bool boundary = M_originalMesh->isBoundaryPoint(*it);
         if (boundary)
@@ -288,7 +286,7 @@ void MeshPartBuilder<MeshType>::constructVertices()
             ++M_nBoundaryVertices;
         }
 
-        pp = &(M_meshPart->addPoint(boundary));
+        pp = &(M_meshPart->addPoint(boundary, false));
         *pp = M_originalMesh->point( *it );
 
         pp->setLocalId( inode );
