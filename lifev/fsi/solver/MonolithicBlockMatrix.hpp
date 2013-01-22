@@ -36,6 +36,7 @@
 #ifndef BLOCKMATRIX_H
 #define BLOCKMATRIX_H 1
 
+#include <boost/scoped_ptr.hpp>
 #include <lifev/fsi/solver/MonolithicBlock.hpp>
 
 namespace LifeV
@@ -73,13 +74,13 @@ public:
     //! @name Constructor & Destructor
     //@{
 
-    MonolithicBlockMatrix(UInt coupling):
+    MonolithicBlockMatrix(const std::vector<Int>& flags/*UInt coupling*/):
             super_Type(),
             M_globalMatrix(),
             M_coupling(),
             M_interfaceMap(),
             M_interface(0),
-            M_couplingFlag(coupling),
+            M_couplingFlags(new std::vector<Int>(flags)),
             M_numerationInterface()
     {}
 
@@ -94,6 +95,8 @@ public:
         @param section string specifying the path in the data file where to find the options for the operator
      */
     virtual void  setDataFromGetPot( const GetPot& data, const std::string& section);
+
+    virtual void setupSolver(solver_Type& solver, const GetPot& data);
 
     //! runs GlobalAssemble on the blocks
     /*!
@@ -121,7 +124,9 @@ public:
     virtual void coupler(mapPtr_Type& map,
                          const std::map<ID, ID>& locDofMap,
                          const vectorPtr_Type& numerationInterface,
-                         const Real& timeStep);
+                         const Real& timeStep,
+                         const Real& coefficient,
+                         const Real& rescaleFactor);
 
 
     //! Adds a coupling part to the already existing coupling matrix
@@ -142,7 +147,10 @@ public:
                  const std::map<ID, ID>& locDofMap,
                  const vectorPtr_Type& numerationInterface,
                  const Real& timeStep,
-                 UInt couplingFlag);
+                 const Real& coefficient,
+                 const Real& rescaleFactor,
+                 UInt couplingBlock
+                 );
 
     //! returns true if the operator has at least one block
     /*!
@@ -296,11 +304,18 @@ public:
      */
     void addToGlobalMatrix( const matrixPtr_Type& Mat)
     {
-        matrixPtr_Type tmp(new matrix_Type(M_globalMatrix->map()));
-        *tmp += *M_globalMatrix;
-        *tmp += *Mat;
-        tmp->globalAssemble();
-        M_globalMatrix = tmp;
+        if(M_globalMatrix->matrixPtr()->Filled())
+        {
+            matrixPtr_Type tmp(new matrix_Type(M_globalMatrix->map()));
+            *tmp += *M_globalMatrix;
+            *tmp += *Mat;
+            tmp->globalAssemble();
+            M_globalMatrix = tmp;
+        }
+        else
+        {
+            *M_globalMatrix += *Mat;
+        }
     }
 
     //! adds a coupling block to the coupling matrix
@@ -324,20 +339,26 @@ public:
     //! returns the map built for theLagrange multipliers
     mapPtr_Type interfaceMap() const { return M_interfaceMap; }
 
+    matrixPtr_Type coupling() const { return M_coupling; }
+
     //! returns the numeration of the interface
     /*!
       \param numeration: output vector
      */
     void numerationInterface( vectorPtr_Type& numeration ) { numeration =  M_numerationInterface; }
 
+    const UInt whereIsBlock( UInt /*position*/ )const {return 0;}
+
     //@}
 
     //!@name Factory Method
     //@{
-    static MonolithicBlockMatrix*    createAdditiveSchwarz()
-    {
-        return new MonolithicBlockMatrix(15);
-    }
+  static MonolithicBlockMatrix*    createAdditiveSchwarz()
+  {
+    const Int couplings[] = { 15, 0, 16 };//to modify (15 to 7, for DN, or 14, for DN2) to neglect the coupling (and solve Navier--Stokes)
+    const std::vector<Int> couplingVector(couplings, couplings+3);
+    return new MonolithicBlockMatrix(couplingVector);
+  }
 
     //@}
 
@@ -348,7 +369,7 @@ protected:
     //@{
     matrixPtr_Type                              M_globalMatrix;
     matrixPtr_Type                              M_coupling;
-    mapPtr_Type                          M_interfaceMap;
+    mapPtr_Type                                 M_interfaceMap;
     UInt                                        M_interface;
     //@}
 
@@ -356,7 +377,7 @@ private:
 
     //! @name Private Members
     //@{
-    const UInt                                  M_couplingFlag;
+    boost::scoped_ptr<std::vector<Int> >        M_couplingFlags;
     vectorPtr_Type                              M_numerationInterface;
     //@}
 };

@@ -28,14 +28,14 @@
 # for release mode and set the version.
 #
 
-SET(LifeV_VERSION 3.2.0)
+SET(LifeV_VERSION 3.4.0)
 SET(LifeV_MAJOR_VERSION 3)
-SET(LifeV_MINOR_VERSION 2)
+SET(LifeV_MINOR_VERSION 4)
 SET(LifeV_MICRO_VERSION 0)
-SET(LifeV_MAJOR_MINOR_VERSION 030200)
-SET(LifeV_VERSION_STRING "3.2.0")
+SET(LifeV_MAJOR_MINOR_VERSION 030400)
+SET(LifeV_VERSION_STRING "3.4.0")
 SET(LifeV_ENABLE_DEVELOPMENT_MODE_DEFAULT ON) # Change to 'OFF' for a release
 
 # Used by testing scripts and should not be used elsewhere
 SET(LifeV_REPOSITORY_BRANCH "master" CACHE INTERNAL "")
-SET(LifeV_TESTING_TRACK "Nightly build 3.2" CACHE INTERNAL "")
+SET(LifeV_TESTING_TRACK "Nightly build 3.4" CACHE INTERNAL "")

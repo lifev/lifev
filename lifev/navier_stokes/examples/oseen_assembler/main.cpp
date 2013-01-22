@@ -50,6 +50,7 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/LifeV.hpp>
+#include <lifev/core/array/VectorEpetra.hpp>
 #include <lifev/core/mesh/RegionMesh3DStructured.hpp>
 #include <lifev/core/mesh/MeshData.hpp>
 #include <lifev/core/mesh/RegionMesh.hpp>
@@ -402,6 +403,8 @@ main( int argc, char** argv )
     vectorPtr_Type beta;
     beta.reset(new vector_Type(solutionMap,Repeated));
 
+    vector_Type convect(rhs->map());
+
     vectorPtr_Type velocity;
     velocity.reset(new vector_Type(uFESpace->map(),Unique));
 
@@ -491,10 +494,11 @@ main( int argc, char** argv )
             }
             else if(convectionTerm == KIO91)
             {
-                *rhs -= bdfConvectionInit.extrapolation();
-                *beta *= 0;
-                oseenAssembler.addConvectionRhs(*beta,1.,*solution);
-                bdfConvectionInit.shiftRight(*beta);
+	      bdfConvectionInit.extrapolation(convect);
+	      *rhs -= convect;
+	      *beta *= 0;
+	      oseenAssembler.addConvectionRhs(*beta,1.,*solution);
+	      bdfConvectionInit.shiftRight(*beta);
             }
 
             if (verbose) std::cout << "done" << std::endl;
@@ -575,8 +579,9 @@ main( int argc, char** argv )
 
         if(convectionTerm == SemiImplicit)
         {
-            *beta = bdf.extrapolation(); // Extrapolation for the convective term
-            oseenAssembler.addConvection(*systemMatrix,1.0,*beta);
+          //  *beta = bdf.extrapolation(); // Extrapolation for the convective term
+          bdf.extrapolation( *beta ); // Extrapolation for the convective term
+	  oseenAssembler.addConvection(*systemMatrix,1.0,*beta);
         }
         else if(convectionTerm == Explicit)
         {
@@ -584,8 +589,11 @@ main( int argc, char** argv )
         }
         else if(convectionTerm == KIO91)
         {
-            *rhs -= bdfConvection.extrapolation();
-        }
+	  //   *rhs -= bdfConvection.extrapolation();
+	  convect *= 0.;
+	  bdfConvection.extrapolation(convect);
+	  *rhs -= convect;
+	}
         if (verbose) std::cout << "done" << std::endl;
 
         if (verbose) std::cout << "Applying BC... " << std::flush;
