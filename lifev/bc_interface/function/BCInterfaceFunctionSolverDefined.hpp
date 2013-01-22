@@ -562,7 +562,7 @@ inline void BCInterfaceFunctionSolverDefined< FSIOperator >::checkFunction( BCVe
             return;
 
         operMethod->setStructureToFluid( operMethod->veloFluidMesh() );
-        operMethod->setStructureToFluidParametres();
+        operMethod->setStructureToFluidParameters();
 
         base = *operMethod->bcvStructureToFluid();
 

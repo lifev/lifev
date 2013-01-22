@@ -549,8 +549,6 @@ void DOFInterface3Dto3D::updateDofConnections( const Mesh& mesh1, const DOF& dof
     // Loop on facets at the interface (matching facets)
     for ( Iterator i = M_facetToFacetConnectionList.begin(); i != M_facetToFacetConnectionList.end(); ++i )
     {
-    	if ( flag3 != 0 && Int(mesh1.boundaryFacet(i->first).markerID()) != *flag3) continue;
-
         feBd1.update( mesh1.boundaryFacet( i->first ) );  // Updating facet information on mesh1
         feBd2.update( mesh2.boundaryFacet( i->second ) );  // Updating facet information on mesh2
 
@@ -559,21 +557,23 @@ void DOFInterface3Dto3D::updateDofConnections( const Mesh& mesh1, const DOF& dof
 
         for (ID lDof1 = 0; lDof1 < localToGlobalMapOnBFacet1.size(); lDof1++)
 		{
-			ID gDof1 = localToGlobalMapOnBFacet1[lDof1];
-			feBd1.coorMap( p1[0], p1[1], p1[2], feBd1.refFE.xi( lDof1 ), feBd1.refFE.eta( lDof1 ) ); // Nodal coordinates on the current facet (mesh1)
+		  if ( flag3 != 0 && mesh1.boundaryFacet(i->first).point(lDof1).markerID() == *flag3)
+		    continue;
+		  ID gDof1 = localToGlobalMapOnBFacet1[lDof1];
+		  feBd1.coorMap( p1[0], p1[1], p1[2], feBd1.refFE.xi( lDof1 ), feBd1.refFE.eta( lDof1 ) ); // Nodal coordinates on the current facet (mesh1)
 
-			for (ID lDof2 = 0; lDof2 < localToGlobalMapOnBFacet2.size(); lDof2++)
+		  for (ID lDof2 = 0; lDof2 < localToGlobalMapOnBFacet2.size(); lDof2++)
+		    {
+		      ID gDof2 = localToGlobalMapOnBFacet2[lDof2];
+		      feBd2.coorMap( p2[0], p2[1], p2[2], feBd2.refFE.xi( lDof2 ), feBd2.refFE.eta( lDof2 ) );
+
+		      if ( coupled( p1, p2, tol ) )
 			{
-				ID gDof2 = localToGlobalMapOnBFacet2[lDof2];
-				feBd2.coorMap( p2[0], p2[1], p2[2], feBd2.refFE.xi( lDof2 ), feBd2.refFE.eta( lDof2 ) );
-
-				if ( coupled( p1, p2, tol ) )
-				{
-					std::pair<ID, ID> locDof( gDof1, gDof2 );
-					M_dofToDofConnectionList.push_front( locDof ); // Updating the list of dof connections
-					break;
-				}
+			  std::pair<ID, ID> locDof( gDof1, gDof2 );
+			  M_dofToDofConnectionList.push_front( locDof ); // Updating the list of dof connections
+			  break;
 			}
+		    }
 		}
     }
 
