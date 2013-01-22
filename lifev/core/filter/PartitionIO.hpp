@@ -436,7 +436,7 @@ void LifeV::PartitionIO<MeshType>::writePoints()
 		for (UInt i = 0; i < M_numParts; ++i) {
 	    	mesh_Type& currentPart = (*(*M_meshPartsOut)[i]);
 	    	for (UInt j = 0; j < currentPart.numPoints(); ++j) {
-	    		M_uintBuffer[j] = currentPart.pointList[j].marker();
+	    		M_uintBuffer[j] = currentPart.pointList[j].markerID();
 	    		M_uintBuffer[stride + j] = currentPart.point(j).id();
 	    		M_uintBuffer[2 * stride + j] =
 						static_cast<int>(currentPart.pointList[j].flag());
@@ -455,7 +455,7 @@ void LifeV::PartitionIO<MeshType>::writePoints()
 	    for (UInt i = 0; i < M_numParts; ++i) {
 	    	mesh_Type& currentPart = (*(*M_meshPartsOut)[i]);
 	    	for (UInt j = 0; j < currentPart.numPoints(); ++j) {
-	    		M_uintBuffer[stride * j] = currentPart.pointList[j].marker();
+	    		M_uintBuffer[stride * j] = currentPart.pointList[j].markerID();
 	    		M_uintBuffer[stride * j + 1] = currentPart.point(j).id();
 	    		M_uintBuffer[stride * j + 2] =
 						static_cast<int>(currentPart.pointList[j].flag());
@@ -508,7 +508,8 @@ void LifeV::PartitionIO<MeshType>::writeEdges()
 	    		M_uintBuffer[j] = currentPart.edgeList[j].point(0).localId();
 	    		M_uintBuffer[stride + j] =
 						currentPart.edgeList[j].point(1).localId();
-	    		M_uintBuffer[2 * stride + j] = currentPart.edgeList[j].marker();
+	    		M_uintBuffer[2 * stride + j] =
+	    				currentPart.edgeList[j].markerID();
 	    		M_uintBuffer[3 * stride + j] = currentPart.edgeList[j].id();
 	    		M_uintBuffer[4 * stride + j] =
 	    				static_cast<int>(currentPart.edgeList[j].flag());
@@ -526,7 +527,8 @@ void LifeV::PartitionIO<MeshType>::writeEdges()
 	    				currentPart.edgeList[j].point(0).localId();
 	    		M_uintBuffer[stride * j + 1] =
 						currentPart.edgeList[j].point(1).localId();
-	    		M_uintBuffer[stride * j + 2] = currentPart.edgeList[j].marker();
+	    		M_uintBuffer[stride * j + 2] =
+	    				currentPart.edgeList[j].markerID();
 	    		M_uintBuffer[stride * j + 3] = currentPart.edgeList[j].id();
 	    		M_uintBuffer[stride * j + 4] =
 	    				static_cast<int>(currentPart.edgeList[j].flag());
@@ -574,7 +576,7 @@ void LifeV::PartitionIO<MeshType>::writeFaces()
 						currentPart.faceList[j].point(k).localId();
 	    		}
 	    		M_uintBuffer[M_faceNodes * stride +j] =
-						currentPart.faceList[j].marker();
+						currentPart.faceList[j].markerID();
 	    		M_uintBuffer[(M_faceNodes + 1) * stride + j] =
 						currentPart.faceList[j].id();
 	    		M_uintBuffer[(M_faceNodes + 2) * stride + j] =
@@ -602,7 +604,7 @@ void LifeV::PartitionIO<MeshType>::writeFaces()
 						currentPart.faceList[j].point(k).localId();
 	    		}
 	    		M_uintBuffer[stride * j + M_faceNodes] =
-						currentPart.faceList[j].marker();
+						currentPart.faceList[j].markerID();
 	    		M_uintBuffer[stride * j + M_faceNodes + 1] =
 						currentPart.faceList[j].id();
 	    		M_uintBuffer[stride * j + M_faceNodes + 2] =
@@ -659,7 +661,7 @@ void LifeV::PartitionIO<MeshType>::writeElements()
 						currentPart.volumeList[j].point(k).localId();
 	    		}
 	    		M_uintBuffer[M_elementNodes * stride +j] =
-						currentPart.volumeList[j].marker();
+						currentPart.volumeList[j].markerID();
 	    		M_uintBuffer[(M_elementNodes + 1) * stride + j] =
 						currentPart.volumeList[j].id();
                 M_uintBuffer[(M_elementNodes + 2) * stride + j] =
@@ -679,7 +681,7 @@ void LifeV::PartitionIO<MeshType>::writeElements()
 						currentPart.volumeList[j].point(k).localId();
 	    		}
 	    		M_uintBuffer[stride * j + M_elementNodes] =
-						currentPart.volumeList[j].marker();
+						currentPart.volumeList[j].markerID();
 	    		M_uintBuffer[stride * j + M_elementNodes + 1] =
 						currentPart.volumeList[j].id();
                 M_uintBuffer[stride * j + M_elementNodes + 2] =
@@ -1019,7 +1021,7 @@ void LifeV::PartitionIO<MeshType>::readElements()
 	            pv->setPoint(k, M_meshPartIn->point(
 	            		M_uintBuffer[k * stride + j]));
 	        }
-	        pv->setMarker(M_uintBuffer[M_elementNodes * stride + j]);
+	        pv->setMarkerID(M_uintBuffer[M_elementNodes * stride + j]);
 	    }
 	} else {
 	    for (UInt j = 0; j < M_numElements; ++j)
@@ -1034,7 +1036,7 @@ void LifeV::PartitionIO<MeshType>::readElements()
 	            pv->setPoint(k, M_meshPartIn->point(
 	            		M_uintBuffer[stride * j + k]));
 	        }
-	        pv->setMarker(M_uintBuffer[stride * j + M_elementNodes]);
+	        pv->setMarkerID(M_uintBuffer[stride * j + M_elementNodes]);
 	    }
 	}
 
