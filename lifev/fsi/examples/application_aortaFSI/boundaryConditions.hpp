@@ -147,7 +147,7 @@ FSIOperator::fluidBchandlerPtr_Type BCh_harmonicExtension(FSIOperator &_oper)
 {
 
     // Boundary condition for the mesh
-    Debug( 10000 ) << "Boundary condition for the harmonic extension\n";
+    debugStream( 10000 ) << "Boundary condition for the harmonic extension\n";
 
     BCFunctionBase bcf(fZero);
 
@@ -158,7 +158,7 @@ FSIOperator::fluidBchandlerPtr_Type BCh_harmonicExtension(FSIOperator &_oper)
 
     if (_oper.data().method() == "monolithicGE")
     {
-        Debug(10000) << "FSIMonolithic GCE harmonic extension\n";
+        debugStream(10000) << "FSIMonolithic GCE harmonic extension\n";
         FSIMonolithicGE *MOper = dynamic_cast<FSIMonolithicGE *>(&_oper);
         MOper->setStructureDispToHarmonicExtension(_oper.lambdaFluidRepeated());
         BCh_he->addBC("Interface", SOLIDINTERFACE, Essential, Full,
@@ -204,7 +204,7 @@ FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFlux()
 FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFluid(FSIOperator &_oper)
 {
     // Boundary conditions for the fluid velocity
-    Debug( 10000 ) << "Boundary condition for the fluid\n";
+    debugStream( 10000 ) << "Boundary condition for the fluid\n";
 
     if (! _oper.isFluid() )
         return FSIOperator::fluidBchandlerPtr_Type();

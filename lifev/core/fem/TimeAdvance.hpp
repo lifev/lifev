@@ -390,7 +390,7 @@ public:
 
 
   //! Return the current velocity
-  virtual feVectorType velocity() const=0;
+  virtual feVectorType firstDerivative() const=0;
 
   //!Return the velocity
   /*!
@@ -399,7 +399,7 @@ public:
     this method is used for example in FSI to return the value of solid
     in the internal loop
   */
-  feVectorType velocity(const  feVector_Type& u) const;
+  feVectorType firstDerivative(const  feVector_Type& u) const;
 
 
   //! Return the velocity based on given vector on the next time step
@@ -409,11 +409,11 @@ public:
       this method is used for example in FSI to return the current mesh velocity
       besed on the currently computed mesh displacement
     */
-    feVectorType nextVelocity( feVectorType const& newEntry ) const;
+    feVectorType nextFirstDerivative( feVectorType const& newEntry ) const;
 
 
   //!Return the current acceleration
-  virtual feVectorType acceleration() const=0;
+  virtual feVectorType secondDerivative() const=0;
 
   //! Return the accelerate
   /*!
@@ -651,7 +651,7 @@ TimeAdvance<feVectorType>::singleElement( const UInt& i) const
 
 template<typename feVectorType>
 feVectorType
-TimeAdvance<feVectorType>::velocity( const feVector_Type& u ) const
+TimeAdvance<feVectorType>::firstDerivative( const feVector_Type& u ) const
 {
     feVector_Type vel( u );
     vel  *= M_alpha[ 0 ] /M_timeStep;
@@ -661,7 +661,7 @@ TimeAdvance<feVectorType>::velocity( const feVector_Type& u ) const
 
 template<typename feVectorType>
 feVectorType
-TimeAdvance<feVectorType>::nextVelocity(feVectorType const& newEntry) const
+TimeAdvance<feVectorType>::nextFirstDerivative(feVectorType const& newEntry) const
 {
     feVectorType rhsContribution(*this->M_unknowns[0]);
     this->RHSFirstDerivative(M_timeStep, rhsContribution,1);
