@@ -44,11 +44,11 @@
 #include <lifev/core/mesh/MeshData.hpp>
 #include <lifev/bc_interface/fem/BCInterface3D.hpp>
 #include <lifev/core/fem/FESpace.hpp>
-#include <lifev/core/fem/TimeAdvanceBDFNavierStokes.hpp>
 #include <lifev/core/filter/ExporterEnsight.hpp>
 #ifdef HAVE_HDF5
 #include <lifev/core/filter/ExporterHDF5.hpp>
 #endif
+#include <lifev/navier_stokes/fem/TimeAdvanceBDFNavierStokes.hpp>
 #include <lifev/navier_stokes/solver/OseenSolverShapeDerivative.hpp>
 
 #include <lifev/multiscale/solver/MultiscaleModel.hpp>
