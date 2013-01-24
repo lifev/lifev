@@ -242,6 +242,7 @@ protected:
     bool        M_useStiffStrain;
     bool        M_enableTransient;
     Real        M_divergenceCoeff;
+    bool        M_recomputeNormalVectors;
 
     std::string M_inflowBoundaryType;
     std::string M_outflowBoundaryType;

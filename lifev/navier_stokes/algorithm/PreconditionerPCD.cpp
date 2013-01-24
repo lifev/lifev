@@ -77,6 +77,7 @@ PreconditionerPCD::PreconditionerPCD( boost::shared_ptr<Epetra_Comm> comm ):
     M_useStiffStrain             ( false ),
     M_enableTransient            ( true ),
     M_divergenceCoeff            ( 1.0 ),
+    M_recomputeNormalVectors     ( true ),
     M_schurOperatorReverseOrder  ( false ),
     M_inflowBoundaryType         ( "Robin" ),
     M_outflowBoundaryType        ( "Neumann" ),
@@ -149,6 +150,9 @@ PreconditionerPCD::createParametersList( list_Type&         list,
 
     bool useMinusDivergence = dataFile( ( section + "/" + subsection + "/use_minus_divergence" ).data(), false );
     list.set( "use minus divergence", useMinusDivergence );
+
+    bool recomputeNormalVectors = dataFile( ( section + "/" + subsection + "/recompute_normal_vectors" ).data(), true );
+    list.set( "recompute normal vectors", recomputeNormalVectors );
 
     bool schurOperatorReverseOrder = dataFile( ( section + "/" + subsection + "/Schur_operator_reverse_order" ).data(), false );
     list.set( "Schur operator reverse order", schurOperatorReverseOrder );
@@ -739,6 +743,7 @@ PreconditionerPCD::setParameters( Teuchos::ParameterList& list )
     M_enableTransient                  = list.get( "enable transient", true );
     bool useMinusDivergence            = list.get( "use minus divergence", false );
     this->setUseMinusDivergence( useMinusDivergence );
+    M_recomputeNormalVectors           = list.get( "recompute normal vectors", true );
     M_schurOperatorReverseOrder        = list.get( "Schur operator reverse order", false );
     M_inflowBoundaryType               = list.get( "inflow boundary type", "Robin" );
     M_outflowBoundaryType              = list.get( "outflow boundary type", "Neumann" );
@@ -900,7 +905,7 @@ PreconditionerPCD::computeNormalVectors()
 PreconditionerPCD::vectorPtr_Type
 PreconditionerPCD::computeRobinCoefficient()
 {
-    //if( M_normalVectors.get() == 0 )
+    if( M_normalVectors.get() == 0 || M_recomputeNormalVectors )
     {
         this->computeNormalVectors();
     }
