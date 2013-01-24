@@ -1,4 +1,30 @@
-# -*- readme-debian -*-
+
+LifeV 3.4.1:
+============
+
+* Rewriting the content of the LinearSolver class to be cleaner
+* Bug fix (in some circumstances there were seg. faults)
+* Adding a new "preconditioner" which is basically using a LinearSolver object
+  as a preconditioner (to perform subiterations)
+* Introduction of the concept of matrices and vectors structure… you can now
+  store the structure as an object. This is useful to work with
+  MatrixEpetraStructured.
+* New functions in MatrixEpetraStructuredUtility.hpp to be able to exploit block
+  structure using EpetraMatrix (typically if you do not have a
+  MatrixEpetraStructured).
+* New wrapper for operator (ConfinedOperator). You can apply an operator only on
+   a chosen section of a vector.
+
+
+LifeV 3.4.0:
+============
+
+Implementation of a physical solver for structural mechanics problems using an
+abstract class to handle the constitutive laws that are currently available.
+Moreover, these laws have been inserted in the FSI framework (partitioned and
+monolithic) together with the TimeAdvance classes to have high order in time
+discretization in the case of FSI problems.
+
 
 LifeV 3.2.0:
 ============
@@ -155,6 +181,3 @@ These files are removed. The last tag that has them is LIFEV_1_1_0.
 
 Bug Fixes
 ---------
-
-
- -- Simone Deparis <simone.deparis@epfl.ch>, 3.2.2010
