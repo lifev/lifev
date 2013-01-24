@@ -183,7 +183,7 @@ struct Structure::Private
 
     static Real bcNonZero(const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
     {
-        return  30000.0;
+        return  3000000.0;
     }
 
     static Real d0(const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
@@ -333,15 +333,15 @@ Structure::run3d()
     //! =================================================================================
     //! BC for StructuredCube4_test_structuralsolver.mesh
     //! =================================================================================
-    BCh->addBC("EdgesIn",      20,  Essential,   Component, zero, compz);
-    BCh->addBC("EdgesIn",      40,  Natural, Component, zero, compz);
+    BCh->addBC("EdgesIn",      20,  Natural,   Component, nonZero, compy);
+    BCh->addBC("EdgesIn",      40,  Essential, Component, zero,    compy);
 
-    BCh->addBC("SymmetryX",    350, EssentialVertices, Component, zero, compxy);
-    BCh->addBC("SymmetryX",    450, EssentialVertices, Component, zero, compxz);
-    BCh->addBC("SymmetryX",    250, EssentialVertices, Component, zero, compyz);
-    BCh->addBC("edgeone",      1000,  EssentialVertices, Full, zero, 3);
-    BCh->addBC("edgetwo",      50,  Essential, Component, zero, compx);
-    BCh->addBC("edgetwo",      60,  Essential, Component, zero, compy);
+    BCh->addBC("SymmetryX",    5,  Essential, Component, zero,    compx);
+    BCh->addBC("SymmetryY",    3,  Essential, Component, zero,    compz);
+    BCh->addBC("edgeone",      100,  EssentialVertices, Full, zero, 3);
+    BCh->addBC("edgetwo",      50,  EssentialVertices, Component, zero,    compxy);
+    BCh->addBC("edgetwo",      30,  EssentialVertices, Component, zero,    compyz);
+    BCh->addBC("edgetwo",      80,  EssentialVertices, Component, zero,    compxz);
 
 
     //! 1. Constructor of the structuralSolver
