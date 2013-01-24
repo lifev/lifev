@@ -24,8 +24,6 @@
 */
 
 #include <lifev/core/algorithm/PreconditionerComposed.hpp>
-#include <lifev/core/algorithm/PreconditionerIfpack.hpp>
-#include <lifev/core/algorithm/PreconditionerML.hpp>
 
 namespace LifeV
 {
@@ -41,6 +39,7 @@ PreconditionerComposed::PreconditionerComposed( boost::shared_ptr<Epetra_Comm> c
 {
 }
 
+/*
 PreconditionerComposed::PreconditionerComposed(PreconditionerComposed& P):
     super_Type(P, boost::dynamic_pointer_cast<ComposedOperator<Ifpack_Preconditioner> >(P.preconditionerPtr())->commPtr()),
     M_operVector(P.operVector()),
@@ -49,6 +48,8 @@ PreconditionerComposed::PreconditionerComposed(PreconditionerComposed& P):
 {
     //    *M_prec=*P.preconditioner();
 }
+*/
+
 PreconditionerComposed::~PreconditionerComposed()
 {
     M_prec.reset();
@@ -69,17 +70,16 @@ PreconditionerComposed::setDataFromGetPot( const GetPot&      dataFile,
 
 void
 PreconditionerComposed::createParametersList(       list_Type& /*list*/,
-                                          const GetPot&      dataFile,
-                                          const std::string& section,
-                                          const std::string& subSection )
+                                                    const GetPot&      dataFile,
+                                                    const std::string& section,
+                                                    const std::string& subSection )
 {
-    //M_list.resize(listNumber);
     //! See http://trilinos.sandia.gov/packages/docs/r9.0/packages/ifpack/doc/html/index.html
     //! for more informations on the parameters
     ASSERT( !M_prec->number(), "Error, when initializing the preconditioner, it must be empty" );
     for ( UInt i(0); i < dataFile.vector_variable_size( ( section + "/" + subSection + "/list" ).data() ); ++i )
     {
-        epetraPrec_Type tmp( PRECFactory::instance().createObject( dataFile( ( section + "/" + subSection + "/list" ).data(), "ML", i ) ) );
+        epetraPrecPtr_Type tmp( PRECFactory::instance().createObject( dataFile( ( section + "/" + subSection + "/list" ).data(), "ML", i ) ) );
         M_prec->push_back(tmp);
         M_prec->OperatorView()[i]->createParametersList(M_prec->OperatorView()[i]->parametersList(), dataFile, section, dataFile( ( section + "/" + subSection + "/sections" ).data(), "ML", i ));
     }

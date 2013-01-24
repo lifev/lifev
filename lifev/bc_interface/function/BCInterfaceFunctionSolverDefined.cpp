@@ -109,8 +109,11 @@ BCInterfaceFunctionSolverDefined< FSIOperator >::updatePhysicalSolverVariables()
         Int gid;
         Real x, y, z;
         Real alpha, beta;
-        Real t( M_physicalSolver->dataSolid()->getdataTime()->time() );
-        Real timeStep( M_physicalSolver->dataSolid()->getdataTime()->timeStep() );
+        Real t( M_physicalSolver->dataSolid()->dataTime()->time() );
+        Real timeStep( M_physicalSolver->dataSolid()->dataTime()->timeStep() );
+
+        // Update Time advance
+        M_physicalSolver->solidTimeAdvance()->updateRHSFirstDerivative( timeStep );
 
         Int verticesGlobalNumber( M_physicalSolver->solidLocalMesh().numGlobalVertices() );
         for ( UInt i(0) ; i < M_physicalSolver->solidLocalMesh().numVertices() ; ++i )
@@ -124,8 +127,7 @@ BCInterfaceFunctionSolverDefined< FSIOperator >::updatePhysicalSolverVariables()
             alpha = M_vectorFunctionRobin[0]->functionTimeSpace( t, x, y, z, 0 );
             beta  = M_vectorFunctionRobin[1]->functionTimeSpace( t, x, y, z, 0 );
 
-            alpha += 2 / timeStep * beta;
-            alpha *= timeStep; // This is due to the structural scaling on the timeStep
+            alpha += M_physicalSolver->solidTimeAdvance()->coefficientFirstDerivative( 0 ) / timeStep * beta;
 
             (*M_robinAlphaCoefficient)[gid] = alpha;
             (*M_robinBetaCoefficient)[gid]  = beta;
@@ -137,14 +139,7 @@ BCInterfaceFunctionSolverDefined< FSIOperator >::updatePhysicalSolverVariables()
             (*M_robinBetaCoefficient)[gid + verticesGlobalNumber * 2]  = beta;
         }
 
-        // Set displacement and velocity at time tn (mid-point scheme for the solid)
-        FSIOperator::vector_Type displacementTn( M_physicalSolver->dFESpace().map(), Repeated, Zero );
-        FSIOperator::vector_Type velocityTn( M_physicalSolver->dFESpace().map(), Repeated, Zero );
-
-        M_physicalSolver->exportSolidDisplacement( displacementTn );
-        M_physicalSolver->exportSolidVelocity( velocityTn );
-
-        *M_robinRHS = 2 / timeStep * displacementTn + velocityTn;
+        *M_robinRHS = M_physicalSolver->solidTimeAdvance()->rhsContributionFirstDerivative();
 
         break;
     }

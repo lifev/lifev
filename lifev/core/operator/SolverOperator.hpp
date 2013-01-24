@@ -50,6 +50,7 @@
 
 #include <Teuchos_ParameterList.hpp>
 #include <Teuchos_RCPDecl.hpp>
+#include <Epetra_MpiComm.h>
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic warning "-Wunused-variable"

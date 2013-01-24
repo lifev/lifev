@@ -43,6 +43,11 @@ void MonolithicBlockMatrix::setDataFromGetPot(const GetPot& /*data*/, const std:
 {
 }
 
+void MonolithicBlockMatrix::setupSolver(solver_Type& solver, const GetPot& data)
+{
+solver.setupPreconditioner(data, "linear_system/prec");//to avoid if we have already a prec.
+}
+
 
 void MonolithicBlockMatrix::GlobalAssemble()
 {
@@ -51,14 +56,16 @@ void MonolithicBlockMatrix::GlobalAssemble()
 }
 
 void MonolithicBlockMatrix::coupler(mapPtr_Type& map,
-                          const std::map<ID, ID>& locDofMap,
-                          const vectorPtr_Type& numerationInterface,
-                          const Real& timeStep
+                                    const std::map<ID, ID>& locDofMap,
+                                    const vectorPtr_Type& numerationInterface,
+                                    const Real& timeStep,
+                                    const Real& coefficient=1.,
+                                    const Real& rescaleFactor=1.
                          )
 {
     ASSERT(!M_coupling.get(), "coupler must not be called twice \n");
     M_coupling.reset(new matrix_Type(*map));
-    super_Type::couplingMatrix( M_coupling,  M_couplingFlag, super_Type::M_FESpace, super_Type::M_offset, locDofMap, numerationInterface, timeStep);
+    super_Type::couplingMatrix( M_coupling,  (*M_couplingFlags)[0], super_Type::M_FESpace, super_Type::M_offset, locDofMap, numerationInterface, timeStep, 1.,  coefficient, rescaleFactor);
 }
 
 
@@ -66,10 +73,12 @@ void MonolithicBlockMatrix::coupler(mapPtr_Type& /*map*/,
                                     const std::map<ID, ID>& locDofMap,
                                     const vectorPtr_Type& numerationInterface,
                                     const Real& timeStep,
-                                    UInt couplingFlag
+                                    const Real& coefficient,
+                                    const Real& rescaleFactor,
+                                    UInt couplingBlock
                          )
 {
-    super_Type::couplingMatrix( M_coupling,  couplingFlag, super_Type::M_FESpace, super_Type::M_offset, locDofMap, numerationInterface, timeStep);
+    super_Type::couplingMatrix( M_coupling,  (*M_couplingFlags)[couplingBlock], super_Type::M_FESpace, super_Type::M_offset, locDofMap, numerationInterface, timeStep, 1., coefficient, rescaleFactor);
 }
 
 

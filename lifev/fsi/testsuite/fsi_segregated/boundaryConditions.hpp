@@ -44,6 +44,16 @@
 #include "lifev/fsi/solver/FSIFixedPoint.hpp"
 
 
+#define OUTLET 3
+#define INLET 2
+#define FLUIDINTERFACE 1
+#define SOLIDINTERFACE 1
+#define OUTERWALL 10
+#define RING  2
+#define RING2 3
+#define INOUTEDGE 20
+#define INEDGE 30
+
 //#define FLUX
 
 namespace LifeV
@@ -72,8 +82,14 @@ FSIOperator::fluidBchandlerPtr_Type BCh_harmonicExtension(FSIOperator &_oper)
 
     FSISolver::fluidBchandlerPtr_Type BCh_he(new FSIOperator::fluidBchandler_Type );
 
-    BCh_he->addBC("Top",         3, Essential, Full, bcf,   3);
-    BCh_he->addBC("Base",        2, Essential, Full, bcf,   3);
+
+
+    BCh_he->addBC("Edges", INOUTEDGE, Essential, Full, bcf,   3);
+    BCh_he->addBC("Edges", INEDGE, Essential, Full, bcf,   3);
+    BCh_he->addBC("Base",  INLET,     Essential, Full, bcf,   3);
+
+    // BCh_he->addBC("Top",         3, Essential, Full, bcf,   3);
+    // BCh_he->addBC("Base",        2, Essential, Full, bcf,   3);
 
 
     if (_oper.data().method() == "steklovPoincare")
@@ -119,19 +135,19 @@ FSIOperator::fluidBchandlerPtr_Type BCh_fluid(FSIOperator &_oper)
     FSIOperator::fluidBchandlerPtr_Type BCh_fluid( new FSIOperator::fluidBchandler_Type );
 
     BCFunctionBase bcf           (fZero);
-    BCFunctionBase in_flow       (u2);
-    BCFunctionBase in_flow_flux  (PhysFlux);
+    BCFunctionBase in_flow  (u2);
+    //    BCFunctionBase in_flow_flux  (PhysFlux);
     BCFunctionBase out_flow      (fZero);
 
 
 #ifdef FLUX
-    BCh_fluid->addBC("InFlow" ,   2,  Flux,   Full, in_flow_flux, 3);
+    BCh_fluid->addBC("InFlow" ,   2,  Flux,  Normal, in_flow, 3);
 #else
     BCh_fluid->addBC("InFlow" , 2,  Natural,   Full, in_flow, 3);
 #endif
 
     BCh_fluid->addBC("OutFlow",   3,  Natural,   Full, out_flow, 3);
-    BCh_fluid->addBC("EdgesIn",  20, EssentialVertices, Full, bcf,  3);
+    //BCh_fluid->addBC("EdgesIn",  20, EssentialVertices, Full, bcf,  3);
 
 
 
@@ -145,13 +161,14 @@ FSIOperator::fluidBchandlerPtr_Type BCh_fluid(FSIOperator &_oper)
     {
         // _oper.setAlphafbcf(alpha); // if alpha is bcFunction define in ud_function.cpp
 
-        _oper.setSolidLoadToStructure( _oper.minusSigmaFluidRepeated());
-        _oper.setStructureToFluidParametres();
+      //        assert(false);
+         _oper.setSolidLoadToStructure( _oper.minusSigmaFluidRepeated());
+         _oper.setStructureToFluidParameters();
 
-        BCh_fluid->addBC("Interface",   1,  Robin, Full,
-                         *_oper.bcvStructureToFluid(),  3);
-        BCh_fluid->addBC("Interface",   1,  Natural, Full,
-                         *_oper.bcvSolidLoadToStructure(), 3);
+         BCh_fluid->addBC("Interface",   1,  Robin, Full,
+                          *_oper.bcvStructureToFluid(),  3);
+         BCh_fluid->addBC("Interface",   1,  Natural, Full,
+                          *_oper.bcvSolidLoadToStructure(), 3);
     }
     else
     {
@@ -197,13 +214,13 @@ FSIOperator::fluidBchandlerPtr_Type BCh_fluidLin(FSIOperator &_oper)
     BCFunctionBase in_flow(u2);
 
 #ifdef FLUX
-    BCh_fluidLin->addBC("InFlow",   2,       Flux, Full, bcf,     3);
+    BCh_fluidLin->addBC("InFlow",   2,       Flux, Normal, bcf,     3);
 #else
     //BCh_fluidLin->addBC("InFlow",  2,  Natural,   Full, bcf,     3);
 #endif
 
     BCh_fluidLin->addBC("outFlow",  3,    Natural, Full, bcf,     3);
-    BCh_fluidLin->addBC("Edges",   20,  EssentialVertices, Full, bcf,     3);//this condition must be equal to the one
+    //BCh_fluidLin->addBC("Edges",   20,  EssentialVertices, Full, bcf,     3);//this condition must be equal to the one
 
     //BCh_fluidLin->addBC("ainterface",  1,  Essential,   Full, bcf,     3);
 
@@ -241,9 +258,9 @@ FSIOperator::solidBchandlerPtr_Type BCh_solid(FSIOperator &_oper)
     BCFunctionBase bcf(fZero);
 
 
-    //    BCh_solid->addBC("Top",       3, Essential, Full, bcf,  3);
+    BCh_solid->addBC("Top",       3, Essential, Full, bcf,  3);
     BCh_solid->addBC("Base",      2, Essential, Full, bcf,  3);
-    BCh_solid->addBC("EdgesIn",    20, EssentialVertices, Full, bcf,  3);
+    //BCh_solid->addBC("EdgesIn",    20, EssentialVertices, Full, bcf,  3);
 
     std::vector<ID> zComp(1);
     zComp[0] = 3;
@@ -290,9 +307,9 @@ FSIOperator::solidBchandlerPtr_Type BCh_solidLin(FSIOperator &_oper)
 
     BCFunctionBase bcf(fZero);
 
-    //BCh_solidLin->addBC("Top",       3, Essential, Full, bcf,  3);
+    BCh_solidLin->addBC("Top",       3, Essential, Full, bcf,  3);
     BCh_solidLin->addBC("Base",      2, Essential, Full, bcf,  3);
-    BCh_solidLin->addBC("EdgesIn",    20, EssentialVertices, Full, bcf,  3);
+    //BCh_solidLin->addBC("EdgesIn",    20, EssentialVertices, Full, bcf,  3);
 
     std::vector<ID> zComp(1);
     zComp[0] = 3;

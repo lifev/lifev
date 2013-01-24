@@ -840,7 +840,7 @@ PreconditionerPCD::computeNormalVectors()
 
                 //if the normal is not already calculated
                 //and the marker correspond to the flag of the point
-                // if ((flag == M_uFESpace->mesh().boundaryFacet( iFace ).marker())||(flag == 0))
+                // if ((flag == M_uFESpace->mesh().boundaryFacet( iFace ).markerID())||(flag == 0))
                 // {
                     //Warning: the normal is taken in the first Gauss point
                     //since the normal is the same over the triangle
@@ -1119,7 +1119,7 @@ PreconditionerPCD::setBCByBoundaryType( matrixPtr_type Ap, UInt ApOffset,
     {
         // construction of localToGlobalMapOnBElem (this part should be moved in DOF.hpp)
         M_pFESpace->feBd().updateMeas( M_pFESpace->mesh()->boundaryFacet( iBoundaryElement ) );  // updating finite element information
-        elementMarker = M_pFESpace->mesh()->boundaryFacet( iBoundaryElement ).marker(); // We keep the element marker
+        elementMarker = M_pFESpace->mesh()->boundaryFacet( iBoundaryElement ).markerID(); // We keep the element marker
 
 
         //vector containing the local to global map on each element

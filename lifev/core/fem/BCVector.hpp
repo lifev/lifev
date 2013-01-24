@@ -379,13 +379,10 @@ public:
 
     //! Destructor
     virtual ~BCVector( ) {}
-
     //@}
-
 
     //! @name Operators
     //@{
-
     //! Assignment operator for BCVector
     BCVector & operator=( const BCVector & bcVector );
 
