@@ -42,6 +42,7 @@
 #pragma GCC diagnostic ignored "-Wextra"
 
 #include <Epetra_Comm.h>
+#include <Epetra_MpiComm.h>
 #include <Epetra_Map.h>
 #include <Epetra_MultiVector.h>
 #include <Epetra_Operator.h>
