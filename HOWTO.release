@@ -19,7 +19,7 @@ git remote add github git@github.com:lifev/lifev.git
 
    git tag  RELEASE_${X_Y_Z}
 
-   git push origin  master:master
+   git push github  master:master
    git push github  RELEASE_${X_Y_Z}
    git push origin  master:master
    git push origin  RELEASE_${X_Y_Z}
