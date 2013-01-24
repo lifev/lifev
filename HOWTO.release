@@ -15,7 +15,7 @@ git remote add github git@github.com:lifev/lifev.git
 2- update NEWS
 
 3- tag master with the tag RELEASE_X_Y_Z
-   X_Y_Z=3_2_1
+   X_Y_Z=3_4_2
 
    git tag  RELEASE_${X_Y_Z}
 
