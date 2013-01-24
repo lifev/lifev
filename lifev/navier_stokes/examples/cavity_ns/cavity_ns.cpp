@@ -31,7 +31,7 @@
 #include <lifev/navier_stokes/solver/OseenData.hpp>
 #include <lifev/core/array/MapEpetra.hpp>
 #include <lifev/core/fem/FESpace.hpp>
-#include <lifev/core/fem/TimeAdvanceBDFNavierStokes.hpp>
+#include <lifev/navier_stokes/fem/TimeAdvanceBDFNavierStokes.hpp>
 #include <lifev/core/mesh/MeshPartitioner.hpp>
 #include <lifev/core/filter/ExporterEnsight.hpp>
 #include <lifev/core/filter/ExporterHDF5.hpp>
@@ -225,7 +225,7 @@ int main(int argc, char** argv)
     oseenData->setup( dataFile );
 
 
-    if (verbose) std::cout << "Time discretization order " << oseenData->dataTime()->orderBDF() << std::endl;
+    if (verbose) std::cout << "Time discretization order " << oseenData->dataTimeAdvance()->orderBDF() << std::endl;
 
     // The problem (matrix and rhs) is packed in an object called fluid
     OseenSolver< mesh_Type > fluid (oseenData,
@@ -253,7 +253,7 @@ int main(int argc, char** argv)
 
     // bdf object to store the previous solutions
     TimeAdvanceBDFNavierStokes<vector_Type> bdf;
-    bdf.setup(oseenData->dataTime()->orderBDF());
+    bdf.setup(oseenData->dataTimeAdvance()->orderBDF());
 
     t0 -= dt * bdf.bdfVelocity().order();
 
@@ -323,7 +323,7 @@ int main(int argc, char** argv)
 
         double alpha = bdf.bdfVelocity().coefficientFirstDerivative( 0 ) / oseenData->dataTime()->timeStep();
 
-        beta = bdf.bdfVelocity().extrapolation(); // Extrapolation for the convective term
+        bdf.bdfVelocity().extrapolation(beta); // Extrapolation for the convective term
         bdf.bdfVelocity().updateRHSContribution(oseenData->dataTime()->timeStep() );
         rhs  = fluid.matrixMass()*bdf.bdfVelocity().rhsContributionFirstDerivative();
 
