@@ -41,7 +41,15 @@
 #ifndef TimeData_H
 #define TimeData_H 1
 
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
 #include <ostream>
+
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
+
+
 #include <lifev/core/filter/GetPot.hpp>
 #include <lifev/core/LifeV.hpp>
 
@@ -108,6 +116,13 @@ public:
      */
     bool isFirstTimeStep() { return round( M_time ) == round( M_initialTime ); }
 
+    //! Return if it is the N time step with respect to the current initial time
+    /*!
+     * @param n time step number
+     * @return true if time - (n - 1) * timeStep == initialTime, false viceversa
+     */
+    bool isFirstNTimeStep( const UInt& n ) { return round( M_time - (n - 1) * M_timeStep ) == round( M_initialTime ); }
+
     //! Return if it is the last time step
     /*!
      * @return true if time + timestep > endTime, false viceversa.
@@ -155,24 +170,6 @@ public:
      * @param timeStepNumber time step number
      */
     void setTimeStepNumber( const UInt& timeStepNumber ) { M_timeStepNumber = timeStepNumber; }
-
-    //! Set the BDF odert to use
-    /*!
-     * @param order BDF order
-     */
-    void setOrderBDF( const UInt& orderBDF ) { M_orderBDF = orderBDF; }
-
-    //! Set the theta of TimeAdvanceNewmark scheme
-    /*!
-     * @param theta - coefficient of TimeAdvanceNewmark scheme
-     */
-    void setTheta( const Real& theta ) { M_theta = theta; }
-
-    //! Set the theta of TimeAdvanceNewmark scheme
-    /*!
-     * @param gamma- coefficient of TimeAdvanceNewmark scheme
-     */
-    void setGamma( const Real& gamma ) { M_gamma = gamma; }
 
     //@}
 
@@ -248,46 +245,29 @@ public:
      */
     const UInt& timeStepNumber() const { return M_timeStepNumber; }
 
-    //! Get the BDF order used
-    /*!
-     * @return BDF order value
-     */
-    const UInt& orderBDF() const { return M_orderBDF; }
-
-    //! Return theta parameter of TimeAdvanceNewmark scheme
-    /*!
-     * @return theta value
-     */
-    const Real& theta() const { return M_theta; }
-
-    //! Return gamma of TimeAdvanceNewmark scheme
-    /*!
-     * @return gamma value
-     */
-    const Real& gamma() const { return M_gamma; }
-
-    //! Return TimeAdvanceNewmark parameters (\f$theta\f$, \f$\gamma\f$)
-    /*!
-     * @return TimeAdvanceNewmark parameters (\f$theta\f$, \f$\gamma\f$)
-     */
-    std::vector<Real> coefficientsNewmark();
-
-    //@}
+  //@}
 
 private:
 
     Real round( const Real& n, const Int& decimal=10 ) const;
 
-    Real                    M_initialTime;    // initial time
-    Real                    M_endTime;        // end time
-    Real                    M_periodTime;     // period time
-    Real                    M_inCycleTime;    // in cycle time
-    Real                    M_time;           // time
-    Real                    M_timeStep;       // time step
-    UInt                    M_timeStepNumber; // iteration number
-    UInt                    M_orderBDF;       // order of the time discretization formula
-    Real                    M_theta;          // TimeAdvanceNewmark parameter
-    Real                    M_gamma;          // TimeAdvanceNewmark parameter
+    //! initial time
+    Real                    M_initialTime;
+
+    //! end time
+    Real                    M_endTime;
+
+    //! period time
+    Real                    M_periodTime;
+
+    //! current time
+    Real                    M_time;
+
+    //! time step
+    Real                    M_timeStep;
+
+    //! iteration number
+    UInt                    M_timeStepNumber;
 };
 
 } // namespace LifeV

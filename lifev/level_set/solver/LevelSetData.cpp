@@ -44,27 +44,29 @@ namespace LifeV
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-
-
 DataLevelSet::
 DataLevelSet():
-        M_TimeData(),
-        M_stabilization(),
-        M_IPTreatment(),
-        M_IPCoef()
+        M_time          ( ),
+        M_timeAdvance   ( ),
+        M_stabilization ( ),
+        M_IPTreatment   ( ),
+        M_IPCoef        ( )
 {}
-
 
 // ===================================================
 // Methods
 // ===================================================
-
-
 void
 DataLevelSet::
 setup( const GetPot& dataFile, const std::string& section)
 {
-    M_TimeData.reset( new TimeData_type(dataFile, section+"/time_discretization"));
+    // If data time has not been set
+    if ( !M_time.get() )
+        M_time.reset( new time_Type( dataFile, section + "/time_discretization" ) );
+
+    if ( !M_timeAdvance.get() )
+        M_timeAdvance.reset( new timeAdvance_Type( dataFile, section + "/time_discretization" ) );
+
     std::string stabName = dataFile((section+"/stabilization").data(),"none");
     setStabilization(stabName);
     std::string ipName = dataFile((section+"/ip/treatment").data(),"implicit");
@@ -74,27 +76,27 @@ setup( const GetPot& dataFile, const std::string& section)
 
 void
 DataLevelSet::
-showMe(std::ostream& out) const
+showMe(std::ostream& output) const
 {
-    out << " Time data : " << std::endl;
-    M_TimeData->showMe(out);
-    out << " Stabilization : ";
+    output << " Time data : " << std::endl;
+    M_time->showMe( output );
+    M_timeAdvance->showMe( output );
 
-    if (M_stabilization == NONE) out << "none" << std::endl;
-    if (M_stabilization == IP) out << "ip" << std::endl;
+    output << " Stabilization : ";
+    if (M_stabilization == NONE) output << "none" << std::endl;
+    if (M_stabilization == IP) output << "ip" << std::endl;
 
-    out << " IP Treatment  : ";
-    if (M_IPTreatment == IMPLICIT) out << "implicit" << std::endl;
-    if (M_IPTreatment == SEMI_IMPLICIT) out << "semi-implicit" << std::endl;
-    if (M_IPTreatment == EXPLICIT) out << "explicit" << std::endl;
+    output << " IP Treatment  : ";
+    if (M_IPTreatment == IMPLICIT) output << "implicit" << std::endl;
+    if (M_IPTreatment == SEMI_IMPLICIT) output << "semi-implicit" << std::endl;
+    if (M_IPTreatment == EXPLICIT) output << "explicit" << std::endl;
 
-    out << " IP coefficient : " << M_IPCoef << std::endl;
+    output << " IP coefficient : " << M_IPCoef << std::endl;
 }
 
 // ===================================================
 // Set Methods
 // ===================================================
-
 void
 DataLevelSet::
 setStabilization(const std::string& stab)

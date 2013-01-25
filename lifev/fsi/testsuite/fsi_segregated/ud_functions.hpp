@@ -51,7 +51,8 @@ Real u0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i)
 Real p0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
 
 Real u2(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
-
+Real u2vel(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
+  Real pressure(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
 
 // Initial displacement and velocity
 Real d0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);

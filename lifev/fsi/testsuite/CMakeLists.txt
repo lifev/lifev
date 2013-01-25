@@ -7,4 +7,5 @@ ADD_SUBDIRECTORIES(
   fsi_monolithic
   RBF_test3D
   RBF_test2D
+  fsi_restart
   )

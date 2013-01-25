@@ -370,7 +370,7 @@ setup(const data_ptrType& data)
 {
     M_data=data;
     M_bdf.reset(new bdf_type());
-    M_bdf->setup(data->dataTime()->orderBDF());
+    M_bdf->setup(data->dataTimeAdvance()->orderBDF());
 }
 
 
