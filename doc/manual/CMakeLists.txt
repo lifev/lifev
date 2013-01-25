@@ -1,26 +1,42 @@
-add_custom_target (manual_links
-                   COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_SOURCE_DIR}/../tex/lifestyle.cls;lifestyle.cls
-                   COMMAND ${CMAKE_COMMAND} -E create_symlink ${CMAKE_CURRENT_SOURCE_DIR}/../tex/rcs.sty;rcs.sty
-                   VERBATIM)
 
-add_latex_document (lifev-manual.tex
-                    INPUTS lifev-manual.tex lifev-install.tex lifev-examples.tex cavity.tex navierstokes.tex fsi.tex BCCond.fig  BCHandler.fig  BasElSha.fig  Fem_nodes.fig  mixed_pattern.fig  theFE.fig BCCond.eps BasElSha.eps NSCode_mesh_types.eps theFE.eps BCHandler.eps Fem_nodes.eps mixed_pattern.eps BCCond.pdf BasElSha.pdf NSCode_mesh_types.pdf theFE.pdf BCHandler.pdf Fem_nodes.pdf mixed_pattern.pdf cavityFigure.pdf_t cavityFigure.pdf ALEmapping.pdf
-                    BIBFILES ../tex/lifev.bib
-                    DEFAULT_PDF
-                    MANGLE_TARGET_NAMES
-                    USE_INDEX)
+SET(TEX_FILES
+  lifev-manual
+  lifev-dev
+)
 
-add_latex_document (lifev-dev.tex
-                    INPUTS lifev-dev.tex lifev-install.tex lifev-examples.tex lifev-dev_conventions.tex lifev-dev_overview.tex lifev-dev_howto.tex BCCond.fig  BCHandler.fig  BasElSha.fig  Fem_nodes.fig  mixed_pattern.fig  theFE.fig BCCond.eps BasElSha.eps NSCode_mesh_types.eps theFE.eps BCHandler.eps Fem_nodes.eps mixed_pattern.eps BCCond.pdf BasElSha.pdf NSCode_mesh_types.pdf theFE.pdf BCHandler.pdf Fem_nodes.pdf mixed_pattern.pdf cavityFigure.pdf_t cavityFigure.pdf ALEmapping.pdf
-                    BIBFILES ../tex/lifev.bib
-                    DEFAULT_PDF
-                    MANGLE_TARGET_NAMES
-                    USE_INDEX)
+SET(FILES_lifev-manual
+  lifev-manual.tex lifev-install.tex lifev-examples.tex cavity.tex navierstokes.tex fsi.tex BCCond.fig  BCHandler.fig  BasElSha.fig  Fem_nodes.fig  mixed_pattern.fig  theFE.fig BCCond.eps BasElSha.eps NSCode_mesh_types.eps theFE.eps BCHandler.eps Fem_nodes.eps mixed_pattern.eps BCCond.pdf BasElSha.pdf NSCode_mesh_types.pdf theFE.pdf BCHandler.pdf Fem_nodes.pdf mixed_pattern.pdf cavityFigure.pdf_t cavityFigure.pdf ALEmapping.pdf
+)
 
-add_custom_target (manual)
-add_custom_target (dev-guide)
-add_dependencies (manual DEPENDS lifev-manual_pdf)
-add_dependencies (dev-guide DEPENDS lifev-dev_pdf)
-add_dependencies (lifev-manual_pdf DEPENDS manual_links)
-add_dependencies (lifev-dev_pdf DEPENDS manual_links)
+SET(FILES_lifev-dev
+ lifev-dev.tex lifev-install.tex lifev-examples.tex lifev-dev_conventions.tex lifev-dev_overview.tex lifev-dev_howto.tex BCCond.fig  BCHandler.fig  BasElSha.fig  Fem_nodes.fig  mixed_pattern.fig  theFE.fig BCCond.eps BasElSha.eps NSCode_mesh_types.eps theFE.eps BCHandler.eps Fem_nodes.eps mixed_pattern.eps BCCond.pdf BasElSha.pdf NSCode_mesh_types.pdf theFE.pdf BCHandler.pdf Fem_nodes.pdf mixed_pattern.pdf cavityFigure.pdf_t cavityFigure.pdf ALEmapping.pdf
+)
+SET(BIB_FILES 
+  ../tex/lifev.bib
+)
 
+
+
+CONFIGURE_FILE(ltxcompile.cmake
+               ltxcompile @ONLY)
+
+FOREACH(TEX_FILE ${TEX_FILES})
+  ADD_CUSTOM_TARGET(pdf_${TEX_FILE} echo
+    DEPENDS ${TEX_FILE}.pdf
+  )
+  ADD_DEPENDENCIES(pdf pdf_${TEX_FILE})
+
+  ADD_CUSTOM_COMMAND(
+    OUTPUT    ${TEX_FILE}.pdf
+    COMMAND   /bin/sh ltxcompile
+    ARGS      ${TEX_FILE}.tex
+    DEPENDS   ${FILES_${TEX_FILE}} ${BIB_FILES}
+  )
+
+  INSTALL(
+    FILES ${CMAKE_CURRENT_BINARY_DIR}/${TEX_FILE}.pdf
+    DESTINATION share/doc/lifev
+    COMPONENT doc
+    OPTIONAL
+  )
+ENDFOREACH()
