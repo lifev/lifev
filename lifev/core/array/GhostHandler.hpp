@@ -74,12 +74,12 @@ public:
     typedef std::map< UInt, mapPtr_Type > mapList_Type;
     typedef std::vector<std::vector<Int> > graph_Type;
     typedef boost::shared_ptr<graph_Type> graphPtr_Type;
+    typedef std::vector<int> flag_Type;
 
     //@}
 
     //! @name Constructors & Destructors
     //@{
-
     //! Constructor
     explicit GhostHandler( commPtr_Type const & comm );
 
@@ -111,23 +111,16 @@ public:
 
     //! Node to node neighbor map
     neighborList_Type const & nodeNodeNeighborsList()
-    {
-        ASSERT( !M_nodeNodeNeighborsList.empty(), "M_nodeNodeNeighborsList is empty" );
-        return M_nodeNodeNeighborsList;
-    }
-
-    //! Node to edge neighbor map
-    neighborList_Type const & nodeEdgeNeighborsList()
-    {
-        ASSERT( !M_nodeEdgeNeighborsList.empty(), "M_nodeEdgeNeighborsList is empty" );
-        return M_nodeEdgeNeighborsList;
+    { 
+      ASSERT( !M_nodeNodeNeighborsList.empty(), "M_nodeNodeNeighborsList is empty" );
+      return M_nodeNodeNeighborsList;
     }
 
     //! Node to element neighbor map
     neighborList_Type const & nodeElementNeighborsList()
-    {
-        ASSERT( !M_nodeElementNeighborsList.empty(), "M_nodeElementNeighborsList is empty" );
-        return M_nodeElementNeighborsList;
+    { 
+      ASSERT( !M_nodeElementNeighborsList.empty(), "M_nodeElementNeighborsList is empty" );
+      return M_nodeElementNeighborsList; 
     }
 
     //@}
@@ -145,6 +138,9 @@ public:
     //! setup
     void setUp();
 
+    //! setup
+    void setUp(flag_Type const & flags);
+  
     //! release
     void release();
 
@@ -164,6 +160,15 @@ public:
 
     //! create node node neighbors map
     void createNodeNodeNeighborsMap();
+
+    //! create node node neighbors map for some specified flag
+    void createNodeNodeNeighborsMap(flag_Type const & flags);
+
+    //! create node node neighbors map, where the neighbors are selected over the first circles
+    std::set<ID> createCircleNodeNodeNeighborsMap(UInt Ncircles, UInt GlobalID);
+
+    //! create node node neighbors map, where the neighbors are selected within a certain user-defined radius
+    std::set<ID> createNodeNodeNeighborsMapWithinRadius(double Radius, UInt GlobalID);
 
     //! create node edge neighbors map
     void createNodeEdgeNeighborsMap();
@@ -209,6 +214,9 @@ public:
     //! showMe method
     void showMe( bool const verbose = false, std::ostream & out = std::cout );
 
+    //! Check if the point with markerID pointMarker has to be selected
+    bool isInside(ID const &  pointMarker, flag_Type const & flags);
+
     //@}
 
 protected:
@@ -220,6 +228,10 @@ protected:
     mapPtr_Type M_ghostMapOnEdges;
     mapPtr_Type M_ghostMapOnElementsP0;
     mapPtr_Type M_ghostMapOnElementsP1;
+    mapList_Type M_ghostMapOnNodesMap;
+    mapList_Type M_ghostMapOnEdgesMap;
+    mapList_Type M_ghostMapOnElementsP0Map;
+    mapList_Type M_ghostMapOnElementsP1Map;
 
     //@}
 
@@ -310,6 +322,12 @@ void GhostHandler<Mesh>::setUp()
 }
 
 template <typename Mesh>
+void GhostHandler<Mesh>::setUp(flag_Type const & flags)
+{
+    this->createNodeNodeNeighborsMap(flags);
+}
+
+template <typename Mesh>
 void GhostHandler<Mesh>::release()
 {
     M_fullMesh.reset();
@@ -352,18 +370,19 @@ void writeNeighborMap( EpetraExt::HDF5 & file, neighborList_Type & list, std::st
     file.Write( name, "valueSize", static_cast<Int>( values.size() ) );
     file.Write( name, "values", H5T_NATIVE_INT, values.size(), &values[ 0 ] );
 
-//#ifdef HAVE_LIFEV_DEBUG
-//    std::cerr << name << std::endl;
-//    for ( UInt i ( 0 ); i < map.size(); i++ )
-//    {
-//        std::cerr << i << "> ";
-//        for ( neighborList_Type::const_iterator j ( map[ i ].begin() ); j != map[ i ].end(); ++j )
-//        {
-//            std::cerr << *j << " ";
-//        }
-//        std::cerr <<std::endl;
-//    }
-//#endif
+    /*
+    // DEBUG
+    std::cerr << name << std::endl;
+    for ( UInt i ( 0 ); i < map.size(); i++ )
+    {
+        std::cerr << i << "> ";
+        for ( neighborList_Type::const_iterator j ( map[ i ].begin() ); j != map[ i ].end(); ++j )
+        {
+            std::cerr << *j << " ";
+        }
+        std::cerr <<std::endl;
+    }
+    */
 }
 
 void readNeighborMap( EpetraExt::HDF5 & file, neighborList_Type & list, std::string const & name )
@@ -388,18 +407,19 @@ void readNeighborMap( EpetraExt::HDF5 & file, neighborList_Type & list, std::str
         }
     }
 
-//#ifdef HAVE_LIFEV_DEBUG
-//    std::cerr << name << std::endl;
-//    for ( UInt i ( 0 ); i < map.size(); i++ )
-//    {
-//        std::cerr << i << "> ";
-//        for ( neighborList_Type::const_iterator j ( map[ i ].begin() ); j != map[ i ].end(); ++j )
-//        {
-//            std::cerr << *j << " ";
-//        }
-//        std::cerr <<std::endl;
-//    }
-//#endif
+    /*
+    // DEBUG
+    std::cerr << name << std::endl;
+    for ( UInt i ( 0 ); i < map.size(); i++ )
+    {
+        std::cerr << i << "> ";
+        for ( neighborList_Type::const_iterator j ( map[ i ].begin() ); j != map[ i ].end(); ++j )
+        {
+            std::cerr << *j << " ";
+        }
+        std::cerr <<std::endl;
+    }
+    */
 }
 
 }
@@ -526,6 +546,109 @@ void GhostHandler<Mesh>::createNodeNodeNeighborsMap()
 #endif
 }
 
+
+template <typename Mesh>
+void GhostHandler<Mesh>::createNodeNodeNeighborsMap(flag_Type const & flags)
+{
+    M_nodeNodeNeighborsList.resize( M_fullMesh->numGlobalPoints() );
+    // generate node neighbors by watching edges
+    // note: this can be based also on faces or volumes
+    for ( UInt ie = 0; ie < M_fullMesh->numEdges(); ie++ )
+    {
+        ID id0 = M_fullMesh->edge( ie ).point( 0 ).id();
+        ID id1 = M_fullMesh->edge( ie ).point( 1 ).id();
+
+        ASSERT ( M_fullMesh->point( id0 ).id() == id0 && M_fullMesh->point( id1 ).id() == id1,
+                 "the mesh has been reordered, the point must be found" );
+
+	if( this->isInside(M_fullMesh->edge( ie ).point( 1 ).markerID(), flags) )
+	  M_nodeNodeNeighborsList[ id0 ].insert( id1 );
+
+	if( this->isInside(M_fullMesh->edge( ie ).point( 0 ).markerID(), flags) )
+	  M_nodeNodeNeighborsList[ id1 ].insert( id0 );
+
+	//if(M_fullMesh->edge( ie ).point( 1 ).markerID()==20 || M_fullMesh->edge( ie ).point( 1 ).markerID()==1)
+        //    M_nodeNodeNeighborsList[ id0 ].insert( id1 );
+
+        //if(M_fullMesh->edge( ie ).point( 0 ).markerID()==20 || M_fullMesh->edge( ie ).point( 0 ).markerID()==1)
+        //    M_nodeNodeNeighborsList[ id1 ].insert( id0 );
+    }
+}
+
+template <typename Mesh>
+bool GhostHandler<Mesh>::isInside(ID const & pointMarker, flag_Type const & flags)
+{
+  int check = 0;
+  for(UInt i = 0; i < flags.size(); ++i)
+    if(pointMarker == flags[i])
+      ++check;
+  return (check > 0) ? true : false;
+}
+
+template <typename Mesh>
+std::set<ID> GhostHandler<Mesh>::createCircleNodeNodeNeighborsMap(UInt Ncircles, UInt GlobalID)
+{
+    std::set<ID> Neighbors;
+    std::set<ID> New_entries;
+    std::set<ID> New_neighbors;
+
+    Neighbors = this->nodeNodeNeighborsList()[GlobalID];
+
+    for(UInt i = 0; i < Ncircles - 1; ++i)
+    {
+        for(std::set<ID>::iterator it = Neighbors.begin(); it != Neighbors.end(); ++it)
+        {
+            New_entries = this->nodeNodeNeighborsList()[*it];
+            for(std::set<ID>::iterator ii = New_entries.begin(); ii != New_entries.end(); ++ii)
+                New_neighbors.insert(*ii);
+        }
+        Neighbors = New_neighbors;
+    }
+
+    return Neighbors;
+}
+
+
+template <typename Mesh>
+std::set<ID> GhostHandler<Mesh>::createNodeNodeNeighborsMapWithinRadius(double Radius, UInt GlobalID)
+{
+    std::set<ID> Neighbors;
+    std::set<ID> New_entries;
+    std::set<ID> New_neighbors;
+    bool isInside = true;
+    double d = 0;
+    UInt mysize = 0;
+
+    Neighbors = this->nodeNodeNeighborsList()[GlobalID];
+
+    while(isInside)
+    {
+        for(std::set<ID>::iterator it = Neighbors.begin(); it != Neighbors.end(); ++it)
+        {
+            New_entries = this->nodeNodeNeighborsList()[*it];
+            for(std::set<ID>::iterator ii = New_entries.begin(); ii != New_entries.end(); ++ii)
+	      {
+		d = std::sqrt( pow( M_fullMesh->point(*ii).x()- M_fullMesh->point(GlobalID).x() , 2) +
+			       pow( M_fullMesh->point(*ii).y()- M_fullMesh->point(GlobalID).y() , 2) +
+			       pow( M_fullMesh->point(*ii).z()- M_fullMesh->point(GlobalID).z() , 2));
+		if(d < Radius)
+		  New_neighbors.insert(*ii);
+	      }
+        }
+
+        Neighbors = New_neighbors;
+
+	if(Neighbors.size()==mysize)
+	  isInside = false;
+
+	mysize = Neighbors.size();
+
+    }
+
+    return Neighbors;
+
+}
+
 template <typename Mesh>
 void GhostHandler<Mesh>::createNodeEdgeNeighborsMap()
 {
@@ -555,6 +678,7 @@ void GhostHandler<Mesh>::createNodeEdgeNeighborsMap()
         M_debugOut << std::endl;
     }
 #endif
+
 }
 
 template <typename Mesh>
@@ -619,6 +743,9 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnNodes()
     map_Type::map_ptrtype repeatedMap ( new Epetra_Map( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_comm ) );
     ghostMap.setMap( repeatedMap, Repeated );
 
+    // memorize the map in the list
+    //    M_ghostMapOnNodesMap[ 1 ] = M_ghostMapOnNodes;
+
     return *M_ghostMapOnNodes;
 }
 
@@ -681,6 +808,9 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnNodes( UIn
     map_Type::map_ptrtype repeatedMap ( new Epetra_Map( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_comm ) );
     ghostMap.setMap( repeatedMap, Repeated );
 
+    // memorize the map in the list
+    //M_ghostMapOnNodesMap[ overlap ] = M_ghostMapOnNodes;
+
     return *M_ghostMapOnNodes;
 }
 
@@ -699,6 +829,16 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnEdges( UIn
         this->createNodeEdgeNeighborsMap();
     }
 
+    // Modified version 25 Jan 2013
+    // loop on local mesh edges
+    //std::vector<Int> myGlobalElements;
+    //myGlobalElements.reserve( M_localMesh->numEdges() );
+    // for ( ID ie = 0; ie < M_localMesh->numEdges(); ie++ )
+    // {
+    //     myGlobalElements.push_back( M_localMesh->edge( ie ).id() );
+    // }
+
+    // Original GhostMapEpetra
     // set up Unique (first) and Repeated edges based on the OWNED flag
     std::pair< std::vector<Int>, std::vector<Int> > myGlobalElements;
     myGlobalElements.first.reserve( M_localMesh->numEdges() );
@@ -711,7 +851,11 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnEdges( UIn
             myGlobalElements.first.push_back( M_localMesh->edge( ie ).id() );
     }
 
+    // Modified Version
     // create map
+    // M_ghostMapOnEdges.reset ( new map_Type( -1, myGlobalElements.size(), &myGlobalElements[0], M_comm ) );
+
+    //Original
     M_ghostMapOnEdges.reset ( new map_Type( myGlobalElements, M_comm ) );
 
     if ( overlap > 0 )
@@ -720,6 +864,17 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnEdges( UIn
 
         std::set<Int> myGlobalElementsSet;
         std::set<Int> addedElementsSet;
+
+	// Modified Version
+        // for (  UInt k ( 0 ); k < myGlobalElements.size(); k++ )
+        // {
+        //     typename mesh_Type::EdgeType const & edge = M_fullMesh->edge ( myGlobalElements[ k ] );
+        //     for ( UInt edgePoint = 0; edgePoint < mesh_Type::EdgeType::S_numPoints; edgePoint++ )
+        //         addedElementsSet.insert( edge.point( edgePoint ).id() );
+        // }
+        // ( myGlobalElements.begin(), myGlobalElements.end() );
+
+	//Original
         for (  UInt k ( 0 ); k < myGlobalElements.second.size(); k++ )
         {
             typename mesh_Type::edge_Type const & edge = M_fullMesh->edge ( myGlobalElements.second[ k ] );
@@ -727,6 +882,7 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnEdges( UIn
                 addedElementsSet.insert( edge.point( edgePoint ).id() );
         }
         ( myGlobalElements.second.begin(), myGlobalElements.second.end() );
+
 
         // @todo: optimize this!!
         // 1: work only on the boundary
@@ -757,12 +913,23 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnEdges( UIn
             }
         }
 
-        myGlobalElements.second.assign( myGlobalElementsSet.begin(), myGlobalElementsSet.end() );
+	// Modified Version
+        // myGlobalElements.assign( myGlobalElementsSet.begin(), myGlobalElementsSet.end() );
 
+	//Original
+        myGlobalElements.second.assign( myGlobalElementsSet.begin(), myGlobalElementsSet.end() );
+	
+	//Modified Version
         // generate map
+        //map_Type::map_ptrtype repeatedMap ( new Epetra_Map( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_comm ) );
+
+	//Original
         map_Type::map_ptrtype repeatedMap ( new Epetra_Map( -1, myGlobalElements.second.size(), &myGlobalElements.second[0], 0, *M_comm ) );
         ghostMap.setMap( repeatedMap, Repeated );
     }
+
+    // memorize the map in the list
+    //M_ghostMapOnEdgesMap[ overlap ] = M_ghostMapOnEdges;
 
     return *M_ghostMapOnEdges;
 }
@@ -810,6 +977,9 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnElementsP0
     // generate map
     map_Type::map_ptrtype repeatedMap ( new Epetra_Map( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_comm ) );
     ghostMap.setMap( repeatedMap, Repeated );
+
+    // memorize the map in the list
+    //M_ghostMapOnElementsP0Map[ 1 ] = M_ghostMapOnElementsP0;
 
     return *M_ghostMapOnElementsP0;
 }
@@ -891,13 +1061,15 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnElementsP1
     map_Type::map_ptrtype repeatedMap ( new Epetra_Map( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_comm ) );
     ghostMap.setMap( repeatedMap, Repeated );
 
+    // memorize the map in the list
+    M_ghostMapOnElementsP1Map[ overlap ] = M_ghostMapOnElementsP1;
+
     return *M_ghostMapOnElementsP1;
 }
 
 template <typename Mesh>
 void GhostHandler<Mesh>::fillEntityPID( graphPtr_Type elemGraph, std::vector<std::vector<UInt> >& entityPID )
 {
-    //@todo: this routine does not belong here, should be moved to MeshPartitioner
     if ( M_verbose ) std::cout << " GH- fillEntityPID()" << std::endl;
 
     // initialize pointPID to NumProc
