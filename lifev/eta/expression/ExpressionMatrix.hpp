@@ -133,7 +133,7 @@ inline ExpressionMatrix<iDim,jDim>
 value(const MatrixSmall<iDim,jDim>& myValue)
 {
 	return ExpressionMatrix<iDim,jDim>(myValue);
-};
+}
 
 
 } // Namespace ExpressionAssembly

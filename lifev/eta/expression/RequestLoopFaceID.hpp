@@ -124,7 +124,7 @@ RequestLoopFaceID<MeshType>
 boundary(const boost::shared_ptr<MeshType>& mesh, const UInt id)
 {
 	return RequestLoopFaceID<MeshType>(mesh,id);
-};
+}
 
 
 } // Namespace ExpressionAssembly
