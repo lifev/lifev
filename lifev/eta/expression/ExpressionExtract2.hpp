@@ -169,7 +169,7 @@ inline ExpressionExtract2<ExpressionType>
 extract(const ExpressionBase<ExpressionType>& ex, const UInt& i, const UInt& j)
 {
     return ExpressionExtract2<ExpressionType>(ex.cast(), i, j);
-};
+}
 
 
 } // Namespace ExpressionAssembly

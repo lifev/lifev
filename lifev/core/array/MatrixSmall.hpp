@@ -79,37 +79,8 @@ namespace LifeV
 	typedef Real& (MatrixSmall::*DereferenceMethod) ( UInt const & i );
 	typedef const Real& (MatrixSmall::*ConstDereferenceMethod) ( UInt const & i ) const;
 
-	class Dereferencer {
-	public:
-	    Dereferencer(UInt iRow, MatrixSmall<Dim1, Dim2> const & iMatrix): row(iRow), matrix(iMatrix) {}
-	    Real & operator[] ( UInt const & i )
-	    {
-#if MATRIX_SMALL_DIMENSION_CHECK  == MATRIX_SMALL_DIMENSION_CHECK_ASSERT
-		ASSERT ( i < Dim2, "trying to access an index that exceeds the second dimension of the matrix" );
-#elif MATRIX_SMALL_DIMENSION_CHECK  == MATRIX_SMALL_DIMENSION_CHECK_EXCEPTION
-		if (i>=Dim2) {
-		    stringstream messageStream(stringstream::out);
-		    messageStream << "Trying to access an index [" << row << "][" << i << "] that exceeds the second dimension of the matrix " << Dim2;
-		    throw range_error(messageStream.str());
-		}
-#endif
-		return (const_cast<Real&>(matrix.M_coords [ row ] [ i ]));
-	    }
-
-	    const Real & operator[] ( UInt const & i ) const
-	    {
-		return ((const_cast<Dereferencer&>(*this))[i]);
-	    }
-
-	    UInt row;
-	    const MatrixSmall& matrix;
-	};
-
-#if MATRIX_SMALL_DIMENSION_CHECK  == MATRIX_SMALL_DIMENSION_CHECK_NO_CHECK
 	typedef Real* OpIndexReturnType;
-#else
-	typedef Dereferencer OpIndexReturnType;
-#endif
+	typedef Real const* OpIndexReturnConstType;
 
 	void copyFrom ( MatrixSmall<Dim1, Dim2> const & matrix ) {
 	    for ( UInt i = 0; i < Dim1; i++ )
@@ -279,7 +250,7 @@ namespace LifeV
 		    {    
 			resultMatrix[i][j] = 0;
 			for ( UInt k = 0; k < Dim2; k++ )
-			    resultMatrix[i][j] +=(*this)[i][k]*matrix[k][j];
+			    resultMatrix[i][j] +=M_coords[i][k]*matrix.M_coords[k][j];
 		    }
 	    }
 	    return (resultMatrix);
@@ -288,38 +259,23 @@ namespace LifeV
 
 	//! Operator []
 	//const OpIndexReturnType operator[] ( UInt const & i ) const
-	OpIndexReturnType operator[] ( UInt const & i ) const
+	OpIndexReturnConstType const& operator[] ( UInt const & i ) const
 	{
-	    return ((const_cast<MatrixSmall<Dim1, Dim2>&>(*this))[i]);
+	    ASSERT ( i < Dim1, "trying to access an index that exceeds the first dimension of the matrix" );
+        return (M_coords [ i ]);
 	}
 
 	//! Operator []
 	OpIndexReturnType operator[] ( UInt const & i )
 	{
-#if MATRIX_SMALL_DIMENSION_CHECK  == MATRIX_SMALL_DIMENSION_CHECK_ASSERT
 	    ASSERT ( i < Dim1, "trying to access an index that exceeds the first dimension of the matrix" );
-#elif MATRIX_SMALL_DIMENSION_CHECK  == MATRIX_SMALL_DIMENSION_CHECK_EXCEPTION
-            stringstream messageStream(stringstream::out);
-            messageStream << "Trying to access an index[" << i << "] that exceeds the second dimension of the matrix " << Dim1;
-            if (i>=Dim1) throw range_error(messageStream.str());
-#endif
-#if MATRIX_SMALL_DIMENSION_CHECK  == MATRIX_SMALL_DIMENSION_CHECK_NO_CHECK
-            return (M_coords [ i ]);
-#else
-            return (Dereferencer(i, *this));
-#endif
+        return (M_coords [ i ]);
 	}
 
 	//! Operator ()
 	Real const & operator() ( UInt const & i, UInt const & j ) const
 	{
-#if MATRIX_SMALL_DIMENSION_CHECK  == MATRIX_SMALL_DIMENSION_CHECK_ASSERT
 	    ASSERT ( i < Dim1 && j<Dim2, "trying to access an index that exceeds the first dimension of the matrix" );
-#elif MATRIX_SMALL_DIMENSION_CHECK  == MATRIX_SMALL_DIMENSION_CHECK_EXCEPTION
-	    stringstream messageStream(stringstream::out);
-	    messageStream << "Trying to access an index [" << i << "][" << j << "] that is out of bounds.";
-	    if (i>=Dim1 || j>=Dim2) throw range_error(messageStream.str());
-#endif
 	    return (M_coords[i][j]);
 	}
 
@@ -363,6 +319,21 @@ namespace LifeV
 	    return resultantMatrix;
 	}
 
+	//! Element-wise multiplication between a matrix and a vector
+	/*!
+      Line[i] of the matrix is multipled by the scalar vector[i]
+	  @param vector
+	  @return resultant matrix
+	*/
+	MatrixSmall<Dim1, Dim2> emult ( VectorSmall<Dim1> const & vector ) const
+	{
+	    MatrixSmall<Dim1, Dim2> resultantMatrix ;
+	    for ( UInt i = 0; i < Dim1; i++ )
+		for ( UInt j = 0; j < Dim2; j++ )
+		    resultantMatrix.M_coords[ i ][ j ] = M_coords[ i ][ j ] * vector[ i ];
+	    return resultantMatrix;
+	}
+
 
 	//! Extraction of a row
 	/*!
@@ -394,8 +365,8 @@ namespace LifeV
 	MatrixSmall<Dim2, Dim1> transpose () const
 	{
 	    MatrixSmall<Dim2, Dim1> resultantMatrix ;
-	    for (int j=0; j < Dim2; ++j)
-		for(int i=0; i < Dim1; ++i)
+	    for (UInt j=0; j < Dim2; ++j)
+		for(UInt i=0; i < Dim1; ++i)
 		    resultantMatrix.M_coords[ j ][ i ] = M_coords[ i ][ j ];
 
 	    return (resultantMatrix);

@@ -164,7 +164,7 @@ ExpressionEmult<LExpressionType,RExpressionType>
 emult(const ExpressionBase<LExpressionType>& l, const ExpressionBase<RExpressionType>& r)
 {
 	return ExpressionEmult<LExpressionType,RExpressionType>(l.cast(),r.cast());
-};
+}
 
 
 // Specialization for the matricial constants
@@ -173,14 +173,14 @@ ExpressionEmult<ExpressionMatrix<Dim1, Dim2>, RExpressionType>
 emult(const MatrixSmall<Dim1, Dim2>& l, const ExpressionBase<RExpressionType>& r)
 {
     return ExpressionEmult<ExpressionMatrix<Dim1, Dim2>, RExpressionType>(ExpressionMatrix<Dim1, Dim2>(l),r.cast());
-};
+}
 
 template< typename LExpressionType, UInt Dim1, UInt Dim2 >
 ExpressionEmult<LExpressionType, ExpressionMatrix<Dim1, Dim2> >
 emult(const ExpressionBase<LExpressionType>& l, const MatrixSmall<Dim1, Dim2>& r)
 {
     return ExpressionEmult<LExpressionType,ExpressionMatrix<Dim1, Dim2> >(l.cast(),ExpressionMatrix<Dim1, Dim2>(r));
-};
+}
 
 
 } // Namespace ExpressionAssembly

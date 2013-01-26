@@ -164,7 +164,7 @@ ExpressionOuterProduct<LExpressionType,RExpressionType>
 outerProduct(const ExpressionBase<LExpressionType>& l, const ExpressionBase<RExpressionType>& r)
 {
 	return ExpressionOuterProduct<LExpressionType,RExpressionType>(l.cast(),r.cast());
-};
+}
 
 
 // Specialization for the matricial constants
@@ -173,14 +173,14 @@ ExpressionOuterProduct<ExpressionVector<Dim1>, RExpressionType>
 outerProduct(const VectorSmall<Dim1>& l, const ExpressionBase<RExpressionType>& r)
 {
     return ExpressionOuterProduct<ExpressionVector<Dim1>, RExpressionType>(ExpressionVector<Dim1>(l),r.cast());
-};
+}
 
 template< typename LExpressionType, UInt Dim1 >
 ExpressionOuterProduct<LExpressionType, ExpressionVector<Dim1> >
 outerProduct(const ExpressionBase<LExpressionType>& l, const VectorSmall<Dim1>& r)
 {
     return ExpressionOuterProduct<LExpressionType,ExpressionVector<Dim1> >(l.cast(),ExpressionVector<Dim1>(r));
-};
+}
 
 // Specialization for the matricial constants
 template< UInt Dim1 >
@@ -188,7 +188,7 @@ ExpressionOuterProduct<ExpressionVector<Dim1>, ExpressionVector<Dim1> >
 outerProduct(const VectorSmall<Dim1>& l, const  VectorSmall<Dim1>& r)
 {
     return ExpressionOuterProduct<ExpressionVector<Dim1>, ExpressionVector<Dim1> >(ExpressionVector<Dim1>(l),ExpressionVector<Dim1>(r));
-};
+}
 
 
 } // Namespace ExpressionAssembly

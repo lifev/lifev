@@ -165,7 +165,7 @@ ifCrossed(
 )
 {
 	return ExpressionIfCrossed<MeshType,MapType,SpaceDim>(fespace,vector);
-};
+}
 
 
 } // Namespace ExpressionAssembly

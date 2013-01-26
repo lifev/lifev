@@ -162,7 +162,7 @@ inline ExpressionExtract1<ExpressionType>
 extract(const ExpressionBase<ExpressionType>& ex, const UInt& i)
 {
     return ExpressionExtract1<ExpressionType>(ex.cast(), i);
-};
+}
 
 
 } // Namespace ExpressionAssembly

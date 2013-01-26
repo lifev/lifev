@@ -471,30 +471,38 @@ public:
 		M_currentFE.update(M_fespace->mesh()->element(iElement), ET_UPDATE_DPHI);
 		Real nbFEDof(M_fespace->refFE().nbDof());
 
-		for (UInt i(0); i< nbFEDof; ++i)
-		{
-		    for (UInt q(0); q< M_quadrature->nbQuadPt(); ++q)
-		    {
-			for (UInt iField(0); iField<3; ++iField)
-			{
-			    UInt globalID(M_fespace->dof().localToGlobalMap(iElement,i) + iField * M_fespace->dof().numTotalDof() );
-			    
-			    for (UInt iDim(0); iDim<3; ++iDim)
-			    {
-				M_interpolatedGradients[q][iField][iDim] += M_currentFE.dphi(i+iField*nbFEDof,iField,q)[iDim] * M_vector[globalID];
-				//M_interpolatedGradients[q] += M_currentFE->M_dphi[q][i] * M_vector[globalID];
-			    }
-			}
-		    }
-		}
-	}
+        VectorSmall<3> nodalValues;
+        MatrixSmall<3,3> nodalGradMatrix;
+
+        for (UInt i(0); i< nbFEDof; ++i)
+        {
+            for (UInt iField(0); iField<3; ++iField)
+            {
+                UInt globalID(M_fespace->dof().localToGlobalMap(iElement,i) + iField * M_fespace->dof().numTotalDof() );
+                nodalValues[iField] = M_vector[globalID];
+            }
+
+
+
+            for (UInt q(0); q< M_quadrature->nbQuadPt(); ++q)
+            {
+                nodalGradMatrix = M_currentFE.dphi(i,q)
+                    + M_currentFE.dphi(i+nbFEDof,q)
+                    + M_currentFE.dphi(i+2*nbFEDof,q);
+
+                M_interpolatedGradients[q] += nodalGradMatrix.emult(nodalValues);
+
+            }
+
+        }
+    }
 
     //! Erase the interpolated gradients stored internally
 	void zero()
 	{
 	    for (UInt q(0); q<M_quadrature->nbQuadPt(); ++q)
 	    {
-	        for (UInt j(0); j<3; ++j) 
+	        for (UInt j(0); j<3; ++j)
 	        {
 	            for (UInt i(0); i<3; ++i)
                     {
