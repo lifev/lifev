@@ -189,6 +189,27 @@ static Real bcNonZero(const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, 
     return  300000.;
 }
 
+static Real d0(const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
+{
+    switch (i)
+    {
+    case 0:
+        return - 0.01846 * ( x - 0.5 );
+        break;
+    case 1:
+        return ( 0.07755/ 2 ) * y;
+        break;
+    case 2:
+        return - 0.01846 * ( z + 0.5);
+        break;
+    default:
+        ERROR_MSG("This entry is not allowed: ud_functions.hpp");
+        return 0.;
+        break;
+    }
+}
+
+
 };
 
 
@@ -351,16 +372,20 @@ Structure::run3d()
         uv0.push_back(acc);
     }
 
+    // vectorPtr_Type initialDisplacement(new vector_Type(solid.displacement(), Unique) );
+    // dFESpace->interpolate( static_cast<solidFESpace_Type::function_Type>( Private::d0 ), *initialDisplacement, 0.0 );
+
     if (timeAdvanceMethod =="BDF")
     {
       Real tZero = dataStructure->dataTime()->initialTime();
 
-        for ( UInt previousPass=0; previousPass < dataStructure->dataTimeAdvance()->orderBDF() ; previousPass++)
-        {
-      Real previousTimeStep = tZero - previousPass*dt;
-      std::cout<<"BDF " <<previousTimeStep<<"\n";
-      uv0.push_back(disp);
-        }
+      for ( UInt previousPass=0; previousPass < timeAdvance->size() ; previousPass++)
+      {
+          Real previousTimeStep = tZero - previousPass*dt;
+          std::cout<<"BDF " <<previousTimeStep<<"\n";
+          //uv0.push_back(initialDisplacement);
+          uv0.push_back(disp);
+      }
     }
 
     timeAdvance->setInitialCondition(uv0);
@@ -368,6 +393,9 @@ Structure::run3d()
     timeAdvance->setTimeStep( dt );
 
     timeAdvance->updateRHSContribution( dt );
+
+    //solid.initialize( initialDisplacement );
+    solid.initialize( disp );
 
     MPI_Barrier(MPI_COMM_WORLD);
 
@@ -446,6 +474,9 @@ Structure::run3d()
     //! =================================================================================
 
 
+      Real normVect;
+      normVect =  solid.displacement().norm2();
+      std::cout << "The norm 2 of the displacement field is: "<< normVect << std::endl;
 
     //! =============================================================================
     //! Temporal loop

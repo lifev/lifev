@@ -443,10 +443,10 @@ public:
     matrixPtr_Type const massMatrix() const {return M_massMatrix; }
 
     //! Get the FESpace object
-    FESpace_Type& dFESpace() {return M_FESpace;}
+    FESpace_Type dispFESpace() {return M_dispFESpace;}
 
     //! Get the ETFESpace object
-    ETFESpace_Type& ETFESpace() {return M_ETFESpace;}
+    ETFESpace_Type dispETFESpace() {return M_dispETFESpace;}
 
     //! Get the bCHandler object
     bcHandler_Type const & bcHandler() const {return M_BCh;}
@@ -532,7 +532,7 @@ protected:
                                  UInt         offset=0);
 
 
-    UInt dim() const { return M_FESpace->dim(); }
+    UInt dim() const { return M_dispFESpace->dim(); }
 
 
     //! construct the map between the markers and the volumes
@@ -546,9 +546,9 @@ protected:
 
     boost::shared_ptr<data_Type>         M_data;
 
-    FESpacePtr_Type                      M_FESpace;
+    FESpacePtr_Type                      M_dispFESpace;
 
-    ETFESpacePtr_Type                    M_ETFESpace;
+    ETFESpacePtr_Type                    M_dispETFESpace;
 
     boost::shared_ptr<const Displayer>   M_Displayer;
 
@@ -634,8 +634,8 @@ protected:
 template <typename Mesh, typename SolverType>
 StructuralOperator<Mesh, SolverType>::StructuralOperator( ):
     M_data                       ( ),
-    M_FESpace                    ( ),
-    M_ETFESpace                  ( ),
+    M_dispFESpace                    ( ),
+    M_dispETFESpace                  ( ),
     M_Displayer                  ( ),
     M_me                         ( 0 ),
     M_linearSolver               ( ),
@@ -667,11 +667,11 @@ template <typename Mesh, typename SolverType>
 void
 StructuralOperator<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>          data,
                                             const FESpacePtr_Type dFESpace,
-                                            const ETFESpacePtr_Type ETFESpace,
+                                            const ETFESpacePtr_Type dETFESpace,
                                             bcHandler_Type&                    BCh,
                                             boost::shared_ptr<Epetra_Comm>&   comm)
 {
-    setup(data, dFESpace, ETFESpace, comm);
+    setup(data, dFESpace, dETFESpace, comm);
     M_BCh = BCh;
 }
 
@@ -679,10 +679,10 @@ template <typename Mesh, typename SolverType>
 void
 StructuralOperator<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        data,
                                             const FESpacePtr_Type dFESpace,
-                                            const ETFESpacePtr_Type ETFESpace,
+                                            const ETFESpacePtr_Type dETFESpace,
                                             boost::shared_ptr<Epetra_Comm>&     comm)
 {
-    setup( data, dFESpace, ETFESpace, comm, dFESpace->mapPtr(), (UInt)0 );
+    setup( data, dFESpace, dETFESpace, comm, dFESpace->mapPtr(), (UInt)0 );
 
     M_rhs.reset                        ( new vector_Type(*M_localMap));
     M_rhsNoBC.reset                    ( new vector_Type(*M_localMap));
@@ -697,17 +697,17 @@ template <typename Mesh, typename SolverType>
 void
 StructuralOperator<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        data,
                                             const FESpacePtr_Type dFESpace,
-                                            const ETFESpacePtr_Type ETFESpace,
+                                            const ETFESpacePtr_Type dETFESpace,
                                             boost::shared_ptr<Epetra_Comm>&     comm,
                                             const boost::shared_ptr<const MapEpetra>&  monolithicMap,
                                             UInt                                offset)
 {
     M_data                            = data;
-    M_FESpace                         = dFESpace;
-    M_ETFESpace                       = ETFESpace;
+    M_dispFESpace                     = dFESpace;
+    M_dispETFESpace                   = dETFESpace;
     M_Displayer.reset                 (new Displayer(comm));
     M_me                              = comm->MyPID();
-    M_elmatM.reset                    ( new MatrixElemental( M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
+    M_elmatM.reset                    ( new MatrixElemental( M_dispFESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
     M_localMap                        = monolithicMap;
     M_massMatrix.reset                (new matrix_Type(*M_localMap));
     M_systemMatrix.reset              (new matrix_Type(*M_localMap));
@@ -716,7 +716,7 @@ StructuralOperator<Mesh, SolverType>::setup(boost::shared_ptr<data_Type>        
     M_offset                          = offset;
 
     M_material.reset( material_Type::StructureMaterialFactory::instance().createObject( M_data->solidType() ) );
-    M_material->setup( dFESpace, ETFESpace, M_localMap,M_offset, M_data, M_Displayer );
+    M_material->setup( dFESpace, dETFESpace, M_localMap,M_offset, M_data, M_Displayer );
 
     if ( M_data->verbose() )
     {
@@ -742,7 +742,7 @@ void StructuralOperator<Mesh, SolverType>::setupMapMarkersVolumes( void )
         markerSelectorPtr_Type ref( new markerSelector_Type(M_data->vectorFlags()[i]) );
 
         //Number of volumes with the current marker
-        UInt numExtractedVolumes = this->M_FESpace->mesh()->elementList().countAccordingToPredicate( *ref );
+        UInt numExtractedVolumes = this->M_dispFESpace->mesh()->elementList().countAccordingToPredicate( *ref );
 
         this->M_Displayer->leaderPrint(" Current marker: ", M_data->vectorFlags()[i]);
         this->M_Displayer->leaderPrint(" \n");
@@ -753,7 +753,7 @@ void StructuralOperator<Mesh, SolverType>::setupMapMarkersVolumes( void )
         vectorVolumes_Type extractedVolumes( numExtractedVolumes );
 
         //Extracting the volumes
-        extractedVolumes = this->M_FESpace->mesh()->elementList().extractAccordingToPredicate( *ref );
+        extractedVolumes = this->M_dispFESpace->mesh()->elementList().extractAccordingToPredicate( *ref );
 
         //Insert the correspondande Marker <--> List of Volumes inside the map
         M_mapMarkersVolumes->insert( pair<UInt, vectorVolumes_Type> (M_data->vectorFlags()[i], extractedVolumes) ) ;
@@ -801,21 +801,21 @@ void StructuralOperator<Mesh, SolverType>::updateSourceTerm( source_Type const& 
 {
     vector_Type rhs(vector_Type(*M_localMap));
 
-    VectorElemental M_elvec(M_FESpace->fe().nbFEDof(), nDimensions);
+    VectorElemental M_elvec(M_dispFESpace->fe().nbFEDof(), nDimensions);
     UInt nc = nDimensions;
 
     // loop on volumes: assembling source term
-    for ( UInt i = 1; i <= M_FESpace->mesh()->numVolumes(); ++i )
+    for ( UInt i = 1; i <= M_dispFESpace->mesh()->numVolumes(); ++i )
     {
 
-        M_FESpace->fe().updateFirstDerivQuadPt( M_FESpace->mesh()->volumeList( i ) );
+        M_dispFESpace->fe().updateFirstDerivQuadPt( M_dispFESpace->mesh()->volumeList( i ) );
 
         M_elvec.zero();
 
         for ( UInt ic = 0; ic < nc; ++ic )
         {
-            //compute_vec( source, M_elvec, M_FESpace->fe(),  M_data->dataTime()->time(), ic ); // compute local vector
-            assembleVector( *rhs, M_elvec, M_FESpace->fe(), M_FESpace->dof(), ic, ic*M_FESpace->fieldDim() ); // assemble local vector into global one
+            //compute_vec( source, M_elvec, M_dispFESpace->fe(),  M_data->dataTime()->time(), ic ); // compute local vector
+            assembleVector( *rhs, M_elvec, M_dispFESpace->fe(), M_dispFESpace->dof(), ic, ic*M_dispFESpace->fieldDim() ); // assemble local vector into global one
         }
     }
     M_rhsNoBC +=rhs;
@@ -849,7 +849,7 @@ StructuralOperator<Mesh, SolverType>::computeMassMatrix( const Real factor)
 {
     using namespace ExpressionAssembly;
 
-    UInt totalDof = M_FESpace->dof().numTotalDof();
+    UInt totalDof = M_dispFESpace->dof().numTotalDof();
 
     //! Number of displacement components
     UInt nc = nDimensions;
@@ -860,10 +860,10 @@ StructuralOperator<Mesh, SolverType>::computeMassMatrix( const Real factor)
     //performed the quadrature rule set in FESpace is used.
     //Otherwhise, one can set his preferred quadrature rule for the integrals.
 
-    integrate( elements(M_ETFESpace->mesh()),
-               M_FESpace->qr(),
-               M_ETFESpace,
-               M_ETFESpace,
+    integrate( elements(M_dispETFESpace->mesh()),
+               M_dispFESpace->qr(),
+               M_dispETFESpace,
+               M_dispETFESpace,
                value(factorMassMatrix) *  dot( phi_i , phi_j ) ) >> M_massMatrix;
 
     M_massMatrix->globalAssemble();
@@ -931,8 +931,8 @@ StructuralOperator<Mesh, SolverType>::iterateLin( bcHandler_Type& bch )
     vector_Type rhsFull (M_rhsNoBC->map());
     Real zero(0.);
     if ( !bch->bcUpdateDone() )
-        bch->bcUpdate( *M_FESpace->mesh(), M_FESpace->feBd(), M_FESpace->dof() );
-    bcManageVector( rhsFull, *M_FESpace->mesh(), M_FESpace->dof(), *bch, M_FESpace->feBd(), M_data->dataTime()->time(), 1.0 );
+        bch->bcUpdate( *M_dispFESpace->mesh(), M_dispFESpace->feBd(), M_dispFESpace->dof() );
+    bcManageVector( rhsFull, *M_dispFESpace->mesh(), M_dispFESpace->dof(), *bch, M_dispFESpace->feBd(), M_data->dataTime()->time(), 1.0 );
     solveJacobian(*M_disp, rhsFull, zero, bch);
     evalResidualDisplacementLin(*M_disp);
 }
@@ -984,7 +984,7 @@ StructuralOperator<Mesh, SolverType>::evalResidual( vector_Type &residual, const
     LifeChrono chrono;
 
     if ( !M_BCh->bcUpdateDone() )
-        M_BCh->bcUpdate( *M_FESpace->mesh(), M_FESpace->feBd(), M_FESpace->dof() );
+        M_BCh->bcUpdate( *M_dispFESpace->mesh(), M_dispFESpace->feBd(), M_dispFESpace->dof() );
 
     // ignoring non-local entries, Otherwise they are summed up lately
     if ( M_data->solidType() == "linearVenantKirchhoff" || M_data->solidType() == "nonLinearVenantKirchhoff" )
@@ -996,10 +996,10 @@ StructuralOperator<Mesh, SolverType>::evalResidual( vector_Type &residual, const
         if(iter==0)
         {
             *M_rhs=*M_rhsNoBC;
-            bcManageVector( *M_rhs, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(),  M_data->dataTime()->time(), 1.0 );
+            bcManageVector( *M_rhs, *M_dispFESpace->mesh(), M_dispFESpace->dof(), *M_BCh, M_dispFESpace->feBd(),  M_data->dataTime()->time(), 1.0 );
         }
 
-        bcManageMatrix( matrixFull, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(), 1.0 );
+        bcManageMatrix( matrixFull, *M_dispFESpace->mesh(), M_dispFESpace->dof(), *M_BCh, M_dispFESpace->feBd(), 1.0 );
 
         residual  = matrixFull * solution;
         residual -= *M_rhs;
@@ -1013,7 +1013,7 @@ StructuralOperator<Mesh, SolverType>::evalResidual( vector_Type &residual, const
         residual = *M_massMatrix * solution;
         residual += *M_material->stiffVector();
         vector_Type solRep(solution, Repeated);
-        bcManageResidual( residual, *M_rhs, solRep, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(), M_data->dataTime()->time(), 1.0 );
+        bcManageResidual( residual, *M_rhs, solRep, *M_dispFESpace->mesh(), M_dispFESpace->dof(), *M_BCh, M_dispFESpace->feBd(), M_data->dataTime()->time(), 1.0 );
         residual -= *M_rhs;
         chrono.stop();
         M_Displayer->leaderPrintMax("done in ", chrono.diff() );
@@ -1072,82 +1072,82 @@ StructuralOperator<Mesh, SolverType>::evalConstraintTensor()
     *M_syy *= 0.;
     *M_szz *= 0.;
 
-    for ( UInt ielem = 0; ielem < M_FESpace->mesh()->numVolumes(); ielem++ )
+    for ( UInt ielem = 0; ielem < M_dispFESpace->mesh()->numVolumes(); ielem++ )
     {
-        //UInt elem = M_FESpace->mesh()->volumeList( ielem ).id();
-        M_FESpace->fe().updateFirstDerivQuadPt( M_FESpace->mesh()->volumeList( ielem ) );
+        //UInt elem = M_dispFESpace->mesh()->volumeList( ielem ).id();
+        M_dispFESpace->fe().updateFirstDerivQuadPt( M_dispFESpace->mesh()->volumeList( ielem ) );
 
-        //int    marker = M_FESpace->mesh()->volumeList( ielem ).marker();
+        //int    marker = M_dispFESpace->mesh()->volumeList( ielem ).marker();
         Real s      = 0;
-        Real volume = M_FESpace->fe().detJac(0);
+        Real volume = M_dispFESpace->fe().detJac(0);
 
-        for ( Int ig = 0; ig < M_FESpace->fe().nbQuadPt(); ++ig )
+        for ( Int ig = 0; ig < M_dispFESpace->fe().nbQuadPt(); ++ig )
         {
-            for ( Int k = 0; k < M_FESpace->fe().nbFEDof(); ++k )
+            for ( Int k = 0; k < M_dispFESpace->fe().nbFEDof(); ++k )
             {
-                Int i    = M_FESpace->fe().patternFirst(k);
-                Int idof = M_FESpace->dof().localToGlobalMap(M_FESpace->fe().currentLocalId(), i + 1);
+                Int i    = M_dispFESpace->fe().patternFirst(k);
+                Int idof = M_dispFESpace->dof().localToGlobalMap(M_dispFESpace->fe().currentLocalId(), i + 1);
 
                 s+= (2*M_data->mu(1) + M_data->lambda(1))*
-                    M_FESpace->fe().weightDet( ig )*
-                    M_FESpace->fe().phiDer( k, 0 , ig )*
-                    (*M_disp)[idof + 0*M_FESpace->dim()];
+                    M_dispFESpace->fe().weightDet( ig )*
+                    M_dispFESpace->fe().phiDer( k, 0 , ig )*
+                    (*M_disp)[idof + 0*M_dispFESpace->dim()];
 
                 s+= M_data->lambda(1)*
-                    M_FESpace->fe().weightDet( ig )*
-                    M_FESpace->fe().phiDer( k, 1 , ig )*
-                    (*M_disp)[idof + 1*M_FESpace->dim()];
+                    M_dispFESpace->fe().weightDet( ig )*
+                    M_dispFESpace->fe().phiDer( k, 1 , ig )*
+                    (*M_disp)[idof + 1*M_dispFESpace->dim()];
 
                 s+= M_data->lambda(1)*
-                    M_FESpace->fe().weightDet( ig )*
-                    M_FESpace->fe().phiDer( k, 2 , ig )*
-                    (*M_disp)[idof + 2*M_FESpace->dim()];
+                    M_dispFESpace->fe().weightDet( ig )*
+                    M_dispFESpace->fe().phiDer( k, 2 , ig )*
+                    (*M_disp)[idof + 2*M_dispFESpace->dim()];
 
                 count[idof]++;
             }
         }
 
-        for ( Int k = 0; k < M_FESpace->fe().nbFEDof(); ++k )
+        for ( Int k = 0; k < M_dispFESpace->fe().nbFEDof(); ++k )
         {
-            Int i    = M_FESpace->fe().patternFirst(k);
-            Int idof = M_FESpace->dof().localToGlobalMap(M_FESpace->fe().currentLocalId(), i + 1);
+            Int i    = M_dispFESpace->fe().patternFirst(k);
+            Int idof = M_dispFESpace->dof().localToGlobalMap(M_dispFESpace->fe().currentLocalId(), i + 1);
 
-            (*M_sxx)[idof] += s/M_FESpace->fe().detJac(0);
+            (*M_sxx)[idof] += s/M_dispFESpace->fe().detJac(0);
         }
 
         s = 0;
 
-        for ( Int ig = 0; ig < M_FESpace->fe().nbQuadPt(); ++ig )
+        for ( Int ig = 0; ig < M_dispFESpace->fe().nbQuadPt(); ++ig )
         {
-            for ( Int k = 0; k < M_FESpace->fe().nbFEDof(); ++k )
+            for ( Int k = 0; k < M_dispFESpace->fe().nbFEDof(); ++k )
             {
-                Int i    = M_FESpace->fe().patternFirst(k);
-                Int idof = M_FESpace->dof().localToGlobalMap(M_FESpace->fe().currentLocalId(), i + 1);
+                Int i    = M_dispFESpace->fe().patternFirst(k);
+                Int idof = M_dispFESpace->dof().localToGlobalMap(M_dispFESpace->fe().currentLocalId(), i + 1);
 
                 s += M_data->lambda(1)*
-                    M_FESpace->fe().weightDet( ig )*
-                    M_FESpace->fe().phiDer( k, 0 , ig )*
-                    (*M_disp)[idof + 0*M_FESpace->dim()];
+                    M_dispFESpace->fe().weightDet( ig )*
+                    M_dispFESpace->fe().phiDer( k, 0 , ig )*
+                    (*M_disp)[idof + 0*M_dispFESpace->dim()];
 
                 s += (2*M_data->mu(1) + M_data->lambda(1))*
-                    M_FESpace->fe().weightDet( ig )*
-                    M_FESpace->fe().phiDer( k, 1 , ig )*
-                    (*M_disp)[idof + 1*M_FESpace->dim()];
+                    M_dispFESpace->fe().weightDet( ig )*
+                    M_dispFESpace->fe().phiDer( k, 1 , ig )*
+                    (*M_disp)[idof + 1*M_dispFESpace->dim()];
 
                 s += M_data->lambda(1)*
-                    M_FESpace->fe().weightDet( ig )*
-                    M_FESpace->fe().phiDer( k, 2 , ig )*
-                    (*M_disp)[idof + 2*M_FESpace->dim()];
+                    M_dispFESpace->fe().weightDet( ig )*
+                    M_dispFESpace->fe().phiDer( k, 2 , ig )*
+                    (*M_disp)[idof + 2*M_dispFESpace->dim()];
                 //                         M_sxx[idof] += s;
 
                 //                M_syy[idof] += s/volume;
             }
         }
 
-        for ( Int k = 0; k < M_FESpace->fe().nbFEDof(); ++k )
+        for ( Int k = 0; k < M_dispFESpace->fe().nbFEDof(); ++k )
         {
-            Int i    = M_FESpace->fe().patternFirst(k);
-            Int idof = M_FESpace->dof().localToGlobalMap(M_FESpace->fe().currentLocalId(), i + 1);
+            Int i    = M_dispFESpace->fe().patternFirst(k);
+            Int idof = M_dispFESpace->dof().localToGlobalMap(M_dispFESpace->fe().currentLocalId(), i + 1);
 
             (*M_syy)[idof] += s/volume;
         }
@@ -1155,43 +1155,43 @@ StructuralOperator<Mesh, SolverType>::evalConstraintTensor()
 
         s = 0;
 
-        for ( Int ig = 0; ig < M_FESpace->fe().nbQuadPt(); ++ig )
+        for ( Int ig = 0; ig < M_dispFESpace->fe().nbQuadPt(); ++ig )
         {
-            for ( Int k = 0; k < M_FESpace->fe().nbFEDof(); ++k )
+            for ( Int k = 0; k < M_dispFESpace->fe().nbFEDof(); ++k )
             {
-                Int i    = M_FESpace->fe().patternFirst(k);
-                Int idof = M_FESpace->dof().localToGlobalMap(M_FESpace->fe().currentLocalId(), i + 1);
+                Int i    = M_dispFESpace->fe().patternFirst(k);
+                Int idof = M_dispFESpace->dof().localToGlobalMap(M_dispFESpace->fe().currentLocalId(), i + 1);
 
                 s += M_data->lambda(1)*
-                    M_FESpace->fe().weightDet( ig )*
-                    M_FESpace->fe().phiDer( k, 0 , ig )*
-                    (*M_disp)[idof + 0*M_FESpace->dim()];
+                    M_dispFESpace->fe().weightDet( ig )*
+                    M_dispFESpace->fe().phiDer( k, 0 , ig )*
+                    (*M_disp)[idof + 0*M_dispFESpace->dim()];
 
                 s += M_data->lambda(1)*
-                    M_FESpace->fe().weightDet( ig )*
-                    M_FESpace->fe().phiDer( k, 1 , ig )*
-                    (*M_disp)[idof + 1*M_FESpace->dim()];
+                    M_dispFESpace->fe().weightDet( ig )*
+                    M_dispFESpace->fe().phiDer( k, 1 , ig )*
+                    (*M_disp)[idof + 1*M_dispFESpace->dim()];
 
                 s += (2*M_data->mu(1) + M_data->lambda(1))*
-                    M_FESpace->fe().weightDet( ig )*
-                    M_FESpace->fe().phiDer( k, 2 , ig )*
-                    (*M_disp)[idof + 2*M_FESpace->dim()];
+                    M_dispFESpace->fe().weightDet( ig )*
+                    M_dispFESpace->fe().phiDer( k, 2 , ig )*
+                    (*M_disp)[idof + 2*M_dispFESpace->dim()];
 
                 //                         M_sxx[idof] += s;
             }
         }
 
-        for ( Int k = 0; k < M_FESpace->fe().nbFEDof(); ++k )
+        for ( Int k = 0; k < M_dispFESpace->fe().nbFEDof(); ++k )
         {
-            Int i    = M_FESpace->fe().patternFirst(k);
-            Int idof = M_FESpace->dof().localToGlobalMap(M_FESpace->fe().currentLocalId(), i + 1);
+            Int i    = M_dispFESpace->fe().patternFirst(k);
+            Int idof = M_dispFESpace->dof().localToGlobalMap(M_dispFESpace->fe().currentLocalId(), i + 1);
 
-            (*M_szz)[idof] += s/M_FESpace->fe().detJac(0);
+            (*M_szz)[idof] += s/M_dispFESpace->fe().detJac(0);
         }
 
     }
 
-    for (UInt ii = 1; ii <= M_FESpace->dim(); ++ii)
+    for (UInt ii = 1; ii <= M_dispFESpace->dim(); ++ii)
     {
         (*M_sxx)[ii] /= count[ii];
         (*M_syy)[ii] /= count[ii];
@@ -1221,9 +1221,9 @@ template <typename Mesh, typename SolverType>
 void
 StructuralOperator<Mesh, SolverType>::initialize( const function& d0, const function& w0, const function& a0 )
 {
-    M_FESpace->interpolate(d0, *M_disp, 0.0);
-    //M_FESpace->interpolate(w0, *M_vel , 0.0);
-    // M_FESpace->interpolate(a0, *M_acc , 0.0);
+    M_dispFESpace->interpolate(d0, *M_disp, 0.0);
+    //M_dispFESpace->interpolate(w0, *M_vel , 0.0);
+    // M_dispFESpace->interpolate(a0, *M_acc , 0.0);
 }
 
 /*
@@ -1264,7 +1264,7 @@ StructuralOperator<Mesh, SolverType>::setDataFromGetPot( const GetPot& dataFile 
     M_linearSolver->setupPreconditioner(dataFile, "solid/prec");
     M_rescaleFactor=dataFile( "solid/rescaleFactor", 0. );
     // This is done in DataClass
-    // UInt marker = M_FESpace->mesh()->volumeList( 1 ).marker();
+    // UInt marker = M_dispFESpace->mesh()->volumeList( 1 ).marker();
     // if (!M_data->young(marker))
     //     M_data->setYoung(dataFile( "solid/physics/young", 0. ), marker);
     // if (!M_data->poisson(marker))
@@ -1284,7 +1284,8 @@ void StructuralOperator<Mesh, SolverType>::updateJacobian( const vector_Type & s
     M_material->updateJacobianMatrix(sol, M_data, M_mapMarkersVolumes, M_Displayer);
 
     jacobian.reset(new matrix_Type(*M_localMap));
-    *jacobian += *M_material->jacobian();
+    *jacobian += *(M_material->jacobian());
+
     *jacobian += *M_massMatrix;
 
     chrono.stop();
@@ -1314,7 +1315,7 @@ template <typename Mesh, typename SolverType>
 void StructuralOperator<Mesh, SolverType>::
 solveJacobian(vector_Type&           step,
               const vector_Type&     res,
-              Real&                /*linear_rel_tol*/,
+              Real&                 /*linear_rel_tol*/,
               bcHandler_Type&       /* BCh*/)
 {
     LifeChrono chrono;
@@ -1329,13 +1330,17 @@ solveJacobian(vector_Type&           step,
 
 
     if ( !M_BCh->bcUpdateDone() )
-        M_BCh->bcUpdate( *M_FESpace->mesh(), M_FESpace->feBd(), M_FESpace->dof() );
-    bcManageMatrix( *matrFull, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(), 1.0 );
+        M_BCh->bcUpdate( *M_dispFESpace->mesh(), M_dispFESpace->feBd(), M_dispFESpace->dof() );
+    bcManageMatrix( *matrFull, *M_dispFESpace->mesh(), M_dispFESpace->dof(), *M_BCh, M_dispFESpace->feBd(), 1.0 );
 
     M_Displayer->leaderPrintMax( "done in ", chrono.diff() );
 
     M_Displayer->leaderPrint("\tS'-  Solving system                    ... \n");
     chrono.start();
+
+
+    matrFull->spy("systemMatrix");
+    res.spy("residual");
 
     M_linearSolver->setMatrix(*matrFull);
 
@@ -1345,6 +1350,12 @@ solveJacobian(vector_Type&           step,
     //     M_material->stiffMatrix()->spy("S");
     //     M_systemMatrix->spy("M");
     chrono.stop();
+
+    // step.spy("solution");
+
+    // std::cout << "saveds" << std::endl;
+    // int n;
+    // std::cin >> n;
 }
 
 template<typename Mesh, typename SolverType>
@@ -1365,12 +1376,12 @@ StructuralOperator<Mesh, SolverType>::applyBoundaryConditions( matrix_Type&     
     if (offset)
         BCh->setOffset(offset);
     if ( !BCh->bcUpdateDone() )
-        BCh->bcUpdate( *M_FESpace->mesh(), M_FESpace->feBd(), M_FESpace->dof() );
+        BCh->bcUpdate( *M_dispFESpace->mesh(), M_dispFESpace->feBd(), M_dispFESpace->dof() );
 
     // vector_Type rhsFull(rhs, Repeated, Zero); // ignoring non-local entries, Otherwise they are summed up lately
     vector_Type rhsFull(rhs, Unique);  // bcManages now manages the also repeated parts
 
-    bcManage( matrix, rhsFull, *M_FESpace->mesh(), M_FESpace->dof(), *BCh, M_FESpace->feBd(), 1., M_data->dataTime()->time() );
+    bcManage( matrix, rhsFull, *M_dispFESpace->mesh(), M_dispFESpace->dof(), *BCh, M_dispFESpace->feBd(), 1., M_data->dataTime()->time() );
 
     // matrix should be GlobalAssembled by  bcManage
 
