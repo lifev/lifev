@@ -151,7 +151,7 @@ ExpressionMinusTransposed<ExpressionType>
 minusT(const ExpressionBase<ExpressionType>& expr)
 {
 	return ExpressionMinusTransposed<ExpressionType>(expr.cast());
-};
+}
 
 
 // Specialization for the matricial constants
@@ -160,7 +160,7 @@ ExpressionMinusTransposed<ExpressionMatrix<Dim1, Dim2> >
 minusT(const MatrixSmall<Dim1, Dim2>& m)
 {
     return ExpressionMinusTransposed<ExpressionMatrix<Dim1, Dim2> >(ExpressionMatrix<Dim1, Dim2>(m));
-};
+}
 
 
 } // Namespace ExpressionAssembly

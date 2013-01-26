@@ -126,7 +126,7 @@ public:
     //! Display method
 	static void display(std::ostream& out = std::cout)
 	{
-       out << " transpose "; EvaluationType::display(out);
+        out << " minusT ( "; EvaluationType::display(out); out << ")";
     }
 
     //@}

@@ -151,7 +151,7 @@ ExpressionDeterminant<ExpressionType>
 det(const ExpressionBase<ExpressionType>& expr)
 {
 	return ExpressionDeterminant<ExpressionType>(expr.cast());
-};
+}
 
 
 // Specialization for the matricial constants
@@ -160,7 +160,7 @@ ExpressionDeterminant<ExpressionMatrix<Dim1, Dim2> >
 det(const MatrixSmall<Dim1, Dim2>& m)
 {
     return ExpressionDeterminant<ExpressionMatrix<Dim1, Dim2> >(ExpressionMatrix<Dim1, Dim2>(m));
-};
+}
 
 
 } // Namespace ExpressionAssembly

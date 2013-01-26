@@ -349,6 +349,7 @@ addTo(VectorType& vec)
         }
         else
         {
+
             // Check if the last one was adapted
             if (isPreviousAdapted)
             {
@@ -384,15 +385,14 @@ addTo(VectorType& vec)
                     for (UInt i(0); i<nbTestDof; ++i)
                     {
                         M_elementalVector.element(i+iblock*nbTestDof) +=
-                            M_evaluation.value_qi(iQuadPt,i+iblock*nbTestDof)
-                            * M_globalCFE_std->wDet(iQuadPt);
+                            M_evaluation.value_qi(iQuadPt,i+iblock*nbTestDof) *
+                            M_globalCFE_std->wDet(iQuadPt);
 
                     }
                 }
             }
 
         }
-
         M_elementalVector.pushToGlobal(vec);
     }
 }

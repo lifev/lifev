@@ -151,7 +151,7 @@ ExpressionTrace<ExpressionType>
 trace(const ExpressionBase<ExpressionType>& expr)
 {
 	return ExpressionTrace<ExpressionType>(expr.cast());
-};
+}
 
 
 // Specialization for the matricial constants
@@ -160,7 +160,7 @@ ExpressionTrace<ExpressionMatrix<Dim1, Dim2> >
 trace(const MatrixSmall<Dim1, Dim2>& m)
 {
     return ExpressionTrace<ExpressionMatrix<Dim1, Dim2> >(ExpressionMatrix<Dim1, Dim2>(m));
-};
+}
 
 
 } // Namespace ExpressionAssembly

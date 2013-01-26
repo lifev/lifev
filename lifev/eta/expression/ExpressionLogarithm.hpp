@@ -153,20 +153,11 @@ private:
 
 // "Specialization" for the case of a scalar
 template< typename  ExpressionType>
-ExpressionLogarithm<ExpressionDeterminant<ExpressionType> >
-log(const ExpressionBase<ExpressionDeterminant<ExpressionType> >& l)
+ExpressionLogarithm<ExpressionType>
+log(const ExpressionBase<ExpressionType>& l)
 {
-    return ExpressionLogarithm<ExpressionDeterminant<ExpressionType> >(l.cast());
+    return ExpressionLogarithm<ExpressionType>(l.cast());
 }
-
-// "Specialization" for the case of a scalar
-template< typename  ExpressionType>
-ExpressionLogarithm<ExpressionTrace<ExpressionType> >
-log(const ExpressionBase<ExpressionTrace<ExpressionType> >& l)
-{
-    return ExpressionLogarithm<ExpressionTrace<ExpressionType> >(l.cast());
-}
-
 
 } // Namespace ExpressionAssembly
 

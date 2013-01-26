@@ -126,7 +126,7 @@ public:
     //! Display method
 	static void display(std::ostream& out = std::cout)
 	{
-       out << " determinant "; EvaluationType::display(out);
+        out << " determinant ( "; EvaluationType::display(out); out << ")";
     }
 
     //@}

@@ -124,7 +124,7 @@ integrationOverSelectedVolumes(const boost::shared_ptr<MeshType>& mesh,
                                const boost::shared_ptr<FunctorType>& functorSelection)
 {
 	return RequestLoopVolumeID<MeshType, FunctorType>( mesh, functorSelection );
-};
+}
 
 
 } // Namespace ExpressionAssembly
