@@ -190,7 +190,7 @@ BCInterface0D< BcHandler, PhysicalSolverType >::insertBC()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    Debug( 5020 ) << "BCInterface0D::insertBC\n";
+    debugStream( 5020 ) << "BCInterface0D::insertBC\n";
 #endif
 
     switch ( M_data.base().second )
