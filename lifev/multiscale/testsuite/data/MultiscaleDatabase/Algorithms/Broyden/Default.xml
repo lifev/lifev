@@ -50,9 +50,9 @@
                 <Parameter name="Output Frequency" type="int" value="1"/>
                 <Parameter name="Block Size" type="int" value="1"/>
                 <Parameter name="Num Blocks" type="int" value="10000"/>
-                <Parameter name="Maximum Restarts" type="int" value="1"/>
+                <Parameter name="Maximum Restarts" type="int" value="0"/>
                 <Parameter name="Output Style" type="int" value="1"/>
-                <Parameter name="Verbosity" type="int" value="35"/>
+                <Parameter name="Verbosity" type="int" value="0"/>
             </ParameterList>
 
             <!-- Trilinos parameters -->
