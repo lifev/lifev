@@ -208,7 +208,7 @@ MultiscaleSolver::solveProblem( const Real& referenceSolution )
     Real computedSolution( M_model->checkSolution() );
     if ( referenceSolution >= 0. && std::abs( referenceSolution - computedSolution ) > 1e-8 )
         multiscaleErrorCheck( Solution, "Problem solution: "    + number2string( computedSolution ) +
-                                        " (External solution: " + number2string( referenceSolution ) + ")\n", M_comm->MyPID() == 0 );
+                                        " (Reference solution: " + number2string( referenceSolution ) + ")\n", M_comm->MyPID() == 0 );
 
     return multiscaleExitFlag;
 }
