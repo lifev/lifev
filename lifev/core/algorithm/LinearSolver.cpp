@@ -119,7 +119,7 @@ LinearSolver::solve( vectorPtr_Type solutionPtr )
         return -1;
     }
 
-    // Setup the Solver Operator?? Really here??
+    // Setup the Solver Operator
     setupSolverOperator();
 
     // Reset status informations
@@ -184,18 +184,14 @@ LinearSolver::solve( vectorPtr_Type solutionPtr )
     if( M_quitOnFailure && failure )
         exit( -1 );
 
+    // Reset the solver to free the internal pointers
+    M_solverOperator->resetSolver();
+
     // If the number of iterations reaches the threshold of maxIterForReuse
     // we reset the preconditioners to force to solver to recompute it next
     // time
     if( numIters > M_maxItersForReuse )
         resetPreconditioner();
-
-    // <!-- TO BE RECODED IF POSSIBLE
-    // AztecOO and Belos contain pointers
-    // to some operators.
-    // ML is crashing for this reason.
-    M_solverOperator.reset();
-    // -->
 
     return numIters;
 }
@@ -287,7 +283,9 @@ void
 LinearSolver::resetPreconditioner()
 {
     if( M_preconditioner )
+    {
         M_preconditioner->resetPreconditioner();
+    }
 }
 
 bool
@@ -317,6 +315,48 @@ LinearSolver::showMe( std::ostream& output ) const
         output << M_parameterList << std::endl;
         output << "-----------------------------" << std::endl;
     }
+}
+
+void
+LinearSolver::setupSolverOperator()
+{
+    // Creation of a solver if there exists any
+    if( !M_solverOperator )
+    {
+        switch( M_solverType )
+        {
+            case Belos:
+                M_solverOperator.reset( Operators::SolverOperatorFactory::instance().createObject( "Belos" ) );
+                break;
+            case AztecOO:
+                M_solverOperator.reset( Operators::SolverOperatorFactory::instance().createObject( "AztecOO" ) );
+                break;
+            default:
+                M_displayer->leaderPrint( "SLV-  ERROR: The type of solver is not recognized!\n" );
+                exit( 1 );
+                break;
+        }
+    }
+
+    // Set the preconditioner operator in the SolverOperator object
+    if( M_preconditioner )
+    {
+    	M_solverOperator->setPreconditioner( M_preconditioner->preconditionerPtr() );
+    }
+    else
+    {
+    	M_solverOperator->setPreconditioner( M_preconditionerOperator );
+    }
+
+    // Set the operator in the SolverOperator object
+    M_solverOperator->setOperator( M_operator );
+
+    // Set the tolerance if it has been set
+    if( M_tolerance > 0 )
+        M_solverOperator->setTolerance( M_tolerance );
+
+    // Set the parameter inside the solver
+    M_solverOperator->setParameters( M_parameterList.sublist( "Solver: Operator List" ) );
 }
 
 // ===================================================
@@ -365,12 +405,16 @@ LinearSolver::setPreconditioner( preconditionerPtr_Type preconditionerPtr )
 void
 LinearSolver::setPreconditioner( operatorPtr_Type preconditionerPtr )
 {
-    // Does the solverOperator exists?
-
     // If a LifeV::Preconditioner exists it must be deleted
     M_preconditioner.reset();
 
     M_preconditionerOperator = preconditionerPtr;
+}
+
+void
+LinearSolver::setBaseMatrixForPreconditioner( matrixPtr_Type baseMatrixPtr )
+{
+    M_baseMatrixForPreconditioner = baseMatrixPtr;
 }
 
 void
@@ -519,45 +563,5 @@ LinearSolver::hasConverged() const
 // ===================================================
 // Private Methods
 // ===================================================
-
-void
-LinearSolver::setupSolverOperator()
-{
-    // If a SolverOperator already exists we simply clean it!
-    if( M_solverOperator )
-    {
-        M_solverOperator.reset();
-    }
-
-    switch( M_solverType )
-    {
-        case Belos:
-            M_solverOperator.reset( Operators::SolverOperatorFactory::instance().createObject( "Belos" ) );
-            break;
-        case AztecOO:
-            M_solverOperator.reset( Operators::SolverOperatorFactory::instance().createObject( "AztecOO" ) );
-            break;
-        default:
-            M_displayer->leaderPrint( "SLV-  ERROR: The type of solver is not recognized!\n" );
-            exit( 1 );
-            break;
-    }
-
-    // Set the operator in the SolverOperator object
-    M_solverOperator->setOperator( M_operator );
-
-    // Set the preconditioner operator in the SolverOperator object
-    if( M_preconditioner )
-        M_solverOperator->setPreconditioner( M_preconditioner->preconditionerPtr() );
-    else
-        M_solverOperator->setPreconditioner( M_preconditionerOperator );
-
-    // Set the tolerance if it has been set
-    if( M_tolerance > 0 )
-        M_solverOperator->setTolerance( M_tolerance );
-
-    // Set the parameter inside the solver
-    M_solverOperator->setParameters( M_parameterList.sublist( "Solver: Operator List", true, "" ) );
-}
 
 } // namespace LifeV
