@@ -36,8 +36,8 @@
      @maintainer M. Kern <michel.kern@inria.fr>
  */
 
-#ifndef _DATADARCY_H_
-#define _DATADARCY_H_ 1
+#ifndef _DATADARCY_HPP_
+#define _DATADARCY_HPP_ 1
 
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -377,6 +377,6 @@ setup ( const data_Type& dataFile, const std::string& section )
 
 } // Namespace LifeV
 
-#endif // _DATADARCY_H_
+#endif // _DATADARCY_HPP_
 
 // -*- mode: c++ -*-

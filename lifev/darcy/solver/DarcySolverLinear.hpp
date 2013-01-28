@@ -36,8 +36,8 @@
      @maintainer M. Kern <michel.kern@inria.fr>
 */
 
-#ifndef _DARCYSOLVERLINEAR_H_
-#define _DARCYSOLVERLINEAR_H_ 1
+#ifndef _DARCYSOLVERLINEAR_HPP_
+#define _DARCYSOLVERLINEAR_HPP_ 1
 
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
@@ -1711,6 +1711,6 @@ symmetrizeMatrix ( Int N, MatrixType& A  )
 } // namespace LifeV
 
 
-#endif //_DARCYSOLVERLINEAR_H_
+#endif //_DARCYSOLVERLINEAR_HPP_
 
 // -*- mode: c++ -*-
