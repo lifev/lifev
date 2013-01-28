@@ -1,4 +1,9 @@
 
+LifeV 3.4.3:
+============
+
+Removed old files from autotools.
+
 LifeV 3.4.2:
 ============
 
