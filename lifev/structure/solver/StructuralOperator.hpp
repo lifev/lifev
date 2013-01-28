@@ -118,8 +118,7 @@ private:
 
 */
 template <typename Mesh,
-          typename SolverType = LifeV::SolverAztecOO >
-
+          typename SolverType = LifeV::SolverAztecOO>
 class StructuralOperator
 {
 public:
@@ -148,7 +147,7 @@ public:
     typedef StructuralConstitutiveLawData                data_Type;
 
     typedef RegionMesh<LinearTetra >                      mesh_Type;
-    typedef std::vector< mesh_Type::element_Type const *> vectorVolumes_Type;
+    typedef std::vector< mesh_Type::element_Type* >       vectorVolumes_Type;
 
     typedef std::map< UInt, vectorVolumes_Type>           mapMarkerVolumes_Type;
     typedef boost::shared_ptr<mapMarkerVolumes_Type>      mapMarkerVolumesPtr_Type;
@@ -753,7 +752,7 @@ void StructuralOperator<Mesh, SolverType>::setupMapMarkersVolumes( void )
         vectorVolumes_Type extractedVolumes( numExtractedVolumes );
 
         //Extracting the volumes
-        extractedVolumes = this->M_dispFESpace->mesh()->elementList().extractAccordingToPredicate( *ref );
+        extractedVolumes = this->M_dispFESpace->mesh()->elementList().extractAccordingToPredicateNonConstElement( *ref );
 
         //Insert the correspondande Marker <--> List of Volumes inside the map
         M_mapMarkersVolumes->insert( pair<UInt, vectorVolumes_Type> (M_data->vectorFlags()[i], extractedVolumes) ) ;

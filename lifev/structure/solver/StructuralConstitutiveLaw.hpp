@@ -139,7 +139,7 @@ public:
     typedef FactorySingleton<Factory<StructuralConstitutiveLaw<Mesh>,std::string> >  StructureMaterialFactory;
 
     typedef RegionMesh<LinearTetra >                      mesh_Type;
-    typedef std::vector< mesh_Type::element_Type const *> vectorVolumes_Type;
+    typedef std::vector< mesh_Type::element_Type* > vectorVolumes_Type;
 
     typedef std::map< UInt, vectorVolumes_Type>           mapMarkerVolumes_Type;
     typedef boost::shared_ptr<mapMarkerVolumes_Type>      mapMarkerVolumesPtr_Type;

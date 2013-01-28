@@ -39,6 +39,7 @@
 #include <lifev/core/LifeV.hpp>
 
 #include <lifev/core/fem/QuadratureRule.hpp>
+#include <lifev/core/mesh/RegionMesh.hpp>
 #include <lifev/eta/fem/ETCurrentFE.hpp>
 #include <lifev/eta/fem/MeshGeometricMap.hpp>
 #include <lifev/eta/fem/QRAdapterBase.hpp>
@@ -66,8 +67,7 @@ namespace ExpressionAssembly
   using the Evaluation corresponding to the Expression (this convertion is done
   within a typedef).
  */
-template < typename MeshType,
-           typename FunctorType,
+template < typename VectorType,
            typename TestSpaceType,
            typename SolutionSpaceType,
            typename ExpressionType,
@@ -85,9 +85,8 @@ public:
                                              SolutionSpaceType::field_dim,
                                              3>::evaluation_Type evaluation_Type;
 
-    typedef typename MeshType::element_Type       elementMesh_Type;
-    typedef std::vector<elementMesh_Type const* > vectorVolumes_Type;
-    typedef boost::shared_ptr<vectorVolumes_Type> vectorVolumesPtr_Type;
+    typedef RegionMesh<LinearTetra>       mesh_Type;
+    typedef boost::shared_ptr<VectorType>             vectorVolumesPtr_Type;
 
     //@}
 
@@ -96,15 +95,14 @@ public:
     //@{
 
     //! Full data constructor
-	IntegrateMatrixVolumeID(const boost::shared_ptr<MeshType>& mesh,
-                            const boost::shared_ptr<FunctorType>& functorSelection,
+	IntegrateMatrixVolumeID(const vectorVolumesPtr_Type volumeList,
                             const QRAdapterType& qrAdapter,
                             const boost::shared_ptr<TestSpaceType>& testSpace,
                             const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
                             const ExpressionType& expression);
 
     //! Copy constructor
-	IntegrateMatrixVolumeID( const IntegrateMatrixVolumeID < MeshType, FunctorType, TestSpaceType, SolutionSpaceType, ExpressionType,QRAdapterType> & integrator);
+	IntegrateMatrixVolumeID( const IntegrateMatrixVolumeID < VectorType, TestSpaceType, SolutionSpaceType, ExpressionType,QRAdapterType> & integrator);
 
     //! Destructor
     ~IntegrateMatrixVolumeID();
@@ -168,11 +166,9 @@ private:
 
     //@}
 
-    // Pointer on the mesh
-	boost::shared_ptr<MeshType> M_mesh;
+    //List of volumes with a marker
+    vectorVolumesPtr_Type M_volumeList;
 
-    // Pointer to the selectionObject
-    boost::shared_ptr<FunctorType> M_functorSelection;
     // Quadrature to be used
 	QRAdapterType M_qrAdapter;
 
@@ -204,23 +200,21 @@ private:
 // Constructors & Destructor
 // ===================================================
 
-template < typename MeshType, typename FunctorType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType, typename QRAdapterType>
-IntegrateMatrixVolumeID<MeshType,FunctorType,TestSpaceType,SolutionSpaceType,ExpressionType,QRAdapterType>::
-IntegrateMatrixVolumeID(const boost::shared_ptr<MeshType>& mesh,
-                        const boost::shared_ptr<FunctorType>& functorSelection,
+template < typename VectorType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType, typename QRAdapterType>
+IntegrateMatrixVolumeID<VectorType,TestSpaceType,SolutionSpaceType,ExpressionType,QRAdapterType>::
+IntegrateMatrixVolumeID(const vectorVolumesPtr_Type volumeList,
                         const QRAdapterType& qrAdapter,
                         const boost::shared_ptr<TestSpaceType>& testSpace,
                         const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
                         const ExpressionType& expression)
-    :	M_mesh( mesh ),
-        M_functorSelection( functorSelection ),
+    :	M_volumeList( volumeList ),
         M_qrAdapter(qrAdapter),
         M_testSpace(testSpace),
         M_solutionSpace(solutionSpace),
         M_evaluation(expression),
 
-        M_globalCFE_std(new ETCurrentFE<3,1>(feTetraP0,geometricMapFromMesh<MeshType>(),qrAdapter.standardQR())),
-        M_globalCFE_adapted(new ETCurrentFE<3,1>(feTetraP0,geometricMapFromMesh<MeshType>(),qrAdapter.standardQR())),
+        M_globalCFE_std(new ETCurrentFE<3,1>(feTetraP0,geometricMapFromMesh<mesh_Type>(),qrAdapter.standardQR())),
+        M_globalCFE_adapted(new ETCurrentFE<3,1>(feTetraP0,geometricMapFromMesh<mesh_Type>(),qrAdapter.standardQR())),
 
         M_testCFE_std(new ETCurrentFE<3,TestSpaceType::field_dim>(testSpace->refFE(),testSpace->geoMap(),qrAdapter.standardQR())),
         M_testCFE_adapted(new ETCurrentFE<3,TestSpaceType::field_dim>(testSpace->refFE(),testSpace->geoMap(),qrAdapter.standardQR())),
@@ -237,18 +231,17 @@ IntegrateMatrixVolumeID(const boost::shared_ptr<MeshType>& mesh,
     M_evaluation.setSolutionCFE(M_solutionCFE_std);
 }
 
-template < typename MeshType, typename FunctorType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType, typename QRAdapterType>
-IntegrateMatrixVolumeID<MeshType,FunctorType, TestSpaceType,SolutionSpaceType,ExpressionType,QRAdapterType>::
-IntegrateMatrixVolumeID(const IntegrateMatrixVolumeID<MeshType, FunctorType,TestSpaceType,SolutionSpaceType,ExpressionType,QRAdapterType>& integrator)
-    :	M_mesh(integrator.M_mesh),
-        M_functorSelection(integrator.M_functorSelection),
+template < typename VectorType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType, typename QRAdapterType>
+IntegrateMatrixVolumeID<VectorType, TestSpaceType,SolutionSpaceType,ExpressionType,QRAdapterType>::
+IntegrateMatrixVolumeID(const IntegrateMatrixVolumeID<VectorType,TestSpaceType,SolutionSpaceType,ExpressionType,QRAdapterType>& integrator)
+    :	M_volumeList(integrator.M_volumeList),
         M_qrAdapter(integrator.M_qrAdapter),
         M_testSpace(integrator.M_testSpace),
         M_solutionSpace(integrator.M_solutionSpace),
         M_evaluation(integrator.M_evaluation),
 
-        M_globalCFE_std(new ETCurrentFE<3,1>(feTetraP0,geometricMapFromMesh<MeshType>(),integrator.M_qrAdapter.standardQR())),
-        M_globalCFE_adapted(new ETCurrentFE<3,1>(feTetraP0,geometricMapFromMesh<MeshType>(),integrator.M_qrAdapter.standardQR())),
+        M_globalCFE_std(new ETCurrentFE<3,1>(feTetraP0,geometricMapFromMesh<mesh_Type>(),integrator.M_qrAdapter.standardQR())),
+        M_globalCFE_adapted(new ETCurrentFE<3,1>(feTetraP0,geometricMapFromMesh<mesh_Type>(),integrator.M_qrAdapter.standardQR())),
 
         M_testCFE_std(new ETCurrentFE<3,TestSpaceType::field_dim>(M_testSpace->refFE(), M_testSpace->geoMap(),integrator.M_qrAdapter.standardQR())),
         M_testCFE_adapted(new ETCurrentFE<3,TestSpaceType::field_dim>(M_testSpace->refFE(), M_testSpace->geoMap(),integrator.M_qrAdapter.standardQR())),
@@ -265,8 +258,8 @@ IntegrateMatrixVolumeID(const IntegrateMatrixVolumeID<MeshType, FunctorType,Test
     M_evaluation.setSolutionCFE(M_solutionCFE_std);
 }
 
-template < typename MeshType, typename FunctorType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType, typename QRAdapterType>
-IntegrateMatrixVolumeID<MeshType,FunctorType,TestSpaceType,SolutionSpaceType,ExpressionType, QRAdapterType>::
+template <typename VectorType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType, typename QRAdapterType>
+IntegrateMatrixVolumeID<VectorType,TestSpaceType,SolutionSpaceType,ExpressionType, QRAdapterType>::
 ~IntegrateMatrixVolumeID()
 {
     delete M_globalCFE_std;
@@ -282,9 +275,9 @@ IntegrateMatrixVolumeID<MeshType,FunctorType,TestSpaceType,SolutionSpaceType,Exp
 // Methods
 // ===================================================
 
-template < typename MeshType, typename FunctorType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType, typename QRAdapterType>
+template < typename VectorType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType, typename QRAdapterType>
 void
-IntegrateMatrixVolumeID<MeshType,FunctorType, TestSpaceType,SolutionSpaceType,ExpressionType, QRAdapterType>::
+IntegrateMatrixVolumeID<VectorType, TestSpaceType,SolutionSpaceType,ExpressionType, QRAdapterType>::
 check(std::ostream& out)
 {
     out << " Checking the integration : " << std::endl;
@@ -296,26 +289,17 @@ check(std::ostream& out)
 }
 
 
-template < typename MeshType, typename FunctorType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType, typename QRAdapterType>
+template < typename VectorType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType, typename QRAdapterType>
 template <typename MatrixType>
 void
-IntegrateMatrixVolumeID<MeshType, FunctorType, TestSpaceType,SolutionSpaceType,ExpressionType, QRAdapterType>::
+IntegrateMatrixVolumeID<VectorType, TestSpaceType,SolutionSpaceType,ExpressionType, QRAdapterType>::
 addTo(MatrixType& mat)
 {
     // Defaulted to true for security
     bool isPreviousAdapted(true);
 
-    //First: extract the list of volumes over which we integrate according to the
-    //       functor that is received
-
-    UInt numExtractedVolumes = this->M_mesh->elementList().countAccordingToPredicate( *(this->M_functorSelection) );
-    vectorVolumes_Type extractedVolumes( numExtractedVolumes );
-
-    //Extracting the volumes
-    extractedVolumes = this->M_mesh->elementList().extractAccordingToPredicate( *(this->M_functorSelection) );
-
     //number of volumes
-    UInt nbElements( extractedVolumes.size() );
+    UInt nbElements( (*M_volumeList).size() );
     UInt nbQuadPt_std(M_qrAdapter.standardQR().nbQuadPt());
     UInt nbTestDof(M_testSpace->refFE().nbDof());
     UInt nbSolutionDof(M_solutionSpace->refFE().nbDof());
@@ -344,9 +328,9 @@ addTo(MatrixType& mat)
             M_evaluation.update(iElement);
 
             // Update the CurrentFEs
-            M_globalCFE_adapted->update(M_mesh->element(iElement),evaluation_Type::S_globalUpdateFlag | ET_UPDATE_WDET);
-            M_testCFE_adapted->update(M_mesh->element(iElement),evaluation_Type::S_testUpdateFlag);
-            M_solutionCFE_adapted->update(M_mesh->element(iElement),evaluation_Type::S_solutionUpdateFlag);
+            M_globalCFE_adapted->update(*((*M_volumeList)[iElement]),evaluation_Type::S_globalUpdateFlag | ET_UPDATE_WDET);
+            M_testCFE_adapted->update(*((*M_volumeList)[iElement]),evaluation_Type::S_testUpdateFlag);
+            M_solutionCFE_adapted->update(*((*M_volumeList)[iElement]),evaluation_Type::S_solutionUpdateFlag);
 
 
             // Assembly
@@ -404,9 +388,9 @@ addTo(MatrixType& mat)
             }
 
             // Update the currentFEs
-            M_globalCFE_std->update(M_mesh->element(iElement),evaluation_Type::S_globalUpdateFlag | ET_UPDATE_WDET);
-            M_testCFE_std->update(M_mesh->element(iElement),evaluation_Type::S_testUpdateFlag);
-            M_solutionCFE_std->update(M_mesh->element(iElement),evaluation_Type::S_solutionUpdateFlag);
+            M_globalCFE_std->update(*((*M_volumeList)[iElement]),evaluation_Type::S_globalUpdateFlag | ET_UPDATE_WDET);
+            M_testCFE_std->update(*((*M_volumeList)[iElement]),evaluation_Type::S_testUpdateFlag);
+            M_solutionCFE_std->update(*((*M_volumeList)[iElement]),evaluation_Type::S_solutionUpdateFlag);
 
             // Update the evaluation
             M_evaluation.update(iElement);

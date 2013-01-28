@@ -68,11 +68,14 @@ public:
     typedef typename super::mapMarkerVolumes_Type mapMarkerVolumes_Type;
     typedef typename mapMarkerVolumes_Type::const_iterator mapIterator_Type;
 
+    typedef typename super::vectorVolumes_Type       vectorVolumes_Type;
+    typedef boost::shared_ptr<vectorVolumes_Type>    vectorVolumesPtr_Type;
+
     typedef typename super::FESpacePtr_Type          FESpacePtr_Type;
     typedef typename super::ETFESpacePtr_Type        ETFESpacePtr_Type;
 
-    typedef typename super::markerFunctor_Type                markerFunctor_Type;
-    typedef typename super::markerFunctorPtr_Type             markerFunctorPtr_Type;
+    typedef typename super::markerFunctor_Type       markerFunctor_Type;
+    typedef typename super::markerFunctorPtr_Type    markerFunctorPtr_Type;
 
     typedef MatrixSmall<3,3>                         matrixSmall_Type;
 
@@ -228,6 +231,8 @@ void VenantKirchhoffMaterialLinear<Mesh>::computeLinearStiff(dataPtr_Type& dataM
                                                              const mapMarkerVolumesPtr_Type mapsMarkerVolumes)
 {
 
+    *(this->M_linearStiff) *= 0.0;
+
     UInt totalDof = this->M_FESpace->dof().numTotalDof();
     // Number of displacement components
     UInt nc = nDimensions;
@@ -238,42 +243,29 @@ void VenantKirchhoffMaterialLinear<Mesh>::computeLinearStiff(dataPtr_Type& dataM
 
     mapIterator_Type it;
 
-    //Create the indentity for F
-    matrixSmall_Type identity;
-    identity(0,0) = 1.0; identity(0,1) = 0.0; identity(0,2) = 0.0;
-    identity(1,0) = 0.0; identity(1,1) = 1.0; identity(1,2) = 0.0;
-    identity(2,0) = 0.0; identity(2,1) = 0.0; identity(2,2) = 1.0;
+    vectorVolumesPtr_Type pointerListOfVolumes;
 
     for( it = (*mapsMarkerVolumes).begin(); it != (*mapsMarkerVolumes).end(); it++ )
     {
 
         //Given the marker pointed by the iterator, let's extract the material parameters
         UInt marker = it->first;
-        *(this->M_linearStiff) *= 0.0;
 
-        this->M_markerFunctorPtr.reset( new markerFunctor_Type(marker) );
+        pointerListOfVolumes.reset( new vectorVolumes_Type(it->second) );
 
         Real mu = dataMaterial->mu( marker );
         Real lambda = dataMaterial->lambda( marker );
 
-        integrate( integrationOverSelectedVolumes( this->M_FESpace->mesh(), this->M_markerFunctorPtr ) ,
+        integrate( integrationOverSelectedVolumes(  pointerListOfVolumes ),
                    this->M_FESpace->qr(),
                    this->M_ETFESpace,
                    this->M_ETFESpace,
-                   value(lambda) * dot( value(identity), grad( phi_i) ) * dot( value(identity), grad ( phi_j ) )
-                   ) >> M_linearStiff;
-
-        integrate( integrationOverSelectedVolumes( this->M_FESpace->mesh(), this->M_markerFunctorPtr ) ,
-                   this->M_FESpace->qr(),
-                   this->M_ETFESpace,
-                   this->M_ETFESpace,
+                   value(lambda) * div( phi_i ) * div( phi_j ) +
                    value( mu ) * dot( (grad(phi_j) + transpose(grad(phi_j)) ), grad(phi_i))
                    ) >> M_linearStiff;
     }
 
     this->M_linearStiff->globalAssemble();
-    // std::string nameFile = "nameMatrix";
-    // this->M_linearStiff->spy(nameFile);
 
     //Initialization of the pointer M_stiff to what is pointed by M_linearStiff
     this->M_stiff = this->M_linearStiff;
