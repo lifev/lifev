@@ -67,7 +67,7 @@ class DarcyData
 public:
 
     // Policies.
-    //! @name Public policies
+    //! @name Public Types
     //@{
 
     //! Typedef for the mesh template.
