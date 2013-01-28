@@ -59,7 +59,7 @@ namespace LifeV
 
 //! @class DarcyData This class contain the basic data for the Darcy solver.
 /*!
-  In particolar it stores the data as GetPot object, the data for the mesh and the data for the time schemes.
+  In particular it stores the data as GetPot object, the data for the mesh and the data for the time schemes.
 */
 template < typename MeshType >
 class DarcyData
@@ -79,7 +79,7 @@ public:
     //! Shared pointer for the data.
     typedef boost::shared_ptr < data_Type > dataPtr_Type;
 
-    //! Teuchos pareameter list.
+    //! Teuchos parameter list.
     typedef Teuchos::ParameterList paramList_Type;
 
     //! Shared pointer for the Teuchos parameter list.
@@ -119,7 +119,7 @@ public:
 
     //! Constructor using a data file.
     /*!
-      @param dataFile GetPot data file for setup the problem.
+      @param dataFile GetPot data file for set-up the problem.
       @param section the section for the Darcy data.
     */
     DarcyData ( const data_Type& dataFile,
@@ -129,7 +129,7 @@ public:
     //! @name Methods
     //@{
 
-    //! External setup.
+    //! External set-up.
     /*!
       @param dataFile The data file with all the data.
       @param section The global section.
