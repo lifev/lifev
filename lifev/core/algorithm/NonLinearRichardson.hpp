@@ -80,15 +80,17 @@ namespace LifeV
 
 template < class Fct >
 Int NonLinearRichardson( VectorEpetra& sol,
-                      Fct&        functional,
-                      Real        abstol,
-                      Real        reltol,
-                      UInt&       maxit,
-                      Real        eta_max,
-                      Int         NonLinearLineSearch,
-                      std::ofstream& out_res,
-                      const Real& time,
-                      UInt iter = UInt(0) )
+			 Fct&        functional,
+			 Real        abstol,
+			 Real        reltol,
+			 UInt&       maxit,
+			 Real        eta_max,
+			 Int         NonLinearLineSearch,
+			 UInt iter = UInt(0),
+			 UInt        verboseLevel = 0,
+			 std::ostream& output = std::cout,
+			 const Real& time = 0
+			 )
 {
     /*
         */
@@ -108,9 +110,8 @@ Int NonLinearRichardson( VectorEpetra& sol,
 
     //----------------------------------------------------------------------
 
-    bool const verbose(sol.comm().MyPID() == 0);
-
-    //UInt iter = 0;
+    if ( sol.comm().MyPID() != 0 )
+        verboseLevel = 0;
 
     VectorEpetra residual ( sol.map() );
     VectorEpetra step     ( sol.map() );
@@ -119,16 +120,15 @@ Int NonLinearRichardson( VectorEpetra& sol,
 
     Real normResOld = 1;
 
-    if (verbose)
+    if ( verboseLevel > 0 )
     {
-        //std::cout << "------------------------------------------------------------------" << std::endl;
         std::cout << std::endl;
         std::cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << std::endl;
         std::cout << "      Non-Linear Richardson: starting          " << std::endl;
         std::cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << std::endl;
         std::cout << std::endl;
-        //std::cout << "------------------------------------------------------------------" << std::endl;
     }
+
     functional.evalResidual( residual, sol, iter );
 
     Real normRes      = residual.normInf();
@@ -145,30 +145,27 @@ Int NonLinearRichardson( VectorEpetra& sol,
 
     Real solNormInf(sol.normInf());
     Real stepNormInf;
-    if (verbose)
+    if ( verboseLevel > 1 )
     {
-        out_res << std::scientific;
-        out_res << "# time = ";
-        out_res << time << "   " << "initial norm_res " <<  normRes
+        output << std::scientific;
+        output << "# time = ";
+        output << time << "   " << "initial norm_res " <<  normRes
         << " stop tol = " << stop_tol
         << "initial norm_sol "
         << solNormInf << std::endl;
-        out_res << "#iter      disp_norm       step_norm       residual_norm" << std::endl;
+        output << "#iter      disp_norm       step_norm       residual_norm" << std::endl;
     }
     while ( normRes > stop_tol && iter < maxit )
     {
-        if (verbose)
+        if ( verboseLevel > 0 )
         {
             std::cout << std::endl;
-            //std::cout << "------------------------------------------------------------------" << std::endl;
             std::cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << std::endl;
             std::cout << "      Non-Linear Richardson: iteration  =      " << iter << std::endl
                       << "                             residual   =      " << normRes << std::endl
                       << "                             tolerance  =      " << stop_tol << std::endl;
             std::cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << std::endl;
             std::cout << std::endl;
-            //std::cout << "------------------------------------------------------------------" << std::endl;
-            //std::cout << std::endl;
         }
 
         iter++;
@@ -178,13 +175,14 @@ Int NonLinearRichardson( VectorEpetra& sol,
         normRes    = residual.normInf();
 
         residual *= -1;
+
         functional.solveJac(step, residual, linearRelTol); // J*step = -R
 
         solNormInf = sol.normInf();
         stepNormInf = step.normInf();
-        if (verbose)
+        if ( verboseLevel > 1 )
         {
-            out_res   << std::setw(5) << iter
+            output   << std::setw(5) << iter
             << std::setw(15) << solNormInf
             << std::setw(15) << stepNormInf;
         }
@@ -202,10 +200,10 @@ Int NonLinearRichardson( VectorEpetra& sol,
 //                normRes = residual.NormInf();
             break;
         case 1:
-            status = NonLinearLineSearchParabolic( functional, residual, sol, step, normRes, lambda, iter, verbose );
+            status = NonLinearLineSearchParabolic( functional, residual, sol, step, normRes, lambda, iter, verboseLevel );
             break;
         case 2:  // recommended
-            status = NonLinearLineSearchCubic( functional, residual, sol, step, normRes, lambda, slope, iter, verbose );
+            status = NonLinearLineSearchCubic( functional, residual, sol, step, normRes, lambda, slope, iter, verboseLevel );
             break;
         default:
             std::cout << "Unknown NonLinearLineSearch \n";
@@ -215,12 +213,10 @@ Int NonLinearRichardson( VectorEpetra& sol,
         if (status == EXIT_FAILURE)
             return status;
 
-
-
         normRes = residual.normInf();
 
-        if (verbose)
-            out_res << std::setw(15) << normRes << std::endl;
+        if ( verboseLevel > 1 )
+            output << std::setw(15) << normRes << std::endl;
 
         if ( eta_max > 0 )
         {
@@ -234,30 +230,30 @@ Int NonLinearRichardson( VectorEpetra& sol,
             linearRelTol = std::min<Real>( eta_max,
                                            std::max<Real>( linearRelTol,
                                                            .5 * stop_tol / normRes ) );
-            //if (verbose)
+            //if ( verboseLevel > 0 )
             //    std::cout << "    Newton: forcing term eta = " << linearRelTol << std::endl;
+	    //std::cout<<"\nVerbose = "<<verboseLevel<<std::endl;
         }
 
     }
 
     if ( normRes > stop_tol )
     {
-        if (verbose)
+        if ( verboseLevel > 0 )
             std::cout << "!!! NonLinRichardson: convergence fails" << std::endl;
         maxit = iter;
         return EXIT_FAILURE;
     }
 
-    if (verbose)
+
+    if ( verboseLevel > 0 )
     {
         std::cout << std::endl;
-        //std::cout << "------------------------------------------------------------------" << std::endl;
         std::cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << std::endl;
         std::cout << "      Non-Linear Richardson: convergence =     " << normRes << std::endl
                   << "                             iterations  =     " << iter << std::endl;
         std::cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << std::endl;
         std::cout << std::endl;
-        //std::cout << "------------------------------------------------------------------" << std::endl;
     }
     maxit = iter;
 

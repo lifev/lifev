@@ -286,6 +286,16 @@ Real u1(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z
     return 0.0;
 }
 
+Real vinit(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+{
+    if (i==2)
+        return 10;
+    else
+        return 0.;
+}
+
+
+
 Real fZero(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     return 0.0;
@@ -338,9 +348,9 @@ Real u2(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, 
 }
 
 
-Real u2normal(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
+Real u2normal(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
-    //   if (t<=0.003)
+    if (t<=0.003)
         return -1.3332e4;
 
     return 0.;
@@ -351,7 +361,7 @@ Real u2normal(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Rea
 Real d0(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
 {
     switch (i)
-    {
+      {
     case 0:
         return 0.;
         break;
@@ -391,7 +401,7 @@ Real w0(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z
 
 Real fluxFunction(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
-    return -100;
+    return -10;
 }
 
 Real squareSinusoidalFluxFunction(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
@@ -409,5 +419,6 @@ else return 0;
 Real LifeV::aortaVelIn::S_timestep;
 
 }
+
 
 

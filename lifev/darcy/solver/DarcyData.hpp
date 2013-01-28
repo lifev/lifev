@@ -51,6 +51,7 @@
 #include <lifev/core/mesh/MeshData.hpp>
 
 #include <lifev/core/fem/TimeData.hpp>
+#include <lifev/core/fem/TimeAdvanceData.hpp>
 
 // LifeV namespace
 namespace LifeV
@@ -89,6 +90,12 @@ public:
 
     //! Shared pointer for the time data.
     typedef boost::shared_ptr < timeData_Type > timeDataPtr_Type;
+
+    //! Typedef for the time advance data.
+    typedef TimeAdvanceData timeAdvanceData_Type;
+
+    //! Shared pointer for the time advance data.
+    typedef boost::shared_ptr < timeAdvanceData_Type > timeAdvanceDataPtr_Type;
 
     //! Typedef for the mesh data.
     typedef MeshData meshData_Type;
@@ -153,20 +160,20 @@ public:
 
     //! Set data time container.
     /*!
-      @param TimeData Boost shared_ptr to TimeData container
+      @param timeData Boost shared_ptr to timeData container
     */
-    void setTimeData ( const timeDataPtr_Type& TimeData )
+    void setTimeData ( const timeDataPtr_Type& timeData )
     {
-        M_time = TimeData;
+        M_time = timeData;
     } // setTimeData
 
     //! Set mesh container.
     /*!
-      @param MeshData Boost shared_ptr to meshData container
+      @param meshData Boost shared_ptr to meshData container
     */
-    void setMeshData ( const meshDataPtr_Type& MeshData )
+    void setMeshData ( const meshDataPtr_Type& meshData )
     {
-        M_mesh = MeshData;
+        M_mesh = meshData;
     } // setMeshData
 
     // Get methods.
@@ -220,6 +227,24 @@ public:
     {
         return M_time;
     } // dataTimePtr
+
+    //! Get data time advance container.
+    /*!
+      @return shared_ptr to TimeAdvanceData container.
+    */
+    const timeAdvanceDataPtr_Type& dataTimeAdvancePtr () const
+    {
+        return M_timeAdvance;
+    }
+
+    //! Get data time advance container.
+    /*!
+       @return shared_ptr to TimeAdvanceData container.
+    */
+    timeAdvanceDataPtr_Type& dataTimeAdvancePtr ()
+    {
+        return M_timeAdvance;
+    }
 
     //! Get mesh container
     /*!
@@ -290,6 +315,9 @@ private:
     //! Data container for time.
     timeDataPtr_Type M_time;
 
+    //! Data container for time advance.
+    timeAdvanceDataPtr_Type M_timeAdvance;
+
     //! Data container for mesh.
     meshDataPtr_Type M_mesh;
 
@@ -329,6 +357,12 @@ setup ( const data_Type& dataFile, const std::string& section )
     if ( !M_time.get() )
     {
         M_time.reset( new timeData_Type ( dataFile, M_section + "/time_discretization" ) );
+    }
+
+    // If data time has not been set
+    if ( !M_timeAdvance.get() )
+    {
+        M_timeAdvance.reset( new timeAdvanceData_Type ( dataFile, M_section + "/time_discretization" ) );
     }
 
     // If data mesh has not been set

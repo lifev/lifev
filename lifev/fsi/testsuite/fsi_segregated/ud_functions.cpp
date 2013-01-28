@@ -33,7 +33,7 @@
  */
 
 #include "ud_functions.hpp"
-
+#define PI 3.141592653589793
 
 namespace LifeV
 {
@@ -64,9 +64,6 @@ Real p0(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z
 }
 
 
-
-
-
 Real u2(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
 {
     switch (i)
@@ -75,22 +72,49 @@ Real u2(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, 
         return 0.0;
         break;
     case 1:
-        return 0.0;
-        //      return 1.3332e4;
-        //    else
-        //      return 0.0;
+      return 0.0;
         break;
     case 2:
-        if ( t <= 0.003 )
-            return 1.3332e4;
-        //      return 0.01;
+        if ( t <= 0.003 ) 
+	  return 1.3332e4;
+	else
+	  return 0.0;
+        break;
+
+    }
+    return 0;
+}
+
+Real u2vel(const Real& t, const Real& x, const Real& y, const Real& /*z*/, const ID& i)
+{
+  
+    switch (i)
+    {
+    case 0:
         return 0.0;
+        break;
+    case 1:
+      if (t< 0.003)
+	return 120.0*((0.25 - x*x - y*y) / 0.25 )*sin(3.14159265*t/0.003);
+      else
+	return 0.0;
+      break;
+    case 2:
+      return 0.0;
         break;
     }
     return 0;
 }
 
 
+Real pressure(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+{
+  if ( t <= 0.003 )
+    return -1.3332e4;
+  else
+    return 0.0;
+  
+}
 // Initial displacement and velocity
 Real d0(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
 {

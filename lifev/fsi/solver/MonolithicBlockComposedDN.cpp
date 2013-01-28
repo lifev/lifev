@@ -71,21 +71,23 @@ int MonolithicBlockComposedDN::solveSystem( const vector_Type& rhs, vector_Type&
 
 
 void MonolithicBlockComposedDN::coupler(mapPtr_Type& map,
-                         const std::map<ID, ID>& locDofMap,
-                         const vectorPtr_Type& numerationInterface,
-                         const Real& timeStep)
+                                        const std::map<ID, ID>& locDofMap,
+                                        const vectorPtr_Type& numerationInterface,
+                                        const Real& timeStep,
+                                        const Real& coefficient,
+                                        const Real& rescaleFactor)
 {
     UInt totalDofs( map->map(Unique)->NumGlobalElements() );
     UInt solidAndFluid(M_offset[solid]+M_FESpace[solid]->map().map(Unique)->NumGlobalElements());
 
     matrixPtr_Type coupling(new matrix_Type(*map));
-    couplingMatrix( coupling,  (*M_couplingFlags)[solid], M_FESpace, M_offset, locDofMap, numerationInterface, timeStep);
+    couplingMatrix( coupling,  (*M_couplingFlags)[solid], M_FESpace, M_offset, locDofMap, numerationInterface, timeStep, 1., coefficient, rescaleFactor);
     coupling->insertValueDiagonal( 1., M_offset[fluid], M_offset[solid] );
     coupling->insertValueDiagonal( 1., solidAndFluid, totalDofs );
     M_coupling.push_back(coupling);
 
     coupling.reset(new matrix_Type(*map));
-    couplingMatrix( coupling,  (*M_couplingFlags)[fluid], M_FESpace, M_offset, locDofMap, numerationInterface, timeStep);
+    couplingMatrix( coupling,  (*M_couplingFlags)[fluid], M_FESpace, M_offset, locDofMap, numerationInterface, timeStep, 1., coefficient, rescaleFactor);
     coupling->insertValueDiagonal( 1. , M_offset[solid], solidAndFluid );
     coupling->insertValueDiagonal( 1. , solidAndFluid + nDimensions*numerationInterface->map().map(Unique)->NumGlobalElements(), totalDofs );
     M_coupling.push_back(coupling);

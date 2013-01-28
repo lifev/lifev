@@ -50,6 +50,7 @@
 
 #include <Teuchos_ParameterList.hpp>
 #include <Teuchos_RCPDecl.hpp>
+#include <Epetra_MpiComm.h>
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic warning "-Wunused-variable"
@@ -70,7 +71,11 @@ class SolverOperator : public LinearOperator
 public:
 	enum SolverOperatorStatusType          { undefined, yes, no };
 
-	SolverOperator();
+#ifdef HAVE_MPI
+	SolverOperator( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>( new Epetra_MpiComm( MPI_COMM_WORLD ) ) );
+#else
+	SolverOperator( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>( new Epetra_SerialComm ) );
+#endif
 	virtual ~SolverOperator();
 
 	//! @name Attribute set methods
@@ -86,6 +91,12 @@ public:
 	void setParameters( const Teuchos::ParameterList & _pList );
 
 	void setTolerance( const Real& tolerance );
+
+	void setUsedForPreconditioning( const bool& enable );
+
+	void resetCumulIterations() { M_numCumulIterations = 0; }
+
+	void resetSolver();
 
 	//@}
 
@@ -139,6 +150,9 @@ public:
 	 */
 	int numIterations() const { return M_numIterations; }
 
+	//! Returns the cumul of iterations
+	int numCumulIterations() const { return M_numCumulIterations; }
+
 	//@}
 
 protected:
@@ -147,6 +161,7 @@ protected:
 	virtual void doSetOperator() = 0;
 	virtual void doSetPreconditioner() = 0;
 	virtual void doSetParameterList() = 0;
+	virtual void doResetSolver() = 0;
 
 	//! The name of the Operator
 	std::string M_name;
@@ -172,8 +187,17 @@ protected:
 	//! Number of iterations performed by the solver
 	mutable int M_numIterations;
 
+	//! Number of cumulated iterations performed by the solver
+	mutable int M_numCumulIterations;
+
 	//! Solver tolerance
 	Real M_tolerance;
+
+	//! Print the number of iteration (used only for preconditioner LinearSolver)
+	bool M_printSubiterationCount;
+
+	//! Communicator
+	boost::shared_ptr<Epetra_Comm> M_comm;
 
 };
 
