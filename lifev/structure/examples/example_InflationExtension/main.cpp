@@ -67,6 +67,7 @@ each time step and with the BDF method!!
 
 #include <lifev/core/mesh/MeshData.hpp>
 #include <lifev/core/mesh/MeshPartitioner.hpp>
+#include <lifev/core/filter/PartitionIO.hpp>
 
 #include <lifev/structure/solver/StructuralConstitutiveLawData.hpp>
 
@@ -309,17 +310,38 @@ Structure::run3d()
     boost::shared_ptr<StructuralConstitutiveLawData> dataStructure(new StructuralConstitutiveLawData( ));
     dataStructure->setup(dataFile);
 
-    MeshData             meshData;
-    meshData.setup(dataFile, "solid/space_discretization");
+    //Loading a partitoned mesh or reading a new one
+    const std::string partitioningMesh = dataFile( "partitioningOffline/loadMesh", "no");
 
-    boost::shared_ptr<RegionMesh<LinearTetra> > fullMeshPtr(new RegionMesh<LinearTetra>( ( parameters->comm ) ));
-    readMesh(*fullMeshPtr, meshData);
+    //Creation of pointers
+    boost::shared_ptr<MeshPartitioner<mesh_Type> > meshPart;
+    boost::shared_ptr<mesh_Type> pointerToMesh;
 
-    MeshPartitioner< RegionMesh<LinearTetra> > meshPart( fullMeshPtr, parameters->comm );
+    if( !(partitioningMesh.compare("no")) )
+    {
+        boost::shared_ptr<mesh_Type > fullMeshPtr(new mesh_Type( ( parameters->comm ) ));
+        //Creating a new mesh from scratch
+        MeshData             meshData;
+        meshData.setup(dataFile, "solid/space_discretization");
+        readMesh(*fullMeshPtr, meshData);
+
+        meshPart.reset( new MeshPartitioner<mesh_Type> (fullMeshPtr, parameters->comm ) );
+
+        pointerToMesh = meshPart->meshPartition();
+    }
+    else
+    {
+        //Creating a mesh object from a partitioned mesh
+        const std::string partsFileName(dataFile("partitioningOffline/hdf5_file_name", "NO_DEFAULT_VALUE.h5"));
+    	PartitionIO<mesh_Type > partitionIO(partsFileName, parameters->comm);
+    	partitionIO.read(pointerToMesh);
+
+    }
+
 
     std::string dOrder =  dataFile( "solid/space_discretization/order", "P1");
 
-    solidFESpacePtr_Type dFESpace( new solidFESpace_Type(meshPart,dOrder,3,parameters->comm) );
+    solidFESpacePtr_Type dFESpace( new solidFESpace_Type(pointerToMesh,dOrder,3,parameters->comm) );
     if (verbose) std::cout << std::endl;
 
     std::string timeAdvanceMethod =  dataFile( "solid/time_discretization/method", "Newmark");
@@ -425,7 +447,7 @@ Structure::run3d()
 
         //Creation of Exporter to check the loaded solution (working only for HDF5)
         // std::string expVerFile = "verificationDisplExporter";
-        // LifeV::ExporterHDF5<RegionMesh<LinearTetra> > exporter( dataFile, meshPart.meshPartition(), expVerFile, parameters->comm->MyPID());
+        // LifeV::ExporterHDF5<RegionMesh<LinearTetra> > exporter( dataFile, pointerToMesh, expVerFile, parameters->comm->MyPID());
         // vectorPtr_Type vectVer ( new vector_Type(solid.displacement(),  LifeV::Unique ) );
 
         // exporter.addVariable( ExporterData<mesh_Type >::VectorField, "displVer", dFESpace, vectVer, UInt(0) );
@@ -531,14 +553,14 @@ Structure::run3d()
 #endif
     {
         if (exporterType.compare("none") == 0)
-            exporterSolid.reset( new emptyExporter_Type ( dataFile, meshPart.meshPartition(), exportFileName, parameters->comm->MyPID()) );
+            exporterSolid.reset( new emptyExporter_Type ( dataFile, pointerToMesh, exportFileName, parameters->comm->MyPID()) );
         else
-            exporterSolid.reset( new ensightFilter_Type ( dataFile, meshPart.meshPartition(), exportFileName, parameters->comm->MyPID()) );
+            exporterSolid.reset( new ensightFilter_Type ( dataFile, pointerToMesh, exportFileName, parameters->comm->MyPID()) );
     }
 
     exporterSolid->setPostDir( "./" );
-    exporterSolid->setMeshProcId( meshPart.meshPartition(), parameters->comm->MyPID() );
-    exporterCheck->setMeshProcId( meshPart.meshPartition(), parameters->comm->MyPID() );
+    exporterSolid->setMeshProcId( pointerToMesh, parameters->comm->MyPID() );
+    exporterCheck->setMeshProcId( pointerToMesh, parameters->comm->MyPID() );
 
     vectorPtr_Type solidDisp ( new vector_Type(solid.displacement(),  Unique ) );
     vectorPtr_Type solidVel  ( new vector_Type(solid.displacement(),  Unique ) );

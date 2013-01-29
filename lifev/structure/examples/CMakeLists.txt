@@ -9,4 +9,5 @@ ADD_SUBDIRECTORIES(
   example_creatingDamagedZone
   example_tractionWithSymmetry
   example_principalTensionsInflationExtensions
+  example_partitionMesh
 )

@@ -1,0 +1,24 @@
+###################################################################################################
+#
+#                       This file is part of the LifeV Applications
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+#
+#      Author(s):
+#           Date: 00-00-0000
+#  License Terms: GNU LGPL
+#
+###################################################################################################
+### DATA FILE #####################################################################################
+###################################################################################################
+
+[test]
+num_parts = 3
+
+[solid]
+
+[./space_discretization]
+mesh_type   = .mesh
+mesh_dir  	= ./
+mesh_file 	= validationWTEC.mesh
+order     	= P1
