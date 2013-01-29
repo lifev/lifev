@@ -515,7 +515,7 @@ setupTime ()
     M_maxIterSolver = dataFile( ( this->M_data->section() + "/solver/max_iter_reuse" ).data(), static_cast<Int>(0) );
 
     // Set up the time advance.
-    M_timeAdvance->setup ( this->M_data->dataTimePtr()->orderBDF(), 1 );
+    M_timeAdvance->setup ( this->M_data->dataTimeAdvancePtr()->orderBDF(), 1 );
 
 } // setupTime
 
@@ -554,9 +554,12 @@ solve ()
     // Reset the right hand side coming from the time advance scheme.
     M_rhsTimeAdvance.reset ( new vector_Type ( this->M_primalField->getFESpace().map() ) );
 
+    // Update the RHS
+    M_timeAdvance->updateRHSFirstDerivative ();
+
     // Put in M_rhsTimeAdvance the contribution for the right hand side coming
     // from the time scheme, without the time step.
-    *M_rhsTimeAdvance = M_timeAdvance->updateRHSFirstDerivative ();
+    *M_rhsTimeAdvance = M_timeAdvance->rhsContributionFirstDerivative ();
 
     // Solve the problem
     darcySolverLinear_Type::solve ();

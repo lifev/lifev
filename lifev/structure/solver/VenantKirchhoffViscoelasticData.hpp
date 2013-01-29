@@ -54,6 +54,7 @@
 #include <lifev/core/filter/GetPot.hpp>
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/fem/TimeData.hpp>
+#include <lifev/core/fem/TimeAdvanceData.hpp>
 
 
 namespace LifeV
@@ -61,18 +62,20 @@ namespace LifeV
 /*!
   \class VenantKirchhoffViscoelasticData
 */
-class VenantKirchhoffViscoelasticData:
-      public TimeData
+class VenantKirchhoffViscoelasticData
 {
 public:
     //! @name Type definitions
     //@{
 
-    typedef TimeData                                 Time_Type;
-    typedef boost::shared_ptr< Time_Type >           Time_ptrType;
+    typedef TimeData                               time_Type;
+    typedef boost::shared_ptr<time_Type>           timePtr_Type;
 
-    typedef std::map<UInt, Real>                    MaterialContainer_Type;
-    typedef MaterialContainer_Type::const_iterator  MaterialContainer_ConstIterator;
+    typedef TimeAdvanceData                        timeAdvance_Type;
+    typedef boost::shared_ptr<timeAdvance_Type>    timeAdvancePtr_Type;
+
+    typedef std::map<UInt, Real>                   MaterialContainer_Type;
+    typedef MaterialContainer_Type::const_iterator MaterialContainer_ConstIterator;
 
     //@}
 
@@ -112,7 +115,13 @@ public:
     /*!
      * @param TimeData shared_ptr to TimeData container
      */
-    void setTimeData( const Time_ptrType TimeData );
+    void setTimeData( const timePtr_Type timeData ) { M_time = timeData; }
+
+    //! Set data time advance container
+    /*!
+     * @param timeAdvanceData shared_ptr to TimeAdvanceData container
+     */
+    void setTimeAdvanceData( const timeAdvancePtr_Type timeAdvanceData ) { M_timeAdvance = timeAdvanceData; }
 
     //! Set density
     /*!
@@ -166,7 +175,13 @@ public:
     /*!
      * @return shared_ptr to TimeData container
      */
-    Time_ptrType dataTime() const;
+    timePtr_Type dataTime() const { return M_time; }
+
+    //! Get data time container
+    /*!
+     * @return shared_ptr to TimeAdvanceData container
+     */
+    timeAdvancePtr_Type dataTimeAdvance() const { return M_timeAdvance; }
 
     //! Get solid density
     /*!
@@ -250,7 +265,8 @@ public:
 private:
 
     //! Data containers for time and mesh
-    Time_ptrType           M_time;
+    timePtr_Type        M_time;
+    timeAdvancePtr_Type M_timeAdvance;
 
     //@name Physics
     //@{
@@ -273,8 +289,6 @@ private:
     MaterialContainer_Type  M_beta;
     //@}
 
-    //! Miscellaneous
-    Real                   M_factor; // amplification factor for deformed mesh
     //!verbose
     UInt                   M_verbose; // temporal output verbose
     //! order

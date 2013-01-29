@@ -271,10 +271,10 @@ problem::run()
 
     //! initialization of parameters of time Advance method:
     if (TimeAdvanceMethod =="Newmark")
-        timeAdvance->setup( dataProblem->dataTime()->coefficientsNewmark() , OrderDev);
+        timeAdvance->setup( dataProblem->dataTimeAdvance()->coefficientsNewmark() , OrderDev);
 
     if (TimeAdvanceMethod =="BDF")
-        timeAdvance->setup(dataProblem->dataTime()->orderBDF() , OrderDev);
+        timeAdvance->setup(dataProblem->dataTimeAdvance()->orderBDF() , OrderDev);
 
     timeAdvance->setTimeStep(dataProblem->dataTime()->timeStep());
     timeAdvance->showMe();
@@ -344,24 +344,29 @@ problem::run()
 
 //evaluate disp and vel as interpolate the bcFunction d0 and v0 and w0
 
-    std::vector<vector_type> uv0;
+    std::vector<vector_ptrtype> uv0;
 
     Real dt = dataProblem->dataTime()->timeStep();
     Real T  = dataProblem->dataTime()->endTime();
 
     if (TimeAdvanceMethod =="Newmark")
     {
-        uv0.push_back(*U);
-        uv0.push_back(*V);
-        uv0.push_back(*W);
+        uv0.push_back(U);
+        uv0.push_back(V);
+        uv0.push_back(W);
     }
     if (TimeAdvanceMethod =="BDF")
     {
-        for ( UInt previousPass=0; previousPass < dataProblem->orderBDF() ; previousPass++)
+        for ( UInt previousPass=0; previousPass < dataProblem->dataTimeAdvance()->orderBDF() ; previousPass++)
         {
             Real previousTimeStep = -previousPass*dt;
-            feSpace->interpolate( static_cast<FESpace_type::function_Type>( uexact ), *U, previousTimeStep);
-            uv0.push_back(*U);
+// <<<<<<< HEAD
+            feSpace->interpolate(uexact, *U, previousTimeStep );
+            uv0.push_back(U);
+// =======
+            // feSpace->interpolate( static_cast<FESpace_type::function_Type>( uexact ), *U, previousTimeStep);
+            // uv0.push_back(*U);
+        //>>>>>>> master
         }
     }
 
@@ -381,8 +386,8 @@ problem::run()
     feSpace->interpolate( static_cast<FESpace_type::function_Type>( a0 ),     *wExact, 0 );
 
     *U = timeAdvance->solution();
-    *V = timeAdvance->velocity();
-    *W = timeAdvance->accelerate();
+    *V = timeAdvance->firstDerivative();
+    *W = timeAdvance->secondDerivative();
 
 
     exporter->postProcess( 0 );
@@ -392,7 +397,7 @@ problem::run()
 
     for (Real time = dt; time <= T; time += dt)
     {
-        dataProblem->setTime(time);
+        dataProblem->dataTime()->setTime(time);
 
         if (verbose)
         {
@@ -424,8 +429,8 @@ problem::run()
         feSpace->interpolate( static_cast<FESpace_type::function_Type>( a0 ),     *wExact, time );
 
         *U =  timeAdvance->solution();
-        *V = timeAdvance->velocity();
-        *W = timeAdvance->accelerate();
+        *V = timeAdvance->firstDerivative();
+        *W = timeAdvance->secondDerivative();
 
         //postProcess
         exporter->postProcess( time );
