@@ -90,7 +90,7 @@ int main(int argc, char** argv)
     GetPot dataFile(dataFileName);
 
     const UInt numParts(dataFile("offlinePartition/num_parts", 4));
-    std::string stringFileName(dataFile("solid/space_discretizetion/mesh_file", "NO_DEFAULT_VALE.mesh"));
+    std::string stringFileName(dataFile("offlinePartition/nameFile", "NO_DEFAULT_VALE"));
 
     stringFileName +="partitoned.h5";
 

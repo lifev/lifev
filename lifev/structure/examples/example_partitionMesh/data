@@ -12,13 +12,14 @@
 ### DATA FILE #####################################################################################
 ###################################################################################################
 
-[test]
-num_parts = 3
+[offlinePartition]
+num_parts = 128
+nameFile  = veryFine
 
 [solid]
 
 [./space_discretization]
 mesh_type   = .mesh
 mesh_dir  	= ./
-mesh_file 	= validationWTEC.mesh
+mesh_file 	= veryFine.mesh
 order     	= P1
