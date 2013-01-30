@@ -10,4 +10,5 @@ ADD_SUBDIRECTORIES(
   example_tractionWithSymmetry
   example_principalTensionsInflationExtensions
   example_partitionMesh
+  example_computationNorm
 )
