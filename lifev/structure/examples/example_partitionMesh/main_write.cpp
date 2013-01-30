@@ -92,7 +92,7 @@ int main(int argc, char** argv)
     const UInt numParts(dataFile("offlinePartition/num_parts", 4));
     std::string stringFileName(dataFile("offlinePartition/nameFile", "NO_DEFAULT_VALE"));
 
-    stringFileName +="partitoned.h5";
+    stringFileName +="Partitioned.h5";
 
     std::cout << "Number of parts: " << numParts << std::endl;
     std::cout << "Name of HDF5 container: " << stringFileName << std::endl;
