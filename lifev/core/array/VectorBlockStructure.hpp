@@ -26,48 +26,28 @@
 
 /*!
     @file
-    @brief File containing the VectorEpetraStructured class
+    @brief File containing the VectorBlockStructure class
 
-    @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
-    @date 01 Jun 2011
+    @author Gwenol Grandperrin <gwenol.grandperrin@gmail.com>
+    @date 21-08-2012
  */
 
-#ifndef _VECTOREPETRASTRUCTURED_HPP_
-#define _VECTOREPETRASTRUCTURED_HPP_ 1
+#ifndef _VECTORBLOCKSTRUCTURE_HPP_
+#define _VECTORBLOCKSTRUCTURE_HPP_ 1
 
+#include <boost/shared_ptr.hpp>
 #include <lifev/core/LifeV.hpp>
-
 #include <lifev/core/array/MapEpetra.hpp>
-#include <lifev/core/array/VectorEpetra.hpp>
 #include <lifev/core/array/MapVector.hpp>
-#include <lifev/core/array/VectorBlockStructure.hpp>
-#include <lifev/core/array/VectorEpetraStructuredView.hpp>
-
 
 namespace LifeV {
 
-//! VectorEpetraStructured - class of block vector
+//! VectorBlockStructure - class representing the structure of a vector
 /*!
-  @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
-
-  The VectorEpetraStructured class contains data related
-  to block vector. It is an extension to VectorEpetra where data about blocks have
-  been set. For an introduction to the block structures in LifeV, see
-  \ref BlockAlgebraPage "this page".
-
-  There are mainly two ways to define a VectorEpetraStructured:
-  <ul>
-  <li> Construct it using the same syntax as for LifeV::VectorEpetra and the use
-  a setter for the structure.
-  <li> Construct it directly with the maps of the blocks.
-  </ul>
-  Both ways are equivalent.
-
-  To access the blocks, one uses then the blockView or block methods.
+  @author Gwenol Grandperrin <gwenol.grandperrin@gmail.com>
 
  */
-class VectorEpetraStructured
-    : public VectorEpetra
+class VectorBlockStructure
 {
 public:
 
@@ -75,25 +55,19 @@ public:
     //@{
 
     //! Type of data stored
-    typedef Real data_type;
+    typedef Real data_Type;
 
     //! Type of the map to be used
-    typedef MapEpetra map_type;
+    typedef MapEpetra map_Type;
 
     //! Type of the MapVector to be used with this class
-    typedef MapVector<map_type> mapVector_type;
+    typedef MapVector<map_Type> mapVector_Type;
 
     //! Type of the map (Unique/Repeated)
-    typedef MapEpetraType mapType_type;
+    typedef MapEpetraType mapType_Type;
 
     //! Combine mode
-    typedef Epetra_CombineMode combine_type;
-
-    //! Type of the view
-    typedef VectorEpetraStructuredView block_type;
-
-    //! Pointer on the view
-    typedef boost::shared_ptr<block_type> block_ptrType;
+    typedef Epetra_CombineMode combine_Type;
 
     //@}
 
@@ -101,28 +75,25 @@ public:
     //! @name Constructor & Destructor
     //@{
 
-    //! Constructor with the monolithic map
-    VectorEpetraStructured( const map_type& map, const mapType_type& mapType = Unique );
+    //! Default constructor
+    VectorBlockStructure();
 
-    //! Construction with a vector of map
+    //! Constructor with the monolithic map
+    VectorBlockStructure( const map_Type& map );
+
+    //! Construction with a map
     /*!
       With this constructor, the block structure is automatically deduced from the maps in the
       vector. The monolithic map and vectors are also built by concatenating the different maps
       in the vector.
      */
-    VectorEpetraStructured( const mapVector_type& mapVector, const mapType_type& mapType = Unique );
+    VectorBlockStructure( const mapVector_Type& mapVector );
 
     //! Copy constructor
-    VectorEpetraStructured( const VectorEpetraStructured& vector );
-
-    //! Copy constructor with a specified map type (Repeated/Unique)
-    VectorEpetraStructured( const VectorEpetraStructured& vector, const mapType_type& mapType );
-
-    //! Copy constructor with specified map type and combine mode
-    VectorEpetraStructured( const VectorEpetraStructured& vector, const mapType_type& mapType, const combine_type& combineMode );
+    VectorBlockStructure( const VectorBlockStructure& blockStructure );
 
     //! Destructor
-    ~VectorEpetraStructured(){}
+    ~VectorBlockStructure(){}
 
     //@}
 
@@ -145,9 +116,9 @@ public:
       through this method, nor its map.
       @param The MapVector containing the maps
      */
-    void setBlockStructure( const mapVector_type& mapVector );
+    void setBlockStructure( const mapVector_Type& mapVector );
 
-    /*! Set the block structure of the vector
+    /*! Set the block structure using a block structure
      *  @param blockStructure Structure of the vector
      */
     void setBlockStructure( const VectorBlockStructure& blockStructure );
@@ -163,35 +134,48 @@ public:
       @param index Index of the block
       @return size of the index-th block
      */
-    UInt blockSize( const UInt& index ) const;
+    UInt blockSize( const UInt& index ) const
+    {
+        ASSERT( index < M_blockSize.size(), "Invalid block index" );
+        return M_blockSize[index];
+    }
 
-    //! Getter for the block index
     /*!
       @param index Index of the block
-      @param blockView The blockView to be filled
+      @return index of the first entry in the index-th block
      */
-    void blockView( const UInt& index, block_type& blockView );
+    UInt blockFirstIndex( const UInt& index ) const
+    {
+        ASSERT( index < M_blockFirstIndex.size(), "Invalid block index" );
+        return M_blockFirstIndex[index];
+    }
 
-    //! Getter for the block index
     /*!
-      @param index Index of the block
-      @return The index-th block
+       @return Number of blocks
      */
-    block_ptrType block( const UInt& index );
+    UInt numBlocks() const
+    {
+        return M_blockSize.size();
+    }
 
-    /*! Get the block structure of the vector
-     *  @param blockStructure Structure of the vector
+    /*!
+       @return Number of blocks
      */
-    VectorBlockStructure blockStructure() const;
+    UInt totalSize() const
+    {
+        return M_totalSize;
+    }
 
     //@}
 
 private:
 
-    VectorBlockStructure M_blockStructure;
+    std::vector<UInt> M_blockSize;
+    std::vector<UInt> M_blockFirstIndex;
+    UInt              M_totalSize;
 
 };
 
 } // Namespace LifeV
 
-#endif /* _VECTOREPETRASTRUCTURED_HPP_ */
+#endif /* _VECTORBLOCKSTRUCTURE_HPP_ */

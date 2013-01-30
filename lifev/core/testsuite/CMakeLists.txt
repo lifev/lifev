@@ -11,6 +11,7 @@ ADD_SUBDIRECTORIES(
   filter
   hyperbolic
   linear_solver
+  linear_solver_preconditioner
   matrix_epetra_structured_framework
   mesh
   region_marker_id
