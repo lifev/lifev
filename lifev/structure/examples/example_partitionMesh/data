@@ -23,3 +23,5 @@ mesh_type   = .mesh
 mesh_dir  	= ./
 mesh_file 	= veryFine.mesh
 order     	= P1
+
+###The example has been verified
