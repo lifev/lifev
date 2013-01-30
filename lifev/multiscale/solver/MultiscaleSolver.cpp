@@ -206,7 +206,7 @@ MultiscaleSolver::solveProblem( const Real& referenceSolution )
 
     // Numerical check of the last iteration solution (used for the night testsuite check)
     Real computedSolution( M_model->checkSolution() );
-    if ( referenceSolution >= 0. && std::abs( ( referenceSolution - computedSolution ) / referenceSolution ) >  1e-10 )
+    if ( referenceSolution >= 0. && std::abs( ( referenceSolution - computedSolution ) / referenceSolution ) >  1e-8 )
         multiscaleErrorCheck( Solution, "Problem solution: "    + number2string( computedSolution ) +
                                         " (Reference solution: " + number2string( referenceSolution ) + ")\n", M_comm->MyPID() == 0 );
 
