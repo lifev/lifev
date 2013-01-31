@@ -84,6 +84,9 @@ int main(int argc, char** argv )
     // DATAFILE
     GetPot command_line(argc, argv);
     GetPot dataFile( command_line.follow("data", 2, "-f", "--file" ));
+    
+    Teuchos::RCP< Teuchos::ParameterList > belosList = Teuchos::rcp ( new Teuchos::ParameterList );
+    belosList = Teuchos::getParametersFromXmlFile( "SolverParamList.xml" );
 
     // LOADING MESHES
     MeshData Solid_mesh_data;
@@ -150,7 +153,7 @@ int main(int argc, char** argv )
 								  flags));
     
     // LOADING INFORMATION ABOUT THE TWO VECTORS INVOLVED IN THE INTERPOLATION PROCESS
-    RBFInterpolant->setupRBFData(Solid_vector, Fluid_solution);
+    RBFInterpolant->setupRBFData(Solid_vector, Fluid_solution, dataFile, belosList);
 
     // BUILDING THE OPERATORS
     RBFInterpolant->buildOperators();

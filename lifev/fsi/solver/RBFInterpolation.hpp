@@ -264,6 +264,7 @@ namespace LifeV
     delete GlobalID;
 
     M_interpolationOperator.reset(new matrix_Type(*M_interpolationOperatorMap, InterpolationOperator));
+    M_interpolationOperator->spy("M_interpolationOperator.m");
 
   }
 
@@ -399,16 +400,15 @@ namespace LifeV
     solverF.setCommunicator( M_knownField->mapPtr()->commPtr() );
     solverF.setParameters( *M_belosList );
     solverF.setPreconditioner( precPtr );
-    
+  
     solverF.setOperator(M_interpolationOperator);
-    solverF.setRightHandSide( M_RhsOne );
-    solverF.solve( gamma_one );
-
+    solverF.setRightHandSide(M_RhsOne);
+    solverF.solve(gamma_one);
+ 
     LinearSolver solverOne;
     solverOne.setCommunicator( M_knownField->mapPtr()->commPtr() );
     solverOne.setParameters( *M_belosList );
     solverOne.setPreconditioner( precPtr );
-    solverOne.showMe();
 
     solverOne.setOperator(M_interpolationOperator);
     solverOne.setRightHandSide( M_RhsF );

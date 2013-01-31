@@ -13,15 +13,38 @@
 ###################################################################################################
 
 [fluid]
-	[./space_discretization]
-        	mesh_dir      = ./ 
-        	mesh_file     = tube20_rbf.mesh
-        	mesh_type     = .mesh 
+    [./space_discretization]
+        mesh_dir                 = ./ 
+        mesh_file                = tube20_rbf.mesh
+	mesh_type                = .mesh 
 
 [solid]
-	[./space_discretization]
-        	mesh_dir      = ./ 
-        	mesh_file     = vessel20_rbf.mesh
-        	mesh_type     = .mesh 
+    [./space_discretization]
+        mesh_dir                 = ./ 
+        mesh_file                = vessel20_rbf.mesh
+        mesh_type                = .mesh 
 
+[prec]
+    prectype                     = ML # Ifpack or ML
+    displayList                  = false
 
+    [./ifpack]
+        overlap                  = 2
+
+        [./fact]
+            ilut_level-of-fill   = 1
+            drop_tolerance       = 0.0
+            relax_value          = 0
+
+        [../amesos]
+            solvertype           = Amesos_Umfpack # Amesos_KLU or Amesos_Umfpack
+
+        [../partitioner]
+            overlap              = 2
+
+        [../schwarz]
+            reordering_type      = none #metis, rcm, none
+            filter_singletons    = true
+
+		[../]
+	[../]
