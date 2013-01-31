@@ -29,7 +29,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 @brief
 
 @author Davide Forti <davide.forti@epfl.ch>
-@date 11-07-2012
+@date 01-31-2012
 */
 
 // Tell the compiler to ignore specific kind of warnings:
@@ -50,6 +50,9 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/core/mesh/MeshData.hpp>
 #include <lifev/core/filter/ExporterHDF5.hpp>
 #include <lifev/fsi/solver/RBFInterpolation.hpp>
+#include <Teuchos_ParameterList.hpp>
+#include <Teuchos_XMLParameterListHelpers.hpp>
+#include <Teuchos_RCP.hpp>
 
 //Tell the compiler to restore the warning previously silented
 #pragma GCC diagnostic warning "-Wunused-variable"
@@ -84,6 +87,9 @@ int main(int argc, char** argv )
     // DATAFILE
     GetPot command_line(argc, argv);
     GetPot dataFile( command_line.follow("data", 2, "-f", "--file" ));
+
+    Teuchos::RCP< Teuchos::ParameterList > belosList2 = Teuchos::rcp ( new Teuchos::ParameterList );
+    belosList2 = Teuchos::getParametersFromXmlFile( "SolverParamList2.xml" );
 
     // LOADING MESHES
     MeshData Solid_mesh_data;
@@ -134,7 +140,7 @@ int main(int argc, char** argv )
     int nFlags = 2;
     std::vector<int> flags(nFlags);
     flags[0] = 20;
-    flags[1] = 1;
+    flags[1] =  1;
 
     // DEFINING SOME STUFF FOR EVALUATING THE SOLUTION. I CREATE A FE SPACE ON THE MESH WHERE I WANT TO GET THE SOLUTION, A VECTOR THAT WILL 
     // CONTAIN THE SOLUTION AND ANOTHER ONE CONTAINING THE SOLUTION GAINED BY RBF. THIS IS DUE TO THE FACT THAT WE HAVE SLIGHTLY MODIFIED 
@@ -150,20 +156,22 @@ int main(int argc, char** argv )
 								 Solid_mesh_ptr, 
 								 Solid_localMesh, 
 								 flags));
-
+    
     // LOADING INFORMATION ABOUT THE TWO VECTORS INVOLVED IN THE INTERPOLATION PROCESS
-    RBFInterpolant->setupRBFData(Fluid_vector, Solid_solution);
+    RBFInterpolant->setupRBFData(Fluid_vector, Solid_solution, dataFile, belosList2);
 
     // BUILDING THE OPERATORS
     RBFInterpolant->buildOperators();
 
+    
     // COMPUTING THE SOLUTION
     RBFInterpolant->interpolate();
     
+
     // SAVE THE SOLUTION
     RBFInterpolant->solution(Solid_solution);
     
-    // SAVE THE RBF'S ORIGINAL SOLUTION
+    // SAVE THE RBF'S ORIGINAL SOLUTION 
     RBFInterpolant->solutionrbf(Solid_solution_rbf);
 
     // COMPUTING THE ERROR
@@ -193,7 +201,7 @@ int main(int argc, char** argv )
     Solid_exporter.addVariable(ExporterData<mesh_Type>::ScalarField, "RBF's error", Solid_fieldFESpace, rbfError, UInt(0));
     Solid_exporter.postProcess(0);
     Solid_exporter.closeFile();
-
+    
 #ifdef HAVE_MPI
     MPI_Finalize();
 #endif

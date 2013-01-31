@@ -1,13 +1,53 @@
+//@HEADER
+/*
+*******************************************************************************
+
+    Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+    Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+
+    This file is part of LifeV.
+
+    LifeV is free software; you can redistribute it and/or modify
+    it under the terms of the GNU Lesser General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    LifeV is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public License
+    along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
+
+*******************************************************************************
+*/
+//@HEADER
+
+/*!
+    @file
+    @brief FSIData - File containing the implementation of Radial Basis Functions suited for interpolation 
+                     between non-matching grids
+
+    @author Davide Forti <davide.forti@epfl.ch>
+    @date 01-31-2010
+
+    @maintainer Davide Forti <davide.Forti@epfl.ch>
+ */
+
 #ifndef RBF_INTERPOLATION_HPP
 #define RBF_INTERPOLATION_HPP
 
 #include <lifev/core/LifeV.hpp>
 #include <Epetra_Vector.h>
-#include <Epetra_CrsMatrix.h>
-#include "EpetraExt_CrsMatrixIn.h"
 #include <lifev/core/array/MatrixEpetra.hpp>
-#include "AztecOO.h"
 #include <lifev/core/array/GhostHandler.hpp>
+#include <Epetra_FECrsMatrix.h>
+#include <lifev/core/algorithm/PreconditionerIfpack.hpp>
+#include <lifev/core/algorithm/LinearSolver.hpp>
+#include <Teuchos_ParameterList.hpp>
+#include <Teuchos_XMLParameterListHelpers.hpp>
+#include <Teuchos_RCP.hpp>
 
 namespace LifeV 
 {
@@ -19,17 +59,36 @@ namespace LifeV
     
     typedef Mesh                                              mesh_Type;
     typedef boost::shared_ptr<mesh_Type>                      meshPtr_Type;
+
     typedef VectorEpetra                                      vector_Type;
     typedef boost::shared_ptr<vector_Type >                   vectorPtr_Type;
-    typedef Epetra_CrsMatrix                                  matrix_Type;
+    
+    typedef Epetra_FECrsMatrix                                matrixEpetra_Type;
+    typedef boost::shared_ptr<matrixEpetra_Type>              matrixEpetraPtr_Type;
+
+    typedef MatrixEpetra<double>                              matrix_Type;
     typedef boost::shared_ptr<matrix_Type>                    matrixPtr_Type;
+
     typedef std::vector<int>                                  flagContainer_Type;
+
     typedef std::set<ID>                                      idContainer_Type;
-    typedef Epetra_Vector                                     vectorEpetra_Type;
-    typedef boost::shared_ptr<Epetra_Vector>                  vectorEpetraPtr_Type;
-    typedef boost::shared_ptr<Epetra_Map>                     mapEpetraPtr_type;
+
+    typedef MapEpetra                                         map_Type;
+    typedef boost::shared_ptr<MapEpetra>                      mapPtr_Type;
+
+    typedef Epetra_Map                                        mapEpetra_Type;
+    typedef boost::shared_ptr<mapEpetra_Type>                 mapEpetraPtr_Type;
+
     typedef GhostHandler<mesh_Type>                           neighbors_Type;
     typedef boost::shared_ptr<neighbors_Type>                 neighborsPtr_Type;
+
+    typedef LifeV::Preconditioner                             basePrec_Type;
+    typedef boost::shared_ptr<basePrec_Type>                  basePrecPtr_Type;
+
+    typedef LifeV::PreconditionerIfpack                       prec_Type;
+    typedef boost::shared_ptr<prec_Type>                      precPtr_Type;      
+
+    typedef Teuchos::RCP< Teuchos::ParameterList >            parameterList_Type;
 
     //! Constructor
     RBFInterpolation( meshPtr_Type fullMeshKnown, 
@@ -41,12 +100,11 @@ namespace LifeV
     //! Destructor
     ~RBFInterpolation(){}
 
+    
     //! Setup the RBF data
-    void setupRBFData(vectorPtr_Type KnownField, vectorPtr_Type UnknownField /*, double radius*/);
+    void setupRBFData(vectorPtr_Type KnownField, vectorPtr_Type UnknownField, GetPot datafile, Teuchos::RCP< Teuchos::ParameterList > belosList);
 
-    //! Set the value of the RBF radius 
-    void setRBFradius(double const & radius ){ M_RBFRadius = radius; }
-
+    
     //! Build the RBF Operators, namely the interpolant and the projection ones.
     void buildOperators();
     
@@ -59,27 +117,21 @@ namespace LifeV
     //! Check if the point with markerID pointMarker has to be selected
     bool isInside(ID pointMarker, flagContainer_Type Flags);
 
-    //! Evaluation of the RBF
-    double rbf(double x1, double y1, double z1, double x2, double y2, double z2, double radius);
-
     //! Evaluate the RBF radius
     double computeRBFradius(meshPtr_Type MeshNeighbors, meshPtr_Type MeshGID, idContainer_Type Neighbors, ID GlobalID);
 
+    //! Evaluation of the RBF
+    double rbf(double x1, double y1, double z1, double x2, double y2, double z2, double radius);
+    
     //! Build the projection operator
     void ProjectionOperator();
-
-     //! Spy of an EpetraCrsMatrix
-    void spy( std::string const &fileName, matrixPtr_Type A);
-
+    
     //! Prepare Rhs
     void buildRhs();
-
+    
     //! Manages the solution of the interpolation problem
     void interpolate();
-
-    //! It solves the interpolation problem, namely it solves a system and performs a matrix-vector multiplication
-    void solve(matrixPtr_Type A, vectorEpetra_Type & x, vectorEpetraPtr_Type b);
-
+    
     //! Getter for the solution
     void solution(vectorPtr_Type & Solution);
 
@@ -88,24 +140,27 @@ namespace LifeV
 
   private:
     
-    meshPtr_Type          M_fullMeshKnown;
-    meshPtr_Type          M_localMeshKnown;
-    meshPtr_Type          M_fullMeshUnknown;
-    meshPtr_Type          M_localMeshUnknown;
-    matrixPtr_Type        M_interpolationOperator;
-    matrixPtr_Type        M_projectionOperator;
-    flagContainer_Type    M_flags;
-    double                M_RBFRadius;
-    vectorPtr_Type        M_knownField;
-    vectorPtr_Type        M_unknownField;
-    idContainer_Type      M_GIdsKnownMesh;
-    idContainer_Type      M_GIdsUnknownMesh;
-    vectorEpetraPtr_Type  M_RhsF;
-    vectorEpetraPtr_Type  M_RhsOne;
-    mapEpetraPtr_type     M_interpolationOperatorMap;
-    mapEpetraPtr_type     M_projectionOperatorMap;
-    neighborsPtr_Type     M_neighbors;
-    vectorPtr_Type        M_unknownField_rbf;
+    meshPtr_Type                M_fullMeshKnown;
+    meshPtr_Type                M_localMeshKnown;
+    meshPtr_Type                M_fullMeshUnknown;
+    meshPtr_Type                M_localMeshUnknown;
+    matrixPtr_Type              M_interpolationOperator;
+    matrixPtr_Type              M_projectionOperator;
+    flagContainer_Type          M_flags;
+    vectorPtr_Type              M_knownField;
+    vectorPtr_Type              M_unknownField;
+    idContainer_Type            M_GIdsKnownMesh;
+    idContainer_Type            M_GIdsUnknownMesh;
+    vectorPtr_Type              M_RhsF;
+    vectorPtr_Type              M_RhsOne;
+    mapEpetraPtr_Type           M_interpolationOperatorEpetraMap;
+    mapEpetraPtr_Type           M_projectionOperatorEpetraMap;
+    mapPtr_Type                 M_interpolationOperatorMap;
+    mapPtr_Type                 M_projectionOperatorMap;
+    neighborsPtr_Type           M_neighbors;
+    vectorPtr_Type              M_unknownField_rbf;
+    GetPot                      M_datafile;
+    parameterList_Type          M_belosList;
   };
 
   template <typename Mesh>
@@ -122,24 +177,25 @@ namespace LifeV
   {
   }
 
+  
   template <typename Mesh>
-  void RBFInterpolation<Mesh>::setupRBFData(vectorPtr_Type KnownField, vectorPtr_Type UnknownField )
+  void RBFInterpolation<Mesh>::setupRBFData(vectorPtr_Type KnownField, vectorPtr_Type UnknownField, GetPot datafile, parameterList_Type belosList)
   {
     M_knownField   = KnownField;
     M_unknownField = UnknownField;
+    M_datafile     = datafile;
+    M_belosList    = belosList;
   }
 
+  
   template <typename Mesh>
   void RBFInterpolation<Mesh>::buildOperators()
   {
     this->InterpolationOperator();
     this->ProjectionOperator();
     this->buildRhs();
-
-    //spy("M_interpolationOperator", M_interpolationOperator);
-    //spy("M_projectionOperator", M_projectionOperator);
   }
-
+  
   template <typename Mesh>
   void RBFInterpolation<Mesh>::InterpolationOperator()
   {
@@ -154,7 +210,7 @@ namespace LifeV
     int TotalNodesNumber = 0;
 
     MPI_Allreduce(&LocalNodesNumber, &TotalNodesNumber, 1,  MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-    
+  
     std::vector<double>   RBF_radius(LocalNodesNumber);
     std::vector<std::set<ID> > MatrixGraph(LocalNodesNumber);
     int * ElementsPerRow = new int[LocalNodesNumber];
@@ -173,10 +229,13 @@ namespace LifeV
 	  Max_entries = ElementsPerRow[k];
 	++k;
       }
-    
-    M_interpolationOperatorMap.reset(new Epetra_Map(TotalNodesNumber, LocalNodesNumber, GlobalID, 0, *(M_knownField->mapPtr()->commPtr())));
-    M_interpolationOperator.reset(new matrix_Type(Copy, *M_interpolationOperatorMap, ElementsPerRow));
-    
+									
+    M_interpolationOperatorMap.reset(new map_Type(TotalNodesNumber, LocalNodesNumber, GlobalID, M_knownField->mapPtr()->commPtr()));
+    M_interpolationOperatorEpetraMap.reset(new mapEpetra_Type(TotalNodesNumber, LocalNodesNumber, GlobalID, 0, *(M_knownField->mapPtr()->commPtr())));
+
+    matrixEpetraPtr_Type InterpolationOperator;
+    InterpolationOperator.reset(new matrixEpetra_Type(Copy, *M_interpolationOperatorEpetraMap, ElementsPerRow));
+
     int * Indices = new int[Max_entries];
     double * Values = new double[Max_entries];
     
@@ -195,10 +254,17 @@ namespace LifeV
 				RBF_radius[i]);
 	      ++k;
 	    }
-	M_interpolationOperator->InsertGlobalValues(GlobalID[i], k, Values, Indices);
+	InterpolationOperator->InsertGlobalValues(GlobalID[i], k, Values, Indices);
       }      
-    M_interpolationOperator->FillComplete();
-  
+    InterpolationOperator->FillComplete();
+
+    delete Indices;
+    delete Values;
+    delete ElementsPerRow;
+    delete GlobalID;
+
+    M_interpolationOperator.reset(new matrix_Type(*M_interpolationOperatorMap, InterpolationOperator));
+
   }
 
   template <typename Mesh>
@@ -248,8 +314,12 @@ namespace LifeV
       }
 	
     MPI_Allreduce(&LocalNodesNumber, &TotalNodesNumber, 1,  MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-    M_projectionOperatorMap.reset(new Epetra_Map(TotalNodesNumber, LocalNodesNumber, GlobalID, 0, *(M_unknownField->mapPtr()->commPtr())));
-    M_projectionOperator.reset(new matrix_Type(Copy, *M_projectionOperatorMap, ElementsPerRow));
+    
+    M_projectionOperatorMap.reset(new map_Type(TotalNodesNumber, LocalNodesNumber, GlobalID, M_unknownField->mapPtr()->commPtr()));
+    M_projectionOperatorEpetraMap.reset(new mapEpetra_Type(TotalNodesNumber, LocalNodesNumber, GlobalID, 0, *(M_unknownField->mapPtr()->commPtr())));
+
+    matrixEpetraPtr_Type ProjectionOperator;
+    ProjectionOperator.reset(new matrixEpetra_Type(Copy, *M_projectionOperatorEpetraMap, ElementsPerRow));
     
     int * Indices = new int[Max_entries];
     double * Values = new double[Max_entries];
@@ -269,18 +339,19 @@ namespace LifeV
 			      RBF_radius[i]);
             ++k;
 	  }
-        M_projectionOperator->InsertGlobalValues(GlobalID[i], k, Values, Indices);
+        ProjectionOperator->InsertGlobalValues(GlobalID[i], k, Values, Indices);
       }
-    M_projectionOperator->FillComplete(*M_interpolationOperatorMap, *M_projectionOperatorMap); 
-    spy("PHI_f", M_projectionOperator);
-    
+    ProjectionOperator->FillComplete(*M_interpolationOperatorEpetraMap, *M_projectionOperatorEpetraMap); 
+
     delete Indices;
     delete Values;
     delete ElementsPerRow;
     delete GlobalID;
 
-  }
+    M_projectionOperator.reset(new matrix_Type(*M_projectionOperatorMap, ProjectionOperator));
 
+  }
+  
   template <typename Mesh>
   double RBFInterpolation<Mesh>::computeRBFradius(meshPtr_Type MeshNeighbors, meshPtr_Type MeshGID, idContainer_Type Neighbors, ID GlobalID)
   {
@@ -296,64 +367,75 @@ namespace LifeV
     return r_max;
   }
 
+  
   template <typename Mesh>
   void RBFInterpolation<Mesh>::buildRhs()
   {
-    int k = 0;
-    M_RhsF.reset(new vectorEpetra_Type(M_interpolationOperator->RowMap()));
-    M_RhsOne.reset(new vectorEpetra_Type(M_interpolationOperator->RowMap()));
-    for(std::set<ID>::iterator it = M_GIdsKnownMesh.begin(); it != M_GIdsKnownMesh.end(); ++it) 
-      if(M_knownField->blockMap().LID(*it)!=-1)
-	{
-	  (*M_RhsF)[k] = (*M_knownField)[*it];
-	  (*M_RhsOne)[k] = 1;
-	  ++k;
-	}
+    M_RhsF.reset(new vector_Type(*M_interpolationOperatorMap));
+    M_RhsOne.reset(new vector_Type(*M_interpolationOperatorMap));
+    
+    M_RhsF->subset(*M_knownField,*M_interpolationOperatorMap,0,0);
+    *M_RhsOne = *M_RhsF;
+    *M_RhsOne /= *M_RhsF;
   }
 
+  
   template <typename Mesh>
   void RBFInterpolation<Mesh>::interpolate()
   {
-    vectorEpetra_Type gamma_f(*M_interpolationOperatorMap);
-    vectorEpetra_Type gamma_one(*M_interpolationOperatorMap);
+    vectorPtr_Type gamma_f;
+    gamma_f.reset(new vector_Type(*M_interpolationOperatorMap));
+    vectorPtr_Type gamma_one;
+    gamma_one.reset(new vector_Type(*M_interpolationOperatorMap));
 
-    this->solve(M_interpolationOperator, gamma_f, M_RhsF);
-    this->solve(M_interpolationOperator, gamma_one, M_RhsOne);
+    // Preconditioner
+    prec_Type* precRawPtr;
+    basePrecPtr_Type precPtr;
+    precRawPtr = new prec_Type;
+    precRawPtr->setDataFromGetPot( M_datafile, "prec" );
+    precPtr.reset( precRawPtr );
 
-    vectorEpetra_Type rbf_f(*M_projectionOperatorMap);
-    vectorEpetra_Type rbf_one(*M_projectionOperatorMap);
-    vectorEpetra_Type solution(*M_projectionOperatorMap);
+    LinearSolver solverF;
+    solverF.setCommunicator( M_knownField->mapPtr()->commPtr() );
+    solverF.setParameters( *M_belosList );
+    solverF.setPreconditioner( precPtr );
+    
+    solverF.setOperator(M_interpolationOperator);
+    solverF.setRightHandSide( M_RhsOne );
+    solverF.solve( gamma_one );
 
-    M_projectionOperator->Multiply(false, gamma_f, rbf_f);	  
-    M_projectionOperator->Multiply(false, gamma_one, rbf_one);
+    LinearSolver solverOne;
+    solverOne.setCommunicator( M_knownField->mapPtr()->commPtr() );
+    solverOne.setParameters( *M_belosList );
+    solverOne.setPreconditioner( precPtr );
+    solverOne.showMe();
 
-    for ( UInt i = 0; i < rbf_f.MyLength(); ++i )
-      solution[i] = rbf_f[i]/rbf_one[i];
+    solverOne.setOperator(M_interpolationOperator);
+    solverOne.setRightHandSide( M_RhsF );
+    solverOne.solve( gamma_f );
+
+    vectorPtr_Type rbf_f;
+    rbf_f.reset(new vector_Type(*M_projectionOperatorMap));
+   
+    vectorPtr_Type rbf_one;
+    rbf_one.reset(new vector_Type(*M_projectionOperatorMap));
+
+    vectorPtr_Type solution;
+    solution.reset(new vector_Type(*M_projectionOperatorMap));
+
+    M_projectionOperator->multiply(false, *gamma_f, *rbf_f); 
+    M_projectionOperator->multiply(false, *gamma_one, *rbf_one);
+
+    *solution = *rbf_f;
+    *solution /= *rbf_one;
 
     M_unknownField_rbf.reset(new vector_Type(M_unknownField->map()));
+    M_unknownField_rbf->subset(*rbf_f,*M_projectionOperatorMap,0,0);
 
-    int k = 0;
-    for(std::set<ID>::iterator it = M_GIdsUnknownMesh.begin(); it != M_GIdsUnknownMesh.end(); ++it)
-      {
-	(*M_unknownField_rbf)[*it] = rbf_f[k];
-	(*M_unknownField)[*it] = solution[k];
-	++k;
-      }
-  }
+    M_unknownField->subset(*solution,*M_projectionOperatorMap,0,0);
 
-  template <typename Mesh>
-  void RBFInterpolation<Mesh>::solve(matrixPtr_Type A, vectorEpetra_Type & x, vectorEpetraPtr_Type b)
-  {
-    Epetra_LinearProblem Problem(&(*A), &x, &(*b));
-    AztecOO solver (Problem);
-    solver.SetAztecOption(AZ_solver, AZ_gmres);
-    solver.SetAztecOption(AZ_precond, AZ_dom_decomp);
-    solver.SetAztecOption(AZ_subdomain_solve, AZ_ilut);
-    solver.SetAztecOption(AZ_output, AZ_last);
-    int Niters = 1500;
-    double tol = 1e-10;
-    solver.Iterate(Niters, tol);
   }
+  
 
   template <typename Mesh>
   void RBFInterpolation<Mesh>::identifyNodes(meshPtr_Type LocalMesh, std::set<ID> & GID_nodes, vectorPtr_Type CheckVector)
@@ -385,6 +467,7 @@ namespace LifeV
     return (check > 0) ? true : false;
   }
 
+  
   template <typename Mesh>
   double RBFInterpolation<Mesh>::rbf(double x1, double y1, double z1, double x2, double y2, double z2, double radius)
   {
@@ -398,21 +481,11 @@ namespace LifeV
     Solution = M_unknownField;
   }
 
+  
   template <typename Mesh>
   void RBFInterpolation<Mesh>::solutionrbf(vectorPtr_Type & Solution_rbf)
   {
     Solution_rbf = M_unknownField_rbf;
-  }
-
-  template <typename Mesh>
-  void RBFInterpolation<Mesh>::spy( std::string const &fileName, matrixPtr_Type A)
-  {
-    std::string name = fileName, uti = " , ";
-    Int  me = A->Comm().MyPID();
-    std::ostringstream myStream;
-    myStream << me;
-    name = fileName + ".m";
-    EpetraExt::RowMatrixToMatlabFile( name.c_str(), *A );
   }
 
 } // namespace LifeV
