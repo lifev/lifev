@@ -374,18 +374,18 @@ Structure::run3d()
 
 
     //Creation of Exporter to check the loaded solution (working only for HDF5)
-    std::string expVerFile = "exactSolution";
-    LifeV::ExporterHDF5<RegionMesh<LinearTetra> > exporter( dataFile, pointerToMesh, expVerFile, parameters->comm->MyPID());
-    vectorPtr_Type vectVer ( new vector_Type(*solidDisp,  LifeV::Unique ) );
+    // std::string expVerFile = "exactSolution";
+    // LifeV::ExporterHDF5<RegionMesh<LinearTetra> > exporter( dataFile, pointerToMesh, expVerFile, parameters->comm->MyPID());
+    // vectorPtr_Type vectVer ( new vector_Type(*solidDisp,  LifeV::Unique ) );
 
-    exporter.addVariable( ExporterData<mesh_Type >::VectorField, "exactDispl", dFESpace, vectVer, UInt(0) );
+    // exporter.addVariable( ExporterData<mesh_Type >::VectorField, "exactDispl", dFESpace, vectVer, UInt(0) );
 
-    exporter.postProcess(0.0);
+    // exporter.postProcess(0.0);
 
-    //interpolating the exact function on the FESpace
-    dFESpace->interpolate( static_cast<solidFESpace_Type::function_Type>( Private::uexact ), *vectVer , 0);
+    // //interpolating the exact function on the FESpace
+    // dFESpace->interpolate( static_cast<solidFESpace_Type::function_Type>( Private::uexact ), *vectVer , 0);
 
-    exporter.postProcess(1.0);
+    // exporter.postProcess(1.0);
 
     L2_Error = dFESpace->l2Error(Private::uexact, solution, initialTime ,&L2_RelError);
 
