@@ -1,0 +1,29 @@
+<ParameterList>
+	<!-- LinearSolver parameters -->
+	<Parameter name="Reuse Preconditioner" type="bool" value="true"/>
+    <Parameter name="Max Iterations For Reuse" type="int" value="80"/>
+    <Parameter name="Quit On Failure" type="bool" value="false"/>
+    <Parameter name="Silent" type="bool" value="false"/>
+	<Parameter name="Solver Type" type="string" value="Belos"/>
+	<Parameter name="Maximum Iterations" type="int" value="1000"/>
+        <Parameter name="Block Size" type="int" value="2"/>
+	
+	<!-- Operator specific parameters (Belos) -->
+	<ParameterList name="Solver: Operator List">
+	<Parameter name="Solver Manager Type" type="string" value="BlockGmres"/>
+		<Parameter name="Preconditioner Side" type="string" value="Left"/>
+
+		<!-- Trilinos parameters -->
+		<ParameterList name="Trilinos: Belos List">
+    		<Parameter name="Flexible Gmres" type="bool" value="false"/>
+	    	<Parameter name="Convergence Tolerance" type="double" value="1e-10"/>
+    		<Parameter name="Maximum Iterations" type="int" value="1000"/>
+	    	<Parameter name="Output Frequency" type="int" value="1"/>
+    		<Parameter name="Block Size" type="int" value="2"/>
+	    	<Parameter name="Num Blocks" type="int" value="100"/>
+    		<Parameter name="Maximum Restarts" type="int" value="1"/>
+	    	<Parameter name="Output Style" type="int" value="1"/>
+    		<Parameter name="Verbosity" type="int" value="35"/>
+    	</ParameterList>
+    </ParameterList>
+</ParameterList>
