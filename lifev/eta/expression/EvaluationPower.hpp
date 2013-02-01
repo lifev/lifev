@@ -71,9 +71,9 @@ public:
     typedef typename EvaluationBaseType::return_Type BaseReturn_Type;
     typedef Real exponentType;
 
+
     //! Type of the value returned by this class
-	//typedef typename OperationSmallPower<BaseReturn_Type,exponentType>::result_Type return_Type;
-    typedef Real return_Type;
+    typedef typename OperationSmallPower<BaseReturn_Type,exponentType>::result_Type return_Type;
     //@}
 
 
