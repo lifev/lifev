@@ -308,7 +308,7 @@ Structure::run3d()
         timeAdvance->setup(dataStructure->dataTimeAdvance()->orderBDF() , OrderDev);
 
     timeAdvance->setTimeStep(dataStructure->dataTime()->timeStep());
-    timeAdvance->showMe();
+    //timeAdvance->showMe();
 
     //! #################################################################################
     //! BOUNDARY CONDITIONS
@@ -347,7 +347,7 @@ Structure::run3d()
     solid.buildSystem(timeAdvanceCoefficient);
 
 
-    dataStructure->showMe();
+    //dataStructure->showMe();
     //! =================================================================================
     //! Temporal data and initial conditions
     //! =================================================================================

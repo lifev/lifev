@@ -1068,8 +1068,10 @@ template <typename Mesh>
 void
 StructuralOperator<Mesh>::setDataFromGetPot( const GetPot& dataFile )
 {
+
+    M_Displayer->leaderPrint( "Setting up Preconditioner... \n" );
     //Setting up the preconditioner
-    const std::string preconditionerType = dataFile( "prec/prectype", "Ifpack" );
+    const std::string preconditionerType = dataFile( "solid/prec/prectype", "Ifpack" );
     const std::string xmlFileName = dataFile( "prec/xmlName", "xmlParameters.xml" );
     basePrecPtr_Type precPtr; //Abstract class for preconditioners
 
@@ -1077,7 +1079,7 @@ StructuralOperator<Mesh>::setDataFromGetPot( const GetPot& dataFile )
     {
         precIfpack_Type* precRawPtr;
         precRawPtr = new precIfpack_Type;
-        precRawPtr->setDataFromGetPot( dataFile, "prec" );
+        precRawPtr->setDataFromGetPot( dataFile, "solid/prec" );
 
         //Initializing the preconditioner
         M_preconditioner.reset( precRawPtr );
@@ -1086,7 +1088,7 @@ StructuralOperator<Mesh>::setDataFromGetPot( const GetPot& dataFile )
     {
         precML_Type* precRawPtr;
         precRawPtr = new precML_Type;
-        precRawPtr->setDataFromGetPot( dataFile, "prec" );
+        precRawPtr->setDataFromGetPot( dataFile, "solid/prec" );
 
         //Initializing the preconditioner
         M_preconditioner.reset( precRawPtr );
