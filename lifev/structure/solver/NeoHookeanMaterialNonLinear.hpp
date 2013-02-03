@@ -315,7 +315,7 @@ void NeoHookeanMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matrixPtr_
         Real bulk   = dataMaterial->bulk(marker);
 
         //Macros to make the assembly more readable
-#define F ( grad( this->M_dispETFESpace,  disp) + value(this->M_identity) )
+#define F ( grad( this->M_dispETFESpace,  disp, this->M_offset) + value(this->M_identity) )
 #define J det( F )
 #define F_T  minusT(F)
 #define RIGHTCAUCHYGREEN transpose(F) * F
