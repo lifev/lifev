@@ -177,8 +177,8 @@ public:
       \param monolithicMap: the MapEpetra
       \param offset: the offset parameter used assembling the matrices
     */
-    virtual void setup( const FESpacePtr_Type dFESpace,
-                        const ETFESpacePtr_Type ETFESpace,
+    virtual void setup( const FESpacePtr_Type& dFESpace,
+                        const ETFESpacePtr_Type& ETFESpace,
                         const boost::shared_ptr<const MapEpetra>&   monolithicMap,
                         const UInt offset, const dataPtr_Type& dataMaterial,
                         const displayerPtr_Type& displayer  )=0;
@@ -250,7 +250,7 @@ public:
     MapEpetra   const& map()     const { return *M_localMap; }
 
     //! Get the FESpace object
-    FESpace_Type& dFESpace()  {return M_FESpace;}
+    FESpace_Type& dFESpace()  {return M_dispFESpace;}
 
     //! Get the Stiffness matrix
     matrixPtr_Type const jacobian()    const {return M_jacobian; }
@@ -270,14 +270,11 @@ protected:
 
     //!Protected Members
 
-    FESpacePtr_Type                                M_FESpace;
+    FESpacePtr_Type                                M_dispFESpace;
 
-    ETFESpacePtr_Type                              M_ETFESpace;
+    ETFESpacePtr_Type                              M_dispETFESpace;
 
     boost::shared_ptr<const MapEpetra>             M_localMap;
-
-    //! Elementary matrix for the Jacobian
-    boost::scoped_ptr<MatrixElemental>             M_elmatJac;
 
     //! Matrix jacobian
     matrixPtr_Type                                 M_jacobian;
@@ -288,8 +285,6 @@ protected:
     dataPtr_Type                                   M_dataMaterial;
 
     displayerPtr_Type                              M_displayer;
-
-    markerFunctorPtr_Type                          M_markerFunctorPtr;
 };
 
 //=====================================
@@ -298,12 +293,11 @@ protected:
 
 template <typename Mesh>
 StructuralConstitutiveLaw<Mesh>::StructuralConstitutiveLaw( ):
-    M_FESpace                    ( ),
-    M_ETFESpace                  ( ),
+    M_dispFESpace                ( ),
+    M_dispETFESpace              ( ),
     M_localMap                   ( ),
     M_jacobian                   ( ),
-    M_offset                     ( 0 ),
-    M_markerFunctorPtr           ( )
+    M_offset                     ( 0 )
 {
     //    std::cout << "I am in the constructor of StructuralConstitutiveLaw" << std::endl;
 }

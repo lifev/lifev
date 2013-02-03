@@ -99,8 +99,8 @@ public:
     \param monolithicMap: the MapEpetra
     \param offset: the offset parameter used assembling the matrices
     */
-    void setup(const FESpacePtr_Type dFESpace,
-               const ETFESpacePtr_Type ETFESpace,
+    void setup(const FESpacePtr_Type& dFESpace,
+               const ETFESpacePtr_Type& ETFESpace,
                const boost::shared_ptr<const MapEpetra>&  monolithicMap,
                const UInt offset, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer
                );
@@ -207,8 +207,8 @@ VenantKirchhoffMaterialLinear<Mesh>::~VenantKirchhoffMaterialLinear()
 
 template <typename Mesh>
 void
-VenantKirchhoffMaterialLinear<Mesh>::setup(const FESpacePtr_Type dFESpace,
-                                           const ETFESpacePtr_Type ETFESpace,
+VenantKirchhoffMaterialLinear<Mesh>::setup(const FESpacePtr_Type& dFESpace,
+                                           const ETFESpacePtr_Type& ETFESpace,
                                            const boost::shared_ptr<const MapEpetra>&  monolithicMap,
                                            const UInt offset, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer
                                            )
@@ -218,9 +218,9 @@ VenantKirchhoffMaterialLinear<Mesh>::setup(const FESpacePtr_Type dFESpace,
 
     //    std::cout<<"I am setting up the Material "<<std::endl;
 
-    this->M_FESpace                       = dFESpace;
-    this->M_ETFESpace                     = ETFESpace;
-    this->M_elmatK.reset                  (new MatrixElemental( this->M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
+    this->M_dispFESpace                       = dFESpace;
+    this->M_dispETFESpace                     = ETFESpace;
+    this->M_elmatK.reset                  (new MatrixElemental( this->M_dispFESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
     this->M_localMap                      = monolithicMap;
     this->M_linearStiff.reset             (new matrix_Type(*this->M_localMap));
     this->M_offset                        = offset;
@@ -232,10 +232,6 @@ void VenantKirchhoffMaterialLinear<Mesh>::computeLinearStiff(dataPtr_Type& dataM
 {
 
     *(this->M_linearStiff) *= 0.0;
-
-    UInt totalDof = this->M_FESpace->dof().numTotalDof();
-    // Number of displacement components
-    UInt nc = nDimensions;
 
     //Compute the linear part of the Stiffness Matrix.
     //In the case of Linear Material it is the Stiffness Matrix.
@@ -257,10 +253,16 @@ void VenantKirchhoffMaterialLinear<Mesh>::computeLinearStiff(dataPtr_Type& dataM
         Real lambda = dataMaterial->lambda( marker );
 
         integrate( integrationOverSelectedVolumes(  pointerListOfVolumes ),
-                   this->M_FESpace->qr(),
-                   this->M_ETFESpace,
-                   this->M_ETFESpace,
-                   value(lambda) * div( phi_i ) * div( phi_j ) +
+                   this->M_dispFESpace->qr(),
+                   this->M_dispETFESpace,
+                   this->M_dispETFESpace,
+                   value(lambda) * div( phi_i ) * div( phi_j )
+                   ) >> M_linearStiff;
+
+        integrate( integrationOverSelectedVolumes(  pointerListOfVolumes ),
+                   this->M_dispFESpace->qr(),
+                   this->M_dispETFESpace,
+                   this->M_dispETFESpace,
                    value( 2.0 * mu ) * dot( sym(grad(phi_j)) , grad(phi_i))
                    ) >> M_linearStiff;
     }
