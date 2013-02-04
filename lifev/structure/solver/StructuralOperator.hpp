@@ -764,7 +764,7 @@ void StructuralOperator<Mesh>::updateSystem( matrixPtr_Type& mat_stiff)
     //Compute the new Stiffness Matrix
     M_material->computeStiffness(*M_disp, M_rescaleFactor, M_data, M_mapMarkersVolumes, M_Displayer);
 
-    if ( M_data->solidType() == "linearVenantKirchhoff" || M_data->solidType() == "nonLinearVenantKirchhoff" )
+    if ( M_data->solidType() == "linearVenantKirchhoff" )
     {
         *mat_stiff += *M_material->stiffMatrix();
         mat_stiff->globalAssemble();
@@ -930,7 +930,7 @@ void StructuralOperator<Mesh>::computeMatrix( matrixPtr_Type& stiff, const vecto
     //! It is right to do globalAssemble() inside the M_material class
     M_material->computeStiffness( sol, 1., M_data, M_mapMarkersVolumes, M_Displayer);
 
-    if ( M_data->solidType() == "linearVenantKirchhoff" || M_data->solidType() == "nonLinearVenantKirchhoff" )
+    if ( M_data->solidType() == "linearVenantKirchhoff" )
     {
         *stiff = *M_material->stiffMatrix();
         *stiff += *M_massMatrix;
@@ -958,7 +958,7 @@ StructuralOperator<Mesh>::evalResidual( vector_Type &residual, const vector_Type
         M_BCh->bcUpdate( *M_dispFESpace->mesh(), M_dispFESpace->feBd(), M_dispFESpace->dof() );
 
     // ignoring non-local entries, Otherwise they are summed up lately
-    if ( M_data->solidType() == "linearVenantKirchhoff" || M_data->solidType() == "nonLinearVenantKirchhoff" )
+    if ( M_data->solidType() == "linearVenantKirchhoff" )
     {
         chrono.start();
 
@@ -977,7 +977,7 @@ StructuralOperator<Mesh>::evalResidual( vector_Type &residual, const vector_Type
         chrono.stop();
         M_Displayer->leaderPrintMax("done in ", chrono.diff() );
     }
-    else //NH and Exp
+    else //NH and Exp and SVK
     {
         chrono.start();
         *M_rhs=*M_rhsNoBC;
@@ -1000,7 +1000,7 @@ StructuralOperator<Mesh>::evalResidualDisplacement( const vector_Type& solution 
     LifeChrono chrono;
     chrono.start();
 
-    if ( M_data->solidType() == "linearVenantKirchhoff" || M_data->solidType() == "nonLinearVenantKirchhoff" )
+    if ( M_data->solidType() == "linearVenantKirchhoff" )
     {
         M_residual_d.reset(new vector_Type( *M_systemMatrix * solution ));
         *M_residual_d -= *M_rhsNoBC;
