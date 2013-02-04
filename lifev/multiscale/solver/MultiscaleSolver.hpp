@@ -87,9 +87,10 @@ public:
     /*!
      * If the provided reference solution is positive, the solver make also a check on the last computed solution.
      * @param referenceSolution the reference coupling variables norm 2.
+     * @param tolerance the tolerance to check the reference solution with respect to the computed one.
      * @return 0: EXIT_SUCCESS, 1: EXIT_FAILURE
      */
-    bool solveProblem( const Real& referenceSolution = -1. );
+    bool solveProblem( const Real& referenceSolution = -1., const Real& tolerance = 1e-8 );
 
     //! Display some information about the Multiscale problem (should be called after setupProblem)
     void showMe() const;

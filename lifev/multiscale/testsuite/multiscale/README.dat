@@ -30,6 +30,7 @@ More generally, after ./test_MS the following options can be specified:
 -ns (--nodesize): to specify the number of cores per node (mandatory for clusters - default: 1)
 -c (--check):     to specify the final external residual at the coupling interface that
                   will be compared with the one obtained from the solver (default: -1.)
+-t (--tolerance): to specify the tolerance for the external residual comparison (default: 1e-8)
 
 DEVELOPING NEW APPLICATIONS
 After compilation, the user should create an empty folder where to copy the executable and the MultiscaleDatabase folder
