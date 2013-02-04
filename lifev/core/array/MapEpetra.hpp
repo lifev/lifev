@@ -44,25 +44,28 @@
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-pedantic"
 
 #include <Epetra_Map.h>
 #include <Epetra_Export.h>
 #include <Epetra_Import.h>
 #include <Epetra_Comm.h>
 
+#ifdef HAVE_HDF5
+#include <EpetraExt_HDF5.h>
+#endif
+
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
+#pragma GCC diagnostic warning "-pedantic"
 
 #include <lifev/core/LifeV.hpp>
-
+#include <lifev/core/array/EnumMapEpetra.hpp>
 #include <lifev/core/array/MapVector.hpp>
-
 
 namespace LifeV
 {
-
-enum MapEpetraType {Unique = 0, Repeated};
 
 
 //! MapEpetra - Wrapper for Epetra_Map
@@ -116,6 +119,9 @@ public:
     MapEpetra( Int  numGlobalElements,
                Int  numMyElements,
                Int* myGlobalElements,
+               const comm_ptrtype& commPtr );
+
+    MapEpetra( std::pair<std::vector<Int>, std::vector<Int> > myGlobalElements,
                const comm_ptrtype& commPtr );
 
     //! Constructor
@@ -245,6 +251,23 @@ public:
     //! This method return true if both the unique map and the repeated map are identical
     bool mapsAreSimilar( MapEpetra const& epetraMap ) const;
 
+#ifdef HAVE_HDF5
+    //! Save the matrix into a HDF5 (.h5) file
+    /*!
+      @param fileName Name of the file where the map will be saved, without extension (.h5)
+      @param mapName Name of the map in the HDF5 file
+      @param truncate True if the file has to be truncated; False if the file already exist and should not be truncated
+     */
+    void exportToHDF5( std::string const &fileName, std::string const &mapName = "map", bool const& truncate = true );
+
+    //! Read a matrix from a HDF5 (.h5) file
+    /*!
+      @param fileName Name of the file where the map will be saved, without extension (.h5)
+      @param matrixName Name of the map in the HDF5 file
+     */
+    void importFromHDF5( std::string const &fileName, std::string const &mapName = "map" );
+#endif
+
     //! Show informations about the map
     void showMe( std::ostream& output = std::cout ) const;
 
@@ -252,6 +275,12 @@ public:
     UInt mapSize() const
     {
         return map(Unique)->NumGlobalElements();
+    }
+
+    //! check if a global id is owned by the current partition
+    bool isOwned( const UInt globalId ) const
+    {
+        return ( M_uniqueMapEpetra->LID( globalId ) > -1 );
     }
 
     //@}
@@ -274,6 +303,16 @@ public:
 
     //! Getter for the Epetra_Import
     Epetra_Import const& importer();
+    //@}
+
+    //! @name Set Methods
+    //@{
+
+    //! Set the communicator
+    void setComm( comm_ptrtype const& commPtr ) { M_commPtr = commPtr; }
+
+    //! set the internal Epetra_Maps
+    void setMap( map_ptrtype map, MapEpetraType mapType );
 
     //@}
 
@@ -320,7 +359,6 @@ private:
     exporter_ptrtype   M_exporter;
     importer_ptrtype   M_importer;
     comm_ptrtype       M_commPtr;
-
 };
 
 typedef MapVector<MapEpetra> MapEpetraVector;

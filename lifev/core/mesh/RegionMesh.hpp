@@ -40,9 +40,23 @@
 #ifndef _REGIONMESH_HH_
 #define _REGIONMESH_HH_
 
-#include <cstdlib>
-#include <iomanip>
 #include <fstream>
+
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+#include <Epetra_ConfigDefs.h>
+#ifdef EPETRA_MPI
+#include <mpi.h>
+#include <Epetra_MpiComm.h>
+#else
+#include <Epetra_SerialComm.h>
+#endif
+
+//Tell the compiler to restore the warning previously silented
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/util/LifeDebug.hpp>
@@ -54,7 +68,6 @@
 #include <lifev/core/array/ArraySimple.hpp>
 #include <lifev/core/mesh/ElementShapes.hpp>
 #include <lifev/core/mesh/MeshUtility.hpp>
-#include <boost/numeric/ublas/matrix.hpp>
 
 namespace LifeV
 {
@@ -2315,6 +2328,7 @@ RegionMesh<GeoShapeType, MCType>::addVolume( element_Type const & v )
 {
     volumeList.push_back( v );
     volume_Type & thisVolume(volumeList.back());
+    thisVolume.setFlag( EntityFlags::OWNED );
     thisVolume.setLocalId( volumeList.size() - 1 );
     return thisVolume;
 }
@@ -2412,6 +2426,7 @@ RegionMesh<GeoShapeType, MCType>::addFace( face_Type const & f )
 {
     faceList.push_back( f );
     face_Type & thisFace=faceList.back();
+    thisFace.setFlag( EntityFlags::OWNED );
     thisFace.setLocalId( faceList.size() -1 );
     return thisFace;
 }
@@ -2567,6 +2582,7 @@ RegionMesh<GeoShapeType, MCType>::addEdge( edge_Type const & f)
 {
     edgeList.push_back( f );
     edge_Type & thisEdge = edgeList.back();
+    thisEdge.setFlag( EntityFlags::OWNED );
     thisEdge.setLocalId( edgeList.size() - 1 );
     return thisEdge;
 }
@@ -2743,6 +2759,7 @@ RegionMesh<GeoShapeType, MCType>::addPoint( point_Type const & p)
 
     pointList.push_back( p );
     point_Type & thisPoint( pointList.back() );
+    thisPoint.setFlag( EntityFlags::OWNED );
     thisPoint.setLocalId( pointList.size() - 1 );
     //todo This is bug prone!
     if ( thisPoint.boundary() )
@@ -2875,7 +2892,45 @@ RegionMesh<GeoShapeType, MCType>::showMe( bool verbose, std::ostream & out ) con
     out << "**************************************************" << std::endl;
     if ( verbose )
     {
-        std::cout << "Verbose version not implemented yet";
+        out << "list of points " << this->numPoints() << std::endl;
+        for( UInt i = 0; i < this->numPoints(); i++ )
+        {
+            out << "p " << i << " (" << this->point( i ).id() << "): "
+                << this->point( i ).coordinate( 0 ) << " "
+                << this->point( i ).coordinate( 1 ) << " "
+                << this->point( i ).coordinate( 2 ) << std::endl;
+        }
+
+        out << "list of elements " << this->numElements() << std::endl;
+        for( UInt i = 0; i < this->numElements(); i++ )
+        {
+            out << "e " << i << " (" << this->element( i ).id() << "): ";
+            for ( UInt j = 0; j < element_Type::S_numPoints; j++ )
+                out << this->element( i ).point( j ).localId() << " ";
+            out << std::endl;
+        }
+
+        out << "list of facets " << this->numFacets() << std::endl;
+        for( UInt i = 0; i < this->numFacets(); i++ )
+        {
+            out << "f " << i << " (" << this->facet( i ).id() << "): ";
+            for ( UInt j = 0; j < facet_Type::S_numPoints; j++ )
+                out << this->facet( i ).point( j ).localId() << " ";
+            out << std::endl;
+        }
+
+        // @todo the ridge part cannot be printed since in 2d ridges
+        // do not have S_numPoints
+/*
+        out << "list of ridges " << this->numRidges() << std::endl;
+        for( UInt i = 0; i < this->numRidges(); i++ )
+        {
+            out << "r " << i << " (" << this->ridge( i ).id() << "): ";
+            for ( UInt j = 0; j < ridge_Type::S_numPoints; j++ )
+                out << this->ridge( i ).point( j ).localId() << " ";
+            out << std::endl;
+        }
+*/
     }
     return out;
 

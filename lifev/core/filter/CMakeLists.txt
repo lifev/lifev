@@ -3,6 +3,7 @@ SET(filter_HEADERS
   filter/MeshWriter.hpp
   filter/ExporterHDF5Mesh3D.hpp
   filter/GetPot.hpp
+  filter/HDF5IO.hpp
   filter/Exporter.hpp
   filter/ImporterMesh3D.hpp
   filter/Importer.hpp
@@ -16,6 +17,7 @@ SET(filter_HEADERS
 CACHE INTERNAL "")
 
 SET(filter_SOURCES
+  filter/HDF5IO.cpp
   filter/Importer.cpp
   filter/ImporterMesh3D.cpp
 CACHE INTERNAL "")

@@ -52,12 +52,12 @@
 
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/util/Switch.hpp>
+#include <lifev/core/array/VectorSmall.hpp>
 #include <lifev/core/mesh/MeshElementBare.hpp>
 #include <lifev/core/mesh/MarkerDefinitions.hpp>
 #include <lifev/core/mesh/MeshEntity.hpp>
 #include <lifev/core/mesh/MeshEntityContainer.hpp>
-#include <lifev/core/array/MapEpetra.hpp>
-#include <lifev/core/array/VectorSmall.hpp>
+#include <lifev/core/array/EnumMapEpetra.hpp>
 
 namespace LifeV
 {

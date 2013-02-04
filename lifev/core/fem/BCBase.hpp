@@ -79,7 +79,6 @@
 #include <lifev/core/fem/BCVector.hpp>
 #include <lifev/core/fem/BCFunction.hpp>
 
-
 namespace LifeV
 {
 

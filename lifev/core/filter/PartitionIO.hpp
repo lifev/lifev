@@ -36,18 +36,16 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef PARTITION_IO_H_
 #define PARTITION_IO_H_
 
-#ifdef HAVE_HDF5
-#ifdef HAVE_MPI
-
-#include <algorithm>
-
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <Epetra_config.h>
 
-#include <hdf5.h>
+#ifdef HAVE_HDF5
+#ifdef HAVE_MPI
+
+#include <mpi.h>
 
 #include <Epetra_MpiComm.h>
 
@@ -56,6 +54,8 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include<lifev/core/LifeV.hpp>
+
+#include <lifev/core/filter/HDF5IO.hpp>
 
 namespace LifeV {
 
@@ -216,37 +216,24 @@ public:
     //@}
 
 private:
-    // Private copy constructor and assignment operator are disabled
+    // Copy constructor and assignment operator are disabled
     PartitionIO(const PartitionIO&);
     PartitionIO& operator=(const PartitionIO&);
 
     //! Private Methods
     //@{
     // Methods for writing
-    void createHDF5File();
     void writeStats();
     void writePoints();
     void writeEdges();
     void writeFaces();
     void writeElements();
-    void closeHDF5File();
-    // This method just wraps H5Sselect_hyperslab and H5Dwrite to avoid
-    // code duplication
-    void writeData(hid_t& filespace, hid_t& memspace, hid_t& plist,
-                   hid_t& dataset, hid_t& datatype, hsize_t currentOffset[],
-                   hsize_t currentCount[], void* buffer);
     // Methods for reading
-    void openHDF5File();
     void readStats();
     void readPoints();
     void readEdges();
     void readFaces();
     void readElements();
-    // This method just wraps H5Sselect_hyperslab and H5Dread to avoid
-    // code duplication
-    void readData(hid_t& filespace, hid_t& memspace, hid_t& plist,
-                  hid_t& dataset, hid_t& datatype, hsize_t currentOffset[],
-                  hsize_t currentCount[], void* buffer);
     //@}
 
     //! Private Data Members
@@ -271,8 +258,8 @@ private:
     UInt M_numEdges;
     UInt M_numFaces;
     UInt M_numElements;
-    // HDF5 file handle
-    hid_t M_fileId;
+    //HDF5 I/O filter
+    HDF5IO M_HDF5IO;
     // Buffers for reading/writing
     std::vector<UInt> M_uintBuffer;
     std::vector<Real> M_realBuffer;
@@ -295,6 +282,9 @@ inline LifeV::PartitionIO<MeshType>::PartitionIO(const std::string& fileName,
 {
     M_elementNodes = MeshType::elementShape_Type::S_numPoints;
     M_faceNodes = MeshType::elementShape_Type::GeoBShape::S_numPoints;
+
+    M_myRank = M_comm->MyPID();
+    M_numProc = M_comm->NumProc();
 }
 
 template<typename MeshType>
@@ -320,13 +310,13 @@ void LifeV::PartitionIO<MeshType>::write(const meshPartsPtr_Type& meshParts)
     M_meshPartsOut = meshParts;
     M_numParts = M_meshPartsOut->size();
 
-    createHDF5File();
+    M_HDF5IO.openFile(M_fileName, M_comm, false);
     writeStats();
     writePoints();
     writeEdges();
     writeFaces();
     writeElements();
-    closeHDF5File();
+    M_HDF5IO.closeFile();
 
     M_meshPartsOut.reset();
 }
@@ -335,39 +325,18 @@ template<typename MeshType>
 void LifeV::PartitionIO<MeshType>::read(meshPtr_Type& meshPart)
 {
     meshPart.reset();
-    M_meshPartIn.reset(new mesh_Type( M_comm ) );
+    M_meshPartIn.reset(new mesh_Type( M_comm ));
 
-    openHDF5File();
+    M_HDF5IO.openFile(M_fileName, M_comm, true);
     readStats();
     readPoints();
     readEdges();
     readFaces();
     readElements();
-    closeHDF5File();
+    M_HDF5IO.closeFile();
 
     meshPart = M_meshPartIn;
     M_meshPartIn.reset();
-}
-
-template<typename MeshType>
-void LifeV::PartitionIO<MeshType>::createHDF5File()
-{
-    hid_t plistId;
-    MPI_Comm comm;
-    boost::shared_ptr<Epetra_MpiComm> tempComm =
-            boost::dynamic_pointer_cast<Epetra_MpiComm>(M_comm);
-    ASSERT( tempComm, "Error: the casting of M_comm has failed" );
-    comm = tempComm->Comm();
-    MPI_Info info = MPI_INFO_NULL;
-
-    // Set up file access property list with parallel I/O access
-    plistId = H5Pcreate(H5P_FILE_ACCESS);
-    H5Pset_fapl_mpio(plistId, comm, info);
-
-    // Create a new file collectively and release property list identifier.
-    M_fileId = H5Fcreate(M_fileName.c_str(), H5F_ACC_TRUNC,
-                         H5P_DEFAULT, plistId);
-    H5Pclose(plistId);
 }
 
 template<typename MeshType>
@@ -376,35 +345,21 @@ void LifeV::PartitionIO<MeshType>::writeStats()
     // Write mesh partition stats (N = number of parts)
     // This is an N x 15 table of int
     hsize_t currentSpaceDims[2];
+    hsize_t currentCount[2];
     if (! M_transposeInFile) {
         currentSpaceDims[0] = M_numParts;
         currentSpaceDims[1] = 15;
-    } else {
-        currentSpaceDims[0] = 15;
-        currentSpaceDims[1] = M_numParts;
-    }
-    hid_t filespace = H5Screate_simple(2, currentSpaceDims, currentSpaceDims);
-
-#ifdef H5_USE_16_API
-    hid_t intDataset = H5Dcreate(M_fileId, "stats", H5T_STD_U32BE, filespace,
-                                 H5P_DEFAULT);
-#else
-    hid_t intDataset = H5Dcreate(M_fileId, "stats", H5T_STD_U32BE, filespace,
-                                 H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-#endif
-
-    hsize_t currentCount[2];
-    if (! M_transposeInFile) {
         currentCount[0] = 1;
         currentCount[1] = currentSpaceDims[1];
     } else {
+        currentSpaceDims[0] = 15;
+        currentSpaceDims[1] = M_numParts;
         currentCount[0] = currentSpaceDims[0];
         currentCount[1] = 1;
     }
-    hid_t memspace = H5Screate_simple(2, currentCount, currentCount);
 
-    hid_t plistId = H5Pcreate(H5P_DATASET_XFER);
-    H5Pset_dxpl_mpio(plistId, H5FD_MPIO_COLLECTIVE);
+    // Create new table
+    M_HDF5IO.createTable("stats", H5T_STD_U32BE, currentSpaceDims);
 
     // Fill buffer
     M_uintBuffer.resize(15);
@@ -441,15 +396,11 @@ void LifeV::PartitionIO<MeshType>::writeStats()
             currentOffset[0] = 0;
             currentOffset[1] = i;
         }
-        writeData(filespace, memspace, plistId, intDataset, H5T_NATIVE_UINT,
-                  currentOffset, currentCount, &M_uintBuffer[0]);
+        M_HDF5IO.write("stats", H5T_NATIVE_UINT, currentCount, currentOffset,
+                       &M_uintBuffer[0]);
     }
 
-    // HDF5 cleanup
-    H5Dclose(intDataset);
-    H5Sclose(filespace);
-    H5Sclose(memspace);
-    H5Pclose(plistId);
+    M_HDF5IO.closeTable("stats");
 }
 
 template<typename MeshType>
@@ -459,41 +410,21 @@ void LifeV::PartitionIO<MeshType>::writePoints()
     // Two tables: one is (3 * N) x max_num_points of int
     //             second is (3 * N) x max_num_points of real
     hsize_t currentSpaceDims[2];
+    hsize_t currentCount[2];
     if (! M_transposeInFile) {
         currentSpaceDims[0] = 3 * M_numParts;
         currentSpaceDims[1] = M_maxNumPoints;
-    } else {
-        currentSpaceDims[0] = M_maxNumPoints;
-        currentSpaceDims[1] = 3 * M_numParts;
-    }
-    hid_t filespace = H5Screate_simple(2, currentSpaceDims, currentSpaceDims);
-
-#ifdef H5_USE_16_API
-    hid_t intDataset = H5Dcreate(M_fileId, "point_ids", H5T_STD_U32BE,
-                                 filespace, H5P_DEFAULT);
-    hid_t realDataset = H5Dcreate(M_fileId, "point_coords", H5T_IEEE_F64BE,
-                                  filespace, H5P_DEFAULT);
-#else
-    hid_t realDataset = H5Dcreate(M_fileId, "point_coords", H5T_IEEE_F64BE,
-                                  filespace, H5P_DEFAULT, H5P_DEFAULT,
-                                  H5P_DEFAULT);
-    hid_t intDataset = H5Dcreate(M_fileId, "point_ids", H5T_STD_U32BE,
-                                 filespace, H5P_DEFAULT, H5P_DEFAULT,
-                                 H5P_DEFAULT);
-#endif
-
-    hsize_t currentCount[2];
-    if (! M_transposeInFile) {
         currentCount[0] = 3;
         currentCount[1] = currentSpaceDims[1];
     } else {
+        currentSpaceDims[0] = M_maxNumPoints;
+        currentSpaceDims[1] = 3 * M_numParts;
         currentCount[0] = currentSpaceDims[0];
         currentCount[1] = 3;
     }
-    hid_t memspace = H5Screate_simple(2, currentCount, currentCount);
 
-    hid_t plistId = H5Pcreate(H5P_DATASET_XFER);
-    H5Pset_dxpl_mpio(plistId, H5FD_MPIO_COLLECTIVE);
+    M_HDF5IO.createTable("point_ids", H5T_STD_U32BE, currentSpaceDims);
+    M_HDF5IO.createTable("point_coords", H5T_IEEE_F64BE, currentSpaceDims);
 
     // Fill buffer
     M_uintBuffer.resize(currentCount[0] * currentCount[1], 0);
@@ -513,12 +444,10 @@ void LifeV::PartitionIO<MeshType>::writePoints()
             }
 
             hsize_t currentOffset[2] = {i * currentCount[0], 0};
-            writeData(filespace, memspace, plistId, intDataset,
-                      H5T_NATIVE_UINT, currentOffset, currentCount,
-                      &M_uintBuffer[0]);
-            writeData(filespace, memspace, plistId, realDataset,
-                      H5T_NATIVE_DOUBLE, currentOffset, currentCount,
-                      &M_realBuffer[0]);
+            M_HDF5IO.write("point_ids", H5T_NATIVE_UINT, currentCount,
+                           currentOffset, &M_uintBuffer[0]);
+            M_HDF5IO.write("point_coords", H5T_NATIVE_DOUBLE, currentCount,
+                           currentOffset, &M_realBuffer[0]);
         }
     } else {
         for (UInt i = 0; i < M_numParts; ++i) {
@@ -534,22 +463,16 @@ void LifeV::PartitionIO<MeshType>::writePoints()
             }
 
             hsize_t currentOffset[2] = {0, i * currentCount[1]};
-            writeData(filespace, memspace, plistId, intDataset,
-                      H5T_NATIVE_UINT, currentOffset, currentCount,
-                      &M_uintBuffer[0]);
-            writeData(filespace, memspace, plistId, realDataset,
-                      H5T_NATIVE_DOUBLE, currentOffset, currentCount,
-                      &M_realBuffer[0]);
+            M_HDF5IO.write("point_ids", H5T_NATIVE_UINT, currentCount,
+                           currentOffset, &M_uintBuffer[0]);
+            M_HDF5IO.write("point_coords", H5T_NATIVE_DOUBLE, currentCount,
+                           currentOffset, &M_realBuffer[0]);
         }
     }
     M_realBuffer.resize(0);
 
-    // HDF5 cleanup
-    H5Dclose(intDataset);
-    H5Dclose(realDataset);
-    H5Sclose(filespace);
-    H5Sclose(memspace);
-    H5Pclose(plistId);
+    M_HDF5IO.closeTable("point_ids");
+    M_HDF5IO.closeTable("point_coords");
 }
 
 template<typename MeshType>
@@ -558,34 +481,20 @@ void LifeV::PartitionIO<MeshType>::writeEdges()
     // Write edges (N = number of parts)
     // Table is (5 * N) x max_num_edges of int
     hsize_t currentSpaceDims[2];
+    hsize_t currentCount[2];
     if (! M_transposeInFile) {
         currentSpaceDims[0] = 5 * M_numParts;
         currentSpaceDims[1] = M_maxNumEdges;
-    } else {
-        currentSpaceDims[0] = M_maxNumEdges;
-        currentSpaceDims[1] = 5 * M_numParts;
-    }
-    hid_t filespace = H5Screate_simple(2, currentSpaceDims, currentSpaceDims);
-#ifdef H5_USE_16_API
-    hid_t dataset = H5Dcreate(M_fileId, "edges", H5T_STD_U32BE, filespace,
-                              H5P_DEFAULT);
-#else
-    hid_t dataset = H5Dcreate(M_fileId, "edges", H5T_STD_U32BE, filespace,
-                              H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-#endif
-
-    hsize_t currentCount[2];
-    if (! M_transposeInFile) {
         currentCount[0] = 5;
         currentCount[1] = currentSpaceDims[1];
     } else {
+        currentSpaceDims[0] = M_maxNumEdges;
+        currentSpaceDims[1] = 5 * M_numParts;
         currentCount[0] = currentSpaceDims[0];
         currentCount[1] = 5;
     }
-    hid_t memspace = H5Screate_simple(2, currentCount, currentCount);
 
-    hid_t plistId = H5Pcreate(H5P_DATASET_XFER);
-    H5Pset_dxpl_mpio(plistId, H5FD_MPIO_COLLECTIVE);
+    M_HDF5IO.createTable("edges", H5T_STD_U32BE, currentSpaceDims);
 
     // Fill buffer
     M_uintBuffer.resize(currentCount[0] * currentCount[1], 0);
@@ -604,8 +513,8 @@ void LifeV::PartitionIO<MeshType>::writeEdges()
             }
 
             hsize_t currentOffset[2] = {i * currentCount[0], 0};
-            writeData(filespace, memspace, plistId, dataset, H5T_NATIVE_UINT,
-                      currentOffset, currentCount, &M_uintBuffer[0]);
+            M_HDF5IO.write("edges", H5T_NATIVE_UINT, currentCount,
+                           currentOffset, &M_uintBuffer[0]);
         }
     } else {
         for (UInt i = 0; i < M_numParts; ++i) {
@@ -622,16 +531,12 @@ void LifeV::PartitionIO<MeshType>::writeEdges()
             }
 
             hsize_t currentOffset[2] = {0, i * currentCount[1]};
-            writeData(filespace, memspace, plistId, dataset, H5T_NATIVE_UINT,
-                      currentOffset, currentCount, &M_uintBuffer[0]);
+            M_HDF5IO.write("edges", H5T_NATIVE_UINT, currentCount,
+                           currentOffset, &M_uintBuffer[0]);
         }
     }
 
-    // HDF5 cleanup
-    H5Dclose(dataset);
-    H5Sclose(filespace);
-    H5Sclose(memspace);
-    H5Pclose(plistId);
+    M_HDF5IO.closeTable("edges");
 }
 
 template<typename MeshType>
@@ -640,34 +545,20 @@ void LifeV::PartitionIO<MeshType>::writeFaces()
     // Write faces (N = number of parts)
     // Table is ((7 + num_face_nodes * N) x max_num_faces of int
     hsize_t currentSpaceDims[2];
+    hsize_t currentCount[2];
     if (! M_transposeInFile) {
         currentSpaceDims[0] = (7 + M_faceNodes) * M_numParts;
         currentSpaceDims[1] = M_maxNumFaces;
-    } else {
-        currentSpaceDims[0] = M_maxNumFaces;
-        currentSpaceDims[1] = (7 + M_faceNodes) * M_numParts;
-    }
-    hid_t filespace = H5Screate_simple(2, currentSpaceDims, currentSpaceDims);
-#ifdef H5_USE_16_API
-    hid_t dataset = H5Dcreate(M_fileId, "faces", H5T_STD_U32BE, filespace,
-                              H5P_DEFAULT);
-#else
-    hid_t dataset = H5Dcreate(M_fileId, "faces", H5T_STD_U32BE, filespace,
-                              H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-#endif
-
-    hsize_t currentCount[2];
-    if (! M_transposeInFile) {
         currentCount[0] = 7 + M_faceNodes;
         currentCount[1] = currentSpaceDims[1];
     } else {
+        currentSpaceDims[0] = M_maxNumFaces;
+        currentSpaceDims[1] = (7 + M_faceNodes) * M_numParts;
         currentCount[0] = currentSpaceDims[0];
         currentCount[1] = 7 + M_faceNodes;
     }
-    hid_t memspace = H5Screate_simple(2, currentCount, currentCount);
 
-    hid_t plistId = H5Pcreate(H5P_DATASET_XFER);
-    H5Pset_dxpl_mpio(plistId, H5FD_MPIO_COLLECTIVE);
+    M_HDF5IO.createTable("faces", H5T_STD_U32BE, currentSpaceDims);
 
     // Fill buffer
     M_uintBuffer.resize(currentCount[0] * currentCount[1], 0);
@@ -697,8 +588,8 @@ void LifeV::PartitionIO<MeshType>::writeFaces()
             }
 
             hsize_t currentOffset[2] = {i * currentCount[0], 0};
-            writeData(filespace, memspace, plistId, dataset, H5T_NATIVE_UINT,
-                      currentOffset, currentCount, &M_uintBuffer[0]);
+            M_HDF5IO.write("faces", H5T_NATIVE_UINT, currentCount,
+                           currentOffset, &M_uintBuffer[0]);
         }
     } else {
         for (UInt i = 0; i < M_numParts; ++i) {
@@ -725,16 +616,12 @@ void LifeV::PartitionIO<MeshType>::writeFaces()
             }
 
             hsize_t currentOffset[2] = {0, i * currentCount[1]};
-            writeData(filespace, memspace, plistId, dataset, H5T_NATIVE_UINT,
-                      currentOffset, currentCount, &M_uintBuffer[0]);
+            M_HDF5IO.write("faces", H5T_NATIVE_UINT, currentCount,
+                           currentOffset, &M_uintBuffer[0]);
         }
     }
 
-    // HDF5 cleanup
-    H5Dclose(dataset);
-    H5Sclose(filespace);
-    H5Sclose(memspace);
-    H5Pclose(plistId);
+    M_HDF5IO.closeTable("faces");
 }
 
 template<typename MeshType>
@@ -743,34 +630,20 @@ void LifeV::PartitionIO<MeshType>::writeElements()
     // Write elements (N = number of parts)
     // Table is ((3 + num_element_nodes * N) x max_num_elements of int
     hsize_t currentSpaceDims[2];
+    hsize_t currentCount[2];
     if (! M_transposeInFile) {
         currentSpaceDims[0] = (3 + M_elementNodes) * M_numParts;
         currentSpaceDims[1] = M_maxNumElements;
-    } else {
-        currentSpaceDims[0] = M_maxNumElements;
-        currentSpaceDims[1] = (3 + M_elementNodes) * M_numParts;
-    }
-    hid_t filespace = H5Screate_simple(2, currentSpaceDims, currentSpaceDims);
-#ifdef H5_USE_16_API
-    hid_t dataset = H5Dcreate(M_fileId, "elements", H5T_STD_U32BE, filespace, 
-                              H5P_DEFAULT);
-#else
-    hid_t dataset = H5Dcreate(M_fileId, "elements", H5T_STD_U32BE, filespace,
-                              H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-#endif
-
-    hsize_t currentCount[2];
-    if (! M_transposeInFile) {
         currentCount[0] = 3 + M_elementNodes;
         currentCount[1] = currentSpaceDims[1];
     } else {
+        currentSpaceDims[0] = M_maxNumElements;
+        currentSpaceDims[1] = (3 + M_elementNodes) * M_numParts;
         currentCount[0] = currentSpaceDims[0];;
         currentCount[1] = 3 + M_elementNodes;
     }
-    hid_t memspace = H5Screate_simple(2, currentCount, currentCount);
 
-    hid_t plistId = H5Pcreate(H5P_DATASET_XFER);
-    H5Pset_dxpl_mpio(plistId, H5FD_MPIO_COLLECTIVE);
+    M_HDF5IO.createTable("elements", H5T_STD_U32BE, currentSpaceDims);
 
     // Fill buffer
     M_uintBuffer.resize(currentCount[0] * currentCount[1], 0);
@@ -792,8 +665,8 @@ void LifeV::PartitionIO<MeshType>::writeElements()
                 }
 
             hsize_t currentOffset[2] = {i * currentCount[0], 0};
-            writeData(filespace, memspace, plistId, dataset, H5T_NATIVE_UINT,
-                      currentOffset, currentCount, &M_uintBuffer[0]);
+            M_HDF5IO.write("elements", H5T_NATIVE_UINT, currentCount,
+                           currentOffset, &M_uintBuffer[0]);
         }
     } else {
         for (UInt i = 0; i < M_numParts; ++i) {
@@ -812,45 +685,12 @@ void LifeV::PartitionIO<MeshType>::writeElements()
                 }
 
             hsize_t currentOffset[2] = {0, i * currentCount[1]};
-            writeData(filespace, memspace, plistId, dataset, H5T_NATIVE_UINT,
-                      currentOffset, currentCount, &M_uintBuffer[0]);
+            M_HDF5IO.write("elements", H5T_NATIVE_UINT, currentCount,
+                           currentOffset, &M_uintBuffer[0]);
         }
     }
 
-    // HDF5 cleanup
-    H5Dclose(dataset);
-    H5Sclose(filespace);
-    H5Sclose(memspace);
-    H5Pclose(plistId);
-}
-
-template<typename MeshType>
-void LifeV::PartitionIO<MeshType>::closeHDF5File()
-{
-    H5Fclose(M_fileId);
-}
-
-template<typename MeshType>
-void LifeV::PartitionIO<MeshType>::openHDF5File()
-{
-    hid_t plistId;
-    MPI_Comm comm;
-    boost::shared_ptr<Epetra_MpiComm> tempComm =
-            boost::dynamic_pointer_cast<Epetra_MpiComm>(M_comm);
-    if (tempComm != 0) {
-        comm = tempComm->Comm();
-        M_myRank = tempComm->MyPID();
-        M_numProc = tempComm->NumProc();
-    }
-    MPI_Info info = MPI_INFO_NULL;
-
-    // Set up file access property list with parallel I/O access
-    plistId = H5Pcreate(H5P_FILE_ACCESS);
-    H5Pset_fapl_mpio(plistId, comm, info);
-
-    // Create a new file collectively and release property list identifier.
-    M_fileId = H5Fopen(M_fileName.c_str(), H5F_ACC_RDONLY, plistId);
-    H5Pclose(plistId);
+    M_HDF5IO.closeTable("elements");
 }
 
 template<typename MeshType>
@@ -859,45 +699,29 @@ void LifeV::PartitionIO<MeshType>::readStats()
     // Write mesh partition stats (N = number of parts)
     // This is an N x 15 table of int
     hsize_t currentSpaceDims[2];
-#ifdef H5_USE_16_API
-    hid_t intDataset = H5Dopen(M_fileId, "stats");
-#else
-    hid_t intDataset = H5Dopen(M_fileId, "stats", H5P_DEFAULT);
-#endif
-    hid_t filespace = H5Dget_space(intDataset);
-    H5Sget_simple_extent_dims(filespace, currentSpaceDims, NULL);
-
     hsize_t currentCount[2];
+    hsize_t currentOffset[2];
+
+    M_HDF5IO.openTable("stats", currentSpaceDims);
+
     if (! M_transposeInFile) {
         currentCount[0] = 1;
         currentCount[1] = currentSpaceDims[1];
-    } else {
-        currentCount[0] = currentSpaceDims[0];
-        currentCount[1] = 1;
-    }
-    hid_t memspace = H5Screate_simple(2, currentCount, currentCount);
-
-    hid_t plistId = H5Pcreate(H5P_DATASET_XFER);
-    H5Pset_dxpl_mpio(plistId, H5FD_MPIO_COLLECTIVE);
-
-    // Fill buffer
-    M_uintBuffer.resize(currentCount[0] * currentCount[1], 0);
-    hsize_t currentOffset[2];
-    if (! M_transposeInFile) {
         currentOffset[0] = M_myRank;
         currentOffset[1] = 0;
     } else {
+        currentCount[0] = currentSpaceDims[0];
+        currentCount[1] = 1;
         currentOffset[0] = 0;
         currentOffset[1] = M_myRank;
     }
-    readData(filespace, memspace, plistId, intDataset, H5T_NATIVE_UINT,
-             currentOffset, currentCount, &M_uintBuffer[0]);
 
-    // HDF5 cleanup
-    H5Dclose(intDataset);
-    H5Sclose(filespace);
-    H5Sclose(memspace);
-    H5Pclose(plistId);
+    // Fill buffer
+    M_uintBuffer.resize(currentCount[0] * currentCount[1], 0);
+    M_HDF5IO.read("stats", H5T_NATIVE_UINT, currentCount, currentOffset,
+                  &M_uintBuffer[0]);
+
+    M_HDF5IO.closeTable("stats");
 
     // Insert stats into mesh partition object
     M_numPoints = M_uintBuffer[2];
@@ -936,51 +760,35 @@ void LifeV::PartitionIO<MeshType>::readPoints()
     // There are two tables: a (3 * N) x max_num_points table of int and
     // a (3 * N) x max_num_points table of real
     hsize_t currentSpaceDims[2];
-#ifdef H5_USE_16_API
-    hid_t intDataset = H5Dopen(M_fileId, "point_ids");
-    hid_t realDataset = H5Dopen(M_fileId, "point_coords");
-#else
-    hid_t intDataset = H5Dopen(M_fileId, "point_ids", H5P_DEFAULT);
-    hid_t realDataset = H5Dopen(M_fileId, "point_coords", H5P_DEFAULT);
-#endif
-
-    hid_t filespace = H5Dget_space(intDataset);
-    H5Sget_simple_extent_dims(filespace, currentSpaceDims, NULL);
-
     hsize_t currentCount[2];
+    hsize_t currentOffset[2];
+
+    //hid_t realDataset = H5Dopen(M_fileId, "point_coords", H5P_DEFAULT);
+
+    M_HDF5IO.openTable("point_ids", currentSpaceDims);
+    M_HDF5IO.openTable("point_coords", currentSpaceDims);
+
     if (! M_transposeInFile) {
         currentCount[0] = 3;
         currentCount[1] = currentSpaceDims[1];
-    } else {
-        currentCount[0] = currentSpaceDims[0];
-        currentCount[1] = 3;
-    }
-    hid_t memspace = H5Screate_simple(2, currentCount, currentCount);
-
-    hid_t plistId = H5Pcreate(H5P_DATASET_XFER);
-    H5Pset_dxpl_mpio(plistId, H5FD_MPIO_COLLECTIVE);
-
-    M_uintBuffer.resize(currentCount[0] * currentCount[1], 0);
-    M_realBuffer.resize(currentCount[0] * currentCount[1], 0);
-    hsize_t currentOffset[2];
-    if (! M_transposeInFile) {
         currentOffset[0] = currentCount[0] * M_myRank;
         currentOffset[1] = 0;
     } else {
+        currentCount[0] = currentSpaceDims[0];
+        currentCount[1] = 3;
         currentOffset[0] = 0;
         currentOffset[1] = currentCount[1] * M_myRank;
     }
-    readData(filespace, memspace, plistId, intDataset, H5T_NATIVE_UINT,
-             currentOffset, currentCount, &M_uintBuffer[0]);
-    readData(filespace, memspace, plistId, realDataset, H5T_NATIVE_DOUBLE,
-             currentOffset, currentCount, &M_realBuffer[0]);
 
-    // HDF5 cleanup
-    H5Dclose(intDataset);
-    H5Dclose(realDataset);
-    H5Sclose(filespace);
-    H5Sclose(memspace);
-    H5Pclose(plistId);
+    M_uintBuffer.resize(currentCount[0] * currentCount[1], 0);
+    M_realBuffer.resize(currentCount[0] * currentCount[1], 0);
+    M_HDF5IO.read("point_ids", H5T_NATIVE_UINT, currentCount, currentOffset,
+                  &M_uintBuffer[0]);
+    M_HDF5IO.read("point_coords", H5T_NATIVE_DOUBLE, currentCount,
+                  currentOffset, &M_realBuffer[0]);
+
+    M_HDF5IO.closeTable("point_ids");
+    M_HDF5IO.closeTable("point_coords");
 
     // Insert points into the mesh partition object
     M_meshPartIn->pointList.reserve(M_numPoints);
@@ -992,7 +800,7 @@ void LifeV::PartitionIO<MeshType>::readPoints()
     if (! M_transposeInFile) {
         for (UInt j = 0; j < M_numPoints; ++j)
         {
-            pp = &( M_meshPartIn->addPoint( false, false ) );
+            pp = &(M_meshPartIn->addPoint(false,false));
             pp->replaceFlag(
                     static_cast<flag_Type>(M_uintBuffer[2 * stride + j]));
             pp->setMarkerID(M_uintBuffer[j]);
@@ -1004,7 +812,7 @@ void LifeV::PartitionIO<MeshType>::readPoints()
     } else {
         for (UInt j = 0; j < M_numPoints; ++j)
         {
-            pp = &( M_meshPartIn->addPoint( false, false ) );
+            pp = &(M_meshPartIn->addPoint(false,false));
             pp->replaceFlag(
                     static_cast<flag_Type>(M_uintBuffer[stride * j + 2]));
             pp->setMarkerID(M_uintBuffer[stride * j]);
@@ -1023,45 +831,28 @@ void LifeV::PartitionIO<MeshType>::readEdges()
     // Read mesh edges (N = number of parts)
     // Read a (5 * N) x max_num_edges table of int and
     hsize_t currentSpaceDims[2];
-#ifdef H5_USE_16_API
-    hid_t intDataset = H5Dopen(M_fileId, "edges");
-#else
-    hid_t intDataset = H5Dopen(M_fileId, "edges", H5P_DEFAULT);
-#endif
-
-    hid_t filespace = H5Dget_space(intDataset);
-    H5Sget_simple_extent_dims(filespace, currentSpaceDims, NULL);
-
     hsize_t currentCount[2];
+    hsize_t currentOffset[2];
+
+    M_HDF5IO.openTable("edges", currentSpaceDims);
+
     if (! M_transposeInFile) {
         currentCount[0] = 5;
         currentCount[1] = currentSpaceDims[1];
-    } else {
-        currentCount[0] = currentSpaceDims[0];
-        currentCount[1] = 5;
-    }
-    hid_t memspace = H5Screate_simple(2, currentCount, currentCount);
-
-    hid_t plistId = H5Pcreate(H5P_DATASET_XFER);
-    H5Pset_dxpl_mpio(plistId, H5FD_MPIO_COLLECTIVE);
-
-    M_uintBuffer.resize(currentCount[0] * currentCount[1], 0);
-    hsize_t currentOffset[2];
-    if (! M_transposeInFile) {
         currentOffset[0] = currentCount[0] * M_myRank;
         currentOffset[1] = 0;
     } else {
+        currentCount[0] = currentSpaceDims[0];
+        currentCount[1] = 5;
         currentOffset[0] = 0;
         currentOffset[1] = currentCount[1] * M_myRank;
     }
-    readData(filespace, memspace, plistId, intDataset, H5T_NATIVE_UINT,
-             currentOffset, currentCount, &M_uintBuffer[0]);
 
-    // HDF5 cleanup
-    H5Dclose(intDataset);
-    H5Sclose(filespace);
-    H5Sclose(memspace);
-    H5Pclose(plistId);
+    M_uintBuffer.resize(currentCount[0] * currentCount[1], 0);
+    M_HDF5IO.read("edges", H5T_NATIVE_UINT, currentCount, currentOffset,
+                  &M_uintBuffer[0]);
+
+    M_HDF5IO.closeTable("edges");
 
     M_meshPartIn->edgeList.reserve(M_numEdges);
 
@@ -1099,45 +890,28 @@ void LifeV::PartitionIO<MeshType>::readFaces()
     // read mesh faces (N = number of parts)
     // Read a ((7 + num_face_points) * N) x max_num_faces table of int
     hsize_t currentSpaceDims[2];
-#ifdef H5_USE_16_API
-    hid_t intDataset = H5Dopen(M_fileId, "faces");
-#else
-    hid_t intDataset = H5Dopen(M_fileId, "faces", H5P_DEFAULT);
-#endif
-
-    hid_t filespace = H5Dget_space(intDataset);
-    H5Sget_simple_extent_dims(filespace, currentSpaceDims, NULL);
-
     hsize_t currentCount[2];
+    hsize_t currentOffset[2];
+
+    M_HDF5IO.openTable("faces", currentSpaceDims);
+
     if (! M_transposeInFile) {
         currentCount[0] = 7 + M_faceNodes;
         currentCount[1] = currentSpaceDims[1];
-    } else {
-        currentCount[0] = currentSpaceDims[0];
-        currentCount[1] = 7 + M_faceNodes;
-    }
-    hid_t memspace = H5Screate_simple(2, currentCount, currentCount);
-
-    hid_t plistId = H5Pcreate(H5P_DATASET_XFER);
-    H5Pset_dxpl_mpio(plistId, H5FD_MPIO_COLLECTIVE);
-
-    M_uintBuffer.resize(currentCount[0] * currentCount[1], 0);
-    hsize_t currentOffset[2];
-    if (! M_transposeInFile) {
         currentOffset[0] = currentCount[0] * M_myRank;
         currentOffset[1] = 0;
     } else {
+        currentCount[0] = currentSpaceDims[0];
+        currentCount[1] = 7 + M_faceNodes;
         currentOffset[0] = 0;
         currentOffset[1] = currentCount[1] * M_myRank;
     }
-    readData(filespace, memspace, plistId, intDataset, H5T_NATIVE_UINT,
-             currentOffset, currentCount, &M_uintBuffer[0]);
 
-    // HDF5 cleanup
-    H5Dclose(intDataset);
-    H5Sclose(filespace);
-    H5Sclose(memspace);
-    H5Pclose(plistId);
+    M_uintBuffer.resize(currentCount[0] * currentCount[1], 0);
+    M_HDF5IO.read("faces", H5T_NATIVE_UINT, currentCount, currentOffset,
+                  &M_uintBuffer[0]);
+
+    M_HDF5IO.closeTable("faces");
 
     typename MeshType::face_Type *pf = 0;
 
@@ -1202,45 +976,28 @@ void LifeV::PartitionIO<MeshType>::readElements()
     // Read mesh elements (N = number of parts)
     // Read a ((3 + num_element_points) * N) x max_num_elements table of int
     hsize_t currentSpaceDims[2];
-#ifdef H5_USE_16_API
-    hid_t uintDataset = H5Dopen(M_fileId, "elements");
-#else
-    hid_t uintDataset = H5Dopen(M_fileId, "elements", H5P_DEFAULT);
-#endif
-
-    hid_t filespace = H5Dget_space(uintDataset);
-    H5Sget_simple_extent_dims(filespace, currentSpaceDims, NULL);
-
     hsize_t currentCount[2];
+    hsize_t currentOffset[2];
+
+    M_HDF5IO.openTable("elements", currentSpaceDims);
+
     if (! M_transposeInFile) {
         currentCount[0] = 3 + M_elementNodes;
         currentCount[1] = currentSpaceDims[1];
-    } else {
-        currentCount[0] = currentSpaceDims[0];
-        currentCount[1] = 3 + M_elementNodes;
-    }
-    hid_t memspace = H5Screate_simple(2, currentCount, currentCount);
-
-    hid_t plistId = H5Pcreate(H5P_DATASET_XFER);
-    H5Pset_dxpl_mpio(plistId, H5FD_MPIO_COLLECTIVE);
-
-    M_uintBuffer.resize(currentCount[0] * currentCount[1], 0);
-    hsize_t currentOffset[2];
-    if (! M_transposeInFile) {
         currentOffset[0] = currentCount[0] * M_myRank;
         currentOffset[1] = 0;
     } else {
+        currentCount[0] = currentSpaceDims[0];
+        currentCount[1] = 3 + M_elementNodes;
         currentOffset[0] = 0;
         currentOffset[1] = currentCount[1] * M_myRank;
     }
-    readData(filespace, memspace, plistId, uintDataset, H5T_NATIVE_UINT,
-             currentOffset, currentCount, &M_uintBuffer[0]);
 
-    // HDF5 cleanup
-    H5Dclose(uintDataset);
-    H5Sclose(filespace);
-    H5Sclose(memspace);
-    H5Pclose(plistId);
+    M_uintBuffer.resize(currentCount[0] * currentCount[1], 0);
+    M_HDF5IO.read("elements", H5T_NATIVE_UINT, currentCount, currentOffset,
+                  &M_uintBuffer[0]);
+
+    M_HDF5IO.closeTable("elements");
 
     M_meshPartIn->volumeList.reserve(M_numElements);
 
@@ -1279,38 +1036,6 @@ void LifeV::PartitionIO<MeshType>::readElements()
 
     M_meshPartIn->updateElementEdges(false, false);
     M_meshPartIn->updateElementFaces(false, false);
-}
-
-template<typename MeshType>
-void LifeV::PartitionIO<MeshType>::writeData(hid_t& filespace,
-                                             hid_t& memspace,
-                                             hid_t& plist,
-                                             hid_t& dataset,
-                                             hid_t& datatype,
-                                             hsize_t currentOffset[],
-                                             hsize_t currentCount[],
-                                             void* buffer)
-{
-    H5Sselect_hyperslab(filespace, H5S_SELECT_SET, currentOffset, NULL,
-                        currentCount, NULL);
-    H5Dwrite(dataset, datatype, memspace, filespace, plist,
-             buffer);
-}
-
-template<typename MeshType>
-void LifeV::PartitionIO<MeshType>::readData(hid_t& filespace,
-                                            hid_t& memspace,
-                                            hid_t& plist,
-                                            hid_t& dataset,
-                                            hid_t& datatype,
-                                            hsize_t currentOffset[],
-                                            hsize_t currentCount[],
-                                            void* buffer)
-{
-    H5Sselect_hyperslab(filespace, H5S_SELECT_SET, currentOffset, NULL,
-                        currentCount, NULL);
-    H5Dread(dataset, datatype, memspace, filespace, plist,
-            buffer);
 }
 
 #endif /* HAVE_MPI */
