@@ -1869,7 +1869,7 @@ OseenSolver<MeshType, SolverType>::meanNormalStress(const markerID_Type& flag, b
     else
     {
 #ifdef HAVE_LIFEV_DEBUG
-        M_Displayer.leaderPrint( " !!! WARNING - OseenSolver::meanNormalStress( flag, bcHandler, solution) is returning an approximation" );
+        M_Displayer.leaderPrint( " !!! WARNING - OseenSolver::meanNormalStress( flag, bcHandler, solution) is returning an approximation \n" );
 #endif
         return -pressure( flag, solution ); // TODO: This is an approximation of the mean normal stress as the pressure.
                                             // A proper method should be coded in the PostprocessingBoundary class
@@ -1918,7 +1918,7 @@ OseenSolver<MeshType, SolverType>::lagrangeMultiplier( const markerID_Type&  fla
                                           + M_pressureFESpace.dof().numTotalDof() + lmIndex];
 
     // If lmIndex has not been found a warning message is printed
-    M_Displayer.leaderPrint(  "!!! Warning - Lagrange multiplier for Flux BC not found!" );
+    M_Displayer.leaderPrint(  "!!! Warning - Lagrange multiplier for Flux BC not found!\n" );
     return 0;
 }
 
