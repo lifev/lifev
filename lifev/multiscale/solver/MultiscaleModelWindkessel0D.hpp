@@ -185,7 +185,7 @@ public:
 
     //! Get the integral of the mean total normal stress on a specific boundary interface of the model
     /*!
-     * Note: returns always a NaN.
+     * Note: returns always a NaN since the mean total normal stress is not defined in the windkessel model
      *
      * @param boundaryID ID of the boundary interface
      * @return mean total normal stress value
@@ -194,7 +194,7 @@ public:
 
     //! Get the area on a specific boundary interface of the model
     /*!
-     *  Note: returns always a NaN.
+     *  Note: returns always a NaN since the area is not defined in the windkessel model
      *
      * @param boundaryID ID of the boundary interface
      * @return area value
@@ -219,7 +219,7 @@ public:
 
     //! Get the variation of the integral of the mean total normal stress (on a specific boundary interface) using the linear model
     /*!
-     *  Note: returns always a NaN.
+     *  Note: returns always a NaN since the mean total normal stress is not defined in the windkessel model.
      *
      * @param boundaryID ID of the boundary interface
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved
@@ -229,7 +229,7 @@ public:
 
     //! Get the variation of the integral of the area (on a specific boundary interface) using the linear model
     /*!
-     *  Note: returns always a NaN.
+     *  Note: returns always a NaN since the area is not defined in the windkessel model.
      *
      * @param boundaryID ID of the boundary interface
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved

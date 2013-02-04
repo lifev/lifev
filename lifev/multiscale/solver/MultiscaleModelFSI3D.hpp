@@ -322,7 +322,7 @@ public:
 
     //! Get the variation of the integral of the area (on a specific boundary interface) using the linear model
     /*!
-     *  Note: returns always a NaN.
+     *  Note: returns always a NaN since this specific method is never used in the current interface equations.
      *
      * @param boundaryID ID of the boundary interface
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved
