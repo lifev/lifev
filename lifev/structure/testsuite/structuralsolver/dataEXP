@@ -74,6 +74,7 @@ tol             = 1.e-10    		# AztecOO tolerance
 [../prec]
 prectype        = Ifpack	 		# Ifpack or ML
 displayList     = true
+xmlName         = xmlParameters.xml
 
 [./ifpack]
 overlap  	= 2

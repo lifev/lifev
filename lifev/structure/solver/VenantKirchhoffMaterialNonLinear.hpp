@@ -173,7 +173,7 @@ public:
     /*!
       \param dk_loc: the elemental displacement
     */
-    void computeKinematicsVariables( const VectorElemental& dk_loc )
+    void computeKinematicsVariables( const VectorElemental& /*dk_loc*/ )
     {
     }
 

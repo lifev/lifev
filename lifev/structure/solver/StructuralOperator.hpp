@@ -1072,7 +1072,7 @@ StructuralOperator<Mesh>::setDataFromGetPot( const GetPot& dataFile )
     M_Displayer->leaderPrint( "Setting up Preconditioner... \n" );
     //Setting up the preconditioner
     const std::string preconditionerType = dataFile( "solid/prec/prectype", "Ifpack" );
-    const std::string xmlFileName = dataFile( "prec/xmlName", "xmlParameters.xml" );
+    const std::string xmlFileName = dataFile( "solid/prec/xmlName", "xmlParameters.xml" );
     basePrecPtr_Type precPtr; //Abstract class for preconditioners
 
     if(  !( preconditionerType.compare("Ifpack") ) ) //The preconditioner if Ifpack
