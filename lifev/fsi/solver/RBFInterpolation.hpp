@@ -350,7 +350,7 @@ namespace LifeV
     delete GlobalID;
 
     M_projectionOperator.reset(new matrix_Type(*M_projectionOperatorMap, ProjectionOperator));
-
+    M_projectionOperator->spy("M_projectionOperator.m");
   }
   
   template <typename Mesh>
@@ -376,8 +376,7 @@ namespace LifeV
     M_RhsOne.reset(new vector_Type(*M_interpolationOperatorMap));
     
     M_RhsF->subset(*M_knownField,*M_interpolationOperatorMap,0,0);
-    *M_RhsOne = *M_RhsF;
-    *M_RhsOne /= *M_RhsF;
+    *M_RhsOne += 1;
   }
 
   
