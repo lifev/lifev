@@ -74,8 +74,43 @@
 
 #include <lifev/structure/solver/StructuralConstitutiveLawData.hpp>
 
+//ET include for assemblings
+#include <lifev/eta/fem/ETFESpace.hpp>
+#include <lifev/eta/expression/Integrate.hpp>
+
 namespace LifeV
 {
+//Functor to select volumes
+template < typename MeshEntityType,
+           typename ComparisonPolicyType = boost::function2<bool,
+                                                            const UInt,
+                                                            const UInt > >
+class MarkerFunctor
+{
+public:
+    typedef MeshEntityType       meshEntity_Type;
+    typedef ComparisonPolicyType comparisonPolicy_Type;
+
+    MarkerFunctor( const UInt materialFlagReference,
+                    comparisonPolicy_Type const & policy = std::equal_to<UInt>() )
+        : M_reference( materialFlagReference ),
+          M_policy( policy ) {}
+
+    bool operator()( const meshEntity_Type & entity ) const
+    {
+        //Extract the flag from the mesh entity
+        UInt flagChecked = entity.markerID();
+
+        return M_policy( flagChecked, M_reference );
+    }
+
+private:
+    const UInt M_reference;
+    const comparisonPolicy_Type M_policy;
+
+}; // Marker selector
+
+
 /*!
   \class StructuralConstitutiveLaw
   \brief
@@ -90,7 +125,6 @@ public:
 
     //!@name Type definitions
     //@{
-
     typedef StructuralConstitutiveLawData          data_Type;
 
     typedef typename LifeV::SolverAztecOO          solver_Type;
@@ -106,11 +140,19 @@ public:
     typedef FactorySingleton<Factory<StructuralConstitutiveLaw<Mesh>,std::string> >  StructureMaterialFactory;
 
     typedef RegionMesh<LinearTetra >                      mesh_Type;
-    typedef std::vector< mesh_Type::element_Type const *> vectorVolumes_Type;
+    typedef std::vector< mesh_Type::element_Type* > vectorVolumes_Type;
 
     typedef std::map< UInt, vectorVolumes_Type>           mapMarkerVolumes_Type;
     typedef boost::shared_ptr<mapMarkerVolumes_Type>      mapMarkerVolumesPtr_Type;
 
+    typedef ETFESpace< RegionMesh<LinearTetra>, MapEpetra, 3, 3 >  ETFESpace_Type;
+    typedef boost::shared_ptr<ETFESpace_Type>                      ETFESpacePtr_Type;
+
+    typedef FESpace< RegionMesh<LinearTetra>, MapEpetra >          FESpace_Type;
+    typedef boost::shared_ptr<FESpace_Type>                        FESpacePtr_Type;
+
+    typedef MarkerFunctor<typename Mesh::element_Type, boost::function2<bool,const UInt,const UInt> >     markerFunctor_Type;
+    typedef boost::shared_ptr<markerFunctor_Type>                      markerFunctorPtr_Type;
 
     //@}
 
@@ -136,7 +178,8 @@ public:
       \param monolithicMap: the MapEpetra
       \param offset: the offset parameter used assembling the matrices
     */
-    virtual void setup( const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
+    virtual void setup( const FESpacePtr_Type& dFESpace,
+                        const ETFESpacePtr_Type& ETFESpace,
                         const boost::shared_ptr<const MapEpetra>&   monolithicMap,
                         const UInt offset, const dataPtr_Type& dataMaterial,
                         const displayerPtr_Type& displayer  )=0;
@@ -223,7 +266,7 @@ public:
     MapEpetra   const& map()     const { return *M_localMap; }
 
     //! Get the FESpace object
-    FESpace<Mesh, MapEpetra>& dFESpace()  {return M_FESpace;}
+    FESpace_Type& dFESpace()  {return M_dispFESpace;}
 
     //! Get the Stiffness matrix
     matrixPtr_Type const jacobian()    const {return M_jacobian; }
@@ -243,12 +286,11 @@ protected:
 
     //!Protected Members
 
-    boost::shared_ptr<FESpace<Mesh, MapEpetra> >   M_FESpace;
+    FESpacePtr_Type                                M_dispFESpace;
+
+    ETFESpacePtr_Type                              M_dispETFESpace;
 
     boost::shared_ptr<const MapEpetra>             M_localMap;
-
-    //! Elementary matrix for the Jacobian
-    boost::scoped_ptr<MatrixElemental>             M_elmatJac;
 
     //! Matrix jacobian
     matrixPtr_Type                                 M_jacobian;
@@ -259,7 +301,6 @@ protected:
     dataPtr_Type                                   M_dataMaterial;
 
     displayerPtr_Type                              M_displayer;
-
 };
 
 //=====================================
@@ -268,7 +309,8 @@ protected:
 
 template <typename Mesh>
 StructuralConstitutiveLaw<Mesh>::StructuralConstitutiveLaw( ):
-    M_FESpace                    ( ),
+    M_dispFESpace                ( ),
+    M_dispETFESpace              ( ),
     M_localMap                   ( ),
     M_jacobian                   ( ),
     M_offset                     ( 0 )

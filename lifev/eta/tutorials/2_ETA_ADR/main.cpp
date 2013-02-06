@@ -118,7 +118,7 @@ function_Type betaFct(betaFctRaw);
 
 
 // ---------------------------------------------------------------
-// As in the tutorial 1, we start with the definition of the 
+// As in the tutorial 1, we start with the definition of the
 // MPI communicator and boolean for the outputs.
 // ---------------------------------------------------------------
 
@@ -144,7 +144,7 @@ int main( int argc, char** argv )
 
     const UInt Nelements(10);
 
-    boost::shared_ptr< mesh_Type > fullMeshPtr(new mesh_Type);
+    boost::shared_ptr< mesh_Type > fullMeshPtr(new mesh_Type( Comm ) );
 
     regularMesh3D( *fullMeshPtr, 1, Nelements, Nelements, Nelements, false,
                    2.0,   2.0,   2.0,
@@ -167,7 +167,7 @@ int main( int argc, char** argv )
 // if this is the case here.
 //
 // We remark here two details:
-// 1. The spaces for the advection (betaSpace and ETbetaSpace) are 
+// 1. The spaces for the advection (betaSpace and ETbetaSpace) are
 //    vectorial.
 // 2. The constructor for the ETFESpace structures use an
 //    additional arguement, the geometric mapping. In the
@@ -207,10 +207,10 @@ int main( int argc, char** argv )
 // ---------------------------------------------------------------
 // We interpolate then the advection function of the mesh at hand.
 // This is performed with the classical FESpace only.
-// 
-// Indeed, the interpolation has not yet been implemented for the 
+//
+// Indeed, the interpolation has not yet been implemented for the
 // ETFESpace and vector of values for the FESpace and ETFESpace
-// are fully compatible (they use the same degrees of freedom 
+// are fully compatible (they use the same degrees of freedom
 // numbering). Therefore, they can be exchanged at will. This is
 // very important since some features have been implemented only
 // for regular FESpace but not yet for ETFESpace (e.g. output
@@ -280,20 +280,20 @@ int main( int argc, char** argv )
 // ---------------------------------------------------------------
 // We perform now the same assembly with the ET assembly and still
 // monitor the timings required.
-// 
-// As in tutorial 1, we need to use the special namespace. The 
+//
+// As in tutorial 1, we need to use the special namespace. The
 // arguments of the integrate function still have the same
 // meaning, but the expression is not a bit different.
 // Remark that to ensure a fair comparison, we use the quadrature
 // rule used for the classical way (stored in the uSpace).
 //
-// One of the differences between the two assembly is that with 
+// One of the differences between the two assembly is that with
 // the ET way, the weak formulation is immediately visible, while
 // it is not with the classical way.
 //
 // For the advective term, we remark that a new expression is used
 // for the interpolation of the velocity field. The value
-// function is used with, as first argument the ETFESpace in 
+// function is used with, as first argument the ETFESpace in
 // which the velocity is given and in second argument the vector
 // of the values.
 //
@@ -318,7 +318,7 @@ int main( int argc, char** argv )
                    dot( grad(phi_i) , grad(phi_j) )
                    + dot( grad(phi_j) , value(ETbetaSpace,beta))*phi_i
                    + 2.0* phi_i*phi_j
-                   
+
                    )
             >> ETsystemMatrix;
     }
@@ -334,8 +334,8 @@ int main( int argc, char** argv )
 // than the classical way. Indeed, the classical way loops over
 // the elements for each term added (3 times here), assembles
 // different local contributions for each term and adds them for
-// each term. With the ET way, only one loop over the elements 
-// is required, computations are reused and only one local 
+// each term. With the ET way, only one loop over the elements
+// is required, computations are reused and only one local
 // contribution is computed and added to the global matrix.
 //
 // In general, the longer is the expression, the better is the
@@ -354,7 +354,7 @@ int main( int argc, char** argv )
 
 
 // ---------------------------------------------------------------
-// We compute now the matrix of the difference and finally the 
+// We compute now the matrix of the difference and finally the
 // norm of the difference. This should be very low if the two
 // matrices are identical.
 // ---------------------------------------------------------------
@@ -392,7 +392,7 @@ int main( int argc, char** argv )
 
     Real testTolerance(1e-10);
 
-    if (errorNorm < testTolerance) 
+    if (errorNorm < testTolerance)
     {
         return( EXIT_SUCCESS );
     }

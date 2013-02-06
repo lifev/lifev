@@ -43,6 +43,7 @@
 
 namespace LifeV
 {
+
 template <typename Mesh>
 class VenantKirchhoffMaterialLinear :
         public StructuralConstitutiveLaw<Mesh>
@@ -67,6 +68,16 @@ public:
     typedef typename super::mapMarkerVolumes_Type mapMarkerVolumes_Type;
     typedef typename mapMarkerVolumes_Type::const_iterator mapIterator_Type;
 
+    typedef typename super::vectorVolumes_Type       vectorVolumes_Type;
+    typedef boost::shared_ptr<vectorVolumes_Type>    vectorVolumesPtr_Type;
+
+    typedef typename super::FESpacePtr_Type          FESpacePtr_Type;
+    typedef typename super::ETFESpacePtr_Type        ETFESpacePtr_Type;
+
+    typedef typename super::markerFunctor_Type       markerFunctor_Type;
+    typedef typename super::markerFunctorPtr_Type    markerFunctorPtr_Type;
+
+    typedef MatrixSmall<3,3>                         matrixSmall_Type;
 
     //@}
 
@@ -76,6 +87,7 @@ public:
     VenantKirchhoffMaterialLinear();
 
     virtual  ~VenantKirchhoffMaterialLinear();
+
     //@}
 
     //!@name Methods
@@ -83,11 +95,12 @@ public:
 
     //! Setup the created object of the class StructuralConstitutiveLaw
     /*!
-      \param dFespace: the FiniteElement Space
-      \param monolithicMap: the MapEpetra
-      \param offset: the offset parameter used assembling the matrices
+    \param dFespace: the FiniteElement Space
+    \param monolithicMap: the MapEpetra
+    \param offset: the offset parameter used assembling the matrices
     */
-    void setup(const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
+    void setup(const FESpacePtr_Type& dFESpace,
+               const ETFESpacePtr_Type& ETFESpace,
                const boost::shared_ptr<const MapEpetra>&  monolithicMap,
                const UInt offset, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer
                );
@@ -208,7 +221,8 @@ VenantKirchhoffMaterialLinear<Mesh>::~VenantKirchhoffMaterialLinear()
 
 template <typename Mesh>
 void
-VenantKirchhoffMaterialLinear<Mesh>::setup(const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
+VenantKirchhoffMaterialLinear<Mesh>::setup(const FESpacePtr_Type& dFESpace,
+                                           const ETFESpacePtr_Type& ETFESpace,
                                            const boost::shared_ptr<const MapEpetra>&  monolithicMap,
                                            const UInt offset, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer
                                            )
@@ -218,8 +232,9 @@ VenantKirchhoffMaterialLinear<Mesh>::setup(const boost::shared_ptr< FESpace<Mesh
 
     //    std::cout<<"I am setting up the Material "<<std::endl;
 
-    this->M_FESpace                       = dFESpace;
-    this->M_elmatK.reset                  (new MatrixElemental( this->M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
+    this->M_dispFESpace                       = dFESpace;
+    this->M_dispETFESpace                     = ETFESpace;
+    this->M_elmatK.reset                  (new MatrixElemental( this->M_dispFESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
     this->M_localMap                      = monolithicMap;
     this->M_linearStiff.reset             (new matrix_Type(*this->M_localMap));
     this->M_offset                        = offset;
@@ -229,11 +244,8 @@ template <typename Mesh>
 void VenantKirchhoffMaterialLinear<Mesh>::computeLinearStiff(dataPtr_Type& dataMaterial,
                                                              const mapMarkerVolumesPtr_Type mapsMarkerVolumes)
 {
-    //  std::cout<<"compute LinearStiff Matrix start\n";
 
-    UInt totalDof = this->M_FESpace->dof().numTotalDof();
-    // Number of displacement components
-    UInt nc = nDimensions;
+    *(this->M_linearStiff) *= 0.0;
 
     //Compute the linear part of the Stiffness Matrix.
     //In the case of Linear Material it is the Stiffness Matrix.
@@ -241,56 +253,38 @@ void VenantKirchhoffMaterialLinear<Mesh>::computeLinearStiff(dataPtr_Type& dataM
 
     mapIterator_Type it;
 
+    vectorVolumesPtr_Type pointerListOfVolumes;
+
     for( it = (*mapsMarkerVolumes).begin(); it != (*mapsMarkerVolumes).end(); it++ )
     {
 
         //Given the marker pointed by the iterator, let's extract the material parameters
         UInt marker = it->first;
 
-        Real mu = dataMaterial->mu(marker);
-        Real lambda = dataMaterial->lambda(marker);
+        pointerListOfVolumes.reset( new vectorVolumes_Type(it->second) );
 
-        //Given the parameters I loop over the volumes with that marker
-        for ( UInt j(0); j < it->second.size(); j++ )
-        {
-            this->M_FESpace->fe().updateFirstDerivQuadPt( *(it->second[j]) );
+        Real mu = dataMaterial->mu( marker );
+        Real lambda = dataMaterial->lambda( marker );
 
-            this->M_elmatK->zero();
+        integrate( integrationOverSelectedVolumes(  pointerListOfVolumes ),
+                   this->M_dispFESpace->qr(),
+                   this->M_dispETFESpace,
+                   this->M_dispETFESpace,
+                   value(lambda) * div( phi_i ) * div( phi_j )
+                   ) >> M_linearStiff;
 
-            //These methods are implemented in AssemblyElemental.cpp
-            //They have been kept in AssemblyElemental in order to avoid repetitions
-            stiff_strain( 2*mu, *this->M_elmatK, this->M_FESpace->fe() );// here in the previous version was 1. (instead of 2.)
-            stiff_div   ( lambda, *this->M_elmatK, this->M_FESpace->fe() );// here in the previous version was 0.5 (instead of 1.)
-
-            //this->M_elmatK->showMe();
-
-            // assembling
-            for ( UInt ic = 0; ic < nc; ic++ )
-            {
-                for ( UInt jc = 0; jc < nc; jc++ )
-                {
-                    assembleMatrix( *this->M_linearStiff,
-                                    *this->M_elmatK,
-                                    this->M_FESpace->fe(),
-                                    this->M_FESpace->fe(),
-                                    this->M_FESpace->dof(),
-                                    this->M_FESpace->dof(),
-                                    ic,  jc,
-                                    this->M_offset +ic*totalDof, this->M_offset + jc*totalDof );
-
-                }
-            }
-
-
-        }
-
+        integrate( integrationOverSelectedVolumes(  pointerListOfVolumes ),
+                   this->M_dispFESpace->qr(),
+                   this->M_dispETFESpace,
+                   this->M_dispETFESpace,
+                   value( 2.0 * mu ) * dot( sym(grad(phi_j)) , grad(phi_i))
+                   ) >> M_linearStiff;
     }
 
     this->M_linearStiff->globalAssemble();
 
     //Initialization of the pointer M_stiff to what is pointed by M_linearStiff
     this->M_stiff = this->M_linearStiff;
-    //   std::cout<<"compute LinearStiff Matrix end\n";
     this->M_jacobian = this->M_linearStiff;
 }
 

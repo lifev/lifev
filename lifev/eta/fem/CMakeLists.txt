@@ -2,11 +2,19 @@ SET(fem_HEADERS
   fem/ETCurrentFE.hpp
   fem/ETCurrentFE_FD3.hpp
   fem/ETCurrentFlag.hpp
+  fem/ETCurrentBDFE.hpp
   fem/ETFESpace.hpp
   fem/MeshGeometricMap.hpp
+  fem/QRAdapterBase.hpp
+  fem/QRAdapterNeverAdapt.hpp
+  fem/QuadratureBoundary.hpp
+  fem/QuadratureRuleBoundary.hpp
+  fem/LevelSetBDQRAdapter.hpp
 CACHE INTERNAL "")
 
 SET(fem_SOURCES ""
+  fem/ETCurrentFE.cpp
+  fem/ETCurrentFE_FD3.cpp
 CACHE INTERNAL "")
 
 

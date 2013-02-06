@@ -25,8 +25,14 @@
 //@HEADER
 /**
    \file main.cpp
-   \author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
-   \date 2005-04-16
+
+   This test is the case of traction of a cube. It does not use the symmetry BCs
+   This test uses the FESpace which is the standard in LifeV and the ETFESpace
+   The FESpace is used for the BCs of Neumann type since in the ET branch there
+   is not the integration over the boundary faces.
+
+   \author Paolo Tricerri <paolo.tricerri@epfl.ch>
+   \date 1861-03-17
  */
 
 #ifdef TWODIM
@@ -53,8 +59,6 @@
 #include <lifev/core/algorithm/PreconditionerIfpack.hpp>
 #include <lifev/core/algorithm/PreconditionerML.hpp>
 
-
-//Include fils which were in the structure.cpp file
 #include <lifev/core/array/MapEpetra.hpp>
 
 #include <lifev/core/fem/TimeAdvance.hpp>
@@ -70,15 +74,18 @@
 #include <lifev/structure/solver/StructuralOperator.hpp>
 #include <lifev/structure/solver/VenantKirchhoffMaterialLinear.hpp>
 #include <lifev/structure/solver/VenantKirchhoffMaterialNonLinear.hpp>
-#include <lifev/structure/solver/NeoHookeanMaterialNonLinear.hpp>
 #include <lifev/structure/solver/ExponentialMaterialNonLinear.hpp>
 #include <lifev/structure/solver/VenantKirchhoffMaterialNonLinearPenalized.hpp>
+#include <lifev/structure/solver/NeoHookeanMaterialNonLinear.hpp>
 
 #include <lifev/core/filter/ExporterEnsight.hpp>
 #ifdef HAVE_HDF5
 #include <lifev/core/filter/ExporterHDF5.hpp>
 #endif
 #include <lifev/core/filter/ExporterEmpty.hpp>
+
+//Includes for the Expression Template
+#include <lifev/eta/fem/ETFESpace.hpp>
 
 #include <iostream>
 
@@ -186,6 +193,27 @@ static Real bcNonZero(const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, 
     return  300000.;
 }
 
+static Real d0(const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
+{
+    switch (i)
+    {
+    case 0:
+        return - 0.01846 * ( x - 0.5 );
+        break;
+    case 1:
+        return ( 0.07755/ 2 ) * y;
+        break;
+    case 2:
+        return - 0.01846 * ( z + 0.5);
+        break;
+    default:
+        ERROR_MSG("This entry is not allowed: ud_functions.hpp");
+        return 0.;
+        break;
+    }
+}
+
+
 };
 
 
@@ -234,8 +262,14 @@ void
 Structure::run3d()
 {
     typedef StructuralOperator< RegionMesh<LinearTetra> >::vector_Type  vector_Type;
-    typedef boost::shared_ptr<vector_Type> vectorPtr_Type;
-    typedef boost::shared_ptr< TimeAdvance< vector_Type > >       timeAdvance_type;
+    typedef boost::shared_ptr<vector_Type>                              vectorPtr_Type;
+    typedef boost::shared_ptr< TimeAdvance< vector_Type > >             timeAdvance_Type;
+    typedef FESpace< RegionMesh<LinearTetra>, MapEpetra >               solidFESpace_Type;
+    typedef boost::shared_ptr<solidFESpace_Type>                        solidFESpacePtr_Type;
+
+    typedef ETFESpace< RegionMesh<LinearTetra>, MapEpetra, 3, 3 >       solidETFESpace_Type;
+    typedef boost::shared_ptr<solidETFESpace_Type>                      solidETFESpacePtr_Type;
+
 
     bool verbose = (parameters->comm->MyPID() == 0);
 
@@ -258,18 +292,15 @@ Structure::run3d()
 
     std::string dOrder =  dataFile( "solid/space_discretization/order", "P1");
 
-    typedef FESpace< RegionMesh<LinearTetra>, MapEpetra > solidFESpace_type;
-    typedef boost::shared_ptr<solidFESpace_type> solidFESpace_ptrtype;
-    solidFESpace_ptrtype dFESpace( new solidFESpace_type(meshPart,dOrder,3,parameters->comm) );
+    //Mainly used for BCs assembling (Neumann type)
+    solidFESpacePtr_Type dFESpace( new solidFESpace_Type(meshPart,dOrder,3,parameters->comm) );
+    solidETFESpacePtr_Type dETFESpace( new solidETFESpace_Type(meshPart,&(dFESpace->refFE()),&(dFESpace->fe().geoMap()), parameters->comm) );
+
     if (verbose) std::cout << std::endl;
-
-    //MapEpetra structMap(dFESpace->refFE(), meshPart, parameters->comm);
-
-    //MapEpetra fullMap;
 
     std::string timeAdvanceMethod =  dataFile( "solid/time_discretization/method", "Newmark");
 
-    timeAdvance_type  timeAdvance( TimeAdvanceFactory::instance().createObject( timeAdvanceMethod ) );
+    timeAdvance_Type  timeAdvance( TimeAdvanceFactory::instance().createObject( timeAdvanceMethod ) );
 
     UInt OrderDev = 2;
 
@@ -281,14 +312,7 @@ Structure::run3d()
         timeAdvance->setup(dataStructure->dataTimeAdvance()->orderBDF() , OrderDev);
 
     timeAdvance->setTimeStep(dataStructure->dataTime()->timeStep());
-    timeAdvance->showMe();
-
-    /*
-    for (UInt ii = 0; ii < nDimensions; ++ii)
-    {
-        fullMap += structMap;
-    }
-    */
+    //timeAdvance->showMe();
 
     //! #################################################################################
     //! BOUNDARY CONDITIONS
@@ -309,27 +333,13 @@ Structure::run3d()
     BCh->addBC("EdgesIn",      40,  Essential, Component, zero,    compx);
     //! =================================================================================
 
-    //! =================================================================================
-    //! BC for StructuredCube4_simmetry.mesh
-    //! =================================================================================
-    /*
-    BCh->addBC("surf5",    5,   EssentialVertices,    Component, Homogeneous, compz);
-    BCh->addBC("line10",   10,  EssentialVertices,    Component, Homogeneous, compxz);
-    BCh->addBC("line20",   20,  EssentialVertices,    Component, Homogeneous, compxy);
-    BCh->addBC("line30",   30,  EssentialVertices,    Component, Homogeneous, compyz);
-    BCh->addBC("line40",   40,  EssentialVertices,    Component, Homogeneous, compy);
-    BCh->addBC("line50",   50,  EssentialVertices,    Component, Homogeneous, compz);
-    BCh->addBC("point100", 100, EssentialVertices,    Full,      Homogeneous, 3);
-    */
-    //! =================================================================================
-    //! #################################################################################
-
     //! 1. Constructor of the structuralSolver
     StructuralOperator< RegionMesh<LinearTetra> > solid;
 
     //! 2. Setup of the structuralSolver
     solid.setup(dataStructure,
                 dFESpace,
+                dETFESpace,
                 BCh,
                 parameters->comm);
 
@@ -341,7 +351,7 @@ Structure::run3d()
     solid.buildSystem(timeAdvanceCoefficient);
 
 
-    dataStructure->showMe();
+    //dataStructure->showMe();
     //! =================================================================================
     //! Temporal data and initial conditions
     //! =================================================================================
@@ -366,16 +376,20 @@ Structure::run3d()
         uv0.push_back(acc);
     }
 
+    // vectorPtr_Type initialDisplacement(new vector_Type(solid.displacement(), Unique) );
+    // dFESpace->interpolate( static_cast<solidFESpace_Type::function_Type>( Private::d0 ), *initialDisplacement, 0.0 );
+
     if (timeAdvanceMethod =="BDF")
     {
       Real tZero = dataStructure->dataTime()->initialTime();
 
-        for ( UInt previousPass=0; previousPass < dataStructure->dataTimeAdvance()->orderBDF() ; previousPass++)
-        {
-      Real previousTimeStep = tZero - previousPass*dt;
-      std::cout<<"BDF " <<previousTimeStep<<"\n";
-      uv0.push_back(disp);
-        }
+      for ( UInt previousPass=0; previousPass < timeAdvance->size() ; previousPass++)
+      {
+          Real previousTimeStep = tZero - previousPass*dt;
+          std::cout<<"BDF " <<previousTimeStep<<"\n";
+          //uv0.push_back(initialDisplacement);
+          uv0.push_back(disp);
+      }
     }
 
     timeAdvance->setInitialCondition(uv0);
@@ -383,6 +397,9 @@ Structure::run3d()
     timeAdvance->setTimeStep( dt );
 
     timeAdvance->updateRHSContribution( dt );
+
+    //solid.initialize( initialDisplacement );
+    solid.initialize( disp );
 
     MPI_Barrier(MPI_COMM_WORLD);
 
@@ -461,6 +478,9 @@ Structure::run3d()
     //! =================================================================================
 
 
+      Real normVect;
+      normVect =  solid.displacement().norm2();
+      std::cout << "The norm 2 of the displacement field is: "<< normVect << std::endl;
 
     //! =============================================================================
     //! Temporal loop

@@ -10,6 +10,7 @@ SET(fem_HEADERS
   fem/TimeData.hpp
   fem/TimeAdvanceData.hpp
   fem/GeometricMap.hpp
+  fem/GradientRecovery.hpp
   fem/Assembly.hpp
   fem/ReferenceElement.hpp
   fem/FESpace.hpp
@@ -36,8 +37,10 @@ SET(fem_HEADERS
   fem/BCDataInterpolator.hpp
   fem/HyperbolicFluxNumerical.hpp
   fem/AssemblyElemental.hpp
+  fem/AssemblyElementalBoundary.hpp
   fem/ReferenceFE.hpp
   fem/BCHandler.hpp
+  fem/QRKeast.hpp
 CACHE INTERNAL "")
 
 SET(fem_SOURCES
@@ -69,6 +72,7 @@ SET(fem_SOURCES
   fem/ReferenceElement.cpp
   fem/DOF.cpp
   fem/ReferenceFE.cpp
+  fem/QRKeast.cpp
 CACHE INTERNAL "")
 
 

@@ -1,12 +1,22 @@
 SET(array_HEADERS
   array/ETMatrixElemental.hpp
   array/ETVectorElemental.hpp
-  array/MatrixSmall.hpp
   array/OperationSmallAddition.hpp
   array/OperationSmallDivision.hpp
   array/OperationSmallDot.hpp
+  array/OperationSmallEmult.hpp
+  array/OperationSmallExtract.hpp
+  array/OperationSmallOuterProduct.hpp
   array/OperationSmallProduct.hpp
   array/OperationSmallSubstraction.hpp
+  array/OperationSmallTranspose.hpp
+  array/OperationSmallMinusTranspose.hpp
+  array/OperationSmallSymmetricTensor.hpp
+  array/OperationSmallLogarithm.hpp
+  array/OperationSmallExponential.hpp
+  array/OperationSmallDeterminant.hpp
+  array/OperationSmallTrace.hpp
+  array/OperationSmallPower.hpp
 CACHE INTERNAL "")
 
 SET(array_SOURCES ""

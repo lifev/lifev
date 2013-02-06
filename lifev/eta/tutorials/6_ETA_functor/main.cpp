@@ -171,10 +171,10 @@ public:
                          , 1.0/M_exponent);
     }
 
-    normFunctor(const UInt& expo = 1) 
+    normFunctor(const UInt& expo = 1)
         : M_exponent(expo) {}
 
-    normFunctor(const normFunctor& nf) 
+    normFunctor(const normFunctor& nf)
         : M_exponent(nf.M_exponent){}
 
     ~normFunctor(){}
@@ -182,7 +182,7 @@ public:
     void setExponent(const UInt& expo) { M_exponent = expo; }
 
 private:
-    
+
     UInt M_exponent;
 };
 
@@ -209,7 +209,7 @@ int main( int argc, char** argv )
 
     const UInt Nelements(10);
 
-    boost::shared_ptr< mesh_Type > fullMeshPtr(new mesh_Type);
+    boost::shared_ptr< mesh_Type > fullMeshPtr(new mesh_Type( Comm ) );
 
     regularMesh3D( *fullMeshPtr, 1, Nelements, Nelements, Nelements, false,
                    2.0,   2.0,   2.0,
@@ -335,7 +335,7 @@ int main( int argc, char** argv )
         VectorSmall<3> beta(0,1.0,2.0);
 
         boost::shared_ptr<normFunctor> norm( new normFunctor);
-        
+
         norm->setExponent(2);
 
         integrate( elements(ETuSpace->mesh()),

@@ -143,7 +143,7 @@ StructuralConstitutiveLawData::setup( const GetPot& dataFile, const std::string&
         // and by default it is memorized with ID 1. Getters and Setters have been designed to deal with thic choice.
         M_materialsFlagSet = false;
 	M_vectorMaterialFlags.resize(1);
-	
+
 	M_vectorMaterialFlags[0] = 1;
         M_young[1]   = dataFile( ( section + "/physics/young"   ).data(), 0. );
         M_poisson[1] = dataFile( ( section + "/physics/poisson" ).data(), 0. );
@@ -163,10 +163,10 @@ StructuralConstitutiveLawData::setup( const GetPot& dataFile, const std::string&
         UInt material(0);
         for ( UInt i(0) ; i < materialsNumber ; ++i )
         {
-	  
+
   	    M_vectorMaterialFlags.resize( materialsNumber );
             material            = dataFile( ( section + "/physics/material_flag" ).data(), 0., i );
-	    
+
 	    M_vectorMaterialFlags[i] = material;
             M_young[material]   = dataFile( ( section + "/physics/young"         ).data(), 0., i );
             M_poisson[material] = dataFile( ( section + "/physics/poisson"       ).data(), 0., i );

@@ -112,7 +112,7 @@ int main( int argc, char** argv )
 
     const UInt Nelements(10);
 
-    boost::shared_ptr< mesh_Type > fullMeshPtr(new mesh_Type);
+    boost::shared_ptr< mesh_Type > fullMeshPtr(new mesh_Type( Comm ) );
 
     regularMesh3D( *fullMeshPtr, 1, Nelements, Nelements, Nelements, false,
                    2.0,   2.0,   2.0,
@@ -139,36 +139,36 @@ int main( int argc, char** argv )
     if (verbose) std::cout << " ---> Dofs: " << scalarSpace->dof().numTotalDof() << std::endl;
 
     if (verbose) std::cout << " -- Defining the matrix ... " << std::flush;
-   
+
     boost::shared_ptr<matrix_Type> scalarMatrix (new matrix_Type( scalarSpace->map() ));
 
     *scalarMatrix *=0.0;
-    
+
     if (verbose) std::cout << " done! " << std::endl;
 
 
 // ---------------------------------------------------------------
 // We can now start the assembly. To understand whether an
-// expression is valid, the critical observation is that every 
-// piece of expression is associated to a "fictitious" type (in 
-// the sense that it is not the type of the expression in the 
+// expression is valid, the critical observation is that every
+// piece of expression is associated to a "fictitious" type (in
+// the sense that it is not the type of the expression in the
 // C++ sense), which matches the mathematical type.
 //
 // For example, in the case of a scalar finite element space, the
 // basis functions are scalar quantities, while their gradients
 // are vectorial quantities.
 //
-// With this in mind, we can now formulate the rules for an 
+// With this in mind, we can now formulate the rules for an
 // expression to be valid:
-// 
-// Rule A: The combinaisons between two expressions (through an 
+//
+// Rule A: The combinaisons between two expressions (through an
 // operator or a function) must be valid. For example, it is not
 // possible to sum a vectorial quantity and a scalar quantity.
 //
 // Rule B: The overall expression must be a scalar quantity. For
 // example, it not possible to integrate simply grad(phi_i)).
 //
-// 
+//
 // ---------------------------------------------------------------
 
     if (verbose) std::cout << " -- Assembling the scalar matrix ... " << std::flush;
@@ -185,10 +185,10 @@ int main( int argc, char** argv )
         // should use the dot function.
 
         /*integrate(  elements(scalarSpace->mesh()),
-                    quadRuleTetra4pt, 
+                    quadRuleTetra4pt,
                     scalarSpace,
                     scalarSpace,
-                    
+
                     grad(phi_i) * grad(phi_j)
             )
             >> scalarMatrix;
@@ -199,17 +199,17 @@ int main( int argc, char** argv )
         //  grad(phi_i) is a vectorial quantity
         //  phi_j is a scalar quantity
         // the product between a scalar quantity and
-        // a vectorial quantity is well defined and 
+        // a vectorial quantity is well defined and
         // yield a vectorial quantity.
         // However, the whole expression is a vectorial
         // quantity, therefore, it is not possible to
         // integrate it.
 
         /*integrate(  elements(scalarSpace->mesh()),
-                    quadRuleTetra4pt, 
+                    quadRuleTetra4pt,
                     scalarSpace,
                     scalarSpace,
-                    
+
                     grad(phi_i) * phi_j
             )
             >> scalarMatrix;
@@ -223,7 +223,7 @@ int main( int argc, char** argv )
         VectorSmall<3> V1(1.0,0.0,0.0);
 
         integrate(  elements(scalarSpace->mesh()),
-                    quadRuleTetra4pt, 
+                    quadRuleTetra4pt,
                     scalarSpace,
                     scalarSpace,
                     dot( grad(phi_i) , grad(phi_j) )
@@ -239,7 +239,7 @@ int main( int argc, char** argv )
 
 
 // ---------------------------------------------------------------
-// The rule A and B are very simple, usually much more than the 
+// The rule A and B are very simple, usually much more than the
 // compilation errors that can be issued. In case of problem, it
 // is then much easier to look at the expression with the rules A
 // and B to find where is the problem.
@@ -265,7 +265,7 @@ int main( int argc, char** argv )
     Real matrixNormDiff(std::abs(matrixNorm-3.2));
 
     if (verbose) std::cout << " Error : " << matrixNormDiff << std::endl;
-    
+
     Real testTolerance(1e-10);
 
     if ( matrixNormDiff < testTolerance )
@@ -273,7 +273,7 @@ int main( int argc, char** argv )
         return( EXIT_SUCCESS );
     }
     return ( EXIT_FAILURE );
-    
+
 }
 
 
