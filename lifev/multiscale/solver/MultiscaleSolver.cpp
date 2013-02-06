@@ -206,10 +206,11 @@ MultiscaleSolver::solveProblem( const Real& referenceSolution, const Real& toler
 
     // Numerical check of the last iteration solution (used for the night testsuite check)
     Real computedSolution( M_model->checkSolution() );
-    if ( referenceSolution >= 0. && std::abs( ( referenceSolution - computedSolution ) / referenceSolution ) >  tolerance )
+    Real relativeError( std::abs( ( referenceSolution - computedSolution ) / referenceSolution ) );
+    if ( referenceSolution >= 0. && relativeError > tolerance )
         multiscaleErrorCheck( Solution, "Problem solution: "    + number2string( computedSolution ) +
-                                        " (Reference solution: " + number2string( referenceSolution ) 
-			      + " Relative error: " + number2string( std::abs( ( referenceSolution - computedSolution ) / referenceSolution ) ) + ")\n", M_comm->MyPID() == 0 );
+                                        " (Reference solution: " + number2string( referenceSolution ) +
+                                        "; Relative error: " + number2string( relativeError ) + ")\n", M_comm->MyPID() == 0 );
 
     return multiscaleExitFlag;
 }
