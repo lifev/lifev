@@ -1,0 +1,118 @@
+# -*- getpot -*- (GetPot mode activation for emacs)
+#-------------------------------------------------
+#      Data file for EthierSteinman test case
+#-------------------------------------------------
+
+
+[exporter]
+type       = hdf5 # hdf5 (if library compiled with hdf5 support) or ensight
+multimesh  = false
+start      = 0
+save       = 1
+
+[fluid]
+
+    [./physics]
+    density   = 1.0               # density
+	viscosity = 0.05            # viscosity
+
+    [../space_discretization]
+    mesh_dir		= ./
+    mesh_file       = cube4x4.mesh
+    mesh_type       = '.mesh'
+
+    verbose         = 0
+    linearized      = 0
+    diagonalize     = 1 # weight, 0=off
+    div_beta_u_v    = 0 # 1=on, 0=off
+
+    vel_order         = P2
+    press_order       = P1
+
+    [../miscellaneous]
+    verbose         = 1
+    steady          = 0
+    Stokes          = true
+
+	[../prec]
+	prectype                = Ifpack # Ifpack or ML
+	displayList             = false
+
+		[./ML]
+		analyze_smoother        = false
+		default_parameter_list 	= DD-ML    # for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
+
+			[./smoother]
+			# smoother type
+			# Aztec, IFPACK, Jacobi, ML symmetric Gauss-Seidel, symmetric Gauss-Seidel,
+			# ML Gauss-Seidel, Gauss-Seidel, Chebyshev, MLS, Hiptmair, Amesos-KLU,
+			# Amesos-Superlu, Amesos-UMFPACK, Amesos-Superludist, Amesos-MUMPS,
+			# user-defined, SuperLU, IFPACK-Chebyshev, self, do-nothing,
+			# IC, ICT, ILU, ILUT
+			type                    = IFPACK
+			pre_or_post             = pre
+			sweeps                  = 3
+			damping_factor          = 1
+
+			[../coarse]
+			#type                    = Amesos-UMFPACK
+			type                    = Amesos-KLU
+			sweeps                  = 1
+			pre_or_post             = both
+			max_size                = 200
+
+			[../repartition]
+			enable                  = 1
+			partitioner             = ParMETIS
+			max_min_ration          = 1.3
+			min_per_proc            = 500
+
+			[../energy_minimization]
+			enable			= true
+			type			= 3
+			[../]
+
+        # ifpack
+        [../ifpack]
+        overlap		= 2
+
+           	[./fact]
+           	ilut_level-of-fill            = 1
+           	drop_tolerance                = 1.e-5
+           	relax_value                   = 0
+
+           	[../amesos]
+           	solvertype =  Amesos_Umfpack # Amesos_KLU or Amesos_Umfpack
+
+           	[../partitioner]
+           	overlap = 2
+
+           	[../schwarz]
+           	reordering_type = none #metis, rcm, none
+           	filter_singletons = true
+
+			[../]
+		[../]
+
+    [../solver]
+    solver          = gmres
+    scaling         = none
+    output          = all # none
+    conv            = rhs
+    max_iter        = 200
+    reuse           = true
+    max_iter_reuse  = 80
+    kspace          = 100
+    tol             = 1.e-10    # AztecOO tolerance
+
+    [../ipstab]
+    gammaBeta  = 0.7
+    gammaDiv   = 0.7
+    gammaPress = 0.7
+    max_iter_reuse  = 60
+
+    [../problem]
+    #a = 1.57
+    #d = 0.78
+    sigma = 0
+
