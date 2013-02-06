@@ -6,7 +6,7 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
 
 
 TRIBITS_ADD_EXECUTABLE_AND_TEST(
-  DarcyTest
+  BasicTest_3D
   SOURCES main.cpp  user_fun.cpp darcy.cpp
   ARGS -c
   NUM_MPI_PROCS 3
