@@ -38,6 +38,7 @@
 
 #include <lifev/core/mesh/NeighborMarker.hpp>
 #include <lifev/core/array/MapEpetra.hpp>
+#include <lifev/core/mesh/GraphCutterBase.hpp>
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -74,6 +75,7 @@ public:
     typedef std::map< UInt, mapPtr_Type > mapList_Type;
     typedef std::vector<std::vector<Int> > graph_Type;
     typedef boost::shared_ptr<graph_Type> graphPtr_Type;
+    typedef boost::shared_ptr<GraphCutterBase<Mesh> > graphCutterPtr_Type;
     typedef std::vector<int> flag_Type;
 
     //@}
@@ -196,8 +198,17 @@ public:
     //! fill entityPID
     void fillEntityPID( graphPtr_Type elemGraph, std::vector<std::vector<UInt> >& entityPID );
 
+    //! fill entityPID
+    void fillEntityPID( graphCutterPtr_Type graphCutter,
+    					std::vector<std::vector<UInt> >& entityPID );
+
     //! create ghost map
     void ghostMapOnElementsP1( graphPtr_Type elemGraph, const std::vector<UInt> & entityPID, UInt overlap );
+
+    //! create ghost map
+    void ghostMapOnElementsP1( graphCutterPtr_Type graphCutter,
+    						   const std::vector<UInt> & entityPID,
+    						   UInt overlap );
 
     //! create ghost map
     map_Type & ghostMapOnNodesMap( UInt overlap );
@@ -1123,6 +1134,64 @@ void GhostHandler<Mesh>::fillEntityPID( graphPtr_Type elemGraph, std::vector<std
 }
 
 template <typename Mesh>
+void GhostHandler<Mesh>::fillEntityPID(
+		graphCutterPtr_Type graphCutter,
+		std::vector<std::vector<UInt> >& entityPID )
+{
+    if ( M_verbose ) std::cout << " GH- fillEntityPID()" << std::endl;
+
+    // initialize pointPID to NumProc
+    std::vector<UInt> & pointPID = entityPID[ 3 ];
+    std::vector<UInt> & elemPID = entityPID[ 0 ];
+    std::vector<UInt> & facetPID = entityPID[ 1 ];
+    std::vector<UInt> & ridgePID = entityPID[ 2 ];
+    pointPID.resize( M_fullMesh->numPoints(), M_comm->NumProc() );
+    elemPID.resize( M_fullMesh->numElements(), M_comm->NumProc() );
+    facetPID.resize( M_fullMesh->numFacets(), M_comm->NumProc() );
+    ridgePID.resize( M_fullMesh->numRidges(), M_comm->NumProc() );
+
+    // @todo: check if parallel building + comm is faster
+    for( UInt p = 0; p < static_cast<UInt>( M_comm->NumProc() ); p++ )
+    {
+    	std::vector<Int>& currentPart = graphCutter->getPart(p);
+		for( UInt e = 0; e < currentPart.size(); e++ )
+        {
+            // point block
+            for ( UInt k = 0; k < mesh_Type::element_Type::S_numPoints; k++ )
+            {
+                const ID & pointID = M_fullMesh->element( currentPart[ e ] ).point( k ).id();
+                const UInt & pointCurrentPID = pointPID[ pointID ];
+                // pointPID should be the minimum between the proc that own it
+                if( p < pointCurrentPID ) pointPID[ pointID ] = p;
+            }
+
+            // elem block
+            const ID & elemID = M_fullMesh->element( currentPart[ e ] ).id();
+            // elemPID is always at its initialization value
+            elemPID[ elemID ] = p;
+
+            // facet block
+            for ( UInt k = 0; k < mesh_Type::element_Type::S_numFacets; k++ )
+            {
+                const ID & facetID = M_fullMesh->facet( M_fullMesh->localFacetId( elemID, k ) ).id();
+                const UInt & facetCurrentPID = facetPID[ facetID ];
+                // facetPID should be the minimum between the proc that own it
+                if( p < facetCurrentPID ) facetPID[ facetID ] = p;
+            }
+
+            // ridge block
+            for ( UInt k = 0; k < mesh_Type::element_Type::S_numRidges; k++ )
+            {
+                const ID & ridgeID = M_fullMesh->ridge( M_fullMesh->localRidgeId( elemID, k ) ).id();
+                const UInt & ridgeCurrentPID = ridgePID[ ridgeID ];
+                // ridgePID should be the minimum between the proc that own it
+                if( p < ridgeCurrentPID ) ridgePID[ ridgeID ] = p;
+            }
+        }
+    }
+}
+
+template <typename Mesh>
 void GhostHandler<Mesh>::ghostMapOnElementsP1( graphPtr_Type elemGraph,
                                                const std::vector<UInt> & pointPID,
                                                UInt overlap )
@@ -1182,6 +1251,155 @@ void GhostHandler<Mesh>::ghostMapOnElementsP1( graphPtr_Type elemGraph,
         for ( UInt k = 0; k < mesh_Type::element_Type::S_numPoints; k++ )
         {
             const ID & pointID = M_fullMesh->element( (*elemGraph)[ M_me ][ e ] ).point( k ).id();
+            isInPartition[ pointID ] = true;
+        }
+    }
+
+    // find subdomain interface nodes
+    std::set<Int> mySubdIntPoints;
+    for( UInt k = 0; k < myPoints.size(); k++ )
+    {
+        int const & currentPoint = myPoints[ k ];
+        // mark as SUBD_INT point only if the point is owned by current process
+        if( pointPID[ currentPoint ] == M_me )
+        {
+
+            // check if all neighbors are on this proc
+            for( neighbors_Type::const_iterator neighborIt = M_nodeNodeNeighborsList[ currentPoint ].begin();
+                 neighborIt != M_nodeNodeNeighborsList[ currentPoint ].end(); ++neighborIt )
+            {
+                // add the point if a neighbor is missing
+                if( !isInPartition[ *neighborIt ] )
+                {
+                    mySubdIntPoints.insert( currentPoint );
+                    break;
+                }
+            }
+        }
+    }
+#ifdef HAVE_LIFEV_DEBUG
+    M_debugOut << "own SUBDOMAIN_INTERFACE points on proc " << M_me << std::endl;
+    for( std::set<Int>::const_iterator i = mySubdIntPoints.begin(); i != mySubdIntPoints.end(); ++i )
+        M_debugOut << *i << std::endl;
+#endif
+
+    std::vector<int> workingPoints( mySubdIntPoints.begin(), mySubdIntPoints.end() );
+    std::set<int> newPoints;
+    std::set<int> augmentedElemsSet( myElems.begin(), myElems.end() );
+
+    for( UInt o = 0; o < overlap; o++ )
+    {
+#ifdef HAVE_LIFEV_DEBUG
+        M_debugOut << "workingPoints" << std::endl;
+        for( UInt i = 0; i < workingPoints.size(); i++ )
+            M_debugOut << workingPoints[ i ] << std::endl;
+#endif
+
+        for( UInt k = 0; k < workingPoints.size(); k++ )
+        {
+            const int & currentPoint = workingPoints[ k ];
+            // iterate on point neighborhood
+            for ( neighbors_Type::const_iterator neighborIt = M_nodeElementNeighborsList[ currentPoint ].begin();
+                            neighborIt != M_nodeElementNeighborsList[ currentPoint ].end(); ++neighborIt )
+            {
+                std::pair<std::set<Int>::iterator, bool> isInserted = augmentedElemsSet.insert( *neighborIt );
+                if( isInserted.second )
+                {
+                    // if the element is inserted in the list, we add its points to the ones
+                    // to be checked for next overlap value
+                    for ( UInt j = 0; j < mesh_Type::element_Type::S_numPoints; j++ )
+                        newPoints.insert( M_fullMesh->element( *neighborIt ).point( j ).id() );
+                }
+            }
+        }
+
+#ifdef HAVE_LIFEV_DEBUG
+        M_debugOut << "augmentedElemsSet" << std::endl;
+        for( std::set<Int>::const_iterator i = augmentedElemsSet.begin(); i != augmentedElemsSet.end(); ++i )
+            M_debugOut << *i << std::endl;
+#endif
+
+        // clean up newPoints from already analized points
+        for( UInt k = 0; k < workingPoints.size(); k++ )
+        {
+            newPoints.erase( newPoints.find( workingPoints[ k ] ) );
+        }
+#ifdef HAVE_LIFEV_DEBUG
+        M_debugOut << "newPoints" << std::endl;
+        for( std::set<int>::const_iterator i = newPoints.begin(); i != newPoints.end(); ++i )
+            M_debugOut << *i << std::endl;
+#endif
+
+        // set up workingPoints if we are not exiting
+        if( o + 1 < overlap  )
+            workingPoints.assign( newPoints.begin(), newPoints.end() );
+    }
+
+    // assign the augmentedElems to the element graph
+    myElems.assign( augmentedElemsSet.begin(), augmentedElemsSet.end() );
+}
+
+template <typename Mesh>
+void GhostHandler<Mesh>::ghostMapOnElementsP1( graphCutterPtr_Type graphCutter,
+                                               const std::vector<UInt> & pointPID,
+                                               UInt overlap )
+{
+    if ( M_verbose ) std::cout << " GH- ghostMapOnElementsP1( graph )" << std::endl;
+
+    // check that the nodeElementNeighborsMap has been created
+    if ( M_nodeElementNeighborsList.empty()  )
+    {
+        if ( M_verbose ) std::cerr << "the nodeElementNeighborsMap is empty, will be generated now" << std::endl;
+        this->createNodeElementNeighborsMap();
+    }
+    if ( M_nodeNodeNeighborsList.empty()  )
+    {
+        if ( M_verbose ) std::cerr << "the nodeElementNeighborsMap is empty, will be generated now" << std::endl;
+        this->createNodeNodeNeighborsMap();
+    }
+
+    std::vector<int> & myElems = graphCutter->getPart(M_me);
+#ifdef HAVE_LIFEV_DEBUG
+    // show own elements
+    M_debugOut << "own elements on proc " << M_me << std::endl;
+    for( UInt i = 0; i < myElems.size(); i++ )
+        M_debugOut << myElems[ i ] << std::endl;
+#endif
+
+    // generate graph of points
+    graph_Type pointGraph( M_comm->NumProc() );
+
+    // @todo: check if parallel building + comm is faster
+    for( UInt p = 0; p < static_cast<UInt>( M_comm->NumProc() ); p++ )
+    {
+    	std::vector<Int>& currentPart = graphCutter->getPart(p);
+        std::set<int> localPointsSet;
+        for( UInt e = 0; e < currentPart.size(); e++ )
+        {
+            // point block
+            for ( UInt k = 0; k < mesh_Type::element_Type::S_numPoints; k++ )
+            {
+                const ID & pointID = M_fullMesh->element( currentPart[ e ] ).point( k ).id();
+                localPointsSet.insert( pointID );
+            }
+        }
+        pointGraph[ p ].assign( localPointsSet.begin(), localPointsSet.end() );
+    }
+
+    std::vector<int> const & myPoints = pointGraph[ M_me ];
+#ifdef HAVE_LIFEV_DEBUG
+    M_debugOut << "own points on proc " << M_me << std::endl;
+    for( UInt i = 0; i < myPoints.size(); i++ )
+        M_debugOut << myPoints[ i ] << std::endl;
+#endif
+
+    // initialize a bool vector to know if a point is in current partition
+    std::vector<bool> isInPartition( M_fullMesh->numPoints(), false );
+    for( UInt e = 0; e < graphCutter->getPart(M_me).size(); e++ )
+    {
+        for ( UInt k = 0; k < mesh_Type::element_Type::S_numPoints; k++ )
+        {
+            const ID & pointID = M_fullMesh->element( (graphCutter->getPart(M_me))[ e ] ).point( k ).id();
             isInPartition[ pointID ] = true;
         }
     }

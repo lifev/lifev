@@ -49,6 +49,7 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/LifeV.hpp>
+#include <lifev/core/mesh/GraphCutterBase.hpp>
 
 namespace LifeV {
 
@@ -81,7 +82,7 @@ struct TransportBuffer
     More on class functionality to follow. Stay tuned...
  */
 template<typename MeshType>
-class GraphCutterZoltan
+class GraphCutterZoltan : public GraphCutterBase<MeshType>
 {
 public:
     //! @name Public Types
@@ -116,13 +117,17 @@ public:
     //! @name Public methods
     //@{
     //! Performs the graph partitioning
-    Int run();
+    virtual Int run();
     //@}
 
     //! @name Get Methods
     //@{
     //! Get a pointer to one of the parts
-    const std::vector<Int>& getPart(const UInt i) const
+    virtual const std::vector<Int>& getPart(const UInt i) const
+	{
+    	return M_partitionTable.find(i)->second;
+	}
+    virtual std::vector<Int>& getPart(const UInt i)
 	{
     	return M_partitionTable.find(i)->second;
 	}
@@ -196,7 +201,7 @@ private:
     //! @name Private methods
     //@{
     //! Set values for all the parameters, with default values where needed
-    void setParameters(pList_Type& parameters);
+    virtual void setParameters(pList_Type& parameters);
     //@}
 
     // Private copy constructor and assignment operator are disabled

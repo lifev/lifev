@@ -87,10 +87,6 @@ public:
     typedef boost::shared_ptr<mesh_Type>         meshPtr_Type;
     typedef std::vector<meshPtr_Type>            partMesh_Type;
     typedef boost::shared_ptr<partMesh_Type>     partMeshPtr_Type;
-    //! Container for the ghost data
-    //typedef std::vector <GhostEntityData>        GhostEntityDataContainer_Type;
-    //! Map processor -> container for the ghost data
-    //typedef std::map <UInt, GhostEntityDataContainer_Type> GhostEntityDataMap_Type;
     //@}
 
     //! \name Constructors & Destructors
@@ -163,7 +159,6 @@ private:
     boost::shared_ptr<graphCutter_Type>        M_graphCutter;
     boost::shared_ptr<meshPartBuilder_Type>    M_meshPartBuilder;
     bool                                       M_success;
-    //GhostEntityDataMap_Type                    M_ghostDataMap;
     //@}
 }; // class MeshPartitionToolOnline
 
@@ -191,7 +186,8 @@ MeshPartitionTool<MeshType,
     M_meshPart(),
     M_allMeshParts(),
     M_graphCutter(new graphCutter_Type(M_originalMesh, M_comm, M_parameters)),
-	M_meshPartBuilder(new meshPartBuilder_Type(M_originalMesh)),
+	M_meshPartBuilder(new meshPartBuilder_Type(M_originalMesh, M_graphCutter,
+					  M_parameters.get<UInt>("overlap", 0), M_comm)),
 	M_success(false)
 {
     run();
@@ -228,7 +224,7 @@ void MeshPartitionTool<MeshType,
 		// Online partitioning
 		M_meshPart.reset(new mesh_Type);
 	    const std::vector<Int>& myElements = M_graphCutter->getPart(M_myPID);
-		M_meshPartBuilder->run(M_meshPart, myElements);
+		M_meshPartBuilder->run(M_meshPart, myElements, M_myPID);
 
 	    // Mark the partition as successful
 	    M_success = true;
@@ -247,7 +243,7 @@ void MeshPartitionTool<MeshType,
 			    const std::vector<Int>& curElements
 			    		= M_graphCutter->getPart(curPart);
 				M_meshPartBuilder->run(M_allMeshParts->at(curPart),
-									   curElements);
+									   curElements, curPart);
 
 			    // Mark the partition as successful
 			    M_success = true;

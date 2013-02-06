@@ -42,10 +42,15 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/shared_ptr.hpp>
 
+#include <Epetra_Comm.h>
+
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include<lifev/core/LifeV.hpp>
+
+#include <lifev/core/array/GhostHandler.hpp>
+#include <lifev/core/mesh/GraphCutterBase.hpp>
 
 namespace LifeV
 {
@@ -70,6 +75,8 @@ public:
     //@{
     typedef MeshType mesh_Type;
     typedef boost::shared_ptr<mesh_Type> meshPtr_Type;
+    typedef boost::shared_ptr<Epetra_Comm>       commPtr_Type;
+    typedef boost::shared_ptr<GraphCutterBase<MeshType> > graphCutterPtr_Type;
     //@}
 
     //! \name Constructors & Destructors
@@ -82,7 +89,9 @@ public:
      *
      * \param mesh - shared pointer to the global uncut mesh
     */
-    MeshPartBuilder(const meshPtr_Type& mesh);
+    MeshPartBuilder(const meshPtr_Type& mesh, const graphCutterPtr_Type& graph,
+    				const UInt overlap,
+    				const commPtr_Type& comm);
 
     //! Empty destructor
     ~MeshPartBuilder() {}
@@ -100,7 +109,8 @@ public:
      * 						element IDs associated with this mesh part
      */
     void run(const meshPtr_Type& meshPart,
-    		 const std::vector<Int>& elementList);
+    		 const std::vector<Int>& elementList,
+    		 const UInt partIndex);
     //@}
 
     //! \name Get Methods
@@ -153,6 +163,13 @@ private:
     void reset();
     //@}
 
+    //! Mark entity ownership
+    /*!
+      Mark all owned entities in the partition with EntityFlag::OWNED
+      to properly build map members in DOF::GlobalElements().
+    */
+    void markEntityOwnership();
+
     //! Private Data Members
     //@{
     UInt                                       M_nBoundaryVertices;
@@ -170,13 +187,21 @@ private:
     std::map<Int, Int>                         M_globalToLocalElement;
     meshPtr_Type                               M_originalMesh;
     meshPtr_Type                               M_meshPart;
+    graphCutterPtr_Type                        M_graph;
+    UInt                                       M_partIndex;
+    UInt                                       M_overlap;
+    std::vector<std::vector<UInt> >            M_entityPID;
+    commPtr_Type                               M_comm;
     //@}
 }; // class MeshPartBuilder
 
 // IMPLEMENTATION
 
 template<typename MeshType>
-MeshPartBuilder<MeshType>::MeshPartBuilder(const meshPtr_Type& mesh)
+MeshPartBuilder<MeshType>::MeshPartBuilder(const meshPtr_Type& mesh,
+										   const graphCutterPtr_Type& graph,
+										   const UInt overlap,
+										   const commPtr_Type& comm)
 	: M_nBoundaryVertices(0),
 	  M_nBoundaryRidges(0),
 	  M_nBoundaryFacets(0),
@@ -185,14 +210,28 @@ MeshPartBuilder<MeshType>::MeshPartBuilder(const meshPtr_Type& mesh)
 	  M_elementRidges(MeshType::elementShape_Type::S_numRidges),
 	  M_facetVertices(MeshType::facetShape_Type::S_numVertices),
 	  M_originalMesh(mesh),
-	  M_meshPart()
+	  M_meshPart(),
+	  M_graph(graph),
+	  M_partIndex(0),
+	  M_overlap(overlap),
+	  M_entityPID(4),
+	  M_comm(comm)
 {}
 
 template<typename MeshType>
 void MeshPartBuilder<MeshType>::run(const meshPtr_Type& meshPart,
-									const std::vector<Int>& elementList)
+									const std::vector<Int>& elementList,
+									const UInt partIndex)
 {
 	M_meshPart = meshPart;
+	M_partIndex = partIndex;
+
+    if( M_overlap != 0)
+    {
+        GhostHandler<mesh_Type> gh( M_originalMesh, M_comm );
+        gh.fillEntityPID( M_graph, M_entityPID );
+        gh.ghostMapOnElementsP1( M_graph, M_entityPID[ 3 ], 1 );
+     }
 
     constructLocalMesh(elementList);
     constructVertices();
@@ -201,6 +240,8 @@ void MeshPartBuilder<MeshType>::run(const meshPtr_Type& meshPart,
     constructFacets();
 
     finalSetup();
+
+    markEntityOwnership();
 
     reset();
 }
@@ -432,46 +473,52 @@ void MeshPartBuilder<MeshType>::constructFacets()
 
         pf->setLocalId( count );
 
-        // true if we are on a subdomain border
+        for (ID id = 0; id < M_originalMesh->facet(*is).S_numLocalVertices; ++id)
+		{
+			inode = pf->point(id).id();
+			im = M_globalToLocalVertex.find(inode);
+			pf->setPoint(id, M_meshPart->pointList((*im).second));
+		}
+
+		// true if we are on a subdomain border
+		ID ghostElem = ( localElem1 == NotAnId ) ? elem1 : elem2;
+
         if ( !boundary && ( localElem1 == NotAnId || localElem2 == NotAnId ) )
         {
             // set the flag for faces on the subdomain border
             pf->setFlag( EntityFlags::SUBDOMAIN_INTERFACE );
+            // set the flag for all points on that face
+            for ( UInt pointOnFacet = 0; pointOnFacet < MeshType::facet_Type::S_numLocalPoints; pointOnFacet++ )
+            {
+                M_meshPart->point( pf->point( pointOnFacet ).localId() ).setFlag( EntityFlags::SUBDOMAIN_INTERFACE );
+            }
         }
 
-        ASSERT((localElem1 != NotAnId)||(localElem2 != NotAnId),
-			   "A hanging face in mesh partitioner!");
+        ASSERT((localElem1 != NotAnId)||(localElem2 != NotAnId),"A hanging facet in mesh partitioner!");
 
-        if (localElem1 == NotAnId)
+        if ( localElem1 == NotAnId )
          {
              pf->firstAdjacentElementIdentity()  = localElem2;
-             pf->firstAdjacentElementPosition()
-				 = M_originalMesh->face(*is).secondAdjacentElementPosition();
-             pf->secondAdjacentElementIdentity() = NotAnId;
+             pf->firstAdjacentElementPosition()  = M_originalMesh->facet(*is).secondAdjacentElementPosition();
+             pf->secondAdjacentElementIdentity() = ghostElem;
              pf->secondAdjacentElementPosition() = NotAnId;
              pf->reversePoints();
          }
+        else if ( localElem2 == NotAnId )
+        {
+            pf->firstAdjacentElementIdentity()  = localElem1;
+            pf->firstAdjacentElementPosition()  = M_originalMesh->facet(*is).firstAdjacentElementPosition();
+            pf->secondAdjacentElementIdentity() = ghostElem;
+            pf->secondAdjacentElementPosition() = NotAnId;
+        }
         else
         {
             pf->firstAdjacentElementIdentity()  = localElem1;
-            pf->firstAdjacentElementPosition()
-				= M_originalMesh->face(*is).firstAdjacentElementPosition();
+            pf->firstAdjacentElementPosition()  = M_originalMesh->facet(*is).firstAdjacentElementPosition();
             pf->secondAdjacentElementIdentity() = localElem2;
-            pf->secondAdjacentElementPosition()
-				= localElem2 != NotAnId
-						?
-					M_originalMesh->face(*is).secondAdjacentElementPosition()
-						:
-					NotAnId;
+            pf->secondAdjacentElementPosition() = M_originalMesh->facet(*is).secondAdjacentElementPosition();
         }
 
-        for (ID id = 0;
-			 id < M_originalMesh->face(*is).S_numLocalVertices; ++id)
-        {
-            inode = pf->point(id).id();
-            im = M_globalToLocalVertex.find(inode);
-            pf->setPoint(id, M_meshPart->pointList((*im).second));
-        }
     }
     M_meshPart->setLinkSwitch("HAS_ALL_FACETS");
     M_meshPart->setLinkSwitch("FACETS_HAVE_ADIACENCY");
@@ -510,6 +557,52 @@ void MeshPartBuilder<MeshType>::finalSetup()
 }
 
 template<typename MeshType>
+void MeshPartBuilder<MeshType>::markEntityOwnership()
+{
+    if( M_overlap != 0)
+    {
+        // mark owned entities by each partition as described in M_entityPID
+        //M_entityPID or flags should be exported and read back to make it work
+		for( UInt e = 0; e < M_meshPart->numElements(); e++ )
+		{
+			typename MeshType::element_Type & element = M_meshPart->element(e);
+			if(M_entityPID[0][element.id()] != static_cast<UInt>(M_partIndex)) {
+				element.unSetFlag( EntityFlags::OWNED );
+			}
+		}
+
+		for( UInt f = 0; f < M_meshPart->numFacets(); f++ )
+		{
+			typename MeshType::facet_Type & facet = M_meshPart->facet(f);
+			if(M_entityPID[1][facet.id()] != static_cast<UInt>(M_partIndex)) {
+				facet.unSetFlag( EntityFlags::OWNED );
+			}
+		}
+
+		for( UInt r = 0; r < M_meshPart->numRidges(); r++ )
+		{
+			typename MeshType::ridge_Type & ridge = M_meshPart->ridge(r);
+			if(M_entityPID[2][ridge.id()] != static_cast<UInt>(M_partIndex)) {
+				ridge.unSetFlag( EntityFlags::OWNED );
+			}
+		}
+
+		for( UInt p = 0; p < M_meshPart->numPoints(); p++ )
+		{
+			typename MeshType::point_Type & point = M_meshPart->point(p);
+			if(M_entityPID[3][point.id()] != static_cast<UInt>(M_partIndex)) {
+				point.unSetFlag( EntityFlags::OWNED );
+			}
+		}
+
+		clearVector( M_entityPID[ 0 ] );
+        clearVector( M_entityPID[ 1 ] );
+        clearVector( M_entityPID[ 2 ] );
+        clearVector( M_entityPID[ 3 ] );
+    }
+}
+
+template<typename MeshType>
 void MeshPartBuilder<MeshType>::reset()
 {
 	M_nBoundaryVertices = 0;
@@ -522,6 +615,12 @@ void MeshPartBuilder<MeshType>::reset()
 	M_localElements.resize(0);
 	M_globalToLocalVertex.clear();
 	M_globalToLocalElement.clear();
+
+	M_partIndex = 0;
+
+	// Maybe also reset M_entityPID
+	M_entityPID.clear();
+	M_entityPID.resize(4);
 }
 
 }// namespace LifeV

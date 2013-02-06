@@ -52,6 +52,7 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/LifeV.hpp>
+#include <lifev/core/mesh/GraphCutterBase.hpp>
 
 namespace LifeV {
 
@@ -70,7 +71,7 @@ namespace LifeV {
     MeshPartitionTool class during the mesh partition process.
  */
 template<typename MeshType>
-class GraphCutterParMETIS
+class GraphCutterParMETIS : public GraphCutterBase<MeshType>
 {
 public:
     //! @name Public Types
@@ -81,7 +82,7 @@ public:
     typedef boost::shared_ptr<mesh_Type>           meshPtr_Type;
     typedef std::vector<
     		boost::shared_ptr<std::vector<Int> > > vertexPartition_Type;
-    typedef boost::bimap<UInt, UInt>                 biMap_Type;
+    typedef boost::bimap<UInt, UInt>               biMap_Type;
     typedef biMap_Type::value_type                 biMapValue_Type;
     //@}
 
@@ -108,13 +109,17 @@ public:
     //! @name Public methods
     //@{
     //! Performs the graph partitioning
-    Int run();
+    virtual Int run();
     //@}
 
     //! @name Get Methods
     //@{
     //! Get a pointer to one of the partitions
-    const std::vector<Int>& getPart(const UInt i) const
+    virtual const std::vector<Int>& getPart(const UInt i) const
+	{
+    	return *(M_vertexPartition[i]);
+	}
+    virtual std::vector<Int>& getPart(const UInt i)
 	{
     	return *(M_vertexPartition[i]);
 	}
@@ -124,7 +129,7 @@ private:
     //! @name Private methods
     //@{
     //! Set values for all the parameters, with default values where needed
-    void setParameters(pList_Type& parameters);
+    virtual void setParameters(pList_Type& parameters);
 
     //! Perform a flat, non-hierarchical partition
     Int partitionFlat();
