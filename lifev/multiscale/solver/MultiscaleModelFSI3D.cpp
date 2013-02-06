@@ -606,7 +606,6 @@ MultiscaleModelFSI3D::initializeSolution()
     // Initialize the external pressure scalar
     M_externalPressureScalar = M_data->dataSolid()->externalPressure();
     M_data->dataSolid()->setExternalPressure( 0.0 );
-    updateBC();
 #endif
 
     if ( multiscaleProblemStep > 0 )
