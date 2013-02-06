@@ -855,7 +855,7 @@ void BCManageNormal<MatrixType>::M_buildRotationMatrix (const MapEpetra& map, UI
     std::map< ID, std::vector< Real > >::iterator mapIt;
 
     //Creating the matrix
-    M_rotationMatrixPtr.reset ( new matrix_Type(map, 3) );
+    M_rotationMatrixPtr.reset ( new matrix_Type (map, 3) );
 
     //Adding one to the diagonal
     M_rotationMatrixPtr->insertOneDiagonal();

@@ -419,10 +419,16 @@ public:
         return M_nbUpper;
     };
 
-    //! Getter for the number of coordinates
-    inline UInt nbCoor() const
+    //! Old getter for the number of local coordinates
+    inline LIFEV_DEPRECATED ( UInt ) nbCoor() const
     {
-        return M_nbCoor;
+        return M_nbLocalCoor;
+    };
+
+    //! Getter for the number of local coordinates
+    UInt nbLocalCoor () const
+    {
+        return M_nbLocalCoor;
     };
 
     //@}
@@ -610,7 +616,7 @@ protected:
 
     // Constants
     const UInt M_nbNode;
-    const UInt M_nbCoor;
+    const UInt M_nbLocalCoor;
     const UInt M_nbDiag;
     const UInt M_nbUpper;
     const UInt M_nbPattern;
@@ -793,7 +799,7 @@ void CurrentFE::update (const MeshElementMarked& geoele, flag_Type upFlag)
     M_currentId      = geoele.id();
     M_currentLocalId = geoele.localId();
 
-    std::vector< std::vector <Real> > pts (M_nbGeoNode, std::vector<Real> (M_nbCoor) );
+    std::vector< std::vector <Real> > pts (M_nbGeoNode, std::vector<Real> (nDimensions) );
 
     for ( UInt i (0); i < M_nbGeoNode; ++i )
     {
@@ -808,11 +814,11 @@ void CurrentFE::update (const MeshElementMarked& geoele, flag_Type upFlag)
 template<typename MeshElementMarked>
 void CurrentFE::computeCellNodes (const MeshElementMarked& geoele)
 {
-    std::vector< std::vector <Real> > pts (M_nbGeoNode, std::vector<Real> (M_nbCoor) );
+    std::vector< std::vector <Real> > pts (M_nbGeoNode, std::vector<Real> (nDimensions) );
 
     for ( UInt i (0); i < M_nbGeoNode; ++i )
     {
-        for ( UInt icoor (0); icoor < M_nbCoor; ++icoor)
+        for ( UInt icoor (0); icoor < nDimensions; ++icoor)
         {
             pts[i][icoor] = geoele.point (i).coordinate (icoor);
         }

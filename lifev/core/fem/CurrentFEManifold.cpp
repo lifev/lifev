@@ -36,11 +36,11 @@ namespace LifeV
 CurrentFEManifold::CurrentFEManifold (const ReferenceFE& refFE, const GeometricMap& geoMap, const QuadratureRule& qr ) :
     CurrentFE               (refFE, geoMap, qr),
     M_phiGeo                (boost::extents[M_nbGeoNode][M_nbQuadPt]),
-    M_tangents              (boost::extents[M_nbCoor][nDimensions][M_nbQuadPt]),
+    M_tangents              (boost::extents[M_nbLocalCoor][nDimensions][M_nbQuadPt]),
     M_normal                (boost::extents[nDimensions][M_nbQuadPt]),
-    M_metric                (boost::extents[M_nbCoor][M_nbCoor][M_nbQuadPt]),
+    M_metric                (boost::extents[M_nbLocalCoor][M_nbLocalCoor][M_nbQuadPt]),
     M_detMetric             (boost::extents[M_nbQuadPt]),
-    M_inverseMetric         (boost::extents[M_nbCoor][M_nbCoor][M_nbQuadPt]),
+    M_inverseMetric         (boost::extents[M_nbLocalCoor][M_nbLocalCoor][M_nbQuadPt]),
     M_wRootDetMetric        (boost::extents[M_nbQuadPt]),
     M_tangentsUpdated       (false),
     M_normalUpdated         (false),
@@ -55,11 +55,11 @@ CurrentFEManifold::CurrentFEManifold (const ReferenceFE& refFE, const GeometricM
 CurrentFEManifold::CurrentFEManifold (const ReferenceFE& refFE, const GeometricMap& geoMap) :
     CurrentFE         (refFE, geoMap),
     M_phiGeo                (boost::extents[M_nbGeoNode][M_nbQuadPt]),
-    M_tangents              (boost::extents[M_nbCoor][nDimensions][M_nbQuadPt]),
+    M_tangents              (boost::extents[M_nbLocalCoor][nDimensions][M_nbQuadPt]),
     M_normal                (boost::extents[nDimensions][M_nbQuadPt]),
-    M_metric                (boost::extents[M_nbCoor][M_nbCoor][M_nbQuadPt]),
+    M_metric                (boost::extents[M_nbLocalCoor][M_nbLocalCoor][M_nbQuadPt]),
     M_detMetric             (boost::extents[M_nbQuadPt]),
-    M_inverseMetric         (boost::extents[M_nbCoor][M_nbCoor][M_nbQuadPt]),
+    M_inverseMetric         (boost::extents[M_nbLocalCoor][M_nbLocalCoor][M_nbQuadPt]),
     M_wRootDetMetric        (boost::extents[M_nbQuadPt]),
     M_tangentsUpdated       (false),
     M_normalUpdated         (false),
@@ -76,11 +76,11 @@ CurrentFEManifold::CurrentFEManifold (const ReferenceFE& refFE, const GeometricM
                                       UInt currentId, Real invArea ) :
     CurrentFE               (refFE, geoMap, qr),
     M_phiGeo                (boost::extents[M_nbGeoNode][M_nbQuadPt]),
-    M_tangents              (boost::extents[M_nbCoor][nDimensions][M_nbQuadPt]),
+    M_tangents              (boost::extents[M_nbLocalCoor][nDimensions][M_nbQuadPt]),
     M_normal                (boost::extents[nDimensions][M_nbQuadPt]),
-    M_metric                (boost::extents[M_nbCoor][M_nbCoor][M_nbQuadPt]),
+    M_metric                (boost::extents[M_nbLocalCoor][M_nbLocalCoor][M_nbQuadPt]),
     M_detMetric             (boost::extents[M_nbQuadPt]),
-    M_inverseMetric         (boost::extents[M_nbCoor][M_nbCoor][M_nbQuadPt]),
+    M_inverseMetric         (boost::extents[M_nbLocalCoor][M_nbLocalCoor][M_nbQuadPt]),
     M_wRootDetMetric        (boost::extents[M_nbQuadPt]),
     M_tangentsUpdated       (false),
     M_normalUpdated         (false),
@@ -220,7 +220,7 @@ void CurrentFEManifold::computeTangents()
     ASSERT (M_dphiGeometricMapUpdated, "Missing update: dphiGeometricMap");
 
     for (UInt iq (0); iq < M_nbQuadPt; ++iq)
-        for (UInt iTangent (0); iTangent < M_nbCoor; ++iTangent)
+        for (UInt iTangent (0); iTangent < M_nbLocalCoor; ++iTangent)
             for (UInt iCoor (0); iCoor < nDimensions; ++iCoor)
             {
                 M_tangents[iTangent][iCoor][iq] = 0.0;
@@ -239,8 +239,8 @@ void CurrentFEManifold::computeNormal()
 
     Real norm, n1, n2;
 
-    // So far I can't find a general method for dimension n, so we need to switch on M_nbCoor
-    switch (M_nbCoor)
+    // So far I can't find a general method for dimension n, so we need to switch on M_nbLocalCoor
+    switch (M_nbLocalCoor)
     {
         case 1:
             for (UInt iq (0); iq < M_nbQuadPt; ++iq)
@@ -283,11 +283,11 @@ void CurrentFEManifold::computeMetric()
     ASSERT (M_tangentsUpdated, "Missing update: tangents\n");
 
     for (UInt iq (0); iq < M_nbQuadPt; ++iq)
-        for (UInt iTangent (0); iTangent < M_nbCoor; ++iTangent)
+        for (UInt iTangent (0); iTangent < M_nbLocalCoor; ++iTangent)
         {
             // Diagonal part
             M_metric[iTangent][iTangent][iq] = 0.0;
-            for (UInt iCoor (0); iCoor < M_nbCoor + 1; ++iCoor)
+            for (UInt iCoor (0); iCoor < M_nbLocalCoor + 1; ++iCoor)
             {
                 M_metric[iTangent][iTangent][iq] += M_tangents[iTangent][iCoor][iq] * M_tangents[iTangent][iCoor][iq];
             }
@@ -296,7 +296,7 @@ void CurrentFEManifold::computeMetric()
             for (UInt jTangent (0); jTangent < iTangent; ++jTangent)
             {
                 M_metric[iTangent][jTangent][iq] = 0.0;
-                for (UInt iCoor (0); iCoor < M_nbCoor + 1; ++iCoor)
+                for (UInt iCoor (0); iCoor < M_nbLocalCoor + 1; ++iCoor)
                 {
                     M_metric[iTangent][jTangent][iq] += M_tangents[iTangent][iCoor][iq] * M_tangents[jTangent][iCoor][iq];
                 }
@@ -313,7 +313,7 @@ void CurrentFEManifold::computeDetMetric()
 
     for (UInt iq (0); iq < M_nbQuadPt; ++iq)
     {
-        switch (M_nbCoor)
+        switch (M_nbLocalCoor)
         {
             case 1:
                 M_detMetric[iq] = M_metric[0][0][iq];
@@ -335,7 +335,7 @@ void CurrentFEManifold::computeInverseMetric()
 
     for (UInt iq (0); iq < M_nbQuadPt; ++iq)
     {
-        switch (M_nbCoor)
+        switch (M_nbLocalCoor)
         {
             case 1:
                 M_inverseMetric[0][0][iq] = 1. / M_metric[0][0][iq];

@@ -170,7 +170,7 @@ void interpolateGradient (localVector& localGradient,
         {
 
             for (UInt jDim (0); jDim < nDimensions; ++jDim)
-                //for ( jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
+                //for ( jcoor = 0; jcoor < fe.nbLocalCoor(); ++jcoor )
             {
                 localGradient[ iQuadPt ][ iterDim ][ jDim ] = 0.0;
                 for ( UInt i = 0; i < nbFEDof; ++i )
@@ -288,7 +288,7 @@ void advection (MatrixElemental& localAdv,
             for (UInt iQuadPt (0); iQuadPt < nbQuadPt; ++iQuadPt)
             {
                 advGrad = 0.;
-                for (UInt iDim (0); iDim < advCFE.nbCoor(); ++iDim)
+                for (UInt iDim (0); iDim < advCFE.nbLocalCoor(); ++iDim)
                 {
                     advGrad += localValues[iQuadPt][iDim]
                                * advCFE.dphi (jDof, iDim, iQuadPt);

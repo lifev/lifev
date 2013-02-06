@@ -43,7 +43,7 @@ namespace LifeV
 CurrentFE::CurrentFE ( const ReferenceFE& refFE, const GeometricMap& geoMap, const QuadratureRule& qr )
     :
     M_nbNode ( refFE.nbDof() ),
-    M_nbCoor ( refFE.nbCoor() ),
+    M_nbLocalCoor ( refFE.nbLocalCoor() ),
     M_nbDiag ( refFE.nbDiag() ),
     M_nbUpper ( refFE.nbUpper() ) ,
     M_nbPattern ( refFE.nbPattern() ),
@@ -59,19 +59,19 @@ CurrentFE::CurrentFE ( const ReferenceFE& refFE, const GeometricMap& geoMap, con
     M_cellNodes (boost::extents[geoMap.nbDof()][nDimensions]),
     M_quadNodes (boost::extents[M_nbQuadPt][nDimensions]),
 
-    M_dphiGeometricMap (boost::extents[M_nbGeoNode][M_nbCoor][M_nbQuadPt]),
-    M_jacobian (boost::extents[M_nbCoor][M_nbCoor][M_nbQuadPt]),
+    M_dphiGeometricMap (boost::extents[M_nbGeoNode][M_nbLocalCoor][M_nbQuadPt]),
+    M_jacobian (boost::extents[M_nbLocalCoor][M_nbLocalCoor][M_nbQuadPt]),
     M_detJacobian (boost::extents[M_nbQuadPt]),
     M_wDetJacobian (boost::extents[M_nbQuadPt]),
-    M_tInverseJacobian (boost::extents[M_nbCoor][M_nbCoor][M_nbQuadPt]),
+    M_tInverseJacobian (boost::extents[M_nbLocalCoor][M_nbLocalCoor][M_nbQuadPt]),
 
     M_phi (boost::extents[M_nbNode][M_refFE->feDim()][M_nbQuadPt]),
-    M_dphi (boost::extents[M_nbNode][M_nbCoor][M_nbQuadPt]),
-    M_d2phi (boost::extents[M_nbNode][M_nbCoor][M_nbCoor][M_nbQuadPt]),
+    M_dphi (boost::extents[M_nbNode][M_nbLocalCoor][M_nbQuadPt]),
+    M_d2phi (boost::extents[M_nbNode][M_nbLocalCoor][M_nbLocalCoor][M_nbQuadPt]),
     M_phiVect (boost::extents[M_nbNode][M_refFE->feDim()][M_nbQuadPt]),
 
-    M_dphiRef (boost::extents[M_nbNode][M_nbCoor][M_nbQuadPt]),
-    M_d2phiRef (boost::extents[M_nbNode][M_nbCoor][M_nbCoor][M_nbQuadPt]),
+    M_dphiRef (boost::extents[M_nbNode][M_nbLocalCoor][M_nbQuadPt]),
+    M_d2phiRef (boost::extents[M_nbNode][M_nbLocalCoor][M_nbLocalCoor][M_nbQuadPt]),
     M_divPhiRef (boost::extents[M_nbNode][M_nbQuadPt]),
 
     M_cellNodesUpdated (false),
@@ -118,7 +118,7 @@ CurrentFE::CurrentFE ( const ReferenceFE& refFE, const GeometricMap& geoMap, con
             };
 
 
-            for ( UInt icoor (0); icoor < M_nbCoor; ++icoor )
+            for ( UInt icoor (0); icoor < M_nbLocalCoor; ++icoor )
             {
                 // --- DPHI ---
                 if (M_refFE->hasDPhi() )
@@ -132,7 +132,7 @@ CurrentFE::CurrentFE ( const ReferenceFE& refFE, const GeometricMap& geoMap, con
                 // --- D2PHI
                 if (M_refFE->hasD2Phi() )
                 {
-                    for ( UInt jcoor (0); jcoor < M_nbCoor; ++jcoor )
+                    for ( UInt jcoor (0); jcoor < M_nbLocalCoor; ++jcoor )
                     {
                         M_d2phiRef[iterNode][icoor][jcoor][iterQuad] = M_refFE->d2Phi ( iterNode,
                                                                                         icoor, jcoor,
@@ -144,7 +144,7 @@ CurrentFE::CurrentFE ( const ReferenceFE& refFE, const GeometricMap& geoMap, con
         }
         for ( UInt k (0); k < M_nbGeoNode; ++k )
         {
-            for ( UInt icoor (0); icoor < M_nbCoor; ++icoor )
+            for ( UInt icoor (0); icoor < M_nbLocalCoor; ++icoor )
             {
                 M_dphiGeometricMap[k][icoor][iterQuad] = M_geoMap->dPhi ( k, icoor,
                                                                           M_quadRule->quadPointCoor (iterQuad) );
@@ -153,46 +153,39 @@ CurrentFE::CurrentFE ( const ReferenceFE& refFE, const GeometricMap& geoMap, con
     }
 
     M_dphiGeometricMapUpdated = true;
-
-
 }
 
-CurrentFE::CurrentFE ( const ReferenceFE& refFE, const GeometricMap& geoMap )
-    :
-    M_nbNode ( refFE.nbDof() ),
-    M_nbCoor ( refFE.nbCoor() ),
-    M_nbDiag ( refFE.nbDiag() ),
-    M_nbUpper ( refFE.nbUpper() ) ,
-    M_nbPattern ( refFE.nbPattern() ),
+CurrentFE::CurrentFE ( const ReferenceFE& refFE, const GeometricMap& geoMap ) :
+    M_nbNode                  (refFE.nbDof() ),
+    M_nbLocalCoor             (refFE.nbLocalCoor() ),
+    M_nbDiag                  (refFE.nbDiag() ),
+    M_nbUpper                 (refFE.nbUpper() ),
+    M_nbPattern               (refFE.nbPattern() ),
 
-    M_nbGeoNode ( geoMap.nbDof() ),
-    M_nbQuadPt (0),
+    M_nbGeoNode               (geoMap.nbDof() ),
+    M_nbQuadPt                (0),
 
-    M_refFE ( & refFE ),
-    M_geoMap ( &geoMap ),
-    M_quadRule ( 0 ),
+    M_refFE                   (&refFE),
+    M_geoMap                  (&geoMap),
+    M_quadRule                (0),
 
-
-    M_cellNodes (boost::extents[geoMap.nbDof()][nDimensions]),
+    M_cellNodes               (boost::extents[geoMap.nbDof()][nDimensions]),
 
 
-    M_cellNodesUpdated (false),
-    M_quadNodesUpdated (false),
-
+    M_cellNodesUpdated        (false),
+    M_quadNodesUpdated        (false),
     M_dphiGeometricMapUpdated (false),
-    M_jacobianUpdated (false),
-    M_detJacobianUpdated (false),
-    M_wDetJacobianUpdated (false),
+    M_jacobianUpdated         (false),
+    M_detJacobianUpdated      (false),
+    M_wDetJacobianUpdated     (false),
     M_tInverseJacobianUpdated (false),
-
-    M_phiUpdated (false),
-    M_dphiUpdated (false),
-    M_d2phiUpdated (false),
-    M_phiVectUpdated (false),
-
-    M_dphiRefUpdated (false),
-    M_d2phiRefUpdated (false),
-    M_divPhiRefUpdated (false)
+    M_phiUpdated              (false),
+    M_dphiUpdated             (false),
+    M_d2phiUpdated            (false),
+    M_phiVectUpdated          (false),
+    M_dphiRefUpdated          (false),
+    M_d2phiRefUpdated         (false),
+    M_divPhiRefUpdated        (false)
 
 {
     // Nothing to be done here
@@ -200,7 +193,7 @@ CurrentFE::CurrentFE ( const ReferenceFE& refFE, const GeometricMap& geoMap )
 
 CurrentFE::CurrentFE (const CurrentFE& fe) :
     M_nbNode                  (fe.M_nbNode),
-    M_nbCoor                  (fe.M_nbCoor),
+    M_nbLocalCoor             (fe.M_nbLocalCoor),
     M_nbDiag                  (fe.M_nbDiag),
     M_nbUpper                 (fe.M_nbUpper) ,
     M_nbPattern               (fe.M_nbPattern),
@@ -271,7 +264,7 @@ void CurrentFE::coorBackMap (Real x, Real y, Real z,
     // For "simplicity", we use Cramer's formula (no need for an heavy solver)
 
 
-    if (M_nbCoor == 1)
+    if (M_nbLocalCoor == 1)
     {
 
         // 1D Case
@@ -286,7 +279,7 @@ void CurrentFE::coorBackMap (Real x, Real y, Real z,
         zeta = 0;
 
     }
-    else if ( M_nbCoor == 2)
+    else if ( M_nbLocalCoor == 2)
     {
 
         // 2D Case
@@ -310,7 +303,7 @@ void CurrentFE::coorBackMap (Real x, Real y, Real z,
         zeta = 0;
 
     }
-    else if (M_nbCoor == 3)
+    else if (M_nbLocalCoor == 3)
     {
 
         // 3D Case
@@ -377,7 +370,7 @@ Real CurrentFE::pointDetJacobian (Real hat_x, Real hat_y, Real hat_z) const
 {
     Real det (0);
 
-    switch (M_nbCoor)
+    switch (M_nbLocalCoor)
     {
         case 1:
         {
@@ -422,7 +415,7 @@ Real CurrentFE::pointDetJacobian (Real hat_x, Real hat_y, Real hat_z) const
             break;
         }
         default:
-            ERROR_MSG ( "Dimension (M_nbCoor): only 1, 2 or 3!" );
+            ERROR_MSG ( "Dimension (M_nbLocalCoor): only 1, 2 or 3!" );
             break;
     }
 
@@ -432,12 +425,12 @@ Real CurrentFE::pointDetJacobian (Real hat_x, Real hat_y, Real hat_z) const
 Real CurrentFE::pointInverseJacobian (Real hat_x, Real hat_y, Real hat_z,
                                       Int comp_x, Int comp_zeta) const
 {
-    if ( M_nbCoor == 1 )
+    if ( M_nbLocalCoor == 1 )
     {
 
         return 1 / pointJacobian (hat_x, hat_y, hat_z, comp_x, comp_zeta);
     }
-    else if (M_nbCoor == 2)
+    else if (M_nbLocalCoor == 2)
     {
 
         Real a11 = pointJacobian (hat_x, hat_y, hat_z, 0, 0);
@@ -455,7 +448,7 @@ Real CurrentFE::pointInverseJacobian (Real hat_x, Real hat_y, Real hat_z,
         return mysign * pointJacobian (hat_x, hat_y, hat_z, comp_zeta, comp_x) / (a11 * a22 - a12 * a21);
 
     }
-    else if (M_nbCoor == 3)
+    else if (M_nbLocalCoor == 3)
     {
 
         Real a11 = pointJacobian (hat_x, hat_y, hat_z, 0, 0);
@@ -487,7 +480,7 @@ Real CurrentFE::pointInverseJacobian (Real hat_x, Real hat_y, Real hat_z,
     }
     else
     {
-        ERROR_MSG ( "Dimension (M_nbCoor): only 1, 2 or 3!" );
+        ERROR_MSG ( "Dimension (M_nbLocalCoor): only 1, 2 or 3!" );
     };
     return 0.;
 }
@@ -576,7 +569,7 @@ Real CurrentFE::measure() const
     for ( UInt iterQuadNode (0); iterQuadNode < M_nbQuadPt; ++iterQuadNode )
     {
         meas += M_wDetJacobian[iterQuadNode];
-    };
+    }
     return meas;
 }
 
@@ -587,32 +580,42 @@ void CurrentFE::barycenter ( Real& x, Real& y, Real& z ) const
     x = 0.0;
     y = 0.0;
     z = 0.0;
-    switch ( M_nbCoor )
+    /*
+        switch ( M_nbLocalCoor )
+        {
+            case 1:    // 1D
+                for ( UInt i (0); i < M_nbGeoNode ; ++i)
+                {
+                    x += M_cellNodes[i][0];
+                }
+                break;
+            case 2:    // 2D
+                for ( UInt i (0); i < M_nbGeoNode ; ++i)
+                {
+                    x += M_cellNodes[i][0];
+                    y += M_cellNodes[i][1];
+                }
+                break;
+            case 3:    // 3D
+                for ( UInt i (0); i < M_nbGeoNode ; ++i)
+                {
+                    x += M_cellNodes[i][0];
+                    y += M_cellNodes[i][1];
+                    z += M_cellNodes[i][2];
+                }
+                break;
+            default:
+                ERROR_MSG ( "Dimension (M_nbLocalCoor): only 1, 2 or 3!" );
+                break;
+        }
+    */
+    // Note: since in diameter/diameter2 we are considering all the 3 components
+    //       of the cell nodes, why not doing it here too?
+    for (UInt iNode (0); iNode < M_nbGeoNode; ++iNode)
     {
-        case 1:    // 1D
-            for ( UInt i (0); i < M_nbGeoNode ; ++i)
-            {
-                x += M_cellNodes[i][0];
-            }
-            break;
-        case 2:    // 2D
-            for ( UInt i (0); i < M_nbGeoNode ; ++i)
-            {
-                x += M_cellNodes[i][0];
-                y += M_cellNodes[i][1];
-            }
-            break;
-        case 3:    // 3D
-            for ( UInt i (0); i < M_nbGeoNode ; ++i)
-            {
-                x += M_cellNodes[i][0];
-                y += M_cellNodes[i][1];
-                z += M_cellNodes[i][2];
-            }
-            break;
-        default:
-            ERROR_MSG ( "Dimension (M_nbCoor): only 1, 2 or 3!" );
-            break;
+        x += M_cellNodes[iNode][0];
+        y += M_cellNodes[iNode][1];
+        z += M_cellNodes[iNode][2];
     }
 
     x /= M_nbGeoNode;
@@ -682,32 +685,32 @@ void CurrentFE::coorMap ( Real& x, Real& y, Real& z,
     y = 0.0;
     z = 0.0;
     /*
-        switch ( M_nbCoor )
+        switch ( M_nbLocalCoor )
         {
-        case 1:    // 1D
-            for ( UInt i(0); i < M_nbGeoNode; ++i )
-            {
-                x += M_cellNodes[i][0]* M_geoMap->phi( i, xi, eta, zeta );
-            }
-            break;
-        case 2:    // 2D
-            for ( UInt i(0); i < M_nbGeoNode; ++i )
-            {
-                x += M_cellNodes[i][0] * M_geoMap->phi( i, xi, eta, zeta );
-                y += M_cellNodes[i][1] * M_geoMap->phi( i, xi, eta, zeta );
-            }
-            break;
-        case 3:    // 3D
-            for ( UInt i(0); i < M_nbGeoNode; ++i )
-            {
-                x += M_cellNodes[i][0] * M_geoMap->phi( i, xi, eta, zeta );
-                y += M_cellNodes[i][1] * M_geoMap->phi( i, xi, eta, zeta );
-                z += M_cellNodes[i][2] * M_geoMap->phi( i, xi, eta, zeta );
-            }
-            break;
-        default:
-            ERROR_MSG( "Dimension (M_nbCoor): only 1, 2 or 3!" );
-            break;
+            case 1:    // 1D
+                for ( UInt i(0); i < M_nbGeoNode; ++i )
+                {
+                    x += M_cellNodes[i][0]* M_geoMap->phi( i, xi, eta, zeta );
+                }
+                break;
+            case 2:    // 2D
+                for ( UInt i(0); i < M_nbGeoNode; ++i )
+                {
+                    x += M_cellNodes[i][0] * M_geoMap->phi( i, xi, eta, zeta );
+                    y += M_cellNodes[i][1] * M_geoMap->phi( i, xi, eta, zeta );
+                }
+                break;
+            case 3:    // 3D
+                for ( UInt i(0); i < M_nbGeoNode; ++i )
+                {
+                    x += M_cellNodes[i][0] * M_geoMap->phi( i, xi, eta, zeta );
+                    y += M_cellNodes[i][1] * M_geoMap->phi( i, xi, eta, zeta );
+                    z += M_cellNodes[i][2] * M_geoMap->phi( i, xi, eta, zeta );
+                }
+                break;
+            default:
+                ERROR_MSG( "Dimension (M_nbLocalCoor): only 1, 2 or 3!" );
+                break;
         }
     */
 
@@ -788,19 +791,19 @@ void CurrentFE::setQuadRule (const QuadratureRule& newQuadRule)
     // Resize all the arrays that need it
     M_quadNodes.resize (boost::extents[M_nbQuadPt][3]);
 
-    M_dphiGeometricMap.resize (boost::extents[M_nbGeoNode][M_nbCoor][M_nbQuadPt]);
-    M_jacobian.resize (boost::extents[M_nbCoor][M_nbCoor][M_nbQuadPt]);
+    M_dphiGeometricMap.resize (boost::extents[M_nbGeoNode][M_nbLocalCoor][M_nbQuadPt]);
+    M_jacobian.resize (boost::extents[M_nbLocalCoor][M_nbLocalCoor][M_nbQuadPt]);
     M_detJacobian.resize (boost::extents[M_nbQuadPt]);
     M_wDetJacobian.resize (boost::extents[M_nbQuadPt]);
-    M_tInverseJacobian.resize (boost::extents[M_nbCoor][M_nbCoor][M_nbQuadPt]);
+    M_tInverseJacobian.resize (boost::extents[M_nbLocalCoor][M_nbLocalCoor][M_nbQuadPt]);
 
     M_phi.resize (boost::extents[M_nbNode][M_refFE->feDim()][M_nbQuadPt]);
-    M_dphi.resize (boost::extents[M_nbNode][M_nbCoor][M_nbQuadPt]);
-    M_d2phi.resize (boost::extents[M_nbNode][M_nbCoor][M_nbCoor][M_nbQuadPt]);
+    M_dphi.resize (boost::extents[M_nbNode][M_nbLocalCoor][M_nbQuadPt]);
+    M_d2phi.resize (boost::extents[M_nbNode][M_nbLocalCoor][M_nbLocalCoor][M_nbQuadPt]);
     M_phiVect.resize (boost::extents[M_nbNode][M_refFE->feDim()][M_nbQuadPt]);
 
-    M_dphiRef.resize (boost::extents[M_nbNode][M_nbCoor][M_nbQuadPt]);
-    M_d2phiRef.resize (boost::extents[M_nbNode][M_nbCoor][M_nbCoor][M_nbQuadPt]);
+    M_dphiRef.resize (boost::extents[M_nbNode][M_nbLocalCoor][M_nbQuadPt]);
+    M_d2phiRef.resize (boost::extents[M_nbNode][M_nbLocalCoor][M_nbLocalCoor][M_nbQuadPt]);
     M_divPhiRef.resize (boost::extents[M_nbNode][M_nbQuadPt]);
 
     // All the updates have to be done again
@@ -846,7 +849,7 @@ void CurrentFE::setQuadRule (const QuadratureRule& newQuadRule)
                 M_divPhiRefUpdated = true;
             }
 
-            for ( UInt icoor (0); icoor < M_nbCoor; ++icoor )
+            for ( UInt icoor (0); icoor < M_nbLocalCoor; ++icoor )
             {
                 // --- DPHI ---
                 if (M_refFE->hasDPhi() )
@@ -860,7 +863,7 @@ void CurrentFE::setQuadRule (const QuadratureRule& newQuadRule)
                 // --- D2PHI ---
                 if (M_refFE->hasD2Phi() )
                 {
-                    for ( UInt jcoor (0); jcoor < M_nbCoor; ++jcoor )
+                    for ( UInt jcoor (0); jcoor < M_nbLocalCoor; ++jcoor )
                     {
                         M_d2phiRef[iterNode][icoor][jcoor][iterQuad] = M_refFE->d2Phi ( iterNode,
                                                                                         icoor, jcoor,
@@ -872,7 +875,7 @@ void CurrentFE::setQuadRule (const QuadratureRule& newQuadRule)
         }
         for ( UInt k (0); k < M_nbGeoNode; ++k )
         {
-            for ( UInt icoor (0); icoor < M_nbCoor; ++icoor )
+            for ( UInt icoor (0); icoor < M_nbLocalCoor; ++icoor )
             {
                 M_dphiGeometricMap[k][icoor][iterQuad] = M_geoMap->dPhi ( k, icoor,
                                                                           M_quadRule->quadPointCoor (iterQuad) );
@@ -931,7 +934,7 @@ void CurrentFE::computeDphiGeometricMap()
     {
         for (UInt iterNode (0); iterNode < M_nbGeoNode; ++iterNode)
         {
-            for (UInt iterCoor (0); iterCoor < M_nbCoor; ++iterCoor)
+            for (UInt iterCoor (0); iterCoor < M_nbLocalCoor; ++iterCoor)
             {
                 M_dphiGeometricMap[iterNode][iterCoor][iterQuad] = M_geoMap->dPhi (iterNode, iterCoor,
                                                                                    M_quadRule->quadPointCoor (iterQuad) );
@@ -950,9 +953,9 @@ void CurrentFE::computeJacobian()
 
     for (UInt iterQuad (0); iterQuad < M_nbQuadPt ; ++iterQuad)
     {
-        for (UInt icoord (0); icoord < M_nbCoor; ++icoord)
+        for (UInt icoord (0); icoord < M_nbLocalCoor; ++icoord)
         {
-            for (UInt jcoord (0); jcoord < M_nbCoor; ++jcoord)
+            for (UInt jcoord (0); jcoord < M_nbLocalCoor; ++jcoord)
             {
                 partialSum = 0;
                 for (UInt iterNode (0); iterNode < M_nbGeoNode; ++iterNode)
@@ -972,7 +975,7 @@ void CurrentFE::computeTInverseJacobian()
 
     for (UInt iterQuad (0); iterQuad < M_nbQuadPt ; ++iterQuad)
     {
-        switch (M_nbCoor)
+        switch (M_nbLocalCoor)
         {
             case 1:
             {
@@ -1034,7 +1037,7 @@ void CurrentFE::computeTInverseJacobian()
                 break;
             }
             default:
-                ERROR_MSG ( "Dimension (M_nbCoor): only 1, 2 or 3!" );
+                ERROR_MSG ( "Dimension (M_nbLocalCoor): only 1, 2 or 3!" );
                 break;
         }
 
@@ -1049,7 +1052,7 @@ void CurrentFE::computeDetJacobian()
 
     for (UInt iterQuad (0); iterQuad < M_nbQuadPt ; ++iterQuad)
     {
-        switch (M_nbCoor)
+        switch (M_nbLocalCoor)
         {
             case 1:
             {
@@ -1094,7 +1097,7 @@ void CurrentFE::computeDetJacobian()
                 break;
             }
             default:
-                ERROR_MSG ( "Dimension (M_nbCoor): only 1, 2 or 3!" );
+                ERROR_MSG ( "Dimension (M_nbLocalCoor): only 1, 2 or 3!" );
                 break;
         }
     }
@@ -1119,7 +1122,7 @@ void CurrentFE::computeDphiRef()
     {
         for (UInt iterNode (0); iterNode < M_nbNode; ++iterNode)
         {
-            for (UInt iterCoor (0); iterCoor < M_nbCoor; ++iterCoor)
+            for (UInt iterCoor (0); iterCoor < M_nbLocalCoor; ++iterCoor)
             {
                 M_dphiRef[iterNode][iterCoor][iterQuad] = M_refFE->dPhi (iterNode, iterCoor,
                                                                          M_quadRule->quadPointCoor (iterQuad) );
@@ -1140,10 +1143,10 @@ void CurrentFE::computeDphi()
     {
         for (UInt iterNode (0); iterNode < M_nbNode; ++iterNode)
         {
-            for (UInt iterCoor (0); iterCoor < M_nbCoor; ++iterCoor)
+            for (UInt iterCoor (0); iterCoor < M_nbLocalCoor; ++iterCoor)
             {
                 partialSum = 0;
-                for (UInt iter (0); iter < M_nbCoor; ++iter)
+                for (UInt iter (0); iter < M_nbLocalCoor; ++iter)
                 {
                     partialSum += M_tInverseJacobian[iterCoor][iter][iterQuad] * M_dphiRef[iterNode][iter][iterQuad];
                 }
@@ -1161,9 +1164,9 @@ void CurrentFE::computeD2phiRef()
     {
         for (UInt iterNode (0); iterNode < M_nbNode; ++iterNode)
         {
-            for (UInt iterCoor (0); iterCoor < M_nbCoor; ++iterCoor)
+            for (UInt iterCoor (0); iterCoor < M_nbLocalCoor; ++iterCoor)
             {
-                for (UInt iterCoor2 (0); iterCoor2 < M_nbCoor; ++iterCoor2)
+                for (UInt iterCoor2 (0); iterCoor2 < M_nbLocalCoor; ++iterCoor2)
                 {
                     M_d2phiRef[iterNode][iterCoor][iterCoor2][iterQuad] = M_refFE->d2Phi (iterNode, iterCoor, iterCoor2,
                                                                                           M_quadRule->quadPointCoor (iterQuad) );
@@ -1185,14 +1188,14 @@ void CurrentFE::computeD2phi()
     {
         for ( UInt iterNode (0); iterNode < M_nbNode; ++iterNode )
         {
-            for ( UInt icoor (0); icoor < M_nbCoor; ++icoor )
+            for ( UInt icoor (0); icoor < M_nbLocalCoor; ++icoor )
             {
-                for ( UInt jcoor (0); jcoor < M_nbCoor; ++jcoor )
+                for ( UInt jcoor (0); jcoor < M_nbLocalCoor; ++jcoor )
                 {
                     partialSum = 0.;
-                    for ( UInt k1 (0); k1 < M_nbCoor; ++k1 )
+                    for ( UInt k1 (0); k1 < M_nbLocalCoor; ++k1 )
                     {
-                        for ( UInt k2 (0) ; k2 < M_nbCoor; ++k2 )
+                        for ( UInt k2 (0) ; k2 < M_nbLocalCoor; ++k2 )
                         {
                             partialSum += M_tInverseJacobian[icoor][k1][iterQuad]
                                           * M_d2phiRef[iterNode][k1][k2][iterQuad]
@@ -1218,10 +1221,10 @@ void CurrentFE::computePhiVect()
     {
         for ( UInt idof (0); idof < M_nbNode; ++idof )
         {
-            for ( UInt icoor (0); icoor < M_nbCoor; ++icoor )
+            for ( UInt icoor (0); icoor < M_nbLocalCoor; ++icoor )
             {
                 sum = 0.;
-                for ( UInt jcoor (0); jcoor < M_nbCoor; ++jcoor )
+                for ( UInt jcoor (0); jcoor < M_nbLocalCoor; ++jcoor )
                 {
                     sum += M_jacobian[ icoor ][ jcoor ][ ig ] * M_phi[ idof ][ jcoor ][ ig ];
                 }

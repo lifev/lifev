@@ -122,7 +122,7 @@ void stiffness (MatrixElemental& localStiff,
         // Loop on the quadrature noodes
         for (UInt iQuadPt (0); iQuadPt < nbQuadPt; ++iQuadPt)
         {
-            for (UInt iDim (0); iDim < stiffCFE.nbCoor(); ++iDim)
+            for (UInt iDim (0); iDim < stiffCFE.nbLocalCoor(); ++iDim)
             {
                 localValue += stiffCFE.dphi (iDof, iDim, iQuadPt)
                               * stiffCFE.dphi (iDof, iDim, iQuadPt)
@@ -145,13 +145,14 @@ void stiffness (MatrixElemental& localStiff,
             // Loop on the quadrature nodes
             for (UInt iQuadPt (0); iQuadPt < nbQuadPt; ++iQuadPt)
             {
-                for (UInt iDim (0); iDim < stiffCFE.nbCoor(); ++iDim)
+                for (UInt iDim (0); iDim < stiffCFE.nbLocalCoor(); ++iDim)
                 {
                     localValue += stiffCFE.dphi (iDof, iDim, iQuadPt)
                                   * stiffCFE.dphi (jDof, iDim, iQuadPt)
                                   * stiffCFE.wDetJacobian (iQuadPt);
                 }
             }
+
 
             localValue *= coefficient;
 
@@ -540,7 +541,7 @@ void stiff_divgrad ( Real coef, const VectorElemental& uk_loc, MatrixElemental& 
     {
         s = 0;
         // loop on space coordinates
-        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
+        for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
         {
             // s = 0.0; Alessandro
             for ( UInt i = 0; i < fe.nbFEDof(); i++ )
@@ -560,7 +561,7 @@ void stiff_divgrad ( Real coef, const VectorElemental& uk_loc, MatrixElemental& 
         for ( UInt j = 0; j < fe.nbFEDof(); ++j )
         {
             s = 0.0;
-            for ( UInt k = 0; k < fe.nbCoor(); ++k )
+            for ( UInt k = 0; k < fe.nbLocalCoor(); ++k )
             {
                 for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
                 {
@@ -571,7 +572,7 @@ void stiff_divgrad ( Real coef, const VectorElemental& uk_loc, MatrixElemental& 
         }
     }
 
-    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
+    for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); ++icoor )
     {
         MatrixElemental::matrix_view mat = elmat.block ( icoor, icoor );
         mat += mat_tmp;
@@ -584,16 +585,16 @@ void stiff_divgrad_2 ( Real coef, const VectorElemental& uk_loc, MatrixElemental
 {
 
     double s;
-    boost::multi_array<Real, 3> guk (boost::extents[fe.nbCoor()][fe.nbCoor()][fe.nbQuadPt()]);
+    boost::multi_array<Real, 3> guk (boost::extents[fe.nbLocalCoor()][fe.nbLocalCoor()][fe.nbQuadPt()]);
 
     // loop on quadrature points
     for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
         // loop on space coordinates
-        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
+        for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
         {
             // loop  on space coordinates
-            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+            for ( UInt jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
             {
                 s = 0.0;
                 for ( UInt i = 0; i < fe.nbFEDof(); i++ )
@@ -609,9 +610,9 @@ void stiff_divgrad_2 ( Real coef, const VectorElemental& uk_loc, MatrixElemental
     // blocks (icoor,jcoor) of elmat
     //
 
-    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
+    for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); ++icoor )
     {
-        for ( UInt jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
+        for ( UInt jcoor = 0; jcoor < fe.nbLocalCoor(); ++jcoor )
         {
             MatrixElemental::matrix_view mat = elmat.block ( icoor, jcoor );
 
@@ -620,7 +621,7 @@ void stiff_divgrad_2 ( Real coef, const VectorElemental& uk_loc, MatrixElemental
                 for ( UInt j = 0; j < fe.nbFEDof(); ++j )
                 {
                     s = 0;
-                    for ( UInt k = 0; k < fe.nbCoor(); ++k )
+                    for ( UInt k = 0; k < fe.nbLocalCoor(); ++k )
                         for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
                         {
                             s += fe.phiDer ( j, jcoor, ig ) * guk[ icoor ][ k ][ ig ] * fe.phiDer ( i, k, ig ) * fe.weightDet ( ig );
@@ -644,9 +645,9 @@ void stiff_gradgrad ( Real coef, const VectorElemental& uk_loc, MatrixElemental&
     {
         s = 0;
         // loop on space coordinates
-        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
+        for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
         {
-            for ( UInt l = 0; l < fe.nbCoor(); l++ )
+            for ( UInt l = 0; l < fe.nbLocalCoor(); l++ )
             {
                 s1 = 0;
                 for ( UInt i = 0; i < fe.nbFEDof(); i++ )
@@ -666,7 +667,7 @@ void stiff_gradgrad ( Real coef, const VectorElemental& uk_loc, MatrixElemental&
         for ( UInt j = 0; j < fe.nbFEDof(); ++j )
         {
             s = 0.0;
-            for ( UInt k = 0; k < fe.nbCoor(); ++k )
+            for ( UInt k = 0; k < fe.nbLocalCoor(); ++k )
             {
                 for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
                 {
@@ -677,7 +678,7 @@ void stiff_gradgrad ( Real coef, const VectorElemental& uk_loc, MatrixElemental&
         }
     }
 
-    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
+    for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); ++icoor )
     {
         MatrixElemental::matrix_view mat = elmat.block ( icoor, icoor );
         mat += mat_tmp;
@@ -690,16 +691,16 @@ void stiff_gradgrad_2 ( Real coef, const VectorElemental& uk_loc, MatrixElementa
 
     double s;
     boost::multi_array<Real, 3> guk (
-        boost::extents[fe.nbCoor()][fe.nbCoor()][fe.nbQuadPt()]);
+        boost::extents[fe.nbLocalCoor()][fe.nbLocalCoor()][fe.nbQuadPt()]);
 
     // loop on quadrature points
     for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
         // loop on space coordinates
-        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
+        for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
         {
             // loop  on space coordinates
-            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+            for ( UInt jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
             {
                 s = 0.0;
                 for ( UInt i = 0; i < fe.nbFEDof(); i++ )
@@ -711,9 +712,9 @@ void stiff_gradgrad_2 ( Real coef, const VectorElemental& uk_loc, MatrixElementa
         }
     }
 
-    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
+    for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); ++icoor )
     {
-        for ( UInt jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
+        for ( UInt jcoor = 0; jcoor < fe.nbLocalCoor(); ++jcoor )
         {
             MatrixElemental::matrix_view mat = elmat.block ( icoor, jcoor );
 
@@ -722,9 +723,9 @@ void stiff_gradgrad_2 ( Real coef, const VectorElemental& uk_loc, MatrixElementa
                 for ( UInt j = 0; j < fe.nbFEDof(); ++j )
                 {
                     s = 0.0;
-                    for ( UInt k = 0; k < fe.nbCoor(); ++k )
+                    for ( UInt k = 0; k < fe.nbLocalCoor(); ++k )
                     {
-                        for ( UInt l = 0; l < fe.nbCoor(); ++l )
+                        for ( UInt l = 0; l < fe.nbLocalCoor(); ++l )
                         {
                             for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
                             {
@@ -745,18 +746,18 @@ void stiff_dergrad_gradbis ( Real coef, const VectorElemental& uk_loc, MatrixEle
 
     double s;
     boost::multi_array<Real, 3> guk (
-        boost::extents[fe.nbCoor()][fe.nbCoor()][fe.nbQuadPt()]);
+        boost::extents[fe.nbLocalCoor()][fe.nbLocalCoor()][fe.nbQuadPt()]);
 
     // loop on quadrature points
     for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
 
         // loop on space coordinates
-        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
+        for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
         {
 
             // loop  on space coordinates
-            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+            for ( UInt jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
             {
                 s = 0.0;
                 for ( UInt i = 0; i < fe.nbFEDof(); i++ )
@@ -771,9 +772,9 @@ void stiff_dergrad_gradbis ( Real coef, const VectorElemental& uk_loc, MatrixEle
     // blocks (icoor,jcoor) of elmat
     //
 
-    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
+    for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); ++icoor )
     {
-        for ( UInt jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
+        for ( UInt jcoor = 0; jcoor < fe.nbLocalCoor(); ++jcoor )
         {
 
             MatrixElemental::matrix_view mat = elmat.block ( icoor, jcoor );
@@ -783,7 +784,7 @@ void stiff_dergrad_gradbis ( Real coef, const VectorElemental& uk_loc, MatrixEle
                 for ( UInt j = 0; j < fe.nbFEDof(); ++j )
                 {
                     s = 0.0;
-                    for ( UInt k = 0; k < fe.nbCoor(); ++k )
+                    for ( UInt k = 0; k < fe.nbLocalCoor(); ++k )
                     {
                         for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
                         {
@@ -803,18 +804,18 @@ void stiff_dergrad_gradbis_Tr ( Real coef, const VectorElemental& uk_loc, Matrix
 
     double s;
     boost::multi_array<Real, 3> guk (
-        boost::extents[fe.nbCoor()][fe.nbCoor()][fe.nbQuadPt()]);
+        boost::extents[fe.nbLocalCoor()][fe.nbLocalCoor()][fe.nbQuadPt()]);
 
     // loop on quadrature points
     for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
 
         // loop on space coordinates
-        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
+        for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
         {
 
             // loop  on space coordinates
-            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+            for ( UInt jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
             {
                 s = 0.0;
                 for ( UInt i = 0; i < fe.nbFEDof(); i++ )
@@ -829,9 +830,9 @@ void stiff_dergrad_gradbis_Tr ( Real coef, const VectorElemental& uk_loc, Matrix
     // blocks (icoor,jcoor) of elmat
     //
 
-    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
+    for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); ++icoor )
     {
-        for ( UInt jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
+        for ( UInt jcoor = 0; jcoor < fe.nbLocalCoor(); ++jcoor )
         {
 
             MatrixElemental::matrix_view mat = elmat.block ( icoor, jcoor );
@@ -841,7 +842,7 @@ void stiff_dergrad_gradbis_Tr ( Real coef, const VectorElemental& uk_loc, Matrix
                 for ( UInt j = 0; j < fe.nbFEDof(); ++j )
                 {
                     s = 0.0;
-                    for ( UInt k = 0; k < fe.nbCoor(); ++k )
+                    for ( UInt k = 0; k < fe.nbLocalCoor(); ++k )
                     {
                         for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
                         {
@@ -861,18 +862,18 @@ void stiff_dergrad_gradbis_2 ( Real coef, const VectorElemental& uk_loc, MatrixE
 
     double s;
     boost::multi_array<Real, 3> guk (
-        boost::extents[fe.nbCoor()][fe.nbCoor()][fe.nbQuadPt()]);
+        boost::extents[fe.nbLocalCoor()][fe.nbLocalCoor()][fe.nbQuadPt()]);
 
     // loop on quadrature points
     for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
 
         // loop on space coordinates
-        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
+        for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
         {
 
             // loop  on space coordinates
-            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+            for ( UInt jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
             {
                 s = 0.0;
                 for ( UInt i = 0; i < fe.nbFEDof(); i++ )
@@ -893,9 +894,9 @@ void stiff_dergrad_gradbis_2 ( Real coef, const VectorElemental& uk_loc, MatrixE
         for ( UInt j = 0; j < fe.nbFEDof(); ++j )
         {
             s = 0.0;
-            for ( UInt l = 0; l < fe.nbCoor(); ++l )
+            for ( UInt l = 0; l < fe.nbLocalCoor(); ++l )
             {
-                for ( UInt k = 0; k < fe.nbCoor(); ++k )
+                for ( UInt k = 0; k < fe.nbLocalCoor(); ++k )
                 {
                     for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
                     {
@@ -907,7 +908,7 @@ void stiff_dergrad_gradbis_2 ( Real coef, const VectorElemental& uk_loc, MatrixE
         }
     }
 
-    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
+    for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); ++icoor )
     {
         MatrixElemental::matrix_view mat = elmat.block ( icoor, icoor );
         mat += mat_tmp;
@@ -920,18 +921,18 @@ void stiff_dergrad_gradbis_Tr_2 ( Real coef, const VectorElemental& uk_loc, Matr
 
     double s;
     boost::multi_array<Real, 3> guk (
-        boost::extents[fe.nbCoor()][fe.nbCoor()][fe.nbQuadPt()]);
+        boost::extents[fe.nbLocalCoor()][fe.nbLocalCoor()][fe.nbQuadPt()]);
 
     // loop on quadrature points
     for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
 
         // loop on space coordinates
-        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
+        for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
         {
 
             // loop  on space coordinates
-            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+            for ( UInt jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
             {
                 s = 0.0;
                 for ( UInt i = 0; i < fe.nbFEDof(); i++ )
@@ -952,9 +953,9 @@ void stiff_dergrad_gradbis_Tr_2 ( Real coef, const VectorElemental& uk_loc, Matr
         for ( UInt j = 0; j < fe.nbFEDof(); ++j )
         {
             s = 0.0;
-            for ( UInt l = 0; l < fe.nbCoor(); ++l )
+            for ( UInt l = 0; l < fe.nbLocalCoor(); ++l )
             {
-                for ( UInt k = 0; k < fe.nbCoor(); ++k )
+                for ( UInt k = 0; k < fe.nbLocalCoor(); ++k )
                 {
                     for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
                     {
@@ -966,7 +967,7 @@ void stiff_dergrad_gradbis_Tr_2 ( Real coef, const VectorElemental& uk_loc, Matr
         }
     }
 
-    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor ) // copia del blocco sulla diagonale
+    for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); ++icoor ) // copia del blocco sulla diagonale
     {
         MatrixElemental::matrix_view mat = elmat.block ( icoor, icoor );
         mat += mat_tmp;
@@ -979,21 +980,21 @@ void stiff_gradgradTr_gradbis ( Real coef, const VectorElemental& uk_loc, Matrix
 
     double s;
     boost::multi_array<Real, 3> guk_gukT (
-        boost::extents[fe.nbCoor()][fe.nbCoor()][fe.nbQuadPt()]);
+        boost::extents[fe.nbLocalCoor()][fe.nbLocalCoor()][fe.nbQuadPt()]);
 
     // loop on quadrature points
     for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
 
         // loop on space coordinates
-        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
+        for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
         {
 
             // loop  on space coordinates
-            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+            for ( UInt jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
             {
                 s = 0.0;
-                for ( UInt n = 0; n < fe.nbCoor(); n++ )
+                for ( UInt n = 0; n < fe.nbLocalCoor(); n++ )
                 {
                     for ( UInt i = 0; i < fe.nbFEDof(); i++ )
                     {
@@ -1011,9 +1012,9 @@ void stiff_gradgradTr_gradbis ( Real coef, const VectorElemental& uk_loc, Matrix
     // blocks (icoor,jcoor) of elmat
     //
 
-    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
+    for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); ++icoor )
     {
-        for ( UInt jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
+        for ( UInt jcoor = 0; jcoor < fe.nbLocalCoor(); ++jcoor )
         {
 
             MatrixElemental::matrix_view mat = elmat.block ( icoor, jcoor ); // estrae il blocco (icoor, jcoor)
@@ -1023,7 +1024,7 @@ void stiff_gradgradTr_gradbis ( Real coef, const VectorElemental& uk_loc, Matrix
                 for ( UInt j = 0; j < fe.nbFEDof(); ++j )
                 {
                     s = 0;
-                    for ( UInt k = 0; k < fe.nbCoor(); ++k )
+                    for ( UInt k = 0; k < fe.nbLocalCoor(); ++k )
                         for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
                         {
                             s += fe.phiDer ( i, k, ig ) * guk_gukT[ icoor ][ jcoor ][ ig ] * fe.phiDer ( j, k, ig ) * fe.weightDet ( ig );
@@ -1041,18 +1042,18 @@ void stiff_gradgradTr_gradbis_2 ( Real coef, const VectorElemental& uk_loc, Matr
 
     double s;
     boost::multi_array<Real, 3> guk (
-        boost::extents[fe.nbCoor()][fe.nbCoor()][fe.nbQuadPt()]);
+        boost::extents[fe.nbLocalCoor()][fe.nbLocalCoor()][fe.nbQuadPt()]);
 
     // loop on quadrature points
     for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
 
         // loop on space coordinates
-        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
+        for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
         {
 
             // loop  on space coordinates
-            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+            for ( UInt jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
             {
                 s = 0.0;
                 for ( UInt i = 0; i < fe.nbFEDof(); i++ )
@@ -1067,9 +1068,9 @@ void stiff_gradgradTr_gradbis_2 ( Real coef, const VectorElemental& uk_loc, Matr
     //
     // blocks (icoor,jcoor) of elmat
     //
-    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
+    for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); ++icoor )
     {
-        for ( UInt jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
+        for ( UInt jcoor = 0; jcoor < fe.nbLocalCoor(); ++jcoor )
         {
 
             MatrixElemental::matrix_view mat = elmat.block ( icoor, jcoor ); // estrae il blocco (icoor, jcoor)
@@ -1079,9 +1080,9 @@ void stiff_gradgradTr_gradbis_2 ( Real coef, const VectorElemental& uk_loc, Matr
                 for ( UInt j = 0; j < fe.nbFEDof(); ++j )
                 {
                     s = 0;
-                    for ( UInt l = 0; l < fe.nbCoor(); ++l )
+                    for ( UInt l = 0; l < fe.nbLocalCoor(); ++l )
                     {
-                        for ( UInt k = 0; k < fe.nbCoor(); ++k )
+                        for ( UInt k = 0; k < fe.nbLocalCoor(); ++k )
                         {
                             for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
                             {
@@ -1102,7 +1103,7 @@ void stiff_gradgradTr_gradbis_3 ( Real coef, const VectorElemental& uk_loc, Matr
 
     double s;
     boost::multi_array<Real, 3> guk_gukT (
-        boost::extents[fe.nbCoor()][fe.nbCoor()][fe.nbQuadPt()]);
+        boost::extents[fe.nbLocalCoor()][fe.nbLocalCoor()][fe.nbQuadPt()]);
 
     // attenzione in questa funzione si deve usare il trasposto
     // loop on quadrature points                                                // (\grad u^k  [\grad u^k]^T )^T
@@ -1110,14 +1111,14 @@ void stiff_gradgradTr_gradbis_3 ( Real coef, const VectorElemental& uk_loc, Matr
     {
 
         // loop on space coordinates
-        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
+        for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
         {
 
             // loop  on space coordinates
-            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+            for ( UInt jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
             {
                 s = 0.0;
-                for ( UInt n = 0; n < fe.nbCoor(); n++ )
+                for ( UInt n = 0; n < fe.nbLocalCoor(); n++ )
                 {
                     for ( UInt i = 0; i < fe.nbFEDof(); i++ )
                     {
@@ -1142,9 +1143,9 @@ void stiff_gradgradTr_gradbis_3 ( Real coef, const VectorElemental& uk_loc, Matr
         for ( UInt j = 0; j < fe.nbFEDof(); ++j )
         {
             s = 0.0;
-            for ( UInt l = 0; l < fe.nbCoor(); ++l )
+            for ( UInt l = 0; l < fe.nbLocalCoor(); ++l )
             {
-                for ( UInt k = 0; k < fe.nbCoor(); ++k )
+                for ( UInt k = 0; k < fe.nbLocalCoor(); ++k )
                 {
                     for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
                     {
@@ -1156,7 +1157,7 @@ void stiff_gradgradTr_gradbis_3 ( Real coef, const VectorElemental& uk_loc, Matr
         }
     }
 
-    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor ) // copia del blocco sulla diagonale
+    for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); ++icoor ) // copia del blocco sulla diagonale
     {
         MatrixElemental::matrix_view mat = elmat.block ( icoor, icoor );
         mat += mat_tmp;
@@ -1190,9 +1191,9 @@ void ipstab_grad ( const Real         coef,
     Real x[ 3 ], rx1[ 3 ], drp1[ 3 ], rx2[ 3 ], drp2[ 3 ];
 
     boost::multi_array<Real, 3> phid1 (
-        boost::extents[fe1.nbFEDof()][fe1.nbCoor()][bdfe.nbQuadPt()]);
+        boost::extents[fe1.nbFEDof()][fe1.nbLocalCoor()][bdfe.nbQuadPt()]);
     boost::multi_array<Real, 3> phid2 (
-        boost::extents[fe2.nbFEDof()][fe2.nbCoor()][bdfe.nbQuadPt()]);
+        boost::extents[fe2.nbFEDof()][fe2.nbLocalCoor()][bdfe.nbQuadPt()]);
 
     Real b1[ 3 ], b2[ 3 ];
 
@@ -1205,11 +1206,11 @@ void ipstab_grad ( const Real         coef,
         bdfe.coorQuadPt ( x[ 0 ], x[ 1 ], x[ 2 ], ig );      // quadrature points coordinates
 
         // local coordinates of the quadrature point
-        for ( icoor = 0; icoor < fe1.nbCoor(); ++icoor )
+        for ( icoor = 0; icoor < fe1.nbLocalCoor(); ++icoor )
         {
             sum1 = 0;
             sum2 = 0;
-            for ( jcoor = 0; jcoor < fe1.nbCoor(); ++jcoor )
+            for ( jcoor = 0; jcoor < fe1.nbLocalCoor(); ++jcoor )
             {
                 sum1 += fe1.tInvJac ( jcoor, icoor, 0 ) * ( x[ jcoor ] - b1[ jcoor ] );
                 sum2 += fe2.tInvJac ( jcoor, icoor, 0 ) * ( x[ jcoor ] - b2[ jcoor ] );
@@ -1222,18 +1223,18 @@ void ipstab_grad ( const Real         coef,
         {
 
             // first derivative on the reference element
-            for ( icoor = 0; icoor < fe1.nbCoor(); ++icoor )
+            for ( icoor = 0; icoor < fe1.nbLocalCoor(); ++icoor )
             {
                 drp1[ icoor ] = fe1.refFE().dPhi ( i, icoor, rx1[ 0 ], rx1[ 1 ], rx1[ 2 ] );
                 drp2[ icoor ] = fe2.refFE().dPhi ( i, icoor, rx2[ 0 ], rx2[ 1 ], rx2[ 2 ] );
             }
 
             // first derivative on the current element
-            for ( icoor = 0; icoor < fe1.nbCoor(); ++icoor )
+            for ( icoor = 0; icoor < fe1.nbLocalCoor(); ++icoor )
             {
                 sum1 = 0;
                 sum2 = 0;
-                for ( jcoor = 0; jcoor < fe1.nbCoor(); ++jcoor )
+                for ( jcoor = 0; jcoor < fe1.nbLocalCoor(); ++jcoor )
                 {
                     sum1 += fe1.tInvJac ( icoor, jcoor, 0 ) * drp1[ jcoor ];
                     sum2 += fe2.tInvJac ( icoor, jcoor, 0 ) * drp2[ jcoor ];
@@ -1254,7 +1255,7 @@ void ipstab_grad ( const Real         coef,
         {
             sum = 0.0;
             // Loop on coordinates
-            for ( icoor = 0; icoor < fe1.nbCoor(); ++icoor )
+            for ( icoor = 0; icoor < fe1.nbLocalCoor(); ++icoor )
                 for ( ig = 0; ig < bdfe.nbQuadPt() ; ++ig )
                 {
                     sum += phid1[ i ][ icoor ][ ig ] * phid2[ j ][ icoor ][ ig ] * bdfe.wRootDetMetric ( ig );
@@ -1292,9 +1293,9 @@ void ipstab_grad ( const Real         coef,
     Real x[ 3 ], rx1[ 3 ], drp1[ 3 ], rx2[ 3 ], drp2[ 3 ];
 
     boost::multi_array<Real, 3> phid1 (
-        boost::extents[fe1.nbFEDof()][fe1.nbCoor()][bdfe.nbQuadPt()]);
+        boost::extents[fe1.nbFEDof()][fe1.nbLocalCoor()][bdfe.nbQuadPt()]);
     boost::multi_array<Real, 3> phid2 (
-        boost::extents[fe2.nbFEDof()][fe2.nbCoor()][bdfe.nbQuadPt()]);
+        boost::extents[fe2.nbFEDof()][fe2.nbLocalCoor()][bdfe.nbQuadPt()]);
 
     Real b1[ 3 ], b2[ 3 ];
 
@@ -1307,11 +1308,11 @@ void ipstab_grad ( const Real         coef,
         bdfe.coorQuadPt ( x[ 0 ], x[ 1 ], x[ 2 ], ig );      // quadrature points coordinates
 
         // local coordinates of the quadrature point
-        for ( icoor = 0; icoor < fe1.nbCoor(); ++icoor )
+        for ( icoor = 0; icoor < fe1.nbLocalCoor(); ++icoor )
         {
             sum1 = 0;
             sum2 = 0;
-            for ( jcoor = 0; jcoor < fe1.nbCoor(); ++jcoor )
+            for ( jcoor = 0; jcoor < fe1.nbLocalCoor(); ++jcoor )
             {
                 sum1 += fe1.tInvJac ( jcoor, icoor, 0 ) * ( x[ jcoor ] - b1[ jcoor ] );
                 sum2 += fe2.tInvJac ( jcoor, icoor, 0 ) * ( x[ jcoor ] - b2[ jcoor ] );
@@ -1324,18 +1325,18 @@ void ipstab_grad ( const Real         coef,
         {
 
             // first derivative on the reference element
-            for ( icoor = 0; icoor < fe1.nbCoor(); ++icoor )
+            for ( icoor = 0; icoor < fe1.nbLocalCoor(); ++icoor )
             {
                 drp1[ icoor ] = fe1.refFE().dPhi ( i, icoor, rx1[ 0 ], rx1[ 1 ], rx1[ 2 ] );
                 drp2[ icoor ] = fe2.refFE().dPhi ( i, icoor, rx2[ 0 ], rx2[ 1 ], rx2[ 2 ] );
             }
 
             // first derivative on the current element
-            for ( icoor = 0; icoor < fe1.nbCoor(); ++icoor )
+            for ( icoor = 0; icoor < fe1.nbLocalCoor(); ++icoor )
             {
                 sum1 = 0;
                 sum2 = 0;
-                for ( jcoor = 0; jcoor < fe1.nbCoor(); ++jcoor )
+                for ( jcoor = 0; jcoor < fe1.nbLocalCoor(); ++jcoor )
                 {
                     sum1 += fe1.tInvJac ( icoor, jcoor, 0 ) * drp1[ jcoor ];
                     sum2 += fe2.tInvJac ( icoor, jcoor, 0 ) * drp2[ jcoor ];
@@ -1355,7 +1356,7 @@ void ipstab_grad ( const Real         coef,
         {
             sum = 0.0;
             // Loop on coordinates
-            for ( icoor = 0; icoor < fe1.nbCoor(); ++icoor )
+            for ( icoor = 0; icoor < fe1.nbLocalCoor(); ++icoor )
                 for ( ig = 0; ig < bdfe.nbQuadPt() ; ++ig )
                 {
                     sum += phid1[ i ][ icoor ][ ig ] * phid2[ j ][ icoor ][ ig ] * bdfe.wRootDetMetric ( ig );
@@ -1401,16 +1402,16 @@ void ipstab_bgrad ( const Real         coef,
     // convection velocity \beta on the boundary quadrature points
     //
     boost::multi_array<Real, 2> b (
-        boost::extents[fe1.nbCoor()][bdfe.nbQuadPt()]);
+        boost::extents[fe1.nbLocalCoor()][bdfe.nbQuadPt()]);
 
-    for ( icoor = 0; icoor < fe1.nbCoor(); ++icoor )
+    for ( icoor = 0; icoor < fe1.nbLocalCoor(); ++icoor )
     {
         for ( ig = 0; ig < bdfe.nbQuadPt(); ig++ )
         {
             sum = 0;
             for ( i = 0; i < bdfe.nbFEDof(); ++i )
             {
-                sum += bdfe.phi ( i, ig ) * beta.vec() [ icoor * bdfe.nbCoor() + i ];
+                sum += bdfe.phi ( i, ig ) * beta.vec() [ icoor * bdfe.nbLocalCoor() + i ];
             }
             b[ icoor ][ ig ] = sum;
         }
@@ -1426,9 +1427,9 @@ void ipstab_bgrad ( const Real         coef,
     Real x[ 3 ], rx1[ 3 ], drp1[ 3 ], rx2[ 3 ], drp2[ 3 ];
 
     boost::multi_array<Real, 3> phid1 (
-        boost::extents[fe1.nbFEDof()][fe1.nbCoor()][bdfe.nbQuadPt()]);
+        boost::extents[fe1.nbFEDof()][fe1.nbLocalCoor()][bdfe.nbQuadPt()]);
     boost::multi_array<Real, 3> phid2 (
-        boost::extents[fe2.nbFEDof()][fe2.nbCoor()][bdfe.nbQuadPt()]);
+        boost::extents[fe2.nbFEDof()][fe2.nbLocalCoor()][bdfe.nbQuadPt()]);
 
     Real b1[ 3 ], b2[ 3 ];
 
@@ -1441,11 +1442,11 @@ void ipstab_bgrad ( const Real         coef,
         bdfe.coorQuadPt ( x[ 0 ], x[ 1 ], x[ 2 ], ig );      // quadrature points coordinates
 
         // local coordinates of the quadrature point
-        for ( icoor = 0; icoor < fe1.nbCoor(); ++icoor )
+        for ( icoor = 0; icoor < fe1.nbLocalCoor(); ++icoor )
         {
             sum1 = 0;
             sum2 = 0;
-            for ( jcoor = 0; jcoor < fe1.nbCoor(); ++jcoor )
+            for ( jcoor = 0; jcoor < fe1.nbLocalCoor(); ++jcoor )
             {
                 sum1 += fe1.tInvJac ( jcoor, icoor, 0 ) * ( x[ jcoor ] - b1[ jcoor ] );
                 sum2 += fe2.tInvJac ( jcoor, icoor, 0 ) * ( x[ jcoor ] - b2[ jcoor ] );
@@ -1458,18 +1459,18 @@ void ipstab_bgrad ( const Real         coef,
         {
 
             // first derivative on the reference element
-            for ( icoor = 0; icoor < fe1.nbCoor(); ++icoor )
+            for ( icoor = 0; icoor < fe1.nbLocalCoor(); ++icoor )
             {
                 drp1[ icoor ] = fe1.refFE().dPhi ( i, icoor, rx1[ 0 ], rx1[ 1 ], rx1[ 2 ] );
                 drp2[ icoor ] = fe2.refFE().dPhi ( i, icoor, rx2[ 0 ], rx2[ 1 ], rx2[ 2 ] );
             }
 
             // first derivative on the current element
-            for ( icoor = 0; icoor < fe1.nbCoor(); ++icoor )
+            for ( icoor = 0; icoor < fe1.nbLocalCoor(); ++icoor )
             {
                 sum1 = 0;
                 sum2 = 0;
-                for ( jcoor = 0; jcoor < fe1.nbCoor(); ++jcoor )
+                for ( jcoor = 0; jcoor < fe1.nbLocalCoor(); ++jcoor )
                 {
                     sum1 += fe1.tInvJac ( icoor, jcoor, 0 ) * drp1[ jcoor ];
                     sum2 += fe2.tInvJac ( icoor, jcoor, 0 ) * drp2[ jcoor ];
@@ -1488,8 +1489,8 @@ void ipstab_bgrad ( const Real         coef,
         {
             sum = 0.0;
             // Loop on coordinates
-            for ( icoor = 0; icoor < fe1.nbCoor(); ++icoor )
-                for ( jcoor = 0; jcoor < fe1.nbCoor(); ++jcoor )
+            for ( icoor = 0; icoor < fe1.nbLocalCoor(); ++icoor )
+                for ( jcoor = 0; jcoor < fe1.nbLocalCoor(); ++jcoor )
                     for ( ig = 0; ig < bdfe.nbQuadPt(); ig++ )
                         sum += phid1[ i ][ icoor ][ ig ] * phid2[ j ][ jcoor ][ ig ]
                                * b[ icoor ][ ig ] * b[ jcoor ][ ig ]
@@ -1524,9 +1525,9 @@ void ipstab_div ( const Real coef, MatrixElemental& elmat, const CurrentFE& fe1,
     Real x[ 3 ], rx1[ 3 ], drp1[ 3 ], rx2[ 3 ], drp2[ 3 ];
 
     boost::multi_array<Real, 3> phid1 (
-        boost::extents[fe1.nbFEDof()][fe1.nbCoor()][bdfe.nbQuadPt()]);
+        boost::extents[fe1.nbFEDof()][fe1.nbLocalCoor()][bdfe.nbQuadPt()]);
     boost::multi_array<Real, 3> phid2 (
-        boost::extents[fe2.nbFEDof()][fe2.nbCoor()][bdfe.nbQuadPt()]);
+        boost::extents[fe2.nbFEDof()][fe2.nbLocalCoor()][bdfe.nbQuadPt()]);
 
     Real b1[ 3 ], b2[ 3 ];
 
@@ -1539,11 +1540,11 @@ void ipstab_div ( const Real coef, MatrixElemental& elmat, const CurrentFE& fe1,
         bdfe.coorQuadPt ( x[ 0 ], x[ 1 ], x[ 2 ], ig );      // quadrature points coordinates
 
         // local coordinates of the quadrature point
-        for ( icoor = 0; icoor < fe1.nbCoor(); ++icoor )
+        for ( icoor = 0; icoor < fe1.nbLocalCoor(); ++icoor )
         {
             sum1 = 0;
             sum2 = 0;
-            for ( jcoor = 0; jcoor < fe1.nbCoor(); ++jcoor )
+            for ( jcoor = 0; jcoor < fe1.nbLocalCoor(); ++jcoor )
             {
                 sum1 += fe1.tInvJac ( jcoor, icoor, 0 ) * ( x[ jcoor ] - b1[ jcoor ] );
                 sum2 += fe2.tInvJac ( jcoor, icoor, 0 ) * ( x[ jcoor ] - b2[ jcoor ] );
@@ -1556,18 +1557,18 @@ void ipstab_div ( const Real coef, MatrixElemental& elmat, const CurrentFE& fe1,
         {
 
             // first derivative on the reference element
-            for ( icoor = 0; icoor < fe1.nbCoor(); ++icoor )
+            for ( icoor = 0; icoor < fe1.nbLocalCoor(); ++icoor )
             {
                 drp1[ icoor ] = fe1.refFE().dPhi ( i, icoor, rx1[ 0 ], rx1[ 1 ], rx1[ 2 ] );
                 drp2[ icoor ] = fe2.refFE().dPhi ( i, icoor, rx2[ 0 ], rx2[ 1 ], rx2[ 2 ] );
             }
 
             // first derivative on the current element
-            for ( icoor = 0; icoor < fe1.nbCoor(); ++icoor )
+            for ( icoor = 0; icoor < fe1.nbLocalCoor(); ++icoor )
             {
                 sum1 = 0;
                 sum2 = 0;
-                for ( jcoor = 0; jcoor < fe1.nbCoor(); ++jcoor )
+                for ( jcoor = 0; jcoor < fe1.nbLocalCoor(); ++jcoor )
                 {
                     sum1 += fe1.tInvJac ( icoor, jcoor, 0 ) * drp1[ jcoor ];
                     sum2 += fe2.tInvJac ( icoor, jcoor, 0 ) * drp2[ jcoor ];
@@ -1578,9 +1579,9 @@ void ipstab_div ( const Real coef, MatrixElemental& elmat, const CurrentFE& fe1,
         }
     }
 
-    for ( icoor = 0; icoor < fe1.nbCoor(); ++icoor )
+    for ( icoor = 0; icoor < fe1.nbLocalCoor(); ++icoor )
     {
-        for ( jcoor = 0; jcoor < fe1.nbCoor(); ++jcoor )
+        for ( jcoor = 0; jcoor < fe1.nbLocalCoor(); ++jcoor )
         {
             MatrixElemental::matrix_view mat_icomp = elmat.block ( iblock + icoor, jblock + jcoor );
             // Loop on rows
@@ -1618,9 +1619,9 @@ void ipstab_bagrad ( const Real coef, MatrixElemental& elmat,
     UInt i, j, ig;
 
     boost::multi_array<Real, 3> phid1 (
-        boost::extents[fe1.nbFEDof()][fe1.nbCoor()][bdfe.nbQuadPt()]);
+        boost::extents[fe1.nbFEDof()][fe1.nbLocalCoor()][bdfe.nbQuadPt()]);
     boost::multi_array<Real, 3> phid2 (
-        boost::extents[fe2.nbFEDof()][fe2.nbCoor()][bdfe.nbQuadPt()]);
+        boost::extents[fe2.nbFEDof()][fe2.nbLocalCoor()][bdfe.nbQuadPt()]);
 
     std::vector<Real> x (3), rx1 (3), drp1 (3), rx2 (3), drp2 (3);
     std::vector<Real> b1 (3), b2 (3);
@@ -1638,12 +1639,12 @@ void ipstab_bagrad ( const Real coef, MatrixElemental& elmat,
     {
         sum1 = 0;
         sum2 = 0;
-        for ( icoor = 0; icoor < fe1.nbCoor(); ++icoor )
+        for ( icoor = 0; icoor < fe1.nbLocalCoor(); ++icoor )
         {
-            for ( i = 0; i < bdfe.nbCoor(); ++i )
+            for ( i = 0; i < bdfe.nbLocalCoor(); ++i )
             {
                 Real betaLoc = bdfe.phi ( i, ig ) *
-                               beta.vec() [ icoor * bdfe.nbCoor() + i ];
+                               beta.vec() [ icoor * bdfe.nbLocalCoor() + i ];
                 sum1 += betaLoc * bdfe.normal (icoor, ig);
                 sum2 += betaLoc * betaLoc;
             }
@@ -1657,11 +1658,11 @@ void ipstab_bagrad ( const Real coef, MatrixElemental& elmat,
         bdfe.coorQuadPt ( x[ 0 ], x[ 1 ], x[ 2 ], ig );      // quadrature points coordinates
 
         // local coordinates of the quadrature point
-        for ( icoor = 0; icoor < fe1.nbCoor(); ++icoor )
+        for ( icoor = 0; icoor < fe1.nbLocalCoor(); ++icoor )
         {
             sum1 = 0;
             sum2 = 0;
-            for ( jcoor = 0; jcoor < fe1.nbCoor(); ++jcoor )
+            for ( jcoor = 0; jcoor < fe1.nbLocalCoor(); ++jcoor )
             {
                 sum1 += fe1.tInvJac ( jcoor, icoor, 0 ) * ( x[ jcoor ] - b1[ jcoor ] );
                 sum2 += fe2.tInvJac ( jcoor, icoor, 0 ) * ( x[ jcoor ] - b2[ jcoor ] );
@@ -1674,18 +1675,18 @@ void ipstab_bagrad ( const Real coef, MatrixElemental& elmat,
         {
 
             // first derivative on the reference element
-            for ( icoor = 0; icoor < fe1.nbCoor(); ++icoor )
+            for ( icoor = 0; icoor < fe1.nbLocalCoor(); ++icoor )
             {
                 drp1[ icoor ] = fe1.refFE().dPhi ( i, icoor, rx1[ 0 ], rx1[ 1 ], rx1[ 2 ] );
                 drp2[ icoor ] = fe2.refFE().dPhi ( i, icoor, rx2[ 0 ], rx2[ 1 ], rx2[ 2 ] );
             }
 
             // first derivative on the current element
-            for ( icoor = 0; icoor < fe1.nbCoor(); ++icoor )
+            for ( icoor = 0; icoor < fe1.nbLocalCoor(); ++icoor )
             {
                 sum1 = 0;
                 sum2 = 0;
-                for ( jcoor = 0; jcoor < fe1.nbCoor(); ++jcoor )
+                for ( jcoor = 0; jcoor < fe1.nbLocalCoor(); ++jcoor )
                 {
                     sum1 += fe1.tInvJac ( icoor, jcoor, 0 ) * drp1[ jcoor ];
                     sum2 += fe2.tInvJac ( icoor, jcoor, 0 ) * drp2[ jcoor ];
@@ -1706,7 +1707,7 @@ void ipstab_bagrad ( const Real coef, MatrixElemental& elmat,
         {
             sum = 0.0;
             // Loop on coordinates
-            for ( icoor = 0; icoor < fe1.nbCoor(); ++icoor )
+            for ( icoor = 0; icoor < fe1.nbLocalCoor(); ++icoor )
                 for ( ig = 0; ig < bdfe.nbQuadPt() ; ++ig )
                     sum += ba2[ ig ] *
                            phid1[ i ][ icoor ][ ig ] *
@@ -1745,9 +1746,9 @@ void ipstab_bagrad ( const Real         coef,
     UInt i, j, ig;
 
     boost::multi_array<Real, 3> phid1 (
-        boost::extents[fe1.nbFEDof()][fe1.nbCoor()][bdfe.nbQuadPt()]);
+        boost::extents[fe1.nbFEDof()][fe1.nbLocalCoor()][bdfe.nbQuadPt()]);
     boost::multi_array<Real, 3> phid2 (
-        boost::extents[fe2.nbFEDof()][fe2.nbCoor()][bdfe.nbQuadPt()]);
+        boost::extents[fe2.nbFEDof()][fe2.nbLocalCoor()][bdfe.nbQuadPt()]);
 
     std::vector<Real> x (3), rx1 (3), drp1 (3), rx2 (3), drp2 (3);
     std::vector<Real> b1 (3), b2 (3);
@@ -1766,7 +1767,7 @@ void ipstab_bagrad ( const Real         coef,
         sum1 = 0;
         sum2 = 0;
 
-        for ( icoor = 0; icoor < fe3.nbCoor(); ++icoor )
+        for ( icoor = 0; icoor < fe3.nbLocalCoor(); ++icoor )
         {
             for ( i = 0; i < fe3.nbFEDof(); ++i )
             {
@@ -1784,11 +1785,11 @@ void ipstab_bagrad ( const Real         coef,
         bdfe.coorQuadPt ( x[ 0 ], x[ 1 ], x[ 2 ], ig );      // quadrature points coordinates
 
         // local coordinates of the quadrature point
-        for ( icoor = 0; icoor < fe1.nbCoor(); ++icoor )
+        for ( icoor = 0; icoor < fe1.nbLocalCoor(); ++icoor )
         {
             sum1 = 0;
             sum2 = 0;
-            for ( jcoor = 0; jcoor < fe1.nbCoor(); ++jcoor )
+            for ( jcoor = 0; jcoor < fe1.nbLocalCoor(); ++jcoor )
             {
                 sum1 += fe1.tInvJac ( jcoor, icoor, 0 ) * ( x[ jcoor ] - b1[ jcoor ] );
                 sum2 += fe2.tInvJac ( jcoor, icoor, 0 ) * ( x[ jcoor ] - b2[ jcoor ] );
@@ -1801,18 +1802,18 @@ void ipstab_bagrad ( const Real         coef,
         {
 
             // first derivative on the reference element
-            for ( icoor = 0; icoor < fe1.nbCoor(); ++icoor )
+            for ( icoor = 0; icoor < fe1.nbLocalCoor(); ++icoor )
             {
                 drp1[ icoor ] = fe1.refFE().dPhi ( i, icoor, rx1[ 0 ], rx1[ 1 ], rx1[ 2 ] );
                 drp2[ icoor ] = fe2.refFE().dPhi ( i, icoor, rx2[ 0 ], rx2[ 1 ], rx2[ 2 ] );
             }
 
             // first derivative on the current element
-            for ( icoor = 0; icoor < fe1.nbCoor(); ++icoor )
+            for ( icoor = 0; icoor < fe1.nbLocalCoor(); ++icoor )
             {
                 sum1 = 0;
                 sum2 = 0;
-                for ( jcoor = 0; jcoor < fe1.nbCoor(); ++jcoor )
+                for ( jcoor = 0; jcoor < fe1.nbLocalCoor(); ++jcoor )
                 {
                     sum1 += fe1.tInvJac ( icoor, jcoor, 0 ) * drp1[ jcoor ];
                     sum2 += fe2.tInvJac ( icoor, jcoor, 0 ) * drp2[ jcoor ];
@@ -1833,7 +1834,7 @@ void ipstab_bagrad ( const Real         coef,
         {
             sum = 0.0;
             // Loop on coordinates
-            for ( icoor = 0; icoor < fe1.nbCoor(); ++icoor )
+            for ( icoor = 0; icoor < fe1.nbLocalCoor(); ++icoor )
                 for ( ig = 0; ig < bdfe.nbQuadPt() ; ++ig )
                     sum += bn[ ig ] *
                            phid1[ i ][ icoor ][ ig ] *
@@ -1865,7 +1866,7 @@ void stiff ( Real coef, MatrixElemental& elmat, const CurrentFE& fe,
         s = 0;
         for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
-            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+            for ( icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
                 s += fe.phiDer ( iloc, icoor, ig ) * fe.phiDer ( iloc, icoor, ig )
                      * fe.weightDet ( ig );
         }
@@ -1881,7 +1882,7 @@ void stiff ( Real coef, MatrixElemental& elmat, const CurrentFE& fe,
         s = 0;
         for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
-            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+            for ( icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
                 s += fe.phiDer ( iloc, icoor, ig ) * fe.phiDer ( jloc, icoor, ig ) *
                      fe.weightDet ( ig );
         }
@@ -1912,7 +1913,7 @@ void stiff ( Real coef, Real ( *fct ) ( Real, Real, Real ), MatrixElemental& elm
         for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
             coef_f = fct ( fe.quadPt ( ig, 0 ), fe.quadPt ( ig, 1 ), fe.quadPt ( ig, 2 ) );
-            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+            for ( icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
                 s += coef_f * fe.phiDer ( iloc, icoor, ig ) * fe.phiDer ( iloc, icoor, ig )
                      * fe.weightDet ( ig );
         }
@@ -1929,7 +1930,7 @@ void stiff ( Real coef, Real ( *fct ) ( Real, Real, Real ), MatrixElemental& elm
         for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
             coef_f = fct ( fe.quadPt ( ig, 0 ), fe.quadPt ( ig, 1 ), fe.quadPt ( ig, 2 ) );
-            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+            for ( icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
                 s += coef_f * fe.phiDer ( iloc, icoor, ig ) * fe.phiDer ( jloc, icoor, ig ) *
                      fe.weightDet ( ig );
         }
@@ -1963,7 +1964,7 @@ void stiff ( Real coef, MatrixElemental& elmat, const CurrentFE& fe,
         s = 0;
         for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
-            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+            for ( icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
                 s += fe.phiDer ( iloc, icoor, ig ) * fe.phiDer ( iloc, icoor, ig )
                      * fe.weightDet ( ig );
         }
@@ -1979,7 +1980,7 @@ void stiff ( Real coef, MatrixElemental& elmat, const CurrentFE& fe,
         s = 0;
         for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
-            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+            for ( icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
                 s += fe.phiDer ( iloc, icoor, ig ) * fe.phiDer ( jloc, icoor, ig ) *
                      fe.weightDet ( ig );
         }
@@ -2030,7 +2031,7 @@ void stiff ( const std::vector<Real>& coef, MatrixElemental& elmat, const Curren
         s = 0;
         for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
-            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+            for ( icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
                 s += coef[ig] * fe.phiDer ( iloc, icoor, ig ) * fe.phiDer ( iloc, icoor, ig )
                      * fe.weightDet ( ig );
         }
@@ -2046,7 +2047,7 @@ void stiff ( const std::vector<Real>& coef, MatrixElemental& elmat, const Curren
         s = 0;
         for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
-            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+            for ( icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
                 s += coef[ig] * fe.phiDer ( iloc, icoor, ig ) * fe.phiDer ( jloc, icoor, ig ) *
                      fe.weightDet ( ig );
         }
@@ -2509,9 +2510,9 @@ void stiff_div ( Real coef, MatrixElemental& elmat, const CurrentFE& fe )
     //
     // blocks (icoor,jcoor) of elmat
     //
-    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
+    for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); ++icoor )
     {
-        for ( UInt jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
+        for ( UInt jcoor = 0; jcoor < fe.nbLocalCoor(); ++jcoor )
         {
 
             MatrixElemental::matrix_view mat = elmat.block ( icoor, jcoor );
@@ -2542,18 +2543,18 @@ void stiff_dergradbis ( Real coef, const VectorElemental& uk_loc, MatrixElementa
 
     double s;
     boost::multi_array<Real, 3> guk (
-        boost::extents[fe.nbCoor()][fe.nbCoor()][fe.nbQuadPt()]);
+        boost::extents[fe.nbLocalCoor()][fe.nbLocalCoor()][fe.nbQuadPt()]);
 
     // loop on quadrature points
     for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
 
         // loop on space coordinates
-        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
+        for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
         {
 
             // loop  on space coordinates
-            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+            for ( UInt jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
             {
                 s = 0.0;
                 for ( UInt i = 0; i < fe.nbFEDof(); i++ )
@@ -2568,9 +2569,9 @@ void stiff_dergradbis ( Real coef, const VectorElemental& uk_loc, MatrixElementa
     // blocks (icoor,jcoor) of elmat
     //
 
-    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
+    for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); ++icoor )
     {
-        for ( UInt jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
+        for ( UInt jcoor = 0; jcoor < fe.nbLocalCoor(); ++jcoor )
         {
 
             MatrixElemental::matrix_view mat = elmat.block ( icoor, jcoor );
@@ -2580,7 +2581,7 @@ void stiff_dergradbis ( Real coef, const VectorElemental& uk_loc, MatrixElementa
                 for ( UInt j = 0; j < fe.nbFEDof(); ++j )
                 {
                     s = 0;
-                    for ( UInt k = 0; k < fe.nbCoor(); ++k )
+                    for ( UInt k = 0; k < fe.nbLocalCoor(); ++k )
                         for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
                         {
                             s += fe.phiDer ( i, k, ig ) * guk[ jcoor ][ icoor ][ ig ] * fe.phiDer ( j, k, ig ) * fe.weightDet ( ig );
@@ -2604,18 +2605,18 @@ void stiff_dergrad ( Real coef, const VectorElemental& uk_loc, MatrixElemental& 
     double s;
 
     boost::multi_array<Real, 3> guk (
-        boost::extents[fe.nbCoor()][fe.nbCoor()][fe.nbQuadPt()]);
+        boost::extents[fe.nbLocalCoor()][fe.nbLocalCoor()][fe.nbQuadPt()]);
 
     // loop on quadrature points
     for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
 
         // loop on space coordinates
-        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
+        for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
         {
 
             // loop  on space coordinates
-            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+            for ( UInt jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
             {
                 s = 0.0;
                 for ( UInt i = 0; i < fe.nbFEDof(); i++ )
@@ -2630,9 +2631,9 @@ void stiff_dergrad ( Real coef, const VectorElemental& uk_loc, MatrixElemental& 
     // blocks (icoor,jcoor) of elmat
     //
 
-    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
+    for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); ++icoor )
     {
-        for ( UInt jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
+        for ( UInt jcoor = 0; jcoor < fe.nbLocalCoor(); ++jcoor )
         {
 
             MatrixElemental::matrix_view mat = elmat.block ( icoor, jcoor );
@@ -2642,7 +2643,7 @@ void stiff_dergrad ( Real coef, const VectorElemental& uk_loc, MatrixElemental& 
                 for ( UInt j = 0; j < fe.nbFEDof(); ++j )
                 {
                     s = 0;
-                    for ( UInt k = 0; k < fe.nbCoor(); ++k )
+                    for ( UInt k = 0; k < fe.nbLocalCoor(); ++k )
                         for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
                         {
                             s += fe.phiDer ( i, k, ig ) * ( guk[ jcoor ][ k ][ ig ] * fe.phiDer ( j, icoor, ig )
@@ -2666,7 +2667,7 @@ void stiff_dergrad ( Real coef, const VectorElemental& uk_loc, MatrixElemental& 
 void stiff_derdiv ( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe )
 {
     boost::multi_array<Real, 3> guk (
-        boost::extents[fe.nbCoor()][fe.nbCoor()][fe.nbQuadPt()]);
+        boost::extents[fe.nbLocalCoor()][fe.nbLocalCoor()][fe.nbQuadPt()]);
 
     Real s;
 
@@ -2675,11 +2676,11 @@ void stiff_derdiv ( Real coef, const VectorElemental& uk_loc, MatrixElemental& e
     {
 
         // loop on space coordinates
-        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
+        for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
         {
 
             // loop  on space coordinates
-            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+            for ( UInt jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
             {
                 s = 0.0;
                 for ( UInt i = 0; i < fe.nbFEDof(); i++ )
@@ -2693,9 +2694,9 @@ void stiff_derdiv ( Real coef, const VectorElemental& uk_loc, MatrixElemental& e
     //
     // blocks (icoor,jcoor) of elmat
     //
-    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
+    for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); ++icoor )
     {
-        for ( UInt jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
+        for ( UInt jcoor = 0; jcoor < fe.nbLocalCoor(); ++jcoor )
         {
 
             MatrixElemental::matrix_view mat = elmat.block ( icoor, jcoor );
@@ -2705,7 +2706,7 @@ void stiff_derdiv ( Real coef, const VectorElemental& uk_loc, MatrixElemental& e
                 for ( UInt j = 0; j < fe.nbFEDof(); ++j )
                 {
                     s = 0;
-                    for ( UInt k = 0; k < fe.nbCoor(); ++k )
+                    for ( UInt k = 0; k < fe.nbLocalCoor(); ++k )
                         for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
                         {
                             s += fe.phiDer ( i, icoor, ig ) * guk[ jcoor ][ k ][ ig ] * fe.phiDer ( j, k, ig ) * fe.weightDet ( ig );
@@ -2736,22 +2737,22 @@ void stiff_strain ( Real coef, MatrixElemental& elmat, const CurrentFE& fe )
         {
             s = 0;
             for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
-                for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
+                for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); ++icoor )
                 {
                     s += fe.phiDer ( i, icoor, ig ) * fe.phiDer ( j, icoor, ig ) * fe.weightDet ( ig );
                 }
             mat_tmp ( i, j ) = tmp * s;
         }
     }
-    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
+    for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); ++icoor )
     {
         MatrixElemental::matrix_view mat = elmat.block ( icoor, icoor );
         mat += mat_tmp;
     }
 
-    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
+    for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); ++icoor )
     {
-        for ( UInt jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
+        for ( UInt jcoor = 0; jcoor < fe.nbLocalCoor(); ++jcoor )
         {
             MatrixElemental::matrix_view mat = elmat.block ( icoor, jcoor );
             for ( UInt i = 0; i < fe.nbFEDof(); ++i )
@@ -2788,7 +2789,7 @@ void mass_divw ( Real coef, const VectorElemental& w_loc, MatrixElemental& elmat
     for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
         divw[ ig ] = 0.0;
-        for ( icoor = 0; icoor < fe.nbCoor(); ++icoor )
+        for ( icoor = 0; icoor < fe.nbLocalCoor(); ++icoor )
             for ( i = 0; i < fe.nbFEDof(); ++i )
             {
                 divw[ ig ] += fe.phiDer ( i, icoor, ig ) * w_loc.vec() [ i + icoor * fe.nbFEDof() ];
@@ -2862,7 +2863,7 @@ void mass_divw (const std::vector<Real>& coef, const VectorElemental& w_loc, Mat
     for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
         divw[ ig ] = 0.0;
-        for ( icoor = 0; icoor < fe.nbCoor(); ++icoor )
+        for ( icoor = 0; icoor < fe.nbLocalCoor(); ++icoor )
             for ( i = 0; i < fe.nbFEDof(); ++i )
             {
                 divw[ ig ] += fe.phiDer ( i, icoor, ig ) * w_loc.vec() [ i + icoor * fe.nbFEDof() ];
@@ -2929,15 +2930,15 @@ void mass_gradu ( Real coef, const VectorElemental& u0_loc, MatrixElemental& elm
     Real s;
 
     boost::multi_array<Real, 3> gu0 (
-        boost::extents[fe.nbQuadPt()][fe.nbCoor()][fe.nbCoor()]);
+        boost::extents[fe.nbQuadPt()][fe.nbLocalCoor()][fe.nbLocalCoor()]);
 
     //
     // grad u0 at quadrature nodes
     //
     for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
-        for ( icoor = 0; icoor < fe.nbCoor(); ++icoor )
-            for ( jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
+        for ( icoor = 0; icoor < fe.nbLocalCoor(); ++icoor )
+            for ( jcoor = 0; jcoor < fe.nbLocalCoor(); ++jcoor )
             {
                 gu0[ ig ][ icoor ][ jcoor ] = 0.0;
                 for ( i = 0; i < fe.nbFEDof(); ++i )
@@ -2949,9 +2950,9 @@ void mass_gradu ( Real coef, const VectorElemental& u0_loc, MatrixElemental& elm
     //
     // blocks (icoor,jcoor) of elmat
     //
-    for ( icoor = 0; icoor < fe.nbCoor(); ++icoor )
+    for ( icoor = 0; icoor < fe.nbLocalCoor(); ++icoor )
     {
-        for ( jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
+        for ( jcoor = 0; jcoor < fe.nbLocalCoor(); ++jcoor )
         {
 
             MatrixElemental::matrix_view mat = elmat.block ( icoor, jcoor );
@@ -2987,7 +2988,7 @@ void stiff_sd ( Real coef, const VectorElemental& vec_loc, MatrixElemental& elma
     MatrixElemental::matrix_view mat = elmat.block ( iblock, jblock );
     UInt iloc, jloc;
     UInt i, icoor, ig, jcoor;
-    std::vector<Real> coef_v (fe.nbCoor() );
+    std::vector<Real> coef_v (fe.nbLocalCoor() );
 
     double s, coef_s;
     //    int nbN1=fe.nbFEDof();
@@ -3001,13 +3002,13 @@ void stiff_sd ( Real coef, const VectorElemental& vec_loc, MatrixElemental& elma
         s = 0;
         for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
-            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+            for ( icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
             {
                 coef_v[ icoor ] = 0.;
             }
 
             // computation of the convection term in the quadrature nodes
-            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+            for ( icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
             {
                 for ( UInt iloc = 0; iloc < nbN2; iloc++ )
                 {
@@ -3015,9 +3016,9 @@ void stiff_sd ( Real coef, const VectorElemental& vec_loc, MatrixElemental& elma
                 }
             }
 
-            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+            for ( icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
             {
-                for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+                for ( jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
                 {
                     s += coef_v[ icoor ] * fe.phiDer ( iloc, icoor, ig ) * coef_v[ jcoor ] * fe.phiDer ( iloc, jcoor, ig )
                          * fe.weightDet ( ig );
@@ -3036,12 +3037,12 @@ void stiff_sd ( Real coef, const VectorElemental& vec_loc, MatrixElemental& elma
         s = 0;
         for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
-            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+            for ( icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
             {
                 coef_v[ icoor ] = 0.;
             }
 
-            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+            for ( icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
             {
                 for ( UInt iloc = 0; iloc < nbN2; iloc++ )
                 {
@@ -3049,9 +3050,9 @@ void stiff_sd ( Real coef, const VectorElemental& vec_loc, MatrixElemental& elma
                 }
             }
 
-            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+            for ( icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
             {
-                for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+                for ( jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
                 {
                     s += coef_v[ icoor ] * fe.phiDer ( iloc, icoor, ig ) * coef_v[ jcoor ] * fe.phiDer ( jloc, jcoor, ig )
                          * fe.weightDet ( ig );
@@ -3145,8 +3146,8 @@ void grad_div ( Real coef_grad, Real coef_div, MatrixElemental& elmat,
 */
 {
     double s;
-    int iblock = block_pres - fe_u.nbCoor();
-    for ( UInt icoor = 0; icoor < fe_u.nbCoor(); icoor++ )
+    int iblock = block_pres - fe_u.nbLocalCoor();
+    for ( UInt icoor = 0; icoor < fe_u.nbLocalCoor(); icoor++ )
     {
         MatrixElemental::matrix_view mat_grad = elmat.block ( iblock + icoor, block_pres );
         MatrixElemental::matrix_view mat_div = elmat.block ( block_pres , iblock + icoor );
@@ -3179,7 +3180,7 @@ void stab_stokes ( Real visc, Real coef_stab, MatrixElemental& elmat,
             s = 0;
             for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
             {
-                for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
+                for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
                 {
                     s += fe.phiDer ( i, icoor, ig ) * fe.phiDer ( j, icoor, ig ) * fe.weightDet ( ig );
                 }
@@ -3197,10 +3198,10 @@ void advection ( Real coef, VectorElemental& vel,
 {
     Matrix mat_tmp ( fe.nbFEDof(), fe.nbFEDof() );
     Real v_grad, s;
-    Matrix v ( fe.nbQuadPt(), fe.nbCoor() );
+    Matrix v ( fe.nbQuadPt(), fe.nbLocalCoor() );
 
     //Evaluate the advective field at the quadrature nodes
-    for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
+    for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
     {
         VectorElemental::vector_view velicoor = vel.block ( icoor );
         for ( UInt iq = 0; iq < fe.nbQuadPt(); iq++ )
@@ -3223,7 +3224,7 @@ void advection ( Real coef, VectorElemental& vel,
             for ( UInt iq = 0; iq < fe.nbQuadPt(); iq++ )
             {
                 v_grad = 0.;
-                for ( int icoor = 0; icoor < ( int ) fe.nbCoor(); icoor++ )
+                for ( int icoor = 0; icoor < ( int ) fe.nbLocalCoor(); icoor++ )
                 {
                     v_grad += v (iq, icoor) * fe.phiDer ( j, icoor, iq );
                 }
@@ -3548,7 +3549,7 @@ void source_stiff (const std::vector<Real>& constant, VectorElemental& elvec, co
     {
         for ( UInt iterQuadNode (0); iterQuadNode < nbQuadPt; iterQuadNode++ )
         {
-            for (UInt iterGradComp (0); iterGradComp < currentFe.nbCoor(); ++iterGradComp)
+            for (UInt iterGradComp (0); iterGradComp < currentFe.nbLocalCoor(); ++iterGradComp)
             {
                 vec (iterNode) += constant[iterQuadNode + iterGradComp * nbQuadPt]
                                   * currentFe.phiDer ( iterNode, iterGradComp, iterQuadNode )
@@ -3571,7 +3572,7 @@ void source_divuq (Real alpha, VectorElemental& uLoc,  VectorElemental& elvec, c
         s = 0;
         for (iq = 0; iq < fe_p.nbQuadPt(); ++iq )
             for (j = 0; j < fe_u.nbFEDof(); ++j)
-                for (ic = 0; ic < fe_u.nbCoor(); ++ic)
+                for (ic = 0; ic < fe_u.nbLocalCoor(); ++ic)
                 {
                     s += uLoc[ic * fe_u.nbFEDof() + j] * fe_u.phiDer (j, ic, iq) * fe_p.phi (i, iq) * fe_p.weightDet ( iq );
                 }
@@ -3637,10 +3638,10 @@ void source_advection ( const Real& coefficient, const VectorElemental& beta_loc
                         VectorElemental& elvec, const CurrentFE& fe )
 {
     boost::multi_array<Real, 2> guk (
-        boost::extents[fe.nbCoor()][fe.nbCoor()]);
+        boost::extents[fe.nbLocalCoor()][fe.nbLocalCoor()]);
     boost::multi_array<Real, 2> conv (
-        boost::extents[fe.nbQuadPt()][fe.nbCoor()]);
-    std::vector<Real> beta (fe.nbCoor() );
+        boost::extents[fe.nbQuadPt()][fe.nbLocalCoor()]);
+    std::vector<Real> beta (fe.nbLocalCoor() );
 
     Real s;
 
@@ -3651,7 +3652,7 @@ void source_advection ( const Real& coefficient, const VectorElemental& beta_loc
     {
 
         // Interpolating beta
-        for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+        for ( icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
         {
             // Evaluate beta in the Gauss Point
             s = 0.0;
@@ -3663,10 +3664,10 @@ void source_advection ( const Real& coefficient, const VectorElemental& beta_loc
         }
 
         // Interpolation of grad u
-        for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+        for ( icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
         {
             // loop  on the derivative variable
-            for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+            for ( jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
             {
                 // Evaluate the derivative in the gauss point
                 s = 0.0;
@@ -3680,10 +3681,10 @@ void source_advection ( const Real& coefficient, const VectorElemental& beta_loc
         }
 
         // beta*(\grad u^k) at each quadrature point
-        for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+        for ( jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
         {
             s = 0.0;
-            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+            for ( icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
             {
                 s += beta[ icoor ] * guk[ jcoor ][ icoor ];
             }
@@ -3696,7 +3697,7 @@ void source_advection ( const Real& coefficient, const VectorElemental& beta_loc
     //
 
     // loop on coordinates, i.e. loop on elementary vector blocks
-    for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+    for ( icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
     {
 
         VectorElemental::vector_view vec = elvec.block ( icoor );
@@ -3725,18 +3726,18 @@ void source_mass1 ( Real coef, const VectorElemental& uk_loc, const VectorElemen
 {
 
     boost::multi_array<Real, 2> A (
-        boost::extents[fe.nbCoor()][fe.nbCoor()]);
+        boost::extents[fe.nbLocalCoor()][fe.nbLocalCoor()]);
     boost::multi_array<Real, 2> B (
-        boost::extents[fe.nbCoor()][fe.nbCoor()]);
+        boost::extents[fe.nbLocalCoor()][fe.nbLocalCoor()]);
     boost::multi_array<Real, 2> uk (
-        boost::extents[fe.nbQuadPt()][fe.nbCoor()]);
+        boost::extents[fe.nbQuadPt()][fe.nbLocalCoor()]);
     boost::multi_array<Real, 3> guk (
-        boost::extents[fe.nbQuadPt()][fe.nbCoor()][fe.nbCoor()]);
-    std::vector<Real> dw (fe.nbCoor() );
+        boost::extents[fe.nbQuadPt()][fe.nbLocalCoor()][fe.nbLocalCoor()]);
+    std::vector<Real> dw (fe.nbLocalCoor() );
     std::vector<Real> aux (fe.nbQuadPt() );
-    std::vector<Real> convect (fe.nbCoor() );
+    std::vector<Real> convect (fe.nbLocalCoor() );
     boost::multi_array<Real, 2> convect_A (
-        boost::extents[fe.nbQuadPt()][fe.nbCoor()]);
+        boost::extents[fe.nbQuadPt()][fe.nbLocalCoor()]);
 
     Real s, sA, sB, sG;
 
@@ -3747,7 +3748,7 @@ void source_mass1 ( Real coef, const VectorElemental& uk_loc, const VectorElemen
     {
 
         // loop on space coordindates
-        for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+        for ( icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
         {
 
             // each compontent of uk at each quadrature points
@@ -3768,7 +3769,7 @@ void source_mass1 ( Real coef, const VectorElemental& uk_loc, const VectorElemen
 
 
             // loop  on space coordindates
-            for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+            for ( jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
             {
                 sB = 0.0;
                 sA = 0.0;
@@ -3786,28 +3787,28 @@ void source_mass1 ( Real coef, const VectorElemental& uk_loc, const VectorElemen
         }
 
         s = 0.0;
-        for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+        for ( jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
         {
             s -= A[ jcoor ][ jcoor ];    // \div d at this quadrature point ( - trace( A ) )
         }
 
-        for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+        for ( jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
         {
             A[ jcoor ][ jcoor ] += s;    // I\div d - (\grad d)^T at this quadrature point (A+I(-tr(A)))
         }
 
         s = 0;
-        for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
-            for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+        for ( icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
+            for ( jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
             {
                 s += B[ icoor ][ jcoor ] * A[ icoor ][ jcoor ];    // \grad (-w^k):[I\div d - (\grad d)^T] at each quadrature point
             }
         aux[ ig ] = s;
 
         s = 0;
-        for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+        for ( jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
         {
-            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+            for ( icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
             {
                 s += convect[ icoor ] * A[ icoor ][ jcoor ];    // convect^T [I\div d - (\grad d)^T]
             }
@@ -3815,8 +3816,8 @@ void source_mass1 ( Real coef, const VectorElemental& uk_loc, const VectorElemen
         }
         //         std::cout<<"aux "<<aux[ig]<<std::endl;
 
-        //     for(icoor=0; icoor<fe.nbCoor(); ++icoor)
-        //         for(jcoor=0; jcoor<fe.nbCoor(); ++jcoor)
+        //     for(icoor=0; icoor<fe.nbLocalCoor(); ++icoor)
+        //         for(jcoor=0; jcoor<fe.nbLocalCoor(); ++jcoor)
         //             {
         //                 std::cout<<" Atrue ["<<icoor<<"]["<<jcoor<<"] = "<<A[icoor][jcoor]<<std::endl;
         //             }
@@ -3834,7 +3835,7 @@ void source_mass1 ( Real coef, const VectorElemental& uk_loc, const VectorElemen
     //
 
     // loop on coordinates, i.e. loop on elementary vector blocks
-    for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+    for ( icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
     {
 
         // the block iccor of the elementary vector
@@ -3853,7 +3854,7 @@ void source_mass1 ( Real coef, const VectorElemental& uk_loc, const VectorElemen
                 s += aux[ ig ] * uk[ ig ][ icoor ] * fe.phi ( i, ig ) * fe.weightDet ( ig );
 
                 // convect^T [I\div d - (\grad d)^T] (\grad u^k)^T \phi_i
-                for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+                for ( jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
                 {
                     s += convect_A[ ig ][ jcoor ] * guk[ ig ][ icoor ][ jcoor ] * fe.phi ( i, ig ) * fe.weightDet ( ig );
                 }
@@ -3874,10 +3875,10 @@ void source_mass2 ( Real coef, const VectorElemental& uk_loc, const VectorElemen
 {
 
     boost::multi_array<Real, 2> guk (
-        boost::extents[fe.nbCoor()][fe.nbCoor()]);
-    std::vector<Real> dw (fe.nbCoor() );
+        boost::extents[fe.nbLocalCoor()][fe.nbLocalCoor()]);
+    std::vector<Real> dw (fe.nbLocalCoor() );
     boost::multi_array<Real, 2> aux (
-        boost::extents[fe.nbQuadPt()][fe.nbCoor()]);
+        boost::extents[fe.nbQuadPt()][fe.nbLocalCoor()]);
 
     Real s;
 
@@ -3888,7 +3889,7 @@ void source_mass2 ( Real coef, const VectorElemental& uk_loc, const VectorElemen
     {
 
         // loop on space coordinates
-        for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+        for ( icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
         {
 
             // each compontent (icoor) of dw at this quadrature point
@@ -3900,7 +3901,7 @@ void source_mass2 ( Real coef, const VectorElemental& uk_loc, const VectorElemen
             dw[ icoor ] = s;
 
             // loop  on space coordinates
-            for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+            for ( jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
             {
                 s = 0.0;
                 for ( i = 0; i < fe.nbFEDof(); i++ )
@@ -3912,10 +3913,10 @@ void source_mass2 ( Real coef, const VectorElemental& uk_loc, const VectorElemen
         }
 
         // (\grad u^k)dw at each quadrature point
-        for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+        for ( icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
         {
             s = 0.0;
-            for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+            for ( jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
             {
                 s += guk[ icoor ][ jcoor ] * dw[ jcoor ];
             }
@@ -3928,7 +3929,7 @@ void source_mass2 ( Real coef, const VectorElemental& uk_loc, const VectorElemen
     //
 
     // loop on coordinates, i.e. loop on elementary vector blocks
-    for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+    for ( icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
     {
 
         VectorElemental::vector_view vec = elvec.block ( icoor );
@@ -3959,11 +3960,11 @@ void source_mass3 ( Real coef, const VectorElemental& un_loc, const VectorElemen
 {
 
     boost::multi_array<Real, 2> B (
-        boost::extents[fe.nbCoor()][fe.nbCoor()]);
+        boost::extents[fe.nbLocalCoor()][fe.nbLocalCoor()]);
     boost::multi_array<Real, 2> A (
-        boost::extents[fe.nbCoor()][fe.nbCoor()]);
+        boost::extents[fe.nbLocalCoor()][fe.nbLocalCoor()]);
     boost::multi_array<Real, 2> uk (
-        boost::extents[fe.nbQuadPt()][fe.nbCoor()]);
+        boost::extents[fe.nbQuadPt()][fe.nbLocalCoor()]);
     std::vector<Real> aux (fe.nbQuadPt() );
 
     Real s, sA, sB;
@@ -3975,7 +3976,7 @@ void source_mass3 ( Real coef, const VectorElemental& un_loc, const VectorElemen
     {
 
         // loop on space coordindates
-        for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+        for ( icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
         {
 
             // each compontent of uk at each quadrature points
@@ -3988,7 +3989,7 @@ void source_mass3 ( Real coef, const VectorElemental& un_loc, const VectorElemen
 
 
             // loop  on space coordindates
-            for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+            for ( jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
             {
                 sB = 0.0;
                 sA = 0.0;
@@ -4003,19 +4004,19 @@ void source_mass3 ( Real coef, const VectorElemental& un_loc, const VectorElemen
         }
 
         s = 0.0;
-        for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+        for ( jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
         {
             s -= A[ jcoor ][ jcoor ];    // \div d at this quadrature point ( - trace( A ) )
         }
 
-        for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+        for ( jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
         {
             A[ jcoor ][ jcoor ] += 2 * s;    // 2 * I\div d - (\grad d)^T at this quadrature point
         }
 
         s = 0;
-        for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
-            for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+        for ( icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
+            for ( jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
             {
                 s += B[ icoor ][ jcoor ] * A[ icoor ][ jcoor ];    // \grad u^n:[2 * I\div d - (\grad d)^T] at each quadrature point
             }
@@ -4032,7 +4033,7 @@ void source_mass3 ( Real coef, const VectorElemental& un_loc, const VectorElemen
     //
 
     // loop on coordinates, i.e. loop on elementary vector blocks
-    for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+    for ( icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
     {
 
         // the block iccor of the elementary vector
@@ -4067,13 +4068,13 @@ void source_stress ( Real coef, Real mu, const VectorElemental& uk_loc, const Ve
 {
 
     boost::multi_array<Real, 3> B (
-        boost::extents[fe_u.nbQuadPt()][fe_u.nbCoor()][fe_u.nbCoor()]);
+        boost::extents[fe_u.nbQuadPt()][fe_u.nbLocalCoor()][fe_u.nbLocalCoor()]);
     boost::multi_array<Real, 2> A (
-        boost::extents[fe_u.nbCoor()][fe_u.nbCoor()]);
+        boost::extents[fe_u.nbLocalCoor()][fe_u.nbLocalCoor()]);
     boost::multi_array<Real, 2> guk (
-        boost::extents[fe_u.nbCoor()][fe_u.nbCoor()]);
+        boost::extents[fe_u.nbLocalCoor()][fe_u.nbLocalCoor()]);
     boost::multi_array<Real, 2> sigma (
-        boost::extents[fe_u.nbCoor()][fe_u.nbCoor()]);
+        boost::extents[fe_u.nbLocalCoor()][fe_u.nbLocalCoor()]);
 
     Real s, sA, sG, pk;
 
@@ -4084,11 +4085,11 @@ void source_stress ( Real coef, Real mu, const VectorElemental& uk_loc, const Ve
     {
 
         // loop on space coordinates
-        for ( icoor = 0; icoor < fe_u.nbCoor(); icoor++ )
+        for ( icoor = 0; icoor < fe_u.nbLocalCoor(); icoor++ )
         {
 
             // loop  on space coordindates
-            for ( jcoor = 0; jcoor < fe_u.nbCoor(); jcoor++ )
+            for ( jcoor = 0; jcoor < fe_u.nbLocalCoor(); jcoor++ )
             {
                 sA = 0.0;
                 sG = 0.0;
@@ -4103,14 +4104,14 @@ void source_stress ( Real coef, Real mu, const VectorElemental& uk_loc, const Ve
         }
 
         s = 0.0;
-        for ( jcoor = 0; jcoor < fe_u.nbCoor(); jcoor++ )
+        for ( jcoor = 0; jcoor < fe_u.nbLocalCoor(); jcoor++ )
         {
             s -= A[ jcoor ][ jcoor ];    // \div d at a quadrature point ( - trace( A ) )
         }
 
         //         std::cout<<"div = "<< s <<std::endl;
 
-        for ( jcoor = 0; jcoor < fe_u.nbCoor(); jcoor++ )
+        for ( jcoor = 0; jcoor < fe_u.nbLocalCoor(); jcoor++ )
         {
             A[ jcoor ][ jcoor ] += s;    // I\div d  - (\grad d)^T
         }
@@ -4123,9 +4124,9 @@ void source_stress ( Real coef, Real mu, const VectorElemental& uk_loc, const Ve
 
 
         // sigma = [-p^k I + 2*mu e(u^k)] a quadrature point
-        for ( icoor = 0; icoor < fe_u.nbCoor(); icoor++ )
+        for ( icoor = 0; icoor < fe_u.nbLocalCoor(); icoor++ )
         {
-            for ( jcoor = 0; jcoor < fe_u.nbCoor(); jcoor++ )
+            for ( jcoor = 0; jcoor < fe_u.nbLocalCoor(); jcoor++ )
             {
                 sigma[ icoor ][ jcoor ] = mu * ( guk[ icoor ][ jcoor ] + guk[ jcoor ][ icoor ] );
             }
@@ -4133,11 +4134,11 @@ void source_stress ( Real coef, Real mu, const VectorElemental& uk_loc, const Ve
         }
 
         // [-p^k I + 2*mu e(u^k)] [I\div d - (\grad d)^T] at each quadrature point
-        for ( icoor = 0; icoor < fe_u.nbCoor(); icoor++ )
-            for ( jcoor = 0; jcoor < fe_u.nbCoor(); jcoor++ )
+        for ( icoor = 0; icoor < fe_u.nbLocalCoor(); icoor++ )
+            for ( jcoor = 0; jcoor < fe_u.nbLocalCoor(); jcoor++ )
             {
                 s = 0;
-                for ( kcoor = 0; kcoor < fe_u.nbCoor(); kcoor++ )
+                for ( kcoor = 0; kcoor < fe_u.nbLocalCoor(); kcoor++ )
                 {
                     s += sigma[ icoor ][ kcoor ] * A[ kcoor ][ jcoor ];
                 }
@@ -4145,14 +4146,14 @@ void source_stress ( Real coef, Real mu, const VectorElemental& uk_loc, const Ve
             }
     }
 
-    //     for(icoor=0; icoor<fe_u.nbCoor(); ++icoor)
-    //         for(jcoor=0; jcoor<fe_u.nbCoor(); ++jcoor)
+    //     for(icoor=0; icoor<fe_u.nbLocalCoor(); ++icoor)
+    //         for(jcoor=0; jcoor<fe_u.nbLocalCoor(); ++jcoor)
     //             {
     //                 std::cout<<" Atrue ["<<icoor<<"]["<<jcoor<<"] = "<<A[icoor][jcoor]<<std::endl;
     //             }
 
-    //     for(icoor=0; icoor<fe_u.nbCoor(); ++icoor)
-    //         for(jcoor=0; jcoor<fe_u.nbCoor(); ++jcoor)
+    //     for(icoor=0; icoor<fe_u.nbLocalCoor(); ++icoor)
+    //         for(jcoor=0; jcoor<fe_u.nbLocalCoor(); ++jcoor)
     //             {
     //                 double l=0.;
     //                 for(int e=0; e<fe_u.nbQuadPt(); ++e)
@@ -4165,7 +4166,7 @@ void source_stress ( Real coef, Real mu, const VectorElemental& uk_loc, const Ve
     //
 
     // loop on coordinates, i.e. loop on elementary vector blocks
-    for ( icoor = 0; icoor < fe_u.nbCoor(); icoor++ )
+    for ( icoor = 0; icoor < fe_u.nbLocalCoor(); icoor++ )
     {
 
         VectorElemental::vector_view vec = elvec.block ( icoor );
@@ -4178,7 +4179,7 @@ void source_stress ( Real coef, Real mu, const VectorElemental& uk_loc, const Ve
             s = 0;
             for ( ig = 0; ig < fe_u.nbQuadPt(); ig++ )
 
-                for ( jcoor = 0; jcoor < fe_u.nbCoor(); jcoor++ )
+                for ( jcoor = 0; jcoor < fe_u.nbLocalCoor(); jcoor++ )
                 {
                     s += B[ ig ][ icoor ][ jcoor ] * fe_u.phiDer ( i, jcoor, ig ) * fe_u.weightDet ( ig );
                 }
@@ -4196,11 +4197,11 @@ void source_stress2 ( Real coef, const VectorElemental& uk_loc, const VectorElem
 {
 
     boost::multi_array<Real, 3> A (
-        boost::extents[fe_u.nbQuadPt()][fe_u.nbCoor()][fe_u.nbCoor()]);
+        boost::extents[fe_u.nbQuadPt()][fe_u.nbLocalCoor()][fe_u.nbLocalCoor()]);
     boost::multi_array<Real, 2> guk (
-        boost::extents[fe_u.nbCoor()][fe_u.nbCoor()]);
+        boost::extents[fe_u.nbLocalCoor()][fe_u.nbLocalCoor()]);
     boost::multi_array<Real, 2> gd (
-        boost::extents[fe_u.nbCoor()][fe_u.nbCoor()]);
+        boost::extents[fe_u.nbLocalCoor()][fe_u.nbLocalCoor()]);
 
     Real su, sd, s;
 
@@ -4211,11 +4212,11 @@ void source_stress2 ( Real coef, const VectorElemental& uk_loc, const VectorElem
     {
 
         // loop on space coordinates
-        for ( icoor = 0; icoor < fe_u.nbCoor(); icoor++ )
+        for ( icoor = 0; icoor < fe_u.nbLocalCoor(); icoor++ )
         {
 
             // loop  on space coordindates
-            for ( jcoor = 0; jcoor < fe_u.nbCoor(); jcoor++ )
+            for ( jcoor = 0; jcoor < fe_u.nbLocalCoor(); jcoor++ )
             {
                 su = 0.0;
                 sd = 0.0;
@@ -4230,12 +4231,12 @@ void source_stress2 ( Real coef, const VectorElemental& uk_loc, const VectorElem
         }
 
 
-        for ( icoor = 0; icoor < fe_u.nbCoor(); icoor++ )
+        for ( icoor = 0; icoor < fe_u.nbLocalCoor(); icoor++ )
         {
-            for ( jcoor = 0; jcoor < fe_u.nbCoor(); jcoor++ )
+            for ( jcoor = 0; jcoor < fe_u.nbLocalCoor(); jcoor++ )
             {
                 s = 0;
-                for ( kcoor = 0; kcoor < fe_u.nbCoor(); kcoor++ )
+                for ( kcoor = 0; kcoor < fe_u.nbLocalCoor(); kcoor++ )
                 {
                     s += guk[ icoor ][ kcoor ] * gd[ kcoor ][ jcoor ] + gd[ kcoor ][ icoor ] * guk[ jcoor ][ kcoor ];
                 }
@@ -4243,13 +4244,13 @@ void source_stress2 ( Real coef, const VectorElemental& uk_loc, const VectorElem
             }
         }
 
-        //     for(icoor=0; icoor<fe_u.nbCoor(); ++icoor)
-        //         for(jcoor=0; jcoor<fe_u.nbCoor(); ++jcoor)
+        //     for(icoor=0; icoor<fe_u.nbLocalCoor(); ++icoor)
+        //         for(jcoor=0; jcoor<fe_u.nbLocalCoor(); ++jcoor)
         //             {
         //                 std::cout<<" gdtrue ["<<icoor<<"]["<<jcoor<<"] = "<<gd[icoor][jcoor]<<std::endl;
         //             }
-        //     for(icoor=0; icoor<fe_u.nbCoor(); ++icoor)
-        //         for(jcoor=0; jcoor<fe_u.nbCoor(); ++jcoor)
+        //     for(icoor=0; icoor<fe_u.nbLocalCoor(); ++icoor)
+        //         for(jcoor=0; jcoor<fe_u.nbLocalCoor(); ++jcoor)
         //             {
         //                 std::cout<<" Atrue ["<<icoor<<"]["<<jcoor<<"] = "<<A[ig][icoor][jcoor]<<std::endl;
         //             }
@@ -4259,7 +4260,7 @@ void source_stress2 ( Real coef, const VectorElemental& uk_loc, const VectorElem
     // Numerical integration
     //
     // loop on coordinates, i.e. loop on elementary vector blocks
-    for ( icoor = 0; icoor < fe_u.nbCoor(); icoor++ )
+    for ( icoor = 0; icoor < fe_u.nbLocalCoor(); icoor++ )
     {
 
         VectorElemental::vector_view vec = elvec.block ( icoor );
@@ -4272,7 +4273,7 @@ void source_stress2 ( Real coef, const VectorElemental& uk_loc, const VectorElem
             s = 0;
             for ( ig = 0; ig < fe_u.nbQuadPt(); ig++ )
 
-                for ( jcoor = 0; jcoor < fe_u.nbCoor(); jcoor++ )
+                for ( jcoor = 0; jcoor < fe_u.nbLocalCoor(); jcoor++ )
                 {
                     s += fe_u.phiDer ( i, jcoor, ig ) * A[ ig ][ icoor ][ jcoor ] * fe_u.weightDet ( ig );
                 }
@@ -4292,9 +4293,9 @@ void source_press ( Real coef, const VectorElemental& uk_loc, const VectorElemen
                     const CurrentFE& fe_u, const CurrentFE& fe_p, int iblock )
 {
     boost::multi_array<Real, 2> A (
-        boost::extents[fe_u.nbCoor()][fe_u.nbCoor()]);
+        boost::extents[fe_u.nbLocalCoor()][fe_u.nbLocalCoor()]);
     boost::multi_array<Real, 2> guk (
-        boost::extents[fe_u.nbCoor()][fe_u.nbCoor()]);
+        boost::extents[fe_u.nbLocalCoor()][fe_u.nbLocalCoor()]);
     std::vector<Real> aux (fe_u.nbQuadPt() );
 
     VectorElemental::vector_view vec = elvec.block ( iblock );
@@ -4308,11 +4309,11 @@ void source_press ( Real coef, const VectorElemental& uk_loc, const VectorElemen
     {
 
         // loop on space coordinates
-        for ( icoor = 0; icoor < fe_u.nbCoor(); icoor++ )
+        for ( icoor = 0; icoor < fe_u.nbLocalCoor(); icoor++ )
         {
 
             // loop  on space coordinates
-            for ( jcoor = 0; jcoor < fe_u.nbCoor(); jcoor++ )
+            for ( jcoor = 0; jcoor < fe_u.nbLocalCoor(); jcoor++ )
             {
                 sA = 0.0;
                 sG = 0.0;
@@ -4327,19 +4328,19 @@ void source_press ( Real coef, const VectorElemental& uk_loc, const VectorElemen
         }
 
         s = 0.0;
-        for ( jcoor = 0; jcoor < fe_u.nbCoor(); jcoor++ )
+        for ( jcoor = 0; jcoor < fe_u.nbLocalCoor(); jcoor++ )
         {
             s -= A[ jcoor ][ jcoor ];    // \div d at this quadrature point ( - trace( A ) )
         }
 
-        for ( jcoor = 0; jcoor < fe_u.nbCoor(); jcoor++ )
+        for ( jcoor = 0; jcoor < fe_u.nbLocalCoor(); jcoor++ )
         {
             A[ jcoor ][ jcoor ] += s;    // I\div d - (\grad d)^T at this quadrature point
         }
 
         s = 0;
-        for ( icoor = 0; icoor < fe_u.nbCoor(); icoor++ )
-            for ( jcoor = 0; jcoor < fe_u.nbCoor(); jcoor++ )
+        for ( icoor = 0; icoor < fe_u.nbLocalCoor(); icoor++ )
+            for ( jcoor = 0; jcoor < fe_u.nbLocalCoor(); jcoor++ )
             {
                 s += guk[ icoor ][ jcoor ] * A[ icoor ][ jcoor ];    // \grad u^k : [I\div d - (\grad d)^T] at each quadrature point
             }
@@ -4373,12 +4374,12 @@ void source_press2 ( Real coef, const VectorElemental& p_loc, const VectorElemen
                      const CurrentFE& fe, int iblock )
 {
     boost::multi_array<Real, 2> A (
-        boost::extents[fe.nbCoor()][fe.nbCoor()]);
+        boost::extents[fe.nbLocalCoor()][fe.nbLocalCoor()]);
     boost::multi_array<Real, 2> B (
-        boost::extents[fe.nbCoor()][fe.nbCoor()]);
+        boost::extents[fe.nbLocalCoor()][fe.nbLocalCoor()]);
     boost::multi_array<Real, 2> aux (
-        boost::extents[fe.nbQuadPt()][fe.nbCoor()]);
-    std::vector<Real> gpk (fe.nbCoor() );
+        boost::extents[fe.nbQuadPt()][fe.nbLocalCoor()]);
+    std::vector<Real> gpk (fe.nbLocalCoor() );
 
     VectorElemental::vector_view vec = elvec.block ( iblock );
 
@@ -4392,7 +4393,7 @@ void source_press2 ( Real coef, const VectorElemental& p_loc, const VectorElemen
 
 
         // loop on space coordinates
-        for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+        for ( icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
         {
 
             sG = 0.0;
@@ -4403,7 +4404,7 @@ void source_press2 ( Real coef, const VectorElemental& p_loc, const VectorElemen
             gpk[ icoor ] = sG;
 
             // loop  on space coordinates
-            for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+            for ( jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
             {
                 sA = 0.0;
                 for ( i = 0; i < fe.nbFEDof(); i++ )
@@ -4416,26 +4417,26 @@ void source_press2 ( Real coef, const VectorElemental& p_loc, const VectorElemen
         }
 
         s = 0.0;
-        for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+        for ( jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
         {
             s -= A[ jcoor ][ jcoor ];    // \div d at this quadrature point ( - trace( A ) )
         }
 
-        for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+        for ( jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
         {
             A[ jcoor ][ jcoor ] += s;    // I\div d - (\grad d)^T at this quadrature point
         }
 
-        for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
-            for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+        for ( icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
+            for ( jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
             {
                 A[ icoor ][ jcoor ] += B[ icoor ][ jcoor ];    // I\div d - (\grad d)^T - \grad d at this quadrature point
             }
 
         s = 0;
-        for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+        for ( icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
         {
-            for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+            for ( jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
             {
                 s += A[ icoor ][ jcoor ] * gpk[jcoor];    // [I\div d - (\grad d)^T -\grad d] \grad p^k at each quadrature point
             }
@@ -4454,7 +4455,7 @@ void source_press2 ( Real coef, const VectorElemental& p_loc, const VectorElemen
         // loop on quadrature points
         s = 0;
         for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
-            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+            for ( icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
             {
                 s += aux[ ig ][icoor] * fe.phiDer ( i, icoor, ig ) * fe.weightDet ( ig );
             }
@@ -4526,11 +4527,11 @@ void source_press ( Real coef, const VectorElemental& uk_loc, MatrixElemental& e
                     const CurrentFE& fe_u, const CurrentFE& fe_p, ID mmDim , int iblock )
 {
     boost::multi_array<Real, 4> A (
-        boost::extents[fe_u.nbCoor()][fe_u.nbCoor()][fe_u.nbFEDof()][fe_u.nbCoor()]);
+        boost::extents[fe_u.nbLocalCoor()][fe_u.nbLocalCoor()][fe_u.nbFEDof()][fe_u.nbLocalCoor()]);
     boost::multi_array<Real, 2> guk (
-        boost::extents[fe_u.nbCoor()][fe_u.nbCoor()]);
+        boost::extents[fe_u.nbLocalCoor()][fe_u.nbLocalCoor()]);
     boost::multi_array<Real, 3> aux (
-        boost::extents[fe_u.nbQuadPt()][fe_u.nbFEDof()][fe_u.nbCoor()]);
+        boost::extents[fe_u.nbQuadPt()][fe_u.nbFEDof()][fe_u.nbLocalCoor()]);
 
     Real l, sA, sG;
     UInt icoor, jcoor, ig;
@@ -4542,13 +4543,13 @@ void source_press ( Real coef, const VectorElemental& uk_loc, MatrixElemental& e
 
 
         ////INIT
-        for (UInt p = 0; p < fe_u.nbCoor(); ++p)
+        for (UInt p = 0; p < fe_u.nbLocalCoor(); ++p)
         {
-            for (UInt q = 0; q < fe_u.nbCoor(); ++q)
+            for (UInt q = 0; q < fe_u.nbLocalCoor(); ++q)
             {
                 for (UInt d = 0; d < fe_u.nbFEDof(); ++d)
                 {
-                    for (UInt e = 0; e < fe_u.nbCoor(); ++e)
+                    for (UInt e = 0; e < fe_u.nbLocalCoor(); ++e)
                     {
                         A[p][q][d][e] = 0.;
                     }
@@ -4561,15 +4562,15 @@ void source_press ( Real coef, const VectorElemental& uk_loc, MatrixElemental& e
         ////END INIT
 
         // loop on space coordinates
-        for ( icoor = 0; icoor < fe_u.nbCoor(); icoor++ )
+        for ( icoor = 0; icoor < fe_u.nbLocalCoor(); icoor++ )
         {
 
             //for ( i = 0;i < fe_u.nbFEDof();i++ )
-            //for ( short k = 0;k < fe_u.nbCoor();k++ )
+            //for ( short k = 0;k < fe_u.nbLocalCoor();k++ )
             //sA[i][k] = 0.0;
             // loop  on space coordinates
-            for ( UInt kcoor = 0; kcoor < fe_u.nbCoor(); kcoor++ )
-                for ( jcoor = 0; jcoor < fe_u.nbCoor(); jcoor++ )
+            for ( UInt kcoor = 0; kcoor < fe_u.nbLocalCoor(); kcoor++ )
+                for ( jcoor = 0; jcoor < fe_u.nbLocalCoor(); jcoor++ )
                 {
                     sG = 0.0;
                     for ( UInt i = 0; i < fe_u.nbFEDof(); i++ )
@@ -4586,19 +4587,19 @@ void source_press ( Real coef, const VectorElemental& uk_loc, MatrixElemental& e
 
 
 
-        std::vector<Real> z (fe_u.nbCoor() );
+        std::vector<Real> z (fe_u.nbLocalCoor() );
         for ( UInt i = 0; i < fe_u.nbFEDof(); i++ )
         {
-            //                for ( int kcoor = 0;kcoor < fe_u.nbCoor();kcoor++ )
-            for ( jcoor = 0; jcoor < fe_u.nbCoor(); jcoor++ )
+            //                for ( int kcoor = 0;kcoor < fe_u.nbLocalCoor();kcoor++ )
+            for ( jcoor = 0; jcoor < fe_u.nbLocalCoor(); jcoor++ )
             {
                 //if(icoor==jcoor)
                 z[ jcoor ] = A[ jcoor ][ jcoor ][i][jcoor];  // -\delta_{jcoor kcoor} \partial_{icoor} + \delta_{jcoor icoor}\partial_{kcoor}
             }
 
-            for ( jcoor = 0; jcoor < fe_p.nbCoor(); jcoor++ )
+            for ( jcoor = 0; jcoor < fe_p.nbLocalCoor(); jcoor++ )
             {
-                for (UInt kcoor = 0; kcoor < fe_p.nbCoor(); kcoor++ )
+                for (UInt kcoor = 0; kcoor < fe_p.nbLocalCoor(); kcoor++ )
                 {
                     //if(icoor==jcoor)
                     A[ jcoor ][ jcoor ][i][kcoor] -= z[ kcoor ];  // -\delta_{jcoor kcoor} \partial_{icoor} + \delta_{jcoor icoor}\partial_{kcoor}
@@ -4607,10 +4608,10 @@ void source_press ( Real coef, const VectorElemental& uk_loc, MatrixElemental& e
 
 
 
-            //                         for ( jcoor = 0;jcoor < fe_u.nbCoor();jcoor++ )
+            //                         for ( jcoor = 0;jcoor < fe_u.nbLocalCoor();jcoor++ )
             //                             {
             //                             //if(kcoor==jcoor)
-            //                                     for ( icoor = 0;icoor < fe_u.nbCoor();icoor++ )
+            //                                     for ( icoor = 0;icoor < fe_u.nbLocalCoor();icoor++ )
             //                                         {
             //                                             //    if(icoor==jcoor)
             //                                             A[ icoor ][ jcoor ][i][kcoor] -= A[ kcoor ][ icoor ][i][jcoor];  // \delta_{jcoor icoor}\partial_{kcoor}
@@ -4619,31 +4620,31 @@ void source_press ( Real coef, const VectorElemental& uk_loc, MatrixElemental& e
             //                                         }
             //                             }
             //                    }
-            //                for ( UInt kcoor = 0;kcoor < fe_u.nbCoor();kcoor++ )
+            //                for ( UInt kcoor = 0;kcoor < fe_u.nbLocalCoor();kcoor++ )
             //                    {
-            //                         for ( jcoor = 0;jcoor < fe_u.nbCoor();jcoor++ )
+            //                         for ( jcoor = 0;jcoor < fe_u.nbLocalCoor();jcoor++ )
             //                         {
-            //                             for ( icoor = 0;icoor < fe_u.nbCoor();icoor++ )
+            //                             for ( icoor = 0;icoor < fe_u.nbLocalCoor();icoor++ )
             //                                 {
-            //                                     //for ( jcoor = 0;jcoor < fe_u.nbCoor();jcoor++ )
+            //                                     //for ( jcoor = 0;jcoor < fe_u.nbLocalCoor();jcoor++ )
             //                                     if(icoor==jcoor)
             //                                         A[ icoor ][ jcoor ][i][kcoor] += f[icoor][jcoor];  // -\delta_{jcoor kcoor} \partial_{icoor} + \delta_{jcoor icoor}\partial_{kcoor}
             //                 //                for ( i = 0;i < fe_u.nbFEDof();i++ )
-            //                 //                    for(jcoor=0;jcoor<fe_u.nbCoor();++jcoor)
+            //                 //                    for(jcoor=0;jcoor<fe_u.nbLocalCoor();++jcoor)
             //                 //                        s[i][jcoor] = 0.0;
-            //                               //for ( jcoor = 0;jcoor < fe_u.nbCoor();jcoor++ )
+            //                               //for ( jcoor = 0;jcoor < fe_u.nbLocalCoor();jcoor++ )
             //                               //{
             //                                 }
             //                         }
             //                    }
-            //                for ( UInt kcoor = 0;kcoor < fe_u.nbCoor();kcoor++ )
+            //                for ( UInt kcoor = 0;kcoor < fe_u.nbLocalCoor();kcoor++ )
             //                    {
-            for ( UInt kcoor = 0; kcoor < fe_u.nbCoor(); kcoor++ )
+            for ( UInt kcoor = 0; kcoor < fe_u.nbLocalCoor(); kcoor++ )
             {
                 l = 0;
-                //for ( kcoor = 0;kcoor < fe_u.nbCoor();kcoor++ )
-                for ( icoor = 0; icoor < fe_u.nbCoor(); icoor++ )
-                    for ( jcoor = 0; jcoor < fe_u.nbCoor(); jcoor++ )
+                //for ( kcoor = 0;kcoor < fe_u.nbLocalCoor();kcoor++ )
+                for ( icoor = 0; icoor < fe_u.nbLocalCoor(); icoor++ )
+                    for ( jcoor = 0; jcoor < fe_u.nbLocalCoor(); jcoor++ )
                     {
                         l += guk[ icoor ][ jcoor ] * A[ icoor ][ jcoor ][i][kcoor]; // \grad u^k : [I\div d - (\grad d)^T] at each quadrature point
                         //}
@@ -4657,10 +4658,10 @@ void source_press ( Real coef, const VectorElemental& uk_loc, MatrixElemental& e
     //
     // Numerical integration
     //
-    for ( UInt kcoor = 0; kcoor < fe_u.nbCoor(); kcoor++ )
+    for ( UInt kcoor = 0; kcoor < fe_u.nbLocalCoor(); kcoor++ )
     {
         //            for ( short l = 0;i < fe_u.nbFEDof();i++ )
-        //for ( jcoor = 0;jcoor < fe_u.nbCoor();jcoor++ )
+        //for ( jcoor = 0;jcoor < fe_u.nbLocalCoor();jcoor++ )
         double l = 0.;
 
         MatrixElemental::matrix_view mat = elmat.block ( iblock, kcoor );
@@ -4734,47 +4735,47 @@ void shape_terms (
 {
     // I div d - (grad d)^T
     boost::multi_array<Real, 4> eta (
-        boost::extents[fe.nbCoor()][fe.nbCoor()][fe.nbFEDof()][fe.nbCoor()]);
+        boost::extents[fe.nbLocalCoor()][fe.nbLocalCoor()][fe.nbFEDof()][fe.nbLocalCoor()]);
     // I div d - (grad d)^T
     boost::multi_array<Real, 4> etaMass3 (
-        boost::extents[fe.nbCoor()][fe.nbCoor()][fe.nbFEDof()][fe.nbCoor()]);
+        boost::extents[fe.nbLocalCoor()][fe.nbLocalCoor()][fe.nbFEDof()][fe.nbLocalCoor()]);
     // u^k
     boost::multi_array<Real, 2> uk (
-        boost::extents[fe.nbQuadPt()][fe.nbCoor()]);
+        boost::extents[fe.nbQuadPt()][fe.nbLocalCoor()]);
     // grad u^k
     boost::multi_array<Real, 3> guk (
-        boost::extents[fe.nbQuadPt()][fe.nbCoor()][fe.nbCoor()]);
+        boost::extents[fe.nbQuadPt()][fe.nbLocalCoor()][fe.nbLocalCoor()]);
     // div u^k
     std::vector<Real> duk (fe.nbQuadPt() );
     // grad u^k
     boost::multi_array<Real, 3> gun (
-        boost::extents[fe.nbQuadPt()][fe.nbCoor()][fe.nbCoor()]);
+        boost::extents[fe.nbQuadPt()][fe.nbLocalCoor()][fe.nbLocalCoor()]);
     // convect
-    std::vector<Real> convect (fe.nbCoor() );
+    std::vector<Real> convect (fe.nbLocalCoor() );
     // convect^T [ I div d - (grad d)^T ]
     boost::multi_array<Real, 4> convect_eta (
-        boost::extents[fe.nbQuadPt()][fe.nbCoor()][fe.nbFEDof()][fe.nbCoor()]);
+        boost::extents[fe.nbQuadPt()][fe.nbLocalCoor()][fe.nbFEDof()][fe.nbLocalCoor()]);
     // - p^k I + 2 mu e(u^k)
     boost::multi_array<Real, 2> sigma (
-        boost::extents[fe.nbCoor()][fe.nbCoor()]);
+        boost::extents[fe.nbLocalCoor()][fe.nbLocalCoor()]);
     // ( - p^k I + 2 mu e(u^k) )( I div d - (grad d)^T )
     boost::multi_array<Real, 5> B (
-        boost::extents[fe.nbQuadPt()][fe.nbCoor()][fe.nbCoor()][fe.nbFEDof()][fe.nbCoor()]);
+        boost::extents[fe.nbQuadPt()][fe.nbLocalCoor()][fe.nbLocalCoor()][fe.nbFEDof()][fe.nbLocalCoor()]);
     // gd
     boost::multi_array<Real, 4> gd (
-        boost::extents[fe.nbCoor()][fe.nbCoor()][fe.nbFEDof()][fe.nbCoor()]);
+        boost::extents[fe.nbLocalCoor()][fe.nbLocalCoor()][fe.nbFEDof()][fe.nbLocalCoor()]);
     // grad u^k grad d + (grad d)^T (grad u^k)^T
     boost::multi_array<Real, 5> A2 (
-        boost::extents[fe.nbQuadPt()][fe.nbCoor()][fe.nbCoor()][fe.nbFEDof()][fe.nbCoor()]);
+        boost::extents[fe.nbQuadPt()][fe.nbLocalCoor()][fe.nbLocalCoor()][fe.nbFEDof()][fe.nbLocalCoor()]);
 
     boost::multi_array<Real, 4> aux (
-        boost::extents[fe.nbQuadPt()][fe.nbCoor()][fe.nbFEDof()][fe.nbCoor()]);
+        boost::extents[fe.nbQuadPt()][fe.nbLocalCoor()][fe.nbFEDof()][fe.nbLocalCoor()]);
     boost::multi_array<Real, 2> BMass (
-        boost::extents[fe.nbCoor()][fe.nbCoor()]);
+        boost::extents[fe.nbLocalCoor()][fe.nbLocalCoor()]);
     boost::multi_array<Real, 3> auxMass (
-        boost::extents[fe.nbQuadPt()][fe.nbFEDof()][fe.nbCoor()]);
+        boost::extents[fe.nbQuadPt()][fe.nbFEDof()][fe.nbLocalCoor()]);
     boost::multi_array<Real, 3> auxMass3 (
-        boost::extents[fe.nbQuadPt()][fe.nbFEDof()][fe.nbCoor()]);
+        boost::extents[fe.nbQuadPt()][fe.nbFEDof()][fe.nbLocalCoor()]);
 
     Real s,  sA, sB, sGk, sGn, pk;
 
@@ -4785,11 +4786,11 @@ void shape_terms (
     for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
         ////INIT
-        for (UInt p = 0; p < fe.nbCoor(); ++p)
+        for (UInt p = 0; p < fe.nbLocalCoor(); ++p)
         {
             uk[ig][p] = 0.;
             convect[p] = 0.;
-            for (UInt q = 0; q < fe.nbCoor(); ++q)
+            for (UInt q = 0; q < fe.nbLocalCoor(); ++q)
             {
                 guk[ig][p][q] = 0.;
                 gun[ig][p][q] = 0.;
@@ -4801,7 +4802,7 @@ void shape_terms (
                     auxMass3[ ig ][d][q] = 0.;
                     aux[ig][p][d][q] = 0.;
                     convect_eta[ig][p][d][q] = 0.;
-                    for (UInt e = 0; e < fe.nbCoor(); ++e)
+                    for (UInt e = 0; e < fe.nbLocalCoor(); ++e)
                     {
                         gd[p][q][d][e] = 0.;
                         eta[p][q][d][e] = 0.;
@@ -4815,7 +4816,7 @@ void shape_terms (
         ////////END INIT
 
         // loop on space coordindates
-        for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+        for ( icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
         {
 
             // each compontent of uk at each quadrature points
@@ -4836,7 +4837,7 @@ void shape_terms (
 
 
             // loop  on space coordindates
-            for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+            for ( jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
             {
                 sB = 0.0;
                 sGk = 0.0;
@@ -4866,9 +4867,9 @@ void shape_terms (
         }
 
         // sigma = [-p^k I + 2*mu e(u^k)] a quadrature point
-        for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+        for ( icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
         {
-            for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+            for ( jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
             {
                 sigma[ icoor ][ jcoor ] = mu * ( guk[ig][ icoor ][ jcoor ] + guk[ig][ jcoor ][ icoor ] );
             }
@@ -4879,15 +4880,15 @@ void shape_terms (
         for ( i = 0; i < fe.nbFEDof(); i++ )
         {
 
-            std::vector<Real> z (fe.nbCoor() );
-            for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+            std::vector<Real> z (fe.nbLocalCoor() );
+            for ( jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
             {
                 //if(icoor==jcoor)
                 z[ jcoor ] = eta[ jcoor ][ jcoor ][i][jcoor];  // -\delta_{jcoor kcoor} \partial_{icoor} + \delta_{jcoor icoor}\partial_{kcoor}
             }
-            for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+            for ( jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
             {
-                for ( kcoor = 0; kcoor < fe.nbCoor(); kcoor++ )
+                for ( kcoor = 0; kcoor < fe.nbLocalCoor(); kcoor++ )
                 {
                     eta[ jcoor ][ jcoor ][i][kcoor] -= z[kcoor];  // -\delta_{jcoor kcoor} \partial_{icoor} + \delta_{jcoor icoor}\partial_{kcoor}
                 }
@@ -4895,20 +4896,20 @@ void shape_terms (
 
             //!source_mass1
 
-            for ( kcoor = 0; kcoor < fe.nbCoor(); kcoor++ )
+            for ( kcoor = 0; kcoor < fe.nbLocalCoor(); kcoor++ )
             {
                 s = 0;
-                for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
-                    for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+                for ( icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
+                    for ( jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
                     {
                         s += BMass[ icoor ][ jcoor ] * eta[ icoor ][ jcoor ][i][kcoor];    // \grad (-w^k):[I\div d - (\grad d)^T] at each quadrature point
                     }
                 auxMass[ ig ][i][kcoor] = s;
 
-                for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+                for ( jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
                 {
                     s = 0.;
-                    for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+                    for ( icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
                     {
                         s += convect[ icoor ] * eta[ icoor ][ jcoor ][i][kcoor]; // convect^T [I\div d - (\grad d)^T]
                     }
@@ -4917,14 +4918,14 @@ void shape_terms (
             }
             //! source_stress
 
-            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+            for ( icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
             {
-                for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+                for ( jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
                 {
-                    for ( kcoor = 0; kcoor < fe.nbCoor(); kcoor++ )
+                    for ( kcoor = 0; kcoor < fe.nbLocalCoor(); kcoor++ )
                     {
                         s = 0.;
-                        for (UInt zcoor = 0; zcoor < fe.nbCoor(); zcoor++ )
+                        for (UInt zcoor = 0; zcoor < fe.nbLocalCoor(); zcoor++ )
                         {
                             s += sigma[ icoor ][ zcoor ] * eta[ zcoor ][ jcoor ][i][kcoor];
                         }
@@ -4935,14 +4936,14 @@ void shape_terms (
 
 
             //! source_stress2
-            for ( kcoor = 0; kcoor < fe.nbCoor(); kcoor++ )
+            for ( kcoor = 0; kcoor < fe.nbLocalCoor(); kcoor++ )
             {
-                for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+                for ( icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
                 {
-                    for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+                    for ( jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
                     {
                         s = 0.;
-                        for ( UInt zcoor = 0; zcoor < fe.nbCoor(); zcoor++ )
+                        for ( UInt zcoor = 0; zcoor < fe.nbLocalCoor(); zcoor++ )
                             // \grad u^k \grad d + [\grad d]^T[\grad u^k]^T  at each quadrature point
                         {
                             s += guk[ig][ icoor ][ zcoor ] * gd[ zcoor ][ jcoor ][i][kcoor] + gd[ zcoor ][ icoor ][i][kcoor] * guk[ig][ jcoor ][ zcoor ];
@@ -4954,16 +4955,16 @@ void shape_terms (
 
             if (wImplicit) //source_mass2 and convective term derivative
             {
-                for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+                for ( icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
                 {
                     //s = 0.0;
-                    for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+                    for ( jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
                     {
                         aux[ ig ][ icoor ][i][jcoor] = guk[ig][ icoor ][ jcoor ]  * fe.phi ( i, ig ) /**alpha*/;
                     }
 
                 }
-                for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+                for ( jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
                 {
                     duk[ig] += guk[ig][ jcoor ][ jcoor ];  //div uk
                 }
@@ -4976,23 +4977,23 @@ void shape_terms (
             //
 
             //!building the tensor \f$\eta = [I\nabla\cdot d - (\nabla d)^T]\f$
-            //                for ( int kcoor = 0;kcoor < fe.nbCoor();kcoor++ )
+            //                for ( int kcoor = 0;kcoor < fe.nbLocalCoor();kcoor++ )
 
-            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
-                for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+            for ( icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
+                for ( jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
                 {
-                    for (kcoor = 0; kcoor < fe.nbCoor(); kcoor++ )
+                    for (kcoor = 0; kcoor < fe.nbLocalCoor(); kcoor++ )
                     {
                         //if(icoor==jcoor)
                         etaMass3[ icoor ][ jcoor ][i][kcoor] -= 2 * z[kcoor]; //! -2*\delta_{jcoor, kcoor} \partial_{icoor} + \delta_{jcoor, icoor}\partial_{kcoor}
                     }
                 }
 
-            for (kcoor = 0; kcoor < fe.nbCoor(); ++kcoor)
+            for (kcoor = 0; kcoor < fe.nbLocalCoor(); ++kcoor)
             {
                 s = 0;
-                for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
-                    for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+                for ( icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
+                    for ( jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
                     {
                         s += gun[ig][ icoor ][ jcoor ] * etaMass3/**/[ icoor ][ jcoor ][i][kcoor];    // \grad u^n:[/*2*/ * I\div d - (\grad d)^T] at each quadrature point
                     }
@@ -5012,9 +5013,9 @@ void shape_terms (
     //
     Real g = 0.;
     // loop on coordinates, i.e. loop on elementary vector blocks
-    for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+    for ( icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
     {
-        for ( kcoor = 0; kcoor < fe.nbCoor(); kcoor++ )
+        for ( kcoor = 0; kcoor < fe.nbLocalCoor(); kcoor++ )
         {
 
             // the block iccor of the elementary vector
@@ -5038,7 +5039,7 @@ void shape_terms (
                     for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
                     {
                         // - convect^T [I\div d - (\grad d)^T] (u^k)^T :\grad\phi_i
-                        for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+                        for ( jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
                         {
                             //source_mass1
                             s += convect_eta[ ig ][ jcoor ][j][kcoor] * guk[ ig ][ icoor ][jcoor] * fe.phi ( i, ig ) * fe.weightDet ( ig ) * rho;
@@ -5222,7 +5223,7 @@ void mass_Hdiv ( Real coef, MatrixElemental& elmat, const CurrentFE& dualFE, int
             for ( UInt ig (0); ig < dualFE.nbQuadPt(); ++ig )
             {
                 // Loop over all the space dimension, e.g. in 3D three times, in 2D two times.
-                for ( UInt icoor (0); icoor < dualFE.nbCoor() ; ++icoor )
+                for ( UInt icoor (0); icoor < dualFE.nbLocalCoor() ; ++icoor )
                 {
                     sum += dualFE.phi ( j, icoor, ig ) * dualFE.phi ( i, icoor, ig ) * dualFE.wDetJacobian ( ig );
                 }
@@ -5254,11 +5255,11 @@ void mass_Hdiv ( Matrix const&  Invperm, MatrixElemental& elmat, const CurrentFE
                 partialSum = 0.;
                 /* Loop over all the space dimension of the first dual variable,
                     e.g. in 3D three times, in 2D two times.*/
-                for ( UInt icoor (0); icoor < dualFE.nbCoor(); ++icoor )
+                for ( UInt icoor (0); icoor < dualFE.nbLocalCoor(); ++icoor )
                 {
                     /* Loop over all the space dimension of the first dual variable,
                           e.g. in 3D three times, in 2D two times.*/
-                    for ( UInt jcoor (0); jcoor < dualFE.nbCoor(); ++jcoor )
+                    for ( UInt jcoor (0); jcoor < dualFE.nbLocalCoor(); ++jcoor )
                     {
                         // Invperm is the inverse of the permeability.
                         partialSum += ( Invperm ( icoor, jcoor ) *
@@ -5297,7 +5298,7 @@ void mass_Hdiv ( Real ( *InvpermFun ) ( const Real&, const Real&, const Real& ),
                 z = dualFE.quadNode (ig, 2);
 
                 // Loop over all the space dimension, e.g. in 3D three times, in 2D two times.
-                for ( UInt icoor (0); icoor < dualFE.nbCoor(); ++icoor )
+                for ( UInt icoor (0); icoor < dualFE.nbLocalCoor(); ++icoor )
                 {
                     // Caution Invperm is the inverse of the permeability.
                     sum += InvpermFun ( x, y, z ) *
@@ -5327,7 +5328,7 @@ void source_Hdiv ( const Vector& source, VectorElemental& elvec, const CurrentFE
             sum = 0.;
             /* Loop over all the space dimension of the dual variable,
                e.g. in 3D three times, in 2D two times.*/
-            for ( UInt icoor (0); icoor < dualFE.nbCoor(); ++icoor )
+            for ( UInt icoor (0); icoor < dualFE.nbLocalCoor(); ++icoor )
             {
                 // sum[icoor] = source[icoor] * phi[icoor] for all icorr.
                 sum += source ( icoor ) * dualFE.phi ( i, icoor, ig );

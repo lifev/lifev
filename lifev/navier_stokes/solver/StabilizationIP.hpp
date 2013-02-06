@@ -318,7 +318,7 @@ void StabilizationIP<MeshType, DofType>::apply ( MatrixType& matrix,  const Vect
             for ( UInt iNode ( 0 ); iNode < M_feBd->nbFEDof(); ++iNode )
             {
                 UInt iloc ( M_facetToPoint ( iFaEl, iNode ) );
-                for ( UInt iCoor ( 0 ); iCoor < M_feOnSide1->nbCoor(); ++iCoor )
+                for ( UInt iCoor ( 0 ); iCoor < M_feOnSide1->nbLocalCoor(); ++iCoor )
                 {
                     UInt ig ( M_dof->localToGlobalMap ( iElAd1, iloc ) + iCoor * nDof );
 
@@ -330,7 +330,7 @@ void StabilizationIP<MeshType, DofType>::apply ( MatrixType& matrix,  const Vect
             }
 
             // second, calculate its max norm
-            for ( UInt l ( 0 ); l < static_cast<UInt> ( M_feOnSide1->nbCoor() *M_feBd->nbFEDof() ); ++l )
+            for ( UInt l ( 0 ); l < static_cast<UInt> ( M_feOnSide1->nbLocalCoor() *M_feBd->nbFEDof() ); ++l )
             {
                 if ( bmax < std::fabs ( beta.vec() [ l ] ) )
                 {
@@ -424,7 +424,7 @@ void StabilizationIP<MeshType, DofType>::apply ( MatrixType& matrix,  const Vect
             for ( UInt iNode (0); iNode < M_feBd->nbNode; ++iNode )
             {
                 Real bn ( 0 );
-                for ( UInt iCoor (0); iCoor < M_feOnSide1->nbCoor(); ++iCoor )
+                for ( UInt iCoor (0); iCoor < M_feOnSide1->nbLocalCoor(); ++iCoor )
                 {
                     bn += normal (iNode, iCoor) *
                           beta.vec() [ iCoor * M_feBd->nbNode + iNode ];

@@ -127,7 +127,7 @@ public:
       @param nbDofPerFace Number of degrees of freedom per face
       @param nbDofPerVolume Number of degrees of freedom per volume
       @param nbDof Total number of degrees of freedom ( = nbDofPerVertex * nb vertex + nbDofPerEdge * nb edges + etc...)
-      @param nbCoor Number of local coordinates
+      @param nbLocalCoor Number of local coordinates
       @param refCoor Static array containing the coordinates of the nodes on the reference element
       @param numBoundaryFE Number of static boundary elements
       @param boundaryFEList List of static boundary elements
@@ -145,7 +145,7 @@ public:
                         UInt               nbDofPerFace,
                         UInt               nbDofPerVolume,
                         UInt               nbDof,
-                        UInt               nbCoor,
+                        UInt                       nbLocalCoor,
                         const UInt&        numberBoundaryFE,
                         const CurrentFEManifold**  boundaryFEList,
                         const Real*        refCoor,

@@ -57,8 +57,8 @@ const flag_Type UPDATE_ONLY_TANGENTS (16384);
 const flag_Type UPDATE_ONLY_NORMALS (32768);
 const flag_Type UPDATE_ONLY_METRIC (65536);
 const flag_Type UPDATE_ONLY_DET_METRIC (131072);
-const flag_Type UPDATE_ONLY_INV_METRIC (262144);
-const flag_Type UPDATE_ONLY_W_ROOT_DET_METRIC (524288);
+const flag_Type UPDATE_ONLY_W_ROOT_DET_METRIC (262144);
+const flag_Type UPDATE_ONLY_INV_METRIC (524288);
 
 const flag_Type UPDATE_TANGENTS (UPDATE_ONLY_TANGENTS
                                  | UPDATE_ONLY_CELL_NODES);
@@ -69,13 +69,11 @@ const flag_Type UPDATE_METRIC (UPDATE_ONLY_METRIC
                                | UPDATE_ONLY_TANGENTS
                                | UPDATE_ONLY_CELL_NODES);
 const flag_Type UPDATE_INV_METRIC (UPDATE_ONLY_INV_METRIC
-                                   | UPDATE_ONLY_METRIC
+                                   | UPDATE_METRIC
                                    | UPDATE_ONLY_DET_METRIC);
 const flag_Type UPDATE_W_ROOT_DET_METRIC (UPDATE_ONLY_W_ROOT_DET_METRIC
-                                          | UPDATE_ONLY_METRIC
-                                          | UPDATE_ONLY_DET_METRIC
-                                          | UPDATE_ONLY_TANGENTS
-                                          | UPDATE_ONLY_CELL_NODES);
+                                          | UPDATE_METRIC
+                                          | UPDATE_ONLY_DET_METRIC);
 
 /*!
   \class CurrentFEManifold
@@ -124,6 +122,7 @@ public:
     //! @name Methods
     //@{
 
+    // The update method which takes the geometric element is inherited from the base class
     using CurrentFE::update;
 
     //! Update method using only point coordinates.
@@ -131,7 +130,7 @@ public:
         Overrides the method of base class CurrentFE. Actually, it calls the method of the base
         class and then performs some extra updates if upFlag contains also some boundary updates
         @param pts The coordinates of the points defining the current element
-        @ upFlag   The update flag which determines what kind of update has to be done (see top of the file)
+        @param upFlag   The update flag which determines what kind of update has to be done (see top of the file)
      */
     virtual void update (const std::vector<std::vector<Real> >& pts, flag_Type upFlag);
 
@@ -150,7 +149,7 @@ public:
      */
     Real measure () const;
 
-    //! Compute the integral of a function f over the current boundary element
+    //! Compute the integral of a function f over the current element
     /*!
         @param f The function to be integrated. It must have the signature
                  Real f(Real x, Real y, Real z)
@@ -158,11 +157,14 @@ public:
     template <typename FunctorType>
     Real integral (const FunctorType& f) const;
 
-    //! Compute the integral of the normal component of a vector function f over the current boundary element
+    //! Compute the integral of the normal component of a vector function f over the current element
     /*!
         @param f The function to be integrated. It must have the signature
                  void f(Real x, Real y, Real z, Real* result)
-                 where result is an array of size equal to the dimension of the ambient space (already created)
+                 where result is an array of size equal to the dimension of the ambient space.
+                 The function should NOT create the array, but instead should assume that
+                 the array is already created. The dimension of the ambient spase should be
+                 equal to M_nbLocalCoor+1
      */
     template <typename FunctorType>
     Real normalIntegral (const FunctorType& f) const;
@@ -263,7 +265,7 @@ protected:
 template <typename FunctorType>
 Real CurrentFEManifold::integral (const FunctorType& f) const
 {
-    ASSERT_PRE (M_quadNodesUpdated && M_wRootDetMetricUpdated, "Error! Quadrature nodes and Jacobian Determinant have not been updated yet.\n");
+    ASSERT (M_quadNodesUpdated && M_wRootDetMetricUpdated, "Error! Quadrature nodes and Jacobian Determinant have not been updated yet.\n");
     Real result = 0.0;
     for (UInt iq (0); iq < M_nbQuadPt; ++iq)
     {
@@ -276,16 +278,16 @@ Real CurrentFEManifold::integral (const FunctorType& f) const
 template <typename FunctorType>
 Real CurrentFEManifold::normalIntegral (const FunctorType& f) const
 {
-    ASSERT_PRE (M_quadNodesUpdated && M_normalUpdated && M_wRootDetMetricUpdated, "Error! Normal and Jacobian Determinant have not been updated yet.\n");
+    ASSERT (M_quadNodesUpdated && M_normalUpdated && M_wRootDetMetricUpdated, "Error! Normal and Jacobian Determinant have not been updated yet.\n");
     Real result = 0.0;
 
     Real tmp;
-    Real* returnValues = new Real[M_nbCoor + 1];
+    Real* returnValues = new Real[M_nbLocalCoor + 1];
     for (UInt iq (0); iq < M_nbQuadPt; ++iq)
     {
         tmp = 0;
         f (M_quadNodes[iq][0], M_quadNodes[iq][1], M_quadNodes[iq][2], returnValues);
-        for (UInt iCoor (0); iCoor <= M_nbCoor; ++iCoor)
+        for (UInt iCoor (0); iCoor <= M_nbLocalCoor; ++iCoor)
         {
             tmp += returnValues[iCoor] * M_normal[iCoor][iq];
         }
