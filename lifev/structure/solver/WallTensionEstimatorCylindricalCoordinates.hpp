@@ -375,8 +375,8 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensionsRecoveryDispla
             //Save the eigenvalues in the global vector
             for( UInt icoor = 0; icoor < this->M_FESpace->fieldDim(); ++icoor )
             {
-                UInt ig = this->M_FESpace->dof().localToGlobalMap( eleID, iloc ) + iComp * this->M_FESpace->dim() + this->M_offset;
-                    (*(this->M_globalEigen))(ig) = this->M_eigenvaluesR[icoor];
+                UInt ig = this->M_FESpace->dof().localToGlobalMap( eleID, iloc ) + icoor * this->M_FESpace->dim() + this->M_offset;
+                (*(this->M_globalEigen))(ig) = this->M_eigenvaluesR[icoor];
                 // Int LIDid = this->M_displ->blockMap().LID(ig);
                 // if( this->M_globalEigen->blockMap().LID(ig) != -1  )
                 // {
