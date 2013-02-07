@@ -46,61 +46,14 @@
 // OneDFSI includes
 #include <lifev/one_d_fsi/solver/OneDFSISolver.hpp>
 
+// Multiscale includes
+#include <lifev/multiscale/solver/MultiscaleGlobalData.hpp>
+
 // BCInterface includes
 #include <lifev/bc_interface/function/BCInterfaceFunctionParser.hpp>
 
 namespace LifeV
 {
-
-#ifndef MULTISCALE_IS_IN_LIFEV
-//! ZeroDimensionalData - Temporary data container for ZeroDimensionalModels until they are defined only in LifeV
-/*!
- * This class will be removed when the Multiscale framework will be ported in LifeV
- */
-class ZeroDimensionalTemporaryData
-{
-public:
-
-    //! @name Constructors & Destructor
-    //@{
-
-    //! Constructor
-    explicit ZeroDimensionalTemporaryData() : M_fluidVenousPressure() {}
-
-    //! Destructor
-    virtual ~ZeroDimensionalTemporaryData() {}
-
-    //@}
-
-
-    //! @name Set Methods
-    //@{
-
-    //! Set the global fluid venous pressure.
-    /*!
-     * @return venous pressure of the fluid.
-     */
-    void setFluidVenousPressure( const Real& fluidVenousPressure ) { M_fluidVenousPressure = fluidVenousPressure; }
-
-    //@}
-
-
-    //! @name Get Methods
-    //@{
-
-    //! Get the global fluid venous pressure.
-    /*!
-     * @return venous pressure of the fluid.
-     */
-    const Real& fluidVenousPressure() const { return M_fluidVenousPressure; }
-
-    //@}
-
-private:
-
-    Real                                M_fluidVenousPressure;
-};
-#endif
 
 //! BCInterfaceFunctionParserSolver - LifeV boundary condition function file wrapper for \c BCInterface
 /*!
@@ -497,13 +450,13 @@ BCInterfaceFunctionParserSolver< FSIOperator >::updatePhysicalSolverVariables()
 
         case f_flux:
 
-               if ( M_physicalSolver->isFluid() )
+            if ( M_physicalSolver->isFluid() )
             {
 #ifdef HAVE_LIFEV_DEBUG
-            debugStream( 5023 ) << "                                              f_flux(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->fluid().flux( M_flag ) << "\n";
+                debugStream( 5023 ) << "!!! Warning: fluid not initialized yet, setting flux = 0 in BCInterface !!!\n";
 
 #endif
-            setVariable( "f_flux", 0.0 );
+                setVariable( "f_flux", 0.0 );
             }
             else
             {
@@ -751,15 +704,11 @@ BCInterfaceFunctionParserSolver< OseenSolverShapeDerivative< RegionMesh< LinearT
 
 template< >
 inline void
-#ifdef MULTISCALE_IS_IN_LIFEV
-BCInterfaceFunctionParserSolver< Multiscale::MultiscaleData >::updatePhysicalSolverVariables()
-#else
-BCInterfaceFunctionParserSolver< ZeroDimensionalTemporaryData >::updatePhysicalSolverVariables()
-#endif
+BCInterfaceFunctionParserSolver< Multiscale::MultiscaleGlobalData >::updatePhysicalSolverVariables()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 5023 ) << "BCInterfaceFunctionSolver<MultiscaleData>::updatePhysicalSolverVariables" << "\n";
+    debugStream( 5023 ) << "BCInterfaceFunctionSolver<MultiscaleGlobalData>::updatePhysicalSolverVariables" << "\n";
 #endif
 
     // Create/Update variables
@@ -767,7 +716,6 @@ BCInterfaceFunctionParserSolver< ZeroDimensionalTemporaryData >::updatePhysicalS
         switch ( *j )
         {
         // f_ -> FLUID
-#ifdef MULTISCALE_IS_IN_LIFEV
         case f_timeStep:
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -794,7 +742,7 @@ BCInterfaceFunctionParserSolver< ZeroDimensionalTemporaryData >::updatePhysicalS
             setVariable( "f_viscosity", M_physicalSolver->fluidViscosity() );
 
             break;
-#endif
+
         case f_venousPressure:
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -806,7 +754,7 @@ BCInterfaceFunctionParserSolver< ZeroDimensionalTemporaryData >::updatePhysicalS
 
         default:
 
-            switchErrorMessage( "MultiscaleData" );
+            switchErrorMessage( "MultiscaleGlobalData" );
 
             break;
         }
@@ -942,15 +890,11 @@ BCInterfaceFunctionParserSolver< OseenSolverShapeDerivative< RegionMesh< LinearT
 
 template< >
 inline void
-#ifdef MULTISCALE_IS_IN_LIFEV
-BCInterfaceFunctionParserSolver< Multiscale::MultiscaleData >::createAccessList( const BCInterfaceData& data )
-#else
-BCInterfaceFunctionParserSolver< ZeroDimensionalTemporaryData >::createAccessList( const BCInterfaceData& data )
-#endif
+BCInterfaceFunctionParserSolver< Multiscale::MultiscaleGlobalData >::createAccessList( const BCInterfaceData& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 5023 ) << "BCInterfaceFunctionSolver<MultiscaleData>::createAccessList( data )" << "\n";
+    debugStream( 5023 ) << "BCInterfaceFunctionSolver<MultiscaleGlobalData>::createAccessList( data )" << "\n";
 #endif
 
     std::map< std::string, physicalSolverList > mapList;

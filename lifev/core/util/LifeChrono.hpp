@@ -87,6 +87,8 @@ public:
     //@{
     void reset()
     {
+        M_t1 = 0;
+        M_t2 = 0;
         M_dt = 0;
         M_running = false;
     }
