@@ -112,6 +112,8 @@ main( int argc, char** argv )
 #ifdef HAVE_MPI
     MPI_Init(&argc, &argv);
 #endif
+    int exit_status;
+    bool verbose( true );
 
     {
 
@@ -121,7 +123,8 @@ main( int argc, char** argv )
     boost::shared_ptr<Epetra_Comm> Comm( new Epetra_SerialComm );
 #endif
 
-    const bool verbose( Comm->MyPID() == 0 );
+    verbose = (Comm->MyPID() == 0);
+
     if( verbose ){
         std::cout
             << " +-----------------------------------------------+" << std::endl
@@ -307,13 +310,6 @@ main( int argc, char** argv )
     if( verbose ) std::cout << "Linear solver Belos" << std::endl;
     printErrors( *solution, uFESpace,verbose );
 
-    if( linearSolver.numIterations() != 3 || precRawPtr->solverPtr()->numIterations() != 5 )
-    {
-        if( verbose ) std::cout << "The number of iterations has changed." << std::endl;
-        if( verbose ) std::cout << "Test status: FAILED" << std::endl;
-        return( EXIT_FAILURE );
-    }
-
     // +-----------------------------------------------+
     // |            Ending the simulation              |
     // +-----------------------------------------------+
@@ -321,15 +317,23 @@ main( int argc, char** argv )
     if( verbose ) std::cout << std::endl << "Total simulation time: " << globalChrono.diff() << " s." << std::endl;
     if( verbose ) std::cout << std::endl << "[[END_SIMULATION]]" << std::endl;
 
+    exit_status = (linearSolver.numIterations() != 3 || precRawPtr->solverPtr()->numIterations() != 5);
+
     }
 
 #ifdef HAVE_MPI
     MPI_Finalize();
 #endif
 
-    /*if( verbose )*/ std::cout << "Test status: SUCCESS" << std::endl;
+    if( exit_status )
+    {
+        if( verbose ) std::cout << "The number of iterations has changed." << std::endl;
+        if( verbose ) std::cout << "Test status: FAILED" << std::endl;
+        return( EXIT_FAILURE );
+    }
+
+
+    if( verbose ) std::cout << "Test status: SUCCESS" << std::endl;
 
     return( EXIT_SUCCESS );
 }
-
-
