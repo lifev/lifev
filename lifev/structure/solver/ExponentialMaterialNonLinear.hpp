@@ -318,6 +318,8 @@ void ExponentialMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matrixPtr
                                                                        const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
                                                                        const displayerPtr_Type& displayer )
 {
+    using namespace ExpressionAssembly;
+
     displayer->leaderPrint("   Non-Linear S-  updating non linear terms in the Jacobian Matrix (Exponential)");
 
     *(jacobian) *= 0.0;

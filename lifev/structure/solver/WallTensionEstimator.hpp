@@ -88,6 +88,8 @@
 #include <lifev/structure/solver/ExponentialMaterialNonLinear.hpp>
 #include <lifev/structure/solver/NeoHookeanMaterialNonLinear.hpp>
 
+#include <lifev/eta/fem/ETFESpace.hpp>
+
 namespace LifeV
 {
 /*!
@@ -131,6 +133,12 @@ public:
     typedef StructuralConstitutiveLaw<Mesh>                material_Type;
     typedef boost::shared_ptr<material_Type>               materialPtr_Type;
 
+    typedef ETFESpace< RegionMesh<LinearTetra>, MapEpetra, 3, 3 >  ETFESpace_Type;
+    typedef boost::shared_ptr<ETFESpace_Type>                      ETFESpacePtr_Type;
+
+    typedef FESpace< RegionMesh<LinearTetra>, MapEpetra >          FESpace_Type;
+    typedef boost::shared_ptr<FESpace_Type>                        FESpacePtr_Type;
+
     //@}
 
 
@@ -157,7 +165,8 @@ public:
     */
     void setup( const dataPtr_Type& dataMaterial,
                 const analysisDataPtr_Type& tensionData,
-                const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
+                const FESpacePtr_Type& dFESpace,
+                const ETFESpacePtr_Type&      dETFESpace,
                 boost::shared_ptr<Epetra_Comm>&     comm,
                 UInt marker);
 
@@ -383,7 +392,8 @@ template <typename Mesh>
 void
 WallTensionEstimator<Mesh >::setup( const dataPtr_Type& dataMaterial,
                                     const analysisDataPtr_Type& tensionData,
-                                    const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
+                                    const FESpacePtr_Type&        dFESpace,
+                                    const ETFESpacePtr_Type&      dETFESpace,
                                     boost::shared_ptr<Epetra_Comm>&     comm,
                                     UInt marker)
 
@@ -423,7 +433,7 @@ WallTensionEstimator<Mesh >::setup( const dataPtr_Type& dataMaterial,
 
     // Materials
     M_material.reset( material_Type::StructureMaterialFactory::instance().createObject( M_dataMaterial->solidType() ) );
-    M_material->setup( dFESpace,M_localMap,M_offset, M_dataMaterial, M_displayer );
+    M_material->setup( dFESpace, dETFESpace, M_localMap,M_offset, M_dataMaterial, M_displayer );
 }
 
 
@@ -523,7 +533,7 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryDisplacement( void )
             //     sumI += M_invariants[i];
 
             //Compute the first Piola-Kirchhoff tensor
-            M_material->computeLocalFirstPiolaKirchhoffTensor(*M_firstPiola, *M_deformationF, *M_cofactorF, M_invariants, M_marker);
+            //M_material->computeLocalFirstPiolaKirchhoffTensor(*M_firstPiola, *M_deformationF, *M_cofactorF, M_invariants, M_marker);
 
             //Compute the Cauchy tensor
             AssemblyElementalStructure::computeCauchyStressTensor(*M_sigma, *M_firstPiola, M_invariants[3], *M_deformationF);
@@ -663,7 +673,7 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryEigenvalues( void )
             AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor(M_invariants, vectorDeformationF[nDOF], *M_cofactorF);
 
             //Compute the first Piola-Kirchhoff tensor
-            M_material->computeLocalFirstPiolaKirchhoffTensor(*M_firstPiola, vectorDeformationF[nDOF], *M_cofactorF, M_invariants, M_marker);
+            //M_material->computeLocalFirstPiolaKirchhoffTensor(*M_firstPiola, vectorDeformationF[nDOF], *M_cofactorF, M_invariants, M_marker);
 
             //Compute the Cauchy tensor
             AssemblyElementalStructure::computeCauchyStressTensor(*M_sigma, *M_firstPiola, M_invariants[3], vectorDeformationF[nDOF]);
@@ -934,7 +944,7 @@ WallTensionEstimator<Mesh >::constructGlobalStressVector( solutionVect_Type& sig
             AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor(M_invariants, vectorDeformationF[nDOF], *M_cofactorF);
 
             //Compute the first Piola-Kirchhoff tensor
-            M_material->computeLocalFirstPiolaKirchhoffTensor(*M_firstPiola, vectorDeformationF[nDOF], *M_cofactorF, M_invariants, M_marker);
+            //M_material->computeLocalFirstPiolaKirchhoffTensor(*M_firstPiola, vectorDeformationF[nDOF], *M_cofactorF, M_invariants, M_marker);
 
             //Compute the Cauchy tensor
             AssemblyElementalStructure::computeCauchyStressTensor(*M_sigma, *M_firstPiola, M_invariants[3], vectorDeformationF[nDOF]);

@@ -149,6 +149,9 @@ public:
     typedef FESpace< RegionMesh<LinearTetra>, MapEpetra >         solidFESpace_Type;
     typedef boost::shared_ptr<solidFESpace_Type>                  solidFESpacePtr_Type;
 
+
+    typedef ETFESpace< RegionMesh<LinearTetra>, MapEpetra, 3, 3 >       solidETFESpace_Type;
+    typedef boost::shared_ptr<solidETFESpace_Type>                      solidETFESpacePtr_Type;
     /** @name Constructors, destructor
      */
     //@{
@@ -342,6 +345,8 @@ Structure::run3d()
     std::string dOrder =  dataFile( "solid/space_discretization/order", "P1");
 
     solidFESpacePtr_Type dFESpace( new solidFESpace_Type(pointerToMesh,dOrder,3,parameters->comm) );
+    solidETFESpacePtr_Type dETFESpace( new solidETFESpace_Type(pointerToMesh,&(dFESpace->refFE()),&(dFESpace->fe().geoMap()), parameters->comm) );
+
     if (verbose) std::cout << std::endl;
 
     std::string timeAdvanceMethod =  dataFile( "solid/time_discretization/method", "Newmark");
@@ -405,6 +410,7 @@ Structure::run3d()
     //! 2. Setup of the structuralSolver
     solid.setup(dataStructure,
                 dFESpace,
+                dETFESpace,
                 BCh,
                 parameters->comm);
 

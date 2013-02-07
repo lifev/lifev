@@ -153,6 +153,10 @@ public:
     typedef FESpace< RegionMesh<LinearTetra>, MapEpetra >         solidFESpace_Type;
     typedef boost::shared_ptr<solidFESpace_Type>                  solidFESpacePtr_Type;
 
+
+    typedef ETFESpace< RegionMesh<LinearTetra>, MapEpetra,3,3 >      solidETFESpace_Type;
+    typedef boost::shared_ptr<solidETFESpace_Type>                 solidETFESpacePtr_Type;
+
     /** @name Constructors, destructor
      */
     //@{
@@ -194,6 +198,7 @@ private:
     filterPtr_Type exporterCheck;
 
     solidFESpacePtr_Type dFESpace;
+    solidETFESpacePtr_Type dETFESpace;
     solidFESpacePtr_Type exporterFESpace;
 
 };
@@ -276,6 +281,7 @@ Structure::Structure( int                                   argc,
                       boost::shared_ptr<Epetra_Comm>        structComm):
     parameters( new Private() ),
     dFESpace(),
+    dETFESpace(),
     exporterFESpace()
 {
     GetPot command_line(argc, argv);
@@ -334,13 +340,14 @@ Structure::run3d()
     boost::shared_ptr<RegionMesh<LinearTetra> > fullMeshPtr(new RegionMesh<LinearTetra>( ( parameters->comm ) ));
     readMesh(*fullMeshPtr, meshData);
 
-    fullMeshPtr->showMe( );
+    //fullMeshPtr->showMe( );
 
     MeshPartitioner< RegionMesh<LinearTetra> > meshPart( fullMeshPtr, parameters->comm );
 
     std::string dOrder =  dataFile( "solid/space_discretization/order", "P1");
 
     dFESpace.reset( new solidFESpace_Type(meshPart,dOrder,3,parameters->comm) );
+    dETFESpace.reset( new solidETFESpace_Type(meshPart,&(dFESpace->refFE()),&(dFESpace->fe().geoMap()), parameters->comm) );
 
     // if( dOrder.compare("P2") == 0 )
     //     exporterFESpace.reset( new solidFESpace_Type(meshPart,"P1",3,parameters->comm) );
@@ -361,7 +368,7 @@ Structure::run3d()
         timeAdvance->setup(dataStructure->dataTimeAdvance()->orderBDF() , OrderDev);
 
     timeAdvance->setTimeStep(dataStructure->dataTime()->timeStep());
-    timeAdvance->showMe();
+    //    timeAdvance->showMe();
 
     //! #################################################################################
     //! BOUNDARY CONDITIONS
@@ -402,6 +409,7 @@ Structure::run3d()
     //! 2. Setup of the structuralSolver
     solid.setup(dataStructure,
                 dFESpace,
+                dETFESpace,
                 BCh,
                 parameters->comm);
 

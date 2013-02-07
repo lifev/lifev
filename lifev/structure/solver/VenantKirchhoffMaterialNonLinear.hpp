@@ -308,6 +308,9 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matri
                                                                            const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
                                                                            const displayerPtr_Type& displayer )
 {
+
+    using namespace ExpressionAssembly;
+
     displayer->leaderPrint("   Non-Linear S-  updating non linear terms in the Jacobian Matrix (Exponential)");
 
     *(jacobian) *= 0.0;
@@ -489,8 +492,8 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::computeLocalFirstPiolaKirchhoffTens
   Real coeff = -1.0 * mu;
   secondTerm.Scale( coeff );
 
-  Epetra_SerialDenseMatrix thirdTerm(this->M_FESpace->fieldDim(),this->M_FESpace->fieldDim());
-  Epetra_SerialDenseMatrix rightCauchyC(this->M_FESpace->fieldDim(),this->M_FESpace->fieldDim());
+  Epetra_SerialDenseMatrix thirdTerm(this->M_dispFESpace->fieldDim(),this->M_dispFESpace->fieldDim());
+  Epetra_SerialDenseMatrix rightCauchyC(this->M_dispFESpace->fieldDim(),this->M_dispFESpace->fieldDim());
   rightCauchyC.Scale(0.0);
 
 

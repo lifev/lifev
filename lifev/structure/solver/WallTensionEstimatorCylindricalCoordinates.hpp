@@ -83,6 +83,8 @@
 #include <lifev/structure/solver/WallTensionEstimatorData.hpp>
 #include <lifev/structure/solver/WallTensionEstimator.hpp>
 
+#include <lifev/eta/fem/ETFESpace.hpp>
+
 namespace LifeV
 {
 /*!
@@ -128,6 +130,11 @@ public:
     typedef StructuralConstitutiveLaw<Mesh>                material_Type;
     typedef boost::shared_ptr<material_Type>               materialPtr_Type;
 
+    typedef ETFESpace< RegionMesh<LinearTetra>, MapEpetra, 3, 3 >  ETFESpace_Type;
+    typedef boost::shared_ptr<ETFESpace_Type>                      ETFESpacePtr_Type;
+
+    typedef FESpace< RegionMesh<LinearTetra>, MapEpetra >          FESpace_Type;
+    typedef boost::shared_ptr<FESpace_Type>                        FESpacePtr_Type;
     //@}
 
 
@@ -152,7 +159,8 @@ public:
     */
     void setup( const dataPtr_Type& dataMaterial,
                 const analysisDataPtr_Type& tensionData,
-    	        const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
+                const FESpacePtr_Type& dFESpace,
+                const ETFESpacePtr_Type&      dETFESpace,
                 boost::shared_ptr<Epetra_Comm>&     comm,
                 UInt marker);
 
@@ -251,15 +259,16 @@ WallTensionEstimatorCylindricalCoordinates<Mesh>::WallTensionEstimatorCylindrica
 template <typename Mesh>
 void
 WallTensionEstimatorCylindricalCoordinates<Mesh >::setup( const dataPtr_Type& dataMaterial,
-				    const analysisDataPtr_Type& tensionData,
-				    const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
-				    boost::shared_ptr<Epetra_Comm>&     comm,
-				    UInt marker)
+                                                          const analysisDataPtr_Type& tensionData,
+                                                          const FESpacePtr_Type&        dFESpace,
+                                                          const ETFESpacePtr_Type&      dETFESpace,
+                                                          boost::shared_ptr<Epetra_Comm>&     comm,
+                                                          UInt marker)
 
 {
-  super::setup(dataMaterial, tensionData, dFESpace, comm, marker);
-  M_deformationCylindricalF.reset  ( new matrix_Type( this->M_FESpace->fieldDim(), this->M_FESpace->fieldDim() ) );
-  M_changeOfVariableMatrix.reset   ( new matrix_Type(this->M_FESpace->fieldDim(), this->M_FESpace->fieldDim() ) );
+    super::setup(dataMaterial, tensionData, dFESpace, dETFESpace,comm, marker);
+    M_deformationCylindricalF.reset  ( new matrix_Type( this->M_FESpace->fieldDim(), this->M_FESpace->fieldDim() ) );
+    M_changeOfVariableMatrix.reset   ( new matrix_Type(this->M_FESpace->fieldDim(), this->M_FESpace->fieldDim() ) );
 }
 
 template <typename Mesh>
@@ -343,7 +352,7 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensionsRecoveryDispla
             AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor(this->M_invariants, *M_deformationCylindricalF, *(this->M_cofactorF) );
 
             //Compute the first Piola-Kirchhoff tensor
-            this->M_material->computeLocalFirstPiolaKirchhoffTensor(*(this->M_firstPiola), *M_deformationCylindricalF, *(this->M_cofactorF), this->M_invariants, this->M_marker);
+            //this->M_material->computeLocalFirstPiolaKirchhoffTensor(*(this->M_firstPiola), *M_deformationCylindricalF, *(this->M_cofactorF), this->M_invariants, this->M_marker);
 
             //Compute the Cauchy tensor
             AssemblyElementalStructure::computeCauchyStressTensor(*(this->M_sigma), *(this->M_firstPiola), this->M_invariants[3], *M_deformationCylindricalF);
@@ -478,7 +487,7 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensionsRecoveryEigenv
             AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor(this->M_invariants, *M_deformationCylindricalF, *(this->M_cofactorF) );
 
             //Compute the first Piola-Kirchhoff tensor
-            this->M_material->computeLocalFirstPiolaKirchhoffTensor(*(this->M_firstPiola), *M_deformationCylindricalF, *(this->M_cofactorF), this->M_invariants, this->M_marker);
+            //this->M_material->computeLocalFirstPiolaKirchhoffTensor(*(this->M_firstPiola), *M_deformationCylindricalF, *(this->M_cofactorF), this->M_invariants, this->M_marker);
 
             //Compute the Cauchy tensor
             AssemblyElementalStructure::computeCauchyStressTensor(*(this->M_sigma), *(this->M_firstPiola), this->M_invariants[3], *M_deformationCylindricalF);
@@ -681,7 +690,7 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::constructGlobalStressVector( 
             AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor(this->M_invariants, *M_deformationCylindricalF, *(this->M_cofactorF) );
 
             //Compute the first Piola-Kirchhoff tensor
-            this->M_material->computeLocalFirstPiolaKirchhoffTensor(*(this->M_firstPiola), *M_deformationCylindricalF, *(this->M_cofactorF), this->M_invariants, this->M_marker);
+            //this->M_material->computeLocalFirstPiolaKirchhoffTensor(*(this->M_firstPiola), *M_deformationCylindricalF, *(this->M_cofactorF), this->M_invariants, this->M_marker);
 
             //Compute the Cauchy tensor
             AssemblyElementalStructure::computeCauchyStressTensor(*(this->M_sigma), *(this->M_firstPiola), this->M_invariants[3], *M_deformationCylindricalF);

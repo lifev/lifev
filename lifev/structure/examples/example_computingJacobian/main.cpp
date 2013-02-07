@@ -232,6 +232,8 @@ Structure::run3d()
     typedef FESpace< mesh_Type, MapEpetra >                       solidFESpace_Type;
     typedef boost::shared_ptr<solidFESpace_Type>                  solidFESpacePtr_Type;
 
+    typedef ETFESpace< RegionMesh<LinearTetra>, MapEpetra, 3, 3 >       solidETFESpace_Type;
+    typedef boost::shared_ptr<solidETFESpace_Type>                      solidETFESpacePtr_Type;
 
     bool verbose = (parameters->comm->MyPID() == 0);
 
@@ -252,8 +254,9 @@ Structure::run3d()
     //! Functional spaces - needed for the computations of the gradients
     std::string dOrder =  dataFile( "solid/space_discretization/order", "P1");
     solidFESpacePtr_Type dFESpace( new solidFESpace_Type(meshPart,dOrder,3,parameters->comm) );
+    solidETFESpacePtr_Type dETFESpace( new solidETFESpace_Type(meshPart,&(dFESpace->refFE()),&(dFESpace->fe().geoMap()), parameters->comm) );
 
-    //    solidFESpace_Type copyFESpace(meshPart,dOrder,3,parameters->comm);
+
     if (verbose) std::cout << std::endl;
 
     //! 1. Constructor of the class to compute the tensions
@@ -265,6 +268,7 @@ Structure::run3d()
     //! 2. Its setup
     solid.setup(dataStructure,
                  dFESpace,
+                 dETFESpace,
                  BCh,
                  parameters->comm);
 

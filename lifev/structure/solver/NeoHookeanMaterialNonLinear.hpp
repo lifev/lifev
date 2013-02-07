@@ -311,6 +311,8 @@ void NeoHookeanMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matrixPtr_
                                                                       const displayerPtr_Type&  displayer )
 {
 
+    using namespace ExpressionAssembly;
+
     displayer->leaderPrint("   Non-Linear S-  updating non linear terms in the Jacobian Matrix (Neo-Hookean)");
 
     *(jacobian) *= 0.0;
@@ -418,6 +420,8 @@ void NeoHookeanMaterialNonLinear<Mesh>::computeStiffness( const vector_Type&    
                                                           const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
                                                           const displayerPtr_Type& displayer )
 {
+    using namespace ExpressionAssembly;
+
     this->M_stiff.reset(new vector_Type(*this->M_localMap));
 
     displayer->leaderPrint(" \n******************************************************************\n  ");
