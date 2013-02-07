@@ -533,7 +533,7 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryDisplacement( void )
             //     sumI += M_invariants[i];
 
             //Compute the first Piola-Kirchhoff tensor
-            //M_material->computeLocalFirstPiolaKirchhoffTensor(*M_firstPiola, *M_deformationF, *M_cofactorF, M_invariants, M_marker);
+            M_material->computeLocalFirstPiolaKirchhoffTensor(*M_firstPiola, *M_deformationF, *M_cofactorF, M_invariants, M_marker);
 
             //Compute the Cauchy tensor
             AssemblyElementalStructure::computeCauchyStressTensor(*M_sigma, *M_firstPiola, M_invariants[3], *M_deformationF);
@@ -673,7 +673,7 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryEigenvalues( void )
             AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor(M_invariants, vectorDeformationF[nDOF], *M_cofactorF);
 
             //Compute the first Piola-Kirchhoff tensor
-            //M_material->computeLocalFirstPiolaKirchhoffTensor(*M_firstPiola, vectorDeformationF[nDOF], *M_cofactorF, M_invariants, M_marker);
+            M_material->computeLocalFirstPiolaKirchhoffTensor(*M_firstPiola, vectorDeformationF[nDOF], *M_cofactorF, M_invariants, M_marker);
 
             //Compute the Cauchy tensor
             AssemblyElementalStructure::computeCauchyStressTensor(*M_sigma, *M_firstPiola, M_invariants[3], vectorDeformationF[nDOF]);
@@ -944,7 +944,7 @@ WallTensionEstimator<Mesh >::constructGlobalStressVector( solutionVect_Type& sig
             AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor(M_invariants, vectorDeformationF[nDOF], *M_cofactorF);
 
             //Compute the first Piola-Kirchhoff tensor
-            //M_material->computeLocalFirstPiolaKirchhoffTensor(*M_firstPiola, vectorDeformationF[nDOF], *M_cofactorF, M_invariants, M_marker);
+            M_material->computeLocalFirstPiolaKirchhoffTensor(*M_firstPiola, vectorDeformationF[nDOF], *M_cofactorF, M_invariants, M_marker);
 
             //Compute the Cauchy tensor
             AssemblyElementalStructure::computeCauchyStressTensor(*M_sigma, *M_firstPiola, M_invariants[3], vectorDeformationF[nDOF]);
