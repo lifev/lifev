@@ -476,7 +476,7 @@ MultiscaleModelFSI3D::boundaryMeanNormalStress( const multiscaleID_Type& boundar
 #ifdef FSI_WITH_EXTERNALPRESSURE
     return M_FSIoperator->fluid().meanNormalStress( boundaryFlag( boundaryID ), *M_fluidBC->handler(), *M_stateVariable );
 #else
-    return M_FSIoperator->fluid().meanNormalStress( boundaryFlag( boundaryID ), *M_fluidBC->handler(), *M_stateVariable ) + M_externalPressureScalar;
+    return M_FSIoperator->fluid().meanNormalStress( boundaryFlag( boundaryID ), *M_fluidBC->handler(), *M_stateVariable ) - M_externalPressureScalar;
 #endif
 }
 
@@ -486,7 +486,7 @@ MultiscaleModelFSI3D::boundaryMeanTotalNormalStress( const multiscaleID_Type& bo
 #ifdef FSI_WITH_EXTERNALPRESSURE
     return M_FSIoperator->fluid().meanTotalNormalStress( boundaryFlag( boundaryID ), *M_fluidBC->handler(), *M_stateVariable );
 #else
-    return M_FSIoperator->fluid().meanTotalNormalStress( boundaryFlag( boundaryID ), *M_fluidBC->handler(), *M_stateVariable ) + M_externalPressureScalar;
+    return M_FSIoperator->fluid().meanTotalNormalStress( boundaryFlag( boundaryID ), *M_fluidBC->handler(), *M_stateVariable ) - M_externalPressureScalar;
 #endif
 }
 
@@ -597,10 +597,6 @@ MultiscaleModelFSI3D::initializeSolution()
 #ifdef HAVE_LIFEV_DEBUG
     debugStream( 8140 ) << "MultiscaleModelFSI3D::initializeSolution() \n";
 #endif
-
-    // Initialize the external pressure vector
-    vector_Type fluidExternalPressure( M_FSIoperator->pFESpace().map(), Unique );
-    fluidExternalPressure = M_data->dataSolid()->externalPressure();
 
 #ifndef FSI_WITH_EXTERNALPRESSURE
     // Initialize the external pressure scalar
