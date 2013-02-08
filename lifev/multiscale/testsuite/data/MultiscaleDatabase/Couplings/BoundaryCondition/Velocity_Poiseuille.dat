@@ -1,0 +1,40 @@
+###################################################################################################
+#
+#                       This file is part of the LifeV Library
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+#
+#      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
+#           Date: 2011-03-10
+#  License Terms: GNU LGPL
+#
+###################################################################################################
+
+[Multiscale]
+couplingName    = BoundaryCondition_Velocity_Poiseuille
+
+[boundary_conditions]
+#list = 'XY ZPoiseuille' # Poiseuille
+list = 'XYZPoiseuille'  # Poiseuille
+
+    [./XY]
+    type                = Essential
+    mode                = Component
+    component           = '0 1'
+    function            = 0
+
+    [../ZPoiseuille]
+    type                = Essential
+    mode                = Component
+    component           = 2
+    #functionSolver      = '(1/4-(x^2+y^2))/(4*f_viscosity)'
+    functionSolver      = '(f_area/pi-(x^2+y^2))/(4*f_viscosity)' # More general
+
+    [../XYZPoiseuille]
+    type                = Essential
+    mode                = Full
+    component           = 2
+    #functionSolver      = '[0., 0., (1/4-(x^2+y^2))/(4*f_viscosity)]'
+    functionSolver      = '[0., 0., (f_area/pi-(x^2+y^2))/(4*f_viscosity)]' # More general
+
+    [../]

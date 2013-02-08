@@ -1,0 +1,73 @@
+<!--
+###################################################################################################
+#
+#                       This file is part of the LifeV Library
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+#
+#      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
+#           Date: 2011-03-10
+#  License Terms: GNU LGPL
+#
+###################################################################################################
+-->
+
+<ParameterList>
+    <!-- Multiscale parameters -->
+    <ParameterList name="Multiscale">
+        <Parameter name="Algorithm Name" type="string" value="Default"/>
+        <Parameter name="Algorithm Type" type="string" value="Broyden"/>
+    </ParameterList>
+
+    <!-- Multiscale Algorithm parameters -->
+    <ParameterList name="Multiscale Algorithm">
+        <Parameter name="Subiterations Maximum Number" type="unsigned int" value="100"/>
+        <Parameter name="Tolerance" type="double" value="1e-6"/>
+        <Parameter name="Initialize as identity matrix" type="bool" value="false"/>
+        <Parameter name="Iterations limit for reset" type="double" value="0.8"/>
+        <Parameter name="Orthogonalization" type="bool" value="false"/>
+        <Parameter name="Orthogonalization size" type="unsigned int" value="0"/>
+    </ParameterList>
+
+    <!-- LinearSolver parameters -->
+    <ParameterList name="Linear Solver List">
+        <Parameter name="Reuse Preconditioner" type="bool" value="false"/>
+        <Parameter name="Max Iterations For Reuse" type="int" value="10000"/>
+        <Parameter name="Quit On Failure" type="bool" value="false"/>
+        <Parameter name="Silent" type="bool" value="false"/>
+        <Parameter name="Solver Type" type="string" value="AztecOO"/>
+
+        <!-- Operator specific parameters (Belos) -->
+        <ParameterList name="Solver: Operator List">
+            <Parameter name="Solver Manager Type" type="string" value="BlockGmres"/>
+            <Parameter name="Preconditioner Side" type="string" value="Right"/>
+
+            <!-- Trilinos parameters -->
+            <ParameterList name="Trilinos: Belos List">
+                <Parameter name="Flexible Gmres" type="bool" value="false"/>
+                <Parameter name="Convergence Tolerance" type="double" value="1e-14"/>
+                <Parameter name="Maximum Iterations" type="int" value="10000"/>
+                <Parameter name="Output Frequency" type="int" value="1"/>
+                <Parameter name="Block Size" type="int" value="1"/>
+                <Parameter name="Num Blocks" type="int" value="10000"/>
+                <Parameter name="Maximum Restarts" type="int" value="0"/>
+                <Parameter name="Output Style" type="int" value="1"/>
+                <Parameter name="Verbosity" type="int" value="0"/>
+            </ParameterList>
+
+            <!-- Trilinos parameters -->
+            <ParameterList name="Trilinos: AztecOO List">
+                <Parameter name="solver" type="string" value="gmres"/>
+                <Parameter name="conv" type="string" value="AZ_noscaled"/>
+                <Parameter name="scaling" type="string" value="none"/>
+                <Parameter name="output" type="string" value="none"/>
+                <Parameter name="tol" type="double" value="1.e-14"/>
+                <Parameter name="max_iter" type="int" value="10000"/>
+                <Parameter name="kspace" type="int" value="10000"/>
+                <Parameter name="orthog" type="int" value="0"/>
+                <Parameter name="aux_vec" type="int" value="0"/>
+            </ParameterList>
+        </ParameterList>
+    </ParameterList>
+</ParameterList>
+

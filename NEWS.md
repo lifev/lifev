@@ -1,3 +1,14 @@
+LifeV 3.4.4:
+============
+Bug fixes in ExporterVTK:
+
+* the pvdu and vtu files names should be stored in the pvd (and pvdu)
+  file(s) without the postDir. Otherwise paraview will look for them
+  in postDir/postDir (path is relative to the leading file for paraview)
+* the update of the CurrentFE (during the points map computation) should
+  be done with the newer method, otherwise we don't store correctly the
+  z-coordinate of 2D entities which do not lie on the xy plane (and
+  similarly for 1D entities which do not lie on the x axis).
 
 LifeV 3.4.3:
 ============

@@ -153,7 +153,46 @@ For other details, see the <a href="http://www.lifev.org">LifeV web site</a>.
              and to exploit the general interface in the FSI and Multiscale frameworks.
     </ul>
 
+    \subsection geometricalMultiscale Geometrical Multiscale Framework
 
+    The geometrical multiscale framework provides a general and abstract way to couple different dimensionally-heterogeneous physical solvers.
+    In the framework, the local specific mathematical equations (partial differential equations, differential algebraic equations, etc.) and
+    the numerical approximation (finite elements, finite differences, etc.) of the heterogeneous compartments are hidden behind generic operators.
+    Consequently, the resulting global interface problem is formulated and solved in a completely transparent way. The coupling between models of
+    different dimensional scale (three-dimensional, one-dimensional, etc.) and type (Navier--Stokes, fluid-structure interaction, etc.) is
+    addressed writing the interface equations in terms of scalar quantities, i.e., area, flow rate, and mean (total) normal stress. In the
+    resulting flexible framework the heterogeneous models are treated as black boxes, each one equipped with a specific number of compatible
+    interfaces such that (i) the arrangement of the compartments in the network can be easily manipulated, thus allowing a high level of
+    customization in the design and optimization of the global geometrical multiscale model, (ii) the parallelization of the solution of the
+    different compartments is straightforward, leading to the opportunity to make use of the latest high-performance computing facilities, and
+    (iii) new models can be easily added and connected to the existing ones.
+
+    At the present time the framework includes the following models
+    <ol>
+        <li> Fluid3D
+        <li> FSI3D
+        <li> OneDimensional
+        <li> Multiscale
+        <li> Windkessel0D
+    </ol>
+
+    which can be coupled through the following interface equations (or just closed by boundary conditions)
+    <ol>
+        <li> BoundaryCondition
+        <li> MeanNormalStress
+        <li> MeanNormalStressArea
+        <li> MeanNormalStressValve
+        <li> MeanTotalNormalStress
+        <li> MeanTotalNormalStressArea
+    </ol>
+
+    while the interface problem can be solved through the following algorithms
+    <ol>
+        <li> Aitken
+        <li> Broyden
+        <li> Explicit
+        <li> Newton
+    </ol>
 
 
     \subsection tools Tools
