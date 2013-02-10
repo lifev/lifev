@@ -267,22 +267,22 @@ In the following we briefly describe some of the main tools inside the library.
         <li> Alessandro Melani, MOX - Politecnico di Milano
         <li> Alessandro Veneziani, Math&CS - Emory University
         <li> Alessio Fumagalli, MOX - Politecnico di Milano
-        <li> Alexis Aposporidis, Math&CS - Emory University
         <li> Antonio Cervone, MOX - Politecnico di Milano
+        <li> Carlo de Falco, MOX - Politecnico di Milano
         <li> Claudia Colciago, CMCS - École Polytechnique Fédérale de Lausanne
         <li> Christian Vergara, MOX - Politecnico di Milano
         <li> Cristiano Malossi, CMCS - École Polytechnique Fédérale de Lausanne
         <li> Gianmarco Mengaldo, MOX - Politecnico di Milano
         <li> Guido Iori, MOX - Politecnico di Milano
         <li> Gwenol Grandperrin, CMCS - École Polytechnique Fédérale de Lausanne
+        <li> Huanhuan Yang, Math&CS - Emory University
         <li> Jean Bonnemain, CMCS - École Polytechnique Fédérale de Lausanne
         <li> Laura Cattaneo, MOX - Politecnico di Milano
-        <li> Luca Bertagna, MOX - Politecnico di Milano
+        <li> Luca Bertagna, Math&CS - Emory University
         <li> Luca Formaggia, MOX - Politecnico di Milano
         <li> Lucia Mirabella, CFM Lab - Georgia Institute of Technology
-        <li> Marta D'Elia, Math&CS - Emory University
         <li> Matteo Pozzoli, MOX - Politecnico di Milano
-        <li> Mauro Perego, Scientific Computing - Florida State University
+        <li> Mauro Perego, Sandia National Laboratories
         <li> Michel Kern, ESTIME - INRIA
         <li> Nur Fadel, MOX - Politecnico di Milano
         <li> Paolo Crosetto, CMCS - École Polytechnique Fédérale de Lausanne
@@ -295,31 +295,37 @@ In the following we briefly describe some of the main tools inside the library.
         <li> Tiziano Passerini, Math&CS - Emory University
         <li> Toni Lassila, CMCS - École Polytechnique Fédérale de Lausanne
         <li> Tricerri Paolo, CMCS - École Polytechnique Fédérale de Lausanne
-        <li> Umberto Emanuele Villa, Math&CS - Emory University
+        <li> Umberto Emanuele Villa, Lawrence Livermore National Laboratory
     </ul>
 
     The following people are former developers:
     <ul>
-        <li> Alexandra Moura
-        <li> Andrea Manzoni, CMCS - École Polytechnique Fédérale de Lausanne
+        <li> Alexandra Moura, formerly at MOX, Politecnico di Milano
+        <li> Alexis Aposporidis, formerly at Math&CS - Emory University
+        <li> Andrea Manzoni, formerly at CMCS - École Polytechnique Fédérale de Lausanne
         <li> Andreas Fischle
-        <li> Carlo de Falco
         <li> Christoph Winkelmann, formerly at CMCS, École Polytechnique Fédérale de Lausanne
         <li> Christophe Prud'homme, formerly at CMCS, École Polytechnique Fédérale de Lausanne
+        <li> Daniele A. Di Pietro, formerly at CMCS, École Polytechnique Fédérale de Lausanne
         <li> Fabio Nobile, CMCS - École Polytechnique Fédérale de Lausanne
         <li> Federico Bonelli
-        <li> Gilles Fourestey, CMCS - École Polytechnique Fédérale de Lausanne
+        <li> Gilles Fourestey, formerly at CMCS - École Polytechnique Fédérale de Lausanne
+        <li> Jean-Frédéric Gerbeau - REO, INRIA
         <li> Laura Iapichino, CMCS - École Polytechnique Fédérale de Lausanne
-        <li> Lorenzo Tamellini, MOX - Politecnico di Milano
-        <li> Marco Discacciati, CMCS - École Polytechnique Fédérale de Lausanne
-        <li> Mariarita de Luca
+        <li> Lorenzo Tamellini, CMCS - École Polytechnique Fédérale de Lausanne
+        <li> Marco Discacciati, formerly at CMCS, École Polytechnique Fédérale de Lausanne
+        <li> Mariarita de Luca, formerly at MOX, Politecnico di Milano
+        <li> Marta D'Elia, formerly at Math&CS - Emory University
+        <li> Martin Prosi, formerly at MOX, Politecnico di Milano
         <li> Matteo Astorino, CMCS - École Polytechnique Fédérale de Lausanne
         <li> Matteo Lesinigo, CMCS - École Polytechnique Fédérale de Lausanne
-        <li> Nicola Parolini
-        <li> Paolo Ferrandi, MOX - Politecnico di Milano
-        <li> Sara Minisini, MOX - Politecnico di Milano
+        <li> Miguel Ángel Fernández - REO, INRIA
+        <li> Nicola Parolini, MOX - Politecnico di Milano
+        <li> Paolo Ferrandi, formerly at MOX - Politecnico di Milano
+        <li> Sara Minisini, formerly at MOX - Politecnico di Milano
         <li> Simone Cassani
         <li> Susanna Carcano, MOX - Politecnico di Milano
+        <li> Vincent Martin, formerly at MOX - Politecnico di Milano
         <li> Zhen Wang, Math&CS - Emory University
     </ul>
 
