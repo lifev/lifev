@@ -23,12 +23,12 @@ ProblemFile = ./MultiscaleDatabase/Models/Multiscale/FSI3D_2Cylinders_MNS_Stress
 
     [../Output]
     ProblemPrefix              = Multiscale # Problem prefix
-    SaveEach                   = 3          # time steps
+    SaveEach                   = 2          # time steps
 
     [../time_discretization]
     initialtime                = 0.000   # [s]
-    endtime                    = 0.003   # [s]
-    timestep                   = 0.001   # [s]
+    endtime                    = 0.004   # [s]
+    timestep                   = 0.002   # [s]
 
     [../]
 
