@@ -113,7 +113,7 @@ public:
       @param the prefix for the case file (ex. "test" for test.case)
       @param the procId determines de CPU id. if negative, it ussemes there is only one processor
     */
-    ExporterHDF5Mesh3D(const GetPot& dataFile, meshPtr_Type mesh, const std::string& prefix, const Int& procId);
+    ExporterHDF5Mesh3D (const GetPot& dataFile, meshPtr_Type mesh, const std::string& prefix, const Int& procId);
 
     //! Constructor for ExporterHDF5Mesh3D without prefix and procID
     /*!
@@ -123,7 +123,7 @@ public:
       "multimesh" ( = true if the mesh has to be saved at each post-processing step)
       @param mesh the mesh
     */
-    ExporterHDF5Mesh3D(const GetPot& dataFile, const std::string& prefix);
+    ExporterHDF5Mesh3D (const GetPot& dataFile, const std::string& prefix);
 
     //! Destructor for ExporterHDF5Mesh3D
     virtual ~ExporterHDF5Mesh3D() {}
@@ -132,7 +132,7 @@ public:
 
     //! @name Pubic Methods
     //@{
-    virtual void postProcess(const Real& time);
+    virtual void postProcess (const Real& time);
 
     //! Add the partition graph to the post processing data file
     /*!
@@ -141,8 +141,11 @@ public:
       (as returned by partitionMesh::graph() )
       \param comm - Epetra_Comm* - raw pointer to the Epetra communicator to be used
     */
-    void addPartitionGraph(const graphPtr_Type& graph, boost::shared_ptr<Epetra_Comm>& comm)
-    {M_graph = graph; M_comm = comm;}
+    void addPartitionGraph (const graphPtr_Type& graph, boost::shared_ptr<Epetra_Comm>& comm)
+    {
+        M_graph = graph;
+        M_comm = comm;
+    }
 
     //! Add all of the mesh partitions to the post processing data file (serial operation)
     /*!
@@ -151,8 +154,12 @@ public:
       pointers to the mesh partitions (as returned by partitionMesh::meshAllPartitions() )
       \param comm - Epetra_Comm* - raw pointer to the Epetra communicator to be used
     */
-    void addMeshPartitionAll(const serialMeshPtr_Type& meshPointer, boost::shared_ptr<Epetra_Comm>& comm)
-    {M_serialMesh = meshPointer; M_parallelMesh.reset(); M_comm = comm;}
+    void addMeshPartitionAll (const serialMeshPtr_Type& meshPointer, boost::shared_ptr<Epetra_Comm>& comm)
+    {
+        M_serialMesh = meshPointer;
+        M_parallelMesh.reset();
+        M_comm = comm;
+    }
 
     //! Add to HDF5 file the mesh partition that belongs to the current process (parallel operation)
     /*!
@@ -164,19 +171,21 @@ public:
       partitionMesh::mesh() )
       \param comm - Epetra_Comm* - raw pointer to the Epetra communicator to be used
     */
-    void addMyMeshPartition( const meshPtr_Type& /*meshPointer*/, boost::shared_ptr<Epetra_Comm>& /*comm*/ )
-    {/*M_parallelMesh = meshPointer; M_serialMesh.reset(); M_comm = comm;*/}
+    void addMyMeshPartition ( const meshPtr_Type& /*meshPointer*/, boost::shared_ptr<Epetra_Comm>& /*comm*/ )
+    {
+        /*M_parallelMesh = meshPointer; M_serialMesh.reset(); M_comm = comm;*/
+    }
 
     //! Add a DOF interface for writing to file
     /*!
       Add a DOF interface to the member vector M_interfaceData, for writing to the HDF5
       file. Call once for each interface that is to be written.
     */
-    void addDOFInterface(const interfaceVectorPtr_Type& interfaces,
-                         const std::string& type,
-                         const Int& firstInterfaceFlag,
-                         const Int& secondInterfaceFlag,
-                         const boost::shared_ptr<Epetra_Comm>& comm);
+    void addDOFInterface (const interfaceVectorPtr_Type& interfaces,
+                          const std::string& type,
+                          const Int& firstInterfaceFlag,
+                          const Int& secondInterfaceFlag,
+                          const boost::shared_ptr<Epetra_Comm>& comm);
 
     //! Get the number of stored DOF interfaces
     Int queryStoredInterfaceNumber();
@@ -191,26 +200,29 @@ public:
     meshPtr_Type  getMeshPartition();
 
     //! Return a pointer to the k-th interface stored inside the file
-    boost::shared_ptr< std::map<UInt, UInt> > getStoredInterface(Int k) ;
+    boost::shared_ptr< std::map<UInt, UInt> > getStoredInterface (Int k) ;
 
     // When reading back partitions and interfaces, the comm member must be set explicitly.
     // This is intended for use with getMeshPartition and getStoredInterface
     //! Set the M_comm data member.
-    void setComm( const boost::shared_ptr<Epetra_Comm>& comm ) {M_comm = comm;}
+    void setComm ( const boost::shared_ptr<Epetra_Comm>& comm )
+    {
+        M_comm = comm;
+    }
     //@}
 
 private:
 
-//! @name Private methods
-//@{
+    //! @name Private methods
+    //@{
     // The following private methods are for writing the partitioned graph
     // and mesh to the output file
     void writeGraph();
-    void writePartition(meshPtr_Type partition, std::string& suffix);
+    void writePartition (meshPtr_Type partition, std::string& suffix);
     void writeParallelMesh();
     void writeSerialMesh();
     void writeInterfaces();
-//@}
+    //@}
 
     serialMeshPtr_Type                     M_serialMesh;
     meshPtr_Type                           M_parallelMesh;
@@ -229,16 +241,16 @@ private:
 // ===================================================
 
 template<typename MeshType>
-ExporterHDF5Mesh3D<MeshType>::ExporterHDF5Mesh3D(const GetPot& dataFile, meshPtr_Type mesh,
-                                                 const std::string& prefix,
-                                                 const Int& procId) :
-        base                ( dataFile, mesh, prefix, procId )
+ExporterHDF5Mesh3D<MeshType>::ExporterHDF5Mesh3D (const GetPot& dataFile, meshPtr_Type mesh,
+                                                  const std::string& prefix,
+                                                  const Int& procId) :
+    base                ( dataFile, mesh, prefix, procId )
 {
 }
 
 template<typename MeshType>
-ExporterHDF5Mesh3D<MeshType>::ExporterHDF5Mesh3D(const GetPot& dataFile, const std::string& prefix):
-        base                ( dataFile, prefix )
+ExporterHDF5Mesh3D<MeshType>::ExporterHDF5Mesh3D (const GetPot& dataFile, const std::string& prefix) :
+    base                ( dataFile, prefix )
 {
 }
 
@@ -247,35 +259,35 @@ ExporterHDF5Mesh3D<MeshType>::ExporterHDF5Mesh3D(const GetPot& dataFile, const s
 // ===================================================
 
 template<typename MeshType>
-void ExporterHDF5Mesh3D<MeshType>::addDOFInterface(const interfaceVectorPtr_Type& interfaces,
-                                                   const std::string& type,
-                                                   const Int& firstInterfaceFlag,
-                                                   const Int& secondInterfaceFlag,
-                                                   const boost::shared_ptr<Epetra_Comm>& comm)
+void ExporterHDF5Mesh3D<MeshType>::addDOFInterface (const interfaceVectorPtr_Type& interfaces,
+                                                    const std::string& type,
+                                                    const Int& firstInterfaceFlag,
+                                                    const Int& secondInterfaceFlag,
+                                                    const boost::shared_ptr<Epetra_Comm>& comm)
 {
-    M_DOFInterfaces.push_back(interfaces);
-    M_interfaceTypes.push_back(type);
-    M_firstInterfaceFlags.push_back(firstInterfaceFlag);
-    M_secondInterfaceFlags.push_back(secondInterfaceFlag);
+    M_DOFInterfaces.push_back (interfaces);
+    M_interfaceTypes.push_back (type);
+    M_firstInterfaceFlags.push_back (firstInterfaceFlag);
+    M_secondInterfaceFlags.push_back (secondInterfaceFlag);
 
     M_comm = comm;
 }
 
 template<typename MeshType>
-void ExporterHDF5Mesh3D<MeshType>::postProcess(const Real& time)
+void ExporterHDF5Mesh3D<MeshType>::postProcess (const Real& time)
 {
     if ( this->M_HDF5.get() == 0)
     {
         if (this->M_dataVector.size() != 0)
         {
-            this->M_HDF5.reset(new hdf5_Type(this->M_dataVector.begin()->storedArrayPtr()->comm()));
+            this->M_HDF5.reset (new hdf5_Type (this->M_dataVector.begin()->storedArrayPtr()->comm() ) );
         }
         else
         {
-            this->M_HDF5.reset(new hdf5_Type(*M_comm));
+            this->M_HDF5.reset (new hdf5_Type (*M_comm) );
         }
-        this->M_outputFileName=this->M_prefix+".h5";
-        this->M_HDF5->Create(this->M_postDir+this->M_outputFileName);
+        this->M_outputFileName = this->M_prefix + ".h5";
+        this->M_HDF5->Create (this->M_postDir + this->M_outputFileName);
 
         // write empty xdmf file
         this->writeInitXdmf();
@@ -319,17 +331,20 @@ void ExporterHDF5Mesh3D<MeshType>::postProcess(const Real& time)
 
     if ( this->M_postfix != "*****" )
     {
-        if (!this->M_procId) std::cout << "  X-  HDF5 post-processing ...        " << std::flush;
+        if (!this->M_procId)
+        {
+            std::cout << "  X-  HDF5 post-processing ...        " << std::flush;
+        }
         LifeChrono chrono;
         chrono.start();
-        for (typename base::dataVectorIterator_Type i=this->M_dataVector.begin(); i != this->M_dataVector.end(); ++i)
+        for (typename base::dataVectorIterator_Type i = this->M_dataVector.begin(); i != this->M_dataVector.end(); ++i)
         {
-            this->writeVariable(*i);
+            this->writeVariable (*i);
         }
         // pushing time
-        this->M_timeSteps.push_back(time);
+        this->M_timeSteps.push_back (time);
 
-        this->writeXdmf(time);
+        this->writeXdmf (time);
 
         if (this->M_multimesh)
         {
@@ -341,7 +356,10 @@ void ExporterHDF5Mesh3D<MeshType>::postProcess(const Real& time)
         // Write to file without closing the file
         this->M_HDF5->Flush();
 
-        if (!this->M_procId) std::cout << "         done in " << chrono.diff() << " s." << std::endl;
+        if (!this->M_procId)
+        {
+            std::cout << "         done in " << chrono.diff() << " s." << std::endl;
+        }
     }
 }
 
@@ -350,15 +368,15 @@ int ExporterHDF5Mesh3D<MeshType>::queryStoredInterfaceNumber()
 {
     if (this->M_HDF5.get() == 0)
     {
-        this->M_HDF5.reset(new hdf5_Type(*M_comm));
+        this->M_HDF5.reset (new hdf5_Type (*M_comm) );
     }
-    if (! this->M_HDF5->IsOpen())
+    if (! this->M_HDF5->IsOpen() )
     {
-        this->M_HDF5->Open(this->M_postDir + this->M_prefix + ".h5", H5F_ACC_RDONLY);
+        this->M_HDF5->Open (this->M_postDir + this->M_prefix + ".h5", H5F_ACC_RDONLY);
     }
 
     Int storedInterfaceNumber;
-    this->M_HDF5->Read("Interfaces", "Number", storedInterfaceNumber);
+    this->M_HDF5->Read ("Interfaces", "Number", storedInterfaceNumber);
 
     return storedInterfaceNumber;
 }
@@ -368,22 +386,22 @@ std::vector<std::string> ExporterHDF5Mesh3D<MeshType>::queryStoredInterfaceTypes
 {
     if (this->M_HDF5.get() == 0)
     {
-        this->M_HDF5.reset(new hdf5_Type(*M_comm));
+        this->M_HDF5.reset (new hdf5_Type (*M_comm) );
     }
-    if (! this->M_HDF5->IsOpen())
+    if (! this->M_HDF5->IsOpen() )
     {
-        this->M_HDF5->Open(this->M_postDir + this->M_prefix + ".h5", H5F_ACC_RDONLY);
+        this->M_HDF5->Open (this->M_postDir + this->M_prefix + ".h5", H5F_ACC_RDONLY);
     }
 
     int storedInterfaceNumber;
-    this->M_HDF5->Read("Interfaces", "Number", storedInterfaceNumber);
+    this->M_HDF5->Read ("Interfaces", "Number", storedInterfaceNumber);
 
-    std::vector<std::string> storedInterfaceTypes(storedInterfaceNumber);
+    std::vector<std::string> storedInterfaceTypes (storedInterfaceNumber);
     for (Int k = 0; k < storedInterfaceNumber; ++k)
     {
         std::stringstream idx;
         idx << k;
-        this->M_HDF5->Read("Interfaces", "Type." + idx.str(), storedInterfaceTypes[k]);
+        this->M_HDF5->Read ("Interfaces", "Type." + idx.str(), storedInterfaceTypes[k]);
     }
 
     return storedInterfaceTypes;
@@ -392,40 +410,40 @@ std::vector<std::string> ExporterHDF5Mesh3D<MeshType>::queryStoredInterfaceTypes
 template <typename MeshType>
 typename ExporterHDF5Mesh3D<MeshType>::graphPtr_Type ExporterHDF5Mesh3D<MeshType>::getGraph()
 {
-    graphPtr_Type tempGraph(new graphPtr_Type::element_type);
+    graphPtr_Type tempGraph (new graphPtr_Type::element_type);
 
     if (this->M_HDF5.get() == 0)
     {
-        this->M_HDF5.reset(new hdf5_Type(*M_comm));
+        this->M_HDF5.reset (new hdf5_Type (*M_comm) );
     }
-    if (! this->M_HDF5->IsOpen())
+    if (! this->M_HDF5->IsOpen() )
     {
-        this->M_HDF5->Open(this->M_postDir + this->M_prefix + ".h5", H5F_ACC_RDONLY);
+        this->M_HDF5->Open (this->M_postDir + this->M_prefix + ".h5", H5F_ACC_RDONLY);
     }
 
     Int nPartitions;
 
-    this->M_HDF5->Read("Graph", "number_partitions", nPartitions);
+    this->M_HDF5->Read ("Graph", "number_partitions", nPartitions);
 
-    std::vector<Int> partitionSizes(nPartitions);
-    this->M_HDF5->Read("Graph", "partition_sizes", H5T_NATIVE_INT, nPartitions,
-                       &partitionSizes[0]);
+    std::vector<Int> partitionSizes (nPartitions);
+    this->M_HDF5->Read ("Graph", "partition_sizes", H5T_NATIVE_INT, nPartitions,
+                        &partitionSizes[0]);
 
-    tempGraph->resize(0);
-    tempGraph->reserve(nPartitions);
+    tempGraph->resize (0);
+    tempGraph->reserve (nPartitions);
 
     std::vector<Int> partBuffer;
     std::stringstream index;
 
     for (Int i = 0; i < nPartitions; ++i)
     {
-        partBuffer.resize(partitionSizes[i]);
+        partBuffer.resize (partitionSizes[i]);
         index << i;
-        this->M_HDF5->Read("Graph_partitions", "P" + index.str(),
-                           H5T_NATIVE_INT, partitionSizes[i],
-                           &partBuffer[0]);
-        tempGraph->push_back(partBuffer);
-        index.str(std::string());
+        this->M_HDF5->Read ("Graph_partitions", "P" + index.str(),
+                            H5T_NATIVE_INT, partitionSizes[i],
+                            &partBuffer[0]);
+        tempGraph->push_back (partBuffer);
+        index.str (std::string() );
         index.clear();
     }
 
@@ -435,27 +453,27 @@ typename ExporterHDF5Mesh3D<MeshType>::graphPtr_Type ExporterHDF5Mesh3D<MeshType
 template <typename MeshType>
 typename ExporterHDF5Mesh3D<MeshType>::meshPtr_Type ExporterHDF5Mesh3D<MeshType>::getMeshPartition()
 {
-    meshPtr_Type tempMesh( new MeshType ( M_comm ) );
+    meshPtr_Type tempMesh ( new MeshType ( M_comm ) );
 
     UInt elementNodes, faceNodes;
     switch (MeshType::elementShape_Type::S_shape)
     {
-    case HEXA:
-        elementNodes = 8;
-        faceNodes    = 4;
-        break;
-    case TETRA:
-        elementNodes = 4;
-        faceNodes    = 3;
+        case HEXA:
+            elementNodes = 8;
+            faceNodes    = 4;
+            break;
+        case TETRA:
+            elementNodes = 4;
+            faceNodes    = 3;
     }
 
     if (this->M_HDF5.get() == 0)
     {
-        this->M_HDF5.reset(new hdf5_Type(*M_comm));
+        this->M_HDF5.reset (new hdf5_Type (*M_comm) );
     }
-    if (! this->M_HDF5->IsOpen())
+    if (! this->M_HDF5->IsOpen() )
     {
-        this->M_HDF5->Open(this->M_postDir + this->M_prefix + ".h5", H5F_ACC_RDONLY);
+        this->M_HDF5->Open (this->M_postDir + this->M_prefix + ".h5", H5F_ACC_RDONLY);
     }
 
     std::stringstream index;
@@ -463,66 +481,66 @@ typename ExporterHDF5Mesh3D<MeshType>::meshPtr_Type ExporterHDF5Mesh3D<MeshType>
     std::string suffix = "." + index.str();
 
     // Read counters from file and set them in the mesh
-    
-    std::vector<Int> counters(13);
-    this->M_HDF5->Read("Mesh_counters", "P" + suffix, H5T_NATIVE_INT, 13, &counters[0]);
+
+    std::vector<Int> counters (13);
+    this->M_HDF5->Read ("Mesh_counters", "P" + suffix, H5T_NATIVE_INT, 13, &counters[0]);
     // Points
     Int numPoints = counters[0];
-    tempMesh->setMaxNumPoints(counters[0], true);
-    tempMesh->setNumBPoints(counters[1]);
+    tempMesh->setMaxNumPoints (counters[0], true);
+    tempMesh->setNumBPoints (counters[1]);
 
     // Vertices
-    tempMesh->setNumVertices(counters[2]);
-    tempMesh->setNumBVertices(counters[3]);
-    tempMesh->setNumGlobalVertices(counters[4]);
+    tempMesh->setNumVertices (counters[2]);
+    tempMesh->setNumBVertices (counters[3]);
+    tempMesh->setNumGlobalVertices (counters[4]);
 
     // Edges
     Int numEdges = counters[5];
-    tempMesh->setNumEdges(counters[5]);
-    tempMesh->setMaxNumEdges(counters[5]);
-    tempMesh->setNumBEdges(counters[6]);
-    tempMesh->setMaxNumGlobalEdges(counters[7]);
+    tempMesh->setNumEdges (counters[5]);
+    tempMesh->setMaxNumEdges (counters[5]);
+    tempMesh->setNumBEdges (counters[6]);
+    tempMesh->setMaxNumGlobalEdges (counters[7]);
 
     // Faces
     Int numFaces = counters[8];
-    tempMesh->setNumFaces(counters[8]);
-    tempMesh->setMaxNumFaces(counters[8]);
-    tempMesh->setNumBFaces(counters[9]);
-    tempMesh->setMaxNumGlobalFaces(counters[10]);
+    tempMesh->setNumFaces (counters[8]);
+    tempMesh->setMaxNumFaces (counters[8]);
+    tempMesh->setNumBFaces (counters[9]);
+    tempMesh->setMaxNumGlobalFaces (counters[10]);
 
     // Volumes
     Int numVolumes = counters[11];
-    tempMesh->setMaxNumVolumes(counters[11], true);
-    tempMesh->setMaxNumGlobalVolumes(counters[12]);
+    tempMesh->setMaxNumVolumes (counters[11], true);
+    tempMesh->setMaxNumGlobalVolumes (counters[12]);
 
     // Read the list of points
-    std::vector<Real> tmpVectorDouble(numPoints);
-    std::vector<std::vector<Real> > pointCoordinates(3, tmpVectorDouble);
+    std::vector<Real> tmpVectorDouble (numPoints);
+    std::vector<std::vector<Real> > pointCoordinates (3, tmpVectorDouble);
 
-    std::vector<Int> pointMarkers(numPoints);
-    std::vector<Int> pointBoundaryFlags(numPoints);
-    std::vector<Int> pointGlobalId(numPoints);
+    std::vector<Int> pointMarkers (numPoints);
+    std::vector<Int> pointBoundaryFlags (numPoints);
+    std::vector<Int> pointGlobalId (numPoints);
 
-    this->M_HDF5->Read("Mesh_points_coordinates_x", "P" + suffix, H5T_NATIVE_DOUBLE, numPoints, &pointCoordinates[0][0]);
-    this->M_HDF5->Read("Mesh_points_coordinates_y", "P" + suffix, H5T_NATIVE_DOUBLE, numPoints, &pointCoordinates[1][0]);
-    this->M_HDF5->Read("Mesh_points_coordinates_z", "P" + suffix, H5T_NATIVE_DOUBLE, numPoints, &pointCoordinates[2][0]);
-    this->M_HDF5->Read("Mesh_points_markers", "P" + suffix, H5T_NATIVE_INT, numPoints, &pointMarkers[0]);
-    this->M_HDF5->Read("Mesh_points_boundary_flag", "P" + suffix, H5T_NATIVE_INT, numPoints, &pointBoundaryFlags[0]);
-    this->M_HDF5->Read("Mesh_points_gid", "P" + suffix, H5T_NATIVE_INT, numPoints, &pointGlobalId[0]);
+    this->M_HDF5->Read ("Mesh_points_coordinates_x", "P" + suffix, H5T_NATIVE_DOUBLE, numPoints, &pointCoordinates[0][0]);
+    this->M_HDF5->Read ("Mesh_points_coordinates_y", "P" + suffix, H5T_NATIVE_DOUBLE, numPoints, &pointCoordinates[1][0]);
+    this->M_HDF5->Read ("Mesh_points_coordinates_z", "P" + suffix, H5T_NATIVE_DOUBLE, numPoints, &pointCoordinates[2][0]);
+    this->M_HDF5->Read ("Mesh_points_markers", "P" + suffix, H5T_NATIVE_INT, numPoints, &pointMarkers[0]);
+    this->M_HDF5->Read ("Mesh_points_boundary_flag", "P" + suffix, H5T_NATIVE_INT, numPoints, &pointBoundaryFlags[0]);
+    this->M_HDF5->Read ("Mesh_points_gid", "P" + suffix, H5T_NATIVE_INT, numPoints, &pointGlobalId[0]);
 
-    tempMesh->pointList.reserve(numPoints);
-    tempMesh->_bPoints.reserve(tempMesh->numBPoints());
+    tempMesh->pointList.reserve (numPoints);
+    tempMesh->_bPoints.reserve (tempMesh->numBPoints() );
 
-    typename MeshType::point_Type *pp = 0;
+    typename MeshType::point_Type* pp = 0;
 
     for (Int j = 0; j < numPoints; ++j)
     {
-        pp = &(tempMesh->addPoint(bool(pointBoundaryFlags[j]), true ));
-        pp->setMarkerID(pointMarkers[j]);
+        pp = & (tempMesh->addPoint (bool (pointBoundaryFlags[j]), true ) );
+        pp->setMarkerID (pointMarkers[j]);
         pp->x() = pointCoordinates[0][j];
         pp->y() = pointCoordinates[1][j];
         pp->z() = pointCoordinates[2][j];
-        pp->setId(pointGlobalId[j]);
+        pp->setId (pointGlobalId[j]);
     }
 
     pointCoordinates.clear();
@@ -531,31 +549,31 @@ typename ExporterHDF5Mesh3D<MeshType>::meshPtr_Type ExporterHDF5Mesh3D<MeshType>
     pointGlobalId.clear();
 
     // Read the list of edges
-    std::vector<Int> tmpVectorInt(numEdges);
-    std::vector<std::vector<Int> > edgePoints(2, tmpVectorInt);
+    std::vector<Int> tmpVectorInt (numEdges);
+    std::vector<std::vector<Int> > edgePoints (2, tmpVectorInt);
 
-    std::vector<Int> edgeMarkers(numEdges);
-    std::vector<Int> edgeGlobalId(numEdges);
-    std::vector<Int> edgeBoundaryFlags(numEdges);
+    std::vector<Int> edgeMarkers (numEdges);
+    std::vector<Int> edgeGlobalId (numEdges);
+    std::vector<Int> edgeBoundaryFlags (numEdges);
 
-    this->M_HDF5->Read("Mesh_edges_p1", "P" + suffix, H5T_NATIVE_INT, numEdges, &edgePoints[0][0]);
-    this->M_HDF5->Read("Mesh_edges_p2", "P" + suffix, H5T_NATIVE_INT, numEdges, &edgePoints[1][0]);
-    this->M_HDF5->Read("Mesh_edges_markers", "P" + suffix, H5T_NATIVE_INT, numEdges, &edgeMarkers[0]);
-    this->M_HDF5->Read("Mesh_edges_gid", "P" + suffix, H5T_NATIVE_INT, numEdges, &edgeGlobalId[0]);
-    this->M_HDF5->Read("Mesh_edges_boundary_flag", "P" + suffix, H5T_NATIVE_INT, numEdges,
-                       &edgeBoundaryFlags[0]);
+    this->M_HDF5->Read ("Mesh_edges_p1", "P" + suffix, H5T_NATIVE_INT, numEdges, &edgePoints[0][0]);
+    this->M_HDF5->Read ("Mesh_edges_p2", "P" + suffix, H5T_NATIVE_INT, numEdges, &edgePoints[1][0]);
+    this->M_HDF5->Read ("Mesh_edges_markers", "P" + suffix, H5T_NATIVE_INT, numEdges, &edgeMarkers[0]);
+    this->M_HDF5->Read ("Mesh_edges_gid", "P" + suffix, H5T_NATIVE_INT, numEdges, &edgeGlobalId[0]);
+    this->M_HDF5->Read ("Mesh_edges_boundary_flag", "P" + suffix, H5T_NATIVE_INT, numEdges,
+                        &edgeBoundaryFlags[0]);
 
-    tempMesh->edgeList.reserve(numEdges);
+    tempMesh->edgeList.reserve (numEdges);
 
-    typename MeshType::edge_Type *pe;
+    typename MeshType::edge_Type* pe;
 
     for (Int j = 0; j < numEdges; ++j)
     {
-        pe = &(tempMesh->addEdge(edgeBoundaryFlags[j]));
-        pe->setId(edgeGlobalId[j]);
-        pe->setPoint(0, tempMesh->point(edgePoints[0][j]));
-        pe->setPoint(1, tempMesh->point(edgePoints[1][j]));
-        pe->setMarkerID(edgeMarkers[j]);
+        pe = & (tempMesh->addEdge (edgeBoundaryFlags[j]) );
+        pe->setId (edgeGlobalId[j]);
+        pe->setPoint (0, tempMesh->point (edgePoints[0][j]) );
+        pe->setPoint (1, tempMesh->point (edgePoints[1][j]) );
+        pe->setMarkerID (edgeMarkers[j]);
     }
 
     edgePoints.clear();
@@ -564,63 +582,63 @@ typename ExporterHDF5Mesh3D<MeshType>::meshPtr_Type ExporterHDF5Mesh3D<MeshType>
     edgeBoundaryFlags.clear();
 
     // Read the list of faces
-    tmpVectorInt.resize(numFaces);
-    std::vector<std::vector<Int> > facePoints(faceNodes, tmpVectorInt);
+    tmpVectorInt.resize (numFaces);
+    std::vector<std::vector<Int> > facePoints (faceNodes, tmpVectorInt);
 
-    std::vector<Int> faceMarkers(numFaces);
-    std::vector<Int> faceGlobalId(numFaces);
-    std::vector<Int> faceBoundaryFlags(numFaces);
+    std::vector<Int> faceMarkers (numFaces);
+    std::vector<Int> faceGlobalId (numFaces);
+    std::vector<Int> faceBoundaryFlags (numFaces);
 
-    std::vector<std::vector<Int> > faceNeighbourId(2, tmpVectorInt);
-    std::vector<std::vector<Int> > faceNeighbourPos(2, tmpVectorInt);
+    std::vector<std::vector<Int> > faceNeighbourId (2, tmpVectorInt);
+    std::vector<std::vector<Int> > faceNeighbourPos (2, tmpVectorInt);
 
     std::stringstream idx;
     for (UInt k = 0; k < faceNodes; ++k)
     {
         idx << k + 1;
-        this->M_HDF5->Read("Mesh_faces_points", "P" + idx.str() + suffix, H5T_NATIVE_INT, numFaces,
-                           &facePoints[k][0]);
-        idx.str(std::string());
+        this->M_HDF5->Read ("Mesh_faces_points", "P" + idx.str() + suffix, H5T_NATIVE_INT, numFaces,
+                            &facePoints[k][0]);
+        idx.str (std::string() );
         idx.clear();
     }
-    this->M_HDF5->Read("Mesh_faces_markers", "P" + suffix, H5T_NATIVE_INT, numFaces, &faceMarkers[0]);
-    this->M_HDF5->Read("Mesh_faces_gid", "P" + suffix, H5T_NATIVE_INT, numFaces, &faceGlobalId[0]);
-    this->M_HDF5->Read("Mesh_faces_boundary_flags", "P" + suffix, H5T_NATIVE_INT, numFaces,
-                       &faceBoundaryFlags[0]);
+    this->M_HDF5->Read ("Mesh_faces_markers", "P" + suffix, H5T_NATIVE_INT, numFaces, &faceMarkers[0]);
+    this->M_HDF5->Read ("Mesh_faces_gid", "P" + suffix, H5T_NATIVE_INT, numFaces, &faceGlobalId[0]);
+    this->M_HDF5->Read ("Mesh_faces_boundary_flags", "P" + suffix, H5T_NATIVE_INT, numFaces,
+                        &faceBoundaryFlags[0]);
 
-    this->M_HDF5->Read("Mesh_faces_neighbour1", "P" + suffix, H5T_NATIVE_INT, numFaces,
-                       &faceNeighbourId[0][0]);
-    this->M_HDF5->Read("Mesh_faces_neighbour2", "P" + suffix, H5T_NATIVE_INT, numFaces,
-                       &faceNeighbourId[1][0]);
-    this->M_HDF5->Read("Mesh_faces_neighbour_pos1", "P" + suffix, H5T_NATIVE_INT, numFaces,
-                       &faceNeighbourPos[0][0]);
-    this->M_HDF5->Read("Mesh_faces_neighbour_pos2", "P" + suffix, H5T_NATIVE_INT, numFaces,
-                       &faceNeighbourPos[1][0]);
+    this->M_HDF5->Read ("Mesh_faces_neighbour1", "P" + suffix, H5T_NATIVE_INT, numFaces,
+                        &faceNeighbourId[0][0]);
+    this->M_HDF5->Read ("Mesh_faces_neighbour2", "P" + suffix, H5T_NATIVE_INT, numFaces,
+                        &faceNeighbourId[1][0]);
+    this->M_HDF5->Read ("Mesh_faces_neighbour_pos1", "P" + suffix, H5T_NATIVE_INT, numFaces,
+                        &faceNeighbourPos[0][0]);
+    this->M_HDF5->Read ("Mesh_faces_neighbour_pos2", "P" + suffix, H5T_NATIVE_INT, numFaces,
+                        &faceNeighbourPos[1][0]);
 
 
-    typename MeshType::face_Type *pf = 0;
+    typename MeshType::face_Type* pf = 0;
 
-    tempMesh->faceList.reserve(numFaces);
+    tempMesh->faceList.reserve (numFaces);
 
     for (Int j = 0; j < numFaces; ++j)
     {
-        pf = &(tempMesh->addFace(faceBoundaryFlags[j]));
-        pf->setId(faceGlobalId[j]);
+        pf = & (tempMesh->addFace (faceBoundaryFlags[j]) );
+        pf->setId (faceGlobalId[j]);
 
         pf->firstAdjacentElementIdentity() = faceNeighbourId[0][j];
         pf->secondAdjacentElementIdentity() = faceNeighbourId[1][j];
         pf->firstAdjacentElementPosition() = faceNeighbourPos[0][j];
         pf->secondAdjacentElementPosition() = faceNeighbourPos[1][j];
 
-        pf->setMarkerID(faceMarkers[j]);
+        pf->setMarkerID (faceMarkers[j]);
         for (UInt k = 0; k < faceNodes; ++k)
         {
-            pf->setPoint(k, tempMesh->point(facePoints[k][j]));
+            pf->setPoint (k, tempMesh->point (facePoints[k][j]) );
         }
     }
 
-    tempMesh->setLinkSwitch("HAS_ALL_FACETS");
-    tempMesh->setLinkSwitch("FACETS_HAVE_ADIACENCY");
+    tempMesh->setLinkSwitch ("HAS_ALL_FACETS");
+    tempMesh->setLinkSwitch ("FACETS_HAVE_ADIACENCY");
 
     facePoints.clear();
     faceMarkers.clear();
@@ -630,58 +648,58 @@ typename ExporterHDF5Mesh3D<MeshType>::meshPtr_Type ExporterHDF5Mesh3D<MeshType>
     faceNeighbourPos.clear();
 
     // Read the list of volumes
-    tmpVectorInt.resize(numVolumes);
-    std::vector<std::vector<Int> > volumePoints(elementNodes, tmpVectorInt);
+    tmpVectorInt.resize (numVolumes);
+    std::vector<std::vector<Int> > volumePoints (elementNodes, tmpVectorInt);
 
-    std::vector<Int> volumeMarkers(numVolumes);
-    std::vector<Int> volumeGlobalId(numVolumes);
+    std::vector<Int> volumeMarkers (numVolumes);
+    std::vector<Int> volumeGlobalId (numVolumes);
 
     for (UInt k = 0; k < elementNodes; ++k)
     {
         idx << k + 1;
-        this->M_HDF5->Read("Mesh_volumes_points", "P" + idx.str() + suffix, H5T_NATIVE_INT, numVolumes,
-                           &volumePoints[k][0]);
-        idx.str(std::string());
+        this->M_HDF5->Read ("Mesh_volumes_points", "P" + idx.str() + suffix, H5T_NATIVE_INT, numVolumes,
+                            &volumePoints[k][0]);
+        idx.str (std::string() );
         idx.clear();
     }
-    this->M_HDF5->Read("Mesh_volumes_markers", "P" + suffix, H5T_NATIVE_INT, numVolumes, &volumeMarkers[0]);
-    this->M_HDF5->Read("Mesh_volumes_gid", "P" + suffix, H5T_NATIVE_INT, numVolumes, &volumeGlobalId[0]);
+    this->M_HDF5->Read ("Mesh_volumes_markers", "P" + suffix, H5T_NATIVE_INT, numVolumes, &volumeMarkers[0]);
+    this->M_HDF5->Read ("Mesh_volumes_gid", "P" + suffix, H5T_NATIVE_INT, numVolumes, &volumeGlobalId[0]);
 
-    tempMesh->volumeList.reserve(numVolumes);
+    tempMesh->volumeList.reserve (numVolumes);
 
-    typename MeshType::volume_Type *pv = 0;
+    typename MeshType::volume_Type* pv = 0;
 
     for (Int j = 0; j < numVolumes; ++j)
     {
-        pv = &(tempMesh->addVolume());
-        pv->setId(volumeGlobalId[j]);
+        pv = & (tempMesh->addVolume() );
+        pv->setId (volumeGlobalId[j]);
         for (UInt k = 0; k < elementNodes; ++k)
         {
-            pv->setPoint(k, tempMesh->point(volumePoints[k][j]) );
+            pv->setPoint (k, tempMesh->point (volumePoints[k][j]) );
         }
-        pv->setMarkerID(volumeMarkers[j]);
+        pv->setMarkerID (volumeMarkers[j]);
     }
 
     volumePoints.clear();
     volumeMarkers.clear();
     volumeGlobalId.clear();
 
-    tempMesh->updateElementEdges(false, false);
-    tempMesh->updateElementFaces(false, false);
+    tempMesh->updateElementEdges (false, false);
+    tempMesh->updateElementFaces (false, false);
 
     return tempMesh;
 }
 
 template <typename MeshType>
-boost::shared_ptr< std::map<UInt, UInt> > ExporterHDF5Mesh3D<MeshType>::getStoredInterface(int k)
+boost::shared_ptr< std::map<UInt, UInt> > ExporterHDF5Mesh3D<MeshType>::getStoredInterface (int k)
 {
     if (this->M_HDF5.get() == 0)
     {
-        this->M_HDF5.reset(new hdf5_Type(*M_comm));
+        this->M_HDF5.reset (new hdf5_Type (*M_comm) );
     }
-    if (! this->M_HDF5->IsOpen())
+    if (! this->M_HDF5->IsOpen() )
     {
-        this->M_HDF5->Open(this->M_postDir + this->M_prefix + ".h5", H5F_ACC_RDONLY);
+        this->M_HDF5->Open (this->M_postDir + this->M_prefix + ".h5", H5F_ACC_RDONLY);
     }
 
     int myRank = M_comm->MyPID();
@@ -689,22 +707,22 @@ boost::shared_ptr< std::map<UInt, UInt> > ExporterHDF5Mesh3D<MeshType>::getStore
     std::stringstream idx;
     idx << k << "." << myRank;
 
-    boost::shared_ptr<std::map<UInt, UInt> > interface(new std::map<UInt, UInt>);
+    boost::shared_ptr<std::map<UInt, UInt> > interface (new std::map<UInt, UInt>);
 
     Int size;
-    this->M_HDF5->Read("Interfaces", "Size." + idx.str(), size);
+    this->M_HDF5->Read ("Interfaces", "Size." + idx.str(), size);
 
-    std::vector<UInt> keyVector(size);
-    std::vector<UInt> valueVector(size);
+    std::vector<UInt> keyVector (size);
+    std::vector<UInt> valueVector (size);
 
-    this->M_HDF5->Read("Interfaces", "Key." + idx.str(), H5T_NATIVE_INT, size,
-                       &keyVector[0]);
-    this->M_HDF5->Read("Interfaces", "Value." + idx.str(), H5T_NATIVE_INT, size,
-                       &valueVector[0]);
+    this->M_HDF5->Read ("Interfaces", "Key." + idx.str(), H5T_NATIVE_INT, size,
+                        &keyVector[0]);
+    this->M_HDF5->Read ("Interfaces", "Value." + idx.str(), H5T_NATIVE_INT, size,
+                        &valueVector[0]);
 
     for (Int i = 0; i < size; ++i)
     {
-        interface->insert(std::make_pair(keyVector[i], valueVector[i]));
+        interface->insert (std::make_pair (keyVector[i], valueVector[i]) );
     }
 
     return interface;
@@ -722,7 +740,7 @@ void ExporterHDF5Mesh3D<MeshType>::writeGraph()
 
     // Calculate the maximum size of the partitions and store partition
     // sizes
-    partitionSizes.reserve(M_graph->size());
+    partitionSizes.reserve (M_graph->size() );
     for (std::vector<std::vector<Int> >::iterator it = M_graph->begin();
             it != M_graph->end(); ++it)
     {
@@ -731,24 +749,24 @@ void ExporterHDF5Mesh3D<MeshType>::writeGraph()
         {
             maxSize = size;
         }
-        partitionSizes.push_back(size);
+        partitionSizes.push_back (size);
     }
 
-    this->M_HDF5->Write("Graph", "partition_sizes", H5T_NATIVE_INT,
-                        M_graph->size(), &partitionSizes[0]);
+    this->M_HDF5->Write ("Graph", "partition_sizes", H5T_NATIVE_INT,
+                         M_graph->size(), &partitionSizes[0]);
 
     // Write partition array size
-    this->M_HDF5->Write("Graph", "number_partitions", static_cast<Int>((M_graph->size())));
+    this->M_HDF5->Write ("Graph", "number_partitions", static_cast<Int> ( (M_graph->size() ) ) );
 
     // Write partition array
     std::stringstream index;
     for (UInt i = 0; i < M_graph->size(); ++i)
     {
         index << i;
-        this->M_HDF5->Write("Graph_partitions", "P" + index.str(),
-                            H5T_NATIVE_INT, partitionSizes[i],
-                            &(*M_graph)[i][0]);
-        index.str(std::string());
+        this->M_HDF5->Write ("Graph_partitions", "P" + index.str(),
+                             H5T_NATIVE_INT, partitionSizes[i],
+                             & (*M_graph) [i][0]);
+        index.str (std::string() );
         index.clear();
 
         this->M_HDF5->Flush();
@@ -758,45 +776,45 @@ void ExporterHDF5Mesh3D<MeshType>::writeGraph()
 }
 
 template <typename MeshType>
-void ExporterHDF5Mesh3D<MeshType>::writePartition(meshPtr_Type mesh, std::string& suffix)
+void ExporterHDF5Mesh3D<MeshType>::writePartition (meshPtr_Type mesh, std::string& suffix)
 {
     UInt elementNodes, faceNodes;
     switch (MeshType::elementShape_Type::S_shape)
     {
-    case HEXA:
-        elementNodes = 8;
-        faceNodes    = 4;
-        break;
-    case TETRA:
-        elementNodes = 4;
-        faceNodes    = 3;
+        case HEXA:
+            elementNodes = 8;
+            faceNodes    = 4;
+            break;
+        case TETRA:
+            elementNodes = 4;
+            faceNodes    = 3;
     }
 
     std::vector<Int> counters;
-    counters.push_back(static_cast<Int>(mesh->numPoints()));
-    counters.push_back(static_cast<Int>(mesh->numBPoints()));
-    counters.push_back(static_cast<Int>(mesh->numVertices()));
-    counters.push_back(static_cast<Int>(mesh->numBVertices()));
-    counters.push_back(static_cast<Int>(mesh->numGlobalVertices()));
-    counters.push_back(static_cast<Int>(mesh->numEdges()));
-    counters.push_back(static_cast<Int>(mesh->numBEdges()));
-    counters.push_back(static_cast<Int>(mesh->numGlobalEdges()));
-    counters.push_back(static_cast<Int>(mesh->numFaces()));
-    counters.push_back(static_cast<Int>(mesh->numBFaces()));
-    counters.push_back(static_cast<Int>(mesh->numGlobalFaces()));
-    counters.push_back(static_cast<Int>(mesh->numVolumes()));
-    counters.push_back(static_cast<Int>(mesh->numGlobalVolumes()));
+    counters.push_back (static_cast<Int> (mesh->numPoints() ) );
+    counters.push_back (static_cast<Int> (mesh->numBPoints() ) );
+    counters.push_back (static_cast<Int> (mesh->numVertices() ) );
+    counters.push_back (static_cast<Int> (mesh->numBVertices() ) );
+    counters.push_back (static_cast<Int> (mesh->numGlobalVertices() ) );
+    counters.push_back (static_cast<Int> (mesh->numEdges() ) );
+    counters.push_back (static_cast<Int> (mesh->numBEdges() ) );
+    counters.push_back (static_cast<Int> (mesh->numGlobalEdges() ) );
+    counters.push_back (static_cast<Int> (mesh->numFaces() ) );
+    counters.push_back (static_cast<Int> (mesh->numBFaces() ) );
+    counters.push_back (static_cast<Int> (mesh->numGlobalFaces() ) );
+    counters.push_back (static_cast<Int> (mesh->numVolumes() ) );
+    counters.push_back (static_cast<Int> (mesh->numGlobalVolumes() ) );
 
-    this->M_HDF5->Write("Mesh_counters", "P" + suffix, H5T_NATIVE_INT, 13, &counters[0]);
+    this->M_HDF5->Write ("Mesh_counters", "P" + suffix, H5T_NATIVE_INT, 13, &counters[0]);
     this->M_HDF5->Flush();
 
     UInt numPoints = mesh->numPoints();
-    std::vector<Real> tmpVectorDouble(numPoints);
-    std::vector<std::vector<Real> > pointCoordinates(3, tmpVectorDouble);
+    std::vector<Real> tmpVectorDouble (numPoints);
+    std::vector<std::vector<Real> > pointCoordinates (3, tmpVectorDouble);
 
-    std::vector<Int> pointMarkers(numPoints);
-    std::vector<Int> pointGlobalId(numPoints);
-    std::vector<Int> pointBoundaryFlags(numPoints);
+    std::vector<Int> pointMarkers (numPoints);
+    std::vector<Int> pointGlobalId (numPoints);
+    std::vector<Int> pointBoundaryFlags (numPoints);
 
     for (UInt j = 0; j < numPoints; ++j)
     {
@@ -804,20 +822,20 @@ void ExporterHDF5Mesh3D<MeshType>::writePartition(meshPtr_Type mesh, std::string
         pointCoordinates[1][j] = mesh->pointList[j].y();
         pointCoordinates[2][j] = mesh->pointList[j].z();
         pointMarkers[j] = mesh->pointList[j].markerID();
-        pointGlobalId[j] = mesh->point(j).id();
-        if (mesh->isBoundaryPoint(j))
+        pointGlobalId[j] = mesh->point (j).id();
+        if (mesh->isBoundaryPoint (j) )
         {
             pointBoundaryFlags[j] = 1;
         }
     }
 
-    this->M_HDF5->Write("Mesh_points_coordinates_x", "P" + suffix, H5T_NATIVE_DOUBLE, numPoints, &pointCoordinates[0][0]);
-    this->M_HDF5->Write("Mesh_points_coordinates_y", "P" + suffix, H5T_NATIVE_DOUBLE, numPoints, &pointCoordinates[1][0]);
-    this->M_HDF5->Write("Mesh_points_coordinates_z", "P" + suffix, H5T_NATIVE_DOUBLE, numPoints, &pointCoordinates[2][0]);
-    this->M_HDF5->Write("Mesh_points_markers", "P" + suffix, H5T_NATIVE_INT, numPoints, &pointMarkers[0]);
-    this->M_HDF5->Write("Mesh_points_gid", "P" + suffix, H5T_NATIVE_INT, numPoints, &pointGlobalId[0]);
-    this->M_HDF5->Write("Mesh_points_boundary_flag", "P" + suffix, H5T_NATIVE_INT, numPoints,
-                        &pointBoundaryFlags[0]);
+    this->M_HDF5->Write ("Mesh_points_coordinates_x", "P" + suffix, H5T_NATIVE_DOUBLE, numPoints, &pointCoordinates[0][0]);
+    this->M_HDF5->Write ("Mesh_points_coordinates_y", "P" + suffix, H5T_NATIVE_DOUBLE, numPoints, &pointCoordinates[1][0]);
+    this->M_HDF5->Write ("Mesh_points_coordinates_z", "P" + suffix, H5T_NATIVE_DOUBLE, numPoints, &pointCoordinates[2][0]);
+    this->M_HDF5->Write ("Mesh_points_markers", "P" + suffix, H5T_NATIVE_INT, numPoints, &pointMarkers[0]);
+    this->M_HDF5->Write ("Mesh_points_gid", "P" + suffix, H5T_NATIVE_INT, numPoints, &pointGlobalId[0]);
+    this->M_HDF5->Write ("Mesh_points_boundary_flag", "P" + suffix, H5T_NATIVE_INT, numPoints,
+                         &pointBoundaryFlags[0]);
 
     this->M_HDF5->Flush();
 
@@ -827,32 +845,32 @@ void ExporterHDF5Mesh3D<MeshType>::writePartition(meshPtr_Type mesh, std::string
     pointGlobalId.clear();
 
     Int numEdges = mesh->numEdges();
-    std::vector<Int> tmpVectorInt(numEdges);
-    std::vector<std::vector<Int> > edgePoints(2,tmpVectorInt);
+    std::vector<Int> tmpVectorInt (numEdges);
+    std::vector<std::vector<Int> > edgePoints (2, tmpVectorInt);
 
-    std::vector<Int> edgeMarkers(numEdges);
-    std::vector<Int> edgeGlobalId(numEdges);
-    std::vector<Int> edgeBoundaryFlags(numEdges);
+    std::vector<Int> edgeMarkers (numEdges);
+    std::vector<Int> edgeGlobalId (numEdges);
+    std::vector<Int> edgeBoundaryFlags (numEdges);
 
     for (Int j = 0; j < numEdges; ++j)
     {
-        edgePoints[0][j] = mesh->edgeList[j].point(0).localId();
-        edgePoints[1][j] = mesh->edgeList[j].point(1).localId();
+        edgePoints[0][j] = mesh->edgeList[j].point (0).localId();
+        edgePoints[1][j] = mesh->edgeList[j].point (1).localId();
         edgeMarkers[j] = mesh->edgeList[j].markerID();
         edgeGlobalId[j] = mesh->edgeList[j].id();
 
-        if (mesh->isBoundaryEdge(j))
+        if (mesh->isBoundaryEdge (j) )
         {
             edgeBoundaryFlags[j] = 1;
         }
     }
 
-    this->M_HDF5->Write("Mesh_edges_p1", "P" + suffix, H5T_NATIVE_INT, numEdges, &edgePoints[0][0]);
-    this->M_HDF5->Write("Mesh_edges_p2", "P" + suffix, H5T_NATIVE_INT, numEdges, &edgePoints[1][0]);
-    this->M_HDF5->Write("Mesh_edges_markers", "P" + suffix, H5T_NATIVE_INT, numEdges, &edgeMarkers[0]);
-    this->M_HDF5->Write("Mesh_edges_gid", "P" + suffix, H5T_NATIVE_INT, numEdges, &edgeGlobalId[0]);
-    this->M_HDF5->Write("Mesh_edges_boundary_flag", "P" + suffix, H5T_NATIVE_INT, numEdges,
-                        &edgeBoundaryFlags[0]);
+    this->M_HDF5->Write ("Mesh_edges_p1", "P" + suffix, H5T_NATIVE_INT, numEdges, &edgePoints[0][0]);
+    this->M_HDF5->Write ("Mesh_edges_p2", "P" + suffix, H5T_NATIVE_INT, numEdges, &edgePoints[1][0]);
+    this->M_HDF5->Write ("Mesh_edges_markers", "P" + suffix, H5T_NATIVE_INT, numEdges, &edgeMarkers[0]);
+    this->M_HDF5->Write ("Mesh_edges_gid", "P" + suffix, H5T_NATIVE_INT, numEdges, &edgeGlobalId[0]);
+    this->M_HDF5->Write ("Mesh_edges_boundary_flag", "P" + suffix, H5T_NATIVE_INT, numEdges,
+                         &edgeBoundaryFlags[0]);
 
     this->M_HDF5->Flush();
 
@@ -862,21 +880,21 @@ void ExporterHDF5Mesh3D<MeshType>::writePartition(meshPtr_Type mesh, std::string
     edgeBoundaryFlags.clear();
 
     Int numFaces = mesh->numFaces();
-    tmpVectorInt.resize(numFaces);
-    std::vector<std::vector<Int> > facePoints(faceNodes, tmpVectorInt);
+    tmpVectorInt.resize (numFaces);
+    std::vector<std::vector<Int> > facePoints (faceNodes, tmpVectorInt);
 
-    std::vector<Int> faceMarkers(numFaces);
-    std::vector<Int> faceGlobalId(numFaces);
-    std::vector<Int> faceBoundaryFlags(numFaces);
+    std::vector<Int> faceMarkers (numFaces);
+    std::vector<Int> faceGlobalId (numFaces);
+    std::vector<Int> faceBoundaryFlags (numFaces);
 
-    std::vector<std::vector<Int> > faceNeighbourId(2, tmpVectorInt);
-    std::vector<std::vector<Int> > faceNeighbourPos(2, tmpVectorInt);
+    std::vector<std::vector<Int> > faceNeighbourId (2, tmpVectorInt);
+    std::vector<std::vector<Int> > faceNeighbourPos (2, tmpVectorInt);
 
     for (Int j = 0; j < numFaces; ++j)
     {
         for (UInt k = 0; k < faceNodes; ++k)
         {
-            facePoints[k][j] = mesh->faceList[j].point(k).localId();
+            facePoints[k][j] = mesh->faceList[j].point (k).localId();
         }
         faceMarkers[j] = mesh->faceList[j].markerID();
         faceGlobalId[j] = mesh->faceList[j].id();
@@ -886,7 +904,7 @@ void ExporterHDF5Mesh3D<MeshType>::writePartition(meshPtr_Type mesh, std::string
         faceNeighbourPos[0][j] = mesh->faceList[j].firstAdjacentElementPosition();
         faceNeighbourPos[1][j] = mesh->faceList[j].secondAdjacentElementPosition();
 
-        if (mesh->isBoundaryFace(j))
+        if (mesh->isBoundaryFace (j) )
         {
             faceBoundaryFlags[j] = 1;
         }
@@ -896,24 +914,24 @@ void ExporterHDF5Mesh3D<MeshType>::writePartition(meshPtr_Type mesh, std::string
     for (UInt k = 0; k < faceNodes; ++k)
     {
         idx << k + 1;
-        this->M_HDF5->Write("Mesh_faces_points", "P" + idx.str() + suffix, H5T_NATIVE_INT, numFaces,
-                            &facePoints[k][0]);
-        idx.str(std::string());
+        this->M_HDF5->Write ("Mesh_faces_points", "P" + idx.str() + suffix, H5T_NATIVE_INT, numFaces,
+                             &facePoints[k][0]);
+        idx.str (std::string() );
         idx.clear();
     }
-    this->M_HDF5->Write("Mesh_faces_markers", "P" + suffix, H5T_NATIVE_INT, numFaces, &faceMarkers[0]);
-    this->M_HDF5->Write("Mesh_faces_gid", "P" + suffix, H5T_NATIVE_INT, numFaces, &faceGlobalId[0]);
-    this->M_HDF5->Write("Mesh_faces_boundary_flags", "P" + suffix, H5T_NATIVE_INT, numFaces,
-                        &faceBoundaryFlags[0]);
+    this->M_HDF5->Write ("Mesh_faces_markers", "P" + suffix, H5T_NATIVE_INT, numFaces, &faceMarkers[0]);
+    this->M_HDF5->Write ("Mesh_faces_gid", "P" + suffix, H5T_NATIVE_INT, numFaces, &faceGlobalId[0]);
+    this->M_HDF5->Write ("Mesh_faces_boundary_flags", "P" + suffix, H5T_NATIVE_INT, numFaces,
+                         &faceBoundaryFlags[0]);
 
-    this->M_HDF5->Write("Mesh_faces_neighbour1", "P" + suffix, H5T_NATIVE_INT, numFaces,
-                        &faceNeighbourId[0][0]);
-    this->M_HDF5->Write("Mesh_faces_neighbour2", "P" + suffix, H5T_NATIVE_INT, numFaces,
-                        &faceNeighbourId[1][0]);
-    this->M_HDF5->Write("Mesh_faces_neighbour_pos1", "P" + suffix, H5T_NATIVE_INT, numFaces,
-                        &faceNeighbourPos[0][0]);
-    this->M_HDF5->Write("Mesh_faces_neighbour_pos2", "P" + suffix, H5T_NATIVE_INT, numFaces,
-                        &faceNeighbourPos[1][0]);
+    this->M_HDF5->Write ("Mesh_faces_neighbour1", "P" + suffix, H5T_NATIVE_INT, numFaces,
+                         &faceNeighbourId[0][0]);
+    this->M_HDF5->Write ("Mesh_faces_neighbour2", "P" + suffix, H5T_NATIVE_INT, numFaces,
+                         &faceNeighbourId[1][0]);
+    this->M_HDF5->Write ("Mesh_faces_neighbour_pos1", "P" + suffix, H5T_NATIVE_INT, numFaces,
+                         &faceNeighbourPos[0][0]);
+    this->M_HDF5->Write ("Mesh_faces_neighbour_pos2", "P" + suffix, H5T_NATIVE_INT, numFaces,
+                         &faceNeighbourPos[1][0]);
 
     this->M_HDF5->Flush();
 
@@ -925,17 +943,17 @@ void ExporterHDF5Mesh3D<MeshType>::writePartition(meshPtr_Type mesh, std::string
     faceNeighbourPos.clear();
 
     Int numVolumes = mesh->numVolumes();
-    tmpVectorInt.resize(numVolumes);
-    std::vector<std::vector<Int> > volumePoints(elementNodes, tmpVectorInt);
+    tmpVectorInt.resize (numVolumes);
+    std::vector<std::vector<Int> > volumePoints (elementNodes, tmpVectorInt);
 
-    std::vector<Int> volumeMarkers(numVolumes);
-    std::vector<Int> volumeGlobalId(numVolumes);
+    std::vector<Int> volumeMarkers (numVolumes);
+    std::vector<Int> volumeGlobalId (numVolumes);
 
     for (Int j = 0; j < numVolumes; ++j)
     {
         for (UInt k = 0; k < elementNodes; ++k)
         {
-            volumePoints[k][j] = mesh->volumeList[j].point(k).localId();
+            volumePoints[k][j] = mesh->volumeList[j].point (k).localId();
         }
         volumeMarkers[j] = mesh->volumeList[j].markerID();
         volumeGlobalId[j] = mesh->volumeList[j].id();
@@ -944,13 +962,13 @@ void ExporterHDF5Mesh3D<MeshType>::writePartition(meshPtr_Type mesh, std::string
     for (UInt k = 0; k < elementNodes; ++k)
     {
         idx << k + 1;
-        this->M_HDF5->Write("Mesh_volumes_points", "P" + idx.str() + suffix, H5T_NATIVE_INT, numVolumes,
-                            &volumePoints[k][0]);
-        idx.str(std::string());
+        this->M_HDF5->Write ("Mesh_volumes_points", "P" + idx.str() + suffix, H5T_NATIVE_INT, numVolumes,
+                             &volumePoints[k][0]);
+        idx.str (std::string() );
         idx.clear();
     }
-    this->M_HDF5->Write("Mesh_volumes_markers", "P" + suffix, H5T_NATIVE_INT, numVolumes, &volumeMarkers[0]);
-    this->M_HDF5->Write("Mesh_volumes_gid", "P" + suffix, H5T_NATIVE_INT, numVolumes, &volumeGlobalId[0]);
+    this->M_HDF5->Write ("Mesh_volumes_markers", "P" + suffix, H5T_NATIVE_INT, numVolumes, &volumeMarkers[0]);
+    this->M_HDF5->Write ("Mesh_volumes_gid", "P" + suffix, H5T_NATIVE_INT, numVolumes, &volumeGlobalId[0]);
 
     this->M_HDF5->Flush();
 
@@ -970,9 +988,9 @@ void ExporterHDF5Mesh3D<MeshType>::writeSerialMesh()
         index << i;
         suffix = "." + index.str();
 
-        writePartition((*M_serialMesh)[i], suffix);
+        writePartition ( (*M_serialMesh) [i], suffix);
 
-        index.str(std::string());
+        index.str (std::string() );
         index.clear();
 
         std::cout << "Wrote mesh partition " << i << std::endl;
@@ -988,7 +1006,7 @@ void ExporterHDF5Mesh3D<MeshType>::writeParallelMesh()
     index << M_comm->MyPID();
     suffix = "." + index.str();
 
-    writePartition(M_parallelMesh, suffix);
+    writePartition (M_parallelMesh, suffix);
 }
 
 template <typename MeshType>
@@ -999,42 +1017,42 @@ void ExporterHDF5Mesh3D<MeshType>::writeInterfaces()
     std::vector<Int> firstDOF;
     std::vector<Int> secondDOF;
 
-    this->M_HDF5->Write("Interfaces", "Number", interfaceNumber);
+    this->M_HDF5->Write ("Interfaces", "Number", interfaceNumber);
 
     for (Int i = 0; i < interfaceNumber; ++i)
     {
-        interfaceVector_Type& currentInterfaceSet = *(M_DOFInterfaces[i]);
+        interfaceVector_Type& currentInterfaceSet = * (M_DOFInterfaces[i]);
 
         Int partitionNumber = currentInterfaceSet.size();
         std::stringstream idx;
         idx << i;
-        this->M_HDF5->Write("Interfaces", "Partitions." + idx.str(), partitionNumber);
+        this->M_HDF5->Write ("Interfaces", "Partitions." + idx.str(), partitionNumber);
 
         Int flag1 = M_firstInterfaceFlags[i];
         Int flag2 = M_secondInterfaceFlags[i];
         std::string type = M_interfaceTypes[i];
 
-        this->M_HDF5->Write("Interfaces", "Flag1." + idx.str(), flag1);
-        this->M_HDF5->Write("Interfaces", "Flag2." + idx.str(), flag2);
-        this->M_HDF5->Write("Interfaces", "Type." + idx.str(), type);
+        this->M_HDF5->Write ("Interfaces", "Flag1." + idx.str(), flag1);
+        this->M_HDF5->Write ("Interfaces", "Flag2." + idx.str(), flag2);
+        this->M_HDF5->Write ("Interfaces", "Type." + idx.str(), type);
 
         for (Int j = 0; j < partitionNumber; ++j)
         {
-            interface_Type& currentInterface = *(currentInterfaceSet[j]);
+            interface_Type& currentInterface = * (currentInterfaceSet[j]);
 
             const std::map<UInt, UInt>& locDofMap = currentInterface.localDofMap();
 
             Int size = locDofMap.size();
 
-            idx.str(std::string());
+            idx.str (std::string() );
             idx.clear();
             idx << i << "." << j;
-            this->M_HDF5->Write("Interfaces", "Size." + idx.str(), size);
+            this->M_HDF5->Write ("Interfaces", "Size." + idx.str(), size);
 
             firstDOF.clear();
             secondDOF.clear();
-            firstDOF.resize(size);
-            secondDOF.resize(size);
+            firstDOF.resize (size);
+            secondDOF.resize (size);
 
             Int k = 0;
             for (std::map<UInt, UInt>::const_iterator it = locDofMap.begin();
@@ -1044,8 +1062,8 @@ void ExporterHDF5Mesh3D<MeshType>::writeInterfaces()
                 secondDOF[k] = it->second;
                 ++k;
             }
-            this->M_HDF5->Write("Interfaces", "Key." + idx.str(), H5T_NATIVE_INT, size, &firstDOF[0]);
-            this->M_HDF5->Write("Interfaces", "Value." + idx.str(), H5T_NATIVE_INT, size, &secondDOF[0]);
+            this->M_HDF5->Write ("Interfaces", "Key." + idx.str(), H5T_NATIVE_INT, size, &firstDOF[0]);
+            this->M_HDF5->Write ("Interfaces", "Value." + idx.str(), H5T_NATIVE_INT, size, &secondDOF[0]);
         }
 
     }

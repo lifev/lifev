@@ -50,10 +50,10 @@ class SetofFun
 {
 public:
     SetofFun();
-    Real val(int fun, Real& x, Real& y, Real& z);
-    UInt degree(UInt fun);
-    Real ex_int(UInt fun);
-    std::string name(UInt fun);
+    Real val (int fun, Real& x, Real& y, Real& z);
+    UInt degree (UInt fun);
+    Real ex_int (UInt fun);
+    std::string name (UInt fun);
     UInt nfun();
 private:
     int _i;

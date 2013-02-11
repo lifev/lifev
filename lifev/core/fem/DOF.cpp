@@ -47,39 +47,45 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 
-DOF::DOF( const DOFLocalPattern& fePattern) : M_elementDofPattern( fePattern ), M_totalDof( 0 ),
-        M_numElement( 0 ), M_nbLocalPeaks( 0 ), M_nbLocalRidges( 0 ), M_nbLocalFacets( 0 ), M_localToGlobal(),
-        M_localToGlobalByBdFacet()
+DOF::DOF ( const DOFLocalPattern& fePattern) : M_elementDofPattern ( fePattern ), M_totalDof ( 0 ),
+    M_numElement ( 0 ), M_nbLocalPeaks ( 0 ), M_nbLocalRidges ( 0 ), M_nbLocalFacets ( 0 ), M_localToGlobal(),
+    M_localToGlobalByBdFacet()
 {
-	for ( UInt i = 0; i < 5; ++i )
+    for ( UInt i = 0; i < 5; ++i )
+    {
         M_dofPositionByEntity[ i ] = 0;
+    }
 }
 
-DOF::DOF( const DOF & dof2 ) : M_elementDofPattern( dof2.M_elementDofPattern ), //, M_offset( dof2.M_offset ),
-        M_totalDof( dof2.M_totalDof ), M_numElement( dof2.M_numElement ),
-        M_nbLocalPeaks( dof2.M_nbLocalPeaks ), M_nbLocalRidges( dof2.M_nbLocalRidges ), M_nbLocalFacets( dof2.M_nbLocalFacets ),
-        M_localToGlobal( dof2.M_localToGlobal ),
-        M_localToGlobalByBdFacet(), M_facetToPoint(dof2.M_facetToPoint)
+DOF::DOF ( const DOF& dof2 ) : M_elementDofPattern ( dof2.M_elementDofPattern ), //, M_offset( dof2.M_offset ),
+    M_totalDof ( dof2.M_totalDof ), M_numElement ( dof2.M_numElement ),
+    M_nbLocalPeaks ( dof2.M_nbLocalPeaks ), M_nbLocalRidges ( dof2.M_nbLocalRidges ), M_nbLocalFacets ( dof2.M_nbLocalFacets ),
+    M_localToGlobal ( dof2.M_localToGlobal ),
+    M_localToGlobalByBdFacet(), M_facetToPoint (dof2.M_facetToPoint)
 {
     if ( &dof2 == this )
+    {
         return ;
+    }
 
     for ( UInt i = 0; i < 5; ++i )
+    {
         M_dofPositionByEntity[ i ] = dof2.M_dofPositionByEntity[ i ];
+    }
 }
 
 // ===================================================
 // Methods
 // ===================================================
 
-ID DOF::localToGlobalMapByBdFacet(const ID& facetId, const ID& localDof ) const
+ID DOF::localToGlobalMapByBdFacet (const ID& facetId, const ID& localDof ) const
 {
-	ASSERT_PRE( (M_localToGlobalByBdFacet.size()>0) , "The local to global map by boundary facet is void");
-	return M_localToGlobalByBdFacet[facetId][localDof];
+    ASSERT_PRE ( (M_localToGlobalByBdFacet.size() > 0) , "The local to global map by boundary facet is void");
+    return M_localToGlobalByBdFacet[facetId][localDof];
 }
 
 
-void DOF::showMe( std::ostream & out, bool verbose ) const
+void DOF::showMe ( std::ostream& out, bool verbose ) const
 {
     out << " Degree of Freedom (DOF) Object" << std::endl;
     out << " Total DOF Stored             " << M_totalDof << std::endl;
@@ -99,15 +105,17 @@ void DOF::showMe( std::ostream & out, bool verbose ) const
         {
             for ( UInt j = 0; j < numLocalDof(); ++j )
             {
-                out.width( 10 );
+                out.width ( 10 );
                 out << i;
-                out.width( 10 );
+                out.width ( 10 );
                 out << j;
-                out.width( 10 );
-                out << localToGlobalMap( i, j );
+                out.width ( 10 );
+                out << localToGlobalMap ( i, j );
                 out << " # ";
-                if ( (i*numLocalDof()+j) % 2 != 0 )
+                if ( (i * numLocalDof() + j) % 2 != 0 )
+                {
                     out << std::endl;
+                }
             }
 
         }
@@ -117,7 +125,7 @@ void DOF::showMe( std::ostream & out, bool verbose ) const
 
 }
 
-void DOF::showMeByBdFacet(std::ostream& out, bool verbose) const
+void DOF::showMeByBdFacet (std::ostream& out, bool verbose) const
 {
     out << "--------------------------------------------------------------------------------" << std::endl;
     out << " Degree of freedom by facet object " << std::endl;
@@ -138,14 +146,17 @@ void DOF::showMeByBdFacet(std::ostream& out, bool verbose) const
         {
             for (UInt j = 0; j < M_localToGlobalByBdFacet[i].size(); ++j)
             {
-                out.width(12);
+                out.width (12);
                 out << i;
-                out.width(12);
+                out.width (12);
                 out << j;
-                out.width(12);
+                out.width (12);
                 out << M_localToGlobalByBdFacet[i][j];
                 out << " # ";
-                if (j % 2 != 0) out << std::endl;
+                if (j % 2 != 0)
+                {
+                    out << std::endl;
+                }
             } // for j
         } //for i
     } // if verbose

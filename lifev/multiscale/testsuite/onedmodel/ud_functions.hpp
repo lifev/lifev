@@ -56,13 +56,16 @@ class Constant
 {
 public:
 
-    explicit Constant( const Real& value ) :
-            M_value ( value )
+    explicit Constant ( const Real& value ) :
+        M_value ( value )
     {}
 
     virtual ~Constant() {}
 
-    Real operator()( const Real& /*time*/ ) { return M_value; }
+    Real operator() ( const Real& /*time*/ )
+    {
+        return M_value;
+    }
 
 private:
 
@@ -87,11 +90,11 @@ public:
       \param[in] period the sinus period \f$ T \f$
       \param[in] phase the sinus phase \f$ \phi \f$
     */
-    explicit Sin( const Real mean   = 0, const Real scale  = 10, const Real period = .01, const Real phase  = 0. ) :
-            M_mean(mean),
-            M_scale(scale),
-            M_period(period),
-            M_phase(phase)
+    explicit Sin ( const Real mean   = 0, const Real scale  = 10, const Real period = .01, const Real phase  = 0. ) :
+        M_mean (mean),
+        M_scale (scale),
+        M_period (period),
+        M_phase (phase)
     {}
 
     virtual ~Sin() {}
@@ -102,12 +105,12 @@ public:
       \param[in] time the time
       \return \f$ B + A sin( \frac{2 \pi t}{T} + \phi ) \f$
     */
-    Real operator()( const Real& time )
+    Real operator() ( const Real& time )
     {
         if (time < M_period)
         {
-            std::cout << time << " Flux BC = " << M_mean + M_scale*std::sin(M_phase+2*M_PI*time/M_period) << std::endl;
-            return -(M_mean + M_scale*std::sin(M_phase+2*M_PI*time/M_period));
+            std::cout << time << " Flux BC = " << M_mean + M_scale* std::sin (M_phase + 2 * M_PI * time / M_period) << std::endl;
+            return - (M_mean + M_scale * std::sin (M_phase + 2 * M_PI * time / M_period) );
         }
         else
         {
@@ -148,22 +151,22 @@ public:
       \param[in] frequency_sin the sinus period \f$ T_s \f$
       \param[in] phase_sin the sinus phase \f$ \phi_s \f$
     */
-    explicit Cos_min_Sin(const Real coeff_exp_t_cos = 0, const Real mean_cos = 0,
-                const Real amplitude_cos = 10, const Real frequency_cos = 8.*atan(1.),
-                const Real phase_cos = 0.,
-                const Real coeff_exp_t_sin = 0, const Real mean_sin = 0,
-                const Real amplitude_sin = 10, const Real frequency_sin = 8.*atan(1.),
-                const Real phase_sin = 0. ) :
-            M_coeff_exp_t_cos(coeff_exp_t_cos),
-            M_mean_cos(mean_cos),
-            M_amplitude_cos(amplitude_cos),
-            M_frequency_cos(frequency_cos),
-            M_phase_cos(phase_cos),
-            M_coeff_exp_t_sin(coeff_exp_t_sin),
-            M_mean_sin(mean_sin),
-            M_amplitude_sin(amplitude_sin),
-            M_frequency_sin(frequency_sin),
-            M_phase_sin(phase_sin)
+    explicit Cos_min_Sin (const Real coeff_exp_t_cos = 0, const Real mean_cos = 0,
+                          const Real amplitude_cos = 10, const Real frequency_cos = 8.*atan (1.),
+                          const Real phase_cos = 0.,
+                          const Real coeff_exp_t_sin = 0, const Real mean_sin = 0,
+                          const Real amplitude_sin = 10, const Real frequency_sin = 8.*atan (1.),
+                          const Real phase_sin = 0. ) :
+        M_coeff_exp_t_cos (coeff_exp_t_cos),
+        M_mean_cos (mean_cos),
+        M_amplitude_cos (amplitude_cos),
+        M_frequency_cos (frequency_cos),
+        M_phase_cos (phase_cos),
+        M_coeff_exp_t_sin (coeff_exp_t_sin),
+        M_mean_sin (mean_sin),
+        M_amplitude_sin (amplitude_sin),
+        M_frequency_sin (frequency_sin),
+        M_phase_sin (phase_sin)
     {}
 
     virtual ~Cos_min_Sin() {}
@@ -175,11 +178,11 @@ public:
       \return \f$ B_c + A_c cos( \frac{2 \pi t}{T_c} + \phi_c ) -
       ( B_s + A_s sin( \frac{2 \pi t}{T_s} + \phi_s ) ) \f$
     */
-    Real operator()( const Real& time )
+    Real operator() ( const Real& time )
     {
         Real result = M_mean_cos
-                      + M_amplitude_cos * std::cos(M_phase_cos+time*M_frequency_cos)
-                      - ( M_mean_sin + M_amplitude_sin * std::sin(M_phase_sin+time*M_frequency_sin) );
+                      + M_amplitude_cos * std::cos (M_phase_cos + time * M_frequency_cos)
+                      - ( M_mean_sin + M_amplitude_sin * std::sin (M_phase_sin + time * M_frequency_sin) );
 
         return result;
     }
@@ -188,16 +191,46 @@ public:
      */
     //@{
 
-    Real& coeff_exp_t_cos() { return M_coeff_exp_t_cos;}
-    Real& mean_cos() { return M_mean_cos;}
-    Real& amplitude_cos() { return M_amplitude_cos;}
-    Real& frequency_cos() { return M_frequency_cos;}
-    Real& phase_cos() { return M_phase_cos;}
-    Real& coeff_exp_t_sin() { return M_coeff_exp_t_sin;}
-    Real& mean_sin() { return M_mean_sin;}
-    Real& amplitude_sin() { return M_amplitude_sin;}
-    Real& frequency_sin() { return M_frequency_sin;}
-    Real& phase_sin() { return M_phase_sin;}
+    Real& coeff_exp_t_cos()
+    {
+        return M_coeff_exp_t_cos;
+    }
+    Real& mean_cos()
+    {
+        return M_mean_cos;
+    }
+    Real& amplitude_cos()
+    {
+        return M_amplitude_cos;
+    }
+    Real& frequency_cos()
+    {
+        return M_frequency_cos;
+    }
+    Real& phase_cos()
+    {
+        return M_phase_cos;
+    }
+    Real& coeff_exp_t_sin()
+    {
+        return M_coeff_exp_t_sin;
+    }
+    Real& mean_sin()
+    {
+        return M_mean_sin;
+    }
+    Real& amplitude_sin()
+    {
+        return M_amplitude_sin;
+    }
+    Real& frequency_sin()
+    {
+        return M_frequency_sin;
+    }
+    Real& phase_sin()
+    {
+        return M_phase_sin;
+    }
 
     //@}
 
@@ -242,15 +275,15 @@ public:
       \param[in] kappa_Im the imaginary part of the wave number \f$ k \f$
       \param[in] omega the wave time frequency \f$ \omega \f$ (supposed to be real)
     */
-    explicit Analytical_Solution( Real const& sol_amplitude_Re, Real const& sol_amplitude_Im,
-                         Real const& kappa_Re, Real const& kappa_Im,
-                         Real const& omega ) :
-            Cos_min_Sin(0., 0., sol_amplitude_Re, omega, 0.,
-                        0., 0., sol_amplitude_Im, omega, 0.),
-            M_sol_amplitude_Re(sol_amplitude_Re),
-            M_sol_amplitude_Im(sol_amplitude_Im),
-            M_kappa_Re(kappa_Re),
-            M_kappa_Im(kappa_Im)
+    explicit Analytical_Solution ( Real const& sol_amplitude_Re, Real const& sol_amplitude_Im,
+                                   Real const& kappa_Re, Real const& kappa_Im,
+                                   Real const& omega ) :
+        Cos_min_Sin (0., 0., sol_amplitude_Re, omega, 0.,
+                     0., 0., sol_amplitude_Im, omega, 0.),
+        M_sol_amplitude_Re (sol_amplitude_Re),
+        M_sol_amplitude_Im (sol_amplitude_Im),
+        M_kappa_Re (kappa_Re),
+        M_kappa_Im (kappa_Im)
     {}
 
     virtual ~Analytical_Solution() {}
@@ -262,9 +295,9 @@ public:
       \return \f$ B_c + A_c cos( \frac{2 \pi t}{T_c} + \phi_c ) -
       ( B_s + A_s sin( \frac{2 \pi t}{T_s} + \phi_s ) ) \f$
     */
-    Real operator()( const Real& time )
+    Real operator() ( const Real& time )
     {
-        return Cos_min_Sin::operator()(time);
+        return Cos_min_Sin::operator() (time);
     }
 
     /*!
@@ -274,11 +307,11 @@ public:
       \return \f$ B_c + A_c cos( \frac{2 \pi t}{T_c} + \phi_c ) -
       ( B_s + A_s sin( \frac{2 \pi t}{T_s} + \phi_s ) ) \f$
     */
-    void update_x( const Real& _x )
+    void update_x ( const Real& _x )
     {
-        this->amplitude_cos() = M_sol_amplitude_Re * std::exp( M_kappa_Im * _x );
+        this->amplitude_cos() = M_sol_amplitude_Re * std::exp ( M_kappa_Im * _x );
         this->phase_cos() = - M_kappa_Re * _x;
-        this->amplitude_sin() = M_sol_amplitude_Im * std::exp( M_kappa_Im * _x );
+        this->amplitude_sin() = M_sol_amplitude_Im * std::exp ( M_kappa_Im * _x );
         this->phase_sin() = - M_kappa_Re * _x;
     }
 
@@ -300,14 +333,14 @@ class PhysiologicalFlux
 public:
 
     explicit PhysiologicalFlux() :
-            M_rampT(),
-            M_time_step(),
-            M_scale()
+        M_rampT(),
+        M_time_step(),
+        M_scale()
     {}
 
     virtual ~PhysiologicalFlux() {}
 
-    Real operator()( const Real& time );
+    Real operator() ( const Real& time );
 
 private:
 
@@ -317,7 +350,7 @@ private:
 };
 
 Real
-PhysiologicalFlux::operator()( const Real& t )
+PhysiologicalFlux::operator() ( const Real& t )
 {
     double time = t;
     int    numData = 100;
@@ -424,23 +457,26 @@ PhysiologicalFlux::operator()( const Real& t )
                           0.55457447187998
                        };
 
-    double timescale = M_scale/numData;
+    double timescale = M_scale / numData;
 
     for (;;)
     {
-        if (time < M_scale) break;
+        if (time < M_scale)
+        {
+            break;
+        }
         time = time - M_scale;
     }
 
-    int     ipos     = time/timescale;
-    double t2 =timescale*(ipos + 1);
+    int     ipos     = time / timescale;
+    double t2 = timescale * (ipos + 1);
 
-    double a = (flux[ipos + 1] - flux[ipos])/timescale;
-    double b = flux[ipos + 1] - a*t2;
+    double a = (flux[ipos + 1] - flux[ipos]) / timescale;
+    double b = flux[ipos + 1] - a * t2;
 
-    std::cout << "BC: Flux = " << time*a + b
+    std::cout << "BC: Flux = " << time* a + b
               << " period = " << M_scale << " pos = " << ipos << std::endl;
-    return time*a + b;
+    return time * a + b;
 }
 
 //! PressureRamp
@@ -450,13 +486,13 @@ PhysiologicalFlux::operator()( const Real& t )
 class PressureRamp
 {
 public:
-    explicit PressureRamp( const Real& startT   = .001,
-                  const Real& duration = 0.7,
-                  const Real& endvalue = 106400 );
+    explicit PressureRamp ( const Real& startT   = .001,
+                            const Real& duration = 0.7,
+                            const Real& endvalue = 106400 );
 
     virtual ~PressureRamp() {}
 
-    Real operator()( const Real& time );
+    Real operator() ( const Real& time );
 
 private:
 
@@ -465,16 +501,16 @@ private:
     Real M_endvalue;
 };
 
-PressureRamp::PressureRamp( const Real& startT,
-                            const Real& duration,
-                            const Real& endvalue ):
-        M_startT    ( startT ),
-        M_duration  ( duration ),
-        M_endvalue  ( endvalue )
+PressureRamp::PressureRamp ( const Real& startT,
+                             const Real& duration,
+                             const Real& endvalue ) :
+    M_startT    ( startT ),
+    M_duration  ( duration ),
+    M_endvalue  ( endvalue )
 {}
 
 Real
-PressureRamp::operator()( const Real& time )
+PressureRamp::operator() ( const Real& time )
 {
     Real t = time;
 
@@ -564,32 +600,36 @@ PressureRamp::operator()( const Real& time )
 
     Real P = 0;
     if (t < 0)
-        P = t/M_startT*pressure[0];
+    {
+        P = t / M_startT * pressure[0];
+    }
     else
     {
-        Real timescale = M_duration/numData;
+        Real timescale = M_duration / numData;
 
         for (;;)
         {
             if (t < M_duration)
+            {
                 break;
+            }
             t -= M_duration;
         }
 
-        Int  ipos = t/timescale;
-        Real t2   = timescale*(ipos + 1);
+        Int  ipos = t / timescale;
+        Real t2   = timescale * (ipos + 1);
 
         Real a = ( pressure[ipos + 1] - pressure[ipos] ) / timescale;
-        Real b =   pressure[ipos + 1] - a*t2;
+        Real b =   pressure[ipos + 1] - a * t2;
 
-        P = t*a + b;
+        P = t * a + b;
 
         std::cout << "BC: Pressure = " << P
                   << " period = " << M_duration << " pos = " << ipos << std::endl;
     }
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 6030 ) << "[PressureRamp::evaluate] imposed pressure = " << P << "\n";
+    debugStream ( 6030 ) << "[PressureRamp::evaluate] imposed pressure = " << P << "\n";
 #endif
 
     return P;

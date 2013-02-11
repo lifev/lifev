@@ -62,9 +62,9 @@ public:
 
     typedef PhysicalSolverType                                                                      physicalSolver_Type;
 
-    typedef boost::function<Real ( const Real& )>                                                   boundaryFunctionTime_Type;
-    typedef boost::function<Real ( const Real&, const Real& )>                                      boundaryFunctionTimeTimeStep_Type;
-    typedef boost::function<Real ( const Real&, const Real&, const Real&, const Real&, const ID& )> boundaryFunctionTimeSpaceID_Type;
+    typedef boost::function<Real ( const Real& ) >                                                   boundaryFunctionTime_Type;
+    typedef boost::function<Real ( const Real&, const Real& ) >                                      boundaryFunctionTimeTimeStep_Type;
+    typedef boost::function<Real ( const Real&, const Real&, const Real&, const Real&, const ID& ) > boundaryFunctionTimeSpaceID_Type;
 
     //@}
 
@@ -88,20 +88,20 @@ public:
     /*!
      * @param base base of the 1D boundary condition
      */
-    virtual void assignFunction( OneDFSIFunction& base ) = 0;
+    virtual void assignFunction ( OneDFSIFunction& base ) = 0;
 
     //! Assign the function to the base of the 3D \c BCHandler
     /*!
      * @param base base of the 3D boundary condition
      */
-    virtual void assignFunction( BCFunctionBase& base ) = 0;
+    virtual void assignFunction ( BCFunctionBase& base ) = 0;
 
     //! Function of time
     /*!
      * @param t time
      * @return boundary condition value
      */
-    virtual Real functionTime( const Real& t ) = 0;
+    virtual Real functionTime ( const Real& t ) = 0;
 
     //! Function of time and time step
     /*!
@@ -109,7 +109,7 @@ public:
      * @param timeStep time step
      * @return boundary condition value
      */
-    virtual Real functionTimeTimeStep( const Real& t, const Real& timeStep ) = 0;
+    virtual Real functionTimeTimeStep ( const Real& t, const Real& timeStep ) = 0;
 
     //! Function of time and space
     /*!
@@ -120,7 +120,7 @@ public:
      * @param id id of the boundary condition (not used)
      * @return boundary condition value
      */
-    virtual Real functionTimeSpace( const Real& t, const Real& x, const Real& y, const Real& z, const ID& /*id*/) = 0;
+    virtual Real functionTimeSpace ( const Real& t, const Real& x, const Real& y, const Real& z, const ID& /*id*/) = 0;
 
     //! Function of time and space with ID
     /*!
@@ -131,7 +131,7 @@ public:
      * @param id id of the boundary condition
      * @return boundary condition value
      */
-    virtual Real functionTimeSpaceID( const Real& t, const Real& x, const Real& y, const Real& z, const ID& id ) = 0;
+    virtual Real functionTimeSpaceID ( const Real& t, const Real& x, const Real& y, const Real& z, const ID& id ) = 0;
 
     //@}
 
@@ -143,20 +143,20 @@ public:
     /*!
      * @param data boundary condition data loaded from \c GetPot file
      */
-    virtual void setData( const BCInterfaceData0D& data ) = 0;
+    virtual void setData ( const BCInterfaceData0D& data ) = 0;
 
 
     //! Set data for 1D boundary conditions
     /*!
      * @param data boundary condition data loaded from \c GetPot file
      */
-    virtual void setData( const BCInterfaceData1D& data ) = 0;
+    virtual void setData ( const BCInterfaceData1D& data ) = 0;
 
     //! Set data for 3D boundary conditions
     /*!
      * @param data boundary condition data loaded from \c GetPot file
      */
-    virtual void setData( const BCInterfaceData3D& data ) = 0;
+    virtual void setData ( const BCInterfaceData3D& data ) = 0;
 
     //@}
 
@@ -165,9 +165,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    BCInterfaceFunction( const BCInterfaceFunction& function );
+    BCInterfaceFunction ( const BCInterfaceFunction& function );
 
-    BCInterfaceFunction& operator=( const BCInterfaceFunction& function );
+    BCInterfaceFunction& operator= ( const BCInterfaceFunction& function );
 
     //@}
 };

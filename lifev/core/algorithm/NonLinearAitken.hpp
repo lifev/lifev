@@ -99,10 +99,16 @@ public:
     /*!
      * @param useDefaultOmega true: use always default Omega (relaxed fixed-point method)
      */
-    void useDefaultOmega( const bool useDefaultOmega = true ) { M_useDefaultOmega = useDefaultOmega; }
+    void useDefaultOmega ( const bool useDefaultOmega = true )
+    {
+        M_useDefaultOmega = useDefaultOmega;
+    }
 
     //! Reinitialize Omega to the default value
-    void restart() { M_restart = true; }
+    void restart()
+    {
+        M_restart = true;
+    }
 
     //! Compute OmegaS * deltaRSolid + OmegaF * deltaRFluid
     /*!
@@ -110,9 +116,9 @@ public:
      * @param residualFluid - vector of residuals (Fluid for FSI problems)
      * @param residualSolid - vector of residuals (Solid for FSI problems)
      */
-    vector_Type computeDeltaLambdaFSI( const vector_Type& solution,
-                                       const vector_Type& residualFluid,
-                                       const vector_Type& residualSolid );
+    vector_Type computeDeltaLambdaFSI ( const vector_Type& solution,
+                                        const vector_Type& residualFluid,
+                                        const vector_Type& residualSolid );
 
     //! Compute Omega * residual - Paragraph 4.2.3 & 4.2.4 of S. Deparis PhD Thesis
     /*!
@@ -120,17 +126,17 @@ public:
      * @param residual - vector of residuals
      * @param invertedOmega - false (default): minimizing on omega; true: minimizing on omega^-1
      */
-    vector_Type computeDeltaLambdaScalar( const vector_Type& solution,
-                                          const vector_Type& residual );
+    vector_Type computeDeltaLambdaScalar ( const vector_Type& solution,
+                                           const vector_Type& residual );
 
     //! Compute Omega * residual - Paragraph 4.2.6 of S. Deparis PhD Thesis
     /*!
      * @param solution - vector of unknown
      * @param residual - vector of residuals
      */
-    vector_Type computeDeltaLambdaVector( const vector_Type& solution,
-                                          const vector_Type& residual,
-                                          const bool&        independentOmega = false );
+    vector_Type computeDeltaLambdaVector ( const vector_Type& solution,
+                                           const vector_Type& residual,
+                                           const bool&        independentOmega = false );
 
     //! Compute Omega * residual - Paragraph 4.2.6 of S. Deparis PhD Thesis
     /*!
@@ -139,10 +145,10 @@ public:
      * @param blocksVector - vector identifying the different blocks ( ID start from 1 )
      * @param blocksNumber - number of different blocks == higher ID (if = 1, it equal to the scalar case)
      */
-    vector_Type computeDeltaLambdaVectorBlock( const vector_Type& solution,
-                                               const vector_Type& residual,
-                                               const vector_Type& blocksVector,
-                                               const UInt&        blocksNumber = 1);
+    vector_Type computeDeltaLambdaVectorBlock ( const vector_Type& solution,
+                                                const vector_Type& residual,
+                                                const vector_Type& blocksVector,
+                                                const UInt&        blocksNumber = 1);
 
     //@}
 
@@ -156,7 +162,7 @@ public:
      * @param defaultOmegaSolid default value for the omega solid parameter
      * if defaultOmegaFluid is negative, set  M_useDefaultOmega  equal true
      */
-    void setDefaultOmega( const Real& defaultOmegaFluid = 0.1, const Real& defaultOmegaSolid = 0.1 );
+    void setDefaultOmega ( const Real& defaultOmegaFluid = 0.1, const Real& defaultOmegaSolid = 0.1 );
 
     //! Set the range of Omega.
     /*!
@@ -164,25 +170,37 @@ public:
      *
      * @param omegaRange array with the minimum and the maximum of Omega
      */
-    void setOmegaRange( const boost::array< Real, 2 >& omegaRange ) { M_rangeOmega = omegaRange; }
+    void setOmegaRange ( const boost::array< Real, 2 >& omegaRange )
+    {
+        M_rangeOmega = omegaRange;
+    }
 
     //! Set the minimum of Omega.
     /*!
      * @param omegaMin minimum of Omega
      */
-    void setOmegaMin( const Real& omegaMin ) { M_rangeOmega[0] = std::fabs( omegaMin ); }
+    void setOmegaMin ( const Real& omegaMin )
+    {
+        M_rangeOmega[0] = std::fabs ( omegaMin );
+    }
 
     //! Set the maximum of Omega.
     /*!
      * @param omegaMax maximum of Omega
      */
-    void setOmegaMax( const Real& omegaMax ) { M_rangeOmega[1] = std::fabs( omegaMax ); }
+    void setOmegaMax ( const Real& omegaMax )
+    {
+        M_rangeOmega[1] = std::fabs ( omegaMax );
+    }
 
     //! Set minimization type.
     /*!
      * @param inverseOmega false: minimizing on omega; true: minimizing on omega^-1
      */
-    void setMinimizationType( const bool& inverseOmega ) { M_inverseOmega = inverseOmega; }
+    void setMinimizationType ( const bool& inverseOmega )
+    {
+        M_inverseOmega = inverseOmega;
+    }
 
     //@}
 
@@ -194,13 +212,19 @@ public:
     /*!
      * @return default value of omega fluid
      */
-    const Real& defaultOmegaFluid()  const { return M_defaultOmegaFluid; }
+    const Real& defaultOmegaFluid()  const
+    {
+        return M_defaultOmegaFluid;
+    }
 
     //! Get the default value of omega solid.
     /*!
      * @return default value of omega solid
      */
-    const Real& defaultOmegaSolid()  const { return M_defaultOmegaSolid; }
+    const Real& defaultOmegaSolid()  const
+    {
+        return M_defaultOmegaSolid;
+    }
 
     //@}
 
@@ -209,9 +233,9 @@ private:
     //! @name Private unimplemented Methods
     //@{
 
-    NonLinearAitken( const NonLinearAitken& aitken );
+    NonLinearAitken ( const NonLinearAitken& aitken );
 
-    NonLinearAitken& operator=( const NonLinearAitken& aitken );
+    NonLinearAitken& operator= ( const NonLinearAitken& aitken );
 
     //@}
 
@@ -219,7 +243,7 @@ private:
     //! @name Private Methods
     //@{
 
-    void checkRange( Real& omega );
+    void checkRange ( Real& omega );
 
     //@}
 
@@ -254,15 +278,15 @@ private:
 // ===================================================
 template < class VectorType >
 NonLinearAitken< VectorType >::NonLinearAitken() :
-        M_oldSolution      ( ),
-        M_oldResidualFluid ( ),
-        M_oldResidualSolid ( ),
-        M_defaultOmegaFluid( 0.1 ),
-        M_defaultOmegaSolid( 0.1 ),
-        M_restart          ( true ),
-        M_useDefaultOmega  ( false ),
-        M_rangeOmega       ( ),
-        M_inverseOmega     ( false )
+    M_oldSolution      ( ),
+    M_oldResidualFluid ( ),
+    M_oldResidualSolid ( ),
+    M_defaultOmegaFluid ( 0.1 ),
+    M_defaultOmegaSolid ( 0.1 ),
+    M_restart          ( true ),
+    M_useDefaultOmega  ( false ),
+    M_rangeOmega       ( ),
+    M_inverseOmega     ( false )
 {
     // Initializing the array
     M_rangeOmega[0] = 0.;
@@ -274,20 +298,20 @@ NonLinearAitken< VectorType >::NonLinearAitken() :
 // ===================================================
 template < class VectorType >
 typename NonLinearAitken< VectorType >::vector_Type
-NonLinearAitken< VectorType >::computeDeltaLambdaFSI( const vector_Type& solution,
-                                                      const vector_Type& residualFluid,
-                                                      const vector_Type& residualSolid )
+NonLinearAitken< VectorType >::computeDeltaLambdaFSI ( const vector_Type& solution,
+                                                       const vector_Type& residualFluid,
+                                                       const vector_Type& residualSolid )
 {
     if ( M_restart || M_useDefaultOmega )
     {
         M_restart = false;
 
-        M_oldSolution.reset ( new vector_Type( solution ) );
-        M_oldResidualSolid.reset( new vector_Type( residualSolid ) );
-        M_oldResidualFluid.reset( new vector_Type( residualFluid) );
+        M_oldSolution.reset ( new vector_Type ( solution ) );
+        M_oldResidualSolid.reset ( new vector_Type ( residualSolid ) );
+        M_oldResidualFluid.reset ( new vector_Type ( residualFluid) );
 
 #ifdef HAVE_LIFEV_DEBUG
-        debugStream(7020) << "NonLinearAitken: omegaFluid = " << M_defaultOmegaFluid << " omegaSolid = " << M_defaultOmegaSolid << "\n";
+        debugStream (7020) << "NonLinearAitken: omegaFluid = " << M_defaultOmegaFluid << " omegaSolid = " << M_defaultOmegaSolid << "\n";
 #endif
         return M_defaultOmegaFluid * residualFluid + M_defaultOmegaSolid * residualSolid;
     }
@@ -308,39 +332,45 @@ NonLinearAitken< VectorType >::computeDeltaLambdaFSI( const vector_Type& solutio
         Real omegaFluid ( M_defaultOmegaFluid );
         Real omegaSolid ( M_defaultOmegaSolid );
 
-        if ( std::fabs( det ) != 0. )  //! eq. (12) page 8
+        if ( std::fabs ( det ) != 0. ) //! eq. (12) page 8
         {
             omegaFluid = - ( a22 * b1 - a21 * b2 ) / det;
             omegaSolid = - ( a11 * b2 - a21 * b1 ) / det;
 
             if ( omegaFluid == 0. )
+            {
                 omegaFluid = M_defaultOmegaFluid;
+            }
 
             if ( omegaSolid == 0. )
+            {
                 omegaSolid = M_defaultOmegaSolid;
+            }
         }
-        else if ( std::fabs( a22 ) == 0. )
+        else if ( std::fabs ( a22 ) == 0. )
         {
 #ifdef HAVE_LIFEV_DEBUG
-            debugStream(7020) << "NonLinearAitken:  a22 = " << std::fabs(a22) << "\n";
+            debugStream (7020) << "NonLinearAitken:  a22 = " << std::fabs (a22) << "\n";
 #endif
             omegaFluid = -b1 / a11;
             omegaSolid = 0.;
         }
-        else if ( std::fabs(a11) == 0. )
+        else if ( std::fabs (a11) == 0. )
         {
 #ifdef HAVE_LIFEV_DEBUG
-            debugStream(7020) << "NonLinearAitken:  a11 = " << std::fabs(a11) << "\n";
+            debugStream (7020) << "NonLinearAitken:  a11 = " << std::fabs (a11) << "\n";
 #endif
             omegaFluid = 0.;
             omegaSolid = -b2 / a22;
         }
 #ifdef HAVE_LIFEV_DEBUG
         else
-            debugStream(7020) << "NonLinearAitken: Failure: Det=0!!" << std::fabs(det) << "\n";
+        {
+            debugStream (7020) << "NonLinearAitken: Failure: Det=0!!" << std::fabs (det) << "\n";
+        }
 
-        debugStream(7020) << " --------------- NonLinearAitken: \n";
-        debugStream(7020) << " omegaSolid = " << omegaSolid << " omegaFluid = " << omegaFluid << "\n";
+        debugStream (7020) << " --------------- NonLinearAitken: \n";
+        debugStream (7020) << " omegaSolid = " << omegaSolid << " omegaFluid = " << omegaFluid << "\n";
 #endif
 
         *M_oldSolution = solution;
@@ -354,25 +384,25 @@ NonLinearAitken< VectorType >::computeDeltaLambdaFSI( const vector_Type& solutio
 /*! one parameter version of the generalized aitken method. cf page 85 S. Deparis, PhD thesis */
 template < class VectorType >
 typename NonLinearAitken< VectorType >::vector_Type
-NonLinearAitken< VectorType >::computeDeltaLambdaScalar( const vector_Type& solution,
-                                                         const vector_Type& residual )
+NonLinearAitken< VectorType >::computeDeltaLambdaScalar ( const vector_Type& solution,
+                                                          const vector_Type& residual )
 {
     if ( M_restart || M_useDefaultOmega )
     {
         M_restart = false;
 
-        M_oldSolution.reset ( new vector_Type( solution ) );
-        M_oldResidualFluid.reset( new vector_Type( residual ) );
+        M_oldSolution.reset ( new vector_Type ( solution ) );
+        M_oldResidualFluid.reset ( new vector_Type ( residual ) );
 
 #ifdef HAVE_LIFEV_DEBUG
-        debugStream(7020) << "NonLinearAitken: omega = " << M_defaultOmegaFluid << "\n";
+        debugStream (7020) << "NonLinearAitken: omega = " << M_defaultOmegaFluid << "\n";
 #endif
 
         return M_defaultOmegaFluid * residual;
     }
 
-    vector_Type deltaX( solution );
-    vector_Type deltaR( residual );
+    vector_Type deltaX ( solution );
+    vector_Type deltaR ( residual );
 
     deltaX -= *M_oldSolution;
     deltaR -= *M_oldResidualFluid;
@@ -384,23 +414,23 @@ NonLinearAitken< VectorType >::computeDeltaLambdaScalar( const vector_Type& solu
     if ( M_inverseOmega )
     {
         // Minimization of the inverse omega
-        omega = deltaX.dot( deltaX );
-        norm  = deltaR.dot( deltaX );
+        omega = deltaX.dot ( deltaX );
+        norm  = deltaR.dot ( deltaX );
     }
     else
     {
         //Minimization of the original omega
-        omega = deltaX.dot( deltaR );
-        norm  = deltaR.dot( deltaR );
+        omega = deltaX.dot ( deltaR );
+        norm  = deltaR.dot ( deltaR );
     }
 
     omega = - omega / norm ;
 
     //Check omega limits
-    checkRange(omega);
+    checkRange (omega);
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream(7020) << "NonLinearAitken: omega = " << omega << "\n";
+    debugStream (7020) << "NonLinearAitken: omega = " << omega << "\n";
 #endif
 
     return omega * residual;
@@ -408,26 +438,26 @@ NonLinearAitken< VectorType >::computeDeltaLambdaScalar( const vector_Type& solu
 
 template < class VectorType >
 typename NonLinearAitken< VectorType >::vector_Type
-NonLinearAitken< VectorType >::computeDeltaLambdaVector( const vector_Type& solution,
-                                                         const vector_Type& residual,
-                                                         const bool&        independentOmega )
+NonLinearAitken< VectorType >::computeDeltaLambdaVector ( const vector_Type& solution,
+                                                          const vector_Type& residual,
+                                                          const bool&        independentOmega )
 {
     if ( M_restart || M_useDefaultOmega )
     {
         M_restart = false;
 
-        M_oldSolution.reset ( new vector_Type( solution ) );
-        M_oldResidualFluid.reset( new vector_Type( residual ) );
+        M_oldSolution.reset ( new vector_Type ( solution ) );
+        M_oldResidualFluid.reset ( new vector_Type ( residual ) );
 
 #ifdef HAVE_LIFEV_DEBUG
-        debugStream(7020) << "NonLinearAitken: omega = " << M_defaultOmegaFluid << "\n";
+        debugStream (7020) << "NonLinearAitken: omega = " << M_defaultOmegaFluid << "\n";
 #endif
 
         return M_defaultOmegaFluid * residual;
     }
 
-    vector_Type deltaX( solution );
-    vector_Type deltaR( residual );
+    vector_Type deltaX ( solution );
+    vector_Type deltaR ( residual );
 
     deltaX -= *M_oldSolution;
     deltaR -= *M_oldResidualFluid;
@@ -435,7 +465,7 @@ NonLinearAitken< VectorType >::computeDeltaLambdaVector( const vector_Type& solu
     *M_oldSolution  = solution;
     *M_oldResidualFluid = residual;
 
-    vector_Type omega( deltaX );
+    vector_Type omega ( deltaX );
     Real   norm = 1;
     if ( independentOmega )
     {
@@ -445,22 +475,24 @@ NonLinearAitken< VectorType >::computeDeltaLambdaVector( const vector_Type& solu
     else if ( M_inverseOmega )
     {
         omega *= deltaX;
-        norm = deltaR.dot( deltaX );
+        norm = deltaR.dot ( deltaX );
     }
     else
     {
         omega *= deltaR;
-        norm = deltaR.dot( deltaR );
+        norm = deltaR.dot ( deltaR );
     }
 
     omega /= -norm;
 
     //Check omega limits
-    for ( UInt i(0) ; i < static_cast<UInt> ( omega.size() ) ; ++i )
-        checkRange(omega[i]);
+    for ( UInt i (0) ; i < static_cast<UInt> ( omega.size() ) ; ++i )
+    {
+        checkRange (omega[i]);
+    }
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream(7020) << "NonLinearAitken: omega = " << "\n";
+    debugStream (7020) << "NonLinearAitken: omega = " << "\n";
     omega.showMe();
 #endif
 
@@ -471,27 +503,27 @@ NonLinearAitken< VectorType >::computeDeltaLambdaVector( const vector_Type& solu
 
 template < class VectorType >
 typename NonLinearAitken< VectorType >::vector_Type
-NonLinearAitken< VectorType >::computeDeltaLambdaVectorBlock( const vector_Type& solution,
-                                                              const vector_Type& residual,
-                                                              const vector_Type& blocksVector,
-                                                              const UInt&        blocksNumber )
+NonLinearAitken< VectorType >::computeDeltaLambdaVectorBlock ( const vector_Type& solution,
+                                                               const vector_Type& residual,
+                                                               const vector_Type& blocksVector,
+                                                               const UInt&        blocksNumber )
 {
     if ( M_restart || M_useDefaultOmega )
     {
         M_restart = false;
 
-        M_oldSolution.reset(  new vector_Type( solution ) );
-        M_oldResidualFluid.reset( new vector_Type( residual ) );
+        M_oldSolution.reset (  new vector_Type ( solution ) );
+        M_oldResidualFluid.reset ( new vector_Type ( residual ) );
 
 #ifdef HAVE_LIFEV_DEBUG
-        debugStream(7020) << "NonLinearAitken: omega = " << M_defaultOmegaFluid << "\n";
+        debugStream (7020) << "NonLinearAitken: omega = " << M_defaultOmegaFluid << "\n";
 #endif
 
         return M_defaultOmegaFluid * residual;
     }
 
-    vector_Type deltaX( solution );
-    vector_Type deltaR( residual );
+    vector_Type deltaX ( solution );
+    vector_Type deltaR ( residual );
 
     deltaX -= *M_oldSolution;
     deltaR -= *M_oldResidualFluid;
@@ -499,11 +531,11 @@ NonLinearAitken< VectorType >::computeDeltaLambdaVectorBlock( const vector_Type&
     *M_oldSolution  = solution;
     *M_oldResidualFluid = residual;
 
-    vector_Type omega( deltaX );
+    vector_Type omega ( deltaX );
     omega = 0.0;
     Real   tempOmega = 0;
 
-    vector_Type tempVector( blocksVector );
+    vector_Type tempVector ( blocksVector );
     vector_Type tempDeltaX ( deltaX );
     vector_Type tempDeltaR ( deltaR );
 
@@ -521,22 +553,22 @@ NonLinearAitken< VectorType >::computeDeltaLambdaVectorBlock( const vector_Type&
         if ( M_inverseOmega )
         {
             // Minimization of the inverse omega
-            tempOmega = -( tempDeltaX.Dot( tempDeltaX ) ) / ( tempDeltaR.Dot( tempDeltaX ) );
+            tempOmega = - ( tempDeltaX.Dot ( tempDeltaX ) ) / ( tempDeltaR.Dot ( tempDeltaX ) );
         }
         else
         {
             //Minimization of the original omega
-            tempOmega = -( tempDeltaX.Dot( tempDeltaR ) ) / ( tempDeltaR.Dot( tempDeltaR ) );
+            tempOmega = - ( tempDeltaX.Dot ( tempDeltaR ) ) / ( tempDeltaR.Dot ( tempDeltaR ) );
         }
 
         //Check omega limits
-        checkRange(tempOmega);
+        checkRange (tempOmega);
 
         omega += tempOmega * tempVector;
     }
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream(7020) << "NonLinearAitken: omega = " << "\n";
+    debugStream (7020) << "NonLinearAitken: omega = " << "\n";
     omega.ShowMe();
 #endif
 
@@ -548,13 +580,15 @@ NonLinearAitken< VectorType >::computeDeltaLambdaVectorBlock( const vector_Type&
 // ===================================================
 template < class VectorType >
 inline void
-NonLinearAitken< VectorType >::setDefaultOmega( const Real& defaultOmegaFluid, const Real& defaultOmegaSolid )
+NonLinearAitken< VectorType >::setDefaultOmega ( const Real& defaultOmegaFluid, const Real& defaultOmegaSolid )
 {
     M_defaultOmegaFluid = defaultOmegaFluid;
     M_defaultOmegaSolid = defaultOmegaSolid;
 
     if (M_defaultOmegaFluid < 0 )
-      M_useDefaultOmega = true;
+    {
+        M_useDefaultOmega = true;
+    }
 }
 
 // ===================================================
@@ -562,24 +596,32 @@ NonLinearAitken< VectorType >::setDefaultOmega( const Real& defaultOmegaFluid, c
 // ===================================================
 template < class VectorType >
 inline void
-NonLinearAitken< VectorType >::checkRange( Real& omega )
+NonLinearAitken< VectorType >::checkRange ( Real& omega )
 {
     //The division and multiplication is to make the range of Omega
     //bigger. This changes was introduce in order to improve the convergence
     //of the fsi_segregated solver using fixed point method for Dirichlet-Neumann
-    if ( std::fabs(omega) < std::fabs(M_rangeOmega[0])/1024. )
+    if ( std::fabs (omega) < std::fabs (M_rangeOmega[0]) / 1024. )
     {
         if ( omega < 0 )
+        {
             omega = -M_rangeOmega[0];
+        }
         else
+        {
             omega = M_rangeOmega[0];
+        }
     }
-    else if ( std::fabs(omega) > std::fabs(M_rangeOmega[1])*1024. )
+    else if ( std::fabs (omega) > std::fabs (M_rangeOmega[1]) * 1024. )
     {
         if ( omega < 0 )
+        {
             omega = -M_rangeOmega[1];
+        }
         else
+        {
             omega = M_rangeOmega[1];
+        }
     }
 }
 

@@ -75,8 +75,8 @@
  *  @see
  */
 class test_bdf
-//     :
-//     public LifeV::Application
+    //     :
+    //     public LifeV::Application
 {
 public:
 
@@ -84,8 +84,8 @@ public:
      */
     //@{
 
-    test_bdf( int argc,
-              char** argv );
+    test_bdf ( int argc,
+               char** argv );
 
     ~test_bdf()
     {}

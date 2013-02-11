@@ -42,7 +42,7 @@ namespace LifeV
 class SourceFct_2d
 {
 public:
-    inline Real operator()(Real /*x*/,Real /*y*/,Real /*z*/,Real /*t*/,int /*ic*/) const
+    inline Real operator() (Real /*x*/, Real /*y*/, Real /*z*/, Real /*t*/, int /*ic*/) const
     {
         return -4.;
     }
@@ -52,26 +52,26 @@ class AnalyticalSol_2d
 {
     // ic stands for a component index (unuseful in the scalar case)
 public:
-    static Real u(Real t, Real x,Real y,Real /*z*/, UInt /*ic*/)
+    static Real u (Real t, Real x, Real y, Real /*z*/, UInt /*ic*/)
     {
-        return t*t*(x*x+y*y);
+        return t * t * (x * x + y * y);
     }
 
-    static Real der_t(Real t, Real x,Real y,Real /*z*/, UInt /*ic*/)
+    static Real der_t (Real t, Real x, Real y, Real /*z*/, UInt /*ic*/)
     {
-        return 2*t*(x*x+y*y);
+        return 2 * t * (x * x + y * y);
     }
 
-    static Real grad( UInt icoor, Real t, Real x,Real y,Real /*z*/, UInt /*ic*/)
+    static Real grad ( UInt icoor, Real t, Real x, Real y, Real /*z*/, UInt /*ic*/)
     {
         switch (icoor)
         {
-        case 1:
-            return 2*x*t*t;
-        case 2:
-            return 2*y*t*t;
-        default:
-            return 0;
+            case 1:
+                return 2 * x * t * t;
+            case 2:
+                return 2 * y * t * t;
+            default:
+                return 0;
         }
     }
 };
@@ -79,7 +79,7 @@ public:
 class SourceFct
 {
 public:
-    inline Real operator()(Real /*x*/,Real /*y*/,Real /*z*/,Real /*t*/,int /*ic*/) const
+    inline Real operator() (Real /*x*/, Real /*y*/, Real /*z*/, Real /*t*/, int /*ic*/) const
     {
         return -6.;
     }
@@ -90,35 +90,35 @@ class AnalyticalSol
 {
     // ic stands for a component index (unuseful in the scalar case)
 public:
-    static Real u(Real t, Real x,Real y,Real z, UInt /*ic*/)
+    static Real u (Real t, Real x, Real y, Real z, UInt /*ic*/)
     {
-        return t*t*(x*x+y*y+z*z);
+        return t * t * (x * x + y * y + z * z);
     }
-    static Real grad(UInt icoor, Real t, Real x,Real y,Real z, UInt /*ic*/)
+    static Real grad (UInt icoor, Real t, Real x, Real y, Real z, UInt /*ic*/)
     {
         switch (icoor)
         {
-        case 1: //der_x
-            return 2*x*t*t;
-        case 2: //der_y
-            return 2*y*t*t;
-        case 3: //der_z
-            return 2*z*t*t;
-        default:
-            return 0;
+            case 1: //der_x
+                return 2 * x * t * t;
+            case 2: //der_y
+                return 2 * y * t * t;
+            case 3: //der_z
+                return 2 * z * t * t;
+            default:
+                return 0;
         }
     }
 };
 
 
-Real nu(const Real& t)
+Real nu (const Real& t)
 {
-    return 1./(t*t);
+    return 1. / (t * t);
 }
 
-Real sigma(const Real& t)
+Real sigma (const Real& t)
 {
-    return -2./t;
+    return -2. / t;
 }
 
 }

@@ -75,7 +75,7 @@ public:
     /*!
      * @param data BCInterfaceData3D
      */
-    BCInterfaceData3D( const BCInterfaceData3D& data );
+    BCInterfaceData3D ( const BCInterfaceData3D& data );
 
     //! Destructor
     virtual ~BCInterfaceData3D() {}
@@ -91,7 +91,7 @@ public:
      * @param data BCInterfaceData3D
      * @return reference to a copy of the class
      */
-    BCInterfaceData3D& operator=( const BCInterfaceData3D& data );
+    BCInterfaceData3D& operator= ( const BCInterfaceData3D& data );
 
     //@}
 
@@ -105,22 +105,34 @@ public:
      * @param dataSection BC section
      * @param name name of the boundary condition
      */
-    void readBC( const std::string& fileName, const std::string& dataSection, const std::string& name );
+    void readBC ( const std::string& fileName, const std::string& dataSection, const std::string& name );
 
     //! Set the directional base as the current base
-    void setDirectionalBase() { M_base = M_baseDirectional; M_baseString = M_baseStringDirectional; }
+    void setDirectionalBase()
+    {
+        M_base = M_baseDirectional;
+        M_baseString = M_baseStringDirectional;
+    }
 
     //! Set the Robin Alpha base as the current base
-    void setRobinBaseAlpha() { M_base = M_baseRobinAlpha; M_baseString = M_baseStringRobinAlpha; }
+    void setRobinBaseAlpha()
+    {
+        M_base = M_baseRobinAlpha;
+        M_baseString = M_baseStringRobinAlpha;
+    }
 
     //! Set the Robin Beta base as the current base
-    void setRobinBaseBeta() { M_base = M_baseRobinBeta; M_baseString = M_baseStringRobinBeta; }
+    void setRobinBaseBeta()
+    {
+        M_base = M_baseRobinBeta;
+        M_baseString = M_baseStringRobinBeta;
+    }
 
     //! Display general information about the content of the class
     /*!
      * @param output specify the output format (std::cout by default)
      */
-    void showMe( std::ostream& output = std::cout ) const;
+    void showMe ( std::ostream& output = std::cout ) const;
 
     //@}
 
@@ -132,44 +144,65 @@ public:
     /*!
      * @param name Boundary condition name
      */
-    void setName( const bcName_Type& name ) { M_name = name; }
+    void setName ( const bcName_Type& name )
+    {
+        M_name = name;
+    }
 
     //! Set the flag of the boundary condition
     /*!
      * @param flag Boundary condition flag
      */
-    void setFlag( const bcFlag_Type& flag ) { M_flag = flag; }
+    void setFlag ( const bcFlag_Type& flag )
+    {
+        M_flag = flag;
+    }
 
     //! Set the type of the boundary condition
     /*!
      * @param type Boundary condition type
      */
-    void setType( const bcType_Type& type ) { M_type = type; }
+    void setType ( const bcType_Type& type )
+    {
+        M_type = type;
+    }
 
     //! Set the mode of the boundary condition
     /*!
      * @param mode Boundary condition mode
      */
-    void setMode( const bcMode_Type& mode ) { M_mode = mode; }
+    void setMode ( const bcMode_Type& mode )
+    {
+        M_mode = mode;
+    }
 
     //! Set the components vector of the boundary condition
     /*!
      * @param componentsVector Boundary condition components vector
      */
-    void setComponentsVector( const bcComponentsVec_Type& componentsVector ) { M_componentsVector = componentsVector; }
+    void setComponentsVector ( const bcComponentsVec_Type& componentsVector )
+    {
+        M_componentsVector = componentsVector;
+    }
 
     //! Set the i-component of the components vector of the boundary condition
     /*!
      * @param componentsVector Boundary condition component
      * @param index Index value
      */
-    void setComponentsVector( const UInt& componentsVector, const UInt& index ) { M_componentsVector[index] = componentsVector; }
+    void setComponentsVector ( const UInt& componentsVector, const UInt& index )
+    {
+        M_componentsVector[index] = componentsVector;
+    }
 
     //! Add a component to the component vector of the boundary condition
     /*!
      * @param componentsVector Boundary condition component
      */
-    void addComponentsVector( const UInt& componentsVector ) { M_componentsVector.push_back( componentsVector ); }
+    void addComponentsVector ( const UInt& componentsVector )
+    {
+        M_componentsVector.push_back ( componentsVector );
+    }
 
     //@}
 
@@ -181,31 +214,46 @@ public:
     /*!
      * @return Boundary condition name
      */
-    const bcName_Type& name() const { return M_name; }
+    const bcName_Type& name() const
+    {
+        return M_name;
+    }
 
     //! Get the flag of the boundary condition
     /*!
      * @return Boundary condition flag
      */
-    const bcFlag_Type& flag() const { return M_flag; }
+    const bcFlag_Type& flag() const
+    {
+        return M_flag;
+    }
 
     //! Get the type of the boundary condition
     /*!
      * @return Boundary condition type
      */
-    const bcType_Type& type() const { return M_type; }
+    const bcType_Type& type() const
+    {
+        return M_type;
+    }
 
     //! Get the mode of the boundary condition
     /*!
      * @return Boundary condition mode
      */
-    const bcMode_Type& mode() const { return M_mode; }
+    const bcMode_Type& mode() const
+    {
+        return M_mode;
+    }
 
     //! Get the vector of components of the boundary condition
     /*!
      * @return Boundary condition vector of components
      */
-    const bcComponentsVec_Type& componentsVector() const { return M_componentsVector; }
+    const bcComponentsVec_Type& componentsVector() const
+    {
+        return M_componentsVector;
+    }
 
     //! Get the number of components of the boundary condition
     /*!
@@ -215,7 +263,10 @@ public:
      *
      * @return Number of components of the boundary condition
      */
-    const ID& componentsNumber() const { return M_componentsVector.front(); }
+    const ID& componentsNumber() const
+    {
+        return M_componentsVector.front();
+    }
 
     //@}
 
@@ -224,13 +275,22 @@ private:
     //! @name Private Methods
     //@{
 
-    void readFlag( const GetPot& dataFile, const char* flag ) { M_flag = dataFile( flag, 0 ); }
+    void readFlag ( const GetPot& dataFile, const char* flag )
+    {
+        M_flag = dataFile ( flag, 0 );
+    }
 
-    void readType( const GetPot& dataFile, const char* type ) { M_type = M_mapType[dataFile( type, "Essential" )]; }
+    void readType ( const GetPot& dataFile, const char* type )
+    {
+        M_type = M_mapType[dataFile ( type, "Essential" )];
+    }
 
-    void readMode( const GetPot& dataFile, const char* mode ) { M_mode = M_mapMode[dataFile( mode, "Full" )]; }
+    void readMode ( const GetPot& dataFile, const char* mode )
+    {
+        M_mode = M_mapMode[dataFile ( mode, "Full" )];
+    }
 
-    void readComponentsVector( const GetPot& dataFile, const char* component );
+    void readComponentsVector ( const GetPot& dataFile, const char* component );
 
     //@}
 

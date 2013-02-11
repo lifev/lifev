@@ -105,7 +105,10 @@ public:
      *
      * @return true if the topology is changed, false otherwise
      */
-    bool topologyChange() { return M_topologyChange; }
+    bool topologyChange()
+    {
+        return M_topologyChange;
+    }
 
     //@}
 
@@ -118,7 +121,7 @@ private:
     /*!
      * @param jacobian the Jacobian matrix
      */
-    void insertJacobianConstantCoefficients( multiscaleMatrix_Type& jacobian );
+    void insertJacobianConstantCoefficients ( multiscaleMatrix_Type& jacobian );
 
     //! Insert the Jacobian coefficient(s) depending on a perturbation of the model, due to a specific variable (the column)
     /*!
@@ -127,7 +130,7 @@ private:
      * @param ID the global ID of the model which is perturbed by the variable
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      */
-    void insertJacobianDeltaCoefficients( multiscaleMatrix_Type& jacobian, const UInt& column, const UInt& ID, bool& solveLinearSystem );
+    void insertJacobianDeltaCoefficients ( multiscaleMatrix_Type& jacobian, const UInt& column, const UInt& ID, bool& solveLinearSystem );
 
     //@}
 
@@ -135,9 +138,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    MultiscaleCouplingMeanNormalStressValve( const MultiscaleCouplingMeanNormalStressValve& coupling );
+    MultiscaleCouplingMeanNormalStressValve ( const MultiscaleCouplingMeanNormalStressValve& coupling );
 
-    MultiscaleCouplingMeanNormalStressValve& operator=( const MultiscaleCouplingMeanNormalStressValve& coupling );
+    MultiscaleCouplingMeanNormalStressValve& operator= ( const MultiscaleCouplingMeanNormalStressValve& coupling );
 
     //@}
 

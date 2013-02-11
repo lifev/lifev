@@ -36,11 +36,11 @@ void MonolithicBlockComposedDND::blockAssembling( )
 {
     if (!M_swapped)
     {
-        super_Type::super_Type::super_Type::swap(M_coupling[2], M_coupling[3]);
+        super_Type::super_Type::super_Type::swap (M_coupling[2], M_coupling[3]);
         M_swapped = true;
     }
 
-    addToCoupling(M_coupling[3], 2);
+    addToCoupling (M_coupling[3], 2);
 
     super_Type::blockAssembling();
 }

@@ -46,24 +46,24 @@ namespace Multiscale
 // Constructors & Destructor
 // ===================================================
 MultiscaleModelWindkessel0D::MultiscaleModelWindkessel0D() :
-        multiscaleModel_Type           (),
-        MultiscaleInterface            (),
-        M_outputFile                   (),
-        M_bc                           ( new bcInterface_Type() ),
-        M_pressureLeft_tn              (),
-        M_flowRateLeft_tn              (),
-        M_pressureLeft                 (),
-        M_flowRateLeft                 (),
-        M_pressureRight                (),
-        M_tangentPressureLeft          (),
-        M_tangentFlowRateLeft          (),
-        M_resistance1                  (),
-        M_resistance2                  (),
-        M_capacitance                  ()
+    multiscaleModel_Type           (),
+    MultiscaleInterface            (),
+    M_outputFile                   (),
+    M_bc                           ( new bcInterface_Type() ),
+    M_pressureLeft_tn              (),
+    M_flowRateLeft_tn              (),
+    M_pressureLeft                 (),
+    M_flowRateLeft                 (),
+    M_pressureRight                (),
+    M_tangentPressureLeft          (),
+    M_tangentFlowRateLeft          (),
+    M_resistance1                  (),
+    M_resistance2                  (),
+    M_capacitance                  ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 8150 ) << "MultiscaleModelWindkessel0D::MultiscaleModelWindkessel0D() \n";
+    debugStream ( 8150 ) << "MultiscaleModelWindkessel0D::MultiscaleModelWindkessel0D() \n";
 #endif
 
     M_type = Windkessel0D;
@@ -73,27 +73,29 @@ MultiscaleModelWindkessel0D::MultiscaleModelWindkessel0D() :
 // MultiscaleModel Methods
 // ===================================================
 void
-MultiscaleModelWindkessel0D::setupData( const std::string& fileName )
+MultiscaleModelWindkessel0D::setupData ( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 8150 ) << "MultiscaleModelWindkessel0D::setupData( fileName ) \n";
+    debugStream ( 8150 ) << "MultiscaleModelWindkessel0D::setupData( fileName ) \n";
 #endif
 
-    multiscaleModel_Type::setupData( fileName );
+    multiscaleModel_Type::setupData ( fileName );
 
-    GetPot dataFile( fileName );
+    GetPot dataFile ( fileName );
 
     // R1, R2, and C can have global scaling factors applied to them, these are overridden by local scaling factors
-    Real resistanceScalingFactor = dataFile( "ScalingFactors/Resistance", M_globalData->scalingFactorResistance() );
-    Real complianceScalingFactor = dataFile( "ScalingFactors/Compliance", M_globalData->scalingFactorCompliance() );
+    Real resistanceScalingFactor = dataFile ( "ScalingFactors/Resistance", M_globalData->scalingFactorResistance() );
+    Real complianceScalingFactor = dataFile ( "ScalingFactors/Compliance", M_globalData->scalingFactorCompliance() );
 
-    M_resistance1       = dataFile( "Coefficients/Resistance1"     , 1.0 ) * resistanceScalingFactor;
-    M_resistance2       = dataFile( "Coefficients/Resistance2"     , 1.0 ) * resistanceScalingFactor;
-    M_capacitance       = dataFile( "Coefficients/Capacitance"     , 1.0 ) * complianceScalingFactor;
+    M_resistance1       = dataFile ( "Coefficients/Resistance1"     , 1.0 ) * resistanceScalingFactor;
+    M_resistance2       = dataFile ( "Coefficients/Resistance2"     , 1.0 ) * resistanceScalingFactor;
+    M_capacitance       = dataFile ( "Coefficients/Capacitance"     , 1.0 ) * complianceScalingFactor;
 
     if ( M_globalData.get() )
-        setupGlobalData( fileName );
+    {
+        setupGlobalData ( fileName );
+    }
 
     // We need to create the BCHandler before using it
     M_bc->createHandler();
@@ -107,16 +109,18 @@ MultiscaleModelWindkessel0D::setupModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 8150 ) << "MultiscaleModelWindkessel0D::setupModel() \n";
+    debugStream ( 8150 ) << "MultiscaleModelWindkessel0D::setupModel() \n";
 #endif
 
     initializeSolution();
 
-    M_bc->setPhysicalSolver( M_globalData );
+    M_bc->setPhysicalSolver ( M_globalData );
 
     // Safety check
-    if ( M_bc->handler()->bc( 1 ).bcType() != Voltage )
+    if ( M_bc->handler()->bc ( 1 ).bcType() != Voltage )
+    {
         std::cout << "!!! Error: the Windkessel model support only stress boundary conditions on the right at the present time !!!" << std::endl;
+    }
 }
 
 void
@@ -124,7 +128,7 @@ MultiscaleModelWindkessel0D::buildModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 8150 ) << "MultiscaleModelWindkessel0D::buildModel() \n";
+    debugStream ( 8150 ) << "MultiscaleModelWindkessel0D::buildModel() \n";
 #endif
 
     updateModel();
@@ -135,7 +139,7 @@ MultiscaleModelWindkessel0D::updateModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 8150 ) << "MultiscaleModelWindkessel0D::updateModel() \n";
+    debugStream ( 8150 ) << "MultiscaleModelWindkessel0D::updateModel() \n";
 #endif
 
     M_pressureLeft_tn = M_pressureLeft;
@@ -144,7 +148,7 @@ MultiscaleModelWindkessel0D::updateModel()
     // Update BCInterface solver variables
     M_bc->updatePhysicalSolverVariables();
 
-    M_pressureRight   = -M_bc->handler()->bc( 1 ).evaluate( M_globalData->dataTime()->time() );
+    M_pressureRight   = -M_bc->handler()->bc ( 1 ).evaluate ( M_globalData->dataTime()->time() );
 }
 
 void
@@ -152,32 +156,32 @@ MultiscaleModelWindkessel0D::solveModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 8150 ) << "MultiscaleModelWindkessel0D::solveModel() \n";
+    debugStream ( 8150 ) << "MultiscaleModelWindkessel0D::solveModel() \n";
 #endif
 
-    displayModelStatus( "Solve" );
+    displayModelStatus ( "Solve" );
 
-    switch ( M_bc->handler()->bc( 0 ).bcType() )
+    switch ( M_bc->handler()->bc ( 0 ).bcType() )
     {
-    case Current:
+        case Current:
 
-        M_flowRateLeft = M_bc->handler()->bc( 0 ).evaluate( M_globalData->dataTime()->time() );
-        M_pressureLeft = solveForPressure();
+            M_flowRateLeft = M_bc->handler()->bc ( 0 ).evaluate ( M_globalData->dataTime()->time() );
+            M_pressureLeft = solveForPressure();
 
-        break;
+            break;
 
-    case Voltage:
+        case Voltage:
 
-        M_pressureLeft = -M_bc->handler()->bc( 0 ).evaluate( M_globalData->dataTime()->time() );
-        M_flowRateLeft = solveForFlowRate();
+            M_pressureLeft = -M_bc->handler()->bc ( 0 ).evaluate ( M_globalData->dataTime()->time() );
+            M_flowRateLeft = solveForFlowRate();
 
-        break;
+            break;
 
-    default:
+        default:
 
-        std::cout << "Warning: bcType \"" << M_bc->handler()->bc( 0 ).bcType() << "\"not available!" << std::endl;
+            std::cout << "Warning: bcType \"" << M_bc->handler()->bc ( 0 ).bcType() << "\"not available!" << std::endl;
 
-        break;
+            break;
     }
 }
 
@@ -186,7 +190,7 @@ MultiscaleModelWindkessel0D::updateSolution()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 8150 ) << "MultiscaleModelWindkessel0D::updateSolution() \n";
+    debugStream ( 8150 ) << "MultiscaleModelWindkessel0D::updateSolution() \n";
 #endif
 
 }
@@ -196,7 +200,7 @@ MultiscaleModelWindkessel0D::saveSolution()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 8150 ) << "MultiscaleModelWindkessel0D::saveSolution() \n";
+    debugStream ( 8150 ) << "MultiscaleModelWindkessel0D::saveSolution() \n";
 #endif
 
     M_outputFile << "    " << M_globalData->dataTime()->time()
@@ -204,7 +208,9 @@ MultiscaleModelWindkessel0D::saveSolution()
                  << "    " << M_pressureLeft << std::endl;
 
     if ( M_globalData->dataTime()->isLastTimeStep() )
+    {
         M_outputFile.close();
+    }
 }
 
 void
@@ -230,35 +236,39 @@ MultiscaleModelWindkessel0D::checkSolution() const
 // MultiscaleInterface Methods
 // ===================================================
 void
-MultiscaleModelWindkessel0D::imposeBoundaryFlowRate( const multiscaleID_Type& boundaryID, const function_Type& function )
+MultiscaleModelWindkessel0D::imposeBoundaryFlowRate ( const multiscaleID_Type& boundaryID, const function_Type& function )
 {
-    M_bc->handler()->setBC( boundaryFlag( boundaryID ), Current, boost::bind( function, _1, _1, _1, _1, _1 ) );
+    M_bc->handler()->setBC ( boundaryFlag ( boundaryID ), Current, boost::bind ( function, _1, _1, _1, _1, _1 ) );
 }
 
 void
-MultiscaleModelWindkessel0D::imposeBoundaryMeanNormalStress( const multiscaleID_Type& boundaryID, const function_Type& function )
+MultiscaleModelWindkessel0D::imposeBoundaryMeanNormalStress ( const multiscaleID_Type& boundaryID, const function_Type& function )
 {
-    M_bc->handler()->setBC( boundaryFlag( boundaryID ), Voltage, boost::bind( function, _1, _1, _1, _1, _1 ) );
+    M_bc->handler()->setBC ( boundaryFlag ( boundaryID ), Voltage, boost::bind ( function, _1, _1, _1, _1, _1 ) );
 }
 
 Real
-MultiscaleModelWindkessel0D::boundaryDeltaFlowRate( const multiscaleID_Type& boundaryID, bool& solveLinearSystem )
+MultiscaleModelWindkessel0D::boundaryDeltaFlowRate ( const multiscaleID_Type& boundaryID, bool& solveLinearSystem )
 {
-    if ( boundaryFlag( boundaryID ) == 1 )
+    if ( boundaryFlag ( boundaryID ) == 1 )
+    {
         return 0;
+    }
 
-    solveLinearModel( solveLinearSystem );
+    solveLinearModel ( solveLinearSystem );
 
     return M_tangentFlowRateLeft;
 }
 
 Real
-MultiscaleModelWindkessel0D::boundaryDeltaMeanNormalStress( const multiscaleID_Type& boundaryID, bool& solveLinearSystem )
+MultiscaleModelWindkessel0D::boundaryDeltaMeanNormalStress ( const multiscaleID_Type& boundaryID, bool& solveLinearSystem )
 {
-    if ( boundaryFlag( boundaryID ) == 1 )
+    if ( boundaryFlag ( boundaryID ) == 1 )
+    {
         return 0;
+    }
 
-    solveLinearModel( solveLinearSystem );
+    solveLinearModel ( solveLinearSystem );
 
     return -M_tangentPressureLeft;
 }
@@ -267,12 +277,14 @@ MultiscaleModelWindkessel0D::boundaryDeltaMeanNormalStress( const multiscaleID_T
 // Private Methods
 // ===================================================
 void
-MultiscaleModelWindkessel0D::setupGlobalData( const std::string& fileName )
+MultiscaleModelWindkessel0D::setupGlobalData ( const std::string& fileName )
 {
-    GetPot dataFile( fileName );
+    GetPot dataFile ( fileName );
 
-    if ( !dataFile.checkVariable( "Coefficients/VenousPressure" ) )
+    if ( !dataFile.checkVariable ( "Coefficients/VenousPressure" ) )
+    {
         M_pressureRight = M_globalData->fluidVenousPressure();
+    }
 }
 
 void
@@ -280,39 +292,39 @@ MultiscaleModelWindkessel0D::initializeSolution()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 8150 ) << "MultiscaleModelWindkessel0D::initializeSolution() \n";
+    debugStream ( 8150 ) << "MultiscaleModelWindkessel0D::initializeSolution() \n";
 #endif
 
     if ( multiscaleProblemStep > 0 )
     {
-        std::string fileName = multiscaleProblemFolder + multiscaleProblemPrefix + "_Model_" + number2string( M_ID ) + "_" + number2string( multiscaleProblemStep - 1 ) + ".mfile";
+        std::string fileName = multiscaleProblemFolder + multiscaleProblemPrefix + "_Model_" + number2string ( M_ID ) + "_" + number2string ( multiscaleProblemStep - 1 ) + ".mfile";
 
         std::ifstream inputFile;
-        inputFile.open( fileName.c_str(), std::ios::in );
+        inputFile.open ( fileName.c_str(), std::ios::in );
 
         if ( inputFile.is_open() )
         {
             // Define some variables
             std::string line;
             std::vector<std::string> stringsVector;
-            Real deltaT(1e15);
+            Real deltaT (1e15);
 
             // Read the first line with comments
-            std::getline( inputFile, line, '\n' );
+            std::getline ( inputFile, line, '\n' );
 
             // Read one-by-one all the others lines of the fileName
-            while ( std::getline( inputFile, line, '\n' ) )
+            while ( std::getline ( inputFile, line, '\n' ) )
             {
                 // Split the three entries
-                boost::split( stringsVector, line, boost::is_any_of( " " ), boost::token_compress_on );
+                boost::split ( stringsVector, line, boost::is_any_of ( " " ), boost::token_compress_on );
 
                 // Import values
-                if ( std::abs( string2number( stringsVector[1] ) - M_globalData->dataTime()->initialTime() ) <= deltaT )
+                if ( std::abs ( string2number ( stringsVector[1] ) - M_globalData->dataTime()->initialTime() ) <= deltaT )
                 {
-                    deltaT = std::abs( string2number( stringsVector[1] ) - M_globalData->dataTime()->initialTime() );
+                    deltaT = std::abs ( string2number ( stringsVector[1] ) - M_globalData->dataTime()->initialTime() );
 
-                    M_flowRateLeft = string2number( stringsVector[2] );
-                    M_pressureLeft = string2number( stringsVector[3] );
+                    M_flowRateLeft = string2number ( stringsVector[2] );
+                    M_pressureLeft = string2number ( stringsVector[3] );
                 }
             }
 
@@ -320,33 +332,35 @@ MultiscaleModelWindkessel0D::initializeSolution()
             inputFile.close();
         }
         else
+        {
             std::cerr << " !!! Error: cannot open fileName: " << fileName.c_str() << " !!!" << std::endl;
+        }
     }
     else
     {
         M_flowRateLeft = 0;
         M_pressureLeft = M_globalData->solidExternalPressure();
 
-        switch ( M_bc->handler()->bc( 0 ).bcType() )
+        switch ( M_bc->handler()->bc ( 0 ).bcType() )
         {
-        case Current:
+            case Current:
 
-            M_flowRateLeft = M_bc->handler()->bc( 0 ).evaluate( M_globalData->dataTime()->time() );
+                M_flowRateLeft = M_bc->handler()->bc ( 0 ).evaluate ( M_globalData->dataTime()->time() );
 
-            break;
+                break;
 
-        case Voltage:
+            case Voltage:
 
-//            if ( std::abs( M_globalData->solidExternalPressure() + M_bc->handler()->bc( 0 ).evaluate( M_globalData->dataTime()->time() ) ) > 1e-14 )
-//                std::cout << "!!! Warning: external pressure should be equal to the initial pressure !!! " << std::endl;
+                //            if ( std::abs( M_globalData->solidExternalPressure() + M_bc->handler()->bc( 0 ).evaluate( M_globalData->dataTime()->time() ) ) > 1e-14 )
+                //                std::cout << "!!! Warning: external pressure should be equal to the initial pressure !!! " << std::endl;
 
-            break;
+                break;
 
-        default:
+            default:
 
-            std::cout << "Warning: bcType \"" << M_bc->handler()->bc( 0 ).bcType() << "\"not available!" << std::endl;
+                std::cout << "Warning: bcType \"" << M_bc->handler()->bc ( 0 ).bcType() << "\"not available!" << std::endl;
 
-            break;
+                break;
         }
     }
 }
@@ -356,12 +370,12 @@ MultiscaleModelWindkessel0D::setupExporterImporter()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 8150 ) << "MultiscaleModelWindkessel0D::setupExporterImporter() \n";
+    debugStream ( 8150 ) << "MultiscaleModelWindkessel0D::setupExporterImporter() \n";
 #endif
 
-    std::string file = multiscaleProblemFolder + multiscaleProblemPrefix + "_Model_" + number2string( M_ID ) + "_" + number2string( multiscaleProblemStep ) + ".mfile";
-    M_outputFile.open( file.c_str(), std::ios::trunc );
-    M_outputFile << std::scientific << std::setprecision( 15 )
+    std::string file = multiscaleProblemFolder + multiscaleProblemPrefix + "_Model_" + number2string ( M_ID ) + "_" + number2string ( multiscaleProblemStep ) + ".mfile";
+    M_outputFile.open ( file.c_str(), std::ios::trunc );
+    M_outputFile << std::scientific << std::setprecision ( 15 )
                  << "%   MODEL: " << M_modelName << std::endl
                  << "%   TIME                     FLOW RATE                PRESSURE" << std::endl;
 }
@@ -370,21 +384,23 @@ Real
 MultiscaleModelWindkessel0D::solveForFlowRate()
 {
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 8150 ) << "MultiscaleModelWindkessel0D::solveForFlowRate() \n";
+    debugStream ( 8150 ) << "MultiscaleModelWindkessel0D::solveForFlowRate() \n";
 #endif
 
-    if ( std::abs( M_capacitance ) < 1e-14 )
-        return -( M_pressureLeft - M_pressureRight ) / ( M_resistance1 + M_resistance2 );
+    if ( std::abs ( M_capacitance ) < 1e-14 )
+    {
+        return - ( M_pressureLeft - M_pressureRight ) / ( M_resistance1 + M_resistance2 );
+    }
     else
     {
         Real dt     =   M_globalData->dataTime()->timeStep();
-        Real dP     = -( M_pressureLeft    - M_pressureLeft_tn ) / dt;
+        Real dP     = - ( M_pressureLeft    - M_pressureLeft_tn ) / dt;
         Real K1     = ( M_resistance1 + M_resistance2 ) / ( M_resistance1 * M_resistance2 * M_capacitance );
         Real K2     =   1.0 / ( M_resistance1 * M_resistance2 * M_capacitance );
         Real K3     =   1.0 / M_resistance1;
 
         return - 1.0 / ( K1 * K1 )
-               * ( K2 * dP - std::exp( -K1 * dt ) * ( K2 * dP + (K1 * K1) * M_flowRateLeft_tn - K1 * K2 * M_pressureRight + K1 * K2 * M_pressureLeft_tn - K1 * K3 * dP ) )
+               * ( K2 * dP - std::exp ( -K1 * dt ) * ( K2 * dP + (K1 * K1) * M_flowRateLeft_tn - K1 * K2 * M_pressureRight + K1 * K2 * M_pressureLeft_tn - K1 * K3 * dP ) )
                + ( K3 * dP - K2 * M_pressureLeft_tn + K2 * M_pressureRight + K2 * dP * dt ) / K1;
     }
 }
@@ -393,59 +409,63 @@ Real
 MultiscaleModelWindkessel0D::solveForPressure()
 {
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 8150 ) << "MultiscaleModelWindkessel0D::solveForPressure() \n";
+    debugStream ( 8150 ) << "MultiscaleModelWindkessel0D::solveForPressure() \n";
 #endif
 
-    if ( std::abs( M_capacitance ) < 1e-14 )
-        return -( M_resistance1 + M_resistance2 ) * M_flowRateLeft + M_pressureRight;
+    if ( std::abs ( M_capacitance ) < 1e-14 )
+    {
+        return - ( M_resistance1 + M_resistance2 ) * M_flowRateLeft + M_pressureRight;
+    }
     else
     {
         Real dt     = M_globalData->dataTime()->timeStep();
-        Real dQ     = -( M_flowRateLeft - M_flowRateLeft_tn ) / dt;
+        Real dQ     = - ( M_flowRateLeft - M_flowRateLeft_tn ) / dt;
         Real K1     = 1.0 / ( M_resistance2 * M_capacitance );
         Real K2     = ( M_resistance1 + M_resistance2 ) / ( M_resistance2 * M_capacitance );
         Real K3     = M_resistance1;
 
         return - 1.0 / ( K1 * K1 )
-               * ( K2 * dQ - std::exp( -K1 * dt ) * ( K2 * dQ + ( K1 * K1 ) * M_pressureLeft_tn - K1 * K1 * M_pressureRight + K1 * K2 * M_flowRateLeft_tn - K1 * K3 * dQ) )
+               * ( K2 * dQ - std::exp ( -K1 * dt ) * ( K2 * dQ + ( K1 * K1 ) * M_pressureLeft_tn - K1 * K1 * M_pressureRight + K1 * K2 * M_flowRateLeft_tn - K1 * K3 * dQ) )
                + ( K3 * dQ - K2 * M_flowRateLeft_tn + K1 * M_pressureRight + K2 * dQ * dt ) / K1;
     }
 }
 
 void
-MultiscaleModelWindkessel0D::solveLinearModel( bool& solveLinearSystem )
+MultiscaleModelWindkessel0D::solveLinearModel ( bool& solveLinearSystem )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 8150 ) << "MultiscaleModelWindkessel0D::solveLinearModel() \n";
+    debugStream ( 8150 ) << "MultiscaleModelWindkessel0D::solveLinearModel() \n";
 #endif
 
     if ( !solveLinearSystem )
+    {
         return;
+    }
 
     //Solve the linear problem
-    displayModelStatus( "Solve linear" );
-    switch ( M_bc->handler()->bc( 0 ).bcType() )
+    displayModelStatus ( "Solve linear" );
+    switch ( M_bc->handler()->bc ( 0 ).bcType() )
     {
-    case Current: // dP/dQ
+        case Current: // dP/dQ
 
-        M_tangentFlowRateLeft = 1.;
-        M_tangentPressureLeft = tangentSolveForPressure();
+            M_tangentFlowRateLeft = 1.;
+            M_tangentPressureLeft = tangentSolveForPressure();
 
-        break;
+            break;
 
-    case Voltage: // dQ/dS
+        case Voltage: // dQ/dS
 
-        M_tangentPressureLeft = 1.;
-        M_tangentFlowRateLeft = -tangentSolveForFlowRate();
+            M_tangentPressureLeft = 1.;
+            M_tangentFlowRateLeft = -tangentSolveForFlowRate();
 
-        break;
+            break;
 
-    default:
+        default:
 
-        std::cout << "Warning: bcType \"" << M_bc->handler()->bc( 0 ).bcType() << "\"not available!" << std::endl;
+            std::cout << "Warning: bcType \"" << M_bc->handler()->bc ( 0 ).bcType() << "\"not available!" << std::endl;
 
-        break;
+            break;
     }
 
     // This flag avoid recomputation of the same system
@@ -456,11 +476,13 @@ Real
 MultiscaleModelWindkessel0D::tangentSolveForFlowRate()
 {
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 8150 ) << "MultiscaleModelWindkessel0D::tangentSolveForFlowRate() \n";
+    debugStream ( 8150 ) << "MultiscaleModelWindkessel0D::tangentSolveForFlowRate() \n";
 #endif
 
-    if ( std::abs( M_capacitance ) < 1e-14 )
+    if ( std::abs ( M_capacitance ) < 1e-14 )
+    {
         return -1.0 / ( M_resistance1 + M_resistance2 );
+    }
     else
     {
         Real dt     =   M_globalData->dataTime()->timeStep();
@@ -468,8 +490,8 @@ MultiscaleModelWindkessel0D::tangentSolveForFlowRate()
         Real K2     =   1.0 / ( M_resistance1 * M_resistance2 * M_capacitance);
         Real K3     =   1.0 /   M_resistance1;
 
-        return -( K2 + K3 / dt ) / K1
-               -  1.0 / ( K1 * K1 ) * ( std::exp( -K1 * dt ) * ( K2 / dt - ( K1 * K3 ) / dt ) - K2 / dt );
+        return - ( K2 + K3 / dt ) / K1
+               -  1.0 / ( K1 * K1 ) * ( std::exp ( -K1 * dt ) * ( K2 / dt - ( K1 * K3 ) / dt ) - K2 / dt );
     }
 }
 
@@ -477,11 +499,13 @@ Real
 MultiscaleModelWindkessel0D::tangentSolveForPressure()
 {
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 8150 ) << "MultiscaleModelWindkessel0D::tangentSolveForPressure() \n";
+    debugStream ( 8150 ) << "MultiscaleModelWindkessel0D::tangentSolveForPressure() \n";
 #endif
 
-    if ( std::abs( M_capacitance ) < 1e-14 )
-        return -( M_resistance1 + M_resistance2 );
+    if ( std::abs ( M_capacitance ) < 1e-14 )
+    {
+        return - ( M_resistance1 + M_resistance2 );
+    }
     else
     {
         Real dt     = M_globalData->dataTime()->timeStep();
@@ -489,8 +513,8 @@ MultiscaleModelWindkessel0D::tangentSolveForPressure()
         Real K2     = ( M_resistance1 + M_resistance2 ) / ( M_resistance2 * M_capacitance );
         Real K3     = M_resistance1;
 
-        return -( K2 + K3 / dt ) / K1
-               -  1.0 / ( K1 * K1 ) * ( std::exp( -K1 * dt ) * ( K2 / dt - ( K1 * K3 ) / dt ) - K2 / dt );
+        return - ( K2 + K3 / dt ) / K1
+               -  1.0 / ( K1 * K1 ) * ( std::exp ( -K1 * dt ) * ( K2 / dt - ( K1 * K3 ) / dt ) - K2 / dt );
     }
 }
 

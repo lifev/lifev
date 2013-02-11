@@ -48,8 +48,8 @@ namespace LifeV
 class DebugStream;
 class NdebugStream;
 
-typedef DebugStream & (*LManipFunction)( DebugStream &); // manipulator function
-typedef NdebugStream & (*LNManipFunction)( NdebugStream&); // manipulator function
+typedef DebugStream& (*LManipFunction) ( DebugStream&);  // manipulator function
+typedef NdebugStream& (*LNManipFunction) ( NdebugStream&); // manipulator function
 
 #ifdef __GNUC__
 # define LIFEV_FUNCINFO "[" << __PRETTY_FUNCTION__ << "] "
@@ -65,34 +65,34 @@ public:
     //! @name Public typedefs and structures
     //@{
     struct Private;
-    typedef int (*stprintf)( const char* format, ... );
+    typedef int (*stprintf) ( const char* format, ... );
     //@}
 
     /** @name Constructors, destructor
      */
     //@{
-    DebugStream(int area = 0, int level = 1, bool print = true);
-    DebugStream(const char* initialString, int area = 0, int level = 1, bool print = true);
-    DebugStream( DebugStream const& );
+    DebugStream (int area = 0, int level = 1, bool print = true);
+    DebugStream (const char* initialString, int area = 0, int level = 1, bool print = true);
+    DebugStream ( DebugStream const& );
     ~DebugStream();
     //@}
 
     //! @name Operators
     //@{
-    DebugStream& operator<<( char const* c);
-    DebugStream& operator<<( double d);
-    DebugStream& operator<<( std::string const& str);
-    DebugStream& operator<<( LManipFunction f);
+    DebugStream& operator<< ( char const* c);
+    DebugStream& operator<< ( double d);
+    DebugStream& operator<< ( std::string const& str);
+    DebugStream& operator<< ( LManipFunction f);
     //@}
 
     //! @name  Methods
     //@{
-    void setFlush( stprintf = 0 );
+    void setFlush ( stprintf = 0 );
     void flush();
 
-    static void attach( std::string const& logfile );
-    static void attach( std::string const& logfile, int area );
-    static void detach( std::string const& logfile, int area );
+    static void attach ( std::string const& logfile );
+    static void attach ( std::string const& logfile, int area );
+    static void detach ( std::string const& logfile, int area );
     static void detachAll();
     //@}
 
@@ -124,7 +124,7 @@ class NdebugStream
 public:
     //! @name Public typedefs
     //@{
-    typedef int (*stprintf)( const char* format, ... );
+    typedef int (*stprintf) ( const char* format, ... );
     //@}
 
     //! @name Constructors, destructor
@@ -135,45 +135,69 @@ public:
 
     //! @name Operators
     //@{
-    NdebugStream& operator<<( char const* /*code*/ ) { return *this; }
-    NdebugStream& operator<<( std::string const& /*str*/) { return *this; }
-    NdebugStream& operator<<( double /*code*/) { return *this; }
-    NdebugStream& operator<<( LNManipFunction /*f*/ ) { return *this; }
+    NdebugStream& operator<< ( char const* /*code*/ )
+    {
+        return *this;
+    }
+    NdebugStream& operator<< ( std::string const& /*str*/)
+    {
+        return *this;
+    }
+    NdebugStream& operator<< ( double /*code*/)
+    {
+        return *this;
+    }
+    NdebugStream& operator<< ( LNManipFunction /*f*/ )
+    {
+        return *this;
+    }
     //@}
 
     //! @name  Methods
     //@{
-    void flush( stprintf = 0 ) {}
+    void flush ( stprintf = 0 ) {}
     //@}
 };
 
-inline NdebugStream& perror( NdebugStream& s ) { return s; }
-inline NdebugStream& endl( NdebugStream& s )   { return s; }
-inline NdebugStream& flush( NdebugStream& s )    { return s; }
+inline NdebugStream& perror ( NdebugStream& s )
+{
+    return s;
+}
+inline NdebugStream& endl ( NdebugStream& s )
+{
+    return s;
+}
+inline NdebugStream& flush ( NdebugStream& s )
+{
+    return s;
+}
 
 #ifndef NDEBUG_OLD
-DebugStream debugStream( int area = 0, DebugStream::stprintf = 0 );
-DebugStream debugStream( bool cond, int area = 0, DebugStream::stprintf = 0 );
-LIFEV_DEPRECATED( DebugStream Debug( int area = 0, DebugStream::stprintf func = 0 ) );
-LIFEV_DEPRECATED( DebugStream Debug( bool cond, int area = 0, DebugStream::stprintf func = 0 ) );
+DebugStream debugStream ( int area = 0, DebugStream::stprintf = 0 );
+DebugStream debugStream ( bool cond, int area = 0, DebugStream::stprintf = 0 );
+LIFEV_DEPRECATED ( DebugStream Debug ( int area = 0, DebugStream::stprintf func = 0 ) );
+LIFEV_DEPRECATED ( DebugStream Debug ( bool cond, int area = 0, DebugStream::stprintf func = 0 ) );
 #else
 #define debugStream noDebugStream
-inline NdebugStream noDebugStream( int = 0, NdebugStream::stprintf = &printf ) { return NdebugStream(); }
+inline NdebugStream noDebugStream ( int = 0, NdebugStream::stprintf = &printf )
+{
+    return NdebugStream();
+}
 #endif
 
-DebugStream Warning( int area = 0 );
-DebugStream Warning( bool cond, int area = 0 );
+DebugStream Warning ( int area = 0 );
+DebugStream Warning ( bool cond, int area = 0 );
 
-DebugStream Error( int area = 0 );
-DebugStream Error( bool cond, int area = 0 );
+DebugStream Error ( int area = 0 );
+DebugStream Error ( bool cond, int area = 0 );
 
-DebugStream Fatal( int area = 0 );
-DebugStream Fatal( bool cond, int area = 0 );
+DebugStream Fatal ( int area = 0 );
+DebugStream Fatal ( bool cond, int area = 0 );
 
 }
 
-LifeV::DebugStream& perror( LifeV::DebugStream& s );
-LifeV::DebugStream& endl( LifeV::DebugStream& s );
-LifeV::DebugStream& flush( LifeV::DebugStream& s );
+LifeV::DebugStream& perror ( LifeV::DebugStream& s );
+LifeV::DebugStream& endl ( LifeV::DebugStream& s );
+LifeV::DebugStream& flush ( LifeV::DebugStream& s );
 
 #endif // LIFE_DEBUG_H

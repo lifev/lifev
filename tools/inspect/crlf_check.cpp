@@ -13,14 +13,14 @@ namespace boost
 {
 namespace inspect
 {
-crlf_check::crlf_check() : m_files_with_errors(0)
+crlf_check::crlf_check() : m_files_with_errors (0)
 {
 }
 
-void crlf_check::inspect(
-    const string & library_name,
-    const path & full_path,   // example: c:/foo/boost/filesystem/path.hpp
-    const string & contents )     // contents of file to be inspected
+void crlf_check::inspect (
+    const string& library_name,
+    const path& full_path,    // example: c:/foo/boost/filesystem/path.hpp
+    const string& contents )      // contents of file to be inspected
 {
 
     // The understanding on line endings, as I remember it, was that
@@ -36,10 +36,10 @@ void crlf_check::inspect(
     for ( std::string::const_iterator itr ( contents.begin() );
             itr != contents.end(); ++itr )
     {
-        if ( *itr == '\r' && ((itr+1) == contents.end() || *(itr+1) != '\n') )
+        if ( *itr == '\r' && ( (itr + 1) == contents.end() || * (itr + 1) != '\n') )
         {
             ++m_files_with_errors;
-            error( library_name, full_path, desc() );
+            error ( library_name, full_path, desc() );
             break;
         }
     }

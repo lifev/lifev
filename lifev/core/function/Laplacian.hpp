@@ -33,7 +33,7 @@
 
     @date 2011-08-03
 
-	Exact solution for the problem \f$-\Delta\mathbf{u}=\mathbf{f} on the cube [0,1]x[0,1]x[0,1].
+    Exact solution for the problem \f$-\Delta\mathbf{u}=\mathbf{f} on the cube [0,1]x[0,1]x[0,1].
  */
 
 #ifndef LAPLACIAN_HPP
@@ -47,21 +47,21 @@ namespace LifeV
 class Laplacian
 {
 public:
-    static Real f( const Real& t, const Real& x, const Real& y,
-                   const Real& z, const ID& i );
-    static Real uexact( const Real& t, const Real& x, const Real& y,
-                        const Real& z, const ID& i );
+    static Real f ( const Real& t, const Real& x, const Real& y,
+                    const Real& z, const ID& i );
+    static Real uexact ( const Real& t, const Real& x, const Real& y,
+                         const Real& z, const ID& i );
 
-    static Real duexactdx( const Real& t, const Real& x, const Real& y,
-                           const Real& z, const ID& i );
+    static Real duexactdx ( const Real& t, const Real& x, const Real& y,
+                            const Real& z, const ID& i );
 
-    static Real duexactdy( const Real& t, const Real& x, const Real& y,
-                               const Real& z, const ID& i );
+    static Real duexactdy ( const Real& t, const Real& x, const Real& y,
+                            const Real& z, const ID& i );
 
-    static Real duexactdz( const Real& t, const Real& x, const Real& y,
-                               const Real& z, const ID& i );
+    static Real duexactdz ( const Real& t, const Real& x, const Real& y,
+                            const Real& z, const ID& i );
 
-    static void setModes( const Int& xMode, const Int& yMode, const Int& zMode );
+    static void setModes ( const Int& xMode, const Int& yMode, const Int& zMode );
 
 private:
     static Int  M_xMode;

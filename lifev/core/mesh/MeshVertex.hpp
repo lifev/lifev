@@ -80,7 +80,7 @@ public:
         @param identity Element identity (local and global)
         @param boundary True if the element is on boundary
      */
-    explicit MeshVertex( ID identity, bool boundary = false );
+    explicit MeshVertex ( ID identity, bool boundary = false );
 
     //! Declares item identity, provides coordinate and states if it is on boundary
     /*!
@@ -90,7 +90,7 @@ public:
         @param z Element z coordinate
         @param boundary True if the element is on boundary
      */
-    MeshVertex( ID identity, Real x, Real y, Real z, bool boundary = false );
+    MeshVertex ( ID identity, Real x, Real y, Real z, bool boundary = false );
 
     //! Destructor
     virtual ~MeshVertex()
@@ -112,13 +112,13 @@ public:
         List of things displayed in the class
         @param output specify the output format (std::cout by default)
      */
-    std::ostream & showMe( bool Verbose = false, std::ostream & coordinateVector = std::cout ) const;
+    std::ostream& showMe ( bool Verbose = false, std::ostream& coordinateVector = std::cout ) const;
 
     //! Returns the pointer to the coordinates vector
     /*!
         @return Pointer to coordinate vector
      */
-    Real const * coordinatesArray() const
+    Real const* coordinatesArray() const
     {
         return &M_coordinates[0];
     };
@@ -128,7 +128,7 @@ public:
         Used to provide coordinates to object created using a constructor with no coordinates given, or to modify existing coordinates
         @return Reference to element x-coordinate
      */
-    Real & x()
+    Real& x()
     {
         return M_coordinates[ 0 ];
     }
@@ -137,7 +137,7 @@ public:
         Used to provide coordinates to object created using a constructor with no coordinates given, or to modify existing coordinates
         @return Reference to element y-coordinate
      */
-    Real & y()
+    Real& y()
     {
         return M_coordinates[ 1 ];
     }
@@ -146,7 +146,7 @@ public:
         Used to provide coordinates to object created using a constructor with no coordinates given, or to modify existing coordinates
         @return Reference to element z-coordinate
      */
-    Real & z()
+    Real& z()
     {
         return M_coordinates[ 2 ];
     }
@@ -183,7 +183,7 @@ public:
      */
     Real coordinate ( ID const coordinate ) const
     {
-        ASSERT_BD( coordinate < NDIM ) ;
+        ASSERT_BD ( coordinate < NDIM ) ;
         return M_coordinates[ coordinate ];
     }
     //! Returns the reference to the coordinate specified in the argument
@@ -192,9 +192,9 @@ public:
         @param coordinate x, y, or z coordinate to be returned
         @return Reference to the coordinate specified in the argument
      */
-    Real & coordinate ( ID const coordinate )
+    Real& coordinate ( ID const coordinate )
     {
-        ASSERT_BD( coordinate < NDIM ) ;
+        ASSERT_BD ( coordinate < NDIM ) ;
         return M_coordinates[ coordinate ];
     }
 
@@ -208,7 +208,7 @@ public:
         The method allows to access coordinates and modify them
         @return Coordinates array
     */
-    Vector3D const & coordinates () const
+    Vector3D const& coordinates () const
     {
         return M_coordinates;
     }

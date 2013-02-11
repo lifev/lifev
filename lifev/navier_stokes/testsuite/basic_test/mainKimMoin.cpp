@@ -57,31 +57,40 @@
 using namespace LifeV;
 
 int
-main( int argc, char** argv )
+main ( int argc, char** argv )
 {
 
-    bool verbose(false);
+    bool verbose (false);
 #ifdef HAVE_MPI
-    MPI_Init(&argc, &argv);
-    Epetra_MpiComm Comm(MPI_COMM_WORLD);
-    if ( Comm.MyPID() == 0 ) verbose = true;
+    MPI_Init (&argc, &argv);
+    Epetra_MpiComm Comm (MPI_COMM_WORLD);
+    if ( Comm.MyPID() == 0 )
+    {
+        verbose = true;
+    }
 #else
     Epetra_SerialComm Comm;
     verbose = true;
 #endif
 
     NavierStokes<RegionMesh<LinearTriangle>, KimMoin >
-            ns( argc, argv, "dataKimMoin", "kimMoin" );
+    ns ( argc, argv, "dataKimMoin", "kimMoin" );
 
     ns.run();
 
-    if (verbose) std::cout << "End Result: TEST PASSED" << std::endl;
+    if (verbose)
+    {
+        std::cout << "End Result: TEST PASSED" << std::endl;
+    }
 
 #ifdef HAVE_MPI
-    if (verbose) std::cout << "MPI Finalization" << std::endl;
+    if (verbose)
+    {
+        std::cout << "MPI Finalization" << std::endl;
+    }
     MPI_Finalize();
 #endif
-    return( EXIT_SUCCESS );
+    return ( EXIT_SUCCESS );
 }
 
 

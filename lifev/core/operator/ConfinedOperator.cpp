@@ -40,12 +40,12 @@ namespace LifeV
 namespace Operators
 {
 
-ConfinedOperator::ConfinedOperator( boost::shared_ptr<Epetra_Comm> comm ):
-        M_oper(),
-        M_blockStructure(),
-        M_blockIndex( 0 ),
-        M_comm( comm ),
-        M_map()
+ConfinedOperator::ConfinedOperator ( boost::shared_ptr<Epetra_Comm> comm ) :
+    M_oper(),
+    M_blockStructure(),
+    M_blockIndex ( 0 ),
+    M_comm ( comm ),
+    M_map()
 {
 
 }
@@ -57,48 +57,48 @@ ConfinedOperator::~ConfinedOperator()
 
 
 int
-ConfinedOperator::SetUseTranspose( bool useTranspose )
+ConfinedOperator::SetUseTranspose ( bool useTranspose )
 {
-    ASSERT( M_oper.get() != 0, "ConfinedOperator::SetUseTranspose: Error: M_oper pointer is null" );
-    return M_oper->SetUseTranspose( useTranspose );
+    ASSERT ( M_oper.get() != 0, "ConfinedOperator::SetUseTranspose: Error: M_oper pointer is null" );
+    return M_oper->SetUseTranspose ( useTranspose );
 }
 
 void
-ConfinedOperator::setOperator( operatorPtr_Type oper )
+ConfinedOperator::setOperator ( operatorPtr_Type oper )
 {
     M_oper = oper;
 }
 
 void
-ConfinedOperator::setFullMap( const MapEpetra& map )
+ConfinedOperator::setFullMap ( const MapEpetra& map )
 {
-    M_map.reset( new Epetra_Map( *( map.map(Unique) ) ) );
+    M_map.reset ( new Epetra_Map ( * ( map.map (Unique) ) ) );
 }
 
 void
-ConfinedOperator::setBlockStructure( const blockStructure_Type& blockStructure )
+ConfinedOperator::setBlockStructure ( const blockStructure_Type& blockStructure )
 {
-    M_blockStructure.setBlockStructure( blockStructure );
+    M_blockStructure.setBlockStructure ( blockStructure );
 }
 
 void
-ConfinedOperator::setBlockIndex( UInt index )
+ConfinedOperator::setBlockIndex ( UInt index )
 {
-    ASSERT( M_blockStructure.numBlocks() > 0, "ConfinedOperator::setBlockIndex: Error: M_structure is not initialized" );
-    ASSERT( index < M_blockStructure.numBlocks(), "ConfinedOperator::setBlockIndex: Error: index out of range" );
+    ASSERT ( M_blockStructure.numBlocks() > 0, "ConfinedOperator::setBlockIndex: Error: M_structure is not initialized" );
+    ASSERT ( index < M_blockStructure.numBlocks(), "ConfinedOperator::setBlockIndex: Error: index out of range" );
     M_blockIndex = index;
 }
 
 int
-ConfinedOperator::Apply( const vector_Type& X, vector_Type& Y ) const
+ConfinedOperator::Apply ( const vector_Type& X, vector_Type& Y ) const
 {
-    ASSERT( M_oper.get() != 0, "ConfinedOperator::Apply: Error: M_oper pointer is null" );
-    ASSERT( M_blockStructure.numBlocks() > 0, "ConfinedOperator::Apply: Error: M_structure is not initialized" );
-    ASSERT( X.MyLength() == Y.MyLength(), "ConfinedOperator::Apply: Error: X and Y must have the same length" );
+    ASSERT ( M_oper.get() != 0, "ConfinedOperator::Apply: Error: M_oper pointer is null" );
+    ASSERT ( M_blockStructure.numBlocks() > 0, "ConfinedOperator::Apply: Error: M_structure is not initialized" );
+    ASSERT ( X.MyLength() == Y.MyLength(), "ConfinedOperator::Apply: Error: X and Y must have the same length" );
 
-    int firstIndex = M_blockStructure.blockFirstIndex( M_blockIndex );
-    Epetra_MultiVector xtmp( M_oper->OperatorDomainMap(), 1 );
-    Epetra_MultiVector ytmp( M_oper->OperatorRangeMap() , 1 );
+    int firstIndex = M_blockStructure.blockFirstIndex ( M_blockIndex );
+    Epetra_MultiVector xtmp ( M_oper->OperatorDomainMap(), 1 );
+    Epetra_MultiVector ytmp ( M_oper->OperatorRangeMap() , 1 );
 
     // Extract the values from the vector
     const Int* gids         = M_oper->OperatorDomainMap().MyGlobalElements();
@@ -107,14 +107,14 @@ ConfinedOperator::Apply( const vector_Type& X, vector_Type& Y ) const
     Int lid2;
     for ( UInt i = 0; i < numMyEntries; ++i )
     {
-        lid1 = X.Map().LID( gids[i]+firstIndex );
-        lid2 = M_oper->OperatorDomainMap().LID( gids[i] );
-        ASSERT( ( lid2 >= 0 ) && ( lid1 >= 0 ), "ConfinedOperator::Apply: Error: lid < 0" );
+        lid1 = X.Map().LID ( gids[i] + firstIndex );
+        lid2 = M_oper->OperatorDomainMap().LID ( gids[i] );
+        ASSERT ( ( lid2 >= 0 ) && ( lid1 >= 0 ), "ConfinedOperator::Apply: Error: lid < 0" );
         xtmp[0][lid2] = X[0][lid1];
     }
 
     // Apply the operator
-    int result = M_oper->Apply( xtmp, ytmp );
+    int result = M_oper->Apply ( xtmp, ytmp );
 
     // Copy back the result in the Y vector;
     Y = X;
@@ -122,9 +122,9 @@ ConfinedOperator::Apply( const vector_Type& X, vector_Type& Y ) const
     const UInt numMyEntries2 = M_oper->OperatorRangeMap().NumMyElements();
     for ( UInt i = 0; i < numMyEntries2; ++i )
     {
-        lid1 = Y.Map().LID( gids2[i]+firstIndex );
-        lid2 = M_oper->OperatorRangeMap().LID( gids2[i] );
-        ASSERT( ( lid2 >= 0 ) && ( lid1 >= 0 ), "ConfinedOperator::Apply: Error: lid < 0" );
+        lid1 = Y.Map().LID ( gids2[i] + firstIndex );
+        lid2 = M_oper->OperatorRangeMap().LID ( gids2[i] );
+        ASSERT ( ( lid2 >= 0 ) && ( lid1 >= 0 ), "ConfinedOperator::Apply: Error: lid < 0" );
         Y[0][lid1] = ytmp[0][lid2];
     }
 
@@ -132,15 +132,15 @@ ConfinedOperator::Apply( const vector_Type& X, vector_Type& Y ) const
 }
 
 int
-ConfinedOperator::ApplyInverse( const vector_Type& X, vector_Type& Y ) const
+ConfinedOperator::ApplyInverse ( const vector_Type& X, vector_Type& Y ) const
 {
-    ASSERT( M_oper.get() != 0, "ConfinedOperator::ApplyInverse: Error: M_oper pointer is null" );
-    ASSERT( M_blockStructure.numBlocks() > 0, "ConfinedOperator::ApplyInverse: Error: M_structure is not initialized" );
-    ASSERT( X.MyLength() == Y.MyLength(), "ConfinedOperator::ApplyInverse: Error: X and Y must have the same length" );
+    ASSERT ( M_oper.get() != 0, "ConfinedOperator::ApplyInverse: Error: M_oper pointer is null" );
+    ASSERT ( M_blockStructure.numBlocks() > 0, "ConfinedOperator::ApplyInverse: Error: M_structure is not initialized" );
+    ASSERT ( X.MyLength() == Y.MyLength(), "ConfinedOperator::ApplyInverse: Error: X and Y must have the same length" );
 
-    int firstIndex = M_blockStructure.blockFirstIndex( M_blockIndex );
-    Epetra_MultiVector xtmp( M_oper->OperatorRangeMap() , 1 );
-    Epetra_MultiVector ytmp( M_oper->OperatorDomainMap(), 1 );
+    int firstIndex = M_blockStructure.blockFirstIndex ( M_blockIndex );
+    Epetra_MultiVector xtmp ( M_oper->OperatorRangeMap() , 1 );
+    Epetra_MultiVector ytmp ( M_oper->OperatorDomainMap(), 1 );
 
     // Extract the values from the vector
     const Int* gids         = M_oper->OperatorRangeMap().MyGlobalElements();
@@ -149,14 +149,14 @@ ConfinedOperator::ApplyInverse( const vector_Type& X, vector_Type& Y ) const
     Int lid2;
     for ( UInt i = 0; i < numMyEntries; ++i )
     {
-        lid1 = X.Map().LID( gids[i]+firstIndex );
-        lid2 = M_oper->OperatorRangeMap().LID( gids[i] );
-        ASSERT( ( lid2 >= 0 ) && ( lid1 >= 0 ), "ConfinedOperator::ApplyInverse: Error: lid < 0" );
+        lid1 = X.Map().LID ( gids[i] + firstIndex );
+        lid2 = M_oper->OperatorRangeMap().LID ( gids[i] );
+        ASSERT ( ( lid2 >= 0 ) && ( lid1 >= 0 ), "ConfinedOperator::ApplyInverse: Error: lid < 0" );
         xtmp[0][lid2] = X[0][lid1];
     }
 
     // Apply the operator
-    int result = M_oper->ApplyInverse( xtmp, ytmp );
+    int result = M_oper->ApplyInverse ( xtmp, ytmp );
 
     // Copy back the result in the Y vector;
     Y = X;
@@ -164,9 +164,9 @@ ConfinedOperator::ApplyInverse( const vector_Type& X, vector_Type& Y ) const
     const UInt numMyEntries2 = M_oper->OperatorDomainMap().NumMyElements();
     for ( UInt i = 0; i < numMyEntries2; ++i )
     {
-        lid1 = Y.Map().LID( gids2[i]+firstIndex );
-        lid2 = M_oper->OperatorDomainMap().LID( gids2[i] );
-        ASSERT( ( lid2 >= 0 ) && ( lid1 >= 0 ), "ConfinedOperator::Apply: Error: lid < 0" );
+        lid1 = Y.Map().LID ( gids2[i] + firstIndex );
+        lid2 = M_oper->OperatorDomainMap().LID ( gids2[i] );
+        ASSERT ( ( lid2 >= 0 ) && ( lid1 >= 0 ), "ConfinedOperator::Apply: Error: lid < 0" );
         Y[0][lid1] = ytmp[0][lid2];
     }
 
@@ -176,49 +176,49 @@ ConfinedOperator::ApplyInverse( const vector_Type& X, vector_Type& Y ) const
 double
 ConfinedOperator::NormInf() const
 {
-    ASSERT( M_oper.get() != 0, "ConfinedOperator::NormInf: Error: M_oper pointer is null" );
+    ASSERT ( M_oper.get() != 0, "ConfinedOperator::NormInf: Error: M_oper pointer is null" );
     return M_oper->NormInf();
 }
 
 const char*
 ConfinedOperator::Label() const
 {
-    ASSERT( M_oper.get() != 0, "ConfinedOperator::Label: Error: M_oper pointer is null" );
+    ASSERT ( M_oper.get() != 0, "ConfinedOperator::Label: Error: M_oper pointer is null" );
     return M_oper->Label();
 }
 
 bool
 ConfinedOperator::UseTranspose() const
 {
-    ASSERT( M_oper.get() != 0, "ConfinedOperator::UseTranspose: Error: M_oper pointer is null" );
+    ASSERT ( M_oper.get() != 0, "ConfinedOperator::UseTranspose: Error: M_oper pointer is null" );
     return M_oper->UseTranspose();
 }
 
 bool
 ConfinedOperator::HasNormInf() const
 {
-    ASSERT( M_oper.get() != 0, "ConfinedOperator::HasNormInf: Error: M_oper pointer is null" );
+    ASSERT ( M_oper.get() != 0, "ConfinedOperator::HasNormInf: Error: M_oper pointer is null" );
     return M_oper->HasNormInf();
 }
 
 const ConfinedOperator::comm_Type&
 ConfinedOperator::Comm() const
 {
-    ASSERT( M_oper.get() != 0, "ConfinedOperator::Comm: Error: M_oper pointer is null" );
+    ASSERT ( M_oper.get() != 0, "ConfinedOperator::Comm: Error: M_oper pointer is null" );
     return M_oper->Comm();
 }
 
 const ConfinedOperator::map_Type&
 ConfinedOperator::OperatorDomainMap() const
 {
-    ASSERT( M_blockStructure.numBlocks() > 0, "ConfinedOperator::OperatorDomainMap: Error: the structure is not known" );
+    ASSERT ( M_blockStructure.numBlocks() > 0, "ConfinedOperator::OperatorDomainMap: Error: the structure is not known" );
     return *M_map;
 }
 
 const ConfinedOperator::map_Type&
 ConfinedOperator::OperatorRangeMap() const
 {
-    ASSERT( M_blockStructure.numBlocks() > 0, "ConfinedOperator::OperatorRangeMap: Error: the structure is not known" );
+    ASSERT ( M_blockStructure.numBlocks() > 0, "ConfinedOperator::OperatorRangeMap: Error: the structure is not known" );
     return *M_map;
 }
 

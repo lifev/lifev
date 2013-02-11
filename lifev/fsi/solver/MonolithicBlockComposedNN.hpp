@@ -66,10 +66,10 @@ public:
     //@{
 
     //! Empty Constructor
-    MonolithicBlockComposedNN(const std::vector<Int>& flag, const std::vector<Int>& order):
-            super_Type( flag, order ),
-            M_blockPrecs(),
-            M_prec()
+    MonolithicBlockComposedNN (const std::vector<Int>& flag, const std::vector<Int>& order) :
+        super_Type ( flag, order ),
+        M_blockPrecs(),
+        M_prec()
     {}
 
 
@@ -89,7 +89,7 @@ public:
         @param data GetPot object reading the text data file
         @param section string specifying the path in the data file where to find the options for the operator
      */
-    void setDataFromGetPot( const GetPot& data, const std::string& section );
+    void setDataFromGetPot ( const GetPot& data, const std::string& section );
 
     //! Solves the preconditioned linear system (used only when dealing with a preconditioner)
     /*!
@@ -99,7 +99,7 @@ public:
         @param result output result
         @param linearSolver the linear system
      */
-    virtual int   solveSystem( const vector_Type& rhs, vector_Type& step, solverPtr_Type& linearSolver);
+    virtual int   solveSystem ( const vector_Type& rhs, vector_Type& step, solverPtr_Type& linearSolver);
 
 
     //! Computes the coupling
@@ -115,12 +115,12 @@ public:
       the subproblems
       @param numerationInterface vector containing the correspondence of the Lagrange multipliers with the interface dofs
      */
-    virtual void coupler( mapPtr_Type& map,
-                          const std::map<ID, ID>& locDofMap,
-                          const vectorPtr_Type& numerationInterface,
-                          const Real& timeStep,
-                          const Real& coefficient,
-                          const Real& rescaleFactor);
+    virtual void coupler ( mapPtr_Type& map,
+                           const std::map<ID, ID>& locDofMap,
+                           const vectorPtr_Type& numerationInterface,
+                           const Real& timeStep,
+                           const Real& coefficient,
+                           const Real& rescaleFactor);
 
     //!Applies the correspondent boundary conditions to every block
     /*!
@@ -129,23 +129,26 @@ public:
       conditions the value replaced on the diagonal must be 2 instead of 1.
       \param time: time
      */
-    void applyBoundaryConditions(const Real& time, const UInt i);
+    void applyBoundaryConditions (const Real& time, const UInt i);
 
     //! Multiplies the block times 2 and calls super_Type::push_back_matrix(...)
     /*!
       \param Mat: block matrix
       \param recompute: flag stating if the matrix need to be recomputed
      */
-    void push_back_matrix( const  matrixPtr_Type& Mat, const  bool recompute );
+    void push_back_matrix ( const  matrixPtr_Type& Mat, const  bool recompute );
 
     /*! Multiplies the block times 2 and calls super_Type::replace_matrix(...) in the position "position" specified in
       input and in the shifted position "position"+2
       \param oper: input matrix
       \param position: position
      */
-    void replace_matrix( const matrixPtr_Type& oper, UInt position );
+    void replace_matrix ( const matrixPtr_Type& oper, UInt position );
 
-    bool set(){return (bool) M_blockPrecs.get() && M_blockPrecs->number();}
+    bool set()
+    {
+        return (bool) M_blockPrecs.get() && M_blockPrecs->number();
+    }
 
 
     //@}
@@ -154,11 +157,11 @@ public:
 
     static MonolithicBlock* createComposedNN()
     {
-        const Int order[] = {  MonolithicBlockComposedNN::fluid1, MonolithicBlockComposedNN::solid1,MonolithicBlockComposedNN::fluid2, MonolithicBlockComposedNN::solid2};
+        const Int order[] = {  MonolithicBlockComposedNN::fluid1, MonolithicBlockComposedNN::solid1, MonolithicBlockComposedNN::fluid2, MonolithicBlockComposedNN::solid2};
         const Int couplingsNN[] = { 8, 4, 1, 2};
-        const std::vector<Int> couplingVectorNN(couplingsNN, couplingsNN+4);
-        const std::vector<Int> orderVector(order, order+4);
-        return new MonolithicBlockComposedNN( couplingVectorNN, orderVector );
+        const std::vector<Int> couplingVectorNN (couplingsNN, couplingsNN + 4);
+        const std::vector<Int> orderVector (order, order + 4);
+        return new MonolithicBlockComposedNN ( couplingVectorNN, orderVector );
     }
 
     //@}

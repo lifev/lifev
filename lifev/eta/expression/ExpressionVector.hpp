@@ -67,7 +67,7 @@ public:
     //! @name Public Types
     //@{
 
-	typedef ExpressionBase<ExpressionVector<VectorDim> > base_Type;
+    typedef ExpressionBase<ExpressionVector<VectorDim> > base_Type;
 
     //@}
 
@@ -76,15 +76,15 @@ public:
     //@{
 
     //! Constructor using the vector of values
-	ExpressionVector(const VectorSmall<VectorDim>& myValue)
-	: base_Type(), M_value(myValue) {}
+    ExpressionVector (const VectorSmall<VectorDim>& myValue)
+        : base_Type(), M_value (myValue) {}
 
     //! Copy constructor
-	ExpressionVector(const ExpressionVector<VectorDim>& expr)
-	: base_Type(), M_value(expr.M_value) {}
+    ExpressionVector (const ExpressionVector<VectorDim>& expr)
+        : base_Type(), M_value (expr.M_value) {}
 
     //! Destructor
-    ~ExpressionVector(){}
+    ~ExpressionVector() {}
 
     //@}
 
@@ -93,8 +93,10 @@ public:
     //@{
 
     //! Display method
-	static void display(std::ostream& out= std::cout)
-	{ out << "vector[" << VectorDim << "] ";}
+    static void display (std::ostream& out = std::cout)
+    {
+        out << "vector[" << VectorDim << "] ";
+    }
 
     //@}
 
@@ -103,7 +105,10 @@ public:
     //@{
 
     //! Getter for the vector of values
-	const VectorSmall<VectorDim>& value() const { return M_value; }
+    const VectorSmall<VectorDim>& value() const
+    {
+        return M_value;
+    }
 
     //@}
 
@@ -116,7 +121,7 @@ private:
 
     //@}
 
-	VectorSmall<VectorDim> M_value;
+    VectorSmall<VectorDim> M_value;
 };
 
 //! Simple function to be used in the construction of an expression
@@ -129,9 +134,9 @@ private:
 */
 template<UInt VectorDim>
 inline ExpressionVector<VectorDim>
-value(const VectorSmall<VectorDim>& myValue)
+value (const VectorSmall<VectorDim>& myValue)
 {
-	return ExpressionVector<VectorDim>(myValue);
+    return ExpressionVector<VectorDim> (myValue);
 }
 
 

@@ -89,7 +89,7 @@ public:
     /*!
      * @param fileName Name of data file.
      */
-    void setupData( const std::string& fileName );
+    void setupData ( const std::string& fileName );
 
     //! Setup the model.
     void setupModel();
@@ -129,25 +129,25 @@ public:
     /*!
      * @param couplingMap Global coupling map
      */
-    void createCouplingMap( MapEpetra& couplingMap );
+    void createCouplingMap ( MapEpetra& couplingMap );
 
     //! Import the values of the coupling variables
-    void importCouplingVariables( const multiscaleVector_Type& couplingVariables );
+    void importCouplingVariables ( const multiscaleVector_Type& couplingVariables );
 
     //! Export the values of the coupling variables
-    void exportCouplingVariables( multiscaleVector_Type& couplingVariables );
+    void exportCouplingVariables ( multiscaleVector_Type& couplingVariables );
 
     //! Compute the values of the interface residuals
     void computeCouplingResiduals();
 
     //! Export the values of the interface residuals
-    void exportCouplingResiduals( multiscaleVector_Type& couplingResiduals );
+    void exportCouplingResiduals ( multiscaleVector_Type& couplingResiduals );
 
     //! Export the Jacobian matrix
     /*!
      * @param jacobian Matrix
      */
-    void exportJacobian( multiscaleMatrix_Type& jacobian );
+    void exportJacobian ( multiscaleMatrix_Type& jacobian );
 
     //! Check if the topology is changed
     /*!
@@ -176,9 +176,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    MultiscaleModelMultiscale( const MultiscaleModelMultiscale& model );
+    MultiscaleModelMultiscale ( const MultiscaleModelMultiscale& model );
 
-    MultiscaleModelMultiscale& operator=( const MultiscaleModelMultiscale& model );
+    MultiscaleModelMultiscale& operator= ( const MultiscaleModelMultiscale& model );
 
     //@}
 

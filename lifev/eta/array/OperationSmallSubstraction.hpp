@@ -48,56 +48,56 @@ namespace LifeV
 /*!
   @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
 
-	This class only contains information that can be usefull in a templated framework (such as the
-	one for assembling the algebraic systems via expressions).
+    This class only contains information that can be usefull in a templated framework (such as the
+    one for assembling the algebraic systems via expressions).
 
-	It cannot be instanciated, neither the generic definition nor the specializations (private constructors
-	and destructor only).
+    It cannot be instanciated, neither the generic definition nor the specializations (private constructors
+    and destructor only).
 
-	The only information stored in this class is the type of the result, see LifeV::OperationSmallAddition.
+    The only information stored in this class is the type of the result, see LifeV::OperationSmallAddition.
 */
 
 template <typename LeftOperand, typename RightOperand>
 class OperationSmallSubstraction
 {
 private:
-	//! @name Constructors and destructors
+    //! @name Constructors and destructors
     //@{
 
-	//! No default constructor
-	OperationSmallSubstraction();
+    //! No default constructor
+    OperationSmallSubstraction();
 
-	//! No destructor
-	~OperationSmallSubstraction();
+    //! No destructor
+    ~OperationSmallSubstraction();
 
-	//@}
+    //@}
 };
 
 //! \cond
 
 template <>
-class OperationSmallSubstraction<Real,Real>
+class OperationSmallSubstraction<Real, Real>
 {
 public:
 
     //! @name Public Types
     //@{
 
-	typedef Real result_Type;
+    typedef Real result_Type;
 
-	//@}
+    //@}
 
 private:
-	//! @name Constructors and destructors
+    //! @name Constructors and destructors
     //@{
 
-	//! No default constructor
-	OperationSmallSubstraction();
+    //! No default constructor
+    OperationSmallSubstraction();
 
-	//! No destructor
-	~OperationSmallSubstraction();
+    //! No destructor
+    ~OperationSmallSubstraction();
 
-	//@}
+    //@}
 };
 
 
@@ -109,21 +109,21 @@ public:
     //! @name Public Types
     //@{
 
-	typedef VectorSmall<Size> result_Type;
+    typedef VectorSmall<Size> result_Type;
 
-	//@}
+    //@}
 
 private:
-	//! @name Constructors and destructors
+    //! @name Constructors and destructors
     //@{
 
-	//! No default constructor
-	OperationSmallSubstraction();
+    //! No default constructor
+    OperationSmallSubstraction();
 
-	//! No destructor
-	~OperationSmallSubstraction();
+    //! No destructor
+    ~OperationSmallSubstraction();
 
-	//@}
+    //@}
 };
 
 //! \endcond

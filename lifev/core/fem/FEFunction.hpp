@@ -54,12 +54,12 @@ namespace LifeV
   <br>
   The method eval, which is abstract and virtual, is the manipulator of the fields.
   <br>
-  For example the scalar function \f$ f \f$ is a function of the scalar field \f$ S \f$ and the vector 
+  For example the scalar function \f$ f \f$ is a function of the scalar field \f$ S \f$ and the vector
   field \f$ u \f$, that is \f$ f = f(S, u)\f$. And, for example, the function \f$ f \f$ is
   \f[
-	f(S, u) = S^2 + \sin( u_0 )
+    f(S, u) = S^2 + \sin( u_0 )
   \f]
-  then create a new class MyFun which inherit from FEFunction<MeshType, MapType, Real> where the eval method, 
+  then create a new class MyFun which inherit from FEFunction<MeshType, MapType, Real> where the eval method,
   using the methods scalarField and vectorField, can be written as
   @code
   const Real S = scalarField(0).eval( iElem, point, time );
@@ -67,10 +67,10 @@ namespace LifeV
   return std::pow(S, 2) + std::sin( u[0] );
   @endcode
   Partial specialization of the type returned by the access operator is scalar, vector and matrix, implemented
-  in the derived classes. The implementation of user defined classes can be derived from one of the specialized 
+  in the derived classes. The implementation of user defined classes can be derived from one of the specialized
   classes.
   <br>
-  The evaluation of the field in a given point is given in the access operator (). The implementation 
+  The evaluation of the field in a given point is given in the access operator (). The implementation
   of this method requires also the id of the geometrical element in the mesh, which is less general but
   more efficient compared to the case where the id of the geometrical element is not given.
 
@@ -119,15 +119,15 @@ public:
 
     //! Abstract virtual eval function.
     /*!
-      In the case of derived and specialized classes it evaluates the function on a given point 
+      In the case of derived and specialized classes it evaluates the function on a given point
       in a given element
       @param iElem Element id in the mesh.
       @param point Point where the field is evaluated, vector format.
       @param time Time in the evaluation.
       @return The type template of value of the function.
     */
-    virtual return_Type eval ( const UInt& iElem, 
-                               const point_Type& P, 
+    virtual return_Type eval ( const UInt& iElem,
+                               const point_Type& P,
                                const Real& time = 0. ) const = 0;
 
     //! Interpolate to a field
@@ -140,7 +140,7 @@ public:
     void interpolate ( FEField_Type& interpolatedFct,
                        const Real& time = 0. ) const
     {
-        interpolatedFct.getFESpace().interpolate( this, interpolatedFct.getVector(), time );
+        interpolatedFct.getFESpace().interpolate ( this, interpolatedFct.getVector(), time );
     }
 
     //! Add an external scalar field to the function.
@@ -149,7 +149,7 @@ public:
     */
     void addScalarField ( const FEScalarFieldPtr_Type& fieldPtr )
     {
-        M_scalarFields.push_back( fieldPtr );
+        M_scalarFields.push_back ( fieldPtr );
     }
 
     //! Add an external vector field to the function.
@@ -158,7 +158,7 @@ public:
     */
     void addVectorField ( const FEVectorFieldPtr_Type& fieldPtr )
     {
-        M_vectorFields.push_back( fieldPtr );
+        M_vectorFields.push_back ( fieldPtr );
     }
 
     //@}
@@ -185,7 +185,7 @@ public:
     const FEScalarField_Type& scalarField ( const UInt& i ) const
     {
         ASSERT ( i < M_scalarFields.size() , "Index out of range.");
-        return *( M_scalarFields[ i ] );
+        return * ( M_scalarFields[ i ] );
     }
 
     //! Return the i-th vector field.
@@ -207,7 +207,7 @@ public:
     const FEVectorField_Type& vectorField ( const UInt& i ) const
     {
         ASSERT ( i < M_vectorFields.size() , "Index out of range.");
-        return *( M_vectorFields[ i ] );
+        return * ( M_vectorFields[ i ] );
     }
 
     //@}

@@ -84,7 +84,7 @@ namespace ExpressionAssembly
 */
 
 template< typename FunctorType, typename ArgumentType >
-class ExpressionFunctor1 : public ExpressionBase<ExpressionFunctor1<FunctorType,ArgumentType> >
+class ExpressionFunctor1 : public ExpressionBase<ExpressionFunctor1<FunctorType, ArgumentType> >
 {
 public:
 
@@ -92,7 +92,7 @@ public:
     //@{
 
     // Base class, typedef usefull to make the code cleaner
-	typedef ExpressionBase<ExpressionFunctor1<FunctorType,ArgumentType> > base_Type;
+    typedef ExpressionBase<ExpressionFunctor1<FunctorType, ArgumentType> > base_Type;
 
     //@}
 
@@ -101,21 +101,21 @@ public:
     //@{
 
     //! Argument with the required data in argument
-	ExpressionFunctor1(boost::shared_ptr<FunctorType> fct, const ArgumentType& arg)
+    ExpressionFunctor1 (boost::shared_ptr<FunctorType> fct, const ArgumentType& arg)
         : base_Type(),
-          M_functor(fct),
-          M_argument(arg)
+          M_functor (fct),
+          M_argument (arg)
     {}
 
     //! Copy constructor
-	ExpressionFunctor1(const ExpressionFunctor1<FunctorType,ArgumentType>& expr)
+    ExpressionFunctor1 (const ExpressionFunctor1<FunctorType, ArgumentType>& expr)
         : base_Type(),
-          M_functor(expr.M_functor),
-          M_argument(expr.M_argument)
+          M_functor (expr.M_functor),
+          M_argument (expr.M_argument)
     {}
 
     //! Destructor
-    ~ExpressionFunctor1(){}
+    ~ExpressionFunctor1() {}
 
     //@}
 
@@ -124,7 +124,12 @@ public:
     //@{
 
     //! Display method
-	static void display(std::ostream& out= std::cout){ out << "fct( "; ArgumentType::display(out); out << " )"; }
+    static void display (std::ostream& out = std::cout)
+    {
+        out << "fct( ";
+        ArgumentType::display (out);
+        out << " )";
+    }
 
     //@}
 
@@ -133,10 +138,16 @@ public:
     //@{
 
     //! Getter for the functor
-	boost::shared_ptr<FunctorType> functor() const { return M_functor; }
+    boost::shared_ptr<FunctorType> functor() const
+    {
+        return M_functor;
+    }
 
     //! Getter for the expression to be placed as argument
-	const ArgumentType& argument() const { return M_argument; }
+    const ArgumentType& argument() const
+    {
+        return M_argument;
+    }
 
     //@}
 
@@ -151,10 +162,10 @@ private:
     //@}
 
     // Storage for the functor
-	boost::shared_ptr<FunctorType> M_functor;
+    boost::shared_ptr<FunctorType> M_functor;
 
     // Storage for the argument
-	ArgumentType M_argument;
+    ArgumentType M_argument;
 };
 
 //! Simple function to be used in the construction of an expression
@@ -179,24 +190,24 @@ private:
 */
 
 template< typename FunctorType, typename ArgumentType>
-inline ExpressionFunctor1<FunctorType,ArgumentType>
-eval(boost::shared_ptr<FunctorType> fct, const ExpressionBase<ArgumentType>& argument)
+inline ExpressionFunctor1<FunctorType, ArgumentType>
+eval (boost::shared_ptr<FunctorType> fct, const ExpressionBase<ArgumentType>& argument)
 {
-    return ExpressionFunctor1<FunctorType,ArgumentType>(fct,argument.cast());
+    return ExpressionFunctor1<FunctorType, ArgumentType> (fct, argument.cast() );
 }
 
 template< typename FunctorType>
-inline ExpressionFunctor1<FunctorType,ExpressionScalar>
-eval(boost::shared_ptr<FunctorType> fct, const Real& argument)
+inline ExpressionFunctor1<FunctorType, ExpressionScalar>
+eval (boost::shared_ptr<FunctorType> fct, const Real& argument)
 {
-    return ExpressionFunctor1<FunctorType,ExpressionScalar>(fct,ExpressionScalar(argument));
+    return ExpressionFunctor1<FunctorType, ExpressionScalar> (fct, ExpressionScalar (argument) );
 }
 
 template< typename FunctorType, UInt Vdim>
-inline ExpressionFunctor1<FunctorType,ExpressionVector<Vdim> >
-eval(boost::shared_ptr<FunctorType> fct, const VectorSmall<Vdim>& argument)
+inline ExpressionFunctor1<FunctorType, ExpressionVector<Vdim> >
+eval (boost::shared_ptr<FunctorType> fct, const VectorSmall<Vdim>& argument)
 {
-    return ExpressionFunctor1<FunctorType,ExpressionVector<Vdim> >(fct,ExpressionVector<Vdim>(argument));
+    return ExpressionFunctor1<FunctorType, ExpressionVector<Vdim> > (fct, ExpressionVector<Vdim> (argument) );
 }
 
 
@@ -232,7 +243,7 @@ eval(boost::shared_ptr<FunctorType> fct, const VectorSmall<Vdim>& argument)
 */
 
 template< typename FunctorType, typename ArgumentType1, typename ArgumentType2 >
-class ExpressionFunctor2 : public ExpressionBase<ExpressionFunctor2<FunctorType,ArgumentType1,ArgumentType2> >
+class ExpressionFunctor2 : public ExpressionBase<ExpressionFunctor2<FunctorType, ArgumentType1, ArgumentType2> >
 {
 public:
 
@@ -240,7 +251,7 @@ public:
     //@{
 
     // Base class, typedef usefull to make the code cleaner
-	typedef ExpressionBase<ExpressionFunctor2<FunctorType,ArgumentType1,ArgumentType2> > base_Type;
+    typedef ExpressionBase<ExpressionFunctor2<FunctorType, ArgumentType1, ArgumentType2> > base_Type;
 
     //@}
 
@@ -249,23 +260,23 @@ public:
     //@{
 
     //! Argument with the required data in argument
-	ExpressionFunctor2(boost::shared_ptr<FunctorType> fct, const ArgumentType1& arg1, const ArgumentType2& arg2)
+    ExpressionFunctor2 (boost::shared_ptr<FunctorType> fct, const ArgumentType1& arg1, const ArgumentType2& arg2)
         : base_Type(),
-          M_functor(fct),
-          M_argument1(arg1),
-          M_argument2(arg2)
+          M_functor (fct),
+          M_argument1 (arg1),
+          M_argument2 (arg2)
     {}
 
     //! Copy constructor
-	ExpressionFunctor2(const ExpressionFunctor2<FunctorType,ArgumentType1,ArgumentType2>& expr)
+    ExpressionFunctor2 (const ExpressionFunctor2<FunctorType, ArgumentType1, ArgumentType2>& expr)
         : base_Type(),
-          M_functor(expr.M_functor),
-          M_argument1(expr.M_argument1),
-          M_argument2(expr.M_argument2)
+          M_functor (expr.M_functor),
+          M_argument1 (expr.M_argument1),
+          M_argument2 (expr.M_argument2)
     {}
 
     //! Destructor
-    ~ExpressionFunctor2(){}
+    ~ExpressionFunctor2() {}
 
     //@}
 
@@ -274,8 +285,13 @@ public:
     //@{
 
     //! Display method
-	static void display(std::ostream& out= std::cout)
-    { out << "fct( "; ArgumentType1::display(out); out << " , " << ArgumentType2::display(out); out << " )"; }
+    static void display (std::ostream& out = std::cout)
+    {
+        out << "fct( ";
+        ArgumentType1::display (out);
+        out << " , " << ArgumentType2::display (out);
+        out << " )";
+    }
 
     //@}
 
@@ -284,13 +300,22 @@ public:
     //@{
 
     //! Getter for the functor
-	boost::shared_ptr<FunctorType> functor() const { return M_functor; }
+    boost::shared_ptr<FunctorType> functor() const
+    {
+        return M_functor;
+    }
 
     //! Getter for the expression to be placed as first argument
-	const ArgumentType1& argument1() const { return M_argument1; }
+    const ArgumentType1& argument1() const
+    {
+        return M_argument1;
+    }
 
     //! Getter for the expression to be placed as second argument
-	const ArgumentType2& argument2() const { return M_argument2; }
+    const ArgumentType2& argument2() const
+    {
+        return M_argument2;
+    }
 
     //@}
 
@@ -305,10 +330,10 @@ private:
     //@}
 
     // Storage for the functor
-	boost::shared_ptr<FunctorType> M_functor;
+    boost::shared_ptr<FunctorType> M_functor;
 
     // Storage for the arguments
-	ArgumentType1 M_argument1;
+    ArgumentType1 M_argument1;
     ArgumentType2 M_argument2;
 };
 
@@ -339,10 +364,10 @@ private:
 */
 
 template< typename FunctorType, typename ArgumentType1, typename ArgumentType2>
-inline ExpressionFunctor2<FunctorType,ArgumentType1,ArgumentType2>
-eval(boost::shared_ptr<FunctorType> fct, const ArgumentType1& arg1, const ArgumentType2& arg2)
+inline ExpressionFunctor2<FunctorType, ArgumentType1, ArgumentType2>
+eval (boost::shared_ptr<FunctorType> fct, const ArgumentType1& arg1, const ArgumentType2& arg2)
 {
-	return ExpressionFunctor2<FunctorType,ArgumentType1,ArgumentType2>(fct,arg1,arg2);
+    return ExpressionFunctor2<FunctorType, ArgumentType1, ArgumentType2> (fct, arg1, arg2);
 }
 
 } // Namespace ExpressionAssembly

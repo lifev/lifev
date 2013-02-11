@@ -44,20 +44,20 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 
-ReferenceElement::ReferenceElement( std::string name, ReferenceShapes shape, UInt nbDof, UInt nbCoor, UInt feDim,
-                const function_Type* phi, const function_Type* dPhi, const function_Type* d2Phi,
-                const function_Type* divPhi, const Real* refCoor ) :
-        M_phi( phi ),
-        M_dPhi( dPhi ),
-        M_d2Phi( d2Phi ),
-        M_divPhi( divPhi),
-        M_refCoor( refCoor ),
+ReferenceElement::ReferenceElement ( std::string name, ReferenceShapes shape, UInt nbDof, UInt nbCoor, UInt feDim,
+                                     const function_Type* phi, const function_Type* dPhi, const function_Type* d2Phi,
+                                     const function_Type* divPhi, const Real* refCoor ) :
+    M_phi ( phi ),
+    M_dPhi ( dPhi ),
+    M_d2Phi ( d2Phi ),
+    M_divPhi ( divPhi),
+    M_refCoor ( refCoor ),
 
-        M_name( name ),
-        M_shape( shape ),
-        M_nbDof( nbDof ),
-        M_nbCoor( nbCoor ),
-        M_feDim( feDim )
+    M_name ( name ),
+    M_shape ( shape ),
+    M_nbDof ( nbDof ),
+    M_nbCoor ( nbCoor ),
+    M_feDim ( feDim )
 {
 }
 
@@ -72,12 +72,12 @@ ReferenceElement::~ReferenceElement()
 std::vector<GeoVector>
 ReferenceElement::refCoor() const
 {
-    std::vector<GeoVector> coordinates(M_nbDof, GeoVector(3));
-    for (UInt i(0); i<M_nbDof; ++i)
+    std::vector<GeoVector> coordinates (M_nbDof, GeoVector (3) );
+    for (UInt i (0); i < M_nbDof; ++i)
     {
-        coordinates[i][0]=M_refCoor[3*i];
-        coordinates[i][1]=M_refCoor[3*i+1];
-        coordinates[i][2]=M_refCoor[3*i+2];
+        coordinates[i][0] = M_refCoor[3 * i];
+        coordinates[i][1] = M_refCoor[3 * i + 1];
+        coordinates[i][2] = M_refCoor[3 * i + 2];
     }
     return coordinates;
 }

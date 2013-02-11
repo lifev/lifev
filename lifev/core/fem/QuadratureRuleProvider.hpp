@@ -41,7 +41,8 @@
 
 #include <lifev/core/fem/QuadratureRule.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! QuadratureRuleProvider - Short description of the class
 /*!
@@ -110,10 +111,10 @@ public:
       given exactness. If such a quadrature rule is not defined, the program will
       abort.
      */
-    static const QuadratureRule& provideExactness(const ReferenceShapes& shape, const UInt& exactness);
+    static const QuadratureRule& provideExactness (const ReferenceShapes& shape, const UInt& exactness);
 
     //! Provide the quadrature rule with the highest exactness available.
-    static const QuadratureRule& provideMaximal(const ReferenceShapes& shape);
+    static const QuadratureRule& provideMaximal (const ReferenceShapes& shape);
 
     //! Provide a quadrature with the given exactness (or the maximal one if not available)
     /*
@@ -121,7 +122,7 @@ public:
       If such a quadrature is not defined, the quadrature with the highest exactness for
       the shape is returned.
      */
-    static const QuadratureRule& provideExactnessMax(const ReferenceShapes& shape, const UInt& exactness);
+    static const QuadratureRule& provideExactnessMax (const ReferenceShapes& shape, const UInt& exactness);
 
     //@}
 
@@ -153,17 +154,17 @@ private:
     QuadratureRuleProvider();
 
     //! Copy Constructor
-    QuadratureRuleProvider( const QuadratureRuleProvider& T );
+    QuadratureRuleProvider ( const QuadratureRuleProvider& T );
 
     //! Method for the differentShapes
 
-    static const QuadratureRule& provideExactnessTetra(const UInt& exactness);
-    static const QuadratureRule& provideExactnessPrism(const UInt& exactness);
-    static const QuadratureRule& provideExactnessHexa(const UInt& exactness);
-    static const QuadratureRule& provideExactnessQuad(const UInt& exactness);
-    static const QuadratureRule& provideExactnessTriangle(const UInt& exactness);
-    static const QuadratureRule& provideExactnessLine(const UInt& exactness);
-    static const QuadratureRule& provideExactnessPoint(const UInt& exactness);
+    static const QuadratureRule& provideExactnessTetra (const UInt& exactness);
+    static const QuadratureRule& provideExactnessPrism (const UInt& exactness);
+    static const QuadratureRule& provideExactnessHexa (const UInt& exactness);
+    static const QuadratureRule& provideExactnessQuad (const UInt& exactness);
+    static const QuadratureRule& provideExactnessTriangle (const UInt& exactness);
+    static const QuadratureRule& provideExactnessLine (const UInt& exactness);
+    static const QuadratureRule& provideExactnessPoint (const UInt& exactness);
 
     //@}
 

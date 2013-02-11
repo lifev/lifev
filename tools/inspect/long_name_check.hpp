@@ -21,12 +21,18 @@ public:
     long_name_check();
     virtual ~long_name_check();
 
-    virtual const char * name() const { return "long-name-check"; }
-    virtual const char * desc() const { return "file names too long"; }
+    virtual const char* name() const
+    {
+        return "long-name-check";
+    }
+    virtual const char* desc() const
+    {
+        return "file names too long";
+    }
 
-    virtual void inspect(
-        const std::string & library_name,
-        const path & full_path );
+    virtual void inspect (
+        const std::string& library_name,
+        const path& full_path );
 };
 }
 }

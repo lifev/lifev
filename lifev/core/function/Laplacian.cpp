@@ -33,7 +33,7 @@
 
     @date 2011-08-03
 
-	Implementation.
+    Implementation.
 */
 
 #include <lifev/core/function/Laplacian.hpp>
@@ -41,31 +41,31 @@
 namespace LifeV
 {
 
-Real Laplacian::f( const Real& /* t */, const Real& x, const Real& y, const Real& z, const ID& /* i */ )
+Real Laplacian::f ( const Real& /* t */, const Real& x, const Real& y, const Real& z, const ID& /* i */ )
 {
-    return  (M_xMode*M_xMode + M_yMode*M_yMode + M_zMode*M_zMode)*4*M_PI*M_PI*std::sin(M_xMode*2*M_PI*x)*std::sin(M_yMode*2*M_PI*y)*std::sin(M_zMode*2*M_PI*z);
+    return  (M_xMode * M_xMode + M_yMode * M_yMode + M_zMode * M_zMode) * 4 * M_PI * M_PI * std::sin (M_xMode * 2 * M_PI * x) * std::sin (M_yMode * 2 * M_PI * y) * std::sin (M_zMode * 2 * M_PI * z);
 }
 
-Real Laplacian::uexact( const Real& /* t */, const Real& x, const Real& y, const Real& z, const ID& /* i */ )
+Real Laplacian::uexact ( const Real& /* t */, const Real& x, const Real& y, const Real& z, const ID& /* i */ )
 {
-    return  std::sin(M_xMode*2*M_PI*x)*std::sin(M_yMode*2*M_PI*y)*std::sin(M_zMode*2*M_PI*z);
+    return  std::sin (M_xMode * 2 * M_PI * x) * std::sin (M_yMode * 2 * M_PI * y) * std::sin (M_zMode * 2 * M_PI * z);
 }
-Real Laplacian::duexactdx( const Real& /* t */, const Real& x, const Real& y, const Real& z, const ID& /* i */ )
+Real Laplacian::duexactdx ( const Real& /* t */, const Real& x, const Real& y, const Real& z, const ID& /* i */ )
 {
-    return  M_xMode*2*M_PI*std::cos(M_xMode*2*M_PI*x)*std::sin(M_yMode*2*M_PI*y)*std::sin(M_zMode*2*M_PI*z);
-}
-
-Real Laplacian::duexactdy( const Real& /* t */, const Real& x, const Real& y, const Real& z, const ID& /* i */ )
-{
-    return  M_yMode*2*M_PI*std::sin(M_xMode*2*M_PI*x)*std::cos(M_yMode*2*M_PI*y)*std::sin(M_zMode*2*M_PI*z);
+    return  M_xMode * 2 * M_PI * std::cos (M_xMode * 2 * M_PI * x) * std::sin (M_yMode * 2 * M_PI * y) * std::sin (M_zMode * 2 * M_PI * z);
 }
 
-Real Laplacian::duexactdz( const Real& /* t */, const Real& x, const Real& y, const Real& z, const ID& /* i */ )
+Real Laplacian::duexactdy ( const Real& /* t */, const Real& x, const Real& y, const Real& z, const ID& /* i */ )
 {
-    return  M_zMode*2*M_PI*std::sin(M_xMode*2*M_PI*x)*std::sin(M_yMode*2*M_PI*y)*std::cos(M_zMode*2*M_PI*z);
+    return  M_yMode * 2 * M_PI * std::sin (M_xMode * 2 * M_PI * x) * std::cos (M_yMode * 2 * M_PI * y) * std::sin (M_zMode * 2 * M_PI * z);
 }
 
-void Laplacian::setModes( const Int& xMode, const Int& yMode, const Int& zMode )
+Real Laplacian::duexactdz ( const Real& /* t */, const Real& x, const Real& y, const Real& z, const ID& /* i */ )
+{
+    return  M_zMode * 2 * M_PI * std::sin (M_xMode * 2 * M_PI * x) * std::sin (M_yMode * 2 * M_PI * y) * std::cos (M_zMode * 2 * M_PI * z);
+}
+
+void Laplacian::setModes ( const Int& xMode, const Int& yMode, const Int& zMode )
 {
     M_xMode = xMode;
     M_yMode = yMode;

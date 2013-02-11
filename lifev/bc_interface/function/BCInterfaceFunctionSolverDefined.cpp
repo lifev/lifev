@@ -43,21 +43,21 @@ namespace LifeV
 // Constructors
 // ===================================================
 BCInterfaceFunctionSolverDefined< FSIOperator >::BCInterfaceFunctionSolverDefined() :
-        M_FSIFunction           (),
-        M_physicalSolver        (),
-        M_name                  (),
-        M_flag                  (),
-        M_type                  (),
-        M_mode                  (),
-        M_componentsVector      (),
-        M_vectorFunctionRobin   (),
-        M_robinRHS              (),
-        M_robinAlphaCoefficient (),
-        M_robinBetaCoefficient  ()
+    M_FSIFunction           (),
+    M_physicalSolver        (),
+    M_name                  (),
+    M_flag                  (),
+    M_type                  (),
+    M_mode                  (),
+    M_componentsVector      (),
+    M_vectorFunctionRobin   (),
+    M_robinRHS              (),
+    M_robinAlphaCoefficient (),
+    M_robinBetaCoefficient  ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 5025 ) << "BCInterfaceFunctionSolverDefined::BCInterfaceFunctionSolverDefined()" << "\n";
+    debugStream ( 5025 ) << "BCInterfaceFunctionSolverDefined::BCInterfaceFunctionSolverDefined()" << "\n";
 #endif
 
 }
@@ -66,18 +66,18 @@ BCInterfaceFunctionSolverDefined< FSIOperator >::BCInterfaceFunctionSolverDefine
 // Methods
 // ===================================================
 void
-BCInterfaceFunctionSolverDefined< FSIOperator >::exportData( BCInterfaceData3D& data )
+BCInterfaceFunctionSolverDefined< FSIOperator >::exportData ( BCInterfaceData3D& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 5025 ) << "BCInterfaceFunctionSolverDefined::exportData" << "\n";
+    debugStream ( 5025 ) << "BCInterfaceFunctionSolverDefined::exportData" << "\n";
 #endif
 
-    data.setName( M_name );
-    data.setFlag( M_flag );
-    data.setType( M_type );
-    data.setMode( M_mode );
-    data.setComponentsVector( M_componentsVector );
+    data.setName ( M_name );
+    data.setFlag ( M_flag );
+    data.setType ( M_type );
+    data.setMode ( M_mode );
+    data.setComponentsVector ( M_componentsVector );
 }
 
 void
@@ -85,66 +85,70 @@ BCInterfaceFunctionSolverDefined< FSIOperator >::updatePhysicalSolverVariables()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 5025 ) << "BCInterfaceFunctionSolverDefined::updatePhysicalSolverVariables" << "\n";
+    debugStream ( 5025 ) << "BCInterfaceFunctionSolverDefined::updatePhysicalSolverVariables" << "\n";
 #endif
 
     switch ( M_FSIFunction )
     {
-    case RobinWall:
-    {
-        if ( !M_physicalSolver->isSolid() )
-            return;
-
-        // Update the physical solver variables
-        for ( UInt i( 0 ); i < M_vectorFunctionRobin.size(); ++i )
+        case RobinWall:
         {
-            boost::shared_ptr< BCInterfaceFunctionParserSolver< physicalSolver_Type > > castedFunctionSolver =
-                boost::dynamic_pointer_cast< BCInterfaceFunctionParserSolver< physicalSolver_Type > > ( M_vectorFunctionRobin[i] );
+            if ( !M_physicalSolver->isSolid() )
+            {
+                return;
+            }
 
-            if ( castedFunctionSolver != 0 )
-                castedFunctionSolver->updatePhysicalSolverVariables();
+            // Update the physical solver variables
+            for ( UInt i ( 0 ); i < M_vectorFunctionRobin.size(); ++i )
+            {
+                boost::shared_ptr< BCInterfaceFunctionParserSolver< physicalSolver_Type > > castedFunctionSolver =
+                    boost::dynamic_pointer_cast< BCInterfaceFunctionParserSolver< physicalSolver_Type > > ( M_vectorFunctionRobin[i] );
+
+                if ( castedFunctionSolver != 0 )
+                {
+                    castedFunctionSolver->updatePhysicalSolverVariables();
+                }
+            }
+
+            // Set coefficients
+            Int gid;
+            Real x, y, z;
+            Real alpha, beta;
+            Real t ( M_physicalSolver->dataSolid()->dataTime()->time() );
+            Real timeStep ( M_physicalSolver->dataSolid()->dataTime()->timeStep() );
+
+            // Update Time advance
+            M_physicalSolver->solidTimeAdvance()->updateRHSFirstDerivative ( timeStep );
+
+            Int verticesGlobalNumber ( M_physicalSolver->solidLocalMesh().numGlobalVertices() );
+            for ( UInt i (0) ; i < M_physicalSolver->solidLocalMesh().numVertices() ; ++i )
+            {
+                gid = M_physicalSolver->solidLocalMesh().meshTransformer().pointInitial ( i ).id();
+
+                x   = M_physicalSolver->solidLocalMesh().meshTransformer().pointInitial ( i ).x();
+                y   = M_physicalSolver->solidLocalMesh().meshTransformer().pointInitial ( i ).y();
+                z   = M_physicalSolver->solidLocalMesh().meshTransformer().pointInitial ( i ).z();
+
+                alpha = M_vectorFunctionRobin[0]->functionTimeSpace ( t, x, y, z, 0 );
+                beta  = M_vectorFunctionRobin[1]->functionTimeSpace ( t, x, y, z, 0 );
+
+                alpha += M_physicalSolver->solidTimeAdvance()->coefficientFirstDerivative ( 0 ) / timeStep * beta;
+
+                (*M_robinAlphaCoefficient) [gid] = alpha;
+                (*M_robinBetaCoefficient) [gid]  = beta;
+
+                (*M_robinAlphaCoefficient) [gid + verticesGlobalNumber] = alpha;
+                (*M_robinBetaCoefficient) [gid + verticesGlobalNumber]  = beta;
+
+                (*M_robinAlphaCoefficient) [gid + verticesGlobalNumber * 2] = alpha;
+                (*M_robinBetaCoefficient) [gid + verticesGlobalNumber * 2]  = beta;
+            }
+
+            *M_robinRHS = M_physicalSolver->solidTimeAdvance()->rhsContributionFirstDerivative();
+
+            break;
         }
-
-        // Set coefficients
-        Int gid;
-        Real x, y, z;
-        Real alpha, beta;
-        Real t( M_physicalSolver->dataSolid()->dataTime()->time() );
-        Real timeStep( M_physicalSolver->dataSolid()->dataTime()->timeStep() );
-
-        // Update Time advance
-        M_physicalSolver->solidTimeAdvance()->updateRHSFirstDerivative( timeStep );
-
-        Int verticesGlobalNumber( M_physicalSolver->solidLocalMesh().numGlobalVertices() );
-        for ( UInt i(0) ; i < M_physicalSolver->solidLocalMesh().numVertices() ; ++i )
-        {
-            gid = M_physicalSolver->solidLocalMesh().meshTransformer().pointInitial( i ).id();
-
-            x   = M_physicalSolver->solidLocalMesh().meshTransformer().pointInitial( i ).x();
-            y   = M_physicalSolver->solidLocalMesh().meshTransformer().pointInitial( i ).y();
-            z   = M_physicalSolver->solidLocalMesh().meshTransformer().pointInitial( i ).z();
-
-            alpha = M_vectorFunctionRobin[0]->functionTimeSpace( t, x, y, z, 0 );
-            beta  = M_vectorFunctionRobin[1]->functionTimeSpace( t, x, y, z, 0 );
-
-            alpha += M_physicalSolver->solidTimeAdvance()->coefficientFirstDerivative( 0 ) / timeStep * beta;
-
-            (*M_robinAlphaCoefficient)[gid] = alpha;
-            (*M_robinBetaCoefficient)[gid]  = beta;
-
-            (*M_robinAlphaCoefficient)[gid + verticesGlobalNumber] = alpha;
-            (*M_robinBetaCoefficient)[gid + verticesGlobalNumber]  = beta;
-
-            (*M_robinAlphaCoefficient)[gid + verticesGlobalNumber * 2] = alpha;
-            (*M_robinBetaCoefficient)[gid + verticesGlobalNumber * 2]  = beta;
-        }
-
-        *M_robinRHS = M_physicalSolver->solidTimeAdvance()->rhsContributionFirstDerivative();
-
-        break;
-    }
-    default:
-        break;
+        default:
+            break;
     }
 }
 
@@ -152,11 +156,11 @@ BCInterfaceFunctionSolverDefined< FSIOperator >::updatePhysicalSolverVariables()
 // Set Methods
 // ===================================================
 void
-BCInterfaceFunctionSolverDefined< FSIOperator >::setData( const BCInterfaceData3D& data )
+BCInterfaceFunctionSolverDefined< FSIOperator >::setData ( const BCInterfaceData3D& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 5025 ) << "BCInterfaceFunctionSolverDefined::setData" << "\n";
+    debugStream ( 5025 ) << "BCInterfaceFunctionSolverDefined::setData" << "\n";
 #endif
 
     //Set mapFunction
@@ -186,16 +190,16 @@ BCInterfaceFunctionSolverDefined< FSIOperator >::setData( const BCInterfaceData3
     if ( M_FSIFunction == RobinWall )
     {
         factory_Type factory;
-        M_vectorFunctionRobin.reserve(2);
+        M_vectorFunctionRobin.reserve (2);
         BCInterfaceData3D temporaryData ( data );
 
         // Create the mass term function
         temporaryData.setRobinBaseAlpha();
-        M_vectorFunctionRobin.push_back( factory.createFunctionParser( temporaryData ) );
+        M_vectorFunctionRobin.push_back ( factory.createFunctionParser ( temporaryData ) );
 
         // Create the RHS
         temporaryData.setRobinBaseBeta();
-        M_vectorFunctionRobin.push_back( factory.createFunctionParser( temporaryData ) );
+        M_vectorFunctionRobin.push_back ( factory.createFunctionParser ( temporaryData ) );
     }
 }
 
@@ -208,28 +212,28 @@ BCInterfaceFunctionSolverDefined< FSIOperator >::baseType() const
 {
     switch ( M_FSIFunction )
     {
-    case DerFluidLoadToFluid:
-    case DerFluidLoadToStructure:
-    case DerHarmonicExtensionVelToFluid:
-    case DerStructureDispToSolid:
-    case FluidInterfaceDisp:
-    case FluidLoadToStructure:
-    case HarmonicExtensionVelToFluid:
-    case SolidLoadToStructure:
-    case StructureDispToHarmonicExtension:
-    case StructureDispToSolid:
-    case StructureToFluid:
+        case DerFluidLoadToFluid:
+        case DerFluidLoadToStructure:
+        case DerHarmonicExtensionVelToFluid:
+        case DerStructureDispToSolid:
+        case FluidInterfaceDisp:
+        case FluidLoadToStructure:
+        case HarmonicExtensionVelToFluid:
+        case SolidLoadToStructure:
+        case StructureDispToHarmonicExtension:
+        case StructureDispToSolid:
+        case StructureToFluid:
 
-        return BASEVectorInterface3D;
+            return BASEVectorInterface3D;
 
-    case RobinWall:
+        case RobinWall:
 
-        return BASEVector3D;
+            return BASEVector3D;
 
-    default:
+        default:
 
-        std::cout << " !!! Error: " << M_FSIFunction << " is not available as a FSIFunction !!!" << std::endl;
-        return BASEDefault;
+            std::cout << " !!! Error: " << M_FSIFunction << " is not available as a FSIFunction !!!" << std::endl;
+            return BASEDefault;
     }
 }
 
@@ -241,12 +245,12 @@ BCInterfaceFunctionSolverDefined< FSIOperator >::baseType() const
 // Constructors
 // ===================================================
 BCInterfaceFunctionSolverDefined< OneDFSISolver >::BCInterfaceFunctionSolverDefined() :
-        M_defaultFunction (),
-        M_function        ()
+    M_defaultFunction (),
+    M_function        ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 5025 ) << "BCInterfaceFunctionSolverDefined::BCInterfaceFunctionSolverDefined()" << "\n";
+    debugStream ( 5025 ) << "BCInterfaceFunctionSolverDefined::BCInterfaceFunctionSolverDefined()" << "\n";
 #endif
 
 }
@@ -255,37 +259,37 @@ BCInterfaceFunctionSolverDefined< OneDFSISolver >::BCInterfaceFunctionSolverDefi
 // Methods
 // ===================================================
 void
-BCInterfaceFunctionSolverDefined< OneDFSISolver >::assignFunction( OneDFSIFunction& base )
+BCInterfaceFunctionSolverDefined< OneDFSISolver >::assignFunction ( OneDFSIFunction& base )
 {
     switch ( M_defaultFunction )
     {
-    case Riemann:
+        case Riemann:
 
-        base.setFunction( boost::bind( &OneDFSIFunctionSolverDefinedRiemann::operator(),
-                                       dynamic_cast<OneDFSIFunctionSolverDefinedRiemann *> ( &( *M_function ) ), _1, _2 ) );
+            base.setFunction ( boost::bind ( &OneDFSIFunctionSolverDefinedRiemann::operator(),
+                                             dynamic_cast<OneDFSIFunctionSolverDefinedRiemann*> ( & ( *M_function ) ), _1, _2 ) );
 
-        break;
+            break;
 
-    case Compatibility:
+        case Compatibility:
 
-        base.setFunction( boost::bind( &OneDFSIFunctionSolverDefinedCompatibility::operator(),
-                                       dynamic_cast<OneDFSIFunctionSolverDefinedCompatibility *> ( &( *M_function ) ), _1, _2 ) );
+            base.setFunction ( boost::bind ( &OneDFSIFunctionSolverDefinedCompatibility::operator(),
+                                             dynamic_cast<OneDFSIFunctionSolverDefinedCompatibility*> ( & ( *M_function ) ), _1, _2 ) );
 
-        break;
+            break;
 
-    case Absorbing:
+        case Absorbing:
 
-        base.setFunction( boost::bind( &OneDFSIFunctionSolverDefinedAbsorbing::operator(),
-                                       dynamic_cast<OneDFSIFunctionSolverDefinedAbsorbing *> ( &( *M_function ) ), _1, _2 ) );
+            base.setFunction ( boost::bind ( &OneDFSIFunctionSolverDefinedAbsorbing::operator(),
+                                             dynamic_cast<OneDFSIFunctionSolverDefinedAbsorbing*> ( & ( *M_function ) ), _1, _2 ) );
 
-        break;
+            break;
 
-    case Resistance:
+        case Resistance:
 
-        base.setFunction( boost::bind( &OneDFSIFunctionSolverDefinedResistance::operator(),
-                                       dynamic_cast<OneDFSIFunctionSolverDefinedResistance *> ( &( *M_function ) ), _1, _2 ) );
+            base.setFunction ( boost::bind ( &OneDFSIFunctionSolverDefinedResistance::operator(),
+                                             dynamic_cast<OneDFSIFunctionSolverDefinedResistance*> ( & ( *M_function ) ), _1, _2 ) );
 
-        break;
+            break;
     }
 }
 
@@ -293,11 +297,11 @@ BCInterfaceFunctionSolverDefined< OneDFSISolver >::assignFunction( OneDFSIFuncti
 // Set Methods
 // ===================================================
 void
-BCInterfaceFunctionSolverDefined< OneDFSISolver >::setData( const BCInterfaceData1D& data )
+BCInterfaceFunctionSolverDefined< OneDFSISolver >::setData ( const BCInterfaceData1D& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 5025 ) << "BCInterfaceFunctionSolverDefined::setData( data )" << "\n";
+    debugStream ( 5025 ) << "BCInterfaceFunctionSolverDefined::setData( data )" << "\n";
 #endif
 
     //Set mapFunction
@@ -311,29 +315,29 @@ BCInterfaceFunctionSolverDefined< OneDFSISolver >::setData( const BCInterfaceDat
 
     switch ( M_defaultFunction )
     {
-    case Riemann:
+        case Riemann:
 
-        M_function.reset( new OneDFSIFunctionSolverDefinedRiemann( data.side(), data.quantity() ) );
+            M_function.reset ( new OneDFSIFunctionSolverDefinedRiemann ( data.side(), data.quantity() ) );
 
-        break;
+            break;
 
-    case Compatibility:
+        case Compatibility:
 
-        M_function.reset( new OneDFSIFunctionSolverDefinedCompatibility( data.side(), data.quantity() ) );
+            M_function.reset ( new OneDFSIFunctionSolverDefinedCompatibility ( data.side(), data.quantity() ) );
 
-        break;
+            break;
 
-    case Absorbing:
+        case Absorbing:
 
-        M_function.reset( new OneDFSIFunctionSolverDefinedAbsorbing( data.side(), data.quantity() ) );
+            M_function.reset ( new OneDFSIFunctionSolverDefinedAbsorbing ( data.side(), data.quantity() ) );
 
-        break;
+            break;
 
-    case Resistance:
+        case Resistance:
 
-        M_function.reset( new OneDFSIFunctionSolverDefinedResistance( data.side(), data.quantity(), data.resistance()[0] ) );
+            M_function.reset ( new OneDFSIFunctionSolverDefinedResistance ( data.side(), data.quantity(), data.resistance() [0] ) );
 
-        break;
+            break;
     }
 }
 

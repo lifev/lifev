@@ -43,25 +43,29 @@ namespace LifeV
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-Displayer::Displayer():
-    M_comm (commPtr_Type()),
+Displayer::Displayer() :
+    M_comm (commPtr_Type() ),
     M_verbose (true)
 {
     if (M_comm)
+    {
         M_verbose = M_comm->MyPID() == 0;
+    }
 }
 
-Displayer::Displayer( const commPtr_Type& comm ):
-        M_comm          ( comm ),
-        M_verbose       ( true )
+Displayer::Displayer ( const commPtr_Type& comm ) :
+    M_comm          ( comm ),
+    M_verbose       ( true )
 {
     if ( M_comm )
+    {
         M_verbose = M_comm->MyPID() == 0;
+    }
 }
 
-Displayer::Displayer( const Displayer& displayer ):
-        M_comm          ( displayer.M_comm ),
-        M_verbose       ( displayer.M_verbose )
+Displayer::Displayer ( const Displayer& displayer ) :
+    M_comm          ( displayer.M_comm ),
+    M_verbose       ( displayer.M_verbose )
 {
 }
 
@@ -79,11 +83,13 @@ Displayer::isLeader() const
 // =================
 
 void
-Displayer::setCommunicator( const commPtr_Type& comm )
+Displayer::setCommunicator ( const commPtr_Type& comm )
 {
     M_comm = comm;
     if ( M_comm.get() )
+    {
         M_verbose = M_comm->MyPID() == 0;
+    }
 }
 
 } // Namespace LifeV

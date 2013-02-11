@@ -174,7 +174,7 @@ public:
     //@{
 
     //! Setup method for the FESpaces
-    void setup( const fespace_ptrType& fespace, const fespace_ptrType& betaFEspace);
+    void setup ( const fespace_ptrType& fespace, const fespace_ptrType& betaFEspace);
 
     //! This method adds the IP stabilization terms into two matrices depending on the stencil.
     /*!
@@ -184,29 +184,29 @@ public:
       for the eventually extra stencil are added. Beta is the transport field (given for the
       betaFESpace), coef is a coefficient that is put in front of all the terms.
      */
-    void addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
-                                   const matrix_ptrType& matrixExtended,
-                                   const vector_type& beta,
-                                   const Real& coef);
+    void addIPStabilizationStencil (const matrix_ptrType& matrixGalerkin,
+                                    const matrix_ptrType& matrixExtended,
+                                    const vector_type& beta,
+                                    const Real& coef);
 
     //! This method adds the IP stabilization on the two matrices, depening on the stencil.
     /*!
       However, it does not take into account the advection field to balance the stabilization.
      */
-    void addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
-                                   const matrix_ptrType& matrixExtended,
-                                   const Real& coef);
+    void addIPStabilizationStencil (const matrix_ptrType& matrixGalerkin,
+                                    const matrix_ptrType& matrixExtended,
+                                    const Real& coef);
 
     //! This method builds the IP stabilization on a unique matrix (both stencils)
     /*!
       This method takes also into account the transport field for wieghting the
       stabilization.
      */
-    void addIPStabilization(const matrix_ptrType& matrix,
-                            const vector_type& beta,
-                            const Real& coef)
+    void addIPStabilization (const matrix_ptrType& matrix,
+                             const vector_type& beta,
+                             const Real& coef)
     {
-        addIPStabilizationStencil(matrix,matrix,beta,coef);
+        addIPStabilizationStencil (matrix, matrix, beta, coef);
     }
 
     //! Simplest method to add IP stabilization on the matrix.
@@ -214,10 +214,10 @@ public:
       Terms for both stencils are added on the same matrix and the coefficient
       acts uniformly on the domain (no scaling with the transport field)
      */
-    void addIPStabilization(const matrix_ptrType& matrix,
-                            const Real& coef)
+    void addIPStabilization (const matrix_ptrType& matrix,
+                             const Real& coef)
     {
-        addIPStabilizationStencil(matrix,matrix,coef);
+        addIPStabilizationStencil (matrix, matrix, coef);
     }
 
     //@}
@@ -265,25 +265,25 @@ private:
 
 template<typename mesh_type, typename matrix_type, typename vector_type>
 ADRAssemblerIP< mesh_type, matrix_type, vector_type>::
-ADRAssemblerIP():
+ADRAssemblerIP() :
 
-        M_fespace(),
-        M_betaFESpace(),
+    M_fespace(),
+    M_betaFESpace(),
 
-        M_IPFaceCFE(),
+    M_IPFaceCFE(),
 
-        M_IPQuad1CFE(),
-        M_IPQuad2CFE(),
+    M_IPQuad1CFE(),
+    M_IPQuad2CFE(),
 
-        M_IP1CFE(),
-        M_IP2CFE(),
+    M_IP1CFE(),
+    M_IP2CFE(),
 
-        M_IPBetaCFE(),
+    M_IPBetaCFE(),
 
-        M_localIPGalerkin_11(),
-        M_localIPGalerkin_22(),
-        M_localIPExtended_12(),
-        M_localIPExtended_21()
+    M_localIPGalerkin_11(),
+    M_localIPGalerkin_22(),
+    M_localIPExtended_12(),
+    M_localIPExtended_21()
 {}
 
 // ===================================================
@@ -293,79 +293,79 @@ ADRAssemblerIP():
 template<typename mesh_type, typename matrix_type, typename vector_type>
 void
 ADRAssemblerIP< mesh_type, matrix_type, vector_type>::
-setup( const fespace_ptrType& fespace, const fespace_ptrType& betaFESpace )
+setup ( const fespace_ptrType& fespace, const fespace_ptrType& betaFESpace )
 {
     M_fespace = fespace;
     M_betaFESpace = betaFESpace;
 
-    M_IPFaceCFE.reset(new CurrentBoundaryFE(M_fespace->feBd().refFE, M_fespace->feBd().geoMap, M_fespace->feBd().qr));
+    M_IPFaceCFE.reset (new CurrentBoundaryFE (M_fespace->feBd().refFE, M_fespace->feBd().geoMap, M_fespace->feBd().qr) );
 
     // For the two next CurrentFEs, the quadrature plays no role
-    M_IPQuad1CFE.reset(new CurrentFE(M_fespace->refFE(),M_fespace->fe().geoMap(), M_fespace->qr() ));
-    M_IPQuad2CFE.reset(new CurrentFE(M_fespace->refFE(),M_fespace->fe().geoMap(), M_fespace->qr() ));
+    M_IPQuad1CFE.reset (new CurrentFE (M_fespace->refFE(), M_fespace->fe().geoMap(), M_fespace->qr() ) );
+    M_IPQuad2CFE.reset (new CurrentFE (M_fespace->refFE(), M_fespace->fe().geoMap(), M_fespace->qr() ) );
 
     // For the three next CurrentFEs, the quadrature will be replaced when computing the
     // IP stabilization
-    M_IP1CFE.reset(new CurrentFE(M_fespace->refFE(),M_fespace->fe().geoMap(), M_fespace->qr() ));
-    M_IP2CFE.reset(new CurrentFE(M_fespace->refFE(),M_fespace->fe().geoMap(), M_fespace->qr() ));
-    M_IPBetaCFE.reset(new CurrentFE(M_betaFESpace->refFE(),M_fespace->fe().geoMap(), M_fespace->qr() ));
+    M_IP1CFE.reset (new CurrentFE (M_fespace->refFE(), M_fespace->fe().geoMap(), M_fespace->qr() ) );
+    M_IP2CFE.reset (new CurrentFE (M_fespace->refFE(), M_fespace->fe().geoMap(), M_fespace->qr() ) );
+    M_IPBetaCFE.reset (new CurrentFE (M_betaFESpace->refFE(), M_fespace->fe().geoMap(), M_fespace->qr() ) );
 
     // Local matrices
-    M_localIPGalerkin_11.reset(new localMatrix_type(M_fespace->fe().nbFEDof()
-                                                    ,M_fespace->fieldDim()
-                                                    ,M_fespace->fieldDim()));
-    M_localIPGalerkin_22.reset(new localMatrix_type(M_fespace->fe().nbFEDof()
-                                                    ,M_fespace->fieldDim()
-                                                    ,M_fespace->fieldDim()));
-    M_localIPExtended_12.reset(new localMatrix_type(M_fespace->fe().nbFEDof()
-                                                    ,M_fespace->fieldDim()
-                                                    ,M_fespace->fieldDim()));
-    M_localIPExtended_21.reset(new localMatrix_type(M_fespace->fe().nbFEDof()
-                                                    ,M_fespace->fieldDim()
-                                                    ,M_fespace->fieldDim()));
+    M_localIPGalerkin_11.reset (new localMatrix_type (M_fespace->fe().nbFEDof()
+                                                      , M_fespace->fieldDim()
+                                                      , M_fespace->fieldDim() ) );
+    M_localIPGalerkin_22.reset (new localMatrix_type (M_fespace->fe().nbFEDof()
+                                                      , M_fespace->fieldDim()
+                                                      , M_fespace->fieldDim() ) );
+    M_localIPExtended_12.reset (new localMatrix_type (M_fespace->fe().nbFEDof()
+                                                      , M_fespace->fieldDim()
+                                                      , M_fespace->fieldDim() ) );
+    M_localIPExtended_21.reset (new localMatrix_type (M_fespace->fe().nbFEDof()
+                                                      , M_fespace->fieldDim()
+                                                      , M_fespace->fieldDim() ) );
 }
 
 template<typename mesh_type, typename matrix_type, typename vector_type>
 void
 ADRAssemblerIP< mesh_type, matrix_type, vector_type>::
-addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
-                          const matrix_ptrType& matrixExtended,
-                          const vector_type& beta,
-                          const Real& coef)
+addIPStabilizationStencil (const matrix_ptrType& matrixGalerkin,
+                           const matrix_ptrType& matrixExtended,
+                           const vector_type& beta,
+                           const Real& coef)
 {
     if (beta.mapType() != Repeated)
     {
-        addIPStabilizationStencil(matrixGalerkin,matrixExtended,vector_type(beta,Repeated),coef);
+        addIPStabilizationStencil (matrixGalerkin, matrixExtended, vector_type (beta, Repeated), coef);
         return;
     }
 
-    ASSERT(M_fespace != 0, "No FE space for building the IP stabilization! ");
-    ASSERT(M_betaFESpace != 0, "No FE space (beta) for building the IP stabilization! ");
+    ASSERT (M_fespace != 0, "No FE space for building the IP stabilization! ");
+    ASSERT (M_betaFESpace != 0, "No FE space (beta) for building the IP stabilization! ");
 
     // Some constants
-    const UInt nbBoundaryFaces(M_fespace->mesh()->numBFaces());
-    const UInt nbFaces(M_fespace->mesh()->numFaces());
-    const UInt nbQuadPt(M_fespace->bdQr().nbQuadPt());
-    const UInt nbLocalDof(M_fespace->fe().nbFEDof());
-    const UInt nbLocalBetaDof(M_betaFESpace->fe().nbFEDof());
-    const UInt nbComponents(M_fespace->fieldDim());
-    const UInt betaTotalDof(M_betaFESpace->dof().numTotalDof());
+    const UInt nbBoundaryFaces (M_fespace->mesh()->numBFaces() );
+    const UInt nbFaces (M_fespace->mesh()->numFaces() );
+    const UInt nbQuadPt (M_fespace->bdQr().nbQuadPt() );
+    const UInt nbLocalDof (M_fespace->fe().nbFEDof() );
+    const UInt nbLocalBetaDof (M_betaFESpace->fe().nbFEDof() );
+    const UInt nbComponents (M_fespace->fieldDim() );
+    const UInt betaTotalDof (M_betaFESpace->dof().numTotalDof() );
 
 
     // Temporaries
-    Real localValue_11(0.0);
-    Real localValue_22(0.0);
-    Real localValue_12(0.0);
-    Real localValue_21(0.0);
-    std::vector<Real> betaN(nbQuadPt,0.0);
-    Real hFace2(0.0);
+    Real localValue_11 (0.0);
+    Real localValue_22 (0.0);
+    Real localValue_12 (0.0);
+    Real localValue_21 (0.0);
+    std::vector<Real> betaN (nbQuadPt, 0.0);
+    Real hFace2 (0.0);
 
     // Here instead of looping over the elements, we loop on the faces.
-    for (UInt iFace(nbBoundaryFaces); iFace< nbFaces; ++iFace)
+    for (UInt iFace (nbBoundaryFaces); iFace < nbFaces; ++iFace)
     {
         // Get the adjacent elements ID
-        const UInt adjacentElement1(M_fespace->mesh()->face(iFace).firstAdjacentElementIdentity());
-        const UInt adjacentElement2(M_fespace->mesh()->face(iFace).secondAdjacentElementIdentity());
+        const UInt adjacentElement1 (M_fespace->mesh()->face (iFace).firstAdjacentElementIdentity() );
+        const UInt adjacentElement2 (M_fespace->mesh()->face (iFace).secondAdjacentElementIdentity() );
 
         // Here we check that the face is included in the IP
         // stabilization: it is not a boundary face (we do not
@@ -373,7 +373,7 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
         // across the different partitions of the mesh (if they exist).
         // These cases are the excluded.
 
-        if ( Flag::testOneSet( M_fespace->mesh()->face(iFace).flag(), EntityFlags::SUBDOMAIN_INTERFACE | EntityFlags::PHYSICAL_BOUNDARY ) )
+        if ( Flag::testOneSet ( M_fespace->mesh()->face (iFace).flag(), EntityFlags::SUBDOMAIN_INTERFACE | EntityFlags::PHYSICAL_BOUNDARY ) )
         {
             continue;
         };
@@ -383,69 +383,69 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
         // we need to update the currentFEs with a quadrature that lies on the face.
         // First step , we compute this quadrature.
 
-        M_IPFaceCFE->updateMeasNormalQuadPt(M_fespace->mesh()->face(iFace));
+        M_IPFaceCFE->updateMeasNormalQuadPt (M_fespace->mesh()->face (iFace) );
         hFace2 = M_IPFaceCFE->measure();
 
         // Second step, we take the quadrature back to the reference frame for both
         // adjacent elements
 
-        M_IPQuad1CFE->update( M_fespace->mesh()->element(adjacentElement1),UPDATE_ONLY_CELL_NODES );
+        M_IPQuad1CFE->update ( M_fespace->mesh()->element (adjacentElement1), UPDATE_ONLY_CELL_NODES );
 
-        QuadratureRule faceQR1("custom quad 1",TETRA,3,0,0);
-        for (UInt iQuad(0); iQuad< nbQuadPt; ++iQuad) // Here we do not use UInt because of KNM, but we should
+        QuadratureRule faceQR1 ("custom quad 1", TETRA, 3, 0, 0);
+        for (UInt iQuad (0); iQuad < nbQuadPt; ++iQuad) // Here we do not use UInt because of KNM, but we should
         {
-            Real x(0.0),y(0.0),z(0.0);
-            M_IPQuad1CFE->coorBackMap( M_IPFaceCFE->quadPt(iQuad,0),
-                                       M_IPFaceCFE->quadPt(iQuad,1),
-                                       M_IPFaceCFE->quadPt(iQuad,2),
-                                       x,y,z);
-            QuadraturePoint newPoint(x,y,z,M_fespace->bdQr().weight(iQuad));
-            faceQR1.addPoint(newPoint);
+            Real x (0.0), y (0.0), z (0.0);
+            M_IPQuad1CFE->coorBackMap ( M_IPFaceCFE->quadPt (iQuad, 0),
+                                        M_IPFaceCFE->quadPt (iQuad, 1),
+                                        M_IPFaceCFE->quadPt (iQuad, 2),
+                                        x, y, z);
+            QuadraturePoint newPoint (x, y, z, M_fespace->bdQr().weight (iQuad) );
+            faceQR1.addPoint (newPoint);
         }
 
-        M_IPQuad2CFE->update( M_fespace->mesh()->element(adjacentElement2),UPDATE_ONLY_CELL_NODES );
-        QuadratureRule faceQR2("custom quad 2",TETRA,3,0,0);
-        for (UInt iQuad(0); iQuad< nbQuadPt; ++iQuad) // Idem here
+        M_IPQuad2CFE->update ( M_fespace->mesh()->element (adjacentElement2), UPDATE_ONLY_CELL_NODES );
+        QuadratureRule faceQR2 ("custom quad 2", TETRA, 3, 0, 0);
+        for (UInt iQuad (0); iQuad < nbQuadPt; ++iQuad) // Idem here
         {
-            Real x(0.0),y(0.0),z(0.0);
-            M_IPQuad2CFE->coorBackMap( M_IPFaceCFE->quadPt(iQuad,0),
-                                       M_IPFaceCFE->quadPt(iQuad,1),
-                                       M_IPFaceCFE->quadPt(iQuad,2),
-                                       x,y,z);
-            QuadraturePoint newPoint(x,y,z,M_fespace->bdQr().weight(iQuad));
-            faceQR2.addPoint(newPoint);
+            Real x (0.0), y (0.0), z (0.0);
+            M_IPQuad2CFE->coorBackMap ( M_IPFaceCFE->quadPt (iQuad, 0),
+                                        M_IPFaceCFE->quadPt (iQuad, 1),
+                                        M_IPFaceCFE->quadPt (iQuad, 2),
+                                        x, y, z);
+            QuadraturePoint newPoint (x, y, z, M_fespace->bdQr().weight (iQuad) );
+            faceQR2.addPoint (newPoint);
         }
 
         // Third step, we change the quadrature in the CurrentFEs
 
-        M_IP1CFE->setQuadRule(faceQR1);
-        M_IP2CFE->setQuadRule(faceQR2);
-        M_IPBetaCFE->setQuadRule(faceQR1);
+        M_IP1CFE->setQuadRule (faceQR1);
+        M_IP2CFE->setQuadRule (faceQR2);
+        M_IPBetaCFE->setQuadRule (faceQR1);
 
         // Now the CurrentFEs are updated with a quadrature that is
         // actually only on the considered face (iterFace).
 
-        M_IP1CFE->update(M_fespace->mesh()->element(adjacentElement1), UPDATE_DPHI | UPDATE_WDET);
-        M_IP2CFE->update(M_fespace->mesh()->element(adjacentElement2), UPDATE_DPHI | UPDATE_WDET);
-        M_IPBetaCFE->update(M_fespace->mesh()->element(adjacentElement1), UPDATE_PHI );
+        M_IP1CFE->update (M_fespace->mesh()->element (adjacentElement1), UPDATE_DPHI | UPDATE_WDET);
+        M_IP2CFE->update (M_fespace->mesh()->element (adjacentElement2), UPDATE_DPHI | UPDATE_WDET);
+        M_IPBetaCFE->update (M_fespace->mesh()->element (adjacentElement1), UPDATE_PHI );
 
         // Before starting the assembly, we compute the values of |beta n|
         // in the quadrature nodes
 
-        for (UInt iQuadPt(0); iQuadPt<nbQuadPt; ++iQuadPt)
+        for (UInt iQuadPt (0); iQuadPt < nbQuadPt; ++iQuadPt)
         {
-            betaN[iQuadPt]=0.0;
-            for (UInt iDof(0); iDof< nbLocalBetaDof; ++iDof)
+            betaN[iQuadPt] = 0.0;
+            for (UInt iDof (0); iDof < nbLocalBetaDof; ++iDof)
             {
-                for (UInt iDim(0); iDim<3; ++iDim)
+                for (UInt iDim (0); iDim < 3; ++iDim)
                 {
-                    betaN[iQuadPt] += beta[M_betaFESpace->dof().localToGlobalMap(adjacentElement1,iDof)
-                                           + betaTotalDof*iDim]
-                                      * M_IPBetaCFE->phi(iDof,iQuadPt)
-                                      * M_IPFaceCFE->normal(iDim,iQuadPt);
+                    betaN[iQuadPt] += beta[M_betaFESpace->dof().localToGlobalMap (adjacentElement1, iDof)
+                                           + betaTotalDof * iDim]
+                                      * M_IPBetaCFE->phi (iDof, iQuadPt)
+                                      * M_IPFaceCFE->normal (iDim, iQuadPt);
                 }
             }
-            betaN[iQuadPt] = std::fabs(betaN[iQuadPt]);
+            betaN[iQuadPt] = std::fabs (betaN[iQuadPt]);
         }
 
         // Now we can start the assembly. There are 4 parts, depending on
@@ -460,56 +460,56 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
         M_localIPExtended_21->zero();
 
         // Loop on the components
-        for (UInt iFieldDim(0); iFieldDim<nbComponents; ++iFieldDim)
+        for (UInt iFieldDim (0); iFieldDim < nbComponents; ++iFieldDim)
         {
             // Extract the views
-            localMatrix_type::matrix_view viewIPGalerkin_11 = M_localIPGalerkin_11->block(iFieldDim,iFieldDim);
-            localMatrix_type::matrix_view viewIPGalerkin_22 = M_localIPGalerkin_22->block(iFieldDim,iFieldDim);
-            localMatrix_type::matrix_view viewIPExtended_12 = M_localIPExtended_12->block(iFieldDim,iFieldDim);
-            localMatrix_type::matrix_view viewIPExtended_21 = M_localIPExtended_21->block(iFieldDim,iFieldDim);
+            localMatrix_type::matrix_view viewIPGalerkin_11 = M_localIPGalerkin_11->block (iFieldDim, iFieldDim);
+            localMatrix_type::matrix_view viewIPGalerkin_22 = M_localIPGalerkin_22->block (iFieldDim, iFieldDim);
+            localMatrix_type::matrix_view viewIPExtended_12 = M_localIPExtended_12->block (iFieldDim, iFieldDim);
+            localMatrix_type::matrix_view viewIPExtended_21 = M_localIPExtended_21->block (iFieldDim, iFieldDim);
 
-            for (UInt iDof(0); iDof< nbLocalDof; ++iDof)
+            for (UInt iDof (0); iDof < nbLocalDof; ++iDof)
             {
-                for (UInt jDof(0); jDof<nbLocalDof; ++jDof)
+                for (UInt jDof (0); jDof < nbLocalDof; ++jDof)
                 {
                     localValue_11 = 0.0;
                     localValue_22 = 0.0;
                     localValue_12 = 0.0;
                     localValue_21 = 0.0;
 
-                    for (UInt iQuadPt(0); iQuadPt< nbQuadPt; ++iQuadPt)
+                    for (UInt iQuadPt (0); iQuadPt < nbQuadPt; ++iQuadPt)
                     {
-                        for (UInt iDim(0); iDim<3; ++iDim)
+                        for (UInt iDim (0); iDim < 3; ++iDim)
                         {
                             localValue_11 += betaN[iQuadPt]
-                                             * M_IP1CFE->dphi(iDof,iDim,iQuadPt)
-                                             * M_IP1CFE->dphi(jDof,iDim,iQuadPt)
-                                             * M_IP1CFE->wDetJacobian(iQuadPt);
+                                             * M_IP1CFE->dphi (iDof, iDim, iQuadPt)
+                                             * M_IP1CFE->dphi (jDof, iDim, iQuadPt)
+                                             * M_IP1CFE->wDetJacobian (iQuadPt);
 
                             localValue_22 += betaN[iQuadPt]
-                                             * M_IP2CFE->dphi(iDof,iDim,iQuadPt)
-                                             * M_IP2CFE->dphi(jDof,iDim,iQuadPt)
-                                             * M_IP2CFE->wDetJacobian(iQuadPt);
+                                             * M_IP2CFE->dphi (iDof, iDim, iQuadPt)
+                                             * M_IP2CFE->dphi (jDof, iDim, iQuadPt)
+                                             * M_IP2CFE->wDetJacobian (iQuadPt);
 
                             localValue_12 += betaN[iQuadPt]
-                                             * M_IP1CFE->dphi(iDof,iDim,iQuadPt)
-                                             * M_IP2CFE->dphi(jDof,iDim,iQuadPt)
-                                             * M_IP1CFE->wDetJacobian(iQuadPt);
+                                             * M_IP1CFE->dphi (iDof, iDim, iQuadPt)
+                                             * M_IP2CFE->dphi (jDof, iDim, iQuadPt)
+                                             * M_IP1CFE->wDetJacobian (iQuadPt);
 
                             localValue_21 += betaN[iQuadPt]
-                                             * M_IP2CFE->dphi(iDof,iDim,iQuadPt)
-                                             * M_IP1CFE->dphi(jDof,iDim,iQuadPt)
-                                             * M_IP1CFE->wDetJacobian(iQuadPt);
+                                             * M_IP2CFE->dphi (iDof, iDim, iQuadPt)
+                                             * M_IP1CFE->dphi (jDof, iDim, iQuadPt)
+                                             * M_IP1CFE->wDetJacobian (iQuadPt);
                         }
                     }
 
                     // Here we put the values in the local matrices
                     // We care for sign (to get jumps) and for the
                     // coefficient here.
-                    viewIPGalerkin_11(iDof,jDof) += coef*hFace2*localValue_11;
-                    viewIPGalerkin_22(iDof,jDof) += coef*hFace2*localValue_22;
-                    viewIPExtended_12(iDof,jDof) += -coef*hFace2*localValue_12;
-                    viewIPExtended_21(iDof,jDof) += -coef*hFace2*localValue_21;
+                    viewIPGalerkin_11 (iDof, jDof) += coef * hFace2 * localValue_11;
+                    viewIPGalerkin_22 (iDof, jDof) += coef * hFace2 * localValue_22;
+                    viewIPExtended_12 (iDof, jDof) += -coef * hFace2 * localValue_12;
+                    viewIPExtended_21 (iDof, jDof) += -coef * hFace2 * localValue_21;
                 }
             }
         }
@@ -519,43 +519,43 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
         // contributions for Galerkin and Extended
         // stencil.
 
-        for (UInt iFieldDim(0); iFieldDim<nbComponents; ++iFieldDim)
+        for (UInt iFieldDim (0); iFieldDim < nbComponents; ++iFieldDim)
         {
-            assembleMatrix( *matrixGalerkin,
-                            *M_localIPGalerkin_11,
-                            *M_IP1CFE,
-                            *M_IP1CFE,
-                            M_fespace->dof(),
-                            M_fespace->dof(),
-                            iFieldDim, iFieldDim,
-                            iFieldDim*M_fespace->dof().numTotalDof(), iFieldDim*M_fespace->dof().numTotalDof() );
+            assembleMatrix ( *matrixGalerkin,
+                             *M_localIPGalerkin_11,
+                             *M_IP1CFE,
+                             *M_IP1CFE,
+                             M_fespace->dof(),
+                             M_fespace->dof(),
+                             iFieldDim, iFieldDim,
+                             iFieldDim * M_fespace->dof().numTotalDof(), iFieldDim * M_fespace->dof().numTotalDof() );
 
-            assembleMatrix( *matrixGalerkin,
-                            *M_localIPGalerkin_22,
-                            *M_IP2CFE,
-                            *M_IP2CFE,
-                            M_fespace->dof(),
-                            M_fespace->dof(),
-                            iFieldDim, iFieldDim,
-                            iFieldDim*M_fespace->dof().numTotalDof(), iFieldDim*M_fespace->dof().numTotalDof() );
+            assembleMatrix ( *matrixGalerkin,
+                             *M_localIPGalerkin_22,
+                             *M_IP2CFE,
+                             *M_IP2CFE,
+                             M_fespace->dof(),
+                             M_fespace->dof(),
+                             iFieldDim, iFieldDim,
+                             iFieldDim * M_fespace->dof().numTotalDof(), iFieldDim * M_fespace->dof().numTotalDof() );
 
-            assembleMatrix( *matrixExtended,
-                            *M_localIPExtended_12,
-                            *M_IP1CFE,
-                            *M_IP2CFE,
-                            M_fespace->dof(),
-                            M_fespace->dof(),
-                            iFieldDim, iFieldDim,
-                            iFieldDim*M_fespace->dof().numTotalDof(), iFieldDim*M_fespace->dof().numTotalDof() );
+            assembleMatrix ( *matrixExtended,
+                             *M_localIPExtended_12,
+                             *M_IP1CFE,
+                             *M_IP2CFE,
+                             M_fespace->dof(),
+                             M_fespace->dof(),
+                             iFieldDim, iFieldDim,
+                             iFieldDim * M_fespace->dof().numTotalDof(), iFieldDim * M_fespace->dof().numTotalDof() );
 
-            assembleMatrix( *matrixExtended,
-                            *M_localIPExtended_21,
-                            *M_IP2CFE,
-                            *M_IP1CFE,
-                            M_fespace->dof(),
-                            M_fespace->dof(),
-                            iFieldDim, iFieldDim,
-                            iFieldDim*M_fespace->dof().numTotalDof(), iFieldDim*M_fespace->dof().numTotalDof() );
+            assembleMatrix ( *matrixExtended,
+                             *M_localIPExtended_21,
+                             *M_IP2CFE,
+                             *M_IP1CFE,
+                             M_fespace->dof(),
+                             M_fespace->dof(),
+                             iFieldDim, iFieldDim,
+                             iFieldDim * M_fespace->dof().numTotalDof(), iFieldDim * M_fespace->dof().numTotalDof() );
         }
     }
 
@@ -564,33 +564,33 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
 template<typename mesh_type, typename matrix_type, typename vector_type>
 void
 ADRAssemblerIP< mesh_type, matrix_type, vector_type>::
-addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
-                          const matrix_ptrType& matrixExtended,
-                          const Real& coef)
+addIPStabilizationStencil (const matrix_ptrType& matrixGalerkin,
+                           const matrix_ptrType& matrixExtended,
+                           const Real& coef)
 {
-    ASSERT(M_fespace != 0, "No FE space for building the IP stabilization! ");
+    ASSERT (M_fespace != 0, "No FE space for building the IP stabilization! ");
 
     // Some constants
-    const UInt nbBoundaryFaces(M_fespace->mesh()->numBFaces());
-    const UInt nbFaces(M_fespace->mesh()->numFaces());
-    const UInt nbQuadPt(M_fespace->bdQr().nbQuadPt());
-    const UInt nbLocalDof(M_fespace->fe().nbFEDof());
-    const UInt nbComponents(M_fespace->fieldDim());
+    const UInt nbBoundaryFaces (M_fespace->mesh()->numBFaces() );
+    const UInt nbFaces (M_fespace->mesh()->numFaces() );
+    const UInt nbQuadPt (M_fespace->bdQr().nbQuadPt() );
+    const UInt nbLocalDof (M_fespace->fe().nbFEDof() );
+    const UInt nbComponents (M_fespace->fieldDim() );
 
 
     // Temporaries
-    Real localValue_11(0.0);
-    Real localValue_22(0.0);
-    Real localValue_12(0.0);
-    Real localValue_21(0.0);
-    Real hFace2(0.0);
+    Real localValue_11 (0.0);
+    Real localValue_22 (0.0);
+    Real localValue_12 (0.0);
+    Real localValue_21 (0.0);
+    Real hFace2 (0.0);
 
     // Here instead of looping over the elements, we loop on the faces.
-    for (UInt iFace(nbBoundaryFaces); iFace< nbFaces; ++iFace)
+    for (UInt iFace (nbBoundaryFaces); iFace < nbFaces; ++iFace)
     {
         // Get the adjacent elements ID
-        const UInt adjacentElement1(M_fespace->mesh()->face(iFace).firstAdjacentElementIdentity());
-        const UInt adjacentElement2(M_fespace->mesh()->face(iFace).secondAdjacentElementIdentity());
+        const UInt adjacentElement1 (M_fespace->mesh()->face (iFace).firstAdjacentElementIdentity() );
+        const UInt adjacentElement2 (M_fespace->mesh()->face (iFace).secondAdjacentElementIdentity() );
 
         // Here we check that the face is included in the IP
         // stabilization: it is not a boundary face (we do not
@@ -598,7 +598,7 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
         // across the different partitions of the mesh (if they exist).
         // These cases are the excluded.
 
-        if ((adjacentElement1 == NotAnId) || (adjacentElement2 == NotAnId) || (adjacentElement1 == adjacentElement2))
+        if ( (adjacentElement1 == NotAnId) || (adjacentElement2 == NotAnId) || (adjacentElement1 == adjacentElement2) )
         {
             continue;
         };
@@ -608,49 +608,49 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
         // we need to update the currentFEs with a quadrature that lies on the face.
         // First step , we compute this quadrature.
 
-        M_IPFaceCFE->updateMeasNormalQuadPt(M_fespace->mesh()->face(iFace));
+        M_IPFaceCFE->updateMeasNormalQuadPt (M_fespace->mesh()->face (iFace) );
         hFace2 = M_IPFaceCFE->measure();
 
         // Second step, we take the quadrature back to the reference frame for both
         // adjacent elements
 
-        M_IPQuad1CFE->update( M_fespace->mesh()->element(adjacentElement1),UPDATE_ONLY_CELL_NODES );
+        M_IPQuad1CFE->update ( M_fespace->mesh()->element (adjacentElement1), UPDATE_ONLY_CELL_NODES );
 
-        QuadratureRule faceQR1("custom quad 1",TETRA,3,0,0);
-        for (int iQuad(0); iQuad< nbQuadPt; ++iQuad) // Here we do not use UInt because of KNM, but we should
+        QuadratureRule faceQR1 ("custom quad 1", TETRA, 3, 0, 0);
+        for (int iQuad (0); iQuad < nbQuadPt; ++iQuad) // Here we do not use UInt because of KNM, but we should
         {
-            Real x(0.0),y(0.0),z(0.0);
-            M_IPQuad1CFE->coorBackMap( M_IPFaceCFE->quadPt(iQuad,0),
-                                       M_IPFaceCFE->quadPt(iQuad,1),
-                                       M_IPFaceCFE->quadPt(iQuad,2),
-                                       x,y,z);
-            QuadraturePoint newPoint(x,y,z,M_fespace->bdQr().weight(iQuad));
-            faceQR1.addPoint(newPoint);
+            Real x (0.0), y (0.0), z (0.0);
+            M_IPQuad1CFE->coorBackMap ( M_IPFaceCFE->quadPt (iQuad, 0),
+                                        M_IPFaceCFE->quadPt (iQuad, 1),
+                                        M_IPFaceCFE->quadPt (iQuad, 2),
+                                        x, y, z);
+            QuadraturePoint newPoint (x, y, z, M_fespace->bdQr().weight (iQuad) );
+            faceQR1.addPoint (newPoint);
         }
 
-        M_IPQuad2CFE->update( M_fespace->mesh()->element(adjacentElement2),UPDATE_ONLY_CELL_NODES );
-        QuadratureRule faceQR2("custom quad 2",TETRA,3,0,0);
-        for (int iQuad(0); iQuad< nbQuadPt; ++iQuad) // Idem here
+        M_IPQuad2CFE->update ( M_fespace->mesh()->element (adjacentElement2), UPDATE_ONLY_CELL_NODES );
+        QuadratureRule faceQR2 ("custom quad 2", TETRA, 3, 0, 0);
+        for (int iQuad (0); iQuad < nbQuadPt; ++iQuad) // Idem here
         {
-            Real x(0.0),y(0.0),z(0.0);
-            M_IPQuad2CFE->coorBackMap( M_IPFaceCFE->quadPt(iQuad,0),
-                                       M_IPFaceCFE->quadPt(iQuad,1),
-                                       M_IPFaceCFE->quadPt(iQuad,2),
-                                       x,y,z);
-            QuadraturePoint newPoint(x,y,z,M_fespace->bdQr().weight(iQuad));
-            faceQR2.addPoint(newPoint);
+            Real x (0.0), y (0.0), z (0.0);
+            M_IPQuad2CFE->coorBackMap ( M_IPFaceCFE->quadPt (iQuad, 0),
+                                        M_IPFaceCFE->quadPt (iQuad, 1),
+                                        M_IPFaceCFE->quadPt (iQuad, 2),
+                                        x, y, z);
+            QuadraturePoint newPoint (x, y, z, M_fespace->bdQr().weight (iQuad) );
+            faceQR2.addPoint (newPoint);
         }
 
         // Third step, we change the quadrature in the CurrentFEs
 
-        M_IP1CFE->setQuadRule(faceQR1);
-        M_IP2CFE->setQuadRule(faceQR2);
+        M_IP1CFE->setQuadRule (faceQR1);
+        M_IP2CFE->setQuadRule (faceQR2);
 
         // Now the CurrentFEs are updated with a quadrature that is
         // actually only on the considered face (iterFace).
 
-        M_IP1CFE->update(M_fespace->mesh()->element(adjacentElement1), UPDATE_DPHI | UPDATE_WDET);
-        M_IP2CFE->update(M_fespace->mesh()->element(adjacentElement2), UPDATE_DPHI | UPDATE_WDET);
+        M_IP1CFE->update (M_fespace->mesh()->element (adjacentElement1), UPDATE_DPHI | UPDATE_WDET);
+        M_IP2CFE->update (M_fespace->mesh()->element (adjacentElement2), UPDATE_DPHI | UPDATE_WDET);
 
         // Now we can start the assembly. There are 4 parts, depending on
         // which sides we consider ( side1 with side1, side1 with side2,...)
@@ -664,56 +664,56 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
         M_localIPExtended_21->zero();
 
         // Loop on the components
-        for (UInt iFieldDim(0); iFieldDim<nbComponents; ++iFieldDim)
+        for (UInt iFieldDim (0); iFieldDim < nbComponents; ++iFieldDim)
         {
             // Extract the views
-            localMatrix_type::matrix_view viewIPGalerkin_11 = M_localIPGalerkin_11->block(iFieldDim,iFieldDim);
-            localMatrix_type::matrix_view viewIPGalerkin_22 = M_localIPGalerkin_22->block(iFieldDim,iFieldDim);
-            localMatrix_type::matrix_view viewIPExtended_12 = M_localIPExtended_12->block(iFieldDim,iFieldDim);
-            localMatrix_type::matrix_view viewIPExtended_21 = M_localIPExtended_21->block(iFieldDim,iFieldDim);
+            localMatrix_type::matrix_view viewIPGalerkin_11 = M_localIPGalerkin_11->block (iFieldDim, iFieldDim);
+            localMatrix_type::matrix_view viewIPGalerkin_22 = M_localIPGalerkin_22->block (iFieldDim, iFieldDim);
+            localMatrix_type::matrix_view viewIPExtended_12 = M_localIPExtended_12->block (iFieldDim, iFieldDim);
+            localMatrix_type::matrix_view viewIPExtended_21 = M_localIPExtended_21->block (iFieldDim, iFieldDim);
 
-            for (UInt iDof(0); iDof< nbLocalDof; ++iDof)
+            for (UInt iDof (0); iDof < nbLocalDof; ++iDof)
             {
-                for (UInt jDof(0); jDof<nbLocalDof; ++jDof)
+                for (UInt jDof (0); jDof < nbLocalDof; ++jDof)
                 {
                     localValue_11 = 0.0;
                     localValue_22 = 0.0;
                     localValue_12 = 0.0;
                     localValue_21 = 0.0;
 
-                    for (UInt iQuadPt(0); iQuadPt< nbQuadPt; ++iQuadPt)
+                    for (UInt iQuadPt (0); iQuadPt < nbQuadPt; ++iQuadPt)
                     {
-                        for (UInt iDim(0); iDim<3; ++iDim)
+                        for (UInt iDim (0); iDim < 3; ++iDim)
                         {
                             localValue_11 += 1.0
-                                             * M_IP1CFE->dphi(iDof,iDim,iQuadPt)
-                                             * M_IP1CFE->dphi(jDof,iDim,iQuadPt)
-                                             * M_IP1CFE->wDetJacobian(iQuadPt);
+                                             * M_IP1CFE->dphi (iDof, iDim, iQuadPt)
+                                             * M_IP1CFE->dphi (jDof, iDim, iQuadPt)
+                                             * M_IP1CFE->wDetJacobian (iQuadPt);
 
                             localValue_22 += 1.0
-                                             * M_IP2CFE->dphi(iDof,iDim,iQuadPt)
-                                             * M_IP2CFE->dphi(jDof,iDim,iQuadPt)
-                                             * M_IP2CFE->wDetJacobian(iQuadPt);
+                                             * M_IP2CFE->dphi (iDof, iDim, iQuadPt)
+                                             * M_IP2CFE->dphi (jDof, iDim, iQuadPt)
+                                             * M_IP2CFE->wDetJacobian (iQuadPt);
 
                             localValue_12 += 1.0
-                                             * M_IP1CFE->dphi(iDof,iDim,iQuadPt)
-                                             * M_IP2CFE->dphi(jDof,iDim,iQuadPt)
-                                             * M_IP1CFE->wDetJacobian(iQuadPt);
+                                             * M_IP1CFE->dphi (iDof, iDim, iQuadPt)
+                                             * M_IP2CFE->dphi (jDof, iDim, iQuadPt)
+                                             * M_IP1CFE->wDetJacobian (iQuadPt);
 
                             localValue_21 += 1.0
-                                             * M_IP2CFE->dphi(iDof,iDim,iQuadPt)
-                                             * M_IP1CFE->dphi(jDof,iDim,iQuadPt)
-                                             * M_IP1CFE->wDetJacobian(iQuadPt);
+                                             * M_IP2CFE->dphi (iDof, iDim, iQuadPt)
+                                             * M_IP1CFE->dphi (jDof, iDim, iQuadPt)
+                                             * M_IP1CFE->wDetJacobian (iQuadPt);
                         }
                     }
 
                     // Here we put the values in the local matrices
                     // We care for sign (to get jumps) and for the
                     // coefficient here.
-                    viewIPGalerkin_11(iDof,jDof) += coef*hFace2*localValue_11;
-                    viewIPGalerkin_22(iDof,jDof) += coef*hFace2*localValue_22;
-                    viewIPExtended_12(iDof,jDof) += -coef*hFace2*localValue_12;
-                    viewIPExtended_21(iDof,jDof) += -coef*hFace2*localValue_21;
+                    viewIPGalerkin_11 (iDof, jDof) += coef * hFace2 * localValue_11;
+                    viewIPGalerkin_22 (iDof, jDof) += coef * hFace2 * localValue_22;
+                    viewIPExtended_12 (iDof, jDof) += -coef * hFace2 * localValue_12;
+                    viewIPExtended_21 (iDof, jDof) += -coef * hFace2 * localValue_21;
                 }
             }
         }
@@ -723,43 +723,43 @@ addIPStabilizationStencil(const matrix_ptrType& matrixGalerkin,
         // contributions for Galerkin and Extended
         // stencil.
 
-        for (UInt iFieldDim(0); iFieldDim<nbComponents; ++iFieldDim)
+        for (UInt iFieldDim (0); iFieldDim < nbComponents; ++iFieldDim)
         {
-            assembleMatrix( *matrixGalerkin,
-                            *M_localIPGalerkin_11,
-                            *M_IP1CFE,
-                            *M_IP1CFE,
-                            M_fespace->dof(),
-                            M_fespace->dof(),
-                            iFieldDim, iFieldDim,
-                            iFieldDim*M_fespace->dof().numTotalDof(), iFieldDim*M_fespace->dof().numTotalDof() );
+            assembleMatrix ( *matrixGalerkin,
+                             *M_localIPGalerkin_11,
+                             *M_IP1CFE,
+                             *M_IP1CFE,
+                             M_fespace->dof(),
+                             M_fespace->dof(),
+                             iFieldDim, iFieldDim,
+                             iFieldDim * M_fespace->dof().numTotalDof(), iFieldDim * M_fespace->dof().numTotalDof() );
 
-            assembleMatrix( *matrixGalerkin,
-                            *M_localIPGalerkin_22,
-                            *M_IP2CFE,
-                            *M_IP2CFE,
-                            M_fespace->dof(),
-                            M_fespace->dof(),
-                            iFieldDim, iFieldDim,
-                            iFieldDim*M_fespace->dof().numTotalDof(), iFieldDim*M_fespace->dof().numTotalDof() );
+            assembleMatrix ( *matrixGalerkin,
+                             *M_localIPGalerkin_22,
+                             *M_IP2CFE,
+                             *M_IP2CFE,
+                             M_fespace->dof(),
+                             M_fespace->dof(),
+                             iFieldDim, iFieldDim,
+                             iFieldDim * M_fespace->dof().numTotalDof(), iFieldDim * M_fespace->dof().numTotalDof() );
 
-            assembleMatrix( *matrixExtended,
-                            *M_localIPExtended_12,
-                            *M_IP1CFE,
-                            *M_IP2CFE,
-                            M_fespace->dof(),
-                            M_fespace->dof(),
-                            iFieldDim, iFieldDim,
-                            iFieldDim*M_fespace->dof().numTotalDof(), iFieldDim*M_fespace->dof().numTotalDof() );
+            assembleMatrix ( *matrixExtended,
+                             *M_localIPExtended_12,
+                             *M_IP1CFE,
+                             *M_IP2CFE,
+                             M_fespace->dof(),
+                             M_fespace->dof(),
+                             iFieldDim, iFieldDim,
+                             iFieldDim * M_fespace->dof().numTotalDof(), iFieldDim * M_fespace->dof().numTotalDof() );
 
-            assembleMatrix( *matrixExtended,
-                            *M_localIPExtended_21,
-                            *M_IP2CFE,
-                            *M_IP1CFE,
-                            M_fespace->dof(),
-                            M_fespace->dof(),
-                            iFieldDim, iFieldDim,
-                            iFieldDim*M_fespace->dof().numTotalDof(), iFieldDim*M_fespace->dof().numTotalDof() );
+            assembleMatrix ( *matrixExtended,
+                             *M_localIPExtended_21,
+                             *M_IP2CFE,
+                             *M_IP1CFE,
+                             M_fespace->dof(),
+                             M_fespace->dof(),
+                             iFieldDim, iFieldDim,
+                             iFieldDim * M_fespace->dof().numTotalDof(), iFieldDim * M_fespace->dof().numTotalDof() );
         }
     }
 

@@ -43,9 +43,9 @@ namespace LifeV
 // Public methods
 // =======================
 
-bool Switch::set ( std::string const & a )
+bool Switch::set ( std::string const& a )
 {
-    iterator_Type i = find( a );
+    iterator_Type i = find ( a );
     if ( i == end() )
     {
         return false;
@@ -58,16 +58,16 @@ bool Switch::set ( std::string const & a )
     }
 }
 
-bool Switch::set ( const char * a )
+bool Switch::set ( const char* a )
 {
-    std::string temp( a );
+    std::string temp ( a );
     return set
            ( temp );
 }
 
-bool Switch::unset( std::string const & a )
+bool Switch::unset ( std::string const& a )
 {
-    iterator_Type i = find( a );
+    iterator_Type i = find ( a );
     if ( i == end() )
     {
         return false;
@@ -80,16 +80,16 @@ bool Switch::unset( std::string const & a )
     }
 }
 
-bool Switch::unset( const char * a )
+bool Switch::unset ( const char* a )
 {
-    std::string temp( a );
-    return unset( temp );
+    std::string temp ( a );
+    return unset ( temp );
 
 }
 
-bool Switch::toggle( std::string const & a )
+bool Switch::toggle ( std::string const& a )
 {
-    iterator_Type i = find( a );
+    iterator_Type i = find ( a );
     if ( i == end() )
     {
         return false;
@@ -102,19 +102,19 @@ bool Switch::toggle( std::string const & a )
     }
 }
 
-bool Switch::toggle( const char * a )
+bool Switch::toggle ( const char* a )
 {
-    std::string temp( a );
-    return toggle( temp );
+    std::string temp ( a );
+    return toggle ( temp );
 
 }
 
-void Switch::create( std::string const & a, bool status )
+void Switch::create ( std::string const& a, bool status )
 {
-    iterator_Type i = find( a );
+    iterator_Type i = find ( a );
     if ( i == end() )
     {
-        insert( std::make_pair( a, status ) );
+        insert ( std::make_pair ( a, status ) );
     }
 
     else
@@ -123,38 +123,38 @@ void Switch::create( std::string const & a, bool status )
     }
 }
 
-void Switch::create( const char * a, bool status )
+void Switch::create ( const char* a, bool status )
 {
-    std::string temp( a );
-    create( temp, status );
+    std::string temp ( a );
+    create ( temp, status );
 }
 
 
-std::pair<bool, bool> Switch::status( std::string const & a ) const
+std::pair<bool, bool> Switch::status ( std::string const& a ) const
 {
-    iteratorConst_Type i = find( a );
+    iteratorConst_Type i = find ( a );
     if ( i == end() )
     {
-        return std::make_pair( false, false );
+        return std::make_pair ( false, false );
     }
 
     else
     {
-        return std::make_pair( true, i->second );
+        return std::make_pair ( true, i->second );
     }
 }
 
-std::pair<bool, bool> Switch::status( const char * a ) const
+std::pair<bool, bool> Switch::status ( const char* a ) const
 {
-    std::string temp( a );
-    return status( temp );
+    std::string temp ( a );
+    return status ( temp );
 }
 
 
 bool
-Switch::test( std::string const & a ) const
+Switch::test ( std::string const& a ) const
 {
-    iteratorConst_Type i = find( a );
+    iteratorConst_Type i = find ( a );
     if ( i == end() )
     {
         return false;
@@ -165,13 +165,13 @@ Switch::test( std::string const & a ) const
     }
 }
 
-bool Switch::test( const char * a ) const
+bool Switch::test ( const char* a ) const
 {
-    std::string temp( a );
-    return test( temp );
+    std::string temp ( a );
+    return test ( temp );
 }
 
-std::ostream & Switch::showMe( bool verbose, std::ostream & out ) const
+std::ostream& Switch::showMe ( bool verbose, std::ostream& out ) const
 {
     if ( verbose )
     {

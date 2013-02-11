@@ -655,7 +655,7 @@ protected:
       @param elmatMix The local matrix in mixed form.
       @param elmatReactionTerm The local matrix for the reaction term.
     */
-    virtual void localMatrixComputation ( const UInt & iElem,
+    virtual void localMatrixComputation ( const UInt& iElem,
                                           MatrixElemental& elmatMix,
                                           MatrixElemental& elmatReactionTerm );
 
@@ -667,7 +667,7 @@ protected:
       @param iElem Id of the current geometrical element.
       @param elvecMix The local vector in mixed form.
     */
-    virtual void localVectorComputation ( const UInt & iElem,
+    virtual void localVectorComputation ( const UInt& iElem,
                                           VectorElemental& elvecMix );
 
     //! Performs static condensation
@@ -838,10 +838,10 @@ buildSystem ()
     M_displayer->leaderPrint ( "Perform Static Condensation..." );
     chronoStaticCondensation.start();
 
-   /* Elemental matrix for mixed hybrid matrix, maps [A | B | C] in
-     | A    B  C |
-     | B^T  0  0 |
-     | C^T  0  0 | */
+    /* Elemental matrix for mixed hybrid matrix, maps [A | B | C] in
+      | A    B  C |
+      | B^T  0  0 |
+      | C^T  0  0 | */
     const UInt primalNbDof = M_primalField->getFESpace().refFE().nbDof();
     const UInt dualNbDof   = M_dualField->getFESpace().refFE().nbDof();
     const UInt hybridNbDof = M_hybridField->getFESpace().refFE().nbDof();
@@ -870,7 +870,7 @@ buildSystem ()
     preLoopElementsComputation ();
 
     //! Loop on all the volume elements.
-    for ( UInt iElem(0); iElem < meshNumberOfElements; ++iElem )
+    for ( UInt iElem (0); iElem < meshNumberOfElements; ++iElem )
     {
 
         // Clear the local hybrid matrix and the local hybrid right hand side.
@@ -909,9 +909,9 @@ buildSystem ()
     //! End of loop volume operation.
 
     chronoStaticCondensation.stop();
-    M_displayer->leaderPrintMax( " done in " , chronoStaticCondensation.diff() );
+    M_displayer->leaderPrintMax ( " done in " , chronoStaticCondensation.diff() );
 
-    M_displayer->leaderPrint( "Apply boundary conditions and assemble global matrix and vector..." );
+    M_displayer->leaderPrint ( "Apply boundary conditions and assemble global matrix and vector..." );
 
     chronoAssemble.start();
 
@@ -926,7 +926,7 @@ buildSystem ()
 
     chronoAssemble.stop();
 
-    M_displayer->leaderPrintMax( " done in " , chronoAssemble.diff() );
+    M_displayer->leaderPrintMax ( " done in " , chronoAssemble.diff() );
 
 } // buildSystem
 
@@ -937,18 +937,18 @@ DarcySolverLinear < MeshType >::
 setup ()
 {
     // Setup the linear solver.
-    M_linearSolver.setParameters( M_data->linearSolverList() );
+    M_linearSolver.setParameters ( M_data->linearSolverList() );
     M_linearSolver.setCommunicator ( M_displayer->comm() );
 
     // Choose the preconditioner type.
-    const std::string precType = M_data->preconditionerList().template get<std::string>( "prectype" );
+    const std::string precType = M_data->preconditionerList().template get<std::string> ( "prectype" );
 
     // Create a preconditioner object.
-    M_prec.reset ( PRECFactory::instance().createObject( precType ) );
-    ASSERT( M_prec.get() != 0, "DarcySolverLinear : Preconditioner not set" );
+    M_prec.reset ( PRECFactory::instance().createObject ( precType ) );
+    ASSERT ( M_prec.get() != 0, "DarcySolverLinear : Preconditioner not set" );
 
     // Set the data for the preconditioner.
-    M_prec->setParametersList( M_data->preconditionerList().sublist( precType ) );
+    M_prec->setParametersList ( M_data->preconditionerList().sublist ( precType ) );
 } // setup
 
 // Solve the linear system.
@@ -975,7 +975,7 @@ solveLinearSystem ()
     M_linearSolver.solve ( solution );
 
     // Save the solution into the hybrid variable.
-    M_hybridField->setVector( *solution );
+    M_hybridField->setVector ( *solution );
 
 } // solveLinearSystem
 
@@ -989,7 +989,7 @@ computePrimalAndDual ()
     // LifeChrono.
     LifeChrono chronoComputePrimalAndDual;
 
-    M_displayer->leaderPrint( "Compute pressure and flux..." );
+    M_displayer->leaderPrint ( "Compute pressure and flux..." );
     chronoComputePrimalAndDual.start();
 
     // The total number of elements in the mesh.
@@ -1008,7 +1008,7 @@ computePrimalAndDual ()
        The reconstruction of the primal and dual variabile need this share, so we create a repeated
        epetra vector. This operation maximize the efficiency of send/receive time cost instead to
        send and receive each time a single datum. */
-    vector_Type hybrid_Repeated( M_hybridField->getVector(), Repeated );
+    vector_Type hybrid_Repeated ( M_hybridField->getVector(), Repeated );
 
     // Clean the vector for the primal and the dual variable
     M_primalField->cleanField();
@@ -1042,7 +1042,7 @@ computePrimalAndDual ()
                                     hybridNbDof, 1 );
 
     //! Loop on all the volume elements.
-    for ( UInt iElem(0); iElem < meshNumberOfElements; ++iElem )
+    for ( UInt iElem (0); iElem < meshNumberOfElements; ++iElem )
     {
         // Clear the local solution vector.
         localSolution.zero();
@@ -1070,10 +1070,10 @@ computePrimalAndDual ()
                          primalNbDof,
                          M_primalField->getFESpace().dof (), 1 );
 
-        for ( UInt iLocalFacet(0); iLocalFacet < elementNumberFacets; ++iLocalFacet )
+        for ( UInt iLocalFacet (0); iLocalFacet < elementNumberFacets; ++iLocalFacet )
         {
             const UInt iGlobalFacet ( M_dualField->getFESpace().mesh()->localFacetId ( iElem, iLocalFacet ) );
-            if ( M_dualField->getFESpace().mesh()->facet( iGlobalFacet ).firstAdjacentElementIdentity() != iElem )
+            if ( M_dualField->getFESpace().mesh()->facet ( iGlobalFacet ).firstAdjacentElementIdentity() != iElem )
             {
                 localSolution.block ( 0 ) [ iLocalFacet ] = 0.;
             }
@@ -1097,7 +1097,7 @@ computePrimalAndDual ()
     postComputePrimalAndDual ();
 
     chronoComputePrimalAndDual.stop ();
-    M_displayer->leaderPrintMax( " done in " , chronoComputePrimalAndDual.diff() );
+    M_displayer->leaderPrintMax ( " done in " , chronoComputePrimalAndDual.diff() );
 
 } // computePrimalAndDual
 
@@ -1130,14 +1130,14 @@ computeConstantMatrices ( MatrixElemental& elmatMix )
 {
 
     // Clean the local matrix which will store the matrix B.
-    elmatMix.block ( 0, 1 ) = static_cast<Real>(0.);
+    elmatMix.block ( 0, 1 ) = static_cast<Real> (0.);
 
     // Clean the local matrix which will store the matrix C.
-    elmatMix.block ( 0, 2 ) = static_cast<Real>(0.);
+    elmatMix.block ( 0, 2 ) = static_cast<Real> (0.);
 
     /* Update the divergence matrix, it is independent of the current element
        thanks to the Piola transform. */
-    grad_Hdiv ( static_cast<Real>(1.), elmatMix, M_dualField->getFESpace().fe(),
+    grad_Hdiv ( static_cast<Real> (1.), elmatMix, M_dualField->getFESpace().fe(),
                 M_primalField->getFESpace().fe(), 0, 1 );
 
     // Select the correct element which represent ( RT0 \cdot N ) * Hybrid.
@@ -1175,11 +1175,11 @@ computeConstantMatrices ( MatrixElemental& elmatMix )
 template < typename MeshType >
 void
 DarcySolverLinear < MeshType >::
-localMatrixComputation ( const UInt & iElem, MatrixElemental& elmatMix,
+localMatrixComputation ( const UInt& iElem, MatrixElemental& elmatMix,
                          MatrixElemental& elmatReactionTerm )
 {
     // Element of current id.
-    const typename mesh_Type::element_Type& element = M_primalField->getFESpace().mesh()->element( iElem );
+    const typename mesh_Type::element_Type& element = M_primalField->getFESpace().mesh()->element ( iElem );
 
     /* Modify the (0,0) block (A) of the matrix elmatMix. The blocks (0,1) (B)
        and (0,2) (C) are independent of the element and have already been computed. */
@@ -1212,7 +1212,7 @@ localMatrixComputation ( const UInt & iElem, MatrixElemental& elmatMix,
     elmatReactionTerm.zero();
 
     // Computes the value for the reaction term.
-    const Real reactionValue = M_reactionTermFct->eval( iElem, barycenter, M_data->dataTimePtr()->time() );
+    const Real reactionValue = M_reactionTermFct->eval ( iElem, barycenter, M_data->dataTimePtr()->time() );
 
     // Update the current element of ID iElem for the primal variable.
     M_primalField->getFESpace().fe().update ( element, UPDATE_PHI | UPDATE_WDET );
@@ -1226,10 +1226,10 @@ localMatrixComputation ( const UInt & iElem, MatrixElemental& elmatMix,
 template < typename MeshType >
 void
 DarcySolverLinear < MeshType >::
-localVectorComputation ( const UInt & iElem, VectorElemental& elvecMix )
+localVectorComputation ( const UInt& iElem, VectorElemental& elvecMix )
 {
     // Element of current id.
-    const typename mesh_Type::element_Type& element = M_primalField->getFESpace().mesh()->element( iElem );
+    const typename mesh_Type::element_Type& element = M_primalField->getFESpace().mesh()->element ( iElem );
 
     // Update the current element of ID iElem only for the dual variable.
     M_dualField->getFESpace().fe().update ( element, UPDATE_PHI_VECT | UPDATE_WDET );
@@ -1331,17 +1331,17 @@ staticCondensation ( MatrixElemental& localMatrixHybrid,
     /* Put in A the matrix L and L^T, where L and L^T is the Cholesky factorization of A.
        For more details see http://www.netlib.org/lapack/double/dpotrf.f */
     lapack.POTRF ( UPLO, dualNbDof, A, dualNbDof, INFO );
-    ASSERT_PRE( !INFO[0], "Lapack factorization of A is not achieved." );
+    ASSERT_PRE ( !INFO[0], "Lapack factorization of A is not achieved." );
 
     /* Put in B the matrix L^{-1} * B, solving a triangular system.
        For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
     lapack.TRTRS ( UPLO, NOTRANS, NODIAG, dualNbDof, primalNbDof, A, dualNbDof, B, dualNbDof, INFO );
-    ASSERT_PRE( !INFO[0], "Lapack Computation B = L^{-1} B  is not achieved." );
+    ASSERT_PRE ( !INFO[0], "Lapack Computation B = L^{-1} B  is not achieved." );
 
     /* Put in C the matrix L^{-1} * C, solving a triangular system.
        For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
     lapack.TRTRS ( UPLO, NOTRANS, NODIAG, dualNbDof, hybridNbDof, A, dualNbDof, C, hybridNbDof, INFO );
-    ASSERT_PRE( !INFO[0], "Lapack Computation C = L^{-1} C  is not achieved." );
+    ASSERT_PRE ( !INFO[0], "Lapack Computation C = L^{-1} C  is not achieved." );
 
     /* Put in BtB the matrix  B^T * L^{-T} * L^{-1} * B = B^T * A^{-1} * B
        BtB stored only on lower part.
@@ -1368,12 +1368,12 @@ staticCondensation ( MatrixElemental& localMatrixHybrid,
        factorization of B^T * A^{-1} * B + elmatReactionTerm.
        For more details see http://www.netlib.org/lapack/double/dpotrf.f  */
     lapack.POTRF ( UPLO, primalNbDof, BtB, primalNbDof, INFO );
-    ASSERT_PRE( !INFO[0],"Lapack factorization of BtB is not achieved." );
+    ASSERT_PRE ( !INFO[0], "Lapack factorization of BtB is not achieved." );
 
     /* Put in BtC the matrix LB^{-1} * BtC = LB^{-1} * B^T * A^{-1} * C.
        For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
     lapack.TRTRS ( UPLO, NOTRANS, NODIAG, primalNbDof, hybridNbDof, BtB, primalNbDof, BtC, primalNbDof, INFO );
-    ASSERT_PRE( !INFO[0], "Lapack Computation BtC = LB^{-1} BtC is not achieved." );
+    ASSERT_PRE ( !INFO[0], "Lapack Computation BtC = LB^{-1} BtC is not achieved." );
 
     /* Put in CtC the matrix -CtC + BtC^T * BtC
        Result stored only on lower part, the matrix CtC stores
@@ -1398,7 +1398,7 @@ staticCondensation ( MatrixElemental& localMatrixHybrid,
     /* Put in fp the vector LB^{-1} * fp = LB^{-1} Fp
        For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
     lapack.TRTRS ( UPLO, NOTRANS, NODIAG, primalNbDof, NBRHS, BtB, primalNbDof, fp, primalNbDof, INFO );
-    ASSERT_PRE( !INFO[0], "Lapack Computation fp = LB^{-1} fp is not achieved." );
+    ASSERT_PRE ( !INFO[0], "Lapack Computation fp = LB^{-1} fp is not achieved." );
 
     /* Put in localVectorHybrid the vector BtC^T * fp =
        C^T * A^{-1} * B^T * ( B^T * A^{-1} * B + elmatReactionTerm )^{-1} * Fp
@@ -1410,7 +1410,7 @@ staticCondensation ( MatrixElemental& localMatrixHybrid,
     /* Put in fv the vector L^{-1} * fv = L^{-1} * Fv, solving a triangular system.
        For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
     lapack.TRTRS ( UPLO, NOTRANS, NODIAG, dualNbDof, NBRHS, A, dualNbDof, fv, dualNbDof, INFO );
-    ASSERT_PRE( !INFO[0], "Lapack Computation fv = L^{-1} fv is not achieved." );
+    ASSERT_PRE ( !INFO[0], "Lapack Computation fv = L^{-1} fv is not achieved." );
 
     /* Put in localVectorHybrid the vector - C^T * fv + localVectorHybrid =
        = C^T * A^{-1} * ( B^T * ( B^T * A^{-1} * B + elmatReactionTerm )^{-1} * Fp - Fv )
@@ -1427,7 +1427,7 @@ staticCondensation ( MatrixElemental& localMatrixHybrid,
     /* Put in fp the vector LB^{-1} * fp = LB^{-1} * B^T * A^{-1} * Fv
        For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
     lapack.TRTRS ( UPLO, NOTRANS, NODIAG, primalNbDof, NBRHS, BtB, primalNbDof, fp, NBRHS, INFO );
-    ASSERT_PRE( !INFO[0], "Lapack Computation fp = LB^{-1} rhs is not achieved." );
+    ASSERT_PRE ( !INFO[0], "Lapack Computation fp = LB^{-1} rhs is not achieved." );
 
     /* Put in M_elvecHyb the vector BtC^T * fp + localVectorHybrid =
        C^T * A^{-1} * [ B^T * ( B^T * A^{-1} * B + elmatReactionTerm )^{-1} * ( B^T * A^{-1} + Fp ) - Fv ]
@@ -1444,7 +1444,7 @@ staticCondensation ( MatrixElemental& localMatrixHybrid,
     symmetrizeMatrix ( hybridNbDof, CtC );
 
     // Update the hybrid element matrix.
-    localMatrixHybrid.block(0,0) = CtC;
+    localMatrixHybrid.block (0, 0) = CtC;
 
 } // staticCondensation
 
@@ -1512,12 +1512,12 @@ localComputePrimalAndDual ( VectorElemental& localSolution,
     /* Put in A the matrix L and L^T, where L and L^T is the Cholesky factorization of A.
        For more details see http://www.netlib.org/lapack/double/dpotrf.f */
     lapack.POTRF ( UPLO, dualNbDof, A, dualNbDof, INFO );
-    ASSERT_PRE( !INFO[0], "Lapack factorization of A is not achieved." );
+    ASSERT_PRE ( !INFO[0], "Lapack factorization of A is not achieved." );
 
     /* Put in B the matrix L^{-1} * B, solving a triangular system.
        For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
     lapack.TRTRS ( UPLO, NOTRANS, NODIAG, dualNbDof, primalNbDof, A, dualNbDof, B, dualNbDof, INFO );
-    ASSERT_PRE( !INFO[0], "Lapack Computation B = L^{-1} B  is not achieved." );
+    ASSERT_PRE ( !INFO[0], "Lapack Computation B = L^{-1} B  is not achieved." );
 
     /* Put in C the matrix L^{-1} * C, solving a triangular system.
        For more details see http://www.netlib.org/lapack/lapack-3.1.1/SRC/dtrtrs.f */
@@ -1676,7 +1676,7 @@ applyBoundaryConditions ()
     }
 
     // Ignoring non-local entries, otherwise they are summed up lately.
-    vector_Type rhsFull( *M_rhs, Unique );
+    vector_Type rhsFull ( *M_rhs, Unique );
 
     /* Update the global hybrid matrix and the global hybrid right hand side with the boundary conditions.
        It takes care of the current time for DarcySolverTransient derived class. */
@@ -1697,9 +1697,9 @@ DarcySolverLinear < MeshType >::
 symmetrizeMatrix ( Int N, MatrixType& A  )
 {
 
-    for ( UInt i ( 0 ); i < static_cast<UInt>(N); ++i )
+    for ( UInt i ( 0 ); i < static_cast<UInt> (N); ++i )
     {
-        for ( UInt j ( i + 1 ); j < static_cast<UInt>(N); ++j )
+        for ( UInt j ( i + 1 ); j < static_cast<UInt> (N); ++j )
         {
             A ( i, j ) = A ( j, i );
         }

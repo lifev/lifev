@@ -136,14 +136,14 @@ public:
 // ===================================================
 namespace BCFlags
 {
-    // Flags for structured meshes
-    const UInt BOTTOM = 1;
-    const UInt LEFT   = 2;
-    const UInt TOP    = 3;
-    const UInt RIGHT  = 4;
+// Flags for structured meshes
+const UInt BOTTOM = 1;
+const UInt LEFT   = 2;
+const UInt TOP    = 3;
+const UInt RIGHT  = 4;
 }
 
-void setBoundaryConditions ( bcHandlerPtr_Type & bcDarcy) ;
+void setBoundaryConditions ( bcHandlerPtr_Type& bcDarcy) ;
 
 // Boundary condition of Dirichlet
 Real dirichlet ( const Real&, const Real&, const Real&, const Real&, const ID& );

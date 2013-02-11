@@ -124,7 +124,7 @@ public:
     /*!
         @param order order of the BDF
      */
-    void setup( const UInt order );
+    void setup ( const UInt order );
 
     //! Initialize all the entries of the unknown vector to be derived with the
     //! vector u0 (duplicated if startup=0)
@@ -133,26 +133,26 @@ public:
         The array of initial conditions needed by the selected BDF is
         initialized as follows: _unk=[ u0(t0), u0(t0-dt), u0(t0-2*dt), ...]
         When startUp = true, only M_unknown[0] is initialized (with u0).
-    	At the first step, class Bfd computes the coefficients of BDF1,
-    	at the second step, the coefficient of BDF2, and so on,
-    	until it reaches the wanted method.
-    	Second order of accuracy is obtained using this procedure to startup BDF2.
-    	Using the startup procedure with BDF3, the accuracy order is limited to the second order;
-    	anyway it is better to use the startup procedure instead of taking u_{-2} = u_{-1} = u_0.
+        At the first step, class Bfd computes the coefficients of BDF1,
+        at the second step, the coefficient of BDF2, and so on,
+        until it reaches the wanted method.
+        Second order of accuracy is obtained using this procedure to startup BDF2.
+        Using the startup procedure with BDF3, the accuracy order is limited to the second order;
+        anyway it is better to use the startup procedure instead of taking u_{-2} = u_{-1} = u_0.
 
-	    @param u0 initial condition vector
-	    @param timeStep time step
-	    @param startup
+        @param u0 initial condition vector
+        @param timeStep time step
+        @param startup
      */
-    void setInitialCondition( feVector_Type u0, Real const timeStep, bool startup = 0 );
+    void setInitialCondition ( feVector_Type u0, Real const timeStep, bool startup = 0 );
 
     //! Initialize all the entries of the unknown vector to be derived with a
     //! set of vectors u0s
     /*!
         @param u0s initial condition vectors
-	    @param timeStep time step
+        @param timeStep time step
      */
-    void setInitialCondition( std::vector<feVector_Type> u0s, Real const timeStep );
+    void setInitialCondition ( std::vector<feVector_Type> u0s, Real const timeStep );
 
     //!Initialize all the entries of the unknonwn vectors with a given function
     /*!
@@ -163,20 +163,20 @@ public:
         on:
         @param u0Function the function we want to interpolate
         @param u0Vector corrected mapped vector, it contains the u0Function(t0) in output
-    	@param feSpace finite element space
+        @param feSpace finite element space
         @param t0 initial time (t0) and the
         @param timeStep time step (for solutions before the initial instant)
 
         Based on the NavierStokesHandler::initialize by M. Fernandez
      */
     template<typename FunctionType, typename FESpaceType>
-    void setInitialCondition( const FunctionType& u0Function, feVector_Type& u0Vector, FESpaceType& feSpace,
-                          Real t0, Real timeStep );
+    void setInitialCondition ( const FunctionType& u0Function, feVector_Type& u0Vector, FESpaceType& feSpace,
+                               Real t0, Real timeStep );
 
     //! Returns the right hand side \f$ \bar{p} \f$ of the time derivative
     //! formula divided by dt
     /*!
-	    @return a feVector_Type, by default feVector_Type = VectorEpetra
+        @return a feVector_Type, by default feVector_Type = VectorEpetra
      */
 
     feVector_Type rhsContribution() const;
@@ -185,9 +185,9 @@ public:
     //! formula divided by timeStep (backward compatibility version, will be discontinued)
     /*!
         @param timeStep time step, 1 by default
-	    @return a feVector_Type, by default feVector_Type = VectorEpetra
+        @return a feVector_Type, by default feVector_Type = VectorEpetra
      */
-    feVector_Type rhsContributionTimeStep( Real timeStep = 1 ) const;
+    feVector_Type rhsContributionTimeStep ( Real timeStep = 1 ) const;
 
     //! Compute the polynomial extrapolation approximation of order n-1 of
     //! u^{n+1} defined by the n stored state vectors
@@ -198,7 +198,7 @@ public:
     /*!
         @param uCurrent current (new) value of the state vector
      */
-    void shiftRight( feVector_Type const& uCurrent );
+    void shiftRight ( feVector_Type const& uCurrent );
 
     //! Update the vectors of the previous time steps by shifting on the right
     //! the old values.
@@ -207,7 +207,7 @@ public:
         @param uCurrent current (new) value of the state vector
         @param timeStepNew new value of the time step
      */
-    void shiftRight( feVector_Type const& uCurrent, Real timeStepNew );
+    void shiftRight ( feVector_Type const& uCurrent, Real timeStepNew );
 
     //! Save the current vector M_unknowns and the current vector M_timeStep
     void storeSolution();
@@ -219,7 +219,7 @@ public:
     /*!
         @param timeStep new time step
      */
-    void restoreSolution( Real timeStep );
+    void restoreSolution ( Real timeStep );
 
     //! Show informations about the BDF
     void showMe() const;
@@ -232,7 +232,7 @@ public:
     /*!
         @param timeStep time step
      */
-    void setTimeStep( Real timeStep );
+    void setTimeStep ( Real timeStep );
 
     //@}
 
@@ -243,27 +243,36 @@ public:
     /*!
         @param i index of the coefficient
      */
-    const Real& coefficientDerivative( UInt i ) const;
+    const Real& coefficientDerivative ( UInt i ) const;
 
     //! Return the i-th coefficient of the time derivative alpha_i divided by dt
     /*!
         @param i index of the coefficient
      */
-    Real coefficientDerivativeOverTimeStep( UInt i ) const;
+    Real coefficientDerivativeOverTimeStep ( UInt i ) const;
 
     //! Return the i-th coefficient of the time extrapolation beta_i
     /*!
         @param i index of the coefficient
      */
-    const Real& coefficientExtrapolation( UInt i ) const;
+    const Real& coefficientExtrapolation ( UInt i ) const;
 
     //! Return the vector of the time steps, ordered starting from the most recent one.
-    const container_Type& timeStepVector() const {return M_timeStep;}
+    const container_Type& timeStepVector() const
+    {
+        return M_timeStep;
+    }
 
     //! Return a vector with the last n state vectors
-    const feVectorPtrContainer_Type& stateVector() const {return M_unknowns;}
+    const feVectorPtrContainer_Type& stateVector() const
+    {
+        return M_unknowns;
+    }
 
-    const feVectorPtrContainer_Type& stateVectorBack() const {return M_unknownsBack;}
+    const feVectorPtrContainer_Type& stateVectorBack() const
+    {
+        return M_unknownsBack;
+    }
 
     //@}
 
@@ -321,11 +330,11 @@ private:
 // ===================================================
 template<typename FEVectorType>
 TimeAdvanceBDFVariableStep<FEVectorType>::TimeAdvanceBDFVariableStep()
-        :
-        M_order( 0 ),
-        M_alpha( M_order + 1 ),
-        M_beta( M_order ),
-        M_timeStep( ScalarVector( M_order, 1. ) )
+    :
+    M_order ( 0 ),
+    M_alpha ( M_order + 1 ),
+    M_beta ( M_order ),
+    M_timeStep ( ScalarVector ( M_order, 1. ) )
 {}
 
 
@@ -337,41 +346,43 @@ TimeAdvanceBDFVariableStep<FEVectorType>::~TimeAdvanceBDFVariableStep()
 // Methods
 // ===================================================
 template<typename FEVectorType>
-void TimeAdvanceBDFVariableStep<FEVectorType>::setup( const UInt order )
+void TimeAdvanceBDFVariableStep<FEVectorType>::setup ( const UInt order )
 {
     M_order = order;
-    M_alpha.resize( M_order + 1 );
-    M_beta.resize( M_order );
-    M_timeStep = ScalarVector( M_order, 1. );
+    M_alpha.resize ( M_order + 1 );
+    M_beta.resize ( M_order );
+    M_timeStep = ScalarVector ( M_order, 1. );
 
     if ( order <= 0 || order > bdfMaxOrder )
     {
         std::ostringstream errorMessage;
         errorMessage << "Error: wrong BDF order\n"
-        << " you want to use BDF order " << order << "\n"
-        << " we support BDF order from 1 to " << bdfMaxOrder << "\n";
-        throw std::invalid_argument( errorMessage.str() );
+                     << " you want to use BDF order " << order << "\n"
+                     << " we support BDF order from 1 to " << bdfMaxOrder << "\n";
+        throw std::invalid_argument ( errorMessage.str() );
     }
     computeCoefficient();
-    M_unknowns.reserve( order );
+    M_unknowns.reserve ( order );
 }
 
 
 template<typename FEVectorType>
-void TimeAdvanceBDFVariableStep<FEVectorType>::setInitialCondition( feVector_Type u0, Real const timeStep, bool startup )
+void TimeAdvanceBDFVariableStep<FEVectorType>::setInitialCondition ( feVector_Type u0, Real const timeStep, bool startup )
 {
-    M_unknowns.resize( 0 );
+    M_unknowns.resize ( 0 );
     for ( UInt i = 0; i < M_order; i++ )
     {
-        feVectorPtr_Type feVectorPtr( new feVector_Type( u0 ) );
-        M_unknowns.push_back( feVectorPtr );
+        feVectorPtr_Type feVectorPtr ( new feVector_Type ( u0 ) );
+        M_unknowns.push_back ( feVectorPtr );
         M_timeStep[ i ] = timeStep;
     }
 
     if ( startup )
     {
         for ( UInt  i = 1; i < M_order; i++ )
+        {
             M_timeStep[ i ] = 1e20;
+        }
     }
 
     computeCoefficient();
@@ -381,17 +392,17 @@ void TimeAdvanceBDFVariableStep<FEVectorType>::setInitialCondition( feVector_Typ
 
 
 template<typename FEVectorType>
-void TimeAdvanceBDFVariableStep<FEVectorType>::setInitialCondition( std::vector<feVector_Type> u0s, Real const timeStep )
+void TimeAdvanceBDFVariableStep<FEVectorType>::setInitialCondition ( std::vector<feVector_Type> u0s, Real const timeStep )
 {
-    UInt n0( u0s.size() );
+    UInt n0 ( u0s.size() );
     // Check if u0s has the right dimensions
-    ASSERT( n0 >= M_order, "Initial data are not enough for the selected BDF" );
+    ASSERT ( n0 >= M_order, "Initial data are not enough for the selected BDF" );
 
-    M_unknowns.resize(0);
+    M_unknowns.resize (0);
     for ( UInt i = 0; i < M_order; i++ )
     {
-        feVectorPtr_Type tmp( new feVector_Type( u0s[ i ] ) );
-        M_unknowns.push_back( tmp );
+        feVectorPtr_Type tmp ( new feVector_Type ( u0s[ i ] ) );
+        M_unknowns.push_back ( tmp );
         M_timeStep[ i ] = timeStep;
     }
 
@@ -412,16 +423,16 @@ void TimeAdvanceBDFVariableStep<FEVectorType>::setInitialCondition( std::vector<
 
 template<typename FEVectorType>
 template<typename FunctionType, typename FESpaceType>
-void TimeAdvanceBDFVariableStep<FEVectorType>::setInitialCondition( const FunctionType& u0Function, feVector_Type& u0Vector,
-					FESpaceType & feSpace, Real t0, Real timeStep )
+void TimeAdvanceBDFVariableStep<FEVectorType>::setInitialCondition ( const FunctionType& u0Function, feVector_Type& u0Vector,
+                                                                     FESpaceType& feSpace, Real t0, Real timeStep )
 {
-    M_unknowns.resize( 0 );
+    M_unknowns.resize ( 0 );
 
     for ( UInt i = 0 ; i < M_order; ++i )
     {
-        feVectorPtr_Type tmp( new feVector_Type( u0Vector ) );
-        M_unknowns.push_back( tmp );
-        feSpace.interpolate( static_cast<typename FESpaceType::function_Type>( u0Function ), *M_unknowns[ i ], t0 - i * timeStep );
+        feVectorPtr_Type tmp ( new feVector_Type ( u0Vector ) );
+        M_unknowns.push_back ( tmp );
+        feSpace.interpolate ( static_cast<typename FESpaceType::function_Type> ( u0Function ), *M_unknowns[ i ], t0 - i * timeStep );
         M_timeStep[ i ] = timeStep;
     }
     u0Vector = *M_unknowns[ 0 ];
@@ -436,11 +447,13 @@ template<typename FEVectorType>
 typename TimeAdvanceBDFVariableStep<FEVectorType>::feVector_Type
 TimeAdvanceBDFVariableStep<FEVectorType>::rhsContribution() const
 {
-    feVector_Type uTimeDerivative( *M_unknowns[ 0 ] );
+    feVector_Type uTimeDerivative ( *M_unknowns[ 0 ] );
     uTimeDerivative *= M_alpha[ 1 ] / M_timeStep[ 0 ];
 
     for ( UInt i = 1; i < M_order; ++i )
+    {
         uTimeDerivative += ( M_alpha[ i + 1 ] / M_timeStep[ 0 ] ) * *M_unknowns[ i ];
+    }
 
     return uTimeDerivative;
 }
@@ -448,13 +461,15 @@ TimeAdvanceBDFVariableStep<FEVectorType>::rhsContribution() const
 
 template<typename FEVectorType>
 typename TimeAdvanceBDFVariableStep<FEVectorType>::feVector_Type
-TimeAdvanceBDFVariableStep<FEVectorType>::rhsContributionTimeStep( Real timeStep ) const
+TimeAdvanceBDFVariableStep<FEVectorType>::rhsContributionTimeStep ( Real timeStep ) const
 {
-    feVector_Type uTimeDerivative( *M_unknowns[ 0 ] );
+    feVector_Type uTimeDerivative ( *M_unknowns[ 0 ] );
     uTimeDerivative *= M_alpha[ 1 ] / timeStep;
 
     for ( UInt i = 1; i < M_order; ++i )
+    {
         uTimeDerivative += ( M_alpha[ i + 1 ] / timeStep ) * *M_unknowns[ i ];
+    }
 
     return uTimeDerivative;
 }
@@ -464,11 +479,13 @@ template<typename FEVectorType>
 typename TimeAdvanceBDFVariableStep<FEVectorType>::feVector_Type
 TimeAdvanceBDFVariableStep<FEVectorType>::extrapolateSolution() const
 {
-    feVector_Type uExtrapolated( *M_unknowns[ 0 ] );
+    feVector_Type uExtrapolated ( *M_unknowns[ 0 ] );
     uExtrapolated *= M_beta[ 0 ];
 
     for ( UInt i = 1; i < M_order; ++i )
+    {
         uExtrapolated += M_beta[ i ] * *M_unknowns[ i ];
+    }
 
     return uExtrapolated;
 }
@@ -476,7 +493,7 @@ TimeAdvanceBDFVariableStep<FEVectorType>::extrapolateSolution() const
 
 template<typename FEVectorType>
 void
-TimeAdvanceBDFVariableStep<FEVectorType>::shiftRight( feVector_Type const& uCurrent )
+TimeAdvanceBDFVariableStep<FEVectorType>::shiftRight ( feVector_Type const& uCurrent )
 {
     typedef typename feVectorPtrContainer_Type::iterator bdfContainerIterator_Type;
     bdfContainerIterator_Type it = M_unknowns.end() - 1;
@@ -488,18 +505,20 @@ TimeAdvanceBDFVariableStep<FEVectorType>::shiftRight( feVector_Type const& uCurr
         itMinusOne--;
         *it = *itMinusOne;
     }
-    feVectorPtr_Type tmp( new feVector_Type( uCurrent ) );
+    feVectorPtr_Type tmp ( new feVector_Type ( uCurrent ) );
     *itBegin = tmp;
 
-    for ( UInt i = M_order-1; i > 0; i-- )
-        M_timeStep[ i ] = M_timeStep[ i-1 ];
+    for ( UInt i = M_order - 1; i > 0; i-- )
+    {
+        M_timeStep[ i ] = M_timeStep[ i - 1 ];
+    }
 
     computeCoefficient();
 }
 
 template<typename FEVectorType>
 void
-TimeAdvanceBDFVariableStep<FEVectorType>::shiftRight( feVector_Type const& uCurrent, Real timeStepNew )
+TimeAdvanceBDFVariableStep<FEVectorType>::shiftRight ( feVector_Type const& uCurrent, Real timeStepNew )
 {
 
     typedef typename feVectorPtrContainer_Type::iterator bdfContainerIterator_Type;
@@ -513,11 +532,13 @@ TimeAdvanceBDFVariableStep<FEVectorType>::shiftRight( feVector_Type const& uCurr
         *it = *itMinusOne;
     }
 
-    feVectorPtr_Type tmp( new feVector_Type( uCurrent ) );
+    feVectorPtr_Type tmp ( new feVector_Type ( uCurrent ) );
     *itBegin = tmp;
 
-    for ( UInt i = M_order-1; i > 0; i-- )
-        M_timeStep[ i ] = M_timeStep[ i-1 ];
+    for ( UInt i = M_order - 1; i > 0; i-- )
+    {
+        M_timeStep[ i ] = M_timeStep[ i - 1 ];
+    }
     M_timeStep[ 0 ] = timeStepNew;
 
     computeCoefficient();
@@ -528,9 +549,11 @@ void TimeAdvanceBDFVariableStep<FEVectorType>::storeSolution()
 {
     typedef typename feVectorPtrContainer_Type::iterator bdfContainerIterator_Type;
 
-    M_unknownsBack.resize( 0 );
+    M_unknownsBack.resize ( 0 );
     for (bdfContainerIterator_Type it = M_unknowns.begin(); it < M_unknowns.end(); ++it)
-        M_unknownsBack.push_back( new feVectorPtr_Type( **it ) );
+    {
+        M_unknownsBack.push_back ( new feVectorPtr_Type ( **it ) );
+    }
 
     M_timeStepBack = M_timeStep;
 }
@@ -541,9 +564,11 @@ void TimeAdvanceBDFVariableStep<FEVectorType>::restoreSolution()
 {
     typedef typename feVectorPtrContainer_Type::iterator bdfContainerIterator_Type;
 
-    M_unknowns.resize( 0 );
+    M_unknowns.resize ( 0 );
     for ( bdfContainerIterator_Type it = M_unknownsBack.begin(); it < M_unknownsBack.end(); ++it )
-        M_unknowns.push_back( new feVectorPtr_Type( **it ) );
+    {
+        M_unknowns.push_back ( new feVectorPtr_Type ( **it ) );
+    }
 
 
     M_timeStep = M_timeStepBack;
@@ -552,13 +577,15 @@ void TimeAdvanceBDFVariableStep<FEVectorType>::restoreSolution()
 }
 
 template<typename FEVectorType>
-void TimeAdvanceBDFVariableStep<FEVectorType>::restoreSolution( Real timeStep )
+void TimeAdvanceBDFVariableStep<FEVectorType>::restoreSolution ( Real timeStep )
 {
     typedef typename feVectorPtrContainer_Type::iterator bdfContainerIterator_Type;
 
-    M_unknowns.resize( 0 );
+    M_unknowns.resize ( 0 );
     for ( bdfContainerIterator_Type it = M_unknownsBack.begin(); it < M_unknownsBack.end(); ++it )
-        M_unknowns.push_back( new feVectorPtr_Type( **it ) );
+    {
+        M_unknowns.push_back ( new feVectorPtr_Type ( **it ) );
+    }
 
     M_timeStep = M_timeStepBack;
     M_timeStep[ 0 ] = timeStep;
@@ -587,7 +614,7 @@ TimeAdvanceBDFVariableStep<FEVectorType>::showMe() const
 //Set Methods
 // ===================================================
 template<typename FEVectorType>
-void TimeAdvanceBDFVariableStep<FEVectorType>::setTimeStep( Real timeStep )
+void TimeAdvanceBDFVariableStep<FEVectorType>::setTimeStep ( Real timeStep )
 {
     M_timeStep[ 0 ] = timeStep;
     computeCoefficient();
@@ -598,33 +625,33 @@ void TimeAdvanceBDFVariableStep<FEVectorType>::setTimeStep( Real timeStep )
 // ===================================================
 template<typename FEVectorType>
 const Real&
-TimeAdvanceBDFVariableStep<FEVectorType>::coefficientDerivative( UInt i ) const
+TimeAdvanceBDFVariableStep<FEVectorType>::coefficientDerivative ( UInt i ) const
 {
     // Pay attention: i is c-based indexed
-    ASSERT( i < M_order + 1,
-            "Error in specification of the time derivative coefficient for the BDF formula (out of range error)" );
+    ASSERT ( i < M_order + 1,
+             "Error in specification of the time derivative coefficient for the BDF formula (out of range error)" );
     return M_alpha[ i ];
 }
 
 
 template<typename FEVectorType>
 Real
-TimeAdvanceBDFVariableStep<FEVectorType>::coefficientDerivativeOverTimeStep( UInt i ) const
+TimeAdvanceBDFVariableStep<FEVectorType>::coefficientDerivativeOverTimeStep ( UInt i ) const
 {
     // Pay attention: i is c-based indexed
-    ASSERT( i < M_order + 1,
-            "Error in specification of the time derivative coefficient for the BDF formula (out of range error)" );
-    return M_alpha[ i ]/M_timeStep[ 0 ];
+    ASSERT ( i < M_order + 1,
+             "Error in specification of the time derivative coefficient for the BDF formula (out of range error)" );
+    return M_alpha[ i ] / M_timeStep[ 0 ];
 }
 
 
 template<typename FEVectorType>
 const Real&
-TimeAdvanceBDFVariableStep<FEVectorType>::coefficientExtrapolation( UInt i ) const
+TimeAdvanceBDFVariableStep<FEVectorType>::coefficientExtrapolation ( UInt i ) const
 {
     // Pay attention: i is c-based indexed
-    ASSERT(  i < M_order,
-             "Error in specification of the time derivative coefficient for the BDF formula (out of range error)" );
+    ASSERT (  i < M_order,
+              "Error in specification of the time derivative coefficient for the BDF formula (out of range error)" );
     return M_beta[ i ];
 }
 
@@ -634,19 +661,19 @@ TimeAdvanceBDFVariableStep<FEVectorType>::coefficientExtrapolation( UInt i ) con
 template<typename FEVectorType>
 void TimeAdvanceBDFVariableStep<FEVectorType>::computeCoefficient()
 {
-    container_Type rho( ScalarVector( M_order, M_timeStep[ 0 ] ) );
+    container_Type rho ( ScalarVector ( M_order, M_timeStep[ 0 ] ) );
 
-    container_Type cumulativeSumTimeStep( M_order );
-    std::partial_sum( M_timeStep.begin(), M_timeStep.end(), cumulativeSumTimeStep.begin() );
+    container_Type cumulativeSumTimeStep ( M_order );
+    std::partial_sum ( M_timeStep.begin(), M_timeStep.end(), cumulativeSumTimeStep.begin() );
 
-    std::transform( rho.begin(), rho.end(), cumulativeSumTimeStep.begin(),
-                    rho.begin(), std::divides<double>() );
+    std::transform ( rho.begin(), rho.end(), cumulativeSumTimeStep.begin(),
+                     rho.begin(), std::divides<double>() );
 
-    M_alpha[ 0 ] = boost::numeric::ublas::sum( rho );
+    M_alpha[ 0 ] = boost::numeric::ublas::sum ( rho );
 
     for ( UInt j = 0; j < M_order; ++j )
     {
-        Real tmp( 1.0 );
+        Real tmp ( 1.0 );
 
         if ( rho[j] != 0 ) //rho[j] may be 0 with the start-up procedure
         {
@@ -657,12 +684,12 @@ void TimeAdvanceBDFVariableStep<FEVectorType>::computeCoefficient()
                     tmp *= ( 1 - rho[ kk ] / rho[ j ] );
                 }
             }
-            M_alpha[ j+1 ] = rho[ j ] / tmp;
+            M_alpha[ j + 1 ] = rho[ j ] / tmp;
             M_beta[ j ]    = 1. / tmp;
         }
         else //we don't have enough initial data to start a higher order BDF.
         {
-            M_alpha[ j+1 ] = 0;
+            M_alpha[ j + 1 ] = 0;
             M_beta[ j ] = 0;
         }
     }

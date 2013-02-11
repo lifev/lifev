@@ -60,57 +60,57 @@ quadRuleTetra.plt ==> Show the Convergence Rate of all the quadrature rules on T
 
 #include "test_quadrule.hpp"
 
-int main(int argc, char** argv )
+int main (int argc, char** argv )
 {
     using namespace LifeV;
 
 #ifdef HAVE_MPI
     std::cout << "MPI Initialization" << std::endl;
-    MPI_Init( &argc, &argv );
+    MPI_Init ( &argc, &argv );
 #endif
 
-    bool checkGlobal(true), check(true);
+    bool checkGlobal (true), check (true);
 
     // All the quadrature rules for tetrahedra
     container_Type allQuadRuleTetra;
-    allQuadRuleTetra.reserve(5);
-    allQuadRuleTetra.push_back(&quadRuleTetra1pt);
-    allQuadRuleTetra.push_back(&quadRuleTetra4pt);
-    allQuadRuleTetra.push_back(&quadRuleTetra5pt);
-    allQuadRuleTetra.push_back(&quadRuleTetra15pt);
-    allQuadRuleTetra.push_back(&quadRuleTetra64pt);
+    allQuadRuleTetra.reserve (5);
+    allQuadRuleTetra.push_back (&quadRuleTetra1pt);
+    allQuadRuleTetra.push_back (&quadRuleTetra4pt);
+    allQuadRuleTetra.push_back (&quadRuleTetra5pt);
+    allQuadRuleTetra.push_back (&quadRuleTetra15pt);
+    allQuadRuleTetra.push_back (&quadRuleTetra64pt);
 
     // All the quadrature rules for triangles
     container_Type allQuadRuleTria;
-    allQuadRuleTria.reserve(5);
-    allQuadRuleTria.push_back(&quadRuleTria1pt);
-    allQuadRuleTria.push_back(&quadRuleTria3pt);
-    allQuadRuleTria.push_back(&quadRuleTria4pt);
-    allQuadRuleTria.push_back(&quadRuleTria6pt);
-    allQuadRuleTria.push_back(&quadRuleTria7pt);
+    allQuadRuleTria.reserve (5);
+    allQuadRuleTria.push_back (&quadRuleTria1pt);
+    allQuadRuleTria.push_back (&quadRuleTria3pt);
+    allQuadRuleTria.push_back (&quadRuleTria4pt);
+    allQuadRuleTria.push_back (&quadRuleTria6pt);
+    allQuadRuleTria.push_back (&quadRuleTria7pt);
 
     // All the quadrature rules for segments
     container_Type allQuadRuleSegments;
-    allQuadRuleSegments.reserve(3);
-    allQuadRuleSegments.push_back(&quadRuleSeg1pt);
-    allQuadRuleSegments.push_back(&quadRuleSeg2pt);
-    allQuadRuleSegments.push_back(&quadRuleSeg3pt);
+    allQuadRuleSegments.reserve (3);
+    allQuadRuleSegments.push_back (&quadRuleSeg1pt);
+    allQuadRuleSegments.push_back (&quadRuleSeg2pt);
+    allQuadRuleSegments.push_back (&quadRuleSeg3pt);
 
     // Check Quadrature Rule on Tetrahedra
-    check = quad_check_doe< RegionMesh<LinearTetra> >(feTetraP1, geoLinearTetra, allQuadRuleTetra, "quadRuleTetra");
+    check = quad_check_doe< RegionMesh<LinearTetra> > (feTetraP1, geoLinearTetra, allQuadRuleTetra, "quadRuleTetra");
     checkGlobal = checkGlobal & check;
-    check = quad_check_cr< RegionMesh<LinearTetra> >(feTetraP1, geoLinearTetra, allQuadRuleTetra, "quadRuleTetra");
+    check = quad_check_cr< RegionMesh<LinearTetra> > (feTetraP1, geoLinearTetra, allQuadRuleTetra, "quadRuleTetra");
     checkGlobal = checkGlobal & check;
 
     // Check the quadrature rules for triangles
-    for (constIterator_Type it(allQuadRuleTria.begin()); it != allQuadRuleTria.end(); ++it)
+    for (constIterator_Type it (allQuadRuleTria.begin() ); it != allQuadRuleTria.end(); ++it)
     {
         check = (*it)->degreeOfExactness() == (*it)->checkExactness();
         checkGlobal = checkGlobal & check;
     }
 
     // Check the quadrature rules for triangles
-    for (constIterator_Type it(allQuadRuleSegments.begin()); it != allQuadRuleSegments.end(); ++it)
+    for (constIterator_Type it (allQuadRuleSegments.begin() ); it != allQuadRuleSegments.end(); ++it)
     {
         check = (*it)->degreeOfExactness() == (*it)->checkExactness();
         checkGlobal = checkGlobal & check;
@@ -123,9 +123,13 @@ int main(int argc, char** argv )
 
 
     if (check)
+    {
         return EXIT_SUCCESS;
+    }
     else
+    {
         return EXIT_FAILURE;
+    }
 }//end main
 
 

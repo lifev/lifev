@@ -66,37 +66,37 @@ const GeometricMap& geometricMapFromElementShape();
 template<>
 inline const GeometricMap& geometricMapFromElementShape<GeoPoint>()
 {
-	return geoLinearNode;
+    return geoLinearNode;
 }
 
 template<>
 inline const GeometricMap& geometricMapFromElementShape<LinearLine>()
 {
-	return geoLinearSeg;
+    return geoLinearSeg;
 }
 
 template<>
 inline const GeometricMap& geometricMapFromElementShape<LinearTriangle>()
 {
-	return geoLinearTria;
+    return geoLinearTria;
 }
 
 template<>
 inline const GeometricMap& geometricMapFromElementShape<LinearQuad>()
 {
-	return geoBilinearQuad;
+    return geoBilinearQuad;
 }
 
 template<>
 inline const GeometricMap& geometricMapFromElementShape<LinearTetra>()
 {
-	return geoLinearTetra;
+    return geoLinearTetra;
 }
 
 template<>
 inline const GeometricMap& geometricMapFromElementShape<LinearHexa>()
 {
-	return geoBilinearHexa;
+    return geoBilinearHexa;
 }
 
 
@@ -104,25 +104,25 @@ inline const GeometricMap& geometricMapFromElementShape<LinearHexa>()
 
 //! Function to get the map that goes with a mesh (version with template argument only)
 /*!
-	Given a type of mesh, this method returns an instance of geometric mapping
-	that corresponds with the mesh.
+    Given a type of mesh, this method returns an instance of geometric mapping
+    that corresponds with the mesh.
 */
 template <typename MeshType>
 inline const GeometricMap& geometricMapFromMesh()
 {
-	return geometricMapFromElementShape<typename MeshType::elementShape_Type>();
+    return geometricMapFromElementShape<typename MeshType::elementShape_Type>();
 }
 
 
 //! Function to get the map that goes with a mesh (version with mesh in argument)
 /*!
-	Given a type of mesh, this method returns an instance of geometric mapping
-	that corresponds with the mesh.
+    Given a type of mesh, this method returns an instance of geometric mapping
+    that corresponds with the mesh.
 */
 template <typename MeshType>
-inline const GeometricMap& geometricMapFromMesh(const boost::shared_ptr<MeshType> & /*mesh*/ )
+inline const GeometricMap& geometricMapFromMesh (const boost::shared_ptr<MeshType>& /*mesh*/ )
 {
-	return geometricMapFromElementShape<typename MeshType::elementShape_Type>();
+    return geometricMapFromElementShape<typename MeshType::elementShape_Type>();
 }
 
 } // namespace LifeV

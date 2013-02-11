@@ -40,26 +40,26 @@
 
 namespace LifeV
 {
-Real f(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
+Real f (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
 
-Real u1(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
+Real u1 (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
 
-Real fZero(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
+Real fZero (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
 
 // Initial velocity
-Real u0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
-Real p0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
+Real u0 (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
+Real p0 (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
 
-Real u2(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
-Real u2vel(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
-  Real pressure(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
+Real u2 (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
+Real u2vel (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
+Real pressure (const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
 
 // Initial displacement and velocity
-Real d0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
+Real d0 (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
 
-Real w0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
-Real PhysFlux(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
-Real aortaPhysPress(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
+Real w0 (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
+Real PhysFlux (const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
+Real aortaPhysPress (const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
 
 }
 

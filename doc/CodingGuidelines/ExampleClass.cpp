@@ -46,23 +46,23 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 ExampleClass::ExampleClass() :
-        M_variableOne (),
-        M_variableTwo ()
+    M_variableOne (),
+    M_variableTwo ()
 {
 
 }
 
-ExampleClass::ExampleClass( first_Type&  variableOne,
-                            second_Type& variableTwo ) :
-        M_variableOne ( variableOne ),
-        M_variableTwo ( variableTwo )
+ExampleClass::ExampleClass ( first_Type&  variableOne,
+                             second_Type& variableTwo ) :
+    M_variableOne ( variableOne ),
+    M_variableTwo ( variableTwo )
 {
 
 }
 
-ExampleClass::ExampleClass( const ExampleClass& example ) :
-        M_variableOne ( example.M_variableOne ),
-        M_variableTwo ( example.M_variableTwo )
+ExampleClass::ExampleClass ( const ExampleClass& example ) :
+    M_variableOne ( example.M_variableOne ),
+    M_variableTwo ( example.M_variableTwo )
 {
 
 }
@@ -76,7 +76,7 @@ ExampleClass::~ExampleClass()
 // Operators
 // ===================================================
 ExampleClass&
-ExampleClass::operator=( const ExampleClass& example )
+ExampleClass::operator= ( const ExampleClass& example )
 {
     if ( this != &example )
     {
@@ -91,12 +91,12 @@ ExampleClass::operator=( const ExampleClass& example )
 // Methods
 // ===================================================
 void
-ExampleClass::methodOne( first_Type&  inputVariableOne,
-                         second_Type& inputVariableTwo )
+ExampleClass::methodOne ( first_Type&  inputVariableOne,
+                          second_Type& inputVariableTwo )
 {
     // Example of debug
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 0000 ) << "ExampleClass::methodOne inputVariableOne = " << inputVariableOne << " inputVariableTwo = " << inputVariableTwo << "\n";
+    debugStream ( 0000 ) << "ExampleClass::methodOne inputVariableOne = " << inputVariableOne << " inputVariableTwo = " << inputVariableTwo << "\n";
 #endif
 
     //Do something
@@ -109,7 +109,7 @@ ExampleClass::methodTwo()
 }
 
 void
-ExampleClass::showMe( std::ostream& output ) const
+ExampleClass::showMe ( std::ostream& output ) const
 {
     output << "ExampleClass::showMe()" << std::endl;
     output << "Variable one: " << M_variableOne << std::endl;
@@ -120,7 +120,7 @@ ExampleClass::showMe( std::ostream& output ) const
 // Set Methods
 // ===================================================
 void
-ExampleClass::setVariableOne( const first_Type& variableOne )
+ExampleClass::setVariableOne ( const first_Type& variableOne )
 {
     M_variableOne = variableOne;
 }

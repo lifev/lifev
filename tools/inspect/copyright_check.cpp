@@ -11,20 +11,20 @@ namespace boost
 {
 namespace inspect
 {
-copyright_check::copyright_check() : m_files_with_errors(0)
+copyright_check::copyright_check() : m_files_with_errors (0)
 {
 }
 
-void copyright_check::inspect(
-    const string & library_name,
-    const path & full_path,   // example: c:/foo/boost/filesystem/path.hpp
-    const string & contents )     // contents of file to be inspected
+void copyright_check::inspect (
+    const string& library_name,
+    const path& full_path,    // example: c:/foo/boost/filesystem/path.hpp
+    const string& contents )      // contents of file to be inspected
 {
-    if ( contents.find( "Copyright" ) == string::npos
-            && contents.find( "copyright" ) == string::npos )
+    if ( contents.find ( "Copyright" ) == string::npos
+            && contents.find ( "copyright" ) == string::npos )
     {
         ++m_files_with_errors;
-        error( library_name, full_path, desc() );
+        error ( library_name, full_path, desc() );
     }
 }
 } // namespace inspect

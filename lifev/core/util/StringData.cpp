@@ -47,12 +47,12 @@ namespace LifeV
 // Constructors
 // ===============
 
-StringData::StringData( std::string str, Int val, std::string help ) :
-    M_string( str ), M_value( val ), M_help( help )
+StringData::StringData ( std::string str, Int val, std::string help ) :
+    M_string ( str ), M_value ( val ), M_help ( help )
 {}
 
-StringDataList::StringDataList( std::string title ) :
-    M_title( title )
+StringDataList::StringDataList ( std::string title ) :
+    M_title ( title )
 {}
 
 // ===============
@@ -61,36 +61,40 @@ StringDataList::StringDataList( std::string title ) :
 
 void StringDataList::add ( std::string str, Int val, std::string help )
 {
-    M_list.push_back( StringData( str, val, help ) );
+    M_list.push_back ( StringData ( str, val, help ) );
 }
 
-void StringDataList::showMe( std::ostream& c, bool val ) const
+void StringDataList::showMe ( std::ostream& c, bool val ) const
 {
     c << M_title << " : " << std::endl;
     for ( std::vector<StringData>::const_iterator ds = M_list.begin();
-          ds != M_list.end(); ++ds )
+            ds != M_list.end(); ++ds )
     {
         c << "   " << ds->string() << " : " << ds->help();
         if ( val )
+        {
             c << " (" << ds->value() << ")";
+        }
         c << std::endl;
     }
 }
 
-Int StringDataList::value( const std::string& str ) const
+Int StringDataList::value ( const std::string& str ) const
 {
     std::vector<StringData>::const_iterator ds = M_list.begin();
     while ( ds != M_list.end() )
     {
         if ( ds->string() == str )
+        {
             return ds->value();
+        }
         ++ds;
     };
     std::ostringstream exception;
     exception << "Error in " << LIFEV_FUNCINFO  << ": "
               << str << " is not in the list of possible choices for '"
               << M_title;
-    throw std::invalid_argument( exception.str() );
+    throw std::invalid_argument ( exception.str() );
 }
 
 }

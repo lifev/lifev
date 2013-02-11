@@ -45,13 +45,13 @@ namespace Multiscale
 // Constructors & Destructor
 // ===================================================
 MultiscaleAlgorithmNewton::MultiscaleAlgorithmNewton() :
-        multiscaleAlgorithm_Type   (),
-        M_solver                   (),
-        M_jacobian                 ()
+    multiscaleAlgorithm_Type   (),
+    M_solver                   (),
+    M_jacobian                 ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 8013 ) << "MultiscaleAlgorithmNewton::MultiscaleAlgorithmNewton() \n";
+    debugStream ( 8013 ) << "MultiscaleAlgorithmNewton::MultiscaleAlgorithmNewton() \n";
 #endif
 
     M_type = Newton;
@@ -61,24 +61,24 @@ MultiscaleAlgorithmNewton::MultiscaleAlgorithmNewton() :
 // Multiscale Algorithm Virtual Methods
 // ===================================================
 void
-MultiscaleAlgorithmNewton::setupData( const std::string& fileName )
+MultiscaleAlgorithmNewton::setupData ( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 8013 ) << "MultiscaleAlgorithmNewton::setupData( fileName ) \n";
+    debugStream ( 8013 ) << "MultiscaleAlgorithmNewton::setupData( fileName ) \n";
 #endif
 
     // Read parameters
-    multiscaleParameterListPtr_Type solverParametersList = Teuchos::rcp( new Teuchos::ParameterList );
-    solverParametersList = Teuchos::getParametersFromXmlFile( fileName );
+    multiscaleParameterListPtr_Type solverParametersList = Teuchos::rcp ( new Teuchos::ParameterList );
+    solverParametersList = Teuchos::getParametersFromXmlFile ( fileName );
 
     // Set main parameters
-    setAlgorithmName( solverParametersList->sublist( "Multiscale", true, "" ) );
-    setAlgorithmParameters( solverParametersList->sublist( "Multiscale Algorithm", true, "" ) );
+    setAlgorithmName ( solverParametersList->sublist ( "Multiscale", true, "" ) );
+    setAlgorithmParameters ( solverParametersList->sublist ( "Multiscale Algorithm", true, "" ) );
 
     // Set main parameters
-    M_solver.setCommunicator( M_comm );
-    M_solver.setParameters( solverParametersList->sublist( "Linear Solver List", true, "" ) );
+    M_solver.setCommunicator ( M_comm );
+    M_solver.setParameters ( solverParametersList->sublist ( "Linear Solver List", true, "" ) );
 }
 
 void
@@ -86,31 +86,33 @@ MultiscaleAlgorithmNewton::subIterate()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 8013 ) << "MultiscaleAlgorithmNewton::subIterate() \n";
+    debugStream ( 8013 ) << "MultiscaleAlgorithmNewton::subIterate() \n";
 #endif
 
     multiscaleAlgorithm_Type::subIterate();
 
     // Verify tolerance
-    if ( checkResidual( 0 ) )
+    if ( checkResidual ( 0 ) )
+    {
         return;
+    }
 
-    M_multiscale->exportCouplingVariables( *M_couplingVariables );
+    M_multiscale->exportCouplingVariables ( *M_couplingVariables );
 
-    multiscaleVectorPtr_Type delta( new multiscaleVector_Type( *M_couplingResiduals, Unique ) );
+    multiscaleVectorPtr_Type delta ( new multiscaleVector_Type ( *M_couplingResiduals, Unique ) );
     *delta = 0.0;
 
-    for ( UInt subIT(1); subIT <= M_subiterationsMaximumNumber; ++subIT )
+    for ( UInt subIT (1); subIT <= M_subiterationsMaximumNumber; ++subIT )
     {
         // Compute the Jacobian
         assembleJacobianMatrix();
 
         // Set matrix and RHS
-        M_solver.setOperator( M_jacobian );
-        M_solver.setRightHandSide( M_couplingResiduals );
+        M_solver.setOperator ( M_jacobian );
+        M_solver.setRightHandSide ( M_couplingResiduals );
 
         // Solve Newton (without changing the sign of the residual)
-        M_solver.solve( delta );
+        M_solver.solve ( delta );
 
         // Changing the sign of the solution
         *delta *= -1;
@@ -119,17 +121,19 @@ MultiscaleAlgorithmNewton::subIterate()
         *M_couplingVariables += *delta;
 
         // Import Coupling Variables inside the coupling blocks
-        M_multiscale->importCouplingVariables( *M_couplingVariables );
+        M_multiscale->importCouplingVariables ( *M_couplingVariables );
 
         // Verify tolerance
-        if ( checkResidual( subIT ) )
+        if ( checkResidual ( subIT ) )
+        {
             return;
+        }
     }
 
-    save( M_subiterationsMaximumNumber, M_couplingResiduals->norm2() );
+    save ( M_subiterationsMaximumNumber, M_couplingResiduals->norm2() );
 
-    multiscaleErrorCheck( Tolerance, "Newton algorithm residual: " + number2string( M_couplingResiduals->norm2() ) +
-                        " (required: " + number2string( M_tolerance ) + ")\n", M_multiscale->communicator() == 0 );
+    multiscaleErrorCheck ( Tolerance, "Newton algorithm residual: " + number2string ( M_couplingResiduals->norm2() ) +
+                           " (required: " + number2string ( M_tolerance ) + ")\n", M_multiscale->communicator() == 0 );
 }
 
 // ===================================================
@@ -139,8 +143,8 @@ void
 MultiscaleAlgorithmNewton::assembleJacobianMatrix()
 {
     // Compute the Jacobian matrix (we completely delete the previous matrix)
-    M_jacobian.reset( new multiscaleMatrix_Type( M_couplingVariables->map(), 50 ) );
-    M_multiscale->exportJacobian( *M_jacobian );
+    M_jacobian.reset ( new multiscaleMatrix_Type ( M_couplingVariables->map(), 50 ) );
+    M_multiscale->exportJacobian ( *M_jacobian );
     M_jacobian->globalAssemble();
 
     //M_jacobian->spy( multiscaleProblemFolder + multiscaleProblemPrefix + "_AlgorithmJacobianNewtonExported" + "_" + number2string( multiscaleProblemStep ) + "_" + number2string( M_multiscale->globalData()->dataTime()->timeStepNumber() ) );
