@@ -43,21 +43,21 @@ namespace LifeV
 // Constructors
 // ===================================================
 BCInterfaceData0D::BCInterfaceData0D() :
-        BCInterfaceData         (),
-        M_flag                  (),
-        M_type                  (),
-        M_mapType               ()
+    BCInterfaceData         (),
+    M_flag                  (),
+    M_type                  (),
+    M_mapType               ()
 {
     //Set mapType
     M_mapType["Current"]  = Current;
     M_mapType["Voltage"]  = Voltage;
 }
 
-BCInterfaceData0D::BCInterfaceData0D( const BCInterfaceData0D& data ) :
-        BCInterfaceData         ( data ),
-        M_flag                  ( data.M_flag ),
-        M_type                  ( data.M_type ),
-        M_mapType               ( data.M_mapType )
+BCInterfaceData0D::BCInterfaceData0D ( const BCInterfaceData0D& data ) :
+    BCInterfaceData         ( data ),
+    M_flag                  ( data.M_flag ),
+    M_type                  ( data.M_type ),
+    M_mapType               ( data.M_mapType )
 {
 }
 
@@ -65,11 +65,11 @@ BCInterfaceData0D::BCInterfaceData0D( const BCInterfaceData0D& data ) :
 // Operators
 // ===================================================
 BCInterfaceData0D&
-BCInterfaceData0D::operator=( const BCInterfaceData0D& data )
+BCInterfaceData0D::operator= ( const BCInterfaceData0D& data )
 {
     if ( this != &data )
     {
-        BCInterfaceData::operator=( data );
+        BCInterfaceData::operator= ( data );
         M_flag                  = data.M_flag;
         M_type                  = data.M_type;
         M_mapType               = data.M_mapType;
@@ -82,23 +82,23 @@ BCInterfaceData0D::operator=( const BCInterfaceData0D& data )
 // Methods
 // ===================================================
 void
-BCInterfaceData0D::readBC( const std::string& fileName, const std::string& dataSection, const std::string& name )
+BCInterfaceData0D::readBC ( const std::string& fileName, const std::string& dataSection, const std::string& name )
 {
     // Call to the base class
-    dataContainer_Type::readBC( fileName, dataSection, name );
+    dataContainer_Type::readBC ( fileName, dataSection, name );
 
     // Read 0D data
-    GetPot dataFile( fileName );
+    GetPot dataFile ( fileName );
 
-    readFlag( dataFile, ( dataSection + name + "/flag" ).c_str() );
-    readType( dataFile, ( dataSection + name + "/type0D" ).c_str() );
+    readFlag ( dataFile, ( dataSection + name + "/flag" ).c_str() );
+    readType ( dataFile, ( dataSection + name + "/type0D" ).c_str() );
 }
 
 void
-BCInterfaceData0D::showMe( std::ostream& output ) const
+BCInterfaceData0D::showMe ( std::ostream& output ) const
 {
     // Call to the base class
-    dataContainer_Type::showMe( output );
+    dataContainer_Type::showMe ( output );
 
     // Show 0D data
     output << "Flag              = " << static_cast< Real > ( M_flag ) << std::endl;

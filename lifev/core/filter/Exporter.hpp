@@ -119,13 +119,13 @@ public:
         @param regime       - if UnsteadyRegime, then the file name for postprocessing has to include time dependency
         @param where        - where is variable located (Node or Cell)
     */
-    ExporterData(const FieldTypeEnum&   fieldType,
-                 const std::string&     variableName,
-                 const feSpacePtr_Type& feSpacePtr,
-                 const vectorPtr_Type&  vectorPtr,
-                 const UInt&            start,
-                 const FieldRegimeEnum& regime,
-                 const WhereEnum&       where = Node);
+    ExporterData (const FieldTypeEnum&   fieldType,
+                  const std::string&     variableName,
+                  const feSpacePtr_Type& feSpacePtr,
+                  const vectorPtr_Type&  vectorPtr,
+                  const UInt&            start,
+                  const FieldRegimeEnum& regime,
+                  const WhereEnum&       where = Node);
 
     //@}
 
@@ -136,13 +136,13 @@ public:
     /*!
         @param i which component to access
     */
-    Real operator()(const UInt i) const;
+    Real operator() (const UInt i) const;
 
     //! Accessor to component (reference)
     /*!
         @param i which component to access
     */
-    Real& operator()(const UInt i);
+    Real& operator() (const UInt i);
 
     //@}
 
@@ -150,10 +150,16 @@ public:
     //@{
 
     //! set the time regime of the field
-    void setRegime(FieldRegimeEnum regime) {M_regime = regime;}
+    void setRegime (FieldRegimeEnum regime)
+    {
+        M_regime = regime;
+    }
 
     //! set where is the variable located (Node or Cell)
-    void setWhere( WhereEnum where ){M_where = where;}
+    void setWhere ( WhereEnum where )
+    {
+        M_where = where;
+    }
     //@}
 
 
@@ -174,7 +180,10 @@ public:
     }
 
     //! address of first datum in the array
-    const UInt& start() const { return M_start; }
+    const UInt& start() const
+    {
+        return M_start;
+    }
 
     //! scalar or vector field
     const FieldTypeEnum& fieldType() const
@@ -189,7 +198,10 @@ public:
     }
 
     //! returns UnsteadyRegime (=0) if file name for postprocessing has to include time dependency
-    FieldRegimeEnum regime() const {return M_regime; }
+    FieldRegimeEnum regime() const
+    {
+        return M_regime;
+    }
 
     //! returns Scalar or Vector strings
     std::string typeName() const;
@@ -206,7 +218,10 @@ public:
     //! returns Node or Cell centered string
     std::string whereName() const;
 
-    const feSpacePtr_Type& feSpacePtr() const {return M_feSpacePtr;};
+    const feSpacePtr_Type& feSpacePtr() const
+    {
+        return M_feSpacePtr;
+    };
     //@}
 
 private:
@@ -285,7 +300,7 @@ public:
           "multimesh" ( = true if the mesh has to be saved at each post-processing step)
        @param the prefix for the case file (ex. "test" for test.case)
     */
-    Exporter(const GetPot& dfile, const std::string& prefix);
+    Exporter (const GetPot& dfile, const std::string& prefix);
 
     //! Destructor
     virtual ~Exporter() {};
@@ -305,46 +320,46 @@ public:
         @param regime if UnsteadyRegime the filename should change at each time step
         @param where choose whether the variable is defined on Nodes of Elements
     */
-    void addVariable(const FieldTypeEnum& type,
-                     const std::string& variableName,
-                     const feSpacePtr_Type& feSpacePtr,
-                     const vectorPtr_Type& vectorPtr,
-                     const UInt& start,
-                     const FieldRegimeEnum& regime = exporterData_Type::UnsteadyRegime,
-                     const WhereEnum& where = exporterData_Type::Node );
+    void addVariable (const FieldTypeEnum& type,
+                      const std::string& variableName,
+                      const feSpacePtr_Type& feSpacePtr,
+                      const vectorPtr_Type& vectorPtr,
+                      const UInt& start,
+                      const FieldRegimeEnum& regime = exporterData_Type::UnsteadyRegime,
+                      const WhereEnum& where = exporterData_Type::Node );
 
     //! Post-process the variables added to the list
     /*!
         @param time the solver time
     */
-    virtual void postProcess(const Real& time) = 0;
+    virtual void postProcess (const Real& time) = 0;
 
     //! Import data from previous simulations at a certain time
     /*!
        @param Time the time of the data to be imported
      */
-    virtual UInt importFromTime( const Real& Time ) = 0;
+    virtual UInt importFromTime ( const Real& Time ) = 0;
 
     //! Import data from previous simulations
     /*!
        @param time the solver time
        @param dt time step used to rebuild the history up to now
     */
-    virtual void import(const Real& startTime, const Real& dt) = 0;
+    virtual void import (const Real& startTime, const Real& dt) = 0;
 
     //! Read  only last timestep
-    virtual void import(const Real& startTime) = 0;
+    virtual void import (const Real& startTime) = 0;
 
-    virtual void readVariable(exporterData_Type& dvar);
+    virtual void readVariable (exporterData_Type& dvar);
 
     //! Export the Processor ID as P0 variable
-    virtual void exportPID( boost::shared_ptr<MeshType> mesh, boost::shared_ptr<Epetra_Comm> comm );
+    virtual void exportPID ( boost::shared_ptr<MeshType> mesh, boost::shared_ptr<Epetra_Comm> comm );
 
     //! Export the region marker ID as P0 variable
     void exportRegionMarkerID ( boost::shared_ptr<MeshType> mesh, boost::shared_ptr<Epetra_Comm> comm  );
 
     //! Export entity flags
-    virtual void exportFlags( boost::shared_ptr<MeshType> mesh, boost::shared_ptr<Epetra_Comm> comm, flag_Type const & flag = EntityFlags::ALL );
+    virtual void exportFlags ( boost::shared_ptr<MeshType> mesh, boost::shared_ptr<Epetra_Comm> comm, flag_Type const& flag = EntityFlags::ALL );
 
     //@}
 
@@ -356,13 +371,13 @@ public:
      * @param dataFile data file.
      * @param section section in the data file.
      */
-    virtual void setDataFromGetPot( const GetPot& dataFile, const std::string& section = "exporter" );
+    virtual void setDataFromGetPot ( const GetPot& dataFile, const std::string& section = "exporter" );
 
     //! Set prefix.
     /*!
      * @param prefix prefix.
      */
-    void setPrefix( const std::string& prefix )
+    void setPrefix ( const std::string& prefix )
     {
         M_prefix = prefix;
     }
@@ -371,7 +386,7 @@ public:
     /*!
      * @param Directory output folder
      */
-    void setPostDir( const std::string& Directory )
+    void setPostDir ( const std::string& Directory )
     {
         M_postDir = Directory;
     }
@@ -380,7 +395,7 @@ public:
     /*!
      * @param timeIndex index of the current time frame
      */
-    void setTimeIndex( const UInt& timeIndex )
+    void setTimeIndex ( const UInt& timeIndex )
     {
         M_timeIndex = timeIndex;
     }
@@ -389,7 +404,7 @@ public:
     /*!
      * @param timeIndexStart index of the first time frame
      */
-    void setTimeIndexStart( const UInt& timeIndexStart )
+    void setTimeIndexStart ( const UInt& timeIndexStart )
     {
         M_timeIndexStart = timeIndexStart;
     }
@@ -398,7 +413,7 @@ public:
     /*!
      * @param save steps
      */
-    void setSave( const UInt& save )
+    void setSave ( const UInt& save )
     {
         M_save = save;
     }
@@ -407,12 +422,12 @@ public:
     /*!
      * @param multimesh multimesh
      */
-    void setMultimesh( const bool& multimesh )
+    void setMultimesh ( const bool& multimesh )
     {
         M_multimesh = multimesh;
     }
 
-    virtual void setMeshProcId( const meshPtr_Type mesh, const int& procId );
+    virtual void setMeshProcId ( const meshPtr_Type mesh, const int& procId );
 
     //! Close the output file
     /*!
@@ -424,13 +439,22 @@ public:
     //! @name Get Methods
     //@{
     //! returns how many time steps between two snapshots
-    const UInt& save() const { return M_save; }
+    const UInt& save() const
+    {
+        return M_save;
+    }
 
     //! returns the time index of the first snapshot
-    const UInt& timeIndexStart() const { return M_timeIndexStart; }
+    const UInt& timeIndexStart() const
+    {
+        return M_timeIndexStart;
+    }
 
     //! returns the time index of the current snapshot
-    const UInt& timeIndex() const { return M_timeIndex; }
+    const UInt& timeIndex() const
+    {
+        return M_timeIndex;
+    }
 
     //! returns the type of the map to use for the VectorEpetra
     virtual MapEpetraType mapType() const = 0;
@@ -447,12 +471,12 @@ protected:
     /*!
        @param dvar the ExporterData object
      */
-    virtual void readScalar( exporterData_Type& dvar ) = 0;
+    virtual void readScalar ( exporterData_Type& dvar ) = 0;
     //! A method to read a vector field (to be implemented in derived classes)
     /*!
        @param dvar the ExporterData object
      */
-    virtual void readVector( exporterData_Type& dvar ) = 0;
+    virtual void readVector ( exporterData_Type& dvar ) = 0;
 
     //@}
 
@@ -500,21 +524,21 @@ protected:
 // =================
 
 template< typename MeshType >
-ExporterData<MeshType>::ExporterData( const FieldTypeEnum&   type,
-                                      const std::string&     variableName,
-                                      const feSpacePtr_Type& feSpacePtr,
-                                      const vectorPtr_Type&  vectorPtr,
-                                      const UInt&            start,
-                                      const FieldRegimeEnum& regime,
-                                      const WhereEnum&       where ):
-        M_variableName      ( variableName ),
-        M_feSpacePtr        ( feSpacePtr ),
-        M_storedArrayPtr    ( vectorPtr ),
-        M_numDOF            ( feSpacePtr->dim() ),
-        M_start             ( start ),
-        M_fieldType         ( type ),
-        M_regime            ( regime ),
-        M_where             ( where )
+ExporterData<MeshType>::ExporterData ( const FieldTypeEnum&   type,
+                                       const std::string&     variableName,
+                                       const feSpacePtr_Type& feSpacePtr,
+                                       const vectorPtr_Type&  vectorPtr,
+                                       const UInt&            start,
+                                       const FieldRegimeEnum& regime,
+                                       const WhereEnum&       where ) :
+    M_variableName      ( variableName ),
+    M_feSpacePtr        ( feSpacePtr ),
+    M_storedArrayPtr    ( vectorPtr ),
+    M_numDOF            ( feSpacePtr->dim() ),
+    M_start             ( start ),
+    M_fieldType         ( type ),
+    M_regime            ( regime ),
+    M_where             ( where )
 {}
 
 // ==============
@@ -522,15 +546,15 @@ ExporterData<MeshType>::ExporterData( const FieldTypeEnum&   type,
 // ==============
 
 template< typename MeshType >
-Real ExporterData<MeshType>::operator()( const UInt i ) const
+Real ExporterData<MeshType>::operator() ( const UInt i ) const
 {
-    return (*M_storedArrayPtr)[i];
+    return (*M_storedArrayPtr) [i];
 }
 
 template< typename MeshType >
-Real& ExporterData<MeshType>::operator()( const UInt i )
+Real& ExporterData<MeshType>::operator() ( const UInt i )
 {
-    return (*M_storedArrayPtr)[i];
+    return (*M_storedArrayPtr) [i];
 }
 
 template< typename MeshType >
@@ -538,13 +562,13 @@ std::string ExporterData<MeshType>::typeName() const
 {
     switch (M_fieldType)
     {
-    case ScalarField:
-        return "Scalar";
-    case VectorField:
-        return "Vector";
+        case ScalarField:
+            return "Scalar";
+        case VectorField:
+            return "Vector";
     }
 
-    ERROR_MSG( "Unknown field type" );
+    ERROR_MSG ( "Unknown field type" );
     return std::string();
 }
 
@@ -559,13 +583,13 @@ std::string ExporterData<MeshType>::whereName() const
 {
     switch (M_where)
     {
-    case Node:
-        return "Node";
-    case Cell:
-        return "Cell";
+        case Node:
+            return "Node";
+        case Cell:
+            return "Cell";
     }
 
-    ERROR_MSG( "Unknown location of data" );
+    ERROR_MSG ( "Unknown location of data" );
     return std::string();
 }
 
@@ -577,96 +601,96 @@ std::string ExporterData<MeshType>::whereName() const
 // Constructors
 // ===================================================
 template<typename MeshType>
-Exporter<MeshType>::Exporter():
-        M_prefix            ( "output"),
-        M_postDir           ( "./" ),
-        M_timeIndexStart    ( 0 ),
-        M_timeIndex         ( M_timeIndexStart ),
-        M_save              ( 1 ),
-        M_multimesh         ( true ),
-        M_timeIndexWidth    ( 5 ),
-        M_numImportProc     ( 0 )
+Exporter<MeshType>::Exporter() :
+    M_prefix            ( "output"),
+    M_postDir           ( "./" ),
+    M_timeIndexStart    ( 0 ),
+    M_timeIndex         ( M_timeIndexStart ),
+    M_save              ( 1 ),
+    M_multimesh         ( true ),
+    M_timeIndexWidth    ( 5 ),
+    M_numImportProc     ( 0 )
 {}
 
 template<typename MeshType>
-Exporter<MeshType>::Exporter( const GetPot& dfile, const std::string& prefix ):
-        M_prefix        ( prefix )
+Exporter<MeshType>::Exporter ( const GetPot& dfile, const std::string& prefix ) :
+    M_prefix        ( prefix )
 {
-    setDataFromGetPot(dfile);
+    setDataFromGetPot (dfile);
 }
 
 // ===================================================
 // Methods
 // ===================================================
 template<typename MeshType>
-void Exporter<MeshType>::addVariable(const FieldTypeEnum& type,
-                                     const std::string& variableName,
-                                     const feSpacePtr_Type& feSpacePtr,
-                                     const vectorPtr_Type& vectorPtr,
-                                     const UInt& start,
-                                     const FieldRegimeEnum& regime,
-                                     const WhereEnum& where )
+void Exporter<MeshType>::addVariable (const FieldTypeEnum& type,
+                                      const std::string& variableName,
+                                      const feSpacePtr_Type& feSpacePtr,
+                                      const vectorPtr_Type& vectorPtr,
+                                      const UInt& start,
+                                      const FieldRegimeEnum& regime,
+                                      const WhereEnum& where )
 {
-    M_dataVector.push_back( exporterData_Type(type, variableName, feSpacePtr, vectorPtr, start, regime, where) );
-    M_whereToDataIdMap.insert( std::pair<WhereEnum,UInt >(where, M_dataVector.size()-1 ) );
-    M_feTypeToDataIdMap.insert( std::pair<FE_TYPE,UInt >(feSpacePtr->fe().refFE().type(), M_dataVector.size()-1 ) );
+    M_dataVector.push_back ( exporterData_Type (type, variableName, feSpacePtr, vectorPtr, start, regime, where) );
+    M_whereToDataIdMap.insert ( std::pair<WhereEnum, UInt > (where, M_dataVector.size() - 1 ) );
+    M_feTypeToDataIdMap.insert ( std::pair<FE_TYPE, UInt > (feSpacePtr->fe().refFE().type(), M_dataVector.size() - 1 ) );
 }
 
 template <typename MeshType>
-void Exporter<MeshType>::readVariable(exporterData_Type& dvar)
+void Exporter<MeshType>::readVariable (exporterData_Type& dvar)
 {
     switch ( dvar.fieldType() )
     {
-    case exporterData_Type::ScalarField:
-        readScalar(dvar);
-        break;
-    case exporterData_Type::VectorField:
-        readVector(dvar);
-        break;
+        case exporterData_Type::ScalarField:
+            readScalar (dvar);
+            break;
+        case exporterData_Type::VectorField:
+            readVector (dvar);
+            break;
     }
 }
 
 template <typename MeshType>
-void Exporter<MeshType>::exportFlags( boost::shared_ptr<MeshType> mesh, boost::shared_ptr<Epetra_Comm> comm, flag_Type const & compareFlag )
+void Exporter<MeshType>::exportFlags ( boost::shared_ptr<MeshType> mesh, boost::shared_ptr<Epetra_Comm> comm, flag_Type const& compareFlag )
 {
     // @todo this is only for point flags, extension to other entity flags is trivial
 
     // @todo switch loops for efficiency!
 
     // @todo use FESpace M_spacemap for generality
-    const ReferenceFE &    refFE = feTetraP1;
-    const QuadratureRule & qR    = quadRuleTetra15pt;
-    const QuadratureRule & bdQr  = quadRuleTria4pt;
+    const ReferenceFE&     refFE = feTetraP1;
+    const QuadratureRule& qR    = quadRuleTetra15pt;
+    const QuadratureRule& bdQr  = quadRuleTria4pt;
 
-    feSpacePtr_Type FlagFESpacePtr( new feSpace_Type( mesh, refFE, qR, bdQr, 1, comm ) );
+    feSpacePtr_Type FlagFESpacePtr ( new feSpace_Type ( mesh, refFE, qR, bdQr, 1, comm ) );
 
     std::vector< vectorPtr_Type > FlagData ( EntityFlags::number );
 
-    for ( flag_Type kFlag ( 1 ), flagCount ( 0 ); kFlag < EntityFlags::ALL; kFlag *=2, flagCount++ )
+    for ( flag_Type kFlag ( 1 ), flagCount ( 0 ); kFlag < EntityFlags::ALL; kFlag *= 2, flagCount++ )
     {
         if ( kFlag & compareFlag )
         {
             FlagData[ flagCount ].reset ( new vector_Type ( FlagFESpacePtr->map() ) );
 
-            for ( UInt iPoint( 0 ); iPoint < FlagFESpacePtr->mesh()->numPoints(); ++iPoint )
+            for ( UInt iPoint ( 0 ); iPoint < FlagFESpacePtr->mesh()->numPoints(); ++iPoint )
             {
-                typename MeshType::point_Type const & point = FlagFESpacePtr->mesh()->pointList[ iPoint ];
-                FlagData[ flagCount ]->setCoefficient ( point.id() , Flag::testOneSet( point.flag(), kFlag ) );
+                typename MeshType::point_Type const& point = FlagFESpacePtr->mesh()->pointList[ iPoint ];
+                FlagData[ flagCount ]->setCoefficient ( point.id() , Flag::testOneSet ( point.flag(), kFlag ) );
             }
 
-            addVariable( exporterData_Type::ScalarField,
-                         "Flag " + EntityFlags::name ( kFlag ),
-                         FlagFESpacePtr,
-                         FlagData[ flagCount ],
-                         0,
-                         exporterData_Type::SteadyRegime,
-                         exporterData_Type::Node );
+            addVariable ( exporterData_Type::ScalarField,
+                          "Flag " + EntityFlags::name ( kFlag ),
+                          FlagFESpacePtr,
+                          FlagData[ flagCount ],
+                          0,
+                          exporterData_Type::SteadyRegime,
+                          exporterData_Type::Node );
         }
     }
 }
 
 template <typename MeshType>
-void Exporter<MeshType>::exportPID( boost::shared_ptr<MeshType> mesh, boost::shared_ptr<Epetra_Comm> comm )
+void Exporter<MeshType>::exportPID ( boost::shared_ptr<MeshType> mesh, boost::shared_ptr<Epetra_Comm> comm )
 {
     // TODO: use FESpace M_spacemap for generality
     const ReferenceFE* refFEPtr;
@@ -689,30 +713,30 @@ void Exporter<MeshType>::exportPID( boost::shared_ptr<MeshType> mesh, boost::sha
     }
 
     // Useless quadrature rule
-    const QuadratureRule & dummyQR = quadRuleDummy;
+    const QuadratureRule& dummyQR = quadRuleDummy;
 
-    feSpacePtr_Type PID_FESpacePtr( new feSpace_Type( mesh, *refFEPtr, dummyQR, dummyQR, 1, comm ) );
+    feSpacePtr_Type PID_FESpacePtr ( new feSpace_Type ( mesh, *refFEPtr, dummyQR, dummyQR, 1, comm ) );
 
     vectorPtr_Type PIDData ( new vector_Type ( PID_FESpacePtr->map() ) );
 
-    for ( UInt iElem( 0 ); iElem < mesh->numElements(); ++iElem )
+    for ( UInt iElem ( 0 ); iElem < mesh->numElements(); ++iElem )
     {
-        const ID globalElem = mesh->element(iElem).id();
-        (*PIDData)[ globalElem ] = comm->MyPID();
+        const ID globalElem = mesh->element (iElem).id();
+        (*PIDData) [ globalElem ] = comm->MyPID();
     }
 
-    addVariable( exporterData_Type::ScalarField,
-                 "PID",
-                 PID_FESpacePtr,
-                 PIDData,
-                 0,
-                 exporterData_Type::SteadyRegime,
-                 exporterData_Type::Cell );
+    addVariable ( exporterData_Type::ScalarField,
+                  "PID",
+                  PID_FESpacePtr,
+                  PIDData,
+                  0,
+                  exporterData_Type::SteadyRegime,
+                  exporterData_Type::Cell );
 }
 
 // Export the region marker ID as P0 variable
 template <typename MeshType>
-void Exporter<MeshType>::exportRegionMarkerID( boost::shared_ptr<MeshType> mesh, boost::shared_ptr<Epetra_Comm> comm )
+void Exporter<MeshType>::exportRegionMarkerID ( boost::shared_ptr<MeshType> mesh, boost::shared_ptr<Epetra_Comm> comm )
 {
     // TODO: use FESpace M_spacemap for generality
     const ReferenceFE* refFEPtr;
@@ -735,27 +759,27 @@ void Exporter<MeshType>::exportRegionMarkerID( boost::shared_ptr<MeshType> mesh,
     }
 
     // Useless quadrature rule
-    const QuadratureRule & dummyQR = quadRuleDummy;
+    const QuadratureRule& dummyQR = quadRuleDummy;
 
-    const feSpacePtr_Type regionMarkerID_FESpacePtr( new feSpace_Type( mesh, *refFEPtr,
-                                                                       dummyQR, dummyQR,
-                                                                       1, comm ) );
+    const feSpacePtr_Type regionMarkerID_FESpacePtr ( new feSpace_Type ( mesh, *refFEPtr,
+                                                                         dummyQR, dummyQR,
+                                                                         1, comm ) );
 
     vectorPtr_Type regionMarkerIDData ( new vector_Type ( regionMarkerID_FESpacePtr->map() ) );
 
-    for ( UInt iElem( 0 ); iElem < mesh->numElements(); ++iElem )
+    for ( UInt iElem ( 0 ); iElem < mesh->numElements(); ++iElem )
     {
-        const ID globalElem = mesh->element(iElem).id();
-        (*regionMarkerIDData)[ globalElem ] = mesh->element(iElem).markerID();
+        const ID globalElem = mesh->element (iElem).id();
+        (*regionMarkerIDData) [ globalElem ] = mesh->element (iElem).markerID();
     }
 
-    addVariable( exporterData_Type::ScalarField,
-                 "regionMarkerID",
-                 regionMarkerID_FESpacePtr,
-                 regionMarkerIDData,
-                 0,
-                 exporterData_Type::SteadyRegime,
-                 exporterData_Type::Cell );
+    addVariable ( exporterData_Type::ScalarField,
+                  "regionMarkerID",
+                  regionMarkerID_FESpacePtr,
+                  regionMarkerIDData,
+                  0,
+                  exporterData_Type::SteadyRegime,
+                  exporterData_Type::Cell );
 
 } // exportRegionMarkerID
 
@@ -763,19 +787,22 @@ template <typename MeshType>
 void Exporter<MeshType>::computePostfix()
 {
     std::ostringstream index;
-    index.fill( '0' );
+    index.fill ( '0' );
 
     if (M_timeIndex % M_save == 0)
     {
-        index << std::setw(M_timeIndexWidth) << ( M_timeIndex / M_save );
+        index << std::setw (M_timeIndexWidth) << ( M_timeIndex / M_save );
 
         M_postfix = "." + index.str();
     }
     else
     {
         // M_postfix = "*****";
-        std::string stars("");
-        for (UInt cc(0); cc<M_timeIndexWidth; ++cc) stars+="*";
+        std::string stars ("");
+        for (UInt cc (0); cc < M_timeIndexWidth; ++cc)
+        {
+            stars += "*";
+        }
         M_postfix = stars;
     }
 
@@ -786,19 +813,19 @@ void Exporter<MeshType>::computePostfix()
 // Set Methods
 // ===================================================
 template<typename MeshType>
-void Exporter<MeshType>::setDataFromGetPot( const GetPot& dataFile, const std::string& section )
+void Exporter<MeshType>::setDataFromGetPot ( const GetPot& dataFile, const std::string& section )
 {
-    M_postDir           = dataFile( ( section + "/post_dir"  ).data(), "./" );
-    M_timeIndexStart    = dataFile( ( section + "/start"     ).data(), 0 );
+    M_postDir           = dataFile ( ( section + "/post_dir"  ).data(), "./" );
+    M_timeIndexStart    = dataFile ( ( section + "/start"     ).data(), 0 );
     M_timeIndex         = M_timeIndexStart;
-    M_save              = dataFile( ( section + "/save"      ).data(), 1 );
-    M_multimesh         = dataFile( ( section + "/multimesh" ).data(), true );
-    M_timeIndexWidth    = dataFile( ( section + "/time_id_width" ).data(), 5);
-    M_numImportProc     = dataFile( ( section + "/numImportProc" ).data(), 1);
+    M_save              = dataFile ( ( section + "/save"      ).data(), 1 );
+    M_multimesh         = dataFile ( ( section + "/multimesh" ).data(), true );
+    M_timeIndexWidth    = dataFile ( ( section + "/time_id_width" ).data(), 5);
+    M_numImportProc     = dataFile ( ( section + "/numImportProc" ).data(), 1);
 }
 
 template<typename MeshType>
-void Exporter<MeshType>::setMeshProcId( const meshPtr_Type mesh , const int& procId )
+void Exporter<MeshType>::setMeshProcId ( const meshPtr_Type mesh , const int& procId )
 {
     M_mesh   = mesh;
     M_procId = procId;

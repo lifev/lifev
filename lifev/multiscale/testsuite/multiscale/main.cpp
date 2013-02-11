@@ -89,32 +89,36 @@ using namespace LifeV;
 using namespace Multiscale;
 
 Int
-main( Int argc, char** argv )
+main ( Int argc, char** argv )
 {
     //Setup main communicator
     boost::shared_ptr< Epetra_Comm > comm;
 
     //Setup MPI variables
-    Int numberOfProcesses(1);
-    Int rank(0);
+    Int numberOfProcesses (1);
+    Int rank (0);
 
 #ifdef HAVE_MPI
-    MPI_Init( &argc, &argv );
+    MPI_Init ( &argc, &argv );
 
-    MPI_Comm_size( MPI_COMM_WORLD, &numberOfProcesses );
-    MPI_Comm_rank( MPI_COMM_WORLD, &rank );
+    MPI_Comm_size ( MPI_COMM_WORLD, &numberOfProcesses );
+    MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
 #endif
 
     if ( rank == 0 )
+    {
         std::cout << "MPI Processes: " << numberOfProcesses << std::endl;
+    }
 
 #ifdef EPETRA_MPI
     if ( rank == 0 )
+    {
         std::cout << "MPI Epetra Initialization ... " << std::endl;
-    comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
+    }
+    comm.reset ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
 #else
     std::cout << "SERIAL Epetra Initialization ... " << std::endl;
-    comm.reset( new Epetra_SerialComm() );
+    comm.reset ( new Epetra_SerialComm() );
 #endif
 
     // Setup Multiscale problem
@@ -122,42 +126,50 @@ main( Int argc, char** argv )
     MultiscaleSolver multiscale;
 
     // Set the communicator
-    multiscale.setCommunicator( comm );
+    multiscale.setCommunicator ( comm );
 
     // Command line parameters
-    GetPot commandLine( argc, argv );
-    std::string dataFile      = commandLine.follow( "./Multiscale.dat", 2, "-f", "--file" );
-    bool verbose              = commandLine.follow( true, 2, "-s", "--showme" );
-    std::string problemFolder = commandLine.follow( "Output", 2, "-o", "--output" );
-    Real referenceSolution    = commandLine.follow( -1., 2, "-c", "--check" );
-    UInt coresPerNode         = commandLine.follow(  1, 2, "-ns", "--nodesize" );
-    Real tolerance            = commandLine.follow(  1e-8, 2, "-t", "--tolerance" );
+    GetPot commandLine ( argc, argv );
+    std::string dataFile      = commandLine.follow ( "./Multiscale.dat", 2, "-f", "--file" );
+    bool verbose              = commandLine.follow ( true, 2, "-s", "--showme" );
+    std::string problemFolder = commandLine.follow ( "Output", 2, "-o", "--output" );
+    Real referenceSolution    = commandLine.follow ( -1., 2, "-c", "--check" );
+    UInt coresPerNode         = commandLine.follow (  1, 2, "-ns", "--nodesize" );
+    Real tolerance            = commandLine.follow (  1e-8, 2, "-t", "--tolerance" );
 
     if ( coresPerNode > static_cast<UInt> ( numberOfProcesses ) )
+    {
         coresPerNode = numberOfProcesses;
+    }
 
     // Create the problem folder
-    if ( problemFolder.compare("./") )
+    if ( problemFolder.compare ("./") )
     {
         problemFolder += "/";
 
         if ( comm->MyPID() == 0 )
-            mkdir( problemFolder.c_str(), 0777 );
+        {
+            mkdir ( problemFolder.c_str(), 0777 );
+        }
     }
 
     // Setup the problem
-    multiscale.setupProblem( dataFile, problemFolder, coresPerNode );
+    multiscale.setupProblem ( dataFile, problemFolder, coresPerNode );
 
     // Display problem information
     if ( verbose )
+    {
         multiscale.showMe();
+    }
 
     // Solve the problem
-    exitFlag = multiscale.solveProblem( referenceSolution, tolerance );
+    exitFlag = multiscale.solveProblem ( referenceSolution, tolerance );
 
 #ifdef HAVE_MPI
     if ( rank == 0 )
+    {
         std::cout << "MPI Finalization" << std::endl;
+    }
     MPI_Finalize();
 #endif
 

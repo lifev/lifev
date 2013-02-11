@@ -153,62 +153,86 @@ mapsDefinition()
 
 //! Fast pow for the case of exponent 0.5
 inline Real
-pow05( const Real& base, const Real& exponent )
+pow05 ( const Real& base, const Real& exponent )
 {
     if ( exponent == 0.5 )
-        return std::sqrt( base );
+    {
+        return std::sqrt ( base );
+    }
     else
-        return std::pow( base, exponent );
+    {
+        return std::pow ( base, exponent );
+    }
 }
 
 //! Fast pow for the case of exponent 1.0
 inline Real
-pow10( const Real& base, const Real& exponent )
+pow10 ( const Real& base, const Real& exponent )
 {
     if ( exponent == 1.0 )
+    {
         return base;
+    }
     else
-        return std::pow( base, exponent );
+    {
+        return std::pow ( base, exponent );
+    }
 }
 
 //! Fast pow for the case of exponent 1.5
 inline Real
-pow15( const Real& base, const Real& exponent )
+pow15 ( const Real& base, const Real& exponent )
 {
     if ( exponent == 1.5 )
-        return std::sqrt( base ) * base;
+    {
+        return std::sqrt ( base ) * base;
+    }
     else
-        return std::pow( base, exponent );
+    {
+        return std::pow ( base, exponent );
+    }
 }
 
 //! Fast pow for the case of exponent 2.0
 inline Real
-pow20( const Real& base, const Real& exponent )
+pow20 ( const Real& base, const Real& exponent )
 {
     if ( exponent == 2.0 )
+    {
         return base * base;
+    }
     else
-        return std::pow( base, exponent );
+    {
+        return std::pow ( base, exponent );
+    }
 }
 
 //! Fast pow for the case of exponent 3.0
 inline Real
-pow30( const Real& base, const Real& exponent )
+pow30 ( const Real& base, const Real& exponent )
 {
     if ( exponent == 3.0 )
+    {
         return base * base * base;
+    }
     else
-        return std::pow( base, exponent );
+    {
+        return std::pow ( base, exponent );
+    }
 }
 
 //! Fast pow for the case of exponent 4.0
 inline Real
-pow40( const Real& base, const Real& exponent )
+pow40 ( const Real& base, const Real& exponent )
 {
     if ( exponent == 4.0 )
+    {
         return base * base * base * base;
+    }
     else
-        return std::pow( base, exponent );
+    {
+        return std::pow ( base, exponent );
+    }
 }
 
 } // OneDFSI namespace

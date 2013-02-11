@@ -37,10 +37,12 @@
      @maintainer Simone Deparis <simone.deparis@epfl.ch>
  */
 
-namespace LifeV {
-   namespace DarcyDummy{
-     const bool dummy(0);
-   }
+namespace LifeV
+{
+namespace DarcyDummy
+{
+const bool dummy (0);
+}
 }
 
 

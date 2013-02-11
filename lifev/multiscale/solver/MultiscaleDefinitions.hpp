@@ -224,7 +224,7 @@ multiscaleMapsDefinition()
  */
 template < typename DerivedType, typename BasePtrType >
 inline boost::shared_ptr< DerivedType >
-multiscaleDynamicCast( BasePtrType& base )
+multiscaleDynamicCast ( BasePtrType& base )
 {
     return boost::dynamic_pointer_cast< DerivedType > ( base );
 }
@@ -234,9 +234,9 @@ multiscaleDynamicCast( BasePtrType& base )
  * @param errorMessage - The message that should be displayed
  */
 inline void
-multiscaleErrorMessage( const std::stringstream& errorMessage )
+multiscaleErrorMessage ( const std::stringstream& errorMessage )
 {
-    std::cerr << std::setprecision( 10 ) << std::scientific << "MS ERROR: " << errorMessage.str() << std::endl;
+    std::cerr << std::setprecision ( 10 ) << std::scientific << "MS ERROR: " << errorMessage.str() << std::endl;
 }
 
 //! Create an error message
@@ -245,7 +245,7 @@ multiscaleErrorMessage( const std::stringstream& errorMessage )
  * @param message - Additional information about the error
  */
 inline void
-multiscaleErrorCheck( const errors_Type& error, const std::string& message = "", const UInt& isLeader = true )
+multiscaleErrorCheck ( const errors_Type& error, const std::string& message = "", const UInt& isLeader = true )
 {
     if ( isLeader )
     {
@@ -253,57 +253,57 @@ multiscaleErrorCheck( const errors_Type& error, const std::string& message = "",
 
         switch ( error )
         {
-        case IterationsMaximumNumber:
+            case IterationsMaximumNumber:
 
-            errorMessage << "Maximum number of iterations reached!\n";
+                errorMessage << "Maximum number of iterations reached!\n";
 
-            break;
+                break;
 
-        case Tolerance:
+            case Tolerance:
 
-            errorMessage << "Tolerance not satisfied!\n";
+                errorMessage << "Tolerance not satisfied!\n";
 
-            break;
+                break;
 
-        case Residual:
+            case Residual:
 
-            errorMessage << "External residual not satisfied!\n";
+                errorMessage << "External residual not satisfied!\n";
 
-            break;
+                break;
 
-        case Solution:
+            case Solution:
 
-            errorMessage << "Solution check not satisfied!\n";
+                errorMessage << "Solution check not satisfied!\n";
 
-            break;
+                break;
 
-        case ModelType:
+            case ModelType:
 
-            errorMessage << "Model type incorrect!\n";
+                errorMessage << "Model type incorrect!\n";
 
-            break;
+                break;
 
-        case CouplingType:
+            case CouplingType:
 
-            errorMessage << "Coupling type incorrect!\n";
+                errorMessage << "Coupling type incorrect!\n";
 
-            break;
+                break;
 
-        case ModelInterface:
+            case ModelInterface:
 
-            errorMessage << "Model interface not available!\n";
+                errorMessage << "Model interface not available!\n";
 
-            break;
+                break;
 
-        default:
+            default:
 
-            errorMessage << "No error message for this errorType!\n";
+                errorMessage << "No error message for this errorType!\n";
 
-            break;
+                break;
         }
 
         errorMessage << message << "\n";
-        multiscaleErrorMessage( errorMessage );
+        multiscaleErrorMessage ( errorMessage );
     }
 
     // Change ExitFlag

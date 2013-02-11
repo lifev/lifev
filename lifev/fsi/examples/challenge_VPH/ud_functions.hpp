@@ -26,51 +26,51 @@
 
 namespace LifeV
 {
-Real f(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
+Real f (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
 
-Real u1(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
+Real u1 (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
 
-Real fZero(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
+Real fZero (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
 
 // Initial velocity
-Real u0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
-Real p0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
-Real E(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
+Real u0 (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
+Real p0 (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
+Real E (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
 
 
 // Initial displacement and velocity
-Real d0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
+Real d0 (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
 
-Real w0(const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
+Real w0 (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
 
-Real aortaPhisPress(const Real&  t, const Real& x=0, const Real& y=0, const Real& z=0, const ID& i=0);
+Real aortaPhisPress (const Real&  t, const Real& x = 0, const Real& y = 0, const Real& z = 0, const ID& i = 0);
 
-Real abdominalAorta(const Real&  t, const Real& x=0, const Real& y=0, const Real& z=0, const ID& i=0);
+Real abdominalAorta (const Real&  t, const Real& x = 0, const Real& y = 0, const Real& z = 0, const ID& i = 0);
 
-Real aortaFlux4(const Real&  t, const Real& x=0, const Real& y=0, const Real& z=0, const ID& i=0);
-Real aortaFlux5(const Real&  t, const Real& x=0, const Real& y=0, const Real& z=0, const ID& i=0);
-Real aortaFlux7(const Real&  t, const Real& x=0, const Real& y=0, const Real& z=0, const ID& i=0);
-Real aortaFlux8(const Real&  t, const Real& x=0, const Real& y=0, const Real& z=0, const ID& i=0);
-Real aortaFlux9(const Real&  t, const Real& x=0, const Real& y=0, const Real& z=0, const ID& i=0);
-Real aortaFluxIn(const Real&  t, const Real& x=0, const Real& y=0, const Real& z=0, const ID& i=0);
-Real aortaFlux3_(const Real&  t, const Real& x=0, const Real& y=0, const Real& z=0, const ID& i=0);
-Real aortaFlux3(const Real&  t, const Real& x=0, const Real& y=0, const Real& z=0, const ID& i=0);
-Real aortaFlux6_(const Real&  t, const Real& x=0, const Real& y=0, const Real& z=0, const ID& i=0);
-Real aortaFlux6(const Real&  t, const Real& x=0, const Real& y=0, const Real& z=0, const ID& i=0);
+Real aortaFlux4 (const Real&  t, const Real& x = 0, const Real& y = 0, const Real& z = 0, const ID& i = 0);
+Real aortaFlux5 (const Real&  t, const Real& x = 0, const Real& y = 0, const Real& z = 0, const ID& i = 0);
+Real aortaFlux7 (const Real&  t, const Real& x = 0, const Real& y = 0, const Real& z = 0, const ID& i = 0);
+Real aortaFlux8 (const Real&  t, const Real& x = 0, const Real& y = 0, const Real& z = 0, const ID& i = 0);
+Real aortaFlux9 (const Real&  t, const Real& x = 0, const Real& y = 0, const Real& z = 0, const ID& i = 0);
+Real aortaFluxIn (const Real&  t, const Real& x = 0, const Real& y = 0, const Real& z = 0, const ID& i = 0);
+Real aortaFlux3_ (const Real&  t, const Real& x = 0, const Real& y = 0, const Real& z = 0, const ID& i = 0);
+Real aortaFlux3 (const Real&  t, const Real& x = 0, const Real& y = 0, const Real& z = 0, const ID& i = 0);
+Real aortaFlux6_ (const Real&  t, const Real& x = 0, const Real& y = 0, const Real& z = 0, const ID& i = 0);
+Real aortaFlux6 (const Real&  t, const Real& x = 0, const Real& y = 0, const Real& z = 0, const ID& i = 0);
 
-Real linearFlux3_(Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
-Real linearFlux3(Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
-Real linearFluxIn(Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
-Real linearFlux4(Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
-Real linearFlux5(Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
-Real linearFlux6(Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
-Real linearFlux6_(Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
-Real linearFlux7(Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
-Real linearFlux8(Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
-Real linearFlux9(Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
-Real linearPress2(Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
+Real linearFlux3_ (Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
+Real linearFlux3 (Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
+Real linearFluxIn (Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
+Real linearFlux4 (Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
+Real linearFlux5 (Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
+Real linearFlux6 (Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
+Real linearFlux6_ (Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
+Real linearFlux7 (Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
+Real linearFlux8 (Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
+Real linearFlux9 (Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
+Real linearPress2 (Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
 
-Real u2(Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
+Real u2 (Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
 
 }
 

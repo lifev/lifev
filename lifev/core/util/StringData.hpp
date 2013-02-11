@@ -55,7 +55,7 @@ public:
     //! @name Constructor
     //@{
     StringData() {}
-    StringData( std::string str, Int val, std::string help );
+    StringData ( std::string str, Int val, std::string help );
 
     virtual ~StringData() {}
     //@}
@@ -136,7 +136,7 @@ public:
     //! @name Constructor
     //@{
     StringDataList() {}
-    StringDataList( std::string title );
+    StringDataList ( std::string title );
 
     virtual ~StringDataList() {}
     //@}
@@ -146,9 +146,9 @@ public:
     void add ( std::string str, Int val, std::string help );
 
     //! State printing function (val=true:the values are shown)
-    void showMe( std::ostream& c = std::cout, bool val = false ) const;
+    void showMe ( std::ostream& c = std::cout, bool val = false ) const;
 
-    Int value( const std::string& str ) const;
+    Int value ( const std::string& str ) const;
     //@}
 
 private:

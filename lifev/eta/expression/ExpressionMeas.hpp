@@ -70,7 +70,7 @@ public:
     ExpressionMeas();
 
     //! Copy constructor
-    ExpressionMeas( const ExpressionMeas& );
+    ExpressionMeas ( const ExpressionMeas& );
 
     //! Destructor
     ~ExpressionMeas();
@@ -82,7 +82,7 @@ public:
     //@{
 
     //! Display method
-    static void display(std::ostream& out=std::cout);
+    static void display (std::ostream& out = std::cout);
 
     //@}
 };

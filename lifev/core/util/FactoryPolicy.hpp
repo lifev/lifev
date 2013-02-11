@@ -51,7 +51,7 @@ struct FactoryPolicyCreationUsingNew
         return new T;
     }
 
-    static void destroy( T* p )
+    static void destroy ( T* p )
     {
         delete p;
     }
@@ -66,14 +66,14 @@ struct FactoryPolicyLifeTimeDefault
 {
     //! @name Static methods
     //@{
-    static void scheduleDestruction( T*, void ( *pFun ) () )
+    static void scheduleDestruction ( T*, void ( *pFun ) () )
     {
-        std::atexit( pFun );
+        std::atexit ( pFun );
     }
 
     static void onDeadReference()
     {
-        throw std::logic_error( "Dead Reference Detected" );
+        throw std::logic_error ( "Dead Reference Detected" );
     }
     //@}
 };

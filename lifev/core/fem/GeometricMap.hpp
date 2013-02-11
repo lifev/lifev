@@ -57,7 +57,7 @@ namespace LifeV
   Modified by S. Quinodoz (samuel.quinodoz@epfl.ch, 04.2010)
 */
 class GeometricMap:
-        public ReferenceElement
+    public ReferenceElement
 {
 public:
 
@@ -84,15 +84,15 @@ public:
       @param refCoor : the static array containing the coordinates of the nodes on the reference element (defined in refEle.h)
       @param  bdMap : a pointer on the natural associated mapping for the boundary of the element
      */
-    GeometricMap( std::string          name,
-            ReferenceShapes      shape,
-            UInt                 nbDof,
-            UInt                 nbCoor,
-            const function_Type* phi,
-            const function_Type* dPhi,
-            const function_Type* d2Phi,
-            const Real*          refCoor,
-            const GeometricMap*        bdMap );
+    GeometricMap ( std::string          name,
+                   ReferenceShapes      shape,
+                   UInt                 nbDof,
+                   UInt                 nbCoor,
+                   const function_Type* phi,
+                   const function_Type* dPhi,
+                   const function_Type* d2Phi,
+                   const Real*          refCoor,
+                   const GeometricMap*        bdMap );
 
     //! Destructor
     ~GeometricMap();
@@ -106,7 +106,7 @@ public:
     //! return the natural mapping for the boundary of the element
     const GeometricMap& boundaryMap() const
     {
-        ASSERT( M_boundaryMap!=0 , "No boundary map defined" );
+        ASSERT ( M_boundaryMap != 0 , "No boundary map defined" );
         return *M_boundaryMap;
     }
 
@@ -121,7 +121,7 @@ private:
     GeometricMap();
 
     //! No copy constructor
-    GeometricMap(const GeometricMap&);
+    GeometricMap (const GeometricMap&);
 
     //@}
 
@@ -146,51 +146,75 @@ extern const GeometricMap geoBiquadraticHexa;
 
 /*! Helper function that returns the geomap associated to a mesh */
 template <typename MeshType>
-const GeometricMap& getGeometricMap( MeshType & /*mesh*/ )
+const GeometricMap& getGeometricMap ( MeshType& /*mesh*/ )
 {
 
     typedef typename MeshType::elementShape_Type elementShape_Type;
 
     switch ( elementShape_Type::S_shape )
     {
-    case POINT:
-        if ( elementShape_Type::S_numPoints == 1 )
-            return geoLinearNode;
-        else
-            ERROR_MSG( "Geomap type not yet implemented" );
-        break;
-    case LINE:
-        if ( elementShape_Type::S_numPoints == 2 )
-            return geoLinearSeg;
-        else
-            ERROR_MSG( "Geomap type not yet implemented" );
-        break;
-    case HEXA:
-        if ( elementShape_Type::S_numPoints == 8 )
-            return geoBilinearHexa;
-        else
-            ERROR_MSG( "Geomap type not yet implemented" );
-        break;
-    case TETRA:
-        if ( elementShape_Type::S_numPoints == 4 )
-            return geoLinearTetra;
-        else
-            ERROR_MSG( "Geomap type not yet implemented" );
-        break;
-    case TRIANGLE:
-        if ( elementShape_Type::S_numPoints == 3 )
-            return geoLinearTria;
-        else
-            ERROR_MSG( "Geomap type not yet implemented" );
-        break;
-    case QUAD:
-        if ( elementShape_Type::S_numPoints == 4 )
-            return geoBilinearQuad;
-        else
-            ERROR_MSG( "Geomap type not yet implemented" );
-        break;
-    default:
-        ERROR_MSG( "Geomap type not yet implemented" );
+        case POINT:
+            if ( elementShape_Type::S_numPoints == 1 )
+            {
+                return geoLinearNode;
+            }
+            else
+            {
+                ERROR_MSG ( "Geomap type not yet implemented" );
+            }
+            break;
+        case LINE:
+            if ( elementShape_Type::S_numPoints == 2 )
+            {
+                return geoLinearSeg;
+            }
+            else
+            {
+                ERROR_MSG ( "Geomap type not yet implemented" );
+            }
+            break;
+        case HEXA:
+            if ( elementShape_Type::S_numPoints == 8 )
+            {
+                return geoBilinearHexa;
+            }
+            else
+            {
+                ERROR_MSG ( "Geomap type not yet implemented" );
+            }
+            break;
+        case TETRA:
+            if ( elementShape_Type::S_numPoints == 4 )
+            {
+                return geoLinearTetra;
+            }
+            else
+            {
+                ERROR_MSG ( "Geomap type not yet implemented" );
+            }
+            break;
+        case TRIANGLE:
+            if ( elementShape_Type::S_numPoints == 3 )
+            {
+                return geoLinearTria;
+            }
+            else
+            {
+                ERROR_MSG ( "Geomap type not yet implemented" );
+            }
+            break;
+        case QUAD:
+            if ( elementShape_Type::S_numPoints == 4 )
+            {
+                return geoBilinearQuad;
+            }
+            else
+            {
+                ERROR_MSG ( "Geomap type not yet implemented" );
+            }
+            break;
+        default:
+            ERROR_MSG ( "Geomap type not yet implemented" );
     }
     return  geoLinearNode;
 }

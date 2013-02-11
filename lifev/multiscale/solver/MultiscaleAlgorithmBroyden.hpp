@@ -84,7 +84,7 @@ public:
     /*!
      * @param FileName Name of the data file.
      */
-    void setupData( const std::string& fileName );
+    void setupData ( const std::string& fileName );
 
     //! Setup coupling variables and other quantities of the algorithm
     void setupAlgorithm();
@@ -105,7 +105,7 @@ public:
     /*!
      * @param parameterList teuchos list of parameters
      */
-    void setAlgorithmParameters( const multiscaleParameterList_Type& parameterList );
+    void setAlgorithmParameters ( const multiscaleParameterList_Type& parameterList );
 
     //@}
 
@@ -123,9 +123,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    MultiscaleAlgorithmBroyden( const MultiscaleAlgorithmBroyden& algorithm );
+    MultiscaleAlgorithmBroyden ( const MultiscaleAlgorithmBroyden& algorithm );
 
-    MultiscaleAlgorithmBroyden& operator=( const MultiscaleAlgorithmBroyden& algorithm );
+    MultiscaleAlgorithmBroyden& operator= ( const MultiscaleAlgorithmBroyden& algorithm );
 
     //@}
 
@@ -135,9 +135,9 @@ private:
 
     void assembleJacobianMatrix();
 
-    void broydenJacobianUpdate( const multiscaleVector_Type& delta );
+    void broydenJacobianUpdate ( const multiscaleVector_Type& delta );
 
-    void orthogonalizationUpdate( const multiscaleVector_Type& delta );
+    void orthogonalizationUpdate ( const multiscaleVector_Type& delta );
 
 #ifdef HAVE_HDF5
     //! Export Jacobian matrix to HDF5 file

@@ -71,7 +71,7 @@ public:
     //! Constructor
     explicit ZeroDimensionalBCHandler() : M_bc() {}
 
-    explicit ZeroDimensionalBCHandler( const ZeroDimensionalBCHandler& handler ) : M_bc( handler.M_bc ) {}
+    explicit ZeroDimensionalBCHandler ( const ZeroDimensionalBCHandler& handler ) : M_bc ( handler.M_bc ) {}
 
     //! Destructor
     virtual ~ZeroDimensionalBCHandler() {}
@@ -86,7 +86,10 @@ public:
     /*!
       @param bcType the bc type
     */
-    void setBC( const bcFlag_Type& flag, const bcType_Type& bcType, const function_Type& function ) { M_bc[flag].setBC( bcType, function ); }
+    void setBC ( const bcFlag_Type& flag, const bcType_Type& bcType, const function_Type& function )
+    {
+        M_bc[flag].setBC ( bcType, function );
+    }
 
     //@}
 
@@ -99,7 +102,10 @@ public:
      *  @param side the boundary condition side
      *  @return boundary condition
      */
-    const bc_Type& bc( const bcFlag_Type& flag ) const { return M_bc.find( flag )->second; }
+    const bc_Type& bc ( const bcFlag_Type& flag ) const
+    {
+        return M_bc.find ( flag )->second;
+    }
 
     //@}
 

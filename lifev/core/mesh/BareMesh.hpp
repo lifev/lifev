@@ -26,7 +26,7 @@
 
 /*!
     @file BareMesh.hpp
-    @brief Contains utility for importing meshes 
+    @brief Contains utility for importing meshes
 
     @date 16 Aug 2011
     @author: luca formaggia
@@ -79,7 +79,7 @@ struct BareMesh
 };
 
 template <typename GeoShapeType>
-BareMesh<GeoShapeType>::BareMesh() : isPartitioned(false) {}
+BareMesh<GeoShapeType>::BareMesh() : isPartitioned (false) {}
 
 template <typename GeoShapeType>
 void BareMesh<GeoShapeType>::clear()

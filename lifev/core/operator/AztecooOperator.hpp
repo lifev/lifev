@@ -63,26 +63,29 @@ namespace Operators
 class AztecooOperator : public SolverOperator
 {
 public:
-	typedef AztecOO SolverType;
-	typedef boost::shared_ptr<SolverType> SolverType_ptr;
+    typedef AztecOO SolverType;
+    typedef boost::shared_ptr<SolverType> SolverType_ptr;
 
-	AztecooOperator();
+    AztecooOperator();
 
 protected:
 
-	virtual int doApplyInverse( const vector_Type& X, vector_Type& Y ) const;
-	virtual void doSetOperator();
-	virtual void doSetPreconditioner();
-	virtual void doSetParameterList();
-	virtual void doResetSolver();
+    virtual int doApplyInverse ( const vector_Type& X, vector_Type& Y ) const;
+    virtual void doSetOperator();
+    virtual void doSetPreconditioner();
+    virtual void doSetParameterList();
+    virtual void doResetSolver();
 
-	SolverType_ptr M_linSolver;
+    SolverType_ptr M_linSolver;
 };
 
-inline SolverOperator* createAztecooOperator() { return new AztecooOperator(); }
+inline SolverOperator* createAztecooOperator()
+{
+    return new AztecooOperator();
+}
 namespace
 {
-	static bool registerAztecoo = SolverOperatorFactory::instance().registerProduct( "AztecOO", &createAztecooOperator );
+static bool registerAztecoo = SolverOperatorFactory::instance().registerProduct ( "AztecOO", &createAztecooOperator );
 }
 
 

@@ -74,11 +74,11 @@ public:
 
     //! @name Constructor
     //@{
-    LifeChrono():
-        M_t1(0),
-        M_t2(0),
-        M_dt(0),
-        M_running(false)
+    LifeChrono() :
+        M_t1 (0),
+        M_t2 (0),
+        M_dt (0),
+        M_running (false)
     {
     }
     //@}
@@ -115,7 +115,9 @@ public:
     Real diff()
     {
         if (M_running)
+        {
             return ( 1. * ( clock() - M_t1 ) ) / CLOCKS_PER_SEC;
+        }
 
         return ( 1. * ( M_t2 - M_t1 ) ) / CLOCKS_PER_SEC;
     }
@@ -125,17 +127,21 @@ public:
      * @param comm the global communicator
      * @return elapsed time
      */
-    Real globalDiff( const comm_Type& comm )
+    Real globalDiff ( const comm_Type& comm )
     {
         Real localDifference;
         Real globalDifference;
 
         if ( M_running )
+        {
             localDifference = ( 1. * ( clock() - M_t1 ) ) / CLOCKS_PER_SEC;
+        }
         else
+        {
             localDifference = ( 1. * ( M_t2 - M_t1 ) ) / CLOCKS_PER_SEC;
+        }
 
-        comm.MaxAll( &localDifference, &globalDifference, 1 );
+        comm.MaxAll ( &localDifference, &globalDifference, 1 );
 
         return globalDifference;
     }
@@ -144,7 +150,9 @@ public:
     Real diffCumul()
     {
         if (M_running)
+        {
             return ( 1. * ( M_dt +  clock() - M_t1 ) ) / CLOCKS_PER_SEC;
+        }
 
         return ( 1. * M_dt / CLOCKS_PER_SEC );
     }

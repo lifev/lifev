@@ -2,11 +2,11 @@
 
 using namespace LifeV;
 
-int main(int argc, char** argv)
+int main (int argc, char** argv)
 {
 
 #ifdef HAVE_MPI
-    MPI_Init( &argc, &argv );
+    MPI_Init ( &argc, &argv );
 #endif
 
     std::cout << "End Result: TEST PASSED" << std::endl;

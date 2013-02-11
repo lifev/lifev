@@ -60,7 +60,7 @@ public:
     //! @name Public Types
     //@{
 
-	typedef ExpressionBase<ExpressionDphiJ> base_Type;
+    typedef ExpressionBase<ExpressionDphiJ> base_Type;
 
     //@}
 
@@ -69,10 +69,10 @@ public:
     //@{
 
     //! Empty constructor
-	ExpressionDphiJ();
+    ExpressionDphiJ();
 
     //! Copy constructor
-	ExpressionDphiJ(const ExpressionDphiJ&);
+    ExpressionDphiJ (const ExpressionDphiJ&);
 
     //! Destructor
     ~ExpressionDphiJ();
@@ -84,7 +84,7 @@ public:
     //@{
 
     //! Display method
-	static void display(std::ostream& out= std::cout);
+    static void display (std::ostream& out = std::cout);
 
     //@}
 };
@@ -94,9 +94,9 @@ public:
   @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
 */
 inline ExpressionDphiJ
-grad(const ExpressionPhiJ&)
+grad (const ExpressionPhiJ&)
 {
-	return ExpressionDphiJ();
+    return ExpressionDphiJ();
 }
 
 } // Namespace ExpressionAssembly

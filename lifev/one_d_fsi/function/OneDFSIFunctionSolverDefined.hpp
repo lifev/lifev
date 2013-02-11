@@ -107,13 +107,13 @@ public:
      *  @param bcLine the line of the boundary condition (first or second).
      *  @param bcType the type of the boundary condition (\f$Q\f$, \f$A\f$, \f$P\f$, \f$S\f$, \f$W_1\f$, \f$W_2\f$).
      */
-    explicit OneDFSIFunctionSolverDefined( const bcSide_Type& bcSide, const bcType_Type& bcType );
+    explicit OneDFSIFunctionSolverDefined ( const bcSide_Type& bcSide, const bcType_Type& bcType );
 
     //! Copy constructor
     /*!
      * @param bcFunctionDefault OneDFSIFunctionSolverDefined
      */
-    explicit OneDFSIFunctionSolverDefined( const OneDFSIFunctionSolverDefined& bcFunctionDefault );
+    explicit OneDFSIFunctionSolverDefined ( const OneDFSIFunctionSolverDefined& bcFunctionDefault );
 
     //! Destructor
     virtual ~OneDFSIFunctionSolverDefined() {}
@@ -145,13 +145,16 @@ public:
      *  @param fluxPtr pointer to the flux term of the problem.
      *  @param sourcePtr pointer to the source term of the problem.
      */
-    void setFluxSource( const fluxPtr_Type& fluxPtr, const sourcePtr_Type& sourcePtr );
+    void setFluxSource ( const fluxPtr_Type& fluxPtr, const sourcePtr_Type& sourcePtr );
 
     //! Set the solution of the problem
     /*!
      *  @param solutionPtr pointer to the solution of the problem.
      */
-    void setSolution( const solutionPtr_Type& solutionPtr ) { M_solutionPtr = solutionPtr; }
+    void setSolution ( const solutionPtr_Type& solutionPtr )
+    {
+        M_solutionPtr = solutionPtr;
+    }
 
     //@}
 
@@ -203,13 +206,13 @@ public:
      *  @param bcLine the line of the boundary condition (first or second).
      *  @param bcType the type of the boundary condition (\f$Q\f$, \f$A\f$, \f$P\f$, \f$S\f$, \f$W_1\f$, \f$W_2\f$).
      */
-    explicit OneDFSIFunctionSolverDefinedRiemann( const bcSide_Type& bcSide, const bcType_Type& bcType );
+    explicit OneDFSIFunctionSolverDefinedRiemann ( const bcSide_Type& bcSide, const bcType_Type& bcType );
 
     //! Copy constructor
     /*!
      * @param bcFunctionRiemann OneDFSIFunctionSolverDefinedRiemann
      */
-    explicit OneDFSIFunctionSolverDefinedRiemann( const OneDFSIFunctionSolverDefinedRiemann& bcFunctionRiemann );
+    explicit OneDFSIFunctionSolverDefinedRiemann ( const OneDFSIFunctionSolverDefinedRiemann& bcFunctionRiemann );
 
     //! Destructor
     virtual ~OneDFSIFunctionSolverDefinedRiemann() {}
@@ -289,13 +292,13 @@ public:
      *  @param bcLine the line of the boundary condition (first or second).
      *  @param bcType the type of the boundary condition (\f$Q\f$, \f$A\f$, \f$P\f$, \f$S\f$, \f$W_1\f$, \f$W_2\f$).
      */
-    explicit OneDFSIFunctionSolverDefinedCompatibility( const bcSide_Type& bcSide,  const bcType_Type& bcType );
+    explicit OneDFSIFunctionSolverDefinedCompatibility ( const bcSide_Type& bcSide,  const bcType_Type& bcType );
 
     //! Copy constructor
     /*!
      * @param bcFunctionCompatibility OneDFSIFunctionSolverDefinedCompatibility
      */
-    explicit OneDFSIFunctionSolverDefinedCompatibility( const OneDFSIFunctionSolverDefinedCompatibility& bcFunctionCompatibility );
+    explicit OneDFSIFunctionSolverDefinedCompatibility ( const OneDFSIFunctionSolverDefinedCompatibility& bcFunctionCompatibility );
 
     //! Destructor
     virtual ~OneDFSIFunctionSolverDefinedCompatibility() {}
@@ -314,7 +317,10 @@ public:
      *  @param timeStep the time step.
      *  @return the value of the function.
      */
-    virtual Real operator() ( const Real& /*time*/, const Real& timeStep ) { return computeRHS( timeStep ); }
+    virtual Real operator() ( const Real& /*time*/, const Real& timeStep )
+    {
+        return computeRHS ( timeStep );
+    }
 
     //@}
 
@@ -331,7 +337,7 @@ protected:
      *  @param timeStep the time step.
      *  @return rhs of the problem.
      */
-    Real computeRHS( const Real& timeStep );
+    Real computeRHS ( const Real& timeStep );
 
     //! Compute the current eigenvalues and eigenvectors
     void computeEigenValuesVectors();
@@ -344,8 +350,8 @@ protected:
      *  @param timeStep the time step.
      *  @return rhs of the problem
      */
-    Real evaluateRHS( const Real& eigenvalue, const container2D_Type& eigenvector,
-                      const container2D_Type& deltaEigenvector, const Real& timeStep );
+    Real evaluateRHS ( const Real& eigenvalue, const container2D_Type& eigenvector,
+                       const container2D_Type& deltaEigenvector, const Real& timeStep );
 
     //! Compute the current CFL
     /*!
@@ -353,7 +359,7 @@ protected:
      *  @param timeStep the time step.
      *  @return CFL
      */
-    Real computeCFL( const Real& eigenvalue, const Real& timeStep ) const;
+    Real computeCFL ( const Real& eigenvalue, const Real& timeStep ) const;
 
     //! Scalar product between 2 2D vectors
     /*!
@@ -361,7 +367,10 @@ protected:
      *  @pararm vector2 second vector
      *  @return scalar product
      */
-    Real scalarProduct( const container2D_Type& vector1, const container2D_Type& vector2 ) { return vector1[0]*vector2[0] + vector1[1]*vector2[1]; }
+    Real scalarProduct ( const container2D_Type& vector1, const container2D_Type& vector2 )
+    {
+        return vector1[0] * vector2[0] + vector1[1] * vector2[1];
+    }
 
     //@}
 
@@ -414,13 +423,13 @@ public:
      *  @param bcLine the line of the boundary condition (first or second).
      *  @param bcType the type of the boundary condition (\f$Q\f$, \f$A\f$, \f$P\f$, \f$S\f$, \f$W_1\f$, \f$W_2\f$).
      */
-    explicit OneDFSIFunctionSolverDefinedAbsorbing( const bcSide_Type& bcSide, const bcType_Type& bcType ) : super( bcSide, bcType ) {}
+    explicit OneDFSIFunctionSolverDefinedAbsorbing ( const bcSide_Type& bcSide, const bcType_Type& bcType ) : super ( bcSide, bcType ) {}
 
     //! Copy constructor
     /*!
      * @param bcFunctionAbsorbing OneDFSIFunctionSolverDefinedAbsorbing
      */
-    explicit OneDFSIFunctionSolverDefinedAbsorbing( const OneDFSIFunctionSolverDefinedAbsorbing& bcFunctionAbsorbing ) : super( bcFunctionAbsorbing ) {}
+    explicit OneDFSIFunctionSolverDefinedAbsorbing ( const OneDFSIFunctionSolverDefinedAbsorbing& bcFunctionAbsorbing ) : super ( bcFunctionAbsorbing ) {}
 
     //! Destructor
     virtual ~OneDFSIFunctionSolverDefinedAbsorbing() {}
@@ -450,14 +459,20 @@ protected:
      * For absorbing BC do nothing.
      * @param resistance value of the resistance
      */
-    virtual void resistance( Real& /*resistance*/ ) { /*Do nothing => absorbing!*/ }
+    virtual void resistance ( Real& /*resistance*/ )
+    {
+        /*Do nothing => absorbing!*/
+    }
 
     //! Venous pressure
     /*!
      * For absorbing BC the venous pressure is equal to the external pressure.
      * @return venous pressure.
      */
-    virtual Real venousPressure() { return M_fluxPtr->physics()->externalPressure(); }
+    virtual Real venousPressure()
+    {
+        return M_fluxPtr->physics()->externalPressure();
+    }
 
 };
 
@@ -493,13 +508,13 @@ public:
      *  @param bcType the type of the boundary condition (\f$Q\f$, \f$A\f$, \f$P\f$, \f$S\f$, \f$W_1\f$, \f$W_2\f$).
      *  @param resistance the terminal resistance.
      */
-    explicit OneDFSIFunctionSolverDefinedResistance( const bcSide_Type& bcSide,  const bcType_Type& bcType, const Real& resistance );
+    explicit OneDFSIFunctionSolverDefinedResistance ( const bcSide_Type& bcSide,  const bcType_Type& bcType, const Real& resistance );
 
     //! Copy constructor
     /*!
      * @param bcFunctionResistance OneDFSIFunctionSolverDefinedResistance
      */
-    explicit OneDFSIFunctionSolverDefinedResistance( const OneDFSIFunctionSolverDefinedResistance& bcFunctionResistance );
+    explicit OneDFSIFunctionSolverDefinedResistance ( const OneDFSIFunctionSolverDefinedResistance& bcFunctionResistance );
 
     //! Destructor
     virtual ~OneDFSIFunctionSolverDefinedResistance() {}
@@ -512,13 +527,19 @@ protected:
     /*!
      * @param resistance value of the resistance
      */
-    void resistance( Real& resistance ) { resistance = M_resistance; }
+    void resistance ( Real& resistance )
+    {
+        resistance = M_resistance;
+    }
 
     //! Venous pressure
     /*!
      * @return venous pressure.
      */
-    Real venousPressure() { return M_fluxPtr->physics()->venousPressure(); }
+    Real venousPressure()
+    {
+        return M_fluxPtr->physics()->venousPressure();
+    }
 
     Real M_resistance;
 };
@@ -582,17 +603,17 @@ public:
      *  @param absorbing is an absorbing boundary condition
      *  @param venousPressure the venous pressure
      */
-    explicit OneDFSIFunctionSolverDefinedWindkessel3( const bcSide_Type& bcSide, const bcType_Type& bcType,
-                                                  const Real& resistance1, const Real& resistance2,
-                                                  const Real& compliance,
-                                                  const bool& absorbing = false,
-                                                  const Real& venousPressure = 6666. );
+    explicit OneDFSIFunctionSolverDefinedWindkessel3 ( const bcSide_Type& bcSide, const bcType_Type& bcType,
+                                                       const Real& resistance1, const Real& resistance2,
+                                                       const Real& compliance,
+                                                       const bool& absorbing = false,
+                                                       const Real& venousPressure = 6666. );
 
     //! Copy constructor
     /*!
      * @param bcFunctionWindkessel3 OneDFSIFunctionSolverDefinedWindkessel3
      */
-    explicit OneDFSIFunctionSolverDefinedWindkessel3( const OneDFSIFunctionSolverDefinedWindkessel3& bcFunctionWindkessel3 );
+    explicit OneDFSIFunctionSolverDefinedWindkessel3 ( const OneDFSIFunctionSolverDefinedWindkessel3& bcFunctionWindkessel3 );
 
     //! Destructor
     virtual ~OneDFSIFunctionSolverDefinedWindkessel3() {}

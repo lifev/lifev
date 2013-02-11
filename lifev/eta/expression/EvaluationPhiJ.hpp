@@ -94,18 +94,18 @@ public:
     //@{
 
     //! Empty constructor
-    EvaluationPhiJ(){}
+    EvaluationPhiJ() {}
 
     //! Copy constructor
-    EvaluationPhiJ(const EvaluationPhiJ& provider)
-        : M_valuesPtr(provider.M_valuesPtr)
+    EvaluationPhiJ (const EvaluationPhiJ& provider)
+        : M_valuesPtr (provider.M_valuesPtr)
     {}
 
     //! Expression-based constructor
-    explicit EvaluationPhiJ(const ExpressionPhiJ& /*expression*/) {}
+    explicit EvaluationPhiJ (const ExpressionPhiJ& /*expression*/) {}
 
     //! Destructor
-    ~EvaluationPhiJ(){}
+    ~EvaluationPhiJ() {}
 
     //@}
 
@@ -114,10 +114,10 @@ public:
     //@{
 
     //! Do nothing internal update
-    void update(const UInt& /*iElement*/){}
+    void update (const UInt& /*iElement*/) {}
 
     //! Display method
-    static void display(ostream& out=std::cout)
+    static void display (ostream& out = std::cout)
     {
         out << "phi_j";
     }
@@ -130,22 +130,22 @@ public:
 
     //! Do nothing setter for the global current FE
     template< typename CFEType >
-    void setGlobalCFE(const CFEType* /*globalCFE*/){}
+    void setGlobalCFE (const CFEType* /*globalCFE*/) {}
 
     //! Do nothing setter for the test current FE
     template< typename CFEType >
-    void setTestCFE(const CFEType* /*testCFE*/){}
+    void setTestCFE (const CFEType* /*testCFE*/) {}
 
     //! Setter for the solution current FE
     template< typename CFEType >
-    void setSolutionCFE(const CFEType* solutionCFE)
+    void setSolutionCFE (const CFEType* solutionCFE)
     {
-        ASSERT(solutionCFE != 0, "Nul pointer to the solutionCFE cannot be set");
-        M_valuesPtr = &(solutionCFE->M_phi);
+        ASSERT (solutionCFE != 0, "Nul pointer to the solutionCFE cannot be set");
+        M_valuesPtr = & (solutionCFE->M_phi);
     }
 
     //! Do nothing setter for the quadrature
-    void setQuadrature(const QuadratureRule&){}
+    void setQuadrature (const QuadratureRule&) {}
 
     //@}
 
@@ -154,11 +154,11 @@ public:
     //@{
 
     //! Getter for the value for a matrix
-    const return_Type& value_qij(const UInt& q, const UInt& /*i*/, const UInt& j) const
+    const return_Type& value_qij (const UInt& q, const UInt& /*i*/, const UInt& j) const
     {
-        ASSERT( q < M_valuesPtr->size(), "Quadrature point index invalid");
-        ASSERT( j < (*M_valuesPtr)[q].size(), "Dof index invalid");
-        return (*M_valuesPtr)[q][j];
+        ASSERT ( q < M_valuesPtr->size(), "Quadrature point index invalid");
+        ASSERT ( j < (*M_valuesPtr) [q].size(), "Dof index invalid");
+        return (*M_valuesPtr) [q][j];
     }
 
     //@}
@@ -166,19 +166,19 @@ public:
 private:
 
     //! Storage for the pointer to the data
-    std::vector< std::vector < return_Type > > const * M_valuesPtr;
+    std::vector< std::vector < return_Type > > const* M_valuesPtr;
 
 };
 
 
 template<UInt solutionDim>
-const flag_Type EvaluationPhiJ<solutionDim>::S_globalUpdateFlag=ET_UPDATE_NONE;
+const flag_Type EvaluationPhiJ<solutionDim>::S_globalUpdateFlag = ET_UPDATE_NONE;
 
 template<UInt solutionDim>
-const flag_Type EvaluationPhiJ<solutionDim>::S_testUpdateFlag=ET_UPDATE_NONE;
+const flag_Type EvaluationPhiJ<solutionDim>::S_testUpdateFlag = ET_UPDATE_NONE;
 
 template<UInt solutionDim>
-const flag_Type EvaluationPhiJ<solutionDim>::S_solutionUpdateFlag=ET_UPDATE_PHI;
+const flag_Type EvaluationPhiJ<solutionDim>::S_solutionUpdateFlag = ET_UPDATE_PHI;
 
 
 //! Evaluation of the basis function phi_j in the case of a scalar FE.
@@ -199,7 +199,7 @@ public:
     //@{
 
     //! Type of the values returned by this class
-	typedef Real return_Type;
+    typedef Real return_Type;
 
     //@}
 
@@ -207,14 +207,14 @@ public:
     //! @name Static constants
     //@{
 
-	//! Flag for the global current FE
+    //! Flag for the global current FE
     const static flag_Type S_globalUpdateFlag;
 
     //! Flag for the test current FE
-	const static flag_Type S_testUpdateFlag;
+    const static flag_Type S_testUpdateFlag;
 
     //! Flag fot the solution current FE
-	const static flag_Type S_solutionUpdateFlag;
+    const static flag_Type S_solutionUpdateFlag;
 
     //@}
 
@@ -222,19 +222,19 @@ public:
     //! @name Constructors, destructor
     //@{
 
-	//! Empty constructor
-	EvaluationPhiJ(){}
+    //! Empty constructor
+    EvaluationPhiJ() {}
 
-	//! Copy constructor
-	EvaluationPhiJ(const EvaluationPhiJ& provider)
-        : M_valuesPtr(provider.M_valuesPtr)
+    //! Copy constructor
+    EvaluationPhiJ (const EvaluationPhiJ& provider)
+        : M_valuesPtr (provider.M_valuesPtr)
     {}
 
-	//! Expression-based constructor
-	explicit EvaluationPhiJ(const ExpressionPhiJ& /*expression*/) {}
+    //! Expression-based constructor
+    explicit EvaluationPhiJ (const ExpressionPhiJ& /*expression*/) {}
 
     //! Destructor
-    ~EvaluationPhiJ(){}
+    ~EvaluationPhiJ() {}
 
     //@}
 
@@ -243,10 +243,10 @@ public:
     //@{
 
     //! Do nothing internal update
-	void update(const UInt& /*iElement*/){}
+    void update (const UInt& /*iElement*/) {}
 
     //! Display method
-	static void display(ostream& out=std::cout)
+    static void display (ostream& out = std::cout)
     {
         out << "phi_j";
     }
@@ -258,23 +258,23 @@ public:
     //@{
 
     //! Do nothing setter for the global current FE
-	template< typename CFEType >
-	void setGlobalCFE(const CFEType* /*globalCFE*/){}
+    template< typename CFEType >
+    void setGlobalCFE (const CFEType* /*globalCFE*/) {}
 
     //! Do nothing setter for the test current FE
-	template< typename CFEType >
-	void setTestCFE(const CFEType* /*testCFE*/){}
+    template< typename CFEType >
+    void setTestCFE (const CFEType* /*testCFE*/) {}
 
     //! Setter for the solution current FE
-	template< typename CFEType >
-	void setSolutionCFE(const CFEType* solutionCFE)
+    template< typename CFEType >
+    void setSolutionCFE (const CFEType* solutionCFE)
     {
-        ASSERT(solutionCFE != 0, "Nul pointer to the solutionCFE cannot be set");
-        M_valuesPtr = &(solutionCFE->M_phi);
+        ASSERT (solutionCFE != 0, "Nul pointer to the solutionCFE cannot be set");
+        M_valuesPtr = & (solutionCFE->M_phi);
     }
 
     //! Do nothing setter for the quadrature
-	void setQuadrature(const QuadratureRule&){}
+    void setQuadrature (const QuadratureRule&) {}
 
     //@}
 
@@ -283,11 +283,11 @@ public:
     //@{
 
     //! Getter for the value for a matrix
-	const return_Type& value_qij(const UInt& q, const UInt& /*i*/, const UInt& j) const
+    const return_Type& value_qij (const UInt& q, const UInt& /*i*/, const UInt& j) const
     {
-        ASSERT( q < M_valuesPtr->size(), "Quadrature point index invalid");
-        ASSERT( j < (*M_valuesPtr)[q].size(), "Dof index invalid");
-        return (*M_valuesPtr)[q][j];
+        ASSERT ( q < M_valuesPtr->size(), "Quadrature point index invalid");
+        ASSERT ( j < (*M_valuesPtr) [q].size(), "Dof index invalid");
+        return (*M_valuesPtr) [q][j];
     }
 
     //@}
@@ -295,16 +295,16 @@ public:
 private:
 
     //! Storage for the pointer to the data
-	std::vector< std::vector < Real > > const * M_valuesPtr;
+    std::vector< std::vector < Real > > const* M_valuesPtr;
 
 };
 
 
-const flag_Type EvaluationPhiJ<1>::S_globalUpdateFlag=ET_UPDATE_NONE;
+const flag_Type EvaluationPhiJ<1>::S_globalUpdateFlag = ET_UPDATE_NONE;
 
-const flag_Type EvaluationPhiJ<1>::S_testUpdateFlag=ET_UPDATE_NONE;
+const flag_Type EvaluationPhiJ<1>::S_testUpdateFlag = ET_UPDATE_NONE;
 
-const flag_Type EvaluationPhiJ<1>::S_solutionUpdateFlag=ET_UPDATE_PHI;
+const flag_Type EvaluationPhiJ<1>::S_solutionUpdateFlag = ET_UPDATE_PHI;
 
 
 } // Namespace ExpressionAssembly

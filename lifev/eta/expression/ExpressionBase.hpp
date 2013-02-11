@@ -68,7 +68,7 @@ public:
     //! @name Public Types
     //@{
 
-	typedef DerivedType derived_Type;
+    typedef DerivedType derived_Type;
 
     //@}
 
@@ -76,11 +76,11 @@ public:
     //! @name Constructors & Destructor
     //@{
 
-	//! Empty and only constructor
-	ExpressionBase(){}
+    //! Empty and only constructor
+    ExpressionBase() {}
 
-	//! Destructor
-	virtual ~ExpressionBase(){}
+    //! Destructor
+    virtual ~ExpressionBase() {}
 
     //@}
 
@@ -88,8 +88,11 @@ public:
     //! @name Methods
     //@{
 
-	//! Method to cast away the type and get the real (DerivedType) object
-	const derived_Type& cast() const { return static_cast<const derived_Type&>(*this); }
+    //! Method to cast away the type and get the real (DerivedType) object
+    const derived_Type& cast() const
+    {
+        return static_cast<const derived_Type&> (*this);
+    }
 
     //@}
 
@@ -98,11 +101,11 @@ private:
     //! @name Private Methods
     //@{
 
-	//! No copy (avoid slicing)
-	ExpressionBase(const ExpressionBase<DerivedType>&);
+    //! No copy (avoid slicing)
+    ExpressionBase (const ExpressionBase<DerivedType>&);
 
-	//! No equality (avoid slicing)
-	void operator=(const ExpressionBase<DerivedType>&);
+    //! No equality (avoid slicing)
+    void operator= (const ExpressionBase<DerivedType>&);
 
     //@}
 };

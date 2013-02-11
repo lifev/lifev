@@ -63,9 +63,9 @@ public:
     //! @name Constructors and destructor
     //@{
 
-    MonolithicBlockComposedDND( const std::vector<Int>& flag, const std::vector<Int>& order ):
-            super_Type(flag, order),
-            M_swapped(false)
+    MonolithicBlockComposedDND ( const std::vector<Int>& flag, const std::vector<Int>& order ) :
+        super_Type (flag, order),
+        M_swapped (false)
     {
     }
 
@@ -85,18 +85,18 @@ public:
     {
         const Int order[] = {  MonolithicBlockComposed::mesh, MonolithicBlockComposed::solid, MonolithicBlockComposed::fluid };
         const Int couplingsDNGI2[] = { 0, 7, 0 };
-        const std::vector<Int> couplingVectorDNGI2(couplingsDNGI2, couplingsDNGI2+3);
-        const std::vector<Int> orderVector(order, order+3);
-        return new MonolithicBlockComposedDND( couplingVectorDNGI2, orderVector );
+        const std::vector<Int> couplingVectorDNGI2 (couplingsDNGI2, couplingsDNGI2 + 3);
+        const std::vector<Int> orderVector (order, order + 3);
+        return new MonolithicBlockComposedDND ( couplingVectorDNGI2, orderVector );
     }
 
     static MonolithicBlock* createComposedDND2GI()
     {
         const Int order[] = { MonolithicBlockComposed::mesh, MonolithicBlockComposed::fluid , MonolithicBlockComposed::solid};
         const Int couplingsDN2GI2[] = { 8, 6, 0 };
-        const std::vector<Int> couplingVectorDN2GI2(couplingsDN2GI2, couplingsDN2GI2+3);
-        const std::vector<Int> orderVector(order, order+3);
-        return new MonolithicBlockComposedDND( couplingVectorDN2GI2, orderVector );
+        const std::vector<Int> couplingVectorDN2GI2 (couplingsDN2GI2, couplingsDN2GI2 + 3);
+        const std::vector<Int> orderVector (order, order + 3);
+        return new MonolithicBlockComposedDND ( couplingVectorDN2GI2, orderVector );
     }
 
 

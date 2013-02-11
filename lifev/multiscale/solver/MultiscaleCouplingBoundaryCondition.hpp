@@ -87,7 +87,7 @@ public:
     /*!
      *  @param fileName Name of data file
      */
-    void setupData( const std::string& fileName );
+    void setupData ( const std::string& fileName );
 
     //! Setup the coupling variables number.
     void setupCouplingVariablesNumber();
@@ -119,13 +119,13 @@ private:
      * @param localCouplingVariableID id of the perturbed local coupling variable
      * @param perturbedModelsList list of models affected by the perturbation
      */
-    void exportListOfPerturbedModels( const UInt& /*localCouplingVariableID*/, multiscaleModelsContainer_Type& /*perturbedModelsList*/ ) {}
+    void exportListOfPerturbedModels ( const UInt& /*localCouplingVariableID*/, multiscaleModelsContainer_Type& /*perturbedModelsList*/ ) {}
 
     //! Insert constant coefficients into the Jacobian matrix (DO NOTHING)
     /*!
      * @param jacobian the Jacobian matrix
      */
-    void insertJacobianConstantCoefficients( multiscaleMatrix_Type& /*jacobian*/ ) {}
+    void insertJacobianConstantCoefficients ( multiscaleMatrix_Type& /*jacobian*/ ) {}
 
     //! Insert the Jacobian coefficient(s) depending on a perturbation of the model, due to a specific variable (the column) (DO NOTHING)
     /*!
@@ -134,7 +134,7 @@ private:
      * @param ID                the global ID of the model which is perturbed by the variable
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      */
-    void insertJacobianDeltaCoefficients( multiscaleMatrix_Type& /*jacobian*/, const UInt& /*column*/, const UInt& /*ID*/, bool& /*solveLinearSystem*/ ) {}
+    void insertJacobianDeltaCoefficients ( multiscaleMatrix_Type& /*jacobian*/, const UInt& /*column*/, const UInt& /*ID*/, bool& /*solveLinearSystem*/ ) {}
 
     //@}
 
@@ -144,15 +144,15 @@ private:
 
     //! Apply the boundary condition to the specific 0D model
     template< class ModelType >
-    void applyBoundaryConditions0D( const UInt& i );
+    void applyBoundaryConditions0D ( const UInt& i );
 
     //! Apply the boundary condition to the specific 1D model
     template< class ModelType >
-    void applyBoundaryConditions1D( const UInt& i );
+    void applyBoundaryConditions1D ( const UInt& i );
 
     //! Apply the boundary condition to the specific 3D model
     template< class ModelType >
-    void applyBoundaryConditions3D( const UInt& i );
+    void applyBoundaryConditions3D ( const UInt& i );
 
     //@}
 
@@ -160,9 +160,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    MultiscaleCouplingBoundaryCondition( const MultiscaleCouplingBoundaryCondition& coupling );
+    MultiscaleCouplingBoundaryCondition ( const MultiscaleCouplingBoundaryCondition& coupling );
 
-    MultiscaleCouplingBoundaryCondition& operator=( const MultiscaleCouplingBoundaryCondition& coupling );
+    MultiscaleCouplingBoundaryCondition& operator= ( const MultiscaleCouplingBoundaryCondition& coupling );
 
     //@}
 
@@ -183,16 +183,16 @@ inline multiscaleCoupling_Type* createMultiscaleCouplingBoundaryCondition()
 // ===================================================
 template< class ModelType >
 inline void
-MultiscaleCouplingBoundaryCondition::applyBoundaryConditions0D( const UInt& i )
+MultiscaleCouplingBoundaryCondition::applyBoundaryConditions0D ( const UInt& i )
 {
-    boost::shared_ptr< ModelType > model = multiscaleDynamicCast< ModelType >( M_models[i] );
-    multiscaleID_Type flag( model->boundaryFlag( M_boundaryIDs[i] ) );
+    boost::shared_ptr< ModelType > model = multiscaleDynamicCast< ModelType > ( M_models[i] );
+    multiscaleID_Type flag ( model->boundaryFlag ( M_boundaryIDs[i] ) );
 
-    for ( UInt j( 0 ); j < M_listSize; ++j )
+    for ( UInt j ( 0 ); j < M_listSize; ++j )
     {
-        model->bcInterface().readBC( M_fileName, "boundary_conditions/", M_list[j] );
+        model->bcInterface().readBC ( M_fileName, "boundary_conditions/", M_list[j] );
 
-        model->bcInterface().dataContainer().setFlag( flag );
+        model->bcInterface().dataContainer().setFlag ( flag );
 
         model->bcInterface().insertBC();
     }
@@ -200,16 +200,16 @@ MultiscaleCouplingBoundaryCondition::applyBoundaryConditions0D( const UInt& i )
 
 template< class ModelType >
 inline void
-MultiscaleCouplingBoundaryCondition::applyBoundaryConditions1D( const UInt& i )
+MultiscaleCouplingBoundaryCondition::applyBoundaryConditions1D ( const UInt& i )
 {
-    boost::shared_ptr< ModelType > model = multiscaleDynamicCast< ModelType >( M_models[i] );
-    multiscaleID_Type flag( model->boundaryFlag( M_boundaryIDs[i] ) );
+    boost::shared_ptr< ModelType > model = multiscaleDynamicCast< ModelType > ( M_models[i] );
+    multiscaleID_Type flag ( model->boundaryFlag ( M_boundaryIDs[i] ) );
 
-    for ( UInt j( 0 ); j < M_listSize; ++j )
+    for ( UInt j ( 0 ); j < M_listSize; ++j )
     {
-        model->bcInterface().readBC( M_fileName, "boundary_conditions/", M_list[j] );
+        model->bcInterface().readBC ( M_fileName, "boundary_conditions/", M_list[j] );
 
-        model->bcInterface().dataContainer().setSide( ( flag == 0 ) ? OneDFSI::left : OneDFSI::right );
+        model->bcInterface().dataContainer().setSide ( ( flag == 0 ) ? OneDFSI::left : OneDFSI::right );
 
         model->bcInterface().insertBC();
     }
@@ -217,17 +217,17 @@ MultiscaleCouplingBoundaryCondition::applyBoundaryConditions1D( const UInt& i )
 
 template< class ModelType >
 inline void
-MultiscaleCouplingBoundaryCondition::applyBoundaryConditions3D( const UInt& i )
+MultiscaleCouplingBoundaryCondition::applyBoundaryConditions3D ( const UInt& i )
 {
-    boost::shared_ptr< ModelType > model = multiscaleDynamicCast< ModelType >( M_models[i] );
-    multiscaleID_Type flag( model->boundaryFlag( M_boundaryIDs[i] ) );
+    boost::shared_ptr< ModelType > model = multiscaleDynamicCast< ModelType > ( M_models[i] );
+    multiscaleID_Type flag ( model->boundaryFlag ( M_boundaryIDs[i] ) );
 
-    for ( UInt j( 0 ); j < M_listSize; ++j )
+    for ( UInt j ( 0 ); j < M_listSize; ++j )
     {
-        model->bcInterface().readBC( M_fileName, "boundary_conditions/", M_list[j] );
+        model->bcInterface().readBC ( M_fileName, "boundary_conditions/", M_list[j] );
 
-        model->bcInterface().dataContainer().setName( "CouplingBC_Model_" + number2string( model->ID() ) + "_BoundaryID_" + number2string( M_boundaryIDs[i] ) + "_" + M_list[j] );
-        model->bcInterface().dataContainer().setFlag( flag );
+        model->bcInterface().dataContainer().setName ( "CouplingBC_Model_" + number2string ( model->ID() ) + "_BoundaryID_" + number2string ( M_boundaryIDs[i] ) + "_" + M_list[j] );
+        model->bcInterface().dataContainer().setFlag ( flag );
 
         model->bcInterface().insertBC();
     }

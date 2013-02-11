@@ -64,86 +64,90 @@ namespace LifeV
 {
 
 
-Real fZero(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
+Real fZero (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     return 0.0;
 }
 
-Real u2normal(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
+Real u2normal (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
-        return -5.e4;
+    return -5.e4;
 }
 
 typedef FSIOperator::fluid_Type fluid;
 typedef FSIOperator::solid_Type solid;
 
-FSIOperator::fluidBchandlerPtr_Type BCh_harmonicExtension(FSIOperator &_oper)
+FSIOperator::fluidBchandlerPtr_Type BCh_harmonicExtension (FSIOperator& _oper)
 {
 
     // Boundary condition for the mesh
-    debugStream( 10000 ) << "Boundary condition for the harmonic extension\n";
+    debugStream ( 10000 ) << "Boundary condition for the harmonic extension\n";
 
-    BCFunctionBase bcf(fZero);
+    BCFunctionBase bcf (fZero);
 
-    FSISolver::fluidBchandlerPtr_Type BCh_he(new FSIOperator::fluidBchandler_Type );
+    FSISolver::fluidBchandlerPtr_Type BCh_he (new FSIOperator::fluidBchandler_Type );
 
-    std::vector<ID> componentsVector(0);
-    componentsVector.push_back(2);
-    BCh_he->addBC("Base",  INLET, Essential, Component, bcf, componentsVector);
-    BCh_he->addBC("Top",  OUTLET, Essential, Component, bcf, componentsVector);
+    std::vector<ID> componentsVector (0);
+    componentsVector.push_back (2);
+    BCh_he->addBC ("Base",  INLET, Essential, Component, bcf, componentsVector);
+    BCh_he->addBC ("Top",  OUTLET, Essential, Component, bcf, componentsVector);
 
     if (_oper.data().method() == "monolithicGE")
     {
-        debugStream(10000) << "FSIMonolithic GCE harmonic extension\n";
-        FSIMonolithicGE *MOper = dynamic_cast<FSIMonolithicGE *>(&_oper);
-        MOper->setStructureDispToHarmonicExtension(_oper.lambdaFluidRepeated());
-        BCh_he->addBC("Interface", SOLIDINTERFACE, Essential, Full,
-                      *MOper->bcvStructureDispToHarmonicExtension(), 3);
+        debugStream (10000) << "FSIMonolithic GCE harmonic extension\n";
+        FSIMonolithicGE* MOper = dynamic_cast<FSIMonolithicGE*> (&_oper);
+        MOper->setStructureDispToHarmonicExtension (_oper.lambdaFluidRepeated() );
+        BCh_he->addBC ("Interface", SOLIDINTERFACE, Essential, Full,
+                       *MOper->bcvStructureDispToHarmonicExtension(), 3);
     }
 
     return BCh_he;
 }
 
 
-FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFluid(FSIOperator &_oper)
+FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFluid (FSIOperator& _oper)
 {
     // Boundary conditions for the fluid velocity
 
     if (! _oper.isFluid() )
+    {
         return FSIOperator::fluidBchandlerPtr_Type();
+    }
 
-    FSIOperator::fluidBchandlerPtr_Type BCh_fluid( new FSIOperator::fluidBchandler_Type );
+    FSIOperator::fluidBchandlerPtr_Type BCh_fluid ( new FSIOperator::fluidBchandler_Type );
 
     BCFunctionBase bcf      (fZero);
     BCFunctionBase in_flow  (u2normal);
 
-    BCh_fluid->addBC("InFlow" , INLET,  Natural, Normal, in_flow);
+    BCh_fluid->addBC ("InFlow" , INLET,  Natural, Normal, in_flow);
 
     return BCh_fluid;
 }
 
-FSIOperator::solidBchandlerPtr_Type BCh_monolithicSolid(FSIOperator &_oper)
+FSIOperator::solidBchandlerPtr_Type BCh_monolithicSolid (FSIOperator& _oper)
 {
     // Boundary conditions for the solid displacement
 
     if (! _oper.isSolid() )
+    {
         return FSIOperator::solidBchandlerPtr_Type();
+    }
 
-    FSIOperator::solidBchandlerPtr_Type BCh_solid( new FSIOperator::solidBchandler_Type );
+    FSIOperator::solidBchandlerPtr_Type BCh_solid ( new FSIOperator::solidBchandler_Type );
 
-    BCFunctionBase bcf(fZero);
+    BCFunctionBase bcf (fZero);
 
-    std::vector<ID> componentsVector(0);
-    componentsVector.push_back(2);
-    BCh_solid->addBC("Base",  INLET, Essential, Component, bcf, componentsVector);
-    BCh_solid->addBC("Top",  OUTLET, Essential, Component, bcf, componentsVector);
+    std::vector<ID> componentsVector (0);
+    componentsVector.push_back (2);
+    BCh_solid->addBC ("Base",  INLET, Essential, Component, bcf, componentsVector);
+    BCh_solid->addBC ("Top",  OUTLET, Essential, Component, bcf, componentsVector);
 
     return BCh_solid;
 }
 
-FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFlux(bool /*isOpen=true*/)
+FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFlux (bool /*isOpen=true*/)
 {
-    FSIOperator::fluidBchandlerPtr_Type BCh_fluid( new FSIOperator::fluidBchandler_Type );
+    FSIOperator::fluidBchandlerPtr_Type BCh_fluid ( new FSIOperator::fluidBchandler_Type );
     return BCh_fluid;
 }
 

@@ -52,7 +52,8 @@ public:
 
     // TODO This should be a separate class and not a struct here
     //! Rhytmos solver data container
-    struct SolverData {
+    struct SolverData
+    {
         std::string        method;
         Int                numberTimeStep;
         Real               maxError;
@@ -78,7 +79,7 @@ public:
     virtual ~ZeroDimensionalData();
 
     //! setup model
-    void setup( const GetPot& dataFile, bcPtr_Type bc, const std::string& section = "0D_Model" );
+    void setup ( const GetPot& dataFile, bcPtr_Type bc, const std::string& section = "0D_Model" );
 
     //! initialize Solution
     void initializeSolution() ;
@@ -90,23 +91,41 @@ public:
     void saveSolution() ;
 
     //! show some information
-    void showMe() const { M_circuitData->showMe(); }
+    void showMe() const
+    {
+        M_circuitData->showMe();
+    }
 
     //! show variables
     void showMeVariables() ;
 
     //! set time
-    void setTimeData( const timePtr_Type timeData ) { M_time = timeData; }
+    void setTimeData ( const timePtr_Type timeData )
+    {
+        M_time = timeData;
+    }
 
-    const timePtr_Type& dataTime() const { return M_time; }
+    const timePtr_Type& dataTime() const
+    {
+        return M_time;
+    }
 
     //! get circuit data container
-    zeroDimensionalCircuitDataPtr_Type circuitData() const { return M_circuitData; }
+    zeroDimensionalCircuitDataPtr_Type circuitData() const
+    {
+        return M_circuitData;
+    }
 
     //!total number of unknowns
-    const Int& unknownCounter() const { return M_unknownCounter; }
+    const Int& unknownCounter() const
+    {
+        return M_unknownCounter;
+    }
 
-    const solverData_Type& solverData() const { return M_solverData; }
+    const solverData_Type& solverData() const
+    {
+        return M_solverData;
+    }
 
 private:
 

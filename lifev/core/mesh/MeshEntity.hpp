@@ -60,7 +60,7 @@ const flag_Type ALL                 ( 0x7F );
 
 const UInt number                   (    7 );
 
-std::string name( const flag_Type & flag );
+std::string name ( const flag_Type& flag );
 
 }// namespace EntityFlags
 
@@ -102,7 +102,7 @@ public:
      * This enum helps to develop methods to operate on local or globalID
      *
      */
-    enum SwitchId{LOCALID=0,GLOBALID=1};
+    enum SwitchId {LOCALID = 0, GLOBALID = 1};
     //! @name Constructors & Destructor
     //@{
 
@@ -110,10 +110,10 @@ public:
     /*!
        Using this constructor, both identifiers are set to NotAnId.
      */
-    MeshEntity():
-            M_id( NotAnId ),
-            M_localId( NotAnId ),
-            M_flag ( EntityFlags::DEFAULT )
+    MeshEntity() :
+        M_id ( NotAnId ),
+        M_localId ( NotAnId ),
+        M_flag ( EntityFlags::DEFAULT )
     {};
 
     //! Constructor with a single value for both identifiers.
@@ -121,10 +121,10 @@ public:
        @param id The value for both identifers.
        @param flag The value of the flag to assign (optional)
      */
-    MeshEntity( const ID& id, const flag_Type& flag = EntityFlags::DEFAULT ):
-            M_id( id ),
-            M_localId( id ),
-            M_flag ( flag )
+    MeshEntity ( const ID& id, const flag_Type& flag = EntityFlags::DEFAULT ) :
+        M_id ( id ),
+        M_localId ( id ),
+        M_flag ( flag )
     {};
 
     //! Full constructor, where both identifiers are specified.
@@ -133,10 +133,10 @@ public:
        @param lid The value for the local ID.
        @param flag The value of the flag to assign (optional)
      */
-    MeshEntity( const ID& id, const ID& lid, const flag_Type& flag = EntityFlags::DEFAULT ):
-            M_id( id ),
-            M_localId( lid ),
-            M_flag ( flag )
+    MeshEntity ( const ID& id, const ID& lid, const flag_Type& flag = EntityFlags::DEFAULT ) :
+        M_id ( id ),
+        M_localId ( lid ),
+        M_flag ( flag )
     {};
 
     //! backward-compatible constructor
@@ -145,9 +145,9 @@ public:
       a set method if you want different identifiers.
       @param boundary The value of the boundary indicator.
     */
-    MeshEntity( const ID& id, const bool& boundary ) :
-        M_id( id ),
-        M_localId( id )
+    MeshEntity ( const ID& id, const bool& boundary ) :
+        M_id ( id ),
+        M_localId ( id )
     {
         // NOTE: this is conservative, if PHYSICAL_BOUNDARY = 0x01
         // this can be done as
@@ -156,14 +156,14 @@ public:
     };
 
     //! Destructor
-    virtual ~MeshEntity(){};
+    virtual ~MeshEntity() {};
 
     //@}
 
     //! @name Methods
     //@{
     //! Displays the informations stored by this class
-    void showMe( std::ostream& output = std::cout ) const;
+    void showMe ( std::ostream& output = std::cout ) const;
     //@}
 
 
@@ -175,7 +175,7 @@ public:
      * @todo change the name in setGlobalId
       @param id The new global identifier.
     */
-    inline void setId( const ID& id)
+    inline void setId ( const ID& id)
     {
         M_id = id;
     };
@@ -184,7 +184,7 @@ public:
     /*!
       @param id The new local identifier.
     */
-    inline void setLocalId( const ID& id)
+    inline void setLocalId ( const ID& id)
     {
         M_localId = id;
     };
@@ -195,8 +195,14 @@ public:
     */
     void setBoundary (const bool& boundary)
     {
-        if ( boundary ) M_flag = Flag::turnOn  ( M_flag, EntityFlags::PHYSICAL_BOUNDARY );
-        else            M_flag = Flag::turnOff ( M_flag, EntityFlags::PHYSICAL_BOUNDARY );
+        if ( boundary )
+        {
+            M_flag = Flag::turnOn  ( M_flag, EntityFlags::PHYSICAL_BOUNDARY );
+        }
+        else
+        {
+            M_flag = Flag::turnOff ( M_flag, EntityFlags::PHYSICAL_BOUNDARY );
+        }
     };
 
     //! Replace method for the entity flag
@@ -215,7 +221,7 @@ public:
      */
     void setFlag ( const flag_Type& flag )
     {
-        M_flag = Flag::turnOn(flag,M_flag);
+        M_flag = Flag::turnOn (flag, M_flag);
     };
     //! Remove a flag
     /**
@@ -223,7 +229,7 @@ public:
      */
     void unSetFlag ( const flag_Type& flag )
     {
-        M_flag = Flag::turnOff(M_flag,flag);
+        M_flag = Flag::turnOff (M_flag, flag);
     };
 
     //@}
@@ -236,7 +242,7 @@ public:
     /*!
       @return The global identifier.
     */
-    inline const ID & id() const
+    inline const ID& id() const
     {
         return M_id;
     };
@@ -245,7 +251,7 @@ public:
     /*!
       @return The local identifier.
     */
-    inline const ID & localId() const
+    inline const ID& localId() const
     {
         return M_localId;
     };
@@ -258,7 +264,7 @@ public:
 
 
     //! returns the entity flag
-    const flag_Type & flag() const
+    const flag_Type& flag() const
     {
         return M_flag;
     };
@@ -271,7 +277,8 @@ private:
     flag_Type M_flag;
 };
 
-namespace MeshEntityUtility{
+namespace MeshEntityUtility
+{
 /*! @defgroup MeshEntityUtilities
  *  Utilities to get local or global ID according to a switch
  *  The template parameter is in fact a MeshEntity::SwitchId
@@ -283,33 +290,37 @@ namespace MeshEntityUtility{
  * @{
  */
 template<int Selector>
-inline ID getID(MeshEntity const &);
+inline ID getID (MeshEntity const&);
 //! Generic definition of setter
 template<int Selector>
-inline void setID(MeshEntity&,const ID);
+inline void setID (MeshEntity&, const ID);
 
 //! Specialization for global id
 template<>
-inline ID getID<MeshEntity::GLOBALID>(MeshEntity const & entity){
+inline ID getID<MeshEntity::GLOBALID> (MeshEntity const& entity)
+{
     return entity.id();
 }
 
 //! Specialization for local id
 template<>
-inline ID getID<MeshEntity::LOCALID>(MeshEntity const & entity){
+inline ID getID<MeshEntity::LOCALID> (MeshEntity const& entity)
+{
     return entity.localId();
 }
 
 //! Specialization for global id
 template<>
-inline void setID<MeshEntity::GLOBALID>(MeshEntity& entity,const ID id){
-    entity.setId(id);
+inline void setID<MeshEntity::GLOBALID> (MeshEntity& entity, const ID id)
+{
+    entity.setId (id);
 }
 
 //! Specialization for local id
 template<>
-inline void setID<MeshEntity::LOCALID>(MeshEntity& entity,const ID id){
-    entity.setLocalId(id);
+inline void setID<MeshEntity::LOCALID> (MeshEntity& entity, const ID id)
+{
+    entity.setLocalId (id);
 }
 //! Generic definition of the functor to extract the local or global ID
 /*
@@ -317,9 +328,12 @@ inline void setID<MeshEntity::LOCALID>(MeshEntity& entity,const ID id){
  * std compliant containers.
  */
 template<int Selector>
-struct IdGetter{
-    inline ID operator() (MeshEntity const & entity) const
-    {return getID<Selector>(entity);};
+struct IdGetter
+{
+    inline ID operator() (MeshEntity const& entity) const
+    {
+        return getID<Selector> (entity);
+    };
 };
 
 

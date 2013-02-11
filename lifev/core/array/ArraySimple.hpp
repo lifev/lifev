@@ -91,7 +91,7 @@ public:
         Construct a ArraySimple vector of size (size,1)
         @param vectorSize size of the ArraySimple vector
      */
-    explicit ArraySimple( vectorSize_Type vectorSize );
+    explicit ArraySimple ( vectorSize_Type vectorSize );
 
     //! Constructor
     /*!
@@ -99,7 +99,7 @@ public:
         @param numberOfRows number of rows
         @param numberOfColumns number of columns
      */
-    explicit ArraySimple( vectorSize_Type numberOfRows, vectorSize_Type numberOfColumns );
+    explicit ArraySimple ( vectorSize_Type numberOfRows, vectorSize_Type numberOfColumns );
 
     //! Destructor
     ~ArraySimple() {}
@@ -118,7 +118,7 @@ public:
      */
     vectorReference_Type operator() ( vectorSize_Type const i )
     {
-        return *( this->begin() + ( i ) );
+        return * ( this->begin() + ( i ) );
     }
 
     //! Const access operator
@@ -129,7 +129,7 @@ public:
      */
     vectorConstReference_Type operator() ( vectorSize_Type const i ) const
     {
-        return *( this->begin() + ( i ) );
+        return * ( this->begin() + ( i ) );
     }
 
     //! Access operator
@@ -140,7 +140,7 @@ public:
      */
     vectorReference_Type operator() ( vectorSize_Type const i, vectorSize_Type const j )
     {
-        return *( this->begin() + ( j ) * M_numberOfRows + ( i ) );
+        return * ( this->begin() + ( j ) * M_numberOfRows + ( i ) );
     }
 
     //! Const access operator
@@ -151,7 +151,7 @@ public:
      */
     vectorConstReference_Type operator() ( vectorSize_Type const i, vectorSize_Type const j ) const
     {
-        return *( this->begin() + ( j ) * M_numberOfRows + ( i ) );
+        return * ( this->begin() + ( j ) * M_numberOfRows + ( i ) );
     }
 
     //@}
@@ -165,14 +165,14 @@ public:
         @param column column index
         @return ArraySimple iterator
      */
-    inline typename ArraySimple<DataType>::iterator columnIterator( vectorSize_Type const column );
+    inline typename ArraySimple<DataType>::iterator columnIterator ( vectorSize_Type const column );
 
     //!Resize the ArraySimple vector
     /*!
         @param numberOfRows number of rows
         @param numberOfColumns number of columns
      */
-    void reshape( vectorSize_Type const numberOfRows, vectorSize_Type const numberOfColumns );
+    void reshape ( vectorSize_Type const numberOfRows, vectorSize_Type const numberOfColumns );
 
     //! Completely clear out the container, returning memory to the system
     inline void clearArray();
@@ -183,7 +183,7 @@ public:
         @param j column index
         @return boolean
      */
-    bool checkIndex( vectorSize_Type const i, vectorSize_Type const j ) const
+    bool checkIndex ( vectorSize_Type const i, vectorSize_Type const j ) const
     {
         return i >= 0 && i + ( j ) * M_numberOfRows < this->size();
     }
@@ -232,26 +232,26 @@ private:
 //============================================================================
 template <typename DataType>
 ArraySimple<DataType>::ArraySimple()
-        :
-        std::vector<DataType>(),
-        M_numberOfRows( 0 ),
-        M_numberOfColumns( 0 )
+    :
+    std::vector<DataType>(),
+    M_numberOfRows ( 0 ),
+    M_numberOfColumns ( 0 )
 {}
 
 template <typename DataType>
-ArraySimple<DataType>::ArraySimple( vectorSize_Type vectorSize )
-        :
-        std::vector<DataType>( vectorSize ),
-        M_numberOfRows( vectorSize ),
-        M_numberOfColumns( 1 )
+ArraySimple<DataType>::ArraySimple ( vectorSize_Type vectorSize )
+    :
+    std::vector<DataType> ( vectorSize ),
+    M_numberOfRows ( vectorSize ),
+    M_numberOfColumns ( 1 )
 {}
 
 template <typename DataType>
-ArraySimple<DataType>::ArraySimple( vectorSize_Type numberOfRows, vectorSize_Type numberOfColumns )
-        :
-        std::vector<DataType>( numberOfRows * numberOfColumns ),
-        M_numberOfRows( numberOfRows ),
-        M_numberOfColumns( numberOfColumns )
+ArraySimple<DataType>::ArraySimple ( vectorSize_Type numberOfRows, vectorSize_Type numberOfColumns )
+    :
+    std::vector<DataType> ( numberOfRows* numberOfColumns ),
+    M_numberOfRows ( numberOfRows ),
+    M_numberOfColumns ( numberOfColumns )
 {}
 
 //============================================================================
@@ -259,20 +259,24 @@ ArraySimple<DataType>::ArraySimple( vectorSize_Type numberOfRows, vectorSize_Typ
 //============================================================================
 template <typename DataType>
 typename ArraySimple<DataType>::iterator
-ArraySimple<DataType>::columnIterator( vectorSize_Type const column )
+ArraySimple<DataType>::columnIterator ( vectorSize_Type const column )
 {
     if ( column > M_numberOfColumns )
+    {
         return typename ArraySimple<DataType>::iterator();
+    }
     else
+    {
         return this->begin() + ( column ) * M_numberOfRows;
+    }
 }
 
 
 template <typename DataType>
 void
-ArraySimple<DataType>::reshape( vectorSize_Type numberOfRows, vectorSize_Type numberOfColumns )
+ArraySimple<DataType>::reshape ( vectorSize_Type numberOfRows, vectorSize_Type numberOfColumns )
 {
-    vector_Type::resize( numberOfRows * numberOfColumns ); // Standard Library vector method
+    vector_Type::resize ( numberOfRows * numberOfColumns ); // Standard Library vector method
     M_numberOfRows = numberOfRows;
     M_numberOfColumns = numberOfColumns;
 }
@@ -283,7 +287,7 @@ ArraySimple<DataType>::clearArray()
 {
     vector_Type tmp;
     this->clear();
-    this->swap( tmp );
+    this->swap ( tmp );
     M_numberOfRows = 0;
     M_numberOfColumns = 0;
 }

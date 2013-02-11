@@ -73,28 +73,28 @@ using namespace LifeV;
 // ===================================================
 //! Main
 // ===================================================
-int main(int argc, char** argv)
+int main (int argc, char** argv)
 {
 
 #ifdef HAVE_MPI
-    MPI_Init(&argc, &argv);
+    MPI_Init (&argc, &argv);
     std::cout << "MPI Initialization" << std::endl;
 #endif
 
 
     // Error of the problem
-    LifeV::Real error(0);
+    LifeV::Real error (0);
     // Error known
-    const LifeV::Real errorKnown( 0.357740920454703 );
+    const LifeV::Real errorKnown ( 0.357740920454703 );
     // Tollerance between the error and the errorKnown
-    const LifeV::Real tolerance( 1e-8 );
+    const LifeV::Real tolerance ( 1e-8 );
 
-    hyperbolic Hyperbolic( argc, argv );
+    hyperbolic Hyperbolic ( argc, argv );
 
     // Error of the problem
     error = Hyperbolic.run();
 
-    bool success=std::fabs( error - errorKnown ) <= tolerance;
+    bool success = std::fabs ( error - errorKnown ) <= tolerance;
 
 #ifdef HAVE_MPI
     MPI_Finalize();
@@ -109,7 +109,9 @@ int main(int argc, char** argv)
         return ( EXIT_FAILURE );
     }
     else
-      std::cout << "End Result: TEST PASSED" << std::endl;
+    {
+        std::cout << "End Result: TEST PASSED" << std::endl;
+    }
 
     return ( EXIT_SUCCESS );
 }

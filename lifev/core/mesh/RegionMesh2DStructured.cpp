@@ -40,10 +40,10 @@
 namespace LifeV
 {
 
-markerID_Type regularMeshPointPosition2D( const UInt& i_x,
-                                          const UInt& i_y,
-                                          const UInt& n_x,
-                                          const UInt& n_y )
+markerID_Type regularMeshPointPosition2D ( const UInt& i_x,
+                                           const UInt& i_y,
+                                           const UInt& n_x,
+                                           const UInt& n_y )
 {
     // We will use a binary representation to
     // find the position of the point
@@ -53,12 +53,24 @@ markerID_Type regularMeshPointPosition2D( const UInt& i_x,
     // 0100 = on the x=l_x axis       ( 4)
     // 1000 = on the x=0 axis         ( 8)
 
-    UInt pointPosition(0);
+    UInt pointPosition (0);
 
-    if ( i_y == 0 )       { pointPosition = pointPosition |  1; }
-    if ( i_y == n_y - 1)  { pointPosition = pointPosition |  2; }
-    if ( i_x == n_x - 1)  { pointPosition = pointPosition |  4; }
-    if ( i_x == 0 )       { pointPosition = pointPosition |  8; }
+    if ( i_y == 0 )
+    {
+        pointPosition = pointPosition |  1;
+    }
+    if ( i_y == n_y - 1)
+    {
+        pointPosition = pointPosition |  2;
+    }
+    if ( i_x == n_x - 1)
+    {
+        pointPosition = pointPosition |  4;
+    }
+    if ( i_x == 0 )
+    {
+        pointPosition = pointPosition |  8;
+    }
 
     /*
     // The boundary of the structured mesh
@@ -80,10 +92,10 @@ markerID_Type regularMeshPointPosition2D( const UInt& i_x,
     */
     switch ( pointPosition )
     {
-        // We are inside
+            // We are inside
         case 0:
             return Structured2DLabel::INTERNAL;
-        // We are on 1 edge
+            // We are on 1 edge
         case 1:
             return Structured2DLabel::BOTTOM;
         case 2:
@@ -92,7 +104,7 @@ markerID_Type regularMeshPointPosition2D( const UInt& i_x,
             return Structured2DLabel::RIGHT;
         case 8:
             return Structured2DLabel::LEFT;
-        // We are on a corner
+            // We are on a corner
         case 5:
             return Structured2DLabel::BOTTOM_RIGHT;
         case 6:

@@ -45,15 +45,15 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 
-ReferenceFEHdiv::ReferenceFEHdiv( std::string name, FE_TYPE type, ReferenceShapes shape,
-                      Int nbDofPerVertex, Int nbDofPerEdge, Int nbDofPerFace,
-                      Int nbDofPerVolume, Int nbDof, Int nbCoor, const function_Type* phi,
-                      const function_Type* divPhi, const Real* refCoor, DofPatternType patternType,
-                      const ReferenceFE* bdRefFE ) :
-        ReferenceFE( name, type, shape,nbDofPerVertex,nbDofPerEdge,nbDofPerFace,
-               nbDofPerVolume, nbDof, nbCoor, nbCoor, phi, static_cast<function_Type*>(NULL),
-               static_cast<function_Type*>(NULL), divPhi, refCoor,
-               patternType, bdRefFE )
+ReferenceFEHdiv::ReferenceFEHdiv ( std::string name, FE_TYPE type, ReferenceShapes shape,
+                                   Int nbDofPerVertex, Int nbDofPerEdge, Int nbDofPerFace,
+                                   Int nbDofPerVolume, Int nbDof, Int nbCoor, const function_Type* phi,
+                                   const function_Type* divPhi, const Real* refCoor, DofPatternType patternType,
+                                   const ReferenceFE* bdRefFE ) :
+    ReferenceFE ( name, type, shape, nbDofPerVertex, nbDofPerEdge, nbDofPerFace,
+                  nbDofPerVolume, nbDof, nbCoor, nbCoor, phi, static_cast<function_Type*> (NULL),
+                  static_cast<function_Type*> (NULL), divPhi, refCoor,
+                  patternType, bdRefFE )
 {}
 
 

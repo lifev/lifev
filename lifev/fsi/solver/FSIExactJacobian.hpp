@@ -101,9 +101,9 @@ public:
        \param linearRelTol: tolerance for the nonlinear solver
        \todo{replace Real with Real& }
      */
-    void solveJac(vector_Type       &_muk,
-                  const vector_Type &_res,
-                  const Real       _linearRelTol);
+    void solveJac (vector_Type&       _muk,
+                   const vector_Type& _res,
+                   const Real       _linearRelTol);
 
     //! Evaluates the nonlinear residual of the FSI system
     /**
@@ -112,9 +112,9 @@ public:
        \param disp: current unknown solution
        \param iter: nonlinear iteration counter. The part of th rhs related to the time discretization is computed only for iter=0
     */
-    void evalResidual(vector_Type       &_res,
-                      const vector_Type &_disp,
-                      const UInt          _iter);
+    void evalResidual (vector_Type&       _res,
+                       const vector_Type& _disp,
+                       const UInt          _iter);
 
     //! Solves the linear fluid problem
     /** this method is called only by the class Epetra_ExactJacobian
@@ -140,7 +140,7 @@ public:
     void setupFluidSolid();
 
     //! initializes the GetPot data file
-    void setDataFile( GetPot const& data );
+    void setDataFile ( GetPot const& data );
 
     //! should call bcManage for a vector, but the implementation is empty
     void bcManageVec   ( super::fluidBchandler_Type& /*bch*/, vector_Type& /*rhs*/ ) {};
@@ -157,21 +157,21 @@ private:
 
     UInt imposeFlux( );
 
-    void eval(const vector_Type& _res, UInt status);
+    void eval (const vector_Type& _res, UInt status);
 
 
     //@}
 
-//! Epetra_ExactJacobian  This class implements an Epetra_Operator to be passed to AztecOO.
-/*!
+    //! Epetra_ExactJacobian  This class implements an Epetra_Operator to be passed to AztecOO.
+    /*!
 
-    @author Gilles Fourestey
-    @see
-    exactJacobian
+        @author Gilles Fourestey
+        @see
+        exactJacobian
 
-    This class relies on exactJacobian to solve the linear jacobian problem
+        This class relies on exactJacobian to solve the linear jacobian problem
 
-*/
+    */
 
     class Epetra_ExactJacobian:
         public Epetra_Operator
@@ -184,7 +184,7 @@ private:
         typedef boost::shared_ptr<map_Type> mapPtr_Type;
 
         // OBSOLETE typedef
-//         typedef exactJacobian::vector_Type  vector_Type;
+        //         typedef exactJacobian::vector_Type  vector_Type;
 
         //! @name Constructor & Destructor
         //@{
@@ -199,26 +199,53 @@ private:
         //@{
 
         //! sets the exactJacobian pointer and some contents thereof
-        void setOperator(FSIExactJacobian* ej);
+        void setOperator (FSIExactJacobian* ej);
 
         //! apply the jacobian to X and returns the result in Y
-        int     Apply           (const Epetra_MultiVector &X, Epetra_MultiVector &Y) const;
+        int     Apply           (const Epetra_MultiVector& X, Epetra_MultiVector& Y) const;
 
         //! These are the methods necessary to implement Epetra_Operator but that are not used.
         int     SetUseTranspose (bool  /*UseTranspose*/)
-        {std::cout << "********* EJ : transpose not available\n"; return -1;}
+        {
+            std::cout << "********* EJ : transpose not available\n";
+            return -1;
+        }
 
-        int     ApplyInverse    (const Epetra_MultiVector &/*X*/, Epetra_MultiVector &/*Y*/) const
-        {std::cout << "********* EJ : inverse not available\n"; return -1;}
+        int     ApplyInverse    (const Epetra_MultiVector& /*X*/, Epetra_MultiVector& /*Y*/) const
+        {
+            std::cout << "********* EJ : inverse not available\n";
+            return -1;
+        }
         double     NormInf         () const
-        {std::cout << "********* EJ : NormInf not available\n"; return 1.;}
-        const char * Label      () const {return "exactJacobian";}
-        bool     UseTranspose    () const {return false;}
-        bool     HasNormInf      () const {return false;}
+        {
+            std::cout << "********* EJ : NormInf not available\n";
+            return 1.;
+        }
+        const char* Label      () const
+        {
+            return "exactJacobian";
+        }
+        bool     UseTranspose    () const
+        {
+            return false;
+        }
+        bool     HasNormInf      () const
+        {
+            return false;
+        }
 
-        const Epetra_Comm&  Comm () const { return *M_comm; }
-        const Epetra_Map &     OperatorDomainMap () const {return *M_operatorDomainMap;}
-        const Epetra_Map &     OperatorRangeMap  () const {return *M_operatorRangeMap;}
+        const Epetra_Comm&  Comm () const
+        {
+            return *M_comm;
+        }
+        const Epetra_Map&      OperatorDomainMap () const
+        {
+            return *M_operatorDomainMap;
+        }
+        const Epetra_Map&      OperatorRangeMap  () const
+        {
+            return *M_operatorRangeMap;
+        }
         //@}
 
 
@@ -249,11 +276,14 @@ private:
 }; // end class exactJacobian
 
 
-inline FSIOperator* createEJ() { return new FSIExactJacobian(); }
+inline FSIOperator* createEJ()
+{
+    return new FSIExactJacobian();
+}
 
 namespace
 {
-  //static bool registerEJ = FSIOperator::FSIFactory_Type::instance().registerProduct( "exactJacobian", &createEJ );
+//static bool registerEJ = FSIOperator::FSIFactory_Type::instance().registerProduct( "exactJacobian", &createEJ );
 }
 
 }  // Namespace LifeV

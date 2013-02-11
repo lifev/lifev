@@ -65,22 +65,22 @@ namespace LifeV
 // ===================================================
 
 // Subroutine readmesh2d
-SUBROUTINE_F77 F77NAME( readmesh2d ) ( I_F77 & ne, I_F77 & np,
-                                       I_F77 & nptot, I_F77 & nb, I_F77 & nps, I_F77 & nx,
-                                       I_F77 & ndimn, I_F77 & npe, I_F77 & npb,
-                                       I_F77 & npc, I_F77 * iel,
-                                       I_F77 & nd, R4_F77 * coor, I_F77 & ndc,
-                                       R4_F77 & xmin, R4_F77 & xmax, R4_F77 & ymin,
-                                       R4_F77 & ymax, I_F77 * ib, I_F77 & nbd,
-                                       I_F77 * ic, I_F77 * bc, I_F77 * ie,
-                                       I_F77 * cpl, R4_F77 * xmed, I_F77 & isw,
-                                       I_F77 & ierr, FortranCharacterString filename );
+SUBROUTINE_F77 F77NAME ( readmesh2d ) ( I_F77& ne, I_F77& np,
+                                        I_F77& nptot, I_F77& nb, I_F77& nps, I_F77& nx,
+                                        I_F77& ndimn, I_F77& npe, I_F77& npb,
+                                        I_F77& npc, I_F77* iel,
+                                        I_F77& nd, R4_F77* coor, I_F77& ndc,
+                                        R4_F77& xmin, R4_F77& xmax, R4_F77& ymin,
+                                        R4_F77& ymax, I_F77* ib, I_F77& nbd,
+                                        I_F77* ic, I_F77* bc, I_F77* ie,
+                                        I_F77* cpl, R4_F77* xmed, I_F77& isw,
+                                        I_F77& ierr, FortranCharacterString filename );
 
 // Subroutine read_mesh2d_head(filename,ne,np,nptot,npe,nb,nx,npc,ierr)
-SUBROUTINE_F77 F77NAME( readmesh2dhead ) ( I_F77 & ne, I_F77 & np,
-                                           I_F77 & nptot, I_F77 & npe, I_F77 & nb,
-                                           I_F77 & nps, I_F77 & nx,
-                                           I_F77 & npc, I_F77 & ierr, FortranCharacterString filename );
+SUBROUTINE_F77 F77NAME ( readmesh2dhead ) ( I_F77& ne, I_F77& np,
+                                            I_F77& nptot, I_F77& npe, I_F77& nb,
+                                            I_F77& nps, I_F77& nx,
+                                            I_F77& npc, I_F77& ierr, FortranCharacterString filename );
 
 //! importerMesh2D - reads a mesh in mesh2D(LF) format.
 /*!
@@ -603,21 +603,21 @@ read a freefem mesh (2D) file and store it in a RegionMesh.
 
 template <typename MC>
 bool
-readFreeFemFile( RegionMesh<LinearTriangle, MC> & mesh,
-                 const std::string          & fileName,
-                 markerID_Type              regionFlag, bool /*useless*/ = false)
+readFreeFemFile ( RegionMesh<LinearTriangle, MC>& mesh,
+                  const std::string&           fileName,
+                  markerID_Type              regionFlag, bool /*useless*/ = false)
 {
     MeshElementBareHandler<BareEdge> _be;
     std::pair<BareEdge, bool> _edge;
 
     typedef LinearTriangle GeoShape;
 
-    typename RegionMesh<GeoShape, MC>::point_Type * pp = 0;
-    typename RegionMesh<GeoShape, MC>::edge_Type * pe = 0;
-    typename RegionMesh<GeoShape, MC>::face_Type * pf = 0;
+    typename RegionMesh<GeoShape, MC>::point_Type* pp = 0;
+    typename RegionMesh<GeoShape, MC>::edge_Type* pe = 0;
+    typename RegionMesh<GeoShape, MC>::face_Type* pf = 0;
 
     std::ifstream __is ( fileName.c_str() );
-    if( __is.fail() )
+    if ( __is.fail() )
     {
         std::cerr << " Error in readFreeFemFile: File " << fileName
                   << " not found or locked"
@@ -630,23 +630,23 @@ readFreeFemFile( RegionMesh<LinearTriangle, MC> & mesh,
     __is >> __nv >> __nt >> __ne;
 
 #ifdef DEBUG
-    debugStream ( 8000 ) << "number of vertices: "<< __nv << "\n";
-    debugStream ( 8000 ) << "number of triangles: "<< __nt << "\n";
-    debugStream ( 8000 ) << "number of edges: "<< __ne << "\n";
+    debugStream ( 8000 ) << "number of vertices: " << __nv << "\n";
+    debugStream ( 8000 ) << "number of triangles: " << __nt << "\n";
+    debugStream ( 8000 ) << "number of edges: " << __ne << "\n";
 #endif
 
     // first section: read the list of vertices
     // on each row find the two coordinates and the label for each node
-    std::vector<Real> __x(2*__nv);
-    std::vector<bool> __isonboundary(__nv);
-    std::vector<UInt> __whichboundary(__nv);
+    std::vector<Real> __x (2 * __nv);
+    std::vector<bool> __isonboundary (__nv);
+    std::vector<UInt> __whichboundary (__nv);
 
 #ifdef DEBUG
-    debugStream ( 8000 ) << "reading "<< __nv << " nodes\n";
+    debugStream ( 8000 ) << "reading " << __nv << " nodes\n";
 #endif
 
     // count the number of nodes on the boundary
-    UInt __nbv( 0 );
+    UInt __nbv ( 0 );
 
     // reading vertices
     for ( UInt __i = 0; __i < __nv; ++ __i )
@@ -658,29 +658,29 @@ readFreeFemFile( RegionMesh<LinearTriangle, MC> & mesh,
 
     // second section: read the list of triangles
     // on each row find the three nodes and the label for each triangle
-    std::vector<int> __triangle_nodes( 3 * __nt );
-    std::vector<int> __triangle_label( __nt );
+    std::vector<int> __triangle_nodes ( 3 * __nt );
+    std::vector<int> __triangle_label ( __nt );
 
 #ifdef DEBUG
-    debugStream ( 8000 ) << "reading "<< __nt << " triangles\n";
+    debugStream ( 8000 ) << "reading " << __nt << " triangles\n";
 #endif
 
-    std::map<UInt,UInt> edge_to_firstAdjacentElementIdentity, edge_to_firstAdjacentElementPosition;
+    std::map<UInt, UInt> edge_to_firstAdjacentElementIdentity, edge_to_firstAdjacentElementPosition;
 
     // reading vertices
     for ( UInt __i = 0; __i < __nt; ++__i )
     {
         __is >> __triangle_nodes[ 3 * __i ]
-        >> __triangle_nodes[ 3 * __i + 1 ]
-        >> __triangle_nodes[ 3 * __i + 2 ]
-        >> __triangle_label[ __i ];
+             >> __triangle_nodes[ 3 * __i + 1 ]
+             >> __triangle_nodes[ 3 * __i + 2 ]
+             >> __triangle_label[ __i ];
 
         //from 1-based numbering to 0-based numbering
-		__triangle_nodes[3 * __i]--;
-		__triangle_nodes[3 * __i+1]--;
-		__triangle_nodes[3 * __i+2]--;
+        __triangle_nodes[3 * __i]--;
+        __triangle_nodes[3 * __i + 1]--;
+        __triangle_nodes[3 * __i + 2]--;
 
-		// dump first the existing edges, to maintain the correct numbering
+        // dump first the existing edges, to maintain the correct numbering
         // if everything is correct the numbering in the bareedge
         // structure will reflect the actual edge numbering
 
@@ -690,18 +690,18 @@ readFreeFemFile( RegionMesh<LinearTriangle, MC> & mesh,
         i2 = __triangle_nodes[ 3 * __i + 1 ];
         i3 = __triangle_nodes[ 3 * __i + 2 ];
 
-        _edge                             = makeBareEdge( i1, i2 );
-        _check                            = _be.addIfNotThere( _edge.first );
+        _edge                             = makeBareEdge ( i1, i2 );
+        _check                            = _be.addIfNotThere ( _edge.first );
         edge_to_firstAdjacentElementIdentity[ _check.first ]  = __i;
         edge_to_firstAdjacentElementPosition[ _check.first ] = 0;
 
-        _edge                             = makeBareEdge( i2, i3 );
-        _check                            = _be.addIfNotThere( _edge.first );
+        _edge                             = makeBareEdge ( i2, i3 );
+        _check                            = _be.addIfNotThere ( _edge.first );
         edge_to_firstAdjacentElementIdentity[ _check.first ]  = __i;
         edge_to_firstAdjacentElementPosition[ _check.first ] = 1;
 
-        _edge                             = makeBareEdge( i3, i1 );
-        _check                            = _be.addIfNotThere( _edge.first );
+        _edge                             = makeBareEdge ( i3, i1 );
+        _check                            = _be.addIfNotThere ( _edge.first );
         edge_to_firstAdjacentElementIdentity[ _check.first ]  = __i;
         edge_to_firstAdjacentElementPosition[ _check.first ] = 2;
     }
@@ -711,8 +711,8 @@ readFreeFemFile( RegionMesh<LinearTriangle, MC> & mesh,
     // third section: read the list of edges
     // NOTE: only boundary edges are stored
     // on each row find the two nodes and the label for each edge
-    std::vector<int> __edge_nodes( 2 * __ne );
-    std::vector<int> __edge_label( __ne );
+    std::vector<int> __edge_nodes ( 2 * __ne );
+    std::vector<int> __edge_label ( __ne );
 
     // reading edges
 
@@ -722,36 +722,38 @@ readFreeFemFile( RegionMesh<LinearTriangle, MC> & mesh,
     }
 
     //from 1-based numbering to 0-based numbering
-    for(UInt i(0); i<__edge_nodes.size(); i++)
-    	__edge_nodes[i]--;
+    for (UInt i (0); i < __edge_nodes.size(); i++)
+    {
+        __edge_nodes[i]--;
+    }
 
     // Set mesh properties
     // Add Marker to list of Markers
-    mesh.setMarkerID( regionFlag );
+    mesh.setMarkerID ( regionFlag );
 
     // Till now I only have information about boundary edges - I don't know the MAX num of edges
     // Euler formula: ne = nv + nt - 1
     mesh.setMaxNumEdges      ( _be.size() );
-    mesh.setMaxNumGlobalEdges( _be.size() );
+    mesh.setMaxNumGlobalEdges ( _be.size() );
 
     // Here the REAL number of edges (all of them)
     mesh.setNumEdges         ( _be.size() );
 
     mesh.setNumBEdges        ( __ne );
     mesh.setMaxNumFaces      ( __nt );
-    mesh.setMaxNumGlobalFaces( __nt );
+    mesh.setMaxNumGlobalFaces ( __nt );
 
     // Here the REAL number of edges (all of them)
     mesh.setNumFaces          ( __nt);
 
     mesh.setMaxNumPoints      ( __nv, true );
-    mesh.setMaxNumGlobalPoints( __nv );
+    mesh.setMaxNumGlobalPoints ( __nv );
 
     mesh.setNumVertices       ( __nv );
     mesh.setNumGlobalVertices ( __nv );
 
     mesh.numBVertices()      = __nbv;
-    mesh.setNumBPoints( mesh.numBVertices() );
+    mesh.setNumBPoints ( mesh.numBVertices() );
 
 #ifdef DEBUG
     debugStream ( 8000 ) << "number of points : " << mesh.numPoints() << "\n";
@@ -762,24 +764,24 @@ readFreeFemFile( RegionMesh<LinearTriangle, MC> & mesh,
 
     for ( UInt __i = 0; __i < __nv; ++__i )
     {
-        pp = &mesh.addPoint( __isonboundary[ __i ], true );
-        pp->setMarkerID( __whichboundary[ __i ] );
+        pp = &mesh.addPoint ( __isonboundary[ __i ], true );
+        pp->setMarkerID ( __whichboundary[ __i ] );
         pp->x() = __x[ 2 * __i ];
         pp->y() = __x[ 2 * __i + 1 ];
         pp->z() = 0;
-        pp->setId( __i );
+        pp->setId ( __i );
     }
 
     // add the edges to the mesh
     for ( UInt __i = 0; __i < __ne; ++__i )
     {
-        pe = &( mesh.addEdge( true ) );
-        pe->setMarkerID( markerID_Type( __edge_label[ __i ] ) );
-        pe->setPoint( 0, mesh.point( __edge_nodes[ 2 * __i ] ) );
-        pe->setPoint( 1, mesh.point( __edge_nodes[ 2 * __i + 1 ] ) );
-        pe->setId( __i );
-        _edge = makeBareEdge( __edge_nodes[ 2 * __i ], __edge_nodes[ 2 * __i + 1 ] );
-        UInt map_it( _be.id( _edge.first ) );
+        pe = & ( mesh.addEdge ( true ) );
+        pe->setMarkerID ( markerID_Type ( __edge_label[ __i ] ) );
+        pe->setPoint ( 0, mesh.point ( __edge_nodes[ 2 * __i ] ) );
+        pe->setPoint ( 1, mesh.point ( __edge_nodes[ 2 * __i + 1 ] ) );
+        pe->setId ( __i );
+        _edge = makeBareEdge ( __edge_nodes[ 2 * __i ], __edge_nodes[ 2 * __i + 1 ] );
+        UInt map_it ( _be.id ( _edge.first ) );
         pe->firstAdjacentElementIdentity() = edge_to_firstAdjacentElementIdentity[ map_it ];
         pe->firstAdjacentElementPosition() = edge_to_firstAdjacentElementPosition[ map_it ];
     }
@@ -787,12 +789,12 @@ readFreeFemFile( RegionMesh<LinearTriangle, MC> & mesh,
     // add the triangles to the mesh
     for ( UInt __i = 0; __i < __nt; ++__i )
     {
-        pf = &( mesh.addFace(true) );
-        pf->setId( __i );
-        pf->setMarkerID( markerID_Type( __triangle_label[ __i ] ) );
-        pf->setPoint( 0, mesh.point( __triangle_nodes[ 3 * __i ] ) );
-        pf->setPoint( 1, mesh.point( __triangle_nodes[ 3 * __i + 1 ] ) );
-        pf->setPoint( 2, mesh.point( __triangle_nodes[ 3 * __i + 2 ] ) );
+        pf = & ( mesh.addFace (true) );
+        pf->setId ( __i );
+        pf->setMarkerID ( markerID_Type ( __triangle_label[ __i ] ) );
+        pf->setPoint ( 0, mesh.point ( __triangle_nodes[ 3 * __i ] ) );
+        pf->setPoint ( 1, mesh.point ( __triangle_nodes[ 3 * __i + 1 ] ) );
+        pf->setPoint ( 2, mesh.point ( __triangle_nodes[ 3 * __i + 2 ] ) );
     }
 
     return true;

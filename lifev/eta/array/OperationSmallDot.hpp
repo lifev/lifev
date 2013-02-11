@@ -60,16 +60,16 @@ template <typename LeftOperand, typename RightOperand>
 class OperationSmallDot
 {
 private:
-	//! @name Constructors and destructors
+    //! @name Constructors and destructors
     //@{
 
-	//! No default constructor
-	OperationSmallDot();
+    //! No default constructor
+    OperationSmallDot();
 
-	//! No destructor
-	~OperationSmallDot();
+    //! No destructor
+    ~OperationSmallDot();
 
-	//@}
+    //@}
 };
 
 //! \cond
@@ -82,46 +82,46 @@ public:
     //! @name Public Types
     //@{
 
-	typedef Real result_Type;
+    typedef Real result_Type;
 
-	//@}
+    //@}
 
 private:
-	//! @name Constructors and destructors
+    //! @name Constructors and destructors
     //@{
 
-	//! No default constructor
-	OperationSmallDot();
+    //! No default constructor
+    OperationSmallDot();
 
-	//! No destructor
-	~OperationSmallDot();
+    //! No destructor
+    ~OperationSmallDot();
 
-	//@}
+    //@}
 };
 
 template <UInt Size1, UInt Size2>
-class OperationSmallDot< MatrixSmall<Size1,Size2> , MatrixSmall<Size1,Size2> >
+class OperationSmallDot< MatrixSmall<Size1, Size2> , MatrixSmall<Size1, Size2> >
 {
 public:
 
     //! @name Public Types
     //@{
 
-	typedef Real result_Type;
+    typedef Real result_Type;
 
-	//@}
+    //@}
 
 private:
-	//! @name Constructors and destructors
+    //! @name Constructors and destructors
     //@{
 
-	//! No default constructor
-	OperationSmallDot();
+    //! No default constructor
+    OperationSmallDot();
 
-	//! No destructor
-	~OperationSmallDot();
+    //! No destructor
+    ~OperationSmallDot();
 
-	//@}
+    //@}
 };
 
 // specialization for matrix * vector

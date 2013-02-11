@@ -113,8 +113,8 @@ enum FE_TYPE
 
 
 class ReferenceFE:
-        public ReferenceElement,
-        public DOFLocalPattern
+    public ReferenceElement,
+    public DOFLocalPattern
 {
 
 public:
@@ -159,23 +159,23 @@ public:
       code it in refFE.cc following the example of P1ISOP2_TRIA_PATTERN)
       @param bdRefFE  a pointer on the associated reference finite element on the boundary
     */
-    ReferenceFE( std::string          name,
-           FE_TYPE              type,
-           ReferenceShapes      shape,
-           Int                  nbDofPerVertex,
-           Int                  nbDofPerEdge,
-           Int                  nbDofPerFace,
-           Int                  nbDofPerVolume,
-           Int                  nbDof,
-           Int                  nbCoor,
-           Int                  FEDim,
-           const function_Type* phi,
-           const function_Type* dPhi,
-           const function_Type* d2Phi,
-           const function_Type* divPhi,
-           const Real*          refCoor,
-           DofPatternType       patternType,
-           const ReferenceFE*         bdRefFE );
+    ReferenceFE ( std::string          name,
+                  FE_TYPE              type,
+                  ReferenceShapes      shape,
+                  Int                  nbDofPerVertex,
+                  Int                  nbDofPerEdge,
+                  Int                  nbDofPerFace,
+                  Int                  nbDofPerVolume,
+                  Int                  nbDof,
+                  Int                  nbCoor,
+                  Int                  FEDim,
+                  const function_Type* phi,
+                  const function_Type* dPhi,
+                  const function_Type* d2Phi,
+                  const function_Type* divPhi,
+                  const Real*          refCoor,
+                  DofPatternType       patternType,
+                  const ReferenceFE*         bdRefFE );
 
     //! Destructor
     virtual ~ReferenceFE();
@@ -187,7 +187,10 @@ public:
     //@{
 
     //! Check if the reference element has boundary elements
-    bool hasBoundaryFE() const { return M_boundaryFE != NULL; }
+    bool hasBoundaryFE() const
+    {
+        return M_boundaryFE != NULL;
+    }
 
     //! Getter for the boundary finite element
     /*
@@ -195,7 +198,7 @@ public:
      */
     const ReferenceFE& boundaryFE() const
     {
-        ASSERT( M_boundaryFE , "No boundary FE defined" );
+        ASSERT ( M_boundaryFE , "No boundary FE defined" );
         return *M_boundaryFE;
     }
 
@@ -216,7 +219,7 @@ private:
     ReferenceFE();
 
     //! No copy constructor
-    ReferenceFE(const ReferenceFE&);
+    ReferenceFE (const ReferenceFE&);
 
     //@}
 

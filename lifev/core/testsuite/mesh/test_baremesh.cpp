@@ -71,64 +71,72 @@
 // A dummy class to imitate a VectorEpetra
 class dummyVect:
     public std::vector<double>
+{
+public:
+    dummyVect() : std::vector<double>() {}
+    dummyVect (unsigned const int& n) : std::vector<double> (n) {}
+    dummyVect ( dummyVect v, LifeV::MapEpetraType ) : std::vector<double> (v) {}
+    bool isGlobalIDPresent (int ) const
     {
-    public:
-        dummyVect(): std::vector<double>(){}
-        dummyVect(unsigned const int & n): std::vector<double>(n){}
-        dummyVect( dummyVect v, LifeV::MapEpetraType ):std::vector<double>(v){}
-        bool isGlobalIDPresent(int )const {return true;}
-        LifeV::MapEpetraType mapType() const { return LifeV::Repeated; }
-    };
+        return true;
+    }
+    LifeV::MapEpetraType mapType() const
+    {
+        return LifeV::Repeated;
+    }
+};
 
 template<typename meshEntity>
 class ResetFlag
 {
 public:
-    void operator()(meshEntity &m){
-        m.replaceFlag(LifeV::EntityFlags::DEFAULT);
-        m.setMarkerID(0);
+    void operator() (meshEntity& m)
+    {
+        m.replaceFlag (LifeV::EntityFlags::DEFAULT);
+        m.setMarkerID (0);
     }
 };
 
 using namespace LifeV;
 
-int main(int argc, char** argv)
+int main (int argc, char** argv)
 {
 #ifdef HAVE_MPI
-    MPI_Init(&argc, &argv);
+    MPI_Init (&argc, &argv);
     std::cout << "MPI Initialization" << std::endl;
-    boost::shared_ptr<Epetra_Comm> comm( new Epetra_MpiComm( MPI_COMM_WORLD ) );
+    boost::shared_ptr<Epetra_Comm> comm ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
 #else
-    boost::shared_ptr<Epetra_Comm> comm( new Epetra_SerialComm );
+    boost::shared_ptr<Epetra_Comm> comm ( new Epetra_SerialComm );
 #endif
 
-    GetPot datafile( "data_baremesh" );
-    std::string dirname = datafile( "mesh_dir", "." ); // "../data/mesh/inria/"
-    std::string fname = dirname + datafile( "mesh_file",
-                                          "cartesian_cube8.mesh" ); // dirname + "cartesian_cube8.mesh";
+    GetPot datafile ( "data_baremesh" );
+    std::string dirname = datafile ( "mesh_dir", "." ); // "../data/mesh/inria/"
+    std::string fname = dirname + datafile ( "mesh_file",
+                                             "cartesian_cube8.mesh" ); // dirname + "cartesian_cube8.mesh";
     std::string outfile = "testBuilders_baremesh.dat";
-    std::ofstream ofile( outfile.c_str() );
-    if ( ofile.fail() ) {
-      std::cerr << " Error: Cannot creat output file " << std::endl;
-      abort();
+    std::ofstream ofile ( outfile.c_str() );
+    if ( ofile.fail() )
+    {
+        std::cerr << " Error: Cannot creat output file " << std::endl;
+        abort();
     }
 
     typedef BareMesh<LinearTetra> bareMesh_Type;
     typedef RegionMesh<LinearTetra>     mesh_Type;
 
-    ID m=1;
+    ID m = 1;
 
     bareMesh_Type bareMesh;
-    MeshIO::ReadINRIAMeshFile( bareMesh, fname, m );
+    MeshIO::ReadINRIAMeshFile ( bareMesh, fname, m );
 
-    mesh_Type aMesh( comm );
+    mesh_Type aMesh ( comm );
     convertBareMesh ( bareMesh, aMesh );
 
     std::cout << " **********************************************************" << std::endl;
 
     std::cout << "  ****************** CHECKING MESH WITH INTERNAL CHECKER" << std::endl;
 
-    aMesh.check( 0, true, true );
+    aMesh.check ( 0, true, true );
     Switch sw;
 
     std::cout << " **********************************************************" << std::endl;
@@ -138,9 +146,9 @@ int main(int argc, char** argv)
     aMesh.edgeList.clear();
     aMesh.faceList.clear();
 
-    checkMesh3D(aMesh, sw,
-                true, true,
-                std::cerr, std::cout, ofile);
+    checkMesh3D (aMesh, sw,
+                 true, true,
+                 std::cerr, std::cout, ofile);
 
 
     aMesh.showMe();
@@ -158,14 +166,14 @@ int main(int argc, char** argv)
 
     std::cout << "  ****************** BUILDING ALL EDGES" << std::endl;
     UInt bedges_found, iedges_found;
-    MeshUtility::buildEdges( aMesh, ofile, cerr, bedges_found,
-               iedges_found, true, true, true );
+    MeshUtility::buildEdges ( aMesh, ofile, cerr, bedges_found,
+                              iedges_found, true, true, true );
     std::cout << " **********************************************************" << std::endl;
 
     std::cout << "  ****************** BUILDING ALL FACES" << std::endl;
     UInt bfaces_found, ifaces_found;
-    MeshUtility::buildFaces( aMesh, ofile, cerr, bfaces_found,
-               ifaces_found, true, true, true );
+    MeshUtility::buildFaces ( aMesh, ofile, cerr, bfaces_found,
+                              ifaces_found, true, true, true );
 
     aMesh.showMe();
 
@@ -173,77 +181,77 @@ int main(int argc, char** argv)
     aMesh.updateElementEdges();
     aMesh.updateElementFaces();
     aMesh.showMe();
-    checkMesh3D(aMesh, sw,
-                true, true,
-                cerr, cout, ofile);
+    checkMesh3D (aMesh, sw,
+                 true, true,
+                 cerr, cout, ofile);
     ofile.close();
 
     ///THIS PART IS ONLY TO VERIFY IF THESE ROUTINES COMPILE PROPERLY
     std::cerr << "Fixing bpoints" << std::endl;
 
-    MeshUtility::fixBoundaryPoints( aMesh, ofile, std::cerr, true );
+    MeshUtility::fixBoundaryPoints ( aMesh, ofile, std::cerr, true );
     std::cerr << "Fixing edge markers" << std::endl;
-    MeshUtility::setBoundaryEdgesMarker( aMesh, ofile, std::cerr, true );
+    MeshUtility::setBoundaryEdgesMarker ( aMesh, ofile, std::cerr, true );
     std::cerr << "Fixing faces marker" << std::endl;
-    MeshUtility::setBoundaryFacesMarker( aMesh, ofile, std::cerr, true );
+    MeshUtility::setBoundaryFacesMarker ( aMesh, ofile, std::cerr, true );
     std::cerr << "Fixing points marker" << std::endl;
-    MeshUtility::setBoundaryPointsMarker( aMesh, ofile, std::cerr, true );
+    MeshUtility::setBoundaryPointsMarker ( aMesh, ofile, std::cerr, true );
     std::cerr << std::endl;
-    dummyVect disp( 3*aMesh.numPoints() );
-    MeshUtility::MeshTransformer<mesh_Type > transformer( aMesh );
-    transformer.moveMesh( disp, 3 );
-    MeshUtility::MeshStatistics::meshSize sizes= MeshUtility::MeshStatistics::computeSize( aMesh );
+    dummyVect disp ( 3 * aMesh.numPoints() );
+    MeshUtility::MeshTransformer<mesh_Type > transformer ( aMesh );
+    transformer.moveMesh ( disp, 3 );
+    MeshUtility::MeshStatistics::meshSize sizes = MeshUtility::MeshStatistics::computeSize ( aMesh );
     std::cerr << "Hmin =" << sizes.minH << " Hmax=" << sizes.maxH << std::endl;
     mesh_Type::points_Type newPointList = aMesh.pointList;
     mesh_Type::faces_Type newFaceList = aMesh.faceList;
-    Utilities::fixAfterShallowCopy( newFaceList, newPointList );
-    for ( mesh_Type::faces_Type::iterator i=newFaceList.begin(); i<newFaceList.end(); ++i )
+    Utilities::fixAfterShallowCopy ( newFaceList, newPointList );
+    for ( mesh_Type::faces_Type::iterator i = newFaceList.begin(); i < newFaceList.end(); ++i )
     {
-        ID theId = i->point(0).id();
-        if( &(i->point(0) ) != &( newPointList[ theId ] ) )
+        ID theId = i->point (0).id();
+        if ( & (i->point (0) ) != & ( newPointList[ theId ] ) )
         {
             std::cerr << "ERROR: Error after renumbering Faces" << std::endl;
             break;
         }
     }
-    aMesh.faceList[2].replaceFlag( EntityFlags::CUTTED );
-    aMesh.faceList.reorderAccordingToFlag( EntityFlags::CUTTED, Flag::testOneSet );
+    aMesh.faceList[2].replaceFlag ( EntityFlags::CUTTED );
+    aMesh.faceList.reorderAccordingToFlag ( EntityFlags::CUTTED, Flag::testOneSet );
     if ( aMesh.faceList[0].flag() != EntityFlags::CUTTED )
     {
         std::cerr << "ERROR: Reordering is not working" << std::endl;
     }
     std::cout << "Number of cutted faces (should be 1) " <<
-                    aMesh.faceList.countElementsWithFlag( EntityFlags::CUTTED,Flag::testOneSet ) << std::endl;
+              aMesh.faceList.countElementsWithFlag ( EntityFlags::CUTTED, Flag::testOneSet ) << std::endl;
     // Reset all flags to default
-    aMesh.edgeList.changeAccordingToFunctor( ResetFlag<mesh_Type::edge_Type>() );
-    aMesh.edge(  0 ).setMarkerID( 10 );
-    aMesh.edge(  5 ).setMarkerID( 10 );
-    aMesh.edge( 10 ).setMarkerID( 15 );
-    std::vector<ID> watermarks( 2 );
+    aMesh.edgeList.changeAccordingToFunctor ( ResetFlag<mesh_Type::edge_Type>() );
+    aMesh.edge (  0 ).setMarkerID ( 10 );
+    aMesh.edge (  5 ).setMarkerID ( 10 );
+    aMesh.edge ( 10 ).setMarkerID ( 15 );
+    std::vector<ID> watermarks ( 2 );
     watermarks[ 0 ] = 10;
     watermarks[ 1 ] = 15;
     // change flags according to marker iD
-    SetFlagAccordingToWatermarks  changeFlags( EntityFlags::CUTTED, watermarks );
-    aMesh.edgeList.changeAccordingToFunctor( changeFlags );
+    SetFlagAccordingToWatermarks  changeFlags ( EntityFlags::CUTTED, watermarks );
+    aMesh.edgeList.changeAccordingToFunctor ( changeFlags );
     std::cout << "Number of cutted edges (should be 3) " <<
-                     aMesh.edgeList.countElementsWithFlag(EntityFlags::CUTTED,Flag::testOneSet) << std::endl;
-    aMesh.edgeList.changeAccordingToFunctor( ResetFlag<mesh_Type::edge_Type>() );
-    aMesh.edge(  0 ).setMarkerID( 10 );
-    aMesh.edge(  5 ).setMarkerID( 12 );
-    aMesh.edge( 10 ).setMarkerID( 15 );
-    SetFlagAccordingToMarkerRanges changer( Flag::turnOn ); //I may use the default constructor
-    changer.insert( std::make_pair( 10, 12 ),EntityFlags::INTERNAL_INTERFACE );
-    changer.insert( std::make_pair( 15, 18 ),EntityFlags::CUTTED );
-    aMesh.edgeList.changeAccordingToFunctor( changer );
+              aMesh.edgeList.countElementsWithFlag (EntityFlags::CUTTED, Flag::testOneSet) << std::endl;
+    aMesh.edgeList.changeAccordingToFunctor ( ResetFlag<mesh_Type::edge_Type>() );
+    aMesh.edge (  0 ).setMarkerID ( 10 );
+    aMesh.edge (  5 ).setMarkerID ( 12 );
+    aMesh.edge ( 10 ).setMarkerID ( 15 );
+    SetFlagAccordingToMarkerRanges changer ( Flag::turnOn ); //I may use the default constructor
+    changer.insert ( std::make_pair ( 10, 12 ), EntityFlags::INTERNAL_INTERFACE );
+    changer.insert ( std::make_pair ( 15, 18 ), EntityFlags::CUTTED );
+    aMesh.edgeList.changeAccordingToFunctor ( changer );
     std::cout << "Number of cutted edges (should be 1) " <<
-                     aMesh.edgeList.countElementsWithFlag( EntityFlags::CUTTED, Flag::testOneSet ) << std::endl;
+              aMesh.edgeList.countElementsWithFlag ( EntityFlags::CUTTED, Flag::testOneSet ) << std::endl;
     std::cout << "Number of internal interface edges (should be 2) " <<
-                      aMesh.edgeList.countElementsWithFlag( EntityFlags::INTERNAL_INTERFACE, Flag::testOneSet ) << std::endl;
+              aMesh.edgeList.countElementsWithFlag ( EntityFlags::INTERNAL_INTERFACE, Flag::testOneSet ) << std::endl;
 
 #ifdef HAVE_MPI
     MPI_Finalize();
 #endif
 
-    return( EXIT_SUCCESS );
+    return ( EXIT_SUCCESS );
 }
 

@@ -76,7 +76,7 @@ public:
     /*!
      * @param data BCInterfaceData0D
      */
-    BCInterfaceData0D( const BCInterfaceData0D& data );
+    BCInterfaceData0D ( const BCInterfaceData0D& data );
 
     //! Destructor
     virtual ~BCInterfaceData0D() {}
@@ -92,7 +92,7 @@ public:
      * @param data BCInterfaceData0D
      * @return reference to a copy of the class
      */
-    BCInterfaceData0D& operator=( const BCInterfaceData0D& data );
+    BCInterfaceData0D& operator= ( const BCInterfaceData0D& data );
 
     //@}
 
@@ -106,13 +106,13 @@ public:
      * @param dataSection BC section
      * @param name name of the boundary condition
      */
-    void readBC( const std::string& fileName, const std::string& dataSection, const std::string& name );
+    void readBC ( const std::string& fileName, const std::string& dataSection, const std::string& name );
 
     //! Display general information about the content of the class
     /*!
      * @param output specify the output format (std::cout by default)
      */
-    void showMe( std::ostream& output = std::cout ) const;
+    void showMe ( std::ostream& output = std::cout ) const;
 
     //@}
 
@@ -124,13 +124,19 @@ public:
     /*!
      * @param flag Boundary condition flag
      */
-    void setFlag( const bcFlag_Type& flag ) { M_flag = flag; }
+    void setFlag ( const bcFlag_Type& flag )
+    {
+        M_flag = flag;
+    }
 
     //! Set the type of the boundary condition
     /*!
      * @param type Boundary condition type
      */
-    void setType( const bcType_Type& type ) { M_type = type; }
+    void setType ( const bcType_Type& type )
+    {
+        M_type = type;
+    }
 
     //@}
 
@@ -142,13 +148,19 @@ public:
     /*!
      * @return Boundary condition flag
      */
-    const bcFlag_Type& flag() const { return M_flag; }
+    const bcFlag_Type& flag() const
+    {
+        return M_flag;
+    }
 
     //! Get the type of the boundary condition
     /*!
      * @return Boundary condition type
      */
-    const bcType_Type& type() const { return M_type; }
+    const bcType_Type& type() const
+    {
+        return M_type;
+    }
 
     //@}
 
@@ -157,9 +169,15 @@ private:
     //! @name Private Methods
     //@{
 
-    void readFlag( const GetPot& dataFile, const char* flag ) { M_flag = dataFile( flag, 0 ); }
+    void readFlag ( const GetPot& dataFile, const char* flag )
+    {
+        M_flag = dataFile ( flag, 0 );
+    }
 
-    void readType( const GetPot& dataFile, const char* type ) { M_type = M_mapType[dataFile( type, "Current" )]; }
+    void readType ( const GetPot& dataFile, const char* type )
+    {
+        M_type = M_mapType[dataFile ( type, "Current" )];
+    }
 
     //@}
 

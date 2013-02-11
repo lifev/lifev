@@ -32,67 +32,70 @@
 #include <lifev/fsi/solver/MonolithicBlockComposedDND.hpp>
 #include <lifev/fsi/solver/MonolithicBlockMatrixRN.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 // ===================================================
 //  Constructors and Descructor
 // ===================================================
 FSIMonolithicGI::FSIMonolithicGI() :
-                    super_Type              (),
-                    M_mapWithoutMesh        (),
-                    M_uk                    (),
-                    M_interface             (0),
-                    M_meshBlock             (),
-                    M_shapeDerivativesBlock (),
-                    M_solidDerBlock         ()
+    super_Type              (),
+    M_mapWithoutMesh        (),
+    M_uk                    (),
+    M_interface             (0),
+    M_meshBlock             (),
+    M_shapeDerivativesBlock (),
+    M_solidDerBlock         ()
 {
 }
 
 // ===================================================
 //  Public Methods
 // ===================================================
-void FSIMonolithicGI::setup( const GetPot& dataFile )
+void FSIMonolithicGI::setup ( const GetPot& dataFile )
 {
-    super_Type::setup( dataFile );
+    super_Type::setup ( dataFile );
 }
 
-void FSIMonolithicGI::setupFluidSolid( UInt const fluxes )
+void FSIMonolithicGI::setupFluidSolid ( UInt const fluxes )
 {
-    super_Type::setupFluidSolid( fluxes );
-    UInt offset = M_monolithicMap->map( Unique )->NumGlobalElements();
-    M_mapWithoutMesh.reset( new MapEpetra( *M_monolithicMap ) );
+    super_Type::setupFluidSolid ( fluxes );
+    UInt offset = M_monolithicMap->map ( Unique )->NumGlobalElements();
+    M_mapWithoutMesh.reset ( new MapEpetra ( *M_monolithicMap ) );
 
     *M_monolithicMap += M_mmFESpace->map();
 
-    M_interface=M_monolithicMatrix->interface();
+    M_interface = M_monolithicMatrix->interface();
 
-    M_beta.reset( new vector_Type(M_uFESpace->map()) );
-    M_rhs.reset(new vector_Type(*M_monolithicMap));
-    M_rhsFull.reset(new vector_Type(*M_monolithicMap));
-    if(M_data->dataFluid()->useShapeDerivatives())
-        M_shapeDerivativesBlock.reset(new matrix_Type(*M_monolithicMap));
-    M_uk.reset (new vector_Type(*M_monolithicMap));
+    M_beta.reset ( new vector_Type (M_uFESpace->map() ) );
+    M_rhs.reset (new vector_Type (*M_monolithicMap) );
+    M_rhsFull.reset (new vector_Type (*M_monolithicMap) );
+    if (M_data->dataFluid()->useShapeDerivatives() )
+    {
+        M_shapeDerivativesBlock.reset (new matrix_Type (*M_monolithicMap) );
+    }
+    M_uk.reset (new vector_Type (*M_monolithicMap) );
 
-    M_meshMotion.reset(new meshMotion_Type(*M_mmFESpace,
-                                           M_epetraComm,
-                                           *M_monolithicMap,
-                                           offset));
+    M_meshMotion.reset (new meshMotion_Type (*M_mmFESpace,
+                                             M_epetraComm,
+                                             *M_monolithicMap,
+                                             offset) );
 
-    M_fluid.reset     (new fluid_Type(M_data->dataFluid(),
-                                      *M_uFESpace,
-                                      *M_pFESpace,
-                                      *M_mmFESpace,
-                                      M_epetraComm,
-                                      *M_monolithicMap,
-                                      fluxes));
-    M_solid.reset(new solid_Type());
+    M_fluid.reset     (new fluid_Type (M_data->dataFluid(),
+                                       *M_uFESpace,
+                                       *M_pFESpace,
+                                       *M_mmFESpace,
+                                       M_epetraComm,
+                                       *M_monolithicMap,
+                                       fluxes) );
+    M_solid.reset (new solid_Type() );
 
-    M_solid->setup(M_data->dataSolid(),
-                   M_dFESpace,
-                   M_epetraComm,
-                   M_monolithicMap,
-                   M_offset
-    );
+    M_solid->setup (M_data->dataSolid(),
+                    M_dFESpace,
+                    M_epetraComm,
+                    M_monolithicMap,
+                    M_offset
+                   );
 
 }
 
@@ -104,106 +107,114 @@ FSIMonolithicGI::buildSystem()
 }
 
 void
-FSIMonolithicGI::evalResidual( vector_Type&       res,
-                               const vector_Type& disp,
-                               const UInt          iter )
+FSIMonolithicGI::evalResidual ( vector_Type&       res,
+                                const vector_Type& disp,
+                                const UInt          iter )
 {
     // disp here is the current solution guess (u,p,ds,df)
 
     res = 0.;//this is important. Don't remove it!
 
-    M_uk.reset(new vector_Type( disp ));
+    M_uk.reset (new vector_Type ( disp ) );
 
-    UInt offset( M_solidAndFluidDim + nDimensions*M_interface );
+    UInt offset ( M_solidAndFluidDim + nDimensions * M_interface );
 
-    vectorPtr_Type meshDisp( new vector_Type(M_mmFESpace->map()) );
-    vectorPtr_Type mmRep( new vector_Type(M_mmFESpace->map(), Repeated ));
+    vectorPtr_Type meshDisp ( new vector_Type (M_mmFESpace->map() ) );
+    vectorPtr_Type mmRep ( new vector_Type (M_mmFESpace->map(), Repeated ) );
 
-    meshDisp->subset(disp, offset); //if the conv. term is to be condidered implicitly
+    meshDisp->subset (disp, offset); //if the conv. term is to be condidered implicitly
     mmRep = meshDisp;
-    moveMesh( *mmRep );
+    moveMesh ( *mmRep );
 
     //here should use extrapolationFirstDerivative instead of velocity
-    vector_Type meshVelocityRepeated ( this->M_ALETimeAdvance->nextFirstDerivative( *meshDisp ), Repeated );
-    vector_Type interpolatedMeshVelocity(this->M_uFESpace->map());
+    vector_Type meshVelocityRepeated ( this->M_ALETimeAdvance->nextFirstDerivative ( *meshDisp ), Repeated );
+    vector_Type interpolatedMeshVelocity (this->M_uFESpace->map() );
 
-    interpolateVelocity( meshVelocityRepeated, interpolatedMeshVelocity );
+    interpolateVelocity ( meshVelocityRepeated, interpolatedMeshVelocity );
 
-    vectorPtr_Type fluid( new vector_Type( M_uFESpace->map() ) );
-    M_beta->subset( disp,0 );
+    vectorPtr_Type fluid ( new vector_Type ( M_uFESpace->map() ) );
+    M_beta->subset ( disp, 0 );
     *M_beta -= interpolatedMeshVelocity; // convective term, u^(n+1) - w^(n+1)
 
-    assembleSolidBlock( iter, disp );
-    assembleFluidBlock( iter, disp );
-    assembleMeshBlock( iter );
+    assembleSolidBlock ( iter, disp );
+    assembleFluidBlock ( iter, disp );
+    assembleMeshBlock ( iter );
 
     *M_rhsFull = *M_rhs;
 
-    M_monolithicMatrix->setRobin( M_robinCoupling, M_rhsFull );
-    M_precPtr->setRobin(M_robinCoupling, M_rhsFull);
+    M_monolithicMatrix->setRobin ( M_robinCoupling, M_rhsFull );
+    M_precPtr->setRobin (M_robinCoupling, M_rhsFull);
 
-    if (!M_monolithicMatrix->set())
+    if (!M_monolithicMatrix->set() )
     {
-        M_BChs.push_back(M_BCh_d);
-        M_BChs.push_back(M_BCh_u);
-        M_FESpaces.push_back(M_dFESpace);
-        M_FESpaces.push_back(M_uFESpace);
+        M_BChs.push_back (M_BCh_d);
+        M_BChs.push_back (M_BCh_u);
+        M_FESpaces.push_back (M_dFESpace);
+        M_FESpaces.push_back (M_uFESpace);
 
-        M_BChs.push_back(M_BCh_mesh);
-        M_FESpaces.push_back(M_mmFESpace);
+        M_BChs.push_back (M_BCh_mesh);
+        M_FESpaces.push_back (M_mmFESpace);
 
-        M_monolithicMatrix->push_back_matrix(M_solidBlockPrec, false);
-        M_monolithicMatrix->push_back_matrix(M_fluidBlock, true);
-        M_monolithicMatrix->push_back_matrix(M_meshBlock, false);
-        M_monolithicMatrix->setConditions(M_BChs);
-        M_monolithicMatrix->setSpaces(M_FESpaces);
-        M_monolithicMatrix->setOffsets(3, M_offset, 0, M_solidAndFluidDim + nDimensions*M_interface);
-        M_monolithicMatrix->coupler(M_monolithicMap, M_dofStructureToFluid->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep(), M_solidTimeAdvance->coefficientFirstDerivative( 0 ), M_solid->rescaleFactor());
-        M_monolithicMatrix->coupler( M_monolithicMap, M_dofStructureToFluid->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep(), M_solidTimeAdvance->coefficientFirstDerivative( 0 ), M_solid->rescaleFactor(), 2);
+        M_monolithicMatrix->push_back_matrix (M_solidBlockPrec, false);
+        M_monolithicMatrix->push_back_matrix (M_fluidBlock, true);
+        M_monolithicMatrix->push_back_matrix (M_meshBlock, false);
+        M_monolithicMatrix->setConditions (M_BChs);
+        M_monolithicMatrix->setSpaces (M_FESpaces);
+        M_monolithicMatrix->setOffsets (3, M_offset, 0, M_solidAndFluidDim + nDimensions * M_interface);
+        M_monolithicMatrix->coupler (M_monolithicMap, M_dofStructureToFluid->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep(), M_solidTimeAdvance->coefficientFirstDerivative ( 0 ), M_solid->rescaleFactor() );
+        M_monolithicMatrix->coupler ( M_monolithicMap, M_dofStructureToFluid->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep(), M_solidTimeAdvance->coefficientFirstDerivative ( 0 ), M_solid->rescaleFactor(), 2);
     }
     else
     {
-        M_monolithicMatrix->replace_matrix(M_solidBlockPrec, 0);
-        M_monolithicMatrix->replace_matrix(M_fluidBlock, 1);
-        M_monolithicMatrix->replace_matrix(M_meshBlock, 2);
+        M_monolithicMatrix->replace_matrix (M_solidBlockPrec, 0);
+        M_monolithicMatrix->replace_matrix (M_fluidBlock, 1);
+        M_monolithicMatrix->replace_matrix (M_meshBlock, 2);
     }
 
     M_monolithicMatrix->blockAssembling();
-    super_Type::checkIfChangedFluxBC( M_monolithicMatrix );
+    super_Type::checkIfChangedFluxBC ( M_monolithicMatrix );
 
 
 
-    if( (M_data->dataSolid()->solidType().compare("exponential") && M_data->dataSolid()->solidType().compare("neoHookean")) )
+    if ( (M_data->dataSolid()->solidType().compare ("exponential") && M_data->dataSolid()->solidType().compare ("neoHookean") ) )
+    {
         applyBoundaryConditions();
+    }
 
     M_monolithicMatrix->GlobalAssemble();
 
-    super_Type::evalResidual( disp, M_rhsFull, res, false );
+    super_Type::evalResidual ( disp, M_rhsFull, res, false );
 
-    if ( !( M_data->dataSolid()->solidType().compare( "exponential" ) && M_data->dataSolid()->solidType().compare( "neoHookean" ) ) )
+    if ( ! ( M_data->dataSolid()->solidType().compare ( "exponential" ) && M_data->dataSolid()->solidType().compare ( "neoHookean" ) ) )
     {
         res += *M_meshBlock * disp;
 
         if ( !M_BCh_u->bcUpdateDone() )
-            M_BCh_u->bcUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
-        M_BCh_d->setOffset( M_offset );
+        {
+            M_BCh_u->bcUpdate ( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
+        }
+        M_BCh_d->setOffset ( M_offset );
         if ( !M_BCh_d->bcUpdateDone() )
-            M_BCh_d->bcUpdate( *M_dFESpace->mesh(), M_dFESpace->feBd(), M_dFESpace->dof() );
-        M_BCh_mesh->setOffset( M_solidAndFluidDim + nDimensions * M_interface );
+        {
+            M_BCh_d->bcUpdate ( *M_dFESpace->mesh(), M_dFESpace->feBd(), M_dFESpace->dof() );
+        }
+        M_BCh_mesh->setOffset ( M_solidAndFluidDim + nDimensions * M_interface );
         if ( !M_BCh_mesh->bcUpdateDone() )
-            M_BCh_mesh->bcUpdate( *M_mmFESpace->mesh(), M_mmFESpace->feBd(), M_mmFESpace->dof() );
+        {
+            M_BCh_mesh->bcUpdate ( *M_mmFESpace->mesh(), M_mmFESpace->feBd(), M_mmFESpace->dof() );
+        }
 
-        M_monolithicMatrix->applyBoundaryConditions( dataFluid()->dataTime()->time()/*, M_rhsFull*/);
+        M_monolithicMatrix->applyBoundaryConditions ( dataFluid()->dataTime()->time() /*, M_rhsFull*/);
         M_monolithicMatrix->GlobalAssemble();
 
-        bcManageResidual( res, *M_rhsFull, disp, *M_uFESpace->mesh(), M_uFESpace->dof(), *M_BCh_u,
-                          M_uFESpace->feBd(), M_data->dataFluid()->dataTime()->time(), 1. );
+        bcManageResidual ( res, *M_rhsFull, disp, *M_uFESpace->mesh(), M_uFESpace->dof(), *M_BCh_u,
+                           M_uFESpace->feBd(), M_data->dataFluid()->dataTime()->time(), 1. );
 
         // below sol is repeated by BCManageResidual
-        bcManageResidual( res, *M_rhsFull, disp, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BCh_d,
-                          M_dFESpace->feBd(), M_data->dataSolid()->dataTime()->time(), 1. );
-        bcManageResidual( res, *M_rhsFull, disp, *M_mmFESpace->mesh(), M_mmFESpace->dof(), *M_BCh_mesh,
-                          M_mmFESpace->feBd(), M_data->dataFluid()->dataTime()->time(), 1. );
+        bcManageResidual ( res, *M_rhsFull, disp, *M_dFESpace->mesh(), M_dFESpace->dof(), *M_BCh_d,
+                           M_dFESpace->feBd(), M_data->dataSolid()->dataTime()->time(), 1. );
+        bcManageResidual ( res, *M_rhsFull, disp, *M_mmFESpace->mesh(), M_mmFESpace->dof(), *M_BCh_mesh,
+                           M_mmFESpace->feBd(), M_data->dataFluid()->dataTime()->time(), 1. );
         res -= *M_rhsFull;
     }
 }
@@ -211,62 +222,62 @@ FSIMonolithicGI::evalResidual( vector_Type&       res,
 void FSIMonolithicGI::applyBoundaryConditions()
 {
     if ( !M_BCh_u->bcUpdateDone() )
-        M_BCh_u->bcUpdate( *M_uFESpace->mesh(),
-                           M_uFESpace->feBd(),
-                           M_uFESpace->dof() );
-    M_BCh_d->setOffset( M_offset );
+        M_BCh_u->bcUpdate ( *M_uFESpace->mesh(),
+                            M_uFESpace->feBd(),
+                            M_uFESpace->dof() );
+    M_BCh_d->setOffset ( M_offset );
     if ( !M_BCh_d->bcUpdateDone() )
-        M_BCh_d->bcUpdate( *M_dFESpace->mesh(),
-                           M_dFESpace->feBd(),
-                           M_dFESpace->dof() );
-    M_BCh_mesh->setOffset( M_solidAndFluidDim + nDimensions * M_interface );
+        M_BCh_d->bcUpdate ( *M_dFESpace->mesh(),
+                            M_dFESpace->feBd(),
+                            M_dFESpace->dof() );
+    M_BCh_mesh->setOffset ( M_solidAndFluidDim + nDimensions * M_interface );
     if ( !M_BCh_mesh->bcUpdateDone() )
-        M_BCh_mesh->bcUpdate( *M_mmFESpace->mesh(),
-                              M_mmFESpace->feBd(),
-                              M_mmFESpace->dof() );
+        M_BCh_mesh->bcUpdate ( *M_mmFESpace->mesh(),
+                               M_mmFESpace->feBd(),
+                               M_mmFESpace->dof() );
 
-    M_monolithicMatrix->applyBoundaryConditions(dataFluid()->dataTime()->time(), M_rhsFull);
+    M_monolithicMatrix->applyBoundaryConditions (dataFluid()->dataTime()->time(), M_rhsFull);
 }
 
-void FSIMonolithicGI::setALEVectorInStencil( const vectorPtr_Type& fluidDisp,
-                                             const UInt iter,
-                                             const bool lastVector)
+void FSIMonolithicGI::setALEVectorInStencil ( const vectorPtr_Type& fluidDisp,
+                                              const UInt iter,
+                                              const bool lastVector)
 {
 
     //The fluid timeAdvance has size = orderBDF because it is seen as an equation frist order in time.
     //We need to add the solidVector to the fluidVector in the fluid TimeAdvance because we have the
     //extrapolation on it.
-    if( ( iter < M_fluidTimeAdvance->size() - 1 ) && !lastVector )
-      {
-          vectorPtr_Type harmonicSolutionRestartTime(new vector_Type( *M_monolithicMap, Unique, Zero ) );
-
-          *harmonicSolutionRestartTime *= 0.0;
-
-          UInt givenOffset( M_solidAndFluidDim + nDimensions*M_interface );
-          harmonicSolutionRestartTime->subset(*fluidDisp, fluidDisp->map(), (UInt)0, givenOffset );
-
-          //We sum the vector in the first element of fluidtimeAdvance
-        *( M_fluidTimeAdvance->stencil()[ iter + 1 ] ) += *harmonicSolutionRestartTime;
-      }
-
-    if( !lastVector )
+    if ( ( iter < M_fluidTimeAdvance->size() - 1 ) && !lastVector )
     {
-        //The shared_pointer for the vectors has to be trasformed into a pointer to VectorEpetra
-        //That is the type of pointers that are used in TimeAdvance
-        vector_Type* normalPointerToALEVector( new vector_Type(*fluidDisp) );
-        (M_ALETimeAdvance->stencil()).push_back( normalPointerToALEVector );
-    }
-    else
-    {
-        vectorPtr_Type harmonicSolutionRestartTime(new vector_Type( *M_monolithicMap, Unique, Zero ) );
+        vectorPtr_Type harmonicSolutionRestartTime (new vector_Type ( *M_monolithicMap, Unique, Zero ) );
 
         *harmonicSolutionRestartTime *= 0.0;
 
-        UInt givenOffset( M_solidAndFluidDim + nDimensions*M_interface );
-        harmonicSolutionRestartTime->subset(*fluidDisp, fluidDisp->map(), (UInt)0, givenOffset );
+        UInt givenOffset ( M_solidAndFluidDim + nDimensions * M_interface );
+        harmonicSolutionRestartTime->subset (*fluidDisp, fluidDisp->map(), (UInt) 0, givenOffset );
 
         //We sum the vector in the first element of fluidtimeAdvance
-        *( M_fluidTimeAdvance->stencil()[ 0 ] ) += *harmonicSolutionRestartTime;
+        * ( M_fluidTimeAdvance->stencil() [ iter + 1 ] ) += *harmonicSolutionRestartTime;
+    }
+
+    if ( !lastVector )
+    {
+        //The shared_pointer for the vectors has to be trasformed into a pointer to VectorEpetra
+        //That is the type of pointers that are used in TimeAdvance
+        vector_Type* normalPointerToALEVector ( new vector_Type (*fluidDisp) );
+        (M_ALETimeAdvance->stencil() ).push_back ( normalPointerToALEVector );
+    }
+    else
+    {
+        vectorPtr_Type harmonicSolutionRestartTime (new vector_Type ( *M_monolithicMap, Unique, Zero ) );
+
+        *harmonicSolutionRestartTime *= 0.0;
+
+        UInt givenOffset ( M_solidAndFluidDim + nDimensions * M_interface );
+        harmonicSolutionRestartTime->subset (*fluidDisp, fluidDisp->map(), (UInt) 0, givenOffset );
+
+        //We sum the vector in the first element of fluidtimeAdvance
+        * ( M_fluidTimeAdvance->stencil() [ 0 ] ) += *harmonicSolutionRestartTime;
     }
 }
 
@@ -280,21 +291,21 @@ void FSIMonolithicGI::setupBlockPrec()
     //The following part accounts for a possibly nonlinear structure model, should not be run when linear
     //elasticity is used
 
-    if ( M_data->dataSolid()->getUseExactJacobian() && ( M_data->dataSolid()->solidType().compare( "exponential" )
-                    && M_data->dataSolid()->solidType().compare( "neoHookean" ) ) )
+    if ( M_data->dataSolid()->getUseExactJacobian() && ( M_data->dataSolid()->solidType().compare ( "exponential" )
+                                                         && M_data->dataSolid()->solidType().compare ( "neoHookean" ) ) )
     {
-        M_solid->material()->updateJacobianMatrix( *M_uk * M_solid->rescaleFactor(),
-                                                   dataSolid(),
-                                                   M_solid->mapMarkersVolumes(),
-                                                   M_solid->displayerPtr() ); // computing the derivatives if nonlinear (comment this for inexact Newton);
-        M_solidBlockPrec.reset( new matrix_Type( *M_monolithicMap,
-                                                 1 ) );
+        M_solid->material()->updateJacobianMatrix ( *M_uk * M_solid->rescaleFactor(),
+                                                    dataSolid(),
+                                                    M_solid->mapMarkersVolumes(),
+                                                    M_solid->displayerPtr() ); // computing the derivatives if nonlinear (comment this for inexact Newton);
+        M_solidBlockPrec.reset ( new matrix_Type ( *M_monolithicMap,
+                                                   1 ) );
         *M_solidBlockPrec += *M_solid->massMatrix();
         *M_solidBlockPrec += *M_solid->material()->jacobian();
         M_solidBlockPrec->globalAssemble();
         *M_solidBlockPrec *= M_solid->rescaleFactor();
 
-        M_monolithicMatrix->replace_matrix( M_solidBlockPrec, 0 );
+        M_monolithicMatrix->replace_matrix ( M_solidBlockPrec, 0 );
     }
 
     M_monolithicMatrix->blockAssembling();
@@ -303,29 +314,29 @@ void FSIMonolithicGI::setupBlockPrec()
     {
         *M_shapeDerivativesBlock *= 0.;
         M_shapeDerivativesBlock->openCrsMatrix();
-        shapeDerivatives( M_shapeDerivativesBlock );
+        shapeDerivatives ( M_shapeDerivativesBlock );
         M_shapeDerivativesBlock->globalAssemble();
-        M_monolithicMatrix->addToGlobalMatrix( M_shapeDerivativesBlock );
+        M_monolithicMatrix->addToGlobalMatrix ( M_shapeDerivativesBlock );
     }
 
     if ( M_data->dataFluid()->useShapeDerivatives() || M_data->dataSolid()->getUseExactJacobian() )
     {
         if ( !M_BCh_u->bcUpdateDone() )
-            M_BCh_u->bcUpdate( *M_uFESpace->mesh(),
-                               M_uFESpace->feBd(),
-                               M_uFESpace->dof() );
-        M_BCh_d->setOffset( M_offset );
+            M_BCh_u->bcUpdate ( *M_uFESpace->mesh(),
+                                M_uFESpace->feBd(),
+                                M_uFESpace->dof() );
+        M_BCh_d->setOffset ( M_offset );
         if ( !M_BCh_d->bcUpdateDone() )
-            M_BCh_d->bcUpdate( *M_dFESpace->mesh(),
-                               M_dFESpace->feBd(),
-                               M_dFESpace->dof() );
-        M_BCh_mesh->setOffset( M_solidAndFluidDim + nDimensions * M_interface );
+            M_BCh_d->bcUpdate ( *M_dFESpace->mesh(),
+                                M_dFESpace->feBd(),
+                                M_dFESpace->dof() );
+        M_BCh_mesh->setOffset ( M_solidAndFluidDim + nDimensions * M_interface );
         if ( !M_BCh_mesh->bcUpdateDone() )
-            M_BCh_mesh->bcUpdate( *M_mmFESpace->mesh(),
-                                  M_mmFESpace->feBd(),
-                                  M_mmFESpace->dof() );
+            M_BCh_mesh->bcUpdate ( *M_mmFESpace->mesh(),
+                                   M_mmFESpace->feBd(),
+                                   M_mmFESpace->dof() );
 
-        M_monolithicMatrix->applyBoundaryConditions( dataFluid()->dataTime()->time() );
+        M_monolithicMatrix->applyBoundaryConditions ( dataFluid()->dataTime()->time() );
         M_monolithicMatrix->GlobalAssemble();
     }
 
@@ -333,71 +344,71 @@ void FSIMonolithicGI::setupBlockPrec()
 
     if ( M_precPtr->blockVector().size() < 3 )
     {
-        M_precPtr->push_back_matrix( M_meshBlock,
-                                     false );
-        M_precPtr->setConditions( M_BChs );
-        M_precPtr->setSpaces( M_FESpaces );
-        M_precPtr->setOffsets( 3, M_offset, 0,  M_solidAndFluidDim + nDimensions*M_interface );
-        M_precPtr->coupler( M_monolithicMap, M_dofStructureToFluid->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep() ,M_solidTimeAdvance->coefficientFirstDerivative( 0 ), M_solid->rescaleFactor(), 2);
+        M_precPtr->push_back_matrix ( M_meshBlock,
+                                      false );
+        M_precPtr->setConditions ( M_BChs );
+        M_precPtr->setSpaces ( M_FESpaces );
+        M_precPtr->setOffsets ( 3, M_offset, 0,  M_solidAndFluidDim + nDimensions * M_interface );
+        M_precPtr->coupler ( M_monolithicMap, M_dofStructureToFluid->localDofMap(), M_numerationInterface, M_data->dataFluid()->dataTime()->timeStep() , M_solidTimeAdvance->coefficientFirstDerivative ( 0 ), M_solid->rescaleFactor(), 2);
 
-        if (M_data->dataFluid()->useShapeDerivatives())
+        if (M_data->dataFluid()->useShapeDerivatives() )
         {
-            boost::shared_ptr<MatrixEpetra<Real> > staticCast=boost::static_pointer_cast<MatrixEpetra<Real> >(M_shapeDerivativesBlock);
-            M_precPtr->push_back_coupling( staticCast );
+            boost::shared_ptr<MatrixEpetra<Real> > staticCast = boost::static_pointer_cast<MatrixEpetra<Real> > (M_shapeDerivativesBlock);
+            M_precPtr->push_back_coupling ( staticCast );
         }
     }
     else
     {
         //M_precPtr->replace_matrix( M_solidBlockPrec, 0 );
         //M_precPtr->replace_matrix( M_fluidBlock, 1 );
-        M_precPtr->replace_matrix( M_meshBlock, 2 );
+        M_precPtr->replace_matrix ( M_meshBlock, 2 );
 
         if ( M_data->dataFluid()->useShapeDerivatives() )
         {
-            M_precPtr->replace_coupling( M_shapeDerivativesBlock, 2 );
+            M_precPtr->replace_coupling ( M_shapeDerivativesBlock, 2 );
         }
     }
 }
 
-void FSIMonolithicGI::shapeDerivatives( FSIOperator::fluidPtr_Type::value_type::matrixPtr_Type sdMatrix )
+void FSIMonolithicGI::shapeDerivatives ( FSIOperator::fluidPtr_Type::value_type::matrixPtr_Type sdMatrix )
 {
-    Real alpha = M_fluidTimeAdvance->coefficientFirstDerivative( 0 )/M_data->dataFluid()->dataTime()->timeStep();
-    vectorPtr_Type rhsNew(new vector_Type(*M_monolithicMap));
-    vector_Type un(M_uFESpace->map());
-    vector_Type uk(M_uFESpace->map()+M_pFESpace->map());
+    Real alpha = M_fluidTimeAdvance->coefficientFirstDerivative ( 0 ) / M_data->dataFluid()->dataTime()->timeStep();
+    vectorPtr_Type rhsNew (new vector_Type (*M_monolithicMap) );
+    vector_Type un (M_uFESpace->map() );
+    vector_Type uk (M_uFESpace->map() + M_pFESpace->map() );
 
-    vectorPtr_Type meshVelRep( new vector_Type( M_mmFESpace->map(), Repeated ) );
+    vectorPtr_Type meshVelRep ( new vector_Type ( M_mmFESpace->map(), Repeated ) );
 
     *meshVelRep = M_ALETimeAdvance->firstDerivative();
 
     //When this class is used, the convective term is used implictly
-    un.subset( *M_uk, 0 );
+    un.subset ( *M_uk, 0 );
 
-    uk.subset( *M_uk, 0 );
-    vector_Type veloFluidMesh( M_uFESpace->map(), Repeated );
-    this->transferMeshMotionOnFluid( *meshVelRep, veloFluidMesh );
+    uk.subset ( *M_uk, 0 );
+    vector_Type veloFluidMesh ( M_uFESpace->map(), Repeated );
+    this->transferMeshMotionOnFluid ( *meshVelRep, veloFluidMesh );
 
     //The last two flags are consistent with the currect interface.
     //When this class is used, they should not be changed.
-    M_fluid->updateShapeDerivatives( *sdMatrix, alpha,
-                                     un,
-                                     uk,
-                                     veloFluidMesh, //(xk-xn)/dt (FI), or (xn-xn-1)/dt (CE)//Repeated
-                                     M_solidAndFluidDim + M_interface * nDimensions,
-                                     *M_uFESpace,
-                                     true /*This flag tells the method to consider the velocity of the domain implicitly*/,
-                                     true /*This flag tells the method to consider the convective term implicitly */ );
+    M_fluid->updateShapeDerivatives ( *sdMatrix, alpha,
+                                      un,
+                                      uk,
+                                      veloFluidMesh, //(xk-xn)/dt (FI), or (xn-xn-1)/dt (CE)//Repeated
+                                      M_solidAndFluidDim + M_interface * nDimensions,
+                                      *M_uFESpace,
+                                      true /*This flag tells the method to consider the velocity of the domain implicitly*/,
+                                      true /*This flag tells the method to consider the convective term implicitly */ );
 }
 
-void FSIMonolithicGI::assembleMeshBlock( UInt iter)
+void FSIMonolithicGI::assembleMeshBlock ( UInt iter)
 {
 
-    M_meshBlock.reset( new matrix_Type( *M_monolithicMap ) );
-    M_meshMotion->addSystemMatrixTo( M_meshBlock );
+    M_meshBlock.reset ( new matrix_Type ( *M_monolithicMap ) );
+    M_meshMotion->addSystemMatrixTo ( M_meshBlock );
     M_meshBlock->globalAssemble();
-    UInt offset( M_solidAndFluidDim + nDimensions * M_interface );
+    UInt offset ( M_solidAndFluidDim + nDimensions * M_interface );
     std::map< ID, ID >::const_iterator ITrow;
-    std::map< ID, ID > locdofmap( M_dofStructureToHarmonicExtension->localDofMap() );
+    std::map< ID, ID > locdofmap ( M_dofStructureToHarmonicExtension->localDofMap() );
 
     /******************alternative way************************/
     //     BCFunctionBase bcf(fZero);
@@ -417,28 +428,28 @@ void FSIMonolithicGI::assembleMeshBlock( UInt iter)
         for ( ITrow = locdofmap.begin(); ITrow != locdofmap.end(); ++ITrow )
         {
             UInt i = ITrow->first;
-            M_meshBlock->diagonalize( i + offset + dim * M_mmFESpace->dof().numTotalDof(), 1. );
+            M_meshBlock->diagonalize ( i + offset + dim * M_mmFESpace->dof().numTotalDof(), 1. );
         }
 }
 
 // ===================================================
 //  Products registration
 // ===================================================
-bool FSIMonolithicGI::S_register = BlockPrecFactory::instance().registerProduct( "AdditiveSchwarzGI",
-                                                                                 &MonolithicBlockMatrix::createAdditiveSchwarz )
-                && BlockPrecFactory::instance().registerProduct( "ComposedDNGI",
-                                                                 &MonolithicBlockComposedDN::createComposedDNGI )
-                && MonolithicBlockMatrix::Factory_Type::instance().registerProduct( "AdditiveSchwarzGI",
-                                                                                    &MonolithicBlockMatrix::createAdditiveSchwarz )
-                && MonolithicBlockMatrix::Factory_Type::instance().registerProduct( "AdditiveSchwarzRNGI",
-                                                                                    &MonolithicBlockMatrixRN::createAdditiveSchwarzRN )
-                && FSIOperator::FSIFactory_Type::instance().registerProduct( "monolithicGI",
-                                                                             &FSIMonolithicGI::instantiate )
-                && BlockPrecFactory::instance().registerProduct( "ComposedDNDGI",
-                                                                 &MonolithicBlockComposedDND::createComposedDNDGI )
-                && BlockPrecFactory::instance().registerProduct( "ComposedDND2GI",
-                                                                 &MonolithicBlockComposedDND::createComposedDND2GI )
-                && BlockPrecFactory::instance().registerProduct( "ComposedDN2GI",
-                                                                 &MonolithicBlockComposedDN::createComposedDN2GI );
+bool FSIMonolithicGI::S_register = BlockPrecFactory::instance().registerProduct ( "AdditiveSchwarzGI",
+                                   &MonolithicBlockMatrix::createAdditiveSchwarz )
+                                   && BlockPrecFactory::instance().registerProduct ( "ComposedDNGI",
+                                           &MonolithicBlockComposedDN::createComposedDNGI )
+                                   && MonolithicBlockMatrix::Factory_Type::instance().registerProduct ( "AdditiveSchwarzGI",
+                                           &MonolithicBlockMatrix::createAdditiveSchwarz )
+                                   && MonolithicBlockMatrix::Factory_Type::instance().registerProduct ( "AdditiveSchwarzRNGI",
+                                           &MonolithicBlockMatrixRN::createAdditiveSchwarzRN )
+                                   && FSIOperator::FSIFactory_Type::instance().registerProduct ( "monolithicGI",
+                                           &FSIMonolithicGI::instantiate )
+                                   && BlockPrecFactory::instance().registerProduct ( "ComposedDNDGI",
+                                           &MonolithicBlockComposedDND::createComposedDNDGI )
+                                   && BlockPrecFactory::instance().registerProduct ( "ComposedDND2GI",
+                                           &MonolithicBlockComposedDND::createComposedDND2GI )
+                                   && BlockPrecFactory::instance().registerProduct ( "ComposedDN2GI",
+                                           &MonolithicBlockComposedDN::createComposedDN2GI );
 
 }

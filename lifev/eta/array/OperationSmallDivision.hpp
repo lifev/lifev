@@ -47,56 +47,56 @@ namespace LifeV
 /*!
   @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
 
-	This class only contains information that can be usefull in a templated framework (such as the
-	one for assembling the algebraic systems via expressions).
+    This class only contains information that can be usefull in a templated framework (such as the
+    one for assembling the algebraic systems via expressions).
 
-	It cannot be instanciated, neither the generic definition nor the specializations (private constructors
-	and destructor only).
+    It cannot be instanciated, neither the generic definition nor the specializations (private constructors
+    and destructor only).
 
-	The only information stored in this class is the type of the result, see LifeV::OperationSmallAddition.
+    The only information stored in this class is the type of the result, see LifeV::OperationSmallAddition.
 */
 
 template <typename LeftOperand, typename RightOperand>
 class OperationSmallDivision
 {
 private:
-	//! @name Constructors and destructors
+    //! @name Constructors and destructors
     //@{
 
-	//! No default constructor
-	OperationSmallDivision();
+    //! No default constructor
+    OperationSmallDivision();
 
-	//! No destructor
-	~OperationSmallDivision();
+    //! No destructor
+    ~OperationSmallDivision();
 
-	//@}
+    //@}
 };
 
 //! \cond
 
 template <>
-class OperationSmallDivision<Real,Real>
+class OperationSmallDivision<Real, Real>
 {
 public:
 
     //! @name Public Types
     //@{
 
-	typedef Real result_Type;
+    typedef Real result_Type;
 
-	//@}
+    //@}
 
 private:
-	//! @name Constructors and destructors
+    //! @name Constructors and destructors
     //@{
 
-	//! No default constructor
-	OperationSmallDivision();
+    //! No default constructor
+    OperationSmallDivision();
 
-	//! No destructor
-	~OperationSmallDivision();
+    //! No destructor
+    ~OperationSmallDivision();
 
-	//@}
+    //@}
 };
 
 
@@ -108,21 +108,21 @@ public:
     //! @name Public Types
     //@{
 
-	typedef VectorSmall<Size> result_Type;
+    typedef VectorSmall<Size> result_Type;
 
-	//@}
+    //@}
 
 private:
-	//! @name Constructors and destructors
+    //! @name Constructors and destructors
     //@{
 
-	//! No default constructor
-	OperationSmallDivision();
+    //! No default constructor
+    OperationSmallDivision();
 
-	//! No destructor
-	~OperationSmallDivision();
+    //! No destructor
+    ~OperationSmallDivision();
 
-	//@}
+    //@}
 };
 
 //! \endcond

@@ -197,14 +197,17 @@ public:
     //@{
 
     //! Create the bcHandler.
-    void createHandler() { M_handler.reset( new bcHandler_Type() ); }
+    void createHandler()
+    {
+        M_handler.reset ( new bcHandler_Type() );
+    }
 
     //! Fill the bcHandler with the BC provided in the file.
     /*!
      * @param fileName Name of the data file
      * @param dataSection Subsection inside [boundary_conditions]
      */
-    void fillHandler( const std::string& fileName, const std::string& dataSection );
+    void fillHandler ( const std::string& fileName, const std::string& dataSection );
 
     //! Read a specific boundary condition from a file and add it to the data container
     /*!
@@ -212,7 +215,7 @@ public:
      * @param dataSection section in the data file
      * @param name name of the boundary condition
      */
-    virtual void readBC( const std::string& fileName, const std::string& dataSection, const std::string& name ) = 0;
+    virtual void readBC ( const std::string& fileName, const std::string& dataSection, const std::string& name ) = 0;
 
     //! Insert the current boundary condition in the BChandler
     virtual void insertBC() = 0;
@@ -230,13 +233,16 @@ public:
     /*!
      * @param physicalSolver physical solver
      */
-    virtual void setPhysicalSolver( const physicalSolverPtr_Type& physicalSolver );
+    virtual void setPhysicalSolver ( const physicalSolverPtr_Type& physicalSolver );
 
     //! Set an Handler
     /*!
      * @param handler BCHandler
      */
-    void setHandler( const bcHandlerPtr_Type& handler ) { M_handler = handler; }
+    void setHandler ( const bcHandlerPtr_Type& handler )
+    {
+        M_handler = handler;
+    }
 
     //@}
 
@@ -248,7 +254,10 @@ public:
     /*!
      * @return the pointer to the BCHandler
      */
-    const bcHandlerPtr_Type& handler() { return M_handler; }
+    const bcHandlerPtr_Type& handler()
+    {
+        return M_handler;
+    }
 
     //! Get the data container
     /*!
@@ -275,9 +284,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    BCInterface( const BCInterface& interface1D );
+    BCInterface ( const BCInterface& interface1D );
 
-    BCInterface& operator=( const BCInterface& interface1D );
+    BCInterface& operator= ( const BCInterface& interface1D );
 
     //@}
 };
@@ -287,13 +296,13 @@ private:
 // ===================================================
 template< class BcHandler, class PhysicalSolverType >
 BCInterface< BcHandler, PhysicalSolverType >::BCInterface() :
-        M_handler                     (),
-        M_vectorFunction              (),
-        M_vectorFunctionSolverDefined ()
+    M_handler                     (),
+    M_vectorFunction              (),
+    M_vectorFunctionSolverDefined ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 5020 ) << "BCInterface::BCInterface" << "\n";
+    debugStream ( 5020 ) << "BCInterface::BCInterface" << "\n";
 #endif
 
 }
@@ -303,18 +312,18 @@ BCInterface< BcHandler, PhysicalSolverType >::BCInterface() :
 // ===================================================
 template< class BcHandler, class PhysicalSolverType >
 void
-BCInterface< BcHandler, PhysicalSolverType >::fillHandler( const std::string& fileName, const std::string& dataSection )
+BCInterface< BcHandler, PhysicalSolverType >::fillHandler ( const std::string& fileName, const std::string& dataSection )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 5020 ) << "BCInterface::fillHandler\n";
+    debugStream ( 5020 ) << "BCInterface::fillHandler\n";
 #endif
 
-    GetPot dataFile( fileName );
-    for ( UInt i( 0 ); i < dataFile.vector_variable_size( ( dataSection + "/boundary_conditions/list" ).c_str() ); ++i )
+    GetPot dataFile ( fileName );
+    for ( UInt i ( 0 ); i < dataFile.vector_variable_size ( ( dataSection + "/boundary_conditions/list" ).c_str() ); ++i )
     {
-        readBC( fileName, dataSection + "/boundary_conditions/",
-                          dataFile( ( dataSection + "/boundary_conditions/list" ).c_str(), " ", i ) );
+        readBC ( fileName, dataSection + "/boundary_conditions/",
+                 dataFile ( ( dataSection + "/boundary_conditions/list" ).c_str(), " ", i ) );
 
         this->insertBC();
     }
@@ -326,20 +335,24 @@ BCInterface< BcHandler, PhysicalSolverType >::updatePhysicalSolverVariables()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 5020 ) << "BCInterface::updatePhysicalSolverVariables\n";
+    debugStream ( 5020 ) << "BCInterface::updatePhysicalSolverVariables\n";
 #endif
 
-    for ( UInt i( 0 ); i < M_vectorFunction.size(); ++i )
+    for ( UInt i ( 0 ); i < M_vectorFunction.size(); ++i )
     {
         boost::shared_ptr< BCInterfaceFunctionParserSolver< physicalSolver_Type > > castedFunctionSolver =
             boost::dynamic_pointer_cast< BCInterfaceFunctionParserSolver< physicalSolver_Type > > ( M_vectorFunction[i] );
 
         if ( castedFunctionSolver != 0 )
+        {
             castedFunctionSolver->updatePhysicalSolverVariables();
+        }
     }
 
     for ( typename vectorFunctionSolverDefined_Type::const_iterator i = M_vectorFunctionSolverDefined.begin() ; i < M_vectorFunctionSolverDefined.end() ; ++i )
+    {
         ( *i )->updatePhysicalSolverVariables();
+    }
 }
 
 // ===================================================
@@ -347,20 +360,24 @@ BCInterface< BcHandler, PhysicalSolverType >::updatePhysicalSolverVariables()
 // ===================================================
 template< class BcHandler, class PhysicalSolverType >
 void
-BCInterface< BcHandler, PhysicalSolverType >::setPhysicalSolver( const physicalSolverPtr_Type& physicalSolver )
+BCInterface< BcHandler, PhysicalSolverType >::setPhysicalSolver ( const physicalSolverPtr_Type& physicalSolver )
 {
     //for ( typename vectorFunction_Type::const_iterator i = M_vectorFunction.begin() ; i < M_vectorFunction.end() ; ++i )
-    for ( UInt i( 0 ); i < M_vectorFunction.size(); ++i )
+    for ( UInt i ( 0 ); i < M_vectorFunction.size(); ++i )
     {
         boost::shared_ptr< BCInterfaceFunctionParserSolver< physicalSolver_Type > > castedFunctionSolver =
             boost::dynamic_pointer_cast< BCInterfaceFunctionParserSolver< physicalSolver_Type > > ( M_vectorFunction[i] );
 
         if ( castedFunctionSolver != 0 )
-            castedFunctionSolver->setPhysicalSolver( physicalSolver );
+        {
+            castedFunctionSolver->setPhysicalSolver ( physicalSolver );
+        }
     }
 
     for ( typename vectorFunctionSolverDefined_Type::const_iterator i = M_vectorFunctionSolverDefined.begin() ; i < M_vectorFunctionSolverDefined.end() ; ++i )
-        ( *i )->setPhysicalSolver( physicalSolver );
+    {
+        ( *i )->setPhysicalSolver ( physicalSolver );
+    }
 }
 
 } // Namespace LifeV

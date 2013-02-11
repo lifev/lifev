@@ -49,14 +49,14 @@ namespace LifeV
 /*!
   @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
 
-	This class is meant to represent an ETVectorElemental. It contains mainly:
+    This class is meant to represent an ETVectorElemental. It contains mainly:
 
-	<ol>
-		<li> Simple constructors
-		<li> Methods to access and modify the indexes
-		<li> Methods to store and access the entries
-		<li> Assembly methods to put the local entries in a global vector
-	</ol>
+    <ol>
+        <li> Simple constructors
+        <li> Methods to access and modify the indexes
+        <li> Methods to store and access the entries
+        <li> Assembly methods to put the local entries in a global vector
+    </ol>
 
 */
 class ETVectorElemental
@@ -64,177 +64,189 @@ class ETVectorElemental
 
 public:
 
-	//! @name Constructors & Destructor
+    //! @name Constructors & Destructor
     //@{
 
-	//! Constructor with the minimal interface: number of rows has to be provided.
-    explicit ETVectorElemental(const UInt& nbRow)
-	: 	M_rowIndices(nbRow,0),
-		M_nbRow(nbRow),
-		M_rawData(new Real[nbRow])
-	{
-		zero();
-	}
+    //! Constructor with the minimal interface: number of rows has to be provided.
+    explicit ETVectorElemental (const UInt& nbRow)
+        :   M_rowIndices (nbRow, 0),
+            M_nbRow (nbRow),
+            M_rawData (new Real[nbRow])
+    {
+        zero();
+    }
 
-	//! Copy constructor (including deep copy of the data)
-	ETVectorElemental(const ETVectorElemental& vec)
-	:	M_rowIndices(vec.M_rowIndices),
-		M_nbRow(vec.M_nbRow),
-		M_rawData( new Real[M_nbRow])
-	{
-		for (UInt iRow(0); iRow<M_nbRow; ++iRow)
-		{
-			M_rawData[iRow]=vec.M_rawData[iRow];
-		}
-	}
+    //! Copy constructor (including deep copy of the data)
+    ETVectorElemental (const ETVectorElemental& vec)
+        :   M_rowIndices (vec.M_rowIndices),
+            M_nbRow (vec.M_nbRow),
+            M_rawData ( new Real[M_nbRow])
+    {
+        for (UInt iRow (0); iRow < M_nbRow; ++iRow)
+        {
+            M_rawData[iRow] = vec.M_rawData[iRow];
+        }
+    }
 
-	//! Destructor
+    //! Destructor
     ~ETVectorElemental()
-	{
-		delete M_rawData;
-	}
+    {
+        delete M_rawData;
+    }
 
-	//@}
+    //@}
 
 
     //! @name Operators
     //@{
 
     //! Operator to access (read-only) the iloc-th element
-    const Real& operator[](const UInt& iloc) const
+    const Real& operator[] (const UInt& iloc) const
     {
-        ASSERT(iloc < M_nbRow, "Access out of range");
+        ASSERT (iloc < M_nbRow, "Access out of range");
         return M_rawData[iloc];
     }
 
     //! Operator to access (read-write) the iloc-th element
-    Real& operator[](const UInt& iloc)
+    Real& operator[] (const UInt& iloc)
     {
-        ASSERT(iloc < M_nbRow, "Access out of range");
+        ASSERT (iloc < M_nbRow, "Access out of range");
         return M_rawData[iloc];
     }
 
     //@}
 
 
- 	//! @name Methods
+    //! @name Methods
     //@{
 
-	//! Put zero all the data stored
+    //! Put zero all the data stored
     void zero()
-	{
-		for (UInt i(0); i<M_nbRow; ++i)
-		{
-			M_rawData[i]=0.0;
-		}
-	}
+    {
+        for (UInt i (0); i < M_nbRow; ++i)
+        {
+            M_rawData[i] = 0.0;
+        }
+    }
 
-	//! Assembly procedure for a vector or a block of a vector
-	/*!
-	This method puts the values stored in this elemental vector into the global
-	vector passed as arguement, using the positions given in the global indices
-	stored in this elemental vector.
-	*/
-	template <typename VectorType>
-	void pushToGlobal(VectorType& vec)
-	{
-		for (UInt iRow(0); iRow<M_nbRow; ++iRow)
-		{
-			vec.sumIntoGlobalValues( M_rowIndices[iRow], M_rawData[iRow] );
-		}
-	}
+    //! Assembly procedure for a vector or a block of a vector
+    /*!
+    This method puts the values stored in this elemental vector into the global
+    vector passed as arguement, using the positions given in the global indices
+    stored in this elemental vector.
+    */
+    template <typename VectorType>
+    void pushToGlobal (VectorType& vec)
+    {
+        for (UInt iRow (0); iRow < M_nbRow; ++iRow)
+        {
+            vec.sumIntoGlobalValues ( M_rowIndices[iRow], M_rawData[iRow] );
+        }
+    }
 
-	//! Assembly procedure for a vector or a block of a vector passed in a shared_ptr
-	/*!
-	This method puts the values stored in this elemental vector into the global
-	vector passed as argument, using the positions given in the global indices
-	stored in this elemental vector.
+    //! Assembly procedure for a vector or a block of a vector passed in a shared_ptr
+    /*!
+    This method puts the values stored in this elemental vector into the global
+    vector passed as argument, using the positions given in the global indices
+    stored in this elemental vector.
 
-	This is a partial specialization of the other assembly procedure of this class.
-	*/
-	template <typename VectorType>
-	void globalAssembly(boost::shared_ptr<VectorType> vec)
-	{
-		for (UInt iRow(0); iRow<M_nbRow; ++iRow)
-		{
-			vec->sumIntoGlobalValues( M_rowIndices[iRow], M_rawData[iRow] );
-		}
-	}
+    This is a partial specialization of the other assembly procedure of this class.
+    */
+    template <typename VectorType>
+    void globalAssembly (boost::shared_ptr<VectorType> vec)
+    {
+        for (UInt iRow (0); iRow < M_nbRow; ++iRow)
+        {
+            vec->sumIntoGlobalValues ( M_rowIndices[iRow], M_rawData[iRow] );
+        }
+    }
 
 
-	//! Ouput method for the sizes and the stored values
-    void showMe( std::ostream& out = std::cout ) const
-	{
-		out << " Elemental vector : Size " << M_nbRow << std::endl;
-		for (UInt i(0); i<M_nbRow; ++i)
-		{
-			out << "[" << i << "] " << M_rawData[i] << " ";
-		}
-		out << std::endl;
-	}
+    //! Ouput method for the sizes and the stored values
+    void showMe ( std::ostream& out = std::cout ) const
+    {
+        out << " Elemental vector : Size " << M_nbRow << std::endl;
+        for (UInt i (0); i < M_nbRow; ++i)
+        {
+            out << "[" << i << "] " << M_rawData[i] << " ";
+        }
+        out << std::endl;
+    }
 
-	//@}
+    //@}
 
-	//! @name Set Methods
+    //! @name Set Methods
     //@{
 
-	//! Setter for the value in the local position (iloc)
-	Real& element(const UInt& iloc)
+    //! Setter for the value in the local position (iloc)
+    Real& element (const UInt& iloc)
     {
-        ASSERT(iloc < M_nbRow, "Access out of range");
+        ASSERT (iloc < M_nbRow, "Access out of range");
         return M_rawData[iloc];
     }
 
-	//! Setter for the global index corresponding to the iloc row of the local vector
-	void setRowIndex(const UInt& iloc, const UInt& iglobal){M_rowIndices[iloc]=iglobal;}
+    //! Setter for the global index corresponding to the iloc row of the local vector
+    void setRowIndex (const UInt& iloc, const UInt& iglobal)
+    {
+        M_rowIndices[iloc] = iglobal;
+    }
 
     //! Setter for all the global indices using a std::vector
-    void setRowIndex(const std::vector<Int>& indicesVector){M_rowIndices = indicesVector;}
+    void setRowIndex (const std::vector<Int>& indicesVector)
+    {
+        M_rowIndices = indicesVector;
+    }
 
-	//@}
+    //@}
 
 
-	//! @name Get Methods
+    //! @name Get Methods
     //@{
 
-	//! Getter for the data stored in the given elemental position
-	const Real& element(const UInt& iloc) const
+    //! Getter for the data stored in the given elemental position
+    const Real& element (const UInt& iloc) const
     {
-        ASSERT(iloc < M_nbRow, "Access out of range");
+        ASSERT (iloc < M_nbRow, "Access out of range");
         return M_rawData[iloc];
     }
 
-	//! Getter for the full set of data
-	Real* rawData() const {return M_rawData;}
+    //! Getter for the full set of data
+    Real* rawData() const
+    {
+        return M_rawData;
+    }
 
 
-	//! Getter for the global indices of the rows
-	const std::vector<Int>& rowIndices() const { return M_rowIndices;}
+    //! Getter for the global indices of the rows
+    const std::vector<Int>& rowIndices() const
+    {
+        return M_rowIndices;
+    }
 
-	//@}
+    //@}
 
 private:
 
     //! @name Private Methods
     //@{
 
-	//! No empty constructor, as we want at least the sizes to be defined.
-	ETVectorElemental();
+    //! No empty constructor, as we want at least the sizes to be defined.
+    ETVectorElemental();
 
-	//! No need for an assignement operator
-	ETVectorElemental operator=(const ETVectorElemental&);
+    //! No need for an assignement operator
+    ETVectorElemental operator= (const ETVectorElemental&);
 
-	//@}
+    //@}
 
-	// Vectors storing the global indices corresponding to the entries stored
-	// Here UInt would be more suitable, but it does not work with assembly functions.
-	std::vector<Int> M_rowIndices;
+    // Vectors storing the global indices corresponding to the entries stored
+    // Here UInt would be more suitable, but it does not work with assembly functions.
+    std::vector<Int> M_rowIndices;
 
-	// Number of rows
-	UInt M_nbRow;
+    // Number of rows
+    UInt M_nbRow;
 
-	// Raw data
-	Real* M_rawData;
+    // Raw data
+    Real* M_rawData;
 };
 
 }

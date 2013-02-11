@@ -39,7 +39,8 @@
 
 #include <lifev/core/array/VectorEpetra.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //!  VectorEpetraStructuredView - class representing a block in a  VectorEpetraStructuredView
 /*!
@@ -75,7 +76,7 @@ public:
       but not the underlying vector (both views still look at the
       same vector, not at different copies).
      */
-    VectorEpetraStructuredView( const VectorEpetraStructuredView& otherView );
+    VectorEpetraStructuredView ( const VectorEpetraStructuredView& otherView );
 
     //! Default destructor
     ~VectorEpetraStructuredView();
@@ -90,9 +91,9 @@ public:
     /*!
       @param output Stream where to print the informations
      */
-    void showMe(std::ostream& output = std::cout) const;
+    void showMe (std::ostream& output = std::cout) const;
 
-	//! Assembly procedure
+    //! Assembly procedure
     /*!
       This procedure should always have the same behaviour and the same
       syntax than the corresponding method in MatrixEpetra.
@@ -100,7 +101,7 @@ public:
       @param GID the global index of the element within the block viewed.
       @param value the value to be added
      */
-    Int sumIntoGlobalValues( const Int GID, const Real value ) const;
+    Int sumIntoGlobalValues ( const Int GID, const Real value ) const;
 
     //@}
 
@@ -113,9 +114,9 @@ public:
      *  @param blockSize Number of indices in the block
      *  @param vector Vector from which the view has to be extracted
      */
-    void setup( const UInt& firstIndex,
-                const UInt& blockSize,
-                vector_Type* vector );
+    void setup ( const UInt& firstIndex,
+                 const UInt& blockSize,
+                 vector_Type* vector );
 
     //@}
 
@@ -124,16 +125,28 @@ public:
     //@{
 
     //! Returns the size of the block
-    UInt blockSize() const { return M_blockSize; }
+    UInt blockSize() const
+    {
+        return M_blockSize;
+    }
 
     //! Returns the index in the block
-    UInt firstIndex() const { return M_firstIndex; }
+    UInt firstIndex() const
+    {
+        return M_firstIndex;
+    }
 
     //! Returns the last index in the block
-    UInt lastValidIndex() const { return M_lastValidIndex; }
+    UInt lastValidIndex() const
+    {
+        return M_lastValidIndex;
+    }
 
     //! Return the shared_pointer of the Epetra_FEVector
-    vector_Type* vectorPtr() const { return M_vector; }
+    vector_Type* vectorPtr() const
+    {
+        return M_vector;
+    }
 
     //@}
 
@@ -149,7 +162,7 @@ private:
       like vector.block(0) = vector.block(1), that would only copy the views
       and not the blocks.
      */
-    VectorEpetraStructuredView operator=(const VectorEpetraStructuredView& otherView);
+    VectorEpetraStructuredView operator= (const VectorEpetraStructuredView& otherView);
 
     //@}
 

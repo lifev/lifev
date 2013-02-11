@@ -21,13 +21,19 @@ class license_check : public source_inspector
 public:
 
     license_check();
-    virtual const char * name() const { return "license-check"; }
-    virtual const char * desc() const { return "missing license info (LGPL or GPL)"; }
+    virtual const char* name() const
+    {
+        return "license-check";
+    }
+    virtual const char* desc() const
+    {
+        return "missing license info (LGPL or GPL)";
+    }
 
-    virtual void inspect(
-        const std::string & library_name,
-        const path & full_path,
-        const std::string & contents );
+    virtual void inspect (
+        const std::string& library_name,
+        const path& full_path,
+        const std::string& contents );
 
     virtual ~license_check()
     {

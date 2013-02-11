@@ -215,7 +215,7 @@ public:
       @remark Nul pointers cannot be passed to this method. Use a more
       specific setter if you want to do that.
      */
-    void setup(const fespace_ptrType& fespace, const fespace_ptrType& betaFESpace);
+    void setup (const fespace_ptrType& fespace, const fespace_ptrType& betaFESpace);
 
     //! Assembling for the mass
     /*!
@@ -224,9 +224,9 @@ public:
       @Remark The matrix is NOT finalized, you have to call globalAssemble
       outside this method when the matrix is finished.
      */
-    inline void addMass(matrix_ptrType matrix, const Real& coefficient=1.0)
+    inline void addMass (matrix_ptrType matrix, const Real& coefficient = 1.0)
     {
-        addMass(matrix,coefficient,0,0);
+        addMass (matrix, coefficient, 0, 0);
     }
 
     //! Assembling for the mass using offsets
@@ -235,7 +235,7 @@ public:
       so that one can chose where to add the mass in the matrix, i.e. somewhere else
       than in the upper left block.
      */
-    void addMass(matrix_ptrType matrix, const Real& coefficient, const UInt& offsetLeft, const UInt& offsetUp);
+    void addMass (matrix_ptrType matrix, const Real& coefficient, const UInt& offsetLeft, const UInt& offsetUp);
 
     //! Assembling for the advection
     /*!
@@ -246,9 +246,9 @@ public:
       @Remark The matrix is NOT finalized, you have to call globalAssemble
       outside this method when the matrix is finished.
      */
-    inline void addAdvection(matrix_ptrType matrix, const vector_type& beta)
+    inline void addAdvection (matrix_ptrType matrix, const vector_type& beta)
     {
-        addAdvection(matrix,beta,0,0);
+        addAdvection (matrix, beta, 0, 0);
     }
 
     //! Assembling for the advection using offsets
@@ -257,7 +257,7 @@ public:
       so that one can chose where to add the mass in the matrix, i.e. somewhere else
       than in the upper left block.
      */
-    void addAdvection(matrix_ptrType matrix, const vector_type& beta, const UInt& offsetLeft, const UInt& offsetUp);
+    void addAdvection (matrix_ptrType matrix, const vector_type& beta, const UInt& offsetLeft, const UInt& offsetUp);
 
     //! Assembling for the diffusion
     /*!
@@ -266,9 +266,9 @@ public:
       @Remark The matrix is NOT finalized, you have to call globalAssemble
       outside this method when the matrix is finished.
      */
-    inline void addDiffusion(matrix_ptrType matrix, const Real& coefficient=1.0)
+    inline void addDiffusion (matrix_ptrType matrix, const Real& coefficient = 1.0)
     {
-        addDiffusion(matrix,coefficient,0,0);
+        addDiffusion (matrix, coefficient, 0, 0);
     }
 
     //! Assembling for the diffusion using offsets
@@ -277,21 +277,21 @@ public:
       so that one can chose where to add the mass in the matrix, i.e. somewhere else
       than in the upper left block.
      */
-    void addDiffusion(matrix_ptrType matrix, const Real& coefficient, const UInt& offsetLeft, const UInt& offsetUp);
+    void addDiffusion (matrix_ptrType matrix, const Real& coefficient, const UInt& offsetLeft, const UInt& offsetUp);
 
     //! Assembly for the right hand side (mass) with f given in vectorial form.
     /*!
       This method assembles the right hand side for the ADR problem
       where the forcing term is given in the FE space of the unknown.
      */
-    void addMassRhs(vector_type& rhs, const vector_type& f);
+    void addMassRhs (vector_type& rhs, const vector_type& f);
 
     //! Assembly for the right hand side (mass) with f given in functional form.
     /*!
       This method assembles the right hand side for the ADR problem
       where f is given as a function of space and time (t,x,y,z,component)
      */
-    void addMassRhs(vector_type& rhs, const function_type& f, const Real& t);
+    void addMassRhs (vector_type& rhs, const function_type& f, const Real& t);
 
     //@}
 
@@ -301,23 +301,23 @@ public:
     //@{
 
     //! Setter for the finite element space used for the unknown (reset the quadratures as well!)
-    void setFespace(const fespace_ptrType& fespace);
+    void setFespace (const fespace_ptrType& fespace);
 
     //! Setter for the finite element space used for the advection field (reset the quadratures as well!)
     /*!
       Beware that a FE space for the unknown has to be set before calling this method.
      */
-    void setBetaFespace(const fespace_ptrType& betaFESpace);
+    void setBetaFespace (const fespace_ptrType& betaFESpace);
 
     //! Setter for the quadrature used for the mass matrix
     /*!
       Beware that calling this function might be quite heavy, so avoid using
       it when it is not necessary.
      */
-    inline void setQuadRuleForMassMatrix(const QuadratureRule& qr)
+    inline void setQuadRuleForMassMatrix (const QuadratureRule& qr)
     {
-        ASSERT(M_massCFE != 0,"No mass currentFE for setting the quadrature rule!");
-        M_massCFE->setQuadRule(qr);
+        ASSERT (M_massCFE != 0, "No mass currentFE for setting the quadrature rule!");
+        M_massCFE->setQuadRule (qr);
     }
 
     //! Setter for the quadrature used for the diffusion matrix
@@ -325,10 +325,10 @@ public:
       Beware that calling this function might be quite heavy, so avoid using
       it when it is not necessary.
      */
-    inline void setQuadRuleForDiffusionMatrix(const QuadratureRule& qr)
+    inline void setQuadRuleForDiffusionMatrix (const QuadratureRule& qr)
     {
-        ASSERT(M_diffCFE != 0,"No diffusion currentFE for setting the quadrature rule!");
-        M_diffCFE->setQuadRule(qr);
+        ASSERT (M_diffCFE != 0, "No diffusion currentFE for setting the quadrature rule!");
+        M_diffCFE->setQuadRule (qr);
     }
 
     //! Setter for the quadrature used for the advection matrix
@@ -336,12 +336,12 @@ public:
       Beware that calling this function might be quite heavy, so avoid using
       it when it is not necessary.
      */
-    inline void setQuadRuleForAdvectionMatrix(const QuadratureRule& qr)
+    inline void setQuadRuleForAdvectionMatrix (const QuadratureRule& qr)
     {
-        ASSERT(M_advCFE != 0,"No advection (u) currentFE for setting the quadrature rule!");
-        ASSERT(M_advBetaCFE != 0,"No advection (beta) currentFE for setting the quadrature rule!");
-        M_advCFE->setQuadRule(qr);
-        M_advBetaCFE->setQuadRule(qr);
+        ASSERT (M_advCFE != 0, "No advection (u) currentFE for setting the quadrature rule!");
+        ASSERT (M_advBetaCFE != 0, "No advection (beta) currentFE for setting the quadrature rule!");
+        M_advCFE->setQuadRule (qr);
+        M_advBetaCFE->setQuadRule (qr);
     }
 
     //! Setter for the quadrature used for the right hand side
@@ -349,10 +349,10 @@ public:
       Beware that calling this function might be quite heavy, so avoid using
       it when it is not necessary.
     */
-    inline void setQuadRuleForMassRhs(const QuadratureRule& qr)
+    inline void setQuadRuleForMassRhs (const QuadratureRule& qr)
     {
-        ASSERT(M_massRhsCFE != 0,"No Rhs currentFE for setting the quadrature rule!");
-        M_massRhsCFE->setQuadRule(qr);
+        ASSERT (M_massRhsCFE != 0, "No Rhs currentFE for setting the quadrature rule!");
+        M_massRhsCFE->setQuadRule (qr);
     }
 
     //@}
@@ -362,19 +362,34 @@ public:
     //@{
 
     //! Getter for the chrono of the assembly of the mass term
-    chrono_type& massAssemblyChrono() {return M_massAssemblyChrono; }
+    chrono_type& massAssemblyChrono()
+    {
+        return M_massAssemblyChrono;
+    }
 
     //! Getter for the chrono of the assembly of the advection term
-    chrono_type& advectionAssemblyChrono() {return M_advectionAssemblyChrono; }
+    chrono_type& advectionAssemblyChrono()
+    {
+        return M_advectionAssemblyChrono;
+    }
 
     //! Getter for the chrono of the assembly of the diffusion term
-    chrono_type& diffusionAssemblyChrono() {return M_diffusionAssemblyChrono; }
+    chrono_type& diffusionAssemblyChrono()
+    {
+        return M_diffusionAssemblyChrono;
+    }
 
     //! Getter for the chrono of the setup of the assembler
-    chrono_type& setupChrono() {return M_setupChrono; }
+    chrono_type& setupChrono()
+    {
+        return M_setupChrono;
+    }
 
     //! Getter for the chrono of the assembly of the rhs (mass)
-    chrono_type& massRhsAssemblyChrono() { return M_massRhsAssemblyChrono; }
+    chrono_type& massRhsAssemblyChrono()
+    {
+        return M_massRhsAssemblyChrono;
+    }
 
     //@}
 
@@ -394,7 +409,7 @@ private:
     //@{
 
     // Copy constructor is a no-sense.
-    ADRAssembler(const ADRAssembler&);
+    ADRAssembler (const ADRAssembler&);
 
     //@}
 
@@ -445,27 +460,27 @@ private:
 
 template<typename mesh_type, typename matrix_type, typename vector_type>
 ADRAssembler< mesh_type, matrix_type, vector_type>::
-ADRAssembler():
+ADRAssembler() :
 
-        M_fespace(),
-        M_betaFESpace(),
+    M_fespace(),
+    M_betaFESpace(),
 
-        M_massCFE(),
-        M_diffCFE(),
-        M_advCFE(),
-        M_advBetaCFE(),
-        M_massRhsCFE(),
+    M_massCFE(),
+    M_diffCFE(),
+    M_advCFE(),
+    M_advBetaCFE(),
+    M_massRhsCFE(),
 
-        M_localMass(),
-        M_localAdv(),
-        M_localDiff(),
-        M_localMassRhs(),
+    M_localMass(),
+    M_localAdv(),
+    M_localDiff(),
+    M_localMassRhs(),
 
-        M_diffusionAssemblyChrono(),
-        M_advectionAssemblyChrono(),
-        M_massAssemblyChrono(),
-        M_setupChrono(),
-        M_massRhsAssemblyChrono()
+    M_diffusionAssemblyChrono(),
+    M_advectionAssemblyChrono(),
+    M_massAssemblyChrono(),
+    M_setupChrono(),
+    M_massRhsAssemblyChrono()
 {}
 
 // ===================================================
@@ -475,15 +490,15 @@ ADRAssembler():
 template<typename mesh_type, typename matrix_type, typename vector_type>
 void
 ADRAssembler< mesh_type, matrix_type, vector_type>::
-setup( const fespace_ptrType& fespace, const fespace_ptrType& betaFESpace )
+setup ( const fespace_ptrType& fespace, const fespace_ptrType& betaFESpace )
 {
-    ASSERT(fespace!=0," Empty FE Space cannot setup the ADR assembler ");
-    ASSERT(betaFESpace!=0,"Empty beta FE Space cannot setup the ADR assembler ");
+    ASSERT (fespace != 0, " Empty FE Space cannot setup the ADR assembler ");
+    ASSERT (betaFESpace != 0, "Empty beta FE Space cannot setup the ADR assembler ");
 
     M_setupChrono.start();
 
-    setFespace(fespace);
-    setBetaFespace(betaFESpace);
+    setFespace (fespace);
+    setBetaFespace (betaFESpace);
 
     M_setupChrono.stop();
 }
@@ -495,41 +510,41 @@ setup( const fespace_ptrType& fespace, const fespace_ptrType& betaFESpace )
 template<typename mesh_type, typename matrix_type, typename vector_type>
 void
 ADRAssembler< mesh_type, matrix_type, vector_type>::
-addMass(matrix_ptrType matrix, const Real& coefficient, const UInt& offsetLeft, const UInt& offsetUp)
+addMass (matrix_ptrType matrix, const Real& coefficient, const UInt& offsetLeft, const UInt& offsetUp)
 {
     // Check that the fespace is set
-    ASSERT(M_fespace != 0, "No FE space for assembling the mass!");
+    ASSERT (M_fespace != 0, "No FE space for assembling the mass!");
 
     M_massAssemblyChrono.start();
 
     // Some constants
-    const UInt nbElements(M_fespace->mesh()->numElements());
-    const UInt fieldDim(M_fespace->fieldDim());
-    const UInt nbTotalDof(M_fespace->dof().numTotalDof());
+    const UInt nbElements (M_fespace->mesh()->numElements() );
+    const UInt fieldDim (M_fespace->fieldDim() );
+    const UInt nbTotalDof (M_fespace->dof().numTotalDof() );
 
     // Loop over the elements
-    for (UInt iterElement(0); iterElement < nbElements; ++iterElement)
+    for (UInt iterElement (0); iterElement < nbElements; ++iterElement)
     {
         // Update the mass current FE
-        M_massCFE->update( M_fespace->mesh()->element(iterElement), UPDATE_PHI | UPDATE_WDET );
+        M_massCFE->update ( M_fespace->mesh()->element (iterElement), UPDATE_PHI | UPDATE_WDET );
 
         // Clean the local matrix
         M_localMass->zero();
 
         // Local Mass
-        AssemblyElemental::mass(*M_localMass,*M_massCFE,coefficient,fieldDim);
+        AssemblyElemental::mass (*M_localMass, *M_massCFE, coefficient, fieldDim);
 
         // Assembly
-        for (UInt iFieldDim(0); iFieldDim<fieldDim; ++iFieldDim)
+        for (UInt iFieldDim (0); iFieldDim < fieldDim; ++iFieldDim)
         {
-            assembleMatrix( *matrix,
-                            *M_localMass,
-                            *M_massCFE,
-                            *M_massCFE,
-                            M_fespace->dof(),
-                            M_fespace->dof(),
-                            iFieldDim, iFieldDim,
-                            iFieldDim*nbTotalDof + offsetLeft, iFieldDim*nbTotalDof + offsetUp);
+            assembleMatrix ( *matrix,
+                             *M_localMass,
+                             *M_massCFE,
+                             *M_massCFE,
+                             M_fespace->dof(),
+                             M_fespace->dof(),
+                             iFieldDim, iFieldDim,
+                             iFieldDim * nbTotalDof + offsetLeft, iFieldDim * nbTotalDof + offsetUp);
         }
     }
 
@@ -540,61 +555,61 @@ addMass(matrix_ptrType matrix, const Real& coefficient, const UInt& offsetLeft, 
 template<typename mesh_type, typename matrix_type, typename vector_type>
 void
 ADRAssembler< mesh_type, matrix_type, vector_type>::
-addAdvection(matrix_ptrType matrix, const vector_type& beta, const UInt& offsetLeft, const UInt& offsetUp)
+addAdvection (matrix_ptrType matrix, const vector_type& beta, const UInt& offsetLeft, const UInt& offsetUp)
 {
     // Beta has to be repeated!
     if (beta.mapType() == Unique)
     {
-        addAdvection(matrix,vector_type(beta,Repeated), offsetLeft, offsetUp);
+        addAdvection (matrix, vector_type (beta, Repeated), offsetLeft, offsetUp);
         return;
     }
 
     // Check that the fespace is set
-    ASSERT(M_fespace != 0, "No FE space for assembling the advection!");
-    ASSERT(M_betaFESpace !=0, "No FE space (beta) for assembling the advection!");
+    ASSERT (M_fespace != 0, "No FE space for assembling the advection!");
+    ASSERT (M_betaFESpace != 0, "No FE space (beta) for assembling the advection!");
 
     M_advectionAssemblyChrono.start();
 
 
     // Some constants
-    const UInt nbElements(M_fespace->mesh()->numElements());
-    const UInt fieldDim(M_fespace->fieldDim());
-    const UInt betaFieldDim(M_betaFESpace->fieldDim());
-    const UInt nbTotalDof(M_fespace->dof().numTotalDof());
-    const UInt nbQuadPt(M_advCFE->nbQuadPt());
+    const UInt nbElements (M_fespace->mesh()->numElements() );
+    const UInt fieldDim (M_fespace->fieldDim() );
+    const UInt betaFieldDim (M_betaFESpace->fieldDim() );
+    const UInt nbTotalDof (M_fespace->dof().numTotalDof() );
+    const UInt nbQuadPt (M_advCFE->nbQuadPt() );
 
     // Temporaries
     //Real localValue(0);
-    std::vector< std::vector< Real > > localBetaValue(nbQuadPt, std::vector<Real>( betaFieldDim, 0.0 ) );
+    std::vector< std::vector< Real > > localBetaValue (nbQuadPt, std::vector<Real> ( betaFieldDim, 0.0 ) );
 
     // Loop over the elements
-    for (UInt iterElement(0); iterElement < nbElements; ++iterElement)
+    for (UInt iterElement (0); iterElement < nbElements; ++iterElement)
     {
         // Update the advection current FEs
-        M_advCFE->update( M_fespace->mesh()->element(iterElement), UPDATE_PHI | UPDATE_DPHI | UPDATE_WDET );
-        M_advBetaCFE->update(M_fespace->mesh()->element(iterElement), UPDATE_PHI );
+        M_advCFE->update ( M_fespace->mesh()->element (iterElement), UPDATE_PHI | UPDATE_DPHI | UPDATE_WDET );
+        M_advBetaCFE->update (M_fespace->mesh()->element (iterElement), UPDATE_PHI );
 
         // Clean the local matrix
         M_localAdv->zero();
 
         // Interpolate beta in the quadrature points
-        AssemblyElemental::interpolate(localBetaValue,*M_advBetaCFE,betaFieldDim,M_betaFESpace->dof(),iterElement,beta);
+        AssemblyElemental::interpolate (localBetaValue, *M_advBetaCFE, betaFieldDim, M_betaFESpace->dof(), iterElement, beta);
 
         // Assemble the advection
-        AssemblyElemental::advection(*M_localAdv,*M_advCFE,1.0,localBetaValue,fieldDim);
+        AssemblyElemental::advection (*M_localAdv, *M_advCFE, 1.0, localBetaValue, fieldDim);
 
 
         // Assembly
-        for (UInt iFieldDim(0); iFieldDim<fieldDim; ++iFieldDim)
+        for (UInt iFieldDim (0); iFieldDim < fieldDim; ++iFieldDim)
         {
-            assembleMatrix( *matrix,
-                            *M_localAdv,
-                            *M_advCFE,
-                            *M_advCFE,
-                            M_fespace->dof(),
-                            M_fespace->dof(),
-                            iFieldDim, iFieldDim,
-                            iFieldDim*nbTotalDof + offsetLeft, iFieldDim*nbTotalDof + offsetUp );
+            assembleMatrix ( *matrix,
+                             *M_localAdv,
+                             *M_advCFE,
+                             *M_advCFE,
+                             M_fespace->dof(),
+                             M_fespace->dof(),
+                             iFieldDim, iFieldDim,
+                             iFieldDim * nbTotalDof + offsetLeft, iFieldDim * nbTotalDof + offsetUp );
         }
     }
 
@@ -604,41 +619,41 @@ addAdvection(matrix_ptrType matrix, const vector_type& beta, const UInt& offsetL
 template<typename mesh_type, typename matrix_type, typename vector_type>
 void
 ADRAssembler< mesh_type, matrix_type, vector_type>::
-addDiffusion(matrix_ptrType matrix, const Real& coefficient, const UInt& offsetLeft, const UInt& offsetUp)
+addDiffusion (matrix_ptrType matrix, const Real& coefficient, const UInt& offsetLeft, const UInt& offsetUp)
 {
     // Check that the fespace is set
-    ASSERT(M_fespace != 0, "No FE space for assembling the diffusion!");
+    ASSERT (M_fespace != 0, "No FE space for assembling the diffusion!");
 
     M_diffusionAssemblyChrono.start();
 
     // Some constants
-    const UInt nbElements(M_fespace->mesh()->numElements());
-    const UInt fieldDim(M_fespace->fieldDim());
-    const UInt nbTotalDof(M_fespace->dof().numTotalDof());
+    const UInt nbElements (M_fespace->mesh()->numElements() );
+    const UInt fieldDim (M_fespace->fieldDim() );
+    const UInt nbTotalDof (M_fespace->dof().numTotalDof() );
 
     // Loop over the elements
-    for (UInt iterElement(0); iterElement < nbElements; ++iterElement)
+    for (UInt iterElement (0); iterElement < nbElements; ++iterElement)
     {
         // Update the diffusion current FE
-        M_diffCFE->update( M_fespace->mesh()->element(iterElement), UPDATE_DPHI | UPDATE_WDET );
+        M_diffCFE->update ( M_fespace->mesh()->element (iterElement), UPDATE_DPHI | UPDATE_WDET );
 
         // Clean the local matrix
         M_localDiff->zero();
 
         // local stiffness
-        AssemblyElemental::stiffness(*M_localDiff,*M_diffCFE,coefficient,fieldDim);
+        AssemblyElemental::stiffness (*M_localDiff, *M_diffCFE, coefficient, fieldDim);
 
         // Assembly
-        for (UInt iFieldDim(0); iFieldDim<fieldDim; ++iFieldDim)
+        for (UInt iFieldDim (0); iFieldDim < fieldDim; ++iFieldDim)
         {
-            assembleMatrix( *matrix,
-                            *M_localDiff,
-                            *M_diffCFE,
-                            *M_diffCFE,
-                            M_fespace->dof(),
-                            M_fespace->dof(),
-                            iFieldDim, iFieldDim,
-                            iFieldDim*nbTotalDof + offsetLeft, iFieldDim*nbTotalDof + offsetUp );
+            assembleMatrix ( *matrix,
+                             *M_localDiff,
+                             *M_diffCFE,
+                             *M_diffCFE,
+                             M_fespace->dof(),
+                             M_fespace->dof(),
+                             iFieldDim, iFieldDim,
+                             iFieldDim * nbTotalDof + offsetLeft, iFieldDim * nbTotalDof + offsetUp );
         }
     }
 
@@ -648,85 +663,85 @@ addDiffusion(matrix_ptrType matrix, const Real& coefficient, const UInt& offsetL
 template<typename mesh_type, typename matrix_type, typename vector_type>
 void
 ADRAssembler< mesh_type, matrix_type, vector_type>::
-addMassRhs(vector_type& rhs, const vector_type& f)
+addMassRhs (vector_type& rhs, const vector_type& f)
 {
     // f has to be repeated!
     if (f.mapType() == Unique)
     {
-        addMassRhs(rhs,vector_type(f,Repeated));
+        addMassRhs (rhs, vector_type (f, Repeated) );
         return;
     }
 
     // Check that the fespace is set
-    ASSERT(M_fespace != 0, "No FE space for assembling the right hand side (mass)!");
+    ASSERT (M_fespace != 0, "No FE space for assembling the right hand side (mass)!");
 
     M_massRhsAssemblyChrono.start();
 
     // Some constants
-    const UInt nbElements(M_fespace->mesh()->numElements());
-    const UInt fieldDim(M_fespace->fieldDim());
-    const UInt nbFEDof(M_massRhsCFE->nbFEDof());
-    const UInt nbQuadPt(M_massRhsCFE->nbQuadPt());
-    const UInt nbTotalDof(M_fespace->dof().numTotalDof());
+    const UInt nbElements (M_fespace->mesh()->numElements() );
+    const UInt fieldDim (M_fespace->fieldDim() );
+    const UInt nbFEDof (M_massRhsCFE->nbFEDof() );
+    const UInt nbQuadPt (M_massRhsCFE->nbQuadPt() );
+    const UInt nbTotalDof (M_fespace->dof().numTotalDof() );
 
     // Temporaries
-    Real localValue(0.0);
-    std::vector<Real> fValues(nbQuadPt,0.0);
+    Real localValue (0.0);
+    std::vector<Real> fValues (nbQuadPt, 0.0);
 
     // Loop over the elements
-    for (UInt iterElement(0); iterElement < nbElements; ++iterElement)
+    for (UInt iterElement (0); iterElement < nbElements; ++iterElement)
     {
         // Update the diffusion current FE
-        M_massRhsCFE->update( M_fespace->mesh()->element(iterElement), UPDATE_PHI |UPDATE_WDET );
+        M_massRhsCFE->update ( M_fespace->mesh()->element (iterElement), UPDATE_PHI | UPDATE_WDET );
 
         // Clean the local matrix
         M_localMassRhs->zero();
 
         // Assemble the local diffusion
-        for (UInt iterFDim(0); iterFDim<fieldDim; ++iterFDim)
+        for (UInt iterFDim (0); iterFDim < fieldDim; ++iterFDim)
         {
-            localVector_type::vector_view localView = M_localMassRhs->block(iterFDim);
+            localVector_type::vector_view localView = M_localMassRhs->block (iterFDim);
 
             // Compute the value of f in the quadrature nodes
-            for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
+            for (UInt iQuadPt (0); iQuadPt < nbQuadPt; ++iQuadPt)
             {
-                fValues[iQuadPt]=0.0;
-                for (UInt iDof(0); iDof < nbFEDof ; ++iDof)
+                fValues[iQuadPt] = 0.0;
+                for (UInt iDof (0); iDof < nbFEDof ; ++iDof)
                 {
-                    fValues[iQuadPt]+=
-                        f[ M_fespace->dof().localToGlobalMap(iterElement,iDof) + iterFDim*nbTotalDof]
-                        * M_massRhsCFE->phi(iDof,iQuadPt);
+                    fValues[iQuadPt] +=
+                        f[ M_fespace->dof().localToGlobalMap (iterElement, iDof) + iterFDim * nbTotalDof]
+                        * M_massRhsCFE->phi (iDof, iQuadPt);
                 }
             }
 
             // Loop over the basis functions
-            for (UInt iDof(0); iDof < nbFEDof ; ++iDof)
+            for (UInt iDof (0); iDof < nbFEDof ; ++iDof)
             {
                 localValue = 0.0;
 
                 //Loop on the quadrature nodes
-                for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
+                for (UInt iQuadPt (0); iQuadPt < nbQuadPt; ++iQuadPt)
                 {
                     localValue += fValues[iQuadPt]
-                                  * M_massRhsCFE->phi(iDof,iQuadPt)
-                                  * M_massRhsCFE->wDetJacobian(iQuadPt);
+                                  * M_massRhsCFE->phi (iDof, iQuadPt)
+                                  * M_massRhsCFE->wDetJacobian (iQuadPt);
                 }
 
                 // Add on the local matrix
-                localView(iDof)=localValue;
+                localView (iDof) = localValue;
             }
         }
 
         // Here add in the global rhs
-        for (UInt iterFDim(0); iterFDim<fieldDim; ++iterFDim)
+        for (UInt iterFDim (0); iterFDim < fieldDim; ++iterFDim)
         {
-            assembleVector( rhs,
-                            iterElement,
-                            *M_localMassRhs,
-                            nbFEDof,
-                            M_fespace->dof(),
-                            iterFDim,
-                            iterFDim*M_fespace->dof().numTotalDof());
+            assembleVector ( rhs,
+                             iterElement,
+                             *M_localMassRhs,
+                             nbFEDof,
+                             M_fespace->dof(),
+                             iterFDim,
+                             iterFDim * M_fespace->dof().numTotalDof() );
         }
     }
 
@@ -736,75 +751,75 @@ addMassRhs(vector_type& rhs, const vector_type& f)
 template<typename mesh_type, typename matrix_type, typename vector_type>
 void
 ADRAssembler< mesh_type, matrix_type, vector_type>::
-addMassRhs(vector_type& rhs, const function_type& f, const Real& t)
+addMassRhs (vector_type& rhs, const function_type& f, const Real& t)
 {
     // Check that the fespace is set
-    ASSERT(M_fespace != 0, "No FE space for assembling the right hand side (mass)!");
+    ASSERT (M_fespace != 0, "No FE space for assembling the right hand side (mass)!");
 
     M_massRhsAssemblyChrono.start();
 
     // Some constants
-    const UInt nbElements(M_fespace->mesh()->numElements());
-    const UInt fieldDim(M_fespace->fieldDim());
-    const UInt nbFEDof(M_massRhsCFE->nbFEDof());
-    const UInt nbQuadPt(M_massRhsCFE->nbQuadPt());
+    const UInt nbElements (M_fespace->mesh()->numElements() );
+    const UInt fieldDim (M_fespace->fieldDim() );
+    const UInt nbFEDof (M_massRhsCFE->nbFEDof() );
+    const UInt nbQuadPt (M_massRhsCFE->nbQuadPt() );
 
     // Temporaries
-    Real localValue(0.0);
-    std::vector<Real> fValues(nbQuadPt,0.0);
+    Real localValue (0.0);
+    std::vector<Real> fValues (nbQuadPt, 0.0);
 
     // Loop over the elements
-    for (UInt iterElement(0); iterElement < nbElements; ++iterElement)
+    for (UInt iterElement (0); iterElement < nbElements; ++iterElement)
     {
         // Update the diffusion current FE
-        M_massRhsCFE->update( M_fespace->mesh()->element(iterElement), UPDATE_QUAD_NODES | UPDATE_PHI |UPDATE_WDET );
+        M_massRhsCFE->update ( M_fespace->mesh()->element (iterElement), UPDATE_QUAD_NODES | UPDATE_PHI | UPDATE_WDET );
 
         // Clean the local matrix
         M_localMassRhs->zero();
 
         // Assemble the local diffusion
-        for (UInt iterFDim(0); iterFDim<fieldDim; ++iterFDim)
+        for (UInt iterFDim (0); iterFDim < fieldDim; ++iterFDim)
         {
-            localVector_type::vector_view localView = M_localMassRhs->block(iterFDim);
+            localVector_type::vector_view localView = M_localMassRhs->block (iterFDim);
 
             // Compute the value of f in the quadrature nodes
-            for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
+            for (UInt iQuadPt (0); iQuadPt < nbQuadPt; ++iQuadPt)
             {
-                fValues[iQuadPt]= f(t,
-                                    M_massRhsCFE->quadNode(iQuadPt,0),
-                                    M_massRhsCFE->quadNode(iQuadPt,1),
-                                    M_massRhsCFE->quadNode(iQuadPt,2),
-                                    iterFDim);
+                fValues[iQuadPt] = f (t,
+                                      M_massRhsCFE->quadNode (iQuadPt, 0),
+                                      M_massRhsCFE->quadNode (iQuadPt, 1),
+                                      M_massRhsCFE->quadNode (iQuadPt, 2),
+                                      iterFDim);
             }
 
             // Loop over the basis functions
-            for (UInt iDof(0); iDof < nbFEDof ; ++iDof)
+            for (UInt iDof (0); iDof < nbFEDof ; ++iDof)
             {
                 localValue = 0.0;
 
                 //Loop on the quadrature nodes
-                for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
+                for (UInt iQuadPt (0); iQuadPt < nbQuadPt; ++iQuadPt)
                 {
                     localValue += fValues[iQuadPt]
-                                  * M_massRhsCFE->phi(iDof,iQuadPt)
-                                  * M_massRhsCFE->wDetJacobian(iQuadPt);
+                                  * M_massRhsCFE->phi (iDof, iQuadPt)
+                                  * M_massRhsCFE->wDetJacobian (iQuadPt);
                 }
 
                 // Add on the local matrix
-                localView(iDof)=localValue;
+                localView (iDof) = localValue;
             }
         }
 
         // Here add in the global rhs
-        for (UInt iterFDim(0); iterFDim<fieldDim; ++iterFDim)
+        for (UInt iterFDim (0); iterFDim < fieldDim; ++iterFDim)
         {
-            assembleVector( rhs,
-                            iterElement,
-                            *M_localMassRhs,
-                            nbFEDof,
-                            M_fespace->dof(),
-                            iterFDim,
-                            iterFDim*M_fespace->dof().numTotalDof());
+            assembleVector ( rhs,
+                             iterElement,
+                             *M_localMassRhs,
+                             nbFEDof,
+                             M_fespace->dof(),
+                             iterFDim,
+                             iterFDim * M_fespace->dof().numTotalDof() );
         }
     }
 
@@ -819,41 +834,41 @@ addMassRhs(vector_type& rhs, const function_type& f, const Real& t)
 template<typename mesh_type, typename matrix_type, typename vector_type>
 void
 ADRAssembler< mesh_type, matrix_type, vector_type>::
-setFespace(const fespace_ptrType& fespace)
+setFespace (const fespace_ptrType& fespace)
 {
-    ASSERT(fespace!=0," Setting the FE space for the unknown to 0 is not permitted ");
+    ASSERT (fespace != 0, " Setting the FE space for the unknown to 0 is not permitted ");
 
-    M_fespace=fespace;
+    M_fespace = fespace;
 
-    M_massCFE.reset(new currentFE_type(M_fespace->refFE(),M_fespace->fe().geoMap(),M_fespace->qr()));
-    M_localMass.reset(new localMatrix_type(M_fespace->fe().nbFEDof(),
-                                           M_fespace->fieldDim(),
-                                           M_fespace->fieldDim()));
+    M_massCFE.reset (new currentFE_type (M_fespace->refFE(), M_fespace->fe().geoMap(), M_fespace->qr() ) );
+    M_localMass.reset (new localMatrix_type (M_fespace->fe().nbFEDof(),
+                                             M_fespace->fieldDim(),
+                                             M_fespace->fieldDim() ) );
 
-    M_advCFE.reset(new currentFE_type(M_fespace->refFE(),M_fespace->fe().geoMap(),M_fespace->qr()));
-    M_localAdv.reset(new localMatrix_type(M_fespace->fe().nbFEDof(),
-                                          M_fespace->fieldDim(),
-                                          M_fespace->fieldDim()));
+    M_advCFE.reset (new currentFE_type (M_fespace->refFE(), M_fespace->fe().geoMap(), M_fespace->qr() ) );
+    M_localAdv.reset (new localMatrix_type (M_fespace->fe().nbFEDof(),
+                                            M_fespace->fieldDim(),
+                                            M_fespace->fieldDim() ) );
 
-    M_diffCFE.reset(new currentFE_type(M_fespace->refFE(),M_fespace->fe().geoMap(),M_fespace->qr()));
-    M_localDiff.reset(new localMatrix_type(M_fespace->fe().nbFEDof(),
-                                           M_fespace->fieldDim(),
-                                           M_fespace->fieldDim()));
+    M_diffCFE.reset (new currentFE_type (M_fespace->refFE(), M_fespace->fe().geoMap(), M_fespace->qr() ) );
+    M_localDiff.reset (new localMatrix_type (M_fespace->fe().nbFEDof(),
+                                             M_fespace->fieldDim(),
+                                             M_fespace->fieldDim() ) );
 
-    M_massRhsCFE.reset(new currentFE_type(M_fespace->refFE(),M_fespace->fe().geoMap(),M_fespace->qr()));
-    M_localMassRhs.reset(new localVector_type(M_fespace->fe().nbFEDof(), M_fespace->fieldDim()));
+    M_massRhsCFE.reset (new currentFE_type (M_fespace->refFE(), M_fespace->fe().geoMap(), M_fespace->qr() ) );
+    M_localMassRhs.reset (new localVector_type (M_fespace->fe().nbFEDof(), M_fespace->fieldDim() ) );
 }
 
 template<typename mesh_type, typename matrix_type, typename vector_type>
 void
 ADRAssembler< mesh_type, matrix_type, vector_type>::
-setBetaFespace(const fespace_ptrType& betaFESpace)
+setBetaFespace (const fespace_ptrType& betaFESpace)
 {
-    ASSERT(M_fespace != 0," No FE space for the unknown! Use setFespace before setBetaFespace!");
-    ASSERT(M_advCFE != 0, " No current FE set for the advection of the unknown! Internal error.");
-    M_betaFESpace=betaFESpace;
+    ASSERT (M_fespace != 0, " No FE space for the unknown! Use setFespace before setBetaFespace!");
+    ASSERT (M_advCFE != 0, " No current FE set for the advection of the unknown! Internal error.");
+    M_betaFESpace = betaFESpace;
 
-    M_advBetaCFE.reset(new currentFE_type(M_betaFESpace->refFE(),M_fespace->fe().geoMap(),M_advCFE->quadRule()));
+    M_advBetaCFE.reset (new currentFE_type (M_betaFESpace->refFE(), M_fespace->fe().geoMap(), M_advCFE->quadRule() ) );
 }
 
 
