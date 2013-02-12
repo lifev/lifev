@@ -5,4 +5,5 @@ INCLUDE(AddSubdirectories)
 ADD_SUBDIRECTORIES(
   example_biPhasic
   vortex_shedding
+  generalizedRobin
 )
