@@ -139,11 +139,14 @@ public:
 
     typedef FactorySingleton<Factory<StructuralConstitutiveLaw<Mesh>,std::string> >  StructureMaterialFactory;
 
-    typedef RegionMesh<LinearTetra >                      mesh_Type;
-    typedef std::vector< mesh_Type::element_Type* > vectorVolumes_Type;
+    typedef std::vector< typename Mesh::element_Type* > vectorVolumes_Type;
 
     typedef std::map< UInt, vectorVolumes_Type>           mapMarkerVolumes_Type;
     typedef boost::shared_ptr<mapMarkerVolumes_Type>      mapMarkerVolumesPtr_Type;
+
+    typedef std::vector<UInt>                             vectorIndexes_Type;
+    typedef std::map< UInt, vectorIndexes_Type>           mapMarkerIndexes_Type;
+    typedef boost::shared_ptr<mapMarkerIndexes_Type>      mapMarkerIndexesPtr_Type;
 
     typedef ETFESpace< RegionMesh<LinearTetra>, MapEpetra, 3, 3 >  ETFESpace_Type;
     typedef boost::shared_ptr<ETFESpace_Type>                      ETFESpacePtr_Type;
@@ -190,7 +193,8 @@ public:
       \param dataMaterial the class with Material properties data
     */
     virtual  void computeLinearStiff( dataPtr_Type& dataMaterial,
-                                      const mapMarkerVolumesPtr_Type mapsMarkerVolumes  ) = 0;
+                                      const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                                      const mapMarkerIndexesPtr_Type mapsMarkerIndexes ) = 0;
 
     //! Updates the Jacobian matrix in StructuralSolver::updateJacobian
     /*!
@@ -201,6 +205,7 @@ public:
     */
     virtual  void updateJacobianMatrix( const vector_Type& disp, const dataPtr_Type& dataMaterial,
                                         const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                                        const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
                                         const displayerPtr_Type& displayer ) = 0;
 
     //! Computes the new Stiffness matrix in StructuralSolver given a certain displacement field.
@@ -216,6 +221,7 @@ public:
     */
     virtual  void computeStiffness( const vector_Type& sol, Real factor, const dataPtr_Type& dataMaterial,
                                     const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                                    const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
                                     const displayerPtr_Type& displayer ) = 0;
 
 
@@ -278,7 +284,8 @@ public:
     virtual vectorPtr_Type const stiffVector() const = 0;
 
     virtual void apply( const vector_Type& sol, vector_Type& res,
-                        const mapMarkerVolumesPtr_Type mapsMarkerVolumes) =0;
+                        const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                        const mapMarkerIndexesPtr_Type mapsMarkerIndexes) =0;
 
     //@}
 

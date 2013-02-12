@@ -158,9 +158,12 @@ public:
 
     typedef RegionMesh<LinearTetra >                      mesh_Type;
     typedef std::vector< mesh_Type::element_Type* >       vectorVolumes_Type;
+    typedef std::vector< UInt >                           vectorIndexes_Type;
 
     typedef std::map< UInt, vectorVolumes_Type>           mapMarkerVolumes_Type;
+    typedef std::map< UInt, vectorIndexes_Type>           mapMarkerIndexes_Type;
     typedef boost::shared_ptr<mapMarkerVolumes_Type>      mapMarkerVolumesPtr_Type;
+    typedef boost::shared_ptr<mapMarkerIndexes_Type>      mapMarkerIndexesPtr_Type;
     typedef mapMarkerVolumes_Type::const_iterator         mapIterator_Type;
 
     typedef typename mesh_Type::element_Type              meshEntity_Type;
@@ -551,6 +554,10 @@ public:
 
     //! Get the density
     mapMarkerVolumesPtr_Type mapMarkersVolumes() const { return M_mapMarkersVolumes; }
+
+    //! Get the density
+    mapMarkerIndexesPtr_Type mapMarkersIndexes() const { return M_mapMarkersIndexes; }
+
     //@}
 
 protected:
@@ -667,6 +674,9 @@ protected:
     //! Map between markers and volumes on the mesh
     mapMarkerVolumesPtr_Type             M_mapMarkersVolumes;
 
+    //! Map between markers and volumes on the mesh
+    mapMarkerIndexesPtr_Type             M_mapMarkersIndexes;
+
 #ifdef COMPUTATION_JACOBIAN
     //! Elementary matrix for the tensor F
     matrixSerialDensePtr_Type            M_deformationF;
@@ -710,7 +720,8 @@ StructuralOperator<Mesh>::StructuralOperator( ):
     M_deformationF               ( ),
     M_invariants                 ( ),
 #endif
-    M_mapMarkersVolumes          ( )
+    M_mapMarkersVolumes          ( ),
+    M_mapMarkersIndexes          ( )
 {
 
     //    M_Displayer->leaderPrint("I am in the constructor for the solver");
@@ -776,6 +787,7 @@ StructuralOperator<Mesh>::setup(boost::shared_ptr<data_Type>        data,
         M_out_res.open( "out_res_solid" );
     }
     M_mapMarkersVolumes.reset( new mapMarkerVolumes_Type() );
+    M_mapMarkersIndexes.reset( new mapMarkerIndexes_Type() );
     this->setupMapMarkersVolumes();
 }
 
@@ -803,15 +815,21 @@ void StructuralOperator<Mesh>::setupMapMarkersVolumes( void )
 
         //Vector large enough to contain the number of volumes with the current marker
         vectorVolumes_Type extractedVolumes( numExtractedVolumes );
+        vectorIndexes_Type extractedIndexes;
 
-        //Extracting the volumes
-        extractedVolumes = this->M_dispFESpace->mesh()->elementList().extractAccordingToPredicateNonConstElement( *ref );
+        //Extracting the volumes and the corresponding position
+        extractedVolumes = this->M_dispFESpace->mesh()->elementList().extractAccordingToPredicateNonConstElement( *ref, extractedIndexes );
 
         //Insert the correspondande Marker <--> List of Volumes inside the map
         M_mapMarkersVolumes->insert( pair<UInt, vectorVolumes_Type> (M_data->vectorFlags()[i], extractedVolumes) ) ;
+        M_mapMarkersIndexes->insert( pair<UInt, vectorIndexes_Type> (M_data->vectorFlags()[i], extractedIndexes) ) ;
+
+        // for( UInt i(0); i<extractedIndexes.size(); i++ )
+        //     std::cout << "Element: " << extractedIndexes[i] << std::endl;
 
         //Cleaning the vector
         extractedVolumes.clear();
+        extractedIndexes.clear();
 
     }
 }
@@ -831,7 +849,7 @@ void StructuralOperator<Mesh>::updateSystem( matrixPtr_Type& mat_stiff)
     chrono.start();
 
     //Compute the new Stiffness Matrix
-    M_material->computeStiffness(*M_disp, M_rescaleFactor, M_data, M_mapMarkersVolumes, M_Displayer);
+    M_material->computeStiffness(*M_disp, M_rescaleFactor, M_data, M_mapMarkersVolumes, M_mapMarkersIndexes, M_Displayer);
 
     if ( M_data->solidType() == "linearVenantKirchhoff" )
     {
@@ -878,7 +896,7 @@ void StructuralOperator<Mesh>::buildSystem( const Real coefficient )
     chrono.start();
 
     computeMassMatrix( coefficient );
-    M_material->computeLinearStiff(M_data, M_mapMarkersVolumes);
+    M_material->computeLinearStiff(M_data, M_mapMarkersVolumes, M_mapMarkersIndexes);
 
     chrono.stop();
     M_Displayer->leaderPrintMax( "done in ", chrono.diff() );
@@ -997,7 +1015,7 @@ void StructuralOperator<Mesh>::computeMatrix( matrixPtr_Type& stiff, const vecto
     chrono.start();
 
     //! It is right to do globalAssemble() inside the M_material class
-    M_material->computeStiffness( sol, 1., M_data, M_mapMarkersVolumes, M_Displayer);
+    M_material->computeStiffness( sol, 1., M_data, M_mapMarkersVolumes, M_mapMarkersIndexes, M_Displayer);
 
     if ( M_data->solidType() == "linearVenantKirchhoff" )
     {
@@ -1441,7 +1459,7 @@ void StructuralOperator<Mesh>::updateJacobian( const vector_Type & sol, matrixPt
     LifeChrono chrono;
     chrono.start();
 
-    M_material->updateJacobianMatrix(sol, M_data, M_mapMarkersVolumes, M_Displayer);
+    M_material->updateJacobianMatrix(sol, M_data, M_mapMarkersVolumes, M_mapMarkersIndexes,  M_Displayer);
 
     jacobian.reset(new matrix_Type(*M_localMap));
     *jacobian += *(M_material->jacobian());
@@ -1521,7 +1539,7 @@ solveJacobian(vector_Type&           step,
 template<typename Mesh>
 void StructuralOperator<Mesh>::apply( const vector_Type& sol, vector_Type& res) const
 {
-    M_material->apply(sol, res, M_mapMarkersVolumes);
+    M_material->apply(sol, res, M_mapMarkersVolumes, M_mapMarkersIndexes);
     res += (*M_massMatrix)*sol;
 }
 
