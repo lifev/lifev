@@ -1,0 +1,34 @@
+<!--
+###################################################################################################
+#
+#                       This file is part of the LifeV Library
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+#
+#      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
+#           Date: 2011-03-10
+#  License Terms: GNU LGPL
+#
+###################################################################################################
+-->
+
+<ParameterList>
+    <!-- Multiscale parameters -->
+    <ParameterList name="Multiscale">
+        <Parameter name="Algorithm Name" type="string" value="Default"/>
+        <Parameter name="Algorithm Type" type="string" value="Aitken"/>
+    </ParameterList>
+
+    <!-- Multiscale Algorithm parameters -->
+    <ParameterList name="Multiscale Algorithm">
+        <Parameter name="Subiterations Maximum Number" type="unsigned int" value="100"/>
+        <Parameter name="Tolerance" type="double" value="1e-6"/>
+        <Parameter name="Omega" type="double" value="0.5"/>
+        <Parameter name="Fixed omega" type="bool" value="true"/>
+        <Parameter name="Method" type="string" value="Vectorial"/> <!-- Scalar, Vectorial -->
+        <Parameter name="Range minimum" type="double" value="0.1"/>
+        <Parameter name="Range maximum" type="double" value="1.5"/>
+        <Parameter name="Inverse omega" type="bool" value="true"/>
+    </ParameterList>
+</ParameterList>
+

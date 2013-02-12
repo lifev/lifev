@@ -1,0 +1,39 @@
+###################################################################################################
+#
+#                       This file is part of the LifeV Library
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+#
+#      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
+#           Date: 24-09-2009
+#  License Terms: GNU LGPL
+#
+###################################################################################################
+
+DATA FILES:
+Inside the test folder (lifev-git/lifev/multiscale/testsuite/multiscale) there isn't any data file,
+in fact all the data are placed into the "lifev-git/lifev/multiscale/testsuite/data/MultiscaleDatabase".
+In order to preserve the generality and abstraction, the Multiscale must be keept independent from BCs
+through BCInterface.
+
+SIMULATION RUNNING:
+To run a simulation type in a shell:
+
+./Multiscale_Framework.exe -f MultiscaleDatabase/*.dat
+
+where the * should be replaced with the name of the file to be loaded.
+
+More generally, after ./test_MS the following options can be specified:
+-f (--file):      to specify the file
+-s (--showme):    to turn on verbose mode (available parameters: 0, 1)
+-o (--output):    to specify the output folder (default: Output/)
+-ns (--nodesize): to specify the number of cores per node (mandatory for clusters - default: 1)
+-c (--check):     to specify the final external residual at the coupling interface that
+                  will be compared with the one obtained from the solver (default: -1.)
+-t (--tolerance): to specify the tolerance for the external residual comparison (default: 1e-8)
+
+DEVELOPING NEW APPLICATIONS
+After compilation, the user should create an empty folder where to copy the executable and the MultiscaleDatabase folder
+(or a subset of it, depending on the needs). Since the same executable can be used to run ANY simulation, the resulting
+package will be independent from the library and can be used to set up any kind of simulation.
+In particular, the user need just prepare the data files in order to set up the desired problem.

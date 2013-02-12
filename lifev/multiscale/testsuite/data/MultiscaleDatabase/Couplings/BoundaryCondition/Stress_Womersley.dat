@@ -1,0 +1,32 @@
+###################################################################################################
+#
+#                       This file is part of the LifeV Library
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+#
+#      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
+#           Date: 2011-03-10
+#  License Terms: GNU LGPL
+#
+###################################################################################################
+
+[Multiscale]
+couplingName    = BoundaryCondition_Stress_Womersley
+
+[boundary_conditions]
+list = 'Stress_Womersley'  # Womersley Sinusoidal Pressure
+
+    [./Stress_Womersley]
+    type                = Natural
+    mode                = Normal
+    function            = 'A=25; T=29.6088132032681; -A*sin(2*pi*t/T)'
+                        # Wo = 5, Re = 600 (with rho = 0.00593454445511297, mu = 2.79658816105093, D = 1)
+
+    # Additional parameters for 1D BC
+    quantity            = S
+    line                = first
+
+    # Additional parameters for 0D BC
+    type0D              = Voltage
+
+    [../]
