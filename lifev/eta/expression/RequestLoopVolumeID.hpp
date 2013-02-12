@@ -49,7 +49,7 @@ namespace LifeV
 namespace ExpressionAssembly
 {
 
-template <typename VectorType>
+template< typename MeshType>
 class RequestLoopVolumeID
 {
 public:
@@ -57,7 +57,10 @@ public:
 
     //! @name Public Types
     //@{
-    typedef boost::shared_ptr<VectorType> vectorVolumesPtr_Type;
+    typedef typename MeshType::element_Type element_Type;
+
+    typedef boost::shared_ptr<std::vector<element_Type*> > vectorVolumesPtr_Type;
+    typedef boost::shared_ptr<std::vector<UInt> > vectorIndexesPtr_Type;
     //@}
 
 
@@ -66,13 +69,13 @@ public:
     //@{
 
     //! Simple constructor with a shared_ptr on the mesh
-	RequestLoopVolumeID(const vectorVolumesPtr_Type volumeListExtracted)
-        : M_volumeList( volumeListExtracted )
+	RequestLoopVolumeID(const vectorVolumesPtr_Type& volumeListExtracted, const vectorIndexesPtr_Type& indexListExtracted)
+        : M_volumeList( volumeListExtracted ), M_indexList( indexListExtracted )
     {}
 
     //! Copy constructor
 	RequestLoopVolumeID(const RequestLoopVolumeID& loop)
-    : M_volumeList(loop.M_volumeList)
+    : M_volumeList(loop.M_volumeList), M_indexList(loop.M_indexList)
     {}
 
     //@}
@@ -83,6 +86,10 @@ public:
 
     //! Getter for the mesh pointer
 	const vectorVolumesPtr_Type volumeList() const { return M_volumeList; }
+
+    //! Getter for the mesh pointer
+	const vectorIndexesPtr_Type indexList() const { return M_indexList; }
+
     //@}
 
 private:
@@ -98,6 +105,7 @@ private:
 
     // Pointer on the mesh
 	vectorVolumesPtr_Type M_volumeList;
+	vectorIndexesPtr_Type M_indexList;
 
 };
 
@@ -118,11 +126,11 @@ private:
     <i>MeshType</i>: See in LifeV::RequestLoopElement
 
  */
-template<typename VectorType>
-RequestLoopVolumeID<VectorType>
-integrationOverSelectedVolumes(const boost::shared_ptr<VectorType>& volumeListExtracted )
+template<typename MeshType>
+RequestLoopVolumeID<MeshType>
+integrationOverSelectedVolumes(boost::shared_ptr<std::vector<typename MeshType::element_Type*> >& volumeListExtracted, boost::shared_ptr<std::vector<UInt> >& indexListExtracted )
 {
-	return RequestLoopVolumeID<VectorType>( volumeListExtracted );
+	return RequestLoopVolumeID<MeshType> ( volumeListExtracted, indexListExtracted );
 }
 
 
