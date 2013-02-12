@@ -48,15 +48,15 @@
 namespace LifeV
 {
 
-template <typename Mesh>
+template <typename MeshType>
 class NeoHookeanMaterialNonLinear :
-        public StructuralConstitutiveLaw<Mesh>
+        public StructuralConstitutiveLaw<MeshType>
 {
     //!@name Type definitions
     //@{
 
 public:
-    typedef StructuralConstitutiveLaw<Mesh>          super;
+    typedef StructuralConstitutiveLaw<MeshType>          super;
 
     typedef StructuralConstitutiveLawData            data_Type;
 
@@ -74,6 +74,13 @@ public:
 
     typedef typename super::vectorVolumes_Type       vectorVolumes_Type;
     typedef boost::shared_ptr<vectorVolumes_Type>    vectorVolumesPtr_Type;
+
+    typedef std::vector<UInt>                        vectorIndexes_Type;
+    typedef boost::shared_ptr<vectorIndexes_Type>    vectorIndexesPtr_Type;
+
+    typedef typename super::mapMarkerIndexesPtr_Type mapMarkerIndexesPtr_Type;
+    typedef typename super::mapMarkerIndexes_Type    mapMarkerIndexes_Type;
+    typedef typename mapMarkerIndexes_Type::const_iterator mapIteratorIndex_Type;
 
     typedef typename super::FESpacePtr_Type          FESpacePtr_Type;
     typedef typename super::ETFESpacePtr_Type        ETFESpacePtr_Type;
@@ -111,7 +118,8 @@ public:
     /*!
       \param dataMaterial the class with Material properties data
     */
-    void computeLinearStiff( dataPtr_Type& /*dataMaterial*/, const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/ );
+    void computeLinearStiff( dataPtr_Type& /*dataMaterial*/, const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
+                             const mapMarkerIndexesPtr_Type /*mapsMarkerIndexes*/ );
 
 
     //! Updates the Jacobian matrix in StructualSolver::updateJacobian
@@ -124,6 +132,7 @@ public:
     void updateJacobianMatrix( const vector_Type& disp,
                                const dataPtr_Type& dataMaterial,
                                const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                               const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
                                const displayerPtr_Type& displayer);
 
 
@@ -139,6 +148,7 @@ public:
                                        const vector_Type& disp,
                                        const dataPtr_Type& dataMaterial,
                                        const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                                       const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
                                        const displayerPtr_Type& displayer);
 
     //! Interface method to compute the new Stiffness matrix in StructuralSolver::evalResidual and in
@@ -152,6 +162,7 @@ public:
     */
     void computeStiffness( const vector_Type& disp, Real factor, const dataPtr_Type& dataMaterial,
                            const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                           const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
                            const displayerPtr_Type& displayer );
 
     //! Computes the new Stiffness vector for Neo-Hookean and Exponential materials in
@@ -212,7 +223,8 @@ public:
     vectorPtr_Type const stiffVector() const {return M_stiff; }
 
     void apply( const vector_Type& sol, vector_Type& res,
-                const mapMarkerVolumesPtr_Type mapsMarkerVolumes);
+                const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                const mapMarkerIndexesPtr_Type mapsMarkerIndexes);
 
     //@}
 
@@ -229,8 +241,8 @@ protected:
 
 };
 
-template <typename Mesh>
-NeoHookeanMaterialNonLinear<Mesh>::NeoHookeanMaterialNonLinear():
+template <typename MeshType>
+NeoHookeanMaterialNonLinear<MeshType>::NeoHookeanMaterialNonLinear():
     super			( ),
     M_stiff	        ( ),
     M_identity        ( )
@@ -241,22 +253,22 @@ NeoHookeanMaterialNonLinear<Mesh>::NeoHookeanMaterialNonLinear():
 
 
 
-template <typename Mesh>
-NeoHookeanMaterialNonLinear<Mesh>::~NeoHookeanMaterialNonLinear()
+template <typename MeshType>
+NeoHookeanMaterialNonLinear<MeshType>::~NeoHookeanMaterialNonLinear()
 {}
 
 
 
 
 
-template <typename Mesh>
+template <typename MeshType>
 void
-NeoHookeanMaterialNonLinear<Mesh>::setup( const FESpacePtr_Type&                      dFESpace,
-                                          const ETFESpacePtr_Type&                    dETFESpace,
-                                          const boost::shared_ptr<const MapEpetra>&   monolithicMap,
-                                          const UInt                                  offset,
-                                          const dataPtr_Type&                         dataMaterial,
-                                          const displayerPtr_Type&                    displayer)
+NeoHookeanMaterialNonLinear<MeshType>::setup( const FESpacePtr_Type&                      dFESpace,
+                                              const ETFESpacePtr_Type&                    dETFESpace,
+                                              const boost::shared_ptr<const MapEpetra>&   monolithicMap,
+                                              const UInt                                  offset,
+                                              const dataPtr_Type&                         dataMaterial,
+                                              const displayerPtr_Type&                    displayer)
 {
     this->M_displayer = displayer;
     this->M_dataMaterial  = dataMaterial;
@@ -277,24 +289,26 @@ NeoHookeanMaterialNonLinear<Mesh>::setup( const FESpacePtr_Type&                
 
 }
 
-template <typename Mesh>
-void NeoHookeanMaterialNonLinear<Mesh>::computeLinearStiff(dataPtr_Type& /*dataMaterial*/,
-                                                           const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/)
+template <typename MeshType>
+void NeoHookeanMaterialNonLinear<MeshType>::computeLinearStiff(dataPtr_Type& /*dataMaterial*/,
+                                                               const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
+                                                               const mapMarkerIndexesPtr_Type /*mapsMarkerIndexes*/)
 {
     //! Empty method for neo-hookean material
 }
 
 
-template <typename Mesh>
-void NeoHookeanMaterialNonLinear<Mesh>::updateJacobianMatrix( const vector_Type&       disp,
-                                                              const dataPtr_Type&      dataMaterial,
-                                                              const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
-                                                              const displayerPtr_Type& displayer )
+template <typename MeshType>
+void NeoHookeanMaterialNonLinear<MeshType>::updateJacobianMatrix( const vector_Type&       disp,
+                                                                  const dataPtr_Type&      dataMaterial,
+                                                                  const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                                                                  const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
+                                                                  const displayerPtr_Type& displayer )
 {
     this->M_jacobian.reset(new matrix_Type(*this->M_localMap));
 
     displayer->leaderPrint(" \n*********************************\n  ");
-    updateNonLinearJacobianTerms(this->M_jacobian, disp, dataMaterial, mapsMarkerVolumes, displayer);
+    updateNonLinearJacobianTerms(this->M_jacobian, disp, dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
     displayer->leaderPrint(" \n*********************************\n  ");
     std::cout << std::endl;
 }
@@ -303,12 +317,13 @@ void NeoHookeanMaterialNonLinear<Mesh>::updateJacobianMatrix( const vector_Type&
 
 
 
-template <typename Mesh>
-void NeoHookeanMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matrixPtr_Type& 		jacobian,
-                                                                      const vector_Type& 	disp,
-                                                                      const dataPtr_Type& 	dataMaterial,
-                                                                      const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
-                                                                      const displayerPtr_Type&  displayer )
+template <typename MeshType>
+void NeoHookeanMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms( matrixPtr_Type& 		jacobian,
+                                                                          const vector_Type& 	disp,
+                                                                          const dataPtr_Type& 	dataMaterial,
+                                                                          const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                                                                          const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
+                                                                          const displayerPtr_Type&  displayer )
 {
 
     using namespace ExpressionAssembly;
@@ -318,15 +333,23 @@ void NeoHookeanMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matrixPtr_
     *(jacobian) *= 0.0;
 
     mapIterator_Type it;
+    mapIteratorIndex_Type itIndex;
 
     vectorVolumesPtr_Type pointerListOfVolumes;
+    vectorIndexesPtr_Type pointerListOfIndexes;
 
-    for( it = (*mapsMarkerVolumes).begin(); it != (*mapsMarkerVolumes).end(); it++ )
+    for( it = (*mapsMarkerVolumes).begin(),itIndex = (*mapsMarkerIndexes).begin() ; it != (*mapsMarkerVolumes).end(); it++, itIndex++ )
 	{
 
         //Given the marker pointed by the iterator, let's extract the material parameters
         UInt marker = it->first;
+        UInt markerIndex = it->first;
+
+        ASSERT( marker == markerIndex, "The list of volumes is referring to a marker that is not the same as the marker of index!!!");
+
         pointerListOfVolumes.reset( new vectorVolumes_Type(it->second) );
+        pointerListOfIndexes.reset( new vectorIndexes_Type(itIndex->second) );
+
         Real mu     = dataMaterial->mu(marker);
         Real bulk   = dataMaterial->bulk(marker);
 
@@ -339,14 +362,14 @@ void NeoHookeanMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matrixPtr_
 #define ICbar pow( J, (-2.0/3.0) ) * IC
 
         //Assembling Volumetric Part
-        integrate( integrationOverSelectedVolumes( pointerListOfVolumes  ) ,
+        integrate( integrationOverSelectedVolumes<MeshType> ( pointerListOfVolumes, pointerListOfIndexes  ) ,
                    this->M_dispFESpace->qr(),
                    this->M_dispETFESpace,
                    this->M_dispETFESpace,
                    value( bulk / 2.0 ) * ( value(2.0)*pow(J, 2.0) - J + value(1.0) ) * dot( F_T, grad(phi_j) ) * dot( F_T, grad(phi_i) )
                    ) >> jacobian;
 
-        integrate( integrationOverSelectedVolumes( pointerListOfVolumes ) ,
+        integrate( integrationOverSelectedVolumes<MeshType> ( pointerListOfVolumes, pointerListOfIndexes ) ,
                    this->M_dispFESpace->qr(),
                    this->M_dispETFESpace,
                    this->M_dispETFESpace,
@@ -356,7 +379,7 @@ void NeoHookeanMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matrixPtr_
 
         //! ISOCHORIC PART
         //! 1. Stiffness matrix : int { -2/3 * mu * J^(-2/3) *( F^-T : \nabla \delta ) ( F : \nabla \v ) }
-        integrate( integrationOverSelectedVolumes( pointerListOfVolumes ) ,
+        integrate( integrationOverSelectedVolumes<MeshType> ( pointerListOfVolumes, pointerListOfIndexes ) ,
                    this->M_dispFESpace->qr(),
                    this->M_dispETFESpace,
                    this->M_dispETFESpace,
@@ -365,7 +388,7 @@ void NeoHookeanMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matrixPtr_
 
 
         //! 2. Stiffness matrix : int { 2/9 * mu * ( Ic_iso )( F^-T : \nabla \delta ) ( F^-T : \nabla \v ) }
-        integrate( integrationOverSelectedVolumes( pointerListOfVolumes ) ,
+        integrate( integrationOverSelectedVolumes<MeshType> ( pointerListOfVolumes, pointerListOfIndexes ) ,
                    this->M_dispFESpace->qr(),
                    this->M_dispETFESpace,
                    this->M_dispETFESpace,
@@ -373,7 +396,7 @@ void NeoHookeanMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matrixPtr_
                    ) >> jacobian;
 
         //! 3. Stiffness matrix : int { mu * J^(-2/3) (\nabla \delta : \nabla \v)}
-        integrate( integrationOverSelectedVolumes( pointerListOfVolumes ) ,
+        integrate( integrationOverSelectedVolumes<MeshType> ( pointerListOfVolumes, pointerListOfIndexes ) ,
                    this->M_dispFESpace->qr(),
                    this->M_dispETFESpace,
                    this->M_dispETFESpace,
@@ -381,7 +404,7 @@ void NeoHookeanMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matrixPtr_
                    ) >> jacobian;
 
         //! 4. Stiffness matrix : int { -2/3 * mu * J^(-2/3) ( F : \nabla \delta ) ( F^-T : \nabla \v ) }
-        integrate( integrationOverSelectedVolumes( pointerListOfVolumes ) ,
+        integrate( integrationOverSelectedVolumes<MeshType> ( pointerListOfVolumes, pointerListOfIndexes ) ,
                    this->M_dispFESpace->qr(),
                    this->M_dispETFESpace,
                    this->M_dispETFESpace,
@@ -391,7 +414,7 @@ void NeoHookeanMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matrixPtr_
 
 
         //! 5. Stiffness matrix : int { 1/3 * mu * Ic_iso * (F^-T [\nabla \delta]^t F^-T ) : \nabla \v }
-        integrate( integrationOverSelectedVolumes( pointerListOfVolumes ) ,
+        integrate( integrationOverSelectedVolumes<MeshType> ( pointerListOfVolumes, pointerListOfIndexes ) ,
                    this->M_dispFESpace->qr(),
                    this->M_dispETFESpace,
                    this->M_dispETFESpace,
@@ -404,21 +427,23 @@ void NeoHookeanMaterialNonLinear<Mesh>::updateNonLinearJacobianTerms( matrixPtr_
 }
 
 
-template <typename Mesh>
-void NeoHookeanMaterialNonLinear<Mesh>::apply( const vector_Type& sol, vector_Type& res,
-                                               const mapMarkerVolumesPtr_Type mapsMarkerVolumes )
+template <typename MeshType>
+void NeoHookeanMaterialNonLinear<MeshType>::apply( const vector_Type& sol, vector_Type& res,
+                                                   const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                                                   const mapMarkerIndexesPtr_Type mapsMarkerIndexes)
 {
-    computeStiffness(sol, 0., this->M_dataMaterial, mapsMarkerVolumes, this->M_displayer);
+    computeStiffness(sol, 0., this->M_dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, this->M_displayer);
     res += *M_stiff;
 }
 
 
-template <typename Mesh>
-void NeoHookeanMaterialNonLinear<Mesh>::computeStiffness( const vector_Type&       disp,
-                                                          Real                     /*factor*/,
-                                                          const dataPtr_Type&      dataMaterial,
-                                                          const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
-                                                          const displayerPtr_Type& displayer )
+template <typename MeshType>
+void NeoHookeanMaterialNonLinear<MeshType>::computeStiffness( const vector_Type&       disp,
+                                                              Real                     /*factor*/,
+                                                              const dataPtr_Type&      dataMaterial,
+                                                              const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                                                              const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
+                                                              const displayerPtr_Type& displayer )
 {
     using namespace ExpressionAssembly;
 
@@ -432,27 +457,34 @@ void NeoHookeanMaterialNonLinear<Mesh>::computeStiffness( const vector_Type&    
     *(M_stiff) *= 0.0;
 
     mapIterator_Type it;
-    vectorVolumesPtr_Type pointerListOfVolumes;
+    mapIteratorIndex_Type itIndex;
 
-    for( it = (*mapsMarkerVolumes).begin(); it != (*mapsMarkerVolumes).end(); it++ )
+    vectorVolumesPtr_Type pointerListOfVolumes;
+    vectorIndexesPtr_Type pointerListOfIndexes;
+
+    for( it = (*mapsMarkerVolumes).begin(),itIndex = (*mapsMarkerIndexes).begin() ; it != (*mapsMarkerVolumes).end(); it++, itIndex++ )
     {
 
         //Given the marker pointed by the iterator, let's extract the material parameters
         UInt marker = it->first;
+        UInt markerIndex = it->first;
+
         pointerListOfVolumes.reset( new vectorVolumes_Type(it->second) );
+        pointerListOfIndexes.reset( new vectorIndexes_Type(itIndex->second) );
+
         Real mu     = dataMaterial->mu(marker);
         Real bulk   = dataMaterial->bulk(marker);
 
         //Computation of the volumetric part
         //
-        integrate( integrationOverSelectedVolumes( pointerListOfVolumes ) ,
+        integrate( integrationOverSelectedVolumes<MeshType> ( pointerListOfVolumes, pointerListOfIndexes ) ,
                    this->M_dispFESpace->qr(),
                    this->M_dispETFESpace,
                    value(bulk / 2.0) * ( pow( J ,2.0) - J + log(J)) * dot(  F_T, grad(phi_i) )
                    ) >> M_stiff;
 
         //Computation of the isochoric part
-        integrate( integrationOverSelectedVolumes( pointerListOfVolumes ) ,
+        integrate( integrationOverSelectedVolumes<MeshType> ( pointerListOfVolumes, pointerListOfIndexes ) ,
                    this->M_dispFESpace->qr(),
                    this->M_dispETFESpace,
                    value(mu) * pow(J,-2.0/3.0) * (dot( F - value(1.0/3.0) * IC * F_T,grad(phi_i) ) )
@@ -462,20 +494,20 @@ void NeoHookeanMaterialNonLinear<Mesh>::computeStiffness( const vector_Type&    
     this->M_stiff->globalAssemble();
 }
 
-template <typename Mesh>
-void NeoHookeanMaterialNonLinear<Mesh>::showMe( std::string const& fileNameStiff,
+template <typename MeshType>
+void NeoHookeanMaterialNonLinear<MeshType>::showMe( std::string const& fileNameStiff,
                                                 std::string const& fileNameJacobian)
 {
     this->M_stiff->spy(fileNameStiff);
     this->M_jacobian->spy(fileNameJacobian);
 }
 
-template <typename Mesh>
-void NeoHookeanMaterialNonLinear<Mesh>::computeLocalFirstPiolaKirchhoffTensor( Epetra_SerialDenseMatrix& firstPiola,
-									       const Epetra_SerialDenseMatrix& tensorF,
-									       const Epetra_SerialDenseMatrix& cofactorF,
-									       const std::vector<Real>& invariants,
-									       const UInt marker)
+template <typename MeshType>
+void NeoHookeanMaterialNonLinear<MeshType>::computeLocalFirstPiolaKirchhoffTensor( Epetra_SerialDenseMatrix& firstPiola,
+                                                                                   const Epetra_SerialDenseMatrix& tensorF,
+                                                                                   const Epetra_SerialDenseMatrix& cofactorF,
+                                                                                   const std::vector<Real>& invariants,
+                                                                                   const UInt marker)
 {
 
   //Get the material parameters
@@ -506,8 +538,8 @@ void NeoHookeanMaterialNonLinear<Mesh>::computeLocalFirstPiolaKirchhoffTensor( E
 
 
 
-template <typename Mesh>
-inline StructuralConstitutiveLaw<Mesh>* createNeoHookeanMaterialNonLinear() { return new NeoHookeanMaterialNonLinear<Mesh >(); }
+template <typename MeshType>
+inline StructuralConstitutiveLaw<MeshType>* createNeoHookeanMaterialNonLinear() { return new NeoHookeanMaterialNonLinear<MeshType >(); }
 namespace
 {
 static bool registerNH = StructuralConstitutiveLaw<LifeV::RegionMesh<LinearTetra> >::StructureMaterialFactory::instance().registerProduct( "neoHookean", &createNeoHookeanMaterialNonLinear<LifeV::RegionMesh<LinearTetra> > );

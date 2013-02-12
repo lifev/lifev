@@ -80,37 +80,6 @@
 
 namespace LifeV
 {
-//Functor to select volumes
-template < typename MeshEntityType,
-           typename ComparisonPolicyType = boost::function2<bool,
-                                                            const UInt,
-                                                            const UInt > >
-class MarkerFunctor
-{
-public:
-    typedef MeshEntityType       meshEntity_Type;
-    typedef ComparisonPolicyType comparisonPolicy_Type;
-
-    MarkerFunctor( const UInt materialFlagReference,
-                    comparisonPolicy_Type const & policy = std::equal_to<UInt>() )
-        : M_reference( materialFlagReference ),
-          M_policy( policy ) {}
-
-    bool operator()( const meshEntity_Type & entity ) const
-    {
-        //Extract the flag from the mesh entity
-        UInt flagChecked = entity.markerID();
-
-        return M_policy( flagChecked, M_reference );
-    }
-
-private:
-    const UInt M_reference;
-    const comparisonPolicy_Type M_policy;
-
-}; // Marker selector
-
-
 /*!
   \class StructuralConstitutiveLaw
   \brief
@@ -118,7 +87,7 @@ private:
   This class has just pure virtual methods. They are implemented in the specific class for one material
 */
 
-template <typename Mesh>
+template <typename MeshType>
 class StructuralConstitutiveLaw
 {
 public:
@@ -137,9 +106,9 @@ public:
     typedef typename boost::shared_ptr<data_Type>  dataPtr_Type;
     typedef typename boost::shared_ptr<const Displayer>    displayerPtr_Type;
 
-    typedef FactorySingleton<Factory<StructuralConstitutiveLaw<Mesh>,std::string> >  StructureMaterialFactory;
+    typedef FactorySingleton<Factory<StructuralConstitutiveLaw<MeshType>,std::string> >  StructureMaterialFactory;
 
-    typedef std::vector< typename Mesh::element_Type* > vectorVolumes_Type;
+    typedef std::vector< typename MeshType::element_Type* > vectorVolumes_Type;
 
     typedef std::map< UInt, vectorVolumes_Type>           mapMarkerVolumes_Type;
     typedef boost::shared_ptr<mapMarkerVolumes_Type>      mapMarkerVolumesPtr_Type;
@@ -148,14 +117,11 @@ public:
     typedef std::map< UInt, vectorIndexes_Type>           mapMarkerIndexes_Type;
     typedef boost::shared_ptr<mapMarkerIndexes_Type>      mapMarkerIndexesPtr_Type;
 
-    typedef ETFESpace< RegionMesh<LinearTetra>, MapEpetra, 3, 3 >  ETFESpace_Type;
-    typedef boost::shared_ptr<ETFESpace_Type>                      ETFESpacePtr_Type;
+    typedef ETFESpace<MeshType, MapEpetra, 3, 3 >         ETFESpace_Type;
+    typedef boost::shared_ptr<ETFESpace_Type>             ETFESpacePtr_Type;
 
-    typedef FESpace< RegionMesh<LinearTetra>, MapEpetra >          FESpace_Type;
-    typedef boost::shared_ptr<FESpace_Type>                        FESpacePtr_Type;
-
-    typedef MarkerFunctor<typename Mesh::element_Type, boost::function2<bool,const UInt,const UInt> >     markerFunctor_Type;
-    typedef boost::shared_ptr<markerFunctor_Type>                      markerFunctorPtr_Type;
+    typedef FESpace< MeshType, MapEpetra >                FESpace_Type;
+    typedef boost::shared_ptr<FESpace_Type>               FESpacePtr_Type;
 
     //@}
 
@@ -314,8 +280,8 @@ protected:
 // Constructor
 //=====================================
 
-template <typename Mesh>
-StructuralConstitutiveLaw<Mesh>::StructuralConstitutiveLaw( ):
+template <typename MeshType>
+StructuralConstitutiveLaw<MeshType>::StructuralConstitutiveLaw( ):
     M_dispFESpace                ( ),
     M_dispETFESpace              ( ),
     M_localMap                   ( ),
