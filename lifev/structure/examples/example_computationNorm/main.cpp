@@ -310,6 +310,16 @@ Structure::run3d()
     std::string dOrder =  dataFile( "solid/space_discretization/order", "P1");
 
     solidFESpacePtr_Type dFESpace( new solidFESpace_Type(pointerToMesh,dOrder,3,parameters->comm) );
+
+    // setting precise quadrature rule for fine meshes
+    QuadratureRule fineQuadRule;
+    QuadratureRule fineBdQuadRule;
+
+    fineQuadRule = quadRuleTetra15pt;
+
+    dFESpace->setQuadRule( fineQuadRule );
+    dFESpace->qr().showMe();
+
     if (verbose) std::cout << std::endl;
 
     if (verbose)
