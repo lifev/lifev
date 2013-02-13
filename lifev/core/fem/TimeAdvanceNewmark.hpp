@@ -176,7 +176,7 @@ public:
       @param timeStep defined the  time step need to compute the
       @returns rhsV
     */
-    void RHSFirstDerivative (const Real& timeStep, feVectorType& rhsContribution, int const shift = 0 ) const;
+    void RHSFirstDerivative (const Real& timeStep, feVectorType& rhsContribution) const;
 
     //! Update the right hand side \f$ f_W \f$ of the time derivative formula
     /*!
@@ -358,7 +358,7 @@ void TimeAdvanceNewmark <feVectorType>::shiftRight (const feVector_Type& solutio
 
 template<typename feVectorType>
 void
-TimeAdvanceNewmark<feVectorType>::RHSFirstDerivative (const Real& timeStep, feVectorType& rhsContribution, int const shift ) const
+TimeAdvanceNewmark<feVectorType>::RHSFirstDerivative (const Real& timeStep, feVectorType& rhsContribution ) const
 {
     rhsContribution *=  (this->M_alpha[ 1 ] / timeStep) ;
 
@@ -366,7 +366,7 @@ TimeAdvanceNewmark<feVectorType>::RHSFirstDerivative (const Real& timeStep, feVe
 
     for (UInt i = 1; i  < this->M_firstOrderDerivativeSize; ++i )
     {
-        rhsContribution += ( this->M_alpha[ i + 1 ] * timeStepPower ) *  (* this->M_unknowns[ i - shift ]);
+        rhsContribution += ( this->M_alpha[ i + 1 ] * timeStepPower ) *  (* this->M_unknowns[ i ]);
         timeStepPower *= timeStep;
     }
 }

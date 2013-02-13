@@ -196,7 +196,7 @@ public:
       @param shift how much shift the stored solutions. usually zero, but can be 1.
       @return  rhsV the first order Rhs
     */
-    virtual  void RHSFirstDerivative (const Real& timeStep, feVectorType& rhsContribution, int const shift = 0 ) const = 0;
+    virtual void RHSFirstDerivative (const Real& timeStep, feVectorType& rhsContribution ) const = 0;
 
     //! Update the right hand side \f$ f_V \f$ of the time derivative formula
     /*!
@@ -410,17 +410,6 @@ public:
       in the internal loop
     */
     feVectorType firstDerivative (const  feVector_Type& u) const;
-
-
-    //! Return the velocity based on given vector on the next time step
-    /*!
-      @param newEntry unk  to compute the current velocity;
-      @returns the velocity associated to \f$u\f$
-      this method is used for example in FSI to return the current mesh velocity
-      besed on the currently computed mesh displacement
-    */
-    feVectorType nextFirstDerivative ( feVectorType const& newEntry ) const;
-
 
     //!Return the current acceleration
     virtual feVectorType secondDerivative() const = 0;
@@ -692,15 +681,6 @@ TimeAdvance<feVectorType>::firstDerivative ( const feVector_Type& u ) const
     vel  *= M_alpha[ 0 ] / M_timeStep;
     vel  -= (*this->M_rhsContribution[ 0 ]);
     return vel;
-}
-
-template<typename feVectorType>
-feVectorType
-TimeAdvance<feVectorType>::nextFirstDerivative (feVectorType const& newEntry) const
-{
-    feVectorType rhsContribution (*this->M_unknowns[0]);
-    this->RHSFirstDerivative (M_timeStep, rhsContribution, 1);
-    return newEntry * this->M_alpha[ 0 ] / this->M_timeStep -  rhsContribution;
 }
 
 
