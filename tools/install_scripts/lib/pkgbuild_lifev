@@ -1,10 +1,10 @@
 #! /bin/bash
 #
 # author: Antonio Cervone <ant.cervone@gmail.com>
-# date:   09-01-2013
+# date:   13-02-2013
 #
 
-ver='3.2'
+ver=
 
 download_lifev() {
   pushd ${lifev_src} >/dev/null
@@ -58,6 +58,7 @@ build_lifev() {
     -D LifeV_ENABLE_ALL_PACKAGES:BOOL=ON \
     -D LifeV_ENABLE_TESTS:BOOL=ON \
     -D LifeV_ENABLE_STRONG_CXX_COMPILE_WARNINGS:BOOL=ON \
+    -D LifeV_EXTRA_LINK_FLAGS:STRING="${lifev_flags}" \
     -D Trilinos_INCLUDE_DIRS:PATH="${trilinos_include}" \
     -D Trilinos_LIBRARY_DIRS:PATH="${trilinos_lib}" \
     -D ParMETIS_INCLUDE_DIRS:PATH="${parmetis_include}" \
