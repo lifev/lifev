@@ -10,6 +10,15 @@ that are needed to get a working copy of the LifeV library
 git clone https://github.com/lifev/lifev.git
 ```
 
+1b) OPTIONAL - if you plan to use your own configuration script for lifev
+you chould also clone the cmake repo. If you are going to use these scripts
+it will be cloned automatically.
+
+```bash
+cd lifev
+git clone https://github.com/lifev/cmake.git
+```
+
 2) move to the tools/install_scripts directory
 
 ```bash
@@ -40,5 +49,4 @@ installed.
 ```bash
 ./build
 ```
-
 
