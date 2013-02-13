@@ -19,7 +19,7 @@ pushd app > /dev/null # app
 
   ${cmake_bin}/cmake \
     -D CMAKE_INSTALL_PREFIX:PATH=${INSTALL_DIR}/app_install \
-    -D LifeV_DIR:PATH=${INSTALL_DIR}/lib/lifev \
+    -D LifeV_DIR:PATH=${INSTALL_DIR}/lib/lifevlib \
     ${SRC_DIR} || exit
 
   make -j${NUM_PROC} || exit
