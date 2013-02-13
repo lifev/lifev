@@ -20,6 +20,7 @@ unpack_lifev() {
 }
 
 build_lifev() {
+  mkdir -p "${lifev_build}" || return 1
   pushd "${lifev_build}" >/dev/null
   if [ $MOX_MACHINE ]; then
     mox_extra="\
