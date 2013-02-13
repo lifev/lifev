@@ -7,11 +7,11 @@
 ver='2.4'
 
 download_superlu_dist() {
-  wget "http://crd.lbl.gov/~xiaoye/SuperLU/superlu_dist_${ver}.tar.gz"
+  wget -c "http://crd.lbl.gov/~xiaoye/SuperLU/superlu_dist_${ver}.tar.gz" || return 1
 }
 
 unpack_superlu_dist() {
-  tar xzf superlu_dist_${ver}.tar.gz
+  tar xzf superlu_dist_${ver}.tar.gz || return 1
 }
 
 build_superlu_dist() {
@@ -44,7 +44,7 @@ build_superlu_dist() {
 }
 
 install_superlu_dist() {
-  mkdir -p ${install_dir}
+  mkdir -p ${install_dir} || return 1
   pushd ${install_dir} >/dev/null
   install -d -m 775 {lib,include}
   install -m 664 ${build_dir}/static/libsuperlu_dist.a lib

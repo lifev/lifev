@@ -5,7 +5,7 @@
 #
 
 # include configuration file
-source ../config
+source ../config || return 1
 
 # abort if no package is specified
 if [ $# -lt 1 ]; then
@@ -64,8 +64,8 @@ build_package() {
     install_dir=$INSTALL_DIR/lib/$package
 
     # download library sources
-    mkdir -p $src_dir
-    pushd src >/dev/null
+    mkdir -p $src_dir || return 1
+    pushd $src_dir >/dev/null
       if [ $DOWNLOAD ]; then
         echo_dbg "downloading $package package"
         download_$package || return 1
@@ -79,8 +79,8 @@ build_package() {
     popd >/dev/null # $src_dir
 
     # build
-    mkdir -p $build_dir
-    pushd build >/dev/null
+    mkdir -p $build_dir || return 1
+    pushd $build_dir >/dev/null
       echo_dbg "building $package package"
       build_$package || return 1
 

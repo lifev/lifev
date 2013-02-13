@@ -7,27 +7,28 @@
 ver="2.8.10"
 
 download_cmake() {
-  wget http://www.cmake.org/files/v2.8/cmake-${ver}.tar.gz
+  wget -c http://www.cmake.org/files/v2.8/cmake-${ver}.tar.gz || return 1
 }
 
 unpack_cmake() {
-  tar xzf cmake-${ver}.tar.gz
+  tar xzf cmake-${ver}.tar.gz || return 1
 }
 
 build_cmake() {
 
-  cd ${src_dir}/cmake-${ver}
+  pushd ${src_dir}/cmake-${ver} >/dev/null
 
   ./bootstrap --prefix=${install_dir} \
-    --parallel=${NUM_PROC}
+    --parallel=${NUM_PROC} || return 1
 
 #    --system-libs \
 
-  make -j${NUM_PROC}
+  make -j${NUM_PROC} || return 1
+  popd >/dev/null
 }
 
 install_cmake() {
   cd ${src_dir}/cmake-${ver}
-  make -j${NUM_PROC} install
+  make -j${NUM_PROC} install || return 1
 }
 

@@ -64,15 +64,15 @@ build_lifev() {
     -D Boost_INCLUDE_DIRS:PATH="${boost_include}" \
     "${lib_extra}" \
     ${mox_extra} \
-    "${lifev_src}"
+    "${lifev_src}" || return 1
 
-  make -j${NUM_PROC}
+  make -j${NUM_PROC}  || return 1
   make -j${NUM_PROC} doc
   popd >/dev/null
 }
 
 install_lifev() {
   pushd "${lifev_build}" >/dev/null
-  make -j${NUM_PROC} install
+  make -j${NUM_PROC} install || return 1
   popd >/dev/null
 }

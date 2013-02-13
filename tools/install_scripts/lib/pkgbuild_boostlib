@@ -7,13 +7,12 @@
 ver="1.48.0"
 
 download_boostlib() {
-#  wget http://gitorious.org/boost/cmake/archive-tarball/cmake-$ver
-  : # empty functions are not allowed!
+    wget -c http://gitorious.org/boost/cmake/archive-tarball/cmake-$ver || return 1
 }
 
 unpack_boostlib() {
   mv cmake-$ver boost-cmake-${ver}.tar.gz
-  tar xvf boost-cmake-${ver}.tar.gz
+  tar xvf boost-cmake-${ver}.tar.gz || return 1
 }
 
 build_boostlib() {
@@ -29,4 +28,3 @@ build_boostlib() {
 install_boostlib() {
   make -j${NUM_PROC} install || return 1
 }
-

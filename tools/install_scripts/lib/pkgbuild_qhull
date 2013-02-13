@@ -7,17 +7,17 @@
 ver='2012.1'
 
 download_qhull() {
-  wget "http://www.qhull.org/download/qhull-${ver}-src.tgz"
+  wget -c "http://www.qhull.org/download/qhull-${ver}-src.tgz" || return 1
 }
 
 unpack_qhull() { 
-  tar xzf qhull-${ver}-src.tgz
+  tar xzf qhull-${ver}-src.tgz || return 1
 }
 
 build_qhull() {  
   pushd ${src_dir}/qhull-${ver}
     config/bootstrap.sh --prefix=${install_dir} \
-      --parallel=${NUM_PROC}
+      --parallel=${NUM_PROC} || return 1
   popd
 
   if [[ "${CARCH}" == "x86_64" ]]; then
@@ -31,13 +31,13 @@ build_qhull() {
     -DCMAKE_INSTALL_PREFIX=${install_dir} \
     $EXTRAOPTS  \
     \
-    ${src_dir}/qhull-$ver
+    ${src_dir}/qhull-$ver || return 1
   
-  make -j$NUM_PROC
+  make -j$NUM_PROC || return 1
 }
 
 install_qhull() {
-  make -j$NUM_PROC install
+  make -j$NUM_PROC install || return 1
 }
 
 
