@@ -121,7 +121,7 @@ FSIMonolithicGE::evalResidual ( vector_Type&       res,
         this->moveMesh (meshDispRepeated);
 
         //here should use extrapolationFirstDerivative instead of velocity
-        vector_Type meshVelocityRepeated ( this->M_ALETimeAdvance->nextFirstDerivative (  M_meshMotion->disp() ), Repeated );
+        vector_Type meshVelocityRepeated ( this->M_ALETimeAdvance->firstDerivative (  M_meshMotion->disp() ), Repeated );
         vector_Type interpolatedMeshVelocity (this->M_uFESpace->map() );
 
         interpolateVelocity ( meshVelocityRepeated, interpolatedMeshVelocity );

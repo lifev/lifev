@@ -127,7 +127,7 @@ FSIMonolithicGI::evalResidual ( vector_Type&       res,
     moveMesh ( *mmRep );
 
     //here should use extrapolationFirstDerivative instead of velocity
-    vector_Type meshVelocityRepeated ( this->M_ALETimeAdvance->nextFirstDerivative ( *meshDisp ), Repeated );
+    vector_Type meshVelocityRepeated ( this->M_ALETimeAdvance->firstDerivative ( *meshDisp ), Repeated );
     vector_Type interpolatedMeshVelocity (this->M_uFESpace->map() );
 
     interpolateVelocity ( meshVelocityRepeated, interpolatedMeshVelocity );
