@@ -71,9 +71,11 @@ lifev_flags=
 #LIFEV LIB
 # this is to use LifeV as an external library
 lifevlib=NO
-lifev_include=${INSTALL_DIR}/lib/lifev/include
-lifev_lib=${INSTALL_DIR}/lib/lifev/lib
-lifev_src=/path/to/lifev_src
+lifevlib_include=${INSTALL_DIR}/lib/lifev/include
+lifevlib_lib=${INSTALL_DIR}/lib/lifev/lib
+lifevlib_src=/path/to/lifev_src
+# additional flags for linking
+lifevlib_flags=
 
 #####################
 # OPTIONAL PACKAGES
