@@ -90,13 +90,13 @@ void FSIMonolithicGI::setupFluidSolid ( UInt const fluxes )
                                        fluxes) );
     M_solid.reset (new solid_Type() );
 
-    M_solid->setup (M_data->dataSolid(),
-                    M_dFESpace,
-                    M_epetraComm,
-                    M_monolithicMap,
-                    M_offset
+    M_solid->setup(M_data->dataSolid(),
+                   M_dFESpace,
+                   M_dETFESpace,
+                   M_epetraComm,
+                   M_dFESpace->mapPtr(),
+                   UInt(0)
                    );
-
 }
 
 void
@@ -174,18 +174,17 @@ FSIMonolithicGI::evalResidual ( vector_Type&       res,
     M_monolithicMatrix->blockAssembling();
     super_Type::checkIfChangedFluxBC ( M_monolithicMatrix );
 
-
-
-    if ( (M_data->dataSolid()->solidType().compare ("exponential") && M_data->dataSolid()->solidType().compare ("neoHookean") ) )
-    {
+    // formulation matrix * vector (i.e. linear elastic )
+    // todo: pass to boolean for nonlinear structures
+    if( (M_data->dataSolid()->solidType().compare("exponential") && M_data->dataSolid()->solidType().compare("neoHookean")) )
         applyBoundaryConditions();
-    }
 
     M_monolithicMatrix->GlobalAssemble();
 
     super_Type::evalResidual ( disp, M_rhsFull, res, false );
 
-    if ( ! ( M_data->dataSolid()->solidType().compare ( "exponential" ) && M_data->dataSolid()->solidType().compare ( "neoHookean" ) ) )
+    //case for exponential and neohookean
+    if ( !( M_data->dataSolid()->solidType().compare( "exponential" ) && M_data->dataSolid()->solidType().compare( "neoHookean" ) ) )
     {
         res += *M_meshBlock * disp;
 
@@ -292,8 +291,10 @@ void FSIMonolithicGI::setupBlockPrec()
     //The following part accounts for a possibly nonlinear structure model, should not be run when linear
     //elasticity is used
 
-    if ( M_data->dataSolid()->getUseExactJacobian() && ( M_data->dataSolid()->solidType().compare ( "exponential" )
-                                                         && M_data->dataSolid()->solidType().compare ( "neoHookean" ) ) )
+    // case of exponential and neohookean model
+    // todo: pass to boolean variable for Nonlinear models ( i.e. for vector formulation )
+    if ( M_data->dataSolid()->getUseExactJacobian() && ( M_data->dataSolid()->solidType().compare( "exponential" )
+                    && M_data->dataSolid()->solidType().compare( "neoHookean" ) ) )
     {
         M_solid->material()->updateJacobianMatrix ( *M_uk * M_solid->rescaleFactor(),
                                                     dataSolid(),

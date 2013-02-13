@@ -68,6 +68,14 @@
 #include <life/lifealg/PreconditionerPCD.hpp>
 #endif
 
+//To handle ET for FSI
+#include <lifev/core/array/MatrixEpetraStructured.hpp>
+#include <lifev/core/array/MatrixEpetraStructuredUtility.hpp>
+#include <lifev/core/array/MatrixEpetraStructuredView.hpp>
+#include <lifev/core/array/VectorEpetraStructured.hpp>
+#include <lifev/core/array/VectorEpetraStructuredView.hpp>
+
+
 namespace LifeV
 {
 
@@ -112,6 +120,10 @@ public:
     typedef FactorySingleton< Factory< FSIMonolithic, std::string > > factory_Type;
     typedef SolverAztecOO                                             solver_Type;
 
+    // Added due to ET
+    typedef MatrixEpetraStructured<Real>                              matrixBlock_Type;
+    typedef MatrixEpetraStructuredView<Real>                          matrixBlockView_Type;
+    typedef boost::shared_ptr<matrixBlock_Type>                      matrixBlockPtr_Type;
     //@}
 
     // constructors

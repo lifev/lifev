@@ -39,6 +39,9 @@
 #define _MONOLITHICGI_HPP
 
 #include <lifev/fsi/solver/FSIMonolithic.hpp>
+#include <lifev/core/array/MatrixBlockMonolithicEpetra.hpp>
+#include <lifev/core/array/VectorBlockMonolithicEpetra.hpp>
+
 
 namespace LifeV
 {

@@ -250,11 +250,11 @@ VenantKirchhoffMaterialLinear<MeshType>::~VenantKirchhoffMaterialLinear()
 
 template <typename MeshType>
 void
-VenantKirchhoffMaterialLinear<MeshType>::setup (const FESpacePtr_Type& dFESpace,
-                                                const ETFESpacePtr_Type& ETFESpace,
-                                                const boost::shared_ptr<const MapEpetra>&  monolithicMap,
-                                                const UInt offset, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer
-                                               )
+VenantKirchhoffMaterialLinear<Mesh>::setup(const FESpacePtr_Type& dFESpace,
+                                           const ETFESpacePtr_Type& dETFESpace,
+                                           const boost::shared_ptr<const MapEpetra>&  monolithicMap,
+                                           const UInt offset, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer
+                                           )
 {
     this->M_displayer = displayer;
     this->M_dataMaterial  = dataMaterial;
@@ -343,6 +343,13 @@ void VenantKirchhoffMaterialLinear<MeshType>::computeLinearStiff (dataPtr_Type& 
     //Initialization of the pointer M_stiff to what is pointed by M_linearStiff
     this->M_stiff = this->M_linearStiff;
     this->M_jacobian = this->M_linearStiff;
+
+
+    // std::cout << "Done!" << std::endl;
+    // int n;
+    // std::cin >> n;
+
+    // this->M_jacobian->spy("matrixJacobianLE");
 }
 
 
@@ -375,17 +382,16 @@ void VenantKirchhoffMaterialLinear<MeshType>::updateNonLinearJacobianTerms ( mat
     //  displayer->leaderPrint("  S- Doing nothing - Updating non linear terms in Jacobian Matrix (constant, Linear Elastic)\n");
 }
 
-template <typename MeshType>
-void VenantKirchhoffMaterialLinear<MeshType>::computeStiffness ( const vector_Type& /*disp*/,
-                                                                 Real /*factor*/,
-                                                                 const dataPtr_Type& /*dataMaterial*/,
-                                                                 const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
-                                                                 const mapMarkerIndexesPtr_Type /*mapsMarkerIndexes*/,
-                                                                 const displayerPtr_Type& /*displayer*/ )
+template <typename Mesh>
+void VenantKirchhoffMaterialLinear<Mesh>::computeStiffness( const vector_Type& /*disp*/,
+                                                            Real /*factor*/,
+                                                            const dataPtr_Type& /*dataMaterial*/,
+                                                            const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
+                                                            const displayerPtr_Type& displayer )
 {
-    //displayer->leaderPrint(" \n*********************************\n  ");
-    //displayer->leaderPrint("  S- Using the the Stiffness Matrix (constant, Linear Elastic)");
-    //displayer->leaderPrint(" \n*********************************\n  ");
+    displayer->leaderPrint(" \n*********************************\n  ");
+    displayer->leaderPrint("  S- Using the the Stiffness Matrix (constant, Linear Elastic)");
+    displayer->leaderPrint(" \n*********************************\n  ");
 }
 
 

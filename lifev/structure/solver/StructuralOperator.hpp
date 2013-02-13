@@ -507,16 +507,10 @@ public:
     }
 
     //! Get the FESpace object
-    FESpace_Type dispFESpace()
-    {
-        return M_dispFESpace;
-    }
+    FESpace_Type& dispFESpace() {return *M_dispFESpace;}
 
     //! Get the ETFESpace object
-    ETFESpace_Type dispETFESpace()
-    {
-        return M_dispETFESpace;
-    }
+    ETFESpace_Type& dispETFESpace() {return *M_dispETFESpace;}
 
     //! Get the bCHandler object
     bcHandler_Type const& bcHandler() const
@@ -1036,6 +1030,7 @@ StructuralOperator<Mesh>::computeMassMatrix ( const Real factor)
     time.stop();
 
     std::cout << "Assembed Mass.....: " << time.diff() << std::endl;
+    //M_massMatrix->spy("massMatrixStructure.m");
 
     //*massStiff *= factor; //M_data.dataTime()->timeStep() * M_rescaleFactor;
 }
