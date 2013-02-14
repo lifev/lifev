@@ -27,13 +27,13 @@ save       = 1
 
 [./physics]
 density   	= 1.2
-material_flag   = 1
-young     	= 8.e+6
-poisson   	= 0.49
+material_flag   = 101
+young     	= 6e+5
+poisson   	= 0.47
 bulk		= 1.3333e+8
 alpha 		= 2.684564e+6
 gamma		= 1.0
-solidType 	= nonLinearVenantKirchhoffPenalized
+solidType 	= secondOrderExponential
 
 # linearVenantKirchhoff / nonLinearVenantKirchhoff / neoHookean / expoenential / secondOrderExponential / nonLinearVenantKirchhoffPenalized
 
@@ -47,7 +47,7 @@ BDF_order   	= 2
 [../space_discretization]
 mesh_type = .mesh
 mesh_dir  	= ./
-mesh_file 	= cubicYMesh.mesh
+mesh_file 	= cubeX10.mesh
 order     	= P1
 
 

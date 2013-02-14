@@ -183,7 +183,7 @@ struct Structure::Private
 
     static Real bcNonZero(const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
     {
-        return  136400.0;
+        return  70000; //136400.0;
     }
 
     static Real d0(const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
@@ -191,13 +191,13 @@ struct Structure::Private
         switch (i)
         {
         case 0:
-            return ( 0.034661/ 2 ) * x;
+            return ( 0.256942/ 2 ) * x;
             break;
         case 1:
-            return - 0.00838235 * ( y - 0.5 );
+            return - 0.058549 * ( y - 0.5 );
             break;
         case 2:
-            return - 0.00838235 * ( z + 0.5);
+            return - 0.058549 * ( z + 0.5);
             break;
         default:
             ERROR_MSG("This entry is not allowed: ud_functions.hpp");
@@ -525,7 +525,7 @@ Structure::run3d()
         //Let's get the initial displacement and velocity
         exporter.postProcess(0.0);
 
-        *vectVer = *initialDisplacement;
+        *vectVer = *initialDisplacement;//*disp;
         exporter.postProcess( 1.0 );
 
 
