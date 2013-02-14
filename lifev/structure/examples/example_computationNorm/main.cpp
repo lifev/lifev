@@ -312,12 +312,11 @@ Structure::run3d()
     solidFESpacePtr_Type dFESpace( new solidFESpace_Type(pointerToMesh,dOrder,3,parameters->comm) );
 
     // setting precise quadrature rule for fine meshes
-    QuadratureRule fineQuadRule;
-    QuadratureRule fineBdQuadRule;
-
-    fineQuadRule = quadRuleTetra15pt;
+    const QuadratureRule fineQuadRule = quadRuleTetra15pt;
+    QuadratureRule fineBdQuadRule = quadRuleTria4pt;
 
     dFESpace->setQuadRule( fineQuadRule );
+    dFESpace->setBdQuadRule( fineBdQuadRule );
     dFESpace->qr().showMe();
 
     if (verbose) std::cout << std::endl;
