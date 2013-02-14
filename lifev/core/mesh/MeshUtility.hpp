@@ -2094,8 +2094,11 @@ bool buildEdges ( MeshType& mesh,
                 edge.setPoint ( kPointId, facePtr->point ( faceShape_Type::edgeToPoint ( jEdgeLocalId, kPointId ) ) );
             }
 
-            // Get marker value inheriting from points
-            inheritPointsWeakerMarker ( edge );
+            // Get marker value inheriting from points if necessary
+            if ( edge.isMarkerUnset() )
+            {
+                inheritPointsWeakerMarker ( edge );
+            }
             edge.setBoundary (true);
             if (edgeExists)
             {
