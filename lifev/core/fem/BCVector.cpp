@@ -28,7 +28,7 @@
     @file
     @brief File contains classes to holds the FE vectors used for prescribing boundary conditions
 
-	@author Miguel Fernandez <miguel.fernandez@inria.fr>
+    @author Miguel Fernandez <miguel.fernandez@inria.fr>
     @author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
     @author Vincent Martin <vincent.martin@inria.fr>
     @contributor Mauro Perego <perego.mauro@gmail.com>
@@ -52,42 +52,42 @@ namespace LifeV
 
 
 BCVectorBase::BCVectorBase()
-        :
-        M_robinBoundaryMassCoeff( 0.0 ),
-        M_resistanceCoeff( 0.0 ),
-        M_betaCoeff(1.0),
-        M_isRobinBdMassCoeffAVector( false ),
-        M_isBetaCoeffAVector( false  ),
-        M_type( 0 ),
-        M_finalized( false )
+    :
+    M_robinBoundaryMassCoeff ( 0.0 ),
+    M_resistanceCoeff ( 0.0 ),
+    M_betaCoeff (1.0),
+    M_isRobinBdMassCoeffAVector ( false ),
+    M_isBetaCoeffAVector ( false  ),
+    M_type ( 0 ),
+    M_finalized ( false )
 {}
 
 
-BCVectorBase::BCVectorBase( const vector_Type& rightHandSideVector , const UInt numberOfTotalDof, UInt type )
-        :
-        M_rightHandSideVectorPtr       ( &rightHandSideVector  ),
-        M_numberOfTotalDof( numberOfTotalDof ),
-        M_robinBoundaryMassCoeff ( 0.0 ),
-        M_resistanceCoeff( 0.0 ),
-        M_betaCoeff(1.0),
-        M_isRobinBdMassCoeffAVector( false ),
-        M_isBetaCoeffAVector( false  ),
-        M_type      ( type ),
-        M_finalized ( false )
+BCVectorBase::BCVectorBase ( const vector_Type& rightHandSideVector , const UInt numberOfTotalDof, UInt type )
+    :
+    M_rightHandSideVectorPtr       ( &rightHandSideVector  ),
+    M_numberOfTotalDof ( numberOfTotalDof ),
+    M_robinBoundaryMassCoeff ( 0.0 ),
+    M_resistanceCoeff ( 0.0 ),
+    M_betaCoeff (1.0),
+    M_isRobinBdMassCoeffAVector ( false ),
+    M_isBetaCoeffAVector ( false  ),
+    M_type      ( type ),
+    M_finalized ( false )
 {}
 
-BCVectorBase::BCVectorBase( BCVectorBase const& bcVectorBase ):
-        M_rightHandSideVectorPtr ( bcVectorBase.M_rightHandSideVectorPtr ),
-        M_robinBoundaryMassCoeffVectorPtr ( bcVectorBase.M_robinBoundaryMassCoeffVectorPtr),
-        M_betaCoeffVectorPtr( bcVectorBase.M_betaCoeffVectorPtr ),
-        M_numberOfTotalDof ( bcVectorBase.M_numberOfTotalDof ),
-        M_robinBoundaryMassCoeff ( bcVectorBase.M_robinBoundaryMassCoeff ),
-        M_resistanceCoeff ( bcVectorBase.M_resistanceCoeff ),
-        M_betaCoeff ( bcVectorBase.M_betaCoeff ),
-        M_isRobinBdMassCoeffAVector ( bcVectorBase.M_isRobinBdMassCoeffAVector ),
-        M_isBetaCoeffAVector ( bcVectorBase.M_isBetaCoeffAVector ),
-        M_type ( bcVectorBase.M_type ),
-        M_finalized ( bcVectorBase.M_finalized )
+BCVectorBase::BCVectorBase ( BCVectorBase const& bcVectorBase ) :
+    M_rightHandSideVectorPtr ( bcVectorBase.M_rightHandSideVectorPtr ),
+    M_robinBoundaryMassCoeffVectorPtr ( bcVectorBase.M_robinBoundaryMassCoeffVectorPtr),
+    M_betaCoeffVectorPtr ( bcVectorBase.M_betaCoeffVectorPtr ),
+    M_numberOfTotalDof ( bcVectorBase.M_numberOfTotalDof ),
+    M_robinBoundaryMassCoeff ( bcVectorBase.M_robinBoundaryMassCoeff ),
+    M_resistanceCoeff ( bcVectorBase.M_resistanceCoeff ),
+    M_betaCoeff ( bcVectorBase.M_betaCoeff ),
+    M_isRobinBdMassCoeffAVector ( bcVectorBase.M_isRobinBdMassCoeffAVector ),
+    M_isBetaCoeffAVector ( bcVectorBase.M_isBetaCoeffAVector ),
+    M_type ( bcVectorBase.M_type ),
+    M_finalized ( bcVectorBase.M_finalized )
 {
 
 }
@@ -98,7 +98,7 @@ BCVectorBase::BCVectorBase( BCVectorBase const& bcVectorBase ):
 
 
 BCVectorBase&
-BCVectorBase::operator=( BCVectorBase const& bcVectorBase )
+BCVectorBase::operator= ( BCVectorBase const& bcVectorBase )
 {
     if ( this != &bcVectorBase )
     {
@@ -122,7 +122,7 @@ BCVectorBase::operator=( BCVectorBase const& bcVectorBase )
 Real
 BCVectorBase::operator() ( const ID& globalDofId, const ID& component ) const
 {
-    ASSERT_PRE( this->isFinalized(), "BC Vector should be finalized before being accessed." );
+    ASSERT_PRE ( this->isFinalized(), "BC Vector should be finalized before being accessed." );
     return ( *M_rightHandSideVectorPtr ) ( component * M_numberOfTotalDof + globalDofId );
 }
 
@@ -134,7 +134,7 @@ BCVectorBase::operator() ( const ID& globalDofId, const ID& component ) const
 Real
 BCVectorBase::robinCoeffVector ( const ID& globalDofId, const ID& component ) const
 {
-    ASSERT_PRE( this->isFinalized(), "BC Vector should be finalized before being accessed." );
+    ASSERT_PRE ( this->isFinalized(), "BC Vector should be finalized before being accessed." );
     return ( *M_robinBoundaryMassCoeffVectorPtr ) ( component * M_numberOfTotalDof + globalDofId );
 }
 
@@ -144,7 +144,7 @@ BCVectorBase::betaCoeffVector ( const ID& globalDofId, const ID& component ) con
 {
 
 
-    ASSERT_PRE( this->isFinalized(), "BC Vector should be finalized before being accessed." );
+    ASSERT_PRE ( this->isFinalized(), "BC Vector should be finalized before being accessed." );
 
     return ( *M_betaCoeffVectorPtr ) ( component * M_numberOfTotalDof + globalDofId );
 }
@@ -155,7 +155,7 @@ BCVectorBase::betaCoeffVector ( const ID& globalDofId, const ID& component ) con
 //====================================
 
 void
-BCVectorBase::setRhsVector( const vector_Type& rightHandSideVector , UInt numberOfTotalDof, UInt type )
+BCVectorBase::setRhsVector ( const vector_Type& rightHandSideVector , UInt numberOfTotalDof, UInt type )
 {
     M_rightHandSideVectorPtr = &rightHandSideVector  ;
     M_numberOfTotalDof = numberOfTotalDof;
@@ -164,17 +164,17 @@ BCVectorBase::setRhsVector( const vector_Type& rightHandSideVector , UInt number
 }
 
 void
-BCVectorBase::setRobinCoeffVector( const vector_Type& robinBoundaryMassCoeffVector )
+BCVectorBase::setRobinCoeffVector ( const vector_Type& robinBoundaryMassCoeffVector )
 {
     M_isRobinBdMassCoeffAVector = true;
-    M_robinBoundaryMassCoeffVectorPtr= &robinBoundaryMassCoeffVector;
+    M_robinBoundaryMassCoeffVectorPtr = &robinBoundaryMassCoeffVector;
 }
 
 void
-BCVectorBase::setBetaCoeffVector( const vector_Type& betaCoeffVector )
+BCVectorBase::setBetaCoeffVector ( const vector_Type& betaCoeffVector )
 {
     M_isBetaCoeffAVector = true;
-    M_betaCoeffVectorPtr= &betaCoeffVector;
+    M_betaCoeffVectorPtr = &betaCoeffVector;
 }
 
 
@@ -189,16 +189,16 @@ BCVectorBase::setBetaCoeffVector( const vector_Type& betaCoeffVector )
 //====================================
 
 
-BCVector::BCVector( const vector_Type& rightHandSideVector, UInt const numberOfTotalDof, UInt type )
-        :
-        BCVectorBase( rightHandSideVector, numberOfTotalDof, type )
+BCVector::BCVector ( const vector_Type& rightHandSideVector, UInt const numberOfTotalDof, UInt type )
+    :
+    BCVectorBase ( rightHandSideVector, numberOfTotalDof, type )
 {
-	M_finalized = true;
+    M_finalized = true;
 }
 
 
-BCVector::BCVector( const BCVector& bcVector ):
-        BCVectorBase( bcVector ) {}
+BCVector::BCVector ( const BCVector& bcVector ) :
+    BCVectorBase ( bcVector ) {}
 
 
 // ===================================
@@ -208,10 +208,12 @@ BCVector::BCVector( const BCVector& bcVector ):
 
 //! Assignment operator for BCVector
 BCVector&
-BCVector::operator=( const BCVector& bcVector )
+BCVector::operator= ( const BCVector& bcVector )
 {
     if ( this != &bcVector )
-        bcVectorBase_Type::operator=( bcVector );
+    {
+        bcVectorBase_Type::operator= ( bcVector );
+    }
 
     return *this;
 }
@@ -222,9 +224,9 @@ BCVector::operator=( const BCVector& bcVector )
 
 
 std::ostream&
-BCVector::showMe( bool /* verbose */, std::ostream & out ) const
+BCVector::showMe ( bool /* verbose */, std::ostream& out ) const
 {
-    ASSERT_PRE( this->isFinalized(), "BC Vector should be finalized before being accessed." );
+    ASSERT_PRE ( this->isFinalized(), "BC Vector should be finalized before being accessed." );
     out << "+++++++++++++++++++++++++++++++" << std::endl;
     out << "BC Vector Interface: " << std::endl;
     out << "number of interface vector DOF : " << this->nbTotalDOF() << std::endl;
@@ -238,9 +240,9 @@ BCVector::showMe( bool /* verbose */, std::ostream & out ) const
 
 
 BCVectorBase*
-createBCVector( BCVectorBase const* __bc )
+createBCVector ( BCVectorBase const* __bc )
 {
-    return new BCVector( ( BCVector const& )*__bc );
+    return new BCVector ( ( BCVector const& ) *__bc );
 }
 
 
@@ -254,19 +256,19 @@ createBCVector( BCVectorBase const* __bc )
 //====================================
 
 
-BCVectorInterface::BCVectorInterface( const VectorEpetra& rightHandSideVector, UInt numberOfTotalDof,
-                                      const dofInterfacePtr_Type& interfaceDofPtr, UInt type )
-        :
-        BCVectorBase( rightHandSideVector, numberOfTotalDof, type ),
-        M_interfaceDofPtr( interfaceDofPtr )
+BCVectorInterface::BCVectorInterface ( const VectorEpetra& rightHandSideVector, UInt numberOfTotalDof,
+                                       const dofInterfacePtr_Type& interfaceDofPtr, UInt type )
+    :
+    BCVectorBase ( rightHandSideVector, numberOfTotalDof, type ),
+    M_interfaceDofPtr ( interfaceDofPtr )
 {
-	M_finalized = true;
+    M_finalized = true;
 }
 
 
-BCVectorInterface::BCVectorInterface( const BCVectorInterface & bcVectorInterface ):
-        BCVectorBase( bcVectorInterface ),
-        M_interfaceDofPtr( bcVectorInterface.M_interfaceDofPtr ) {}
+BCVectorInterface::BCVectorInterface ( const BCVectorInterface& bcVectorInterface ) :
+    BCVectorBase ( bcVectorInterface ),
+    M_interfaceDofPtr ( bcVectorInterface.M_interfaceDofPtr ) {}
 
 
 // ===================================
@@ -274,11 +276,11 @@ BCVectorInterface::BCVectorInterface( const BCVectorInterface & bcVectorInterfac
 //====================================
 
 BCVectorInterface&
-BCVectorInterface::operator=( const BCVectorInterface & bcVectorInterface )
+BCVectorInterface::operator= ( const BCVectorInterface& bcVectorInterface )
 {
     if ( this != &bcVectorInterface )
     {
-        bcVectorBase_Type::operator=( bcVectorInterface );
+        bcVectorBase_Type::operator= ( bcVectorInterface );
         M_interfaceDofPtr = bcVectorInterface.M_interfaceDofPtr;
     }
 
@@ -289,15 +291,15 @@ BCVectorInterface::operator=( const BCVectorInterface & bcVectorInterface )
 Real
 BCVectorInterface::operator() ( const ID& globalDofId, const ID& component ) const
 {
-    ASSERT_PRE( this->isFinalized(), "BC Vector should be finalized before being accessed." );
-    return ( *M_rightHandSideVectorPtr ) ( component * M_numberOfTotalDof + M_interfaceDofPtr->getInterfaceDof( globalDofId ));
+    ASSERT_PRE ( this->isFinalized(), "BC Vector should be finalized before being accessed." );
+    return ( *M_rightHandSideVectorPtr ) ( component * M_numberOfTotalDof + M_interfaceDofPtr->getInterfaceDof ( globalDofId ) );
 }
 
 // ===================================
 // methods
 //====================================
 
-void BCVectorInterface::setup( const vector_Type& rightHandSideVector, UInt numberOfTotalDof, const dofInterfacePtr_Type& interfaceDofPtr, UInt type )
+void BCVectorInterface::setup ( const vector_Type& rightHandSideVector, UInt numberOfTotalDof, const dofInterfacePtr_Type& interfaceDofPtr, UInt type )
 {
     M_rightHandSideVectorPtr        = &rightHandSideVector;
     M_numberOfTotalDof = numberOfTotalDof;
@@ -313,11 +315,11 @@ void BCVectorInterface::setup( const vector_Type& rightHandSideVector, UInt numb
 
 
 void
-BCVectorInterface::setRhsVector( const vector_Type& rightHandSideVector, UInt numberOfTotalDof, const dofInterfacePtr_Type& interfaceDofPtr, UInt type )
+BCVectorInterface::setRhsVector ( const vector_Type& rightHandSideVector, UInt numberOfTotalDof, const dofInterfacePtr_Type& interfaceDofPtr, UInt type )
 {
-    ASSERT_PRE( !this->isFinalized(), "BC Vector cannot be set twice." );
+    ASSERT_PRE ( !this->isFinalized(), "BC Vector cannot be set twice." );
 
-    bcVectorBase_Type::setRhsVector( rightHandSideVector, numberOfTotalDof, type );
+    bcVectorBase_Type::setRhsVector ( rightHandSideVector, numberOfTotalDof, type );
 
     M_interfaceDofPtr = interfaceDofPtr;
 
@@ -325,38 +327,38 @@ BCVectorInterface::setRhsVector( const vector_Type& rightHandSideVector, UInt nu
 
 
 Real
-BCVectorInterface::robinCoeffVector( const ID& globalDofId, const ID& component ) const
+BCVectorInterface::robinCoeffVector ( const ID& globalDofId, const ID& component ) const
 {
-    ASSERT_PRE( this->isFinalized(), "BC Vector should be finalized before being accessed." );
-    return ( *M_robinBoundaryMassCoeffVectorPtr ) ( component * M_numberOfTotalDof + M_interfaceDofPtr->getInterfaceDof( globalDofId ));
+    ASSERT_PRE ( this->isFinalized(), "BC Vector should be finalized before being accessed." );
+    return ( *M_robinBoundaryMassCoeffVectorPtr ) ( component * M_numberOfTotalDof + M_interfaceDofPtr->getInterfaceDof ( globalDofId ) );
 }
 
 
 Real
-BCVectorInterface::betaCoeffVector( const ID& globalDofId, const ID& component ) const
+BCVectorInterface::betaCoeffVector ( const ID& globalDofId, const ID& component ) const
 {
-    ASSERT_PRE( this->isFinalized(), "BC Vector should be finalized before being accessed." );
-    return ( *M_betaCoeffVectorPtr ) ( component * M_numberOfTotalDof + M_interfaceDofPtr->getInterfaceDof( globalDofId ));
+    ASSERT_PRE ( this->isFinalized(), "BC Vector should be finalized before being accessed." );
+    return ( *M_betaCoeffVectorPtr ) ( component * M_numberOfTotalDof + M_interfaceDofPtr->getInterfaceDof ( globalDofId ) );
 }
 
 
 std::ostream&
-BCVectorInterface::showMe( bool verbose, std::ostream & out ) const
+BCVectorInterface::showMe ( bool verbose, std::ostream& out ) const
 {
-    ASSERT_PRE( this->isFinalized(), "BC Vector should be finalized before being accessed." );
+    ASSERT_PRE ( this->isFinalized(), "BC Vector should be finalized before being accessed." );
     out << "+++++++++++++++++++++++++++++++" << std::endl;
     out << "BC Vector Interface: " << std::endl;
     out << "number of interface vector DOF : " << M_numberOfTotalDof << std::endl;
     out << "==>Interface DOF :\n";
-    M_interfaceDofPtr->showMe( verbose, out );  // no showMe(..) in Miguel's DofInterface
+    M_interfaceDofPtr->showMe ( verbose, out ); // no showMe(..) in Miguel's DofInterface
     out << "+++++++++++++++++++++++++++++++" << std::endl;
     return out;
 }
 
 BCVectorBase*
-createBCVectorInterface( BCVectorBase const* bcVectorBase )
+createBCVectorInterface ( BCVectorBase const* bcVectorBase )
 {
-    return new BCVectorInterface( ( BCVectorInterface const& )* bcVectorBase );
+    return new BCVectorInterface ( ( BCVectorInterface const& ) * bcVectorBase );
 }
 
 

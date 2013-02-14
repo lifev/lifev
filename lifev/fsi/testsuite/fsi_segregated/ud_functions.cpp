@@ -37,136 +37,157 @@
 
 namespace LifeV
 {
-Real f(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
+Real f (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     return 0.;
 }
 
-Real u1(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
+Real u1 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     return 0.0;
 }
 
-Real fZero(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
+Real fZero (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     return 0.0;
 }
 
 // Initial velocity
-Real u0(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
+Real u0 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     return 0.0;
 }
 
-Real p0(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
+Real p0 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     return 0.0;
 }
 
 
-Real u2(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+Real u2 (const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
 {
     switch (i)
     {
-    case 0:
-        return 0.0;
-        break;
-    case 1:
-      return 0.0;
-        break;
-    case 2:
-        if ( t <= 0.003 ) 
-	  return 1.3332e4;
-	else
-	  return 0.0;
-        break;
+        case 0:
+            return 0.0;
+            break;
+        case 1:
+            return 0.0;
+            break;
+        case 2:
+            if ( t <= 0.003 )
+            {
+                return 1.3332e4;
+            }
+            else
+            {
+                return 0.0;
+            }
+            break;
 
     }
     return 0;
 }
 
-Real u2vel(const Real& t, const Real& x, const Real& y, const Real& /*z*/, const ID& i)
+Real u2vel (const Real& t, const Real& x, const Real& y, const Real& /*z*/, const ID& i)
 {
-  
+
     switch (i)
     {
-    case 0:
-        return 0.0;
-        break;
-    case 1:
-      if (t< 0.003)
-	return 120.0*((0.25 - x*x - y*y) / 0.25 )*sin(3.14159265*t/0.003);
-      else
-	return 0.0;
-      break;
-    case 2:
-      return 0.0;
-        break;
+        case 0:
+            return 0.0;
+            break;
+        case 1:
+            if (t < 0.003)
+            {
+                return 120.0 * ( (0.25 - x * x - y * y) / 0.25 ) * sin (3.14159265 * t / 0.003);
+            }
+            else
+            {
+                return 0.0;
+            }
+            break;
+        case 2:
+            return 0.0;
+            break;
     }
     return 0;
 }
 
 
-Real pressure(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+Real pressure (const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
 {
-  if ( t <= 0.003 )
-    return -1.3332e4;
-  else
-    return 0.0;
-  
+    if ( t <= 0.003 )
+    {
+        return -1.3332e4;
+    }
+    else
+    {
+        return 0.0;
+    }
+
 }
 // Initial displacement and velocity
-Real d0(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+Real d0 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
 {
     switch (i)
     {
-    case 0:
-        return 0.;
-        break;
-    case 1:
-        return 0.;
-        break;
-    case 2:
-        return 0.;
-        break;
-    default:
-        ERROR_MSG("This entrie is not allowed: ud_functions.hpp");
-        break;
+        case 0:
+            return 0.;
+            break;
+        case 1:
+            return 0.;
+            break;
+        case 2:
+            return 0.;
+            break;
+        default:
+            ERROR_MSG ("This entrie is not allowed: ud_functions.hpp");
+            break;
     }
 
     return 0.;
 }
 
-Real w0(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+Real w0 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
 {
 
     switch (i)
     {
-    case 0:
-        return 0.0;
-        break;
-    case 1:
-        return 0.0;
-        break;
-    case 2:
-        return 0.0;
-        break;
-    default:
-        ERROR_MSG("This entrie is not allowed: ud_functions.hpp");
-        break;
+        case 0:
+            return 0.0;
+            break;
+        case 1:
+            return 0.0;
+            break;
+        case 2:
+            return 0.0;
+            break;
+        default:
+            ERROR_MSG ("This entrie is not allowed: ud_functions.hpp");
+            break;
     }
 
     return 0.;
 }
 
-Real PhysFlux(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
+Real PhysFlux (const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     //double coef = 0.001;
     double plusmoins = -1.;
 
-    if (t < 0.01) return -1000.*t;
-    if (t <= 0.02) return -10.;
-    if (t <= 0.03) return 1000.*t - 30.;
+    if (t < 0.01)
+    {
+        return -1000.*t;
+    }
+    if (t <= 0.02)
+    {
+        return -10.;
+    }
+    if (t <= 0.03)
+    {
+        return 1000.*t - 30.;
+    }
     return 0;
 
     int    numData = 100;
@@ -274,115 +295,355 @@ Real PhysFlux(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& 
                        };
 
 
-    double timescale = 1./numData;
-    int     ipos = t/timescale;
+    double timescale = 1. / numData;
+    int     ipos = t / timescale;
 
-    double t2 =timescale*(ipos + 1);
+    double t2 = timescale * (ipos + 1);
 
-    double a = (flux[ipos + 1] - flux[ipos])/timescale;
-    double b = flux[ipos + 1] - a*t2;
+    double a = (flux[ipos + 1] - flux[ipos]) / timescale;
+    double b = flux[ipos + 1] - a * t2;
 
     //double slope = ipos -  t;
 
-    std::cout << "t = " << t << " f = " << t*a + b << " " << ipos << " " << a << " " << b << std::endl;
+    std::cout << "t = " << t << " f = " << t* a + b << " " << ipos << " " << a << " " << b << std::endl;
 
 
-    return plusmoins*(t*a + b);
+    return plusmoins * (t * a + b);
 }
 
-Real aortaPhysPress(const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+Real aortaPhysPress (const Real&  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
 {
     double coef = .1;
     switch (i)
     {
-    case 0:
-        return 0.0;
-        break;
-    case 1:
-        return 0.0;
-        break;
-    case 2:
-        if (t<=0.00) return 110170*coef;
-        if (t<=0.01) return 109540*coef;
-        if (t<=0.02) return 108930*coef;
-        if (t<=0.03) return 108320*coef;
-        if (t<=0.04) return 107710*coef;
-        if (t<=0.05) return 107120*coef;
-        if (t<=0.06) return 106530*coef;
-        if (t<=0.07) return 111130*coef;
-        if (t<=0.08) return 115440*coef;
-        if (t<=0.09) return 118690*coef;
-        if (t<=0.10) return 121460*coef;
-        if (t<=0.11) return 123940*coef;
-        if (t<=0.12) return 126350*coef;
-        if (t<=0.13) return 128890*coef;
-        if (t<=0.14) return 131510*coef;
-        if (t<=0.15) return 133980*coef;
-        if (t<=0.16) return 136200*coef;
-        if (t<=0.17) return 138330*coef;
-        if (t<=0.18) return 140350*coef;
-        if (t<=0.19) return 142290*coef;
-        if (t<=0.20) return 144360*coef;
-        if (t<=0.21) return 146130*coef;
-        if (t<=0.22) return 147530*coef;
-        if (t<=0.23) return 148780*coef;
-        if (t<=0.24) return 149740*coef;
-        if (t<=0.25) return 150320*coef;
-        if (t<=0.26) return 150470*coef;
-        if (t<=0.27) return 150250*coef;
-        if (t<=0.28) return 149750*coef;
-        if (t<=0.29) return 148990*coef;
-        if (t<=0.30) return 148220*coef;
-        if (t<=0.31) return 147210*coef;
-        if (t<=0.32) return 145940*coef;
-        if (t<=0.33) return 144960*coef;
-        if (t<=0.34) return 143750*coef;
-        if (t<=0.35) return 141980*coef;
-        if (t<=0.36) return 139900*coef;
-        if (t<=0.37) return 137260*coef;
-        if (t<=0.38) return 133970*coef;
-        if (t<=0.39) return 131670*coef;
-        if (t<=0.40) return 131320*coef;
-        if (t<=0.41) return 133150*coef;
-        if (t<=0.42) return 132710*coef;
-        if (t<=0.43) return 131570*coef;
-        if (t<=0.44) return 130280*coef;
-        if (t<=0.45) return 129750*coef;
-        if (t<=0.46) return 129330*coef;
-        if (t<=0.47) return 128910*coef;
-        if (t<=0.48) return 128360*coef;
-        if (t<=0.49) return 127680*coef;
-        if (t<=0.50) return 127000*coef;
-        if (t<=0.51) return 126410*coef;
-        if (t<=0.52) return 125920*coef;
-        if (t<=0.53) return 125480*coef;
-        if (t<=0.54) return 125040*coef;
-        if (t<=0.55) return 124560*coef;
-        if (t<=0.56) return 124050*coef;
-        if (t<=0.57) return 123530*coef;
-        if (t<=0.58) return 123000*coef;
-        if (t<=0.59) return 122440*coef;
-        if (t<=0.60) return 121840*coef;
-        if (t<=0.61) return 121220*coef;
-        if (t<=0.62) return 120580*coef;
-        if (t<=0.63) return 119950*coef;
-        if (t<=0.64) return 119330*coef;
-        if (t<=0.65) return 118710*coef;
-        if (t<=0.66) return 118100*coef;
-        if (t<=0.67) return 117470*coef;
-        if (t<=0.68) return 116840*coef;
-        if (t<=0.69) return 116200*coef;
-        if (t<=0.70) return 115560*coef;
-        if (t<=0.71) return 114920*coef;
-        if (t<=0.72) return 114280*coef;
-        if (t<=0.73) return 113650*coef;
-        if (t<=0.74) return 113020*coef;
-        if (t<=0.75) return 112400*coef;
-        if (t<=0.76) return 111790*coef;
-        if (t<=0.77) return 111200*coef;
-        if (t<=0.78) return 110620*coef;
-        if (t<=0.79) return 110060*coef;
-        break;
+        case 0:
+            return 0.0;
+            break;
+        case 1:
+            return 0.0;
+            break;
+        case 2:
+            if (t <= 0.00)
+            {
+                return 110170 * coef;
+            }
+            if (t <= 0.01)
+            {
+                return 109540 * coef;
+            }
+            if (t <= 0.02)
+            {
+                return 108930 * coef;
+            }
+            if (t <= 0.03)
+            {
+                return 108320 * coef;
+            }
+            if (t <= 0.04)
+            {
+                return 107710 * coef;
+            }
+            if (t <= 0.05)
+            {
+                return 107120 * coef;
+            }
+            if (t <= 0.06)
+            {
+                return 106530 * coef;
+            }
+            if (t <= 0.07)
+            {
+                return 111130 * coef;
+            }
+            if (t <= 0.08)
+            {
+                return 115440 * coef;
+            }
+            if (t <= 0.09)
+            {
+                return 118690 * coef;
+            }
+            if (t <= 0.10)
+            {
+                return 121460 * coef;
+            }
+            if (t <= 0.11)
+            {
+                return 123940 * coef;
+            }
+            if (t <= 0.12)
+            {
+                return 126350 * coef;
+            }
+            if (t <= 0.13)
+            {
+                return 128890 * coef;
+            }
+            if (t <= 0.14)
+            {
+                return 131510 * coef;
+            }
+            if (t <= 0.15)
+            {
+                return 133980 * coef;
+            }
+            if (t <= 0.16)
+            {
+                return 136200 * coef;
+            }
+            if (t <= 0.17)
+            {
+                return 138330 * coef;
+            }
+            if (t <= 0.18)
+            {
+                return 140350 * coef;
+            }
+            if (t <= 0.19)
+            {
+                return 142290 * coef;
+            }
+            if (t <= 0.20)
+            {
+                return 144360 * coef;
+            }
+            if (t <= 0.21)
+            {
+                return 146130 * coef;
+            }
+            if (t <= 0.22)
+            {
+                return 147530 * coef;
+            }
+            if (t <= 0.23)
+            {
+                return 148780 * coef;
+            }
+            if (t <= 0.24)
+            {
+                return 149740 * coef;
+            }
+            if (t <= 0.25)
+            {
+                return 150320 * coef;
+            }
+            if (t <= 0.26)
+            {
+                return 150470 * coef;
+            }
+            if (t <= 0.27)
+            {
+                return 150250 * coef;
+            }
+            if (t <= 0.28)
+            {
+                return 149750 * coef;
+            }
+            if (t <= 0.29)
+            {
+                return 148990 * coef;
+            }
+            if (t <= 0.30)
+            {
+                return 148220 * coef;
+            }
+            if (t <= 0.31)
+            {
+                return 147210 * coef;
+            }
+            if (t <= 0.32)
+            {
+                return 145940 * coef;
+            }
+            if (t <= 0.33)
+            {
+                return 144960 * coef;
+            }
+            if (t <= 0.34)
+            {
+                return 143750 * coef;
+            }
+            if (t <= 0.35)
+            {
+                return 141980 * coef;
+            }
+            if (t <= 0.36)
+            {
+                return 139900 * coef;
+            }
+            if (t <= 0.37)
+            {
+                return 137260 * coef;
+            }
+            if (t <= 0.38)
+            {
+                return 133970 * coef;
+            }
+            if (t <= 0.39)
+            {
+                return 131670 * coef;
+            }
+            if (t <= 0.40)
+            {
+                return 131320 * coef;
+            }
+            if (t <= 0.41)
+            {
+                return 133150 * coef;
+            }
+            if (t <= 0.42)
+            {
+                return 132710 * coef;
+            }
+            if (t <= 0.43)
+            {
+                return 131570 * coef;
+            }
+            if (t <= 0.44)
+            {
+                return 130280 * coef;
+            }
+            if (t <= 0.45)
+            {
+                return 129750 * coef;
+            }
+            if (t <= 0.46)
+            {
+                return 129330 * coef;
+            }
+            if (t <= 0.47)
+            {
+                return 128910 * coef;
+            }
+            if (t <= 0.48)
+            {
+                return 128360 * coef;
+            }
+            if (t <= 0.49)
+            {
+                return 127680 * coef;
+            }
+            if (t <= 0.50)
+            {
+                return 127000 * coef;
+            }
+            if (t <= 0.51)
+            {
+                return 126410 * coef;
+            }
+            if (t <= 0.52)
+            {
+                return 125920 * coef;
+            }
+            if (t <= 0.53)
+            {
+                return 125480 * coef;
+            }
+            if (t <= 0.54)
+            {
+                return 125040 * coef;
+            }
+            if (t <= 0.55)
+            {
+                return 124560 * coef;
+            }
+            if (t <= 0.56)
+            {
+                return 124050 * coef;
+            }
+            if (t <= 0.57)
+            {
+                return 123530 * coef;
+            }
+            if (t <= 0.58)
+            {
+                return 123000 * coef;
+            }
+            if (t <= 0.59)
+            {
+                return 122440 * coef;
+            }
+            if (t <= 0.60)
+            {
+                return 121840 * coef;
+            }
+            if (t <= 0.61)
+            {
+                return 121220 * coef;
+            }
+            if (t <= 0.62)
+            {
+                return 120580 * coef;
+            }
+            if (t <= 0.63)
+            {
+                return 119950 * coef;
+            }
+            if (t <= 0.64)
+            {
+                return 119330 * coef;
+            }
+            if (t <= 0.65)
+            {
+                return 118710 * coef;
+            }
+            if (t <= 0.66)
+            {
+                return 118100 * coef;
+            }
+            if (t <= 0.67)
+            {
+                return 117470 * coef;
+            }
+            if (t <= 0.68)
+            {
+                return 116840 * coef;
+            }
+            if (t <= 0.69)
+            {
+                return 116200 * coef;
+            }
+            if (t <= 0.70)
+            {
+                return 115560 * coef;
+            }
+            if (t <= 0.71)
+            {
+                return 114920 * coef;
+            }
+            if (t <= 0.72)
+            {
+                return 114280 * coef;
+            }
+            if (t <= 0.73)
+            {
+                return 113650 * coef;
+            }
+            if (t <= 0.74)
+            {
+                return 113020 * coef;
+            }
+            if (t <= 0.75)
+            {
+                return 112400 * coef;
+            }
+            if (t <= 0.76)
+            {
+                return 111790 * coef;
+            }
+            if (t <= 0.77)
+            {
+                return 111200 * coef;
+            }
+            if (t <= 0.78)
+            {
+                return 110620 * coef;
+            }
+            if (t <= 0.79)
+            {
+                return 110060 * coef;
+            }
+            break;
     }
 
     return 0.;

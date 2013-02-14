@@ -99,7 +99,7 @@ public:
     /*!
         @param order Order q of the bdf
      */
-    void setup( const UInt order );
+    void setup ( const UInt order );
 
     //@}
 
@@ -113,13 +113,19 @@ public:
     /*!
         @return Reference to a new Bdf template which holds the velocity field
      */
-    TimeAdvanceBDF<VectorType>& bdfVelocity() { return M_bdfVelocity; }
+    TimeAdvanceBDF<VectorType>& bdfVelocity()
+    {
+        return M_bdfVelocity;
+    }
 
     //! The method returns the Bdf pressure
     /*!
         @return Reference to a new Bdf template which holds the pressure
      */
-    TimeAdvanceBDF<VectorType>& bdfPressure() { return M_bdfPressure; }
+    TimeAdvanceBDF<VectorType>& bdfPressure()
+    {
+        return M_bdfPressure;
+    }
 
     //@}
 
@@ -138,18 +144,18 @@ private:
 // ===================================================
 template<typename VectorType>
 TimeAdvanceBDFNavierStokes<VectorType>::TimeAdvanceBDFNavierStokes()
-        :
-        M_bdfVelocity( ),
-        M_bdfPressure( )
+    :
+    M_bdfVelocity( ),
+    M_bdfPressure( )
 {}
 
 
 template<typename VectorType>
 void
-TimeAdvanceBDFNavierStokes<VectorType>::setup( const UInt order )
+TimeAdvanceBDFNavierStokes<VectorType>::setup ( const UInt order )
 {
-    M_bdfVelocity.setup( order, 1 );
-    M_bdfPressure.setup( std::max( UInt( 1 ), order - 1 ), 1 );
+    M_bdfVelocity.setup ( order, 1 );
+    M_bdfPressure.setup ( std::max ( UInt ( 1 ), order - 1 ), 1 );
 }
 
 // ===================================================

@@ -45,32 +45,32 @@ namespace Multiscale
 // Constructors & Destructor
 // ===================================================
 MultiscaleGlobalData::MultiscaleGlobalData() :
-        M_timeData                      (),
-        M_fluidDensity                  (),
-        M_fluidViscosity                (),
-        M_fluidVenousPressure           (),
-        M_solidExternalPressure         (),
-        M_solidDensity                  (),
-        M_solidPoissonCoefficient       (),
-        //M_solidThickness                (),
-        M_solidYoungModulus             (),
-        M_scalingFactorResistance       (),
-        M_scalingFactorCompliance       ()
+    M_timeData                      (),
+    M_fluidDensity                  (),
+    M_fluidViscosity                (),
+    M_fluidVenousPressure           (),
+    M_solidExternalPressure         (),
+    M_solidDensity                  (),
+    M_solidPoissonCoefficient       (),
+    //M_solidThickness                (),
+    M_solidYoungModulus             (),
+    M_scalingFactorResistance       (),
+    M_scalingFactorCompliance       ()
 {
 }
 
-MultiscaleGlobalData::MultiscaleGlobalData( const MultiscaleGlobalData& data ) :
-        M_timeData                      ( data.M_timeData ),
-        M_fluidDensity                  ( data.M_fluidDensity ),
-        M_fluidViscosity                ( data.M_fluidViscosity ),
-        M_fluidVenousPressure           ( data.M_fluidVenousPressure ),
-        M_solidExternalPressure         ( data.M_solidExternalPressure ),
-        M_solidDensity                  ( data.M_solidDensity ),
-        M_solidPoissonCoefficient       ( data.M_solidPoissonCoefficient ),
-        //M_solidThickness                ( data.M_solidThickness ),
-        M_solidYoungModulus             ( data.M_solidYoungModulus ),
-        M_scalingFactorResistance       ( data.M_scalingFactorResistance ),
-        M_scalingFactorCompliance       ( data.M_scalingFactorCompliance )
+MultiscaleGlobalData::MultiscaleGlobalData ( const MultiscaleGlobalData& data ) :
+    M_timeData                      ( data.M_timeData ),
+    M_fluidDensity                  ( data.M_fluidDensity ),
+    M_fluidViscosity                ( data.M_fluidViscosity ),
+    M_fluidVenousPressure           ( data.M_fluidVenousPressure ),
+    M_solidExternalPressure         ( data.M_solidExternalPressure ),
+    M_solidDensity                  ( data.M_solidDensity ),
+    M_solidPoissonCoefficient       ( data.M_solidPoissonCoefficient ),
+    //M_solidThickness                ( data.M_solidThickness ),
+    M_solidYoungModulus             ( data.M_solidYoungModulus ),
+    M_scalingFactorResistance       ( data.M_scalingFactorResistance ),
+    M_scalingFactorCompliance       ( data.M_scalingFactorCompliance )
 {
 }
 
@@ -78,7 +78,7 @@ MultiscaleGlobalData::MultiscaleGlobalData( const MultiscaleGlobalData& data ) :
 // Operators
 // ===================================================
 MultiscaleGlobalData&
-MultiscaleGlobalData::operator=( const MultiscaleGlobalData& data )
+MultiscaleGlobalData::operator= ( const MultiscaleGlobalData& data )
 {
     if ( this != &data )
     {
@@ -102,19 +102,19 @@ MultiscaleGlobalData::operator=( const MultiscaleGlobalData& data )
 // Methods
 // ===================================================
 void
-MultiscaleGlobalData::readData( const GetPot& dataFile )
+MultiscaleGlobalData::readData ( const GetPot& dataFile )
 {
-    M_timeData.reset( new time_Type( dataFile, "Solver/time_discretization" ) );
-    M_fluidDensity                  = dataFile( "Physics/FluidDensity", 0. );
-    M_fluidViscosity                = dataFile( "Physics/FluidViscosity", 0. );
-    M_fluidVenousPressure           = dataFile( "Physics/FluidVenousPressure", 0. );
-    M_solidExternalPressure         = dataFile( "Physics/SolidExternalPressure", 0. );
-    M_solidDensity                  = dataFile( "Physics/SolidDensity", 0. );
-    M_solidPoissonCoefficient       = dataFile( "Physics/SolidPoissonCoefficient", 0. );
+    M_timeData.reset ( new time_Type ( dataFile, "Solver/time_discretization" ) );
+    M_fluidDensity                  = dataFile ( "Physics/FluidDensity", 0. );
+    M_fluidViscosity                = dataFile ( "Physics/FluidViscosity", 0. );
+    M_fluidVenousPressure           = dataFile ( "Physics/FluidVenousPressure", 0. );
+    M_solidExternalPressure         = dataFile ( "Physics/SolidExternalPressure", 0. );
+    M_solidDensity                  = dataFile ( "Physics/SolidDensity", 0. );
+    M_solidPoissonCoefficient       = dataFile ( "Physics/SolidPoissonCoefficient", 0. );
     //M_solidThickness                = dataFile( "Physics/SolidThickness", 0. );
-    M_solidYoungModulus             = dataFile( "Physics/SolidYoungModulus", 0. );
-    M_scalingFactorResistance       = dataFile( "Physics/ScalingFactorResistance", 1. );
-    M_scalingFactorCompliance       = dataFile( "Physics/ScalingFactorCompliance", 1. );
+    M_solidYoungModulus             = dataFile ( "Physics/SolidYoungModulus", 0. );
+    M_scalingFactorResistance       = dataFile ( "Physics/ScalingFactorResistance", 1. );
+    M_scalingFactorCompliance       = dataFile ( "Physics/ScalingFactorCompliance", 1. );
 }
 
 void

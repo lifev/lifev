@@ -70,7 +70,7 @@ public:
     ExpressionPosition();
 
     //! Copy constructor
-    ExpressionPosition( const ExpressionPosition& );
+    ExpressionPosition ( const ExpressionPosition& );
 
     //! Destructor
     ~ExpressionPosition();
@@ -82,7 +82,7 @@ public:
     //@{
 
     //! Display method
-    static void display(std::ostream& out=std::cout);
+    static void display (std::ostream& out = std::cout);
 
     //@}
 };

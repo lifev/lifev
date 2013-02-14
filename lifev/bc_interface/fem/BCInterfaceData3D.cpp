@@ -43,20 +43,20 @@ namespace LifeV
 // Constructors
 // ===================================================
 BCInterfaceData3D::BCInterfaceData3D() :
-        BCInterfaceData         (),
-        M_baseRobinAlpha        (),
-        M_baseStringRobinAlpha  (),
-        M_baseRobinBeta         (),
-        M_baseStringRobinBeta   (),
-        M_baseDirectional       (),
-        M_baseStringDirectional (),
-        M_name                  (),
-        M_flag                  (),
-        M_type                  (),
-        M_mode                  (),
-        M_componentsVector      (),
-        M_mapType               (),
-        M_mapMode               ()
+    BCInterfaceData         (),
+    M_baseRobinAlpha        (),
+    M_baseStringRobinAlpha  (),
+    M_baseRobinBeta         (),
+    M_baseStringRobinBeta   (),
+    M_baseDirectional       (),
+    M_baseStringDirectional (),
+    M_name                  (),
+    M_flag                  (),
+    M_type                  (),
+    M_mode                  (),
+    M_componentsVector      (),
+    M_mapType               (),
+    M_mapMode               ()
 {
     //Set mapType
     M_mapType["Essential"]         = Essential;
@@ -76,21 +76,21 @@ BCInterfaceData3D::BCInterfaceData3D() :
     M_mapMode["Directional"] = Directional;
 }
 
-BCInterfaceData3D::BCInterfaceData3D( const BCInterfaceData3D& data ) :
-        BCInterfaceData         ( data ),
-        M_baseRobinAlpha        ( data.M_baseRobinAlpha ),
-        M_baseStringRobinAlpha  ( data.M_baseStringRobinAlpha ),
-        M_baseRobinBeta         ( data.M_baseRobinBeta ),
-        M_baseStringRobinBeta   ( data.M_baseStringRobinBeta ),
-        M_baseDirectional       ( data.M_baseDirectional ),
-        M_baseStringDirectional ( data.M_baseStringDirectional ),
-        M_name                  ( data.M_name ),
-        M_flag                  ( data.M_flag ),
-        M_type                  ( data.M_type ),
-        M_mode                  ( data.M_mode ),
-        M_componentsVector      ( data.M_componentsVector ),
-        M_mapType               ( data.M_mapType ),
-        M_mapMode               ( data.M_mapMode )
+BCInterfaceData3D::BCInterfaceData3D ( const BCInterfaceData3D& data ) :
+    BCInterfaceData         ( data ),
+    M_baseRobinAlpha        ( data.M_baseRobinAlpha ),
+    M_baseStringRobinAlpha  ( data.M_baseStringRobinAlpha ),
+    M_baseRobinBeta         ( data.M_baseRobinBeta ),
+    M_baseStringRobinBeta   ( data.M_baseStringRobinBeta ),
+    M_baseDirectional       ( data.M_baseDirectional ),
+    M_baseStringDirectional ( data.M_baseStringDirectional ),
+    M_name                  ( data.M_name ),
+    M_flag                  ( data.M_flag ),
+    M_type                  ( data.M_type ),
+    M_mode                  ( data.M_mode ),
+    M_componentsVector      ( data.M_componentsVector ),
+    M_mapType               ( data.M_mapType ),
+    M_mapMode               ( data.M_mapMode )
 {
 }
 
@@ -98,11 +98,11 @@ BCInterfaceData3D::BCInterfaceData3D( const BCInterfaceData3D& data ) :
 // Operators
 // ===================================================
 BCInterfaceData3D&
-BCInterfaceData3D::operator=( const BCInterfaceData3D& data )
+BCInterfaceData3D::operator= ( const BCInterfaceData3D& data )
 {
     if ( this != &data )
     {
-        BCInterfaceData::operator=( data );
+        BCInterfaceData::operator= ( data );
         M_baseRobinAlpha        = data.M_baseRobinAlpha;
         M_baseStringRobinAlpha  = data.M_baseStringRobinAlpha;
         M_baseRobinBeta         = data.M_baseRobinBeta;
@@ -125,44 +125,48 @@ BCInterfaceData3D::operator=( const BCInterfaceData3D& data )
 // Methods
 // ===================================================
 void
-BCInterfaceData3D::readBC( const std::string& fileName, const std::string& dataSection, const std::string& name )
+BCInterfaceData3D::readBC ( const std::string& fileName, const std::string& dataSection, const std::string& name )
 {
     // Call to the base class
-    dataContainer_Type::readBC( fileName, dataSection, name );
+    dataContainer_Type::readBC ( fileName, dataSection, name );
 
     // Read 3D data
-    GetPot dataFile( fileName );
+    GetPot dataFile ( fileName );
 
     M_name = name;
 
-    readFlag( dataFile, ( dataSection + name + "/flag" ).c_str() );
-    readType( dataFile, ( dataSection + name + "/type" ).c_str() );
-    readMode( dataFile, ( dataSection + name + "/mode" ).c_str() );
-    readComponentsVector( dataFile, ( dataSection + name + "/component" ).c_str() );
+    readFlag ( dataFile, ( dataSection + name + "/flag" ).c_str() );
+    readType ( dataFile, ( dataSection + name + "/type" ).c_str() );
+    readMode ( dataFile, ( dataSection + name + "/mode" ).c_str() );
+    readComponentsVector ( dataFile, ( dataSection + name + "/component" ).c_str() );
 
     // Read base
     if ( M_type == Robin )
     {
-        readBase( dataFile, dataSection + name + "/RobinAlpha/", M_baseRobinAlpha, M_baseStringRobinAlpha );
-        readBase( dataFile, dataSection + name + "/RobinBeta/", M_baseRobinBeta, M_baseStringRobinBeta );
+        readBase ( dataFile, dataSection + name + "/RobinAlpha/", M_baseRobinAlpha, M_baseStringRobinAlpha );
+        readBase ( dataFile, dataSection + name + "/RobinBeta/", M_baseRobinBeta, M_baseStringRobinBeta );
     }
     if ( M_mode == Directional )
-        readBase( dataFile, dataSection + name + "/Directional/", M_baseDirectional, M_baseStringDirectional );
+    {
+        readBase ( dataFile, dataSection + name + "/Directional/", M_baseDirectional, M_baseStringDirectional );
+    }
 }
 
 void
-BCInterfaceData3D::showMe( std::ostream& output ) const
+BCInterfaceData3D::showMe ( std::ostream& output ) const
 {
     // Call to the base class
-    dataContainer_Type::showMe( output );
+    dataContainer_Type::showMe ( output );
 
     // Show 3D data
     output << "Flag              = " << static_cast< Real > ( M_flag ) << std::endl;
     output << "Type              = " << M_type << std::endl;
     output << "Mode              = " << M_mode << std::endl;
     output << "Components Vector = ";
-    for ( UInt i(0); i < static_cast<UInt>( M_componentsVector.size() ); ++i )
+    for ( UInt i (0); i < static_cast<UInt> ( M_componentsVector.size() ); ++i )
+    {
         output << M_componentsVector[i] << " ";
+    }
     output << "\n";
 }
 
@@ -170,13 +174,15 @@ BCInterfaceData3D::showMe( std::ostream& output ) const
 // Private Methods
 // ===================================================
 void
-BCInterfaceData3D::readComponentsVector( const GetPot& dataFile, const char* component )
+BCInterfaceData3D::readComponentsVector ( const GetPot& dataFile, const char* component )
 {
-    UInt componentSize = dataFile.vector_variable_size( component );
+    UInt componentSize = dataFile.vector_variable_size ( component );
 
-    M_componentsVector.resize( componentSize );
-    for ( UInt j( 0 ); j < componentSize; ++j )
-        M_componentsVector[j] = dataFile( component, 0, j );
+    M_componentsVector.resize ( componentSize );
+    for ( UInt j ( 0 ); j < componentSize; ++j )
+    {
+        M_componentsVector[j] = dataFile ( component, 0, j );
+    }
 }
 
 } // Namespace LifeV

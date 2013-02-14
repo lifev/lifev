@@ -88,8 +88,8 @@ public:
 
     //! @name Public Types
     //@{
-	typedef Epetra_Comm comm_Type;
-	typedef boost::shared_ptr<comm_Type> commPtr_Type;
+    typedef Epetra_Comm comm_Type;
+    typedef boost::shared_ptr<comm_Type> commPtr_Type;
     typedef Epetra_Map map_Type;
     typedef boost::shared_ptr<map_Type> mapPtr_Type;
     typedef boost::shared_ptr<const map_Type> constMapPtr_Type;
@@ -118,7 +118,7 @@ public:
 
     \return Integer error code, set to 0 if successful.  Set to -1 if this implementation does not support transpose.
     */
-    virtual int SetUseTranspose(bool UseTranspose) = 0;
+    virtual int SetUseTranspose (bool UseTranspose) = 0;
     //@}
 
     //! @name Mathematical functions
@@ -133,7 +133,7 @@ public:
 
     \return Integer error code, set to 0 if successful.
     */
-    virtual int Apply(const vector_Type& X, vector_Type& Y) const = 0;
+    virtual int Apply (const vector_Type& X, vector_Type& Y) const = 0;
 
     //! Returns the result of a LinearOperator applied to a VectorEpetra X in Y.
     /*!
@@ -144,9 +144,9 @@ public:
 
     \return Integer error code, set to 0 if successful.
     */
-    inline int apply(const VectorEpetra & X, VectorEpetra & Y) const
+    inline int apply (const VectorEpetra& X, VectorEpetra& Y) const
     {
-        return Apply(X.epetraVector(), Y.epetraVector());
+        return Apply (X.epetraVector(), Y.epetraVector() );
     }
 
     //! Returns the result of a raw_operator inverse applied to an raw_vector X in Y.
@@ -161,7 +161,7 @@ public:
     \warning In order to work with AztecOO, any implementation of this method must
               support the case where X and Y are the same object.
     */
-    virtual int ApplyInverse(const vector_Type& X, vector_Type& Y) const = 0;
+    virtual int ApplyInverse (const vector_Type& X, vector_Type& Y) const = 0;
 
     //! Returns the result of a LinearOperator inverse applied to an VectorEpetra X in Y.
     /*!
@@ -176,9 +176,9 @@ public:
               support the case where X and Y are the same object.
     */
 
-    inline int applyInverse(const VectorEpetra & X, VectorEpetra & Y)
+    inline int applyInverse (const VectorEpetra& X, VectorEpetra& Y)
     {
-        return ApplyInverse(X.epetraVector(), Y.epetraVector());
+        return ApplyInverse (X.epetraVector(), Y.epetraVector() );
     }
 
     //! Returns the infinity norm of the global matrix.
@@ -194,7 +194,7 @@ public:
     //@{
 
     //! Returns a character string describing the operator
-    virtual const char * Label() const = 0;
+    virtual const char* Label() const = 0;
 
     //! Returns the current UseTranspose setting.
     virtual bool UseTranspose() const = 0;
@@ -203,13 +203,13 @@ public:
     virtual bool HasNormInf() const = 0;
 
     //! Returns a pointer to the Epetra_Comm communicator associated with this operator.
-    virtual const comm_Type & Comm() const = 0;
+    virtual const comm_Type& Comm() const = 0;
 
     //! Returns the raw_map object associated with the domain of this operator.
-    virtual const map_Type & OperatorDomainMap() const = 0;
+    virtual const map_Type& OperatorDomainMap() const = 0;
 
     //! Returns the raw_map object associated with the range of this operator.
-    virtual const map_Type & OperatorRangeMap() const = 0;
+    virtual const map_Type& OperatorRangeMap() const = 0;
     //@}
 
 };

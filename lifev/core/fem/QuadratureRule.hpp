@@ -129,8 +129,8 @@ public:
       @param nbQuadPt The number of quadrature points defined
       @param degOfExact The degree of exactness of the quadrature rule
      */
-    QuadratureRule( const QuadraturePoint* pt, int id, std::string name, ReferenceShapes shape,
-              UInt nbQuadPt, UInt degOfExact );
+    QuadratureRule ( const QuadraturePoint* pt, int id, std::string name, ReferenceShapes shape,
+                     UInt nbQuadPt, UInt degOfExact );
 
     //! Full constructor
     /*!
@@ -147,14 +147,14 @@ public:
       @param degreeOfExactness The degree of exactness of the quadrature
       @param nbQuadPt The number of quadrature points
      */
-    QuadratureRule(std::string name, ReferenceShapes shape, UInt dimension, UInt degreeOfExactness, UInt nbQuadPt, ... );
+    QuadratureRule (std::string name, ReferenceShapes shape, UInt dimension, UInt degreeOfExactness, UInt nbQuadPt, ... );
 
 
     //! Copy constructor
     /*!
       @param qr The quadrature rule that we want to copy.
      */
-    QuadratureRule( const QuadratureRule& qr);
+    QuadratureRule ( const QuadratureRule& qr);
 
     //! Copy constructor using a different dimension
     /*!
@@ -164,7 +164,7 @@ public:
       @param qr The quadrature rule to export
       @param dim The new dimension to be used with the quadrature rule.
      */
-    QuadratureRule( const QuadratureRule& qr, const UInt dim);
+    QuadratureRule ( const QuadratureRule& qr, const UInt dim);
 
 
     //! Destructor
@@ -195,14 +195,14 @@ public:
 
       @param qp The quadrature point to add.
      */
-    void addPoint(const QuadraturePoint& qp)
+    void addPoint (const QuadraturePoint& qp)
     {
-        M_pt.push_back(QuadraturePoint(qp,M_dimension));
-        M_nbQuadPt+=1;
+        M_pt.push_back (QuadraturePoint (qp, M_dimension) );
+        M_nbQuadPt += 1;
     };
 
     //! ShowMe method
-    void showMe( std::ostream& output = std::cout) const;
+    void showMe ( std::ostream& output = std::cout) const;
 
     //! Check for the exactness of the quadrature
     /*!
@@ -224,7 +224,7 @@ public:
 
       @param filename The name of the file to be created.
      */
-    void vtkExport( const std::string& filename) const;
+    void vtkExport ( const std::string& filename) const;
 
     //@}
 
@@ -237,7 +237,7 @@ public:
       Beware to have set the dimension (default: 0!) before calling
       this method (use the QuadratureRule::setDimensionShape method for example).
      */
-    void setPoints(const std::vector<QuadraturePoint> & pts);
+    void setPoints (const std::vector<QuadraturePoint>& pts);
 
     //! Change the quadrature points for the one given here
     /*!
@@ -251,16 +251,16 @@ public:
      @param coordinates An array containing the coordinates of the points
      @param weights An array containing the weights of the points
      */
-    void setPoints(const std::vector<GeoVector>& coordinates, const std::vector<Real>& weights);
+    void setPoints (const std::vector<GeoVector>& coordinates, const std::vector<Real>& weights);
 
     //! Change the name of the quadrature
-    void setName(const std::string& newName);
+    void setName (const std::string& newName);
 
     //! Change the degree of exactness
-    void setExactness(const UInt& exactness);
+    void setExactness (const UInt& exactness);
 
     //! Change the dimension and the shape
-    void setDimensionShape(const UInt& newDim, const ReferenceShapes& newShape);
+    void setDimensionShape (const UInt& newDim, const ReferenceShapes& newShape);
 
 
     //@}
@@ -270,30 +270,30 @@ public:
     //@{
 
     //! quadPoint(ig) is the ig-th quadrature point
-    const QuadraturePoint& quadPoint( const UInt& ig ) const
+    const QuadraturePoint& quadPoint ( const UInt& ig ) const
     {
-        ASSERT_BD( ig < M_nbQuadPt );
+        ASSERT_BD ( ig < M_nbQuadPt );
         return M_pt[ ig ];
     }
 
     //! weight(ig) is the ig-th quadrature weight
-    const Real& weight(const UInt& ig ) const
+    const Real& weight (const UInt& ig ) const
     {
-        ASSERT_BD( ig < M_nbQuadPt );
+        ASSERT_BD ( ig < M_nbQuadPt );
         return M_pt[ ig ].weight();
     }
 
     //! quadPointCoor(ig,icoor) is the coordinate icoor of the quadrature point ig
-    const Real& quadPointCoor( const UInt& ig, const UInt& icoor ) const
+    const Real& quadPointCoor ( const UInt& ig, const UInt& icoor ) const
     {
-        ASSERT_BD( ig < M_nbQuadPt );
-        return M_pt[ ig ].coor( icoor );
+        ASSERT_BD ( ig < M_nbQuadPt );
+        return M_pt[ ig ].coor ( icoor );
     }
 
     //! quadPointCoor(ig) is the full coordinates of the quadrature point ig
-    const GeoVector& quadPointCoor( const UInt& ig ) const
+    const GeoVector& quadPointCoor ( const UInt& ig ) const
     {
-        ASSERT_BD( ig < M_nbQuadPt );
+        ASSERT_BD ( ig < M_nbQuadPt );
         return M_pt[ ig ].coor( );
     }
 

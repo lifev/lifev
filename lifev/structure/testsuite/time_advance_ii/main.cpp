@@ -89,29 +89,31 @@ using namespace LifeV;
 
 namespace
 {
-static bool regIF = (PRECFactory::instance().registerProduct( "Ifpack", &createIfpack ));
-static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ));
+static bool regIF = (PRECFactory::instance().registerProduct ( "Ifpack", &createIfpack ) );
+static bool regML = (PRECFactory::instance().registerProduct ( "ML", &createML ) );
 }
 
 // ===================================================
 //! Main
 // ===================================================
 int
-main( int argc, char** argv )
+main ( int argc, char** argv )
 {
 #ifdef HAVE_MPI
-    MPI_Init(&argc, &argv);
+    MPI_Init (&argc, &argv);
 
-    boost::shared_ptr<Epetra_MpiComm> Comm(new Epetra_MpiComm( MPI_COMM_WORLD ) );
+    boost::shared_ptr<Epetra_MpiComm> Comm (new Epetra_MpiComm ( MPI_COMM_WORLD ) );
     if ( Comm->MyPID() == 0 )
+    {
         cout << "% using MPI" << endl;
+    }
 #else
-    boost::shared_ptr<Epetra_SerialComm> Comm( new Epetra_SerialComm() );
+    boost::shared_ptr<Epetra_SerialComm> Comm ( new Epetra_SerialComm() );
     cout << "% using serial Version" << endl;
 #endif
 
 
-    problem ProblemOrderII( argc, argv,  Comm );
+    problem ProblemOrderII ( argc, argv,  Comm );
     ProblemOrderII.run();
 
 
@@ -120,5 +122,5 @@ main( int argc, char** argv )
     std::cout << "MPI Finalization" << std::endl;
 #endif
 
-    return( EXIT_SUCCESS );
+    return ( EXIT_SUCCESS );
 }

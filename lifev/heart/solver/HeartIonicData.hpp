@@ -50,8 +50,8 @@ namespace LifeV
 
 */
 class HeartIonicData:
-        public MeshData,
-        public TimeData
+    public MeshData,
+    public TimeData
 {
 public:
 
@@ -62,9 +62,9 @@ public:
     HeartIonicData();
 
 
-    HeartIonicData( const GetPot& dataFile );
+    HeartIonicData ( const GetPot& dataFile );
 
-    HeartIonicData( const HeartIonicData& dataIonic );
+    HeartIonicData ( const HeartIonicData& dataIonic );
 
     virtual ~HeartIonicData() {}
     //@}
@@ -75,7 +75,7 @@ public:
 
 
 
-    HeartIonicData& operator=( const HeartIonicData& dataIonic );
+    HeartIonicData& operator= ( const HeartIonicData& dataIonic );
 
     //@}
 
@@ -83,7 +83,7 @@ public:
     //@{
 
     //! output: show the data used for the simulation
-    void showMe( std::ostream& output = std::cout );
+    void showMe ( std::ostream& output = std::cout );
 
     //@}
 
@@ -92,49 +92,112 @@ public:
     //@{
 
     //!external setup: set all the data for the simulation
-    void setup( const GetPot& dataFile );
+    void setup ( const GetPot& dataFile );
 
-    const Real& RMCParameterA() const { return M_RMCParameterA; }
+    const Real& RMCParameterA() const
+    {
+        return M_RMCParameterA;
+    }
 
-    const Real& RMCParameterB() const { return M_RMCParameterB; }
+    const Real& RMCParameterB() const
+    {
+        return M_RMCParameterB;
+    }
 
-    const Real& RMCParameterC1() const { return M_RMCParameterC1; }
+    const Real& RMCParameterC1() const
+    {
+        return M_RMCParameterC1;
+    }
 
-    const Real& RMCParameterC2() const { return M_RMCParameterC2; }
+    const Real& RMCParameterC2() const
+    {
+        return M_RMCParameterC2;
+    }
 
-    const Real& RMCParameterD() const { return M_RMCParameterD; }
+    const Real& RMCParameterD() const
+    {
+        return M_RMCParameterD;
+    }
 
-    const Real& RMCTimeUnit() const { return M_RMCTimeUnit; }
+    const Real& RMCTimeUnit() const
+    {
+        return M_RMCTimeUnit;
+    }
 
-    const Real& RMCPotentialAmplitude() const { return M_RMCPotentialAmplitude; }
+    const Real& RMCPotentialAmplitude() const
+    {
+        return M_RMCPotentialAmplitude;
+    }
 
-    const Real& RMCRestPotential() const { return M_RMCRestPotential; }
+    const Real& RMCRestPotential() const
+    {
+        return M_RMCRestPotential;
+    }
 
-    const Real& RMCInitialRepolarization() const { return M_RMCInitialRepolarization; }
+    const Real& RMCInitialRepolarization() const
+    {
+        return M_RMCInitialRepolarization;
+    }
 
-    const Real& MSTauIn() const { return M_MSTauIn; }
+    const Real& MSTauIn() const
+    {
+        return M_MSTauIn;
+    }
 
-    const Real& MSTauOut() const { return M_MSTauOut; }
+    const Real& MSTauOut() const
+    {
+        return M_MSTauOut;
+    }
 
-    const Real& MSTauOpen() const { return M_MSTauOpen; }
+    const Real& MSTauOpen() const
+    {
+        return M_MSTauOpen;
+    }
 
-    const Real& MSTauClose() const { return M_MSTauClose; }
+    const Real& MSTauClose() const
+    {
+        return M_MSTauClose;
+    }
 
-    const Real& MSCriticalPotential() const { return M_MSCriticalPotential; }
+    const Real& MSCriticalPotential() const
+    {
+        return M_MSCriticalPotential;
+    }
 
-    const Real& MSPotentialMinimum() const { return M_MSPotentialMinimum; }
+    const Real& MSPotentialMinimum() const
+    {
+        return M_MSPotentialMinimum;
+    }
 
-    const Real& MSPotentialMaximum() const { return M_MSPotentialMaximum; }
+    const Real& MSPotentialMaximum() const
+    {
+        return M_MSPotentialMaximum;
+    }
 
-    const Real& MSReactionAmplitude() const { return M_MSReactionAmplitude; }
+    const Real& MSReactionAmplitude() const
+    {
+        return M_MSReactionAmplitude;
+    }
 
-    const Real& MSInitialTime() const { return M_MSInitialTime; }
+    const Real& MSInitialTime() const
+    {
+        return M_MSInitialTime;
+    }
 
-    const Real& MSTend() const { return M_MSTend; }
+    const Real& MSTend() const
+    {
+        return M_MSTend;
+    }
 
-    const Real& MSBDForder() const { return M_MSBDForder; }
+    const Real& MSBDForder() const
+    {
+        return M_MSBDForder;
+    }
 
-    const bool& MSHasHeterogeneousTauClose() const { return M_MSHasHeterogeneousTauClose; }
+    const bool& MSHasHeterogeneousTauClose() const
+    {
+        return M_MSHasHeterogeneousTauClose;
+    }
     //@}
 
     /*//! End time
@@ -142,7 +205,7 @@ public:
 
     //! FE space order
     std::string wOrder() const;
-*/
+    */
 
 
 private:

@@ -92,7 +92,7 @@ public:
     /*!
      * @param fileName Name of the data file.
      */
-    virtual void setupData( const std::string& fileName ) = 0;
+    virtual void setupData ( const std::string& fileName ) = 0;
 
     //! Setup coupling variables and other quantities of the algorithm
     virtual void setupAlgorithm();
@@ -121,37 +121,49 @@ public:
     /*!
      * @param comm Epetra communicator
      */
-    void setCommunicator( const multiscaleCommPtr_Type& comm ) { M_comm = comm; }
+    void setCommunicator ( const multiscaleCommPtr_Type& comm )
+    {
+        M_comm = comm;
+    }
 
     //! Set the main Multiscale model
     /*!
      * @param model Multiscale model
      */
-    void setMultiscaleModel( const multiscaleModelMultiscalePtr_Type model ) { M_multiscale = model; }
+    void setMultiscaleModel ( const multiscaleModelMultiscalePtr_Type model )
+    {
+        M_multiscale = model;
+    }
 
     //! Set the maximum number of subiterations
     /*!
      * @param subiterationsMaximumNumber maximum number of subiterations
      */
-    void setSubiterationsMaximumNumber( const UInt& subiterationsMaximumNumber ) { M_subiterationsMaximumNumber = subiterationsMaximumNumber; }
+    void setSubiterationsMaximumNumber ( const UInt& subiterationsMaximumNumber )
+    {
+        M_subiterationsMaximumNumber = subiterationsMaximumNumber;
+    }
 
     //! Set the tolerance
     /*!
      * @param tolerance coupling tolerance
      */
-    void setTolerance( const Real& tolerance ) { M_tolerance = tolerance; }
+    void setTolerance ( const Real& tolerance )
+    {
+        M_tolerance = tolerance;
+    }
 
     //! Set the algorithm name
     /*!
      * @param parameterList teuchos list of parameters
      */
-    void setAlgorithmName( const multiscaleParameterList_Type& parameterList );
+    void setAlgorithmName ( const multiscaleParameterList_Type& parameterList );
 
     //! Set the the main parameters of the algorithm (tolerance, maximum number of subiterations, etc.)
     /*!
      * @param parameterList teuchos list of parameters
      */
-    virtual void setAlgorithmParameters( const multiscaleParameterList_Type& parameterList );
+    virtual void setAlgorithmParameters ( const multiscaleParameterList_Type& parameterList );
 
     //@}
 
@@ -163,43 +175,64 @@ public:
     /*!
      * @return type of the algorithm
      */
-    const algorithms_Type& type() const { return M_type; }
+    const algorithms_Type& type() const
+    {
+        return M_type;
+    }
 
     //! Get the Multiscale problem
     /*!
      * @return shared_ptr to the Multiscale problem
      */
-    const multiscaleModelMultiscalePtr_Type& multiScaleProblem() const { return M_multiscale; }
+    const multiscaleModelMultiscalePtr_Type& multiScaleProblem() const
+    {
+        return M_multiscale;
+    }
 
     //! Get the coupling variables
     /*!
      * @return pointer to the coupling variables vector
      */
-    const multiscaleVectorPtr_Type& couplingVariables() const { return M_couplingVariables; }
+    const multiscaleVectorPtr_Type& couplingVariables() const
+    {
+        return M_couplingVariables;
+    }
 
     //! Get the coupling residuals
     /*!
      * @return pointer to the coupling residuals vector
      */
-    const multiscaleVectorPtr_Type& couplingResiduals() const { return M_couplingResiduals; }
+    const multiscaleVectorPtr_Type& couplingResiduals() const
+    {
+        return M_couplingResiduals;
+    }
 
     //! Get the communicator
     /*!
      * @return pointer to the communicator
      */
-    const multiscaleCommPtr_Type& communicator() const { return M_comm; }
+    const multiscaleCommPtr_Type& communicator() const
+    {
+        return M_comm;
+    }
 
     //! Get the subiterations maximum number
     /*!
      * @return maximum number of subiterations
      */
-    const UInt& subiterationsMaximumNumber() const { return M_subiterationsMaximumNumber; }
+    const UInt& subiterationsMaximumNumber() const
+    {
+        return M_subiterationsMaximumNumber;
+    }
 
     //! Get the required tolerance
     /*!
      * @return tolerance
      */
-    const Real& tolerance() const { return M_tolerance; }
+    const Real& tolerance() const
+    {
+        return M_tolerance;
+    }
 
     //@}
 
@@ -213,14 +246,14 @@ protected:
      * @param subiterationsNumber Number of subiterations performed.
      * @param computeResidual computeResidual.
      */
-    void save( const UInt& subiterationsNumber, const Real& residual ) const;
+    void save ( const UInt& subiterationsNumber, const Real& residual ) const;
 
     //! Update the residual and check if the tolerance has been satisfied
     /*!
      * @param subIT subiteration number (for output purpose)
      * @return true if the tolerance is satisfied
      */
-    bool checkResidual( const UInt& subIT = 0 ) const;
+    bool checkResidual ( const UInt& subIT = 0 ) const;
 
     //@}
 
@@ -242,9 +275,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    MultiscaleAlgorithm( const MultiscaleAlgorithm& algorithm );
+    MultiscaleAlgorithm ( const MultiscaleAlgorithm& algorithm );
 
-    MultiscaleAlgorithm& operator=( const MultiscaleAlgorithm& algorithm );
+    MultiscaleAlgorithm& operator= ( const MultiscaleAlgorithm& algorithm );
 
     //@}
 };

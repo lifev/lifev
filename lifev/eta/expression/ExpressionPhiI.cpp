@@ -54,7 +54,7 @@ ExpressionPhiI::ExpressionPhiI()
 {}
 
 
-ExpressionPhiI::ExpressionPhiI(const ExpressionPhiI&)
+ExpressionPhiI::ExpressionPhiI (const ExpressionPhiI&)
     : base_Type()
 {}
 
@@ -67,7 +67,7 @@ ExpressionPhiI::~ExpressionPhiI()
 // ===================================================
 
 void
-ExpressionPhiI::display(std::ostream& out)
+ExpressionPhiI::display (std::ostream& out)
 {
     out << "phi_i";
 }

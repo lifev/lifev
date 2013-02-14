@@ -68,7 +68,7 @@ namespace ExpressionAssembly
 
 */
 template <typename LExpressionType, typename RExpressionType>
-class ExpressionDot : public ExpressionBase< ExpressionDot<LExpressionType,RExpressionType> >
+class ExpressionDot : public ExpressionBase< ExpressionDot<LExpressionType, RExpressionType> >
 {
 public:
 
@@ -76,7 +76,7 @@ public:
     //@{
 
     // No real need, just for ease of coding
-	typedef ExpressionBase< ExpressionDot <LExpressionType,RExpressionType> > base_Type;
+    typedef ExpressionBase< ExpressionDot <LExpressionType, RExpressionType> > base_Type;
 
     //@}
 
@@ -85,15 +85,15 @@ public:
     //@{
 
     //! Full constructor, with the two expressions.
-	ExpressionDot(const LExpressionType& l, const RExpressionType& r)
-	: base_Type(), M_l(l), M_r(r) {}
+    ExpressionDot (const LExpressionType& l, const RExpressionType& r)
+        : base_Type(), M_l (l), M_r (r) {}
 
     //! Copy constructor
-	ExpressionDot(const ExpressionDot<LExpressionType,RExpressionType>& expression)
-	 : base_Type(), M_l(expression.M_l), M_r(expression.M_r) {}
+    ExpressionDot (const ExpressionDot<LExpressionType, RExpressionType>& expression)
+        : base_Type(), M_l (expression.M_l), M_r (expression.M_r) {}
 
     //! Destructor
-    ~ExpressionDot(){}
+    ~ExpressionDot() {}
 
     //@}
 
@@ -102,8 +102,12 @@ public:
     //@{
 
     //! Display method
-	static void display(std::ostream& out= std::cout)
-    { LExpressionType::display(out); out << " dot "; RExpressionType::display(out);}
+    static void display (std::ostream& out = std::cout)
+    {
+        LExpressionType::display (out);
+        out << " dot ";
+        RExpressionType::display (out);
+    }
 
     //@}
 
@@ -112,10 +116,16 @@ public:
     //@{
 
     //! Getter for the left hand side of the dot product
-	const LExpressionType& left() const {return M_l;}
+    const LExpressionType& left() const
+    {
+        return M_l;
+    }
 
     //! Getter for the right hand side of the dot product
-	const RExpressionType& right() const {return M_r;}
+    const RExpressionType& right() const
+    {
+        return M_r;
+    }
 
     //@}
 
@@ -125,15 +135,15 @@ private:
     //@{
 
     //! No default constructor
-	ExpressionDot();
+    ExpressionDot();
 
     //@}
 
     // Left hand side
-	LExpressionType M_l;
+    LExpressionType M_l;
 
     // Right hand side
-	RExpressionType M_r;
+    RExpressionType M_r;
 };
 
 
@@ -159,40 +169,40 @@ private:
 
 */
 template< typename LExpressionType, typename RExpressionType >
-ExpressionDot<LExpressionType,RExpressionType>
-dot(const ExpressionBase<LExpressionType>& l, const ExpressionBase<RExpressionType>& r)
+ExpressionDot<LExpressionType, RExpressionType>
+dot (const ExpressionBase<LExpressionType>& l, const ExpressionBase<RExpressionType>& r)
 {
-	return ExpressionDot<LExpressionType,RExpressionType>(l.cast(),r.cast());
+    return ExpressionDot<LExpressionType, RExpressionType> (l.cast(), r.cast() );
 }
 
 // Specialization for the real constants
 template< typename LExpressionType >
 ExpressionDot<LExpressionType, ExpressionScalar >
-dot(const ExpressionBase<LExpressionType>& l, const Real& r)
+dot (const ExpressionBase<LExpressionType>& l, const Real& r)
 {
-    return ExpressionDot<LExpressionType,ExpressionScalar>(l.cast(),ExpressionScalar(r));
+    return ExpressionDot<LExpressionType, ExpressionScalar> (l.cast(), ExpressionScalar (r) );
 }
 
 template< typename RExpressionType >
-ExpressionDot<ExpressionScalar,RExpressionType>
-dot(const Real& l, const ExpressionBase<RExpressionType>& r)
+ExpressionDot<ExpressionScalar, RExpressionType>
+dot (const Real& l, const ExpressionBase<RExpressionType>& r)
 {
-    return ExpressionDot<ExpressionScalar,RExpressionType>(ExpressionScalar(l),r.cast());
+    return ExpressionDot<ExpressionScalar, RExpressionType> (ExpressionScalar (l), r.cast() );
 }
 
 // Specialization for the vectorial constants
 template< typename RExpressionType , UInt Vdim>
-ExpressionDot<ExpressionVector<Vdim>,RExpressionType>
-dot(const VectorSmall<Vdim>& l, const ExpressionBase<RExpressionType>& r)
+ExpressionDot<ExpressionVector<Vdim>, RExpressionType>
+dot (const VectorSmall<Vdim>& l, const ExpressionBase<RExpressionType>& r)
 {
-    return ExpressionDot<ExpressionVector<Vdim>,RExpressionType>(ExpressionVector<Vdim>(l),r.cast());
+    return ExpressionDot<ExpressionVector<Vdim>, RExpressionType> (ExpressionVector<Vdim> (l), r.cast() );
 }
 
 template< typename LExpressionType, UInt Vdim >
 ExpressionDot<LExpressionType, ExpressionVector<Vdim> >
-dot(const ExpressionBase<LExpressionType>& l, const VectorSmall<Vdim>& r)
+dot (const ExpressionBase<LExpressionType>& l, const VectorSmall<Vdim>& r)
 {
-    return ExpressionDot<LExpressionType,ExpressionVector<Vdim> >(l.cast(),ExpressionVector<Vdim>(r));
+    return ExpressionDot<LExpressionType, ExpressionVector<Vdim> > (l.cast(), ExpressionVector<Vdim> (r) );
 }
 
 

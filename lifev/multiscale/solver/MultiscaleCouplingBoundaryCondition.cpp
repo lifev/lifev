@@ -45,14 +45,14 @@ namespace Multiscale
 // Constructors & Destructor
 // ===================================================
 MultiscaleCouplingBoundaryCondition::MultiscaleCouplingBoundaryCondition() :
-        multiscaleCoupling_Type       (),
-        M_fileName                    (),
-        M_list                        (),
-        M_listSize                    ()
+    multiscaleCoupling_Type       (),
+    M_fileName                    (),
+    M_list                        (),
+    M_listSize                    ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 8210 ) << "MultiscaleCouplingBoundaryCondition::MultiscaleCouplingBoundaryCondition() \n";
+    debugStream ( 8210 ) << "MultiscaleCouplingBoundaryCondition::MultiscaleCouplingBoundaryCondition() \n";
 #endif
 
     M_type = BoundaryCondition;
@@ -62,26 +62,28 @@ MultiscaleCouplingBoundaryCondition::MultiscaleCouplingBoundaryCondition() :
 // Multiscale PhysicalCoupling Implementation
 // ===================================================
 void
-MultiscaleCouplingBoundaryCondition::setupData( const std::string& fileName )
+MultiscaleCouplingBoundaryCondition::setupData ( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 8210 ) << "MultiscaleCouplingBoundaryCondition::setupData() \n";
+    debugStream ( 8210 ) << "MultiscaleCouplingBoundaryCondition::setupData() \n";
 #endif
 
-    multiscaleCoupling_Type::setupData( fileName );
+    multiscaleCoupling_Type::setupData ( fileName );
 
     if ( modelsNumber() > 0 )
     {
         M_fileName = fileName;
-        GetPot dataFile( fileName );
+        GetPot dataFile ( fileName );
 
         //Load the list of boundary conditions
-        M_listSize = dataFile.vector_variable_size( "boundary_conditions/list" );
+        M_listSize = dataFile.vector_variable_size ( "boundary_conditions/list" );
 
-        M_list.reserve( M_listSize );
-        for ( UInt i( 0 ); i < M_listSize; ++i )
-            M_list.push_back( dataFile( "boundary_conditions/list", " ", i ) );
+        M_list.reserve ( M_listSize );
+        for ( UInt i ( 0 ); i < M_listSize; ++i )
+        {
+            M_list.push_back ( dataFile ( "boundary_conditions/list", " ", i ) );
+        }
     }
 }
 
@@ -90,7 +92,7 @@ MultiscaleCouplingBoundaryCondition::setupCouplingVariablesNumber()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 8210 ) << "MultiscaleCouplingBoundaryCondition::setupCouplingVariablesNumber() \n";
+    debugStream ( 8210 ) << "MultiscaleCouplingBoundaryCondition::setupCouplingVariablesNumber() \n";
 #endif
 
     M_couplingVariablesNumber = 0;
@@ -101,51 +103,51 @@ MultiscaleCouplingBoundaryCondition::setupCoupling()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 8210 ) << "MultiscaleCouplingBoundaryCondition::setupCoupling() \n";
+    debugStream ( 8210 ) << "MultiscaleCouplingBoundaryCondition::setupCoupling() \n";
 #endif
 
     if ( myModelsNumber() > 0 )
     {
         // Impose boundary conditions on all the models
-        for ( UInt i( 0 ); i < modelsNumber(); ++i )
-            if ( myModel( i ) )
+        for ( UInt i ( 0 ); i < modelsNumber(); ++i )
+            if ( myModel ( i ) )
                 switch ( M_models[i]->type() )
                 {
-                case Fluid3D:
+                    case Fluid3D:
 
-                    applyBoundaryConditions3D< MultiscaleModelFluid3D > ( i );
+                        applyBoundaryConditions3D< MultiscaleModelFluid3D > ( i );
 
-                    break;
+                        break;
 
-                case FSI3D:
+                    case FSI3D:
 
-                    applyBoundaryConditions3D< MultiscaleModelFSI3D > ( i );
+                        applyBoundaryConditions3D< MultiscaleModelFSI3D > ( i );
 
-                    break;
+                        break;
 
-                case FSI1D:
+                    case FSI1D:
 
-                    applyBoundaryConditions1D< MultiscaleModelFSI1D > ( i );
+                        applyBoundaryConditions1D< MultiscaleModelFSI1D > ( i );
 
-                    break;
+                        break;
 
-                case Windkessel0D:
+                    case Windkessel0D:
 
-                    applyBoundaryConditions0D< MultiscaleModelWindkessel0D > ( i );
+                        applyBoundaryConditions0D< MultiscaleModelWindkessel0D > ( i );
 
-                    break;
+                        break;
 
-                case ZeroDimensional:
+                    case ZeroDimensional:
 
-                    applyBoundaryConditions0D< MultiscaleModel0D > ( i );
+                        applyBoundaryConditions0D< MultiscaleModel0D > ( i );
 
-                    break;
+                        break;
 
-                default:
+                    default:
 
-                    switchErrorMessage( M_models[i] );
+                        switchErrorMessage ( M_models[i] );
 
-                    break;
+                        break;
                 }
     }
 }

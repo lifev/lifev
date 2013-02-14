@@ -21,16 +21,24 @@ class copyright_check : public source_inspector
 public:
 
     copyright_check();
-    virtual const char * name() const { return "copyright-check"; }
-    virtual const char * desc() const { return "missing copyright"; }
+    virtual const char* name() const
+    {
+        return "copyright-check";
+    }
+    virtual const char* desc() const
+    {
+        return "missing copyright";
+    }
 
-    virtual void inspect(
-        const std::string & library_name,
-        const path & full_path,
-        const std::string & contents );
+    virtual void inspect (
+        const std::string& library_name,
+        const path& full_path,
+        const std::string& contents );
 
     virtual ~copyright_check()
-    { std::cout << "  " << m_files_with_errors << " files missing copyrights\n"; }
+    {
+        std::cout << "  " << m_files_with_errors << " files missing copyrights\n";
+    }
 };
 }
 }

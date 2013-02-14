@@ -48,13 +48,13 @@ Also it test the interpolation of an analytical function into a finite element s
 
 using namespace LifeV;
 
-Real linearFunction(const Real& t, const Real& x, const Real& y, const Real& z, const ID& ic);
+Real linearFunction (const Real& t, const Real& x, const Real& y, const Real& z, const ID& ic);
 
-Real linearBubbleFunction(const Real& t, const Real& x, const Real& y, const Real& z, const ID& ic);
+Real linearBubbleFunction (const Real& t, const Real& x, const Real& y, const Real& z, const ID& ic);
 
-Real quadraticFunction(const Real& t, const Real& x, const Real& y, const Real& z, const ID& ic);
+Real quadraticFunction (const Real& t, const Real& x, const Real& y, const Real& z, const ID& ic);
 
-Real bilinearFunction(const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& ic);
+Real bilinearFunction (const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& ic);
 
 
 //! Interpolate the analytical function into the FE spaces specified in originalFeSpaceVecPtr, obtaining the set of FE vectors.
@@ -62,38 +62,40 @@ Real bilinearFunction(const Real& /*t*/, const Real& x, const Real& y, const Rea
 //! Compute the errors between these FE vectors and the analytical solution, and compare them with the ones provided in the array errorArray.
 //! return true if all the errors are equal to the errors in errorArray, within a tolerance eps. return false otherwise.
 template<typename MeshType, typename MapType, typename Fct>
-bool check_interpolate( std::vector< boost::shared_ptr < FESpace<MeshType, MapType> > >& originalFeSpaceVecPtr,
-                      std::vector< boost::shared_ptr < FESpace<MeshType, MapType> > >& finalFeSpaceVecPtr,
-                      const MapEpetraType& outputMapType,  Fct& function,
-                      const Real errorArray [], const string stringArray [], Real eps, Real time, UInt verbose)
+bool check_interpolate ( std::vector< boost::shared_ptr < FESpace<MeshType, MapType> > >& originalFeSpaceVecPtr,
+                         std::vector< boost::shared_ptr < FESpace<MeshType, MapType> > >& finalFeSpaceVecPtr,
+                         const MapEpetraType& outputMapType,  Fct& function,
+                         const Real errorArray [], const string stringArray [], Real eps, Real time, UInt verbose)
 {
-    std::vector< boost::shared_ptr <VectorEpetra> > interpVecPtr(originalFeSpaceVecPtr.size());
-    bool check(true);
+    std::vector< boost::shared_ptr <VectorEpetra> > interpVecPtr (originalFeSpaceVecPtr.size() );
+    bool check (true);
 
-    for(UInt i=0; i< originalFeSpaceVecPtr.size(); i++)
+    for (UInt i = 0; i < originalFeSpaceVecPtr.size(); i++)
     {
-        boost::shared_ptr <VectorEpetra> tmp(new VectorEpetra(originalFeSpaceVecPtr[i]->map(), outputMapType));
-        originalFeSpaceVecPtr[i]->interpolate( static_cast<typename FESpace<MeshType, MapType>::function_Type>( function ), *tmp, time);
+        boost::shared_ptr <VectorEpetra> tmp (new VectorEpetra (originalFeSpaceVecPtr[i]->map(), outputMapType) );
+        originalFeSpaceVecPtr[i]->interpolate ( static_cast<typename FESpace<MeshType, MapType>::function_Type> ( function ), *tmp, time);
         interpVecPtr[i] = tmp;
     }
 
-    Real err_rel(0);
-    for(UInt i=0; i< originalFeSpaceVecPtr.size(); i++)
-        for(UInt j=0; j< finalFeSpaceVecPtr.size(); j++)
+    Real err_rel (0);
+    for (UInt i = 0; i < originalFeSpaceVecPtr.size(); i++)
+        for (UInt j = 0; j < finalFeSpaceVecPtr.size(); j++)
         {
-            VectorEpetra interpolated = finalFeSpaceVecPtr[j]->feToFEInterpolate(*originalFeSpaceVecPtr[i], *interpVecPtr[i], outputMapType);
-            finalFeSpaceVecPtr[j]->l2Error( function, VectorEpetra(interpolated, Repeated), time, &err_rel );
-            check &= fabs(err_rel - errorArray[finalFeSpaceVecPtr.size() * i+ j]) < eps;
+            VectorEpetra interpolated = finalFeSpaceVecPtr[j]->feToFEInterpolate (*originalFeSpaceVecPtr[i], *interpVecPtr[i], outputMapType);
+            finalFeSpaceVecPtr[j]->l2Error ( function, VectorEpetra (interpolated, Repeated), time, &err_rel );
+            check &= fabs (err_rel - errorArray[finalFeSpaceVecPtr.size() * i + j]) < eps;
 
-            if(verbose)
+            if (verbose)
             {
-                UInt index = finalFeSpaceVecPtr.size() * i+ j;
-                cout.precision(7);
-                std::cout << stringArray[index] << ": " << std::setw(15) << std::setprecision(10) << err_rel << " (expected " << errorArray[index] << ")\t";
+                UInt index = finalFeSpaceVecPtr.size() * i + j;
+                cout.precision (7);
+                std::cout << stringArray[index] << ": " << std::setw (15) << std::setprecision (10) << err_rel << " (expected " << errorArray[index] << ")\t";
                 std::cout << "\n";
             }
         }
-    if(verbose)
+    if (verbose)
+    {
         std::cout << std::endl;
+    }
     return check;
 }

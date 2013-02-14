@@ -64,43 +64,43 @@
 
 namespace NOX
 {
-    namespace Parameter
-    {
-        class List;
-    }
+namespace Parameter
+{
+class List;
+}
 }
 namespace LifeV
 {
 
-    //! Rhytmos model interface.
-    /*!
-     * Rhytmos solver interface will communicate with this class.
-     * this class have access to circuit data. The main task of this class is to
-     * provide the residual and jacobian at every step to Rhythmos solver interface.
-     */
+//! Rhytmos model interface.
+/*!
+ * Rhytmos solver interface will communicate with this class.
+ * this class have access to circuit data. The main task of this class is to
+ * provide the residual and jacobian at every step to Rhythmos solver interface.
+ */
 class RythmosModelInterface : public NOX::Epetra::Interface::Required,
-public NOX::Epetra::Interface::Jacobian,
-public NOX::Epetra::Interface::Preconditioner
+    public NOX::Epetra::Interface::Jacobian,
+    public NOX::Epetra::Interface::Preconditioner
 {
 public:
 
     //! Constructor
-    RythmosModelInterface(Int NumGlobalElements, Epetra_Comm* comm, zeroDimensionalCircuitDataPtr_Type circuitData);
+    RythmosModelInterface (Int NumGlobalElements, Epetra_Comm* comm, zeroDimensionalCircuitDataPtr_Type circuitData);
 
     //! Destructor
     virtual ~RythmosModelInterface();
 
     //! This method is empty.
-    virtual bool computeF(const Epetra_Vector& x, Epetra_Vector& FVec, FillType fillType = Residual);
+    virtual bool computeF (const Epetra_Vector& x, Epetra_Vector& FVec, FillType fillType = Residual);
 
     //! This method is empty.
-    virtual bool computeJacobian(const Epetra_Vector& x, Epetra_Operator& Jac);
+    virtual bool computeJacobian (const Epetra_Vector& x, Epetra_Operator& Jac);
 
     //! This method is empty
-    virtual bool computePrecMatrix(const Epetra_Vector& x);
+    virtual bool computePrecMatrix (const Epetra_Vector& x);
 
     //! This method is empty
-    virtual bool computePreconditioner(const Epetra_Vector& x, Epetra_Operator& Prec, Teuchos::ParameterList* precParams = 0);
+    virtual bool computePreconditioner (const Epetra_Vector& x, Epetra_Operator& Prec, Teuchos::ParameterList* precParams = 0);
 
     //! get solution vector
     Epetra_Vector& getSolutionY();
@@ -113,26 +113,29 @@ public:
     Epetra_CrsGraph& getGraph();
 
     //! this method empty.
-    virtual bool evaluate(Real t, const Epetra_Vector* x, Epetra_Vector* f );
+    virtual bool evaluate (Real t, const Epetra_Vector* x, Epetra_Vector* f );
 
     //! compute Implicit residual.
-    virtual bool evaluateFImplicit(const Real& t, const Epetra_Vector* x,const Epetra_Vector* x_dot, Epetra_Vector* f );
+    virtual bool evaluateFImplicit (const Real& t, const Epetra_Vector* x, const Epetra_Vector* x_dot, Epetra_Vector* f );
 
     //! compute jacobian.
-    virtual bool evaluateWImplicit(const Real& t, const Real& alpha,const Real& beta,const Epetra_Vector* x, const Epetra_Vector* x_dot, Epetra_CrsMatrix* W );
+    virtual bool evaluateWImplicit (const Real& t, const Real& alpha, const Real& beta, const Epetra_Vector* x, const Epetra_Vector* x_dot, Epetra_CrsMatrix* W );
 
     virtual bool initializeSolnY();
 
-    bool initializeSolnY(const vectorEpetra_Type& y);
+    bool initializeSolnY (const vectorEpetra_Type& y);
 
     virtual bool initializeSolnYp();
 
-    bool initializeSolnYp(const vectorEpetra_Type& yp);
+    bool initializeSolnYp (const vectorEpetra_Type& yp);
 
     //! hafter complete Rythmos step, this method will update circuit data.
-    void extractSolution(const Real &t1,const vectorEpetra_Type& y , const vectorEpetra_Type& yp );
+    void extractSolution (const Real& t1, const vectorEpetra_Type& y , const vectorEpetra_Type& yp );
 
-    Int numCircuitElements() { return M_numCircuitElements; }
+    Int numCircuitElements()
+    {
+        return M_numCircuitElements;
+    }
 
 protected:
     Int                                             M_numCircuitElements; // Total Number of elements

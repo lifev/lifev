@@ -70,7 +70,7 @@ public:
     ExpressionHK();
 
     //! Copy constructor
-    ExpressionHK( const ExpressionHK& );
+    ExpressionHK ( const ExpressionHK& );
 
     //! Destructor
     ~ExpressionHK();
@@ -82,7 +82,7 @@ public:
     //@{
 
     //! Display method
-    static void display(std::ostream& out=std::cout);
+    static void display (std::ostream& out = std::cout);
 
     //@}
 };

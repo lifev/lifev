@@ -47,12 +47,12 @@ namespace LifeV
 // ===================================================
 
 bool
-readMppFileHead( std::ifstream & myStream,
-                 UInt          & numberVertices,
-                 UInt          & numberBoundaryVertices,
-                 UInt          & numberBoundaryFaces,
-                 UInt          & numberBoundaryEdges,
-                 UInt          & numberVolumes )
+readMppFileHead ( std::ifstream& myStream,
+                  UInt&           numberVertices,
+                  UInt&           numberBoundaryVertices,
+                  UInt&           numberBoundaryFaces,
+                  UInt&           numberBoundaryEdges,
+                  UInt&           numberVolumes )
 {
     std::string line;
 
@@ -64,12 +64,12 @@ readMppFileHead( std::ifstream & myStream,
     UInt i, ibc;
     UInt p1, p2, p3;
 
-    while ( nextGoodLine( myStream, line ).good() )
+    while ( nextGoodLine ( myStream, line ).good() )
     {
-        if ( line.find( "odes" ) != std::string::npos )
+        if ( line.find ( "odes" ) != std::string::npos )
         {
-            std::string node_s = line.substr( line.find_last_of( ":" ) + 1 );
-            numberVertices = atoi( node_s );
+            std::string node_s = line.substr ( line.find_last_of ( ":" ) + 1 );
+            numberVertices = atoi ( node_s );
             done++;
             numberBoundaryVertices = 0;
 
@@ -88,10 +88,10 @@ readMppFileHead( std::ifstream & myStream,
             }
         }
 
-        if ( line.find( "iangular" ) != std::string::npos )
+        if ( line.find ( "iangular" ) != std::string::npos )
         {
-            std::string node_s = line.substr( line.find_last_of( ":" ) + 1 );
-            numberBoundaryFaces = atoi( node_s );
+            std::string node_s = line.substr ( line.find_last_of ( ":" ) + 1 );
+            numberBoundaryFaces = atoi ( node_s );
             done++;
 
             for ( i = 0; i < numberBoundaryFaces; i++ )
@@ -105,10 +105,10 @@ readMppFileHead( std::ifstream & myStream,
             }
         }
 
-        if ( line.find( "oundary" ) != std::string::npos )
+        if ( line.find ( "oundary" ) != std::string::npos )
         {
-            std::string node_s = line.substr( line.find_last_of( ":" ) + 1 );
-            numberBoundaryEdges = atoi( node_s );
+            std::string node_s = line.substr ( line.find_last_of ( ":" ) + 1 );
+            numberBoundaryEdges = atoi ( node_s );
 
             for ( i = 0; i < numberBoundaryEdges; i++ )
             {
@@ -121,10 +121,10 @@ readMppFileHead( std::ifstream & myStream,
             done++;
         }
 
-        if ( line.find( "etrahedral" ) != std::string::npos )
+        if ( line.find ( "etrahedral" ) != std::string::npos )
         {
-            std::string node_s = line.substr( line.find_last_of( ":" ) + 1 );
-            numberVolumes = atoi( node_s );
+            std::string node_s = line.substr ( line.find_last_of ( ":" ) + 1 );
+            numberVolumes = atoi ( node_s );
             done++;
         }
     }
@@ -137,8 +137,8 @@ readMppFileHead( std::ifstream & myStream,
 // ===================================================
 
 Int
-nextIntINRIAMeshField( std::string const & line,
-                       std::istream      & myStream )
+nextIntINRIAMeshField ( std::string const& line,
+                        std::istream&       myStream )
 {
     /*
      first control if line has something.
@@ -148,12 +148,12 @@ nextIntINRIAMeshField( std::string const & line,
      */
 
     for ( std::string::const_iterator is = line.begin(); is != line.end(); ++is )
-       {
+    {
         if ( *is != ' ' )
-          {
-            return atoi( line );
-          }
-         }
+        {
+            return atoi ( line );
+        }
+    }
     Int dummy;
     myStream >> dummy;
 
@@ -165,17 +165,17 @@ nextIntINRIAMeshField( std::string const & line,
  so as to be able to properly dimension all arrays
 */
 bool
-readINRIAMeshFileHead( std::ifstream          & myStream,
-                       UInt                   & numberVertices,
-                       UInt                   & numberBoundaryVertices,
-                       UInt                   & numberBoundaryFaces,
-                       UInt                   & numberBoundaryEdges,
-                       UInt                   & numberVolumes,
-                       UInt                   & numberStoredFaces,
-                       ReferenceShapes        & shape,
-                       InternalEntitySelector   iSelect )
+readINRIAMeshFileHead ( std::ifstream&           myStream,
+                        UInt&                    numberVertices,
+                        UInt&                    numberBoundaryVertices,
+                        UInt&                    numberBoundaryFaces,
+                        UInt&                    numberBoundaryEdges,
+                        UInt&                    numberVolumes,
+                        UInt&                    numberStoredFaces,
+                        ReferenceShapes&         shape,
+                        InternalEntitySelector   iSelect )
 {
-	const int idOffset = 1; //IDs in INRIA files start from 1
+    const int idOffset = 1; //IDs in INRIA files start from 1
 
     std::string line;
 
@@ -193,32 +193,32 @@ readINRIAMeshFileHead( std::ifstream          & myStream,
     std::vector<bool> isboundary;
     //streampos start=myStream.tellg();
 
-    while ( nextGoodLine( myStream, line ).good() )
+    while ( nextGoodLine ( myStream, line ).good() )
     {
-        if ( line.find( "MeshVersionFormatted" ) != std::string::npos )
+        if ( line.find ( "MeshVersionFormatted" ) != std::string::npos )
         {
-            idummy = nextIntINRIAMeshField( line.substr( line.find_last_of( "d" ) + 1 ), myStream );
-            ASSERT_PRE0( idummy == 1, "I can read only formatted INRIA Mesh files, sorry" );
+            idummy = nextIntINRIAMeshField ( line.substr ( line.find_last_of ( "d" ) + 1 ), myStream );
+            ASSERT_PRE0 ( idummy == 1, "I can read only formatted INRIA Mesh files, sorry" );
         }
 
-        if ( line.find( "Dimension" ) != std::string:: npos )
+        if ( line.find ( "Dimension" ) != std::string:: npos )
         {
-            idummy = nextIntINRIAMeshField( line.substr( line.find_last_of( "n" ) + 1 ), myStream );
-            ASSERT_PRE0( idummy == 3, "I can read only 3D INRIA Mesh files, sorry" );
+            idummy = nextIntINRIAMeshField ( line.substr ( line.find_last_of ( "n" ) + 1 ), myStream );
+            ASSERT_PRE0 ( idummy == 3, "I can read only 3D INRIA Mesh files, sorry" );
         }
 
         // I assume that internal vertices have their Ref value set to 0 (not clear from medit manual)
-        if ( line.find( "Vertices" ) != std::string::npos )
+        if ( line.find ( "Vertices" ) != std::string::npos )
         {
-            numberVertices = nextIntINRIAMeshField( line.substr( line.find_last_of( "s" ) + 1 ), myStream );
+            numberVertices = nextIntINRIAMeshField ( line.substr ( line.find_last_of ( "s" ) + 1 ), myStream );
             done++;
             numberBoundaryVertices = 0;
-            isboundary.resize( numberVertices,false );
+            isboundary.resize ( numberVertices, false );
 
             for ( i = 0; i < numberVertices; ++i )
             {
                 myStream >> x >> y >> z >> ibc;
-                if ( ! iSelect( markerID_Type( ibc ) ) )
+                if ( ! iSelect ( markerID_Type ( ibc ) ) )
                 {
                     numberBoundaryVertices++;
                     isboundary[ i ] = true;
@@ -226,11 +226,11 @@ readINRIAMeshFileHead( std::ifstream          & myStream,
             }
         }
 
-        if ( line.find( "Triangles" ) != std::string::npos )
+        if ( line.find ( "Triangles" ) != std::string::npos )
         {
-            ASSERT_PRE0( shape != HEXA, " Cannot have triangular faces in an HEXA INRIA  MESH" );
+            ASSERT_PRE0 ( shape != HEXA, " Cannot have triangular faces in an HEXA INRIA  MESH" );
             shape = TETRA;
-            numReadFaces = nextIntINRIAMeshField( line.substr( line.find_last_of( "s" ) + 1 ), myStream );
+            numReadFaces = nextIntINRIAMeshField ( line.substr ( line.find_last_of ( "s" ) + 1 ), myStream );
             numberBoundaryFaces = 0;
 
             done++;
@@ -240,7 +240,7 @@ readINRIAMeshFileHead( std::ifstream          & myStream,
                 myStream >> p1 >> p2 >> p3 >> ibc;
                 if ( isboundary[ p1 - idOffset ] && isboundary [ p2 - idOffset ] && isboundary[ p3 - idOffset ])
                 {
-                    if ( iSelect( markerID_Type( ibc ) ) )
+                    if ( iSelect ( markerID_Type ( ibc ) ) )
                     {
                         std::cerr << "ATTENTION: Face (1-based numbering) "
                                   << p1 << " "
@@ -252,7 +252,7 @@ readINRIAMeshFileHead( std::ifstream          & myStream,
                 }
                 else
                 {
-                    if ( !iSelect( markerID_Type( ibc ) ) )
+                    if ( !iSelect ( markerID_Type ( ibc ) ) )
                     {
                         std::cerr << "ATTENTION: Face (1-based numbering) "
                                   << p1 << " "
@@ -267,21 +267,21 @@ readINRIAMeshFileHead( std::ifstream          & myStream,
         }
 
 
-        if ( line.find( "Quadrilaterals" ) != std::string::npos )
+        if ( line.find ( "Quadrilaterals" ) != std::string::npos )
         {
-            ASSERT_PRE0( shape != TETRA, " Cannot have quad faces in an TETRA INRIA MESH" );
+            ASSERT_PRE0 ( shape != TETRA, " Cannot have quad faces in an TETRA INRIA MESH" );
             shape = HEXA;
-            numReadFaces = nextIntINRIAMeshField( line.substr( line.find_last_of( "s" ) + 1 ), myStream );
+            numReadFaces = nextIntINRIAMeshField ( line.substr ( line.find_last_of ( "s" ) + 1 ), myStream );
             done++;
             numberBoundaryFaces = 0;
 
             for ( UInt k = 0; k < numReadFaces; k++ )
             {
-               myStream >> p1 >> p2 >> p3 >> p4 >> ibc;
-               if ( isboundary[ p1 - idOffset ] && isboundary[ p2 - idOffset ]
-                    && isboundary[ p3 - idOffset ] && isboundary[ p4 - idOffset ] )
+                myStream >> p1 >> p2 >> p3 >> p4 >> ibc;
+                if ( isboundary[ p1 - idOffset ] && isboundary[ p2 - idOffset ]
+                        && isboundary[ p3 - idOffset ] && isboundary[ p4 - idOffset ] )
                 {
-                    if ( iSelect( markerID_Type( ibc ) ) )
+                    if ( iSelect ( markerID_Type ( ibc ) ) )
                     {
                         std::cerr << "ATTENTION: Face (1-based numbering) "
                                   << p1 << " "
@@ -298,11 +298,11 @@ readINRIAMeshFileHead( std::ifstream          & myStream,
             numberStoredFaces = numReadFaces;
         }
         // To cope with a mistake in INRIA Mesh files
-        if ( line.find( "Tetrahedra" ) != std::string::npos )
+        if ( line.find ( "Tetrahedra" ) != std::string::npos )
         {
-            ASSERT_PRE0( shape != HEXA, " Cannot have tetras  in a HEXA INRIA MESH" );
+            ASSERT_PRE0 ( shape != HEXA, " Cannot have tetras  in a HEXA INRIA MESH" );
             shape = TETRA;
-            numberVolumes = nextIntINRIAMeshField( line.substr( line.find_last_of( "a" ) + 1 ), myStream );
+            numberVolumes = nextIntINRIAMeshField ( line.substr ( line.find_last_of ( "a" ) + 1 ), myStream );
             done++;
 
             for ( i = 0; i < numberVolumes; i++ )
@@ -311,11 +311,11 @@ readINRIAMeshFileHead( std::ifstream          & myStream,
             }
         }
 
-        if ( line.find( "Hexahedra" ) != std::string::npos )
+        if ( line.find ( "Hexahedra" ) != std::string::npos )
         {
-            ASSERT_PRE0( shape != TETRA, " Cannot have Hexahedra in a TETRA INRIA MESH" );
+            ASSERT_PRE0 ( shape != TETRA, " Cannot have Hexahedra in a TETRA INRIA MESH" );
             shape = HEXA;
-            numberVolumes = nextIntINRIAMeshField( line.substr( line.find_last_of( "a" ) + 1 ), myStream );
+            numberVolumes = nextIntINRIAMeshField ( line.substr ( line.find_last_of ( "a" ) + 1 ), myStream );
             done++;
 
             for ( i = 0; i < numberVolumes; i++ )
@@ -324,9 +324,9 @@ readINRIAMeshFileHead( std::ifstream          & myStream,
             }
         }
         // I assume we are storing only boundary edges
-        if ( line.find( "Edges" ) != std::string::npos )
+        if ( line.find ( "Edges" ) != std::string::npos )
         {
-            numberBoundaryEdges = nextIntINRIAMeshField( line.substr( line.find_last_of( "s" ) + 1 ), myStream );
+            numberBoundaryEdges = nextIntINRIAMeshField ( line.substr ( line.find_last_of ( "s" ) + 1 ), myStream );
             done++;
             for ( i = 0; i < numberBoundaryEdges; i++ )
             {

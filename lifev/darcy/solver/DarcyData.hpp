@@ -113,8 +113,8 @@ public:
     //@{
 
     //! Empty Constructor.
-    DarcyData ():
-        M_verbose(0)
+    DarcyData () :
+        M_verbose (0)
     {}
 
     //! Constructor using a data file.
@@ -271,7 +271,7 @@ public:
     const paramList_Type& linearSolverList () const
     {
         ASSERT ( M_linearAlgebraList.get(), "Parameter list not set." );
-        return M_linearAlgebraList->sublist( M_linearSolverSection );
+        return M_linearAlgebraList->sublist ( M_linearSolverSection );
     } // linearSolverList
 
     //! Get Teuchos parameter list for the preconditioner.
@@ -281,7 +281,7 @@ public:
     const paramList_Type& preconditionerList () const
     {
         ASSERT ( M_linearAlgebraList.get(), "Parameter list not set." );
-        return M_linearAlgebraList->sublist( M_precondSection );
+        return M_linearAlgebraList->sublist ( M_precondSection );
     } // preconditionerList
 
     //@}
@@ -292,7 +292,7 @@ private:
     //@{
 
     //! Inhibited copy constructor.
-    DarcyData ( const darcyData_Type & );
+    DarcyData ( const darcyData_Type& );
 
     //@}
 
@@ -350,29 +350,29 @@ setup ( const data_Type& dataFile, const std::string& section )
     // If data has not been set
     if ( !M_data.get() )
     {
-        M_data.reset( new data_Type ( dataFile ) );
+        M_data.reset ( new data_Type ( dataFile ) );
     }
 
     // If data time has not been set
     if ( !M_time.get() )
     {
-        M_time.reset( new timeData_Type ( dataFile, M_section + "/time_discretization" ) );
+        M_time.reset ( new timeData_Type ( dataFile, M_section + "/time_discretization" ) );
     }
 
     // If data time has not been set
     if ( !M_timeAdvance.get() )
     {
-        M_timeAdvance.reset( new timeAdvanceData_Type ( dataFile, M_section + "/time_discretization" ) );
+        M_timeAdvance.reset ( new timeAdvanceData_Type ( dataFile, M_section + "/time_discretization" ) );
     }
 
     // If data mesh has not been set
     if ( !M_mesh.get() )
     {
-        M_mesh.reset( new meshData_Type ( dataFile, M_section + "/space_discretization" ) );
+        M_mesh.reset ( new meshData_Type ( dataFile, M_section + "/space_discretization" ) );
     }
 
     // Miscellaneous
-    M_verbose = dataFile( ( M_section + "/miscellaneous/verbose" ).data(), 1 );
+    M_verbose = dataFile ( ( M_section + "/miscellaneous/verbose" ).data(), 1 );
 } // setup
 
 } // Namespace LifeV

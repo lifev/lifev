@@ -46,9 +46,9 @@ K = [1 0
 */
 Matrix inversePermeability::eval ( const UInt& iElem, const Vector3D& P, const Real& time ) const
 {
-    Matrix invK ( static_cast<UInt>(2), static_cast<UInt>(2) );
+    Matrix invK ( static_cast<UInt> (2), static_cast<UInt> (2) );
 
-    const Real unkown_n = scalarField(0).eval( iElem, P, time );
+    const Real unkown_n = scalarField (0).eval ( iElem, P, time );
 
     // First row
     const Real Entry00 = 1.;
@@ -58,10 +58,10 @@ Matrix inversePermeability::eval ( const UInt& iElem, const Vector3D& P, const R
     const Real Entry11 = 1. / ( unkown_n * unkown_n + 1. );
 
     // Fill in of the inversePermeabilityMatrix
-    invK ( static_cast<UInt>(0), static_cast<UInt>(0) ) = Entry00;
-    invK ( static_cast<UInt>(0), static_cast<UInt>(1) ) = Entry01;
-    invK ( static_cast<UInt>(1), static_cast<UInt>(0) ) = Entry01;
-    invK ( static_cast<UInt>(1), static_cast<UInt>(1) ) = Entry11;
+    invK ( static_cast<UInt> (0), static_cast<UInt> (0) ) = Entry00;
+    invK ( static_cast<UInt> (0), static_cast<UInt> (1) ) = Entry01;
+    invK ( static_cast<UInt> (1), static_cast<UInt> (0) ) = Entry01;
+    invK ( static_cast<UInt> (1), static_cast<UInt> (1) ) = Entry11;
 
     return invK;
 }
@@ -75,7 +75,7 @@ Real reactionTerm::eval ( const UInt& /*iElem*/, const Vector3D& P, const Real& 
 // Scalar source term
 Real scalarSource::eval ( const UInt& /*iElem*/, const Vector3D& P, const Real& time ) const
 {
-    const Real x(P[0]), y(P[1]), t(time);
+    const Real x (P[0]), y (P[1]), t (time);
     return  t * x * x - 2. * t * t - t -
             ( 6. * y + 2. * t * t * y ) * ( 1. + t * t * t * t * x * x * x * x +
                                             y * y * y * y * y * y +
@@ -88,14 +88,14 @@ Real scalarSource::eval ( const UInt& /*iElem*/, const Vector3D& P, const Real& 
 // Vector source term
 Vector vectorSource::eval ( const UInt& /*iElem*/, const Vector3D& P, const Real& time ) const
 {
-    const Real x(P[0]), y(P[1]), t(time);
-    Vector source( static_cast<UInt>(2) );
+    const Real x (P[0]), y (P[1]), t (time);
+    Vector source ( static_cast<UInt> (2) );
 
     const Real Entry0 = t * ( - x + y );
     const Real Entry1 = t * t * ( - y * y );
 
-    source ( static_cast<UInt>(0) ) = Entry0;
-    source ( static_cast<UInt>(1) ) = Entry1;
+    source ( static_cast<UInt> (0) ) = Entry0;
+    source ( static_cast<UInt> (1) ) = Entry1;
 
     return source;
 }
@@ -103,7 +103,7 @@ Vector vectorSource::eval ( const UInt& /*iElem*/, const Vector3D& P, const Real
 // Initial time primal variable for transient and non-linear transient solvers
 Real initialCondition::eval ( const UInt& /*iElem*/, const Vector3D& P, const Real& /*time*/ ) const
 {
-    const Real y(P[1]);
+    const Real y (P[1]);
     return y * y * y;
 }
 
@@ -116,16 +116,16 @@ Real massFunction::eval ( const UInt& /*iElem*/, const Vector3D& /*P*/, const Re
 // ===================================================
 //!                    Boundary data
 // ===================================================
-void setBoundaryConditions ( bcHandlerPtr_Type & bcDarcy )
+void setBoundaryConditions ( bcHandlerPtr_Type& bcDarcy )
 {
 
     BCFunctionBase dirichletBDfun;
     dirichletBDfun.setFunction ( dirichlet );
 
-    bcDarcy->addBC( "Top",    BCFlags::TOP,    Essential, Scalar, dirichletBDfun );
-    bcDarcy->addBC( "Bottom", BCFlags::BOTTOM, Essential, Scalar, dirichletBDfun );
-    bcDarcy->addBC( "Left",   BCFlags::LEFT,   Essential, Scalar, dirichletBDfun );
-    bcDarcy->addBC( "Right",  BCFlags::RIGHT,  Essential, Scalar, dirichletBDfun );
+    bcDarcy->addBC ( "Top",    BCFlags::TOP,    Essential, Scalar, dirichletBDfun );
+    bcDarcy->addBC ( "Bottom", BCFlags::BOTTOM, Essential, Scalar, dirichletBDfun );
+    bcDarcy->addBC ( "Left",   BCFlags::LEFT,   Essential, Scalar, dirichletBDfun );
+    bcDarcy->addBC ( "Right",  BCFlags::RIGHT,  Essential, Scalar, dirichletBDfun );
 
 }
 
@@ -162,15 +162,15 @@ Real analyticalFlux ( const Real& t,
 {
     switch ( icomp )
     {
-    case 0:
-        return -1. * ( 2. * t * t * x + t * ( x - y ) );
-    case 1:
-        return -1. * ( ( 3. * y * y + t * t * y * y ) *
-                       ( 1. + t * t * t * t * x * x * x * x +
-                         y * y * y * y * y * y +
-                         2. * t * t * x * x * y * y * y ) );
-    default:
-        return 0.;
+        case 0:
+            return -1. * ( 2. * t * t * x + t * ( x - y ) );
+        case 1:
+            return -1. * ( ( 3. * y * y + t * t * y * y ) *
+                           ( 1. + t * t * t * t * x * x * x * x +
+                             y * y * y * y * y * y +
+                             2. * t * t * x * x * y * y * y ) );
+        default:
+            return 0.;
     }
 }
 

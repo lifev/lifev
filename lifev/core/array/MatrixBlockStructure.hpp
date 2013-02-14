@@ -41,7 +41,8 @@
 #include <lifev/core/array/MapVector.hpp>
 #include <lifev/core/array/VectorBlockStructure.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! MatrixBlockStructure - class representing the structure of a vector
 /*!
@@ -76,11 +77,11 @@ public:
     MatrixBlockStructure();
 
     //! Constructor with the monolithic maps
-    MatrixBlockStructure( const map_Type& rowMap,
-                          const map_Type& columnMap );
+    MatrixBlockStructure ( const map_Type& rowMap,
+                           const map_Type& columnMap );
 
     //! Constructor with a unique monolithic map
-    MatrixBlockStructure( const map_Type& map );
+    MatrixBlockStructure ( const map_Type& map );
 
     //! Construction with a map
     /*!
@@ -88,8 +89,8 @@ public:
       vectors. The monolithic map and vectors are also built by concatenating the different maps
       in the vector.
      */
-    MatrixBlockStructure( const mapVector_Type& rowMapVector,
-                          const mapVector_Type& columnMapVector );
+    MatrixBlockStructure ( const mapVector_Type& rowMapVector,
+                           const mapVector_Type& columnMapVector );
 
     //! Construction with a map
     /*!
@@ -97,17 +98,17 @@ public:
       vector. The monolithic map and vectors are also built by concatenating the different maps
       in the vector.
      */
-    MatrixBlockStructure( const mapVector_Type& mapVector );
+    MatrixBlockStructure ( const mapVector_Type& mapVector );
 
     //! Construction with row and column structure
-    MatrixBlockStructure( const VectorBlockStructure& rowsBlockStructure,
-                          const VectorBlockStructure& columnsBlockStructure );
+    MatrixBlockStructure ( const VectorBlockStructure& rowsBlockStructure,
+                           const VectorBlockStructure& columnsBlockStructure );
 
     //! Construction with vector structure
-    MatrixBlockStructure( const VectorBlockStructure& vectorStructure );
+    MatrixBlockStructure ( const VectorBlockStructure& vectorStructure );
 
     //! Copy constructor
-    MatrixBlockStructure( const MatrixBlockStructure& blockStructure );
+    MatrixBlockStructure ( const MatrixBlockStructure& blockStructure );
 
     //! Destructor
     ~MatrixBlockStructure();
@@ -122,13 +123,13 @@ public:
      *  @param blockNumRows Number of rows in the blocks
      *  @param blockNumColumns Number of columns in the blocks
      */
-    void setBlockStructure( const std::vector<UInt>& blockNumRows,
-                            const std::vector<UInt>& blockNumColumns );
+    void setBlockStructure ( const std::vector<UInt>& blockNumRows,
+                             const std::vector<UInt>& blockNumColumns );
 
     /*! Set the size of the blocks of the matrix
      *  @param blocksSize Number of rows/columns in the blocks
      */
-    void setBlockStructure( const std::vector<UInt>& blocksSize );
+    void setBlockStructure ( const std::vector<UInt>& blocksSize );
 
     /*!
      * Set the size of the blocks of the matrix using the maps stored in the vector
@@ -139,8 +140,8 @@ public:
      * of the matrix cannot be changed with this method (and the block structure has
      * to be compatible with the global size).
      */
-    void setBlockStructure( const MapVector<MapEpetra>& rowMapVector,
-                            const MapVector<MapEpetra>& columnMapVector );
+    void setBlockStructure ( const MapVector<MapEpetra>& rowMapVector,
+                             const MapVector<MapEpetra>& columnMapVector );
 
     /*!
      * Set the size of the blocks of the matrix using the maps stored in the vector
@@ -151,17 +152,17 @@ public:
      * of the matrix cannot be changed with this method (and the block structure has
      * to be compatible with the global size).
      */
-    void setBlockStructure( const MapVector<MapEpetra>& mapVector );
+    void setBlockStructure ( const MapVector<MapEpetra>& mapVector );
 
     //! Set the block structure from a matrix structure object
-    void setBlockStructure( const MatrixBlockStructure& blockStructure );
+    void setBlockStructure ( const MatrixBlockStructure& blockStructure );
 
     //! Set the block structure from row and column structures
-    void setBlockStructure( const VectorBlockStructure& rowsBlockStructure,
-                            const VectorBlockStructure& columnsBlockStructure );
+    void setBlockStructure ( const VectorBlockStructure& rowsBlockStructure,
+                             const VectorBlockStructure& columnsBlockStructure );
 
     //! Set the block structure from row and column structures
-    void setBlockStructure( const VectorBlockStructure& vectorBlockStructure );
+    void setBlockStructure ( const VectorBlockStructure& vectorBlockStructure );
 
     //@}
 
@@ -172,25 +173,25 @@ public:
     /*!
      * @param rowIndex Row index of the block
      */
-    UInt blockNumRows( const UInt& rowIndex ) const;
+    UInt blockNumRows ( const UInt& rowIndex ) const;
 
     //! Returns the number of columns of the block
     /*!
      * @param columnIndex Column index of the block
      */
-    UInt blockNumColumns( const UInt& columnIndex ) const;
+    UInt blockNumColumns ( const UInt& columnIndex ) const;
 
     /*!
       @param index Index of the block
       @return index of the first entry in the index-th block
      */
-    UInt rowBlockFirstIndex( const UInt& index ) const;
+    UInt rowBlockFirstIndex ( const UInt& index ) const;
 
     /*!
       @param index Index of the block
       @return index of the first entry in the index-th block
      */
-    UInt columnBlockFirstIndex( const UInt& index ) const;
+    UInt columnBlockFirstIndex ( const UInt& index ) const;
 
     //! Number of row blocks
     UInt numRowBlocks() const;

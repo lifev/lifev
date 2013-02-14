@@ -45,229 +45,244 @@ namespace LifeV
 {
 
 template <class vector_type>
-void stiff(const Real sigma_l, const Real sigma_t, const vector_type& cos, MatrixElemental& elmat, const CurrentFE& fe, const DOF& dof, UInt iblock, UInt jblock);
+void stiff (const Real sigma_l, const Real sigma_t, const vector_type& cos, MatrixElemental& elmat, const CurrentFE& fe, const DOF& dof, UInt iblock, UInt jblock);
 
 template <class reduced_sigma, class vector_type>
-void stiff( const reduced_sigma& red_sigma, const Real sigma_l, const Real sigma_t, const vector_type& cos, MatrixElemental& elmat, const CurrentFE& fe, const DOF& dof, UInt iblock, UInt jblock, ID id=0);
+void stiff ( const reduced_sigma& red_sigma, const Real sigma_l, const Real sigma_t, const vector_type& cos, MatrixElemental& elmat, const CurrentFE& fe, const DOF& dof, UInt iblock, UInt jblock, ID id = 0);
 
 template <class reduced_sigma>
-void stiff( reduced_sigma red_sigma, const Real D, MatrixElemental& elmat, const CurrentFE& fe, const DOF& dof, UInt iblock, UInt jblock, ID id=0);
+void stiff ( reduced_sigma red_sigma, const Real D, MatrixElemental& elmat, const CurrentFE& fe, const DOF& dof, UInt iblock, UInt jblock, ID id = 0);
 
 template <class vector_type>
-void stiffNL(vector_type& U, Real coef, MatrixElemental& elmat, const CurrentFE& fe,
-             const DOF& dof, UInt iblock, UInt jblock, const Real beta);
+void stiffNL (vector_type& U, Real coef, MatrixElemental& elmat, const CurrentFE& fe,
+              const DOF& dof, UInt iblock, UInt jblock, const Real beta);
 
 //template <class vector_type>
 //void stiffNL(vector_type& U, Real coef, MatrixElemental& elmat, const CurrentFE& fe,
 //             const DOF& dof, UInt iblock, UInt jblock, UInt nb, const Real beta);
 
 template <class vector_type>
-void stiffNL(const vector_type& U, const Real sigma_l, const Real sigma_t,
-                 const vector_type& cos, MatrixElemental& elmat, const CurrentFE& fe,
-             const DOF& dof, UInt iblock, UInt jblock, const Real beta);
+void stiffNL (const vector_type& U, const Real sigma_l, const Real sigma_t,
+              const vector_type& cos, MatrixElemental& elmat, const CurrentFE& fe,
+              const DOF& dof, UInt iblock, UInt jblock, const Real beta);
 
 template <class vector_type>
-void stiff( const Real sigma_l, const Real sigma_t, const vector_type& cos, MatrixElemental& elmat, const CurrentFE& fe, const DOF& dof, UInt iblock, UInt jblock)
+void stiff ( const Real sigma_l, const Real sigma_t, const vector_type& cos, MatrixElemental& elmat, const CurrentFE& fe, const DOF& dof, UInt iblock, UInt jblock)
 {
-	//! Assembling the righthand side
+    //! Assembling the righthand side
     //ASSERT_PRE( fe.hasFirstDeriv(),
     //            "Stiffness matrix needs at least the first derivatives" );
-    MatrixElemental::matrix_view mat = elmat.block( iblock, jblock );
+    MatrixElemental::matrix_view mat = elmat.block ( iblock, jblock );
     Int iloc, jloc;
     UInt i, icoor, jcoor, ig;
     Real s;
-    ID eleId=fe.currentLocalId();
+    ID eleId = fe.currentLocalId();
     UInt dim = dof.numTotalDof();
 
-    Vector a_l(fe.nbCoor());
-    Vector u_x(fe.nbQuadPt());
-    Vector u_y(fe.nbQuadPt());
-    Vector u_z(fe.nbQuadPt());
+    Vector a_l (fe.nbCoor() );
+    Vector u_x (fe.nbQuadPt() );
+    Vector u_y (fe.nbQuadPt() );
+    Vector u_z (fe.nbQuadPt() );
 
-    for ( ig = 0;ig < fe.nbQuadPt();ig++ ){
+    for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
+    {
         u_x[ig] = u_y[ig] = u_z[ig] = 0;
-        for (i=0;i<fe.nbFEDof();i++){
-           u_x[ig]+=cos[dof.localToGlobalMap(eleId,i)]*fe.phi(i,ig);    //(one component)
-           u_y[ig]+=cos[dof.localToGlobalMap(eleId,i)+dim]*fe.phi(i,ig);
-           u_z[ig]+=cos[dof.localToGlobalMap(eleId,i)+2*dim]*fe.phi(i,ig);
+        for (i = 0; i < fe.nbFEDof(); i++)
+        {
+            u_x[ig] += cos[dof.localToGlobalMap (eleId, i)] * fe.phi (i, ig); //(one component)
+            u_y[ig] += cos[dof.localToGlobalMap (eleId, i) + dim] * fe.phi (i, ig);
+            u_z[ig] += cos[dof.localToGlobalMap (eleId, i) + 2 * dim] * fe.phi (i, ig);
         }
     }
     //
     // diagonal
     //
 
-    for ( i = 0;i < fe.nbDiag();i++ )
-       {
-           iloc = fe.patternFirst( i );
-           s = 0;
-           for ( ig = 0;ig < fe.nbQuadPt();ig++ ){
-               a_l[0] = u_x[ig];
-               a_l[1] = u_y[ig];
-               a_l[2] = u_z[ig];
-               Real norm = std::sqrt(a_l[0]*a_l[0]+a_l[1]*a_l[1]+a_l[2]*a_l[2]);
-               a_l[0] = a_l[0]/norm; a_l[1] = a_l[1]/norm; a_l[2] = a_l[2]/norm;
+    for ( i = 0; i < fe.nbDiag(); i++ )
+    {
+        iloc = fe.patternFirst ( i );
+        s = 0;
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
+        {
+            a_l[0] = u_x[ig];
+            a_l[1] = u_y[ig];
+            a_l[2] = u_z[ig];
+            Real norm = std::sqrt (a_l[0] * a_l[0] + a_l[1] * a_l[1] + a_l[2] * a_l[2]);
+            a_l[0] = a_l[0] / norm;
+            a_l[1] = a_l[1] / norm;
+            a_l[2] = a_l[2] / norm;
 
-             //  std::cout<< a_l[0] << a_l[1] << a_l[2] << " ";            //  D = sigma_t * I + (sigma_l-sigma_t) * a_l * a_l^T
-               for ( icoor = 0;icoor < fe.nbCoor();icoor++ ){
-                   s += fe.phiDer( iloc, icoor, ig ) * fe.phiDer( iloc, icoor, ig ) *
-                           fe.weightDet( ig )* sigma_t;
-                   for ( jcoor = 0;jcoor < fe.nbCoor(); jcoor++ )
-                       s += fe.phiDer( iloc, icoor, ig ) * fe.phiDer( iloc, jcoor, ig ) *
-                           fe.weightDet( ig )* (sigma_l-sigma_t)*a_l[icoor] * a_l[jcoor];
-                    }
+            //  std::cout<< a_l[0] << a_l[1] << a_l[2] << " ";            //  D = sigma_t * I + (sigma_l-sigma_t) * a_l * a_l^T
+            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+            {
+                s += fe.phiDer ( iloc, icoor, ig ) * fe.phiDer ( iloc, icoor, ig ) *
+                     fe.weightDet ( ig ) * sigma_t;
+                for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+                    s += fe.phiDer ( iloc, icoor, ig ) * fe.phiDer ( iloc, jcoor, ig ) *
+                         fe.weightDet ( ig ) * (sigma_l - sigma_t) * a_l[icoor] * a_l[jcoor];
+            }
 
-           }
-           mat( iloc, iloc ) += s;
-       }
+        }
+        mat ( iloc, iloc ) += s;
+    }
 
 
 
     //
     // extra diagonal
     //
-    for ( i = fe.nbDiag();i < fe.nbDiag() + fe.nbUpper();i++ )
+    for ( i = fe.nbDiag(); i < fe.nbDiag() + fe.nbUpper(); i++ )
     {
         s = 0;
-        iloc = fe.patternFirst( i );
-        jloc = fe.patternSecond( i );
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ ){
+        iloc = fe.patternFirst ( i );
+        jloc = fe.patternSecond ( i );
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
+        {
             a_l[0] = u_x[ig];
             a_l[1] = u_y[ig];
             a_l[2] = u_z[ig];
-            Real norm = std::sqrt(a_l[0]*a_l[0]+a_l[1]*a_l[1]+a_l[2]*a_l[2]);
-            a_l[0] = a_l[0]/norm; a_l[1] = a_l[1]/norm; a_l[2] = a_l[2]/norm;
+            Real norm = std::sqrt (a_l[0] * a_l[0] + a_l[1] * a_l[1] + a_l[2] * a_l[2]);
+            a_l[0] = a_l[0] / norm;
+            a_l[1] = a_l[1] / norm;
+            a_l[2] = a_l[2] / norm;
             //  D = sigma_t * I + (sigma_l-sigma_t) * a_l * a_l^T
-            for ( icoor = 0;icoor < fe.nbCoor(); icoor++ ){
-                s += fe.phiDer( iloc, icoor, ig ) * fe.phiDer( jloc, icoor, ig ) *
-                        fe.weightDet( ig )* sigma_t;  //diagonal
+            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+            {
+                s += fe.phiDer ( iloc, icoor, ig ) * fe.phiDer ( jloc, icoor, ig ) *
+                     fe.weightDet ( ig ) * sigma_t; //diagonal
                 for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
-                    s += fe.phiDer( iloc, icoor, ig ) * fe.phiDer( jloc, jcoor, ig ) *
-                        fe.weightDet( ig )* (sigma_l-sigma_t)*a_l[icoor] * a_l[jcoor];
-                    }
+                    s += fe.phiDer ( iloc, icoor, ig ) * fe.phiDer ( jloc, jcoor, ig ) *
+                         fe.weightDet ( ig ) * (sigma_l - sigma_t) * a_l[icoor] * a_l[jcoor];
             }
+        }
 
-        mat( iloc, jloc ) += s;
-        mat( jloc, iloc ) += s;
+        mat ( iloc, jloc ) += s;
+        mat ( jloc, iloc ) += s;
     }
 }
 
 
 template <class reduced_sigma, class vector_type>
-void stiff( const reduced_sigma& red_sigma, const Real sigma_l, const Real sigma_t, const vector_type& cos, MatrixElemental& elmat, const CurrentFE& fe, const DOF& dof, UInt iblock, UInt jblock, ID id)
+void stiff ( const reduced_sigma& red_sigma, const Real sigma_l, const Real sigma_t, const vector_type& cos, MatrixElemental& elmat, const CurrentFE& fe, const DOF& dof, UInt iblock, UInt jblock, ID id)
 {
-//     ASSERT_PRE( fe.hasFirstDeriv(),
-//                 "Stiffness matrix needs at least the first derivatives" );
-    MatrixElemental::matrix_view mat = elmat.block( iblock, jblock );
+    //     ASSERT_PRE( fe.hasFirstDeriv(),
+    //                 "Stiffness matrix needs at least the first derivatives" );
+    MatrixElemental::matrix_view mat = elmat.block ( iblock, jblock );
     Int iloc, jloc;
     UInt i, icoor, jcoor, ig;
     Real s;
-    ID eleId=fe.currentLocalId();
-    Real x,y,z;
+    ID eleId = fe.currentLocalId();
+    Real x, y, z;
 
 
-    Vector a_l(fe.nbCoor());
+    Vector a_l (fe.nbCoor() );
     UInt dim = dof.numTotalDof();
-    Vector u_x(fe.nbQuadPt());
-    Vector u_y(fe.nbQuadPt());
-    Vector u_z(fe.nbQuadPt());
+    Vector u_x (fe.nbQuadPt() );
+    Vector u_y (fe.nbQuadPt() );
+    Vector u_z (fe.nbQuadPt() );
 
-    for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+    for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
         u_x[ig] = u_y[ig] = u_z[ig] = 0;
-        for (i=0;i<fe.nbFEDof();i++)
-	{
-           u_x[ig]+=cos[dof.localToGlobalMap(eleId,i)]*fe.phi(i,ig);    //(one component)
-           u_y[ig]+=cos[dim+dof.localToGlobalMap(eleId,i)]*fe.phi(i,ig);
-           u_z[ig]+=cos[2*dim+dof.localToGlobalMap(eleId,i)]*fe.phi(i,ig);
+        for (i = 0; i < fe.nbFEDof(); i++)
+        {
+            u_x[ig] += cos[dof.localToGlobalMap (eleId, i)] * fe.phi (i, ig); //(one component)
+            u_y[ig] += cos[dim + dof.localToGlobalMap (eleId, i)] * fe.phi (i, ig);
+            u_z[ig] += cos[2 * dim + dof.localToGlobalMap (eleId, i)] * fe.phi (i, ig);
         }
     }
 
     //
     // diagonal
     //
-    for ( i = 0;i < fe.nbDiag();i++ )
+    for ( i = 0; i < fe.nbDiag(); i++ )
     {
-        iloc = fe.patternFirst( i );
+        iloc = fe.patternFirst ( i );
         s = 0;
-       for ( ig = 0;ig < fe.nbQuadPt();ig++ ){
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
+        {
             a_l[0] = u_x[ig];
             a_l[1] = u_y[ig];
             a_l[2] = u_z[ig];
-            Real norm = std::sqrt(a_l[0]*a_l[0]+a_l[1]*a_l[1]+a_l[2]*a_l[2]);
-            a_l[0] = a_l[0]/norm; a_l[1] = a_l[1]/norm; a_l[2] = a_l[2]/norm;
+            Real norm = std::sqrt (a_l[0] * a_l[0] + a_l[1] * a_l[1] + a_l[2] * a_l[2]);
+            a_l[0] = a_l[0] / norm;
+            a_l[1] = a_l[1] / norm;
+            a_l[2] = a_l[2] / norm;
 
-            fe.coorQuadPt(x,y,z,ig);
-           //  D = sigma_t * I + (sigma_l-sigma_t) * a_l * a_l^T
-            for ( icoor = 0;icoor < fe.nbCoor();icoor++ )
-	    {
-                s += fe.phiDer( iloc, icoor, ig ) * fe.phiDer( iloc, icoor, ig ) *
-                        fe.weightDet( ig )* red_sigma(x,y,z,0,id,sigma_t);
-                for ( jcoor = 0;jcoor < fe.nbCoor(); jcoor++ )
-                    s += fe.phiDer( iloc, icoor, ig ) * fe.phiDer( iloc, jcoor, ig ) *
-                        fe.weightDet( ig )* (red_sigma(x,y,z,0,id, sigma_l)-red_sigma(x,y,z,0,id, sigma_t))*a_l[icoor] * a_l[jcoor];
-                 }
+            fe.coorQuadPt (x, y, z, ig);
+            //  D = sigma_t * I + (sigma_l-sigma_t) * a_l * a_l^T
+            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+            {
+                s += fe.phiDer ( iloc, icoor, ig ) * fe.phiDer ( iloc, icoor, ig ) *
+                     fe.weightDet ( ig ) * red_sigma (x, y, z, 0, id, sigma_t);
+                for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+                    s += fe.phiDer ( iloc, icoor, ig ) * fe.phiDer ( iloc, jcoor, ig ) *
+                         fe.weightDet ( ig ) * (red_sigma (x, y, z, 0, id, sigma_l) - red_sigma (x, y, z, 0, id, sigma_t) ) * a_l[icoor] * a_l[jcoor];
+            }
 
         }
-        mat( iloc, iloc ) += s;
+        mat ( iloc, iloc ) += s;
     }
     //
     // extra diagonal
     //
-    for ( i = fe.nbDiag();i < fe.nbDiag() + fe.nbUpper();i++ )
+    for ( i = fe.nbDiag(); i < fe.nbDiag() + fe.nbUpper(); i++ )
     {
         s = 0;
-        iloc = fe.patternFirst( i );
-        jloc = fe.patternSecond( i );
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
-	{
+        iloc = fe.patternFirst ( i );
+        jloc = fe.patternSecond ( i );
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
+        {
             a_l[0] = u_x[ig];
             a_l[1] = u_y[ig];
             a_l[2] = u_z[ig];
 
-            Real norm = std::sqrt(a_l[0]*a_l[0]+a_l[1]*a_l[1]+a_l[2]*a_l[2]);
-            a_l[0] = a_l[0]/norm; a_l[1] = a_l[1]/norm; a_l[2] = a_l[2]/norm;
+            Real norm = std::sqrt (a_l[0] * a_l[0] + a_l[1] * a_l[1] + a_l[2] * a_l[2]);
+            a_l[0] = a_l[0] / norm;
+            a_l[1] = a_l[1] / norm;
+            a_l[2] = a_l[2] / norm;
 
             //  D = sigma_t * I + (sigma_l-sigma_t) * a_l * a_l^T
-            for ( icoor = 0;icoor < fe.nbCoor(); icoor++ )
-	    {
-                s += fe.phiDer( iloc, icoor, ig ) * fe.phiDer( jloc, icoor, ig ) *
-                        fe.weightDet( ig )* red_sigma(x,y,z,0,id,sigma_t);  //diagonal
+            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+            {
+                s += fe.phiDer ( iloc, icoor, ig ) * fe.phiDer ( jloc, icoor, ig ) *
+                     fe.weightDet ( ig ) * red_sigma (x, y, z, 0, id, sigma_t); //diagonal
                 for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
-                    s += fe.phiDer( iloc, icoor, ig ) * fe.phiDer( jloc, jcoor, ig ) *
-                        fe.weightDet( ig )* (red_sigma(x,y,z,0,id,sigma_l)-red_sigma(x,y,z,0,id,sigma_t))*a_l[icoor] * a_l[jcoor];
+                    s += fe.phiDer ( iloc, icoor, ig ) * fe.phiDer ( jloc, jcoor, ig ) *
+                         fe.weightDet ( ig ) * (red_sigma (x, y, z, 0, id, sigma_l) - red_sigma (x, y, z, 0, id, sigma_t) ) * a_l[icoor] * a_l[jcoor];
             }
-         }
+        }
 
-        mat( iloc, jloc ) += s;
-        mat( jloc, iloc ) += s;
+        mat ( iloc, jloc ) += s;
+        mat ( jloc, iloc ) += s;
     }
 }
 
 
 template <class reduced_sigma>
-void stiff( reduced_sigma red_sigma, const Real D, MatrixElemental& elmat, const CurrentFE& fe, const DOF& /*dof*/, UInt iblock, UInt jblock, ID id)
+void stiff ( reduced_sigma red_sigma, const Real D, MatrixElemental& elmat, const CurrentFE& fe, const DOF& /*dof*/, UInt iblock, UInt jblock, ID id)
 {
 
-//     ASSERT_PRE( fe.hasFirstDeriv(),
-//                 "Stiffness matrix needs at least the first derivatives" );
-    MatrixElemental::matrix_view mat = elmat.block( iblock, jblock );
+    //     ASSERT_PRE( fe.hasFirstDeriv(),
+    //                 "Stiffness matrix needs at least the first derivatives" );
+    MatrixElemental::matrix_view mat = elmat.block ( iblock, jblock );
     Int iloc, jloc;
     UInt i, icoor, ig;
     Real s;
 
-    Real x,y,z;
-    for ( i = 0;i < fe.nbDiag();i++ )
+    Real x, y, z;
+    for ( i = 0; i < fe.nbDiag(); i++ )
     {
-        iloc = fe.patternFirst( i );
+        iloc = fe.patternFirst ( i );
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
-            fe.coorQuadPt(x,y,z,ig);
-            for ( icoor = 0;icoor < fe.nbCoor();icoor++ )
-                s += fe.phiDer( iloc, icoor, ig ) * fe.phiDer( iloc, icoor, ig )
-                    * fe.weightDet( ig )*red_sigma(x,y,z,0,id, D);
+            fe.coorQuadPt (x, y, z, ig);
+            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+                s += fe.phiDer ( iloc, icoor, ig ) * fe.phiDer ( iloc, icoor, ig )
+                     * fe.weightDet ( ig ) * red_sigma (x, y, z, 0, id, D);
         }
-        mat( iloc, iloc ) += s;
+        mat ( iloc, iloc ) += s;
     }
 
 
@@ -276,92 +291,98 @@ void stiff( reduced_sigma red_sigma, const Real D, MatrixElemental& elmat, const
     //
 
 
-    for ( i = fe.nbDiag();i < fe.nbDiag() + fe.nbUpper();i++ )
+    for ( i = fe.nbDiag(); i < fe.nbDiag() + fe.nbUpper(); i++ )
     {
-        iloc = fe.patternFirst( i );
-        jloc = fe.patternSecond( i );
+        iloc = fe.patternFirst ( i );
+        jloc = fe.patternSecond ( i );
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
-            fe.coorQuadPt(x,y,z,ig);
-            for ( icoor = 0;icoor < fe.nbCoor();icoor++ )
-                s += fe.phiDer( iloc, icoor, ig ) * fe.phiDer( jloc, icoor, ig ) *
-                    fe.weightDet( ig )*red_sigma(x,y,z,0,id,D);
+            fe.coorQuadPt (x, y, z, ig);
+            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+                s += fe.phiDer ( iloc, icoor, ig ) * fe.phiDer ( jloc, icoor, ig ) *
+                     fe.weightDet ( ig ) * red_sigma (x, y, z, 0, id, D);
         }
-        mat( iloc, jloc ) += s;
-        mat( jloc, iloc ) += s;
+        mat ( iloc, jloc ) += s;
+        mat ( jloc, iloc ) += s;
     }
 }
 
 //Without fibers
 template <class vector_type>
-void stiffNL(vector_type& U, Real coef, MatrixElemental& elmat, const CurrentFE& fe,
-             const DOF& dof, UInt iblock, UInt jblock, const Real beta)
+void stiffNL (vector_type& U, Real coef, MatrixElemental& elmat, const CurrentFE& fe,
+              const DOF& dof, UInt iblock, UInt jblock, const Real beta)
 {
-    MatrixElemental::matrix_view mat = elmat.block( iblock, jblock );
+    MatrixElemental::matrix_view mat = elmat.block ( iblock, jblock );
     Int iloc, jloc, i, icoor, jcoor, ig;
     Real s, coef_s;
-    ID eleId=fe.currentLocalId();
+    ID eleId = fe.currentLocalId();
     UInt dim = dof.numTotalDof();
     Int iu;
-    std::vector<Real> locU(fe.nbFEDof());
-    std::vector<Real> MM_l(fe.nbCoor());
+    std::vector<Real> locU (fe.nbFEDof() );
+    std::vector<Real> MM_l (fe.nbCoor() );
     Real bPt;
 
-    for (i=0;i<fe.nbFEDof();i++){
-        locU[i]=U[dof.localToGlobalMap(eleId,i)];    //(one component)
+    for (i = 0; i < fe.nbFEDof(); i++)
+    {
+        locU[i] = U[dof.localToGlobalMap (eleId, i)]; //(one component)
     }
 
     //
     // diagonal
     //
-    for ( i = 0;i < fe.nbDiag();i++ )
+    for ( i = 0; i < fe.nbDiag(); i++ )
     {
-        iloc = fe.patternFirst( i );
+        iloc = fe.patternFirst ( i );
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ )
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
             bPt = 0.0;
-            for(iu=0;iu<fe.nbFEDof();iu++){
-                bPt+=locU[iu]*fe.phi(iu,ig);
+            for (iu = 0; iu < fe.nbFEDof(); iu++)
+            {
+                bPt += locU[iu] * fe.phi (iu, ig);
             }
-            MM_l[0] = 1.0/(1.0+beta*(bPt+84.0)/(184.0+bPt)+0.001*bPt);
-            MM_l[1] = 1.0+beta*(bPt+84.0)/(184.0+bPt)+0.001*bPt;
-            MM_l[2] = 1.0+beta*(bPt+84.0)/(184.0+bPt)+0.001*bPt;
+            MM_l[0] = 1.0 / (1.0 + beta * (bPt + 84.0) / (184.0 + bPt) + 0.001 * bPt);
+            MM_l[1] = 1.0 + beta * (bPt + 84.0) / (184.0 + bPt) + 0.001 * bPt;
+            MM_l[2] = 1.0 + beta * (bPt + 84.0) / (184.0 + bPt) + 0.001 * bPt;
 
-            for ( icoor = 0;icoor < fe.nbCoor();icoor++ ){
-                s += fe.phiDer( iloc, icoor, ig ) * fe.phiDer( iloc, icoor, ig ) *
-                    fe.weightDet( ig )*MM_l[icoor];
+            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+            {
+                s += fe.phiDer ( iloc, icoor, ig ) * fe.phiDer ( iloc, icoor, ig ) *
+                     fe.weightDet ( ig ) * MM_l[icoor];
             }
         }
-        mat( iloc, iloc ) += coef * s;
+        mat ( iloc, iloc ) += coef * s;
     }
     //
     // extra diagonal
     //
 
-    for ( i = fe.nbDiag();i < fe.nbDiag() + fe.nbUpper();i++ )
+    for ( i = fe.nbDiag(); i < fe.nbDiag() + fe.nbUpper(); i++ )
     {
         s = 0;
-        iloc = fe.patternFirst( i );
-        jloc = fe.patternSecond( i );
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ ){
+        iloc = fe.patternFirst ( i );
+        jloc = fe.patternSecond ( i );
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
+        {
             bPt = 0.0;
-            for(iu=0;iu<fe.nbFEDof();iu++){
-                bPt+=locU[iu]*fe.phi(iu,ig);
+            for (iu = 0; iu < fe.nbFEDof(); iu++)
+            {
+                bPt += locU[iu] * fe.phi (iu, ig);
             }
-            MM_l[0] = 1.0/(1.0+beta*(bPt+84.0)/(184.0+bPt)+0.001*bPt);
-            MM_l[1]=1.0+beta*(bPt+84.0)/(184.0+bPt)+0.001*bPt;
-            MM_l[2]=1.0+beta*(bPt+84.0)/(184.0+bPt)+0.001*bPt;
+            MM_l[0] = 1.0 / (1.0 + beta * (bPt + 84.0) / (184.0 + bPt) + 0.001 * bPt);
+            MM_l[1] = 1.0 + beta * (bPt + 84.0) / (184.0 + bPt) + 0.001 * bPt;
+            MM_l[2] = 1.0 + beta * (bPt + 84.0) / (184.0 + bPt) + 0.001 * bPt;
 
-            for ( icoor = 0;icoor < fe.nbCoor();icoor++ ){
-                s += fe.phiDer( iloc, icoor, ig ) * fe.phiDer( jloc, icoor, ig ) *
-                    fe.weightDet( ig )*MM_l[icoor];
+            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+            {
+                s += fe.phiDer ( iloc, icoor, ig ) * fe.phiDer ( jloc, icoor, ig ) *
+                     fe.weightDet ( ig ) * MM_l[icoor];
             }
         }
-        coef_s= coef * s;
-        mat( iloc, jloc ) += coef_s;
-        mat( jloc, iloc ) += coef_s;
+        coef_s = coef * s;
+        mat ( iloc, jloc ) += coef_s;
+        mat ( jloc, iloc ) += coef_s;
     }
 }
 
@@ -467,67 +488,74 @@ void stiffNL(vector_type& U, Real coef, MatrixElemental& elmat, const CurrentFE&
 
 //with the fibers
 template <class vector_type>
-void stiffNL(const vector_type& U, const Real sigma_l, const Real sigma_t,
-             const vector_type& cos, MatrixElemental& elmat, const CurrentFE& fe,
-             const DOF& dof, UInt iblock, UInt jblock, const Real beta)
+void stiffNL (const vector_type& U, const Real sigma_l, const Real sigma_t,
+              const vector_type& cos, MatrixElemental& elmat, const CurrentFE& fe,
+              const DOF& dof, UInt iblock, UInt jblock, const Real beta)
 {
-    MatrixElemental::matrix_view mat = elmat.block( iblock, jblock );
+    MatrixElemental::matrix_view mat = elmat.block ( iblock, jblock );
     Int iloc, jloc;
     UInt i, icoor, jcoor, ig;
     Real s;
-    ID eleId=fe.currentLocalId();
+    ID eleId = fe.currentLocalId();
     UInt dim = dof.numTotalDof();
     Int iu;
-    Vector locU(fe.nbFEDof());
-    Vector MM_l(fe.nbCoor());
+    Vector locU (fe.nbFEDof() );
+    Vector MM_l (fe.nbCoor() );
     Real bPt;
-    Vector a_l(fe.nbCoor());
-    Vector u_x(fe.nbQuadPt());
-    Vector u_y(fe.nbQuadPt());
-    Vector u_z(fe.nbQuadPt());
+    Vector a_l (fe.nbCoor() );
+    Vector u_x (fe.nbQuadPt() );
+    Vector u_y (fe.nbQuadPt() );
+    Vector u_z (fe.nbQuadPt() );
 
-    for ( ig = 0;ig < fe.nbQuadPt();ig++ ){
+    for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
+    {
         u_x[ig] = u_y[ig] = u_z[ig] = 0;
-        for (i=0;i<fe.nbFEDof();i++){
-            locU[i]=U[dof.localToGlobalMap(eleId,i)]; // ojo!!! quizas es -1
-            u_x[ig]+=cos[dof.localToGlobalMap(eleId,i)]*fe.phi(i,ig);    //(one component)
-            u_y[ig]+=cos[dof.localToGlobalMap(eleId,i)+dim]*fe.phi(i,ig);
-            u_z[ig]+=cos[dof.localToGlobalMap(eleId,i)+2*dim]*fe.phi(i,ig);
+        for (i = 0; i < fe.nbFEDof(); i++)
+        {
+            locU[i] = U[dof.localToGlobalMap (eleId, i)]; // ojo!!! quizas es -1
+            u_x[ig] += cos[dof.localToGlobalMap (eleId, i)] * fe.phi (i, ig); //(one component)
+            u_y[ig] += cos[dof.localToGlobalMap (eleId, i) + dim] * fe.phi (i, ig);
+            u_z[ig] += cos[dof.localToGlobalMap (eleId, i) + 2 * dim] * fe.phi (i, ig);
         }
     }
     //
     // diagonal
     //
 
-    for ( i = 0;i < fe.nbDiag();i++ )
+    for ( i = 0; i < fe.nbDiag(); i++ )
     {
-        iloc = fe.patternFirst( i );
+        iloc = fe.patternFirst ( i );
         s = 0;
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ ){
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
+        {
             bPt = 0.0;
-            for(iu=0;iu<fe.nbFEDof();iu++){
-                bPt+=locU[iu]*fe.phi(iu,ig);
+            for (iu = 0; iu < fe.nbFEDof(); iu++)
+            {
+                bPt += locU[iu] * fe.phi (iu, ig);
             }
-            MM_l[0]= 1.0/(1.0+beta*(bPt+84.0)/(184.0+bPt)+0.001*bPt);
-            MM_l[1]= 1.0+beta*(bPt+84.0)/(184.0+bPt)+0.001*bPt;
-            MM_l[2]= 1.0+beta*(bPt+84.0)/(184.0+bPt)+0.001*bPt;
+            MM_l[0] = 1.0 / (1.0 + beta * (bPt + 84.0) / (184.0 + bPt) + 0.001 * bPt);
+            MM_l[1] = 1.0 + beta * (bPt + 84.0) / (184.0 + bPt) + 0.001 * bPt;
+            MM_l[2] = 1.0 + beta * (bPt + 84.0) / (184.0 + bPt) + 0.001 * bPt;
             a_l[0] = u_x[ig];
             a_l[1] = u_y[ig];
             a_l[2] = u_z[ig];
-            Real norm = std::sqrt(a_l[0]*a_l[0]+a_l[1]*a_l[1]+a_l[2]*a_l[2]);
-            a_l[0] = a_l[0]/norm; a_l[1] = a_l[1]/norm; a_l[2] = a_l[2]/norm;
+            Real norm = std::sqrt (a_l[0] * a_l[0] + a_l[1] * a_l[1] + a_l[2] * a_l[2]);
+            a_l[0] = a_l[0] / norm;
+            a_l[1] = a_l[1] / norm;
+            a_l[2] = a_l[2] / norm;
 
             //  D = sigma_t * I + (sigma_l-sigma_t) * a_l * a_l^T
-            for ( icoor = 0;icoor < fe.nbCoor();icoor++ ){
-                s += fe.phiDer( iloc, icoor, ig ) * fe.phiDer( iloc, icoor, ig ) *
-                    fe.weightDet( ig )* sigma_t*MM_l[icoor];
-                for ( jcoor = 0;jcoor < fe.nbCoor(); jcoor++ )
-                    s += fe.phiDer( iloc, icoor, ig ) * fe.phiDer( iloc, jcoor, ig ) *
-                        fe.weightDet( ig )* (sigma_l-sigma_t)*a_l[icoor] * a_l[jcoor];
+            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+            {
+                s += fe.phiDer ( iloc, icoor, ig ) * fe.phiDer ( iloc, icoor, ig ) *
+                     fe.weightDet ( ig ) * sigma_t * MM_l[icoor];
+                for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+                    s += fe.phiDer ( iloc, icoor, ig ) * fe.phiDer ( iloc, jcoor, ig ) *
+                         fe.weightDet ( ig ) * (sigma_l - sigma_t) * a_l[icoor] * a_l[jcoor];
             }
 
         }
-        mat( iloc, iloc ) += s;
+        mat ( iloc, iloc ) += s;
     }
 
 
@@ -535,36 +563,41 @@ void stiffNL(const vector_type& U, const Real sigma_l, const Real sigma_t,
     //
     // extra diagonal
     //
-    for ( i = fe.nbDiag();i < fe.nbDiag() + fe.nbUpper();i++ )
+    for ( i = fe.nbDiag(); i < fe.nbDiag() + fe.nbUpper(); i++ )
     {
         s = 0;
-        iloc = fe.patternFirst( i );
-        jloc = fe.patternSecond( i );
-        for ( ig = 0;ig < fe.nbQuadPt();ig++ ){
+        iloc = fe.patternFirst ( i );
+        jloc = fe.patternSecond ( i );
+        for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
+        {
             bPt = 0.0;
-            for(iu=0;iu<fe.nbFEDof();iu++){
-                bPt+=locU[iu]*fe.phi(iu,ig);
+            for (iu = 0; iu < fe.nbFEDof(); iu++)
+            {
+                bPt += locU[iu] * fe.phi (iu, ig);
             }
-            MM_l[0]= 1.0/(1.0+beta*(bPt+84.0)/(184.0+bPt)+0.001*bPt);
-            MM_l[1]= 1.0+beta*(bPt+84.0)/(184.0+bPt)+0.001*bPt;
-        MM_l[2]= 1.0+beta*(bPt+84.0)/(184.0+bPt)+0.001*bPt;
+            MM_l[0] = 1.0 / (1.0 + beta * (bPt + 84.0) / (184.0 + bPt) + 0.001 * bPt);
+            MM_l[1] = 1.0 + beta * (bPt + 84.0) / (184.0 + bPt) + 0.001 * bPt;
+            MM_l[2] = 1.0 + beta * (bPt + 84.0) / (184.0 + bPt) + 0.001 * bPt;
             a_l[0] = u_x[ig];
             a_l[1] = u_y[ig];
             a_l[2] = u_z[ig];
-            Real norm = std::sqrt(a_l[0]*a_l[0]+a_l[1]*a_l[1]+a_l[2]*a_l[2]);
-            a_l[0] = a_l[0]/norm; a_l[1] = a_l[1]/norm; a_l[2] = a_l[2]/norm;
+            Real norm = std::sqrt (a_l[0] * a_l[0] + a_l[1] * a_l[1] + a_l[2] * a_l[2]);
+            a_l[0] = a_l[0] / norm;
+            a_l[1] = a_l[1] / norm;
+            a_l[2] = a_l[2] / norm;
             //  D = sigma_t * I + (sigma_l-sigma_t) * a_l * a_l^T
-            for ( icoor = 0;icoor < fe.nbCoor(); icoor++ ){
-                s += fe.phiDer( iloc, icoor, ig ) * fe.phiDer( jloc, icoor, ig ) *
-                    fe.weightDet( ig )* sigma_t*MM_l[icoor];  //diagonal
+            for ( icoor = 0; icoor < fe.nbCoor(); icoor++ )
+            {
+                s += fe.phiDer ( iloc, icoor, ig ) * fe.phiDer ( jloc, icoor, ig ) *
+                     fe.weightDet ( ig ) * sigma_t * MM_l[icoor]; //diagonal
                 for ( jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
-                    s += fe.phiDer( iloc, icoor, ig ) * fe.phiDer( jloc, jcoor, ig ) *
-                        fe.weightDet( ig )* (sigma_l-sigma_t)*a_l[icoor] * a_l[jcoor];
+                    s += fe.phiDer ( iloc, icoor, ig ) * fe.phiDer ( jloc, jcoor, ig ) *
+                         fe.weightDet ( ig ) * (sigma_l - sigma_t) * a_l[icoor] * a_l[jcoor];
             }
         }
 
-        mat( iloc, jloc ) += s;
-        mat( jloc, iloc ) += s;
+        mat ( iloc, jloc ) += s;
+        mat ( jloc, iloc ) += s;
     }
 }
 

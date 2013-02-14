@@ -53,25 +53,33 @@ const markerID_Type MarkerIDStandardPolicy::S_NULLMARKERID =
 //MM: if you modify these changes here recheck function readNetgenMesh
 //        because it uses this changes
 
-markerID_Type MarkerIDStandardPolicy::strongerMarkerID( markerID_Type const & markerID1, markerID_Type const & markerID2 )
+markerID_Type MarkerIDStandardPolicy::strongerMarkerID ( markerID_Type const& markerID1, markerID_Type const& markerID2 )
 {
     if ( markerID1 == S_NULLMARKERID )
+    {
         return markerID2;
+    }
     if ( markerID2 == S_NULLMARKERID )
+    {
         return markerID1;
+    }
     return markerID1 > markerID2 ? markerID1 : markerID2 ;
 }
 
-markerID_Type MarkerIDStandardPolicy::weakerMarkerID( markerID_Type const & markerID1, markerID_Type const & markerID2 )
+markerID_Type MarkerIDStandardPolicy::weakerMarkerID ( markerID_Type const& markerID1, markerID_Type const& markerID2 )
 {
     if ( markerID1 == S_NULLMARKERID )
+    {
         return markerID2;
+    }
     if ( markerID2 == S_NULLMARKERID )
+    {
         return markerID1;
+    }
     return markerID1 < markerID2 ? markerID1 : markerID2 ;
 }
 
-bool MarkerIDStandardPolicy::equalMarkerID(const markerID_Type& markerID1, const markerID_Type& markerID2)
+bool MarkerIDStandardPolicy::equalMarkerID (const markerID_Type& markerID1, const markerID_Type& markerID2)
 {
     return markerID1 == markerID2;
 }

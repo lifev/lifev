@@ -68,7 +68,7 @@ namespace LifeV
   @author Simone Deparis   <simone.deparis@epfl.ch>
 */
 class PreconditionerIfpack:
-        public Preconditioner
+    public Preconditioner
 {
 public:
 
@@ -91,9 +91,9 @@ public:
 
     //! Empty constructor
 #ifdef HAVE_MPI
-    PreconditionerIfpack( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>( new Epetra_MpiComm( MPI_COMM_WORLD ) ) );
+    PreconditionerIfpack ( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm> ( new Epetra_MpiComm ( MPI_COMM_WORLD ) ) );
 #else
-    PreconditionerIfpack( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>( new Epetra_SerialComm ) );
+    PreconditionerIfpack ( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm> ( new Epetra_SerialComm ) );
 #endif
 
     //! Destructor
@@ -109,7 +109,7 @@ public:
     /*!
       @param matrix Matrix upon which construct the preconditioner
      */
-    Int buildPreconditioner( operator_type& matrix );
+    Int buildPreconditioner ( operator_type& matrix );
 
     //! Reset the preconditioner
     void resetPreconditioner();
@@ -121,10 +121,10 @@ public:
       @param section The section in "dataFile" where to find data about the preconditioner
       @param subSection The subsection in "dataFile" where to find data about the preconditioner
      */
-    virtual void createParametersList( list_Type&         list,
-                                       const GetPot&      dataFile,
-                                       const std::string& section,
-                                       const std::string& subSection );
+    virtual void createParametersList ( list_Type&         list,
+                                        const GetPot&      dataFile,
+                                        const std::string& section,
+                                        const std::string& subSection );
 
     //! Create the list of parameters of the preconditioner
     /*!
@@ -133,28 +133,28 @@ public:
       @param section The section in "dataFile" where to find data about the preconditioner
       @param subSection The subsection in "dataFile" where to find data about the preconditioner
      */
-    static void createIfpackList( list_Type&         list,
-                                  const GetPot&      dataFile,
-                                  const std::string& section,
-                                  const std::string& subSection = "ifpack",
-                                  const bool& verbose = true );
+    static void createIfpackList ( list_Type&         list,
+                                   const GetPot&      dataFile,
+                                   const std::string& section,
+                                   const std::string& subSection = "ifpack",
+                                   const bool& verbose = true );
 
     //! Apply the inverse of the preconditioner on vector1 and store the result in vector2
     /*!
       @param vector1 Vector to which we apply the preconditioner
       @param vector2 Vector to the store the result
      */
-    virtual Int ApplyInverse( const Epetra_MultiVector& vector1, Epetra_MultiVector& vector2 ) const;
+    virtual Int ApplyInverse ( const Epetra_MultiVector& vector1, Epetra_MultiVector& vector2 ) const;
 
     //! Apply the inverse of the preconditioner on vector1 and store the result in vector2
     /*!
       @param vector1 Vector to which we apply the preconditioner
       @param vector2 Vector to the store the result
      */
-    virtual Int Apply( const Epetra_MultiVector& vector1, Epetra_MultiVector& vector2 ) const;
+    virtual Int Apply ( const Epetra_MultiVector& vector1, Epetra_MultiVector& vector2 ) const;
 
     //! Show informations about the preconditioner
-    virtual void showMe( std::ostream& output = std::cout ) const;
+    virtual void showMe ( std::ostream& output = std::cout ) const;
 
     //@}
 
@@ -174,7 +174,7 @@ public:
     /*!
       @param useTranspose If true the preconditioner is transposed
      */
-    Int SetUseTranspose( bool useTranspose = false );
+    Int SetUseTranspose ( bool useTranspose = false );
 
     //@}
 
@@ -201,10 +201,10 @@ public:
     bool UseTranspose();
 
     //! Return the Range map of the operator
-    const Epetra_Map & OperatorRangeMap() const;
+    const Epetra_Map& OperatorRangeMap() const;
 
     //! Return the Domain map of the operator
-    const Epetra_Map & OperatorDomainMap() const;
+    const Epetra_Map& OperatorDomainMap() const;
 
     //@}
 
@@ -221,10 +221,13 @@ private:
 };
 
 
-inline Preconditioner* createIfpack() { return new PreconditionerIfpack(); }
+inline Preconditioner* createIfpack()
+{
+    return new PreconditionerIfpack();
+}
 namespace
 {
-static bool registerIF = PRECFactory::instance().registerProduct( "Ifpack", &createIfpack );
+static bool registerIF = PRECFactory::instance().registerProduct ( "Ifpack", &createIfpack );
 }
 
 } // namespace LifeV

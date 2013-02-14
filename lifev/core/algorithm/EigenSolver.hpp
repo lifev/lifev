@@ -82,13 +82,13 @@ class UNDEF_EIGENSOLVER_EXCEPTION;
 //  template <typename DataType, typename solver_Type, typename vector_Type>
 class EigenSolver
 {
-/**
-   @class
- * class handling the Anasazi BlockKrylovSchur eigensolver. It works for any Epetra_Operator:
- * in particular in Lifev it shuld be used with the ComposedOperator, that inherits direcly
- * from the Epetra_Operator. Since the class ComposedOperator is templated it can contain
- *  both matrices or preconditioners. See Monolithic.cpp for an example using the ComposedOperator.
- */
+    /**
+       @class
+     * class handling the Anasazi BlockKrylovSchur eigensolver. It works for any Epetra_Operator:
+     * in particular in Lifev it shuld be used with the ComposedOperator, that inherits direcly
+     * from the Epetra_Operator. Since the class ComposedOperator is templated it can contain
+     *  both matrices or preconditioners. See Monolithic.cpp for an example using the ComposedOperator.
+     */
 
 public:
 
@@ -100,14 +100,14 @@ public:
 
     typedef Anasazi::BasicEigenproblem<data_Type, vector_Type, solver_Type>                     eigenpb_Type;
     typedef Teuchos::RCP<Anasazi::BasicEigenproblem<data_Type, vector_Type, solver_Type> >      eigenpbPtr_Type;
-    typedef Anasazi::BlockKrylovSchurSolMgr <data_Type,vector_Type,solver_Type>                 eigensolver_Type;
+    typedef Anasazi::BlockKrylovSchurSolMgr <data_Type, vector_Type, solver_Type>                 eigensolver_Type;
     typedef boost::shared_ptr<eigensolver_Type>                                  eigensolverPtr_Type;
 
     //@}
     //!@name Constructor and Destructor
     //@{
 
-    EigenSolver(boost::shared_ptr<solver_Type> const matrix, Epetra_BlockMap const& block_map, long unsigned int numvec);
+    EigenSolver (boost::shared_ptr<solver_Type> const matrix, Epetra_BlockMap const& block_map, long unsigned int numvec);
 
     virtual ~EigenSolver()
     {}
@@ -118,13 +118,16 @@ public:
 
     /**sets the parameters for the eigenproblem:
      */
-    void setDataFromGetPot( GetPot const& dataFile, std::string const& section/*="eigensolver"*/ );
+    void setDataFromGetPot ( GetPot const& dataFile, std::string const& section/*="eigensolver"*/ );
 
     /** set to true if the operator is symmetric*/
-    void setHermitian(bool flag) { MyProblem->setHermitian(flag);}
+    void setHermitian (bool flag)
+    {
+        MyProblem->setHermitian (flag);
+    }
 
     /** fills the input vectors with the real and imaginary part of the eigenvalues*/
-    void eigenvalues(std::vector< data_Type>& realPart, std::vector< data_Type>& imgPart);
+    void eigenvalues (std::vector< data_Type>& realPart, std::vector< data_Type>& imgPart);
 
     /** solves the eigenproblem*/
     int solve();

@@ -40,45 +40,45 @@ const Real Pi = 3.14159265358979323846264338328;
 class AnalyticalSol
 {
 public:
-    inline Real operator()(Real t, Real x,Real y,Real z, UInt /*ic*/=0) const
+    inline Real operator() (Real t, Real x, Real y, Real z, UInt /*ic*/ = 0) const
     {
-        return exp(-sin(Pi/2*t))*(x+y+z);
+        return exp (-sin (Pi / 2 * t) ) * (x + y + z);
     }
-    inline Real grad(UInt icoor, Real t, Real /*x*/,Real /*y*/,Real /*z*/, UInt /*ic*/=0) const
+    inline Real grad (UInt icoor, Real t, Real /*x*/, Real /*y*/, Real /*z*/, UInt /*ic*/ = 0) const
     {
         switch (icoor)
         {
-        case 1: // der_x
-            return exp(-sin(Pi/2*t));
-        case 2: // der_y
-            return exp(-sin(Pi/2*t));
-        case 3: // der_z
-            return exp(-sin(Pi/2*t));
-        default:
-            return 0;
+            case 1: // der_x
+                return exp (-sin (Pi / 2 * t) );
+            case 2: // der_y
+                return exp (-sin (Pi / 2 * t) );
+            case 3: // der_z
+                return exp (-sin (Pi / 2 * t) );
+            default:
+                return 0;
         }
     }
 };
 
 //solution on the boundary
-Real uexact( const Real&  t ,
-             const Real& x,
-             const Real& y,
-             const Real& z,
-             const ID&  /*icomp*/)
+Real uexact ( const Real&  t ,
+              const Real& x,
+              const Real& y,
+              const Real& z,
+              const ID&  /*icomp*/)
 {
-    return exp(-sin(Pi/2*t))*(x+y+z);
+    return exp (-sin (Pi / 2 * t) ) * (x + y + z);
 }
 
 
-Real source_in( const Real&  t ,
-                const Real& x,
-                const Real& y,
-                const Real& z,
-                const ID&  /*icomp*/)
+Real source_in ( const Real&  t ,
+                 const Real& x,
+                 const Real& y,
+                 const Real& z,
+                 const ID&  /*icomp*/)
 {
-    return  -Pi/2*cos(Pi/2*t)*exp(-sin(Pi/2*t))*(x+y+z) ;
-//  return (3*Pi*Pi-alpha)*exp(-alpha*t)*sin(Pi*x+Pi/2)*sin(Pi*y+Pi/2)*sin(Pi*z+Pi/2);
+    return  -Pi / 2 * cos (Pi / 2 * t) * exp (-sin (Pi / 2 * t) ) * (x + y + z) ;
+    //  return (3*Pi*Pi-alpha)*exp(-alpha*t)*sin(Pi*x+Pi/2)*sin(Pi*y+Pi/2)*sin(Pi*z+Pi/2);
 }
 
 
@@ -88,41 +88,41 @@ Real d0       ( const Real& ,
                 const Real& z,
                 const ID&  )
 {
-    return x+y+z;
+    return x + y + z;
 }
 
-Real v0( const Real& t ,
-         const Real& x,
-         const Real& y,
-         const Real& z,
-         const ID&)
+Real v0 ( const Real& t ,
+          const Real& x,
+          const Real& y,
+          const Real& z,
+          const ID&)
 {
-    return -Pi/2*cos(Pi/2*t)*exp(-sin(Pi/2*t))*(x+y+z);
+    return -Pi / 2 * cos (Pi / 2 * t) * exp (-sin (Pi / 2 * t) ) * (x + y + z);
 }
 
-Real a0( const Real&  ,
-         const Real& ,
-         const Real& ,
-         const Real& ,
-         const ID&  )
+Real a0 ( const Real&  ,
+          const Real& ,
+          const Real& ,
+          const Real& ,
+          const ID&  )
 {
     return 0;
 }
 
-Real UOne( const Real& /* t */,
-           const Real& ,
-           const Real& ,
-           const Real& ,
-           const ID&   )
-{
-    return 1.;
-}
-
-Real UZero( const Real& /* t */,
+Real UOne ( const Real& /* t */,
             const Real& ,
             const Real& ,
             const Real& ,
             const ID&   )
+{
+    return 1.;
+}
+
+Real UZero ( const Real& /* t */,
+             const Real& ,
+             const Real& ,
+             const Real& ,
+             const ID&   )
 {
     return 0.;
 }

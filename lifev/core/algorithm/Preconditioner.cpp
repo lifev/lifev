@@ -44,20 +44,20 @@ namespace LifeV
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-Preconditioner::Preconditioner( const commPtr_Type& comm ):
-        M_precType              ( "Preconditioner" ),
-        M_displayer             ( comm ),
-        M_list                  (),
-        M_preconditionerCreated ( false )
+Preconditioner::Preconditioner ( const commPtr_Type& comm ) :
+    M_precType              ( "Preconditioner" ),
+    M_displayer             ( comm ),
+    M_list                  (),
+    M_preconditionerCreated ( false )
 {
 
 }
 
-Preconditioner::Preconditioner( const Preconditioner& preconditioner, const commPtr_Type& comm ):
-        M_precType              ( preconditioner.M_precType ),
-        M_displayer             ( comm ),
-        M_list                  ( preconditioner.parametersList() ),
-        M_preconditionerCreated ( preconditioner.M_preconditionerCreated )
+Preconditioner::Preconditioner ( const Preconditioner& preconditioner, const commPtr_Type& comm ) :
+    M_precType              ( preconditioner.M_precType ),
+    M_displayer             ( comm ),
+    M_list                  ( preconditioner.parametersList() ),
+    M_preconditionerCreated ( preconditioner.M_preconditionerCreated )
 {
 
 }
@@ -76,43 +76,43 @@ Preconditioner::~Preconditioner()
 // Epetra Operator Interface Methods
 // ===================================================
 Int
-Preconditioner::SetUseTranspose( const bool /*useTranspose=false*/ )
+Preconditioner::SetUseTranspose ( const bool /*useTranspose=false*/ )
 {
-    assert( false );
+    assert ( false );
     return 0;
 }
 
 Int
-Preconditioner::Apply( const Epetra_MultiVector& /*vector1*/, Epetra_MultiVector& /*vector2*/ ) const
+Preconditioner::Apply ( const Epetra_MultiVector& /*vector1*/, Epetra_MultiVector& /*vector2*/ ) const
 {
-    assert( false );
+    assert ( false );
     return 0;
 }
 
 Int
-Preconditioner::ApplyInverse( const Epetra_MultiVector& /*vector1*/, Epetra_MultiVector& /*vector2*/ ) const
+Preconditioner::ApplyInverse ( const Epetra_MultiVector& /*vector1*/, Epetra_MultiVector& /*vector2*/ ) const
 {
-    assert( false );
+    assert ( false );
     return 0;
 }
 
 void
-Preconditioner::showMe( std::ostream& /*output*/ ) const
+Preconditioner::showMe ( std::ostream& /*output*/ ) const
 {
-    assert( false );
+    assert ( false );
 }
 
 // ===================================================
 // Set Methods
 // ===================================================
 void
-Preconditioner::setParametersList( const list_Type& list )
+Preconditioner::setParametersList ( const list_Type& list )
 {
     M_list = list;
 }
 
 void
-Preconditioner::setSolver( SolverAztecOO& /*solver*/ )
+Preconditioner::setSolver ( SolverAztecOO& /*solver*/ )
 {
     //assert( false );
 }
@@ -141,23 +141,23 @@ Preconditioner::parametersList()
 bool
 Preconditioner::UseTranspose()
 {
-    assert( false );
+    assert ( false );
     return false;
 }
 
 const Epetra_Map&
 Preconditioner::OperatorRangeMap() const
 {
-    assert( false );
-    Epetra_Map *emptyMapPtr( NULL );
+    assert ( false );
+    Epetra_Map* emptyMapPtr ( NULL );
     return *emptyMapPtr;
 }
 
 const Epetra_Map&
 Preconditioner::OperatorDomainMap() const
 {
-    assert( false );
-    Epetra_Map *emptyMapPtr( NULL );
+    assert ( false );
+    Epetra_Map* emptyMapPtr ( NULL );
     return *emptyMapPtr;
 }
 
