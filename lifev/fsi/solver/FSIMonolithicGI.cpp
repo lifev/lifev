@@ -384,12 +384,12 @@ void FSIMonolithicGI::shapeDerivatives( FSIOperator::fluidPtr_Type::value_type::
                                      uk,
                                      veloFluidMesh, //(xk-xn)/dt (FI), or (xn-xn-1)/dt (CE)//Repeated
                                      M_solidAndFluidDim + M_interface * nDimensions,
-                                     *M_uFESpace,
+                                     *M_mmFESpace,
                                      true /*This flag tells the method to consider the velocity of the domain implicitly*/,
                                      true /*This flag tells the method to consider the convective term implicitly */ );
 }
 
-void FSIMonolithicGI::assembleMeshBlock( UInt iter)
+void FSIMonolithicGI::assembleMeshBlock( UInt /*iter*/ )
 {
 
     M_meshBlock.reset( new matrix_Type( *M_monolithicMap ) );
