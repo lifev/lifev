@@ -796,6 +796,13 @@ template <typename Mesh>
 void StructuralOperator<Mesh>::setupMapMarkersVolumes( void )
 {
 
+    LifeChrono time;
+
+    this->M_Displayer->leaderPrint(" S-  Starting the time:  \n");
+
+    time.start();
+
+
     this->M_Displayer->leaderPrint(" S-  Building the map between volumesMarkers <--> volumes \n");
 
     //We first loop over the vector of the material_flags
@@ -832,6 +839,10 @@ void StructuralOperator<Mesh>::setupMapMarkersVolumes( void )
         extractedIndexes.clear();
 
     }
+
+    time.stop();
+
+    this->M_Displayer->leaderPrint(" S-  Time to build the map:", time.diff() );
 }
 
 template <typename Mesh>
@@ -907,6 +918,12 @@ template <typename Mesh>
 void
 StructuralOperator<Mesh>::computeMassMatrix( const Real factor)
 {
+
+    LifeChrono time;
+
+    std::cout << "Assembling Mass..... " << std::endl;
+    time.start();
+
     using namespace ExpressionAssembly;
 
     UInt totalDof = M_dispFESpace->dof().numTotalDof();
@@ -927,6 +944,10 @@ StructuralOperator<Mesh>::computeMassMatrix( const Real factor)
                value(factorMassMatrix) *  dot( phi_i , phi_j ) ) >> M_massMatrix;
 
     M_massMatrix->globalAssemble();
+
+    time.stop();
+
+    std::cout << "Assembed Mass.....: " << time.diff() << std::endl;
 
     //*massStiff *= factor; //M_data.dataTime()->timeStep() * M_rescaleFactor;
 }
