@@ -348,12 +348,12 @@ void ExponentialMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms( matri
     //! loop on volumes (i)
 
     mapIterator_Type it;
-    mapIteratorIndex_Type itIndex;
+    //mapIteratorIndex_Type itIndex;
 
     vectorVolumesPtr_Type pointerListOfVolumes;
     vectorIndexesPtr_Type pointerListOfIndexes;
 
-    for( it = (*mapsMarkerVolumes).begin(),itIndex = (*mapsMarkerIndexes).begin() ; it != (*mapsMarkerVolumes).end(); it++, itIndex++ )
+    for( it = (*mapsMarkerVolumes).begin(); it != (*mapsMarkerVolumes).end(); it++ )
     {
         //Given the marker pointed by the iterator, let's extract the material parameters
         UInt marker = it->first;
@@ -363,7 +363,7 @@ void ExponentialMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms( matri
         // ASSERT( marker == markerIndex, "The list of volumes is referring to a marker that is not the same as the marker of index!!!");
 
         pointerListOfVolumes.reset( new vectorVolumes_Type(it->second) );
-        pointerListOfIndexes.reset( new vectorIndexes_Type(itIndex->second) );
+        pointerListOfIndexes.reset( new vectorIndexes_Type( (*mapsMarkerIndexes)[marker] ) );
 
         Real bulk = dataMaterial->bulk(marker);
         Real alpha = dataMaterial->alpha(marker);
@@ -484,11 +484,11 @@ void ExponentialMaterialNonLinear<MeshType>::computeStiffness( const vector_Type
     displayer->leaderPrint(" \n*********************************\n  ");
 
     mapIterator_Type it;
-    mapIteratorIndex_Type itIndex;
+    //mapIteratorIndex_Type itIndex;
     vectorVolumesPtr_Type pointerListOfVolumes;
     vectorIndexesPtr_Type pointerListOfIndexes;
 
-    for( it = (*mapsMarkerVolumes).begin(),itIndex = (*mapsMarkerIndexes).begin(); it != (*mapsMarkerVolumes).end(); it++, itIndex++ )
+    for( it = (*mapsMarkerVolumes).begin(); it != (*mapsMarkerVolumes).end(); it++ )
     {
 
         //Given the marker pointed by the iterator, let's extract the material parameters
@@ -499,7 +499,7 @@ void ExponentialMaterialNonLinear<MeshType>::computeStiffness( const vector_Type
         // ASSERT( marker == markerIndex, "The list of volumes is referring to a marker that is not the same as the marker of index!!!");
 
         pointerListOfVolumes.reset( new vectorVolumes_Type(it->second) );
-        pointerListOfIndexes.reset( new vectorIndexes_Type(itIndex->second) );
+        pointerListOfIndexes.reset( new vectorIndexes_Type( (*mapsMarkerIndexes)[marker] ) );
 
         Real bulk = dataMaterial->bulk(marker);
         Real alpha = dataMaterial->alpha(marker);

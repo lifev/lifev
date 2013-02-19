@@ -76,7 +76,7 @@
 #include <lifev/structure/solver/VenantKirchhoffMaterialNonLinear.hpp>
 #include <lifev/structure/solver/ExponentialMaterialNonLinear.hpp>
 #include <lifev/structure/solver/VenantKirchhoffMaterialNonLinearPenalized.hpp>
-//#include <lifev/structure/solver/SecondOrderExponentialMaterialNonLinear.hpp>
+#include <lifev/structure/solver/SecondOrderExponentialMaterialNonLinear.hpp>
 #include <lifev/structure/solver/NeoHookeanMaterialNonLinear.hpp>
 
 #include <lifev/core/filter/ExporterEnsight.hpp>
@@ -191,29 +191,35 @@ static Real bcZero(const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, con
 
 static Real bcNonZero(const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
 {
-    return  300000.;
+    return  19180.;
+}
+
+static Real bcNonZeroSecondOrderExponential(const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
+{
+    return  19180.;
 }
 
 static Real d0(const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
 {
+
     switch (i)
     {
     case 0:
-        return - 0.01846 * ( x - 0.5 );
+        return  0.088002 * ( x + 0.5 );
         break;
     case 1:
-        return ( 0.07755/ 2 ) * y;
+        return - ( 0.02068 * 2.0 ) * ( y );
         break;
     case 2:
-        return - 0.01846 * ( z + 0.5);
+        return - ( 0.02068 * 2.0 ) * ( z );
         break;
     default:
         ERROR_MSG("This entry is not allowed: ud_functions.hpp");
         return 0.;
         break;
     }
-}
 
+}
 
 };
 
@@ -325,7 +331,13 @@ Structure::run3d()
     compyz[0]=1; compyz[1]=2;
 
     BCFunctionBase zero(Private::bcZero);
-    BCFunctionBase nonZero(Private::bcNonZero);
+    BCFunctionBase nonZero;
+
+    if( dataStructure->solidType().compare("secondOrderExponential") )
+        nonZero.setFunction(Private::bcNonZero);
+    else
+        nonZero.setFunction(Private::bcNonZeroSecondOrderExponential);
+
 
     //! =================================================================================
     //! BC for StructuredCube4_test_structuralsolver.mesh
@@ -377,8 +389,12 @@ Structure::run3d()
         uv0.push_back(acc);
     }
 
-    // vectorPtr_Type initialDisplacement(new vector_Type(solid.displacement(), Unique) );
-    // dFESpace->interpolate( static_cast<solidFESpace_Type::function_Type>( Private::d0 ), *initialDisplacement, 0.0 );
+    vectorPtr_Type initialDisplacement(new vector_Type(solid.displacement(), Unique) );
+
+    if( !dataStructure->solidType().compare("secondOrderExponential") )
+    {
+        dFESpace->interpolate( static_cast<solidFESpace_Type::function_Type>( Private::d0 ), *initialDisplacement, 0.0 );
+    }
 
     if (timeAdvanceMethod =="BDF")
     {
@@ -388,8 +404,14 @@ Structure::run3d()
       {
           Real previousTimeStep = tZero - previousPass*dt;
           std::cout<<"BDF " <<previousTimeStep<<"\n";
-          //uv0.push_back(initialDisplacement);
-          uv0.push_back(disp);
+          if( !dataStructure->solidType().compare("secondOrderExponential") )
+          {
+              uv0.push_back(initialDisplacement);
+          }
+          else
+          {
+              uv0.push_back(disp);
+          }
       }
     }
 
@@ -399,8 +421,14 @@ Structure::run3d()
 
     timeAdvance->updateRHSContribution( dt );
 
-    //solid.initialize( initialDisplacement );
-    solid.initialize( disp );
+    if( !dataStructure->solidType().compare("secondOrderExponential") )
+    {
+        solid.initialize( initialDisplacement );
+    }
+    else
+    {
+        solid.initialize( disp );
+    }
 
     MPI_Barrier(MPI_COMM_WORLD);
 

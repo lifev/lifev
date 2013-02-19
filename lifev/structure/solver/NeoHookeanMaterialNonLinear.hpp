@@ -333,12 +333,12 @@ void NeoHookeanMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms( matrix
     *(jacobian) *= 0.0;
 
     mapIterator_Type it;
-    mapIteratorIndex_Type itIndex;
+    //mapIteratorIndex_Type itIndex;
 
     vectorVolumesPtr_Type pointerListOfVolumes;
     vectorIndexesPtr_Type pointerListOfIndexes;
 
-    for( it = (*mapsMarkerVolumes).begin(),itIndex = (*mapsMarkerIndexes).begin() ; it != (*mapsMarkerVolumes).end(); it++, itIndex++ )
+    for( it = (*mapsMarkerVolumes).begin(); it != (*mapsMarkerVolumes).end(); it++)
 	{
 
         //Given the marker pointed by the iterator, let's extract the material parameters
@@ -349,7 +349,7 @@ void NeoHookeanMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms( matrix
         // ASSERT( marker == markerIndex, "The list of volumes is referring to a marker that is not the same as the marker of index!!!");
 
         pointerListOfVolumes.reset( new vectorVolumes_Type(it->second) );
-        pointerListOfIndexes.reset( new vectorIndexes_Type(itIndex->second) );
+        pointerListOfIndexes.reset( new vectorIndexes_Type( (*mapsMarkerIndexes)[marker]) );
 
         Real mu     = dataMaterial->mu(marker);
         Real bulk   = dataMaterial->bulk(marker);
@@ -458,12 +458,12 @@ void NeoHookeanMaterialNonLinear<MeshType>::computeStiffness( const vector_Type&
     *(M_stiff) *= 0.0;
 
     mapIterator_Type it;
-    mapIteratorIndex_Type itIndex;
+    //mapIteratorIndex_Type itIndex;
 
     vectorVolumesPtr_Type pointerListOfVolumes;
     vectorIndexesPtr_Type pointerListOfIndexes;
 
-    for( it = (*mapsMarkerVolumes).begin(),itIndex = (*mapsMarkerIndexes).begin() ; it != (*mapsMarkerVolumes).end(); it++, itIndex++ )
+    for( it = (*mapsMarkerVolumes).begin(); it != (*mapsMarkerVolumes).end(); it++ )
     {
 
         //Given the marker pointed by the iterator, let's extract the material parameters
@@ -474,7 +474,7 @@ void NeoHookeanMaterialNonLinear<MeshType>::computeStiffness( const vector_Type&
         // ASSERT( marker == markerIndex, "The list of volumes is referring to a marker that is not the same as the marker of index!!!");
 
         pointerListOfVolumes.reset( new vectorVolumes_Type(it->second) );
-        pointerListOfIndexes.reset( new vectorIndexes_Type(itIndex->second) );
+        pointerListOfIndexes.reset( new vectorIndexes_Type( (*mapsMarkerIndexes)[marker]) );
 
         Real mu     = dataMaterial->mu(marker);
         Real bulk   = dataMaterial->bulk(marker);

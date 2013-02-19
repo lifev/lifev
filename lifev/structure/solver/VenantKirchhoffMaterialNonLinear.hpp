@@ -332,12 +332,12 @@ void VenantKirchhoffMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms( m
     //! loop on volumes (i)
 
     mapIterator_Type it;
-    mapIteratorIndex_Type itIndex;
+    //mapIteratorIndex_Type itIndex;
 
     vectorVolumesPtr_Type pointerListOfVolumes;
     vectorIndexesPtr_Type pointerListOfIndexes;
 
-    for( it = (*mapsMarkerVolumes).begin(),itIndex = (*mapsMarkerIndexes).begin() ; it != (*mapsMarkerVolumes).end(); it++, itIndex++ )
+    for( it = (*mapsMarkerVolumes).begin(); it != (*mapsMarkerVolumes).end(); it++)
     {
         //Given the marker pointed by the iterator, let's extract the material parameters
         UInt marker = it->first;
@@ -347,7 +347,7 @@ void VenantKirchhoffMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms( m
         // ASSERT( marker == markerIndex, "The list of volumes is referring to a marker that is not the same as the marker of index!!!");
 
         pointerListOfVolumes.reset( new vectorVolumes_Type(it->second) );
-        pointerListOfIndexes.reset( new vectorIndexes_Type(itIndex->second) );
+        pointerListOfIndexes.reset( new vectorIndexes_Type( (*mapsMarkerIndexes)[marker] ) );
 
         Real lambda = dataMaterial->lambda(marker);
         Real mu = dataMaterial->mu(marker);
@@ -434,12 +434,12 @@ void VenantKirchhoffMaterialNonLinear<MeshType>::computeStiffness( const vector_
     displayer->leaderPrint(" \n*********************************\n  ");
 
     mapIterator_Type it;
-    mapIteratorIndex_Type itIndex;
+    //mapIteratorIndex_Type itIndex;
 
     vectorVolumesPtr_Type pointerListOfVolumes;
     vectorIndexesPtr_Type pointerListOfIndexes;
 
-    for( it = (*mapsMarkerVolumes).begin(),itIndex = (*mapsMarkerIndexes).begin() ; it != (*mapsMarkerVolumes).end(); it++, itIndex++ )
+    for( it = (*mapsMarkerVolumes).begin(); it != (*mapsMarkerVolumes).end(); it++ )
     {
 
         //Given the marker pointed by the iterator, let's extract the material parameters
@@ -450,7 +450,7 @@ void VenantKirchhoffMaterialNonLinear<MeshType>::computeStiffness( const vector_
         // ASSERT( marker == markerIndex, "The list of volumes is referring to a marker that is not the same as the marker of index!!!");
 
         pointerListOfVolumes.reset( new vectorVolumes_Type(it->second) );
-        pointerListOfIndexes.reset( new vectorIndexes_Type(itIndex->second) );
+        pointerListOfIndexes.reset( new vectorIndexes_Type( (*mapsMarkerIndexes)[marker] ) );
 
         Real lambda = dataMaterial->lambda(marker);
         Real mu = dataMaterial->mu(marker);
