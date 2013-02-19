@@ -183,7 +183,7 @@ struct Structure::Private
 
     static Real bcNonZero(const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
     {
-        return  3000000.0;
+        return  70000; //136400.0;
     }
 
     static Real d0(const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
@@ -191,13 +191,13 @@ struct Structure::Private
         switch (i)
         {
         case 0:
-            return - 0.01846 * ( x - 0.5 );
+            return ( 0.256942/ 2 ) * x;
             break;
         case 1:
-            return ( 0.07755/ 2 ) * y;
+            return - 0.058549 * ( y - 0.5 );
             break;
         case 2:
-            return - 0.01846 * ( z + 0.5);
+            return - 0.058549 * ( z + 0.5);
             break;
         default:
             ERROR_MSG("This entry is not allowed: ud_functions.hpp");
@@ -335,15 +335,15 @@ Structure::run3d()
     //! =================================================================================
     //! BC for StructuredCube4_test_structuralsolver.mesh
     //! =================================================================================
-    BCh->addBC("EdgesIn",      20,  Natural,   Component, nonZero, compy);
-    BCh->addBC("EdgesIn",      40,  Essential, Component, zero,    compy);
+    BCh->addBC("EdgesIn",      20,  Natural,   Component, nonZero, compx);
+    BCh->addBC("EdgesIn",      40,  Essential, Component, zero,    compx);
 
-    BCh->addBC("SymmetryX",    5,  Essential, Component, zero,    compx);
+    BCh->addBC("SymmetryX",    7,  Essential, Component, zero,    compy);
     BCh->addBC("SymmetryY",    3,  Essential, Component, zero,    compz);
-    BCh->addBC("edgeone",      100,  EssentialVertices, Full, zero, 3);
-    BCh->addBC("edgetwo",      50,  EssentialVertices, Component, zero,    compxy);
-    BCh->addBC("edgetwo",      30,  EssentialVertices, Component, zero,    compyz);
-    BCh->addBC("edgetwo",      80,  EssentialVertices, Component, zero,    compxz);
+    BCh->addBC("edgeone",      1000,  EssentialVertices, Full, zero, 3);
+    BCh->addBC("edgetwo",      500,  EssentialVertices, Component, zero,    compxz);
+    BCh->addBC("edgetwo",      300,  EssentialVertices, Component, zero,    compxy);
+    BCh->addBC("edgetwo",      800,  EssentialVertices, Component, zero,    compyz);
 
 
     //! 1. Constructor of the structuralSolver
@@ -487,8 +487,8 @@ Structure::run3d()
             {
                 Real previousTimeStep = tZero - previousPass*dt;
                 std::cout<<"BDF " <<previousTimeStep<<"\n";
-                uv0.push_back(disp);
-                //uv0.push_back(initialDisplacement);
+                //uv0.push_back(disp);
+                uv0.push_back(initialDisplacement);
             }
         }
 
@@ -498,9 +498,25 @@ Structure::run3d()
 
         timeAdvance->updateRHSContribution( dt );
 
+
+        // debug purposes
+        // vector_Type RHSfirstTerm( timeAdvance->rhsContributionFirstDerivative() );
+        // vector_Type RHSsecondTerm( timeAdvance->rhsContributionSecondDerivative() );
+
+        // vector_Type velInitialize( timeAdvance->firstDerivative() );
+        // vector_Type accInitialize( timeAdvance->secondDerivative() );
+
+
+        // std::cout << "Norm RHS 1: " << RHSfirstTerm.norm2() << std::endl;
+        // std::cout << "Norm RHS 2: " << RHSsecondTerm.norm2() << std::endl;
+
+
+        // std::cout << "Velocity 1: " << velInitialize.norm2() << std::endl;
+        // std::cout << "Acceleration 2: " << accInitialize.norm2() << std::endl;
+
         //In the case of non-zero displacement
-        solid.initialize( disp );
-        //solid.initialize( initialDisplacement );
+        //solid.initialize( disp );
+        solid.initialize( initialDisplacement );
         //Let's verify that the set displacement is the one I expect
         //Creation of Exporter to check the loaded solution (working only for HDF5)
         std::string expVerFile = "verificationDisplExporter";
@@ -512,7 +528,7 @@ Structure::run3d()
         //Let's get the initial displacement and velocity
         exporter.postProcess(0.0);
 
-        *vectVer = *disp; //initialDisplacement;
+        *vectVer = *initialDisplacement;//*disp;
         exporter.postProcess( 1.0 );
 
 

@@ -381,6 +381,8 @@ public:
      */
     void setQuadRule(const QuadratureRule& Qr);
 
+    void setBdQuadRule(const QuadratureRule& bdQr);
+
     //@}
 
 
@@ -1644,6 +1646,16 @@ setQuadRule(const QuadratureRule& Qr)
 }
 
 
+template<typename MeshType, typename MapType>
+void
+FESpace<MeshType,MapType>::
+setBdQuadRule(const QuadratureRule& Qr)
+{
+    M_bdQr = &Qr;
+    resetBoundaryFE();
+}
+
+
 // ===================================================
 // Private Methods
 // ===================================================
@@ -1683,8 +1695,11 @@ template<typename MeshType, typename MapType>
 void
 FESpace<MeshType,MapType>::
 resetBoundaryFE(){
-if (M_refFE->hasBoundaryFE())
-M_feBd.reset(new CurrentBoundaryFE( M_refFE->boundaryFE(), getGeometricMap( *M_mesh ).boundaryMap(), *M_bdQr ) );
+    if (M_refFE->hasBoundaryFE())
+    {
+        M_feBd.reset(new CurrentBoundaryFE( M_refFE->boundaryFE(), getGeometricMap( *M_mesh ).boundaryMap(), *M_bdQr ) );
+        std::cout << "resetting BD rule" << std::endl;
+    }
 }
 
 
