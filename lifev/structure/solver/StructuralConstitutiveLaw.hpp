@@ -96,11 +96,9 @@ public:
     //@{
     typedef StructuralConstitutiveLawData          data_Type;
 
-    typedef typename LifeV::SolverAztecOO          solver_Type;
-
-    typedef typename solver_Type::matrix_type      matrix_Type;
+    typedef MatrixEpetra<Real>            matrix_Type;
     typedef boost::shared_ptr<matrix_Type>         matrixPtr_Type;
-    typedef typename solver_Type::vector_type      vector_Type;
+    typedef VectorEpetra           vector_Type;
     typedef boost::shared_ptr<vector_Type>         vectorPtr_Type;
 
     typedef typename boost::shared_ptr<data_Type>  dataPtr_Type;
@@ -116,6 +114,7 @@ public:
     typedef std::vector<UInt>                             vectorIndexes_Type;
     typedef std::map< UInt, vectorIndexes_Type>           mapMarkerIndexes_Type;
     typedef boost::shared_ptr<mapMarkerIndexes_Type>      mapMarkerIndexesPtr_Type;
+
 
     typedef ETFESpace<MeshType, MapEpetra, 3, 3 >         ETFESpace_Type;
     typedef boost::shared_ptr<ETFESpace_Type>             ETFESpacePtr_Type;

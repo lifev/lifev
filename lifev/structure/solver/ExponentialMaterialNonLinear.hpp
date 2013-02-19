@@ -303,8 +303,8 @@ ExponentialMaterialNonLinear<MeshType>::setup( const FESpacePtr_Type&           
 
 template <typename MeshType>
 void ExponentialMaterialNonLinear<MeshType>::computeLinearStiff(dataPtr_Type& /*dataMaterial*/,
-                                                            const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
-                                                            const mapMarkerIndexesPtr_Type /*mapsMarkerIndexes*/)
+                                                                const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
+                                                                const mapMarkerIndexesPtr_Type /*mapsMarkerIndexes*/)
 {
     //! Empty method for exponential material
 }
@@ -332,11 +332,11 @@ void ExponentialMaterialNonLinear<MeshType>::updateJacobianMatrix( const vector_
 
 template <typename MeshType>
 void ExponentialMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms( matrixPtr_Type&         jacobian,
-                                                                       const vector_Type&     disp,
-                                                                       const dataPtr_Type&     dataMaterial,
-                                                                       const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
-                                                                       const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
-                                                                       const displayerPtr_Type& displayer )
+                                                                           const vector_Type&     disp,
+                                                                           const dataPtr_Type&     dataMaterial,
+                                                                           const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                                                                           const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
+                                                                           const displayerPtr_Type& displayer )
 {
     using namespace ExpressionAssembly;
 
@@ -357,9 +357,10 @@ void ExponentialMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms( matri
     {
         //Given the marker pointed by the iterator, let's extract the material parameters
         UInt marker = it->first;
-        UInt markerIndex = it->first;
 
-        ASSERT( marker == markerIndex, "The list of volumes is referring to a marker that is not the same as the marker of index!!!");
+        // Debug
+        // UInt markerIndex = itIndex->first;
+        // ASSERT( marker == markerIndex, "The list of volumes is referring to a marker that is not the same as the marker of index!!!");
 
         pointerListOfVolumes.reset( new vectorVolumes_Type(it->second) );
         pointerListOfIndexes.reset( new vectorIndexes_Type(itIndex->second) );
@@ -492,6 +493,10 @@ void ExponentialMaterialNonLinear<MeshType>::computeStiffness( const vector_Type
 
         //Given the marker pointed by the iterator, let's extract the material parameters
         UInt marker = it->first;
+
+        //Debug reason
+        // UInt markerIndex = itIndex->first;
+        // ASSERT( marker == markerIndex, "The list of volumes is referring to a marker that is not the same as the marker of index!!!");
 
         pointerListOfVolumes.reset( new vectorVolumes_Type(it->second) );
         pointerListOfIndexes.reset( new vectorIndexes_Type(itIndex->second) );
