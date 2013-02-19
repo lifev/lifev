@@ -76,6 +76,7 @@
 #include <lifev/structure/solver/VenantKirchhoffMaterialNonLinear.hpp>
 #include <lifev/structure/solver/ExponentialMaterialNonLinear.hpp>
 #include <lifev/structure/solver/VenantKirchhoffMaterialNonLinearPenalized.hpp>
+#include <lifev/structure/solver/SecondOrderExponentialMaterialNonLinear.hpp>
 #include <lifev/structure/solver/NeoHookeanMaterialNonLinear.hpp>
 
 #include <lifev/core/filter/ExporterEnsight.hpp>
