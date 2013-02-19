@@ -859,7 +859,7 @@ void StructuralOperator<Mesh, SolverType>::updateSystem ( matrixPtr_Type& mat_st
 template <typename Mesh, typename SolverType>
 void StructuralOperator<Mesh, SolverType>::updateSourceTerm ( source_Type const& source )
 {
-    vector_Type rhs (vector_Type (*M_localMap) );
+    vector_Type rhs ( *M_localMap );
 
     VectorElemental M_elvec (M_FESpace->fe().nbFEDof(), nDimensions);
     UInt nc = nDimensions;
