@@ -60,7 +60,8 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-namespace LifeV {
+namespace LifeV
+{
 
 /*!
   @brief Convenience wrapper for the C interface of the HDF5 library
@@ -81,7 +82,8 @@ namespace LifeV {
       - close the tables after you are finished, with HDF5::closeTable
       - close the file: HDF5::closeFile
 */
-class HDF5IO {
+class HDF5IO
+{
 public:
     //! @name Public Types
     //@{
@@ -101,8 +103,8 @@ public:
      * \param existing boolean flag indicating whether the file exists already
      *        or not. If it exists, data is appended
      */
-    HDF5IO(const std::string& fileName, const commPtr_Type& comm,
-           const bool& existing);
+    HDF5IO (const std::string& fileName, const commPtr_Type& comm,
+            const bool& existing);
 
     //! Empty destructor
     virtual ~HDF5IO() {}
@@ -118,8 +120,8 @@ public:
      * \param existing boolean flag indicating whether the file exists already
      *        or not. If it exists, data is appended
      */
-    void openFile(const std::string& fileName, const commPtr_Type& comm,
-                  const bool& existing);
+    void openFile (const std::string& fileName, const commPtr_Type& comm,
+                   const bool& existing);
     //! Create a new table
     /*!
      * Create a new table in the open file
@@ -130,8 +132,8 @@ public:
      * \param tableDimensions array of hsize_t of size 2 which holds the
      *        dimensions of the table
      */
-    void createTable(const std::string& tableName, hid_t& fileDataType,
-                     hsize_t tableDimensions[]);
+    void createTable (const std::string& tableName, hid_t& fileDataType,
+                      hsize_t tableDimensions[]);
     //! Open a new table
     /*!
      * Open a new table in the open file
@@ -139,7 +141,7 @@ public:
      * \param tableDimensions array of hsize_t of size 2 which will hold the
      *        dimensions of the table (output parameter)
      */
-    void openTable(const std::string& tableName, hsize_t tableDimensions[]);
+    void openTable (const std::string& tableName, hsize_t tableDimensions[]);
     //! Write
     /*!
      * \param tableName a string containing the table name
@@ -152,9 +154,9 @@ public:
      * \param buffer pointer to a memory region containing the data to be
      *        written
      */
-    void write(const std::string& tableName,
-               hid_t& memDataType, hsize_t currentCount[],
-               hsize_t currentOffset[], void* buffer);
+    void write (const std::string& tableName,
+                hid_t& memDataType, hsize_t currentCount[],
+                hsize_t currentOffset[], void* buffer);
     //! Write
     /*!
      * \param tableName a string containing the table name
@@ -167,14 +169,14 @@ public:
      * \param buffer pointer to a memory region that represents the destination
      *        of the read operation
      */
-    void read(const std::string& tableName,
-              hid_t& memDataType, hsize_t currentCount[],
-              hsize_t currentOffset[], void* buffer);
+    void read (const std::string& tableName,
+               hid_t& memDataType, hsize_t currentCount[],
+               hsize_t currentOffset[], void* buffer);
     //! Write
     /*!
      * \param tableName a string containing the table name
      */
-    void closeTable(const std::string& tableName);
+    void closeTable (const std::string& tableName);
     //! Close an open file
     /*!
      * Call this when finished operating with a file
@@ -184,15 +186,16 @@ public:
 
 private:
     // typedef for internal use
-    typedef struct {
+    typedef struct
+    {
         hid_t filespace;
         hid_t dataset;
         hid_t plist;
     } tableHandle;
 
     // Copy constructor and assignment operator are disabled
-    HDF5IO(const HDF5IO&);
-    HDF5IO& operator=(const HDF5IO&);
+    HDF5IO (const HDF5IO&);
+    HDF5IO& operator= (const HDF5IO&);
 
     //! Private Data Members
     //@{

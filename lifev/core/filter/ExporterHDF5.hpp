@@ -1030,16 +1030,16 @@ void ExporterHDF5<MeshType>::writeGeometry()
     UInt numberOfPoints = MeshType::elementShape_Type::S_numPoints;
 
     std::vector<Int> elementList;
-    UInt ownedElements = this->M_mesh->elementList().countElementsWithFlag( EntityFlags::OWNED, &Flag::testOneSet );
-    elementList.reserve( ownedElements*numberOfPoints );
+    UInt ownedElements = this->M_mesh->elementList().countElementsWithFlag ( EntityFlags::OWNED, &Flag::testOneSet );
+    elementList.reserve ( ownedElements * numberOfPoints );
     UInt elementCount = 0;
-    for( ID i=0; i < this->M_mesh->numElements(); ++i )
+    for ( ID i = 0; i < this->M_mesh->numElements(); ++i )
     {
-        typename MeshType::element_Type const& element (this->M_mesh->element(i));
-        if( Flag::testOneSet( element.flag(), EntityFlags::OWNED ) )
+        typename MeshType::element_Type const& element (this->M_mesh->element (i) );
+        if ( Flag::testOneSet ( element.flag(), EntityFlags::OWNED ) )
         {
-            UInt lid= elementCount * numberOfPoints;
-            for (ID j=0; j< numberOfPoints; ++j, ++lid)
+            UInt lid = elementCount * numberOfPoints;
+            for (ID j = 0; j < numberOfPoints; ++j, ++lid)
             {
                 elementList[lid] = element.id() * numberOfPoints + j;
             }
@@ -1047,22 +1047,22 @@ void ExporterHDF5<MeshType>::writeGeometry()
         }
     }
 
-    Epetra_Map connectionsMap( this->M_mesh->numGlobalElements()*numberOfPoints,
-                               ownedElements*numberOfPoints,
-                               &elementList[0],
-                               0, this->M_dataVector.begin()->storedArrayPtr()->comm() );
+    Epetra_Map connectionsMap ( this->M_mesh->numGlobalElements() *numberOfPoints,
+                                ownedElements * numberOfPoints,
+                                &elementList[0],
+                                0, this->M_dataVector.begin()->storedArrayPtr()->comm() );
 
-    Epetra_IntVector connections(connectionsMap);
+    Epetra_IntVector connections (connectionsMap);
     elementCount = 0;
-    for (ID i=0; i < this->M_mesh->numElements(); ++i)
+    for (ID i = 0; i < this->M_mesh->numElements(); ++i)
     {
-        typename MeshType::element_Type const& element (this->M_mesh->element(i));
-        if( Flag::testOneSet( element.flag(), EntityFlags::OWNED ) )
+        typename MeshType::element_Type const& element (this->M_mesh->element (i) );
+        if ( Flag::testOneSet ( element.flag(), EntityFlags::OWNED ) )
         {
             UInt lid = elementCount * numberOfPoints;
-            for (ID j=0; j< numberOfPoints; ++j, ++lid)
+            for (ID j = 0; j < numberOfPoints; ++j, ++lid)
             {
-                connections[lid] = element.point(j).id();
+                connections[lid] = element.point (j).id();
             }
             elementCount++;
         }
@@ -1144,18 +1144,18 @@ void ExporterHDF5<MeshType>::writeGeometry()
             point = this->M_mesh->meshTransformer().pointInitial (i);
         }
 
-        if( Flag::testOneSet( point.flag(), EntityFlags::OWNED ) )
+        if ( Flag::testOneSet ( point.flag(), EntityFlags::OWNED ) )
         {
 
             gid = point.id();
 
-            bool insertedX(true);
-            bool insertedY(true);
-            bool insertedZ(true);
+            bool insertedX (true);
+            bool insertedY (true);
+            bool insertedZ (true);
 
-            insertedX = insertedX && pointsX.setCoefficient(gid, point.x());
-            insertedY = insertedY && pointsY.setCoefficient(gid, point.y());
-            insertedZ = insertedZ && pointsZ.setCoefficient(gid, point.z());
+            insertedX = insertedX && pointsX.setCoefficient (gid, point.x() );
+            insertedY = insertedY && pointsY.setCoefficient (gid, point.y() );
+            insertedZ = insertedZ && pointsZ.setCoefficient (gid, point.z() );
         }
     }
 

@@ -64,7 +64,7 @@ using namespace LifeV;
 
 double f (double x, double y, double z)
 {
-    return sin(2*PI*x)*cos(3*PI*y)+exp(x*y);
+    return sin (2 * PI * x) * cos (3 * PI * y) + exp (x * y);
 }
 
 typedef VectorEpetra                             vector_Type;

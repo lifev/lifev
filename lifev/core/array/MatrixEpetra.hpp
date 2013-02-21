@@ -111,7 +111,7 @@ public:
       @param map Row map. The column map will be defined in MatrixEpetra<DataType>::GlobalAssemble(...,...)
       @param numEntries The average number of entries for each row.
      */
-    MatrixEpetra( const MapEpetra& map, Int numEntries = 50, bool ignoreNonLocalValues=false );
+    MatrixEpetra ( const MapEpetra& map, Int numEntries = 50, bool ignoreNonLocalValues = false );
 
     //! Copy Constructor
     /*!
@@ -611,9 +611,9 @@ MatrixEpetra<DataType>::MatrixEpetra ( const MapEpetra& map, const Epetra_CrsGra
 }
 
 template <typename DataType>
-MatrixEpetra<DataType>::MatrixEpetra( const MapEpetra& map, Int numEntries, bool ignoreNonLocalValues ) :
-    M_map       ( new MapEpetra( map ) ),
-    M_epetraCrs ( new matrix_type( Copy, *M_map->map( Unique ), numEntries, ignoreNonLocalValues) )
+MatrixEpetra<DataType>::MatrixEpetra ( const MapEpetra& map, Int numEntries, bool ignoreNonLocalValues ) :
+    M_map       ( new MapEpetra ( map ) ),
+    M_epetraCrs ( new matrix_type ( Copy, *M_map->map ( Unique ), numEntries, ignoreNonLocalValues) )
 {
 
 }
@@ -681,7 +681,7 @@ template <typename DataType>
 MatrixEpetra<DataType>&
 MatrixEpetra<DataType>::operator -= ( const MatrixEpetra& matrix )
 {
-    EpetraExt::MatrixMatrix::Add( *matrix.matrixPtr(), false, 1., *this->matrixPtr(), -1. );
+    EpetraExt::MatrixMatrix::Add ( *matrix.matrixPtr(), false, 1., *this->matrixPtr(), -1. );
 
     return *this;
 }
@@ -1379,8 +1379,8 @@ Int MatrixEpetra<DataType>::fillComplete()
 }
 
 template <typename DataType>
-Int MatrixEpetra<DataType>::globalAssemble( const boost::shared_ptr<const MapEpetra> & domainMap,
-                                            const boost::shared_ptr<const MapEpetra> & rangeMap )
+Int MatrixEpetra<DataType>::globalAssemble ( const boost::shared_ptr<const MapEpetra>& domainMap,
+                                             const boost::shared_ptr<const MapEpetra>& rangeMap )
 {
 
     if ( !M_epetraCrs->Filled() && domainMap->mapsAreSimilar ( *rangeMap) )

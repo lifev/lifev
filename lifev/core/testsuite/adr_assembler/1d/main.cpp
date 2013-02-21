@@ -109,142 +109,271 @@ main ( int argc, char* argv[] )
         boost::shared_ptr<Epetra_Comm> Comm (new Epetra_SerialComm);
 #endif
 
-    typedef RegionMesh<LinearLine> mesh_Type;
-    typedef MatrixEpetra<Real> matrix_Type;
-    typedef VectorEpetra vector_Type;
-    typedef FESpace<mesh_Type, MapEpetra> feSpace_Type;
-    typedef boost::shared_ptr<feSpace_Type> feSpacePtr_Type;
+        typedef RegionMesh<LinearLine> mesh_Type;
+        typedef MatrixEpetra<Real> matrix_Type;
+        typedef VectorEpetra vector_Type;
+        typedef FESpace<mesh_Type, MapEpetra> feSpace_Type;
+        typedef boost::shared_ptr<feSpace_Type> feSpacePtr_Type;
 
-    const bool verbose(Comm->MyPID()==0);
+        const bool verbose (Comm->MyPID() == 0);
 
-    // Read first the data needed
+        // Read first the data needed
 
-    if (verbose) std::cout << " -- Reading the data ... " << std::flush;
-    GetPot dataFile( "data" );
-    if (verbose) std::cout << " done ! " << std::endl;
+        if (verbose)
+        {
+            std::cout << " -- Reading the data ... " << std::flush;
+        }
+        GetPot dataFile ( "data" );
+        if (verbose)
+        {
+            std::cout << " done ! " << std::endl;
+        }
 
-    // Build the mesh
+        // Build the mesh
 
-    if (verbose) std::cout << " -- Reading the mesh ... " << std::flush;
-    // MeshData meshData(dataFile, "mesh");
-    boost::shared_ptr< mesh_Type > meshPtr( new mesh_Type( Comm ) );
+        if (verbose)
+        {
+            std::cout << " -- Reading the mesh ... " << std::flush;
+        }
+        // MeshData meshData(dataFile, "mesh");
+        boost::shared_ptr< mesh_Type > meshPtr ( new mesh_Type ( Comm ) );
 
-    // Set up the structured mesh
-    regularMesh1D( *meshPtr, 0,
-                   dataFile( "mesh/n", 20 ),
-                   dataFile( "mesh/verbose", false ),
-                   dataFile( "mesh/length", 1. ),
-                   dataFile( "mesh/origin", 0. ) );
+        // Set up the structured mesh
+        regularMesh1D ( *meshPtr, 0,
+                        dataFile ( "mesh/n", 20 ),
+                        dataFile ( "mesh/verbose", false ),
+                        dataFile ( "mesh/length", 1. ),
+                        dataFile ( "mesh/origin", 0. ) );
 
-    if (verbose) std::cout << " done ! " << std::endl;
+        if (verbose)
+        {
+            std::cout << " done ! " << std::endl;
+        }
 
-    // Build the FESpaces
-    if (verbose) std::cout << " -- Building FESpaces ... " << std::flush;
-    feSpacePtr_Type uFESpace( new feSpace_Type( meshPtr, feSegP1, quadRuleSeg1pt, quadRuleNode1pt, 1, Comm ) );
-    if (verbose) std::cout << " done ! " << std::endl;
-    if (verbose) std::cout << " ---> Dofs: " << uFESpace->dof().numTotalDof() << std::endl;
+        // Build the FESpaces
+        if (verbose)
+        {
+            std::cout << " -- Building FESpaces ... " << std::flush;
+        }
+        feSpacePtr_Type uFESpace ( new feSpace_Type ( meshPtr, feSegP1, quadRuleSeg1pt, quadRuleNode1pt, 1, Comm ) );
+        if (verbose)
+        {
+            std::cout << " done ! " << std::endl;
+        }
+        if (verbose)
+        {
+            std::cout << " ---> Dofs: " << uFESpace->dof().numTotalDof() << std::endl;
+        }
 
-    // Build the assembler and the matrices
+        // Build the assembler and the matrices
 
-    if (verbose) std::cout << " -- Building assembler ... " << std::flush;
-    ADRAssembler<mesh_Type,matrix_Type,vector_Type> adrAssembler;
-    if (verbose) std::cout << " done! " << std::endl;
+        if (verbose)
+        {
+            std::cout << " -- Building assembler ... " << std::flush;
+        }
+        ADRAssembler<mesh_Type, matrix_Type, vector_Type> adrAssembler;
+        if (verbose)
+        {
+            std::cout << " done! " << std::endl;
+        }
 
-    if (verbose) std::cout << " -- Setting up assembler ... " << std::flush;
-    adrAssembler.setFespace(uFESpace);
-    if (verbose) std::cout << " done! " << std::endl;
+        if (verbose)
+        {
+            std::cout << " -- Setting up assembler ... " << std::flush;
+        }
+        adrAssembler.setFespace (uFESpace);
+        if (verbose)
+        {
+            std::cout << " done! " << std::endl;
+        }
 
-    if (verbose) std::cout << " -- Defining the matrix ... " << std::flush;
-    boost::shared_ptr<matrix_Type> systemMatrix(new matrix_Type( uFESpace->map() ));
-    if (verbose) std::cout << " done! " << std::endl;
+        if (verbose)
+        {
+            std::cout << " -- Defining the matrix ... " << std::flush;
+        }
+        boost::shared_ptr<matrix_Type> systemMatrix (new matrix_Type ( uFESpace->map() ) );
+        if (verbose)
+        {
+            std::cout << " done! " << std::endl;
+        }
 
-    // Perform the assembly of the matrix
+        // Perform the assembly of the matrix
 
-    if (verbose) std::cout << " -- Adding the diffusion ... " << std::flush;
-    adrAssembler.addDiffusion(systemMatrix, 1.);
-    if (verbose) std::cout << " done! " << std::endl;
-    if (verbose) std::cout << " Time needed : " << adrAssembler.diffusionAssemblyChrono().diffCumul() << std::endl;
+        if (verbose)
+        {
+            std::cout << " -- Adding the diffusion ... " << std::flush;
+        }
+        adrAssembler.addDiffusion (systemMatrix, 1.);
+        if (verbose)
+        {
+            std::cout << " done! " << std::endl;
+        }
+        if (verbose)
+        {
+            std::cout << " Time needed : " << adrAssembler.diffusionAssemblyChrono().diffCumul() << std::endl;
+        }
 
-    if (verbose) std::cout << " -- Adding the mass ... " << std::flush;
-    adrAssembler.addMass(systemMatrix, M_PI * M_PI );
-    if (verbose) std::cout << " done! " << std::endl;
+        if (verbose)
+        {
+            std::cout << " -- Adding the mass ... " << std::flush;
+        }
+        adrAssembler.addMass (systemMatrix, M_PI * M_PI );
+        if (verbose)
+        {
+            std::cout << " done! " << std::endl;
+        }
 
-    if (verbose) std::cout << " -- Closing the matrix ... " << std::flush;
-    systemMatrix->globalAssemble();
-    if (verbose) std::cout << " done ! " << std::endl;
+        if (verbose)
+        {
+            std::cout << " -- Closing the matrix ... " << std::flush;
+        }
+        systemMatrix->globalAssemble();
+        if (verbose)
+        {
+            std::cout << " done ! " << std::endl;
+        }
 
-    // Definition and assembly of the RHS
-    if (verbose) std::cout << " -- Building the RHS ... " << std::flush;
-    vector_Type rhs(uFESpace->map(),Repeated);
+        // Definition and assembly of the RHS
+        if (verbose)
+        {
+            std::cout << " -- Building the RHS ... " << std::flush;
+        }
+        vector_Type rhs (uFESpace->map(), Repeated);
 
-    vector_Type fInterpolated(uFESpace->map(),Repeated);
-    uFESpace->interpolate( static_cast<feSpace_Type::function_Type>( fRhs ), fInterpolated, 0.0 );
-    adrAssembler.addMassRhs(rhs,fInterpolated);
-    rhs.globalAssemble();
+        vector_Type fInterpolated (uFESpace->map(), Repeated);
+        uFESpace->interpolate ( static_cast<feSpace_Type::function_Type> ( fRhs ), fInterpolated, 0.0 );
+        adrAssembler.addMassRhs (rhs, fInterpolated);
+        rhs.globalAssemble();
 
-    if (verbose) std::cout << " done ! " << std::endl;
+        if (verbose)
+        {
+            std::cout << " done ! " << std::endl;
+        }
 
-    // Definition and application of the BCs
-    if (verbose) std::cout << " -- Building the BCHandler ... " << std::flush;
-    BCHandler bchandler;
+        // Definition and application of the BCs
+        if (verbose)
+        {
+            std::cout << " -- Building the BCHandler ... " << std::flush;
+        }
+        BCHandler bchandler;
 
-    BCFunctionBase BCu( static_cast<feSpace_Type::function_Type>( exactSolution ) );
+        BCFunctionBase BCu ( static_cast<feSpace_Type::function_Type> ( exactSolution ) );
 
-    bchandler.addBC("Dirichlet", Structured1DLabel::LEFT,Essential,Full,BCu,1);
-    bchandler.addBC("Dirichlet", Structured1DLabel::RIGHT,Essential,Full,BCu,1);
+        bchandler.addBC ("Dirichlet", Structured1DLabel::LEFT, Essential, Full, BCu, 1);
+        bchandler.addBC ("Dirichlet", Structured1DLabel::RIGHT, Essential, Full, BCu, 1);
 
-    if (verbose) std::cout << " done ! " << std::endl;
+        if (verbose)
+        {
+            std::cout << " done ! " << std::endl;
+        }
 
-    if (verbose) std::cout << " -- Updating the BCs ... " << std::flush;
-    bchandler.bcUpdate(*uFESpace->mesh(),uFESpace->feBd(),uFESpace->dof());
-    if (verbose) std::cout << " done ! " << std::endl;
+        if (verbose)
+        {
+            std::cout << " -- Updating the BCs ... " << std::flush;
+        }
+        bchandler.bcUpdate (*uFESpace->mesh(), uFESpace->feBd(), uFESpace->dof() );
+        if (verbose)
+        {
+            std::cout << " done ! " << std::endl;
+        }
 
-    if (verbose) std::cout << " -- Applying the BCs ... " << std::flush;
-    vector_Type rhsBC(rhs,Unique);
-    bcManage(*systemMatrix,rhsBC,*uFESpace->mesh(),uFESpace->dof(),bchandler,uFESpace->feBd(),1.0,0.0);
-    rhs = rhsBC;
-    if (verbose) std::cout << " done ! " << std::endl;
+        if (verbose)
+        {
+            std::cout << " -- Applying the BCs ... " << std::flush;
+        }
+        vector_Type rhsBC (rhs, Unique);
+        bcManage (*systemMatrix, rhsBC, *uFESpace->mesh(), uFESpace->dof(), bchandler, uFESpace->feBd(), 1.0, 0.0);
+        rhs = rhsBC;
+        if (verbose)
+        {
+            std::cout << " done ! " << std::endl;
+        }
 
-    // Definition of the solver
-    if (verbose) std::cout << " -- Building the solver ... " << std::flush;
-    SolverAztecOO linearSolver;
-    if (verbose) std::cout << " done ! " << std::endl;
+        // Definition of the solver
+        if (verbose)
+        {
+            std::cout << " -- Building the solver ... " << std::flush;
+        }
+        SolverAztecOO linearSolver;
+        if (verbose)
+        {
+            std::cout << " done ! " << std::endl;
+        }
 
-    if (verbose) std::cout << " -- Setting up the solver ... " << std::flush;
-    linearSolver.setDataFromGetPot(dataFile,"solver");
-    linearSolver.setupPreconditioner(dataFile,"prec");
-    if (verbose) std::cout << " done ! " << std::endl;
+        if (verbose)
+        {
+            std::cout << " -- Setting up the solver ... " << std::flush;
+        }
+        linearSolver.setDataFromGetPot (dataFile, "solver");
+        linearSolver.setupPreconditioner (dataFile, "prec");
+        if (verbose)
+        {
+            std::cout << " done ! " << std::endl;
+        }
 
-    if (verbose) std::cout << " -- Setting matrix in the solver ... " << std::flush;
-    linearSolver.setMatrix(*systemMatrix);
-    if (verbose) std::cout << " done ! " << std::endl;
+        if (verbose)
+        {
+            std::cout << " -- Setting matrix in the solver ... " << std::flush;
+        }
+        linearSolver.setMatrix (*systemMatrix);
+        if (verbose)
+        {
+            std::cout << " done ! " << std::endl;
+        }
 
-    linearSolver.setCommunicator(Comm);
+        linearSolver.setCommunicator (Comm);
 
-    // Definition of the solution
-    if (verbose) std::cout << " -- Defining the solution ... " << std::flush;
-    vector_Type solution(uFESpace->map(),Unique);
-    if (verbose) std::cout << " done ! " << std::endl;
+        // Definition of the solution
+        if (verbose)
+        {
+            std::cout << " -- Defining the solution ... " << std::flush;
+        }
+        vector_Type solution (uFESpace->map(), Unique);
+        if (verbose)
+        {
+            std::cout << " done ! " << std::endl;
+        }
 
-    // Solve the solution
-    if (verbose) std::cout << " -- Solving the system ... " << std::flush;
-    linearSolver.solveSystem(rhsBC,solution,systemMatrix);
-    if (verbose) std::cout << " done ! " << std::endl;
+        // Solve the solution
+        if (verbose)
+        {
+            std::cout << " -- Solving the system ... " << std::flush;
+        }
+        linearSolver.solveSystem (rhsBC, solution, systemMatrix);
+        if (verbose)
+        {
+            std::cout << " done ! " << std::endl;
+        }
 
-    // Error computation
-    if (verbose) std::cout << " -- Computing the error ... " << std::flush;
-    vector_Type solutionErr(solution);
-    uFESpace->interpolate( static_cast<feSpace_Type::function_Type>( exactSolution ), solutionErr, 0.0 );
-    solutionErr-=solution;
-    solutionErr.abs();
-    Real l2error(uFESpace->l2Error(exactSolution,vector_Type(solution,Repeated),0.0));
-    if (verbose) std::cout << " -- done ! " << std::endl;
-    if (verbose) std::cout << " ---> Norm L2  : " << l2error << std::endl;
-    Real linferror( solutionErr.normInf());
-    if (verbose) std::cout << " ---> Norm Inf : " << linferror << std::endl;
+        // Error computation
+        if (verbose)
+        {
+            std::cout << " -- Computing the error ... " << std::flush;
+        }
+        vector_Type solutionErr (solution);
+        uFESpace->interpolate ( static_cast<feSpace_Type::function_Type> ( exactSolution ), solutionErr, 0.0 );
+        solutionErr -= solution;
+        solutionErr.abs();
+        Real l2error (uFESpace->l2Error (exactSolution, vector_Type (solution, Repeated), 0.0) );
+        if (verbose)
+        {
+            std::cout << " -- done ! " << std::endl;
+        }
+        if (verbose)
+        {
+            std::cout << " ---> Norm L2  : " << l2error << std::endl;
+        }
+        Real linferror ( solutionErr.normInf() );
+        if (verbose)
+        {
+            std::cout << " ---> Norm Inf : " << linferror << std::endl;
+        }
 
-    // Exporter definition and use
-    if (verbose) std::cout << " -- Defining the exporter ... " << std::flush;
+        // Exporter definition and use
+        if (verbose)
+        {
+            std::cout << " -- Defining the exporter ... " << std::flush;
+        }
 
 #ifdef HAVE_HDF5
         ExporterHDF5<mesh_Type> exporter ( dataFile, "solution" );

@@ -143,7 +143,8 @@ public:
     */
     ID localToGlobalMapByBdFacet (const ID& facetId, const ID& localDof ) const;
 
-    inline std::vector<ID> localToGlobalMapOnBdFacet(const ID& facetId) const{
+    inline std::vector<ID> localToGlobalMapOnBdFacet (const ID& facetId) const
+    {
         return M_localToGlobalByBdFacet[facetId];
     }
 
@@ -187,9 +188,9 @@ public:
       \param localNode the local DOF numbering
       \return The numbering of the DOF
     */
-    const ID& localToGlobalMap( const ID ElId, const ID localNode) const
+    const ID& localToGlobalMap ( const ID ElId, const ID localNode) const
     {
-        return M_localToGlobal( localNode, ElId );
+        return M_localToGlobal ( localNode, ElId );
     }
 
     //! Number of elements in mesh
@@ -320,18 +321,18 @@ void DOF::update ( MeshType& mesh )
 
     // Total number of degree of freedom for each element
     UInt nldof = nbLocalDofPerElement
-                + nbLocalDofPerRidge * M_nbLocalRidges
-                + nbLocalDofPerPeak * M_nbLocalPeaks
-                + nbLocalDofPerFacet * M_nbLocalFacets;
+                 + nbLocalDofPerRidge * M_nbLocalRidges
+                 + nbLocalDofPerPeak * M_nbLocalPeaks
+                 + nbLocalDofPerFacet * M_nbLocalFacets;
 
     // Consistency check
     ASSERT_PRE ( nldof == UInt ( M_elementDofPattern.nbLocalDof() ), "Something wrong in FE specification" ) ;
 
     // Global total of degrees of freedom
     M_totalDof = nbGlobalElements * nbLocalDofPerElement
-        + nbGlobalRidges * nbLocalDofPerRidge
-        + nbGlobalPeaks * nbLocalDofPerPeak
-        + nbGlobalFacets * nbLocalDofPerFacet;
+                 + nbGlobalRidges * nbLocalDofPerRidge
+                 + nbGlobalPeaks * nbLocalDofPerPeak
+                 + nbGlobalFacets * nbLocalDofPerFacet;
 
     // Reshape the container to fit the needs
     M_localToGlobal.reshape ( nldof, M_numElement );
@@ -446,35 +447,41 @@ void DOF::update ( MeshType& mesh )
 
     for ( ID iBoundaryFacet = 0 ; iBoundaryFacet < mesh.numBoundaryFacets(); ++iBoundaryFacet )
     {
-        ID iAdjacentElem = mesh.boundaryFacet( iBoundaryFacet ).firstAdjacentElementIdentity();  // id of the element adjacent to the face
-        ID iElemBFacet = mesh.boundaryFacet( iBoundaryFacet ).firstAdjacentElementPosition(); // local id of the face in its adjacent element
+        ID iAdjacentElem = mesh.boundaryFacet ( iBoundaryFacet ).firstAdjacentElementIdentity(); // id of the element adjacent to the face
+        ID iElemBFacet = mesh.boundaryFacet ( iBoundaryFacet ).firstAdjacentElementPosition(); // local id of the face in its adjacent element
 
-        UInt lDof(0), dofOffset; //local DOF on boundary element
+        UInt lDof (0), dofOffset; //local DOF on boundary element
 
         //loop on Dofs associated with peaks
-        if(nbLocalDofPerPeak)
+        if (nbLocalDofPerPeak)
             for ( ID iBElemRidge = 0; iBElemRidge < nBElemRidges; ++iBElemRidge )
             {
-                ID iElemPeak = geoShape_Type::facetToPeak( iElemBFacet, iBElemRidge ); // local vertex number (in element)
+                ID iElemPeak = geoShape_Type::facetToPeak ( iElemBFacet, iBElemRidge ); // local vertex number (in element)
                 dofOffset = iElemPeak * nbLocalDofPerPeak;
                 for ( ID l = 0; l < nbLocalDofPerPeak; ++l )
-                    globalDOFOnBdFacet[ lDof++ ] = M_localToGlobal( dofOffset + l, iAdjacentElem );
+                {
+                    globalDOFOnBdFacet[ lDof++ ] = M_localToGlobal ( dofOffset + l, iAdjacentElem );
+                }
             }
 
         //loop on Dofs associated with Ridges
-        if(nbLocalDofPerRidge)
+        if (nbLocalDofPerRidge)
             for ( ID iBElemFacets = 0; iBElemFacets < nBElemFacets; ++iBElemFacets )
             {
-                ID iElemRidge = geoShape_Type::facetToRidge( iElemBFacet, iBElemFacets ); // local edge number (in element)
+                ID iElemRidge = geoShape_Type::facetToRidge ( iElemBFacet, iBElemFacets ); // local edge number (in element)
                 dofOffset = nbDofElemPeaks + iElemRidge * nbLocalDofPerRidge;
                 for ( ID l = 0; l < nbLocalDofPerRidge; ++l )
-                    globalDOFOnBdFacet[ lDof++ ] = M_localToGlobal( dofOffset + l, iAdjacentElem ); // global Dof
+                {
+                    globalDOFOnBdFacet[ lDof++ ] = M_localToGlobal ( dofOffset + l, iAdjacentElem );    // global Dof
+                }
             }
 
         //loop on Dofs associated with facets
         dofOffset = nbDofElemPeaks + nbDofElemRidges + iElemBFacet * nbLocalDofPerFacet;
         for ( ID l = 0; l < nbLocalDofPerFacet; ++l )
-            globalDOFOnBdFacet[ lDof++ ] = M_localToGlobal( dofOffset + l, iAdjacentElem ); // global Dof
+        {
+            globalDOFOnBdFacet[ lDof++ ] = M_localToGlobal ( dofOffset + l, iAdjacentElem );    // global Dof
+        }
 
 
         M_localToGlobalByBdFacet[iBoundaryFacet] = globalDOFOnBdFacet;
@@ -482,84 +489,96 @@ void DOF::update ( MeshType& mesh )
 
 
     if ( update_ridges )
-         mesh.cleanElementRidges();
+    {
+        mesh.cleanElementRidges();
+    }
     if ( update_facets )
-         mesh.cleanElementFacets();
+    {
+        mesh.cleanElementFacets();
+    }
 }
 
 template <typename MeshType>
 std::vector<Int> DOF::globalElements ( MeshType& mesh )
 {
-/*
-    std::set<Int> dofNumberSet;
-    // Gather all dofs local to the given mesh (dofs use global numbering)
-    // The set ensures no repetition
-    for (UInt elementId=0; elementId < mesh.numElements(); ++elementId )
-        for (UInt localDof=0; localDof < this->numLocalDof();++localDof )
-            dofNumberSet.insert( static_cast<Int>( this->localToGlobalMap( elementId, localDof ) ) );
-    // dump the set into a vector for adjacency
-    // to save memory I use copy() and not the vector constructor directly
-    std::vector<Int> myGlobalElements( dofNumberSet.size() );
-    std::copy( dofNumberSet.begin(), dofNumberSet.end(), myGlobalElements.begin() );
-    // Save memory
-    dofNumberSet.clear();
-*/
+    /*
+        std::set<Int> dofNumberSet;
+        // Gather all dofs local to the given mesh (dofs use global numbering)
+        // The set ensures no repetition
+        for (UInt elementId=0; elementId < mesh.numElements(); ++elementId )
+            for (UInt localDof=0; localDof < this->numLocalDof();++localDof )
+                dofNumberSet.insert( static_cast<Int>( this->localToGlobalMap( elementId, localDof ) ) );
+        // dump the set into a vector for adjacency
+        // to save memory I use copy() and not the vector constructor directly
+        std::vector<Int> myGlobalElements( dofNumberSet.size() );
+        std::copy( dofNumberSet.begin(), dofNumberSet.end(), myGlobalElements.begin() );
+        // Save memory
+        dofNumberSet.clear();
+    */
 
     std::set<Int> myGlobalElementsSet;
 
     // insert dof associated to geometric entities owned by current proc
-    const UInt pointOffset( 0 );
-    const UInt ridgeOffset( pointOffset + M_elementDofPattern.nbDofPerPeak() * mesh.numGlobalPeaks() );
-    const UInt facetOffset( ridgeOffset + M_elementDofPattern.nbDofPerRidge() * mesh.numGlobalRidges() );
-    const UInt elementOffset( facetOffset + M_elementDofPattern.nbDofPerFacet() * mesh.numGlobalFacets() );
+    const UInt pointOffset ( 0 );
+    const UInt ridgeOffset ( pointOffset + M_elementDofPattern.nbDofPerPeak() * mesh.numGlobalPeaks() );
+    const UInt facetOffset ( ridgeOffset + M_elementDofPattern.nbDofPerRidge() * mesh.numGlobalRidges() );
+    const UInt elementOffset ( facetOffset + M_elementDofPattern.nbDofPerFacet() * mesh.numGlobalFacets() );
 
-    for( UInt i = 0; i < mesh.numElements(); i++ )
+    for ( UInt i = 0; i < mesh.numElements(); i++ )
     {
-        const typename MeshType::element_Type & element = mesh.element( i );
+        const typename MeshType::element_Type& element = mesh.element ( i );
 
         // point block
         for ( UInt k = 0; k < element.S_numPoints; k++ )
         {
-            const typename MeshType::point_Type point = element.point( k );
-            if( Flag::testOneSet( point.flag(), EntityFlags::OWNED ) )
+            const typename MeshType::point_Type point = element.point ( k );
+            if ( Flag::testOneSet ( point.flag(), EntityFlags::OWNED ) )
             {
-                for( UInt d = 0; d < M_elementDofPattern.nbDofPerPeak(); d++ )
-                    myGlobalElementsSet.insert( pointOffset + point.id() + d * mesh.numGlobalPoints() );
+                for ( UInt d = 0; d < M_elementDofPattern.nbDofPerPeak(); d++ )
+                {
+                    myGlobalElementsSet.insert ( pointOffset + point.id() + d * mesh.numGlobalPoints() );
+                }
             }
         }
 
         // ridge block
         for ( UInt k = 0; k < element.S_numRidges; k++ )
         {
-            const typename MeshType::ridge_Type ridge = mesh.ridge( mesh.localRidgeId( i, k ) );
-            if( Flag::testOneSet( ridge.flag(), EntityFlags::OWNED ) )
+            const typename MeshType::ridge_Type ridge = mesh.ridge ( mesh.localRidgeId ( i, k ) );
+            if ( Flag::testOneSet ( ridge.flag(), EntityFlags::OWNED ) )
             {
-                for( UInt d = 0; d < M_elementDofPattern.nbDofPerRidge(); d++ )
-                    myGlobalElementsSet.insert( ridgeOffset + ridge.id() + d * mesh.numGlobalRidges() );
+                for ( UInt d = 0; d < M_elementDofPattern.nbDofPerRidge(); d++ )
+                {
+                    myGlobalElementsSet.insert ( ridgeOffset + ridge.id() + d * mesh.numGlobalRidges() );
+                }
             }
         }
 
         // facet block
         for ( UInt k = 0; k < element.S_numFacets; k++ )
         {
-            const typename MeshType::facet_Type facet = mesh.facet( mesh.localFacetId( i, k ) );
-            if( Flag::testOneSet( facet.flag(), EntityFlags::OWNED ) )
+            const typename MeshType::facet_Type facet = mesh.facet ( mesh.localFacetId ( i, k ) );
+            if ( Flag::testOneSet ( facet.flag(), EntityFlags::OWNED ) )
             {
-                for( UInt d = 0; d < M_elementDofPattern.nbDofPerFacet(); d++ )
-                    myGlobalElementsSet.insert( facetOffset + facet.id() + d * mesh.numGlobalFacets() );
+                for ( UInt d = 0; d < M_elementDofPattern.nbDofPerFacet(); d++ )
+                {
+                    myGlobalElementsSet.insert ( facetOffset + facet.id() + d * mesh.numGlobalFacets() );
+                }
             }
         }
 
         // elem block
-        if( Flag::testOneSet( element.flag(), EntityFlags::OWNED ) )
+        if ( Flag::testOneSet ( element.flag(), EntityFlags::OWNED ) )
         {
-            for( UInt d = 0; d < M_elementDofPattern.nbDofPerElement(); d++ )
-                myGlobalElementsSet.insert( elementOffset + element.id() + d * mesh.numGlobalFacets() );
+            for ( UInt d = 0; d < M_elementDofPattern.nbDofPerElement(); d++ )
+            {
+                myGlobalElementsSet.insert ( elementOffset + element.id() + d * mesh.numGlobalFacets() );
+            }
         }
     }
 
-    std::vector<Int> myGlobalElements( myGlobalElementsSet.size() );
-    std::copy( myGlobalElementsSet.begin(), myGlobalElementsSet.end(), myGlobalElements.begin() );
+    std::vector<Int> myGlobalElements ( myGlobalElementsSet.size() );
+    std::copy ( myGlobalElementsSet.begin(), myGlobalElementsSet.end(), myGlobalElements.begin() );
 
     return myGlobalElements;
 }

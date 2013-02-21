@@ -191,7 +191,10 @@ public:
     //! temporary: the method should work form the Exporter class
     void exportPID (  meshPtr_Type /*meshPart*/, commPtr_Type comm, const bool /*binaryFormat*/ = false )
     {
-        if ( !comm->MyPID() ) std::cerr << "  X-  exportPID is not working with VTK" << std::endl;
+        if ( !comm->MyPID() )
+        {
+            std::cerr << "  X-  exportPID is not working with VTK" << std::endl;
+        }
     }
 
     //! Set data from file.
