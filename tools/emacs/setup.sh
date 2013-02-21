@@ -7,7 +7,7 @@ DESTDIR=${DIRNAME}/../..
 cd ${DESTDIR}
 if test -e .emacs-dirvars ; then
   echo ".emacs-dirvars already exists. The file will not be linked"
-else 
+else    
   ln -s tools/emacs/emacs-dirvars .emacs-dirvars
 fi
 

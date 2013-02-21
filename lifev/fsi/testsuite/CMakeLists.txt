@@ -5,7 +5,6 @@ INCLUDE(AddSubdirectories)
 ADD_SUBDIRECTORIES(
   fsi_segregated
   fsi_monolithic
-  RBF_test3D
   RBF_test2D
   fsi_restart
   )

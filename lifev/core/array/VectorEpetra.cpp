@@ -159,7 +159,6 @@ VectorEpetra::operator[]( const UInt row )
         std::cout << M_epetraVector->Comm().MyPID() << " " << row << " " << lrow << std::endl;
         ERROR_MSG( "VectorEpetra::operator [] ERROR : !! lrow < 0\n" );
     }
-#endif
 
     return (*M_epetraVector)[0][lrow];
 }
@@ -167,15 +166,13 @@ VectorEpetra::operator[]( const UInt row )
 const VectorEpetra::data_type&
 VectorEpetra::operator[]( const UInt row ) const
 {
-    Int lrow = blockMap().LID(row);
 
-#ifdef HAVE_LIFEV_DEBUG
+    Int lrow = blockMap().LID (row);
     if ( lrow < 0 )
     {
         std::cout << M_epetraVector->Comm().MyPID() << " " << row << " " << lrow << std::endl;
-        ERROR_MSG( "VectorEpetra::operator () ERROR : !! lrow < 0\n" );
+        ERROR_MSG ( "VectorEpetra::operator () ERROR : !! lrow < 0\n" );
     }
-#endif
 
     return ((*M_epetraVector)[0][lrow]);
 }
@@ -577,13 +574,11 @@ Int VectorEpetra::globalToLocalRowId( const UInt row ) const
 {
     Int lrow = blockMap().LID(row);
 
-#ifdef HAVE_LIFEV_DEBUG
     if ( lrow < 0 && blockMap().Comm().NumProc() == 1 )
     {
         std::cout << M_epetraVector->Comm().MyPID() << " " << row << " " << lrow << std::endl;
         ERROR_MSG( "VectorEpetra::globalToLocalRowId ERROR : !! lrow < 0\n" );
     }
-#endif
 
     return lrow;
 }
@@ -729,10 +724,10 @@ VectorEpetra::subset( const Epetra_MultiVector& vector,
     // eg:  p = (u,p) or u = (u,p)
     for ( UInt i = 0; i < numMyEntries; ++i )
     {
-        lid1 = vector.Map().LID(gids[i]+offset1);
-        lid2 = blockMap().LID(gids[i]+offset2);
-        ASSERT( ( lid2 >= 0 ) && ( lid1 >= 0 ), "VectorEpetra::subset ERROR : !! lid < 0\n" );
-        (*M_epetraVector)[0][lid2] = vector[column][lid1];
+        lid1 = vector.Map().LID (gids[i] + offset1);
+        lid2 = blockMap().LID (gids[i] + offset2);
+        ASSERT ( ( lid2 >= 0 ) && ( lid1 >= 0 ), "VectorEpetra::subset ERROR : !! lid < 0\n" );
+        (*M_epetraVector) [0][lid2] = vector[column][lid1];
     }
 
     return *this;

@@ -14,15 +14,15 @@
 
 [fluid]
     [./space_discretization]
-        mesh_dir                 = ./ 
-        mesh_file                = tube20_rbf.mesh
-	mesh_type                = .mesh 
+        mesh_dir                 = ./
+        mesh_file                = tube20_long.mesh
+	    mesh_type                = .mesh
 
 [solid]
     [./space_discretization]
-        mesh_dir                 = ./ 
-        mesh_file                = vessel20_rbf.mesh
-        mesh_type                = .mesh 
+        mesh_dir                 = ./
+        mesh_file                = vessel20.mesh
+        mesh_type                = .mesh
 
 [prec]
     prectype                     = ML # Ifpack or ML

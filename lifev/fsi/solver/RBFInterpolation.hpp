@@ -26,7 +26,7 @@
 
 /*!
     @file
-    @brief FSIData - File containing the implementation of Radial Basis Functions suited for interpolation 
+    @brief FSIData - File containing the implementation of Radial Basis Functions suited for interpolation
                      between non-matching grids
 
     @author Davide Forti <davide.forti@epfl.ch>
@@ -49,22 +49,19 @@
 #include <Teuchos_XMLParameterListHelpers.hpp>
 #include <Teuchos_RCP.hpp>
 
-namespace LifeV 
+namespace LifeV
 {
-  template <typename Mesh>
-  class RBFInterpolation
-  {
-    
-  public:
-    
+template <typename Mesh>
+class RBFInterpolation
+{
+
+public:
+
     typedef Mesh                                              mesh_Type;
     typedef boost::shared_ptr<mesh_Type>                      meshPtr_Type;
 
     typedef VectorEpetra                                      vector_Type;
     typedef boost::shared_ptr<vector_Type >                   vectorPtr_Type;
-    
-    typedef Epetra_FECrsMatrix                                matrixEpetra_Type;
-    typedef boost::shared_ptr<matrixEpetra_Type>              matrixEpetraPtr_Type;
 
     typedef MatrixEpetra<double>                              matrix_Type;
     typedef boost::shared_ptr<matrix_Type>                    matrixPtr_Type;
@@ -76,9 +73,6 @@ namespace LifeV
     typedef MapEpetra                                         map_Type;
     typedef boost::shared_ptr<MapEpetra>                      mapPtr_Type;
 
-    typedef Epetra_Map                                        mapEpetra_Type;
-    typedef boost::shared_ptr<mapEpetra_Type>                 mapEpetraPtr_Type;
-
     typedef GhostHandler<mesh_Type>                           neighbors_Type;
     typedef boost::shared_ptr<neighbors_Type>                 neighborsPtr_Type;
 
@@ -86,60 +80,63 @@ namespace LifeV
     typedef boost::shared_ptr<basePrec_Type>                  basePrecPtr_Type;
 
     typedef LifeV::PreconditionerIfpack                       prec_Type;
-    typedef boost::shared_ptr<prec_Type>                      precPtr_Type;      
+    typedef boost::shared_ptr<prec_Type>                      precPtr_Type;
 
     typedef Teuchos::RCP< Teuchos::ParameterList >            parameterList_Type;
 
     //! Constructor
-    RBFInterpolation( meshPtr_Type fullMeshKnown, 
-		      meshPtr_Type localMeshKnown, 
-		      meshPtr_Type fullMeshUnknown, 
-		      meshPtr_Type localMeshUnknown, 
-		      flagContainer_Type flags);
-    
+    RBFInterpolation ( meshPtr_Type fullMeshKnown,
+                       meshPtr_Type localMeshKnown,
+                       meshPtr_Type fullMeshUnknown,
+                       meshPtr_Type localMeshUnknown,
+                       flagContainer_Type flags);
+
     //! Destructor
-    ~RBFInterpolation(){}
+    ~RBFInterpolation() {}
 
-    
+
     //! Setup the RBF data
-    void setupRBFData(vectorPtr_Type KnownField, vectorPtr_Type UnknownField, GetPot datafile, Teuchos::RCP< Teuchos::ParameterList > belosList);
+    void setupRBFData (vectorPtr_Type KnownField, vectorPtr_Type UnknownField, GetPot datafile, Teuchos::RCP< Teuchos::ParameterList > belosList);
 
-    
+
     //! Build the RBF Operators, namely the interpolant and the projection ones.
     void buildOperators();
-    
+
     //! Build the RBF interpolant
     void InterpolationOperator();
 
-    //! Identifies nodes with an assigned markerID 
-    void identifyNodes(meshPtr_Type LocalMesh, std::set<ID> & GID_nodes, vectorPtr_Type CheckVector);
+    //! Identifies nodes with an assigned markerID
+    void identifyNodes (meshPtr_Type LocalMesh, std::set<ID>& GID_nodes, vectorPtr_Type CheckVector);
 
     //! Check if the point with markerID pointMarker has to be selected
-    bool isInside(ID pointMarker, flagContainer_Type Flags);
+    bool isInside (ID pointMarker, flagContainer_Type Flags);
 
     //! Evaluate the RBF radius
-    double computeRBFradius(meshPtr_Type MeshNeighbors, meshPtr_Type MeshGID, idContainer_Type Neighbors, ID GlobalID);
+    double computeRBFradius (meshPtr_Type MeshNeighbors, meshPtr_Type MeshGID, idContainer_Type Neighbors, ID GlobalID);
 
     //! Evaluation of the RBF
-    double rbf(double x1, double y1, double z1, double x2, double y2, double z2, double radius);
-    
+    double rbf (double x1, double y1, double z1, double x2, double y2, double z2, double radius);
+
     //! Build the projection operator
     void ProjectionOperator();
-    
+
     //! Prepare Rhs
     void buildRhs();
-    
+
     //! Manages the solution of the interpolation problem
     void interpolate();
-    
+
+    //! Manages the solution of the interpolation problem, namely the costant (c=1) field.
+    void interpolateCostantField();
+
     //! Getter for the solution
-    void solution(vectorPtr_Type & Solution);
+    void solution (vectorPtr_Type& Solution);
 
     //! Getter for the solution obtained by a pure RBF approach
-    void solutionrbf(vectorPtr_Type & Solution_rbf);
+    void solutionrbf (vectorPtr_Type& Solution_rbf);
 
-  private:
-    
+private:
+
     meshPtr_Type                M_fullMeshKnown;
     meshPtr_Type                M_localMeshKnown;
     meshPtr_Type                M_fullMeshUnknown;
@@ -153,339 +150,344 @@ namespace LifeV
     idContainer_Type            M_GIdsUnknownMesh;
     vectorPtr_Type              M_RhsF;
     vectorPtr_Type              M_RhsOne;
-    mapEpetraPtr_Type           M_interpolationOperatorEpetraMap;
-    mapEpetraPtr_Type           M_projectionOperatorEpetraMap;
+    vectorPtr_Type              M_rbf_one;
     mapPtr_Type                 M_interpolationOperatorMap;
     mapPtr_Type                 M_projectionOperatorMap;
     neighborsPtr_Type           M_neighbors;
     vectorPtr_Type              M_unknownField_rbf;
     GetPot                      M_datafile;
     parameterList_Type          M_belosList;
-  };
+};
 
-  template <typename Mesh>
-  RBFInterpolation<Mesh>::RBFInterpolation( meshPtr_Type fullMeshKnown, 
-					    meshPtr_Type localMeshKnown, 
-					    meshPtr_Type fullMeshUnknown, 
-					    meshPtr_Type localMeshUnknown, 
-					    flagContainer_Type flags):
-    M_fullMeshKnown( fullMeshKnown ),
-    M_localMeshKnown( localMeshKnown ),
-    M_fullMeshUnknown( fullMeshUnknown ),
-    M_localMeshUnknown( localMeshUnknown ),
-    M_flags( flags )
-  {
-  }
+template <typename Mesh>
+RBFInterpolation<Mesh>::RBFInterpolation ( meshPtr_Type fullMeshKnown,
+                                           meshPtr_Type localMeshKnown,
+                                           meshPtr_Type fullMeshUnknown,
+                                           meshPtr_Type localMeshUnknown,
+                                           flagContainer_Type flags) :
+    M_fullMeshKnown ( fullMeshKnown ),
+    M_localMeshKnown ( localMeshKnown ),
+    M_fullMeshUnknown ( fullMeshUnknown ),
+    M_localMeshUnknown ( localMeshUnknown ),
+    M_flags ( flags )
+{
+}
 
-  
-  template <typename Mesh>
-  void RBFInterpolation<Mesh>::setupRBFData(vectorPtr_Type KnownField, vectorPtr_Type UnknownField, GetPot datafile, parameterList_Type belosList)
-  {
+
+template <typename Mesh>
+void RBFInterpolation<Mesh>::setupRBFData (vectorPtr_Type KnownField, vectorPtr_Type UnknownField, GetPot datafile, parameterList_Type belosList)
+{
     M_knownField   = KnownField;
     M_unknownField = UnknownField;
     M_datafile     = datafile;
     M_belosList    = belosList;
-  }
+}
 
-  
-  template <typename Mesh>
-  void RBFInterpolation<Mesh>::buildOperators()
-  {
+
+template <typename Mesh>
+void RBFInterpolation<Mesh>::buildOperators()
+{
     this->InterpolationOperator();
     this->ProjectionOperator();
     this->buildRhs();
-  }
-  
-  template <typename Mesh>
-  void RBFInterpolation<Mesh>::InterpolationOperator()
-  {
-    this->identifyNodes(M_localMeshKnown, M_GIdsKnownMesh, M_knownField);
-    M_neighbors.reset( new neighbors_Type( M_fullMeshKnown, M_localMeshKnown, M_knownField->mapPtr(), M_knownField->mapPtr()->commPtr() ) );
-    if(M_flags[0]==-1)
-      M_neighbors->setUp();
-    else
-      M_neighbors->setUp(M_flags);
-    
-    int LocalNodesNumber = M_GIdsKnownMesh.size();
-    int TotalNodesNumber = 0;
+    this->interpolateCostantField();
+}
 
-    MPI_Allreduce(&LocalNodesNumber, &TotalNodesNumber, 1,  MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-  
-    std::vector<double>   RBF_radius(LocalNodesNumber);
-    std::vector<std::set<ID> > MatrixGraph(LocalNodesNumber);
-    int * ElementsPerRow = new int[LocalNodesNumber];
-    int * GlobalID = new int[LocalNodesNumber];
+template <typename Mesh>
+void RBFInterpolation<Mesh>::InterpolationOperator()
+{
+    this->identifyNodes (M_localMeshKnown, M_GIdsKnownMesh, M_knownField);
+    M_neighbors.reset ( new neighbors_Type ( M_fullMeshKnown, M_localMeshKnown, M_knownField->mapPtr(), M_knownField->mapPtr()->commPtr() ) );
+    if (M_flags[0] == -1)
+    {
+        M_neighbors->setUp();
+    }
+    else
+    {
+        M_neighbors->setUp (M_flags);
+    }
+
+    int LocalNodesNumber = M_GIdsKnownMesh.size();
+
+    std::vector<double>   RBF_radius (LocalNodesNumber);
+    std::vector<std::set<ID> > MatrixGraph (LocalNodesNumber);
+    int* ElementsPerRow = new int[LocalNodesNumber];
+    int* GlobalID = new int[LocalNodesNumber];
     int k = 0;
     int Max_entries = 0;
-    
-    for(std::set<ID>::iterator it = M_GIdsKnownMesh.begin(); it != M_GIdsKnownMesh.end(); ++it)
-      {
-	GlobalID[k] = *it;
-	MatrixGraph[k] = M_neighbors->nodeNodeNeighborsList()[GlobalID[k]];
-	MatrixGraph[k].insert(GlobalID[k]);
-	RBF_radius[k] = computeRBFradius( M_fullMeshKnown, M_fullMeshKnown, MatrixGraph[k], GlobalID[k]);
-	ElementsPerRow[k] = MatrixGraph[k].size();
-	if(ElementsPerRow[k]>Max_entries)
-	  Max_entries = ElementsPerRow[k];
-	++k;
-      }
-									
-    M_interpolationOperatorMap.reset(new map_Type(TotalNodesNumber, LocalNodesNumber, GlobalID, M_knownField->mapPtr()->commPtr()));
-    M_interpolationOperatorEpetraMap.reset(new mapEpetra_Type(TotalNodesNumber, LocalNodesNumber, GlobalID, 0, *(M_knownField->mapPtr()->commPtr())));
 
-    matrixEpetraPtr_Type InterpolationOperator;
-    InterpolationOperator.reset(new matrixEpetra_Type(Copy, *M_interpolationOperatorEpetraMap, ElementsPerRow));
+    for (std::set<ID>::iterator it = M_GIdsKnownMesh.begin(); it != M_GIdsKnownMesh.end(); ++it)
+    {
+        GlobalID[k] = *it;
+        MatrixGraph[k] = M_neighbors->nodeNodeNeighborsList() [GlobalID[k]];
+        MatrixGraph[k].insert (GlobalID[k]);
+        RBF_radius[k] = computeRBFradius ( M_fullMeshKnown, M_fullMeshKnown, MatrixGraph[k], GlobalID[k]);
+        ElementsPerRow[k] = MatrixGraph[k].size();
+        if (ElementsPerRow[k] > Max_entries)
+        {
+            Max_entries = ElementsPerRow[k];
+        }
+        ++k;
+    }
 
-    int * Indices = new int[Max_entries];
-    double * Values = new double[Max_entries];
-    
-    for( int i = 0 ; i < LocalNodesNumber; ++i )
-      {
-	k = 0;
-	for( std::set<ID>::iterator it = MatrixGraph[i].begin(); it != MatrixGraph[i].end(); ++it)
-	  {
-	      Indices[k] = *it;
-	      Values[k]  = rbf( M_fullMeshKnown->point(GlobalID[i]).x(),
-				M_fullMeshKnown->point(GlobalID[i]).y(),
-				M_fullMeshKnown->point(GlobalID[i]).z(),
-				M_fullMeshKnown->point(*it).x(),
-				M_fullMeshKnown->point(*it).y(),
-				M_fullMeshKnown->point(*it).z(),
-				RBF_radius[i]);
-	      ++k;
-	    }
-	InterpolationOperator->InsertGlobalValues(GlobalID[i], k, Values, Indices);
-      }      
-    InterpolationOperator->FillComplete();
+    M_interpolationOperatorMap.reset (new map_Type (-1, LocalNodesNumber, GlobalID, M_knownField->mapPtr()->commPtr() ) );
+    M_interpolationOperator.reset (new matrix_Type (*M_interpolationOperatorMap, ElementsPerRow) );
+
+    int* Indices = new int[Max_entries];
+    double* Values = new double[Max_entries];
+
+    for ( int i = 0 ; i < LocalNodesNumber; ++i )
+    {
+        k = 0;
+        for ( std::set<ID>::iterator it = MatrixGraph[i].begin(); it != MatrixGraph[i].end(); ++it)
+        {
+            Indices[k] = *it;
+            Values[k]  = rbf ( M_fullMeshKnown->point (GlobalID[i]).x(),
+                               M_fullMeshKnown->point (GlobalID[i]).y(),
+                               M_fullMeshKnown->point (GlobalID[i]).z(),
+                               M_fullMeshKnown->point (*it).x(),
+                               M_fullMeshKnown->point (*it).y(),
+                               M_fullMeshKnown->point (*it).z(),
+                               RBF_radius[i]);
+            ++k;
+        }
+        M_interpolationOperator->insertGlobalValues (GlobalID[i], k, Values, Indices);
+    }
+    M_interpolationOperator->globalAssemble();
 
     delete Indices;
     delete Values;
     delete ElementsPerRow;
     delete GlobalID;
+}
 
-    M_interpolationOperator.reset(new matrix_Type(*M_interpolationOperatorMap, InterpolationOperator));
-    M_interpolationOperator->spy("M_interpolationOperator.m");
+template <typename Mesh>
+void RBFInterpolation<Mesh>::ProjectionOperator()
+{
 
-  }
+    this->identifyNodes (M_localMeshUnknown, M_GIdsUnknownMesh, M_unknownField);
 
-  template <typename Mesh>
-  void RBFInterpolation<Mesh>::ProjectionOperator()
-  {
-    
-    this->identifyNodes(M_localMeshUnknown, M_GIdsUnknownMesh, M_unknownField);
-    
     int LocalNodesNumber = M_GIdsUnknownMesh.size();
-    int TotalNodesNumber = 0;
 
-    std::vector<double>   RBF_radius(LocalNodesNumber);
-    std::vector<std::set<ID> > MatrixGraph(LocalNodesNumber);
-    int * ElementsPerRow = new int[LocalNodesNumber];
-    int * GlobalID = new int[LocalNodesNumber];
+    std::vector<double>   RBF_radius (LocalNodesNumber);
+    std::vector<std::set<ID> > MatrixGraph (LocalNodesNumber);
+    int* ElementsPerRow = new int[LocalNodesNumber];
+    int* GlobalID = new int[LocalNodesNumber];
     int k = 0;
     int Max_entries = 0;
     double d;
     double d_min;
     int nearestPoint;
-    
-    for(std::set<ID>::iterator it = M_GIdsUnknownMesh.begin(); it != M_GIdsUnknownMesh.end(); ++it)
-      {
-	GlobalID[k] = *it;
-	d_min = 100;
-	for (int j = 0; j <  M_fullMeshKnown->numVertices(); ++j)
-	  {
-	    if( M_flags[0] == -1 || this->isInside(M_fullMeshKnown->point(j).markerID(), M_flags) )
-	      {
-		d = std::sqrt( pow(M_fullMeshKnown->point(j).x()-M_fullMeshUnknown->point(GlobalID[k]).x(),2)
-			       + pow(M_fullMeshKnown->point(j).y()-M_fullMeshUnknown->point(GlobalID[k]).y(),2)
-			       + pow(M_fullMeshKnown->point(j).z()-M_fullMeshUnknown->point(GlobalID[k]).z(),2) );
-		if (d < d_min)
-		  {
-		    d_min = d;
-		    nearestPoint = M_fullMeshKnown->point(j).id();
-		  }
-	      }
-	  }
-	MatrixGraph[k] = M_neighbors->nodeNodeNeighborsList()[nearestPoint];
-	MatrixGraph[k].insert(nearestPoint);       
-        RBF_radius[k] = computeRBFradius( M_fullMeshKnown, M_fullMeshUnknown, MatrixGraph[k], GlobalID[k]);	     
-	ElementsPerRow[k] = MatrixGraph[k].size();
-	if(ElementsPerRow[k] > Max_entries)
-	  Max_entries = ElementsPerRow[k];
-	++k;
-      }
-	
-    MPI_Allreduce(&LocalNodesNumber, &TotalNodesNumber, 1,  MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-    
-    M_projectionOperatorMap.reset(new map_Type(TotalNodesNumber, LocalNodesNumber, GlobalID, M_unknownField->mapPtr()->commPtr()));
-    M_projectionOperatorEpetraMap.reset(new mapEpetra_Type(TotalNodesNumber, LocalNodesNumber, GlobalID, 0, *(M_unknownField->mapPtr()->commPtr())));
 
-    matrixEpetraPtr_Type ProjectionOperator;
-    ProjectionOperator.reset(new matrixEpetra_Type(Copy, *M_projectionOperatorEpetraMap, ElementsPerRow));
-    
-    int * Indices = new int[Max_entries];
-    double * Values = new double[Max_entries];
+    for (std::set<ID>::iterator it = M_GIdsUnknownMesh.begin(); it != M_GIdsUnknownMesh.end(); ++it)
+    {
+        GlobalID[k] = *it;
+        d_min = 100;
+        for (int j = 0; j <  M_fullMeshKnown->numVertices(); ++j)
+        {
+            if ( M_flags[0] == -1 || this->isInside (M_fullMeshKnown->point (j).markerID(), M_flags) )
+            {
+                d = std::sqrt ( pow (M_fullMeshKnown->point (j).x() - M_fullMeshUnknown->point (GlobalID[k]).x(), 2)
+                                + pow (M_fullMeshKnown->point (j).y() - M_fullMeshUnknown->point (GlobalID[k]).y(), 2)
+                                + pow (M_fullMeshKnown->point (j).z() - M_fullMeshUnknown->point (GlobalID[k]).z(), 2) );
+                if (d < d_min)
+                {
+                    d_min = d;
+                    nearestPoint = M_fullMeshKnown->point (j).id();
+                }
+            }
+        }
+        MatrixGraph[k] = M_neighbors->nodeNodeNeighborsList() [nearestPoint];
+        MatrixGraph[k].insert (nearestPoint);
+        RBF_radius[k] = computeRBFradius ( M_fullMeshKnown, M_fullMeshUnknown, MatrixGraph[k], GlobalID[k]);
+        ElementsPerRow[k] = MatrixGraph[k].size();
+        if (ElementsPerRow[k] > Max_entries)
+        {
+            Max_entries = ElementsPerRow[k];
+        }
+        ++k;
+    }
 
-    for( int i = 0 ; i < LocalNodesNumber; ++i )
-      {
+    M_projectionOperatorMap.reset (new map_Type (-1, LocalNodesNumber, GlobalID, M_unknownField->mapPtr()->commPtr() ) );
+    M_projectionOperator.reset (new matrix_Type (*M_projectionOperatorMap, ElementsPerRow) );
+
+    int* Indices = new int[Max_entries];
+    double* Values = new double[Max_entries];
+
+    for ( int i = 0 ; i < LocalNodesNumber; ++i )
+    {
         k = 0;
-        for( std::set<ID>::iterator it = MatrixGraph[i].begin(); it != MatrixGraph[i].end(); ++it)
-	  {
+        for ( std::set<ID>::iterator it = MatrixGraph[i].begin(); it != MatrixGraph[i].end(); ++it)
+        {
             Indices[k] = *it;
-            Values[k]  = rbf( M_fullMeshUnknown->point(GlobalID[i]).x(),
-			      M_fullMeshUnknown->point(GlobalID[i]).y(),
-			      M_fullMeshUnknown->point(GlobalID[i]).z(),
-			      M_fullMeshKnown->point(*it).x(),
-			      M_fullMeshKnown->point(*it).y(),
-			      M_fullMeshKnown->point(*it).z(),
-			      RBF_radius[i]);
+            Values[k]  = rbf ( M_fullMeshUnknown->point (GlobalID[i]).x(),
+                               M_fullMeshUnknown->point (GlobalID[i]).y(),
+                               M_fullMeshUnknown->point (GlobalID[i]).z(),
+                               M_fullMeshKnown->point (*it).x(),
+                               M_fullMeshKnown->point (*it).y(),
+                               M_fullMeshKnown->point (*it).z(),
+                               RBF_radius[i]);
             ++k;
-	  }
-        ProjectionOperator->InsertGlobalValues(GlobalID[i], k, Values, Indices);
-      }
-    ProjectionOperator->FillComplete(*M_interpolationOperatorEpetraMap, *M_projectionOperatorEpetraMap); 
+        }
+        M_projectionOperator->insertGlobalValues (GlobalID[i], k, Values, Indices);
+    }
+    M_projectionOperator->globalAssemble (M_interpolationOperatorMap, M_projectionOperatorMap);
 
     delete Indices;
     delete Values;
     delete ElementsPerRow;
     delete GlobalID;
+}
 
-    M_projectionOperator.reset(new matrix_Type(*M_projectionOperatorMap, ProjectionOperator));
-    M_projectionOperator->spy("M_projectionOperator.m");
-  }
-  
-  template <typename Mesh>
-  double RBFInterpolation<Mesh>::computeRBFradius(meshPtr_Type MeshNeighbors, meshPtr_Type MeshGID, idContainer_Type Neighbors, ID GlobalID)
-  {
+template <typename Mesh>
+double RBFInterpolation<Mesh>::computeRBFradius (meshPtr_Type MeshNeighbors, meshPtr_Type MeshGID, idContainer_Type Neighbors, ID GlobalID)
+{
     double r = 0;
     double r_max = 0;
-    for(idContainer_Type::iterator it = Neighbors.begin(); it != Neighbors.end(); ++it)
-	  {
-	    r = std::sqrt( pow( MeshGID->point( GlobalID ).x() - MeshNeighbors->point( *it ).x(), 2 )
-			   + pow( MeshGID->point( GlobalID ).y() - MeshNeighbors->point( *it ).y(), 2 )
-			   + pow( MeshGID->point( GlobalID ).z() - MeshNeighbors->point( *it ).z(), 2 ) );
-	    r_max = ( r > r_max ) ? r : r_max;
-	  }
+    for (idContainer_Type::iterator it = Neighbors.begin(); it != Neighbors.end(); ++it)
+    {
+        r = std::sqrt ( pow ( MeshGID->point ( GlobalID ).x() - MeshNeighbors->point ( *it ).x(), 2 )
+                        + pow ( MeshGID->point ( GlobalID ).y() - MeshNeighbors->point ( *it ).y(), 2 )
+                        + pow ( MeshGID->point ( GlobalID ).z() - MeshNeighbors->point ( *it ).z(), 2 ) );
+        r_max = ( r > r_max ) ? r : r_max;
+    }
     return r_max;
-  }
+}
 
-  
-  template <typename Mesh>
-  void RBFInterpolation<Mesh>::buildRhs()
-  {
-    M_RhsF.reset(new vector_Type(*M_interpolationOperatorMap));
-    M_RhsOne.reset(new vector_Type(*M_interpolationOperatorMap));
-    
-    M_RhsF->subset(*M_knownField,*M_interpolationOperatorMap,0,0);
+
+template <typename Mesh>
+void RBFInterpolation<Mesh>::buildRhs()
+{
+    M_RhsF.reset (new vector_Type (*M_interpolationOperatorMap) );
+    M_RhsOne.reset (new vector_Type (*M_interpolationOperatorMap) );
+
+    M_RhsF->subset (*M_knownField, *M_interpolationOperatorMap, 0, 0);
     *M_RhsOne += 1;
-  }
+}
 
-  
-  template <typename Mesh>
-  void RBFInterpolation<Mesh>::interpolate()
-  {
-    vectorPtr_Type gamma_f;
-    gamma_f.reset(new vector_Type(*M_interpolationOperatorMap));
+template <typename Mesh>
+void RBFInterpolation<Mesh>::interpolateCostantField()
+{
     vectorPtr_Type gamma_one;
-    gamma_one.reset(new vector_Type(*M_interpolationOperatorMap));
+    gamma_one.reset (new vector_Type (*M_interpolationOperatorMap) );
 
     // Preconditioner
     prec_Type* precRawPtr;
     basePrecPtr_Type precPtr;
     precRawPtr = new prec_Type;
-    precRawPtr->setDataFromGetPot( M_datafile, "prec" );
-    precPtr.reset( precRawPtr );
+    precRawPtr->setDataFromGetPot ( M_datafile, "prec" );
+    precPtr.reset ( precRawPtr );
 
-    LinearSolver solverF;
-    solverF.setCommunicator( M_knownField->mapPtr()->commPtr() );
-    solverF.setParameters( *M_belosList );
-    solverF.setPreconditioner( precPtr );
-  
-    solverF.setOperator(M_interpolationOperator);
-    solverF.setRightHandSide(M_RhsOne);
-    solverF.solve(gamma_one);
- 
     LinearSolver solverOne;
-    solverOne.setCommunicator( M_knownField->mapPtr()->commPtr() );
-    solverOne.setParameters( *M_belosList );
-    solverOne.setPreconditioner( precPtr );
+    solverOne.setCommunicator ( M_knownField->mapPtr()->commPtr() );
+    solverOne.setParameters ( *M_belosList );
+    solverOne.setPreconditioner ( precPtr );
 
-    solverOne.setOperator(M_interpolationOperator);
-    solverOne.setRightHandSide( M_RhsF );
-    solverOne.solve( gamma_f );
+    solverOne.setOperator (M_interpolationOperator);
+    solverOne.setRightHandSide ( M_RhsOne );
+    solverOne.solve ( gamma_one );
+
+    M_rbf_one.reset (new vector_Type (*M_projectionOperatorMap) );
+
+    M_projectionOperator->multiply (false, *gamma_one, *M_rbf_one);
+
+}
+
+template <typename Mesh>
+void RBFInterpolation<Mesh>::interpolate()
+{
+    vectorPtr_Type gamma_f;
+    gamma_f.reset (new vector_Type (*M_interpolationOperatorMap) );
+
+    // Preconditioner
+    prec_Type* precRawPtr;
+    basePrecPtr_Type precPtr;
+    precRawPtr = new prec_Type;
+    precRawPtr->setDataFromGetPot ( M_datafile, "prec" );
+    precPtr.reset ( precRawPtr );
+
+    LinearSolver solverRBF;
+    solverRBF.setCommunicator ( M_knownField->mapPtr()->commPtr() );
+    solverRBF.setParameters ( *M_belosList );
+    solverRBF.setPreconditioner ( precPtr );
+
+    solverRBF.setOperator (M_interpolationOperator);
+    solverRBF.setRightHandSide (M_RhsF);
+    solverRBF.solve (gamma_f);
 
     vectorPtr_Type rbf_f;
-    rbf_f.reset(new vector_Type(*M_projectionOperatorMap));
-   
-    vectorPtr_Type rbf_one;
-    rbf_one.reset(new vector_Type(*M_projectionOperatorMap));
+    rbf_f.reset (new vector_Type (*M_projectionOperatorMap) );
 
     vectorPtr_Type solution;
-    solution.reset(new vector_Type(*M_projectionOperatorMap));
+    solution.reset (new vector_Type (*M_projectionOperatorMap) );
 
-    M_projectionOperator->multiply(false, *gamma_f, *rbf_f); 
-    M_projectionOperator->multiply(false, *gamma_one, *rbf_one);
+    M_projectionOperator->multiply (false, *gamma_f, *rbf_f);
 
     *solution = *rbf_f;
-    *solution /= *rbf_one;
+    *solution /= *M_rbf_one;
 
-    M_unknownField_rbf.reset(new vector_Type(M_unknownField->map()));
-    M_unknownField_rbf->subset(*rbf_f,*M_projectionOperatorMap,0,0);
+    M_unknownField_rbf.reset (new vector_Type (M_unknownField->map() ) );
+    M_unknownField_rbf->subset (*rbf_f, *M_projectionOperatorMap, 0, 0);
 
-    M_unknownField->subset(*solution,*M_projectionOperatorMap,0,0);
+    M_unknownField->subset (*solution, *M_projectionOperatorMap, 0, 0);
 
-  }
-  
+}
 
-  template <typename Mesh>
-  void RBFInterpolation<Mesh>::identifyNodes(meshPtr_Type LocalMesh, std::set<ID> & GID_nodes, vectorPtr_Type CheckVector)
-  {
-    
-    if(M_flags[0] == -1)
-      {
-	for ( UInt i = 0; i < LocalMesh->numVertices(); ++i )
-	  if(CheckVector->blockMap().LID(LocalMesh->point(i).id()) != -1)
-	    GID_nodes.insert(LocalMesh->point(i).id()); 
-      }
+
+template <typename Mesh>
+void RBFInterpolation<Mesh>::identifyNodes (meshPtr_Type LocalMesh, std::set<ID>& GID_nodes, vectorPtr_Type CheckVector)
+{
+    if (M_flags[0] == -1)
+    {
+        for ( UInt i = 0; i < LocalMesh->numVertices(); ++i )
+            if (CheckVector->blockMap().LID (LocalMesh->point (i).id() ) != -1)
+            {
+                GID_nodes.insert (LocalMesh->point (i).id() );
+            }
+    }
     else
-      {
-	for ( UInt i = 0; i < LocalMesh->numVertices(); ++i )
-	  if( this->isInside(LocalMesh->point(i).markerID(), M_flags) )
-	    if(CheckVector->blockMap().LID(LocalMesh->point(i).id()) != -1)
-	      GID_nodes.insert(LocalMesh->point(i).id()); 
-      }
-    
-  }
-  
-  template <typename Mesh>
-  bool RBFInterpolation<Mesh>::isInside(ID pointMarker, flagContainer_Type flags)
-  {
+    {
+        for ( UInt i = 0; i < LocalMesh->numVertices(); ++i )
+            if ( this->isInside (LocalMesh->point (i).markerID(), M_flags) )
+                if (CheckVector->blockMap().LID (LocalMesh->point (i).id() ) != -1)
+                {
+                    GID_nodes.insert (LocalMesh->point (i).id() );
+                }
+    }
+}
+
+template <typename Mesh>
+bool RBFInterpolation<Mesh>::isInside (ID pointMarker, flagContainer_Type flags)
+{
     int check = 0;
-    for(UInt i = 0; i < flags.size(); ++i)
-      if(pointMarker == flags[i])
-	++check;
+    for (UInt i = 0; i < flags.size(); ++i)
+        if (pointMarker == flags[i])
+        {
+            ++check;
+        }
     return (check > 0) ? true : false;
-  }
+}
 
-  
-  template <typename Mesh>
-  double RBFInterpolation<Mesh>::rbf(double x1, double y1, double z1, double x2, double y2, double z2, double radius)
-  {
-    double distance = sqrt( pow(x1-x2,2) + pow(y1-y2,2) + pow(z1-z2,2));
-    return pow(1-distance/radius,4)*(4*distance/radius+1); 
-  }
-  
-  template <typename Mesh>
-  void RBFInterpolation<Mesh>::solution(vectorPtr_Type & Solution)
-  {
+
+template <typename Mesh>
+double RBFInterpolation<Mesh>::rbf (double x1, double y1, double z1, double x2, double y2, double z2, double radius)
+{
+    double distance = sqrt ( pow (x1 - x2, 2) + pow (y1 - y2, 2) + pow (z1 - z2, 2) );
+    return pow (1 - distance / radius, 4) * (4 * distance / radius + 1);
+}
+
+template <typename Mesh>
+void RBFInterpolation<Mesh>::solution (vectorPtr_Type& Solution)
+{
     Solution = M_unknownField;
-  }
+}
 
-  
-  template <typename Mesh>
-  void RBFInterpolation<Mesh>::solutionrbf(vectorPtr_Type & Solution_rbf)
-  {
+
+template <typename Mesh>
+void RBFInterpolation<Mesh>::solutionrbf (vectorPtr_Type& Solution_rbf)
+{
     Solution_rbf = M_unknownField_rbf;
-  }
+}
 
 } // namespace LifeV
 

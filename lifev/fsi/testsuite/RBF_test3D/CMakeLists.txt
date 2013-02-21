@@ -21,8 +21,8 @@ TRIBITS_COPY_FILES_TO_BINARY_DIR(SolverParamList_rbf3d
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
-TRIBITS_COPY_FILES_TO_BINARY_DIR(tube20_rbf.mesh
-  SOURCE_FILES tube20_rbf.mesh
+TRIBITS_COPY_FILES_TO_BINARY_DIR(tube20_long.mesh
+  SOURCE_FILES tube20_long.mesh
   SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/fsi/data/mesh/inria/
 )
 
