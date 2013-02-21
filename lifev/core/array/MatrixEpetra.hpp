@@ -113,6 +113,13 @@ public:
      */
     MatrixEpetra ( const MapEpetra& map, Int numEntries = 50, bool ignoreNonLocalValues = false );
 
+    //! Constructor for square and rectangular matrices, knowing the number of entries per row
+    /*!
+      @param map Row map. The column map will be defined in MatrixEpetra<DataType>::GlobalAssemble(...,...)
+      @param numEntries The average number of entries for each row.
+     */
+    MatrixEpetra ( const MapEpetra& map, Int* numEntriesPerRow, bool ignoreNonLocalValues = false );
+
     //! Copy Constructor
     /*!
       @param matrix Matrix used to create the new occurence
@@ -378,6 +385,16 @@ public:
       @param Map The MapEpetra
       @param offset An offset for the insertion of the diagonal entries
     */
+
+    void insertGlobalValues (int GlobalRow, int NumEntries, const double* Values, const int* Indices);
+    //! insert values into the matrix
+    /*!
+      @param GlobalRow The global row-index
+      @param NumEntries number of entries per row
+      @param Values The values to be inserted
+      @param Indices The global column-index
+    */
+
     void insertValueDiagonal ( const DataType entry, const MapEpetra& Map, const UInt offset = 0 );
 
     //! insert the given value into the diagonal
@@ -612,6 +629,14 @@ MatrixEpetra<DataType>::MatrixEpetra ( const MapEpetra& map, const Epetra_CrsGra
 
 template <typename DataType>
 MatrixEpetra<DataType>::MatrixEpetra ( const MapEpetra& map, Int numEntries, bool ignoreNonLocalValues ) :
+    M_map       ( new MapEpetra ( map ) ),
+    M_epetraCrs ( new matrix_type ( Copy, *M_map->map ( Unique ), numEntries, ignoreNonLocalValues) )
+{
+
+}
+
+template <typename DataType>
+MatrixEpetra<DataType>::MatrixEpetra ( const MapEpetra& map, int* numEntries, bool ignoreNonLocalValues ) :
     M_map       ( new MapEpetra ( map ) ),
     M_epetraCrs ( new matrix_type ( Copy, *M_map->map ( Unique ), numEntries, ignoreNonLocalValues) )
 {
@@ -1395,13 +1420,18 @@ Int MatrixEpetra<DataType>::globalAssemble ( const boost::shared_ptr<const MapEp
 }
 
 template <typename DataType>
-void
-MatrixEpetra<DataType>::insertValueDiagonal ( const DataType entry, const MapEpetra& Map, const UInt offset )
+void MatrixEpetra<DataType>::insertValueDiagonal ( const DataType entry, const MapEpetra& Map, const UInt offset )
 {
     for ( Int i = 0 ; i < Map.map (Unique)->NumMyElements(); ++i )
     {
         addToCoefficient ( offset + Map.map (Unique)->GID (i) , offset + Map.map (Unique)->GID (i), entry );
     }
+}
+
+template <typename DataType>
+void MatrixEpetra<DataType>::insertGlobalValues (int GlobalRow, int NumEntries, const double* Values, const int* Indices)
+{
+    M_epetraCrs->InsertGlobalValues (GlobalRow, NumEntries, Values, Indices);
 }
 
 template <typename DataType>

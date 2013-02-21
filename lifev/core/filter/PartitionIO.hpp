@@ -1129,22 +1129,6 @@ void LifeV::PartitionIO<MeshType>::readElements()
     M_meshPartIn->updateElementFaces (false, false);
 }
 
-template<typename MeshType>
-void LifeV::PartitionIO<MeshType>::writeData (hid_t& filespace,
-                                              hid_t& memspace,
-                                              hid_t& plist,
-                                              hid_t& dataset,
-                                              hid_t& datatype,
-                                              hsize_t currentOffset[],
-                                              hsize_t currentCount[],
-                                              void* buffer)
-{
-    H5Sselect_hyperslab (filespace, H5S_SELECT_SET, currentOffset, NULL,
-                         currentCount, NULL);
-    H5Dwrite (dataset, datatype, memspace, filespace, plist,
-              buffer);
-}
-
 #endif /* HAVE_MPI */
 #endif /* HAVE_HDF5 */
 #endif /* PARTITION_IO_H_ */

@@ -152,8 +152,6 @@ VectorEpetra::data_type&
 VectorEpetra::operator[] ( const UInt row )
 {
     Int lrow = blockMap().LID (row);
-
-#ifdef HAVE_LIFEV_DEBUG
     if ( lrow < 0 )
     {
         std::cout << M_epetraVector->Comm().MyPID() << " " << row << " " << lrow << std::endl;
@@ -166,12 +164,12 @@ VectorEpetra::operator[] ( const UInt row )
 const VectorEpetra::data_type&
 VectorEpetra::operator[] ( const UInt row ) const
 {
-
     Int lrow = blockMap().LID (row);
     if ( lrow < 0 )
     {
         std::cout << M_epetraVector->Comm().MyPID() << " " << row << " " << lrow << std::endl;
         ERROR_MSG ( "VectorEpetra::operator () ERROR : !! lrow < 0\n" );
+
     }
 
     return ( (*M_epetraVector) [0][lrow]);
@@ -1083,3 +1081,4 @@ operator* ( const VectorEpetra::data_type& scalar, const VectorEpetra& vector )
 }
 
 }  // end namespace LifeV
+
