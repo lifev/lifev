@@ -60,7 +60,7 @@ public:
     //! @name Public Types
     //@{
 
-	typedef ExpressionBase<ExpressionDphiI> base_Type;
+    typedef ExpressionBase<ExpressionDphiI> base_Type;
 
     //@}
 
@@ -69,10 +69,10 @@ public:
     //@{
 
     //! Empty constructor
-	ExpressionDphiI();
+    ExpressionDphiI();
 
     //! Copy constructor
-	ExpressionDphiI(const ExpressionDphiI&);
+    ExpressionDphiI (const ExpressionDphiI&);
 
     //! Destructor
     ~ExpressionDphiI();
@@ -83,7 +83,7 @@ public:
     //@{
 
     //! Display method
-	static void display(std::ostream& out= std::cout);
+    static void display (std::ostream& out = std::cout);
 
     //@}
 };
@@ -93,9 +93,9 @@ public:
   @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
 */
 inline ExpressionDphiI
-grad(const ExpressionPhiI& )
+grad (const ExpressionPhiI& )
 {
-	return ExpressionDphiI();
+    return ExpressionDphiI();
 }
 
 

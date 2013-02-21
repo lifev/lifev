@@ -46,80 +46,80 @@ namespace LifeV
 // ===================================================
 
 QuadraturePoint::QuadraturePoint()
-        : M_weight( 0 ),
-        M_coor( 3 )
+    : M_weight ( 0 ),
+      M_coor ( 3 )
 {
     M_coor[ 0 ] = 0;
     M_coor[ 1 ] = 0;
     M_coor[ 2 ] = 0;
 }
 
-QuadraturePoint::QuadraturePoint( Real x, Real y, Real z, Real weight )
-        : M_weight( weight ),
-        M_coor( 3 )
+QuadraturePoint::QuadraturePoint ( Real x, Real y, Real z, Real weight )
+    : M_weight ( weight ),
+      M_coor ( 3 )
 {
     M_coor[ 0 ] = x;
     M_coor[ 1 ] = y;
     M_coor[ 2 ] = z;
 }
 
-QuadraturePoint::QuadraturePoint( Real x, Real y, Real weight )
-        : M_weight( weight ),
-        M_coor( 3 )
+QuadraturePoint::QuadraturePoint ( Real x, Real y, Real weight )
+    : M_weight ( weight ),
+      M_coor ( 3 )
 {
     M_coor[ 0 ] = x;
     M_coor[ 1 ] = y;
     M_coor[ 2 ] = 0.;
 }
 
-QuadraturePoint::QuadraturePoint( Real x, Real weight )
-        : M_weight( weight ),
-        M_coor( 3 )
+QuadraturePoint::QuadraturePoint ( Real x, Real weight )
+    : M_weight ( weight ),
+      M_coor ( 3 )
 {
     M_coor[ 0 ] = x;
     M_coor[ 1 ] = 0.;
     M_coor[ 2 ] = 0.;
 }
 
-QuadraturePoint::QuadraturePoint(const GeoVector& coor, const Real& weight)
-        : M_weight(weight),
-        M_coor(coor)
+QuadraturePoint::QuadraturePoint (const GeoVector& coor, const Real& weight)
+    : M_weight (weight),
+      M_coor (coor)
 {}
 
-QuadraturePoint::QuadraturePoint(const GeoVector& coor, const Real& weight, const UInt& spaceDim)
-        : M_weight(weight),
-        M_coor(spaceDim)
+QuadraturePoint::QuadraturePoint (const GeoVector& coor, const Real& weight, const UInt& spaceDim)
+    : M_weight (weight),
+      M_coor (spaceDim)
 {
-    for (UInt i(0); (i<spaceDim) && (i<coor.size()); ++i)
+    for (UInt i (0); (i < spaceDim) && (i < coor.size() ); ++i)
     {
         M_coor[i] = coor[i];
     }
 
     // Add zeros if necessary
-    for (UInt i(coor.size()); i<spaceDim ; ++i)
+    for (UInt i (coor.size() ); i < spaceDim ; ++i)
     {
         M_coor[i] = 0.0;
     }
 }
 
-QuadraturePoint::QuadraturePoint(const QuadraturePoint& qp)
-        : M_weight(qp.M_weight),
-        M_coor(qp.M_coor.size())
+QuadraturePoint::QuadraturePoint (const QuadraturePoint& qp)
+    : M_weight (qp.M_weight),
+      M_coor (qp.M_coor.size() )
 {
     M_coor = qp.M_coor;
 }
 
-QuadraturePoint::QuadraturePoint(const QuadraturePoint& qp, const UInt spaceDim)
-        : M_weight(qp.M_weight),
-        M_coor(spaceDim)
+QuadraturePoint::QuadraturePoint (const QuadraturePoint& qp, const UInt spaceDim)
+    : M_weight (qp.M_weight),
+      M_coor (spaceDim)
 {
-    for (UInt i(0); (i<spaceDim) && (i<qp.M_coor.size()); ++i)
+    for (UInt i (0); (i < spaceDim) && (i < qp.M_coor.size() ); ++i)
     {
         M_coor[i] = qp.M_coor[i];
     }
 
     // Add zeros if necessary
-    for (UInt i(qp.M_coor.size()); i<spaceDim ; ++i)
+    for (UInt i (qp.M_coor.size() ); i < spaceDim ; ++i)
     {
         M_coor[i] = 0.0;
     }

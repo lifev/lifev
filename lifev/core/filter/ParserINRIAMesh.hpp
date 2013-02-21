@@ -59,8 +59,8 @@ namespace
   @return true if everything went fine, false otherwise.
 */
 Int
-nextIntINRIAMeshField( std::string const & line,
-                       std::istream      & myStream )
+nextIntINRIAMeshField ( std::string const& line,
+                        std::istream&       myStream )
 {
     /*
      first control if line has something.
@@ -70,12 +70,12 @@ nextIntINRIAMeshField( std::string const & line,
      */
 
     for ( std::string::const_iterator is = line.begin(); is != line.end(); ++is )
-       {
+    {
         if ( *is != ' ' )
-          {
-            return atoi( line );
-          }
-         }
+        {
+            return atoi ( line );
+        }
+    }
     Int dummy;
     myStream >> dummy;
 
@@ -99,15 +99,15 @@ nextIntINRIAMeshField( std::string const & line,
   @return false if mesh check is unsuccessfull.
 */
 bool
-readINRIAMeshFileHead( std::ifstream          & myStream,
-                       UInt                   & numberVertices,
-                       UInt                   & numberBoundaryVertices,
-                       UInt                   & numberBoundaryFaces,
-                       UInt                   & numberBoundaryEdges,
-                       UInt                   & numberVolumes,
-                       UInt                   & numberStoredFaces,
-                       ReferenceShapes        & shape,
-                       InternalEntitySelector   iSelect )
+readINRIAMeshFileHead ( std::ifstream&           myStream,
+                        UInt&                    numberVertices,
+                        UInt&                    numberBoundaryVertices,
+                        UInt&                    numberBoundaryFaces,
+                        UInt&                    numberBoundaryEdges,
+                        UInt&                    numberVolumes,
+                        UInt&                    numberStoredFaces,
+                        ReferenceShapes&         shape,
+                        InternalEntitySelector   iSelect )
 {
     const int idOffset = 1; //IDs in INRIA files start from 1
 
@@ -116,7 +116,7 @@ readINRIAMeshFileHead( std::ifstream          & myStream,
     numberBoundaryFaces = 0;
     numberBoundaryEdges = 0;
     numberVolumes = 0;
-    numberStoredFaces =0;
+    numberStoredFaces = 0;
 
     std::string line;
 
@@ -134,32 +134,32 @@ readINRIAMeshFileHead( std::ifstream          & myStream,
     std::vector<bool> isboundary;
     //streampos start=myStream.tellg();
 
-    while ( nextGoodLine( myStream, line ).good() )
+    while ( nextGoodLine ( myStream, line ).good() )
     {
-        if ( line.find( "MeshVersionFormatted" ) != std::string::npos )
+        if ( line.find ( "MeshVersionFormatted" ) != std::string::npos )
         {
-            idummy = nextIntINRIAMeshField( line.substr( line.find_last_of( "d" ) + 1 ), myStream );
-            ASSERT_PRE0( idummy == 1, "I can read only formatted INRIA Mesh files, sorry" );
+            idummy = nextIntINRIAMeshField ( line.substr ( line.find_last_of ( "d" ) + 1 ), myStream );
+            ASSERT_PRE0 ( idummy == 1, "I can read only formatted INRIA Mesh files, sorry" );
         }
 
-        if ( line.find( "Dimension" ) != std::string:: npos )
+        if ( line.find ( "Dimension" ) != std::string:: npos )
         {
-            idummy = nextIntINRIAMeshField( line.substr( line.find_last_of( "n" ) + 1 ), myStream );
-            ASSERT_PRE0( idummy == 3, "I can read only 3D INRIA Mesh files, sorry" );
+            idummy = nextIntINRIAMeshField ( line.substr ( line.find_last_of ( "n" ) + 1 ), myStream );
+            ASSERT_PRE0 ( idummy == 3, "I can read only 3D INRIA Mesh files, sorry" );
         }
 
         // I assume that internal vertices have their Ref value set to 0 (not clear from medit manual)
-        if ( line.find( "Vertices" ) != std::string::npos )
+        if ( line.find ( "Vertices" ) != std::string::npos )
         {
-            numberVertices = nextIntINRIAMeshField( line.substr( line.find_last_of( "s" ) + 1 ), myStream );
+            numberVertices = nextIntINRIAMeshField ( line.substr ( line.find_last_of ( "s" ) + 1 ), myStream );
             done++;
             numberBoundaryVertices = 0;
-            isboundary.resize( numberVertices,false );
+            isboundary.resize ( numberVertices, false );
 
             for ( i = 0; i < numberVertices; ++i )
             {
                 myStream >> x >> y >> z >> ibc;
-                if ( ! iSelect( markerID_Type( ibc ) ) )
+                if ( ! iSelect ( markerID_Type ( ibc ) ) )
                 {
                     numberBoundaryVertices++;
                     isboundary[ i ] = true;
@@ -167,11 +167,11 @@ readINRIAMeshFileHead( std::ifstream          & myStream,
             }
         }
 
-        if ( line.find( "Triangles" ) != std::string::npos )
+        if ( line.find ( "Triangles" ) != std::string::npos )
         {
-            ASSERT_PRE0( shape != HEXA, " Cannot have triangular faces in an HEXA INRIA  MESH" );
+            ASSERT_PRE0 ( shape != HEXA, " Cannot have triangular faces in an HEXA INRIA  MESH" );
             shape = TETRA;
-            numReadFaces = nextIntINRIAMeshField( line.substr( line.find_last_of( "s" ) + 1 ), myStream );
+            numReadFaces = nextIntINRIAMeshField ( line.substr ( line.find_last_of ( "s" ) + 1 ), myStream );
             numberBoundaryFaces = 0;
 
             done++;
@@ -181,7 +181,7 @@ readINRIAMeshFileHead( std::ifstream          & myStream,
                 myStream >> p1 >> p2 >> p3 >> ibc;
                 if ( isboundary[ p1 - idOffset ] && isboundary [ p2 - idOffset ] && isboundary[ p3 - idOffset ])
                 {
-                    if ( iSelect( markerID_Type( ibc ) ) )
+                    if ( iSelect ( markerID_Type ( ibc ) ) )
                     {
                         std::cerr << "ATTENTION: Face (1-based numbering) "
                                   << p1 << " "
@@ -193,7 +193,7 @@ readINRIAMeshFileHead( std::ifstream          & myStream,
                 }
                 else
                 {
-                    if ( !iSelect( markerID_Type( ibc ) ) )
+                    if ( !iSelect ( markerID_Type ( ibc ) ) )
                     {
                         std::cerr << "ATTENTION: Face (1-based numbering) "
                                   << p1 << " "
@@ -208,21 +208,21 @@ readINRIAMeshFileHead( std::ifstream          & myStream,
         }
 
 
-        if ( line.find( "Quadrilaterals" ) != std::string::npos )
+        if ( line.find ( "Quadrilaterals" ) != std::string::npos )
         {
-            ASSERT_PRE0( shape != TETRA, " Cannot have quad faces in an TETRA INRIA MESH" );
+            ASSERT_PRE0 ( shape != TETRA, " Cannot have quad faces in an TETRA INRIA MESH" );
             shape = HEXA;
-            numReadFaces = nextIntINRIAMeshField( line.substr( line.find_last_of( "s" ) + 1 ), myStream );
+            numReadFaces = nextIntINRIAMeshField ( line.substr ( line.find_last_of ( "s" ) + 1 ), myStream );
             done++;
             numberBoundaryFaces = 0;
 
             for ( UInt k = 0; k < numReadFaces; k++ )
             {
-               myStream >> p1 >> p2 >> p3 >> p4 >> ibc;
-               if ( isboundary[ p1 - idOffset ] && isboundary[ p2 - idOffset ]
-                    && isboundary[ p3 - idOffset ] && isboundary[ p4 - idOffset ] )
+                myStream >> p1 >> p2 >> p3 >> p4 >> ibc;
+                if ( isboundary[ p1 - idOffset ] && isboundary[ p2 - idOffset ]
+                        && isboundary[ p3 - idOffset ] && isboundary[ p4 - idOffset ] )
                 {
-                    if ( iSelect( markerID_Type( ibc ) ) )
+                    if ( iSelect ( markerID_Type ( ibc ) ) )
                     {
                         std::cerr << "ATTENTION: Face (1-based numbering) "
                                   << p1 << " "
@@ -239,11 +239,11 @@ readINRIAMeshFileHead( std::ifstream          & myStream,
             numberStoredFaces = numReadFaces;
         }
         // To cope with a mistake in INRIA Mesh files
-        if ( line.find( "Tetrahedra" ) != std::string::npos )
+        if ( line.find ( "Tetrahedra" ) != std::string::npos )
         {
-            ASSERT_PRE0( shape != HEXA, " Cannot have tetras  in a HEXA INRIA MESH" );
+            ASSERT_PRE0 ( shape != HEXA, " Cannot have tetras  in a HEXA INRIA MESH" );
             shape = TETRA;
-            numberVolumes = nextIntINRIAMeshField( line.substr( line.find_last_of( "a" ) + 1 ), myStream );
+            numberVolumes = nextIntINRIAMeshField ( line.substr ( line.find_last_of ( "a" ) + 1 ), myStream );
             done++;
 
             for ( i = 0; i < numberVolumes; i++ )
@@ -252,11 +252,11 @@ readINRIAMeshFileHead( std::ifstream          & myStream,
             }
         }
 
-        if ( line.find( "Hexahedra" ) != std::string::npos )
+        if ( line.find ( "Hexahedra" ) != std::string::npos )
         {
-            ASSERT_PRE0( shape != TETRA, " Cannot have Hexahedra in a TETRA INRIA MESH" );
+            ASSERT_PRE0 ( shape != TETRA, " Cannot have Hexahedra in a TETRA INRIA MESH" );
             shape = HEXA;
-            numberVolumes = nextIntINRIAMeshField( line.substr( line.find_last_of( "a" ) + 1 ), myStream );
+            numberVolumes = nextIntINRIAMeshField ( line.substr ( line.find_last_of ( "a" ) + 1 ), myStream );
             done++;
 
             for ( i = 0; i < numberVolumes; i++ )
@@ -265,9 +265,9 @@ readINRIAMeshFileHead( std::ifstream          & myStream,
             }
         }
         // I assume we are storing only boundary edges
-        if ( line.find( "Edges" ) != std::string::npos )
+        if ( line.find ( "Edges" ) != std::string::npos )
         {
-            numberBoundaryEdges = nextIntINRIAMeshField( line.substr( line.find_last_of( "s" ) + 1 ), myStream );
+            numberBoundaryEdges = nextIntINRIAMeshField ( line.substr ( line.find_last_of ( "s" ) + 1 ), myStream );
             done++;
             for ( i = 0; i < numberBoundaryEdges; i++ )
             {
@@ -292,237 +292,248 @@ readINRIAMeshFileHead( std::ifstream          & myStream,
 */
 template <typename GeoShape>
 bool
-ReadINRIAMeshFile( BareMesh<GeoShape> & bareMesh,
-             std::string const &        fileName,
-             markerID_Type              regionFlag,
-             bool                       verbose = false,
-             InternalEntitySelector     iSelect = InternalEntitySelector() )
+ReadINRIAMeshFile ( BareMesh<GeoShape>& bareMesh,
+                    std::string const&         fileName,
+                    markerID_Type              regionFlag,
+                    bool                       verbose = false,
+                    InternalEntitySelector     iSelect = InternalEntitySelector() )
 {
-  const int idOffset = 1; //IDs in INRIA meshes start from 1
+    const int idOffset = 1; //IDs in INRIA meshes start from 1
 
-  std::string line, faceName, volumeName;
+    std::string line, faceName, volumeName;
 
-  Real x, y, z;
-  ID buffer;
+    Real x, y, z;
+    ID buffer;
 
-  UInt done = 0;
-  UInt numberPoints, numberBoundaryPoints;
-  UInt numberVertices, numberBoundaryVertices;
-  UInt numberEdges, numberBoundaryEdges;
-  UInt numberBoundaryFaces, numberStoredFaces;
-  UInt numberVolumes;
+    UInt done = 0;
+    UInt numberPoints, numberBoundaryPoints;
+    UInt numberVertices, numberBoundaryVertices;
+    UInt numberEdges, numberBoundaryEdges;
+    UInt numberBoundaryFaces, numberStoredFaces;
+    UInt numberVolumes;
 
-  std::stringstream discardedLog;
+    std::stringstream discardedLog;
 
-  ReferenceShapes shape( NONE );
+    ReferenceShapes shape ( NONE );
 
-  std::ostream& oStr = verbose ? std::cout : discardedLog;
+    std::ostream& oStr = verbose ? std::cout : discardedLog;
 
-  // open stream to read header
+    // open stream to read header
 
-  std::ifstream hstream( fileName.c_str() );
+    std::ifstream hstream ( fileName.c_str() );
 
-  if ( verbose )
-  {
-      std::cout << "Reading from file " << fileName << std::endl;
-  }
+    if ( verbose )
+    {
+        std::cout << "Reading from file " << fileName << std::endl;
+    }
 
-  if ( hstream.fail() )
-  {
-      std::cerr << " Error in readINRIAMeshFile = file " << fileName
-                << " not found or locked" << std::endl;
-      std::abort();
-  }
+    if ( hstream.fail() )
+    {
+        std::cerr << " Error in readINRIAMeshFile = file " << fileName
+                  << " not found or locked" << std::endl;
+        std::abort();
+    }
 
-  if ( verbose )
-  {
-      std::cout << "Reading INRIA mesh file" << fileName << std::endl;
-  }
+    if ( verbose )
+    {
+        std::cout << "Reading INRIA mesh file" << fileName << std::endl;
+    }
 
-  if ( ! MeshIO::readINRIAMeshFileHead( hstream, numberVertices, numberBoundaryVertices,
-                                numberBoundaryFaces, numberBoundaryEdges,
-                                numberVolumes, numberStoredFaces, shape, iSelect) )
-  {
-      std::cerr << " Error while reading INRIA mesh file headers" << std::endl;
-      std::abort() ;
-  }
+    if ( ! MeshIO::readINRIAMeshFileHead ( hstream, numberVertices, numberBoundaryVertices,
+                                           numberBoundaryFaces, numberBoundaryEdges,
+                                           numberVolumes, numberStoredFaces, shape, iSelect) )
+    {
+        std::cerr << " Error while reading INRIA mesh file headers" << std::endl;
+        std::abort() ;
+    }
 
-  hstream.close();
+    hstream.close();
 
-  //Reopen the stream: I know it is stupid but this is how it goes
-  std::ifstream myStream( fileName.c_str() );
+    //Reopen the stream: I know it is stupid but this is how it goes
+    std::ifstream myStream ( fileName.c_str() );
 
-  if ( myStream.fail() )
-  {
-      std::cerr << " Error in readINRIAMeshFile = file " << fileName
-                << " not found or locked" << std::endl;
-      std::abort();
-  }
+    if ( myStream.fail() )
+    {
+        std::cerr << " Error in readINRIAMeshFile = file " << fileName
+                  << " not found or locked" << std::endl;
+        std::abort();
+    }
 
-  ASSERT_PRE0( GeoShape::S_shape == shape, "INRIA Mesh file and mesh element shape is not consistent" );
+    ASSERT_PRE0 ( GeoShape::S_shape == shape, "INRIA Mesh file and mesh element shape is not consistent" );
 
-  numberPoints         =  numberVertices;
-  numberBoundaryPoints = numberBoundaryVertices;
+    numberPoints         =  numberVertices;
+    numberBoundaryPoints = numberBoundaryVertices;
 
-  // Be a little verbose
-  switch ( shape )
-  {
-  case HEXA:
-      ASSERT_PRE0( GeoShape::S_numPoints == 8, "Sorry I can read only linear Hexa meshes" );
-      if ( verbose ) std::cout << "Linear Hexa mesh" << std::endl;
-      faceName = "Quadrilaterals";
-      volumeName = "Hexahedra";
-      break;
-
-  case TETRA:
-      if( GeoShape::S_numPoints == 4 )
-      {
-          if ( verbose ) std::cout << "Linear Tetra Mesh" << std::endl;
-      }
-      else if( GeoShape::S_numPoints == 10 )
-      {
-          if ( verbose ) std::cout << "Quadratic Tetra mesh (from linear geometry)" << std::endl;
-          numberPoints         += numberEdges;
-          numberBoundaryPoints += numberBoundaryEdges;
-      }
-      else
-          ERROR_MSG( "mesh type not supported" );
-
-      faceName = "Triangles";
-      volumeName = "Tetrahedra";
-      break;
-  default:
-      ERROR_MSG( "Current version of INRIA Mesh file reader only accepts TETRA and HEXA" );
-  }
-
-  // Set all basic data structure
-  bareMesh.numBoundaryPoints = numberBoundaryPoints;
-  bareMesh.numVertices = numberVertices;
-  bareMesh.numBoundaryVertices = numberBoundaryVertices;
-  bareMesh.points.reshape( 3, numberPoints );
-  bareMesh.pointMarkers.resize( numberPoints );
-  bareMesh.pointIDs.resize( numberPoints );
-
-  bareMesh.ridges.reshape    ( GeoShape::GeoBShape::GeoBShape::S_numPoints, numberBoundaryEdges );
-  bareMesh.ridgeMarkers.resize( numberBoundaryEdges );
-  bareMesh.ridgeIDs.resize( numberBoundaryEdges );
-
-  bareMesh.numBoundaryFacets = numberBoundaryFaces;
-  bareMesh.facets.reshape( GeoShape::GeoBShape::S_numPoints, numberStoredFaces );
-  bareMesh.facetMarkers.resize( numberStoredFaces );
-  bareMesh.facetIDs.resize( numberStoredFaces );
-
-  bareMesh.elements.reshape( GeoShape::S_numPoints, numberVolumes );
-  bareMesh.elementMarkers.resize( numberVolumes );
-  bareMesh.elementIDs.resize( numberVolumes );
-
-  bareMesh.regionMarkerID = regionFlag;
-
-  UInt count = 0;
-  Int  ibc;
-
-  // To account for internal faces
-  if ( numberStoredFaces > numberBoundaryFaces )
-  {
-      oStr << "WARNING: The mesh file (apparently) contains "
-           << numberStoredFaces - numberBoundaryFaces << " internal faces" << std::endl;
-  }
-
-  while ( nextGoodLine( myStream, line ).good() )
-  {
-      if ( line.find( "Vertices" ) != std::string::npos )
-      {
-          nextIntINRIAMeshField( line.substr( line.find_last_of( "s" ) + 1 ), myStream );
-
-          for ( UInt i = 0; i < numberVertices; i++ )
-          {
-              myStream >> x >> y >> z >> ibc;
-
-              if ( !iSelect(markerID_Type(ibc)))
-              {
-                  ++count;
-              }
-
-              bareMesh.points( 0, i ) = x;
-              bareMesh.points( 1, i ) = y;
-              bareMesh.points( 2, i ) = z;
-              bareMesh.pointMarkers[ i ] = ibc;
-              bareMesh.pointIDs[i] = i;
-          }
-          done++;
-
-          if ( count != numberBoundaryVertices )
+    // Be a little verbose
+    switch ( shape )
+    {
+        case HEXA:
+            ASSERT_PRE0 ( GeoShape::S_numPoints == 8, "Sorry I can read only linear Hexa meshes" );
+            if ( verbose )
             {
-              std::cerr << "Number boundary points inconsistent!" << std::endl;
+                std::cout << "Linear Hexa mesh" << std::endl;
             }
-      }
+            faceName = "Quadrilaterals";
+            volumeName = "Hexahedra";
+            break;
 
-      if ( line.find( faceName ) != std::string::npos )
-      {
-          nextIntINRIAMeshField( line.substr( line.find_last_of( "s" ) + 1 ), myStream );
-          oStr << "Reading boundary faces " << std::endl;
+        case TETRA:
+            if ( GeoShape::S_numPoints == 4 )
+            {
+                if ( verbose )
+                {
+                    std::cout << "Linear Tetra Mesh" << std::endl;
+                }
+            }
+            else if ( GeoShape::S_numPoints == 10 )
+            {
+                if ( verbose )
+                {
+                    std::cout << "Quadratic Tetra mesh (from linear geometry)" << std::endl;
+                }
+                numberPoints         += numberEdges;
+                numberBoundaryPoints += numberBoundaryEdges;
+            }
+            else
+            {
+                ERROR_MSG ( "mesh type not supported" );
+            }
 
-          for ( UInt i = 0; i < numberStoredFaces; i++ )
-          {
-              for( UInt k = 0; k < GeoShape::GeoBShape::S_numPoints; k++ )
-              {
-                  myStream >> buffer;
-                  bareMesh.facets( k, i ) = buffer - idOffset;
-              }
-              myStream >> ibc;
-              bareMesh.facetMarkers[ i ] = ibc;
-              bareMesh.facetIDs[ i ] = i;
-          }
+            faceName = "Triangles";
+            volumeName = "Tetrahedra";
+            break;
+        default:
+            ERROR_MSG ( "Current version of INRIA Mesh file reader only accepts TETRA and HEXA" );
+    }
 
-          oStr << "Boundary faces read " << std::endl;
-          done++;
-      }
+    // Set all basic data structure
+    bareMesh.numBoundaryPoints = numberBoundaryPoints;
+    bareMesh.numVertices = numberVertices;
+    bareMesh.numBoundaryVertices = numberBoundaryVertices;
+    bareMesh.points.reshape ( 3, numberPoints );
+    bareMesh.pointMarkers.resize ( numberPoints );
+    bareMesh.pointIDs.resize ( numberPoints );
 
-      if ( line.find( "Edges" ) != std::string::npos )
-      {
-          nextIntINRIAMeshField( line.substr( line.find_last_of( "s" ) + 1 ), myStream );
-          oStr << "Reading boundary edges " << std::endl;
+    bareMesh.ridges.reshape    ( GeoShape::GeoBShape::GeoBShape::S_numPoints, numberBoundaryEdges );
+    bareMesh.ridgeMarkers.resize ( numberBoundaryEdges );
+    bareMesh.ridgeIDs.resize ( numberBoundaryEdges );
 
-          for ( UInt i = 0; i < numberBoundaryEdges; i++ )
-          {
-              for( UInt k = 0; k < GeoShape::GeoBShape::GeoBShape::S_numPoints; k++ )
-              {
-                  myStream >> buffer;
-                  bareMesh.ridges( k, i ) = buffer - idOffset;
-              }
-              myStream >> ibc;
-              bareMesh.ridgeMarkers[ i ] = ibc;
-              bareMesh.ridgeIDs[ i ] = i;
-          }
-          oStr << "Boundary edges read " << std::endl;
-          done++;
-      }
+    bareMesh.numBoundaryFacets = numberBoundaryFaces;
+    bareMesh.facets.reshape ( GeoShape::GeoBShape::S_numPoints, numberStoredFaces );
+    bareMesh.facetMarkers.resize ( numberStoredFaces );
+    bareMesh.facetIDs.resize ( numberStoredFaces );
 
-      if ( line.find( volumeName ) != std::string::npos )
-      {
-          count = 0;
-          nextIntINRIAMeshField( line.substr( line.find_last_of( "a" ) + 1 ), myStream );
-          oStr << "Reading volumes " << std::endl;
+    bareMesh.elements.reshape ( GeoShape::S_numPoints, numberVolumes );
+    bareMesh.elementMarkers.resize ( numberVolumes );
+    bareMesh.elementIDs.resize ( numberVolumes );
 
-          for ( UInt i = 0; i < numberVolumes; i++ )
-          {
-              for( UInt k = 0; k < GeoShape::S_numPoints; k++ )
-              {
-                  myStream >> buffer;
-                  bareMesh.elements( k, i ) = buffer - idOffset;
-              }
-              myStream >> ibc;
-              bareMesh.elementMarkers[ i ] = ibc;
-              bareMesh.elementIDs[ i ] = i;
-              count++;
-          }
-          oStr << count << " Volume elements read" << std::endl;
-          done++;
-      }
-  }
+    bareMesh.regionMarkerID = regionFlag;
 
-  myStream.close();
-  return done == 4 ;
+    UInt count = 0;
+    Int  ibc;
+
+    // To account for internal faces
+    if ( numberStoredFaces > numberBoundaryFaces )
+    {
+        oStr << "WARNING: The mesh file (apparently) contains "
+             << numberStoredFaces - numberBoundaryFaces << " internal faces" << std::endl;
+    }
+
+    while ( nextGoodLine ( myStream, line ).good() )
+    {
+        if ( line.find ( "Vertices" ) != std::string::npos )
+        {
+            nextIntINRIAMeshField ( line.substr ( line.find_last_of ( "s" ) + 1 ), myStream );
+
+            for ( UInt i = 0; i < numberVertices; i++ )
+            {
+                myStream >> x >> y >> z >> ibc;
+
+                if ( !iSelect (markerID_Type (ibc) ) )
+                {
+                    ++count;
+                }
+
+                bareMesh.points ( 0, i ) = x;
+                bareMesh.points ( 1, i ) = y;
+                bareMesh.points ( 2, i ) = z;
+                bareMesh.pointMarkers[ i ] = ibc;
+                bareMesh.pointIDs[i] = i;
+            }
+            done++;
+
+            if ( count != numberBoundaryVertices )
+            {
+                std::cerr << "Number boundary points inconsistent!" << std::endl;
+            }
+        }
+
+        if ( line.find ( faceName ) != std::string::npos )
+        {
+            nextIntINRIAMeshField ( line.substr ( line.find_last_of ( "s" ) + 1 ), myStream );
+            oStr << "Reading boundary faces " << std::endl;
+
+            for ( UInt i = 0; i < numberStoredFaces; i++ )
+            {
+                for ( UInt k = 0; k < GeoShape::GeoBShape::S_numPoints; k++ )
+                {
+                    myStream >> buffer;
+                    bareMesh.facets ( k, i ) = buffer - idOffset;
+                }
+                myStream >> ibc;
+                bareMesh.facetMarkers[ i ] = ibc;
+                bareMesh.facetIDs[ i ] = i;
+            }
+
+            oStr << "Boundary faces read " << std::endl;
+            done++;
+        }
+
+        if ( line.find ( "Edges" ) != std::string::npos )
+        {
+            nextIntINRIAMeshField ( line.substr ( line.find_last_of ( "s" ) + 1 ), myStream );
+            oStr << "Reading boundary edges " << std::endl;
+
+            for ( UInt i = 0; i < numberBoundaryEdges; i++ )
+            {
+                for ( UInt k = 0; k < GeoShape::GeoBShape::GeoBShape::S_numPoints; k++ )
+                {
+                    myStream >> buffer;
+                    bareMesh.ridges ( k, i ) = buffer - idOffset;
+                }
+                myStream >> ibc;
+                bareMesh.ridgeMarkers[ i ] = ibc;
+                bareMesh.ridgeIDs[ i ] = i;
+            }
+            oStr << "Boundary edges read " << std::endl;
+            done++;
+        }
+
+        if ( line.find ( volumeName ) != std::string::npos )
+        {
+            count = 0;
+            nextIntINRIAMeshField ( line.substr ( line.find_last_of ( "a" ) + 1 ), myStream );
+            oStr << "Reading volumes " << std::endl;
+
+            for ( UInt i = 0; i < numberVolumes; i++ )
+            {
+                for ( UInt k = 0; k < GeoShape::S_numPoints; k++ )
+                {
+                    myStream >> buffer;
+                    bareMesh.elements ( k, i ) = buffer - idOffset;
+                }
+                myStream >> ibc;
+                bareMesh.elementMarkers[ i ] = ibc;
+                bareMesh.elementIDs[ i ] = i;
+                count++;
+            }
+            oStr << count << " Volume elements read" << std::endl;
+            done++;
+        }
+    }
+
+    myStream.close();
+    return done == 4 ;
 }
 
 } // GmshIO

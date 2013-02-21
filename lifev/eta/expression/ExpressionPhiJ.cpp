@@ -53,7 +53,7 @@ ExpressionPhiJ::ExpressionPhiJ()
 {}
 
 
-ExpressionPhiJ::ExpressionPhiJ(const ExpressionPhiJ&)
+ExpressionPhiJ::ExpressionPhiJ (const ExpressionPhiJ&)
     : base_Type()
 {}
 
@@ -67,7 +67,7 @@ ExpressionPhiJ::~ExpressionPhiJ()
 // ===================================================
 
 void
-ExpressionPhiJ::display(std::ostream& out)
+ExpressionPhiJ::display (std::ostream& out)
 {
     out << "phi_j";
 }

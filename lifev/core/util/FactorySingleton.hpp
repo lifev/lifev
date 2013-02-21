@@ -127,15 +127,15 @@ void FactorySingleton<SingletonType>::makeInstance()
             S_destroyed = false;
         }
         S_instance = creationFactoryPolicy_Type::create();
-        lifetimeFactoryPolicy_Type::scheduleDestruction( S_instance, &destroyFactorySingleton );
+        lifetimeFactoryPolicy_Type::scheduleDestruction ( S_instance, &destroyFactorySingleton );
     }
 }
 
 template <class SingletonType>
 void FactorySingleton<SingletonType>::destroyFactorySingleton()
 {
-    assert( !S_destroyed );
-    creationFactoryPolicy_Type::destroy( S_instance );
+    assert ( !S_destroyed );
+    creationFactoryPolicy_Type::destroy ( S_instance );
     S_instance = 0;
     S_destroyed = true;
 }

@@ -45,12 +45,12 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 DataLevelSet::
-DataLevelSet():
-        M_time          ( ),
-        M_timeAdvance   ( ),
-        M_stabilization ( ),
-        M_IPTreatment   ( ),
-        M_IPCoef        ( )
+DataLevelSet() :
+    M_time          ( ),
+    M_timeAdvance   ( ),
+    M_stabilization ( ),
+    M_IPTreatment   ( ),
+    M_IPCoef        ( )
 {}
 
 // ===================================================
@@ -58,38 +58,57 @@ DataLevelSet():
 // ===================================================
 void
 DataLevelSet::
-setup( const GetPot& dataFile, const std::string& section)
+setup ( const GetPot& dataFile, const std::string& section)
 {
     // If data time has not been set
     if ( !M_time.get() )
-        M_time.reset( new time_Type( dataFile, section + "/time_discretization" ) );
+    {
+        M_time.reset ( new time_Type ( dataFile, section + "/time_discretization" ) );
+    }
 
     if ( !M_timeAdvance.get() )
-        M_timeAdvance.reset( new timeAdvance_Type( dataFile, section + "/time_discretization" ) );
+    {
+        M_timeAdvance.reset ( new timeAdvance_Type ( dataFile, section + "/time_discretization" ) );
+    }
 
-    std::string stabName = dataFile((section+"/stabilization").data(),"none");
-    setStabilization(stabName);
-    std::string ipName = dataFile((section+"/ip/treatment").data(),"implicit");
-    setIPTreatment(ipName);
-    M_IPCoef = dataFile((section+"/ip/coefficient").data(),0.0);
+    std::string stabName = dataFile ( (section + "/stabilization").data(), "none");
+    setStabilization (stabName);
+    std::string ipName = dataFile ( (section + "/ip/treatment").data(), "implicit");
+    setIPTreatment (ipName);
+    M_IPCoef = dataFile ( (section + "/ip/coefficient").data(), 0.0);
 }
 
 void
 DataLevelSet::
-showMe(std::ostream& output) const
+showMe (std::ostream& output) const
 {
     output << " Time data : " << std::endl;
-    M_time->showMe( output );
-    M_timeAdvance->showMe( output );
+    M_time->showMe ( output );
+    M_timeAdvance->showMe ( output );
 
     output << " Stabilization : ";
-    if (M_stabilization == NONE) output << "none" << std::endl;
-    if (M_stabilization == IP) output << "ip" << std::endl;
+    if (M_stabilization == NONE)
+    {
+        output << "none" << std::endl;
+    }
+    if (M_stabilization == IP)
+    {
+        output << "ip" << std::endl;
+    }
 
     output << " IP Treatment  : ";
-    if (M_IPTreatment == IMPLICIT) output << "implicit" << std::endl;
-    if (M_IPTreatment == SEMI_IMPLICIT) output << "semi-implicit" << std::endl;
-    if (M_IPTreatment == EXPLICIT) output << "explicit" << std::endl;
+    if (M_IPTreatment == IMPLICIT)
+    {
+        output << "implicit" << std::endl;
+    }
+    if (M_IPTreatment == SEMI_IMPLICIT)
+    {
+        output << "semi-implicit" << std::endl;
+    }
+    if (M_IPTreatment == EXPLICIT)
+    {
+        output << "explicit" << std::endl;
+    }
 
     output << " IP coefficient : " << M_IPCoef << std::endl;
 }
@@ -99,34 +118,34 @@ showMe(std::ostream& output) const
 // ===================================================
 void
 DataLevelSet::
-setStabilization(const std::string& stab)
+setStabilization (const std::string& stab)
 {
-    if (stab.compare("ip") ==0)
+    if (stab.compare ("ip") == 0)
     {
         M_stabilization = IP;
     }
     else
     {
-        ASSERT( stab.compare("none") ==0, " Unknown stabilization! ");
+        ASSERT ( stab.compare ("none") == 0, " Unknown stabilization! ");
         M_stabilization = NONE;
     }
 }
 
 void
 DataLevelSet::
-setIPTreatment(const std::string& treat)
+setIPTreatment (const std::string& treat)
 {
-    if (treat.compare("implicit") ==0)
+    if (treat.compare ("implicit") == 0)
     {
         M_IPTreatment = IMPLICIT;
     }
-    else if (treat.compare("semi-implicit") ==0)
+    else if (treat.compare ("semi-implicit") == 0)
     {
         M_IPTreatment = SEMI_IMPLICIT;
     }
     else
     {
-        ASSERT( treat.compare("explicit") ==0, " Unknown IP treatment! ");
+        ASSERT ( treat.compare ("explicit") == 0, " Unknown IP treatment! ");
         M_IPTreatment = EXPLICIT;
     }
 }

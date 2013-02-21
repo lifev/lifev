@@ -63,7 +63,7 @@ namespace LifeV
   * the ComposedOperator class, which behave in the same way.
   */
 class PreconditionerComposed:
-        public Preconditioner
+    public Preconditioner
 {
 public:
 
@@ -85,14 +85,14 @@ public:
      */
     //@{
     //! default constructor.
-    PreconditionerComposed( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>() );
+    PreconditionerComposed ( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>() );
 
 private: //set it private to be sure that it's never called
     //!Copy Constructor
     /**
        This copy constructor does not copy the matrices, but just the shared_ptrs. It calls the copy constructor of ComposedOperator.
      */
-    PreconditionerComposed( PreconditionerComposed& P );
+    PreconditionerComposed ( PreconditionerComposed& P );
 
 public:
     //! constructor from matrix A.
@@ -112,58 +112,67 @@ public:
     void                   setDataFromGetPot ( const GetPot&      dataFile,
                                                const std::string& section);
     //! Creates the Trilinos Teuchos parameter list reading from data file
-    void                   createParametersList( list_Type& /*list*/, const GetPot& dataFile, const std::string& section, const std::string& subSection );
+    void                   createParametersList ( list_Type& /*list*/, const GetPot& dataFile, const std::string& section, const std::string& subSection );
 
     //! Returns an estimate of the condition number
     double                 condest ();
 
     //! same as push_back
-    int                    buildPreconditioner(operatorPtr_Type& A);
+    int                    buildPreconditioner (operatorPtr_Type& A);
 
     //! same as push_back
-    int                    buildPreconditioner(operatorPtr_Type& A,
-                                               const bool useInverse,
-                                               const bool useTranspose=false);
+    int                    buildPreconditioner (operatorPtr_Type& A,
+                                                const bool useInverse,
+                                                const bool useTranspose = false);
     //! Builds a preconditioner based on A and pushes it back in the composedPreconditioner.
     int                    push_back          (operatorPtr_Type& A,
-                                               const bool useInverse=false,
-                                               const bool useTranspose=false
+                                               const bool useInverse = false,
+                                               const bool useTranspose = false
                                               );
 
     //! Builds a preconditioner based on A and replaces it in the composedPreconditioner.
     int                    replace            (operatorPtr_Type& A,
                                                const UInt index,
-                                               const bool useInverse=false,
-                                               const bool useTranspose=false);
+                                               const bool useInverse = false,
+                                               const bool useTranspose = false);
 
     //! resets the pointer to the preconditioner M_prec
     void                   resetPreconditioner();
 
     //! returns the operator vectir
-    const std::vector<operatorPtr_Type>& operVector() const {return M_operVector;}
+    const std::vector<operatorPtr_Type>& operVector() const
+    {
+        return M_operVector;
+    }
     //@}
 
     //!@name Implementation of Methods from Epetra_Operator
     //@{
     //! returns the communicator
-    const Epetra_Comm& Comm(){return preconditioner()->Comm(); }
+    const Epetra_Comm& Comm()
+    {
+        return preconditioner()->Comm();
+    }
 
     //! sets the M_useTranspose flag
-    int            SetUseTranspose( bool useTranspose=false )
+    int            SetUseTranspose ( bool useTranspose = false )
     {
-        return M_prec->SetUseTranspose(useTranspose);
+        return M_prec->SetUseTranspose (useTranspose);
     }
     //! returns the M_useTranspose flag
-    bool            UseTranspose(  ) {return M_prec->UseTranspose();}
+    bool            UseTranspose(  )
+    {
+        return M_prec->UseTranspose();
+    }
 
     //! Applies the inverse operator to an input vector
     /**
        \param X: input vector
        \param Y: output vector
      */
-    virtual int ApplyInverse(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
+    virtual int ApplyInverse (const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
     {
-        return M_prec->ApplyInverse(X, Y);
+        return M_prec->ApplyInverse (X, Y);
     }
 
     //! Applies the operator to an input vector
@@ -171,18 +180,22 @@ public:
        \param X: input vector
        \param Y: output vector
      */
-    virtual int Apply(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
+    virtual int Apply (const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
     {
-        return M_prec->Apply(X, Y);
+        return M_prec->Apply (X, Y);
     }
 
     //! returns the range map
-    const Epetra_Map & OperatorRangeMap() const
-    {return M_prec->OperatorRangeMap();}
+    const Epetra_Map& OperatorRangeMap() const
+    {
+        return M_prec->OperatorRangeMap();
+    }
 
     //! returns the domain map
-    const Epetra_Map & OperatorDomainMap() const
-    {return M_prec->OperatorDomainMap();}
+    const Epetra_Map& OperatorDomainMap() const
+    {
+        return M_prec->OperatorDomainMap();
+    }
     //@}
 
     //!@name Get Methods
@@ -191,16 +204,28 @@ public:
     super_Type::prec_raw_type*  preconditioner ();
 
     //! returms the number of factors in the preconditioner
-    UInt number() const {return M_prec->number();}
+    UInt number() const
+    {
+        return M_prec->number();
+    }
 
     //! returns a shared pointer to the preconditioner
-    super_Type::prec_type              preconditionerPtr(){return M_prec;}
+    super_Type::prec_type              preconditionerPtr()
+    {
+        return M_prec;
+    }
 
     //! returns a shared pointer to the preconditioner
-    const precPtr_Type                 composedPreconditionerPtr(){return M_prec;}
+    const precPtr_Type                 composedPreconditionerPtr()
+    {
+        return M_prec;
+    }
 
     //! returns a string identifying the preconditioner type
-    std::string            preconditionerType() {return "PreconditionerComposed";}
+    std::string            preconditionerType()
+    {
+        return "PreconditionerComposed";
+    }
     //@}
 
     //!@name Static Methods

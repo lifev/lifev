@@ -65,7 +65,7 @@ public:
 
     /*! @typedef function_Type */
     //! Type definition for the 1D boundary function
-    typedef boost::function<Real ( const Real&, const Real&  )> function_Type;
+    typedef boost::function<Real ( const Real&, const Real&  ) > function_Type;
 
     //@}
 
@@ -80,13 +80,13 @@ public:
     /*!
      *  @param function the user defined function
      */
-    explicit OneDFSIFunction( const function_Type& function ) : M_function( function ) {}
+    explicit OneDFSIFunction ( const function_Type& function ) : M_function ( function ) {}
 
     //! Copy constructor
     /*!
      *  @param bcFunction OneDFSIFunction
      */
-    OneDFSIFunction( const OneDFSIFunction& bcFunction ) : M_function  ( bcFunction.M_function ) {}
+    OneDFSIFunction ( const OneDFSIFunction& bcFunction ) : M_function  ( bcFunction.M_function ) {}
 
     //! Destructor
     virtual ~OneDFSIFunction() {}
@@ -102,10 +102,12 @@ public:
      *  @param bcFunction OneDFSIFunction
      *  @return reference to a copy of the class
      */
-    OneDFSIFunction& operator=( const OneDFSIFunction& bcFunction )
+    OneDFSIFunction& operator= ( const OneDFSIFunction& bcFunction )
     {
-        if( this != &bcFunction )
+        if ( this != &bcFunction )
+        {
             M_function = bcFunction.M_function;
+        }
 
         return *this;
     }
@@ -118,7 +120,10 @@ public:
      *  @param timeStep the time step.
      *  @return the value of the function.
      */
-    Real operator()( const Real& time, const Real& timeStep = 0. ) const { return M_function( time, timeStep ); }
+    Real operator() ( const Real& time, const Real& timeStep = 0. ) const
+    {
+        return M_function ( time, timeStep );
+    }
 
     //@}
 
@@ -130,7 +135,10 @@ public:
     /*!
       @param function the user defined function
     */
-    void setFunction( const function_Type& function ) { M_function = function; }
+    void setFunction ( const function_Type& function )
+    {
+        M_function = function;
+    }
 
     //@}
 
@@ -142,7 +150,10 @@ public:
     /*!
       @return the user defined function
     */
-    const function_Type& function() const { return M_function; }
+    const function_Type& function() const
+    {
+        return M_function;
+    }
 
     //@}
 

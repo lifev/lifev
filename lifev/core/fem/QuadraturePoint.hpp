@@ -122,7 +122,7 @@ public:
       @param z Third coordinate of the point
       @param weight Weight of the point
      */
-    QuadraturePoint( Real x, Real y, Real z, Real weight );
+    QuadraturePoint ( Real x, Real y, Real z, Real weight );
 
     //! Full constructor for 2D
     /*!
@@ -130,21 +130,21 @@ public:
       @param y Second coordinate of the point
       @param weight Weight of the point
      */
-    QuadraturePoint( Real x, Real y, Real weight );
+    QuadraturePoint ( Real x, Real y, Real weight );
 
     //! Full constructor for 1D
     /*!
       @param x First coordinate of the point
       @param weight Weight of the point
      */
-    QuadraturePoint( Real x, Real weight );
+    QuadraturePoint ( Real x, Real weight );
 
     //! Full multidimension constructor
     /*!
       @param coor Coordinates of the point
       @param weight Weight of the point
      */
-    QuadraturePoint(const GeoVector& coor, const Real& weight);
+    QuadraturePoint (const GeoVector& coor, const Real& weight);
 
     //! Multidimension constructor with specified dimension
     /*!
@@ -156,14 +156,14 @@ public:
       @param weight Weight of the point
       @param spaceDim The new dimension of the point
      */
-    QuadraturePoint(const GeoVector& coor, const Real& weight, const UInt& spaceDim);
+    QuadraturePoint (const GeoVector& coor, const Real& weight, const UInt& spaceDim);
 
 
     //! Simple copy constructor
     /*!
       @param qp The quadrature point to copy
      */
-    QuadraturePoint(const QuadraturePoint& qp);
+    QuadraturePoint (const QuadraturePoint& qp);
 
     //! Import from another dimension
     /*!
@@ -173,7 +173,7 @@ public:
       @param qp The quadrature point to import
       @param spaceDim The dimension of the space where the quadrature point is defined
      */
-    QuadraturePoint(const QuadraturePoint& qp, const UInt spaceDim);
+    QuadraturePoint (const QuadraturePoint& qp, const UInt spaceDim);
 
     //! Destructor
     virtual ~QuadraturePoint() {};
@@ -197,10 +197,10 @@ public:
     //@{
 
     //! Output operator
-    friend std::ostream & operator << ( std::ostream& out, const QuadraturePoint& qp )
+    friend std::ostream& operator << ( std::ostream& out, const QuadraturePoint& qp )
     {
         out << " Coordinates = ";
-        for (UInt i(0); i<qp.M_coor.size(); ++i)
+        for (UInt i (0); i < qp.M_coor.size(); ++i)
         {
             out << qp.M_coor[i] << ", ";
         };
@@ -223,28 +223,28 @@ public:
     //! Getter for the first coordinate
     const Real& x() const
     {
-        ASSERT(0<M_coor.size()," No x coordinate for this quadrature point");
+        ASSERT (0 < M_coor.size(), " No x coordinate for this quadrature point");
         return M_coor[ 0 ];
     }
 
     //! Getter for the second coordinate
     const Real& y() const
     {
-        ASSERT(1<M_coor.size()," No y coordinate for this quadrature point");
+        ASSERT (1 < M_coor.size(), " No y coordinate for this quadrature point");
         return M_coor[ 1 ];
     }
 
     //! Getter for the third coordinate
     const Real& z() const
     {
-        ASSERT(2<M_coor.size()," No z coordinate for this quadrature point");
+        ASSERT (2 < M_coor.size(), " No z coordinate for this quadrature point");
         return M_coor[ 2 ];
     }
 
     //! Getter for the coordinate (0<=i)
-    const Real& coor(const UInt& i ) const
+    const Real& coor (const UInt& i ) const
     {
-        ASSERT(i<M_coor.size()," Error in the coordinate for this quadrature point");
+        ASSERT (i < M_coor.size(), " Error in the coordinate for this quadrature point");
         return M_coor[ i ];
     }
 

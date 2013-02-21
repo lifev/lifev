@@ -116,10 +116,10 @@ public:
       @param myGlobalElements Array of Id of the local element
       @param commPtr Pointer to the communicator
     */
-    MapEpetra( Int  numGlobalElements,
-               Int  numMyElements,
-               Int* myGlobalElements,
-               const comm_ptrtype& commPtr );
+    MapEpetra ( Int  numGlobalElements,
+                Int  numMyElements,
+                Int* myGlobalElements,
+                const comm_ptrtype& commPtr );
 
     MapEpetra( std::pair<std::vector<Int>, std::vector<Int> > myGlobalElements,
                const comm_ptrtype& commPtr );
@@ -132,7 +132,7 @@ public:
       @param NumGlobalElements Total number of elements inside the map
       @param CommPtr A pointer to the Epetra communicator
      */
-     MapEpetra( const Int numGlobalElements,
+    MapEpetra ( const Int numGlobalElements,
                 const Int notUsed,
                 const comm_ptrtype& commPtr );
 
@@ -141,14 +141,14 @@ public:
       @param size Size of the map
       @param commPtr Pointer to the communicator
      */
-    MapEpetra( const Int           size,
-               const comm_ptrtype& commPtr );
+    MapEpetra ( const Int           size,
+                const comm_ptrtype& commPtr );
 
     //! Copy constructor
     /*!
       @param epetraMap An MapEpetra object
      */
-    MapEpetra( const MapEpetra&  epetraMap );
+    MapEpetra ( const MapEpetra&  epetraMap );
 
     //! Constructor
     /*!
@@ -167,9 +167,9 @@ public:
       @param offset Offset to be used to build the map
       @param maxId Maximum Id
     */
-    MapEpetra( const Epetra_BlockMap& blockMap,
-               const Int offset,
-               const Int maxId);
+    MapEpetra ( const Epetra_BlockMap& blockMap,
+                const Int offset,
+                const Int maxId);
 
 private:
     //! Constructor from raw Epetra_Map
@@ -178,7 +178,7 @@ private:
       therefore it is private
       @param map: underlying Epetra_Map
      */
-    MapEpetra( const map_type map );
+    MapEpetra ( const map_type map );
 
 public:
     //! Destructor
@@ -234,7 +234,7 @@ public:
      */
     MapVector<MapEpetra> operator| (const MapEpetra& map) const
     {
-        return MapVector<MapEpetra>(*this,map);
+        return MapVector<MapEpetra> (*this, map);
     }
 
     //@}
@@ -246,10 +246,10 @@ public:
     /*!
       @param root processor on which to export all the points
      */
-    boost::shared_ptr<MapEpetra> createRootMap( Int const root ) const;
+    boost::shared_ptr<MapEpetra> createRootMap ( Int const root ) const;
 
     //! This method return true if both the unique map and the repeated map are identical
-    bool mapsAreSimilar( MapEpetra const& epetraMap ) const;
+    bool mapsAreSimilar ( MapEpetra const& epetraMap ) const;
 
 #ifdef HAVE_HDF5
     //! Save the matrix into a HDF5 (.h5) file
@@ -269,12 +269,12 @@ public:
 #endif
 
     //! Show informations about the map
-    void showMe( std::ostream& output = std::cout ) const;
+    void showMe ( std::ostream& output = std::cout ) const;
 
     //! Getter for the global number of entries
     UInt mapSize() const
     {
-        return map(Unique)->NumGlobalElements();
+        return map (Unique)->NumGlobalElements();
     }
 
     //! check if a global id is owned by the current partition
@@ -289,14 +289,23 @@ public:
     //@{
 
     //! Return the communicator
-    comm_type const& comm() const { return *M_commPtr; }
+    comm_type const& comm() const
+    {
+        return *M_commPtr;
+    }
 
     //! Return a shared pointer on the communicator
-    comm_ptrtype const& commPtr() const { return M_commPtr; }
-    comm_ptrtype& commPtr() { return M_commPtr; }
+    comm_ptrtype const& commPtr() const
+    {
+        return M_commPtr;
+    }
+    comm_ptrtype& commPtr()
+    {
+        return M_commPtr;
+    }
 
     //! Return a shared pointer on the internal Epetra_Map
-    map_ptrtype const& map( MapEpetraType mapType ) const;
+    map_ptrtype const& map ( MapEpetraType mapType ) const;
 
     //! Getter for the Epetra_Export
     Epetra_Export const& exporter();
@@ -329,16 +338,22 @@ private:
       @param myGlobalElements Array of Id of the global elements of the map
       @param comm Communicator
     */
-    void createMap( Int   numGlobalElements,
-                    Int   numMyElements,
-                    Int*  myGlobalElements,
-                    const comm_type& comm );
+    void createMap ( Int   numGlobalElements,
+                     Int   numMyElements,
+                     Int*  myGlobalElements,
+                     const comm_type& comm );
 
     //! Getter for the repeated map
-    map_ptrtype const & getRepeatedMap() const { return M_repeatedMapEpetra; }
+    map_ptrtype const& getRepeatedMap() const
+    {
+        return M_repeatedMapEpetra;
+    }
 
     //! Getter for the unique map
-    map_ptrtype const & getUniqueMap()   const { return M_uniqueMapEpetra; }
+    map_ptrtype const& getUniqueMap()   const
+    {
+        return M_uniqueMapEpetra;
+    }
 
     //! Reset the internal unique map and recompute it using the repeated map
     void  uniqueMap();
@@ -350,7 +365,7 @@ private:
     /*!
       @param elements Epetra_IntSerialDenseVector vector to be sorted
      */
-    void  bubbleSort( Epetra_IntSerialDenseVector& elements );
+    void  bubbleSort ( Epetra_IntSerialDenseVector& elements );
 
     //@}
 

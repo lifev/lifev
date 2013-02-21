@@ -52,50 +52,60 @@ namespace LifeV
 
 
 template <class R>
-void MatMul( KNM_<R> & ab, KNM_<R> & a, KNM_<R> & b )
+void MatMul ( KNM_<R>& ab, KNM_<R>& a, KNM_<R>& b )
 {
     // attention ne marche que si les adresses ne sont pas les memes
     int N = a.shapei.n;
     int M = a.shapej.n;
-    K_assert( a.shapej.n == a.shapei.n );
-    K_assert( a.shapei.n == ab.shapei.n );
-    K_assert( b.shapej.n == ab.shapej.n );
-    K_assert( b.v != ab.v );
-    K_assert( a.v != ab.v );
-    KN_<R> ai = a( 0 );
+    K_assert ( a.shapej.n == a.shapei.n );
+    K_assert ( a.shapei.n == ab.shapei.n );
+    K_assert ( b.shapej.n == ab.shapej.n );
+    K_assert ( b.v != ab.v );
+    K_assert ( a.v != ab.v );
+    KN_<R> ai = a ( 0 );
     for ( int i = 1; i < N; i++, ++ai )
     {
         KN_<R> bj = b[ 0 ];
         for ( int j = 1; j < M; j++, ++bj )
-            ab( i, j ) = ( ai , bj ) ;
+        {
+            ab ( i, j ) = ( ai , bj ) ;
+        }
     }
 }
 
 
 
-inline std::ostream & operator<<( std::ostream & f, const ShapeOfArray & s )
+inline std::ostream& operator<< ( std::ostream& f, const ShapeOfArray& s )
 {
     f << s.n ;
     if ( s.step != 1 )
+    {
         f << ":" << s.step ;
+    }
     if ( s.step * s.n != s.next )
-        f << " n: " << std::setw( 3 ) << s.next ;
+    {
+        f << " n: " << std::setw ( 3 ) << s.next ;
+    }
     f << ",";
     return f;
 }
 
 template <class R>
-std::ostream & operator<<( std::ostream & f, const KN_<const_R> & v )
-{ //f <<  " KN_ : " << (ShapeOfArray) v << " "   <<  (const_R *) v << " :\n\t"  ;
+std::ostream& operator<< ( std::ostream& f, const KN_<const_R>& v )
+{
+    //f <<  " KN_ : " << (ShapeOfArray) v << " "   <<  (const_R *) v << " :\n\t"  ;
     f << v.N() << "\t:\t" ;
     for ( int i = 0; i < v.N(); i++ )
-        std::cout << std::setw( 3 ) << v[ i ] << ( ( i % 10 ) == 9 ? "\n\t" : "\t" );
+    {
+        std::cout << std::setw ( 3 ) << v[ i ] << ( ( i % 10 ) == 9 ? "\n\t" : "\t" );
+    }
     return f;
 }
 
 template <class R>
-std::ostream & operator<<( std::ostream & f, const KNM_<const_R> & v )
-{  //f << " KNM_ "<<v.N()<<"x"<<v.M()<< ": " << (ShapeOfArray) v
+std::ostream& operator<< ( std::ostream& f, const KNM_<const_R>& v )
+{
+    //f << " KNM_ "<<v.N()<<"x"<<v.M()<< ": " << (ShapeOfArray) v
     //<< " i "  << v.shapei
     // << " j "  << v.shapej
     // << " " << &v(0,0) << " :\n\t";
@@ -103,7 +113,9 @@ std::ostream & operator<<( std::ostream & f, const KNM_<const_R> & v )
     for ( int i = 0; i < v.N(); i++ )
     {
         for ( int j = 0; j < v.M(); j++ )
-            std::cout << " " << std::setw( 3 ) << v( i, j );
+        {
+            std::cout << " " << std::setw ( 3 ) << v ( i, j );
+        }
         std::cout << "\n\t";
     }
     return f;
@@ -111,8 +123,9 @@ std::ostream & operator<<( std::ostream & f, const KNM_<const_R> & v )
 }
 
 template <class R>
-std::ostream & operator<<( std::ostream & f, const KNMK_<const_R> & v )
-{ //f << " KNM_" <<v.N()<<"x"<<v.M()<<"x"<<v.K()<< " : " << (ShapeOfArray) v
+std::ostream& operator<< ( std::ostream& f, const KNMK_<const_R>& v )
+{
+    //f << " KNM_" <<v.N()<<"x"<<v.M()<<"x"<<v.K()<< " : " << (ShapeOfArray) v
     // << " i "  << v.shapei
     // << " j "  << v.shapej
     // << " k "  << v.shapek << std::endl;
@@ -123,7 +136,9 @@ std::ostream & operator<<( std::ostream & f, const KNMK_<const_R> & v )
         for ( int j = 0; j < v.shapej.n; j++ )
         {
             for ( int k = 0; k < v.shapek.n; k++ )
-                std::cout << " " << std::setw( 3 ) << v( i, j, k );
+            {
+                std::cout << " " << std::setw ( 3 ) << v ( i, j, k );
+            }
             std::cout << "\n\t";
         }
         std::cout << "\n\t";
@@ -133,14 +148,16 @@ std::ostream & operator<<( std::ostream & f, const KNMK_<const_R> & v )
 }
 
 template <class R>
-R KN_<R>::operator,( const KN_<const_R> & u ) const
+R KN_<R>::operator, ( const KN_<const_R>& u ) const
 {
-    K_assert( u.n == n );
+    K_assert ( u.n == n );
     double s = 0;
-    R * l( v );
-    R *r( u.v );
+    R* l ( v );
+    R* r ( u.v );
     for ( int i = 0; i < n; i++, l += step, r += u.step )
+    {
         s += *l * *r;
+    }
     return s;
 }
 
@@ -148,35 +165,41 @@ R KN_<R>::operator,( const KN_<const_R> & u ) const
 template <class R>
 R KN_<R>::KNMmin() const
 {
-    R minv = v[ index( 0 ) ];
+    R minv = v[ index ( 0 ) ];
     for ( int i = 1; i < n; i++ )
-        minv = minv < v[ index( i ) ] ? minv : v[ index( i ) ];
+    {
+        minv = minv < v[ index ( i ) ] ? minv : v[ index ( i ) ];
+    }
     return minv;
 }
 template <class R>
 R KN_<R>::KNMmax() const
 {
-    R maxv = v[ index( 0 ) ];
+    R maxv = v[ index ( 0 ) ];
     for ( int i = 1; i < n; i++ )
-        maxv = maxv > v[ index( i ) ] ? maxv : v[ index( i ) ];
+    {
+        maxv = maxv > v[ index ( i ) ] ? maxv : v[ index ( i ) ];
+    }
     return maxv;
 }
 
 template <class R>
 R KN_<R>::sum() const
 {
-    R s = v[ index( 0 ) ];
+    R s = v[ index ( 0 ) ];
     for ( int i = 1; i < n; i++ )
-        s += v[ index( i ) ];
+    {
+        s += v[ index ( i ) ];
+    }
     return s;
 }
 template <class R>
-KN_<R>& KN_<R>::map( R ( *f ) ( R ) )
+KN_<R>& KN_<R>::map ( R ( *f ) ( R ) )
 {
     for ( int i = 0; i < n; i++ )
     {
-        R & x( v[ index( i ) ] );
-        x = f( x );
+        R& x ( v[ index ( i ) ] );
+        x = f ( x );
     }
     return *this;
 }

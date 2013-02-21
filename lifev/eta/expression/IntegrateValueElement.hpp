@@ -68,14 +68,14 @@ class IntegrateValueElement
 {
 public:
 
-	//! @name Public Types
+    //! @name Public Types
     //@{
 
     //! Evaluation type
-	typedef typename ExpressionToEvaluation< ExpressionType,
-                                             0,
-                                             0,
-                                             3>::evaluation_Type evaluation_Type;
+    typedef typename ExpressionToEvaluation < ExpressionType,
+            0,
+            0,
+            3 >::evaluation_Type evaluation_Type;
 
     //@}
 
@@ -84,12 +84,12 @@ public:
     //@{
 
     //! Full data constructor
-	IntegrateValueElement(const boost::shared_ptr<MeshType>& mesh,
-                          const QuadratureRule& quadrature,
-                          const ExpressionType& expression);
+    IntegrateValueElement (const boost::shared_ptr<MeshType>& mesh,
+                           const QuadratureRule& quadrature,
+                           const ExpressionType& expression);
 
     //! Copy constructor
-	IntegrateValueElement( const IntegrateValueElement < MeshType, ExpressionType> & integrator);
+    IntegrateValueElement ( const IntegrateValueElement < MeshType, ExpressionType>& integrator);
 
     //! Destructor
     ~IntegrateValueElement();
@@ -101,9 +101,9 @@ public:
     //@{
 
     //! Operator wrapping the addTo method
-    inline void operator>>(Real& value)
+    inline void operator>> (Real& value)
     {
-        addTo(value);
+        addTo (value);
     }
 
     //@}
@@ -113,7 +113,7 @@ public:
     //@{
 
     //! Ouput method
-	void check(std::ostream& out = std::cout);
+    void check (std::ostream& out = std::cout);
 
     //! Method that performs the assembly
     /*!
@@ -122,7 +122,7 @@ public:
       performed: update the values, sum over the quadrature nodes,
       sum into the global value.
      */
-	void addTo(Real& value);
+    void addTo (Real& value);
 
     //@}
 
@@ -132,20 +132,20 @@ private:
     //@{
 
     //! No empty constructor
-	IntegrateValueElement();
+    IntegrateValueElement();
 
     //@}
 
     // Pointer on the mesh
-	boost::shared_ptr<MeshType> M_mesh;
+    boost::shared_ptr<MeshType> M_mesh;
 
     // Quadrature to be used
-	QuadratureRule M_quadrature;
+    QuadratureRule M_quadrature;
 
     // Tree to compute the values for the assembly
-	evaluation_Type M_evaluation;
+    evaluation_Type M_evaluation;
 
-	ETCurrentFE<3,1>* M_globalCFE;
+    ETCurrentFE<3, 1>* M_globalCFE;
 };
 
 
@@ -159,33 +159,33 @@ private:
 
 template < typename MeshType, typename ExpressionType>
 IntegrateValueElement < MeshType, ExpressionType>::
-IntegrateValueElement(const boost::shared_ptr<MeshType>& mesh,
-                      const QuadratureRule& quadrature,
-                      const ExpressionType& expression)
-	:	M_mesh(mesh),
-		M_quadrature(quadrature),
-		M_evaluation(expression),
+IntegrateValueElement (const boost::shared_ptr<MeshType>& mesh,
+                       const QuadratureRule& quadrature,
+                       const ExpressionType& expression)
+    :   M_mesh (mesh),
+        M_quadrature (quadrature),
+        M_evaluation (expression),
 
-		M_globalCFE(new ETCurrentFE<3,1>(feTetraP0,geometricMapFromMesh<MeshType>(),quadrature))
+        M_globalCFE (new ETCurrentFE<3, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), quadrature) )
 
 {
-    M_evaluation.setQuadrature(quadrature);
-    M_evaluation.setGlobalCFE(M_globalCFE);
+    M_evaluation.setQuadrature (quadrature);
+    M_evaluation.setGlobalCFE (M_globalCFE);
 }
 
 
 template < typename MeshType, typename ExpressionType>
 IntegrateValueElement < MeshType, ExpressionType>::
-IntegrateValueElement( const IntegrateValueElement < MeshType, ExpressionType> & integrator)
-	:	M_mesh(integrator.M_mesh),
-		M_quadrature(integrator.M_quadrature),
-		M_evaluation(integrator.M_evaluation),
+IntegrateValueElement ( const IntegrateValueElement < MeshType, ExpressionType>& integrator)
+    :   M_mesh (integrator.M_mesh),
+        M_quadrature (integrator.M_quadrature),
+        M_evaluation (integrator.M_evaluation),
 
-	  	M_globalCFE(new ETCurrentFE<3,1>(feTetraP0,geometricMapFromMesh<MeshType>(),M_quadrature))
+        M_globalCFE (new ETCurrentFE<3, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), M_quadrature) )
 
 {
-    M_evaluation.setQuadrature(M_quadrature);
-    M_evaluation.setGlobalCFE(M_globalCFE);
+    M_evaluation.setQuadrature (M_quadrature);
+    M_evaluation.setGlobalCFE (M_globalCFE);
 }
 
 
@@ -204,35 +204,35 @@ IntegrateValueElement < MeshType, ExpressionType>::
 template < typename MeshType, typename ExpressionType>
 void
 IntegrateValueElement < MeshType, ExpressionType>::
-check(std::ostream& out)
+check (std::ostream& out)
 {
     out << " Checking the integration : " << std::endl;
-    M_evaluation.display(out);
+    M_evaluation.display (out);
 }
 
 
 template < typename MeshType, typename ExpressionType>
 void
 IntegrateValueElement < MeshType, ExpressionType>::
-addTo(Real& value)
+addTo (Real& value)
 {
-    UInt nbElements(M_mesh->numElements());
-    UInt nbQuadPt(M_quadrature.nbQuadPt());
+    UInt nbElements (M_mesh->numElements() );
+    UInt nbQuadPt (M_quadrature.nbQuadPt() );
 
-    for (UInt iElement(0); iElement< nbElements; ++iElement)
+    for (UInt iElement (0); iElement < nbElements; ++iElement)
     {
         // Update the currentFEs
-        M_globalCFE->update(M_mesh->element(iElement),evaluation_Type::S_globalUpdateFlag | ET_UPDATE_WDET);
+        M_globalCFE->update (M_mesh->element (iElement), evaluation_Type::S_globalUpdateFlag | ET_UPDATE_WDET);
 
         // Update the evaluation
-        M_evaluation.update(iElement);
+        M_evaluation.update (iElement);
 
 
         // Make the assembly
-        for (UInt iQuadPt(0); iQuadPt< nbQuadPt; ++iQuadPt)
+        for (UInt iQuadPt (0); iQuadPt < nbQuadPt; ++iQuadPt)
         {
-            value += M_evaluation.value_q(iQuadPt)
-                * M_globalCFE->wDet(iQuadPt);
+            value += M_evaluation.value_q (iQuadPt)
+                     * M_globalCFE->wDet (iQuadPt);
         }
     }
 }

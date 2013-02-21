@@ -31,22 +31,28 @@ class link_check : public hypertext_inspector
     typedef std::map< string, int > m_path_map;
     m_path_map m_paths; // first() is relative initial_path()
 
-    void do_url( const string & url,
-                 const string & library_name, const path & full_source_path );
+    void do_url ( const string& url,
+                  const string& library_name, const path& full_source_path );
 public:
 
     link_check();
-    virtual const char * name() const { return "link-check"; }
-    virtual const char * desc() const { return "invalid bookmarks, invalid urls, broken links, unlinked files"; }
+    virtual const char* name() const
+    {
+        return "link-check";
+    }
+    virtual const char* desc() const
+    {
+        return "invalid bookmarks, invalid urls, broken links, unlinked files";
+    }
 
-    virtual void inspect(
-        const std::string & library_name,
-        const path & full_path );
+    virtual void inspect (
+        const std::string& library_name,
+        const path& full_path );
 
-    virtual void inspect(
-        const std::string & library_name,
-        const path & full_path,
-        const std::string & contents );
+    virtual void inspect (
+        const std::string& library_name,
+        const path& full_path,
+        const std::string& contents );
 
     virtual void close();
 

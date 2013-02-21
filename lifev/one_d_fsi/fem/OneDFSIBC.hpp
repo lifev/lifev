@@ -96,13 +96,13 @@ public:
     //@{
 
     //! Constructor
-    explicit OneDFSIBC( const bcSide_Type& bcSide );
+    explicit OneDFSIBC ( const bcSide_Type& bcSide );
 
     //! Copy constructor
     /*!
      * @param bc OneDFSIBC
      */
-    explicit OneDFSIBC( const OneDFSIBC& bc );
+    explicit OneDFSIBC ( const OneDFSIBC& bc );
 
     //! Destructor
     virtual ~OneDFSIBC() {}
@@ -121,8 +121,8 @@ public:
      *  @param fluxPtr pointer to the flux class.
      *  @param rhs the rhs of the Taylor-Galerking problem.
      */
-    void applyBC( const Real& time, const Real& timeStep, const solution_Type& solution,
-                  const fluxPtr_Type& fluxPtr, vectorPtrContainer_Type& rhs );
+    void applyBC ( const Real& time, const Real& timeStep, const solution_Type& solution,
+                   const fluxPtr_Type& fluxPtr, vectorPtrContainer_Type& rhs );
 
     //! Apply boundary conditions to the rhs of the viscoelastic problem
     /*!
@@ -130,7 +130,7 @@ public:
      *  @param matrix the matrix of the viscoelastic problem.
      *  @param rhs the rhs of the viscoelastic problem.
      */
-    void applyViscoelasticBC( const fluxPtr_Type& fluxPtr, matrix_Type& matrix, vector_Type& rhs );
+    void applyViscoelasticBC ( const fluxPtr_Type& fluxPtr, matrix_Type& matrix, vector_Type& rhs );
 
     //@}
 
@@ -143,14 +143,20 @@ public:
      *  @param bcLine the line of the boundary condition (first or second).
      *  @param bcType the type of the boundary condition (\f$Q\f$, \f$A\f$, \f$P\f$, \f$S\f$, \f$W_1\f$, \f$W_2\f$).
      */
-    void setType( const bcLine_Type& bcLine, const bcType_Type& bcType ) { M_bcType[bcLine] = bcType; }
+    void setType ( const bcLine_Type& bcLine, const bcType_Type& bcType )
+    {
+        M_bcType[bcLine] = bcType;
+    }
 
     //! Set the boundary condition function
     /*!
      *  @param bcLine the line of the boundary condition (first or second).
      *  @param bcFunction the boundary condition function.
      */
-    void setBCFunction( const bcLine_Type& bcLine, const bcFunction_Type& rhs ) { M_bcFunction[bcLine] = rhs; }
+    void setBCFunction ( const bcLine_Type& bcLine, const bcFunction_Type& rhs )
+    {
+        M_bcFunction[bcLine] = rhs;
+    }
 
     //@}
 
@@ -163,14 +169,20 @@ public:
      *  @param bcLine the line of the boundary condition (first or second).
      *  @return the type of the boundary condition (\f$Q\f$, \f$A\f$, \f$P\f$, \f$S\f$, \f$W_1\f$, \f$W_2\f$).
      */
-    const bcType_Type& type( const bcLine_Type& bcLine ) const { return M_bcType.find( bcLine )->second; }
+    const bcType_Type& type ( const bcLine_Type& bcLine ) const
+    {
+        return M_bcType.find ( bcLine )->second;
+    }
 
     //! Get the boundary condition function
     /*!
      *  @param bcLine the line of the boundary condition (first or second).
      *  @return the boundary condition function.
      */
-    const bcFunction_Type& bcFunction( const bcLine_Type& bcLine ) const { return M_bcFunction.find( bcLine )->second; }
+    const bcFunction_Type& bcFunction ( const bcLine_Type& bcLine ) const
+    {
+        return M_bcFunction.find ( bcLine )->second;
+    }
 
     //@}
 
@@ -179,7 +191,7 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    OneDFSIBC& operator=( const OneDFSIBC& bc );
+    OneDFSIBC& operator= ( const OneDFSIBC& bc );
 
     //@}
 
@@ -199,9 +211,9 @@ private:
      *  @param bcMatrix the 2x2 matrix problem for the boundary condition computation.
      *  @param bcRHS the rhs of the 2x2 problem for the boundary condition computation.
      */
-    void computeMatrixAndRHS( const Real& time, const Real& timeStep, const fluxPtr_Type& fluxPtr, const bcLine_Type& bcLine,
-                              const container2D_Type& leftEigenvector1, const container2D_Type& leftEigenvector2,
-                              const UInt& dof, std::map<bcLine_Type, container2D_Type>& bcMatrix, Real& bcRHS );
+    void computeMatrixAndRHS ( const Real& time, const Real& timeStep, const fluxPtr_Type& fluxPtr, const bcLine_Type& bcLine,
+                               const container2D_Type& leftEigenvector1, const container2D_Type& leftEigenvector2,
+                               const UInt& dof, std::map<bcLine_Type, container2D_Type>& bcMatrix, Real& bcRHS );
 
     //! Solve a 2x2 linear system by the Cramer method (for the boundary conditions)
     /*!
@@ -211,8 +223,8 @@ private:
      * @param rhs rhs of the 2x2 system.
      * @return solution
      */
-    container2D_Type solveLinearSystem( const container2D_Type& line1,
-                                        const container2D_Type& line2, const container2D_Type& rhs ) const;
+    container2D_Type solveLinearSystem ( const container2D_Type& line1,
+                                         const container2D_Type& line2, const container2D_Type& rhs ) const;
 
     //@}
 

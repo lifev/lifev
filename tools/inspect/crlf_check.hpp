@@ -23,16 +23,24 @@ class crlf_check : public source_inspector
 public:
 
     crlf_check();
-    virtual const char * name() const { return "crlf-check"; }
-    virtual const char * desc() const { return "invalid (cr only) line-ending"; }
+    virtual const char* name() const
+    {
+        return "crlf-check";
+    }
+    virtual const char* desc() const
+    {
+        return "invalid (cr only) line-ending";
+    }
 
-    virtual void inspect(
-        const std::string & library_name,
-        const path & full_path,
-        const std::string & contents );
+    virtual void inspect (
+        const std::string& library_name,
+        const path& full_path,
+        const std::string& contents );
 
     virtual ~crlf_check()
-    { std::cout << "  " << m_files_with_errors << " files with invalid line endings\n"; }
+    {
+        std::cout << "  " << m_files_with_errors << " files with invalid line endings\n";
+    }
 };
 }
 }

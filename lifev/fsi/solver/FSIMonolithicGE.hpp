@@ -72,8 +72,8 @@ namespace LifeV
  - DDBlockPrec: specifies the possible preconditioners to use. Can be: AdditiveSchwarz, MonolithicBlockComposedDN, MonolithicBlockComposedDN2,
  MonolithicBlockComposedNN, MonolithicBlockComposedDNND.
  */
-   typedef FactorySingleton<Factory<FSIOperator, std::string> >                    FSIFactory_Type;
-    class FSIMonolithicGE : public FSIMonolithic
+typedef FactorySingleton<Factory<FSIOperator, std::string> >                    FSIFactory_Type;
+class FSIMonolithicGE : public FSIMonolithic
 {
 public:
 
@@ -83,7 +83,7 @@ public:
     //@{
 
     //! Empty Constructor
-    FSIMonolithicGE():
+    FSIMonolithicGE() :
         super_Type()
     {}
 
@@ -102,7 +102,7 @@ public:
        Sets up the fluid, solid and harmonic extension finite element spaces and initializes most of the variables
        used in the solver
      */
-    void setupFluidSolid( UInt const fluxes );
+    void setupFluidSolid ( UInt const fluxes );
 
     //! setup of the dofs
     /** calls super_Type::setupDof and instantiate the boundary condition vector needed to couple fluid--structure and harmonic extention*/
@@ -124,7 +124,7 @@ public:
     /*!
      *  Set vectors for restart
      */
-    void setALEVectorInStencil(const vectorPtr_Type& fluidDisp, const UInt iter,const bool /*lastVector*/);
+    void setALEVectorInStencil (const vectorPtr_Type& fluidDisp, const UInt iter, const bool /*lastVector*/);
 
     /**
        evaluates the residual Ax-b
@@ -132,18 +132,18 @@ public:
        \param _sol: monolithic solution
        \param iter: current NonLinearRichardson (Newton) iteration
     */
-    void evalResidual( vector_Type& res, const vector_Type& sol, const UInt iter );
+    void evalResidual ( vector_Type& res, const vector_Type& sol, const UInt iter );
 
     /**
       iterates the mesh
       \param disp: monolithic solution
     */
-    void iterateMesh( const vector_Type& disp );
+    void iterateMesh ( const vector_Type& disp );
 
     //! Applies the bounsary conditions to the matrix
     void applyBoundaryConditions();
 
-    void updateSolution( const vector_Type& solution );
+    void updateSolution ( const vector_Type& solution );
 
     //@}
 
@@ -152,31 +152,34 @@ public:
     //@{
 
     //! Gets the solution
-    LIFEV_DEPRECATED( const vector_Type& solution() const )
+    LIFEV_DEPRECATED ( const vector_Type& solution() const )
     {
         if ( M_epetraWorldComm->MyPID() == 0 )
         {
             std::cerr << std::endl << "Warning: FSIMonolithic::solution() is deprecated!" << std::endl
-                                   << "         You should not access the solution inside FSIOperator or FSIMonolithic!" << std::endl;
+                      << "         You should not access the solution inside FSIOperator or FSIMonolithic!" << std::endl;
         }
 
-        return  M_fluidTimeAdvance->singleElement(0);
+        return  M_fluidTimeAdvance->singleElement (0);
     }
 
     //@}
 
 
     //! Factory method
-    static FSIOperator* instantiate(){ return new FSIMonolithicGE(); }
+    static FSIOperator* instantiate()
+    {
+        return new FSIMonolithicGE();
+    }
 
 private:
 
     //!@name Private Methods
     //@{
 
-    void createOperator( std::string& operType )
+    void createOperator ( std::string& operType )
     {
-        M_monolithicMatrix.reset(MonolithicBlockMatrix::Factory_Type::instance().createObject( operType ));
+        M_monolithicMatrix.reset (MonolithicBlockMatrix::Factory_Type::instance().createObject ( operType ) );
     }
 
     //@}

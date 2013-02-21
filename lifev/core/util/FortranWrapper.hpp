@@ -101,14 +101,14 @@ public:
     //! @name Constructors and destructor
     //@{
     FortranMatrix() {}
-    FortranMatrix( size_t dim1, size_t dim2 = 1 );
-    FortranMatrix( ScalarType* cppArray, size_t dim1, size_t dim2 = 1 );
+    FortranMatrix ( size_t dim1, size_t dim2 = 1 );
+    FortranMatrix ( ScalarType* cppArray, size_t dim1, size_t dim2 = 1 );
     virtual ~FortranMatrix();
     //@}
 
     //! @name Operators
     //@{
-    operator ScalarType*();
+    operator ScalarType* ();
     ScalarType& operator() ( size_t index1, size_t index2 = 0 ); // numbering from 0
     //@}
 
@@ -155,21 +155,21 @@ public:
     //! @name Constructors and destructor
     //@{
     FortranCharacterString() {}
-    FortranCharacterString( char* cstring );
-    FortranCharacterString( char* cstring, const size_t stringLength );
+    FortranCharacterString ( char* cstring );
+    FortranCharacterString ( char* cstring, const size_t stringLength );
     virtual ~FortranCharacterString();
     //@}
 
     //! @name Operators
     //@{
     FortranCharacterString operator() ( size_t index );
-    void operator=( char* str );
-    operator char*();
+    void operator= ( char* str );
+    operator char* ();
     //@}
 
     //! @name Methods
     //@{
-    void pad( size_t first, size_t paddingSize = 1 );
+    void pad ( size_t first, size_t paddingSize = 1 );
     //@}
 
 public:
@@ -186,10 +186,10 @@ public:
 // =======================================
 
 template <class ScalarType>
-FortranMatrix<ScalarType>::FortranMatrix( size_t dim1, size_t dim2 ):
-    M_cppRepresentation( NULL ),
-    M_fortranRepresentation( new ScalarType[ dim1*dim2 ] ),
-    M_numDimensions( 2 )
+FortranMatrix<ScalarType>::FortranMatrix ( size_t dim1, size_t dim2 ) :
+    M_cppRepresentation ( NULL ),
+    M_fortranRepresentation ( new ScalarType[ dim1* dim2 ] ),
+    M_numDimensions ( 2 )
 {
     M_arrayDimensions[ 0 ] = dim1;
     M_arrayDimensions[ 1 ] = dim2;
@@ -201,10 +201,10 @@ FortranMatrix<ScalarType>::FortranMatrix( size_t dim1, size_t dim2 ):
 }
 
 template <class ScalarType>
-FortranMatrix<ScalarType>::FortranMatrix( ScalarType* cppArray, size_t dim1, size_t dim2 ):
-    M_cppRepresentation( cppArray ),
-    M_fortranRepresentation( new ScalarType[ dim1*dim2 ] ),
-    M_numDimensions( 2 )
+FortranMatrix<ScalarType>::FortranMatrix ( ScalarType* cppArray, size_t dim1, size_t dim2 ) :
+    M_cppRepresentation ( cppArray ),
+    M_fortranRepresentation ( new ScalarType[ dim1* dim2 ] ),
+    M_numDimensions ( 2 )
 {
     M_arrayDimensions[ 0 ] = dim1;
     M_arrayDimensions[ 1 ] = dim2;
@@ -232,7 +232,7 @@ FortranMatrix<ScalarType>::~FortranMatrix()
 {
     if ( M_cppRepresentation )
     {
-        assert( M_numDimensions == 2 ); // only 2d arrays supported (so far)
+        assert ( M_numDimensions == 2 ); // only 2d arrays supported (so far)
         // copy back from FORTRAN to C++ array
         size_t index_cpp;
         size_t index_f77 = 0;
@@ -254,7 +254,7 @@ FortranMatrix<ScalarType>::~FortranMatrix()
 // ============================
 
 template <class ScalarType>
-FortranMatrix<ScalarType>::operator ScalarType*()
+FortranMatrix<ScalarType>::operator ScalarType* ()
 {
     // Pass the FORTRAN representation when calling a function
     return M_fortranRepresentation;
@@ -263,43 +263,50 @@ FortranMatrix<ScalarType>::operator ScalarType*()
 template <class ScalarType>
 ScalarType& FortranMatrix<ScalarType>::operator() ( size_t index1, size_t index2 )
 {
-    assert( M_numDimensions == 2 ); // only 2d arrays supported (so far)
+    assert ( M_numDimensions == 2 ); // only 2d arrays supported (so far)
     // indexing according to F77 conventions
     size_t index_f77 = index2 * M_arrayDimensions[ 0 ] + index1;
     // return a reference to the array element
-    return *( M_fortranRepresentation + index_f77 );
+    return * ( M_fortranRepresentation + index_f77 );
 }
 
 // =======================================
 // FortranCharacterString Constructors and destructor
 // =======================================
 
-inline FortranCharacterString::FortranCharacterString( char* cstring ):
-    M_representation( cstring ),
-    M_length( strlen( cstring ) )
+inline FortranCharacterString::FortranCharacterString ( char* cstring ) :
+    M_representation ( cstring ),
+    M_length ( strlen ( cstring ) )
 {}
 
-inline FortranCharacterString::FortranCharacterString( char* cstring, const size_t stringLength ):
-    M_representation( cstring ),
-    M_length( stringLength )
+inline FortranCharacterString::FortranCharacterString ( char* cstring, const size_t stringLength ) :
+    M_representation ( cstring ),
+    M_length ( stringLength )
 {
     // find position from where to start padding
-    size_t slen = strlen( M_representation ); // upper limit
+    size_t slen = strlen ( M_representation ); // upper limit
     size_t actual = ( slen < M_length ) ? slen : M_length; // actual <= M_length.
     for ( size_t i = actual; i < M_length; i++ )
-        M_representation[ i ] = ' '; // Do the padding.
+    {
+        M_representation[ i ] = ' ';    // Do the padding.
+    }
 }
 
 inline FortranCharacterString::~FortranCharacterString()
 {
     if ( M_representation[ M_length ] == '\0' )
-        return ; // catches string constants
+    {
+        return ;    // catches string constants
+    }
     for ( int i = M_length - 1; i >= 0; i-- )
     {
         if ( M_representation[ i ] == '\0' )
-            break; // already zero terminated
+        {
+            break;    // already zero terminated
+        }
         if ( M_representation[ i ] != ' ' )
-        { // non-blank discovered, so
+        {
+            // non-blank discovered, so
             M_representation[ i + 1 ] = '\0'; // zero-terminate and jump out
             break;
         }
@@ -315,21 +322,23 @@ inline FortranCharacterString FortranCharacterString::operator() ( size_t index 
     // Construct a temporary FortranCharacterString object for the array element
     // identified by "index" in order to zero-terminate that element
     size_t pos = index * M_length; // start pos of array element
-    FortranCharacterString element( M_representation + pos, M_length ); // construct new FortranCharacterString.
+    FortranCharacterString element ( M_representation + pos, M_length ); // construct new FortranCharacterString.
     return element; // destructor called here.
 }
 
-inline void FortranCharacterString::operator=( char* str )
+inline void FortranCharacterString::operator= ( char* str )
 {
-    strncpy( M_representation, str, M_length ); // this will copy a zero if str < rep
+    strncpy ( M_representation, str, M_length ); // this will copy a zero if str < rep
     M_representation[ M_length - 1 ] = '\0'; // zero terminate in case strncpy did not
-    size_t slen = strlen( M_representation ); // upper limit
+    size_t slen = strlen ( M_representation ); // upper limit
     size_t actual = ( slen < M_length ) ? slen : M_length; // actual <= M_length.
     for ( size_t i = actual; i < M_length; i++ )
-        M_representation[ i ] = ' '; // Do the padding.
+    {
+        M_representation[ i ] = ' ';    // Do the padding.
+    }
 }
 
-inline FortranCharacterString::operator char*()
+inline FortranCharacterString::operator char* ()
 {
     return M_representation;
 }
@@ -338,16 +347,18 @@ inline FortranCharacterString::operator char*()
 // FortranCharacterString Methods
 // ================================
 
-inline void FortranCharacterString::pad( size_t first, size_t paddingSize )
+inline void FortranCharacterString::pad ( size_t first, size_t paddingSize )
 {
     size_t pos = 0, i = 0, stop = first + paddingSize - 1;
     for ( size_t index = first; index <= stop; index++ )
     {
         pos = index * M_length;
-        size_t slen = strlen( M_representation + pos ); // upper limit
+        size_t slen = strlen ( M_representation + pos ); // upper limit
         size_t actual = ( slen < M_length ) ? slen : M_length;
         for ( i = pos + actual; i < pos + M_length; i++ )
-            M_representation[ i ] = ' '; // Do the padding.
+        {
+            M_representation[ i ] = ' ';    // Do the padding.
+        }
     }
 }
 

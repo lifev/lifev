@@ -81,7 +81,7 @@ public:
     //! @name Public Types
     //@{
 
-    typedef boost::function<Real ( const Real&, const Real&, const Real&, const Real&, const ID& )> function_Type;
+    typedef boost::function<Real ( const Real&, const Real&, const Real&, const Real&, const ID& ) > function_Type;
     typedef boost::shared_ptr<BCFunctionBase> BCFunctionBasePtr_Type;
 
     //@}
@@ -99,13 +99,13 @@ public:
     /*!
       @param userDefinedFunction the user defined function
     */
-    BCFunctionBase( function_Type userDefinedFunction );
+    BCFunctionBase ( function_Type userDefinedFunction );
 
     //! Copy Constructor
     /*!
       @param bcFunctionBase The BCFunctionBase
     */
-    BCFunctionBase( const BCFunctionBase& bcFunctionBase );
+    BCFunctionBase ( const BCFunctionBase& bcFunctionBase );
 
 
     //! Destructor
@@ -121,7 +121,7 @@ public:
         @param bcFunctionBase The BCFunctionBase
         @return Reference to a new BCFunctionBase object with the same content of bcFunctionBase
      */
-    virtual BCFunctionBase& operator=( const BCFunctionBase& bcFunctionBase );
+    virtual BCFunctionBase& operator= ( const BCFunctionBase& bcFunctionBase );
 
 
     //! Overloading function operator by calling M_userDefinedFunction
@@ -135,7 +135,9 @@ public:
     */
     inline Real operator() ( const Real& t, const Real& x, const Real& y,
                              const Real& z, const ID& component ) const
-    { return M_userDefinedFunction( t, x, y, z, component ); }
+    {
+        return M_userDefinedFunction ( t, x, y, z, component );
+    }
 
     //@}
 
@@ -147,7 +149,10 @@ public:
     /*!
       @param userDefinedFunction the user defined function
     */
-    inline void setFunction( function_Type userDefinedFunction ) {M_userDefinedFunction = userDefinedFunction;}
+    inline void setFunction ( function_Type userDefinedFunction )
+    {
+        M_userDefinedFunction = userDefinedFunction;
+    }
 
     //@}
 
@@ -158,7 +163,10 @@ public:
     /*!
       @return Reference to M_userDefinedFunction
     */
-    inline const function_Type& Function() const {return M_userDefinedFunction;}
+    inline const function_Type& Function() const
+    {
+        return M_userDefinedFunction;
+    }
 
     //@}
 
@@ -169,11 +177,11 @@ public:
     /*!
       @return Pointer to the cloned object
     */
-   virtual BCFunctionBasePtr_Type clone() const
-   {
-       BCFunctionBasePtr_Type copy ( new BCFunctionBase( M_userDefinedFunction ) );
-       return copy;
-   }
+    virtual BCFunctionBasePtr_Type clone() const
+    {
+        BCFunctionBasePtr_Type copy ( new BCFunctionBase ( M_userDefinedFunction ) );
+        return copy;
+    }
 
     //@}
 
@@ -246,14 +254,14 @@ public:
       @param rightHandSideFunction The user defined function for @c f
       @param massTermFunction The user defined function for @c coeff
     */
-    BCFunctionRobin( const function_Type& rightHandSideFunction, const function_Type& massTermFunction  );
+    BCFunctionRobin ( const function_Type& rightHandSideFunction, const function_Type& massTermFunction  );
 
 
     //! Copy Constructor
     /*!
       @param bcFunctionUDepRobin The BCFunctionRobin object
     */
-    BCFunctionRobin( const BCFunctionRobin& bcFunctionUDepRobin );
+    BCFunctionRobin ( const BCFunctionRobin& bcFunctionUDepRobin );
 
     //! Destructor
     virtual ~BCFunctionRobin() {}
@@ -270,7 +278,7 @@ public:
       @return Reference to a new BCFunctionRobin object which is a copy of bcFunctionMixt
     */
     BCFunctionRobin&
-    operator=( const BCFunctionRobin& bcFunctionUDepRobin );
+    operator= ( const BCFunctionRobin& bcFunctionUDepRobin );
 
 
     //@}
@@ -284,7 +292,7 @@ public:
     */
     BCFunctionBase::BCFunctionBasePtr_Type clone() const
     {
-        BCFunctionBase::BCFunctionBasePtr_Type copy ( new BCFunctionRobin( M_userDefinedFunction, M_robinBoundaryMassCoeffFunction ) );
+        BCFunctionBase::BCFunctionBasePtr_Type copy ( new BCFunctionRobin ( M_userDefinedFunction, M_robinBoundaryMassCoeffFunction ) );
         return copy;
     }
 
@@ -297,9 +305,11 @@ public:
       @param component component of the vector function
       @return selected component of the user defined for @ coeff evaluated in (t,x,y,z)
     */
-    Real coef( const Real& t, const Real& x, const Real& y,
-               const Real& z, const ID& component ) const
-    { return M_robinBoundaryMassCoeffFunction(t, x, y, z, component); }
+    Real coef ( const Real& t, const Real& x, const Real& y,
+                const Real& z, const ID& component ) const
+    {
+        return M_robinBoundaryMassCoeffFunction (t, x, y, z, component);
+    }
 
     //@}
 
@@ -313,7 +323,7 @@ public:
       @param rightHandSideFunction The user defined function for @c f
       @param massTermFunction The user defined function for @c coeff
     */
-    void setFunctions_Robin( const function_Type& rightHandSideFunction, const function_Type& massCoeffFunction );
+    void setFunctions_Robin ( const function_Type& rightHandSideFunction, const function_Type& massCoeffFunction );
 
     //@}
 
@@ -326,7 +336,10 @@ public:
     /*!
       @return user defined function for @c coeff
     */
-    inline const function_Type& Functions_Robin() const {return M_robinBoundaryMassCoeffFunction;}
+    inline const function_Type& Functions_Robin() const
+    {
+        return M_robinBoundaryMassCoeffFunction;
+    }
 
     //@}
 
@@ -371,7 +384,7 @@ public:
     //! @name Public Types
     //@{
 
-    typedef boost::function<Real ( const Real&, const Real&, const Real&, const Real&, const ID&, const Real& )> function_Type;
+    typedef boost::function<Real ( const Real&, const Real&, const Real&, const Real&, const ID&, const Real& ) > function_Type;
     typedef boost::shared_ptr<BCFunctionUDepBase> BCFunctionUDepBasePtr_Type;
 
     //@}
@@ -386,14 +399,14 @@ public:
     /*!
       @param userDefinedFunction the user defined function
     */
-    BCFunctionUDepBase(const function_Type& userDefinedFunction );
+    BCFunctionUDepBase (const function_Type& userDefinedFunction );
 
 
     //! Copy Constructor
     /*!
       @param bcFunctionBase The BCFunctionBase
     */
-    BCFunctionUDepBase(const BCFunctionUDepBase& bcFunctionUDepBase );
+    BCFunctionUDepBase (const BCFunctionUDepBase& bcFunctionUDepBase );
 
 
     //! Destructor
@@ -408,7 +421,7 @@ public:
         @param bcFunctionUDepBase The BCFunctionUDepBase
         @return Reference to a new BCFunctionUDepBase object with the same content of bcFunctionUDepBase
      */
-    virtual BCFunctionUDepBase& operator=( const BCFunctionUDepBase& bcFunctionUDepBase);
+    virtual BCFunctionUDepBase& operator= ( const BCFunctionUDepBase& bcFunctionUDepBase);
 
 
     //! Overloading function operator by calling M_userDefinedFunction
@@ -421,9 +434,11 @@ public:
       @param feVectorEvaluatedInThisPoint The FE vector evaluated in the point (x, y, z) at time t.
       @return The selected component of the user defined function evaluated in (t,x,y,z)
     */
-    inline Real operator()(const Real& t, const Real& x, const Real& y,
-                           const Real& z, const ID& component, const Real& feVectorEvaluatedInThisPoint ) const
-    { return M_userDefinedFunction( t, x, y, z, component, feVectorEvaluatedInThisPoint ); }
+    inline Real operator() (const Real& t, const Real& x, const Real& y,
+                            const Real& z, const ID& component, const Real& feVectorEvaluatedInThisPoint ) const
+    {
+        return M_userDefinedFunction ( t, x, y, z, component, feVectorEvaluatedInThisPoint );
+    }
 
     //@}
 
@@ -436,7 +451,7 @@ public:
     */
     virtual BCFunctionUDepBasePtr_Type clone() const
     {
-        BCFunctionUDepBasePtr_Type copy ( new BCFunctionUDepBase( M_userDefinedFunction ) );
+        BCFunctionUDepBasePtr_Type copy ( new BCFunctionUDepBase ( M_userDefinedFunction ) );
         return copy;
     }
 
@@ -450,7 +465,10 @@ public:
     /*!
       @param userDefinedFunction the user defined function
     */
-    inline void setFunction(const function_Type& userDefinedFunction ) { M_userDefinedFunction = userDefinedFunction;}
+    inline void setFunction (const function_Type& userDefinedFunction )
+    {
+        M_userDefinedFunction = userDefinedFunction;
+    }
 
     //@}
 
@@ -463,7 +481,10 @@ public:
     /*!
       @return Reference to M_userDefinedFunction
     */
-    inline const function_Type& Function() const {return M_userDefinedFunction;}
+    inline const function_Type& Function() const
+    {
+        return M_userDefinedFunction;
+    }
 
     //@}
 
@@ -528,14 +549,14 @@ public:
       @param rightHandSideFunction The user defined function for f
       @param massTermFunction The user defined function for coeff
     */
-    BCFunctionUDepRobin( const function_Type& rightHandSideFunction, const function_Type& massTermFunction  );
+    BCFunctionUDepRobin ( const function_Type& rightHandSideFunction, const function_Type& massTermFunction  );
 
 
     //! Copy Constructor
     /*!
       @param bcFunctionUDepRobin The BCFunctionUDepRobin object
     */
-    BCFunctionUDepRobin( const BCFunctionUDepRobin& bcFunctionUDepRobin );
+    BCFunctionUDepRobin ( const BCFunctionUDepRobin& bcFunctionUDepRobin );
 
 
     //! Destructor
@@ -555,7 +576,7 @@ public:
       @return Reference to a new BCFunctionUDepRobin object which is a copy of bcFunctionMixt
     */
     BCFunctionUDepRobin&
-    operator=( const BCFunctionUDepRobin& bcFunctionUDepRobin );
+    operator= ( const BCFunctionUDepRobin& bcFunctionUDepRobin );
 
 
     //@}
@@ -570,7 +591,7 @@ public:
     */
     BCFunctionUDepBase::BCFunctionUDepBasePtr_Type clone() const
     {
-        BCFunctionUDepBase::BCFunctionUDepBasePtr_Type copy ( new BCFunctionUDepRobin( M_userDefinedFunction, M_robinBoundaryMassCoeffFunction ) );
+        BCFunctionUDepBase::BCFunctionUDepBasePtr_Type copy ( new BCFunctionUDepRobin ( M_userDefinedFunction, M_robinBoundaryMassCoeffFunction ) );
         return copy;
     }
 
@@ -584,9 +605,11 @@ public:
       @param feVectorEvaluatedInThisPoint The FE vector evaluated in the point (x, y, z) at time t.
       @return selected component of the user defined for @c coeff evaluated in (t,x,y,z)
     */
-    Real coef( const Real& t, const Real& x, const Real& y,
-               const Real& z, const ID& component, const Real& feVectorEvaluatedInThisPoint ) const
-    { return M_robinBoundaryMassCoeffFunction(t, x, y, z, component, feVectorEvaluatedInThisPoint); }
+    Real coef ( const Real& t, const Real& x, const Real& y,
+                const Real& z, const ID& component, const Real& feVectorEvaluatedInThisPoint ) const
+    {
+        return M_robinBoundaryMassCoeffFunction (t, x, y, z, component, feVectorEvaluatedInThisPoint);
+    }
 
 
     ///@}
@@ -601,7 +624,7 @@ public:
       @param rightHandSideFunction The user defined function for f
       @param massTermFunction The user defined function for @c coeff
     */
-    void setFunctions_Robin( const function_Type& rightHandSideFunction, const function_Type& massCoeffFunction );
+    void setFunctions_Robin ( const function_Type& rightHandSideFunction, const function_Type& massCoeffFunction );
 
     //@}
 
@@ -614,7 +637,10 @@ public:
     /*!
       @return user defined function for @c coeff
     */
-    inline const function_Type& Functions_Robin() const {return M_robinBoundaryMassCoeffFunction;}
+    inline const function_Type& Functions_Robin() const
+    {
+        return M_robinBoundaryMassCoeffFunction;
+    }
 
     //@}
 
@@ -655,8 +681,8 @@ private:
   */
 
 class BCFunctionDirectional
-        :
-        public BCFunctionBase
+    :
+public BCFunctionBase
 {
 public:
 
@@ -682,13 +708,13 @@ public:
       @param userDefinedFunctional The user defined function
       @param userDefinedVersorsFunction user defined function for returning versors along which the essential boundary condition will be prescribed
     */
-    BCFunctionDirectional( const function_Type& userDefinedFunctional, const function_Type& userDefinedVersorsFunction );
+    BCFunctionDirectional ( const function_Type& userDefinedFunctional, const function_Type& userDefinedVersorsFunction );
 
     //! Copy Constructor
     /*!
       @param bcFunctionDirectional The BCFunctionDirectional
     */
-    BCFunctionDirectional( const BCFunctionDirectional& bcFunctionDirectional );
+    BCFunctionDirectional ( const BCFunctionDirectional& bcFunctionDirectional );
 
     virtual ~BCFunctionDirectional() {}
 
@@ -704,7 +730,7 @@ public:
       @return Reference to a new BCFunctionDirectional object which is a copy of bcFunctionDirectional
     */
     BCFunctionDirectional&
-    operator=( const BCFunctionDirectional& bcFunctionDirectional );
+    operator= ( const BCFunctionDirectional& bcFunctionDirectional );
 
 
     //@}
@@ -722,9 +748,11 @@ public:
       \param component The component of the vectors function
       \return The selected component of the versors' function evaluated in (t,x,y,z)
     */
-    inline Real vectFct( const Real& t, const Real& x, const Real& y,
-                         const Real& z, const ID& component ) const
-    { return M_userDefinedVersorsFunction(t, x, y, z, component); }
+    inline Real vectFct ( const Real& t, const Real& x, const Real& y,
+                          const Real& z, const ID& component ) const
+    {
+        return M_userDefinedVersorsFunction (t, x, y, z, component);
+    }
 
     //@}
 
@@ -739,7 +767,7 @@ public:
        @param userDefinedFunctional User defined function
        @param userDefinedVersorsFunction User defined function for returning versors along which the essential boundary condition will be prescribed
     */
-    void setFunctions_Directional( const function_Type& userDefinedFunctional, const function_Type& userDefinedVersorsFunction );
+    void setFunctions_Directional ( const function_Type& userDefinedFunctional, const function_Type& userDefinedVersorsFunction );
 
     //@}
 
@@ -752,7 +780,10 @@ public:
     /*!
       @return User defined function for returning versors along which the essential boundary condition will be prescribed
     */
-    inline const function_Type& Functions_Directional() const { return M_userDefinedVersorsFunction; }
+    inline const function_Type& Functions_Directional() const
+    {
+        return M_userDefinedVersorsFunction;
+    }
 
     //@}
 

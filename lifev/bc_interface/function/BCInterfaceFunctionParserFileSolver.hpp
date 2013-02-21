@@ -57,7 +57,7 @@ namespace LifeV
  */
 template< class PhysicalSolverType >
 class BCInterfaceFunctionParserFileSolver: public virtual BCInterfaceFunctionParserFile< PhysicalSolverType > ,
-                                           public virtual BCInterfaceFunctionParserSolver< PhysicalSolverType >
+    public virtual BCInterfaceFunctionParserSolver< PhysicalSolverType >
 {
 public:
 
@@ -92,19 +92,19 @@ public:
     /*!
      * @param data boundary condition data loaded from \c GetPot file
      */
-    virtual void setData( const BCInterfaceData0D& data );
+    virtual void setData ( const BCInterfaceData0D& data );
 
     //! Set data for 1D boundary conditions
     /*!
      * @param data boundary condition data loaded from \c GetPot file
      */
-    virtual void setData( const BCInterfaceData1D& data );
+    virtual void setData ( const BCInterfaceData1D& data );
 
     //! Set data for 3D boundary conditions
     /*!
      * @param data boundary condition data loaded from \c GetPot file
      */
-    virtual void setData( const BCInterfaceData3D& data );
+    virtual void setData ( const BCInterfaceData3D& data );
 
     //@}
 
@@ -113,9 +113,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    BCInterfaceFunctionParserFileSolver( const BCInterfaceFunctionParserFileSolver& function );
+    BCInterfaceFunctionParserFileSolver ( const BCInterfaceFunctionParserFileSolver& function );
 
-    BCInterfaceFunctionParserFileSolver& operator=( const BCInterfaceFunctionParserFileSolver& function );
+    BCInterfaceFunctionParserFileSolver& operator= ( const BCInterfaceFunctionParserFileSolver& function );
 
     //@}
 
@@ -136,14 +136,14 @@ inline BCInterfaceFunctionParser< PhysicalSolverType >* createBCInterfaceFunctio
 // ===================================================
 template< class PhysicalSolverType >
 BCInterfaceFunctionParserFileSolver< PhysicalSolverType >::BCInterfaceFunctionParserFileSolver() :
-        function_Type                (),
-        functionParser_Type          (),
-        functionParserFile_Type      (),
-        functionParserSolver_Type    ()
+    function_Type                (),
+    functionParser_Type          (),
+    functionParserFile_Type      (),
+    functionParserSolver_Type    ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 5024 ) << "BCInterfaceFunctionFileSolver::BCInterfaceFunctionFileSolver()" << "\n";
+    debugStream ( 5024 ) << "BCInterfaceFunctionFileSolver::BCInterfaceFunctionFileSolver()" << "\n";
 #endif
 
 }
@@ -153,50 +153,50 @@ BCInterfaceFunctionParserFileSolver< PhysicalSolverType >::BCInterfaceFunctionPa
 // ===================================================
 template< class PhysicalSolverType >
 void
-BCInterfaceFunctionParserFileSolver< PhysicalSolverType >::setData( const BCInterfaceData0D& data )
+BCInterfaceFunctionParserFileSolver< PhysicalSolverType >::setData ( const BCInterfaceData0D& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 5024 ) << "BCInterfaceFunctionFileSolver::setData" << "\n";
+    debugStream ( 5024 ) << "BCInterfaceFunctionFileSolver::setData" << "\n";
 #endif
-    functionParserFile_Type::setData( data );
+    functionParserFile_Type::setData ( data );
 
     //functionParserSolver_Type::setData( data ); Cannot call directly, because it call again BCInterfaceFunctionParser::setup( data )
     functionParserSolver_Type::M_flag = data.flag();
 
-    functionParserSolver_Type::createAccessList( data );
+    functionParserSolver_Type::createAccessList ( data );
 }
 
 template< class PhysicalSolverType >
 void
-BCInterfaceFunctionParserFileSolver< PhysicalSolverType >::setData( const BCInterfaceData1D& data )
+BCInterfaceFunctionParserFileSolver< PhysicalSolverType >::setData ( const BCInterfaceData1D& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 5024 ) << "BCInterfaceFunctionFileSolver::setData" << "\n";
+    debugStream ( 5024 ) << "BCInterfaceFunctionFileSolver::setData" << "\n";
 #endif
-    functionParserFile_Type::setData( data );
+    functionParserFile_Type::setData ( data );
 
     //functionParserSolver_Type::setData( data ); Cannot call directly, because it call again BCInterfaceFunctionParser::setup( data )
     functionParserSolver_Type::M_side = data.side();
 
-    functionParserSolver_Type::createAccessList( data );
+    functionParserSolver_Type::createAccessList ( data );
 }
 
 template< class PhysicalSolverType >
 void
-BCInterfaceFunctionParserFileSolver< PhysicalSolverType >::setData( const BCInterfaceData3D& data )
+BCInterfaceFunctionParserFileSolver< PhysicalSolverType >::setData ( const BCInterfaceData3D& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 5024 ) << "BCInterfaceFunctionFileSolver::setData" << "\n";
+    debugStream ( 5024 ) << "BCInterfaceFunctionFileSolver::setData" << "\n";
 #endif
-    functionParserFile_Type::setData( data );
+    functionParserFile_Type::setData ( data );
 
     //functionParserSolver_Type::setData( data ); Cannot call directly, because it call again BCInterfaceFunctionParser::setup( data )
     functionParserSolver_Type::M_flag = data.flag();
 
-    functionParserSolver_Type::createAccessList( data );
+    functionParserSolver_Type::createAccessList ( data );
 }
 
 } // Namespace LifeV

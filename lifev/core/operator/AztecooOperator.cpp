@@ -41,36 +41,40 @@ namespace LifeV
 namespace Operators
 {
 
-AztecooOperator::AztecooOperator():
-		SolverOperator(),
-		M_linSolver( new SolverType )
+AztecooOperator::AztecooOperator() :
+    SolverOperator(),
+    M_linSolver ( new SolverType )
 {
-	M_name = "AztecOOOperator";
+    M_name = "AztecOOOperator";
 }
 
 int
-AztecooOperator::doApplyInverse( const vector_Type& X, vector_Type& Y ) const
+AztecooOperator::doApplyInverse ( const vector_Type& X, vector_Type& Y ) const
 {
     M_numIterations = 0;
 
-	vector_Type Xcopy( X );
-	Y.PutScalar( 0.0 );
-	if( M_tolerance > 0 )
-	    M_pList->sublist( "Trilinos: AztecOO List" ).set( "tol", M_tolerance );
-	M_linSolver->SetParameters( M_pList->sublist( "Trilinos: AztecOO List" ) );
-	M_linSolver->SetRHS( &Xcopy );
-	M_linSolver->SetLHS( &Y );
+    vector_Type Xcopy ( X );
+    Y.PutScalar ( 0.0 );
+    if ( M_tolerance > 0 )
+    {
+        M_pList->sublist ( "Trilinos: AztecOO List" ).set ( "tol", M_tolerance );
+    }
+    M_linSolver->SetParameters ( M_pList->sublist ( "Trilinos: AztecOO List" ) );
+    M_linSolver->SetRHS ( &Xcopy );
+    M_linSolver->SetLHS ( &Y );
 
-    M_linSolver->SetUserOperator( M_oper.get() );
+    M_linSolver->SetUserOperator ( M_oper.get() );
 
-    if( M_prec.get() != 0 )
-        M_linSolver->SetPrecOperator( (Epetra_Operator*) M_prec.get() );
+    if ( M_prec.get() != 0 )
+    {
+        M_linSolver->SetPrecOperator ( (Epetra_Operator*) M_prec.get() );
+    }
 
-	int maxIter( M_pList->sublist( "Trilinos: AztecOO List" ).get<int>( "max_iter" ) );
-	double tol(  M_pList->sublist( "Trilinos: AztecOO List" ).get<double>( "tol" ) );
+    int maxIter ( M_pList->sublist ( "Trilinos: AztecOO List" ).get<int> ( "max_iter" ) );
+    double tol (  M_pList->sublist ( "Trilinos: AztecOO List" ).get<double> ( "tol" ) );
 
-	// Solving the system
-	int retValue = M_linSolver->Iterate(maxIter, tol);
+    // Solving the system
+    int retValue = M_linSolver->Iterate (maxIter, tol);
 
     /* try to solve again (reason may be:
       -2 "Aztec status AZ_breakdown: numerical breakdown"
@@ -81,35 +85,35 @@ AztecooOperator::doApplyInverse( const vector_Type& X, vector_Type& Y ) const
     if ( retValue <= -2 )
     {
         M_numIterations += M_linSolver->NumIters();
-        retValue = M_linSolver->Iterate(maxIter, tol);
+        retValue = M_linSolver->Iterate (maxIter, tol);
     }
 
-	// Update the number of performed iterations
-	M_numIterations += M_linSolver->NumIters();
+    // Update the number of performed iterations
+    M_numIterations += M_linSolver->NumIters();
 
-	// Update of the status
-	Real status[AZ_STATUS_SIZE];
-	M_linSolver->GetAllAztecStatus( status );
+    // Update of the status
+    Real status[AZ_STATUS_SIZE];
+    M_linSolver->GetAllAztecStatus ( status );
 
-	if ( status[AZ_why] == AZ_normal )
-	{
-		M_converged = yes;
-	}
-	else
-	{
-		M_converged = no;
-	}
+    if ( status[AZ_why] == AZ_normal )
+    {
+        M_converged = yes;
+    }
+    else
+    {
+        M_converged = no;
+    }
 
-	if ( status[AZ_why] == AZ_loss )
-	{
-		M_lossOfAccuracy = yes;
-	}
-	else
-	{
-		M_lossOfAccuracy = no;
-	}
+    if ( status[AZ_why] == AZ_loss )
+    {
+        M_lossOfAccuracy = yes;
+    }
+    else
+    {
+        M_lossOfAccuracy = no;
+    }
 
-	return retValue;
+    return retValue;
 }
 
 void
@@ -127,13 +131,16 @@ AztecooOperator::doSetPreconditioner()
 void
 AztecooOperator::doSetParameterList()
 {
-	M_linSolver->SetParameters( M_pList->sublist( "Trilinos: AztecOO List" ) );
+    M_linSolver->SetParameters ( M_pList->sublist ( "Trilinos: AztecOO List" ) );
 }
 
 void
 AztecooOperator::doResetSolver()
 {
-    if( M_linSolver ) M_linSolver->DestroyPreconditioner();
+    if ( M_linSolver )
+    {
+        M_linSolver->DestroyPreconditioner();
+    }
 }
 
 } // Namespace Operators

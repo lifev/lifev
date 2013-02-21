@@ -58,8 +58,8 @@
  @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
  */
 class hyperbolic
-//     :
-//     public LifeV::Application
+    //     :
+    //     public LifeV::Application
 {
 public:
 
@@ -67,8 +67,8 @@ public:
      */
     //@{
 
-    hyperbolic( int argc,
-                char** argv );
+    hyperbolic ( int argc,
+                 char** argv );
 
     ~hyperbolic()
     {}

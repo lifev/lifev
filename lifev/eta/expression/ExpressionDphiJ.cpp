@@ -53,7 +53,7 @@ ExpressionDphiJ::ExpressionDphiJ()
 {}
 
 
-ExpressionDphiJ::ExpressionDphiJ(const ExpressionDphiJ&)
+ExpressionDphiJ::ExpressionDphiJ (const ExpressionDphiJ&)
     : base_Type()
 {}
 
@@ -66,7 +66,7 @@ ExpressionDphiJ::~ExpressionDphiJ()
 // ===================================================
 
 void
-ExpressionDphiJ::display(std::ostream& out)
+ExpressionDphiJ::display (std::ostream& out)
 {
     out << "dphi_j";
 }

@@ -54,14 +54,14 @@
 using namespace LifeV;
 
 int
-main( int argc, char** argv )
+main ( int argc, char** argv )
 {
     //MPI communicator initialization
     boost::shared_ptr<Epetra_Comm> commPtr;
 
 #ifdef HAVE_MPI
     std::cout << "MPI Initialization" << std::endl;
-    MPI_Init( &argc, &argv );
+    MPI_Init ( &argc, &argv );
 #endif
 
     //MPI Preprocessing
@@ -70,32 +70,32 @@ main( int argc, char** argv )
     int nprocs;
     int rank;
 
-    MPI_Comm_size( MPI_COMM_WORLD, &nprocs );
-    MPI_Comm_rank( MPI_COMM_WORLD, &rank );
+    MPI_Comm_size ( MPI_COMM_WORLD, &nprocs );
+    MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
 
     if ( rank == 0 )
     {
         std::cout << "MPI processes: " << nprocs << std::endl;
         std::cout << "MPI Epetra Initialization ... " << std::endl;
     }
-    commPtr.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
+    commPtr.reset ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
 
     commPtr->Barrier();
 
 #else
 
     std::cout << "MPI SERIAL Epetra Initialization ... " << std::endl;
-    commPtr.reset( new Epetra_SerialComm() );
+    commPtr.reset ( new Epetra_SerialComm() );
 
 #endif
 
-    GetPot command_line(argc,argv);
-    TestImportExport testImportExport( commPtr );
+    GetPot command_line (argc, argv);
+    TestImportExport testImportExport ( commPtr );
 
-    bool passed(false);
+    bool passed (false);
 
     typedef ExporterEnsight<mesh_Type> exporter_Type;
-    passed = testImportExport.run<exporter_Type, exporter_Type >( command_line, "export" );
+    passed = testImportExport.run<exporter_Type, exporter_Type > ( command_line, "export" );
 
     // ----- End of test calls -----
 
@@ -105,7 +105,11 @@ main( int argc, char** argv )
 #endif
 
     if (passed)
+    {
         return EXIT_SUCCESS;
+    }
     else
+    {
         return EXIT_FAILURE;
+    }
 }

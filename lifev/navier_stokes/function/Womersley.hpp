@@ -35,20 +35,20 @@
     @date 11-12-2009
 
     Analytic solution of Womersley for unsteady Navier-Stokes 3D on the cylinder having axis x, origin (0,0,0), diameter D and height L.
-	Solution of incompressible NS equation in a cylindrical vessel with a sinusoidal pressure drop (deltaP = A cos(wt) )
-	between the inflow and the outflow and no-slip conditions on the vessel wall.
-	this solution works also in the 2D-axisymmetric formulation (geometry [0, L]x[0, D/2]).
-	<br>
-	The Womersley number \alpha arises in the solution of the linearized Navier Stokes equations
-	for oscillatory flow (presumed to be laminar and incompressible) in a tube.
-	When \alpha is small (1 or less), it means the frequency of pulsations is sufficiently low
-	that a parabolic velocity profile has time to develop during each cycle,
-	and the flow will be very nearly in phase with the pressure gradient,
-	and will be given to a good approximation by Poiseuille's law,
-	using the instantaneous pressure gradient.
-	When \alpha is large (10 or more), it means the frequency of pulsations is sufficiently large
-	that the velocity profile is relatively flat or plug-like,
-	and the mean flow lags the pressure gradient by about 90 degrees.
+    Solution of incompressible NS equation in a cylindrical vessel with a sinusoidal pressure drop (deltaP = A cos(wt) )
+    between the inflow and the outflow and no-slip conditions on the vessel wall.
+    this solution works also in the 2D-axisymmetric formulation (geometry [0, L]x[0, D/2]).
+    <br>
+    The Womersley number \alpha arises in the solution of the linearized Navier Stokes equations
+    for oscillatory flow (presumed to be laminar and incompressible) in a tube.
+    When \alpha is small (1 or less), it means the frequency of pulsations is sufficiently low
+    that a parabolic velocity profile has time to develop during each cycle,
+    and the flow will be very nearly in phase with the pressure gradient,
+    and will be given to a good approximation by Poiseuille's law,
+    using the instantaneous pressure gradient.
+    When \alpha is large (10 or more), it means the frequency of pulsations is sufficiently large
+    that the velocity profile is relatively flat or plug-like,
+    and the mean flow lags the pressure gradient by about 90 degrees.
 
  */
 
@@ -68,41 +68,41 @@ namespace LifeV
 class Womersley
 {
 public:
-    static Real f( const Real& t, const Real& x, const Real& y,
-                   const Real& z, const ID& i );
-
-    static Real xexact( const Real& t, const Real& x, const Real& y,
-                        const Real& z, const ID& i );
-    static Real uexact( const Real& t, const Real& x, const Real& y,
-                        const Real& z, const ID& i );
-    static Real pexact( const Real& t, const Real& x, const Real& y,
-                        const Real& z, const ID& i );
-
-    // Initial velocity
-    static Real x0( const Real& t, const Real& x, const Real& y,
+    static Real f ( const Real& t, const Real& x, const Real& y,
                     const Real& z, const ID& i );
 
-    static Real u0( const Real& t, const Real& x, const Real& y,
-                        const Real& z, const ID& i );
+    static Real xexact ( const Real& t, const Real& x, const Real& y,
+                         const Real& z, const ID& i );
+    static Real uexact ( const Real& t, const Real& x, const Real& y,
+                         const Real& z, const ID& i );
+    static Real pexact ( const Real& t, const Real& x, const Real& y,
+                         const Real& z, const ID& i );
 
-    static Real p0( const Real& t, const Real& x, const Real& y,
-                        const Real& z, const ID& i );
+    // Initial velocity
+    static Real x0 ( const Real& t, const Real& x, const Real& y,
+                     const Real& z, const ID& i );
 
-    static Real grad_u( const UInt& icoor, const Real& t, const Real& x, const Real& y,
-                                     const Real& z, const ID& i );
+    static Real u0 ( const Real& t, const Real& x, const Real& y,
+                     const Real& z, const ID& i );
 
-    static Real fNeumann( const Real& t, const Real& x, const Real& y,
-                          const Real& z, const ID& i );
+    static Real p0 ( const Real& t, const Real& x, const Real& y,
+                     const Real& z, const ID& i );
 
-    static Real normalVector( const Real& t, const Real& x, const Real& y,
-                          const Real& z, const ID& i );
+    static Real grad_u ( const UInt& icoor, const Real& t, const Real& x, const Real& y,
+                         const Real& z, const ID& i );
 
-    static Real fShearStress( const Real& t, const Real& x, const Real& y,
-                              const Real& z, const ID& i );
+    static Real fNeumann ( const Real& t, const Real& x, const Real& y,
+                           const Real& z, const ID& i );
 
-    static Real fWallShearStress( const Real& t, const Real& x, const Real& y,
-                              const Real& z, const ID& i );
-    static void setParamsFromGetPot( const GetPot& dataFile );
+    static Real normalVector ( const Real& t, const Real& x, const Real& y,
+                               const Real& z, const ID& i );
+
+    static Real fShearStress ( const Real& t, const Real& x, const Real& y,
+                               const Real& z, const ID& i );
+
+    static Real fWallShearStress ( const Real& t, const Real& x, const Real& y,
+                                   const Real& z, const ID& i );
+    static void setParamsFromGetPot ( const GetPot& dataFile );
     static void showMe();
 
 

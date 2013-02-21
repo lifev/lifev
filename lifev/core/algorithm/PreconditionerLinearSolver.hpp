@@ -102,9 +102,9 @@ public:
      * @param comm The communicator.
      */
 #ifdef HAVE_MPI
-    PreconditionerLinearSolver( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>( new Epetra_MpiComm( MPI_COMM_WORLD ) ) );
+    PreconditionerLinearSolver ( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm> ( new Epetra_MpiComm ( MPI_COMM_WORLD ) ) );
 #else
-    PreconditionerLinearSolver( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>( new Epetra_SerialComm ) );
+    PreconditionerLinearSolver ( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm> ( new Epetra_SerialComm ) );
 #endif
 
     //! Destructor
@@ -115,17 +115,17 @@ public:
     //! @name Methods
     //@{
 
-     //! Create the list of parameters of the preconditioner
+    //! Create the list of parameters of the preconditioner
     /*!
       @param list A Parameter list to be filled
       @param dataFile A GetPot object containing the data about the preconditioner
       @param section The section in "dataFile" where to find data about the preconditioner
       @param subSection The subsection in "dataFile" where to find data about the preconditioner
      */
-    virtual void createParametersList( list_Type& list,
-                                       const GetPot& dataFile,
-                                       const std::string& section,
-                                       const std::string& subSection );
+    virtual void createParametersList ( list_Type& list,
+                                        const GetPot& dataFile,
+                                        const std::string& section,
+                                        const std::string& subSection );
 
     //! Create the list of parameters of the preconditioner
     /*!
@@ -134,17 +134,17 @@ public:
       @param section The section in "dataFile" where to find data about the preconditioner
       @param subSection The subsection in "dataFile" where to find data about the preconditioner
      */
-    static void createLinearSolverList( list_Type&         list,
-                                        const GetPot&      dataFile,
-                                        const std::string& section,
-                                        const std::string& subSection = "SolverLinear",
-                                        const bool&        verbose = true );
+    static void createLinearSolverList ( list_Type&         list,
+                                         const GetPot&      dataFile,
+                                         const std::string& section,
+                                         const std::string& subSection = "SolverLinear",
+                                         const bool&        verbose = true );
 
     //! Build a preconditioner based on the given matrix
     /*!
       @param matrix Matrix upon which construct the preconditioner
      */
-    virtual Int buildPreconditioner( operator_type& matrix );
+    virtual Int buildPreconditioner ( operator_type& matrix );
 
     //! Reset the preconditioner
     virtual void resetPreconditioner();
@@ -153,7 +153,7 @@ public:
     virtual Real condest();
 
     //! Show informations about the preconditioner
-    virtual void showMe( std::ostream& output = std::cout ) const;
+    virtual void showMe ( std::ostream& output = std::cout ) const;
 
     //@}
 
@@ -165,7 +165,7 @@ public:
     /*!
       @param useTranspose If true the preconditioner is transposed
      */
-    Int SetUseTranspose( const bool useTranspose = false );
+    Int SetUseTranspose ( const bool useTranspose = false );
 
     //! Return true if the preconditioner is transposed
     bool UseTranspose();
@@ -175,14 +175,14 @@ public:
       @param vector1 Vector to which we apply the preconditioner
       @param vector2 Vector to the store the result
      */
-    Int Apply( const Epetra_MultiVector& vector1, Epetra_MultiVector& vector2 ) const;
+    Int Apply ( const Epetra_MultiVector& vector1, Epetra_MultiVector& vector2 ) const;
 
     //! Apply the inverse of the preconditioner on vector1 and store the result in vector2
     /*!
       @param vector1 Vector to which we apply the preconditioner
       @param vector2 Vector to the store the result
      */
-    Int ApplyInverse( const Epetra_MultiVector& vector1, Epetra_MultiVector& vector2 ) const;
+    Int ApplyInverse ( const Epetra_MultiVector& vector1, Epetra_MultiVector& vector2 ) const;
 
 
     //! Return the Range map of the operator
@@ -208,7 +208,7 @@ public:
       Note: the argument is unused
       @param solver SolverAztecOO
      */
-    void setSolver( SolverAztecOO& /*solver*/ );
+    void setSolver ( SolverAztecOO& /*solver*/ );
 
     //@}
 
@@ -245,10 +245,13 @@ private:
 
 };
 
-inline Preconditioner* createLinearSolverPreconditioner() { return new PreconditionerLinearSolver(); }
+inline Preconditioner* createLinearSolverPreconditioner()
+{
+    return new PreconditionerLinearSolver();
+}
 namespace
 {
-    static bool registerSB = PRECFactory::instance().registerProduct( "LinearSolver", &createLinearSolverPreconditioner );
+static bool registerSB = PRECFactory::instance().registerProduct ( "LinearSolver", &createLinearSolverPreconditioner );
 }
 
 } // namespace LifeV

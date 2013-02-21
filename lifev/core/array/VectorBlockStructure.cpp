@@ -34,7 +34,8 @@
 
 #include <lifev/core/array/VectorBlockStructure.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 // ===================================================
 // Constructors & Destructor
@@ -44,43 +45,43 @@ VectorBlockStructure::
 VectorBlockStructure()
     : M_blockSize(),
       M_blockFirstIndex(),
-      M_totalSize( 0 )
+      M_totalSize ( 0 )
 {}
 
 VectorBlockStructure::
-VectorBlockStructure( const map_Type& map )
-    : M_blockSize( 1, map.map( Unique )->NumGlobalElements() ),
-      M_blockFirstIndex( 1, 0 ),
-      M_totalSize( map.map( Unique )->NumGlobalElements() )
+VectorBlockStructure ( const map_Type& map )
+    : M_blockSize ( 1, map.map ( Unique )->NumGlobalElements() ),
+      M_blockFirstIndex ( 1, 0 ),
+      M_totalSize ( map.map ( Unique )->NumGlobalElements() )
 {}
 
 VectorBlockStructure::
-VectorBlockStructure( const mapVector_Type& mapVector )
-    : M_blockSize( mapVector.nbMap() ),
-      M_blockFirstIndex( mapVector.nbMap() )
+VectorBlockStructure ( const mapVector_Type& mapVector )
+    : M_blockSize ( mapVector.nbMap() ),
+      M_blockFirstIndex ( mapVector.nbMap() )
 {
-    ASSERT( mapVector.nbMap() > 0 , "Map vector empty, impossible to construct a VectorBlockMonolithicEpetra!" );
+    ASSERT ( mapVector.nbMap() > 0 , "Map vector empty, impossible to construct a VectorBlockMonolithicEpetra!" );
 
-	M_blockSize[0] = mapVector.mapSize( 0 );
-	M_blockFirstIndex[0] = 0;
+    M_blockSize[0] = mapVector.mapSize ( 0 );
+    M_blockFirstIndex[0] = 0;
 
-	M_totalSize = M_blockSize[0];
+    M_totalSize = M_blockSize[0];
 
-	for ( UInt i( 1 ); i < mapVector.nbMap(); ++i )
-	{
-		M_blockSize[i] = mapVector.mapSize( i );
-		M_blockFirstIndex[i] = M_totalSize;
+    for ( UInt i ( 1 ); i < mapVector.nbMap(); ++i )
+    {
+        M_blockSize[i] = mapVector.mapSize ( i );
+        M_blockFirstIndex[i] = M_totalSize;
 
-		M_totalSize += M_blockSize[i];
-	}
+        M_totalSize += M_blockSize[i];
+    }
 
 }
 
 VectorBlockStructure::
-VectorBlockStructure( const VectorBlockStructure& blockStructure )
-    : M_blockSize( blockStructure.M_blockSize ),
-      M_blockFirstIndex( blockStructure.M_blockFirstIndex ),
-      M_totalSize( blockStructure.M_totalSize )
+VectorBlockStructure ( const VectorBlockStructure& blockStructure )
+    : M_blockSize ( blockStructure.M_blockSize ),
+      M_blockFirstIndex ( blockStructure.M_blockFirstIndex ),
+      M_totalSize ( blockStructure.M_totalSize )
 {
 
 }
@@ -91,15 +92,15 @@ VectorBlockStructure( const VectorBlockStructure& blockStructure )
 
 void
 VectorBlockStructure::
-setBlockStructure( const std::vector<UInt>& blockSizes )
+setBlockStructure ( const std::vector<UInt>& blockSizes )
 {
     M_blockSize = blockSizes;
 
-    M_blockFirstIndex.resize( M_blockSize.size() );
+    M_blockFirstIndex.resize ( M_blockSize.size() );
 
     M_totalSize = 0;
 
-    for ( UInt i( 0 ); i< M_blockSize.size(); ++i )
+    for ( UInt i ( 0 ); i < M_blockSize.size(); ++i )
     {
         M_blockFirstIndex[i] = M_totalSize;
         M_totalSize += M_blockSize[i];
@@ -108,34 +109,34 @@ setBlockStructure( const std::vector<UInt>& blockSizes )
 
 void
 VectorBlockStructure::
-setBlockStructure( const mapVector_Type& mapVector )
+setBlockStructure ( const mapVector_Type& mapVector )
 {
-    ASSERT( mapVector.nbMap() > 0 , "Map vector empty, impossible to set the block structure" );
+    ASSERT ( mapVector.nbMap() > 0 , "Map vector empty, impossible to set the block structure" );
 
-    M_blockSize.resize( mapVector.nbMap() );
-    M_blockFirstIndex.resize( mapVector.nbMap() );
+    M_blockSize.resize ( mapVector.nbMap() );
+    M_blockFirstIndex.resize ( mapVector.nbMap() );
 
-	M_totalSize = 0;
+    M_totalSize = 0;
 
-	for ( UInt i( 0 ); i < mapVector.nbMap(); ++i )
-	{
-		M_blockSize[i] = mapVector.mapSize( i );
-		M_blockFirstIndex[i] = M_totalSize;
-		M_totalSize += M_blockSize[i];
-	}
+    for ( UInt i ( 0 ); i < mapVector.nbMap(); ++i )
+    {
+        M_blockSize[i] = mapVector.mapSize ( i );
+        M_blockFirstIndex[i] = M_totalSize;
+        M_totalSize += M_blockSize[i];
+    }
 }
 
 void
 VectorBlockStructure::
-setBlockStructure( const VectorBlockStructure& blockStructure )
+setBlockStructure ( const VectorBlockStructure& blockStructure )
 {
-    UInt size( blockStructure.numBlocks() );
-    M_blockSize.resize( size );
-    M_blockFirstIndex.resize( size );
+    UInt size ( blockStructure.numBlocks() );
+    M_blockSize.resize ( size );
+    M_blockFirstIndex.resize ( size );
 
     M_totalSize = blockStructure.M_totalSize;
 
-    for ( UInt i( 0 ); i < size; ++i )
+    for ( UInt i ( 0 ); i < size; ++i )
     {
         M_blockSize[i] = blockStructure.M_blockSize[i];
         M_blockFirstIndex[i] = blockStructure.M_blockFirstIndex[i];

@@ -68,7 +68,7 @@ namespace ExpressionAssembly
 
 */
 template <typename LExpressionType, typename RExpressionType>
-class ExpressionAddition : public ExpressionBase< ExpressionAddition<LExpressionType,RExpressionType> >
+class ExpressionAddition : public ExpressionBase< ExpressionAddition<LExpressionType, RExpressionType> >
 {
 public:
 
@@ -76,7 +76,7 @@ public:
     //@{
 
     // Base class (no need, just for ease of coding this class)
-	typedef ExpressionBase< ExpressionAddition <LExpressionType,RExpressionType> > base_Type;
+    typedef ExpressionBase< ExpressionAddition <LExpressionType, RExpressionType> > base_Type;
 
     //@}
 
@@ -85,15 +85,15 @@ public:
     //@{
 
     //! Complete constructor using the two expressions to be summed
-	ExpressionAddition(const LExpressionType& l, const RExpressionType& r)
-	: base_Type(), M_l(l), M_r(r) {}
+    ExpressionAddition (const LExpressionType& l, const RExpressionType& r)
+        : base_Type(), M_l (l), M_r (r) {}
 
     //! Copy constructor
-	ExpressionAddition(const ExpressionAddition<LExpressionType,RExpressionType>& expression)
-	 : base_Type(), M_l(expression.M_l), M_r(expression.M_r) {}
+    ExpressionAddition (const ExpressionAddition<LExpressionType, RExpressionType>& expression)
+        : base_Type(), M_l (expression.M_l), M_r (expression.M_r) {}
 
     //! Destructor
-    ~ExpressionAddition(){}
+    ~ExpressionAddition() {}
 
     //@}
 
@@ -102,8 +102,12 @@ public:
     //@{
 
     //! Display method
-	static void display(std::ostream& out= std::cout)
-    { LExpressionType::display(out); out << " + "; RExpressionType::display(out);}
+    static void display (std::ostream& out = std::cout)
+    {
+        LExpressionType::display (out);
+        out << " + ";
+        RExpressionType::display (out);
+    }
 
     //@}
 
@@ -112,10 +116,16 @@ public:
     //@{
 
     //! Getter for the expression on the left side of the addition
-	const LExpressionType& left() const {return M_l;}
+    const LExpressionType& left() const
+    {
+        return M_l;
+    }
 
     //! Getter for the expression on the right side of the addition
-	const RExpressionType& right() const {return M_r;}
+    const RExpressionType& right() const
+    {
+        return M_r;
+    }
 
     //@}
 
@@ -125,15 +135,15 @@ private:
     //@{
 
     //! No default constructor
-	ExpressionAddition();
+    ExpressionAddition();
 
     //@}
 
     // Left side of the operation
-	LExpressionType M_l;
+    LExpressionType M_l;
 
     // Right side of the operation
-	RExpressionType M_r;
+    RExpressionType M_r;
 };
 
 
@@ -159,40 +169,40 @@ private:
 
 */
 template< typename LExpressionType, typename RExpressionType >
-ExpressionAddition<LExpressionType,RExpressionType>
-operator+(const ExpressionBase<LExpressionType>& l, const ExpressionBase<RExpressionType>& r)
+ExpressionAddition<LExpressionType, RExpressionType>
+operator+ (const ExpressionBase<LExpressionType>& l, const ExpressionBase<RExpressionType>& r)
 {
-	return ExpressionAddition<LExpressionType,RExpressionType>(l.cast(),r.cast());
+    return ExpressionAddition<LExpressionType, RExpressionType> (l.cast(), r.cast() );
 }
 
 // Specialization for the real constants
 template< typename LExpressionType >
 ExpressionAddition<LExpressionType, ExpressionScalar >
-operator+(const ExpressionBase<LExpressionType>& l, const Real& r)
+operator+ (const ExpressionBase<LExpressionType>& l, const Real& r)
 {
-    return ExpressionAddition<LExpressionType,ExpressionScalar>(l.cast(),ExpressionScalar(r));
+    return ExpressionAddition<LExpressionType, ExpressionScalar> (l.cast(), ExpressionScalar (r) );
 }
 
 template< typename RExpressionType >
-ExpressionAddition<ExpressionScalar,RExpressionType>
-operator+(const Real& l, const ExpressionBase<RExpressionType>& r)
+ExpressionAddition<ExpressionScalar, RExpressionType>
+operator+ (const Real& l, const ExpressionBase<RExpressionType>& r)
 {
-    return ExpressionAddition<ExpressionScalar,RExpressionType>(ExpressionScalar(l),r.cast());
+    return ExpressionAddition<ExpressionScalar, RExpressionType> (ExpressionScalar (l), r.cast() );
 }
 
 // Specialization for the vectorial constants
 template< typename RExpressionType , UInt Vdim>
-ExpressionAddition<ExpressionVector<Vdim>,RExpressionType>
-operator+(const VectorSmall<Vdim>& l, const ExpressionBase<RExpressionType>& r)
+ExpressionAddition<ExpressionVector<Vdim>, RExpressionType>
+operator+ (const VectorSmall<Vdim>& l, const ExpressionBase<RExpressionType>& r)
 {
-    return ExpressionAddition<ExpressionVector<Vdim>,RExpressionType>(ExpressionVector<Vdim>(l),r.cast());
+    return ExpressionAddition<ExpressionVector<Vdim>, RExpressionType> (ExpressionVector<Vdim> (l), r.cast() );
 }
 
 template< typename LExpressionType, UInt Vdim >
 ExpressionAddition<LExpressionType, ExpressionVector<Vdim> >
-operator+(const ExpressionBase<LExpressionType>& l, const VectorSmall<Vdim>& r)
+operator+ (const ExpressionBase<LExpressionType>& l, const VectorSmall<Vdim>& r)
 {
-    return ExpressionAddition<LExpressionType,ExpressionVector<Vdim> >(l.cast(),ExpressionVector<Vdim>(r));
+    return ExpressionAddition<LExpressionType, ExpressionVector<Vdim> > (l.cast(), ExpressionVector<Vdim> (r) );
 }
 
 

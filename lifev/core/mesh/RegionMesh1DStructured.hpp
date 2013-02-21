@@ -48,14 +48,14 @@ namespace LifeV
 // Labels for the structured 1D mesh
 namespace Structured1DLabel
 {
-    //! Label for the internal entities
-    const markerID_Type INTERNAL = 0;
+//! Label for the internal entities
+const markerID_Type INTERNAL = 0;
 
-    //! Label for the left boundary corner
-    const markerID_Type LEFT = 1;
+//! Label for the left boundary corner
+const markerID_Type LEFT = 1;
 
-    //! Label for the right boundary corner
-    const markerID_Type RIGHT = 2;
+//! Label for the right boundary corner
+const markerID_Type RIGHT = 2;
 } // namespace Structured1DLabel
 
 //! Build uniform mesh along the x axis.
@@ -71,12 +71,12 @@ namespace Structured1DLabel
     with numberOfElements elements.
 */
 template <typename MeshType>
-void regularMesh1D( MeshType& mesh,
-                    markerID_Type regionFlag,
-                    const UInt& numberOfElements,
-                    bool verbose = false,
-                    const Real& length = 1.,
-                    const Real& origin = 0. )
+void regularMesh1D ( MeshType& mesh,
+                     markerID_Type regionFlag,
+                     const UInt& numberOfElements,
+                     bool verbose = false,
+                     const Real& length = 1.,
+                     const Real& origin = 0. )
 {
     typedef MeshType mesh_Type;
 
@@ -85,24 +85,24 @@ void regularMesh1D( MeshType& mesh,
         std::cout << "Building 1d mesh" << std::endl;
     }
 
-    mesh.setMaxNumPoints(numberOfElements + 1, true);
-    mesh.setNumBPoints(2);
-    mesh.setMarkerID(regionFlag);
+    mesh.setMaxNumPoints (numberOfElements + 1, true);
+    mesh.setNumBPoints (2);
+    mesh.setMarkerID (regionFlag);
 
     Real deltax = (length - origin) / numberOfElements;
 
-    typename mesh_Type::point_Type * pp = 0;
+    typename mesh_Type::point_Type* pp = 0;
 
     for (UInt it = 0; it < numberOfElements + 1; it++)
     {
         bool isBoundary = (it == numberOfElements) || ( it == 0);
 
         // insert a new Point1D in point list
-        pp = &mesh.addPoint( isBoundary, false );
-        pp->x() = origin + it*deltax;
+        pp = &mesh.addPoint ( isBoundary, false );
+        pp->x() = origin + it * deltax;
         pp->y() = 0.;
         pp->z() = 0.;
-        pp->setId(it);
+        pp->setId (it);
 
         if ( it == 0 )
         {
@@ -138,32 +138,32 @@ void regularMesh1D( MeshType& mesh,
 
     }
 
-    mesh.setNumGlobalVertices( mesh.pointList.size() );
-    mesh.setNumVertices(mesh.pointList.size() );
+    mesh.setNumGlobalVertices ( mesh.pointList.size() );
+    mesh.setNumVertices (mesh.pointList.size() );
     mesh.setMaxNumPoints      ( mesh.pointList.size(), true );
-    mesh.setMaxNumGlobalPoints( mesh.pointList.size() );
+    mesh.setMaxNumGlobalPoints ( mesh.pointList.size() );
     mesh.numBVertices() = 2;
-    mesh.setNumBPoints( mesh.numBVertices() );
+    mesh.setNumBPoints ( mesh.numBVertices() );
 
-    mesh.setLinkSwitch( "FACETS_HAVE_ADIACENCY" );
-    mesh.setLinkSwitch( "HAS_ALL_FACETS" );
+    mesh.setLinkSwitch ( "FACETS_HAVE_ADIACENCY" );
+    mesh.setLinkSwitch ( "HAS_ALL_FACETS" );
 
-    mesh.setMaxNumEdges(numberOfElements, true);
+    mesh.setMaxNumEdges (numberOfElements, true);
 
     typename mesh_Type::edge_Type* pe = 0;
 
     for (UInt it = 0; it < numberOfElements; it++)
     {
-        pe = &mesh.addEdge( false );
-        pe->setPoint(0, mesh.point(it));
-        pe->setPoint(1, mesh.point(it + 1));
-        pe->setId(it);
+        pe = &mesh.addEdge ( false );
+        pe->setPoint (0, mesh.point (it) );
+        pe->setPoint (1, mesh.point (it + 1) );
+        pe->setId (it);
         pe->setMarkerID ( Structured1DLabel::INTERNAL );
     }
-    mesh.setNumEdges(mesh.edgeList.size() );
-    mesh.setMaxNumGlobalEdges(mesh.edgeList.size() );
+    mesh.setNumEdges (mesh.edgeList.size() );
+    mesh.setMaxNumGlobalEdges (mesh.edgeList.size() );
 
-    mesh.updateElementFacets( true, false, mesh.pointList.size() );
+    mesh.updateElementFacets ( true, false, mesh.pointList.size() );
 } // regularMesh1D
 
 } // Namespace LifeV

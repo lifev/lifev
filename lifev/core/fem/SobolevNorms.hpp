@@ -54,25 +54,25 @@ typedef boost::numeric::ublas::zero_vector<Real> ZeroVector;
 //! version for vectorial problem
 template <typename VectorType>
 Real
-elementaryL2NormSquare( const VectorType & u, const CurrentFE& fe, const DOF& dof,
-                        const UInt nbComp )
+elementaryL2NormSquare ( const VectorType& u, const CurrentFE& fe, const DOF& dof,
+                         const UInt nbComp )
 {
     Int dofID;
-    UInt eleID (fe.currentLocalId());
-    Real sum(0.0);
+    UInt eleID (fe.currentLocalId() );
+    Real sum (0.0);
     Real uQuadPt;
 
     for ( UInt iComp (0); iComp < nbComp; ++iComp )
     {
-        for ( UInt iQuadPt(0); iQuadPt < fe.nbQuadPt(); ++iQuadPt )
+        for ( UInt iQuadPt (0); iQuadPt < fe.nbQuadPt(); ++iQuadPt )
         {
             uQuadPt = 0.;
-            for ( UInt iDof(0); iDof < fe.nbFEDof(); ++iDof )
+            for ( UInt iDof (0); iDof < fe.nbFEDof(); ++iDof )
             {
-                dofID = dof.localToGlobalMap( eleID, iDof ) + iComp * dof.numTotalDof();
-                uQuadPt += u( dofID ) * fe.phi( iDof, iQuadPt );
+                dofID = dof.localToGlobalMap ( eleID, iDof ) + iComp * dof.numTotalDof();
+                uQuadPt += u ( dofID ) * fe.phi ( iDof, iQuadPt );
             }
-            sum += uQuadPt * uQuadPt * fe.weightDet( iQuadPt );
+            sum += uQuadPt * uQuadPt * fe.weightDet ( iQuadPt );
         }
     }
     return sum;
@@ -80,21 +80,21 @@ elementaryL2NormSquare( const VectorType & u, const CurrentFE& fe, const DOF& do
 
 //! returns the square of the L2 norm of fct on the current element
 inline Real
-elementaryFctL2NormSquare( boost::function<Real( Real,Real,Real )> fct,
-                           const CurrentFE& fe )
+elementaryFctL2NormSquare ( boost::function<Real ( Real, Real, Real ) > fct,
+                            const CurrentFE& fe )
 {
-    Real sum(0.0);
+    Real sum (0.0);
     Real f;
     Real x;
     Real y;
     Real z;
     for ( UInt iQuadPt = 0; iQuadPt < fe.nbQuadPt(); ++iQuadPt )
     {
-    	x = fe.quadNode(iQuadPt,0);
-        y = fe.quadNode(iQuadPt,1);
-	    z = fe.quadNode(iQuadPt,2);
-        f = fct( x, y, z );
-        sum += f * f * fe.weightDet( iQuadPt );
+        x = fe.quadNode (iQuadPt, 0);
+        y = fe.quadNode (iQuadPt, 1);
+        z = fe.quadNode (iQuadPt, 2);
+        f = fct ( x, y, z );
+        sum += f * f * fe.weightDet ( iQuadPt );
     }
     return sum;
 }
@@ -102,23 +102,23 @@ elementaryFctL2NormSquare( boost::function<Real( Real,Real,Real )> fct,
 
 //! for time dependent+vectorial.
 inline Real
-elementaryFctL2NormSquare( boost::function<Real( Real, Real, Real, Real, UInt )> fct,
-                           const CurrentFE& fe, const Real t, const UInt nbComp )
+elementaryFctL2NormSquare ( boost::function<Real ( Real, Real, Real, Real, UInt ) > fct,
+                            const CurrentFE& fe, const Real t, const UInt nbComp )
 {
-    Real sum(0.0);
+    Real sum (0.0);
     Real f;
     Real x;
     Real y;
     Real z;
     for ( UInt iQuadPt = 0; iQuadPt < fe.nbQuadPt(); ++iQuadPt )
     {
-        x = fe.quadNode(iQuadPt,0);
-        y = fe.quadNode(iQuadPt,1);
-	    z = fe.quadNode(iQuadPt,2);
-        for ( UInt iComp(0); iComp < nbComp; ++iComp )
+        x = fe.quadNode (iQuadPt, 0);
+        y = fe.quadNode (iQuadPt, 1);
+        z = fe.quadNode (iQuadPt, 2);
+        for ( UInt iComp (0); iComp < nbComp; ++iComp )
         {
-            f = fct( t, x, y, z, iComp );
-            sum += f * f * fe.weightDet( iQuadPt );
+            f = fct ( t, x, y, z, iComp );
+            sum += f * f * fe.weightDet ( iQuadPt );
         }
     }
     return sum;
@@ -127,32 +127,32 @@ elementaryFctL2NormSquare( boost::function<Real( Real, Real, Real, Real, UInt )>
 //! returns the square of the H1 norm of u on the current element
 template <typename VectorType>
 Real
-elementaryH1NormSquare( const VectorType & u, const CurrentFE& fe, const DOF& dof, const UInt nbComp=1 )
+elementaryH1NormSquare ( const VectorType& u, const CurrentFE& fe, const DOF& dof, const UInt nbComp = 1 )
 {
-    UInt eleID (fe.currentLocalId());
+    UInt eleID (fe.currentLocalId() );
     Real sum (0.0);
-    Real sum2(0.0);
-    std::vector<Real> graduQuadPt(fe.nbCoor(),0.0);
-    Real uQuadPt(0.0);
+    Real sum2 (0.0);
+    std::vector<Real> graduQuadPt (fe.nbCoor(), 0.0);
+    Real uQuadPt (0.0);
 
     for (UInt iComp (0); iComp < nbComp; ++iComp )
     {
-        for ( UInt iQuadPt(0); iQuadPt < fe.nbQuadPt(); ++iQuadPt )
+        for ( UInt iQuadPt (0); iQuadPt < fe.nbQuadPt(); ++iQuadPt )
         {
 
             uQuadPt = 0.0;
-            for (UInt iCoor(0); iCoor < fe.nbCoor(); ++iCoor)
+            for (UInt iCoor (0); iCoor < fe.nbCoor(); ++iCoor)
             {
-                graduQuadPt[iCoor] =0.0;
+                graduQuadPt[iCoor] = 0.0;
             }
 
-            for ( UInt iDof(0); iDof < fe.nbFEDof(); ++iDof )
+            for ( UInt iDof (0); iDof < fe.nbFEDof(); ++iDof )
             {
-                UInt dofID = dof.localToGlobalMap( eleID, iDof ) + iComp * dof.numTotalDof();
-                uQuadPt += u( dofID ) * fe.phi( iDof, iQuadPt );
+                UInt dofID = dof.localToGlobalMap ( eleID, iDof ) + iComp * dof.numTotalDof();
+                uQuadPt += u ( dofID ) * fe.phi ( iDof, iQuadPt );
                 for (UInt iCoor (0); iCoor < fe.nbCoor(); ++iCoor)
                 {
-                    graduQuadPt[iCoor] += u( dofID ) * fe.dphi( iDof, iCoor, iQuadPt );
+                    graduQuadPt[iCoor] += u ( dofID ) * fe.dphi ( iDof, iCoor, iQuadPt );
                 }
             }
 
@@ -161,7 +161,7 @@ elementaryH1NormSquare( const VectorType & u, const CurrentFE& fe, const DOF& do
             {
                 sum2 += graduQuadPt[icoor] * graduQuadPt[icoor];
             }
-            sum += sum2*fe.weightDet( iQuadPt );
+            sum += sum2 * fe.weightDet ( iQuadPt );
         }
     }
     return sum;
@@ -170,54 +170,54 @@ elementaryH1NormSquare( const VectorType & u, const CurrentFE& fe, const DOF& do
 //! returns the square of the H1 norm of fct on the current element
 template<typename FunctionType>
 Real
-elementaryFctH1NormSquare( const FunctionType& fct, const CurrentFE& fe )
+elementaryFctH1NormSquare ( const FunctionType& fct, const CurrentFE& fe )
 {
-    Real sum(0.0);
-    Real sum2(0.0);
+    Real sum (0.0);
+    Real sum2 (0.0);
     Real x;
     Real y;
     Real z;
 
     for ( UInt iQuadPt (0); iQuadPt < fe.nbQuadPt(); ++iQuadPt )
     {
-    	x = fe.quadNode(iQuadPt,0);
-		y = fe.quadNode(iQuadPt,1);
-		z = fe.quadNode(iQuadPt,2);
+        x = fe.quadNode (iQuadPt, 0);
+        y = fe.quadNode (iQuadPt, 1);
+        z = fe.quadNode (iQuadPt, 2);
 
-        sum2 = std::pow(fct( x, y, z ),2);
+        sum2 = std::pow (fct ( x, y, z ), 2);
         for (UInt iCoor (0); iCoor < fe.nbCoor(); ++iCoor)
         {
-            sum2 += std::pow(fct.grad(iCoor, x,y,z), 2);
+            sum2 += std::pow (fct.grad (iCoor, x, y, z), 2);
         }
-        sum += sum2 * fe.weightDet( iQuadPt );
+        sum += sum2 * fe.weightDet ( iQuadPt );
     }
     return sum;
 }
 
 //! returns the square of the H1 norm of fct on the current element (time-dependent case)
 template <typename FunctionType>
-Real elementaryFctH1NormSquare( const FunctionType& fct, const CurrentFE& fe, const Real t, const UInt nbComp )
+Real elementaryFctH1NormSquare ( const FunctionType& fct, const CurrentFE& fe, const Real t, const UInt nbComp )
 {
-    Real sum(0.0);
-    Real sum2(0.0);
+    Real sum (0.0);
+    Real sum2 (0.0);
     Real x;
     Real y;
     Real z;
-    for ( UInt iQuadPt(0); iQuadPt < fe.nbQuadPt(); ++iQuadPt )
+    for ( UInt iQuadPt (0); iQuadPt < fe.nbQuadPt(); ++iQuadPt )
     {
-    	x = fe.quadNode(iQuadPt,0);
-		y = fe.quadNode(iQuadPt,1);
-		z = fe.quadNode(iQuadPt,2);
+        x = fe.quadNode (iQuadPt, 0);
+        y = fe.quadNode (iQuadPt, 1);
+        z = fe.quadNode (iQuadPt, 2);
 
         for ( UInt iComp = 0; iComp < nbComp; ++iComp )
         {
-            sum2 = std::pow(fct(t, x, y, z, iComp ),2);
+            sum2 = std::pow (fct (t, x, y, z, iComp ), 2);
 
             for (UInt iCoor = 0; iCoor < fe.nbCoor(); ++iCoor)
             {
-                sum2 += std::pow(fct.grad(iCoor, t,x,y,z, iComp),2);
+                sum2 += std::pow (fct.grad (iCoor, t, x, y, z, iComp), 2);
             }
-            sum += sum2 * fe.weightDet( iQuadPt );
+            sum += sum2 * fe.weightDet ( iQuadPt );
         }
     }
     return sum;
@@ -225,32 +225,32 @@ Real elementaryFctH1NormSquare( const FunctionType& fct, const CurrentFE& fe, co
 
 //! returns the square of the L2 norm of (u-fct) on the current element
 template <typename VectorType>
-Real elementaryDifferenceL2NormSquare( VectorType & u,
-                                       boost::function<Real( Real, Real, Real )> fct,
-                                       const CurrentFE& fe,
-                                       const DOF& dof )
+Real elementaryDifferenceL2NormSquare ( VectorType& u,
+                                        boost::function<Real ( Real, Real, Real ) > fct,
+                                        const CurrentFE& fe,
+                                        const DOF& dof )
 {
-    UInt eleID (fe.currentLocalId());
-    Real sum(0.0);
+    UInt eleID (fe.currentLocalId() );
+    Real sum (0.0);
     Real x;
     Real y;
     Real z;
-    Real uQuadPt(0.0);
-    Real diffQuadPt(0.0);
+    Real uQuadPt (0.0);
+    Real diffQuadPt (0.0);
 
     for (UInt iQuadPt (0); iQuadPt < fe.nbQuadPt(); ++iQuadPt )
     {
-        uQuadPt=0.0;
-    	x = fe.quadNode(iQuadPt,0);
-        y = fe.quadNode(iQuadPt,1);
-	    z = fe.quadNode(iQuadPt,2);
-        for (UInt iDof(0); iDof < fe.nbFEDof(); ++iDof )
+        uQuadPt = 0.0;
+        x = fe.quadNode (iQuadPt, 0);
+        y = fe.quadNode (iQuadPt, 1);
+        z = fe.quadNode (iQuadPt, 2);
+        for (UInt iDof (0); iDof < fe.nbFEDof(); ++iDof )
         {
-            UInt dofID = dof.localToGlobalMap( eleID, iDof );
-            uQuadPt += u( dofID ) * fe.phi( iDof, iQuadPt );
+            UInt dofID = dof.localToGlobalMap ( eleID, iDof );
+            uQuadPt += u ( dofID ) * fe.phi ( iDof, iQuadPt );
         }
-        diffQuadPt = uQuadPt - fct( x, y, z );
-        sum += diffQuadPt * diffQuadPt * fe.weightDet( iQuadPt );
+        diffQuadPt = uQuadPt - fct ( x, y, z );
+        sum += diffQuadPt * diffQuadPt * fe.weightDet ( iQuadPt );
     }
     return sum;
 }
@@ -258,36 +258,36 @@ Real elementaryDifferenceL2NormSquare( VectorType & u,
 //! returns the square of the L2 norm of (u-fct) on the current element
 //! for time dependent+vectorial
 template <typename VectorType>
-Real elementaryDifferenceL2NormSquare( VectorType & u,
-                                       boost::function<Real( Real, Real, Real, Real, UInt )> fct,
-                                       const CurrentFE& fe,
-                                       const DOF& dof, const Real t, const UInt nbComp )
+Real elementaryDifferenceL2NormSquare ( VectorType& u,
+                                        boost::function<Real ( Real, Real, Real, Real, UInt ) > fct,
+                                        const CurrentFE& fe,
+                                        const DOF& dof, const Real t, const UInt nbComp )
 {
     // returns the square of the L2 norm of (u-fct) on the current element
 
     UInt eleID ( fe.currentLocalId() );
-    Real sum(0.0);
+    Real sum (0.0);
     Real x;
     Real y;
     Real z;
     Real uQuadPt;
     Real diffQuadPt;
 
-    for ( UInt iQuadPt(0); iQuadPt < fe.nbQuadPt(); ++iQuadPt )
+    for ( UInt iQuadPt (0); iQuadPt < fe.nbQuadPt(); ++iQuadPt )
     {
-    	x = fe.quadNode(iQuadPt,0);
-        y = fe.quadNode(iQuadPt,1);
-	    z = fe.quadNode(iQuadPt,2);
+        x = fe.quadNode (iQuadPt, 0);
+        y = fe.quadNode (iQuadPt, 1);
+        z = fe.quadNode (iQuadPt, 2);
         for (UInt iComp = 0; iComp < nbComp; ++iComp )
         {
-            uQuadPt=0.0;
-            for (UInt iDof(0); iDof < fe.nbFEDof(); ++iDof )
+            uQuadPt = 0.0;
+            for (UInt iDof (0); iDof < fe.nbFEDof(); ++iDof )
             {
-                UInt dofID = dof.localToGlobalMap( eleID, iDof ) + iComp * dof.numTotalDof();
-                uQuadPt += u( dofID ) * fe.phi( iDof, iQuadPt );
+                UInt dofID = dof.localToGlobalMap ( eleID, iDof ) + iComp * dof.numTotalDof();
+                uQuadPt += u ( dofID ) * fe.phi ( iDof, iQuadPt );
             }
-            diffQuadPt = uQuadPt - fct( t, x, y, z, iComp );
-            sum += diffQuadPt * diffQuadPt * fe.weightDet( iQuadPt );
+            diffQuadPt = uQuadPt - fct ( t, x, y, z, iComp );
+            sum += diffQuadPt * diffQuadPt * fe.weightDet ( iQuadPt );
         }
     }
     return sum;
@@ -295,103 +295,103 @@ Real elementaryDifferenceL2NormSquare( VectorType & u,
 
 //! returns the square of the H1 norm of (u-fct) on the current element
 template <typename VectorType, typename UsrFct>
-Real elementaryDifferenceH1NormSquare( const VectorType & u, const UsrFct& fct, const CurrentFE& fe,
-                                       const DOF& dof )
+Real elementaryDifferenceH1NormSquare ( const VectorType& u, const UsrFct& fct, const CurrentFE& fe,
+                                        const DOF& dof )
 {
-    UInt eleID (fe.currentLocalId());
-    Real sum(0.0);
+    UInt eleID (fe.currentLocalId() );
+    Real sum (0.0);
     Real x;
     Real y;
     Real z;
-    Real uQuadPt(0.0);
-    Real diffQuadPt(0.0);
+    Real uQuadPt (0.0);
+    Real diffQuadPt (0.0);
 
     for (UInt iQuadPt (0); iQuadPt < fe.nbQuadPt(); ++iQuadPt )
     {
-        uQuadPt=0.0;
-        Vector graduQuadPt = ZeroVector(fe.nbCoor());
+        uQuadPt = 0.0;
+        Vector graduQuadPt = ZeroVector (fe.nbCoor() );
 
-        x = fe.quadNode(iQuadPt,0);
-		y = fe.quadNode(iQuadPt,1);
-		z = fe.quadNode(iQuadPt,2);
+        x = fe.quadNode (iQuadPt, 0);
+        y = fe.quadNode (iQuadPt, 1);
+        z = fe.quadNode (iQuadPt, 2);
 
 
-        for (UInt iDof(0); iDof < fe.nbFEDof(); ++iDof )
+        for (UInt iDof (0); iDof < fe.nbFEDof(); ++iDof )
         {
-            UInt dofID = dof.localToGlobalMap( eleID, iDof );
-            uQuadPt += u( dofID ) * fe.phi( iDof, iQuadPt );
+            UInt dofID = dof.localToGlobalMap ( eleID, iDof );
+            uQuadPt += u ( dofID ) * fe.phi ( iDof, iQuadPt );
             for (UInt iCoor (0); iCoor < fe.nbCoor(); ++iCoor)
             {
-                graduQuadPt(iCoor) += u( dofID ) * fe.dphi( iDof, iCoor, iQuadPt );
+                graduQuadPt (iCoor) += u ( dofID ) * fe.dphi ( iDof, iCoor, iQuadPt );
             }
         }
 
-        diffQuadPt = uQuadPt - fct( x, y, z );
+        diffQuadPt = uQuadPt - fct ( x, y, z );
 
         Vector diffGradQuadPt = graduQuadPt;
-        for (UInt iCoor(0); iCoor < fe.nbCoor(); ++iCoor)
+        for (UInt iCoor (0); iCoor < fe.nbCoor(); ++iCoor)
         {
-            diffGradQuadPt(iCoor) -= fct.grad(iCoor, x, y, z);
+            diffGradQuadPt (iCoor) -= fct.grad (iCoor, x, y, z);
         }
-        Real sum2 = diffQuadPt*diffQuadPt;
-        for (UInt iCoor(0); iCoor < fe.nbCoor(); ++iCoor)
+        Real sum2 = diffQuadPt * diffQuadPt;
+        for (UInt iCoor (0); iCoor < fe.nbCoor(); ++iCoor)
         {
-            sum2 += diffGradQuadPt(iCoor) * diffGradQuadPt(iCoor);
+            sum2 += diffGradQuadPt (iCoor) * diffGradQuadPt (iCoor);
         }
-        sum += sum2* fe.weightDet( iQuadPt );
+        sum += sum2 * fe.weightDet ( iQuadPt );
     }
     return sum;
 }
 
 //! returns the square of the H1 norm of (u-fct) on the current element  (time-dependent case)
 template <typename VectorType, typename UsrFct>
-Real elementaryDifferenceH1NormSquare( const VectorType & u, const UsrFct& fct, const CurrentFE& fe,
-                                       const DOF& dof, const Real t, const UInt nbComp )
+Real elementaryDifferenceH1NormSquare ( const VectorType& u, const UsrFct& fct, const CurrentFE& fe,
+                                        const DOF& dof, const Real t, const UInt nbComp )
 {
     UInt eleID = fe.currentLocalId();
-    Real sum(0.0);
-    Real sum2(0.0);
+    Real sum (0.0);
+    Real sum2 (0.0);
     Real x;
     Real y;
     Real z;
-    Real uQuadPt(0.0);
-    Real diffQuadPt(0.0);
+    Real uQuadPt (0.0);
+    Real diffQuadPt (0.0);
 
-    for (UInt iQuadPt(0); iQuadPt < fe.nbQuadPt(); ++iQuadPt )
+    for (UInt iQuadPt (0); iQuadPt < fe.nbQuadPt(); ++iQuadPt )
     {
-    	x = fe.quadNode(iQuadPt,0);
-		y = fe.quadNode(iQuadPt,1);
-		z = fe.quadNode(iQuadPt,2);
+        x = fe.quadNode (iQuadPt, 0);
+        y = fe.quadNode (iQuadPt, 1);
+        z = fe.quadNode (iQuadPt, 2);
 
-        for (UInt iComp(0); iComp < nbComp; ++iComp )
+        for (UInt iComp (0); iComp < nbComp; ++iComp )
         {
             uQuadPt = 0.0;
-            Vector graduQuadPt = ZeroVector(fe.nbCoor());
+            Vector graduQuadPt = ZeroVector (fe.nbCoor() );
 
-            for (UInt iDof(0); iDof < fe.nbFEDof(); ++iDof )
+            for (UInt iDof (0); iDof < fe.nbFEDof(); ++iDof )
             {
-                UInt dofID = dof.localToGlobalMap( eleID, iDof ) + iComp * dof.numTotalDof();
-                uQuadPt += u( dofID ) * fe.phi( iDof, iQuadPt );
-                for (UInt iCoor(0); iCoor < fe.nbCoor(); ++iCoor)
+                UInt dofID = dof.localToGlobalMap ( eleID, iDof ) + iComp * dof.numTotalDof();
+                uQuadPt += u ( dofID ) * fe.phi ( iDof, iQuadPt );
+                for (UInt iCoor (0); iCoor < fe.nbCoor(); ++iCoor)
                 {
-                    graduQuadPt(iCoor) += u( dofID ) * fe.dphi( iDof, iCoor, iQuadPt );
+                    graduQuadPt (iCoor) += u ( dofID ) * fe.dphi ( iDof, iCoor, iQuadPt );
                 }
             }
 
-            diffQuadPt = uQuadPt - fct(t, x, y, z, iComp);
+            diffQuadPt = uQuadPt - fct (t, x, y, z, iComp);
 
             Vector diffGradQuadPt = graduQuadPt;
-            for (UInt iCoor(0); iCoor < fe.nbCoor(); ++iCoor)
+            for (UInt iCoor (0); iCoor < fe.nbCoor(); ++iCoor)
             {
-                diffGradQuadPt(iCoor) -= fct.grad(iCoor, t, x, y, z, iComp);
+                diffGradQuadPt (iCoor) -= fct.grad (iCoor, t, x, y, z, iComp);
             }
 
-            sum2 = diffQuadPt*diffQuadPt;
-            for (UInt iCoor(0); iCoor < fe.nbCoor(); ++iCoor)
+            sum2 = diffQuadPt * diffQuadPt;
+            for (UInt iCoor (0); iCoor < fe.nbCoor(); ++iCoor)
             {
-                sum2 += diffGradQuadPt(iCoor) * diffGradQuadPt(iCoor);
+                sum2 += diffGradQuadPt (iCoor) * diffGradQuadPt (iCoor);
             }
-            sum += sum2* fe.weightDet( iQuadPt );
+            sum += sum2 * fe.weightDet ( iQuadPt );
         }
     }
     return sum;
@@ -400,84 +400,86 @@ Real elementaryDifferenceH1NormSquare( const VectorType & u, const UsrFct& fct, 
 //! returns the integral of (u-fct) of u on the current element
 //! for time dependent+vectorial
 template <typename VectorType>
-Real elementaryDifferenceIntegral( VectorType & u,
-                         boost::function<Real( Real, Real, Real, Real, UInt )> fct,
-                         const CurrentFE& fe,
-                         const DOF& dof, const Real t, const UInt nbComp = 1)
+Real elementaryDifferenceIntegral ( VectorType& u,
+                                    boost::function<Real ( Real, Real, Real, Real, UInt ) > fct,
+                                    const CurrentFE& fe,
+                                    const DOF& dof, const Real t, const UInt nbComp = 1)
 {
-    UInt eleID (fe.currentLocalId());
-    Real sum(0.0);
+    UInt eleID (fe.currentLocalId() );
+    Real sum (0.0);
     Real x;
     Real y;
     Real z;
     Real uQuadPt;
-    Real diffQuadPt(0.0);
+    Real diffQuadPt (0.0);
 
-    for ( UInt iQuadPt(0); iQuadPt < fe.nbQuadPt(); ++iQuadPt )
+    for ( UInt iQuadPt (0); iQuadPt < fe.nbQuadPt(); ++iQuadPt )
     {
-    	x = fe.quadNode(iQuadPt,0);
-        y = fe.quadNode(iQuadPt,1);
-	    z = fe.quadNode(iQuadPt,2);
-        uQuadPt =0.0;
-        for(ID component = 0; component < nbComp; component++)
+        x = fe.quadNode (iQuadPt, 0);
+        y = fe.quadNode (iQuadPt, 1);
+        z = fe.quadNode (iQuadPt, 2);
+        uQuadPt = 0.0;
+        for (ID component = 0; component < nbComp; component++)
         {
-			for ( UInt iDof(0); iDof < fe.nbFEDof(); ++iDof )
-			{
-				UInt dofID = dof.localToGlobalMap( eleID, iDof )+ component * dof.numTotalDof();
-				uQuadPt += u( dofID ) * fe.phi( iDof, iQuadPt );
-			}
-			diffQuadPt = uQuadPt - fct( t, x, y, z, component );
+            for ( UInt iDof (0); iDof < fe.nbFEDof(); ++iDof )
+            {
+                UInt dofID = dof.localToGlobalMap ( eleID, iDof ) + component * dof.numTotalDof();
+                uQuadPt += u ( dofID ) * fe.phi ( iDof, iQuadPt );
+            }
+            diffQuadPt = uQuadPt - fct ( t, x, y, z, component );
         }
-        sum += diffQuadPt * fe.weightDet( iQuadPt );
+        sum += diffQuadPt * fe.weightDet ( iQuadPt );
     }
     return sum;
 }
 
 //! returns the integral of u on the current element
 template <typename VectorType>
-Real elementaryIntegral( VectorType & u,
-                         const CurrentFE& fe,
-                         const DOF& dof, const UInt nbComp = 1)
+Real elementaryIntegral ( VectorType& u,
+                          const CurrentFE& fe,
+                          const DOF& dof, const UInt nbComp = 1)
 {
-    UInt eleID (fe.currentLocalId());
-    Real sum(0.0);
-    Real uQuadPt(0.0);
+    UInt eleID (fe.currentLocalId() );
+    Real sum (0.0);
+    Real uQuadPt (0.0);
 
-    for ( UInt iQuadPt(0); iQuadPt < fe.nbQuadPt(); ++iQuadPt )
+    for ( UInt iQuadPt (0); iQuadPt < fe.nbQuadPt(); ++iQuadPt )
     {
         uQuadPt = 0.0;
-        for(ID component = 0; component < nbComp; component++)
+        for (ID component = 0; component < nbComp; component++)
         {
-        	for ( UInt iDof(0); iDof < fe.nbFEDof(); ++iDof )
-			{
-				UInt dofID = dof.localToGlobalMap( eleID, iDof ) + component * dof.numTotalDof();
-				uQuadPt += u( dofID ) * fe.phi( iDof, iQuadPt );
-			}
+            for ( UInt iDof (0); iDof < fe.nbFEDof(); ++iDof )
+            {
+                UInt dofID = dof.localToGlobalMap ( eleID, iDof ) + component * dof.numTotalDof();
+                uQuadPt += u ( dofID ) * fe.phi ( iDof, iQuadPt );
+            }
         }
-        sum += uQuadPt * fe.weightDet( iQuadPt );
+        sum += uQuadPt * fe.weightDet ( iQuadPt );
     }
     return sum;
 }
 
 //! returns the integral of fct on the current element
 inline Real
-elementaryFctIntegral( boost::function<Real( Real, Real, Real,
-                                             Real, UInt )> fct,
-                       const CurrentFE& fe, const Real t, const UInt nbComp = 1)
+elementaryFctIntegral ( boost::function < Real ( Real, Real, Real,
+                                                 Real, UInt ) > fct,
+                        const CurrentFE& fe, const Real t, const UInt nbComp = 1)
 {
-    Real sum(0.0);
+    Real sum (0.0);
     Real x;
     Real y;
     Real z;
 
-    for (UInt iQuadPt(0); iQuadPt < fe.nbQuadPt(); ++iQuadPt )
+    for (UInt iQuadPt (0); iQuadPt < fe.nbQuadPt(); ++iQuadPt )
     {
-    	x = fe.quadNode(iQuadPt,0);
-		y = fe.quadNode(iQuadPt,1);
-		z = fe.quadNode(iQuadPt,2);
+        x = fe.quadNode (iQuadPt, 0);
+        y = fe.quadNode (iQuadPt, 1);
+        z = fe.quadNode (iQuadPt, 2);
 
-		for(ID component = 0; component < nbComp; component++)
-			sum += fct( t, x, y, z,  component ) * fe.weightDet( iQuadPt );
+        for (ID component = 0; component < nbComp; component++)
+        {
+            sum += fct ( t, x, y, z,  component ) * fe.weightDet ( iQuadPt );
+        }
     }
     return sum;
 }

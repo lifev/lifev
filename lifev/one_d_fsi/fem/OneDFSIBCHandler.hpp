@@ -102,7 +102,7 @@ public:
     /*!
      * @param bcHandler OneDFSIBCHandler
      */
-    explicit OneDFSIBCHandler( const OneDFSIBCHandler& bcHandler );
+    explicit OneDFSIBCHandler ( const OneDFSIBCHandler& bcHandler );
 
     //! Destructor
     virtual ~OneDFSIBCHandler() {}
@@ -121,8 +121,8 @@ public:
      *  @param fluxPtr pointer to the flux class.
      *  @param rhs the rhs of the Taylor-Galerking problem.
      */
-    void applyBC( const Real& time, const Real& timeStep, const solution_Type& solution,
-                  const fluxPtr_Type& fluxPtr, vectorPtrContainer_Type& rhs );
+    void applyBC ( const Real& time, const Real& timeStep, const solution_Type& solution,
+                   const fluxPtr_Type& fluxPtr, vectorPtrContainer_Type& rhs );
 
     //! Apply boundary conditions to the rhs of the viscoelastic problem
     /*!
@@ -130,7 +130,7 @@ public:
      *  @param matrix the matrix of the viscoelastic problem.
      *  @param rhs the rhs of the viscoelastic problem.
      */
-    void applyViscoelasticBC(const fluxPtr_Type& fluxPtr, matrix_Type& matrix, vector_Type& rhs );
+    void applyViscoelasticBC (const fluxPtr_Type& fluxPtr, matrix_Type& matrix, vector_Type& rhs );
 
     //@}
 
@@ -145,7 +145,7 @@ public:
      *  @param bcType the type of the boundary condition (\f$Q\f$, \f$A\f$, \f$P\f$, \f$S\f$, \f$W_1\f$, \f$W_2\f$).
      *  @param bcFunction the boundary condition function.
      */
-    void setBC( const bcSide_Type& bcSide, const bcLine_Type& bcLine, const bcType_Type& bcType, const bcFunction_Type& bcFunction );
+    void setBC ( const bcSide_Type& bcSide, const bcLine_Type& bcLine, const bcType_Type& bcType, const bcFunction_Type& bcFunction );
 
     //! Set the default boundary conditions
     /*!
@@ -158,13 +158,13 @@ public:
      *  @param fluxPtr pointer to the flux term of the problem.
      *  @param source pointer to the source term of the problem.
      */
-    void setFluxSource( const fluxPtr_Type& fluxPtr, const sourcePtr_Type& sourcePtr );
+    void setFluxSource ( const fluxPtr_Type& fluxPtr, const sourcePtr_Type& sourcePtr );
 
     //! Set the solution of the problem
     /*!
      *  @param solutionPtr pointer to the solution of the problem.
      */
-    void setSolution( const solutionPtr_Type& solutionPtr );
+    void setSolution ( const solutionPtr_Type& solutionPtr );
 
     //@}
 
@@ -177,7 +177,10 @@ public:
      *  @param bcSide the side of the boundary condition (left or right).
      *  @return the pointer to the boundary conditions on a specific side
      */
-    const bcPtr_Type& bc( const bcSide_Type& bcSide ) const { return M_boundary.find( bcSide )->second; }
+    const bcPtr_Type& bc ( const bcSide_Type& bcSide ) const
+    {
+        return M_boundary.find ( bcSide )->second;
+    }
 
     //! Return true if the boundary condition has been set
     /*!
@@ -185,7 +188,10 @@ public:
      *  @param bcLine the line of the boundary condition (first or second).
      *  @return true if the boundary condition has been set, false otherwise.
      */
-    const bool& bcReady( const bcSide_Type& bcSide, const bcLine_Type& bcLine ) const { return M_boundarySet.find( bcSide )->second.find( bcLine )->second; }
+    const bool& bcReady ( const bcSide_Type& bcSide, const bcLine_Type& bcLine ) const
+    {
+        return M_boundarySet.find ( bcSide )->second.find ( bcLine )->second;
+    }
 
     //@}
 
@@ -194,7 +200,7 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    OneDFSIBCHandler& operator=( const OneDFSIBCHandler& bcHandler );
+    OneDFSIBCHandler& operator= ( const OneDFSIBCHandler& bcHandler );
 
     //@}
 

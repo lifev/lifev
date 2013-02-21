@@ -78,20 +78,20 @@ UInt colour_fun ( const Vector3D& barycentre )
     return 3;
 }
 
-int main(int argc, char* argv[])
+int main (int argc, char* argv[])
 {
 #ifdef HAVE_MPI
-    MPI_Init(&argc, &argv);
-    boost::shared_ptr<Epetra_Comm> comm( new Epetra_MpiComm( MPI_COMM_WORLD ) );
+    MPI_Init (&argc, &argv);
+    boost::shared_ptr<Epetra_Comm> comm ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
 #else
-    boost::shared_ptr<Epetra_Comm> comm( new Epetra_SerialComm );
+    boost::shared_ptr<Epetra_Comm> comm ( new Epetra_SerialComm );
 #endif
 
     typedef RegionMesh<LinearTriangle> mesh_Type;
     typedef boost::shared_ptr< mesh_Type > meshPtr_Type;
 
     // Create the mesh.
-    meshPtr_Type mesh( new mesh_Type ( comm ) );
+    meshPtr_Type mesh ( new mesh_Type ( comm ) );
 
     // Fill the mesh with a structured mesh.
     regularMesh2D ( *mesh, 0, 8, 11 );
@@ -100,28 +100,29 @@ int main(int argc, char* argv[])
     MeshUtility::assignRegionMarkerID ( *mesh, colour_fun );
 
     // Count the number of elements with colour 2
-    const UInt colourElements = mesh->elementList().countElementsWithMarkerID( 2, std::equal_to<markerID_Type>() );
+    const UInt colourElements = mesh->elementList().countElementsWithMarkerID ( 2, std::equal_to<markerID_Type>() );
 
     // Number of elements with colour 2
     const UInt exactNumber = 44;
 
-    { // Needed to correctly destroy the exporterHDF5
+    {
+        // Needed to correctly destroy the exporterHDF5
 
-    // Set the exporter for the mesh region.
+        // Set the exporter for the mesh region.
 #ifdef HAVE_HDF5
-    ExporterHDF5< mesh_Type > exporter;
+        ExporterHDF5< mesh_Type > exporter;
 #else
-    ExporterEmpty< mesh_Type > exporter;
+        ExporterEmpty< mesh_Type > exporter;
 #endif
 
-    // Set the mesh.
-    exporter.setMeshProcId( mesh, comm->MyPID() );
+        // Set the mesh.
+        exporter.setMeshProcId ( mesh, comm->MyPID() );
 
-    // Export the region marker ID.
-    exporter.exportRegionMarkerID( mesh, comm );
+        // Export the region marker ID.
+        exporter.exportRegionMarkerID ( mesh, comm );
 
-    // Do the export.
-    exporter.postProcess( 0 );
+        // Do the export.
+        exporter.postProcess ( 0 );
 
     } // Needed to correctly destroy the exporterHDF5
 
@@ -131,10 +132,10 @@ int main(int argc, char* argv[])
 
     if ( colourElements == exactNumber )
     {
-        return( EXIT_SUCCESS );
+        return ( EXIT_SUCCESS );
     }
     else
     {
-        return( EXIT_FAILURE );
+        return ( EXIT_FAILURE );
     }
 }

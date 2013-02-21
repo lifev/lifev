@@ -27,28 +27,39 @@ public:
 
     cvs_iterator() {} // end iterator
 
-    ~cvs_iterator() { if ( !!entries_file ) entries_file.close(); }
-
-    cvs_iterator( const boost::filesystem::path & dir_path ) : dir_path(dir_path)
+    ~cvs_iterator()
     {
-        boost::filesystem::path entries_file_path( dir_path / "CVS/Entries" );
-        entries_file.open( entries_file_path );
+        if ( !!entries_file )
+        {
+            entries_file.close();
+        }
+    }
+
+    cvs_iterator ( const boost::filesystem::path& dir_path ) : dir_path (dir_path)
+    {
+        boost::filesystem::path entries_file_path ( dir_path / "CVS/Entries" );
+        entries_file.open ( entries_file_path );
         if ( !entries_file )
-            throw std::string( "could not open: " ) + entries_file_path.string();
+        {
+            throw std::string ( "could not open: " ) + entries_file_path.string();
+        }
         ++*this;
     }
 
-    const boost::filesystem::path & operator*() const { return value_path; }
-
-    cvs_iterator & operator++()
+    const boost::filesystem::path& operator*() const
     {
-        assert( !!entries_file );
+        return value_path;
+    }
+
+    cvs_iterator& operator++()
+    {
+        assert ( !!entries_file );
         std::string contents;
         do
         {
             do
             {
-                std::getline( entries_file, contents );
+                std::getline ( entries_file, contents );
                 if ( entries_file.eof() )
                 {
                     entries_file.close();
@@ -57,21 +68,28 @@ public:
                 }
             }
             while ( contents == "D" );
-            if ( contents[0] == 'D' ) contents.erase( 0, 1 );
+            if ( contents[0] == 'D' )
+            {
+                contents.erase ( 0, 1 );
+            }
             value_path = dir_path
-                         / boost::filesystem::path( contents.substr( 1, contents.find( '/', 1 ) ), boost::filesystem::no_check );
+                         / boost::filesystem::path ( contents.substr ( 1, contents.find ( '/', 1 ) ), boost::filesystem::no_check );
 
             // in case entries file is mistaken, do until value_path actually found
         }
-        while ( !boost::filesystem::exists( value_path ) );
+        while ( !boost::filesystem::exists ( value_path ) );
         return *this;
     }
 
-    bool operator==( const cvs_iterator & rhs )
-    { return value_path.string() == rhs.value_path.string(); }
+    bool operator== ( const cvs_iterator& rhs )
+    {
+        return value_path.string() == rhs.value_path.string();
+    }
 
-    bool operator!=( const cvs_iterator & rhs )
-    { return value_path.string() != rhs.value_path.string(); }
+    bool operator!= ( const cvs_iterator& rhs )
+    {
+        return value_path.string() != rhs.value_path.string();
+    }
 
 };
 }

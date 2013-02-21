@@ -88,7 +88,7 @@ public:
     /*!
      * @param StructuralConstitutiveLawData - StructuralConstitutiveLawData
      */
-    StructuralConstitutiveLawData( const StructuralConstitutiveLawData& structuralConstitutiveLawData );
+    StructuralConstitutiveLawData ( const StructuralConstitutiveLawData& structuralConstitutiveLawData );
 
     //@}
 
@@ -100,7 +100,7 @@ public:
     /*!
      * @param StructuralConstitutiveLawData - StructuralConstitutiveLawData
      */
-    StructuralConstitutiveLawData& operator=( const StructuralConstitutiveLawData& structuralConstitutiveLawData );
+    StructuralConstitutiveLawData& operator= ( const StructuralConstitutiveLawData& structuralConstitutiveLawData );
 
     //@}
 
@@ -113,10 +113,10 @@ public:
      * @param dataFile data file
      * @param section section of the file
      */
-    void setup( const GetPot& dataFile, const std::string& section = "solid" );
+    void setup ( const GetPot& dataFile, const std::string& section = "solid" );
 
     //! Display the values
-    void showMe( std::ostream& output = std::cout ) const;
+    void showMe ( std::ostream& output = std::cout ) const;
 
     //@}
 
@@ -128,66 +128,101 @@ public:
     /*!
      * @param TimeData shared_ptr to TimeData container
      */
-    void setTimeData( const timePtr_Type timeData ) { M_time = timeData; }
+    void setTimeData ( const timePtr_Type timeData )
+    {
+        M_time = timeData;
+    }
 
     //! Set data time advance container
     /*!
      * @param timeAdvanceData shared_ptr to TimeAdvanceData container
      */
-    void setTimeAdvanceData( const timeAdvancePtr_Type timeAdvanceData ) { M_timeAdvance = timeAdvanceData; }
+    void setTimeAdvanceData ( const timeAdvancePtr_Type timeAdvanceData )
+    {
+        M_timeAdvance = timeAdvanceData;
+    }
 
     //! Set data external pressure for the external surface of the solid
     /*!
      * @param externalPressure external pressure value
      */
-    void setExternalPressure( const Real& externalPressure ) { M_externalPressure = externalPressure; }
+    void setExternalPressure ( const Real& externalPressure )
+    {
+        M_externalPressure = externalPressure;
+    }
 
     //! Set density
     /*!
      * @param density solid density value
      */
-    void setDensity( const Real& density ) { M_density = density; }
+    void setDensity ( const Real& density )
+    {
+        M_density = density;
+    }
 
     //! Set thickness
     /*!
      * @param thickness solid thickness value
      */
-    void setThickness( const Real& thickness ) { M_thickness = thickness; }
+    void setThickness ( const Real& thickness )
+    {
+        M_thickness = thickness;
+    }
 
     //! Set poisson
     /*!
      * @param poisson solid poisson value
      * @param material material ID (1 by default)
      */
-    void setPoisson( const Real& poisson, const UInt& material ) { M_materialsFlagSet = true; M_poisson[material] = poisson; }
+    void setPoisson ( const Real& poisson, const UInt& material )
+    {
+        M_materialsFlagSet = true;
+        M_poisson[material] = poisson;
+    }
 
     //! Set Young modulus
     /*!
      * @param Solid Young modulus value
      * @param material material ID (1 by default)
      */
-    void setYoung( const Real& young, const UInt& material ) { M_materialsFlagSet = true; M_young[material] = young; }
+    void setYoung ( const Real& young, const UInt& material )
+    {
+        M_materialsFlagSet = true;
+        M_young[material] = young;
+    }
 
     //! Set bulk modulus (nearly incompressible materials)
     /*!
      * @param bulk modulus value
      * @param material material ID (1 by default)
      */
-    void setBulk( const Real& bulk, const UInt& material ) { M_materialsFlagSet = true; M_bulk[material] = bulk; }
+    void setBulk ( const Real& bulk, const UInt& material )
+    {
+        M_materialsFlagSet = true;
+        M_bulk[material] = bulk;
+    }
 
     //! Set Alfa modulus (nearly incompressible materials)
     /*!
      * @param Alfa modulus value
      * @param material material ID (1 by default)
      */
-    void setAlpha( const Real& alpha, const UInt& material ) { M_materialsFlagSet = true; M_alpha[material] = alpha; }
+    void setAlpha ( const Real& alpha, const UInt& material )
+    {
+        M_materialsFlagSet = true;
+        M_alpha[material] = alpha;
+    }
 
     //! Set Gamma (nearly imcompressible materials)
     /*!
      * @param Gamma modulus value
      * @param material material ID (1 by default)
      */
-    void setGamma( const Real& gamma, const UInt& material ) { M_materialsFlagSet = true; M_gamma[material] = gamma; }
+    void setGamma ( const Real& gamma, const UInt& material )
+    {
+        M_materialsFlagSet = true;
+        M_gamma[material] = gamma;
+    }
 
     //@}
 
@@ -199,111 +234,141 @@ public:
     /*!
      * @return shared_ptr to TimeData container
      */
-    timePtr_Type dataTime() const { return M_time; }
+    timePtr_Type dataTime() const
+    {
+        return M_time;
+    }
 
     //! Get data time advance container
     /*!
      * @return shared_ptr to TimeAdvanceData container
      */
-    timeAdvancePtr_Type dataTimeAdvance() const { return M_timeAdvance; }
+    timeAdvancePtr_Type dataTimeAdvance() const
+    {
+        return M_timeAdvance;
+    }
 
     //! Get the external pressure to be applied to the external surface of the solid
     /*!
      * @return the value of the external pressure
      */
-    const Real& externalPressure() const { return M_externalPressure; }
+    const Real& externalPressure() const
+    {
+        return M_externalPressure;
+    }
 
     //! Get solid density
     /*!
      * @return Solid density
      */
-    const Real& rho() const { return M_density; }
+    const Real& rho() const
+    {
+        return M_density;
+    }
 
     //! Get solid thickness
     /*!
      * @return Solid thickness
      */
-    const Real& thickness() const { return M_thickness; }
+    const Real& thickness() const
+    {
+        return M_thickness;
+    }
 
     //! Get solid poisson coefficient
     /*!
      * @param material material ID (1 by default)
      * @return Solid poisson coefficient
      */
-    Real poisson( const UInt& material ) const;
+    Real poisson ( const UInt& material ) const;
 
     //! Get solid young modulus
     /*!
      * @param material material ID (1 by default)
      * @return Solid young modulus
      */
-    Real young( const UInt& material ) const;
+    Real young ( const UInt& material ) const;
 
     //! Get solid first lame coefficient
     /*!
      * @param material material ID (1 by default)
      * @return Solid first Lame coefficient
      */
-    Real lambda( const UInt& material ) const;
+    Real lambda ( const UInt& material ) const;
 
     //! Get solid second Lame coefficient
     /*!
      * @param material material ID (1 by default)
      * @return Solid second Lame coefficient
      */
-    Real mu( const UInt& material ) const;
+    Real mu ( const UInt& material ) const;
 
     //! Get bulk modulus (nearly incompressible materials)
     /*!
      * @param material material ID (1 by default)
      * @return bulk modulus
      */
-    Real bulk( const UInt& material = 1 ) const;
+    Real bulk ( const UInt& material = 1 ) const;
 
     //! Get alpha parameter (nearly incompressible materials)
     /*!
      * @param material material ID (1 by default)
      * @return alpha parameter (neraly incompressible materials)
      */
-    Real alpha( const UInt& material = 1 ) const;
+    Real alpha ( const UInt& material = 1 ) const;
 
     //! Get gamma parameter (nearly incompressible materials)
     /*!
      * @param material material ID (1 by default)
      * @return gamma parameter (nearly incompressible materials)
      */
-    Real gamma( const UInt& material = 1 ) const;
+    Real gamma ( const UInt& material = 1 ) const;
 
     //! Get FE order
     /*!
      * @return FE order
      */
-    const std::string& order() const { return M_order; }
+    const std::string& order() const
+    {
+        return M_order;
+    }
 
     //! Get verbose level
     /*!
      * @return verbose level
      */
-    const UInt& verbose() const { return M_verbose; }
+    const UInt& verbose() const
+    {
+        return M_verbose;
+    }
 
     //! Get solid type
     /*!
      * @return solid type
      */
-    const std::string& solidType() { return M_solidType; }
+    const std::string& solidType()
+    {
+        return M_solidType;
+    }
 
     //! Get whether to use or not exact Jacobian
     /*!
      * @return true: if using exact Jacobian, false: otherwise
      */
-    const bool& getUseExactJacobian() const { return M_useExactJacobian; }
+    const bool& getUseExactJacobian() const
+    {
+        return M_useExactJacobian;
+    }
 
 
     //! Get the vector of the set material_flags
     /*!
      * @return the vector of the material_flags set in the data file
      */
-    const vectorFlags_Type& vectorFlags() const { return M_vectorMaterialFlags; }
+    const vectorFlags_Type& vectorFlags() const
+    {
+        return M_vectorMaterialFlags;
+    }
 
     //@}
 

@@ -98,10 +98,10 @@ public:
       \param Offset: the smallest DOF numbering. It might be used if we want the
       degrees of freedom numbering start from a specific value.
     */
-    DOF( const DOFLocalPattern& fePattern);
+    DOF ( const DOFLocalPattern& fePattern);
 
     //! Copy constructor
-    DOF( const DOF & dof2 );
+    DOF ( const DOF& dof2 );
 
     //! Constructor accepting a mesh as parameter
     /*!
@@ -111,7 +111,7 @@ public:
       degrees of freedom numbering start from a specific value.
     */
     template <typename MeshType>
-    DOF( MeshType& mesh, const DOFLocalPattern& fePattern);
+    DOF ( MeshType& mesh, const DOFLocalPattern& fePattern);
 
     //@}
 
@@ -125,14 +125,14 @@ public:
       Updates the LocaltoGlobal array
     */
     template <typename MeshType>
-    void update( MeshType & );
+    void update ( MeshType& );
 
     //! Build the globalElements list
     /*!
       @param mesh A RegionMesh
     */
     template <typename MeshType>
-    std::vector<Int> globalElements( MeshType & mesh );
+    std::vector<Int> globalElements ( MeshType& mesh );
 
     /*!
       Returns the global numbering of a DOF, given an boundary facet and the
@@ -141,15 +141,15 @@ public:
       \param localDOF the local DOF numbering
       \return The global numbering of the DOF
     */
-     ID localToGlobalMapByBdFacet(const ID& facetId, const ID& localDof ) const;
+    ID localToGlobalMapByBdFacet (const ID& facetId, const ID& localDof ) const;
 
     inline std::vector<ID> localToGlobalMapOnBdFacet(const ID& facetId) const{
         return M_localToGlobalByBdFacet[facetId];
     }
 
     //! Ouput
-    void showMe( std::ostream & out = std::cout, bool verbose = false ) const;
-    void showMeByBdFacet(std::ostream& out = std::cout, bool verbose = false) const;
+    void showMe ( std::ostream& out = std::cout, bool verbose = false ) const;
+    void showMeByBdFacet (std::ostream& out = std::cout, bool verbose = false) const;
 
     //@}
 
@@ -157,7 +157,7 @@ public:
     //! @name Set Methods
     //@{
 
-    void setTotalDof(const UInt& totalDof)
+    void setTotalDof (const UInt& totalDof)
     {
         M_totalDof = totalDof;
     }
@@ -231,7 +231,7 @@ private:
 
     typedef ArraySimple<UInt> Container_Type;
 
-    typedef ID ( *facetToPointPtr_Type )( ID const& localFace, ID const& point );
+    typedef ID ( *facetToPointPtr_Type ) ( ID const& localFace, ID const& point );
 
     //! The pattern of the local degrees of freedom.
     const DOFLocalPattern& M_elementDofPattern;
@@ -267,18 +267,20 @@ private:
 
 //! Constructor that builds the localToglobal table
 template <typename MeshType>
-DOF::DOF( MeshType& mesh, const DOFLocalPattern& fePattern):
-        M_elementDofPattern       ( fePattern ),
-        M_totalDof( 0 ),
-        M_numElement     ( 0 ),
-        M_nbLocalPeaks      ( 0 ),
-        M_nbLocalRidges      ( 0 ),
-        M_nbLocalFacets      ( 0 ),
-        M_localToGlobal     ()
+DOF::DOF ( MeshType& mesh, const DOFLocalPattern& fePattern) :
+    M_elementDofPattern       ( fePattern ),
+    M_totalDof ( 0 ),
+    M_numElement     ( 0 ),
+    M_nbLocalPeaks      ( 0 ),
+    M_nbLocalRidges      ( 0 ),
+    M_nbLocalFacets      ( 0 ),
+    M_localToGlobal     ()
 {
     for ( UInt i = 0; i < 5; ++i )
+    {
         M_dofPositionByEntity[ i ] = 0;
-    update( mesh );
+    }
+    update ( mesh );
 }
 
 // ===================================================
@@ -287,7 +289,7 @@ DOF::DOF( MeshType& mesh, const DOFLocalPattern& fePattern):
 
 //! Build the localToGlobal table
 template <typename MeshType>
-void DOF::update( MeshType& mesh )
+void DOF::update ( MeshType& mesh )
 {
 
     typedef typename MeshType::elementShape_Type geoShape_Type;
@@ -323,7 +325,7 @@ void DOF::update( MeshType& mesh )
                 + nbLocalDofPerFacet * M_nbLocalFacets;
 
     // Consistency check
-    ASSERT_PRE( nldof == UInt( M_elementDofPattern.nbLocalDof() ), "Something wrong in FE specification" ) ;
+    ASSERT_PRE ( nldof == UInt ( M_elementDofPattern.nbLocalDof() ), "Something wrong in FE specification" ) ;
 
     // Global total of degrees of freedom
     M_totalDof = nbGlobalElements * nbLocalDofPerElement
@@ -332,36 +334,40 @@ void DOF::update( MeshType& mesh )
         + nbGlobalFacets * nbLocalDofPerFacet;
 
     // Reshape the container to fit the needs
-    M_localToGlobal.reshape( nldof, M_numElement );
+    M_localToGlobal.reshape ( nldof, M_numElement );
 
     // Make sure the mesh has everything needed
-    bool update_ridges( nbLocalDofPerRidge != 0 && ! mesh.hasLocalRidges() && (MeshType::S_geoDimensions == 3));
+    bool update_ridges ( nbLocalDofPerRidge != 0 && ! mesh.hasLocalRidges() && (MeshType::S_geoDimensions == 3) );
     if ( update_ridges )
+    {
         mesh.updateElementRidges();
+    }
 
-    bool update_facets( nbLocalDofPerFacet != 0 && ! mesh.hasLocalFacets() );
+    bool update_facets ( nbLocalDofPerFacet != 0 && ! mesh.hasLocalFacets() );
     if ( update_facets )
+    {
         mesh.updateElementFacets();
+    }
 
-    UInt gcount( 0 );
+    UInt gcount ( 0 );
     UInt lcount;
     UInt lc;
 
     // Peak Based DOFs
     M_dofPositionByEntity[ 0 ] = gcount;
     if ( nbLocalDofPerPeak > 0 )
-        for ( ie = 0; ie < M_numElement; ++ie )//for each element
+        for ( ie = 0; ie < M_numElement; ++ie ) //for each element
         {
             lc = 0;
-            for ( i = 0; i < M_nbLocalPeaks; ++i )//for each vertex in the element
+            for ( i = 0; i < M_nbLocalPeaks; ++i ) //for each vertex in the element
             {
-                ID pID = mesh.element( ie ).point( i ).id();
-                for ( l = 0; l < nbLocalDofPerPeak; ++l )//for each degree of freedom per vertex
+                ID pID = mesh.element ( ie ).point ( i ).id();
+                for ( l = 0; l < nbLocalDofPerPeak; ++l ) //for each degree of freedom per vertex
                 {
                     // label of the ith point of the mesh element
                     UInt dof = gcount +  pID * nbLocalDofPerPeak + l;
-                    ASSERT( dof != NotAnId, "the dof is not properly set" );
-                    M_localToGlobal( lc++, ie ) = dof;
+                    ASSERT ( dof != NotAnId, "the dof is not properly set" );
+                    M_localToGlobal ( lc++, ie ) = dof;
                 }
             }
         }
@@ -370,19 +376,19 @@ void DOF::update( MeshType& mesh )
     gcount += nbLocalDofPerPeak * nbGlobalPeaks;//dof per vertex * total # vertices
     lcount = nbLocalDofPerPeak * M_nbLocalPeaks;
     M_dofPositionByEntity[ 1 ] = gcount;
-    
+
     if ( nbLocalDofPerRidge > 0 )
         for ( ie = 0; ie < M_numElement; ++ie )
         {
             lc = lcount;
             for ( i = 0; i < M_nbLocalRidges; ++i )
             {
-                UInt rID = mesh.ridge(mesh.localRidgeId(ie, i)).id();
+                UInt rID = mesh.ridge (mesh.localRidgeId (ie, i) ).id();
                 for ( l = 0; l < nbLocalDofPerRidge; ++l )
                 {
                     UInt dof = gcount +  rID * nbLocalDofPerRidge + l;
-                    ASSERT( dof != NotAnId, "the dof is not properly set" );
-                    M_localToGlobal( lc++, ie ) = dof;
+                    ASSERT ( dof != NotAnId, "the dof is not properly set" );
+                    M_localToGlobal ( lc++, ie ) = dof;
                 }
             }
         }
@@ -399,12 +405,12 @@ void DOF::update( MeshType& mesh )
 
             for ( i = 0; i < M_nbLocalFacets; ++i )
             {
-                UInt fID = mesh.facet( mesh.localFacetId( ie, i ) ).id();
+                UInt fID = mesh.facet ( mesh.localFacetId ( ie, i ) ).id();
                 for ( l = 0; l < nbLocalDofPerFacet; ++l )
                 {
                     UInt dof = gcount +  fID * nbLocalDofPerFacet + l;
-                    ASSERT( dof != NotAnId, "the dof is not properly set" );
-                    M_localToGlobal( lc++, ie ) = dof;
+                    ASSERT ( dof != NotAnId, "the dof is not properly set" );
+                    M_localToGlobal ( lc++, ie ) = dof;
                 }
             }
         }
@@ -418,25 +424,25 @@ void DOF::update( MeshType& mesh )
         for ( ie = 0; ie < M_numElement; ++ie )
         {
             lc = lcount;
-            ID eID = mesh.element( ie ).id();
+            ID eID = mesh.element ( ie ).id();
             for ( l = 0; l < nbLocalDofPerElement; ++l )
             {
                 UInt dof = gcount +  eID * nbLocalDofPerElement + l;
-                ASSERT( dof != NotAnId, "the dof is not properly set" );
-                M_localToGlobal( lc++, ie ) = dof;
+                ASSERT ( dof != NotAnId, "the dof is not properly set" );
+                M_localToGlobal ( lc++, ie ) = dof;
             }
         }
     gcount += nbGlobalElements * nbLocalDofPerElement;
     M_dofPositionByEntity[ 4 ] = gcount;
 
-    ASSERT_POS( gcount == M_totalDof , "Something wrong in Dof Setup " << gcount  << " " << M_totalDof ) ;
+    ASSERT_POS ( gcount == M_totalDof , "Something wrong in Dof Setup " << gcount  << " " << M_totalDof ) ;
 
     //Building map of global DOF on boundary facets
     UInt nBElemRidges = geoBShape_Type::S_numRidges; // Number of boundary facet's vertices
     UInt nBElemFacets = geoBShape_Type::S_numFacets;    // Number of boundary facet's edges
-    
-    std::vector<ID> globalDOFOnBdFacet(nbLocalDofPerPeak*nBElemRidges + nBElemFacets*nbLocalDofPerRidge + nbLocalDofPerFacet);
-    M_localToGlobalByBdFacet.resize(mesh.numBoundaryFacets());
+
+    std::vector<ID> globalDOFOnBdFacet (nbLocalDofPerPeak * nBElemRidges + nBElemFacets * nbLocalDofPerRidge + nbLocalDofPerFacet);
+    M_localToGlobalByBdFacet.resize (mesh.numBoundaryFacets() );
 
     for ( ID iBoundaryFacet = 0 ; iBoundaryFacet < mesh.numBoundaryFacets(); ++iBoundaryFacet )
     {
@@ -482,7 +488,7 @@ void DOF::update( MeshType& mesh )
 }
 
 template <typename MeshType>
-std::vector<Int> DOF::globalElements( MeshType& mesh )
+std::vector<Int> DOF::globalElements ( MeshType& mesh )
 {
 /*
     std::set<Int> dofNumberSet;

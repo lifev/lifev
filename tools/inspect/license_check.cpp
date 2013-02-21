@@ -10,7 +10,7 @@
 
 namespace
 {
-boost::regex license_regex(
+boost::regex license_regex (
     "General(\\s+|\\s+#\\s*|\\s+//\\s*)Public(\\s+|\\s+#\\s*|\\s+//\\s*)License",
     boost::regbase::normal | boost::regbase::icase);
 
@@ -20,19 +20,19 @@ namespace boost
 {
 namespace inspect
 {
-license_check::license_check() : m_files_with_errors(0)
+license_check::license_check() : m_files_with_errors (0)
 {
 }
 
-void license_check::inspect(
-    const string & library_name,
-    const path & full_path,   // example: c:/foo/boost/filesystem/path.hpp
-    const string & contents )     // contents of file to be inspected
+void license_check::inspect (
+    const string& library_name,
+    const path& full_path,    // example: c:/foo/boost/filesystem/path.hpp
+    const string& contents )      // contents of file to be inspected
 {
-    if ( !boost::regex_search( contents, license_regex ) )
+    if ( !boost::regex_search ( contents, license_regex ) )
     {
         ++m_files_with_errors;
-        error( library_name, full_path, desc() );
+        error ( library_name, full_path, desc() );
     }
 }
 } // namespace inspect

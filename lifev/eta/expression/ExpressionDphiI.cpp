@@ -55,7 +55,7 @@ ExpressionDphiI::ExpressionDphiI()
 {}
 
 
-ExpressionDphiI::ExpressionDphiI(const ExpressionDphiI&)
+ExpressionDphiI::ExpressionDphiI (const ExpressionDphiI&)
     : base_Type()
 {}
 
@@ -68,7 +68,7 @@ ExpressionDphiI::~ExpressionDphiI()
 // ===================================================
 
 void
-ExpressionDphiI::display(std::ostream& out)
+ExpressionDphiI::display (std::ostream& out)
 {
     out << "dphi_i";
 }

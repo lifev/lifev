@@ -48,15 +48,15 @@ namespace ExpressionAssembly
 // Constructors & Destructor
 // ===================================================
 
-ExpressionScalar::ExpressionScalar(const Real& myValue)
+ExpressionScalar::ExpressionScalar (const Real& myValue)
     : base_Type(),
-      M_value(myValue)
+      M_value (myValue)
 {}
 
 
-ExpressionScalar::ExpressionScalar(const ExpressionScalar& expr)
+ExpressionScalar::ExpressionScalar (const ExpressionScalar& expr)
     : base_Type(),
-      M_value(expr.M_value)
+      M_value (expr.M_value)
 {}
 
 
@@ -68,7 +68,7 @@ ExpressionScalar::~ExpressionScalar()
 // ===================================================
 
 void
-ExpressionScalar::display(std::ostream& out)
+ExpressionScalar::display (std::ostream& out)
 {
     out << "scalar";
 }

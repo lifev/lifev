@@ -43,18 +43,18 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 TimeAdvanceData::TimeAdvanceData( ) :
-        M_orderBDF      ( 1 ),
-        M_theta         ( 0.25 ),
-        M_gamma         ( 0.5 )
+    M_orderBDF      ( 1 ),
+    M_theta         ( 0.25 ),
+    M_gamma         ( 0.5 )
 {
 }
 
-TimeAdvanceData::TimeAdvanceData( const GetPot& dataFile, const std::string& section )
+TimeAdvanceData::TimeAdvanceData ( const GetPot& dataFile, const std::string& section )
 {
-    setup( dataFile, section );
+    setup ( dataFile, section );
 }
 
-TimeAdvanceData::TimeAdvanceData( const TimeAdvanceData& timeData )
+TimeAdvanceData::TimeAdvanceData ( const TimeAdvanceData& timeData )
 {
     M_orderBDF       = timeData.M_orderBDF;
     M_theta          = timeData.M_theta;
@@ -65,15 +65,15 @@ TimeAdvanceData::TimeAdvanceData( const TimeAdvanceData& timeData )
 // Methods
 // ===================================================
 void
-TimeAdvanceData::setup( const GetPot& dataFile, const std::string& section )
+TimeAdvanceData::setup ( const GetPot& dataFile, const std::string& section )
 {
-    M_orderBDF = dataFile(( section + "/BDF_order" ).data(), 1 );
-    M_theta = dataFile((section + "/theta").data(),0.25);
-    M_gamma = dataFile(( section + "/gamma").data(),0.5);
+    M_orderBDF = dataFile ( ( section + "/BDF_order" ).data(), 1 );
+    M_theta = dataFile ( (section + "/theta").data(), 0.25);
+    M_gamma = dataFile ( ( section + "/gamma").data(), 0.5);
 }
 
 void
-TimeAdvanceData::showMe( std::ostream& output ) const
+TimeAdvanceData::showMe ( std::ostream& output ) const
 {
     output << "\n*** TimeAdvanceData: values for user-defined data\n";
 
@@ -91,8 +91,8 @@ TimeAdvanceData::coefficientsNewmark()
 {
     std::vector<Real> coefficients;
 
-    coefficients.push_back( M_theta );
-    coefficients.push_back( M_gamma );
+    coefficients.push_back ( M_theta );
+    coefficients.push_back ( M_gamma );
 
     return  coefficients;
 }

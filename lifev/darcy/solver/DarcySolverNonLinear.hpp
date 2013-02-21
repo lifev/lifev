@@ -245,7 +245,7 @@ namespace LifeV
 */
 template < typename MeshType >
 class DarcySolverNonLinear :
-        virtual public DarcySolverLinear < MeshType >
+    virtual public DarcySolverLinear < MeshType >
 {
 
 public:
@@ -331,19 +331,19 @@ public:
       the last field set, by the user, plus one. So the inverse of permeability
       can access to the primal variable, for example, with
       \code
-// Inverse of permeability matrix
-typedef RegionMesh < LinearTriangle > regionMesh_Type;
-class inversePermeability : public FEFunction < regionMesh_Type, MapEpetra, Matrix >
+    // Inverse of permeability matrix
+    typedef RegionMesh < LinearTriangle > regionMesh_Type;
+    class inversePermeability : public FEFunction < regionMesh_Type, MapEpetra, Matrix >
 
-{
-public:
+    {
+    public:
     virtual Matrix eval ( const UInt& iElem, const Vector3D& P, const Real& time = 0. ) const;
-};
+    };
       \endcode
       Its implementation is
       \code
-Matrix inversePermeability::eval ( const UInt& iElem, const Vector3D& P, const Real& time ) const
-{
+    Matrix inversePermeability::eval ( const UInt& iElem, const Vector3D& P, const Real& time ) const
+    {
     Matrix invK ( 2, 2 );
 
     Real unkown_n = scalarField(0).eval( iElem, P, time );
@@ -355,7 +355,7 @@ Matrix inversePermeability::eval ( const UInt& iElem, const Vector3D& P, const R
     invK ( 1, 1 ) = 1. / ( unkown_n * unkown_n + 1. );
 
     return invK;
-}
+    }
       \endcode
       obtaining a tensor with the non linearity in the position \f$ (1,1) \f$
       the function \f$ \left[K^{-1}\right]_{1,1} = u^2 + 1 \f$.
@@ -365,7 +365,7 @@ Matrix inversePermeability::eval ( const UInt& iElem, const Vector3D& P, const R
       If the user has set \f$ m \f$ scalar fields prior to calling setInversePermeability, then the code
       should be
       \code
-const Real unkown_n = scalarField(m).eval( iElem, P, time );
+    const Real unkown_n = scalarField(m).eval( iElem, P, time );
       \endcode
       to access the primal at previous step.
       @note For an example of the usage see darcy_nonlinear and
@@ -564,14 +564,14 @@ private:
 // Complete constructor.
 template < typename MeshType >
 DarcySolverNonLinear < MeshType >::
-DarcySolverNonLinear ( ):
-        // Standard Darcy solver constructor.
-        darcySolverLinear_Type::DarcySolverLinear  ( ),
-        // Non-linear stuff.
-        M_fixedPointMaxIteration       ( static_cast<UInt>(10) ),
-        M_fixedPointNumIteration       ( static_cast<UInt>(0) ),
-        M_fixedPointTolerance          ( static_cast<Real>(1.e-8) ),
-        M_fixedPointResidual           ( M_fixedPointTolerance + static_cast<Real>(1.) )
+DarcySolverNonLinear ( ) :
+    // Standard Darcy solver constructor.
+    darcySolverLinear_Type::DarcySolverLinear  ( ),
+    // Non-linear stuff.
+    M_fixedPointMaxIteration       ( static_cast<UInt> (10) ),
+    M_fixedPointNumIteration       ( static_cast<UInt> (0) ),
+    M_fixedPointTolerance          ( static_cast<Real> (1.e-8) ),
+    M_fixedPointResidual           ( M_fixedPointTolerance + static_cast<Real> (1.) )
 {
 } // Constructor
 
@@ -601,17 +601,17 @@ DarcySolverNonLinear < MeshType >::
 setupNonLinear ()
 {
 
-    const typename darcySolverLinear_Type::data_Type::data_Type& dataFile = *( this->M_data->dataFilePtr() );
+    const typename darcySolverLinear_Type::data_Type::data_Type& dataFile = * ( this->M_data->dataFilePtr() );
 
     // Path for the non linear stuff in the data file.
     const std::string dataPath = this->M_data->section() + "/non-linear";
 
     // Set the maximum number of iteration for the fixed point iteration scheme.
-    const UInt maxIter = dataFile( ( dataPath + "/fixed_point_iteration" ).data(), 10 );
+    const UInt maxIter = dataFile ( ( dataPath + "/fixed_point_iteration" ).data(), 10 );
     setFixedPointMaxIteration ( maxIter );
 
     // Set the tollerance for the fixed point iteration scheme.
-    const Real tol = dataFile( ( dataPath + "/fixed_point_toll" ).data(), 1.e-8 );
+    const Real tol = dataFile ( ( dataPath + "/fixed_point_toll" ).data(), 1.e-8 );
     setFixedPointTolerance ( tol );
 
 } // setupNonLinear
@@ -624,7 +624,7 @@ fixedPoint ()
 {
 
     // Current iteration.
-    M_fixedPointNumIteration = static_cast<UInt>(0);
+    M_fixedPointNumIteration = static_cast<UInt> (0);
 
     // Error between two iterations, it is the relative error between two step of the primal vector
     M_fixedPointResidual = fixedPointTolerance() + 1.;
@@ -669,7 +669,7 @@ fixedPoint ()
                   << std::endl << "Max of iterations " << M_fixedPointMaxIteration
                   << std::endl << "Number of iterations " << M_fixedPointNumIteration
                   << std::endl;
-        exit(1);
+        exit (1);
     }
 
 } // fixedPoint
@@ -684,7 +684,7 @@ setPrimalZeroIteration ( const scalarFctPtr_Type& primalZeroIterationFct )
     M_primalFieldZeroIterationFct = primalZeroIterationFct;
 
     // Interpolate the primal variable for the first iteration.
-    M_primalFieldZeroIterationFct->interpolate ( *(this->M_primalField),
+    M_primalFieldZeroIterationFct->interpolate ( * (this->M_primalField),
                                                  this->M_data->dataTimePtr()->initialTime() );
 
 } // SetZeroIterationPrimal
@@ -701,7 +701,7 @@ resetVariables ()
 {
 
     // Update the primal vector at the previous iteration step.
-    M_primalFieldPreviousIteration->setVector( this->M_primalField->getVector() );
+    M_primalFieldPreviousIteration->setVector ( this->M_primalField->getVector() );
 
     // Call the method of the DarcySolverLinear to update all the variables defined in it.
     darcySolverLinear_Type::resetVariables();
