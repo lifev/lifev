@@ -68,8 +68,9 @@ struct darcy_nonlinear::Private
                                    const Real&, const Real&, const ID& )>
     fct_type;
 
-    std::string    data_file_name;
-    std::string    discretization_section;
+    std::string data_file_name;
+    std::string xml_file_name;
+    std::string discretization_section;
 
     boost::shared_ptr<Epetra_Comm>   comm;
 
@@ -106,16 +107,15 @@ darcy_nonlinear::darcy_nonlinear ( int argc, char** argv )
         : Members( new Private )
 {
     GetPot command_line(argc, argv);
-    const string data_file_name = command_line.follow("data", 2, "-f", "--file");
-    GetPot dataFile( data_file_name );
+    Members->data_file_name = command_line.follow("data", 2, "-f", "--file");
+    Members->xml_file_name = command_line.follow("parameterList.xml", "--xml");
 
-    Members->data_file_name = data_file_name;
+    GetPot dataFile( Members->data_file_name );
+
     Members->discretization_section = "darcy";
 
 #ifdef EPETRA_MPI
     Members->comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
-    Int ntasks;
-    MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
 #else
     Members->comm.reset( new Epetra_SerialComm() );
 #endif
@@ -163,6 +163,13 @@ darcy_nonlinear::run()
 
     // Set up the data
     darcyData->setup( dataFile );
+
+    // Create a Teuchos parameter list for the linear algebra.
+    darcyData_Type::paramListPtr_Type linearAlgebraList = Teuchos::rcp ( new darcyData_Type::paramList_Type );
+    linearAlgebraList = Teuchos::getParametersFromXmlFile( Members->xml_file_name );
+
+    // Set the parameter list into the data darcy.
+    darcyData->setLinearAlgebraList( linearAlgebraList );
 
     // Create the mesh file handler
     MeshData meshData;

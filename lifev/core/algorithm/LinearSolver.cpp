@@ -343,7 +343,7 @@ LinearSolver::setupSolverOperator()
     {
     	M_solverOperator->setPreconditioner( M_preconditioner->preconditionerPtr() );
     }
-    else
+    else if ( M_preconditionerOperator )
     {
     	M_solverOperator->setPreconditioner( M_preconditionerOperator );
     }

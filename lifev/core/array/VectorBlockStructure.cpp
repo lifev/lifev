@@ -80,7 +80,7 @@ VectorBlockStructure::
 VectorBlockStructure( const VectorBlockStructure& blockStructure )
     : M_blockSize( blockStructure.M_blockSize ),
       M_blockFirstIndex( blockStructure.M_blockFirstIndex ),
-      M_totalSize( M_totalSize )
+      M_totalSize( blockStructure.M_totalSize )
 {
 
 }
