@@ -122,6 +122,9 @@ public:
     typedef FESpace< MeshType, MapEpetra >                FESpace_Type;
     typedef boost::shared_ptr<FESpace_Type>               FESpacePtr_Type;
 
+    //Vector for vector parameters
+    typedef std::vector<std::vector<Real> >           vectorsParameters_Type;
+    typedef boost::shared_ptr<vectorsParameters_Type> vectorsParametersPtr_Type;
     //@}
 
 
@@ -158,8 +161,8 @@ public:
       \param dataMaterial the class with Material properties data
     */
     virtual  void computeLinearStiff( dataPtr_Type& dataMaterial,
-                                      const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
-                                      const mapMarkerIndexesPtr_Type mapsMarkerIndexes ) = 0;
+                                      const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
+                                      const mapMarkerIndexesPtr_Type /*mapsMarkerIndexes*/ ) = 0;
 
     //! Updates the Jacobian matrix in StructuralSolver::updateJacobian
     /*!
@@ -256,6 +259,14 @@ public:
 
 protected:
 
+
+    //! construct the vectors for the parameters
+    /*!
+      \param VOID
+      \return VOID
+    */
+    virtual void setupVectorsParameters( void ) = 0;
+
     //!Protected Members
 
     FESpacePtr_Type                                M_dispFESpace;
@@ -273,6 +284,9 @@ protected:
     dataPtr_Type                                   M_dataMaterial;
 
     displayerPtr_Type                              M_displayer;
+
+    //! Map between markers and volumes on the mesh
+    vectorsParametersPtr_Type           M_vectorsParameters;
 };
 
 //=====================================
@@ -285,7 +299,8 @@ StructuralConstitutiveLaw<MeshType>::StructuralConstitutiveLaw( ):
     M_dispETFESpace              ( ),
     M_localMap                   ( ),
     M_jacobian                   ( ),
-    M_offset                     ( 0 )
+    M_offset                     ( 0 ),
+    M_vectorsParameters          ( )
 {
     //    std::cout << "I am in the constructor of StructuralConstitutiveLaw" << std::endl;
 }

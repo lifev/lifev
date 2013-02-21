@@ -359,6 +359,18 @@ private:
 	~ExpressionToEvaluation();
 };
 
+// Specialized for scalar given by a functor
+template<typename VectorType, UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation<ExpressionExtractScalar<VectorType>,testDim,solutionDim,spaceDim>
+{
+public:
+	typedef EvaluationExtractScalar<VectorType>    evaluation_Type;
+private:
+	ExpressionToEvaluation();
+	~ExpressionToEvaluation();
+};
+
+
 // Specialized for vector
 template<UInt testDim, UInt solutionDim, UInt spaceDim, UInt VectorDim>
 class ExpressionToEvaluation<ExpressionVector<VectorDim>,testDim,solutionDim,spaceDim>

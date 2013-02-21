@@ -1696,10 +1696,7 @@ void
 FESpace<MeshType,MapType>::
 resetBoundaryFE(){
     if (M_refFE->hasBoundaryFE())
-    {
         M_feBd.reset(new CurrentBoundaryFE( M_refFE->boundaryFE(), getGeometricMap( *M_mesh ).boundaryMap(), *M_bdQr ) );
-        std::cout << "resetting BD rule" << std::endl;
-    }
 }
 
 

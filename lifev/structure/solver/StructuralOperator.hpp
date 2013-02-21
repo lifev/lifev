@@ -186,7 +186,6 @@ public:
     typedef boost::shared_ptr<precIfpack_Type>      precIfpackPtr_Type;
     typedef LifeV::PreconditionerML                 precML_Type;
     typedef boost::shared_ptr<precML_Type>          precMLPtr_Type;
-
     //@}
 
 
@@ -557,7 +556,6 @@ public:
 
     //! Get the density
     mapMarkerIndexesPtr_Type mapMarkersIndexes() const { return M_mapMarkersIndexes; }
-
     //@}
 
 protected:
@@ -716,12 +714,12 @@ StructuralOperator<Mesh>::StructuralOperator( ):
     M_offset                     ( 0 ),
     M_rescaleFactor              ( 1. ),
     M_material                   ( ),
+    M_mapMarkersVolumes          ( ),
+    M_mapMarkersIndexes          ( ),
 #ifdef COMPUTATION_JACOBIAN
     M_deformationF               ( ),
-    M_invariants                 ( ),
+    M_invariants                 ( )
 #endif
-    M_mapMarkersVolumes          ( ),
-    M_mapMarkersIndexes          ( )
 {
 
     //    M_Displayer->leaderPrint("I am in the constructor for the solver");
@@ -788,7 +786,7 @@ StructuralOperator<Mesh>::setup(boost::shared_ptr<data_Type>        data,
     }
     M_mapMarkersVolumes.reset( new mapMarkerVolumes_Type() );
     M_mapMarkersIndexes.reset( new mapMarkerIndexes_Type() );
-    this->setupMapMarkersVolumes();
+    //this->setupMapMarkersVolumes();
 }
 
 
