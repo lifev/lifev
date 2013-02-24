@@ -714,12 +714,12 @@ StructuralOperator<Mesh>::StructuralOperator( ):
     M_offset                     ( 0 ),
     M_rescaleFactor              ( 1. ),
     M_material                   ( ),
-    M_mapMarkersVolumes          ( ),
-    M_mapMarkersIndexes          ( ),
 #ifdef COMPUTATION_JACOBIAN
     M_deformationF               ( ),
     M_invariants                 ( )
 #endif
+   M_mapMarkersVolumes          ( ),
+    M_mapMarkersIndexes          ( )
 {
 
     //    M_Displayer->leaderPrint("I am in the constructor for the solver");
