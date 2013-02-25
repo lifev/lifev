@@ -354,7 +354,6 @@ ExponentialMaterialNonLinear<MeshType>::setupVectorsParameters( void )
         Real gamma = this->M_dataMaterial->gamma( markerID );
         Real bulk = this->M_dataMaterial->bulk( markerID );
 
-
         ( (*(this->M_vectorsParameters) )[0])[ i ] = alpha;
         ( (*(this->M_vectorsParameters) )[1])[ i ] = gamma;
         ( (*(this->M_vectorsParameters) )[2])[ i ] = bulk;
