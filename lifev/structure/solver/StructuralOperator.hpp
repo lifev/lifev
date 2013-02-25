@@ -716,9 +716,9 @@ StructuralOperator<Mesh>::StructuralOperator( ):
     M_material                   ( ),
 #ifdef COMPUTATION_JACOBIAN
     M_deformationF               ( ),
-    M_invariants                 ( )
+    M_invariants                 ( ),
 #endif
-   M_mapMarkersVolumes          ( ),
+    M_mapMarkersVolumes          ( ),
     M_mapMarkersIndexes          ( )
 {
 
