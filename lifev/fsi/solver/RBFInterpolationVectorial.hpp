@@ -35,8 +35,8 @@
     @maintainer Davide Forti <davide.Forti@epfl.ch>
  */
 
-#ifndef RBF_INTERPOLATION_HPP
-#define RBF_INTERPOLATION_HPP
+#ifndef RBF_INTERPOLATIONVECTORIAL_HPP
+#define RBF_INTERPOLATIONVECTORIAL_HPP
 
 #include <lifev/core/LifeV.hpp>
 #include <Epetra_Vector.h>
@@ -52,7 +52,7 @@
 namespace LifeV
 {
 template <typename Mesh>
-class RBFInterpolation
+class RBFInterpolationVectorial
 {
 
 public:
@@ -85,14 +85,14 @@ public:
     typedef Teuchos::RCP< Teuchos::ParameterList >            parameterList_Type;
 
     //! Constructor
-    RBFInterpolation ( meshPtr_Type fullMeshKnown,
-                       meshPtr_Type localMeshKnown,
-                       meshPtr_Type fullMeshUnknown,
-                       meshPtr_Type localMeshUnknown,
-                       flagContainer_Type flags); 
+    RBFInterpolationVectorial ( meshPtr_Type fullMeshKnown,
+				meshPtr_Type localMeshKnown,
+				meshPtr_Type fullMeshUnknown,
+				meshPtr_Type localMeshUnknown,
+				flagContainer_Type flags); 
 
     //! Destructor
-    ~RBFInterpolation() {}
+    ~RBFInterpolationVectorial() {}
 
 
     //! Setup the RBF data
@@ -162,22 +162,22 @@ private:
 };
 
 template <typename Mesh>
-RBFInterpolation<Mesh>::RBFInterpolation ( meshPtr_Type fullMeshKnown,
-                                           meshPtr_Type localMeshKnown,
-                                           meshPtr_Type fullMeshUnknown,
-                                           meshPtr_Type localMeshUnknown,
-                                           flagContainer_Type flags) :
-    M_fullMeshKnown ( fullMeshKnown ),
-    M_localMeshKnown ( localMeshKnown ),
-    M_fullMeshUnknown ( fullMeshUnknown ),
-    M_localMeshUnknown ( localMeshUnknown ),
-    M_flags ( flags )
+RBFInterpolationVectorial<Mesh>::RBFInterpolationVectorial ( meshPtr_Type fullMeshKnown,
+							     meshPtr_Type localMeshKnown,
+							     meshPtr_Type fullMeshUnknown,
+							     meshPtr_Type localMeshUnknown,
+							     flagContainer_Type flags) :
+  M_fullMeshKnown ( fullMeshKnown ),
+  M_localMeshKnown ( localMeshKnown ),
+  M_fullMeshUnknown ( fullMeshUnknown ),
+  M_localMeshUnknown ( localMeshUnknown ),
+  M_flags ( flags )
 {
 }
-
+  
 
 template <typename Mesh>
-void RBFInterpolation<Mesh>::setupRBFData (vectorPtr_Type KnownField, vectorPtr_Type UnknownField, GetPot datafile, parameterList_Type belosList)
+void RBFInterpolationVectorial<Mesh>::setupRBFData (vectorPtr_Type KnownField, vectorPtr_Type UnknownField, GetPot datafile, parameterList_Type belosList)
 {
     M_knownField   = KnownField;
     M_unknownField = UnknownField;
@@ -187,7 +187,7 @@ void RBFInterpolation<Mesh>::setupRBFData (vectorPtr_Type KnownField, vectorPtr_
 
 
 template <typename Mesh>
-void RBFInterpolation<Mesh>::buildOperators()
+void RBFInterpolationVectorial<Mesh>::buildOperators()
 {
     this->InterpolationOperator();
     this->ProjectionOperator();
@@ -196,7 +196,7 @@ void RBFInterpolation<Mesh>::buildOperators()
 }
 
 template <typename Mesh>
-void RBFInterpolation<Mesh>::InterpolationOperator()
+void RBFInterpolationVectorial<Mesh>::InterpolationOperator()
 {
     this->identifyNodes (M_localMeshKnown, M_GIdsKnownMesh, M_knownField);
     M_neighbors.reset ( new neighbors_Type ( M_fullMeshKnown, M_localMeshKnown, M_knownField->mapPtr(), M_knownField->mapPtr()->commPtr() ) );
@@ -264,7 +264,7 @@ void RBFInterpolation<Mesh>::InterpolationOperator()
 }
 
 template <typename Mesh>
-void RBFInterpolation<Mesh>::ProjectionOperator()
+void RBFInterpolationVectorial<Mesh>::ProjectionOperator()
 {
 
     this->identifyNodes (M_localMeshUnknown, M_GIdsUnknownMesh, M_unknownField);
@@ -342,7 +342,7 @@ void RBFInterpolation<Mesh>::ProjectionOperator()
 }
 
 template <typename Mesh>
-double RBFInterpolation<Mesh>::computeRBFradius (meshPtr_Type MeshNeighbors, meshPtr_Type MeshGID, idContainer_Type Neighbors, ID GlobalID)
+double RBFInterpolationVectorial<Mesh>::computeRBFradius (meshPtr_Type MeshNeighbors, meshPtr_Type MeshGID, idContainer_Type Neighbors, ID GlobalID)
 {
     double r = 0;
     double r_max = 0;
@@ -358,7 +358,7 @@ double RBFInterpolation<Mesh>::computeRBFradius (meshPtr_Type MeshNeighbors, mes
 
 
 template <typename Mesh>
-void RBFInterpolation<Mesh>::buildRhs()
+void RBFInterpolationVectorial<Mesh>::buildRhs()
 {
     M_RhsF1.reset (new vector_Type (*M_interpolationOperatorMap) );
     M_RhsF2.reset (new vector_Type (*M_interpolationOperatorMap) );
@@ -372,7 +372,7 @@ void RBFInterpolation<Mesh>::buildRhs()
 }
 
 template <typename Mesh>
-void RBFInterpolation<Mesh>::interpolateCostantField()
+void RBFInterpolationVectorial<Mesh>::interpolateCostantField()
 {
     vectorPtr_Type gamma_one;
     gamma_one.reset (new vector_Type (*M_interpolationOperatorMap) );
@@ -400,7 +400,7 @@ void RBFInterpolation<Mesh>::interpolateCostantField()
 }
 
 template <typename Mesh>
-void RBFInterpolation<Mesh>::interpolate()
+void RBFInterpolationVectorial<Mesh>::interpolate()
 {
     vectorPtr_Type gamma_f1;
     gamma_f1.reset (new vector_Type (*M_interpolationOperatorMap) );
@@ -492,7 +492,7 @@ void RBFInterpolation<Mesh>::interpolate()
 
 
 template <typename Mesh>
-void RBFInterpolation<Mesh>::identifyNodes (meshPtr_Type LocalMesh, std::set<ID>& GID_nodes, vectorPtr_Type CheckVector)
+void RBFInterpolationVectorial<Mesh>::identifyNodes (meshPtr_Type LocalMesh, std::set<ID>& GID_nodes, vectorPtr_Type CheckVector)
 {
     if (M_flags[0] == -1)
     {
@@ -514,7 +514,7 @@ void RBFInterpolation<Mesh>::identifyNodes (meshPtr_Type LocalMesh, std::set<ID>
 }
 
 template <typename Mesh>
-bool RBFInterpolation<Mesh>::isInside (ID pointMarker, flagContainer_Type flags)
+bool RBFInterpolationVectorial<Mesh>::isInside (ID pointMarker, flagContainer_Type flags)
 {
     int check = 0;
     for (UInt i = 0; i < flags.size(); ++i)
@@ -527,25 +527,25 @@ bool RBFInterpolation<Mesh>::isInside (ID pointMarker, flagContainer_Type flags)
 
 
 template <typename Mesh>
-double RBFInterpolation<Mesh>::rbf (double x1, double y1, double z1, double x2, double y2, double z2, double radius)
+double RBFInterpolationVectorial<Mesh>::rbf (double x1, double y1, double z1, double x2, double y2, double z2, double radius)
 {
     double distance = sqrt ( pow (x1 - x2, 2) + pow (y1 - y2, 2) + pow (z1 - z2, 2) );
     return pow (1 - distance / radius, 4) * (4 * distance / radius + 1);
 }
 
 template <typename Mesh>
-void RBFInterpolation<Mesh>::solution (vectorPtr_Type& Solution)
+void RBFInterpolationVectorial<Mesh>::solution (vectorPtr_Type& Solution)
 {
     Solution = M_unknownField;
 }
 
 
 template <typename Mesh>
-void RBFInterpolation<Mesh>::solutionrbf (vectorPtr_Type& Solution_rbf)
+void RBFInterpolationVectorial<Mesh>::solutionrbf (vectorPtr_Type& Solution_rbf)
 {
     Solution_rbf = M_unknownField_rbf;
 }
 
 } // namespace LifeV
 
-#endif // RBF_INTERPOLATION_HPP
+#endif // RBF_INTERPOLATIONVECTORIAL_HPP
