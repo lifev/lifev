@@ -424,8 +424,6 @@ evalResidual ( const vector_Type& sol, const vectorPtr_Type& rhs, vector_Type& r
         res = * (M_monolithicMatrix->matrix() ) * sol;
 
         res -= *rhs; // Ax-b
-
-        res.spy("residualBranch");
     }
 }
 
@@ -538,10 +536,17 @@ diagonalScale (vector_Type& rhs, matrixPtr_Type matrFull)
 void
 FSIMonolithic::variablesInit (const std::string& dOrder)
 {
-    M_dFESpace.reset (new FESpace<mesh_Type, MapEpetra> (M_solidLocalMesh,
-                                                         dOrder,
-                                                         3,
-                                                         M_epetraComm) );
+    M_dFESpace.reset(new FESpace<mesh_Type, MapEpetra>(M_solidLocalMesh,
+                                                       dOrder,
+                                                       3,
+                                                       M_epetraComm));
+
+    M_dETFESpace.reset(new ETFESpace<mesh_Type, MapEpetra,3,3>(M_solidLocalMesh,
+                                                                     &(M_dFESpace->refFE()),
+                                                                     &(M_dFESpace->fe().geoMap()),
+                                                                     M_epetraComm));
+
+
     // INITIALIZATION OF THE VARIABLES
     M_lambdaFluid.reset (new vector_Type (*M_fluidInterfaceMap, Unique) );
     M_lambdaFluidRepeated.reset (new vector_Type (*M_fluidInterfaceMap, Repeated) );
@@ -632,26 +637,13 @@ FSIMonolithic::assembleSolidBlock ( UInt iter, const vector_Type& solution )
                                                                        | *(M_monolithicMatrix->interfaceMap()) |  M_mmFESpace->map() ) );
 
             //Need to inglobe it into a boost::shared to avoid memeory leak
-            boost::shared_ptr<MatrixEpetra<Real> >  solidMatrix(new MatrixEpetra<Real>( M_dFESpace->map() ));
+            boost::shared_ptr<MatrixEpetra<Real> >  solidMatrix(new MatrixEpetra<Real>( M_solid->map(), 1 ));
+            *solidMatrix *= 0.0;
 
-            solidMatrix = M_solid->massMatrix();
+            *solidMatrix += *M_solid->massMatrix();
             *solidMatrix += *(M_solid->material()->stiffMatrix());
 
-
-            //M_solid->massMatrix()->spy("mass");
-
-            if( iter == 0 )
-            M_solid->material()->stiffMatrix()->spy("stiffness");
-
-            std::cout << "***************************" << std::endl;
-            std::cout << "***************************" << std::endl;
-            std::cout << "***************************" << std::endl;
-            std::cout << "MATRIX SOLID" << std::endl;
-            std::cout << "***************************" << std::endl;
-            std::cout << "***************************" << std::endl;
-            std::cout << "***************************" << std::endl;
-
-            solidMatrix->spy("solidMatrix");
+            solidMatrix->globalAssemble();
 
             MatrixEpetra<Real>* rawPointerToMatrix = new MatrixEpetra<Real>( *solidMatrix );
 
@@ -673,8 +665,6 @@ FSIMonolithic::assembleSolidBlock ( UInt iter, const vector_Type& solution )
             //Summing the local matrix into the global
             *M_solidBlockPrec += *globalMatrixWithOnlyStructure;
 
-
-
         }
         //The map is composed of ( u , p , fluxes, solid, interface )
         else
@@ -684,16 +674,9 @@ FSIMonolithic::assembleSolidBlock ( UInt iter, const vector_Type& solution )
         }
 
         M_solidBlockPrec->globalAssemble();
-        M_solidBlockPrec->spy("solidBlockMatrix");
-        std::cout << "***************************" << std::endl;
-        std::cout << "***************************" << std::endl;
-        std::cout << "***************************" << std::endl;
-        std::cout << "MATRIX" << std::endl;
-        std::cout << "***************************" << std::endl;
-        std::cout << "***************************" << std::endl;
-        std::cout << "***************************" << std::endl;
 
         *M_solidBlockPrec *= M_solid->rescaleFactor();
+        //M_solidBlockPrec->spy("solidBlockMatrix");
 
     }
     // case of formulation vector (i.e. all the nonlinear laws)
