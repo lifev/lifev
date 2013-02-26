@@ -113,53 +113,53 @@ void mass (MatrixElemental& localMass,
   @param fieldDim The dimension of the FE space (scalar/vectorial)
  */
 template<typename localVector>
-void weightedMass(MatrixElemental& localMass,
-		  const CurrentFE& massCFE,
-		  const Real& coefficient,
-		  const localVector& localValues,
-		  const UInt& fieldDim)
+void weightedMass (MatrixElemental& localMass,
+                   const CurrentFE& massCFE,
+                   const Real& coefficient,
+                   const localVector& localValues,
+                   const UInt& fieldDim)
 {
-    const UInt nbFEDof(massCFE.nbFEDof());
-    const UInt nbQuadPt(massCFE.nbQuadPt());
-    Real localValue(0);
-    Real localCoefficient(0);
+    const UInt nbFEDof (massCFE.nbFEDof() );
+    const UInt nbQuadPt (massCFE.nbQuadPt() );
+    Real localValue (0);
+    Real localCoefficient (0);
 
     // Assemble the local mass
-    for (UInt iterFDim(0); iterFDim<fieldDim; ++iterFDim)
+    for (UInt iterFDim (0); iterFDim < fieldDim; ++iterFDim)
     {
         // Extract the view of the matrix
-        MatrixElemental::matrix_view localView = localMass.block(iterFDim,iterFDim);
+        MatrixElemental::matrix_view localView = localMass.block (iterFDim, iterFDim);
 
         // Loop over the basis functions
-        for (UInt iDof(0); iDof < nbFEDof ; ++iDof)
+        for (UInt iDof (0); iDof < nbFEDof ; ++iDof)
         {
             // Build the local matrix only where needed:
             // Lower triangular + diagonal parts
-            for (UInt jDof(0); jDof <= iDof; ++jDof)
+            for (UInt jDof (0); jDof <= iDof; ++jDof)
             {
                 localValue = 0.0;
-		
-                //Loop on the quadrature nodes
-                for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
-                {
-		    localCoefficient = 0.0;
-		    for (UInt iterDim(0); iterDim<fieldDim; ++iterDim)
-		    {
-		        localCoefficient += localValues[iQuadPt][iterDim]*localValues[iQuadPt][iterDim];
-		    }
 
-		    localValue += coefficient * localCoefficient
-		                  * massCFE.phi(iDof,iQuadPt)
-                                  * massCFE.phi(jDof,iQuadPt)
-                                  * massCFE.wDetJacobian(iQuadPt);
+                //Loop on the quadrature nodes
+                for (UInt iQuadPt (0); iQuadPt < nbQuadPt; ++iQuadPt)
+                {
+                    localCoefficient = 0.0;
+                    for (UInt iterDim (0); iterDim < fieldDim; ++iterDim)
+                    {
+                        localCoefficient += localValues[iQuadPt][iterDim] * localValues[iQuadPt][iterDim];
+                    }
+
+                    localValue += coefficient * localCoefficient
+                                  * massCFE.phi (iDof, iQuadPt)
+                                  * massCFE.phi (jDof, iQuadPt)
+                                  * massCFE.wDetJacobian (iQuadPt);
                 }
 
-		// Add on the local matrix
-                localView(iDof,jDof)+=localValue;
+                // Add on the local matrix
+                localView (iDof, jDof) += localValue;
 
-                if (iDof!=jDof)
+                if (iDof != jDof)
                 {
-                    localView(jDof,iDof)+=localValue;
+                    localView (jDof, iDof) += localValue;
                 }
             }
         }

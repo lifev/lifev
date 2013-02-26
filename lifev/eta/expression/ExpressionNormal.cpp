@@ -48,7 +48,7 @@ ExpressionNormal::ExpressionNormal()
     : base_Type()
 {}
 
-ExpressionNormal::ExpressionNormal( const ExpressionNormal&)
+ExpressionNormal::ExpressionNormal ( const ExpressionNormal&)
     : base_Type()
 {}
 
@@ -60,7 +60,7 @@ ExpressionNormal::~ExpressionNormal()
 // ===================================================
 
 void
-ExpressionNormal::display( std::ostream& out )
+ExpressionNormal::display ( std::ostream& out )
 {
     out << "N";
 }

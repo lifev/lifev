@@ -66,11 +66,11 @@ class EvaluationMatrix
 {
 public:
 
-	//! @name Public Types
+    //! @name Public Types
     //@{
 
     //! Type of the value returned by this class
-	typedef MatrixSmall<iDim,jDim> return_Type;
+    typedef MatrixSmall<iDim, jDim> return_Type;
 
     //@}
 
@@ -79,13 +79,13 @@ public:
     //@{
 
     //! Flag for the global current FE
-	const static flag_Type S_globalUpdateFlag;
+    const static flag_Type S_globalUpdateFlag;
 
     //! Flag for the test current FE
-	const static flag_Type S_testUpdateFlag;
+    const static flag_Type S_testUpdateFlag;
 
     //! Flag for the solution current FE
-	const static flag_Type S_solutionUpdateFlag;
+    const static flag_Type S_solutionUpdateFlag;
 
     //@}
 
@@ -93,18 +93,18 @@ public:
     //! @name Constructors, destructor
     //@{
 
-	//! Empty constructor
-	EvaluationMatrix()
+    //! Empty constructor
+    EvaluationMatrix()
     {}
 
-	//! Copy constructor
-	EvaluationMatrix(const EvaluationMatrix<iDim,jDim>& evaluation)
-        : M_value(evaluation.M_value)
+    //! Copy constructor
+    EvaluationMatrix (const EvaluationMatrix<iDim, jDim>& evaluation)
+        : M_value (evaluation.M_value)
     {}
 
-	//! Expression-based constructor
-	explicit EvaluationMatrix(const ExpressionMatrix<iDim,jDim>& expression)
-        : M_value(expression.value())
+    //! Expression-based constructor
+    explicit EvaluationMatrix (const ExpressionMatrix<iDim, jDim>& expression)
+        : M_value (expression.value() )
     {}
 
     //! Destructor
@@ -118,12 +118,12 @@ public:
     //@{
 
     //! Do nothing internal update
-	void update(const UInt& /*iElement*/)
+    void update (const UInt& /*iElement*/)
     {}
 
     //! Display method
-	static void display(ostream& out=std::cout)
-	{
+    static void display (ostream& out = std::cout)
+    {
         out << "matrix[" << iDim << "][" << jDim << "] ";
     }
 
@@ -134,22 +134,22 @@ public:
     //@{
 
     //! Do nothing setter for the global current FE
-	template< typename CFEType >
-	void setGlobalCFE(const CFEType* /*globalCFE*/)
+    template< typename CFEType >
+    void setGlobalCFE (const CFEType* /*globalCFE*/)
     {}
 
     //! Do nothing setter for the test current FE
-	template< typename CFEType >
-	void setTestCFE(const CFEType* /*testCFE*/)
+    template< typename CFEType >
+    void setTestCFE (const CFEType* /*testCFE*/)
     {}
 
     //! Do nothing setter for the solution current FE
-	template< typename CFEType >
-	void setSolutionCFE(const CFEType* /*solutionCFE*/)
+    template< typename CFEType >
+    void setSolutionCFE (const CFEType* /*solutionCFE*/)
     {}
 
     //! Setter for the quadrature rule
-	void setQuadrature(const QuadratureRule&)
+    void setQuadrature (const QuadratureRule&)
     {}
 
     //@}
@@ -159,19 +159,19 @@ public:
     //@{
 
     //! Getter for a value
-	return_Type value_q(const UInt& /*q*/) const
+    return_Type value_q (const UInt& /*q*/) const
     {
         return M_value;
     }
 
     //! Getter for the value for a vector
-	return_Type value_qi(const UInt& /*q*/, const UInt& /*i*/) const
+    return_Type value_qi (const UInt& /*q*/, const UInt& /*i*/) const
     {
         return M_value;
     }
 
     //! Getter for the value for a matrix
-	return_Type value_qij(const UInt& /*q*/, const UInt& /*i*/, const UInt& /*j*/) const
+    return_Type value_qij (const UInt& /*q*/, const UInt& /*i*/, const UInt& /*j*/) const
     {
         return M_value;
     }
@@ -181,18 +181,18 @@ public:
 private:
 
     // Storage
-	MatrixSmall<iDim,jDim> M_value;
+    MatrixSmall<iDim, jDim> M_value;
 };
 
 
 template<UInt iDim, UInt jDim>
-const flag_Type EvaluationMatrix<iDim,jDim>::S_globalUpdateFlag=ET_UPDATE_NONE;
+const flag_Type EvaluationMatrix<iDim, jDim>::S_globalUpdateFlag = ET_UPDATE_NONE;
 
 template<UInt iDim, UInt jDim>
-const flag_Type EvaluationMatrix<iDim,jDim>::S_testUpdateFlag=ET_UPDATE_NONE;
+const flag_Type EvaluationMatrix<iDim, jDim>::S_testUpdateFlag = ET_UPDATE_NONE;
 
 template<UInt iDim, UInt jDim>
-const flag_Type EvaluationMatrix<iDim,jDim>::S_solutionUpdateFlag=ET_UPDATE_NONE;
+const flag_Type EvaluationMatrix<iDim, jDim>::S_solutionUpdateFlag = ET_UPDATE_NONE;
 
 
 } // Namespace ExpressionAssembly

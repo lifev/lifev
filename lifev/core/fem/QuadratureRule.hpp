@@ -228,7 +228,7 @@ public:
 
     //! Method for importing the quadrature rule from another class
     template <typename QRType>
-    void import( const QRType& qr);
+    void import ( const QRType& qr);
 
     //@}
 
@@ -364,11 +364,11 @@ private:
 // Definition of the template method
 template< typename QRType>
 void
-QuadratureRule::import(const QRType& qr)
+QuadratureRule::import (const QRType& qr)
 {
-    for (UInt i(0); i<qr.nbQuadPt(); ++i)
+    for (UInt i (0); i < qr.nbQuadPt(); ++i)
     {
-        M_pt.push_back(qr.quadPoint(i));
+        M_pt.push_back (qr.quadPoint (i) );
     }
     M_shape = qr.shape();
     M_name = "";

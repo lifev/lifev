@@ -133,7 +133,7 @@ public:
     //! @name Public Types
     //@{
 
-	typedef ExpressionBase<ExpressionExtractScalar<VectorType> > base_Type;
+    typedef ExpressionBase<ExpressionExtractScalar<VectorType> > base_Type;
     typedef boost::shared_ptr<VectorType>                        containerPtr_Type;
 
     //@}
@@ -143,15 +143,15 @@ public:
     //@{
 
     //! Constructor using the value of the scalar
-	ExpressionExtractScalar(const VectorType& myVector)
-    : base_Type(), M_vector(new VectorType(myVector) ) {}
+    ExpressionExtractScalar (const VectorType& myVector)
+        : base_Type(), M_vector (new VectorType (myVector) ) {}
 
     //! Copy constructor
-	ExpressionExtractScalar(const ExpressionExtractScalar<VectorType>& expr)
-    : base_Type(), M_vector( expr.vector() ){}
+    ExpressionExtractScalar (const ExpressionExtractScalar<VectorType>& expr)
+        : base_Type(), M_vector ( expr.vector() ) {}
 
     //! Destructor
-    ~ExpressionExtractScalar(){}
+    ~ExpressionExtractScalar() {}
 
     //@}
 
@@ -160,7 +160,7 @@ public:
     //@{
 
     //! Display method
-	static void display(std::ostream& out= std::cout);
+    static void display (std::ostream& out = std::cout);
 
     //@}
 
@@ -169,7 +169,10 @@ public:
     //@{
 
     //! Getter for the value of the scalar
-	const containerPtr_Type vector() const { return M_vector; } ;
+    const containerPtr_Type vector() const
+    {
+        return M_vector;
+    } ;
 
     //@}
 
@@ -183,7 +186,7 @@ private:
 
     //@}
 
-	containerPtr_Type M_vector;
+    containerPtr_Type M_vector;
 };
 
 //! Simple function to be used in the construction of an expression
@@ -192,9 +195,9 @@ private:
 */
 template<typename VectorType>
 inline ExpressionExtractScalar<VectorType>
-parameter(const VectorType& myVector)
+parameter (const VectorType& myVector)
 {
-	return ExpressionExtractScalar<VectorType>( myVector );
+    return ExpressionExtractScalar<VectorType> ( myVector );
 }
 
 } // Namespace ExpressionAssembly

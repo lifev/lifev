@@ -76,7 +76,7 @@ public:
     //@{
 
     // No direct use, just ease of coding
-	typedef ExpressionBase< ExpressionLogarithm <BaseExpressionType> > base_Type;
+    typedef ExpressionBase< ExpressionLogarithm <BaseExpressionType> > base_Type;
 
     //@}
 
@@ -84,15 +84,15 @@ public:
     //@{
 
     //! Full constructor using the two expressions
-	ExpressionLogarithm(const BaseExpressionType& l)
-	: base_Type(), M_l(l) {}
+    ExpressionLogarithm (const BaseExpressionType& l)
+        : base_Type(), M_l (l) {}
 
     //! Copy constructor
-	ExpressionLogarithm(const ExpressionLogarithm<BaseExpressionType>& expression)
-	 : base_Type(), M_l(expression.M_l) {}
+    ExpressionLogarithm (const ExpressionLogarithm<BaseExpressionType>& expression)
+        : base_Type(), M_l (expression.M_l) {}
 
     //! Destructor
-    ~ExpressionLogarithm(){}
+    ~ExpressionLogarithm() {}
 
     //@}
 
@@ -101,8 +101,11 @@ public:
     //@{
 
     //! Display method
-	static void display(std::ostream& out= std::cout)
-    { out << "Expression Logarithm of: ";BaseExpressionType::display(out);}
+    static void display (std::ostream& out = std::cout)
+    {
+        out << "Expression Logarithm of: ";
+        BaseExpressionType::display (out);
+    }
 
     //@}
 
@@ -111,7 +114,10 @@ public:
     //@{
 
     //! Getter for the left hand side
-	const BaseExpressionType& base() const {return M_l;}
+    const BaseExpressionType& base() const
+    {
+        return M_l;
+    }
     //@}
 
 private:
@@ -119,9 +125,9 @@ private:
     //! @name Private Methods
     //@{
 
-	ExpressionLogarithm();
+    ExpressionLogarithm();
 
-	//@}
+    //@}
 
 
     // Left hand side
@@ -154,9 +160,9 @@ private:
 // "Specialization" for the case of a scalar
 template< typename  ExpressionType>
 ExpressionLogarithm<ExpressionType>
-log(const ExpressionBase<ExpressionType>& l)
+log (const ExpressionBase<ExpressionType>& l)
 {
-    return ExpressionLogarithm<ExpressionType>(l.cast());
+    return ExpressionLogarithm<ExpressionType> (l.cast() );
 }
 
 } // Namespace ExpressionAssembly

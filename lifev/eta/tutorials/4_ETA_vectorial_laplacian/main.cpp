@@ -118,7 +118,7 @@ int main ( int argc, char** argv )
 
     const UInt Nelements (10);
 
-    boost::shared_ptr< mesh_Type > fullMeshPtr(new mesh_Type( Comm ) );
+    boost::shared_ptr< mesh_Type > fullMeshPtr (new mesh_Type ( Comm ) );
 
     regularMesh3D ( *fullMeshPtr, 1, Nelements, Nelements, Nelements, false,
                     2.0,   2.0,   2.0,
@@ -249,10 +249,10 @@ int main ( int argc, char** argv )
                     ETuSpace,
                     ETuSpace,
 
-                   dot( grad(phi_i) , grad(phi_j) )
+                    dot ( grad (phi_i) , grad (phi_j) )
 
-                   )
-            >> ETsystemMatrix;
+                  )
+                >> ETsystemMatrix;
     }
 
     if (verbose)
@@ -279,11 +279,11 @@ int main ( int argc, char** argv )
     }
 
 
-// ---------------------------------------------------------------
-// We compute now the matrix of the difference and finally the
-// norm of the difference. This should be very low if the two
-// matrices are identical.
-// ---------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // We compute now the matrix of the difference and finally the
+    // norm of the difference. This should be very low if the two
+    // matrices are identical.
+    // ---------------------------------------------------------------
 
     if (verbose)
     {

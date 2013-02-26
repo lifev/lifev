@@ -144,7 +144,7 @@ int main ( int argc, char** argv )
 
     const UInt Nelements (10);
 
-    boost::shared_ptr< mesh_Type > fullMeshPtr(new mesh_Type( Comm ) );
+    boost::shared_ptr< mesh_Type > fullMeshPtr (new mesh_Type ( Comm ) );
 
     regularMesh3D ( *fullMeshPtr, 1, Nelements, Nelements, Nelements, false,
                     2.0,   2.0,   2.0,

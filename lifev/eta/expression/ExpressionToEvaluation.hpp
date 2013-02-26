@@ -159,16 +159,16 @@ private:
 
 // Specialized for Extract1
 template<typename Expression, UInt testDim, UInt solutionDim, UInt spaceDim>
-class ExpressionToEvaluation<
+class ExpressionToEvaluation <
     ExpressionExtract1<Expression>
-    ,testDim
-    ,solutionDim
-    ,spaceDim>
+    , testDim
+    , solutionDim
+    , spaceDim >
 {
 public:
-    typedef EvaluationExtract1<
-                    typename ExpressionToEvaluation<Expression,testDim,solutionDim,spaceDim>::evaluation_Type
-                    > evaluation_Type;
+    typedef EvaluationExtract1 <
+    typename ExpressionToEvaluation<Expression, testDim, solutionDim, spaceDim>::evaluation_Type
+    > evaluation_Type;
 private:
     ExpressionToEvaluation();
     ~ExpressionToEvaluation();
@@ -177,20 +177,20 @@ private:
 
 // Specialized for Extract2
 template<typename Expression, UInt testDim, UInt solutionDim, UInt spaceDim>
-class ExpressionToEvaluation<
+class ExpressionToEvaluation <
     ExpressionExtract2<Expression>
-    ,testDim
-    ,solutionDim
-    ,spaceDim>
+    , testDim
+    , solutionDim
+    , spaceDim >
 {
 public:
-    typedef EvaluationExtract2<
-                    typename ExpressionToEvaluation<Expression,testDim,solutionDim,spaceDim>::evaluation_Type
-                    > evaluation_Type;
+    typedef EvaluationExtract2 <
+    typename ExpressionToEvaluation<Expression, testDim, solutionDim, spaceDim>::evaluation_Type
+    > evaluation_Type;
 private:
     ExpressionToEvaluation();
     ~ExpressionToEvaluation();
-    };
+};
 
 // Specialized for phi_i
 template<UInt testDim, UInt solutionDim, UInt spaceDim>
@@ -258,94 +258,94 @@ private:
     ~ExpressionToEvaluation();
 };
 
-  // Specialized for transpose
+// Specialized for transpose
 template<typename Expression, UInt testDim, UInt solutionDim, UInt spaceDim>
-class ExpressionToEvaluation<
+class ExpressionToEvaluation <
     ExpressionTranspose<Expression>
-    ,testDim
-    ,solutionDim
-    ,spaceDim>
+    , testDim
+    , solutionDim
+    , spaceDim >
 {
 public:
-    typedef EvaluationTranspose<
-                    typename ExpressionToEvaluation<Expression,testDim,solutionDim,spaceDim>::evaluation_Type
-                    > evaluation_Type;
+    typedef EvaluationTranspose <
+    typename ExpressionToEvaluation<Expression, testDim, solutionDim, spaceDim>::evaluation_Type
+    > evaluation_Type;
 private:
     ExpressionToEvaluation();
     ~ExpressionToEvaluation();
-    };
+};
 
 
-  // Specialized for symmetric expression
+// Specialized for symmetric expression
 template<typename Expression, UInt testDim, UInt solutionDim, UInt spaceDim>
-class ExpressionToEvaluation<
+class ExpressionToEvaluation <
     ExpressionSymmetricTensor<Expression>
-    ,testDim
-    ,solutionDim
-    ,spaceDim>
+    , testDim
+    , solutionDim
+    , spaceDim >
 {
 public:
-    typedef EvaluationSymmetricTensor<
-                    typename ExpressionToEvaluation<Expression,testDim,solutionDim,spaceDim>::evaluation_Type
-                    > evaluation_Type;
+    typedef EvaluationSymmetricTensor <
+    typename ExpressionToEvaluation<Expression, testDim, solutionDim, spaceDim>::evaluation_Type
+    > evaluation_Type;
 private:
     ExpressionToEvaluation();
     ~ExpressionToEvaluation();
-    };
+};
 
 
-  // Specialized for the minus transposed
+// Specialized for the minus transposed
 template<typename Expression, UInt testDim, UInt solutionDim, UInt spaceDim>
-class ExpressionToEvaluation<
+class ExpressionToEvaluation <
     ExpressionMinusTransposed<Expression>
-    ,testDim
-    ,solutionDim
-    ,spaceDim>
+    , testDim
+    , solutionDim
+    , spaceDim >
 {
 public:
-    typedef EvaluationMinusTransposed<
-                    typename ExpressionToEvaluation<Expression,testDim,solutionDim,spaceDim>::evaluation_Type
-                    > evaluation_Type;
+    typedef EvaluationMinusTransposed <
+    typename ExpressionToEvaluation<Expression, testDim, solutionDim, spaceDim>::evaluation_Type
+    > evaluation_Type;
 private:
     ExpressionToEvaluation();
     ~ExpressionToEvaluation();
-    };
+};
 
 
-  // Specialized for determinant
+// Specialized for determinant
 template<typename Expression, UInt testDim, UInt solutionDim, UInt spaceDim>
-class ExpressionToEvaluation<
+class ExpressionToEvaluation <
     ExpressionDeterminant<Expression>
-    ,testDim
-    ,solutionDim
-    ,spaceDim>
+    , testDim
+    , solutionDim
+    , spaceDim >
 {
 public:
-    typedef EvaluationDeterminant<
-                    typename ExpressionToEvaluation<Expression,testDim,solutionDim,spaceDim>::evaluation_Type
-                    > evaluation_Type;
+    typedef EvaluationDeterminant <
+    typename ExpressionToEvaluation<Expression, testDim, solutionDim, spaceDim>::evaluation_Type
+    > evaluation_Type;
 private:
     ExpressionToEvaluation();
     ~ExpressionToEvaluation();
-    };
+};
 
 
-  // Specialized for trace
+// Specialized for trace
 template<typename Expression, UInt testDim, UInt solutionDim, UInt spaceDim>
-class ExpressionToEvaluation<
+class ExpressionToEvaluation <
     ExpressionTrace<Expression>
-    ,testDim
-    ,solutionDim
-    ,spaceDim>
+    , testDim
+    , solutionDim
+    , spaceDim >
 {
 public:
-    typedef EvaluationTrace<
-                    typename ExpressionToEvaluation<Expression,testDim,solutionDim,spaceDim>::evaluation_Type
-                    > evaluation_Type;
+    typedef EvaluationTrace <
+    typename ExpressionToEvaluation<Expression, testDim, solutionDim, spaceDim>::evaluation_Type
+    > evaluation_Type;
 private:
     ExpressionToEvaluation();
     ~ExpressionToEvaluation();
-    };
+};
 
 
 // Specialized for scalar
@@ -361,13 +361,13 @@ private:
 
 // Specialized for scalar given by a functor
 template<typename VectorType, UInt testDim, UInt solutionDim, UInt spaceDim>
-class ExpressionToEvaluation<ExpressionExtractScalar<VectorType>,testDim,solutionDim,spaceDim>
+class ExpressionToEvaluation<ExpressionExtractScalar<VectorType>, testDim, solutionDim, spaceDim>
 {
 public:
-	typedef EvaluationExtractScalar<VectorType>    evaluation_Type;
+    typedef EvaluationExtractScalar<VectorType>    evaluation_Type;
 private:
-	ExpressionToEvaluation();
-	~ExpressionToEvaluation();
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
 };
 
 
@@ -384,13 +384,13 @@ private:
 
 // Specialized for matrix
 template<UInt testDim, UInt solutionDim, UInt spaceDim, UInt MatrixDim1, UInt MatrixDim2>
-class ExpressionToEvaluation<ExpressionMatrix<MatrixDim1, MatrixDim2>,testDim,solutionDim,spaceDim>
+class ExpressionToEvaluation<ExpressionMatrix<MatrixDim1, MatrixDim2>, testDim, solutionDim, spaceDim>
 {
 public:
-  typedef EvaluationMatrix<MatrixDim1, MatrixDim2> evaluation_Type;
+    typedef EvaluationMatrix<MatrixDim1, MatrixDim2> evaluation_Type;
 private:
-	ExpressionToEvaluation();
-	~ExpressionToEvaluation();
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
 };
 
 // Specialized for an interpolated value
@@ -500,41 +500,41 @@ private:
 
 // Specialized for a power
 template<typename ExpressionBase, UInt testDim, UInt solutionDim, UInt spaceDim>
-class ExpressionToEvaluation<ExpressionPower<ExpressionBase>,testDim,solutionDim,spaceDim>
+class ExpressionToEvaluation<ExpressionPower<ExpressionBase>, testDim, solutionDim, spaceDim>
 {
 public:
-	typedef EvaluationPower<
-				typename ExpressionToEvaluation<ExpressionBase,testDim,solutionDim,spaceDim>::evaluation_Type
-			> evaluation_Type;
+    typedef EvaluationPower <
+    typename ExpressionToEvaluation<ExpressionBase, testDim, solutionDim, spaceDim>::evaluation_Type
+    > evaluation_Type;
 private:
-	ExpressionToEvaluation();
-	~ExpressionToEvaluation();
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
 };
 
 // Specialized for a logarithm
 template<typename ExpressionBase, UInt testDim, UInt solutionDim, UInt spaceDim>
-class ExpressionToEvaluation<ExpressionLogarithm<ExpressionBase>,testDim,solutionDim,spaceDim>
+class ExpressionToEvaluation<ExpressionLogarithm<ExpressionBase>, testDim, solutionDim, spaceDim>
 {
 public:
-	typedef EvaluationLogarithm<
-    typename ExpressionToEvaluation<ExpressionBase,testDim,solutionDim,spaceDim>::evaluation_Type
+    typedef EvaluationLogarithm <
+    typename ExpressionToEvaluation<ExpressionBase, testDim, solutionDim, spaceDim>::evaluation_Type
     > evaluation_Type;
 private:
-	ExpressionToEvaluation();
-	~ExpressionToEvaluation();
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
 };
 
 // Specialized for a exponential
 template<typename ExpressionBase, UInt testDim, UInt solutionDim, UInt spaceDim>
-class ExpressionToEvaluation<ExpressionExponential<ExpressionBase>,testDim,solutionDim,spaceDim>
+class ExpressionToEvaluation<ExpressionExponential<ExpressionBase>, testDim, solutionDim, spaceDim>
 {
 public:
-	typedef EvaluationExponential<
-    typename ExpressionToEvaluation<ExpressionBase,testDim,solutionDim,spaceDim>::evaluation_Type
+    typedef EvaluationExponential <
+    typename ExpressionToEvaluation<ExpressionBase, testDim, solutionDim, spaceDim>::evaluation_Type
     > evaluation_Type;
 private:
-	ExpressionToEvaluation();
-	~ExpressionToEvaluation();
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
 };
 
 // Specialized for a dot product
@@ -553,13 +553,13 @@ private:
 
 // Specialized for a vector product multiplication
 template<typename ExpressionL, typename ExpressionR, UInt testDim, UInt solutionDim, UInt spaceDim>
-class ExpressionToEvaluation<ExpressionOuterProduct<ExpressionL,ExpressionR>,testDim,solutionDim,spaceDim>
+class ExpressionToEvaluation<ExpressionOuterProduct<ExpressionL, ExpressionR>, testDim, solutionDim, spaceDim>
 {
 public:
-    typedef EvaluationOuterProduct<
-                typename ExpressionToEvaluation<ExpressionL,testDim,solutionDim,spaceDim>::evaluation_Type
-               ,typename ExpressionToEvaluation<ExpressionR,testDim,solutionDim,spaceDim>::evaluation_Type
-            > evaluation_Type;
+    typedef EvaluationOuterProduct <
+    typename ExpressionToEvaluation<ExpressionL, testDim, solutionDim, spaceDim>::evaluation_Type
+    , typename ExpressionToEvaluation<ExpressionR, testDim, solutionDim, spaceDim>::evaluation_Type
+    > evaluation_Type;
 private:
     ExpressionToEvaluation();
     ~ExpressionToEvaluation();
@@ -567,17 +567,17 @@ private:
 
 // Specialized for a element-wise multiplication
 template<typename ExpressionL, typename ExpressionR, UInt testDim, UInt solutionDim, UInt spaceDim>
-class ExpressionToEvaluation<ExpressionEmult<ExpressionL,ExpressionR>,testDim,solutionDim,spaceDim>
+class ExpressionToEvaluation<ExpressionEmult<ExpressionL, ExpressionR>, testDim, solutionDim, spaceDim>
 {
 public:
-    typedef EvaluationEmult<
-                typename ExpressionToEvaluation<ExpressionL,testDim,solutionDim,spaceDim>::evaluation_Type
-               ,typename ExpressionToEvaluation<ExpressionR,testDim,solutionDim,spaceDim>::evaluation_Type
-            > evaluation_Type;
+    typedef EvaluationEmult <
+    typename ExpressionToEvaluation<ExpressionL, testDim, solutionDim, spaceDim>::evaluation_Type
+    , typename ExpressionToEvaluation<ExpressionR, testDim, solutionDim, spaceDim>::evaluation_Type
+    > evaluation_Type;
 private:
     ExpressionToEvaluation();
     ~ExpressionToEvaluation();
-    };
+};
 
 // Specialized for a division
 template<typename ExpressionL, typename ExpressionR, UInt testDim, UInt solutionDim, UInt spaceDim>
@@ -628,24 +628,24 @@ private:
 
 // Specialized for the normal
 template<UInt testDim, UInt solutionDim, UInt spaceDim>
-class ExpressionToEvaluation<ExpressionNormal,testDim,solutionDim,spaceDim>
+class ExpressionToEvaluation<ExpressionNormal, testDim, solutionDim, spaceDim>
 {
 public:
-	typedef EvaluationNormal<spaceDim> evaluation_Type;
+    typedef EvaluationNormal<spaceDim> evaluation_Type;
 private:
-	ExpressionToEvaluation();
-	~ExpressionToEvaluation();
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
 };
 
 template<typename MeshType, typename MapType, UInt FESpaceDim, UInt testDim, UInt solutionDim, UInt spaceDim>
-class ExpressionToEvaluation<
-ExpressionIfCrossed<MeshType,MapType,FESpaceDim>,testDim,solutionDim,spaceDim>
+class ExpressionToEvaluation <
+    ExpressionIfCrossed<MeshType, MapType, FESpaceDim>, testDim, solutionDim, spaceDim >
 {
 public:
-	typedef EvaluationIfCrossed<MeshType,MapType,FESpaceDim> evaluation_Type;
+    typedef EvaluationIfCrossed<MeshType, MapType, FESpaceDim> evaluation_Type;
 private:
-	ExpressionToEvaluation();
-	~ExpressionToEvaluation();
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
 };
 
 // \endcond

@@ -115,7 +115,7 @@ int main ( int argc, char** argv )
 
     const UInt Nelements (10);
 
-    boost::shared_ptr< mesh_Type > fullMeshPtr(new mesh_Type( Comm ) );
+    boost::shared_ptr< mesh_Type > fullMeshPtr (new mesh_Type ( Comm ) );
 
     regularMesh3D ( *fullMeshPtr, 1, Nelements, Nelements, Nelements, false,
                     2.0,   2.0,   2.0,
@@ -158,42 +158,48 @@ int main ( int argc, char** argv )
         std::cout << " -- Defining the matrix ... " << std::flush;
     }
 
-    if (verbose) std::cout << " -- Defining the matrix ... " << std::flush;
+    if (verbose)
+    {
+        std::cout << " -- Defining the matrix ... " << std::flush;
+    }
 
-    boost::shared_ptr<matrix_Type> scalarMatrix (new matrix_Type( scalarSpace->map() ));
+    boost::shared_ptr<matrix_Type> scalarMatrix (new matrix_Type ( scalarSpace->map() ) );
 
-    *scalarMatrix *=0.0;
-
-    if (verbose) std::cout << " done! " << std::endl;
+    *scalarMatrix *= 0.0;
 
     if (verbose)
     {
         std::cout << " done! " << std::endl;
     }
 
-// ---------------------------------------------------------------
-// We can now start the assembly. To understand whether an
-// expression is valid, the critical observation is that every
-// piece of expression is associated to a "fictitious" type (in
-// the sense that it is not the type of the expression in the
-// C++ sense), which matches the mathematical type.
-//
-// For example, in the case of a scalar finite element space, the
-// basis functions are scalar quantities, while their gradients
-// are vectorial quantities.
-//
-// With this in mind, we can now formulate the rules for an
-// expression to be valid:
-//
-// Rule A: The combinaisons between two expressions (through an
-// operator or a function) must be valid. For example, it is not
-// possible to sum a vectorial quantity and a scalar quantity.
-//
-// Rule B: The overall expression must be a scalar quantity. For
-// example, it not possible to integrate simply grad(phi_i)).
-//
-//
-// ---------------------------------------------------------------
+    if (verbose)
+    {
+        std::cout << " done! " << std::endl;
+    }
+
+    // ---------------------------------------------------------------
+    // We can now start the assembly. To understand whether an
+    // expression is valid, the critical observation is that every
+    // piece of expression is associated to a "fictitious" type (in
+    // the sense that it is not the type of the expression in the
+    // C++ sense), which matches the mathematical type.
+    //
+    // For example, in the case of a scalar finite element space, the
+    // basis functions are scalar quantities, while their gradients
+    // are vectorial quantities.
+    //
+    // With this in mind, we can now formulate the rules for an
+    // expression to be valid:
+    //
+    // Rule A: The combinaisons between two expressions (through an
+    // operator or a function) must be valid. For example, it is not
+    // possible to sum a vectorial quantity and a scalar quantity.
+    //
+    // Rule B: The overall expression must be a scalar quantity. For
+    // example, it not possible to integrate simply grad(phi_i)).
+    //
+    //
+    // ---------------------------------------------------------------
 
     // ---------------------------------------------------------------
     // We can now start the assembly. To understand whether an
@@ -271,19 +277,19 @@ int main ( int argc, char** argv )
         // are respected, and even if the expression
         // does not correspond to any real problem.
 
-        VectorSmall<3> V1(1.0,0.0,0.0);
+        VectorSmall<3> V1 (1.0, 0.0, 0.0);
 
-        integrate(  elements(scalarSpace->mesh()),
-                    quadRuleTetra4pt,
-                    scalarSpace,
-                    scalarSpace,
-                    dot( grad(phi_i) , grad(phi_j) )
-                    +0.0*
-                    (2.0* phi_i/phi_j
-                    - dot( grad(phi_i), phi_i*V1)*phi_j
-                     + 3.1415)
-            )
-            >> scalarMatrix;
+        integrate (  elements (scalarSpace->mesh() ),
+                     quadRuleTetra4pt,
+                     scalarSpace,
+                     scalarSpace,
+                     dot ( grad (phi_i) , grad (phi_j) )
+                     + 0.0 *
+                     (2.0 * phi_i / phi_j
+                      - dot ( grad (phi_i), phi_i * V1) *phi_j
+                      + 3.1415)
+                  )
+                >> scalarMatrix;
     }
 
     if (verbose)
@@ -292,15 +298,15 @@ int main ( int argc, char** argv )
     }
 
 
-// ---------------------------------------------------------------
-// The rule A and B are very simple, usually much more than the
-// compilation errors that can be issued. In case of problem, it
-// is then much easier to look at the expression with the rules A
-// and B to find where is the problem.
-//
-// To finish this tutorial, we compare the norm of the matrix with
-// the norm it should have.
-// ---------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // The rule A and B are very simple, usually much more than the
+    // compilation errors that can be issued. In case of problem, it
+    // is then much easier to look at the expression with the rules A
+    // and B to find where is the problem.
+    //
+    // To finish this tutorial, we compare the norm of the matrix with
+    // the norm it should have.
+    // ---------------------------------------------------------------
 
     if (verbose)
     {
@@ -327,9 +333,12 @@ int main ( int argc, char** argv )
 
     Real matrixNormDiff (std::abs (matrixNorm - 3.2) );
 
-    if (verbose) std::cout << " Error : " << matrixNormDiff << std::endl;
+    if (verbose)
+    {
+        std::cout << " Error : " << matrixNormDiff << std::endl;
+    }
 
-    Real testTolerance(1e-10);
+    Real testTolerance (1e-10);
 
     if ( matrixNormDiff < testTolerance )
     {

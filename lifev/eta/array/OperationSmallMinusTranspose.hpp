@@ -60,16 +60,16 @@ template <typename Operand >
 class OperationSmallMinusTranspose
 {
 private:
-	//! @name Constructors and destructors
+    //! @name Constructors and destructors
     //@{
 
-	//! No default constructor
-	OperationSmallMinusTranspose();
+    //! No default constructor
+    OperationSmallMinusTranspose();
 
-	//! No destructor
-	~OperationSmallMinusTranspose();
+    //! No destructor
+    ~OperationSmallMinusTranspose();
 
-	//@}
+    //@}
 };
 
 //! \cond
@@ -82,21 +82,21 @@ public:
     //! @name Public Types
     //@{
 
-	typedef MatrixSmall<Dim1, Dim2> result_Type;
+    typedef MatrixSmall<Dim1, Dim2> result_Type;
 
-	//@}
+    //@}
 
 private:
-	//! @name Constructors and destructors
+    //! @name Constructors and destructors
     //@{
 
-	//! No default constructor
-	OperationSmallMinusTranspose();
+    //! No default constructor
+    OperationSmallMinusTranspose();
 
-	//! No destructor
-	~OperationSmallMinusTranspose();
+    //! No destructor
+    ~OperationSmallMinusTranspose();
 
-	//@}
+    //@}
 };
 
 //! \endcond

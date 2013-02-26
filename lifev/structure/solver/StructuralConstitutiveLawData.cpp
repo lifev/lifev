@@ -146,11 +146,11 @@ StructuralConstitutiveLawData::setup ( const GetPot& dataFile, const std::string
         // If no material is specified in the data file the code assume that there is just one material
         // and by default it is memorized with ID 1. Getters and Setters have been designed to deal with thic choice.
         M_materialsFlagSet = false;
-	M_vectorMaterialFlags.resize(1);
+        M_vectorMaterialFlags.resize (1);
 
-	M_vectorMaterialFlags[0] = 1;
-        M_young[1]   = dataFile( ( section + "/physics/young"   ).data(), 0. );
-        M_poisson[1] = dataFile( ( section + "/physics/poisson" ).data(), 0. );
+        M_vectorMaterialFlags[0] = 1;
+        M_young[1]   = dataFile ( ( section + "/physics/young"   ).data(), 0. );
+        M_poisson[1] = dataFile ( ( section + "/physics/poisson" ).data(), 0. );
 
         M_bulk[1] = dataFile ( ( section + "/physics/bulk"   ).data(), 1e9 );
         M_alpha[1] = dataFile ( ( section + "/physics/alpha" ).data(), 3e6 );
@@ -168,16 +168,16 @@ StructuralConstitutiveLawData::setup ( const GetPot& dataFile, const std::string
         for ( UInt i (0) ; i < materialsNumber ; ++i )
         {
 
-  	    M_vectorMaterialFlags.resize( materialsNumber );
-            material            = dataFile( ( section + "/physics/material_flag" ).data(), 0., i );
+            M_vectorMaterialFlags.resize ( materialsNumber );
+            material            = dataFile ( ( section + "/physics/material_flag" ).data(), 0., i );
 
-	    M_vectorMaterialFlags[i] = material;
-            M_young[material]   = dataFile( ( section + "/physics/young"         ).data(), 0., i );
-            M_poisson[material] = dataFile( ( section + "/physics/poisson"       ).data(), 0., i );
+            M_vectorMaterialFlags[i] = material;
+            M_young[material]   = dataFile ( ( section + "/physics/young"         ).data(), 0., i );
+            M_poisson[material] = dataFile ( ( section + "/physics/poisson"       ).data(), 0., i );
 
-            M_bulk[material] = dataFile( ( section + "/physics/bulk"         ).data(), 1e9, i );
-            M_alpha[material] = dataFile( ( section + "/physics/alpha"       ).data(), 3e6, i );
-            M_gamma[material] = dataFile( ( section + "/physics/gamma"       ).data(), 0.8, i );
+            M_bulk[material] = dataFile ( ( section + "/physics/bulk"         ).data(), 1e9, i );
+            M_alpha[material] = dataFile ( ( section + "/physics/alpha"       ).data(), 3e6, i );
+            M_gamma[material] = dataFile ( ( section + "/physics/gamma"       ).data(), 0.8, i );
         }
     }
 

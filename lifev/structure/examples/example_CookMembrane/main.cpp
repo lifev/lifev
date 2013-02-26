@@ -154,7 +154,7 @@ public:
     typedef boost::shared_ptr<solidFESpace_Type>                  solidFESpacePtr_Type;
 
 
-    typedef ETFESpace< RegionMesh<LinearTetra>, MapEpetra,3,3 >      solidETFESpace_Type;
+    typedef ETFESpace< RegionMesh<LinearTetra>, MapEpetra, 3, 3 >      solidETFESpace_Type;
     typedef boost::shared_ptr<solidETFESpace_Type>                 solidETFESpacePtr_Type;
 
     /** @name Constructors, destructor
@@ -349,8 +349,8 @@ Structure::run3d()
 
     std::string dOrder =  dataFile ( "solid/space_discretization/order", "P1");
 
-    dFESpace.reset( new solidFESpace_Type(meshPart,dOrder,3,parameters->comm) );
-    dETFESpace.reset( new solidETFESpace_Type(meshPart,&(dFESpace->refFE()),&(dFESpace->fe().geoMap()), parameters->comm) );
+    dFESpace.reset ( new solidFESpace_Type (meshPart, dOrder, 3, parameters->comm) );
+    dETFESpace.reset ( new solidETFESpace_Type (meshPart, & (dFESpace->refFE() ), & (dFESpace->fe().geoMap() ), parameters->comm) );
 
     // if( dOrder.compare("P2") == 0 )
     //     exporterFESpace.reset( new solidFESpace_Type(meshPart,"P1",3,parameters->comm) );
@@ -377,7 +377,7 @@ Structure::run3d()
         timeAdvance->setup (dataStructure->dataTimeAdvance()->orderBDF() , OrderDev);
     }
 
-    timeAdvance->setTimeStep(dataStructure->dataTime()->timeStep());
+    timeAdvance->setTimeStep (dataStructure->dataTime()->timeStep() );
     //    timeAdvance->showMe();
 
     //! #################################################################################
@@ -421,11 +421,11 @@ Structure::run3d()
     StructuralOperator< RegionMesh<LinearTetra> > solid;
 
     //! 2. Setup of the structuralSolver
-    solid.setup(dataStructure,
-                dFESpace,
-                dETFESpace,
-                BCh,
-                parameters->comm);
+    solid.setup (dataStructure,
+                 dFESpace,
+                 dETFESpace,
+                 BCh,
+                 parameters->comm);
 
     //! 3. Setting data from getPot
     solid.setDataFromGetPot (dataFile);

@@ -52,7 +52,7 @@ class VenantKirchhoffMaterialNonLinearPenalized : public StructuralConstitutiveL
     //!@name Type definitions
     //@{
 
-    public:
+public:
     typedef StructuralConstitutiveLaw<MeshType>                 super;
 
     typedef typename super::data_Type                data_Type;
@@ -86,8 +86,8 @@ class VenantKirchhoffMaterialNonLinearPenalized : public StructuralConstitutiveL
     typedef typename super::vectorsParameters_Type       vectorsParameters_Type;
     typedef typename super::vectorsParametersPtr_Type    vectorsParametersPtr_Type;
 
-    typedef MatrixSmall<3,3>                          matrixSmall_Type;
-//@}
+    typedef MatrixSmall<3, 3>                          matrixSmall_Type;
+    //@}
 
 
 
@@ -111,19 +111,19 @@ class VenantKirchhoffMaterialNonLinearPenalized : public StructuralConstitutiveL
       \param monolithicMap: the MapEpetra
       \param offset: the offset parameter used assembling the matrices
     */
-    void setup( const FESpacePtr_Type& dFESpace,
-                const ETFESpacePtr_Type& dETFESpace,
-                const boost::shared_ptr<const MapEpetra>&  monolithicMap,
-                const UInt offset, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer );
+    void setup ( const FESpacePtr_Type& dFESpace,
+                 const ETFESpacePtr_Type& dETFESpace,
+                 const boost::shared_ptr<const MapEpetra>&  monolithicMap,
+                 const UInt offset, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer );
 
 
     //! Compute the Stiffness matrix in StructuralSolver::buildSystem()
     /*!
       \param dataMaterial the class with Material properties data
     */
-    void computeLinearStiff( dataPtr_Type& /*dataMaterial*/,
-                             const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
-                             const mapMarkerIndexesPtr_Type /*mapsMarkerIndexes*/ );
+    void computeLinearStiff ( dataPtr_Type& /*dataMaterial*/,
+                              const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
+                              const mapMarkerIndexesPtr_Type /*mapsMarkerIndexes*/ );
 
 
     //! Updates the Jacobian matrix in StructualSolver::updateJacobian
@@ -132,11 +132,11 @@ class VenantKirchhoffMaterialNonLinearPenalized : public StructuralConstitutiveL
       \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
-    void updateJacobianMatrix( const vector_Type& sol,
-                               const dataPtr_Type& dataMaterial,
-                               const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
-                               const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
-                               const displayerPtr_Type& displayer );
+    void updateJacobianMatrix ( const vector_Type& sol,
+                                const dataPtr_Type& dataMaterial,
+                                const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                                const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
+                                const displayerPtr_Type& displayer );
 
 
     //! Updates the nonlinear terms in the Jacobian matrix in StructualSolver::updateJacobian
@@ -146,12 +146,12 @@ class VenantKirchhoffMaterialNonLinearPenalized : public StructuralConstitutiveL
       \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
-    void updateNonLinearJacobianTerms( matrixPtr_Type& jacobian,
-                                       const vector_Type& sol,
-                                       const dataPtr_Type& dataMaterial,
-                                       const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
-                                       const mapMarkerIndexesPtr_Type /*mapsMarkerIndexes*/,
-                                       const displayerPtr_Type& displayer );
+    void updateNonLinearJacobianTerms ( matrixPtr_Type& jacobian,
+                                        const vector_Type& sol,
+                                        const dataPtr_Type& dataMaterial,
+                                        const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
+                                        const mapMarkerIndexesPtr_Type /*mapsMarkerIndexes*/,
+                                        const displayerPtr_Type& displayer );
 
 
     //! Interface method to compute the new Stiffness matrix in StructuralSolver::evalResidual and in
@@ -162,12 +162,12 @@ class VenantKirchhoffMaterialNonLinearPenalized : public StructuralConstitutiveL
       \param dataMaterial: a pointer to the dataType member in StructuralSolver class to get the material coefficients (e.g. Young modulus, Poisson ratio..)
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
-    void computeStiffness( const vector_Type& sol,
-                           Real factor,
-                           const dataPtr_Type& dataMaterial,
-                           const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
-			   const mapMarkerIndexesPtr_Type /*mapsMarkerIndexes*/,
-                           const displayerPtr_Type& displayer );
+    void computeStiffness ( const vector_Type& sol,
+                            Real factor,
+                            const dataPtr_Type& dataMaterial,
+                            const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
+                            const mapMarkerIndexesPtr_Type /*mapsMarkerIndexes*/,
+                            const displayerPtr_Type& displayer );
 
     //! Computes the new Stiffness vector for Neo-Hookean and VK-Penalized materials in StructuralSolver given a certain displacement field.
     //! This function is used both in StructuralSolver::evalResidual and in StructuralSolver::updateSystem since the matrix is the expression of the matrix is the same.
@@ -234,8 +234,8 @@ class VenantKirchhoffMaterialNonLinearPenalized : public StructuralConstitutiveL
         return M_stiff;
     }
 
-    void apply( const vector_Type& sol, vector_Type& res, const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
-                const mapMarkerIndexesPtr_Type mapsMarkerIndexes);
+    void apply ( const vector_Type& sol, vector_Type& res, const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                 const mapMarkerIndexesPtr_Type mapsMarkerIndexes);
 
     //@}
 
@@ -248,7 +248,7 @@ protected:
       \param VOID
       \return VOID
     */
-    void setupVectorsParameters( void );
+    void setupVectorsParameters ( void );
 
 
     //! Vector: stiffness non-linear
@@ -263,7 +263,7 @@ protected:
 
 
 template <typename MeshType>
-VenantKirchhoffMaterialNonLinearPenalized<MeshType>::VenantKirchhoffMaterialNonLinearPenalized():
+VenantKirchhoffMaterialNonLinearPenalized<MeshType>::VenantKirchhoffMaterialNonLinearPenalized() :
     super                  ( ),
     M_stiff                ( ),
     M_identity             ( )
@@ -284,11 +284,11 @@ VenantKirchhoffMaterialNonLinearPenalized<MeshType>::~VenantKirchhoffMaterialNon
 
 template <typename MeshType>
 void
-VenantKirchhoffMaterialNonLinearPenalized<MeshType>::setup( const FESpacePtr_Type&                       dFESpace,
-                                                        const ETFESpacePtr_Type&                     dETFESpace,
-                                                        const boost::shared_ptr<const MapEpetra>&            monolithicMap,
-                                                        const UInt  offset,
-                                                        const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer  )
+VenantKirchhoffMaterialNonLinearPenalized<MeshType>::setup ( const FESpacePtr_Type&                       dFESpace,
+                                                             const ETFESpacePtr_Type&                     dETFESpace,
+                                                             const boost::shared_ptr<const MapEpetra>&            monolithicMap,
+                                                             const UInt  offset,
+                                                             const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer  )
 {
     this->M_displayer = displayer;
     this->M_dataMaterial  = dataMaterial;
@@ -301,14 +301,20 @@ VenantKirchhoffMaterialNonLinearPenalized<MeshType>::setup( const FESpacePtr_Typ
 
     M_stiff.reset                     ( new vector_Type (*this->M_localMap) );
 
-    M_identity(0,0) = 1.0; M_identity(0,1) = 0.0; M_identity(0,2) = 0.0;
-    M_identity(1,0) = 0.0; M_identity(1,1) = 1.0; M_identity(1,2) = 0.0;
-    M_identity(2,0) = 0.0; M_identity(2,1) = 0.0; M_identity(2,2) = 1.0;
+    M_identity (0, 0) = 1.0;
+    M_identity (0, 1) = 0.0;
+    M_identity (0, 2) = 0.0;
+    M_identity (1, 0) = 0.0;
+    M_identity (1, 1) = 1.0;
+    M_identity (1, 2) = 0.0;
+    M_identity (2, 0) = 0.0;
+    M_identity (2, 1) = 0.0;
+    M_identity (2, 2) = 1.0;
 
     // The 3 is because the law uses three parameters (lambda, mu, bulk).
     // another way would be to set up the number of constitutive parameters of the law
     // in the data file to get the right size. Note the comment below.
-    this->M_vectorsParameters.reset( new vectorsParameters_Type( 3 ) );
+    this->M_vectorsParameters.reset ( new vectorsParameters_Type ( 3 ) );
 
     this->setupVectorsParameters();
 
@@ -316,7 +322,7 @@ VenantKirchhoffMaterialNonLinearPenalized<MeshType>::setup( const FESpacePtr_Typ
 
 template <typename MeshType>
 void
-VenantKirchhoffMaterialNonLinearPenalized<MeshType>::setupVectorsParameters( void )
+VenantKirchhoffMaterialNonLinearPenalized<MeshType>::setupVectorsParameters ( void )
 {
     // Paolo Tricerri: February, 20th
     // In each class, the name of the parameters has to inserted in the law
@@ -329,26 +335,26 @@ VenantKirchhoffMaterialNonLinearPenalized<MeshType>::setupVectorsParameters( voi
 
     // Parameter lambda
     // 1. resize the vector in the first element of the vector.
-    (*(this->M_vectorsParameters))[0].resize( nbElements );
+    (* (this->M_vectorsParameters) ) [0].resize ( nbElements );
 
     // Parameter mu
-    (*(this->M_vectorsParameters))[1].resize( nbElements );
+    (* (this->M_vectorsParameters) ) [1].resize ( nbElements );
 
     // Parameter mu
-    (*(this->M_vectorsParameters))[2].resize( nbElements );
+    (* (this->M_vectorsParameters) ) [2].resize ( nbElements );
 
-    for(UInt i(0); i < nbElements; i++ )
+    for (UInt i (0); i < nbElements; i++ )
     {
         // Extracting the marker
-        UInt markerID = this->M_dispFESpace->mesh()->element( i ).markerID();
+        UInt markerID = this->M_dispFESpace->mesh()->element ( i ).markerID();
 
-        Real lambda = this->M_dataMaterial->lambda( markerID );
-        Real mu = this->M_dataMaterial->mu( markerID );
-        Real bulk = this->M_dataMaterial->bulk( markerID );
+        Real lambda = this->M_dataMaterial->lambda ( markerID );
+        Real mu = this->M_dataMaterial->mu ( markerID );
+        Real bulk = this->M_dataMaterial->bulk ( markerID );
 
-        ( (*(this->M_vectorsParameters) )[0])[ i ] = lambda;
-        ( (*(this->M_vectorsParameters) )[1])[ i ] = mu;
-        ( (*(this->M_vectorsParameters) )[2])[ i ] = bulk;
+        ( (* (this->M_vectorsParameters) ) [0]) [ i ] = lambda;
+        ( (* (this->M_vectorsParameters) ) [1]) [ i ] = mu;
+        ( (* (this->M_vectorsParameters) ) [2]) [ i ] = bulk;
     }
 }
 
@@ -356,9 +362,9 @@ VenantKirchhoffMaterialNonLinearPenalized<MeshType>::setupVectorsParameters( voi
 
 
 template <typename MeshType>
-void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::computeLinearStiff(dataPtr_Type& /*dataMaterial*/,
-                                                                         const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
-                                                                         const mapMarkerIndexesPtr_Type /*mapsMarkerIndexes*/)
+void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::computeLinearStiff (dataPtr_Type& /*dataMaterial*/,
+                                                                              const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
+                                                                              const mapMarkerIndexesPtr_Type /*mapsMarkerIndexes*/)
 {
     //! Empty method for this law
 }
@@ -368,17 +374,17 @@ void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::computeLinearStiff(dat
 
 
 template <typename MeshType>
-void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::updateJacobianMatrix( const vector_Type&       sol,
-                                                                            const dataPtr_Type&      dataMaterial,
-                                                                            const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
-                                                                            const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
-                                                                            const displayerPtr_Type& displayer )
+void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::updateJacobianMatrix ( const vector_Type&       sol,
+        const dataPtr_Type&      dataMaterial,
+        const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+        const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
+        const displayerPtr_Type& displayer )
 {
     this->M_jacobian.reset (new matrix_Type (*this->M_localMap) );
 
-    displayer->leaderPrint(" \n************************************************\n ");
-    updateNonLinearJacobianTerms(this->M_jacobian, sol, dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
-    displayer->leaderPrint(" \n************************************************\n ");
+    displayer->leaderPrint (" \n************************************************\n ");
+    updateNonLinearJacobianTerms (this->M_jacobian, sol, dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
+    displayer->leaderPrint (" \n************************************************\n ");
 
 }
 
@@ -387,12 +393,12 @@ void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::updateJacobianMatrix( 
 
 
 template <typename MeshType>
-void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::updateNonLinearJacobianTerms( matrixPtr_Type&        jacobian,
-                                                                                    const vector_Type&     sol,
-                                                                                    const dataPtr_Type&    dataMaterial,
-                                                                                    const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
-                                                                                    const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
-                                                                                    const displayerPtr_Type& displayer )
+void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::updateNonLinearJacobianTerms ( matrixPtr_Type&        jacobian,
+        const vector_Type&     sol,
+        const dataPtr_Type&    dataMaterial,
+        const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+        const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
+        const displayerPtr_Type& displayer )
 {
 
     using namespace ExpressionAssembly;
@@ -427,7 +433,7 @@ void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::updateNonLinearJacobia
     //     Real mu = dataMaterial->mu(marker);
     //     Real lambda = dataMaterial->lambda(marker);
 
-        //Macros to make the assembly more readable
+    //Macros to make the assembly more readable
 #define F ( grad( this->M_dispETFESpace,  sol, this->M_offset) + value(this->M_identity) )
 #define J det( F )
 #define F_T  minusT(F)
@@ -444,170 +450,170 @@ void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::updateNonLinearJacobia
 
     //! VOLUMETRIC PART
     //! 1. Stiffness matrix: int { 1/2 * bulk * ( 2 - 1/J + 1/J^2 ) * ( CofF : \nabla \delta ) (CofF : \nabla v) }
-    integrate( elements( this->M_dispETFESpace->mesh() ) ,
-	       this->M_dispFESpace->qr(),
-	       this->M_dispETFESpace,
-	       this->M_dispETFESpace,
-	       value( 1.0 / 2.0 ) * parameter( (*(this->M_vectorsParameters) )[2] ) * ( value(2.0)*pow(J, 2.0) - J + value(1.0) ) * dot( F_T, grad(phi_j) ) * dot( F_T, grad(phi_i) )
-	       ) >> jacobian;
+    integrate ( elements ( this->M_dispETFESpace->mesh() ) ,
+                this->M_dispFESpace->qr(),
+                this->M_dispETFESpace,
+                this->M_dispETFESpace,
+                value ( 1.0 / 2.0 ) * parameter ( (* (this->M_vectorsParameters) ) [2] ) * ( value (2.0) *pow (J, 2.0) - J + value (1.0) ) * dot ( F_T, grad (phi_j) ) * dot ( F_T, grad (phi_i) )
+              ) >> jacobian;
 
     //! 2. Stiffness matrix: int { 1/2 * bulk * ( 1/J- 1 - log(J)/J^2 ) * ( CofF1 [\nabla \delta]^t CofF ) : \nabla v }
-    integrate( elements( this->M_dispETFESpace->mesh() ) ,
-	       this->M_dispFESpace->qr(),
-	       this->M_dispETFESpace,
-	       this->M_dispETFESpace,
-	       value( - 1.0 / 2.0 ) * parameter( (*(this->M_vectorsParameters) )[2] ) * ( pow(J,2.0) - J + log(J) ) * dot( F_T * transpose(grad(phi_j)) * F_T,  grad(phi_i) )
-	       ) >> jacobian;
+    integrate ( elements ( this->M_dispETFESpace->mesh() ) ,
+                this->M_dispFESpace->qr(),
+                this->M_dispETFESpace,
+                this->M_dispETFESpace,
+                value ( - 1.0 / 2.0 ) * parameter ( (* (this->M_vectorsParameters) ) [2] ) * ( pow (J, 2.0) - J + log (J) ) * dot ( F_T * transpose (grad (phi_j) ) * F_T,  grad (phi_i) )
+              ) >> jacobian;
 
 
     //! ISOCHORIC PART
     //! 0. Stiffness matrix : int { -(2.0/3.0) * Jk^(-2.0/3.0) * ( (lambda/2) * Ic_isok - ( (3/2)*lambda + mu ) ) * F^-T:\nabla \delta ) * ( F - (1.0/3.0) * Ic_k * F^-T ): \nabla \v  }
-    integrate( elements( this->M_dispETFESpace->mesh() ) ,
-	       this->M_dispFESpace->qr(),
-	       this->M_dispETFESpace,
-	       this->M_dispETFESpace,
-	       value( - 2.0 / 3.0 ) * pow( J,-(2.0/3.0) ) * ( value( 1.0/2.0 ) * parameter( (*(this->M_vectorsParameters) )[0] ) * ICbar -
-							      ( value(3.0/2.0)* parameter( (*(this->M_vectorsParameters) )[0] ) + parameter( (*(this->M_vectorsParameters) )[1] ) ) ) *
-	       dot( F_T, grad(phi_j) ) * dot( F + value(-1.0/3.0) * IC * F_T, grad(phi_i) )
-	       ) >> jacobian;
+    integrate ( elements ( this->M_dispETFESpace->mesh() ) ,
+                this->M_dispFESpace->qr(),
+                this->M_dispETFESpace,
+                this->M_dispETFESpace,
+                value ( - 2.0 / 3.0 ) * pow ( J, - (2.0 / 3.0) ) * ( value ( 1.0 / 2.0 ) * parameter ( (* (this->M_vectorsParameters) ) [0] ) * ICbar -
+                                                                     ( value (3.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [0] ) + parameter ( (* (this->M_vectorsParameters) ) [1] ) ) ) *
+                dot ( F_T, grad (phi_j) ) * dot ( F + value (-1.0 / 3.0) * IC * F_T, grad (phi_i) )
+              ) >> jacobian;
 
 
     // //! 1. Stiffness matrix : int { J^(-2/3) * (lambda / 2) * ( (-2/3) * Ic_k * J^(-2/3) * F^-T:\nabla \delta ) * ( F : \nabla \v ) }
-    integrate( elements( this->M_dispETFESpace->mesh() ) ,
-	       this->M_dispFESpace->qr(),
-	       this->M_dispETFESpace,
-	       this->M_dispETFESpace,
-	       pow( J,-(4.0/3.0) ) * value( -1.0/3.0 ) * parameter( (*(this->M_vectorsParameters) )[0] ) * IC *
-	       dot( F_T, grad(phi_j) ) * dot( F , grad(phi_i) )
-	       ) >> jacobian;
+    integrate ( elements ( this->M_dispETFESpace->mesh() ) ,
+                this->M_dispFESpace->qr(),
+                this->M_dispETFESpace,
+                this->M_dispETFESpace,
+                pow ( J, - (4.0 / 3.0) ) * value ( -1.0 / 3.0 ) * parameter ( (* (this->M_vectorsParameters) ) [0] ) * IC *
+                dot ( F_T, grad (phi_j) ) * dot ( F , grad (phi_i) )
+              ) >> jacobian;
 
     // //! 2. Stiffness matrix : int { J^(-2/3) * (lambda / 2) * ( ( 2/9 ) * J^(-2/3) * Ic_k^2 ) * ( F^-T : \nabla \delta ) ( F^-T : \nabla \v ) }
-    integrate( elements( this->M_dispETFESpace->mesh() ) ,
-	       this->M_dispFESpace->qr(),
-	       this->M_dispETFESpace,
-	       this->M_dispETFESpace,
-	       pow( J,-(4.0/3.0) ) * value( 1.0/9.0 ) * parameter( (*(this->M_vectorsParameters) )[0] ) * pow( IC, 2.0) *
-	       dot( F_T, grad(phi_j) ) * dot( F_T , grad(phi_i) )
-	       ) >> jacobian;
+    integrate ( elements ( this->M_dispETFESpace->mesh() ) ,
+                this->M_dispFESpace->qr(),
+                this->M_dispETFESpace,
+                this->M_dispETFESpace,
+                pow ( J, - (4.0 / 3.0) ) * value ( 1.0 / 9.0 ) * parameter ( (* (this->M_vectorsParameters) ) [0] ) * pow ( IC, 2.0) *
+                dot ( F_T, grad (phi_j) ) * dot ( F_T , grad (phi_i) )
+              ) >> jacobian;
 
     // //! 3. Stiffness matrix:int { J^(-2/3) * (lambda / 2) * ( 2 * J^(-2/3) * F : \nabla \delta ) * ( F : \nabla v) }
-    integrate( elements( this->M_dispETFESpace->mesh() ) ,
-	       this->M_dispFESpace->qr(),
-	       this->M_dispETFESpace,
-	       this->M_dispETFESpace,
-	       pow( J,-(4.0/3.0) ) * parameter( (*(this->M_vectorsParameters) )[0] ) *
-	       dot( F, grad(phi_j) ) * dot( F , grad(phi_i) )
-	       ) >> jacobian;
+    integrate ( elements ( this->M_dispETFESpace->mesh() ) ,
+                this->M_dispFESpace->qr(),
+                this->M_dispETFESpace,
+                this->M_dispETFESpace,
+                pow ( J, - (4.0 / 3.0) ) * parameter ( (* (this->M_vectorsParameters) ) [0] ) *
+                dot ( F, grad (phi_j) ) * dot ( F , grad (phi_i) )
+              ) >> jacobian;
 
     // //! 4. Stiffness matrix:int{ J^(-2/3) * (lambda / 2) * ( -2.0/3.0 * J^(-2/3) * Ic_k ) * ( F : \nabla \delta ) * ( F^-T : \nabla \v ) }
-    integrate( elements( this->M_dispETFESpace->mesh() ) ,
-	       this->M_dispFESpace->qr(),
-	       this->M_dispETFESpace,
-	       this->M_dispETFESpace,
-	       pow( J,-(4.0/3.0) ) * value( -1.0/3.0 ) * parameter( (*(this->M_vectorsParameters) )[0] ) * IC *
-	       dot( F, grad(phi_j) ) * dot( F_T , grad(phi_i) )
-	       ) >> jacobian;
+    integrate ( elements ( this->M_dispETFESpace->mesh() ) ,
+                this->M_dispFESpace->qr(),
+                this->M_dispETFESpace,
+                this->M_dispETFESpace,
+                pow ( J, - (4.0 / 3.0) ) * value ( -1.0 / 3.0 ) * parameter ( (* (this->M_vectorsParameters) ) [0] ) * IC *
+                dot ( F, grad (phi_j) ) * dot ( F_T , grad (phi_i) )
+              ) >> jacobian;
 
     // //! 5. Stiffness matrix : int { J^(-2/3) * ( (lambda/2) * Ic_isok - ( (3/2)*lambda + mu ) ) * \nabla \delta : \nabla v }
-    integrate( elements( this->M_dispETFESpace->mesh() ) ,
-	       this->M_dispFESpace->qr(),
-	       this->M_dispETFESpace,
-	       this->M_dispETFESpace,
-	       pow( J,-(2.0/3.0) ) * ( value( 1.0/2.0 ) * parameter( (*(this->M_vectorsParameters) )[0] ) * ICbar - 
-				       (value (3.0/2.0) * parameter( (*(this->M_vectorsParameters) )[0] ) + parameter( (*(this->M_vectorsParameters) )[1] )) ) *
-	       dot(  grad(phi_j) , grad(phi_i) )
-	       ) >> jacobian;
+    integrate ( elements ( this->M_dispETFESpace->mesh() ) ,
+                this->M_dispFESpace->qr(),
+                this->M_dispETFESpace,
+                this->M_dispETFESpace,
+                pow ( J, - (2.0 / 3.0) ) * ( value ( 1.0 / 2.0 ) * parameter ( (* (this->M_vectorsParameters) ) [0] ) * ICbar -
+                                             (value (3.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [0] ) + parameter ( (* (this->M_vectorsParameters) ) [1] ) ) ) *
+                dot (  grad (phi_j) , grad (phi_i) )
+              ) >> jacobian;
 
 
     // //! 6. Stiffness matrix : int { J^(-2.0/3.0) * ( (lambda/2) * Ic_isok - ( (3/2)*lambda + mu ) ) * ( (-2/3) * ( F :\nabla \delta ) ) * ( F^-T : \nabla v ) }
-    integrate( elements( this->M_dispETFESpace->mesh() ) ,
-	       this->M_dispFESpace->qr(),
-	       this->M_dispETFESpace,
-	       this->M_dispETFESpace,
-	       pow( J,-(2.0/3.0) ) * ( value( 1.0/2.0 ) * parameter( (*(this->M_vectorsParameters) )[0] ) * ICbar -
-				       (value(3.0/2.0) * parameter( (*(this->M_vectorsParameters) )[0] ) + parameter( (*(this->M_vectorsParameters) )[1] )) ) * value(-2.0/3.0) *
-	       dot(  F, grad(phi_j) ) * dot( F_T , grad(phi_i) )
-	       ) >> jacobian;
+    integrate ( elements ( this->M_dispETFESpace->mesh() ) ,
+                this->M_dispFESpace->qr(),
+                this->M_dispETFESpace,
+                this->M_dispETFESpace,
+                pow ( J, - (2.0 / 3.0) ) * ( value ( 1.0 / 2.0 ) * parameter ( (* (this->M_vectorsParameters) ) [0] ) * ICbar -
+                                             (value (3.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [0] ) + parameter ( (* (this->M_vectorsParameters) ) [1] ) ) ) * value (-2.0 / 3.0) *
+                dot (  F, grad (phi_j) ) * dot ( F_T , grad (phi_i) )
+              ) >> jacobian;
 
 
 
     // //! 7. Stiffness matrix : int { ( J^(-2.0/3.0) * (lambda/2) * Ic_isok - ( (3/2)*lambda + mu ) ) * ( (1/3) * Ic_k * ( F^-T \nabla \delta^T F-T ) : \nabla v  }
-    integrate( elements( this->M_dispETFESpace->mesh() ),
-	       this->M_dispFESpace->qr(),
-	       this->M_dispETFESpace,
-	       this->M_dispETFESpace,
-	       pow( J,-(2.0/3.0) ) * ( value( 1.0/2.0 ) * parameter( (*(this->M_vectorsParameters) )[0] ) * ICbar -
-				       (value(3.0/2.0) * parameter( (*(this->M_vectorsParameters) )[0] ) + parameter( (*(this->M_vectorsParameters) )[1] )) ) * value(1.0/3.0) * IC *
-	       dot(  F_T * transpose(grad(phi_j)) * F_T , grad(phi_i) )
-	       ) >> jacobian;
+    integrate ( elements ( this->M_dispETFESpace->mesh() ),
+                this->M_dispFESpace->qr(),
+                this->M_dispETFESpace,
+                this->M_dispETFESpace,
+                pow ( J, - (2.0 / 3.0) ) * ( value ( 1.0 / 2.0 ) * parameter ( (* (this->M_vectorsParameters) ) [0] ) * ICbar -
+                                             (value (3.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [0] ) + parameter ( (* (this->M_vectorsParameters) ) [1] ) ) ) * value (1.0 / 3.0) * IC *
+                dot (  F_T * transpose (grad (phi_j) ) * F_T , grad (phi_i) )
+              ) >> jacobian;
 
     //! 8. Stiffness matrix : int { ( -4.0/3.0) * ( mu * J^(-4/3) ) * ( F^-T: \grad \delta ) * ( F C ) : \nabla v  }
-    integrate( elements( this->M_dispETFESpace->mesh() ),
-	       this->M_dispFESpace->qr(),
-	       this->M_dispETFESpace,
-	       this->M_dispETFESpace,
-	       value( (-4.0/3.0) ) * parameter( (*(this->M_vectorsParameters) )[1]  ) * pow( J, (-4.0/3.0) ) *
-	       dot(  F_T , grad(phi_j)) * dot( F * RIGHTCAUCHYGREEN , grad(phi_i) )
-	       ) >> jacobian;
+    integrate ( elements ( this->M_dispETFESpace->mesh() ),
+                this->M_dispFESpace->qr(),
+                this->M_dispETFESpace,
+                this->M_dispETFESpace,
+                value ( (-4.0 / 3.0) ) * parameter ( (* (this->M_vectorsParameters) ) [1]  ) * pow ( J, (-4.0 / 3.0) ) *
+                dot (  F_T , grad (phi_j) ) * dot ( F * RIGHTCAUCHYGREEN , grad (phi_i) )
+              ) >> jacobian;
 
 
     // //! 9. Stiffness matrix : int { ( 4.0/9.0) * ( mu * J^(-4/3) ) * Ic_kSquared * (F^-T : \grad \delta ) * F^-T : \nabla \v  }
-    integrate( elements( this->M_dispETFESpace->mesh() ),
-	       this->M_dispFESpace->qr(),
-	       this->M_dispETFESpace,
-	       this->M_dispETFESpace,
-	       value( 4.0/9.0 ) * parameter( (*(this->M_vectorsParameters) )[1] ) * pow( J, (-4.0/3.0) ) * ICsquared *
-	       dot(  F_T , grad(phi_j) ) * dot( F_T , grad(phi_i) )
-	       ) >> jacobian;
+    integrate ( elements ( this->M_dispETFESpace->mesh() ),
+                this->M_dispFESpace->qr(),
+                this->M_dispETFESpace,
+                this->M_dispETFESpace,
+                value ( 4.0 / 9.0 ) * parameter ( (* (this->M_vectorsParameters) ) [1] ) * pow ( J, (-4.0 / 3.0) ) * ICsquared *
+                dot (  F_T , grad (phi_j) ) * dot ( F_T , grad (phi_i) )
+              ) >> jacobian;
 
 
     // //! 10. Stiffness matrix : int { ( mu * J^(-4/3) ) * ( \nabla \delta * C ) : \nabla v  }
-    integrate( elements( this->M_dispETFESpace->mesh() ) ,
-	       this->M_dispFESpace->qr(),
-	       this->M_dispETFESpace,
-	       this->M_dispETFESpace,
-	       parameter( (*(this->M_vectorsParameters) )[1] ) * pow( J, (-4.0/3.0) ) *
-	       dot( grad(phi_j) * RIGHTCAUCHYGREEN , grad(phi_i) )
-	       ) >> jacobian;
+    integrate ( elements ( this->M_dispETFESpace->mesh() ) ,
+                this->M_dispFESpace->qr(),
+                this->M_dispETFESpace,
+                this->M_dispETFESpace,
+                parameter ( (* (this->M_vectorsParameters) ) [1] ) * pow ( J, (-4.0 / 3.0) ) *
+                dot ( grad (phi_j) * RIGHTCAUCHYGREEN , grad (phi_i) )
+              ) >> jacobian;
 
 
     // //! 11. Stiffness matrix : int { ( mu * J^(-4/3) ) * (F [\nabla \delta]^T F ) : \nabla \v  }
-    integrate( elements( this->M_dispETFESpace->mesh() ) ,
-	       this->M_dispFESpace->qr(),
-	       this->M_dispETFESpace,
-	       this->M_dispETFESpace,
-	       parameter( (*(this->M_vectorsParameters) )[1] ) * pow( J, (-4.0/3.0) ) *
-	       dot( F * transpose( grad(phi_j) ) * F, grad(phi_i) )
-	       ) >> jacobian;
+    integrate ( elements ( this->M_dispETFESpace->mesh() ) ,
+                this->M_dispFESpace->qr(),
+                this->M_dispETFESpace,
+                this->M_dispETFESpace,
+                parameter ( (* (this->M_vectorsParameters) ) [1] ) * pow ( J, (-4.0 / 3.0) ) *
+                dot ( F * transpose ( grad (phi_j) ) * F, grad (phi_i) )
+              ) >> jacobian;
 
 
     // //! 12. Stiffness matrix : int  { ( mu * J^(-4/3) ) * (F * F^T * [\nabla \delta] ) : \nabla \v }
-    integrate( elements( this->M_dispETFESpace->mesh() ) ,
-	       this->M_dispFESpace->qr(),
-	       this->M_dispETFESpace,
-	       this->M_dispETFESpace,
-	       parameter( (*(this->M_vectorsParameters) )[1] ) * pow( J, (-4.0/3.0) ) *
-	       dot( F * transpose(F) * grad(phi_j), grad(phi_i) )
-	       ) >> jacobian;
+    integrate ( elements ( this->M_dispETFESpace->mesh() ) ,
+                this->M_dispFESpace->qr(),
+                this->M_dispETFESpace,
+                this->M_dispETFESpace,
+                parameter ( (* (this->M_vectorsParameters) ) [1] ) * pow ( J, (-4.0 / 3.0) ) *
+                dot ( F * transpose (F) * grad (phi_j), grad (phi_i) )
+              ) >> jacobian;
 
     // //! 13. Stiffness matrix : int {  ( mu * J^(-4/3) ) * ( (1/3) *  Ic_SquaredK * ( F^-T [\nabla \delta ]^T F^-T) : \nabla v ) }
-    integrate( elements( this->M_dispETFESpace->mesh() ) ,
-	       this->M_dispFESpace->qr(),
-	       this->M_dispETFESpace,
-	       this->M_dispETFESpace,
-	       parameter( (*(this->M_vectorsParameters) )[1] ) * pow( J, (-4.0/3.0) ) * value( 1.0/3.0 ) * ICsquared *
-	       dot( F_T * transpose( grad(phi_j) ) * F_T, grad(phi_i) )
-	       ) >> jacobian;
+    integrate ( elements ( this->M_dispETFESpace->mesh() ) ,
+                this->M_dispFESpace->qr(),
+                this->M_dispETFESpace,
+                this->M_dispETFESpace,
+                parameter ( (* (this->M_vectorsParameters) ) [1] ) * pow ( J, (-4.0 / 3.0) ) * value ( 1.0 / 3.0 ) * ICsquared *
+                dot ( F_T * transpose ( grad (phi_j) ) * F_T, grad (phi_i) )
+              ) >> jacobian;
 
 
     //! 14. Stiffness matrix : int {  ( mu * J^(-4/3) ) * ( (-4.0/3.0) * ( FkCk : \nabla \delta ) ) * F^-T : \nabla v ) }
-    integrate( elements( this->M_dispETFESpace->mesh() ) ,
-	       this->M_dispFESpace->qr(),
-	       this->M_dispETFESpace,
-	       this->M_dispETFESpace,
-	       parameter( (*(this->M_vectorsParameters) )[1] ) * pow( J, (-4.0/3.0) ) * value( -4.0/3.0 ) *
-	       dot( F * RIGHTCAUCHYGREEN, grad(phi_j) ) *dot( F_T, grad(phi_i) )
-	       ) >> jacobian;
+    integrate ( elements ( this->M_dispETFESpace->mesh() ) ,
+                this->M_dispFESpace->qr(),
+                this->M_dispETFESpace,
+                this->M_dispETFESpace,
+                parameter ( (* (this->M_vectorsParameters) ) [1] ) * pow ( J, (-4.0 / 3.0) ) * value ( -4.0 / 3.0 ) *
+                dot ( F * RIGHTCAUCHYGREEN, grad (phi_j) ) *dot ( F_T, grad (phi_i) )
+              ) >> jacobian;
 
     //    }
 
@@ -619,17 +625,17 @@ void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::updateNonLinearJacobia
 
 
 template <typename MeshType>
-void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::computeStiffness( const vector_Type& sol,
-                                                                            Real /*factor*/,
-                                                                            const dataPtr_Type& dataMaterial,
-                                                                            const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
-                                                                            const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
-                                                                            const displayerPtr_Type& displayer )
+void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::computeStiffness ( const vector_Type& sol,
+                                                                             Real /*factor*/,
+                                                                             const dataPtr_Type& dataMaterial,
+                                                                             const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                                                                             const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
+                                                                             const displayerPtr_Type& displayer )
 {
     using namespace ExpressionAssembly;
 
-    this->M_stiff.reset(new vector_Type(*this->M_localMap));
-    *(M_stiff) *= 0.0;
+    this->M_stiff.reset (new vector_Type (*this->M_localMap) );
+    * (M_stiff) *= 0.0;
 
     displayer->leaderPrint (" \n*********************************\n  ");
     displayer->leaderPrint (" Non-Linear S-  Computing the VK-Penalized nonlinear stiffness vector ");
@@ -659,33 +665,33 @@ void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::computeStiffness( cons
 
     //! Stiffness for non-linear terms of the Neo-Hookean model
     //! Volumetric part : int { bulk /2* (J1^2 - J1  + log(J1) ) * 1/J1 * (CofF1 : \nabla v) }
-    integrate( elements( this->M_dispETFESpace->mesh() ) ,
-	       this->M_dispFESpace->qr(),
-	       this->M_dispETFESpace,
-	       value(1.0 / 2.0) * parameter( (*(this->M_vectorsParameters) )[2] ) * ( pow( J ,2.0) - J + log(J)) * dot(  F_T, grad(phi_i) )
-	       ) >> M_stiff;
+    integrate ( elements ( this->M_dispETFESpace->mesh() ) ,
+                this->M_dispFESpace->qr(),
+                this->M_dispETFESpace,
+                value (1.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [2] ) * ( pow ( J , 2.0) - J + log (J) ) * dot (  F_T, grad (phi_i) )
+              ) >> M_stiff;
 
     //! Isochoric part : int { J^(-2.0/3.0) * ( \frac{lambda}{2}*Ic_isoK -  \frac{3}{2}*lambda - mu )*
     //                   ( (F1 : \nabla v) - 1/3 * (Ic) * (F1^-T : \nabla v) ) }
-    integrate( elements( this->M_dispETFESpace->mesh() ) ,
-	       this->M_dispFESpace->qr(),
-	       this->M_dispETFESpace,
-	       pow( J , (-2.0/3.0) ) * ( value(1.0/2.0) * parameter( (*(this->M_vectorsParameters) )[0] ) * ICbar -
-					 value(3.0/2.0)* parameter((*(this->M_vectorsParameters) )[0]) - parameter( (*(this->M_vectorsParameters) )[1]  ) ) *
-	       dot(  F + value( (-1.0/3.0) ) * IC *  F_T, grad(phi_i) )
-	       ) >> M_stiff;
+    integrate ( elements ( this->M_dispETFESpace->mesh() ) ,
+                this->M_dispFESpace->qr(),
+                this->M_dispETFESpace,
+                pow ( J , (-2.0 / 3.0) ) * ( value (1.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [0] ) * ICbar -
+                                             value (3.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [0]) - parameter ( (* (this->M_vectorsParameters) ) [1]  ) ) *
+                dot (  F + value ( (-1.0 / 3.0) ) * IC *  F_T, grad (phi_i) )
+              ) >> M_stiff;
 
     //! Isochoric part second term
     /*!
       Source term P2iso_VKPenalized: int { ( mu * Jk^(-4.0/3.0) )*
       ( (F*C : \nabla v) - 1/3 * (Ic_squared) * (F1^-T : \nabla v) ) }
     */
-    integrate( elements( this->M_dispETFESpace->mesh() ) ,
-	       this->M_dispFESpace->qr(),
-	       this->M_dispETFESpace,
-	       parameter( (*(this->M_vectorsParameters) )[1]  ) * pow( J , (-4.0/3.0) ) *
-	       dot(  F * RIGHTCAUCHYGREEN + value( (-1.0/3.0) ) * ICsquared * F_T, grad(phi_i) )
-	       ) >> M_stiff;
+    integrate ( elements ( this->M_dispETFESpace->mesh() ) ,
+                this->M_dispFESpace->qr(),
+                this->M_dispETFESpace,
+                parameter ( (* (this->M_vectorsParameters) ) [1]  ) * pow ( J , (-4.0 / 3.0) ) *
+                dot (  F * RIGHTCAUCHYGREEN + value ( (-1.0 / 3.0) ) * ICsquared * F_T, grad (phi_i) )
+              ) >> M_stiff;
 
     //}
 
@@ -697,7 +703,7 @@ void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::computeStiffness( cons
 
 
 template <typename MeshType>
-void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::computeKinematicsVariables( const VectorElemental& dk_loc )
+void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::computeKinematicsVariables ( const VectorElemental& dk_loc )
 {
 
     // Real s;
@@ -839,8 +845,8 @@ void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::computeKinematicsVaria
 }
 
 template <typename MeshType>
-void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::showMe( std::string const& fileNameStiff,
-                                                              std::string const& fileNameJacobian )
+void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::showMe ( std::string const& fileNameStiff,
+                                                                   std::string const& fileNameJacobian )
 {
     this->M_stiff->spy (fileNameStiff);
     this->M_jacobian->spy (fileNameJacobian);
@@ -848,20 +854,20 @@ void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::showMe( std::string co
 
 
 template <typename MeshType>
-void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::apply( const vector_Type& sol, vector_Type& res, const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
-                                                             const mapMarkerIndexesPtr_Type mapsMarkerIndexes )
+void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::apply ( const vector_Type& sol, vector_Type& res, const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                                                                  const mapMarkerIndexesPtr_Type mapsMarkerIndexes )
 {
-    computeStiffness(sol, 0, this->M_dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, this->M_displayer);
+    computeStiffness (sol, 0, this->M_dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, this->M_displayer);
     res += *M_stiff;
 }
 
 
 template <typename MeshType>
-void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::computeLocalFirstPiolaKirchhoffTensor( Epetra_SerialDenseMatrix& firstPiola,
-                                                                                             const Epetra_SerialDenseMatrix& tensorF,
-                                                                                             const Epetra_SerialDenseMatrix& cofactorF,
-                                                                                             const std::vector<Real>& invariants,
-                                                                                             const UInt marker)
+void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::computeLocalFirstPiolaKirchhoffTensor ( Epetra_SerialDenseMatrix& firstPiola,
+        const Epetra_SerialDenseMatrix& tensorF,
+        const Epetra_SerialDenseMatrix& cofactorF,
+        const std::vector<Real>& invariants,
+        const UInt marker)
 {
 
     //Get the material parameters
@@ -900,7 +906,10 @@ void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::computeLocalFirstPiola
 }
 
 template <typename MeshType>
-inline StructuralConstitutiveLaw<MeshType>* createVenantKirchhoffMaterialNonLinearPenalized() { return new VenantKirchhoffMaterialNonLinearPenalized<MeshType >(); }
+inline StructuralConstitutiveLaw<MeshType>* createVenantKirchhoffMaterialNonLinearPenalized()
+{
+    return new VenantKirchhoffMaterialNonLinearPenalized<MeshType >();
+}
 
 namespace
 {

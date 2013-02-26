@@ -54,7 +54,8 @@
 
 #include <boost/shared_ptr.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 
 /*!
@@ -67,7 +68,7 @@ namespace LifeV {
 
  */
 template< typename FESpaceType, typename VectorType >
-class LevelSetQRAdapter : public QRAdapterBase< LevelSetQRAdapter<FESpaceType,VectorType> >
+class LevelSetQRAdapter : public QRAdapterBase< LevelSetQRAdapter<FESpaceType, VectorType> >
 {
 public:
 
@@ -76,7 +77,7 @@ public:
 
     typedef boost::shared_ptr<FESpaceType> FESpaceType_Ptr;
 
-  typedef QRAdapterBase< LevelSetQRAdapter<FESpaceType,VectorType> > base_Type;
+    typedef QRAdapterBase< LevelSetQRAdapter<FESpaceType, VectorType> > base_Type;
 
     //@}
 
@@ -85,13 +86,13 @@ public:
     //@{
 
     //! Constructor with both FESpace and level set values
-    LevelSetQRAdapter(FESpaceType_Ptr fespace, const VectorType& vect, const QuadratureRule& qr);
+    LevelSetQRAdapter (FESpaceType_Ptr fespace, const VectorType& vect, const QuadratureRule& qr);
 
     //! Copy constructor
-    LevelSetQRAdapter(const LevelSetQRAdapter<FESpaceType,VectorType>& lsqra);
+    LevelSetQRAdapter (const LevelSetQRAdapter<FESpaceType, VectorType>& lsqra);
 
     //! Simple destructor
-    ~LevelSetQRAdapter(){}
+    ~LevelSetQRAdapter() {}
 
     //@}
 
@@ -110,7 +111,7 @@ public:
       This checks if the element is crossed by the interface
       and if so, computes the adapted quadrature rule.
      */
-    void update(UInt elementID);
+    void update (UInt elementID);
 
 
     //@}
@@ -126,13 +127,22 @@ public:
     //@{
 
     //! Is the current element crossed by the interface
-    bool isAdaptedElement() const { return M_isAdaptedElement; }
+    bool isAdaptedElement() const
+    {
+        return M_isAdaptedElement;
+    }
 
     //! Getter for the non-adapted quadrature
-    const QuadratureRule& standardQR() const { return M_qr; }
+    const QuadratureRule& standardQR() const
+    {
+        return M_qr;
+    }
 
     //! Getter for the adapted quadrature
-    const QuadratureRule& adaptedQR() const { return *M_adaptedQR; }
+    const QuadratureRule& adaptedQR() const
+    {
+        return *M_adaptedQR;
+    }
 
 
     //@}
@@ -159,7 +169,7 @@ private:
     QuadratureRule M_qr;
 
     // CurrentFE for the level set
-    ETCurrentFE<FESpaceType::space_dim,1> M_currentFE;
+    ETCurrentFE<FESpaceType::space_dim, 1> M_currentFE;
 
     // Boolean indicating if the element is crossed by the interface
     bool M_isAdaptedElement;
@@ -170,75 +180,75 @@ private:
 };
 
 template<typename FESpaceType, typename VectorType>
-LevelSetQRAdapter<FESpaceType,VectorType>
-adapt(boost::shared_ptr<FESpaceType> fespace, const VectorType& vector, const QuadratureRule& qr)
+LevelSetQRAdapter<FESpaceType, VectorType>
+adapt (boost::shared_ptr<FESpaceType> fespace, const VectorType& vector, const QuadratureRule& qr)
 {
-    return LevelSetQRAdapter<FESpaceType,VectorType>(fespace,vector,qr);
+    return LevelSetQRAdapter<FESpaceType, VectorType> (fespace, vector, qr);
 }
 
 
 template< typename FESpaceType, typename VectorType >
-LevelSetQRAdapter<FESpaceType,VectorType>::
-LevelSetQRAdapter(FESpaceType_Ptr fespace, const VectorType& vect, const QuadratureRule& qr)
+LevelSetQRAdapter<FESpaceType, VectorType>::
+LevelSetQRAdapter (FESpaceType_Ptr fespace, const VectorType& vect, const QuadratureRule& qr)
     :
     base_Type(),
-    M_lsFESpace(fespace),
-    M_lsValue(vect,Repeated),
-    M_qr(qr),
-    M_currentFE(fespace->refFE(),getGeometricMap(*fespace->mesh()),qr),
-    M_isAdaptedElement(false),
-    M_adaptedQR(new QuadratureRule(qr))
+    M_lsFESpace (fespace),
+    M_lsValue (vect, Repeated),
+    M_qr (qr),
+    M_currentFE (fespace->refFE(), getGeometricMap (*fespace->mesh() ), qr),
+    M_isAdaptedElement (false),
+    M_adaptedQR (new QuadratureRule (qr) )
 {
-    ASSERT( M_lsFESpace->fieldDim() == 1, "Quadrature adaptation only for scalar fields!");
-    ASSERT( M_lsFESpace->spaceDim() == 3, "Quadrature adaptation only 3D cases for the moment!");
+    ASSERT ( M_lsFESpace->fieldDim() == 1, "Quadrature adaptation only for scalar fields!");
+    ASSERT ( M_lsFESpace->spaceDim() == 3, "Quadrature adaptation only 3D cases for the moment!");
 }
 
 template< typename FESpaceType, typename VectorType >
-LevelSetQRAdapter<FESpaceType,VectorType>::
-LevelSetQRAdapter(const LevelSetQRAdapter<FESpaceType,VectorType>& lsqra)
+LevelSetQRAdapter<FESpaceType, VectorType>::
+LevelSetQRAdapter (const LevelSetQRAdapter<FESpaceType, VectorType>& lsqra)
     :
     base_Type(),
-    M_lsFESpace( lsqra.M_lsFESpace ),
-    M_lsValue( lsqra.M_lsValue ),
+    M_lsFESpace ( lsqra.M_lsFESpace ),
+    M_lsValue ( lsqra.M_lsValue ),
     M_qr ( lsqra.M_qr ),
-    M_currentFE( lsqra.M_currentFE ),
-    M_isAdaptedElement( lsqra.M_isAdaptedElement ),
-    M_adaptedQR( new QuadratureRule(*lsqra.M_adaptedQR) )
+    M_currentFE ( lsqra.M_currentFE ),
+    M_isAdaptedElement ( lsqra.M_isAdaptedElement ),
+    M_adaptedQR ( new QuadratureRule (*lsqra.M_adaptedQR) )
 {}
 
 
 template< typename FESpaceType, typename VectorType >
 void
-LevelSetQRAdapter<FESpaceType,VectorType>::
-update(UInt elementID)
+LevelSetQRAdapter<FESpaceType, VectorType>::
+update (UInt elementID)
 {
     //! Check that the level set values are Repeated
-    ASSERT( M_lsValue.mapType() == Repeated, "Internal error: level values are Unique!");
-    ASSERT( M_lsFESpace != 0, "Internal error: empty pointer to the Space");
+    ASSERT ( M_lsValue.mapType() == Repeated, "Internal error: level values are Unique!");
+    ASSERT ( M_lsFESpace != 0, "Internal error: empty pointer to the Space");
 
     // First, check the values of the level set and detect sign changes
 
     std::vector<UInt> localPositive;
     std::vector<UInt> localNegative;
-    std::vector<Real> localLSValue(4,0.0);
+    std::vector<Real> localLSValue (4, 0.0);
 
-    for (UInt iDof(0); iDof<4; ++iDof)
+    for (UInt iDof (0); iDof < 4; ++iDof)
     {
-        UInt myGlobalID( M_lsFESpace->dof().localToGlobalMap(elementID,iDof) );
+        UInt myGlobalID ( M_lsFESpace->dof().localToGlobalMap (elementID, iDof) );
         localLSValue[iDof] = M_lsValue[myGlobalID];
 
         if (localLSValue[iDof] >= 0)
         {
-            localPositive.push_back(iDof);
+            localPositive.push_back (iDof);
         }
         else
         {
-            localNegative.push_back(iDof);
+            localNegative.push_back (iDof);
         }
     }
 
     // Check if adaptation is needed
-    if ( localPositive.empty() || localNegative.empty())
+    if ( localPositive.empty() || localNegative.empty() )
     {
         // No adaptation
         M_isAdaptedElement = false;
@@ -250,7 +260,7 @@ update(UInt elementID)
         M_isAdaptedElement = true;
 
         // Define the reference tetrahedra
-        std::vector< VectorSmall<3> > refPts(4);
+        std::vector< VectorSmall<3> > refPts (4);
         refPts[1][0] = 1;
         refPts[2][1] = 1;
         refPts[3][2] = 1;
@@ -258,14 +268,14 @@ update(UInt elementID)
         // Define the CurrentFE that will be used to map the
         // quadrature from its reference shape to the part
         // of the tetrahedra
-        ETCurrentFE<3,1> QRMapper(feTetraP1,getGeometricMap(*M_lsFESpace->mesh()),M_qr);
+        ETCurrentFE<3, 1> QRMapper (feTetraP1, getGeometricMap (*M_lsFESpace->mesh() ), M_qr);
 
         // Reset the adapted quadrature
-        M_adaptedQR.reset(new QuadratureRule);
-        M_adaptedQR->setDimensionShape(3,TETRA);
+        M_adaptedQR.reset (new QuadratureRule);
+        M_adaptedQR->setDimensionShape (3, TETRA);
 
         // Constant
-        UInt QuadratureSize(M_qr.nbQuadPt());
+        UInt QuadratureSize (M_qr.nbQuadPt() );
 
         // If there's only one negative value
         // the tetrahedra has to be cut into 4
@@ -273,89 +283,89 @@ update(UInt elementID)
         if (localPositive.size() == 1)
         {
             // Localize the intersections
-            std::vector< VectorSmall<3> > intersections(3);
+            std::vector< VectorSmall<3> > intersections (3);
 
-            for (UInt i(0); i<3; ++i)
+            for (UInt i (0); i < 3; ++i)
             {
-                UInt pos(localPositive[0]);
-                UInt neg(localNegative[i]);
-                Real mu( localLSValue[pos] / (localLSValue[pos]-localLSValue[neg]) );
-                VectorSmall<3> I( refPts[pos] + mu*( refPts[neg]- refPts[pos] ));
-                intersections[i]=I;
+                UInt pos (localPositive[0]);
+                UInt neg (localNegative[i]);
+                Real mu ( localLSValue[pos] / (localLSValue[pos] - localLSValue[neg]) );
+                VectorSmall<3> I ( refPts[pos] + mu * ( refPts[neg] - refPts[pos] ) );
+                intersections[i] = I;
             }
 
 
             // Build the first tetra
-            std::vector< VectorSmall<3> > tetra1(4);
+            std::vector< VectorSmall<3> > tetra1 (4);
             tetra1[0] = refPts[localPositive[0]];
             tetra1[1] = intersections[0];
             tetra1[2] = intersections[1];
             tetra1[3] = intersections[2];
 
             // Map the QR
-            QRMapper.update( tetra1, ET_UPDATE_QUAD_NODE | ET_UPDATE_WDET);
+            QRMapper.update ( tetra1, ET_UPDATE_QUAD_NODE | ET_UPDATE_WDET);
 
-            for (UInt iQuadPt(0); iQuadPt<QuadratureSize; ++iQuadPt)
+            for (UInt iQuadPt (0); iQuadPt < QuadratureSize; ++iQuadPt)
             {
-                M_adaptedQR->addPoint(QuadraturePoint( QRMapper.quadNode(iQuadPt,0),
-                                                       QRMapper.quadNode(iQuadPt,1),
-                                                       QRMapper.quadNode(iQuadPt,2),
-                                                       std::abs(QRMapper.wDet(iQuadPt))));
+                M_adaptedQR->addPoint (QuadraturePoint ( QRMapper.quadNode (iQuadPt, 0),
+                                                         QRMapper.quadNode (iQuadPt, 1),
+                                                         QRMapper.quadNode (iQuadPt, 2),
+                                                         std::abs (QRMapper.wDet (iQuadPt) ) ) );
             }
 
             // Build the second tetra
-            std::vector< VectorSmall<3> > tetra2(4);
+            std::vector< VectorSmall<3> > tetra2 (4);
             tetra2[0] = intersections[0];
             tetra2[1] = intersections[1];
             tetra2[2] = intersections[2];
             tetra2[3] = refPts[localNegative[0]];
 
             // Map the QR
-            QRMapper.update( tetra2, ET_UPDATE_QUAD_NODE | ET_UPDATE_WDET);
+            QRMapper.update ( tetra2, ET_UPDATE_QUAD_NODE | ET_UPDATE_WDET);
 
-            for (UInt iQuadPt(0); iQuadPt<QuadratureSize; ++iQuadPt)
+            for (UInt iQuadPt (0); iQuadPt < QuadratureSize; ++iQuadPt)
             {
-                M_adaptedQR->addPoint(QuadraturePoint( QRMapper.quadNode(iQuadPt,0),
-                                                       QRMapper.quadNode(iQuadPt,1),
-                                                       QRMapper.quadNode(iQuadPt,2),
-                                                       std::abs(QRMapper.wDet(iQuadPt))));
+                M_adaptedQR->addPoint (QuadraturePoint ( QRMapper.quadNode (iQuadPt, 0),
+                                                         QRMapper.quadNode (iQuadPt, 1),
+                                                         QRMapper.quadNode (iQuadPt, 2),
+                                                         std::abs (QRMapper.wDet (iQuadPt) ) ) );
             }
 
             // Build the third tetra
-            std::vector< VectorSmall<3> > tetra3(4);
+            std::vector< VectorSmall<3> > tetra3 (4);
             tetra3[0] = refPts[localNegative[0]];
             tetra3[1] = refPts[localNegative[1]];
             tetra3[2] = refPts[localNegative[2]];
             tetra3[3] = intersections[2];
 
             // Map the QR
-            QRMapper.update( tetra3, ET_UPDATE_QUAD_NODE | ET_UPDATE_WDET);
+            QRMapper.update ( tetra3, ET_UPDATE_QUAD_NODE | ET_UPDATE_WDET);
 
-            for (UInt iQuadPt(0); iQuadPt<QuadratureSize; ++iQuadPt)
+            for (UInt iQuadPt (0); iQuadPt < QuadratureSize; ++iQuadPt)
             {
-                M_adaptedQR->addPoint(QuadraturePoint( QRMapper.quadNode(iQuadPt,0),
-                                                       QRMapper.quadNode(iQuadPt,1),
-                                                       QRMapper.quadNode(iQuadPt,2),
-                                                       std::abs(QRMapper.wDet(iQuadPt))));
+                M_adaptedQR->addPoint (QuadraturePoint ( QRMapper.quadNode (iQuadPt, 0),
+                                                         QRMapper.quadNode (iQuadPt, 1),
+                                                         QRMapper.quadNode (iQuadPt, 2),
+                                                         std::abs (QRMapper.wDet (iQuadPt) ) ) );
             }
 
 
             // Build the fourth tetra
-            std::vector< VectorSmall<3> > tetra4(4);
+            std::vector< VectorSmall<3> > tetra4 (4);
             tetra4[0] = refPts[localNegative[0]];
             tetra4[1] = refPts[localNegative[1]];
             tetra4[2] = intersections[1];
             tetra4[3] = intersections[2];
 
             // Map the QR
-            QRMapper.update( tetra4, ET_UPDATE_QUAD_NODE | ET_UPDATE_WDET);
+            QRMapper.update ( tetra4, ET_UPDATE_QUAD_NODE | ET_UPDATE_WDET);
 
-            for (UInt iQuadPt(0); iQuadPt<QuadratureSize; ++iQuadPt)
+            for (UInt iQuadPt (0); iQuadPt < QuadratureSize; ++iQuadPt)
             {
-                M_adaptedQR->addPoint(QuadraturePoint( QRMapper.quadNode(iQuadPt,0),
-                                                       QRMapper.quadNode(iQuadPt,1),
-                                                       QRMapper.quadNode(iQuadPt,2),
-                                                       std::abs(QRMapper.wDet(iQuadPt))));
+                M_adaptedQR->addPoint (QuadraturePoint ( QRMapper.quadNode (iQuadPt, 0),
+                                                         QRMapper.quadNode (iQuadPt, 1),
+                                                         QRMapper.quadNode (iQuadPt, 2),
+                                                         std::abs (QRMapper.wDet (iQuadPt) ) ) );
             }
 
         }
@@ -363,127 +373,127 @@ update(UInt elementID)
         {
 
             // Localize the intersections
-            std::vector< VectorSmall<3> > intersections(4);
+            std::vector< VectorSmall<3> > intersections (4);
 
-            for (UInt i(0); i<2; ++i)
+            for (UInt i (0); i < 2; ++i)
             {
-                for (UInt j(0); j<2; ++j)
+                for (UInt j (0); j < 2; ++j)
                 {
-                    UInt pos(localPositive[i]);
-                    UInt neg(localNegative[j]);
-                    Real mu( localLSValue[pos] / (localLSValue[pos]-localLSValue[neg]) );
-                    VectorSmall<3> I( refPts[pos] + mu*( refPts[neg]- refPts[pos] ));
-                    intersections[i+2*j]=I;
+                    UInt pos (localPositive[i]);
+                    UInt neg (localNegative[j]);
+                    Real mu ( localLSValue[pos] / (localLSValue[pos] - localLSValue[neg]) );
+                    VectorSmall<3> I ( refPts[pos] + mu * ( refPts[neg] - refPts[pos] ) );
+                    intersections[i + 2 * j] = I;
                 }
             }
 
 
             // Build the first tetra
-            std::vector< VectorSmall<3> > tetra1(4);
+            std::vector< VectorSmall<3> > tetra1 (4);
             tetra1[0] = refPts[localPositive[0]];
             tetra1[1] = intersections[0];
             tetra1[2] = intersections[1];
             tetra1[3] = intersections[2];
 
             // Map the QR
-            QRMapper.update( tetra1, ET_UPDATE_QUAD_NODE | ET_UPDATE_WDET);
+            QRMapper.update ( tetra1, ET_UPDATE_QUAD_NODE | ET_UPDATE_WDET);
 
-            for (UInt iQuadPt(0); iQuadPt<QuadratureSize; ++iQuadPt)
+            for (UInt iQuadPt (0); iQuadPt < QuadratureSize; ++iQuadPt)
             {
-                M_adaptedQR->addPoint(QuadraturePoint( QRMapper.quadNode(iQuadPt,0),
-                                                       QRMapper.quadNode(iQuadPt,1),
-                                                       QRMapper.quadNode(iQuadPt,2),
-                                                       std::abs(QRMapper.wDet(iQuadPt))));
+                M_adaptedQR->addPoint (QuadraturePoint ( QRMapper.quadNode (iQuadPt, 0),
+                                                         QRMapper.quadNode (iQuadPt, 1),
+                                                         QRMapper.quadNode (iQuadPt, 2),
+                                                         std::abs (QRMapper.wDet (iQuadPt) ) ) );
             }
 
             // Build the second tetra
-            std::vector< VectorSmall<3> > tetra2(4);
+            std::vector< VectorSmall<3> > tetra2 (4);
             tetra2[0] = intersections[1];
             tetra2[1] = intersections[2];
             tetra2[2] = intersections[3];
             tetra2[3] = refPts[localPositive[0]];
 
             // Map the QR
-            QRMapper.update( tetra2, ET_UPDATE_QUAD_NODE | ET_UPDATE_WDET);
+            QRMapper.update ( tetra2, ET_UPDATE_QUAD_NODE | ET_UPDATE_WDET);
 
-            for (UInt iQuadPt(0); iQuadPt<QuadratureSize; ++iQuadPt)
+            for (UInt iQuadPt (0); iQuadPt < QuadratureSize; ++iQuadPt)
             {
-                M_adaptedQR->addPoint(QuadraturePoint( QRMapper.quadNode(iQuadPt,0),
-                                                       QRMapper.quadNode(iQuadPt,1),
-                                                       QRMapper.quadNode(iQuadPt,2),
-                                                       std::abs(QRMapper.wDet(iQuadPt))));
+                M_adaptedQR->addPoint (QuadraturePoint ( QRMapper.quadNode (iQuadPt, 0),
+                                                         QRMapper.quadNode (iQuadPt, 1),
+                                                         QRMapper.quadNode (iQuadPt, 2),
+                                                         std::abs (QRMapper.wDet (iQuadPt) ) ) );
             }
 
             // Build the third tetra
-            std::vector< VectorSmall<3> > tetra3(4);
+            std::vector< VectorSmall<3> > tetra3 (4);
             tetra3[0] = refPts[localPositive[0]];
             tetra3[1] = refPts[localPositive[1]];
             tetra3[2] = intersections[1];
             tetra3[3] = intersections[3];
 
             // Map the QR
-            QRMapper.update( tetra3, ET_UPDATE_QUAD_NODE | ET_UPDATE_WDET);
+            QRMapper.update ( tetra3, ET_UPDATE_QUAD_NODE | ET_UPDATE_WDET);
 
-            for (UInt iQuadPt(0); iQuadPt<QuadratureSize; ++iQuadPt)
+            for (UInt iQuadPt (0); iQuadPt < QuadratureSize; ++iQuadPt)
             {
-                M_adaptedQR->addPoint(QuadraturePoint( QRMapper.quadNode(iQuadPt,0),
-                                                       QRMapper.quadNode(iQuadPt,1),
-                                                       QRMapper.quadNode(iQuadPt,2),
-                                                       std::abs(QRMapper.wDet(iQuadPt))));
+                M_adaptedQR->addPoint (QuadraturePoint ( QRMapper.quadNode (iQuadPt, 0),
+                                                         QRMapper.quadNode (iQuadPt, 1),
+                                                         QRMapper.quadNode (iQuadPt, 2),
+                                                         std::abs (QRMapper.wDet (iQuadPt) ) ) );
             }
 
             // Build the fourth tetra
-            std::vector< VectorSmall<3> > tetra4(4);
+            std::vector< VectorSmall<3> > tetra4 (4);
             tetra4[0] = refPts[localNegative[0]];
             tetra4[1] = intersections[0];
             tetra4[2] = intersections[1];
             tetra4[3] = intersections[2];
 
             // Map the QR
-            QRMapper.update( tetra4, ET_UPDATE_QUAD_NODE | ET_UPDATE_WDET);
+            QRMapper.update ( tetra4, ET_UPDATE_QUAD_NODE | ET_UPDATE_WDET);
 
-            for (UInt iQuadPt(0); iQuadPt<QuadratureSize; ++iQuadPt)
+            for (UInt iQuadPt (0); iQuadPt < QuadratureSize; ++iQuadPt)
             {
-                M_adaptedQR->addPoint(QuadraturePoint( QRMapper.quadNode(iQuadPt,0),
-                                                       QRMapper.quadNode(iQuadPt,1),
-                                                       QRMapper.quadNode(iQuadPt,2),
-                                                       std::abs(QRMapper.wDet(iQuadPt))));
+                M_adaptedQR->addPoint (QuadraturePoint ( QRMapper.quadNode (iQuadPt, 0),
+                                                         QRMapper.quadNode (iQuadPt, 1),
+                                                         QRMapper.quadNode (iQuadPt, 2),
+                                                         std::abs (QRMapper.wDet (iQuadPt) ) ) );
             }
 
             // Build the fifth tetra
-            std::vector< VectorSmall<3> > tetra5(4);
+            std::vector< VectorSmall<3> > tetra5 (4);
             tetra5[0] = refPts[localNegative[0]];
             tetra5[1] = intersections[1];
             tetra5[2] = intersections[2];
             tetra5[3] = intersections[3];
 
             // Map the QR
-            QRMapper.update( tetra5, ET_UPDATE_QUAD_NODE | ET_UPDATE_WDET);
+            QRMapper.update ( tetra5, ET_UPDATE_QUAD_NODE | ET_UPDATE_WDET);
 
-            for (UInt iQuadPt(0); iQuadPt<QuadratureSize; ++iQuadPt)
+            for (UInt iQuadPt (0); iQuadPt < QuadratureSize; ++iQuadPt)
             {
-                M_adaptedQR->addPoint(QuadraturePoint( QRMapper.quadNode(iQuadPt,0),
-                                                       QRMapper.quadNode(iQuadPt,1),
-                                                       QRMapper.quadNode(iQuadPt,2),
-                                                       std::abs(QRMapper.wDet(iQuadPt))));
+                M_adaptedQR->addPoint (QuadraturePoint ( QRMapper.quadNode (iQuadPt, 0),
+                                                         QRMapper.quadNode (iQuadPt, 1),
+                                                         QRMapper.quadNode (iQuadPt, 2),
+                                                         std::abs (QRMapper.wDet (iQuadPt) ) ) );
             }
 
             // Build the sixth tetra
-            std::vector< VectorSmall<3> > tetra6(4);
+            std::vector< VectorSmall<3> > tetra6 (4);
             tetra6[0] = refPts[localNegative[0]];
             tetra6[1] = refPts[localNegative[1]];
             tetra6[2] = intersections[2];
             tetra6[3] = intersections[3];
 
             // Map the QR
-            QRMapper.update( tetra6, ET_UPDATE_QUAD_NODE | ET_UPDATE_WDET);
+            QRMapper.update ( tetra6, ET_UPDATE_QUAD_NODE | ET_UPDATE_WDET);
 
-            for (UInt iQuadPt(0); iQuadPt<QuadratureSize; ++iQuadPt)
+            for (UInt iQuadPt (0); iQuadPt < QuadratureSize; ++iQuadPt)
             {
-                M_adaptedQR->addPoint(QuadraturePoint( QRMapper.quadNode(iQuadPt,0),
-                                                       QRMapper.quadNode(iQuadPt,1),
-                                                       QRMapper.quadNode(iQuadPt,2),
-                                                       std::abs(QRMapper.wDet(iQuadPt))));
+                M_adaptedQR->addPoint (QuadraturePoint ( QRMapper.quadNode (iQuadPt, 0),
+                                                         QRMapper.quadNode (iQuadPt, 1),
+                                                         QRMapper.quadNode (iQuadPt, 2),
+                                                         std::abs (QRMapper.wDet (iQuadPt) ) ) );
             }
 
 
@@ -491,92 +501,92 @@ update(UInt elementID)
         }
         else
         {
-            ASSERT( localPositive.size() == 3, "Internal inconsistency");
+            ASSERT ( localPositive.size() == 3, "Internal inconsistency");
 
             // Localize the intersections
-            std::vector< VectorSmall<3> > intersections(3);
+            std::vector< VectorSmall<3> > intersections (3);
 
-            for (UInt i(0); i<3; ++i)
+            for (UInt i (0); i < 3; ++i)
             {
-                UInt pos(localPositive[i]);
-                UInt neg(localNegative[0]);
-                Real mu( localLSValue[pos] / (localLSValue[pos]-localLSValue[neg]) );
-                VectorSmall<3> I( refPts[pos] + mu*( refPts[neg]- refPts[pos] ));
-                intersections[i]=I;
+                UInt pos (localPositive[i]);
+                UInt neg (localNegative[0]);
+                Real mu ( localLSValue[pos] / (localLSValue[pos] - localLSValue[neg]) );
+                VectorSmall<3> I ( refPts[pos] + mu * ( refPts[neg] - refPts[pos] ) );
+                intersections[i] = I;
             }
 
 
             // Build the first tetra
-            std::vector< VectorSmall<3> > tetra1(4);
+            std::vector< VectorSmall<3> > tetra1 (4);
             tetra1[0] = refPts[localNegative[0]];
             tetra1[1] = intersections[0];
             tetra1[2] = intersections[1];
             tetra1[3] = intersections[2];
 
             // Map the QR
-            QRMapper.update( tetra1, ET_UPDATE_QUAD_NODE | ET_UPDATE_WDET);
+            QRMapper.update ( tetra1, ET_UPDATE_QUAD_NODE | ET_UPDATE_WDET);
 
-            for (UInt iQuadPt(0); iQuadPt<QuadratureSize; ++iQuadPt)
+            for (UInt iQuadPt (0); iQuadPt < QuadratureSize; ++iQuadPt)
             {
-                M_adaptedQR->addPoint(QuadraturePoint( QRMapper.quadNode(iQuadPt,0),
-                                                       QRMapper.quadNode(iQuadPt,1),
-                                                       QRMapper.quadNode(iQuadPt,2),
-                                                       std::abs(QRMapper.wDet(iQuadPt))));
+                M_adaptedQR->addPoint (QuadraturePoint ( QRMapper.quadNode (iQuadPt, 0),
+                                                         QRMapper.quadNode (iQuadPt, 1),
+                                                         QRMapper.quadNode (iQuadPt, 2),
+                                                         std::abs (QRMapper.wDet (iQuadPt) ) ) );
             }
 
 
             // Build the second tetra
-            std::vector< VectorSmall<3> > tetra2(4);
+            std::vector< VectorSmall<3> > tetra2 (4);
             tetra2[0] = intersections[0];
             tetra2[1] = intersections[1];
             tetra2[2] = intersections[2];
             tetra2[3] = refPts[localPositive[0]];
 
             // Map the QR
-            QRMapper.update( tetra2, ET_UPDATE_QUAD_NODE | ET_UPDATE_WDET);
+            QRMapper.update ( tetra2, ET_UPDATE_QUAD_NODE | ET_UPDATE_WDET);
 
-            for (UInt iQuadPt(0); iQuadPt<QuadratureSize; ++iQuadPt)
+            for (UInt iQuadPt (0); iQuadPt < QuadratureSize; ++iQuadPt)
             {
-                M_adaptedQR->addPoint(QuadraturePoint( QRMapper.quadNode(iQuadPt,0),
-                                                       QRMapper.quadNode(iQuadPt,1),
-                                                       QRMapper.quadNode(iQuadPt,2),
-                                                       std::abs(QRMapper.wDet(iQuadPt))));
+                M_adaptedQR->addPoint (QuadraturePoint ( QRMapper.quadNode (iQuadPt, 0),
+                                                         QRMapper.quadNode (iQuadPt, 1),
+                                                         QRMapper.quadNode (iQuadPt, 2),
+                                                         std::abs (QRMapper.wDet (iQuadPt) ) ) );
             }
 
             // Build the third tetra
-            std::vector< VectorSmall<3> > tetra3(4);
+            std::vector< VectorSmall<3> > tetra3 (4);
             tetra3[0] = refPts[localPositive[0]];
             tetra3[1] = refPts[localPositive[1]];
             tetra3[2] = refPts[localPositive[2]];
             tetra3[3] = intersections[2];
 
             // Map the QR
-            QRMapper.update( tetra3, ET_UPDATE_QUAD_NODE | ET_UPDATE_WDET);
+            QRMapper.update ( tetra3, ET_UPDATE_QUAD_NODE | ET_UPDATE_WDET);
 
-            for (UInt iQuadPt(0); iQuadPt<QuadratureSize; ++iQuadPt)
+            for (UInt iQuadPt (0); iQuadPt < QuadratureSize; ++iQuadPt)
             {
-                M_adaptedQR->addPoint(QuadraturePoint( QRMapper.quadNode(iQuadPt,0),
-                                                       QRMapper.quadNode(iQuadPt,1),
-                                                       QRMapper.quadNode(iQuadPt,2),
-                                                       std::abs(QRMapper.wDet(iQuadPt))));
+                M_adaptedQR->addPoint (QuadraturePoint ( QRMapper.quadNode (iQuadPt, 0),
+                                                         QRMapper.quadNode (iQuadPt, 1),
+                                                         QRMapper.quadNode (iQuadPt, 2),
+                                                         std::abs (QRMapper.wDet (iQuadPt) ) ) );
             }
 
             // Build the fourth tetra
-            std::vector< VectorSmall<3> > tetra4(4);
+            std::vector< VectorSmall<3> > tetra4 (4);
             tetra4[0] = refPts[localPositive[0]];
             tetra4[1] = refPts[localPositive[1]];
             tetra4[2] = intersections[1];
             tetra4[3] = intersections[2];
 
             // Map the QR
-            QRMapper.update( tetra4, ET_UPDATE_QUAD_NODE | ET_UPDATE_WDET);
+            QRMapper.update ( tetra4, ET_UPDATE_QUAD_NODE | ET_UPDATE_WDET);
 
-            for (UInt iQuadPt(0); iQuadPt<QuadratureSize; ++iQuadPt)
+            for (UInt iQuadPt (0); iQuadPt < QuadratureSize; ++iQuadPt)
             {
-                M_adaptedQR->addPoint(QuadraturePoint( QRMapper.quadNode(iQuadPt,0),
-                                                       QRMapper.quadNode(iQuadPt,1),
-                                                       QRMapper.quadNode(iQuadPt,2),
-                                                       std::abs(QRMapper.wDet(iQuadPt))));
+                M_adaptedQR->addPoint (QuadraturePoint ( QRMapper.quadNode (iQuadPt, 0),
+                                                         QRMapper.quadNode (iQuadPt, 1),
+                                                         QRMapper.quadNode (iQuadPt, 2),
+                                                         std::abs (QRMapper.wDet (iQuadPt) ) ) );
             }
         }
     }

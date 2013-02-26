@@ -208,24 +208,24 @@ operator+ (const ExpressionBase<LExpressionType>& l, const VectorSmall<Vdim>& r)
 
 // Specialization for the matrix constants
 template< typename RExpressionType , UInt Dim1, UInt Dim2>
-ExpressionAddition<ExpressionMatrix<Dim1,Dim2>,RExpressionType>
-operator+(const MatrixSmall<Dim1,Dim2>& l, const ExpressionBase<RExpressionType>& r)
+ExpressionAddition<ExpressionMatrix<Dim1, Dim2>, RExpressionType>
+operator+ (const MatrixSmall<Dim1, Dim2>& l, const ExpressionBase<RExpressionType>& r)
 {
-    return ExpressionAddition<ExpressionMatrix<Dim1,Dim2>,RExpressionType>(ExpressionMatrix<Dim1,Dim2>(l),r.cast());
+    return ExpressionAddition<ExpressionMatrix<Dim1, Dim2>, RExpressionType> (ExpressionMatrix<Dim1, Dim2> (l), r.cast() );
 }
 
 template< typename LExpressionType, UInt Dim1, UInt Dim2 >
 ExpressionAddition<LExpressionType, ExpressionMatrix<Dim1, Dim2> >
-operator+(const ExpressionBase<LExpressionType>& l, const MatrixSmall<Dim1, Dim2>& r)
+operator+ (const ExpressionBase<LExpressionType>& l, const MatrixSmall<Dim1, Dim2>& r)
 {
-    return ExpressionAddition<LExpressionType,ExpressionMatrix<Dim1,Dim2> >(l.cast(),ExpressionMatrix<Dim1,Dim2>(r));
+    return ExpressionAddition<LExpressionType, ExpressionMatrix<Dim1, Dim2> > (l.cast(), ExpressionMatrix<Dim1, Dim2> (r) );
 }
 
 template<  UInt Dim1, UInt Dim2 >
-ExpressionAddition< ExpressionMatrix<Dim1, Dim2>,ExpressionMatrix<Dim1, Dim2> >
-operator+(const MatrixSmall<Dim1, Dim2>& l, const MatrixSmall<Dim1, Dim2>& r)
+ExpressionAddition< ExpressionMatrix<Dim1, Dim2>, ExpressionMatrix<Dim1, Dim2> >
+operator+ (const MatrixSmall<Dim1, Dim2>& l, const MatrixSmall<Dim1, Dim2>& r)
 {
-    return ExpressionAddition< ExpressionMatrix<Dim1,Dim2>,ExpressionMatrix<Dim1,Dim2> >(ExpressionMatrix<Dim1,Dim2>(l),ExpressionMatrix<Dim1,Dim2>(r));
+    return ExpressionAddition< ExpressionMatrix<Dim1, Dim2>, ExpressionMatrix<Dim1, Dim2> > (ExpressionMatrix<Dim1, Dim2> (l), ExpressionMatrix<Dim1, Dim2> (r) );
 }
 
 

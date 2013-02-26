@@ -60,47 +60,47 @@ namespace LifeV
   the LifeV::Real type.
 
 */
-template <typename Base,typename Exponent>
+template <typename Base, typename Exponent>
 class OperationSmallPower
 {
 private:
-	//! @name Constructors and destructors
+    //! @name Constructors and destructors
     //@{
 
-	//! No default constructor
-	OperationSmallPower();
+    //! No default constructor
+    OperationSmallPower();
 
-	//! No destructor
-	~OperationSmallPower();
+    //! No destructor
+    ~OperationSmallPower();
 
-	//@}
+    //@}
 };
 
 //! \cond
 
 template <>
-class OperationSmallPower<Real,Real>
+class OperationSmallPower<Real, Real>
 {
 public:
 
     //! @name Public Types
     //@{
 
-	typedef Real result_Type;
+    typedef Real result_Type;
 
-	//@}
+    //@}
 
 private:
-	//! @name Constructors and destructors
+    //! @name Constructors and destructors
     //@{
 
-	//! No default constructor
-	OperationSmallPower();
+    //! No default constructor
+    OperationSmallPower();
 
-	//! No destructor
-	~OperationSmallPower();
+    //! No destructor
+    ~OperationSmallPower();
 
-	//@}
+    //@}
 };
 
 //! \endcond

@@ -60,16 +60,16 @@ template <typename Operand >
 class OperationSmallDeterminant
 {
 private:
-	//! @name Constructors and destructors
+    //! @name Constructors and destructors
     //@{
 
-	//! No default constructor
-	OperationSmallDeterminant();
+    //! No default constructor
+    OperationSmallDeterminant();
 
-	//! No destructor
-	~OperationSmallDeterminant();
+    //! No destructor
+    ~OperationSmallDeterminant();
 
-	//@}
+    //@}
 };
 
 //! \cond
@@ -82,21 +82,21 @@ public:
     //! @name Public Types
     //@{
 
-	typedef Real result_Type;
+    typedef Real result_Type;
 
-	//@}
+    //@}
 
 private:
-	//! @name Constructors and destructors
+    //! @name Constructors and destructors
     //@{
 
-	//! No default constructor
-	OperationSmallDeterminant();
+    //! No default constructor
+    OperationSmallDeterminant();
 
-	//! No destructor
-	~OperationSmallDeterminant();
+    //! No destructor
+    ~OperationSmallDeterminant();
 
-	//@}
+    //@}
 };
 
 //! \endcond

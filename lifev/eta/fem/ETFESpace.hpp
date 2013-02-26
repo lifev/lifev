@@ -116,10 +116,10 @@ public:
     //@{
 
     //! Dimension of the space
-        enum{space_dim=SpaceDim};
+    enum {space_dim = SpaceDim};
 
     //! Dimension of the field of the FE space
-        enum{field_dim=FieldDim};
+    enum {field_dim = FieldDim};
 
     //@}
 
@@ -134,10 +134,10 @@ public:
       @param geoMap The geometric mapping
       @param commptr Pointer on the communicator to be used
      */
-    ETFESpace(const meshPtr_Type& mesh,
-              const ReferenceFE* refFE,
-              const GeometricMap* geoMap,
-              commPtr_Type& commptr);
+    ETFESpace (const meshPtr_Type& mesh,
+               const ReferenceFE* refFE,
+               const GeometricMap* geoMap,
+               commPtr_Type& commptr);
 
     //! Constructor where the geometric mapping is guessed
     /*!
@@ -148,9 +148,9 @@ public:
       @param refFE The reference element for the finite element
       @param commptr Pointer on the communicator to be used
      */
-    ETFESpace(const meshPtr_Type& mesh,
-              const ReferenceFE* refFE,
-              commPtr_Type& commptr);
+    ETFESpace (const meshPtr_Type& mesh,
+               const ReferenceFE* refFE,
+               commPtr_Type& commptr);
 
     //! Full constructor using the partitioner of the mesh
     /*!
@@ -159,10 +159,10 @@ public:
       @param geoMap The geometric mapping
       @param commptr Pointer on the communicator to be used
      */
-    ETFESpace(const MeshPartitioner<MeshType>& meshPartitioner,
-              const ReferenceFE* refFE,
-              const GeometricMap* geoMap,
-              commPtr_Type& commptr);
+    ETFESpace (const MeshPartitioner<MeshType>& meshPartitioner,
+               const ReferenceFE* refFE,
+               const GeometricMap* geoMap,
+               commPtr_Type& commptr);
 
     //! Full constructor using the partitioner of the mesh and a guessed geometric map
     /*!
@@ -173,9 +173,9 @@ public:
       @param refFE The reference element for the finite element
       @param commptr Pointer on the communicator to be used
      */
-    ETFESpace(const MeshPartitioner<MeshType>& meshPartitioner,
-              const ReferenceFE* refFE,
-              commPtr_Type& commptr);
+    ETFESpace (const MeshPartitioner<MeshType>& meshPartitioner,
+               const ReferenceFE* refFE,
+               commPtr_Type& commptr);
 
 
     //! Copy constructor
@@ -198,31 +198,46 @@ public:
     /*!
       @return The pointer (shared) on the mesh
      */
-    meshPtr_Type mesh() const { return M_mesh; }
+    meshPtr_Type mesh() const
+    {
+        return M_mesh;
+    }
 
     //! Getter for the reference FE
     /*!
       @return The reference FE of this space
      */
-    const ReferenceFE& refFE() const { return *M_referenceFE; }
+    const ReferenceFE& refFE() const
+    {
+        return *M_referenceFE;
+    }
 
     //! Getter for the geometric mapping
     /*!
       @return The geometric mapping used for this space
      */
-    const GeometricMap& geoMap() const { return *M_geometricMap; }
+    const GeometricMap& geoMap() const
+    {
+        return *M_geometricMap;
+    }
 
     //! Getter for the dof manager
     /*!
       @return The structure retaining the dof numbering
      */
-    const DOF& dof() const { return *M_dof; }
+    const DOF& dof() const
+    {
+        return *M_dof;
+    }
 
     //! Getter for the algebraic map
     /*!
       @return The algebraic map
      */
-    const MapType& map() const { return *M_map; }
+    const MapType& map() const
+    {
+        return *M_map;
+    }
 
     //! Getter for the algebraic map
     /*!
@@ -237,13 +252,19 @@ public:
     /*!
       @return The dimension of the space in which this FE space is defined
      */
-    const UInt& spaceDim() const {return space_dim; }
+    const UInt& spaceDim() const
+    {
+        return space_dim;
+    }
 
     //! Getter for the dimension of the field (scalar vs vectorial FE)
     /*!
       @return The dimension of the field represented.
      */
-    const UInt& fieldDim() const {return field_dim; }
+    const UInt& fieldDim() const
+    {
+        return field_dim;
+    }
     //@}
 
 private:
@@ -286,56 +307,56 @@ private:
 // ===================================================
 
 template<typename MeshType, typename MapType, UInt SpaceDim, UInt FieldDim>
-ETFESpace<MeshType,MapType,SpaceDim,FieldDim>::
-ETFESpace(const meshPtr_Type& mesh, const ReferenceFE* refFE, const GeometricMap* geoMap, commPtr_Type& commptr)
+ETFESpace<MeshType, MapType, SpaceDim, FieldDim>::
+ETFESpace (const meshPtr_Type& mesh, const ReferenceFE* refFE, const GeometricMap* geoMap, commPtr_Type& commptr)
 
-  : M_mesh(mesh),
-    M_referenceFE(refFE),
-    M_geometricMap(geoMap),
-    M_dof( new DOF( *M_mesh, *M_referenceFE )),
-    M_map(new MapType())
+    : M_mesh (mesh),
+      M_referenceFE (refFE),
+      M_geometricMap (geoMap),
+      M_dof ( new DOF ( *M_mesh, *M_referenceFE ) ),
+      M_map (new MapType() )
 {
     createMap (commptr);
 }
 
 template<typename MeshType, typename MapType, UInt SpaceDim, UInt FieldDim>
-ETFESpace<MeshType,MapType,SpaceDim,FieldDim>::
-ETFESpace(const meshPtr_Type& mesh, const ReferenceFE* refFE, commPtr_Type& commptr)
+ETFESpace<MeshType, MapType, SpaceDim, FieldDim>::
+ETFESpace (const meshPtr_Type& mesh, const ReferenceFE* refFE, commPtr_Type& commptr)
 
-  : M_mesh(mesh),
-    M_referenceFE(refFE),
-    M_geometricMap(&geometricMapFromMesh<MeshType>()),
-    M_dof( new DOF( *M_mesh, *M_referenceFE )),
-    M_map(new MapType())
+    : M_mesh (mesh),
+      M_referenceFE (refFE),
+      M_geometricMap (&geometricMapFromMesh<MeshType>() ),
+      M_dof ( new DOF ( *M_mesh, *M_referenceFE ) ),
+      M_map (new MapType() )
 {
     createMap (commptr);
 }
 
 template<typename MeshType, typename MapType, UInt SpaceDim, UInt FieldDim>
-ETFESpace<MeshType,MapType,SpaceDim,FieldDim>::
-ETFESpace(const MeshPartitioner<MeshType>& meshPartitioner,
-              const ReferenceFE* refFE,
-              const GeometricMap* geoMap,
-              commPtr_Type& commptr)
-: M_mesh(meshPartitioner.meshPartition()),
-    M_referenceFE(refFE),
-    M_geometricMap(geoMap),
-    M_dof( new DOF( *M_mesh, *M_referenceFE )),
-    M_map(new MapType())
+ETFESpace<MeshType, MapType, SpaceDim, FieldDim>::
+ETFESpace (const MeshPartitioner<MeshType>& meshPartitioner,
+           const ReferenceFE* refFE,
+           const GeometricMap* geoMap,
+           commPtr_Type& commptr)
+    : M_mesh (meshPartitioner.meshPartition() ),
+      M_referenceFE (refFE),
+      M_geometricMap (geoMap),
+      M_dof ( new DOF ( *M_mesh, *M_referenceFE ) ),
+      M_map (new MapType() )
 {
     createMap (commptr);
 }
 
 template<typename MeshType, typename MapType, UInt SpaceDim, UInt FieldDim>
-ETFESpace<MeshType,MapType,SpaceDim,FieldDim>::
-ETFESpace(const MeshPartitioner<MeshType>& meshPartitioner,
-              const ReferenceFE* refFE,
-              commPtr_Type& commptr)
-: M_mesh(meshPartitioner.meshPartition()),
-    M_referenceFE(refFE),
-    M_geometricMap( &geometricMapFromMesh<MeshType>()),
-    M_dof( new DOF( *M_mesh, *M_referenceFE )),
-    M_map(new MapType())
+ETFESpace<MeshType, MapType, SpaceDim, FieldDim>::
+ETFESpace (const MeshPartitioner<MeshType>& meshPartitioner,
+           const ReferenceFE* refFE,
+           commPtr_Type& commptr)
+    : M_mesh (meshPartitioner.meshPartition() ),
+      M_referenceFE (refFE),
+      M_geometricMap ( &geometricMapFromMesh<MeshType>() ),
+      M_dof ( new DOF ( *M_mesh, *M_referenceFE ) ),
+      M_map (new MapType() )
 {
     createMap (commptr);
 }

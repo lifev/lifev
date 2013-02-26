@@ -163,12 +163,12 @@ public:
       \param dFESpace: the FiniteElement Space
       \param displayer: the displayer object
     */
-    void setup( const dataPtr_Type& dataMaterial,
-                const analysisDataPtr_Type& tensionData,
-                const FESpacePtr_Type& dFESpace,
-                const ETFESpacePtr_Type&      dETFESpace,
-                boost::shared_ptr<Epetra_Comm>&     comm,
-                UInt marker);
+    void setup ( const dataPtr_Type& dataMaterial,
+                 const analysisDataPtr_Type& tensionData,
+                 const FESpacePtr_Type& dFESpace,
+                 const ETFESpacePtr_Type&      dETFESpace,
+                 boost::shared_ptr<Epetra_Comm>&     comm,
+                 UInt marker);
 
 
 
@@ -426,12 +426,12 @@ WallTensionEstimator<Mesh>::WallTensionEstimator( ) :
 //===================================
 template <typename Mesh>
 void
-WallTensionEstimator<Mesh >::setup( const dataPtr_Type& dataMaterial,
-                                    const analysisDataPtr_Type& tensionData,
-                                    const FESpacePtr_Type&        dFESpace,
-                                    const ETFESpacePtr_Type&      dETFESpace,
-                                    boost::shared_ptr<Epetra_Comm>&     comm,
-                                    UInt marker)
+WallTensionEstimator<Mesh >::setup ( const dataPtr_Type& dataMaterial,
+                                     const analysisDataPtr_Type& tensionData,
+                                     const FESpacePtr_Type&        dFESpace,
+                                     const ETFESpacePtr_Type&      dETFESpace,
+                                     boost::shared_ptr<Epetra_Comm>&     comm,
+                                     UInt marker)
 
 {
 
@@ -468,8 +468,8 @@ WallTensionEstimator<Mesh >::setup( const dataPtr_Type& dataMaterial,
     M_eigenvaluesI.resize ( M_FESpace->fieldDim() );
 
     // Materials
-    M_material.reset( material_Type::StructureMaterialFactory::instance().createObject( M_dataMaterial->solidType() ) );
-    M_material->setup( dFESpace, dETFESpace, M_localMap,M_offset, M_dataMaterial, M_displayer );
+    M_material.reset ( material_Type::StructureMaterialFactory::instance().createObject ( M_dataMaterial->solidType() ) );
+    M_material->setup ( dFESpace, dETFESpace, M_localMap, M_offset, M_dataMaterial, M_displayer );
 }
 
 

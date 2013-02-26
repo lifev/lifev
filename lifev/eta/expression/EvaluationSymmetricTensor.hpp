@@ -66,14 +66,14 @@ class EvaluationSymmetricTensor
 public:
 
 
-	//! @name Public Types
+    //! @name Public Types
     //@{
 
-	//! Type of the value returned by the 'operand' to be transposed
-//	typedef typename EvaluationType::return_Type return_Type;
+    //! Type of the value returned by the 'operand' to be transposed
+    //  typedef typename EvaluationType::return_Type return_Type;
 
     //! Type of the value returned by this class
-	typedef typename OperationSmallSymmetricTensor< typename EvaluationType::return_Type >::result_Type return_Type;
+    typedef typename OperationSmallSymmetricTensor< typename EvaluationType::return_Type >::result_Type return_Type;
 
     //@}
 
@@ -82,13 +82,13 @@ public:
     //@{
 
     //! Flag for the global current FE
-	const static flag_Type S_globalUpdateFlag;
+    const static flag_Type S_globalUpdateFlag;
 
     //! Flag for the test current FE
-	const static flag_Type S_testUpdateFlag;
+    const static flag_Type S_testUpdateFlag;
 
     //! Flag for the solution current FE
-	const static flag_Type S_solutionUpdateFlag;
+    const static flag_Type S_solutionUpdateFlag;
 
     //@}
 
@@ -96,15 +96,15 @@ public:
     //! @name Constructors, destructor
     //@{
 
-	//! Copy constructor
-	EvaluationSymmetricTensor(const EvaluationSymmetricTensor& eval)
-		: M_evaluation(eval.M_evaluation)
+    //! Copy constructor
+    EvaluationSymmetricTensor (const EvaluationSymmetricTensor& eval)
+        : M_evaluation (eval.M_evaluation)
     {}
 
-	//! Constructor from the corresponding expression
-	template< typename Expression>
-	explicit EvaluationSymmetricTensor(const ExpressionSymmetricTensor<Expression>& expression)
-		: M_evaluation(expression.exprEx())
+    //! Constructor from the corresponding expression
+    template< typename Expression>
+    explicit EvaluationSymmetricTensor (const ExpressionSymmetricTensor<Expression>& expression)
+        : M_evaluation (expression.exprEx() )
     {}
 
     //! Destructor
@@ -118,15 +118,17 @@ public:
     //@{
 
     //! Internal update method
-	void update(const UInt& iElement)
-	{
-		M_evaluation.update(iElement);
-	}
+    void update (const UInt& iElement)
+    {
+        M_evaluation.update (iElement);
+    }
 
     //! Display method
-	static void display(std::ostream& out = std::cout)
-	{
-        out << " sym ( "; EvaluationType::display(out); out << ")";
+    static void display (std::ostream& out = std::cout)
+    {
+        out << " sym ( ";
+        EvaluationType::display (out);
+        out << ")";
     }
 
     //@}
@@ -136,31 +138,31 @@ public:
     //@{
 
     //! Setter for the global current FE
-	template< typename CFEType >
-	void setGlobalCFE(const CFEType* globalCFE)
-	{
-        M_evaluation.setGlobalCFE(globalCFE);
+    template< typename CFEType >
+    void setGlobalCFE (const CFEType* globalCFE)
+    {
+        M_evaluation.setGlobalCFE (globalCFE);
     }
 
     //! Setter for the test current FE
-	template< typename CFEType >
-	void setTestCFE(const CFEType* testCFE)
-	{
-        M_evaluation.setTestCFE(testCFE);
+    template< typename CFEType >
+    void setTestCFE (const CFEType* testCFE)
+    {
+        M_evaluation.setTestCFE (testCFE);
     }
 
     //! Setter for the solution FE
-	template< typename CFEType >
-	void setSolutionCFE(const CFEType* solutionCFE)
-	{
-        M_evaluation.setSolutionCFE(solutionCFE);
+    template< typename CFEType >
+    void setSolutionCFE (const CFEType* solutionCFE)
+    {
+        M_evaluation.setSolutionCFE (solutionCFE);
     }
 
     //! Setter for the quadrature rule
-	void setQuadrature(const QuadratureRule& qr)
-	{
-		M_evaluation.setQuadrature(qr);
-	}
+    void setQuadrature (const QuadratureRule& qr)
+    {
+        M_evaluation.setQuadrature (qr);
+    }
 
     //@}
 
@@ -169,21 +171,21 @@ public:
     //@{
 
     //! Getter for a value
-	return_Type value_q(const UInt& q) const
+    return_Type value_q (const UInt& q) const
     {
-        return ( M_evaluation.value_q(q) + M_evaluation.value_q(q).transpose() ) / 2.0 ;
+        return ( M_evaluation.value_q (q) + M_evaluation.value_q (q).transpose() ) / 2.0 ;
     }
 
     //! Getter for the value for a vector
-	return_Type value_qi(const UInt& q, const UInt& i) const
+    return_Type value_qi (const UInt& q, const UInt& i) const
     {
-	    return ( M_evaluation.value_qi(q,i) + M_evaluation.value_qi(q,i).transpose() ) / 2.0;
+        return ( M_evaluation.value_qi (q, i) + M_evaluation.value_qi (q, i).transpose() ) / 2.0;
     }
 
     //! Getter for the value for a matrix
-	return_Type value_qij(const UInt& q, const UInt& i, const UInt& j) const
+    return_Type value_qij (const UInt& q, const UInt& i, const UInt& j) const
     {
-        return ( M_evaluation.value_qij(q,i,j) + M_evaluation.value_qij(q,i,j).transpose() ) / 2.0;
+        return ( M_evaluation.value_qij (q, i, j) + M_evaluation.value_qij (q, i, j).transpose() ) / 2.0;
     }
 
     //@}
@@ -193,27 +195,27 @@ private:
     //! @name Private Methods
     //@{
 
-	//! No default
-	EvaluationSymmetricTensor();
+    //! No default
+    EvaluationSymmetricTensor();
 
     //@}
 
     // Internal storage
-	EvaluationType M_evaluation;
+    EvaluationType M_evaluation;
 };
 
 
 template< typename EvaluationType >
 const flag_Type EvaluationSymmetricTensor<EvaluationType>::S_globalUpdateFlag
- = EvaluationType::S_globalUpdateFlag;
+    = EvaluationType::S_globalUpdateFlag;
 
 template< typename EvaluationType >
 const flag_Type EvaluationSymmetricTensor<EvaluationType>::S_testUpdateFlag
- = EvaluationType::S_testUpdateFlag;
+    = EvaluationType::S_testUpdateFlag;
 
 template< typename EvaluationType >
 const flag_Type EvaluationSymmetricTensor<EvaluationType>::S_solutionUpdateFlag
- = EvaluationType::S_solutionUpdateFlag;
+    = EvaluationType::S_solutionUpdateFlag;
 
 } // Namespace ExpressionAssembly
 

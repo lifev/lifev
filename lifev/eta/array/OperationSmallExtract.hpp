@@ -76,7 +76,7 @@ private:
 
 
 template <UInt Dim1, UInt Dim2>
-class OperationSmallExtract1< MatrixSmall<Dim1,Dim2> >
+class OperationSmallExtract1< MatrixSmall<Dim1, Dim2> >
 {
 public:
 
@@ -136,23 +136,23 @@ template <typename Operand>
 class OperationSmallExtract2 // two indexes specified
 {
 private:
-	//! @name Constructors and destructors
+    //! @name Constructors and destructors
     //@{
 
-	//! No default constructor
-	OperationSmallExtract2();
+    //! No default constructor
+    OperationSmallExtract2();
 
-	//! No destructor
-	~OperationSmallExtract2();
+    //! No destructor
+    ~OperationSmallExtract2();
 
-	//@}
+    //@}
 };
 
 //! \cond
 
 
 template <UInt Dim1, UInt Dim2>
-class OperationSmallExtract2< MatrixSmall<Dim1,Dim2> >
+class OperationSmallExtract2< MatrixSmall<Dim1, Dim2> >
 {
 public:
 

@@ -72,7 +72,7 @@ public:
     //@{
 
     // No real need, just for ease of coding
-	typedef ExpressionBase< ExpressionSymmetricTensor <ExpressionType> > base_Type;
+    typedef ExpressionBase< ExpressionSymmetricTensor <ExpressionType> > base_Type;
 
     //@}
 
@@ -81,15 +81,15 @@ public:
     //@{
 
     //! Full constructor
-	ExpressionSymmetricTensor(const ExpressionType& expr)
-	: base_Type(), M_expr(expr) {}
+    ExpressionSymmetricTensor (const ExpressionType& expr)
+        : base_Type(), M_expr (expr) {}
 
     //! Copy constructor
-	ExpressionSymmetricTensor(const ExpressionSymmetricTensor<ExpressionType>& expression)
-	 : base_Type(), M_expr(expression.M_expr) {}
+    ExpressionSymmetricTensor (const ExpressionSymmetricTensor<ExpressionType>& expression)
+        : base_Type(), M_expr (expression.M_expr) {}
 
     //! Destructor
-    ~ExpressionSymmetricTensor(){}
+    ~ExpressionSymmetricTensor() {}
 
     //@}
 
@@ -98,8 +98,11 @@ public:
     //@{
 
     //! Display method
-	static void display(std::ostream& out= std::cout)
-    { out << " transpose "; ExpressionType::display(out);}
+    static void display (std::ostream& out = std::cout)
+    {
+        out << " transpose ";
+        ExpressionType::display (out);
+    }
 
     //@}
 
@@ -108,7 +111,10 @@ public:
     //@{
 
     //! Getter for the expression that we transpose
-	const ExpressionType& exprEx() const {return M_expr;}
+    const ExpressionType& exprEx() const
+    {
+        return M_expr;
+    }
 
 
     //@}
@@ -119,12 +125,12 @@ private:
     //@{
 
     //! No default constructor
-	ExpressionSymmetricTensor();
+    ExpressionSymmetricTensor();
 
     //@}
 
     // Expression that we transpose
-	ExpressionType M_expr;
+    ExpressionType M_expr;
 
 };
 
@@ -148,18 +154,18 @@ private:
 */
 template< typename ExpressionType >
 ExpressionSymmetricTensor<ExpressionType>
-sym(const ExpressionBase<ExpressionType>& expr)
+sym (const ExpressionBase<ExpressionType>& expr)
 {
-	return ExpressionSymmetricTensor<ExpressionType>(expr.cast());
+    return ExpressionSymmetricTensor<ExpressionType> (expr.cast() );
 }
 
 
 // Specialization for the matricial constants
 template< UInt Dim1, UInt Dim2>
 ExpressionSymmetricTensor<ExpressionMatrix<Dim1, Dim2> >
-sym(const MatrixSmall<Dim1, Dim2>& m)
+sym (const MatrixSmall<Dim1, Dim2>& m)
 {
-    return ExpressionSymmetricTensor<ExpressionMatrix<Dim1, Dim2> >(ExpressionMatrix<Dim1, Dim2>(m));
+    return ExpressionSymmetricTensor<ExpressionMatrix<Dim1, Dim2> > (ExpressionMatrix<Dim1, Dim2> (m) );
 }
 
 

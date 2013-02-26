@@ -1791,10 +1791,13 @@ createMap (const commPtr_Type& commptr)
 
 template<typename MeshType, typename MapType>
 void
-FESpace<MeshType,MapType>::
-resetBoundaryFE(){
-    if (M_refFE->hasBoundaryFE())
-        M_feBd.reset(new CurrentBoundaryFE( M_refFE->boundaryFE(), getGeometricMap( *M_mesh ).boundaryMap(), *M_bdQr ) );
+FESpace<MeshType, MapType>::
+resetBoundaryFE()
+{
+    if (M_refFE->hasBoundaryFE() )
+    {
+        M_feBd.reset (new CurrentBoundaryFE ( M_refFE->boundaryFE(), getGeometricMap ( *M_mesh ).boundaryMap(), *M_bdQr ) );
+    }
 }
 
 

@@ -68,9 +68,9 @@ namespace ExpressionAssembly
   within a typedef).
  */
 template < typename MeshType,
-           typename TestSpaceType,
-           typename ExpressionType,
-           typename QRAdapterType>
+         typename TestSpaceType,
+         typename ExpressionType,
+         typename QRAdapterType >
 class IntegrateVectorVolumeID
 {
 public:
@@ -79,10 +79,10 @@ public:
     //@{
 
     //! Type of the Evaluation
-	typedef typename ExpressionToEvaluation< ExpressionType,
-                                             TestSpaceType::field_dim,
-                                             0,
-                                             3>::evaluation_Type evaluation_Type;
+    typedef typename ExpressionToEvaluation < ExpressionType,
+            TestSpaceType::field_dim,
+            0,
+            3 >::evaluation_Type evaluation_Type;
 
     typedef typename MeshType::element_Type element_Type;
 
@@ -97,14 +97,14 @@ public:
     //@{
 
     //! Full data constructor
-    IntegrateVectorVolumeID(const vectorVolumesPtr_Type volumeList,
-                            const vectorIndexesPtr_Type indexList,
-                            const QRAdapterType& qrAdapter,
-                            const boost::shared_ptr<TestSpaceType>& testSpace,
-                            const ExpressionType& expression);
+    IntegrateVectorVolumeID (const vectorVolumesPtr_Type volumeList,
+                             const vectorIndexesPtr_Type indexList,
+                             const QRAdapterType& qrAdapter,
+                             const boost::shared_ptr<TestSpaceType>& testSpace,
+                             const ExpressionType& expression);
 
     //! Copy constructor
-    IntegrateVectorVolumeID( const IntegrateVectorVolumeID < MeshType, TestSpaceType, ExpressionType, QRAdapterType> & integrator);
+    IntegrateVectorVolumeID ( const IntegrateVectorVolumeID < MeshType, TestSpaceType, ExpressionType, QRAdapterType>& integrator);
 
     //! Destructor
     ~IntegrateVectorVolumeID();
@@ -117,16 +117,16 @@ public:
 
     //! Operator wrapping the addTo method
     template <typename Vector>
-    inline void operator>>(Vector& vector)
+    inline void operator>> (Vector& vector)
     {
-        addTo(vector);
+        addTo (vector);
     }
 
     //! Operator wrapping the addTo method (for shared_ptr)
     template <typename Vector>
-    inline void operator>>(boost::shared_ptr<Vector> vector)
+    inline void operator>> (boost::shared_ptr<Vector> vector)
     {
-        addTo(*vector);
+        addTo (*vector);
     }
 
 
@@ -136,7 +136,7 @@ public:
     //@{
 
     //! Ouput method
-    void check(std::ostream& out = std::cout);
+    void check (std::ostream& out = std::cout);
 
     //! Method that performs the assembly
     /*!
@@ -147,7 +147,7 @@ public:
       vector.
      */
     template <typename Vector>
-    void addTo(Vector& vec);
+    void addTo (Vector& vec);
 
     //@}
 
@@ -174,11 +174,11 @@ private:
     // Tree to compute the values for the assembly
     evaluation_Type M_evaluation;
 
-    ETCurrentFE<3,1>* M_globalCFE_std;
-    ETCurrentFE<3,1>* M_globalCFE_adapted;
+    ETCurrentFE<3, 1>* M_globalCFE_std;
+    ETCurrentFE<3, 1>* M_globalCFE_adapted;
 
-    ETCurrentFE<3,TestSpaceType::field_dim>* M_testCFE_std;
-    ETCurrentFE<3,TestSpaceType::field_dim>* M_testCFE_adapted;
+    ETCurrentFE<3, TestSpaceType::field_dim>* M_testCFE_std;
+    ETCurrentFE<3, TestSpaceType::field_dim>* M_testCFE_adapted;
 
     ETVectorElemental M_elementalVector;
 };
@@ -194,51 +194,51 @@ private:
 
 template < typename MeshType, typename TestSpaceType, typename ExpressionType, typename QRAdapterType>
 IntegrateVectorVolumeID < MeshType, TestSpaceType, ExpressionType, QRAdapterType>::
-IntegrateVectorVolumeID(const vectorVolumesPtr_Type volumeList,
-                        const vectorIndexesPtr_Type indexList,
-                        const QRAdapterType& qrAdapter,
-                        const boost::shared_ptr<TestSpaceType>& testSpace,
-                        const ExpressionType& expression)
-    :	M_volumeList( volumeList ),
-        M_indexList( indexList ),
-        M_qrAdapter(qrAdapter),
-        M_testSpace(testSpace),
-        M_evaluation(expression),
+IntegrateVectorVolumeID (const vectorVolumesPtr_Type volumeList,
+                         const vectorIndexesPtr_Type indexList,
+                         const QRAdapterType& qrAdapter,
+                         const boost::shared_ptr<TestSpaceType>& testSpace,
+                         const ExpressionType& expression)
+    :   M_volumeList ( volumeList ),
+        M_indexList ( indexList ),
+        M_qrAdapter (qrAdapter),
+        M_testSpace (testSpace),
+        M_evaluation (expression),
 
-        M_globalCFE_std(new ETCurrentFE<3,1>(feTetraP0,geometricMapFromMesh<MeshType>(),qrAdapter.standardQR())),
-        M_globalCFE_adapted(new ETCurrentFE<3,1>(feTetraP0,geometricMapFromMesh<MeshType>(),qrAdapter.standardQR())),
+        M_globalCFE_std (new ETCurrentFE<3, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), qrAdapter.standardQR() ) ),
+        M_globalCFE_adapted (new ETCurrentFE<3, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), qrAdapter.standardQR() ) ),
 
-        M_testCFE_std(new ETCurrentFE<3,TestSpaceType::field_dim>(testSpace->refFE(),testSpace->geoMap(),qrAdapter.standardQR())),
-        M_testCFE_adapted(new ETCurrentFE<3,TestSpaceType::field_dim>(testSpace->refFE(),testSpace->geoMap(),qrAdapter.standardQR())),
+        M_testCFE_std (new ETCurrentFE<3, TestSpaceType::field_dim> (testSpace->refFE(), testSpace->geoMap(), qrAdapter.standardQR() ) ),
+        M_testCFE_adapted (new ETCurrentFE<3, TestSpaceType::field_dim> (testSpace->refFE(), testSpace->geoMap(), qrAdapter.standardQR() ) ),
 
-        M_elementalVector(TestSpaceType::field_dim * testSpace->refFE().nbDof())
+        M_elementalVector (TestSpaceType::field_dim * testSpace->refFE().nbDof() )
 {
-    M_evaluation.setQuadrature(qrAdapter.standardQR());
-    M_evaluation.setGlobalCFE(M_globalCFE_std);
-    M_evaluation.setTestCFE(M_testCFE_std);
+    M_evaluation.setQuadrature (qrAdapter.standardQR() );
+    M_evaluation.setGlobalCFE (M_globalCFE_std);
+    M_evaluation.setTestCFE (M_testCFE_std);
 }
 
 
 template <typename MeshType, typename TestSpaceType, typename ExpressionType, typename QRAdapterType>
 IntegrateVectorVolumeID <MeshType, TestSpaceType, ExpressionType, QRAdapterType>::
-IntegrateVectorVolumeID( const IntegrateVectorVolumeID <MeshType,  TestSpaceType, ExpressionType, QRAdapterType> & integrator)
-	:	M_volumeList(integrator.M_volumeList),
-        M_indexList(integrator.M_indexList),
-		M_qrAdapter(integrator.M_qrAdapter),
-		M_testSpace(integrator.M_testSpace),
-		M_evaluation(integrator.M_evaluation),
+IntegrateVectorVolumeID ( const IntegrateVectorVolumeID <MeshType,  TestSpaceType, ExpressionType, QRAdapterType>& integrator)
+    :   M_volumeList (integrator.M_volumeList),
+        M_indexList (integrator.M_indexList),
+        M_qrAdapter (integrator.M_qrAdapter),
+        M_testSpace (integrator.M_testSpace),
+        M_evaluation (integrator.M_evaluation),
 
-	  	M_globalCFE_std(new ETCurrentFE<3,1>(feTetraP0,geometricMapFromMesh<MeshType>(),integrator.M_qrAdapter.standardQR())),
-	  	M_globalCFE_adapted(new ETCurrentFE<3,1>(feTetraP0,geometricMapFromMesh<MeshType>(),integrator.M_qrAdapter.standardQR())),
+        M_globalCFE_std (new ETCurrentFE<3, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), integrator.M_qrAdapter.standardQR() ) ),
+        M_globalCFE_adapted (new ETCurrentFE<3, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), integrator.M_qrAdapter.standardQR() ) ),
 
-		M_testCFE_std(new ETCurrentFE<3,TestSpaceType::field_dim>(M_testSpace->refFE(), M_testSpace->geoMap(),integrator.M_qrAdapter.standardQR())),
-		M_testCFE_adapted(new ETCurrentFE<3,TestSpaceType::field_dim>(M_testSpace->refFE(), M_testSpace->geoMap(),integrator.M_qrAdapter.standardQR())),
+        M_testCFE_std (new ETCurrentFE<3, TestSpaceType::field_dim> (M_testSpace->refFE(), M_testSpace->geoMap(), integrator.M_qrAdapter.standardQR() ) ),
+        M_testCFE_adapted (new ETCurrentFE<3, TestSpaceType::field_dim> (M_testSpace->refFE(), M_testSpace->geoMap(), integrator.M_qrAdapter.standardQR() ) ),
 
-		M_elementalVector(integrator.M_elementalVector)
+        M_elementalVector (integrator.M_elementalVector)
 {
-    M_evaluation.setQuadrature(integrator.M_qrAdapter.standardQR());
-    M_evaluation.setGlobalCFE(M_globalCFE_std);
-    M_evaluation.setTestCFE(M_testCFE_std);
+    M_evaluation.setQuadrature (integrator.M_qrAdapter.standardQR() );
+    M_evaluation.setGlobalCFE (M_globalCFE_std);
+    M_evaluation.setTestCFE (M_testCFE_std);
 }
 
 
@@ -259,13 +259,13 @@ IntegrateVectorVolumeID < MeshType, TestSpaceType, ExpressionType, QRAdapterType
 template < typename MeshType, typename TestSpaceType, typename ExpressionType, typename QRAdapterType>
 void
 IntegrateVectorVolumeID <MeshType,  TestSpaceType, ExpressionType, QRAdapterType>::
-check(std::ostream& out)
+check (std::ostream& out)
 {
     out << " Checking the integration : " << std::endl;
-    M_evaluation.display(out);
+    M_evaluation.display (out);
     out << std::endl;
     out << " Elemental vector : " << std::endl;
-    M_elementalVector.showMe(out);
+    M_elementalVector.showMe (out);
     out << std::endl;
 }
 
@@ -273,67 +273,67 @@ template < typename MeshType, typename TestSpaceType, typename ExpressionType, t
 template <typename Vector>
 void
 IntegrateVectorVolumeID <MeshType, TestSpaceType, ExpressionType, QRAdapterType>::
-addTo(Vector& vec)
+addTo (Vector& vec)
 {
     // Defaulted to true for security
-    bool isPreviousAdapted(true);
+    bool isPreviousAdapted (true);
 
     //number of volumes
-    UInt nbElements( (*M_volumeList).size() );
-    UInt nbIndexes( (*M_indexList).size() );
+    UInt nbElements ( (*M_volumeList).size() );
+    UInt nbIndexes ( (*M_indexList).size() );
 
-    ASSERT( nbElements == nbIndexes, "The number of indexes is different from the number of volumes!!!");
+    ASSERT ( nbElements == nbIndexes, "The number of indexes is different from the number of volumes!!!");
 
-    UInt nbQuadPt_std(M_qrAdapter.standardQR().nbQuadPt());
-    UInt nbTestDof(M_testSpace->refFE().nbDof());
+    UInt nbQuadPt_std (M_qrAdapter.standardQR().nbQuadPt() );
+    UInt nbTestDof (M_testSpace->refFE().nbDof() );
 
-    for (UInt iElement(0); iElement< nbElements; ++iElement)
+    for (UInt iElement (0); iElement < nbElements; ++iElement)
     {
         // Zeros out the elemental vector
         M_elementalVector.zero();
 
         // Update the quadrature rule adapter
-        M_qrAdapter.update( (*M_indexList)[iElement] );
+        M_qrAdapter.update ( (*M_indexList) [iElement] );
 
 
         if (M_qrAdapter.isAdaptedElement() )
         {
             // Reset the quadrature in the different structures
-            M_evaluation.setQuadrature( M_qrAdapter.adaptedQR() );
-            M_globalCFE_adapted -> setQuadratureRule( M_qrAdapter.adaptedQR() );
-            M_testCFE_adapted -> setQuadratureRule( M_qrAdapter.adaptedQR() );
+            M_evaluation.setQuadrature ( M_qrAdapter.adaptedQR() );
+            M_globalCFE_adapted -> setQuadratureRule ( M_qrAdapter.adaptedQR() );
+            M_testCFE_adapted -> setQuadratureRule ( M_qrAdapter.adaptedQR() );
 
             // Reset the CurrentFEs in the evaluation
-            M_evaluation.setGlobalCFE( M_globalCFE_adapted );
-            M_evaluation.setTestCFE( M_testCFE_adapted );
+            M_evaluation.setGlobalCFE ( M_globalCFE_adapted );
+            M_evaluation.setTestCFE ( M_testCFE_adapted );
 
             // Update with the correct element
-            M_evaluation.update( (*M_indexList)[iElement] );
+            M_evaluation.update ( (*M_indexList) [iElement] );
 
             // Update the currentFEs
-            M_globalCFE_adapted->update(*((*M_volumeList)[iElement]),evaluation_Type::S_globalUpdateFlag | ET_UPDATE_WDET);
-            M_testCFE_adapted->update(*((*M_volumeList)[iElement]),evaluation_Type::S_testUpdateFlag);
+            M_globalCFE_adapted->update (* ( (*M_volumeList) [iElement]), evaluation_Type::S_globalUpdateFlag | ET_UPDATE_WDET);
+            M_testCFE_adapted->update (* ( (*M_volumeList) [iElement]), evaluation_Type::S_testUpdateFlag);
 
 
             // Assembly
-            for (UInt iblock(0); iblock < TestSpaceType::field_dim; ++iblock)
+            for (UInt iblock (0); iblock < TestSpaceType::field_dim; ++iblock)
             {
                 // Set the row global indices in the local vector
-                for (UInt i(0); i<nbTestDof; ++i)
+                for (UInt i (0); i < nbTestDof; ++i)
                 {
                     M_elementalVector.setRowIndex
-                        (i + iblock*nbTestDof,
-                         M_testSpace->dof().localToGlobalMap( (*M_indexList)[iElement],i)+ iblock*M_testSpace->dof().numTotalDof());
+                    (i + iblock * nbTestDof,
+                     M_testSpace->dof().localToGlobalMap ( (*M_indexList) [iElement], i) + iblock * M_testSpace->dof().numTotalDof() );
                 }
 
                 // Make the assembly
-                for (UInt iQuadPt(0); iQuadPt< M_qrAdapter.adaptedQR().nbQuadPt(); ++iQuadPt)
+                for (UInt iQuadPt (0); iQuadPt < M_qrAdapter.adaptedQR().nbQuadPt(); ++iQuadPt)
                 {
-                    for (UInt i(0); i<nbTestDof; ++i)
+                    for (UInt i (0); i < nbTestDof; ++i)
                     {
-                        M_elementalVector.element(i+iblock*nbTestDof) +=
-                            M_evaluation.value_qi(iQuadPt,i+iblock*nbTestDof)
-                            * M_globalCFE_adapted->wDet(iQuadPt);
+                        M_elementalVector.element (i + iblock * nbTestDof) +=
+                            M_evaluation.value_qi (iQuadPt, i + iblock * nbTestDof)
+                            * M_globalCFE_adapted->wDet (iQuadPt);
 
                     }
                 }
@@ -348,47 +348,47 @@ addTo(Vector& vec)
             // Check if the last one was adapted
             if (isPreviousAdapted)
             {
-                M_evaluation.setQuadrature( M_qrAdapter.standardQR() );
-                M_evaluation.setGlobalCFE( M_globalCFE_std );
-                M_evaluation.setTestCFE( M_testCFE_std );
+                M_evaluation.setQuadrature ( M_qrAdapter.standardQR() );
+                M_evaluation.setGlobalCFE ( M_globalCFE_std );
+                M_evaluation.setTestCFE ( M_testCFE_std );
 
                 isPreviousAdapted = false;
             }
 
 
             // Update the currentFEs
-            M_globalCFE_std->update(*((*M_volumeList)[iElement]),evaluation_Type::S_globalUpdateFlag | ET_UPDATE_WDET);
-            M_testCFE_std->update(*((*M_volumeList)[iElement]),evaluation_Type::S_testUpdateFlag);
+            M_globalCFE_std->update (* ( (*M_volumeList) [iElement]), evaluation_Type::S_globalUpdateFlag | ET_UPDATE_WDET);
+            M_testCFE_std->update (* ( (*M_volumeList) [iElement]), evaluation_Type::S_testUpdateFlag);
 
             // Update the evaluation
-            M_evaluation.update( (*M_indexList)[iElement] );
+            M_evaluation.update ( (*M_indexList) [iElement] );
 
             // Loop on the blocks
-            for (UInt iblock(0); iblock < TestSpaceType::field_dim; ++iblock)
+            for (UInt iblock (0); iblock < TestSpaceType::field_dim; ++iblock)
             {
                 // Set the row global indices in the local vector
-                for (UInt i(0); i<nbTestDof; ++i)
+                for (UInt i (0); i < nbTestDof; ++i)
                 {
                     M_elementalVector.setRowIndex
-                        (i + iblock*nbTestDof,
-                         M_testSpace->dof().localToGlobalMap( (*M_indexList)[iElement],i)+ iblock*M_testSpace->dof().numTotalDof());
+                    (i + iblock * nbTestDof,
+                     M_testSpace->dof().localToGlobalMap ( (*M_indexList) [iElement], i) + iblock * M_testSpace->dof().numTotalDof() );
                 }
 
                 // Make the assembly
-                for (UInt iQuadPt(0); iQuadPt< nbQuadPt_std; ++iQuadPt)
+                for (UInt iQuadPt (0); iQuadPt < nbQuadPt_std; ++iQuadPt)
                 {
-                    for (UInt i(0); i<nbTestDof; ++i)
+                    for (UInt i (0); i < nbTestDof; ++i)
                     {
-                        M_elementalVector.element(i+iblock*nbTestDof) +=
-                            M_evaluation.value_qi(iQuadPt,i+iblock*nbTestDof) *
-                            M_globalCFE_std->wDet(iQuadPt);
+                        M_elementalVector.element (i + iblock * nbTestDof) +=
+                            M_evaluation.value_qi (iQuadPt, i + iblock * nbTestDof) *
+                            M_globalCFE_std->wDet (iQuadPt);
 
                     }
                 }
             }
 
         }
-        M_elementalVector.pushToGlobal(vec);
+        M_elementalVector.pushToGlobal (vec);
     }
 }
 

@@ -147,7 +147,7 @@ int main ( int argc, char** argv )
 
     const UInt Nelements (10);
 
-    boost::shared_ptr< mesh_Type > fullMeshPtr(new mesh_Type( Comm ) );
+    boost::shared_ptr< mesh_Type > fullMeshPtr (new mesh_Type ( Comm ) );
 
     regularMesh3D ( *fullMeshPtr, 1, Nelements, Nelements, Nelements, false,
                     2.0,   2.0,   2.0,
@@ -162,26 +162,26 @@ int main ( int argc, char** argv )
         std::cout << " done ! " << std::endl;
     }
 
-// ---------------------------------------------------------------
-// We start by defining the finite element spaces. We use the type
-// FESpace for the classical way and copy it in an ETFESpace for
-// the ET assembly.
-//
-// We also build similar spaces for the advection field. This
-// space does not need to be the same as the solution space, even
-// if this is the case here.
-//
-// We remark here two details:
-// 1. The spaces for the advection (betaSpace and ETbetaSpace) are
-//    vectorial.
-// 2. The constructor for the ETFESpace structures use an
-//    additional arguement, the geometric mapping. In the
-//    tutorial 1, this argument was omitted, so the geometric
-//    mapping was guessed from the mesh type.
-//
-// In the end, both solution spaces display their respective
-// number of degrees of freedom, which must be the same.
-// ---------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // We start by defining the finite element spaces. We use the type
+    // FESpace for the classical way and copy it in an ETFESpace for
+    // the ET assembly.
+    //
+    // We also build similar spaces for the advection field. This
+    // space does not need to be the same as the solution space, even
+    // if this is the case here.
+    //
+    // We remark here two details:
+    // 1. The spaces for the advection (betaSpace and ETbetaSpace) are
+    //    vectorial.
+    // 2. The constructor for the ETFESpace structures use an
+    //    additional arguement, the geometric mapping. In the
+    //    tutorial 1, this argument was omitted, so the geometric
+    //    mapping was guessed from the mesh type.
+    //
+    // In the end, both solution spaces display their respective
+    // number of degrees of freedom, which must be the same.
+    // ---------------------------------------------------------------
 
     // ---------------------------------------------------------------
     // We start by defining the finite element spaces. We use the type
@@ -247,18 +247,18 @@ int main ( int argc, char** argv )
         std::cout << " ---> Dofs: " << ETuSpace->dof().numTotalDof() << std::endl;
     }
 
-// ---------------------------------------------------------------
-// We interpolate then the advection function of the mesh at hand.
-// This is performed with the classical FESpace only.
-//
-// Indeed, the interpolation has not yet been implemented for the
-// ETFESpace and vector of values for the FESpace and ETFESpace
-// are fully compatible (they use the same degrees of freedom
-// numbering). Therefore, they can be exchanged at will. This is
-// very important since some features have been implemented only
-// for regular FESpace but not yet for ETFESpace (e.g. output
-// functionalities).
-// ---------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // We interpolate then the advection function of the mesh at hand.
+    // This is performed with the classical FESpace only.
+    //
+    // Indeed, the interpolation has not yet been implemented for the
+    // ETFESpace and vector of values for the FESpace and ETFESpace
+    // are fully compatible (they use the same degrees of freedom
+    // numbering). Therefore, they can be exchanged at will. This is
+    // very important since some features have been implemented only
+    // for regular FESpace but not yet for ETFESpace (e.g. output
+    // functionalities).
+    // ---------------------------------------------------------------
 
     // ---------------------------------------------------------------
     // We interpolate then the advection function of the mesh at hand.
@@ -354,29 +354,29 @@ int main ( int argc, char** argv )
     }
 
 
-// ---------------------------------------------------------------
-// We perform now the same assembly with the ET assembly and still
-// monitor the timings required.
-//
-// As in tutorial 1, we need to use the special namespace. The
-// arguments of the integrate function still have the same
-// meaning, but the expression is not a bit different.
-// Remark that to ensure a fair comparison, we use the quadrature
-// rule used for the classical way (stored in the uSpace).
-//
-// One of the differences between the two assembly is that with
-// the ET way, the weak formulation is immediately visible, while
-// it is not with the classical way.
-//
-// For the advective term, we remark that a new expression is used
-// for the interpolation of the velocity field. The value
-// function is used with, as first argument the ETFESpace in
-// which the velocity is given and in second argument the vector
-// of the values.
-//
-// Remark also that the Real constants and VectorSmall constants
-// can be used directly in the expressions to integrate.
-// ---------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // We perform now the same assembly with the ET assembly and still
+    // monitor the timings required.
+    //
+    // As in tutorial 1, we need to use the special namespace. The
+    // arguments of the integrate function still have the same
+    // meaning, but the expression is not a bit different.
+    // Remark that to ensure a fair comparison, we use the quadrature
+    // rule used for the classical way (stored in the uSpace).
+    //
+    // One of the differences between the two assembly is that with
+    // the ET way, the weak formulation is immediately visible, while
+    // it is not with the classical way.
+    //
+    // For the advective term, we remark that a new expression is used
+    // for the interpolation of the velocity field. The value
+    // function is used with, as first argument the ETFESpace in
+    // which the velocity is given and in second argument the vector
+    // of the values.
+    //
+    // Remark also that the Real constants and VectorSmall constants
+    // can be used directly in the expressions to integrate.
+    // ---------------------------------------------------------------
 
     LifeChrono ETChrono;
     ETChrono.start();
@@ -390,17 +390,17 @@ int main ( int argc, char** argv )
     {
         using namespace ExpressionAssembly;
 
-        integrate( elements(ETuSpace->mesh()),
-                   uSpace->qr(),
-                   ETuSpace,
-                   ETuSpace,
+        integrate ( elements (ETuSpace->mesh() ),
+                    uSpace->qr(),
+                    ETuSpace,
+                    ETuSpace,
 
-                   dot( grad(phi_i) , grad(phi_j) )
-                   + dot( grad(phi_j) , value(ETbetaSpace,beta))*phi_i
-                   + 2.0* phi_i*phi_j
+                    dot ( grad (phi_i) , grad (phi_j) )
+                    + dot ( grad (phi_j) , value (ETbetaSpace, beta) ) *phi_i
+                    + 2.0 * phi_i * phi_j
 
-                   )
-            >> ETsystemMatrix;
+                  )
+                >> ETsystemMatrix;
     }
 
     ETChrono.stop();
@@ -415,23 +415,26 @@ int main ( int argc, char** argv )
     }
 
 
-// ---------------------------------------------------------------
-// The timings displayed should indicate that the ET way is faster
-// than the classical way. Indeed, the classical way loops over
-// the elements for each term added (3 times here), assembles
-// different local contributions for each term and adds them for
-// each term. With the ET way, only one loop over the elements
-// is required, computations are reused and only one local
-// contribution is computed and added to the global matrix.
-//
-// In general, the longer is the expression, the better is the
-// performance of the ET with respect to the classical way.
-//
-// We finally need to check that both yield the same matrix. In
-// that aim, we need to finalize both matrices.
-// ---------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // The timings displayed should indicate that the ET way is faster
+    // than the classical way. Indeed, the classical way loops over
+    // the elements for each term added (3 times here), assembles
+    // different local contributions for each term and adds them for
+    // each term. With the ET way, only one loop over the elements
+    // is required, computations are reused and only one local
+    // contribution is computed and added to the global matrix.
+    //
+    // In general, the longer is the expression, the better is the
+    // performance of the ET with respect to the classical way.
+    //
+    // We finally need to check that both yield the same matrix. In
+    // that aim, we need to finalize both matrices.
+    // ---------------------------------------------------------------
 
-    if (verbose) std::cout << " -- Closing the matrices ... " << std::flush;
+    if (verbose)
+    {
+        std::cout << " -- Closing the matrices ... " << std::flush;
+    }
 
     systemMatrix->globalAssemble();
     ETsystemMatrix->globalAssemble();
@@ -442,11 +445,11 @@ int main ( int argc, char** argv )
     }
 
 
-// ---------------------------------------------------------------
-// We compute now the matrix of the difference and finally the
-// norm of the difference. This should be very low if the two
-// matrices are identical.
-// ---------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // We compute now the matrix of the difference and finally the
+    // norm of the difference. This should be very low if the two
+    // matrices are identical.
+    // ---------------------------------------------------------------
 
     if (verbose)
     {

@@ -157,12 +157,12 @@ public:
       \param dFESpace: the FiniteElement Space
       \param displayer: the displayer object
     */
-    void setup( const dataPtr_Type& dataMaterial,
-                const analysisDataPtr_Type& tensionData,
-                const FESpacePtr_Type& dFESpace,
-                const ETFESpacePtr_Type&      dETFESpace,
-                boost::shared_ptr<Epetra_Comm>&     comm,
-                UInt marker);
+    void setup ( const dataPtr_Type& dataMaterial,
+                 const analysisDataPtr_Type& tensionData,
+                 const FESpacePtr_Type& dFESpace,
+                 const ETFESpacePtr_Type&      dETFESpace,
+                 boost::shared_ptr<Epetra_Comm>&     comm,
+                 UInt marker);
 
 
 
@@ -258,17 +258,17 @@ WallTensionEstimatorCylindricalCoordinates<Mesh>::WallTensionEstimatorCylindrica
 //===================================
 template <typename Mesh>
 void
-WallTensionEstimatorCylindricalCoordinates<Mesh >::setup( const dataPtr_Type& dataMaterial,
-                                                          const analysisDataPtr_Type& tensionData,
-                                                          const FESpacePtr_Type&        dFESpace,
-                                                          const ETFESpacePtr_Type&      dETFESpace,
-                                                          boost::shared_ptr<Epetra_Comm>&     comm,
-                                                          UInt marker)
+WallTensionEstimatorCylindricalCoordinates<Mesh >::setup ( const dataPtr_Type& dataMaterial,
+                                                           const analysisDataPtr_Type& tensionData,
+                                                           const FESpacePtr_Type&        dFESpace,
+                                                           const ETFESpacePtr_Type&      dETFESpace,
+                                                           boost::shared_ptr<Epetra_Comm>&     comm,
+                                                           UInt marker)
 
 {
-    super::setup(dataMaterial, tensionData, dFESpace, dETFESpace,comm, marker);
-    M_deformationCylindricalF.reset  ( new matrix_Type( this->M_FESpace->fieldDim(), this->M_FESpace->fieldDim() ) );
-    M_changeOfVariableMatrix.reset   ( new matrix_Type(this->M_FESpace->fieldDim(), this->M_FESpace->fieldDim() ) );
+    super::setup (dataMaterial, tensionData, dFESpace, dETFESpace, comm, marker);
+    M_deformationCylindricalF.reset  ( new matrix_Type ( this->M_FESpace->fieldDim(), this->M_FESpace->fieldDim() ) );
+    M_changeOfVariableMatrix.reset   ( new matrix_Type (this->M_FESpace->fieldDim(), this->M_FESpace->fieldDim() ) );
 }
 
 template <typename Mesh>
@@ -383,8 +383,8 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensionsRecoveryDispla
             //Save the eigenvalues in the global vector
             for ( UInt icoor = 0; icoor < this->M_FESpace->fieldDim(); ++icoor )
             {
-                UInt ig = this->M_FESpace->dof().localToGlobalMap( eleID, iloc ) + icoor * this->M_FESpace->dim() + this->M_offset;
-                (*(this->M_globalEigen))(ig) = this->M_eigenvaluesR[icoor];
+                UInt ig = this->M_FESpace->dof().localToGlobalMap ( eleID, iloc ) + icoor * this->M_FESpace->dim() + this->M_offset;
+                (* (this->M_globalEigen) ) (ig) = this->M_eigenvaluesR[icoor];
                 // Int LIDid = this->M_displ->blockMap().LID(ig);
                 // if( this->M_globalEigen->blockMap().LID(ig) != -1  )
                 // {

@@ -44,7 +44,7 @@ namespace LifeV
 {
 template <typename MeshType>
 class VenantKirchhoffMaterialNonLinear :
-        public StructuralConstitutiveLaw<MeshType>
+    public StructuralConstitutiveLaw<MeshType>
 {
     //!@name Type definitions
     //@{
@@ -82,7 +82,7 @@ public:
     typedef typename super::vectorsParameters_Type       vectorsParameters_Type;
     typedef typename super::vectorsParametersPtr_Type    vectorsParametersPtr_Type;
 
-    typedef MatrixSmall<3,3>                          matrixSmall_Type;
+    typedef MatrixSmall<3, 3>                          matrixSmall_Type;
     //@}
 
 
@@ -107,17 +107,17 @@ public:
       \param monolithicMap: the MapEpetra
       \param offset: the offset parameter used assembling the matrices
     */
-    void setup( const FESpacePtr_Type& dFESpace,
-                const ETFESpacePtr_Type& dETFESpace,
-                const boost::shared_ptr<const MapEpetra>&  monolithicMap,
-                const UInt offset, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer );
+    void setup ( const FESpacePtr_Type& dFESpace,
+                 const ETFESpacePtr_Type& dETFESpace,
+                 const boost::shared_ptr<const MapEpetra>&  monolithicMap,
+                 const UInt offset, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer );
 
 
     //! Compute the Stiffness matrix in StructuralSolver::buildSystem()
     /*!
       \param dataMaterial the class with Material properties data
     */
-    void computeLinearStiff( dataPtr_Type& /*dataMaterial*/, const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,const mapMarkerIndexesPtr_Type /*mapsMarkerIndexes*/ );
+    void computeLinearStiff ( dataPtr_Type& /*dataMaterial*/, const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/, const mapMarkerIndexesPtr_Type /*mapsMarkerIndexes*/ );
 
 
     //! Updates the Jacobian matrix in StructualSolver::updateJacobian
@@ -127,11 +127,11 @@ public:
                            the material coefficients (e.g. Young modulus, Poisson ratio..)
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
-    void updateJacobianMatrix( const vector_Type& disp,
-                               const dataPtr_Type& dataMaterial,
-                               const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
-                               const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
-                               const displayerPtr_Type& displayer );
+    void updateJacobianMatrix ( const vector_Type& disp,
+                                const dataPtr_Type& dataMaterial,
+                                const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                                const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
+                                const displayerPtr_Type& displayer );
 
 
     //! Updates the nonlinear terms in the Jacobian matrix in StructualSolver::updateJacobian
@@ -142,12 +142,12 @@ public:
                            the material coefficients (e.g. Young modulus, Poisson ratio..)
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
-    void updateNonLinearJacobianTerms( matrixPtr_Type& jacobian,
-                                       const vector_Type& disp,
-                                       const dataPtr_Type& dataMaterial,
-                                       const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
-                                       const mapMarkerIndexesPtr_Type /*mapsMarkerIndexes*/,
-                                       const displayerPtr_Type& displayer );
+    void updateNonLinearJacobianTerms ( matrixPtr_Type& jacobian,
+                                        const vector_Type& disp,
+                                        const dataPtr_Type& dataMaterial,
+                                        const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
+                                        const mapMarkerIndexesPtr_Type /*mapsMarkerIndexes*/,
+                                        const displayerPtr_Type& displayer );
 
 
     //! Interface method to compute the new Stiffness matrix in StructuralSolver::evalResidual and in
@@ -159,8 +159,8 @@ public:
                            material coefficients (e.g. Young modulus, Poisson ratio..)o
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
-    void computeStiffness( const vector_Type& disp, Real factor, const dataPtr_Type& dataMaterial, const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
-			   const mapMarkerIndexesPtr_Type /*mapsMarkerIndexes*/, const displayerPtr_Type& displayer );
+    void computeStiffness ( const vector_Type& disp, Real factor, const dataPtr_Type& dataMaterial, const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
+                            const mapMarkerIndexesPtr_Type /*mapsMarkerIndexes*/, const displayerPtr_Type& displayer );
 
 
     //! Computes the new Stiffness vector for Neo-Hookean and Exponential materials in StructuralSolver
@@ -186,13 +186,13 @@ public:
     /*!
       \param dk_loc: the elemental displacement
     */
-    void computeKinematicsVariables( const VectorElemental& /*dk_loc*/ )
+    void computeKinematicsVariables ( const VectorElemental& /*dk_loc*/ )
     {
     }
 
     //! ShowMe method of the class (saved on a file the stiffness vector and the jacobian)
-    void showMe( std::string const& fileNameVectStiff,
-                 std::string const& fileNameJacobain );
+    void showMe ( std::string const& fileNameVectStiff,
+                  std::string const& fileNameJacobain );
 
     //@}
 
@@ -200,15 +200,21 @@ public:
     //@{
 
     //! Get the Stiffness matrix
-    matrixPtr_Type  const stiffMatrix() const { return super::M_jacobian; }
+    matrixPtr_Type  const stiffMatrix() const
+    {
+        return super::M_jacobian;
+    }
 
 
     //! Get the stiffness vector
-    vectorPtr_Type  const stiffVector() const  {return M_stiff; }
+    vectorPtr_Type  const stiffVector() const
+    {
+        return M_stiff;
+    }
 
-    void apply( const vector_Type& sol, vector_Type& res,
-                const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
-                const mapMarkerIndexesPtr_Type mapsMarkerIndexes) ;
+    void apply ( const vector_Type& sol, vector_Type& res,
+                 const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                 const mapMarkerIndexesPtr_Type mapsMarkerIndexes) ;
 
     //! Compute the First Piola Kirchhoff Tensor
     /*!
@@ -236,7 +242,7 @@ protected:
       \param VOID
       \return VOID
     */
-    void setupVectorsParameters( void );
+    void setupVectorsParameters ( void );
 
 
     //! Vector: stiffness non-linear
@@ -252,7 +258,7 @@ protected:
 
 
 template <typename MeshType>
-VenantKirchhoffMaterialNonLinear<MeshType>::VenantKirchhoffMaterialNonLinear():
+VenantKirchhoffMaterialNonLinear<MeshType>::VenantKirchhoffMaterialNonLinear() :
     super            ( ),
     M_stiff          ( ),
     M_identity       ( )
@@ -273,12 +279,12 @@ VenantKirchhoffMaterialNonLinear<MeshType>::~VenantKirchhoffMaterialNonLinear()
 
 template <typename MeshType>
 void
-VenantKirchhoffMaterialNonLinear<MeshType>::setup( const FESpacePtr_Type&                       dFESpace,
-                                                   const ETFESpacePtr_Type&                     dETFESpace,
-                                                   const boost::shared_ptr<const MapEpetra>&   monolithicMap,
-                                                   const UInt                                  offset,
-                                                   const dataPtr_Type&                         dataMaterial,
-                                                   const displayerPtr_Type&                    displayer  )
+VenantKirchhoffMaterialNonLinear<MeshType>::setup ( const FESpacePtr_Type&                       dFESpace,
+                                                    const ETFESpacePtr_Type&                     dETFESpace,
+                                                    const boost::shared_ptr<const MapEpetra>&   monolithicMap,
+                                                    const UInt                                  offset,
+                                                    const dataPtr_Type&                         dataMaterial,
+                                                    const displayerPtr_Type&                    displayer  )
 {
     this->M_displayer = displayer;
     this->M_dataMaterial  = dataMaterial;
@@ -289,23 +295,29 @@ VenantKirchhoffMaterialNonLinear<MeshType>::setup( const FESpacePtr_Type&       
     this->M_localMap                    = monolithicMap;
     this->M_offset                      = offset;
 
-    M_stiff.reset                     (new vector_Type(*this->M_localMap));
+    M_stiff.reset                     (new vector_Type (*this->M_localMap) );
 
-    M_identity(0,0) = 1.0; M_identity(0,1) = 0.0; M_identity(0,2) = 0.0;
-    M_identity(1,0) = 0.0; M_identity(1,1) = 1.0; M_identity(1,2) = 0.0;
-    M_identity(2,0) = 0.0; M_identity(2,1) = 0.0; M_identity(2,2) = 1.0;
+    M_identity (0, 0) = 1.0;
+    M_identity (0, 1) = 0.0;
+    M_identity (0, 2) = 0.0;
+    M_identity (1, 0) = 0.0;
+    M_identity (1, 1) = 1.0;
+    M_identity (1, 2) = 0.0;
+    M_identity (2, 0) = 0.0;
+    M_identity (2, 1) = 0.0;
+    M_identity (2, 2) = 1.0;
 
     // The 2 is because the law uses three parameters (lambda, mu).
     // another way would be to set up the number of constitutive parameters of the law
     // in the data file to get the right size. Note the comment below.
-    this->M_vectorsParameters.reset( new vectorsParameters_Type( 2 ) );
+    this->M_vectorsParameters.reset ( new vectorsParameters_Type ( 2 ) );
 
     this->setupVectorsParameters();
 }
 
 template <typename MeshType>
 void
-VenantKirchhoffMaterialNonLinear<MeshType>::setupVectorsParameters( void )
+VenantKirchhoffMaterialNonLinear<MeshType>::setupVectorsParameters ( void )
 {
     // Paolo Tricerri: February, 20th
     // In each class, the name of the parameters has to inserted in the law
@@ -318,30 +330,30 @@ VenantKirchhoffMaterialNonLinear<MeshType>::setupVectorsParameters( void )
 
     // Parameter lambda
     // 1. resize the vector in the first element of the vector.
-    (*(this->M_vectorsParameters))[0].resize( nbElements );
+    (* (this->M_vectorsParameters) ) [0].resize ( nbElements );
 
     // Parameter mu
-    (*(this->M_vectorsParameters))[1].resize( nbElements );
+    (* (this->M_vectorsParameters) ) [1].resize ( nbElements );
 
-    for(UInt i(0); i < nbElements; i++ )
+    for (UInt i (0); i < nbElements; i++ )
     {
         // Extracting the marker
-        UInt markerID = this->M_dispFESpace->mesh()->element( i ).markerID();
+        UInt markerID = this->M_dispFESpace->mesh()->element ( i ).markerID();
 
-        Real lambda = this->M_dataMaterial->lambda( markerID );
-        Real mu = this->M_dataMaterial->mu( markerID );
+        Real lambda = this->M_dataMaterial->lambda ( markerID );
+        Real mu = this->M_dataMaterial->mu ( markerID );
 
 
-        ( (*(this->M_vectorsParameters) )[0])[ i ] = lambda;
-        ( (*(this->M_vectorsParameters) )[1])[ i ] = mu;
+        ( (* (this->M_vectorsParameters) ) [0]) [ i ] = lambda;
+        ( (* (this->M_vectorsParameters) ) [1]) [ i ] = mu;
     }
 }
 
 
 template <typename MeshType>
-void VenantKirchhoffMaterialNonLinear<MeshType>::computeLinearStiff(dataPtr_Type& /*dataMaterial*/,
-                                                                    const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
-                                                                    const mapMarkerIndexesPtr_Type /*mapsMarkerIndexes*/)
+void VenantKirchhoffMaterialNonLinear<MeshType>::computeLinearStiff (dataPtr_Type& /*dataMaterial*/,
+                                                                     const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
+                                                                     const mapMarkerIndexesPtr_Type /*mapsMarkerIndexes*/)
 {
     //! Empty method for exponential material
 }
@@ -351,36 +363,36 @@ void VenantKirchhoffMaterialNonLinear<MeshType>::computeLinearStiff(dataPtr_Type
 
 
 template <typename MeshType>
-void VenantKirchhoffMaterialNonLinear<MeshType>::updateJacobianMatrix( const vector_Type&       disp,
-                                                                       const dataPtr_Type&      dataMaterial,
-                                                                       const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
-                                                                       const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
-                                                                       const displayerPtr_Type& displayer )
+void VenantKirchhoffMaterialNonLinear<MeshType>::updateJacobianMatrix ( const vector_Type&       disp,
+                                                                        const dataPtr_Type&      dataMaterial,
+                                                                        const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                                                                        const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
+                                                                        const displayerPtr_Type& displayer )
 {
 
-    this->M_jacobian.reset(new matrix_Type(*this->M_localMap));
+    this->M_jacobian.reset (new matrix_Type (*this->M_localMap) );
 
-    displayer->leaderPrint(" \n*********************************\n  ");
-    updateNonLinearJacobianTerms(this->M_jacobian, disp, dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
-    displayer->leaderPrint(" \n*********************************\n  ");
+    displayer->leaderPrint (" \n*********************************\n  ");
+    updateNonLinearJacobianTerms (this->M_jacobian, disp, dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
+    displayer->leaderPrint (" \n*********************************\n  ");
     std::cout << std::endl;
 
 }
 
 template <typename MeshType>
-void VenantKirchhoffMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms( matrixPtr_Type&         jacobian,
-                                                                               const vector_Type&     disp,
-                                                                               const dataPtr_Type&     dataMaterial,
-                                                                               const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
-                                                                               const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
-                                                                               const displayerPtr_Type& displayer )
+void VenantKirchhoffMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( matrixPtr_Type&         jacobian,
+                                                                                const vector_Type&     disp,
+                                                                                const dataPtr_Type&     dataMaterial,
+                                                                                const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                                                                                const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
+                                                                                const displayerPtr_Type& displayer )
 {
 
     using namespace ExpressionAssembly;
 
-    displayer->leaderPrint("   Non-Linear S-  updating non linear terms in the Jacobian Matrix (Exponential)");
+    displayer->leaderPrint ("   Non-Linear S-  updating non linear terms in the Jacobian Matrix (Exponential)");
 
-    *(jacobian) *= 0.0;
+    * (jacobian) *= 0.0;
 
     //! Nonlinear part of jacobian
     // //! loop on volumes (i)
@@ -406,59 +418,59 @@ void VenantKirchhoffMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms( m
     //     Real lambda = dataMaterial->lambda(marker);
     //     Real mu = dataMaterial->mu(marker);
 
-        //Macros to make the assembly more readable
+    //Macros to make the assembly more readable
 #define F ( grad( this->M_dispETFESpace,  disp, this->M_offset) + value(this->M_identity) )
 #define RIGHTCAUCHYGREEN transpose(F) * F
 #define IC trace( RIGHTCAUCHYGREEN )
 
     // //Assembling the Isochoric Part
     // //! 1. Stiffness matrix : int { (lambda/2.0) * ( 2* F:dF) * ( F : \nabla \v ) }
-    integrate( elements( this->M_dispETFESpace->mesh() ) ,
-	       this->M_dispFESpace->qr(),
-	       this->M_dispETFESpace,
-	       this->M_dispETFESpace,
-	       parameter( (*(this->M_vectorsParameters) )[0] ) * dot( F, grad(phi_j) ) * dot( F, grad(phi_i) )
-	       ) >> jacobian;
+    integrate ( elements ( this->M_dispETFESpace->mesh() ) ,
+                this->M_dispFESpace->qr(),
+                this->M_dispETFESpace,
+                this->M_dispETFESpace,
+                parameter ( (* (this->M_vectorsParameters) ) [0] ) * dot ( F, grad (phi_j) ) * dot ( F, grad (phi_i) )
+              ) >> jacobian;
 
     //! 2. Stiffness matrix : int { (lambda/2.0) * ( Ic-3.0 ) * ( dF : \nabla \v ) }
-    integrate( elements( this->M_dispETFESpace->mesh() ) ,
-	       this->M_dispFESpace->qr(),
-	       this->M_dispETFESpace,
-	       this->M_dispETFESpace,
-	       value( 1.0/2.0 ) *parameter( (*(this->M_vectorsParameters) )[0] ) * ( IC - value(3.0) ) * dot( grad(phi_j), grad(phi_i) )
-	       ) >> jacobian;
+    integrate ( elements ( this->M_dispETFESpace->mesh() ) ,
+                this->M_dispFESpace->qr(),
+                this->M_dispETFESpace,
+                this->M_dispETFESpace,
+                value ( 1.0 / 2.0 ) *parameter ( (* (this->M_vectorsParameters) ) [0] ) * ( IC - value (3.0) ) * dot ( grad (phi_j), grad (phi_i) )
+              ) >> jacobian;
 
     // //! 3. Stiffness matrix : int { - mu * ( dF : \nabla \v )}
-    integrate( elements( this->M_dispETFESpace->mesh() ) ,
-	       this->M_dispFESpace->qr(),
-	       this->M_dispETFESpace,
-	       this->M_dispETFESpace,
-	       value(-1.0) * parameter( (*(this->M_vectorsParameters) )[1] ) * dot( grad(phi_j), grad(phi_i) )
-	       ) >> jacobian;
+    integrate ( elements ( this->M_dispETFESpace->mesh() ) ,
+                this->M_dispFESpace->qr(),
+                this->M_dispETFESpace,
+                this->M_dispETFESpace,
+                value (-1.0) * parameter ( (* (this->M_vectorsParameters) ) [1] ) * dot ( grad (phi_j), grad (phi_i) )
+              ) >> jacobian;
 
     // //! 4. Stiffness matrix : int { mu * (dF * C) : \nabla v }
-    integrate( elements( this->M_dispETFESpace->mesh() ) ,
-	       this->M_dispFESpace->qr(),
-	       this->M_dispETFESpace,
-	       this->M_dispETFESpace,
-	       parameter( (*(this->M_vectorsParameters) )[1] ) * dot( grad(phi_j) * RIGHTCAUCHYGREEN , grad(phi_i) )
-	       ) >> jacobian;
+    integrate ( elements ( this->M_dispETFESpace->mesh() ) ,
+                this->M_dispFESpace->qr(),
+                this->M_dispETFESpace,
+                this->M_dispETFESpace,
+                parameter ( (* (this->M_vectorsParameters) ) [1] ) * dot ( grad (phi_j) * RIGHTCAUCHYGREEN , grad (phi_i) )
+              ) >> jacobian;
 
     // //! 5. Stiffness matrix : int { mu * ( ( F * F * transpose(dF) ) : \nabla \v ) }
-    integrate( elements( this->M_dispETFESpace->mesh() ) ,
-	       this->M_dispFESpace->qr(),
-	       this->M_dispETFESpace,
-	       this->M_dispETFESpace,
-	       parameter( (*(this->M_vectorsParameters) )[1]) * dot( F * F * transpose(grad(phi_j)) , grad(phi_i) )
-	       ) >> jacobian;
+    integrate ( elements ( this->M_dispETFESpace->mesh() ) ,
+                this->M_dispFESpace->qr(),
+                this->M_dispETFESpace,
+                this->M_dispETFESpace,
+                parameter ( (* (this->M_vectorsParameters) ) [1]) * dot ( F * F * transpose (grad (phi_j) ) , grad (phi_i) )
+              ) >> jacobian;
 
     // //! 6. Stiffness matrix : int { mu * ( ( F * F^T * transpose(dF) ) : \nabla \v ) }
-    integrate( elements( this->M_dispETFESpace->mesh() )  ,
-	       this->M_dispFESpace->qr(),
-	       this->M_dispETFESpace,
-	       this->M_dispETFESpace,
-	       parameter( (*(this->M_vectorsParameters) )[1] ) *  dot( F * transpose(F) * grad(phi_j) , grad(phi_i) )
-	       ) >> jacobian;
+    integrate ( elements ( this->M_dispETFESpace->mesh() )  ,
+                this->M_dispFESpace->qr(),
+                this->M_dispETFESpace,
+                this->M_dispETFESpace,
+                parameter ( (* (this->M_vectorsParameters) ) [1] ) *  dot ( F * transpose (F) * grad (phi_j) , grad (phi_i) )
+              ) >> jacobian;
 
     jacobian->globalAssemble();
 }
@@ -468,22 +480,22 @@ void VenantKirchhoffMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms( m
 
 
 template <typename MeshType>
-void VenantKirchhoffMaterialNonLinear<MeshType>::computeStiffness( const vector_Type& disp,
-                                                           Real /*factor*/,
-                                                           const dataPtr_Type& dataMaterial,
-                                                           const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
-                                                           const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
-                                                           const displayerPtr_Type& displayer )
+void VenantKirchhoffMaterialNonLinear<MeshType>::computeStiffness ( const vector_Type& disp,
+                                                                    Real /*factor*/,
+                                                                    const dataPtr_Type& dataMaterial,
+                                                                    const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                                                                    const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
+                                                                    const displayerPtr_Type& displayer )
 {
 
     using namespace ExpressionAssembly;
 
-    M_stiff.reset(new vector_Type(*this->M_localMap));
-    *(M_stiff) *= 0.0;
+    M_stiff.reset (new vector_Type (*this->M_localMap) );
+    * (M_stiff) *= 0.0;
 
-    displayer->leaderPrint(" \n*********************************\n  ");
-    displayer->leaderPrint(" Non-Linear S-  Computing the Exponential nonlinear stiffness vector ");
-    displayer->leaderPrint(" \n*********************************\n  ");
+    displayer->leaderPrint (" \n*********************************\n  ");
+    displayer->leaderPrint (" Non-Linear S-  Computing the Exponential nonlinear stiffness vector ");
+    displayer->leaderPrint (" \n*********************************\n  ");
 
     // mapIterator_Type it;
     // //mapIteratorIndex_Type itIndex;
@@ -509,27 +521,27 @@ void VenantKirchhoffMaterialNonLinear<MeshType>::computeStiffness( const vector_
 
     //Computation of the isochoric part
     // // ! Stiffness matrix : int { ( lambda / 2.0 ) * ( Ic - 3.0 ) * ( F : \nabla \v )}
-    integrate( elements( this->M_dispETFESpace->mesh() ) ,
-	       this->M_dispFESpace->qr(),
-	       this->M_dispETFESpace,
-	       value( 1.0 / 2.0 ) * parameter( (*(this->M_vectorsParameters) )[0] ) * ( IC - 3.0 ) * dot( F,grad(phi_i) )
-	       ) >> M_stiff;
+    integrate ( elements ( this->M_dispETFESpace->mesh() ) ,
+                this->M_dispFESpace->qr(),
+                this->M_dispETFESpace,
+                value ( 1.0 / 2.0 ) * parameter ( (* (this->M_vectorsParameters) ) [0] ) * ( IC - 3.0 ) * dot ( F, grad (phi_i) )
+              ) >> M_stiff;
 
     //Computation of the isochoric part
     // // ! Stiffness matrix : int { ( - mu ) * ( F : \nabla \v )}
-    integrate( elements( this->M_dispETFESpace->mesh() ) ,
-	       this->M_dispFESpace->qr(),
-	       this->M_dispETFESpace,
-	       value(-1.0) * parameter( (*(this->M_vectorsParameters) )[1] ) * dot( F ,grad(phi_i) )
-	       ) >> M_stiff;
+    integrate ( elements ( this->M_dispETFESpace->mesh() ) ,
+                this->M_dispFESpace->qr(),
+                this->M_dispETFESpace,
+                value (-1.0) * parameter ( (* (this->M_vectorsParameters) ) [1] ) * dot ( F , grad (phi_i) )
+              ) >> M_stiff;
 
     //Computation of the isochoric part
     // // ! Stiffness matrix : int { ( mu ) * ( (F * C) : \nabla \v )}
-    integrate( elements( this->M_dispETFESpace->mesh() ) ,
-	       this->M_dispFESpace->qr(),
-	       this->M_dispETFESpace,
-	       parameter( (*(this->M_vectorsParameters) )[1] ) * dot( F * RIGHTCAUCHYGREEN ,grad(phi_i) )
-	       ) >> M_stiff;
+    integrate ( elements ( this->M_dispETFESpace->mesh() ) ,
+                this->M_dispFESpace->qr(),
+                this->M_dispETFESpace,
+                parameter ( (* (this->M_vectorsParameters) ) [1] ) * dot ( F * RIGHTCAUCHYGREEN , grad (phi_i) )
+              ) >> M_stiff;
     //}
 
     this->M_stiff->globalAssemble();
@@ -537,29 +549,29 @@ void VenantKirchhoffMaterialNonLinear<MeshType>::computeStiffness( const vector_
 
 
 template <typename MeshType>
-void VenantKirchhoffMaterialNonLinear<MeshType>::showMe( std::string const& fileNameStiff,
-                                                 std::string const& fileNameJacobian )
+void VenantKirchhoffMaterialNonLinear<MeshType>::showMe ( std::string const& fileNameStiff,
+                                                          std::string const& fileNameJacobian )
 {
-    this->M_stiff->spy(fileNameStiff);
-    this->M_jacobian->spy(fileNameJacobian);
+    this->M_stiff->spy (fileNameStiff);
+    this->M_jacobian->spy (fileNameJacobian);
 }
 
 
 template <typename MeshType>
-void VenantKirchhoffMaterialNonLinear<MeshType>::apply( const vector_Type& sol,
-                                                        vector_Type& res, const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
-                                                        const mapMarkerIndexesPtr_Type mapsMarkerIndexes )
+void VenantKirchhoffMaterialNonLinear<MeshType>::apply ( const vector_Type& sol,
+                                                         vector_Type& res, const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                                                         const mapMarkerIndexesPtr_Type mapsMarkerIndexes )
 {
-    computeStiffness(sol, 0, this->M_dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, this->M_displayer);
+    computeStiffness (sol, 0, this->M_dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, this->M_displayer);
     res += *M_stiff;
 }
 
 template <typename MeshType>
-void VenantKirchhoffMaterialNonLinear<MeshType>::computeLocalFirstPiolaKirchhoffTensor( Epetra_SerialDenseMatrix& firstPiola,
-									       const Epetra_SerialDenseMatrix& tensorF,
-									       const Epetra_SerialDenseMatrix& cofactorF,
-									       const std::vector<Real>& invariants,
-									       const UInt marker)
+void VenantKirchhoffMaterialNonLinear<MeshType>::computeLocalFirstPiolaKirchhoffTensor ( Epetra_SerialDenseMatrix& firstPiola,
+        const Epetra_SerialDenseMatrix& tensorF,
+        const Epetra_SerialDenseMatrix& cofactorF,
+        const std::vector<Real>& invariants,
+        const UInt marker)
 {
 
     //Get the material parameters
@@ -574,9 +586,9 @@ void VenantKirchhoffMaterialNonLinear<MeshType>::computeLocalFirstPiolaKirchhoff
     Real coeff = -1.0 * mu;
     secondTerm.Scale ( coeff );
 
-  Epetra_SerialDenseMatrix thirdTerm(this->M_dispFESpace->fieldDim(),this->M_dispFESpace->fieldDim());
-  Epetra_SerialDenseMatrix rightCauchyC(this->M_dispFESpace->fieldDim(),this->M_dispFESpace->fieldDim());
-  rightCauchyC.Scale(0.0);
+    Epetra_SerialDenseMatrix thirdTerm (this->M_dispFESpace->fieldDim(), this->M_dispFESpace->fieldDim() );
+    Epetra_SerialDenseMatrix rightCauchyC (this->M_dispFESpace->fieldDim(), this->M_dispFESpace->fieldDim() );
+    rightCauchyC.Scale (0.0);
 
 
     //Compute the tensors C
@@ -595,7 +607,10 @@ void VenantKirchhoffMaterialNonLinear<MeshType>::computeLocalFirstPiolaKirchhoff
 
 
 template <typename MeshType>
-inline StructuralConstitutiveLaw<MeshType>* createVenantKirchhoffNonLinear() { return new VenantKirchhoffMaterialNonLinear<MeshType >(); }
+inline StructuralConstitutiveLaw<MeshType>* createVenantKirchhoffNonLinear()
+{
+    return new VenantKirchhoffMaterialNonLinear<MeshType >();
+}
 
 namespace
 {

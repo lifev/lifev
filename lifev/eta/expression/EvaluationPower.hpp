@@ -64,7 +64,7 @@ class EvaluationPower
 {
 public:
 
-	//! @name Public Types
+    //! @name Public Types
     //@{
 
     //! Type of the value returned by the left operand
@@ -73,7 +73,7 @@ public:
 
 
     //! Type of the value returned by this class
-    typedef typename OperationSmallPower<BaseReturn_Type,exponentType>::result_Type return_Type;
+    typedef typename OperationSmallPower<BaseReturn_Type, exponentType>::result_Type return_Type;
     //@}
 
 
@@ -81,13 +81,13 @@ public:
     //@{
 
     //! Flag for the global current FE
-	const static flag_Type S_globalUpdateFlag;
+    const static flag_Type S_globalUpdateFlag;
 
     //! Flag for the test current FE
-	const static flag_Type S_testUpdateFlag;
+    const static flag_Type S_testUpdateFlag;
 
     //! Flag for the solution current FE
-	const static flag_Type S_solutionUpdateFlag;
+    const static flag_Type S_solutionUpdateFlag;
 
     //@}
 
@@ -95,21 +95,21 @@ public:
     //! @name Constructors, destructor
     //@{
 
-	//! Copy constructor
-	EvaluationPower(const EvaluationPower& eval)
-		: M_evaluationBase(eval.M_evaluationBase),
-          M_exponent(eval.M_exponent)
+    //! Copy constructor
+    EvaluationPower (const EvaluationPower& eval)
+        : M_evaluationBase (eval.M_evaluationBase),
+          M_exponent (eval.M_exponent)
     {}
 
-	//! Constructor from the corresponding expression
-	template <typename BaseExpressionType>
-	explicit EvaluationPower(const ExpressionPower<BaseExpressionType>& expression)
-		: M_evaluationBase(expression.base()),
-          M_exponent(expression.exponent())
+    //! Constructor from the corresponding expression
+    template <typename BaseExpressionType>
+    explicit EvaluationPower (const ExpressionPower<BaseExpressionType>& expression)
+        : M_evaluationBase (expression.base() ),
+          M_exponent (expression.exponent() )
     {}
 
     //! Destructor
-    ~EvaluationPower(){}
+    ~EvaluationPower() {}
 
     //@}
 
@@ -118,15 +118,17 @@ public:
     //@{
 
     //! Internal update method
-	void update(const UInt& iElement)
-	{
-		M_evaluationBase.update(iElement);
-	}
+    void update (const UInt& iElement)
+    {
+        M_evaluationBase.update (iElement);
+    }
 
     //! Display method
-	static void display(ostream& out = std::cout )
-	{
-        out << " pow( " ; EvaluationBaseType::display(out); out << ")";
+    static void display (ostream& out = std::cout )
+    {
+        out << " pow( " ;
+        EvaluationBaseType::display (out);
+        out << ")";
     }
 
     //@}
@@ -136,31 +138,31 @@ public:
     //@{
 
     //! Setter for the global current FE
-	template< typename CFEType >
-	void setGlobalCFE(const CFEType* globalCFE)
-	{
-        M_evaluationBase.setGlobalCFE(globalCFE);
+    template< typename CFEType >
+    void setGlobalCFE (const CFEType* globalCFE)
+    {
+        M_evaluationBase.setGlobalCFE (globalCFE);
     }
 
     //! Setter for the test current FE
-	template< typename CFEType >
-	void setTestCFE(const CFEType* testCFE)
-	{
-        M_evaluationBase.setTestCFE(testCFE);
+    template< typename CFEType >
+    void setTestCFE (const CFEType* testCFE)
+    {
+        M_evaluationBase.setTestCFE (testCFE);
     }
 
     //! Setter for the solution current FE
-	template< typename CFEType >
-	void setSolutionCFE(const CFEType* solutionCFE)
-	{
-        M_evaluationBase.setSolutionCFE(solutionCFE);
+    template< typename CFEType >
+    void setSolutionCFE (const CFEType* solutionCFE)
+    {
+        M_evaluationBase.setSolutionCFE (solutionCFE);
     }
 
     //! Setter for the quadrature rule
-	void setQuadrature(const QuadratureRule& qr)
-	{
-		M_evaluationBase.setQuadrature(qr);
-	}
+    void setQuadrature (const QuadratureRule& qr)
+    {
+        M_evaluationBase.setQuadrature (qr);
+    }
 
     //@}
 
@@ -168,22 +170,22 @@ public:
     //! @name Get Methods
     //@{
 
-	//! Getter a value
-	return_Type value_q(const UInt& q) const
+    //! Getter a value
+    return_Type value_q (const UInt& q) const
     {
-        return std::pow(M_evaluationBase.value_q(q), M_exponent);
+        return std::pow (M_evaluationBase.value_q (q), M_exponent);
     }
 
     //! Getter for the value for a vector
-    return_Type value_qi(const UInt& q, const UInt& i) const
+    return_Type value_qi (const UInt& q, const UInt& i) const
     {
-        return std::pow(M_evaluationBase.value_qi(q,i),M_exponent);
+        return std::pow (M_evaluationBase.value_qi (q, i), M_exponent);
     }
 
     //! Getter for the value for a matrix
-	return_Type value_qij(const UInt& q, const UInt& i, const UInt& j) const
+    return_Type value_qij (const UInt& q, const UInt& i, const UInt& j) const
     {
-        return std::pow(M_evaluationBase.value_qij(q,i,j),M_exponent);
+        return std::pow (M_evaluationBase.value_qij (q, i, j), M_exponent);
     }
 
     //@}
@@ -193,27 +195,27 @@ private:
     //! @name Private Methods
     //@{
 
-	//! No empty constructor
-	EvaluationPower();
+    //! No empty constructor
+    EvaluationPower();
 
     //@}
 
-	//! Internal storage
-	EvaluationBaseType M_evaluationBase;
+    //! Internal storage
+    EvaluationBaseType M_evaluationBase;
     Real M_exponent;
 };
 
 template< typename EvaluationBaseType>
 const flag_Type EvaluationPower<EvaluationBaseType>::S_globalUpdateFlag
- = EvaluationBaseType::S_globalUpdateFlag;
+    = EvaluationBaseType::S_globalUpdateFlag;
 
 template< typename EvaluationBaseType>
 const flag_Type EvaluationPower<EvaluationBaseType>::S_testUpdateFlag
- = EvaluationBaseType::S_testUpdateFlag;
+    = EvaluationBaseType::S_testUpdateFlag;
 
 template< typename EvaluationBaseType>
 const flag_Type EvaluationPower<EvaluationBaseType>::S_solutionUpdateFlag
- = EvaluationBaseType::S_solutionUpdateFlag;
+    = EvaluationBaseType::S_solutionUpdateFlag;
 
 } // Namespace ExpressionAssembly
 

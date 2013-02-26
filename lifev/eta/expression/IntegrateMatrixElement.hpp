@@ -68,10 +68,10 @@ namespace ExpressionAssembly
   within a typedef).
  */
 template < typename MeshType,
-           typename TestSpaceType,
-           typename SolutionSpaceType,
-           typename ExpressionType,
-           typename QRAdapterType>
+         typename TestSpaceType,
+         typename SolutionSpaceType,
+         typename ExpressionType,
+         typename QRAdapterType >
 
 class IntegrateMatrixElement
 {
@@ -81,10 +81,10 @@ public:
     //@{
 
     //! Type of the Evaluation
-	typedef typename ExpressionToEvaluation< ExpressionType,
-                                             TestSpaceType::field_dim,
-                                             SolutionSpaceType::field_dim,
-                                             3>::evaluation_Type  evaluation_Type;
+    typedef typename ExpressionToEvaluation < ExpressionType,
+            TestSpaceType::field_dim,
+            SolutionSpaceType::field_dim,
+            3 >::evaluation_Type  evaluation_Type;
 
     //@}
 
@@ -93,14 +93,14 @@ public:
     //@{
 
     //! Full data constructor
-    IntegrateMatrixElement(const boost::shared_ptr<MeshType>& mesh,
-                           const QRAdapterType& qrAdapter,
-                           const boost::shared_ptr<TestSpaceType>& testSpace,
-                           const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
-                           const ExpressionType& expression);
+    IntegrateMatrixElement (const boost::shared_ptr<MeshType>& mesh,
+                            const QRAdapterType& qrAdapter,
+                            const boost::shared_ptr<TestSpaceType>& testSpace,
+                            const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
+                            const ExpressionType& expression);
 
     //! Copy constructor
-    IntegrateMatrixElement(const IntegrateMatrixElement<MeshType,TestSpaceType,SolutionSpaceType,ExpressionType,QRAdapterType>& integrator);
+    IntegrateMatrixElement (const IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, QRAdapterType>& integrator);
 
     //! Destructor
     ~IntegrateMatrixElement();
@@ -132,7 +132,7 @@ public:
     //@{
 
     //! Ouput method
-    void check(std::ostream& out = std::cout);
+    void check (std::ostream& out = std::cout);
 
     //! Method that performs the assembly
     /*!
@@ -143,7 +143,7 @@ public:
       matrix.
      */
     template <typename MatrixType>
-    void addTo(MatrixType& mat);
+    void addTo (MatrixType& mat);
 
     //! Method that performs the assembly
     /*!
@@ -156,7 +156,7 @@ public:
       Specialized for the case where the matrix is passed as a shared_ptr
      */
     template <typename MatrixType>
-    inline void addTo(boost::shared_ptr<MatrixType> mat)
+    inline void addTo (boost::shared_ptr<MatrixType> mat)
     {
         ASSERT (mat != 0, " Cannot assemble with an empty matrix");
         addTo (*mat);
@@ -188,14 +188,14 @@ private:
     evaluation_Type M_evaluation;
 
 
-    ETCurrentFE<3,1>* M_globalCFE_std;
-    ETCurrentFE<3,1>* M_globalCFE_adapted;
+    ETCurrentFE<3, 1>* M_globalCFE_std;
+    ETCurrentFE<3, 1>* M_globalCFE_adapted;
 
-    ETCurrentFE<3,TestSpaceType::field_dim>* M_testCFE_std;
-    ETCurrentFE<3,TestSpaceType::field_dim>* M_testCFE_adapted;
+    ETCurrentFE<3, TestSpaceType::field_dim>* M_testCFE_std;
+    ETCurrentFE<3, TestSpaceType::field_dim>* M_testCFE_adapted;
 
-    ETCurrentFE<3,SolutionSpaceType::field_dim>* M_solutionCFE_std;
-    ETCurrentFE<3,SolutionSpaceType::field_dim>* M_solutionCFE_adapted;
+    ETCurrentFE<3, SolutionSpaceType::field_dim>* M_solutionCFE_std;
+    ETCurrentFE<3, SolutionSpaceType::field_dim>* M_solutionCFE_adapted;
 
     ETMatrixElemental M_elementalMatrix;
 };
@@ -210,64 +210,64 @@ private:
 // ===================================================
 
 template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType, typename QRAdapterType>
-IntegrateMatrixElement<MeshType,TestSpaceType,SolutionSpaceType,ExpressionType,QRAdapterType>::
-IntegrateMatrixElement(const boost::shared_ptr<MeshType>& mesh,
-                       const QRAdapterType& qrAdapter,
-                       const boost::shared_ptr<TestSpaceType>& testSpace,
-                       const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
-                       const ExpressionType& expression)
-    :	M_mesh(mesh),
-        M_qrAdapter(qrAdapter),
-        M_testSpace(testSpace),
-        M_solutionSpace(solutionSpace),
-        M_evaluation(expression),
+IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, QRAdapterType>::
+IntegrateMatrixElement (const boost::shared_ptr<MeshType>& mesh,
+                        const QRAdapterType& qrAdapter,
+                        const boost::shared_ptr<TestSpaceType>& testSpace,
+                        const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
+                        const ExpressionType& expression)
+    :   M_mesh (mesh),
+        M_qrAdapter (qrAdapter),
+        M_testSpace (testSpace),
+        M_solutionSpace (solutionSpace),
+        M_evaluation (expression),
 
-        M_globalCFE_std(new ETCurrentFE<3,1>(feTetraP0,geometricMapFromMesh<MeshType>(),qrAdapter.standardQR())),
-        M_globalCFE_adapted(new ETCurrentFE<3,1>(feTetraP0,geometricMapFromMesh<MeshType>(),qrAdapter.standardQR())),
+        M_globalCFE_std (new ETCurrentFE<3, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), qrAdapter.standardQR() ) ),
+        M_globalCFE_adapted (new ETCurrentFE<3, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), qrAdapter.standardQR() ) ),
 
-        M_testCFE_std(new ETCurrentFE<3,TestSpaceType::field_dim>(testSpace->refFE(),testSpace->geoMap(),qrAdapter.standardQR())),
-        M_testCFE_adapted(new ETCurrentFE<3,TestSpaceType::field_dim>(testSpace->refFE(),testSpace->geoMap(),qrAdapter.standardQR())),
+        M_testCFE_std (new ETCurrentFE<3, TestSpaceType::field_dim> (testSpace->refFE(), testSpace->geoMap(), qrAdapter.standardQR() ) ),
+        M_testCFE_adapted (new ETCurrentFE<3, TestSpaceType::field_dim> (testSpace->refFE(), testSpace->geoMap(), qrAdapter.standardQR() ) ),
 
-        M_solutionCFE_std(new ETCurrentFE<3,SolutionSpaceType::field_dim>(solutionSpace->refFE(),testSpace->geoMap(),qrAdapter.standardQR())),
-        M_solutionCFE_adapted(new ETCurrentFE<3,SolutionSpaceType::field_dim>(solutionSpace->refFE(),testSpace->geoMap(),qrAdapter.standardQR())),
+        M_solutionCFE_std (new ETCurrentFE<3, SolutionSpaceType::field_dim> (solutionSpace->refFE(), testSpace->geoMap(), qrAdapter.standardQR() ) ),
+        M_solutionCFE_adapted (new ETCurrentFE<3, SolutionSpaceType::field_dim> (solutionSpace->refFE(), testSpace->geoMap(), qrAdapter.standardQR() ) ),
 
-        M_elementalMatrix(TestSpaceType::field_dim * testSpace->refFE().nbDof(),
-                          SolutionSpaceType::field_dim * solutionSpace->refFE().nbDof())
+        M_elementalMatrix (TestSpaceType::field_dim * testSpace->refFE().nbDof(),
+                           SolutionSpaceType::field_dim * solutionSpace->refFE().nbDof() )
 {
-    M_evaluation.setQuadrature(qrAdapter.standardQR());
-    M_evaluation.setGlobalCFE(M_globalCFE_std);
-    M_evaluation.setTestCFE(M_testCFE_std);
-    M_evaluation.setSolutionCFE(M_solutionCFE_std);
+    M_evaluation.setQuadrature (qrAdapter.standardQR() );
+    M_evaluation.setGlobalCFE (M_globalCFE_std);
+    M_evaluation.setTestCFE (M_testCFE_std);
+    M_evaluation.setSolutionCFE (M_solutionCFE_std);
 }
 
 template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType, typename QRAdapterType>
-IntegrateMatrixElement<MeshType,TestSpaceType,SolutionSpaceType,ExpressionType,QRAdapterType>::
-IntegrateMatrixElement(const IntegrateMatrixElement<MeshType,TestSpaceType,SolutionSpaceType,ExpressionType,QRAdapterType>& integrator)
-    :	M_mesh(integrator.M_mesh),
-        M_qrAdapter(integrator.M_qrAdapter),
-        M_testSpace(integrator.M_testSpace),
-        M_solutionSpace(integrator.M_solutionSpace),
-        M_evaluation(integrator.M_evaluation),
+IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, QRAdapterType>::
+IntegrateMatrixElement (const IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, QRAdapterType>& integrator)
+    :   M_mesh (integrator.M_mesh),
+        M_qrAdapter (integrator.M_qrAdapter),
+        M_testSpace (integrator.M_testSpace),
+        M_solutionSpace (integrator.M_solutionSpace),
+        M_evaluation (integrator.M_evaluation),
 
-        M_globalCFE_std(new ETCurrentFE<3,1>(feTetraP0,geometricMapFromMesh<MeshType>(),integrator.M_qrAdapter.standardQR())),
-        M_globalCFE_adapted(new ETCurrentFE<3,1>(feTetraP0,geometricMapFromMesh<MeshType>(),integrator.M_qrAdapter.standardQR())),
+        M_globalCFE_std (new ETCurrentFE<3, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), integrator.M_qrAdapter.standardQR() ) ),
+        M_globalCFE_adapted (new ETCurrentFE<3, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), integrator.M_qrAdapter.standardQR() ) ),
 
-        M_testCFE_std(new ETCurrentFE<3,TestSpaceType::field_dim>(M_testSpace->refFE(), M_testSpace->geoMap(),integrator.M_qrAdapter.standardQR())),
-        M_testCFE_adapted(new ETCurrentFE<3,TestSpaceType::field_dim>(M_testSpace->refFE(), M_testSpace->geoMap(),integrator.M_qrAdapter.standardQR())),
+        M_testCFE_std (new ETCurrentFE<3, TestSpaceType::field_dim> (M_testSpace->refFE(), M_testSpace->geoMap(), integrator.M_qrAdapter.standardQR() ) ),
+        M_testCFE_adapted (new ETCurrentFE<3, TestSpaceType::field_dim> (M_testSpace->refFE(), M_testSpace->geoMap(), integrator.M_qrAdapter.standardQR() ) ),
 
-        M_solutionCFE_std(new ETCurrentFE<3,SolutionSpaceType::field_dim>(M_solutionSpace->refFE(), M_solutionSpace->geoMap(),integrator.M_qrAdapter.standardQR())),
-        M_solutionCFE_adapted(new ETCurrentFE<3,SolutionSpaceType::field_dim>(M_solutionSpace->refFE(), M_solutionSpace->geoMap(),integrator.M_qrAdapter.standardQR())),
+        M_solutionCFE_std (new ETCurrentFE<3, SolutionSpaceType::field_dim> (M_solutionSpace->refFE(), M_solutionSpace->geoMap(), integrator.M_qrAdapter.standardQR() ) ),
+        M_solutionCFE_adapted (new ETCurrentFE<3, SolutionSpaceType::field_dim> (M_solutionSpace->refFE(), M_solutionSpace->geoMap(), integrator.M_qrAdapter.standardQR() ) ),
 
-        M_elementalMatrix(integrator.M_elementalMatrix)
+        M_elementalMatrix (integrator.M_elementalMatrix)
 {
-    M_evaluation.setQuadrature(integrator.M_qrAdapter.standardQR());
-    M_evaluation.setGlobalCFE(M_globalCFE_std);
-    M_evaluation.setTestCFE(M_testCFE_std);
-    M_evaluation.setSolutionCFE(M_solutionCFE_std);
+    M_evaluation.setQuadrature (integrator.M_qrAdapter.standardQR() );
+    M_evaluation.setGlobalCFE (M_globalCFE_std);
+    M_evaluation.setTestCFE (M_testCFE_std);
+    M_evaluation.setSolutionCFE (M_solutionCFE_std);
 }
 
-    template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType, typename QRAdapterType>
-    IntegrateMatrixElement<MeshType,TestSpaceType,SolutionSpaceType,ExpressionType, QRAdapterType>::
+template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType, typename QRAdapterType>
+IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, QRAdapterType>::
 ~IntegrateMatrixElement()
 {
     delete M_globalCFE_std;
@@ -284,8 +284,8 @@ IntegrateMatrixElement(const IntegrateMatrixElement<MeshType,TestSpaceType,Solut
 
 template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType, typename QRAdapterType>
 void
-IntegrateMatrixElement<MeshType,TestSpaceType,SolutionSpaceType,ExpressionType,QRAdapterType>::
-check(std::ostream& out)
+IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, QRAdapterType>::
+check (std::ostream& out)
 {
     out << " Checking the integration : " << std::endl;
     M_evaluation.display (out);
@@ -299,77 +299,77 @@ check(std::ostream& out)
 template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType, typename QRAdapterType>
 template <typename MatrixType>
 void
-IntegrateMatrixElement<MeshType,TestSpaceType,SolutionSpaceType,ExpressionType,QRAdapterType>::
-addTo(MatrixType& mat)
+IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, QRAdapterType>::
+addTo (MatrixType& mat)
 {
-    UInt nbElements(M_mesh->numElements());
-    UInt nbQuadPt_std(M_qrAdapter.standardQR().nbQuadPt());
-    UInt nbTestDof(M_testSpace->refFE().nbDof());
-    UInt nbSolutionDof(M_solutionSpace->refFE().nbDof());
+    UInt nbElements (M_mesh->numElements() );
+    UInt nbQuadPt_std (M_qrAdapter.standardQR().nbQuadPt() );
+    UInt nbTestDof (M_testSpace->refFE().nbDof() );
+    UInt nbSolutionDof (M_solutionSpace->refFE().nbDof() );
 
     // Defaulted to true for security
-    bool isPreviousAdapted(true);
+    bool isPreviousAdapted (true);
 
-    for (UInt iElement(0); iElement< nbElements; ++iElement)
+    for (UInt iElement (0); iElement < nbElements; ++iElement)
     {
         // Zeros out the matrix
         M_elementalMatrix.zero();
 
         // Update the quadrature rule adapter
-        M_qrAdapter.update(iElement);
+        M_qrAdapter.update (iElement);
 
-        if (M_qrAdapter.isAdaptedElement())
+        if (M_qrAdapter.isAdaptedElement() )
         {
             // Set the quadrature rule everywhere
             M_evaluation.setQuadrature ( M_qrAdapter.adaptedQR() );
-            M_globalCFE_adapted -> setQuadratureRule( M_qrAdapter.adaptedQR());
-            M_testCFE_adapted -> setQuadratureRule( M_qrAdapter.adaptedQR());
-            M_solutionCFE_adapted -> setQuadratureRule( M_qrAdapter.adaptedQR());
+            M_globalCFE_adapted -> setQuadratureRule ( M_qrAdapter.adaptedQR() );
+            M_testCFE_adapted -> setQuadratureRule ( M_qrAdapter.adaptedQR() );
+            M_solutionCFE_adapted -> setQuadratureRule ( M_qrAdapter.adaptedQR() );
 
             // Reset the CurrentFEs in the evaluation
-            M_evaluation.setGlobalCFE( M_globalCFE_adapted );
-            M_evaluation.setTestCFE( M_testCFE_adapted );
-            M_evaluation.setSolutionCFE( M_solutionCFE_adapted );
+            M_evaluation.setGlobalCFE ( M_globalCFE_adapted );
+            M_evaluation.setTestCFE ( M_testCFE_adapted );
+            M_evaluation.setSolutionCFE ( M_solutionCFE_adapted );
 
-            M_evaluation.update(iElement);
+            M_evaluation.update (iElement);
 
             // Update the CurrentFEs
-            M_globalCFE_adapted->update(M_mesh->element(iElement),evaluation_Type::S_globalUpdateFlag | ET_UPDATE_WDET);
-            M_testCFE_adapted->update(M_mesh->element(iElement),evaluation_Type::S_testUpdateFlag);
-            M_solutionCFE_adapted->update(M_mesh->element(iElement),evaluation_Type::S_solutionUpdateFlag);
+            M_globalCFE_adapted->update (M_mesh->element (iElement), evaluation_Type::S_globalUpdateFlag | ET_UPDATE_WDET);
+            M_testCFE_adapted->update (M_mesh->element (iElement), evaluation_Type::S_testUpdateFlag);
+            M_solutionCFE_adapted->update (M_mesh->element (iElement), evaluation_Type::S_solutionUpdateFlag);
 
 
             // Assembly
-            for (UInt iblock(0); iblock < TestSpaceType::field_dim; ++iblock)
+            for (UInt iblock (0); iblock < TestSpaceType::field_dim; ++iblock)
             {
-                for (UInt jblock(0); jblock < SolutionSpaceType::field_dim; ++jblock)
+                for (UInt jblock (0); jblock < SolutionSpaceType::field_dim; ++jblock)
                 {
 
                     // Set the row global indices in the local matrix
-                    for (UInt i(0); i<nbTestDof; ++i)
+                    for (UInt i (0); i < nbTestDof; ++i)
                     {
                         M_elementalMatrix.setRowIndex
-                            (i+iblock*nbTestDof,
-                             M_testSpace->dof().localToGlobalMap(iElement,i)+ iblock*M_testSpace->dof().numTotalDof());
+                        (i + iblock * nbTestDof,
+                         M_testSpace->dof().localToGlobalMap (iElement, i) + iblock * M_testSpace->dof().numTotalDof() );
                     }
 
                     // Set the column global indices in the local matrix
-                    for (UInt j(0); j<nbSolutionDof; ++j)
+                    for (UInt j (0); j < nbSolutionDof; ++j)
                     {
                         M_elementalMatrix.setColumnIndex
-                            (j+jblock*nbSolutionDof,
-                             M_solutionSpace->dof().localToGlobalMap(iElement,j)+ jblock*M_solutionSpace->dof().numTotalDof());
+                        (j + jblock * nbSolutionDof,
+                         M_solutionSpace->dof().localToGlobalMap (iElement, j) + jblock * M_solutionSpace->dof().numTotalDof() );
                     }
 
-                    for (UInt iQuadPt(0); iQuadPt< M_qrAdapter.adaptedQR().nbQuadPt(); ++iQuadPt)
+                    for (UInt iQuadPt (0); iQuadPt < M_qrAdapter.adaptedQR().nbQuadPt(); ++iQuadPt)
                     {
-                        for (UInt i(0); i<nbTestDof; ++i)
+                        for (UInt i (0); i < nbTestDof; ++i)
                         {
-                            for (UInt j(0); j<nbSolutionDof; ++j)
+                            for (UInt j (0); j < nbSolutionDof; ++j)
                             {
-                                M_elementalMatrix.element(i+iblock*nbTestDof,j+jblock*nbSolutionDof) +=
-                                    M_evaluation.value_qij(iQuadPt,i+iblock*nbTestDof,j+jblock*nbSolutionDof)
-                                    * M_globalCFE_adapted->wDet(iQuadPt);
+                                M_elementalMatrix.element (i + iblock * nbTestDof, j + jblock * nbSolutionDof) +=
+                                    M_evaluation.value_qij (iQuadPt, i + iblock * nbTestDof, j + jblock * nbSolutionDof)
+                                    * M_globalCFE_adapted->wDet (iQuadPt);
 
                             }
                         }
@@ -385,54 +385,54 @@ addTo(MatrixType& mat)
             // Change in the evaluation if needed
             if (isPreviousAdapted)
             {
-                M_evaluation.setQuadrature( M_qrAdapter.standardQR() );
-                M_evaluation.setGlobalCFE( M_globalCFE_std );
-                M_evaluation.setTestCFE( M_testCFE_std );
-                M_evaluation.setSolutionCFE( M_solutionCFE_std );
+                M_evaluation.setQuadrature ( M_qrAdapter.standardQR() );
+                M_evaluation.setGlobalCFE ( M_globalCFE_std );
+                M_evaluation.setTestCFE ( M_testCFE_std );
+                M_evaluation.setSolutionCFE ( M_solutionCFE_std );
 
-                isPreviousAdapted=false;
+                isPreviousAdapted = false;
             }
 
             // Update the currentFEs
-            M_globalCFE_std->update(M_mesh->element(iElement),evaluation_Type::S_globalUpdateFlag | ET_UPDATE_WDET);
-            M_testCFE_std->update(M_mesh->element(iElement),evaluation_Type::S_testUpdateFlag);
-            M_solutionCFE_std->update(M_mesh->element(iElement),evaluation_Type::S_solutionUpdateFlag);
+            M_globalCFE_std->update (M_mesh->element (iElement), evaluation_Type::S_globalUpdateFlag | ET_UPDATE_WDET);
+            M_testCFE_std->update (M_mesh->element (iElement), evaluation_Type::S_testUpdateFlag);
+            M_solutionCFE_std->update (M_mesh->element (iElement), evaluation_Type::S_solutionUpdateFlag);
 
             // Update the evaluation
-            M_evaluation.update(iElement);
+            M_evaluation.update (iElement);
 
             // Loop on the blocks
 
-            for (UInt iblock(0); iblock < TestSpaceType::field_dim; ++iblock)
+            for (UInt iblock (0); iblock < TestSpaceType::field_dim; ++iblock)
             {
-                for (UInt jblock(0); jblock < SolutionSpaceType::field_dim; ++jblock)
+                for (UInt jblock (0); jblock < SolutionSpaceType::field_dim; ++jblock)
                 {
 
                     // Set the row global indices in the local matrix
-                    for (UInt i(0); i<nbTestDof; ++i)
+                    for (UInt i (0); i < nbTestDof; ++i)
                     {
                         M_elementalMatrix.setRowIndex
-                            (i+iblock*nbTestDof,
-                             M_testSpace->dof().localToGlobalMap(iElement,i)+ iblock*M_testSpace->dof().numTotalDof());
+                        (i + iblock * nbTestDof,
+                         M_testSpace->dof().localToGlobalMap (iElement, i) + iblock * M_testSpace->dof().numTotalDof() );
                     }
 
                     // Set the column global indices in the local matrix
-                    for (UInt j(0); j<nbSolutionDof; ++j)
+                    for (UInt j (0); j < nbSolutionDof; ++j)
                     {
                         M_elementalMatrix.setColumnIndex
-                            (j+jblock*nbSolutionDof,
-                             M_solutionSpace->dof().localToGlobalMap(iElement,j)+ jblock*M_solutionSpace->dof().numTotalDof());
+                        (j + jblock * nbSolutionDof,
+                         M_solutionSpace->dof().localToGlobalMap (iElement, j) + jblock * M_solutionSpace->dof().numTotalDof() );
                     }
 
-                    for (UInt iQuadPt(0); iQuadPt< nbQuadPt_std; ++iQuadPt)
+                    for (UInt iQuadPt (0); iQuadPt < nbQuadPt_std; ++iQuadPt)
                     {
-                        for (UInt i(0); i<nbTestDof; ++i)
+                        for (UInt i (0); i < nbTestDof; ++i)
                         {
-                            for (UInt j(0); j<nbSolutionDof; ++j)
+                            for (UInt j (0); j < nbSolutionDof; ++j)
                             {
-                                M_elementalMatrix.element(i+iblock*nbTestDof,j+jblock*nbSolutionDof) +=
-                                    M_evaluation.value_qij(iQuadPt,i+iblock*nbTestDof,j+jblock*nbSolutionDof)
-                                    * M_globalCFE_std->wDet(iQuadPt);
+                                M_elementalMatrix.element (i + iblock * nbTestDof, j + jblock * nbSolutionDof) +=
+                                    M_evaluation.value_qij (iQuadPt, i + iblock * nbTestDof, j + jblock * nbSolutionDof)
+                                    * M_globalCFE_std->wDet (iQuadPt);
 
                             }
                         }

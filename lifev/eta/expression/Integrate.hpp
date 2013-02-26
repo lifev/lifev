@@ -87,27 +87,27 @@ namespace ExpressionAssembly
   with a loop on the elements.
  */
 template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType, typename QRAdapterType>
-IntegrateMatrixElement<MeshType,TestSpaceType,SolutionSpaceType,ExpressionType,QRAdapterType>
-integrate( const RequestLoopElement<MeshType>& request,
-           const QRAdapterBase<QRAdapterType>& qrAdapterBase,
-           const boost::shared_ptr<TestSpaceType>& testSpace,
-           const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
-           const ExpressionType& expression)
+IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, QRAdapterType>
+integrate ( const RequestLoopElement<MeshType>& request,
+            const QRAdapterBase<QRAdapterType>& qrAdapterBase,
+            const boost::shared_ptr<TestSpaceType>& testSpace,
+            const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
+            const ExpressionType& expression)
 {
-    return IntegrateMatrixElement<MeshType,TestSpaceType,SolutionSpaceType,ExpressionType,QRAdapterType>
-        (request.mesh(),qrAdapterBase.implementation(),testSpace,solutionSpace,expression);
+    return IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, QRAdapterType>
+           (request.mesh(), qrAdapterBase.implementation(), testSpace, solutionSpace, expression);
 }
 
 template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
-IntegrateMatrixElement<MeshType,TestSpaceType,SolutionSpaceType,ExpressionType,QRAdapterNeverAdapt>
-integrate( const RequestLoopElement<MeshType>& request,
-           const QuadratureRule& quadrature,
-           const boost::shared_ptr<TestSpaceType>& testSpace,
-           const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
-           const ExpressionType& expression)
+IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, QRAdapterNeverAdapt>
+integrate ( const RequestLoopElement<MeshType>& request,
+            const QuadratureRule& quadrature,
+            const boost::shared_ptr<TestSpaceType>& testSpace,
+            const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
+            const ExpressionType& expression)
 {
-    return IntegrateMatrixElement<MeshType,TestSpaceType,SolutionSpaceType,ExpressionType,QRAdapterNeverAdapt>
-        (request.mesh(),QRAdapterNeverAdapt(quadrature),testSpace,solutionSpace,expression);
+    return IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, QRAdapterNeverAdapt>
+           (request.mesh(), QRAdapterNeverAdapt (quadrature), testSpace, solutionSpace, expression);
 }
 
 //! Integrate function for vectorial expressions
@@ -119,25 +119,25 @@ integrate( const RequestLoopElement<MeshType>& request,
   with a loop on the elements.
  */
 template < typename MeshType, typename TestSpaceType, typename ExpressionType, typename QRAdapterType>
-IntegrateVectorElement<MeshType,TestSpaceType,ExpressionType,QRAdapterType>
-integrate( const RequestLoopElement<MeshType>& request,
-           const QRAdapterBase<QRAdapterType>& qrAdapterBase,
-           const boost::shared_ptr<TestSpaceType>& testSpace,
-           const ExpressionType& expression)
+IntegrateVectorElement<MeshType, TestSpaceType, ExpressionType, QRAdapterType>
+integrate ( const RequestLoopElement<MeshType>& request,
+            const QRAdapterBase<QRAdapterType>& qrAdapterBase,
+            const boost::shared_ptr<TestSpaceType>& testSpace,
+            const ExpressionType& expression)
 {
-    return IntegrateVectorElement<MeshType,TestSpaceType,ExpressionType,QRAdapterType>
-        (request.mesh(),qrAdapterBase.implementation(),testSpace,expression);
+    return IntegrateVectorElement<MeshType, TestSpaceType, ExpressionType, QRAdapterType>
+           (request.mesh(), qrAdapterBase.implementation(), testSpace, expression);
 }
 
 template < typename MeshType, typename TestSpaceType, typename ExpressionType>
-IntegrateVectorElement<MeshType,TestSpaceType,ExpressionType,QRAdapterNeverAdapt>
-integrate( const RequestLoopElement<MeshType>& request,
-           const QuadratureRule& quadrature,
-           const boost::shared_ptr<TestSpaceType>& testSpace,
-           const ExpressionType& expression)
+IntegrateVectorElement<MeshType, TestSpaceType, ExpressionType, QRAdapterNeverAdapt>
+integrate ( const RequestLoopElement<MeshType>& request,
+            const QuadratureRule& quadrature,
+            const boost::shared_ptr<TestSpaceType>& testSpace,
+            const ExpressionType& expression)
 {
-    return IntegrateVectorElement<MeshType,TestSpaceType,ExpressionType,QRAdapterNeverAdapt>
-        (request.mesh(),QRAdapterNeverAdapt(quadrature),testSpace,expression);
+    return IntegrateVectorElement<MeshType, TestSpaceType, ExpressionType, QRAdapterNeverAdapt>
+           (request.mesh(), QRAdapterNeverAdapt (quadrature), testSpace, expression);
 }
 
 //! Integrate function for benchmark expressions
@@ -149,129 +149,129 @@ integrate( const RequestLoopElement<MeshType>& request,
   with a loop on the elements.
  */
 template < typename MeshType, typename ExpressionType, typename QRAdapterType>
-IntegrateValueElement<MeshType,ExpressionType,QRAdapterType>
-integrate( const RequestLoopElement<MeshType>& request,
-           const QRAdapterBase<QRAdapterType>& qrAdapterBase,
-           const ExpressionType& expression)
+IntegrateValueElement<MeshType, ExpressionType, QRAdapterType>
+integrate ( const RequestLoopElement<MeshType>& request,
+            const QRAdapterBase<QRAdapterType>& qrAdapterBase,
+            const ExpressionType& expression)
 {
-    return IntegrateValueElement<MeshType,ExpressionType,QRAdapterType>
-        (request.mesh(),qrAdapterBase.implementation(),expression);
+    return IntegrateValueElement<MeshType, ExpressionType, QRAdapterType>
+           (request.mesh(), qrAdapterBase.implementation(), expression);
 }
 
 template < typename MeshType, typename ExpressionType>
-IntegrateValueElement<MeshType,ExpressionType,QRAdapterNeverAdapt>
-integrate( const RequestLoopElement<MeshType>& request,
-           const QuadratureRule& quadrature,
-           const ExpressionType& expression)
+IntegrateValueElement<MeshType, ExpressionType, QRAdapterNeverAdapt>
+integrate ( const RequestLoopElement<MeshType>& request,
+            const QuadratureRule& quadrature,
+            const ExpressionType& expression)
 {
-    return IntegrateValueElement<MeshType,ExpressionType,QRAdapterNeverAdapt>
-        (request.mesh(),QRAdapterNeverAdapt(quadrature),expression);
+    return IntegrateValueElement<MeshType, ExpressionType, QRAdapterNeverAdapt>
+           (request.mesh(), QRAdapterNeverAdapt (quadrature), expression);
 }
 
 // =============================================================
 // Methods to integrate over a portion of the mesh
 // =============================================================
-template < typename MeshType,typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
-IntegrateMatrixVolumeID<MeshType, TestSpaceType,SolutionSpaceType,ExpressionType,QRAdapterNeverAdapt>
-integrate( const RequestLoopVolumeID<MeshType>& request,
-           const QuadratureRule& quadrature,
-           const boost::shared_ptr<TestSpaceType>& testSpace,
-           const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
-           const ExpressionType& expression)
+template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
+IntegrateMatrixVolumeID<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, QRAdapterNeverAdapt>
+integrate ( const RequestLoopVolumeID<MeshType>& request,
+            const QuadratureRule& quadrature,
+            const boost::shared_ptr<TestSpaceType>& testSpace,
+            const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
+            const ExpressionType& expression)
 {
-	return IntegrateMatrixVolumeID<MeshType,TestSpaceType,SolutionSpaceType,ExpressionType,QRAdapterNeverAdapt>
-		(request.volumeList(), request.indexList(),QRAdapterNeverAdapt(quadrature),testSpace,solutionSpace,expression);
+    return IntegrateMatrixVolumeID<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, QRAdapterNeverAdapt>
+           (request.volumeList(), request.indexList(), QRAdapterNeverAdapt (quadrature), testSpace, solutionSpace, expression);
 }
 
-template < typename MeshType,typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType, typename QRAdapterType>
-IntegrateMatrixVolumeID<MeshType, TestSpaceType,SolutionSpaceType,ExpressionType,QRAdapterType>
-integrate( const RequestLoopVolumeID<MeshType>& request,
-           const QRAdapterBase<QRAdapterType>& qrAdapter,
-           const boost::shared_ptr<TestSpaceType>& testSpace,
-           const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
-           const ExpressionType& expression)
+template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType, typename QRAdapterType>
+IntegrateMatrixVolumeID<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, QRAdapterType>
+integrate ( const RequestLoopVolumeID<MeshType>& request,
+            const QRAdapterBase<QRAdapterType>& qrAdapter,
+            const boost::shared_ptr<TestSpaceType>& testSpace,
+            const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
+            const ExpressionType& expression)
 {
-	return IntegrateMatrixVolumeID<MeshType,TestSpaceType,SolutionSpaceType,ExpressionType,QRAdapterType>
-		(request.volumeList(), request.indexList(),qrAdapter.implementation(),testSpace,solutionSpace,expression);
+    return IntegrateMatrixVolumeID<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, QRAdapterType>
+           (request.volumeList(), request.indexList(), qrAdapter.implementation(), testSpace, solutionSpace, expression);
 }
 
 template < typename MeshType, typename TestSpaceType, typename ExpressionType>
-IntegrateVectorVolumeID<MeshType, TestSpaceType,ExpressionType,QRAdapterNeverAdapt>
-integrate( const RequestLoopVolumeID<MeshType>& request,
-           const QuadratureRule& quadrature,
-           const boost::shared_ptr<TestSpaceType>& testSpace,
-           const ExpressionType& expression)
+IntegrateVectorVolumeID<MeshType, TestSpaceType, ExpressionType, QRAdapterNeverAdapt>
+integrate ( const RequestLoopVolumeID<MeshType>& request,
+            const QuadratureRule& quadrature,
+            const boost::shared_ptr<TestSpaceType>& testSpace,
+            const ExpressionType& expression)
 {
-    return IntegrateVectorVolumeID<MeshType,TestSpaceType, ExpressionType, QRAdapterNeverAdapt>(request.volumeList(), request.indexList(),QRAdapterNeverAdapt(quadrature),testSpace,expression);
+    return IntegrateVectorVolumeID<MeshType, TestSpaceType, ExpressionType, QRAdapterNeverAdapt> (request.volumeList(), request.indexList(), QRAdapterNeverAdapt (quadrature), testSpace, expression);
 }
 
 template < typename MeshType, typename TestSpaceType, typename ExpressionType, typename QRAdapterType>
 IntegrateVectorVolumeID<MeshType, TestSpaceType, ExpressionType, QRAdapterType>
-integrate( const RequestLoopVolumeID<MeshType>& request,
-           const QRAdapterBase<QRAdapterType>& qrAdapter,
-           const boost::shared_ptr<TestSpaceType>& testSpace,
-           const ExpressionType& expression)
+integrate ( const RequestLoopVolumeID<MeshType>& request,
+            const QRAdapterBase<QRAdapterType>& qrAdapter,
+            const boost::shared_ptr<TestSpaceType>& testSpace,
+            const ExpressionType& expression)
 {
-	return IntegrateVectorVolumeID<MeshType,TestSpaceType,ExpressionType,QRAdapterType>
-		(request.volumeList(), request.indexList(),qrAdapter.implementation(),testSpace,expression);
+    return IntegrateVectorVolumeID<MeshType, TestSpaceType, ExpressionType, QRAdapterType>
+           (request.volumeList(), request.indexList(), qrAdapter.implementation(), testSpace, expression);
 }
 
 /* Integration on the boundary of the domain */
 
 
 template < typename MeshType, typename TestSpaceType, typename ExpressionType>
-IntegrateVectorFaceID<MeshType,TestSpaceType,ExpressionType>
-integrate( const RequestLoopFaceID<MeshType>& request,
-			const QuadratureBoundary& quadratureBoundary,
-			const boost::shared_ptr<TestSpaceType>& testSpace,
-			const ExpressionType& expression)
+IntegrateVectorFaceID<MeshType, TestSpaceType, ExpressionType>
+integrate ( const RequestLoopFaceID<MeshType>& request,
+            const QuadratureBoundary& quadratureBoundary,
+            const boost::shared_ptr<TestSpaceType>& testSpace,
+            const ExpressionType& expression)
 {
-	return IntegrateVectorFaceID<MeshType,TestSpaceType,ExpressionType>
-		(request.mesh(),request.id(),quadratureBoundary,testSpace,expression);
+    return IntegrateVectorFaceID<MeshType, TestSpaceType, ExpressionType>
+           (request.mesh(), request.id(), quadratureBoundary, testSpace, expression);
 }
 
 
 template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
-IntegrateMatrixFaceID<MeshType,TestSpaceType,SolutionSpaceType, ExpressionType>
-integrate( const RequestLoopFaceID<MeshType>& request,
-           const QuadratureBoundary& quadratureBoundary,
+IntegrateMatrixFaceID<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType>
+integrate ( const RequestLoopFaceID<MeshType>& request,
+            const QuadratureBoundary& quadratureBoundary,
+            const boost::shared_ptr<TestSpaceType> testSpace,
+            const boost::shared_ptr<SolutionSpaceType> solutionSpace,
+            const ExpressionType& expression)
+{
+    return IntegrateMatrixFaceID<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType>
+           (request.mesh(), request.id(), quadratureBoundary, testSpace, solutionSpace, expression);
+}
+
+
+template < typename MeshType,
+         typename TestSpaceType,
+         typename SolutionSpaceType,
+         typename ExpressionType,
+         typename LSFESpaceType,
+         typename LSVectorType >
+IntegrateMatrixFaceIDLSAdapted < MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, LSFESpaceType, LSVectorType>
+integrate (const RequestLoopFaceID<MeshType>& request,
+           const LevelSetBDQRAdapter<LSFESpaceType, LSVectorType>& quadratureAdapter,
            const boost::shared_ptr<TestSpaceType> testSpace,
            const boost::shared_ptr<SolutionSpaceType> solutionSpace,
            const ExpressionType& expression)
 {
-	return IntegrateMatrixFaceID<MeshType,TestSpaceType,SolutionSpaceType,ExpressionType>
-		(request.mesh(),request.id(),quadratureBoundary,testSpace,solutionSpace,expression);
-}
-
-
-template < typename MeshType,
-           typename TestSpaceType,
-           typename SolutionSpaceType,
-           typename ExpressionType,
-           typename LSFESpaceType,
-           typename LSVectorType>
-IntegrateMatrixFaceIDLSAdapted < MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, LSFESpaceType, LSVectorType>
-integrate(const RequestLoopFaceID<MeshType>& request,
-          const LevelSetBDQRAdapter<LSFESpaceType,LSVectorType>& quadratureAdapter,
-          const boost::shared_ptr<TestSpaceType> testSpace,
-          const boost::shared_ptr<SolutionSpaceType> solutionSpace,
-          const ExpressionType& expression)
-{
-	return IntegrateMatrixFaceIDLSAdapted < MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, LSFESpaceType, LSVectorType> (request.mesh(),request.id(),quadratureAdapter,testSpace,solutionSpace,expression);
+    return IntegrateMatrixFaceIDLSAdapted < MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, LSFESpaceType, LSVectorType> (request.mesh(), request.id(), quadratureAdapter, testSpace, solutionSpace, expression);
 }
 
 template < typename MeshType,
-           typename TestSpaceType,
-           typename ExpressionType,
-           typename LSFESpaceType,
-           typename LSVectorType>
+         typename TestSpaceType,
+         typename ExpressionType,
+         typename LSFESpaceType,
+         typename LSVectorType >
 IntegrateVectorFaceIDLSAdapted < MeshType, TestSpaceType, ExpressionType, LSFESpaceType, LSVectorType>
-integrate(const RequestLoopFaceID<MeshType>& request,
-          const LevelSetBDQRAdapter<LSFESpaceType,LSVectorType>& quadratureAdapter,
-          const boost::shared_ptr<TestSpaceType> testSpace,
-          const ExpressionType& expression)
+integrate (const RequestLoopFaceID<MeshType>& request,
+           const LevelSetBDQRAdapter<LSFESpaceType, LSVectorType>& quadratureAdapter,
+           const boost::shared_ptr<TestSpaceType> testSpace,
+           const ExpressionType& expression)
 {
-	return IntegrateVectorFaceIDLSAdapted < MeshType, TestSpaceType, ExpressionType, LSFESpaceType, LSVectorType> (request.mesh(),request.id(),quadratureAdapter,testSpace,expression);
+    return IntegrateVectorFaceIDLSAdapted < MeshType, TestSpaceType, ExpressionType, LSFESpaceType, LSVectorType> (request.mesh(), request.id(), quadratureAdapter, testSpace, expression);
 }
 
 

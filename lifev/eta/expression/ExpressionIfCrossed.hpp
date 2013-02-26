@@ -61,7 +61,7 @@ namespace ExpressionAssembly
 */
 template<typename MeshType, typename MapType, UInt SpaceDim>
 class ExpressionIfCrossed
-	: public ExpressionBase<ExpressionIfCrossed < MeshType,MapType,SpaceDim > >
+    : public ExpressionBase<ExpressionIfCrossed < MeshType, MapType, SpaceDim > >
 {
 public:
 
@@ -69,16 +69,16 @@ public:
     //@{
 
     // Base class, used only to make the code cleaner
-	typedef ExpressionBase<ExpressionIfCrossed < MeshType,MapType,SpaceDim > > base_Type;
+    typedef ExpressionBase<ExpressionIfCrossed < MeshType, MapType, SpaceDim > > base_Type;
 
     //! Type of the finite element space
-	typedef ETFESpace<MeshType,MapType,SpaceDim,1> fespace_Type;
+    typedef ETFESpace<MeshType, MapType, SpaceDim, 1> fespace_Type;
 
     //! Type for the pointer on the finite element space
-	typedef boost::shared_ptr<fespace_Type> fespacePtr_Type;
+    typedef boost::shared_ptr<fespace_Type> fespacePtr_Type;
 
     //! Data vector type
-	typedef VectorEpetra vector_Type;
+    typedef VectorEpetra vector_Type;
 
     //@}
 
@@ -87,15 +87,15 @@ public:
     //@{
 
     //! Constructor using the finite element space and the data vector
-	ExpressionIfCrossed(fespacePtr_Type fespace, const vector_Type& vector)
-	: base_Type(), M_fespace(fespace), M_vector(vector) {}
+    ExpressionIfCrossed (fespacePtr_Type fespace, const vector_Type& vector)
+        : base_Type(), M_fespace (fespace), M_vector (vector) {}
 
     //! Copy constructor
-	ExpressionIfCrossed(const ExpressionIfCrossed<MeshType,MapType,SpaceDim>& expr)
-	: base_Type(), M_fespace(expr.M_fespace), M_vector(expr.M_vector) {}
+    ExpressionIfCrossed (const ExpressionIfCrossed<MeshType, MapType, SpaceDim>& expr)
+        : base_Type(), M_fespace (expr.M_fespace), M_vector (expr.M_vector) {}
 
     //! Destructor
-    ~ExpressionIfCrossed(){}
+    ~ExpressionIfCrossed() {}
 
     //@}
 
@@ -104,8 +104,10 @@ public:
     //@{
 
     //! Display method
-	static void display(std::ostream& out= std::cout)
-	{ out << "ifCrossed";}
+    static void display (std::ostream& out = std::cout)
+    {
+        out << "ifCrossed";
+    }
 
     //@}
 
@@ -114,10 +116,16 @@ public:
     //@{
 
     //! Getter for the finite element space
-	fespacePtr_Type fespace() const { return M_fespace; }
+    fespacePtr_Type fespace() const
+    {
+        return M_fespace;
+    }
 
     //! Getter for the data vector
-	const vector_Type vector() const { return M_vector; }
+    const vector_Type vector() const
+    {
+        return M_vector;
+    }
 
     // @}
 
@@ -132,10 +140,10 @@ private:
     //@}
 
     // Storage for the finite element space
-	fespacePtr_Type M_fespace;
+    fespacePtr_Type M_fespace;
 
     // Storage for the data vector
-	vector_Type M_vector;
+    vector_Type M_vector;
 };
 
 //! Simple function to be used in the construction of an expression
@@ -158,13 +166,13 @@ private:
 
 */
 template<typename MeshType, typename MapType, UInt SpaceDim>
-inline ExpressionIfCrossed<MeshType,MapType,SpaceDim>
-ifCrossed(
-	boost::shared_ptr< ETFESpace<MeshType,MapType,SpaceDim,1> > fespace,
-	const VectorEpetra& vector
+inline ExpressionIfCrossed<MeshType, MapType, SpaceDim>
+ifCrossed (
+    boost::shared_ptr< ETFESpace<MeshType, MapType, SpaceDim, 1> > fespace,
+    const VectorEpetra& vector
 )
 {
-	return ExpressionIfCrossed<MeshType,MapType,SpaceDim>(fespace,vector);
+    return ExpressionIfCrossed<MeshType, MapType, SpaceDim> (fespace, vector);
 }
 
 

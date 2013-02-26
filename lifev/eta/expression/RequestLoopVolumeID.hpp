@@ -69,13 +69,13 @@ public:
     //@{
 
     //! Simple constructor with a shared_ptr on the mesh
-	RequestLoopVolumeID(const vectorVolumesPtr_Type& volumeListExtracted, const vectorIndexesPtr_Type& indexListExtracted)
-        : M_volumeList( volumeListExtracted ), M_indexList( indexListExtracted )
+    RequestLoopVolumeID (const vectorVolumesPtr_Type& volumeListExtracted, const vectorIndexesPtr_Type& indexListExtracted)
+        : M_volumeList ( volumeListExtracted ), M_indexList ( indexListExtracted )
     {}
 
     //! Copy constructor
-	RequestLoopVolumeID(const RequestLoopVolumeID& loop)
-    : M_volumeList(loop.M_volumeList), M_indexList(loop.M_indexList)
+    RequestLoopVolumeID (const RequestLoopVolumeID& loop)
+        : M_volumeList (loop.M_volumeList), M_indexList (loop.M_indexList)
     {}
 
     //@}
@@ -85,10 +85,16 @@ public:
     //@{
 
     //! Getter for the mesh pointer
-	const vectorVolumesPtr_Type volumeList() const { return M_volumeList; }
+    const vectorVolumesPtr_Type volumeList() const
+    {
+        return M_volumeList;
+    }
 
     //! Getter for the mesh pointer
-	const vectorIndexesPtr_Type indexList() const { return M_indexList; }
+    const vectorIndexesPtr_Type indexList() const
+    {
+        return M_indexList;
+    }
 
     //@}
 
@@ -99,13 +105,13 @@ private:
     //@{
 
     //! No empty constructor
-	RequestLoopVolumeID();
+    RequestLoopVolumeID();
 
     //@}
 
     // Pointer on the mesh
-	vectorVolumesPtr_Type M_volumeList;
-	vectorIndexesPtr_Type M_indexList;
+    vectorVolumesPtr_Type M_volumeList;
+    vectorIndexesPtr_Type M_indexList;
 
 };
 
@@ -128,9 +134,9 @@ private:
  */
 template<typename MeshType>
 RequestLoopVolumeID<MeshType>
-integrationOverSelectedVolumes(boost::shared_ptr<std::vector<typename MeshType::element_Type*> >& volumeListExtracted, boost::shared_ptr<std::vector<UInt> >& indexListExtracted )
+integrationOverSelectedVolumes (boost::shared_ptr<std::vector<typename MeshType::element_Type*> >& volumeListExtracted, boost::shared_ptr<std::vector<UInt> >& indexListExtracted )
 {
-	return RequestLoopVolumeID<MeshType> ( volumeListExtracted, indexListExtracted );
+    return RequestLoopVolumeID<MeshType> ( volumeListExtracted, indexListExtracted );
 }
 
 

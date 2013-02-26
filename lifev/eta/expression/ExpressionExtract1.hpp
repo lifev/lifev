@@ -75,7 +75,7 @@ public:
     //@{
 
     // Base class, typedef useful to make the code cleaner
-	typedef ExpressionBase<ExpressionExtract1<ExpressionType> > base_Type;
+    typedef ExpressionBase<ExpressionExtract1<ExpressionType> > base_Type;
 
     //@}
 
@@ -84,21 +84,21 @@ public:
     //@{
 
     //! Full constructor, with the expression and the specification of the row index of the component to be extracted
-	ExpressionExtract1(const ExpressionType& ex, const UInt& i)
+    ExpressionExtract1 (const ExpressionType& ex, const UInt& i)
         : base_Type(),
-          M_ex(ex),
-          M_i(i)
+          M_ex (ex),
+          M_i (i)
     {}
 
     //! Copy constructor
-    ExpressionExtract1(const ExpressionExtract1<ExpressionType>& expr)
+    ExpressionExtract1 (const ExpressionExtract1<ExpressionType>& expr)
         : base_Type(),
-          M_ex(expr.M_ex),
-          M_i(expr.M_i)
+          M_ex (expr.M_ex),
+          M_i (expr.M_i)
     {}
 
     //! Destructor
-    ~ExpressionExtract1(){}
+    ~ExpressionExtract1() {}
 
     //@}
 
@@ -107,7 +107,11 @@ public:
     //@{
 
     //! Display method
-	static void display(std::ostream& out= std::cout){ out<<"Extraction from "; ExpressionType::display(out); }
+    static void display (std::ostream& out = std::cout)
+    {
+        out << "Extraction from ";
+        ExpressionType::display (out);
+    }
 
     //@}
 
@@ -116,10 +120,16 @@ public:
     //@{
 
     //! Getter for the row index
-	UInt indexI() const { return M_i; }
+    UInt indexI() const
+    {
+        return M_i;
+    }
 
     //! Getter for the expression from which we extract
-	const ExpressionType& exprEx() const { return M_ex; }
+    const ExpressionType& exprEx() const
+    {
+        return M_ex;
+    }
 
     //@}
 
@@ -134,10 +144,10 @@ private:
     //@}
 
     // Storage for the row index
-	UInt M_i;
+    UInt M_i;
 
     // Storage for the expression from which we extract
-	ExpressionType M_ex;
+    ExpressionType M_ex;
 };
 
 //! extract The generic function for the extraction
@@ -159,9 +169,9 @@ private:
 
 template< typename ExpressionType >
 inline ExpressionExtract1<ExpressionType>
-extract(const ExpressionBase<ExpressionType>& ex, const UInt& i)
+extract (const ExpressionBase<ExpressionType>& ex, const UInt& i)
 {
-    return ExpressionExtract1<ExpressionType>(ex.cast(), i);
+    return ExpressionExtract1<ExpressionType> (ex.cast(), i);
 }
 
 

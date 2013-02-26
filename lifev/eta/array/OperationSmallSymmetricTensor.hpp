@@ -60,16 +60,16 @@ template <typename Operand >
 class OperationSmallSymmetricTensor
 {
 private:
-	//! @name Constructors and destructors
+    //! @name Constructors and destructors
     //@{
 
-	//! No default constructor
-	OperationSmallSymmetricTensor();
+    //! No default constructor
+    OperationSmallSymmetricTensor();
 
-	//! No destructor
-	~OperationSmallSymmetricTensor();
+    //! No destructor
+    ~OperationSmallSymmetricTensor();
 
-	//@}
+    //@}
 };
 
 //! \cond
@@ -82,21 +82,21 @@ public:
     //! @name Public Types
     //@{
 
-	typedef MatrixSmall<Dim1, Dim2> result_Type;
+    typedef MatrixSmall<Dim1, Dim2> result_Type;
 
-	//@}
+    //@}
 
 private:
-	//! @name Constructors and destructors
+    //! @name Constructors and destructors
     //@{
 
-	//! No default constructor
-	OperationSmallSymmetricTensor();
+    //! No default constructor
+    OperationSmallSymmetricTensor();
 
-	//! No destructor
-	~OperationSmallSymmetricTensor();
+    //! No destructor
+    ~OperationSmallSymmetricTensor();
 
-	//@}
+    //@}
 };
 
 //! \endcond

@@ -64,16 +64,16 @@ template <typename Base>
 class OperationSmallLogarithm
 {
 private:
-	//! @name Constructors and destructors
+    //! @name Constructors and destructors
     //@{
 
-	//! No default constructor
-	OperationSmallLogarithm();
+    //! No default constructor
+    OperationSmallLogarithm();
 
-	//! No destructor
-	~OperationSmallLogarithm();
+    //! No destructor
+    ~OperationSmallLogarithm();
 
-	//@}
+    //@}
 };
 
 //! \cond
@@ -86,21 +86,21 @@ public:
     //! @name Public Types
     //@{
 
-	typedef Real result_Type;
+    typedef Real result_Type;
 
-	//@}
+    //@}
 
 private:
-	//! @name Constructors and destructors
+    //! @name Constructors and destructors
     //@{
 
-	//! No default constructor
-	OperationSmallLogarithm();
+    //! No default constructor
+    OperationSmallLogarithm();
 
-	//! No destructor
-	~OperationSmallLogarithm();
+    //! No destructor
+    ~OperationSmallLogarithm();
 
-	//@}
+    //@}
 };
 
 //! \endcond

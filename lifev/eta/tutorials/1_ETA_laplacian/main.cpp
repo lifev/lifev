@@ -148,7 +148,7 @@ int main ( int argc, char** argv )
 
     const UInt Nelements (10);
 
-    boost::shared_ptr< mesh_Type > fullMeshPtr(new mesh_Type( Comm ) );
+    boost::shared_ptr< mesh_Type > fullMeshPtr (new mesh_Type ( Comm ) );
 
     regularMesh3D ( *fullMeshPtr, 1, Nelements, Nelements, Nelements, false,
                     2.0,   2.0,   2.0,
@@ -164,20 +164,23 @@ int main ( int argc, char** argv )
     }
 
 
-// ---------------------------------------------------------------
-// We define now the ETFESpace that we need for the assembly.
-// Remark that we use a shared pointer because other structures
-// will require this ETFESpace to be alive. We can also observe
-// that the ETFESpace has more template parameters than the
-// classical FESpace (this is the main difference). The 3
-// indicates that the problem is in 3D while the 1 indicate that
-// the unknown is scalar.
-//
-// After having constructed the ETFESpace, we display the number
-// of degrees of freedom of the problem.
-// ---------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // We define now the ETFESpace that we need for the assembly.
+    // Remark that we use a shared pointer because other structures
+    // will require this ETFESpace to be alive. We can also observe
+    // that the ETFESpace has more template parameters than the
+    // classical FESpace (this is the main difference). The 3
+    // indicates that the problem is in 3D while the 1 indicate that
+    // the unknown is scalar.
+    //
+    // After having constructed the ETFESpace, we display the number
+    // of degrees of freedom of the problem.
+    // ---------------------------------------------------------------
 
-    if (verbose) std::cout << " -- Building ETFESpaces ... " << std::flush;
+    if (verbose)
+    {
+        std::cout << " -- Building ETFESpaces ... " << std::flush;
+    }
 
     boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 1 > > uSpace
     ( new ETFESpace< mesh_Type, MapEpetra, 3, 1 > (meshPart, &feTetraP1, Comm) );
@@ -196,13 +199,19 @@ int main ( int argc, char** argv )
     // The matrix is then defined using the map of the FE space.
     // ---------------------------------------------------------------
 
-    if (verbose) std::cout << " -- Defining the matrix ... " << std::flush;
+    if (verbose)
+    {
+        std::cout << " -- Defining the matrix ... " << std::flush;
+    }
 
-    boost::shared_ptr<matrix_Type> systemMatrix (new matrix_Type( uSpace->map() ));
+    boost::shared_ptr<matrix_Type> systemMatrix (new matrix_Type ( uSpace->map() ) );
 
-    *systemMatrix *=0.0;
+    *systemMatrix *= 0.0;
 
-    if (verbose) std::cout << " done! " << std::endl;
+    if (verbose)
+    {
+        std::cout << " done! " << std::endl;
+    }
 
     *systemMatrix *= 0.0;
 
@@ -233,44 +242,44 @@ int main ( int argc, char** argv )
     {
         using namespace ExpressionAssembly;
 
-// ---------------------------------------------------------------
-// We can now proceed with assembly. The next instruction
-// assembles the laplace operator.
-//
-// The first argument of the integrate function indicates that the
-// integration is done on the elements of the mesh located in the
-// ETFESpace defined earlier.
-//
-// The second argument is simply the quadrature rule to be used.
-//
-// The third argument is the finite element space of the test
-// functions.
-//
-// The fourth argument is the finite element space of the trial
-// functions (those used to represent the solution).
-//
-// The last argument is the expression to be integrated, i.e.
-// that represents the weak formulation of the problem. The
-// keyword phi_i stands for a generic test function and phi_j
-// a generic trial function. The function grad applied to them
-// indicates that the gradient is considered and the dot function
-// indicates a dot product between the two gradients. The
-// expression to be integrated is then the dot product between
-// the gradient of the test function and the gradient of the trial
-// function. This corresponds to the left hand side of the weak
-// formulation of the Laplace problem.
-//
-// Finally, the operator >> indicates that the result of the
-// integration must be added to the systemMatrix.
-// ---------------------------------------------------------------
+        // ---------------------------------------------------------------
+        // We can now proceed with assembly. The next instruction
+        // assembles the laplace operator.
+        //
+        // The first argument of the integrate function indicates that the
+        // integration is done on the elements of the mesh located in the
+        // ETFESpace defined earlier.
+        //
+        // The second argument is simply the quadrature rule to be used.
+        //
+        // The third argument is the finite element space of the test
+        // functions.
+        //
+        // The fourth argument is the finite element space of the trial
+        // functions (those used to represent the solution).
+        //
+        // The last argument is the expression to be integrated, i.e.
+        // that represents the weak formulation of the problem. The
+        // keyword phi_i stands for a generic test function and phi_j
+        // a generic trial function. The function grad applied to them
+        // indicates that the gradient is considered and the dot function
+        // indicates a dot product between the two gradients. The
+        // expression to be integrated is then the dot product between
+        // the gradient of the test function and the gradient of the trial
+        // function. This corresponds to the left hand side of the weak
+        // formulation of the Laplace problem.
+        //
+        // Finally, the operator >> indicates that the result of the
+        // integration must be added to the systemMatrix.
+        // ---------------------------------------------------------------
 
-        integrate(  elements(uSpace->mesh()),
-                    quadRuleTetra4pt,
-                    uSpace,
-                    uSpace,
-                    dot( grad(phi_i) , grad(phi_j) )
-            )
-            >> systemMatrix;
+        integrate (  elements (uSpace->mesh() ),
+                     quadRuleTetra4pt,
+                     uSpace,
+                     uSpace,
+                     dot ( grad (phi_i) , grad (phi_j) )
+                  )
+                >> systemMatrix;
     }
 
     if (verbose)
@@ -331,9 +340,12 @@ int main ( int argc, char** argv )
         std::cout << " Error : " << matrixNormDiff << std::endl;
     }
 
-    if (verbose) std::cout << " Error : " << matrixNormDiff << std::endl;
+    if (verbose)
+    {
+        std::cout << " Error : " << matrixNormDiff << std::endl;
+    }
 
-    Real testTolerance(1e-10);
+    Real testTolerance (1e-10);
 
     if ( matrixNormDiff < testTolerance )
     {

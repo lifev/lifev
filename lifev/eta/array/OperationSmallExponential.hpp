@@ -64,16 +64,16 @@ template <typename Argument>
 class OperationSmallExponential
 {
 private:
-	//! @name Constructors and destructors
+    //! @name Constructors and destructors
     //@{
 
-	//! No default constructor
-	OperationSmallExponential();
+    //! No default constructor
+    OperationSmallExponential();
 
-	//! No destructor
-	~OperationSmallExponential();
+    //! No destructor
+    ~OperationSmallExponential();
 
-	//@}
+    //@}
 };
 
 //! \cond
@@ -86,21 +86,21 @@ public:
     //! @name Public Types
     //@{
 
-	typedef Real result_Type;
+    typedef Real result_Type;
 
-	//@}
+    //@}
 
 private:
-	//! @name Constructors and destructors
+    //! @name Constructors and destructors
     //@{
 
-	//! No default constructor
-	OperationSmallExponential();
+    //! No default constructor
+    OperationSmallExponential();
 
-	//! No destructor
-	~OperationSmallExponential();
+    //! No destructor
+    ~OperationSmallExponential();
 
-	//@}
+    //@}
 };
 
 //! \endcond

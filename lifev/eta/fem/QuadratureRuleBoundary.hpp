@@ -40,7 +40,8 @@
 
 #include <vector>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! QuadratureRuleBoundary - Short description of the class
 /*!
@@ -51,31 +52,31 @@ class QuadratureRuleBoundary
 {
 public:
 
-    QuadratureRuleBoundary(){};
+    QuadratureRuleBoundary() {};
 
-    QuadratureRuleBoundary(const QuadratureRuleBoundary& QRBD)
+    QuadratureRuleBoundary (const QuadratureRuleBoundary& QRBD)
     {
-        for (UInt i(0); i<QRBD.M_quadrature.size(); ++i)
+        for (UInt i (0); i < QRBD.M_quadrature.size(); ++i)
         {
-            M_quadratures.push_back(QRBD.M_quadratures[i]);
+            M_quadratures.push_back (QRBD.M_quadratures[i]);
         }
     }
 
-    ~QuadratureRuleBoundary(){}
+    ~QuadratureRuleBoundary() {}
 
-    QuadratureRule qr(const UInt i) const
+    QuadratureRule qr (const UInt i) const
     {
         return M_quadratures[i];
     }
 
-    void setQR(const UInt i, QuadratureRule myQR)
+    void setQR (const UInt i, QuadratureRule myQR)
     {
         while (M_quadratures.size() <= i)
         {
-            M_quadratures.push_back(QuadratureRule());
+            M_quadratures.push_back (QuadratureRule() );
         }
 
-        M_quadratures[i]=myQR;
+        M_quadratures[i] = myQR;
     }
 
 private:
@@ -87,53 +88,53 @@ private:
 
 
 inline QuadratureRuleBoundary
-createTetraBDQR( const QuadratureRule& myQR)
+createTetraBDQR ( const QuadratureRule& myQR)
 {
     QuadratureRuleBoundary QRBD;
 
-    QRBD.setQR(0,myQR);
+    QRBD.setQR (0, myQR);
 
     QuadratureRule F1;
-    for (UInt i(0); i<myQR.nbQuadPt(); ++i)
+    for (UInt i (0); i < myQR.nbQuadPt(); ++i)
     {
-        Real x0(myQR.quadPointCoor(i,0));
-        Real y0(myQR.quadPointCoor(i,1));
+        Real x0 (myQR.quadPointCoor (i, 0) );
+        Real y0 (myQR.quadPointCoor (i, 1) );
 
-        Real x(x0);
-        Real y(0);
-        Real z(y0);
+        Real x (x0);
+        Real y (0);
+        Real z (y0);
 
-        F1.addPoint(QuadraturePoint(x,y,z,myQR.weight(i)));
+        F1.addPoint (QuadraturePoint (x, y, z, myQR.weight (i) ) );
     }
-    QRBD.setQR(1,F1);
+    QRBD.setQR (1, F1);
 
     QuadratureRule F2;
-    for (UInt i(0); i<myQR.nbQuadPt(); ++i)
+    for (UInt i (0); i < myQR.nbQuadPt(); ++i)
     {
-        Real x0(myQR.quadPointCoor(i,0));
-        Real y0(myQR.quadPointCoor(i,1));
+        Real x0 (myQR.quadPointCoor (i, 0) );
+        Real y0 (myQR.quadPointCoor (i, 1) );
 
-        Real x(x0);
-        Real y(y0);
-        Real z(1-x0-y0);
+        Real x (x0);
+        Real y (y0);
+        Real z (1 - x0 - y0);
 
-        F2.addPoint(QuadraturePoint(x,y,z,myQR.weight(i)*std::sqrt(3)/(2.0*sqrt(2))));
+        F2.addPoint (QuadraturePoint (x, y, z, myQR.weight (i) *std::sqrt (3) / (2.0 * sqrt (2) ) ) );
     }
-    QRBD.setQR(2,F2);
+    QRBD.setQR (2, F2);
 
     QuadratureRule F3;
-    for (UInt i(0); i<myQR.nbQuadPt(); ++i)
+    for (UInt i (0); i < myQR.nbQuadPt(); ++i)
     {
-        Real x0(myQR.quadPointCoor(i,0));
-        Real y0(myQR.quadPointCoor(i,1));
+        Real x0 (myQR.quadPointCoor (i, 0) );
+        Real y0 (myQR.quadPointCoor (i, 1) );
 
-        Real x(0);
-        Real y(y0);
-        Real z(x0);
+        Real x (0);
+        Real y (y0);
+        Real z (x0);
 
-        F3.addPoint(QuadraturePoint(x,y,z,myQR.weight(i)));
+        F3.addPoint (QuadraturePoint (x, y, z, myQR.weight (i) ) );
     }
-    QRBD.setQR(3,F3);
+    QRBD.setQR (3, F3);
 
     return QRBD;
 }

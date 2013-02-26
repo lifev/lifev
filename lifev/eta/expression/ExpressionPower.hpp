@@ -76,7 +76,7 @@ public:
     //@{
 
     // No direct use, just ease of coding
-	typedef ExpressionBase< ExpressionPower <BaseExpressionType> > base_Type;
+    typedef ExpressionBase< ExpressionPower <BaseExpressionType> > base_Type;
 
     //@}
 
@@ -84,15 +84,15 @@ public:
     //@{
 
     //! Full constructor using the two expressions
-	ExpressionPower(const BaseExpressionType& l, const Real exponent)
-	: base_Type(), M_l(l), M_exponent(exponent) {}
+    ExpressionPower (const BaseExpressionType& l, const Real exponent)
+        : base_Type(), M_l (l), M_exponent (exponent) {}
 
     //! Copy constructor
-	ExpressionPower(const ExpressionPower<BaseExpressionType>& expression)
-	 : base_Type(), M_l(expression.M_l), M_exponent(expression.M_exponent) {}
+    ExpressionPower (const ExpressionPower<BaseExpressionType>& expression)
+        : base_Type(), M_l (expression.M_l), M_exponent (expression.M_exponent) {}
 
     //! Destructor
-    ~ExpressionPower(){}
+    ~ExpressionPower() {}
 
     //@}
 
@@ -101,8 +101,11 @@ public:
     //@{
 
     //! Display method
-	static void display(std::ostream& out= std::cout)
-    { BaseExpressionType::display(out); out << " ^ ";}
+    static void display (std::ostream& out = std::cout)
+    {
+        BaseExpressionType::display (out);
+        out << " ^ ";
+    }
 
     //@}
 
@@ -111,10 +114,16 @@ public:
     //@{
 
     //! Getter for the left hand side
-	const BaseExpressionType& base() const {return M_l;}
+    const BaseExpressionType& base() const
+    {
+        return M_l;
+    }
 
     //! Getter for the right hand side
-	const Real& exponent() const {return M_exponent;}
+    const Real& exponent() const
+    {
+        return M_exponent;
+    }
 
     //@}
 
@@ -123,16 +132,16 @@ private:
     //! @name Private Methods
     //@{
 
-	ExpressionPower();
+    ExpressionPower();
 
-	//@}
+    //@}
 
 
     // Left hand side
     BaseExpressionType M_l;
 
     // Right hand side
-	Real M_exponent;
+    Real M_exponent;
 };
 
 
@@ -160,9 +169,9 @@ private:
 
 template< typename  ExpressionType>
 ExpressionPower<ExpressionType>
-pow(const ExpressionBase<ExpressionType>& l, const Real& r)
+pow (const ExpressionBase<ExpressionType>& l, const Real& r)
 {
-    return ExpressionPower<ExpressionType>(l.cast(),r);
+    return ExpressionPower<ExpressionType> (l.cast(), r);
 }
 
 

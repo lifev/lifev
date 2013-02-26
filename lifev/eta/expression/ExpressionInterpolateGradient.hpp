@@ -106,12 +106,12 @@ public:
     //@{
 
     //! Constructor using the finite element space and the data vector
-	ExpressionInterpolateGradient(fespacePtr_Type fespace, const vector_Type& vector, const UInt& offset)
-        : base_Type(), M_fespace(fespace), M_vector(vector), M_offset(offset) {}
+    ExpressionInterpolateGradient (fespacePtr_Type fespace, const vector_Type& vector, const UInt& offset)
+        : base_Type(), M_fespace (fespace), M_vector (vector), M_offset (offset) {}
 
     //! Copy constructor
-	ExpressionInterpolateGradient(const ExpressionInterpolateGradient<MeshType,MapType,SpaceDim,FieldDim>& expr)
-        : base_Type(), M_fespace(expr.M_fespace), M_vector(expr.M_vector), M_offset(expr.M_offset) {}
+    ExpressionInterpolateGradient (const ExpressionInterpolateGradient<MeshType, MapType, SpaceDim, FieldDim>& expr)
+        : base_Type(), M_fespace (expr.M_fespace), M_vector (expr.M_vector), M_offset (expr.M_offset) {}
 
     //! Destructor
     ~ExpressionInterpolateGradient() {}
@@ -147,7 +147,10 @@ public:
     }
 
     //! Getter for the data vector
-	const UInt offset() const { return M_offset; }
+    const UInt offset() const
+    {
+        return M_offset;
+    }
 
     // @}
 
@@ -165,7 +168,7 @@ private:
     fespacePtr_Type M_fespace;
 
     // Storage for the data vector
-	vector_Type M_vector;
+    vector_Type M_vector;
 
     //Offset to pick up the right portion of the vector
     UInt M_offset;
@@ -193,14 +196,14 @@ private:
 
 */
 template<typename MeshType, typename MapType, UInt SpaceDim, UInt FieldDim>
-inline ExpressionInterpolateGradient<MeshType,MapType,SpaceDim,FieldDim>
-grad(
-	boost::shared_ptr< ETFESpace<MeshType,MapType,SpaceDim,FieldDim> > fespace,
-	const VectorEpetra& vector,
+inline ExpressionInterpolateGradient<MeshType, MapType, SpaceDim, FieldDim>
+grad (
+    boost::shared_ptr< ETFESpace<MeshType, MapType, SpaceDim, FieldDim> > fespace,
+    const VectorEpetra& vector,
     const UInt& offset = 0
 )
 {
-	return ExpressionInterpolateGradient<MeshType,MapType,SpaceDim,FieldDim>(fespace,vector,offset);
+    return ExpressionInterpolateGradient<MeshType, MapType, SpaceDim, FieldDim> (fespace, vector, offset);
 }
 
 

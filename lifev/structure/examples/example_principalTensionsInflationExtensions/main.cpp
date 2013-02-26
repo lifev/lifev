@@ -262,11 +262,14 @@ Structure::run3d()
     MeshPartitioner< mesh_Type > meshPart ( fullMeshPtr, parameters->comm );
 
     //! Functional spaces - needed for the computations of the gradients
-    std::string dOrder =  dataFile( "solid/space_discretization/order", "P1");
-    solidFESpacePtr_Type dFESpace( new solidFESpace_Type(meshPart,dOrder,3,parameters->comm) );
-    solidETFESpacePtr_Type dETFESpace( new solidETFESpace_Type(meshPart,&(dFESpace->refFE()),&(dFESpace->fe().geoMap()), parameters->comm) );
+    std::string dOrder =  dataFile ( "solid/space_discretization/order", "P1");
+    solidFESpacePtr_Type dFESpace ( new solidFESpace_Type (meshPart, dOrder, 3, parameters->comm) );
+    solidETFESpacePtr_Type dETFESpace ( new solidETFESpace_Type (meshPart, & (dFESpace->refFE() ), & (dFESpace->fe().geoMap() ), parameters->comm) );
 
-    if (verbose) std::cout << std::endl;
+    if (verbose)
+    {
+        std::cout << std::endl;
+    }
 
 
     //! Setting the marker for the volumes
@@ -277,12 +280,12 @@ Structure::run3d()
     solid ( new WallTensionEstimatorCylindricalCoordinates< mesh_Type >() );
 
     //! 2. Its setup
-    solid->setup(dataStructure,
-                 tensionData,
-                 dFESpace,
-                 dETFESpace,
-                 parameters->comm,
-                 marker);
+    solid->setup (dataStructure,
+                  tensionData,
+                  dFESpace,
+                  dETFESpace,
+                  parameters->comm,
+                  marker);
 
     //! 3. Creation of the importers to read the displacement field
     std::string const filename    = tensionData->nameFile();

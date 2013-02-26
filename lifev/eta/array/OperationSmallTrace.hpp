@@ -60,16 +60,16 @@ template <typename Operand >
 class OperationSmallTrace
 {
 private:
-	//! @name Constructors and destructors
+    //! @name Constructors and destructors
     //@{
 
-	//! No default constructor
-	OperationSmallTrace();
+    //! No default constructor
+    OperationSmallTrace();
 
-	//! No destructor
-	~OperationSmallTrace();
+    //! No destructor
+    ~OperationSmallTrace();
 
-	//@}
+    //@}
 };
 
 //! \cond
@@ -82,21 +82,21 @@ public:
     //! @name Public Types
     //@{
 
-	typedef Real result_Type;
+    typedef Real result_Type;
 
-	//@}
+    //@}
 
 private:
-	//! @name Constructors and destructors
+    //! @name Constructors and destructors
     //@{
 
-	//! No default constructor
-	OperationSmallTrace();
+    //! No default constructor
+    OperationSmallTrace();
 
-	//! No destructor
-	~OperationSmallTrace();
+    //! No destructor
+    ~OperationSmallTrace();
 
-	//@}
+    //@}
 };
 
 //! \endcond

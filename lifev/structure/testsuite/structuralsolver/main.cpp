@@ -143,14 +143,14 @@ public:
     {
         run3d();
     }
-    void CheckResultLE(const Real& dispNorm, const Real& time);
-    void CheckResultSVK(const Real& dispNorm, const Real& time);
-    void CheckResultSVKPenalized(const Real& dispNorm, const Real& time);
-    void CheckResultEXP(const Real& dispNorm, const Real& time);
-    void CheckResultNH(const Real& dispNorm, const Real& time);
-    void CheckResult2ndOrderExponential(const Real& dispNorm, const Real& time);
-    void resultChanged(Real time);
-//@}
+    void CheckResultLE (const Real& dispNorm, const Real& time);
+    void CheckResultSVK (const Real& dispNorm, const Real& time);
+    void CheckResultSVKPenalized (const Real& dispNorm, const Real& time);
+    void CheckResultEXP (const Real& dispNorm, const Real& time);
+    void CheckResultNH (const Real& dispNorm, const Real& time);
+    void CheckResult2ndOrderExponential (const Real& dispNorm, const Real& time);
+    void resultChanged (Real time);
+    //@}
 
 protected:
 
@@ -195,32 +195,32 @@ struct Structure::Private
         return  300000.;
     }
 
-static Real bcNonZeroSecondOrderExponential(const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
-{
-    return  19180.;
-}
-
-static Real d0(const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
-{
-
-    switch (i)
+    static Real bcNonZeroSecondOrderExponential (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
     {
-    case 0:
-        return  0.088002 * ( x + 0.5 );
-        break;
-    case 1:
-        return - ( 0.02068 * 2.0 ) * ( y );
-        break;
-    case 2:
-        return - ( 0.02068 * 2.0 ) * ( z );
-        break;
-    default:
-        ERROR_MSG("This entry is not allowed: ud_functions.hpp");
-        return 0.;
-        break;
+        return  19180.;
     }
 
-}
+    static Real d0 (const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
+    {
+
+        switch (i)
+        {
+            case 0:
+                return  0.088002 * ( x + 0.5 );
+                break;
+            case 1:
+                return - ( 0.02068 * 2.0 ) * ( y );
+                break;
+            case 2:
+                return - ( 0.02068 * 2.0 ) * ( z );
+                break;
+            default:
+                ERROR_MSG ("This entry is not allowed: ud_functions.hpp");
+                return 0.;
+                break;
+        }
+
+    }
 
 };
 
@@ -304,14 +304,17 @@ Structure::run3d()
     std::string dOrder =  dataFile ( "solid/space_discretization/order", "P1");
 
     //Mainly used for BCs assembling (Neumann type)
-    solidFESpacePtr_Type dFESpace( new solidFESpace_Type(meshPart,dOrder,3,parameters->comm) );
-    solidETFESpacePtr_Type dETFESpace( new solidETFESpace_Type(meshPart,&(dFESpace->refFE()),&(dFESpace->fe().geoMap()), parameters->comm) );
+    solidFESpacePtr_Type dFESpace ( new solidFESpace_Type (meshPart, dOrder, 3, parameters->comm) );
+    solidETFESpacePtr_Type dETFESpace ( new solidETFESpace_Type (meshPart, & (dFESpace->refFE() ), & (dFESpace->fe().geoMap() ), parameters->comm) );
 
-    if (verbose) std::cout << std::endl;
+    if (verbose)
+    {
+        std::cout << std::endl;
+    }
 
     std::string timeAdvanceMethod =  dataFile ( "solid/time_discretization/method", "Newmark");
 
-    timeAdvance_Type  timeAdvance( TimeAdvanceFactory::instance().createObject( timeAdvanceMethod ) );
+    timeAdvance_Type  timeAdvance ( TimeAdvanceFactory::instance().createObject ( timeAdvanceMethod ) );
 
     UInt OrderDev = 2;
 
@@ -326,25 +329,33 @@ Structure::run3d()
         timeAdvance->setup (dataStructure->dataTimeAdvance()->orderBDF() , OrderDev);
     }
 
-    timeAdvance->setTimeStep(dataStructure->dataTime()->timeStep());
+    timeAdvance->setTimeStep (dataStructure->dataTime()->timeStep() );
     //timeAdvance->showMe();
 
     //! #################################################################################
     //! BOUNDARY CONDITIONS
     //! #################################################################################
-    vector <ID> compx(1), compy(1), compz(1), compxy(2), compxz(2), compyz(2);
-    compx[0]=0; compy[0]=1, compz[0]=2;
-    compxy[0]=0; compxy[1]=1;
-    compxz[0]=0; compxz[1]=2;
-    compyz[0]=1; compyz[1]=2;
+    vector <ID> compx (1), compy (1), compz (1), compxy (2), compxz (2), compyz (2);
+    compx[0] = 0;
+    compy[0] = 1, compz[0] = 2;
+    compxy[0] = 0;
+    compxy[1] = 1;
+    compxz[0] = 0;
+    compxz[1] = 2;
+    compyz[0] = 1;
+    compyz[1] = 2;
 
-    BCFunctionBase zero(Private::bcZero);
+    BCFunctionBase zero (Private::bcZero);
     BCFunctionBase nonZero;
 
-    if( dataStructure->solidType().compare("secondOrderExponential") )
-        nonZero.setFunction(Private::bcNonZero);
+    if ( dataStructure->solidType().compare ("secondOrderExponential") )
+    {
+        nonZero.setFunction (Private::bcNonZero);
+    }
     else
-        nonZero.setFunction(Private::bcNonZeroSecondOrderExponential);
+    {
+        nonZero.setFunction (Private::bcNonZeroSecondOrderExponential);
+    }
 
 
     //! =================================================================================
@@ -358,11 +369,11 @@ Structure::run3d()
     StructuralOperator< RegionMesh<LinearTetra> > solid;
 
     //! 2. Setup of the structuralSolver
-    solid.setup(dataStructure,
-                dFESpace,
-                dETFESpace,
-                BCh,
-                parameters->comm);
+    solid.setup (dataStructure,
+                 dFESpace,
+                 dETFESpace,
+                 BCh,
+                 parameters->comm);
 
     //! 3. Setting data from getPot
     solid.setDataFromGetPot (dataFile);
@@ -400,30 +411,30 @@ Structure::run3d()
         uv0.push_back (acc);
     }
 
-    vectorPtr_Type initialDisplacement(new vector_Type(solid.displacement(), Unique) );
+    vectorPtr_Type initialDisplacement (new vector_Type (solid.displacement(), Unique) );
 
-    if( !dataStructure->solidType().compare("secondOrderExponential") )
+    if ( !dataStructure->solidType().compare ("secondOrderExponential") )
     {
-        dFESpace->interpolate( static_cast<solidFESpace_Type::function_Type>( Private::d0 ), *initialDisplacement, 0.0 );
+        dFESpace->interpolate ( static_cast<solidFESpace_Type::function_Type> ( Private::d0 ), *initialDisplacement, 0.0 );
     }
 
-    if (timeAdvanceMethod =="BDF")
+    if (timeAdvanceMethod == "BDF")
     {
         Real tZero = dataStructure->dataTime()->initialTime();
 
-      for ( UInt previousPass=0; previousPass < timeAdvance->size() ; previousPass++)
-      {
-          Real previousTimeStep = tZero - previousPass*dt;
-          std::cout<<"BDF " <<previousTimeStep<<"\n";
-          if( !dataStructure->solidType().compare("secondOrderExponential") )
-          {
-              uv0.push_back(initialDisplacement);
-          }
-          else
-          {
-              uv0.push_back(disp);
-          }
-      }
+        for ( UInt previousPass = 0; previousPass < timeAdvance->size() ; previousPass++)
+        {
+            Real previousTimeStep = tZero - previousPass * dt;
+            std::cout << "BDF " << previousTimeStep << "\n";
+            if ( !dataStructure->solidType().compare ("secondOrderExponential") )
+            {
+                uv0.push_back (initialDisplacement);
+            }
+            else
+            {
+                uv0.push_back (disp);
+            }
+        }
     }
 
     timeAdvance->setInitialCondition (uv0);
@@ -432,16 +443,16 @@ Structure::run3d()
 
     timeAdvance->updateRHSContribution ( dt );
 
-    if( !dataStructure->solidType().compare("secondOrderExponential") )
+    if ( !dataStructure->solidType().compare ("secondOrderExponential") )
     {
-        solid.initialize( initialDisplacement );
+        solid.initialize ( initialDisplacement );
     }
     else
     {
-        solid.initialize( disp );
+        solid.initialize ( disp );
     }
 
-    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Barrier (MPI_COMM_WORLD);
 
     if (verbose )
     {
@@ -459,14 +470,14 @@ Structure::run3d()
     else
 #endif
     {
-        if (exporterType.compare("none") == 0)
+        if (exporterType.compare ("none") == 0)
         {
-            exporter.reset( new ExporterEmpty<RegionMesh<LinearTetra> > ( dataFile, meshPart.meshPartition(), "structure", parameters->comm->MyPID()) );
+            exporter.reset ( new ExporterEmpty<RegionMesh<LinearTetra> > ( dataFile, meshPart.meshPartition(), "structure", parameters->comm->MyPID() ) );
         }
 
         else
         {
-            exporter.reset( new ExporterEnsight<RegionMesh<LinearTetra> > ( dataFile, meshPart.meshPartition(), "structure", parameters->comm->MyPID()) );
+            exporter.reset ( new ExporterEnsight<RegionMesh<LinearTetra> > ( dataFile, meshPart.meshPartition(), "structure", parameters->comm->MyPID() ) );
         }
     }
 
@@ -521,9 +532,9 @@ Structure::run3d()
     //! =================================================================================
 
 
-      Real normVect;
-      normVect =  solid.displacement().norm2();
-      std::cout << "The norm 2 of the displacement field is: "<< normVect << std::endl;
+    Real normVect;
+    normVect =  solid.displacement().norm2();
+    std::cout << "The norm 2 of the displacement field is: " << normVect << std::endl;
 
     //! =============================================================================
     //! Temporal loop
@@ -546,21 +557,21 @@ Structure::run3d()
         }
 
         //! 6. Updating right-hand side
-        *rhs *=0;
-        timeAdvance->updateRHSContribution( dt );
-        *rhs += *solid.massMatrix() *timeAdvance->rhsContributionSecondDerivative()/timeAdvanceCoefficient;
-        solid.setRightHandSide( *rhs );
+        *rhs *= 0;
+        timeAdvance->updateRHSContribution ( dt );
+        *rhs += *solid.massMatrix() * timeAdvance->rhsContributionSecondDerivative() / timeAdvanceCoefficient;
+        solid.setRightHandSide ( *rhs );
 
         //! 7. Iterate --> Calling Newton
-        solid.iterate( BCh );
+        solid.iterate ( BCh );
 
-        timeAdvance->shiftRight( solid.displacement() );
+        timeAdvance->shiftRight ( solid.displacement() );
 
         *solidDisp = solid.displacement();
         *solidVel  = timeAdvance->firstDerivative();
         *solidAcc  = timeAdvance->secondDerivative();
 
-        exporter->postProcess( dataStructure->dataTime()->time() );
+        exporter->postProcess ( dataStructure->dataTime()->time() );
 
         /* This part lets to save the displacement at one point of the mesh and to check the result
            w.r.t. manufactured solution.
@@ -581,21 +592,33 @@ Structure::run3d()
 
         Real normVect;
         normVect =  solid.displacement().norm2();
-        std::cout << "The norm 2 of the displacement field is: "<< normVect << std::endl;
+        std::cout << "The norm 2 of the displacement field is: " << normVect << std::endl;
 
         ///////// CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
-        if (!dataStructure->solidType().compare("linearVenantKirchhoff"))
-            CheckResultLE(normVect, dataStructure->dataTime()->time() );
-        else if (!dataStructure->solidType().compare("nonLinearVenantKirchhoff"))
-            CheckResultSVK(normVect, dataStructure->dataTime()->time() );
-        else if (!dataStructure->solidType().compare("nonLinearVenantKirchhoffPenalized"))
-            CheckResultSVKPenalized(normVect, dataStructure->dataTime()->time() );
-        else if (!dataStructure->solidType().compare("exponential"))
-            CheckResultEXP(normVect, dataStructure->dataTime()->time() );
-        else if (!dataStructure->solidType().compare("secondOrderExponential"))
-            CheckResult2ndOrderExponential(normVect, dataStructure->dataTime()->time() );
+        if (!dataStructure->solidType().compare ("linearVenantKirchhoff") )
+        {
+            CheckResultLE (normVect, dataStructure->dataTime()->time() );
+        }
+        else if (!dataStructure->solidType().compare ("nonLinearVenantKirchhoff") )
+        {
+            CheckResultSVK (normVect, dataStructure->dataTime()->time() );
+        }
+        else if (!dataStructure->solidType().compare ("nonLinearVenantKirchhoffPenalized") )
+        {
+            CheckResultSVKPenalized (normVect, dataStructure->dataTime()->time() );
+        }
+        else if (!dataStructure->solidType().compare ("exponential") )
+        {
+            CheckResultEXP (normVect, dataStructure->dataTime()->time() );
+        }
+        else if (!dataStructure->solidType().compare ("secondOrderExponential") )
+        {
+            CheckResult2ndOrderExponential (normVect, dataStructure->dataTime()->time() );
+        }
         else
-            CheckResultNH(normVect, dataStructure->dataTime()->time() );
+        {
+            CheckResultNH (normVect, dataStructure->dataTime()->time() );
+        }
 
         ///////// END OF CHECK
 
@@ -707,16 +730,24 @@ void Structure::CheckResultNH (const Real& dispNorm, const Real& time)
 }
 
 
-void Structure::CheckResult2ndOrderExponential(const Real& dispNorm,const Real& time)
+void Structure::CheckResult2ndOrderExponential (const Real& dispNorm, const Real& time)
 {
-    if ( time == 0.1  && std::fabs(dispNorm-0.561523)<=1e-5 )
-        this->resultChanged(time);
-    if ( time == 0.2  && std::fabs(dispNorm-0.561496)<=1e-5 )
-        this->resultChanged(time);
-    if ( time == 0.3  && std::fabs(dispNorm-0.561517)<=1e-5 )
-        this->resultChanged(time);
-    if ( time == 0.4  && std::fabs(dispNorm-0.561512)<=1e-5 )
-        this->resultChanged(time);
+    if ( time == 0.1  && std::fabs (dispNorm - 0.561523) <= 1e-5 )
+    {
+        this->resultChanged (time);
+    }
+    if ( time == 0.2  && std::fabs (dispNorm - 0.561496) <= 1e-5 )
+    {
+        this->resultChanged (time);
+    }
+    if ( time == 0.3  && std::fabs (dispNorm - 0.561517) <= 1e-5 )
+    {
+        this->resultChanged (time);
+    }
+    if ( time == 0.4  && std::fabs (dispNorm - 0.561512) <= 1e-5 )
+    {
+        this->resultChanged (time);
+    }
 }
 
 

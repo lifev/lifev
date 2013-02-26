@@ -76,7 +76,7 @@ public:
     //@{
 
     // No direct use, just ease of coding
-	typedef ExpressionBase< ExpressionExponential <BaseExpressionType> > base_Type;
+    typedef ExpressionBase< ExpressionExponential <BaseExpressionType> > base_Type;
 
     //@}
 
@@ -84,15 +84,15 @@ public:
     //@{
 
     //! Full constructor using the two expressions
-	ExpressionExponential(const BaseExpressionType& l)
-	: base_Type(), M_l(l) {}
+    ExpressionExponential (const BaseExpressionType& l)
+        : base_Type(), M_l (l) {}
 
     //! Copy constructor
-	ExpressionExponential(const ExpressionExponential<BaseExpressionType>& expression)
-	 : base_Type(), M_l(expression.M_l) {}
+    ExpressionExponential (const ExpressionExponential<BaseExpressionType>& expression)
+        : base_Type(), M_l (expression.M_l) {}
 
     //! Destructor
-    ~ExpressionExponential(){}
+    ~ExpressionExponential() {}
 
     //@}
 
@@ -101,8 +101,11 @@ public:
     //@{
 
     //! Display method
-	static void display(std::ostream& out= std::cout)
-    { out << "Expression Exponential of: ";BaseExpressionType::display(out);}
+    static void display (std::ostream& out = std::cout)
+    {
+        out << "Expression Exponential of: ";
+        BaseExpressionType::display (out);
+    }
 
     //@}
 
@@ -111,7 +114,10 @@ public:
     //@{
 
     //! Getter for the left hand side
-	const BaseExpressionType& base() const {return M_l;}
+    const BaseExpressionType& base() const
+    {
+        return M_l;
+    }
     //@}
 
 private:
@@ -119,9 +125,9 @@ private:
     //! @name Private Methods
     //@{
 
-	ExpressionExponential();
+    ExpressionExponential();
 
-	//@}
+    //@}
 
 
     // Left hand side
@@ -153,9 +159,9 @@ private:
 
 template< typename  ExpressionType>
 ExpressionExponential<ExpressionType>
-exp(const ExpressionBase<ExpressionType>& l)
+exp (const ExpressionBase<ExpressionType>& l)
 {
-    return ExpressionExponential<ExpressionType >(l.cast());
+    return ExpressionExponential<ExpressionType > (l.cast() );
 }
 
 

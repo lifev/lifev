@@ -300,9 +300,12 @@ Structure::run3d()
     typedef boost::shared_ptr<solidETFESpace_Type>                      solidETFESpacePtr_Type;
 
 
-    solidFESpace_ptrtype dFESpace( new solidFESpace_type(meshPart,dOrder,3,parameters->comm) );
-    solidETFESpacePtr_Type dETFESpace( new solidETFESpace_Type(meshPart,&(dFESpace->refFE()),&(dFESpace->fe().geoMap()), parameters->comm) );
-    if (verbose) std::cout << std::endl;
+    solidFESpace_ptrtype dFESpace ( new solidFESpace_type (meshPart, dOrder, 3, parameters->comm) );
+    solidETFESpacePtr_Type dETFESpace ( new solidETFESpace_Type (meshPart, & (dFESpace->refFE() ), & (dFESpace->fe().geoMap() ), parameters->comm) );
+    if (verbose)
+    {
+        std::cout << std::endl;
+    }
 
     std::string timeAdvanceMethod =  dataFile ( "solid/time_discretization/method", "Newmark");
 
@@ -323,7 +326,7 @@ Structure::run3d()
         timeAdvance->setup (dataStructure->dataTimeAdvance()->orderBDF() , OrderDev);
     }
 
-    timeAdvance->setTimeStep(dataStructure->dataTime()->timeStep());
+    timeAdvance->setTimeStep (dataStructure->dataTime()->timeStep() );
     //timeAdvance->showMe();
 
 
@@ -361,11 +364,11 @@ Structure::run3d()
     StructuralOperator< RegionMesh<LinearTetra> > solid;
 
     //! 2. Setup of the structuralSolver
-    solid.setup(dataStructure,
-                dFESpace,
-                dETFESpace,
-                BCh,
-                parameters->comm);
+    solid.setup (dataStructure,
+                 dFESpace,
+                 dETFESpace,
+                 BCh,
+                 parameters->comm);
 
     //! 3. Setting data from getPot
     solid.setDataFromGetPot (dataFile);

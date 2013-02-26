@@ -255,12 +255,15 @@ Structure::run3d()
     MeshPartitioner< mesh_Type > meshPart ( fullMeshPtr, parameters->comm );
 
     //! Functional spaces - needed for the computations of the gradients
-    std::string dOrder =  dataFile( "solid/space_discretization/order", "P1");
-    solidFESpacePtr_Type dFESpace( new solidFESpace_Type(meshPart,dOrder,3,parameters->comm) );
-    solidETFESpacePtr_Type dETFESpace( new solidETFESpace_Type(meshPart,&(dFESpace->refFE()),&(dFESpace->fe().geoMap()), parameters->comm) );
+    std::string dOrder =  dataFile ( "solid/space_discretization/order", "P1");
+    solidFESpacePtr_Type dFESpace ( new solidFESpace_Type (meshPart, dOrder, 3, parameters->comm) );
+    solidETFESpacePtr_Type dETFESpace ( new solidETFESpace_Type (meshPart, & (dFESpace->refFE() ), & (dFESpace->fe().geoMap() ), parameters->comm) );
 
 
-    if (verbose) std::cout << std::endl;
+    if (verbose)
+    {
+        std::cout << std::endl;
+    }
 
     //! 1. Constructor of the class to compute the tensions
     StructuralOperator<RegionMesh<LinearTetra> >  solid;

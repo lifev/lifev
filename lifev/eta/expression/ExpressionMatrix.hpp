@@ -61,14 +61,14 @@ namespace ExpressionAssembly
 
 */
 template < UInt iDim, UInt jDim >
-class ExpressionMatrix : public ExpressionBase<ExpressionMatrix<iDim,jDim> >
+class ExpressionMatrix : public ExpressionBase<ExpressionMatrix<iDim, jDim> >
 {
 public:
 
     //! @name Public Types
     //@{
 
-	typedef ExpressionBase<ExpressionMatrix<iDim,jDim> > base_Type;
+    typedef ExpressionBase<ExpressionMatrix<iDim, jDim> > base_Type;
 
     //@}
 
@@ -77,15 +77,15 @@ public:
     //@{
 
     //! Constructor using the vector of values
-	ExpressionMatrix(const MatrixSmall<iDim,jDim>& myValue)
-	: base_Type(), M_value(myValue) {}
+    ExpressionMatrix (const MatrixSmall<iDim, jDim>& myValue)
+        : base_Type(), M_value (myValue) {}
 
     //! Copy constructor
-	ExpressionMatrix(const ExpressionMatrix<iDim,jDim>& expr)
-	: base_Type(), M_value(expr.M_value) {}
+    ExpressionMatrix (const ExpressionMatrix<iDim, jDim>& expr)
+        : base_Type(), M_value (expr.M_value) {}
 
     //! Destructor
-    ~ExpressionMatrix(){}
+    ~ExpressionMatrix() {}
 
     //@}
 
@@ -94,8 +94,10 @@ public:
     //@{
 
     //! Display method
-	static void display(std::ostream& out= std::cout)
-	{ out << "matrix[" << iDim << "][" << jDim << "] ";}
+    static void display (std::ostream& out = std::cout)
+    {
+        out << "matrix[" << iDim << "][" << jDim << "] ";
+    }
 
     //@}
 
@@ -104,7 +106,10 @@ public:
     //@{
 
     //! Getter for the vector of values
-	const MatrixSmall<iDim,jDim>& value() const { return M_value; }
+    const MatrixSmall<iDim, jDim>& value() const
+    {
+        return M_value;
+    }
 
     //@}
 
@@ -117,7 +122,7 @@ private:
 
     //@}
 
-	MatrixSmall<iDim,jDim> M_value;
+    MatrixSmall<iDim, jDim> M_value;
 };
 
 //! Simple function to be used in the construction of an expression
@@ -129,10 +134,10 @@ private:
   <i>VectorDim</i>: The dimension (size) of the vector to be represented.
 */
 template<UInt iDim, UInt jDim>
-inline ExpressionMatrix<iDim,jDim>
-value(const MatrixSmall<iDim,jDim>& myValue)
+inline ExpressionMatrix<iDim, jDim>
+value (const MatrixSmall<iDim, jDim>& myValue)
 {
-	return ExpressionMatrix<iDim,jDim>(myValue);
+    return ExpressionMatrix<iDim, jDim> (myValue);
 }
 
 

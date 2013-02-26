@@ -85,12 +85,12 @@ public:
     //@{
 
     //! Full data constructor
-    IntegrateValueElement(const boost::shared_ptr<MeshType>& mesh,
-                          const QRAdapterType& qrAdapter,
-                          const ExpressionType& expression);
+    IntegrateValueElement (const boost::shared_ptr<MeshType>& mesh,
+                           const QRAdapterType& qrAdapter,
+                           const ExpressionType& expression);
 
     //! Copy constructor
-    IntegrateValueElement( const IntegrateValueElement < MeshType, ExpressionType, QRAdapterType> & integrator);
+    IntegrateValueElement ( const IntegrateValueElement < MeshType, ExpressionType, QRAdapterType>& integrator);
 
     //! Destructor
     ~IntegrateValueElement();
@@ -147,10 +147,10 @@ private:
     evaluation_Type M_evaluation;
 
     // CurrentFE for the unadapted quadrature
-    ETCurrentFE<3,1>* M_globalCFE_std;
+    ETCurrentFE<3, 1>* M_globalCFE_std;
 
     // CurrentFE for the adapted quadrature
-    ETCurrentFE<3,1>* M_globalCFE_adapted;
+    ETCurrentFE<3, 1>* M_globalCFE_adapted;
 };
 
 
@@ -162,37 +162,37 @@ private:
 // Constructors & Destructor
 // ===================================================
 
-    template < typename MeshType, typename ExpressionType, typename QRAdapterType>
-    IntegrateValueElement < MeshType, ExpressionType,QRAdapterType>::
-IntegrateValueElement(const boost::shared_ptr<MeshType>& mesh,
-                      const QRAdapterType& qrAdapter,
-                      const ExpressionType& expression)
-	:	M_mesh(mesh),
-		M_qrAdapter(qrAdapter),
-		M_evaluation(expression),
+template < typename MeshType, typename ExpressionType, typename QRAdapterType>
+IntegrateValueElement < MeshType, ExpressionType, QRAdapterType>::
+IntegrateValueElement (const boost::shared_ptr<MeshType>& mesh,
+                       const QRAdapterType& qrAdapter,
+                       const ExpressionType& expression)
+    :   M_mesh (mesh),
+        M_qrAdapter (qrAdapter),
+        M_evaluation (expression),
 
-		M_globalCFE_std(new ETCurrentFE<3,1>(feTetraP0,geometricMapFromMesh<MeshType>(),qrAdapter.standardQR())),
-                M_globalCFE_adapted(new ETCurrentFE<3,1>(feTetraP0,geometricMapFromMesh<MeshType>(),qrAdapter.standardQR()))
+        M_globalCFE_std (new ETCurrentFE<3, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), qrAdapter.standardQR() ) ),
+        M_globalCFE_adapted (new ETCurrentFE<3, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), qrAdapter.standardQR() ) )
 
 {
-    M_evaluation.setQuadrature(qrAdapter.standardQR());
-    M_evaluation.setGlobalCFE(M_globalCFE_std);
+    M_evaluation.setQuadrature (qrAdapter.standardQR() );
+    M_evaluation.setGlobalCFE (M_globalCFE_std);
 }
 
 
 template < typename MeshType, typename ExpressionType, typename QRAdapterType>
-IntegrateValueElement < MeshType, ExpressionType,QRAdapterType>::
-IntegrateValueElement( const IntegrateValueElement < MeshType, ExpressionType, QRAdapterType> & integrator)
-	:	M_mesh(integrator.M_mesh),
-		M_qrAdapter(integrator.M_qrAdapter),
-		M_evaluation(integrator.M_evaluation),
+IntegrateValueElement < MeshType, ExpressionType, QRAdapterType>::
+IntegrateValueElement ( const IntegrateValueElement < MeshType, ExpressionType, QRAdapterType>& integrator)
+    :   M_mesh (integrator.M_mesh),
+        M_qrAdapter (integrator.M_qrAdapter),
+        M_evaluation (integrator.M_evaluation),
 
-	  	M_globalCFE_std(new ETCurrentFE<3,1>(feTetraP0,geometricMapFromMesh<MeshType>(),M_qrAdapter.standardQR())),
-	  	M_globalCFE_adapted(new ETCurrentFE<3,1>(feTetraP0,geometricMapFromMesh<MeshType>(),M_qrAdapter.standardQR()))
+        M_globalCFE_std (new ETCurrentFE<3, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), M_qrAdapter.standardQR() ) ),
+        M_globalCFE_adapted (new ETCurrentFE<3, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), M_qrAdapter.standardQR() ) )
 
 {
-    M_evaluation.setQuadrature(M_qrAdapter.standardQR());
-    M_evaluation.setGlobalCFE(M_globalCFE_std);
+    M_evaluation.setQuadrature (M_qrAdapter.standardQR() );
+    M_evaluation.setGlobalCFE (M_globalCFE_std);
 }
 
 
@@ -212,7 +212,7 @@ IntegrateValueElement < MeshType, ExpressionType, QRAdapterType>::
 template < typename MeshType, typename ExpressionType, typename QRAdapterType>
 void
 IntegrateValueElement < MeshType, ExpressionType, QRAdapterType>::
-check(std::ostream& out)
+check (std::ostream& out)
 {
     out << " Checking the integration : " << std::endl;
     M_evaluation.display (out);
@@ -222,20 +222,20 @@ check(std::ostream& out)
 template < typename MeshType, typename ExpressionType, typename QRAdapterType>
 void
 IntegrateValueElement < MeshType, ExpressionType, QRAdapterType>::
-addTo(Real& value)
+addTo (Real& value)
 {
-    UInt nbElements(M_mesh->numElements());
-    UInt nbQuadPt_std(M_qrAdapter.standardQR().nbQuadPt());
+    UInt nbElements (M_mesh->numElements() );
+    UInt nbQuadPt_std (M_qrAdapter.standardQR().nbQuadPt() );
 
     // This flag reports whether the previous element
     // needed an adapted integration. It is set to true
     // by default for security.
-    bool isPreviousAdapted(true);
+    bool isPreviousAdapted (true);
 
     for (UInt iElement (0); iElement < nbElements; ++iElement)
     {
         // Update the quadrature adapter
-        M_qrAdapter.update(iElement);
+        M_qrAdapter.update (iElement);
 
         // Check if the current element needs an adapted
         // quadrature rule.
@@ -243,52 +243,52 @@ addTo(Real& value)
         {
 
             // Set the adapted QR
-            M_evaluation.setQuadrature( M_qrAdapter.adaptedQR() );
-            M_globalCFE_adapted->setQuadratureRule( M_qrAdapter.adaptedQR() );
+            M_evaluation.setQuadrature ( M_qrAdapter.adaptedQR() );
+            M_globalCFE_adapted->setQuadratureRule ( M_qrAdapter.adaptedQR() );
 
             // Set the right CFE (even if the previous one was
             // adapted! The memory locations might have changed!
-            M_evaluation.setGlobalCFE( M_globalCFE_adapted );
+            M_evaluation.setGlobalCFE ( M_globalCFE_adapted );
 
             // Update the currentFE
-            M_globalCFE_adapted->update(M_mesh->element(iElement),evaluation_Type::S_globalUpdateFlag | ET_UPDATE_WDET);
+            M_globalCFE_adapted->update (M_mesh->element (iElement), evaluation_Type::S_globalUpdateFlag | ET_UPDATE_WDET);
 
             // Update the evaluation
-            M_evaluation.update(iElement);
+            M_evaluation.update (iElement);
 
             // Make the assembly
-            for (UInt iQuadPt(0); iQuadPt< M_qrAdapter.adaptedQR().nbQuadPt(); ++iQuadPt)
+            for (UInt iQuadPt (0); iQuadPt < M_qrAdapter.adaptedQR().nbQuadPt(); ++iQuadPt)
             {
-                value += M_evaluation.value_q(iQuadPt)
-                    * M_globalCFE_adapted->wDet(iQuadPt);
+                value += M_evaluation.value_q (iQuadPt)
+                         * M_globalCFE_adapted->wDet (iQuadPt);
             }
 
             // Finally, set the flag
-            isPreviousAdapted=true;
+            isPreviousAdapted = true;
         }
         else
         {
             // Check if the previous one was adapted
             if (isPreviousAdapted)
             {
-                M_evaluation.setQuadrature( M_qrAdapter.standardQR() );
-                M_evaluation.setGlobalCFE( M_globalCFE_std );
+                M_evaluation.setQuadrature ( M_qrAdapter.standardQR() );
+                M_evaluation.setGlobalCFE ( M_globalCFE_std );
                 // Update the flag
-                isPreviousAdapted=false;
+                isPreviousAdapted = false;
             }
 
             // Update the currentFEs
-            M_globalCFE_std->update(M_mesh->element(iElement),evaluation_Type::S_globalUpdateFlag | ET_UPDATE_WDET);
+            M_globalCFE_std->update (M_mesh->element (iElement), evaluation_Type::S_globalUpdateFlag | ET_UPDATE_WDET);
 
             // Update the evaluation
-            M_evaluation.update(iElement);
+            M_evaluation.update (iElement);
 
 
             // Make the assembly
-            for (UInt iQuadPt(0); iQuadPt< nbQuadPt_std; ++iQuadPt)
+            for (UInt iQuadPt (0); iQuadPt < nbQuadPt_std; ++iQuadPt)
             {
-                value += M_evaluation.value_q(iQuadPt)
-                    * M_globalCFE_std->wDet(iQuadPt);
+                value += M_evaluation.value_q (iQuadPt)
+                         * M_globalCFE_std->wDet (iQuadPt);
             }
         }
     }

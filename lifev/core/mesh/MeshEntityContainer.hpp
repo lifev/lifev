@@ -367,10 +367,10 @@ public:
      *  of those in the container
      */
     template<typename Predicate>
-    std::vector<DataType const *> extractAccordingToPredicate( Predicate const& p ) const;
+    std::vector<DataType const*> extractAccordingToPredicate ( Predicate const& p ) const;
 
     template<typename Predicate>
-    std::vector<DataType *> extractAccordingToPredicateNonConstElement( Predicate const& p, std::vector< UInt>& indexes );
+    std::vector<DataType*> extractAccordingToPredicateNonConstElement ( Predicate const& p, std::vector< UInt>& indexes );
 
     /** Entity Counter.
      *  It returns the number of stored entities for which a predicate
@@ -691,20 +691,20 @@ MeshEntityContainer<DataType, Allocator>::extractAccordingToPredicate ( Predicat
 
 template<typename DataType, class Allocator>
 template<typename Predicate>
-std::vector<DataType *>
-MeshEntityContainer<DataType, Allocator>::extractAccordingToPredicateNonConstElement( Predicate const& p, std::vector< UInt>& indexes )
+std::vector<DataType*>
+MeshEntityContainer<DataType, Allocator>::extractAccordingToPredicateNonConstElement ( Predicate const& p, std::vector< UInt>& indexes )
 {
-    UInt howmany = this->countAccordingToPredicate( p );
-    std::vector<DataType *> tmp;
-    tmp.reserve( howmany );
-    indexes.reserve( howmany );
-    for( UInt i(0); i < this->size(); i++ )
+    UInt howmany = this->countAccordingToPredicate ( p );
+    std::vector<DataType*> tmp;
+    tmp.reserve ( howmany );
+    indexes.reserve ( howmany );
+    for ( UInt i (0); i < this->size(); i++ )
     {
         //Saving the volume and the index if the predicate is true
-        if( p( this->at(i) ) )
+        if ( p ( this->at (i) ) )
         {
-            tmp.push_back( &(this->at(i)) );
-            indexes.push_back( i );
+            tmp.push_back ( & (this->at (i) ) );
+            indexes.push_back ( i );
         }
     }
 

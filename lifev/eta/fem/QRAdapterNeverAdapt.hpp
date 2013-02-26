@@ -50,26 +50,27 @@
 #include <lifev/core/fem/QuadratureRule.hpp>
 
 
-namespace LifeV {
+namespace LifeV
+{
 
 
 class QRAdapterNeverAdapt : public QRAdapterBase< QRAdapterNeverAdapt >
 {
 public:
 
-	typedef QRAdapterBase< QRAdapterNeverAdapt > base_Type;
+    typedef QRAdapterBase< QRAdapterNeverAdapt > base_Type;
 
     //! @name Constructor & Destructor
     //@{
 
     //! Constructor with a quadrature rule.
-    QRAdapterNeverAdapt(const QuadratureRule& qr) : base_Type(), M_qr(qr) {}
+    QRAdapterNeverAdapt (const QuadratureRule& qr) : base_Type(), M_qr (qr) {}
 
     //! Copy constructor
-    QRAdapterNeverAdapt(const QRAdapterNeverAdapt& qrAdapter) : base_Type(), M_qr(qrAdapter.M_qr) {}
+    QRAdapterNeverAdapt (const QRAdapterNeverAdapt& qrAdapter) : base_Type(), M_qr (qrAdapter.M_qr) {}
 
     //! Simple destructor
-    ~QRAdapterNeverAdapt(){}
+    ~QRAdapterNeverAdapt() {}
 
     //@}
 
@@ -84,7 +85,7 @@ public:
       the case... We just give more information to the compiler
       so that it can better optimize the code.
      */
-    static void update (UInt /*elementID*/){}
+    static void update (UInt /*elementID*/) {}
 
     //@}
 
@@ -105,18 +106,26 @@ public:
       In this way, we simply give stronger hints to the
       compiler.
      */
-    static bool isAdaptedElement(){ return false; }
+    static bool isAdaptedElement()
+    {
+        return false;
+    }
 
     //! Getter for the non-adapted quadrature
-    const QuadratureRule& standardQR() const { return M_qr; }
+    const QuadratureRule& standardQR() const
+    {
+        return M_qr;
+    }
 
     //! Getter for the adapted quadrature
     /*!
       In this case, it should never happen!
      */
-    const QuadratureRule& adaptedQR() const {
-        ERROR_MSG("No adapted quadrature! Internal error...")
-        return M_qr; }
+    const QuadratureRule& adaptedQR() const
+    {
+        ERROR_MSG ("No adapted quadrature! Internal error...")
+        return M_qr;
+    }
 
     //@}
 

@@ -79,19 +79,24 @@ public:
     //! Empty constructor (all components are set to zero)
     VectorSmall()
     {
-        for ( UInt i = 0; i < Dim; i++ ) M_coords[ i ] = 0.;
+        for ( UInt i = 0; i < Dim; i++ )
+        {
+            M_coords[ i ] = 0.;
+        }
     }
 
     //! Assignment operator
-    VectorSmall<Dim> & operator= ( VectorSmall<Dim> const & vector )
+    VectorSmall<Dim>& operator= ( VectorSmall<Dim> const& vector )
     {
         for ( UInt i = 0; i < Dim; i++ )
+        {
             M_coords[ i ] = vector.M_coords[ i ];
+        }
         return *this;
     }
 
     //! Copy constructor
-    VectorSmall( VectorSmall<Dim> const & vector )
+    VectorSmall ( VectorSmall<Dim> const& vector )
     {
         *this = vector;
     }
@@ -102,18 +107,20 @@ public:
     //@{
 
     //! Constant initialization
-    static VectorSmall<Dim> Constant ( Real const & value )
+    static VectorSmall<Dim> Constant ( Real const& value )
     {
         VectorSmall<Dim> v;
         for ( UInt i = 0; i < Dim; i++ )
+        {
             v[ i ] = value;
+        }
         return v;
     }
 
     //! Zero initialization
     static VectorSmall<Dim> Zero ()
     {
-        return VectorSmall<Dim>::Constant( 0. );
+        return VectorSmall<Dim>::Constant ( 0. );
     }
 
     //@}
@@ -122,43 +129,51 @@ public:
     //@{
 
     //! Operator +=
-    VectorSmall<Dim> & operator+= ( VectorSmall<Dim> const & vector )
+    VectorSmall<Dim>& operator+= ( VectorSmall<Dim> const& vector )
     {
         for ( UInt i = 0; i < Dim; i++ )
+        {
             M_coords[ i ] += vector.M_coords[ i ];
+        }
         return *this;
     }
 
     //! Operator +
-    VectorSmall<Dim> operator+ ( VectorSmall<Dim> const & vector ) const
+    VectorSmall<Dim> operator+ ( VectorSmall<Dim> const& vector ) const
     {
-        VectorSmall<Dim> tmp ( *this ); return tmp += vector;
+        VectorSmall<Dim> tmp ( *this );
+        return tmp += vector;
     }
 
     //! Operator -=
-    VectorSmall<Dim> & operator-= ( VectorSmall<Dim> const & vector )
+    VectorSmall<Dim>& operator-= ( VectorSmall<Dim> const& vector )
     {
         for ( UInt i = 0; i < Dim; i++ )
+        {
             M_coords[ i ] -= vector.M_coords[ i ];
+        }
         return *this;
     }
 
     //! Operator -
-    VectorSmall<Dim> operator- ( VectorSmall<Dim> const & vector ) const
+    VectorSmall<Dim> operator- ( VectorSmall<Dim> const& vector ) const
     {
-        VectorSmall tmp ( *this ); return tmp -= vector;
+        VectorSmall tmp ( *this );
+        return tmp -= vector;
     }
 
     //! Operator *= (multiplication by scalar)
-    VectorSmall<Dim> &  operator*= ( Real const & factor )
+    VectorSmall<Dim>&   operator*= ( Real const& factor )
     {
         for ( UInt i = 0; i < Dim; i++ )
+        {
             M_coords[ i ] *= factor;
+        }
         return *this;
     }
 
     //! Operator /= (division by scalar)
-    VectorSmall<Dim> & operator/= ( Real const & factor )
+    VectorSmall<Dim>& operator/= ( Real const& factor )
     {
         ASSERT ( factor != 0. , "Division by zero!" );
         *this *= 1. / factor;
@@ -166,34 +181,35 @@ public:
     }
 
     //! Operator / (division by scalar)
-    VectorSmall<Dim> operator/ ( Real const & factor ) const
+    VectorSmall<Dim> operator/ ( Real const& factor ) const
     {
-        VectorSmall<Dim> tmp ( *this ); return tmp /= factor;
+        VectorSmall<Dim> tmp ( *this );
+        return tmp /= factor;
     }
 
     //! Operator []
-    Real const & operator[] ( UInt const & i ) const
+    Real const& operator[] ( UInt const& i ) const
     {
         ASSERT ( i < Dim, "trying to access an index that exceeds the dimension of the array" );
         return M_coords [ i ];
     }
 
     //! Operator []
-    Real & operator[] ( UInt const & i )
+    Real& operator[] ( UInt const& i )
     {
         ASSERT ( i < Dim, "trying to set an index that exceeds the dimension of the array" );
         return M_coords [ i ];
     }
 
     //! Operator ()
-    Real const & operator() ( UInt const & i ) const
+    Real const& operator() ( UInt const& i ) const
     {
         ASSERT ( i < Dim, "trying to access an index that exceeds the dimension of the array" );
         return M_coords [ i ];
     }
 
     //! Operator ()
-    Real & operator() ( UInt const & i )
+    Real& operator() ( UInt const& i )
     {
         ASSERT ( i < Dim, "trying to set an index that exceeds the dimension of the array" );
         return M_coords [ i ];
@@ -209,21 +225,25 @@ public:
     @param vector second operand
     @return scalar product value
     */
-    Real dot ( VectorSmall<Dim> const & vector ) const
+    Real dot ( VectorSmall<Dim> const& vector ) const
     {
         Real scalarProduct = 0.;
         for ( UInt i = 0; i < Dim; i++ )
-        scalarProduct += M_coords[ i ] * vector.M_coords[ i ];
+        {
+            scalarProduct += M_coords[ i ] * vector.M_coords[ i ];
+        }
         return scalarProduct;
     }
 
-    MatrixSmall< Dim , Dim > outerProduct ( VectorSmall<Dim> const & vector ) const
+    MatrixSmall< Dim , Dim > outerProduct ( VectorSmall<Dim> const& vector ) const
     {
-        MatrixSmall<Dim,Dim> result;
+        MatrixSmall<Dim, Dim> result;
 
         for ( UInt i = 0; i < Dim; i++ )
             for ( UInt j = 0; j < Dim; j++ )
+            {
                 result[i][j] = M_coords[ i ] * vector.M_coords[ j ];
+            }
         return result;
     }
 
@@ -233,7 +253,7 @@ public:
     */
     Real norm () const
     {
-        return std::sqrt( this->dot( *this ) );
+        return std::sqrt ( this->dot ( *this ) );
     }
 
     //! Normalize vector
@@ -260,7 +280,10 @@ public:
     /*!
     @return the fixed size of the VectorSmall
     */
-    static UInt size() { return Dim;}
+    static UInt size()
+    {
+        return Dim;
+    }
 
     //@}
 
@@ -280,7 +303,7 @@ private:
 
 //! Operator * (multiplication by scalar on the right)
 template <UInt Dim>
-inline VectorSmall<Dim> operator* ( VectorSmall<Dim> const & vector, Real const & factor )
+inline VectorSmall<Dim> operator* ( VectorSmall<Dim> const& vector, Real const& factor )
 {
     VectorSmall<Dim> tmp ( vector );
     return tmp *= factor;
@@ -288,7 +311,7 @@ inline VectorSmall<Dim> operator* ( VectorSmall<Dim> const & vector, Real const 
 
 //! Operator * (multiplication by scalar on the left)
 template <UInt Dim>
-inline VectorSmall<Dim> operator* ( Real const & factor, VectorSmall<Dim> const & vector )
+inline VectorSmall<Dim> operator* ( Real const& factor, VectorSmall<Dim> const& vector )
 {
     VectorSmall<Dim> tmp ( vector );
     return tmp *= factor;
@@ -296,11 +319,13 @@ inline VectorSmall<Dim> operator* ( Real const & factor, VectorSmall<Dim> const 
 
 //! Operator <<
 template <UInt Dim>
-inline std::ostream & operator<< ( std::ostream & out , VectorSmall<Dim> const & point )
+inline std::ostream& operator<< ( std::ostream& out , VectorSmall<Dim> const& point )
 {
     out << "( ";
     for ( UInt i = 0; i < Dim; i++ )
+    {
         out << point[ i ] << " ";
+    }
     out << ")";
     return out;
 }
@@ -316,12 +341,14 @@ inline std::ostream & operator<< ( std::ostream & out , VectorSmall<Dim> const &
 @return the VectorSmall that corresponds to the input
 */
 template <UInt Dim, typename Vector>
-inline VectorSmall<Dim> castToVectorSmall ( Vector const & coords )
+inline VectorSmall<Dim> castToVectorSmall ( Vector const& coords )
 {
     ASSERT ( coords.size() == Dim , "the input vector has the wrong dimension" );
     VectorSmall<Dim> tmp;
     for ( UInt i = 0; i < Dim; i++ )
+    {
         tmp[ i ] = coords[ i ];
+    }
     return tmp;
 }
 
@@ -349,7 +376,7 @@ public:
     @param y y-component of the point
     @param z z-component of the point
     */
-    VectorSmall( Real const & x, Real const & y, Real const & z )
+    VectorSmall ( Real const& x, Real const& y, Real const& z )
     {
         M_coords[ 0 ] = x;
         M_coords[ 1 ] = y;
@@ -357,15 +384,15 @@ public:
     }
 
 
-     VectorSmall( Real* rawVector )
+    VectorSmall ( Real* rawVector )
     {
         M_coords[ 0 ] = rawVector[0];
         M_coords[ 1 ] = rawVector[1];
         M_coords[ 2 ] = rawVector[2];
-     }
+    }
 
     //! Assignment operator
-    VectorSmall<3> & operator= ( VectorSmall<3> const & vector )
+    VectorSmall<3>& operator= ( VectorSmall<3> const& vector )
     {
         M_coords[ 0 ] = vector.M_coords[ 0 ];
         M_coords[ 1 ] = vector.M_coords[ 1 ];
@@ -374,18 +401,18 @@ public:
     }
 
     //! Copy constructor
-    VectorSmall ( VectorSmall<3> const & vector )
+    VectorSmall ( VectorSmall<3> const& vector )
     {
         *this = vector;
     }
 
     //@}
 
-    //! @name Overloaded operators 
+    //! @name Overloaded operators
     //@{
 
     //! Operator +=
-    VectorSmall<3> & operator+= ( VectorSmall<3> const & vector )
+    VectorSmall<3>& operator+= ( VectorSmall<3> const& vector )
     {
         M_coords[ 0 ] += vector.M_coords[ 0 ];
         M_coords[ 1 ] += vector.M_coords[ 1 ];
@@ -394,13 +421,14 @@ public:
     }
 
     //! Operator +
-    VectorSmall<3> operator+ ( VectorSmall<3> const & vector ) const
+    VectorSmall<3> operator+ ( VectorSmall<3> const& vector ) const
     {
-        VectorSmall<3> tmp ( *this ); return tmp += vector;
+        VectorSmall<3> tmp ( *this );
+        return tmp += vector;
     }
 
     //! Operator -=
-    VectorSmall<3> & operator-= ( VectorSmall<3> const & vector )
+    VectorSmall<3>& operator-= ( VectorSmall<3> const& vector )
     {
         M_coords[ 0 ] -= vector.M_coords[ 0 ];
         M_coords[ 1 ] -= vector.M_coords[ 1 ];
@@ -409,13 +437,14 @@ public:
     }
 
     //! Operator -
-    VectorSmall<3> operator- ( VectorSmall<3> const & vector ) const
+    VectorSmall<3> operator- ( VectorSmall<3> const& vector ) const
     {
-        VectorSmall<3> tmp ( *this ); return tmp -= vector;
+        VectorSmall<3> tmp ( *this );
+        return tmp -= vector;
     }
 
     //! Operator *= (multiplication by scalar)
-    VectorSmall<3> &  operator*= ( Real const & factor )
+    VectorSmall<3>&   operator*= ( Real const& factor )
     {
         M_coords[ 0 ] *= factor;
         M_coords[ 1 ] *= factor;
@@ -424,13 +453,14 @@ public:
     }
 
     //! Operator * (multiplication by scalar on the right)
-    VectorSmall<3> operator* ( Real const & factor ) const
+    VectorSmall<3> operator* ( Real const& factor ) const
     {
-        VectorSmall<3> tmp ( *this ); return tmp *= factor;
+        VectorSmall<3> tmp ( *this );
+        return tmp *= factor;
     }
 
     //! Operator /= (division by scalar)
-    VectorSmall<3> & operator/= ( Real const & factor )
+    VectorSmall<3>& operator/= ( Real const& factor )
     {
         ASSERT ( factor != 0. , "Division by zero!" );
         *this *= 1. / factor;
@@ -438,41 +468,42 @@ public:
     }
 
     //! Operator / (division by scalar)
-    VectorSmall<3> operator/ ( Real const & factor ) const
+    VectorSmall<3> operator/ ( Real const& factor ) const
     {
-        VectorSmall<3> tmp ( *this ); return tmp /= factor;
+        VectorSmall<3> tmp ( *this );
+        return tmp /= factor;
     }
 
     //! Operator []
-    Real const & operator[] ( UInt const & i ) const
+    Real const& operator[] ( UInt const& i ) const
     {
         ASSERT ( i < 3 , "trying to access an index different from 0,1,2" );
         return M_coords [ i ];
     }
 
     //! Operator []
-    Real & operator[] ( UInt const & i )
+    Real& operator[] ( UInt const& i )
     {
         ASSERT ( i < 3 , "trying to set an index different from 0,1,2" );
         return M_coords [ i ];
     }
 
     //! Operator ()
-    Real const & operator() ( UInt const & i ) const
+    Real const& operator() ( UInt const& i ) const
     {
         ASSERT ( i < 3 , "trying to access an index different from 0,1,2" );
         return M_coords [ i ];
     }
 
     //! Operator ()
-    Real & operator() ( UInt const & i )
+    Real& operator() ( UInt const& i )
     {
         ASSERT ( i < 3 , "trying to set an index different from 0,1,2" );
         return M_coords [ i ];
     }
 
     //@}
-    
+
     //! @name Geometric Methods
     //@{
 
@@ -481,41 +512,41 @@ public:
     @param vector second operand
     @return scalar product value
     */
-    Real dot ( VectorSmall<3> const & vector ) const
+    Real dot ( VectorSmall<3> const& vector ) const
     {
         return ( M_coords[ 0 ] * vector.M_coords[ 0 ]
-               + M_coords[ 1 ] * vector.M_coords[ 1 ]
-               + M_coords[ 2 ] * vector.M_coords[ 2 ] );
+                 + M_coords[ 1 ] * vector.M_coords[ 1 ]
+                 + M_coords[ 2 ] * vector.M_coords[ 2 ] );
     }
 
     //! Cross product
     /*!
     @param vector second operand
     */
-    VectorSmall<3> cross ( VectorSmall<3> const & vector ) const
+    VectorSmall<3> cross ( VectorSmall<3> const& vector ) const
     {
         return VectorSmall ( M_coords[ 1 ] * vector.M_coords[ 2 ]
-                           - M_coords[ 2 ] * vector.M_coords[ 1 ],
+                             - M_coords[ 2 ] * vector.M_coords[ 1 ],
                              M_coords[ 2 ] * vector.M_coords[ 0 ]
-                           - M_coords[ 0 ] * vector.M_coords[ 2 ],
+                             - M_coords[ 0 ] * vector.M_coords[ 2 ],
                              M_coords[ 0 ] * vector.M_coords[ 1 ]
-                           - M_coords[ 1 ] * vector.M_coords[ 0 ] );
+                             - M_coords[ 1 ] * vector.M_coords[ 0 ] );
     }
 
     //! Outer product
     /*!
     @param vector second operand
     */
-    MatrixSmall<3,3> outerProduct ( VectorSmall<3> const & vector ) const;
+    MatrixSmall<3, 3> outerProduct ( VectorSmall<3> const& vector ) const;
 
     //! Extraction of a component
     /*!
     @param index of the component to be extracted
     @return extracted component
     */
-    Real extract ( UInt const & i ) const
+    Real extract ( UInt const& i ) const
     {
-        return( M_coords[ i ] );
+        return ( M_coords[ i ] );
     }
 
 
@@ -526,7 +557,7 @@ public:
     */
     Real norm () const
     {
-        return std::sqrt( this->dot( *this ) );
+        return std::sqrt ( this->dot ( *this ) );
     }
 
     //! Normalize vector
@@ -553,7 +584,10 @@ public:
     /*!
     @return the fixed size of the VectorSmall
     */
-    UInt size() const { return 3; }
+    UInt size() const
+    {
+        return 3;
+    }
 
     //@}
 
@@ -572,7 +606,7 @@ private:
 //@{
 
 //! Operator * (multiplication by scalar on the left)
-inline VectorSmall<3> operator* ( Real const & factor, VectorSmall<3> const & vector )
+inline VectorSmall<3> operator* ( Real const& factor, VectorSmall<3> const& vector )
 {
     VectorSmall<3> tmp ( vector );
     tmp *= factor;
@@ -590,7 +624,7 @@ inline VectorSmall<3> operator* ( Real const & factor, VectorSmall<3> const & ve
 @return the VectorSmall that corresponds to the input
 */
 template <typename Vector>
-inline VectorSmall<3> castToVector3D ( Vector const & coords )
+inline VectorSmall<3> castToVector3D ( Vector const& coords )
 {
     ASSERT ( coords.size() == 3 , "the input vector has the wrong dimension" );
     return VectorSmall<3> ( coords[ 0 ], coords[ 1 ], coords[ 2 ] );

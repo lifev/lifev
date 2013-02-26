@@ -104,7 +104,7 @@ public:
     typedef typename boost::shared_ptr<data_Type>  dataPtr_Type;
     typedef typename boost::shared_ptr<const Displayer>    displayerPtr_Type;
 
-    typedef FactorySingleton<Factory<StructuralConstitutiveLaw<MeshType>,std::string> >  StructureMaterialFactory;
+    typedef FactorySingleton<Factory<StructuralConstitutiveLaw<MeshType>, std::string> >  StructureMaterialFactory;
 
     typedef std::vector< typename MeshType::element_Type* > vectorVolumes_Type;
 
@@ -149,20 +149,20 @@ public:
       \param monolithicMap: the MapEpetra
       \param offset: the offset parameter used assembling the matrices
     */
-    virtual void setup( const FESpacePtr_Type& dFESpace,
-                        const ETFESpacePtr_Type& ETFESpace,
-                        const boost::shared_ptr<const MapEpetra>&   monolithicMap,
-                        const UInt offset, const dataPtr_Type& dataMaterial,
-                        const displayerPtr_Type& displayer  )=0;
+    virtual void setup ( const FESpacePtr_Type& dFESpace,
+                         const ETFESpacePtr_Type& ETFESpace,
+                         const boost::shared_ptr<const MapEpetra>&   monolithicMap,
+                         const UInt offset, const dataPtr_Type& dataMaterial,
+                         const displayerPtr_Type& displayer  ) = 0;
 
 
     //! Computes the linear part of the stiffness matrix StructuralSolver::buildSystem
     /*!
       \param dataMaterial the class with Material properties data
     */
-    virtual  void computeLinearStiff( dataPtr_Type& dataMaterial,
-                                      const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
-                                      const mapMarkerIndexesPtr_Type /*mapsMarkerIndexes*/ ) = 0;
+    virtual  void computeLinearStiff ( dataPtr_Type& dataMaterial,
+                                       const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
+                                       const mapMarkerIndexesPtr_Type /*mapsMarkerIndexes*/ ) = 0;
 
     //! Updates the Jacobian matrix in StructuralSolver::updateJacobian
     /*!
@@ -171,10 +171,10 @@ public:
                            material coefficients (e.g. Young modulus, Poisson ratio..)
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
-    virtual  void updateJacobianMatrix( const vector_Type& disp, const dataPtr_Type& dataMaterial,
-                                        const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
-                                        const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
-                                        const displayerPtr_Type& displayer ) = 0;
+    virtual  void updateJacobianMatrix ( const vector_Type& disp, const dataPtr_Type& dataMaterial,
+                                         const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                                         const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
+                                         const displayerPtr_Type& displayer ) = 0;
 
     //! Computes the new Stiffness matrix in StructuralSolver given a certain displacement field.
     //! This function is used both in StructuralSolver::evalResidual and in
@@ -187,10 +187,10 @@ public:
                            material coefficients (e.g. Young modulus, Poisson ratio..)
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
-    virtual  void computeStiffness( const vector_Type& sol, Real factor, const dataPtr_Type& dataMaterial,
-                                    const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
-                                    const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
-                                    const displayerPtr_Type& displayer ) = 0;
+    virtual  void computeStiffness ( const vector_Type& sol, Real factor, const dataPtr_Type& dataMaterial,
+                                     const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                                     const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
+                                     const displayerPtr_Type& displayer ) = 0;
 
 
     //! Computes the deformation Gradient F, the cofactor of F Cof(F),
@@ -243,7 +243,10 @@ public:
     }
 
     //! Get the FESpace object
-    FESpace_Type& dFESpace()  {return M_dispFESpace;}
+    FESpace_Type& dFESpace()
+    {
+        return M_dispFESpace;
+    }
 
     //! Get the Stiffness matrix
     matrixPtr_Type const jacobian()    const
@@ -257,9 +260,9 @@ public:
     //! Get the Stiffness matrix
     virtual vectorPtr_Type const stiffVector() const = 0;
 
-    virtual void apply( const vector_Type& sol, vector_Type& res,
-                        const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
-                        const mapMarkerIndexesPtr_Type mapsMarkerIndexes) =0;
+    virtual void apply ( const vector_Type& sol, vector_Type& res,
+                         const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                         const mapMarkerIndexesPtr_Type mapsMarkerIndexes) = 0;
 
     //@}
 
@@ -271,7 +274,7 @@ protected:
       \param VOID
       \return VOID
     */
-    virtual void setupVectorsParameters( void ) = 0;
+    virtual void setupVectorsParameters ( void ) = 0;
 
     //!Protected Members
 
@@ -300,7 +303,7 @@ protected:
 //=====================================
 
 template <typename MeshType>
-StructuralConstitutiveLaw<MeshType>::StructuralConstitutiveLaw( ):
+StructuralConstitutiveLaw<MeshType>::StructuralConstitutiveLaw( ) :
     M_dispFESpace                ( ),
     M_dispETFESpace              ( ),
     M_localMap                   ( ),
