@@ -1491,7 +1491,7 @@ INCLUDE_FILE_PATTERNS  =
 # undefined via #undef or recursively expanded use the := operator
 # instead of the = operator.
 
-PREDEFINED             = QT_VERSION=320 \
+PREDEFINED             = QT_VERSION=320 HAVE_HDF5=1 HAVE_MPI=1 \
                          __cplusplus
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then

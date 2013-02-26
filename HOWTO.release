@@ -14,12 +14,15 @@ git remote add github git@github.com:lifev/lifev.git
 
 2- update NEWS
 
-3- tag master with the tag RELEASE_X_Y_Z
-   X_Y_Z=3_2_0
+3- tag master with the tag LifeV-X.Y.Z
+   X_Y_Z=3.4.2
 
-   git tag  RELEASE_${X_Y_Z}
-   git push github  RELEASE_${X_Y_Z}
-   git push origin  RELEASE_${X_Y_Z}
+   git tag  LifeV-${X_Y_Z}
+
+   git push github  master:master
+   git push github  LifeV-${X_Y_Z}
+   git push origin  master:master
+   git push origin  LifeV-${X_Y_Z}
 
 4- add news on cmcsforge.epfl.ch and www.lifev.org
 
