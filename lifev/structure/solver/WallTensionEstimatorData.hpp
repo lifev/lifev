@@ -75,10 +75,10 @@ public:
     /*!
      * @param WallTensionEstimatorData - WallTensionEstimatorData
      */
-    WallTensionEstimatorData( const WallTensionEstimatorData& wallTensionEstimatorData );
+    WallTensionEstimatorData ( const WallTensionEstimatorData& wallTensionEstimatorData );
 
     //! Destructor
-    virtual ~WallTensionEstimatorData(){};
+    virtual ~WallTensionEstimatorData() {};
 
     //@}
 
@@ -90,7 +90,7 @@ public:
     /*!
      * @param WallTensionEstimatorData - WallTensionEstimatorData
      */
-    WallTensionEstimatorData& operator=( const WallTensionEstimatorData& wallTensionEstimatorData );
+    WallTensionEstimatorData& operator= ( const WallTensionEstimatorData& wallTensionEstimatorData );
 
     //@}
 
@@ -103,10 +103,10 @@ public:
      * @param dataFile data file
      * @param section section of the file
      */
-    void setup( const GetPot& dataFile, const std::string& section = "solid" );
+    void setup ( const GetPot& dataFile, const std::string& section = "solid" );
 
     //! Display the values
-    void showMe( std::ostream& output = std::cout ) const;
+    void showMe ( std::ostream& output = std::cout ) const;
 
     //@}
 
@@ -118,43 +118,64 @@ public:
     /*!
      * @param nameFile name of the post-processing file to be opened
      */
-    void setNameFile( const  std::string& nameFile) { M_nameFile = nameFile; }
+    void setNameFile ( const  std::string& nameFile)
+    {
+        M_nameFile = nameFile;
+    }
 
     //! Set Analysis Type
     /*!
      * @param analysis Type of analysis that can be performed
      */
-    void setAnalysisType( const std::string& analysisType) { M_analysisType = analysisType; }
+    void setAnalysisType ( const std::string& analysisType)
+    {
+        M_analysisType = analysisType;
+    }
 
     //! Set Recovery Variable
     /*!
      * @param recoveryVariable the field that is recovered (displacement or tensions)
      */
-    void setRecoveryVariable( const std::string& recoveryVariable) { M_recoveryVariable = recoveryVariable; }
+    void setRecoveryVariable ( const std::string& recoveryVariable)
+    {
+        M_recoveryVariable = recoveryVariable;
+    }
 
     //! Set initialTime
     /*!
      * @param initial Time initial of the analysis
      */
-    void setInitialTime(const UInt i, const Real initialTime ) { M_initialTime[i] = initialTime; }
+    void setInitialTime (const UInt i, const Real initialTime )
+    {
+        M_initialTime[i] = initialTime;
+    }
 
     //! Set final Time
     /*!
      * @param final Time final time of the analysis
      */
-    void setFinalTime( const UInt i, const Real finalTime ) { M_finalTime[i] = finalTime; }
+    void setFinalTime ( const UInt i, const Real finalTime )
+    {
+        M_finalTime[i] = finalTime;
+    }
 
     //! Set starting iteration
     /*!
      * @param starting iteration
      */
-    void setIterationStart( const UInt i, const std::string& iterStart ) { M_iterStart[i] = iterStart; }
+    void setIterationStart ( const UInt i, const std::string& iterStart )
+    {
+        M_iterStart[i] = iterStart;
+    }
 
     //! Set final Time
     /*!
      * @param final Time final time of the analysis
      */
-    void setIterationEnd ( const UInt i, const std::string& iterEnd ) { M_iterEnd[i] = iterEnd; }
+    void setIterationEnd ( const UInt i, const std::string& iterEnd )
+    {
+        M_iterEnd[i] = iterEnd;
+    }
 
     //@}
 
@@ -166,80 +187,116 @@ public:
     /*!
      * @return std::string with the name of the file used for the analysis
      */
-     const std::string& nameFile() const { return M_nameFile; }
+    const std::string& nameFile() const
+    {
+        return M_nameFile;
+    }
 
     //! Get typeFile
     /*!
      * @return std::string with the type of the file used for the analysis
      */
-     const std::string& typeFile() const { return M_typeFile; }
+    const std::string& typeFile() const
+    {
+        return M_typeFile;
+    }
 
     //! Get analysisType
     /*!
      * @return std::string with the type of analysis that has to be performed
      */
-    const std::string& analysisType() const { return M_analysisType; }
+    const std::string& analysisType() const
+    {
+        return M_analysisType;
+    }
 
     //! Get recoveryVariable
     /*!
      * @return std::string with the name of the field that is recovered
      */
-    const std::string& recoveryVariable() const { return M_recoveryVariable; }
+    const std::string& recoveryVariable() const
+    {
+        return M_recoveryVariable;
+    }
 
     //! Get initial Time
     /*!
      * @return initial Time of the analysis
      */
-    const time_Type& initialTime() const { return M_initialTime; }
+    const time_Type& initialTime() const
+    {
+        return M_initialTime;
+    }
 
     //! Get initial Time of the interval i
     /*!
      * @return initial Time of the i-th interval
      */
-    const Real initialTime(const UInt i) const { return M_initialTime[i]; }
+    const Real initialTime (const UInt i) const
+    {
+        return M_initialTime[i];
+    }
 
     //! Get final Time
     /*!
      * @return final time of the anaysis
      */
-    const time_Type& finalTime() const { return M_finalTime; }
+    const time_Type& finalTime() const
+    {
+        return M_finalTime;
+    }
 
     //! Get final Time of the i-th interval
     /*!
      * @return final time of the i-th interval
      */
-    const Real finalTime(const UInt i) const { return M_finalTime[i]; }
+    const Real finalTime (const UInt i) const
+    {
+        return M_finalTime[i];
+    }
 
     //! Get starting iteration
     /*!
      * @return starting iteration
      */
-    const iteration_Type& iterStart() const { return M_iterStart; }
+    const iteration_Type& iterStart() const
+    {
+        return M_iterStart;
+    }
 
     //! Get starting iteration of the i-th interval
     /*!
      * @return starting iteration of the i-th interval
      */
-    const std::string& iterStart(const UInt i) const { return M_iterStart[i]; }
+    const std::string& iterStart (const UInt i) const
+    {
+        return M_iterStart[i];
+    }
 
 
     //! Get ending iteration
     /*!
      * @return ending iteration
      */
-    const iteration_Type& iterEnd() const { return M_iterEnd; }
+    const iteration_Type& iterEnd() const
+    {
+        return M_iterEnd;
+    }
 
     //! Get starting iteration
     /*!
      * @return starting iteration
      */
-    const std::string& iterEnd(const UInt i) const { return M_iterEnd[i]; }
+    const std::string& iterEnd (const UInt i) const
+    {
+        return M_iterEnd[i];
+    }
 
     //@}
 
 private:
 
-    enum M_analysisType{istant,interval};
+    enum M_analysisType {istant, interval};
     //! Name of the file
     std::string           M_nameFile;
     std::string           M_typeFile;

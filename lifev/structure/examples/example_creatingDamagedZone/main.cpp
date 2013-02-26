@@ -77,37 +77,39 @@ int returnValue = EXIT_FAILURE;
 
 //Class to investigate the mesh
 template < typename MeshEntityType,
-           typename ComparisonPolicyType = boost::function2<bool,
-                                                            Real const &,
-                                                            Real const & > >
+         typename ComparisonPolicyType = boost::function2 < bool,
+         Real const&,
+         Real const& > >
 class SphereInterrogator
 {
 public:
     typedef MeshEntityType       meshEntity_Type;
     typedef ComparisonPolicyType comparisonPolicy_Type;
 
-    SphereInterrogator( Vector3D const & center,
-                        Real radius,
-                        comparisonPolicy_Type const & policy = std::less<Real>() )
-        : M_center( center ),
-          M_radius( radius ),
-          M_policy( policy ) {}
+    SphereInterrogator ( Vector3D const& center,
+                         Real radius,
+                         comparisonPolicy_Type const& policy = std::less<Real>() )
+        : M_center ( center ),
+          M_radius ( radius ),
+          M_policy ( policy ) {}
 
-    void operator()( meshEntity_Type & entity ) const
+    void operator() ( meshEntity_Type& entity ) const
     {
         // compute the barycenter of the entity
         // (this should be a method of the object)
         Vector3D barycenter;
-        for( UInt k = 0; k < meshEntity_Type::S_numPoints; k++ )
-            barycenter += entity.point( k ).coordinates();
+        for ( UInt k = 0; k < meshEntity_Type::S_numPoints; k++ )
+        {
+            barycenter += entity.point ( k ).coordinates();
+        }
         barycenter /= meshEntity_Type::S_numPoints;
 
-        UInt newMarker(2);
+        UInt newMarker (2);
         // check if the distance between the barycenter and the center of the circle
         // satisfies the policy (default: distance less than the radius)
-        if ( M_policy( ( barycenter - M_center ).norm(), M_radius ) )
+        if ( M_policy ( ( barycenter - M_center ).norm(), M_radius ) )
         {
-            entity.setMarkerID( newMarker );
+            entity.setMarkerID ( newMarker );
         }
     }
 
@@ -121,35 +123,37 @@ private:
 //This class is to count how many volumes are in the sphere. This is for debug purposes
 //It cannot be used the same functor as SphereInspector since they perform different operation
 template < typename MeshEntityType,
-           typename ComparisonPolicyType = boost::function2<bool,
-                                                            Real const &,
-                                                            Real const & > >
+         typename ComparisonPolicyType = boost::function2 < bool,
+         Real const&,
+         Real const& > >
 class SphereCounter
 {
 public:
     typedef MeshEntityType       meshEntity_Type;
     typedef ComparisonPolicyType comparisonPolicy_Type;
 
-    SphereCounter( Vector3D const & center,
-                        Real radius,
-                        comparisonPolicy_Type const & policy = std::less<Real>() )
-        : M_center( center ),
-          M_radius( radius ),
-          M_policy( policy ) {}
+    SphereCounter ( Vector3D const& center,
+                    Real radius,
+                    comparisonPolicy_Type const& policy = std::less<Real>() )
+        : M_center ( center ),
+          M_radius ( radius ),
+          M_policy ( policy ) {}
 
-    bool operator()( const meshEntity_Type& entity ) const
+    bool operator() ( const meshEntity_Type& entity ) const
     {
         // compute the barycenter of the entity
         // (this should be a method of the object)
         Vector3D barycenter;
-        for( UInt k = 0; k < meshEntity_Type::S_numPoints; k++ )
-            barycenter += entity.point( k ).coordinates();
+        for ( UInt k = 0; k < meshEntity_Type::S_numPoints; k++ )
+        {
+            barycenter += entity.point ( k ).coordinates();
+        }
         barycenter /= meshEntity_Type::S_numPoints;
 
         // check if the distance between the barycenter and the center of the circle
         // satisfies the policy (default: distance less than the radius)
-        return M_policy( ( barycenter - M_center ).norm(), M_radius );
-     }
+        return M_policy ( ( barycenter - M_center ).norm(), M_radius );
+    }
 
 private:
     const Vector3D M_center;
@@ -159,7 +163,7 @@ private:
 }; // SphereCounter
 
 
-std::set<UInt> parseList( const std::string& list )
+std::set<UInt> parseList ( const std::string& list )
 {
     std::string stringList = list;
     std::set<UInt> setList;
@@ -170,11 +174,11 @@ std::set<UInt> parseList( const std::string& list )
     size_t commaPos = 0;
     while ( commaPos != std::string::npos )
     {
-        commaPos = stringList.find( "," );
-        setList.insert( atoi( stringList.substr( 0, commaPos ).c_str() ) );
-        stringList = stringList.substr( commaPos+1 );
+        commaPos = stringList.find ( "," );
+        setList.insert ( atoi ( stringList.substr ( 0, commaPos ).c_str() ) );
+        stringList = stringList.substr ( commaPos + 1 );
     }
-    setList.insert( atoi( stringList.c_str() ) );
+    setList.insert ( atoi ( stringList.c_str() ) );
     return setList;
 }
 
@@ -190,9 +194,9 @@ public:
     /** @name Constructors, destructor
      */
     //@{
-    Structure( int                                   argc,
-               char**                                argv,
-               boost::shared_ptr<Epetra_Comm>        structComm );
+    Structure ( int                                   argc,
+                char**                                argv,
+                boost::shared_ptr<Epetra_Comm>        structComm );
 
     ~Structure()
     {}
@@ -231,7 +235,7 @@ private:
 struct Structure::Private
 {
     Private() :
-        rho(1), poisson(1), young(1), bulk(1), alpha(1), gamma(1)
+        rho (1), poisson (1), young (1), bulk (1), alpha (1), gamma (1)
     {}
     double rho, poisson, young, bulk, alpha, gamma;
 
@@ -243,23 +247,23 @@ struct Structure::Private
 
 
 
-Structure::Structure( int                                   argc,
-                      char**                                argv,
-                      boost::shared_ptr<Epetra_Comm>        structComm):
-    parameters( new Private() ),
+Structure::Structure ( int                                   argc,
+                       char**                                argv,
+                       boost::shared_ptr<Epetra_Comm>        structComm) :
+    parameters ( new Private() ),
     dFESpace()
 {
-    GetPot command_line(argc, argv);
-    string data_file_name = command_line.follow("data", 2, "-f", "--file");
-    GetPot dataFile( data_file_name );
+    GetPot command_line (argc, argv);
+    string data_file_name = command_line.follow ("data", 2, "-f", "--file");
+    GetPot dataFile ( data_file_name );
     parameters->data_file_name = data_file_name;
 
-    parameters->rho     = dataFile( "solid/physics/density", 1. );
-    parameters->young   = dataFile( "solid/physics/young",   1. );
-    parameters->poisson = dataFile( "solid/physics/poisson", 1. );
-    parameters->bulk    = dataFile( "solid/physics/bulk",    1. );
-    parameters->alpha   = dataFile( "solid/physics/alpha",   1. );
-    parameters->gamma   = dataFile( "solid/physics/gamma",   1. );
+    parameters->rho     = dataFile ( "solid/physics/density", 1. );
+    parameters->young   = dataFile ( "solid/physics/young",   1. );
+    parameters->poisson = dataFile ( "solid/physics/poisson", 1. );
+    parameters->bulk    = dataFile ( "solid/physics/bulk",    1. );
+    parameters->alpha   = dataFile ( "solid/physics/alpha",   1. );
+    parameters->gamma   = dataFile ( "solid/physics/gamma",   1. );
 
     std::cout << "density = " << parameters->rho     << std::endl
               << "young   = " << parameters->young   << std::endl
@@ -271,7 +275,10 @@ Structure::Structure( int                                   argc,
     parameters->comm = structComm;
     int ntasks = parameters->comm->NumProc();
 
-    if (!parameters->comm->MyPID()) std::cout << "My PID = " << parameters->comm->MyPID() << " out of " << ntasks << " running." << std::endl;
+    if (!parameters->comm->MyPID() )
+    {
+        std::cout << "My PID = " << parameters->comm->MyPID() << " out of " << ntasks << " running." << std::endl;
+    }
 }
 
 
@@ -291,48 +298,51 @@ Structure::run3d()
     bool verbose = (parameters->comm->MyPID() == 0);
 
     //! Number of boundary conditions for the velocity and mesh motion
-    boost::shared_ptr<BCHandler> BCh( new BCHandler() );
+    boost::shared_ptr<BCHandler> BCh ( new BCHandler() );
 
     //! dataElasticStructure
-    GetPot dataFile( parameters->data_file_name.c_str() );
+    GetPot dataFile ( parameters->data_file_name.c_str() );
 
-    boost::shared_ptr<StructuralConstitutiveLawData> dataStructure(new StructuralConstitutiveLawData( ));
-    dataStructure->setup(dataFile);
+    boost::shared_ptr<StructuralConstitutiveLawData> dataStructure (new StructuralConstitutiveLawData( ) );
+    dataStructure->setup (dataFile);
 
     MeshData             meshData;
-    meshData.setup(dataFile, "solid/space_discretization");
+    meshData.setup (dataFile, "solid/space_discretization");
 
-    boost::shared_ptr<RegionMesh<LinearTetra> > fullMeshPtr(new RegionMesh<LinearTetra>( ( parameters->comm ) ));
-    readMesh(*fullMeshPtr, meshData);
+    boost::shared_ptr<RegionMesh<LinearTetra> > fullMeshPtr (new RegionMesh<LinearTetra> ( ( parameters->comm ) ) );
+    readMesh (*fullMeshPtr, meshData);
 
     fullMeshPtr->showMe( );
 
-    if (verbose) std::cout << std::endl;
+    if (verbose)
+    {
+        std::cout << std::endl;
+    }
 
     //Geometrical Infos on the sphere
-    Vector3D center(0.0, 0.55, 8.0);
-    Real     radius(0.7);
+    Vector3D center (0.0, 0.55, 8.0);
+    Real     radius (0.7);
 
     //Count how many volumes are in the sphere
     //Create the Predicate
-    SphereCounter<mesh_Type::element_Type> countVolumesFunctor( center, radius );
+    SphereCounter<mesh_Type::element_Type> countVolumesFunctor ( center, radius );
     //Count phase
-    UInt numExtractedVolumes = fullMeshPtr->elementList().countAccordingToPredicate( countVolumesFunctor );
+    UInt numExtractedVolumes = fullMeshPtr->elementList().countAccordingToPredicate ( countVolumesFunctor );
 
-    std::cout << " The Number of volumes inside the sphere is: "<< numExtractedVolumes << std::endl;
+    std::cout << " The Number of volumes inside the sphere is: " << numExtractedVolumes << std::endl;
 
     //Extract the list of elements inside the sphere.
     //Creation of the class to investigate the mesh
-    SphereInterrogator<mesh_Type::element_Type> setSphereInterrogator( center, radius );
+    SphereInterrogator<mesh_Type::element_Type> setSphereInterrogator ( center, radius );
 
     //This method changes the markerID for the volumes which are inside the defined sphere
-    fullMeshPtr->elementList().changeAccordingToFunctor( setSphereInterrogator );
+    fullMeshPtr->elementList().changeAccordingToFunctor ( setSphereInterrogator );
 
     //Exporting the modified mesh
-    std::string const nameExportMesh =  dataFile( "exporter/modifiedMesh", "damagedMesh");
-    MeshWriter::writeMeshMedit<RegionMesh<LinearTetra> >( nameExportMesh , *fullMeshPtr );
+    std::string const nameExportMesh =  dataFile ( "exporter/modifiedMesh", "damagedMesh");
+    MeshWriter::writeMeshMedit<RegionMesh<LinearTetra> > ( nameExportMesh , *fullMeshPtr );
 
-    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Barrier (MPI_COMM_WORLD);
 }
 
 
@@ -340,25 +350,27 @@ Structure::run3d()
 
 
 
-    int
-        main( int argc, char** argv )
+int
+main ( int argc, char** argv )
+{
+
+#ifdef HAVE_MPI
+    MPI_Init (&argc, &argv);
+    boost::shared_ptr<Epetra_MpiComm> Comm (new Epetra_MpiComm ( MPI_COMM_WORLD ) );
+    if ( Comm->MyPID() == 0 )
     {
-
-#ifdef HAVE_MPI
-        MPI_Init(&argc, &argv);
-        boost::shared_ptr<Epetra_MpiComm> Comm(new Epetra_MpiComm( MPI_COMM_WORLD ) );
-        if ( Comm->MyPID() == 0 )
-            cout << "% using MPI" << endl;
-#else
-        boost::shared_ptr<Epetra_SerialComm> Comm( new Epetra_SerialComm() );
-        cout << "% using serial Version" << endl;
-#endif
-
-        Structure structure( argc, argv, Comm );
-        structure.run();
-
-#ifdef HAVE_MPI
-        MPI_Finalize();
-#endif
-        return EXIT_SUCCESS; //Check has to be perfomed later.
+        cout << "% using MPI" << endl;
     }
+#else
+    boost::shared_ptr<Epetra_SerialComm> Comm ( new Epetra_SerialComm() );
+    cout << "% using serial Version" << endl;
+#endif
+
+    Structure structure ( argc, argv, Comm );
+    structure.run();
+
+#ifdef HAVE_MPI
+    MPI_Finalize();
+#endif
+    return EXIT_SUCCESS; //Check has to be perfomed later.
+}

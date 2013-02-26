@@ -35,8 +35,8 @@
 
     @date 2004-11-12
 
-	Exponentially increasing analytic solution of Ross-Ethier Steinmann for unsteady Navier-Stokes 3D on the cube [-1,1]x[-1,1]x[-1,1].
-	@see Exact fully 3D Navier-Stokes solutions for benchmarking - C. Ross Ethier, D. A. Steinman
+    Exponentially increasing analytic solution of Ross-Ethier Steinmann for unsteady Navier-Stokes 3D on the cube [-1,1]x[-1,1]x[-1,1].
+    @see Exact fully 3D Navier-Stokes solutions for benchmarking - C. Ross Ethier, D. A. Steinman
  */
 
 /*
@@ -70,32 +70,32 @@ namespace LifeV
 class RossEthierSteinmanUnsteadyInc
 {
 public:
-    static Real f( const Real& t, const Real& x, const Real& y,
-                   const Real& z, const ID& i );
-    static Real xexact( const Real& t, const Real& x, const Real& y,
-                        const Real& z, const ID& i );
-    static Real uexact( const Real& t, const Real& x, const Real& y,
-                        const Real& z, const ID& i );
-    static Real uderexact( const Real& t, const Real& x, const Real& y,
-                           const Real& z, const ID& i );
-    static Real pexact( const Real& t, const Real& x, const Real& y,
-                        const Real& z, const ID& i );
-    static Real grad_u( const UInt& icoor, const Real& t, const Real& x, const Real& y,
+    static Real f ( const Real& t, const Real& x, const Real& y,
+                    const Real& z, const ID& i );
+    static Real xexact ( const Real& t, const Real& x, const Real& y,
+                         const Real& z, const ID& i );
+    static Real uexact ( const Real& t, const Real& x, const Real& y,
+                         const Real& z, const ID& i );
+    static Real uderexact ( const Real& t, const Real& x, const Real& y,
                             const Real& z, const ID& i );
+    static Real pexact ( const Real& t, const Real& x, const Real& y,
+                         const Real& z, const ID& i );
+    static Real grad_u ( const UInt& icoor, const Real& t, const Real& x, const Real& y,
+                         const Real& z, const ID& i );
 
     // Initial velocity
-    static Real x0( const Real& t, const Real& x, const Real& y,
-                    const Real& z, const ID& i );
+    static Real x0 ( const Real& t, const Real& x, const Real& y,
+                     const Real& z, const ID& i );
 
-    static Real fNeumann( const Real& t, const Real& x, const Real& y,
-                          const Real& z, const ID& i );
+    static Real fNeumann ( const Real& t, const Real& x, const Real& y,
+                           const Real& z, const ID& i );
 
-    static void setParamsFromGetPot( const GetPot& dataFile );
-    static void setA(const Real& aValue);
-    static void setD(const Real& dValue);
-    static void setViscosity(const Real& mu);
-    static void setDensity(const Real& rho);
-    static void setFlagStrain(const Int& flagValue);
+    static void setParamsFromGetPot ( const GetPot& dataFile );
+    static void setA (const Real& aValue);
+    static void setD (const Real& dValue);
+    static void setViscosity (const Real& mu);
+    static void setDensity (const Real& rho);
+    static void setFlagStrain (const Int& flagValue);
 
 private:
 

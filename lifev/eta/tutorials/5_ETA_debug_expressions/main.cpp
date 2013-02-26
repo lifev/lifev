@@ -88,55 +88,75 @@ typedef RegionMesh<LinearTetra> mesh_Type;
 typedef MatrixEpetra<Real> matrix_Type;
 
 
-int main( int argc, char** argv )
+int main ( int argc, char** argv )
 {
 
 #ifdef HAVE_MPI
-    MPI_Init(&argc, &argv);
-    boost::shared_ptr<Epetra_Comm> Comm(new Epetra_MpiComm(MPI_COMM_WORLD));
+    MPI_Init (&argc, &argv);
+    boost::shared_ptr<Epetra_Comm> Comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
 #else
-    boost::shared_ptr<Epetra_Comm> Comm(new Epetra_SerialComm);
+    boost::shared_ptr<Epetra_Comm> Comm (new Epetra_SerialComm);
 #endif
 
-    const bool verbose(Comm->MyPID()==0);
+    const bool verbose (Comm->MyPID() == 0);
 
 
-// ---------------------------------------------------------------
-// The next step is to build the mesh. We use here a structured
-// cartesian mesh over the square domain (-1,1)x(-1,1)x(-1,1).
-// The mesh is the partitioned for the parallel computations and
-// the original mesh is deleted.
-// ---------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // The next step is to build the mesh. We use here a structured
+    // cartesian mesh over the square domain (-1,1)x(-1,1)x(-1,1).
+    // The mesh is the partitioned for the parallel computations and
+    // the original mesh is deleted.
+    // ---------------------------------------------------------------
 
-    if (verbose) std::cout << " -- Building and partitioning the mesh ... " << std::flush;
+    if (verbose)
+    {
+        std::cout << " -- Building and partitioning the mesh ... " << std::flush;
+    }
 
-    const UInt Nelements(10);
+    const UInt Nelements (10);
 
     boost::shared_ptr< mesh_Type > fullMeshPtr(new mesh_Type( Comm ) );
 
-    regularMesh3D( *fullMeshPtr, 1, Nelements, Nelements, Nelements, false,
-                   2.0,   2.0,   2.0,
-                   -1.0,  -1.0,  -1.0);
+    regularMesh3D ( *fullMeshPtr, 1, Nelements, Nelements, Nelements, false,
+                    2.0,   2.0,   2.0,
+                    -1.0,  -1.0,  -1.0);
 
-    MeshPartitioner< mesh_Type >  meshPart(fullMeshPtr, Comm);
+    MeshPartitioner< mesh_Type >  meshPart (fullMeshPtr, Comm);
 
     fullMeshPtr.reset();
 
-    if (verbose) std::cout << " done ! " << std::endl;
+    if (verbose)
+    {
+        std::cout << " done ! " << std::endl;
+    }
 
 
-// ---------------------------------------------------------------
-// We start the discussion with the scalar case, so we define a
-// scalar finite element space and the corresponding matrix.
-// ---------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // We start the discussion with the scalar case, so we define a
+    // scalar finite element space and the corresponding matrix.
+    // ---------------------------------------------------------------
 
-    if (verbose) std::cout << " -- Building the scalar ETFESpace ... " << std::flush;
+    if (verbose)
+    {
+        std::cout << " -- Building the scalar ETFESpace ... " << std::flush;
+    }
 
     boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 1 > > scalarSpace
-        ( new ETFESpace< mesh_Type, MapEpetra, 3, 1 >(meshPart,&feTetraP1, Comm));
+    ( new ETFESpace< mesh_Type, MapEpetra, 3, 1 > (meshPart, &feTetraP1, Comm) );
 
-    if (verbose) std::cout << " done ! " << std::endl;
-    if (verbose) std::cout << " ---> Dofs: " << scalarSpace->dof().numTotalDof() << std::endl;
+    if (verbose)
+    {
+        std::cout << " done ! " << std::endl;
+    }
+    if (verbose)
+    {
+        std::cout << " ---> Dofs: " << scalarSpace->dof().numTotalDof() << std::endl;
+    }
+
+    if (verbose)
+    {
+        std::cout << " -- Defining the matrix ... " << std::flush;
+    }
 
     if (verbose) std::cout << " -- Defining the matrix ... " << std::flush;
 
@@ -146,6 +166,10 @@ int main( int argc, char** argv )
 
     if (verbose) std::cout << " done! " << std::endl;
 
+    if (verbose)
+    {
+        std::cout << " done! " << std::endl;
+    }
 
 // ---------------------------------------------------------------
 // We can now start the assembly. To understand whether an
@@ -171,7 +195,34 @@ int main( int argc, char** argv )
 //
 // ---------------------------------------------------------------
 
-    if (verbose) std::cout << " -- Assembling the scalar matrix ... " << std::flush;
+    // ---------------------------------------------------------------
+    // We can now start the assembly. To understand whether an
+    // expression is valid, the critical observation is that every
+    // piece of expression is associated to a "fictitious" type (in
+    // the sense that it is not the type of the expression in the
+    // C++ sense), which matches the mathematical type.
+    //
+    // For example, in the case of a scalar finite element space, the
+    // basis functions are scalar quantities, while their gradients
+    // are vectorial quantities.
+    //
+    // With this in mind, we can now formulate the rules for an
+    // expression to be valid:
+    //
+    // Rule A: The combinaisons between two expressions (through an
+    // operator or a function) must be valid. For example, it is not
+    // possible to sum a vectorial quantity and a scalar quantity.
+    //
+    // Rule B: The overall expression must be a scalar quantity. For
+    // example, it not possible to integrate simply grad(phi_i)).
+    //
+    //
+    // ---------------------------------------------------------------
+
+    if (verbose)
+    {
+        std::cout << " -- Assembling the scalar matrix ... " << std::flush;
+    }
 
     {
         using namespace ExpressionAssembly;
@@ -235,7 +286,10 @@ int main( int argc, char** argv )
             >> scalarMatrix;
     }
 
-    if (verbose) std::cout << " done! " << std::endl;
+    if (verbose)
+    {
+        std::cout << " done! " << std::endl;
+    }
 
 
 // ---------------------------------------------------------------
@@ -248,21 +302,30 @@ int main( int argc, char** argv )
 // the norm it should have.
 // ---------------------------------------------------------------
 
-    if (verbose) std::cout << " -- Closing the matrix ... " << std::flush;
+    if (verbose)
+    {
+        std::cout << " -- Closing the matrix ... " << std::flush;
+    }
 
     scalarMatrix->globalAssemble();
 
-    if (verbose) std::cout << " done ! " << std::endl;
+    if (verbose)
+    {
+        std::cout << " done ! " << std::endl;
+    }
 
-    Real matrixNorm( scalarMatrix->normInf() );
+    Real matrixNorm ( scalarMatrix->normInf() );
 
-    if (verbose) std::cout << " Matrix norm : " << matrixNorm << std::endl;
+    if (verbose)
+    {
+        std::cout << " Matrix norm : " << matrixNorm << std::endl;
+    }
 
 #ifdef HAVE_MPI
     MPI_Finalize();
 #endif
 
-    Real matrixNormDiff(std::abs(matrixNorm-3.2));
+    Real matrixNormDiff (std::abs (matrixNorm - 3.2) );
 
     if (verbose) std::cout << " Error : " << matrixNormDiff << std::endl;
 
@@ -270,7 +333,7 @@ int main( int argc, char** argv )
 
     if ( matrixNormDiff < testTolerance )
     {
-        return( EXIT_SUCCESS );
+        return ( EXIT_SUCCESS );
     }
     return ( EXIT_FAILURE );
 

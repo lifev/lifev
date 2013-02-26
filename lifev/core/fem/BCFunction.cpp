@@ -28,7 +28,7 @@
     @file
     @brief File contains BCManageNormal class for handling normal essential boundary conditions
 
-	@author Miguel Fernandez <miguel.fernandez@inria.fr>
+    @author Miguel Fernandez <miguel.fernandez@inria.fr>
     @contributor Christophe Prud'homme <christophe.prudhomme@epfl.ch>
     @contributor Mauro Perego <perego.mauro@gmail.com>
     @maintainer Mauro Perego <perego.mauro@gmail.com>
@@ -53,15 +53,15 @@ namespace LifeV
 //==================================================
 
 
-BCFunctionBase::BCFunctionBase( function_Type userDefinedFunction )
-        :
-        M_userDefinedFunction( userDefinedFunction )
+BCFunctionBase::BCFunctionBase ( function_Type userDefinedFunction )
+    :
+    M_userDefinedFunction ( userDefinedFunction )
 {
 }
 
-BCFunctionBase::BCFunctionBase( const BCFunctionBase& bcFunctionBase )
-        :
-        M_userDefinedFunction( bcFunctionBase.M_userDefinedFunction )
+BCFunctionBase::BCFunctionBase ( const BCFunctionBase& bcFunctionBase )
+    :
+    M_userDefinedFunction ( bcFunctionBase.M_userDefinedFunction )
 {
 }
 
@@ -83,9 +83,9 @@ BCFunctionBase::operator= ( const BCFunctionBase& bcFunctionBase )
 
 
 BCFunctionBase*
-createBCFunctionBase( BCFunctionBase const* bcFunctionBase )
+createBCFunctionBase ( BCFunctionBase const* bcFunctionBase )
 {
-    return new BCFunctionBase( ( BCFunctionBase const& )* bcFunctionBase );
+    return new BCFunctionBase ( ( BCFunctionBase const& ) * bcFunctionBase );
 }
 
 
@@ -99,17 +99,17 @@ createBCFunctionBase( BCFunctionBase const* bcFunctionBase )
 // Constructors
 //==================================================
 
-BCFunctionRobin::BCFunctionRobin( const BCFunctionRobin& bcFunctionRobin )
-        :
-        BCFunctionBase( bcFunctionRobin ),
-        M_robinBoundaryMassCoeffFunction( bcFunctionRobin.M_robinBoundaryMassCoeffFunction )
+BCFunctionRobin::BCFunctionRobin ( const BCFunctionRobin& bcFunctionRobin )
+    :
+    BCFunctionBase ( bcFunctionRobin ),
+    M_robinBoundaryMassCoeffFunction ( bcFunctionRobin.M_robinBoundaryMassCoeffFunction )
 {
 }
 
-BCFunctionRobin::BCFunctionRobin( const function_Type& rightHandSideFunction, const function_Type& massCoeffFunction )
-        :
-        BCFunctionBase( rightHandSideFunction ),
-        M_robinBoundaryMassCoeffFunction( massCoeffFunction )
+BCFunctionRobin::BCFunctionRobin ( const function_Type& rightHandSideFunction, const function_Type& massCoeffFunction )
+    :
+    BCFunctionBase ( rightHandSideFunction ),
+    M_robinBoundaryMassCoeffFunction ( massCoeffFunction )
 
 {
 }
@@ -121,11 +121,11 @@ BCFunctionRobin::BCFunctionRobin( const function_Type& rightHandSideFunction, co
 
 
 BCFunctionRobin&
-BCFunctionRobin::operator=( const BCFunctionRobin& bcFunctionRobin )
+BCFunctionRobin::operator= ( const BCFunctionRobin& bcFunctionRobin )
 {
     if ( this != &bcFunctionRobin )
     {
-        this->BCFunctionBase::operator=( bcFunctionRobin );
+        this->BCFunctionBase::operator= ( bcFunctionRobin );
         M_robinBoundaryMassCoeffFunction = bcFunctionRobin.M_robinBoundaryMassCoeffFunction;
     }
     return *this;
@@ -137,18 +137,18 @@ BCFunctionRobin::operator=( const BCFunctionRobin& bcFunctionRobin )
 //==================================================
 
 void
-BCFunctionRobin::setFunctions_Robin( const function_Type& rightHandSideFunction, const function_Type& massCoeffFunction )
+BCFunctionRobin::setFunctions_Robin ( const function_Type& rightHandSideFunction, const function_Type& massCoeffFunction )
 {
-    setFunction( rightHandSideFunction );
+    setFunction ( rightHandSideFunction );
     M_robinBoundaryMassCoeffFunction = massCoeffFunction;
 }
 
 
 
 BCFunctionBase*
-createBCFunctionRobin( BCFunctionBase const* __bc )
+createBCFunctionRobin ( BCFunctionBase const* __bc )
 {
-    return new BCFunctionRobin( ( BCFunctionRobin const& )*__bc );
+    return new BCFunctionRobin ( ( BCFunctionRobin const& ) *__bc );
 }
 
 
@@ -161,13 +161,13 @@ createBCFunctionRobin( BCFunctionBase const* __bc )
 //==================================================
 
 
-BCFunctionUDepBase::BCFunctionUDepBase(const function_Type& userDefinedFunction ): M_userDefinedFunction(userDefinedFunction)
+BCFunctionUDepBase::BCFunctionUDepBase (const function_Type& userDefinedFunction ) : M_userDefinedFunction (userDefinedFunction)
 {
 }
 
 
-BCFunctionUDepBase::BCFunctionUDepBase(const BCFunctionUDepBase& bcFunctionUDepBase ):
-        M_userDefinedFunction(bcFunctionUDepBase.M_userDefinedFunction)
+BCFunctionUDepBase::BCFunctionUDepBase (const BCFunctionUDepBase& bcFunctionUDepBase ) :
+    M_userDefinedFunction (bcFunctionUDepBase.M_userDefinedFunction)
 {
 }
 
@@ -188,9 +188,9 @@ BCFunctionUDepBase::operator= ( const BCFunctionUDepBase& bcFunctionUDepBase )
 
 
 BCFunctionUDepBase*
-createBCFunctionUDep( BCFunctionUDepBase const* bcFunctionUDepBase )
+createBCFunctionUDep ( BCFunctionUDepBase const* bcFunctionUDepBase )
 {
-    return new BCFunctionUDepBase( ( BCFunctionUDepBase const& )* bcFunctionUDepBase );
+    return new BCFunctionUDepBase ( ( BCFunctionUDepBase const& ) * bcFunctionUDepBase );
 }
 
 
@@ -203,17 +203,17 @@ createBCFunctionUDep( BCFunctionUDepBase const* bcFunctionUDepBase )
 // Constructor
 //==================================================
 
-BCFunctionUDepRobin::BCFunctionUDepRobin( const BCFunctionUDepRobin& bcFunctionUDepRobin )
-        :
-        BCFunctionUDepBase( bcFunctionUDepRobin ),
-        M_robinBoundaryMassCoeffFunction( bcFunctionUDepRobin.M_robinBoundaryMassCoeffFunction )
+BCFunctionUDepRobin::BCFunctionUDepRobin ( const BCFunctionUDepRobin& bcFunctionUDepRobin )
+    :
+    BCFunctionUDepBase ( bcFunctionUDepRobin ),
+    M_robinBoundaryMassCoeffFunction ( bcFunctionUDepRobin.M_robinBoundaryMassCoeffFunction )
 {
 }
 
-BCFunctionUDepRobin::BCFunctionUDepRobin( const function_Type& rightHandSideFunction, const function_Type& massCoeffFunction )
-        :
-        BCFunctionUDepBase( rightHandSideFunction ),
-        M_robinBoundaryMassCoeffFunction( massCoeffFunction )
+BCFunctionUDepRobin::BCFunctionUDepRobin ( const function_Type& rightHandSideFunction, const function_Type& massCoeffFunction )
+    :
+    BCFunctionUDepBase ( rightHandSideFunction ),
+    M_robinBoundaryMassCoeffFunction ( massCoeffFunction )
 
 {
 }
@@ -224,11 +224,11 @@ BCFunctionUDepRobin::BCFunctionUDepRobin( const function_Type& rightHandSideFunc
 //==================================================
 
 BCFunctionUDepRobin&
-BCFunctionUDepRobin::operator=( const BCFunctionUDepRobin& bcFunctionUDepRobin )
+BCFunctionUDepRobin::operator= ( const BCFunctionUDepRobin& bcFunctionUDepRobin )
 {
     if ( this != &bcFunctionUDepRobin )
     {
-        this->BCFunctionUDepBase::operator=( bcFunctionUDepRobin );
+        this->BCFunctionUDepBase::operator= ( bcFunctionUDepRobin );
         M_robinBoundaryMassCoeffFunction = bcFunctionUDepRobin.M_robinBoundaryMassCoeffFunction;
     }
     return *this;
@@ -240,17 +240,17 @@ BCFunctionUDepRobin::operator=( const BCFunctionUDepRobin& bcFunctionUDepRobin )
 //==================================================
 
 void
-BCFunctionUDepRobin::setFunctions_Robin( const function_Type& rightHandSideFunction, const function_Type& massCoeffFunction )
+BCFunctionUDepRobin::setFunctions_Robin ( const function_Type& rightHandSideFunction, const function_Type& massCoeffFunction )
 {
-    setFunction( rightHandSideFunction );
+    setFunction ( rightHandSideFunction );
     M_robinBoundaryMassCoeffFunction = massCoeffFunction;
 }
 
 
 BCFunctionUDepBase*
-createBCFunctionUDepRobin( BCFunctionUDepBase const* bcFunctionUDepRobin )
+createBCFunctionUDepRobin ( BCFunctionUDepBase const* bcFunctionUDepRobin )
 {
-    return new BCFunctionUDepRobin( ( BCFunctionUDepRobin const& )* bcFunctionUDepRobin );
+    return new BCFunctionUDepRobin ( ( BCFunctionUDepRobin const& ) * bcFunctionUDepRobin );
 }
 
 
@@ -261,17 +261,17 @@ createBCFunctionUDepRobin( BCFunctionUDepBase const* bcFunctionUDepRobin )
 //==================================================
 // Constructors
 //==================================================
-BCFunctionDirectional::BCFunctionDirectional( const BCFunctionDirectional& bcFunctionDirectional )
-        :
-        BCFunctionBase( bcFunctionDirectional ),
-        M_userDefinedVersorsFunction( bcFunctionDirectional.M_userDefinedVersorsFunction )
+BCFunctionDirectional::BCFunctionDirectional ( const BCFunctionDirectional& bcFunctionDirectional )
+    :
+    BCFunctionBase ( bcFunctionDirectional ),
+    M_userDefinedVersorsFunction ( bcFunctionDirectional.M_userDefinedVersorsFunction )
 {
 }
 
-BCFunctionDirectional::BCFunctionDirectional( const function_Type& userDefinedFunction, const function_Type& userDefinedVersorsFunction )
-        :
-        BCFunctionBase( userDefinedFunction ),
-        M_userDefinedVersorsFunction( userDefinedVersorsFunction )
+BCFunctionDirectional::BCFunctionDirectional ( const function_Type& userDefinedFunction, const function_Type& userDefinedVersorsFunction )
+    :
+    BCFunctionBase ( userDefinedFunction ),
+    M_userDefinedVersorsFunction ( userDefinedVersorsFunction )
 
 {
 }
@@ -281,11 +281,11 @@ BCFunctionDirectional::BCFunctionDirectional( const function_Type& userDefinedFu
 //==================================================
 
 BCFunctionDirectional&
-BCFunctionDirectional::operator=( const BCFunctionDirectional& bcFunctionDirectional )
+BCFunctionDirectional::operator= ( const BCFunctionDirectional& bcFunctionDirectional )
 {
     if ( this != &bcFunctionDirectional )
     {
-        this->BCFunctionBase::operator=( bcFunctionDirectional );
+        this->BCFunctionBase::operator= ( bcFunctionDirectional );
         M_userDefinedVersorsFunction = bcFunctionDirectional.M_userDefinedVersorsFunction;
     }
     return *this;
@@ -296,17 +296,17 @@ BCFunctionDirectional::operator=( const BCFunctionDirectional& bcFunctionDirecti
 // Set Method
 //==================================================
 void
-BCFunctionDirectional::setFunctions_Directional( const function_Type& userDefinedFunction, const function_Type& userDefinedVersorsFunction )
+BCFunctionDirectional::setFunctions_Directional ( const function_Type& userDefinedFunction, const function_Type& userDefinedVersorsFunction )
 {
-    setFunction( userDefinedFunction );
+    setFunction ( userDefinedFunction );
     M_userDefinedVersorsFunction = userDefinedVersorsFunction;
 }
 
 
 BCFunctionBase*
-createBCFunctionDirectional( BCFunctionBase const* bcFunctionDirectional )
+createBCFunctionDirectional ( BCFunctionBase const* bcFunctionDirectional )
 {
-    return new BCFunctionDirectional( ( BCFunctionDirectional const& )* bcFunctionDirectional);
+    return new BCFunctionDirectional ( ( BCFunctionDirectional const& ) * bcFunctionDirectional);
 }
 
 } //End of namespace LifeV

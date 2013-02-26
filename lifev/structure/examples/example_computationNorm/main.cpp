@@ -80,7 +80,7 @@ using namespace LifeV;
 
 int returnValue = EXIT_FAILURE;
 
-std::set<UInt> parseList( const std::string& list )
+std::set<UInt> parseList ( const std::string& list )
 {
     std::string stringList = list;
     std::set<UInt> setList;
@@ -91,11 +91,11 @@ std::set<UInt> parseList( const std::string& list )
     size_t commaPos = 0;
     while ( commaPos != std::string::npos )
     {
-        commaPos = stringList.find( "," );
-        setList.insert( atoi( stringList.substr( 0, commaPos ).c_str() ) );
-        stringList = stringList.substr( commaPos+1 );
+        commaPos = stringList.find ( "," );
+        setList.insert ( atoi ( stringList.substr ( 0, commaPos ).c_str() ) );
+        stringList = stringList.substr ( commaPos + 1 );
     }
-    setList.insert( atoi( stringList.c_str() ) );
+    setList.insert ( atoi ( stringList.c_str() ) );
     return setList;
 }
 
@@ -108,7 +108,7 @@ public:
     typedef VectorEpetra                                          vector_Type;
     typedef boost::shared_ptr<vector_Type>                        vectorPtr_Type;
 
-    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> fct_type;
+    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > fct_type;
     //Exporters Typedefs
     typedef typename LifeV::Exporter<mesh_Type >                  filter_Type;
     typedef boost::shared_ptr<filter_Type >                       filterPtr_Type;
@@ -130,9 +130,9 @@ public:
     /** @name Constructors, destructor
      */
     //@{
-    Structure( int                                   argc,
-               char**                                argv,
-               boost::shared_ptr<Epetra_Comm>        structComm );
+    Structure ( int                                   argc,
+                char**                                argv,
+                boost::shared_ptr<Epetra_Comm>        structComm );
 
     ~Structure()
     {}
@@ -171,7 +171,7 @@ private:
 struct Structure::Private
 {
     Private() :
-        rho(1), poisson(1), young(1), bulk(1), alpha(1), gamma(1)
+        rho (1), poisson (1), young (1), bulk (1), alpha (1), gamma (1)
     {}
     double rho, poisson, young, bulk, alpha, gamma;
 
@@ -179,7 +179,7 @@ struct Structure::Private
 
     boost::shared_ptr<Epetra_Comm>     comm;
 
-    static Real uexact(const Real& /*t*/, const Real&  X, const Real& Y, const Real& /*Z*/, const ID& i)
+    static Real uexact (const Real& /*t*/, const Real&  X, const Real& Y, const Real& /*Z*/, const ID& i)
     {
         //Setting up the data of the problem
         Real E = 8e+6;
@@ -193,30 +193,30 @@ struct Structure::Private
 
 
         // Defining the new variables
-        Real radius= std::sqrt( X*X + Y*Y  );
-        Real theta= std::atan( Y / X );
+        Real radius = std::sqrt ( X * X + Y * Y  );
+        Real theta = std::atan ( Y / X );
 
-        switch(i)
+        switch (i)
         {
-        case 0:
-            //u_x = cos(theta) * u_r(r)
-            return std::cos(theta) * ( ( ( radius/(2.0*(mu + lambda)) ) * ( ( Rin * Rin * Pin - Rout * Rout * Pout ) / ( Rout * Rout - Rin * Rin ) ) )
-                                       + ( ( (Rin * Rin * Rout * Rout ) / ( 2 * mu * radius)  ) * ( ( Pin - Pout ) / ( Rout * Rout - Rin * Rin ) ) ) );
+            case 0:
+                //u_x = cos(theta) * u_r(r)
+                return std::cos (theta) * ( ( ( radius / (2.0 * (mu + lambda) ) ) * ( ( Rin * Rin * Pin - Rout * Rout * Pout ) / ( Rout * Rout - Rin * Rin ) ) )
+                                            + ( ( (Rin * Rin * Rout * Rout ) / ( 2 * mu * radius)  ) * ( ( Pin - Pout ) / ( Rout * Rout - Rin * Rin ) ) ) );
 
-            break;
-        case 1:
-            //u_x = sin(theta) * u_r(r)
-            return std::sin(theta) * ( ( ( radius/(2.0*(mu + lambda)) ) * ( ( Rin * Rin * Pin - Rout * Rout * Pout ) / ( Rout * Rout - Rin * Rin ) ) )
-                                       + ( ( (Rin * Rin * Rout * Rout ) / ( 2 * mu * radius)  ) * ( ( Pin - Pout ) / ( Rout * Rout - Rin * Rin ) ) ) );
+                break;
+            case 1:
+                //u_x = sin(theta) * u_r(r)
+                return std::sin (theta) * ( ( ( radius / (2.0 * (mu + lambda) ) ) * ( ( Rin * Rin * Pin - Rout * Rout * Pout ) / ( Rout * Rout - Rin * Rin ) ) )
+                                            + ( ( (Rin * Rin * Rout * Rout ) / ( 2 * mu * radius)  ) * ( ( Pin - Pout ) / ( Rout * Rout - Rin * Rin ) ) ) );
 
-            break;
-        case 2:
-            return 0.0;
-            break;
-        default:
-            ERROR_MSG("This entry is not allowed!!");
-            return 0;
-            break;
+                break;
+            case 2:
+                return 0.0;
+                break;
+            default:
+                ERROR_MSG ("This entry is not allowed!!");
+                return 0;
+                break;
         }
 
         return  0.;
@@ -226,14 +226,14 @@ struct Structure::Private
 
 
 
-Structure::Structure( int                                   argc,
-                      char**                                argv,
-                      boost::shared_ptr<Epetra_Comm>        structComm):
-    parameters( new Private() )
+Structure::Structure ( int                                   argc,
+                       char**                                argv,
+                       boost::shared_ptr<Epetra_Comm>        structComm) :
+    parameters ( new Private() )
 {
-    GetPot command_line(argc, argv);
-    string data_file_name = command_line.follow("data", 2, "-f", "--file");
-    GetPot dataFile( data_file_name );
+    GetPot command_line (argc, argv);
+    string data_file_name = command_line.follow ("data", 2, "-f", "--file");
+    GetPot dataFile ( data_file_name );
     parameters->data_file_name = data_file_name;
 
     // parameters->rho     = dataFile( "solid/physics/density", 1. );
@@ -253,7 +253,10 @@ Structure::Structure( int                                   argc,
     parameters->comm = structComm;
     int ntasks = parameters->comm->NumProc();
 
-    if (!parameters->comm->MyPID()) std::cout << "My PID = " << parameters->comm->MyPID() << " out of " << ntasks << " running." << std::endl;
+    if (!parameters->comm->MyPID() )
+    {
+        std::cout << "My PID = " << parameters->comm->MyPID() << " out of " << ntasks << " running." << std::endl;
+    }
 }
 
 
@@ -273,77 +276,88 @@ Structure::run3d()
     bool verbose = (parameters->comm->MyPID() == 0);
 
     //! Number of boundary conditions for the velocity and mesh motion
-    boost::shared_ptr<BCHandler> BCh( new BCHandler() );
+    boost::shared_ptr<BCHandler> BCh ( new BCHandler() );
 
     //! dataElasticStructure
-    GetPot dataFile( parameters->data_file_name.c_str() );
+    GetPot dataFile ( parameters->data_file_name.c_str() );
 
     //Loading a partitoned mesh or reading a new one
-    const std::string partitioningMesh = dataFile( "partitioningOffline/loadMesh", "no");
+    const std::string partitioningMesh = dataFile ( "partitioningOffline/loadMesh", "no");
 
     //Creation of pointers
     boost::shared_ptr<MeshPartitioner<mesh_Type> > meshPart;
     boost::shared_ptr<mesh_Type> pointerToMesh;
 
-    if( !(partitioningMesh.compare("no")) )
+    if ( ! (partitioningMesh.compare ("no") ) )
     {
-        boost::shared_ptr<mesh_Type > fullMeshPtr(new mesh_Type( ( parameters->comm ) ));
+        boost::shared_ptr<mesh_Type > fullMeshPtr (new mesh_Type ( ( parameters->comm ) ) );
         //Creating a new mesh from scratch
         MeshData             meshData;
-        meshData.setup(dataFile, "solid/space_discretization");
-        readMesh(*fullMeshPtr, meshData);
+        meshData.setup (dataFile, "solid/space_discretization");
+        readMesh (*fullMeshPtr, meshData);
 
-        meshPart.reset( new MeshPartitioner<mesh_Type> (fullMeshPtr, parameters->comm ) );
+        meshPart.reset ( new MeshPartitioner<mesh_Type> (fullMeshPtr, parameters->comm ) );
 
         pointerToMesh = meshPart->meshPartition();
     }
     else
     {
         //Creating a mesh object from a partitioned mesh
-        const std::string partsFileName(dataFile("partitioningOffline/hdf5_file_name", "NO_DEFAULT_VALUE.h5"));
-    	PartitionIO<mesh_Type > partitionIO(partsFileName, parameters->comm);
-    	partitionIO.read(pointerToMesh);
+        const std::string partsFileName (dataFile ("partitioningOffline/hdf5_file_name", "NO_DEFAULT_VALUE.h5") );
+        PartitionIO<mesh_Type > partitionIO (partsFileName, parameters->comm);
+        partitionIO.read (pointerToMesh);
 
     }
 
 
-    std::string dOrder =  dataFile( "solid/space_discretization/order", "P1");
+    std::string dOrder =  dataFile ( "solid/space_discretization/order", "P1");
 
-    solidFESpacePtr_Type dFESpace( new solidFESpace_Type(pointerToMesh,dOrder,3,parameters->comm) );
+    solidFESpacePtr_Type dFESpace ( new solidFESpace_Type (pointerToMesh, dOrder, 3, parameters->comm) );
 
     // setting precise quadrature rule for fine meshes
     const QuadratureRule fineQuadRule = quadRuleTetra15pt;
     QuadratureRule fineBdQuadRule = quadRuleTria4pt;
 
-    dFESpace->setQuadRule( fineQuadRule );
-    dFESpace->setBdQuadRule( fineBdQuadRule );
+    dFESpace->setQuadRule ( fineQuadRule );
+    dFESpace->setBdQuadRule ( fineBdQuadRule );
     dFESpace->qr().showMe();
 
-    if (verbose) std::cout << std::endl;
+    if (verbose)
+    {
+        std::cout << std::endl;
+    }
 
     if (verbose)
+    {
         std::cout << "Setting up the reader and the iterations!! " <<  std::endl;
+    }
 
     //Reading fileNames - setting data for reading
-    std::string const importerType =  dataFile( "importer/type", "ensight");
-    std::string const fileName     =  dataFile( "importer/filename", "structure");
-    std::string const initialLoaded     =  dataFile( "importer/initialSol", "NO_DEFAULT_VALUE");
-    LifeV::Real initialTime        =  dataFile( "importer/initialTime", 0.0);
+    std::string const importerType =  dataFile ( "importer/type", "ensight");
+    std::string const fileName     =  dataFile ( "importer/filename", "structure");
+    std::string const initialLoaded     =  dataFile ( "importer/initialSol", "NO_DEFAULT_VALUE");
+    LifeV::Real initialTime        =  dataFile ( "importer/initialTime", 0.0);
 
     //Creating the importer
 #ifdef HAVE_HDF5
-    if ( !importerType.compare("hdf5") )
-        importerSolid.reset( new  hdf5Filter_Type( dataFile, fileName) );
+    if ( !importerType.compare ("hdf5") )
+    {
+        importerSolid.reset ( new  hdf5Filter_Type ( dataFile, fileName) );
+    }
     else
 #endif
     {
-        if ( !importerType.compare("none") )
-            importerSolid.reset( new emptyExporter_Type ( dataFile, dFESpace->mesh(), "solid", dFESpace->map().comm().MyPID()) );
+        if ( !importerType.compare ("none") )
+        {
+            importerSolid.reset ( new emptyExporter_Type ( dataFile, dFESpace->mesh(), "solid", dFESpace->map().comm().MyPID() ) );
+        }
         else
-            importerSolid.reset( new  ensightFilter_Type ( dataFile, fileName) );
+        {
+            importerSolid.reset ( new  ensightFilter_Type ( dataFile, fileName) );
+        }
     }
 
-    importerSolid->setMeshProcId(dFESpace->mesh(), dFESpace->map().comm().MyPID());
+    importerSolid->setMeshProcId (dFESpace->mesh(), dFESpace->map().comm().MyPID() );
 
     //Creation of Exporter to check the loaded solution (working only for HDF5)
     // std::string expVerFile = "verificationDisplExporter";
@@ -355,7 +369,7 @@ Structure::run3d()
     // exporter.postProcess(0.0);
 
     //Reading the displacement field
-    vectorPtr_Type solidDisp (new vector_Type(dFESpace->map(),importerSolid->mapType() ));
+    vectorPtr_Type solidDisp (new vector_Type (dFESpace->map(), importerSolid->mapType() ) );
     *solidDisp *= 0.0;
 
     std::string iterationString;
@@ -364,9 +378,9 @@ Structure::run3d()
     iterationString = initialLoaded;
 
     //Reading
-    LifeV::ExporterData<mesh_Type> solidDataReader (LifeV::ExporterData<mesh_Type>::VectorField, std::string("displacement."+iterationString), dFESpace, solidDisp, UInt(0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
+    LifeV::ExporterData<mesh_Type> solidDataReader (LifeV::ExporterData<mesh_Type>::VectorField, std::string ("displacement." + iterationString), dFESpace, solidDisp, UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
 
-    importerSolid->readVariable(solidDataReader);
+    importerSolid->readVariable (solidDataReader);
 
     //Exporting the just loaded solution (debug purposes)
     // Real currentLoading(iterInit + 1.0);
@@ -379,7 +393,7 @@ Structure::run3d()
     //Compute the error at the moment, the L2 error
     Real L2_Error, L2_RelError;
 
-    vector_Type solution(*solidDisp,Repeated);
+    vector_Type solution (*solidDisp, Repeated);
 
 
     //Creation of Exporter to check the loaded solution (working only for HDF5)
@@ -396,39 +410,41 @@ Structure::run3d()
 
     // exporter.postProcess(1.0);
 
-    L2_Error = dFESpace->l2Error(Private::uexact, solution, initialTime ,&L2_RelError);
+    L2_Error = dFESpace->l2Error (Private::uexact, solution, initialTime , &L2_RelError);
 
     std::ofstream out_norm;
     //save the norm
     if (verbose)
     {
-        out_norm.open("norm.txt", std::ios::app);
+        out_norm.open ("norm.txt", std::ios::app);
         out_norm << L2_Error       << "   "
                  << L2_RelError << "\n";
         out_norm.close();
     }
 
 
-    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Barrier (MPI_COMM_WORLD);
 
     std::cout << "Relative error L2: " << L2_RelError << std::endl;
 }
 
 int
-main( int argc, char** argv )
+main ( int argc, char** argv )
 {
 
 #ifdef HAVE_MPI
-    MPI_Init(&argc, &argv);
-    boost::shared_ptr<Epetra_MpiComm> Comm(new Epetra_MpiComm( MPI_COMM_WORLD ) );
+    MPI_Init (&argc, &argv);
+    boost::shared_ptr<Epetra_MpiComm> Comm (new Epetra_MpiComm ( MPI_COMM_WORLD ) );
     if ( Comm->MyPID() == 0 )
+    {
         cout << "% using MPI" << endl;
+    }
 #else
-    boost::shared_ptr<Epetra_SerialComm> Comm( new Epetra_SerialComm() );
+    boost::shared_ptr<Epetra_SerialComm> Comm ( new Epetra_SerialComm() );
     cout << "% using serial Version" << endl;
 #endif
 
-    Structure structure( argc, argv, Comm );
+    Structure structure ( argc, argv, Comm );
     structure.run();
 
 #ifdef HAVE_MPI

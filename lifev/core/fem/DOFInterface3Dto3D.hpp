@@ -68,13 +68,13 @@ namespace LifeV
 
 */
 class DOFInterface3Dto3D:
-        public DOFInterface
+    public DOFInterface
 {
 public:
     //! @name Public typedefs
     //@{
     typedef boost::numeric::ublas::vector<Real> Vector;
-    typedef boost::function<bool ( const std::vector<Real>&, const std::vector<Real>&, const Real& )> fct;
+    typedef boost::function<bool ( const std::vector<Real>&, const std::vector<Real>&, const Real& ) > fct;
     //@}
 
     //! @name Constructor & Destructor
@@ -82,11 +82,11 @@ public:
 
     //! default constructor
     DOFInterface3Dto3D()
-            :
-            M_refFE1( 0 ),
-            M_dof1( 0 ),
-            M_refFE2( 0 ),
-            M_dof2( 0 )
+        :
+        M_refFE1 ( 0 ),
+        M_dof1 ( 0 ),
+        M_refFE2 ( 0 ),
+        M_dof2 ( 0 )
     {}
 
     //! Constructor for interfacing DOF of the same type (ReferenceFE)
@@ -95,7 +95,7 @@ public:
      \param dof1 the DOF object of the mesh in which we want to make the computations
      \param dof2 the DOF object of the mesh which provides the data at the interface
     */
-    DOFInterface3Dto3D( const ReferenceFE& refFE, const DOF& dof1, const DOF& dof2 );
+    DOFInterface3Dto3D ( const ReferenceFE& refFE, const DOF& dof1, const DOF& dof2 );
 
     //! Constructor for interfacing DOF of different type (ReferenceFE)
     /*!
@@ -104,13 +104,13 @@ public:
       \param refFe2 the reference FE used in the mesh which provides the data at the interface
       \param dof2 the DOF object of the mesh which provides the data at the interface
      */
-    DOFInterface3Dto3D( const ReferenceFE& refFE1, const DOF& dof1, const ReferenceFE& refFE2, const DOF& dof2 );
+    DOFInterface3Dto3D ( const ReferenceFE& refFE1, const DOF& dof1, const ReferenceFE& refFE2, const DOF& dof2 );
 
     //! Constructor for interfacing DOF of the same type (ReferenceFE)
-	/*!
-	 \param dof the DOF object of the mesh in which we want to make the computations
-	*/
-	DOFInterface3Dto3D( const ReferenceFE& refFE, const DOF& dof);
+    /*!
+     \param dof the DOF object of the mesh in which we want to make the computations
+    */
+    DOFInterface3Dto3D ( const ReferenceFE& refFE, const DOF& dof);
 
 
     //@}
@@ -120,10 +120,10 @@ public:
     //@{
 
     //! Setup method for common finite element
-    void setup(const ReferenceFE& refFE, const DOF& dof1, const DOF& dof2 );
+    void setup (const ReferenceFE& refFE, const DOF& dof1, const DOF& dof2 );
 
     //! Setup method for possibly different finite element
-    void setup(const ReferenceFE& refFE1, const DOF& dof1, const ReferenceFE& refFE2, const DOF& dof2 );
+    void setup (const ReferenceFE& refFE1, const DOF& dof1, const ReferenceFE& refFE2, const DOF& dof2 );
 
     //! This method builds the DOF connections at the interface
     /*!
@@ -137,12 +137,12 @@ public:
      */
 
     template <typename MeshType>
-    void update( MeshType& mesh1,
-                 const markerID_Type& flag1,
-                 MeshType& mesh2,
-                 const markerID_Type& flag2,
-                 const Real& tol,
-                 Int const* const flag3 = 0 );
+    void update ( MeshType& mesh1,
+                  const markerID_Type& flag1,
+                  MeshType& mesh2,
+                  const markerID_Type& flag2,
+                  const Real& tol,
+                  Int const* const flag3 = 0 );
 
     //! This method builds the DOF connections between two matching surfaces belonging to the same mesh
     /*!
@@ -151,13 +151,13 @@ public:
       \param flag2 the marker of facets to be connected with facets marked with flag1
       \param tol tolerance for connecting points of both meshes at the interface
       \param coupled a function of points p1 and p2, that returns true if the points are coupled, false otherwise.
-			 points p1 and p2 are constituted of std::vector<Real>(3) containing the coordinates.
+             points p1 and p2 are constituted of std::vector<Real>(3) containing the coordinates.
     */
     template <typename MeshType>
-    void update( MeshType& mesh,
-                 const markerID_Type& flag1,
-                 const markerID_Type& flag2,
-                 const Real& tol, const fct& coupled );
+    void update ( MeshType& mesh,
+                  const markerID_Type& flag1,
+                  const markerID_Type& flag2,
+                  const Real& tol, const fct& coupled );
 
 
     //! This method interpolate data when using different FE
@@ -171,7 +171,7 @@ public:
      than refFE2
      */
     template <typename MeshType>
-    void interpolate( MeshType& mesh2, const UInt nbComp, const Vector& v, Vector& vI );
+    void interpolate ( MeshType& mesh2, const UInt nbComp, const Vector& v, Vector& vI );
 
     //@}
 
@@ -180,10 +180,16 @@ public:
     //@{
 
     //! This method returns the corresponding dof object when interpolation is used
-    const UInt& numTotalDof() const {return M_dof->numTotalDof();}
+    const UInt& numTotalDof() const
+    {
+        return M_dof->numTotalDof();
+    }
 
     //! reference to the list of connected facets.
-    const std::list< std::pair<ID, ID> >& connectedFacetMap() const {return M_facetToFacetConnectionList;}
+    const std::list< std::pair<ID, ID> >& connectedFacetMap() const
+    {
+        return M_facetToFacetConnectionList;
+    }
 
     //@}
 
@@ -204,11 +210,11 @@ private:
       \param flag2 the marker of the interface in the mesh2
       \param tol tolerance for connecting points of both meshes at the interface
       \param coupled a function of points p1 and p2, that returns true if the points are coupled, false otherwise.
-			 points p1 and p2 are constituted of std::vector<Real>(3) containing the coordinates.
+             points p1 and p2 are constituted of std::vector<Real>(3) containing the coordinates.
      */
     template <typename MeshType>
-    void updateFacetConnections( const MeshType& mesh1, const markerID_Type& flag1,
-                                 const MeshType& mesh2, const markerID_Type& flag2, const Real& tol, const fct& coupled );
+    void updateFacetConnections ( const MeshType& mesh1, const markerID_Type& flag1,
+                                  const MeshType& mesh2, const markerID_Type& flag2, const Real& tol, const fct& coupled );
     //! This method builds the connections between DOF at the interface (M_dofToDofConnectionList container)
     /*!
       \param mesh1 the mesh in which we want to make the computations
@@ -217,12 +223,12 @@ private:
       \param dof2 the DOF object of the mesh which provides de data at the interface
       \param tol tolerance for connecting points of both meshes at the interface
       \param coupled a function of points p1 and p2, that returns true if the points are coupled, false otherwise.
-			 points p1 and p2 are constituted of std::vector<Real>(3) containing the coordinates.
-	  \param flag3 the marker of a region of interface in the mesh1
+             points p1 and p2 are constituted of std::vector<Real>(3) containing the coordinates.
+      \param flag3 the marker of a region of interface in the mesh1
       \brief{The parameter flag3 is used in test_meshReorder to export the part of interface determined by flag3 on mesh2.}
       */
     template <typename MeshType>
-    void updateDofConnections( const MeshType& mesh1, const DOF& dof1,
+    void updateDofConnections ( const MeshType& mesh1, const DOF& dof1,
                                 const MeshType& mesh2, const DOF& dof2, const Real& tol, const fct& coupled,
                                 Int const* const flag3 = 0 );
 
@@ -259,47 +265,49 @@ private:
 // ===================================================
 
 //! Returns true if the Points p1 and p2 are equal with respect to the tolerance tol (in norm 1)
-bool coincide( const std::vector<Real>& p1, const std::vector<Real>& p2, const Real& tol );
+bool coincide ( const std::vector<Real>& p1, const std::vector<Real>& p2, const Real& tol );
 
 // ===================================================
 // Methods
 // ===================================================
 
 template <typename MeshType>
-void DOFInterface3Dto3D::update( MeshType& mesh1, const markerID_Type& flag1,
-                                 MeshType& mesh2, const markerID_Type& flag2,
-                                 const Real& tol, Int const* const flag3 )
+void DOFInterface3Dto3D::update ( MeshType& mesh1, const markerID_Type& flag1,
+                                  MeshType& mesh2, const markerID_Type& flag2,
+                                  const Real& tol, Int const* const flag3 )
 {
 
     // Updating facet connections at the interface
-    updateFacetConnections( mesh1, flag1, mesh2, flag2, tol, coincide );
+    updateFacetConnections ( mesh1, flag1, mesh2, flag2, tol, coincide );
 
     if ( M_refFE1->nbDof() > M_refFE2->nbDof() )
     {
         // Update of the DOF connections when we need interpolation
-        M_dof->update( mesh2 ); // Building auxiliary dof
-        updateDofConnections( mesh1, *M_dof1, mesh2, *M_dof, tol, coincide, flag3 ); // Update of the DOF connections
+        M_dof->update ( mesh2 ); // Building auxiliary dof
+        updateDofConnections ( mesh1, *M_dof1, mesh2, *M_dof, tol, coincide, flag3 ); // Update of the DOF connections
     }
     else
         // Update of the DOF connections without interpolation
-        updateDofConnections( mesh1, *M_dof1, mesh2, *M_dof2, tol, coincide, flag3 );
+    {
+        updateDofConnections ( mesh1, *M_dof1, mesh2, *M_dof2, tol, coincide, flag3 );
+    }
 }
 
 
 template <typename MeshType>
-void DOFInterface3Dto3D::update( MeshType& mesh, const markerID_Type& flag1,
-                                 const markerID_Type& flag2, const Real& tol, const fct& coupled)
+void DOFInterface3Dto3D::update ( MeshType& mesh, const markerID_Type& flag1,
+                                  const markerID_Type& flag2, const Real& tol, const fct& coupled)
 {
-	// Updating facet connections at the interface
-    updateFacetConnections( mesh, flag1, mesh, flag2, tol, coupled );
+    // Updating facet connections at the interface
+    updateFacetConnections ( mesh, flag1, mesh, flag2, tol, coupled );
 
     // Update of the DOF connections without interpolation
-    updateDofConnections( mesh, *M_dof1, mesh, *M_dof2, tol, coupled );
+    updateDofConnections ( mesh, *M_dof1, mesh, *M_dof2, tol, coupled );
 }
 
 
 template <typename MeshType>
-void DOFInterface3Dto3D::interpolate( MeshType& mesh2, const UInt nbComp, const Vector& v, Vector& vI )
+void DOFInterface3Dto3D::interpolate ( MeshType& mesh2, const UInt nbComp, const Vector& v, Vector& vI )
 {
 
     typedef typename MeshType::elementShape_Type GeoShape; // Element shape
@@ -324,7 +332,7 @@ void DOFInterface3Dto3D::interpolate( MeshType& mesh2, const UInt nbComp, const 
 
     Real x, y, z, sum;
 
-    std::vector<Real> vLoc( nbDofPerElement * nbComp );
+    std::vector<Real> vLoc ( nbDofPerElement * nbComp );
 
 
     // Loop on facets at the interface (matching facets)
@@ -333,13 +341,15 @@ void DOFInterface3Dto3D::interpolate( MeshType& mesh2, const UInt nbComp, const 
 
         ibF = i->second; // Facet number at the interface
 
-        iElAd = mesh2.boundaryFacet( ibF ).firstAdjacentElementIdentity();  // id of the element adjacent to the facet
-        iFaEl = mesh2.boundaryFacet( ibF ).firstAdjacentElementPosition(); // local id of the facet in its adjacent element
+        iElAd = mesh2.boundaryFacet ( ibF ).firstAdjacentElementIdentity(); // id of the element adjacent to the facet
+        iFaEl = mesh2.boundaryFacet ( ibF ).firstAdjacentElementPosition(); // local id of the facet in its adjacent element
 
         // Updating the local dof of the data vector in the adjacent element
         for ( UInt icmp = 0; icmp < nbComp; ++icmp )
             for ( ID idof = 0; idof < nbDofPerElement; ++idof )
-                vLoc[ icmp * nbDofPerElement + idof ] = v [ icmp * M_dof2->numTotalDof() + M_dof2->localToGlobalMap( iElAd, idof ) ];
+            {
+                vLoc[ icmp * nbDofPerElement + idof ] = v [ icmp * M_dof2->numTotalDof() + M_dof2->localToGlobalMap ( iElAd, idof ) ];
+            }
 
         // Vertex based Dof
         if ( nbDofPerVertex )
@@ -349,7 +359,7 @@ void DOFInterface3Dto3D::interpolate( MeshType& mesh2, const UInt nbComp, const 
             for ( ID iVeFa = 0; iVeFa < nbVertexPerFacet; ++iVeFa )
             {
 
-                iVeEl = GeoShape::facetToPoint( iFaEl, iVeFa ); // local vertex number (in element)
+                iVeEl = GeoShape::facetToPoint ( iFaEl, iVeFa ); // local vertex number (in element)
 
                 // Loop number of DOF per vertex
                 for ( ID l = 0; l < nbDofPerVertex; ++l )
@@ -357,9 +367,9 @@ void DOFInterface3Dto3D::interpolate( MeshType& mesh2, const UInt nbComp, const 
                     lDof = iVeEl * nbDofPerVertex + l; // Local dof in the adjacent Element
 
                     // Nodal coordinates
-                    x = M_refFE1->xi( lDof );
-                    y = M_refFE1->eta( lDof );
-                    z = M_refFE1->zeta( lDof );
+                    x = M_refFE1->xi ( lDof );
+                    y = M_refFE1->eta ( lDof );
+                    z = M_refFE1->zeta ( lDof );
 
                     // Loop on data vector components
                     for ( UInt icmp = 0; icmp < nbComp; ++icmp )
@@ -368,10 +378,12 @@ void DOFInterface3Dto3D::interpolate( MeshType& mesh2, const UInt nbComp, const 
                         // Interpolating data at the nodal point
                         sum = 0;
                         for ( ID idof = 0; idof < nbDofPerElement; ++idof )  // Loop on local DOF on the adjacent element
-                            sum += vLoc[ icmp * nbDofPerElement + idof ] * M_refFE2->phi( idof, x, y, z );
+                        {
+                            sum += vLoc[ icmp * nbDofPerElement + idof ] * M_refFE2->phi ( idof, x, y, z );
+                        }
 
                         // Updating interpolating vector
-                        vI ( icmp * M_dof->numTotalDof() + M_dof->localToGlobalMap( iElAd, lDof ) ) = sum;
+                        vI ( icmp * M_dof->numTotalDof() + M_dof->localToGlobalMap ( iElAd, lDof ) ) = sum;
                     }
                 }
             }
@@ -385,7 +397,7 @@ void DOFInterface3Dto3D::interpolate( MeshType& mesh2, const UInt nbComp, const 
             for ( ID iEdFa = 0; iEdFa < nbRidgePerFacet; ++iEdFa )
             {
 
-                iEdEl = GeoShape::faceToRidge( iFaEl, iEdFa ).first; // local ridge number (in element)
+                iEdEl = GeoShape::faceToRidge ( iFaEl, iEdFa ).first; // local ridge number (in element)
 
                 // Loop number of DOF per ridge
                 for ( ID l = 0; l < nbDofPerRidge; ++l )
@@ -393,9 +405,9 @@ void DOFInterface3Dto3D::interpolate( MeshType& mesh2, const UInt nbComp, const 
                     lDof = nbVertexDofPerElement + iEdEl * nbDofPerRidge + l; // Local dof in the adjacent Element
 
                     // Nodal coordinates
-                    x = M_refFE1->xi( lDof );
-                    y = M_refFE1->eta( lDof );
-                    z = M_refFE1->zeta( lDof );
+                    x = M_refFE1->xi ( lDof );
+                    y = M_refFE1->eta ( lDof );
+                    z = M_refFE1->zeta ( lDof );
 
                     // Loop on data vector components
                     for ( UInt icmp = 0; icmp < nbComp; ++icmp )
@@ -404,10 +416,12 @@ void DOFInterface3Dto3D::interpolate( MeshType& mesh2, const UInt nbComp, const 
                         // Interpolating data at the nodal point
                         sum = 0;
                         for ( ID idof = 0; idof < nbDofPerElement; ++idof )   // Loop on local DOF on the adjacent element
-                            sum += vLoc[ icmp * nbDofPerElement + idof ] * M_refFE2->phi( idof, x, y, z );
+                        {
+                            sum += vLoc[ icmp * nbDofPerElement + idof ] * M_refFE2->phi ( idof, x, y, z );
+                        }
 
                         // Updating interpolating vector
-                        vI ( icmp * M_dof->numTotalDof() + M_dof->localToGlobalMap( iElAd, lDof ) ) = sum;
+                        vI ( icmp * M_dof->numTotalDof() + M_dof->localToGlobalMap ( iElAd, lDof ) ) = sum;
                     }
                 }
             }
@@ -419,9 +433,9 @@ void DOFInterface3Dto3D::interpolate( MeshType& mesh2, const UInt nbComp, const 
             lDof = nbRidgeDofPerElement + nbVertexDofPerElement + iFaEl * nbDofPerFacet + l; // Local dof in the adjacent Element
 
             // Nodal coordinates
-            x = M_refFE1->xi( lDof );
-            y = M_refFE1->eta( lDof );
-            z = M_refFE1->zeta( lDof );
+            x = M_refFE1->xi ( lDof );
+            y = M_refFE1->eta ( lDof );
+            z = M_refFE1->zeta ( lDof );
 
             // Loop on data vector components
             for ( UInt icmp = 0; icmp < nbComp; ++icmp )
@@ -430,10 +444,12 @@ void DOFInterface3Dto3D::interpolate( MeshType& mesh2, const UInt nbComp, const 
                 // Interpolating data at the nodal point
                 sum = 0;
                 for ( ID idof = 0; idof < nbDofPerElement; ++idof )  // Loop on local DOF on the adjacent element
-                    sum += vLoc[ icmp * nbDofPerElement + idof ] * M_refFE2->phi( idof, x, y, z );
+                {
+                    sum += vLoc[ icmp * nbDofPerElement + idof ] * M_refFE2->phi ( idof, x, y, z );
+                }
 
                 // Updating interpolating vector
-                vI ( icmp * M_dof->numTotalDof() + M_dof->localToGlobalMap( iElAd, lDof ) ) = sum;
+                vI ( icmp * M_dof->numTotalDof() + M_dof->localToGlobalMap ( iElAd, lDof ) ) = sum;
             }
         }
     }
@@ -444,8 +460,8 @@ void DOFInterface3Dto3D::interpolate( MeshType& mesh2, const UInt nbComp, const 
 // ===================================================
 
 template <typename MeshType>
-void DOFInterface3Dto3D::updateFacetConnections( const MeshType& mesh1, const markerID_Type& flag1,
-                                                 const MeshType& mesh2, const markerID_Type& flag2, const Real& tol, const fct& coupled )
+void DOFInterface3Dto3D::updateFacetConnections ( const MeshType& mesh1, const markerID_Type& flag1,
+                                                  const MeshType& mesh2, const markerID_Type& flag2, const Real& tol, const fct& coupled )
 {
 
     UInt bdnF1 = mesh1.numBoundaryFacets(); // Number of boundary facets in mesh1
@@ -459,23 +475,25 @@ void DOFInterface3Dto3D::updateFacetConnections( const MeshType& mesh1, const ma
 
     UInt nbVertexPerFacet = GeoBShape::S_numVertices; // Number of facet's vertices
 
-    std::vector<Real>  v1(nDimensions), v2( nDimensions );
-    std::vector< std::vector<Real> > vertexVector(nbVertexPerFacet);
+    std::vector<Real>  v1 (nDimensions), v2 ( nDimensions );
+    std::vector< std::vector<Real> > vertexVector (nbVertexPerFacet);
 
     LifeChrono  chrono;
     chrono.start();
 
     // select facets flagged with flag 2
     for ( ID ibF2 = 0; ibF2 < bdnF2; ++ibF2 )
-    	if ( flag2 == mesh2.boundaryFacet( ibF2 ).markerID())
-    		facetsFlagged2.insert(ibF2);
+        if ( flag2 == mesh2.boundaryFacet ( ibF2 ).markerID() )
+        {
+            facetsFlagged2.insert (ibF2);
+        }
 
     // Loop on boundary facets on mesh1
     for ( ID ibF1 = 0; ibF1 < bdnF1; ++ibF1 )
     {
 
         // The facet marker
-        marker1 = mesh1.boundaryFacet( ibF1 ).markerID();
+        marker1 = mesh1.boundaryFacet ( ibF1 ).markerID();
 
         // Is the facet on the interface?
         if ( marker1 == flag1 )
@@ -487,41 +505,46 @@ void DOFInterface3Dto3D::updateFacetConnections( const MeshType& mesh1, const ma
 
                 // Loop on vertex coordinates
                 for ( ID j = 0; j < nDimensions; ++j )
-                    v1[ j ] = mesh1.boundaryFacet( ibF1 ).point( iVeFa ).coordinate( j );
+                {
+                    v1[ j ] = mesh1.boundaryFacet ( ibF1 ).point ( iVeFa ).coordinate ( j );
+                }
                 vertexVector[iVeFa] = v1;
             }
             // Loop on boundary facets on mesh2
             std::set<ID>::iterator it = facetsFlagged2.begin();
             for (; it != facetsFlagged2.end(); ++it )
             {
-            	ID ibF2 = *it;
+                ID ibF2 = *it;
 
-				// Loop on facet vertices
-				bool matched;
-				ID iVeFa = 0;
-				do{
-					// Loop on vertex coordinates
-					for ( ID j = 0; j < nDimensions; ++j )
-						v2[ j ] = mesh2.boundaryFacet( ibF2 ).point( iVeFa ).coordinate( j );
+                // Loop on facet vertices
+                bool matched;
+                ID iVeFa = 0;
+                do
+                {
+                    // Loop on vertex coordinates
+                    for ( ID j = 0; j < nDimensions; ++j )
+                    {
+                        v2[ j ] = mesh2.boundaryFacet ( ibF2 ).point ( iVeFa ).coordinate ( j );
+                    }
 
-					// Loop on facet vertices on mesh1
-					ID ivefa = 0;
-					do
-					{
-						// Do the vertices match? if yes break the loop
-						matched = coupled( vertexVector[ivefa], v2, tol );
-					}
-					while( (++ivefa < nbVertexPerFacet) && !matched );
-				}
-				while ( (++iVeFa < nbVertexPerFacet)&& matched);
-				//! Do the facets match?
-				if ( matched )
-				{
-					std::pair<ID, ID> elc( ibF1, ibF2 );
-					M_facetToFacetConnectionList.push_front( elc );
-					facetsFlagged2.erase(it);
-					break; // Stop loop on boundary facets on mesh2
-				}
+                    // Loop on facet vertices on mesh1
+                    ID ivefa = 0;
+                    do
+                    {
+                        // Do the vertices match? if yes break the loop
+                        matched = coupled ( vertexVector[ivefa], v2, tol );
+                    }
+                    while ( (++ivefa < nbVertexPerFacet) && !matched );
+                }
+                while ( (++iVeFa < nbVertexPerFacet) && matched);
+                //! Do the facets match?
+                if ( matched )
+                {
+                    std::pair<ID, ID> elc ( ibF1, ibF2 );
+                    M_facetToFacetConnectionList.push_front ( elc );
+                    facetsFlagged2.erase (it);
+                    break; // Stop loop on boundary facets on mesh2
+                }
 
             }
         }
@@ -538,48 +561,52 @@ void DOFInterface3Dto3D::updateFacetConnections( const MeshType& mesh1, const ma
   \param tol tolerance for connecting points of both meshes at the interface
 */
 template <typename Mesh>
-void DOFInterface3Dto3D::updateDofConnections( const Mesh& mesh1, const DOF& dof1,
+void DOFInterface3Dto3D::updateDofConnections ( const Mesh& mesh1, const DOF& dof1,
                                                 const Mesh& mesh2, const DOF& dof2, const Real& tol, const fct& coupled, Int const* const flag3)
 {
-    CurrentBoundaryFE feBd1( M_refFE1->boundaryFE(), getGeometricMap( mesh1 ).boundaryMap() );
-    CurrentBoundaryFE feBd2( M_refFE2->boundaryFE(), getGeometricMap( mesh2 ).boundaryMap() );
+    CurrentBoundaryFE feBd1 ( M_refFE1->boundaryFE(), getGeometricMap ( mesh1 ).boundaryMap() );
+    CurrentBoundaryFE feBd2 ( M_refFE2->boundaryFE(), getGeometricMap ( mesh2 ).boundaryMap() );
 
-    std::vector<Real> p1( nDimensions ), p2( nDimensions );
+    std::vector<Real> p1 ( nDimensions ), p2 ( nDimensions );
 
     // Loop on facets at the interface (matching facets)
     for ( Iterator i = M_facetToFacetConnectionList.begin(); i != M_facetToFacetConnectionList.end(); ++i )
     {
-        feBd1.update( mesh1.boundaryFacet( i->first ) );  // Updating facet information on mesh1
-        feBd2.update( mesh2.boundaryFacet( i->second ) );  // Updating facet information on mesh2
+        feBd1.update ( mesh1.boundaryFacet ( i->first ) ); // Updating facet information on mesh1
+        feBd2.update ( mesh2.boundaryFacet ( i->second ) ); // Updating facet information on mesh2
 
-        std::vector<ID> localToGlobalMapOnBFacet1 = dof1.localToGlobalMapOnBdFacet(i->first);
-        std::vector<ID> localToGlobalMapOnBFacet2 = dof2.localToGlobalMapOnBdFacet(i->second);
+        std::vector<ID> localToGlobalMapOnBFacet1 = dof1.localToGlobalMapOnBdFacet (i->first);
+        std::vector<ID> localToGlobalMapOnBFacet2 = dof2.localToGlobalMapOnBdFacet (i->second);
 
         for (ID lDof1 = 0; lDof1 < localToGlobalMapOnBFacet1.size(); lDof1++)
-		{
-		  if ( flag3 != 0 && mesh1.boundaryFacet(i->first).point(lDof1).markerID() == *flag3)
-		    continue;
-		  ID gDof1 = localToGlobalMapOnBFacet1[lDof1];
-		  feBd1.coorMap( p1[0], p1[1], p1[2], feBd1.refFE.xi( lDof1 ), feBd1.refFE.eta( lDof1 ) ); // Nodal coordinates on the current facet (mesh1)
+        {
+            if ( flag3 != 0 && mesh1.boundaryFacet (i->first).point (lDof1).markerID() == *flag3)
+            {
+                continue;
+            }
+            ID gDof1 = localToGlobalMapOnBFacet1[lDof1];
+            feBd1.coorMap ( p1[0], p1[1], p1[2], feBd1.refFE.xi ( lDof1 ), feBd1.refFE.eta ( lDof1 ) ); // Nodal coordinates on the current facet (mesh1)
 
-		  for (ID lDof2 = 0; lDof2 < localToGlobalMapOnBFacet2.size(); lDof2++)
-		    {
-		      ID gDof2 = localToGlobalMapOnBFacet2[lDof2];
-		      feBd2.coorMap( p2[0], p2[1], p2[2], feBd2.refFE.xi( lDof2 ), feBd2.refFE.eta( lDof2 ) );
+            for (ID lDof2 = 0; lDof2 < localToGlobalMapOnBFacet2.size(); lDof2++)
+            {
+                ID gDof2 = localToGlobalMapOnBFacet2[lDof2];
+                feBd2.coorMap ( p2[0], p2[1], p2[2], feBd2.refFE.xi ( lDof2 ), feBd2.refFE.eta ( lDof2 ) );
 
-		      if ( coupled( p1, p2, tol ) )
-			{
-			  std::pair<ID, ID> locDof( gDof1, gDof2 );
-			  M_dofToDofConnectionList.push_front( locDof ); // Updating the list of dof connections
-			  break;
-			}
-		    }
-		}
+                if ( coupled ( p1, p2, tol ) )
+                {
+                    std::pair<ID, ID> locDof ( gDof1, gDof2 );
+                    M_dofToDofConnectionList.push_front ( locDof ); // Updating the list of dof connections
+                    break;
+                }
+            }
+        }
     }
 
     // Updating the map containter with the connections
     for ( Iterator i = M_dofToDofConnectionList.begin(); i != M_dofToDofConnectionList.end(); ++i )
+    {
         M_localDofMap[ i->first ] = i->second;
+    }
 
     // Saving memory
     M_dofToDofConnectionList.clear();

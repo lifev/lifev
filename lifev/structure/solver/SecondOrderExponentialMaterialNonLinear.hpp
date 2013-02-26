@@ -48,8 +48,8 @@ namespace LifeV
 template <typename MeshType>
 class SecondOrderExponentialMaterialNonLinear : public StructuralConstitutiveLaw<MeshType>
 {
-//!@name Type definitions
-//@{
+    //!@name Type definitions
+    //@{
 
     public:
     typedef StructuralConstitutiveLaw<MeshType>       super;
@@ -90,19 +90,19 @@ class SecondOrderExponentialMaterialNonLinear : public StructuralConstitutiveLaw
 
 
 
-//! @name Constructor &  Destructor
-//@{
+    //! @name Constructor &  Destructor
+    //@{
 
     SecondOrderExponentialMaterialNonLinear();
 
     virtual  ~SecondOrderExponentialMaterialNonLinear();
 
-//@}
+    //@}
 
 
 
-//!@name Methods
-//@{
+    //!@name Methods
+    //@{
 
     //! Setup the created object of the class StructuralConstitutiveLaw
     /*!
@@ -184,7 +184,7 @@ class SecondOrderExponentialMaterialNonLinear : public StructuralConstitutiveLaw
     /*!
       \param dk_loc: the elemental displacement
     */
-    void computeKinematicsVariables( const VectorElemental& dk_loc );
+    void computeKinematicsVariables ( const VectorElemental& dk_loc );
 
     //! Computes the deformation Gradient F, the cofactor of F Cof(F), the determinant of F J = det(F), the trace of C Tr(C).
     /*!
@@ -193,8 +193,8 @@ class SecondOrderExponentialMaterialNonLinear : public StructuralConstitutiveLaw
     //void computeStress( const vector_Type& sol );
 
     //! ShowMe method of the class (saved on a file the stiffness vector and the jacobian)
-    void showMe( std::string const& fileNameVectStiff,
-                 std::string const& fileNameJacobain );
+    void showMe ( std::string const& fileNameVectStiff,
+                  std::string const& fileNameJacobain );
 
     //! Compute the First Piola Kirchhoff Tensor
     /*!
@@ -204,28 +204,34 @@ class SecondOrderExponentialMaterialNonLinear : public StructuralConstitutiveLaw
        \param invariants std::vector with the invariants of C and the detF
        \param material UInt number to get the material parameteres form the VenantElasticData class
     */
-    void computeLocalFirstPiolaKirchhoffTensor( Epetra_SerialDenseMatrix& firstPiola,
-                                                const Epetra_SerialDenseMatrix& tensorF,
-                                                const Epetra_SerialDenseMatrix& cofactorF,
-                                                const std::vector<Real>& invariants,
-                                                const UInt marker);
+    void computeLocalFirstPiolaKirchhoffTensor ( Epetra_SerialDenseMatrix& firstPiola,
+                                                 const Epetra_SerialDenseMatrix& tensorF,
+                                                 const Epetra_SerialDenseMatrix& cofactorF,
+                                                 const std::vector<Real>& invariants,
+                                                 const UInt marker);
 
 
-//@}
+    //@}
 
-//! @name Get Methods
-//@{
+    //! @name Get Methods
+    //@{
 
     //! Get the Stiffness matrix
-    matrixPtr_Type const stiffMatrix() const { return super::M_jacobian; }
+    matrixPtr_Type const stiffMatrix() const
+    {
+        return super::M_jacobian;
+    }
 
 
     //! Get the stiffness vector
-    vectorPtr_Type const stiffVector() const {return M_stiff; }
+    vectorPtr_Type const stiffVector() const
+    {
+        return M_stiff;
+    }
 
     void apply( const vector_Type& sol, vector_Type& res, const mapMarkerVolumesPtr_Type mapsMarkerVolumes, const mapMarkerIndexesPtr_Type mapsMarkerIndexes) ;
 
-//@}
+    //@}
 
 
 
@@ -287,7 +293,7 @@ SecondOrderExponentialMaterialNonLinear<MeshType>::setup(const FESpacePtr_Type& 
     this->M_localMap                    = monolithicMap;
     this->M_offset                      = offset;
 
-    M_stiff.reset                     ( new vector_Type(*this->M_localMap) );
+    M_stiff.reset                     ( new vector_Type (*this->M_localMap) );
 
     M_identity(0,0) = 1.0; M_identity(0,1) = 0.0; M_identity(0,2) = 0.0;
     M_identity(1,0) = 0.0; M_identity(1,1) = 1.0; M_identity(1,2) = 0.0;
@@ -354,7 +360,7 @@ void SecondOrderExponentialMaterialNonLinear<MeshType>::updateJacobianMatrix( co
                                                                               const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
                                                                               const displayerPtr_Type& displayer )
 {
-    this->M_jacobian.reset(new matrix_Type(*this->M_localMap));
+    this->M_jacobian.reset (new matrix_Type (*this->M_localMap) );
 
     displayer->leaderPrint(" \n************************************************\n ");
     updateNonLinearJacobianTerms(this->M_jacobian, disp, dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes,  displayer);
@@ -700,8 +706,8 @@ template <typename MeshType>
 void SecondOrderExponentialMaterialNonLinear<MeshType>::showMe( std::string const& fileNameStiff,
                                                             std::string const& fileNameJacobian )
 {
-    this->M_stiff->spy(fileNameStiff);
-    this->M_jacobian->spy(fileNameJacobian);
+    this->M_stiff->spy (fileNameStiff);
+    this->M_jacobian->spy (fileNameJacobian);
 }
 
 
@@ -729,7 +735,7 @@ inline StructuralConstitutiveLaw<MeshType>* createSecondOrderExponentialMaterial
 
 namespace
 {
-static bool registerSOEXP = StructuralConstitutiveLaw<LifeV::RegionMesh<LinearTetra> >::StructureMaterialFactory::instance().registerProduct( "secondOrderExponential", &createSecondOrderExponentialMaterialNonLinear<LifeV::RegionMesh<LinearTetra> > );
+static bool registerSOEXP = StructuralConstitutiveLaw<LifeV::RegionMesh<LinearTetra> >::StructureMaterialFactory::instance().registerProduct ( "secondOrderExponential", &createSecondOrderExponentialMaterialNonLinear<LifeV::RegionMesh<LinearTetra> > );
 }
 
 } //Namespace LifeV

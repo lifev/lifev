@@ -52,7 +52,7 @@ namespace LifeV
 /*!
  *  @author Vincent Martin, Cristiano Malossi
  *  @see Equations and networks of 1-D models \cite FormaggiaLamponi2003
- *  @see Geometrical multiscale coupling of 1-D models \cite Malossi2011Algorithms \cite Malossi2011Algorithms1D
+ *  @see Geometrical multiscale coupling of 1-D models \cite Malossi2011Algorithms \cite Malossi2011Algorithms1D \cite BonnemainMalossi2012LVAD
  *
  *  It contains the following methods:
  *  <ol>
@@ -82,7 +82,7 @@ public:
     /*!
      * @param dataPtr pointer to the data container of the problem
      */
-    explicit OneDFSIPhysicsLinear( const dataPtr_Type dataPtr ) : super( dataPtr ) {}
+    explicit OneDFSIPhysicsLinear ( const dataPtr_Type dataPtr ) : super ( dataPtr ) {}
 
     //! Destructor
     virtual ~OneDFSIPhysicsLinear() {}
@@ -107,7 +107,7 @@ public:
      *  @param W2 second Riemann variable
      *  @param iNode node of the mesh
      */
-    void fromWToU( Real& U1, Real& U2, const Real& W1, const Real& W2, const UInt& iNode ) const;
+    void fromWToU ( Real& U1, Real& U2, const Real& W1, const Real& W2, const UInt& iNode ) const;
 
     //! Compute \f$\mathbf W\f$ from \f$\mathbf U\f$
     /*!
@@ -122,7 +122,7 @@ public:
      *  @param U2 second physical variable
      *  @param iNode node of the mesh
      */
-    void fromUToW( Real& W1, Real& W2, const Real& U1, const Real& U2, const UInt& iNode ) const;
+    void fromUToW ( Real& W1, Real& W2, const Real& U1, const Real& U2, const UInt& iNode ) const;
 
     //! Compute \f$P\f$ from \f$\mathbf W\f$
     /*!
@@ -133,7 +133,7 @@ public:
      *  @param iNode node of the mesh
      *  @return pressure P = beta0 * ( ( 1 / Area0 )^(beta1) * ( (W1 - W2) / (2 * celerity0) + Area0 )^(beta1) - 1 )
      */
-    Real fromWToP( const Real& W1, const Real& W2, const UInt& iNode ) const;
+    Real fromWToP ( const Real& W1, const Real& W2, const UInt& iNode ) const;
 
     //! Compute \f$W_1\f$ or \f$W_2\f$ from \f$P\f$
     /*!
@@ -148,7 +148,7 @@ public:
      *  @param iNode node of the mesh
      *  @return the other Riemann variable
      */
-    Real fromPToW( const Real& P, const Real& W, const ID& iW, const UInt& iNode ) const;
+    Real fromPToW ( const Real& P, const Real& W, const ID& iW, const UInt& iNode ) const;
 
     //! Compute \f$W_1\f$ or \f$W_2\f$ from \f$Q\f$
     /*!
@@ -163,7 +163,7 @@ public:
      *  @param iNode node of the mesh
      *  @return the other Riemann variable
      */
-    Real fromQToW( const Real& Q, const Real& W_tn, const Real& W, const ID& iW, const UInt& iNode ) const;
+    Real fromQToW ( const Real& Q, const Real& W_tn, const Real& W, const ID& iW, const UInt& iNode ) const;
 
     //@}
 
@@ -184,7 +184,7 @@ public:
      *  @param iNode node of the mesh
      *  @return \f$\displaystyle\frac{dP}{dW_1}\f$ or \f$\displaystyle\frac{dP}{dW_2}\f$
      */
-    Real dPdW( const Real& W1, const Real& W2, const ID& iW, const UInt& iNode ) const;
+    Real dPdW ( const Real& W1, const Real& W2, const ID& iW, const UInt& iNode ) const;
 
     //@}
 
@@ -193,9 +193,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    explicit OneDFSIPhysicsLinear( const OneDFSIPhysicsLinear& physics );
+    explicit OneDFSIPhysicsLinear ( const OneDFSIPhysicsLinear& physics );
 
-    OneDFSIPhysicsLinear& operator=( const OneDFSIPhysicsLinear& physics );
+    OneDFSIPhysicsLinear& operator= ( const OneDFSIPhysicsLinear& physics );
 
     //@}
 };

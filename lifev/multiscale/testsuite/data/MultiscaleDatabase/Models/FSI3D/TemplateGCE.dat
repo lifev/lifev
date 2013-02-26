@@ -1,0 +1,493 @@
+###################################################################################################
+#
+#                       This file is part of the LifeV Library
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+#
+#      Author(s): Paolo Crosetto <paolo.crosetto@epfl.ch>
+#                 Cristiano Malossi <cristiano.malossi@epfl.ch>
+#           Date: 2011-03-10
+#  License Terms: GNU LGPL
+#
+###################################################################################################
+
+[Multiscale]
+modelName        = FSI3D_TemplateGCE
+modelType        = FSI3D
+couplingFlags    = ''
+
+
+
+[exporter]
+start            = 0             # start index for filenames
+save             = 1             # how many time steps per posptrocessing
+multimesh        = false         # true if the mesh has to be saved at each post-processing step
+type             = hdf5
+
+[importer]
+type             = hdf5
+
+
+
+[problem]
+method      = monolithicGE # monolithicGE, monolithicGI
+
+blockOper   = AdditiveSchwarz   # AdditiveSchwarz   AdditiveSchwarzRN
+                                  AdditiveSchwarzGI AdditiveSchwarzRNGI
+
+DDBlockPrec = ComposedDN   # OPTIONS:
+                           #AdditiveSchwarz: monolithic A-S preconditioner,
+                           #AdditiveSchwarzGI: monolithic A-S preconditioner,
+                           #ComposedDN: modular Dirichlet-Neumann preconditioner
+                           #ComposedDN2: modular Dirichlet-Neumann preconditioner
+                           #ComposedNN: modular Neumann-Neumann + Dirichlet-Dirichlet preconditioner
+                           #ComposedDNND: modular Dirichlet-Neumann + Neumann-Dirichlet preconditioner
+                           #ComposedDNGI: modular preconditioner for the geometric implicit, split in 3 factors
+                           #ComposedDN2GI: modular preconditioner for the geometric implicit, split in 3 factors
+                           #ComposedDNDGI: under testing, do not use
+                           #ComposedDND2DGI: under testing, do not use
+
+
+reducedFluid = 0    # 0 = exact, 1 = inexact
+defOmega     = 0.01 # usually 0.01 for precond = 0 or 1; -1 for precond = 2
+defOmegaS    = 0.01 # matters only with  precond = 2
+defOmegaF    = 0.01 # matters only with  precond = 2
+
+linesearch   = 0
+updateEvery  = 1
+# NonLinearRichardson: stop_tol  = abstol + reltol*normRes;
+abstol       =  0.    # tolerance in nonLinearRichardson
+reltol       =  1.e-7 # tolerance in nonLinearRichardson
+restart      = 0
+maxSubIter   = 50
+fluidMeshPartitioned = none
+solidMeshPartitioned = none
+
+
+
+[fluid]
+useShapeDerivatives     = false
+conservativeFormulation = false  # tells if the conservative or non conservative formulation is used
+
+    [./physics] # Defined here only if different from the one in the main file.
+    #density         = 1.0             # density   [g/cm^3]
+    #viscosity       = 0.035           # viscosity [g/cm/s]
+
+    [../time_discretization]
+    method           = BDF             # Newmark, BDF
+    BDF_order        = 2
+    theta            = 0.25
+    gamma            = 0.50
+    #rhoInf           = 1
+    #typeOfGeneralizedAlpha = HHT
+
+    [../space_discretization]
+    mesh_dir        = ./Mesh/
+    mesh_file       = tube20.mesh      # mesh name
+    mesh_type       = .mesh
+    verbose         = 0                # verbose during mesh-reading
+
+    vel_order       = P1               # P1, P1Bubble, P2
+    mesh_order      = P1               # P1, P2
+    press_order     = P1               # P1, P2
+    stiff_strain    = false            # true: sigma with grad( u )^T, false: sigma without it
+    div_beta_u_v    = false            # 1=on, 0=off
+    diagonalize     = 0                # weight, 0=off
+    stabilization   = 'ip'             # "none": none, "ip": Interior Penalty, "sd":Stream-line diffusion
+
+    [../miscellaneous]
+    verbose   = 0
+    steady    = 0
+    factor    = 1
+
+    [../ipstab]
+    use             = 1                 # boolean telling if the stabilization is added
+    gammaBeta       = 1
+    gammaDiv        = 0.2
+    gammaPress      = 0.05
+    max_iter_reuse  = 100
+    reuse           = true
+
+    [../boundary_conditions]
+    list = ' '
+    #list = 'InFlowEdge OutFlowEdge'
+
+        [./InFlowEdge]
+        type            = EssentialEdge
+        flag            = 20
+        mode            = Full
+        component       = 3
+        function        = 0
+
+        [../OutFlowEdge]
+        type            = EssentialEdge
+        flag            = 30
+        mode            = Full
+        component       = 3
+        function        = 0
+
+        [../]
+
+    [../]
+
+
+
+[solid]
+useExactJacobian = true # always false for linear structure model. Otherwise it allows to chose beween an exact-inexact Newton scheme
+rescaleFactor    = 1.0  # this factor can be used to rescale the structure block
+
+    [./physics]
+    solidType        = linearVenantKirchhoff # linearVenantKirchhoff, nonLinearVenantKirchhoff, exponential, neoHookean
+    material_flag    = 1
+    #externalPressure = 0
+    #density          = 1.2
+    #young            = 4.0E6
+    #poisson          = 0.48
+    bulk             = 1e7
+    alpha            = 2.5e6
+    gamma            = 1
+
+    [../time_discretization]
+    method           = BDF            # Newmark, BDF
+    BDF_order        = 2
+    theta            = 0.25
+    gamma            = 0.50
+    #rhoInf           = 1
+    #typeOfGeneralizedAlpha = HHT
+
+    [../space_discretization]
+    mesh_dir         = ./Mesh/
+    mesh_file        = vessel20.mesh    # mesh name
+    order            = P1
+    mesh_faces       = all              # update all faces elements
+    mesh_edges       = all              # update all faces elements
+
+    [../miscellaneous]
+    verbose          = 0
+    depname          = dep
+
+    [../boundary_conditions]
+    #list = ' '                                                                         # Free dispacement
+    #list = 'Top_ReferencePressure Base_ReferencePressure OuterWall_ReferencePressure'   # Free dispacement + Reference pressure
+    #list = 'OuterWall_Robin'                                                           # Free dispacement + Robin on the external Wall
+    list = 'Top_NoDisplacementOnZ Base_NoDisplacementOnZ OuterWall_ReferencePressure'  # Free dispacement on XY + Reference pressure
+    #list = 'Top Base TopEdge BaseEdge OuterWall_ReferencePressure'                     # Fixed dispacement + Reference pressure
+
+        [./Top]
+        type       = Essential
+        flag       = 3
+        mode       = Full
+        component  = 3
+        function   = 0
+
+        [../Base]
+        type       = Essential
+        flag       = 2
+        mode       = Full
+        component  = 3
+        function   = 0
+
+        [../TopEdge]
+        type       = EssentialEdge
+        flag       = 20
+        mode       = Full
+        component  = 3
+        function   = 0
+
+        [../BaseEdge]
+        type       = EssentialEdge
+        flag       = 30
+        mode       = Full
+        component  = 3
+        function   = 0
+
+        [../Top_NoDisplacementOnZ]
+        type       = Essential
+        flag       = 3
+        mode       = Component
+        component  = '2'
+        function   = 0
+
+        [../Base_NoDisplacementOnZ]
+        type       = Essential
+        flag       = 2
+        mode       = Component
+        component  = '2'
+        function   = 0
+
+        [../Top_ReferencePressure]
+        type       = Natural
+        flag       = 3
+        mode       = Normal
+        functionSolver = '-s_externalPressure'
+
+        [../Base_ReferencePressure]
+        type       = Natural
+        flag       = 2
+        mode       = Normal
+        functionSolver = '-s_externalPressure'
+
+        [../OuterWall_ReferencePressure]
+        type       = Natural
+        flag       = 10
+        mode       = Normal
+        functionSolver = '-s_externalPressure'
+
+        [../OuterWall_Robin]
+        type       = Robin
+        flag       = 10
+        mode       = Full
+        component  = 3
+        functionSD = RobinWall
+
+            [./RobinAlpha]
+            #function       = 0
+            function = '29  * 10000'
+
+            [../RobinBeta]
+            function       = 0
+            #function = '29  * 0.5'
+
+            [../]
+
+        [../]
+
+    [../]
+
+
+
+[interface] # mesh dependent flags for the interface.
+fluid_flag      =  1   # default: 1
+solid_flag      =  1   # default: 1
+tolerance       =  0   # how far points are to be considered the same on the interface
+
+
+
+[mesh_motion]
+
+    [./time_discretization]
+    method           = BDF             # Newmark, BDF
+    BDF_order        = 2
+    theta            = 0.25
+    gamma            = 0.50
+    #rhoInf           = 1
+    #typeOfGeneralizedAlpha = HHT
+
+    [../solver]                        # Solver Parameters
+    solver          = gmres
+    scaling         = none
+    output          = none # all none
+    conv            = rhs
+    max_iter        = 500
+    reuse           = true
+    max_iter_reuse  = 500
+    kspace          = 500
+    tol             = 1.e-9
+
+    [../prec]
+    #prectype                = AztecOO
+    prectype                = Ifpack
+    displayList             = false
+
+        [./AztecOO]
+        precond             = 'dom_decomp'
+        prec_calc           = calc
+        reorder             = 1
+        keep_info           = 1
+        overlap             = 1
+        subdomain_solve     = ILUT
+        ilut_fill           = 4
+        drop                = 1.e-5
+
+        [../ifpack]
+        overlap             = 2
+        prectype            = Amesos # Amesos (does a local LU factorization), ILUT (not ILU)
+
+            [./relaxation]
+            type                   = Jacobi
+            sweeps                 = 1
+            damping_factor         = 1.
+            min_diagonal_value     = 0
+            zero_starting_solution = true
+
+            [../partitioner]
+            type                   = metis
+            overlap                = 2
+            local_parts            = 1
+            root_node              = 0
+            use_symmetric_graph    = true
+
+            [../amesos]
+            solvertype             = Amesos_Umfpack # Amesos_KLU or Amesos_Umfpack
+
+            [../fact]
+            level-of-fill          = 10
+            ilut_level-of-fill     = 4
+            absolute_threshold     = 0
+            relative_threshold     = 1
+            relax_value            = 0
+            drop_tolerance         = 1.e-10
+
+            [../schwarz]
+            combine_mode           = 0             # 0=Add, 1=Zero, 2=Insert, 3=Average, 4=AbsMax
+            compute_condest        = true
+            reordering_type        = none          #none, metis, rcm
+            filter_singletons      = true
+
+            [../]
+
+        [../]
+
+    [../boundary_conditions]
+    #list = 'Interface'                                              # Free dispacement
+    list = 'Top_NoDisplacementOnZ Base_NoDisplacementOnZ Interface' # Free dispacement on XY
+    #list = 'Top TopEdge Interface'                                  # Fixed displacement
+    #list = 'Top TopEdge Base BaseEdge NoInterface'                  # Test
+
+        [./Top]
+        type       = Essential
+        flag       = 3
+        mode       = Full
+        component  = 3
+        function   = 0
+
+        [../Base]
+        type       = Essential
+        flag       = 2
+        mode       = Full
+        component  = 3
+        function   = 0
+
+        [../TopEdge]
+        type       = Essential
+        flag       = 20
+        mode       = Full
+        component  = 3
+        function   = 0
+
+        [../BaseEdge]
+        type       = Essential
+        flag       = 30
+        mode       = Full
+        component  = 3
+        function   = 0
+
+        [../Interface]
+        type       = Essential
+        flag       = 1
+        mode       = Full
+        component  = 3
+        functionSD = StructureDispToHarmonicExtension
+
+        [../NoInterface]
+        type       = Essential
+        flag       = 1
+        mode       = Full
+        component  = 3
+        function   = 0
+
+        [../Top_NoDisplacementOnZ]
+        type       = Essential
+        flag       = 3
+        mode       = Component
+        component  = '2'
+        function   = 0
+
+        [../Base_NoDisplacementOnZ]
+        type       = Essential
+        flag       = 2
+        mode       = Component
+        component  = '2'
+        function   = 0
+
+        [../]
+
+    [../]
+
+
+
+[linear_system]
+
+    [./solver]                        # Solver Parameters
+    solver          = gmres
+    scaling         = none
+    output          = none # all none
+    conv            = rhs
+    max_iter        = 500
+    reuse           = true
+    max_iter_reuse  = 500
+    kspace          = 500
+    tol             = 1.e-9
+
+    [../prec]
+    reuse                   = false
+    prectype                = Composed #AztecOO
+    displayList             = false
+
+        [./robin]
+        alphaf = 0.
+        alphas = 0.5 # parameters for Robin-Robin DDBlock preconditioner
+
+        [../Composed]
+        list                = 'Ifpack Ifpack'
+        sections            = 'ifpack ifpack'
+
+        [../AztecOO]
+        precond             = 'dom_decomp'
+        prec_calc           = calc
+        reorder             = 1
+        keep_info           = 1
+        overlap             = 1
+        subdomain_solve     = ILUT
+        ilut_fill           = 4
+        drop                = 1.e-5
+
+        [../ifpack]
+        overlap             = 2
+        prectype            = Amesos # Amesos (does a local LU factorization), ILUT (not ILU)
+
+            [./relaxation]
+            type                   = Jacobi
+            sweeps                 = 1
+            damping_factor         = 1.
+            min_diagonal_value     = 0
+            zero_starting_solution = true
+
+            [../partitioner]
+            type                   = metis
+            overlap                = 2
+            local_parts            = 1
+            root_node              = 0
+            use_symmetric_graph    = true
+
+            [../amesos]
+            solvertype             = Amesos_Umfpack # Amesos_KLU or Amesos_Umfpack
+
+            [../fact]
+            level-of-fill          = 4
+            ilut_level-of-fill     = 10
+            absolute_threshold     = 0
+            relative_threshold     = 1
+            relax_value            = 0
+            drop_tolerance         = 1.e-10
+
+            [../schwarz]
+            combine_mode           = 0             # 0=Add, 1=Zero, 2=Insert, 3=Average, 4=AbsMax
+            compute_condest        = true
+            reordering_type        = none          #none, metis, rcm
+            filter_singletons      = true
+
+            [../]
+
+        [../ML]
+            default_parameter_list = DD    # for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
+            prec_type              = two-level-additive
+            displayList            = false
+
+            [./smoother]
+                type               = IFPACK
+            [../]
+
+        [../]
+
+    [../]

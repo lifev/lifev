@@ -50,7 +50,8 @@
 #include <lifev/eta/fem/MeshGeometricMap.hpp>
 #include <lifev/core/mesh/MeshPartitioner.hpp>
 
-namespace LifeV{
+namespace LifeV
+{
 
 
 
@@ -181,7 +182,7 @@ public:
     /*!
       @param otherSpace The finite element space to be copied
      */
-    ETFESpace(const ETFESpace<MeshType,MapType,SpaceDim,FieldDim>& otherSpace);
+    ETFESpace (const ETFESpace<MeshType, MapType, SpaceDim, FieldDim>& otherSpace);
 
     //! Destructor
     virtual ~ETFESpace()
@@ -227,7 +228,10 @@ public:
     /*!
       @return The algebraic map
      */
-        MapType& map() { return *M_map; }
+    MapType& map()
+    {
+        return *M_map;
+    }
 
     //! Getter for the dimension of the space (geometric, ambiant space)
     /*!
@@ -251,7 +255,7 @@ private:
     ETFESpace();
 
     //! Creates the map from the input
-    void createMap(const commPtr_Type& commptr);
+    void createMap (const commPtr_Type& commptr);
 
     //@}
 
@@ -291,7 +295,7 @@ ETFESpace(const meshPtr_Type& mesh, const ReferenceFE* refFE, const GeometricMap
     M_dof( new DOF( *M_mesh, *M_referenceFE )),
     M_map(new MapType())
 {
-    createMap(commptr);
+    createMap (commptr);
 }
 
 template<typename MeshType, typename MapType, UInt SpaceDim, UInt FieldDim>
@@ -304,7 +308,7 @@ ETFESpace(const meshPtr_Type& mesh, const ReferenceFE* refFE, commPtr_Type& comm
     M_dof( new DOF( *M_mesh, *M_referenceFE )),
     M_map(new MapType())
 {
-    createMap(commptr);
+    createMap (commptr);
 }
 
 template<typename MeshType, typename MapType, UInt SpaceDim, UInt FieldDim>
@@ -319,7 +323,7 @@ ETFESpace(const MeshPartitioner<MeshType>& meshPartitioner,
     M_dof( new DOF( *M_mesh, *M_referenceFE )),
     M_map(new MapType())
 {
-    createMap(commptr);
+    createMap (commptr);
 }
 
 template<typename MeshType, typename MapType, UInt SpaceDim, UInt FieldDim>
@@ -333,30 +337,30 @@ ETFESpace(const MeshPartitioner<MeshType>& meshPartitioner,
     M_dof( new DOF( *M_mesh, *M_referenceFE )),
     M_map(new MapType())
 {
-    createMap(commptr);
+    createMap (commptr);
 }
 
 template<typename MeshType, typename MapType, UInt SpaceDim, UInt FieldDim>
-ETFESpace<MeshType,MapType,SpaceDim,FieldDim>::
-ETFESpace(const ETFESpace<MeshType,MapType,SpaceDim,FieldDim>& otherSpace)
+ETFESpace<MeshType, MapType, SpaceDim, FieldDim>::
+ETFESpace (const ETFESpace<MeshType, MapType, SpaceDim, FieldDim>& otherSpace)
 
-  : M_mesh(otherSpace.M_mesh),
-    M_referenceFE(otherSpace.M_referenceFE),
-    M_geometricMap(otherSpace.M_geometricMap),
-    M_dof(otherSpace.M_dof),
-    M_map(otherSpace.M_map)
+    : M_mesh (otherSpace.M_mesh),
+      M_referenceFE (otherSpace.M_referenceFE),
+      M_geometricMap (otherSpace.M_geometricMap),
+      M_dof (otherSpace.M_dof),
+      M_map (otherSpace.M_map)
 {}
 
 template<typename MeshType, typename MapType, UInt SpaceDim, UInt FieldDim>
 void
-ETFESpace<MeshType,MapType,SpaceDim,FieldDim>::
-createMap(const commPtr_Type& commptr)
+ETFESpace<MeshType, MapType, SpaceDim, FieldDim>::
+createMap (const commPtr_Type& commptr)
 {
-    std::vector<Int> myGlobalElements( this->M_dof->globalElements( *this->M_mesh ) );
+    std::vector<Int> myGlobalElements ( this->M_dof->globalElements ( *this->M_mesh ) );
 
-    MapType map( -1,myGlobalElements.size(),&myGlobalElements[0],commptr );
+    MapType map ( -1, myGlobalElements.size(), &myGlobalElements[0], commptr );
 
-    for ( UInt ii(0); ii < FieldDim; ++ii )
+    for ( UInt ii (0); ii < FieldDim; ++ii )
     {
         *M_map += map;
     }

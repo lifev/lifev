@@ -44,9 +44,9 @@
 namespace LifeV
 {
 class VectorElemental
-        :
-        public KN<Real>
-        //public Tab1d
+    :
+public KN<Real>
+    //public Tab1d
 {
 public:
     //typedef Tab1d super;
@@ -54,18 +54,20 @@ public:
     typedef KN_<Real> vector_view;
 
 
-    VectorElemental( int nNode1, int nbr1 );
-    VectorElemental( int nNode1, int nbr1,
-             int nNode2, int nbr2 );
-    VectorElemental( int nNode1, int nbr1,
-             int nNode2, int nbr2,
-             int nNode3, int nbr3 );
+    VectorElemental ( int nNode1, int nbr1 );
+    VectorElemental ( int nNode1, int nbr1,
+                      int nNode2, int nbr2 );
+    VectorElemental ( int nNode1, int nbr1,
+                      int nNode2, int nbr2,
+                      int nNode3, int nbr3 );
 
-    VectorElemental& operator=( super const& __v )
+    VectorElemental& operator= ( super const& __v )
     {
         if ( this == &__v )
+        {
             return * this;
-        super::operator=( ( super const& ) __v );
+        }
+        super::operator= ( ( super const& ) __v );
         return *this;
     }
 
@@ -82,19 +84,19 @@ public:
         return _nBlockRow;
     }
     //Tab1dView block( int i )
-    vector_view block( int i )
+    vector_view block ( int i )
     {
-        return ( *this ) ( SubArray( _nRow[ i ], _firstRow[ i ] ) );
+        return ( *this ) ( SubArray ( _nRow[ i ], _firstRow[ i ] ) );
         //return Tab1dView( *this, TabRange( _firstRow[i], _nRow[ i ] ) );
     }
     //  inline void zero(){_vec=Tab1d(_nBlockRow*_vec.N(),0.0);};
     void zero()
     {
         //( *this ) = ZeroVector( this->size() );
-        super& __super = ( super& )*this;
-        __super = super( this->N(), 0.0 );
+        super& __super = ( super& ) * this;
+        __super = super ( this->N(), 0.0 );
     }
-    void showMe( std::ostream& c = std::cout );
+    void showMe ( std::ostream& c = std::cout );
 private:
     int _nBlockRow; // number of block rows
     std::vector<int> _nRow; // _nRow[i]=nb of rows in the i-th block row

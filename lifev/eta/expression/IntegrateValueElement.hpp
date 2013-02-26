@@ -69,14 +69,14 @@ class IntegrateValueElement
 {
 public:
 
-	//! @name Public Types
+    //! @name Public Types
     //@{
 
     //! Evaluation type
-	typedef typename ExpressionToEvaluation< ExpressionType,
-                                             0,
-                                             0,
-                                             3>::evaluation_Type evaluation_Type;
+    typedef typename ExpressionToEvaluation < ExpressionType,
+            0,
+            0,
+            3 >::evaluation_Type evaluation_Type;
 
     //@}
 
@@ -102,9 +102,9 @@ public:
     //@{
 
     //! Operator wrapping the addTo method
-    inline void operator>>(Real& value)
+    inline void operator>> (Real& value)
     {
-        addTo(value);
+        addTo (value);
     }
 
     //@}
@@ -114,7 +114,7 @@ public:
     //@{
 
     //! Ouput method
-	void check(std::ostream& out = std::cout);
+    void check (std::ostream& out = std::cout);
 
     //! Method that performs the assembly
     /*!
@@ -123,7 +123,7 @@ public:
       performed: update the values, sum over the quadrature nodes,
       sum into the global value.
      */
-	void addTo(Real& value);
+    void addTo (Real& value);
 
     //@}
 
@@ -215,7 +215,7 @@ IntegrateValueElement < MeshType, ExpressionType, QRAdapterType>::
 check(std::ostream& out)
 {
     out << " Checking the integration : " << std::endl;
-    M_evaluation.display(out);
+    M_evaluation.display (out);
 }
 
 
@@ -232,7 +232,7 @@ addTo(Real& value)
     // by default for security.
     bool isPreviousAdapted(true);
 
-    for (UInt iElement(0); iElement< nbElements; ++iElement)
+    for (UInt iElement (0); iElement < nbElements; ++iElement)
     {
         // Update the quadrature adapter
         M_qrAdapter.update(iElement);

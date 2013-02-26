@@ -49,8 +49,8 @@ namespace LifeV
 template <typename MeshType>
 class VenantKirchhoffMaterialNonLinearPenalized : public StructuralConstitutiveLaw<MeshType>
 {
-//!@name Type definitions
-//@{
+    //!@name Type definitions
+    //@{
 
     public:
     typedef StructuralConstitutiveLaw<MeshType>                 super;
@@ -91,19 +91,19 @@ class VenantKirchhoffMaterialNonLinearPenalized : public StructuralConstitutiveL
 
 
 
-//! @name Constructor &  Destructor
-//@{
+    //! @name Constructor &  Destructor
+    //@{
 
     VenantKirchhoffMaterialNonLinearPenalized();
 
     virtual  ~VenantKirchhoffMaterialNonLinearPenalized();
 
-//@}
+    //@}
 
 
 
-//!@name Methods
-//@{
+    //!@name Methods
+    //@{
 
     //! Setup the created object of the class StructuralConstitutiveLaw
     /*!
@@ -189,7 +189,7 @@ class VenantKirchhoffMaterialNonLinearPenalized : public StructuralConstitutiveL
     /*!
       \param dk_loc: the elemental displacement
     */
-    void computeKinematicsVariables( const VectorElemental& dk_loc );
+    void computeKinematicsVariables ( const VectorElemental& dk_loc );
 
     //! Computes the deformation Gradient F, the cofactor of F Cof(F), the determinant of F J = det(F), the trace of C Tr(C).
     /*!
@@ -198,8 +198,8 @@ class VenantKirchhoffMaterialNonLinearPenalized : public StructuralConstitutiveL
     //void computeStress( const vector_Type& sol );
 
     //! ShowMe method of the class (saved on a file the stiffness vector and the jacobian)
-    void showMe( std::string const& fileNameVectStiff,
-                 std::string const& fileNameJacobain );
+    void showMe ( std::string const& fileNameVectStiff,
+                  std::string const& fileNameJacobain );
 
     //! Compute the First Piola Kirchhoff Tensor
     /*!
@@ -209,29 +209,35 @@ class VenantKirchhoffMaterialNonLinearPenalized : public StructuralConstitutiveL
        \param invariants std::vector with the invariants of C and the detF
        \param material UInt number to get the material parameteres form the VenantElasticData class
     */
-    void computeLocalFirstPiolaKirchhoffTensor( Epetra_SerialDenseMatrix& firstPiola,
-                                                const Epetra_SerialDenseMatrix& tensorF,
-                                                const Epetra_SerialDenseMatrix& cofactorF,
-                                                const std::vector<Real>& invariants,
-                                                const UInt marker);
+    void computeLocalFirstPiolaKirchhoffTensor ( Epetra_SerialDenseMatrix& firstPiola,
+                                                 const Epetra_SerialDenseMatrix& tensorF,
+                                                 const Epetra_SerialDenseMatrix& cofactorF,
+                                                 const std::vector<Real>& invariants,
+                                                 const UInt marker);
 
 
-//@}
+    //@}
 
-//! @name Get Methods
-//@{
+    //! @name Get Methods
+    //@{
 
     //! Get the Stiffness matrix
-    matrixPtr_Type const stiffMatrix() const { return super::M_jacobian; }
+    matrixPtr_Type const stiffMatrix() const
+    {
+        return super::M_jacobian;
+    }
 
 
     //! Get the stiffness vector
-    vectorPtr_Type const stiffVector() const {return M_stiff; }
+    vectorPtr_Type const stiffVector() const
+    {
+        return M_stiff;
+    }
 
     void apply( const vector_Type& sol, vector_Type& res, const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
                 const mapMarkerIndexesPtr_Type mapsMarkerIndexes);
 
-//@}
+    //@}
 
 
 
@@ -293,7 +299,7 @@ VenantKirchhoffMaterialNonLinearPenalized<MeshType>::setup( const FESpacePtr_Typ
     this->M_localMap                    = monolithicMap;
     this->M_offset                      = offset;
 
-    M_stiff.reset                     ( new vector_Type(*this->M_localMap) );
+    M_stiff.reset                     ( new vector_Type (*this->M_localMap) );
 
     M_identity(0,0) = 1.0; M_identity(0,1) = 0.0; M_identity(0,2) = 0.0;
     M_identity(1,0) = 0.0; M_identity(1,1) = 1.0; M_identity(1,2) = 0.0;
@@ -368,7 +374,7 @@ void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::updateJacobianMatrix( 
                                                                             const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
                                                                             const displayerPtr_Type& displayer )
 {
-    this->M_jacobian.reset(new matrix_Type(*this->M_localMap));
+    this->M_jacobian.reset (new matrix_Type (*this->M_localMap) );
 
     displayer->leaderPrint(" \n************************************************\n ");
     updateNonLinearJacobianTerms(this->M_jacobian, sol, dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
@@ -393,7 +399,7 @@ void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::updateNonLinearJacobia
 
     *jacobian *= 0.0;
 
-    displayer->leaderPrint("   Non-Linear S-  updating non linear terms in the Jacobian Matrix (VK-Penalized)");
+    displayer->leaderPrint ("   Non-Linear S-  updating non linear terms in the Jacobian Matrix (VK-Penalized)");
 
     //! Nonlinear part of jacobian
     //! loop on volumes (i)
@@ -625,9 +631,9 @@ void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::computeStiffness( cons
     this->M_stiff.reset(new vector_Type(*this->M_localMap));
     *(M_stiff) *= 0.0;
 
-    displayer->leaderPrint(" \n*********************************\n  ");
-    displayer->leaderPrint(" Non-Linear S-  Computing the VK-Penalized nonlinear stiffness vector ");
-    displayer->leaderPrint(" \n*********************************\n  ");
+    displayer->leaderPrint (" \n*********************************\n  ");
+    displayer->leaderPrint (" Non-Linear S-  Computing the VK-Penalized nonlinear stiffness vector ");
+    displayer->leaderPrint (" \n*********************************\n  ");
 
     // mapIterator_Type it;
     // //mapIteratorIndex_Type itIndex;
@@ -836,8 +842,8 @@ template <typename MeshType>
 void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::showMe( std::string const& fileNameStiff,
                                                               std::string const& fileNameJacobian )
 {
-    this->M_stiff->spy(fileNameStiff);
-    this->M_jacobian->spy(fileNameJacobian);
+    this->M_stiff->spy (fileNameStiff);
+    this->M_jacobian->spy (fileNameJacobian);
 }
 
 
@@ -859,34 +865,34 @@ void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::computeLocalFirstPiola
 {
 
     //Get the material parameters
-    Real alpha    = this->M_dataMaterial->alpha(marker);
-    Real gamma    = this->M_dataMaterial->gamma(marker);
-    Real bulk  	= this->M_dataMaterial->bulk(marker);
+    Real alpha    = this->M_dataMaterial->alpha (marker);
+    Real gamma    = this->M_dataMaterial->gamma (marker);
+    Real bulk   = this->M_dataMaterial->bulk (marker);
 
 
     //Computing the first term \alphaJ^{-2/3}[F-(1/3)tr(C)F^{-T}]exp(\gamma(tr(Ciso) - 3)
-    Epetra_SerialDenseMatrix firstTerm(tensorF);
-    Epetra_SerialDenseMatrix copyCofactorF(cofactorF);
+    Epetra_SerialDenseMatrix firstTerm (tensorF);
+    Epetra_SerialDenseMatrix copyCofactorF (cofactorF);
 
-    Real scale(0.0);
-    scale = -invariants[0]/3.0;
-    copyCofactorF.Scale( scale );
+    Real scale (0.0);
+    scale = -invariants[0] / 3.0;
+    copyCofactorF.Scale ( scale );
     firstTerm += copyCofactorF;
 
     //Computation trace of the isochoric C
-    Real trCiso(0.0);
-    trCiso = std::pow(invariants[3],-(2.0/3.0))*invariants[0];
+    Real trCiso (0.0);
+    trCiso = std::pow (invariants[3], - (2.0 / 3.0) ) * invariants[0];
 
-    Real coef( 0.0 );
-    coef = alpha * std::pow(invariants[3],-(2.0/3.0)) * std::exp( gamma * ( trCiso - 3 ) );
-    firstTerm.Scale( coef );
+    Real coef ( 0.0 );
+    coef = alpha * std::pow (invariants[3], - (2.0 / 3.0) ) * std::exp ( gamma * ( trCiso - 3 ) );
+    firstTerm.Scale ( coef );
 
     //Computing the second term (volumetric part) J*(bulk/2)(J-1+(1/J)*ln(J))F^{-T}
-    Epetra_SerialDenseMatrix secondTerm(cofactorF);
-    Real secCoef(0);
-    secCoef = invariants[3] * (bulk/2.0) * (invariants[3] - 1 + (1.0 / invariants[3]) * std::log(invariants[3]));
+    Epetra_SerialDenseMatrix secondTerm (cofactorF);
+    Real secCoef (0);
+    secCoef = invariants[3] * (bulk / 2.0) * (invariants[3] - 1 + (1.0 / invariants[3]) * std::log (invariants[3]) );
 
-    secondTerm.Scale( secCoef );
+    secondTerm.Scale ( secCoef );
 
     firstPiola += firstTerm;
     firstPiola += secondTerm;
@@ -898,7 +904,7 @@ inline StructuralConstitutiveLaw<MeshType>* createVenantKirchhoffMaterialNonLine
 
 namespace
 {
-static bool registerVKP = StructuralConstitutiveLaw<LifeV::RegionMesh<LinearTetra> >::StructureMaterialFactory::instance().registerProduct( "nonLinearVenantKirchhoffPenalized", &createVenantKirchhoffMaterialNonLinearPenalized<LifeV::RegionMesh<LinearTetra> > );
+static bool registerVKP = StructuralConstitutiveLaw<LifeV::RegionMesh<LinearTetra> >::StructureMaterialFactory::instance().registerProduct ( "nonLinearVenantKirchhoffPenalized", &createVenantKirchhoffMaterialNonLinearPenalized<LifeV::RegionMesh<LinearTetra> > );
 }
 
 } //Namespace LifeV

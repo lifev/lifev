@@ -48,11 +48,11 @@ namespace LifeV
 // Conversion methods
 // ===================================================
 void
-OneDFSIPhysicsNonLinear::fromUToW( Real& W1, Real& W2, const Real& A,  const Real& Q, const UInt& iNode ) const
+OneDFSIPhysicsNonLinear::fromUToW ( Real& W1, Real& W2, const Real& A,  const Real& Q, const UInt& iNode ) const
 {
-    Real celerity( celerity0( iNode ) * std::sqrt( OneDFSI::pow05( A / M_dataPtr->area0( iNode ), M_dataPtr->beta1( iNode ) ) ) );
+    Real celerity ( celerity0 ( iNode ) * std::sqrt ( OneDFSI::pow05 ( A / M_dataPtr->area0 ( iNode ), M_dataPtr->beta1 ( iNode ) ) ) );
 
-    Real add( std::sqrt( M_dataPtr->robertsonCorrection() ) * ( celerity - celerity0( iNode ) ) * 2 / M_dataPtr->beta1( iNode ) );
+    Real add ( std::sqrt ( M_dataPtr->robertsonCorrection() ) * ( celerity - celerity0 ( iNode ) ) * 2 / M_dataPtr->beta1 ( iNode ) );
 
     Real QoverA  = Q / A;
 
@@ -61,80 +61,84 @@ OneDFSIPhysicsNonLinear::fromUToW( Real& W1, Real& W2, const Real& A,  const Rea
 }
 
 void
-OneDFSIPhysicsNonLinear::fromWToU( Real& A, Real& Q, const Real& W1, const Real& W2, const UInt& iNode ) const
+OneDFSIPhysicsNonLinear::fromWToU ( Real& A, Real& Q, const Real& W1, const Real& W2, const UInt& iNode ) const
 {
-    Real rhooverbeta0beta1 ( M_dataPtr->densityRho() / ( M_dataPtr->beta0( iNode ) * M_dataPtr->beta1( iNode ) ) );
+    Real rhooverbeta0beta1 ( M_dataPtr->densityRho() / ( M_dataPtr->beta0 ( iNode ) * M_dataPtr->beta1 ( iNode ) ) );
 
-    Real beta1over4SQRTchi( M_dataPtr->beta1( iNode ) / ( std::sqrt(M_dataPtr->robertsonCorrection() ) * 4 ) );
+    Real beta1over4SQRTchi ( M_dataPtr->beta1 ( iNode ) / ( std::sqrt (M_dataPtr->robertsonCorrection() ) * 4 ) );
 
-    A = M_dataPtr->area0( iNode )
-        * OneDFSI::pow20( rhooverbeta0beta1, 1 / M_dataPtr->beta1( iNode ) )
-        * OneDFSI::pow40( beta1over4SQRTchi * (W1 - W2) + celerity0( iNode ), 2 / M_dataPtr->beta1( iNode ) );
+    A = M_dataPtr->area0 ( iNode )
+        * OneDFSI::pow20 ( rhooverbeta0beta1, 1 / M_dataPtr->beta1 ( iNode ) )
+        * OneDFSI::pow40 ( beta1over4SQRTchi * (W1 - W2) + celerity0 ( iNode ), 2 / M_dataPtr->beta1 ( iNode ) );
 
     Q = A * ( W1 + W2 ) / 2;
 }
 
 Real
-OneDFSIPhysicsNonLinear::fromWToP( const Real& W1, const Real& W2, const UInt& iNode ) const
+OneDFSIPhysicsNonLinear::fromWToP ( const Real& W1, const Real& W2, const UInt& iNode ) const
 {
-    Real rhooverbeta0beta1 ( M_dataPtr->densityRho() / ( M_dataPtr->beta0( iNode ) * M_dataPtr->beta1( iNode ) ) );
+    Real rhooverbeta0beta1 ( M_dataPtr->densityRho() / ( M_dataPtr->beta0 ( iNode ) * M_dataPtr->beta1 ( iNode ) ) );
 
-    Real beta1over4SQRTchi( M_dataPtr->beta1( iNode ) / ( std::sqrt(M_dataPtr->robertsonCorrection()) * 4 ) );
+    Real beta1over4SQRTchi ( M_dataPtr->beta1 ( iNode ) / ( std::sqrt (M_dataPtr->robertsonCorrection() ) * 4 ) );
 
-    return M_dataPtr->beta0( iNode ) * ( rhooverbeta0beta1 * ( beta1over4SQRTchi * (W1 - W2) + celerity0( iNode ) ) *
-                        ( beta1over4SQRTchi * (W1 - W2) + celerity0( iNode ) ) - 1 );
+    return M_dataPtr->beta0 ( iNode ) * ( rhooverbeta0beta1 * ( beta1over4SQRTchi * (W1 - W2) + celerity0 ( iNode ) ) *
+                                          ( beta1over4SQRTchi * (W1 - W2) + celerity0 ( iNode ) ) - 1 );
 }
 
 Real
-OneDFSIPhysicsNonLinear::fromPToW( const Real& P, const Real& W, const ID& iW, const UInt& iNode ) const
+OneDFSIPhysicsNonLinear::fromPToW ( const Real& P, const Real& W, const ID& iW, const UInt& iNode ) const
 {
-    Real SQRTbeta0beta1overrho( M_dataPtr->beta0( iNode ) * M_dataPtr->beta1( iNode ) / M_dataPtr->densityRho() );
-    SQRTbeta0beta1overrho = std::sqrt( SQRTbeta0beta1overrho );
+    Real SQRTbeta0beta1overrho ( M_dataPtr->beta0 ( iNode ) * M_dataPtr->beta1 ( iNode ) / M_dataPtr->densityRho() );
+    SQRTbeta0beta1overrho = std::sqrt ( SQRTbeta0beta1overrho );
 
-    Real SQRTchi4overbeta1( std::sqrt(M_dataPtr->robertsonCorrection()) * 4 / M_dataPtr->beta1( iNode ) );
+    Real SQRTchi4overbeta1 ( std::sqrt (M_dataPtr->robertsonCorrection() ) * 4 / M_dataPtr->beta1 ( iNode ) );
 
-    Real add( SQRTchi4overbeta1 * SQRTbeta0beta1overrho
-              * ( std::sqrt( P / M_dataPtr->beta0( iNode ) + 1 ) - 1 ) );
+    Real add ( SQRTchi4overbeta1 * SQRTbeta0beta1overrho
+               * ( std::sqrt ( P / M_dataPtr->beta0 ( iNode ) + 1 ) - 1 ) );
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream(6320) << "[OneDFSIModel_Physics_NonLinear::W_fromP] "
-    << "SQRTchi4overbeta1 = " << SQRTchi4overbeta1
-    << ", beta0beta1overrho = " << SQRTbeta0beta1overrho
-    << ", pow( ( P / M_dataPtr->beta0( iNode ) + 1 ), 0.5 ) = " << std::sqrt( ( P / M_dataPtr->beta0( iNode ) + 1 ) ) << "\n";
-    debugStream(6320) << "[OneDFSIModel_Physics_NonLinear::W_fromP] add term = " << add << "\n";
+    debugStream (6320) << "[OneDFSIModel_Physics_NonLinear::W_fromP] "
+                       << "SQRTchi4overbeta1 = " << SQRTchi4overbeta1
+                       << ", beta0beta1overrho = " << SQRTbeta0beta1overrho
+                       << ", pow( ( P / M_dataPtr->beta0( iNode ) + 1 ), 0.5 ) = " << std::sqrt ( ( P / M_dataPtr->beta0 ( iNode ) + 1 ) ) << "\n";
+    debugStream (6320) << "[OneDFSIModel_Physics_NonLinear::W_fromP] add term = " << add << "\n";
 #endif
 
     if ( iW == 0 )
+    {
         return W - add;
+    }
     if ( iW == 1 )
+    {
         return W + add;
+    }
 
-    ERROR_MSG("You can only find W1 or W2 as function of P");
+    ERROR_MSG ("You can only find W1 or W2 as function of P");
     return -1.;
 }
 
 Real
-OneDFSIPhysicsNonLinear::fromQToW( const Real& Q, const Real& W_tn, const Real& W, const ID& iW, const UInt& iNode ) const
+OneDFSIPhysicsNonLinear::fromQToW ( const Real& Q, const Real& W_tn, const Real& W, const ID& iW, const UInt& iNode ) const
 {
-    Real K0( M_dataPtr->beta1( iNode ) / ( std::sqrt(M_dataPtr->robertsonCorrection()) * 4 ) );
+    Real K0 ( M_dataPtr->beta1 ( iNode ) / ( std::sqrt (M_dataPtr->robertsonCorrection() ) * 4 ) );
 
-    Real K1( (M_dataPtr->area0( iNode ) / 2) );
-    K1 *= OneDFSI::pow20( M_dataPtr->densityRho() / (M_dataPtr->beta0( iNode ) * M_dataPtr->beta1( iNode )), 1 / M_dataPtr->beta1( iNode ) );
-    K1 *= OneDFSI::pow40( K0, 2/M_dataPtr->beta1( iNode ) );
+    Real K1 ( (M_dataPtr->area0 ( iNode ) / 2) );
+    K1 *= OneDFSI::pow20 ( M_dataPtr->densityRho() / (M_dataPtr->beta0 ( iNode ) * M_dataPtr->beta1 ( iNode ) ), 1 / M_dataPtr->beta1 ( iNode ) );
+    K1 *= OneDFSI::pow40 ( K0, 2 / M_dataPtr->beta1 ( iNode ) );
 
-    Real f_k, df_k, tau_k(0);
+    Real f_k, df_k, tau_k (0);
 
     if ( iW == 0 ) // W1 given
     {
-        f_k = OneDFSI::pow40( W - W_tn + celerity0( iNode ) / K0, 2/M_dataPtr->beta1( iNode ) );
-        tau_k = OneDFSI::pow40( W - W_tn + celerity0( iNode ) / K0, 2/M_dataPtr->beta1( iNode ) );
-        df_k = (-2 / M_dataPtr->beta1( iNode )) * OneDFSI::pow30( W - W_tn + celerity0( iNode ) / K0, 2/M_dataPtr->beta1( iNode ) - 1 );
+        f_k = OneDFSI::pow40 ( W - W_tn + celerity0 ( iNode ) / K0, 2 / M_dataPtr->beta1 ( iNode ) );
+        tau_k = OneDFSI::pow40 ( W - W_tn + celerity0 ( iNode ) / K0, 2 / M_dataPtr->beta1 ( iNode ) );
+        df_k = (-2 / M_dataPtr->beta1 ( iNode ) ) * OneDFSI::pow30 ( W - W_tn + celerity0 ( iNode ) / K0, 2 / M_dataPtr->beta1 ( iNode ) - 1 );
     }
     if ( iW == 1 ) // W2 given
     {
-        f_k = OneDFSI::pow40( W_tn - W + celerity0( iNode ) / K0, 2/M_dataPtr->beta1( iNode ) );
-        tau_k = OneDFSI::pow40( W_tn - W + celerity0( iNode ) / K0, 2/M_dataPtr->beta1( iNode ) );
-        df_k = (-2 / M_dataPtr->beta1( iNode )) * OneDFSI::pow30( W_tn - W + celerity0( iNode ) / K0, 2/M_dataPtr->beta1( iNode ) - 1 );
+        f_k = OneDFSI::pow40 ( W_tn - W + celerity0 ( iNode ) / K0, 2 / M_dataPtr->beta1 ( iNode ) );
+        tau_k = OneDFSI::pow40 ( W_tn - W + celerity0 ( iNode ) / K0, 2 / M_dataPtr->beta1 ( iNode ) );
+        df_k = (-2 / M_dataPtr->beta1 ( iNode ) ) * OneDFSI::pow30 ( W_tn - W + celerity0 ( iNode ) / K0, 2 / M_dataPtr->beta1 ( iNode ) - 1 );
     }
     f_k *= (W + W_tn);
     f_k += - Q / K1;
@@ -142,10 +146,10 @@ OneDFSIPhysicsNonLinear::fromQToW( const Real& Q, const Real& W_tn, const Real& 
     df_k += f_k;
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream(6320) << "[OneDFSIModel_Physics_NonLinear::W_fromQ] "
-    << "K0 = " << K0
-    << ", K1 = " << K1
-    << ", tau_k = " << tau_k << "\n";
+    debugStream (6320) << "[OneDFSIModel_Physics_NonLinear::W_fromQ] "
+                       << "K0 = " << K0
+                       << ", K1 = " << K1
+                       << ", tau_k = " << tau_k << "\n";
 #endif
 
     Real w_kp1 = Q / (K1 * tau_k) - W;
@@ -157,14 +161,14 @@ OneDFSIPhysicsNonLinear::fromQToW( const Real& Q, const Real& W_tn, const Real& 
 // Derivatives methods
 // ===================================================
 Real
-OneDFSIPhysicsNonLinear::dPdW( const Real& W1, const Real& W2, const ID& iW, const UInt& iNode ) const
+OneDFSIPhysicsNonLinear::dPdW ( const Real& W1, const Real& W2, const ID& iW, const UInt& iNode ) const
 {
-    Real rhoover2SQRTchi ( M_dataPtr->densityRho() / ( std::sqrt(M_dataPtr->robertsonCorrection()) * 2 ) );
+    Real rhoover2SQRTchi ( M_dataPtr->densityRho() / ( std::sqrt (M_dataPtr->robertsonCorrection() ) * 2 ) );
 
-    Real beta1over4SQRTchi( M_dataPtr->beta1( iNode ) / ( std::sqrt(M_dataPtr->robertsonCorrection()) * 4 ) );
+    Real beta1over4SQRTchi ( M_dataPtr->beta1 ( iNode ) / ( std::sqrt (M_dataPtr->robertsonCorrection() ) * 4 ) );
 
-    Real result( beta1over4SQRTchi * (W1 - W2)  );
-    result += celerity0( iNode );
+    Real result ( beta1over4SQRTchi * (W1 - W2)  );
+    result += celerity0 ( iNode );
     result *= rhoover2SQRTchi;
 
     if ( iW == 0 ) //! dP/dW1
@@ -177,7 +181,7 @@ OneDFSIPhysicsNonLinear::dPdW( const Real& W1, const Real& W2, const ID& iW, con
         return -result;
     }
 
-    ERROR_MSG("P(W1,W2)'s differential function has only 2 components.");
+    ERROR_MSG ("P(W1,W2)'s differential function has only 2 components.");
     return -1.;
 }
 

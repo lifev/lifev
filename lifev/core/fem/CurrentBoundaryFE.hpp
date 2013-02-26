@@ -63,7 +63,7 @@ namespace LifeV
 */
 
 class CurrentBoundaryFE:
-        public CurrentBoundaryFEBase
+    public CurrentBoundaryFEBase
 {
 public:
 
@@ -71,10 +71,10 @@ public:
     //@{
 
     //! Constructor with reference FE and geometric mapping
-    CurrentBoundaryFE( const ReferenceFE& refFE, const GeometricMap& geoMap );
+    CurrentBoundaryFE ( const ReferenceFE& refFE, const GeometricMap& geoMap );
 
     //! Constructor with reference FE, geometric mapping and quadrature rule
-    CurrentBoundaryFE( const ReferenceFE& refFE, const GeometricMap& geoMap, const QuadratureRule& qr );
+    CurrentBoundaryFE ( const ReferenceFE& refFE, const GeometricMap& geoMap, const QuadratureRule& qr );
 
     //! Destructor
     virtual ~CurrentBoundaryFE();
@@ -89,35 +89,35 @@ public:
       Compute only the coordinates of the nodes on the current boundary element
     */
     template <typename GeometricType>
-    void update( const GeometricType& geometricEntity );
+    void update ( const GeometricType& geometricEntity );
 
     /*!
       Compute the arrays meas, weightMeas, tangent
       on the current boundary element
     */
     template <typename GeometricType>
-    void updateMeas( const GeometricType& geometricEntity );
+    void updateMeas ( const GeometricType& geometricEntity );
 
     /*!
       Compute the arrays meas, weightMeas, tangent
       and quadrature points on the current boundary element
     */
     template <typename GeometricType>
-    void updateMeasQuadPt( const GeometricType& geometricEntity );
+    void updateMeasQuadPt ( const GeometricType& geometricEntity );
 
     /*!
       Compute the arrays meas, weightMeas, tangent
       and normal on the current boundary element
     */
     template <typename GeometricType>
-    void updateMeasNormal( const GeometricType& geometricEntity );
+    void updateMeasNormal ( const GeometricType& geometricEntity );
 
     /*!
       Compute the arrays meas, weightMeas, tangent,
       normal and quadrature points on the current boundary element
     */
     template <typename GeometricType>
-    void updateMeasNormalQuadPt( const GeometricType& geometricEntity );
+    void updateMeasNormalQuadPt ( const GeometricType& geometricEntity );
 
     //@}
 };
@@ -129,7 +129,7 @@ public:
 template <typename GeometricType>
 void
 CurrentBoundaryFE::
-update( const GeometricType& geometricEntity )
+update ( const GeometricType& geometricEntity )
 {
 #ifdef TEST_PRE
     M_hasMeasure = false;
@@ -141,11 +141,11 @@ update( const GeometricType& geometricEntity )
 
     M_currentID = geometricEntity.id();
     // update the definition of the geo points
-    for ( UInt i(0); i < M_nbGeoNode; i++ )
+    for ( UInt i (0); i < M_nbGeoNode; i++ )
     {
-        for (UInt icoor(0); icoor < M_nbCoor+1; icoor++)
+        for (UInt icoor (0); icoor < M_nbCoor + 1; icoor++)
         {
-            M_point( i, icoor ) = geometricEntity.point( i ).coordinatesArray()[icoor];
+            M_point ( i, icoor ) = geometricEntity.point ( i ).coordinatesArray() [icoor];
         }
     }
 }
@@ -153,7 +153,7 @@ update( const GeometricType& geometricEntity )
 template <typename GeometricType>
 void
 CurrentBoundaryFE::
-updateMeas( const GeometricType& geometricEntity )
+updateMeas ( const GeometricType& geometricEntity )
 {
 #ifdef TEST_PRE
     M_hasMeasure = true;
@@ -168,9 +168,9 @@ updateMeas( const GeometricType& geometricEntity )
 
     for ( UInt i = 0; i < M_nbGeoNode; i++ )
     {
-        for (UInt icoor=0; icoor<M_nbCoor+1; icoor++)
+        for (UInt icoor = 0; icoor < M_nbCoor + 1; icoor++)
         {
-            M_point( i, icoor ) = geometricEntity.point( i ).coordinatesArray()[icoor];
+            M_point ( i, icoor ) = geometricEntity.point ( i ).coordinatesArray() [icoor];
         }
     }
 
@@ -181,7 +181,7 @@ updateMeas( const GeometricType& geometricEntity )
 template <typename GeometricType>
 void
 CurrentBoundaryFE::
-updateMeasQuadPt( const GeometricType& geometricEntity )
+updateMeasQuadPt ( const GeometricType& geometricEntity )
 {
 #ifdef TEST_PRE
     M_hasMeasure = true;
@@ -196,9 +196,9 @@ updateMeasQuadPt( const GeometricType& geometricEntity )
 
     for ( UInt i = 0; i < M_nbGeoNode; i++ )
     {
-        for (UInt icoor=0; icoor<M_nbCoor+1; icoor++)
+        for (UInt icoor = 0; icoor < M_nbCoor + 1; icoor++)
         {
-            M_point( i, icoor ) = geometricEntity.point( i ).coordinatesArray()[icoor];
+            M_point ( i, icoor ) = geometricEntity.point ( i ).coordinatesArray() [icoor];
         }
     }
 
@@ -211,7 +211,7 @@ updateMeasQuadPt( const GeometricType& geometricEntity )
 template <typename GeometricType>
 void
 CurrentBoundaryFE::
-updateMeasNormal( const GeometricType& geometricEntity )
+updateMeasNormal ( const GeometricType& geometricEntity )
 {
 #ifdef TEST_PRE
     M_hasMeasure = true;
@@ -226,9 +226,9 @@ updateMeasNormal( const GeometricType& geometricEntity )
 
     for ( UInt i = 0; i < M_nbGeoNode; i++ )
     {
-        for (UInt icoor=0; icoor<M_nbCoor+1; icoor++)
+        for (UInt icoor = 0; icoor < M_nbCoor + 1; icoor++)
         {
-            M_point( i, icoor ) = geometricEntity.point( i ).coordinatesArray()[icoor];
+            M_point ( i, icoor ) = geometricEntity.point ( i ).coordinatesArray() [icoor];
         }
     }
 
@@ -239,7 +239,7 @@ updateMeasNormal( const GeometricType& geometricEntity )
 template <typename GeometricType>
 void
 CurrentBoundaryFE::
-updateMeasNormalQuadPt( const GeometricType& geometricEntity )
+updateMeasNormalQuadPt ( const GeometricType& geometricEntity )
 {
 #ifdef TEST_PRE
     M_hasMeasure = true;
@@ -254,9 +254,9 @@ updateMeasNormalQuadPt( const GeometricType& geometricEntity )
 
     for ( UInt i = 0; i < M_nbGeoNode; i++ )
     {
-    	for (UInt icoor=0; icoor<M_nbCoor+1; icoor++)
+        for (UInt icoor = 0; icoor < M_nbCoor + 1; icoor++)
         {
-            M_point( i, icoor ) = geometricEntity.point( i ).coordinatesArray()[icoor];
+            M_point ( i, icoor ) = geometricEntity.point ( i ).coordinatesArray() [icoor];
         }
     }
 

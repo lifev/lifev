@@ -51,7 +51,7 @@ namespace LifeV
 /*!
  *  @author Vincent Martin, Cristiano Malossi
  *  @see Equations and networks of 1-D models \cite FormaggiaLamponi2003
- *  @see Geometrical multiscale coupling of 1-D models \cite Malossi2011Algorithms \cite Malossi2011Algorithms1D
+ *  @see Geometrical multiscale coupling of 1-D models \cite Malossi2011Algorithms \cite Malossi2011Algorithms1D \cite BonnemainMalossi2012LVAD
  *
  *  The conservative form of the generic hyperbolic problem is
  *
@@ -109,7 +109,7 @@ public:
     /*!
      * @param physicsPtr pointer to the physics of the problem
      */
-    explicit OneDFSIFluxLinear( const physicsPtr_Type physicsPtr ) : super( physicsPtr ) {};
+    explicit OneDFSIFluxLinear ( const physicsPtr_Type physicsPtr ) : super ( physicsPtr ) {};
 
     //! Do nothing destructor
     virtual ~OneDFSIFluxLinear() {}
@@ -134,7 +134,7 @@ public:
      *  @param row row of the source term
      *  @param iNode node of the mesh
      */
-    Real flux( const Real& U1, const Real& U2, const ID& row, const UInt& iNode ) const ;
+    Real flux ( const Real& U1, const Real& U2, const ID& row, const UInt& iNode ) const ;
 
     //! Evaluate the derivative of the flux term
     /*!
@@ -144,7 +144,7 @@ public:
      *  @param column column of the derivative of the flux term
      *  @param iNode node of the mesh
      */
-    Real dFdU( const Real& U1, const Real& U2, const ID& row, const ID& column, const UInt& iNode ) const;
+    Real dFdU ( const Real& U1, const Real& U2, const ID& row, const ID& column, const UInt& iNode ) const;
 
 
     //! Eigenvalues and eigenvectors of the Jacobian matrix
@@ -156,11 +156,11 @@ public:
      *  @param leftEigenvector2 second row of the left eigenvector matrix
      *  @param iNode node of the mesh
      */
-    void eigenValuesEigenVectors( const Real& U1, const Real& U2,
-                                  container2D_Type& eigenvalues,
-                                  container2D_Type& leftEigenvector1,
-                                  container2D_Type& leftEigenvector2,
-                                  const UInt& iNode ) const;
+    void eigenValuesEigenVectors ( const Real& U1, const Real& U2,
+                                   container2D_Type& eigenvalues,
+                                   container2D_Type& leftEigenvector1,
+                                   container2D_Type& leftEigenvector2,
+                                   const UInt& iNode ) const;
 
     //! Derivatives of the eigenvalues and eigenvectors of the derivative of the Jacobian matrix
     /*!
@@ -171,11 +171,11 @@ public:
      *  @param deltaLeftEigenvector2 derivative of the second row of the left eigenvector matrix
      *  @param iNode node of the mesh
      */
-    void deltaEigenValuesEigenVectors( const Real& A, const Real& Q,
-                                       container2D_Type& deltaEigenvalues,
-                                       container2D_Type& deltaLeftEigenvector1,
-                                       container2D_Type& deltaLeftEigenvector2,
-                                       const UInt& iNode ) const;
+    void deltaEigenValuesEigenVectors ( const Real& A, const Real& Q,
+                                        container2D_Type& deltaEigenvalues,
+                                        container2D_Type& deltaLeftEigenvector1,
+                                        container2D_Type& deltaLeftEigenvector2,
+                                        const UInt& iNode ) const;
 
     //@}
 
@@ -184,9 +184,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    explicit OneDFSIFluxLinear( const OneDFSIFluxLinear& flux );
+    explicit OneDFSIFluxLinear ( const OneDFSIFluxLinear& flux );
 
-    OneDFSIFluxLinear& operator=( const OneDFSIFluxLinear& flux );
+    OneDFSIFluxLinear& operator= ( const OneDFSIFluxLinear& flux );
 
     //@}
 

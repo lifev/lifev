@@ -121,41 +121,47 @@ typedef MatrixEpetra<Real> matrix_Type;
 // messages.
 // ---------------------------------------------------------------
 
-int main( int argc, char** argv )
+int main ( int argc, char** argv )
 {
 
 #ifdef HAVE_MPI
-    MPI_Init(&argc, &argv);
-    boost::shared_ptr<Epetra_Comm> Comm(new Epetra_MpiComm(MPI_COMM_WORLD));
+    MPI_Init (&argc, &argv);
+    boost::shared_ptr<Epetra_Comm> Comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
 #else
-    boost::shared_ptr<Epetra_Comm> Comm(new Epetra_SerialComm);
+    boost::shared_ptr<Epetra_Comm> Comm (new Epetra_SerialComm);
 #endif
 
-    const bool verbose(Comm->MyPID()==0);
+    const bool verbose (Comm->MyPID() == 0);
 
 
-// ---------------------------------------------------------------
-// The next step is to build the mesh. We use here a structured
-// cartesian mesh over the square domain (-1,1)x(-1,1)x(-1,1).
-// The mesh is the partitioned for the parallel computations and
-// the original mesh is deleted.
-// ---------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // The next step is to build the mesh. We use here a structured
+    // cartesian mesh over the square domain (-1,1)x(-1,1)x(-1,1).
+    // The mesh is the partitioned for the parallel computations and
+    // the original mesh is deleted.
+    // ---------------------------------------------------------------
 
-    if (verbose) std::cout << " -- Building and partitioning the mesh ... " << std::flush;
+    if (verbose)
+    {
+        std::cout << " -- Building and partitioning the mesh ... " << std::flush;
+    }
 
-    const UInt Nelements(10);
+    const UInt Nelements (10);
 
     boost::shared_ptr< mesh_Type > fullMeshPtr(new mesh_Type( Comm ) );
 
-    regularMesh3D( *fullMeshPtr, 1, Nelements, Nelements, Nelements, false,
-                   2.0,   2.0,   2.0,
-                   -1.0,  -1.0,  -1.0);
+    regularMesh3D ( *fullMeshPtr, 1, Nelements, Nelements, Nelements, false,
+                    2.0,   2.0,   2.0,
+                    -1.0,  -1.0,  -1.0);
 
-    MeshPartitioner< mesh_Type >  meshPart(fullMeshPtr, Comm);
+    MeshPartitioner< mesh_Type >  meshPart (fullMeshPtr, Comm);
 
     fullMeshPtr.reset();
 
-    if (verbose) std::cout << " done ! " << std::endl;
+    if (verbose)
+    {
+        std::cout << " done ! " << std::endl;
+    }
 
 
 // ---------------------------------------------------------------
@@ -174,15 +180,21 @@ int main( int argc, char** argv )
     if (verbose) std::cout << " -- Building ETFESpaces ... " << std::flush;
 
     boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 1 > > uSpace
-        ( new ETFESpace< mesh_Type, MapEpetra, 3, 1 >(meshPart,&feTetraP1, Comm));
+    ( new ETFESpace< mesh_Type, MapEpetra, 3, 1 > (meshPart, &feTetraP1, Comm) );
 
-    if (verbose) std::cout << " done ! " << std::endl;
-    if (verbose) std::cout << " ---> Dofs: " << uSpace->dof().numTotalDof() << std::endl;
+    if (verbose)
+    {
+        std::cout << " done ! " << std::endl;
+    }
+    if (verbose)
+    {
+        std::cout << " ---> Dofs: " << uSpace->dof().numTotalDof() << std::endl;
+    }
 
 
-// ---------------------------------------------------------------
-// The matrix is then defined using the map of the FE space.
-// ---------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // The matrix is then defined using the map of the FE space.
+    // ---------------------------------------------------------------
 
     if (verbose) std::cout << " -- Defining the matrix ... " << std::flush;
 
@@ -192,21 +204,31 @@ int main( int argc, char** argv )
 
     if (verbose) std::cout << " done! " << std::endl;
 
+    *systemMatrix *= 0.0;
 
-// ---------------------------------------------------------------
-// We start now the assembly of the matrix.
-// ---------------------------------------------------------------
+    if (verbose)
+    {
+        std::cout << " done! " << std::endl;
+    }
 
-    if (verbose) std::cout << " -- Assembling the Laplace matrix ... " << std::flush;
+
+    // ---------------------------------------------------------------
+    // We start now the assembly of the matrix.
+    // ---------------------------------------------------------------
+
+    if (verbose)
+    {
+        std::cout << " -- Assembling the Laplace matrix ... " << std::flush;
+    }
 
 
-// ---------------------------------------------------------------
-// To use the ETA framework, it is mandatory to use a special
-// namespace, called ExpressionAssembly. This namespace is useful
-// to avoid collisions with keywords used for the assembly. A
-// special scope is opened to keep only that part of the code
-// in the ExpressionAssembly namespace.
-// ---------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // To use the ETA framework, it is mandatory to use a special
+    // namespace, called ExpressionAssembly. This namespace is useful
+    // to avoid collisions with keywords used for the assembly. A
+    // special scope is opened to keep only that part of the code
+    // in the ExpressionAssembly namespace.
+    // ---------------------------------------------------------------
 
     {
         using namespace ExpressionAssembly;
@@ -251,46 +273,63 @@ int main( int argc, char** argv )
             >> systemMatrix;
     }
 
-    if (verbose) std::cout << " done! " << std::endl;
+    if (verbose)
+    {
+        std::cout << " done! " << std::endl;
+    }
 
 
-// ---------------------------------------------------------------
-// As we are already done with the assembly of the matrix, we
-// finalize it to be able to work on it, e.g. to solve a linear
-// system.
-// ---------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // As we are already done with the assembly of the matrix, we
+    // finalize it to be able to work on it, e.g. to solve a linear
+    // system.
+    // ---------------------------------------------------------------
 
-    if (verbose) std::cout << " -- Closing the matrix ... " << std::flush;
+    if (verbose)
+    {
+        std::cout << " -- Closing the matrix ... " << std::flush;
+    }
 
     systemMatrix->globalAssemble();
 
-    if (verbose) std::cout << " done ! " << std::endl;
+    if (verbose)
+    {
+        std::cout << " done ! " << std::endl;
+    }
 
 
-// ---------------------------------------------------------------
-// We compute for this tutorial only the infinity norm of the
-// matrix for testing purposes.
-// ---------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // We compute for this tutorial only the infinity norm of the
+    // matrix for testing purposes.
+    // ---------------------------------------------------------------
 
-    Real matrixNorm( systemMatrix->normInf() );
+    Real matrixNorm ( systemMatrix->normInf() );
 
-    if (verbose) std::cout << " Matrix norm : " << matrixNorm << std::endl;
+    if (verbose)
+    {
+        std::cout << " Matrix norm : " << matrixNorm << std::endl;
+    }
 
 
-// ---------------------------------------------------------------
-// We finalize the MPI session if MPI was used
-// ---------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // We finalize the MPI session if MPI was used
+    // ---------------------------------------------------------------
 
 #ifdef HAVE_MPI
     MPI_Finalize();
 #endif
 
-// ---------------------------------------------------------------
-// Finally, we check the norm with respect to a previously
-// computed one to ensure that it has not changed.
-// ---------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // Finally, we check the norm with respect to a previously
+    // computed one to ensure that it has not changed.
+    // ---------------------------------------------------------------
 
-    Real matrixNormDiff(std::abs(matrixNorm-3.2));
+    Real matrixNormDiff (std::abs (matrixNorm - 3.2) );
+
+    if (verbose)
+    {
+        std::cout << " Error : " << matrixNormDiff << std::endl;
+    }
 
     if (verbose) std::cout << " Error : " << matrixNormDiff << std::endl;
 
@@ -298,7 +337,7 @@ int main( int argc, char** argv )
 
     if ( matrixNormDiff < testTolerance )
     {
-        return( EXIT_SUCCESS );
+        return ( EXIT_SUCCESS );
     }
     return ( EXIT_FAILURE );
 

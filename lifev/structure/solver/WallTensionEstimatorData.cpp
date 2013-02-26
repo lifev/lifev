@@ -44,25 +44,25 @@ namespace LifeV
 //=====================================================
 // Constructors
 //=====================================================
-WallTensionEstimatorData::WallTensionEstimatorData():
-        M_nameFile                         ( ),
-        M_analysisType                     ( ),
-        M_recoveryVariable                 ( ),
-        M_initialTime                      ( ),
-        M_finalTime                        ( ),
-        M_iterStart                        ( ),
-        M_iterEnd                          ( )
+WallTensionEstimatorData::WallTensionEstimatorData() :
+    M_nameFile                         ( ),
+    M_analysisType                     ( ),
+    M_recoveryVariable                 ( ),
+    M_initialTime                      ( ),
+    M_finalTime                        ( ),
+    M_iterStart                        ( ),
+    M_iterEnd                          ( )
 {
 }
 
-WallTensionEstimatorData::WallTensionEstimatorData( const WallTensionEstimatorData& wallTensionEstimatorData ):
-        M_nameFile                         ( wallTensionEstimatorData.M_nameFile ),
-        M_analysisType                     ( wallTensionEstimatorData.M_analysisType ),
-        M_recoveryVariable                 ( wallTensionEstimatorData.M_recoveryVariable ),
-        M_initialTime                      ( wallTensionEstimatorData.M_initialTime ),
-        M_finalTime                        ( wallTensionEstimatorData.M_finalTime ),
-        M_iterStart                        ( wallTensionEstimatorData.M_iterStart ),
-        M_iterEnd                          ( wallTensionEstimatorData.M_iterEnd )
+WallTensionEstimatorData::WallTensionEstimatorData ( const WallTensionEstimatorData& wallTensionEstimatorData ) :
+    M_nameFile                         ( wallTensionEstimatorData.M_nameFile ),
+    M_analysisType                     ( wallTensionEstimatorData.M_analysisType ),
+    M_recoveryVariable                 ( wallTensionEstimatorData.M_recoveryVariable ),
+    M_initialTime                      ( wallTensionEstimatorData.M_initialTime ),
+    M_finalTime                        ( wallTensionEstimatorData.M_finalTime ),
+    M_iterStart                        ( wallTensionEstimatorData.M_iterStart ),
+    M_iterEnd                          ( wallTensionEstimatorData.M_iterEnd )
 {
 }
 
@@ -70,7 +70,7 @@ WallTensionEstimatorData::WallTensionEstimatorData( const WallTensionEstimatorDa
 // Operators
 // ===================================================
 WallTensionEstimatorData&
-WallTensionEstimatorData::operator=( const WallTensionEstimatorData& wallTensionEstimatorData )
+WallTensionEstimatorData::operator= ( const WallTensionEstimatorData& wallTensionEstimatorData )
 {
     if ( this != &wallTensionEstimatorData )
     {
@@ -81,7 +81,7 @@ WallTensionEstimatorData::operator=( const WallTensionEstimatorData& wallTension
         M_finalTime                        = wallTensionEstimatorData.M_finalTime;
         M_iterStart                        = wallTensionEstimatorData.M_iterStart;
         M_iterEnd                          = wallTensionEstimatorData.M_iterEnd;
-	
+
     }
 
     return *this;
@@ -91,43 +91,47 @@ WallTensionEstimatorData::operator=( const WallTensionEstimatorData& wallTension
 // Methods
 // ===================================================
 void
-WallTensionEstimatorData::setup( const GetPot& dataFile, const std::string& section )
+WallTensionEstimatorData::setup ( const GetPot& dataFile, const std::string& section )
 {
 
     // physics
-    M_nameFile = dataFile( ( section + "/analysis/nameFile" ).data(), "NO_DEFAULT_NAME_FILE" );
-    M_typeFile = dataFile( ( section + "/analysis/typeFile" ).data(), "NO_DEFAULT_FILE_TYPE" );
+    M_nameFile = dataFile ( ( section + "/analysis/nameFile" ).data(), "NO_DEFAULT_NAME_FILE" );
+    M_typeFile = dataFile ( ( section + "/analysis/typeFile" ).data(), "NO_DEFAULT_FILE_TYPE" );
 
-    M_analysisType = dataFile( ( section + "/analysis/analysisType" ).data(), "NO_DEFAULT_ANALYSIS_TYPE" );
-    M_recoveryVariable = dataFile( ( section + "/analysis/recoveryVariable" ).data(), "NO_DEFAULT_ANALYSIS_TYPE" );
+    M_analysisType = dataFile ( ( section + "/analysis/analysisType" ).data(), "NO_DEFAULT_ANALYSIS_TYPE" );
+    M_recoveryVariable = dataFile ( ( section + "/analysis/recoveryVariable" ).data(), "NO_DEFAULT_ANALYSIS_TYPE" );
 
-    UInt timesNumber(0);
+    UInt timesNumber (0);
 
-    if( !M_analysisType.compare("istant") ) 
-      timesNumber = 1;
+    if ( !M_analysisType.compare ("istant") )
+    {
+        timesNumber = 1;
+    }
     else
-      timesNumber = dataFile.vector_variable_size( ( section + "/analysis/start" ).data() );
-    
+    {
+        timesNumber = dataFile.vector_variable_size ( ( section + "/analysis/start" ).data() );
+    }
+
     //Resizing the vectors to store the right number of iterations & times
-    M_initialTime.resize(timesNumber);
-    M_finalTime.resize(timesNumber);
+    M_initialTime.resize (timesNumber);
+    M_finalTime.resize (timesNumber);
 
-    M_iterStart.resize(timesNumber);
-    M_iterEnd.resize(timesNumber);
+    M_iterStart.resize (timesNumber);
+    M_iterEnd.resize (timesNumber);
 
-    for ( UInt i(0); i < timesNumber ; i++)
-      {
-	M_initialTime[i] = dataFile( ( section + "/analysis/start" ).data(), 0., i );
-	M_finalTime[i]   = dataFile( ( section + "/analysis/end"   ).data(), 0., i );
-	
-	M_iterStart[i] = dataFile( ( section + "/analysis/iterationStart" ).data(), "00000", i );
-	M_iterEnd[i]   = dataFile( ( section + "/analysis/iterationEnd"   ).data(), "00000", i );
-      }
- 
+    for ( UInt i (0); i < timesNumber ; i++)
+    {
+        M_initialTime[i] = dataFile ( ( section + "/analysis/start" ).data(), 0., i );
+        M_finalTime[i]   = dataFile ( ( section + "/analysis/end"   ).data(), 0., i );
+
+        M_iterStart[i] = dataFile ( ( section + "/analysis/iterationStart" ).data(), "00000", i );
+        M_iterEnd[i]   = dataFile ( ( section + "/analysis/iterationEnd"   ).data(), "00000", i );
+    }
+
 }
 
 void
-WallTensionEstimatorData::showMe( std::ostream& output ) const
+WallTensionEstimatorData::showMe ( std::ostream& output ) const
 {
     // physics
     output << "\n*** Values for wall tension analysis [solid/analysis]\n\n";
@@ -137,16 +141,16 @@ WallTensionEstimatorData::showMe( std::ostream& output ) const
     output << "Recovery Variable        = " << M_recoveryVariable << std::endl;
     output << "The numbers of intervals is =  " << M_initialTime.size() << std::endl;
 
-    for ( UInt i(0); i< M_initialTime.size() ; i++ )
-      {
+    for ( UInt i (0); i < M_initialTime.size() ; i++ )
+    {
 
-	output <<  i+1 << "  Interval: " <<  std::endl;
-	output << "initial Time " << i+1 << "  = " << M_initialTime[i] << std::endl;
-	output << "final  Time " << i+1 << "   = " << M_finalTime[i] << std::endl;
+        output <<  i + 1 << "  Interval: " <<  std::endl;
+        output << "initial Time " << i + 1 << "  = " << M_initialTime[i] << std::endl;
+        output << "final  Time " << i + 1 << "   = " << M_finalTime[i] << std::endl;
 
-	output << "iteration Start " << i+1 << "= " << M_iterStart[i] << std::endl;
-	output << "iteration End " << i+1 << "= " << M_iterEnd[i] << std::endl;
-      }
+        output << "iteration Start " << i + 1 << "= " << M_iterStart[i] << std::endl;
+        output << "iteration End " << i + 1 << "= " << M_iterEnd[i] << std::endl;
+    }
 }
 
 }

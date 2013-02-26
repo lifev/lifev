@@ -44,9 +44,10 @@
 8160 -- LifeV::MultiscaleModel0D
 8200 -- LifeV::MultiscaleCoupling
 8210 -- LifeV::MultiscaleCouplingBoundaryCondition
-8220 -- LifeV::MultiscaleCouplingStress
-8230 -- LifeV::MultiscaleCouplingFlowRateStress
-8240 -- LifeV::MultiscaleCouplingFlowRate
-8250 -- LifeV::MultiscaleCouplingFlowRateValve
+8220 -- LifeV::MultiscaleCouplingMeanNormalStress
+8230 -- LifeV::MultiscaleCouplingMeanNormalStressArea
+8240 -- LifeV::MultiscaleCouplingMeanNormalStressValve
+8250 -- LifeV::MultiscaleCouplingMeanTotalNormalStress
+8260 -- LifeV::MultiscaleCouplingMeanTotalNormalStressArea
 9000 -- LifeV::filters
 10000 -- testsuite

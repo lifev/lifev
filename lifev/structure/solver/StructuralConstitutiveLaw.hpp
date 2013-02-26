@@ -198,7 +198,7 @@ public:
     /*!
       \param dk_loc: local displacement vector
     */
-    virtual  void computeKinematicsVariables( const VectorElemental& dk_loc ) = 0;
+    virtual  void computeKinematicsVariables ( const VectorElemental& dk_loc ) = 0;
 
 
     //! Output of the class
@@ -206,7 +206,7 @@ public:
        \param fileNamelinearStiff the filename where to apply the spy method for the linear part of the Stiffness matrix
        \param fileNameStiff the filename where to apply the spy method for the Stiffness matrix
     */
-    virtual void showMe( std::string const& fileNameStiff, std::string const& fileNameJacobian ) = 0;
+    virtual void showMe ( std::string const& fileNameStiff, std::string const& fileNameJacobian ) = 0;
 
 
     //! Compute the First Piola Kirchhoff Tensor
@@ -217,11 +217,11 @@ public:
        \param invariants std::vector with the invariants of C and the detF
        \param material UInt number to get the material parameteres form the VenantElasticData class
     */
-    virtual void computeLocalFirstPiolaKirchhoffTensor( Epetra_SerialDenseMatrix& firstPiola,
-                                                        const Epetra_SerialDenseMatrix& tensorF,
-                                                        const Epetra_SerialDenseMatrix& cofactorF,
-                                                        const std::vector<Real>& invariants,
-                                                        const UInt material) = 0;
+    virtual void computeLocalFirstPiolaKirchhoffTensor ( Epetra_SerialDenseMatrix& firstPiola,
+                                                         const Epetra_SerialDenseMatrix& tensorF,
+                                                         const Epetra_SerialDenseMatrix& cofactorF,
+                                                         const std::vector<Real>& invariants,
+                                                         const UInt material) = 0;
 
 
     //! @name Set Methods
@@ -237,13 +237,19 @@ public:
 
     //! Getters
     //! Get the Epetramap
-    MapEpetra   const& map()     const { return *M_localMap; }
+    MapEpetra   const& map()     const
+    {
+        return *M_localMap;
+    }
 
     //! Get the FESpace object
     FESpace_Type& dFESpace()  {return M_dispFESpace;}
 
     //! Get the Stiffness matrix
-    matrixPtr_Type const jacobian()    const {return M_jacobian; }
+    matrixPtr_Type const jacobian()    const
+    {
+        return M_jacobian;
+    }
 
     //! Get the Stiffness matrix
     virtual matrixPtr_Type const stiffMatrix() const = 0;

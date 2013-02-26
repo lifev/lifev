@@ -136,13 +136,13 @@ public:
        sets the interface map between the fluid and solid meshes
        (non scalable, do not use for massively parallel simulations)
      */
-    virtual void setupDOF( void );
+    virtual void setupDOF ( void );
 
 #ifdef HAVE_HDF5
     /**
        reads the interface map between the fluid and solid meshes from file.
      */
-    void setupDOF( meshFilter_Type& filterMesh );
+    void setupDOF ( meshFilter_Type& filterMesh );
 #endif
 
     //! sets the parameters from data file
@@ -158,7 +158,7 @@ public:
     /**
        sets some parameters specific to the FSIMonolithic class
      */
-    virtual void setup( const GetPot& dataFile );
+    virtual void setup ( const GetPot& dataFile );
 
     //! builds the global Epetra map
     /**
@@ -171,7 +171,7 @@ public:
        assigns each mesh partition to the corresponding processor, builds the monolithic map with a number of fluxes
        specified from input
      */
-    virtual void setupFluidSolid( UInt const fluxes );
+    virtual void setupFluidSolid ( UInt const fluxes );
 
     //!@}
 
@@ -184,7 +184,7 @@ public:
        \param lambdaSolid: vector on the solid interface
        \param disp: monolithic vector
      */
-    void monolithicToInterface(    vector_Type& lambdaSolid, const vector_Type& sol) ;
+    void monolithicToInterface (    vector_Type& lambdaSolid, const vector_Type& sol) ;
 
 
     //!Transfers a vector to a subdomain
@@ -196,7 +196,7 @@ public:
        \param map: MapEpetra of the part of vector that we want to transfer
        \param offset: offset for the monolithic vector (also alpplied to the input map)
      */
-    void monolithicToX(const vector_Type& disp, vector_Type& dispFluid, MapEpetra& map, UInt offset=(UInt)0);
+    void monolithicToX (const vector_Type& disp, vector_Type& dispFluid, MapEpetra& map, UInt offset = (UInt) 0);
 
 
     /**
@@ -211,10 +211,14 @@ public:
      */
     void mergeBCHandlers()
     {
-        if(M_BCh_u.get())
-            M_BCh_u->merge(*M_BCh_flux);
+        if (M_BCh_u.get() )
+        {
+            M_BCh_u->merge (*M_BCh_flux);
+        }
         else // in this case only fluxes are imposed on the fluid
-            M_BCh_u=M_BCh_flux;
+        {
+            M_BCh_u = M_BCh_flux;
+        }
         M_BCh_flux.reset();
     }
 
@@ -232,7 +236,7 @@ public:
        to use the boundary conditions methods to compute the normal field on
        a surface.
      */
-    void computeFluidNormals( vector_Type& normals);
+    void computeFluidNormals ( vector_Type& normals);
 
 
     //!Evaluates the nonlinear residual
@@ -242,9 +246,9 @@ public:
        \param _sol: monolithic solution
        \param iter: current NonLinearRichardson (Newton) iteration
      */
-    virtual void   evalResidual(vector_Type&        res,
-                                const vector_Type& sol,
-                                const UInt         iter) = 0 ;
+    virtual void   evalResidual (vector_Type&        res,
+                                 const vector_Type& sol,
+                                 const UInt         iter) = 0 ;
 
     /**
        solves the Jacobian system
@@ -270,9 +274,9 @@ public:
        of the fluid--structure coupling, split in 3 factors
        - DDBlockPrec = MonolithicBlockComposedDN2GI is AAS on an alternative matrix obtained with the previous strategy
      */
-    virtual void   solveJac(vector_Type&       muk,
-                            const vector_Type& res,
-                            const Real       linearRelTol);
+    virtual void   solveJac (vector_Type&       muk,
+                             const vector_Type& res,
+                             const Real       linearRelTol);
 
     /**
        updates the meshmotion, advances of a time step
@@ -284,7 +288,7 @@ public:
     /**
        Notice that the specified flag must be in the coupling fluid-structure interface
      */
-    void enableStressComputation(UInt  flag);
+    void enableStressComputation (UInt  flag);
 
     /**
        Computes the stress on the coupling boundary (the traction vector)
@@ -298,17 +302,23 @@ public:
     //@{
 
     //! returns a non-const pointer to the preconditioner. Can be used either as a setter or a getter.
-    precPtr_Type& precPtrView(){ return M_precPtr; }
+    precPtr_Type& precPtrView()
+    {
+        return M_precPtr;
+    }
 
     //! returns a non-const pointer to the preconditioner. Can be used either as a setter or a getter.
-    blockMatrixPtr_Type& operatorPtrView(){ return M_monolithicMatrix; }
+    blockMatrixPtr_Type& operatorPtrView()
+    {
+        return M_monolithicMatrix;
+    }
 
     /**
        \small sets the solid BCHandle
      */
     virtual void setSolidBC     ( const fluidBchandlerPtr_Type& bc_solid )
     {
-        super_Type::setSolidBC(bc_solid);
+        super_Type::setSolidBC (bc_solid);
         //bc_solid->merge(*M_BCh_Robin);
     }
 
@@ -319,41 +329,47 @@ public:
 
     void setFluidBC     ( const fluidBchandlerPtr_Type& bc_fluid )
     {
-        super_Type::setFluidBC(bc_fluid);
-        if(M_BChs.size())
+        super_Type::setFluidBC (bc_fluid);
+        if (M_BChs.size() )
         {
-            UInt nfluxes(M_BChs[1]->numberOfBCWithType(Flux));
+            UInt nfluxes (M_BChs[1]->numberOfBCWithType (Flux) );
             //M_substituteFlux.reset(new std::vector<bool>(nfluxes))
-            M_fluxOffset.resize(nfluxes);
-            M_BCFluxNames = M_BChs[1]->findAllBCWithType(Flux);
-            for (UInt i=0; i<nfluxes; ++i)
+            M_fluxOffset.resize (nfluxes);
+            M_BCFluxNames = M_BChs[1]->findAllBCWithType (Flux);
+            for (UInt i = 0; i < nfluxes; ++i)
             {
-                const BCBase* bc = M_BChs[1]->findBCWithName(M_BCFluxNames[i]);
-                M_fluxOffset[i]=bc->offset();
+                const BCBase* bc = M_BChs[1]->findBCWithName (M_BCFluxNames[i]);
+                M_fluxOffset[i] = bc->offset();
             }
-            M_BChs[1]=bc_fluid;
-            M_monolithicMatrix->setConditions(M_BChs);
-            M_precPtr->setConditions(M_BChs);
+            M_BChs[1] = bc_fluid;
+            M_monolithicMatrix->setConditions (M_BChs);
+            M_precPtr->setConditions (M_BChs);
         }
     }
 
 
     //!get the total dimension of the FS interface
-    UInt dimInterface() const {return nDimensions*M_monolithicMatrix->interface();}
+    UInt dimInterface() const
+    {
+        return nDimensions * M_monolithicMatrix->interface();
+    }
 
     //! Returns true if CE of FI methods are used, false otherwise (GCE)
     //bool const isFullMonolithic(){return M_fullMonolithic;}
 
     //! Returns the offset assigned to the solid block
-    UInt  offset() const {return M_offset;}
+    UInt  offset() const
+    {
+        return M_offset;
+    }
 
     //!Get the solid displacement from the solution
     /*!
       \param solidDisplacement: input vector
      */
-    void exportSolidDisplacement( vector_Type& solidDisplacement )
+    void exportSolidDisplacement ( vector_Type& solidDisplacement )
     {
-        solidDisplacement.subset( M_fluidTimeAdvance->singleElement(0), M_offset );
+        solidDisplacement.subset ( M_fluidTimeAdvance->singleElement (0), M_offset );
         solidDisplacement *= M_solid->rescaleFactor();
     }
 
@@ -362,7 +378,7 @@ public:
       fills an input vector with the solid displacement from the solution.
       \param solidVelocity: input vector (output solid velocity)
      */
-    void exportSolidVelocity( vector_Type& solidVelocity )
+    void exportSolidVelocity ( vector_Type& solidVelocity )
     {
         solidVelocity = M_solidTimeAdvance->firstDerivative();
         solidVelocity *= M_solid->rescaleFactor();
@@ -373,7 +389,7 @@ public:
       fills an input vector with the solid displacement from the solution.
       \param solidVelocity: input vector (output solid acceleration)
      */
-    void exportSolidAcceleration( vector_Type& solidAcceleration )
+    void exportSolidAcceleration ( vector_Type& solidAcceleration )
     {
         solidAcceleration = M_solidTimeAdvance->secondDerivative();
         solidAcceleration *= M_solid->rescaleFactor();
@@ -383,13 +399,19 @@ public:
     /*!
      * @param fluidVelocity vector to be filled with the fluid velocity
      */
-    void exportFluidVelocity( vector_Type& fluidVelocity ) { fluidVelocity.subset( M_fluidTimeAdvance->singleElement(0), 0 ); }
+    void exportFluidVelocity ( vector_Type& fluidVelocity )
+    {
+        fluidVelocity.subset ( M_fluidTimeAdvance->singleElement (0), 0 );
+    }
 
     //! Export the fluid pressure by copying it to an external vector
     /*!
      * @param fluidPressure vector to be filled with the fluid pressure
      */
-    void exportFluidPressure( vector_Type& fluidPressure ) { fluidPressure.subset( M_fluidTimeAdvance->singleElement(0), static_cast<UInt> (3 * M_uFESpace->dof().numTotalDof() ) ); }
+    void exportFluidPressure ( vector_Type& fluidPressure )
+    {
+        fluidPressure.subset ( M_fluidTimeAdvance->singleElement (0), static_cast<UInt> (3 * M_uFESpace->dof().numTotalDof() ) );
+    }
 
     //! Gets the fluid and pressure
     /**
@@ -397,13 +419,16 @@ public:
        It performs a trilinos import. Thus it works also for the velocity, depending on the map of the input vector
        \param fluidVelocityandPressure: input vector
      */
-    void exportFluidVelocityAndPressure( vector_Type& fluidVelocityAndPressure )
+    void exportFluidVelocityAndPressure ( vector_Type& fluidVelocityAndPressure )
     {
-        fluidVelocityAndPressure = M_fluidTimeAdvance->singleElement(0);
+        fluidVelocityAndPressure = M_fluidTimeAdvance->singleElement (0);
     }
 
     //! Returns the monolithic map
-    virtual boost::shared_ptr<MapEpetra>& couplingVariableMap() { return M_monolithicMap; }
+    virtual boost::shared_ptr<MapEpetra>& couplingVariableMap()
+    {
+        return M_monolithicMap;
+    }
 
     //! get the solution vector
     virtual const vector_Type& solution() const = 0;
@@ -412,12 +437,14 @@ public:
     /*!
      *  Here it is used also to update the velocity for the post-processing.
      */
-    virtual void updateSolution( const vector_Type& solution )
+    virtual void updateSolution ( const vector_Type& solution )
     {
-        this->M_fluidTimeAdvance->shiftRight(solution);
-        if(M_data->dataFluid()->conservativeFormulation())
-            this->M_fluidMassTimeAdvance->shiftRight(M_fluid->matrixMass()*solution);
-        this->M_solidTimeAdvance->shiftRight(solution);
+        this->M_fluidTimeAdvance->shiftRight (solution);
+        if (M_data->dataFluid()->conservativeFormulation() )
+        {
+            this->M_fluidMassTimeAdvance->shiftRight (M_fluid->matrixMass() *solution);
+        }
+        this->M_solidTimeAdvance->shiftRight (solution);
     }
 
     //! Updates the right hand side
@@ -431,17 +458,17 @@ public:
     /*!
      *  Set vectors for restart
      */
-    void setVectorInStencils( const vectorPtr_Type& vel,
-                              const vectorPtr_Type& pressure,
-                              const vectorPtr_Type& solidDisp,
-                              //const vectorPtr_Type& fluidDisp,
-                              const UInt iter);
+    void setVectorInStencils ( const vectorPtr_Type& vel,
+                               const vectorPtr_Type& pressure,
+                               const vectorPtr_Type& solidDisp,
+                               //const vectorPtr_Type& fluidDisp,
+                               const UInt iter);
 
-    void setFluidVectorInStencil( const vectorPtr_Type& vel, const vectorPtr_Type& pressure, const UInt iter);
+    void setFluidVectorInStencil ( const vectorPtr_Type& vel, const vectorPtr_Type& pressure, const UInt iter);
 
-    void setSolidVectorInStencil( const vectorPtr_Type& solidDisp, const UInt iter);
+    void setSolidVectorInStencil ( const vectorPtr_Type& solidDisp, const UInt iter);
 
-    virtual void setALEVectorInStencil( const vectorPtr_Type& fluidDisp, const UInt iter,const bool lastVector) = 0;
+    virtual void setALEVectorInStencil ( const vectorPtr_Type& fluidDisp, const UInt iter, const bool lastVector) = 0;
 
     void finalizeRestart();
 
@@ -455,19 +482,19 @@ protected:
     //!@{
 
     //! pure virtual: creates the operator (either of type FSIMonolithicGI or FSIMonolithicGE)
-    virtual void createOperator( std::string& operType )=0;
+    virtual void createOperator ( std::string& operType ) = 0;
 
     /**
        \small solves the monolithic system, once a solver, a preconditioner and a rhs have been defined.
      */
-    void iterateMonolithic(const vector_Type& rhs, vector_Type& step);
+    void iterateMonolithic (const vector_Type& rhs, vector_Type& step);
 
     /**
        \small adds the part due to coupling to the rhs
        \param rhs: right hand side
        \param un: current solution
      */
-    void couplingRhs( vectorPtr_Type rhs);
+    void couplingRhs ( vectorPtr_Type rhs);
 
 
     /**\small evaluates the linear residual
@@ -476,18 +503,21 @@ protected:
        \param res: the output residual
        \param diagonalScaling: flag stating wether to perform diagonal scaling
      */
-    void evalResidual( const vector_Type& sol, const vectorPtr_Type& rhs,  vector_Type& res, bool diagonalScaling=false);
+    void evalResidual ( const vector_Type& sol, const vectorPtr_Type& rhs,  vector_Type& res, bool diagonalScaling = false);
 
     //!\small says if the preconditioner will be recomputed
-    bool recomputePrec() {return(!M_reusePrec || M_resetPrec);}
+    bool recomputePrec()
+    {
+        return (!M_reusePrec || M_resetPrec);
+    }
 
     //!\small updates the rhs of the solid block.
-    void updateSolidSystem(vectorPtr_Type& rhsFluidCoupling);
+    void updateSolidSystem (vectorPtr_Type& rhsFluidCoupling);
 
     /**\small scales matrix and rhs
        \param rhs: the output rhs
        \param matrFull: the output matrix*/
-    void diagonalScale(vector_Type& rhs, matrixPtr_Type matrFull);
+    void diagonalScale (vector_Type& rhs, matrixPtr_Type matrFull);
 
 
     //! Constructs the solid FESpace
@@ -497,14 +527,14 @@ protected:
        If the interface map is created offline this method is never called.
        \param dOrder: discretization order
      */
-    void solidInit(std::string const& dOrder);
+    void solidInit (std::string const& dOrder);
 
     //! Constructs the solid FESpace and initializes the coupling variables at the interface
     /**
        If the mesh is partitioned online the previous FESpace constructed with the unpartitioned mesh is discarded and
        replaced with one using a partitioned mesh.
      */
-    void variablesInit(std::string const& dOrder);
+    void variablesInit (std::string const& dOrder);
 
     //!
     virtual void setupBlockPrec();
@@ -515,7 +545,7 @@ protected:
       \param iter: current nonlinear iteration: used as flag to distinguish the first nonlinear iteration from the others
       \param solution: current solution, used for the time advance implementation, and thus for the update of the right hand side
      */
-    void assembleSolidBlock(UInt iter, const vector_Type& solution);
+    void assembleSolidBlock (UInt iter, const vector_Type& solution);
 
 
     //! assembles the fluid problem (the matrix and the rhs due to the time derivative)
@@ -523,7 +553,7 @@ protected:
       \param iter: current nonlinear iteration: used as flag to distinguish the first nonlinear iteration from the others
       \param solution: current solution, used for the time advance implementation, and thus for the update of the right hand side
      */
-    void assembleFluidBlock(UInt iter, const vector_Type& solution);
+    void assembleFluidBlock (UInt iter, const vector_Type& solution);
 
     //! Checks if the flux bcs changed during the simulation, e.g. if a flux b.c. has been changed to Natural
     //! (this can be useful when modeling valves)
@@ -531,7 +561,7 @@ protected:
        When the fluxes bcs changed a '1' is added in the line corresponding to the Lagrange multiplier. This method must
        be called for both operator and preconditioner
      */
-    void checkIfChangedFluxBC( precPtr_Type oper );
+    void checkIfChangedFluxBC ( precPtr_Type oper );
 
     //!@}
 
@@ -583,8 +613,8 @@ class WRONG_PREC_EXCEPTION
 public:
 
     //! Exception thrown when a wrong preconditioning strategy is set
-    WRONG_PREC_EXCEPTION(){}
-    virtual ~WRONG_PREC_EXCEPTION(){}
+    WRONG_PREC_EXCEPTION() {}
+    virtual ~WRONG_PREC_EXCEPTION() {}
 
 };
 

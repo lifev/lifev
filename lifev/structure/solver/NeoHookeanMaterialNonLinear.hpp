@@ -196,8 +196,8 @@ public:
     void computeKinematicsVariables( const VectorElemental& dk_loc ){}
 
     //! ShowMe method of the class (saved on a file the stiffness vector and the jacobian)
-    void showMe( std::string const& fileNameVectStiff,
-                 std::string const& fileNameJacobain);
+    void showMe ( std::string const& fileNameVectStiff,
+                  std::string const& fileNameJacobain);
 
 
     //! Compute the First Piola Kirchhoff Tensor
@@ -208,11 +208,11 @@ public:
        \param invariants std::vector with the invariants of C and the detF
        \param material UInt number to get the material parameteres form the VenantElasticData class
     */
-    void computeLocalFirstPiolaKirchhoffTensor( Epetra_SerialDenseMatrix& firstPiola,
-                                                const Epetra_SerialDenseMatrix& tensorF,
-                                                const Epetra_SerialDenseMatrix& cofactorF,
-                                                const std::vector<Real>& invariants,
-                                                const UInt marker);
+    void computeLocalFirstPiolaKirchhoffTensor ( Epetra_SerialDenseMatrix& firstPiola,
+                                                 const Epetra_SerialDenseMatrix& tensorF,
+                                                 const Epetra_SerialDenseMatrix& cofactorF,
+                                                 const std::vector<Real>& invariants,
+                                                 const UInt marker);
 
 
     //@}
@@ -221,10 +221,16 @@ public:
     //@{
 
     //! Get the Stiffness matrix
-    matrixPtr_Type const stiffMatrix() const { return super::M_jacobian; }
+    matrixPtr_Type const stiffMatrix() const
+    {
+        return super::M_jacobian;
+    }
 
     //! Get the stiffness vector
-    vectorPtr_Type const stiffVector() const {return M_stiff; }
+    vectorPtr_Type const stiffVector() const
+    {
+        return M_stiff;
+    }
 
     void apply( const vector_Type& sol, vector_Type& res,
                 const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
@@ -244,7 +250,7 @@ protected:
     void setupVectorsParameters( void );
 
     //! Vector: stiffness non-linear
-    vectorPtr_Type		     			M_stiff;
+    vectorPtr_Type                      M_stiff;
 
     //Create the indentity for F
     matrixSmall_Type                      M_identity;
@@ -291,7 +297,7 @@ NeoHookeanMaterialNonLinear<MeshType>::setup( const FESpacePtr_Type&            
     this->M_offset                      = offset;
     this->M_dataMaterial                = dataMaterial;
     this->M_displayer                   = displayer;
-    M_stiff.reset                  	( new vector_Type(*this->M_localMap) );
+    M_stiff.reset                   ( new vector_Type (*this->M_localMap) );
 
     M_identity(0,0) = 1.0; M_identity(0,1) = 0.0; M_identity(0,2) = 0.0;
     M_identity(1,0) = 0.0; M_identity(1,1) = 1.0; M_identity(1,2) = 0.0;
@@ -355,7 +361,7 @@ void NeoHookeanMaterialNonLinear<MeshType>::updateJacobianMatrix( const vector_T
                                                                   const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
                                                                   const displayerPtr_Type& displayer )
 {
-    this->M_jacobian.reset(new matrix_Type(*this->M_localMap));
+    this->M_jacobian.reset (new matrix_Type (*this->M_localMap) );
 
     displayer->leaderPrint(" \n*********************************\n  ");
     updateNonLinearJacobianTerms(this->M_jacobian, disp, dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
@@ -497,9 +503,9 @@ void NeoHookeanMaterialNonLinear<MeshType>::computeStiffness( const vector_Type&
 
     this->M_stiff.reset(new vector_Type(*this->M_localMap));
 
-    displayer->leaderPrint(" \n******************************************************************\n  ");
-    displayer->leaderPrint(" Non-Linear S-  Computing the Neo-Hookean nonlinear stiffness vector"     );
-    displayer->leaderPrint(" \n******************************************************************\n  ");
+    displayer->leaderPrint (" \n******************************************************************\n  ");
+    displayer->leaderPrint (" Non-Linear S-  Computing the Neo-Hookean nonlinear stiffness vector"     );
+    displayer->leaderPrint (" \n******************************************************************\n  ");
 
     M_stiff.reset(new vector_Type(*this->M_localMap));
     *(M_stiff) *= 0.0;
@@ -549,8 +555,8 @@ template <typename MeshType>
 void NeoHookeanMaterialNonLinear<MeshType>::showMe( std::string const& fileNameStiff,
                                                 std::string const& fileNameJacobian)
 {
-    this->M_stiff->spy(fileNameStiff);
-    this->M_jacobian->spy(fileNameJacobian);
+    this->M_stiff->spy (fileNameStiff);
+    this->M_jacobian->spy (fileNameJacobian);
 }
 
 template <typename MeshType>
@@ -561,30 +567,30 @@ void NeoHookeanMaterialNonLinear<MeshType>::computeLocalFirstPiolaKirchhoffTenso
                                                                                    const UInt marker)
 {
 
-  //Get the material parameters
-  Real mu    	= this->M_dataMaterial->mu(marker);
-  Real bulk  	= this->M_dataMaterial->bulk(marker);
+    //Get the material parameters
+    Real mu       = this->M_dataMaterial->mu (marker);
+    Real bulk     = this->M_dataMaterial->bulk (marker);
 
-  //Computing the first term \muJ^{-2/3}[F-(1/3)tr(C)F^{-T}]
-  Epetra_SerialDenseMatrix firstTerm(tensorF);
-  Epetra_SerialDenseMatrix copyCofactorF(cofactorF);
-  Real scale( 0.0 );
-  scale = -1 * (1.0 / 3.0) * invariants[0];
-  copyCofactorF.Scale( scale );
-  firstTerm += copyCofactorF;
+    //Computing the first term \muJ^{-2/3}[F-(1/3)tr(C)F^{-T}]
+    Epetra_SerialDenseMatrix firstTerm (tensorF);
+    Epetra_SerialDenseMatrix copyCofactorF (cofactorF);
+    Real scale ( 0.0 );
+    scale = -1 * (1.0 / 3.0) * invariants[0];
+    copyCofactorF.Scale ( scale );
+    firstTerm += copyCofactorF;
 
-  Real coef( 0.0 );
-  coef = mu * std::pow(invariants[3],-2.0/3.0);
-  firstTerm.Scale( coef );
+    Real coef ( 0.0 );
+    coef = mu * std::pow (invariants[3], -2.0 / 3.0);
+    firstTerm.Scale ( coef );
 
-  //Computing the second term (volumetric part) J*(bulk/2)(J-1+(1/J)*ln(J))F^{-T}
-  Epetra_SerialDenseMatrix secondTerm(cofactorF);
-  Real sCoef(0);
-  sCoef = invariants[3] * (bulk/2.0) * (invariants[3] - 1 + (1 / invariants[3]) * std::log(invariants[3]));
-  secondTerm.Scale( sCoef );
+    //Computing the second term (volumetric part) J*(bulk/2)(J-1+(1/J)*ln(J))F^{-T}
+    Epetra_SerialDenseMatrix secondTerm (cofactorF);
+    Real sCoef (0);
+    sCoef = invariants[3] * (bulk / 2.0) * (invariants[3] - 1 + (1 / invariants[3]) * std::log (invariants[3]) );
+    secondTerm.Scale ( sCoef );
 
-  firstPiola += firstTerm;
-  firstPiola += secondTerm;
+    firstPiola += firstTerm;
+    firstPiola += secondTerm;
 }
 
 
@@ -593,7 +599,7 @@ template <typename MeshType>
 inline StructuralConstitutiveLaw<MeshType>* createNeoHookeanMaterialNonLinear() { return new NeoHookeanMaterialNonLinear<MeshType >(); }
 namespace
 {
-static bool registerNH = StructuralConstitutiveLaw<LifeV::RegionMesh<LinearTetra> >::StructureMaterialFactory::instance().registerProduct( "neoHookean", &createNeoHookeanMaterialNonLinear<LifeV::RegionMesh<LinearTetra> > );
+static bool registerNH = StructuralConstitutiveLaw<LifeV::RegionMesh<LinearTetra> >::StructureMaterialFactory::instance().registerProduct ( "neoHookean", &createNeoHookeanMaterialNonLinear<LifeV::RegionMesh<LinearTetra> > );
 }
 
 } //Namespace LifeV

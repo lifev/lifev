@@ -209,8 +209,8 @@ public:
     //void computeStress( const vector_Type& sol );
 
     //! ShowMe method of the class (saved on a file the stiffness vector and the jacobian)
-    void showMe( std::string const& fileNameVectStiff,
-                 std::string const& fileNameJacobain );
+    void showMe ( std::string const& fileNameVectStiff,
+                  std::string const& fileNameJacobain );
 
     //! Compute the First Piola Kirchhoff Tensor
     /*!
@@ -220,11 +220,11 @@ public:
        \param invariants std::vector with the invariants of C and the detF
        \param material UInt number to get the material parameteres form the VenantElasticData class
     */
-    void computeLocalFirstPiolaKirchhoffTensor( Epetra_SerialDenseMatrix& firstPiola,
-                                                const Epetra_SerialDenseMatrix& tensorF,
-                                                const Epetra_SerialDenseMatrix& cofactorF,
-                                                const std::vector<Real>& invariants,
-                                                const UInt marker);
+    void computeLocalFirstPiolaKirchhoffTensor ( Epetra_SerialDenseMatrix& firstPiola,
+                                                 const Epetra_SerialDenseMatrix& tensorF,
+                                                 const Epetra_SerialDenseMatrix& cofactorF,
+                                                 const std::vector<Real>& invariants,
+                                                 const UInt marker);
 
     //@}
 
@@ -544,9 +544,9 @@ void ExponentialMaterialNonLinear<MeshType>::computeStiffness( const vector_Type
     M_stiff.reset(new vector_Type(*this->M_localMap));
     *(M_stiff) *= 0.0;
 
-    displayer->leaderPrint(" \n*********************************\n  ");
-    displayer->leaderPrint(" Non-Linear S-  Computing the Exponential nonlinear stiffness vector ");
-    displayer->leaderPrint(" \n*********************************\n  ");
+    displayer->leaderPrint (" \n*********************************\n  ");
+    displayer->leaderPrint (" Non-Linear S-  Computing the Exponential nonlinear stiffness vector ");
+    displayer->leaderPrint (" \n*********************************\n  ");
 
     // mapIterator_Type it;
     // //mapIteratorIndex_Type itIndex;
@@ -595,8 +595,8 @@ template <typename MeshType>
 void ExponentialMaterialNonLinear<MeshType>::showMe( std::string const& fileNameStiff,
                                                  std::string const& fileNameJacobian )
 {
-    this->M_stiff->spy(fileNameStiff);
-    this->M_jacobian->spy(fileNameJacobian);
+    this->M_stiff->spy (fileNameStiff);
+    this->M_jacobian->spy (fileNameJacobian);
 }
 
 
@@ -618,38 +618,38 @@ void ExponentialMaterialNonLinear<MeshType>::computeLocalFirstPiolaKirchhoffTens
                                                                                 const UInt marker)
 {
 
-  //Get the material parameters
-  Real alpha    = this->M_dataMaterial->alpha(marker);
-  Real gamma    = this->M_dataMaterial->gamma(marker);
-  Real bulk  	= this->M_dataMaterial->bulk(marker);
+    //Get the material parameters
+    Real alpha    = this->M_dataMaterial->alpha (marker);
+    Real gamma    = this->M_dataMaterial->gamma (marker);
+    Real bulk     = this->M_dataMaterial->bulk (marker);
 
 
-  //Computing the first term \alphaJ^{-2/3}[F-(1/3)tr(C)F^{-T}]exp(\gamma(tr(Ciso) - 3)
-  Epetra_SerialDenseMatrix firstTerm(tensorF);
-  Epetra_SerialDenseMatrix copyCofactorF(cofactorF);
+    //Computing the first term \alphaJ^{-2/3}[F-(1/3)tr(C)F^{-T}]exp(\gamma(tr(Ciso) - 3)
+    Epetra_SerialDenseMatrix firstTerm (tensorF);
+    Epetra_SerialDenseMatrix copyCofactorF (cofactorF);
 
-  Real scale(0.0);
-  scale = -invariants[0]/3.0;
-  copyCofactorF.Scale( scale );
-  firstTerm += copyCofactorF;
+    Real scale (0.0);
+    scale = -invariants[0] / 3.0;
+    copyCofactorF.Scale ( scale );
+    firstTerm += copyCofactorF;
 
-  //Computation trace of the isochoric C
-  Real trCiso(0.0);
-  trCiso = std::pow(invariants[3],-(2.0/3.0))*invariants[0];
+    //Computation trace of the isochoric C
+    Real trCiso (0.0);
+    trCiso = std::pow (invariants[3], - (2.0 / 3.0) ) * invariants[0];
 
-  Real coef( 0.0 );
-  coef = alpha * std::pow(invariants[3],-(2.0/3.0)) * std::exp( gamma * ( trCiso - 3 ) );
-  firstTerm.Scale( coef );
+    Real coef ( 0.0 );
+    coef = alpha * std::pow (invariants[3], - (2.0 / 3.0) ) * std::exp ( gamma * ( trCiso - 3 ) );
+    firstTerm.Scale ( coef );
 
-  //Computing the second term (volumetric part) J*(bulk/2)(J-1+(1/J)*ln(J))F^{-T}
-  Epetra_SerialDenseMatrix secondTerm(cofactorF);
-  Real secCoef(0);
-  secCoef = invariants[3] * (bulk/2.0) * (invariants[3] - 1 + (1.0 / invariants[3]) * std::log(invariants[3]));
+    //Computing the second term (volumetric part) J*(bulk/2)(J-1+(1/J)*ln(J))F^{-T}
+    Epetra_SerialDenseMatrix secondTerm (cofactorF);
+    Real secCoef (0);
+    secCoef = invariants[3] * (bulk / 2.0) * (invariants[3] - 1 + (1.0 / invariants[3]) * std::log (invariants[3]) );
 
-  secondTerm.Scale( secCoef );
+    secondTerm.Scale ( secCoef );
 
-  firstPiola += firstTerm;
-  firstPiola += secondTerm;
+    firstPiola += firstTerm;
+    firstPiola += secondTerm;
 
 }
 
@@ -658,7 +658,7 @@ inline StructuralConstitutiveLaw<MeshType>* createExponentialMaterialNonLinear()
 
 namespace
 {
-static bool registerEXP = StructuralConstitutiveLaw<LifeV::RegionMesh<LinearTetra> >::StructureMaterialFactory::instance().registerProduct( "exponential", &createExponentialMaterialNonLinear<LifeV::RegionMesh<LinearTetra> > );
+static bool registerEXP = StructuralConstitutiveLaw<LifeV::RegionMesh<LinearTetra> >::StructureMaterialFactory::instance().registerProduct ( "exponential", &createExponentialMaterialNonLinear<LifeV::RegionMesh<LinearTetra> > );
 }
 
 } //Namespace LifeV

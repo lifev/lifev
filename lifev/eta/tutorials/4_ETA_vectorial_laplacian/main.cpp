@@ -93,122 +93,161 @@ typedef VectorEpetra vector_Type;
 // and the boolean for the outputs.
 // ---------------------------------------------------------------
 
-int main( int argc, char** argv )
+int main ( int argc, char** argv )
 {
 
 #ifdef HAVE_MPI
-    MPI_Init(&argc, &argv);
-    boost::shared_ptr<Epetra_Comm> Comm(new Epetra_MpiComm(MPI_COMM_WORLD));
+    MPI_Init (&argc, &argv);
+    boost::shared_ptr<Epetra_Comm> Comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
 #else
-    boost::shared_ptr<Epetra_Comm> Comm(new Epetra_SerialComm);
+    boost::shared_ptr<Epetra_Comm> Comm (new Epetra_SerialComm);
 #endif
 
-    const bool verbose(Comm->MyPID()==0);
+    const bool verbose (Comm->MyPID() == 0);
 
 
-// ---------------------------------------------------------------
-// We define the mesh and parition it. We use again the domain
-// (-1,1)x(-1,1)x(-1,1) and a structured mesh.
-// ---------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // We define the mesh and parition it. We use again the domain
+    // (-1,1)x(-1,1)x(-1,1) and a structured mesh.
+    // ---------------------------------------------------------------
 
-    if (verbose) std::cout << " -- Building and partitioning the mesh ... " << std::flush;
+    if (verbose)
+    {
+        std::cout << " -- Building and partitioning the mesh ... " << std::flush;
+    }
 
-    const UInt Nelements(10);
+    const UInt Nelements (10);
 
     boost::shared_ptr< mesh_Type > fullMeshPtr(new mesh_Type( Comm ) );
 
-    regularMesh3D( *fullMeshPtr, 1, Nelements, Nelements, Nelements, false,
-                   2.0,   2.0,   2.0,
-                   -1.0,  -1.0,  -1.0);
+    regularMesh3D ( *fullMeshPtr, 1, Nelements, Nelements, Nelements, false,
+                    2.0,   2.0,   2.0,
+                    -1.0,  -1.0,  -1.0);
 
-    MeshPartitioner< mesh_Type >   meshPart(fullMeshPtr, Comm);
+    MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, Comm);
 
     fullMeshPtr.reset();
 
-    if (verbose) std::cout << " done ! " << std::endl;
+    if (verbose)
+    {
+        std::cout << " done ! " << std::endl;
+    }
 
 
-// ---------------------------------------------------------------
-// To assemble a vectorial problem, the main difference is in the
-// finite element space. To have a vectorial problem, we have to
-// indicate that the dimension of the field is not 1, but 3 (at
-// least in this example, but it could be 2 for a 2D problem).
-//
-// The field dimension appears as argument of the FESpace
-// constructor and as template argument for the ETFESpace (it is
-// the second 3, the first one indicates the dimension of the
-// space).
-// ---------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // To assemble a vectorial problem, the main difference is in the
+    // finite element space. To have a vectorial problem, we have to
+    // indicate that the dimension of the field is not 1, but 3 (at
+    // least in this example, but it could be 2 for a 2D problem).
+    //
+    // The field dimension appears as argument of the FESpace
+    // constructor and as template argument for the ETFESpace (it is
+    // the second 3, the first one indicates the dimension of the
+    // space).
+    // ---------------------------------------------------------------
 
-    if (verbose) std::cout << " -- Building the FESpace ... " << std::flush;
+    if (verbose)
+    {
+        std::cout << " -- Building the FESpace ... " << std::flush;
+    }
 
-    std::string uOrder("P1");
+    std::string uOrder ("P1");
 
     boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > uSpace
-        ( new FESpace< mesh_Type, MapEpetra >(meshPart,uOrder, 3, Comm));
+    ( new FESpace< mesh_Type, MapEpetra > (meshPart, uOrder, 3, Comm) );
 
-    if (verbose) std::cout << " done ! " << std::endl;
-    if (verbose) std::cout << " ---> Dofs: " << uSpace->dof().numTotalDof() << std::endl;
+    if (verbose)
+    {
+        std::cout << " done ! " << std::endl;
+    }
+    if (verbose)
+    {
+        std::cout << " ---> Dofs: " << uSpace->dof().numTotalDof() << std::endl;
+    }
 
-    if (verbose) std::cout << " -- Building the ETFESpace ... " << std::flush;
+    if (verbose)
+    {
+        std::cout << " -- Building the ETFESpace ... " << std::flush;
+    }
 
     boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 3 > > ETuSpace
-        ( new ETFESpace< mesh_Type, MapEpetra, 3, 3 >(meshPart,&(uSpace->refFE()),&(uSpace->fe().geoMap()), Comm));
+    ( new ETFESpace< mesh_Type, MapEpetra, 3, 3 > (meshPart, & (uSpace->refFE() ), & (uSpace->fe().geoMap() ), Comm) );
 
-    if (verbose) std::cout << " done ! " << std::endl;
-    if (verbose) std::cout << " ---> Dofs: " << ETuSpace->dof().numTotalDof() << std::endl;
-
-
-// ---------------------------------------------------------------
-// We build now two matrices, one for each assembly procedure in
-// order to compare them in the end. There is no difference in the
-// construction of the matrices with respect to the scalar case,
-// as the map of the finite element spaces is already aware of the
-// field dimension.
-// ---------------------------------------------------------------
-
-    if (verbose) std::cout << " -- Defining the matrices ... " << std::flush;
-
-    boost::shared_ptr<matrix_Type> systemMatrix(new matrix_Type( uSpace->map() ));
-    *systemMatrix *=0.0;
-
-    boost::shared_ptr<matrix_Type> ETsystemMatrix(new matrix_Type( ETuSpace->map() ));
-    *ETsystemMatrix *=0.0;
-
-    if (verbose) std::cout << " done! " << std::endl;
+    if (verbose)
+    {
+        std::cout << " done ! " << std::endl;
+    }
+    if (verbose)
+    {
+        std::cout << " ---> Dofs: " << ETuSpace->dof().numTotalDof() << std::endl;
+    }
 
 
-// ---------------------------------------------------------------
-// With the classical assembly, nothing changes with respect to
-// a scalar laplacian.
-// ---------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // We build now two matrices, one for each assembly procedure in
+    // order to compare them in the end. There is no difference in the
+    // construction of the matrices with respect to the scalar case,
+    // as the map of the finite element spaces is already aware of the
+    // field dimension.
+    // ---------------------------------------------------------------
 
-    if (verbose) std::cout << " -- Classical assembly ... " << std::flush;
+    if (verbose)
+    {
+        std::cout << " -- Defining the matrices ... " << std::flush;
+    }
 
-    ADRAssembler<mesh_Type,matrix_Type,vector_Type> adrAssembler;
+    boost::shared_ptr<matrix_Type> systemMatrix (new matrix_Type ( uSpace->map() ) );
+    *systemMatrix *= 0.0;
 
-    adrAssembler.setup(uSpace,uSpace);
+    boost::shared_ptr<matrix_Type> ETsystemMatrix (new matrix_Type ( ETuSpace->map() ) );
+    *ETsystemMatrix *= 0.0;
 
-    adrAssembler.addDiffusion(systemMatrix,1.0);
+    if (verbose)
+    {
+        std::cout << " done! " << std::endl;
+    }
 
-    if (verbose) std::cout << " done ! " << std::endl;
+
+    // ---------------------------------------------------------------
+    // With the classical assembly, nothing changes with respect to
+    // a scalar laplacian.
+    // ---------------------------------------------------------------
+
+    if (verbose)
+    {
+        std::cout << " -- Classical assembly ... " << std::flush;
+    }
+
+    ADRAssembler<mesh_Type, matrix_Type, vector_Type> adrAssembler;
+
+    adrAssembler.setup (uSpace, uSpace);
+
+    adrAssembler.addDiffusion (systemMatrix, 1.0);
+
+    if (verbose)
+    {
+        std::cout << " done ! " << std::endl;
+    }
 
 
-// ---------------------------------------------------------------
-// With the ETA framework, there is also no change with respect
-// to the scalar case.
-// ---------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // With the ETA framework, there is also no change with respect
+    // to the scalar case.
+    // ---------------------------------------------------------------
 
-    if (verbose) std::cout << " -- ET assembly ... " << std::flush;
+    if (verbose)
+    {
+        std::cout << " -- ET assembly ... " << std::flush;
+    }
 
 
     {
         using namespace ExpressionAssembly;
 
-        integrate( elements(ETuSpace->mesh()),
-                   uSpace->qr(),
-                   ETuSpace,
-                   ETuSpace,
+        integrate ( elements (ETuSpace->mesh() ),
+                    uSpace->qr(),
+                    ETuSpace,
+                    ETuSpace,
 
                    dot( grad(phi_i) , grad(phi_j) )
 
@@ -216,19 +255,28 @@ int main( int argc, char** argv )
             >> ETsystemMatrix;
     }
 
-    if (verbose) std::cout << " done! " << std::endl;
+    if (verbose)
+    {
+        std::cout << " done! " << std::endl;
+    }
 
-// ---------------------------------------------------------------
-// We finally need to check that both yield the same matrix. In
-// that aim, we need to finalize both matrices.
-// ---------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // We finally need to check that both yield the same matrix. In
+    // that aim, we need to finalize both matrices.
+    // ---------------------------------------------------------------
 
-    if (verbose) std::cout << " -- Closing the matrices ... " << std::flush;
+    if (verbose)
+    {
+        std::cout << " -- Closing the matrices ... " << std::flush;
+    }
 
     systemMatrix->globalAssemble();
     ETsystemMatrix->globalAssemble();
 
-    if (verbose) std::cout << " done ! " << std::endl;
+    if (verbose)
+    {
+        std::cout << " done ! " << std::endl;
+    }
 
 
 // ---------------------------------------------------------------
@@ -237,42 +285,51 @@ int main( int argc, char** argv )
 // matrices are identical.
 // ---------------------------------------------------------------
 
-    if (verbose) std::cout << " -- Computing the error ... " << std::flush;
+    if (verbose)
+    {
+        std::cout << " -- Computing the error ... " << std::flush;
+    }
 
-    boost::shared_ptr<matrix_Type> checkMatrix(new matrix_Type( ETuSpace->map()));
-    *checkMatrix *=0.0;
+    boost::shared_ptr<matrix_Type> checkMatrix (new matrix_Type ( ETuSpace->map() ) );
+    *checkMatrix *= 0.0;
 
     *checkMatrix += *systemMatrix;
-    *checkMatrix += (*ETsystemMatrix)*(-1);
+    *checkMatrix += (*ETsystemMatrix) * (-1);
 
     checkMatrix->globalAssemble();
 
-    Real errorNorm( checkMatrix->normInf() );
+    Real errorNorm ( checkMatrix->normInf() );
 
-    if (verbose) std::cout << " done ! " << std::endl;
+    if (verbose)
+    {
+        std::cout << " done ! " << std::endl;
+    }
 
 
-// ---------------------------------------------------------------
-// We finalize the MPI if needed.
-// ---------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // We finalize the MPI if needed.
+    // ---------------------------------------------------------------
 
 #ifdef HAVE_MPI
     MPI_Finalize();
 #endif
 
 
-// ---------------------------------------------------------------
-// We finally display the error norm and compare with the
-// tolerance of the test.
-// ---------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // We finally display the error norm and compare with the
+    // tolerance of the test.
+    // ---------------------------------------------------------------
 
-    if (verbose) std::cout << " Matrix Error : " << errorNorm << std::endl;
+    if (verbose)
+    {
+        std::cout << " Matrix Error : " << errorNorm << std::endl;
+    }
 
-    Real testTolerance(1e-10);
+    Real testTolerance (1e-10);
 
     if (errorNorm < testTolerance)
     {
-        return( EXIT_SUCCESS );
+        return ( EXIT_SUCCESS );
     }
     return ( EXIT_FAILURE );
 }

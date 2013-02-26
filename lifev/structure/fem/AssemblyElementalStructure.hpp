@@ -130,7 +130,7 @@ void computeLocalDeformationGradientWithoutIdentity (const VectorElemental& uk_l
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_derdiv( Real coef, const boost::multi_array<Real, 3>& gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_derdiv ( Real coef, const boost::multi_array<Real, 3>& gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe );
 
 
 //! Elementary second term of the nonlinear stiffness matrix for St.Venant-Kirchhoff model (see the reference)
@@ -142,7 +142,7 @@ void stiff_derdiv( Real coef, const boost::multi_array<Real, 3>& gradientLocalDi
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_dergradbis( Real coef, const boost::multi_array<Real, 3>& gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_dergradbis ( Real coef, const boost::multi_array<Real, 3>& gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe );
 
 
 //! Elementary third term of the nonlinear stiffness matrix for St.Venant-Kirchhoff model (see the reference)
@@ -154,7 +154,7 @@ void stiff_dergradbis( Real coef, const boost::multi_array<Real, 3>& gradientLoc
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_divgrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_divgrad ( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
 
 
 //! Elementary fourth term of the nonlinear stiffness matrix for St.Venant-Kirchhoff model (see the reference)
@@ -166,7 +166,7 @@ void stiff_divgrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& e
   @param elmat The elementary stiffness matrix of the current volume
   @param fe The current finite element
 */
-void stiff_gradgrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_gradgrad ( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
 
 
 //! Elementary fifth term of the nonlinear stiffness matrix for St.Venant-Kirchhoff model (see the reference)
@@ -178,7 +178,7 @@ void stiff_gradgrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& 
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_dergrad_gradbis( Real coef, const boost::multi_array<Real, 3>& gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_dergrad_gradbis ( Real coef, const boost::multi_array<Real, 3>& gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe );
 
 
 //! Elementary fifth-2 term of the nonlinear stiffness matrix for St.Venant-Kirchhoff model (see the reference)
@@ -190,7 +190,7 @@ void stiff_dergrad_gradbis( Real coef, const boost::multi_array<Real, 3>& gradie
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_dergrad_gradbis_Tr( Real coef, const boost::multi_array<Real, 3>& gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_dergrad_gradbis_Tr ( Real coef, const boost::multi_array<Real, 3>& gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe );
 
 
 //! Elementary sixth term of the nonlinear stiffness matrix for St.Venant-Kirchhoff model (see the reference)
@@ -202,7 +202,7 @@ void stiff_dergrad_gradbis_Tr( Real coef, const boost::multi_array<Real, 3>& gra
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_gradgradTr_gradbis( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_gradgradTr_gradbis ( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
 
 
 
@@ -218,7 +218,7 @@ void stiff_gradgradTr_gradbis( Real coef, const VectorElemental& uk_loc, MatrixE
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_dergrad( Real coef, const boost::multi_array<Real, 3>& gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_dergrad ( Real coef, const boost::multi_array<Real, 3>& gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe );
 
 
 //! Elementary second term of the Jacobian matrix for the nonlinear stiffness matrix of the St.Venant-Kirchhoff model (see the reference)
@@ -230,7 +230,7 @@ void stiff_dergrad( Real coef, const boost::multi_array<Real, 3>& gradientLocalD
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_divgrad_2( Real coef, const boost::multi_array<Real, 3>& gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_divgrad_2 ( Real coef, const boost::multi_array<Real, 3>& gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe );
 
 
 //! Elementary third term of the Jacobian matrix for the nonlinear stiffness matrix of the St.Venant-Kirchhoff model (see the reference)
@@ -242,7 +242,7 @@ void stiff_divgrad_2( Real coef, const boost::multi_array<Real, 3>& gradientLoca
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_gradgrad_2( Real coef, const boost::multi_array<Real, 3>& gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_gradgrad_2 ( Real coef, const boost::multi_array<Real, 3>& gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe );
 
 
 //! Elementary fourth term of the Jacobian matrix for the nonlinear stiffness matrix of the St.Venant-Kirchhoff model (see the reference)
@@ -254,7 +254,7 @@ void stiff_gradgrad_2( Real coef, const boost::multi_array<Real, 3>& gradientLoc
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_dergrad_gradbis_2( Real coef, const boost::multi_array<Real, 3>& gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_dergrad_gradbis_2 ( Real coef, const boost::multi_array<Real, 3>& gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe );
 
 
 //! Elementary fifth term of the Jacobian matrix for the nonlinear stiffness matrix of the St.Venant-Kirchhoff model (see the reference)
@@ -266,7 +266,7 @@ void stiff_dergrad_gradbis_2( Real coef, const boost::multi_array<Real, 3>& grad
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_dergrad_gradbis_Tr_2( Real coef, const boost::multi_array<Real, 3>& gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_dergrad_gradbis_Tr_2 ( Real coef, const boost::multi_array<Real, 3>& gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe );
 
 
 //! Elementary sixth term of the Jacobian matrix for the nonlinear stiffness matrix of the St.Venant-Kirchhoff model (see the reference)
@@ -278,7 +278,7 @@ void stiff_dergrad_gradbis_Tr_2( Real coef, const boost::multi_array<Real, 3>& g
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_gradgradTr_gradbis_2( Real coef, const boost::multi_array<Real, 3>& gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_gradgradTr_gradbis_2 ( Real coef, const boost::multi_array<Real, 3>& gradientLocalDisplacement, MatrixElemental& elmat, const CurrentFE& fe );
 
 
 //! Elementary seventh term of the Jacobian matrix for the nonlinear stiffness matrix of the St.Venant-Kirchhoff model (see the reference)
@@ -290,7 +290,7 @@ void stiff_gradgradTr_gradbis_2( Real coef, const boost::multi_array<Real, 3>& g
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_gradgradTr_gradbis_3( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_gradgradTr_gradbis_3 ( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
 
 
 
@@ -308,7 +308,7 @@ void stiff_gradgradTr_gradbis_3( Real coef, const VectorElemental& uk_loc, Matri
   @param elvec The elementary vector of the current volume
   @param fe The current finite element
 */
-void source_Pvol(Real coef, const boost::multi_array<Real, 3>&  CofFk, const std::vector<Real>& Jk, VectorElemental& elvec, const CurrentFE& fe);
+void source_Pvol (Real coef, const boost::multi_array<Real, 3>&  CofFk, const std::vector<Real>& Jk, VectorElemental& elvec, const CurrentFE& fe);
 
 //! Methods for the volumetric part of the Jacobian matrix
 
@@ -322,7 +322,7 @@ void source_Pvol(Real coef, const boost::multi_array<Real, 3>&  CofFk, const std
   @param elvec The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_Jac_Pvol_1term( Real coef, const boost::multi_array<Real,3 >& CofFk, const std::vector<Real>& Jk, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_Jac_Pvol_1term ( Real coef, const boost::multi_array<Real, 3 >& CofFk, const std::vector<Real>& Jk, MatrixElemental& elmat, const CurrentFE& fe );
 
 
 //! Elementary second volumetric term of the nonlinear Jacobian matrix of the Neo-Hookean and Exponential models (see the reference)
@@ -335,7 +335,7 @@ void stiff_Jac_Pvol_1term( Real coef, const boost::multi_array<Real,3 >& CofFk, 
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_Jac_Pvol_2term( Real coef, const boost::multi_array<Real,3 >& CofFk, const std::vector<Real>& Jk, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_Jac_Pvol_2term ( Real coef, const boost::multi_array<Real, 3 >& CofFk, const std::vector<Real>& Jk, MatrixElemental& elmat, const CurrentFE& fe );
 
 //! METHODS FOR NEO-HOOKEAN MODEL
 //! Methods for the isochoric part of the stiffness vector
@@ -352,7 +352,7 @@ void stiff_Jac_Pvol_2term( Real coef, const boost::multi_array<Real,3 >& CofFk, 
   @param elvec The elementary vector of the current volume
   @param fe The current finite element
 */
-void source_P1iso_NH(Real coef, const boost::multi_array<Real,3 >& CofFk, const boost::multi_array<Real,3 >& Fk, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, VectorElemental& elvec, const CurrentFE& fe);
+void source_P1iso_NH (Real coef, const boost::multi_array<Real, 3 >& CofFk, const boost::multi_array<Real, 3 >& Fk, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, VectorElemental& elvec, const CurrentFE& fe);
 
 //! METHODS FOR TENSORIAL CALCULUS
 //! In this part of the namespace, the methods to perform basics operations on tensors are defined.
@@ -363,12 +363,12 @@ void source_P1iso_NH(Real coef, const boost::multi_array<Real,3 >& CofFk, const 
   @param invariants vector of invariants of C
   @param tensorF deformation gradient tensor
 */
-void computeInvariantsRightCauchyGreenTensor(std::vector<LifeV::Real>& invariants,
-                                             const Epetra_SerialDenseMatrix& tensorF,
-                                             Epetra_SerialDenseMatrix& cofactorF);
+void computeInvariantsRightCauchyGreenTensor (std::vector<LifeV::Real>& invariants,
+                                              const Epetra_SerialDenseMatrix& tensorF,
+                                              Epetra_SerialDenseMatrix& cofactorF);
 
-void computeInvariantsRightCauchyGreenTensor(std::vector<LifeV::Real>& invariants,
-                                             const Epetra_SerialDenseMatrix& tensorF);
+void computeInvariantsRightCauchyGreenTensor (std::vector<LifeV::Real>& invariants,
+                                              const Epetra_SerialDenseMatrix& tensorF);
 
 
 /*!
@@ -379,19 +379,19 @@ void computeInvariantsRightCauchyGreenTensor(std::vector<LifeV::Real>& invariant
   @param invariants vector of invariants of C
   @param tensorF deformation gradient tensor
 */
-void computeCauchyStressTensor(Epetra_SerialDenseMatrix& cauchy,
-                               Epetra_SerialDenseMatrix& firstPiola,
-                               LifeV::Real det,
-                               Epetra_SerialDenseMatrix& tensorF);
+void computeCauchyStressTensor (Epetra_SerialDenseMatrix& cauchy,
+                                Epetra_SerialDenseMatrix& firstPiola,
+                                LifeV::Real det,
+                                Epetra_SerialDenseMatrix& tensorF);
 
 /*!
   This function computes the eigenvalues of \sigma
   @param cauchy Cauchy stress tensor
   @param eigenvalues vector of principal tensions
 */
-void computeEigenvalues(const Epetra_SerialDenseMatrix& cauchy,
-                        std::vector<LifeV::Real>& eigenvaluesR,
-                        std::vector<LifeV::Real>& eigenvaluesI);
+void computeEigenvalues (const Epetra_SerialDenseMatrix& cauchy,
+                         std::vector<LifeV::Real>& eigenvaluesR,
+                         std::vector<LifeV::Real>& eigenvaluesI);
 
 //! Methods for the isochoric part of the Jacobian matrix
 
@@ -406,7 +406,7 @@ void computeEigenvalues(const Epetra_SerialDenseMatrix& cauchy,
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_Jac_P1iso_NH_1term( Real coef, const boost::multi_array<Real,3 >& CofFk, const boost::multi_array<Real,3 >& Fk, const std::vector<Real>& Jk, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_Jac_P1iso_NH_1term ( Real coef, const boost::multi_array<Real, 3 >& CofFk, const boost::multi_array<Real, 3 >& Fk, const std::vector<Real>& Jk, MatrixElemental& elmat, const CurrentFE& fe );
 
 //! Elementary second nonlinear isochoric Jacobian matrix for Neo-Hookean model (see the reference)
 /*!
@@ -420,7 +420,7 @@ void stiff_Jac_P1iso_NH_1term( Real coef, const boost::multi_array<Real,3 >& Cof
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_Jac_P1iso_NH_2term( Real coef, const boost::multi_array<Real,3 >& CofFk, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_Jac_P1iso_NH_2term ( Real coef, const boost::multi_array<Real, 3 >& CofFk, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
 
 
 //! Elementary third nonlinear isochoric Jacobian matrix for Neo-Hookean model (see the reference)
@@ -432,7 +432,7 @@ void stiff_Jac_P1iso_NH_2term( Real coef, const boost::multi_array<Real,3 >& Cof
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_Jac_P1iso_NH_3term( Real coef, const std::vector<Real>& Jk, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_Jac_P1iso_NH_3term ( Real coef, const std::vector<Real>& Jk, MatrixElemental& elmat, const CurrentFE& fe );
 
 
 //! Elementary fourth nonlinear isochoric Jacobian matrix for Neo-Hookean model (see the reference)
@@ -446,7 +446,7 @@ void stiff_Jac_P1iso_NH_3term( Real coef, const std::vector<Real>& Jk, MatrixEle
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_Jac_P1iso_NH_4term( Real coef, const boost::multi_array<Real,3 >& CofFk, const boost::multi_array<Real,3 >& Fk, const std::vector<Real>& Jk, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_Jac_P1iso_NH_4term ( Real coef, const boost::multi_array<Real, 3 >& CofFk, const boost::multi_array<Real, 3 >& Fk, const std::vector<Real>& Jk, MatrixElemental& elmat, const CurrentFE& fe );
 
 
 //! Elementary fifth nonlinear isochoric Jacobian matrix for Neo-Hookean model (see the reference)
@@ -460,7 +460,7 @@ void stiff_Jac_P1iso_NH_4term( Real coef, const boost::multi_array<Real,3 >& Cof
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_Jac_P1iso_NH_5term( Real coef, const boost::multi_array<Real,3 >& CofFk, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_Jac_P1iso_NH_5term ( Real coef, const boost::multi_array<Real, 3 >& CofFk, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
 
 //! METHODS FOR EXPONENTIAL MODEL
 //! Methods for the isochoric part of the stiffness vector
@@ -478,7 +478,7 @@ void stiff_Jac_P1iso_NH_5term( Real coef, const boost::multi_array<Real,3 >& Cof
   @param elvec The elementary vector of the current volume
   @param fe The current finite element
 */
-void source_P1iso_Exp( Real coef, Real coefExp, const boost::multi_array<Real,3 >& CofFk, const boost::multi_array<Real,3 >& Fk, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, VectorElemental& elvec, const CurrentFE& fe );
+void source_P1iso_Exp ( Real coef, Real coefExp, const boost::multi_array<Real, 3 >& CofFk, const boost::multi_array<Real, 3 >& Fk, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, VectorElemental& elvec, const CurrentFE& fe );
 
 //! Methods for the isochoric part of the Jacobian matrix
 
@@ -495,7 +495,7 @@ void source_P1iso_Exp( Real coef, Real coefExp, const boost::multi_array<Real,3 
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_Jac_P1iso_Exp_1term( Real coef, Real coefExp, const boost::multi_array<Real,3 >& CofFk, const boost::multi_array<Real,3 >& Fk, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_Jac_P1iso_Exp_1term ( Real coef, Real coefExp, const boost::multi_array<Real, 3 >& CofFk, const boost::multi_array<Real, 3 >& Fk, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
 
 
 //! Elementary second nonlinear isochoric Jacobian matrix for Exponential model (see the reference)
@@ -510,7 +510,7 @@ void stiff_Jac_P1iso_Exp_1term( Real coef, Real coefExp, const boost::multi_arra
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_Jac_P1iso_Exp_2term( Real coef, Real coefExp, const boost::multi_array<Real,3 >& Fk, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_Jac_P1iso_Exp_2term ( Real coef, Real coefExp, const boost::multi_array<Real, 3 >& Fk, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
 
 
 //! Elementary third nonlinear isochoric Jacobian matrix for Exponential model (see the reference)
@@ -525,7 +525,7 @@ void stiff_Jac_P1iso_Exp_2term( Real coef, Real coefExp, const boost::multi_arra
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_Jac_P1iso_Exp_3term( Real coef, Real coefExp, const boost::multi_array<Real,3 >& CofFk, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_Jac_P1iso_Exp_3term ( Real coef, Real coefExp, const boost::multi_array<Real, 3 >& CofFk, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
 
 
 //! Elementary fourth nonlinear isochoric Jacobian matrix for Exponential model (see the reference)
@@ -541,7 +541,7 @@ void stiff_Jac_P1iso_Exp_3term( Real coef, Real coefExp, const boost::multi_arra
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_Jac_P1iso_Exp_4term( Real coef, Real coefExp, const boost::multi_array<Real,3 >& CofFk, const boost::multi_array<Real,3 >& Fk,const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_Jac_P1iso_Exp_4term ( Real coef, Real coefExp, const boost::multi_array<Real, 3 >& CofFk, const boost::multi_array<Real, 3 >& Fk, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
 
 //! Elementary fifth nonlinear isochoric Jacobian matrix for Exponential model (see the reference)
 /*!
@@ -554,7 +554,7 @@ void stiff_Jac_P1iso_Exp_4term( Real coef, Real coefExp, const boost::multi_arra
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_Jac_P1iso_Exp_5term( Real coef, Real coefExp, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_Jac_P1iso_Exp_5term ( Real coef, Real coefExp, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
 
 //! Elementary sixth nonlinear isochoric Jacobian matrix for Exponential model (see the reference)
 /*!
@@ -568,7 +568,7 @@ void stiff_Jac_P1iso_Exp_5term( Real coef, Real coefExp, const std::vector<Real>
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_Jac_P1iso_Exp_6term( Real coef, Real coefExp, const boost::multi_array<Real,3 >& CofFk, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_Jac_P1iso_Exp_6term ( Real coef, Real coefExp, const boost::multi_array<Real, 3 >& CofFk, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
 
 //! METHOD FOR THE ST. VENANT-KIRCHHOFF LAW IN THE ISOCHORIC AND VOLUMETRIC DECOUPLED VERSION
 //! This law uses, for the volumetric part, the one used by the exponential and neohookean model.
@@ -586,7 +586,7 @@ void stiff_Jac_P1iso_Exp_6term( Real coef, Real coefExp, const boost::multi_arra
   @param elvec The elementary vector of the current volume
   @param fe The current finite element
 */
-void source_P1iso_VKPenalized( Real lambda, Real mu, const boost::multi_array<Real,3 >& FkMinusTransposed, const boost::multi_array<Real,3 >& Fk, const std::vector<Real>& Ic_isok, const std::vector<Real>& Ic_k, const std::vector<Real>& Jack_k, VectorElemental& elvec, const CurrentFE& fe );
+void source_P1iso_VKPenalized ( Real lambda, Real mu, const boost::multi_array<Real, 3 >& FkMinusTransposed, const boost::multi_array<Real, 3 >& Fk, const std::vector<Real>& Ic_isok, const std::vector<Real>& Ic_k, const std::vector<Real>& Jack_k, VectorElemental& elvec, const CurrentFE& fe );
 
 //! Elementary nonlinear isochoric stiffness vector for St. Venant-Kirchhoff Penalized model
 /*!
@@ -600,7 +600,7 @@ void source_P1iso_VKPenalized( Real lambda, Real mu, const boost::multi_array<Re
   @param elvec The elementary vector of the current volume
   @param fe The current finite element
 */
-void  source_P2iso_VKPenalized( Real mu, const boost::multi_array<Real,3 >& FkMinusTransposed, const boost::multi_array<Real,3 >& FkCk, const std::vector<Real>&   Ic_Squared, const std::vector<Real>&   Jk, VectorElemental& elvec, const CurrentFE& fe );
+void  source_P2iso_VKPenalized ( Real mu, const boost::multi_array<Real, 3 >& FkMinusTransposed, const boost::multi_array<Real, 3 >& FkCk, const std::vector<Real>&   Ic_Squared, const std::vector<Real>&   Jk, VectorElemental& elvec, const CurrentFE& fe );
 
 
 //! Methdos for the Jacobian of the St. Venant-Kirchhoff Penalized law.
@@ -616,7 +616,7 @@ void  source_P2iso_VKPenalized( Real mu, const boost::multi_array<Real,3 >& FkMi
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_Jac_P1iso_VKPenalized_0term( Real lambda, Real mu, const boost::multi_array<Real,3 >& FkMinusTransposed, const boost::multi_array<Real,3 >& Fk, const std::vector<Real>& Jk, const std::vector<Real>& Ic_k, const std::vector<Real>& IcIso_k, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_Jac_P1iso_VKPenalized_0term ( Real lambda, Real mu, const boost::multi_array<Real, 3 >& FkMinusTransposed, const boost::multi_array<Real, 3 >& Fk, const std::vector<Real>& Jk, const std::vector<Real>& Ic_k, const std::vector<Real>& IcIso_k, MatrixElemental& elmat, const CurrentFE& fe );
 
 //! Elementary first nonlinear isochoric Jacobian matrix for VK-Penalized model (see the reference)
 /*!
@@ -630,7 +630,7 @@ void stiff_Jac_P1iso_VKPenalized_0term( Real lambda, Real mu, const boost::multi
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_Jac_P1iso_VKPenalized_1term( Real coeff, const boost::multi_array<Real,3 >& FkMinusTransposed, const boost::multi_array<Real,3 >& Fk, const std::vector<Real>& Jk, const std::vector<Real>& Ic_k, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_Jac_P1iso_VKPenalized_1term ( Real coeff, const boost::multi_array<Real, 3 >& FkMinusTransposed, const boost::multi_array<Real, 3 >& Fk, const std::vector<Real>& Jk, const std::vector<Real>& Ic_k, MatrixElemental& elmat, const CurrentFE& fe );
 
 //! Elementary third nonlinear isochoric Jacobian matrix for VK-Penalized model (see the reference)
 /*!
@@ -643,7 +643,7 @@ void stiff_Jac_P1iso_VKPenalized_1term( Real coeff, const boost::multi_array<Rea
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_Jac_P1iso_VKPenalized_2term( Real coef, const boost::multi_array<Real,3 >& FkMinusTransposed, const std::vector<Real>& Jk, const std::vector<Real>& Ic_k, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_Jac_P1iso_VKPenalized_2term ( Real coef, const boost::multi_array<Real, 3 >& FkMinusTransposed, const std::vector<Real>& Jk, const std::vector<Real>& Ic_k, MatrixElemental& elmat, const CurrentFE& fe );
 
 
 //! Elementary second nonlinear isochoric Jacobian matrix for VK-Penalized model (see the reference)
@@ -656,7 +656,7 @@ void stiff_Jac_P1iso_VKPenalized_2term( Real coef, const boost::multi_array<Real
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_Jac_P1iso_VKPenalized_3term( Real coef, const boost::multi_array<Real,3 >& Fk, const std::vector<Real>& Jk, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_Jac_P1iso_VKPenalized_3term ( Real coef, const boost::multi_array<Real, 3 >& Fk, const std::vector<Real>& Jk, MatrixElemental& elmat, const CurrentFE& fe );
 
 //! Elementary fourth nonlinear isochoric Jacobian matrix for VK-Penalized model (see the reference)
 /*!
@@ -670,7 +670,7 @@ void stiff_Jac_P1iso_VKPenalized_3term( Real coef, const boost::multi_array<Real
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_Jac_P1iso_VKPenalized_4term( Real coef, const boost::multi_array<Real,3 >& FkMinusTransposed, const boost::multi_array<Real,3 >& Fk,const std::vector<Real>& Jk, const std::vector<Real>& Ic_k, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_Jac_P1iso_VKPenalized_4term ( Real coef, const boost::multi_array<Real, 3 >& FkMinusTransposed, const boost::multi_array<Real, 3 >& Fk, const std::vector<Real>& Jk, const std::vector<Real>& Ic_k, MatrixElemental& elmat, const CurrentFE& fe );
 
 //! Elementary fifth nonlinear isochoric Jacobian matrix for VK-Penalized model (see the reference)
 /*!
@@ -682,7 +682,7 @@ void stiff_Jac_P1iso_VKPenalized_4term( Real coef, const boost::multi_array<Real
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_Jac_P1iso_VKPenalized_5term( Real coef, Real secondCoef, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_Jac_P1iso_VKPenalized_5term ( Real coef, Real secondCoef, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
 
 //! Elementary sixth nonlinear isochoric Jacobian matrix for VK-Penalized model (see the reference)
 /*!
@@ -695,7 +695,7 @@ void stiff_Jac_P1iso_VKPenalized_5term( Real coef, Real secondCoef, const std::v
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_Jac_P1iso_VKPenalized_6term( Real coef, Real secondCoef, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, const boost::multi_array<Real,3 >& Fk, const boost::multi_array<Real,3 >& FkMinusTransposed, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_Jac_P1iso_VKPenalized_6term ( Real coef, Real secondCoef, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, const boost::multi_array<Real, 3 >& Fk, const boost::multi_array<Real, 3 >& FkMinusTransposed, MatrixElemental& elmat, const CurrentFE& fe );
 
 
 //! Elementary seventh  nonlinear isochoric Jacobian matrix for VK-Penalized model (see the reference)
@@ -710,7 +710,7 @@ void stiff_Jac_P1iso_VKPenalized_6term( Real coef, Real secondCoef, const std::v
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_Jac_P1iso_VKPenalized_7term( Real coef, Real secondCoef, const boost::multi_array<Real,3 >& FkMinusTransposed, const std::vector<Real>& Ic_isok, const std::vector<Real>& Ic_k, const std::vector<Real>& Jk, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_Jac_P1iso_VKPenalized_7term ( Real coef, Real secondCoef, const boost::multi_array<Real, 3 >& FkMinusTransposed, const std::vector<Real>& Ic_isok, const std::vector<Real>& Ic_k, const std::vector<Real>& Jk, MatrixElemental& elmat, const CurrentFE& fe );
 
 //! Elementary seventh  nonlinear isochoric Jacobian matrix for VK-Penalized model (see the reference)
 /*!
@@ -724,7 +724,7 @@ void stiff_Jac_P1iso_VKPenalized_7term( Real coef, Real secondCoef, const boost:
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_Jac_P1iso_VKPenalized_8term( Real coef, const std::vector<Real>& Jack_k, const boost::multi_array<Real,3 >& FkMinusTransposed, const boost::multi_array<Real,3 >& FkCk, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_Jac_P1iso_VKPenalized_8term ( Real coef, const std::vector<Real>& Jack_k, const boost::multi_array<Real, 3 >& FkMinusTransposed, const boost::multi_array<Real, 3 >& FkCk, MatrixElemental& elmat, const CurrentFE& fe );
 
 
 //! Elementary seventh  nonlinear isochoric Jacobian matrix for VK-Penalized model (see the reference)
@@ -739,7 +739,7 @@ void stiff_Jac_P1iso_VKPenalized_8term( Real coef, const std::vector<Real>& Jack
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_Jac_P1iso_VKPenalized_9term( Real coef, const std::vector<Real>& Jack_k, const std::vector<Real>& Ic_kSquared, const boost::multi_array<Real,3 >& FkMinusTransposed, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_Jac_P1iso_VKPenalized_9term ( Real coef, const std::vector<Real>& Jack_k, const std::vector<Real>& Ic_kSquared, const boost::multi_array<Real, 3 >& FkMinusTransposed, MatrixElemental& elmat, const CurrentFE& fe );
 
 
 //! Elementary eigth nonlinear isochoric Jacobian matrix for VK-Penalized model (see the reference)
@@ -751,7 +751,7 @@ void stiff_Jac_P1iso_VKPenalized_9term( Real coef, const std::vector<Real>& Jack
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_Jac_P1iso_VKPenalized_10term( Real coef, const std::vector<Real>& Jack_k, const boost::multi_array<Real,3 >& Ck, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_Jac_P1iso_VKPenalized_10term ( Real coef, const std::vector<Real>& Jack_k, const boost::multi_array<Real, 3 >& Ck, MatrixElemental& elmat, const CurrentFE& fe );
 
 //! Elementary sixth nonlinear isochoric Jacobian matrix for VK-Penalized model (see the reference)
 /*!
@@ -763,7 +763,7 @@ void stiff_Jac_P1iso_VKPenalized_10term( Real coef, const std::vector<Real>& Jac
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_Jac_P1iso_VKPenalized_11term( Real coef, const std::vector<Real>& Jk, const boost::multi_array<Real,3 >& Fk, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_Jac_P1iso_VKPenalized_11term ( Real coef, const std::vector<Real>& Jk, const boost::multi_array<Real, 3 >& Fk, MatrixElemental& elmat, const CurrentFE& fe );
 
 //! Elementary tenth nonlinear isochoric Jacobian matrix for VK-Penalized model (see the reference)
 /*!
@@ -775,7 +775,7 @@ void stiff_Jac_P1iso_VKPenalized_11term( Real coef, const std::vector<Real>& Jk,
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_Jac_P1iso_VKPenalized_12term( Real coef, const std::vector<Real>& Jk, const boost::multi_array<Real,3 >& Fk, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_Jac_P1iso_VKPenalized_12term ( Real coef, const std::vector<Real>& Jk, const boost::multi_array<Real, 3 >& Fk, MatrixElemental& elmat, const CurrentFE& fe );
 
 //! Elementary eleventh nonlinear isochoric Jacobian matrix for VK-Penalized model (see the reference)
 /*!
@@ -788,7 +788,7 @@ void stiff_Jac_P1iso_VKPenalized_12term( Real coef, const std::vector<Real>& Jk,
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_Jac_P1iso_VKPenalized_13term( Real coef, const std::vector<Real>& Jk, const std::vector<Real>& Ic_kSquared,  const boost::multi_array<Real,3 >& FkMinusTransposed, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_Jac_P1iso_VKPenalized_13term ( Real coef, const std::vector<Real>& Jk, const std::vector<Real>& Ic_kSquared,  const boost::multi_array<Real, 3 >& FkMinusTransposed, MatrixElemental& elmat, const CurrentFE& fe );
 
 //! Elementary twelveth nonlinear isochoric Jacobian matrix for VK-Penalized model (see the reference)
 /*!
@@ -802,11 +802,11 @@ void stiff_Jac_P1iso_VKPenalized_13term( Real coef, const std::vector<Real>& Jk,
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_Jac_P1iso_VKPenalized_14term( Real coef, const std::vector<Real>& Jk, const boost::multi_array<Real,3 >& FkCk, const boost::multi_array<Real,3 >& FkMinusTransposed, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_Jac_P1iso_VKPenalized_14term ( Real coef, const std::vector<Real>& Jk, const boost::multi_array<Real, 3 >& FkCk, const boost::multi_array<Real, 3 >& FkMinusTransposed, MatrixElemental& elmat, const CurrentFE& fe );
 
 //! Methods for second order exponential law
 //! Methods for the first Piola-Kirchhoff tensor
-void source_P1iso_SecondOrderExponential( Real coef, Real coefExp, const boost::multi_array<Real,3 >& CofFk, const boost::multi_array<Real,3 >& Fk, const std::vector<Real>& Jk, const std::vector<Real>& trCisok, VectorElemental& elvec, const CurrentFE& fe );
+void source_P1iso_SecondOrderExponential ( Real coef, Real coefExp, const boost::multi_array<Real, 3 >& CofFk, const boost::multi_array<Real, 3 >& Fk, const std::vector<Real>& Jk, const std::vector<Real>& trCisok, VectorElemental& elvec, const CurrentFE& fe );
 
 //! Methods for the Jacobian matrix
 //! Elementary first nonlinear isochoric Jacobian matrix for Second Order Exponential model (see the reference)
@@ -822,7 +822,7 @@ void source_P1iso_SecondOrderExponential( Real coef, Real coefExp, const boost::
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_Jac_P1iso_SecondOrderExp_1term( Real coef, Real coefExp, const boost::multi_array<Real,3 >& CofFk, const boost::multi_array<Real,3 >& Fk, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_Jac_P1iso_SecondOrderExp_1term ( Real coef, Real coefExp, const boost::multi_array<Real, 3 >& CofFk, const boost::multi_array<Real, 3 >& Fk, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
 
 
 //! Elementary second nonlinear isochoric Jacobian matrix for Second Order Exponential model (see the reference)
@@ -837,7 +837,7 @@ void stiff_Jac_P1iso_SecondOrderExp_1term( Real coef, Real coefExp, const boost:
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_Jac_P1iso_SecondOrderExp_2term( Real coef, Real coefExp, const boost::multi_array<Real,3 >& Fk, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_Jac_P1iso_SecondOrderExp_2term ( Real coef, Real coefExp, const boost::multi_array<Real, 3 >& Fk, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
 
 //! Elementary third nonlinear isochoric Jacobian matrix for Second Order Exponential model (see the reference)
 /*!
@@ -851,7 +851,7 @@ void stiff_Jac_P1iso_SecondOrderExp_2term( Real coef, Real coefExp, const boost:
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_Jac_P1iso_SecondOrderExp_3term( Real coef, Real coefExp, const boost::multi_array<Real,3 >& CofFk, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_Jac_P1iso_SecondOrderExp_3term ( Real coef, Real coefExp, const boost::multi_array<Real, 3 >& CofFk, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
 
 //! Elementary fourth nonlinear isochoric Jacobian matrix for Second Order Exponential model (see the reference)
 /*!
@@ -867,7 +867,7 @@ void stiff_Jac_P1iso_SecondOrderExp_3term( Real coef, Real coefExp, const boost:
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_Jac_P1iso_SecondOrderExp_4term( Real coef, Real coefExp, const boost::multi_array<Real,3 >& CofFk, const boost::multi_array<Real,3 >& Fk,const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, const std::vector<Real>& Ic_k, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_Jac_P1iso_SecondOrderExp_4term ( Real coef, Real coefExp, const boost::multi_array<Real, 3 >& CofFk, const boost::multi_array<Real, 3 >& Fk, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, const std::vector<Real>& Ic_k, MatrixElemental& elmat, const CurrentFE& fe );
 
 //! Elementary fifth nonlinear isochoric Jacobian matrix for Second Order Exponential model (see the reference)
 /*!
@@ -880,7 +880,7 @@ void stiff_Jac_P1iso_SecondOrderExp_4term( Real coef, Real coefExp, const boost:
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_Jac_P1iso_SecondOrderExp_5term( Real coef, Real coefExp, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_Jac_P1iso_SecondOrderExp_5term ( Real coef, Real coefExp, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
 
 //! Elementary sixth nonlinear isochoric Jacobian matrix for Second Order Exponential model (see the reference)
 /*!
@@ -894,7 +894,7 @@ void stiff_Jac_P1iso_SecondOrderExp_5term( Real coef, Real coefExp, const std::v
   @param elmat The elementary matrix of the current volume
   @param fe The current finite element
 */
-void stiff_Jac_P1iso_SecondOrderExp_6term( Real coef, Real coefExp, const boost::multi_array<Real,3 >& CofFk, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_Jac_P1iso_SecondOrderExp_6term ( Real coef, Real coefExp, const boost::multi_array<Real, 3 >& CofFk, const std::vector<Real>& Jk, const std::vector<Real>& Ic_isok, MatrixElemental& elmat, const CurrentFE& fe );
 
 } //! End namespace AssemblyElementalStructure
 

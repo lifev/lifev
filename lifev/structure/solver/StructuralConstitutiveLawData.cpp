@@ -51,39 +51,39 @@ namespace LifeV
 //=====================================================
 // Constructors
 //=====================================================
-StructuralConstitutiveLawData::StructuralConstitutiveLawData():
-        M_time                             ( ),
-        M_timeAdvance                      ( ),
-        M_density                          ( ),
-        M_thickness                        ( ),
-        M_externalPressure                 ( ),
-        M_materialsFlagSet                 ( false ),
-        M_poisson                          ( ),
-        M_young                            ( ),
-        M_bulk                             ( ),
-        M_alpha                            ( ),
-        M_gamma                            ( ),
-        M_order                            ( ),
-        M_verbose                          ( ),
-	M_vectorMaterialFlags              ( )
+StructuralConstitutiveLawData::StructuralConstitutiveLawData() :
+    M_time                             ( ),
+    M_timeAdvance                      ( ),
+    M_density                          ( ),
+    M_thickness                        ( ),
+    M_externalPressure                 ( ),
+    M_materialsFlagSet                 ( false ),
+    M_poisson                          ( ),
+    M_young                            ( ),
+    M_bulk                             ( ),
+    M_alpha                            ( ),
+    M_gamma                            ( ),
+    M_order                            ( ),
+    M_verbose                          ( ),
+    M_vectorMaterialFlags              ( )
 {
 }
 
-StructuralConstitutiveLawData::StructuralConstitutiveLawData( const StructuralConstitutiveLawData& structuralConstitutiveLawData ):
-        M_time                             ( structuralConstitutiveLawData.M_time ),
-        M_timeAdvance                      ( structuralConstitutiveLawData.M_timeAdvance ),
-        M_density                          ( structuralConstitutiveLawData.M_density ),
-        M_thickness                        ( structuralConstitutiveLawData.M_thickness ),
-        M_externalPressure                 ( structuralConstitutiveLawData.M_externalPressure ),
-        M_materialsFlagSet                 ( structuralConstitutiveLawData.M_materialsFlagSet ),
-        M_poisson                          ( structuralConstitutiveLawData.M_poisson ),
-        M_young                            ( structuralConstitutiveLawData.M_young ),
-        M_bulk                             ( structuralConstitutiveLawData.M_bulk ),
-        M_alpha                            ( structuralConstitutiveLawData.M_alpha ),
-        M_gamma                            ( structuralConstitutiveLawData.M_gamma ),
-        M_order                            ( structuralConstitutiveLawData.M_order ),
-        M_verbose                          ( structuralConstitutiveLawData.M_verbose ),
-	M_vectorMaterialFlags              ( structuralConstitutiveLawData.M_vectorMaterialFlags )
+StructuralConstitutiveLawData::StructuralConstitutiveLawData ( const StructuralConstitutiveLawData& structuralConstitutiveLawData ) :
+    M_time                             ( structuralConstitutiveLawData.M_time ),
+    M_timeAdvance                      ( structuralConstitutiveLawData.M_timeAdvance ),
+    M_density                          ( structuralConstitutiveLawData.M_density ),
+    M_thickness                        ( structuralConstitutiveLawData.M_thickness ),
+    M_externalPressure                 ( structuralConstitutiveLawData.M_externalPressure ),
+    M_materialsFlagSet                 ( structuralConstitutiveLawData.M_materialsFlagSet ),
+    M_poisson                          ( structuralConstitutiveLawData.M_poisson ),
+    M_young                            ( structuralConstitutiveLawData.M_young ),
+    M_bulk                             ( structuralConstitutiveLawData.M_bulk ),
+    M_alpha                            ( structuralConstitutiveLawData.M_alpha ),
+    M_gamma                            ( structuralConstitutiveLawData.M_gamma ),
+    M_order                            ( structuralConstitutiveLawData.M_order ),
+    M_verbose                          ( structuralConstitutiveLawData.M_verbose ),
+    M_vectorMaterialFlags              ( structuralConstitutiveLawData.M_vectorMaterialFlags )
 {
 }
 
@@ -91,7 +91,7 @@ StructuralConstitutiveLawData::StructuralConstitutiveLawData( const StructuralCo
 // Operators
 // ===================================================
 StructuralConstitutiveLawData&
-StructuralConstitutiveLawData::operator=( const StructuralConstitutiveLawData& structuralConstitutiveLawData )
+StructuralConstitutiveLawData::operator= ( const StructuralConstitutiveLawData& structuralConstitutiveLawData )
 {
     if ( this != &structuralConstitutiveLawData )
     {
@@ -118,24 +118,28 @@ StructuralConstitutiveLawData::operator=( const StructuralConstitutiveLawData& s
 // Methods
 // ===================================================
 void
-StructuralConstitutiveLawData::setup( const GetPot& dataFile, const std::string& section )
+StructuralConstitutiveLawData::setup ( const GetPot& dataFile, const std::string& section )
 {
     // If data time has not been set
     if ( !M_time.get() )
-        M_time.reset( new time_Type( dataFile, section + "/time_discretization" ) );
+    {
+        M_time.reset ( new time_Type ( dataFile, section + "/time_discretization" ) );
+    }
 
     if ( !M_timeAdvance.get() )
-        M_timeAdvance.reset( new timeAdvance_Type( dataFile, section + "/time_discretization" ) );
+    {
+        M_timeAdvance.reset ( new timeAdvance_Type ( dataFile, section + "/time_discretization" ) );
+    }
 
     // physics
-    M_solidType = dataFile( ( section + "/physics/solidType" ).data(), "NO_DEFAULT_SOLID_TYPE" );
-    M_externalPressure = dataFile( ( section + "/physics/externalPressure" ).data(), 0. );
-    M_density   = dataFile( ( section + "/physics/density"   ).data(), 1. );
-    M_thickness = dataFile( ( section + "/physics/thickness" ).data(), 0.1 );
+    M_solidType = dataFile ( ( section + "/physics/solidType" ).data(), "NO_DEFAULT_SOLID_TYPE" );
+    M_externalPressure = dataFile ( ( section + "/physics/externalPressure" ).data(), 0. );
+    M_density   = dataFile ( ( section + "/physics/density"   ).data(), 1. );
+    M_thickness = dataFile ( ( section + "/physics/thickness" ).data(), 0.1 );
 
-    UInt materialsNumber = dataFile.vector_variable_size( ( section + "/physics/material_flag" ).data() );
+    UInt materialsNumber = dataFile.vector_variable_size ( ( section + "/physics/material_flag" ).data() );
 
-    ASSERT( materialsNumber, "Set the materrial_flag variable in [solid]/physics");
+    ASSERT ( materialsNumber, "Set the materrial_flag variable in [solid]/physics");
 
     if ( materialsNumber == 0 )
     {
@@ -148,9 +152,9 @@ StructuralConstitutiveLawData::setup( const GetPot& dataFile, const std::string&
         M_young[1]   = dataFile( ( section + "/physics/young"   ).data(), 0. );
         M_poisson[1] = dataFile( ( section + "/physics/poisson" ).data(), 0. );
 
-        M_bulk[1] = dataFile( ( section + "/physics/bulk"   ).data(), 1e9 );
-        M_alpha[1] = dataFile( ( section + "/physics/alpha" ).data(), 3e6 );
-        M_gamma[1] = dataFile( ( section + "/physics/gamma" ).data(), 0.8 );
+        M_bulk[1] = dataFile ( ( section + "/physics/bulk"   ).data(), 1e9 );
+        M_alpha[1] = dataFile ( ( section + "/physics/alpha" ).data(), 3e6 );
+        M_gamma[1] = dataFile ( ( section + "/physics/gamma" ).data(), 0.8 );
     }
     else
     {
@@ -160,8 +164,8 @@ StructuralConstitutiveLawData::setup( const GetPot& dataFile, const std::string&
         //ASSERT( M_materialsFlagSet == dataFile.vector_variable_size( ( section + "/physics/young"   ).data()),  "!!! ERROR: Inconsistent size for Young Modulus !!!");
         //ASSERT( M_materialsFlagSet == dataFile.vector_variable_size( ( section + "/physics/poisson" ).data() ), "!!! ERROR: Inconsistent size for Poisson Coef. !!!");
 
-        UInt material(0);
-        for ( UInt i(0) ; i < materialsNumber ; ++i )
+        UInt material (0);
+        for ( UInt i (0) ; i < materialsNumber ; ++i )
         {
 
   	    M_vectorMaterialFlags.resize( materialsNumber );
@@ -178,15 +182,15 @@ StructuralConstitutiveLawData::setup( const GetPot& dataFile, const std::string&
     }
 
     // space_discretization
-    M_order            = dataFile( ( section + "/space_discretization/order" ).data(), "P1" );
+    M_order            = dataFile ( ( section + "/space_discretization/order" ).data(), "P1" );
 
     // miscellaneous
-    M_verbose          = dataFile( ( section + "/miscellaneous/verbose" ).data(), 0 );
-    M_useExactJacobian = dataFile( ( section + "/useExactJacobian"      ).data(), false );
+    M_verbose          = dataFile ( ( section + "/miscellaneous/verbose" ).data(), 0 );
+    M_useExactJacobian = dataFile ( ( section + "/useExactJacobian"      ).data(), false );
 }
 
 void
-StructuralConstitutiveLawData::showMe( std::ostream& output ) const
+StructuralConstitutiveLawData::showMe ( std::ostream& output ) const
 {
     // physics
     output << "\n*** Values for data [solid/physics]\n\n";
@@ -194,26 +198,36 @@ StructuralConstitutiveLawData::showMe( std::ostream& output ) const
     output << "density                          = " << M_density << std::endl;
     output << "thickness                        = " << M_thickness << std::endl;
     for ( materialContainerIterator_Type i = M_young.begin() ; i != M_young.end() ; ++i )
+    {
         output << "young[" << i->first << "]                         = " << i->second << std::endl;
+    }
     for ( materialContainerIterator_Type i = M_poisson.begin() ; i != M_poisson.end() ; ++i )
+    {
         output << "poisson[" << i->first << "]                       = " << i->second << std::endl;
+    }
 
     for ( materialContainerIterator_Type i = M_bulk.begin() ; i != M_bulk.end() ; ++i )
+    {
         output << "bulk[" << i->first << "]                       = " << i->second << std::endl;
+    }
 
     for ( materialContainerIterator_Type i = M_alpha.begin() ; i != M_alpha.end() ; ++i )
+    {
         output << "alpha[" << i->first << "]                       = " << i->second << std::endl;
+    }
 
     for ( materialContainerIterator_Type i = M_gamma.begin() ; i != M_gamma.end() ; ++i )
+    {
         output << "gamma[" << i->first << "]                       = " << i->second << std::endl;
+    }
 
     for ( materialContainerIterator_Type i = M_poisson.begin() ; i != M_poisson.end() ; ++i )
     {
-        output << "Lame - lambda[" << i->first << "]                 = " << lambda( i->first ) << std::endl;
-        output << "Lame - mu[" << i->first << "]                     = " << mu( i->first ) << std::endl;
+        output << "Lame - lambda[" << i->first << "]                 = " << lambda ( i->first ) << std::endl;
+        output << "Lame - mu[" << i->first << "]                     = " << mu ( i->first ) << std::endl;
     }
 
-    for ( UInt i(0); i < M_vectorMaterialFlags.size(); i++ )
+    for ( UInt i (0); i < M_vectorMaterialFlags.size(); i++ )
     {
         output << "Position:" << i << " -> Material Flag:            = " << M_vectorMaterialFlags[i] << std::endl;
     }
@@ -226,25 +240,31 @@ StructuralConstitutiveLawData::showMe( std::ostream& output ) const
     output << "FE order                         = " << M_order << std::endl;
 
     output << "\n*** Values for data [solid/time_discretization]\n\n";
-    M_time->showMe( output );
-    M_timeAdvance->showMe( output );
+    M_time->showMe ( output );
+    M_timeAdvance->showMe ( output );
 }
 
 // ===================================================
 // Get Method
 // ===================================================
 Real
-StructuralConstitutiveLawData::poisson( const UInt& material ) const
+StructuralConstitutiveLawData::poisson ( const UInt& material ) const
 {
     materialContainer_Type::const_iterator IT;
 
     if ( M_materialsFlagSet )
-        IT = M_poisson.find( material );
+    {
+        IT = M_poisson.find ( material );
+    }
     else
-        IT = M_poisson.find( 1 );
+    {
+        IT = M_poisson.find ( 1 );
+    }
 
     if ( IT != M_poisson.end() )
+    {
         return IT->second;
+    }
     else
     {
         std::cout << " !!! Warning: the Poisson modulus has not been set !!!" << std::endl;
@@ -253,16 +273,22 @@ StructuralConstitutiveLawData::poisson( const UInt& material ) const
 }
 
 Real
-StructuralConstitutiveLawData::young( const UInt& material ) const
+StructuralConstitutiveLawData::young ( const UInt& material ) const
 {
     materialContainer_Type::const_iterator IT;
     if ( M_materialsFlagSet )
-        IT = M_young.find( material );
+    {
+        IT = M_young.find ( material );
+    }
     else
-        IT = M_young.find( 1 );
+    {
+        IT = M_young.find ( 1 );
+    }
 
     if ( IT != M_young.end() )
+    {
         return IT->second;
+    }
     else
     {
         std::cout << " !!! Warning: the Young modulus has not been set !!!" << std::endl;
@@ -271,16 +297,22 @@ StructuralConstitutiveLawData::young( const UInt& material ) const
 }
 
 Real
-StructuralConstitutiveLawData::bulk( const UInt& material ) const
+StructuralConstitutiveLawData::bulk ( const UInt& material ) const
 {
     materialContainer_Type::const_iterator IT;
     if ( M_materialsFlagSet )
-        IT = M_bulk.find( material );
+    {
+        IT = M_bulk.find ( material );
+    }
     else
-        IT = M_bulk.find( 1 );
+    {
+        IT = M_bulk.find ( 1 );
+    }
 
     if ( IT != M_bulk.end() )
+    {
         return IT->second;
+    }
     else
     {
         std::cout << " !!! Warning: the bulk modulus has not been set !!!" << std::endl;
@@ -289,16 +321,22 @@ StructuralConstitutiveLawData::bulk( const UInt& material ) const
 }
 
 Real
-StructuralConstitutiveLawData::alpha( const UInt& material ) const
+StructuralConstitutiveLawData::alpha ( const UInt& material ) const
 {
     materialContainer_Type::const_iterator IT;
     if ( M_materialsFlagSet )
-        IT = M_alpha.find( material );
+    {
+        IT = M_alpha.find ( material );
+    }
     else
-        IT = M_alpha.find( 1 );
+    {
+        IT = M_alpha.find ( 1 );
+    }
 
     if ( IT != M_alpha.end() )
+    {
         return IT->second;
+    }
     else
     {
         std::cout << " !!! Warning: the alpha modulus has not been set !!!" << std::endl;
@@ -307,16 +345,22 @@ StructuralConstitutiveLawData::alpha( const UInt& material ) const
 }
 
 Real
-StructuralConstitutiveLawData::gamma( const UInt& material ) const
+StructuralConstitutiveLawData::gamma ( const UInt& material ) const
 {
     materialContainer_Type::const_iterator IT;
     if ( M_materialsFlagSet )
-        IT = M_gamma.find( material );
+    {
+        IT = M_gamma.find ( material );
+    }
     else
-        IT = M_gamma.find( 1 );
+    {
+        IT = M_gamma.find ( 1 );
+    }
 
     if ( IT != M_gamma.end() )
+    {
         return IT->second;
+    }
     else
     {
         std::cout << " !!! Warning: the gamma modulus has not been set !!!" << std::endl;
@@ -326,23 +370,23 @@ StructuralConstitutiveLawData::gamma( const UInt& material ) const
 
 
 Real
-StructuralConstitutiveLawData::lambda( const UInt& material ) const
+StructuralConstitutiveLawData::lambda ( const UInt& material ) const
 {
     Real youngC, poissonC;
 
-    youngC   = this->young( material );
-    poissonC = this->poisson( material );
+    youngC   = this->young ( material );
+    poissonC = this->poisson ( material );
 
     return youngC * poissonC / ( ( 1.0 + poissonC ) * ( 1.0 - 2.0 * poissonC ) );
 }
 
 Real
-StructuralConstitutiveLawData::mu( const UInt& material ) const
+StructuralConstitutiveLawData::mu ( const UInt& material ) const
 {
     Real youngC, poissonC;
 
-    youngC   = this->young( material );
-    poissonC = this->poisson( material );
+    youngC   = this->young ( material );
+    poissonC = this->poisson ( material );
 
     return youngC / ( 2.0 * ( 1.0 + poissonC ) );
 }

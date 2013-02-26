@@ -1,0 +1,83 @@
+###################################################################################################
+#
+#                       This file is part of the LifeV Library
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+#
+#      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
+#           Date: 2011-03-10
+#  License Terms: GNU LGPL
+#
+###################################################################################################
+
+[Multiscale]
+modelName        = '1D Cylinder_80x40'
+modelType        = OneDimensional
+couplingFlags    = '0 1'
+
+
+
+[exporter]
+start                = 0             # start index for filenames
+save                 = 1             # how many time steps per posptrocessing
+multimesh            = false         # true if the mesh has to be saved at each post-processing step
+
+
+
+[1D_Model]
+
+[./Model]
+PhysicsType          = OneD_NonLinearPhysics
+FluxType             = OneD_NonLinearFlux
+SourceType           = OneD_NonLinearSource
+
+[../PhysicalWall]
+ViscoelasticWall     = false       # Enable/Disable viscoelastic effects
+ViscoelasticAngle    = 10          # Viscoelastic wall angle (degree)
+ViscoelasticPeriod   = 0.24        # Viscoelastic systolic period
+
+[../PhysicalParameters]
+ComputeCoefficients  = true
+PowerlawCoefficient  = 9 # 2: Parabolic; 9: Typical value
+
+DistributionLaw      = uniform      # Coefficients distribution law: uniform, linear, pointwise
+Area0                = 0.785398163397448 # Area of tube series
+
+thickVessel          = false
+thickness            = 0.1
+
+[../space_discretization]
+Length               = 80
+NumberOfElements     = 3200          # number of elements
+
+[../JacobianPerturbation]
+deltaArea            = 0.001        # perturbation on the area
+deltaFlowRate        = 0.001        # perturbation on the flow rate
+deltaStress          = 1            # perturbation on the pressure
+
+[../miscellaneous]
+post_dir             = ./           # the directory for postprocessing files
+post_file            = sol          # the file name
+verbose              = 1
+CFLmax               = 0.5          # Maximum admissible value of the CFL
+
+[../solver]
+
+    [./amesos]
+    solvertype            = Umfpack
+
+    outputlevel           = 0
+    print_status          = false
+    print_timing          = false
+    computevectornorms    = false
+    computeresidual       = false
+
+    addzerotodiag         = false
+    refactorize           = false
+    rcondthreshold        = 1e-2
+    redistribute          = true
+    maxprocs              = -1
+    matrixproperty        = general
+    scalemethod           = 1
+
+    [../]

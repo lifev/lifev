@@ -103,208 +103,244 @@ typedef FESpace<mesh_Type, MapEpetra>::function_Type function_Type;
 // force acting on the fluid.
 // ---------------------------------------------------------------
 
-Real forceFctRaw( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& z , const ID& /*i*/)
+Real forceFctRaw ( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& z , const ID& /*i*/)
 {
-    return z*z;
+    return z * z;
 }
-function_Type forceFct(forceFctRaw);
+function_Type forceFct (forceFctRaw);
 
 // ---------------------------------------------------------------
 // As usual, we start by the MPI communicator, the definition of
 // the mesh and its partitioning.
 // ---------------------------------------------------------------
 
-int main( int argc, char** argv )
+int main ( int argc, char** argv )
 {
 
 #ifdef HAVE_MPI
-    MPI_Init(&argc, &argv);
-    boost::shared_ptr<Epetra_Comm> Comm(new Epetra_MpiComm(MPI_COMM_WORLD));
+    MPI_Init (&argc, &argv);
+    boost::shared_ptr<Epetra_Comm> Comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
 #else
-    boost::shared_ptr<Epetra_Comm> Comm(new Epetra_SerialComm);
+    boost::shared_ptr<Epetra_Comm> Comm (new Epetra_SerialComm);
 #endif
 
-    const bool verbose(Comm->MyPID()==0);
+    const bool verbose (Comm->MyPID() == 0);
 
 
-    if (verbose) std::cout << " -- Building and partitioning the mesh ... " << std::flush;
+    if (verbose)
+    {
+        std::cout << " -- Building and partitioning the mesh ... " << std::flush;
+    }
 
-    const UInt Nelements(10);
+    const UInt Nelements (10);
 
     boost::shared_ptr< mesh_Type > fullMeshPtr(new mesh_Type( Comm ) );
 
-    regularMesh3D( *fullMeshPtr, 1, Nelements, Nelements, Nelements, false,
-                   2.0,   2.0,   2.0,
-                  -1.0,  -1.0,  -1.0);
+    regularMesh3D ( *fullMeshPtr, 1, Nelements, Nelements, Nelements, false,
+                    2.0,   2.0,   2.0,
+                    -1.0,  -1.0,  -1.0);
 
-    MeshPartitioner< mesh_Type >   meshPart(fullMeshPtr, Comm);
+    MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, Comm);
 
     fullMeshPtr.reset();
 
-    if (verbose) std::cout << " done ! " << std::endl;
+    if (verbose)
+    {
+        std::cout << " done ! " << std::endl;
+    }
 
 
-// ---------------------------------------------------------------
-// We define now the ETFESpaces. We need one space for the
-// velocity (vectorial, P2) and one space for the pressure
-// (scalar, P1).
-//
-// We also define velocity FESpace to use the interpolation.
-// ---------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // We define now the ETFESpaces. We need one space for the
+    // velocity (vectorial, P2) and one space for the pressure
+    // (scalar, P1).
+    //
+    // We also define velocity FESpace to use the interpolation.
+    // ---------------------------------------------------------------
 
-    if (verbose) std::cout << " -- Building the spaces ... " << std::flush;
+    if (verbose)
+    {
+        std::cout << " -- Building the spaces ... " << std::flush;
+    }
 
-    std::string uOrder("P2");
+    std::string uOrder ("P2");
     boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > uSpace
-        ( new FESpace< mesh_Type, MapEpetra >(meshPart,uOrder, 1, Comm));
+    ( new FESpace< mesh_Type, MapEpetra > (meshPart, uOrder, 1, Comm) );
 
     boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 3 > > ETuSpace
-        ( new ETFESpace< mesh_Type, MapEpetra, 3, 3 >(meshPart,&feTetraP2,&(uSpace->fe().geoMap()), Comm));
+    ( new ETFESpace< mesh_Type, MapEpetra, 3, 3 > (meshPart, &feTetraP2, & (uSpace->fe().geoMap() ), Comm) );
 
     boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 1 > > ETpSpace
-        ( new ETFESpace< mesh_Type, MapEpetra, 3, 1 >(meshPart,&feTetraP1,&(uSpace->fe().geoMap()), Comm));
+    ( new ETFESpace< mesh_Type, MapEpetra, 3, 1 > (meshPart, &feTetraP1, & (uSpace->fe().geoMap() ), Comm) );
 
-    if (verbose) std::cout << " done ! " << std::endl;
-    if (verbose) std::cout << " ---> Velocity dofs: " << ETuSpace->dof().numTotalDof() << std::endl;
-    if (verbose) std::cout << " ---> Pressure dofs: " << ETpSpace->dof().numTotalDof() << std::endl;
-
-
-// ---------------------------------------------------------------
-// We want to assemble a Stokes matrix. This matrix is divided
-// into four blocks (with the (1,1)-block empty). We define it
-// using a special constructor with "|" operators, which
-// separates the different blocks.
-// ---------------------------------------------------------------
-
-    if (verbose) std::cout << " -- Assembly of the Stokes matrix ... " << std::flush;
-
-    boost::shared_ptr<blockMatrix_Type> ETsystemMatrix(new blockMatrix_Type( ETuSpace->map() | ETpSpace->map() ));
-    *ETsystemMatrix *=0.0;
+    if (verbose)
+    {
+        std::cout << " done ! " << std::endl;
+    }
+    if (verbose)
+    {
+        std::cout << " ---> Velocity dofs: " << ETuSpace->dof().numTotalDof() << std::endl;
+    }
+    if (verbose)
+    {
+        std::cout << " ---> Pressure dofs: " << ETpSpace->dof().numTotalDof() << std::endl;
+    }
 
 
-// ---------------------------------------------------------------
-// To fill them, we simply have to call one integrate for each
-// non-empty block and indicate in which block the contribution
-// has to go.
-//
-// Remark that, depending on the block assembled, the spaces for
-// the test and trial functions are different.
-// ---------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // We want to assemble a Stokes matrix. This matrix is divided
+    // into four blocks (with the (1,1)-block empty). We define it
+    // using a special constructor with "|" operators, which
+    // separates the different blocks.
+    // ---------------------------------------------------------------
+
+    if (verbose)
+    {
+        std::cout << " -- Assembly of the Stokes matrix ... " << std::flush;
+    }
+
+    boost::shared_ptr<blockMatrix_Type> ETsystemMatrix (new blockMatrix_Type ( ETuSpace->map() | ETpSpace->map() ) );
+    *ETsystemMatrix *= 0.0;
+
+
+    // ---------------------------------------------------------------
+    // To fill them, we simply have to call one integrate for each
+    // non-empty block and indicate in which block the contribution
+    // has to go.
+    //
+    // Remark that, depending on the block assembled, the spaces for
+    // the test and trial functions are different.
+    // ---------------------------------------------------------------
 
     {
         using namespace ExpressionAssembly;
 
-        integrate( elements(ETuSpace->mesh()),
-                   quadRuleTetra4pt,
-                   ETuSpace,
-                   ETuSpace,
+        integrate ( elements (ETuSpace->mesh() ),
+                    quadRuleTetra4pt,
+                    ETuSpace,
+                    ETuSpace,
 
-                   dot( grad(phi_i) , grad(phi_j) )
+                    dot ( grad (phi_i) , grad (phi_j) )
 
-                   )
-            >> ETsystemMatrix->block(0,0);
+                  )
+                >> ETsystemMatrix->block (0, 0);
 
-        integrate( elements(ETuSpace->mesh()),
-                   quadRuleTetra4pt,
-                   ETuSpace,
-                   ETpSpace,
+        integrate ( elements (ETuSpace->mesh() ),
+                    quadRuleTetra4pt,
+                    ETuSpace,
+                    ETpSpace,
 
-                   phi_j* div(phi_i)
+                    phi_j * div (phi_i)
 
-                   )
-            >> ETsystemMatrix->block(0,1);
+                  )
+                >> ETsystemMatrix->block (0, 1);
 
-        integrate( elements(ETuSpace->mesh()),
-                   quadRuleTetra4pt,
-                   ETpSpace,
-                   ETuSpace,
+        integrate ( elements (ETuSpace->mesh() ),
+                    quadRuleTetra4pt,
+                    ETpSpace,
+                    ETuSpace,
 
-                   phi_i* div(phi_j)
+                    phi_i * div (phi_j)
 
-                   )
-            >> ETsystemMatrix->block(1,0);
+                  )
+                >> ETsystemMatrix->block (1, 0);
     }
 
     ETsystemMatrix->globalAssemble();
 
-    if (verbose) std::cout << " done! " << std::endl;
+    if (verbose)
+    {
+        std::cout << " done! " << std::endl;
+    }
 
 
-// ---------------------------------------------------------------
-// For testing purposes, we also compute the norm of the matrix.
-// ---------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // For testing purposes, we also compute the norm of the matrix.
+    // ---------------------------------------------------------------
 
-    Real matrixNorm(ETsystemMatrix->normInf());
+    Real matrixNorm (ETsystemMatrix->normInf() );
 
-    if (verbose) std::cout << " Matrix norm " << matrixNorm << std::endl;
+    if (verbose)
+    {
+        std::cout << " Matrix norm " << matrixNorm << std::endl;
+    }
 
 
-// ---------------------------------------------------------------
-// In a very similar way, we can assemble the block right hand
-// side. Here, we suppose that a force acts on  the fluid, so
-// only the block associated to the velocity is not empty.
-// ---------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // In a very similar way, we can assemble the block right hand
+    // side. Here, we suppose that a force acts on  the fluid, so
+    // only the block associated to the velocity is not empty.
+    // ---------------------------------------------------------------
 
-    if (verbose) std::cout << " -- Building the rhs ... " << std::flush;
+    if (verbose)
+    {
+        std::cout << " -- Building the rhs ... " << std::flush;
+    }
 
-    vector_Type fInterpolated(ETuSpace->map(),Repeated);
+    vector_Type fInterpolated (ETuSpace->map(), Repeated);
 
-    fInterpolated*=0.0;
+    fInterpolated *= 0.0;
 
-    uSpace->interpolate(forceFct,fInterpolated,0.0);
+    uSpace->interpolate (forceFct, fInterpolated, 0.0);
 
-    blockVector_Type ETrhs(ETuSpace->map() | ETpSpace->map() ,Repeated);
-    ETrhs*=0.0;
+    blockVector_Type ETrhs (ETuSpace->map() | ETpSpace->map() , Repeated);
+    ETrhs *= 0.0;
 
     {
         using namespace ExpressionAssembly;
 
-        integrate( elements(ETuSpace->mesh()),
-                   quadRuleTetra4pt,
-                   ETuSpace,
-                   dot(value(ETuSpace, fInterpolated),phi_i)
-                 )
-            >> ETrhs.block(0);
+        integrate ( elements (ETuSpace->mesh() ),
+                    quadRuleTetra4pt,
+                    ETuSpace,
+                    dot (value (ETuSpace, fInterpolated), phi_i)
+                  )
+                >> ETrhs.block (0);
     }
 
     ETrhs.globalAssemble();
 
-    if (verbose) std::cout << " done! " << std::endl;
+    if (verbose)
+    {
+        std::cout << " done! " << std::endl;
+    }
 
 
-// ---------------------------------------------------------------
-// For testing purposes, we also compute the norm of the rhs. To
-// take the norm, we need a unique vector (globalAssemble is not
-// sufficient).
-// ---------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // For testing purposes, we also compute the norm of the rhs. To
+    // take the norm, we need a unique vector (globalAssemble is not
+    // sufficient).
+    // ---------------------------------------------------------------
 
-    blockVector_Type ETrhsUnique(ETrhs,Unique);
+    blockVector_Type ETrhsUnique (ETrhs, Unique);
 
-    Real rhsNorm(ETrhsUnique.normInf());
+    Real rhsNorm (ETrhsUnique.normInf() );
 
-    if (verbose) std::cout << " Rhs norm " << rhsNorm << std::endl;
+    if (verbose)
+    {
+        std::cout << " Rhs norm " << rhsNorm << std::endl;
+    }
 
 
-// ---------------------------------------------------------------
-// We finalize the MPI if needed.
-// ---------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // We finalize the MPI if needed.
+    // ---------------------------------------------------------------
 
 #ifdef HAVE_MPI
     MPI_Finalize();
 #endif
 
 
-// ---------------------------------------------------------------
-// We finally compare the difference with the tolerance of the
-// test.
-// ---------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // We finally compare the difference with the tolerance of the
+    // test.
+    // ---------------------------------------------------------------
 
     if (
-        ( std::abs(matrixNorm - 3.856 ) < 1e-2) &&
-        ( std::abs(rhsNorm - 0.00187384) < 1e-5)
-       )
+        ( std::abs (matrixNorm - 3.856 ) < 1e-2) &&
+        ( std::abs (rhsNorm - 0.00187384) < 1e-5)
+    )
     {
-        return( EXIT_SUCCESS );
+        return ( EXIT_SUCCESS );
     }
     return ( EXIT_FAILURE );
 }
