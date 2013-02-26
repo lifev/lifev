@@ -51,7 +51,7 @@ namespace LifeV
 /*!
  *  @author Vincent Martin, Cristiano Malossi
  *  @see Equations and networks of 1-D models \cite FormaggiaLamponi2003
- *  @see Geometrical multiscale coupling of 1-D models \cite Malossi2011Algorithms \cite Malossi2011Algorithms1D
+ *  @see Geometrical multiscale coupling of 1-D models \cite Malossi2011Algorithms \cite Malossi2011Algorithms1D \cite BonnemainMalossi2012LVAD
  *
  *  The conservative form of the generic hyperbolic problem is
  *
@@ -109,7 +109,7 @@ public:
     /*!
      * @param physicsPtr pointer to the physics of the problem
      */
-    explicit OneDFSISourceLinear( const physicsPtr_Type physicsPtr ) : super( physicsPtr ) {}
+    explicit OneDFSISourceLinear ( const physicsPtr_Type physicsPtr ) : super ( physicsPtr ) {}
 
     //! Do nothing destructor
     virtual ~OneDFSISourceLinear() {}
@@ -134,7 +134,7 @@ public:
      *  @param row row of the source term
      *  @param iNode node of the mesh
      */
-    Real source( const Real& U1, const Real& U2, const ID& row, const UInt& iNode ) const ;
+    Real source ( const Real& U1, const Real& U2, const ID& row, const UInt& iNode ) const ;
 
     //! Evaluate the derivative of the source term
     /*!
@@ -144,7 +144,7 @@ public:
      *  @param column column of the derivative of the source term
      *  @param iNode node of the mesh
      */
-    Real dSdU( const Real& U1, const Real& U2, const ID& row, const ID& colum, const UInt& iNode ) const;
+    Real dSdU ( const Real& U1, const Real& U2, const ID& row, const ID& colum, const UInt& iNode ) const;
 
     //! Evaluate the non-conservative form of the source term at the foot of the outgoing characteristic.
     /*!
@@ -157,8 +157,8 @@ public:
      *  @param bcNodes list of boundary nodes
      *  @param cfl cfl used to identify the foot of the characteristic
      */
-    Real interpolatedNonConservativeSource( const Real& U1, const Real& U2,
-                                            const ID& row, const container2D_Type& bcNodes, const Real& cfl ) const ;
+    Real interpolatedNonConservativeSource ( const Real& U1, const Real& U2,
+                                             const ID& row, const container2D_Type& bcNodes, const Real& cfl ) const ;
 
     //@}
 private:
@@ -166,9 +166,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    explicit OneDFSISourceLinear( const OneDFSISourceLinear& source );
+    explicit OneDFSISourceLinear ( const OneDFSISourceLinear& source );
 
-    OneDFSISourceLinear& operator=( const OneDFSISourceLinear& source );
+    OneDFSISourceLinear& operator= ( const OneDFSISourceLinear& source );
 
     //@}
 

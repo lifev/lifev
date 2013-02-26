@@ -45,11 +45,11 @@ namespace LifeV
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-PreconditionerLinearSolver::PreconditionerLinearSolver( boost::shared_ptr<Epetra_Comm> comm ) :
-        Preconditioner          ( comm ),
-        M_printSubiterationCount( false ),
-        M_precName              ( "" ),
-        M_precDataSection       ( "" )
+PreconditionerLinearSolver::PreconditionerLinearSolver ( boost::shared_ptr<Epetra_Comm> comm ) :
+    Preconditioner          ( comm ),
+    M_printSubiterationCount ( false ),
+    M_precName              ( "" ),
+    M_precDataSection       ( "" )
 {
 
 }
@@ -65,52 +65,52 @@ PreconditionerLinearSolver::~PreconditionerLinearSolver()
 // ===================================================
 
 void
-PreconditionerLinearSolver::createParametersList( list_Type&         list,
-                                                  const GetPot&      dataFile,
-                                                  const std::string& section,
-                                                  const std::string& subSection )
+PreconditionerLinearSolver::createParametersList ( list_Type&         list,
+                                                   const GetPot&      dataFile,
+                                                   const std::string& section,
+                                                   const std::string& subSection )
 {
-    createLinearSolverList( list, dataFile, section, subSection, M_displayer.comm()->MyPID() == 0 );
+    createLinearSolverList ( list, dataFile, section, subSection, M_displayer.comm()->MyPID() == 0 );
 }
 
 void
-PreconditionerLinearSolver::createLinearSolverList( list_Type&         list,
-                                                    const GetPot&      dataFile,
-                                                    const std::string& section,
-                                                    const std::string& subsection,
-                                                    const bool&        verbose )
+PreconditionerLinearSolver::createLinearSolverList ( list_Type&         list,
+                                                     const GetPot&      dataFile,
+                                                     const std::string& section,
+                                                     const std::string& subsection,
+                                                     const bool&        verbose )
 {
-    bool displayList = dataFile( ( section + "/displayList" ).data(), false);
+    bool displayList = dataFile ( ( section + "/displayList" ).data(), false);
 
     // If this option is true, the solver will print the iteration count
-    const std::string solverParamFile = dataFile( ( section + "/" + subsection + "/parameters_file" ).data(), "none" );
-	list = *( Teuchos::getParametersFromXmlFile( solverParamFile ) );
+    const std::string solverParamFile = dataFile ( ( section + "/" + subsection + "/parameters_file" ).data(), "none" );
+    list = * ( Teuchos::getParametersFromXmlFile ( solverParamFile ) );
 
     if ( displayList && verbose )
     {
-    	std::cout << "PreconditionerLinearSolver parameters list:" << std::endl;
-    	std::cout << "-----------------------------" << std::endl;
-    	list.print( std::cout );
-    	std::cout << "-----------------------------" << std::endl;
+        std::cout << "PreconditionerLinearSolver parameters list:" << std::endl;
+        std::cout << "-----------------------------" << std::endl;
+        list.print ( std::cout );
+        std::cout << "-----------------------------" << std::endl;
     }
 }
 
 Int
-PreconditionerLinearSolver::buildPreconditioner( operator_type& matrix )
+PreconditionerLinearSolver::buildPreconditioner ( operator_type& matrix )
 {
-	// Setup the solver
-    M_solver.reset( new solver_Type( this->M_displayer.comm() ) );
-    M_solver->setParameters( M_list.sublist( "LinearSolver" ) );
-    M_solver->setOperator( matrix );
+    // Setup the solver
+    M_solver.reset ( new solver_Type ( this->M_displayer.comm() ) );
+    M_solver->setParameters ( M_list.sublist ( "LinearSolver" ) );
+    M_solver->setOperator ( matrix );
 
     // Setup the preconditioner for the solver
-    M_preconditioner.reset( PRECFactory::instance().createObject( M_precName ) );
-    ASSERT( M_preconditioner.get() != 0, " Preconditioner not set" );
-    M_preconditioner->setDataFromGetPot( M_dataFile, M_precDataSection );
-    M_solver->setPreconditioner( M_preconditioner );
+    M_preconditioner.reset ( PRECFactory::instance().createObject ( M_precName ) );
+    ASSERT ( M_preconditioner.get() != 0, " Preconditioner not set" );
+    M_preconditioner->setDataFromGetPot ( M_dataFile, M_precDataSection );
+    M_solver->setPreconditioner ( M_preconditioner );
     M_solver->buildPreconditioner();
     M_solver->setupSolverOperator();
-    M_solver->solver()->setUsedForPreconditioning( M_printSubiterationCount );
+    M_solver->solver()->setUsedForPreconditioning ( M_printSubiterationCount );
 
     this->M_preconditionerCreated = true;
 
@@ -131,18 +131,18 @@ PreconditionerLinearSolver::condest()
 }
 
 void
-PreconditionerLinearSolver::showMe( std::ostream& output ) const
+PreconditionerLinearSolver::showMe ( std::ostream& output ) const
 {
-    M_solver->showMe(output);
+    M_solver->showMe (output);
 }
 
 // ===================================================
 // Epetra Operator Interface Methods
 // ===================================================
 Int
-PreconditionerLinearSolver::SetUseTranspose( const bool useTranspose )
+PreconditionerLinearSolver::SetUseTranspose ( const bool useTranspose )
 {
-    return M_solver->solver()->SetUseTranspose(useTranspose);
+    return M_solver->solver()->SetUseTranspose (useTranspose);
 }
 
 bool
@@ -152,20 +152,20 @@ PreconditionerLinearSolver::UseTranspose()
 }
 
 Int
-PreconditionerLinearSolver::Apply( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const
+PreconditionerLinearSolver::Apply ( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const
 {
-    return M_solver->solver()->Apply( X, Y );
+    return M_solver->solver()->Apply ( X, Y );
 }
 
 Int
-PreconditionerLinearSolver::ApplyInverse( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const
+PreconditionerLinearSolver::ApplyInverse ( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const
 {
-    if( M_solver )
+    if ( M_solver )
     {
-    	M_solver->solver()->ApplyInverse( X, Y );
-        if( M_printSubiterationCount )
+        M_solver->solver()->ApplyInverse ( X, Y );
+        if ( M_printSubiterationCount )
         {
-    	    M_displayer.leaderPrint( "> ", M_solver->numIterations(), " subiterations\n" );
+            M_displayer.leaderPrint ( "> ", M_solver->numIterations(), " subiterations\n" );
         }
     }
     return 0;
@@ -189,15 +189,15 @@ PreconditionerLinearSolver::OperatorDomainMap() const
 void
 PreconditionerLinearSolver::setDataFromGetPot ( const GetPot& dataFile, const std::string& section )
 {
-	createLinearSolverList( M_list, dataFile, section, "LinearSolver", M_displayer.comm()->MyPID() == 0 );
-    M_printSubiterationCount = this->M_list.get( "Print Subiteration Count", false );
-    M_precName               = this->M_list.get( "Preconditioner", "ML" );
-    M_precDataSection        = this->M_list.get( "Preconditioner Data Section", "" );
+    createLinearSolverList ( M_list, dataFile, section, "LinearSolver", M_displayer.comm()->MyPID() == 0 );
+    M_printSubiterationCount = this->M_list.get ( "Print Subiteration Count", false );
+    M_precName               = this->M_list.get ( "Preconditioner", "ML" );
+    M_precDataSection        = this->M_list.get ( "Preconditioner Data Section", "" );
     M_dataFile               = dataFile;
 }
 
 void
-PreconditionerLinearSolver::setSolver( SolverAztecOO& /*solver*/ )
+PreconditionerLinearSolver::setSolver ( SolverAztecOO& /*solver*/ )
 {
 
 }

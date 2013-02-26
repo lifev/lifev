@@ -72,22 +72,22 @@ public:
     //@{
 
 #ifdef MONODOMAIN
-    typedef HeartMonodomainSolver< RegionMesh<LinearTetra> >::vector_Type  	vector_Type;
-    typedef HeartMonodomainSolver<RegionMesh<LinearTetra> >::matrix_Type      	matrix_Type;
+    typedef HeartMonodomainSolver< RegionMesh<LinearTetra> >::vector_Type   vector_Type;
+    typedef HeartMonodomainSolver<RegionMesh<LinearTetra> >::matrix_Type        matrix_Type;
 #else
-    typedef HeartBidomainSolver< RegionMesh<LinearTetra> >::vector_Type  	vector_Type;
-    typedef HeartBidomainSolver<RegionMesh<LinearTetra> >::matrix_Type    	matrix_Type;
+    typedef HeartBidomainSolver< RegionMesh<LinearTetra> >::vector_Type     vector_Type;
+    typedef HeartBidomainSolver<RegionMesh<LinearTetra> >::matrix_Type      matrix_Type;
 #endif
-    typedef boost::shared_ptr<vector_Type> 					vectorPtr_Type;
-    typedef boost::shared_ptr<matrix_Type>     				matrixPtr_Type;
+    typedef boost::shared_ptr<vector_Type>                  vectorPtr_Type;
+    typedef boost::shared_ptr<matrix_Type>                  matrixPtr_Type;
     //@}
 
     /** @name Constructors, destructor
      */
     //@{
 
-    Heart( Int argc,
-           char** argv );
+    Heart ( Int argc,
+            char** argv );
 
     virtual ~Heart() {}
 
@@ -102,15 +102,15 @@ public:
 
     //! To compute the righthand side of the system
 #ifdef MONODOMAIN
-    void computeRhs( vector_Type& rhs,
-                     HeartMonodomainSolver< RegionMesh<LinearTetra> >& electricModel,
-                     boost::shared_ptr< HeartIonicSolver< RegionMesh<LinearTetra> > > ionicModel,
-                     HeartMonodomainData& dataMonodomain );
+    void computeRhs ( vector_Type& rhs,
+                      HeartMonodomainSolver< RegionMesh<LinearTetra> >& electricModel,
+                      boost::shared_ptr< HeartIonicSolver< RegionMesh<LinearTetra> > > ionicModel,
+                      HeartMonodomainData& dataMonodomain );
 #else
-    void computeRhs( vector_Type& rhs,
-                     HeartBidomainSolver< RegionMesh<LinearTetra> >& electricModel,
-                     boost::shared_ptr< HeartIonicSolver< RegionMesh<LinearTetra> > > ionicModel,
-                     HeartBidomainData& dataBidomain );
+    void computeRhs ( vector_Type& rhs,
+                      HeartBidomainSolver< RegionMesh<LinearTetra> >& electricModel,
+                      boost::shared_ptr< HeartIonicSolver< RegionMesh<LinearTetra> > > ionicModel,
+                      HeartBidomainData& dataBidomain );
 #endif
     //@}
 

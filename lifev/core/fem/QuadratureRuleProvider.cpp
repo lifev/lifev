@@ -36,7 +36,8 @@
 
 #include <lifev/core/fem/QuadratureRuleProvider.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 const UInt QuadratureRuleProvider::S_maxExactnessTetra = 7;
 const UInt QuadratureRuleProvider::S_maxExactnessPrism = 0;
@@ -59,135 +60,147 @@ const UInt QuadratureRuleProvider::S_maxExactnessLine = 3;
 
 const QuadratureRule&
 QuadratureRuleProvider::
-provideExactness(const ReferenceShapes& shape, const UInt& exactness)
+provideExactness (const ReferenceShapes& shape, const UInt& exactness)
 {
     switch (shape)
     {
-    case TETRA:
-        return provideExactnessTetra(exactness);
-        break;
+        case TETRA:
+            return provideExactnessTetra (exactness);
+            break;
 
-    case PRISM:
-        return provideExactnessPrism(exactness);
-        break;
+        case PRISM:
+            return provideExactnessPrism (exactness);
+            break;
 
-    case HEXA:
-        return provideExactnessHexa(exactness);
-        break;
+        case HEXA:
+            return provideExactnessHexa (exactness);
+            break;
 
-    case QUAD:
-        return provideExactnessQuad(exactness);
-        break;
+        case QUAD:
+            return provideExactnessQuad (exactness);
+            break;
 
-    case TRIANGLE:
-        return provideExactnessTriangle(exactness);
-        break;
+        case TRIANGLE:
+            return provideExactnessTriangle (exactness);
+            break;
 
-    case LINE:
-        return provideExactnessLine(exactness);
-        break;
+        case LINE:
+            return provideExactnessLine (exactness);
+            break;
 
-    case POINT:
-        return provideExactnessPoint(exactness);
-        break;
+        case POINT:
+            return provideExactnessPoint (exactness);
+            break;
 
-    case NONE:
-    default:
-        std::cerr << " QuadratureRuleProvider: No quadrature can be furnished for this shape! " << std::endl;
-        abort();
+        case NONE:
+        default:
+            std::cerr << " QuadratureRuleProvider: No quadrature can be furnished for this shape! " << std::endl;
+            abort();
     };
 
     // In case you have found nothing, return the maximal
     // quadrature rule.
-    return provideMaximal(shape);
+    return provideMaximal (shape);
 }
 
 const QuadratureRule&
 QuadratureRuleProvider::
-provideExactnessMax(const ReferenceShapes& shape, const UInt& exactness)
+provideExactnessMax (const ReferenceShapes& shape, const UInt& exactness)
 {
     switch (shape)
     {
-    case TETRA:
-        if (exactness <= S_maxExactnessTetra)
-            return provideExactnessTetra(exactness);
+        case TETRA:
+            if (exactness <= S_maxExactnessTetra)
+            {
+                return provideExactnessTetra (exactness);
+            }
 
-    case PRISM:
-        if (exactness <= S_maxExactnessPrism)
-            return provideExactnessPrism(exactness);
-        break;
+        case PRISM:
+            if (exactness <= S_maxExactnessPrism)
+            {
+                return provideExactnessPrism (exactness);
+            }
+            break;
 
-    case HEXA:
-        if (exactness <= S_maxExactnessHexa)
-            return provideExactnessHexa(exactness);
-        break;
+        case HEXA:
+            if (exactness <= S_maxExactnessHexa)
+            {
+                return provideExactnessHexa (exactness);
+            }
+            break;
 
-    case QUAD:
-        if (exactness <= S_maxExactnessQuad)
-            return provideExactnessQuad(exactness);
-        break;
+        case QUAD:
+            if (exactness <= S_maxExactnessQuad)
+            {
+                return provideExactnessQuad (exactness);
+            }
+            break;
 
-    case TRIANGLE:
-        if (exactness <= S_maxExactnessTriangle)
-            return provideExactnessTriangle(exactness);
-        break;
+        case TRIANGLE:
+            if (exactness <= S_maxExactnessTriangle)
+            {
+                return provideExactnessTriangle (exactness);
+            }
+            break;
 
-    case LINE:
-        if (exactness <= S_maxExactnessLine)
-            return provideExactnessLine(exactness);
-        break;
+        case LINE:
+            if (exactness <= S_maxExactnessLine)
+            {
+                return provideExactnessLine (exactness);
+            }
+            break;
 
-    case POINT:
-        // No matter the exactness, this is always exact!
-        return provideExactnessPoint(exactness);
-        break;
+        case POINT:
+            // No matter the exactness, this is always exact!
+            return provideExactnessPoint (exactness);
+            break;
 
-    case NONE:
-    default:
-        std::cerr << " QuadratureRuleProvider: No quadrature can be furnished for this shape! " << std::endl;
-        abort();
+        case NONE:
+        default:
+            std::cerr << " QuadratureRuleProvider: No quadrature can be furnished for this shape! " << std::endl;
+            abort();
     };
 
     // In case you have found nothing, return the maximal
     // quadrature rule.
-    return provideMaximal(shape);
+    return provideMaximal (shape);
 }
 
 const QuadratureRule&
 QuadratureRuleProvider::
-provideMaximal(const ReferenceShapes& shape)
+provideMaximal (const ReferenceShapes& shape)
 {
     switch (shape)
     {
-    case TETRA:
-        return quadRuleTetra64pt;
-        break;
+        case TETRA:
+            return quadRuleTetra64pt;
+            break;
 
-    case HEXA:
-        return quadRuleHexa8pt;
-        break;
+        case HEXA:
+            return quadRuleHexa8pt;
+            break;
 
-    case QUAD:
-        return quadRuleQuad9pt;
-        break;
+        case QUAD:
+            return quadRuleQuad9pt;
+            break;
 
-    case TRIANGLE:
-        return quadRuleTria7pt;
-        break;
+        case TRIANGLE:
+            return quadRuleTria7pt;
+            break;
 
-    case LINE:
-        return quadRuleTria3pt;
-        break;
+        case LINE:
+            return quadRuleTria3pt;
+            break;
 
-    case POINT:
-        return quadRuleNode1pt;
-        break;
+        case POINT:
+            return quadRuleNode1pt;
+            break;
 
-    case PRISM:
-    case NONE:
-    default:
-        std::cerr << " QuadratureRuleProvider: No quadrature can be furnished for this shape! " << std::endl;
-        abort();
+        case PRISM:
+        case NONE:
+        default:
+            std::cerr << " QuadratureRuleProvider: No quadrature can be furnished for this shape! " << std::endl;
+            abort();
     };
 
     return quadRuleTetra64pt;
@@ -207,32 +220,32 @@ provideMaximal(const ReferenceShapes& shape)
 
 const QuadratureRule&
 QuadratureRuleProvider::
-provideExactnessTetra(const UInt& exactness)
+provideExactnessTetra (const UInt& exactness)
 {
-    switch(exactness)
+    switch (exactness)
     {
-    case 0:
-    case 1:
-        return quadRuleTetra1pt;
-        break;
-    case 2:
-        return quadRuleTetra4pt;
-        break;
-    case 3:
-        return quadRuleTetra5pt;
-        break;
-    case 4:
-    case 5:
-        return quadRuleTetra15pt;
-        break;
-    case 6:
-    case 7:
-        return quadRuleTetra64pt;
-        break;
-    default:
-        std::cerr << " QuadratureRuleProvider: No quadrature rule can be furnished with such an exactness (tetra) ";
-        std::cerr << std::endl;
-        abort();
+        case 0:
+        case 1:
+            return quadRuleTetra1pt;
+            break;
+        case 2:
+            return quadRuleTetra4pt;
+            break;
+        case 3:
+            return quadRuleTetra5pt;
+            break;
+        case 4:
+        case 5:
+            return quadRuleTetra15pt;
+            break;
+        case 6:
+        case 7:
+            return quadRuleTetra64pt;
+            break;
+        default:
+            std::cerr << " QuadratureRuleProvider: No quadrature rule can be furnished with such an exactness (tetra) ";
+            std::cerr << std::endl;
+            abort();
     };
 
     return quadRuleTetra64pt;
@@ -240,14 +253,14 @@ provideExactnessTetra(const UInt& exactness)
 
 const QuadratureRule&
 QuadratureRuleProvider::
-provideExactnessPrism(const UInt& exactness)
+provideExactnessPrism (const UInt& exactness)
 {
-    switch(exactness)
+    switch (exactness)
     {
-    default:
-        std::cerr << " QuadratureRuleProvider: No quadrature rule can be furnished with such an exactness (prism) ";
-        std::cerr << std::endl;
-        abort();
+        default:
+            std::cerr << " QuadratureRuleProvider: No quadrature rule can be furnished with such an exactness (prism) ";
+            std::cerr << std::endl;
+            abort();
     };
 
     /*
@@ -260,22 +273,22 @@ provideExactnessPrism(const UInt& exactness)
 
 const QuadratureRule&
 QuadratureRuleProvider::
-provideExactnessHexa(const UInt& exactness)
+provideExactnessHexa (const UInt& exactness)
 {
-    switch(exactness)
+    switch (exactness)
     {
-    case 0:
-    case 1:
-        return quadRuleHexa1pt;
-        break;
-    case 2:
-    case 3:
-        return quadRuleHexa8pt;
-        break;
-    default:
-        std::cerr << " QuadratureRuleProvider: No quadrature rule can be furnished with such an exactness (hexa) ";
-        std::cerr << std::endl;
-        abort();
+        case 0:
+        case 1:
+            return quadRuleHexa1pt;
+            break;
+        case 2:
+        case 3:
+            return quadRuleHexa8pt;
+            break;
+        default:
+            std::cerr << " QuadratureRuleProvider: No quadrature rule can be furnished with such an exactness (hexa) ";
+            std::cerr << std::endl;
+            abort();
     };
 
     return quadRuleHexa8pt;
@@ -283,26 +296,26 @@ provideExactnessHexa(const UInt& exactness)
 
 const QuadratureRule&
 QuadratureRuleProvider::
-provideExactnessQuad(const UInt& exactness)
+provideExactnessQuad (const UInt& exactness)
 {
-    switch(exactness)
+    switch (exactness)
     {
-    case 0:
-    case 1:
-        return quadRuleQuad1pt;
-        break;
-    case 2:
-    case 3:
-        return quadRuleQuad4pt;
-        break;
-    case 4:
-    case 5:
-        return quadRuleQuad9pt;
-        break;
-    default:
-        std::cerr << " QuadratureRuleProvider: No quadrature rule can be furnished with such an exactness (quad) ";
-        std::cerr << std::endl;
-        abort();
+        case 0:
+        case 1:
+            return quadRuleQuad1pt;
+            break;
+        case 2:
+        case 3:
+            return quadRuleQuad4pt;
+            break;
+        case 4:
+        case 5:
+            return quadRuleQuad9pt;
+            break;
+        default:
+            std::cerr << " QuadratureRuleProvider: No quadrature rule can be furnished with such an exactness (quad) ";
+            std::cerr << std::endl;
+            abort();
     };
 
     return quadRuleQuad9pt;
@@ -310,30 +323,30 @@ provideExactnessQuad(const UInt& exactness)
 
 const QuadratureRule&
 QuadratureRuleProvider::
-provideExactnessTriangle(const UInt& exactness)
+provideExactnessTriangle (const UInt& exactness)
 {
-    switch(exactness)
+    switch (exactness)
     {
-    case 0:
-    case 1:
-        return quadRuleTria1pt;
-        break;
-    case 2:
-        return quadRuleTria3pt;
-        break;
-    case 3:
-        return quadRuleTria4pt;
-        break;
-    case 4:
-        return quadRuleTria6pt;
-        break;
-    case 5:
-        return quadRuleTria7pt;
-        break;
-    default:
-        std::cerr << " QuadratureRuleProvider: No quadrature rule can be furnished with such an exactness (triangle) ";
-        std::cerr << std::endl;
-        abort();
+        case 0:
+        case 1:
+            return quadRuleTria1pt;
+            break;
+        case 2:
+            return quadRuleTria3pt;
+            break;
+        case 3:
+            return quadRuleTria4pt;
+            break;
+        case 4:
+            return quadRuleTria6pt;
+            break;
+        case 5:
+            return quadRuleTria7pt;
+            break;
+        default:
+            std::cerr << " QuadratureRuleProvider: No quadrature rule can be furnished with such an exactness (triangle) ";
+            std::cerr << std::endl;
+            abort();
     };
 
     return quadRuleTria7pt;
@@ -341,24 +354,24 @@ provideExactnessTriangle(const UInt& exactness)
 
 const QuadratureRule&
 QuadratureRuleProvider::
-provideExactnessLine(const UInt& exactness)
+provideExactnessLine (const UInt& exactness)
 {
-    switch(exactness)
+    switch (exactness)
     {
-    case 0:
-    case 1:
-        return quadRuleSeg1pt;
-        break;
-    case 2:
-        return quadRuleSeg2pt;
-        break;
-    case 3:
-        return quadRuleTria3pt;
-        break;
-    default:
-        std::cerr << " QuadratureRuleProvider: No quadrature rule can be furnished with such an exactness (line) ";
-        std::cerr << std::endl;
-        abort();
+        case 0:
+        case 1:
+            return quadRuleSeg1pt;
+            break;
+        case 2:
+            return quadRuleSeg2pt;
+            break;
+        case 3:
+            return quadRuleTria3pt;
+            break;
+        default:
+            std::cerr << " QuadratureRuleProvider: No quadrature rule can be furnished with such an exactness (line) ";
+            std::cerr << std::endl;
+            abort();
     };
 
     return quadRuleTria3pt;
@@ -366,12 +379,12 @@ provideExactnessLine(const UInt& exactness)
 
 const QuadratureRule&
 QuadratureRuleProvider::
-provideExactnessPoint(const UInt& exactness)
+provideExactnessPoint (const UInt& exactness)
 {
-    switch(exactness)
+    switch (exactness)
     {
-    default:
-        return quadRuleNode1pt;
+        default:
+            return quadRuleNode1pt;
     };
 }
 

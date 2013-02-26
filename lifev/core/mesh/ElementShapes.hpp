@@ -83,7 +83,7 @@ namespace LifeV
  *  @return the (local) ID of the corresponding point in the reversed GeoShape
  */
 template <typename GeoShapeType>
-inline ID reversePoint( ID const & pointId );
+inline ID reversePoint ( ID const& pointId );
 
 //                   *********** BASIS REFERENCE SHAPES ****************
 
@@ -109,7 +109,7 @@ enum ReferenceShapes
     @return the geometric dimension of the shape
     @sa ReferenceShapes
  */
-UInt shapeDimension(const ReferenceShapes& shape);
+UInt shapeDimension (const ReferenceShapes& shape);
 
 
 /*! @enum ReferenceGeometry
@@ -130,7 +130,8 @@ enum ReferenceGeometry
 //! @defgroup BasRefSha   Basis Reference Shapes
 
 //! @ingroup BasRefSha
-class nullShape{
+class nullShape
+{
 public:
     typedef nullShape GeoBShape;
 };
@@ -156,10 +157,10 @@ public:
     static const UInt S_numPeaks              = 0;     //!< Number of peaks
 
     //! @return the local ID of the j-th point of the i-th edge
-    static ID edgeToPoint( ID const& /*iEdge*/, ID const& /*jPoint*/ )
+    static ID edgeToPoint ( ID const& /*iEdge*/, ID const& /*jPoint*/ )
     {
         ERROR_MSG ( "edgeToPoint not implemented for geo Point elements." );
-        return static_cast<ID>(0);
+        return static_cast<ID> (0);
     }
 };
 
@@ -179,19 +180,31 @@ public:
     static const UInt S_numPeaks = 0;                //!< Number of peaks
 
     //! @return the local ID of the j-th point of the i-th edge
-    static ID edgeToPoint( ID const& /*iEdge*/, ID const& jPoint ) { return jPoint;}
+    static ID edgeToPoint ( ID const& /*iEdge*/, ID const& jPoint )
+    {
+        return jPoint;
+    }
 
     //! @return the local ID of the j-th point of the i-th facet
-    static ID facetToPoint( ID const& iFacet, ID const& /*jPoint*/ ) {return iFacet;}
+    static ID facetToPoint ( ID const& iFacet, ID const& /*jPoint*/ )
+    {
+        return iFacet;
+    }
 
-    static ID facetToRidge( ID const& /*iFacet*/, ID const& /*jRidge*/ ) {return NotAnId;}
+    static ID facetToRidge ( ID const& /*iFacet*/, ID const& /*jRidge*/ )
+    {
+        return NotAnId;
+    }
 
-    static ID facetToPeak( ID const& /*iFacet*/, ID const& /*jPeak*/ ) {return NotAnId;}
+    static ID facetToPeak ( ID const& /*iFacet*/, ID const& /*jPeak*/ )
+    {
+        return NotAnId;
+    }
 
-    static std::pair<ID, bool> faceToEdge( ID const& /*iFace*/, ID const& /*jEdge*/ )
+    static std::pair<ID, bool> faceToEdge ( ID const& /*iFace*/, ID const& /*jEdge*/ )
     {
         ERROR_MSG ( "FaceToEdge not implemented for geo Line elements." );
-        return std::make_pair( static_cast<ID>(0), true );
+        return std::make_pair ( static_cast<ID> (0), true );
     }
 };
 
@@ -211,17 +224,25 @@ public:
     static const UInt S_numPeaks = 0;                //!< Number of peaks
 
     //! @return the local ID of the j-th point of the i-th face
-    static ID faceToPoint( ID const& /*iFace*/, ID const& jPoint ) {return jPoint;};
+    static ID faceToPoint ( ID const& /*iFace*/, ID const& jPoint )
+    {
+        return jPoint;
+    };
 
     /*!
         @return a pair: the local numbering of the j-th edge on the i-th face, and
                 true if the orientation of the edge on the face is consistent
                 with that of the same edge on the element
     */
-    static std::pair<ID, bool> faceToEdge( ID const& /*iFace*/, ID const& jEdge ) {
-            return std::make_pair( jEdge, true ); }
+    static std::pair<ID, bool> faceToEdge ( ID const& /*iFace*/, ID const& jEdge )
+    {
+        return std::make_pair ( jEdge, true );
+    }
 
-    static ID facetToPeak( ID const& /*iFacet*/, ID const& /*jPeak*/ ) {return NotAnId;}
+    static ID facetToPeak ( ID const& /*iFacet*/, ID const& /*jPeak*/ )
+    {
+        return NotAnId;
+    }
 };
 
 
@@ -240,17 +261,25 @@ public:
     static const UInt S_numPeaks = 0;                //!< Number of peaks
 
     //! @return the local ID of the j-th point of the i-th face
-    static ID faceToPoint( ID const& /*iFace*/, ID const& jPoint ) {return jPoint;};
+    static ID faceToPoint ( ID const& /*iFace*/, ID const& jPoint )
+    {
+        return jPoint;
+    };
 
     /*!
         @return a pair: the local numbering of the j-th edge on the i-th face, and
                 true if the orientation of the edge on the face is consistent
                 with that of the same edge on the element
     */
-    static std::pair<ID, bool> faceToEdge( ID const& /*iFace*/, ID const& jEdge ) {
-            return std::make_pair( jEdge, true ); }
+    static std::pair<ID, bool> faceToEdge ( ID const& /*iFace*/, ID const& jEdge )
+    {
+        return std::make_pair ( jEdge, true );
+    }
 
-    static ID facetToPeak( ID const& /*iFacet*/, ID const& /*jPeak*/ ) {return NotAnId;}
+    static ID facetToPeak ( ID const& /*iFacet*/, ID const& /*jPeak*/ )
+    {
+        return NotAnId;
+    }
 };
 
 
@@ -273,7 +302,7 @@ public:
                 true if the orientation of the edge on the face is consistent
                 with that of the same edge on the element
      */
-    static std::pair<ID, bool> faceToEdge( ID const& iFace, ID const& jEdge );
+    static std::pair<ID, bool> faceToEdge ( ID const& iFace, ID const& jEdge );
 };
 
 
@@ -296,7 +325,7 @@ public:
                 true if the orientation of the edge on the face is consistent
                 with that of the same edge on the element
      */
-    static std::pair<ID, bool> faceToEdge( ID const& iFace, ID const& jEdge );
+    static std::pair<ID, bool> faceToEdge ( ID const& iFace, ID const& jEdge );
 
 };
 
@@ -324,7 +353,7 @@ class QuadraticHexa;
 //! @ingroup GeoShape
 //! A Geometric Shape
 class GeoPoint:
-public Point
+    public Point
 {
 public:
     //! @name Public Types
@@ -344,7 +373,7 @@ public:
 //! @ingroup GeoShape
 //! A Geometric Shape
 class LinearLine:
-public Line
+    public Line
 {
 public:
     //! @name Public Types
@@ -362,8 +391,9 @@ public:
 };
 //! Inverts a line
 template <>
-inline ID reversePoint<LinearLine>( ID const & pointId ){
-    static ID _rid[]={1,0};
+inline ID reversePoint<LinearLine> ( ID const& pointId )
+{
+    static ID _rid[] = {1, 0};
     return _rid[pointId];
 }
 
@@ -371,7 +401,7 @@ inline ID reversePoint<LinearLine>( ID const & pointId ){
 //! @ingroup GeoShape
 //! A Geometric Shape
 class QuadraticLine:
-public Line
+    public Line
 {
 public:
     //! @name Public Types
@@ -390,8 +420,9 @@ public:
 };
 
 template <>
-inline ID reversePoint<QuadraticLine>( ID const & pointId ){
-    static ID _rid[]={1,0,2};
+inline ID reversePoint<QuadraticLine> ( ID const& pointId )
+{
+    static ID _rid[] = {1, 0, 2};
     return _rid[pointId];
 }
 
@@ -399,7 +430,7 @@ inline ID reversePoint<QuadraticLine>( ID const & pointId ){
 //! @ingroup GeoShape
 //! A Geometric Shape
 class LinearTriangle:
-public Triangle
+    public Triangle
 {
 public:
     //! @name Public Types
@@ -417,20 +448,25 @@ public:
     static const UInt S_numPointsPerPeak = 0;   //!< Number of points per peak
 
     //! @return the local ID of the j-th point of the i-th edge
-    static ID edgeToPoint( ID const& iEdge, ID const& jPoint );
+    static ID edgeToPoint ( ID const& iEdge, ID const& jPoint );
 
     //! @return the local ID of the j-th point of the i-th facet
-    static ID facetToPoint( ID const& iFacet, ID const& jPoint )
-        {return edgeToPoint( iFacet, jPoint );}
+    static ID facetToPoint ( ID const& iFacet, ID const& jPoint )
+    {
+        return edgeToPoint ( iFacet, jPoint );
+    }
 
     //! @return the local ID of the j-th ridge of the i-th facet
-    static ID facetToRidge( ID const& iFacet, ID const& jRidge )
-        {return edgeToPoint(iFacet, jRidge);}
+    static ID facetToRidge ( ID const& iFacet, ID const& jRidge )
+    {
+        return edgeToPoint (iFacet, jRidge);
+    }
 };
 
 template <>
-inline ID reversePoint<LinearTriangle>( ID const & pointId ){
-    static ID _rid[]={1,0,2};
+inline ID reversePoint<LinearTriangle> ( ID const& pointId )
+{
+    static ID _rid[] = {1, 0, 2};
     return _rid[pointId];
 }
 
@@ -438,7 +474,7 @@ inline ID reversePoint<LinearTriangle>( ID const & pointId ){
 //! @ingroup GeoShape
 //! A Geometric Shape
 class QuadraticTriangle:
-public Triangle
+    public Triangle
 {
 public:
     //! @name Public Types
@@ -457,17 +493,22 @@ public:
 
 
     //! @return the local ID of the j-th point of the i-th edge
-    static ID edgeToPoint( ID const& iEdge, ID const& jPoint );
+    static ID edgeToPoint ( ID const& iEdge, ID const& jPoint );
     //! @return the local ID of the j-th point of the i-th facet
-    static ID facetToPoint( ID const& iFacet, ID const& jPoint )
-        {return edgeToPoint( iFacet, jPoint );}
-    static ID facetToRidge( ID const& iFacet, ID const& jRidge )
-        {return edgeToPoint(iFacet, jRidge);}
+    static ID facetToPoint ( ID const& iFacet, ID const& jPoint )
+    {
+        return edgeToPoint ( iFacet, jPoint );
+    }
+    static ID facetToRidge ( ID const& iFacet, ID const& jRidge )
+    {
+        return edgeToPoint (iFacet, jRidge);
+    }
 };
 
 template <>
-inline ID reversePoint<QuadraticTriangle>( ID const & pointId ){
-    static ID _rid[]={1,0,2,3,5,4};
+inline ID reversePoint<QuadraticTriangle> ( ID const& pointId )
+{
+    static ID _rid[] = {1, 0, 2, 3, 5, 4};
     return _rid[pointId];
 }
 
@@ -475,7 +516,7 @@ inline ID reversePoint<QuadraticTriangle>( ID const & pointId ){
 //! @ingroup GeoShape
 //! A Geometric Shape
 class LinearQuad:
-public Quad
+    public Quad
 {
 public:
     //! @name Public Types
@@ -494,21 +535,26 @@ public:
 
 
     //! @return the local ID of the j-th point of the i-th edge
-    static ID edgeToPoint( ID const& iEdge, ID const& jPoint );
+    static ID edgeToPoint ( ID const& iEdge, ID const& jPoint );
 
     //! @return the local ID of the j-th point of the i-th facet
-    static ID facetToPoint( ID const& iFacet, ID const& jPoint )
-        {return edgeToPoint( iFacet, jPoint );}
+    static ID facetToPoint ( ID const& iFacet, ID const& jPoint )
+    {
+        return edgeToPoint ( iFacet, jPoint );
+    }
 
     //! @return the local ID of the j-th point of the i-th ridge
-    static ID facetToRidge( ID const& iFacet, ID const& jRidge )
-        {return edgeToPoint(iFacet, jRidge);}
+    static ID facetToRidge ( ID const& iFacet, ID const& jRidge )
+    {
+        return edgeToPoint (iFacet, jRidge);
+    }
 };
 
 //! Specialization
 template <>
-inline ID reversePoint<LinearQuad>( ID const & pointId ){
-    static ID _rid[]={3,2,1,0};
+inline ID reversePoint<LinearQuad> ( ID const& pointId )
+{
+    static ID _rid[] = {3, 2, 1, 0};
     return _rid[pointId];
 }
 
@@ -516,7 +562,7 @@ inline ID reversePoint<LinearQuad>( ID const & pointId ){
 //! @ingroup GeoShape
 //! A Geometric Shape
 class QuadraticQuad:
-public Quad
+    public Quad
 {
 public:
     //! @name Public Types
@@ -534,20 +580,25 @@ public:
     static const UInt S_numPointsPerPeak = 0;   //!< Number of points per peak
 
     //! @return the local ID of the j-th point of the i-th edge
-    static ID edgeToPoint( ID const& iEdge, ID const& jPoint );
+    static ID edgeToPoint ( ID const& iEdge, ID const& jPoint );
 
     //! @return the local ID of the j-th point of the i-th facet
-    static ID facetToPoint( ID const& iFacet, ID const& jPoint )
-        {return edgeToPoint( iFacet, jPoint );}
+    static ID facetToPoint ( ID const& iFacet, ID const& jPoint )
+    {
+        return edgeToPoint ( iFacet, jPoint );
+    }
 
     //! @return the local ID of the j-th point of the i-th ridge
-    static ID facetToRidge( ID const& iFacet, ID const& jRidge )
-        {return edgeToPoint(iFacet, jRidge);}
+    static ID facetToRidge ( ID const& iFacet, ID const& jRidge )
+    {
+        return edgeToPoint (iFacet, jRidge);
+    }
 };
 //! Specialization
 template <>
-inline ID reversePoint<QuadraticQuad>( ID const & pointId ){
-    static ID _rid[]={3,2,1,0,6,5,4,7,8};
+inline ID reversePoint<QuadraticQuad> ( ID const& pointId )
+{
+    static ID _rid[] = {3, 2, 1, 0, 6, 5, 4, 7, 8};
     return _rid[pointId];
 }
 
@@ -555,7 +606,7 @@ inline ID reversePoint<QuadraticQuad>( ID const & pointId ){
 //! @ingroup GeoShape
 //! A Geometric Shape
 class LinearTetra:
-public Tetra
+    public Tetra
 {
 public:
     //! @name Public Types
@@ -574,28 +625,35 @@ public:
     static const UInt S_numPointsPerPeak = S_numPointsPerVertex;   //!< Number of points per peak
 
     //! @return the local ID of the j-th point of the i-th edge
-    static ID edgeToPoint( ID const& iEdge, ID const& jPoint );
+    static ID edgeToPoint ( ID const& iEdge, ID const& jPoint );
 
     //! @return the local ID of the j-th point of the i-th face
-    static ID faceToPoint( ID const& iFace, ID const& jPoint );
+    static ID faceToPoint ( ID const& iFace, ID const& jPoint );
 
     //! @return the local ID of the j-th point of the i-th facet
-    static ID facetToPoint( ID const& iFacet, ID const& jPoint )
-        {return faceToPoint( iFacet, jPoint );}
+    static ID facetToPoint ( ID const& iFacet, ID const& jPoint )
+    {
+        return faceToPoint ( iFacet, jPoint );
+    }
 
     //! @return the local ID of the j-th ridge of the i-th facet
-    static ID facetToRidge( ID const& iFacet, ID const& jRidge )
-        {return faceToEdge(iFacet, jRidge).first;}
+    static ID facetToRidge ( ID const& iFacet, ID const& jRidge )
+    {
+        return faceToEdge (iFacet, jRidge).first;
+    }
 
     //! @return the local ID of the j-th peak of the i-th facet
-    static ID facetToPeak( ID const& iFacet, ID const& jPeak )
-        {return faceToPoint(iFacet, jPeak);}
+    static ID facetToPeak ( ID const& iFacet, ID const& jPeak )
+    {
+        return faceToPoint (iFacet, jPeak);
+    }
 };
 
 //! Specialization
 template <>
-inline ID reversePoint<LinearTetra>( ID const & pointId ){
-    static ID _rid[]={1,0,2,3};
+inline ID reversePoint<LinearTetra> ( ID const& pointId )
+{
+    static ID _rid[] = {1, 0, 2, 3};
     return _rid[pointId];
 }
 
@@ -603,7 +661,7 @@ inline ID reversePoint<LinearTetra>( ID const & pointId ){
 //! @ingroup GeoShape
 //! A Geometric Shape
 class LinearTetraBubble:
-public Tetra
+    public Tetra
 {
 public:
     //! @name Public Types
@@ -622,27 +680,34 @@ public:
     static const UInt S_numPointsPerPeak = S_numPointsPerVertex;   //!< Number of points per peak
 
     //! @return the local ID of the j-th point of the i-th edge
-    static ID edgeToPoint( ID const& iEdge, ID const& jPoint );
+    static ID edgeToPoint ( ID const& iEdge, ID const& jPoint );
 
     //! @return the local ID of the j-th point of the i-th face
-    static ID faceToPoint( ID const& iFace, ID const& jPoint );
+    static ID faceToPoint ( ID const& iFace, ID const& jPoint );
 
     //! @return the local ID of the j-th point of the i-th facet
-    static ID facetToPoint( ID const& iFacet, ID const& jPoint )
-        {return faceToPoint( iFacet, jPoint );}
+    static ID facetToPoint ( ID const& iFacet, ID const& jPoint )
+    {
+        return faceToPoint ( iFacet, jPoint );
+    }
 
     //! @return the local ID of the j-th ridge of the i-th facet
-    static ID facetToRidge( ID const& iFacet, ID const& jRidge )
-        {return faceToEdge(iFacet, jRidge).first;}
+    static ID facetToRidge ( ID const& iFacet, ID const& jRidge )
+    {
+        return faceToEdge (iFacet, jRidge).first;
+    }
 
     //! @return the local ID of the j-th peak of the i-th facet
-    static ID facetToPeak( ID const& iFacet, ID const& jPeak )
-        {return faceToPoint(iFacet, jPeak);}
+    static ID facetToPeak ( ID const& iFacet, ID const& jPeak )
+    {
+        return faceToPoint (iFacet, jPeak);
+    }
 };
 
 template <>
-inline ID reversePoint<LinearTetraBubble>( ID const & pointId ){
-    static ID _rid[]={1,0,2,3,4};
+inline ID reversePoint<LinearTetraBubble> ( ID const& pointId )
+{
+    static ID _rid[] = {1, 0, 2, 3, 4};
     return _rid[pointId];
 }
 
@@ -650,7 +715,7 @@ inline ID reversePoint<LinearTetraBubble>( ID const & pointId ){
 //! @ingroup GeoShape
 //! A Geometric Shape
 class QuadraticTetra:
-public Tetra
+    public Tetra
 {
 public:
     //! @name Public Types
@@ -670,28 +735,35 @@ public:
 
 
     //! @return the local ID of the j-th point of the i-th edge
-    static ID edgeToPoint( ID const& iEdge, ID const& jPoint );
+    static ID edgeToPoint ( ID const& iEdge, ID const& jPoint );
 
     //! @return the local ID of the j-th point of the i-th face
-    static ID faceToPoint( ID const& iFace, ID const& jPoint );
+    static ID faceToPoint ( ID const& iFace, ID const& jPoint );
 
     //! @return the local ID of the j-th point of the i-th facet
-    static ID facetToPoint( ID const& iFacet, ID const& jPoint )
-        {return faceToPoint( iFacet, jPoint );}
+    static ID facetToPoint ( ID const& iFacet, ID const& jPoint )
+    {
+        return faceToPoint ( iFacet, jPoint );
+    }
 
     //! @return the local ID of the j-th ridge of the i-th facet
-    static ID facetToRidge( ID const& iFacet, ID const& jRidge )
-        {return faceToEdge(iFacet, jRidge).first;}
+    static ID facetToRidge ( ID const& iFacet, ID const& jRidge )
+    {
+        return faceToEdge (iFacet, jRidge).first;
+    }
 
     //! @return the local ID of the j-th peak of the i-th facet
-    static ID facetToPeak( ID const& iFacet, ID const& jPeak )
-        {return faceToPoint(iFacet, jPeak);}
+    static ID facetToPeak ( ID const& iFacet, ID const& jPeak )
+    {
+        return faceToPoint (iFacet, jPeak);
+    }
 
 };
 
 template <>
-inline ID reversePoint<QuadraticTetra>( ID const & pointId ){
-    static ID _rid[]={1,0,2,3,4,6,5,8,7,9};
+inline ID reversePoint<QuadraticTetra> ( ID const& pointId )
+{
+    static ID _rid[] = {1, 0, 2, 3, 4, 6, 5, 8, 7, 9};
     return _rid[pointId];
 }
 
@@ -699,7 +771,7 @@ inline ID reversePoint<QuadraticTetra>( ID const & pointId ){
 //! @ingroup GeoShape
 //! A Geometric Shape
 class LinearHexa:
-public Hexa
+    public Hexa
 {
 public:
     //! @name Public Types
@@ -719,27 +791,34 @@ public:
 
 
     //! @return the local ID of the j-th point of the i-th edge
-    static ID edgeToPoint( ID const& iEdge, ID const& jPoint );
+    static ID edgeToPoint ( ID const& iEdge, ID const& jPoint );
     //! @return the local ID of the j-th point of the i-th face
-    static ID faceToPoint( ID const& iFace, ID const& jPoint );
+    static ID faceToPoint ( ID const& iFace, ID const& jPoint );
 
     //! @return the local ID of the j-th point of the i-th facet
-    static ID facetToPoint( ID const& iFacet, ID const& jPoint )
-         {return faceToPoint( iFacet, jPoint );}
+    static ID facetToPoint ( ID const& iFacet, ID const& jPoint )
+    {
+        return faceToPoint ( iFacet, jPoint );
+    }
 
     //! @return the local ID of the j-th ridge of the i-th facet
-    static ID facetToRidge( ID const& iFacet, ID const& jRidge )
-         {return faceToEdge(iFacet, jRidge).first;}
+    static ID facetToRidge ( ID const& iFacet, ID const& jRidge )
+    {
+        return faceToEdge (iFacet, jRidge).first;
+    }
 
     //! @return the local ID of the j-th peak of the i-th facet
-    static ID facetToPeak( ID const& iFacet, ID const& jPeak )
-         {return faceToPoint(iFacet, jPeak);}
+    static ID facetToPeak ( ID const& iFacet, ID const& jPeak )
+    {
+        return faceToPoint (iFacet, jPeak);
+    }
 
 };
 
 template <>
-inline ID reversePoint<LinearHexa>( ID const & pointId ){
-    static ID _rid[]={3,2,1,0,7,6,5,4};
+inline ID reversePoint<LinearHexa> ( ID const& pointId )
+{
+    static ID _rid[] = {3, 2, 1, 0, 7, 6, 5, 4};
     return _rid[pointId];
 }
 
@@ -747,7 +826,7 @@ inline ID reversePoint<LinearHexa>( ID const & pointId ){
 //! @ingroup GeoShape
 //! A Geometric Shape
 class QuadraticHexa:
-public Hexa
+    public Hexa
 {
 public:
     //! @name Public Types
@@ -767,31 +846,39 @@ public:
 
 
     //! @return the local ID of the j-th point of the i-th edge
-    static ID edgeToPoint( ID const& iEdge, ID const& jPoint );
+    static ID edgeToPoint ( ID const& iEdge, ID const& jPoint );
 
     //! @return the local ID of the j-th point of the i-th face
-    static ID faceToPoint( ID const& iFace, ID const& jPoint );
+    static ID faceToPoint ( ID const& iFace, ID const& jPoint );
 
     //! @return the local ID of the j-th point of the i-th facet
-    static ID facetToPoint( ID const& iFacet, ID const& jPoint )
-         {return faceToPoint( iFacet, jPoint );}
+    static ID facetToPoint ( ID const& iFacet, ID const& jPoint )
+    {
+        return faceToPoint ( iFacet, jPoint );
+    }
 
     //! @return the local ID of the j-th ridge of the i-th facet
-    static ID facetToRidge( ID const& iFacet, ID const& jRidge )
-         {return faceToEdge(iFacet, jRidge).first;}
+    static ID facetToRidge ( ID const& iFacet, ID const& jRidge )
+    {
+        return faceToEdge (iFacet, jRidge).first;
+    }
 
     //! @return the local ID of the j-th peak of the i-th facet
-    static ID facetToPeak( ID const& iFacet, ID const& jPeak )
-         {return faceToPoint(iFacet, jPeak);}
+    static ID facetToPeak ( ID const& iFacet, ID const& jPeak )
+    {
+        return faceToPoint (iFacet, jPeak);
+    }
 
 };
 
 template <>
-inline ID reversePoint<QuadraticHexa>( ID const & pointId ){
-    static ID _rid[]={3,2,1,0,7,6,5,4,
-                     10,9,8,11,15,14,13,12,
-                     18,17,16,19,20,23,22,21,24,25,26};
-  return _rid[pointId];
+inline ID reversePoint<QuadraticHexa> ( ID const& pointId )
+{
+    static ID _rid[] = {3, 2, 1, 0, 7, 6, 5, 4,
+                        10, 9, 8, 11, 15, 14, 13, 12,
+                        18, 17, 16, 19, 20, 23, 22, 21, 24, 25, 26
+                       };
+    return _rid[pointId];
 }
 
 

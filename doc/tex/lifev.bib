@@ -43,7 +43,7 @@
 @article{Veneziani2012,
   author  = {Veneziani, A. and Villa, U.},
   title   = {{ALADINS: an ALgebraic splitting time ADaptive solver for
-                  the Incompressible Navier-Stokes equations}}, 
+                  the Incompressible Navier-Stokes equations}},
   journal = {Journal of Computational Physics},
   year    = {to appear},
   volume  = {},
@@ -70,7 +70,7 @@
 @article{Fernandez2005,
   author  = {Fernandez, M. A. and Moubachir, M.},
   title   = {{A Newton method using exact jacobians for solving
-                  fluid-structure coupling}}, 
+                  fluid-structure coupling}},
   journal = {Computers and Structures},
   year    = {2005},
   volume  = {83},
@@ -80,7 +80,7 @@
 
 @ARTICLE{DeparisDiscacciati2006,
   AUTHOR =       "Simone Deparis and Marco Discacciati and Gilles
-                  Fourestey and Alfio Quarteroni", 
+                  Fourestey and Alfio Quarteroni",
   TITLE =        "Fluid-structure algorithms based on
                   Steklov-Poincar&eacute; operators",
   JOURNAL =      "Comput. Methods Appl. Mech. Engrg.",
@@ -92,7 +92,7 @@
 
 @article{CrosettoEtAl2009,
 title = {Parallel Algorithms for Fluid-Structure Interaction Problems
-                  in Haemodynamics}, 
+                  in Haemodynamics},
 publisher = {SIAM},
 year = 2011,
 doi = {DOI:10.1137/090772836},
@@ -104,7 +104,7 @@ number = 4,
 pages = {1598-1622},
 journal = {SIAM J. on Scientific Computing},
 author = {Paolo Crosetto and  Simone Deparis and  Gilles Fourestey and
-                  Alfio Quarteroni}, 
+                  Alfio Quarteroni},
 url = {http://epubs.siam.org/sisc/resource/1/sjoce3/v33/i4/p1598_s1}
 }
 
@@ -176,7 +176,7 @@ author = "Crosetto, Paolo and  Reymond, Philippe and  Deparis, Simone and Kontax
 @article{Passerini2009,
   author  = {Passerini, Tiziano and de Luca, Mariarita and Formaggia,
                   Luca and Quarteroni, Alfio and Veneziani,
-                  Alessandro}, 
+                  Alessandro},
   title   = {{A 3D/1D geometrical multiscale model of cerebral
                   vasculature}},
   journal = {Journal of Engineering Mathematics},
@@ -186,11 +186,54 @@ author = "Crosetto, Paolo and  Reymond, Philippe and  Deparis, Simone and Kontax
   pages   = {319--330}
 }
 
+
+
+
+
+
+@UNPUBLISHED{BlancoMalossi2012,
+  AUTHOR =       "P. J. Blanco and S. Deparis and A. C. I. Malossi",
+  TITLE =        "On the continuity of mean total normal stress in geometrical multiscale cardiovascular problems",
+  note =         "In preparation",
+  year =         "2012"
+}
+
+@unpublished{BonnemainMalossi2012LVAD,
+  author =       "J. Bonnemain and A. C. I. Malossi and M. Lesinigo and S. Deparis and A. Quarteroni and L. K. von~Segesser",
+  title =        "Numerical simulation of left ventricular assist device implantations: comparing the ascending and the descending aorta cannulations",
+  note =         "Med. Eng. Phys.",
+  year =         "2013"
+}
+
+@INPROCEEDINGS{LassilaProceeding2011,
+  AUTHOR =       "T. Lassila and A. C. I. Malossi and M. Astorino and S. Deparis",
+  TITLE =        "Geometrical multiscale model of an idealized left ventricle with fluid-structure interaction effects coupled to a one-dimensional viscoelastic arterial network",
+  BOOKTITLE =    "Proceedings of the ECCOMAS Thematic International Conference on Simulation and Modeling of Biological Flows (SIMBIO)",
+  YEAR =         "2011",
+  MONTH =        "September",
+  address =      "Brussels, Belgium"
+}
+
+@unpublished{LassilaMalossi2012IdealLeftVentricle,
+  author =       "T. Lassila and A. C. I. Malossi and M. Stevanella and E. Votta and A. Redaelli and S. Deparis",
+  title =        "Multiscale fluid-structure interaction simulation of anatomically correct left ventricle fluid dynamics with fictitious elastic structure regularization",
+  note =         "Submitted",
+  year =         "2012"
+}
+
+
+@INPROCEEDINGS{MalossiProceeding2011,
+  AUTHOR =       "A. C. I. Malossi and P. J. Blanco and S. Deparis",
+  TITLE =        "Algorithms for the coupling of one-dimensional arterial networks with three-dimensional fluid-structure interaction problems",
+  BOOKTITLE =    "Proceedings of the ECCOMAS Thematic International Conference on Simulation and Modeling of Biological Flows (SIMBIO)",
+  YEAR =         "2011",
+  MONTH =        "September",
+  address =      "Brussels, Belgium"
+}
+
 @ARTICLE{Malossi2011Algorithms,
-  AUTHOR =       "A. C. I. Malossi and P. J. Blanco and S. Deparis and
-                  A. Quarteroni", 
-  TITLE =        "Algorithms for the partitioned solution of weakly
-                  coupled fluid models for cardiovascular flows", 
+  AUTHOR =       "A. C. I. Malossi and P. J. Blanco and S. Deparis and A. Quarteroni",
+  TITLE =        "Algorithms for the partitioned solution of weakly coupled fluid models for cardiovascular flows",
   JOURNAL =      "Int. J. Num. Meth. Biomed. Engng.",
   YEAR =         "2011",
   VOLUME =       "27",
@@ -198,31 +241,46 @@ author = "Crosetto, Paolo and  Reymond, Philippe and  Deparis, Simone and Kontax
   PAGES =        "2035--2057"
 }
 
-@UNPUBLISHED{Malossi2011Algorithms1D,
+@ARTICLE{Malossi2011Algorithms1D,
   AUTHOR =       "A. C. I. Malossi and P. J. Blanco and S. Deparis",
-  TITLE =        "A two-level time step technique for the partitioned
-                  solution of one-dimensional arterial networks", 
-  NOTE =         "Submitted",
-  YEAR =         "2011"
+  TITLE =        "A two-level time step technique for the partitioned solution of one-dimensional arterial networks",
+  JOURNAL =      "Comp. Meth. Appl. Mech. Engrg.",
+  YEAR =         "2012",
+  VOLUME =       "237--240",
+  PAGES =        "212--226"
 }
 
-@UNPUBLISHED{Malossi2011Algorithms3D1DFSI,
-  AUTHOR =       "A. C. I. Malossi and P. J. Blanco and P. Crosetto
-                  and S. Deparis and A. Quarteroni", 
-  TITLE =        "Implicit coupling of one-dimensional and
-                  three-dimensional blood-flow models with compliant
-                  vessels", 
-  NOTE =         "Submitted",
-  YEAR =         "2012"
+@ARTICLE{Malossi2011Algorithms3D1DFSI,
+  author =       "A. C. I. Malossi and P. J. Blanco and P. Crosetto and S. Deparis and A. Quarteroni",
+  title =        "Implicit coupling of one-dimensional and three-dimensional blood flow models with compliant vessels",
+  JOURNAL =      "SIAM J. Multiscale Model. Simul.",
+  note =         "To appear",
+  year =         "2013"
 }
 
-@UNPUBLISHED{Malossi2011Algorithms3D1DFSIAortaIliac,
-  AUTHOR =       "A. C. I. Malossi and J. Bonnemain",
-  TITLE =        "Numerical comparison of geometrical multiscale
-                  models for the simulation of arterial flows", 
-  NOTE =         "In preparation",
-  YEAR =         "2012"
+@unpublished{Malossi2011Algorithms3D1DFSIAortaIliac,
+  author =       "A. C. I. Malossi and J. Bonnemain",
+  title =        "Numerical comparison and calibration of geometrical multiscale models for the simulation of arterial flows",
+  note =         "Submitted",
+  year =         "2012"
 }
+
+@PHDTHESIS{Malossi-Thesis,
+  AUTHOR =       "A. C. I. Malossi",
+  TITLE =        "Partitioned Solution of Geometrical Multiscale Problems for the Cardiovascular System: Models, Algorithms, and Applications",
+  YEAR =         "2012",
+  school =       "{\'{E}}cole Polytechnique F{\'{e}}d{\'{e}}rale de Lausanne"
+}
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -232,7 +290,7 @@ author = "Crosetto, Paolo and  Reymond, Philippe and  Deparis, Simone and Kontax
 @article{Perego2009,
   author  = {Perego, Mauro and Veneziani, Alessandro},
   title   = {{An efficient generalization of the Rush-Larsen method
-                  for solving electro-physiology membrane equations}}, 
+                  for solving electro-physiology membrane equations}},
   journal = {Electronic Transactions on Numerical Analysis},
   year    = {2009},
   volume  = {35},
@@ -241,9 +299,9 @@ author = "Crosetto, Paolo and  Reymond, Philippe and  Deparis, Simone and Kontax
 
 @article{GerardoGiorda2009,
   author  = {Gerardo-Giorda, L and Mirabella, L and Nobile, F and Perego,
-                  M and Veneziani, Alessandro}, 
+                  M and Veneziani, Alessandro},
   title   = {{A model-based block-triangular preconditioner for the
-                  bidomain system in electrocardiology}}, 
+                  bidomain system in electrocardiology}},
   journal = {Journal Of Computational Physics},
   year    = {2009},
   volume  = {228},
@@ -262,7 +320,7 @@ author = "Crosetto, Paolo and  Reymond, Philippe and  Deparis, Simone and Kontax
 
 @ARTICLE{Rossi2011EM,
   AUTHOR =       "S. Rossi and R. Ruiz-Baier and L.F. Pavarino and
-                  A. Quarteroni", 
+                  A. Quarteroni",
   TITLE =        "Active strain and activation models in cardiac
                   electromechanics",
   JOURNAL =      "to appear in Proc. Appl. Math. Mech.",
@@ -275,7 +333,7 @@ author = "Crosetto, Paolo and  Reymond, Philippe and  Deparis, Simone and Kontax
 
 @article{Martin2005,
   author  = {Martin, Vincent and Clement, Francois and Decoene, Astrid
-                  and Gerbeau, Jean-Fr{\'e}d{\'e}ric}, 
+                  and Gerbeau, Jean-Fr{\'e}d{\'e}ric},
   title   = {{Parameter identification for a one-dimensional blood flow
                   model}},
   journal = {ESAIM: Proceedings},
@@ -286,7 +344,7 @@ author = "Crosetto, Paolo and  Reymond, Philippe and  Deparis, Simone and Kontax
 
 @article{Perego2011,
   author  = {Perego, Mauro and Veneziani, Alessandro and Vergara,
-                  Christian}, 
+                  Christian},
   title   = {{A variational approach for estimating the compliance of
                   the cardiovascular tissue: an inverse
                   fluid-structure interaction problem}},
@@ -299,10 +357,10 @@ author = "Crosetto, Paolo and  Reymond, Philippe and  Deparis, Simone and Kontax
 
 @article{DElia2012,
   author  = {D'Elia, Marta and Perego, Mauro and Veneziani,
-                  Alessandro}, 
+                  Alessandro},
   title   = {{A Variational Data Assimilation Procedure for the
                   Incompressible Navier-Stokes Equations in
-                  Hemodynamics}}, 
+                  Hemodynamics}},
   journal = {Journal of Scientific Computing},
   year    = {2012},
   volume  = {52},
@@ -318,7 +376,7 @@ author = "Crosetto, Paolo and  Reymond, Philippe and  Deparis, Simone and Kontax
 @article{DiPietro2009,
   author  = {Di Pietro, Daniele Antonio and Veneziani, Alessandro},
   title   = {{Expression templates implementation of continuous and
-                  discontinuous Galerkin methods}}, 
+                  discontinuous Galerkin methods}},
   journal = {Computing and Visualization in Science},
   year    = {2009},
   volume  = {12},
@@ -340,7 +398,7 @@ author = "Crosetto, Paolo and  Reymond, Philippe and  Deparis, Simone and Kontax
                   banding. {C}omputational fluid dynamics and clinical
                   correlations},
   journal = {European journal of cardio-thoracic surgery: official journal of
-	the European Association for Cardio-thoracic Surgery},
+    the European Association for Cardio-thoracic Surgery},
   year = {2006},
   volume = {29},
   pages = {93--9}
@@ -362,7 +420,7 @@ author = "Crosetto, Paolo and  Reymond, Philippe and  Deparis, Simone and Kontax
 @ARTICLE{Vergara2008,
   author  = {C Vergara and P Zunino},
   title   = {Multiscale Boundary Conditions for Drug Release from
-                  Cardiovascular Stents}, 
+                  Cardiovascular Stents},
   journal = {Multiscale Modeling {\&} Simulation},
   year    = {2008},
   pages   = {565--588}
@@ -381,7 +439,7 @@ author = "Crosetto, Paolo and  Reymond, Philippe and  Deparis, Simone and Kontax
 
 @article{Reymond2012,
   author = {Reymond, Philippe and Crosetto, Paolo and Deparis, Simone
-                  and Quarteroni, Alfio and Stergiopulos, Nikos}, 
+                  and Quarteroni, Alfio and Stergiopulos, Nikos},
   title = {{Physiological simulation of blood flow in the aorta:
                   Comparison of hemodynamic indices as predicted by
                   3-D FSI, 3-D rigid wall and 1-D models.}},
@@ -394,7 +452,7 @@ author = "Crosetto, Paolo and  Reymond, Philippe and  Deparis, Simone and Kontax
   author = {Mirabella, Lucia and Haggerty, Christopher M and
                   Passerini, Tiziano and Piccinelli, Marina and
                   Powell, Andrew J and Del Nido, Pedro J and
-                  Veneziani, Alessandro and Yoganathan, Ajit P}, 
+                  Veneziani, Alessandro and Yoganathan, Ajit P},
   title = {{Treatment planning for a TCPC test case: A numerical
                   investigation under rigid and moving wall
                   assumptions}},
@@ -425,7 +483,7 @@ author = "Crosetto, Paolo and  Reymond, Philippe and  Deparis, Simone and Kontax
                   Umberto and Veneziani, Alessandro and Sunderam,
                   Vaidy},
   title     = {{Experiences with target-Platform Heterogeneity in Clouds,
-                  Grids, and On Premise Resources}}, 
+                  Grids, and On Premise Resources}},
   booktitle = {2012 26th IEEE International Parallel and Distributed
                   Processing Symposium Workshops (IPDPSW)},
   year      = {2012},

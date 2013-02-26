@@ -43,10 +43,10 @@ namespace MeshUtility
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-GetCoordComponent::GetCoordComponent() : componentIndex( -1 )
+GetCoordComponent::GetCoordComponent() : componentIndex ( -1 )
 {}
 
-GetCoordComponent::GetCoordComponent( Int i ) : componentIndex( i )
+GetCoordComponent::GetCoordComponent ( Int i ) : componentIndex ( i )
 {}
 
 // ===================================================
@@ -56,25 +56,25 @@ void GetCoordComponent::operator() ( Real const& x, Real const& y, Real const& z
 {
     switch ( componentIndex )
     {
-    case( 0 ) :
-        ret[ 0 ] = x;
-        ret[ 1 ] = 0.0;
-        ret[ 2 ] = 0.0;
-        break;
-    case( 1 ) :
-        ret[ 0 ] = 0.0;
-        ret[ 1 ] = y;
-        ret[ 2 ] = 0.0;
-        break;
-    case( 2 ) :
-        ret[ 0 ] = 0.0;
-        ret[ 1 ] = 0.0;
-        ret[ 2 ] = z;
-        break;
-    default:
-        ret[ 0 ] = x;
-        ret[ 1 ] = y;
-        ret[ 2 ] = z;
+        case ( 0 ) :
+            ret[ 0 ] = x;
+            ret[ 1 ] = 0.0;
+            ret[ 2 ] = 0.0;
+            break;
+        case ( 1 ) :
+            ret[ 0 ] = 0.0;
+            ret[ 1 ] = y;
+            ret[ 2 ] = 0.0;
+            break;
+        case ( 2 ) :
+            ret[ 0 ] = 0.0;
+            ret[ 1 ] = 0.0;
+            ret[ 2 ] = z;
+            break;
+        default:
+            ret[ 0 ] = x;
+            ret[ 1 ] = y;
+            ret[ 2 ] = z;
     }
 }
 

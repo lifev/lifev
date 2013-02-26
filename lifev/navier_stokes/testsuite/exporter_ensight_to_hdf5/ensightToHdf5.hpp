@@ -45,7 +45,7 @@ public:
      */
     //@{
 
-//    typedef LifeV::Application super;
+    //    typedef LifeV::Application super;
 
     //@}
 
@@ -53,8 +53,8 @@ public:
      */
     //@{
 
-    EnsightToHdf5( int argc,
-                   char** argv );
+    EnsightToHdf5 ( int argc,
+                    char** argv );
 
     ~EnsightToHdf5()
     {}

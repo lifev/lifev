@@ -42,7 +42,8 @@
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/mesh/ElementShapes.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! MeshWriter - Short description of the class
 /*!
@@ -58,9 +59,9 @@ namespace MeshWriter
 template <typename Mesh>
 void writeMeshMedit  (std::string fname, Mesh& mesh )
 {
-    std::ofstream ofile( fname.c_str() );
+    std::ofstream ofile ( fname.c_str() );
 
-    ASSERT( ofile, "Error: Output file cannot be open" );
+    ASSERT ( ofile, "Error: Output file cannot be open" );
 
     ofile << "MeshVersionFormatted 1\n";
     ofile << "Dimension 3\n";
@@ -72,10 +73,10 @@ void writeMeshMedit  (std::string fname, Mesh& mesh )
 
     for ( UInt i = 0; i < nVertices; ++i )
     {
-        ofile << mesh.pointList( i ).x() << " "
-              << mesh.pointList( i ).y() << " "
-              << mesh.pointList( i ).z() << " "
-              << mesh.pointList( i ).markerID() << "\n";
+        ofile << mesh.pointList ( i ).x() << " "
+              << mesh.pointList ( i ).y() << " "
+              << mesh.pointList ( i ).z() << " "
+              << mesh.pointList ( i ).markerID() << "\n";
     }
     ofile << "\n";
 
@@ -83,14 +84,14 @@ void writeMeshMedit  (std::string fname, Mesh& mesh )
 
     switch ( faceShape_Type::S_shape )
     {
-    case QUAD:
-        ofile << "Quadrilaterals\n";
-        break;
-    case TRIANGLE:
-        ofile << "Triangles\n";
-        break;
-    default:
-        ERROR_MSG( "BdShape not implement in MEDIT writer" );
+        case QUAD:
+            ofile << "Quadrilaterals\n";
+            break;
+        case TRIANGLE:
+            ofile << "Triangles\n";
+            break;
+        default:
+            ERROR_MSG ( "BdShape not implement in MEDIT writer" );
     }
 
     UInt nBdF = mesh. numBFaces();
@@ -103,10 +104,10 @@ void writeMeshMedit  (std::string fname, Mesh& mesh )
     {
         for ( UInt i = 0; i < nVerticesPerFace; ++i )
         {
-            ofile << mesh.boundaryFace( k ).point( i ).id()+1
+            ofile << mesh.boundaryFace ( k ).point ( i ).id() + 1
                   << " ";
         }
-        ofile << mesh.boundaryFace( k ).markerID() << "\n";
+        ofile << mesh.boundaryFace ( k ).markerID() << "\n";
     }
     ofile << "\n";
 
@@ -114,14 +115,14 @@ void writeMeshMedit  (std::string fname, Mesh& mesh )
 
     switch ( volumeShape_Type::S_shape )
     {
-    case HEXA:
-        ofile << "Hexaedra\n";
-        break;
-    case TETRA:
-        ofile << "Tetrahedra\n";
-        break;
-    default:
-        ERROR_MSG( "Shape not implement in MEDIT writer" );
+        case HEXA:
+            ofile << "Hexaedra\n";
+            break;
+        case TETRA:
+            ofile << "Tetrahedra\n";
+            break;
+        default:
+            ERROR_MSG ( "Shape not implement in MEDIT writer" );
     }
 
     UInt nElements = mesh.numVolumes();
@@ -135,12 +136,12 @@ void writeMeshMedit  (std::string fname, Mesh& mesh )
     {
         for ( UInt i = 0; i < nVerticesPerElement; ++i )
         {
-            ielem =  mesh.volume( k ).point( i ).localId();
+            ielem =  mesh.volume ( k ).point ( i ).localId();
 
-            ofile << ielem+1
+            ofile << ielem + 1
                   << " ";
         }
-        ofile << mesh.volume( k ).markerID() << "\n";
+        ofile << mesh.volume ( k ).markerID() << "\n";
     }
     ofile.close();
 }

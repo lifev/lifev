@@ -119,7 +119,7 @@ public:
         @param VariableOne Description of the first variable
         @param VariableTwo Description of the second variable
      */
-    ExampleClass( first_Type& VariableOne, second_Type& VariableTwo );
+    ExampleClass ( first_Type& VariableOne, second_Type& VariableTwo );
 
     //! Copy constructor
     /*!
@@ -127,7 +127,7 @@ public:
         NOTE: short description is automatically added before this part.
         @param example ExampleClass
      */
-    ExampleClass( const ExampleClass& example );
+    ExampleClass ( const ExampleClass& example );
 
     //! Destructor
     ~ExampleClass();
@@ -146,7 +146,7 @@ public:
         @return Reference to a new ExampleClass with the same
                 content of ExampleClass example
      */
-    ExampleClass& operator=( const ExampleClass& example );
+    ExampleClass& operator= ( const ExampleClass& example );
 
     //@}
 
@@ -161,7 +161,7 @@ public:
         @param inputVariableOne Description of the first input variable
         @param inputVariableTwo Description of the second input variable
      */
-    void methodOne( first_Type& inputVariableOne, second_Type& inputVariableTwo );
+    void methodOne ( first_Type& inputVariableOne, second_Type& inputVariableTwo );
 
     //! Short description of this method
     /*!
@@ -175,7 +175,7 @@ public:
         List of things displayed in the class
         @param output specify the output format (std::cout by default)
      */
-    void showMe( std::ostream& output = std::cout ) const;
+    void showMe ( std::ostream& output = std::cout ) const;
 
     //@}
 
@@ -189,7 +189,7 @@ public:
         NOTE: short description is automatically added before this part.
         @param variableOne Description of the input variable
      */
-    void setVariableOne( const first_Type& variableOne );
+    void setVariableOne ( const first_Type& variableOne );
 
     //@}
 

@@ -73,10 +73,10 @@ public:
     //@{
 
     //! Simple constructor with a shared_ptr on the mesh
-	RequestLoopElement(const boost::shared_ptr<MeshType>& mesh) : M_mesh(mesh) {}
+    RequestLoopElement (const boost::shared_ptr<MeshType>& mesh) : M_mesh (mesh) {}
 
     //! Copy constructor
-	RequestLoopElement(const RequestLoopElement& loop) : M_mesh(loop.M_mesh) {}
+    RequestLoopElement (const RequestLoopElement& loop) : M_mesh (loop.M_mesh) {}
 
     //@}
 
@@ -85,7 +85,10 @@ public:
     //@{
 
     //! Getter for the mesh pointer
-	const boost::shared_ptr<MeshType>& mesh() const { return M_mesh; }
+    const boost::shared_ptr<MeshType>& mesh() const
+    {
+        return M_mesh;
+    }
 
     //@}
 
@@ -96,12 +99,12 @@ private:
     //@{
 
     //! No empty constructor
-	RequestLoopElement();
+    RequestLoopElement();
 
     //@}
 
     // Pointer on the mesh
-	boost::shared_ptr<MeshType> M_mesh;
+    boost::shared_ptr<MeshType> M_mesh;
 };
 
 
@@ -123,9 +126,9 @@ private:
  */
 template< typename MeshType >
 RequestLoopElement<MeshType>
-elements(const boost::shared_ptr<MeshType>& mesh)
+elements (const boost::shared_ptr<MeshType>& mesh)
 {
-	return RequestLoopElement<MeshType>(mesh);
+    return RequestLoopElement<MeshType> (mesh);
 }
 
 

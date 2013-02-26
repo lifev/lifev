@@ -28,33 +28,36 @@ class inspector
 public:
     virtual ~inspector() {}
 
-    virtual const char * name() const = 0; // example: "tab-check"
-    virtual const char * desc() const = 0; // example: "verify no tabs"
+    virtual const char* name() const = 0;  // example: "tab-check"
+    virtual const char* desc() const = 0;  // example: "verify no tabs"
 
     // always called:
-    virtual void inspect(
-        const string & library_name, // "filesystem"
-        const path & full_path ) {}  // "c:/foo/boost/filesystem/path.hpp"
+    virtual void inspect (
+        const string& library_name,  // "filesystem"
+        const path& full_path ) {}   // "c:/foo/boost/filesystem/path.hpp"
 
     // called only for registered leaf() signatures:
-    virtual void inspect(
-        const string & library_name, // "filesystem"
-        const path & full_path,      // "c:/foo/boost/filesystem/path.hpp"
-        const string & contents ) {} // contents of file
+    virtual void inspect (
+        const string& library_name,  // "filesystem"
+        const path& full_path,       // "c:/foo/boost/filesystem/path.hpp"
+        const string& contents ) {}  // contents of file
 
     // called after all paths visited, but still in time to call error():
     virtual void close() {}
 
     // callback used by constructor to register leaf() signature.
     // Signature can be a full file name (Jamfile) or partial (.cpp)
-    void register_signature( const string & signature );
-    const string_set & signatures() const { return m_signatures; }
+    void register_signature ( const string& signature );
+    const string_set& signatures() const
+    {
+        return m_signatures;
+    }
 
     // report error callback (from inspect(), close() ):
-    void error(
-        const string & library_name,
-        const path & full_path,
-        const string & msg );
+    void error (
+        const string& library_name,
+        const path& full_path,
+        const string& msg );
 
 private:
     string_set m_signatures;
@@ -76,18 +79,18 @@ public:
     hypertext_inspector();
 };
 
-inline string relative_to( const path & src_arg, const path & base_arg )
+inline string relative_to ( const path& src_arg, const path& base_arg )
 {
-    path src( src_arg );
+    path src ( src_arg );
     src.normalize();
-    path base( base_arg );
+    path base ( base_arg );
     base.normalize();
-    string::size_type pos( base.string().size() );
-    return src.string().substr(
+    string::size_type pos ( base.string().size() );
+    return src.string().substr (
                pos + ( pos < src.string().size() ? 1 : 0 ) );
 }
 
-string impute_library( const path & full_dir_path );
+string impute_library ( const path& full_dir_path );
 
 }
 }

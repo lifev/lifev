@@ -64,7 +64,7 @@ namespace ExpressionAssembly
   required to work within the Evaluation trees.
  */
 template <UInt spaceDim>
-class EvaluationDphiJ<3,spaceDim>
+class EvaluationDphiJ<3, spaceDim>
 {
 public:
 
@@ -96,18 +96,18 @@ public:
     //@{
 
     //! Empty constructor
-    EvaluationDphiJ(){}
+    EvaluationDphiJ() {}
 
     //! Copy constructor
-    EvaluationDphiJ(const EvaluationDphiJ& provider)
-        : M_valuesPtr(provider.M_valuesPtr)
+    EvaluationDphiJ (const EvaluationDphiJ& provider)
+        : M_valuesPtr (provider.M_valuesPtr)
     {}
 
     //! Expression-based constructor
-    explicit EvaluationDphiJ(const ExpressionDphiJ& /*expression*/) {}
+    explicit EvaluationDphiJ (const ExpressionDphiJ& /*expression*/) {}
 
     //! Destructor
-    ~EvaluationDphiJ(){}
+    ~EvaluationDphiJ() {}
 
     //@}
 
@@ -116,10 +116,10 @@ public:
     //@{
 
     //! Do nothing internal update
-    void update(const UInt& /*iElement*/){}
+    void update (const UInt& /*iElement*/) {}
 
     //! Display method
-    static void display( std::ostream& out = std::cout)
+    static void display ( std::ostream& out = std::cout)
     {
         out << "dphi_j[3][" << spaceDim << "]";
     }
@@ -132,21 +132,21 @@ public:
 
     //! Do nothing setter for the global current FE
     template< typename CFEType >
-    void setGlobalCFE(const CFEType* /*globalCFE*/){}
+    void setGlobalCFE (const CFEType* /*globalCFE*/) {}
 
     //! Do nothing setter for the test current FE
     template< typename CFEType >
-    void setTestCFE(const CFEType* /*testCFE*/){}
+    void setTestCFE (const CFEType* /*testCFE*/) {}
 
     //! Setter for the solution current FE
     template< typename CFEType >
-    void setSolutionCFE(const CFEType* solutionCFE)
+    void setSolutionCFE (const CFEType* solutionCFE)
     {
-        M_valuesPtr = &(solutionCFE->M_dphi);
+        M_valuesPtr = & (solutionCFE->M_dphi);
     }
 
     //! Do nothing setter for the quadrature rule
-    void setQuadrature(const QuadratureRule&){}
+    void setQuadrature (const QuadratureRule&) {}
 
     //@}
 
@@ -155,9 +155,9 @@ public:
     //@{
 
     //! Getter for the value for a matrix
-    const return_Type& value_qij(const UInt& q, const UInt& /*i*/, const UInt& j) const
+    const return_Type& value_qij (const UInt& q, const UInt& /*i*/, const UInt& j) const
     {
-        return (*M_valuesPtr)[q][j];
+        return (*M_valuesPtr) [q][j];
     }
 
     //@}
@@ -165,19 +165,19 @@ public:
 private:
 
     //! Pointer to the data
-    std::vector< std::vector < return_Type > > const * M_valuesPtr;
+    std::vector< std::vector < return_Type > > const* M_valuesPtr;
 
 };
 
 
 template<UInt spaceDim>
-const flag_Type EvaluationDphiJ<3,spaceDim>::S_globalUpdateFlag=ET_UPDATE_NONE;
+const flag_Type EvaluationDphiJ<3, spaceDim>::S_globalUpdateFlag = ET_UPDATE_NONE;
 
 template<UInt spaceDim>
-const flag_Type EvaluationDphiJ<3,spaceDim>::S_testUpdateFlag=ET_UPDATE_NONE;
+const flag_Type EvaluationDphiJ<3, spaceDim>::S_testUpdateFlag = ET_UPDATE_NONE;
 
 template<UInt spaceDim>
-const flag_Type EvaluationDphiJ<3,spaceDim>::S_solutionUpdateFlag=ET_UPDATE_DPHI;
+const flag_Type EvaluationDphiJ<3, spaceDim>::S_solutionUpdateFlag = ET_UPDATE_DPHI;
 
 
 //! Evaluation of the basis function dphi_j in the case of a scalar FE.
@@ -190,15 +190,15 @@ const flag_Type EvaluationDphiJ<3,spaceDim>::S_solutionUpdateFlag=ET_UPDATE_DPHI
   required to work within the Evaluation trees.
  */
 template <UInt spaceDim>
-class EvaluationDphiJ<1,spaceDim>
+class EvaluationDphiJ<1, spaceDim>
 {
 public:
 
-	//! @name Public Types
+    //! @name Public Types
     //@{
 
     //! The type of the values returned by this class
-	typedef VectorSmall<spaceDim> return_Type;
+    typedef VectorSmall<spaceDim> return_Type;
 
     //@}
 
@@ -207,13 +207,13 @@ public:
     //@{
 
     //! Flag for the global current FE
-	const static flag_Type S_globalUpdateFlag;
+    const static flag_Type S_globalUpdateFlag;
 
     //! Flag for the test current FE
-	const static flag_Type S_testUpdateFlag;
+    const static flag_Type S_testUpdateFlag;
 
     //! Flag for the solution current FE
-	const static flag_Type S_solutionUpdateFlag;
+    const static flag_Type S_solutionUpdateFlag;
 
     //@}
 
@@ -221,19 +221,19 @@ public:
     //! @name Constructors, destructor
     //@{
 
-	//! Empty constructor
-	EvaluationDphiJ(){}
+    //! Empty constructor
+    EvaluationDphiJ() {}
 
-	//! Copy constructor
-	EvaluationDphiJ(const EvaluationDphiJ& provider)
-        : M_valuesPtr(provider.M_valuesPtr)
+    //! Copy constructor
+    EvaluationDphiJ (const EvaluationDphiJ& provider)
+        : M_valuesPtr (provider.M_valuesPtr)
     {}
 
-	//! Expression-based constructor
-	explicit EvaluationDphiJ(const ExpressionDphiJ& /*expression*/) {}
+    //! Expression-based constructor
+    explicit EvaluationDphiJ (const ExpressionDphiJ& /*expression*/) {}
 
     //! Destructor
-    ~EvaluationDphiJ(){}
+    ~EvaluationDphiJ() {}
 
     //@}
 
@@ -242,10 +242,10 @@ public:
     //@{
 
     //! Do nothing internal update
-	void update(const UInt& /*iElement*/){}
+    void update (const UInt& /*iElement*/) {}
 
     //! Display method
-	static void display( std::ostream& out = std::cout)
+    static void display ( std::ostream& out = std::cout)
     {
         out << "dphi_j[" << spaceDim << "]";
     }
@@ -257,22 +257,22 @@ public:
     //@{
 
     //! Do nothing setter for the global current FE
-	template< typename CFEType >
-	void setGlobalCFE(const CFEType* /*globalCFE*/){}
+    template< typename CFEType >
+    void setGlobalCFE (const CFEType* /*globalCFE*/) {}
 
     //! Do nothing setter for the test current FE
-	template< typename CFEType >
-	void setTestCFE(const CFEType* /*testCFE*/){}
+    template< typename CFEType >
+    void setTestCFE (const CFEType* /*testCFE*/) {}
 
     //! Setter for the solution current FE
-	template< typename CFEType >
-	void setSolutionCFE(const CFEType* solutionCFE)
+    template< typename CFEType >
+    void setSolutionCFE (const CFEType* solutionCFE)
     {
-        M_valuesPtr = &(solutionCFE->M_dphi);
+        M_valuesPtr = & (solutionCFE->M_dphi);
     }
 
     //! Do nothing setter for the quadrature rule
-	void setQuadrature(const QuadratureRule&){}
+    void setQuadrature (const QuadratureRule&) {}
 
     //@}
 
@@ -281,9 +281,9 @@ public:
     //@{
 
     //! Getter for the value for a matrix
-	const return_Type& value_qij(const UInt& q, const UInt& /*i*/, const UInt& j) const
-	{
-        return (*M_valuesPtr)[q][j];
+    const return_Type& value_qij (const UInt& q, const UInt& /*i*/, const UInt& j) const
+    {
+        return (*M_valuesPtr) [q][j];
     }
 
     //@}
@@ -291,19 +291,19 @@ public:
 private:
 
     //! Pointer to the data
-	std::vector< std::vector < VectorSmall<spaceDim> > > const * M_valuesPtr;
+    std::vector< std::vector < VectorSmall<spaceDim> > > const* M_valuesPtr;
 
 };
 
 
 template<UInt spaceDim>
-const flag_Type EvaluationDphiJ<1,spaceDim>::S_globalUpdateFlag=ET_UPDATE_NONE;
+const flag_Type EvaluationDphiJ<1, spaceDim>::S_globalUpdateFlag = ET_UPDATE_NONE;
 
 template<UInt spaceDim>
-const flag_Type EvaluationDphiJ<1,spaceDim>::S_testUpdateFlag=ET_UPDATE_NONE;
+const flag_Type EvaluationDphiJ<1, spaceDim>::S_testUpdateFlag = ET_UPDATE_NONE;
 
 template<UInt spaceDim>
-const flag_Type EvaluationDphiJ<1,spaceDim>::S_solutionUpdateFlag=ET_UPDATE_DPHI;
+const flag_Type EvaluationDphiJ<1, spaceDim>::S_solutionUpdateFlag = ET_UPDATE_DPHI;
 
 } // Namespace ExpressionAssembly
 

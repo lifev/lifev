@@ -67,7 +67,7 @@ std::string success = "OK     ";
 std::string failed  = "FAILED ";
 
 inline std::string
-check( const bool& expression )
+check ( const bool& expression )
 {
     if ( expression )
     {
@@ -79,18 +79,18 @@ check( const bool& expression )
 }
 
 Int
-main( Int argc, char** argv )
+main ( Int argc, char** argv )
 {
 #ifdef HAVE_MPI
     std::cout << "MPI Initialization" << std::endl;
-    MPI_Init( &argc, &argv );
+    MPI_Init ( &argc, &argv );
 #endif
 
     std::string expression;
     Real result;
     Real tolerance = 1e-15;
 
-    std::cout << std::setprecision(30) << std::endl;
+    std::cout << std::setprecision (30) << std::endl;
 
     // Initialization of the parser
     Parser parser;
@@ -99,138 +99,138 @@ main( Int argc, char** argv )
 
     // TEST 0:
     expression = "-sqrt(4)+1*2"; // = 0
-    parser.setString(expression);
+    parser.setString (expression);
     result = parser.evaluate();
-    std::cout << "TEST  0:  " << check( std::fabs(result - 0) > tolerance )
+    std::cout << "TEST  0:  " << check ( std::fabs (result - 0) > tolerance )
               << expression << " = " << result << std::endl;
 
     // TEST 1:
     expression = "(1+1)/(2+2)"; // = 0.5
-    parser.setString(expression);
+    parser.setString (expression);
     result = parser.evaluate();
 
-    std::cout << "TEST  1:  " << check( std::abs(result - 0.5) > tolerance )
+    std::cout << "TEST  1:  " << check ( std::abs (result - 0.5) > tolerance )
               << expression << " = " << result << std::endl;
 
     // TEST 2:
     expression = "1-2-3+4*5-6-7+8*9+1"; // = 76
-    parser.setString(expression);
+    parser.setString (expression);
     result = parser.evaluate();
-    std::cout << "TEST  2:  " << check( std::abs(result - 76) > tolerance )
+    std::cout << "TEST  2:  " << check ( std::abs (result - 76) > tolerance )
               << expression << " = " << result << std::endl;;
 
     // TEST 3:
     expression = "-(1+1)+(250+250+(-2))"; // = 496
-    parser.setString(expression);
+    parser.setString (expression);
     result = parser.evaluate();
-    std::cout << "TEST  3:  " << check( std::abs(result - 496) > tolerance )
+    std::cout << "TEST  3:  " << check ( std::abs (result - 496) > tolerance )
               << expression << " = " << result << std::endl;
 
     // TEST 4:
     expression = "(0.8 > 0.9)"; // = 0
-    parser.setString(expression);
+    parser.setString (expression);
     result = parser.evaluate();
-    std::cout << "TEST  4:  " << check( std::abs(result - 0) > tolerance )
+    std::cout << "TEST  4:  " << check ( std::abs (result - 0) > tolerance )
               << expression << " = " << result << std::endl;
 
     // TEST 5:
     expression = "(0.800000000000000 <= 0.8)"; // = 1
-    parser.setString(expression);
+    parser.setString (expression);
     result = parser.evaluate();
-    std::cout << "TEST  5:  " << check( std::abs(result - 1) > tolerance )
+    std::cout << "TEST  5:  " << check ( std::abs (result - 1) > tolerance )
               << expression << " = " << result << std::endl;
 
     // TEST 6:
     expression = "sin(3/4*pi) * -sin(3/4*pi) + -(cos(3/4*pi))^2"; // = -1
-    parser.setString(expression);
+    parser.setString (expression);
     result = parser.evaluate();
-    std::cout << "TEST  6:  " << check( std::abs(result - -1) > tolerance )
+    std::cout << "TEST  6:  " << check ( std::abs (result - -1) > tolerance )
               << expression << " = " << result << std::endl;
 
     // TEST 7:
     expression = "144^0.5 * sqrt(144)"; // = 144
-    parser.setString(expression);
+    parser.setString (expression);
     result = parser.evaluate();
-    std::cout << "TEST  7:  " << check( std::abs(result - 144) > tolerance )
+    std::cout << "TEST  7:  " << check ( std::abs (result - 144) > tolerance )
               << expression << " = " << result << std::endl;
 
     // TEST 8:
     expression = "abc = -2^3^-3; abc"; // = -0.001953125
-    parser.setString(expression);
+    parser.setString (expression);
     result = parser.evaluate();
-    std::cout << "TEST  8:  " << check( std::abs(result - -0.001953125) > tolerance )
+    std::cout << "TEST  8:  " << check ( std::abs (result - -0.001953125) > tolerance )
               << expression << " = " << result << std::endl;
     // TEST 9:
     expression = "c=2; [0., c, c*c, c*c*c]"; // (0, 2, 4, 8)
-    parser.setString(expression);
-    std::cout << "TEST  9:  " << check( std::abs( parser.evaluate(0) - 0 ) > tolerance
-                                     || std::abs( parser.evaluate(1) - 2 ) > tolerance
-                                     || std::abs( parser.evaluate(2) - 4 ) > tolerance
-                                     || std::abs( parser.evaluate(3) - 8 ) > tolerance )
-              << expression << " = [" << parser.evaluate(0) << ", "
-                                      << parser.evaluate(1) << ", "
-                                      << parser.evaluate(2) << ", "
-                                      << parser.evaluate(3) << "]" << std::endl;
+    parser.setString (expression);
+    std::cout << "TEST  9:  " << check ( std::abs ( parser.evaluate (0) - 0 ) > tolerance
+                                         || std::abs ( parser.evaluate (1) - 2 ) > tolerance
+                                         || std::abs ( parser.evaluate (2) - 4 ) > tolerance
+                                         || std::abs ( parser.evaluate (3) - 8 ) > tolerance )
+              << expression << " = [" << parser.evaluate (0) << ", "
+              << parser.evaluate (1) << ", "
+              << parser.evaluate (2) << ", "
+              << parser.evaluate (3) << "]" << std::endl;
 
     // TEST 10:
     expression = "[0, 0, -(x^2)+y^2]";
-    parser.setString(expression);
-    parser.setVariable("x", 1);
-    parser.setVariable("y", 2); // (0, 0, -5)
-    std::cout << "TEST 10a: " << check( std::abs( parser.evaluate(0) - 0 ) > tolerance ||
-                                        std::abs( parser.evaluate(1) - 0 ) > tolerance ||
-                                        std::abs( parser.evaluate(2) - 3 ) > tolerance )
+    parser.setString (expression);
+    parser.setVariable ("x", 1);
+    parser.setVariable ("y", 2); // (0, 0, -5)
+    std::cout << "TEST 10a: " << check ( std::abs ( parser.evaluate (0) - 0 ) > tolerance ||
+                                         std::abs ( parser.evaluate (1) - 0 ) > tolerance ||
+                                         std::abs ( parser.evaluate (2) - 3 ) > tolerance )
               << "x = " << 1 << ", y = " << 2 << " ==> "
-              << expression << " = [" << parser.evaluate(0) << ", "
-                                      << parser.evaluate(1) << ", "
-                                      << parser.evaluate(2) << "]" << std::endl;
+              << expression << " = [" << parser.evaluate (0) << ", "
+              << parser.evaluate (1) << ", "
+              << parser.evaluate (2) << "]" << std::endl;
 
 
-    parser.setString(expression);
-    parser.setVariable("x", 4);
-    parser.setVariable("y", 5); // (0, 0, -41)
-    std::cout << "TEST 10b: " << check( std::abs( parser.evaluate(0) - 0 ) > tolerance ||
-                                        std::abs( parser.evaluate(1) - 0 ) > tolerance ||
-                                        std::abs( parser.evaluate(2) - 9 ) > tolerance )
+    parser.setString (expression);
+    parser.setVariable ("x", 4);
+    parser.setVariable ("y", 5); // (0, 0, -41)
+    std::cout << "TEST 10b: " << check ( std::abs ( parser.evaluate (0) - 0 ) > tolerance ||
+                                         std::abs ( parser.evaluate (1) - 0 ) > tolerance ||
+                                         std::abs ( parser.evaluate (2) - 9 ) > tolerance )
               << "x = " << 4 << ", y = " << 5 << " ==> "
-              << expression << " = [" << parser.evaluate(0) << ", "
-                                      << parser.evaluate(1) << ", "
-                                      << parser.evaluate(2) << "]" << std::endl;
+              << expression << " = [" << parser.evaluate (0) << ", "
+              << parser.evaluate (1) << ", "
+              << parser.evaluate (2) << "]" << std::endl;
 
     std::cout << std::endl << "TEST ENDS SUCCESFULLY" << std::endl;
 
     // PERFORMANCE TEST
-//    LifeChrono chronoParser;
-//    LifeChrono chronoReference;
-//
-//    expression = "sqrt(((index+pi)*2)^3)"; //We test ONE complex expression containing different operations
-//    parser.setString(expression);
-//
-//    UInt nEvaluations = 1000000; // 1 Million
-//    Real solution;
-//
-//    chronoParser.start();
-//    for (UInt i = 0 ; i < nEvaluations ; ++i)
-//    {
-//        parser.setVariable("index", i);
-//        solution = parser.evaluate();
-//    }
-//    chronoParser.stop();
-//
-//    chronoReference.start();
-//    for (UInt i = 0 ; i < nEvaluations ; ++i)
-//    {
-//        solution = std::sqrt( std::pow( ( i + M_PI )*2, 3 ) );
-//    }
-//    chronoReference.stop();
-//
-//    std::cout << std::endl << "Total time for " << nEvaluations << " evaluations of expression f=" << expression << " --> " << chronoParser.diff() << " s" << std::endl;
-//    std::cout << std::endl << "Reference time " << chronoReference.diff() << " s" << std::endl;
+    //    LifeChrono chronoParser;
+    //    LifeChrono chronoReference;
+    //
+    //    expression = "sqrt(((index+pi)*2)^3)"; //We test ONE complex expression containing different operations
+    //    parser.setString(expression);
+    //
+    //    UInt nEvaluations = 1000000; // 1 Million
+    //    Real solution;
+    //
+    //    chronoParser.start();
+    //    for (UInt i = 0 ; i < nEvaluations ; ++i)
+    //    {
+    //        parser.setVariable("index", i);
+    //        solution = parser.evaluate();
+    //    }
+    //    chronoParser.stop();
+    //
+    //    chronoReference.start();
+    //    for (UInt i = 0 ; i < nEvaluations ; ++i)
+    //    {
+    //        solution = std::sqrt( std::pow( ( i + M_PI )*2, 3 ) );
+    //    }
+    //    chronoReference.stop();
+    //
+    //    std::cout << std::endl << "Total time for " << nEvaluations << " evaluations of expression f=" << expression << " --> " << chronoParser.diff() << " s" << std::endl;
+    //    std::cout << std::endl << "Reference time " << chronoReference.diff() << " s" << std::endl;
 
 #ifdef HAVE_MPI
     std::cout << std::endl << "MPI Finalization" << std::endl;
     MPI_Finalize();
 #endif
 
-    return( EXIT_FLAG );
+    return ( EXIT_FLAG );
 }

@@ -59,17 +59,19 @@
 
 using namespace LifeV;
 
-Int main( Int argc, char** argv )
+Int main ( Int argc, char** argv )
 {
     //! Initializing Epetra communicator
-    MPI_Init(&argc, &argv);
-    Epetra_MpiComm Comm(MPI_COMM_WORLD);
+    MPI_Init (&argc, &argv);
+    Epetra_MpiComm Comm (MPI_COMM_WORLD);
     if ( Comm.MyPID() == 0 )
+    {
         cout << "% using MPI" << endl;
-    Heart heart( argc, argv );
+    }
+    Heart heart ( argc, argv );
     heart.run();
 
     //! Finalizing Epetra communicator
     MPI_Finalize();
-    return( EXIT_SUCCESS );
+    return ( EXIT_SUCCESS );
 }

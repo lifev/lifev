@@ -59,8 +59,8 @@
     @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
  */
 class impes
-//     :
-//     public LifeV::Application
+    //     :
+    //     public LifeV::Application
 {
 public:
 
@@ -68,8 +68,8 @@ public:
      */
     //@{
 
-    impes( int argc,
-           char** argv );
+    impes ( int argc,
+            char** argv );
 
     ~impes()
     {}

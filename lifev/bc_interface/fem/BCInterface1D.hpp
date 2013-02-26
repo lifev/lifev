@@ -127,7 +127,7 @@ public:
     //@{
 
     //! Constructor
-    explicit BCInterface1D();
+    explicit BCInterface1D() : bcInterface_Type(), M_data() {}
 
     //! Destructor
     virtual ~BCInterface1D() {}
@@ -144,9 +144,9 @@ public:
      * @param dataSection section in the data file
      * @param name name of the boundary condition
      */
-    void readBC( const std::string& fileName, const std::string& dataSection, const std::string& name )
+    void readBC ( const std::string& fileName, const std::string& dataSection, const std::string& name )
     {
-        M_data.readBC( fileName, dataSection, name );
+        M_data.readBC ( fileName, dataSection, name );
     }
 
     //! Insert the current boundary condition in the BChandler
@@ -166,9 +166,9 @@ public:
      * @param base base of the condition
      */
     template< class BCBaseType >
-    void setBC( const OneDFSI::bcSide_Type& bcSide, const OneDFSI::bcLine_Type& bcLine, const OneDFSI::bcType_Type& bcType, const BCBaseType& base )
+    void setBC ( const OneDFSI::bcSide_Type& bcSide, const OneDFSI::bcLine_Type& bcLine, const OneDFSI::bcType_Type& bcType, const BCBaseType& base )
     {
-        this->M_handler->setBC( bcSide, bcLine, bcType, base );
+        this->M_handler->setBC ( bcSide, bcLine, bcType, base );
     }
 
     //@}
@@ -182,13 +182,13 @@ public:
      * @param flux flux
      * @param source source
      */
-    void setFluxSource( const fluxPtr_Type& flux, const sourcePtr_Type& source );
+    void setFluxSource ( const fluxPtr_Type& flux, const sourcePtr_Type& source );
 
     //! Set the solution for the members that need it
     /*!
      * @param solution solution
      */
-    void setSolution( const solutionPtr_Type& solution );
+    void setSolution ( const solutionPtr_Type& solution );
 
     //@}
 
@@ -200,7 +200,10 @@ public:
     /*!
      * @return the data container
      */
-    data_Type& dataContainer() { return M_data; }
+    data_Type& dataContainer()
+    {
+        return M_data;
+    }
 
     //@}
 
@@ -209,9 +212,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    BCInterface1D( const BCInterface1D& interface1D );
+    BCInterface1D ( const BCInterface1D& interface1D );
 
-    BCInterface1D& operator=( const BCInterface1D& interface1D );
+    BCInterface1D& operator= ( const BCInterface1D& interface1D );
 
     //@}
 
@@ -220,31 +223,16 @@ private:
     //@{
 
     template< class BCInterfaceBaseType >
-    void createFunction( std::vector< boost::shared_ptr< BCInterfaceBaseType > >& baseVector );
+    void createFunction ( std::vector< boost::shared_ptr< BCInterfaceBaseType > >& baseVector );
 
     template< class BCBaseType >
-    void addBcToHandler( BCBaseType& base );
+    void addBcToHandler ( BCBaseType& base );
 
     //@}
 
     // Data
     data_Type                       M_data;
 };
-
-// ===================================================
-// Constructors & Destructor
-// ===================================================
-template< class BcHandler, class PhysicalSolverType >
-BCInterface1D< BcHandler, PhysicalSolverType >::BCInterface1D() :
-        bcInterface_Type          (),
-        M_data                    ()
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    debugStream( 5020 ) << "BCInterface1D::BCInterface1D" << "\n";
-#endif
-
-}
 
 // ===================================================
 // Methods
@@ -255,44 +243,42 @@ BCInterface1D< BcHandler, PhysicalSolverType >::insertBC()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 5020 ) << "BCInterface1D::insertBC\n";
+    debugStream ( 5020 ) << "BCInterface1D::insertBC\n";
 #endif
 
+    // Definitions
+    factory_Type factory;
+    OneDFSIFunction base;
+
+    // Define correct BCI type
     switch ( M_data.base().second )
     {
-    case BCIFunctionParser:
-    case BCIFunctionParserFile:
-    case BCIFunctionParserSolver:
-    case BCIFunctionParserFileSolver:
-    case BCIFunctionUserDefined:
-    {
-        factory_Type factory;
-        this->M_vectorFunction.push_back( factory.createFunctionParser( M_data ) );
+        case BCIFunctionParser:
+        case BCIFunctionParserFile:
+        case BCIFunctionParserSolver:
+        case BCIFunctionParserFileSolver:
+        case BCIFunctionUserDefined:
+        {
+            this->M_vectorFunction.push_back ( factory.createFunctionParser ( M_data ) );
+            this->M_vectorFunction.back()->assignFunction ( base );
 
-        OneDFSIFunction base;
-        this->M_vectorFunction.back()->assignFunction( base );
+            break;
+        }
+        case BCIFunctionSolverDefined:
+        {
+            this->M_vectorFunctionSolverDefined.push_back ( factory.createFunctionSolverDefined ( M_data ) );
+            this->M_vectorFunctionSolverDefined.back()->assignFunction ( base );
 
-        addBcToHandler( base );
+            break;
+        }
+        default:
 
-        return;
+            std::cout << " !!! Error: " << M_data.base().first << " is not valid in BCInterface1D !!!" << std::endl;
+            return;
     }
-    case BCIFunctionSolverDefined:
-    {
-        factory_Type factory;
-        this->M_vectorFunctionSolverDefined.push_back( factory.createFunctionSolverDefined( M_data ) );
 
-        OneDFSIFunction base;
-        this->M_vectorFunctionSolverDefined.back()->assignFunction( base );
-
-        addBcToHandler( base );
-
-        return;
-    }
-    default:
-
-        std::cout << " !!! Error: " << M_data.base().first << " is not valid in BCInterface1D !!!" << std::endl;
-        break;
-    }
+    // Add base to BCHandler
+    addBcToHandler ( base );
 }
 
 // ===================================================
@@ -300,32 +286,38 @@ BCInterface1D< BcHandler, PhysicalSolverType >::insertBC()
 // ===================================================
 template< class BcHandler, class PhysicalSolverType >
 void
-BCInterface1D< BcHandler, PhysicalSolverType >::setFluxSource( const fluxPtr_Type& flux, const sourcePtr_Type& source )
+BCInterface1D< BcHandler, PhysicalSolverType >::setFluxSource ( const fluxPtr_Type& flux, const sourcePtr_Type& source )
 {
     for ( typename vectorFunctionSolverDefined_Type::const_iterator i = this->M_vectorFunctionSolverDefined.begin() ; i < this->M_vectorFunctionSolverDefined.end() ; ++i )
-        ( *i )->setFluxSource( flux, source );
+    {
+        ( *i )->setFluxSource ( flux, source );
+    }
 
-    this->M_handler->setFluxSource( flux, source );
+    this->M_handler->setFluxSource ( flux, source );
 }
 
 template< class BcHandler, class PhysicalSolverType >
 void
-BCInterface1D< BcHandler, PhysicalSolverType >::setSolution( const solutionPtr_Type& solution )
+BCInterface1D< BcHandler, PhysicalSolverType >::setSolution ( const solutionPtr_Type& solution )
 {
     //for ( typename vectorFunction_Type::const_iterator i = M_vectorFunction.begin() ; i < M_vectorFunction.end() ; ++i )
-    for ( UInt i( 0 ); i < this->M_vectorFunction.size(); ++i )
+    for ( UInt i ( 0 ); i < this->M_vectorFunction.size(); ++i )
     {
         boost::shared_ptr< BCInterfaceFunctionParserSolver< physicalSolver_Type > > castedFunctionSolver =
             boost::dynamic_pointer_cast< BCInterfaceFunctionParserSolver< physicalSolver_Type > > ( this->M_vectorFunction[i] );
 
         if ( castedFunctionSolver != 0 )
-            castedFunctionSolver->setSolution( solution );
+        {
+            castedFunctionSolver->setSolution ( solution );
+        }
     }
 
     for ( typename vectorFunctionSolverDefined_Type::const_iterator i = this->M_vectorFunctionSolverDefined.begin() ; i < this->M_vectorFunctionSolverDefined.end() ; ++i )
-        ( *i )->setSolution( solution );
+    {
+        ( *i )->setSolution ( solution );
+    }
 
-    this->M_handler->setSolution( solution );
+    this->M_handler->setSolution ( solution );
 }
 
 // ===================================================
@@ -333,25 +325,27 @@ BCInterface1D< BcHandler, PhysicalSolverType >::setSolution( const solutionPtr_T
 // ===================================================
 template< class BcHandler, class PhysicalSolverType > template< class BCInterfaceBaseType >
 inline void
-BCInterface1D< BcHandler, PhysicalSolverType >::createFunction( std::vector< boost::shared_ptr< BCInterfaceBaseType > >& baseVector )
+BCInterface1D< BcHandler, PhysicalSolverType >::createFunction ( std::vector< boost::shared_ptr< BCInterfaceBaseType > >& baseVector )
 {
-    boost::shared_ptr< BCInterfaceBaseType > function( new BCInterfaceBaseType() );
-    function->setData( M_data );
-    baseVector.push_back( function );
+    boost::shared_ptr< BCInterfaceBaseType > function ( new BCInterfaceBaseType() );
+    function->setData ( M_data );
+    baseVector.push_back ( function );
 }
 
 template< class BcHandler, class PhysicalSolverType > template< class BCBaseType >
 inline void
-BCInterface1D< BcHandler, PhysicalSolverType >::addBcToHandler( BCBaseType& base )
+BCInterface1D< BcHandler, PhysicalSolverType >::addBcToHandler ( BCBaseType& base )
 {
     if ( !this->M_handler.get() ) // If BCHandler has not been created yet, we do it now
+    {
         this->createHandler();
+    }
 
 #ifdef HAVE_LIFEV_DEBUG
-        debugStream( 5020 ) << "BCInterface1D::addBCManager" << "\n\n";
+    debugStream ( 5020 ) << "BCInterface1D::addBCManager" << "\n\n";
 #endif
 
-        this->M_handler->setBC( M_data.side(), M_data.line(), M_data.quantity(), base );
+    this->M_handler->setBC ( M_data.side(), M_data.line(), M_data.quantity(), base );
 }
 
 } // Namespace LifeV

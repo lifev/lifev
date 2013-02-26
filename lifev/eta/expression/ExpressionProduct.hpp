@@ -68,7 +68,7 @@ namespace ExpressionAssembly
 
 */
 template <typename LExpressionType, typename RExpressionType>
-class ExpressionProduct : public ExpressionBase< ExpressionProduct<LExpressionType,RExpressionType> >
+class ExpressionProduct : public ExpressionBase< ExpressionProduct<LExpressionType, RExpressionType> >
 {
 public:
 
@@ -76,7 +76,7 @@ public:
     //@{
 
     // No direct use, just ease of coding
-	typedef ExpressionBase< ExpressionProduct <LExpressionType,RExpressionType> > base_Type;
+    typedef ExpressionBase< ExpressionProduct <LExpressionType, RExpressionType> > base_Type;
 
     //@}
 
@@ -84,15 +84,15 @@ public:
     //@{
 
     //! Full constructor using the two expressions
-	ExpressionProduct(const LExpressionType& l, const RExpressionType& r)
-	: base_Type(), M_l(l), M_r(r) {}
+    ExpressionProduct (const LExpressionType& l, const RExpressionType& r)
+        : base_Type(), M_l (l), M_r (r) {}
 
     //! Copy constructor
-	ExpressionProduct(const ExpressionProduct<LExpressionType,RExpressionType>& expression)
-	 : base_Type(), M_l(expression.M_l), M_r(expression.M_r) {}
+    ExpressionProduct (const ExpressionProduct<LExpressionType, RExpressionType>& expression)
+        : base_Type(), M_l (expression.M_l), M_r (expression.M_r) {}
 
     //! Destructor
-    ~ExpressionProduct(){}
+    ~ExpressionProduct() {}
 
     //@}
 
@@ -101,8 +101,12 @@ public:
     //@{
 
     //! Display method
-	static void display(std::ostream& out= std::cout)
-    { LExpressionType::display(out); out << " * "; RExpressionType::display(out);}
+    static void display (std::ostream& out = std::cout)
+    {
+        LExpressionType::display (out);
+        out << " * ";
+        RExpressionType::display (out);
+    }
 
     //@}
 
@@ -111,10 +115,16 @@ public:
     //@{
 
     //! Getter for the left hand side
-	const LExpressionType& left() const {return M_l;}
+    const LExpressionType& left() const
+    {
+        return M_l;
+    }
 
     //! Getter for the right hand side
-	const RExpressionType& right() const {return M_r;}
+    const RExpressionType& right() const
+    {
+        return M_r;
+    }
 
     //@}
 
@@ -123,16 +133,16 @@ private:
     //! @name Private Methods
     //@{
 
-	ExpressionProduct();
+    ExpressionProduct();
 
-	//@}
+    //@}
 
 
     // Left hand side
     LExpressionType M_l;
 
     // Right hand side
-	RExpressionType M_r;
+    RExpressionType M_r;
 };
 
 
@@ -158,42 +168,42 @@ private:
 
 */
 template< typename LExpressionType, typename RExpressionType >
-ExpressionProduct<LExpressionType,RExpressionType>
-operator*(const ExpressionBase<LExpressionType>& l, const ExpressionBase<RExpressionType>& r)
+ExpressionProduct<LExpressionType, RExpressionType>
+operator* (const ExpressionBase<LExpressionType>& l, const ExpressionBase<RExpressionType>& r)
 {
-	return ExpressionProduct<LExpressionType,RExpressionType>(l.cast(),r.cast());
+    return ExpressionProduct<LExpressionType, RExpressionType> (l.cast(), r.cast() );
 }
 
 // "Specialization" for the case of a scalar
 template< typename RExpressionType >
-ExpressionProduct<ExpressionScalar,RExpressionType>
-operator*(const Real& l, const ExpressionBase<RExpressionType>& r)
+ExpressionProduct<ExpressionScalar, RExpressionType>
+operator* (const Real& l, const ExpressionBase<RExpressionType>& r)
 {
-    return ExpressionProduct<ExpressionScalar,RExpressionType>(ExpressionScalar(l),r.cast());
+    return ExpressionProduct<ExpressionScalar, RExpressionType> (ExpressionScalar (l), r.cast() );
 }
 
 // "Specialization" for the case of a scalar
 template< typename LExpressionType >
-ExpressionProduct<LExpressionType,ExpressionScalar>
-operator*(const ExpressionBase<LExpressionType>& l, const Real& r)
+ExpressionProduct<LExpressionType, ExpressionScalar>
+operator* (const ExpressionBase<LExpressionType>& l, const Real& r)
 {
-    return ExpressionProduct<LExpressionType,ExpressionScalar>(l.cast(),ExpressionScalar(r));
+    return ExpressionProduct<LExpressionType, ExpressionScalar> (l.cast(), ExpressionScalar (r) );
 }
 
 // "Specialization" for the case of a vector
 template< typename RExpressionType, UInt Vdim >
 ExpressionProduct<ExpressionVector<Vdim>, RExpressionType>
-operator*(const VectorSmall<Vdim>& l, const ExpressionBase<RExpressionType>& r)
+operator* (const VectorSmall<Vdim>& l, const ExpressionBase<RExpressionType>& r)
 {
-    return ExpressionProduct<ExpressionVector<Vdim>,RExpressionType>(ExpressionVector<Vdim>(l),r.cast());
+    return ExpressionProduct<ExpressionVector<Vdim>, RExpressionType> (ExpressionVector<Vdim> (l), r.cast() );
 }
 
 // "Specialization" for the case of a vector
 template< typename LExpressionType, UInt Vdim>
 ExpressionProduct<LExpressionType, ExpressionVector<Vdim> >
-operator*(const ExpressionBase<LExpressionType>& l, const VectorSmall<Vdim>& r)
+operator* (const ExpressionBase<LExpressionType>& l, const VectorSmall<Vdim>& r)
 {
-    return ExpressionProduct<LExpressionType, ExpressionVector<Vdim> >(l.cast(), ExpressionVector<Vdim>(r));
+    return ExpressionProduct<LExpressionType, ExpressionVector<Vdim> > (l.cast(), ExpressionVector<Vdim> (r) );
 }
 
 

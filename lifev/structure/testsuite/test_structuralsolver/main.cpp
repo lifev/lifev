@@ -90,12 +90,12 @@ enum TimeScheme { BDF_ORDER_ONE = 1, BDF_ORDER_TWO, BDF_ORDER_THREE };
 
 namespace
 {
-static bool regIF = (PRECFactory::instance().registerProduct( "Ifpack", &createIfpack ));
-static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ));
+static bool regIF = (PRECFactory::instance().registerProduct ( "Ifpack", &createIfpack ) );
+static bool regML = (PRECFactory::instance().registerProduct ( "ML", &createML ) );
 }
 
 
-std::set<UInt> parseList( const std::string& list )
+std::set<UInt> parseList ( const std::string& list )
 {
     std::string stringList = list;
     std::set<UInt> setList;
@@ -106,11 +106,11 @@ std::set<UInt> parseList( const std::string& list )
     size_t commaPos = 0;
     while ( commaPos != std::string::npos )
     {
-        commaPos = stringList.find( "," );
-        setList.insert( atoi( stringList.substr( 0, commaPos ).c_str() ) );
-        stringList = stringList.substr( commaPos+1 );
+        commaPos = stringList.find ( "," );
+        setList.insert ( atoi ( stringList.substr ( 0, commaPos ).c_str() ) );
+        stringList = stringList.substr ( commaPos + 1 );
     }
-    setList.insert( atoi( stringList.c_str() ) );
+    setList.insert ( atoi ( stringList.c_str() ) );
     return setList;
 }
 
@@ -119,18 +119,18 @@ class Structure
 {
 public:
 
-/** @name Constructors, destructor
- */
-//@{
-    Structure( int                                   argc,
-               char**                                argv,
-               boost::shared_ptr<Epetra_Comm>        structComm );
+    /** @name Constructors, destructor
+     */
+    //@{
+    Structure ( int                                   argc,
+                char**                                argv,
+                boost::shared_ptr<Epetra_Comm>        structComm );
 
     ~Structure()
     {}
-//@}
+    //@}
 
-//@{
+    //@{
     void run()
     {
         run3d();
@@ -167,45 +167,45 @@ private:
 struct Structure::Private
 {
     Private() :
-            rho(1), poisson(1), young(1), bulk(1), alpha(1), gamma(1)
+        rho (1), poisson (1), young (1), bulk (1), alpha (1), gamma (1)
     {}
-    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> fct_type;
+    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > fct_type;
     double rho, poisson, young, bulk, alpha, gamma;
 
     std::string data_file_name;
 
     boost::shared_ptr<Epetra_Comm>     comm;
 
-static Real bcZero(const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
-{
-    return  0.;
-}
+    static Real bcZero (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
+    {
+        return  0.;
+    }
 
-static Real bcNonZero(const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
-{
-    return  300000.;
-}
+    static Real bcNonZero (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
+    {
+        return  300000.;
+    }
 
 };
 
 
 
-Structure::Structure( int                                   argc,
-                      char**                                argv,
-                      boost::shared_ptr<Epetra_Comm>        structComm):
-                  parameters( new Private() )
+Structure::Structure ( int                                   argc,
+                       char**                                argv,
+                       boost::shared_ptr<Epetra_Comm>        structComm) :
+    parameters ( new Private() )
 {
-    GetPot command_line(argc, argv);
-    string data_file_name = command_line.follow("data", 2, "-f", "--file");
-    GetPot dataFile( data_file_name );
+    GetPot command_line (argc, argv);
+    string data_file_name = command_line.follow ("data", 2, "-f", "--file");
+    GetPot dataFile ( data_file_name );
     parameters->data_file_name = data_file_name;
 
-    parameters->rho     = dataFile( "solid/physics/density", 1. );
-    parameters->young   = dataFile( "solid/physics/young",   1. );
-    parameters->poisson = dataFile( "solid/physics/poisson", 1. );
-    parameters->bulk    = dataFile( "solid/physics/bulk",    1. );
-    parameters->alpha   = dataFile( "solid/physics/alpha",   1. );
-    parameters->gamma   = dataFile( "solid/physics/gamma",   1. );
+    parameters->rho     = dataFile ( "solid/physics/density", 1. );
+    parameters->young   = dataFile ( "solid/physics/young",   1. );
+    parameters->poisson = dataFile ( "solid/physics/poisson", 1. );
+    parameters->bulk    = dataFile ( "solid/physics/bulk",    1. );
+    parameters->alpha   = dataFile ( "solid/physics/alpha",   1. );
+    parameters->gamma   = dataFile ( "solid/physics/gamma",   1. );
 
     std::cout << "density = " << parameters->rho     << std::endl
               << "young   = " << parameters->young   << std::endl
@@ -217,7 +217,10 @@ Structure::Structure( int                                   argc,
     parameters->comm = structComm;
     int ntasks = parameters->comm->NumProc();
 
-    if (!parameters->comm->MyPID()) std::cout << "My PID = " << parameters->comm->MyPID() << " out of " << ntasks << " running." << std::endl;
+    if (!parameters->comm->MyPID() )
+    {
+        std::cout << "My PID = " << parameters->comm->MyPID() << " out of " << ntasks << " running." << std::endl;
+    }
 }
 
 
@@ -240,47 +243,54 @@ Structure::run3d()
     bool verbose = (parameters->comm->MyPID() == 0);
 
     //! Number of boundary conditions for the velocity and mesh motion
-    boost::shared_ptr<BCHandler> BCh( new BCHandler() );
+    boost::shared_ptr<BCHandler> BCh ( new BCHandler() );
 
     //! dataElasticStructure
-    GetPot dataFile( parameters->data_file_name.c_str() );
+    GetPot dataFile ( parameters->data_file_name.c_str() );
 
-    boost::shared_ptr<StructuralConstitutiveLawData> dataStructure(new StructuralConstitutiveLawData( ));
-    dataStructure->setup(dataFile);
+    boost::shared_ptr<StructuralConstitutiveLawData> dataStructure (new StructuralConstitutiveLawData( ) );
+    dataStructure->setup (dataFile);
 
     MeshData             meshData;
-    meshData.setup(dataFile, "solid/space_discretization");
+    meshData.setup (dataFile, "solid/space_discretization");
 
-    boost::shared_ptr<RegionMesh<LinearTetra> > fullMeshPtr(new RegionMesh<LinearTetra>(  parameters->comm  ));
-    readMesh(*fullMeshPtr, meshData);
+    boost::shared_ptr<RegionMesh<LinearTetra> > fullMeshPtr (new RegionMesh<LinearTetra> (  parameters->comm  ) );
+    readMesh (*fullMeshPtr, meshData);
 
-    MeshPartitioner< RegionMesh<LinearTetra> > meshPart( fullMeshPtr, parameters->comm );
+    MeshPartitioner< RegionMesh<LinearTetra> > meshPart ( fullMeshPtr, parameters->comm );
 
-    std::string dOrder =  dataFile( "solid/space_discretization/order", "P1");
+    std::string dOrder =  dataFile ( "solid/space_discretization/order", "P1");
 
     typedef FESpace< RegionMesh<LinearTetra>, MapEpetra > solidFESpace_type;
     typedef boost::shared_ptr<solidFESpace_type> solidFESpace_ptrtype;
-    solidFESpace_ptrtype dFESpace( new solidFESpace_type(meshPart,dOrder,3,parameters->comm) );
-    if (verbose) std::cout << std::endl;
+    solidFESpace_ptrtype dFESpace ( new solidFESpace_type (meshPart, dOrder, 3, parameters->comm) );
+    if (verbose)
+    {
+        std::cout << std::endl;
+    }
 
     //MapEpetra structMap(dFESpace->refFE(), meshPart, parameters->comm);
 
     //MapEpetra fullMap;
 
-    std::string timeAdvanceMethod =  dataFile( "solid/time_discretization/method", "Newmark");
+    std::string timeAdvanceMethod =  dataFile ( "solid/time_discretization/method", "Newmark");
 
-    timeAdvance_type  timeAdvance( TimeAdvanceFactory::instance().createObject( timeAdvanceMethod ) );
+    timeAdvance_type  timeAdvance ( TimeAdvanceFactory::instance().createObject ( timeAdvanceMethod ) );
 
     UInt OrderDev = 2;
 
     //! initialization of parameters of time Advance method:
-    if (timeAdvanceMethod =="Newmark")
-        timeAdvance->setup( dataStructure->dataTimeAdvance()->coefficientsNewmark() , OrderDev);
+    if (timeAdvanceMethod == "Newmark")
+    {
+        timeAdvance->setup ( dataStructure->dataTimeAdvance()->coefficientsNewmark() , OrderDev);
+    }
 
-    if (timeAdvanceMethod =="BDF")
-        timeAdvance->setup(dataStructure->dataTimeAdvance()->orderBDF() , OrderDev);
+    if (timeAdvanceMethod == "BDF")
+    {
+        timeAdvance->setup (dataStructure->dataTimeAdvance()->orderBDF() , OrderDev);
+    }
 
-    timeAdvance->setTimeStep(dataStructure->dataTime()->timeStep());
+    timeAdvance->setTimeStep (dataStructure->dataTime()->timeStep() );
     timeAdvance->showMe();
 
     /*
@@ -293,20 +303,24 @@ Structure::run3d()
     //! #################################################################################
     //! BOUNDARY CONDITIONS
     //! #################################################################################
-    vector <ID> compx(1), compy(1), compz(1), compxy(2), compxz(2), compyz(2);
-    compx[0]=0; compy[0]=1, compz[0]=2;
-    compxy[0]=0; compxy[1]=1;
-    compxz[0]=0; compxz[1]=2;
-    compyz[0]=1; compyz[1]=2;
+    vector <ID> compx (1), compy (1), compz (1), compxy (2), compxz (2), compyz (2);
+    compx[0] = 0;
+    compy[0] = 1, compz[0] = 2;
+    compxy[0] = 0;
+    compxy[1] = 1;
+    compxz[0] = 0;
+    compxz[1] = 2;
+    compyz[0] = 1;
+    compyz[1] = 2;
 
-    BCFunctionBase zero(Private::bcZero);
-    BCFunctionBase nonZero(Private::bcNonZero);
+    BCFunctionBase zero (Private::bcZero);
+    BCFunctionBase nonZero (Private::bcNonZero);
 
     //! =================================================================================
     //! BC for StructuredCube4_test_structuralsolver.mesh
     //! =================================================================================
-    BCh->addBC("EdgesIn",      20,  Natural,   Component, nonZero, compx);
-    BCh->addBC("EdgesIn",      40,  Essential, Component, zero,    compx);
+    BCh->addBC ("EdgesIn",      20,  Natural,   Component, nonZero, compx);
+    BCh->addBC ("EdgesIn",      40,  Essential, Component, zero,    compx);
     //! =================================================================================
 
     //! =================================================================================
@@ -328,17 +342,17 @@ Structure::run3d()
     StructuralOperator< RegionMesh<LinearTetra> > solid;
 
     //! 2. Setup of the structuralSolver
-    solid.setup(dataStructure,
-                dFESpace,
-                BCh,
-                parameters->comm);
+    solid.setup (dataStructure,
+                 dFESpace,
+                 BCh,
+                 parameters->comm);
 
     //! 3. Setting data from getPot
-    solid.setDataFromGetPot(dataFile);
+    solid.setDataFromGetPot (dataFile);
 
     //! 4. Building system using TimeAdvance class
-    double timeAdvanceCoefficient = timeAdvance->coefficientSecondDerivative( 0 ) / (dataStructure->dataTime()->timeStep()*dataStructure->dataTime()->timeStep());
-    solid.buildSystem(timeAdvanceCoefficient);
+    double timeAdvanceCoefficient = timeAdvance->coefficientSecondDerivative ( 0 ) / (dataStructure->dataTime()->timeStep() * dataStructure->dataTime()->timeStep() );
+    solid.buildSystem (timeAdvanceCoefficient);
 
 
     dataStructure->showMe();
@@ -350,78 +364,84 @@ Structure::run3d()
     Real dt = dataStructure->dataTime()->timeStep();
     Real T  = dataStructure->dataTime()->endTime();
 
-    vectorPtr_Type rhs (new vector_Type(solid.displacement(), Unique));
-    vectorPtr_Type disp(new vector_Type(solid.displacement(), Unique));
-    vectorPtr_Type vel (new vector_Type(solid.displacement(), Unique));
-    vectorPtr_Type acc (new vector_Type(solid.displacement(), Unique));
+    vectorPtr_Type rhs (new vector_Type (solid.displacement(), Unique) );
+    vectorPtr_Type disp (new vector_Type (solid.displacement(), Unique) );
+    vectorPtr_Type vel (new vector_Type (solid.displacement(), Unique) );
+    vectorPtr_Type acc (new vector_Type (solid.displacement(), Unique) );
 
-    if (verbose) std::cout << "S- initialization ... ";
+    if (verbose)
+    {
+        std::cout << "S- initialization ... ";
+    }
 
     std::vector<vectorPtr_Type> uv0;
 
-    if (timeAdvanceMethod =="Newmark")
+    if (timeAdvanceMethod == "Newmark")
     {
-        uv0.push_back(disp);
-        uv0.push_back(vel);
-        uv0.push_back(acc);
+        uv0.push_back (disp);
+        uv0.push_back (vel);
+        uv0.push_back (acc);
     }
 
-    if (timeAdvanceMethod =="BDF")
+    if (timeAdvanceMethod == "BDF")
     {
-      Real tZero = dataStructure->dataTime()->initialTime();
+        Real tZero = dataStructure->dataTime()->initialTime();
 
-        for ( UInt previousPass=0; previousPass < dataStructure->dataTimeAdvance()->orderBDF() ; previousPass++)
+        for ( UInt previousPass = 0; previousPass < dataStructure->dataTimeAdvance()->orderBDF() ; previousPass++)
         {
-      Real previousTimeStep = tZero - previousPass*dt;
-      std::cout<<"BDF " <<previousTimeStep<<"\n";
-      uv0.push_back(disp);
+            Real previousTimeStep = tZero - previousPass * dt;
+            std::cout << "BDF " << previousTimeStep << "\n";
+            uv0.push_back (disp);
         }
     }
 
-    timeAdvance->setInitialCondition(uv0);
+    timeAdvance->setInitialCondition (uv0);
 
-    timeAdvance->setTimeStep( dt );
+    timeAdvance->setTimeStep ( dt );
 
-    timeAdvance->updateRHSContribution( dt );
+    timeAdvance->updateRHSContribution ( dt );
 
-    MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Barrier (MPI_COMM_WORLD);
 
-    if (verbose ) std::cout << "ok." << std::endl;
+    if (verbose )
+    {
+        std::cout << "ok." << std::endl;
+    }
 
     boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporter;
 
-    std::string const exporterType =  dataFile( "exporter/type", "ensight");
+    std::string const exporterType =  dataFile ( "exporter/type", "ensight");
 #ifdef HAVE_HDF5
-    if (exporterType.compare("hdf5") == 0)
+    if (exporterType.compare ("hdf5") == 0)
     {
-      exporter.reset( new ExporterHDF5<RegionMesh<LinearTetra> > ( dataFile, "structure" ) );
+        exporter.reset ( new ExporterHDF5<RegionMesh<LinearTetra> > ( dataFile, "structure" ) );
     }
     else
 #endif
     {
-        if (exporterType.compare("none") == 0)
-    {
-        exporter.reset( new ExporterEmpty<RegionMesh<LinearTetra> > ( dataFile, meshPart.meshPartition(), "structure", parameters->comm->MyPID()) );
-    }
+        if (exporterType.compare ("none") == 0)
+        {
+            exporter.reset ( new ExporterEmpty<RegionMesh<LinearTetra> > ( dataFile, meshPart.meshPartition(), "structure", parameters->comm->MyPID() ) );
+        }
 
         else
         {
-        exporter.reset( new ExporterEnsight<RegionMesh<LinearTetra> > ( dataFile, meshPart.meshPartition(), "structure", parameters->comm->MyPID()) );
+            exporter.reset ( new ExporterEnsight<RegionMesh<LinearTetra> > ( dataFile, meshPart.meshPartition(), "structure", parameters->comm->MyPID() ) );
+        }
     }
-    }
 
-    exporter->setPostDir( "./" );
-    exporter->setMeshProcId( meshPart.meshPartition(), parameters->comm->MyPID() );
+    exporter->setPostDir ( "./" );
+    exporter->setMeshProcId ( meshPart.meshPartition(), parameters->comm->MyPID() );
 
-    vectorPtr_Type solidDisp ( new vector_Type(solid.displacement(),  exporter->mapType() ) );
-    vectorPtr_Type solidVel  ( new vector_Type(solid.displacement(),  exporter->mapType() ) );
-    vectorPtr_Type solidAcc  ( new vector_Type(solid.displacement(),  exporter->mapType() ) );
+    vectorPtr_Type solidDisp ( new vector_Type (solid.displacement(),  exporter->mapType() ) );
+    vectorPtr_Type solidVel  ( new vector_Type (solid.displacement(),  exporter->mapType() ) );
+    vectorPtr_Type solidAcc  ( new vector_Type (solid.displacement(),  exporter->mapType() ) );
 
-    exporter->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "displacement", dFESpace, solidDisp, UInt(0) );
-    exporter->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "velocity",     dFESpace, solidVel,  UInt(0) );
-    exporter->addVariable( ExporterData<RegionMesh<LinearTetra> >::VectorField, "acceleration", dFESpace, solidAcc,  UInt(0) );
+    exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "displacement", dFESpace, solidDisp, UInt (0) );
+    exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "velocity",     dFESpace, solidVel,  UInt (0) );
+    exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "acceleration", dFESpace, solidAcc,  UInt (0) );
 
-    exporter->postProcess( 0 );
+    exporter->postProcess ( 0 );
     /*
     //!--------------------------------------------------------------------------------------------
     //! MATLAB FILE WITH DISPLACEMENT OF A CHOSEN POINT
@@ -466,11 +486,11 @@ Structure::run3d()
     //! Temporal loop
     //! =============================================================================
     //    for (Real time = dt; time <= T; time += dt)
-    for (dataStructure->dataTime()->setTime( dt ) ; dataStructure->dataTime()->canAdvance( ); dataStructure->dataTime()->updateTime( ))
+    for (dataStructure->dataTime()->setTime ( dt ) ; dataStructure->dataTime()->canAdvance( ); dataStructure->dataTime()->updateTime( ) )
     {
-      //      dataStructure->dataTime()->setTime(time);
+        //      dataStructure->dataTime()->setTime(time);
 
-      if (verbose)
+        if (verbose)
         {
 	  std::cout << std::endl;
 	  std::cout << "S- Now we are at time " << dataStructure->dataTime()->time() << " s." << std::endl;
@@ -524,41 +544,59 @@ Structure::run3d()
         else if (!dataStructure->solidType().compare("exponential"))
           CheckResultEXP(normVect, dataStructure->dataTime()->time() );
         else
-          CheckResultNH(normVect, dataStructure->dataTime()->time() );
+        {
+            CheckResultNH (normVect, dataStructure->dataTime()->time() );
+        }
 
-    ///////// END OF CHECK
+        ///////// END OF CHECK
 
 
-    //!--------------------------------------------------------------------------------------------------
+        //!--------------------------------------------------------------------------------------------------
 
-        MPI_Barrier(MPI_COMM_WORLD);
+        MPI_Barrier (MPI_COMM_WORLD);
     }
 }
 
 
 
-void Structure::CheckResultLE(const Real& dispNorm,const Real& time)
+void Structure::CheckResultLE (const Real& dispNorm, const Real& time)
 {
-    if ( time == 0.1  && std::fabs(dispNorm-0.276527)<=1e-5 )
-        this->resultChanged(time);
-    if ( time == 0.2  && std::fabs(dispNorm-0.276536)<=1e-5 )
-        this->resultChanged(time);
-    if ( time == 0.3  && std::fabs(dispNorm-0.276529)<=1e-5 )
-        this->resultChanged(time);
-    if ( time == 0.4  && std::fabs(dispNorm-0.276531)<=1e-5 )
-        this->resultChanged(time);
+    if ( time == 0.1  && std::fabs (dispNorm - 0.276527) <= 1e-5 )
+    {
+        this->resultChanged (time);
+    }
+    if ( time == 0.2  && std::fabs (dispNorm - 0.276536) <= 1e-5 )
+    {
+        this->resultChanged (time);
+    }
+    if ( time == 0.3  && std::fabs (dispNorm - 0.276529) <= 1e-5 )
+    {
+        this->resultChanged (time);
+    }
+    if ( time == 0.4  && std::fabs (dispNorm - 0.276531) <= 1e-5 )
+    {
+        this->resultChanged (time);
+    }
 }
 
-void Structure::CheckResultSVK(const Real& dispNorm,const Real& time)
+void Structure::CheckResultSVK (const Real& dispNorm, const Real& time)
 {
-    if ( time == 0.1  && std::fabs(dispNorm-0.263348)<=1e-5 )
-        this->resultChanged(time);
-    if ( time == 0.2  && std::fabs(dispNorm-0.263350)<=1e-5 )
-        this->resultChanged(time);
-    if ( time == 0.3  && std::fabs(dispNorm-0.263350)<=1e-5 )
-        this->resultChanged(time);
-    if ( time == 0.4  && std::fabs(dispNorm-0.263351)<=1e-5 )
-        this->resultChanged(time);
+    if ( time == 0.1  && std::fabs (dispNorm - 0.263348) <= 1e-5 )
+    {
+        this->resultChanged (time);
+    }
+    if ( time == 0.2  && std::fabs (dispNorm - 0.263350) <= 1e-5 )
+    {
+        this->resultChanged (time);
+    }
+    if ( time == 0.3  && std::fabs (dispNorm - 0.263350) <= 1e-5 )
+    {
+        this->resultChanged (time);
+    }
+    if ( time == 0.4  && std::fabs (dispNorm - 0.263351) <= 1e-5 )
+    {
+        this->resultChanged (time);
+    }
 }
 void Structure::CheckResultSVKPenalized(const Real& dispNorm,const Real& time)
 {
@@ -573,53 +611,71 @@ void Structure::CheckResultSVKPenalized(const Real& dispNorm,const Real& time)
 }
 void Structure::CheckResultEXP(const Real& dispNorm,const Real& time)
 {
-    if ( time == 0.1  && std::fabs(dispNorm-0.284844)<=1e-5 )
-        this->resultChanged(time);
-    if ( time == 0.2  && std::fabs(dispNorm-0.284853)<=1e-5 )
-        this->resultChanged(time);
-    if ( time == 0.3  && std::fabs(dispNorm-0.284846)<=1e-5 )
-        this->resultChanged(time);
-    if ( time == 0.4  && std::fabs(dispNorm-0.284848)<=1e-5 )
-        this->resultChanged(time);
+    if ( time == 0.1  && std::fabs (dispNorm - 0.284844) <= 1e-5 )
+    {
+        this->resultChanged (time);
+    }
+    if ( time == 0.2  && std::fabs (dispNorm - 0.284853) <= 1e-5 )
+    {
+        this->resultChanged (time);
+    }
+    if ( time == 0.3  && std::fabs (dispNorm - 0.284846) <= 1e-5 )
+    {
+        this->resultChanged (time);
+    }
+    if ( time == 0.4  && std::fabs (dispNorm - 0.284848) <= 1e-5 )
+    {
+        this->resultChanged (time);
+    }
 }
 
-void Structure::CheckResultNH(const Real& dispNorm,const Real& time)
+void Structure::CheckResultNH (const Real& dispNorm, const Real& time)
 {
-    if ( time == 0.1  && std::fabs(dispNorm-0.286120)<=1e-5 )
-        this->resultChanged(time);
-    if ( time == 0.2  && std::fabs(dispNorm-0.286129)<=1e-5 )
-        this->resultChanged(time);
-    if ( time == 0.3  && std::fabs(dispNorm-0.286122)<=1e-5 )
-        this->resultChanged(time);
-    if ( time == 0.4  && std::fabs(dispNorm-0.286123)<=1e-5 )
-        this->resultChanged(time);
+    if ( time == 0.1  && std::fabs (dispNorm - 0.286120) <= 1e-5 )
+    {
+        this->resultChanged (time);
+    }
+    if ( time == 0.2  && std::fabs (dispNorm - 0.286129) <= 1e-5 )
+    {
+        this->resultChanged (time);
+    }
+    if ( time == 0.3  && std::fabs (dispNorm - 0.286122) <= 1e-5 )
+    {
+        this->resultChanged (time);
+    }
+    if ( time == 0.4  && std::fabs (dispNorm - 0.286123) <= 1e-5 )
+    {
+        this->resultChanged (time);
+    }
 }
 
 
 
-void Structure::resultChanged(Real time)
+void Structure::resultChanged (Real time)
 {
-  std::cout << "Correct value at time: " << time << std::endl;
-  returnValue = EXIT_SUCCESS;
+    std::cout << "Correct value at time: " << time << std::endl;
+    returnValue = EXIT_SUCCESS;
 }
 
 
 
 int
-main( int argc, char** argv )
+main ( int argc, char** argv )
 {
 
 #ifdef HAVE_MPI
-    MPI_Init(&argc, &argv);
-    boost::shared_ptr<Epetra_MpiComm> Comm(new Epetra_MpiComm( MPI_COMM_WORLD ) );
+    MPI_Init (&argc, &argv);
+    boost::shared_ptr<Epetra_MpiComm> Comm (new Epetra_MpiComm ( MPI_COMM_WORLD ) );
     if ( Comm->MyPID() == 0 )
+    {
         cout << "% using MPI" << endl;
+    }
 #else
-    boost::shared_ptr<Epetra_SerialComm> Comm( new Epetra_SerialComm() );
+    boost::shared_ptr<Epetra_SerialComm> Comm ( new Epetra_SerialComm() );
     cout << "% using serial Version" << endl;
 #endif
 
-    Structure structure( argc, argv, Comm );
+    Structure structure ( argc, argv, Comm );
     structure.run();
 
 #ifdef HAVE_MPI

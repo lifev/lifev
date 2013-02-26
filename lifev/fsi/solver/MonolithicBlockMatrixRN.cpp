@@ -29,7 +29,8 @@
 
 #include <lifev/fsi/solver/MonolithicBlockMatrixRN.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 
 // ===================================================
@@ -37,34 +38,34 @@ namespace LifeV {
 // ===================================================
 
 
-void MonolithicBlockMatrixRN::setDataFromGetPot( const GetPot& data, const std::string& section )
+void MonolithicBlockMatrixRN::setDataFromGetPot ( const GetPot& data, const std::string& section )
 {
-    super_Type::setDataFromGetPot(data, section);
-    setRobinData(data, section + "/robin");
+    super_Type::setDataFromGetPot (data, section);
+    setRobinData (data, section + "/robin");
 }
 
-void MonolithicBlockMatrixRN::coupler(mapPtr_Type& map,
-                                      const std::map<ID, ID>& locDofMap,
-                                      const vectorPtr_Type& numerationInterface,
-                                      const Real& timeStep,
-                                      const Real& coefficient,
-                                      const Real& rescaleFactor,
-                                      UInt couplingFlag
+void MonolithicBlockMatrixRN::coupler (mapPtr_Type& map,
+                                       const std::map<ID, ID>& locDofMap,
+                                       const vectorPtr_Type& numerationInterface,
+                                       const Real& timeStep,
+                                       const Real& coefficient,
+                                       const Real& rescaleFactor,
+                                       UInt couplingFlag
                                       )
 {
-    super_Type::coupler( map, locDofMap, numerationInterface, timeStep ,  coefficient, rescaleFactor, couplingFlag);
+    super_Type::coupler ( map, locDofMap, numerationInterface, timeStep ,  coefficient, rescaleFactor, couplingFlag);
 }
 
-void MonolithicBlockMatrixRN::coupler(mapPtr_Type& map,
-                                      const std::map<ID, ID>& locDofMap,
-                                      const vectorPtr_Type& numerationInterface,
-                                      const Real& timeStep,
-                                      const Real& coefficient,
-                                      const Real& rescaleFactor)
+void MonolithicBlockMatrixRN::coupler (mapPtr_Type& map,
+                                       const std::map<ID, ID>& locDofMap,
+                                       const vectorPtr_Type& numerationInterface,
+                                       const Real& timeStep,
+                                       const Real& coefficient,
+                                       const Real& rescaleFactor)
 {
-    super_Type::coupler(map, locDofMap, numerationInterface, timeStep, coefficient, rescaleFactor);
-    M_robinCoupling.reset(new matrix_Type(M_coupling->map(), 0));
-    robinCoupling( M_robinCoupling, M_alphaf, M_alphas, 7, M_FESpace[1], M_offset[1], M_FESpace[0], M_offset[0], locDofMap, numerationInterface );
+    super_Type::coupler (map, locDofMap, numerationInterface, timeStep, coefficient, rescaleFactor);
+    M_robinCoupling.reset (new matrix_Type (M_coupling->map(), 0) );
+    robinCoupling ( M_robinCoupling, M_alphaf, M_alphas, 7, M_FESpace[1], M_offset[1], M_FESpace[0], M_offset[0], locDofMap, numerationInterface );
     M_robinCoupling->globalAssemble( );
     //    M_robinCoupling->spy("RC");
 }
@@ -72,30 +73,30 @@ void MonolithicBlockMatrixRN::coupler(mapPtr_Type& map,
 void MonolithicBlockMatrixRN::GlobalAssemble()
 {
     super_Type::GlobalAssemble();
-    vector_Type rhs((*M_robinCoupling)*(*M_rhsVec));
+    vector_Type rhs ( (*M_robinCoupling) * (*M_rhsVec) );
     *M_rhsVec += rhs;
 }
 
 void MonolithicBlockMatrixRN::blockAssembling()
 {
     M_coupling->globalAssemble();
-    M_globalMatrix.reset(new matrix_Type(M_coupling->map()));
+    M_globalMatrix.reset (new matrix_Type (M_coupling->map() ) );
     *M_globalMatrix += *M_coupling;
-    for (UInt k=0; k<super_Type::M_blocks.size(); ++k)
+    for (UInt k = 0; k < super_Type::M_blocks.size(); ++k)
     {
         super_Type::M_blocks[k]->globalAssemble();
     }
 
-    applyRobinCoupling(M_blocks);
+    applyRobinCoupling (M_blocks);
     M_robinPart->globalAssemble();
 
-    matrixPtr_Type fluidRobinBlock(new matrix_Type(M_robinCoupling->map(), 1));
+    matrixPtr_Type fluidRobinBlock (new matrix_Type (M_robinCoupling->map(), 1) );
     *fluidRobinBlock += *M_blocks[1];
     *fluidRobinBlock += *M_robinPart;
     fluidRobinBlock->globalAssemble();
-    M_blocks[1]->swapCrsMatrix( fluidRobinBlock->matrixPtr() );
+    M_blocks[1]->swapCrsMatrix ( fluidRobinBlock->matrixPtr() );
 
-    for (UInt k=0; k<M_blocks.size(); ++k)
+    for (UInt k = 0; k < M_blocks.size(); ++k)
     {
         *M_globalMatrix += *M_blocks[k];
     }
