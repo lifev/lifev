@@ -163,14 +163,14 @@ public:
        \param invariants std::vector with the invariants of C and the detF
        \param material UInt number to get the material parameteres form the VenantElasticData class
     */
-    void computeLocalFirstPiolaKirchhoffTensor( Epetra_SerialDenseMatrix& firstPiola,
-						const Epetra_SerialDenseMatrix& tensorF,
-						const Epetra_SerialDenseMatrix& cofactorF,
-						const std::vector<Real>& invariants,
-						const UInt marker);
+    void computeLocalFirstPiolaKirchhoffTensor ( Epetra_SerialDenseMatrix& firstPiola,
+                                                 const Epetra_SerialDenseMatrix& tensorF,
+                                                 const Epetra_SerialDenseMatrix& cofactorF,
+                                                 const std::vector<Real>& invariants,
+                                                 const UInt marker);
 
 
-  //@}
+    //@}
 
 protected:
     //KNMKPtr_Type                  M_gradientLocalDisplacement;
@@ -450,47 +450,50 @@ void VenantKirchhoffMaterialNonLinear<Mesh>::computeNonLinearMatrix (matrixPtr_T
 }
 
 template <typename Mesh>
-void VenantKirchhoffMaterialNonLinear<Mesh>::computeLocalFirstPiolaKirchhoffTensor( Epetra_SerialDenseMatrix& firstPiola,
-									       const Epetra_SerialDenseMatrix& tensorF,
-									       const Epetra_SerialDenseMatrix& cofactorF,
-									       const std::vector<Real>& invariants,
-									       const UInt marker)
+void VenantKirchhoffMaterialNonLinear<Mesh>::computeLocalFirstPiolaKirchhoffTensor ( Epetra_SerialDenseMatrix& firstPiola,
+        const Epetra_SerialDenseMatrix& tensorF,
+        const Epetra_SerialDenseMatrix& cofactorF,
+        const std::vector<Real>& invariants,
+        const UInt marker)
 {
 
-  //Get the material parameters
-  Real lambda  	= this->M_dataMaterial->lambda(marker);
-  Real mu    	= this->M_dataMaterial->mu(marker);
-  Real coef = ( lambda / 2.0 ) * ( invariants[0] - 3.0 );
+    //Get the material parameters
+    Real lambda   = this->M_dataMaterial->lambda (marker);
+    Real mu       = this->M_dataMaterial->mu (marker);
+    Real coef = ( lambda / 2.0 ) * ( invariants[0] - 3.0 );
 
-  Epetra_SerialDenseMatrix firstTerm(tensorF);
-  firstTerm.Scale(coef);
+    Epetra_SerialDenseMatrix firstTerm (tensorF);
+    firstTerm.Scale (coef);
 
-  Epetra_SerialDenseMatrix secondTerm(tensorF);
-  Real coeff = -1.0 * mu;
-  secondTerm.Scale( coeff );
+    Epetra_SerialDenseMatrix secondTerm (tensorF);
+    Real coeff = -1.0 * mu;
+    secondTerm.Scale ( coeff );
 
-  Epetra_SerialDenseMatrix thirdTerm(this->M_FESpace->fieldDim(),this->M_FESpace->fieldDim());
-  Epetra_SerialDenseMatrix rightCauchyC(this->M_FESpace->fieldDim(),this->M_FESpace->fieldDim());
-  rightCauchyC.Scale(0.0);
+    Epetra_SerialDenseMatrix thirdTerm (this->M_FESpace->fieldDim(), this->M_FESpace->fieldDim() );
+    Epetra_SerialDenseMatrix rightCauchyC (this->M_FESpace->fieldDim(), this->M_FESpace->fieldDim() );
+    rightCauchyC.Scale (0.0);
 
 
-  //Compute the tensors C
-  rightCauchyC.Multiply('T','N',1.0,tensorF,tensorF,0.0); //see Epetra_SerialDenseMatrix
+    //Compute the tensors C
+    rightCauchyC.Multiply ('T', 'N', 1.0, tensorF, tensorF, 0.0); //see Epetra_SerialDenseMatrix
 
-  thirdTerm.Multiply('N','N',1.0,tensorF,rightCauchyC,0.0);
-  thirdTerm.Scale(mu);
+    thirdTerm.Multiply ('N', 'N', 1.0, tensorF, rightCauchyC, 0.0);
+    thirdTerm.Scale (mu);
 
-  firstPiola.Scale(0.0);
+    firstPiola.Scale (0.0);
 
-  firstPiola += firstTerm;
-  firstPiola += secondTerm;
-  firstPiola += thirdTerm;
+    firstPiola += firstTerm;
+    firstPiola += secondTerm;
+    firstPiola += thirdTerm;
 }
 
 
 
 template <typename Mesh>
-inline StructuralConstitutiveLaw<Mesh>* createVenantKirchhoffNonLinear() { return new VenantKirchhoffMaterialNonLinear<Mesh >(); }
+inline StructuralConstitutiveLaw<Mesh>* createVenantKirchhoffNonLinear()
+{
+    return new VenantKirchhoffMaterialNonLinear<Mesh >();
+}
 
 namespace
 {

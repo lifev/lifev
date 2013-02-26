@@ -190,11 +190,11 @@ public:
        \param invariants std::vector with the invariants of C and the detF
        \param material UInt number to get the material parameteres form the VenantElasticData class
     */
-    void computeLocalFirstPiolaKirchhoffTensor( Epetra_SerialDenseMatrix& firstPiola,
-                                                const Epetra_SerialDenseMatrix& tensorF,
-                                                const Epetra_SerialDenseMatrix& cofactorF,
-                                                const std::vector<Real>& invariants,
-                                                const UInt marker);
+    void computeLocalFirstPiolaKirchhoffTensor ( Epetra_SerialDenseMatrix& firstPiola,
+                                                 const Epetra_SerialDenseMatrix& tensorF,
+                                                 const Epetra_SerialDenseMatrix& cofactorF,
+                                                 const std::vector<Real>& invariants,
+                                                 const UInt marker);
 
     //@}
 
@@ -605,19 +605,19 @@ void ExponentialMaterialNonLinear<Mesh>::computeKinematicsVariables ( const Vect
         i = (*M_Fk) [ 2 ][ 2 ][ ig ];
 
         //! determinant of deformation gradient Fk
-        (*M_Jack)[ig] = a*( e*i - f*h ) - b*( d*i - f*g ) + c*( d*h - e*g );
+        (*M_Jack) [ig] = a * ( e * i - f * h ) - b * ( d * i - f * g ) + c * ( d * h - e * g );
 
-        ASSERT_PRE((*M_Jack)[ig] > 0, "Negative Jacobian. Error!" );
+        ASSERT_PRE ( (*M_Jack) [ig] > 0, "Negative Jacobian. Error!" );
 
-        (*M_CofFk)[ 0 ][ 0 ][ ig ] =   ( e*i - f*h );
-        (*M_CofFk)[ 0 ][ 1 ][ ig ] = - ( d*i - g*f );
-        (*M_CofFk)[ 0 ][ 2 ][ ig ] =   ( d*h - e*g );
-        (*M_CofFk)[ 1 ][ 0 ][ ig ] = - ( b*i - c*h );
-        (*M_CofFk)[ 1 ][ 1 ][ ig ] =   ( a*i - c*g );
-        (*M_CofFk)[ 1 ][ 2 ][ ig ] = - ( a*h - g*b );
-        (*M_CofFk)[ 2 ][ 0 ][ ig ] =   ( b*f - c*e );
-        (*M_CofFk)[ 2 ][ 1 ][ ig ] = - ( a*f - c*d );
-        (*M_CofFk)[ 2 ][ 2 ][ ig ] =   ( a*e - d*b );
+        (*M_CofFk) [ 0 ][ 0 ][ ig ] =   ( e * i - f * h );
+        (*M_CofFk) [ 0 ][ 1 ][ ig ] = - ( d * i - g * f );
+        (*M_CofFk) [ 0 ][ 2 ][ ig ] =   ( d * h - e * g );
+        (*M_CofFk) [ 1 ][ 0 ][ ig ] = - ( b * i - c * h );
+        (*M_CofFk) [ 1 ][ 1 ][ ig ] =   ( a * i - c * g );
+        (*M_CofFk) [ 1 ][ 2 ][ ig ] = - ( a * h - g * b );
+        (*M_CofFk) [ 2 ][ 0 ][ ig ] =   ( b * f - c * e );
+        (*M_CofFk) [ 2 ][ 1 ][ ig ] = - ( a * f - c * d );
+        (*M_CofFk) [ 2 ][ 2 ][ ig ] =   ( a * e - d * b );
 
     }
 
@@ -666,50 +666,53 @@ void ExponentialMaterialNonLinear<Mesh>::apply ( const vector_Type& sol,
 
 
 template <typename Mesh>
-void ExponentialMaterialNonLinear<Mesh>::computeLocalFirstPiolaKirchhoffTensor( Epetra_SerialDenseMatrix& firstPiola,
-                                                                                const Epetra_SerialDenseMatrix& tensorF,
-                                                                                const Epetra_SerialDenseMatrix& cofactorF,
-                                                                                const std::vector<Real>& invariants,
-                                                                                const UInt marker)
+void ExponentialMaterialNonLinear<Mesh>::computeLocalFirstPiolaKirchhoffTensor ( Epetra_SerialDenseMatrix& firstPiola,
+        const Epetra_SerialDenseMatrix& tensorF,
+        const Epetra_SerialDenseMatrix& cofactorF,
+        const std::vector<Real>& invariants,
+        const UInt marker)
 {
 
-  //Get the material parameters
-  Real alpha    = this->M_dataMaterial->alpha(marker);
-  Real gamma    = this->M_dataMaterial->gamma(marker);
-  Real bulk  	= this->M_dataMaterial->bulk(marker);
+    //Get the material parameters
+    Real alpha    = this->M_dataMaterial->alpha (marker);
+    Real gamma    = this->M_dataMaterial->gamma (marker);
+    Real bulk     = this->M_dataMaterial->bulk (marker);
 
 
-  //Computing the first term \alphaJ^{-2/3}[F-(1/3)tr(C)F^{-T}]exp(\gamma(tr(Ciso) - 3)
-  Epetra_SerialDenseMatrix firstTerm(tensorF);
-  Epetra_SerialDenseMatrix copyCofactorF(cofactorF);
+    //Computing the first term \alphaJ^{-2/3}[F-(1/3)tr(C)F^{-T}]exp(\gamma(tr(Ciso) - 3)
+    Epetra_SerialDenseMatrix firstTerm (tensorF);
+    Epetra_SerialDenseMatrix copyCofactorF (cofactorF);
 
-  Real scale(0.0);
-  scale = -invariants[0]/3.0;
-  copyCofactorF.Scale( scale );
-  firstTerm += copyCofactorF;
+    Real scale (0.0);
+    scale = -invariants[0] / 3.0;
+    copyCofactorF.Scale ( scale );
+    firstTerm += copyCofactorF;
 
-  //Computation trace of the isochoric C
-  Real trCiso(0.0);
-  trCiso = std::pow(invariants[3],-(2.0/3.0))*invariants[0];
+    //Computation trace of the isochoric C
+    Real trCiso (0.0);
+    trCiso = std::pow (invariants[3], - (2.0 / 3.0) ) * invariants[0];
 
-  Real coef( 0.0 );
-  coef = alpha * std::pow(invariants[3],-(2.0/3.0)) * std::exp( gamma * ( trCiso - 3 ) );
-  firstTerm.Scale( coef );
+    Real coef ( 0.0 );
+    coef = alpha * std::pow (invariants[3], - (2.0 / 3.0) ) * std::exp ( gamma * ( trCiso - 3 ) );
+    firstTerm.Scale ( coef );
 
-  //Computing the second term (volumetric part) J*(bulk/2)(J-1+(1/J)*ln(J))F^{-T}
-  Epetra_SerialDenseMatrix secondTerm(cofactorF);
-  Real secCoef(0);
-  secCoef = invariants[3] * (bulk/2.0) * (invariants[3] - 1 + (1.0 / invariants[3]) * std::log(invariants[3]));
+    //Computing the second term (volumetric part) J*(bulk/2)(J-1+(1/J)*ln(J))F^{-T}
+    Epetra_SerialDenseMatrix secondTerm (cofactorF);
+    Real secCoef (0);
+    secCoef = invariants[3] * (bulk / 2.0) * (invariants[3] - 1 + (1.0 / invariants[3]) * std::log (invariants[3]) );
 
-  secondTerm.Scale( secCoef );
+    secondTerm.Scale ( secCoef );
 
-  firstPiola += firstTerm;
-  firstPiola += secondTerm;
+    firstPiola += firstTerm;
+    firstPiola += secondTerm;
 
 }
 
 template <typename Mesh>
-inline StructuralConstitutiveLaw<Mesh>* createExponentialMaterialNonLinear() { return new ExponentialMaterialNonLinear<Mesh >(); }
+inline StructuralConstitutiveLaw<Mesh>* createExponentialMaterialNonLinear()
+{
+    return new ExponentialMaterialNonLinear<Mesh >();
+}
 
 namespace
 {

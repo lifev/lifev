@@ -128,7 +128,7 @@ public:
     //@{
     typedef Real ( *function ) ( const Real&, const Real&, const Real&, const Real&, const ID& );
 
-    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> source_Type;
+    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > source_Type;
 
     typedef StructuralConstitutiveLaw<Mesh>               material_Type;
     typedef boost::shared_ptr<material_Type>              materialPtr_Type;
@@ -168,7 +168,7 @@ public:
     typedef std::vector<LifeV::Real>                     vectorInvariants_Type;
     typedef boost::shared_ptr<vectorInvariants_Type>     vectorInvariantsPtr_Type;
 #endif
-  //@}
+    //@}
 
     //! @name Constructor & Destructor
     //@{
@@ -403,7 +403,7 @@ public:
       \param displacement the solution at a certain time
       \return the vector with the values for J
     */
-    void jacobianDistribution( vectorPtr_Type displacement, vector_Type& jacobianDistribution );
+    void jacobianDistribution ( vectorPtr_Type displacement, vector_Type& jacobianDistribution );
 #endif
 
 
@@ -413,7 +413,7 @@ public:
       \param displacement the solution at a certain time
       \return the vector with the values for J
     */
-    void colorMesh( vector_Type& meshColors );
+    void colorMesh ( vector_Type& meshColors );
 #endif
 
     //void updateMatrix(matrix_Type & bigMatrixStokes);// used for monolithic
@@ -538,8 +538,14 @@ public:
     }
 
     //! Get the right hand. The member rhsCopy is used for Debug purposes!
-    vector_Type& rhsCopy() { return *M_rhsCopy; }
-    vector_Type& residualCopy() { return *M_residualCopy; }
+    vector_Type& rhsCopy()
+    {
+        return *M_rhsCopy;
+    }
+    vector_Type& residualCopy()
+    {
+        return *M_residualCopy;
+    }
 
     //! Get the comunicator object
     boost::shared_ptr<Epetra_Comm> const& comunicator() const
@@ -653,14 +659,14 @@ protected:
     /*!
       \param NONE
     */
-    void constructPatchAreaVector( vector_Type& patchArea, const vector_Type& solution );
+    void constructPatchAreaVector ( vector_Type& patchArea, const vector_Type& solution );
 
 
     //! reconstructElementaryVector: This method applies a reconstruction procedure on the elvec that is passed
     /*!
       \param elvecTens VectorElemental over which the reconstruction is applied
     */
-    void reconstructElementaryVector( VectorElemental& elVecSigma, vector_Type& patchArea, UInt nVol );
+    void reconstructElementaryVector ( VectorElemental& elVecSigma, vector_Type& patchArea, UInt nVol );
 #endif
 
 
@@ -812,17 +818,17 @@ StructuralOperator<Mesh, SolverType>::setup (boost::shared_ptr<data_Type>       
                                              const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
                                              boost::shared_ptr<Epetra_Comm>&     comm)
 {
-    setup( data, dFESpace, comm, dFESpace->mapPtr(), (UInt)0 );
+    setup ( data, dFESpace, comm, dFESpace->mapPtr(), (UInt) 0 );
 
-    M_rhs.reset                        ( new vector_Type(*M_localMap));
-    M_rhsCopy.reset                    ( new vector_Type(*M_localMap));
-    M_residualCopy.reset               ( new vector_Type(*M_localMap));
-    M_rhsNoBC.reset                    ( new vector_Type(*M_localMap));
-    M_sxx.reset                        ( new vector_Type(*M_localMap) );
-    M_syy.reset                        ( new vector_Type(*M_localMap) );
-    M_szz.reset                        ( new vector_Type(*M_localMap) );
-    M_linearSolver.reset               ( new SolverType( comm ) );
-    M_disp.reset                       ( new vector_Type(*M_localMap));
+    M_rhs.reset                        ( new vector_Type (*M_localMap) );
+    M_rhsCopy.reset                    ( new vector_Type (*M_localMap) );
+    M_residualCopy.reset               ( new vector_Type (*M_localMap) );
+    M_rhsNoBC.reset                    ( new vector_Type (*M_localMap) );
+    M_sxx.reset                        ( new vector_Type (*M_localMap) );
+    M_syy.reset                        ( new vector_Type (*M_localMap) );
+    M_szz.reset                        ( new vector_Type (*M_localMap) );
+    M_linearSolver.reset               ( new SolverType ( comm ) );
+    M_disp.reset                       ( new vector_Type (*M_localMap) );
 }
 
 template <typename Mesh, typename SolverType>
@@ -1118,54 +1124,56 @@ void StructuralOperator<Mesh, SolverType>::computeMatrix ( matrixPtr_Type& stiff
 #ifdef COMPUTATION_JACOBIAN
 
 template <typename Mesh, typename SolverType>
-void StructuralOperator<Mesh, SolverType>::jacobianDistribution( vectorPtr_Type displacement, vector_Type& jacobianDistribution )
+void StructuralOperator<Mesh, SolverType>::jacobianDistribution ( vectorPtr_Type displacement, vector_Type& jacobianDistribution )
 {
-    M_Displayer->leaderPrint( " Computing the jacobian for all the volumes ... \t\t\t");
+    M_Displayer->leaderPrint ( " Computing the jacobian for all the volumes ... \t\t\t");
 
     //Initialization of the deformationF matrix
-    M_deformationF.reset  ( new matrixSerialDense_Type( M_FESpace->fieldDim(), M_FESpace->fieldDim() ) );
+    M_deformationF.reset  ( new matrixSerialDense_Type ( M_FESpace->fieldDim(), M_FESpace->fieldDim() ) );
 
-    vector_Type vectorJacobian( jacobianDistribution );
+    vector_Type vectorJacobian ( jacobianDistribution );
     vectorJacobian *= 0.0;
 
     LifeChrono chrono;
     chrono.start();
 
     //construct a vector to store the are
-    vector_Type patchArea(*displacement,Unique,Add);
+    vector_Type patchArea (*displacement, Unique, Add);
     patchArea *= 0.0;
 
-    constructPatchAreaVector( patchArea, *displacement );
+    constructPatchAreaVector ( patchArea, *displacement );
 
     //Before assembling the reconstruction process is done
-    vector_Type patchAreaR(patchArea,Repeated);
+    vector_Type patchAreaR (patchArea, Repeated);
 
 
     //Loop over the volumes to compute J = det(F)
     //Inside the loop, the determinant is store in the appropriate positions
-    vector_Type dRep(*displacement, Repeated);
+    vector_Type dRep (*displacement, Repeated);
     UInt totalDof = M_FESpace->dof().numTotalDof();
-    VectorElemental dk_loc( M_FESpace->fe().nbFEDof(), this->M_FESpace->fieldDim() );
-    VectorElemental elVecDet( M_FESpace->fe().nbFEDof(), this->M_FESpace->fieldDim() );
+    VectorElemental dk_loc ( M_FESpace->fe().nbFEDof(), this->M_FESpace->fieldDim() );
+    VectorElemental elVecDet ( M_FESpace->fe().nbFEDof(), this->M_FESpace->fieldDim() );
 
     //Building fake quadrature rules to compute the deformation gradient F at the nodes
     QuadratureRule fakeQuadratureRule;
 
-    Real refElemArea(0); //area of reference element
+    Real refElemArea (0); //area of reference element
     //compute the area of reference element
-    for(UInt iq=0; iq< M_FESpace->qr().nbQuadPt(); iq++)
-        refElemArea += M_FESpace->qr().weight(iq);
+    for (UInt iq = 0; iq < M_FESpace->qr().nbQuadPt(); iq++)
+    {
+        refElemArea += M_FESpace->qr().weight (iq);
+    }
 
-    Real wQuad(refElemArea/M_FESpace->refFE().nbDof());
+    Real wQuad (refElemArea / M_FESpace->refFE().nbDof() );
 
     //Setting the quadrature Points = DOFs of the element and weight = 1
     std::vector<GeoVector> coords = M_FESpace->refFE().refCoor();
-    std::vector<Real> weights(M_FESpace->fe().nbFEDof(), wQuad);
-    fakeQuadratureRule.setDimensionShape ( shapeDimension(M_FESpace->refFE().shape()), M_FESpace->refFE().shape() );
-    fakeQuadratureRule.setPoints(coords,weights);
+    std::vector<Real> weights (M_FESpace->fe().nbFEDof(), wQuad);
+    fakeQuadratureRule.setDimensionShape ( shapeDimension (M_FESpace->refFE().shape() ), M_FESpace->refFE().shape() );
+    fakeQuadratureRule.setPoints (coords, weights);
 
     //Set the new quadrature rule
-    M_FESpace->setQuadRule(fakeQuadratureRule);
+    M_FESpace->setQuadRule (fakeQuadratureRule);
 
 
     //Loop over the volumes. No markerIDs are necessary on this loop for J = det(F)
@@ -1173,52 +1181,52 @@ void StructuralOperator<Mesh, SolverType>::jacobianDistribution( vectorPtr_Type 
     {
 
         //Vectors for the deformation tensor
-        std::vector<matrixSerialDense_Type> vectorDeformationF(M_FESpace->fe().nbFEDof(),*M_deformationF);
+        std::vector<matrixSerialDense_Type> vectorDeformationF (M_FESpace->fe().nbFEDof(), *M_deformationF);
         M_invariants.resize   ( M_FESpace->fieldDim() + 1 );
 
 
-        M_FESpace->fe().updateFirstDerivQuadPt( M_FESpace->mesh()->volumeList( i ) );
+        M_FESpace->fe().updateFirstDerivQuadPt ( M_FESpace->mesh()->volumeList ( i ) );
 
         UInt eleID = M_FESpace->fe().currentLocalId();
 
         //Extracting the local displacement
         for ( UInt iNode = 0; iNode < ( UInt ) M_FESpace->fe().nbFEDof(); iNode++ )
         {
-            UInt  iloc = M_FESpace->fe().patternFirst( iNode );
+            UInt  iloc = M_FESpace->fe().patternFirst ( iNode );
 
             for ( UInt iComp = 0; iComp < this->M_FESpace->fieldDim(); ++iComp )
             {
-                UInt ig = M_FESpace->dof().localToGlobalMap( eleID, iloc ) + iComp*M_FESpace->dim() + this->M_offset;
-                dk_loc[iloc + iComp*M_FESpace->fe().nbFEDof()] = dRep[ig];
+                UInt ig = M_FESpace->dof().localToGlobalMap ( eleID, iloc ) + iComp * M_FESpace->dim() + this->M_offset;
+                dk_loc[iloc + iComp * M_FESpace->fe().nbFEDof()] = dRep[ig];
             }
         }
 
         //computing the tensor F
-        AssemblyElementalStructure::computeLocalDeformationGradient( dk_loc, vectorDeformationF, M_FESpace->fe() );
+        AssemblyElementalStructure::computeLocalDeformationGradient ( dk_loc, vectorDeformationF, M_FESpace->fe() );
 
 
         //Cycle over the nDofs/element
-        for( UInt nDOF=0; nDOF < ( UInt ) M_FESpace->fe().nbFEDof(); nDOF++ )
+        for ( UInt nDOF = 0; nDOF < ( UInt ) M_FESpace->fe().nbFEDof(); nDOF++ )
         {
-            UInt  iloc = M_FESpace->fe().patternFirst( nDOF );
+            UInt  iloc = M_FESpace->fe().patternFirst ( nDOF );
 
             //computing the determinant
-            AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor( M_invariants, vectorDeformationF[nDOF] );
+            AssemblyElementalStructure::computeInvariantsRightCauchyGreenTensor ( M_invariants, vectorDeformationF[nDOF] );
 
             //Assembling elemental vector
-            (elVecDet)[ iloc ] = M_invariants[3];
-            (elVecDet)[ iloc + M_FESpace->fe().nbFEDof() ] = 0.0;
-            (elVecDet)[ iloc + 2 * M_FESpace->fe().nbFEDof() ] = 0.0;
+            (elVecDet) [ iloc ] = M_invariants[3];
+            (elVecDet) [ iloc + M_FESpace->fe().nbFEDof() ] = 0.0;
+            (elVecDet) [ iloc + 2 * M_FESpace->fe().nbFEDof() ] = 0.0;
 
         }
 
         //multiplying it for the patch area
-        reconstructElementaryVector( elVecDet, patchAreaR, i );
+        reconstructElementaryVector ( elVecDet, patchAreaR, i );
 
         //assembling it into the global vector
         for ( UInt ic = 0; ic < this->M_FESpace->fieldDim(); ++ic )
         {
-            assembleVector(vectorJacobian, elVecDet, M_FESpace->fe(), M_FESpace->dof(), ic, this->M_offset +  ic*totalDof );
+            assembleVector (vectorJacobian, elVecDet, M_FESpace->fe(), M_FESpace->dof(), ic, this->M_offset +  ic * totalDof );
         }
 
         vectorDeformationF.clear();
@@ -1229,67 +1237,69 @@ void StructuralOperator<Mesh, SolverType>::jacobianDistribution( vectorPtr_Type 
     vectorJacobian.globalAssemble();
 
     chrono.stop();
-    M_Displayer->leaderPrintMax("done in ", chrono.diff() );
+    M_Displayer->leaderPrintMax ("done in ", chrono.diff() );
 
     jacobianDistribution = vectorJacobian;
 }
 
 
 template <typename Mesh, typename SolverType>
-void StructuralOperator<Mesh,SolverType >::constructPatchAreaVector( vector_Type & patchArea,
-                                                                     const vector_Type& solution )
+void StructuralOperator<Mesh, SolverType >::constructPatchAreaVector ( vector_Type& patchArea,
+                                                                       const vector_Type& solution )
 {
 
-  vector_Type patchAreaR(solution,Repeated);
-  patchAreaR *= 0.0;
+    vector_Type patchAreaR (solution, Repeated);
+    patchAreaR *= 0.0;
 
-  Real refElemArea(0); //area of reference element
-  UInt totalDof = M_FESpace->dof().numTotalDof();
-  //compute the area of reference element
-  for(UInt iq=0; iq< M_FESpace->qr().nbQuadPt(); iq++)
-    refElemArea += M_FESpace->qr().weight(iq);
-
-  // Define a special quadrature rule for the interpolation
-  QuadratureRule interpQuad;
-  interpQuad.setDimensionShape(shapeDimension(M_FESpace->refFE().shape()), M_FESpace->refFE().shape());
-  Real wQuad(refElemArea/M_FESpace->refFE().nbDof());
-
-  for (UInt i(0); i< M_FESpace->refFE().nbDof(); ++i) //nbRefCoor
+    Real refElemArea (0); //area of reference element
+    UInt totalDof = M_FESpace->dof().numTotalDof();
+    //compute the area of reference element
+    for (UInt iq = 0; iq < M_FESpace->qr().nbQuadPt(); iq++)
     {
-      interpQuad.addPoint(QuadraturePoint(M_FESpace->refFE().xi(i),M_FESpace->refFE().eta(i),M_FESpace->refFE().zeta(i),wQuad));
+        refElemArea += M_FESpace->qr().weight (iq);
     }
 
-  UInt totalNumberVolumes(M_FESpace->mesh()->numVolumes());
-  UInt numberLocalDof(M_FESpace->dof().numLocalDof());
+    // Define a special quadrature rule for the interpolation
+    QuadratureRule interpQuad;
+    interpQuad.setDimensionShape (shapeDimension (M_FESpace->refFE().shape() ), M_FESpace->refFE().shape() );
+    Real wQuad (refElemArea / M_FESpace->refFE().nbDof() );
 
-  CurrentFE interpCFE(M_FESpace->refFE(),getGeometricMap(*(M_FESpace->mesh()) ),interpQuad);
-
-  // Loop over the cells
-  for (UInt iterElement(0); iterElement< totalNumberVolumes; iterElement++)
+    for (UInt i (0); i < M_FESpace->refFE().nbDof(); ++i) //nbRefCoor
     {
-      interpCFE.update(M_FESpace->mesh()->volumeList( iterElement ), UPDATE_WDET );
+        interpQuad.addPoint (QuadraturePoint (M_FESpace->refFE().xi (i), M_FESpace->refFE().eta (i), M_FESpace->refFE().zeta (i), wQuad) );
+    }
 
-      for (UInt iterDof(0); iterDof < numberLocalDof; iterDof++)
+    UInt totalNumberVolumes (M_FESpace->mesh()->numVolumes() );
+    UInt numberLocalDof (M_FESpace->dof().numLocalDof() );
+
+    CurrentFE interpCFE (M_FESpace->refFE(), getGeometricMap (* (M_FESpace->mesh() ) ), interpQuad);
+
+    // Loop over the cells
+    for (UInt iterElement (0); iterElement < totalNumberVolumes; iterElement++)
+    {
+        interpCFE.update (M_FESpace->mesh()->volumeList ( iterElement ), UPDATE_WDET );
+
+        for (UInt iterDof (0); iterDof < numberLocalDof; iterDof++)
         {
-	  for (UInt iDim(0); iDim < M_FESpace->fieldDim(); ++iDim)
+            for (UInt iDim (0); iDim < M_FESpace->fieldDim(); ++iDim)
             {
-	      ID globalDofID(M_FESpace->dof().localToGlobalMap(iterElement,iterDof) + iDim * totalDof);
-	      patchAreaR[globalDofID] += interpCFE.measure();
+                ID globalDofID (M_FESpace->dof().localToGlobalMap (iterElement, iterDof) + iDim * totalDof);
+                patchAreaR[globalDofID] += interpCFE.measure();
             }
         }
     }
 
-  vector_Type final(patchAreaR,Unique,Add);
+    vector_Type final (patchAreaR, Unique, Add);
 
-  patchArea.add(final);
+    patchArea.add (final);
 
 }
 
 template <typename Mesh, typename SolverType>
 void
-StructuralOperator<Mesh,SolverType >::reconstructElementaryVector( VectorElemental& elVecDet,
-                                                        vector_Type& patchArea,
-                                                        UInt nVol )
+StructuralOperator<Mesh, SolverType >::reconstructElementaryVector ( VectorElemental& elVecDet,
+                                                                     vector_Type& patchArea,
+                                                                     UInt nVol )
 {
     //UpdateElement Infos
     //M_FESpace->fe().updateFirstDerivQuadPt( M_FESpace->mesh()->volumeList( nVol ) );
@@ -1297,13 +1307,13 @@ StructuralOperator<Mesh,SolverType >::reconstructElementaryVector( VectorElement
     Real measure = M_FESpace->fe().measure();
     UInt eleID = M_FESpace->fe().currentLocalId();
 
-    for (UInt iDof=0; iDof < M_FESpace->fe().nbFEDof(); iDof++)
+    for (UInt iDof = 0; iDof < M_FESpace->fe().nbFEDof(); iDof++)
     {
-        UInt  iloc = M_FESpace->fe().patternFirst( iDof );
+        UInt  iloc = M_FESpace->fe().patternFirst ( iDof );
 
-        for( UInt icoor=0;  icoor < M_FESpace->fieldDim(); icoor++ )
+        for ( UInt icoor = 0;  icoor < M_FESpace->fieldDim(); icoor++ )
         {
-            ID globalDofID(M_FESpace->dof().localToGlobalMap(eleID,iDof) + icoor * M_FESpace->dof().numTotalDof());
+            ID globalDofID (M_FESpace->dof().localToGlobalMap (eleID, iDof) + icoor * M_FESpace->dof().numTotalDof() );
 
             elVecDet[iloc + icoor * M_FESpace->fe().nbFEDof()] *= ( measure / patchArea[globalDofID] );
         }
@@ -1316,43 +1326,43 @@ StructuralOperator<Mesh,SolverType >::reconstructElementaryVector( VectorElement
 
 #ifdef COLORING_MESH
 template <typename Mesh, typename SolverType>
-void StructuralOperator<Mesh, SolverType>::colorMesh( vector_Type& meshColors )
+void StructuralOperator<Mesh, SolverType>::colorMesh ( vector_Type& meshColors )
 {
     UInt totalDof = this->M_FESpace->dof().numTotalDof();
 
     mapIterator_Type it;
 
-    for( it = (*M_mapMarkersVolumes).begin(); it != (*M_mapMarkersVolumes).end(); it++ )
-      {
+    for ( it = (*M_mapMarkersVolumes).begin(); it != (*M_mapMarkersVolumes).end(); it++ )
+    {
 
-          //Given the marker pointed by the iterator, let's extract the material parameters
-          UInt marker = it->first;
+        //Given the marker pointed by the iterator, let's extract the material parameters
+        UInt marker = it->first;
 
-          for ( UInt j(0); j < it->second.size(); j++ )
-          {
-              this->M_FESpace->fe().updateFirstDerivQuadPt( *(it->second[j]) );
+        for ( UInt j (0); j < it->second.size(); j++ )
+        {
+            this->M_FESpace->fe().updateFirstDerivQuadPt ( * (it->second[j]) );
 
-              UInt eleID = this->M_FESpace->fe().currentLocalId();
+            UInt eleID = this->M_FESpace->fe().currentLocalId();
 
-              for ( UInt iNode = 0; iNode < ( UInt ) this->M_FESpace->fe().nbFEDof(); iNode++ )
-              {
-                  UInt  iloc = this->M_FESpace->fe().patternFirst( iNode );
+            for ( UInt iNode = 0; iNode < ( UInt ) this->M_FESpace->fe().nbFEDof(); iNode++ )
+            {
+                UInt  iloc = this->M_FESpace->fe().patternFirst ( iNode );
 
-                  //Extract the global ID of the x-component of the field
-                  UInt globalIDofDOF = this->M_FESpace->dof().localToGlobalMap( eleID, iloc );
+                //Extract the global ID of the x-component of the field
+                UInt globalIDofDOF = this->M_FESpace->dof().localToGlobalMap ( eleID, iloc );
 
-                  if ( meshColors.blockMap().LID(globalIDofDOF) != -1 ) // The Global ID is on the calling processors
-                  {
-                      Int LIDid = meshColors.blockMap().LID( globalIDofDOF );
-                      Int GIDid = meshColors.blockMap().GID( LIDid );
-                      meshColors[ GIDid ] = marker;
+                if ( meshColors.blockMap().LID (globalIDofDOF) != -1 ) // The Global ID is on the calling processors
+                {
+                    Int LIDid = meshColors.blockMap().LID ( globalIDofDOF );
+                    Int GIDid = meshColors.blockMap().GID ( LIDid );
+                    meshColors[ GIDid ] = marker;
 
-                  }
+                }
 
-              }
-          }
+            }
+        }
 
-      }
+    }
 }
 
 #endif
@@ -1383,16 +1393,16 @@ StructuralOperator<Mesh, SolverType>::evalResidual ( vector_Type& residual, cons
 
         if (iter == 0)
         {
-            *M_rhs=*M_rhsNoBC;
-            bcManageVector( *M_rhs, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(),  M_data->dataTime()->time(), 1.0 );
+            *M_rhs = *M_rhsNoBC;
+            bcManageVector ( *M_rhs, *M_FESpace->mesh(), M_FESpace->dof(), *M_BCh, M_FESpace->feBd(),  M_data->dataTime()->time(), 1.0 );
 
-	    //To export for check
-	    M_rhsCopy = M_rhs;
+            //To export for check
+            M_rhsCopy = M_rhs;
 
-	    // std::string nameFile="residualAfterBC";
-	    // M_rhs->spy(nameFile);
-	    // int n;
-	    // std::cin >> n;
+            // std::string nameFile="residualAfterBC";
+            // M_rhs->spy(nameFile);
+            // int n;
+            // std::cin >> n;
 
         }
 
@@ -1416,7 +1426,7 @@ StructuralOperator<Mesh, SolverType>::evalResidual ( vector_Type& residual, cons
         M_Displayer->leaderPrintMax ("done in ", chrono.diff() );
     }
 
-    if( iter == 0 )
+    if ( iter == 0 )
     {
         *M_residualCopy = residual;
         M_rhsCopy = M_rhs;
@@ -1663,9 +1673,9 @@ template <typename Mesh, typename SolverType>
 void
 StructuralOperator<Mesh, SolverType>::setDataFromGetPot ( const GetPot& dataFile )
 {
-    M_linearSolver->setDataFromGetPot( dataFile, "solid/solver" );
-    M_linearSolver->setupPreconditioner(dataFile, "solid/prec");
-    M_rescaleFactor=dataFile( "solid/rescaleFactor", 0. );
+    M_linearSolver->setDataFromGetPot ( dataFile, "solid/solver" );
+    M_linearSolver->setupPreconditioner (dataFile, "solid/prec");
+    M_rescaleFactor = dataFile ( "solid/rescaleFactor", 0. );
     // UInt marker = M_FESpace->mesh()->volumeList( 1 ).marker();
     // if (!M_data->young(marker))
     //     M_data->setYoung(dataFile( "solid/physics/young", 0. ), marker);

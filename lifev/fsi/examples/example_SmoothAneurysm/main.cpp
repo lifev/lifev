@@ -323,7 +323,7 @@ public:
         //LifeV::UInt offset=dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->offset();
 
 
-        dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->enableStressComputation(1);
+        dynamic_cast<LifeV::FSIMonolithic*> (M_fsi->FSIOper().get() )->enableStressComputation (1);
 
 #ifdef HAVE_HDF5
         if (M_exporterFluid->mapType() == LifeV::Unique)
@@ -341,32 +341,32 @@ public:
         LifeV::UInt sizeTA (M_fsi->FSIOper()->solidTimeAdvance()->size() );
         LifeV::UInt tol (sizeTA + M_tolSave);
 
-    for ( ; M_data->dataFluid()->dataTime()->canAdvance(); iter++)
-    {
-        M_data->dataFluid()->dataTime()->updateTime();
-        M_data->dataSolid()->dataTime()->updateTime();
-        M_data->timeDataALE()->updateTime();
+        for ( ; M_data->dataFluid()->dataTime()->canAdvance(); iter++)
+        {
+            M_data->dataFluid()->dataTime()->updateTime();
+            M_data->dataSolid()->dataTime()->updateTime();
+            M_data->timeDataALE()->updateTime();
 
-        FC2.renewParameters( *M_fsi, 2 );
+            FC2.renewParameters ( *M_fsi, 2 );
 
-        boost::timer _timer;
+            boost::timer _timer;
 
 
-        M_fsi->iterate();
+            M_fsi->iterate();
 
             r = iter % M_saveEvery;
             d = iter - r;
 
-        if ( (iter - d) <= tol || ( (std::floor(d/M_saveEvery) + 1)*M_saveEvery - iter ) <= tol )
-        {
-            *M_fluidDisp      = M_fsi->FSIOper()->meshDisp();
-            M_fsi->FSIOper()->exportSolidDisplacement(*M_solidDisp);//    displacement(), M_offset);
-            //M_fsi->FSIOper()->exportSolidVelocity(*M_solidVel);//    displacement(), M_offset);
-            M_fsi->FSIOper()->exportFluidVelocityAndPressure(*M_velAndPressure);
+            if ( (iter - d) <= tol || ( (std::floor (d / M_saveEvery) + 1) *M_saveEvery - iter ) <= tol )
+            {
+                *M_fluidDisp      = M_fsi->FSIOper()->meshDisp();
+                M_fsi->FSIOper()->exportSolidDisplacement (*M_solidDisp); //    displacement(), M_offset);
+                //M_fsi->FSIOper()->exportSolidVelocity(*M_solidVel);//    displacement(), M_offset);
+                M_fsi->FSIOper()->exportFluidVelocityAndPressure (*M_velAndPressure);
 
-            M_exporterSolid->postProcess( M_data->dataFluid()->dataTime()->time() );
-            M_exporterFluid->postProcess( M_data->dataFluid()->dataTime()->time() );
-        }
+                M_exporterSolid->postProcess ( M_data->dataFluid()->dataTime()->time() );
+                M_exporterFluid->postProcess ( M_data->dataFluid()->dataTime()->time() );
+            }
 
             std::cout << "[fsi_run] Iteration " << iter << " was done in : "
                       << _timer.elapsed() << "\n";
@@ -374,10 +374,10 @@ public:
 
             std::cout << "solution norm " << iter << " : "
                       << M_fsi->displacement().norm2() << "\n";
-        std::cout << "Total computation time = "
-                  << _overall_timer.elapsed() << "s" << "\n";
+            std::cout << "Total computation time = "
+                      << _overall_timer.elapsed() << "s" << "\n";
 
-    }
+        }
     }
 
 private:

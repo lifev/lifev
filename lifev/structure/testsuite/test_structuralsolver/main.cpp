@@ -135,13 +135,13 @@ public:
     {
         run3d();
     }
-    void CheckResultLE(const Real& dispNorm, const Real& time);
-    void CheckResultSVK(const Real& dispNorm, const Real& time);
-    void CheckResultSVKPenalized(const Real& dispNorm, const Real& time);
-    void CheckResultEXP(const Real& dispNorm, const Real& time);
-    void CheckResultNH(const Real& dispNorm, const Real& time);
-    void resultChanged(Real time);
-//@}
+    void CheckResultLE (const Real& dispNorm, const Real& time);
+    void CheckResultSVK (const Real& dispNorm, const Real& time);
+    void CheckResultSVKPenalized (const Real& dispNorm, const Real& time);
+    void CheckResultEXP (const Real& dispNorm, const Real& time);
+    void CheckResultNH (const Real& dispNorm, const Real& time);
+    void resultChanged (Real time);
+    //@}
 
 protected:
 
@@ -492,57 +492,65 @@ Structure::run3d()
 
         if (verbose)
         {
-	  std::cout << std::endl;
-	  std::cout << "S- Now we are at time " << dataStructure->dataTime()->time() << " s." << std::endl;
-	}
+            std::cout << std::endl;
+            std::cout << "S- Now we are at time " << dataStructure->dataTime()->time() << " s." << std::endl;
+        }
 
-      //! 6. Updating right-hand side
-      *rhs *=0;
-      timeAdvance->updateRHSContribution( dt );
-      *rhs += *solid.massMatrix() *timeAdvance->rhsContributionSecondDerivative()/timeAdvanceCoefficient;
-      solid.setRightHandSide( *rhs );
+        //! 6. Updating right-hand side
+        *rhs *= 0;
+        timeAdvance->updateRHSContribution ( dt );
+        *rhs += *solid.massMatrix() * timeAdvance->rhsContributionSecondDerivative() / timeAdvanceCoefficient;
+        solid.setRightHandSide ( *rhs );
 
-      //! 7. Iterate --> Calling Newton
-      solid.iterate( BCh );
+        //! 7. Iterate --> Calling Newton
+        solid.iterate ( BCh );
 
-      timeAdvance->shiftRight( solid.displacement() );
+        timeAdvance->shiftRight ( solid.displacement() );
 
-      *solidDisp = solid.displacement();
-      *solidVel  = timeAdvance->firstDerivative();
-      *solidAcc  = timeAdvance->secondDerivative();
+        *solidDisp = solid.displacement();
+        *solidVel  = timeAdvance->firstDerivative();
+        *solidAcc  = timeAdvance->secondDerivative();
 
-      exporter->postProcess( dataStructure->dataTime()->time() );
+        exporter->postProcess ( dataStructure->dataTime()->time() );
 
-      /* This part lets to save the displacement at one point of the mesh and to check the result
-	 w.r.t. manufactured solution.
-	 //!--------------------------------------------------------------------------------------------------
-	 //! MATLAB FILE WITH DISPLACEMENT OF A CHOOSEN POINT
-	 //!--------------------------------------------------------------------------------------------------
-	 cout <<"*******  DISPLACEMENT COMPONENTS of ID node "<< IDPoint << " *******"<< std::endl;
-	 for ( UInt k = IDPoint - 1 ; k <= solid.displacement().size() - 1; k = k + solid.displacement().size()/nDimensions )
-	 {
-	 file_comp<< solid.displacement()[ k ] << " ";
-	 cout.precision(16);
-	 cout <<"*********************************************************"<< std::endl;
-	 cout <<" solid.disp()[ "<< k <<" ] = "<<  solid.displacement()[ k ]  << std::endl;
-	 cout <<"*********************************************************"<< std::endl;
-	 }
-	 file_comp<< endl;
-      */
+        /* This part lets to save the displacement at one point of the mesh and to check the result
+        w.r.t. manufactured solution.
+         //!--------------------------------------------------------------------------------------------------
+         //! MATLAB FILE WITH DISPLACEMENT OF A CHOOSEN POINT
+         //!--------------------------------------------------------------------------------------------------
+         cout <<"*******  DISPLACEMENT COMPONENTS of ID node "<< IDPoint << " *******"<< std::endl;
+         for ( UInt k = IDPoint - 1 ; k <= solid.displacement().size() - 1; k = k + solid.displacement().size()/nDimensions )
+         {
+         file_comp<< solid.displacement()[ k ] << " ";
+         cout.precision(16);
+         cout <<"*********************************************************"<< std::endl;
+         cout <<" solid.disp()[ "<< k <<" ] = "<<  solid.displacement()[ k ]  << std::endl;
+         cout <<"*********************************************************"<< std::endl;
+         }
+         file_comp<< endl;
+            */
 
-      Real normVect;
-      normVect =  solid.displacement().norm2();
-      std::cout << "The norm 2 of the displacement field is: "<< normVect << std::endl;
+        Real normVect;
+        normVect =  solid.displacement().norm2();
+        std::cout << "The norm 2 of the displacement field is: " << normVect << std::endl;
 
-    ///////// CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
-        if (!dataStructure->solidType().compare("linearVenantKirchhoff"))
-          CheckResultLE(normVect, dataStructure->dataTime()->time() );
-        else if (!dataStructure->solidType().compare("nonLinearVenantKirchhoff"))
-          CheckResultSVK(normVect, dataStructure->dataTime()->time() );
-        else if (!dataStructure->solidType().compare("nonLinearVenantKirchhoffPenalized"))
-          CheckResultSVKPenalized(normVect, dataStructure->dataTime()->time() );
-        else if (!dataStructure->solidType().compare("exponential"))
-          CheckResultEXP(normVect, dataStructure->dataTime()->time() );
+        ///////// CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
+        if (!dataStructure->solidType().compare ("linearVenantKirchhoff") )
+        {
+            CheckResultLE (normVect, dataStructure->dataTime()->time() );
+        }
+        else if (!dataStructure->solidType().compare ("nonLinearVenantKirchhoff") )
+        {
+            CheckResultSVK (normVect, dataStructure->dataTime()->time() );
+        }
+        else if (!dataStructure->solidType().compare ("nonLinearVenantKirchhoffPenalized") )
+        {
+            CheckResultSVKPenalized (normVect, dataStructure->dataTime()->time() );
+        }
+        else if (!dataStructure->solidType().compare ("exponential") )
+        {
+            CheckResultEXP (normVect, dataStructure->dataTime()->time() );
+        }
         else
         {
             CheckResultNH (normVect, dataStructure->dataTime()->time() );
@@ -598,18 +606,26 @@ void Structure::CheckResultSVK (const Real& dispNorm, const Real& time)
         this->resultChanged (time);
     }
 }
-void Structure::CheckResultSVKPenalized(const Real& dispNorm,const Real& time)
+void Structure::CheckResultSVKPenalized (const Real& dispNorm, const Real& time)
 {
-    if ( time == 0.1  && std::fabs(dispNorm-0.254316)<=1e-5 )
-        this->resultChanged(time);
-    if ( time == 0.2  && std::fabs(dispNorm-0.254322)<=1e-5 )
-        this->resultChanged(time);
-    if ( time == 0.3  && std::fabs(dispNorm-0.254317)<=1e-5 )
-        this->resultChanged(time);
-    if ( time == 0.4  && std::fabs(dispNorm-0.254318)<=1e-5 )
-        this->resultChanged(time);
+    if ( time == 0.1  && std::fabs (dispNorm - 0.254316) <= 1e-5 )
+    {
+        this->resultChanged (time);
+    }
+    if ( time == 0.2  && std::fabs (dispNorm - 0.254322) <= 1e-5 )
+    {
+        this->resultChanged (time);
+    }
+    if ( time == 0.3  && std::fabs (dispNorm - 0.254317) <= 1e-5 )
+    {
+        this->resultChanged (time);
+    }
+    if ( time == 0.4  && std::fabs (dispNorm - 0.254318) <= 1e-5 )
+    {
+        this->resultChanged (time);
+    }
 }
-void Structure::CheckResultEXP(const Real& dispNorm,const Real& time)
+void Structure::CheckResultEXP (const Real& dispNorm, const Real& time)
 {
     if ( time == 0.1  && std::fabs (dispNorm - 0.284844) <= 1e-5 )
     {

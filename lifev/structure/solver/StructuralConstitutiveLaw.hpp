@@ -200,11 +200,11 @@ public:
        \param invariants std::vector with the invariants of C and the detF
        \param material UInt number to get the material parameteres form the VenantElasticData class
     */
-    virtual void computeLocalFirstPiolaKirchhoffTensor( Epetra_SerialDenseMatrix& firstPiola,
-                                                        const Epetra_SerialDenseMatrix& tensorF,
-                                                        const Epetra_SerialDenseMatrix& cofactorF,
-                                                        const std::vector<Real>& invariants,
-                                                        const UInt material) = 0;
+    virtual void computeLocalFirstPiolaKirchhoffTensor ( Epetra_SerialDenseMatrix& firstPiola,
+                                                         const Epetra_SerialDenseMatrix& tensorF,
+                                                         const Epetra_SerialDenseMatrix& cofactorF,
+                                                         const std::vector<Real>& invariants,
+                                                         const UInt material) = 0;
 
 
     //! @name Set Methods

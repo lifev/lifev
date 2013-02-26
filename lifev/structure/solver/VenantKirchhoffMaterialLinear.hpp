@@ -146,19 +146,19 @@ public:
                   std::string const& fileNameJacobian);
 
     //! Compute the First Piola Kirchhoff Tensor
-    /*! 
+    /*!
        \param firstPiola Epetra_SerialDenseMatrix that has to be filled
-       \param tensorF Epetra_SerialDenseMatrix the deformation gradient 
-       \param cofactorF Epetra_SerialDenseMatrix cofactor of F 
+       \param tensorF Epetra_SerialDenseMatrix the deformation gradient
+       \param cofactorF Epetra_SerialDenseMatrix cofactor of F
        \param invariants std::vector with the invariants of C and the detF
        \param material UInt number to get the material parameteres form the VenantElasticData class
     */
-    void computeLocalFirstPiolaKirchhoffTensor( Epetra_SerialDenseMatrix& firstPiola,
-						const Epetra_SerialDenseMatrix& tensorF,
-						const Epetra_SerialDenseMatrix& cofactorF,
-						const std::vector<Real>& invariants,
-						const UInt marker);
- 
+    void computeLocalFirstPiolaKirchhoffTensor ( Epetra_SerialDenseMatrix& firstPiola,
+                                                 const Epetra_SerialDenseMatrix& tensorF,
+                                                 const Epetra_SerialDenseMatrix& cofactorF,
+                                                 const std::vector<Real>& invariants,
+                                                 const UInt marker);
+
     //@}
 
     //! @name Get Methods
@@ -365,47 +365,50 @@ VenantKirchhoffMaterialLinear<Mesh>::showMe ( std::string const& fileNameStiff,
 
 template <typename Mesh>
 void
-VenantKirchhoffMaterialLinear<Mesh>::computeLocalFirstPiolaKirchhoffTensor( Epetra_SerialDenseMatrix& firstPiola,
-									    const Epetra_SerialDenseMatrix& tensorF,
-									    const Epetra_SerialDenseMatrix& cofactorF,
-									    const std::vector<Real>& invariants,
-									    const UInt marker)
+VenantKirchhoffMaterialLinear<Mesh>::computeLocalFirstPiolaKirchhoffTensor ( Epetra_SerialDenseMatrix& firstPiola,
+                                                                             const Epetra_SerialDenseMatrix& tensorF,
+                                                                             const Epetra_SerialDenseMatrix& cofactorF,
+                                                                             const std::vector<Real>& invariants,
+                                                                             const UInt marker)
 {
 
-  //Get the material parameters
-  Real lambda  	= this->M_dataMaterial->lambda(marker);
-  Real mu    	= this->M_dataMaterial->mu(marker);
+    //Get the material parameters
+    Real lambda   = this->M_dataMaterial->lambda (marker);
+    Real mu       = this->M_dataMaterial->mu (marker);
 
-  Epetra_SerialDenseMatrix copyF(tensorF);
-  Epetra_SerialDenseMatrix identity(nDimensions,nDimensions);
+    Epetra_SerialDenseMatrix copyF (tensorF);
+    Epetra_SerialDenseMatrix identity (nDimensions, nDimensions);
 
-  //Computation gradient of u and setting the identity tensor
-  for( UInt icoor=0; icoor < nDimensions; icoor++ )
+    //Computation gradient of u and setting the identity tensor
+    for ( UInt icoor = 0; icoor < nDimensions; icoor++ )
     {
-      copyF(icoor,icoor) -= 1.0;
-      identity(icoor,icoor) = 1;
+        copyF (icoor, icoor) -= 1.0;
+        identity (icoor, icoor) = 1;
     }
 
-  Real divergenceU( copyF(0,0) + copyF(1,1) + copyF(2,2) ); //DivU = tr(copyF)
-  Real coefIdentity(0.0);
-  coefIdentity = divergenceU * lambda;
-  identity.Scale( coefIdentity );
+    Real divergenceU ( copyF (0, 0) + copyF (1, 1) + copyF (2, 2) ); //DivU = tr(copyF)
+    Real coefIdentity (0.0);
+    coefIdentity = divergenceU * lambda;
+    identity.Scale ( coefIdentity );
 
-  Epetra_SerialDenseMatrix transposed(copyF);
-  transposed.SetUseTranspose(true);
+    Epetra_SerialDenseMatrix transposed (copyF);
+    transposed.SetUseTranspose (true);
 
-  Epetra_SerialDenseMatrix secondTerm(nDimensions,nDimensions);
+    Epetra_SerialDenseMatrix secondTerm (nDimensions, nDimensions);
 
-  secondTerm = copyF;
-  secondTerm += transposed;
-  secondTerm.Scale(mu);
+    secondTerm = copyF;
+    secondTerm += transposed;
+    secondTerm.Scale (mu);
 
-  firstPiola = identity;
-  firstPiola += secondTerm;
+    firstPiola = identity;
+    firstPiola += secondTerm;
 }
 
 template <typename Mesh>
-inline StructuralConstitutiveLaw<Mesh>* createVenantKirchhoffLinear() { return new VenantKirchhoffMaterialLinear<Mesh >(); }
+inline StructuralConstitutiveLaw<Mesh>* createVenantKirchhoffLinear()
+{
+    return new VenantKirchhoffMaterialLinear<Mesh >();
+}
 namespace
 {
 static bool registerVKL = StructuralConstitutiveLaw<LifeV::RegionMesh<LinearTetra> >::StructureMaterialFactory::instance().registerProduct ( "linearVenantKirchhoff", &createVenantKirchhoffLinear<LifeV::RegionMesh<LinearTetra> > );

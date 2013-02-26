@@ -355,7 +355,7 @@ public:
       @Note Results might be very wrong if you are not using lagrangian FE for tetrahedra
      */
     template <typename vector_type>
-    vector_type recoveryFunction(const vector_type& solution) const;
+    vector_type recoveryFunction (const vector_type& solution) const;
 
     //! Reconstruction of the laplacian using gradientRecovery procedures.
     /*!
@@ -381,7 +381,7 @@ public:
      */
     void setQuadRule (const QuadratureRule& Qr);
 
-    void setBdQuadRule(const QuadratureRule& bdQr);
+    void setBdQuadRule (const QuadratureRule& bdQr);
 
     //@}
 
@@ -1744,8 +1744,8 @@ setQuadRule (const QuadratureRule& Qr)
 
 template<typename MeshType, typename MapType>
 void
-FESpace<MeshType,MapType>::
-setBdQuadRule(const QuadratureRule& Qr)
+FESpace<MeshType, MapType>::
+setBdQuadRule (const QuadratureRule& Qr)
 {
     M_bdQr = &Qr;
     resetBoundaryFE();
@@ -1791,11 +1791,12 @@ createMap (const commPtr_Type& commptr)
 
 template<typename MeshType, typename MapType>
 void
-FESpace<MeshType,MapType>::
-resetBoundaryFE(){
-    if (M_refFE->hasBoundaryFE())
+FESpace<MeshType, MapType>::
+resetBoundaryFE()
+{
+    if (M_refFE->hasBoundaryFE() )
     {
-        M_feBd.reset(new CurrentBoundaryFE( M_refFE->boundaryFE(), getGeometricMap( *M_mesh ).boundaryMap(), *M_bdQr ) );
+        M_feBd.reset (new CurrentBoundaryFE ( M_refFE->boundaryFE(), getGeometricMap ( *M_mesh ).boundaryMap(), *M_bdQr ) );
         std::cout << "resetting BD rule" << std::endl;
     }
 }

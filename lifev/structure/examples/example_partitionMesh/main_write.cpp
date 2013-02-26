@@ -68,48 +68,49 @@ using namespace LifeV;
 #endif /* HAVE_MPI */
 #endif /* HAVE_HDF5 */
 
-int main(int argc, char** argv)
+int main (int argc, char** argv)
 {
 #ifdef HAVE_HDF5
 #ifdef HAVE_MPI
 
-	typedef RegionMesh<LinearTetra> mesh_Type;
+    typedef RegionMesh<LinearTetra> mesh_Type;
 
-    MPI_Init(&argc, &argv);
-    boost::shared_ptr<Epetra_Comm> comm(new Epetra_MpiComm(MPI_COMM_WORLD));
+    MPI_Init (&argc, &argv);
+    boost::shared_ptr<Epetra_Comm> comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
 
-    if (comm->NumProc() != 1) {
-    	std::cout << "This test needs to be run "
-    			  << "with a single process. Aborting."
-    			  << std::endl;
-    	return(EXIT_FAILURE);
+    if (comm->NumProc() != 1)
+    {
+        std::cout << "This test needs to be run "
+                  << "with a single process. Aborting."
+                  << std::endl;
+        return (EXIT_FAILURE);
     }
 
-    GetPot commandLine(argc, argv);
-    string dataFileName = commandLine.follow("data", 2, "-f", "--file");
-    GetPot dataFile(dataFileName);
+    GetPot commandLine (argc, argv);
+    string dataFileName = commandLine.follow ("data", 2, "-f", "--file");
+    GetPot dataFile (dataFileName);
 
-    const UInt numParts(dataFile("offlinePartition/num_parts", 4));
-    std::string stringFileName(dataFile("offlinePartition/nameFile", "NO_DEFAULT_VALE"));
+    const UInt numParts (dataFile ("offlinePartition/num_parts", 4) );
+    std::string stringFileName (dataFile ("offlinePartition/nameFile", "NO_DEFAULT_VALE") );
 
-    stringFileName +="Partitioned.h5";
+    stringFileName += "Partitioned.h5";
 
     std::cout << "Number of parts: " << numParts << std::endl;
     std::cout << "Name of HDF5 container: " << stringFileName << std::endl;
 
     //Creation mesh data object to read the whole mesh
     MeshData             meshData;
-    meshData.setup(dataFile, "solid/space_discretization");
+    meshData.setup (dataFile, "solid/space_discretization");
 
     //Creation of the object whole mesh
-    boost::shared_ptr<mesh_Type> fullMeshPtr(new mesh_Type( comm ) );
-    readMesh(*fullMeshPtr, meshData);
+    boost::shared_ptr<mesh_Type> fullMeshPtr (new mesh_Type ( comm ) );
+    readMesh (*fullMeshPtr, meshData);
 
     //Creation object mesh partitioner
     MeshPartitioner<mesh_Type> meshPart;
-    meshPart.setup(numParts, comm);
+    meshPart.setup (numParts, comm);
 
-    meshPart.attachUnpartitionedMesh(fullMeshPtr);
+    meshPart.attachUnpartitionedMesh (fullMeshPtr);
     meshPart.doPartitionGraph();
     meshPart.doPartitionMesh();
 
@@ -119,19 +120,19 @@ int main(int argc, char** argv)
     fullMeshPtr.reset();
 
     // Write mesh parts to HDF5 container
-    PartitionIO<mesh_Type> partitionIO(stringFileName, comm);
-    partitionIO.write(meshPart.meshPartitions());
+    PartitionIO<mesh_Type> partitionIO (stringFileName, comm);
+    partitionIO.write (meshPart.meshPartitions() );
 
     MPI_Finalize();
 
 #else
     std::cout << "This test needs MPI to run. Aborting." << std::endl;
-	return(EXIT_FAILURE);
+    return (EXIT_FAILURE);
 #endif /* HAVE_MPI */
 #else
     std::cout << "This test needs HDF5 to run. Aborting." << std::endl;
-	return(EXIT_FAILURE);
+    return (EXIT_FAILURE);
 #endif /* HAVE_HDF5 */
 
-    return(EXIT_SUCCESS);
+    return (EXIT_SUCCESS);
 }

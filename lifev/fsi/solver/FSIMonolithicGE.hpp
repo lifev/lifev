@@ -144,7 +144,7 @@ public:
     void applyBoundaryConditions();
 
 
-    void updateSolution( const vector_Type& solution );
+    void updateSolution ( const vector_Type& solution );
 
     //@}
 

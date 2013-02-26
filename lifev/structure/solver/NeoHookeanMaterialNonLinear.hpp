@@ -188,11 +188,11 @@ public:
        \param invariants std::vector with the invariants of C and the detF
        \param material UInt number to get the material parameteres form the VenantElasticData class
     */
-    void computeLocalFirstPiolaKirchhoffTensor( Epetra_SerialDenseMatrix& firstPiola,
-                                                const Epetra_SerialDenseMatrix& tensorF,
-                                                const Epetra_SerialDenseMatrix& cofactorF,
-                                                const std::vector<Real>& invariants,
-                                                const UInt marker);
+    void computeLocalFirstPiolaKirchhoffTensor ( Epetra_SerialDenseMatrix& firstPiola,
+                                                 const Epetra_SerialDenseMatrix& tensorF,
+                                                 const Epetra_SerialDenseMatrix& cofactorF,
+                                                 const std::vector<Real>& invariants,
+                                                 const UInt marker);
 
 
     //@}
@@ -648,37 +648,37 @@ void NeoHookeanMaterialNonLinear<Mesh>::showMe ( std::string const& fileNameStif
 }
 
 template <typename Mesh>
-void NeoHookeanMaterialNonLinear<Mesh>::computeLocalFirstPiolaKirchhoffTensor( Epetra_SerialDenseMatrix& firstPiola,
-									       const Epetra_SerialDenseMatrix& tensorF,
-									       const Epetra_SerialDenseMatrix& cofactorF,
-									       const std::vector<Real>& invariants,
-									       const UInt marker)
+void NeoHookeanMaterialNonLinear<Mesh>::computeLocalFirstPiolaKirchhoffTensor ( Epetra_SerialDenseMatrix& firstPiola,
+                                                                                const Epetra_SerialDenseMatrix& tensorF,
+                                                                                const Epetra_SerialDenseMatrix& cofactorF,
+                                                                                const std::vector<Real>& invariants,
+                                                                                const UInt marker)
 {
 
-  //Get the material parameters
-  Real mu    	= this->M_dataMaterial->mu(marker);
-  Real bulk  	= this->M_dataMaterial->bulk(marker);
+    //Get the material parameters
+    Real mu       = this->M_dataMaterial->mu (marker);
+    Real bulk     = this->M_dataMaterial->bulk (marker);
 
-  //Computing the first term \muJ^{-2/3}[F-(1/3)tr(C)F^{-T}]
-  Epetra_SerialDenseMatrix firstTerm(tensorF);
-  Epetra_SerialDenseMatrix copyCofactorF(cofactorF);
-  Real scale( 0.0 );
-  scale = -1 * (1.0 / 3.0) * invariants[0];
-  copyCofactorF.Scale( scale );
-  firstTerm += copyCofactorF;
+    //Computing the first term \muJ^{-2/3}[F-(1/3)tr(C)F^{-T}]
+    Epetra_SerialDenseMatrix firstTerm (tensorF);
+    Epetra_SerialDenseMatrix copyCofactorF (cofactorF);
+    Real scale ( 0.0 );
+    scale = -1 * (1.0 / 3.0) * invariants[0];
+    copyCofactorF.Scale ( scale );
+    firstTerm += copyCofactorF;
 
-  Real coef( 0.0 );
-  coef = mu * std::pow(invariants[3],-2.0/3.0);
-  firstTerm.Scale( coef );
+    Real coef ( 0.0 );
+    coef = mu * std::pow (invariants[3], -2.0 / 3.0);
+    firstTerm.Scale ( coef );
 
-  //Computing the second term (volumetric part) J*(bulk/2)(J-1+(1/J)*ln(J))F^{-T}
-  Epetra_SerialDenseMatrix secondTerm(cofactorF);
-  Real sCoef(0);
-  sCoef = invariants[3] * (bulk/2.0) * (invariants[3] - 1 + (1 / invariants[3]) * std::log(invariants[3]));
-  secondTerm.Scale( sCoef );
+    //Computing the second term (volumetric part) J*(bulk/2)(J-1+(1/J)*ln(J))F^{-T}
+    Epetra_SerialDenseMatrix secondTerm (cofactorF);
+    Real sCoef (0);
+    sCoef = invariants[3] * (bulk / 2.0) * (invariants[3] - 1 + (1 / invariants[3]) * std::log (invariants[3]) );
+    secondTerm.Scale ( sCoef );
 
-  firstPiola += firstTerm;
-  firstPiola += secondTerm;
+    firstPiola += firstTerm;
+    firstPiola += secondTerm;
 }
 
 

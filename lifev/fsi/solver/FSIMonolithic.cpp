@@ -436,11 +436,11 @@ updateSolidSystem ( vectorPtr_Type& rhsFluidCoupling )
 }
 
 
-void FSIMonolithic::setVectorInStencils( const vectorPtr_Type& vel,
-                                         const vectorPtr_Type& pressure,
-                                         const vectorPtr_Type& solidDisp,
-                                         //const vectorPtr_Type& fluidDisp,
-                                         const UInt iter)
+void FSIMonolithic::setVectorInStencils ( const vectorPtr_Type& vel,
+                                          const vectorPtr_Type& pressure,
+                                          const vectorPtr_Type& solidDisp,
+                                          //const vectorPtr_Type& fluidDisp,
+                                          const UInt iter)
 {
     setFluidVectorInStencil (vel, pressure, iter);
     setSolidVectorInStencil (solidDisp, iter);
