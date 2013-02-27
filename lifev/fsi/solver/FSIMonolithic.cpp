@@ -659,122 +659,73 @@ FSIMonolithic::assembleSolidBlock ( UInt iter, const vector_Type& solution )
     }
 
     // Resetting the solidBlockPrec term
+    M_solidBlockPrec.reset(new matrix_Type(*M_monolithicMap, 1));
 
-    // case of formulation matrix * vector ( i.e. Linear Elastic Case )
-    // todo: use a boolean to identify the nonlinear structures.
-    if(M_data->dataSolid()->solidType().compare("exponential") && M_data->dataSolid()->solidType().compare("neoHookean"))
+    // When ET for structures is used, there is not offset parameter. This is why
+    // we need to extract portions of vector and mount them in the proper parts.
+    // Extractig the right portion from the total solution of the solid part
+    vectorPtr_Type solidPortion( new vector_Type( M_dFESpace->map() ) );
+    solidPortion->subset(solution, M_offset );
+
+    //Multiplying it by the rescale factor
+    *solidPortion *= M_solid->rescaleFactor();
+    M_solid->material()->computeStiffness(*solidPortion, 1., M_data->dataSolid(), M_solid->mapMarkersVolumes(), M_solid->mapMarkersIndexes(), M_solid->displayerPtr());
+
+    // Start building a block matrix to handle easily the assembled part
+    // in the structure module.
+    //1. Create the correct global map for fluxes
+    MapEpetra mapEpetraFluxes( M_fluxes, M_epetraComm );
+
+    //2. Construct a global MapVector with all the maps
+    // The globalMatrix will be adjusted according to the monolithic solver
+    // that is used.
+    matrixBlockPtr_Type globalMatrixWithOnlyStructure;
+
+    //The map is composed of ( u , p , fluxes, solid, interface, d_f )
+    if( !M_data->method().compare("monolithicGI") )
     {
-
-        //Extractig the right portion from the total solution of the solid part
-        vectorPtr_Type solidPortion( new vector_Type( M_dFESpace->map() ) );
-
-        solidPortion->subset(solution, M_offset );
-
-        //Multiplying it by the rescale factor
-        *solidPortion *= M_solid->rescaleFactor();
-        M_solid->material()->computeStiffness(*solidPortion, 1., M_data->dataSolid(), M_solid->mapMarkersVolumes(), M_solid->mapMarkersIndexes(), M_solid->displayerPtr());
-
-        // resetting the M_solidBlockPrec
-        M_solidBlockPrec.reset(new matrix_Type(*M_monolithicMap, 1));
-
-        //The map for the structure part is the one corresponding only at the solid blocks
-        //First a block matrix epetra is created and then summed to the total matrix
-
-        //The map is composed of ( u , p , fluxes, solid, interface, d_f )
-        if( !M_data->method().compare("monolithicGI") )
-        {
-
-            //1. Create the correct global map for fluxes
-            MapEpetra mapEpetraFluxes( M_fluxes, M_epetraComm );
-
-            //2. Construct a global MapVector with all the maps
-            matrixBlockPtr_Type globalMatrixWithOnlyStructure;
-            globalMatrixWithOnlyStructure.reset(new matrixBlock_Type( M_uFESpace->map() | M_pFESpace->map() | mapEpetraFluxes | M_dFESpace->map()
+        globalMatrixWithOnlyStructure.reset(new matrixBlock_Type( M_uFESpace->map() | M_pFESpace->map() | mapEpetraFluxes | M_dFESpace->map()
                                                                        | *(M_monolithicMatrix->interfaceMap()) |  M_mmFESpace->map() ) );
-
-            //Need to inglobe it into a boost::shared to avoid memeory leak
-            boost::shared_ptr<MatrixEpetra<Real> >  solidMatrix(new MatrixEpetra<Real>( M_solid->map(), 1 ));
-            *solidMatrix *= 0.0;
-
-            *solidMatrix += *M_solid->massMatrix();
-            *solidMatrix += *(M_solid->material()->stiffMatrix());
-
-            solidMatrix->globalAssemble();
-
-            MatrixEpetra<Real>* rawPointerToMatrix = new MatrixEpetra<Real>( *solidMatrix );
-
-            matrixBlockView_Type structurePart(*(globalMatrixWithOnlyStructure->block(3,3)));
-
-            structurePart.setup(UInt(0), UInt(0), UInt(3*M_dFESpace->dof().numTotalDof()), UInt(3*M_dFESpace->dof().numTotalDof()), rawPointerToMatrix);
-
-            using namespace MatrixEpetraStructuredUtility;
-
-            //3. Put the matrix assembled in the solid in the proper vector
-            copyBlock( structurePart, *(globalMatrixWithOnlyStructure->block(3,3)) );
-
-            globalMatrixWithOnlyStructure->globalAssemble();
-
-            //Summing the local matrix into the global
-            *M_solidBlockPrec += *globalMatrixWithOnlyStructure;
-
-        }
-        //The map is composed of ( u , p , fluxes, solid, interface )
-        else
-        {
-            //1. Create the correct global map for fluxes
-            MapEpetra mapEpetraFluxes( M_fluxes, M_epetraComm );
-
-            //2. Construct a global MapVector with all the maps
-            matrixBlockPtr_Type globalMatrixWithOnlyStructure;
-            globalMatrixWithOnlyStructure.reset(new matrixBlock_Type( M_uFESpace->map() | M_pFESpace->map() | mapEpetraFluxes | M_dFESpace->map()
-                                                                       | *(M_monolithicMatrix->interfaceMap()) ) );
-
-            //Need to inglobe it into a boost::shared to avoid memeory leak
-            boost::shared_ptr<MatrixEpetra<Real> >  solidMatrix(new MatrixEpetra<Real>( M_solid->map(), 1 ));
-            *solidMatrix *= 0.0;
-
-            *solidMatrix += *M_solid->massMatrix();
-            *solidMatrix += *(M_solid->material()->stiffMatrix());
-
-            solidMatrix->globalAssemble();
-
-            MatrixEpetra<Real>* rawPointerToMatrix = new MatrixEpetra<Real>( *solidMatrix );
-
-            matrixBlockView_Type structurePart(*(globalMatrixWithOnlyStructure->block(3,3)));
-
-            structurePart.setup(UInt(0), UInt(0), UInt(3*M_dFESpace->dof().numTotalDof()), UInt(3*M_dFESpace->dof().numTotalDof()), rawPointerToMatrix);
-
-            using namespace MatrixEpetraStructuredUtility;
-
-            //3. Put the matrix assembled in the solid in the proper vector
-            copyBlock( structurePart, *(globalMatrixWithOnlyStructure->block(3,3)) );
-
-            globalMatrixWithOnlyStructure->globalAssemble();
-
-            //Summing the local matrix into the global
-            *M_solidBlockPrec += *globalMatrixWithOnlyStructure;
-
-
-        }
-
-        M_solidBlockPrec->globalAssemble();
-
-        *M_solidBlockPrec *= M_solid->rescaleFactor();
-        //M_solidBlockPrec->spy("solidBlockMatrix");
-
     }
-    // case of formulation vector (i.e. all the nonlinear laws)
+    //The map is composed of ( u , p , fluxes, solid, interface )
     else
     {
-      M_solid->material()->updateJacobianMatrix( solution*M_solid->rescaleFactor(), dataSolid(), M_solid->mapMarkersVolumes(), M_solid->mapMarkersIndexes(), M_solid->displayerPtr() ); // computing the derivatives if nonlinear (comment this for inexact Newton);
-        M_solidBlockPrec.reset(new matrix_Type(*M_monolithicMap, 1));
-
-        *M_solidBlockPrec += *M_solid->massMatrix();
-        *M_solidBlockPrec += *M_solid->material()->jacobian(); //stiffMatrix();
-        M_solidBlockPrec->globalAssemble();
-        *M_solidBlockPrec *= M_solid->rescaleFactor();
+        globalMatrixWithOnlyStructure.reset(new matrixBlock_Type( M_uFESpace->map() | M_pFESpace->map() | mapEpetraFluxes | M_dFESpace->map()
+                                                                  | *(M_monolithicMatrix->interfaceMap()) ) );
     }
 
+    // In the case of LE it does not do anything.
+    M_solid->material()->updateJacobianMatrix( *solidPortion, dataSolid(), M_solid->mapMarkersVolumes(), M_solid->displayerPtr() ); // computing the derivatives if nonlinear (comment this for inexact Newton);
+
+    //Need to inglobe it into a boost::shared to avoid memeory leak
+    boost::shared_ptr<MatrixEpetra<Real> >  solidMatrix(new MatrixEpetra<Real>( M_solid->map(), 1 ));
+    *solidMatrix *= 0.0;
+
+    *solidMatrix += *M_solid->massMatrix();
+    *solidMatrix += *(M_solid->material()->jacobian());
+
+    solidMatrix->globalAssemble();
+
+    MatrixEpetra<Real>* rawPointerToMatrix = new MatrixEpetra<Real>( *solidMatrix );
+
+    matrixBlockView_Type structurePart(*(globalMatrixWithOnlyStructure->block(3,3)));
+
+    structurePart.setup(UInt(0), UInt(0), UInt(3*M_dFESpace->dof().numTotalDof()), UInt(3*M_dFESpace->dof().numTotalDof()), rawPointerToMatrix);
+
+    using namespace MatrixEpetraStructuredUtility;
+
+    //3. Put the matrix assembled in the solid in the proper vector
+    copyBlock( structurePart, *(globalMatrixWithOnlyStructure->block(3,3)) );
+
+    globalMatrixWithOnlyStructure->globalAssemble();
+
+    //Summing the local matrix into the global
+    *M_solidBlockPrec += *globalMatrixWithOnlyStructure;
+
+    M_solidBlockPrec->globalAssemble();
+
+    *M_solidBlockPrec *= M_solid->rescaleFactor();
+    //M_solidBlockPrec->spy("solidBlockMatrix");
 }
 
 void
