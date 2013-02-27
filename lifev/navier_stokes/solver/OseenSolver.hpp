@@ -297,6 +297,20 @@ public:
      */
     Real area( const markerID_Type& flag );
 
+    //! Compute the outgoing normal of a boundary face with given flag
+    /*!
+        @param  flag
+        @return boundary normal
+     */
+    Vector normal( const markerID_Type& flag );
+
+    //! Compute the geometric center of a boundary face with given flag
+    /*!
+        @param  flag
+        @return geometric center
+     */
+    Vector geometricCenter( const markerID_Type& flag );
+
     //! Compute flux on a boundary face with given flag and a given solution
     /*!
         @param  flag
@@ -312,6 +326,37 @@ public:
      */
     Real flux( const markerID_Type& flag );
 
+    //! Compute the kinetic normal stress (i.e., the normal stress due to the kinetic energy) on a boundary face with a given flag and a given solution
+    /*!
+     *  @see \cite BlancoMalossi2012 \cite Malossi-Thesis
+     *
+     *  This method computes the following quantity:
+     *
+     *  \f[
+     *  \mathcal{K} = \frac{1}{2}\rho_\textrm{F}\frac{1}{\left|\Gamma^t_{\textrm{F},j}\right|}\displaystyle\int_{\Gamma^t_{\textrm{F},j}}\left({\mathbf{u}}_\textrm{F} \mathbf{\cdot} {\mathbf{n}}_\textrm{F}\right)^2  \textrm{d} \Gamma
+     *  \f]
+     *
+     *  @param flag boundary flag
+     *  @param solution problem solution
+     *  @return kinetic normal stress
+     */
+    Real kineticNormalStress( const markerID_Type& flag, const vector_Type& solution );
+
+    //! Compute the kinetic normal stress (i.e., the normal stress due to the kinetic energy) on a boundary face with a given flag
+    /*!
+     *  @see \cite BlancoMalossi2012 \cite Malossi-Thesis
+     *
+     *  This method computes the following quantity:
+     *
+     *  \f[
+     *  \mathcal{K} = \frac{1}{2}\rho_\textrm{F}\frac{1}{\left|\Gamma^t_{\textrm{F},j}\right|}\displaystyle\int_{\Gamma^t_{\textrm{F},j}}\left({\mathbf{u}}_\textrm{F} \mathbf{\cdot} {\mathbf{n}}_\textrm{F}\right)^2  \textrm{d} \Gamma
+     *  \f]
+     *
+     *  @param flag boundary flag
+     *  @return kinetic normal stress
+     */
+    Real kineticNormalStress( const markerID_Type& flag );
+
     //! Compute average pressure on a boundary face with given flag and a given solution
     /*!
         @param  flag
@@ -326,6 +371,88 @@ public:
         @return average pressure
      */
     Real pressure( const markerID_Type& flag );
+
+    //! Compute the mean normal stress on a boundary face with a given flag and a given solution
+    /*!
+     *  @see \cite BlancoMalossi2012 \cite Malossi-Thesis
+     *
+     *  The mean normal stress is defined as the average of the normal component of the traction vector.
+     *
+     *  \f[
+     *  \mathcal{S}^{3-D}_j = \frac{1}{\left|\Gamma^t_{\textrm{F},j}\right|}\displaystyle\int_{\Gamma^t_{\textrm{F},j}}
+     *  \left(\sigma_\textrm{F} \mathbf{\cdot} \mathbf{n}_\textrm{F}\right) \mathbf{\cdot} \mathbf{n}_\textrm{F} \: \textrm{d} \Gamma
+     *  \f]
+     *
+     *  @param flag Flag of the boundary face
+     *  @param bcHandler BChandler containing the boundary conditions of the problem.
+     *  @param solution Vector containing the solution of the problem
+     *                   (and also the Lagrange multipliers at the end).
+     *  @return mean normal stress
+     */
+    Real meanNormalStress( const markerID_Type& flag, bcHandler_Type& bcHandler, const vector_Type& solution );
+
+    //! Compute the mean normal stress on a boundary face with a given flag
+    /*!
+     *  @see \cite BlancoMalossi2012 \cite Malossi-Thesis
+     *
+     *  The mean normal stress is defined as the average of the normal component of the traction vector.
+     *
+     *  \f[
+     *  \mathcal{S}^{3-D}_j = \frac{1}{\left|\Gamma^t_{\textrm{F},j}\right|}\displaystyle\int_{\Gamma^t_{\textrm{F},j}}
+     *  \left(\sigma_\textrm{F} \mathbf{\cdot} \mathbf{n}_\textrm{F}\right) \mathbf{\cdot} \mathbf{n}_\textrm{F} \: \textrm{d} \Gamma
+     *  \f]
+     *
+     *  TODO The current version returns the exact mean normal stress if a flow rate boundary condition is imposed on the chosen boundary face.
+     *  On the contrary, if other boundary conditions are applied, the mean normal stress is approximated with the mean pressure, which is a
+     *  reasonable approximation for several applications.
+     *
+     *  @param flag Flag of the boundary face
+     *  @param bcHandler BChandler containing the boundary conditions of the problem.
+     *  @return mean normal stress
+     */
+    Real meanNormalStress( const markerID_Type& flag, bcHandler_Type& bcHandler );
+
+    //! Compute the mean total normal stress on a boundary face with a given flag and a given solution
+    /*!
+     *  @see \cite BlancoMalossi2012 \cite Malossi-Thesis
+     *
+     *  The mean total normal stress is defined as the average of the normal component of the traction vector minus the kinetic contribution.
+     *
+     *  \f[
+     *  \mathcal{T}^{3-D}_j = \frac{1}{\left|\Gamma^t_{\textrm{F},j}\right|}\displaystyle\int_{\Gamma^t_{\textrm{F},j}}
+     *  \left(\sigma_\textrm{F} \mathbf{\cdot} \mathbf{n}_\textrm{F}\right) \mathbf{\cdot} \mathbf{n}_\textrm{F} \: \textrm{d} \Gamma
+     *  - \frac{1}{2}\rho_\textrm{F}\frac{1}{\left|\Gamma^t_{\textrm{F},j}\right|}\displaystyle\int_{\Gamma^t_{\textrm{F},j}}\left(\mathbf{u}_\textrm{F} \mathbf{\cdot} \mathbf{n}_\textrm{F}\right)^2 \: \textrm{d} \Gamma
+     *  \f]
+     *
+     *  TODO The current version returns the exact mean normal stress if a flow rate boundary condition is imposed on the chosen boundary face.
+     *  On the contrary, if other boundary conditions are applied, the mean normal stress is approximated with the mean pressure, which is a
+     *  reasonable approximation for several applications.
+     *
+     *  @param flag Flag of the boundary face
+     *  @param bcHandler BChandler containing the boundary conditions of the problem.
+     *  @param solution Vector containing the solution of the problem
+     *                   (and also the Lagrange multipliers at the end).
+     *  @return mean total normal stress
+     */
+    Real meanTotalNormalStress( const markerID_Type& flag, bcHandler_Type& bcHandler, const vector_Type& solution );
+
+    //! Compute the mean total normal stress on a boundary face with a given flag
+    /*!
+     *  @see \cite BlancoMalossi2012 \cite Malossi-Thesis
+     *
+     *  The mean total normal stress is defined as the average of the normal component of the traction vector minus the kinetic contribution.
+     *
+     *  \f[
+     *  \mathcal{T}^{3-D}_j = \frac{1}{\left|\Gamma^t_{\textrm{F},j}\right|}\displaystyle\int_{\Gamma^t_{\textrm{F},j}}
+     *  \left(\sigma_\textrm{F} \mathbf{\cdot} \mathbf{n}_\textrm{F}\right) \mathbf{\cdot} \mathbf{n}_\textrm{F} \: \textrm{d} \Gamma
+     *  - \frac{1}{2}\rho_\textrm{F}\frac{1}{\left|\Gamma^t_{\textrm{F},j}\right|}\displaystyle\int_{\Gamma^t_{\textrm{F},j}}\left(\mathbf{u}_\textrm{F} \mathbf{\cdot} \mathbf{n}_\textrm{F}\right)^2 \: \textrm{d} \Gamma
+     *  \f]
+     *
+     *  @param flag Flag of the boundary face
+     *  @param bcHandler BChandler containing the boundary conditions of the problem.
+     *  @return mean total normal stress
+     */
+    Real meanTotalNormalStress( const markerID_Type& flag, bcHandler_Type& bcHandler );
 
     //! Get the Lagrange multiplier related to a flux imposed on a given part of the boundary
     /*!
@@ -1656,7 +1783,7 @@ OseenSolver<MeshType, SolverType>::flux( const markerID_Type& flag )
 template<typename MeshType, typename SolverType>
 Real
 OseenSolver<MeshType, SolverType>::flux( const markerID_Type& flag,
-                                   const vector_Type& solution )
+                                         const vector_Type& solution )
 {
     vector_Type velocityAndPressure( solution, Repeated );
     vector_Type velocity( this->M_velocityFESpace.map(), Repeated );
@@ -1667,9 +1794,42 @@ OseenSolver<MeshType, SolverType>::flux( const markerID_Type& flag,
 
 template<typename MeshType, typename SolverType>
 Real
+OseenSolver<MeshType, SolverType>::kineticNormalStress( const markerID_Type& flag )
+{
+    return kineticNormalStress( flag, *M_solution );
+}
+
+template<typename MeshType, typename SolverType>
+Real
+OseenSolver<MeshType, SolverType>::kineticNormalStress( const markerID_Type& flag,
+                                                  const vector_Type& solution )
+{
+    vector_Type velocityAndPressure( solution, Repeated );
+    vector_Type velocity( this->M_velocityFESpace.map(), Repeated );
+    velocity.subset( velocityAndPressure );
+
+    return M_postProcessing->kineticNormalStress( velocity, M_oseenData->density(), flag );
+}
+
+template<typename MeshType, typename SolverType>
+Real
 OseenSolver<MeshType, SolverType>::area( const markerID_Type& flag )
 {
     return M_postProcessing->measure( flag );
+}
+
+template<typename MeshType, typename SolverType>
+Vector
+OseenSolver<MeshType, SolverType>::normal( const markerID_Type& flag )
+{
+    return M_postProcessing->normal( flag );
+}
+
+template<typename MeshType, typename SolverType>
+Vector
+OseenSolver<MeshType, SolverType>::geometricCenter( const markerID_Type& flag )
+{
+    return M_postProcessing->geometricCenter( flag );
 }
 
 template<typename MeshType, typename SolverType>
@@ -1682,7 +1842,7 @@ OseenSolver<MeshType, SolverType>::pressure( const markerID_Type& flag )
 template<typename MeshType, typename SolverType>
 Real
 OseenSolver<MeshType, SolverType>::pressure(const markerID_Type& flag,
-                                      const vector_Type& solution)
+                                            const vector_Type& solution)
 {
     vector_Type velocityAndPressure( solution, Repeated );
     vector_Type pressure( this->M_pressureFESpace.map(), Repeated );
@@ -1695,8 +1855,45 @@ OseenSolver<MeshType, SolverType>::pressure(const markerID_Type& flag,
 
 template<typename MeshType, typename SolverType>
 Real
-OseenSolver<MeshType, SolverType>::lagrangeMultiplier( const markerID_Type& flag,
-                                                 bcHandler_Type& bcHandler )
+OseenSolver<MeshType, SolverType>::meanNormalStress( const markerID_Type& flag, bcHandler_Type& bcHandler )
+{
+    return meanNormalStress( flag, bcHandler, *M_solution );
+}
+
+template<typename MeshType, typename SolverType>
+Real
+OseenSolver<MeshType, SolverType>::meanNormalStress(const markerID_Type& flag, bcHandler_Type& bcHandler, const vector_Type& solution )
+{
+    if ( bcHandler.findBCWithFlag( flag ).type() == Flux )
+        return -lagrangeMultiplier( flag, bcHandler, solution );
+    else
+    {
+#ifdef HAVE_LIFEV_DEBUG
+        M_Displayer.leaderPrint( " !!! WARNING - OseenSolver::meanNormalStress( flag, bcHandler, solution) is returning an approximation \n" );
+#endif
+        return -pressure( flag, solution ); // TODO: This is an approximation of the mean normal stress as the pressure.
+                                            // A proper method should be coded in the PostprocessingBoundary class
+                                            // to compute the exact mean normal stress.
+    }
+}
+
+template<typename MeshType, typename SolverType>
+Real
+OseenSolver<MeshType, SolverType>::meanTotalNormalStress( const markerID_Type& flag, bcHandler_Type& bcHandler )
+{
+    return meanTotalNormalStress( flag, bcHandler, *M_solution );
+}
+
+template<typename MeshType, typename SolverType>
+Real
+OseenSolver<MeshType, SolverType>::meanTotalNormalStress(const markerID_Type& flag, bcHandler_Type& bcHandler, const vector_Type& solution )
+{
+    return meanNormalStress( flag, bcHandler, solution ) - kineticNormalStress( flag, solution );
+}
+
+template<typename MeshType, typename SolverType>
+Real
+OseenSolver<MeshType, SolverType>::lagrangeMultiplier( const markerID_Type& flag, bcHandler_Type& bcHandler )
 {
     return lagrangeMultiplier( flag, bcHandler, *M_solution );
 }
@@ -1704,8 +1901,8 @@ OseenSolver<MeshType, SolverType>::lagrangeMultiplier( const markerID_Type& flag
 template<typename MeshType, typename SolverType>
 Real
 OseenSolver<MeshType, SolverType>::lagrangeMultiplier( const markerID_Type&  flag,
-                                                 bcHandler_Type& bcHandler,
-                                                 const vector_Type& solution )
+                                                             bcHandler_Type& bcHandler,
+                                                       const vector_Type& solution )
 {
     // Create a list of Flux bcName_Type ??
     std::vector< bcName_Type > fluxBCVector = bcHandler.findAllBCWithType( Flux );
@@ -1721,7 +1918,7 @@ OseenSolver<MeshType, SolverType>::lagrangeMultiplier( const markerID_Type&  fla
                                           + M_pressureFESpace.dof().numTotalDof() + lmIndex];
 
     // If lmIndex has not been found a warning message is printed
-    std::cout << "!!! Warning - Lagrange multiplier for Flux BC not found!" << std::endl;
+    M_Displayer.leaderPrint(  "!!! Warning - Lagrange multiplier for Flux BC not found!\n" );
     return 0;
 }
 

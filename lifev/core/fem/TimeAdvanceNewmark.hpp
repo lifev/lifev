@@ -198,7 +198,7 @@ public:
     @param  order define the order of BDF;
     @param  orderDerivatve  define the order of derivative;
   */
-  void setup ( const UInt& order,  const  UInt& orderDerivative )
+  void setup ( const UInt& /*order*/,  const  UInt& /*orderDerivative*/ )
   {
     ERROR_MSG("use setup for TimeAdvanceBDF but the time advance scheme is Newmark");
   }
@@ -388,11 +388,11 @@ void
 TimeAdvanceNewmark<feVectorType>::showMe(std::ostream& output ) const
 {
     output << "*** TimeAdvanceNewmark discretization maximum order of derivate "
-	   << this->M_orderDerivative<< " ***"<< std::endl;
+       << this->M_orderDerivative<< " ***"<< std::endl;
     output <<" Coefficients : "      <<  std::endl;
     output <<" theta :        "      << M_theta<<"\n"
-	   <<" gamma :  "            <<  M_gamma<<"\n"
-	   <<" size unknowns :"      << this->M_size<<"\n";
+       <<" gamma :  "            <<  M_gamma<<"\n"
+       <<" size unknowns :"      << this->M_size<<"\n";
 
     for ( UInt i = 0; i <  this->M_alpha.size(); ++i )
       output << "  alpha(" << i << ") = " <<  this->M_alpha[ i ]<< std::endl;
@@ -400,7 +400,7 @@ TimeAdvanceNewmark<feVectorType>::showMe(std::ostream& output ) const
     if (this->M_orderDerivative == 2)
       {
         for ( UInt i = 0; i <  this->M_xi.size(); ++i )
-	  output << "       xi(" << i << ") = " <<  this->M_xi[ i ] << std::endl;
+      output << "       xi(" << i << ") = " <<  this->M_xi[ i ] << std::endl;
       }
 
     output << "Delta Time : "<< this->M_timeStep<<"\n";
@@ -438,61 +438,61 @@ TimeAdvanceNewmark<feVectorType>::setup(const std::vector<Real>& coefficients, c
     {
       if (this->M_orderDerivative == 1 )  // Theta method
         {
-	  this->M_gamma = 1;
-	  //  unknown vector's  dimension;
-	  this->M_size = 4;
-	  this->M_alpha.resize(3);
-	  this->M_xi.resize(3);
-	  this->M_beta.resize(3);
-	  this->M_alpha[ 0 ] =  M_gamma / M_theta;
-	  this->M_alpha[ 1 ] =  M_gamma / M_theta;
-	  this->M_alpha[ 2 ] =  M_gamma / M_theta - 1.0;
-	  this->M_beta[0] = 1;
-	  this->M_beta[1] = 1;
-	  this->M_beta[2] = 0.5;
-	  this->M_xi[0]   = 0;
-	  this->M_xi[1]   = 0;
-	  this->M_xi[2]   = 0;
-	  this->M_coefficientsSize = 3;
+      this->M_gamma = 1;
+      //  unknown vector's  dimension;
+      this->M_size = 4;
+      this->M_alpha.resize(3);
+      this->M_xi.resize(3);
+      this->M_beta.resize(3);
+      this->M_alpha[ 0 ] =  M_gamma / M_theta;
+      this->M_alpha[ 1 ] =  M_gamma / M_theta;
+      this->M_alpha[ 2 ] =  M_gamma / M_theta - 1.0;
+      this->M_beta[0] = 1;
+      this->M_beta[1] = 1;
+      this->M_beta[2] = 0.5;
+      this->M_xi[0]   = 0;
+      this->M_xi[1]   = 0;
+      this->M_xi[2]   = 0;
+      this->M_coefficientsSize = 3;
         }
       else     //TimeAdvanceNewmarkMethod
         {
-	  //unknown vector's dimension
-	  this->M_size = 6 ;
-	  this->M_alpha.resize(4);
-	  this->M_xi.resize(4);
-	  this->M_beta.resize(3);
-	  this->M_betaFirstDerivative.resize(3);
-	  //initialitation alpha coefficients
-	  this->M_alpha[ 0 ] =  M_gamma / M_theta;
-	  this->M_alpha[ 1 ] =  M_gamma / M_theta;
-	  this->M_alpha[ 2 ] =  M_gamma / M_theta - 1.0;
-	  this->M_alpha[ 3 ] = M_gamma / (2.0 * M_theta) -1.0;
+      //unknown vector's dimension
+      this->M_size = 6 ;
+      this->M_alpha.resize(4);
+      this->M_xi.resize(4);
+      this->M_beta.resize(3);
+      this->M_betaFirstDerivative.resize(3);
+      //initialitation alpha coefficients
+      this->M_alpha[ 0 ] =  M_gamma / M_theta;
+      this->M_alpha[ 1 ] =  M_gamma / M_theta;
+      this->M_alpha[ 2 ] =  M_gamma / M_theta - 1.0;
+      this->M_alpha[ 3 ] = M_gamma / (2.0 * M_theta) -1.0;
 
-	  //initialitation xi coefficients
-	  this->M_xi[ 0 ] =  1. / M_theta;
-	  this->M_xi[ 1 ] =  1. / M_theta;
-	  this->M_xi[ 2 ] =  1. / M_theta;
-	  this->M_xi[ 3 ] =  1. / ( 2.0 * M_theta )-1.0;
+      //initialitation xi coefficients
+      this->M_xi[ 0 ] =  1. / M_theta;
+      this->M_xi[ 1 ] =  1. / M_theta;
+      this->M_xi[ 2 ] =  1. / M_theta;
+      this->M_xi[ 3 ] =  1. / ( 2.0 * M_theta )-1.0;
 
 
-	  //initialitation extrap coefficients
-	  this->M_beta[ 0 ] = 1;
-	  this->M_beta[ 1 ] = 1;
-	  this->M_beta[ 2 ] = 0.5;
-	  this->M_betaFirstDerivative[ 0 ] = 0;
-	  this->M_betaFirstDerivative[ 1 ] = 1;
-	  this->M_betaFirstDerivative[ 2 ] = 1;
+      //initialitation extrap coefficients
+      this->M_beta[ 0 ] = 1;
+      this->M_beta[ 1 ] = 1;
+      this->M_beta[ 2 ] = 0.5;
+      this->M_betaFirstDerivative[ 0 ] = 0;
+      this->M_betaFirstDerivative[ 1 ] = 1;
+      this->M_betaFirstDerivative[ 2 ] = 1;
 
-	  this->M_coefficientsSize  = 4;
+      this->M_coefficientsSize  = 4;
         }
       this->M_unknowns.reserve(this->M_size);
       this-> M_rhsContribution.reserve(2);
       // check order  scheme
       if (this->M_alpha[0] == 0.5)
-	this->M_order = 2;
+    this->M_order = 2;
       else
-	this->M_order = 1;
+    this->M_order = 1;
 
       this->M_firstOrderDerivativeSize  =  static_cast<Real>(this->M_size) / 2.0;
       this->M_secondOrderDerivativeSize = static_cast<Real>(this->M_size) / 2.0;
@@ -626,13 +626,13 @@ TimeAdvanceNewmark<feVectorType>::coefficientExtrapolation(const UInt& i) const
   switch (i)
   {
   case 0:
-	  return this->M_beta(i);
+      return this->M_beta(i);
   case 1:
-	  return this->M_beta(i)*this->M_timeStep;
+      return this->M_beta(i)*this->M_timeStep;
   case 2:
-	  return this->M_beta(i)*this->M_timeStep*this->M_timeStep;
+      return this->M_beta(i)*this->M_timeStep*this->M_timeStep;
   default:
-	  ERROR_MSG ("coeff_der i must equal 0 or 1 because U^*= U^n + timeStep*V^n + timeStep^2 / 2 W^n");
+      ERROR_MSG ("coeff_der i must equal 0 or 1 because U^*= U^n + timeStep*V^n + timeStep^2 / 2 W^n");
   }
   return 1;
 }
@@ -652,7 +652,7 @@ TimeAdvanceNewmark<feVectorType>::coefficientExtrapolationFirstDerivative(const 
     default:
         ERROR_MSG ("coeff_der i must equal 0 or 1 because U^*= U^n + timeStep*V^n + timeStep^2 / 2 W^n");
     }
-	  return 1;
+      return 1;
 }
 
 template<typename feVectorType>
@@ -671,7 +671,7 @@ void
 TimeAdvanceNewmark<feVectorType>::extrapolationFirstDerivative(feVector_Type& extrapolation) const
 {
   ASSERT ( this->M_orderDerivative == 2,
-	   "extrapolationFirstDerivative: this method must be used with the second order problem." )
+       "extrapolationFirstDerivative: this method must be used with the second order problem." )
 
   extrapolation = *this->M_unknowns[1];
   extrapolation += this->M_timeStep * ( *this->M_unknowns[ 2 ]);

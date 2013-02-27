@@ -47,7 +47,9 @@
 #include <BelosPCPGSolMgr.hpp>
 #include <BelosPseudoBlockCGSolMgr.hpp>
 #include <BelosPseudoBlockGmresSolMgr.hpp>
+#ifdef HAVE_TRILINOS_GT_10_6
 #include <BelosMinresSolMgr.hpp>
+#endif
 #include <BelosRCGSolMgr.hpp>
 #include <BelosTFQMRSolMgr.hpp>
 #include "Teuchos_RCPBoostSharedPtrConversions.hpp"
@@ -216,10 +218,12 @@ void BelosOperator::allocateSolver( const SolverManagerType & solverManagerType 
                 // Create TFQMR iteration
                 M_solverManager = rcp( new Belos::TFQMRSolMgr<Real,vector_Type,operator_Type>() );
                 break;
+#ifdef HAVE_TRILINOS_GT_10_6
             case MINRES:
                 // Create MINRES iteration
                 M_solverManager = rcp( new Belos::MinresSolMgr<Real,vector_Type,operator_Type>() );
                 break;
+#endif
             default:
                 ERROR_MSG("Belos solver not found!");
          }

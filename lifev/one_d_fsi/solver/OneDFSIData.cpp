@@ -126,7 +126,7 @@ OneDFSIData::setup( const GetPot& dataFile, const std::string& section )
     Real length = dataFile( ( section + "/space_discretization/Length"           ).data(), 1. );
     Real numberOfElements = dataFile( ( section + "/space_discretization/NumberOfElements" ).data(), 10 );
 
-    uniformMesh1D( *M_meshPtr, 0., length, numberOfElements );
+    regularMesh1D( *M_meshPtr, 1, numberOfElements, false, length, 0 );
 
     //std::cout << " 1D- Mesh nodes:                               " << M_meshPtr->numPoints() << std::endl;
     //std::cout << " 1D- Mesh elements:                            " << M_meshPtr->numElements() << std::endl;
@@ -296,6 +296,9 @@ OneDFSIData::setup( const GetPot& dataFile, const std::string& section )
 void
 OneDFSIData::oldStyleSetup( const GetPot& dataFile, const std::string& section )
 {
+    std::cerr << std::endl << "Warning: OneDFSIData::oldStyleSetup( ... ) is deprecated!" << std::endl
+              << "         You should use OneDFSIData::setup( ... ) instead!" << std::endl;
+
     // Model Type
     M_physicsType = OneDFSI::physicsMap[ dataFile( ( section + "/Model/PhysicsType" ).data(), "OneD_1DLinearPhysics" ) ];
     M_fluxType    = OneDFSI::fluxMap[    dataFile( ( section + "/Model/FluxType"    ).data(), "OneD_1DLinearFlux" ) ];
@@ -309,7 +312,8 @@ OneDFSIData::oldStyleSetup( const GetPot& dataFile, const std::string& section )
     Real length = dataFile( ( section + "/discretization/x_right" ).data(), 1. ) -
                   dataFile( ( section + "/discretization/x_left"  ).data(), 0. );
 
-    uniformMesh1D( *M_meshPtr, 0., length, dataFile( ( section + "/discretization/nb_elem" ).data(), 10 ) );
+    Real numberOfElements = dataFile( ( section + "/discretization/nb_elem" ).data(), 10 );
+    regularMesh1D( *M_meshPtr, 1, numberOfElements, false, length, 0 );
 
     //std::cout << " 1D- Mesh nodes:                               " << M_meshPtr->numPoints() << std::endl;
     //std::cout << " 1D- Mesh elements:                            " << M_meshPtr->numElements() << std::endl;
