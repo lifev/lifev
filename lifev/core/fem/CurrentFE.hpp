@@ -271,7 +271,7 @@ public:
     CurrentFE( const ReferenceFE& refFE, const GeometricMap& geoMap);
 
     //! Destructor
-    ~CurrentFE() { delete M_quadRule;}
+    virtual ~CurrentFE() { delete M_quadRule; }
 
     //@}
 
