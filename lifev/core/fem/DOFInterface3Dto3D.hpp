@@ -549,8 +549,8 @@ void DOFInterface3Dto3D::updateDofConnections( const Mesh& mesh1, const DOF& dof
     // Loop on facets at the interface (matching facets)
     for ( Iterator i = M_facetToFacetConnectionList.begin(); i != M_facetToFacetConnectionList.end(); ++i )
     {
-        feBd1.update( mesh1.boundaryFacet( i->first ) );  // Updating facet information on mesh1
-        feBd2.update( mesh2.boundaryFacet( i->second ) );  // Updating facet information on mesh2
+        feBd1.update( mesh1.boundaryFacet( i->first ), UPDATE_ONLY_CELL_NODES );  // Updating facet information on mesh1
+        feBd2.update( mesh2.boundaryFacet( i->second ), UPDATE_ONLY_CELL_NODES );  // Updating facet information on mesh2
 
         std::vector<ID> localToGlobalMapOnBFacet1 = dof1.localToGlobalMapOnBdFacet(i->first);
         std::vector<ID> localToGlobalMapOnBFacet2 = dof2.localToGlobalMapOnBdFacet(i->second);
