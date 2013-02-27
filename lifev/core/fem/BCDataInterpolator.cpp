@@ -384,25 +384,25 @@ BCDataInterpolator::BCDataInterpolator_point BCDataInterpolator::interpolateVect
 Real BCDataInterpolator::evaluateRBF( const BCDataInterpolator_point point1,
                                       const BCDataInterpolator_point point2 )
 {
-    Real r = sqrt( pow( point1.x - point2.x, 2 ) + pow( point1.y - point2.y, 2 ) + pow( point1.z - point2.z, 2 ) );
+    Real r = std::sqrt( std::pow( point1.x - point2.x, 2 ) + std::pow( point1.y - point2.y, 2 ) + std::pow( point1.z - point2.z, 2 ) );
 
     switch ( M_interpolationMethod )
     {
 
         case RBF_ThinPlateSpline:
-            return ( r < 1e-3 ? 0.0 : pow( r, 2 ) * log( r ));
+            return ( r < 1e-3 ? 0.0 : std::pow( r, 2 ) * std::log( r ));
 
         case RBF_MultiQuadric:
-            return sqrt( pow( r, 2 ) + 1 );
+            return std::sqrt( std::pow( r, 2 ) + 1 );
 
         case RBF_Cubic:
-            return pow( r, 3 );
+            return std::pow( r, 3 );
 
         case RBF_Gaussian:
-            return exp( -pow( r, 2 ) );
+            return std::exp( -std::pow( r, 2 ) );
 
         case RBF_InverseMultiQuadric:
-            return 1 / sqrt(pow( r, 2 ) + 1);
+            return 1 / std::sqrt(std::pow( r, 2 ) + 1);
 
         default:
             return 0.0;
@@ -470,21 +470,21 @@ void BCDataInterpolator::interpolateDataValuesInTime( const Real t )
                 Real tk = M_timePeriod / (2 * n + 1) * k;
                 Int index_ik = indexInTime(i, k);
 
-                c1.x += cos(-j * tk * 2 * M_PI / M_timePeriod) * M_dataValues_timeSamples[index_ik].x;
-                c1.y += cos(-j * tk * 2 * M_PI / M_timePeriod) * M_dataValues_timeSamples[index_ik].y;
-                c1.z += cos(-j * tk * 2 * M_PI / M_timePeriod) * M_dataValues_timeSamples[index_ik].z;
+                c1.x += std::cos(-j * tk * 2 * M_PI / M_timePeriod) * M_dataValues_timeSamples[index_ik].x;
+                c1.y += std::cos(-j * tk * 2 * M_PI / M_timePeriod) * M_dataValues_timeSamples[index_ik].y;
+                c1.z += std::cos(-j * tk * 2 * M_PI / M_timePeriod) * M_dataValues_timeSamples[index_ik].z;
 
-                c2.x += sin(-j * tk * 2 * M_PI / M_timePeriod) * M_dataValues_timeSamples[index_ik].x;
-                c2.y += sin(-j * tk * 2 * M_PI / M_timePeriod) * M_dataValues_timeSamples[index_ik].y;
-                c2.z += sin(-j * tk * 2 * M_PI / M_timePeriod) * M_dataValues_timeSamples[index_ik].z;
+                c2.x += std::sin(-j * tk * 2 * M_PI / M_timePeriod) * M_dataValues_timeSamples[index_ik].x;
+                c2.y += std::sin(-j * tk * 2 * M_PI / M_timePeriod) * M_dataValues_timeSamples[index_ik].y;
+                c2.z += std::sin(-j * tk * 2 * M_PI / M_timePeriod) * M_dataValues_timeSamples[index_ik].z;
             }
 
             c1.x = c1.x / (2 * n + 1); c1.y = c1.y / (2 * n + 1); c1.z = c1.z / (2 * n + 1);
             c2.x = c2.x / (2 * n + 1); c2.y = c2.y / (2 * n + 1); c2.z = c2.z / (2 * n + 1);
 
-            M_dataValues[i].x += c1.x * cos(j * t * 2 * M_PI / M_timePeriod) - c2.x * sin(j * t * 2 * M_PI / M_timePeriod);
-            M_dataValues[i].y += c1.y * cos(j * t * 2 * M_PI / M_timePeriod) - c2.y * sin(j * t * 2 * M_PI / M_timePeriod);
-            M_dataValues[i].z += c1.z * cos(j * t * 2 * M_PI / M_timePeriod) - c2.z * sin(j * t * 2 * M_PI / M_timePeriod);
+            M_dataValues[i].x += c1.x * std::cos(j * t * 2 * M_PI / M_timePeriod) - c2.x * std::sin(j * t * 2 * M_PI / M_timePeriod);
+            M_dataValues[i].y += c1.y * std::cos(j * t * 2 * M_PI / M_timePeriod) - c2.y * std::sin(j * t * 2 * M_PI / M_timePeriod);
+            M_dataValues[i].z += c1.z * std::cos(j * t * 2 * M_PI / M_timePeriod) - c2.z * std::sin(j * t * 2 * M_PI / M_timePeriod);
         }
     }
 

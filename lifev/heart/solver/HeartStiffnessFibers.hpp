@@ -104,7 +104,7 @@ void stiff( const Real sigma_l, const Real sigma_t, const vector_type& cos, Matr
                a_l[0] = u_x[ig];
                a_l[1] = u_y[ig];
                a_l[2] = u_z[ig];
-               Real norm = sqrt(a_l[0]*a_l[0]+a_l[1]*a_l[1]+a_l[2]*a_l[2]);
+               Real norm = std::sqrt(a_l[0]*a_l[0]+a_l[1]*a_l[1]+a_l[2]*a_l[2]);
                a_l[0] = a_l[0]/norm; a_l[1] = a_l[1]/norm; a_l[2] = a_l[2]/norm;
 
              //  std::cout<< a_l[0] << a_l[1] << a_l[2] << " ";            //  D = sigma_t * I + (sigma_l-sigma_t) * a_l * a_l^T
@@ -134,7 +134,7 @@ void stiff( const Real sigma_l, const Real sigma_t, const vector_type& cos, Matr
             a_l[0] = u_x[ig];
             a_l[1] = u_y[ig];
             a_l[2] = u_z[ig];
-            Real norm = sqrt(a_l[0]*a_l[0]+a_l[1]*a_l[1]+a_l[2]*a_l[2]);
+            Real norm = std::sqrt(a_l[0]*a_l[0]+a_l[1]*a_l[1]+a_l[2]*a_l[2]);
             a_l[0] = a_l[0]/norm; a_l[1] = a_l[1]/norm; a_l[2] = a_l[2]/norm;
             //  D = sigma_t * I + (sigma_l-sigma_t) * a_l * a_l^T
             for ( icoor = 0;icoor < fe.nbCoor(); icoor++ ){
@@ -193,7 +193,7 @@ void stiff( const reduced_sigma& red_sigma, const Real sigma_l, const Real sigma
             a_l[0] = u_x[ig];
             a_l[1] = u_y[ig];
             a_l[2] = u_z[ig];
-            Real norm = sqrt(a_l[0]*a_l[0]+a_l[1]*a_l[1]+a_l[2]*a_l[2]);
+            Real norm = std::sqrt(a_l[0]*a_l[0]+a_l[1]*a_l[1]+a_l[2]*a_l[2]);
             a_l[0] = a_l[0]/norm; a_l[1] = a_l[1]/norm; a_l[2] = a_l[2]/norm;
 
             fe.coorQuadPt(x,y,z,ig);
@@ -224,7 +224,7 @@ void stiff( const reduced_sigma& red_sigma, const Real sigma_l, const Real sigma
             a_l[1] = u_y[ig];
             a_l[2] = u_z[ig];
 
-            Real norm = sqrt(a_l[0]*a_l[0]+a_l[1]*a_l[1]+a_l[2]*a_l[2]);
+            Real norm = std::sqrt(a_l[0]*a_l[0]+a_l[1]*a_l[1]+a_l[2]*a_l[2]);
             a_l[0] = a_l[0]/norm; a_l[1] = a_l[1]/norm; a_l[2] = a_l[2]/norm;
 
             //  D = sigma_t * I + (sigma_l-sigma_t) * a_l * a_l^T
@@ -514,7 +514,7 @@ void stiffNL(const vector_type& U, const Real sigma_l, const Real sigma_t,
             a_l[0] = u_x[ig];
             a_l[1] = u_y[ig];
             a_l[2] = u_z[ig];
-            Real norm = sqrt(a_l[0]*a_l[0]+a_l[1]*a_l[1]+a_l[2]*a_l[2]);
+            Real norm = std::sqrt(a_l[0]*a_l[0]+a_l[1]*a_l[1]+a_l[2]*a_l[2]);
             a_l[0] = a_l[0]/norm; a_l[1] = a_l[1]/norm; a_l[2] = a_l[2]/norm;
 
             //  D = sigma_t * I + (sigma_l-sigma_t) * a_l * a_l^T
@@ -551,7 +551,7 @@ void stiffNL(const vector_type& U, const Real sigma_l, const Real sigma_t,
             a_l[0] = u_x[ig];
             a_l[1] = u_y[ig];
             a_l[2] = u_z[ig];
-            Real norm = sqrt(a_l[0]*a_l[0]+a_l[1]*a_l[1]+a_l[2]*a_l[2]);
+            Real norm = std::sqrt(a_l[0]*a_l[0]+a_l[1]*a_l[1]+a_l[2]*a_l[2]);
             a_l[0] = a_l[0]/norm; a_l[1] = a_l[1]/norm; a_l[2] = a_l[2]/norm;
             //  D = sigma_t * I + (sigma_l-sigma_t) * a_l * a_l^T
             for ( icoor = 0;icoor < fe.nbCoor(); icoor++ ){

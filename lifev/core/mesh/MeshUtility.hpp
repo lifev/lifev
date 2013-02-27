@@ -1180,7 +1180,6 @@ bool rearrangeFaces( MeshType & mesh,
     typename faceContainer_Type::iterator faceContainerIterator;
     temporaryFaceContainer_Type *         boundaryFaceContainerPtr;
     temporaryFaceContainer_Type::iterator boundaryFaceContainerIterator;
-    std::pair<ID, ID>                     volumeIdToLocalFaceIdPair;
     UInt                                  numInternalFaces;
     bool                                  externalContainerIsProvided( false );
 
@@ -2498,27 +2497,27 @@ void MeshTransformer<REGIONMESH, RMTYPE >::transformMesh( const VECTOR& scale, c
     R1(0,1) =  0.;
     R1(0,2) =  0.;
     R1(1,0) =  0.;
-    R1(1,1) =  cos(rotate[0]);
-    R1(1,2) = -sin(rotate[0]);
+    R1(1,1) =  std::cos(rotate[0]);
+    R1(1,2) = -std::sin(rotate[0]);
     R1(2,0) =  0.;
-    R1(2,1) =  sin(rotate[0]);
-    R1(2,2) =  cos(rotate[0]);
+    R1(2,1) =  std::sin(rotate[0]);
+    R1(2,2) =  std::cos(rotate[0]);
 
-    R2(0,0) =  cos(rotate[1]);
+    R2(0,0) =  std::cos(rotate[1]);
     R2(0,1) =  0.;
-    R2(0,2) =  sin(rotate[1]);
+    R2(0,2) =  std::sin(rotate[1]);
     R2(1,0) =  0.;
     R2(1,1) =  1.;
     R2(1,2) = 0.;
-    R2(2,0) = -sin(rotate[1]);
+    R2(2,0) = -std::sin(rotate[1]);
     R2(2,1) =  0.;
-    R2(2,2) =  cos(rotate[1]);
+    R2(2,2) =  std::cos(rotate[1]);
 
-    R3(0,0) =  cos(rotate[2]);
-    R3(0,1) = -sin(rotate[2]);
+    R3(0,0) =  std::cos(rotate[2]);
+    R3(0,1) = -std::sin(rotate[2]);
     R3(0,2) = 0.;
-    R3(1,0) =  sin(rotate[2]);
-    R3(1,1) =  cos(rotate[2]);
+    R3(1,0) =  std::sin(rotate[2]);
+    R3(1,1) =  std::cos(rotate[2]);
     R3(1,2) = 0.;
     R3(2,0) =  0;
     R3(2,1) =  0.;
@@ -2580,7 +2579,7 @@ void MeshTransformer<REGIONMESH, RMTYPE >::transformMesh( const function& meshMa
 template <typename REGIONMESH>
 MeshStatistics::meshSize MeshStatistics::computeSize(REGIONMESH const & mesh)
 {
-    const double bignumber=std::numeric_limits<double>::max();
+    const Real bignumber=std::numeric_limits<Real>::max();
     Real MaxH(0), MinH(bignumber), MeanH(0);
     Real deltaX(0), deltaY(0), deltaZ(0), sum(0);
     typedef typename REGIONMESH::edges_Type edges_Type;

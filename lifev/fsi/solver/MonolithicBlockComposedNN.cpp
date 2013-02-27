@@ -135,9 +135,11 @@ void MonolithicBlockComposedNN::setDataFromGetPot(const GetPot& data, const std:
 }
 
 void MonolithicBlockComposedNN::coupler(mapPtr_Type& map,
-                         const std::map<ID, ID>& locDofMap,
-                         const vectorPtr_Type& numerationInterface,
-                         const Real& timeStep)
+                                        const std::map<ID, ID>& locDofMap,
+                                        const vectorPtr_Type& numerationInterface,
+                                        const Real& timeStep,
+                                        const Real& coefficient,
+                                        const Real& rescaleFactor)
 {
     UInt totalDofs=map->map(Unique)->NumGlobalElements();
     UInt fluidSolid=M_offset[0]+M_FESpace[0]->map().map(Unique)->NumGlobalElements();
@@ -158,25 +160,25 @@ void MonolithicBlockComposedNN::coupler(mapPtr_Type& map,
     coupling.reset(new matrix_Type(*map, 0));
     coupling->insertValueDiagonal(1., M_offset[fluid], M_offset[solid] );
     coupling->insertValueDiagonal(1.,  fluidSolid, totalDofs);
-    couplingMatrix(coupling, (*M_couplingFlags)[0]/*8*/,  M_FESpace, M_offset, locDofMap, numerationInterface, timeStep, 2.);
+    couplingMatrix(coupling, (*M_couplingFlags)[0]/*8*/,  M_FESpace, M_offset, locDofMap, numerationInterface, timeStep, 2., coefficient, rescaleFactor);
     M_coupling.push_back(coupling);
 
     coupling.reset(new matrix_Type(*map, 0));
     coupling->insertValueDiagonal( 1., M_offset[0], fluidSolid );
     coupling->insertValueDiagonal( 1., fluidSolid , totalDofs);
-    couplingMatrix(coupling, (*M_couplingFlags)[1]/*4*/, M_FESpace, M_offset, locDofMap, numerationInterface, timeStep, 2.);
+    couplingMatrix(coupling, (*M_couplingFlags)[1]/*4*/, M_FESpace, M_offset, locDofMap, numerationInterface, timeStep, 2., coefficient, rescaleFactor);
     M_coupling.push_back(coupling);
 
     coupling.reset(new matrix_Type(*map, 0));
     coupling->insertValueDiagonal(1., M_offset[fluid], M_offset[solid] );
     coupling->insertValueDiagonal(-1,  fluidSolid, totalDofs);
-    couplingMatrix(coupling, (*M_couplingFlags)[2]/*1*/,  M_FESpace, M_offset, locDofMap, numerationInterface, timeStep, 2.);
+    couplingMatrix(coupling, (*M_couplingFlags)[2]/*1*/,  M_FESpace, M_offset, locDofMap, numerationInterface, timeStep, 2., coefficient, rescaleFactor);
     M_coupling.push_back(coupling);
 
     coupling.reset(new matrix_Type(*map, 0));
     coupling->insertValueDiagonal( 1., M_offset[0], fluidSolid );
     coupling->insertValueDiagonal( 1., fluidSolid, totalDofs );
-    couplingMatrix(coupling, (*M_couplingFlags)[3]/*2*/, M_FESpace, M_offset, locDofMap, numerationInterface, timeStep, 2.);
+    couplingMatrix(coupling, (*M_couplingFlags)[3]/*2*/, M_FESpace, M_offset, locDofMap, numerationInterface, timeStep, 2., coefficient, rescaleFactor);
     M_coupling.push_back(coupling);
 
     M_prec.resize(M_blocks.size());

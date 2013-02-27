@@ -541,7 +541,7 @@ void BCManageNormal<MatrixType>::computeIntegratedNormals(const DOF& dof,Current
         Real nx( (normals)[id] );
         Real ny( (normals)[id+dof.numTotalDof()] );
         Real nz( (normals)[id+2*dof.numTotalDof()] );
-        norm = sqrt( nx*nx + ny*ny + nz*nz );
+        norm = std::sqrt( nx*nx + ny*ny + nz*nz );
         (normals)[id]            /= norm;
         (normals)[id+dof.numTotalDof()]   /= norm;
         (normals)[id+2*dof.numTotalDof()] /= norm;
@@ -746,7 +746,7 @@ void BCManageNormal<MatrixType>::M_storeGivenVersors()
             Real nx( (M_givenVersors)[id][0] );
             Real ny( (M_givenVersors)[id][1] );
             Real nz( (M_givenVersors)[id][2] );
-            norm = sqrt( nx*nx + ny*ny + nz*nz );
+            norm = std::sqrt( nx*nx + ny*ny + nz*nz );
             (*M_normalPtr)[id]            = nx/norm;
             (*M_normalPtr)[id+M_numDof]   = ny/norm;
             (*M_normalPtr)[id+2*M_numDof] = nz/norm;
@@ -806,9 +806,9 @@ void BCManageNormal<MatrixType>::M_calculateTangentVectors()
         Real nx( (*M_normalPtr)[id] );
         Real ny( (*M_normalPtr)[id+M_numDof] );
         Real nz( (*M_normalPtr)[id+2*M_numDof] );
-        Real nxi=sqrt(ny*ny+nz*nz);
-        Real nxj=sqrt(nx*nx+nz*nz);
-        Real nxk=sqrt(nx*nx+ny*ny);
+        Real nxi=std::sqrt(ny*ny+nz*nz);
+        Real nxj=std::sqrt(nx*nx+nz*nz);
+        Real nxk=std::sqrt(nx*nx+ny*ny);
 
         if ((nxi>=nxj)&&(nxi>=nxk)) //max = |n x i|
         {

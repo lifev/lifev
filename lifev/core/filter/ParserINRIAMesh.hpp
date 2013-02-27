@@ -111,6 +111,13 @@ readINRIAMeshFileHead( std::ifstream          & myStream,
 {
     const int idOffset = 1; //IDs in INRIA files start from 1
 
+    numberVertices = 0;
+    numberBoundaryVertices = 0;
+    numberBoundaryFaces = 0;
+    numberBoundaryEdges = 0;
+    numberVolumes = 0;
+    numberStoredFaces =0;
+
     std::string line;
 
     Real x, y, z;
@@ -332,7 +339,7 @@ ReadINRIAMeshFile( BareMesh<GeoShape> & bareMesh,
       std::cout << "Reading INRIA mesh file" << fileName << std::endl;
   }
 
-  if ( ! readINRIAMeshFileHead( hstream, numberVertices, numberBoundaryVertices,
+  if ( ! MeshIO::readINRIAMeshFileHead( hstream, numberVertices, numberBoundaryVertices,
                                 numberBoundaryFaces, numberBoundaryEdges,
                                 numberVolumes, numberStoredFaces, shape, iSelect) )
   {
@@ -354,62 +361,60 @@ ReadINRIAMeshFile( BareMesh<GeoShape> & bareMesh,
 
   ASSERT_PRE0( GeoShape::S_shape == shape, "INRIA Mesh file and mesh element shape is not consistent" );
 
+  numberPoints         =  numberVertices;
+  numberBoundaryPoints = numberBoundaryVertices;
+
   // Be a little verbose
   switch ( shape )
   {
-
   case HEXA:
-      ASSERT_PRE0( GeoShape::S_numPoints == 8, "Sorry I can read only bilinear Hexa meshes" );
+      ASSERT_PRE0( GeoShape::S_numPoints == 8, "Sorry I can read only linear Hexa meshes" );
       if ( verbose ) std::cout << "Linear Hexa mesh" << std::endl;
-      numberPoints         =  numberVertices;
-      numberBoundaryPoints = numberBoundaryVertices;
       faceName = "Quadrilaterals";
       volumeName = "Hexahedra";
       break;
 
   case TETRA:
-      if ( GeoShape::S_numPoints == 6 )
-      {
-          if ( verbose ) std::cout << "Quadratic Tetra mesh (from linear geometry)" << std::endl;
-          numberPoints         = numberVertices + numberEdges;
-          numberBoundaryPoints = numberBoundaryVertices + numberBoundaryEdges;
-      }
-      else if ( GeoShape::S_numPoints == 4 )
+      if( GeoShape::S_numPoints == 4 )
       {
           if ( verbose ) std::cout << "Linear Tetra Mesh" << std::endl;
-
-          numberPoints         = numberVertices;
-          numberBoundaryPoints = numberBoundaryVertices;
-          numberBoundaryEdges  = ( Int ( numberBoundaryVertices + numberBoundaryFaces - Int( 2 ) ) > 0 ?
-                                       ( numberBoundaryVertices + numberBoundaryFaces - 2 ) : 0 );
+      }
+      else if( GeoShape::S_numPoints == 10 )
+      {
+          if ( verbose ) std::cout << "Quadratic Tetra mesh (from linear geometry)" << std::endl;
+          numberPoints         += numberEdges;
+          numberBoundaryPoints += numberBoundaryEdges;
       }
       else
-      {
-          ASSERT( 0, "mesh type not supported" );
-      }
+          ERROR_MSG( "mesh type not supported" );
 
       faceName = "Triangles";
       volumeName = "Tetrahedra";
       break;
-
   default:
       ERROR_MSG( "Current version of INRIA Mesh file reader only accepts TETRA and HEXA" );
   }
 
   // Set all basic data structure
   bareMesh.numBoundaryPoints = numberBoundaryPoints;
+  bareMesh.numVertices = numberVertices;
+  bareMesh.numBoundaryVertices = numberBoundaryVertices;
   bareMesh.points.reshape( 3, numberPoints );
   bareMesh.pointMarkers.resize( numberPoints );
+  bareMesh.pointIDs.resize( numberPoints );
 
   bareMesh.ridges.reshape    ( GeoShape::GeoBShape::GeoBShape::S_numPoints, numberBoundaryEdges );
   bareMesh.ridgeMarkers.resize( numberBoundaryEdges );
+  bareMesh.ridgeIDs.resize( numberBoundaryEdges );
 
   bareMesh.numBoundaryFacets = numberBoundaryFaces;
   bareMesh.facets.reshape( GeoShape::GeoBShape::S_numPoints, numberStoredFaces );
   bareMesh.facetMarkers.resize( numberStoredFaces );
+  bareMesh.facetIDs.resize( numberStoredFaces );
 
   bareMesh.elements.reshape( GeoShape::S_numPoints, numberVolumes );
   bareMesh.elementMarkers.resize( numberVolumes );
+  bareMesh.elementIDs.resize( numberVolumes );
 
   bareMesh.regionMarkerID = regionFlag;
 
@@ -442,6 +447,7 @@ ReadINRIAMeshFile( BareMesh<GeoShape> & bareMesh,
               bareMesh.points( 1, i ) = y;
               bareMesh.points( 2, i ) = z;
               bareMesh.pointMarkers[ i ] = ibc;
+              bareMesh.pointIDs[i] = i;
           }
           done++;
 
@@ -465,6 +471,7 @@ ReadINRIAMeshFile( BareMesh<GeoShape> & bareMesh,
               }
               myStream >> ibc;
               bareMesh.facetMarkers[ i ] = ibc;
+              bareMesh.facetIDs[ i ] = i;
           }
 
           oStr << "Boundary faces read " << std::endl;
@@ -485,6 +492,7 @@ ReadINRIAMeshFile( BareMesh<GeoShape> & bareMesh,
               }
               myStream >> ibc;
               bareMesh.ridgeMarkers[ i ] = ibc;
+              bareMesh.ridgeIDs[ i ] = i;
           }
           oStr << "Boundary edges read " << std::endl;
           done++;
@@ -505,6 +513,7 @@ ReadINRIAMeshFile( BareMesh<GeoShape> & bareMesh,
               }
               myStream >> ibc;
               bareMesh.elementMarkers[ i ] = ibc;
+              bareMesh.elementIDs[ i ] = i;
               count++;
           }
           oStr << count << " Volume elements read" << std::endl;

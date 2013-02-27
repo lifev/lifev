@@ -1,0 +1,711 @@
+# -*- getpot -*- (GetPot mode activation for emacs)
+#-------------------------------------------------
+#      Data file for CE FSI Solver
+#-------------------------------------------------
+* #problem datas
+[problem]
+
+method     = monolithicGI # monolithicGE, monolithicGI
+
+blockOper   = AdditiveSchwarzGI
+# OPTIONS:
+#AdditiveSchwarz: standard operator for the monolithicGE
+#AdditiveSchwarzRN: Robin-Neumann operator for the GE, the the Dirichlet coupling condition becomes mixed (this corresponds to a left-preconditioning step)
+#AdditiveSchwarzGI: standard operator for the monolithicGI, the three fields (fluid, structure and geometry) are assembled in one single matrix
+#AdditiveSchwarzRNGI: Robin-Neumann operator for the GI
+
+DDBlockPrec = ComposedDN2GI
+# OPTIONS:
+#AdditiveSchwarz: monolithic A-S preconditioner,
+#AdditiveSchwarzGI: monolithic A-S preconditioner,
+#ComposedDN: modular Dirichlet-Neumann preconditioner
+#ComposedDN2: modular Dirichlet-Neumann preconditioner
+#ComposedNN: modular Neumann-Neumann + Dirichlet-Dirichlet preconditioner
+#ComposedDNND: modular Dirichlet-Neumann + Neumann-Dirichlet preconditioner
+#ComposedDNGI: modular preconditioner for the geometric implicit, split in 3 factors
+#ComposedDN2GI: modular preconditioner for the geometric implicit, split in 3 factors
+#ComposedDNDGI: other factorization option, the matrix is split in 3 factors, Dirichlet, Neumann and Dirichlet. This option and the one below are usually less effective than the previous one
+#ComposedDND2GI: other factorization option, the matrix is split in 3 factors, Dirichlet, Neumann snd Dirichlet.
+** #examples:
+      //! Factorization in three:
+    - Solid: Neumann
+    | I | 0 | 0 | 0 |
+    |---+---+---+---|
+    | 0 | S | 0 | 0 |
+    |---+---+---+---|
+    | 0 | 0 | I | 0 |
+    |---+---+---+---|
+    | 0 | 0 | 0 | I |
+    - ALE: Dirichlet
+    | I |  0 | 0 | 0 |
+    |---+----+---+---|
+    | 0 |  I | 0 | 0 |
+    |---+----+---+---|
+    | 0 |  0 | I | 0 |
+    |---+----+---+---|
+    | 0 | -C | 0 | H |
+    - Fluid: Dirichlet
+    | F | 0     | C | SD |
+    |---+-------+---+----|
+    | 0 | S     | 0 | 0  |
+    |---+-------+---+----|
+    | C | -C/dt | 0 | 0  |
+    |---+-------+---+----|
+    | 0 | 0     | 0 | I  |
+
+      //! Factorization in three:
+    - Fluid: Dirichlet
+        | F | 0 | 0 | SD |
+        |---+---+---+----|
+        | 0 | I | 0 |  0 |
+        |---+---+---+----|
+        | C | 0 | I |  0 |
+        |---+---+---+----|
+        | 0 | 0 | 0 |  I |
+    - Solid: Neumann
+        | I |     0 | 0 | 0 |
+        |---+-------+---+---|
+        | 0 |     S | C | 0 |
+        |---+-------+---+---|
+        | 0 | -C/dt | 0 | 0 |
+        |---+-------+---+---|
+        | 0 |     0 | 0 | I |
+    - ALE: Dirichlet
+        | I |  0 | 0 | 0 |
+        |---+----+---+---|
+        | 0 |  I | 0 | 0 |
+        |---+----+---+---|
+        | 0 |  0 | I | 0 |
+        |---+----+---+---|
+        | 0 | -C | 0 | H |
+* #Newton tolerance
+# NonLinearRichardson: stop_tol  = abstol + reltol*normRes;
+abstol     =  0. # tolerance in nonLinearRichardson
+reltol     =  1.e-5 # tolerance in nonLinearRichardson
+* #offline partitioner
+# these options tell wether the mesh is partitioned online or offline (saved in hdf5). Options are none or hdf5.
+fluidMeshPartitioned = none
+solidMeshPartitioned = none
+
+* #exporter details
+[exporter]
+multimesh  = false   # actually we export also the displacement
+start      = 0       # the starting iteration counter
+save       = 1       # boolean
+saveEvery  = 1       # save every "saveEvery" iterations
+tolSave    = 2
+type       = hdf5    # format of the exported solution (ensight, hdf5, vtk)
+nRestart   = 0
+
+** #exporter for the fluid
+[./fluid]
+filename   = fluid-homNeumann
+
+** #exporter for the solid
+[../solid]
+filename   = solid-homNeumann
+[../] # solid
+[../] # exporter
+
+* #importer details
+[importer]
+#initSol=00700
+#initSolFD=00701
+#type       = hdf5
+
+** #importer for the fluid
+[./fluid]
+filename   = fluid-Total
+
+** #importer for the solid
+[../solid]
+filename   = solid-Total
+[../] # solid
+# [../] # importer
+
+* #Fluid data
+[fluid]
+useShapeDerivatives           = false # tells if the shape derivatives are neglected or not in the Jacobian matrix
+semiImplicit                  = false # tells if we advance in time after the first nonlinear iteration or not
+domainVelImplicit             = true  # tells if the domain vel is to be considered implicitly in the convective term
+convectiveImplicit            = false  # tells if the velocity is to be considered implicitly in the convective term
+conservativeFormulation       = false  # tells if the conservative or non conservative formulation is used
+
+** #Physical quantities
+[./physics]
+density   = 1.0               # density
+viscosity = 0.035              # viscosity
+
+** #time discretization
+[../time_discretization]
+method          = BDF         # can be BDF, Generalized alpha in the future
+initialtime		= 0.0
+endtime			= 0.01
+timestep		= 0.001
+BDF_order		= 2
+theta           = 0.5
+gamma            = 0.5
+rhoInf          = 1
+typeOfGeneralizedAlpha            = HHT
+
+** #space discretization
+[../space_discretization]
+mesh_dir  = ./
+mesh_file = fluidBig.mesh #aorta_fluid_scaled.mesh
+mesh_order     = P1                                # order for the geometry problem, P1 or P2
+vel_order       = P1Bubble           # order for the fluid velocity FE space: P1, P1Bubble, P2
+press_order     = P1                 # P1, P2
+stiff_strain    = true		     # wether the full stiffness tensor is assembled, or just the laplacian (should be true in FSI for consistency)
+
+** #misellaneous (obsolete)
+[../miscellaneous]
+verbose   = 1
+velname   = vel
+pressname = press
+steady    = 0
+factor    = 1
+
+** # stabilization parameters
+[../ipstab]
+use        = 0
+gammaBeta  = 0.15
+gammaDiv   = 0.15
+gammaPress = 0.075
+reuse = true
+[../] # physics
+[../] # fluid
+
+* #interface data
+[interface]
+fluid_flag      =  200 # default: 1
+fluid_vertex_flag = 200       # tells wether the in/out ring curves on the interface 
+                            # is considered in the coupling (fluid_vertex_flag=0) or not (fluid_vertex_flag=1)
+structure_vertex_flag = 200
+tolerance       =  0 # how far points are to be considered the same on the interface
+[../] # interface
+
+* #solid section
+[solid]
+
+useExactJacobian = true # always false for linear structure model. Otherwise it allows to chose beween an exact-inexact
+                         # Newton scheme
+rescaleFactor    = 1.    # this factor can be used to rescale the structure block
+
+** # physical data for the solid
+[./physics]
+
+solidType = linearVenantKirchhoff
+## available choices: exponential, neoHookean, nonLinearVenantKirchhoff, linearVenantKirchhoff
+material_flag = 1     		   #the mesh flag of the structure volume
+density   = 1.2
+young     = 4.0E6
+poisson   = 0.45
+bulk      = 1e7
+alpha     = 2.5e6              		# the parameter at the exponent for the exponential model
+gamma     = 1		       		# parameter for the exponential model
+thickness = 0.045
+
+** #time discretization
+[../time_discretization]
+method          = BDF # Newmark or BDF (generalized alpha in the future)
+initialtime		= 0.
+endtime			= 0.01
+timestep		= 0.001
+BDF_order		= 2
+theta                   = 0.35
+gamma                    = 0.75
+rhoInf          = 1
+typeOfGeneralizedAlpha            = HHT
+
+** #space discretization
+[../space_discretization]
+mesh_dir  = ./  # the directory where the mesh file is
+mesh_file = solidBig.mesh #aorta_solid_withEdges.mesh  # mesh file
+order     = P1 #P1 or P2
+mesh_faces      = all                   # update all faces elements
+mesh_edges      = all                   # update all faces elements
+
+** #miscellaneous
+[../miscellaneous]
+verbose   = 1
+depname   = dep
+
+* #monolithic FSI linear system data
+[linear_system]
+
+** #linear solver
+[./solver]
+output          = all            # none
+max_iter        = 200		 # max number of iterations
+poly_ord        = 5
+kspace          = 200		 # Krylov space maximum dimension
+tol             = 1.e-6		 # Tolerance for the linear system
+
+*** #aztecoo linear solver section
+[./aztecoo]
+reordering         = 1            # rcm
+# Aztecoo preconditioner:
+subdomain_solve    = ilut
+ilut_fill          = 4.e+0
+drop               = 1.e-5
+athresh            = 1.e-3
+rthresh            = 1.e-3
+reuse              = 1
+displayList        = false
+
+[../] # aztecoo
+
+** # preconditioner section
+[../prec]
+reuse           = false
+prectype        = Composed # either Ifpack, ML, or Composed
+entry           = 0.0
+
+*** # parameters for the Robin-Robin preconditioner
+[./robin]
+alphaf = 0.
+alphas = 0.5 # parameters for Robin-Robin DDBlock preconditioner
+
+*** # composed (split into factors) preconditioner section
+[../Composed]
+list                = 'Ifpack Ifpack Ifpack' # either Ifpack, ML, PCD, ...
+sections            = 'Ifpack1 Ifpack2 Ifpack2'
+
+*** #PCD preconditioner
+[../PCD1]
+
+ pressure_boundary_conditions        = neumann_to_dirichlet
+ set_Ap_boundary_conditions          = true
+ set_Fp_boundary_conditions          = true
+ pressure_laplacian_operator         = standard
+ use_lumped_pressure_mass            = true
+
+**** #options for the PCD
+ [./subprecs]
+ pressure_laplacian_prec = Ifpack
+ pressure_laplacian_prec_data_section = Ifpack
+ fluid_prec = Ifpack
+ fluid_prec_data_section = Ifpack
+ pressure_mass_prec = Ifpack
+ pressure_mass_prec_data_section = Ifpack
+
+[../]
+
+*** #PCD preconditioner
+[../PCD2] #this is the "subsection" in PreconditionerPCD.cpp
+displayList = false
+pressure_boundary_conditions         = neumann_to_dirichlet
+set_Ap_boundary_conditions           = true
+set_Fp_boundary_conditions           = true
+pressure_laplacian_operator          = standard
+use_lumped_pressure_mass             = true
+use_StiffStrain                      = true
+enable_transient                     = true
+
+**** #options for the PCD
+[./subprecs]
+fluid_prec                           = ML
+fluid_prec_data_section              = DD2Levels2 #linear_system/prec
+pressure_laplacian_prec              = ML
+pressure_laplacian_prec_data_section = PCDLaplacian #linear_system/prec
+pressure_mass_prec                   = ML
+pressure_mass_prec_data_section      = DD2Levels2 #linear_system/prec
+[../]
+
+
+*** #set of options for ML preconditioner
+[../ML1] # preconditioner for the first factor in case our choice was ML
+displayList = false
+default_parameter_list = SA    # for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
+prec_type =  MGV # MGV
+    # one-level-postsmoothing , two-level-additive
+    # two-level-hybrid , two-level-hybrid2
+max_levels = 10
+inc_or_dec = increasing
+
+**** energy minimization
+[./energy_minimization]
+enable = true
+type   = 2
+
+#####THE FOLLOWING IS TAKEN BY THE MAXWELL EXAMPLE#########
+**** repartition
+[../repartition]
+enable              = 1
+node_max_min_reatio = 1.1
+node_min_per_proc   = 64
+max_min_ratio       = 1.1
+min_per_proc        = 20
+partitioner         = ParMETIS #Zoltan: to be implemented
+##Zoltan_dimensions = 3
+
+**** aggregation
+[../aggregation]
+type                = METIS
+treshold            = 0.0
+nodes_per_aggregate = 32
+
+**** coarse problem
+[../coarse]
+max_size            = 60
+type                = Amesos-KLU
+################
+
+**** smoother
+[../smoother]
+type = IFPACK # IFPACK, Aztec
+pre_or_post = pre
+[../] # end of ML1
+
+*** #alternative set of options for ML preconditioner
+[../ML2]  # preconditioner for the second factor in case our choice was ML
+default_parameter_list = NSSA    # for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
+displayList = false
+prec_type = MGV # MGV, MGW
+          # one-level-postsmoothing , two-level-additive
+          # two-level-hybrid , two-level-hybrid2
+
+max_levels = 3
+inc_or_dec = increasing
+
+**** #energy minimization options
+[./energy_minimization]
+enable = true
+type   = 2
+
+**** #repartition options
+#####THE FOLLOWING IS TAKEN BY THE MAXWELL EXAMPLE#########
+[../repartition]
+enable              = true
+node_max_min_reatio = 1.1
+node_min_per_proc   = 64
+max_min_ratio       = 1.1
+min_per_proc        = 20
+partitioner         = ParMETIS #Zoltan: to be implemented
+##Zoltan_dimensions   = 3
+
+**** #aggregation options
+[../aggregation]
+type                = METIS
+treshold            = 0.0
+nodes_per_aggregate = 32
+
+**** #coarse solver
+[../coarse]
+max_size            = 60
+#type                = Amesos-KLU
+################
+
+**** #smoother
+[../smoother]
+type = IFPACK # Aztec, IFPACK
+##pre_or_post = pre
+
+[../] # end of ML2
+
+
+
+*** #set of options for Ifpack (Additive Schwarz) preconditioner
+[../Ifpack1]  # preconditioner for the first factor in case our choice was Ifpack
+prectype        = Amesos
+overlap         = 2
+
+**** #options for incomplete factorization of the subproblems (ILU/ILUT)
+[./fact]
+level-of-fill                 = 10
+ilut_level-of-fill            = 4
+drop_tolerance                = 1.e-10
+relax_value                   = 0
+
+**** #options for Amesos direct solver for the subproblems
+[../amesos]
+solvertype = Amesos_Umfpack
+
+**** #options for the partitioner (not used)
+[../partitioner]
+overlap = 2
+
+**** #option for Schwarz (not used)
+[../schwarz]
+reordering_type = none #metis, rcm, none
+flter_singletons = true
+
+[../] # Ifpack1
+
+
+*** #another set of options for Ifpack preconditioner
+[../Ifpack2]   # preconditioner for the second factor in case our choice was Ifpack
+prectype        = Amesos
+overlap         = 2
+
+**** #ILU/ILUT
+[./fact]
+level-of-fill                 = 10
+ilut_level-of-fill            = 4
+drop_tolerance                = 1.e-10
+relax_value                   = 0
+
+**** #Amesos direct solver
+[../amesos]
+solvertype = Amesos_Umfpack
+
+**** #Partitioner
+[../partitioner]
+overlap = 2
+
+**** #Schwarz
+[../schwarz]
+reordering_type = none #metis, rcm, none
+flter_singletons = true
+
+[../] # Ifpack2
+
+
+*** #yet another set of options for Ifpack preconditioner
+[../ifpack] # if Ifpack, and if the preconditioner was not of type "Composed"
+prectype        = Amesos
+overlap         = 2
+
+**** #incomplete factorization
+[./fact]
+level-of-fill                 = 10
+ilut_level-of-fill            = 4
+drop_tolerance                = 1.e-10
+relax_value                   = 0
+
+****  #complete factorization
+[../amesos]
+solvertype = Amesos_Umfpack
+
+**** #partitioner
+[../partitioner]
+overlap = 2
+
+**** #Schwarz
+[../schwarz]
+reordering_type = none #metis, rcm, none
+flter_singletons = true
+
+[../] # ifpack
+
+*** #yet another alternative set of options for ML preconditioner
+[../ML] #if ML, and if the preconditioner was not of type "Composed"
+default_parameter_list = DD-ML    # for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
+prec_type = MGV # MGV
+max_levels = 2
+
+**** #energy minimization options
+[./energy_minimization]
+enable = 0
+type   = 2
+
+#####THE FOLLOWING IS TAKEN BY THE MAXWELL EXAMPLE#########
+**** # repartition
+[../repartition]
+enable              = 0
+node_max_min_reatio = 1.1
+node_min_per_proc   = 64
+max_min_ratio       = 1.1
+min_per_proc        = 20
+partitioner         = ParMETIS #Zoltan: to be implemented
+##Zoltan_dimensions   = 3
+
+**** #aggregation
+[../aggregation]
+type                = METIS
+treshold            = 0.0
+nodes_per_aggregate = 32
+
+**** #coarsening
+[../coarse]
+max_size            = 60
+## type                = Amesos-KLU
+################
+
+**** #smoother
+[../smoother]
+type = Ifpack
+pre_or_post = pre
+[../] # end if ML
+[../] # prec
+# end of preconditioner part
+
+* #problem data for the ALE (harmonic extension)
+[mesh_motion]
+
+** #type of solver (many parameters are used only in the GE case, when this problem is considered separately)
+[./solver]
+output          = all # none
+max_iter        = 200
+poly_ord        = 5
+kspace          = 200
+precond         = dom_decomp
+drop            = 1.00e-4
+ilut_fill       = 4
+tol             = 1.e-10
+keep_info       = 1
+
+** #time discretization (used only for the calculation/extrapolation of the domain velocity)
+[../time_discretization]
+method          = BDF
+initialtime		= 0.0
+endtime			= 0.01
+timestep		= 0.001
+BDF_order		= 1
+theta           = 0.5
+gamma            = 0.5
+rhoInf          = 1
+typeOfGeneralizedAlpha            = HHT
+
+
+** #preconditioner (used only in the GE case, when this problem is considered separately)
+[../prec]
+prectype        = Ifpack
+displayList     = false
+
+*** #Ifpack option
+[./ifpack]
+prectype        = Amesos
+overlap         = 4
+
+**** #incomplete factorization
+[./fact]
+level-of-fill                 = 10
+ilut_level-of-fill            = 4
+drop_tolerance                = 1.e-10
+relax_value                   = 0
+
+**** #complete factorization
+[../amesos]
+solvertype = Amesos_Umfpack
+
+[../] # ifpack
+[../] # prec
+
+* #Obsolete section
+[jacobian]
+
+solver   = gmres;
+poly_ord = 5;
+kspace   = 40;
+conv     = rhs;
+
+* #eigensolver section, used when we want to compute the singular values of the preconditioned FSI system (see in FSIMonolithic.cpp)
+[eigensolver]
+
+nevec = 10
+block_size = 1;
+max_blocks = 1000;
+max_restarts = 1000;
+tol = 1e-5;
+which = ML
+neval = 5
+
+* #preconditioner perameters that can be used for the blocks in the aPCD preconditioner
+** 2 level DD Preconditioner
+[DD2Levels]
+displayList                 = false
+  [./ML]
+  default_parameter_list  = DD
+  max_levels              = 2
+  inc_or_dec              = increasing
+    [./smoother]
+    type                    = IFPACK
+    pre_or_post             = pre
+    ifpack_overlap          = 0
+    [../coarse]
+    type                    = Gauss-Seidel
+    sweeps                  = 1
+    pre_or_post             = both
+    [../aggregation]
+    type                    = Zoltan #METIS
+    nodes_per_aggregate     = 200
+   - #available smoother types:
+       # "Aztec"
+       # "IFPACK"
+       # "Jacobi"
+       # "ML symmetric Gauss-Seidel"
+       # "symmetric Gauss-Seidel"
+       # "ML Gauss-Seidel"
+       # "Gauss-Seidel"
+       # "block Gauss-Seidel"
+       # "symmetric block Gauss-Seidel"
+       # "Chebyshev"
+       # "MLS"
+       # "Hiptmair"
+       # "Amesos-KLU"
+       # "Amesos-Superlu"
+       # "Amesos-UMFPACK"
+       # "Amesos-Superludist"
+       # "Amesos-MUMPS"
+       # "user-defined"
+       # "SuperLU"
+       # "IFPACK-Chebyshev"
+       # "self"
+       # "do-nothing"
+       # "IC"
+       # "ICT"
+       # "ILU"
+       # "ILUT"
+       # "Block Chebyshev"
+       # "IFPACK-Block Chebyshev"
+  [../]
+[../]
+
+** other 2 levels DD preconditioner
+[DD2Levels2]
+displayList                 = false
+  [./ML]
+  default_parameter_list  = DD
+  max_levels              = 2
+  inc_or_dec              = increasing
+    [./smoother]
+    type                    = IFPACK
+    pre_or_post             = pre
+    ifpack_overlap          = 0
+    [../coarse]
+    type                    = Gauss-Seidel
+    sweeps                  = 1
+    pre_or_post             = both
+    [../aggregation]
+    type                    = METIS
+    nodes_per_aggregate     = 200
+  [../]
+[../]
+
+** AMG preconditioner effective for the Laplacian
+[PCDLaplacian]
+displayList                 = false
+  [./ML]
+  default_parameter_list  = SA
+  inc_or_dec              = increasing
+    [./smoother]
+    type                    = 'symmetric Gauss-Seidel'
+    pre_or_post             = pre
+    ifpack_overlap          = 0
+    [../coarse]
+    type                    = Amesos-KLU
+    max_size                = 500
+    [../aggregation]
+    ## Uncoupled-MIS (Default)
+    threshold     = 0.01
+  [../]
+[../]
+
+** Ifpack Additive Schwarz preconditioner
+[Ifpack]
+[./ifpack]
+prectype        = Amesos
+overlap         = 4
+
+[./fact]
+level-of-fill                 = 10
+ilut_level-of-fill            = 4
+drop_tolerance                = 1.e-10
+relax_value                   = 0
+
+[../amesos]
+solvertype = Amesos_Umfpack
+
+[../] # ifpack
+[../]

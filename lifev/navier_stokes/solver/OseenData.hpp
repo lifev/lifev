@@ -47,6 +47,7 @@
 #include <lifev/core/util/StringData.hpp>
 #include <lifev/core/util/StringUtility.hpp>
 #include <lifev/core/fem/TimeData.hpp>
+#include <lifev/core/fem/TimeAdvanceData.hpp>
 #include <boost/shared_ptr.hpp>
 #include <string>
 #include <iostream>
@@ -83,11 +84,11 @@ enum NSStabilization
  *
  *     [./fluid_0]
  *       density = 1;
- *	     viscosity = 1;
+ *         viscosity = 1;
  *
  *     [../fluid_1]
  *       density = 10;
- *	     viscosity = 100;
+ *         viscosity = 100;
  *
  *  Remark: in case both ways of declaring the fluids are used, the new one has priority.
  *  Remark: do not use "fluid_number = 1" with the old way, it will not work properly.
@@ -102,9 +103,11 @@ public:
     //! @name Public Types
     //@{
 
-    typedef TimeData							   time_Type;
-    typedef boost::shared_ptr<time_Type>	       timePtr_Type;
+    typedef TimeData                               time_Type;
+    typedef boost::shared_ptr<time_Type>           timePtr_Type;
 
+    typedef TimeAdvanceData                        timeAdvance_Type;
+    typedef boost::shared_ptr<timeAdvance_Type>    timeAdvancePtr_Type;
 
     //@}
 
@@ -163,14 +166,20 @@ public:
     /*!
      * @param TimeData shared_ptr to TimeData container
      */
-    inline void setTimeData( const timePtr_Type TimeData ) { M_time = TimeData; }
+    void setTimeData( const timePtr_Type timeData ) { M_time = timeData; }
+
+    //! Set data time advance container
+    /*!
+     * @param timeAdvanceData shared_ptr to TimeAdvanceData container
+     */
+    void setTimeAdvanceData( const timeAdvancePtr_Type timeAdvanceData ) { M_timeAdvance = timeAdvanceData; }
 
     //! Set the density for the specified fluid
     /*!
      * @param density
      * @param nfluid the fluid number
      */
-    inline void setDensity ( const Real& density, const UInt nfluid=0 )
+    void setDensity ( const Real& density, const UInt nfluid=0 )
     {
         ASSERT(nfluid< M_fluidNumber,"Undeclared fluid");
         M_density[nfluid] = density;
@@ -181,7 +190,7 @@ public:
      * @param viscosity
      * @param nfluid the fluid number
      */
-    inline void setViscosity ( const Real& viscosity, const UInt nfluid=0 )
+    void setViscosity ( const Real& viscosity, const UInt nfluid=0 )
     {
         ASSERT(nfluid< M_fluidNumber,"Undeclared fluid");
         M_viscosity[nfluid] = viscosity;
@@ -192,13 +201,13 @@ public:
      * @param Stokes a boolean that is "true" for a Stokes problem and "false" for a Navier-Stokes
      *                problem
      */
-    void setStokes             ( const bool stokes )     { M_stokes = stokes; }
+    void setStokes( const bool stokes ) { M_stokes = stokes; }
 
     //! Set the flag for the semi-implicit treatment of the shape derivatives in FSI simulations
     /*!
      * @param SI the flag for semi implicit treatment
      */
-    void setSemiImplicit       ( const bool SI )
+    void setSemiImplicit( const bool SI )
     {
         M_semiImplicit = SI;
         if ( M_semiImplicit )
@@ -209,7 +218,7 @@ public:
     /*!
      * @param SD the flag for using shape derivatives
      */
-    void setUseShapeDerivatives( const bool SD )         { M_shapeDerivatives = SD; }
+    void setUseShapeDerivatives( const bool SD ) { M_shapeDerivatives = SD; }
 
     //@}
 
@@ -222,7 +231,13 @@ public:
     /*!
      * @return shared_ptr to TimeData container
      */
-    inline timePtr_Type dataTime( void ) const { return M_time; }
+    timePtr_Type dataTime() const { return M_time; }
+
+    //! Get data time advance container
+    /*!
+     * @return shared_ptr to TimeAdvanceData container
+     */
+    timeAdvancePtr_Type dataTimeAdvance() const { return M_timeAdvance; }
 
     //! Get the number of the fluid
     /*!
@@ -256,124 +271,147 @@ public:
     /*!
      * @return M_uOrder a string specifying the order of finite elements for velocity
      */
-    std::string     uOrder()                      const { return M_uOrder; }
+    std::string uOrder() const { return M_uOrder; }
 
     //! Get the order of the finite elements used for pressure
     /*!
      * @return M_pOrder a string specifying the order of finite elements for pressure
      */
-    std::string     pOrder()                      const { return M_pOrder; }
+    std::string pOrder() const { return M_pOrder; }
 
     //! Temporal output verbose
     /*!
      * @return M_verbose
      */
-    UInt            verbose()                     const { return M_verbose; }
+    UInt verbose() const { return M_verbose; }
 
     //! Dumping of the results
     /*!
      * @return M_dumpInit the time for dumping of the results
      */
-    Real            dumpInit()                   const { return M_dumpInit; }
+    Real dumpInit() const { return M_dumpInit; }
 
     //! Get the frequency of the dumping
     /*!
      * @return M_dumpPeriod number of time steps after which one dump is performed
      */
-    UInt            dumpPeriod()                 const { return M_dumpPeriod; }
+    UInt dumpPeriod() const { return M_dumpPeriod; }
 
     //! Get the amplification factor
     /*!
      * @return M_factor The amplification factor
      */
-    Real            factor()                      const { return M_factor; }
+    Real factor() const { return M_factor; }
 
     //! Get the stabilization method
     /*!
      * @return M_stabMethod The method used for stabilizing
      */
-    NSStabilization stabilization()               const { return M_stabMethod; }
+    NSStabilization stabilization() const { return M_stabMethod; }
 
     //!
     /*! find out if this is a Stokes or Navier-Stokes problem
      * @return M_stokes Boolean that is "true" for a Stokes and "false" for a Navier-Stokes
      *                  problem
      */
-    inline bool     isStokes()                      const { return M_stokes; }
+    bool isStokes() const { return M_stokes; }
 
     //! Find out if a semi-implicit scheme is used
     /*!
      * @return M_semiImplicit "true" if a semi-implicit scheme is used, "false" otherwise
      */
-    bool            isSemiImplicit()              const { return M_semiImplicit; }
+    bool isSemiImplicit() const { return M_semiImplicit; }
 
     //!Get the flag for using shape derivatives
     /*!
      *@return M_shapeDerivatives Flag for shape derivatives
      *
      */
-    bool            useShapeDerivatives()         const { return M_shapeDerivatives; }
+    bool useShapeDerivatives() const { return M_shapeDerivatives; }
+
+
+    //!Get the flag for considering implicitly the fluid domain (when it is moving, e.g. ALE)
+    /*!
+     *@return M_domainVelImplicit Flag for shape derivatives
+     *
+     */
+    bool domainVelImplicit() const { return M_domainVelImplicit; }
+
+
+    //!Get the flag for considering implicitly the fluid convective term
+    /*!
+     *@return M_convectiveImplicit Flag for shape derivatives
+     *
+     */
+    bool convectiveImplicit() const { return M_convectiveImplicit; }
 
     //! Get the number of mean valuNes per section
     /*!
      * @return M_computeMeanValuesPerSection number of mean values
      */
-    UInt            computeMeanValuesPerSection() const { return M_computeMeanValuesPerSection; }
+    UInt computeMeanValuesPerSection() const { return M_computeMeanValuesPerSection; }
 
     //! Get the number of NBZ-sections
     /*!
      * @return M_NbZSections Number of NBZ-sections
      */
-    UInt            nbZSections()                 const { return M_NbZSections; }
+    UInt nbZSections() const { return M_NbZSections; }
 
     //! Tolerance section
     /*!
      * @return M_ToleranceSection The tolerance section
      */
-    Real            toleranceSection()            const { return M_ToleranceSection; }
+    Real toleranceSection() const { return M_ToleranceSection; }
 
     //! X-Section frontier
     /*!
      * @return M_XSectionFrontier The x-section frontier
      */
-    Real            xSectionFrontier()            const { return M_XSectionFrontier; }
+    Real xSectionFrontier() const { return M_XSectionFrontier; }
 
     //! Z section init
     /*!
      * @return M_ZSectionInit The initial z-section
      */
-    Real            zSectionInit()                const { return M_ZSectionInit; }
+    Real zSectionInit() const { return M_ZSectionInit; }
 
     //! Z section final
     /*!
      * @return M_ZSectionFinal The final z-section
      */
-    Real            zSectionFinal()               const { return M_ZSectionFinal; }
+    Real zSectionFinal() const { return M_ZSectionFinal; }
 
     //! Number of edges of the polygon (in the mesh) describing the circle
     /*!
      * @return M_NbPolygonEdges The number of polygon edges
      */
-    UInt            nbPolygonEdges()              const { return M_NbPolygonEdges; }
+    UInt nbPolygonEdges() const { return M_NbPolygonEdges; }
+
+    //! Returns wether the formulation of the momentum conservation equation is written in conservative form or not.
+    /*!
+     * @return M_conservativeFormulation the output flag
+     */
+    bool conservativeFormulation() const { return M_conservativeFormulation; }
 
     //@}
 
 protected:
 
     //! Data containers for time and mesh
-    timePtr_Type      M_time;
+    timePtr_Type        M_time;
+    timeAdvancePtr_Type M_timeAdvance;
 
     //! @name Physics
     //@{
 
     //! number of this fluid
-    UInt              M_fluidNumber;
+    UInt                M_fluidNumber;
 
     //! density of each fluid
-    std::vector<Real> M_density;
+    std::vector<Real>   M_density;
 
     //! viscosity of each fluid
-    std::vector<Real> M_viscosity;
+    std::vector<Real>   M_viscosity;
 
     //@}
 
@@ -382,10 +420,10 @@ protected:
     //@{
 
     //! order of finite elements for velocity
-    std::string      M_uOrder;
+    std::string         M_uOrder;
 
     //! order of finite elements for pressure
-    std::string      M_pOrder;
+    std::string         M_pOrder;
 
     //@}
 
@@ -394,19 +432,19 @@ protected:
     //@{
 
     //! temporal output verbose
-    UInt             M_verbose;
+    UInt                M_verbose;
 
     //! time for starting the dumping of the results (Alex December 2003)
-    Real             M_dumpInit;
+    Real                M_dumpInit;
 
     //! frequency of the dumping (one dump after _dump_period time steps) (Alex December 2003)
-    UInt             M_dumpPeriod;
+    UInt                M_dumpPeriod;
 
     //! amplification factor for moving domains
-    Real             M_factor;
+    Real                M_factor;
 
     //! true: Stokes problem; false: Navier-Stokes problem
-    bool             M_stokes;
+    bool                M_stokes;
 
     //@}
 
@@ -414,24 +452,27 @@ protected:
     //@{
 
     //! stabilization method
-    NSStabilization  M_stabMethod;
+    NSStabilization     M_stabMethod;
 
     //@}
 
 private:
 
     //! To extract Mean Values at a given section z
-    bool             M_semiImplicit;
-    bool             M_shapeDerivatives;
-    UInt             M_computeMeanValuesPerSection; // switch: 0 don't compute it, 1 compute
-    UInt             M_NbZSections;
-    Real             M_ToleranceSection;
-    Real             M_XSectionFrontier;
-    Real             M_ZSectionInit;
-    Real             M_ZSectionFinal;
-    UInt             M_NbPolygonEdges; // number of edges of the polygon (in mesh) describing the circle
+    bool                M_semiImplicit;
+    bool                M_shapeDerivatives;
+    bool                M_domainVelImplicit;
+    bool                M_convectiveImplicit;
+    UInt                M_computeMeanValuesPerSection; // switch: 0 don't compute it, 1 compute
+    UInt                M_NbZSections;
+    Real                M_ToleranceSection;
+    Real                M_XSectionFrontier;
+    Real                M_ZSectionInit;
+    Real                M_ZSectionFinal;
+    UInt                M_NbPolygonEdges; // number of edges of the polygon (in mesh) describing the circle
 
-    StringDataList   M_stabilizationList;
+    StringDataList      M_stabilizationList;
+    bool                M_conservativeFormulation;
 };
 
 

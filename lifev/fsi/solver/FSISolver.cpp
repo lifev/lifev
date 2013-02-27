@@ -237,53 +237,41 @@ FSISolver::setup( void )
     M_oper->buildSystem();
 }
 
-
 void
-FSISolver::initialize( const std::string& /*velFName*/,
-                       const std::string& /*pressName*/,
-                       const std::string& /*velwName*/,
-                       const std::string& /*depName*/,
-                       const std::string& /*velSName*/,
-                       const Real&        /*Tstart = 0.*/)
+FSISolver::initialize(std::vector< vectorPtr_Type> u0, std::vector< vectorPtr_Type> ds0, std::vector< vectorPtr_Type> df0)
 {
-//             M_oper->fluid().initialize(velFName, pressName, velwName, Tstart);
-//             M_oper->solid().initialize(depName, velSName, Tstart);
-}
-
-
-void
-FSISolver::initialize(vectorPtr_Type u0, vectorPtr_Type v0)
-{
-    if (!u0.get())
+  UInt i;
+  if (!u0.size()||!ds0.size()||!df0.size())
     {
-        u0.reset(new vector_Type(*M_oper->couplingVariableMap()));
-        M_oper->initialize(*u0); // couplingVariableMap()
-        M_oper->initializeBDF(*u0);
+      if ( this->isFluid() )
+      {
+        for(i=0; i<M_oper->fluidTimeAdvance()->size(); ++i)
+      {
+            vectorPtr_Type vec(new vector_Type(M_oper->fluid().getMap()));
+            u0.push_back(vec);// couplingVariableMap()
+      }
+        for(i=0; i<M_oper->ALETimeAdvance()->size(); ++i)
+      {
+            vectorPtr_Type vec(new vector_Type(M_oper->meshMotion().getMap()));
+            df0.push_back(vec);// couplingVariableMap()
+      }
+      }
+      if ( this->isSolid() )
+      {
+        for(i=0; i<M_oper->solidTimeAdvance()->size(); ++i)
+      {
+            vectorPtr_Type vec(new vector_Type(M_oper->solid().map()));
+            ds0.push_back(vec);// couplingVariableMap()
+      }
+      }
+      M_oper->initializeTimeAdvance(u0, ds0, df0);
+      //  M_oper->initializeBDF(*u0);
     }
     else
     {
-        M_oper->initialize(*u0); // couplingVariableMap()//copy
-        M_oper->initializeBDF(*u0);
+        M_oper->initializeTimeAdvance(u0, ds0, df0); // couplingVariableMap()//copy
     }
-    if (!v0.get())
-        M_oper->setSolutionDerivative(*u0); // couplingVariableMap()//copy
-    //        M_oper->setSolutionDerivative(u0); // couplingVariableMap()//copy
-    else
-        M_oper->setSolutionDerivative(*v0);
-    //M_oper->setSolutionDerivative(v0);
-    //M_oper->setupBDF(*M_lambda);
 }
-
-void
-FSISolver::initialize( fluidFunction_Type const& u0,
-                       fluidFunction_Type const& p0,
-                       solidFunction_Type const& d0,
-                       solidFunction_Type const& w0,
-                       fluidFunction_Type const& df0)
-{
-    M_oper->initialize(u0, p0 , d0, w0, df0);
-}
-
 
 
 void
@@ -293,27 +281,93 @@ FSISolver::iterate()
     debugStream( 6220 ) << "Solving FSI at time " << M_data->dataFluid()->dataTime()->time() << " with FSI: " << M_data->method()  << "\n";
     debugStream( 6220 ) << "============================================================\n";
 
+    if (M_epetraWorldComm->MyPID() == 0)
+    {
+        std::cerr << std::endl << "Warning: FSISolver::iterate() is deprecated!" << std::endl
+                  << "         You should use FSISolver::iterate( solution ) instead!" << std::endl;
+    }
+
     // Update the system
     M_oper->updateSystem( );
 
-    // We extract a copy to the solution (\todo{uselessly})
-    vectorPtr_Type lambda(new vector_Type(M_oper->solution()));
-    //M_oper->solutionPtr(lambda);//copy of a shared_ptr
+    // We extract a copy of the solution (\todo{uselessly})
+    vector_Type lambda = M_oper->solution();
 
-    // the newton solver
+    // The Newton solver
     UInt maxiter = M_data->maxSubIterationNumber();
-    UInt status = NonLinearRichardson( *lambda,
+    UInt status = NonLinearRichardson( lambda,
                                        *M_oper,
                                        M_data->absoluteTolerance(),
                                        M_data->relativeTolerance(),
                                        maxiter,
                                        M_data->errorTolerance(),
                                        M_data->NonLinearLineSearch(),
+                                       0,/*first newton iter*/
+                                       2,/*verbosity level*/
                                        M_out_res,
-                                       M_data->dataFluid()->dataTime()->time() );
+                                       M_data->dataFluid()->dataTime()->time()
+                       );
 
     // We update the solution
-    M_oper->updateSolution( *lambda );
+    M_oper->updateSolution( lambda );
+
+    // Update the system
+    M_oper->updateSystem( );
+
+    if (status == EXIT_FAILURE)
+    {
+        std::ostringstream __ex;
+        __ex << "FSISolver::iterate ( " << M_data->dataFluid()->dataTime()->time() << " ) Inners iterations failed to converge\n";
+        throw std::logic_error( __ex.str() );
+    }
+    else
+    {
+        //M_oper->displayer().leaderPrint("FSI-  Number of inner iterations:              ", maxiter, "\n" );
+        if (M_epetraWorldComm->MyPID() == 0)
+        {
+            M_out_iter << M_data->dataFluid()->dataTime()->time() << " " << maxiter;
+        }
+    }
+
+    debugStream( 6220 ) << "FSISolver iteration at time " << M_data->dataFluid()->dataTime()->time() << " done\n";
+    debugStream( 6220 ) << "============================================================\n";
+    std::cout << std::flush;
+}
+
+
+void
+FSISolver::iterate( vectorPtr_Type& solution )
+{
+    debugStream( 6220 ) << "============================================================\n";
+    debugStream( 6220 ) << "Solving FSI at time " << M_data->dataFluid()->dataTime()->time() << " with FSI: " << M_data->method()  << "\n";
+    debugStream( 6220 ) << "============================================================\n";
+
+    // Update the system
+    M_oper->updateSystem( );
+
+    // The initial guess for the Newton method is received from outside.
+    // For instance, it can be the solution at the previous time or an extrapolation
+    vector_Type lambda ( *solution );
+
+
+    // the newton solver
+    UInt maxiter = M_data->maxSubIterationNumber();
+    UInt status = NonLinearRichardson( lambda,
+                                       *M_oper,
+                                       M_data->absoluteTolerance(),
+                                       M_data->relativeTolerance(),
+                                       maxiter,
+                                       M_data->errorTolerance(),
+                                       M_data->NonLinearLineSearch(),
+                                       0,/*first newton iter*/
+                                       2,/*verbosity level*/
+                                       M_out_res,
+                                       M_data->dataFluid()->dataTime()->time()
+                       );
+
+    // After the Newton method, the solution that was received is modified with the current solution
+    // It is passed outside where it is used as the user wants.
+    *solution = lambda;
 
     if (status == EXIT_FAILURE)
     {

@@ -118,7 +118,9 @@ public:
     virtual void coupler( mapPtr_Type& map,
                           const std::map<ID, ID>& locDofMap,
                           const vectorPtr_Type& numerationInterface,
-                          const Real& timeStep);
+                          const Real& timeStep,
+                          const Real& coefficient,
+                          const Real& rescaleFactor);
 
     //!Applies the correspondent boundary conditions to every block
     /*!
@@ -144,6 +146,7 @@ public:
     void replace_matrix( const matrixPtr_Type& oper, UInt position );
 
     bool set(){return (bool) M_blockPrecs.get() && M_blockPrecs->number();}
+
 
     //@}
     //!@name Factory Method

@@ -69,7 +69,7 @@ public:
     static Real u_ex(const Real& /*t*/, const Real& x, const Real& y, const Real& /*z*/, const UInt& /*ic=0*/)
     {
         //        return x*x + y*y; // Polynomial solution
-        return sin(2*Pi*x)*sin(2*Pi*y); // Trigonometric solution
+        return std::sin(2*Pi*x)*std::sin(2*Pi*y); // Trigonometric solution
     }
     // The gradient of the exact solution
     static Real grad_ex(const UInt& icoor, const Real& /*t*/, const Real& x, const Real& y, const Real& /*z*/, const UInt& /*ic=0*/)
@@ -78,10 +78,10 @@ public:
         {
         case 1: //der_x
             //            return 2*x; // Polynomial solution
-            return 2*Pi*cos(2*Pi*x)*sin(2*Pi*y); // Trigonometric solution
+            return 2*Pi*std::cos(2*Pi*x)*std::sin(2*Pi*y); // Trigonometric solution
         case 2: //der_y
             //            return 2*x; // Polynomial solution
-            return 2*Pi*sin(2*Pi*x)*cos(2*Pi*y); // Trigonometric solution
+            return 2*Pi*std::sin(2*Pi*x)*std::cos(2*Pi*y); // Trigonometric solution
         default:
             return 0;
         }
@@ -90,7 +90,7 @@ public:
     static Real source(const Real& /*t*/, const Real& x, const Real& y, const Real& /*z*/, const UInt& /*ic=0*/)
     {
         //        return -4; // Polynomial solution
-        return 8*Pi*Pi*sin(2*Pi*x)*sin(2*Pi*y); // Trigonometric solution
+        return 8*Pi*Pi*std::sin(2*Pi*x)*std::sin(2*Pi*y); // Trigonometric solution
     }
     // The normal derivative to the domain boundary
     // BEWARE: this is case dependent! (works for cubic domains)
@@ -204,7 +204,7 @@ public:
         case ADR_STEADY_POLYNOMIAL: // ADR problem, polynomial solution
             return x*x + y*y + z*z;
         case POISSON_TRIGONOMETRIC: // Poisson problem, trigonometric solution
-            return sin(2*Pi*x)*sin(2*Pi*y)*sin(2*Pi*z);
+            return std::sin(2*Pi*x)*std::sin(2*Pi*y)*std::sin(2*Pi*z);
         case ADR_UNSTEADY_POLYNOMIAL: // ADR problem, polynomial solution
             return t*t + x*x + y*y + z*z;
         default:
@@ -225,7 +225,7 @@ public:
             case ADR_UNSTEADY_POLYNOMIAL: // ADR problem, polynomial solution
                 return 2*x; // Polynomial solution
             case POISSON_TRIGONOMETRIC: // Poisson problem, trigonometric solution
-                return 2*Pi*cos(2*Pi*x)*sin(2*Pi*y)*sin(2*Pi*z); // Trigonometric solution
+                return 2*Pi*std::cos(2*Pi*x)*std::sin(2*Pi*y)*std::sin(2*Pi*z); // Trigonometric solution
             }
         case 2: //der_y
             switch ( problemSolution )
@@ -235,7 +235,7 @@ public:
             case ADR_UNSTEADY_POLYNOMIAL: // ADR problem, polynomial solution
                 return 2*y; // Polynomial solution
             case POISSON_TRIGONOMETRIC: // Poisson problem, trigonometric solution
-                return 2*Pi*sin(2*Pi*x)*cos(2*Pi*y)*sin(2*Pi*z); // Trigonometric solution
+                return 2*Pi*std::sin(2*Pi*x)*std::cos(2*Pi*y)*std::sin(2*Pi*z); // Trigonometric solution
             }
         case 3: //der_z
             switch ( problemSolution )
@@ -245,7 +245,7 @@ public:
             case ADR_UNSTEADY_POLYNOMIAL: // ADR problem, polynomial solution
                 return 2*z; // Polynomial solution
             case POISSON_TRIGONOMETRIC: // Poisson problem, trigonometric solution
-                return 2*Pi*sin(2*Pi*x)*sin(2*Pi*y)*cos(2*Pi*z); // Trigonometric solution
+                return 2*Pi*std::sin(2*Pi*x)*std::sin(2*Pi*y)*std::cos(2*Pi*z); // Trigonometric solution
             }
         default:
             return 0;
@@ -260,7 +260,7 @@ public:
         case POISSON_POLYNOMIAL: // Poisson problem, polynomial solution
             return -diffusionCoeff*6.; // Polynomial solution
         case POISSON_TRIGONOMETRIC: // Poisson problem, trigonometric solution
-            return 12*Pi*Pi*sin(2*Pi*x)*sin(2*Pi*y)*sin(2*Pi*z); // Trigonometric solution
+            return 12*Pi*Pi*std::sin(2*Pi*x)*std::sin(2*Pi*y)*std::sin(2*Pi*z); // Trigonometric solution
         case ADR_UNSTEADY_POLYNOMIAL: // ADR problem, polynomial solution
             value += 2*t;
         case ADR_STEADY_POLYNOMIAL: // ADR problem, polynomial solution

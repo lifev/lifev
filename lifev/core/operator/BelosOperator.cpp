@@ -132,7 +132,7 @@ void BelosOperator::doSetPreconditioner()
     Teuchos::RCP<OP> tmpPtr( M_prec.get(), false );
     M_belosPrec = Teuchos::rcp( new Belos::EpetraPrecOp( tmpPtr ), true );
 
-    // The line below produces a memory link; It has been kept as an example to illustrate
+    // The line below produces a memory leak; It has been kept as an example to illustrate
     // why it has been changed.
     // M_belosPrec = Teuchos::rcp( new Belos::EpetraPrecOp( Teuchos::rcp( M_prec ) ), false );
 }
@@ -264,5 +264,13 @@ BelosOperator::getPreconditionerSideFromString( const std::string& str )
         return None;
 }
 
-} /* end namespace Operators */
-} /* end namespace */
+void
+BelosOperator::doResetSolver()
+{
+    M_solverManager->reset(Belos::Problem);
+    M_belosPrec = Teuchos::null;
+}
+
+} // Namespace Operators
+
+} // Namespace LifeV

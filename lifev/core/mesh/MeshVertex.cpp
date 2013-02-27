@@ -75,7 +75,7 @@ MeshVertex::showMe( bool verbose, std::ostream & out ) const
     out << "----- MeshVertex object -----" << std::endl;
     if ( verbose )
     {
-        unsigned i;
+        UInt i;
         out << " Coordinates:" << std::endl;
         Real const * coordinateVector = coordinatesArray();
         for ( i = 0; i < nDimensions-1; i++ )

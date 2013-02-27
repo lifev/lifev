@@ -66,6 +66,13 @@
 
 #include <lifev/core/algorithm/NonLinearAitken.hpp>
 
+#include <lifev/structure/solver/StructuralOperator.hpp>
+#include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
+#include <lifev/structure/solver/VenantKirchhoffMaterialNonLinear.hpp>
+#include <lifev/structure/solver/VenantKirchhoffMaterialLinear.hpp>
+#include <lifev/structure/solver/ExponentialMaterialNonLinear.hpp>
+#include <lifev/structure/solver/NeoHookeanMaterialNonLinear.hpp>
+
 #include <lifev/core/fem/DOFInterface3Dto3D.hpp>
 #include <lifev/core/fem/DOFInterface3Dto2D.hpp>
 #include <lifev/core/fem/BCHandler.hpp>
@@ -73,11 +80,12 @@
 #include <lifev/core/fem/TimeAdvanceBDF.hpp>
 #include <lifev/core/fem/FESpace.hpp>
 
+#ifdef HAVE_HDF5
 #include <lifev/core/filter/ExporterHDF5Mesh3D.hpp>
+#endif
 
 #include <lifev/fsi/solver/FSIData.hpp>
 #include <lifev/navier_stokes/solver/OseenSolverShapeDerivative.hpp>
-#include <lifev/structure/solver/VenantKirchhoffSolverLinear.hpp>
 #include <lifev/fsi/solver/HarmonicExtensionSolver.hpp>
 
 namespace LifeV
@@ -109,11 +117,12 @@ public:
 #ifdef HAVE_HDF5
     typedef ExporterHDF5Mesh3D<mesh_Type>                                           meshFilter_Type;
 #endif
+
     typedef OseenSolverShapeDerivative   <mesh_Type>                                fluid_Type;
-    typedef VenantKirchhoffSolver  <mesh_Type>                                      solid_Type;
+    typedef StructuralOperator  <mesh_Type>                                           solid_Type;
     typedef HarmonicExtensionSolver<mesh_Type>                                      meshMotion_Type;
     typedef OseenSolverShapeDerivative   <mesh_Type>                                fluidLin_Type;
-    typedef VenantKirchhoffSolver  <mesh_Type>                                      solidLin_Type;
+    typedef StructuralOperator  <mesh_Type>                                           solidLin_Type;
     typedef boost::shared_ptr<fluid_Type>                                           fluidPtr_Type;
     typedef boost::shared_ptr<solid_Type>                                           solidPtr_Type;
     typedef boost::shared_ptr<meshMotion_Type>                                      meshMotionPtr_Type;
@@ -139,7 +148,8 @@ public:
     typedef std::map<ID, ID>::const_iterator                                        iterator_Type;
     typedef FactorySingleton<Factory<FSIOperator, std::string> >                    FSIFactory_Type;
     typedef Displayer::commPtr_Type/*Displayer::commPtr_Type*/                      commPtr_Type;
-
+    typedef GetPot                                                                  dataFile_Type;
+    typedef boost::shared_ptr<dataFile_Type>                                        dataFilePtr_Type;
     //@}
 
 
@@ -160,7 +170,7 @@ public:
     //@{
 
     //! initializes the GetPot data file
-    virtual void setDataFile( const GetPot& data );
+    virtual void setDataFile( const dataFile_Type& data );
 
     //! sets the space discretization parameters
     /*!
@@ -234,7 +244,7 @@ public:
        Extrapolates the solution for the next time step. This method should be handled by a more general time-advance
        class.
      */
-    virtual void couplingVariableExtrap( );
+    void couplingVariableExtrap( );
 
     //! solves the Jacobian system
     /**
@@ -263,6 +273,24 @@ public:
      */
     virtual void updateSolution( const vector_Type& solution );
 
+    //! Set vectors for restart
+    /*!
+     *  Set vectors for restart
+     */
+    virtual void setVectorInStencils( const vectorPtr_Type& /*vel*/,
+                                      const vectorPtr_Type& /*pressure*/,
+                                      const vectorPtr_Type& /*solidDisp*/,
+                                      //                      const vectorPtr_Type& /*fluidDisp*/,
+                                      const UInt /*iter*/) {}
+
+    virtual void setFluidVectorInStencil( const vectorPtr_Type& /*vel*/, const vectorPtr_Type& /*pressure*/, const UInt /*iter*/) {}
+
+    virtual void setSolidVectorInStencil( const vectorPtr_Type& /*solidDisp*/, const UInt /*iter*/) {}
+
+    virtual void setALEVectorInStencil( const vectorPtr_Type& /*fluidDisp*/, const UInt /*iter*/, const bool /*lastVector*/ ) {}
+
+    virtual void finalizeRestart( ) {}
+
     //! Initializes all the quantities using functions
     /*!
      * calls the initialize methods for the subproblems. The mesh velocity is used to compute the convective term in the fluid equations
@@ -273,22 +301,9 @@ public:
      */
     virtual void initialize( fluidPtr_Type::value_type::function_Type const& u0,
                              fluidPtr_Type::value_type::function_Type const& p0,
-                             solidPtr_Type::value_type::Function const& d0,
-                             solidPtr_Type::value_type::Function const& w0,
+                             solidPtr_Type::value_type::function const& d0,
+                             solidPtr_Type::value_type::function const& w0,
                              fluidPtr_Type::value_type::function_Type const& df0 );
-
-    //! Initialize all the quantities required by FSI
-    /*!
-     * This method has been designed to initialize all the quantities of the FSI problem.
-     * @param fluidVelocityAndPressure velocity and pressure of the fluid
-     * @param fluidDisplacement displacement of the fluid
-     * @param solidVelocity velocity of the solid
-     * @param solidDisplacement displacement of the solid
-     */
-    virtual void initialize( const vectorPtr_Type& fluidVelocityAndPressure,
-                             const vectorPtr_Type& fluidDisplacement,
-                             const vectorPtr_Type& solidVelocity,
-                             const vectorPtr_Type& solidDisplacement );
 
     //@}
 
@@ -302,21 +317,29 @@ public:
     virtual void applyBoundaryConditions() {}
     //@}
 
-    //    static VenantKirchhofSolver< FSI::mesh_Type, SolverAztecOO >*    createNonLinearStructure(){ return new NonLinearVenantKirchhofSolver< FSI::mesh_Type, SolverAztecOO >(); }
 
     //!@name Factory Methods
     //@{
-    //! Factory method for the linear elasticity solver
-    static VenantKirchhoffSolver< mesh_Type, SolverAztecOO >* createLinearStructure() { return new VenantKirchhoffSolverLinear< mesh_Type, SolverAztecOO >(); }
+    static StructuralConstitutiveLaw< FSIOperator::mesh_Type >*    createVenantKirchhoffLinear(){ return new VenantKirchhoffMaterialLinear< FSIOperator::mesh_Type >(); }
+
+    static StructuralConstitutiveLaw< FSIOperator::mesh_Type >*    createVenantKirchhoffNonLinear(){ return new VenantKirchhoffMaterialNonLinear< FSIOperator::mesh_Type >(); }
+    static StructuralConstitutiveLaw< FSIOperator::mesh_Type >*    createExponentialMaterialNonLinear(){ return new ExponentialMaterialNonLinear< FSIOperator::mesh_Type >(); }
+
+    static StructuralConstitutiveLaw< FSIOperator::mesh_Type >*    createNeoHookeanMaterialNonLinear(){ return new NeoHookeanMaterialNonLinear< FSIOperator::mesh_Type >(); }
+
     //@}
+
 
     //!@name Public Methods
     //@{
-    //!Initializes the BDF which should handle the fluid time discretization
+
+    //!@name Public Methods
+    //@{
+    //!Initializes the TimeAdvance scheme which should handle the fluid time discretization, solid and move mesh
     /**
-       \todo{a general time advancing class should be used everywhere}
+       Initialization of the time advancing classes for fluid, structure and geometry problem.
      */
-    void initializeBDF( const vector_Type& un );
+    void initializeTimeAdvance( const std::vector<vectorPtr_Type>& initialFluidVel, const std::vector<vectorPtr_Type>& initialSolidDisp,const std::vector<vectorPtr_Type>&  initialFluiDisp);
 
     //! initializes the fluid solver with vectors
     /**
@@ -331,9 +354,6 @@ public:
        \param velocity: initial vector containing the velocity, used for the initialization of the TimeAdvanceNewmark scheme
      */
     void initializeSolid( vectorPtr_Type displacement, vectorPtr_Type velocity );
-
-    //!\todo{kill this method}
-    //void updateJacobian ( const vector_Type& sol, const int& iter );
 
     //!moves the mesh using the solution of the harmonic extension equation
     /**
@@ -360,7 +380,6 @@ public:
      */
     void transferFluidOnInterface( const vector_Type& _vec1, vector_Type& _vec2 );
 
-    //works in serial but no yet in parallel
     void transferSolidOnFluid( const vector_Type& _vec1, vector_Type& _vec2 );
 
     //!Method to import an VectorEpetra defined on the solid map (i.e. with the solid numeration of the dofs) to the interface
@@ -383,11 +402,11 @@ public:
     void bcManageVectorRHS( const fluidBchandlerPtr_Type& bch, vector_Type& rhs );
 
     //! Method to set the Robin vector coefficient of the Robin--Neumann coupling scheme (as a constant vector vector)
-    void setAlphaf() { M_Alphaf->epetraVector().PutScalar( M_AlphafCoef ); }
+    void setAlphaf() { M_alphaF->epetraVector().PutScalar( M_alphaFCoef ); }
     //! Method to compute the scalar coefficient \f$\alpha\f$ of the Robin--Neumann coupling scheme
     void setAlphafCoef();
     //! Method calling setAlphaf and setAlphafCoef
-    void setStructureToFluidParametres();
+    void setStructureToFluidParameters();
 
     //! Reset the right hand side to zero
     /*!
@@ -415,6 +434,12 @@ public:
     /** @name  Get Functions
      */
     //@{
+
+    //! Get the extrapolation of the solution
+    /*!
+     *  @param extrapolation vector to be filled with the extrapolated solution
+     */
+    void extrapolation( vector_Type& extrapolation ) const { M_fluidTimeAdvance->extrapolation( extrapolation ); }
 
 //     vector_Type & displacement()                                        { return *M_lambdaSolid; }
 //     vector_Type & displacementOld()                                     { return *M_lambdaSolidOld; }
@@ -445,7 +470,7 @@ public:
     const vector_Type& minusSigmaFluidRepeated()                  const { return *M_minusSigmaFluidRepeated; }
 
     //!coefficient for the Robin--Neumann coupling scheme
-    vector_Type&       Alphaf()                                   const { return *M_Alphaf;}
+    vector_Type&       Alphaf()                                   const { return *M_alphaF;}
 
     commPtr_Type worldComm()                                      const { return M_epetraWorldComm; }
 
@@ -480,9 +505,9 @@ public:
     //!getter for the FSI data container
     const data_Type& data()                                       const { return *M_data; }
     //!getter for the fluid data container
-    const data_Type::dataFluid_PtrType& dataFluid()               const { return M_data->dataFluid(); }
+    const data_Type::dataFluidPtr_Type& dataFluid()               const { return M_data->dataFluid(); }
     //!getter for the solid data container
-    const data_Type::dataSolid_PtrType& dataSolid()               const { return M_data->dataSolid(); }
+    const data_Type::dataSolidPtr_Type& dataSolid()               const { return M_data->dataSolid(); }
 
     //!getter for the unpartitioned fluid mesh
     mesh_Type& fluidMesh()                                        const { return *M_fluidMesh; }
@@ -510,7 +535,7 @@ public:
     const FESpace<mesh_Type, MapEpetra>& mmFESpace()              const { return *M_mmFESpace; }
     boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > mmFESpacePtr() const { return M_mmFESpace; }
     //!getter for the harmonic extension solution
-    virtual const vector_Type& meshDisp()                         const { return M_meshMotion->disp(); }
+    const vector_Type& meshDisp()                         const { return M_ALETimeAdvance->singleElement(0); }
     //!getter for the harmonic extension solution of the previous time step
     const         vector_Type& dispFluidMeshOld()                 const { return *M_dispFluidMeshOld; }
     //!getter for the mesh velocity
@@ -568,26 +593,52 @@ public:
     //! Getter for the right hand side
     const vectorPtr_Type& getRHS()                                  const { return M_rhs; }
 
-    //! getter for the fluid velocity
-    const vectorPtr_Type& un()                                      const { return M_un; }
+    const boost::shared_ptr<TimeAdvance<vector_Type> > ALETimeAdvance()const { return  M_ALETimeAdvance; }
+    const boost::shared_ptr<TimeAdvance<vector_Type> > fluidTimeAdvance()const { return  M_fluidTimeAdvance; }
+    const boost::shared_ptr<TimeAdvance<vector_Type> > solidTimeAdvance()const { return  M_solidTimeAdvance; }
+
+    const string ALETimeAdvanceMethod() const { return  M_ALETimeAdvanceMethod; }
+    const string fluidTimeAdvanceMethod()const { return  M_fluidTimeAdvanceMethod; }
+    const string solidTimeAdvanceMethod()const { return  M_solidTimeAdvanceMethod; }
 
     //! gets the solution vector by reference
     virtual const vector_Type& solution()                           const { return *M_lambda; }
 
-    //! gets a pointer to the solution vector by reference
-    virtual vectorPtr_Type& solutionPtr()                                 { return M_lambda; }
+    //! gets the solid displacement by copy
+    virtual void getSolidDisp( vector_Type& soliddisp )                 { soliddisp = M_solid->displacement(); }
+
+    //! gets the solid velocity by copy
+    virtual void getSolidVel( vector_Type& solidvel )                   { solidvel = M_solidTimeAdvance->firstDerivative(); }
 
     //! Export the solid displacement by copying it to an external vector
     /*!
      * @param solidDisplacement vector to be filled with the solid displacement
      */
-    virtual void exportSolidDisplacement( vector_Type& solidDisplacement ) { solidDisplacement = M_solid->getDisplacement(); }
+    virtual void exportSolidDisplacement( vector_Type& solidDisplacement ) { solidDisplacement = M_solid->displacement(); }
 
     //! Export the solid velocity by copying it to an external vector
     /*!
      * @param solidVelocity vector to be filled with the solid velocity
      */
-    virtual void exportSolidVelocity( vector_Type& solidVelocity ) { solidVelocity = M_solid->getVelocity(); }
+    virtual void exportSolidVelocity( vector_Type& solidVelocity ) { solidVelocity = M_solidTimeAdvance->firstDerivative(); }
+
+    //! Export the solid acceleration by copying it to an external vector
+    /*!
+     * @param solidAcc vector to be filled with the solid acceleration
+     */
+    virtual void exportSolidAcceleration( vector_Type& solidAcc ) { solidAcc = M_solidTimeAdvance->secondDerivative(); }
+
+    //! Export the fluid velocity by copying it to an external vector
+    /*!
+     * @param fluidVelocity vector to be filled with the fluid velocity
+     */
+    virtual void exportFluidVelocity( vector_Type& fluidVelocity ) { fluidVelocity = *M_fluid->solution(); }
+
+    //! Export the fluid pressure by copying it to an external vector
+    /*!
+     * @param fluidPressure vector to be filled with the fluid pressure
+     */
+    virtual void exportFluidPressure( vector_Type& fluidPressure ) { fluidPressure = *M_fluid->solution(); }
 
     //! Export the fluid velocity and pressure by copying it to an external vector
     /*!
@@ -599,7 +650,7 @@ public:
     /*!
      * @param fluidDisplacement vector to be filled with the fluid displacement
      */
-    virtual void exportFluidDisplacement( vector_Type& fluidDisplacement ) { fluidDisplacement = M_meshMotion->disp(); }
+    virtual void exportFluidDisplacement( vector_Type& fluidDisplacement ) { fluidDisplacement = M_ALETimeAdvance->singleElement(0); }
 
     //@}
 
@@ -709,36 +760,12 @@ public:
     void setDerFluidLoadToFluid              ( const vector_Type& dload, UInt type = 0 );
     void setRobinOuterWall                   ( const function_Type& dload, const function_Type& E);
 
-    //! sets the solution vector by reference
-    virtual void setSolutionPtr              ( const vectorPtr_Type& sol ) { M_lambda = sol; }
-
-    //! sets the solution vector by copy
-    virtual void setSolution                 ( const vector_Type& solution ) { M_lambda.reset( new vector_Type( solution ) ); }
-    virtual void initialize                  ( const vector_Type& solution ) { setSolution(solution); }
-    //! Initialize the fluid solution given a vector (calls setSolution)
-
-
-    //! sets the solution time derivative vector by copy
-    //void setSolutionDerivative( vectorPtr_Type& lambdaDot ) { M_lambdaDot = lambdaDot; }
-
     //! Setter for the time derivative of the interface displacement
     void setSolutionDerivative( const vector_Type& solutionDerivative ) { M_lambdaDot.reset( new vector_Type( solutionDerivative ) ); }
 
-    //@}
-
-//     void setDerReducedFluidLoadToStructure   ( vector_Type &dload, UInt type = 0 );
-//     void setDerStructureAccToReducedFluid    ( vector_Type &acc,   UInt type = 0 );
-
-//     void setReducedLinFluidBC                (fluidBchandlerPtr_Type bc_dredfluid);
-//     void setInvReducedLinFluidBC             (fluidBchandlerPtr_Type bc_invdredfluid);
-
-//     void setBCh_fluid             ( const fluidBchandlerPtr_Type& BCh_fluid)       { M_BCh_u      = BCh_fluid; }
-//     void setBCh_HarmonicExtension ( const fluidBchandlerPtr_Type& BCh_mesh)        { M_BCh_mesh   = BCh_mesh; }
-//     void setBCh_fluidDer          ( const fluidBchandlerPtr_Type& BCh_fluidDer)    { M_BCh_du     = BCh_fluidDer; }
-//     void setBCh_fluidDerInv       ( const fluidBchandlerPtr_Type& BCh_fluidDerInv) { M_BCh_du_inv = BCh_fluidDerInv; }
-//     void setBCh_solid             ( const solidBchandlerPtr_Type& BCh_solid)       { M_BCh_d      = BCh_solid; }
-//     void setBCh_solidDer          ( const solidBchandlerPtr_Type& BCh_solidDer)    { M_BCh_dz     = BCh_solidDer; }
-//     void setBCh_solidDerInv       ( const solidBchandlerPtr_Type& BCh_solidDerInv) { M_BCh_dz_inv = BCh_solidDerInv; }
+    //! Setup of the TimeAdvance classes given the input data file
+    void
+    setupTimeAdvance( const dataFile_Type& dataFile );
 
     //@}
 
@@ -779,11 +806,11 @@ protected:
                                   const FESpace<mesh_Type, MapEpetra>& _fespace2,
                                   vector_Type&                         _vec2,
                                   dofInterface3DPtr_Type&                _dofInterface);
+
     //@}
 
     //!@name Protected Attributes
     //@{
-    boost::shared_ptr<mesh_Type>                      M_mesh;
 
     boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > M_uFESpace;
     boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > M_pFESpace;
@@ -814,12 +841,17 @@ protected:
     solidPtr_Type                                        M_solid;
     meshMotionPtr_Type                                   M_meshMotion;
 
-//     fluidLinPtr_Type                                     M_fluidLin;
-//     solidLinPtr_Type                                     M_solidLin;
+    std::string                                          M_fluidTimeAdvanceMethod;
+    std::string                                          M_solidTimeAdvanceMethod;
+    std::string                                          M_ALETimeAdvanceMethod;
 
-    boost::shared_ptr<TimeAdvanceBDF<vector_Type> >             M_bdf;
+    boost::shared_ptr<TimeAdvance<vector_Type> >      M_fluidTimeAdvance;
+    boost::shared_ptr<TimeAdvance<vector_Type> >      M_fluidMassTimeAdvance;
+    boost::shared_ptr<TimeAdvance<vector_Type> >      M_solidTimeAdvance;
+    boost::shared_ptr<TimeAdvance<vector_Type> >      M_ALETimeAdvance;
 
-    GetPot                                            M_dataFile;
+
+    dataFile_Type                                     M_dataFile;
 
     boost::shared_ptr<MeshData>                       M_meshDataFluid;
     boost::shared_ptr<MeshData>                       M_meshDataSolid;
@@ -874,17 +906,17 @@ protected:
     vectorPtr_Type                    M_lambdaDot;
 
 
-    vectorPtr_Type                    M_un;
     vectorPtr_Type                    M_rhs;
-    vectorPtr_Type                    M_Alphaf;
+    vectorPtr_Type                    M_alphaF;
 
-    Real                                              M_AlphafCoef;
+    Real                                              M_alphaFCoef;
     //\todo{try to set as deprecated}
-    Real                                              M_betamedio;
+    Real                                              M_betaMean;
 
     commPtr_Type                                      M_epetraComm;
     commPtr_Type                                      M_epetraWorldComm;
 
+    bool                                              M_structureNonLinear;
     //@}
 private:
 

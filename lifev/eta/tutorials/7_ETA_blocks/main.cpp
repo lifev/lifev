@@ -96,16 +96,18 @@ typedef MatrixEpetra<Real> matrix_Type;
 typedef VectorEpetra vector_Type;
 typedef MatrixEpetraStructured<Real> blockMatrix_Type;
 typedef VectorEpetraStructured blockVector_Type;
+typedef FESpace<mesh_Type, MapEpetra>::function_Type function_Type;
 
 // ---------------------------------------------------------------
 // We also define a function that is supposed to represent a
 // force acting on the fluid.
 // ---------------------------------------------------------------
 
-Real forceFct( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& z , const ID& /*i*/)
+Real forceFctRaw( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& z , const ID& /*i*/)
 {
     return z*z;
 }
+function_Type forceFct(forceFctRaw);
 
 // ---------------------------------------------------------------
 // As usual, we start by the MPI communicator, the definition of

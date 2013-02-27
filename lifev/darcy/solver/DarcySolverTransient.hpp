@@ -240,9 +240,11 @@ namespace LifeV
     \sigma_K^{n+1} = -A^{-1} \left( B p_K^{n+1} + C \lambda_K^{n+1} \right) \,.
     \end{array}
     \f]
-    @note In the code we do not use the matrix \f$ H \f$ and the vector \f$ G \f$, because all the boundary
-    @note The initial time is not fix at zero.
-    conditions are imposed via BCHandler class.
+    @note In the code we do not use the matrix \f$ H \f$ and the vector \f$ G \f$,
+    because all the boundary conditions are imposed via BCHandler class.
+    @note The initial time is not fixed at zero.
+    @note Example of usage can be found in darcy_nonlinear and darcy_linear.
+    Coupled with an hyperbolic solver in impes.
     @todo Insert any scientific publications that use this solver.
 */
 template < typename MeshType >
@@ -513,7 +515,7 @@ setupTime ()
     M_maxIterSolver = dataFile( ( this->M_data->section() + "/solver/max_iter_reuse" ).data(), static_cast<Int>(0) );
 
     // Set up the time advance.
-    M_timeAdvance->setup ( this->M_data->dataTimePtr()->orderBDF(), 1 );
+    M_timeAdvance->setup ( this->M_data->dataTimeAdvancePtr()->orderBDF(), 1 );
 
 } // setupTime
 
@@ -552,9 +554,12 @@ solve ()
     // Reset the right hand side coming from the time advance scheme.
     M_rhsTimeAdvance.reset ( new vector_Type ( this->M_primalField->getFESpace().map() ) );
 
+    // Update the RHS
+    M_timeAdvance->updateRHSFirstDerivative ();
+
     // Put in M_rhsTimeAdvance the contribution for the right hand side coming
     // from the time scheme, without the time step.
-    *M_rhsTimeAdvance = M_timeAdvance->updateRHSFirstDerivative ();
+    *M_rhsTimeAdvance = M_timeAdvance->rhsContributionFirstDerivative ();
 
     // Solve the problem
     darcySolverLinear_Type::solve ();

@@ -473,7 +473,7 @@ void ExporterVTK<MeshType>::postProcess(const Real& time)
     std::size_t found( this->M_postfix.find( "*" ) );
     if ( found == string::npos )
     {
-        if (!this->M_procId) std::cout << "  X-  ExporterVTK post-processing" << std::flush;
+        if (this->M_procId==0) std::cout << "  X-  ExporterVTK post-processing" << std::flush;
 
         LifeChrono chrono;
         chrono.start();
@@ -491,10 +491,12 @@ void ExporterVTK<MeshType>::postProcess(const Real& time)
             {
                 composePVTUStream(*iData, buffer);
 
-                std::string vtkPFileName( this->M_postDir+this->M_prefix+"_" + iData->variableName()+
+                std::string vtkPFileName( this->M_prefix+"_" + iData->variableName()+
                                           this->M_postfix+".pvtu" );
+                std::string vtkPFileNameWithDir(this->M_postDir+vtkPFileName);
+
                 std::ofstream vtkPFile;
-                vtkPFile.open( vtkPFileName.c_str() );
+                vtkPFile.open( vtkPFileNameWithDir.c_str() );
                 ASSERT(vtkPFile.is_open(), "There is an error while opening " + vtkPFileName );
                 ASSERT(vtkPFile.good(), "There is an error while writing to " + vtkPFileName );
                 vtkPFile << buffer.str();
@@ -534,7 +536,8 @@ void ExporterVTK<MeshType>::postProcess(const Real& time)
 
         }
         chrono.stop();
-        if (!this->M_procId) std::cout << "...done in " << chrono.diff() << " s." << std::endl;
+        if (!this->M_procId)
+            std::cout << "...done in " << chrono.diff() << " s." << std::endl;
     }
 }
 
@@ -546,7 +549,8 @@ void ExporterVTK<MeshType>::import(const Real& /*time*/)
 
     assert( this->M_postfix != "*****" );
 
-    if (!this->M_procId) std::cout << "  X-  ExporterVTK importing ..."<< std::endl;
+    if (this->M_procId==0)
+        std::cout << "  X-  ExporterVTK importing ..."<< std::endl;
 
     LifeChrono chrono;
     chrono.start();
@@ -556,8 +560,8 @@ void ExporterVTK<MeshType>::import(const Real& /*time*/)
         this->readVTUFiles(*iData);
     }
     chrono.stop();
-    if (!this->M_procId) std::cout << "      done in " << chrono.diff() << " s." << std::endl;
-
+    if (this->M_procId==0)
+        std::cout << "      done in " << chrono.diff() << " s." << std::endl;
 }
 
 
@@ -639,7 +643,7 @@ ExporterVTK<MeshType>::composeDataArrayStream(const exporterData_Type& dvar,
     std::stringstream nComponents;
     nComponents << dvar.fieldDim();
 
-    int32_type sizeOfFloat;
+    int32_type sizeOfFloat = 4;
     std::string floatTypeString;
     switch( M_floatPrecision )
     {
@@ -746,7 +750,7 @@ ExporterVTK<MeshType>::readVTUFiles( exporterData_Type& dvar )
 
     UInt numPoints, numCells;
     std::vector<Real> inputValues;
-    std::vector<Real> localDOF;
+    std::vector<Real> globalIDs;
 
     const UInt start        ( dvar.start() );
     const UInt numGlobalDOF ( dvar.numDOF() );
@@ -758,7 +762,8 @@ ExporterVTK<MeshType>::readVTUFiles( exporterData_Type& dvar )
                               this->M_postfix + "." + iProc + ".vtu" );
         std::ifstream inputFile( filename.c_str() );
 
-        if (!this->M_procId) std::cout << "\tfile "<< filename << std::endl;
+        if (this->M_procId==0)
+            std::cout << "\tfile "<< filename << std::endl;
 
         ASSERT(inputFile.is_open(), "There is an error while opening " + filename );
 
@@ -816,16 +821,16 @@ ExporterVTK<MeshType>::readVTUFiles( exporterData_Type& dvar )
                     }
                     if ( line.find( "GlobalId" ) != std::string::npos )
                     {
-                        localDOF.resize( numPoints );
+                        globalIDs.resize( numPoints );
                         ASSERT(inputFile.good(), "There is an error while opening " + filename );
                         getline( inputFile, line );
-                        readASCIIData( line, localDOF );
+                        readASCIIData( line, globalIDs );
                     }
                 }
 
                 for (UInt iPoint=0; iPoint<numPoints; ++iPoint)
                 {
-                    const Int id = localDOF[iPoint];
+                    const Int id = globalIDs[iPoint];
                     if( dvar.feSpacePtr()->map().map(Repeated)->MyGID( id ) )
                     {
                         for (UInt iCoor=0; iCoor< dvar.fieldDim(); ++iCoor)
@@ -1087,7 +1092,7 @@ void ExporterVTK<MeshType>::composePVTUStream(const exporterData_Type& dvar,
 
     for( Int iProc = 0; iProc < dvar.feSpacePtr()->map().comm().NumProc(); ++iProc )
     {
-        std::stringstream fileName( ( this->M_postDir+this->M_prefix+"_" + dvar.variableName()+
+        std::stringstream fileName( ( this->M_prefix+"_" + dvar.variableName()+
                                       this->M_postfix+"."+iProc+".vtu").c_str() );
 
         //footer part of the file
@@ -1148,7 +1153,7 @@ void ExporterVTK<MeshType>::createPointsMaps( const feSpacePtr_Type & _feSpacePt
     // Now I store the coordinates of the supplementary nodes in a temporary vector
     for ( UInt iElement = 0; iElement < numElements; ++iElement )
     {
-        _feSpacePtr->fe().updateJac( this->M_mesh->element( iElement ) );
+        _feSpacePtr->fe().update( this->M_mesh->element( iElement ), UPDATE_ONLY_CELL_NODES );
         for ( UInt iPoint = _feSpacePtr->dof().numLocalVertices();
               iPoint < _feSpacePtr->dof().numLocalDof(); ++iPoint )
         {
@@ -1188,10 +1193,10 @@ template <typename MeshType>
 void ExporterVTK<MeshType>::composeVTKCollection( const std::string& variableName,
                                               std::stringstream& vtkCollectionStringStream )
 {
-    ASSERT( this->M_timeSteps.size(), "No time values to be saved in the VTK collection!");
-    ASSERT( this->M_pvtuFiles[variableName].size(), "No file names to be saved in the VTK collection!");
-    ASSERT( this->M_pvtuFiles[variableName].size() == this->M_timeSteps.size(),
-            "The number of post-processed files does not match the number of time steps in the list!" );
+//    ASSERT( this->M_timeSteps.size(), "No time values to be saved in the VTK collection!");
+//    ASSERT( this->M_pvtuFiles[variableName].size(), "No file names to be saved in the VTK collection!");
+//    ASSERT( this->M_pvtuFiles[variableName].size() == this->M_timeSteps.size(),
+//            "The number of post-processed files does not match the number of time steps in the list!" );
 
     //header part of the file
     vtkCollectionStringStream << "<?xml version=\"1.0\"?>\n";
@@ -1202,11 +1207,12 @@ void ExporterVTK<MeshType>::composeVTKCollection( const std::string& variableNam
     realIterator iTime = this->M_timeSteps.begin();
     typedef std::list<std::string>::const_iterator stringIterator;
     stringIterator iFileName = this->M_pvtuFiles[variableName].begin();
-    for ( ; iTime != this->M_timeSteps.end(); ++iTime, ++iFileName)
-    {
-        vtkCollectionStringStream << "\t\t<DataSet timestep=\"" << *iTime << "\" group=\"\" part=\"0\" "
-                        << "file=\"" << *iFileName << "\" />\n";
-    }
+
+    // Someone might have added a variable but never post processed it (so that no pvtu files are generated)
+    if (iFileName!=this->M_pvtuFiles[variableName].end())
+        for ( ; iTime != this->M_timeSteps.end(); ++iTime, ++iFileName)
+            vtkCollectionStringStream << "\t\t<DataSet timestep=\"" << *iTime << "\" group=\"\" part=\"0\" "
+                                      << "file=\"" << *iFileName << "\" />\n";
 
     vtkCollectionStringStream << "\t</Collection>\n";
     vtkCollectionStringStream << "</VTKFile>\n";

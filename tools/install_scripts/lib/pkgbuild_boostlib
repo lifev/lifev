@@ -1,0 +1,32 @@
+#! /bin/bash
+#
+# author: Antonio Cervone <ant.cervone@gmail.com>
+# date:   22-03-2012
+#
+
+ver="1.48.0"
+
+download_boostlib() {
+#  wget http://gitorious.org/boost/cmake/archive-tarball/cmake-$ver
+  : # empty functions are not allowed!
+}
+
+unpack_boostlib() {
+  mv cmake-$ver boost-cmake-${ver}.tar.gz
+  tar xvf boost-cmake-${ver}.tar.gz
+}
+
+build_boostlib() {
+  cmake \
+    -DCMAKE_INSTALL_PREFIX=${install_dir} \
+    -DINSTALL_VERSIONED:BOOL=OFF \
+    ${src_dir}/boost-cmake || return 1
+
+  make -j${NUM_PROC} || return 1
+
+}
+
+install_boostlib() {
+  make -j${NUM_PROC} install || return 1
+}
+

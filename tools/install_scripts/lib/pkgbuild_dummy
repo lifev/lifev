@@ -1,0 +1,44 @@
+#! /bin/bash
+#
+# author: Antonio Cervone <ant.cervone@gmail.com>
+# date:   22-03-2012
+#
+
+download_dummy() {
+  cat > libdummy.hpp <<EOF
+void foo();
+EOF
+
+  cat > libdummy.cpp <<EOF
+#include <iostream>
+
+void foo()
+{
+  std::cout << "this is foo" << std::endl;
+}
+EOF
+}
+
+unpack_dummy() {
+  echo no unpacking here...
+}
+
+build_dummy() {
+  cp $src_dir/* $build_dir
+  cat > Makefile <<EOF
+SRCS=\$(wildcard *.cpp)
+OBJS=\$(SRCS:.cpp=.o)
+
+all: libdummy.a(\$(OBJS))
+EOF
+  make || return 1
+}
+
+install_dummy() {
+  install -m 755 -d $install_dir
+  install -m 755 -d $install_dir/include
+  install -m 644 libdummy.hpp $install_dir/include
+  install -m 755 -d $install_dir/lib
+  install -m 644 libdummy.a $install_dir/lib
+}
+

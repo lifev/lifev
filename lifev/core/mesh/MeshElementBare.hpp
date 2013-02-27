@@ -677,6 +677,7 @@ std::pair<ID, bool>
 MeshElementBareHandler<BareItemType>::addIfNotThere( const bareItem_Type & item )
 {
     std::pair<typename MeshElementBareHandler<BareItemType>::containerIterator_Type, bool> i( this->insert( std::make_pair( item, M_idCount ) ) );
+
     if ( i.second )
         ++M_idCount;
     return std::make_pair( ( i.first )->second, i.second );
@@ -688,6 +689,7 @@ std::pair<ID, bool>
 MeshElementBareHandler<BareItemType>::addIfNotThere( const bareItem_Type & item, const ID id )
 {
     std::pair<typename MeshElementBareHandler<BareItemType>::containerIterator_Type, bool> i( this->insert( std::make_pair( item, id ) ) );
+
     ( i.first ) ->second = id; // Set new id in any case.
     return std::make_pair( id, i.second ); // for consistency with other version.
 }

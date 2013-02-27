@@ -73,7 +73,7 @@ namespace LifeV
  MonolithicBlockComposedNN, MonolithicBlockComposedDNND.
  */
    typedef FactorySingleton<Factory<FSIOperator, std::string> >                    FSIFactory_Type;
-	class FSIMonolithicGE : public FSIMonolithic
+    class FSIMonolithicGE : public FSIMonolithic
 {
 public:
 
@@ -120,6 +120,12 @@ public:
      */
     void updateSystem();
 
+    //! Set vectors for restart
+    /*!
+     *  Set vectors for restart
+     */
+    void setALEVectorInStencil(const vectorPtr_Type& fluidDisp, const UInt iter,const bool /*lastVector*/);
+
     /**
        evaluates the residual Ax-b
        \param res: output
@@ -137,6 +143,8 @@ public:
     //! Applies the bounsary conditions to the matrix
     void applyBoundaryConditions();
 
+    void updateSolution( const vector_Type& solution );
+
     //@}
 
 
@@ -144,21 +152,16 @@ public:
     //@{
 
     //! Gets the solution
-    const vector_Type& solution() const { return *M_un; }
+    LIFEV_DEPRECATED( const vector_Type& solution() const )
+    {
+        if ( M_epetraWorldComm->MyPID() == 0 )
+        {
+            std::cerr << std::endl << "Warning: FSIMonolithic::solution() is deprecated!" << std::endl
+                                   << "         You should not access the solution inside FSIOperator or FSIMonolithic!" << std::endl;
+        }
 
-    //! Gets the solution ptr
-    vectorPtr_Type& solutionPtr() { return M_un; }
-    //@}
-
-
-    //! @name Set Methods
-    //@{
-
-    //! Sets the solution
-    void setSolution( const vector_Type& solution ) { M_un.reset( new vector_Type( solution ) ); }
-
-    //! Sets the solution ptr
-    void setSolutionPtr( const vectorPtr_Type& sol) { M_un = sol; }
+        return  M_fluidTimeAdvance->singleElement(0);
+    }
 
     //@}
 
@@ -179,13 +182,16 @@ private:
     //@}
 
 
-    //!@name Private Members
-    //@{
+public:
 
     static bool S_register;
-
-    //@}
 };
+
+//! Factory create function
+inline FSIMonolithic* createFSIMonolithicGE()
+{
+    return new FSIMonolithicGE();
+}
 
 } // Namespace LifeV
 

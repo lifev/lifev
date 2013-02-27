@@ -253,7 +253,7 @@ inline FSIOperator* createEJ() { return new FSIExactJacobian(); }
 
 namespace
 {
-//static bool registerEJ = FSIOperator::FSIFactory_Type::instance().registerProduct( "exactJacobian", &createEJ );
+  //static bool registerEJ = FSIOperator::FSIFactory_Type::instance().registerProduct( "exactJacobian", &createEJ );
 }
 
 }  // Namespace LifeV

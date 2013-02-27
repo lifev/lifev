@@ -88,6 +88,7 @@ using namespace LifeV;
 typedef RegionMesh<LinearTetra> mesh_Type;
 typedef VectorEpetra vector_Type;
 typedef MatrixEpetra<Real> matrix_Type;
+typedef FESpace<mesh_Type, MapEpetra>::function_Type function_Type;
 
 
 // ---------------------------------------------------------------
@@ -100,15 +101,17 @@ typedef MatrixEpetra<Real> matrix_Type;
 // integral is known.
 // ---------------------------------------------------------------
 
-Real fRhs( const Real& /* t */, const Real& /*x*/, const Real& /*y*/, const Real& /* z */ , const ID& /* i */ )
+Real fRhsRaw( const Real& /* t */, const Real& /*x*/, const Real& /*y*/, const Real& /* z */ , const ID& /* i */ )
 {
     return  2;
 }
+function_Type fRhs(fRhsRaw);
 
-Real g( const Real& /* t */, const Real& x, const Real& /*y*/, const Real& /* z */ , const ID& /* i */ )
+Real gRaw( const Real& /* t */, const Real& x, const Real& /*y*/, const Real& /* z */ , const ID& /* i */ )
 {
     return  x;
 }
+function_Type g(gRaw);
 
 
 // ---------------------------------------------------------------

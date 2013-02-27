@@ -515,9 +515,9 @@ void StabilizationSD<MeshType, DofType>::computeParameters(const Real dt, const 
             bmax = std::fabs( beta.vec()[ l ] );
     }
 
-    coeffBeta = M_gammaBeta  / sqrt( 4/( dt * dt)
-                                     + 4*bmax*bmax/hK2
-                                     + 16*M_viscosity*M_viscosity/hK4 );
+    coeffBeta = M_gammaBeta  / std::sqrt( 4./( dt * dt)
+                                     + 4.*bmax*bmax/hK2
+                                     + 16.*M_viscosity*M_viscosity/hK4 );
     coeffDiv = M_gammaDiv * bmax * hK;
 
 }

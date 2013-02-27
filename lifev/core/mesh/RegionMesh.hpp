@@ -249,7 +249,7 @@ public:
      *  @return Severity level. If different from 0 the mesh has problem. If positive the problems are such that the mesh may not
      *  work in any case. If less than zero it may work in some cases.
      */
-    int check( int level = 0, bool const fix = false, bool verbose = true, std::ostream & out = std::cerr );
+    Int check( Int level = 0, bool const fix = false, bool verbose = true, std::ostream & out = std::cerr );
 
     //! Display local to global mapping.
     /**
@@ -1369,11 +1369,11 @@ public:
 
     //! List of points
     /**
-     *  @param fct Function of three double arguments.
+     *  @param fct Function of three Real arguments.
      *  @param list_pts List of Points.
      *  @todo Move away, this can be done using the utility of the list of pts
      */
-    void getListOfPoints( bool ( *fct ) ( double, double, double ), std::vector<UInt>& list_pts );
+    void getListOfPoints( bool ( *fct ) ( Real, Real, Real ), std::vector<UInt>& list_pts );
 
     /** @} */ // End of group Points Methods
 
@@ -1541,6 +1541,12 @@ public:
      *  @return how many elements may be stored.
      */
     UInt maxNumElements() const {return maxNumVolumes( M_geoDim );}
+
+    //! Set counter of elements.
+    /**
+     *  @param n Number of elements.
+     */
+    void setNumElements( UInt const n ) {setNumElements( M_geoDim, n );}
 
     //! Changes Current capacity of the container of elements.
     /**
@@ -1980,6 +1986,11 @@ private:
     UInt maxNumElements(threeD_Type) const {return maxNumVolumes();}
     UInt maxNumElements(twoD_Type) const {return maxNumFaces();}
     UInt maxNumElements(oneD_Type) const {return maxNumEdges();}
+
+    //! Set counter of elements.
+    void setNumElements( threeD_Type, UInt const n ) {setNumVolumes( n );}
+    void setNumElements( twoD_Type, UInt const n ) {setNumFaces( n );}
+    void setNumElements( oneD_Type, UInt const n ) {setNumEdges( n );}
 
     //! Changes Current capacity of the container of elements.
     void setMaxNumElements   ( threeD_Type, UInt const n, bool const setcounter = false ) {setMaxNumVolumes( n, setcounter);}
@@ -2874,11 +2885,11 @@ RegionMesh<GeoShapeType, MCType>::showMe( bool verbose, std::ostream & out ) con
 
 
 template <typename GeoShapeType, typename MCType>
-inline int
-RegionMesh<GeoShapeType, MCType>::check( int level, bool const fix, bool verb, std::ostream & out )
+inline Int
+RegionMesh<GeoShapeType, MCType>::check( Int level, bool const fix, bool verb, std::ostream & out )
 {
     verb = verb && ( M_comm->MyPID() == 0 );
-    int severity = 0;
+    Int severity = 0;
     Switch testsw;
     if ( verb )
     {
@@ -3087,7 +3098,9 @@ inline
 void
 RegionMesh<GeoShapeType, MCType>::setLinkSwitch( std::string const & _s )
 {
-    ASSERT0( switches.set( _s ), std::stringstream( "Switch named " + _s + " is not allowed" ).str().c_str() );
+	bool check = switches.set( _s );
+    ASSERT0( check, std::stringstream( "Switch named " + _s + " is not allowed" ).str().c_str() );
+    LIFEV_UNUSED( check );
 }
 
 template <typename GeoShapeType, typename MCType>
@@ -3095,7 +3108,9 @@ inline
 void
 RegionMesh<GeoShapeType, MCType>::unsetLinkSwitch( std::string const & _s )
 {
-    ASSERT0( switches.unset( _s ), std::stringstream( "Switch named " + _s + " is not allowed" ).str().c_str() );
+	bool check = switches.unset( _s );
+    ASSERT0( check, std::stringstream( "Switch named " + _s + " is not allowed" ).str().c_str() );
+    LIFEV_UNUSED( check );
 }
 
 template <typename GeoShapeType, typename MCType>
@@ -3253,7 +3268,7 @@ RegionMesh<GeoShapeType, MCType>::updateElementRidges(threeD_Type, bool ce, bool
     // this is ok for domains with at most 1 hole!
 
     if (verbose)
-        std::cout << "     Updating element edges ... " << std::flush;
+        std::cout << "     Updating element ridges ... " << std::flush;
 
     renumber=renumber && ce && !  this->ridgeList().empty();
     if ( ce && ee == 0 )
@@ -3451,7 +3466,7 @@ RegionMesh<GeoShapeType, MCType>::updateElementFacets( bool cf, bool verbose, UI
     GeoShapeType ele;
     // If we have all facets and the facets store all adjacency info
     // everything is easier
-    if ( (facetList().size() == numFacets()) & getLinkSwitch( "FACETS_HAVE_ADIACENCY" ) & getLinkSwitch( "HAS_ALL_FACETS" ) )
+    if ( (facetList().size() == numFacets()) && getLinkSwitch( "FACETS_HAVE_ADIACENCY" ) && getLinkSwitch( "HAS_ALL_FACETS" ) )
     {
         for ( typename facets_Type::iterator itf = facetList().begin(); itf != facetList().end(); ++itf )
         {
@@ -3617,7 +3632,7 @@ RegionMesh<GeoShapeType, MCType>::cleanElementRidges()
 template <typename GeoShapeType, typename MCType>
 inline void
 RegionMesh<GeoShapeType, MCType>::
-getListOfPoints( bool ( *fct ) ( double, double, double ), std::vector<UInt>& list_pts )
+getListOfPoints( bool ( *fct ) ( Real, Real, Real ), std::vector<UInt>& list_pts )
 {
     for ( UInt i = 0; i < M_numPoints; i++ )
     {

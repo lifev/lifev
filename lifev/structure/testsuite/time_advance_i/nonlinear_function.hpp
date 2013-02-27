@@ -43,18 +43,18 @@ class AnalyticalSol
 public:
     inline Real operator()(Real t, Real x,Real y,Real z, UInt /*ic*/=0) const
     {
-        return exp(-sin(Pi/2*t))*cos(Pi*x)*cos(Pi*y)*cos(Pi*z);
+        return std::exp(-std::sin(Pi/2*t))*std::cos(Pi*x)*std::cos(Pi*y)*std::cos(Pi*z);
     }
     inline Real grad(UInt icoor, Real t, Real x,Real y,Real z, UInt /*ic*/=0) const
     {
         switch (icoor)
         {
         case 1:
-            return -Pi*exp(-sin(Pi/2*t))*sin(Pi*x)*cos(Pi*y)*cos(Pi*z);
+            return -Pi*std::exp(-std::sin(Pi/2*t))*std::sin(Pi*x)*std::cos(Pi*y)*std::cos(Pi*z);
         case 2:
-            return -Pi*exp(-sin(Pi/2*t))*cos(Pi*x)*sin(Pi*y)*cos(Pi*z);
+            return -Pi*std::exp(-std::sin(Pi/2*t))*std::cos(Pi*x)*std::sin(Pi*y)*std::cos(Pi*z);
         case 3:
-            return -Pi*exp(-sin(Pi/2*t))*cos(Pi*x)*cos(Pi*y)*sin(Pi*z);
+            return -Pi*std::exp(-std::sin(Pi/2*t))*std::cos(Pi*x)*std::cos(Pi*y)*std::sin(Pi*z);
         default:
             return 0;
         }
@@ -68,7 +68,7 @@ Real uexact( const Real&  t ,
              const Real& z,
              const ID&  icomp)
 {
-    return exp(-sin(Pi/2*t))*cos(Pi*x)*cos(Pi*y)*cos(Pi*z);
+    return std::exp(-std::sin(Pi/2*t))*std::cos(Pi*x)*std::cos(Pi*y)*std::cos(Pi*z);
 }
 
 
@@ -78,7 +78,7 @@ Real source_in( const Real&  t ,
                 const Real& z,
                 const ID&  icomp)
 {
-    return  (3 * Pi - 1./2.*cos(Pi/2*t) )*Pi*exp(-sin(Pi/2*t))*cos(Pi*x)*cos(Pi*y)*cos(Pi*z);
+    return  (3 * Pi - 1./2.*std::cos(Pi/2*t) )*Pi*std::exp(-std::sin(Pi/2*t))*std::cos(Pi*x)*std::cos(Pi*y)*std::cos(Pi*z);
 }
 
 
@@ -88,7 +88,7 @@ Real d0 ( const Real&  t ,
           const Real& z,
           const ID&  icomp)
 {
-    return exp(-sin(Pi/2.*t))*cos(Pi*x)*cos(Pi*y)*cos(Pi*z) ;
+    return std::exp(-std::sin(Pi/2.*t))*std::cos(Pi*x)*std::cos(Pi*y)*std::cos(Pi*z) ;
 }
 
 Real v0( const Real&  t ,
@@ -97,7 +97,7 @@ Real v0( const Real&  t ,
          const Real& z,
          const ID&  icomp)
 {
-    return Pi/2.*(cos(Pi*x)*cos(Pi*y)*cos(Pi*z) )* cos(Pi/2.*t) * exp(-sin(Pi/2.*t));
+    return Pi/2.*(std::cos(Pi*x)*std::cos(Pi*y)*std::cos(Pi*z) )* std::cos(Pi/2.*t) * std::exp(-std::sin(Pi/2.*t));
 }
 
 Real a0( const Real&  t ,
@@ -106,7 +106,7 @@ Real a0( const Real&  t ,
          const Real& z,
          const ID&  icomp)
 {
-    return Pi2 / 4*( sin(Pi/2*t)+cos(Pi/2*t)*cos(Pi/2*t) )*(cos(Pi*x)*cos(Pi*y)*cos(Pi*z) )*exp(-sin(Pi/2*t)) ;
+    return Pi2 / 4*( std::sin(Pi/2*t)+std::cos(Pi/2*t)*std::cos(Pi/2*t) )*(std::cos(Pi*x)*std::cos(Pi*y)*std::cos(Pi*z) )*std::exp(-std::sin(Pi/2*t)) ;
 }
 
 Real UZero( const Real& /* t */,

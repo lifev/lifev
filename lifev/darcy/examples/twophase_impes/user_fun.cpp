@@ -52,7 +52,7 @@ Real k_rw ( const Real& S_w )
     // Define the effective saturation
     const Real barS_w = (S_w - S_wr) / (1. - S_wr - S_nr);
 
-    return pow( barS_w, (2. + 3.*lambda) / lambda );
+    return std::pow( barS_w, (2. + 3.*lambda) / lambda );
 }
 
 // First derivative of the relative permeability for the wetting phase
@@ -61,7 +61,7 @@ Real Dk_rw ( const Real& S_w )
     // Define the effective saturation
     const Real barS_w = (S_w - S_wr) / (1. - S_wr - S_nr);
 
-    return (2. + 3.*lambda) / lambda * pow(barS_w, (2. + 3.*lambda) / lambda - 1.) / (1. - S_wr - S_nr);
+    return (2. + 3.*lambda) / lambda * std::pow(barS_w, (2. + 3.*lambda) / lambda - 1.) / (1. - S_wr - S_nr);
 }
 
 // Relative permeability for the non-wetting phase
@@ -70,7 +70,7 @@ Real k_rn ( const Real& S_n )
     // Define the effective saturation
     const Real barS_n = (S_n - S_nr) / (1. - S_wr - S_nr);
 
-    return pow( barS_n, 2.) * (1 - pow( 1 - barS_n, (2. + lambda) / lambda));
+    return std::pow( barS_n, 2.) * (1 - std::pow( 1 - barS_n, (2. + lambda) / lambda));
 }
 
 // First derivative of the relative permeability for the non-wetting phase
@@ -79,8 +79,8 @@ Real Dk_rn ( const Real& S_n )
     // Define the effective saturation
     const Real barS_n = (S_n - S_nr) / (1. - S_wr - S_nr);
 
-    return ( 2.*barS_n * (1 - pow( 1 - barS_n, (2. + lambda) / lambda)) -
-             pow( barS_n, 2.) * (2. + lambda) / lambda * pow(1 - barS_n, (2. + lambda) / lambda - 1.) ) /
+    return ( 2.*barS_n * (1 - std::pow( 1 - barS_n, (2. + lambda) / lambda)) -
+             std::pow( barS_n, 2.) * (2. + lambda) / lambda * std::pow(1 - barS_n, (2. + lambda) / lambda - 1.) ) /
            (1. - S_wr - S_nr);
 }
 
@@ -90,7 +90,7 @@ Real pc ( const Real& S_w ) // [Pa]
     // Define the effective saturation
     const Real barS_w = (S_w - S_wr) / (1. - S_wr - S_nr);
 
-    return pd * pow(barS_w, -1. / lambda);
+    return pd * std::pow(barS_w, -1. / lambda);
 }
 
 // First derivative of the capillary pressure
@@ -99,7 +99,7 @@ Real Dpc ( const Real& S_w ) // [Pa]
     // Define the effective saturation
     const Real barS_w = (S_w - S_wr) / (1. - S_wr - S_nr);
 
-    return pd / lambda * pow(barS_w, -1. / lambda - 1.) / (1. - S_wr - S_nr);
+    return pd / lambda * std::pow(barS_w, -1. / lambda - 1.) / (1. - S_wr - S_nr);
 }
 
 // Absolute inverse permeability
@@ -373,7 +373,7 @@ Vector saturationFirstDerivativePhysicalFlux( const Real& t,
 
     // Compute the first derivative of the fractional flow
     const Real Df_n = (Dlambda_w * (lambda_w + lambda_n) - lambda_w * (Dlambda_w + Dlambda_n) ) /
-                      pow(lambda_w + lambda_n, 2);
+                      std::pow(lambda_w + lambda_n, 2);
 
     // Compute the last column of the inverse of the inverse permeability
     const Matrix invK = dataPhysical::invK( t, x, y, z );

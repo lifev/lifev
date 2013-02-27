@@ -63,7 +63,7 @@ void uniformMesh1D ( RegionMesh<LinearLine, MC>& mesh,
                      const Real& x_l, const Real& x_r,
                      const UInt& numberOfElements )
 {
-    regularMesh1D( mesh, 0, numberOfElements, false, x_r - x_l, x_r );
+    regularMesh1D( mesh, 1, numberOfElements, false, x_r - x_l, x_l );
 }
 
 } // Namespace LifeV

@@ -36,17 +36,14 @@
      @maintainer M. Kern <michel.kern@inria.fr>
 */
 
-#ifndef _DARCYSOLVERLINEAR_H_
-#define _DARCYSOLVERLINEAR_H_ 1
+#ifndef _DARCYSOLVERLINEAR_HPP_
+#define _DARCYSOLVERLINEAR_HPP_ 1
 
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <Epetra_LAPACK.h>
 #include <Epetra_BLAS.h>
-
-#include <Teuchos_XMLParameterListHelpers.hpp>
-#include <Teuchos_RCP.hpp>
 
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
@@ -242,6 +239,8 @@ namespace LifeV
     \f]
     @note In the code we do not use the matrix \f$ H \f$ and the vector \f$ G \f$, because all the boundary
     conditions are imposed via BCHandler class.
+    @note Example of usage can be found in darcy_nonlinear and darcy_linear.
+    Coupled with an hyperbolic solver in impes.
     @todo Insert any scientific publications that use this solver.
     @bug If the save flag for the exporter is setted to 0 the program fails.
 */
@@ -937,31 +936,19 @@ void
 DarcySolverLinear < MeshType >::
 setup ()
 {
-
-    const typename data_Type::data_Type& dataFile = *( M_data->dataFilePtr() );
-
-    // Setup the teuchos parameter list for the linear solver.
-    const std::string xmlSection = M_data->section() + "/xml";
-    const std::string xmlFolder = dataFile( ( xmlSection + "/folder" ).data(), "./" );
-    const std::string xmlFile = dataFile( ( xmlSection + "/file" ).data(), "parameterList.xml" );
-
-    Teuchos::RCP< Teuchos::ParameterList > parameterList = Teuchos::rcp ( new Teuchos::ParameterList );
-    parameterList = Teuchos::getParametersFromXmlFile( xmlFolder + xmlFile );
-
     // Setup the linear solver.
-    M_linearSolver.setParameters( parameterList->sublist("Linear Solver") );
+    M_linearSolver.setParameters( M_data->linearSolverList() );
     M_linearSolver.setCommunicator ( M_displayer->comm() );
 
     // Choose the preconditioner type.
-    const std::string precType = parameterList->sublist( "Preconditioner" ).get( "prectype", "Ifpack" );
+    const std::string precType = M_data->preconditionerList().template get<std::string>( "prectype" );
 
     // Create a preconditioner object.
     M_prec.reset ( PRECFactory::instance().createObject( precType ) );
     ASSERT( M_prec.get() != 0, "DarcySolverLinear : Preconditioner not set" );
 
     // Set the data for the preconditioner.
-    M_prec->setParametersList( parameterList->sublist( "Preconditioner" ).sublist( precType ) );
-
+    M_prec->setParametersList( M_data->preconditionerList().sublist( precType ) );
 } // setup
 
 // Solve the linear system.
@@ -1724,6 +1711,6 @@ symmetrizeMatrix ( Int N, MatrixType& A  )
 } // namespace LifeV
 
 
-#endif //_DARCYSOLVERLINEAR_H_
+#endif //_DARCYSOLVERLINEAR_HPP_
 
 // -*- mode: c++ -*-

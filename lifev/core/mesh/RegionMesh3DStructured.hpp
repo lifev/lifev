@@ -250,7 +250,7 @@ void regularMesh3D( RegionMesh<GeoShape,MC>& mesh,
     // Declaration of pointers on the different mesh entities
     typename RegionMesh<GeoShape,MC>::point_Type*  pointPtr  = 0;
     //typename RegionMesh<GeoShape,MC>::edge_Type*   edgePtr   = 0;
-    //typename RegionMesh<GeoShape,MC>::face_Type*   facePtr   = 0;
+    typename RegionMesh<GeoShape,MC>::face_Type*   facePtr   = 0;
     typename RegionMesh<GeoShape,MC>::volume_Type* volumePtr = 0;
 
     // Build the points of the mesh
@@ -572,8 +572,11 @@ void regularMesh3D( RegionMesh<GeoShape,MC>& mesh,
     }
     oStr << "done" << std::endl;
 
+    */
+
     // Build the boundary faces (ONLY!)
     oStr << "building the boundary faces...";
+    UInt faceCount = 0;
     // Faces l_x x l_y
     for ( UInt j(0); j<m_y; ++j )
     {
@@ -586,42 +589,46 @@ void regularMesh3D( RegionMesh<GeoShape,MC>& mesh,
             // P0--P1 o-->x
             //       /
             //      z
-            P0 = j * N_y + i + 1;
+            P0 = j * N_y + i;
             P1 = P0 + N_x;
             P2 = P0 + N_y;
             P3 = P0 + N_x + N_y;
 
-            if ( ( i + 1 <= mid_x && j + 1 <= mid_y ) || ( i + 1 > mid_x && j + 1 > mid_y ) )
+            if ( ( i < mid_x && j < mid_y ) || ( i >= mid_x && j >= mid_y ) )
             {
                 // Face 1 bottom - marker = 5
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(5);
-                facePtr->setPoint( 1, mesh.point(P0) );
-                facePtr->setPoint( 2, mesh.point(P3) );
-                facePtr->setPoint( 3, mesh.point(P1) );
+                facePtr->setId( faceCount++ );
+                facePtr->setPoint( 0, mesh.point(P0) );
+                facePtr->setPoint( 1, mesh.point(P3) );
+                facePtr->setPoint( 2, mesh.point(P1) );
 
                 // Face 2 bottom
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(5);
-                facePtr->setPoint( 1, mesh.point(P0) );
-                facePtr->setPoint( 2, mesh.point(P2) );
-                facePtr->setPoint( 3, mesh.point(P3) );
+                facePtr->setId( faceCount++ );
+                facePtr->setPoint( 0, mesh.point(P0) );
+                facePtr->setPoint( 1, mesh.point(P2) );
+                facePtr->setPoint( 2, mesh.point(P3) );
             }
             else
             {
                 // Face 1 bottom - marker = 5
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(5);
-                facePtr->setPoint( 1, mesh.point(P0) );
-                facePtr->setPoint( 2, mesh.point(P2) );
-                facePtr->setPoint( 3, mesh.point(P1) );
+                facePtr->setId( faceCount++ );
+                facePtr->setPoint( 0, mesh.point(P0) );
+                facePtr->setPoint( 1, mesh.point(P2) );
+                facePtr->setPoint( 2, mesh.point(P1) );
 
                 // Face 2 bottom
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(5);
-                facePtr->setPoint( 1, mesh.point(P1) );
-                facePtr->setPoint( 2, mesh.point(P2) );
-                facePtr->setPoint( 3, mesh.point(P3) );
+                facePtr->setId( faceCount++ );
+                facePtr->setPoint( 0, mesh.point(P1) );
+                facePtr->setPoint( 1, mesh.point(P2) );
+                facePtr->setPoint( 2, mesh.point(P3) );
             }
 
             // The ex,ey,ez unit vectors are oriented
@@ -636,37 +643,41 @@ void regularMesh3D( RegionMesh<GeoShape,MC>& mesh,
             P2 = P0 + N_y;
             P3 = P0 + N_x + N_y;
 
-            if ( ( i + 1 <= mid_x && j + 1 <= mid_y ) || ( i + 1 > mid_x && j + 1 > mid_y ) )
+            if ( ( i < mid_x && j < mid_y ) || ( i >= mid_x && j >= mid_y ) )
             {
                 // Face 1 top - marker = 6
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(6);
-                facePtr->setPoint( 1, mesh.point(P0) );
-                facePtr->setPoint( 2, mesh.point(P1) );
-                facePtr->setPoint( 3, mesh.point(P3) );
+                facePtr->setId( faceCount++ );
+                facePtr->setPoint( 0, mesh.point(P0) );
+                facePtr->setPoint( 1, mesh.point(P1) );
+                facePtr->setPoint( 2, mesh.point(P3) );
 
                 // Face 2 top
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(6);
-                facePtr->setPoint( 1, mesh.point(P0) );
-                facePtr->setPoint( 2, mesh.point(P3) );
-                facePtr->setPoint( 3, mesh.point(P2) );
+                facePtr->setId( faceCount++ );
+                facePtr->setPoint( 0, mesh.point(P0) );
+                facePtr->setPoint( 1, mesh.point(P3) );
+                facePtr->setPoint( 2, mesh.point(P2) );
             }
             else
             {
                 // Face 1 top - marker = 6
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(6);
-                facePtr->setPoint( 1, mesh.point(P0) );
-                facePtr->setPoint( 2, mesh.point(P1) );
-                facePtr->setPoint( 3, mesh.point(P2) );
+                facePtr->setId( faceCount++ );
+                facePtr->setPoint( 0, mesh.point(P0) );
+                facePtr->setPoint( 1, mesh.point(P1) );
+                facePtr->setPoint( 2, mesh.point(P2) );
 
                 // Face 2 top
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(6);
-                facePtr->setPoint( 1, mesh.point(P1) );
-                facePtr->setPoint( 2, mesh.point(P3) );
-                facePtr->setPoint( 3, mesh.point(P2) );
+                facePtr->setId( faceCount++ );
+                facePtr->setPoint( 0, mesh.point(P1) );
+                facePtr->setPoint( 1, mesh.point(P3) );
+                facePtr->setPoint( 2, mesh.point(P2) );
             }
         }
     }
@@ -680,42 +691,46 @@ void regularMesh3D( RegionMesh<GeoShape,MC>& mesh,
             // P2--P3 ^ y
             // |   |  |/
             // P0--P1 0-->x
-            P0 = j * N_z + i+ 1;
+            P0 = j * N_z + i;
             P1 = P0 + N_x;
             P2 = P0 + N_z;
             P3 = P0 + N_x + N_z;
 
-            if ( ( i + 1 <= mid_x && j + 1 <= mid_z ) || ( i + 1 > mid_x && j + 1 > mid_z ) )
+            if ( ( i < mid_x && j < mid_z ) || ( i >= mid_x && j >= mid_z ) )
             {
                 // Face 1 front - marker = 1
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(1);
-                facePtr->setPoint( 1, mesh.point(P0) );
-                facePtr->setPoint( 2, mesh.point(P1) );
-                facePtr->setPoint( 3, mesh.point(P3) );
+                facePtr->setId( faceCount++ );
+                facePtr->setPoint( 0, mesh.point(P0) );
+                facePtr->setPoint( 1, mesh.point(P1) );
+                facePtr->setPoint( 2, mesh.point(P3) );
 
                 // Face 2 front
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(1);
-                facePtr->setPoint( 1, mesh.point(P0) );
-                facePtr->setPoint( 2, mesh.point(P3) );
-                facePtr->setPoint( 3, mesh.point(P2) );
+                facePtr->setId( faceCount++ );
+                facePtr->setPoint( 0, mesh.point(P0) );
+                facePtr->setPoint( 1, mesh.point(P3) );
+                facePtr->setPoint( 2, mesh.point(P2) );
             }
             else
             {
                 // Face 1 front - marker = 1
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(1);
-                facePtr->setPoint( 1, mesh.point(P0) );
-                facePtr->setPoint( 2, mesh.point(P1) );
-                facePtr->setPoint( 3, mesh.point(P2) );
+                facePtr->setId( faceCount++ );
+                facePtr->setPoint( 0, mesh.point(P0) );
+                facePtr->setPoint( 1, mesh.point(P1) );
+                facePtr->setPoint( 2, mesh.point(P2) );
 
                 // Face 2 front
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(1);
-                facePtr->setPoint( 1, mesh.point(P1) );
-                facePtr->setPoint( 2, mesh.point(P3) );
-                facePtr->setPoint( 3, mesh.point(P2) );
+                facePtr->setId( faceCount++ );
+                facePtr->setPoint( 0, mesh.point(P1) );
+                facePtr->setPoint( 1, mesh.point(P3) );
+                facePtr->setPoint( 2, mesh.point(P2) );
             }
 
             // The ex,ey,ez unit vectors are oriented
@@ -728,37 +743,41 @@ void regularMesh3D( RegionMesh<GeoShape,MC>& mesh,
             P2 = P0 + N_z;
             P3 = P0 + N_x + N_z;
 
-            if ( ( i + 1 <= mid_x && j + 1 <= mid_z ) || ( i + 1 > mid_x && j + 1 > mid_z ) )
+            if ( ( i < mid_x && j < mid_z ) || ( i >= mid_x && j >= mid_z ) )
             {
                 // Face 1 back - marker = 3
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(3);
-                facePtr->setPoint( 1, mesh.point(P0) );
-                facePtr->setPoint( 2, mesh.point(P2) );
-                facePtr->setPoint( 3, mesh.point(P3) );
+                facePtr->setId( faceCount++ );
+                facePtr->setPoint( 0, mesh.point(P0) );
+                facePtr->setPoint( 1, mesh.point(P2) );
+                facePtr->setPoint( 2, mesh.point(P3) );
 
                 // Face 2 back
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(3);
-                facePtr->setPoint( 1, mesh.point(P0) );
-                facePtr->setPoint( 2, mesh.point(P3) );
-                facePtr->setPoint( 3, mesh.point(P1) );
+                facePtr->setId( faceCount++ );
+                facePtr->setPoint( 0, mesh.point(P0) );
+                facePtr->setPoint( 1, mesh.point(P3) );
+                facePtr->setPoint( 2, mesh.point(P1) );
             }
             else
             {
                 // Face 1 back - marker = 3
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(3);
-                facePtr->setPoint( 1, mesh.point(P0) );
-                facePtr->setPoint( 2, mesh.point(P2) );
-                facePtr->setPoint( 3, mesh.point(P1) );
+                facePtr->setId( faceCount++ );
+                facePtr->setPoint( 0, mesh.point(P0) );
+                facePtr->setPoint( 1, mesh.point(P2) );
+                facePtr->setPoint( 2, mesh.point(P1) );
 
                 // Face 2 back
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(3);
-                facePtr->setPoint( 1, mesh.point(P1) );
-                facePtr->setPoint( 2, mesh.point(P2) );
-                facePtr->setPoint( 3, mesh.point(P3) );
+                facePtr->setId( faceCount++ );
+                facePtr->setPoint( 0, mesh.point(P1) );
+                facePtr->setPoint( 1, mesh.point(P2) );
+                facePtr->setPoint( 2, mesh.point(P3) );
             }
         }
     }
@@ -774,42 +793,46 @@ void regularMesh3D( RegionMesh<GeoShape,MC>& mesh,
             // P0--P1 0-->y
             //       /
             //      x
-            P0 = j * N_z + i * N_y + 1;
+            P0 = j * N_z + i * N_y;
             P1 = P0 + N_y;
             P2 = P0 + N_z;
             P3 = P0 + N_y + N_z;
 
-            if ( ( i + 1 <= mid_y && j + 1 <= mid_z ) || ( i + 1 > mid_y && j + 1 > mid_z ) )
+            if ( ( i < mid_y && j < mid_z ) || ( i >= mid_y && j >= mid_z ) )
             {
                 // Face 1 left - marker = 4
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(4);
-                facePtr->setPoint( 1, mesh.point(P0) );
-                facePtr->setPoint( 2, mesh.point(P2) );
-                facePtr->setPoint( 3, mesh.point(P3) );
+                facePtr->setId( faceCount++ );
+                facePtr->setPoint( 0, mesh.point(P0) );
+                facePtr->setPoint( 1, mesh.point(P2) );
+                facePtr->setPoint( 2, mesh.point(P3) );
 
                 // Face 2 left
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(4);
-                facePtr->setPoint( 1, mesh.point(P0) );
-                facePtr->setPoint( 2, mesh.point(P3) );
-                facePtr->setPoint( 3, mesh.point(P1) );
+                facePtr->setId( faceCount++ );
+                facePtr->setPoint( 0, mesh.point(P0) );
+                facePtr->setPoint( 1, mesh.point(P3) );
+                facePtr->setPoint( 2, mesh.point(P1) );
             }
             else
             {
                 // Face 1 left - marker = 4
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(4);
-                facePtr->setPoint( 1, mesh.point(P0) );
-                facePtr->setPoint( 2, mesh.point(P2) );
-                facePtr->setPoint( 3, mesh.point(P1) );
+                facePtr->setId( faceCount++ );
+                facePtr->setPoint( 0, mesh.point(P0) );
+                facePtr->setPoint( 1, mesh.point(P2) );
+                facePtr->setPoint( 2, mesh.point(P1) );
 
                 // Face 2 left
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(4);
-                facePtr->setPoint( 1, mesh.point(P1) );
-                facePtr->setPoint( 2, mesh.point(P2) );
-                facePtr->setPoint( 3, mesh.point(P3) );
+                facePtr->setId( faceCount++ );
+                facePtr->setPoint( 0, mesh.point(P1) );
+                facePtr->setPoint( 1, mesh.point(P2) );
+                facePtr->setPoint( 2, mesh.point(P3) );
             }
 
             // The ex,ey,ez unit vectors are oriented
@@ -824,42 +847,45 @@ void regularMesh3D( RegionMesh<GeoShape,MC>& mesh,
             P2 = P0 + N_z;
             P3 = P0 + N_y + N_z;
 
-            if ( ( i + 1 <= mid_y && j + 1 <= mid_z ) || ( i + 1 > mid_y && j + 1 > mid_z ) )
+            if ( ( i < mid_y && j < mid_z ) || ( i >= mid_y && j >= mid_z ) )
             {
                 // Face 1 right - marker = 2
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(2);
-                facePtr->setPoint( 1, mesh.point(P0) );
-                facePtr->setPoint( 2, mesh.point(P3) );
-                facePtr->setPoint( 3, mesh.point(P2) );
+                facePtr->setId( faceCount++ );
+                facePtr->setPoint( 0, mesh.point(P0) );
+                facePtr->setPoint( 1, mesh.point(P3) );
+                facePtr->setPoint( 2, mesh.point(P2) );
 
                 // Face 2 right
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(2);
-                facePtr->setPoint( 1, mesh.point(P0) );
-                facePtr->setPoint( 2, mesh.point(P1) );
-                facePtr->setPoint( 3, mesh.point(P3) );
+                facePtr->setId( faceCount++ );
+                facePtr->setPoint( 0, mesh.point(P0) );
+                facePtr->setPoint( 1, mesh.point(P1) );
+                facePtr->setPoint( 2, mesh.point(P3) );
             }
             else
             {
                 // Face 1 right - marker = 2
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(2);
-                facePtr->setPoint( 1, mesh.point(P0) );
-                facePtr->setPoint( 2, mesh.point(P1) );
-                facePtr->setPoint( 3, mesh.point(P2) );
+                facePtr->setId( faceCount++ );
+                facePtr->setPoint( 0, mesh.point(P0) );
+                facePtr->setPoint( 1, mesh.point(P1) );
+                facePtr->setPoint( 2, mesh.point(P2) );
 
                 // Face 2 right
                 facePtr = &mesh.addFace( true );
                 facePtr->setMarkerID(2);
-                facePtr->setPoint( 1, mesh.point(P1) );
-                facePtr->setPoint( 2, mesh.point(P3) );
-                facePtr->setPoint( 3, mesh.point(P2) );
+                facePtr->setId( faceCount++ );
+                facePtr->setPoint( 0, mesh.point(P1) );
+                facePtr->setPoint( 1, mesh.point(P3) );
+                facePtr->setPoint( 2, mesh.point(P2) );
             }
         }
     }
     oStr << "done" << std::endl;
-    */
 
     // Build the volumes
     oStr << "building the volumes...";

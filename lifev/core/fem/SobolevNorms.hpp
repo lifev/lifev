@@ -184,10 +184,10 @@ elementaryFctH1NormSquare( const FunctionType& fct, const CurrentFE& fe )
 		y = fe.quadNode(iQuadPt,1);
 		z = fe.quadNode(iQuadPt,2);
 
-        sum2 = pow(fct( x, y, z ),2);
+        sum2 = std::pow(fct( x, y, z ),2);
         for (UInt iCoor (0); iCoor < fe.nbCoor(); ++iCoor)
         {
-            sum2 += pow(fct.grad(iCoor, x,y,z), 2);
+            sum2 += std::pow(fct.grad(iCoor, x,y,z), 2);
         }
         sum += sum2 * fe.weightDet( iQuadPt );
     }
@@ -211,11 +211,11 @@ Real elementaryFctH1NormSquare( const FunctionType& fct, const CurrentFE& fe, co
 
         for ( UInt iComp = 0; iComp < nbComp; ++iComp )
         {
-            sum2 = pow(fct(t, x, y, z, iComp ),2);
+            sum2 = std::pow(fct(t, x, y, z, iComp ),2);
 
             for (UInt iCoor = 0; iCoor < fe.nbCoor(); ++iCoor)
             {
-                sum2 += pow(fct.grad(iCoor, t,x,y,z, iComp),2);
+                sum2 += std::pow(fct.grad(iCoor, t,x,y,z, iComp),2);
             }
             sum += sum2 * fe.weightDet( iQuadPt );
         }

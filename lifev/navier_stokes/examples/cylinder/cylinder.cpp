@@ -50,8 +50,8 @@
 #include <lifev/core/mesh/MeshData.hpp>
 #include <lifev/core/mesh/MeshPartitioner.hpp>
 #include <lifev/navier_stokes/solver/OseenData.hpp>
+#include <lifev/navier_stokes/fem/TimeAdvanceBDFNavierStokes.hpp>
 #include <lifev/core/fem/FESpace.hpp>
-#include <lifev/core/fem/TimeAdvanceBDFNavierStokes.hpp>
 #ifdef HAVE_HDF5
 #include <lifev/core/filter/ExporterHDF5.hpp>
 #endif
@@ -207,11 +207,11 @@ struct Cylinder::Private
         {
             if ( centered )
             {
-                return Um_3d() * (H+y)*(H-y) * (H+z)*(H-z) / pow(H,4);
+                return Um_3d() * (H+y)*(H-y) * (H+z)*(H-z) / std::pow(H,4);
             }
             else
             {
-                return 16 * Um_3d() * y * z * (H-y) * (H-z) / pow(H,4);
+                return 16 * Um_3d() * y * z * (H-y) * (H-z) / std::pow(H,4);
             }
         }
         else
@@ -412,7 +412,7 @@ Cylinder::run()
         meshPtr = meshPart.meshPartition();
     }
     if (verbose) std::cout << std::endl;
-    if (verbose) std::cout << "Time discretization order " << oseenData->dataTime()->orderBDF() << std::endl;
+    if (verbose) std::cout << "Time discretization order " << oseenData->dataTimeAdvance()->orderBDF() << std::endl;
 
     //oseenData.meshData()->setMesh(meshPtr);
 
@@ -446,7 +446,7 @@ Cylinder::run()
 
     if (verbose) std::cout << "Calling the fluid constructor ... ";
 
-    bcH.setOffset("Inlet", totalVelDof + totalPressDof);
+    bcH.setOffset( "Inlet", totalVelDof + totalPressDof - 1 );
 
     OseenSolver< mesh_Type > fluid (oseenData,
                                     *uFESpacePtr,
@@ -471,7 +471,7 @@ Cylinder::run()
     // bdf object to store the previous solutions
 
     TimeAdvanceBDFNavierStokes<vector_Type> bdf;
-    bdf.setup(oseenData->dataTime()->orderBDF());
+    bdf.setup(oseenData->dataTimeAdvance()->orderBDF());
 
     vector_Type beta( fullMap );
     vector_Type rhs ( fullMap );
@@ -536,8 +536,8 @@ Cylinder::run()
         chrono.start();
 
         double alpha = bdf.bdfVelocity().coefficientFirstDerivative( 0 ) / oseenData->dataTime()->timeStep();
-
-        beta = bdf.bdfVelocity().extrapolation();
+    //beta = bdf.bdfVelocity().extrapolation(  beta);
+        bdf.bdfVelocity().extrapolation(beta);
         bdf.bdfVelocity().updateRHSContribution( oseenData->dataTime()->timeStep());
         rhs  = fluid.matrixMass()*bdf.bdfVelocity().rhsContributionFirstDerivative();
 
