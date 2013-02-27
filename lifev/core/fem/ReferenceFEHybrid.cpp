@@ -46,14 +46,14 @@ namespace LifeV
 // ===================================================
 
 // Costructor.
-ReferenceFEHybrid::ReferenceFEHybrid( std::string name, FE_TYPE type, ReferenceShapes shape, UInt nbDofPerVertex, UInt nbDofPerEdge,
-                          UInt nbDofPerFace, UInt nbDofPerVolume, UInt nbDof, UInt nbCoor, const UInt& numberBoundaryFE,
-                          const CurrentBoundaryFE** boundaryFEList, const Real* refCoor, DofPatternType patternType ) :
-        ReferenceFE( name, type, shape, nbDofPerVertex, nbDofPerEdge, nbDofPerFace, nbDofPerVolume,
-               nbDof, nbCoor,1,static_cast<function_Type*>(NULL),  static_cast<function_Type*>(NULL),
-               static_cast<function_Type*>(NULL),  static_cast<function_Type*>(NULL),refCoor,
-               patternType, static_cast<ReferenceFE*>(NULL)),
-        M_numberBoundaryFE( numberBoundaryFE ), M_boundaryFEList( boundaryFEList )
+ReferenceFEHybrid::ReferenceFEHybrid ( std::string name, FE_TYPE type, ReferenceShapes shape, UInt nbDofPerVertex, UInt nbDofPerEdge,
+                                       UInt nbDofPerFace, UInt nbDofPerVolume, UInt nbDof, UInt nbCoor, const UInt& numberBoundaryFE,
+                                       const CurrentBoundaryFE** boundaryFEList, const Real* refCoor, DofPatternType patternType ) :
+    ReferenceFE ( name, type, shape, nbDofPerVertex, nbDofPerEdge, nbDofPerFace, nbDofPerVolume,
+                  nbDof, nbCoor, 1, static_cast<function_Type*> (NULL),  static_cast<function_Type*> (NULL),
+                  static_cast<function_Type*> (NULL),  static_cast<function_Type*> (NULL), refCoor,
+                  patternType, static_cast<ReferenceFE*> (NULL) ),
+    M_numberBoundaryFE ( numberBoundaryFE ), M_boundaryFEList ( boundaryFEList )
 {}
 
 // Destructor.

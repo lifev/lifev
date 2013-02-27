@@ -70,7 +70,7 @@ public:
     DOFInterface();
 
     //! Virtual Destructor
-    virtual ~DOFInterface(){};
+    virtual ~DOFInterface() {};
 
     //@}
 
@@ -83,19 +83,19 @@ public:
     /*!
       \param i a dof number in mesh1
     */
-    ID getInterfaceDof( const ID& i ) const;
+    ID getInterfaceDof ( const ID& i ) const;
 
     //! This method says whether a specific dof number at the interface in mesh1 is on this processor
     /*!
       \param i a dof number in mesh1
     */
-    bool isMyInterfaceDof( const ID& i ) const;
+    bool isMyInterfaceDof ( const ID& i ) const;
 
     //! output
-    std::ostream& showMe( bool verbose = false, std::ostream& out = std::cout ) const;
+    std::ostream& showMe ( bool verbose = false, std::ostream& out = std::cout ) const;
 
     //! Makes this DOFInterface to be the inverse map as the one defined by dofBase.
-    void buildInverse( const DOFInterface& dofBase);
+    void buildInverse ( const DOFInterface& dofBase);
 
     //@}
 
@@ -103,7 +103,7 @@ public:
     //@{
 
     //! Set value to be associated to key
-    void set(const ID& key,const ID& value);
+    void set (const ID& key, const ID& value);
 
     //@}
 
@@ -114,7 +114,10 @@ public:
     size_t nbInterfaceDof() const;
 
     //! Return the correspondance map
-    const std::map<ID, ID> & localDofMap() {return M_localDofMap;}
+    const std::map<ID, ID>& localDofMap()
+    {
+        return M_localDofMap;
+    }
 
     //@}
 

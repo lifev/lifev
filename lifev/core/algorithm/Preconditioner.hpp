@@ -95,14 +95,14 @@ public:
     /*!
       @param comm Comminicator
      */
-    Preconditioner( const commPtr_Type& comm = commPtr_Type() );
+    Preconditioner ( const commPtr_Type& comm = commPtr_Type() );
 
     //! Copy constructor
     /*!
       @param preconditioner Preconditioner
       @param comm Comminicator
      */
-    Preconditioner( const Preconditioner& preconditioner, const commPtr_Type& comm = commPtr_Type() );
+    Preconditioner ( const Preconditioner& preconditioner, const commPtr_Type& comm = commPtr_Type() );
 
     //! Destructor
     virtual ~Preconditioner();
@@ -113,23 +113,23 @@ public:
     //! @name Methods
     //@{
 
-     //! Create the list of parameters of the preconditioner
+    //! Create the list of parameters of the preconditioner
     /*!
       @param list A Parameter list to be filled
       @param dataFile A GetPot object containing the data about the preconditioner
       @param section The section in "dataFile" where to find data about the preconditioner
       @param subSection The subsection in "dataFile" where to find data about the preconditioner
      */
-    virtual void createParametersList( list_Type& list,
-                             const GetPot& dataFile,
-                             const std::string& section,
-                             const std::string& subSection ) = 0;
+    virtual void createParametersList ( list_Type& list,
+                                        const GetPot& dataFile,
+                                        const std::string& section,
+                                        const std::string& subSection ) = 0;
 
     //! Build a preconditioner based on the given matrix
     /*!
       @param matrix Matrix upon which construct the preconditioner
      */
-    virtual Int buildPreconditioner( operator_type& matrix ) = 0;
+    virtual Int buildPreconditioner ( operator_type& matrix ) = 0;
 
     //! Reset the preconditioner
     virtual void resetPreconditioner() = 0;
@@ -138,7 +138,7 @@ public:
     virtual Real condest() = 0;
 
     //! Show informations about the preconditioner
-    virtual void showMe( std::ostream& output = std::cout ) const;
+    virtual void showMe ( std::ostream& output = std::cout ) const;
 
     //@}
 
@@ -150,7 +150,7 @@ public:
     /*!
       @param useTranspose If true the preconditioner is transposed
      */
-    virtual Int SetUseTranspose( const bool useTranspose = false );
+    virtual Int SetUseTranspose ( const bool useTranspose = false );
 
     //! Return true if the preconditioner is transposed
     virtual bool UseTranspose();
@@ -160,14 +160,14 @@ public:
       @param vector1 Vector to which we apply the preconditioner
       @param vector2 Vector to the store the result
      */
-    virtual Int Apply( const Epetra_MultiVector& vector1, Epetra_MultiVector& vector2 ) const;
+    virtual Int Apply ( const Epetra_MultiVector& vector1, Epetra_MultiVector& vector2 ) const;
 
     //! Apply the inverse of the preconditioner on vector1 and store the result in vector2
     /*!
       @param vector1 Vector to which we apply the preconditioner
       @param vector2 Vector to the store the result
      */
-    virtual Int ApplyInverse( const Epetra_MultiVector& vector1, Epetra_MultiVector& vector2 ) const;
+    virtual Int ApplyInverse ( const Epetra_MultiVector& vector1, Epetra_MultiVector& vector2 ) const;
 
 
     //! Return the Range map of the operator
@@ -185,7 +185,7 @@ public:
     /*!
       @param list List to be set into the preconditioner
      */
-    void setParametersList( const list_Type& list );
+    void setParametersList ( const list_Type& list );
 
     //! Set the data of the preconditioner using a GetPot object
     /*!
@@ -199,7 +199,7 @@ public:
       Note: the argument is unused
       @param solver SolverAztecOO
      */
-    virtual void setSolver( SolverAztecOO& /*solver*/ );
+    virtual void setSolver ( SolverAztecOO& /*solver*/ );
 
     //@}
 

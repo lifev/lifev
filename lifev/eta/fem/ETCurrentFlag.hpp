@@ -138,43 +138,43 @@ typedef unsigned int flag_Type;
 // care for the completness of the procedure.
 
 // Do nothing flag
-const flag_Type ET_UPDATE_NONE(0);
+const flag_Type ET_UPDATE_NONE (0);
 
 // Update cell coordinates
-const flag_Type ET_UPDATE_ONLY_CELL_NODE(1);
+const flag_Type ET_UPDATE_ONLY_CELL_NODE (1);
 
 // Update quadrature points coordinate in the current element
-const flag_Type ET_UPDATE_ONLY_QUAD_NODE(2);
+const flag_Type ET_UPDATE_ONLY_QUAD_NODE (2);
 
 //Update the jacobian of the transformation
-const flag_Type ET_UPDATE_ONLY_JACOBIAN(4);
+const flag_Type ET_UPDATE_ONLY_JACOBIAN (4);
 
 // Update the determinant of the jacobian
-const flag_Type ET_UPDATE_ONLY_DET_JACOBIAN(8);
+const flag_Type ET_UPDATE_ONLY_DET_JACOBIAN (8);
 
 // Update the inverse of the jacobian
-const flag_Type ET_UPDATE_ONLY_T_INVERSE_JACOBIAN(16);
+const flag_Type ET_UPDATE_ONLY_T_INVERSE_JACOBIAN (16);
 
 // Update the weighted determinant only
-const flag_Type ET_UPDATE_ONLY_W_DET_JACOBIAN(32);
+const flag_Type ET_UPDATE_ONLY_W_DET_JACOBIAN (32);
 
 // Update the derivative of the basis functions
-const flag_Type ET_UPDATE_ONLY_DPHI(64);
+const flag_Type ET_UPDATE_ONLY_DPHI (64);
 
 // Update the second derivative of the basis functions
-const flag_Type ET_UPDATE_ONLY_D2PHI(128);
+const flag_Type ET_UPDATE_ONLY_D2PHI (128);
 
 // Update the divergence of the basis functions
-const flag_Type ET_UPDATE_ONLY_DIVERGENCE(256);
+const flag_Type ET_UPDATE_ONLY_DIVERGENCE (256);
 
 // Update the diameter of the triangle
-const flag_Type ET_UPDATE_ONLY_DIAMETER(512);
+const flag_Type ET_UPDATE_ONLY_DIAMETER (512);
 
 // Update the measure of the triangle
-const flag_Type ET_UPDATE_ONLY_MEASURE(1024);
+const flag_Type ET_UPDATE_ONLY_MEASURE (1024);
 
 // Update everything
-const flag_Type ET_UPDATE_ALL(2048-1);
+const flag_Type ET_UPDATE_ALL (2048 - 1);
 
 
 // COMPOSITE FLAGS
@@ -183,47 +183,47 @@ const flag_Type ET_UPDATE_ALL(2048-1);
 // the final (required) quantity are updated as well.
 
 // Flag for the quadrature nodes in the current cell
-const flag_Type ET_UPDATE_QUAD_NODE(ET_UPDATE_ONLY_CELL_NODE
-                                  |ET_UPDATE_ONLY_QUAD_NODE);
+const flag_Type ET_UPDATE_QUAD_NODE (ET_UPDATE_ONLY_CELL_NODE
+                                     | ET_UPDATE_ONLY_QUAD_NODE);
 
 // Flag for the values of the basis functions
-const flag_Type ET_UPDATE_PHI(ET_UPDATE_ONLY_CELL_NODE);
+const flag_Type ET_UPDATE_PHI (ET_UPDATE_ONLY_CELL_NODE);
 
 // Flag for the gradient of the basis functions
-const flag_Type ET_UPDATE_DPHI(ET_UPDATE_ONLY_CELL_NODE
-                            |ET_UPDATE_ONLY_JACOBIAN
-							|ET_UPDATE_ONLY_DET_JACOBIAN
-                            |ET_UPDATE_ONLY_T_INVERSE_JACOBIAN
-                            |ET_UPDATE_ONLY_DPHI);
+const flag_Type ET_UPDATE_DPHI (ET_UPDATE_ONLY_CELL_NODE
+                                | ET_UPDATE_ONLY_JACOBIAN
+                                | ET_UPDATE_ONLY_DET_JACOBIAN
+                                | ET_UPDATE_ONLY_T_INVERSE_JACOBIAN
+                                | ET_UPDATE_ONLY_DPHI);
 
 // Flag for the second derivate of the basis functions
-const flag_Type ET_UPDATE_D2PHI(ET_UPDATE_ONLY_CELL_NODE
-                             |ET_UPDATE_ONLY_JACOBIAN
-							 |ET_UPDATE_ONLY_DET_JACOBIAN
-                             |ET_UPDATE_ONLY_T_INVERSE_JACOBIAN
-                             |ET_UPDATE_ONLY_D2PHI);
+const flag_Type ET_UPDATE_D2PHI (ET_UPDATE_ONLY_CELL_NODE
+                                 | ET_UPDATE_ONLY_JACOBIAN
+                                 | ET_UPDATE_ONLY_DET_JACOBIAN
+                                 | ET_UPDATE_ONLY_T_INVERSE_JACOBIAN
+                                 | ET_UPDATE_ONLY_D2PHI);
 
 // Flag for the weighted determinant
-const flag_Type ET_UPDATE_WDET(ET_UPDATE_ONLY_CELL_NODE
-                            |ET_UPDATE_ONLY_JACOBIAN
-                            |ET_UPDATE_ONLY_DET_JACOBIAN
-                            |ET_UPDATE_ONLY_W_DET_JACOBIAN);
+const flag_Type ET_UPDATE_WDET (ET_UPDATE_ONLY_CELL_NODE
+                                | ET_UPDATE_ONLY_JACOBIAN
+                                | ET_UPDATE_ONLY_DET_JACOBIAN
+                                | ET_UPDATE_ONLY_W_DET_JACOBIAN);
 
 // Flag for the gradient of the basis functions
-const flag_Type ET_UPDATE_DIVERGENCE(ET_UPDATE_ONLY_CELL_NODE
-                            |ET_UPDATE_ONLY_JACOBIAN
-							|ET_UPDATE_ONLY_DET_JACOBIAN
-                            |ET_UPDATE_ONLY_T_INVERSE_JACOBIAN
-                            |ET_UPDATE_ONLY_DPHI
-                            |ET_UPDATE_ONLY_DIVERGENCE);
+const flag_Type ET_UPDATE_DIVERGENCE (ET_UPDATE_ONLY_CELL_NODE
+                                      | ET_UPDATE_ONLY_JACOBIAN
+                                      | ET_UPDATE_ONLY_DET_JACOBIAN
+                                      | ET_UPDATE_ONLY_T_INVERSE_JACOBIAN
+                                      | ET_UPDATE_ONLY_DPHI
+                                      | ET_UPDATE_ONLY_DIVERGENCE);
 
 // Flag for the diameter of the cell
-const flag_Type ET_UPDATE_DIAMETER(ET_UPDATE_ONLY_CELL_NODE
-                                   |ET_UPDATE_ONLY_DIAMETER);
+const flag_Type ET_UPDATE_DIAMETER (ET_UPDATE_ONLY_CELL_NODE
+                                    | ET_UPDATE_ONLY_DIAMETER);
 
 // Flag for the diameter of the cell
-const flag_Type ET_UPDATE_MEASURE(ET_UPDATE_WDET
-                                   |ET_UPDATE_ONLY_MEASURE);
+const flag_Type ET_UPDATE_MEASURE (ET_UPDATE_WDET
+                                   | ET_UPDATE_ONLY_MEASURE);
 
 
 

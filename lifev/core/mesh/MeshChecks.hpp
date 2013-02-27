@@ -108,50 +108,52 @@ namespace LifeV
   \return It returns the mesh computed volume.
 */
 template <typename RegionMesh>
-Real checkVolumes( RegionMesh const & mesh,
-                   std::vector<bool> & elSign,
-                   Switch & sw )
+Real checkVolumes ( RegionMesh const& mesh,
+                    std::vector<bool>& elSign,
+                    Switch& sw )
 {
     Real meas = 0.0;
     Real lmeas = 0.0;
     elSign.clear();
-    elSign.reserve( mesh.numVolumes() );
+    elSign.reserve ( mesh.numVolumes() );
     typedef typename RegionMesh::elementShape_Type GeoShape;
 
     switch ( GeoShape::S_shape )
     {
-    case TETRA:
-    {
-        CurrentFE fe( feTetraP1, geoLinearTetra, quadRuleTetra1pt );
-        for ( ID i = 0; i < mesh.numVolumes(); i++ )
+        case TETRA:
         {
-            fe.updateJac( mesh.volume( i ) );
-            lmeas = fe.measure();
-            meas += lmeas;
-            elSign.push_back( lmeas > 0.0 );
+            CurrentFE fe ( feTetraP1, geoLinearTetra, quadRuleTetra1pt );
+            for ( ID i = 0; i < mesh.numVolumes(); i++ )
+            {
+                fe.updateJac ( mesh.volume ( i ) );
+                lmeas = fe.measure();
+                meas += lmeas;
+                elSign.push_back ( lmeas > 0.0 );
+            }
         }
-    }
-    break;
-    case HEXA:
-    {
-        CurrentFE fe( feHexaQ1, geoBilinearHexa, quadRuleHexa1pt );
-        for ( ID i = 0; i < mesh.numVolumes(); i++ )
+        break;
+        case HEXA:
         {
-            fe.updateJac( mesh.volume( i ) );
-            lmeas = fe.measure();
-            meas += lmeas;
-            elSign.push_back( lmeas > 0.0 );
+            CurrentFE fe ( feHexaQ1, geoBilinearHexa, quadRuleHexa1pt );
+            for ( ID i = 0; i < mesh.numVolumes(); i++ )
+            {
+                fe.updateJac ( mesh.volume ( i ) );
+                lmeas = fe.measure();
+                meas += lmeas;
+                elSign.push_back ( lmeas > 0.0 );
+            }
         }
-    }
-    break;
-    default:
-        sw.create( "SKIP_ORIENTATION_TEST", true );
+        break;
+        default:
+            sw.create ( "SKIP_ORIENTATION_TEST", true );
 
-        return 0;
+            return 0;
     }
 
-    if ( std::find( elSign.begin(), elSign.end(), false ) != elSign.end() )
-        sw.create( "HAS_NEGATIVE_VOLUMES", true );
+    if ( std::find ( elSign.begin(), elSign.end(), false ) != elSign.end() )
+    {
+        sw.create ( "HAS_NEGATIVE_VOLUMES", true );
+    }
 
     return meas;
 }
@@ -170,17 +172,19 @@ Real checkVolumes( RegionMesh const & mesh,
   \post A mesh with all volumes with positive oreintation.
 */
 template <typename RegionMesh>
-void fixVolumes( RegionMesh & mesh,
-                 const std::vector<bool> & elSign,
-                 Switch & sw )
+void fixVolumes ( RegionMesh& mesh,
+                  const std::vector<bool>& elSign,
+                  Switch& sw )
 {
 
     for ( ID i = 0; i < mesh.numVolumes(); i++ )
     {
         if ( ! elSign[ i ] )
-            mesh.volume(i).reversePoints();
+        {
+            mesh.volume (i).reversePoints();
+        }
     }
-    sw.create("HAS_VOLUMES",true);
+    sw.create ("HAS_VOLUMES", true);
 }
 //!\brief Computes volume enclosed by boundary faces
 /*!
@@ -195,13 +199,13 @@ void fixVolumes( RegionMesh & mesh,
   \param vols returns 3 Real corresponding to the 3 integrals
 */
 template <typename RegionMesh>
-void getVolumeFromFaces( RegionMesh const & mesh,
-                         Real vols[ 3 ],
-                         std::ostream & err = std::cerr )
+void getVolumeFromFaces ( RegionMesh const& mesh,
+                          Real vols[ 3 ],
+                          std::ostream& err = std::cerr )
 {
-    MeshUtility::GetCoordComponent getx( 0 );
-    MeshUtility::GetCoordComponent gety( 1 );
-    MeshUtility::GetCoordComponent getz( 2 );
+    MeshUtility::GetCoordComponent getx ( 0 );
+    MeshUtility::GetCoordComponent gety ( 1 );
+    MeshUtility::GetCoordComponent getz ( 2 );
     vols[ 0 ] = 0.0;
     vols[ 1 ] = 0.0;
     vols[ 2 ] = 0.0;
@@ -213,31 +217,31 @@ void getVolumeFromFaces( RegionMesh const & mesh,
 
     switch ( GeoBShape::S_shape )
     {
-    case TRIANGLE:
-        bdfe = current_fe_type( new CurrentBoundaryFE( feTriaP1, geoLinearTria,
-                                                 quadRuleTria1pt ) );
-        for ( ID i = 0; i < mesh.numBFaces(); i++ )
-        {
-            bdfe->update( mesh.face( i ), UPDATE_W_ROOT_DET_METRIC | UPDATE_NORMALS | UPDATE_QUAD_NODES );
-            vols[ 0 ] += bdfe->normalIntegral( getx );
-            vols[ 1 ] += bdfe->normalIntegral( gety );
-            vols[ 2 ] += bdfe->normalIntegral( getz );
-        }
-        break;
-    case QUAD:
-        bdfe = current_fe_type( new CurrentBoundaryFE( feQuadQ1, geoBilinearQuad,
-                                                 quadRuleQuad1pt ) );
-        for ( ID i = 0; i < mesh.numBFaces(); i++ )
-        {
-            bdfe->update( mesh.face( i ), UPDATE_W_ROOT_DET_METRIC | UPDATE_NORMALS | UPDATE_QUAD_NODES );
-            vols[ 0 ] += bdfe->normalIntegral( getx );
-            vols[ 1 ] += bdfe->normalIntegral( gety );
-            vols[ 2 ] += bdfe->normalIntegral( getz );
-        }
-        break;
-    default:
-        err << "Only tria and quad surface elements  may be checked for volume orientation at the moment" << std::endl;
-        ASSERT0( false, "ABORT CONDITION OCCURRED" );
+        case TRIANGLE:
+            bdfe = current_fe_type ( new CurrentBoundaryFE ( feTriaP1, geoLinearTria,
+                                                             quadRuleTria1pt ) );
+            for ( ID i = 0; i < mesh.numBFaces(); i++ )
+            {
+                bdfe->update ( mesh.face ( i ), UPDATE_W_ROOT_DET_METRIC | UPDATE_NORMALS | UPDATE_QUAD_NODES );
+                vols[ 0 ] += bdfe->normalIntegral ( getx );
+                vols[ 1 ] += bdfe->normalIntegral ( gety );
+                vols[ 2 ] += bdfe->normalIntegral ( getz );
+            }
+            break;
+        case QUAD:
+            bdfe = current_fe_type ( new CurrentBoundaryFE ( feQuadQ1, geoBilinearQuad,
+                                                             quadRuleQuad1pt ) );
+            for ( ID i = 0; i < mesh.numBFaces(); i++ )
+            {
+                bdfe->update ( mesh.face ( i ), UPDATE_W_ROOT_DET_METRIC | UPDATE_NORMALS | UPDATE_QUAD_NODES );
+                vols[ 0 ] += bdfe->normalIntegral ( getx );
+                vols[ 1 ] += bdfe->normalIntegral ( gety );
+                vols[ 2 ] += bdfe->normalIntegral ( getz );
+            }
+            break;
+        default:
+            err << "Only tria and quad surface elements  may be checked for volume orientation at the moment" << std::endl;
+            ASSERT0 ( false, "ABORT CONDITION OCCURRED" );
     }
 }
 
@@ -246,8 +250,8 @@ void getVolumeFromFaces( RegionMesh const & mesh,
   The value returned  should be very proximal to zero
  */
 template <typename RegionMesh>
-Real testClosedDomain( RegionMesh const & mesh,
-                       std::ostream & err = std::cerr )
+Real testClosedDomain ( RegionMesh const& mesh,
+                        std::ostream& err = std::cerr )
 {
     typedef typename RegionMesh::facet_Type facet_Type;
 
@@ -255,33 +259,33 @@ Real testClosedDomain( RegionMesh const & mesh,
     current_fe_type bdfe;
 
     MeshUtility::GetOnes ones;
-    Real test( 0.0 );
+    Real test ( 0.0 );
 
     switch ( RegionMesh::facetShape_Type::S_shape )
     {
-    case TRIANGLE:
-        bdfe = current_fe_type( new CurrentBoundaryFE( feTriaP1, geoLinearTria,
-                                                 quadRuleTria1pt ) );
-        for ( ID i = 0; i < mesh.numBFaces(); i++ )
-        {
-            bdfe->update( mesh.face( i ), UPDATE_W_ROOT_DET_METRIC | UPDATE_NORMALS | UPDATE_QUAD_NODES );
-            test += bdfe->normalIntegral( ones );
-        }
-        break;
-    case QUAD:
-        bdfe = current_fe_type( new CurrentBoundaryFE( feQuadQ1, geoBilinearQuad,
-                                                 quadRuleQuad1pt ) );
-        for ( ID i = 0; i < mesh.numBFaces(); i++ )
-        {
-            bdfe->update( mesh.face( i ), UPDATE_W_ROOT_DET_METRIC | UPDATE_NORMALS | UPDATE_QUAD_NODES );
-            test += bdfe->normalIntegral( ones );
-        }
+        case TRIANGLE:
+            bdfe = current_fe_type ( new CurrentBoundaryFE ( feTriaP1, geoLinearTria,
+                                                             quadRuleTria1pt ) );
+            for ( ID i = 0; i < mesh.numBFaces(); i++ )
+            {
+                bdfe->update ( mesh.face ( i ), UPDATE_W_ROOT_DET_METRIC | UPDATE_NORMALS | UPDATE_QUAD_NODES );
+                test += bdfe->normalIntegral ( ones );
+            }
+            break;
+        case QUAD:
+            bdfe = current_fe_type ( new CurrentBoundaryFE ( feQuadQ1, geoBilinearQuad,
+                                                             quadRuleQuad1pt ) );
+            for ( ID i = 0; i < mesh.numBFaces(); i++ )
+            {
+                bdfe->update ( mesh.face ( i ), UPDATE_W_ROOT_DET_METRIC | UPDATE_NORMALS | UPDATE_QUAD_NODES );
+                test += bdfe->normalIntegral ( ones );
+            }
 
-        break;
+            break;
 
-    default:
-        err << "Only tria and quad surface elements  may be checked for volume orientation at the moment" << std::endl;
-        ASSERT0( false, "ABORT CONDITION OCCURRED" );
+        default:
+            err << "Only tria and quad surface elements  may be checked for volume orientation at the moment" << std::endl;
+            ASSERT0 ( false, "ABORT CONDITION OCCURRED" );
     }
 
     return test;
@@ -312,13 +316,13 @@ Real testClosedDomain( RegionMesh const & mesh,
 */
 
 template <typename RegionMesh>
-bool checkMesh3D( RegionMesh & mesh,
-                  Switch & sw,
-                  bool fix = true,
-                  bool verbose = false,
-                  std::ostream & out = std::cerr,
-                  std::ostream & err = std::cerr,
-                  std::ostream & clog = std::clog )
+bool checkMesh3D ( RegionMesh& mesh,
+                   Switch& sw,
+                   bool fix = true,
+                   bool verbose = false,
+                   std::ostream& out = std::cerr,
+                   std::ostream& err = std::cerr,
+                   std::ostream& clog = std::clog )
 {
     verbose = verbose && ( mesh.comm()->MyPID() == 0 );
     typedef typename RegionMesh::point_Type point_Type;
@@ -326,19 +330,24 @@ bool checkMesh3D( RegionMesh & mesh,
     if ( mesh.storedPoints() == 0 )
     {
         err << "FATAL: mesh does not store points: I cannot do anything"
-        << std::endl;
-        sw.create( "ABORT_CONDITION", true );
-        sw.create( "NOT_HAS_POINTS", true );
+            << std::endl;
+        sw.create ( "ABORT_CONDITION", true );
+        sw.create ( "NOT_HAS_POINTS", true );
         return false;
     }
 
-    if(verbose) out<<" Check point marker ids"<<std::endl;
-    if ( !MeshUtility::checkIsMarkerSet( mesh.pointList ) )
+    if (verbose)
+    {
+        out << " Check point marker ids" << std::endl;
+    }
+    if ( !MeshUtility::checkIsMarkerSet ( mesh.pointList ) )
     {
         if (verbose)
+        {
             err << "WARNING: Not all points have marker id set" << std::endl;
+        }
 
-        sw.create( "POINTS_MARKER_UNSET", true );
+        sw.create ( "POINTS_MARKER_UNSET", true );
     }
 
 
@@ -349,15 +358,15 @@ bool checkMesh3D( RegionMesh & mesh,
 
     if ( mesh.storedVolumes() == 0 )
     {
-        if(verbose) err << "FATAL: mesh does not store volumes: I cannot do anything"
-                        << std::endl;
-        sw.create( "ABORT_CONDITION", true );
-        sw.create( "NOT_HAS_VOLUMES", true );
+        if (verbose) err << "FATAL: mesh does not store volumes: I cannot do anything"
+                             << std::endl;
+        sw.create ( "ABORT_CONDITION", true );
+        sw.create ( "NOT_HAS_VOLUMES", true );
         return false;
     }
 
 
-    if ( !MeshUtility::checkId( mesh.volumeList ) )
+    if ( !MeshUtility::checkId ( mesh.volumeList ) )
     {
         if (verbose)
         {
@@ -365,26 +374,41 @@ bool checkMesh3D( RegionMesh & mesh,
             err << "FIXED" << std::endl;
         }
         if ( fix )
-            sw.create( "FIXED_VOLUMES_ID", true );
+        {
+            sw.create ( "FIXED_VOLUMES_ID", true );
+        }
         if ( fix )
-            MeshUtility::fixId( mesh.volumeList );
+        {
+            MeshUtility::fixId ( mesh.volumeList );
+        }
     }
 
-    if(verbose) out<<" Check volum marker ids"<<std::endl;
-    if ( !MeshUtility::checkIsMarkerSet( mesh.volumeList ) )
+    if (verbose)
+    {
+        out << " Check volum marker ids" << std::endl;
+    }
+    if ( !MeshUtility::checkIsMarkerSet ( mesh.volumeList ) )
     {
         if (verbose)
+        {
             err << "WARNING: Not all volumes have marker flag set" << std::endl;
+        }
 
-        sw.create( "VOLUMES_MARKER_UNSET", true );
+        sw.create ( "VOLUMES_MARKER_UNSET", true );
 
         if ( fix )
-        {   if(verbose)out<<"Fixing volume marker ids"<<std::endl;
+        {
+            if (verbose)
+            {
+                out << "Fixing volume marker ids" << std::endl;
+            }
             for ( typename RegionMesh::volumes_Type::iterator iv = mesh.volumeList.begin();
                     iv != mesh.volumeList.end(); ++iv )
             {
                 if ( iv->isMarkerUnset() )
-                    iv->setMarkerID( mesh.markerID() );
+                {
+                    iv->setMarkerID ( mesh.markerID() );
+                }
             }
         }
     }
@@ -393,21 +417,25 @@ bool checkMesh3D( RegionMesh & mesh,
     {
         if (verbose)
             err << "WARNING: Mesh Volumes must be at least "
-            << mesh.storedVolumes() << std::endl;
+                << mesh.storedVolumes() << std::endl;
         if ( fix )
-            mesh.setNumVolumes( mesh.storedVolumes() );
+        {
+            mesh.setNumVolumes ( mesh.storedVolumes() );
+        }
         if ( fix )
-            sw.create( "FIXED_VOLUME_COUNTER", true );
+        {
+            sw.create ( "FIXED_VOLUME_COUNTER", true );
+        }
     }
 
     // test now orientation
 
-    boost::shared_ptr<std::vector<bool> > elSign( new std::vector<bool> );
+    boost::shared_ptr<std::vector<bool> > elSign ( new std::vector<bool> );
 
-    Real meshMeasure = checkVolumes( mesh, *elSign, sw );
+    Real meshMeasure = checkVolumes ( mesh, *elSign, sw );
     UInt positive;
 
-    if ( sw.test( "SKIP_ORIENTATION_TEST" ) )
+    if ( sw.test ( "SKIP_ORIENTATION_TEST" ) )
     {
         if (verbose)
         {
@@ -415,128 +443,155 @@ bool checkMesh3D( RegionMesh & mesh,
             err << "W: ELEMENT ORIENTATION NOT IMPLEMENTED YET FOR THIS TYPE OF ELEMENTS, SKIP" << std::endl;
         }
     }
-    else if ( sw.test( "HAS_NEGATIVE_VOLUMES" ) )
+    else if ( sw.test ( "HAS_NEGATIVE_VOLUMES" ) )
     {
-        if(verbose) out<<"Checking volume orientation"<<std::endl;
-        positive = count( elSign->begin(), elSign->end(), true );
-        if( verbose ) clog << positive << "W: positive elements out of"
-                           << mesh.storedVolumes() << std::endl;
+        if (verbose)
+        {
+            out << "Checking volume orientation" << std::endl;
+        }
+        positive = count ( elSign->begin(), elSign->end(), true );
+        if ( verbose ) clog << positive << "W: positive elements out of"
+                                << mesh.storedVolumes() << std::endl;
         if ( fix )
         {
-            if( verbose ) clog << "Fixing negative elements" << std::endl;
-            fixVolumes( mesh, *elSign, sw );
+            if ( verbose )
+            {
+                clog << "Fixing negative elements" << std::endl;
+            }
+            fixVolumes ( mesh, *elSign, sw );
         }
 
-        if ( sw.test( "ABORT_CONDITION" ) )
+        if ( sw.test ( "ABORT_CONDITION" ) )
         {
-            if(verbose) err << "ABORT: Cannot fix volumes, this element is not supported"
-                            << std::endl;
+            if (verbose) err << "ABORT: Cannot fix volumes, this element is not supported"
+                                 << std::endl;
             return false;
         }
         else
         {
-            sw.unset( "HAS_NEGATIVE_VOLUMES" );
-            meshMeasure = checkVolumes( mesh, *elSign, sw );
-            if ( sw.test( "HAS_NEGATIVE_VOLUMES" ) )
+            sw.unset ( "HAS_NEGATIVE_VOLUMES" );
+            meshMeasure = checkVolumes ( mesh, *elSign, sw );
+            if ( sw.test ( "HAS_NEGATIVE_VOLUMES" ) )
             {
                 if ( fix )
                 {
-                    if( verbose ) err << "ABORT: Cannot fix volumes: something wrong with this mesh" << std::endl;
-                    sw.create( "ABORT_CONDITION", true );
+                    if ( verbose )
+                    {
+                        err << "ABORT: Cannot fix volumes: something wrong with this mesh" << std::endl;
+                    }
+                    sw.create ( "ABORT_CONDITION", true );
                 }
                 return false;
             }
         }
     }
 
-    if( verbose ) clog << "Volume enclosed by the mesh= " << meshMeasure << std::endl
-                       << "(Computed by integrating mesh elements measures)" << std::endl
-                       << "(Using 1 point Quadrature rule)" << std::endl;
+    if ( verbose ) clog << "Volume enclosed by the mesh= " << meshMeasure << std::endl
+                            << "(Computed by integrating mesh elements measures)" << std::endl
+                            << "(Using 1 point Quadrature rule)" << std::endl;
 
     //-----------------------------------------------------
     //                                    BOUNDARY FACES
     //-----------------------------------------------------
 
-    boost::shared_ptr<MeshUtility::temporaryFaceContainer_Type> bfaces(
-            new MeshUtility::temporaryFaceContainer_Type );
+    boost::shared_ptr<MeshUtility::temporaryFaceContainer_Type> bfaces (
+        new MeshUtility::temporaryFaceContainer_Type );
     UInt numInternalFaces, numFaces;
 
-    if(verbose) out<<"Finding boundary faces from mesh topology"<<std::endl;
+    if (verbose)
+    {
+        out << "Finding boundary faces from mesh topology" << std::endl;
+    }
 
-    UInt bFacesFound = MeshUtility::findBoundaryFaces( mesh, *bfaces, numInternalFaces );
+    UInt bFacesFound = MeshUtility::findBoundaryFaces ( mesh, *bfaces, numInternalFaces );
 
     numFaces = bFacesFound + numInternalFaces;
 
-    MeshUtility::EnquireBFace<RegionMesh> enquireBFace(*bfaces );
+    MeshUtility::EnquireBFace<RegionMesh> enquireBFace (*bfaces );
 
-    UInt meshNumBoundaryFaces ( mesh.numBFaces() + mesh.faceList.countElementsWithFlag( EntityFlags::SUBDOMAIN_INTERFACE, &Flag::testOneSet ) );
+    UInt meshNumBoundaryFaces ( mesh.numBFaces() + mesh.faceList.countElementsWithFlag ( EntityFlags::SUBDOMAIN_INTERFACE, &Flag::testOneSet ) );
 
     if ( mesh.storedFaces() == 0 ||
-         meshNumBoundaryFaces > mesh.storedFaces() ||
-         bFacesFound > mesh.storedFaces() || bFacesFound > meshNumBoundaryFaces )
+            meshNumBoundaryFaces > mesh.storedFaces() ||
+            bFacesFound > mesh.storedFaces() || bFacesFound > meshNumBoundaryFaces )
     {
         // Something strange with boundary faces
         if (verbose)
         {
             err << "ERROR: Not all boundary faces stored" << std::endl;
             err << "Found " << bFacesFound << " stored " << mesh.storedFaces() <<
-                            "B faces declared in mesh "<< meshNumBoundaryFaces <<std::endl;
+                "B faces declared in mesh " << meshNumBoundaryFaces << std::endl;
         }
         if ( fix )
         {
-            sw.create( "BUILD_BFACES", true );
-            if(verbose) out<<"Building boundary faces from topology data"<<std::endl;
-            MeshUtility::buildFaces( mesh, clog, err, bFacesFound, numInternalFaces,
-                                     true, false, false, bfaces.get() );
+            sw.create ( "BUILD_BFACES", true );
+            if (verbose)
+            {
+                out << "Building boundary faces from topology data" << std::endl;
+            }
+            MeshUtility::buildFaces ( mesh, clog, err, bFacesFound, numInternalFaces,
+                                      true, false, false, bfaces.get() );
         }
         if (verbose)
         {
             err << "After buildFaces" << std::endl;
-            err << "Found "<<bFacesFound<<" stored "<< mesh.storedFaces()
-                << "B faces declared in mesh "<< meshNumBoundaryFaces << std::endl;
+            err << "Found " << bFacesFound << " stored " << mesh.storedFaces()
+                << "B faces declared in mesh " << meshNumBoundaryFaces << std::endl;
         }
     }
     else
     {
         if ( mesh.storedFaces() == 0 )
-         {
-             if( verbose ) err << "ABORT CONDITION: cannot find boundary faces" << std::endl;
-             sw.create( "NOT_HAS_FACES", true );
-             sw.create( "ABORT_CONDITION", true );
-         }
-       // The mesh declares to have the correct boundary faces. Yet, are we sure that the flag has been properly set
+        {
+            if ( verbose )
+            {
+                err << "ABORT CONDITION: cannot find boundary faces" << std::endl;
+            }
+            sw.create ( "NOT_HAS_FACES", true );
+            sw.create ( "ABORT_CONDITION", true );
+        }
+        // The mesh declares to have the correct boundary faces. Yet, are we sure that the flag has been properly set
         // and that they are stored first? If fix is set we don't trust anybody!
         //
         // Make sure that flags are set using the info in bfaces, which depends ONLY on the mesh topology. No messing bout with markers
         // Make sure BFaces are stored first
 
-        if(fix)
+        if (fix)
         {
-            if(verbose) out<<"Rearranging faces so that boundary faces are first"<<std::endl;
-            MeshUtility::rearrangeFaces( mesh, clog, err, sw, numFaces, bFacesFound,
-                                           verbose, bfaces.get() );
+            if (verbose)
+            {
+                out << "Rearranging faces so that boundary faces are first" << std::endl;
+            }
+            MeshUtility::rearrangeFaces ( mesh, clog, err, sw, numFaces, bFacesFound,
+                                          verbose, bfaces.get() );
         }
         if ( meshNumBoundaryFaces !=  bFacesFound)
         {
-            if( verbose ) err<<" ERROR: Number of B faces does not correspond to real one"<<std::endl;
+            if ( verbose )
+            {
+                err << " ERROR: Number of B faces does not correspond to real one" << std::endl;
+            }
             if (fix)
             {
-                if( verbose ) err<<"FIXED Number of B faces has been fixed to:" << bFacesFound<<std::endl;
-                mesh.setNumBFaces( bFacesFound);
+                if ( verbose )
+                {
+                    err << "FIXED Number of B faces has been fixed to:" << bFacesFound << std::endl;
+                }
+                mesh.setNumBFaces ( bFacesFound);
             }
         }
 
-        if ( !MeshUtility::checkId( mesh.faceList ) )
+        if ( !MeshUtility::checkId ( mesh.faceList ) )
         {
-            if( verbose )
+            if ( verbose )
             {
                 err << "ERROR: face ids were wrongly set" << std::endl;
                 err << "FIXED" << std::endl;
             }
             if ( fix )
             {
-                sw.create( "FIXED_FACES_ID", true );
-                MeshUtility::fixId( mesh.faceList );
+                sw.create ( "FIXED_FACES_ID", true );
+                MeshUtility::fixId ( mesh.faceList );
             }
         }
 
@@ -544,36 +599,50 @@ bool checkMesh3D( RegionMesh & mesh,
 
         if ( fix )
         {
-            if(verbose)out<<"Make sure that adjacent elements of boundary faces are correct"<<std::endl;
-            MeshUtility::fixBoundaryFaces( mesh, clog, err, sw, numFaces, bFacesFound,
-                              false, verbose, bfaces.get() );
+            if (verbose)
+            {
+                out << "Make sure that adjacent elements of boundary faces are correct" << std::endl;
+            }
+            MeshUtility::fixBoundaryFaces ( mesh, clog, err, sw, numFaces, bFacesFound,
+                                            false, verbose, bfaces.get() );
         }
 
 
 
         if ( mesh.numBFaces() == 0 )
         {
-            if( verbose )err << " MeshBFaces counter is unset" << std::endl;
+            if ( verbose )
+            {
+                err << " MeshBFaces counter is unset" << std::endl;
+            }
             if ( fix )
             {
-                mesh.setNumBFaces( mesh.storedFaces() );
-                sw.create( "FIXED_BFACE_COUNTER", true );
-                mesh.setLinkSwitch( "HAS_BOUNDARY_FACETS" );
+                mesh.setNumBFaces ( mesh.storedFaces() );
+                sw.create ( "FIXED_BFACE_COUNTER", true );
+                mesh.setLinkSwitch ( "HAS_BOUNDARY_FACETS" );
             }
         }
 
 
-        if ( !MeshUtility::checkIsMarkerSet( mesh.faceList ) )
+        if ( !MeshUtility::checkIsMarkerSet ( mesh.faceList ) )
         {
-            if(verbose)out<<"Fix markers id for faces"<<std::endl;
-            if( verbose ) err << "WARNING: Not all faces have marker flag set" << std::endl;
-            sw.create( "FACE_MARKER_UNSET", true );
-            if ( fix )
-                MeshUtility::setBoundaryFacesMarker( mesh, clog, err, verbose );
-            if ( fix && MeshUtility::checkIsMarkerSet( mesh.faceList ) )
+            if (verbose)
             {
-                sw.create( "FACE_MARKER_UNSET", false );
-                sw.create( "FACE_MARKER_FIXED", true );
+                out << "Fix markers id for faces" << std::endl;
+            }
+            if ( verbose )
+            {
+                err << "WARNING: Not all faces have marker flag set" << std::endl;
+            }
+            sw.create ( "FACE_MARKER_UNSET", true );
+            if ( fix )
+            {
+                MeshUtility::setBoundaryFacesMarker ( mesh, clog, err, verbose );
+            }
+            if ( fix && MeshUtility::checkIsMarkerSet ( mesh.faceList ) )
+            {
+                sw.create ( "FACE_MARKER_UNSET", false );
+                sw.create ( "FACE_MARKER_FIXED", true );
             }
         }
     }
@@ -581,7 +650,7 @@ bool checkMesh3D( RegionMesh & mesh,
 
     if ( mesh.numFaces() != bFacesFound + numInternalFaces )
     {
-        if( verbose )
+        if ( verbose )
         {
             err << "WARNING Number of faces incorrectly set" << std::endl;
             err << "        It was       " << mesh.numFaces() << std::endl;
@@ -590,14 +659,19 @@ bool checkMesh3D( RegionMesh & mesh,
         }
         if ( fix )
         {
-            if( verbose ) err << "        Fixing" << std::endl;
-            mesh.setNumFaces( bFacesFound + numInternalFaces );
-            sw.create( "FIXED_FACE_COUNTER", true );
+            if ( verbose )
+            {
+                err << "        Fixing" << std::endl;
+            }
+            mesh.setNumFaces ( bFacesFound + numInternalFaces );
+            sw.create ( "FIXED_FACE_COUNTER", true );
         }
     }
 
     if ( fix && mesh.storedFaces() == bFacesFound + numInternalFaces)
-        mesh.setLinkSwitch( "HAS_ALL_FACETS" );
+    {
+        mesh.setLinkSwitch ( "HAS_ALL_FACETS" );
+    }
 
     if (verbose)
     {
@@ -612,14 +686,14 @@ bool checkMesh3D( RegionMesh & mesh,
     //                                    BOUNDARY EDGES
     //-----------------------------------------------------
 
-    boost::shared_ptr<MeshUtility::temporaryEdgeContainer_Type> bedges(
-            new MeshUtility::temporaryEdgeContainer_Type );
+    boost::shared_ptr<MeshUtility::temporaryEdgeContainer_Type> bedges (
+        new MeshUtility::temporaryEdgeContainer_Type );
 
-    UInt bEdgesFound = MeshUtility::findBoundaryEdges( mesh, *bedges );
-    MeshUtility::EnquireBEdge<RegionMesh> enquireBEdge(*bedges );
+    UInt bEdgesFound = MeshUtility::findBoundaryEdges ( mesh, *bedges );
+    MeshUtility::EnquireBEdge<RegionMesh> enquireBEdge (*bedges );
 
-    UInt intedge(0);
-    UInt Ned(0);
+    UInt intedge (0);
+    UInt Ned (0);
     MeshUtility::temporaryEdgeContainer_Type iedges;
 
     if ( mesh.storedEdges() == 0 ||
@@ -630,16 +704,21 @@ bool checkMesh3D( RegionMesh & mesh,
         {
             err << "WARNING: mesh does not store (all) boundary edges" << std::endl;
         }
-        sw.create( "NOT_HAS_EDGES", true );
+        sw.create ( "NOT_HAS_EDGES", true );
         if ( fix )
         {
-            if(verbose) out<<"Build boundary edges"<<std::endl;
-            MeshUtility::buildEdges( mesh, clog, err, bEdgesFound, intedge, true, false,
-                        false, bedges.get() );
+            if (verbose)
+            {
+                out << "Build boundary edges" << std::endl;
+            }
+            MeshUtility::buildEdges ( mesh, clog, err, bEdgesFound, intedge, true, false,
+                                      false, bedges.get() );
         }
         Ned = bEdgesFound + intedge;
         if ( fix )
-            sw.create( "BUILD_BEDGES", true );
+        {
+            sw.create ( "BUILD_BEDGES", true );
+        }
     }
     else
     {
@@ -651,67 +730,98 @@ bool checkMesh3D( RegionMesh & mesh,
         // todo do the same it was done for faces!
         if ( mesh.numBEdges() !=  bEdgesFound)
         {
-            if( verbose ) err<<" ERROR: Number of BEdges does not correspond to real one"<<std::endl;
+            if ( verbose )
+            {
+                err << " ERROR: Number of BEdges does not correspond to real one" << std::endl;
+            }
             if (fix)
             {
-                if( verbose ) err<<"FIXED Number of BEdges has been fixed to:" <<bEdgesFound<<std::endl;
-                mesh.setNumBEdges( bEdgesFound);
+                if ( verbose )
+                {
+                    err << "FIXED Number of BEdges has been fixed to:" << bEdgesFound << std::endl;
+                }
+                mesh.setNumBEdges ( bEdgesFound);
             }
         }
 
         if ( fix )
         {
-            if(verbose)out<<"Reorder edges so that boundary are first"<<std::endl;
-            mesh.edgeList.reorderAccordingToFlag(EntityFlags::PHYSICAL_BOUNDARY,&Flag::testOneSet);
-
-            sw.create( "FIXED_BEDGES_FIRST" );
-        }
-        if ( !MeshUtility::checkId( mesh.edgeList ) )
-        {
-            if( verbose ) err << "ERROR: edge ids were wrongly set" << std::endl;
-            if(fix){
-                if( verbose ) err << "FIXED" << std::endl;
-                sw.create( "FIXED_EDGES_ID", true );
-                MeshUtility::fixId( mesh.edgeList );
-            }
-        }
-
-
-        if ( !MeshUtility::checkIsMarkerSet( mesh.edgeList ) )
-        {
-            if( verbose ) err << "WARNING: Not all edges have marker flag set" << std::endl;
-            sw.create( "EDGE_MARKER_UNSET", true );
-            if ( fix ){
-                if(verbose)out<<"Fix boundary edges marker"<<std::endl;
-                MeshUtility::setBoundaryEdgesMarker( mesh, clog, err, verbose );
-            }
-            if ( fix && MeshUtility::checkIsMarkerSet( mesh.edgeList ) )
+            if (verbose)
             {
-                sw.unset( "EDGE_MARKER_UNSET" );
-                sw.create( "EDGE_MARKER_FIXED", true );
+                out << "Reorder edges so that boundary are first" << std::endl;
+            }
+            mesh.edgeList.reorderAccordingToFlag (EntityFlags::PHYSICAL_BOUNDARY, &Flag::testOneSet);
+
+            sw.create ( "FIXED_BEDGES_FIRST" );
+        }
+        if ( !MeshUtility::checkId ( mesh.edgeList ) )
+        {
+            if ( verbose )
+            {
+                err << "ERROR: edge ids were wrongly set" << std::endl;
+            }
+            if (fix)
+            {
+                if ( verbose )
+                {
+                    err << "FIXED" << std::endl;
+                }
+                sw.create ( "FIXED_EDGES_ID", true );
+                MeshUtility::fixId ( mesh.edgeList );
             }
         }
-        if(verbose) out << "Computing number of internal edges";
+
+
+        if ( !MeshUtility::checkIsMarkerSet ( mesh.edgeList ) )
+        {
+            if ( verbose )
+            {
+                err << "WARNING: Not all edges have marker flag set" << std::endl;
+            }
+            sw.create ( "EDGE_MARKER_UNSET", true );
+            if ( fix )
+            {
+                if (verbose)
+                {
+                    out << "Fix boundary edges marker" << std::endl;
+                }
+                MeshUtility::setBoundaryEdgesMarker ( mesh, clog, err, verbose );
+            }
+            if ( fix && MeshUtility::checkIsMarkerSet ( mesh.edgeList ) )
+            {
+                sw.unset ( "EDGE_MARKER_UNSET" );
+                sw.create ( "EDGE_MARKER_FIXED", true );
+            }
+        }
+        if (verbose)
+        {
+            out << "Computing number of internal edges";
+        }
         if ( fix )
-            Ned = bEdgesFound + MeshUtility::findInternalEdges( mesh, *bedges, iedges );
+        {
+            Ned = bEdgesFound + MeshUtility::findInternalEdges ( mesh, *bedges, iedges );
+        }
     }
     iedges.clear();
     MeshUtility::temporaryEdgeContainer_Type tmp;
-    iedges.swap(tmp);
+    iedges.swap (tmp);
 
     if ( mesh.numBEdges() != bEdgesFound )
     {
-        if( verbose ) err << "WARNING: number of found boundary edges:" << bEdgesFound
-                          << std::endl
-                          << " does not match that declared in mesh, i.e. "
-                          << mesh.numBEdges() << std::endl;
+        if ( verbose ) err << "WARNING: number of found boundary edges:" << bEdgesFound
+                               << std::endl
+                               << " does not match that declared in mesh, i.e. "
+                               << mesh.numBEdges() << std::endl;
         if ( mesh.numBEdges() == 0 )
         {
             if ( fix )
             {
-                if( verbose ) err << "FIXING" << std::endl;
-                sw.create( "FIXED_BEDGES_COUNTER", true );
-                mesh.setNumBEdges( bEdgesFound );
+                if ( verbose )
+                {
+                    err << "FIXING" << std::endl;
+                }
+                sw.create ( "FIXED_BEDGES_COUNTER", true );
+                mesh.setNumBEdges ( bEdgesFound );
             }
         }
     }
@@ -720,23 +830,26 @@ bool checkMesh3D( RegionMesh & mesh,
     {
         if ( fix )
         {
-            if( verbose ) err << "WARNING: Counter of number of edges badly set: Should be (actual number)" << Ned << std::endl
-                              << "It is instead equal to " << mesh.numEdges() << std::endl;
+            if ( verbose ) err << "WARNING: Counter of number of edges badly set: Should be (actual number)" << Ned << std::endl
+                                   << "It is instead equal to " << mesh.numEdges() << std::endl;
             err << " **FIXED" << std::endl;
-            mesh.setNumEdges( Ned );
+            mesh.setNumEdges ( Ned );
         }
     }
     UInt nbed;
-    UInt counte = MeshUtility::testDomainTopology( mesh, nbed );
+    UInt counte = MeshUtility::testDomainTopology ( mesh, nbed );
     if ( counte == 0 )
     {
-        if( verbose ) out << "**DOMAIN SURFACE IS (TOPOLOGICALLY) CLOSED" << std::endl;
+        if ( verbose )
+        {
+            out << "**DOMAIN SURFACE IS (TOPOLOGICALLY) CLOSED" << std::endl;
+        }
     }
     else
     {
-        sw.create( "DOMAIN_NOT_CLOSED", true );
-        if( verbose ) err << "WARNING: DOMAIN APPEARS TO HAVE AN OPEN BOUNDARY (TOPOLOGY CHECK)" << std::endl
-                          << "Number of inconsistent edges:" << counte << std::endl;
+        sw.create ( "DOMAIN_NOT_CLOSED", true );
+        if ( verbose ) err << "WARNING: DOMAIN APPEARS TO HAVE AN OPEN BOUNDARY (TOPOLOGY CHECK)" << std::endl
+                               << "Number of inconsistent edges:" << counte << std::endl;
     }
 
 
@@ -745,93 +858,140 @@ bool checkMesh3D( RegionMesh & mesh,
     //                                    POINTS
     //-----------------------------------------------------
 
-    if(verbose) out<<"Checking vertexes"<<std::endl;
-    UInt numVerticesFound = mesh.pointList.countElementsWithFlag(EntityFlags::VERTEX, &Flag::testOneSet);
-    if (numVerticesFound != mesh.numVertices())
+    if (verbose)
     {
-        if( verbose ) err << "warning: The number of Points with vertex flag on does not coincide with the declared one." << std::endl;
-        if(fix)
+        out << "Checking vertexes" << std::endl;
+    }
+    UInt numVerticesFound = mesh.pointList.countElementsWithFlag (EntityFlags::VERTEX, &Flag::testOneSet);
+    if (numVerticesFound != mesh.numVertices() )
+    {
+        if ( verbose )
         {
-             if( verbose ) err << "It will be fixed now" << std::endl;
-             // unset the flag. It will be remade
-             for (UInt i=0;i<mesh.numPoints();++i)mesh.point(i).unSetFlag(EntityFlags::VERTEX);
-             // Find the real vertices and set the flag
-             for (UInt i=0;i<mesh.numElements();++i)
-                 for(UInt j=0;j<mesh.numLocalVertices();++j)
-                 {
-                     ID k = mesh.element(i).point(j).localId();
-                     mesh.pointList(k).setFlag(EntityFlags::VERTEX);
-                 }
-             numVerticesFound = mesh.pointList.countElementsWithFlag(
-                             EntityFlags::VERTEX, &Flag::testOneSet);
-             mesh.setNumVertices(numVerticesFound);
-             UInt numBVerticesFound=mesh.pointList.countElementsWithFlag(
-                             EntityFlags::VERTEX|EntityFlags::PHYSICAL_BOUNDARY, &Flag::testAllSet);
-             mesh.setNumBVertices(numBVerticesFound);
-             sw.create( "FIXED_VERTICES_COUNTER", true );
+            err << "warning: The number of Points with vertex flag on does not coincide with the declared one." << std::endl;
+        }
+        if (fix)
+        {
+            if ( verbose )
+            {
+                err << "It will be fixed now" << std::endl;
+            }
+            // unset the flag. It will be remade
+            for (UInt i = 0; i < mesh.numPoints(); ++i)
+            {
+                mesh.point (i).unSetFlag (EntityFlags::VERTEX);
+            }
+            // Find the real vertices and set the flag
+            for (UInt i = 0; i < mesh.numElements(); ++i)
+                for (UInt j = 0; j < mesh.numLocalVertices(); ++j)
+                {
+                    ID k = mesh.element (i).point (j).localId();
+                    mesh.pointList (k).setFlag (EntityFlags::VERTEX);
+                }
+            numVerticesFound = mesh.pointList.countElementsWithFlag (
+                                   EntityFlags::VERTEX, &Flag::testOneSet);
+            mesh.setNumVertices (numVerticesFound);
+            UInt numBVerticesFound = mesh.pointList.countElementsWithFlag (
+                                         EntityFlags::VERTEX | EntityFlags::PHYSICAL_BOUNDARY, &Flag::testAllSet);
+            mesh.setNumBVertices (numBVerticesFound);
+            sw.create ( "FIXED_VERTICES_COUNTER", true );
         }
     }
 
     // Now that boundary faces have been correctly set we may work out
     // boundaty points
 
-    if (fix) {
-        if(verbose)out<<"Fix boundary points using boundary faces info"<<std::endl;
-        MeshUtility::fixBoundaryPoints(mesh,clog,err,verbose);
+    if (fix)
+    {
+        if (verbose)
+        {
+            out << "Fix boundary points using boundary faces info" << std::endl;
+        }
+        MeshUtility::fixBoundaryPoints (mesh, clog, err, verbose);
     }
 
-    MeshUtility::EnquireBPoint<RegionMesh> enquirebpoint( mesh );
+    MeshUtility::EnquireBPoint<RegionMesh> enquirebpoint ( mesh );
 
-    UInt foundBPoints = mesh.pointList.countElementsWithFlag(EntityFlags::PHYSICAL_BOUNDARY,
-                                                                  &Flag::testOneSet);
-    if(verbose) out<<"B Points Found "<<foundBPoints<<std::endl;
+    UInt foundBPoints = mesh.pointList.countElementsWithFlag (EntityFlags::PHYSICAL_BOUNDARY,
+                                                              &Flag::testOneSet);
+    if (verbose)
+    {
+        out << "B Points Found " << foundBPoints << std::endl;
+    }
     if ( foundBPoints == 0 || foundBPoints < mesh.storedBPoints() )
     {
-        if( verbose ) err << "ERROR Bpoints indicator not correctly set" << std::endl;
+        if ( verbose )
+        {
+            err << "ERROR Bpoints indicator not correctly set" << std::endl;
+        }
     }
     else
     {
         if ( fix )
-             sw.create( "FIXED_BOUNDARY_POINTS", true );
+        {
+            sw.create ( "FIXED_BOUNDARY_POINTS", true );
+        }
     }
 
     // Now that we are sure that (jus) boundary points are flagged as such we check if the marker id is set
-    if(verbose)out<<"Chsck point marker Ids"<<std::endl;
-    if ( ! MeshUtility::checkIsMarkerSet( mesh.pointList ) )
+    if (verbose)
+    {
+        out << "Chsck point marker Ids" << std::endl;
+    }
+    if ( ! MeshUtility::checkIsMarkerSet ( mesh.pointList ) )
     {
         if (verbose)
+        {
             err << "Points MARKER id incorrectly set" << std::endl;
+        }
 
         if ( fix )
         {
-            if( verbose ) err<<" Fixing Points Marker ID"<<std::endl<<"If unset the boundary will inherit the strongest among faces"<<std::endl;
-            if( verbose ) err<<" The internal will be set to the domain flag"<<std::endl;
-            MeshUtility::setBoundaryPointsMarker( mesh, clog, err, false );
+            if ( verbose )
+            {
+                err << " Fixing Points Marker ID" << std::endl << "If unset the boundary will inherit the strongest among faces" << std::endl;
+            }
+            if ( verbose )
+            {
+                err << " The internal will be set to the domain flag" << std::endl;
+            }
+            MeshUtility::setBoundaryPointsMarker ( mesh, clog, err, false );
             // fix marker at interior points. It takes
-            if ( ! MeshUtility::checkIsMarkerSet( mesh.pointList ) )
+            if ( ! MeshUtility::checkIsMarkerSet ( mesh.pointList ) )
             {
                 // Maybe boundary points marker is fine, this is enough
-                bool boundaryIsOk(true);
-                std::vector<point_Type const *>
-                listOfPt=mesh.pointList.extractElementsWithFlag(
-                                EntityFlags::PHYSICAL_BOUNDARY, &Flag::testOneSet);
-                for (typename std::vector<point_Type const *>::const_iterator
-                                it=listOfPt.begin();
-                                it < listOfPt.end();
-                                ++it)
-                    boundaryIsOk=boundaryIsOk | (*it)->isMarkerSet();
-                std::vector<point_Type const *>().swap(listOfPt); // save memory
-                if( verbose ) clog<<" Marker ID on boundary points is fine. Internal points may have marker unset"<<std::endl;
+                bool boundaryIsOk (true);
+                std::vector<point_Type const*>
+                listOfPt = mesh.pointList.extractElementsWithFlag (
+                               EntityFlags::PHYSICAL_BOUNDARY, &Flag::testOneSet);
+                for (typename std::vector<point_Type const*>::const_iterator
+                        it = listOfPt.begin();
+                        it < listOfPt.end();
+                        ++it)
+                {
+                    boundaryIsOk = boundaryIsOk | (*it)->isMarkerSet();
+                }
+                std::vector<point_Type const*>().swap (listOfPt); // save memory
+                if ( verbose )
+                {
+                    clog << " Marker ID on boundary points is fine. Internal points may have marker unset" << std::endl;
+                }
                 if (verbose)
+                {
                     err << "Cannot Fix Points MARKER" << std::endl;
-                if( verbose && boundaryIsOk ) err << "But boundary points are fine" << std::endl;
-                sw.create( "POINT_MARKER_UNSET", true );
+                }
+                if ( verbose && boundaryIsOk )
+                {
+                    err << "But boundary points are fine" << std::endl;
+                }
+                sw.create ( "POINT_MARKER_UNSET", true );
             }
             else
             {
                 if (verbose)
+                {
                     err << "FIXED" << std::endl;
-                sw.create( "FIXED_POINT_MARKER", true );
+                }
+                sw.create ( "FIXED_POINT_MARKER", true );
             }
         }
     }
@@ -839,51 +999,63 @@ bool checkMesh3D( RegionMesh & mesh,
 
     if ( mesh.storedBPoints() == 0 )
     {
-        if( verbose ) err << "WARNING B. Points COUNTER incorrectly set" << std::endl;
+        if ( verbose )
+        {
+            err << "WARNING B. Points COUNTER incorrectly set" << std::endl;
+        }
         if ( fix )
         {
-            MeshUtility::setBoundaryPointsCounters( mesh ) ;
-            if( verbose ) err << " FIXED" << std::endl;
-            sw.create( "FIXED_BPOINTS_COUNTER", true );
+            MeshUtility::setBoundaryPointsCounters ( mesh ) ;
+            if ( verbose )
+            {
+                err << " FIXED" << std::endl;
+            }
+            sw.create ( "FIXED_BPOINTS_COUNTER", true );
         }
     }
 
     if ( mesh.numPoints() == 0 )
     {
-        if( verbose ) err << "WARNING Points Counter unset" << std::endl;
+        if ( verbose )
+        {
+            err << "WARNING Points Counter unset" << std::endl;
+        }
         if ( fix )
         {
             mesh.numPoints() = mesh.storedPoints();
-            sw.create( "FIXED_POINTS_COUNTER", true );
+            sw.create ( "FIXED_POINTS_COUNTER", true );
         }
     }
 
-     //-----------------------------------------------------
+    //-----------------------------------------------------
     //                                   FINAL CHECKS
     //-----------------------------------------------------
-    if( verbose ) out << " ********     COUNTERS CONTENT **********************************" << std::endl
+    if ( verbose ) out << " ********     COUNTERS CONTENT **********************************" << std::endl
 
-                      << " Num Volumes    : " << mesh.numVolumes() << std::endl
-                      << " Num Vertices   : " << mesh.numVertices() << std::endl
-                      << " Num B. Vertices: " << mesh.numBVertices() << std::endl
-                      << " Num Points     : " << mesh.numPoints() << std::endl
-                      << " Num B. Points  : " << mesh.numBPoints() << std::endl
-                      << " Num Edges      : " << mesh.numEdges() << std::endl
-                      << " Num B. Edges   : " << mesh.numBEdges() << std::endl
-                      << " Num Faces      : " << mesh.numFaces() << std::endl
-                      << " Num B. Faces   : " << mesh.numBFaces() << std::endl
-                      << " ********     END COUNTERS **********************************"
-                      << std::endl;
+                           << " Num Volumes    : " << mesh.numVolumes() << std::endl
+                           << " Num Vertices   : " << mesh.numVertices() << std::endl
+                           << " Num B. Vertices: " << mesh.numBVertices() << std::endl
+                           << " Num Points     : " << mesh.numPoints() << std::endl
+                           << " Num B. Points  : " << mesh.numBPoints() << std::endl
+                           << " Num Edges      : " << mesh.numEdges() << std::endl
+                           << " Num B. Edges   : " << mesh.numBEdges() << std::endl
+                           << " Num Faces      : " << mesh.numFaces() << std::endl
+                           << " Num B. Faces   : " << mesh.numBFaces() << std::endl
+                           << " ********     END COUNTERS **********************************"
+                           << std::endl;
 
     bool eulok1 = ( 2 * mesh.numFaces() -
                     mesh.numLocalFaces() * mesh.numVolumes() -
                     mesh.numBFaces() ) == 0;
 
-    bool eulok2( true );
+    bool eulok2 ( true );
 
     if ( RegionMesh::elementShape_Type::S_shape == TETRA )
     {
-        if( verbose ) out << std::endl << "Checking Euler formulae: ";
+        if ( verbose )
+        {
+            out << std::endl << "Checking Euler formulae: ";
+        }
         eulok2 = ( mesh.numEdges() -
                    mesh.numVolumes() -
                    mesh.numVertices() -
@@ -891,35 +1063,38 @@ bool checkMesh3D( RegionMesh & mesh,
                      2 * mesh.numBVertices() ) / 4 ) == 0;
     }
 
-    if ( !( eulok1 && eulok2 ) )
+    if ( ! ( eulok1 && eulok2 ) )
     {
-        if( verbose ) err << "WARNING: The following Euler formula(s) are not satisfied"
-        << std::endl;
-        sw.create( "NOT_EULER_OK" );
+        if ( verbose ) err << "WARNING: The following Euler formula(s) are not satisfied"
+                               << std::endl;
+        sw.create ( "NOT_EULER_OK" );
     }
     else
     {
-        if( verbose ) out << std::endl << " ok." << std::endl;
+        if ( verbose )
+        {
+            out << std::endl << " ok." << std::endl;
+        }
     }
 
     if ( !eulok1 )
     {
-        if( verbose ) err << "  2*nFaces = nFacesPerVolume*nVolumes + nBoundaryFaces"
-                          << std::endl
-                          << "  2*" << mesh.numFaces() << " != " << mesh.numLocalFaces()
-                          << " * "<< mesh.numVolumes() << " + " << mesh.numBFaces()
-                          << std::endl;
+        if ( verbose ) err << "  2*nFaces = nFacesPerVolume*nVolumes + nBoundaryFaces"
+                               << std::endl
+                               << "  2*" << mesh.numFaces() << " != " << mesh.numLocalFaces()
+                               << " * " << mesh.numVolumes() << " + " << mesh.numBFaces()
+                               << std::endl;
     }
 
     if ( !eulok2 )
     {
-        if( verbose ) err << "  nEdges = nVolumes + nVertices + (3*nBoundaryFaces - 2*nBoundaryVertices)/4" << std::endl
-                          << "  " << mesh.numEdges() << " != " << mesh.numVolumes() << " + "
-                          << mesh.numVertices() << " + (3*" << mesh.numBFaces() << " - 2*"
-                          << mesh.numBVertices() << ")/4" << std::endl;
+        if ( verbose ) err << "  nEdges = nVolumes + nVertices + (3*nBoundaryFaces - 2*nBoundaryVertices)/4" << std::endl
+                               << "  " << mesh.numEdges() << " != " << mesh.numVolumes() << " + "
+                               << mesh.numVertices() << " + (3*" << mesh.numBFaces() << " - 2*"
+                               << mesh.numBVertices() << ")/4" << std::endl;
     }
 
-    mesh.setLinkSwitch( "HAS_BEEN_CHECKED" );
+    mesh.setLinkSwitch ( "HAS_BEEN_CHECKED" );
 
     return true;
 }

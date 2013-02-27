@@ -90,13 +90,13 @@ public:
       @param dataFile GetPot data file for setup the problem
       @param section the section for the Hyperbolic data
     */
-    HyperbolicData( const GetPot& dataFile, const std::string& section = "hyperbolic" );
+    HyperbolicData ( const GetPot& dataFile, const std::string& section = "hyperbolic" );
 
     //! Copy constructor.
     /*!
       @param hyperbolicData object to take a copy
     */
-    HyperbolicData( const HyperbolicData &hyperbolicData );
+    HyperbolicData ( const HyperbolicData& hyperbolicData );
 
     //! Virtual destructor
     virtual ~HyperbolicData();
@@ -110,7 +110,7 @@ public:
     /*!
       @param hyperbolicData The hyperbolicData to be copied
     */
-    HyperbolicData& operator=( const HyperbolicData& hyperbolicData );
+    HyperbolicData& operator= ( const HyperbolicData& hyperbolicData );
 
     //@}
 
@@ -122,13 +122,13 @@ public:
       @param dataFile The data file with all the data.
       @param section The global section.
     */
-    void setup( const Data_Type& dataFile, const std::string& section = "hyperbolic"  );
+    void setup ( const Data_Type& dataFile, const std::string& section = "hyperbolic"  );
 
     //! Print attributes of the class
     /*!
       @param output Stream to put the output
     */
-    void showMe( std::ostream& output = std::cout ) const;
+    void showMe ( std::ostream& output = std::cout ) const;
 
     //@}
 
@@ -139,7 +139,7 @@ public:
     /*!
       @param TimeData Boost shared_ptr to TimeData container
     */
-    inline void setTimeData( const TimePtr_Type TimeData )
+    inline void setTimeData ( const TimePtr_Type TimeData )
     {
         M_time = TimeData;
     }
@@ -148,7 +148,7 @@ public:
     /*!
       @param MeshData Boost shared_ptr to meshData container
     */
-    inline void setMeshData( const MeshPtr_Type MeshData )
+    inline void setMeshData ( const MeshPtr_Type MeshData )
     {
         M_mesh = MeshData;
     }
@@ -224,32 +224,32 @@ protected:
 // ===================================================
 
 template < typename Mesh >
-HyperbolicData<Mesh>::HyperbolicData( ):
-        // Data containers
-        M_data          ( ),
-        M_time          ( ),
-        M_mesh          ( ),
-        // Miscellaneous
-        M_verbose       ( static_cast<UInt>(0) ),
-        M_section       ( ),
-        // CFL
-        M_relaxCFL      ( static_cast<Real>(0.) )
+HyperbolicData<Mesh>::HyperbolicData( ) :
+    // Data containers
+    M_data          ( ),
+    M_time          ( ),
+    M_mesh          ( ),
+    // Miscellaneous
+    M_verbose       ( static_cast<UInt> (0) ),
+    M_section       ( ),
+    // CFL
+    M_relaxCFL      ( static_cast<Real> (0.) )
 {
 
 }
 
 // Copy constructor
 template < typename Mesh >
-HyperbolicData<Mesh>::HyperbolicData( const HyperbolicData &hyperbolicData ):
-        // Data containers
-        M_data        ( hyperbolicData.M_data ),
-        M_time        ( hyperbolicData.M_time ),
-        M_mesh        ( hyperbolicData.M_mesh ),
-        // Miscellaneous
-        M_verbose     ( hyperbolicData.M_verbose ),
-        M_section     ( hyperbolicData.M_section ),
-        // CFL
-        M_relaxCFL    ( hyperbolicData.M_relaxCFL )
+HyperbolicData<Mesh>::HyperbolicData ( const HyperbolicData& hyperbolicData ) :
+    // Data containers
+    M_data        ( hyperbolicData.M_data ),
+    M_time        ( hyperbolicData.M_time ),
+    M_mesh        ( hyperbolicData.M_mesh ),
+    // Miscellaneous
+    M_verbose     ( hyperbolicData.M_verbose ),
+    M_section     ( hyperbolicData.M_section ),
+    // CFL
+    M_relaxCFL    ( hyperbolicData.M_relaxCFL )
 {
 
 }
@@ -268,7 +268,7 @@ HyperbolicData<Mesh>::~HyperbolicData()
 // Overloading of the operator =
 template < typename Mesh >
 HyperbolicData<Mesh>&
-HyperbolicData<Mesh>::operator=( const HyperbolicData& hyperbolicData )
+HyperbolicData<Mesh>::operator= ( const HyperbolicData& hyperbolicData )
 {
     // Avoid auto-copy
     if ( this != &hyperbolicData )
@@ -294,40 +294,46 @@ HyperbolicData<Mesh>::operator=( const HyperbolicData& hyperbolicData )
 // External set up method
 template < typename Mesh >
 void
-HyperbolicData<Mesh>::setup( const Data_Type& dataFile,
-                             const std::string& section )
+HyperbolicData<Mesh>::setup ( const Data_Type& dataFile,
+                              const std::string& section )
 {
 
     M_section = section;
 
     // If data has not been set
     if ( !M_data.get() )
-        M_data.reset( new Data_Type( dataFile ) );
+    {
+        M_data.reset ( new Data_Type ( dataFile ) );
+    }
 
     // If data time has not been set
     if ( !M_time.get() )
-        M_time.reset( new Time_Type( dataFile, M_section + "/time_discretization" ) );
+    {
+        M_time.reset ( new Time_Type ( dataFile, M_section + "/time_discretization" ) );
+    }
 
     // If data mesh has not been set
     if ( !M_mesh.get() )
-        M_mesh.reset( new Mesh_Type( dataFile, M_section + "/space_discretization" ) );
+    {
+        M_mesh.reset ( new Mesh_Type ( dataFile, M_section + "/space_discretization" ) );
+    }
 
     // Miscellaneous
-    M_verbose = dataFile( ( M_section + "/miscellaneous/verbose" ).data(), 1 );
+    M_verbose = dataFile ( ( M_section + "/miscellaneous/verbose" ).data(), 1 );
 
     // CFL
-    M_relaxCFL = dataFile( (M_section + "/numerical_flux/CFL/relax").data(), 0.9 );
+    M_relaxCFL = dataFile ( (M_section + "/numerical_flux/CFL/relax").data(), 0.9 );
 
 }
 
 // Print attiributes of the class
 template < typename Mesh >
 void
-HyperbolicData<Mesh>::showMe( std::ostream& output ) const
+HyperbolicData<Mesh>::showMe ( std::ostream& output ) const
 {
     output << "Class HyperbolicData:" << std::endl;
-    M_time->showMe( output );
-    M_mesh->showMe( output );
+    M_time->showMe ( output );
+    M_mesh->showMe ( output );
     output << "Verbosity level     " << M_verbose << std::endl
            << "Section of GetPot   " << M_section << std::endl
            << "Relax CFL parameter " << M_relaxCFL << std::endl

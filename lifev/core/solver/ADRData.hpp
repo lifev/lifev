@@ -92,7 +92,7 @@ public:
     /*!
      * @param dataADR an object of type DataADR
      */
-    DataADR( const DataADR& dataADR );
+    DataADR ( const DataADR& dataADR );
 
     //@}
 
@@ -104,10 +104,10 @@ public:
      * @param dataFile data file
      * @param section section of the file
      */
-    void setup( const GetPot& dataFile, const std::string& section = "adr" );
+    void setup ( const GetPot& dataFile, const std::string& section = "adr" );
 
     //! Display the internal values
-    void showMe( std::ostream& output = std::cout ) const;
+    void showMe ( std::ostream& output = std::cout ) const;
 
     //@}
 
@@ -118,24 +118,24 @@ public:
     /*!
      * @param dataADR an object of type DataADR
      */
-    DataADR& operator=( const DataADR& dataADR );
+    DataADR& operator= ( const DataADR& dataADR );
 
     //@}
 
     //! @name Set methods
     //@{
 
-    inline void setDiffusionCoefficient( const Real& diffusionCoefficient )
+    inline void setDiffusionCoefficient ( const Real& diffusionCoefficient )
     {
         M_diffusionCoefficient = diffusionCoefficient;
     }
 
-    inline void setReactionCoefficient( const Real& reactionCoefficient )
+    inline void setReactionCoefficient ( const Real& reactionCoefficient )
     {
         M_reactionCoefficient = reactionCoefficient;
     }
 
-    inline void setSteady( const Real& steady )
+    inline void setSteady ( const Real& steady )
     {
         M_steady = steady;
     }
@@ -144,38 +144,77 @@ public:
     /*!
      * @param TimeData shared_ptr to TimeData container
      */
-    inline void setTimeDataPtr( const TimeData_ptr_type TimeDataPtr ) { M_TimeDataPtr = TimeDataPtr; }
+    inline void setTimeDataPtr ( const TimeData_ptr_type TimeDataPtr )
+    {
+        M_TimeDataPtr = TimeDataPtr;
+    }
 
-    inline void setFieldDimension( const UInt& fieldDim ) { M_solutionFieldDimension = fieldDim; }
+    inline void setFieldDimension ( const UInt& fieldDim )
+    {
+        M_solutionFieldDimension = fieldDim;
+    }
 
-    inline void setStabilizationMethod( const ADRStabilization& stabMethod ) { M_stabilizationMethod = stabMethod; }
+    inline void setStabilizationMethod ( const ADRStabilization& stabMethod )
+    {
+        M_stabilizationMethod = stabMethod;
+    }
 
-    inline void setStabilizationCoefficient( const Real& stabCoeff ) { M_stabilizationCoefficient = stabCoeff; }
+    inline void setStabilizationCoefficient ( const Real& stabCoeff )
+    {
+        M_stabilizationCoefficient = stabCoeff;
+    }
     //@}
 
     //! @name Get methods
     //@{
 
-    inline const Real& diffusionCoefficient() const { return M_diffusionCoefficient; }
+    inline const Real& diffusionCoefficient() const
+    {
+        return M_diffusionCoefficient;
+    }
 
-    inline const Real& reactionCoefficient() const { return M_reactionCoefficient; }
+    inline const Real& reactionCoefficient() const
+    {
+        return M_reactionCoefficient;
+    }
 
-    inline const Real& steady() const { return M_steady; }
+    inline const Real& steady() const
+    {
+        return M_steady;
+    }
 
     //! Get data time container
-    inline TimeData_ptr_type TimeDataPtr( void ) const { return M_TimeDataPtr; }
+    inline TimeData_ptr_type TimeDataPtr ( void ) const
+    {
+        return M_TimeDataPtr;
+    }
 
-    inline const UInt& solutionFieldDimension() const { return M_solutionFieldDimension; }
+    inline const UInt& solutionFieldDimension() const
+    {
+        return M_solutionFieldDimension;
+    }
 
-    inline const UInt& verbose() const { return M_verbose; }
+    inline const UInt& verbose() const
+    {
+        return M_verbose;
+    }
 
-    inline const std::string& solFEType() const { return M_solFEType; }
+    inline const std::string& solFEType() const
+    {
+        return M_solFEType;
+    }
 
     // inline const std::string& advectionFieldFEType() const { return M_advectionFieldFEType; }
 
-    inline const ADRStabilization& stabilizationMethod() const { return M_stabilizationMethod; }
+    inline const ADRStabilization& stabilizationMethod() const
+    {
+        return M_stabilizationMethod;
+    }
 
-    inline const Real& stabilizationCoefficient() const { return M_stabilizationCoefficient; }
+    inline const Real& stabilizationCoefficient() const
+    {
+        return M_stabilizationCoefficient;
+    }
 
     //@}
 

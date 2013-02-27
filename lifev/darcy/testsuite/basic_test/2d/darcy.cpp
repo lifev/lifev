@@ -46,11 +46,11 @@ using namespace LifeV;
 //!              Standard functions
 // ===================================================
 
-Real UOne( const Real& /* t */,
-           const Real& /* x */,
-           const Real& /* y */,
-           const Real& /* z */,
-           const ID&   /* icomp */)
+Real UOne ( const Real& /* t */,
+            const Real& /* x */,
+            const Real& /* y */,
+            const Real& /* z */,
+            const ID&   /* icomp */)
 {
     return 1.;
 }
@@ -64,8 +64,8 @@ struct darcy_nonlinear::Private
     Private() {}
 
     // Policy for scalar functions
-    typedef boost::function<Real ( const Real&, const Real&,
-                                   const Real&, const Real&, const ID& )>
+    typedef boost::function < Real ( const Real&, const Real&,
+                                     const Real&, const Real&, const ID& ) >
     fct_type;
 
     std::string data_file_name;
@@ -79,21 +79,21 @@ struct darcy_nonlinear::Private
     fct_type getUOne ( )
     {
         fct_type f;
-        f = boost::bind( &UOne, _1, _2, _3, _4, _5 );
+        f = boost::bind ( &UOne, _1, _2, _3, _4, _5 );
         return f;
     }
 
     fct_type getAnalyticalSolution ( )
     {
         fct_type f;
-        f = boost::bind( &dataProblem::analyticalSolution, _1, _2, _3, _4, _5 );
+        f = boost::bind ( &dataProblem::analyticalSolution, _1, _2, _3, _4, _5 );
         return f;
     }
 
     fct_type getAnalyticalFlux ( )
     {
         fct_type f;
-        f = boost::bind( &dataProblem::analyticalFlux, _1, _2, _3, _4, _5 );
+        f = boost::bind ( &dataProblem::analyticalFlux, _1, _2, _3, _4, _5 );
         return f;
     }
 
@@ -104,20 +104,20 @@ struct darcy_nonlinear::Private
 // ===================================================
 
 darcy_nonlinear::darcy_nonlinear ( int argc, char** argv )
-        : Members( new Private )
+    : Members ( new Private )
 {
-    GetPot command_line(argc, argv);
-    Members->data_file_name = command_line.follow("data", 2, "-f", "--file");
-    Members->xml_file_name = command_line.follow("parameterList.xml", "--xml");
+    GetPot command_line (argc, argv);
+    Members->data_file_name = command_line.follow ("data", 2, "-f", "--file");
+    Members->xml_file_name = command_line.follow ("parameterList.xml", "--xml");
 
-    GetPot dataFile( Members->data_file_name );
+    GetPot dataFile ( Members->data_file_name );
 
     Members->discretization_section = "darcy";
 
 #ifdef EPETRA_MPI
-    Members->comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
+    Members->comm.reset ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
 #else
-    Members->comm.reset( new Epetra_SerialComm() );
+    Members->comm.reset ( new Epetra_SerialComm() );
 #endif
 
 }
@@ -147,13 +147,13 @@ darcy_nonlinear::run()
     chronoTotal.start();
 
     // Reading from data file
-    GetPot dataFile( Members->data_file_name.c_str() );
+    GetPot dataFile ( Members->data_file_name.c_str() );
 
     //
     // The Darcy Solver
     //
 
-    displayer->leaderPrint( "The Darcy solver\n" );
+    displayer->leaderPrint ( "The Darcy solver\n" );
 
     // Start chronoReadAndPartitionMesh for measure the total time for the creation of the local meshes
     chronoReadAndPartitionMesh.start();
@@ -162,29 +162,29 @@ darcy_nonlinear::run()
     darcyDataPtr_Type darcyData ( new darcyData_Type );
 
     // Set up the data
-    darcyData->setup( dataFile );
+    darcyData->setup ( dataFile );
 
     // Create a Teuchos parameter list for the linear algebra.
     darcyData_Type::paramListPtr_Type linearAlgebraList = Teuchos::rcp ( new darcyData_Type::paramList_Type );
-    linearAlgebraList = Teuchos::getParametersFromXmlFile( Members->xml_file_name );
+    linearAlgebraList = Teuchos::getParametersFromXmlFile ( Members->xml_file_name );
 
     // Set the parameter list into the data darcy.
-    darcyData->setLinearAlgebraList( linearAlgebraList );
+    darcyData->setLinearAlgebraList ( linearAlgebraList );
 
     // Create the mesh file handler
     MeshData meshData;
 
     // Set up the mesh file
-    meshData.setup( dataFile,  Members->discretization_section + "/space_discretization");
+    meshData.setup ( dataFile,  Members->discretization_section + "/space_discretization");
 
     // Create the the mesh
-    regionMeshPtr_Type fullMeshPtr( new regionMesh_Type( Members->comm ) );
+    regionMeshPtr_Type fullMeshPtr ( new regionMesh_Type ( Members->comm ) );
 
     // Select if the mesh is structured or not
     if ( meshData.meshType() != "structured" )
     {
         // Set up the mesh
-        readMesh( *fullMeshPtr, meshData );
+        readMesh ( *fullMeshPtr, meshData );
     }
     else
     {
@@ -192,12 +192,12 @@ darcy_nonlinear::run()
         const std::string structuredSection = Members->discretization_section + "/space_discretization/";
 
         // Set up the structured mesh
-        regularMesh2D( *fullMeshPtr, 0,
-                       dataFile( ( structuredSection + "nx" ).data(), 4 ),
-                       dataFile( ( structuredSection + "ny" ).data(), 4 ),
-                       dataFile( ( structuredSection + "verbose" ).data(), false ),
-                       dataFile( ( structuredSection + "lx" ).data(), 1. ),
-                       dataFile( ( structuredSection + "ly" ).data(), 1. ) );
+        regularMesh2D ( *fullMeshPtr, 0,
+                        dataFile ( ( structuredSection + "nx" ).data(), 4 ),
+                        dataFile ( ( structuredSection + "ny" ).data(), 4 ),
+                        dataFile ( ( structuredSection + "verbose" ).data(), false ),
+                        dataFile ( ( structuredSection + "lx" ).data(), 1. ),
+                        dataFile ( ( structuredSection + "ly" ).data(), 1. ) );
     }
 
     // Create the local mesh ( local scope used to delete the meshPart object )
@@ -227,7 +227,7 @@ darcy_nonlinear::run()
 
     bcHandlerPtr_Type bcDarcy ( new bcHandler_Type );
 
-    setBoundaryConditions( bcDarcy );
+    setBoundaryConditions ( bcDarcy );
 
     // Stop chronoBoundaryCondition
     chronoBoundaryCondition.stop();
@@ -242,27 +242,27 @@ darcy_nonlinear::run()
     chronoFiniteElementSpace.start();
 
     // Primal solution parameters
-    const ReferenceFE* refFE_primal ( static_cast<ReferenceFE*>(NULL) );
-    const QuadratureRule* qR_primal ( static_cast<QuadratureRule*>(NULL) );
-    const QuadratureRule* bdQr_primal ( static_cast<QuadratureRule*>(NULL) );
+    const ReferenceFE* refFE_primal ( static_cast<ReferenceFE*> (NULL) );
+    const QuadratureRule* qR_primal ( static_cast<QuadratureRule*> (NULL) );
+    const QuadratureRule* bdQr_primal ( static_cast<QuadratureRule*> (NULL) );
 
     refFE_primal = &feTriaP0;
     qR_primal = &quadRuleTria4pt;
     bdQr_primal = &quadRuleSeg1pt;
 
     // Dual solution parameters
-    const ReferenceFE* refFE_dual ( static_cast<ReferenceFE*>(NULL) );
-    const QuadratureRule* qR_dual ( static_cast<QuadratureRule*>(NULL) );
-    const QuadratureRule* bdQr_dual ( static_cast<QuadratureRule*>(NULL) );
+    const ReferenceFE* refFE_dual ( static_cast<ReferenceFE*> (NULL) );
+    const QuadratureRule* qR_dual ( static_cast<QuadratureRule*> (NULL) );
+    const QuadratureRule* bdQr_dual ( static_cast<QuadratureRule*> (NULL) );
 
     refFE_dual = &feTriaRT0;
     qR_dual = &quadRuleTria4pt;
     bdQr_dual = &quadRuleSeg1pt;
 
     // Interpolate of dual solution parameters
-    const ReferenceFE* refFE_dualInterpolate ( static_cast<ReferenceFE*>(NULL) );
-    const QuadratureRule* qR_dualInterpolate ( static_cast<QuadratureRule*>(NULL) );
-    const QuadratureRule* bdQr_dualInterpolate ( static_cast<QuadratureRule*>(NULL) );
+    const ReferenceFE* refFE_dualInterpolate ( static_cast<ReferenceFE*> (NULL) );
+    const QuadratureRule* qR_dualInterpolate ( static_cast<QuadratureRule*> (NULL) );
+    const QuadratureRule* bdQr_dualInterpolate ( static_cast<QuadratureRule*> (NULL) );
 
     refFE_dualInterpolate = &feTriaP0;
     qR_dualInterpolate = &quadRuleTria4pt;
@@ -270,9 +270,9 @@ darcy_nonlinear::run()
 
     // Hybrid solution parameters
     // hybrid
-    const ReferenceFE* refFE_hybrid ( static_cast<ReferenceFE*>(NULL) );
-    const QuadratureRule* qR_hybrid ( static_cast<QuadratureRule*>(NULL) );
-    const QuadratureRule* bdQr_hybrid ( static_cast<QuadratureRule*>(NULL) );
+    const ReferenceFE* refFE_hybrid ( static_cast<ReferenceFE*> (NULL) );
+    const QuadratureRule* qR_hybrid ( static_cast<QuadratureRule*> (NULL) );
+    const QuadratureRule* bdQr_hybrid ( static_cast<QuadratureRule*> (NULL) );
 
     refFE_hybrid = &feTriaRT0Hyb;
     qR_hybrid = &quadRuleTria4pt;
@@ -311,7 +311,7 @@ darcy_nonlinear::run()
     chronoProblem.stop();
 
     // The leader process print chronoProblem
-    displayer->leaderPrint( "Time for create the problem ", chronoProblem.diff(), "\n" );
+    displayer->leaderPrint ( "Time for create the problem ", chronoProblem.diff(), "\n" );
 
     // Process the problem
 
@@ -389,25 +389,25 @@ darcy_nonlinear::run()
     vectorPtr_Type dualExporter;
 
     // Type of the exporter
-    std::string const exporterType = dataFile( "exporter/type", "none" );
+    std::string const exporterType = dataFile ( "exporter/type", "none" );
 
     // The name of the file
-    const std::string exporterFileName = dataFile( "exporter/file_name", "PressureVelocity" );
+    const std::string exporterFileName = dataFile ( "exporter/file_name", "PressureVelocity" );
 
     // Choose the exporter
 #ifdef HAVE_HDF5
-    if ( exporterType.compare("hdf5") == 0 )
+    if ( exporterType.compare ("hdf5") == 0 )
     {
-        exporter.reset( new ExporterHDF5 < regionMesh_Type > ( dataFile, exporterFileName ) );
+        exporter.reset ( new ExporterHDF5 < regionMesh_Type > ( dataFile, exporterFileName ) );
     }
     else
 #endif
     {
-        exporter.reset( new ExporterEmpty < regionMesh_Type > ( dataFile, exporterFileName ) );
+        exporter.reset ( new ExporterEmpty < regionMesh_Type > ( dataFile, exporterFileName ) );
     }
 
     // Set directory where to save the solution
-    exporter->setPostDir ( dataFile( "exporter/folder", "./" ) );
+    exporter->setPostDir ( dataFile ( "exporter/folder", "./" ) );
 
     exporter->setMeshProcId ( meshPtr, Members->comm->MyPID() );
 
@@ -416,10 +416,10 @@ darcy_nonlinear::run()
 
     // Add the primal variable to the exporter
     exporter->addVariable ( ExporterData < regionMesh_Type >::ScalarField,
-                            dataFile( "exporter/name_primal", "Pressure" ),
+                            dataFile ( "exporter/name_primal", "Pressure" ),
                             p_FESpacePtr,
                             primalExporter,
-                            static_cast<UInt>( 0 ),
+                            static_cast<UInt> ( 0 ),
                             ExporterData < regionMesh_Type >::UnsteadyRegime,
                             ExporterData < regionMesh_Type >::Cell );
 
@@ -428,19 +428,19 @@ darcy_nonlinear::run()
 
     // Add the variable to the exporter
     exporter->addVariable ( ExporterData < regionMesh_Type >::VectorField,
-                            dataFile( "exporter/name_dual", "Velocity" ),
+                            dataFile ( "exporter/name_dual", "Velocity" ),
                             uInterpolate_FESpacePtr,
                             dualExporter,
-                            static_cast<UInt>( 0 ),
+                            static_cast<UInt> ( 0 ),
                             ExporterData < regionMesh_Type >::UnsteadyRegime,
                             ExporterData < regionMesh_Type >::Cell );
 
     // Display the total number of unknowns
     displayer->leaderPrint ( "Number of unknowns : ",
-                             hybrid_FESpacePtr->map().map( Unique )->NumGlobalElements(), "\n" );
+                             hybrid_FESpacePtr->map().map ( Unique )->NumGlobalElements(), "\n" );
 
     // Export the partitioning
-    exporter->exportPID( meshPtr, Members->comm );
+    exporter->exportPID ( meshPtr, Members->comm );
 
     // Copy the initial primal to the exporter
     *primalExporter = primalField->getVector ();
@@ -449,7 +449,7 @@ darcy_nonlinear::run()
     exporter->postProcess ( darcyData->dataTimePtr()->initialTime() );
 
     // Define if the current time is the last time step.
-    bool isLastTimeStep( false );
+    bool isLastTimeStep ( false );
 
     // Define the end time
     const Real endTime = darcyData->dataTimePtr()->endTime();
@@ -497,8 +497,8 @@ darcy_nonlinear::run()
         *primalExporter = primalField->getVector ();
 
         // Interpolate the dual vector field spammed as Raviart-Thomas into a P0 vector field.
-        dualInterpolated->getVector() = uInterpolate_FESpacePtr->feToFEInterpolate(
-                *u_FESpacePtr, dualField->getVector() );
+        dualInterpolated->getVector() = uInterpolate_FESpacePtr->feToFEInterpolate (
+                                            *u_FESpacePtr, dualField->getVector() );
 
         // Copy the dual interpolated solution to the exporter.
         *dualExporter = dualInterpolated->getVector();
@@ -512,7 +512,7 @@ darcy_nonlinear::run()
     chronoProcess.stop();
 
     // The leader process print chronoProcess
-    displayer->leaderPrint( "Time for process ", chronoProcess.diff(), "\n" );
+    displayer->leaderPrint ( "Time for process ", chronoProcess.diff(), "\n" );
 
     // Compute the errors
     // For non time dependences problem the time where the errors are computed is useless,
@@ -522,82 +522,82 @@ darcy_nonlinear::run()
     chronoError.start();
 
     // Compute the error L2 norms
-    Real primalL2Norm(0), exactPrimalL2Norm(0), primalL2Error(0), primalL2RelativeError(0);
-    Real dualL2Norm(0), exactDualL2Norm(0), dualL2Error(0), dualL2RelativeError(0);
+    Real primalL2Norm (0), exactPrimalL2Norm (0), primalL2Error (0), primalL2RelativeError (0);
+    Real dualL2Norm (0), exactDualL2Norm (0), dualL2Error (0), dualL2RelativeError (0);
 
     // Norms and errors for the pressure
-    displayer->leaderPrint( "\nPRESSURE ERROR\n" );
+    displayer->leaderPrint ( "\nPRESSURE ERROR\n" );
 
     // Compute the L2 norm for the primal solution
-    primalL2Norm = p_FESpacePtr->l2Norm( primalField->getVector () );
+    primalL2Norm = p_FESpacePtr->l2Norm ( primalField->getVector () );
 
     // Display the L2 norm for the primal solution
-    displayer->leaderPrint( " L2 norm of primal unknown:            ", primalL2Norm, "\n" );
+    displayer->leaderPrint ( " L2 norm of primal unknown:            ", primalL2Norm, "\n" );
 
     // Compute the L2 norm for the analytical primal
-    exactPrimalL2Norm = p_FESpacePtr->l2NormFunction( Members->getAnalyticalSolution(),
-                                                      darcyData->dataTimePtr()->endTime() );
+    exactPrimalL2Norm = p_FESpacePtr->l2NormFunction ( Members->getAnalyticalSolution(),
+                                                       darcyData->dataTimePtr()->endTime() );
 
     // Display the L2 norm for the analytical primal
-    displayer->leaderPrint( " L2 norm of primal exact:              ", exactPrimalL2Norm, "\n" );
+    displayer->leaderPrint ( " L2 norm of primal exact:              ", exactPrimalL2Norm, "\n" );
 
     // Compute the L2 error for the primal solution
-    primalL2Error = p_FESpacePtr->l2ErrorWeighted( Members->getAnalyticalSolution(),
-                                                   primalField->getVector(),
-                                                   Members->getUOne(),
-                                                   darcyData->dataTimePtr()->endTime() );
+    primalL2Error = p_FESpacePtr->l2ErrorWeighted ( Members->getAnalyticalSolution(),
+                                                    primalField->getVector(),
+                                                    Members->getUOne(),
+                                                    darcyData->dataTimePtr()->endTime() );
 
     // Display the L2 error for the primal solution
-    displayer->leaderPrint( " L2 error of primal unknown:           ", primalL2Error, "\n" );
+    displayer->leaderPrint ( " L2 error of primal unknown:           ", primalL2Error, "\n" );
 
     // Compute the L2 realative error for the primal solution
     primalL2RelativeError = primalL2Error / exactPrimalL2Norm;
 
     // Display the L2 relative error for the primal solution
-    displayer->leaderPrint( " L2 relative error of primal unknown:  ", primalL2RelativeError, "\n" );
+    displayer->leaderPrint ( " L2 relative error of primal unknown:  ", primalL2RelativeError, "\n" );
 
     // Norms and errors for the interpolated dual
-    displayer->leaderPrint( "\nINTERPOLATED DARCY VELOCITY ERROR\n" );
+    displayer->leaderPrint ( "\nINTERPOLATED DARCY VELOCITY ERROR\n" );
 
     // Compute the L2 norm for the interpolated dual solution
-    dualL2Norm = uInterpolate_FESpacePtr->l2Norm( dualInterpolated->getVector() );
+    dualL2Norm = uInterpolate_FESpacePtr->l2Norm ( dualInterpolated->getVector() );
 
     // Display the L2 norm for the interpolated dual solution
-    displayer->leaderPrint( " L2 norm of dual unknown:              ", dualL2Norm, "\n" );
+    displayer->leaderPrint ( " L2 norm of dual unknown:              ", dualL2Norm, "\n" );
 
     // Compute the L2 norm for the analytical dual
-    exactDualL2Norm = uInterpolate_FESpacePtr->l2NormFunction( Members->getAnalyticalFlux(),
-                                                               darcyData->dataTimePtr()->endTime() );
+    exactDualL2Norm = uInterpolate_FESpacePtr->l2NormFunction ( Members->getAnalyticalFlux(),
+                                                                darcyData->dataTimePtr()->endTime() );
 
     // Display the L2 norm for the analytical dual
-    displayer->leaderPrint( " L2 norm of dual exact:                ", exactDualL2Norm, "\n" );
+    displayer->leaderPrint ( " L2 norm of dual exact:                ", exactDualL2Norm, "\n" );
 
     // Compute the L2 error for the dual solution
-    dualL2Error = uInterpolate_FESpacePtr->l2Error( Members->getAnalyticalFlux(),
-                                                    dualInterpolated->getVector(),
-                                                    darcyData->dataTimePtr()->endTime(),
-                                                    NULL );
+    dualL2Error = uInterpolate_FESpacePtr->l2Error ( Members->getAnalyticalFlux(),
+                                                     dualInterpolated->getVector(),
+                                                     darcyData->dataTimePtr()->endTime(),
+                                                     NULL );
 
     // Display the L2 error for the dual solution
-    displayer->leaderPrint( " L2 error of dual unknown:             ", dualL2Error, "\n" );
+    displayer->leaderPrint ( " L2 error of dual unknown:             ", dualL2Error, "\n" );
 
     // Compute the L2 relative error for the dual solution
     dualL2RelativeError = dualL2Error / exactDualL2Norm;
 
     // Display the L2 relative error for the dual solution
-    displayer->leaderPrint( " L2 relative error of Dual unknown:    ", dualL2RelativeError, "\n" );
+    displayer->leaderPrint ( " L2 relative error of Dual unknown:    ", dualL2RelativeError, "\n" );
 
     // Stop chronoError
     chronoError.stop();
 
     // The leader process print chronoError
-    displayer->leaderPrint( "Time for compute errors ", chronoError.diff(), "\n" );
+    displayer->leaderPrint ( "Time for compute errors ", chronoError.diff(), "\n" );
 
     // Stop chronoTotal
     chronoTotal.stop();
 
     // The leader process print chronoTotal
-    displayer->leaderPrint( "Total time for the computation ", chronoTotal.diff(), "\n" );
+    displayer->leaderPrint ( "Total time for the computation ", chronoTotal.diff(), "\n" );
 
     // Return the error, needed for the succes/failure of the test
     return primalL2Error;

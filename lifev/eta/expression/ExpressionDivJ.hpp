@@ -60,7 +60,7 @@ public:
     //! @name Public Types
     //@{
 
-	typedef ExpressionBase<ExpressionDivJ> base_Type;
+    typedef ExpressionBase<ExpressionDivJ> base_Type;
 
     //@}
 
@@ -69,10 +69,10 @@ public:
     //@{
 
     //! Empty constructor
-	ExpressionDivJ();
+    ExpressionDivJ();
 
     //! Copy constructor
-	ExpressionDivJ(const ExpressionDivJ&);
+    ExpressionDivJ (const ExpressionDivJ&);
 
     //! Destructor
     ~ExpressionDivJ();
@@ -84,7 +84,7 @@ public:
     //@{
 
     //! Display method
-	static void display(std::ostream& out= std::cout);
+    static void display (std::ostream& out = std::cout);
 
     //@}
 };
@@ -94,7 +94,7 @@ public:
   @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
 */
 inline ExpressionDivJ
-div(const ExpressionPhiJ& /*exp*/)
+div (const ExpressionPhiJ& /*exp*/)
 {
     return ExpressionDivJ();
 }

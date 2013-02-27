@@ -71,7 +71,7 @@ namespace Multiscale
  *  for 3D Fluid problem (in particular Oseen with Shape Derivatives).
  */
 class MultiscaleModelFluid3D: public virtual multiscaleModel_Type,
-                              public virtual MultiscaleInterface
+    public virtual MultiscaleInterface
 {
 public:
 
@@ -128,7 +128,7 @@ public:
     /*!
      * @param fileName Name of data file.
      */
-    void setupData( const std::string& fileName );
+    void setupData ( const std::string& fileName );
 
     //! Setup the model.
     void setupModel();
@@ -169,14 +169,14 @@ public:
      * @param boundaryID ID of the boundary interface
      * @param function boundary condition function
      */
-    void imposeBoundaryFlowRate( const multiscaleID_Type& boundaryID, const function_Type& function );
+    void imposeBoundaryFlowRate ( const multiscaleID_Type& boundaryID, const function_Type& function );
 
     //! Impose the integral of the mean normal stress on a specific boundary interface of the model
     /*!
      * @param boundaryID ID of the boundary interface
      * @param function boundary condition function
      */
-    void imposeBoundaryMeanNormalStress( const multiscaleID_Type& boundaryID, const function_Type& function );
+    void imposeBoundaryMeanNormalStress ( const multiscaleID_Type& boundaryID, const function_Type& function );
 
     //! Impose the integral of the mean total normal stress on a specific boundary interface of the model
     /*!
@@ -185,9 +185,9 @@ public:
      * @param boundaryID ID of the boundary interface
      * @param function boundary condition function
      */
-    void imposeBoundaryMeanTotalNormalStress( const multiscaleID_Type& /*boundaryID*/, const function_Type& /*function*/ )
+    void imposeBoundaryMeanTotalNormalStress ( const multiscaleID_Type& /*boundaryID*/, const function_Type& /*function*/ )
     {
-        multiscaleErrorCheck( ModelInterface, "Invalid interface [MeanTotalNormalStress] for model type [" + enum2String( M_type, multiscaleModelsMap ) +"]", M_comm->MyPID() == 0 );
+        multiscaleErrorCheck ( ModelInterface, "Invalid interface [MeanTotalNormalStress] for model type [" + enum2String ( M_type, multiscaleModelsMap ) + "]", M_comm->MyPID() == 0 );
     }
 
     //! Impose the area on a specific boundary interface of the model
@@ -197,9 +197,9 @@ public:
      * @param boundaryID ID of the boundary interface
      * @param function boundary condition function
      */
-    void imposeBoundaryArea( const multiscaleID_Type& /*boundaryID*/, const function_Type& /*function*/ )
+    void imposeBoundaryArea ( const multiscaleID_Type& /*boundaryID*/, const function_Type& /*function*/ )
     {
-        multiscaleErrorCheck( ModelInterface, "Invalid interface [Area] for model type [" + enum2String( M_type, multiscaleModelsMap ) +"]", M_comm->MyPID() == 0 );
+        multiscaleErrorCheck ( ModelInterface, "Invalid interface [Area] for model type [" + enum2String ( M_type, multiscaleModelsMap ) + "]", M_comm->MyPID() == 0 );
     }
 
     //! Get the flow rate on a specific boundary interface of the model
@@ -207,28 +207,40 @@ public:
      * @param boundaryID ID of the boundary interface
      * @return flow rate value
      */
-    Real boundaryFlowRate( const multiscaleID_Type& boundaryID ) const { return M_fluid->flux( boundaryFlag( boundaryID ) ); }
+    Real boundaryFlowRate ( const multiscaleID_Type& boundaryID ) const
+    {
+        return M_fluid->flux ( boundaryFlag ( boundaryID ) );
+    }
 
     //! Get the integral of the mean normal stress on a specific boundary interface of the model
     /*!
      * @param boundaryID ID of the boundary interface
      * @return mean normal stress value
      */
-    Real boundaryMeanNormalStress( const multiscaleID_Type& boundaryID ) const { return M_fluid->meanNormalStress( boundaryFlag( boundaryID ), *M_bc->handler() ); }
+    Real boundaryMeanNormalStress ( const multiscaleID_Type& boundaryID ) const
+    {
+        return M_fluid->meanNormalStress ( boundaryFlag ( boundaryID ), *M_bc->handler() );
+    }
 
     //! Get the integral of the mean total normal stress on a specific boundary interface of the model
     /*!
      * @param boundaryID ID of the boundary interface
      * @return mean total normal stress value
      */
-    Real boundaryMeanTotalNormalStress( const multiscaleID_Type& boundaryID ) const { return M_fluid->meanTotalNormalStress( boundaryFlag( boundaryID ), *M_bc->handler() ); }
+    Real boundaryMeanTotalNormalStress ( const multiscaleID_Type& boundaryID ) const
+    {
+        return M_fluid->meanTotalNormalStress ( boundaryFlag ( boundaryID ), *M_bc->handler() );
+    }
 
     //! Get the area on a specific boundary interface of the model
     /*!
      * @param boundaryID ID of the boundary interface
      * @return area value
      */
-    Real boundaryArea( const multiscaleID_Type& boundaryID ) const { return M_fluid->area( boundaryFlag( boundaryID ) ); }
+    Real boundaryArea ( const multiscaleID_Type& boundaryID ) const
+    {
+        return M_fluid->area ( boundaryFlag ( boundaryID ) );
+    }
 
     //! Get the variation of the flow rate (on a specific boundary interface) using the linear model
     /*!
@@ -236,7 +248,7 @@ public:
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      * @return variation of the flow rate
      */
-    Real boundaryDeltaFlowRate( const multiscaleID_Type& boundaryID, bool& solveLinearSystem );
+    Real boundaryDeltaFlowRate ( const multiscaleID_Type& boundaryID, bool& solveLinearSystem );
 
     //! Get the variation of the integral of the mean normal stress (on a specific boundary interface) using the linear model
     /*!
@@ -244,7 +256,7 @@ public:
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      * @return variation of the mean normal stress
      */
-    Real boundaryDeltaMeanNormalStress( const multiscaleID_Type& boundaryID, bool& solveLinearSystem );
+    Real boundaryDeltaMeanNormalStress ( const multiscaleID_Type& boundaryID, bool& solveLinearSystem );
 
     //! Get the variation of the integral of the mean total normal stress (on a specific boundary interface) using the linear model
     /*!
@@ -252,7 +264,7 @@ public:
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      * @return variation of the mean total normal stress
      */
-    Real boundaryDeltaMeanTotalNormalStress( const multiscaleID_Type& boundaryID, bool& solveLinearSystem );
+    Real boundaryDeltaMeanTotalNormalStress ( const multiscaleID_Type& boundaryID, bool& solveLinearSystem );
 
     //! Get the variation of the integral of the area (on a specific boundary interface) using the linear model
     /*!
@@ -262,7 +274,10 @@ public:
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      * @return variation of the area
      */
-    Real boundaryDeltaArea( const multiscaleID_Type& /*boundaryID*/, bool& /*solveLinearSystem*/ ) { return NaN; }
+    Real boundaryDeltaArea ( const multiscaleID_Type& /*boundaryID*/, bool& /*solveLinearSystem*/ )
+    {
+        return NaN;
+    }
 
     //@}
 
@@ -274,7 +289,7 @@ public:
     /*!
      * @param solution solution vector
      */
-    void setSolution( const fluidVectorPtr_Type& solution );
+    void setSolution ( const fluidVectorPtr_Type& solution );
 
     //@}
 
@@ -286,45 +301,66 @@ public:
     /*!
      * @return BCInterface container
      */
-    bcInterface_Type& bcInterface() { return *M_bc; }
+    bcInterface_Type& bcInterface()
+    {
+        return *M_bc;
+    }
 
     //! Get the density on a specific boundary face of the model
     /*!
      * @return density value
      */
-    Real boundaryDensity() const { return M_data->density(); }
+    Real boundaryDensity() const
+    {
+        return M_data->density();
+    }
 
     //! Get the viscosity on a specific boundary face of the model
     /*!
      * @return viscosity value
      */
-    Real boundaryViscosity() const { return M_data->viscosity(); }
+    Real boundaryViscosity() const
+    {
+        return M_data->viscosity();
+    }
 
     //! Get the integral of the pressure (on a specific boundary face)
     /*!
      * @param boundaryID ID of the boundary interface
      * @return pressure value
      */
-    Real boundaryPressure( const multiscaleID_Type& boundaryID ) const { return M_fluid->pressure( boundaryFlag( boundaryID ) ); }
+    Real boundaryPressure ( const multiscaleID_Type& boundaryID ) const
+    {
+        return M_fluid->pressure ( boundaryFlag ( boundaryID ) );
+    }
 
     //! Get the integral of the total pressure (on a specific boundary face)
     /*!
      * @param boundaryID ID of the boundary interface
      * @return total pressure value
      */
-    Real boundaryTotalPressure( const multiscaleID_Type& boundaryID ) const { return M_fluid->pressure( boundaryFlag( boundaryID ) ) + M_fluid->kineticNormalStress( boundaryFlag( boundaryID ) ); }
+    Real boundaryTotalPressure ( const multiscaleID_Type& boundaryID ) const
+    {
+        return M_fluid->pressure ( boundaryFlag ( boundaryID ) ) + M_fluid->kineticNormalStress ( boundaryFlag ( boundaryID ) );
+    }
 
     //! Get the data container
     /*!
      * @return Data container
      */
-    const data_Type& data() const { return *M_data; }
+    const data_Type& data() const
+    {
+        return *M_data;
+    }
 
     //! Get the solution vector
     /*!
      * @return Solution vector
      */
-    const fluidVector_Type& solution() const { return *M_solution; }
+    const fluidVector_Type& solution() const
+    {
+        return *M_solution;
+    }
 
     //@}
 
@@ -333,9 +369,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    MultiscaleModelFluid3D( const MultiscaleModelFluid3D& model );
+    MultiscaleModelFluid3D ( const MultiscaleModelFluid3D& model );
 
-    MultiscaleModelFluid3D& operator=( const MultiscaleModelFluid3D& model );
+    MultiscaleModelFluid3D& operator= ( const MultiscaleModelFluid3D& model );
 
     //@}
 
@@ -350,7 +386,7 @@ private:
      *
      * @param fileName File name of the specific model.
      */
-    void setupGlobalData( const std::string& fileName );
+    void setupGlobalData ( const std::string& fileName );
 
     //! Initialize the solution.
     void initializeSolution();
@@ -359,7 +395,7 @@ private:
     /*!
      * @param fileName File name of the specific model.
      */
-    void setupExporterImporter( const std::string& fileName );
+    void setupExporterImporter ( const std::string& fileName );
 
     //! Setup the mesh for the fluid problem
     void setupMesh();
@@ -371,7 +407,7 @@ private:
     void setupDOF();
 
     //! Setup the offset for fluxes boundary conditions
-    void setupBCOffset( const bcPtr_Type& BC );
+    void setupBCOffset ( const bcPtr_Type& BC );
 
     //! Setup the linear model
     void setupLinearModel();
@@ -380,7 +416,7 @@ private:
     void updateLinearModel();
 
     //! Solve the linear problem
-    void solveLinearModel( bool& solveLinearSystem );
+    void solveLinearModel ( bool& solveLinearSystem );
 
     //! Impose the coupling perturbation on the correct BC inside the BCHandler
     void imposePerturbation();
@@ -388,8 +424,14 @@ private:
     //! Reset all the coupling perturbations imposed on the BCHandler
     void resetPerturbation();
 
-    Real bcFunctionDeltaZero( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const UInt& /*id*/ ) { return 0.; }
-    Real bcFunctionDeltaOne ( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const UInt& /*id*/ ) { return 1.; }
+    Real bcFunctionDeltaZero ( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const UInt& /*id*/ )
+    {
+        return 0.;
+    }
+    Real bcFunctionDeltaOne ( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const UInt& /*id*/ )
+    {
+        return 1.;
+    }
 
     //@}
 

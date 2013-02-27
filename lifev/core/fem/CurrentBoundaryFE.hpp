@@ -53,29 +53,29 @@ namespace LifeV
    For more info about how update flags work, see CurrentFE.hpp
 */
 
-const flag_Type UPDATE_ONLY_TANGENTS(16384);
-const flag_Type UPDATE_ONLY_NORMALS(32768);
-const flag_Type UPDATE_ONLY_METRIC(65536);
-const flag_Type UPDATE_ONLY_DET_METRIC(131072);
-const flag_Type UPDATE_ONLY_INV_METRIC(262144);
-const flag_Type UPDATE_ONLY_W_ROOT_DET_METRIC(524288);
+const flag_Type UPDATE_ONLY_TANGENTS (16384);
+const flag_Type UPDATE_ONLY_NORMALS (32768);
+const flag_Type UPDATE_ONLY_METRIC (65536);
+const flag_Type UPDATE_ONLY_DET_METRIC (131072);
+const flag_Type UPDATE_ONLY_INV_METRIC (262144);
+const flag_Type UPDATE_ONLY_W_ROOT_DET_METRIC (524288);
 
-const flag_Type UPDATE_TANGENTS(UPDATE_ONLY_TANGENTS
-                                |UPDATE_ONLY_CELL_NODES);
-const flag_Type UPDATE_NORMALS(UPDATE_ONLY_NORMALS
-                               |UPDATE_ONLY_TANGENTS
-                               |UPDATE_ONLY_CELL_NODES);
-const flag_Type UPDATE_METRIC(UPDATE_ONLY_METRIC
-                              |UPDATE_ONLY_TANGENTS
-                              |UPDATE_ONLY_CELL_NODES);
-const flag_Type UPDATE_INV_METRIC(UPDATE_ONLY_INV_METRIC
-                                  |UPDATE_ONLY_METRIC
-                                  |UPDATE_ONLY_DET_METRIC);
-const flag_Type UPDATE_W_ROOT_DET_METRIC(UPDATE_ONLY_W_ROOT_DET_METRIC
-                                         |UPDATE_ONLY_METRIC
-                                         |UPDATE_ONLY_DET_METRIC
-                                         |UPDATE_ONLY_TANGENTS
-                                         |UPDATE_ONLY_CELL_NODES);
+const flag_Type UPDATE_TANGENTS (UPDATE_ONLY_TANGENTS
+                                 | UPDATE_ONLY_CELL_NODES);
+const flag_Type UPDATE_NORMALS (UPDATE_ONLY_NORMALS
+                                | UPDATE_ONLY_TANGENTS
+                                | UPDATE_ONLY_CELL_NODES);
+const flag_Type UPDATE_METRIC (UPDATE_ONLY_METRIC
+                               | UPDATE_ONLY_TANGENTS
+                               | UPDATE_ONLY_CELL_NODES);
+const flag_Type UPDATE_INV_METRIC (UPDATE_ONLY_INV_METRIC
+                                   | UPDATE_ONLY_METRIC
+                                   | UPDATE_ONLY_DET_METRIC);
+const flag_Type UPDATE_W_ROOT_DET_METRIC (UPDATE_ONLY_W_ROOT_DET_METRIC
+                                          | UPDATE_ONLY_METRIC
+                                          | UPDATE_ONLY_DET_METRIC
+                                          | UPDATE_ONLY_TANGENTS
+                                          | UPDATE_ONLY_CELL_NODES);
 
 /*!
   \class CurrentBoundaryFE
@@ -113,7 +113,7 @@ public:
         Overrides the method of base class CurrentFE. Actually, it calls the method of the base
         class and then performs some extra updates if upFlag contains also some boundary updates
      */
-    virtual void update(const std::vector<std::vector<Real> >& pts, flag_Type upFlag);
+    virtual void update (const std::vector<std::vector<Real> >& pts, flag_Type upFlag);
 
     /*!
       return the coordinate (x,y,z)= F(xi,eta), (F: geo mappping)
@@ -148,42 +148,42 @@ public:
     //! Values of the tangents on the quadrature points
     Real tangent (UInt tangent, UInt coordinate, UInt quadNode) const
     {
-        ASSERT(M_tangentsUpdated,"Tangents are not updated!\n");
+        ASSERT (M_tangentsUpdated, "Tangents are not updated!\n");
         return M_tangents[tangent][coordinate][quadNode];
     }
 
     //! Values of the normal on the quadrature points
     Real normal (UInt coordinate, UInt quadNode) const
     {
-        ASSERT(M_normalUpdated,"Normals are not updated!\n");
+        ASSERT (M_normalUpdated, "Normals are not updated!\n");
         return M_normal[coordinate][quadNode];
     }
 
     //! Metric tensor on the quadrature points
     Real metric (UInt iCoor, UInt jCoor, UInt quadNode) const
     {
-        ASSERT(M_metricUpdated,"Metric is not updated!\n");
+        ASSERT (M_metricUpdated, "Metric is not updated!\n");
         return M_metric[iCoor][jCoor][quadNode];
     }
 
     //! Determinant of the metric tensor on the quadrature points
     Real detMetric (UInt quadNode)
     {
-        ASSERT(M_detMetricUpdated,"Determinant of the metric is not updated!\n");
+        ASSERT (M_detMetricUpdated, "Determinant of the metric is not updated!\n");
         return M_detMetric[quadNode];
     }
 
     //! Inverse of the metric tensor on the quadrature points
     Real inverseMetric (UInt iCoor, UInt jCoor, UInt quadNode) const
     {
-        ASSERT(M_inverseMetricUpdated,"Inverse metric is not updated!\n");
+        ASSERT (M_inverseMetricUpdated, "Inverse metric is not updated!\n");
         return M_inverseMetric[iCoor][jCoor][quadNode];
     }
 
     //! Square root of the determinant of the metric times the weight on the quadrature points
     Real wRootDetMetric (UInt quadNode) const
     {
-        ASSERT(M_wRootDetMetricUpdated,"Weighted metric determinant is not updated!\n");
+        ASSERT (M_wRootDetMetricUpdated, "Weighted metric determinant is not updated!\n");
         return M_wRootDetMetric[quadNode];
     }
 
@@ -208,15 +208,15 @@ protected:
     void computeWRootDetMetric ();
 
     //! Geometric map in the geometric nodes (different from M_phi only for Hybrid elements)
-    boost::multi_array<Real,2> M_phiGeo;
+    boost::multi_array<Real, 2> M_phiGeo;
 
     //! Normal and tangent vectors, metric tensor and weighted measure in the quadrature nodes
-    boost::multi_array<Real,3> M_tangents;
-    boost::multi_array<Real,2> M_normal;
-    boost::multi_array<Real,3> M_metric;
-    boost::multi_array<Real,1> M_detMetric;
-    boost::multi_array<Real,3> M_inverseMetric;
-    boost::multi_array<Real,1> M_wRootDetMetric;
+    boost::multi_array<Real, 3> M_tangents;
+    boost::multi_array<Real, 2> M_normal;
+    boost::multi_array<Real, 3> M_metric;
+    boost::multi_array<Real, 1> M_detMetric;
+    boost::multi_array<Real, 3> M_inverseMetric;
+    boost::multi_array<Real, 1> M_wRootDetMetric;
 
     //! Check variables
     bool M_tangentsUpdated;
@@ -228,31 +228,35 @@ protected:
 };
 
 template <typename FunctorType>
-Real CurrentBoundaryFE::integral(const FunctorType& f) const
+Real CurrentBoundaryFE::integral (const FunctorType& f) const
 {
-    ASSERT_PRE(M_quadNodesUpdated && M_wRootDetMetricUpdated,"Error! Quadrature nodes and Jacobian Determinant have not been updated yet.\n");
+    ASSERT_PRE (M_quadNodesUpdated && M_wRootDetMetricUpdated, "Error! Quadrature nodes and Jacobian Determinant have not been updated yet.\n");
     Real result = 0.0;
-    for (UInt iq(0); iq<M_nbQuadPt; ++iq)
-        result += f(M_quadNodes[iq][0],M_quadNodes[iq][1],M_quadNodes[iq][2])*M_wRootDetMetric[iq];
+    for (UInt iq (0); iq < M_nbQuadPt; ++iq)
+    {
+        result += f (M_quadNodes[iq][0], M_quadNodes[iq][1], M_quadNodes[iq][2]) * M_wRootDetMetric[iq];
+    }
 
     return result;
 }
 
 template <typename FunctorType>
-Real CurrentBoundaryFE::normalIntegral(const FunctorType& f) const
+Real CurrentBoundaryFE::normalIntegral (const FunctorType& f) const
 {
-    ASSERT_PRE(M_quadNodesUpdated && M_normalUpdated && M_wRootDetMetricUpdated,"Error! Normal and Jacobian Determinant have not been updated yet.\n");
+    ASSERT_PRE (M_quadNodesUpdated && M_normalUpdated && M_wRootDetMetricUpdated, "Error! Normal and Jacobian Determinant have not been updated yet.\n");
     Real result = 0.0;
 
     Real tmp;
-    Real* returnValues = new Real[M_nbCoor+1];
-    for (UInt iq(0); iq<M_nbQuadPt; ++iq)
+    Real* returnValues = new Real[M_nbCoor + 1];
+    for (UInt iq (0); iq < M_nbQuadPt; ++iq)
     {
         tmp = 0;
-        f(M_quadNodes[iq][0],M_quadNodes[iq][1],M_quadNodes[iq][2],returnValues);
-        for (UInt iCoor(0); iCoor<=M_nbCoor; ++iCoor)
-            tmp += returnValues[iCoor]*M_normal[iCoor][iq];
-        result += tmp*M_wRootDetMetric[iq];
+        f (M_quadNodes[iq][0], M_quadNodes[iq][1], M_quadNodes[iq][2], returnValues);
+        for (UInt iCoor (0); iCoor <= M_nbCoor; ++iCoor)
+        {
+            tmp += returnValues[iCoor] * M_normal[iCoor][iq];
+        }
+        result += tmp * M_wRootDetMetric[iq];
     }
     delete[] returnValues;
     return result;

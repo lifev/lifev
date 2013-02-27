@@ -65,8 +65,8 @@ public:
     //! @name Public Types
     //@{
 
-    typedef boost::function<Real ( Real const& x, Real const& y, Real const& z, Real const&, ID const& id , Real const&)> region_Type;
-    typedef boost::function<Real ( Real const& x, Real const& y, Real const& z, Real const&, ID const& id)> region1_Type;
+    typedef boost::function<Real ( Real const& x, Real const& y, Real const& z, Real const&, ID const& id , Real const&) > region_Type;
+    typedef boost::function<Real ( Real const& x, Real const& y, Real const& z, Real const&, ID const& id) > region1_Type;
 
     //@}
 
@@ -76,7 +76,7 @@ public:
 
     HeartFunctors();
 
-    HeartFunctors( GetPot& dataFile );
+    HeartFunctors ( GetPot& dataFile );
 
     virtual ~HeartFunctors() {}
     //@}
@@ -92,7 +92,7 @@ public:
      */
     Real setAppliedCurrent ( const Real& x, const Real& y, const Real& z, const Real& t ) const;
 
-    Real setAppliedCurrentZygote(const double& t, const double& x, const double& y, const double& z, const ID& /*i*/, const markerID_Type& ref );
+    Real setAppliedCurrentZygote (const double& t, const double& x, const double& y, const double& z, const ID& /*i*/, const markerID_Type& ref );
 
     Real setStimulus ( const Real& t, const Real& x, const Real& y, const Real& z, const ID&   id) const;
 
@@ -105,21 +105,21 @@ public:
      * Reduces the conductivity in a sphere
      *
      */
-    Real setReducedConductivitySphere( const Real& x, const Real& y, const Real& z, const Real& /*t*/, const ID&   id, const Real& sigma) const;
+    Real setReducedConductivitySphere ( const Real& x, const Real& y, const Real& z, const Real& /*t*/, const ID&   id, const Real& sigma) const;
 
     /**
      *
      * Reduces the conductivity in a cylinder
      *
      */
-    Real setReducedConductivityCylinder( const Real& x, const Real& y, const Real& z, const Real& /*t*/, const ID&   id, const Real& sigma ) const;
+    Real setReducedConductivityCylinder ( const Real& x, const Real& y, const Real& z, const Real& /*t*/, const ID&   id, const Real& sigma ) const;
 
-    Real setReducedConductivityBox( const Real& x, const Real& y, const Real& z, const Real& /*t*/, const ID& id, const Real& sigma ) const;
+    Real setReducedConductivityBox ( const Real& x, const Real& y, const Real& z, const Real& /*t*/, const ID& id, const Real& sigma ) const;
 
 
-    Real setInitialScalar( const Real& t, const Real& x, const Real& y, const Real& z, const ID& id );
+    Real setInitialScalar ( const Real& t, const Real& x, const Real& y, const Real& z, const ID& id );
 
-    Real setZeroScalar( const Real& t, const Real& x, const Real& y, const Real& z , const ID& id );
+    Real setZeroScalar ( const Real& t, const Real& x, const Real& y, const Real& z , const ID& id );
     //@}
 
 
@@ -235,9 +235,9 @@ private:
 
 
 
-    HeartFunctors( const HeartFunctors& heartFunctors );
+    HeartFunctors ( const HeartFunctors& heartFunctors );
 
-    HeartFunctors& operator=( const HeartFunctors& heartFunctors );
+    HeartFunctors& operator= ( const HeartFunctors& heartFunctors );
 
     //@}
 

@@ -80,7 +80,7 @@ namespace ExpressionAssembly
 */
 template<typename MeshType, typename MapType, UInt SpaceDim, UInt FieldDim>
 class ExpressionInterpolateGradient
-	: public ExpressionBase<ExpressionInterpolateGradient < MeshType,MapType,SpaceDim,FieldDim > >
+    : public ExpressionBase<ExpressionInterpolateGradient < MeshType, MapType, SpaceDim, FieldDim > >
 {
 public:
 
@@ -88,16 +88,16 @@ public:
     //@{
 
     // Base class, used only to make the code cleaner
-	typedef ExpressionBase<ExpressionInterpolateGradient < MeshType,MapType,SpaceDim,FieldDim > > base_Type;
+    typedef ExpressionBase<ExpressionInterpolateGradient < MeshType, MapType, SpaceDim, FieldDim > > base_Type;
 
     //! Type of the finite element space
-	typedef ETFESpace<MeshType,MapType,SpaceDim,FieldDim> fespace_Type;
+    typedef ETFESpace<MeshType, MapType, SpaceDim, FieldDim> fespace_Type;
 
     //! Type for the pointer on the finite element space
-	typedef boost::shared_ptr<fespace_Type> fespacePtr_Type;
+    typedef boost::shared_ptr<fespace_Type> fespacePtr_Type;
 
     //! Data vector type
-	typedef VectorEpetra vector_Type;
+    typedef VectorEpetra vector_Type;
 
     //@}
 
@@ -106,15 +106,15 @@ public:
     //@{
 
     //! Constructor using the finite element space and the data vector
-	ExpressionInterpolateGradient(fespacePtr_Type fespace, const vector_Type& vector)
-	: base_Type(), M_fespace(fespace), M_vector(vector) {}
+    ExpressionInterpolateGradient (fespacePtr_Type fespace, const vector_Type& vector)
+        : base_Type(), M_fespace (fespace), M_vector (vector) {}
 
     //! Copy constructor
-	ExpressionInterpolateGradient(const ExpressionInterpolateGradient<MeshType,MapType,SpaceDim,FieldDim>& expr)
-	: base_Type(), M_fespace(expr.M_fespace), M_vector(expr.M_vector) {}
+    ExpressionInterpolateGradient (const ExpressionInterpolateGradient<MeshType, MapType, SpaceDim, FieldDim>& expr)
+        : base_Type(), M_fespace (expr.M_fespace), M_vector (expr.M_vector) {}
 
     //! Destructor
-    ~ExpressionInterpolateGradient(){}
+    ~ExpressionInterpolateGradient() {}
 
     //@}
 
@@ -123,8 +123,10 @@ public:
     //@{
 
     //! Display method
-	static void display(std::ostream& out= std::cout)
-	{ out << "interpolated_grad[" << FieldDim << "] ";}
+    static void display (std::ostream& out = std::cout)
+    {
+        out << "interpolated_grad[" << FieldDim << "] ";
+    }
 
     //@}
 
@@ -133,10 +135,16 @@ public:
     //@{
 
     //! Getter for the finite element space
-	fespacePtr_Type fespace() const { return M_fespace; }
+    fespacePtr_Type fespace() const
+    {
+        return M_fespace;
+    }
 
     //! Getter for the data vector
-	const vector_Type vector() const { return M_vector; }
+    const vector_Type vector() const
+    {
+        return M_vector;
+    }
 
     // @}
 
@@ -151,10 +159,10 @@ private:
     //@}
 
     // Storage for the finite element space
-	fespacePtr_Type M_fespace;
+    fespacePtr_Type M_fespace;
 
     // Storage for the data vector
-	vector_Type M_vector;
+    vector_Type M_vector;
 };
 
 //! Simple function to be used in the construction of an expression
@@ -179,13 +187,13 @@ private:
 
 */
 template<typename MeshType, typename MapType, UInt SpaceDim, UInt FieldDim>
-inline ExpressionInterpolateGradient<MeshType,MapType,SpaceDim,FieldDim>
-grad(
-	boost::shared_ptr< ETFESpace<MeshType,MapType,SpaceDim,FieldDim> > fespace,
-	const VectorEpetra& vector
+inline ExpressionInterpolateGradient<MeshType, MapType, SpaceDim, FieldDim>
+grad (
+    boost::shared_ptr< ETFESpace<MeshType, MapType, SpaceDim, FieldDim> > fespace,
+    const VectorEpetra& vector
 )
 {
-	return ExpressionInterpolateGradient<MeshType,MapType,SpaceDim,FieldDim>(fespace,vector);
+    return ExpressionInterpolateGradient<MeshType, MapType, SpaceDim, FieldDim> (fespace, vector);
 }
 
 

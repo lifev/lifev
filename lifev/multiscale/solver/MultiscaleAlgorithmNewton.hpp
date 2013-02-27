@@ -80,7 +80,7 @@ public:
     /*!
      * @param FileName Name of the data file.
      */
-    void setupData( const std::string& fileName );
+    void setupData ( const std::string& fileName );
 
     //! Perform sub-iteration on the coupling variables
     void subIterate();
@@ -92,9 +92,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    MultiscaleAlgorithmNewton( const MultiscaleAlgorithmNewton& algorithm );
+    MultiscaleAlgorithmNewton ( const MultiscaleAlgorithmNewton& algorithm );
 
-    MultiscaleAlgorithmNewton& operator=( const MultiscaleAlgorithmNewton& algorithm );
+    MultiscaleAlgorithmNewton& operator= ( const MultiscaleAlgorithmNewton& algorithm );
 
     //@}
 

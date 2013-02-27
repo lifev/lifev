@@ -95,13 +95,16 @@ public:
      * @param modelID ID of the model.
      * @return true if the model is owned by the process, false otherwise
      */
-    bool myModel( const UInt& modelID ) const;
+    bool myModel ( const UInt& modelID ) const;
 
     //! Determine the number of model owned by the process
     /*!
      * @return number of model owned by the process
      */
-    UInt myModelsNumber() const { return M_commContainer.size(); }
+    UInt myModelsNumber() const
+    {
+        return M_commContainer.size();
+    }
 
     //! Display some information about the communicators
     void showMe();
@@ -116,7 +119,10 @@ public:
     /*!
      * @param comm Epetra communicator
      */
-    void setCommunicator( const multiscaleCommPtr_Type& comm ) { M_comm = comm; }
+    void setCommunicator ( const multiscaleCommPtr_Type& comm )
+    {
+        M_comm = comm;
+    }
 
     //! Add a group of models
     /*!
@@ -125,7 +131,7 @@ public:
      * @param load percentage load of the model (-1 means each model on a different processor).
      * @param modelsIDList list of models.
      */
-    void addGroup( const Real& load, const modelsID_Type& modelsID );
+    void addGroup ( const Real& load, const modelsID_Type& modelsID );
 
     //@}
 
@@ -138,7 +144,10 @@ public:
      * @param modelID ID of the model.
      * @return communicator.
      */
-    const multiscaleCommPtr_Type& modelCommunicator( const UInt& modelID ) const { return M_commContainer.find( modelID )->second; }
+    const multiscaleCommPtr_Type& modelCommunicator ( const UInt& modelID ) const
+    {
+        return M_commContainer.find ( modelID )->second;
+    }
 
     //@}
 
@@ -147,9 +156,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    MultiscaleCommunicatorsManager( const MultiscaleCommunicatorsManager& solver );
+    MultiscaleCommunicatorsManager ( const MultiscaleCommunicatorsManager& solver );
 
-    MultiscaleCommunicatorsManager& operator=( const MultiscaleCommunicatorsManager& solver );
+    MultiscaleCommunicatorsManager& operator= ( const MultiscaleCommunicatorsManager& solver );
 
     //@}
 
@@ -157,9 +166,9 @@ private:
     //! @name Private Methods
     //@{
 
-    void parallelProcessesDistribution( std::vector<Real>& localNumberOfProcesses, const Int& numberOfProcesses );
+    void parallelProcessesDistribution ( std::vector<Real>& localNumberOfProcesses, const Int& numberOfProcesses );
 
-    void parallelProcessesAssignment( std::vector< std::vector< Int > >& parallelProcesses, const std::vector<Real>& localNumberOfProcesses, const Int& numberOfProcesses );
+    void parallelProcessesAssignment ( std::vector< std::vector< Int > >& parallelProcesses, const std::vector<Real>& localNumberOfProcesses, const Int& numberOfProcesses );
 
     //! Round a real number to the closest integer
     /*!
@@ -167,7 +176,10 @@ private:
      * @param value Real value
      * @return rounded integer value
      */
-    Int roundToInteger( const Real& value ) const { return static_cast<Int> ( std::floor( value + 0.5 ) ); }
+    Int roundToInteger ( const Real& value ) const
+    {
+        return static_cast<Int> ( std::floor ( value + 0.5 ) );
+    }
 
     //@}
 

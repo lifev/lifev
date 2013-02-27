@@ -60,8 +60,8 @@
  @author A. Fumagalli <alessio.fumagalli@mail.polimi.it>
  */
 class fefct
-//     :
-//     public LifeV::Application
+    //     :
+    //     public LifeV::Application
 {
 public:
 
@@ -69,8 +69,8 @@ public:
      */
     //@{
 
-    fefct( int argc,
-           char** argv );
+    fefct ( int argc,
+            char** argv );
 
     ~fefct()
     {}

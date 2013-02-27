@@ -122,8 +122,8 @@ public:
     //! @name Constructor and Destructor
     //@{
 
-    MonolithicBlockComposedDNND( const std::vector<Int>& flag, const std::vector<Int>& order ):
-            super_Type( flag, order )
+    MonolithicBlockComposedDNND ( const std::vector<Int>& flag, const std::vector<Int>& order ) :
+        super_Type ( flag, order )
     {
     }
 
@@ -149,12 +149,12 @@ public:
       @param numerationInterface vector containing the correspondence of the Lagrange multipliers with the interface dofs
       @param timestep the timestep chosen
      */
-    void coupler(mapPtr_Type&      map,
-                 const std::map<ID, ID>& locDofMap,
-                 const vectorPtr_Type&    numerationInterface,
-                 const Real& timeStep,
-                 const Real& coefficient,
-                 const Real& rescaleFactor);
+    void coupler (mapPtr_Type&      map,
+                  const std::map<ID, ID>& locDofMap,
+                  const vectorPtr_Type&    numerationInterface,
+                  const Real& timeStep,
+                  const Real& coefficient,
+                  const Real& rescaleFactor);
 
     //@}
     //!@name Factory Method
@@ -164,9 +164,9 @@ public:
     {
         const Int couplingsDNND[] = { 8, 4, 2, 8, 1, 2 };
         const Int order[] = { MonolithicBlockComposedNN::fluid1, MonolithicBlockComposedNN::solid1, MonolithicBlockComposedNN::fluid2, MonolithicBlockComposedNN::solid2};
-        const std::vector<Int> couplingVectorDNND(couplingsDNND, couplingsDNND+6);
-        const std::vector<Int> orderVector(order, order+4);
-        return new MonolithicBlockComposedDNND(couplingVectorDNND, orderVector);
+        const std::vector<Int> couplingVectorDNND (couplingsDNND, couplingsDNND + 6);
+        const std::vector<Int> orderVector (order, order + 4);
+        return new MonolithicBlockComposedDNND (couplingVectorDNND, orderVector);
     }
 
     //@}

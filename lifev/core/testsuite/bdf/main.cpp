@@ -80,17 +80,17 @@ using namespace LifeV;
 // ===================================================
 //! Main
 // ===================================================
-int main(int argc, char** argv)
+int main (int argc, char** argv)
 {
 
 #ifdef HAVE_MPI
-    MPI_Init(&argc, &argv);
+    MPI_Init (&argc, &argv);
     std::cout << "MPI Initialization" << std::endl;
 #endif
 
-    test_bdf bdf_t( argc, argv );
+    test_bdf bdf_t ( argc, argv );
     bdf_t.run();
-    bool check(true);
+    bool check (true);
     check = bdf_t.check();
 
 
@@ -100,7 +100,11 @@ int main(int argc, char** argv)
 #endif
 
     if (check)
-        return( EXIT_SUCCESS );
+    {
+        return ( EXIT_SUCCESS );
+    }
     else
-        return( EXIT_FAILURE );
+    {
+        return ( EXIT_FAILURE );
+    }
 }

@@ -43,7 +43,8 @@
 
 #include <lifev/core/LifeV.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! BCIdentifierBase - Base class holding DOF identifiers for implementing BC
 
@@ -65,13 +66,13 @@ public:
         Creates an BCIdentifier with a given ID
         @param i Usually the id of the DOF, or the id of a boundary face, etc...
     */
-    explicit BCIdentifierBase( ID const & i ) : M_id( i )
+    explicit BCIdentifierBase ( ID const& i ) : M_id ( i )
     {
         // Nothing to be done here
     }
 
     //! Copy constructor
-    BCIdentifierBase( BCIdentifierBase const & id );
+    BCIdentifierBase ( BCIdentifierBase const& id );
 
     //! Destructor
     virtual ~BCIdentifierBase()
@@ -85,7 +86,7 @@ public:
     //@{
 
     //! Display method
-    virtual void showMe( std::ostream & output = std::cout ) const;
+    virtual void showMe ( std::ostream& output = std::cout ) const;
 
     //@}
 
@@ -147,7 +148,7 @@ public:
         @return Boolean which is true if the ID of the first BCIdentifier is smaller
                 than the ID of the second BCIdentifier
      */
-    bool operator() ( boost::shared_ptr<BCIdentifierBase> const & i1, boost::shared_ptr<BCIdentifierBase> const & i2 ) const
+    bool operator() ( boost::shared_ptr<BCIdentifierBase> const& i1, boost::shared_ptr<BCIdentifierBase> const& i2 ) const
     {
         return ( i1.get()->id() < i2.get()->id() );
     }
@@ -161,7 +162,7 @@ public:
     @param second The second BCIdentifier
     @return A bool which is 1 if the ID of the two BCIdentifier objects are the same
  */
-inline bool operator==( const BCIdentifierBase& first, const BCIdentifierBase& second )
+inline bool operator== ( const BCIdentifierBase& first, const BCIdentifierBase& second )
 {
     return first.id() == second.id();
 }
@@ -194,17 +195,17 @@ public:
         @paramx y y-coordinate of the node where this BC applies
         @paramx z z-coordinate of the node where this BC applies
      */
-    BCIdentifierEssential( const ID& id, const Real& x, const Real& y, const Real& z ) :
-            BCIdentifierBase( id ),
-            M_x( x ),
-            M_y( y ),
-            M_z( z )
+    BCIdentifierEssential ( const ID& id, const Real& x, const Real& y, const Real& z ) :
+        BCIdentifierBase ( id ),
+        M_x ( x ),
+        M_y ( y ),
+        M_z ( z )
     {
         // Nothing to be done here
     }
 
     //! Copy Constructor
-    BCIdentifierEssential( BCIdentifierEssential const & id );
+    BCIdentifierEssential ( BCIdentifierEssential const& id );
 
     //@}
 
@@ -212,7 +213,7 @@ public:
     //@{
 
     //! Display method
-    virtual void showMe( std::ostream& output = std::cout ) const;
+    virtual void showMe ( std::ostream& output = std::cout ) const;
 
     //@}
 
@@ -281,16 +282,16 @@ public:
         @param i The number of the boundary face
         @param localToGlobal A vector holding the local-to-global map on this face
     */
-    BCIdentifierNatural( const ID& i, const std::vector<ID>& localToGlobal );
+    BCIdentifierNatural ( const ID& i, const std::vector<ID>& localToGlobal );
 
     //! Constructor given the ID
     /*!
         @param id The ID of the dof
     */
-    explicit BCIdentifierNatural( const ID& id );
+    explicit BCIdentifierNatural ( const ID& id );
 
     //! Copy Constructor
-    BCIdentifierNatural( BCIdentifierNatural const & id );
+    BCIdentifierNatural ( BCIdentifierNatural const& id );
 
     //! Destructor
     virtual ~BCIdentifierNatural()
@@ -304,7 +305,7 @@ public:
     //@{
 
     //! Display method
-    virtual void showMe(std::ostream& output = std::cout ) const;
+    virtual void showMe (std::ostream& output = std::cout ) const;
 
     //@}
 
@@ -315,7 +316,7 @@ public:
     /*!
         @param i The local DOF in the face
     */
-    ID boundaryLocalToGlobalMap( const ID& i ) const
+    ID boundaryLocalToGlobalMap ( const ID& i ) const
     {
         return M_localToGlobal [i ];
     }
