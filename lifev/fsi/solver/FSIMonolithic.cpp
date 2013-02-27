@@ -420,6 +420,7 @@ evalResidual ( const vector_Type& sol, const vectorPtr_Type& rhs, vector_Type& r
     }
     else
     {
+
         // this works for the linear elastic case where the matrix is not touched
         res = * (M_monolithicMatrix->matrix() ) * sol;
 
@@ -536,6 +537,43 @@ void FSIMonolithic::finalizeRestart( )
     M_ALETimeAdvance->updateRHSFirstDerivative ( M_data->dataFluid()->dataTime()->timeStep() );
 }
 
+void FSIMonolithic::initializeMonolithicOperator( std::vector< vectorPtr_Type> u0,
+                                                  std::vector< vectorPtr_Type> ds0,
+                                                  std::vector< vectorPtr_Type> df0)
+{
+    UInt i;
+    if (!u0.size()||!ds0.size()||!df0.size())
+    {
+        if ( this->isFluid() )
+        {
+            for(i=0; i < M_fluidTimeAdvance->size(); ++i)
+            {
+                vectorPtr_Type vec(new vector_Type( *M_monolithicMap ));
+                u0.push_back(vec);// couplingVariableMap()
+            }
+            for(i=0; i < M_ALETimeAdvance->size(); ++i)
+            {
+                vectorPtr_Type vec(new vector_Type( meshMotion().getMap() ));
+                df0.push_back(vec);// couplingVariableMap()
+            }
+        }
+        if ( this->isSolid() )
+        {
+            for(i=0; i<M_solidTimeAdvance->size(); ++i)
+            {
+                vectorPtr_Type vec(new vector_Type( *M_monolithicMap ));
+                ds0.push_back(vec);// couplingVariableMap()
+            }
+        }
+        initializeTimeAdvance(u0, ds0, df0);
+        //  M_oper->initializeBDF(*u0);
+    }
+    else
+    {
+        initializeTimeAdvance(u0, ds0, df0); // couplingVariableMap()//copy
+    }
+
+}
 
 void
 FSIMonolithic::
@@ -668,7 +706,6 @@ FSIMonolithic::assembleSolidBlock ( UInt iter, const vector_Type& solution )
             matrixBlockView_Type structurePart(*(globalMatrixWithOnlyStructure->block(3,3)));
 
             structurePart.setup(UInt(0), UInt(0), UInt(3*M_dFESpace->dof().numTotalDof()), UInt(3*M_dFESpace->dof().numTotalDof()), rawPointerToMatrix);
-            //structurePart.showMe();
 
             using namespace MatrixEpetraStructuredUtility;
 
@@ -676,9 +713,6 @@ FSIMonolithic::assembleSolidBlock ( UInt iter, const vector_Type& solution )
             copyBlock( structurePart, *(globalMatrixWithOnlyStructure->block(3,3)) );
 
             globalMatrixWithOnlyStructure->globalAssemble();
-
-            //Checking out the global matrix
-            //globalMatrixWithOnlyStructure->spy("view");
 
             //Summing the local matrix into the global
             *M_solidBlockPrec += *globalMatrixWithOnlyStructure;

@@ -130,10 +130,10 @@ FSIMonolithicGI::evalResidual ( vector_Type&       res,
     vector_Type meshVelocityRepeated ( this->M_ALETimeAdvance->nextFirstDerivative ( *meshDisp ), Repeated );
     vector_Type interpolatedMeshVelocity (this->M_uFESpace->map() );
 
-    interpolateVelocity ( meshVelocityRepeated, interpolatedMeshVelocity );
+    interpolateVelocity( meshVelocityRepeated, interpolatedMeshVelocity );
+    vectorPtr_Type fluid( new vector_Type( M_uFESpace->map() ) );
+    M_beta->subset( disp,0 );
 
-    vectorPtr_Type fluid ( new vector_Type ( M_uFESpace->map() ) );
-    M_beta->subset ( disp, 0 );
     *M_beta -= interpolatedMeshVelocity; // convective term, u^(n+1) - w^(n+1)
 
     assembleSolidBlock ( iter, disp );
@@ -181,7 +181,7 @@ FSIMonolithicGI::evalResidual ( vector_Type&       res,
 
     M_monolithicMatrix->GlobalAssemble();
 
-    super_Type::evalResidual ( disp, M_rhsFull, res, false );
+    super_Type::evalResidual( disp, M_rhsFull, res, false );
 
     //case for exponential and neohookean
     if ( !( M_data->dataSolid()->solidType().compare( "exponential" ) && M_data->dataSolid()->solidType().compare( "neoHookean" ) ) )

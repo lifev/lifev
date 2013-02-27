@@ -484,6 +484,8 @@ public:
 
     void finalizeRestart();
 
+    void initializeMonolithicOperator( std::vector< vectorPtr_Type> u0, std::vector< vectorPtr_Type> ds0, std::vector< vectorPtr_Type> df0);
+
     //@}
 
 

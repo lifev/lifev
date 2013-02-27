@@ -794,10 +794,11 @@ FSIOperator::initializeSolid( vectorPtr_Type displacement,
 void
 FSIOperator::moveMesh ( const vector_Type& dep )
 {
-    displayer().leaderPrint ("FSI-  Moving the mesh ...                      ");
-    M_fluidLocalMesh->meshTransformer().moveMesh (dep,  this->M_mmFESpace->dof().numTotalDof() );
-    displayer().leaderPrint ( "done\n" );
-    M_fluid->setRecomputeMatrix ( true );
+    displayer().leaderPrint("FSI-  Moving the mesh ...                      ");
+    M_fluidLocalMesh->meshTransformer().moveMesh(dep,  this->M_mmFESpace->dof().numTotalDof());
+    displayer().leaderPrint( "done\n" );
+
+    M_fluid->setRecomputeMatrix( true );
 }
 
 void FSIOperator::createInterfaceMaps ( std::map<ID, ID> const& locDofMap )
