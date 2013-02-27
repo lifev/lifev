@@ -794,7 +794,7 @@ Real PostProcessingBoundary<MeshType>::kineticNormalStress( const VectorType& ve
     for ( std::list<ID>::iterator j(facetList.begin()); j != facetList.end(); ++j )
     {
         // Updating quadrature data on the current facet
-        M_currentBdFEPtrVector[feSpace]->updateMeasNormalQuadPt( M_meshPtr->boundaryFacet( *j ) );
+        M_currentBdFEPtrVector[feSpace]->update( M_meshPtr->boundaryFacet( *j ), UPDATE_NORMALS | UPDATE_W_ROOT_DET_METRIC  );
 
         // Computing the area
         areaScatter += M_currentBdFEPtrVector[0]->measure();
@@ -813,7 +813,7 @@ Real PostProcessingBoundary<MeshType>::kineticNormalStress( const VectorType& ve
                      + velocity[1*M_numTotalDofVector[feSpace]+dofGlobalId] * faceNormal[1]  // u_y * n_y
                      + velocity[2*M_numTotalDofVector[feSpace]+dofGlobalId] * faceNormal[2]; // u_z * n_z
 
-                kineticNormalStressScatter += M_currentBdFEPtrVector[feSpace]->weightMeas(iq)
+                kineticNormalStressScatter += M_currentBdFEPtrVector[feSpace]->wRootDetMetric(iq)
                                             * M_currentBdFEPtrVector[feSpace]->phi(Int(iDof),iq)
                                             * temp * temp;
                 }
@@ -854,7 +854,7 @@ Real PostProcessingBoundary<MeshType>::kineticNormalStressDerivative( const Vect
     for ( std::list<ID>::iterator j(facetList.begin()); j != facetList.end(); ++j )
     {
         // Updating quadrature data on the current facet
-        M_currentBdFEPtrVector[feSpace]->updateMeasNormalQuadPt( M_meshPtr->boundaryFacet( *j ) );
+        M_currentBdFEPtrVector[feSpace]->update( M_meshPtr->boundaryFacet( *j ), UPDATE_NORMALS | UPDATE_W_ROOT_DET_METRIC );
 
         // Computing the area
         areaScatter += M_currentBdFEPtrVector[0]->measure();
@@ -880,7 +880,7 @@ Real PostProcessingBoundary<MeshType>::kineticNormalStressDerivative( const Vect
                      + velocityDerivative[2*M_numTotalDofVector[feSpace]+dofGlobalId] * faceNormal[2]  // du_z * n_z
                        );
 
-                kineticNormalStressScatter += M_currentBdFEPtrVector[feSpace]->weightMeas(iq)
+                kineticNormalStressScatter += M_currentBdFEPtrVector[feSpace]->wRootDetMetric(iq)
                                             * M_currentBdFEPtrVector[feSpace]->phi(Int(iDof),iq)
                                             * temp;
                 }
@@ -956,7 +956,7 @@ Vector PostProcessingBoundary<MeshType>::average( const VectorType& field, const
                     // basic policy for type VectorType: operator[] available
                     localFieldVector[iDof] = field[iComponent*M_numTotalDofVector[feSpace]+dofGlobalId];
 
-                    localField[iComponent] += M_currentBdFEPtrVector[feSpace]->weightMeas(iq)
+                    localField[iComponent] += M_currentBdFEPtrVector[feSpace]->wRootDetMetric(iq)
                                             * localFieldVector[iDof] * M_currentBdFEPtrVector[feSpace]->phi(Int(iDof),iq);
                 }
             }
@@ -1071,7 +1071,7 @@ Vector PostProcessingBoundary<MeshType>::geometricCenter( const markerID_Type& f
     for (Iterator j=facetList.begin(); j != facetList.end(); ++j)
     {
         // Updating quadrature data on the current facet
-        M_currentBdFEPtrVector[feSpace]->updateMeasNormalQuadPt(M_meshPtr->boundaryFacet(*j) );
+        M_currentBdFEPtrVector[feSpace]->update(M_meshPtr->boundaryFacet(*j), UPDATE_QUAD_NODES | UPDATE_NORMALS | UPDATE_W_ROOT_DET_METRIC );
 
         // Compute the area of the facet
         areaScatter += M_currentBdFEPtrVector[0]->measure();
@@ -1085,7 +1085,7 @@ Vector PostProcessingBoundary<MeshType>::geometricCenter( const markerID_Type& f
                 // Interpolation (loop on local dof)
                 for (ID iDof(0); iDof<M_numTotalDofPerFacetVector[feSpace]; ++iDof)
                 {
-                    geometricCenterScatter(iComponent) += M_currentBdFEPtrVector[feSpace]->weightMeas(iq)
+                    geometricCenterScatter(iComponent) += M_currentBdFEPtrVector[feSpace]->wRootDetMetric(iq)
                                                         * M_currentBdFEPtrVector[feSpace]->phi(Int(iDof),iq)
                                                         * M_currentBdFEPtrVector[feSpace]->quadPt(iq,Int(iComponent));
                 }
