@@ -26,17 +26,16 @@
 
 /*!
     @file
-    @brief FSIData - File containing the implementation of Radial Basis Functions suited for interpolation
-                     between non-matching grids
+    @brief A short description of the file content
 
-    @author Davide Forti <davide.forti@epfl.ch>
-    @date 01-31-2010
+    @author Davide Forti <forti@mathicsepc48.epfl.ch>
+    @date 01 Mar 2013
 
-    @maintainer Davide Forti <davide.Forti@epfl.ch>
+    A more detailed description of the file (if necessary)
  */
 
-#ifndef RBF_INTERPOLATIONRADIUS_HPP
-#define RBF_INTERPOLATIONRADIUS_HPP_1
+#ifndef RBFINTERPOLATIONSTANDARD_H
+#define RBFINTERPOLATIONSTANDARD_H 1
 
 #include <lifev/core/LifeV.hpp>
 #include <Epetra_Vector.h>
@@ -51,8 +50,48 @@
 
 namespace LifeV
 {
+
+//! RBFInterpolationStandard - Short description of the class
+/*!
+    @author Davide Forti
+    @see Reference to papers (if available)
+
+    Here write a long and detailed description of the class.
+
+    For this purpose you can use a lot of standard HTML code.
+    Here there is a list with some useful examples:
+
+    For bold text use: <b>BOLD TEXT</b>
+
+    For empatyze a word type @e followed by the word
+
+    For verbatim a word type @c followed by the word
+
+    For vertical space (empty lines) use: <br>
+
+    For creating list type:
+    <ol>
+        <li> First element of the enumerated list
+        <ul>
+             <li> First element of the dotted sublist.
+             <li> Second element of the dotted sublist
+        </ul>
+        <li> Second element of the enumerated list
+        <li> Third element of the enumerated list
+    </ol>
+
+    For writing a warning type: @warning followed by the description
+    of the warning
+
+    It is possible to use a lot of other standard HTML commands.
+    Visit http://www.stack.nl/~dimitri/doxygen/htmlcmds.html for
+    a detailed list.
+
+    For any other kind of information visit www.doxygen.org.
+ */
+
 template <typename Mesh>
-class RBFInterpolationRadius
+class RBFInterpolationStandard
 {
 
 public:
@@ -91,15 +130,15 @@ public:
     typedef Teuchos::RCP< Teuchos::ParameterList >            parameterList_Type;
 
     //! Constructor
-    RBFInterpolationRadius ( meshPtr_Type fullMeshKnown,
-                             meshPtr_Type localMeshKnown,
-                             meshPtr_Type fullMeshUnknown,
-                             meshPtr_Type localMeshUnknown,
-                             flagContainer_Type flags,
-                             double radius);
+    RBFInterpolationStandard ( meshPtr_Type fullMeshKnown,
+                               meshPtr_Type localMeshKnown,
+                               meshPtr_Type fullMeshUnknown,
+                               meshPtr_Type localMeshUnknown,
+                               flagContainer_Type flags,
+                               double radius);
 
     //! Destructor
-    ~RBFInterpolationRadius() {}
+    ~RBFInterpolationStandard() {}
 
 
     //! Setup the RBF data
@@ -167,12 +206,12 @@ private:
 };
 
 template <typename Mesh>
-RBFInterpolationRadius<Mesh>::RBFInterpolationRadius ( meshPtr_Type fullMeshKnown,
-                                                       meshPtr_Type localMeshKnown,
-                                                       meshPtr_Type fullMeshUnknown,
-                                                       meshPtr_Type localMeshUnknown,
-                                                       flagContainer_Type flags,
-                                                       double radius) :
+RBFInterpolationStandard<Mesh>::RBFInterpolationStandard ( meshPtr_Type fullMeshKnown,
+                                                           meshPtr_Type localMeshKnown,
+                                                           meshPtr_Type fullMeshUnknown,
+                                                           meshPtr_Type localMeshUnknown,
+                                                           flagContainer_Type flags,
+                                                           double radius) :
     M_fullMeshKnown ( fullMeshKnown ),
     M_localMeshKnown ( localMeshKnown ),
     M_fullMeshUnknown ( fullMeshUnknown ),
@@ -184,7 +223,7 @@ RBFInterpolationRadius<Mesh>::RBFInterpolationRadius ( meshPtr_Type fullMeshKnow
 
 
 template <typename Mesh>
-void RBFInterpolationRadius<Mesh>::setupRBFData (vectorPtr_Type KnownField, vectorPtr_Type UnknownField, GetPot datafile, parameterList_Type belosList)
+void RBFInterpolationStandard<Mesh>::setupRBFData (vectorPtr_Type KnownField, vectorPtr_Type UnknownField, GetPot datafile, parameterList_Type belosList)
 {
     M_knownField   = KnownField;
     M_unknownField = UnknownField;
@@ -194,7 +233,7 @@ void RBFInterpolationRadius<Mesh>::setupRBFData (vectorPtr_Type KnownField, vect
 
 
 template <typename Mesh>
-void RBFInterpolationRadius<Mesh>::buildOperators()
+void RBFInterpolationStandard<Mesh>::buildOperators()
 {
     this->InterpolationOperator();
     this->ProjectionOperator();
@@ -202,7 +241,7 @@ void RBFInterpolationRadius<Mesh>::buildOperators()
 }
 
 template <typename Mesh>
-void RBFInterpolationRadius<Mesh>::InterpolationOperator()
+void RBFInterpolationStandard<Mesh>::InterpolationOperator()
 {
     this->identifyNodes (M_localMeshKnown, M_GIdsKnownMesh, M_knownField);
     M_neighbors.reset ( new neighbors_Type ( M_fullMeshKnown, M_localMeshKnown, M_knownField->mapPtr(), M_knownField->mapPtr()->commPtr() ) );
@@ -220,7 +259,6 @@ void RBFInterpolationRadius<Mesh>::InterpolationOperator()
 
     MPI_Allreduce (&LocalNodesNumber, &TotalNodesNumber, 1,  MPI_INT, MPI_SUM, MPI_COMM_WORLD);
 
-    //std::vector<double>   RBF_radius(LocalNodesNumber);
     std::vector<std::set<ID> > MatrixGraph (LocalNodesNumber);
     int* ElementsPerRow = new int[LocalNodesNumber];
     int* GlobalID = new int[LocalNodesNumber];
@@ -230,10 +268,8 @@ void RBFInterpolationRadius<Mesh>::InterpolationOperator()
     for (std::set<ID>::iterator it = M_GIdsKnownMesh.begin(); it != M_GIdsKnownMesh.end(); ++it)
     {
         GlobalID[k] = *it;
-        //MatrixGraph[k] = M_neighbors->nodeNodeNeighborsList()[GlobalID[k]];
         MatrixGraph[k] = M_neighbors->createNodeNodeNeighborsMapWithinRadius (M_radius, GlobalID[k]);
         MatrixGraph[k].insert (GlobalID[k]);
-        //RBF_radius[k] = computeRBFradius( M_fullMeshKnown, M_fullMeshKnown, MatrixGraph[k], GlobalID[k]);
         ElementsPerRow[k] = MatrixGraph[k].size();
         if (ElementsPerRow[k] > Max_entries)
         {
@@ -282,7 +318,7 @@ void RBFInterpolationRadius<Mesh>::InterpolationOperator()
 }
 
 template <typename Mesh>
-void RBFInterpolationRadius<Mesh>::ProjectionOperator()
+void RBFInterpolationStandard<Mesh>::ProjectionOperator()
 {
 
     this->identifyNodes (M_localMeshUnknown, M_GIdsUnknownMesh, M_unknownField);
@@ -290,7 +326,6 @@ void RBFInterpolationRadius<Mesh>::ProjectionOperator()
     int LocalNodesNumber = M_GIdsUnknownMesh.size();
     int TotalNodesNumber = 0;
 
-    //std::vector<double>   RBF_radius(LocalNodesNumber);
     std::vector<std::set<ID> > MatrixGraph (LocalNodesNumber);
     int* ElementsPerRow = new int[LocalNodesNumber];
     int* GlobalID = new int[LocalNodesNumber];
@@ -318,11 +353,7 @@ void RBFInterpolationRadius<Mesh>::ProjectionOperator()
                 }
             }
         }
-        /*
-        MatrixGraph[k] = M_neighbors->nodeNodeNeighborsList()[nearestPoint];
-        MatrixGraph[k].insert(nearestPoint);
-        RBF_radius[k] = computeRBFradius( M_fullMeshKnown, M_fullMeshUnknown, MatrixGraph[k], GlobalID[k]);
-            */
+
         MatrixGraph[k] = M_neighbors->createNodeNodeNeighborsMapWithinRadius (M_radius, nearestPoint);
         MatrixGraph[k].insert (nearestPoint);
         ElementsPerRow[k] = MatrixGraph[k].size();
@@ -374,7 +405,7 @@ void RBFInterpolationRadius<Mesh>::ProjectionOperator()
 }
 
 template <typename Mesh>
-double RBFInterpolationRadius<Mesh>::computeRBFradius (meshPtr_Type MeshNeighbors, meshPtr_Type MeshGID, idContainer_Type Neighbors, ID GlobalID)
+double RBFInterpolationStandard<Mesh>::computeRBFradius (meshPtr_Type MeshNeighbors, meshPtr_Type MeshGID, idContainer_Type Neighbors, ID GlobalID)
 {
     double r = 0;
     double r_max = 0;
@@ -390,23 +421,18 @@ double RBFInterpolationRadius<Mesh>::computeRBFradius (meshPtr_Type MeshNeighbor
 
 
 template <typename Mesh>
-void RBFInterpolationRadius<Mesh>::buildRhs()
+void RBFInterpolationStandard<Mesh>::buildRhs()
 {
     M_RhsF.reset (new vector_Type (*M_interpolationOperatorMap) );
-    M_RhsOne.reset (new vector_Type (*M_interpolationOperatorMap) );
-
     M_RhsF->subset (*M_knownField, *M_interpolationOperatorMap, 0, 0);
-    *M_RhsOne += 1;
 }
 
 
 template <typename Mesh>
-void RBFInterpolationRadius<Mesh>::interpolate()
+void RBFInterpolationStandard<Mesh>::interpolate()
 {
     vectorPtr_Type gamma_f;
     gamma_f.reset (new vector_Type (*M_interpolationOperatorMap) );
-    vectorPtr_Type gamma_one;
-    gamma_one.reset (new vector_Type (*M_interpolationOperatorMap) );
 
     // Preconditioner
     prec_Type* precRawPtr;
@@ -415,41 +441,19 @@ void RBFInterpolationRadius<Mesh>::interpolate()
     precRawPtr->setDataFromGetPot ( M_datafile, "prec" );
     precPtr.reset ( precRawPtr );
 
-    LinearSolver solverF;
-    solverF.setCommunicator ( M_knownField->mapPtr()->commPtr() );
-    solverF.setParameters ( *M_belosList );
-    solverF.setPreconditioner ( precPtr );
+    LinearSolver solver;
+    solver.setCommunicator ( M_knownField->mapPtr()->commPtr() );
+    solver.setParameters ( *M_belosList );
+    solver.setPreconditioner ( precPtr );
 
-    solverF.setOperator (M_interpolationOperator);
-    solverF.setRightHandSide (M_RhsOne);
-    solverF.solve (gamma_one);
-
-    LinearSolver solverOne;
-    solverOne.setCommunicator ( M_knownField->mapPtr()->commPtr() );
-    solverOne.setParameters ( *M_belosList );
-    solverOne.setPreconditioner ( precPtr );
-
-    solverOne.setOperator (M_interpolationOperator);
-    solverOne.setRightHandSide ( M_RhsF );
-    solverOne.solve ( gamma_f );
-
-    vectorPtr_Type rbf_f;
-    rbf_f.reset (new vector_Type (*M_projectionOperatorMap) );
-
-    vectorPtr_Type rbf_one;
-    rbf_one.reset (new vector_Type (*M_projectionOperatorMap) );
+    solver.setOperator (M_interpolationOperator);
+    solver.setRightHandSide ( M_RhsF );
+    solver.solve ( gamma_f );
 
     vectorPtr_Type solution;
     solution.reset (new vector_Type (*M_projectionOperatorMap) );
 
-    M_projectionOperator->multiply (false, *gamma_f, *rbf_f);
-    M_projectionOperator->multiply (false, *gamma_one, *rbf_one);
-
-    *solution = *rbf_f;
-    *solution /= *rbf_one;
-
-    M_unknownField_rbf.reset (new vector_Type (M_unknownField->map() ) );
-    M_unknownField_rbf->subset (*rbf_f, *M_projectionOperatorMap, 0, 0);
+    M_projectionOperator->multiply (false, *gamma_f, *solution);
 
     M_unknownField->subset (*solution, *M_projectionOperatorMap, 0, 0);
 
@@ -457,7 +461,7 @@ void RBFInterpolationRadius<Mesh>::interpolate()
 
 
 template <typename Mesh>
-void RBFInterpolationRadius<Mesh>::identifyNodes (meshPtr_Type LocalMesh, std::set<ID>& GID_nodes, vectorPtr_Type CheckVector)
+void RBFInterpolationStandard<Mesh>::identifyNodes (meshPtr_Type LocalMesh, std::set<ID>& GID_nodes, vectorPtr_Type CheckVector)
 {
 
     if (M_flags[0] == -1)
@@ -481,7 +485,7 @@ void RBFInterpolationRadius<Mesh>::identifyNodes (meshPtr_Type LocalMesh, std::s
 }
 
 template <typename Mesh>
-bool RBFInterpolationRadius<Mesh>::isInside (ID pointMarker, flagContainer_Type flags)
+bool RBFInterpolationStandard<Mesh>::isInside (ID pointMarker, flagContainer_Type flags)
 {
     int check = 0;
     for (UInt i = 0; i < flags.size(); ++i)
@@ -494,26 +498,26 @@ bool RBFInterpolationRadius<Mesh>::isInside (ID pointMarker, flagContainer_Type 
 
 
 template <typename Mesh>
-double RBFInterpolationRadius<Mesh>::rbf (double x1, double y1, double z1, double x2, double y2, double z2, double radius)
+double RBFInterpolationStandard<Mesh>::rbf (double x1, double y1, double z1, double x2, double y2, double z2, double radius)
 {
     double distance = sqrt ( pow (x1 - x2, 2) + pow (y1 - y2, 2) + pow (z1 - z2, 2) );
     return pow (1 - distance / radius, 4) * (4 * distance / radius + 1);
-    //return exp(-pow(distance,2)/pow(radius,2));
+    //return exp ( -pow(distance,2) / 2*pow(radius,2));
 }
 
 template <typename Mesh>
-void RBFInterpolationRadius<Mesh>::solution (vectorPtr_Type& Solution)
+void RBFInterpolationStandard<Mesh>::solution (vectorPtr_Type& Solution)
 {
     Solution = M_unknownField;
 }
 
 
 template <typename Mesh>
-void RBFInterpolationRadius<Mesh>::solutionrbf (vectorPtr_Type& Solution_rbf)
+void RBFInterpolationStandard<Mesh>::solutionrbf (vectorPtr_Type& Solution_rbf)
 {
     Solution_rbf = M_unknownField_rbf;
 }
 
 } // namespace LifeV
 
-#endif // RBF_INTERPOLATION_HPP
+#endif // RBF_INTERPOLATIONSTANDARD_HPP

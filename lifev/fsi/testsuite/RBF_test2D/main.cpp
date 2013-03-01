@@ -49,7 +49,9 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/core/mesh/MeshPartitioner.hpp>
 #include <lifev/core/mesh/MeshData.hpp>
 #include <lifev/core/filter/ExporterHDF5.hpp>
-#include <lifev/fsi/solver/RBFInterpolation.hpp>
+#include <lifev/fsi/solver/RBFInterpolation.hpp>         // Nuovo approccio per interpolazione con RBF
+#include <lifev/fsi/solver/RBFInterpolationRadius.hpp>   // Interpolazione con RBF con scelta raggio e divisione per interpolante della costante uguale a 1
+#include <lifev/fsi/solver/RBFInterpolationStandard.hpp> // Interpolazione con RBF standard
 #include <Teuchos_ParameterList.hpp>
 #include <Teuchos_XMLParameterListHelpers.hpp>
 #include <Teuchos_RCP.hpp>
@@ -62,6 +64,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace LifeV;
 
+// f -> function to be interpolated
 double f (double x, double y, double z)
 {
     return sin (2 * PI * x) * cos (3 * PI * y) + exp (x * y);
@@ -73,6 +76,12 @@ typedef RegionMesh<LinearTriangle >              mesh_Type;
 typedef boost::shared_ptr< mesh_Type >           meshPtr_Type;
 typedef RBFInterpolation< mesh_Type >            interpolation_Type;
 typedef boost::shared_ptr< interpolation_Type >  interpolationPtr_Type;
+
+typedef RBFInterpolationRadius< mesh_Type >       interpolationR_Type;
+typedef boost::shared_ptr< interpolationR_Type >  interpolationRPtr_Type;
+
+typedef RBFInterpolationStandard< mesh_Type >     interpolationS_Type;
+typedef boost::shared_ptr< interpolationS_Type >  interpolationSPtr_Type;
 
 int main (int argc, char** argv )
 {
@@ -105,13 +114,13 @@ int main (int argc, char** argv )
     // PARTITIONING MESHES
     MeshPartitioner<mesh_Type>   Solid_mesh_part;
     boost::shared_ptr<mesh_Type> Solid_localMesh;
-    Solid_mesh_part.setPartitionOverlap (1);
+    Solid_mesh_part.setPartitionOverlap (2);
     Solid_mesh_part.doPartition (Solid_mesh_ptr, Comm);
     Solid_localMesh = Solid_mesh_part.meshPartition();
 
     MeshPartitioner<mesh_Type>   Fluid_mesh_part;
     boost::shared_ptr<mesh_Type> Fluid_localMesh;
-    Fluid_mesh_part.setPartitionOverlap (1);
+    Fluid_mesh_part.setPartitionOverlap (2);
     Fluid_mesh_part.doPartition (Fluid_mesh_ptr, Comm);
     Fluid_localMesh = Fluid_mesh_part.meshPartition();
 
@@ -147,6 +156,7 @@ int main (int argc, char** argv )
     vectorPtr_Type Fluid_solution (new vector_Type (Fluid_fieldFESpace->map(), Unique) );
     vectorPtr_Type Fluid_solution_rbf (new vector_Type (Fluid_fieldFESpace->map(), Unique) );
 
+    /*
     // INITIALIZATION: THE FIRST TWO ARGUMENTS ARE RELATED TO THE MESHES WHERE WE KNOW THE FUNCTION. THE 3RD AND THE 4TH TO THE MESHES WHERE
     // WE ARE GOING TO EVALUATE THE FUNCTION. THE LAST IS USED TO SPECIFY THE FLAGS, SO THOSE PARTS OF THE MESHES THAT WE ARE CONSIDERING.
     interpolationPtr_Type RBFInterpolant ( new interpolation_Type ( Solid_mesh_ptr,
@@ -154,26 +164,56 @@ int main (int argc, char** argv )
                                                                     Fluid_mesh_ptr,
                                                                     Fluid_localMesh,
                                                                     flags) );
+    */
+    /*
+    // IN QUESTO CASO USI IL RAGGIO E NON LA SELEZIONE AUTOMATICA, SOLO CHE DIVIDI SEMPRE PER L'INTERPOLANTE DI 1
+    double radius = 2*(double)MeshUtility::MeshStatistics::computeSize(*Solid_mesh_ptr).minH; // maxH, meanH
+    interpolationRPtr_Type RBFInterpolant ( new interpolationR_Type ( Solid_mesh_ptr,
+                                                                      Solid_localMesh,
+                                                                      Fluid_mesh_ptr,
+                                                                      Fluid_localMesh,
+                                                                      flags,
+                                                                      radius) );
+
+    */
+    // IN QUESTO CASO USI IL RAGGIO E NON LA SELEZIONE AUTOMATICA, SOLO CHE DIVIDI SEMPRE PER L'INTERPOLANTE DI 1
+    double radius = (double)MeshUtility::MeshStatistics::computeSize (*Solid_mesh_ptr).minH; // maxH, meanH
+    interpolationSPtr_Type RBFInterpolant ( new interpolationS_Type ( Solid_mesh_ptr,
+                                                                      Solid_localMesh,
+                                                                      Fluid_mesh_ptr,
+                                                                      Fluid_localMesh,
+                                                                      flags,
+                                                                      radius) );
+
 
     // LOADING INFORMATION ABOUT THE TWO VECTORS INVOLVED IN THE INTERPOLATION PROCESS
     RBFInterpolant->setupRBFData (Solid_vector, Fluid_solution, dataFile, belosList);
 
+    LifeChrono buildOperatorChrono;
+    buildOperatorChrono.start();
     // BUILDING THE OPERATORS
     RBFInterpolant->buildOperators();
+    buildOperatorChrono.stop();
+    std::cout << "Time to build operators = " << buildOperatorChrono.diff() << std::endl;
 
     // COMPUTING THE SOLUTION
+    LifeChrono solutionChrono;
+    solutionChrono.start();
     RBFInterpolant->interpolate();
+    solutionChrono.stop();
+    std::cout << "Time to solve the linear systems = " << solutionChrono.diff() << std::endl;
+
 
     // SAVE THE SOLUTION
     RBFInterpolant->solution (Fluid_solution);
 
     // SAVE THE RBF'S ORIGINAL SOLUTION
-    RBFInterpolant->solutionrbf (Fluid_solution_rbf);
+    // RBFInterpolant->solutionrbf (Fluid_solution_rbf);
 
     // COMPUTING THE ERROR
     vectorPtr_Type Fluid_exact_solution (new vector_Type (Fluid_fieldFESpace->map(), Unique) );
     vectorPtr_Type myError (new vector_Type (Fluid_fieldFESpace->map(), Unique) );
-    vectorPtr_Type rbfError (new vector_Type (Fluid_fieldFESpace->map(), Unique) );
+    // vectorPtr_Type rbfError (new vector_Type (Fluid_fieldFESpace->map(), Unique) );
 
     for ( UInt i = 0; i < Fluid_exact_solution->epetraVector().MyLength(); ++i )
         if (Fluid_exact_solution->blockMap().LID (Fluid_exact_solution->blockMap().GID (i) ) != -1)
@@ -183,7 +223,7 @@ int main (int argc, char** argv )
                                                                                      Fluid_mesh_ptr->point (Fluid_exact_solution->blockMap().GID (i) ).z() );
 
             (*myError) [myError->blockMap().GID (i)] = (*Fluid_exact_solution) [Fluid_exact_solution->blockMap().GID (i)] - (*Fluid_solution) [Fluid_solution->blockMap().GID (i)];
-            (*rbfError) [rbfError->blockMap().GID (i)] = (*Fluid_exact_solution) [Fluid_exact_solution->blockMap().GID (i)] - (*Fluid_solution_rbf) [Fluid_solution_rbf->blockMap().GID (i)];
+            // (*rbfError) [rbfError->blockMap().GID (i)] = (*Fluid_exact_solution) [Fluid_exact_solution->blockMap().GID (i)] - (*Fluid_solution_rbf) [Fluid_solution_rbf->blockMap().GID (i)];
 
         }
 
@@ -193,11 +233,18 @@ int main (int argc, char** argv )
     Fluid_exporter.exportPID (Fluid_localMesh, Comm, true );
     Fluid_exporter.addVariable (ExporterData<mesh_Type>::ScalarField, "Exact solution", Fluid_fieldFESpace, Fluid_exact_solution, UInt (0) );
     Fluid_exporter.addVariable (ExporterData<mesh_Type>::ScalarField, "Solution", Fluid_fieldFESpace, Fluid_solution, UInt (0) );
-    Fluid_exporter.addVariable (ExporterData<mesh_Type>::ScalarField, "RBF's solution", Fluid_fieldFESpace, Fluid_solution_rbf, UInt (0) );
     Fluid_exporter.addVariable (ExporterData<mesh_Type>::ScalarField, "Error", Fluid_fieldFESpace, myError, UInt (0) );
-    Fluid_exporter.addVariable (ExporterData<mesh_Type>::ScalarField, "RBF's error", Fluid_fieldFESpace, rbfError, UInt (0) );
+    // Fluid_exporter.addVariable (ExporterData<mesh_Type>::ScalarField, "RBF's solution", Fluid_fieldFESpace, Fluid_solution_rbf, UInt (0) );
+    // Fluid_exporter.addVariable (ExporterData<mesh_Type>::ScalarField, "RBF's error", Fluid_fieldFESpace, rbfError, UInt (0) );
     Fluid_exporter.postProcess (0);
     Fluid_exporter.closeFile();
+
+    std::cout << "MinH = " <<  (double)MeshUtility::MeshStatistics::computeSize(*Solid_mesh_ptr).minH << std::endl;
+    std::cout << "MeanH = " <<  (double)MeshUtility::MeshStatistics::computeSize(*Solid_mesh_ptr).meanH << std::endl;
+    std::cout << "MaxH = " <<  (double)MeshUtility::MeshStatistics::computeSize(*Solid_mesh_ptr).maxH << std::endl;
+    std::cout << "Number of vertices = " << Solid_mesh_ptr->numVertices() << std::endl;
+    std::cout << "Norm Inf = " << myError->normInf() << std::endl;
+    std::cout << "Norm 2 = " << ( myError->norm2()/Fluid_exact_solution->norm2() ) << std::endl;//x* 1/Solid_mesh_ptr->numVertices() << std::endl;
 
 #ifdef HAVE_MPI
     MPI_Finalize();
