@@ -143,8 +143,8 @@ BCInterfaceFunctionSolverDefined< FSIOperator >::updatePhysicalSolverVariables()
             M_physicalSolver->solidTimeAdvance()->updateRHSFirstDerivative ( timeStep );
             if ( M_physicalSolver->data().method().compare ("monolithicGE") == 0 || M_physicalSolver->data().method().compare ("monolithicGI") == 0 )
             {
-                M_robinRHS->subset( M_physicalSolver->solidTimeAdvance()->rhsContributionFirstDerivative(),
-                                    boost::dynamic_pointer_cast< FSIMonolithic > ( M_physicalSolver )->offset() );
+                M_robinRHS->subset ( M_physicalSolver->solidTimeAdvance()->rhsContributionFirstDerivative(),
+                                     boost::dynamic_pointer_cast< FSIMonolithic > ( M_physicalSolver )->offset() );
             }
             else
             {

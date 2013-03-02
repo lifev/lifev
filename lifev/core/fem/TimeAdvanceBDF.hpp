@@ -679,7 +679,7 @@ TimeAdvanceBDF<feVectorType>::firstDerivative() const
     // Before going in this direction the design of the TimeAdvance needs to be discussed.
     // The same consideration is valid for the second derivative.
     return *this->M_unknowns[0] * this->M_alpha[ 0 ] / this->M_timeStep
-           -( *this->M_rhsContribution[0] );
+           - ( *this->M_rhsContribution[0] );
 }
 
 template<typename feVectorType>
