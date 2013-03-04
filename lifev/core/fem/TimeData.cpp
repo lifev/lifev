@@ -95,8 +95,10 @@ TimeData::showMe( std::ostream& output ) const
     output << "TimeStepNumber = " << M_timeStepNumber << std::endl;
 }
 
+
+
 // ===================================================
-// Private Methods
+// Utility methods
 // ===================================================
 Real
 TimeData::round( const Real& n, const Int& decimal ) const

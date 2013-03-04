@@ -117,6 +117,8 @@ public:
     typedef boost::shared_ptr<VectorEpetra>                             vectorPtr_Type;
     typedef Preconditioner                                              preconditioner_Type;
     typedef boost::shared_ptr<preconditioner_Type>                      preconditionerPtr_Type;
+    typedef Teuchos::ParameterList                                      parameterList_Type;
+    typedef Teuchos::RCP< parameterList_Type >                          parameterListPtr_Type;
 
     enum SolverType          { UndefinedSolver, Belos, AztecOO };
 

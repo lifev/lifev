@@ -1,0 +1,46 @@
+###################################################################################################
+#
+#                       This file is part of the LifeV Library
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+#
+#      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
+#           Date: 2011-03-10
+#  License Terms: GNU LGPL
+#
+###################################################################################################
+
+[Problem] #########################################################################################
+ProblemType = Multiscale
+ProblemFile = ./MultiscaleDatabase/Models/Multiscale/FSI3D_2Cylinders_MNS_StressBC
+
+[Solver] ##########################################################################################
+###################################################################################################
+
+    [./Restart]
+    Restart                    = false
+    RestartFromStepNumber      = 0
+
+    [../Output]
+    ProblemPrefix              = Multiscale # Problem prefix
+    SaveEach                   = 5          # time steps
+
+    [../time_discretization]
+    initialtime                = 0.000   # [s]
+    endtime                    = 0.040   # [s]
+    timestep                   = 0.001   # [s]
+
+    [../]
+
+###################################################################################################
+
+[Physics] #########################################################################################
+###################################################################################################
+FluidDensity                = 1.04          # density         [g/cm^3]
+FluidViscosity              = 0.035         # viscosity       [g/cm/s]
+FluidVenousPressure         = 0.0           # ven. pressure   [g/cm/s^2 - dyne/cm^2]
+SolidExternalPressure       = 0.0           # ref. pressure   [g/cm/s^2 - dyne/cm^2]
+SolidDensity                = 1.0           # density         [g/cm^3]
+SolidPoissonCoefficient     = 0.48          # Poisson's ratio []
+SolidYoungModulus           = 3.00E6        # Young's modulus [g/cm/s^2 - dyne/cm^2]
+###################################################################################################
