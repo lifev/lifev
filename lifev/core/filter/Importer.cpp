@@ -65,38 +65,38 @@ Importer& Importer::operator= ( const Importer& importer )
 
 // Import mesh with tetrahedras
 void
-Importer::import( RegionMesh<LinearTetra> & mesh,
-                  markerID_Type             regionFlag )
+Importer::import ( RegionMesh<LinearTetra>& mesh,
+                   markerID_Type             regionFlag )
 {
-    detail::import3D( M_fileName, M_format, mesh, regionFlag );
+    detail::import3D ( M_fileName, M_format, mesh, regionFlag );
 } // import
 
 // Import mesh with linear hexahedras
 void
-Importer::import( RegionMesh<LinearHexa> & mesh,
-                  markerID_Type            regionFlag )
+Importer::import ( RegionMesh<LinearHexa>& mesh,
+                   markerID_Type            regionFlag )
 {
-    detail::import3D( M_fileName, M_format, mesh, regionFlag );
+    detail::import3D ( M_fileName, M_format, mesh, regionFlag );
 } // import
 
 // Import mesh with linear triangles
 void
-Importer::import( RegionMesh<LinearTriangle> & mesh,
-                  markerID_Type                regionFlag )
+Importer::import ( RegionMesh<LinearTriangle>& mesh,
+                   markerID_Type                regionFlag )
 {
-    detail::import2D( M_fileName, M_format, mesh, regionFlag );
+    detail::import2D ( M_fileName, M_format, mesh, regionFlag );
 } // import
 
 // Import mesh with linear quadrangles
 void
-Importer::import( RegionMesh<LinearQuad> &, markerID_Type )
+Importer::import ( RegionMesh<LinearQuad>&, markerID_Type )
 {
-   ERROR_MSG("Importer:No importers available for this type of mesh");
+    ERROR_MSG ("Importer:No importers available for this type of mesh");
 } // import
 
 // Print attributes of the class
 void
-Importer::showMe( std::ostream& output ) const
+Importer::showMe ( std::ostream& output ) const
 {
     output << "Class importer" << std::endl
            << "File Name   " << M_fileName << std::endl

@@ -47,68 +47,68 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 //! Constructors
-HeartIonicData::HeartIonicData( const GetPot& dataFile ) :
-        MeshData( dataFile, "electric/space_discretization" ),
-        TimeData( dataFile, "electric/time_discretization" )
+HeartIonicData::HeartIonicData ( const GetPot& dataFile ) :
+    MeshData ( dataFile, "electric/space_discretization" ),
+    TimeData ( dataFile, "electric/time_discretization" )
 {
-    setup(dataFile);
+    setup (dataFile);
 }
 
 HeartIonicData::HeartIonicData() :
-        MeshData                        ( ),
-        TimeData                        ( ),
-        M_verbose                       ( ),
-        M_RMCParameterA                 ( ),
-        M_RMCParameterB                 ( ),
-        M_RMCParameterC1                ( ),
-        M_RMCParameterC2                ( ),
-        M_RMCParameterD                 ( ),
-        M_RMCTimeUnit                   ( ),
-        M_RMCPotentialAmplitude         ( ),
-        M_RMCRestPotential              ( ),
-        M_RMCInitialRepolarization      ( ),
-        // Mitchell & Schaeffer
-        M_MSTauIn                       ( ),
-        M_MSTauOut                       ( ),
-        M_MSTauOpen                     ( ),
-        M_MSTauClose                    ( ),
-        M_MSCriticalPotential           ( ),
-        M_MSPotentialMinimum            ( ),
-        M_MSPotentialMaximum            ( ),
-        M_MSReactionAmplitude           ( ),
-        M_MSInitialTime                 ( ),
-        M_MSTend                        ( ),
-        M_MSBDForder                    ( ),
-        M_MSHasHeterogeneousTauClose    ( )
+    MeshData                        ( ),
+    TimeData                        ( ),
+    M_verbose                       ( ),
+    M_RMCParameterA                 ( ),
+    M_RMCParameterB                 ( ),
+    M_RMCParameterC1                ( ),
+    M_RMCParameterC2                ( ),
+    M_RMCParameterD                 ( ),
+    M_RMCTimeUnit                   ( ),
+    M_RMCPotentialAmplitude         ( ),
+    M_RMCRestPotential              ( ),
+    M_RMCInitialRepolarization      ( ),
+    // Mitchell & Schaeffer
+    M_MSTauIn                       ( ),
+    M_MSTauOut                       ( ),
+    M_MSTauOpen                     ( ),
+    M_MSTauClose                    ( ),
+    M_MSCriticalPotential           ( ),
+    M_MSPotentialMinimum            ( ),
+    M_MSPotentialMaximum            ( ),
+    M_MSReactionAmplitude           ( ),
+    M_MSInitialTime                 ( ),
+    M_MSTend                        ( ),
+    M_MSBDForder                    ( ),
+    M_MSHasHeterogeneousTauClose    ( )
 {
 }
 
-HeartIonicData::HeartIonicData( const HeartIonicData& dataIonic ) :
-        MeshData		                ( dataIonic ),
-        TimeData                        ( dataIonic ),
-        M_verbose                       ( dataIonic.M_verbose ),
-        M_RMCParameterA                 ( dataIonic.M_RMCParameterA ),
-        M_RMCParameterB                 ( dataIonic.M_RMCParameterB ),
-        M_RMCParameterC1                ( dataIonic.M_RMCParameterC1 ),
-        M_RMCParameterC2                ( dataIonic.M_RMCParameterC2 ),
-        M_RMCParameterD                 ( dataIonic.M_RMCParameterD ),
-        M_RMCTimeUnit                   ( dataIonic.M_RMCTimeUnit ),
-        M_RMCPotentialAmplitude         ( dataIonic.M_RMCPotentialAmplitude ),
-        M_RMCRestPotential              ( dataIonic.M_RMCRestPotential ),
-        M_RMCInitialRepolarization      ( dataIonic.M_RMCInitialRepolarization ),
-        // Mitchell & Schaeffer
-        M_MSTauIn                       ( dataIonic.M_MSTauIn ),
-        M_MSTauOut                       ( dataIonic.M_MSTauOut ),
-        M_MSTauOpen                     ( dataIonic.M_MSTauOpen ),
-        M_MSTauClose                    ( dataIonic.M_MSTauClose ),
-        M_MSCriticalPotential           ( dataIonic.M_MSCriticalPotential ),
-        M_MSPotentialMinimum            ( dataIonic.M_MSPotentialMinimum ),
-        M_MSPotentialMaximum            ( dataIonic.M_MSPotentialMaximum ),
-        M_MSReactionAmplitude           ( dataIonic.M_MSReactionAmplitude ),
-        M_MSInitialTime                 ( dataIonic.M_MSInitialTime ),
-        M_MSTend                        ( dataIonic.M_MSTend ),
-        M_MSBDForder                    ( dataIonic.M_MSBDForder ),
-        M_MSHasHeterogeneousTauClose    ( dataIonic.M_MSHasHeterogeneousTauClose )
+HeartIonicData::HeartIonicData ( const HeartIonicData& dataIonic ) :
+    MeshData                        ( dataIonic ),
+    TimeData                        ( dataIonic ),
+    M_verbose                       ( dataIonic.M_verbose ),
+    M_RMCParameterA                 ( dataIonic.M_RMCParameterA ),
+    M_RMCParameterB                 ( dataIonic.M_RMCParameterB ),
+    M_RMCParameterC1                ( dataIonic.M_RMCParameterC1 ),
+    M_RMCParameterC2                ( dataIonic.M_RMCParameterC2 ),
+    M_RMCParameterD                 ( dataIonic.M_RMCParameterD ),
+    M_RMCTimeUnit                   ( dataIonic.M_RMCTimeUnit ),
+    M_RMCPotentialAmplitude         ( dataIonic.M_RMCPotentialAmplitude ),
+    M_RMCRestPotential              ( dataIonic.M_RMCRestPotential ),
+    M_RMCInitialRepolarization      ( dataIonic.M_RMCInitialRepolarization ),
+    // Mitchell & Schaeffer
+    M_MSTauIn                       ( dataIonic.M_MSTauIn ),
+    M_MSTauOut                       ( dataIonic.M_MSTauOut ),
+    M_MSTauOpen                     ( dataIonic.M_MSTauOpen ),
+    M_MSTauClose                    ( dataIonic.M_MSTauClose ),
+    M_MSCriticalPotential           ( dataIonic.M_MSCriticalPotential ),
+    M_MSPotentialMinimum            ( dataIonic.M_MSPotentialMinimum ),
+    M_MSPotentialMaximum            ( dataIonic.M_MSPotentialMaximum ),
+    M_MSReactionAmplitude           ( dataIonic.M_MSReactionAmplitude ),
+    M_MSInitialTime                 ( dataIonic.M_MSInitialTime ),
+    M_MSTend                        ( dataIonic.M_MSTend ),
+    M_MSBDForder                    ( dataIonic.M_MSBDForder ),
+    M_MSHasHeterogeneousTauClose    ( dataIonic.M_MSHasHeterogeneousTauClose )
 {
 }
 
@@ -117,9 +117,9 @@ HeartIonicData::HeartIonicData( const HeartIonicData& dataIonic ) :
 // Methods
 // ===================================================
 HeartIonicData&
-HeartIonicData::operator=( const HeartIonicData& dataIonic )
+HeartIonicData::operator= ( const HeartIonicData& dataIonic )
 {
-    if( this != &dataIonic )
+    if ( this != &dataIonic )
     {
         M_MSHasHeterogeneousTauClose    = dataIonic.M_MSHasHeterogeneousTauClose;
         M_RMCParameterA                           = dataIonic.M_RMCParameterA;
@@ -149,37 +149,37 @@ HeartIonicData::operator=( const HeartIonicData& dataIonic )
 }
 
 void
-HeartIonicData::setup(  const GetPot& dataFile )
+HeartIonicData::setup (  const GetPot& dataFile )
 {
-    M_MSHasHeterogeneousTauClose = dataFile( "electric/physics/hasHeteroTauClose",1 );
-    M_RMCParameterA   		               = dataFile( "electric/physics/a",0.13 );   // 0.13  adim  //RogersMcCulloch1994
-    M_RMCParameterB   		               = dataFile( "electric/physics/b",0.013 );  // 0.013 adim //RogersMcCulloch1994
-    M_RMCParameterC1   		               = dataFile( "electric/physics/c1",0.26 );  // 0.26  adim //RogersMcCulloch1994
-    M_RMCParameterC2   		               = dataFile( "electric/physics/c2",0.1 );   //0.1    adim //RogersMcCulloch1994
-    M_RMCParameterD   		               = dataFile( "electric/physics/d",1 );      //1      adim //RogersMcCulloch1994
-    M_RMCTimeUnit   		       = dataFile( "electric/physics/T",0.63 );    //0.63ms    //RogersMcCulloch1994
-    M_RMCPotentialAmplitude   	   = dataFile( "electric/physics/A",110 );    //130mV    //RogersMcCulloch1994
-    M_RMCRestPotential            = dataFile( "electric/physics/u0",-84.0 );	  //-84mV    //RogersMcCulloch1994
-    M_RMCInitialRepolarization    = dataFile( "electric/physics/winit", 0 );
+    M_MSHasHeterogeneousTauClose = dataFile ( "electric/physics/hasHeteroTauClose", 1 );
+    M_RMCParameterA                        = dataFile ( "electric/physics/a", 0.13 ); // 0.13  adim  //RogersMcCulloch1994
+    M_RMCParameterB                        = dataFile ( "electric/physics/b", 0.013 ); // 0.013 adim //RogersMcCulloch1994
+    M_RMCParameterC1                       = dataFile ( "electric/physics/c1", 0.26 ); // 0.26  adim //RogersMcCulloch1994
+    M_RMCParameterC2                       = dataFile ( "electric/physics/c2", 0.1 ); //0.1    adim //RogersMcCulloch1994
+    M_RMCParameterD                        = dataFile ( "electric/physics/d", 1 );    //1      adim //RogersMcCulloch1994
+    M_RMCTimeUnit                  = dataFile ( "electric/physics/T", 0.63 );  //0.63ms    //RogersMcCulloch1994
+    M_RMCPotentialAmplitude        = dataFile ( "electric/physics/A", 110 );  //130mV    //RogersMcCulloch1994
+    M_RMCRestPotential            = dataFile ( "electric/physics/u0", -84.0 );    //-84mV    //RogersMcCulloch1994
+    M_RMCInitialRepolarization    = dataFile ( "electric/physics/winit", 0 );
     // Mitchell & Schaeffer
-    M_MSTauIn                   = dataFile( "electric/physics/tau_in",0.8 );
-    M_MSPotentialMinimum         = dataFile( "electric/physics/v_min",-80.0 );
-    M_MSPotentialMaximum         = dataFile( "electric/physics/v_max", 20.0 );
-    M_MSReactionAmplitude        = dataFile( "electric/physics/reac_amp", 0.2 );
-    M_MSTauOut                  = dataFile( "electric/physics/tau_out",18.0 );
-    M_MSTauOpen                 = dataFile( "electric/physics/tau_open",100.0 );
-    M_MSTauClose                = dataFile( "electric/physics/tau_close",100.0 );
-    M_MSCriticalPotential        = dataFile( "electric/physics/vcrit",-67.0 );
-    M_MSInitialTime              = dataFile( "electric/physics/init_time",0.0 );
-    M_MSTend                     = dataFile( "electric/physics/end_time",1000.0 );
-    M_MSBDForder                 = dataFile( "electric/time_discretization/BDF_order",1 );
+    M_MSTauIn                   = dataFile ( "electric/physics/tau_in", 0.8 );
+    M_MSPotentialMinimum         = dataFile ( "electric/physics/v_min", -80.0 );
+    M_MSPotentialMaximum         = dataFile ( "electric/physics/v_max", 20.0 );
+    M_MSReactionAmplitude        = dataFile ( "electric/physics/reac_amp", 0.2 );
+    M_MSTauOut                  = dataFile ( "electric/physics/tau_out", 18.0 );
+    M_MSTauOpen                 = dataFile ( "electric/physics/tau_open", 100.0 );
+    M_MSTauClose                = dataFile ( "electric/physics/tau_close", 100.0 );
+    M_MSCriticalPotential        = dataFile ( "electric/physics/vcrit", -67.0 );
+    M_MSInitialTime              = dataFile ( "electric/physics/init_time", 0.0 );
+    M_MSTend                     = dataFile ( "electric/physics/end_time", 1000.0 );
+    M_MSBDForder                 = dataFile ( "electric/time_discretization/BDF_order", 1 );
 
 }
 
 // Output
-void HeartIonicData::showMe( std::ostream& output )
+void HeartIonicData::showMe ( std::ostream& output )
 {
- output << " The output is still to be coded! \n" << std::endl;
+    output << " The output is still to be coded! \n" << std::endl;
 }
 
 }

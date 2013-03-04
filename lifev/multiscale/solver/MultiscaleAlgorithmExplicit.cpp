@@ -45,11 +45,11 @@ namespace Multiscale
 // Constructors & Destructor
 // ===================================================
 MultiscaleAlgorithmExplicit::MultiscaleAlgorithmExplicit() :
-        multiscaleAlgorithm_Type    ()
+    multiscaleAlgorithm_Type    ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 8011 ) << "MultiscaleAlgorithmExplicit::MultiscaleAlgorithmExplicit() \n";
+    debugStream ( 8011 ) << "MultiscaleAlgorithmExplicit::MultiscaleAlgorithmExplicit() \n";
 #endif
 
     M_type = Explicit;
@@ -59,25 +59,25 @@ MultiscaleAlgorithmExplicit::MultiscaleAlgorithmExplicit() :
 // Multiscale Algorithm Virtual Methods
 // ===================================================
 void
-MultiscaleAlgorithmExplicit::setupData( const std::string& fileName )
+MultiscaleAlgorithmExplicit::setupData ( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 8013 ) << "MultiscaleAlgorithmNewton::setupData( fileName ) \n";
+    debugStream ( 8013 ) << "MultiscaleAlgorithmNewton::setupData( fileName ) \n";
 #endif
 
     // Read parameters
-    multiscaleParameterListPtr_Type solverParametersList = Teuchos::rcp( new Teuchos::ParameterList );
-    solverParametersList = Teuchos::getParametersFromXmlFile( fileName );
+    multiscaleParameterListPtr_Type solverParametersList = Teuchos::rcp ( new Teuchos::ParameterList );
+    solverParametersList = Teuchos::getParametersFromXmlFile ( fileName );
 
-    setAlgorithmName( solverParametersList->sublist( "Multiscale", true, "" ) );
-    setAlgorithmParameters( solverParametersList->sublist( "Multiscale Algorithm", true, "" ) );
+    setAlgorithmName ( solverParametersList->sublist ( "Multiscale", true, "" ) );
+    setAlgorithmParameters ( solverParametersList->sublist ( "Multiscale Algorithm", true, "" ) );
 }
 
 void
 MultiscaleAlgorithmExplicit::subIterate()
 {
-    checkResidual( 0 );
+    checkResidual ( 0 );
 }
 
 } // Namespace Multiscale

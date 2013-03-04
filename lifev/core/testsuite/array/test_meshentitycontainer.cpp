@@ -59,29 +59,29 @@
 #include <lifev/core/mesh/MeshEntityContainer.hpp>
 
 int
-main(int argc, char ** argv)
+main (int argc, char** argv)
 {
-using namespace LifeV;
+    using namespace LifeV;
 
 #ifdef HAVE_MPI
-    MPI_Init(&argc, &argv);
+    MPI_Init (&argc, &argv);
     std::cout << "MPI Initialization" << std::endl;
 #endif
 
     MeshEntityContainer<int> a;
-    MeshEntityContainer<float> b(10);
+    MeshEntityContainer<float> b (10);
 
-    for (MeshEntityContainer<float>::iterator p=b.begin(); p!= b.end(); ++p)
+    for (MeshEntityContainer<float>::iterator p = b.begin(); p != b.end(); ++p)
     {
-        *p=10.0;
+        *p = 10.0;
     }
-    std::cout << b(4) << "\n";
+    std::cout << b (4) << "\n";
 
 #ifdef HAVE_MPI
     MPI_Finalize();
     std::cout << "MPI Finalization" << std::endl;
 #endif
 
-    return( EXIT_SUCCESS );
+    return ( EXIT_SUCCESS );
 }
 

@@ -62,10 +62,10 @@ namespace LifeV
 
 //! MeshData - class for handling spatial discretization.
 /*!
-	@author M.A. Fernandez
-	@author Cristiano Malossi
+    @author M.A. Fernandez
+    @author Cristiano Malossi
 
-	The class is a container for mesh information.
+    The class is a container for mesh information.
  */
 
 class MeshData
@@ -83,12 +83,12 @@ public:
       @param dataFile data file
       @param section the section in the data file
      */
-    MeshData( const GetPot& dataFile, const std::string& section = "space_discretization" );
+    MeshData ( const GetPot& dataFile, const std::string& section = "space_discretization" );
 
     //! Copy constructor
     /*!
      */
-    MeshData( const MeshData& meshData );
+    MeshData ( const MeshData& meshData );
 
     //! Virtual destructor
     virtual ~MeshData() {};
@@ -104,7 +104,7 @@ public:
      @param dataFile data file
      @param section file section
      */
-    void setup( const GetPot& dataFile, const std::string& section );
+    void setup ( const GetPot& dataFile, const std::string& section );
 
     //! Set all members using a Teuchos ParameterList
     /*!
@@ -117,7 +117,7 @@ public:
     void setup( const Teuchos::ParameterList& meshParameters);
 
     //! Display the values
-    virtual void showMe( std::ostream& output = std::cout ) const;
+    virtual void showMe ( std::ostream& output = std::cout ) const;
 
     //@}
 
@@ -125,11 +125,26 @@ public:
     //! @name Set Methods
     //@{
 
-    void setMeshDir  ( const std::string& dir )   { M_meshDir  = dir; }
-    void setMeshFile ( const std::string& file )  { M_meshFile = file; }
-    void setMeshType ( const std::string& type )  { M_meshType = type; }
-    void setMOrder   ( const std::string& order ) { M_order    = order; }
-    void setVerbose  ( const bool& isVerbose )    { M_verbose  = isVerbose; }
+    void setMeshDir  ( const std::string& dir )
+    {
+        M_meshDir  = dir;
+    }
+    void setMeshFile ( const std::string& file )
+    {
+        M_meshFile = file;
+    }
+    void setMeshType ( const std::string& type )
+    {
+        M_meshType = type;
+    }
+    void setMOrder   ( const std::string& order )
+    {
+        M_order    = order;
+    }
+    void setVerbose  ( const bool& isVerbose )
+    {
+        M_verbose  = isVerbose;
+    }
 
     //@}
 
@@ -137,11 +152,26 @@ public:
     //! @name Get Methods
     //@{
 
-    const std::string&   meshDir()   const { return M_meshDir; }
-    const std::string&   meshFile()  const { return M_meshFile; }
-    const std::string&   meshType()  const { return M_meshType; }
-    const std::string&   mOrder()    const { return M_order; }
-    const bool&          verbose()   const { return M_verbose; }
+    const std::string&   meshDir()   const
+    {
+        return M_meshDir;
+    }
+    const std::string&   meshFile()  const
+    {
+        return M_meshFile;
+    }
+    const std::string&   meshType()  const
+    {
+        return M_meshType;
+    }
+    const std::string&   mOrder()    const
+    {
+        return M_order;
+    }
+    const bool&          verbose()   const
+    {
+        return M_verbose;
+    }
 
     //@}
 
@@ -152,61 +182,81 @@ private:
     std::string     M_meshType;    //!< mesh type
     std::string     M_order;       //!< mesh type
 
-    bool            M_verbose;		//!< verbose output?
+    bool            M_verbose;      //!< verbose output?
 };
 
 template <typename MC>
-void readMesh( RegionMesh<LinearTriangle, MC>& mesh, const MeshData& data )
+void readMesh ( RegionMesh<LinearTriangle, MC>& mesh, const MeshData& data )
 {
     if ( data.verbose() )
+    {
         std::cout << "\nBuilding mesh ... ";
+    }
 
 
     if ( data.meshType() == ".msh" )
-        readFreeFemFile( mesh, data.meshDir() + data.meshFile(), 1, data.verbose() );
+    {
+        readFreeFemFile ( mesh, data.meshDir() + data.meshFile(), 1, data.verbose() );
+    }
     else
-        ERROR_MSG( "Sorry, this mesh file can not be loaded" );
+    {
+        ERROR_MSG ( "Sorry, this mesh file can not be loaded" );
+    }
 
     //Update Edges
-    mesh.updateElementFacets(true);
+    mesh.updateElementFacets (true);
 
     if ( data.verbose() )
+    {
         std::cout << "mesh read.\n" << std::endl;
+    }
 }
 
 template <typename GEOSHAPE, typename MC>
-void readMesh( RegionMesh<GEOSHAPE, MC>& mesh, const MeshData& data )
+void readMesh ( RegionMesh<GEOSHAPE, MC>& mesh, const MeshData& data )
 {
     if ( data.verbose() )
+    {
         std::cout << "\nBuilding mesh ... ";
+    }
 
-    bool updateEdgesAndFaces(true);
+    bool updateEdgesAndFaces (true);
 
     if ( data.meshType() == ".mesh" )
     {
-    	BareMesh<GEOSHAPE> bareMesh;
-       	MeshIO::ReadINRIAMeshFile( bareMesh, data.meshDir() + data.meshFile(), 1, data.verbose() );
-    	convertBareMesh ( bareMesh, mesh );
-    //	readINRIAMeshFile( mesh, data.meshDir() + data.meshFile(), 1, data.verbose() );
+        BareMesh<GEOSHAPE> bareMesh;
+        MeshIO::ReadINRIAMeshFile ( bareMesh, data.meshDir() + data.meshFile(), 1, data.verbose() );
+        convertBareMesh ( bareMesh, mesh );
+        //  readINRIAMeshFile( mesh, data.meshDir() + data.meshFile(), 1, data.verbose() );
     }
     else if ( data.meshType() == ".m++" )
-        readMppFile( mesh, data.meshDir() + data.meshFile(), 1, data.verbose() );
+    {
+        readMppFile ( mesh, data.meshDir() + data.meshFile(), 1, data.verbose() );
+    }
     else if ( data.meshType() == ".msh" )
-        readGmshFile( mesh, data.meshDir() + data.meshFile(), 1 );
+    {
+        readGmshFile ( mesh, data.meshDir() + data.meshFile(), 1 );
+    }
     else if ( data.meshType() == ".vol" )
-        readNetgenMesh( mesh, data.meshDir() + data.meshFile(), 1, data.verbose() );
+    {
+        readNetgenMesh ( mesh, data.meshDir() + data.meshFile(), 1, data.verbose() );
+    }
     else
-        ERROR_MSG( "Sorry, this mesh file can not be loaded" );
+    {
+        ERROR_MSG ( "Sorry, this mesh file can not be loaded" );
+    }
 
     //Update Edges & Faces
     if (updateEdgesAndFaces)
     {
-        mesh.updateElementRidges( true, data.verbose() );
-        mesh.updateElementFacets( true, data.verbose() );
+        mesh.updateElementRidges ( true, data.verbose() );
+        mesh.updateElementFacets ( true, data.verbose() );
     }
 
     if ( data.verbose() )
+    {
         std::cout << "mesh read.\n" << std::endl;
+    }
 }
 
 

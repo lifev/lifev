@@ -95,7 +95,7 @@ public:
      *
      * @param fileName Name of data file.
      */
-    virtual void setupData( const std::string& fileName );
+    virtual void setupData ( const std::string& fileName );
 
     //! Setup the model.
     /*!
@@ -170,7 +170,10 @@ public:
      *  This method has to be called before the automatic destructor, in order
      *  to disconnect the coupling classes from the model classes.
      */
-    void clearCouplingsList() { M_couplings.clear(); }
+    void clearCouplingsList()
+    {
+        M_couplings.clear();
+    }
 
     //@}
 
@@ -182,26 +185,38 @@ public:
     /*!
      * @param id Model ID
      */
-    void setID( const UInt& id ) { M_ID = id; }
+    void setID ( const UInt& id )
+    {
+        M_ID = id;
+    }
 
     //! Set the number of couplings attached to this model
     /*!
      * @param couplingsNumber number of couplings attached to this model
      */
-    void setCouplingsNumber( const UInt& couplingsNumber ) { M_couplings.resize( couplingsNumber ); }
+    void setCouplingsNumber ( const UInt& couplingsNumber )
+    {
+        M_couplings.resize ( couplingsNumber );
+    }
 
     //! Add a pointer to one of the couplings attached to this model
     /*!
      * @param localCouplingID local coupling ID
      * @param coupling shared_ptr of the coupling
      */
-    void setCoupling( const UInt& localCouplingID, const multiscaleCouplingPtr_Type& coupling ) { M_couplings[localCouplingID] = coupling ; }
+    void setCoupling ( const UInt& localCouplingID, const multiscaleCouplingPtr_Type& coupling )
+    {
+        M_couplings[localCouplingID] = coupling ;
+    }
 
     //! Add a pointer to one of the couplings which couple the model
     /*!
      * @param coupling shared_ptr of the coupling
      */
-    void addCoupling( const multiscaleCouplingPtr_Type& coupling ) { M_couplings.push_back( coupling ); }
+    void addCoupling ( const multiscaleCouplingPtr_Type& coupling )
+    {
+        M_couplings.push_back ( coupling );
+    }
 
     //! Setup the global data of the model.
     /*!
@@ -210,7 +225,10 @@ public:
      *
      * @param globalData Global data container.
      */
-    void setGlobalData( const multiscaleDataPtr_Type& globalData ) { M_globalData = globalData; }
+    void setGlobalData ( const multiscaleDataPtr_Type& globalData )
+    {
+        M_globalData = globalData;
+    }
 
     //! Scale, rotate and translate the Model in the 3D space
     /*!
@@ -219,15 +237,18 @@ public:
      * @param rotate Vector (Rx,Ry,Rz) of angles for rotation (degree units)
      * @param translate Vector (Tx,Ty,Tz) of offset for position
      */
-    void setGeometry( const boost::array< Real, NDIM >& scale,
-                      const boost::array< Real, NDIM >& rotate,
-                      const boost::array< Real, NDIM >& translate );
+    void setGeometry ( const boost::array< Real, NDIM >& scale,
+                       const boost::array< Real, NDIM >& rotate,
+                       const boost::array< Real, NDIM >& translate );
 
     //! Set the epetra communicator for the model
     /*!
      * @param comm Epetra communicator
      */
-    void setCommunicator( const multiscaleCommPtr_Type& comm ) { M_comm = comm; }
+    void setCommunicator ( const multiscaleCommPtr_Type& comm )
+    {
+        M_comm = comm;
+    }
 
     //@}
 
@@ -239,58 +260,82 @@ public:
     /*!
      * @return global ID of the model
      */
-    const UInt& ID() const { return M_ID; }
+    const UInt& ID() const
+    {
+        return M_ID;
+    }
 
     //! Get the type of the model
     /*!
      * @return type of the model
      */
-    const models_Type& type() const { return M_type; }
+    const models_Type& type() const
+    {
+        return M_type;
+    }
 
     //! Get one available flag by id
     /*!
      * @param id id of the boundary flag
      * @return flag
      */
-    const multiscaleID_Type& boundaryFlag( const multiscaleID_Type& boundaryID ) const { return M_boundaryFlags[boundaryID]; }
+    const multiscaleID_Type& boundaryFlag ( const multiscaleID_Type& boundaryID ) const
+    {
+        return M_boundaryFlags[boundaryID];
+    }
 
     //! Get the name of the model
     /*!
      * @return name of the model
      */
-    const std::string& modelName() const { return M_modelName; }
+    const std::string& modelName() const
+    {
+        return M_modelName;
+    }
 
     //! Get the number of couplings connecting the model
     /*!
      * @return number of couplings connecting the model
      */
-    UInt couplingsNumber() const { return static_cast< UInt > ( M_couplings.size() ); }
+    UInt couplingsNumber() const
+    {
+        return static_cast< UInt > ( M_couplings.size() );
+    }
 
     //! Get the coupling local ID through global ID
     /*!
      * @param ID global ID of the coupling
      * @return local ID of the coupling
      */
-    UInt couplingLocalID( const UInt& ID ) const;
+    UInt couplingLocalID ( const UInt& ID ) const;
 
     //! Get the coupling through local ID
     /*!
      * @param ID local ID of the coupling
      * @return Pointer to the coupling
      */
-    multiscaleCouplingPtr_Type coupling( const UInt& localID ) const { return M_couplings[localID]; }
+    multiscaleCouplingPtr_Type coupling ( const UInt& localID ) const
+    {
+        return M_couplings[localID];
+    }
 
     //! Get the global data of the model.
     /*!
      * @return Global data container.
      */
-    const multiscaleDataPtr_Type& globalData() const { return M_globalData; }
+    const multiscaleDataPtr_Type& globalData() const
+    {
+        return M_globalData;
+    }
 
     //! Get the communicator of the model.
     /*!
      * @return Communicator of the model.
      */
-    const multiscaleCommPtr_Type& communicator() const { return M_comm; }
+    const multiscaleCommPtr_Type& communicator() const
+    {
+        return M_comm;
+    }
 
     //@}
 
@@ -300,7 +345,7 @@ protected:
     /*!
      * @param tag user provided tag.
      */
-    void displayModelStatus( const std::string& tag ) const;
+    void displayModelStatus ( const std::string& tag ) const;
 
     UInt                                 M_ID;                 // Global ID of the model
     models_Type                          M_type;               // Type of the model (depends on the derived class)
@@ -322,9 +367,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    MultiscaleModel( const MultiscaleModel& model );
+    MultiscaleModel ( const MultiscaleModel& model );
 
-    MultiscaleModel& operator=( const MultiscaleModel& model );
+    MultiscaleModel& operator= ( const MultiscaleModel& model );
 
     //@}
 };
@@ -333,10 +378,12 @@ private:
 // Protected Inline Methods
 // ===================================================
 inline void
-MultiscaleModel::displayModelStatus( const std::string& tag ) const
+MultiscaleModel::displayModelStatus ( const std::string& tag ) const
 {
     if ( M_comm->MyPID() == 0 )
+    {
         std::cout << " MS-  " << tag << " model " << M_ID << " - " << M_modelName << std::endl;
+    }
 }
 
 } // Namespace multiscale

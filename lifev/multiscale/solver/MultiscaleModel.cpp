@@ -47,24 +47,24 @@ std::map< std::string, models_Type > multiscaleModelsMap;
 // Constructors & Destructor
 // ===================================================
 MultiscaleModel::MultiscaleModel() :
-        M_ID                (),
-        M_type              (),
-        M_couplings         (),
-        M_modelName         (),
-        M_boundaryFlags     (),
-        M_globalData        (),
-        M_geometryScale     (),
-        M_geometryRotate    (),
-        M_geometryTranslate (),
-        M_comm              ()
+    M_ID                (),
+    M_type              (),
+    M_couplings         (),
+    M_modelName         (),
+    M_boundaryFlags     (),
+    M_globalData        (),
+    M_geometryScale     (),
+    M_geometryRotate    (),
+    M_geometryTranslate (),
+    M_comm              ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 8100 ) << "MultiscaleModel::MultiscaleModel() \n";
+    debugStream ( 8100 ) << "MultiscaleModel::MultiscaleModel() \n";
 #endif
 
     //Initialization of geometry arrays
-    for ( UInt i( 0 ); i < nDimensions; ++i )
+    for ( UInt i ( 0 ); i < nDimensions; ++i )
     {
         M_geometryScale[i]     = 1.;
         M_geometryRotate[i]    = 0.;
@@ -76,23 +76,25 @@ MultiscaleModel::MultiscaleModel() :
 // Multiscale PhysicalModel Virtual Methods
 // ===================================================
 void
-MultiscaleModel::setupData( const std::string& fileName )
+MultiscaleModel::setupData ( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 8100 ) << "MultiscaleModel::SetupData( fileName ) \n";
+    debugStream ( 8100 ) << "MultiscaleModel::SetupData( fileName ) \n";
 #endif
 
-    GetPot dataFile( fileName );
+    GetPot dataFile ( fileName );
 
     // Read modelName
-    M_modelName = dataFile( "Multiscale/modelName", "modelName" );
+    M_modelName = dataFile ( "Multiscale/modelName", "modelName" );
 
     // Read flags
-    UInt componentSize = dataFile.vector_variable_size( "Multiscale/couplingFlags" );
-    M_boundaryFlags.reserve( componentSize );
-    for ( UInt j( 0 ); j < componentSize; ++j )
-        M_boundaryFlags.push_back( dataFile( "Multiscale/couplingFlags", 0, j ) );
+    UInt componentSize = dataFile.vector_variable_size ( "Multiscale/couplingFlags" );
+    M_boundaryFlags.reserve ( componentSize );
+    for ( UInt j ( 0 ); j < componentSize; ++j )
+    {
+        M_boundaryFlags.push_back ( dataFile ( "Multiscale/couplingFlags", 0, j ) );
+    }
 }
 
 void
@@ -100,33 +102,45 @@ MultiscaleModel::showMe()
 {
     std::cout << "Model id            = " << M_ID << std::endl
               << "Model name          = " << M_modelName << std::endl
-              << "Model type          = " << enum2String( M_type, multiscaleModelsMap ) << std::endl;
+              << "Model type          = " << enum2String ( M_type, multiscaleModelsMap ) << std::endl;
 
     std::cout << "Couplings number    = " << couplingsNumber() << std::endl;
     std::cout << "Couplings ID(s)     = ";
-    for ( UInt i( 0 ); i < couplingsNumber(); ++i )
+    for ( UInt i ( 0 ); i < couplingsNumber(); ++i )
+    {
         std::cout << M_couplings[i]->ID() << " ";
+    }
     std::cout << std::endl;
     std::cout << "Couplings type(s)   = ";
-    for ( UInt i( 0 ); i < couplingsNumber(); ++i )
-        std::cout << enum2String( M_couplings[i]->type(), multiscaleCouplingsMap ) << " ";
+    for ( UInt i ( 0 ); i < couplingsNumber(); ++i )
+    {
+        std::cout << enum2String ( M_couplings[i]->type(), multiscaleCouplingsMap ) << " ";
+    }
     std::cout << std::endl;
     std::cout << "Flags list          = ";
-    for ( UInt i( 0 ); i < couplingsNumber(); ++i )
+    for ( UInt i ( 0 ); i < couplingsNumber(); ++i )
+    {
         std::cout << M_boundaryFlags[i] << " ";
+    }
     std::cout << std::endl << std::endl;
 
     std::cout << "Geometry scale      = ";
-    for ( UInt i( 0 ); i < nDimensions; ++i )
+    for ( UInt i ( 0 ); i < nDimensions; ++i )
+    {
         std::cout << M_geometryScale[i] << " ";
+    }
     std::cout << std::endl;
     std::cout << "Geometry rotate     = ";
-    for ( UInt i( 0 ); i < nDimensions; ++i )
+    for ( UInt i ( 0 ); i < nDimensions; ++i )
+    {
         std::cout << M_geometryRotate[i] << " ";
+    }
     std::cout << std::endl;
     std::cout << "Geometry translate  = ";
-    for ( UInt i( 0 ); i < nDimensions; ++i )
+    for ( UInt i ( 0 ); i < nDimensions; ++i )
+    {
         std::cout << M_geometryTranslate[i] << " ";
+    }
     std::cout << std::endl << std::endl;
 }
 
@@ -134,13 +148,13 @@ MultiscaleModel::showMe()
 // Set Methods
 // ===================================================
 void
-MultiscaleModel::setGeometry( const boost::array< Real, NDIM >& scale,
-                              const boost::array< Real, NDIM >& rotate,
-                              const boost::array< Real, NDIM >& translate )
+MultiscaleModel::setGeometry ( const boost::array< Real, NDIM >& scale,
+                               const boost::array< Real, NDIM >& rotate,
+                               const boost::array< Real, NDIM >& translate )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 8100 ) << "MultiscaleModel::SetGeometry( scale, rotate, translate ) \n";
+    debugStream ( 8100 ) << "MultiscaleModel::SetGeometry( scale, rotate, translate ) \n";
 #endif
 
     M_geometryScale     = scale;
@@ -152,11 +166,13 @@ MultiscaleModel::setGeometry( const boost::array< Real, NDIM >& scale,
 // Get Methods
 // ===================================================
 UInt
-MultiscaleModel::couplingLocalID( const UInt& ID ) const
+MultiscaleModel::couplingLocalID ( const UInt& ID ) const
 {
-    for ( UInt localID( 0 ); localID < couplingsNumber(); ++localID )
+    for ( UInt localID ( 0 ); localID < couplingsNumber(); ++localID )
         if ( M_couplings[localID]->ID() == ID )
+        {
             return localID;
+        }
 
     return 0;
 }

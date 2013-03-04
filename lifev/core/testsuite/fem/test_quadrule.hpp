@@ -63,99 +63,101 @@ quadRuleTetra.plt ==> Show the Convergence Rate of all the quadrature rules on T
 namespace LifeV
 {
 typedef boost::numeric::ublas::vector<Real> Vector;
-typedef std::vector<QuadratureRule const *> container_Type;
+typedef std::vector<QuadratureRule const*> container_Type;
 typedef container_Type::const_iterator constIterator_Type;
 
 // This function checks the DEGREE of Exactness (DoE) of the quadrature rules
 template<typename Mesh>
-bool quad_check_doe(const ReferenceFE &refFE, const GeometricMap & geoMap, const container_Type &allQuad, std::string output_file)
+bool quad_check_doe (const ReferenceFE& refFE, const GeometricMap& geoMap, const container_Type& allQuad, std::string output_file)
 {
-    boost::shared_ptr<Epetra_Comm> dummyComm( new Epetra_SerialComm );
-    Mesh aMesh( dummyComm );
-    UInt nEl(1);
-    regularMesh3D( aMesh, 1, nEl, nEl, nEl);
+    boost::shared_ptr<Epetra_Comm> dummyComm ( new Epetra_SerialComm );
+    Mesh aMesh ( dummyComm );
+    UInt nEl (1);
+    regularMesh3D ( aMesh, 1, nEl, nEl, nEl);
 
     SetofFun fct;
     int nquadrule = allQuad.size();
-    bool check(false);
-    output_file = output_file+".txt";
-    std::ofstream ofile(output_file.c_str());
+    bool check (false);
+    output_file = output_file + ".txt";
+    std::ofstream ofile (output_file.c_str() );
 
 
-    for (Int nqr(0); nqr<nquadrule; ++nqr)
+    for (Int nqr (0); nqr < nquadrule; ++nqr)
     {
 
-        CurrentFE fe(refFE,geoMap, *allQuad[nqr]);
-        ofile<<"*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_"<<std::endl;
-        ofile<<allQuad[nqr]->name()<<std::endl;
-        ofile<<"Degree of Exactness: "<<allQuad[nqr]->degreeOfExactness()<<std::endl;
-        ofile<<"*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_"<<std::endl;
+        CurrentFE fe (refFE, geoMap, *allQuad[nqr]);
+        ofile << "*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_" << std::endl;
+        ofile << allQuad[nqr]->name() << std::endl;
+        ofile << "Degree of Exactness: " << allQuad[nqr]->degreeOfExactness() << std::endl;
+        ofile << "*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_*_" << std::endl;
 
-        ofile<<"polynomial \t\t test \t quadrature error"<<std::endl;
+        ofile << "polynomial \t\t test \t quadrature error" << std::endl;
 
-        for (UInt fun(0); fun<fct.nfun(); ++fun)
+        for (UInt fun (0); fun < fct.nfun(); ++fun)
         {
             Real integral = 0.;
-            for (UInt i=0; i<aMesh.numElements(); ++i)
+            for (UInt i = 0; i < aMesh.numElements(); ++i)
             {
-                fe.updateJacQuadPt(aMesh.element(i));
+                fe.updateJacQuadPt (aMesh.element (i) );
                 Real s = 0., x, y, z;
-                for ( UInt ig(0); ig < fe.nbQuadPt(); ++ig )
+                for ( UInt ig (0); ig < fe.nbQuadPt(); ++ig )
                 {
-                    fe.coorQuadPt( x, y, z, ig );
-                    s += fct.val( fun, x, y, z) * fe.weightDet( ig );
+                    fe.coorQuadPt ( x, y, z, ig );
+                    s += fct.val ( fun, x, y, z) * fe.weightDet ( ig );
                 }
-                integral+=s;
+                integral += s;
             }
             Real err;
-            err = integral-fct.ex_int(fun);
+            err = integral - fct.ex_int (fun);
             // Check for Quadrature Rule Errors
-            if (fct.degree(fun) <= allQuad[nqr]->degreeOfExactness())
+            if (fct.degree (fun) <= allQuad[nqr]->degreeOfExactness() )
             {
-                if (std::fabs(err)<1e-9)
+                if (std::fabs (err) < 1e-9)
                 {
                     check = true;
-                    ofile<<fct.name(fun)<<" \t passed \t ("<<err<<")"<<std::endl;
+                    ofile << fct.name (fun) << " \t passed \t (" << err << ")" << std::endl;
                 }
                 else
                 {
                     check = false;
-                    ofile<<fct.name(fun)<<" \t FAILED \t ("<<err<<")"<<std::endl;
+                    ofile << fct.name (fun) << " \t FAILED \t (" << err << ")" << std::endl;
                 }
             }
 
         }//end for on fun
-        ofile<<std::endl<<std::endl;
+        ofile << std::endl << std::endl;
     }//end for on qr
     return check;
 }
 
 // This function checks the convergence rate (CR) of the quadrature rules
 template<typename Mesh>
-bool quad_check_cr( const ReferenceFE &refFE, const GeometricMap & geoMap, const container_Type &allQuad, std::string output_name)
+bool quad_check_cr ( const ReferenceFE& refFE, const GeometricMap& geoMap, const container_Type& allQuad, std::string output_name)
 {
-    boost::shared_ptr<Epetra_Comm> dummyComm( new Epetra_SerialComm );
+    boost::shared_ptr<Epetra_Comm> dummyComm ( new Epetra_SerialComm );
     SetofFun fct;
-    int fun(fct.nfun());
+    int fun (fct.nfun() );
 
-    int nrefine(4);
-    Vector h(nrefine);
+    int nrefine (4);
+    Vector h (nrefine);
 
-    for (int i=0; i<nrefine; ++i)
-        h(i) = std::pow(.5,i);
+    for (int i = 0; i < nrefine; ++i)
+    {
+        h (i) = std::pow (.5, i);
+    }
 
     int nquadrule = allQuad.size();
-    boost::numeric::ublas::matrix<double> err(nrefine,nquadrule+1);
+    boost::numeric::ublas::matrix<double> err (nrefine, nquadrule + 1);
 
-    for (int iref = 0; iref<nrefine; ++iref)
+    for (int iref = 0; iref < nrefine; ++iref)
     {
 
-        Mesh aMesh( dummyComm );
-        UInt nEl( std::pow(2.0,static_cast<double>(iref) ) );
-        regularMesh3D( aMesh, 1, nEl, nEl, nEl);
+        Mesh aMesh ( dummyComm );
+        UInt nEl ( std::pow (2.0, static_cast<double> (iref) ) );
+        regularMesh3D ( aMesh, 1, nEl, nEl, nEl);
 
-        err(iref,0) = h(iref);
-        for (int iqr = 0; iqr<nquadrule; ++iqr)
+        err (iref, 0) = h (iref);
+        for (int iqr = 0; iqr < nquadrule; ++iqr)
         {
 
             // ===================================================
@@ -163,20 +165,20 @@ bool quad_check_cr( const ReferenceFE &refFE, const GeometricMap & geoMap, const
             // mapping and quadrature rules
             // ===================================================
 
-            CurrentFE fe(refFE,geoMap, *allQuad[iqr]);
+            CurrentFE fe (refFE, geoMap, *allQuad[iqr]);
             Real integral = 0.;
-            for (UInt i=0; i<aMesh.numElements(); ++i)
+            for (UInt i = 0; i < aMesh.numElements(); ++i)
             {
-                fe.updateJacQuadPt(aMesh.element(i));
+                fe.updateJacQuadPt (aMesh.element (i) );
                 Real s = 0., x, y, z;
-                for ( UInt ig(0); ig < fe.nbQuadPt(); ++ig )
+                for ( UInt ig (0); ig < fe.nbQuadPt(); ++ig )
                 {
-                    fe.coorQuadPt( x, y, z, ig );
-                    s += fct.val( fun, x, y, z) * fe.weightDet( ig );
+                    fe.coorQuadPt ( x, y, z, ig );
+                    s += fct.val ( fun, x, y, z) * fe.weightDet ( ig );
                 }
-                integral+=s;
+                integral += s;
             }
-            err(iref,iqr+1) = std::fabs(integral-fct.ex_int(fun));
+            err (iref, iqr + 1) = std::fabs (integral - fct.ex_int (fun) );
 
 
         }//end for on qr
@@ -184,26 +186,30 @@ bool quad_check_cr( const ReferenceFE &refFE, const GeometricMap & geoMap, const
 
     std::string fname;
     {
-        fname = output_name+".dat";
-        std::ofstream ofile(fname.c_str());
-        for (int i = 0; i<nrefine; ++i)
+        fname = output_name + ".dat";
+        std::ofstream ofile (fname.c_str() );
+        for (int i = 0; i < nrefine; ++i)
         {
-            for (int j=0; j<nquadrule+1; ++j)
-                ofile<<err(i,j)<<" \t";
-            ofile<<std::endl;
+            for (int j = 0; j < nquadrule + 1; ++j)
+            {
+                ofile << err (i, j) << " \t";
+            }
+            ofile << std::endl;
         }
     }
     {
-        fname = output_name+".plt";
-        std::ofstream ofile(fname.c_str());
-        ofile<<"set timestamp"<<std::endl;
-        ofile<<"set logscale"<<std::endl;
-        ofile<<"plot ";
-        for (int i = 0; i<nquadrule; ++i)
-            ofile<<"\""<<output_name<<".dat\" using 1:"<<i+2<<" with linespoints title '"<<allQuad[i]->name()<<"' ,\\"<<std::endl;
-        ofile<<"\""<<output_name<<".dat\" using 1:($1*$1) with lines title 'order 2', \\"<<std::endl;
-        ofile<<"\""<<output_name<<".dat\" using 1:($1**4) with lines title 'order 4', \\"<<std::endl;
-        ofile<<"\""<<output_name<<".dat\" using 1:($1**6) with lines title 'order 6'";
+        fname = output_name + ".plt";
+        std::ofstream ofile (fname.c_str() );
+        ofile << "set timestamp" << std::endl;
+        ofile << "set logscale" << std::endl;
+        ofile << "plot ";
+        for (int i = 0; i < nquadrule; ++i)
+        {
+            ofile << "\"" << output_name << ".dat\" using 1:" << i + 2 << " with linespoints title '" << allQuad[i]->name() << "' ,\\" << std::endl;
+        }
+        ofile << "\"" << output_name << ".dat\" using 1:($1*$1) with lines title 'order 2', \\" << std::endl;
+        ofile << "\"" << output_name << ".dat\" using 1:($1**4) with lines title 'order 4', \\" << std::endl;
+        ofile << "\"" << output_name << ".dat\" using 1:($1**6) with lines title 'order 6'";
     }
 
     return true;

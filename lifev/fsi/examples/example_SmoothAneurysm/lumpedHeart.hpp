@@ -59,23 +59,23 @@ public:
     typedef FSIOperator::vectorPtr_Type                                                    vectorPtr_Type;
 
     LumpedHeart()
-            :
-            M_time(0.),
-            //M_BC(),
-            M_ODEscheme(),
-            M_dt(0.),
-            M_T_max()  ,
-            M_E_max()  ,
-            M_V_0()    ,
-            M_RV_art() ,
-            M_RA_V()   ,
-            M_LV_art() ,
-            M_LA_V()   ,
-            M_PV(),
-            M_intFlux(),
-            M_Vt_ao()
+        :
+        M_time (0.),
+        //M_BC(),
+        M_ODEscheme(),
+        M_dt (0.),
+        M_T_max()  ,
+        M_E_max()  ,
+        M_V_0()    ,
+        M_RV_art() ,
+        M_RA_V()   ,
+        M_LV_art() ,
+        M_LA_V()   ,
+        M_PV(),
+        M_intFlux(),
+        M_Vt_ao()
     {
-      M_ODEscheme.setup(1);
+        M_ODEscheme.setup (1);
     }
 
     void initParameters      ( FSIOperator&  Oper,
@@ -94,7 +94,7 @@ private:
     //! @name Private Methods
     //@{
 
-    Real                                      M_elastance(const Real& t);
+    Real                                      M_elastance (const Real& t);
 
     //! Short description of this method
     /*!

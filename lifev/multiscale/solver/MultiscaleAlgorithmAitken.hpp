@@ -80,7 +80,7 @@ public:
     /*!
      * @param FileName Name of the data file.
      */
-    void setupData( const std::string& fileName );
+    void setupData ( const std::string& fileName );
 
     //! Perform sub-iteration on the coupling variables
     void subIterate();
@@ -97,7 +97,7 @@ public:
     /*!
      * @param parameterList teuchos list of parameters
      */
-    void setAlgorithmParameters( const multiscaleParameterList_Type& parameterList );
+    void setAlgorithmParameters ( const multiscaleParameterList_Type& parameterList );
 
     //@}
 
@@ -106,9 +106,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    MultiscaleAlgorithmAitken( const MultiscaleAlgorithmAitken& algorithm );
+    MultiscaleAlgorithmAitken ( const MultiscaleAlgorithmAitken& algorithm );
 
-    MultiscaleAlgorithmAitken& operator=( const MultiscaleAlgorithmAitken& algorithm );
+    MultiscaleAlgorithmAitken& operator= ( const MultiscaleAlgorithmAitken& algorithm );
 
     //@}
 

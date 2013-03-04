@@ -55,30 +55,30 @@ DOFInterface::DOFInterface()
 // ===================================================
 
 
-ID DOFInterface::getInterfaceDof( const ID& i ) const
+ID DOFInterface::getInterfaceDof ( const ID& i ) const
 {
-    std::map<ID, ID>::const_iterator it = M_localDofMap.find( i );
+    std::map<ID, ID>::const_iterator it = M_localDofMap.find ( i );
     if ( it == M_localDofMap.end() )
     {
         std::cout << i << " : " << std::flush;
-        ERROR_MSG( "DOFInterface::getInterfaceDof : DOF number not found" );
+        ERROR_MSG ( "DOFInterface::getInterfaceDof : DOF number not found" );
     }
     return it->second;
 }
 
-bool DOFInterface::isMyInterfaceDof( const ID& i ) const
+bool DOFInterface::isMyInterfaceDof ( const ID& i ) const
 {
-    std::map<ID, ID>::const_iterator it = M_localDofMap.find( i );
+    std::map<ID, ID>::const_iterator it = M_localDofMap.find ( i );
     return ( it != M_localDofMap.end() );
 }
 
-std::ostream& DOFInterface::showMe( bool verbose, std::ostream& out ) const
+std::ostream& DOFInterface::showMe ( bool verbose, std::ostream& out ) const
 {
     out << "------------------------------" << std::endl;
     out << "\tNumber of DOF connections (M_localDofMap):" << M_localDofMap.size() << std::endl;
     if ( verbose )
     {
-        UInt count( 0 ), lines( 10 );
+        UInt count ( 0 ), lines ( 10 );
         out << "List of connections between DOF: (global, local)";
         for ( std::map<ID, ID>::const_iterator it = M_localDofMap.begin(); it != M_localDofMap.end(); ++it )
         {
@@ -94,7 +94,7 @@ std::ostream& DOFInterface::showMe( bool verbose, std::ostream& out ) const
     return out;
 }
 
-void DOFInterface::buildInverse( const DOFInterface& dofBase)
+void DOFInterface::buildInverse ( const DOFInterface& dofBase)
 {
     for ( std::map<ID, ID>::const_iterator it = dofBase.M_localDofMap.begin(); it != dofBase.M_localDofMap.end(); ++it )
     {
@@ -107,9 +107,9 @@ void DOFInterface::buildInverse( const DOFInterface& dofBase)
 // Set Methods
 // ===================================================
 
-void DOFInterface::set(const ID& key,const ID& value)
+void DOFInterface::set (const ID& key, const ID& value)
 {
-    M_localDofMap.find(key)->second = value;
+    M_localDofMap.find (key)->second = value;
 }
 
 // ===================================================

@@ -176,12 +176,12 @@ public:
        @param bcFunction the function holding the user defined function defining the boundary condition
        @param components vector of IDs storing the list of components involved in this boundary condition
      */
-    BCBase( const bcName_Type& name,
-            const bcFlag_Type& flag,
-            const bcType_Type& type,
-            const bcMode_Type& mode,
-            BCFunctionBase& bcFunction,
-            const bcComponentsVec_Type& components );
+    BCBase ( const bcName_Type& name,
+             const bcFlag_Type& flag,
+             const bcType_Type& type,
+             const bcMode_Type& mode,
+             BCFunctionBase& bcFunction,
+             const bcComponentsVec_Type& components );
 
     //! Constructor for BCBase without specifying components for Scalar, Tangential or Normal mode problems
     /*!
@@ -193,11 +193,11 @@ public:
        @param bcFunction the BCFunctionBase holding the function defining the boundary condition
        involved in this boundary condition
      */
-    BCBase( const bcName_Type& name,
-            const bcFlag_Type& flag,
-            const bcType_Type& type,
-            const bcMode_Type& mode,
-            BCFunctionBase& bcFunction );
+    BCBase ( const bcName_Type& name,
+             const bcFlag_Type& flag,
+             const bcType_Type& type,
+             const bcMode_Type& mode,
+             BCFunctionBase& bcFunction );
 
     //! Constructor for BCBase without specifying components for without list of components for Full mode problems
     /*!
@@ -210,12 +210,12 @@ public:
        @param numberOfComponents number of components involved
        in this boundary condition
      */
-    BCBase( const bcName_Type& name,
-            const bcFlag_Type& flag,
-            const bcType_Type& type,
-            const bcMode_Type& mode,
-            BCFunctionBase& bcFunction,
-            const UInt& numberOfComponents );
+    BCBase ( const bcName_Type& name,
+             const bcFlag_Type& flag,
+             const bcType_Type& type,
+             const bcMode_Type& mode,
+             BCFunctionBase& bcFunction,
+             const UInt& numberOfComponents );
 
     //! Constructor for BCBase to prescribe a boundary condition from a vector of dof values
     /*!
@@ -228,12 +228,12 @@ public:
        @param vector the vector containing the dof values to be prescribed as boundary data
        @param components vector of IDs storing the list of components involved in this boundary condition
      */
-    BCBase( const bcName_Type& name,
-            const bcFlag_Type& flag,
-            const bcType_Type& type,
-            const bcMode_Type& mode,
-            BCVectorBase& vector,
-            const bcComponentsVec_Type& components );
+    BCBase ( const bcName_Type& name,
+             const bcFlag_Type& flag,
+             const bcType_Type& type,
+             const bcMode_Type& mode,
+             BCVectorBase& vector,
+             const bcComponentsVec_Type& components );
 
     //! Constructor for BCBase to prescribe a boundary condition from a vector of dof values  without specifying components for Scalar, Tangential or Normal mode problems
     /*!
@@ -245,11 +245,11 @@ public:
        Component, Normal, Tangential, Directional
        @param bcVector the vector containing the dof values to be prescribed as boundary data
      */
-    BCBase( const bcName_Type& name,
-            const bcFlag_Type& flag,
-            const bcType_Type& type,
-            const bcMode_Type& mode,
-            BCVectorBase& bcVector );
+    BCBase ( const bcName_Type& name,
+             const bcFlag_Type& flag,
+             const bcType_Type& type,
+             const bcMode_Type& mode,
+             BCVectorBase& bcVector );
 
     //! Constructor for BCBase to prescribe a boundary condition from a vector of dof values  without specifying components for Full mode problems
     /*!
@@ -262,12 +262,12 @@ public:
        @param bcVector the vector containing the dof values to be prescribed as boundary data
        @param numberOfComponents number of components involved in this boundary condition
      */
-    BCBase( const bcName_Type& name,
-            const bcFlag_Type& flag,
-            const bcType_Type& type,
-            const bcMode_Type& mode,
-            BCVectorBase& bcVector,
-            const UInt& numberOfComponents );
+    BCBase ( const bcName_Type& name,
+             const bcFlag_Type& flag,
+             const bcType_Type& type,
+             const bcMode_Type& mode,
+             BCVectorBase& bcVector,
+             const UInt& numberOfComponents );
 
     //! Constructor for BCBase. The BC function depends on a generic FE vector (e.g. the solution at the previous time step)
     /*!
@@ -280,12 +280,12 @@ public:
        @param bcFunctionFEVectorDependent the BCFunctionUDepBase holding the function (depending on a generic finite element vector ) defining the boundary condition
        @param components vector of IDs storing the list of components involved in this boundary condition
      */
-    BCBase( const bcName_Type& name,
-            const bcFlag_Type& flag,
-            const bcType_Type& type,
-            const bcMode_Type& mode,
-            BCFunctionUDepBase& bcFunctionFEVectorDependent,
-            const bcComponentsVec_Type& components );
+    BCBase ( const bcName_Type& name,
+             const bcFlag_Type& flag,
+             const bcType_Type& type,
+             const bcMode_Type& mode,
+             BCFunctionUDepBase& bcFunctionFEVectorDependent,
+             const bcComponentsVec_Type& components );
 
     //! Constructor for BCBase without specifying components for Scalar, Tangential or Normal mode problems. The BC function depends on a generic FE vector (e.g. the solution at the previous time step)
     /*!
@@ -296,11 +296,11 @@ public:
        @param mode the boundary condition mode: Scalar, Normal, Tangential
        @param bcFunctionFEVectorDependent the BCFunctionUDepBase holding the function (depending on a generic finite element vector ) defining the boundary condition
      */
-    BCBase( const bcName_Type& name,
-            const bcFlag_Type& flag,
-            const bcType_Type& type,
-            const bcMode_Type& mode,
-            BCFunctionUDepBase& bcFunctionFEVectorDependent);
+    BCBase ( const bcName_Type& name,
+             const bcFlag_Type& flag,
+             const bcType_Type& type,
+             const bcMode_Type& mode,
+             BCFunctionUDepBase& bcFunctionFEVectorDependent);
 
     //! Constructor for BCBase without specifying components for Full mode problems. The BC function depends on a generic FE vector (e.g. the solution at the previous time step)
     /*!
@@ -312,19 +312,19 @@ public:
        @param bcFunctionFEVectorDependent the BCFunctionUDepBase holding the function (depending on a generic finite element vector ) defining the boundary condition
        @param numberOfComponents number of components involved in this boundary condition
      */
-    BCBase( const bcName_Type& name,
-            const bcFlag_Type& flag,
-            const bcType_Type& type,
-            const bcMode_Type& mode,
-            BCFunctionUDepBase& bcFunctionFEVectorDependent,
-            const UInt& numberOfComponents );
+    BCBase ( const bcName_Type& name,
+             const bcFlag_Type& flag,
+             const bcType_Type& type,
+             const bcMode_Type& mode,
+             BCFunctionUDepBase& bcFunctionFEVectorDependent,
+             const UInt& numberOfComponents );
 
     //! Copy constructor for BCBase
     /*!
      @param bcBase a BCBase object
      @warning This is not a copy constructor since the lists are built empty
      */
-    BCBase( const BCBase& bcBase );
+    BCBase ( const BCBase& bcBase );
 
     //! Destructor
     ~BCBase();
@@ -341,7 +341,7 @@ public:
        @param iComponent the "local" component
        @return the index of the component of the solution associated to the iComponent-th component prescribed in the boundary condition at hand
      */
-    ID component( const ID i ) const;
+    ID component ( const ID i ) const;
 
     //! Returns true if robin coefficient (in BC Vector ) is a VectorEpetra, false if it is scalar (default alphaCoef=1)
     /*!
@@ -362,7 +362,7 @@ public:
        @param iComponent component we are looking for in RobinVec
        @return value of the robin coefficient vector (in BC Vector) corresponding to iDof and iComponent
      */
-    Real robinCoeffVector( const ID& iDof, const ID& iComponent ) const;
+    Real robinCoeffVector ( const ID& iDof, const ID& iComponent ) const;
 
     //! Returns the value of the beta coefficient vector (in BC Vector)
     /*!
@@ -371,7 +371,7 @@ public:
        @param iComponent component we are looking for in BetaVec
        @return value of the Beta coefficient vector (in BC Vector) corresponding to iDof and iComponent
      */
-    Real betaCoeffVector( const ID& iDof, const ID& iComponent ) const;
+    Real betaCoeffVector ( const ID& iDof, const ID& iComponent ) const;
 
     //! Returns a pointer to the BCFunctionBase object
     /*!
@@ -395,7 +395,7 @@ public:
     /*!
        @param identifierToAddPtr pointer to the BCIdentifierBase object to be added
      */
-    void addBCIdentifier( BCIdentifierBase* identifierToAddPtr );
+    void addBCIdentifier ( BCIdentifierBase* identifierToAddPtr );
 
     //! Returns the size of the identifiers list
     /*!
@@ -408,7 +408,7 @@ public:
        @param verbose to specify the level of verbosity (false by default)
        @param outStream to specify the output stream (std::cout by default)
      */
-    std::ostream & showMe( bool verbose = false, std::ostream & outStream = std::cout ) const;
+    std::ostream& showMe ( bool verbose = false, std::ostream& outStream = std::cout ) const;
     //@}
 
 
@@ -421,7 +421,7 @@ public:
         @return Reference to a new BCBase with the same
                 content of bcBase
      */
-    BCBase & operator=( const BCBase& bcBase);
+    BCBase& operator= ( const BCBase& bcBase);
 
     //! Returns a pointer to the (i)-th element of the list of identifiers
     /*!
@@ -470,12 +470,16 @@ public:
        @param bcBase2 second BCBase to compare
        @return True if bcBase1 is smaller, False if bcBase1 is bigger
      */
-    friend bool operator<( const BCBase& bcBase1, const BCBase& bcBase2 )
+    friend bool operator< ( const BCBase& bcBase1, const BCBase& bcBase2 )
     {
-        if (bcBase1.type() == bcBase2.type())
-            return (bcBase1.flag() < bcBase2.flag());
+        if (bcBase1.type() == bcBase2.type() )
+        {
+            return (bcBase1.flag() < bcBase2.flag() );
+        }
         else
+        {
             return ( bcBase1.type() < bcBase2.type() );
+        }
     }
 
 
@@ -486,7 +490,7 @@ public:
        @param flag bcFlag_Type to be compared with bcBase flag
        @return True if bcBase's flag is equal to flag
      */
-    friend bool operator==( const BCBase& bcBase, const bcFlag_Type flag )
+    friend bool operator== ( const BCBase& bcBase, const bcFlag_Type flag )
     {
         return bcBase.flag() == flag;
     }
@@ -501,31 +505,37 @@ public:
     /*!
        @param bcVector to be set in BCBase class
      */
-    void setBCVector( const BCVectorBase& bcVector );
+    void setBCVector ( const BCVectorBase& bcVector );
 
     //! set BCFunctionBase boundary condition
     /*!
        @param bcFunction to be set in BCBase class
      */
-    void setBCFunction( const BCFunctionBase& bcFunction );
+    void setBCFunction ( const BCFunctionBase& bcFunction );
 
     //! set BCFunctionUDepBase boundary condition
     /*!
        @param bcFunctionFEVectorDependent to be set in BCBase class
      */
-    void setBCFunction( const BCFunctionUDepBase& bcFunctionFEVectorDependent );
+    void setBCFunction ( const BCFunctionUDepBase& bcFunctionFEVectorDependent );
 
     //! Set the BC offset
     /*!
        @param bcOffset to be set in BCBase class
      */
-    void setOffset(int bcOffset) {M_offset = bcOffset;}
+    void setOffset (int bcOffset)
+    {
+        M_offset = bcOffset;
+    }
 
     //! Set the BC type
     /*!
        @param bcOffset to be set in BCBase class
     */
-    void setType(const bcType_Type& bcType) {M_type = bcType;}
+    void setType (const bcType_Type& bcType)
+    {
+        M_type = bcType;
+    }
     //@}
 
     //! @name Get Methods
@@ -566,7 +576,10 @@ public:
     /*!
        @return offset associated to this boundary condition
      */
-    const int& offset() const {return M_offset;}
+    const int& offset() const
+    {
+        return M_offset;
+    }
 
     //! Returns the value of the robin coefficient (in BC Vector)
     /*!

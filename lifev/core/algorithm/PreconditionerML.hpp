@@ -68,7 +68,7 @@ namespace LifeV
   @maintainer Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
 */
 class PreconditionerML:
-        public Preconditioner
+    public Preconditioner
 {
 public:
 
@@ -90,9 +90,9 @@ public:
     //@{
     //! Empty constructor.
 #ifdef HAVE_MPI
-    PreconditionerML( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>( new Epetra_MpiComm( MPI_COMM_WORLD ) ) );
+    PreconditionerML ( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm> ( new Epetra_MpiComm ( MPI_COMM_WORLD ) ) );
 #else
-    PreconditionerML( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>( new Epetra_SerialComm ) );
+    PreconditionerML ( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm> ( new Epetra_SerialComm ) );
 #endif
 
     //! destructor.
@@ -102,7 +102,7 @@ public:
     /*!
       @param matrix Matrix upon which construct the preconditioner
     */
-    PreconditionerML( operator_type& matrix );
+    PreconditionerML ( operator_type& matrix );
 
     //@}
 
@@ -113,7 +113,7 @@ public:
     /*!
       @param matrix Matrix upon which construct the preconditioner
      */
-    Int buildPreconditioner( operator_type& matrix );
+    Int buildPreconditioner ( operator_type& matrix );
 
     //! Reset the preconditioner
     void resetPreconditioner();
@@ -125,10 +125,13 @@ public:
       @param section The section in "dataFile" where to find data about the preconditioner
       @param subSection The subsection in "dataFile" where to find data about the preconditioner
      */
-    virtual void createParametersList( list_Type& list,
-                                       const GetPot& dataFile,
-                                       const std::string& section,
-                                       const std::string& subSection ) { createMLList( list, dataFile, section, subSection, M_comm->MyPID() == 0 ); }
+    virtual void createParametersList ( list_Type& list,
+                                        const GetPot& dataFile,
+                                        const std::string& section,
+                                        const std::string& subSection )
+    {
+        createMLList ( list, dataFile, section, subSection, M_comm->MyPID() == 0 );
+    }
 
     //! Create the list of parameters of the preconditioner
     /*!
@@ -137,20 +140,20 @@ public:
       @param section The section in "dataFile" where to find data about the preconditioner
       @param subSection The subsection in "dataFile" where to find data about the preconditioner
      */
-    static void createMLList( list_Type& list,
-                              const GetPot& dataFile,
-                              const std::string& section,
-                              const std::string& subSection = "ML",
-                              const bool& verbose = true );
+    static void createMLList ( list_Type& list,
+                               const GetPot& dataFile,
+                               const std::string& section,
+                               const std::string& subSection = "ML",
+                               const bool& verbose = true );
 
     //! Apply the inverse of the preconditioner on vector1 and store the result in vector2
     /*!
       @param vector1 Vector to which we apply the preconditioner
       @param vector2 Vector to the store the result
      */
-    virtual Int ApplyInverse( const Epetra_MultiVector& vector1, Epetra_MultiVector& vector2 ) const
+    virtual Int ApplyInverse ( const Epetra_MultiVector& vector1, Epetra_MultiVector& vector2 ) const
     {
-        return M_preconditioner->ApplyInverse( vector1, vector2 );
+        return M_preconditioner->ApplyInverse ( vector1, vector2 );
     }
 
     //! Apply the preconditioner on vector1 and store the result in vector2
@@ -158,13 +161,13 @@ public:
       @param vector1 Vector to which we apply the preconditioner
       @param vector2 Vector to the store the result
      */
-    virtual Int Apply( const Epetra_MultiVector& vector1, Epetra_MultiVector& vector2 ) const
+    virtual Int Apply ( const Epetra_MultiVector& vector1, Epetra_MultiVector& vector2 ) const
     {
-        return M_preconditioner->Apply( vector1, vector2 );
+        return M_preconditioner->Apply ( vector1, vector2 );
     }
 
     //! Show informations about the preconditioner
-    virtual void showMe( std::ostream& output = std::cout ) const;
+    virtual void showMe ( std::ostream& output = std::cout ) const;
 
     //@}
 
@@ -184,7 +187,10 @@ public:
     /*!
       @param useTranspose If true the preconditioner is transposed
      */
-    Int SetUseTranspose( bool useTranspose=false ) { return M_preconditioner->SetUseTranspose(useTranspose); }
+    Int SetUseTranspose ( bool useTranspose = false )
+    {
+        return M_preconditioner->SetUseTranspose (useTranspose);
+    }
 
     //! Set the coordinate to be used for the visualization of the aggregates
     /*!
@@ -203,9 +209,9 @@ public:
       @param yCoord Shared pointer on a vector of the y coordinates of the vertices of the mesh
       @param zCoord Shared pointer on a vector of the z coordinates of the vertices of the mesh
      */
-    void setVerticesCoordinates(boost::shared_ptr<vector<Real> > xCoord,
-                                boost::shared_ptr<vector<Real> > yCoord,
-                                boost::shared_ptr<vector<Real> > zCoord);
+    void setVerticesCoordinates (boost::shared_ptr<vector<Real> > xCoord,
+                                 boost::shared_ptr<vector<Real> > yCoord,
+                                 boost::shared_ptr<vector<Real> > zCoord);
 
     //@}
 
@@ -220,21 +226,34 @@ public:
     super::prec_raw_type* preconditioner();
 
     //! Return a shared pointer on the preconditioner
-    super::prec_type preconditionerPtr() { return M_preconditioner; }
+    super::prec_type preconditionerPtr()
+    {
+        return M_preconditioner;
+    }
 
     //! Return the type of preconditioner
-    std::string preconditionerType() { return M_precType; }
+    std::string preconditionerType()
+    {
+        return M_precType;
+    }
 
     //! Return true if the preconditioner is transposed
-    bool UseTranspose() { return M_preconditioner->UseTranspose(); }
+    bool UseTranspose()
+    {
+        return M_preconditioner->UseTranspose();
+    }
 
     //! Return the Range map of the operator
-    const Epetra_Map & OperatorRangeMap() const
-    { return M_preconditioner->OperatorRangeMap(); }
+    const Epetra_Map& OperatorRangeMap() const
+    {
+        return M_preconditioner->OperatorRangeMap();
+    }
 
     //! Return the Domain map of the operator
-    const Epetra_Map & OperatorDomainMap() const
-    { return M_preconditioner->OperatorDomainMap(); }
+    const Epetra_Map& OperatorDomainMap() const
+    {
+        return M_preconditioner->OperatorDomainMap();
+    }
 
     //@}
 
@@ -259,10 +278,13 @@ private:
 };
 
 
-inline Preconditioner* createML() {return new PreconditionerML(); }
+inline Preconditioner* createML()
+{
+    return new PreconditionerML();
+}
 namespace
 {
-static bool registerML = PRECFactory::instance().registerProduct( "ML", &createML );
+static bool registerML = PRECFactory::instance().registerProduct ( "ML", &createML );
 }
 
 

@@ -38,12 +38,12 @@
 namespace LifeV
 {
 
-VectorElemental::VectorElemental( int nNode1, int nbr1 ) :
-        super( nNode1*nbr1 )
+VectorElemental::VectorElemental ( int nNode1, int nbr1 ) :
+    super ( nNode1* nbr1 )
 {
     _nBlockRow = nbr1;
-    _nRow.resize( _nBlockRow );
-    _firstRow.resize( _nBlockRow );
+    _nRow.resize ( _nBlockRow );
+    _firstRow.resize ( _nBlockRow );
     int first = 0, n;
     for ( n = 0; n < nbr1; n++ )
     {
@@ -53,13 +53,13 @@ VectorElemental::VectorElemental( int nNode1, int nbr1 ) :
     }
 }
 
-VectorElemental::VectorElemental( int nNode1, int nbr1,
-                  int nNode2, int nbr2 ) :
-        super( nNode1*nbr1 + nNode2*nbr2 )
+VectorElemental::VectorElemental ( int nNode1, int nbr1,
+                                   int nNode2, int nbr2 ) :
+    super ( nNode1 * nbr1 + nNode2* nbr2 )
 {
     _nBlockRow = nbr1 + nbr2;
-    _nRow.resize( _nBlockRow );
-    _firstRow.resize( _nBlockRow );
+    _nRow.resize ( _nBlockRow );
+    _firstRow.resize ( _nBlockRow );
     int first = 0, n;
     for ( n = 0; n < nbr1; n++ )
     {
@@ -75,14 +75,14 @@ VectorElemental::VectorElemental( int nNode1, int nbr1,
     }
 }
 
-VectorElemental::VectorElemental( int nNode1, int nbr1,
-                  int nNode2, int nbr2,
-                  int nNode3, int nbr3 ) :
-        super( nNode1*nbr1 + nNode2*nbr2 + nNode3*nbr3 )
+VectorElemental::VectorElemental ( int nNode1, int nbr1,
+                                   int nNode2, int nbr2,
+                                   int nNode3, int nbr3 ) :
+    super ( nNode1 * nbr1 + nNode2 * nbr2 + nNode3* nbr3 )
 {
     _nBlockRow = nbr1 + nbr2 + nbr3;
-    _nRow.resize( _nBlockRow );
-    _firstRow.resize( _nBlockRow );
+    _nRow.resize ( _nBlockRow );
+    _firstRow.resize ( _nBlockRow );
     int first = 0, n;
     for ( n = 0; n < nbr1; n++ )
     {
@@ -105,9 +105,11 @@ VectorElemental::VectorElemental( int nNode1, int nbr1,
 }
 
 
-void VectorElemental::showMe( std::ostream& c )
+void VectorElemental::showMe ( std::ostream& c )
 {
     for ( int i = 0; i < _nBlockRow; i++ )
-        c << "Block (" << i << "), " << block( i ) << std::endl;
+    {
+        c << "Block (" << i << "), " << block ( i ) << std::endl;
+    }
 }
 }

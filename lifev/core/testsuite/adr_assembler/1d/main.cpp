@@ -75,37 +75,38 @@ using namespace LifeV;
 
 namespace
 {
-static bool regIF = (PRECFactory::instance().registerProduct( "Ifpack", &createIfpack ));
-static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ));
+static bool regIF = (PRECFactory::instance().registerProduct ( "Ifpack", &createIfpack ) );
+static bool regML = (PRECFactory::instance().registerProduct ( "ML", &createML ) );
 }
 
-Real exactSolution( const Real& /* t */, const Real& x, const Real& /*y*/, const Real& /* z */, const ID& /* i */ )
+Real exactSolution ( const Real& /* t */, const Real& x, const Real& /*y*/, const Real& /* z */, const ID& /* i */ )
 {
-    return std::sin( M_PI * 0.5 * x );
+    return std::sin ( M_PI * 0.5 * x );
 }
 
 
-Real fRhs( const Real& /* t */, const Real& x, const Real& /* y */, const Real& /* z */ , const ID& /* i */ )
+Real fRhs ( const Real& /* t */, const Real& x, const Real& /* y */, const Real& /* z */ , const ID& /* i */ )
 {
-    return 1.25 * M_PI * M_PI * std::sin( M_PI * 0.5 * x );
+    return 1.25 * M_PI * M_PI * std::sin ( M_PI * 0.5 * x );
 }
 
 
 int
-main( int argc, char* argv[] )
+main ( int argc, char* argv[] )
 {
 
 #ifdef HAVE_MPI
-    MPI_Init(&argc, &argv);
+    MPI_Init (&argc, &argv);
 #endif
 
-    { // needed to properly destroy all objects inside before mpi finalize
+    {
+        // needed to properly destroy all objects inside before mpi finalize
 
 #ifdef HAVE_MPI
-    boost::shared_ptr<Epetra_Comm> Comm(new Epetra_MpiComm(MPI_COMM_WORLD));
-    ASSERT ( Comm->NumProc() < 2, "The test does not run in parallel." );
+        boost::shared_ptr<Epetra_Comm> Comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
+        ASSERT ( Comm->NumProc() < 2, "The test does not run in parallel." );
 #else
-    boost::shared_ptr<Epetra_Comm> Comm(new Epetra_SerialComm);
+        boost::shared_ptr<Epetra_Comm> Comm (new Epetra_SerialComm);
 #endif
 
     typedef RegionMesh<LinearLine> mesh_Type;
@@ -246,39 +247,63 @@ main( int argc, char* argv[] )
     if (verbose) std::cout << " -- Defining the exporter ... " << std::flush;
 
 #ifdef HAVE_HDF5
-    ExporterHDF5<mesh_Type> exporter ( dataFile, "solution" );
+        ExporterHDF5<mesh_Type> exporter ( dataFile, "solution" );
 #else
-    ExporterVTK<mesh_Type> exporter ( dataFile, "solution" );
+        ExporterVTK<mesh_Type> exporter ( dataFile, "solution" );
 #endif
-    exporter.setMeshProcId( meshPtr, Comm->MyPID()) ;
-    if (verbose) std::cout << " done ! " << std::endl;
+        exporter.setMeshProcId ( meshPtr, Comm->MyPID() ) ;
+        if (verbose)
+        {
+            std::cout << " done ! " << std::endl;
+        }
 
-    if (verbose) std::cout << " -- Defining the exported quantities ... " << std::flush;
-    boost::shared_ptr<vector_Type> solutionPtr (new vector_Type(solution,Repeated));
-    boost::shared_ptr<vector_Type> solutionErrPtr (new vector_Type(solutionErr,Repeated));
-    if (verbose) std::cout << " done ! " << std::endl;
+        if (verbose)
+        {
+            std::cout << " -- Defining the exported quantities ... " << std::flush;
+        }
+        boost::shared_ptr<vector_Type> solutionPtr (new vector_Type (solution, Repeated) );
+        boost::shared_ptr<vector_Type> solutionErrPtr (new vector_Type (solutionErr, Repeated) );
+        if (verbose)
+        {
+            std::cout << " done ! " << std::endl;
+        }
 
-    if (verbose) std::cout << " -- Updating the exporter ... " << std::flush;
-    exporter.addVariable( ExporterData<mesh_Type>::ScalarField, "solution", uFESpace, solutionPtr, UInt(0) );
-    exporter.addVariable( ExporterData<mesh_Type>::ScalarField, "error", uFESpace, solutionErrPtr, UInt(0) );
-    if (verbose) std::cout << " done ! " << std::endl;
+        if (verbose)
+        {
+            std::cout << " -- Updating the exporter ... " << std::flush;
+        }
+        exporter.addVariable ( ExporterData<mesh_Type>::ScalarField, "solution", uFESpace, solutionPtr, UInt (0) );
+        exporter.addVariable ( ExporterData<mesh_Type>::ScalarField, "error", uFESpace, solutionErrPtr, UInt (0) );
+        if (verbose)
+        {
+            std::cout << " done ! " << std::endl;
+        }
 
-    if (verbose) std::cout << " -- Exporting ... " << std::flush;
-    exporter.postProcess(0);
-    if (verbose) std::cout << " done ! " << std::endl;
+        if (verbose)
+        {
+            std::cout << " -- Exporting ... " << std::flush;
+        }
+        exporter.postProcess (0);
+        if (verbose)
+        {
+            std::cout << " done ! " << std::endl;
+        }
 
-    if ( std::fabs( l2error - 0.0006169843149652788l ) > 1e-10 )
-    {
-        std::cout << " <!> Solution has changed !!! <!> " << std::endl;
-        return EXIT_FAILURE;
-    }
-    if ( std::fabs( linferror - 0.0001092814405985187l ) > 1e-10 )
-    {
-        std::cout << " <!> Solution has changed !!! <!> " << std::endl;
-        return EXIT_FAILURE;
-    }
+        if ( std::fabs ( l2error - 0.0006169843149652788l ) > 1e-10 )
+        {
+            std::cout << " <!> Solution has changed !!! <!> " << std::endl;
+            return EXIT_FAILURE;
+        }
+        if ( std::fabs ( linferror - 0.0001092814405985187l ) > 1e-10 )
+        {
+            std::cout << " <!> Solution has changed !!! <!> " << std::endl;
+            return EXIT_FAILURE;
+        }
 
-    if (verbose) std::cout << "End Result: TEST PASSED" << std::endl;
+        if (verbose)
+        {
+            std::cout << "End Result: TEST PASSED" << std::endl;
+        }
 
     } // needed to properly destroy all objects inside before mpi finalize
 
@@ -286,5 +311,5 @@ main( int argc, char* argv[] )
     MPI_Finalize();
 #endif
 
-    return( EXIT_SUCCESS );
+    return ( EXIT_SUCCESS );
 }

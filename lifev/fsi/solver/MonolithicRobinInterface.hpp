@@ -69,12 +69,12 @@ public:
     //! @name Constructor & Destructor
     //@{
 
-    MonolithicRobinInterface():
-            M_alphaf(),
-            M_alphas(),
-            M_robinCoupling(),
-            M_robinPart(),
-            M_rhsVec()
+    MonolithicRobinInterface() :
+        M_alphaf(),
+        M_alphas(),
+        M_robinCoupling(),
+        M_robinPart(),
+        M_rhsVec()
     {}
 
     ~MonolithicRobinInterface() {}
@@ -90,27 +90,33 @@ public:
       \param data: data file
       \param section: the section (usually /robin) in the GetPot file where the parameters are specified
      */
-    void setRobinData(const GetPot& data, const std::string& section);
+    void setRobinData (const GetPot& data, const std::string& section);
 
     //! method to initialize the pointer to the robin coupling part of the matrix
     /*!
       \param data: data file
       \param section: the section (usually /robin) in the GetPot file where the parameters are specified
      */
-    void setRobinMatrix( MonolithicBlock::matrixPtr_Type& robinMatrix ){M_robinPart=robinMatrix;}
+    void setRobinMatrix ( MonolithicBlock::matrixPtr_Type& robinMatrix )
+    {
+        M_robinPart = robinMatrix;
+    }
 
     //! method to initialize the pointer to the robin RHS
     /*!
       \param vec: the rhs vector
      */
-    void setRobinRhs( MonolithicBlock::vectorPtr_Type& vec ) { M_rhsVec = vec; }
+    void setRobinRhs ( MonolithicBlock::vectorPtr_Type& vec )
+    {
+        M_rhsVec = vec;
+    }
 
     //! method to apply the robin coupling to the blocks.
     /*!
       Note that the coupling matrix M_robinCoupling must be set before calling this.
       \param blockVector: the vector of blocks to couple.
      */
-    void applyRobinCoupling( std::vector<MonolithicBlock::matrixPtr_Type> blockVector);
+    void applyRobinCoupling ( std::vector<MonolithicBlock::matrixPtr_Type> blockVector);
 
     //@}
 
@@ -120,7 +126,7 @@ protected:
     //! @name Protected Methods
     //@{
 
-    void applyRobinCoupling( MonolithicBlock::matrixPtr_Type firstBlock );
+    void applyRobinCoupling ( MonolithicBlock::matrixPtr_Type firstBlock );
 
     //@}
 

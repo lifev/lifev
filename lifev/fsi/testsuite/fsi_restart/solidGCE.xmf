@@ -57,7 +57,7 @@
                1260 3
            </DataStructure>
            <DataStructure  Format="HDF"
-                           Dimensions="1260 3"
+                           Dimensions="8200 3"
                            DataType="Float"
                            Precision="8">
                solidGCE.h5:/s-displacement.00000/Values
@@ -117,7 +117,7 @@
                1260 3
            </DataStructure>
            <DataStructure  Format="HDF"
-                           Dimensions="1260 3"
+                           Dimensions="8200 3"
                            DataType="Float"
                            Precision="8">
                solidGCE.h5:/s-displacement.00001/Values
@@ -177,7 +177,7 @@
                1260 3
            </DataStructure>
            <DataStructure  Format="HDF"
-                           Dimensions="1260 3"
+                           Dimensions="8200 3"
                            DataType="Float"
                            Precision="8">
                solidGCE.h5:/s-displacement.00002/Values
@@ -237,7 +237,7 @@
                1260 3
            </DataStructure>
            <DataStructure  Format="HDF"
-                           Dimensions="1260 3"
+                           Dimensions="8200 3"
                            DataType="Float"
                            Precision="8">
                solidGCE.h5:/s-displacement.00003/Values
@@ -297,7 +297,7 @@
                1260 3
            </DataStructure>
            <DataStructure  Format="HDF"
-                           Dimensions="1260 3"
+                           Dimensions="8200 3"
                            DataType="Float"
                            Precision="8">
                solidGCE.h5:/s-displacement.00004/Values
@@ -357,7 +357,7 @@
                1260 3
            </DataStructure>
            <DataStructure  Format="HDF"
-                           Dimensions="1260 3"
+                           Dimensions="8200 3"
                            DataType="Float"
                            Precision="8">
                solidGCE.h5:/s-displacement.00005/Values
@@ -417,7 +417,7 @@
                1260 3
            </DataStructure>
            <DataStructure  Format="HDF"
-                           Dimensions="1260 3"
+                           Dimensions="8200 3"
                            DataType="Float"
                            Precision="8">
                solidGCE.h5:/s-displacement.00006/Values
@@ -477,7 +477,7 @@
                1260 3
            </DataStructure>
            <DataStructure  Format="HDF"
-                           Dimensions="1260 3"
+                           Dimensions="8200 3"
                            DataType="Float"
                            Precision="8">
                solidGCE.h5:/s-displacement.00007/Values
@@ -537,70 +537,10 @@
                1260 3
            </DataStructure>
            <DataStructure  Format="HDF"
-                           Dimensions="1260 3"
+                           Dimensions="8200 3"
                            DataType="Float"
                            Precision="8">
                solidGCE.h5:/s-displacement.00008/Values
-           </DataStructure>
-         </DataStructure>
-      </Attribute>
-
-    </Grid>
-
-<!-- Time 0.009 Iteration 00009 -->
-    <Grid Name="Mesh 0.009">
-      <Time TimeType="Single" Value="0.009" />
-      <Topology
-         Type="Tetrahedron"
-         NumberOfElements="4800"
-         BaseOffset="0">
-         <DataStructure Format="HDF"
-                        Dimensions="4800 4"
-                        DataType="Int"
-                        Precision="8">
-             solidGCE.h5:/Connections/Values
-         </DataStructure>
-      </Topology>
-      <Geometry Type="X_Y_Z">
-         <DataStructure Format="HDF"
-                        Dimensions="1260"
-                        DataType="Float"
-                        Precision="8">
-             solidGCE.h5:/PointsX/Values
-         </DataStructure>
-         <DataStructure Format="HDF"
-                        Dimensions="1260"
-                        DataType="Float"
-                        Precision="8">
-             solidGCE.h5:/PointsY/Values
-         </DataStructure>
-         <DataStructure Format="HDF"
-                        Dimensions="1260"
-                        DataType="Float"
-                        Precision="8">
-             solidGCE.h5:/PointsZ/Values
-         </DataStructure>
-      </Geometry>
-
-
-      <Attribute
-         Type="Vector"
-         Center="Node"
-         Name="s-displacement">
-         <DataStructure ItemType="HyperSlab"
-                        Dimensions="1260 3"
-                        Type="HyperSlab">
-           <DataStructure  Dimensions="3 2"
-                           Format="XML">
-               0    0
-               1    1
-               1260 3
-           </DataStructure>
-           <DataStructure  Format="HDF"
-                           Dimensions="1260 3"
-                           DataType="Float"
-                           Precision="8">
-               solidGCE.h5:/s-displacement.00009/Values
            </DataStructure>
          </DataStructure>
       </Attribute>

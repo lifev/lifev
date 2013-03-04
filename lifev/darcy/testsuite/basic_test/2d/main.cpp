@@ -72,19 +72,19 @@ Simple Darcy test with Dirichlet, Neumann and Robin boundary conditions
 using namespace LifeV;
 namespace
 {
-static bool regIF = (PRECFactory::instance().registerProduct( "Ifpack", &createIfpack ));
-static bool regML = (PRECFactory::instance().registerProduct( "ML", &createML ));
+static bool regIF = (PRECFactory::instance().registerProduct ( "Ifpack", &createIfpack ) );
+static bool regML = (PRECFactory::instance().registerProduct ( "ML", &createML ) );
 }
 
 // ===================================================
 //! Main
 // ===================================================
-int main(int argc, char* argv[])
+int main (int argc, char* argv[])
 {
 
 #ifdef HAVE_MPI
 
-    MPI_Init( &argc, &argv );
+    MPI_Init ( &argc, &argv );
 
 #endif
 
@@ -92,9 +92,9 @@ int main(int argc, char* argv[])
     const LifeV::Real errorKnown ( 0.9554685918458008 );
 
     // Tolerance between the error and the error known
-    const LifeV::Real tolerance( 1e-10 );
+    const LifeV::Real tolerance ( 1e-10 );
 
-    darcy_nonlinear Darcy( argc, argv );
+    darcy_nonlinear Darcy ( argc, argv );
 
     // Error of the problem
     const LifeV::Real error = Darcy.run();

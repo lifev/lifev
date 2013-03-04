@@ -47,7 +47,7 @@ namespace LifeV
 //! ReferenceFEHdiv - Short description of the class
 
 class ReferenceFEHdiv
-        : public ReferenceFE
+    : public ReferenceFE
 {
 public:
 
@@ -105,7 +105,7 @@ public:
                       DofPatternType       patternType,
                       const ReferenceFE*         bdRefFE );
 
-    ~ReferenceFEHdiv(){};
+    ~ReferenceFEHdiv() {};
 
     //@}
 };

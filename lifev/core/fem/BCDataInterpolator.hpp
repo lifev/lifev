@@ -54,7 +54,8 @@
 #include <lifev/core/fem/BCFunction.hpp>
 #include <lifev/core/fem/BCManage.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! BCDataInterpolator - Class for interpolating boundary functions from scattered data
 /*!
@@ -101,7 +102,7 @@ namespace LifeV {
  */
 
 class BCDataInterpolator :
-                           public BCFunctionBase
+    public BCFunctionBase
 {
 public:
 
@@ -174,25 +175,25 @@ public:
      \param component The component of the vector function
      \return The selected component of the vector function evaluated in (t,x,y,z)
      */
-    Real interpolatedDataFunction( const Real& t,
-                  const Real& x,
-                  const Real& y,
-                  const Real& z,
-                  const ID& component );
+    Real interpolatedDataFunction ( const Real& t,
+                                    const Real& x,
+                                    const Real& y,
+                                    const Real& z,
+                                    const ID& component );
 
     //! Display the content of the variables
     /*!
      @param verbose The verbosity (default: false)
      @param out The ostream output (default: std::cout)
      */
-    void showMe( bool verbose = false,
-                 std::ostream & out = std::cout ) const;
+    void showMe ( bool verbose = false,
+                  std::ostream& out = std::cout ) const;
 
     //! Read control points and data from a file
     /*!
      @param filename The filename for the data sites and data values
      */
-    void readData( const std::string& fileName );
+    void readData ( const std::string& fileName );
 
     //! Export the interpolation matrix for debugging purposes
     /*!
@@ -210,7 +211,7 @@ public:
     /*!
      @param bcInterpolationMethod The interpolation method
      */
-    void setInterpolationMethod( const BCInterpolationMethod& bcInterpolationMethod )
+    void setInterpolationMethod ( const BCInterpolationMethod& bcInterpolationMethod )
     {
         M_interpolationMethod = bcInterpolationMethod;
     }
@@ -219,7 +220,7 @@ public:
     /*!
      @param filteringLevel The filtering level
      */
-    void setFilteringLevel( const Int& filteringLevel )
+    void setFilteringLevel ( const Int& filteringLevel )
     {
         M_filteringLevel = filteringLevel;
     }
@@ -253,17 +254,17 @@ private:
 
     void formRBFMatrix();
     void solveInterpolationSystem();
-    BCDataInterpolator_point interpolateVectorialFunction( const Real& t,
-                                                                const Real& x,
-                                                                const Real& y,
-                                                                const Real& z );
-    Real evaluateRBF( const BCDataInterpolator_point point1,
-                      const BCDataInterpolator_point point2 );
+    BCDataInterpolator_point interpolateVectorialFunction ( const Real& t,
+                                                            const Real& x,
+                                                            const Real& y,
+                                                            const Real& z );
+    Real evaluateRBF ( const BCDataInterpolator_point point1,
+                       const BCDataInterpolator_point point2 );
     bool needSideConstraints() const;
     void formRBFvectors();
-    void interpolateDataValuesInTime( const Real t );
+    void interpolateDataValuesInTime ( const Real t );
 
-    Int indexInTime(const Int dataSite, const Int timeInstant) const
+    Int indexInTime (const Int dataSite, const Int timeInstant) const
     {
         return M_nofControlPoints * timeInstant + dataSite;
     }

@@ -79,10 +79,10 @@ int main(int argc, char** argv)
 #ifdef HAVE_HDF5
 #ifdef HAVE_MPI
 
-	typedef RegionMesh<LinearTetra> mesh_Type;
+    typedef RegionMesh<LinearTetra> mesh_Type;
 
-    MPI_Init(&argc, &argv);
-    boost::shared_ptr<Epetra_Comm> comm(new Epetra_MpiComm(MPI_COMM_WORLD));
+    MPI_Init (&argc, &argv);
+    boost::shared_ptr<Epetra_Comm> comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
 
     if (comm->NumProc() != 1) {
     	std::cout << "This test needs to be run "
@@ -91,9 +91,9 @@ int main(int argc, char** argv)
     	return EXIT_FAILURE;
     }
 
-    GetPot commandLine(argc, argv);
-    string dataFileName = commandLine.follow("data", 2, "-f", "--file");
-    GetPot dataFile(dataFileName);
+    GetPot commandLine (argc, argv);
+    string dataFileName = commandLine.follow ("data", 2, "-f", "--file");
+    GetPot dataFile (dataFileName);
 
     const UInt numElements(dataFile("mesh/nelements",10));
     const Int numParts(dataFile("test/num_parts", 3));
@@ -106,9 +106,9 @@ int main(int argc, char** argv)
     std::cout << "Number of parts: " << numParts << std::endl;
     std::cout << "Name of HDF5 container: " << partsFileName << std::endl;
 
-    boost::shared_ptr<mesh_Type> fullMeshPtr(new mesh_Type( comm ) );
-	regularMesh3D(*fullMeshPtr, 1, numElements, numElements, numElements,
-				  false, 2.0, 2.0, 2.0, -1.0, -1.0, -1.0);
+    boost::shared_ptr<mesh_Type> fullMeshPtr (new mesh_Type ( comm ) );
+    regularMesh3D (*fullMeshPtr, 1, numElements, numElements, numElements,
+                   false, 2.0, 2.0, 2.0, -1.0, -1.0, -1.0);
 
 	Teuchos::ParameterList meshParameters;
     meshParameters.set("num_parts", numParts, "");
@@ -132,11 +132,11 @@ int main(int argc, char** argv)
 
 #else
     std::cout << "This test needs MPI to run. Aborting." << std::endl;
-	return(EXIT_FAILURE);
+    return (EXIT_FAILURE);
 #endif /* HAVE_MPI */
 #else
     std::cout << "This test needs HDF5 to run. Aborting." << std::endl;
-	return(EXIT_FAILURE);
+    return (EXIT_FAILURE);
 #endif /* HAVE_HDF5 */
 
     return EXIT_SUCCESS;

@@ -54,29 +54,31 @@ using namespace LifeV;
 
 
 int
-main( int argc, char** argv )
+main ( int argc, char** argv )
 {
 
 #ifdef HAVE_MPI
-    MPI_Init(&argc, &argv);
-    Epetra_MpiComm Comm(MPI_COMM_WORLD);
+    MPI_Init (&argc, &argv);
+    Epetra_MpiComm Comm (MPI_COMM_WORLD);
     if ( Comm.MyPID() == 0 )
+    {
         cout << "% using MPI" << endl;
+    }
 #else
     Epetra_SerialComm Comm;
     cout << "% using serial Version" << endl;
 #endif
 
-//**************** cylinder
-//    MPI_Init(&argc,&argv);
+    //**************** cylinder
+    //    MPI_Init(&argc,&argv);
 
-    EnsightToHdf5 es( argc, argv );
+    EnsightToHdf5 es ( argc, argv );
     es.run();
 
 #ifdef HAVE_MPI
     MPI_Finalize();
 #endif
-    return( EXIT_SUCCESS );
+    return ( EXIT_SUCCESS );
 }
 
 

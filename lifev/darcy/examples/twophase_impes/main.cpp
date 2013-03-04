@@ -77,22 +77,22 @@ using namespace LifeV;
 // ===================================================
 //! Main
 // ===================================================
-int main(int argc, char** argv)
+int main (int argc, char** argv)
 {
 
 #ifdef HAVE_MPI
-    MPI_Init(&argc, &argv);
+    MPI_Init (&argc, &argv);
     std::cout << "MPI Initialization" << std::endl;
 #endif
 
     // Error of the problem
-    LifeV::Real error(0);
+    LifeV::Real error (0);
     // Error known
-    const LifeV::Real errorKnown( 0.200340988220163 );
+    const LifeV::Real errorKnown ( 0.200340988220163 );
     // Tollerance between the error and the errorKnown
-    const LifeV::Real tollerance( 1e-8 );
+    const LifeV::Real tollerance ( 1e-8 );
 
-    impes IMPES( argc, argv );
+    impes IMPES ( argc, argv );
     error = IMPES.run();
 
 
@@ -101,9 +101,13 @@ int main(int argc, char** argv)
     std::cout << "MPI Finalization" << std::endl;
 #endif
 
-    if ( std::fabs( error - errorKnown ) > tollerance )
+    if ( std::fabs ( error - errorKnown ) > tollerance )
+    {
         return ( EXIT_FAILURE );
+    }
     else
+    {
         return ( EXIT_SUCCESS );
+    }
 }
 

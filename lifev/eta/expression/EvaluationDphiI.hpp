@@ -63,7 +63,7 @@ namespace ExpressionAssembly
   required to work within the Evaluation trees.
  */
 template <UInt spaceDim>
-class EvaluationDphiI<3,spaceDim>
+class EvaluationDphiI<3, spaceDim>
 {
 public:
 
@@ -95,16 +95,16 @@ public:
     //@{
 
     //! Empty constructor
-    EvaluationDphiI(){}
+    EvaluationDphiI() {}
 
     //! Copy constructor
-    EvaluationDphiI(const EvaluationDphiI& provider) : M_valuesPtr(provider.M_valuesPtr) {}
+    EvaluationDphiI (const EvaluationDphiI& provider) : M_valuesPtr (provider.M_valuesPtr) {}
 
     //! Expression-based constructor
-    explicit EvaluationDphiI(const ExpressionDphiI& /*expression*/) {}
+    explicit EvaluationDphiI (const ExpressionDphiI& /*expression*/) {}
 
     //! Destructor
-    ~EvaluationDphiI(){}
+    ~EvaluationDphiI() {}
 
     //@}
 
@@ -113,10 +113,13 @@ public:
     //@{
 
     //! Do nothing internal update
-    void update(const UInt& /*iElement*/){}
+    void update (const UInt& /*iElement*/) {}
 
     //! Display method
-    static void display(std::ostream& out = std::cout) { out << "dphi_i[3][" << spaceDim << "]";}
+    static void display (std::ostream& out = std::cout)
+    {
+        out << "dphi_i[3][" << spaceDim << "]";
+    }
 
     //@}
 
@@ -126,22 +129,22 @@ public:
 
     //! Do nothing setter for the global current FE
     template< typename CFEType >
-    void setGlobalCFE(const CFEType* /*globalCFE*/){}
+    void setGlobalCFE (const CFEType* /*globalCFE*/) {}
 
     //! Setter for the test current FE
     template< typename CFEType >
-    void setTestCFE(const CFEType* testCFE)
+    void setTestCFE (const CFEType* testCFE)
     {
-        ASSERT(testCFE != 0, "Nul pointer to the testCFE cannot be set");
-        M_valuesPtr = &(testCFE->M_dphi);
+        ASSERT (testCFE != 0, "Nul pointer to the testCFE cannot be set");
+        M_valuesPtr = & (testCFE->M_dphi);
     }
 
     //! Do nothing setter for the solution current FE
     template< typename CFEType >
-    void setSolutionCFE(const CFEType* /*solutionCFE*/){}
+    void setSolutionCFE (const CFEType* /*solutionCFE*/) {}
 
     //! Do nothing setter for the quadrature rule
-    void setQuadrature(const QuadratureRule&){}
+    void setQuadrature (const QuadratureRule&) {}
 
     //@}
 
@@ -150,19 +153,19 @@ public:
     //@{
 
     //! Getter for the value for a vector
-    const return_Type& value_qi(const UInt& q, const UInt& i) const
+    const return_Type& value_qi (const UInt& q, const UInt& i) const
     {
-        ASSERT( q < M_valuesPtr->size(), "Quadrature point index invalid");
-        ASSERT( i < (*M_valuesPtr)[q].size(), "Dof index invalid");
-        return (*M_valuesPtr)[q][i];
+        ASSERT ( q < M_valuesPtr->size(), "Quadrature point index invalid");
+        ASSERT ( i < (*M_valuesPtr) [q].size(), "Dof index invalid");
+        return (*M_valuesPtr) [q][i];
     }
 
     //! Getter for the value for a matrix
-    const return_Type& value_qij(const UInt& q, const UInt& i, const UInt& /*j*/) const
+    const return_Type& value_qij (const UInt& q, const UInt& i, const UInt& /*j*/) const
     {
-        ASSERT( q < M_valuesPtr->size(), "Quadrature point index invalid");
-        ASSERT( i < (*M_valuesPtr)[q].size(), "Dof index invalid");
-        return (*M_valuesPtr)[q][i];
+        ASSERT ( q < M_valuesPtr->size(), "Quadrature point index invalid");
+        ASSERT ( i < (*M_valuesPtr) [q].size(), "Dof index invalid");
+        return (*M_valuesPtr) [q][i];
     }
 
     //@}
@@ -170,19 +173,19 @@ public:
 private:
 
     //! Storage of the pointer to the data
-    std::vector< std::vector < return_Type > > const * M_valuesPtr;
+    std::vector< std::vector < return_Type > > const* M_valuesPtr;
 
 };
 
 
 template<UInt spaceDim>
-const flag_Type EvaluationDphiI<3,spaceDim>::S_globalUpdateFlag=ET_UPDATE_NONE;
+const flag_Type EvaluationDphiI<3, spaceDim>::S_globalUpdateFlag = ET_UPDATE_NONE;
 
 template<UInt spaceDim>
-const flag_Type EvaluationDphiI<3,spaceDim>::S_testUpdateFlag=ET_UPDATE_DPHI;
+const flag_Type EvaluationDphiI<3, spaceDim>::S_testUpdateFlag = ET_UPDATE_DPHI;
 
 template<UInt spaceDim>
-const flag_Type EvaluationDphiI<3,spaceDim>::S_solutionUpdateFlag=ET_UPDATE_NONE;
+const flag_Type EvaluationDphiI<3, spaceDim>::S_solutionUpdateFlag = ET_UPDATE_NONE;
 
 
 //! Evaluation of the basis function dphi_i in the case of a scalar FE.
@@ -195,15 +198,15 @@ const flag_Type EvaluationDphiI<3,spaceDim>::S_solutionUpdateFlag=ET_UPDATE_NONE
   required to work within the Evaluation trees.
  */
 template <UInt spaceDim>
-class EvaluationDphiI<1,spaceDim>
+class EvaluationDphiI<1, spaceDim>
 {
 public:
 
-	//! @name Public Types
+    //! @name Public Types
     //@{
 
     //! Type of the values returned by this class
-	typedef VectorSmall<spaceDim> return_Type;
+    typedef VectorSmall<spaceDim> return_Type;
 
     //@}
 
@@ -211,14 +214,14 @@ public:
     //! @name Static constants
     //@{
 
-	//! Flag for the global current FE
+    //! Flag for the global current FE
     const static flag_Type S_globalUpdateFlag;
 
     //! Flag for the test current FE
-	const static flag_Type S_testUpdateFlag;
+    const static flag_Type S_testUpdateFlag;
 
     //! Flag for the solution current FE
-	const static flag_Type S_solutionUpdateFlag;
+    const static flag_Type S_solutionUpdateFlag;
 
     //@}
 
@@ -226,17 +229,17 @@ public:
     //! @name Constructors, destructor
     //@{
 
-	//! Empty constructor
-	EvaluationDphiI(){}
+    //! Empty constructor
+    EvaluationDphiI() {}
 
-	//! Copy constructor
-	EvaluationDphiI(const EvaluationDphiI& provider) : M_valuesPtr(provider.M_valuesPtr) {}
+    //! Copy constructor
+    EvaluationDphiI (const EvaluationDphiI& provider) : M_valuesPtr (provider.M_valuesPtr) {}
 
-	//! Expression-based constructor
-	explicit EvaluationDphiI(const ExpressionDphiI& /*expression*/) {}
+    //! Expression-based constructor
+    explicit EvaluationDphiI (const ExpressionDphiI& /*expression*/) {}
 
     //! Destructor
-    ~EvaluationDphiI(){}
+    ~EvaluationDphiI() {}
 
     //@}
 
@@ -245,10 +248,13 @@ public:
     //@{
 
     //! Do nothing internal update
-	void update(const UInt& /*iElement*/){}
+    void update (const UInt& /*iElement*/) {}
 
     //! Display method
-	static void display(std::ostream& out = std::cout) { out << "dphi_i[" << spaceDim << "]";}
+    static void display (std::ostream& out = std::cout)
+    {
+        out << "dphi_i[" << spaceDim << "]";
+    }
 
     //@}
 
@@ -257,23 +263,23 @@ public:
     //@{
 
     //! Do nothing setter for the global current FE
-	template< typename CFEType >
-	void setGlobalCFE(const CFEType* /*globalCFE*/){}
+    template< typename CFEType >
+    void setGlobalCFE (const CFEType* /*globalCFE*/) {}
 
     //! Setter for the test current FE
-	template< typename CFEType >
-	void setTestCFE(const CFEType* testCFE)
+    template< typename CFEType >
+    void setTestCFE (const CFEType* testCFE)
     {
-        ASSERT(testCFE != 0, "Nul pointer to the testCFE cannot be set");
-        M_valuesPtr = &(testCFE->M_dphi);
+        ASSERT (testCFE != 0, "Nul pointer to the testCFE cannot be set");
+        M_valuesPtr = & (testCFE->M_dphi);
     }
 
     //! Do nothing setter for the solution current FE
-	template< typename CFEType >
-	void setSolutionCFE(const CFEType* /*solutionCFE*/){}
+    template< typename CFEType >
+    void setSolutionCFE (const CFEType* /*solutionCFE*/) {}
 
     //! Do nothing setter for the quadrature rule
-	void setQuadrature(const QuadratureRule&){}
+    void setQuadrature (const QuadratureRule&) {}
 
     //@}
 
@@ -282,19 +288,19 @@ public:
     //@{
 
     //! Getter for the value for a vector
-	const return_Type& value_qi(const UInt& q, const UInt& i) const
-	{
-        ASSERT( q < M_valuesPtr->size(), "Quadrature point index invalid");
-        ASSERT( i < (*M_valuesPtr)[q].size(), "Dof index invalid");
-        return (*M_valuesPtr)[q][i];
+    const return_Type& value_qi (const UInt& q, const UInt& i) const
+    {
+        ASSERT ( q < M_valuesPtr->size(), "Quadrature point index invalid");
+        ASSERT ( i < (*M_valuesPtr) [q].size(), "Dof index invalid");
+        return (*M_valuesPtr) [q][i];
     }
 
     //! Getter for the value for a matrix
-	const return_Type& value_qij(const UInt& q, const UInt& i, const UInt& /*j*/) const
-	{
-        ASSERT( q < M_valuesPtr->size(), "Quadrature point index invalid");
-        ASSERT( i < (*M_valuesPtr)[q].size(), "Dof index invalid");
-        return (*M_valuesPtr)[q][i];
+    const return_Type& value_qij (const UInt& q, const UInt& i, const UInt& /*j*/) const
+    {
+        ASSERT ( q < M_valuesPtr->size(), "Quadrature point index invalid");
+        ASSERT ( i < (*M_valuesPtr) [q].size(), "Dof index invalid");
+        return (*M_valuesPtr) [q][i];
     }
 
     //@}
@@ -302,19 +308,19 @@ public:
 private:
 
     //! Storage of the pointer to the data
-	std::vector< std::vector < VectorSmall<spaceDim> > > const * M_valuesPtr;
+    std::vector< std::vector < VectorSmall<spaceDim> > > const* M_valuesPtr;
 
 };
 
 
 template<UInt spaceDim>
-const flag_Type EvaluationDphiI<1,spaceDim>::S_globalUpdateFlag=ET_UPDATE_NONE;
+const flag_Type EvaluationDphiI<1, spaceDim>::S_globalUpdateFlag = ET_UPDATE_NONE;
 
 template<UInt spaceDim>
-const flag_Type EvaluationDphiI<1,spaceDim>::S_testUpdateFlag=ET_UPDATE_DPHI;
+const flag_Type EvaluationDphiI<1, spaceDim>::S_testUpdateFlag = ET_UPDATE_DPHI;
 
 template<UInt spaceDim>
-const flag_Type EvaluationDphiI<1,spaceDim>::S_solutionUpdateFlag=ET_UPDATE_NONE;
+const flag_Type EvaluationDphiI<1, spaceDim>::S_solutionUpdateFlag = ET_UPDATE_NONE;
 
 } // Namespace ExpressionAssembly
 
