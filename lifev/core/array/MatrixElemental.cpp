@@ -41,17 +41,17 @@ MatrixElemental::~MatrixElemental()
 {
 }
 
-MatrixElemental::MatrixElemental( UInt nNode1, UInt nbr1, UInt nbc1 ) :
-        _mat( nNode1*nbr1, nNode1*nbc1 )
+MatrixElemental::MatrixElemental ( UInt nNode1, UInt nbr1, UInt nbc1 ) :
+    _mat ( nNode1* nbr1, nNode1* nbc1 )
 {
     //
     _nBlockRow = nbr1;
     _nBlockCol = nbc1;
     //
-    _nRow.resize( _nBlockRow );
-    _firstRow.resize( _nBlockRow );
-    _nCol.resize( _nBlockCol );
-    _firstCol.resize( _nBlockCol );
+    _nRow.resize ( _nBlockRow );
+    _firstRow.resize ( _nBlockRow );
+    _nCol.resize ( _nBlockCol );
+    _firstCol.resize ( _nBlockCol );
     //
     UInt first = 0;
     for ( UInt n = 0; n < nbr1; n++ )
@@ -70,18 +70,18 @@ MatrixElemental::MatrixElemental( UInt nNode1, UInt nbr1, UInt nbc1 ) :
     }
 }
 
-MatrixElemental::MatrixElemental( UInt nNode1, UInt nbr1, UInt nbc1,
-                  UInt nNode2, UInt nbr2, UInt nbc2 ) :
-        _mat( nNode1*nbr1 + nNode2*nbr2, nNode1*nbc1 + nNode2*nbc2 )
+MatrixElemental::MatrixElemental ( UInt nNode1, UInt nbr1, UInt nbc1,
+                                   UInt nNode2, UInt nbr2, UInt nbc2 ) :
+    _mat ( nNode1 * nbr1 + nNode2* nbr2, nNode1 * nbc1 + nNode2* nbc2 )
 {
     //
     _nBlockRow = nbr1 + nbr2;
     _nBlockCol = nbc1 + nbc2;
     //
-    _nRow.resize( _nBlockRow );
-    _firstRow.resize( _nBlockRow );
-    _nCol.resize( _nBlockCol );
-    _firstCol.resize( _nBlockCol );
+    _nRow.resize ( _nBlockRow );
+    _firstRow.resize ( _nBlockRow );
+    _nCol.resize ( _nBlockCol );
+    _firstCol.resize ( _nBlockCol );
     //
     UInt first = 0, n;
     for ( n = 0; n < nbr1; n++ )
@@ -113,20 +113,20 @@ MatrixElemental::MatrixElemental( UInt nNode1, UInt nbr1, UInt nbc1,
 }
 
 
-MatrixElemental::MatrixElemental( UInt nNode1, UInt nbr1, UInt nbc1,
-                  UInt nNode2, UInt nbr2, UInt nbc2,
-                  UInt nNode3, UInt nbr3, UInt nbc3 ) :
-        _mat( nNode1*nbr1 + nNode2*nbr2 + nNode3*nbr3,
-              nNode1*nbc1 + nNode2*nbc2 + nNode3*nbc3 )
+MatrixElemental::MatrixElemental ( UInt nNode1, UInt nbr1, UInt nbc1,
+                                   UInt nNode2, UInt nbr2, UInt nbc2,
+                                   UInt nNode3, UInt nbr3, UInt nbc3 ) :
+    _mat ( nNode1 * nbr1 + nNode2 * nbr2 + nNode3* nbr3,
+           nNode1 * nbc1 + nNode2 * nbc2 + nNode3* nbc3 )
 {
     //
     _nBlockRow = nbr1 + nbr2 + nbr3;
     _nBlockCol = nbc1 + nbc2 + nbc3;
     //
-    _nRow.resize( _nBlockRow );
-    _firstRow.resize( _nBlockRow );
-    _nCol.resize( _nBlockCol );
-    _firstCol.resize( _nBlockCol );
+    _nRow.resize ( _nBlockRow );
+    _firstRow.resize ( _nBlockRow );
+    _nCol.resize ( _nBlockCol );
+    _firstCol.resize ( _nBlockCol );
     //
     UInt first = 0, n;
     for ( n = 0; n < nbr1; n++ )
@@ -169,7 +169,7 @@ MatrixElemental::MatrixElemental( UInt nNode1, UInt nbr1, UInt nbc1,
     }
 }
 
-void MatrixElemental::showMe( std::ostream& c )
+void MatrixElemental::showMe ( std::ostream& c )
 {
     UInt i, j;
     for ( i = 0; i < _nBlockRow; i++ )
@@ -177,7 +177,7 @@ void MatrixElemental::showMe( std::ostream& c )
         for ( j = 0; j < _nBlockCol; j++ )
         {
             c << "Block (" << i << "," << j << "), ";
-            c << block( i, j ) << std::endl;
+            c << block ( i, j ) << std::endl;
         }
     }
 }

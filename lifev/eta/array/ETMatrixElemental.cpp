@@ -34,42 +34,43 @@
 
 #include <lifev/eta/array/ETMatrixElemental.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 // ===================================================
 // Constructors & Destructor
 // ===================================================
 
 ETMatrixElemental::
-ETMatrixElemental(const UInt& nbRow, const UInt& nbCol )
-	: 	M_rowIndices(nbRow,0),
-		M_columnIndices(nbCol,0),
-		M_nbRow(nbRow),
-		M_nbColumn(nbCol),
-		M_rawData(new Real*[nbRow])
+ETMatrixElemental (const UInt& nbRow, const UInt& nbCol )
+    :   M_rowIndices (nbRow, 0),
+        M_columnIndices (nbCol, 0),
+        M_nbRow (nbRow),
+        M_nbColumn (nbCol),
+        M_rawData (new Real*[nbRow])
 {
-    for (UInt iRow(0); iRow<nbRow; ++iRow)
+    for (UInt iRow (0); iRow < nbRow; ++iRow)
     {
-        M_rawData[iRow]=new Real[nbCol];
+        M_rawData[iRow] = new Real[nbCol];
     }
 
     zero();
 }
 
 ETMatrixElemental::
-ETMatrixElemental(const ETMatrixElemental& mat)
-	:	M_rowIndices(mat.M_rowIndices),
-		M_columnIndices(mat.M_columnIndices),
-		M_nbRow(mat.M_nbRow),
-		M_nbColumn(mat.M_nbColumn),
-		M_rawData( new Real*[M_nbRow])
+ETMatrixElemental (const ETMatrixElemental& mat)
+    :   M_rowIndices (mat.M_rowIndices),
+        M_columnIndices (mat.M_columnIndices),
+        M_nbRow (mat.M_nbRow),
+        M_nbColumn (mat.M_nbColumn),
+        M_rawData ( new Real*[M_nbRow])
 {
-    for (UInt iRow(0); iRow<M_nbRow; ++iRow)
+    for (UInt iRow (0); iRow < M_nbRow; ++iRow)
     {
-        M_rawData[iRow]=new Real[M_nbColumn];
-        for (UInt iCol(0); iCol<M_nbColumn; ++iCol)
+        M_rawData[iRow] = new Real[M_nbColumn];
+        for (UInt iCol (0); iCol < M_nbColumn; ++iCol)
         {
-            M_rawData[iRow][iCol]=mat.M_rawData[iRow][iCol];
+            M_rawData[iRow][iCol] = mat.M_rawData[iRow][iCol];
         }
     }
 }
@@ -77,7 +78,7 @@ ETMatrixElemental(const ETMatrixElemental& mat)
 ETMatrixElemental::
 ~ETMatrixElemental()
 {
-    for (UInt iRow(0); iRow<M_nbRow; ++iRow)
+    for (UInt iRow (0); iRow < M_nbRow; ++iRow)
     {
         delete M_rawData[iRow];
     }
@@ -90,12 +91,12 @@ ETMatrixElemental::
 
 void
 ETMatrixElemental::
-showMe( std::ostream& out ) const
+showMe ( std::ostream& out ) const
 {
     out << " Local matrix : " << M_nbRow << " x " << M_nbColumn << std::endl;
-    for (UInt i(0); i<M_nbRow; ++i)
+    for (UInt i (0); i < M_nbRow; ++i)
     {
-        for (UInt j(0); j<M_nbColumn; ++j)
+        for (UInt j (0); j < M_nbColumn; ++j)
         {
             out << "[" << i << "][" << j << "] " << M_rawData[i][j] << " ";
         };

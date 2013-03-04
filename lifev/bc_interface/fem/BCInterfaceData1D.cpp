@@ -43,15 +43,15 @@ namespace LifeV
 // Constructors
 // ===================================================
 BCInterfaceData1D::BCInterfaceData1D() :
-        BCInterfaceData         (),
-        M_side                  (),
-        M_line                  (),
-        M_quantity              (),
-        M_resistance            (),
-        M_capacitance           (),
-        M_mapSide               (),
-        M_mapQuantity           (),
-        M_mapLine               ()
+    BCInterfaceData         (),
+    M_side                  (),
+    M_line                  (),
+    M_quantity              (),
+    M_resistance            (),
+    M_capacitance           (),
+    M_mapSide               (),
+    M_mapQuantity           (),
+    M_mapLine               ()
 {
     //Set mapSide
     M_mapSide["left"]   = OneDFSI::left;
@@ -70,16 +70,16 @@ BCInterfaceData1D::BCInterfaceData1D() :
     M_mapLine["second"] = OneDFSI::second;
 }
 
-BCInterfaceData1D::BCInterfaceData1D( const BCInterfaceData1D& data ) :
-        BCInterfaceData         ( data ),
-        M_side                  ( data.M_side ),
-        M_line                  ( data.M_line ),
-        M_quantity              ( data.M_quantity ),
-        M_resistance            ( data.M_resistance ),
-        M_capacitance           ( data.M_capacitance ),
-        M_mapSide               ( data.M_mapSide ),
-        M_mapQuantity           ( data.M_mapQuantity ),
-        M_mapLine               ( data.M_mapLine )
+BCInterfaceData1D::BCInterfaceData1D ( const BCInterfaceData1D& data ) :
+    BCInterfaceData         ( data ),
+    M_side                  ( data.M_side ),
+    M_line                  ( data.M_line ),
+    M_quantity              ( data.M_quantity ),
+    M_resistance            ( data.M_resistance ),
+    M_capacitance           ( data.M_capacitance ),
+    M_mapSide               ( data.M_mapSide ),
+    M_mapQuantity           ( data.M_mapQuantity ),
+    M_mapLine               ( data.M_mapLine )
 {
 }
 
@@ -87,11 +87,11 @@ BCInterfaceData1D::BCInterfaceData1D( const BCInterfaceData1D& data ) :
 // Operators
 // ===================================================
 BCInterfaceData1D&
-BCInterfaceData1D::operator=( const BCInterfaceData1D& data )
+BCInterfaceData1D::operator= ( const BCInterfaceData1D& data )
 {
     if ( this != &data )
     {
-        BCInterfaceData::operator=( data );
+        BCInterfaceData::operator= ( data );
         M_side                  = data.M_side;
         M_line                  = data.M_line;
         M_quantity              = data.M_quantity;
@@ -109,34 +109,36 @@ BCInterfaceData1D::operator=( const BCInterfaceData1D& data )
 // Methods
 // ===================================================
 void
-BCInterfaceData1D::readBC( const std::string& fileName, const std::string& dataSection, const std::string& name )
+BCInterfaceData1D::readBC ( const std::string& fileName, const std::string& dataSection, const std::string& name )
 {
     // Call to the base class
-    dataContainer_Type::readBC( fileName, dataSection, name );
+    dataContainer_Type::readBC ( fileName, dataSection, name );
 
     // Read 3D data
-    GetPot dataFile( fileName );
+    GetPot dataFile ( fileName );
 
-    readSide( dataFile, ( dataSection + name + "/side" ).c_str() );
-    readQuantity( dataFile, ( dataSection + name + "/quantity" ).c_str() );
-    readLine( dataFile, ( dataSection + name + "/line" ).c_str() );
-    readResistance( dataFile, ( dataSection + name + "/resistance" ).c_str() );
-    readCapacitance( dataFile, ( dataSection + name + "/capacitance" ).c_str() );
+    readSide ( dataFile, ( dataSection + name + "/side" ).c_str() );
+    readQuantity ( dataFile, ( dataSection + name + "/quantity" ).c_str() );
+    readLine ( dataFile, ( dataSection + name + "/line" ).c_str() );
+    readResistance ( dataFile, ( dataSection + name + "/resistance" ).c_str() );
+    readCapacitance ( dataFile, ( dataSection + name + "/capacitance" ).c_str() );
 }
 
 void
-BCInterfaceData1D::showMe( std::ostream& output ) const
+BCInterfaceData1D::showMe ( std::ostream& output ) const
 {
     // Call to the base class
-    dataContainer_Type::showMe( output );
+    dataContainer_Type::showMe ( output );
 
     // Show 1D data
     output << "Side              = " << M_side << std::endl;
     output << "Line              = " << M_line << std::endl;
     output << "Quantity          = " << M_quantity << std::endl;
     output << "Resistance        = ";
-    for ( UInt i(0); i < static_cast<UInt>( M_resistance.size() ); ++i )
+    for ( UInt i (0); i < static_cast<UInt> ( M_resistance.size() ); ++i )
+    {
         output << M_resistance[i] << " ";
+    }
     output << "\n";
     output << "Capacitance       = " << M_capacitance << std::endl;
 }
@@ -145,13 +147,15 @@ BCInterfaceData1D::showMe( std::ostream& output ) const
 // Private Methods
 // ===================================================
 void
-BCInterfaceData1D::readResistance( const GetPot& dataFile, const char* resistance )
+BCInterfaceData1D::readResistance ( const GetPot& dataFile, const char* resistance )
 {
-    UInt resistanceSize = dataFile.vector_variable_size( resistance );
+    UInt resistanceSize = dataFile.vector_variable_size ( resistance );
 
-    M_resistance.resize( resistanceSize );
-    for ( UInt j( 0 ); j < resistanceSize; ++j )
-        M_resistance[j] = dataFile( resistance, 0, j );
+    M_resistance.resize ( resistanceSize );
+    for ( UInt j ( 0 ); j < resistanceSize; ++j )
+    {
+        M_resistance[j] = dataFile ( resistance, 0, j );
+    }
 }
 
 } // Namespace LifeV

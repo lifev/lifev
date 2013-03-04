@@ -42,7 +42,7 @@
     \settowidth{\cftchapnumwidth}{\bfseries \appendixname\space A\hspace{1em}}}
 
 \title{\texttt{LifeV} Development Guidelines}
-\author{C. Malossi, S. Deparis}
+\author{A.\ Cristiano I.\ Malossi, Simone Deparis}
 \date{Last updated: December 3rd, 2010}
 
 \begin{document}
@@ -54,7 +54,7 @@ This short guide provides some useful rules to improve the development of \textt
 \section{Nomenclature of classes and methods}
 This is a short list of rules for the nomenclature of files, classes and methods.
 \begin{enumerate}
-  \item All declarations should be placed into \texttt{*.hpp} files. Method definitions should be inside the \texttt{*.cpp} files. In case of template classes and/or methods, the definitions should be placed at the end of the \texttt{*.hpp} files. Inlined methods must be in the \texttt{*.hpp} files: short inline methods (usually no more than one line), should be defined inside the class definition (without the inline keyword), while longer inline methods should be defined at the end of the \texttt{*.hpp} files, using the inline keyword. 
+  \item All declarations should be placed into \texttt{*.hpp} files. Method definitions should be inside the \texttt{*.cpp} files. In case of template classes and/or methods, the definitions should be placed at the end of the \texttt{*.hpp} files. Inlined methods must be in the \texttt{*.hpp} files: short inline methods (usually no more than one line), should be defined inside the class definition (without the inline keyword), while longer inline methods should be defined at the end of the \texttt{*.hpp} files, using the inline keyword.
   \item Use type definitions at the beginning of the class to introduce more generality in the code. The syntax for types and pointer types is the following:
 \begin{lstlisting}
 typedef Epetra_FEVector                       vector_Type;
@@ -142,7 +142,7 @@ void setDataFile( const std::string& ); //NO!!!
 
 void setDataFile( const std::string& fileName ); //OK
 \end{lstlisting}
-  \item Any method that does not change the state of the object must be made const (in particular getters). In addition all get methods should return a const object by reference (even if it is a \texttt{boost::shared\_ptr}). For clarity, the const directive should appear before the type of the object. 
+  \item Any method that does not change the state of the object must be made const (in particular getters). In addition all get methods should return a const object by reference (even if it is a \texttt{boost::shared\_ptr}). For clarity, the const directive should appear before the type of the object.
 \begin{lstlisting}
 matrix_Type&    matrix();     //NO!!!
 matrix_PtrType& matrix_ptr(); //NO!!!
@@ -165,7 +165,7 @@ void matrix_ptr( matrixPtr_Type& matrixPtr); //NO!!!
 void setMatrix( const matrix_Type& matrix );         //OK
 void setMatrixPtr( const matrixPtr_Type& matrixPtr); //OK
 \end{lstlisting}
-  \item Use white space to improve the readability of the code. 
+  \item Use white space to improve the readability of the code.
 \begin{lstlisting}
 M_result=(a+b)/(c*d)             //NO!!!
 
@@ -218,7 +218,7 @@ This is a short list of programming and general conventions that should be used 
   \item In order to improve readability of the code, headers should contain sections (see Section \ref{doxygen} for doxygen syntax) grouping all the similar methods. Basically all the classes should contain at least these sections:
   \begin{description}
       \item[Public Types]: containing the public enum and type definition(s).
-	  \item[Constructors \& Destructor]: containing the constructor(s), the copy constructor and the destructor(s).
+      \item[Constructors \& Destructor]: containing the constructor(s), the copy constructor and the destructor(s).
       \item[Operators]: containing the operators defined in the class, such as the \texttt{operator=} for making copies.
       \item[Methods]: containing all the general methods of the class. Note that a method performs operations on private variables and it is not just a setter or getter function.
       \item[Set Methods]: containing all the set methods (starting with the prefix \texttt{set})
@@ -236,11 +236,11 @@ All new packages and main classes should have a working test in the testsuite: t
 \subsection{How to add a test in the testsuite}
 The first step to add a new test in the testsuite is the creation of a new folder, with the name \texttt{test\_NameOfTheTest}. Inside the folder, at least these files should be present:
 \begin{description}
-	\item[main.cpp]: the main file for the test, containing information about the test and a doxygen description of its purposes. A template for this file is provided in appendix \ref{main}.
-	\item[Makefile.am]: the makefile of the test. A template for this file is provided in appendix \ref{Makefileam}. \textbf{NOTE:} To enable the automatic compilation of the test, it is necessary to add a line in the \texttt{Makefile.am} file placed in the main testsuite folder.
-	\item[data.txt]: the data file(s) for the test, which should be a significant case. This data file is used when a manual execution of the test is performed.
-	\item[testsuite.at]: the configure file for the night test, which could contain the same test as the one in the \texttt{data.txt}, or a different one. A template for this file is provided in appendix \ref{testsuiteat}.
-	\textbf{NOTE:} To enable the night execution of the test, it is necessary to add a line inside the \texttt{Makefile.am} and \texttt{testsuite.at} files placed in the main testsuite folder.
+    \item[main.cpp]: the main file for the test, containing information about the test and a doxygen description of its purposes. A template for this file is provided in appendix \ref{main}.
+    \item[Makefile.am]: the makefile of the test. A template for this file is provided in appendix \ref{Makefileam}. \textbf{NOTE:} To enable the automatic compilation of the test, it is necessary to add a line in the \texttt{Makefile.am} file placed in the main testsuite folder.
+    \item[data.txt]: the data file(s) for the test, which should be a significant case. This data file is used when a manual execution of the test is performed.
+    \item[testsuite.at]: the configure file for the night test, which could contain the same test as the one in the \texttt{data.txt}, or a different one. A template for this file is provided in appendix \ref{testsuiteat}.
+    \textbf{NOTE:} To enable the night execution of the test, it is necessary to add a line inside the \texttt{Makefile.am} and \texttt{testsuite.at} files placed in the main testsuite folder.
 \end{description}
 Note that \texttt{data.txt} and \texttt{testsuite.at} are independent. The test should verify both the compilation and execution of the test. For this second task, it is necessary to place a check at the end of the main file. The check could consist in a tolerance test (for a numeric comparison of the obtained result with the expected one), or a flag check. Here there is an example:
 \begin{lstlisting}

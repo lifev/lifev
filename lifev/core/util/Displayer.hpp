@@ -82,13 +82,13 @@ public:
     //! Constructor
     Displayer();
     // This is dubious! Should avoid using default values for constructor parameters
-    explicit Displayer( const commPtr_Type& comm );
+    explicit Displayer ( const commPtr_Type& comm );
 
     //! Copy constructor
     /*!
      * @param displayer Displayer
      */
-    Displayer( const Displayer& displayer );
+    Displayer ( const Displayer& displayer );
 
     //! Destructor
     virtual ~Displayer() {}
@@ -104,7 +104,7 @@ public:
      * @param message1 message to print out
      */
     template <typename T1>
-    void leaderPrint( const T1& message1 ) const;
+    void leaderPrint ( const T1& message1 ) const;
 
     //! Print two messages.
     /*!
@@ -112,7 +112,7 @@ public:
      * @param message2 second message to print out
      */
     template <typename T1, typename T2>
-    void leaderPrint( const T1& message1, const T2& message2 ) const;
+    void leaderPrint ( const T1& message1, const T2& message2 ) const;
 
     //! Print three messages.
     /*!
@@ -121,7 +121,7 @@ public:
      * @param message3 third message to print out
      */
     template <typename T1, typename T2, typename T3>
-    void leaderPrint( const T1& message1, const T2& message2, const T3& message3 ) const;
+    void leaderPrint ( const T1& message1, const T2& message2, const T3& message3 ) const;
 
     //! Print the maximum value among the processors
     /*!
@@ -132,7 +132,7 @@ public:
      * @param localMax Int or Real local maximum value that we want to print
      */
     template <typename T1>
-    void leaderPrintMax( const T1& message1, const Real& localMax ) const;
+    void leaderPrintMax ( const T1& message1, const Real& localMax ) const;
 
     //! Print the maximum value among the processors
     /*!
@@ -144,7 +144,7 @@ public:
      * @param localMax Int or Real local maximum value that we want to print
      */
     template <typename T1, typename T2>
-    void leaderPrintMax( const T1& message1, const Real& localMax, const T2& message2 ) const;
+    void leaderPrintMax ( const T1& message1, const Real& localMax, const T2& message2 ) const;
 
     //! Determine if it is the leader
     /*!
@@ -159,7 +159,7 @@ public:
     /*!
      * @param comm the communicator
      */
-    void setCommunicator( const commPtr_Type& comm );
+    void setCommunicator ( const commPtr_Type& comm );
 
     //! @name Get Methods
     //@{
@@ -177,8 +177,8 @@ public:
 
 protected:
 
-    commPtr_Type					    M_comm;
-    bool	           					M_verbose;
+    commPtr_Type                        M_comm;
+    bool                                M_verbose;
 
 };
 
@@ -188,60 +188,74 @@ protected:
 // ===================================================
 template <typename T1>
 void
-Displayer::leaderPrint( const T1& message1 ) const
+Displayer::leaderPrint ( const T1& message1 ) const
 {
     if ( M_verbose )
+    {
         std::cout << message1 << std::flush;
+    }
 }
 
 template <typename T1, typename T2>
 void
-Displayer::leaderPrint( const T1& message1, const T2& message2 ) const
+Displayer::leaderPrint ( const T1& message1, const T2& message2 ) const
 {
     if ( M_verbose )
+    {
         std::cout << message1 << message2 << std::flush;
+    }
 }
 
 template <typename T1, typename T2, typename T3>
 void
-Displayer::leaderPrint( const T1& message1, const T2& message2, const T3& message3 ) const
+Displayer::leaderPrint ( const T1& message1, const T2& message2, const T3& message3 ) const
 {
     if ( M_verbose )
+    {
         std::cout << message1 << message2 << message3 << std::flush;
+    }
 }
 
 template <typename T1>
 void
-Displayer::leaderPrintMax( const T1& message1, const Real& localMax ) const
+Displayer::leaderPrintMax ( const T1& message1, const Real& localMax ) const
 {
     if ( M_comm.get() )
     {
-        Real num( localMax );
+        Real num ( localMax );
         Real globalMax;
 
-        M_comm->MaxAll( &num, &globalMax, 1 );
+        M_comm->MaxAll ( &num, &globalMax, 1 );
         if ( M_verbose )
+        {
             std::cout << message1 << globalMax << std::endl;
+        }
     }
     else
+    {
         std::cout << message1 << localMax << std::endl;
+    }
 }
 
 template <typename T1, typename T2>
 void
-Displayer::leaderPrintMax( const T1& message1, const Real& localMax, const T2& message2 ) const
+Displayer::leaderPrintMax ( const T1& message1, const Real& localMax, const T2& message2 ) const
 {
     if ( M_comm.get() )
     {
-        Real num( localMax );
+        Real num ( localMax );
         Real globalMax;
 
-        M_comm->MaxAll( &num, &globalMax, 1 );
+        M_comm->MaxAll ( &num, &globalMax, 1 );
         if ( M_verbose )
+        {
             std::cout << message1 << globalMax << message2 << std::endl;
+        }
     }
     else
+    {
         std::cout << message1 << localMax << message2 << std::endl;
+    }
 }
 
 } // Namespace LifeV

@@ -76,7 +76,7 @@ public:
     /*!
      * @param data BCInterfaceData1D
      */
-    BCInterfaceData1D( const BCInterfaceData1D& data );
+    BCInterfaceData1D ( const BCInterfaceData1D& data );
 
     //! Destructor
     virtual ~BCInterfaceData1D() {}
@@ -92,7 +92,7 @@ public:
      * @param data BCInterfaceData1D
      * @return reference to a copy of the class
      */
-    BCInterfaceData1D& operator=( const BCInterfaceData1D& data );
+    BCInterfaceData1D& operator= ( const BCInterfaceData1D& data );
 
     //@}
 
@@ -106,13 +106,13 @@ public:
      * @param dataSection BC section
      * @param name name of the boundary condition
      */
-    void readBC( const std::string& fileName, const std::string& dataSection, const std::string& name );
+    void readBC ( const std::string& fileName, const std::string& dataSection, const std::string& name );
 
     //! Display general information about the content of the class
     /*!
      * @param output specify the output format (std::cout by default)
      */
-    void showMe( std::ostream& output = std::cout ) const;
+    void showMe ( std::ostream& output = std::cout ) const;
 
     //@}
 
@@ -124,19 +124,28 @@ public:
     /*!
      * @param flag Boundary condition side
      */
-    void setSide( const OneDFSI::bcSide_Type& side ) { M_side = side; }
+    void setSide ( const OneDFSI::bcSide_Type& side )
+    {
+        M_side = side;
+    }
 
     //! Set the line of the boundary condition
     /*!
      * @param line Boundary condition line
      */
-    void setLine( const OneDFSI::bcLine_Type& line ) { M_line = line; }
+    void setLine ( const OneDFSI::bcLine_Type& line )
+    {
+        M_line = line;
+    }
 
     //! Set the quantity of the boundary condition
     /*!
      * @param quantity Boundary condition quantity
      */
-    void setQuantity( const OneDFSI::bcType_Type& quantity ) { M_quantity = quantity; }
+    void setQuantity ( const OneDFSI::bcType_Type& quantity )
+    {
+        M_quantity = quantity;
+    }
 
     //@}
 
@@ -148,31 +157,46 @@ public:
     /*!
      * @return Boundary condition side
      */
-    const OneDFSI::bcSide_Type& side() const { return M_side; }
+    const OneDFSI::bcSide_Type& side() const
+    {
+        return M_side;
+    }
 
     //! Get the mode of the boundary condition
     /*!
      * @return Boundary condition line
      */
-    const OneDFSI::bcLine_Type& line() const { return M_line; }
+    const OneDFSI::bcLine_Type& line() const
+    {
+        return M_line;
+    }
 
     //! Get the quantity of the boundary condition
     /*!
      * @return Boundary condition quantity
      */
-    const OneDFSI::bcType_Type& quantity() const { return M_quantity; }
+    const OneDFSI::bcType_Type& quantity() const
+    {
+        return M_quantity;
+    }
 
     //! Get the resistance vector {R1, R2, R3 ...}
     /*!
      * @return Boundary condition resistance vector
      */
-    const resistanceContainer_Type& resistance() const { return M_resistance; }
+    const resistanceContainer_Type& resistance() const
+    {
+        return M_resistance;
+    }
 
     //! Get the capacitance
     /*!
      * @return Boundary condition capacitance
      */
-    const Real& capacitance() const { return M_capacitance; }
+    const Real& capacitance() const
+    {
+        return M_capacitance;
+    }
 
     //@}
 
@@ -181,15 +205,27 @@ private:
     //! @name Private Methods
     //@{
 
-    void readSide( const GetPot& dataFile, const char* side ) {  M_side = M_mapSide[dataFile( side, "left" )]; }
+    void readSide ( const GetPot& dataFile, const char* side )
+    {
+        M_side = M_mapSide[dataFile ( side, "left" )];
+    }
 
-    void readLine( const GetPot& dataFile, const char* line ) { M_line = M_mapLine[dataFile( line, "first" )]; }
+    void readLine ( const GetPot& dataFile, const char* line )
+    {
+        M_line = M_mapLine[dataFile ( line, "first" )];
+    }
 
-    void readQuantity( const GetPot& dataFile, const char* quantity ) { M_quantity = M_mapQuantity[dataFile( quantity, "A" )]; }
+    void readQuantity ( const GetPot& dataFile, const char* quantity )
+    {
+        M_quantity = M_mapQuantity[dataFile ( quantity, "A" )];
+    }
 
-    void readResistance( const GetPot& dataFile, const char* resistance );
+    void readResistance ( const GetPot& dataFile, const char* resistance );
 
-    void readCapacitance( const GetPot& dataFile, const char* capacitance ) { M_capacitance = dataFile( capacitance, 0 ); }
+    void readCapacitance ( const GetPot& dataFile, const char* capacitance )
+    {
+        M_capacitance = dataFile ( capacitance, 0 );
+    }
 
     //@}
 

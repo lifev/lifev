@@ -55,7 +55,7 @@ ExpressionDivI::ExpressionDivI()
 {}
 
 
-ExpressionDivI::ExpressionDivI(const ExpressionDivI&)
+ExpressionDivI::ExpressionDivI (const ExpressionDivI&)
     : base_Type()
 {}
 
@@ -68,7 +68,7 @@ ExpressionDivI::~ExpressionDivI()
 // ===================================================
 
 void
-ExpressionDivI::display(std::ostream& out)
+ExpressionDivI::display (std::ostream& out)
 {
     out << "div_i";
 }

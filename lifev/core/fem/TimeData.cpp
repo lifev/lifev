@@ -44,22 +44,22 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 TimeData::TimeData( ) :
-        M_initialTime   ( 0. ),
-        M_endTime       ( 1. ),
-        M_periodTime    ( 1. ),
-        M_time          ( M_initialTime ),
-        M_timeStep      ( M_endTime ),
-        M_timeStepNumber( 0 )
+    M_initialTime   ( 0. ),
+    M_endTime       ( 1. ),
+    M_periodTime    ( 1. ),
+    M_time          ( M_initialTime ),
+    M_timeStep      ( M_endTime ),
+    M_timeStepNumber ( 0 )
 {
 }
 
-TimeData::TimeData( const GetPot& dataFile, const std::string& section ) :
-        M_timeStepNumber( 0 )
+TimeData::TimeData ( const GetPot& dataFile, const std::string& section ) :
+    M_timeStepNumber ( 0 )
 {
-    setup( dataFile, section );
+    setup ( dataFile, section );
 }
 
-TimeData::TimeData( const TimeData& timeData )
+TimeData::TimeData ( const TimeData& timeData )
 {
     M_initialTime    = timeData.M_initialTime;
     M_endTime        = timeData.M_endTime;
@@ -73,17 +73,17 @@ TimeData::TimeData( const TimeData& timeData )
 // Methods
 // ===================================================
 void
-TimeData::setup( const GetPot& dataFile, const std::string& section )
+TimeData::setup ( const GetPot& dataFile, const std::string& section )
 {
-    M_initialTime = dataFile(( section + "/initialtime"  ).data(), 0.);
-    M_endTime = dataFile(( section + "/endtime"      ).data(), 1.);
-    M_periodTime = dataFile(( section + "/periodtime"      ).data(), 1.);
+    M_initialTime = dataFile ( ( section + "/initialtime"  ).data(), 0.);
+    M_endTime = dataFile ( ( section + "/endtime"      ).data(), 1.);
+    M_periodTime = dataFile ( ( section + "/periodtime"      ).data(), 1.);
     M_time = M_initialTime;
-    M_timeStep = dataFile(( section + "/timestep" ).data(), M_endTime );
+    M_timeStep = dataFile ( ( section + "/timestep" ).data(), M_endTime );
 }
 
 void
-TimeData::showMe( std::ostream& output ) const
+TimeData::showMe ( std::ostream& output ) const
 {
     output << "\n*** TimeData: values for user-defined data\n";
 
@@ -95,13 +95,15 @@ TimeData::showMe( std::ostream& output ) const
     output << "TimeStepNumber = " << M_timeStepNumber << std::endl;
 }
 
+
+
 // ===================================================
-// Private Methods
+// Utility methods
 // ===================================================
 Real
-TimeData::round( const Real& n, const Int& decimal ) const
+TimeData::round ( const Real& n, const Int& decimal ) const
 {
-    return std::floor( n * std::pow(10.0, decimal) + 0.5 )  / std::pow(10.0, decimal);
+    return std::floor ( n * std::pow (10.0, decimal) + 0.5 )  / std::pow (10.0, decimal);
 }
 
 }

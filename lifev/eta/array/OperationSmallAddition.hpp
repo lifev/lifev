@@ -64,43 +64,43 @@ template <typename LeftOperand, typename RightOperand>
 class OperationSmallAddition
 {
 private:
-	//! @name Constructors and destructors
+    //! @name Constructors and destructors
     //@{
 
-	//! No default constructor
-	OperationSmallAddition();
+    //! No default constructor
+    OperationSmallAddition();
 
-	//! No destructor
-	~OperationSmallAddition();
+    //! No destructor
+    ~OperationSmallAddition();
 
-	//@}
+    //@}
 };
 
 //! \cond
 
 template <>
-class OperationSmallAddition<Real,Real>
+class OperationSmallAddition<Real, Real>
 {
 public:
 
     //! @name Public Types
     //@{
 
-	typedef Real result_Type;
+    typedef Real result_Type;
 
-	//@}
+    //@}
 
 private:
-	//! @name Constructors and destructors
+    //! @name Constructors and destructors
     //@{
 
-	//! No default constructor
-	OperationSmallAddition();
+    //! No default constructor
+    OperationSmallAddition();
 
-	//! No destructor
-	~OperationSmallAddition();
+    //! No destructor
+    ~OperationSmallAddition();
 
-	//@}
+    //@}
 };
 
 
@@ -112,21 +112,21 @@ public:
     //! @name Public Types
     //@{
 
-	typedef VectorSmall<Size> result_Type;
+    typedef VectorSmall<Size> result_Type;
 
-	//@}
+    //@}
 
 private:
-	//! @name Constructors and destructors
+    //! @name Constructors and destructors
     //@{
 
-	//! No default constructor
-	OperationSmallAddition();
+    //! No default constructor
+    OperationSmallAddition();
 
-	//! No destructor
-	~OperationSmallAddition();
+    //! No destructor
+    ~OperationSmallAddition();
 
-	//@}
+    //@}
 };
 
 // specialization for matrix + matrix

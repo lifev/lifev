@@ -64,14 +64,14 @@
 using namespace LifeV;
 
 int
-main( int argc, char** argv )
+main ( int argc, char** argv )
 {
     //MPI communicator initialization
     boost::shared_ptr<Epetra_Comm> comm;
 
 #ifdef HAVE_MPI
     std::cout << "MPI Initialization" << std::endl;
-    MPI_Init( &argc, &argv );
+    MPI_Init ( &argc, &argv );
 #endif
 
     //MPI Preprocessing
@@ -80,22 +80,22 @@ main( int argc, char** argv )
     int nprocs;
     int rank;
 
-    MPI_Comm_size( MPI_COMM_WORLD, &nprocs );
-    MPI_Comm_rank( MPI_COMM_WORLD, &rank );
+    MPI_Comm_size ( MPI_COMM_WORLD, &nprocs );
+    MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
 
     if ( rank == 0 )
     {
         std::cout << "MPI processes: " << nprocs << std::endl;
         std::cout << "MPI Epetra Initialization ... " << std::endl;
     }
-    comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
+    comm.reset ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
 
     comm->Barrier();
 
 #else
 
     std::cout << "MPI SERIAL Epetra Initialization ... " << std::endl;
-    comm.reset( new Epetra_SerialComm() );
+    comm.reset ( new Epetra_SerialComm() );
 
 #endif
 
@@ -106,11 +106,13 @@ main( int argc, char** argv )
     //
 
     // The test must verify if tolerance is satisfied!
-    Real result(0);
-    Real tolerance(1e-10);
+    Real result (0);
+    Real tolerance (1e-10);
 
     if ( result > tolerance)
+    {
         return EXIT_FAILURE;
+    }
 
     // ----- End of test calls -----
 

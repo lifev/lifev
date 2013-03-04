@@ -45,25 +45,25 @@ namespace LifeV
 {
 
 //! Build uniform mesh along the x axis.
-    /**
-     *  @param mesh Reference to the mesh
-     *  @param x_l Left end point
-     *  @param x_r Right end point
-     *  @param numberOfElements Number of elements inside the mesh.
-     *
-     *  Build 1D uniform mesh along the x axis, extending from x_l to x_r, with numberOfElements elements
-     */
+/**
+ *  @param mesh Reference to the mesh
+ *  @param x_l Left end point
+ *  @param x_r Right end point
+ *  @param numberOfElements Number of elements inside the mesh.
+ *
+ *  Build 1D uniform mesh along the x axis, extending from x_l to x_r, with numberOfElements elements
+ */
 template <typename MC>
-void LIFEV_DEPRECATED( uniformMesh1D ( RegionMesh<LinearLine, MC>& mesh,
-                                       const Real& x_l, const Real& x_r,
-                                       const UInt& numberOfElements ) );
+void LIFEV_DEPRECATED ( uniformMesh1D ( RegionMesh<LinearLine, MC>& mesh,
+                                        const Real& x_l, const Real& x_r,
+                                        const UInt& numberOfElements ) );
 
 template <typename MC>
 void uniformMesh1D ( RegionMesh<LinearLine, MC>& mesh,
                      const Real& x_l, const Real& x_r,
                      const UInt& numberOfElements )
 {
-    regularMesh1D( mesh, 1, numberOfElements, false, x_r - x_l, x_l );
+    regularMesh1D ( mesh, 1, numberOfElements, false, x_r - x_l, x_l );
 }
 
 } // Namespace LifeV

@@ -72,7 +72,7 @@ namespace LifeV
 /*!
  *  @author Vincent Martin, Tiziano Passerini, Lucia Mirabella, Gilles Fourestey, Cristiano Malossi
  *  @see Equations and networks of 1-D models \cite FormaggiaLamponi2003
- *  @see Geometrical multiscale coupling of 1-D models \cite Malossi2011Algorithms \cite Malossi2011Algorithms1D
+ *  @see Geometrical multiscale coupling of 1-D models \cite Malossi2011Algorithms \cite Malossi2011Algorithms1D \cite BonnemainMalossi2012LVAD
  *
  *  <b>EQUATIONS:</b> <BR>
  *  The conservative form of the generic hyperbolic problem is
@@ -222,7 +222,10 @@ public:
     /*!
      * @param solution solution container
      */
-    void setupSolution( solution_Type& solution ) { setupSolution( solution, M_feSpacePtr->map() ); }
+    void setupSolution ( solution_Type& solution )
+    {
+        setupSolution ( solution, M_feSpacePtr->map() );
+    }
 
     //! Setup the solution using user defined FESpace map.
     /*!
@@ -230,19 +233,19 @@ public:
      * @param map map for initializing the solution vectors
      * @param onlyMainQuantities if true setup only \f$Q\f$, \f$P\f$, and \f$\displaystyle\frac{A}{A^0}-1\f$
      */
-    void setupSolution( solution_Type& solution, const MapEpetra& map, const bool& onlyMainQuantities = false );
+    void setupSolution ( solution_Type& solution, const MapEpetra& map, const bool& onlyMainQuantities = false );
 
     //! Initialize all the variables of the solution to a reference condition with \f$Q=0\f$, \f$A=A^0\f$, and \f$P=P_\mathrm{ext}\f$
     /*!
      * @param solution the solution container
      */
-    void initialize( solution_Type& solution );
+    void initialize ( solution_Type& solution );
 
     //! Update the Riemann variables.
     /*!
      *  @param solution the solution container is passed with \f$A^n\f$, \f$Q^n\f$ and it is updated with \f$W_1^n\f$, \f$W_2^n\f$
      */
-    void computeW1W2( solution_Type& solution );
+    void computeW1W2 ( solution_Type& solution );
 
     //! Update the pressure.
     /*!
@@ -251,26 +254,26 @@ public:
      *  @param solution the solution container is passed with \f$A^n\f$, \f$Q^n\f$, \f$W_1^n\f$, \f$W_2^n\f$ and is updated with \f$P^n\f$
      *  @param timeStep time step
      */
-    void computePressure( solution_Type& solution, const Real& timeStep );
+    void computePressure ( solution_Type& solution, const Real& timeStep );
 
     //! Update the ratio between \f$A\f$ and \f$A^0\f$.
     /*!
      *  @param solution the solution container is passed with \f$A^n\f$, is updated with \f$\displaystyle\frac{A}{A^0}-1\f$
      */
-    void computeAreaRatio( solution_Type& solution );
+    void computeAreaRatio ( solution_Type& solution );
 
     //! Compute A from the area ratio: \f$\displaystyle\frac{A}{A^0}-1\f$.
     /*!
      *  @param solution the solution container is passed with \f$\displaystyle\frac{A}{A^0}-1\f$ and is updated with \f$A^n\f$
      */
-    void computeArea( solution_Type& solution );
+    void computeArea ( solution_Type& solution );
 
     //! Compute the right hand side
     /*!
      *  @param solution the solution container
      *  @param timeStep the time step.
      */
-    void updateRHS( const solution_Type& solution, const Real& timeStep );
+    void updateRHS ( const solution_Type& solution, const Real& timeStep );
 
     //! Update convective term and BC. Then solve the linearized system
     /*!
@@ -278,7 +281,7 @@ public:
      * @param time the time
      * @param timeStep the time step
      */
-    void iterate( OneDFSIBCHandler& bcH, solution_Type& solution, const Real& time, const Real& timeStep );
+    void iterate ( OneDFSIBCHandler& bcH, solution_Type& solution, const Real& time, const Real& timeStep );
 
     //! Apply the viscoelastic flow rate correction.
     /*!
@@ -314,9 +317,9 @@ public:
      * @param updateSystemMatrix flag for the recomputation of the system matrix
      * @return the viscoelastic flow rate correction \f$\tilde{Q}\f$
      */
-    vector_Type viscoelasticFlowRateCorrection( const vector_Type& newArea, const vector_Type& newElasticFlowRate,
-                                                const vector_Type& oldViscoelasticFlowRate, const Real& timeStep,
-                                                OneDFSIBCHandler& bcHandler, const bool& updateSystemMatrix = true );
+    vector_Type viscoelasticFlowRateCorrection ( const vector_Type& newArea, const vector_Type& newElasticFlowRate,
+                                                 const vector_Type& oldViscoelasticFlowRate, const Real& timeStep,
+                                                 OneDFSIBCHandler& bcHandler, const bool& updateSystemMatrix = true );
 
     //! CFL computation (correct for constant mesh)
     /*!
@@ -324,20 +327,20 @@ public:
      *  @param timeStep the time step
      *  @return CFL
      */
-    Real computeCFL( const solution_Type& solution, const Real& timeStep ) const;
+    Real computeCFL ( const solution_Type& solution, const Real& timeStep ) const;
 
     //! Reset the output files
     /*!
      *  @param solution the solution container
      */
-    void resetOutput( const solution_Type& solution );
+    void resetOutput ( const solution_Type& solution );
 
     //! Save results on output files
     /*!
      * @param solution solution container
      * @param time solution time
      */
-    void postProcess( const solution_Type& solution, const Real& time );
+    void postProcess ( const solution_Type& solution, const Real& time );
 
     //@}
 
@@ -351,33 +354,33 @@ public:
      * @param fluxPtr pointer to the flux class.
      * @param sourcePtr pointer to the source class.
      */
-    void setProblem( const physicsPtr_Type& physicsPtr,
-                     const fluxPtr_Type&    fluxPtr,
-                     const sourcePtr_Type&  sourcePtr );
+    void setProblem ( const physicsPtr_Type& physicsPtr,
+                      const fluxPtr_Type&    fluxPtr,
+                      const sourcePtr_Type&  sourcePtr );
 
     //! Set the communicator
     /*!
      * @param commPtr pointer to the Epetra MPI communicator
      */
-    void setCommunicator( const commPtr_Type& commPtr );
+    void setCommunicator ( const commPtr_Type& commPtr );
 
     //! Set the FEspace
     /*!
      * @param feSpacePtr pointer to the FE space
      */
-    void setFESpace( const feSpacePtr_Type& feSpacePtr );
+    void setFESpace ( const feSpacePtr_Type& feSpacePtr );
 
     //! Set the linear solver
     /*!
      * @param linearSolverPtr pointer to the linear solver for the hyperbolic problem
      */
-    void setLinearSolver( const linearSolverPtr_Type& linearSolverPtr );
+    void setLinearSolver ( const linearSolverPtr_Type& linearSolverPtr );
 
     //! Set the viscoelastic linear solver
     /*!
      * @param linearViscoelasticSolverPtr pointer to the linear solver for the viscoelastic problem
      */
-    void setLinearViscoelasticSolver( const linearSolverPtr_Type& linearViscoelasticSolverPtr );
+    void setLinearViscoelasticSolver ( const linearSolverPtr_Type& linearViscoelasticSolverPtr );
 
     //@}
 
@@ -389,26 +392,35 @@ public:
     /*!
      *  @return shared pointer to the physics class.
      */
-    const physicsPtr_Type& physics() const { return M_physicsPtr; }
+    const physicsPtr_Type& physics() const
+    {
+        return M_physicsPtr;
+    }
 
     //! Get the flux class
     /*!
      *  @return shared pointer to the flux class.
      */
-    const fluxPtr_Type& flux() const { return M_fluxPtr; }
+    const fluxPtr_Type& flux() const
+    {
+        return M_fluxPtr;
+    }
 
     //! Get the source class
     /*!
      *  @return shared pointer to the source class.
      */
-    const sourcePtr_Type& source() const { return M_sourcePtr; }
+    const sourcePtr_Type& source() const
+    {
+        return M_sourcePtr;
+    }
 
     //! Return the ID of the boundary node given a side.
     /*!
      *  @param bcSide Side of the boundary.
      *  @return ID of the boundary node.
      */
-    UInt boundaryDOF( const bcSide_Type& bcSide ) const;
+    UInt boundaryDOF ( const bcSide_Type& bcSide ) const;
 
     //! Return the value of a quantity (\f$P\f$, \f$A\f$, \f$Q\f$, \f$W_1\f$, \f$W_2\f$) on a specified boundary.
     /*!
@@ -417,7 +429,7 @@ public:
      *  @param bcSide Side of the boundary.
      *  @return value of the quantity on the specified side.
      */
-    Real boundaryValue( const solution_Type& solution, const bcType_Type& bcType, const bcSide_Type& bcSide ) const;
+    Real boundaryValue ( const solution_Type& solution, const bcType_Type& bcType, const bcSide_Type& bcSide ) const;
 
     //! Return the value of the eigenvalues and eigenvectors on a specified boundary.
     /*!
@@ -427,22 +439,28 @@ public:
      *  @param leftEigenvector1 output left eigenvector associated to the first eigenvalue.
      *  @param leftEigenvector1 output left eigenvector associated to the second eigenvalue.
      */
-    void boundaryEigenValuesEigenVectors( const bcSide_Type& bcSide, const solution_Type& solution,
-                                          container2D_Type& eigenvalues,
-                                          container2D_Type& leftEigenvector1,
-                                          container2D_Type& leftEigenvector2 );
+    void boundaryEigenValuesEigenVectors ( const bcSide_Type& bcSide, const solution_Type& solution,
+                                           container2D_Type& eigenvalues,
+                                           container2D_Type& leftEigenvector1,
+                                           container2D_Type& leftEigenvector2 );
 
     //! Get the residual container
     /*!
      * @return System residual container
      */
-    const vectorPtrContainer_Type& residual() const { return M_residual; }
+    const vectorPtrContainer_Type& residual() const
+    {
+        return M_residual;
+    }
 
     //! Get the system matrix without BC
     /*!
      * @return shared pointer to the system matrix without BC
      */
-    const matrixPtr_Type& massMatrix() const { return M_homogeneousMassMatrixPtr; }
+    const matrixPtr_Type& massMatrix() const
+    {
+        return M_homogeneousMassMatrixPtr;
+    }
 
     //@}
 
@@ -455,7 +473,7 @@ private:
     /*!
      *  \cond \TODO improve doxygen description with latex equation, input/output parameter, etc... \endcond
      */
-    void updateFlux( const solution_Type& solution );
+    void updateFlux ( const solution_Type& solution );
 
     //! Call _updateFlux and update the P0 derivative of flux vector from U:
     /*!
@@ -466,13 +484,13 @@ private:
      *  (mean value of the two extremal values of dF/dU)
      *  BEWARE: works only for P1Seg elements
      */
-    void updatedFdU( const solution_Type& solution );
+    void updatedFdU ( const solution_Type& solution );
 
     //! Update the P1 source vector from U: M_sourcei = S_h(Un) i=1,2 (works only for P1Seg elements)
     /*!
      *  \cond \TODO improve doxygen description with latex equation, input/output parameter, etc... \endcond
      */
-    void updateSource( const solution_Type& solution );
+    void updateSource ( const solution_Type& solution );
 
     //! Call _updateSource and update the P0 derivative of source vector from U:
     /*!
@@ -483,7 +501,7 @@ private:
      *  (mean value of the two extremal values of dS/dU)
      *  BEWARE: works only for P1Seg elements
      */
-    void updatedSdU( const solution_Type& solution );
+    void updatedSdU ( const solution_Type& solution );
 
     //! Update the matrices
     /*!
@@ -504,13 +522,13 @@ private:
     /*!
      * \cond \TODO improve doxygen description with latex equation, input/output parameter, etc... \endcond
      */
-    void updateElementalMatrices( const Real& dFdU, const Real& dSdU );
+    void updateElementalMatrices ( const Real& dFdU, const Real& dSdU );
 
     //! Assemble the matrices
     /*!
      * \cond \TODO improve doxygen description with latex equation, input/output parameter, etc... \endcond
      */
-    void matrixAssemble( const UInt& ii, const UInt& jj );
+    void matrixAssemble ( const UInt& ii, const UInt& jj );
 
     //! Update the matrices to take into account Dirichlet BC.
     /*!
@@ -519,7 +537,7 @@ private:
      *  the Dirichlet boundary conditions
      *  (works for P1Seg and canonic numbering!)
      */
-    void applyDirichletBCToMatrix( matrix_Type& matrix );
+    void applyDirichletBCToMatrix ( matrix_Type& matrix );
 
     //! Apply the inertial Flux correction:
     /*!
@@ -533,7 +551,7 @@ private:
      *
      *  m = rho_w h0 / ( 2 sqrt(pi) sqrt(A0) )
      */
-    vector_Type inertialFlowRateCorrection( const vector_Type& );
+    vector_Type inertialFlowRateCorrection ( const vector_Type& );
 
     //! Apply the longitudinal Flux correction:
     /*!
@@ -608,9 +626,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    explicit OneDFSISolver( const OneDFSISolver& solver );
+    explicit OneDFSISolver ( const OneDFSISolver& solver );
 
-    OneDFSISolver& operator=( const OneDFSISolver& solver );
+    OneDFSISolver& operator= ( const OneDFSISolver& solver );
 
     //@}
 };

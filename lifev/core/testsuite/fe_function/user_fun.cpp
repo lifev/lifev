@@ -37,12 +37,12 @@ namespace dataProblem
 
 Real MyFun::eval ( const UInt& iElem, const point_Type& P, const Real& time ) const
 {
-    const Real scalar1 = scalarField(0).eval( iElem, P, time );
-    const Real scalar2 = scalarField(1).eval( iElem, P, time );
+    const Real scalar1 = scalarField (0).eval ( iElem, P, time );
+    const Real scalar2 = scalarField (1).eval ( iElem, P, time );
 
-    const Vector vector = vectorField(0).eval( iElem, P, time );
+    const Vector vector = vectorField (0).eval ( iElem, P, time );
 
-    return ( std::sin(scalar1) + scalar2*scalar2 ) /  vector(0);
+    return ( std::sin (scalar1) + scalar2 * scalar2 ) /  vector (0);
 }
 
 } // Namespace DataProblem

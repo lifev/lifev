@@ -42,32 +42,32 @@ namespace LifeV
 // ===================================================
 
 // constructor
-DOFLocalPattern::DOFLocalPattern( const UInt& nbLocalDof, const UInt& nbDofPerVertex,
-                                  const UInt& nbDofPerEdge, const UInt& nbDofPerFace,
-                                  const UInt& nbDofPerVolume, const DofPatternType& patternType, UInt nbCoor  ) :
-        M_dim(nbCoor), M_nbLocalDof( nbLocalDof ), M_nbDofPerDimEntity(std::vector< UInt> (4)),
-        M_patternType( patternType )
+DOFLocalPattern::DOFLocalPattern ( const UInt& nbLocalDof, const UInt& nbDofPerVertex,
+                                   const UInt& nbDofPerEdge, const UInt& nbDofPerFace,
+                                   const UInt& nbDofPerVolume, const DofPatternType& patternType, UInt nbCoor  ) :
+    M_dim (nbCoor), M_nbLocalDof ( nbLocalDof ), M_nbDofPerDimEntity (std::vector< UInt> (4) ),
+    M_patternType ( patternType )
 {
     // Store the location of the dofs
-    M_nbDofPerDimEntity[0]=nbDofPerVertex;
-    M_nbDofPerDimEntity[1]=nbDofPerEdge;
-    M_nbDofPerDimEntity[2]=nbDofPerFace;
-    M_nbDofPerDimEntity[3]=nbDofPerVolume;
+    M_nbDofPerDimEntity[0] = nbDofPerVertex;
+    M_nbDofPerDimEntity[1] = nbDofPerEdge;
+    M_nbDofPerDimEntity[2] = nbDofPerFace;
+    M_nbDofPerDimEntity[3] = nbDofPerVolume;
 
     // Decide the pattern depending on the type
     switch ( M_patternType )
     {
-    case STANDARD_PATTERN:
-    {
-        setupStandardPattern();
-        break;
-    }
-    default:
-    {
-        std::ostringstream errorMessage;
-        errorMessage << "Pattern " << M_patternType << " not available for " << M_dim << "D. ";
-        ERROR_MSG( errorMessage.str().c_str() );
-    }
+        case STANDARD_PATTERN:
+        {
+            setupStandardPattern();
+            break;
+        }
+        default:
+        {
+            std::ostringstream errorMessage;
+            errorMessage << "Pattern " << M_patternType << " not available for " << M_dim << "D. ";
+            ERROR_MSG ( errorMessage.str().c_str() );
+        }
     }
 }
 
@@ -75,28 +75,28 @@ DOFLocalPattern::DOFLocalPattern( const UInt& nbLocalDof, const UInt& nbDofPerVe
 
 // The copy constructor
 
-DOFLocalPattern::DOFLocalPattern( const DOFLocalPattern& localDofPattern) :
-        M_dim(localDofPattern.M_dim),
-        M_nbLocalDof (localDofPattern.M_nbLocalDof ),
-        M_nbDofPerDimEntity (localDofPattern.M_nbDofPerDimEntity),
-        M_patternType (localDofPattern.M_patternType ),
-        M_pattern (localDofPattern.M_pattern),
-        M_nbPattern(localDofPattern.M_nbPattern),
-        M_nbDiag (localDofPattern.M_nbDiag ),
-        M_nbUpper (localDofPattern.M_nbUpper )
+DOFLocalPattern::DOFLocalPattern ( const DOFLocalPattern& localDofPattern) :
+    M_dim (localDofPattern.M_dim),
+    M_nbLocalDof (localDofPattern.M_nbLocalDof ),
+    M_nbDofPerDimEntity (localDofPattern.M_nbDofPerDimEntity),
+    M_patternType (localDofPattern.M_patternType ),
+    M_pattern (localDofPattern.M_pattern),
+    M_nbPattern (localDofPattern.M_nbPattern),
+    M_nbDiag (localDofPattern.M_nbDiag ),
+    M_nbUpper (localDofPattern.M_nbUpper )
 {}
 
 // ===================================================
 // Methods
 // ===================================================
 
-void DOFLocalPattern::showMe( std::ostream& output) const
+void DOFLocalPattern::showMe ( std::ostream& output) const
 {
     output << " Size of the pattern : " << M_nbPattern << std::endl;
     output << " Diag: " << M_nbDiag << "  Upper: " << M_nbUpper << std::endl;
     output << " Pattern type: " << M_patternType << std::endl;
 
-    for (UInt iter(0); iter< M_nbPattern; ++iter)
+    for (UInt iter (0); iter < M_nbPattern; ++iter)
     {
         output << iter << " : " << M_pattern[iter].first << " - " << M_pattern[iter].second << std::endl;
     }
@@ -123,7 +123,7 @@ void DOFLocalPattern::setupStandardPattern()
     // First, put the diagonal entries
     for ( UInt i = 0; i < M_nbLocalDof; i++ )
     {
-        M_pattern[i] = std::pair<UInt,UInt> (i,i);
+        M_pattern[i] = std::pair<UInt, UInt> (i, i);
     }
 
     // Upper diagonal entries
@@ -132,7 +132,7 @@ void DOFLocalPattern::setupStandardPattern()
     {
         for ( UInt j = i + 1; j < M_nbLocalDof; j++ )
         {
-            M_pattern[ip] = std::pair<UInt,UInt> (i,j);
+            M_pattern[ip] = std::pair<UInt, UInt> (i, j);
             ip++;
         }
     }
@@ -142,7 +142,7 @@ void DOFLocalPattern::setupStandardPattern()
     {
         for ( UInt j = 0; j < i; j++ )
         {
-            M_pattern[ip] = std::pair<UInt,UInt> (i,j);
+            M_pattern[ip] = std::pair<UInt, UInt> (i, j);
             ip++;
         }
     }
@@ -152,70 +152,70 @@ void DOFLocalPattern::setupStandardPattern()
 void DOFLocalPattern::setupP1isoP2SegPattern()
 {
     // Some check to ensure consistency
-    ASSERT(M_nbDofPerDimEntity[0] == 1, " Inconsistent P1 iso P2 (Vertices)");
-    ASSERT(M_nbDofPerDimEntity[1] == 1, " Inconsistent P1 iso P2 (Edges)");
-    ASSERT(M_nbDofPerDimEntity[2] == 0, " Inconsistent P1 iso P2 (Faces)");
+    ASSERT (M_nbDofPerDimEntity[0] == 1, " Inconsistent P1 iso P2 (Vertices)");
+    ASSERT (M_nbDofPerDimEntity[1] == 1, " Inconsistent P1 iso P2 (Edges)");
+    ASSERT (M_nbDofPerDimEntity[2] == 0, " Inconsistent P1 iso P2 (Faces)");
 
     M_nbPattern = 7;
     M_nbDiag = 3;
     M_nbUpper = 2;
-    M_pattern = std::vector< std::pair < UInt,UInt > > (M_nbPattern);
+    M_pattern = std::vector< std::pair < UInt, UInt > > (M_nbPattern);
 
     // Diagonal entries
-    for (UInt diag(0); diag<3; ++diag)
+    for (UInt diag (0); diag < 3; ++diag)
     {
-        M_pattern[diag] = std::pair<UInt,UInt> (diag,diag);
+        M_pattern[diag] = std::pair<UInt, UInt> (diag, diag);
     }
 
     // Upper diagonal entries
-    M_pattern[3]  = std::pair<UInt,UInt> (0,2);
-    M_pattern[4]  = std::pair<UInt,UInt> (1,2);
+    M_pattern[3]  = std::pair<UInt, UInt> (0, 2);
+    M_pattern[4]  = std::pair<UInt, UInt> (1, 2);
 
     // Lower diagonal entries
-    M_pattern[5] = std::pair<UInt,UInt> (2,0);
-    M_pattern[6] = std::pair<UInt,UInt> (2,1);
+    M_pattern[5] = std::pair<UInt, UInt> (2, 0);
+    M_pattern[6] = std::pair<UInt, UInt> (2, 1);
 }
 
 
 void DOFLocalPattern::setupP1isoP2TriaPattern()
 {
     // Some check to ensure consistency
-    ASSERT(M_nbDofPerDimEntity[0] == 1, " Inconsistent P1 iso P2 (Vertices)");
-    ASSERT(M_nbDofPerDimEntity[1] == 1, " Inconsistent P1 iso P2 (Edges)");
-    ASSERT(M_nbDofPerDimEntity[2] == 0, " Inconsistent P1 iso P2 (Faces)");
+    ASSERT (M_nbDofPerDimEntity[0] == 1, " Inconsistent P1 iso P2 (Vertices)");
+    ASSERT (M_nbDofPerDimEntity[1] == 1, " Inconsistent P1 iso P2 (Edges)");
+    ASSERT (M_nbDofPerDimEntity[2] == 0, " Inconsistent P1 iso P2 (Faces)");
 
     M_nbPattern = 24;
     M_nbDiag = 6;
     M_nbUpper = 9;
-    M_pattern = std::vector< std::pair < UInt,UInt > > (M_nbPattern);
+    M_pattern = std::vector< std::pair < UInt, UInt > > (M_nbPattern);
 
     // Diagonal entries
-    for (UInt diag(0); diag<6; ++diag)
+    for (UInt diag (0); diag < 6; ++diag)
     {
-        M_pattern[diag] = std::pair<UInt,UInt> (diag,diag);
+        M_pattern[diag] = std::pair<UInt, UInt> (diag, diag);
     };
 
     // Upper diagonal entries
-    M_pattern[6]  = std::pair<UInt,UInt> (0,3);
-    M_pattern[7]  = std::pair<UInt,UInt> (0,5);
-    M_pattern[8]  = std::pair<UInt,UInt> (1,3);
-    M_pattern[9]  = std::pair<UInt,UInt> (1,4);
-    M_pattern[10] = std::pair<UInt,UInt> (2,4);
-    M_pattern[11] = std::pair<UInt,UInt> (2,5);
-    M_pattern[12] = std::pair<UInt,UInt> (3,4);
-    M_pattern[13] = std::pair<UInt,UInt> (3,5);
-    M_pattern[14] = std::pair<UInt,UInt> (4,5);
+    M_pattern[6]  = std::pair<UInt, UInt> (0, 3);
+    M_pattern[7]  = std::pair<UInt, UInt> (0, 5);
+    M_pattern[8]  = std::pair<UInt, UInt> (1, 3);
+    M_pattern[9]  = std::pair<UInt, UInt> (1, 4);
+    M_pattern[10] = std::pair<UInt, UInt> (2, 4);
+    M_pattern[11] = std::pair<UInt, UInt> (2, 5);
+    M_pattern[12] = std::pair<UInt, UInt> (3, 4);
+    M_pattern[13] = std::pair<UInt, UInt> (3, 5);
+    M_pattern[14] = std::pair<UInt, UInt> (4, 5);
 
     // Lower diagonal entries
-    M_pattern[15] = std::pair<UInt,UInt> (3,0);
-    M_pattern[16] = std::pair<UInt,UInt> (3,1);
-    M_pattern[17] = std::pair<UInt,UInt> (4,1);
-    M_pattern[18] = std::pair<UInt,UInt> (4,2);
-    M_pattern[19] = std::pair<UInt,UInt> (4,3);
-    M_pattern[20] = std::pair<UInt,UInt> (5,0);
-    M_pattern[21] = std::pair<UInt,UInt> (5,2);
-    M_pattern[22] = std::pair<UInt,UInt> (5,3);
-    M_pattern[23] = std::pair<UInt,UInt> (5,4);
+    M_pattern[15] = std::pair<UInt, UInt> (3, 0);
+    M_pattern[16] = std::pair<UInt, UInt> (3, 1);
+    M_pattern[17] = std::pair<UInt, UInt> (4, 1);
+    M_pattern[18] = std::pair<UInt, UInt> (4, 2);
+    M_pattern[19] = std::pair<UInt, UInt> (4, 3);
+    M_pattern[20] = std::pair<UInt, UInt> (5, 0);
+    M_pattern[21] = std::pair<UInt, UInt> (5, 2);
+    M_pattern[22] = std::pair<UInt, UInt> (5, 3);
+    M_pattern[23] = std::pair<UInt, UInt> (5, 4);
 }
 
 } // end of the namespace LifeV

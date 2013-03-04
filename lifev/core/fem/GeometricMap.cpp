@@ -48,13 +48,13 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 
-GeometricMap::GeometricMap( std::string name, ReferenceShapes shape,
-                UInt nbDof, UInt nbCoor,
-                const function_Type* phi, const function_Type* dPhi, const function_Type* d2Phi,
-                const Real* refCoor,
-                const GeometricMap* bdMap ) :
-        ReferenceElement( name, shape, nbDof, nbCoor,1, phi, dPhi, d2Phi, static_cast<function_Type*>(NULL),  refCoor ),
-        M_boundaryMap( bdMap )
+GeometricMap::GeometricMap ( std::string name, ReferenceShapes shape,
+                             UInt nbDof, UInt nbCoor,
+                             const function_Type* phi, const function_Type* dPhi, const function_Type* d2Phi,
+                             const Real* refCoor,
+                             const GeometricMap* bdMap ) :
+    ReferenceElement ( name, shape, nbDof, nbCoor, 1, phi, dPhi, d2Phi, static_cast<function_Type*> (NULL),  refCoor ),
+    M_boundaryMap ( bdMap )
 {}
 GeometricMap::~GeometricMap()
 {}

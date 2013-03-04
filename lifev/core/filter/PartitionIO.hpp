@@ -59,7 +59,8 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include<lifev/core/LifeV.hpp>
 #include <lifev/core/filter/HDF5IO.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 /*!
   @brief Class that handles I/O of mesh parts (for offline partitioning mode)
@@ -145,7 +146,8 @@ namespace LifeV {
          - element flag
 */
 template<typename MeshType>
-class PartitionIO {
+class PartitionIO
+{
 public:
     //! @name Public Types
     //@{
@@ -175,9 +177,9 @@ public:
      *        format may be faster on certain machines. Leave as default
      *        unless certain that it works for a given machine.
      */
-    PartitionIO(const std::string& fileName,
-                const commPtr_Type& comm,
-                const bool transposeInFile = false);
+    PartitionIO (const std::string& fileName,
+                 const commPtr_Type& comm,
+                 const bool transposeInFile = false);
 
     //! Empty destructor
     virtual ~PartitionIO() {}
@@ -195,9 +197,9 @@ public:
      *        format may be faster on certain machines. Leave as default
      *        unless certain that it works for a given machine.
      */
-    void setup(const std::string& fileName,
-               const commPtr_Type& comm,
-               const bool transposeInFile = false);
+    void setup (const std::string& fileName,
+                const commPtr_Type& comm,
+                const bool transposeInFile = false);
     //! Write method
     /*!
      * Call this method to write the mesh parts to disk
@@ -205,7 +207,7 @@ public:
      *        parts (RegionMesh objects). This pointer is released after
      *        writing, so the mesh parts can be cleared from memory
      */
-    void write(const meshPartsPtr_Type& meshParts);
+    void write (const meshPartsPtr_Type& meshParts);
     //! Read method
     /*!
      * Call this method to read from the HDF5 file the mesh part associated
@@ -214,7 +216,7 @@ public:
      *        part. If the RegionMesh has been initialized and contains any
      *        state, it will be destroyed before reading
      */
-    void read(meshPtr_Type& meshPart);
+    void read (meshPtr_Type& meshPart);
     //@}
 
 private:
@@ -271,16 +273,16 @@ private:
 } /* namespace LifeV */
 
 template<typename MeshType>
-inline LifeV::PartitionIO<MeshType>::PartitionIO(const std::string& fileName,
-                                                 const commPtr_Type& comm,
-                                                 const bool transposeInFile) :
-    M_comm(comm),
-    M_fileName(fileName),
-    M_transposeInFile(transposeInFile),
-    M_maxNumPoints(0),
-    M_maxNumEdges(0),
-    M_maxNumFaces(0),
-    M_maxNumElements(0)
+inline LifeV::PartitionIO<MeshType>::PartitionIO (const std::string& fileName,
+                                                  const commPtr_Type& comm,
+                                                  const bool transposeInFile) :
+    M_comm (comm),
+    M_fileName (fileName),
+    M_transposeInFile (transposeInFile),
+    M_maxNumPoints (0),
+    M_maxNumEdges (0),
+    M_maxNumFaces (0),
+    M_maxNumElements (0)
 {
 	M_elementNodes = MeshType::elementShape_Type::S_numPoints;
 	M_faceNodes = MeshType::elementShape_Type::GeoBShape::S_numPoints;
@@ -290,9 +292,9 @@ inline LifeV::PartitionIO<MeshType>::PartitionIO(const std::string& fileName,
 }
 
 template<typename MeshType>
-inline void LifeV::PartitionIO<MeshType>::setup(const std::string& fileName,
-                                                const commPtr_Type& comm,
-                                                const bool transposeInFile)
+inline void LifeV::PartitionIO<MeshType>::setup (const std::string& fileName,
+                                                 const commPtr_Type& comm,
+                                                 const bool transposeInFile)
 {
     M_comm = comm;
     M_fileName = fileName;
@@ -307,7 +309,7 @@ inline void LifeV::PartitionIO<MeshType>::setup(const std::string& fileName,
 }
 
 template<typename MeshType>
-void LifeV::PartitionIO<MeshType>::write(const meshPartsPtr_Type& meshParts)
+void LifeV::PartitionIO<MeshType>::write (const meshPartsPtr_Type& meshParts)
 {
 	M_meshPartsOut = meshParts;
 	M_numParts = M_meshPartsOut->size();
@@ -324,7 +326,7 @@ void LifeV::PartitionIO<MeshType>::write(const meshPartsPtr_Type& meshParts)
 }
 
 template<typename MeshType>
-void LifeV::PartitionIO<MeshType>::read(meshPtr_Type& meshPart)
+void LifeV::PartitionIO<MeshType>::read (meshPtr_Type& meshPart)
 {
 	meshPart.reset();
 	M_meshPartIn.reset(new mesh_Type);
@@ -372,17 +374,26 @@ void LifeV::PartitionIO<MeshType>::writeStats()
         // in case I decide to write the graphs
         M_uintBuffer[1] = 0;
         M_uintBuffer[2] = currentPart.numPoints();
-        if (M_uintBuffer[2] > M_maxNumPoints) M_maxNumPoints = M_uintBuffer[2];
+        if (M_uintBuffer[2] > M_maxNumPoints)
+        {
+            M_maxNumPoints = M_uintBuffer[2];
+        }
         M_uintBuffer[3] = currentPart.numBPoints();
         M_uintBuffer[4] = currentPart.numVertices();
         M_uintBuffer[5] = currentPart.numBVertices();
         M_uintBuffer[6] = currentPart.numGlobalVertices();
         M_uintBuffer[7] = currentPart.numEdges();
-        if (M_uintBuffer[7] > M_maxNumEdges) M_maxNumEdges = M_uintBuffer[7];
+        if (M_uintBuffer[7] > M_maxNumEdges)
+        {
+            M_maxNumEdges = M_uintBuffer[7];
+        }
         M_uintBuffer[8] = currentPart.numBEdges();
         M_uintBuffer[9] = currentPart.numGlobalEdges();
         M_uintBuffer[10] = currentPart.numFaces();
-        if (M_uintBuffer[10] > M_maxNumFaces) M_maxNumFaces = M_uintBuffer[10];
+        if (M_uintBuffer[10] > M_maxNumFaces)
+        {
+            M_maxNumFaces = M_uintBuffer[10];
+        }
         M_uintBuffer[11] = currentPart.numBFaces();
         M_uintBuffer[12] = currentPart.numGlobalFaces();
         M_uintBuffer[13] = currentPart.numVolumes();
@@ -429,8 +440,8 @@ void LifeV::PartitionIO<MeshType>::writePoints()
     M_HDF5IO.createTable("point_coords", H5T_IEEE_F64BE, currentSpaceDims);
 
     // Fill buffer
-    M_uintBuffer.resize(currentCount[0] * currentCount[1], 0);
-    M_realBuffer.resize(currentCount[0] * currentCount[1], 0);
+    M_uintBuffer.resize (currentCount[0] * currentCount[1], 0);
+    M_realBuffer.resize (currentCount[0] * currentCount[1], 0);
     UInt stride = currentCount[1];
 	if (! M_transposeInFile) {
 		for (UInt i = 0; i < M_numParts; ++i) {
@@ -667,6 +678,13 @@ void LifeV::PartitionIO<MeshType>::writeElements()
                 M_uintBuffer[(M_elementNodes + 2) * stride + j] =
                         static_cast<int>(currentPart.volumeList[j].flag());
                 }
+                M_uintBuffer[M_elementNodes * stride + j] =
+                    currentPart.volumeList[j].markerID();
+                M_uintBuffer[ (M_elementNodes + 1) * stride + j] =
+                    currentPart.volumeList[j].id();
+                M_uintBuffer[ (M_elementNodes + 2) * stride + j] =
+                    static_cast<int> (currentPart.volumeList[j].flag() );
+            }
 
 	    	hsize_t currentOffset[2] = {i * currentCount[0], 0};
 	    	M_HDF5IO.write("elements", H5T_NATIVE_UINT, currentCount,
@@ -685,8 +703,8 @@ void LifeV::PartitionIO<MeshType>::writeElements()
 	    		M_uintBuffer[stride * j + M_elementNodes + 1] =
 						currentPart.volumeList[j].id();
                 M_uintBuffer[stride * j + M_elementNodes + 2] =
-                        static_cast<int>(currentPart.volumeList[j].flag());
-                }
+                    static_cast<int> (currentPart.volumeList[j].flag() );
+            }
 
 	    	hsize_t currentOffset[2] = {0, i * currentCount[1]};
 	    	M_HDF5IO.write("elements", H5T_NATIVE_UINT, currentCount,
@@ -729,32 +747,32 @@ void LifeV::PartitionIO<MeshType>::readStats()
 
 	// Insert stats into mesh partition object
     M_numPoints = M_uintBuffer[2];
-    M_meshPartIn->setMaxNumPoints(M_uintBuffer[2], true);
-    M_meshPartIn->setNumBPoints(M_uintBuffer[3]);
+    M_meshPartIn->setMaxNumPoints (M_uintBuffer[2], true);
+    M_meshPartIn->setNumBPoints (M_uintBuffer[3]);
 
     // Vertices
-    M_meshPartIn->setNumVertices(M_uintBuffer[4]);
-    M_meshPartIn->setNumBVertices(M_uintBuffer[5]);
-    M_meshPartIn->setNumGlobalVertices(M_uintBuffer[6]);
+    M_meshPartIn->setNumVertices (M_uintBuffer[4]);
+    M_meshPartIn->setNumBVertices (M_uintBuffer[5]);
+    M_meshPartIn->setNumGlobalVertices (M_uintBuffer[6]);
 
     // Edges
     M_numEdges = M_uintBuffer[7];
-    M_meshPartIn->setNumEdges(M_uintBuffer[7]);
-    M_meshPartIn->setMaxNumEdges(M_uintBuffer[7], true);
-    M_meshPartIn->setNumBEdges(M_uintBuffer[8]);
-    M_meshPartIn->setMaxNumGlobalEdges(M_uintBuffer[9]);
+    M_meshPartIn->setNumEdges (M_uintBuffer[7]);
+    M_meshPartIn->setMaxNumEdges (M_uintBuffer[7], true);
+    M_meshPartIn->setNumBEdges (M_uintBuffer[8]);
+    M_meshPartIn->setMaxNumGlobalEdges (M_uintBuffer[9]);
 
     // Faces
     M_numFaces = M_uintBuffer[10];
-    M_meshPartIn->setNumFaces(M_uintBuffer[10]);
-    M_meshPartIn->setMaxNumFaces(M_uintBuffer[10], true);
-    M_meshPartIn->setNumBFaces(M_uintBuffer[11]);
-    M_meshPartIn->setMaxNumGlobalFaces(M_uintBuffer[12]);
+    M_meshPartIn->setNumFaces (M_uintBuffer[10]);
+    M_meshPartIn->setMaxNumFaces (M_uintBuffer[10], true);
+    M_meshPartIn->setNumBFaces (M_uintBuffer[11]);
+    M_meshPartIn->setMaxNumGlobalFaces (M_uintBuffer[12]);
 
     // Volumes
     M_numElements = M_uintBuffer[13];
-    M_meshPartIn->setMaxNumVolumes(M_uintBuffer[13], true);
-    M_meshPartIn->setMaxNumGlobalVolumes(M_uintBuffer[14]);
+    M_meshPartIn->setMaxNumVolumes (M_uintBuffer[13], true);
+    M_meshPartIn->setMaxNumGlobalVolumes (M_uintBuffer[14]);
 }
 
 template<typename MeshType>
@@ -798,35 +816,38 @@ void LifeV::PartitionIO<MeshType>::readPoints()
     M_meshPartIn->pointList.reserve(M_numPoints);
     M_meshPartIn->_bPoints.reserve(M_meshPartIn->numBPoints());
 
-    typename MeshType::point_Type *pp = 0;
+    typename MeshType::point_Type* pp = 0;
 
     UInt stride = currentCount[1];
-    if (! M_transposeInFile) {
+    if (! M_transposeInFile)
+    {
         for (UInt j = 0; j < M_numPoints; ++j)
         {
-            pp = &( M_meshPartIn->addPoint( false, false ) );
-            pp->replaceFlag(
-                    static_cast<flag_Type>(M_uintBuffer[2 * stride + j]));
-            pp->setMarkerID(M_uintBuffer[j]);
+            pp = & ( M_meshPartIn->addPoint ( false, false ) );
+            pp->replaceFlag (
+                static_cast<flag_Type> (M_uintBuffer[2 * stride + j]) );
+            pp->setMarkerID (M_uintBuffer[j]);
             pp->x() = M_realBuffer[j];
             pp->y() = M_realBuffer[stride + j];
             pp->z() = M_realBuffer[2 * stride + j];
-            pp->setId(M_uintBuffer[stride + j]);
+            pp->setId (M_uintBuffer[stride + j]);
         }
-    } else {
+    }
+    else
+    {
         for (UInt j = 0; j < M_numPoints; ++j)
         {
-            pp = &( M_meshPartIn->addPoint( false, false ) );
-            pp->replaceFlag(
-                    static_cast<flag_Type>(M_uintBuffer[stride * j + 2]));
-            pp->setMarkerID(M_uintBuffer[stride * j]);
+            pp = & ( M_meshPartIn->addPoint ( false, false ) );
+            pp->replaceFlag (
+                static_cast<flag_Type> (M_uintBuffer[stride * j + 2]) );
+            pp->setMarkerID (M_uintBuffer[stride * j]);
             pp->x() = M_realBuffer[stride * j];
             pp->y() = M_realBuffer[stride * j + 1];
             pp->z() = M_realBuffer[stride * j + 2];
-            pp->setId(M_uintBuffer[stride * j + 1]);
+            pp->setId (M_uintBuffer[stride * j + 1]);
         }
     }
-    M_realBuffer.resize(0);
+    M_realBuffer.resize (0);
 }
 
 template<typename MeshType>
@@ -858,32 +879,35 @@ void LifeV::PartitionIO<MeshType>::readEdges()
 
     M_HDF5IO.closeTable("edges");
 
-    M_meshPartIn->edgeList.reserve(M_numEdges);
+    M_meshPartIn->edgeList.reserve (M_numEdges);
 
-    typename MeshType::edge_Type *pe;
+    typename MeshType::edge_Type* pe;
 
     UInt stride = currentCount[1];
-    if (! M_transposeInFile) {
+    if (! M_transposeInFile)
+    {
         for (UInt j = 0; j < M_numEdges; ++j)
         {
-            pe = &(M_meshPartIn->addEdge(false));
-            pe->replaceFlag(
-                    static_cast<flag_Type>(M_uintBuffer[4 * stride + j]));
-            pe->setId(M_uintBuffer[3 * stride + j]);
-            pe->setPoint(0, M_meshPartIn->point(M_uintBuffer[j]));
-            pe->setPoint(1, M_meshPartIn->point(M_uintBuffer[stride +j]));
-            pe->setMarkerID(M_uintBuffer[2 * stride + j]);
+            pe = & (M_meshPartIn->addEdge (false) );
+            pe->replaceFlag (
+                static_cast<flag_Type> (M_uintBuffer[4 * stride + j]) );
+            pe->setId (M_uintBuffer[3 * stride + j]);
+            pe->setPoint (0, M_meshPartIn->point (M_uintBuffer[j]) );
+            pe->setPoint (1, M_meshPartIn->point (M_uintBuffer[stride + j]) );
+            pe->setMarkerID (M_uintBuffer[2 * stride + j]);
         }
-    } else {
+    }
+    else
+    {
         for (UInt j = 0; j < M_numEdges; ++j)
         {
-            pe = &(M_meshPartIn->addEdge(false));
-            pe->replaceFlag(
-                    static_cast<flag_Type>(M_uintBuffer[stride * j + 4]));
-            pe->setId(M_uintBuffer[stride * j + 3]);
-            pe->setPoint(0, M_meshPartIn->point(M_uintBuffer[stride * j]));
-            pe->setPoint(1, M_meshPartIn->point(M_uintBuffer[stride * j + 1]));
-            pe->setMarkerID(M_uintBuffer[stride * j + 2]);
+            pe = & (M_meshPartIn->addEdge (false) );
+            pe->replaceFlag (
+                static_cast<flag_Type> (M_uintBuffer[stride * j + 4]) );
+            pe->setId (M_uintBuffer[stride * j + 3]);
+            pe->setPoint (0, M_meshPartIn->point (M_uintBuffer[stride * j]) );
+            pe->setPoint (1, M_meshPartIn->point (M_uintBuffer[stride * j + 1]) );
+            pe->setMarkerID (M_uintBuffer[stride * j + 2]);
         }
     }
 }
@@ -917,61 +941,64 @@ void LifeV::PartitionIO<MeshType>::readFaces()
 
     M_HDF5IO.closeTable("faces");
 
-    typename MeshType::face_Type *pf = 0;
+    typename MeshType::face_Type* pf = 0;
 
-    M_meshPartIn->faceList.reserve(M_numFaces);
+    M_meshPartIn->faceList.reserve (M_numFaces);
 
     UInt stride = currentCount[1];
-    if (! M_transposeInFile) {
+    if (! M_transposeInFile)
+    {
         for (UInt j = 0; j < M_numFaces; ++j)
         {
-            pf = &(M_meshPartIn->addFace(false));
-            pf->replaceFlag(
-                    static_cast<flag_Type>(M_uintBuffer[(6 + M_faceNodes)
-                                                       * stride + j]));
-            pf->setId(M_uintBuffer[(M_faceNodes + 1) * stride + j]);
+            pf = & (M_meshPartIn->addFace (false) );
+            pf->replaceFlag (
+                static_cast<flag_Type> (M_uintBuffer[ (6 + M_faceNodes)
+                                                      * stride + j]) );
+            pf->setId (M_uintBuffer[ (M_faceNodes + 1) * stride + j]);
             pf->firstAdjacentElementIdentity() =
-                    M_uintBuffer[(M_faceNodes + 2) * stride + j];
+                M_uintBuffer[ (M_faceNodes + 2) * stride + j];
             pf->secondAdjacentElementIdentity() =
-                    M_uintBuffer[(M_faceNodes + 3) * stride + j];
+                M_uintBuffer[ (M_faceNodes + 3) * stride + j];
             pf->firstAdjacentElementPosition() =
-                    M_uintBuffer[(M_faceNodes + 4) * stride + j];
+                M_uintBuffer[ (M_faceNodes + 4) * stride + j];
             pf->secondAdjacentElementPosition() =
-                    M_uintBuffer[(M_faceNodes + 5) * stride + j];
-            pf->setMarkerID(M_uintBuffer[M_faceNodes * stride + j]);
+                M_uintBuffer[ (M_faceNodes + 5) * stride + j];
+            pf->setMarkerID (M_uintBuffer[M_faceNodes * stride + j]);
             for (UInt k = 0; k < M_faceNodes; ++k)
             {
-                pf->setPoint(k, M_meshPartIn->point(
-                        M_uintBuffer[k * stride + j]));
+                pf->setPoint (k, M_meshPartIn->point (
+                                  M_uintBuffer[k * stride + j]) );
             }
         }
-    } else {
+    }
+    else
+    {
         for (UInt j = 0; j < M_numFaces; ++j)
         {
-            pf = &(M_meshPartIn->addFace(false));
-            pf->replaceFlag(
-                    static_cast<flag_Type>(M_uintBuffer[stride * j
-                                                       + M_faceNodes + 6]));
-            pf->setId(M_uintBuffer[stride * j + M_faceNodes + 1]);
+            pf = & (M_meshPartIn->addFace (false) );
+            pf->replaceFlag (
+                static_cast<flag_Type> (M_uintBuffer[stride * j
+                                                     + M_faceNodes + 6]) );
+            pf->setId (M_uintBuffer[stride * j + M_faceNodes + 1]);
             pf->firstAdjacentElementIdentity() =
-                    M_uintBuffer[stride * j + M_faceNodes + 2];
+                M_uintBuffer[stride * j + M_faceNodes + 2];
             pf->secondAdjacentElementIdentity() =
-                    M_uintBuffer[stride * j + M_faceNodes + 3];
+                M_uintBuffer[stride * j + M_faceNodes + 3];
             pf->firstAdjacentElementPosition() =
-                    M_uintBuffer[stride * j + M_faceNodes + 4];
+                M_uintBuffer[stride * j + M_faceNodes + 4];
             pf->secondAdjacentElementPosition() =
-                    M_uintBuffer[stride * j + M_faceNodes + 5];
-            pf->setMarkerID(M_uintBuffer[(7 + M_faceNodes) * j + M_faceNodes]);
+                M_uintBuffer[stride * j + M_faceNodes + 5];
+            pf->setMarkerID (M_uintBuffer[ (7 + M_faceNodes) * j + M_faceNodes]);
             for (UInt k = 0; k < M_faceNodes; ++k)
             {
-                pf->setPoint(k, M_meshPartIn->point(
-                        M_uintBuffer[stride * j + k]));
+                pf->setPoint (k, M_meshPartIn->point (
+                                  M_uintBuffer[stride * j + k]) );
             }
         }
     }
 
-    M_meshPartIn->setLinkSwitch("HAS_ALL_FACETS");
-    M_meshPartIn->setLinkSwitch("FACETS_HAVE_ADIACENCY");
+    M_meshPartIn->setLinkSwitch ("HAS_ALL_FACETS");
+    M_meshPartIn->setLinkSwitch ("FACETS_HAVE_ADIACENCY");
 }
 
 template<typename MeshType>
@@ -1003,9 +1030,9 @@ void LifeV::PartitionIO<MeshType>::readElements()
 
 	M_HDF5IO.closeTable("elements");
 
-    M_meshPartIn->volumeList.reserve(M_numElements);
+    M_meshPartIn->volumeList.reserve (M_numElements);
 
-    typename MeshType::volume_Type *pv = 0;
+    typename MeshType::volume_Type* pv = 0;
 
     UInt stride = currentCount[1];
 	if (! M_transposeInFile) {
@@ -1040,8 +1067,24 @@ void LifeV::PartitionIO<MeshType>::readElements()
 	    }
 	}
 
-    M_meshPartIn->updateElementEdges(false, false);
-    M_meshPartIn->updateElementFaces(false, false);
+    M_meshPartIn->updateElementEdges (false, false);
+    M_meshPartIn->updateElementFaces (false, false);
+}
+
+template<typename MeshType>
+void LifeV::PartitionIO<MeshType>::writeData (hid_t& filespace,
+                                              hid_t& memspace,
+                                              hid_t& plist,
+                                              hid_t& dataset,
+                                              hid_t& datatype,
+                                              hsize_t currentOffset[],
+                                              hsize_t currentCount[],
+                                              void* buffer)
+{
+    H5Sselect_hyperslab (filespace, H5S_SELECT_SET, currentOffset, NULL,
+                         currentCount, NULL);
+    H5Dwrite (dataset, datatype, memspace, filespace, plist,
+              buffer);
 }
 
 #endif /* HAVE_MPI */

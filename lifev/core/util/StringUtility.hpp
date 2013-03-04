@@ -63,28 +63,28 @@ Some utilities for handling ascii files
 
 /*! It gets a the next line from std::istream
 */
-std::istream & eatLine( std::istream & s );
+std::istream& eatLine ( std::istream& s );
 //!skip lines starting with '!%#;$'
-std::istream & eatComments( std::istream & s );
+std::istream& eatComments ( std::istream& s );
 //!  gets next uncommented line
-std::istream & nextGoodLine( std::istream & s, std::string & line );
+std::istream& nextGoodLine ( std::istream& s, std::string& line );
 /*!
     always return a std::string with len characters
       - if the s has more than len characters : keep only the first len
       - if the s has less than len characters : complete with c until len
 */
-std::string& setStringLength( std::string& s, unsigned int len, char c );
+std::string& setStringLength ( std::string& s, unsigned int len, char c );
 
 
 //! extends atoi to STL std::strings (from Stroustrup)
-int atoi( const std::string & s );
+int atoi ( const std::string& s );
 
-std::string operator+( const std::string & str, const int i );
-std::string operator+( const std::string & str, const long int i );
-std::string operator+( const std::string & str, const unsigned int i );
+std::string operator+ ( const std::string& str, const int i );
+std::string operator+ ( const std::string& str, const long int i );
+std::string operator+ ( const std::string& str, const unsigned int i );
 
 template <typename EntryType>
-void parseList( const std::string& slist, std::list<EntryType>& list )
+void parseList ( const std::string& slist, std::list<EntryType>& list )
 {
     std::string stringList = slist;
     if ( slist == "" )
@@ -94,24 +94,24 @@ void parseList( const std::string& slist, std::list<EntryType>& list )
 
     int commaPos = 0;
 
-    while ( commaPos != (int)std::string::npos )
+    while ( commaPos != (int) std::string::npos )
     {
-        commaPos = stringList.find( "," );
+        commaPos = stringList.find ( "," );
 
         std::stringstream stream;
-        stream <<  stringList.substr( 0, commaPos ).c_str();
+        stream <<  stringList.substr ( 0, commaPos ).c_str();
 
         EntryType var;
         stream >> var;
-        list.push_back( var );
+        list.push_back ( var );
 
-        stringList = stringList.substr( commaPos + 1 );
+        stringList = stringList.substr ( commaPos + 1 );
     }
 }
 
 // @author Cristiano Malossi
 // Convert a std::string to a number ( Int, bool, Real, ... )
-inline Real string2number( const std::string& s )
+inline Real string2number ( const std::string& s )
 {
     std::stringstream out;
     out << s;
@@ -120,29 +120,31 @@ inline Real string2number( const std::string& s )
     out >> n;
 
     return n;
-    
-    // Temporary disabled 
+
+    // Temporary disabled
     //return boost::lexical_cast< Real >( s );
 }
 
 // @author Cristiano Malossi
 // Convert a number ( Int, bool, Real, ... ) to a std::string
 template <typename NumberType>
-inline std::string number2string( const NumberType& n )
+inline std::string number2string ( const NumberType& n )
 {
-    return boost::lexical_cast< std::string >( n );
+    return boost::lexical_cast< std::string > ( n );
 }
 
 // @author Cristiano Malossi
 // Convert an Enum to a std::string using a map as a library for conversion
 template < typename EnumeratorType >
-inline std::string enum2String( const EnumeratorType& Enum,
-                                const std::map<std::string,
-                                EnumeratorType>& Map )
+inline std::string enum2String ( const EnumeratorType& Enum,
+                                 const std::map < std::string,
+                                 EnumeratorType > & Map )
 {
     for ( typename std::map<std::string, EnumeratorType>::const_iterator j = Map.begin(); j != Map.end() ; ++j )
         if ( j->second == Enum )
+        {
             return j->first;
+        }
 
     return "NO_TYPE_FOUND";
 }
@@ -150,16 +152,18 @@ inline std::string enum2String( const EnumeratorType& Enum,
 // @author Cristiano Malossi
 // Convert a string made by NumberTypes separated by commas, to a vector of numbers
 template< typename NumberType >
-void string2numbersVector( const std::string& string,
-                           std::vector< NumberType >& numberVector )
+void string2numbersVector ( const std::string& string,
+                            std::vector< NumberType >& numberVector )
 {
     //Split the string
     std::vector< std::string > stringVector;
-    boost::split( stringVector, string, boost::is_any_of( "," ) );
+    boost::split ( stringVector, string, boost::is_any_of ( "," ) );
 
     //Convert to the right type
-    for ( UInt i( 0 ); i < static_cast<UInt> ( stringVector.size() ); ++i )
-        numberVector.push_back( static_cast<NumberType>( std::atoi( stringVector[i].c_str())));
+    for ( UInt i ( 0 ); i < static_cast<UInt> ( stringVector.size() ); ++i )
+    {
+        numberVector.push_back ( static_cast<NumberType> ( std::atoi ( stringVector[i].c_str() ) ) );
+    }
 }
 
 } // Namespace LifeV

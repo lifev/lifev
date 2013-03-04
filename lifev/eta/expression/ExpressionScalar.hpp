@@ -59,7 +59,7 @@ public:
     //! @name Public Types
     //@{
 
-	typedef ExpressionBase<ExpressionScalar> base_Type;
+    typedef ExpressionBase<ExpressionScalar> base_Type;
 
     //@}
 
@@ -68,10 +68,10 @@ public:
     //@{
 
     //! Constructor using the value of the scalar
-	ExpressionScalar(const Real& myValue);
+    ExpressionScalar (const Real& myValue);
 
     //! Copy constructor
-	ExpressionScalar(const ExpressionScalar& expr);
+    ExpressionScalar (const ExpressionScalar& expr);
 
     //! Destructor
     ~ExpressionScalar();
@@ -83,7 +83,7 @@ public:
     //@{
 
     //! Display method
-	static void display(std::ostream& out= std::cout);
+    static void display (std::ostream& out = std::cout);
 
     //@}
 
@@ -92,7 +92,7 @@ public:
     //@{
 
     //! Getter for the value of the scalar
-	const Real& value() const;
+    const Real& value() const;
 
     //@}
 
@@ -106,7 +106,7 @@ private:
 
     //@}
 
-	Real M_value;
+    Real M_value;
 };
 
 //! Simple function to be used in the construction of an expression
@@ -114,9 +114,9 @@ private:
   @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
 */
 inline ExpressionScalar
-value(const Real& myValue)
+value (const Real& myValue)
 {
-	return ExpressionScalar(myValue);
+    return ExpressionScalar (myValue);
 }
 
 

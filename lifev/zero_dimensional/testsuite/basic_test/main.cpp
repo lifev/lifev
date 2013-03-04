@@ -61,31 +61,33 @@
 
 using namespace LifeV;
 
-bool checkValue(const Real val, const Real test, const Real tol = 1.e-5, const bool verbose = true)
+bool checkValue (const Real val, const Real test, const Real tol = 1.e-5, const bool verbose = true)
 {
-    Real norm = std::abs(val - test);
+    Real norm = std::abs (val - test);
 
     if ( verbose )
+    {
         std::cout << " value = " << val << " computed value = " << test << " diff = " << norm << std::endl;
+    }
 
     return (norm < tol);
 }
 
 Int
-main( Int argc, char** argv )
+main ( Int argc, char** argv )
 {
     //Setup main communicator
     boost::shared_ptr< Epetra_Comm > comm;
 
     //Setup MPI variables
-    Int numberOfProcesses(1);
-    Int rank(0);
+    Int numberOfProcesses (1);
+    Int rank (0);
 
 #ifdef HAVE_MPI
-    MPI_Init( &argc, &argv );
+    MPI_Init ( &argc, &argv );
 
-    MPI_Comm_size( MPI_COMM_WORLD, &numberOfProcesses );
-    MPI_Comm_rank( MPI_COMM_WORLD, &rank );
+    MPI_Comm_size ( MPI_COMM_WORLD, &numberOfProcesses );
+    MPI_Comm_rank ( MPI_COMM_WORLD, &rank );
 #endif
 
     if ( rank == 0 )
@@ -113,50 +115,54 @@ main( Int argc, char** argv )
 
 #ifdef EPETRA_MPI
     if ( rank == 0 )
+    {
         std::cout << "MPI Epetra Initialization ... " << std::endl;
-    comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
+    }
+    comm.reset ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
 #else
     std::cout << "SERIAL Epetra Initialization ... " << std::endl;
-    comm.reset( new Epetra_SerialComm() );
+    comm.reset ( new Epetra_SerialComm() );
 #endif
 
     bool exitFlag = EXIT_SUCCESS;
 
 #if ( defined(HAVE_NOX_THYRA) && defined(HAVE_TRILINOS_RYTHMOS) )
     // Command line parameters
-    GetPot commandLine( argc, argv );
-    const bool check = commandLine.search( 2, "-c", "--check" );
-    string fileName  = commandLine.follow( "data", 2, "-f","--file" );
+    GetPot commandLine ( argc, argv );
+    const bool check = commandLine.search ( 2, "-c", "--check" );
+    string fileName  = commandLine.follow ( "data", 2, "-f", "--file" );
 
     // SetupData
-    GetPot dataFile( fileName  + ".dat" );
+    GetPot dataFile ( fileName  + ".dat" );
 
-    std::string circuitDataFile = dataFile( "0D_Model/CircuitDataFile", "./inputFile.dat" );
+    std::string circuitDataFile = dataFile ( "0D_Model/CircuitDataFile", "./inputFile.dat" );
     BCInterface0D< ZeroDimensionalBCHandler, ZeroDimensionalData >  zeroDimensionalBC;
     zeroDimensionalBC.createHandler();
-    zeroDimensionalBC.fillHandler( circuitDataFile, "Files" );
+    zeroDimensionalBC.fillHandler ( circuitDataFile, "Files" );
 
-    boost::shared_ptr< ZeroDimensionalData > zeroDimensionalData( new ZeroDimensionalData );
-    zeroDimensionalData->setup( dataFile, zeroDimensionalBC.handler() );
+    boost::shared_ptr< ZeroDimensionalData > zeroDimensionalData ( new ZeroDimensionalData );
+    zeroDimensionalData->setup ( dataFile, zeroDimensionalBC.handler() );
 
-    boost::shared_ptr< ZeroDimensionalSolver > zeroDimensionalSolver( new ZeroDimensionalSolver( zeroDimensionalData->unknownCounter(), comm, zeroDimensionalData->circuitData() ) );
-    zeroDimensionalSolver->setup( zeroDimensionalData->solverData() );
+    boost::shared_ptr< ZeroDimensionalSolver > zeroDimensionalSolver ( new ZeroDimensionalSolver ( zeroDimensionalData->unknownCounter(), comm, zeroDimensionalData->circuitData() ) );
+    zeroDimensionalSolver->setup ( zeroDimensionalData->solverData() );
 
     zeroDimensionalData->showMe();
 
     // SetupModel
-    zeroDimensionalData->dataTime()->setInitialTime(0);
+    zeroDimensionalData->dataTime()->setInitialTime (0);
     zeroDimensionalData->initializeSolution();
 
     // Create output folder
     if ( comm->MyPID() == 0 )
-        mkdir( "output", 0777 );
+    {
+        mkdir ( "output", 0777 );
+    }
 
     // Save initial solution
     zeroDimensionalData->saveSolution();
 
     zeroDimensionalData->dataTime()->updateTime();
-    zeroDimensionalData->dataTime()->setInitialTime(zeroDimensionalData->dataTime()->time());
+    zeroDimensionalData->dataTime()->setInitialTime (zeroDimensionalData->dataTime()->time() );
 
     // Definitions for the time loop
     LifeChrono chronoTotal;
@@ -173,7 +179,7 @@ main( Int argc, char** argv )
         chronoIteration.start();
         chronoSystem.start();
 
-        zeroDimensionalSolver->takeStep( zeroDimensionalData->dataTime()->previousTime(), zeroDimensionalData->dataTime()->time() );
+        zeroDimensionalSolver->takeStep ( zeroDimensionalData->dataTime()->previousTime(), zeroDimensionalData->dataTime()->time() );
 
         chronoSystem.stop();
 
@@ -193,8 +199,8 @@ main( Int argc, char** argv )
     {
         bool ok = true;
 
-        ok = ok && checkValue( 0.001329039627, zeroDimensionalData->circuitData()->Nodes()->nodeListAt(1)->voltage() );
-        ok = ok && checkValue( 0.000787475119, zeroDimensionalData->circuitData()->Elements()->elementListAt(1)->current() );
+        ok = ok && checkValue ( 0.001329039627, zeroDimensionalData->circuitData()->Nodes()->nodeListAt (1)->voltage() );
+        ok = ok && checkValue ( 0.000787475119, zeroDimensionalData->circuitData()->Elements()->elementListAt (1)->current() );
         if (ok)
         {
             std::cout << " Test succesful" << std::endl;
@@ -211,11 +217,16 @@ main( Int argc, char** argv )
     exitFlag = EXIT_SUCCESS;
 #endif /* HAVE_NOX_THYRA && HAVE_TRILINOS_RYTHMOS */
 
-    if (rank == 0) std::cout << "End Result: TEST PASSED" << std::endl;
+    if (rank == 0)
+    {
+        std::cout << "End Result: TEST PASSED" << std::endl;
+    }
 
 #ifdef HAVE_MPI
     if ( rank == 0 )
+    {
         std::cout << "MPI Finalization" << std::endl;
+    }
     MPI_Finalize();
 #endif
 

@@ -43,10 +43,10 @@ namespace LifeV
 // Constructors
 // ===================================================
 BCInterfaceData::BCInterfaceData() :
-        M_base                  (),
-        M_baseString            (),
-        M_mapBase               (),
-        M_parameters            ()
+    M_base                  (),
+    M_baseString            (),
+    M_mapBase               (),
+    M_parameters            ()
 {
     //Set mapBase
     M_mapBase["function"]           = BCIFunctionParser;
@@ -58,11 +58,11 @@ BCInterfaceData::BCInterfaceData() :
     M_mapBase["dataInterpolator"]   = BCI3DDataInterpolator;
 }
 
-BCInterfaceData::BCInterfaceData( const BCInterfaceData& data ) :
-        M_base                  ( data.M_base ),
-        M_baseString            ( data.M_baseString ),
-        M_mapBase               ( data.M_mapBase ),
-        M_parameters            ( data.M_parameters )
+BCInterfaceData::BCInterfaceData ( const BCInterfaceData& data ) :
+    M_base                  ( data.M_base ),
+    M_baseString            ( data.M_baseString ),
+    M_mapBase               ( data.M_mapBase ),
+    M_parameters            ( data.M_parameters )
 {
 }
 
@@ -70,7 +70,7 @@ BCInterfaceData::BCInterfaceData( const BCInterfaceData& data ) :
 // Operators
 // ===================================================
 BCInterfaceData&
-BCInterfaceData::operator=( const BCInterfaceData& data )
+BCInterfaceData::operator= ( const BCInterfaceData& data )
 {
     if ( this != &data )
     {
@@ -87,46 +87,48 @@ BCInterfaceData::operator=( const BCInterfaceData& data )
 // Methods
 // ===================================================
 void
-BCInterfaceData::readBC( const std::string& fileName, const std::string& dataSection, const std::string& name )
+BCInterfaceData::readBC ( const std::string& fileName, const std::string& dataSection, const std::string& name )
 {
-    GetPot dataFile( fileName );
+    GetPot dataFile ( fileName );
 
     // Read base
-    readBase( dataFile, dataSection + name + "/", M_base, M_baseString );
+    readBase ( dataFile, dataSection + name + "/", M_base, M_baseString );
 
     // Read parameters
-    readParameters( dataFile, ( dataSection + name + "/parameters" ).c_str() );
+    readParameters ( dataFile, ( dataSection + name + "/parameters" ).c_str() );
 }
 
 void
-BCInterfaceData::showMe( std::ostream& output ) const
+BCInterfaceData::showMe ( std::ostream& output ) const
 {
     output << "baseString        = " << M_baseString << std::endl;
     output << "base              = " << M_base.second << std::endl;
 
     output << "Parameters        = ";
-    for ( UInt i(0); i < static_cast<UInt>( M_parameters.size() ); ++i )
+    for ( UInt i (0); i < static_cast<UInt> ( M_parameters.size() ); ++i )
+    {
         output << M_parameters[i] << " ";
+    }
     output << "\n";
 }
 
 // ===================================================
 // Set Methods
 // ===================================================
-void BCInterfaceData::setBaseString( const std::string& baseString )
+void BCInterfaceData::setBaseString ( const std::string& baseString )
 {
     M_baseString = baseString;
-    boost::replace_all( M_baseString, " ", "" );
+    boost::replace_all ( M_baseString, " ", "" );
 }
 
 // ===================================================
 // Private Methods
 // ===================================================
 void
-BCInterfaceData::readBase( const GetPot& dataFile, const std::string& path, std::pair< std::string, baseList_Type >& base, std::string& baseString )
+BCInterfaceData::readBase ( const GetPot& dataFile, const std::string& path, std::pair< std::string, baseList_Type >& base, std::string& baseString )
 {
     for ( std::map< std::string, baseList_Type >::iterator j = M_mapBase.begin(); j != M_mapBase.end(); ++j )
-        if ( isBase( dataFile, ( path + j->first ).c_str(), baseString ) )
+        if ( isBase ( dataFile, ( path + j->first ).c_str(), baseString ) )
         {
             base.first = j->first;
             base.second = M_mapBase[j->first];
@@ -136,21 +138,23 @@ BCInterfaceData::readBase( const GetPot& dataFile, const std::string& path, std:
 }
 
 bool
-BCInterfaceData::isBase( const GetPot& dataFile, const char* base, std::string& baseString )
+BCInterfaceData::isBase ( const GetPot& dataFile, const char* base, std::string& baseString )
 {
-    baseString = dataFile( base, " " );
+    baseString = dataFile ( base, " " );
 
-    return dataFile.checkVariable( base );
+    return dataFile.checkVariable ( base );
 }
 
 void
-BCInterfaceData::readParameters( const GetPot& dataFile, const char* parameters )
+BCInterfaceData::readParameters ( const GetPot& dataFile, const char* parameters )
 {
-    UInt parametersSize = dataFile.vector_variable_size( parameters );
+    UInt parametersSize = dataFile.vector_variable_size ( parameters );
 
-    M_parameters.resize( parametersSize );
-    for ( UInt j( 0 ); j < parametersSize; ++j )
-        M_parameters[j] = dataFile( parameters, 0, j );
+    M_parameters.resize ( parametersSize );
+    for ( UInt j ( 0 ); j < parametersSize; ++j )
+    {
+        M_parameters[j] = dataFile ( parameters, 0, j );
+    }
 }
 
 } // Namespace LifeV

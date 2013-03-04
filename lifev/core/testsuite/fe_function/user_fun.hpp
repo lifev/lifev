@@ -54,7 +54,7 @@ typedef Exporter < regionMesh_Type > exporter_Type;
 typedef boost::shared_ptr < exporter_Type > exporterPtr_Type;
 
 typedef FESpace < regionMesh_Type, map_Type > FESpace_Type;
-typedef boost::shared_ptr < FESpace_Type > FESpacePtr_Type; 
+typedef boost::shared_ptr < FESpace_Type > FESpacePtr_Type;
 
 typedef FEVectorField < regionMesh_Type, map_Type > FEVectorField_Type;
 typedef boost::shared_ptr < FEVectorField_Type > FEVectorFieldPtr_Type;
