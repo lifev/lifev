@@ -116,9 +116,6 @@ BCInterfaceFunctionSolverDefined< FSIOperator >::updatePhysicalSolverVariables()
             Real t ( M_physicalSolver->dataSolid()->dataTime()->time() );
             Real timeStep ( M_physicalSolver->dataSolid()->dataTime()->timeStep() );
 
-            // Update Time advance
-            M_physicalSolver->solidTimeAdvance()->updateRHSFirstDerivative ( timeStep );
-
             Int verticesGlobalNumber ( M_physicalSolver->solidLocalMesh().numGlobalVertices() );
             for ( UInt i (0) ; i < M_physicalSolver->solidLocalMesh().numVertices() ; ++i )
             {
@@ -143,8 +140,16 @@ BCInterfaceFunctionSolverDefined< FSIOperator >::updatePhysicalSolverVariables()
                 (*M_robinBetaCoefficient) [gid + verticesGlobalNumber * 2]  = beta;
             }
 
-            *M_robinRHS = M_physicalSolver->solidTimeAdvance()->rhsContributionFirstDerivative();
-
+            M_physicalSolver->solidTimeAdvance()->updateRHSFirstDerivative ( timeStep );
+            if ( M_physicalSolver->data().method().compare ("monolithicGE") == 0 || M_physicalSolver->data().method().compare ("monolithicGI") == 0 )
+            {
+                M_robinRHS->subset ( M_physicalSolver->solidTimeAdvance()->rhsContributionFirstDerivative(),
+                                     boost::dynamic_pointer_cast< FSIMonolithic > ( M_physicalSolver )->offset() );
+            }
+            else
+            {
+                *M_robinRHS = M_physicalSolver->solidTimeAdvance()->rhsContributionFirstDerivative();
+            }
             break;
         }
         default:
