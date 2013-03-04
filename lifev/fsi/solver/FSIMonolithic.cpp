@@ -404,14 +404,31 @@ void
 FSIMonolithic::
 evalResidual ( const vector_Type& sol, const vectorPtr_Type& rhs, vector_Type& res, bool diagonalScaling)
 {
-    if ( diagonalScaling )
-    {
-        diagonalScale (*rhs, M_monolithicMatrix->matrix() );
-    }
-    if (! (M_data->dataSolid()->solidType().compare ("exponential") && M_data->dataSolid()->solidType().compare ("neoHookean") ) )
+    if( diagonalScaling )
+        diagonalScale(*rhs, M_monolithicMatrix->matrix());
+
+    // case of nonlinear laws
+    if( ! ( M_data->dataSolid()->lawType().compare("nonlinear") ) )
     {
         // need to set correctly the vectors to remove offset
-        M_solid->apply(sol*M_solid->rescaleFactor(), res);
+        // Extract the right proportion
+        vectorPtr_Type solidPart( new vector_Type( M_dFESpace->map() ) );
+	solidPart->subset(sol, M_offset );
+
+        vectorPtr_Type resSolidPart( new vector_Type( M_dFESpace->map() ) );
+	resSolidPart->subset(res, M_offset );
+
+	// Multiplying it by the rescale factor
+	*solidPart *= M_solid->rescaleFactor();
+
+	// Computing residual
+        M_solid->apply(*solidPart, *resSolidPart);
+
+	// reassembling them in the right places
+	// Only the residual is needed since the sol is not touched inside the solid part
+	// sol.subset( *solidPart, solidPart->map(), UInt(0), M_offset);
+	res.subset( *resSolidPart, resSolidPart->map(), UInt(0), M_offset);
+
         M_fluidBlock->globalAssemble();
 
         res += ( (*M_fluidBlock) * sol);
@@ -420,7 +437,6 @@ evalResidual ( const vector_Type& sol, const vectorPtr_Type& rhs, vector_Type& r
     }
     else
     {
-
         // this works for the linear elastic case where the matrix is not touched
         res = * (M_monolithicMatrix->matrix() ) * sol;
 

@@ -176,15 +176,15 @@ FSIMonolithicGI::evalResidual ( vector_Type&       res,
 
     // formulation matrix * vector (i.e. linear elastic )
     // todo: pass to boolean for nonlinear structures
-    if( (M_data->dataSolid()->solidType().compare("exponential") && M_data->dataSolid()->solidType().compare("neoHookean")) )
+    if( !(M_data->dataSolid()->lawType().compare("linear") ) )
         applyBoundaryConditions();
 
     M_monolithicMatrix->GlobalAssemble();
 
     super_Type::evalResidual( disp, M_rhsFull, res, false );
 
-    //case for exponential and neohookean
-    if ( !( M_data->dataSolid()->solidType().compare( "exponential" ) && M_data->dataSolid()->solidType().compare( "neoHookean" ) ) )
+    //case for nonlinear laws which are formulated in the residual form
+    if ( !( M_data->dataSolid()->lawType().compare( "nonlinear" ) ) )
     {
         res += *M_meshBlock * disp;
 
@@ -291,10 +291,10 @@ void FSIMonolithicGI::setupBlockPrec()
     //The following part accounts for a possibly nonlinear structure model, should not be run when linear
     //elasticity is used
 
-    // case of exponential and neohookean model
-    // todo: pass to boolean variable for Nonlinear models ( i.e. for vector formulation )
+    case of exponential and neohookean model
+    todo: pass to boolean variable for Nonlinear models ( i.e. for vector formulation )
     if ( M_data->dataSolid()->getUseExactJacobian() && ( M_data->dataSolid()->solidType().compare( "exponential" )
-                    && M_data->dataSolid()->solidType().compare( "neoHookean" ) ) )
+    							 && M_data->dataSolid()->solidType().compare( "neoHookean" ) ) )
     {
         M_solid->material()->updateJacobianMatrix ( *M_uk * M_solid->rescaleFactor(),
                                                     dataSolid(),
@@ -322,7 +322,7 @@ void FSIMonolithicGI::setupBlockPrec()
         M_monolithicMatrix->addToGlobalMatrix ( M_shapeDerivativesBlock );
     }
 
-    if ( M_data->dataFluid()->useShapeDerivatives() || M_data->dataSolid()->getUseExactJacobian() )
+    if ( M_data->dataFluid()->useShapeDerivatives() /* || M_data->dataSolid()->getUseExactJacobian()*/ )
     {
         if ( !M_BCh_u->bcUpdateDone() )
             M_BCh_u->bcUpdate ( *M_uFESpace->mesh(),

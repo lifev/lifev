@@ -132,10 +132,15 @@ StructuralConstitutiveLawData::setup ( const GetPot& dataFile, const std::string
     }
 
     // physics
-    M_solidType = dataFile ( ( section + "/physics/solidType" ).data(), "NO_DEFAULT_SOLID_TYPE" );
-    M_externalPressure = dataFile ( ( section + "/physics/externalPressure" ).data(), 0. );
-    M_density   = dataFile ( ( section + "/physics/density"   ).data(), 1. );
-    M_thickness = dataFile ( ( section + "/physics/thickness" ).data(), 0.1 );
+    M_solidType = dataFile( ( section + "/physics/solidType" ).data(), "NO_DEFAULT_SOLID_TYPE" );
+    M_lawType = dataFile( ( section + "/physics/lawType" ).data(), "NO_DEFAULT_LAW_TYPE" );
+
+    ASSERT( M_lawType.compare("NO_DEFAULT_LAW_TYPE"), "Set the type of law (linear or nonlinear) in [solid]/physics");
+
+    M_externalPressure = dataFile( ( section + "/physics/externalPressure" ).data(), 0. );
+    M_density   = dataFile( ( section + "/physics/density"   ).data(), 1. );
+    M_thickness = dataFile( ( section + "/physics/thickness" ).data(), 0.1 );
+
 
     UInt materialsNumber = dataFile.vector_variable_size ( ( section + "/physics/material_flag" ).data() );
 

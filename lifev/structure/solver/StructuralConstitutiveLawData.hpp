@@ -351,6 +351,12 @@ public:
         return M_solidType;
     }
 
+    //! Get law type
+    /*!
+     * @return law type
+     */
+    const std::string& lawType() { return M_lawType; }
+
     //! Get whether to use or not exact Jacobian
     /*!
      * @return true: if using exact Jacobian, false: otherwise
@@ -401,6 +407,7 @@ private:
     UInt                   M_verbose; // temporal output verbose
 
     std::string            M_solidType;
+    std::string            M_lawType;
     bool                   M_useExactJacobian;
 
     vectorFlags_Type       M_vectorMaterialFlags;
