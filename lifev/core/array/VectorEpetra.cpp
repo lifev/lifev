@@ -232,9 +232,11 @@ VectorEpetra::operator= ( const VectorEpetra& vector )
     {
         case Repeated:
             if ( M_mapType != Repeated )
-                return Export(vector.epetraVector(), M_combineMode);
+            {
+                return Export (vector.epetraVector(), M_combineMode);
+            }
         case Unique:
-            return Import(vector.epetraVector(), M_combineMode);
+            return Import (vector.epetraVector(), M_combineMode);
     }
 
     // if we get here, it means that we have two different repeated maps.

@@ -47,7 +47,8 @@
 
 #include <lifev/core/LifeV.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! Graph cutter base class (abstract)
 /*!
@@ -61,11 +62,11 @@ class GraphCutterBase
 public:
     //! @name Public Types
     //@{
-	typedef Teuchos::ParameterList                 pList_Type;
+    typedef Teuchos::ParameterList                 pList_Type;
     //@}
 
     //! @name Constructor & Destructor
-	//@{
+    //@{
     //! Default constructor
     GraphCutterBase() {}
 
@@ -82,15 +83,15 @@ public:
     //! @name Get Methods
     //@{
     //! Get a pointer to one of the partitions
-    virtual const std::vector<Int>& getPart(const UInt i) const = 0;
-    virtual std::vector<Int>& getPart(const UInt i) = 0;
+    virtual const std::vector<Int>& getPart (const UInt i) const = 0;
+    virtual std::vector<Int>& getPart (const UInt i) = 0;
     //@}
 
 private:
     //! @name Private methods
     //@{
     //! Set values for all the parameters, with default values where needed
-    virtual void setParameters(pList_Type& parameters) = 0;
+    virtual void setParameters (pList_Type& parameters) = 0;
 
     //@}
 };

@@ -331,7 +331,7 @@ hyperbolic::hyperbolic ( int argc,
 Real
 hyperbolic::run()
 {
-    typedef RegionMesh<LinearTetra,neighborMarkerCommon_Type> RegionMesh;
+    typedef RegionMesh<LinearTetra, neighborMarkerCommon_Type> RegionMesh;
     typedef SolverAztecOO                               solver_type;
     typedef HyperbolicSolver< RegionMesh, solver_type > hyper;
     typedef hyper::vector_Type                          vector_type;
@@ -471,7 +471,7 @@ hyperbolic::run()
                                                     1,
                                                     Members->comm ) );
 
-    GhostHandler<RegionMesh> ghost( fullMeshPtr, meshPtr, feSpacePtr->mapPtr(), Members->comm );
+    GhostHandler<RegionMesh> ghost ( fullMeshPtr, meshPtr, feSpacePtr->mapPtr(), Members->comm );
 
     // Stop chronoFiniteElementSpace
     chronoFiniteElementSpace.stop();

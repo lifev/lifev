@@ -200,7 +200,10 @@ public:
     //! \name Get Methods
     //@{
     //! Return a reference to M_vertexDistribution
-    const std::vector<Int>&  vertexDistribution()   const {return M_vertexDistribution;}
+    const std::vector<Int>&  vertexDistribution()   const
+    {
+        return M_vertexDistribution;
+    }
     //! Return a const pointer to M_meshPartitions[0] - for parallel
     const meshPtr_Type&      meshPartition()        const
     {
@@ -230,14 +233,20 @@ public:
         return M_elementDomains;
     }
     //! Return a pointer to the communicator M_comm
-    const boost::shared_ptr<Epetra_Comm> & comm()   const { return M_comm; }
+    const boost::shared_ptr<Epetra_Comm>& comm()   const
+    {
+        return M_comm;
+    }
     //@}
 
     //! @name Set methos
     //@{
 
     //! Set M_buildOverlappingPartitions
-    void setPartitionOverlap( UInt const overlap ) { M_partitionOverlap = overlap; }
+    void setPartitionOverlap ( UInt const overlap )
+    {
+        M_partitionOverlap = overlap;
+    }
 
     //@}
 
@@ -284,7 +293,7 @@ private:
       Updates: M_graphVertexLocations, M_elementDomains
       \param numParts - unsigned int - number of partitions for the graph cutting process
     */
-    void partitionConnectivityGraph(UInt numParts);
+    void partitionConnectivityGraph (UInt numParts);
 
     //! Updates the map between elements and processors in FSI
     /*!
@@ -432,7 +441,7 @@ init ()
     M_nBoundaryRidges.resize ( M_numPartitions );
     M_nBoundaryFacets.resize ( M_numPartitions );
     M_elementDomains.reset ( new graph_Type );
-    M_entityPID.resize( 4 );
+    M_entityPID.resize ( 4 );
     M_serialMode = false;
     M_partitionOverlap = 0;
 
@@ -1372,65 +1381,65 @@ void MeshPartitioner<MeshType>::constructFacets()
             ASSERT ( (localElem1 != NotAnId) || (localElem2 != NotAnId), "A hanging facet in mesh partitioner!");
 
             // todo: move this to a switch ( if...else ) on the EntityFlag
-//            switch ( pf->flag() )
-//            {
-//                case ( EntityFlags::DEFAULT ):
-//                {
-//                    pf->firstAdjacentElementIdentity()  = localElem1;
-//                    pf->firstAdjacentElementPosition()  = M_originalMesh->face(*is).firstAdjacentElementPosition();
-//                    pf->secondAdjacentElementIdentity() = localElem2;
-//                    pf->secondAdjacentElementPosition() = M_originalMesh->face(*is).secondAdjacentElementPosition();
-//                    break;
-//                }
-//                case ( EntityFlags::PHYSICAL_BOUNDARY ):
-//                {
-//                    pf->firstAdjacentElementIdentity()  = localElem1;
-//                    pf->firstAdjacentElementPosition()  = M_originalMesh->face(*is).firstAdjacentElementPosition();
-//                    pf->secondAdjacentElementIdentity() = localElem2;
-//                    pf->secondAdjacentElementPosition() = M_originalMesh->face(*is).secondAdjacentElementPosition();
-//                    break;
-//                }
-//                case ( EntityFlags::SUBDOMAIN_INTERFACE ):
-//                {
-//                    if ( localElem2 != NotAnId )
-//                    {
-//                        pf->firstAdjacentElementIdentity()  = localElem2;
-//                        pf->firstAdjacentElementPosition()  = M_originalMesh->face(*is).secondAdjacentElementPosition();
-//                        pf->secondAdjacentElementIdentity() = ghostElem;
-//                        pf->secondAdjacentElementPosition() = M_originalMesh->face(*is).firstAdjacentElementPosition();
-//                    }
-//                    else
-//                    {
-//                        pf->firstAdjacentElementIdentity()  = localElem1;
-//                        pf->firstAdjacentElementPosition()  = M_originalMesh->face(*is).firstAdjacentElementPosition();
-//                        pf->secondAdjacentElementIdentity() = ghostElem;
-//                        pf->secondAdjacentElementPosition() = M_originalMesh->face(*is).secondAdjacentElementPosition();
-//                    }
-//                    break;
-//                }
-//
-//            }
+            //            switch ( pf->flag() )
+            //            {
+            //                case ( EntityFlags::DEFAULT ):
+            //                {
+            //                    pf->firstAdjacentElementIdentity()  = localElem1;
+            //                    pf->firstAdjacentElementPosition()  = M_originalMesh->face(*is).firstAdjacentElementPosition();
+            //                    pf->secondAdjacentElementIdentity() = localElem2;
+            //                    pf->secondAdjacentElementPosition() = M_originalMesh->face(*is).secondAdjacentElementPosition();
+            //                    break;
+            //                }
+            //                case ( EntityFlags::PHYSICAL_BOUNDARY ):
+            //                {
+            //                    pf->firstAdjacentElementIdentity()  = localElem1;
+            //                    pf->firstAdjacentElementPosition()  = M_originalMesh->face(*is).firstAdjacentElementPosition();
+            //                    pf->secondAdjacentElementIdentity() = localElem2;
+            //                    pf->secondAdjacentElementPosition() = M_originalMesh->face(*is).secondAdjacentElementPosition();
+            //                    break;
+            //                }
+            //                case ( EntityFlags::SUBDOMAIN_INTERFACE ):
+            //                {
+            //                    if ( localElem2 != NotAnId )
+            //                    {
+            //                        pf->firstAdjacentElementIdentity()  = localElem2;
+            //                        pf->firstAdjacentElementPosition()  = M_originalMesh->face(*is).secondAdjacentElementPosition();
+            //                        pf->secondAdjacentElementIdentity() = ghostElem;
+            //                        pf->secondAdjacentElementPosition() = M_originalMesh->face(*is).firstAdjacentElementPosition();
+            //                    }
+            //                    else
+            //                    {
+            //                        pf->firstAdjacentElementIdentity()  = localElem1;
+            //                        pf->firstAdjacentElementPosition()  = M_originalMesh->face(*is).firstAdjacentElementPosition();
+            //                        pf->secondAdjacentElementIdentity() = ghostElem;
+            //                        pf->secondAdjacentElementPosition() = M_originalMesh->face(*is).secondAdjacentElementPosition();
+            //                    }
+            //                    break;
+            //                }
+            //
+            //            }
             if ( localElem1 == NotAnId )
-             {
-                 pf->firstAdjacentElementIdentity()  = localElem2;
-                 pf->firstAdjacentElementPosition()  = M_originalMesh->facet(*is).secondAdjacentElementPosition();
-                 pf->secondAdjacentElementIdentity() = ghostElem;
-                 pf->secondAdjacentElementPosition() = NotAnId;
-                 pf->reversePoints();
-             }
+            {
+                pf->firstAdjacentElementIdentity()  = localElem2;
+                pf->firstAdjacentElementPosition()  = M_originalMesh->facet (*is).secondAdjacentElementPosition();
+                pf->secondAdjacentElementIdentity() = ghostElem;
+                pf->secondAdjacentElementPosition() = NotAnId;
+                pf->reversePoints();
+            }
             else if ( localElem2 == NotAnId )
             {
                 pf->firstAdjacentElementIdentity()  = localElem1;
-                pf->firstAdjacentElementPosition()  = M_originalMesh->facet(*is).firstAdjacentElementPosition();
+                pf->firstAdjacentElementPosition()  = M_originalMesh->facet (*is).firstAdjacentElementPosition();
                 pf->secondAdjacentElementIdentity() = ghostElem;
                 pf->secondAdjacentElementPosition() = NotAnId;
             }
             else
             {
                 pf->firstAdjacentElementIdentity()  = localElem1;
-                pf->firstAdjacentElementPosition()  = M_originalMesh->facet(*is).firstAdjacentElementPosition();
+                pf->firstAdjacentElementPosition()  = M_originalMesh->facet (*is).firstAdjacentElementPosition();
                 pf->secondAdjacentElementIdentity() = localElem2;
-                pf->secondAdjacentElementPosition() = M_originalMesh->facet(*is).secondAdjacentElementPosition();
+                pf->secondAdjacentElementPosition() = M_originalMesh->facet (*is).secondAdjacentElementPosition();
             }
 
         }
@@ -1474,10 +1483,12 @@ void MeshPartitioner<MeshType>::finalSetup()
             (*M_meshPartitions) [i]->updateElementRidges();
         }
 
-        if(MeshType::S_geoDimensions == 3)
-            (*M_meshPartitions)[i]->updateElementRidges();
+        if (MeshType::S_geoDimensions == 3)
+        {
+            (*M_meshPartitions) [i]->updateElementRidges();
+        }
 
-        (*M_meshPartitions)[i]->updateElementFacets();
+        (*M_meshPartitions) [i]->updateElementFacets();
 
 #ifdef HAVE_LIFEV_DEBUG
         if (M_serialMode)
@@ -1535,13 +1546,13 @@ void MeshPartitioner<MeshType>::execute()
     debugStream (4000) << M_me << " has " << (*M_elementDomains) [M_me].size() << " elements.\n";
 #endif
 
-    if( M_partitionOverlap )
+    if ( M_partitionOverlap )
     {
-        GhostHandler<mesh_Type> gh( M_originalMesh, M_comm );
-//        gh.createNodeElementNeighborsMap();
-        gh.fillEntityPID( M_elementDomains, M_entityPID );
-        gh.ghostMapOnElementsP1( M_elementDomains, M_entityPID[ 3 ], 1 );
-     }
+        GhostHandler<mesh_Type> gh ( M_originalMesh, M_comm );
+        //        gh.createNodeElementNeighborsMap();
+        gh.fillEntityPID ( M_elementDomains, M_entityPID );
+        gh.ghostMapOnElementsP1 ( M_elementDomains, M_entityPID[ 3 ], 1 );
+    }
 
     doPartitionMesh();
 
@@ -1561,41 +1572,53 @@ void MeshPartitioner<MeshType>::execute()
 template<typename MeshType>
 void MeshPartitioner<MeshType>::markEntityOwnership()
 {
-    if( M_partitionOverlap )
+    if ( M_partitionOverlap )
     {
         // mark owned entities by each partition as described in M_entityPID
         //@todo: does not work for offline partitioning!
         //M_entityPID or flags should be exported and read back to make it work
         for (UInt i = 0; i < M_numPartitions; ++i)
         {
-            for( UInt e = 0; e < (*M_meshPartitions)[ i ]->numElements(); e++ )
+            for ( UInt e = 0; e < (*M_meshPartitions) [ i ]->numElements(); e++ )
             {
-                typename MeshType::element_Type & element = (*M_meshPartitions)[ i ]->element( e );
-                if( M_entityPID[ 0 ][ element.id() ] != static_cast<UInt>( M_me ) ) element.unSetFlag( EntityFlags::OWNED );
+                typename MeshType::element_Type& element = (*M_meshPartitions) [ i ]->element ( e );
+                if ( M_entityPID[ 0 ][ element.id() ] != static_cast<UInt> ( M_me ) )
+                {
+                    element.unSetFlag ( EntityFlags::OWNED );
+                }
             }
 
-            for( UInt f = 0; f < (*M_meshPartitions)[ i ]->numFacets(); f++ )
+            for ( UInt f = 0; f < (*M_meshPartitions) [ i ]->numFacets(); f++ )
             {
-                typename MeshType::facet_Type & facet = (*M_meshPartitions)[ i ]->facet( f );
-                if( M_entityPID[ 1 ][ facet.id() ] != static_cast<UInt>( M_me ) ) facet.unSetFlag( EntityFlags::OWNED );
+                typename MeshType::facet_Type& facet = (*M_meshPartitions) [ i ]->facet ( f );
+                if ( M_entityPID[ 1 ][ facet.id() ] != static_cast<UInt> ( M_me ) )
+                {
+                    facet.unSetFlag ( EntityFlags::OWNED );
+                }
             }
 
-            for( UInt r = 0; r < (*M_meshPartitions)[ i ]->numRidges(); r++ )
+            for ( UInt r = 0; r < (*M_meshPartitions) [ i ]->numRidges(); r++ )
             {
-                typename MeshType::ridge_Type & ridge = (*M_meshPartitions)[ i ]->ridge( r );
-                if( M_entityPID[ 2 ][ ridge.id() ] != static_cast<UInt>( M_me ) ) ridge.unSetFlag( EntityFlags::OWNED );
+                typename MeshType::ridge_Type& ridge = (*M_meshPartitions) [ i ]->ridge ( r );
+                if ( M_entityPID[ 2 ][ ridge.id() ] != static_cast<UInt> ( M_me ) )
+                {
+                    ridge.unSetFlag ( EntityFlags::OWNED );
+                }
             }
 
-            for( UInt p = 0; p < (*M_meshPartitions)[ i ]->numPoints(); p++ )
+            for ( UInt p = 0; p < (*M_meshPartitions) [ i ]->numPoints(); p++ )
             {
-                typename MeshType::point_Type & point = (*M_meshPartitions)[ i ]->point( p );
-                if( M_entityPID[ 3 ][ point.id() ] != static_cast<UInt>( M_me ) ) point.unSetFlag( EntityFlags::OWNED );
+                typename MeshType::point_Type& point = (*M_meshPartitions) [ i ]->point ( p );
+                if ( M_entityPID[ 3 ][ point.id() ] != static_cast<UInt> ( M_me ) )
+                {
+                    point.unSetFlag ( EntityFlags::OWNED );
+                }
             }
         }
-        clearVector( M_entityPID[ 0 ] );
-        clearVector( M_entityPID[ 1 ] );
-        clearVector( M_entityPID[ 2 ] );
-        clearVector( M_entityPID[ 3 ] );
+        clearVector ( M_entityPID[ 0 ] );
+        clearVector ( M_entityPID[ 1 ] );
+        clearVector ( M_entityPID[ 2 ] );
+        clearVector ( M_entityPID[ 3 ] );
     }
 }
 

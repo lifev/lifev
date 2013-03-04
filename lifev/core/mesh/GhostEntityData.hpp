@@ -37,7 +37,8 @@
 
 #include <lifev/core/LifeV.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! Ghost entity data structure
 /*!
@@ -56,7 +57,7 @@ struct GhostEntityData
     //! Position on the ghost element.
     UInt ghostElementPosition;
 
-    friend std::ostream& operator<<(std::ostream & out, GhostEntityData const & ged);
+    friend std::ostream& operator<< (std::ostream& out, GhostEntityData const& ged);
 };
 
 } // Namespace LifeV

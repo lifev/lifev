@@ -70,11 +70,11 @@ using namespace LifeV;
 #endif /* HAVE_MPI */
 #endif /* HAVE_HDF5 */
 
-typedef MeshPartitionTool<RegionMesh<LinearTetra>,
-						  GraphCutterParMETIS,
-						  MeshPartBuilder> meshCutterParMETIS_Type;
+typedef MeshPartitionTool < RegionMesh<LinearTetra>,
+        GraphCutterParMETIS,
+        MeshPartBuilder > meshCutterParMETIS_Type;
 
-int main(int argc, char** argv)
+int main (int argc, char** argv)
 {
 #ifdef HAVE_HDF5
 #ifdef HAVE_MPI
@@ -84,23 +84,24 @@ int main(int argc, char** argv)
     MPI_Init (&argc, &argv);
     boost::shared_ptr<Epetra_Comm> comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
 
-    if (comm->NumProc() != 1) {
-    	std::cout << "This test needs to be run "
-    			  << "with a single process. Aborting."
-    			  << std::endl;
-    	return EXIT_FAILURE;
+    if (comm->NumProc() != 1)
+    {
+        std::cout << "This test needs to be run "
+                  << "with a single process. Aborting."
+                  << std::endl;
+        return EXIT_FAILURE;
     }
 
     GetPot commandLine (argc, argv);
     string dataFileName = commandLine.follow ("data", 2, "-f", "--file");
     GetPot dataFile (dataFileName);
 
-    const UInt numElements(dataFile("mesh/nelements",10));
-    const Int numParts(dataFile("test/num_parts", 3));
-    const bool hierarchical(dataFile("test/hierarchical", false));
-    const std::string topology(dataFile("test/topology", "1"));
+    const UInt numElements (dataFile ("mesh/nelements", 10) );
+    const Int numParts (dataFile ("test/num_parts", 3) );
+    const bool hierarchical (dataFile ("test/hierarchical", false) );
+    const std::string topology (dataFile ("test/topology", "1") );
 
-    const std::string partsFileName(dataFile("test/hdf5_file_name", "cube.h5"));
+    const std::string partsFileName (dataFile ("test/hdf5_file_name", "cube.h5") );
 
     std::cout << "Number of elements in mesh: " << numElements << std::endl;
     std::cout << "Number of parts: " << numParts << std::endl;
@@ -110,23 +111,24 @@ int main(int argc, char** argv)
     regularMesh3D (*fullMeshPtr, 1, numElements, numElements, numElements,
                    false, 2.0, 2.0, 2.0, -1.0, -1.0, -1.0);
 
-	Teuchos::ParameterList meshParameters;
-    meshParameters.set("num_parts", numParts, "");
-    meshParameters.set("offline_mode", true, "");
-    meshParameters.set("hierarchical", hierarchical, "");
-    meshParameters.set("topology", topology, "");
-	meshCutterParMETIS_Type meshCutter(fullMeshPtr, comm, meshParameters);
-	if (! meshCutter.success()) {
-		std::cout << "Mesh partition failed.";
-		return EXIT_FAILURE;
-	}
+    Teuchos::ParameterList meshParameters;
+    meshParameters.set ("num_parts", numParts, "");
+    meshParameters.set ("offline_mode", true, "");
+    meshParameters.set ("hierarchical", hierarchical, "");
+    meshParameters.set ("topology", topology, "");
+    meshCutterParMETIS_Type meshCutter (fullMeshPtr, comm, meshParameters);
+    if (! meshCutter.success() )
+    {
+        std::cout << "Mesh partition failed.";
+        return EXIT_FAILURE;
+    }
 
     // delete the RegionMesh object
     fullMeshPtr.reset();
 
     // Write mesh parts to HDF5 container
-	PartitionIO<mesh_Type> partitionIO(partsFileName, comm);
-	partitionIO.write(meshCutter.allMeshParts());
+    PartitionIO<mesh_Type> partitionIO (partsFileName, comm);
+    partitionIO.write (meshCutter.allMeshParts() );
 
     MPI_Finalize();
 

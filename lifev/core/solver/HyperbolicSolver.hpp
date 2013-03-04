@@ -176,7 +176,7 @@ public:
     */
     HyperbolicSolver ( const data_Type&          dataFile,
                        FESpace<Mesh, MapEpetra>& fESpace,
-                       MapEpetra &               ghostMap,
+                       MapEpetra&                ghostMap,
                        bchandler_Type&           bcHandler,
                        commPtr_Type&             comm );
 
@@ -188,7 +188,7 @@ public:
     */
     HyperbolicSolver ( const data_Type&          dataFile,
                        FESpace<Mesh, MapEpetra>& fESpace,
-                       MapEpetra &               ghostMap,
+                       MapEpetra&                ghostMap,
                        commPtr_Type&             comm );
 
     //! Virtual destructor.
@@ -432,31 +432,31 @@ template< typename Mesh, typename SolverType >
 HyperbolicSolver< Mesh, SolverType >::
 HyperbolicSolver ( const data_Type&          dataFile,
                    FESpace<Mesh, MapEpetra>& fESpace,
-                   MapEpetra &               ghostMap,
+                   MapEpetra&                ghostMap,
                    bchandler_Type&           bcHandler,
-                   commPtr_Type&             comm ):
-        // Parallel stuff.
-        M_me              ( comm->MyPID() ),
-        M_localMap        ( fESpace.map() ),
-        M_displayer       ( comm ),
-        // Data of the problem.
-        M_data            ( dataFile ),
-        M_source          ( NULL ),
-        M_mass            ( NULL ),
-        M_BCh             ( new bchandler_Type ( bcHandler ) ),
-        M_setBC           ( true ),
-        M_initialSolution ( NULL ),
-        M_numericalFlux   ( ),
-        // Finite element spaces.
-        M_FESpace         ( fESpace ),
-        // Algebraic stuff.
-        M_rhs             ( new vector_Type ( M_localMap ) ),
-        M_u               ( new vector_Type ( M_FESpace.map(), Repeated ) ),
-        M_uOld            ( new vector_Type ( ghostMap, Repeated ) ),
-        M_globalFlux      ( new vector_Type ( ghostMap, Repeated ) ),
-        // Local matrices and vectors.
-        M_localFlux       ( M_FESpace.refFE().nbDof(), 1 ),
-        M_elmatMass       ( )
+                   commPtr_Type&             comm ) :
+    // Parallel stuff.
+    M_me              ( comm->MyPID() ),
+    M_localMap        ( fESpace.map() ),
+    M_displayer       ( comm ),
+    // Data of the problem.
+    M_data            ( dataFile ),
+    M_source          ( NULL ),
+    M_mass            ( NULL ),
+    M_BCh             ( new bchandler_Type ( bcHandler ) ),
+    M_setBC           ( true ),
+    M_initialSolution ( NULL ),
+    M_numericalFlux   ( ),
+    // Finite element spaces.
+    M_FESpace         ( fESpace ),
+    // Algebraic stuff.
+    M_rhs             ( new vector_Type ( M_localMap ) ),
+    M_u               ( new vector_Type ( M_FESpace.map(), Repeated ) ),
+    M_uOld            ( new vector_Type ( ghostMap, Repeated ) ),
+    M_globalFlux      ( new vector_Type ( ghostMap, Repeated ) ),
+    // Local matrices and vectors.
+    M_localFlux       ( M_FESpace.refFE().nbDof(), 1 ),
+    M_elmatMass       ( )
 {
 
     M_elmatMass.reserve ( M_FESpace.mesh()->numElements() );
@@ -469,30 +469,30 @@ template< typename Mesh, typename SolverType >
 HyperbolicSolver< Mesh, SolverType >::
 HyperbolicSolver ( const data_Type&          dataFile,
                    FESpace<Mesh, MapEpetra>& fESpace,
-                   MapEpetra &               ghostMap,
-                   commPtr_Type&             comm ):
-        // Parallel stuff.
-        M_me              ( comm->MyPID() ),
-        M_localMap        ( fESpace.map() ),
-        M_displayer       ( comm ),
-        // Data of the problem.
-        M_data            ( dataFile ),
-        M_source          ( NULL ),
-        M_mass            ( NULL ),
-        M_BCh             ( ),
-        M_setBC           ( false ),
-        M_initialSolution ( NULL ),
-        M_numericalFlux   ( ),
-        // Finite element spaces.
-        M_FESpace         ( fESpace ),
-        // Algebraic stuff.
-        M_rhs             ( new vector_Type ( M_localMap ) ),
-        M_u               ( new vector_Type ( M_FESpace.map(), Repeated ) ),
-        M_uOld            ( new vector_Type ( ghostMap, Repeated ) ),
-        M_globalFlux      ( new vector_Type ( ghostMap, Repeated ) ),
-        // Local matrices and vectors.
-        M_localFlux       ( M_FESpace.refFE().nbDof(), 1 ),
-        M_elmatMass       ( )
+                   MapEpetra&                ghostMap,
+                   commPtr_Type&             comm ) :
+    // Parallel stuff.
+    M_me              ( comm->MyPID() ),
+    M_localMap        ( fESpace.map() ),
+    M_displayer       ( comm ),
+    // Data of the problem.
+    M_data            ( dataFile ),
+    M_source          ( NULL ),
+    M_mass            ( NULL ),
+    M_BCh             ( ),
+    M_setBC           ( false ),
+    M_initialSolution ( NULL ),
+    M_numericalFlux   ( ),
+    // Finite element spaces.
+    M_FESpace         ( fESpace ),
+    // Algebraic stuff.
+    M_rhs             ( new vector_Type ( M_localMap ) ),
+    M_u               ( new vector_Type ( M_FESpace.map(), Repeated ) ),
+    M_uOld            ( new vector_Type ( ghostMap, Repeated ) ),
+    M_globalFlux      ( new vector_Type ( ghostMap, Repeated ) ),
+    // Local matrices and vectors.
+    M_localFlux       ( M_FESpace.refFE().nbDof(), 1 ),
+    M_elmatMass       ( )
 {
 
     M_elmatMass.reserve ( M_FESpace.mesh()->numElements() );
@@ -619,16 +619,16 @@ solveOneTimeStep ()
     M_globalFlux->globalAssemble();
 
     // alternative: instead of modifying M_globalFlux.map, we can make a local copy with the correct map
-//    // this is needed since M_uOld.map != M_globalFlux.map
-//    vector_Type fluxCopy ( M_uOld->map() );
-//    fluxCopy = *M_globalFlux;
+    //    // this is needed since M_uOld.map != M_globalFlux.map
+    //    vector_Type fluxCopy ( M_uOld->map() );
+    //    fluxCopy = *M_globalFlux;
 
     // Update the value of the solution
     (*M_u) = (*M_uOld) - M_data.dataTime()->timeStep() * (*M_globalFlux);
-//    *M_u = *M_uOld - M_data.dataTime()->timeStep() * fluxCopy;
+    //    *M_u = *M_uOld - M_data.dataTime()->timeStep() * fluxCopy;
 
     // Clean the vector of fluxes
-    M_globalFlux.reset( new vector_Type( M_uOld->map(), Repeated ) );
+    M_globalFlux.reset ( new vector_Type ( M_uOld->map(), Repeated ) );
 
     // Update the solution at previous time step
     *M_uOld = *M_u;
@@ -699,7 +699,7 @@ CFL()
             {
                 // TODO: this works only for P0 elements
                 // but extract_vec works only with lids while RightElement is a gid
-                rightValue[ 0 ] = (*M_uOld)[ rightElement ];
+                rightValue[ 0 ] = (*M_uOld) [ rightElement ];
             }
             else // Flag::testOneSet ( M_FESpace.mesh()->face ( iGlobalFace ).flag(), PHYSICAL_BOUNDARY )
             {
@@ -720,8 +720,8 @@ CFL()
 
                 for (UInt icoor (0); icoor < 3; ++icoor)
                 {
-                    quadPoint(icoor) = M_FESpace.feBd().quadPt( ig, icoor );
-                    normal(icoor)    = M_FESpace.feBd().normal( icoor, ig ) ;
+                    quadPoint (icoor) = M_FESpace.feBd().quadPt ( ig, icoor );
+                    normal (icoor)    = M_FESpace.feBd().normal ( icoor, ig ) ;
                 }
 
                 // Compute the local CFL without the time step
@@ -775,12 +775,12 @@ setInitialSolution ( const Function_Type& initialSolution )
 {
 
     // interpolation must be done on a Unique map
-    vector_Type uUnique( M_u->map(), Unique );
+    vector_Type uUnique ( M_u->map(), Unique );
 
     // Interpolate the initial solution.
-    M_FESpace.interpolate( initialSolution,
-                           uUnique,
-                           M_data.dataTime()->initialTime() );
+    M_FESpace.interpolate ( initialSolution,
+                            uUnique,
+                            M_data.dataTime()->initialTime() );
 
     // Update the solutions
     *M_uOld = uUnique;
@@ -873,8 +873,8 @@ localEvolve ( const UInt& iElem )
         else if ( Flag::testOneSet ( M_FESpace.mesh()->face ( iGlobalFace ).flag(), EntityFlags::SUBDOMAIN_INTERFACE ) )
         {
             // TODO: this works only for P0 elements
-//            rightValue[ 0 ] = M_ghostDataMap[ iGlobalFace ];
-            rightValue[ 0 ] = (*M_uOld)[ rightElement ];
+            //            rightValue[ 0 ] = M_ghostDataMap[ iGlobalFace ];
+            rightValue[ 0 ] = (*M_uOld) [ rightElement ];
         }
         else // Flag::testOneSet ( M_FESpace.mesh()->face ( iGlobalFace ).flag(), PHYSICAL_BOUNDARY )
         {

@@ -66,7 +66,7 @@ public:
 
     //! @name Public methods
     //@{
-    void postProcess(const Real& /*time*/) {}
+    void postProcess (const Real& /*time*/) {}
     void exportPID ( meshPtr_Type /*meshPart*/, commPtr_Type /*comm*/, const bool /*binaryFormat*/ = false ) {}
     void exportRegionMarkerID ( boost::shared_ptr<MeshType> /*mesh*/, boost::shared_ptr<Epetra_Comm> /*comm*/  ) {}
     UInt importFromTime ( const Real& /*time*/ )

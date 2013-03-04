@@ -114,7 +114,7 @@ public:
              - order [string] the order of the mesh (P1, P2)
              - verbose [bool] verbosity level
      */
-    void setup( const Teuchos::ParameterList& meshParameters);
+    void setup ( const Teuchos::ParameterList& meshParameters);
 
     //! Display the values
     virtual void showMe ( std::ostream& output = std::cout ) const;

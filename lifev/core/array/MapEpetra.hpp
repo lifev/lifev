@@ -121,8 +121,8 @@ public:
                 Int* myGlobalElements,
                 const comm_ptrtype& commPtr );
 
-    MapEpetra( std::pair<std::vector<Int>, std::vector<Int> > myGlobalElements,
-               const comm_ptrtype& commPtr );
+    MapEpetra ( std::pair<std::vector<Int>, std::vector<Int> > myGlobalElements,
+                const comm_ptrtype& commPtr );
 
     //! Constructor
     /*
@@ -258,14 +258,14 @@ public:
       @param mapName Name of the map in the HDF5 file
       @param truncate True if the file has to be truncated; False if the file already exist and should not be truncated
      */
-    void exportToHDF5( std::string const &fileName, std::string const &mapName = "map", bool const& truncate = true );
+    void exportToHDF5 ( std::string const& fileName, std::string const& mapName = "map", bool const& truncate = true );
 
     //! Read a matrix from a HDF5 (.h5) file
     /*!
       @param fileName Name of the file where the map will be saved, without extension (.h5)
       @param matrixName Name of the map in the HDF5 file
      */
-    void importFromHDF5( std::string const &fileName, std::string const &mapName = "map" );
+    void importFromHDF5 ( std::string const& fileName, std::string const& mapName = "map" );
 #endif
 
     //! Show informations about the map
@@ -278,9 +278,9 @@ public:
     }
 
     //! check if a global id is owned by the current partition
-    bool isOwned( const UInt globalId ) const
+    bool isOwned ( const UInt globalId ) const
     {
-        return ( M_uniqueMapEpetra->LID( static_cast<int>(globalId) ) > -1 );
+        return ( M_uniqueMapEpetra->LID ( static_cast<int> (globalId) ) > -1 );
     }
 
     //@}
@@ -318,10 +318,13 @@ public:
     //@{
 
     //! Set the communicator
-    void setComm( comm_ptrtype const& commPtr ) { M_commPtr = commPtr; }
+    void setComm ( comm_ptrtype const& commPtr )
+    {
+        M_commPtr = commPtr;
+    }
 
     //! set the internal Epetra_Maps
-    void setMap( map_ptrtype map, MapEpetraType mapType );
+    void setMap ( map_ptrtype map, MapEpetraType mapType );
 
     //@}
 

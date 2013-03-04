@@ -34,9 +34,10 @@
 
 #include <GhostEntityData.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
-inline std::ostream& operator<<(std::ostream & out, GhostEntityData const & ged)
+inline std::ostream& operator<< (std::ostream& out, GhostEntityData const& ged)
 {
     out << "ghostEntityData: localFace " << ged.localFacetId
         << " - ghostElem "               << ged.ghostElementLocalId

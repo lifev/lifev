@@ -355,7 +355,7 @@ public:
     virtual void readVariable (exporterData_Type& dvar);
 
     //! Export the Processor ID as P0 variable
-    virtual void exportPID( meshPtr_Type & mesh, commPtr_Type & comm, const bool binaryFormat = false );
+    virtual void exportPID ( meshPtr_Type& mesh, commPtr_Type& comm, const bool binaryFormat = false );
 
     //! Export the region marker ID as P0 variable
     void exportRegionMarkerID ( boost::shared_ptr<MeshType> mesh, boost::shared_ptr<Epetra_Comm> comm  );
@@ -692,7 +692,7 @@ void Exporter<MeshType>::exportFlags ( boost::shared_ptr<MeshType> mesh, boost::
 }
 
 template <typename MeshType>
-void Exporter<MeshType>::exportPID( meshPtr_Type & mesh, commPtr_Type & comm, bool const binaryFormat )
+void Exporter<MeshType>::exportPID ( meshPtr_Type& mesh, commPtr_Type& comm, bool const binaryFormat )
 {
     // TODO: use FESpace M_spacemap for generality
     const ReferenceFE* refFEPtr;
@@ -727,32 +727,32 @@ void Exporter<MeshType>::exportPID( meshPtr_Type & mesh, commPtr_Type & comm, bo
     if ( binaryFormat )
     {
         name = "PIDbinary";
-        for ( UInt iElem( 0 ); iElem < mesh->numElements(); ++iElem )
+        for ( UInt iElem ( 0 ); iElem < mesh->numElements(); ++iElem )
         {
-            const ID globalElem = mesh->element(iElem).id();
+            const ID globalElem = mesh->element (iElem).id();
             Int PIDValue = 1;
             PIDValue <<= comm->MyPID();
-            PIDData->sumIntoGlobalValues( globalElem, PIDValue );
+            PIDData->sumIntoGlobalValues ( globalElem, PIDValue );
         }
         PIDData->globalAssemble();
     }
     else
     {
         name = "PID";
-        for ( UInt iElem( 0 ); iElem < mesh->numElements(); ++iElem )
+        for ( UInt iElem ( 0 ); iElem < mesh->numElements(); ++iElem )
         {
-            const ID globalElem = mesh->element(iElem).id();
-            (*PIDData)[ globalElem ] = comm->MyPID();
+            const ID globalElem = mesh->element (iElem).id();
+            (*PIDData) [ globalElem ] = comm->MyPID();
         }
     }
 
-    addVariable( exporterData_Type::ScalarField,
-                 name,
-                 PID_FESpacePtr,
-                 PIDData,
-                 0,
-                 exporterData_Type::SteadyRegime,
-                 exporterData_Type::Cell );
+    addVariable ( exporterData_Type::ScalarField,
+                  name,
+                  PID_FESpacePtr,
+                  PIDData,
+                  0,
+                  exporterData_Type::SteadyRegime,
+                  exporterData_Type::Cell );
 }
 
 // Export the region marker ID as P0 variable

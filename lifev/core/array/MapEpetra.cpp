@@ -75,33 +75,33 @@ MapEpetra::MapEpetra ( Int  numGlobalElements,
     M_importer(),
     M_commPtr ( commPtr )
 {
-    createMap( numGlobalElements,
-               numMyElements,
-               myGlobalElements,
-               *commPtr );
+    createMap ( numGlobalElements,
+                numMyElements,
+                myGlobalElements,
+                *commPtr );
 }
 
-MapEpetra::MapEpetra( std::pair< std::vector<Int>, std::vector<Int> > myGlobalElements,
-                      const comm_ptrtype& commPtr ):
+MapEpetra::MapEpetra ( std::pair< std::vector<Int>, std::vector<Int> > myGlobalElements,
+                       const comm_ptrtype& commPtr ) :
     M_repeatedMapEpetra(),
     M_uniqueMapEpetra(),
     M_exporter(),
     M_importer(),
-    M_commPtr( commPtr )
+    M_commPtr ( commPtr )
 {
-    std::vector<Int> const & myGlobalElementsUnique = myGlobalElements.first;
-    std::vector<Int> const & myGlobalElementsRepeated = myGlobalElements.second;
+    std::vector<Int> const& myGlobalElementsUnique = myGlobalElements.first;
+    std::vector<Int> const& myGlobalElementsRepeated = myGlobalElements.second;
 
-    M_uniqueMapEpetra.reset( new Epetra_Map( -1,
-                                             myGlobalElementsUnique.size(),
-                                             &myGlobalElementsUnique[ 0 ],
-                                             0,
-                                             *M_commPtr ) );
-    M_repeatedMapEpetra.reset( new Epetra_Map( -1,
-                                               myGlobalElementsRepeated.size(),
-                                               &myGlobalElementsRepeated[ 0 ],
+    M_uniqueMapEpetra.reset ( new Epetra_Map ( -1,
+                                               myGlobalElementsUnique.size(),
+                                               &myGlobalElementsUnique[ 0 ],
                                                0,
                                                *M_commPtr ) );
+    M_repeatedMapEpetra.reset ( new Epetra_Map ( -1,
+                                                 myGlobalElementsRepeated.size(),
+                                                 &myGlobalElementsRepeated[ 0 ],
+                                                 0,
+                                                 *M_commPtr ) );
 }
 
 
@@ -327,19 +327,19 @@ MapEpetra::mapsAreSimilar ( MapEpetra const& epetraMap ) const
 
 #ifdef HAVE_HDF5
 
-void MapEpetra::exportToHDF5( std::string const &fileName, std::string const &mapName, bool const &truncate )
+void MapEpetra::exportToHDF5 ( std::string const& fileName, std::string const& mapName, bool const& truncate )
 {
-    EpetraExt::HDF5 HDF5( *M_commPtr );
+    EpetraExt::HDF5 HDF5 ( *M_commPtr );
 
     if ( truncate )
     {
         // Create and open the file / Truncate and open the file
-        HDF5.Create( ( fileName + ".h5" ).data() );
+        HDF5.Create ( ( fileName + ".h5" ).data() );
     }
     else
     {
         // Open an existing file without truncating it
-        HDF5.Open( ( fileName + ".h5" ).data() );
+        HDF5.Open ( ( fileName + ".h5" ).data() );
     }
 
     // Check if the file is created
@@ -350,20 +350,20 @@ void MapEpetra::exportToHDF5( std::string const &fileName, std::string const &ma
     }
 
     // Save the maps into the file
-    HDF5.Write( ( mapName + "Unique" ).c_str(), *M_uniqueMapEpetra );
-    HDF5.Write( ( mapName + "Repeated" ).c_str(), *M_repeatedMapEpetra );
+    HDF5.Write ( ( mapName + "Unique" ).c_str(), *M_uniqueMapEpetra );
+    HDF5.Write ( ( mapName + "Repeated" ).c_str(), *M_repeatedMapEpetra );
 
     // Close the file
     HDF5.Close();
 
 } // exportToHDF5
 
-void MapEpetra::importFromHDF5( std::string const &fileName, std::string const &mapName )
+void MapEpetra::importFromHDF5 ( std::string const& fileName, std::string const& mapName )
 {
-    EpetraExt::HDF5 HDF5( *M_commPtr );
+    EpetraExt::HDF5 HDF5 ( *M_commPtr );
 
     // Open an existing file
-    HDF5.Open( ( fileName + ".h5" ).data() );
+    HDF5.Open ( ( fileName + ".h5" ).data() );
 
     // Check if the file is created
     if ( !HDF5.IsOpen () )
@@ -373,17 +373,17 @@ void MapEpetra::importFromHDF5( std::string const &fileName, std::string const &
     }
 
     // Read the unique map from the file
-    Epetra_Map* importedMap( 0 );
-    HDF5.Read( ( mapName + "Unique" ).c_str(), importedMap );
+    Epetra_Map* importedMap ( 0 );
+    HDF5.Read ( ( mapName + "Unique" ).c_str(), importedMap );
 
     // Copy the loaded map to the member object
-    M_uniqueMapEpetra.reset( new map_type( *importedMap ) );
+    M_uniqueMapEpetra.reset ( new map_type ( *importedMap ) );
 
     // Read the repeated map from the file
-    HDF5.Read( ( mapName + "Repeated" ).c_str(), importedMap );
+    HDF5.Read ( ( mapName + "Repeated" ).c_str(), importedMap );
 
     // Copy the loaded matrix to the member object
-    M_repeatedMapEpetra.reset( new map_type( *importedMap ) );
+    M_repeatedMapEpetra.reset ( new map_type ( *importedMap ) );
 
     // Close the file
     HDF5.Close();
@@ -434,14 +434,14 @@ MapEpetra::importer()
 // ===================================================
 // Set Methods
 // ===================================================
-void MapEpetra::setMap( map_ptrtype map, MapEpetraType mapType )
+void MapEpetra::setMap ( map_ptrtype map, MapEpetraType mapType )
 {
     switch ( mapType )
     {
-    case Unique:
-        M_uniqueMapEpetra = map;
-    case Repeated:
-        M_repeatedMapEpetra = map;
+        case Unique:
+            M_uniqueMapEpetra = map;
+        case Repeated:
+            M_repeatedMapEpetra = map;
     }
 }
 
