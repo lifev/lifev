@@ -151,7 +151,7 @@ ExpressionTranspose<ExpressionType>
 transpose(const ExpressionBase<ExpressionType>& expr)
 {
 	return ExpressionTranspose<ExpressionType>(expr.cast());
-};
+}
 
 
 // Specialization for the matricial constants
@@ -160,7 +160,7 @@ ExpressionTranspose<ExpressionMatrix<Dim1, Dim2> >
 transpose(const MatrixSmall<Dim1, Dim2>& m)
 {
     return ExpressionTranspose<ExpressionMatrix<Dim2, Dim1> >(ExpressionMatrix<Dim1, Dim2>(m));
-};
+}
 
 
 } // Namespace ExpressionAssembly

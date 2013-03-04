@@ -175,7 +175,7 @@ integrate( const RequestLoopFaceID<MeshType>& request,
 {
 	return IntegrateVectorFaceID<MeshType,TestSpaceType,ExpressionType>
 		(request.mesh(),request.id(),quadratureBoundary,testSpace,expression);
-};
+}
 
 
 template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
@@ -188,7 +188,7 @@ integrate( const RequestLoopFaceID<MeshType>& request,
 {
 	return IntegrateMatrixFaceID<MeshType,TestSpaceType,SolutionSpaceType,ExpressionType>
 		(request.mesh(),request.id(),quadratureBoundary,testSpace,solutionSpace,expression);
-};
+}
 
 
 template < typename MeshType,
@@ -205,7 +205,7 @@ integrate(const RequestLoopFaceID<MeshType>& request,
           const ExpressionType& expression)
 {
 	return IntegrateMatrixFaceIDLSAdapted < MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, LSFESpaceType, LSVectorType> (request.mesh(),request.id(),quadratureAdapter,testSpace,solutionSpace,expression);
-};
+}
 
 template < typename MeshType,
            typename TestSpaceType,
@@ -219,7 +219,7 @@ integrate(const RequestLoopFaceID<MeshType>& request,
           const ExpressionType& expression)
 {
 	return IntegrateVectorFaceIDLSAdapted < MeshType, TestSpaceType, ExpressionType, LSFESpaceType, LSVectorType> (request.mesh(),request.id(),quadratureAdapter,testSpace,expression);
-};
+}
 
 
 
