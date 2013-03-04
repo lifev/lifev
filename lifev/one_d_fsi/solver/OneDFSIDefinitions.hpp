@@ -117,7 +117,8 @@ enum bcType_Type
     A,          /*!< Area */
     Q,          /*!< Flow rate */
     P,          /*!< Pressure */
-    S           /*!< Normal Stress */
+    S,          /*!< Normal stress */
+    T           /*!< Total normal stress */
 };
 
 enum bcSide_Type

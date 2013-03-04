@@ -66,7 +66,7 @@ namespace LifeV
 /*!
  *  @authors Vincent Martin, Cristiano Malossi
  *  @see Equations and networks of 1-D models \cite FormaggiaLamponi2003
- *  @see Geometrical multiscale coupling of 1-D models \cite Malossi2011Algorithms \cite Malossi2011Algorithms1D
+ *  @see Geometrical multiscale coupling of 1-D models \cite Malossi2011Algorithms \cite Malossi2011Algorithms1D \cite BonnemainMalossi2012LVAD
  *
  *  <b>Physical Parameters</b>
  *
@@ -165,7 +165,7 @@ public:
      * @param dataFile GetPot dataFile
      * @return section section in the dataFile
      */
-    void oldStyleSetup( const GetPot& dataFile, const std::string& section = "1dnetwork" );
+    void LIFEV_DEPRECATED( oldStyleSetup( const GetPot& dataFile, const std::string& section = "1dnetwork" ) );
 
     //! Update all the physical coefficients
     /*!

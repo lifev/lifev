@@ -93,22 +93,23 @@ int main(int argc, char** argv)
 
     // Error of the problem
     error = Hyperbolic.run();
+
     bool success=std::fabs( error - errorKnown ) <= tolerance;
-    // For tribits handling of success/failure
-    //! @todo Add verbose to avoid all processes printing this stuff
-    if (!success) 
-    {
-	std::cout << "End Result: TEST NOT PASSED" << std::endl;
-	return ( EXIT_FAILURE );
-    }
-    else
-      std::cout << "End Result: TEST PASSED" << std::endl;
 
 #ifdef HAVE_MPI
     MPI_Finalize();
     std::cout << "MPI Finalization" << std::endl;
 #endif
 
+    // For tribits handling of success/failure
+    //! @todo Add verbose to avoid all processes printing this stuff
+    if (!success)
+    {
+        std::cout << "End Result: TEST NOT PASSED" << std::endl;
+        return ( EXIT_FAILURE );
+    }
+    else
+      std::cout << "End Result: TEST PASSED" << std::endl;
+
     return ( EXIT_SUCCESS );
 }
-

@@ -75,6 +75,15 @@ enum baseList_Type
     BCI3DDataInterpolator
 };
 
+enum baseContainer_Type
+{
+    BASEDefault,
+    BASEFunction1D,
+    BASEFunction3D,
+    BASEVector3D,
+    BASEVectorInterface3D
+};
+
 // Forward class declarations
 template< class PhysicalSolverType >
 class BCInterfaceFactory;

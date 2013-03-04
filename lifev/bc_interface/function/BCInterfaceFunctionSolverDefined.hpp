@@ -109,6 +109,12 @@ public:
      */
     void exportData( BCInterfaceData3D& /*data*/ ) {}
 
+    //! Detect the correct base type
+    /*!
+     * @param bcBaseType the type of the base
+     */
+    baseContainer_Type baseType() const { return BASEDefault; }
+
     //! Assign a boundary function to the boundary condition vector base
     /*!
      * @param physicalSolver FSI physical solver,
@@ -287,6 +293,18 @@ public:
 
     //@}
 
+
+    //! @name Get methods
+    //@{
+
+    //! Detect the correct base type
+    /*!
+     * @param bcBaseType the type of the base
+     */
+    baseContainer_Type baseType() const;
+
+    //@}
+
 private:
 
     //! @name Unimplemented Methods
@@ -307,6 +325,9 @@ private:
 
     template< class MethodType >
     void checkFunction( BCVector& base );
+
+    template< class MethodType >
+    void checkFunction( BCFunctionBase& base );
 
     //@}
 
@@ -622,6 +643,21 @@ inline void BCInterfaceFunctionSolverDefined< FSIOperator >::checkFunction( BCVe
     }
 }
 
+template< class MethodType >
+inline void BCInterfaceFunctionSolverDefined< FSIOperator >::checkFunction( BCFunctionBase& /*base*/ )
+{
+    boost::shared_ptr< MethodType > operMethod = boost::dynamic_pointer_cast< MethodType > ( M_physicalSolver );
+
+    switch ( M_FSIFunction )
+    {
+    default:
+
+        std::cout << " !!! Error: " << M_FSIFunction << " is not available as a BCFunction !!!" << std::endl;
+
+        return;
+    }
+}
+
 
 
 
@@ -721,6 +757,18 @@ public:
      * @param physicalSolver physical solver
      */
     void setPhysicalSolver( const physicalSolverPtr_Type& /*physicalSolver*/ ) {}
+
+    //@}
+
+
+    //! @name Get methods
+    //@{
+
+    //! Detect the correct base type
+    /*!
+     * @param bcBaseType the type of the base
+     */
+    baseContainer_Type baseType() const { return BASEFunction1D; }
 
     //@}
 

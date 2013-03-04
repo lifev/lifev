@@ -1203,8 +1203,7 @@ bcEssentialManage( MatrixType& matrix,
     if ( boundaryCond.isDataAVector() )
     { //! If BC is given under a vectorial form
 
-        const BCVectorInterface* pId = static_cast< const BCVectorInterface* > (boundaryCond.pointerToBCVector());
-        assert( pId != 0);
+        assert( static_cast< const BCVectorInterface* > (boundaryCond.pointerToBCVector()) != 0 );
 
         // Loop on BC identifiers
         for ( ID i = 0; i < boundaryCond.list_size(); ++i )

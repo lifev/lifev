@@ -264,25 +264,93 @@ public:
         return this->M_stabilization;
     }
 
-    //! Return
+    //! Compute the derivative of the flow rate on a boundary face
     /*!
-        @return linear flux
+     *  @param flag boundary flag
+     *  @return derivative of flow rate
      */
-    Real getLinearFlux ( const markerID_Type& flag );
+    Real linearFlux( const markerID_Type& flag );
+    LIFEV_DEPRECATED( Real getLinearFlux( const markerID_Type& flag ) );
 
-    //! Return
+    //! Compute the derivative of the pressure on a boundary face
     /*!
-        @return linear pressure
+     *  @param flag boundary flag
+     *  @return derivative of pressure
      */
-    Real getLinearPressure( const markerID_Type& flag );
+    Real linearPressure( const markerID_Type& flag );
+    LIFEV_DEPRECATED( Real getLinearPressure( const markerID_Type& flag ) );
 
-    //! Get the Lagrange multiplier related to a flux imposed on a given part of the boundary.
+    //! Compute the derivative of a Lagrange multiplier (which correspond to the value of the derivative of the mean normal stress on a boundary face)
     /*!
-        @param Flag flag of the boundary face associated with the flux and the Lagrange multiplier we want.
-        @param BC BChandler containing the boundary conditions of the problem.
-        @return Lagrange multiplier
+     *  @param flag flag of the boundary face associated with the flux and the Lagrange multiplier we want.
+     *  @param BC BChandler containing the boundary conditions of the problem.
+     *  @return derivative of the Lagrange multiplier
      */
-    Real getLinearLagrangeMultiplier( const markerID_Type& flag, bcHandler_Type& bcHandler );
+    Real linearLagrangeMultiplier( const markerID_Type& flag, bcHandler_Type& bcHandler );
+    LIFEV_DEPRECATED( Real getLinearLagrangeMultiplier( const markerID_Type& flag, bcHandler_Type& bcHandler ) );
+
+    //! Compute the derivative of the kinetic normal stress (i.e., the normal stress due to the kinetic energy) on a boundary face with given flag
+    /*!
+     *  @see \cite BlancoMalossi2012 \cite Malossi-Thesis
+     *
+     *  @param flag boundary flag
+     *  @return derivative of the kinetic normal stress
+     */
+    Real linearKineticNormalStress( const markerID_Type& flag );
+
+    //! Compute the derivative of the kinetic normal stress (i.e., the normal stress due to the kinetic energy) on a boundary face with a given flag and a given solution
+    /*!
+     *  @see \cite BlancoMalossi2012 \cite Malossi-Thesis
+     *
+     *  @param flag boundary flag
+     *  @param solution problem solution
+     *  @param linearSolution linear problem solution
+     *  @return derivative of the kinetic normal stress
+     */
+    Real linearKineticNormalStress( const markerID_Type& flag, const vector_Type& solution, const vector_Type& linearSolution );
+
+    //! Compute the derivative of the mean normal stress on a boundary face with a given flag
+    /*!
+     *  @see \cite BlancoMalossi2012 \cite Malossi-Thesis
+     *
+     *  @param flag flag of the boundary face associated with the flux and the Lagrange multiplier we want.
+     *  @param BC BChandler containing the boundary conditions of the problem.
+     *  @return derivative of the mean normal stress
+     */
+    Real linearMeanNormalStress( const markerID_Type& flag, bcHandler_Type& bcHandler );
+
+    //! Compute the derivative of the mean normal stress on a boundary face with a given flag
+    /*!
+     *  @see \cite BlancoMalossi2012 \cite Malossi-Thesis
+     *
+     *  @param flag flag of the boundary face associated with the flux and the Lagrange multiplier we want.
+     *  @param BC BChandler containing the boundary conditions of the problem.
+     *  @param linearSolution linear problem solution
+     *  @return derivative of the mean normal stress
+     */
+    Real linearMeanNormalStress( const markerID_Type& flag, bcHandler_Type& bcHandler, const vector_Type& linearSolution );
+
+    //! Compute the derivative of the mean total normal stress on a boundary face with a given flag
+    /*!
+     *  @see \cite BlancoMalossi2012 \cite Malossi-Thesis
+     *
+     *  @param flag flag of the boundary face associated with the flux and the Lagrange multiplier we want.
+     *  @param BC BChandler containing the boundary conditions of the problem.
+     *  @return derivative of the mean total normal stress
+     */
+    Real linearMeanTotalNormalStress( const markerID_Type& flag, bcHandler_Type& bcHandler );
+
+    //! Compute the derivative of the mean total normal stress on a boundary face with a given flag
+    /*!
+     *  @see \cite BlancoMalossi2012 \cite Malossi-Thesis
+     *
+     *  @param flag flag of the boundary face associated with the flux and the Lagrange multiplier we want.
+     *  @param BC BChandler containing the boundary conditions of the problem.
+     *  @param solution problem solution
+     *  @param linearSolution linear problem solution
+     *  @return derivative of the mean total normal stress
+     */
+    Real linearMeanTotalNormalStress( const markerID_Type& flag, bcHandler_Type& bcHandler, const vector_Type& solution, const vector_Type& linearSolution  );
 
     //@}
 
@@ -443,25 +511,113 @@ OseenSolverShapeDerivative<MeshType, SolverType>::
 
 template<typename MeshType, typename SolverType>
 Real
+OseenSolverShapeDerivative<MeshType, SolverType>::linearFlux( const markerID_Type& flag )
+{
+    return this->flux( flag, M_linearSolution );
+}
+
+template<typename MeshType, typename SolverType>
+Real
 OseenSolverShapeDerivative<MeshType, SolverType>::getLinearFlux( const markerID_Type& flag )
 {
-    return flux( flag, M_linearSolution );
+    if( this->M_displayer->isLeader() )
+    {
+        std::cerr << "Warning: getLinearFlux is deprecated!" << std::endl
+                  << "         You should use linearFlux instead!" << std::endl;
+    }
+
+    return linearFlux( flag );
+}
+
+template<typename MeshType, typename SolverType>
+Real
+OseenSolverShapeDerivative<MeshType, SolverType>::linearPressure( const markerID_Type& flag )
+{
+    return this->pressure( flag, M_linearSolution );
 }
 
 template<typename MeshType, typename SolverType>
 Real
 OseenSolverShapeDerivative<MeshType, SolverType>::getLinearPressure( const markerID_Type& flag )
 {
-    return pressure( flag, M_linearSolution );
+    if( this->M_displayer->isLeader() )
+    {
+        std::cerr << "Warning: getLinearPressure is deprecated!" << std::endl
+                  << "         You should use linearPressure instead!" << std::endl;
+    }
+
+    return linearPressure( flag );
+}
+
+template<typename MeshType, typename SolverType>
+Real
+OseenSolverShapeDerivative<MeshType, SolverType>::linearLagrangeMultiplier( const markerID_Type& flag, bcHandler_Type& bcHandler )
+{
+    return lagrangeMultiplier( flag, bcHandler, M_linearSolution );
 }
 
 template<typename MeshType, typename SolverType>
 Real
 OseenSolverShapeDerivative<MeshType, SolverType>::getLinearLagrangeMultiplier( const markerID_Type& flag, bcHandler_Type& bcHandler )
 {
-    return lagrangeMultiplier( flag, bcHandler, M_linearSolution );
+    if( this->M_displayer->isLeader() )
+    {
+        std::cerr << "Warning: getLinearLagrangeMultiplier is deprecated!" << std::endl
+                  << "         You should use linearLagrangeMultiplier instead!" << std::endl;
+    }
+
+    return linearLagrangeMultiplier( flag, bcHandler );
 }
 
+template<typename MeshType, typename SolverType>
+Real
+OseenSolverShapeDerivative<MeshType, SolverType>::linearKineticNormalStress( const markerID_Type& flag )
+{
+    return this->linearKineticNormalStress( flag, *this->M_solution, M_linearSolution );
+}
+
+template<typename MeshType, typename SolverType>
+Real
+OseenSolverShapeDerivative<MeshType, SolverType>::linearKineticNormalStress( const markerID_Type& flag, const vector_Type& solution, const vector_Type& linearSolution )
+{
+    vector_Type velocityAndPressure( solution, Repeated );
+    vector_Type velocity( this->M_velocityFESpace.map(), Repeated );
+    velocity.subset( velocityAndPressure );
+
+    vector_Type linearVelocityAndPressure( linearSolution, Repeated );
+    vector_Type linearVelocity( this->M_velocityFESpace.map(), Repeated );
+    linearVelocity.subset( linearVelocityAndPressure );
+
+    return this->M_postProcessing->kineticNormalStressDerivative( velocity, linearVelocity, this->M_oseenData->density(), flag );
+}
+
+template<typename MeshType, typename SolverType>
+Real
+OseenSolverShapeDerivative<MeshType, SolverType>::linearMeanNormalStress( const markerID_Type& flag, bcHandler_Type& bcHandler )
+{
+    return this->linearMeanNormalStress( flag, bcHandler, M_linearSolution );
+}
+
+template<typename MeshType, typename SolverType>
+Real
+OseenSolverShapeDerivative<MeshType, SolverType>::linearMeanNormalStress( const markerID_Type& flag, bcHandler_Type& bcHandler, const vector_Type& linearSolution )
+{
+    return this->meanNormalStress( flag, bcHandler, linearSolution );
+}
+
+template<typename MeshType, typename SolverType>
+Real
+OseenSolverShapeDerivative<MeshType, SolverType>::linearMeanTotalNormalStress( const markerID_Type& flag, bcHandler_Type& bcHandler )
+{
+    return this->meanNormalStress( flag, bcHandler, M_linearSolution ) - linearKineticNormalStress( flag, *this->M_solution, M_linearSolution );
+}
+
+template<typename MeshType, typename SolverType>
+Real
+OseenSolverShapeDerivative<MeshType, SolverType>::linearMeanTotalNormalStress( const markerID_Type& flag, bcHandler_Type& bcHandler, const vector_Type& solution, const vector_Type& linearSolution )
+{
+    return this->meanNormalStress( flag, bcHandler, linearSolution ) - linearKineticNormalStress( flag, solution, linearSolution );
+}
 
 template<typename MeshType, typename SolverType>
 void OseenSolverShapeDerivative<MeshType, SolverType>::setUp( const GetPot& dataFile )

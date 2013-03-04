@@ -1,0 +1,16 @@
+###################################################################################################
+#
+#                       This file is part of the LifeV Library
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+#
+#      Author(s): Cristiano Malossi <cristiano.malossi@epfl.ch>
+#           Date: 2012-08-07
+#  License Terms: GNU LGPL
+#
+###################################################################################################
+
+[Multiscale]
+couplingName           = FlowRate2Stress_L2
+timeInterpolationOrder = 2
+flowRateInterfaces     = 2
