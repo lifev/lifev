@@ -43,7 +43,8 @@
 
 #include <lifev/core/fem/QRKeast.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! QuadratureRuleProvider - This class is used to generate quadrature rules
 /*!
@@ -103,9 +104,9 @@ public:
     //! @name Public Types
     //@{
 
-    enum NoPreciseExactness{ ErrorNoPrecise, WarningAndReturnSup, ReturnSup };
-    enum TooHighExactness{ ErrorTooHigh, WarningAndReturnMax, ReturnMax };
-    enum NegativeWeight{ Accept, WarningAndAccept, Reject};
+    enum NoPreciseExactness { ErrorNoPrecise, WarningAndReturnSup, ReturnSup };
+    enum TooHighExactness { ErrorTooHigh, WarningAndReturnMax, ReturnMax };
+    enum NegativeWeight { Accept, WarningAndAccept, Reject};
 
     //@}
 
@@ -119,10 +120,10 @@ public:
       given exactness. If such a quadrature rule is not defined, the program will
       abort.
      */
-    static QuadratureRule provideExactness(const ReferenceShapes& shape, const UInt& exactness);
+    static QuadratureRule provideExactness (const ReferenceShapes& shape, const UInt& exactness);
 
     //! Provide the quadrature rule with the highest exactness available.
-    static QuadratureRule provideMaximal(const ReferenceShapes& shape);
+    static QuadratureRule provideMaximal (const ReferenceShapes& shape);
 
     //@}
 
@@ -142,7 +143,7 @@ public:
       Setter for the behavior in case a quadrature rule with the precise exactness
       required could not be found.
      */
-    static void setBehaviorNoPreciseExactness( const NoPreciseExactness& behavior)
+    static void setBehaviorNoPreciseExactness ( const NoPreciseExactness& behavior)
     {
         S_BehaviorNoPreciseExactness = behavior;
     }
@@ -151,7 +152,7 @@ public:
       Setter for the behavior in case the exactness required cannot be achieved
       by a known quadrature rule.
      */
-    static void setBehaviorTooHighExactness( const TooHighExactness& behavior)
+    static void setBehaviorTooHighExactness ( const TooHighExactness& behavior)
     {
         S_BehaviorTooHighExactness = behavior;
     }
@@ -160,9 +161,9 @@ public:
       Setter for the behavior in case the quadrature rule asked for has
       negative weights for some quadrature nodes.
      */
-    static void setBehaviorNegativeWeight( const NegativeWeight& behavior)
+    static void setBehaviorNegativeWeight ( const NegativeWeight& behavior)
     {
-         S_BehaviorNegativeWeight = behavior;
+        S_BehaviorNegativeWeight = behavior;
     }
 
 
@@ -178,23 +179,23 @@ private:
     QuadratureRuleProvider();
 
     //! Copy Constructor
-    QuadratureRuleProvider( const QuadratureRuleProvider&);
+    QuadratureRuleProvider ( const QuadratureRuleProvider&);
 
     //! Destructor
     virtual ~QuadratureRuleProvider();
 
     //! Method for the differentShapes
 
-    static QuadratureRule provideExactnessTetra(const UInt& exactness);
-    static QuadratureRule provideExactnessPrism(const UInt& exactness);
-    static QuadratureRule provideExactnessHexa(const UInt& exactness);
-    static QuadratureRule provideExactnessQuad(const UInt& exactness);
-    static QuadratureRule provideExactnessTriangle(const UInt& exactness);
-    static QuadratureRule provideExactnessLine(const UInt& exactness);
-    static QuadratureRule provideExactnessPoint(const UInt& exactness);
+    static QuadratureRule provideExactnessTetra (const UInt& exactness);
+    static QuadratureRule provideExactnessPrism (const UInt& exactness);
+    static QuadratureRule provideExactnessHexa (const UInt& exactness);
+    static QuadratureRule provideExactnessQuad (const UInt& exactness);
+    static QuadratureRule provideExactnessTriangle (const UInt& exactness);
+    static QuadratureRule provideExactnessLine (const UInt& exactness);
+    static QuadratureRule provideExactnessPoint (const UInt& exactness);
 
-    static QuadratureRule provideExactnessTetraNoNeg(const UInt& exactness);
-    static QuadratureRule provideExactnessTriangleNoNeg(const UInt& exactness);
+    static QuadratureRule provideExactnessTetraNoNeg (const UInt& exactness);
+    static QuadratureRule provideExactnessTriangleNoNeg (const UInt& exactness);
 
     static void manageNoPreciseExactnessCase();
     static void manageTooHighExactnessCase();

@@ -69,7 +69,7 @@ namespace ExpressionAssembly
 
 */
 template <typename LExpressionType, typename RExpressionType>
-class ExpressionEmult : public ExpressionBase< ExpressionEmult<LExpressionType,RExpressionType> >
+class ExpressionEmult : public ExpressionBase< ExpressionEmult<LExpressionType, RExpressionType> >
 {
 public:
 
@@ -77,7 +77,7 @@ public:
     //@{
 
     // No real need, just for ease of coding
-	typedef ExpressionBase< ExpressionEmult <LExpressionType,RExpressionType> > base_Type;
+    typedef ExpressionBase< ExpressionEmult <LExpressionType, RExpressionType> > base_Type;
 
     //@}
 
@@ -86,15 +86,15 @@ public:
     //@{
 
     //! Full constructor, with the two expressions.
-	ExpressionEmult(const LExpressionType& l, const RExpressionType& r)
-	: base_Type(), M_l(l), M_r(r) {}
+    ExpressionEmult (const LExpressionType& l, const RExpressionType& r)
+        : base_Type(), M_l (l), M_r (r) {}
 
     //! Copy constructor
-	ExpressionEmult(const ExpressionEmult<LExpressionType,RExpressionType>& expression)
-	 : base_Type(), M_l(expression.M_l), M_r(expression.M_r) {}
+    ExpressionEmult (const ExpressionEmult<LExpressionType, RExpressionType>& expression)
+        : base_Type(), M_l (expression.M_l), M_r (expression.M_r) {}
 
     //! Destructor
-    ~ExpressionEmult(){}
+    ~ExpressionEmult() {}
 
     //@}
 
@@ -103,8 +103,12 @@ public:
     //@{
 
     //! Display method
-	static void display(std::ostream& out= std::cout)
-    { LExpressionType::display(out); out << " emult "; RExpressionType::display(out);}
+    static void display (std::ostream& out = std::cout)
+    {
+        LExpressionType::display (out);
+        out << " emult ";
+        RExpressionType::display (out);
+    }
 
     //@}
 
@@ -113,10 +117,16 @@ public:
     //@{
 
     //! Getter for the left hand side of the emult operation
-	const LExpressionType& left() const {return M_l;}
+    const LExpressionType& left() const
+    {
+        return M_l;
+    }
 
     //! Getter for the right hand side of the emult operation
-	const RExpressionType& right() const {return M_r;}
+    const RExpressionType& right() const
+    {
+        return M_r;
+    }
 
     //@}
 
@@ -126,15 +136,15 @@ private:
     //@{
 
     //! No default constructor
-	ExpressionEmult();
+    ExpressionEmult();
 
     //@}
 
     // Left hand side
-	LExpressionType M_l;
+    LExpressionType M_l;
 
     // Right hand side
-	RExpressionType M_r;
+    RExpressionType M_r;
 };
 
 
@@ -160,26 +170,26 @@ private:
 
 */
 template< typename LExpressionType, typename RExpressionType >
-ExpressionEmult<LExpressionType,RExpressionType>
-emult(const ExpressionBase<LExpressionType>& l, const ExpressionBase<RExpressionType>& r)
+ExpressionEmult<LExpressionType, RExpressionType>
+emult (const ExpressionBase<LExpressionType>& l, const ExpressionBase<RExpressionType>& r)
 {
-	return ExpressionEmult<LExpressionType,RExpressionType>(l.cast(),r.cast());
+    return ExpressionEmult<LExpressionType, RExpressionType> (l.cast(), r.cast() );
 }
 
 
 // Specialization for the matricial constants
 template< typename RExpressionType , UInt Dim1, UInt Dim2>
 ExpressionEmult<ExpressionMatrix<Dim1, Dim2>, RExpressionType>
-emult(const MatrixSmall<Dim1, Dim2>& l, const ExpressionBase<RExpressionType>& r)
+emult (const MatrixSmall<Dim1, Dim2>& l, const ExpressionBase<RExpressionType>& r)
 {
-    return ExpressionEmult<ExpressionMatrix<Dim1, Dim2>, RExpressionType>(ExpressionMatrix<Dim1, Dim2>(l),r.cast());
+    return ExpressionEmult<ExpressionMatrix<Dim1, Dim2>, RExpressionType> (ExpressionMatrix<Dim1, Dim2> (l), r.cast() );
 }
 
 template< typename LExpressionType, UInt Dim1, UInt Dim2 >
 ExpressionEmult<LExpressionType, ExpressionMatrix<Dim1, Dim2> >
-emult(const ExpressionBase<LExpressionType>& l, const MatrixSmall<Dim1, Dim2>& r)
+emult (const ExpressionBase<LExpressionType>& l, const MatrixSmall<Dim1, Dim2>& r)
 {
-    return ExpressionEmult<LExpressionType,ExpressionMatrix<Dim1, Dim2> >(l.cast(),ExpressionMatrix<Dim1, Dim2>(r));
+    return ExpressionEmult<LExpressionType, ExpressionMatrix<Dim1, Dim2> > (l.cast(), ExpressionMatrix<Dim1, Dim2> (r) );
 }
 
 

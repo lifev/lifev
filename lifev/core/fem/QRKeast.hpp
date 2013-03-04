@@ -69,7 +69,7 @@ public:
 private:
     QRKeast();
     ~QRKeast();
-    QRKeast( const QRKeast&);
+    QRKeast ( const QRKeast&);
 };
 
 
@@ -79,27 +79,27 @@ class QRKeast<1>
 {
 public:
 
-    QRKeast(){};
-    ~QRKeast(){};
+    QRKeast() {};
+    ~QRKeast() {};
 
-    static const Real& weight(const UInt& iPt)
+    static const Real& weight (const UInt& iPt)
     {
         return M_weights[iPt];
     }
 
-    static const Real& quadPointCoor( const UInt iPt, const UInt iCoor)
+    static const Real& quadPointCoor ( const UInt iPt, const UInt iCoor)
     {
         return M_points[iPt][iCoor];
     }
 
-    static VectorSmall<3> quadPointCoor( const UInt iPt)
+    static VectorSmall<3> quadPointCoor ( const UInt iPt)
     {
-        return VectorSmall<3>(M_points[iPt][0],M_points[iPt][1],M_points[iPt][2]);
+        return VectorSmall<3> (M_points[iPt][0], M_points[iPt][1], M_points[iPt][2]);
     }
 
-    static QuadraturePoint quadPoint(const UInt iPt)
+    static QuadraturePoint quadPoint (const UInt iPt)
     {
-        return QuadraturePoint(M_points[iPt][0],M_points[iPt][1],M_points[iPt][2],M_weights[iPt]);
+        return QuadraturePoint (M_points[iPt][0], M_points[iPt][1], M_points[iPt][2], M_weights[iPt]);
     }
 
     static UInt nbQuadPt()
@@ -128,27 +128,27 @@ class QRKeast<4>
 {
 public:
 
-    QRKeast(){};
-    ~QRKeast(){};
+    QRKeast() {};
+    ~QRKeast() {};
 
-    static const Real& weight(const UInt& iPt)
+    static const Real& weight (const UInt& iPt)
     {
         return M_weights[iPt];
     }
 
-    static const Real& quadPointCoor( const UInt iPt, const UInt iCoor)
+    static const Real& quadPointCoor ( const UInt iPt, const UInt iCoor)
     {
         return M_points[iPt][iCoor];
     }
 
-    static VectorSmall<3> quadPointCoor( const UInt iPt)
+    static VectorSmall<3> quadPointCoor ( const UInt iPt)
     {
-        return VectorSmall<3>(M_points[iPt][0],M_points[iPt][1],M_points[iPt][2]);
+        return VectorSmall<3> (M_points[iPt][0], M_points[iPt][1], M_points[iPt][2]);
     }
 
-    static QuadraturePoint quadPoint(const UInt iPt)
+    static QuadraturePoint quadPoint (const UInt iPt)
     {
-        return QuadraturePoint(M_points[iPt][0],M_points[iPt][1],M_points[iPt][2],M_weights[iPt]);
+        return QuadraturePoint (M_points[iPt][0], M_points[iPt][1], M_points[iPt][2], M_weights[iPt]);
     }
 
     static UInt nbQuadPt()
@@ -177,27 +177,27 @@ class QRKeast<6>
 {
 public:
 
-    QRKeast(){};
-    ~QRKeast(){};
+    QRKeast() {};
+    ~QRKeast() {};
 
-    static const Real& weight(const UInt& iPt)
+    static const Real& weight (const UInt& iPt)
     {
         return M_weights[iPt];
     }
 
-    static const Real& quadPointCoor( const UInt iPt, const UInt iCoor)
+    static const Real& quadPointCoor ( const UInt iPt, const UInt iCoor)
     {
         return M_points[iPt][iCoor];
     }
 
-    static VectorSmall<3> quadPointCoor( const UInt iPt)
+    static VectorSmall<3> quadPointCoor ( const UInt iPt)
     {
-        return VectorSmall<3>(M_points[iPt][0],M_points[iPt][1],M_points[iPt][2]);
+        return VectorSmall<3> (M_points[iPt][0], M_points[iPt][1], M_points[iPt][2]);
     }
 
-    static QuadraturePoint quadPoint(const UInt iPt)
+    static QuadraturePoint quadPoint (const UInt iPt)
     {
-        return QuadraturePoint(M_points[iPt][0],M_points[iPt][1],M_points[iPt][2],M_weights[iPt]);
+        return QuadraturePoint (M_points[iPt][0], M_points[iPt][1], M_points[iPt][2], M_weights[iPt]);
     }
 
     static UInt nbQuadPt()
@@ -227,27 +227,27 @@ class QRKeast<7>
 {
 public:
 
-    QRKeast(){};
-    ~QRKeast(){};
+    QRKeast() {};
+    ~QRKeast() {};
 
-    static const Real& weight(const UInt& iPt)
+    static const Real& weight (const UInt& iPt)
     {
         return M_weights[iPt];
     }
 
-    static const Real& quadPointCoor( const UInt iPt, const UInt iCoor)
+    static const Real& quadPointCoor ( const UInt iPt, const UInt iCoor)
     {
         return M_points[iPt][iCoor];
     }
 
-    static VectorSmall<3> quadPointCoor( const UInt iPt)
+    static VectorSmall<3> quadPointCoor ( const UInt iPt)
     {
-        return VectorSmall<3>(M_points[iPt][0],M_points[iPt][1],M_points[iPt][2]);
+        return VectorSmall<3> (M_points[iPt][0], M_points[iPt][1], M_points[iPt][2]);
     }
 
-    static QuadraturePoint quadPoint(const UInt iPt)
+    static QuadraturePoint quadPoint (const UInt iPt)
     {
-        return QuadraturePoint(M_points[iPt][0],M_points[iPt][1],M_points[iPt][2],M_weights[iPt]);
+        return QuadraturePoint (M_points[iPt][0], M_points[iPt][1], M_points[iPt][2], M_weights[iPt]);
     }
 
     static UInt nbQuadPt()

@@ -72,7 +72,7 @@ public:
     //@{
 
     // No real need, just for ease of coding
-	typedef ExpressionBase< ExpressionTranspose <ExpressionType> > base_Type;
+    typedef ExpressionBase< ExpressionTranspose <ExpressionType> > base_Type;
 
     //@}
 
@@ -81,15 +81,15 @@ public:
     //@{
 
     //! Full constructor
-	ExpressionTranspose(const ExpressionType& expr)
-	: base_Type(), M_expr(expr) {}
+    ExpressionTranspose (const ExpressionType& expr)
+        : base_Type(), M_expr (expr) {}
 
     //! Copy constructor
-	ExpressionTranspose(const ExpressionTranspose<ExpressionType>& expression)
-	 : base_Type(), M_expr(expression.M_expr) {}
+    ExpressionTranspose (const ExpressionTranspose<ExpressionType>& expression)
+        : base_Type(), M_expr (expression.M_expr) {}
 
     //! Destructor
-    ~ExpressionTranspose(){}
+    ~ExpressionTranspose() {}
 
     //@}
 
@@ -98,8 +98,11 @@ public:
     //@{
 
     //! Display method
-	static void display(std::ostream& out= std::cout)
-    { out << " transpose "; ExpressionType::display(out);}
+    static void display (std::ostream& out = std::cout)
+    {
+        out << " transpose ";
+        ExpressionType::display (out);
+    }
 
     //@}
 
@@ -108,7 +111,10 @@ public:
     //@{
 
     //! Getter for the expression that we transpose
-	const ExpressionType& exprEx() const {return M_expr;}
+    const ExpressionType& exprEx() const
+    {
+        return M_expr;
+    }
 
 
     //@}
@@ -119,12 +125,12 @@ private:
     //@{
 
     //! No default constructor
-	ExpressionTranspose();
+    ExpressionTranspose();
 
     //@}
 
     // Expression that we transpose
-	ExpressionType M_expr;
+    ExpressionType M_expr;
 
 };
 
@@ -148,18 +154,18 @@ private:
 */
 template< typename ExpressionType >
 ExpressionTranspose<ExpressionType>
-transpose(const ExpressionBase<ExpressionType>& expr)
+transpose (const ExpressionBase<ExpressionType>& expr)
 {
-	return ExpressionTranspose<ExpressionType>(expr.cast());
+    return ExpressionTranspose<ExpressionType> (expr.cast() );
 }
 
 
 // Specialization for the matricial constants
 template< UInt Dim1, UInt Dim2>
 ExpressionTranspose<ExpressionMatrix<Dim1, Dim2> >
-transpose(const MatrixSmall<Dim1, Dim2>& m)
+transpose (const MatrixSmall<Dim1, Dim2>& m)
 {
-    return ExpressionTranspose<ExpressionMatrix<Dim2, Dim1> >(ExpressionMatrix<Dim1, Dim2>(m));
+    return ExpressionTranspose<ExpressionMatrix<Dim2, Dim1> > (ExpressionMatrix<Dim1, Dim2> (m) );
 }
 
 

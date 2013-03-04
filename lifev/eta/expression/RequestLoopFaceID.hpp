@@ -62,13 +62,13 @@ public:
     //@{
 
     //! Simple constructor with a shared_ptr on the mesh
-	RequestLoopFaceID(const boost::shared_ptr<MeshType>& mesh, const UInt boundaryID)
-        : M_mesh(mesh), M_boundaryIdentifier(boundaryID)
+    RequestLoopFaceID (const boost::shared_ptr<MeshType>& mesh, const UInt boundaryID)
+        : M_mesh (mesh), M_boundaryIdentifier (boundaryID)
     {}
 
     //! Copy constructor
-	RequestLoopFaceID(const RequestLoopFaceID& loop)
-        : M_mesh(loop.M_mesh), M_boundaryIdentifier(loop.M_boundaryIdentifier)
+    RequestLoopFaceID (const RequestLoopFaceID& loop)
+        : M_mesh (loop.M_mesh), M_boundaryIdentifier (loop.M_boundaryIdentifier)
     {}
 
     //@}
@@ -78,10 +78,16 @@ public:
     //@{
 
     //! Getter for the mesh pointer
-	const boost::shared_ptr<MeshType>& mesh() const { return M_mesh; }
+    const boost::shared_ptr<MeshType>& mesh() const
+    {
+        return M_mesh;
+    }
 
     //! Getter for the identifier
-    const UInt& id() const { return M_boundaryIdentifier; }
+    const UInt& id() const
+    {
+        return M_boundaryIdentifier;
+    }
 
     //@}
 
@@ -92,12 +98,12 @@ private:
     //@{
 
     //! No empty constructor
-	RequestLoopFaceID();
+    RequestLoopFaceID();
 
     //@}
 
     // Pointer on the mesh
-	boost::shared_ptr<MeshType> M_mesh;
+    boost::shared_ptr<MeshType> M_mesh;
 
     const UInt M_boundaryIdentifier;
 };
@@ -121,9 +127,9 @@ private:
  */
 template< typename MeshType >
 RequestLoopFaceID<MeshType>
-boundary(const boost::shared_ptr<MeshType>& mesh, const UInt id)
+boundary (const boost::shared_ptr<MeshType>& mesh, const UInt id)
 {
-	return RequestLoopFaceID<MeshType>(mesh,id);
+    return RequestLoopFaceID<MeshType> (mesh, id);
 }
 
 

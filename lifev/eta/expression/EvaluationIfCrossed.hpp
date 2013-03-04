@@ -66,20 +66,20 @@ class EvaluationIfCrossed
 {
 public:
 
-	//! @name Public Types
+    //! @name Public Types
     //@{
 
     //! Type of the value returned by this class
-	typedef Real return_Type;
+    typedef Real return_Type;
 
     //! Type of the FESpace that has to be used with this class
-	typedef ETFESpace<MeshType,MapType,SpaceDim,1> fespace_Type;
+    typedef ETFESpace<MeshType, MapType, SpaceDim, 1> fespace_Type;
 
     //! Pointer on the FESpace
-	typedef boost::shared_ptr<fespace_Type> fespacePtr_Type;
+    typedef boost::shared_ptr<fespace_Type> fespacePtr_Type;
 
     //! Vector of the values
-	typedef VectorEpetra vector_Type;
+    typedef VectorEpetra vector_Type;
 
     //@}
 
@@ -88,13 +88,13 @@ public:
     //@{
 
     //! Flag for the global current FE
-	const static flag_Type S_globalUpdateFlag;
+    const static flag_Type S_globalUpdateFlag;
 
     //! Flag for the test current FE
-	const static flag_Type S_testUpdateFlag;
+    const static flag_Type S_testUpdateFlag;
 
     //! Flag for the solution current FE
-	const static flag_Type S_solutionUpdateFlag;
+    const static flag_Type S_solutionUpdateFlag;
 
     //@}
 
@@ -102,25 +102,25 @@ public:
     //! @name Constructors, destructor
     //@{
 
-	//! Copy constructor
-    EvaluationIfCrossed(const EvaluationIfCrossed<MeshType,MapType,SpaceDim>& evaluation)
-	:
-		M_fespace( evaluation.M_fespace),
-		M_vector( evaluation.M_vector, Repeated),
-		M_value( evaluation.M_value)
-	{}
+    //! Copy constructor
+    EvaluationIfCrossed (const EvaluationIfCrossed<MeshType, MapType, SpaceDim>& evaluation)
+        :
+        M_fespace ( evaluation.M_fespace),
+        M_vector ( evaluation.M_vector, Repeated),
+        M_value ( evaluation.M_value)
+    {}
 
-	//! Expression-based constructor
-	explicit EvaluationIfCrossed(const ExpressionIfCrossed<MeshType,MapType,SpaceDim>& expression)
-	:
-		M_fespace( expression.fespace()),
-		M_vector( expression.vector(),Repeated ),
-		M_value(0.0)
-	{}
+    //! Expression-based constructor
+    explicit EvaluationIfCrossed (const ExpressionIfCrossed<MeshType, MapType, SpaceDim>& expression)
+        :
+        M_fespace ( expression.fespace() ),
+        M_vector ( expression.vector(), Repeated ),
+        M_value (0.0)
+    {}
 
     //! Destructor
-	~EvaluationIfCrossed()
-	{}
+    ~EvaluationIfCrossed()
+    {}
 
     //@}
 
@@ -129,18 +129,18 @@ public:
     //@{
 
     //! Interal update, computes the interpolated values.
-	void update(const UInt& iElement)
-	{
-        bool existPositive(false);
-        bool existNegative(false);
+    void update (const UInt& iElement)
+    {
+        bool existPositive (false);
+        bool existNegative (false);
 
-		for (UInt i(0); i< 4; ++i)
-		{
-            UInt globalID(M_fespace->dof().localToGlobalMap(iElement,i) );
+        for (UInt i (0); i < 4; ++i)
+        {
+            UInt globalID (M_fespace->dof().localToGlobalMap (iElement, i) );
 
             Real interpolatedValue = M_vector[globalID];
 
-            if (interpolatedValue >=0)
+            if (interpolatedValue >= 0)
             {
                 existPositive = true;
             }
@@ -148,20 +148,20 @@ public:
             {
                 existNegative = true;
             }
-		}
+        }
 
         if (existPositive && existNegative)
         {
-            M_value=1.0;
+            M_value = 1.0;
         }
         else
         {
-            M_value=0.0;
+            M_value = 0.0;
         }
-	}
+    }
 
     //! Display method
-	static void display(ostream& out=std::cout)
+    static void display (ostream& out = std::cout)
     {
         out << "ifCrossed";
     }
@@ -173,23 +173,23 @@ public:
     //@{
 
     //! Do nothing setter for the global current FE
-	template< typename CFEType >
-	void setGlobalCFE(const CFEType* /*globalCFE*/)
+    template< typename CFEType >
+    void setGlobalCFE (const CFEType* /*globalCFE*/)
     {}
 
     //! Do nothing setter for the test current FE
-	template< typename CFEType >
-	void setTestCFE(const CFEType* /*testCFE*/)
+    template< typename CFEType >
+    void setTestCFE (const CFEType* /*testCFE*/)
     {}
 
     //! Do nothing setter for the solution current FE
-	template< typename CFEType >
-	void setSolutionCFE(const CFEType* /*solutionCFE*/)
+    template< typename CFEType >
+    void setSolutionCFE (const CFEType* /*solutionCFE*/)
     {}
 
     //! Setter for the quadrature rule (deep copy)
-	void setQuadrature(const QuadratureRule& )
-	{}
+    void setQuadrature (const QuadratureRule& )
+    {}
 
     //@}
 
@@ -198,19 +198,19 @@ public:
     //@{
 
     //! Getter for a value
-	return_Type value_q(const UInt& /*q*/) const
+    return_Type value_q (const UInt& /*q*/) const
     {
         return M_value;
     }
 
     //! Getter for the value for a vector
-	return_Type value_qi(const UInt& /*q*/, const UInt& /*i*/) const
+    return_Type value_qi (const UInt& /*q*/, const UInt& /*i*/) const
     {
         return M_value;
     }
 
     //! Getter for the value for a matrix
-	return_Type value_qij(const UInt& /*q*/, const UInt& /*i*/, const UInt& /*j*/) const
+    return_Type value_qij (const UInt& /*q*/, const UInt& /*i*/, const UInt& /*j*/) const
     {
         return M_value;
     }
@@ -223,30 +223,30 @@ private:
     //@{
 
     //! No empty constructor
-	EvaluationIfCrossed();
+    EvaluationIfCrossed();
 
     //@}
 
-	fespacePtr_Type M_fespace;
-	vector_Type M_vector;
+    fespacePtr_Type M_fespace;
+    vector_Type M_vector;
 
     Real M_value;
 };
 
 template<typename MeshType, typename MapType, UInt SpaceDim>
 const flag_Type
-EvaluationIfCrossed<MeshType,MapType,SpaceDim>::
-S_globalUpdateFlag=ET_UPDATE_NONE;
+EvaluationIfCrossed<MeshType, MapType, SpaceDim>::
+S_globalUpdateFlag = ET_UPDATE_NONE;
 
 template<typename MeshType, typename MapType, UInt SpaceDim>
 const flag_Type
-EvaluationIfCrossed<MeshType,MapType,SpaceDim>::
-S_testUpdateFlag=ET_UPDATE_NONE;
+EvaluationIfCrossed<MeshType, MapType, SpaceDim>::
+S_testUpdateFlag = ET_UPDATE_NONE;
 
 template<typename MeshType, typename MapType, UInt SpaceDim>
 const flag_Type
-EvaluationIfCrossed<MeshType,MapType,SpaceDim>::
-S_solutionUpdateFlag=ET_UPDATE_NONE;
+EvaluationIfCrossed<MeshType, MapType, SpaceDim>::
+S_solutionUpdateFlag = ET_UPDATE_NONE;
 
 
 } // Namespace ExpressionAssembly

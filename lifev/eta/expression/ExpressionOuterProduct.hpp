@@ -69,7 +69,7 @@ namespace ExpressionAssembly
 
 */
 template <typename LExpressionType, typename RExpressionType>
-class ExpressionOuterProduct : public ExpressionBase< ExpressionOuterProduct<LExpressionType,RExpressionType> >
+class ExpressionOuterProduct : public ExpressionBase< ExpressionOuterProduct<LExpressionType, RExpressionType> >
 {
 public:
 
@@ -77,7 +77,7 @@ public:
     //@{
 
     // No real need, just for ease of coding
-	typedef ExpressionBase< ExpressionOuterProduct <LExpressionType,RExpressionType> > base_Type;
+    typedef ExpressionBase< ExpressionOuterProduct <LExpressionType, RExpressionType> > base_Type;
 
     //@}
 
@@ -86,15 +86,15 @@ public:
     //@{
 
     //! Full constructor, with the two expressions.
-	ExpressionOuterProduct(const LExpressionType& l, const RExpressionType& r)
-	: base_Type(), M_l(l), M_r(r) {}
+    ExpressionOuterProduct (const LExpressionType& l, const RExpressionType& r)
+        : base_Type(), M_l (l), M_r (r) {}
 
     //! Copy constructor
-	ExpressionOuterProduct(const ExpressionOuterProduct<LExpressionType,RExpressionType>& expression)
-	 : base_Type(), M_l(expression.M_l), M_r(expression.M_r) {}
+    ExpressionOuterProduct (const ExpressionOuterProduct<LExpressionType, RExpressionType>& expression)
+        : base_Type(), M_l (expression.M_l), M_r (expression.M_r) {}
 
     //! Destructor
-    ~ExpressionOuterProduct(){}
+    ~ExpressionOuterProduct() {}
 
     //@}
 
@@ -103,8 +103,12 @@ public:
     //@{
 
     //! Display method
-	static void display(std::ostream& out= std::cout)
-    { LExpressionType::display(out); out << " outerProduct "; RExpressionType::display(out);}
+    static void display (std::ostream& out = std::cout)
+    {
+        LExpressionType::display (out);
+        out << " outerProduct ";
+        RExpressionType::display (out);
+    }
 
     //@}
 
@@ -113,10 +117,16 @@ public:
     //@{
 
     //! Getter for the left hand side of the emult operation
-	const LExpressionType& left() const {return M_l;}
+    const LExpressionType& left() const
+    {
+        return M_l;
+    }
 
     //! Getter for the right hand side of the emult operation
-	const RExpressionType& right() const {return M_r;}
+    const RExpressionType& right() const
+    {
+        return M_r;
+    }
 
     //@}
 
@@ -126,15 +136,15 @@ private:
     //@{
 
     //! No default constructor
-	ExpressionOuterProduct();
+    ExpressionOuterProduct();
 
     //@}
 
     // Left hand side
-	LExpressionType M_l;
+    LExpressionType M_l;
 
     // Right hand side
-	RExpressionType M_r;
+    RExpressionType M_r;
 };
 
 
@@ -160,34 +170,34 @@ private:
 
 */
 template< typename LExpressionType, typename RExpressionType >
-ExpressionOuterProduct<LExpressionType,RExpressionType>
-outerProduct(const ExpressionBase<LExpressionType>& l, const ExpressionBase<RExpressionType>& r)
+ExpressionOuterProduct<LExpressionType, RExpressionType>
+outerProduct (const ExpressionBase<LExpressionType>& l, const ExpressionBase<RExpressionType>& r)
 {
-	return ExpressionOuterProduct<LExpressionType,RExpressionType>(l.cast(),r.cast());
+    return ExpressionOuterProduct<LExpressionType, RExpressionType> (l.cast(), r.cast() );
 }
 
 
 // Specialization for the matricial constants
 template< typename RExpressionType , UInt Dim1 >
 ExpressionOuterProduct<ExpressionVector<Dim1>, RExpressionType>
-outerProduct(const VectorSmall<Dim1>& l, const ExpressionBase<RExpressionType>& r)
+outerProduct (const VectorSmall<Dim1>& l, const ExpressionBase<RExpressionType>& r)
 {
-    return ExpressionOuterProduct<ExpressionVector<Dim1>, RExpressionType>(ExpressionVector<Dim1>(l),r.cast());
+    return ExpressionOuterProduct<ExpressionVector<Dim1>, RExpressionType> (ExpressionVector<Dim1> (l), r.cast() );
 }
 
 template< typename LExpressionType, UInt Dim1 >
 ExpressionOuterProduct<LExpressionType, ExpressionVector<Dim1> >
-outerProduct(const ExpressionBase<LExpressionType>& l, const VectorSmall<Dim1>& r)
+outerProduct (const ExpressionBase<LExpressionType>& l, const VectorSmall<Dim1>& r)
 {
-    return ExpressionOuterProduct<LExpressionType,ExpressionVector<Dim1> >(l.cast(),ExpressionVector<Dim1>(r));
+    return ExpressionOuterProduct<LExpressionType, ExpressionVector<Dim1> > (l.cast(), ExpressionVector<Dim1> (r) );
 }
 
 // Specialization for the matricial constants
 template< UInt Dim1 >
 ExpressionOuterProduct<ExpressionVector<Dim1>, ExpressionVector<Dim1> >
-outerProduct(const VectorSmall<Dim1>& l, const  VectorSmall<Dim1>& r)
+outerProduct (const VectorSmall<Dim1>& l, const  VectorSmall<Dim1>& r)
 {
-    return ExpressionOuterProduct<ExpressionVector<Dim1>, ExpressionVector<Dim1> >(ExpressionVector<Dim1>(l),ExpressionVector<Dim1>(r));
+    return ExpressionOuterProduct<ExpressionVector<Dim1>, ExpressionVector<Dim1> > (ExpressionVector<Dim1> (l), ExpressionVector<Dim1> (r) );
 }
 
 

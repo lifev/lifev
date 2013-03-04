@@ -61,16 +61,16 @@ template <typename LeftOperand, typename RightOperand>
 class OperationSmallEmult
 {
 private:
-	//! @name Constructors and destructors
+    //! @name Constructors and destructors
     //@{
 
-	//! No default constructor
-	OperationSmallEmult();
+    //! No default constructor
+    OperationSmallEmult();
 
-	//! No destructor
-	~OperationSmallEmult();
+    //! No destructor
+    ~OperationSmallEmult();
 
-	//@}
+    //@}
 };
 
 //! \cond
@@ -83,21 +83,21 @@ public:
     //! @name Public Types
     //@{
 
-	typedef MatrixSmall<Dim1, Dim2> result_Type;
+    typedef MatrixSmall<Dim1, Dim2> result_Type;
 
-	//@}
+    //@}
 
 private:
-	//! @name Constructors and destructors
+    //! @name Constructors and destructors
     //@{
 
-	//! No default constructor
-	OperationSmallEmult();
+    //! No default constructor
+    OperationSmallEmult();
 
-	//! No destructor
-	~OperationSmallEmult();
+    //! No destructor
+    ~OperationSmallEmult();
 
-	//@}
+    //@}
 };
 
 //! \endcond

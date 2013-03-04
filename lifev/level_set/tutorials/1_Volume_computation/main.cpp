@@ -33,7 +33,7 @@
 
     In this simple tutorial, we show how to use a special integration scheme
     to compute the volume comprise in the domain {phi>0} where phi is a given
-    level set function. To this aim, we define a mesh, interpolate the phi function 
+    level set function. To this aim, we define a mesh, interpolate the phi function
     on it and then use the special integration.
 
     Before reading this tutorial, the tutorials concerning the ETA module
@@ -128,9 +128,9 @@ typedef VectorEpetra vector_Type;
 // phi(x,y,z) = (x-3y)/sqrt(10)
 // ---------------------------------------------------------------
 
-Real phiFct(const Real& /*t*/, const Real& x, const Real& y, const Real& /*z*/, const ID& /*i*/)
+Real phiFct (const Real& /*t*/, const Real& x, const Real& y, const Real& /*z*/, const ID& /*i*/)
 {
-    return (x-3*y)/std::sqrt(10);
+    return (x - 3 * y) / std::sqrt (10);
 }
 
 
@@ -145,18 +145,20 @@ public:
 
     typedef Real return_Type;
 
-    return_Type operator()(const Real& value)
+    return_Type operator() (const Real& value)
     {
-        if (value>0)
+        if (value > 0)
+        {
             return 1;
+        }
         return 0;
     }
 
-    HeavisideFunctor(){}
-    
-    HeavisideFunctor( const HeavisideFunctor& /*f*/){}
+    HeavisideFunctor() {}
 
-    ~HeavisideFunctor(){}
+    HeavisideFunctor ( const HeavisideFunctor& /*f*/) {}
+
+    ~HeavisideFunctor() {}
 };
 
 
@@ -167,141 +169,174 @@ public:
 // messages.
 // ---------------------------------------------------------------
 
-int main( int argc, char** argv )
+int main ( int argc, char** argv )
 {
 
 #ifdef HAVE_MPI
-    MPI_Init(&argc, &argv);
-    boost::shared_ptr<Epetra_Comm> Comm(new Epetra_MpiComm(MPI_COMM_WORLD));
+    MPI_Init (&argc, &argv);
+    boost::shared_ptr<Epetra_Comm> Comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
 #else
-    boost::shared_ptr<Epetra_Comm> Comm(new Epetra_SerialComm);
+    boost::shared_ptr<Epetra_Comm> Comm (new Epetra_SerialComm);
 #endif
 
-    const bool verbose(Comm->MyPID()==0);
+    const bool verbose (Comm->MyPID() == 0);
 
 
-// ---------------------------------------------------------------
-// The next step is to build the mesh. We use here a structured
-// cartesian mesh over the square domain (-1,1)x(-1,1)x(-1,1).
-// The mesh is the partitioned for the parallel computations and
-// the original mesh is deleted.
-// ---------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // The next step is to build the mesh. We use here a structured
+    // cartesian mesh over the square domain (-1,1)x(-1,1)x(-1,1).
+    // The mesh is the partitioned for the parallel computations and
+    // the original mesh is deleted.
+    // ---------------------------------------------------------------
 
-    if (verbose) std::cout << " -- Building and partitioning the mesh ... " << std::flush;
+    if (verbose)
+    {
+        std::cout << " -- Building and partitioning the mesh ... " << std::flush;
+    }
 
-    const UInt Nelements(10);
+    const UInt Nelements (10);
 
-    boost::shared_ptr< mesh_Type > fullMeshPtr(new mesh_Type);
+    boost::shared_ptr< mesh_Type > fullMeshPtr (new mesh_Type);
 
-    regularMesh3D( *fullMeshPtr, 1, Nelements, Nelements, Nelements, false,
-                   2.0,   2.0,   2.0,
-                   -1.0,  -1.0,  -1.0);
+    regularMesh3D ( *fullMeshPtr, 1, Nelements, Nelements, Nelements, false,
+                    2.0,   2.0,   2.0,
+                    -1.0,  -1.0,  -1.0);
 
-    MeshPartitioner< mesh_Type >  meshPart(fullMeshPtr, Comm);
+    MeshPartitioner< mesh_Type >  meshPart (fullMeshPtr, Comm);
 
     fullMeshPtr.reset();
 
-    if (verbose) std::cout << " done ! " << std::endl;
+    if (verbose)
+    {
+        std::cout << " done ! " << std::endl;
+    }
 
 
-// ---------------------------------------------------------------
-// We define now the finite element space for the level set
-// function. We use here piecewise linear elements.
-// ---------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // We define now the finite element space for the level set
+    // function. We use here piecewise linear elements.
+    // ---------------------------------------------------------------
 
-    if (verbose) std::cout << " -- Building ETFESpace ... " << std::flush;
+    if (verbose)
+    {
+        std::cout << " -- Building ETFESpace ... " << std::flush;
+    }
 
     boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 1 > > phiSpace
-        ( new ETFESpace< mesh_Type, MapEpetra, 3, 1 >(meshPart,&feTetraP1, Comm));
+    ( new ETFESpace< mesh_Type, MapEpetra, 3, 1 > (meshPart, &feTetraP1, Comm) );
 
-    if (verbose) std::cout << " done ! " << std::endl;
-    if (verbose) std::cout << " ---> Dofs: " << phiSpace->dof().numTotalDof() << std::endl;
-
-
-// ---------------------------------------------------------------
-// For the interpolation, we need the FESpace.
-// ---------------------------------------------------------------
-
-    if (verbose) std::cout << " -- Interpolation ... " << std::flush;
-
-    std::string phiOrder("P1");
-    FESpace<mesh_Type, MapEpetra> interpolationSpace(meshPart,phiOrder,1,Comm);
-
-    vector_Type phiInterpolated(phiSpace->map(), Repeated);
-    interpolationSpace.interpolate(phiFct,phiInterpolated,0.0);
-
-    if (verbose) std::cout << " done ! " << std::endl;
+    if (verbose)
+    {
+        std::cout << " done ! " << std::endl;
+    }
+    if (verbose)
+    {
+        std::cout << " ---> Dofs: " << phiSpace->dof().numTotalDof() << std::endl;
+    }
 
 
-// ---------------------------------------------------------------
-// We compute now the volume taken by the phase {phi>0}, that is
-// the volume integral of the heaviside function of phi.
-// ---------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // For the interpolation, we need the FESpace.
+    // ---------------------------------------------------------------
 
-    if (verbose) std::cout << " -- Computing the volume " << std::flush;
+    if (verbose)
+    {
+        std::cout << " -- Interpolation ... " << std::flush;
+    }
 
-    Real localVolume(0.0);
+    std::string phiOrder ("P1");
+    FESpace<mesh_Type, MapEpetra> interpolationSpace (meshPart, phiOrder, 1, Comm);
 
-// ---------------------------------------------------------------
-// We can now perform the integration. The evaluation (3rd
-// argument) represents the heaviside function of phi.
-//
-// The interesting difference is the 2nd argument, which is
-// usually the quadrature rule. Here, it is replaced by this 
-// call to the special function "adapt", which transforms the
-// quadrature rule depending on the element encountered.
-//
-// The arguments to the adapt are the following:
-// - phiSpace: the finite element space in which the level set 
-//             values are defined
-// - phiInterpolated: the values of the level set in the FE space
-// - quadRuleTetra1pt: the quadrature to adapt.
-// ---------------------------------------------------------------
+    vector_Type phiInterpolated (phiSpace->map(), Repeated);
+    interpolationSpace.interpolate (phiFct, phiInterpolated, 0.0);
+
+    if (verbose)
+    {
+        std::cout << " done ! " << std::endl;
+    }
+
+
+    // ---------------------------------------------------------------
+    // We compute now the volume taken by the phase {phi>0}, that is
+    // the volume integral of the heaviside function of phi.
+    // ---------------------------------------------------------------
+
+    if (verbose)
+    {
+        std::cout << " -- Computing the volume " << std::flush;
+    }
+
+    Real localVolume (0.0);
+
+    // ---------------------------------------------------------------
+    // We can now perform the integration. The evaluation (3rd
+    // argument) represents the heaviside function of phi.
+    //
+    // The interesting difference is the 2nd argument, which is
+    // usually the quadrature rule. Here, it is replaced by this
+    // call to the special function "adapt", which transforms the
+    // quadrature rule depending on the element encountered.
+    //
+    // The arguments to the adapt are the following:
+    // - phiSpace: the finite element space in which the level set
+    //             values are defined
+    // - phiInterpolated: the values of the level set in the FE space
+    // - quadRuleTetra1pt: the quadrature to adapt.
+    // ---------------------------------------------------------------
 
     {
         using namespace ExpressionAssembly;
 
-        boost::shared_ptr<HeavisideFunctor> heaviside(new HeavisideFunctor);
+        boost::shared_ptr<HeavisideFunctor> heaviside (new HeavisideFunctor);
 
-        integrate(  elements(phiSpace->mesh()),
-                    adapt(phiSpace,phiInterpolated,quadRuleTetra1pt),
-                    eval(heaviside, value(phiSpace,phiInterpolated))
-                    
-            )
-            >> localVolume;
+        integrate (  elements (phiSpace->mesh() ),
+                     adapt (phiSpace, phiInterpolated, quadRuleTetra1pt),
+                     eval (heaviside, value (phiSpace, phiInterpolated) )
+
+                  )
+                >> localVolume;
     }
 
-    Real globalVolume(0.0);
+    Real globalVolume (0.0);
 
     Comm->Barrier();
-    Comm->SumAll(&localVolume, &globalVolume, 1);
+    Comm->SumAll (&localVolume, &globalVolume, 1);
 
-    if (verbose) std::cout << " done! " << std::endl;
-    if (verbose) std::cout << " Volume: " << globalVolume << std::endl;
+    if (verbose)
+    {
+        std::cout << " done! " << std::endl;
+    }
+    if (verbose)
+    {
+        std::cout << " Volume: " << globalVolume << std::endl;
+    }
 
 
-// ---------------------------------------------------------------
-// We finalize the MPI session if MPI was used
-// ---------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // We finalize the MPI session if MPI was used
+    // ---------------------------------------------------------------
 
 #ifdef HAVE_MPI
     MPI_Finalize();
 #endif
 
-// ---------------------------------------------------------------
-// Finally, we check the norm with respect to a previously
-// computed one to ensure that it has not changed.
-// ---------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // Finally, we check the norm with respect to a previously
+    // computed one to ensure that it has not changed.
+    // ---------------------------------------------------------------
 
-    Real tol(1e-10);
-    Real absError(std::abs(globalVolume - 4));
+    Real tol (1e-10);
+    Real absError (std::abs (globalVolume - 4) );
 
-    if (verbose) std::cout << " Error : " << absError << std::endl;
-    
+    if (verbose)
+    {
+        std::cout << " Error : " << absError << std::endl;
+    }
+
     if ( absError < tol )
     {
-        return( EXIT_SUCCESS );
+        return ( EXIT_SUCCESS );
     }
     return ( EXIT_FAILURE );
-    
+
 }

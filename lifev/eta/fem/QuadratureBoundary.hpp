@@ -37,7 +37,8 @@
 
 #include <vector>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! QuadratureBoundary - Short description of the class
 
@@ -47,31 +48,31 @@ public:
 
     QuadratureBoundary() {};
 
-    QuadratureBoundary( const QuadratureBoundary& qrbd )
-        : M_qrs(qrbd.M_qrs)
+    QuadratureBoundary ( const QuadratureBoundary& qrbd )
+        : M_qrs (qrbd.M_qrs)
     {};
 
 
-    void setQuadrature(const UInt i, const QuadratureRule& qr)
+    void setQuadrature (const UInt i, const QuadratureRule& qr)
     {
-        while(i>= M_qrs.size())
+        while (i >= M_qrs.size() )
         {
-            M_qrs.push_back(QuadratureRule());
+            M_qrs.push_back (QuadratureRule() );
         }
 
-        M_qrs[i]=qr;
+        M_qrs[i] = qr;
     }
 
-    QuadratureRule qr(const UInt i) const
+    QuadratureRule qr (const UInt i) const
     {
-        ASSERT(i<M_qrs.size(), "Invalid quadrature number");
+        ASSERT (i < M_qrs.size(), "Invalid quadrature number");
         return M_qrs[i];
     }
 
 
     void showMe() const
     {
-        for (UInt i(0); i<M_qrs.size(); ++i)
+        for (UInt i (0); i < M_qrs.size(); ++i)
         {
             std::cout << " ## QR " << i << " ## " << std::endl;
             M_qrs[i].showMe();
@@ -85,48 +86,48 @@ private:
 
 inline
 QuadratureBoundary
-buildTetraBDQR(const QuadratureRule& my_qr)
+buildTetraBDQR (const QuadratureRule& my_qr)
 {
     QuadratureBoundary qrbd;
 
     // Face 0
-    qrbd.setQuadrature(0,my_qr);
+    qrbd.setQuadrature (0, my_qr);
 
     // Face 1
-    QuadratureRule qf1("none",TRIANGLE,3,0,0);
-    for (UInt iq(0); iq < my_qr.nbQuadPt(); ++iq)
+    QuadratureRule qf1 ("none", TRIANGLE, 3, 0, 0);
+    for (UInt iq (0); iq < my_qr.nbQuadPt(); ++iq)
     {
-        Real x(my_qr.quadPointCoor(iq,0));
-        Real y(my_qr.quadPointCoor(iq,1));
-        Real w(my_qr.weight(iq));
+        Real x (my_qr.quadPointCoor (iq, 0) );
+        Real y (my_qr.quadPointCoor (iq, 1) );
+        Real w (my_qr.weight (iq) );
 
-        qf1.addPoint(QuadraturePoint(x,0,y,w));
+        qf1.addPoint (QuadraturePoint (x, 0, y, w) );
     }
-    qrbd.setQuadrature(1,qf1);
+    qrbd.setQuadrature (1, qf1);
 
     // Face 2
-    QuadratureRule qf2("none",TRIANGLE,3,0,0);
-    for (UInt iq(0); iq < my_qr.nbQuadPt(); ++iq)
+    QuadratureRule qf2 ("none", TRIANGLE, 3, 0, 0);
+    for (UInt iq (0); iq < my_qr.nbQuadPt(); ++iq)
     {
-        Real x(my_qr.quadPointCoor(iq,0));
-        Real y(my_qr.quadPointCoor(iq,1));
-        Real w(my_qr.weight(iq));
+        Real x (my_qr.quadPointCoor (iq, 0) );
+        Real y (my_qr.quadPointCoor (iq, 1) );
+        Real w (my_qr.weight (iq) );
 
-        qf2.addPoint(QuadraturePoint(x,y,1-x-y,w));
+        qf2.addPoint (QuadraturePoint (x, y, 1 - x - y, w) );
     }
-    qrbd.setQuadrature(2,qf2);
+    qrbd.setQuadrature (2, qf2);
 
     // Face 3
-    QuadratureRule qf3("none",TRIANGLE,3,0,0);
-    for (UInt iq(0); iq < my_qr.nbQuadPt(); ++iq)
+    QuadratureRule qf3 ("none", TRIANGLE, 3, 0, 0);
+    for (UInt iq (0); iq < my_qr.nbQuadPt(); ++iq)
     {
-        Real x(my_qr.quadPointCoor(iq,0));
-        Real y(my_qr.quadPointCoor(iq,1));
-        Real w(my_qr.weight(iq));
+        Real x (my_qr.quadPointCoor (iq, 0) );
+        Real y (my_qr.quadPointCoor (iq, 1) );
+        Real w (my_qr.weight (iq) );
 
-        qf3.addPoint(QuadraturePoint(0,y,x,w));
+        qf3.addPoint (QuadraturePoint (0, y, x, w) );
     }
-    qrbd.setQuadrature(3,qf3);
+    qrbd.setQuadrature (3, qf3);
 
     return qrbd;
 

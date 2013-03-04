@@ -70,24 +70,24 @@ namespace ExpressionAssembly
   within a typedef).
  */
 template < typename MeshType,
-           typename TestSpaceType,
-           typename ExpressionType,
-           typename LSFESpaceType,
-           typename LSVectorType>
+         typename TestSpaceType,
+         typename ExpressionType,
+         typename LSFESpaceType,
+         typename LSVectorType >
 class IntegrateVectorFaceIDLSAdapted
 {
 public:
 
-	//! @name Public Types
+    //! @name Public Types
     //@{
 
     //! Type of the Evaluation
-	typedef typename ExpressionToEvaluation< ExpressionType,
-                                             TestSpaceType::S_fieldDim,
-                                             0,
-                                             3>::evaluation_Type evaluation_Type;
+    typedef typename ExpressionToEvaluation < ExpressionType,
+            TestSpaceType::S_fieldDim,
+            0,
+            3 >::evaluation_Type evaluation_Type;
 
-    typedef LevelSetBDQRAdapter<LSFESpaceType,LSVectorType> BDQRAdapter_Type;
+    typedef LevelSetBDQRAdapter<LSFESpaceType, LSVectorType> BDQRAdapter_Type;
 
     //@}
 
@@ -96,15 +96,15 @@ public:
     //@{
 
     //! Full data constructor
-	IntegrateVectorFaceIDLSAdapted(const boost::shared_ptr<MeshType>& mesh,
-                                   const UInt boundaryID,
-                                   const BDQRAdapter_Type& quadratureBD,
-                                   const boost::shared_ptr<TestSpaceType> testSpace,
-                                   const ExpressionType& expression);
+    IntegrateVectorFaceIDLSAdapted (const boost::shared_ptr<MeshType>& mesh,
+                                    const UInt boundaryID,
+                                    const BDQRAdapter_Type& quadratureBD,
+                                    const boost::shared_ptr<TestSpaceType> testSpace,
+                                    const ExpressionType& expression);
 
     //! Copy constructor
-	IntegrateVectorFaceIDLSAdapted( const IntegrateVectorFaceIDLSAdapted
-                                    < MeshType, TestSpaceType, ExpressionType,LSFESpaceType, LSVectorType> & integrator);
+    IntegrateVectorFaceIDLSAdapted ( const IntegrateVectorFaceIDLSAdapted
+                                     < MeshType, TestSpaceType, ExpressionType, LSFESpaceType, LSVectorType>& integrator);
 
     //! Destructor
     ~IntegrateVectorFaceIDLSAdapted();
@@ -117,16 +117,16 @@ public:
 
     //! Operator wrapping the addTo method
     template <typename VectorType>
-    inline void operator>>(VectorType& vec)
+    inline void operator>> (VectorType& vec)
     {
-        addTo(vec);
+        addTo (vec);
     }
 
     //! Operator wrapping the addTo method (for shared_ptr)
     template <typename VectorType>
-    inline void operator>>(boost::shared_ptr<VectorType> vec)
+    inline void operator>> (boost::shared_ptr<VectorType> vec)
     {
-        addTo(vec);
+        addTo (vec);
     }
 
     //@}
@@ -136,7 +136,7 @@ public:
     //@{
 
     //! Ouput method
-	void check(std::ostream& out = std::cout);
+    void check (std::ostream& out = std::cout);
 
     //! Method that performs the assembly
     /*!
@@ -146,14 +146,14 @@ public:
       sum over the quadrature nodes, assemble in the global
       vector.
      */
-	template <typename VectorType>
-	void addTo(VectorType& vec);
+    template <typename VectorType>
+    void addTo (VectorType& vec);
 
-	template <typename VectorType>
-	inline void addTo(boost::shared_ptr<VectorType> vec)
+    template <typename VectorType>
+    inline void addTo (boost::shared_ptr<VectorType> vec)
     {
-        ASSERT(vec!=0, " Cannot assemble with an empty vector");
-        addTo(*vec);
+        ASSERT (vec != 0, " Cannot assemble with an empty vector");
+        addTo (*vec);
     }
 
     //@}
@@ -164,27 +164,27 @@ private:
     //@{
 
     // No default constructor
-	IntegrateVectorFaceIDLSAdapted();
+    IntegrateVectorFaceIDLSAdapted();
 
     //@}
 
     // Pointer on the mesh
-	boost::shared_ptr<MeshType> M_mesh;
+    boost::shared_ptr<MeshType> M_mesh;
 
     // Identifier for the boundary
     UInt M_boundaryId;
 
     // Quadrature to be used
-	BDQRAdapter_Type M_qrAdapter;
+    BDQRAdapter_Type M_qrAdapter;
 
     // Shared pointer on the Space
-	boost::shared_ptr<TestSpaceType> M_testSpace;
+    boost::shared_ptr<TestSpaceType> M_testSpace;
 
     // Tree to compute the values for the assembly
-	evaluation_Type M_evaluation;
+    evaluation_Type M_evaluation;
 
     std::vector<ETCurrentBDFE<3>*> M_globalCFE;
-    std::vector<ETCurrentFE<3,TestSpaceType::S_fieldDim>*> M_testCFE;
+    std::vector<ETCurrentFE<3, TestSpaceType::S_fieldDim>*> M_testCFE;
 
     ETVectorElemental M_elementalVector;
 };
@@ -199,129 +199,161 @@ private:
 // ===================================================
 
 template < typename MeshType,
-           typename TestSpaceType,
-           typename ExpressionType,
-           typename LSFESpaceType,
-           typename LSVectorType>
+         typename TestSpaceType,
+         typename ExpressionType,
+         typename LSFESpaceType,
+         typename LSVectorType >
 IntegrateVectorFaceIDLSAdapted < MeshType, TestSpaceType, ExpressionType, LSFESpaceType, LSVectorType>::
-IntegrateVectorFaceIDLSAdapted(const boost::shared_ptr<MeshType>& mesh,
-                               const UInt boundaryID,
-                               const BDQRAdapter_Type& quadratureBD,
-                               const boost::shared_ptr<TestSpaceType> testSpace,
-                               const ExpressionType& expression)
-	:	M_mesh(mesh),
-        M_boundaryId(boundaryID),
-        M_qrAdapter(quadratureBD),
-		M_testSpace(testSpace),
-		M_evaluation(expression),
+IntegrateVectorFaceIDLSAdapted (const boost::shared_ptr<MeshType>& mesh,
+                                const UInt boundaryID,
+                                const BDQRAdapter_Type& quadratureBD,
+                                const boost::shared_ptr<TestSpaceType> testSpace,
+                                const ExpressionType& expression)
+    :   M_mesh (mesh),
+        M_boundaryId (boundaryID),
+        M_qrAdapter (quadratureBD),
+        M_testSpace (testSpace),
+        M_evaluation (expression),
 
-		M_globalCFE(4),
-		M_testCFE(4),
+        M_globalCFE (4),
+        M_testCFE (4),
 
-        M_elementalVector(TestSpaceType::S_fieldDim*testSpace->refFE().nbDof())
+        M_elementalVector (TestSpaceType::S_fieldDim * testSpace->refFE().nbDof() )
 {
-    for (UInt i(0); i<4; ++i)
+    for (UInt i (0); i < 4; ++i)
     {
-        M_globalCFE[i]=new ETCurrentBDFE<3>(geometricMapFromMesh<MeshType>()
-                                            ,M_qrAdapter.adaptedBdQR(i));
-        M_testCFE[i]=new ETCurrentFE<3,TestSpaceType::S_fieldDim>(testSpace->refFE()
-                                                                  ,testSpace->geoMap()
-                                                                  ,M_qrAdapter.adaptedBdQR(i));
+        M_globalCFE[i] = new ETCurrentBDFE<3> (geometricMapFromMesh<MeshType>()
+                                               , M_qrAdapter.adaptedBdQR (i) );
+        M_testCFE[i] = new ETCurrentFE<3, TestSpaceType::S_fieldDim> (testSpace->refFE()
+                                                                      , testSpace->geoMap()
+                                                                      , M_qrAdapter.adaptedBdQR (i) );
     }
 
     // Set the tangent on the different faces
-    std::vector< VectorSmall<3> > t0(2,VectorSmall<3>(0.0,0.0,0.0));
-    t0[0][0]=1;    t0[0][1]=0;    t0[0][2]=0;
-    t0[1][0]=0;    t0[1][1]=1;    t0[1][2]=0;
-    std::vector< VectorSmall<3> > t1(2,VectorSmall<3>(0.0,0.0,0.0));
-    t1[0][0]=0;    t1[0][1]=0;    t1[0][2]=1;
-    t1[1][0]=1;    t1[1][1]=0;    t1[1][2]=0;
-    std::vector< VectorSmall<3> > t2(2,VectorSmall<3>(0.0,0.0,0.0));
+    std::vector< VectorSmall<3> > t0 (2, VectorSmall<3> (0.0, 0.0, 0.0) );
+    t0[0][0] = 1;
+    t0[0][1] = 0;
+    t0[0][2] = 0;
+    t0[1][0] = 0;
+    t0[1][1] = 1;
+    t0[1][2] = 0;
+    std::vector< VectorSmall<3> > t1 (2, VectorSmall<3> (0.0, 0.0, 0.0) );
+    t1[0][0] = 0;
+    t1[0][1] = 0;
+    t1[0][2] = 1;
+    t1[1][0] = 1;
+    t1[1][1] = 0;
+    t1[1][2] = 0;
+    std::vector< VectorSmall<3> > t2 (2, VectorSmall<3> (0.0, 0.0, 0.0) );
     //t2[0][0]=-1/std::sqrt(6);    t2[0][1]=-1/std::sqrt(6);    t2[0][2]=2/std::sqrt(6);
     //t2[1][0]=-1/std::sqrt(2);    t2[1][1]=1/std::sqrt(2);    t2[1][2]=0;
-    t2[0][0]=-1;    t2[0][1]=0;    t2[0][2]=1;
-    t2[1][0]=-1;    t2[1][1]=1;    t2[1][2]=0;
+    t2[0][0] = -1;
+    t2[0][1] = 0;
+    t2[0][2] = 1;
+    t2[1][0] = -1;
+    t2[1][1] = 1;
+    t2[1][2] = 0;
 
-    std::vector< VectorSmall<3> > t3(2,VectorSmall<3>(0.0,0.0,0.0));
-    t3[0][0]=0;    t3[0][1]=1;    t3[0][2]=0;
-    t3[1][0]=0;    t3[1][1]=0;    t3[1][2]=1;
+    std::vector< VectorSmall<3> > t3 (2, VectorSmall<3> (0.0, 0.0, 0.0) );
+    t3[0][0] = 0;
+    t3[0][1] = 1;
+    t3[0][2] = 0;
+    t3[1][0] = 0;
+    t3[1][1] = 0;
+    t3[1][2] = 1;
 
-    M_globalCFE[0]->setRefTangents(t0);
-    M_globalCFE[1]->setRefTangents(t1);
-    M_globalCFE[2]->setRefTangents(t2);
-    M_globalCFE[3]->setRefTangents(t3);
+    M_globalCFE[0]->setRefTangents (t0);
+    M_globalCFE[1]->setRefTangents (t1);
+    M_globalCFE[2]->setRefTangents (t2);
+    M_globalCFE[3]->setRefTangents (t3);
 
 
-    M_evaluation.setQuadrature(M_qrAdapter.adaptedBdQR(0));
-    M_evaluation.setGlobalCFE(M_globalCFE[0]);
-    M_evaluation.setTestCFE(M_testCFE[0]);
+    M_evaluation.setQuadrature (M_qrAdapter.adaptedBdQR (0) );
+    M_evaluation.setGlobalCFE (M_globalCFE[0]);
+    M_evaluation.setTestCFE (M_testCFE[0]);
 }
 
 template < typename MeshType,
-           typename TestSpaceType,
-           typename ExpressionType,
-           typename LSFESpaceType,
-           typename LSVectorType>
+         typename TestSpaceType,
+         typename ExpressionType,
+         typename LSFESpaceType,
+         typename LSVectorType >
 IntegrateVectorFaceIDLSAdapted < MeshType, TestSpaceType, ExpressionType, LSFESpaceType, LSVectorType>::
-IntegrateVectorFaceIDLSAdapted( const IntegrateVectorFaceIDLSAdapted < MeshType, TestSpaceType, ExpressionType,LSFESpaceType,LSVectorType> & integrator)
-	:	M_mesh(integrator.M_mesh),
-        M_boundaryId(integrator.M_boundaryId),
-        M_qrAdapter(integrator.M_qrAdapter),
-		M_testSpace(integrator.M_testSpace),
-		M_evaluation(integrator.M_evaluation),
+IntegrateVectorFaceIDLSAdapted ( const IntegrateVectorFaceIDLSAdapted < MeshType, TestSpaceType, ExpressionType, LSFESpaceType, LSVectorType>& integrator)
+    :   M_mesh (integrator.M_mesh),
+        M_boundaryId (integrator.M_boundaryId),
+        M_qrAdapter (integrator.M_qrAdapter),
+        M_testSpace (integrator.M_testSpace),
+        M_evaluation (integrator.M_evaluation),
 
-	  	M_globalCFE(4),
-		M_testCFE(4),
+        M_globalCFE (4),
+        M_testCFE (4),
 
-		M_elementalVector(integrator.M_elementalVector)
+        M_elementalVector (integrator.M_elementalVector)
 {
-    for (UInt i(0); i<4; ++i)
+    for (UInt i (0); i < 4; ++i)
     {
-        M_globalCFE[i]=new ETCurrentBDFE<3>(geometricMapFromMesh<MeshType>()
-                                            ,M_qrAdapter.adaptedBdQR(i));
-        M_testCFE[i]=new ETCurrentFE<3,TestSpaceType::S_fieldDim>(M_testSpace->refFE()
-                                                                  ,M_testSpace->geoMap()
-                                                                  ,M_qrAdapter.adaptedBdQR(i));
+        M_globalCFE[i] = new ETCurrentBDFE<3> (geometricMapFromMesh<MeshType>()
+                                               , M_qrAdapter.adaptedBdQR (i) );
+        M_testCFE[i] = new ETCurrentFE<3, TestSpaceType::S_fieldDim> (M_testSpace->refFE()
+                                                                      , M_testSpace->geoMap()
+                                                                      , M_qrAdapter.adaptedBdQR (i) );
     }
 
     // Set the tangent on the different faces
-    std::vector< VectorSmall<3> > t0(2,VectorSmall<3>(0.0,0.0,0.0));
-    t0[0][0]=1;    t0[0][1]=0;    t0[0][2]=0;
-    t0[1][0]=0;    t0[1][1]=1;    t0[1][2]=0;
-    std::vector< VectorSmall<3> > t1(2,VectorSmall<3>(0.0,0.0,0.0));
-    t1[0][0]=0;    t1[0][1]=0;    t1[0][2]=1;
-    t1[1][0]=1;    t1[1][1]=0;    t1[1][2]=0;
-    std::vector< VectorSmall<3> > t2(2,VectorSmall<3>(0.0,0.0,0.0));
+    std::vector< VectorSmall<3> > t0 (2, VectorSmall<3> (0.0, 0.0, 0.0) );
+    t0[0][0] = 1;
+    t0[0][1] = 0;
+    t0[0][2] = 0;
+    t0[1][0] = 0;
+    t0[1][1] = 1;
+    t0[1][2] = 0;
+    std::vector< VectorSmall<3> > t1 (2, VectorSmall<3> (0.0, 0.0, 0.0) );
+    t1[0][0] = 0;
+    t1[0][1] = 0;
+    t1[0][2] = 1;
+    t1[1][0] = 1;
+    t1[1][1] = 0;
+    t1[1][2] = 0;
+    std::vector< VectorSmall<3> > t2 (2, VectorSmall<3> (0.0, 0.0, 0.0) );
     //t2[0][0]=-1/std::sqrt(6);    t2[0][1]=-1/std::sqrt(6);    t2[0][2]=2/std::sqrt(6);
     //t2[1][0]=-1/std::sqrt(2);    t2[1][1]=1/std::sqrt(2);    t2[1][2]=0;
-    t2[0][0]=-1;    t2[0][1]=0;    t2[0][2]=1;
-    t2[1][0]=-1;    t2[1][1]=1;    t2[1][2]=0;
+    t2[0][0] = -1;
+    t2[0][1] = 0;
+    t2[0][2] = 1;
+    t2[1][0] = -1;
+    t2[1][1] = 1;
+    t2[1][2] = 0;
 
-    std::vector< VectorSmall<3> > t3(2,VectorSmall<3>(0.0,0.0,0.0));
-    t3[0][0]=0;    t3[0][1]=1;    t3[0][2]=0;
-    t3[1][0]=0;    t3[1][1]=0;    t3[1][2]=1;
+    std::vector< VectorSmall<3> > t3 (2, VectorSmall<3> (0.0, 0.0, 0.0) );
+    t3[0][0] = 0;
+    t3[0][1] = 1;
+    t3[0][2] = 0;
+    t3[1][0] = 0;
+    t3[1][1] = 0;
+    t3[1][2] = 1;
 
-    M_globalCFE[0]->setRefTangents(t0);
-    M_globalCFE[1]->setRefTangents(t1);
-    M_globalCFE[2]->setRefTangents(t2);
-    M_globalCFE[3]->setRefTangents(t3);
+    M_globalCFE[0]->setRefTangents (t0);
+    M_globalCFE[1]->setRefTangents (t1);
+    M_globalCFE[2]->setRefTangents (t2);
+    M_globalCFE[3]->setRefTangents (t3);
 
 
-    M_evaluation.setQuadrature(M_qrAdapter.adaptedBdQR(0));
-    M_evaluation.setGlobalCFE(M_globalCFE[0]);
-    M_evaluation.setTestCFE(M_testCFE[0]);
+    M_evaluation.setQuadrature (M_qrAdapter.adaptedBdQR (0) );
+    M_evaluation.setGlobalCFE (M_globalCFE[0]);
+    M_evaluation.setTestCFE (M_testCFE[0]);
 }
 
 
 template < typename MeshType,
-           typename TestSpaceType,
-           typename ExpressionType,
-           typename LSFESpaceType,
-           typename LSVectorType>
+         typename TestSpaceType,
+         typename ExpressionType,
+         typename LSFESpaceType,
+         typename LSVectorType >
 IntegrateVectorFaceIDLSAdapted < MeshType, TestSpaceType, ExpressionType, LSFESpaceType, LSVectorType>::
 ~IntegrateVectorFaceIDLSAdapted()
 {
-    for (UInt i(0); i<4; ++i)
+    for (UInt i (0); i < 4; ++i)
     {
         delete M_globalCFE[i];
         delete M_testCFE[i];
@@ -333,40 +365,40 @@ IntegrateVectorFaceIDLSAdapted < MeshType, TestSpaceType, ExpressionType, LSFESp
 // ===================================================
 
 template < typename MeshType,
-           typename TestSpaceType,
-           typename ExpressionType,
-           typename LSFESpaceType,
-           typename LSVectorType>
+         typename TestSpaceType,
+         typename ExpressionType,
+         typename LSFESpaceType,
+         typename LSVectorType >
 void
 IntegrateVectorFaceIDLSAdapted < MeshType, TestSpaceType, ExpressionType, LSFESpaceType, LSVectorType>::
-check(std::ostream& out)
+check (std::ostream& out)
 {
     out << " Checking the integration : " << std::endl;
-    M_evaluation.display(out);
+    M_evaluation.display (out);
     out << std::endl;
     out << " Elemental vector : " << std::endl;
-    M_elementalVector.showMe(out);
+    M_elementalVector.showMe (out);
     out << std::endl;
 }
 
 
 template < typename MeshType,
-           typename TestSpaceType,
-           typename ExpressionType,
-           typename LSFESpaceType,
-           typename LSVectorType>
+         typename TestSpaceType,
+         typename ExpressionType,
+         typename LSFESpaceType,
+         typename LSVectorType >
 template <typename VectorType>
 void
 IntegrateVectorFaceIDLSAdapted < MeshType, TestSpaceType, ExpressionType, LSFESpaceType, LSVectorType>::
-addTo(VectorType& vec)
+addTo (VectorType& vec)
 {
-    UInt nbBoundaryFaces(M_mesh->numBFaces());
-    UInt nbTestDof(M_testSpace->refFE().nbDof());
+    UInt nbBoundaryFaces (M_mesh->numBFaces() );
+    UInt nbTestDof (M_testSpace->refFE().nbDof() );
 
-    for (UInt iFace(0); iFace< nbBoundaryFaces; ++iFace)
+    for (UInt iFace (0); iFace < nbBoundaryFaces; ++iFace)
     {
         // Check the identifier
-        if ( M_mesh->face(iFace).markerID() != M_boundaryId )
+        if ( M_mesh->face (iFace).markerID() != M_boundaryId )
         {
             continue;
         }
@@ -375,57 +407,57 @@ addTo(VectorType& vec)
         M_elementalVector.zero();
 
         // Get the number of the face in the adjacent element
-        UInt faceIDinAdjacentElement(M_mesh->face(iFace).firstAdjacentElementPosition());
+        UInt faceIDinAdjacentElement (M_mesh->face (iFace).firstAdjacentElementPosition() );
 
         // Get the ID of the adjacent element
-        UInt adjacentElementID(M_mesh->face(iFace).firstAdjacentElementIdentity());
+        UInt adjacentElementID (M_mesh->face (iFace).firstAdjacentElementIdentity() );
 
         // Update the QR
-        M_qrAdapter.update(adjacentElementID,faceIDinAdjacentElement);
+        M_qrAdapter.update (adjacentElementID, faceIDinAdjacentElement);
 
         // Change the qr
-        M_globalCFE[faceIDinAdjacentElement]->setQuadratureRule(M_qrAdapter.adaptedBdQR(faceIDinAdjacentElement));
-        M_testCFE[faceIDinAdjacentElement]->setQuadratureRule(M_qrAdapter.adaptedBdQR(faceIDinAdjacentElement));
+        M_globalCFE[faceIDinAdjacentElement]->setQuadratureRule (M_qrAdapter.adaptedBdQR (faceIDinAdjacentElement) );
+        M_testCFE[faceIDinAdjacentElement]->setQuadratureRule (M_qrAdapter.adaptedBdQR (faceIDinAdjacentElement) );
 
         // Update the currentFEs
         M_globalCFE[faceIDinAdjacentElement]
-            ->update(M_mesh->element(adjacentElementID));
+        ->update (M_mesh->element (adjacentElementID) );
         M_testCFE[faceIDinAdjacentElement]
-            ->update(M_mesh->element(adjacentElementID),evaluation_Type::S_testUpdateFlag);
+        ->update (M_mesh->element (adjacentElementID), evaluation_Type::S_testUpdateFlag);
 
         // Update the evaluation
-        M_evaluation.setQuadrature(M_qrAdapter.adaptedBdQR(faceIDinAdjacentElement));
-        M_evaluation.setGlobalCFE(M_globalCFE[faceIDinAdjacentElement]);
-        M_evaluation.setTestCFE(M_testCFE[faceIDinAdjacentElement]);
+        M_evaluation.setQuadrature (M_qrAdapter.adaptedBdQR (faceIDinAdjacentElement) );
+        M_evaluation.setGlobalCFE (M_globalCFE[faceIDinAdjacentElement]);
+        M_evaluation.setTestCFE (M_testCFE[faceIDinAdjacentElement]);
 
-        M_evaluation.update(adjacentElementID);
+        M_evaluation.update (adjacentElementID);
 
         // Loop on the blocks
-        for (UInt iblock(0); iblock < TestSpaceType::S_fieldDim; ++iblock)
+        for (UInt iblock (0); iblock < TestSpaceType::S_fieldDim; ++iblock)
         {
 
             // Set the row global indices in the local matrix
-            for (UInt i(0); i<nbTestDof; ++i)
+            for (UInt i (0); i < nbTestDof; ++i)
             {
                 M_elementalVector.setRowIndex
-                    (i + iblock*nbTestDof,
-                     M_testSpace->dof().localToGlobalMap(adjacentElementID,i)+ iblock*M_testSpace->dof().numTotalDof());
+                (i + iblock * nbTestDof,
+                 M_testSpace->dof().localToGlobalMap (adjacentElementID, i) + iblock * M_testSpace->dof().numTotalDof() );
             }
 
 
             // Make the assembly
-            for (UInt iQuadPt(0); iQuadPt< M_qrAdapter.adaptedBdQR(faceIDinAdjacentElement).nbQuadPt(); ++iQuadPt)
+            for (UInt iQuadPt (0); iQuadPt < M_qrAdapter.adaptedBdQR (faceIDinAdjacentElement).nbQuadPt(); ++iQuadPt)
             {
-                for (UInt i(0); i<nbTestDof; ++i)
+                for (UInt i (0); i < nbTestDof; ++i)
                 {
-                    M_elementalVector.element(i+iblock*nbTestDof) +=
-                        M_evaluation.value_qi(iQuadPt,i+iblock*nbTestDof)
+                    M_elementalVector.element (i + iblock * nbTestDof) +=
+                        M_evaluation.value_qi (iQuadPt, i + iblock * nbTestDof)
                         * M_globalCFE[faceIDinAdjacentElement]->M_wMeas[iQuadPt];
                 }
             }
         }
 
-        M_elementalVector.pushToGlobal(vec);
+        M_elementalVector.pushToGlobal (vec);
     }
 }
 

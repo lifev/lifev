@@ -210,17 +210,17 @@ operator* (const ExpressionBase<LExpressionType>& l, const VectorSmall<Vdim>& r)
 // "Specialization" for the case of a matrix
 template< typename RExpressionType, UInt Dim1 , UInt Dim2 >
 ExpressionProduct<ExpressionMatrix<Dim1, Dim2>, RExpressionType>
-operator*(const MatrixSmall<Dim1, Dim2>&  l, const ExpressionBase<RExpressionType>& r)
+operator* (const MatrixSmall<Dim1, Dim2>&  l, const ExpressionBase<RExpressionType>& r)
 {
-  return ExpressionProduct<ExpressionMatrix<Dim1, Dim2>,RExpressionType>(ExpressionMatrix<Dim1,Dim2>(l),r.cast());
+    return ExpressionProduct<ExpressionMatrix<Dim1, Dim2>, RExpressionType> (ExpressionMatrix<Dim1, Dim2> (l), r.cast() );
 }
 
 // "Specialization" for the case of a matrix
 template< typename LExpressionType, UInt Dim1, UInt Dim2 >
 ExpressionProduct<LExpressionType, ExpressionMatrix<Dim1, Dim2> >
-operator*(const ExpressionBase<LExpressionType>& l, const MatrixSmall<Dim1, Dim2>& r)
+operator* (const ExpressionBase<LExpressionType>& l, const MatrixSmall<Dim1, Dim2>& r)
 {
-  return ExpressionProduct<LExpressionType, ExpressionMatrix<Dim1, Dim2> >(l.cast(), ExpressionMatrix<Dim1, Dim2>(r));
+    return ExpressionProduct<LExpressionType, ExpressionMatrix<Dim1, Dim2> > (l.cast(), ExpressionMatrix<Dim1, Dim2> (r) );
 }
 
 

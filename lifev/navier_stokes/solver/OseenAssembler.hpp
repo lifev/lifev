@@ -140,7 +140,7 @@ public:
     void addStiffStrain (matrixType& matrix, const Real& viscosity, const UInt& offsetLeft, const UInt& offsetUp);
 
     //! Add the stiff strain on the boundary in the standard block
-    void addStiffStrainBoundary(matrixType& matrix, const Real& boundaryFlag, const Real& firstLame, const Real& secondLame);
+    void addStiffStrainBoundary (matrixType& matrix, const Real& boundaryFlag, const Real& firstLame, const Real& secondLame);
 
     //! Add the term involved in the gradient of the pressure term
     void addGradPressure (matrixType& matrix)
@@ -184,7 +184,7 @@ public:
     };
 
     //! Add the mass
-    void addWeightedMass(matrixType& matrix, const Real& coefficient, const vectorType& beta );
+    void addWeightedMass (matrixType& matrix, const Real& coefficient, const vectorType& beta );
 
     //! Add the mass using offsets
     void addMass (matrixType& matrix, const Real& coefficient, const UInt& offsetLeft, const UInt offsetUp);
@@ -270,9 +270,9 @@ public:
 private:
 
     typedef CurrentFE                            currentFE_Type;
-    typedef CurrentBoundaryFE                    currentBdFE_Type;  
+    typedef CurrentBoundaryFE                    currentBdFE_Type;
     typedef boost::scoped_ptr<currentFE_Type>    currentFEPtr_Type;
-    typedef boost::scoped_ptr<currentBdFE_Type>  currentBdFEPtr_Type;  
+    typedef boost::scoped_ptr<currentBdFE_Type>  currentBdFEPtr_Type;
 
     typedef MatrixElemental                              localMatrix_Type;
     typedef boost::scoped_ptr<localMatrix_Type>          localMatrixPtr_Type;
@@ -303,7 +303,7 @@ private:
     currentFEPtr_Type M_viscousCFE;
     currentFEPtr_Type M_stiffBoundaryCFE;
     currentBdFEPtr_Type M_stiffBoundaryCBdFE;
-    
+
     currentFEPtr_Type M_gradPressureUCFE;
     currentFEPtr_Type M_gradPressurePCFE;
 
@@ -405,95 +405,95 @@ setup (const fespacePtr_Type& uFESpace, const fespacePtr_Type& pFESpace, const f
     UInt pDegree (M_pFESpace->polynomialDegree() );
     UInt betaDegree (M_betaFESpace->polynomialDegree() );
 
-    M_viscousCFE.reset(new currentFE_Type(M_uFESpace->refFE(),
-                                          M_uFESpace->fe().geoMap(),
-                                          QuadratureRuleProvider::provideExactness(TETRA,2*uDegree-2)));
-    
-    M_stiffBoundaryCFE.reset(new currentFE_Type(M_uFESpace->refFE(),
-						      M_uFESpace->fe().geoMap(),
-						QuadratureRuleProvider::provideExactness(TETRA,2*uDegree-2)));
+    M_viscousCFE.reset (new currentFE_Type (M_uFESpace->refFE(),
+                                            M_uFESpace->fe().geoMap(),
+                                            QuadratureRuleProvider::provideExactness (TETRA, 2 * uDegree - 2) ) );
 
-    M_stiffBoundaryCBdFE.reset(new currentBdFE_Type(M_uFESpace->refFE().boundaryFE(),
-							  M_uFESpace->fe().geoMap().boundaryMap(), 
-						      QuadratureRuleProvider::provideExactness(TRIANGLE,2*uDegree-2)));
+    M_stiffBoundaryCFE.reset (new currentFE_Type (M_uFESpace->refFE(),
+                                                  M_uFESpace->fe().geoMap(),
+                                                  QuadratureRuleProvider::provideExactness (TETRA, 2 * uDegree - 2) ) );
 
-    M_gradPressureUCFE.reset(new currentFE_Type(M_uFESpace->refFE(),
+    M_stiffBoundaryCBdFE.reset (new currentBdFE_Type (M_uFESpace->refFE().boundaryFE(),
+                                                      M_uFESpace->fe().geoMap().boundaryMap(),
+                                                      QuadratureRuleProvider::provideExactness (TRIANGLE, 2 * uDegree - 2) ) );
+
+    M_gradPressureUCFE.reset (new currentFE_Type (M_uFESpace->refFE(),
+                                                  M_uFESpace->fe().geoMap(),
+                                                  QuadratureRuleProvider::provideExactness (TETRA, uDegree + pDegree - 1) ) );
+
+    M_gradPressurePCFE.reset (new currentFE_Type (M_pFESpace->refFE(),
+                                                  M_uFESpace->fe().geoMap(),
+                                                  QuadratureRuleProvider::provideExactness (TETRA, uDegree + pDegree - 1) ) );
+
+    M_divergenceUCFE.reset (new currentFE_Type (M_uFESpace->refFE(),
                                                 M_uFESpace->fe().geoMap(),
-                                                QuadratureRuleProvider::provideExactness(TETRA,uDegree+pDegree-1)));
+                                                QuadratureRuleProvider::provideExactness (TETRA, uDegree + pDegree - 1) ) );
 
-    M_gradPressurePCFE.reset(new currentFE_Type(M_pFESpace->refFE(),
+
+    M_divergencePCFE.reset (new currentFE_Type (M_pFESpace->refFE(),
                                                 M_uFESpace->fe().geoMap(),
-                                                QuadratureRuleProvider::provideExactness(TETRA,uDegree+pDegree-1)));
+                                                QuadratureRuleProvider::provideExactness (TETRA, uDegree + pDegree - 1) ) );
 
-    M_divergenceUCFE.reset(new currentFE_Type(M_uFESpace->refFE(),
-                                              M_uFESpace->fe().geoMap(),
-                                              QuadratureRuleProvider::provideExactness(TETRA,uDegree+pDegree-1)));
+    M_massCFE.reset (new currentFE_Type (M_uFESpace->refFE(),
+                                         M_uFESpace->fe().geoMap(),
+                                         QuadratureRuleProvider::provideExactness (TETRA, 2 * uDegree) ) );
 
+    M_massBetaCFE.reset (new currentFE_Type (M_betaFESpace->refFE(),
+                                             M_uFESpace->fe().geoMap(),
+                                             QuadratureRuleProvider::provideExactness (TETRA, 2 * uDegree) ) );
 
-    M_divergencePCFE.reset(new currentFE_Type(M_pFESpace->refFE(),
-                                              M_uFESpace->fe().geoMap(),
-                                              QuadratureRuleProvider::provideExactness(TETRA,uDegree+pDegree-1)));
-
-    M_massCFE.reset(new currentFE_Type(M_uFESpace->refFE(),
-                                       M_uFESpace->fe().geoMap(),
-                                       QuadratureRuleProvider::provideExactness(TETRA,2*uDegree)));
-
-    M_massBetaCFE.reset(new currentFE_Type(M_betaFESpace->refFE(),
-                                       M_uFESpace->fe().geoMap(),
-                                       QuadratureRuleProvider::provideExactness(TETRA,2*uDegree)));
-
-    M_weightedMassCFE.reset(new currentFE_Type(M_uFESpace->refFE(),
-                                       M_uFESpace->fe().geoMap(),
-                                       QuadratureRuleProvider::provideExactness(TETRA,2*uDegree)));
-
-    M_weightedMassBetaCFE.reset(new currentFE_Type(M_betaFESpace->refFE(),
-                                       M_uFESpace->fe().geoMap(),
-                                       QuadratureRuleProvider::provideExactness(TETRA,2*uDegree)));
-
-
-    M_massPressureCFE.reset(new currentFE_Type(M_pFESpace->refFE(),
-                                               M_pFESpace->fe().geoMap(),
-                                               QuadratureRuleProvider::provideExactness(TETRA,2*pDegree)));
-
-    M_convectionUCFE.reset(new currentFE_Type(M_uFESpace->refFE(),
-                                              M_uFESpace->fe().geoMap(),
-                                              QuadratureRuleProvider::provideExactness(TETRA,2*uDegree+betaDegree-1)));
-
-    M_convectionBetaCFE.reset(new currentFE_Type(M_betaFESpace->refFE(),
+    M_weightedMassCFE.reset (new currentFE_Type (M_uFESpace->refFE(),
                                                  M_uFESpace->fe().geoMap(),
-                                                 QuadratureRuleProvider::provideExactness(TETRA,2*uDegree+betaDegree-1)));
+                                                 QuadratureRuleProvider::provideExactness (TETRA, 2 * uDegree) ) );
 
-    M_convectionRhsUCFE.reset(new currentFE_Type(M_betaFESpace->refFE(),
-                                                 M_uFESpace->fe().geoMap(),
-                                                 QuadratureRuleProvider::provideExactness(TETRA,2*betaDegree+betaDegree-1)));
+    M_weightedMassBetaCFE.reset (new currentFE_Type (M_betaFESpace->refFE(),
+                                                     M_uFESpace->fe().geoMap(),
+                                                     QuadratureRuleProvider::provideExactness (TETRA, 2 * uDegree) ) );
 
-    M_localViscous.reset(new localMatrix_Type(M_uFESpace->fe().nbFEDof(),
-                                              M_uFESpace->fieldDim(),
-                                              M_uFESpace->fieldDim()));
 
-    M_localStiffBoundary.reset(new localMatrix_Type(M_uFESpace->fe().nbFEDof(),
-							  M_uFESpace->fieldDim(),
-						      M_uFESpace->fieldDim()));
-    
-    M_localGradPressure.reset(new localMatrix_Type(M_uFESpace->fe().nbFEDof(),nDimensions,0,
-                                                   M_pFESpace->fe().nbFEDof(),0,1));
+    M_massPressureCFE.reset (new currentFE_Type (M_pFESpace->refFE(),
+                                                 M_pFESpace->fe().geoMap(),
+                                                 QuadratureRuleProvider::provideExactness (TETRA, 2 * pDegree) ) );
 
-    M_localDivergence.reset(new localMatrix_Type(M_uFESpace->fe().nbFEDof(),0,nDimensions,
-                                                 M_pFESpace->fe().nbFEDof(),1,0));
+    M_convectionUCFE.reset (new currentFE_Type (M_uFESpace->refFE(),
+                                                M_uFESpace->fe().geoMap(),
+                                                QuadratureRuleProvider::provideExactness (TETRA, 2 * uDegree + betaDegree - 1) ) );
 
-    M_localMass.reset(new localMatrix_Type(M_uFESpace->fe().nbFEDof(),
-                                           M_uFESpace->fieldDim(),
-                                           M_uFESpace->fieldDim()));
+    M_convectionBetaCFE.reset (new currentFE_Type (M_betaFESpace->refFE(),
+                                                   M_uFESpace->fe().geoMap(),
+                                                   QuadratureRuleProvider::provideExactness (TETRA, 2 * uDegree + betaDegree - 1) ) );
 
-    M_localWeightedMass.reset(new localMatrix_Type(M_uFESpace->fe().nbFEDof(),
-                                           M_uFESpace->fieldDim(),
-                                           M_uFESpace->fieldDim()));
-    M_localMassPressure.reset(new localMatrix_Type(M_pFESpace->fe().nbFEDof(),
-                                                   M_pFESpace->fieldDim(),
-                                                   M_pFESpace->fieldDim()));
-    M_localConvection.reset(new localMatrix_Type(M_uFESpace->fe().nbFEDof(),
-                                                 M_uFESpace->fieldDim(),
-                                                 M_uFESpace->fieldDim()));
+    M_convectionRhsUCFE.reset (new currentFE_Type (M_betaFESpace->refFE(),
+                                                   M_uFESpace->fe().geoMap(),
+                                                   QuadratureRuleProvider::provideExactness (TETRA, 2 * betaDegree + betaDegree - 1) ) );
+
+    M_localViscous.reset (new localMatrix_Type (M_uFESpace->fe().nbFEDof(),
+                                                M_uFESpace->fieldDim(),
+                                                M_uFESpace->fieldDim() ) );
+
+    M_localStiffBoundary.reset (new localMatrix_Type (M_uFESpace->fe().nbFEDof(),
+                                                      M_uFESpace->fieldDim(),
+                                                      M_uFESpace->fieldDim() ) );
+
+    M_localGradPressure.reset (new localMatrix_Type (M_uFESpace->fe().nbFEDof(), nDimensions, 0,
+                                                     M_pFESpace->fe().nbFEDof(), 0, 1) );
+
+    M_localDivergence.reset (new localMatrix_Type (M_uFESpace->fe().nbFEDof(), 0, nDimensions,
+                                                   M_pFESpace->fe().nbFEDof(), 1, 0) );
+
+    M_localMass.reset (new localMatrix_Type (M_uFESpace->fe().nbFEDof(),
+                                             M_uFESpace->fieldDim(),
+                                             M_uFESpace->fieldDim() ) );
+
+    M_localWeightedMass.reset (new localMatrix_Type (M_uFESpace->fe().nbFEDof(),
+                                                     M_uFESpace->fieldDim(),
+                                                     M_uFESpace->fieldDim() ) );
+    M_localMassPressure.reset (new localMatrix_Type (M_pFESpace->fe().nbFEDof(),
+                                                     M_pFESpace->fieldDim(),
+                                                     M_pFESpace->fieldDim() ) );
+    M_localConvection.reset (new localMatrix_Type (M_uFESpace->fe().nbFEDof(),
+                                                   M_uFESpace->fieldDim(),
+                                                   M_uFESpace->fieldDim() ) );
 
     M_localConvectionRhs.reset (new localVector_Type (M_uFESpace->fe().nbFEDof(), M_uFESpace->fieldDim() ) );
 
@@ -601,27 +601,27 @@ addStiffStrain (matrixType& matrix, const Real& viscosity, const UInt& offsetLef
 
 template< typename meshType, typename matrixType, typename vectorType>
 void
-OseenAssembler<meshType,matrixType,vectorType>::
-addStiffStrainBoundary(matrixType& matrix, const Real& boundaryFlag, const Real& firstLame, const Real& secondLame)
+OseenAssembler<meshType, matrixType, vectorType>::
+addStiffStrainBoundary (matrixType& matrix, const Real& boundaryFlag, const Real& firstLame, const Real& secondLame)
 {
-    ASSERT(M_uFESpace != 0, "No FE space for assembling the stiff strain.");
-    ASSERT( M_uFESpace->dof().numTotalDof()*(M_uFESpace->fieldDim()) <=
-           UInt(matrix.matrixPtr()->NumGlobalCols()),
-           " The matrix is too small (columns) for the assembly of the stiff strain");
-    ASSERT( M_uFESpace->dof().numTotalDof()*(M_uFESpace->fieldDim()) <=
-           UInt(matrix.matrixPtr()->NumGlobalRows()),
-           " The matrix is too small (rows) for the assembly of the stiff strain");
+    ASSERT (M_uFESpace != 0, "No FE space for assembling the stiff strain.");
+    ASSERT ( M_uFESpace->dof().numTotalDof() * (M_uFESpace->fieldDim() ) <=
+             UInt (matrix.matrixPtr()->NumGlobalCols() ),
+             " The matrix is too small (columns) for the assembly of the stiff strain");
+    ASSERT ( M_uFESpace->dof().numTotalDof() * (M_uFESpace->fieldDim() ) <=
+             UInt (matrix.matrixPtr()->NumGlobalRows() ),
+             " The matrix is too small (rows) for the assembly of the stiff strain");
 
     BCHandler bcH;
     BCFunctionBase uNull;
-    bcH.addBC( "LB",  boundaryFlag,     Natural,   Full,     uNull, 3 );
-    bcH.bcUpdate(*(M_uFESpace->mesh()),M_uFESpace->feBd(),M_uFESpace->dof());
+    bcH.addBC ( "LB",  boundaryFlag,     Natural,   Full,     uNull, 3 );
+    bcH.bcUpdate (* (M_uFESpace->mesh() ), M_uFESpace->feBd(), M_uFESpace->dof() );
 
     // Some constants
-    const UInt nbElements(bcH[0].list_size());
-    const UInt fieldDim(M_uFESpace->fieldDim());
-    const UInt nbTotalDof(M_uFESpace->dof().numTotalDof());
-    const UInt nbQuadPt(M_uFESpace->bdQr().nbQuadPt());
+    const UInt nbElements (bcH[0].list_size() );
+    const UInt fieldDim (M_uFESpace->fieldDim() );
+    const UInt nbTotalDof (M_uFESpace->dof().numTotalDof() );
+    const UInt nbQuadPt (M_uFESpace->bdQr().nbQuadPt() );
 
 
     const BCIdentifierNatural* pId;
@@ -629,137 +629,140 @@ addStiffStrainBoundary(matrixType& matrix, const Real& boundaryFlag, const Real&
 
     //std::cout<<"Numero di nodi sulla faccia: "<< M_laplaceBeltramiCBdFE->nbNode()<<std::endl;
 
-    if ( M_stiffBoundaryCBdFE->nbNode() == 3 /*P1*/) {
+    if ( M_stiffBoundaryCBdFE->nbNode() == 3 /*P1*/)
+    {
 
         typedef RegionMesh<LinearTetra>::elementShape_Type elementShape_Type;
 
-    // Loop over the elements
-    for (UInt iterElement(0); iterElement < nbElements; ++iterElement)
+        // Loop over the elements
+        for (UInt iterElement (0); iterElement < nbElements; ++iterElement)
+        {
+
+            // Pointer to the i-th identifier in the list
+            pId = static_cast< const BCIdentifierNatural* > ( bcH.findBCWithFlag (boundaryFlag) [ iterElement ] );
+
+            // Number of the current boundary face
+            ibF = pId->id();
+            ibE = M_uFESpace->mesh()->boundaryFace ( ibF ).firstAdjacentElementIdentity();
+            ibFE = M_uFESpace->mesh()->boundaryFace ( ibF ).firstAdjacentElementPosition(); // local id of the face in its adjacent element
+
+            // Updating the laplace Beltrami current BdFE and FE
+            M_stiffBoundaryCBdFE->updateMeasNormalQuadPt ( M_uFESpace->mesh()->boundaryFace ( ibF ) );
+            //M_stiffBoundaryCFE->updateFirstDeriv( M_uFESpace->mesh()->element( ibE ) );
+            M_stiffBoundaryCFE->update ( M_uFESpace->mesh()->element ( ibE ), UPDATE_ONLY_CELL_NODES );
+
+            QuadratureRule faceQR1 ("custom quad 1", TETRA, 3, 0, 0);
+            for (UInt iQuad (0); iQuad < nbQuadPt; ++iQuad) // Here we do not use UInt because of KNM, but we should
+            {
+                Real x (0.0), y (0.0), z (0.0);
+                M_stiffBoundaryCFE->coorBackMap ( M_stiffBoundaryCBdFE->quadPt (iQuad, 0),
+                                                  M_stiffBoundaryCBdFE->quadPt (iQuad, 1),
+                                                  M_stiffBoundaryCBdFE->quadPt (iQuad, 2),
+                                                  x, y, z);
+                QuadraturePoint newPoint (x, y, z, M_uFESpace->bdQr().weight (iQuad) );
+                faceQR1.addPoint (newPoint);
+            }
+            M_stiffBoundaryCFE->setQuadRule (faceQR1);
+            M_stiffBoundaryCFE->update ( M_uFESpace->mesh()->element ( ibE ), UPDATE_DPHI | UPDATE_WDET );
+
+            // Clean the local matrix
+            M_localStiffBoundary->zero();
+
+            // local stiffness
+
+            AssemblyElementalBoundary<elementShape_Type>::instance().stiffStrainBoundary (*M_localStiffBoundary,
+                                                                                          *M_stiffBoundaryCFE,
+                                                                                          *M_stiffBoundaryCBdFE,
+                                                                                          secondLame , ibFE, fieldDim);
+            AssemblyElementalBoundary<elementShape_Type>::instance().divDivBoundary (*M_localStiffBoundary, *M_stiffBoundaryCFE, *M_stiffBoundaryCBdFE, firstLame , ibFE, fieldDim);
+
+            // Assembly
+            for (UInt iFieldDim (0); iFieldDim < fieldDim; ++iFieldDim)
+            {
+                assembleMatrix ( matrix,
+                                 *M_localStiffBoundary,
+                                 *M_stiffBoundaryCFE,
+                                 *M_stiffBoundaryCFE,
+                                 M_uFESpace->dof(),
+                                 M_uFESpace->dof(),
+                                 iFieldDim, iFieldDim,
+                                 iFieldDim * nbTotalDof, iFieldDim * nbTotalDof );
+            }
+        }
+
+    }
+    else /*P2*/
     {
 
-        // Pointer to the i-th identifier in the list
-        pId = static_cast< const BCIdentifierNatural* >( bcH.findBCWithFlag(boundaryFlag)[ iterElement ] );
-	
-	// Number of the current boundary face
-	ibF = pId->id();
-	ibE = M_uFESpace->mesh()->boundaryFace( ibF ).firstAdjacentElementIdentity();
-	ibFE = M_uFESpace->mesh()->boundaryFace( ibF ).firstAdjacentElementPosition(); // local id of the face in its adjacent element
+        typedef RegionMesh<QuadraticTetra>::elementShape_Type elementShape_Type;
 
-	// Updating the laplace Beltrami current BdFE and FE
-	M_stiffBoundaryCBdFE->updateMeasNormalQuadPt( M_uFESpace->mesh()->boundaryFace( ibF ) );
-	//M_stiffBoundaryCFE->updateFirstDeriv( M_uFESpace->mesh()->element( ibE ) );
-	M_stiffBoundaryCFE->update( M_uFESpace->mesh()->element( ibE ),UPDATE_ONLY_CELL_NODES );
-
-        QuadratureRule faceQR1("custom quad 1",TETRA,3,0,0);
-        for (UInt iQuad(0); iQuad< nbQuadPt; ++iQuad) // Here we do not use UInt because of KNM, but we should
+        // Loop over the elements
+        for (UInt iterElement (0); iterElement < nbElements; ++iterElement)
         {
-            Real x(0.0),y(0.0),z(0.0);
-            M_stiffBoundaryCFE->coorBackMap( M_stiffBoundaryCBdFE->quadPt(iQuad,0),
-                                       M_stiffBoundaryCBdFE->quadPt(iQuad,1),
-                                       M_stiffBoundaryCBdFE->quadPt(iQuad,2),
-                                       x,y,z);
-            QuadraturePoint newPoint(x,y,z,M_uFESpace->bdQr().weight(iQuad));
-            faceQR1.addPoint(newPoint);
+
+            // Pointer to the i-th identifier in the list
+            //pId = static_cast< const BCIdentifierNatural* >( bcH.findBCWithFlag(boundaryFlag)[ iterElement ] );
+            pId = static_cast< const BCIdentifierNatural* > ( bcH[0][ iterElement ] );
+
+            // Number of the current boundary face
+            ibF = pId->id();
+            ibE = M_uFESpace->mesh()->boundaryFace ( ibF ).firstAdjacentElementIdentity();
+            ibFE = M_uFESpace->mesh()->boundaryFace ( ibF ).firstAdjacentElementPosition(); // local id of the face in its adjacent element
+
+            // Updating the laplace Beltrami current BdFE and FE
+            M_stiffBoundaryCBdFE->updateMeasNormalQuadPt ( M_uFESpace->mesh()->boundaryFace ( ibF ) );
+            //M_stiffBoundaryCFE->updateFirstDeriv( M_uFESpace->mesh()->element( ibE ) );
+            M_stiffBoundaryCFE->update ( M_uFESpace->mesh()->element ( ibE ), UPDATE_ONLY_CELL_NODES );
+
+            QuadratureRule faceQR1 ("custom quad 1", TETRA, 3, 0, 0);
+            for (UInt iQuad (0); iQuad < nbQuadPt; ++iQuad) // Here we do not use UInt because of KNM, but we should
+            {
+                Real x (0.0), y (0.0), z (0.0);
+                M_stiffBoundaryCFE->coorBackMap ( M_stiffBoundaryCBdFE->quadPt (iQuad, 0),
+                                                  M_stiffBoundaryCBdFE->quadPt (iQuad, 1),
+                                                  M_stiffBoundaryCBdFE->quadPt (iQuad, 2),
+                                                  x, y, z);
+                QuadraturePoint newPoint (x, y, z, M_uFESpace->bdQr().weight (iQuad) );
+                faceQR1.addPoint (newPoint);
+            }
+            M_stiffBoundaryCFE->setQuadRule (faceQR1);
+            M_stiffBoundaryCFE->update ( M_uFESpace->mesh()->element ( ibE ), UPDATE_DPHI | UPDATE_WDET );
+
+            // Clean the local matrix
+            M_localStiffBoundary->zero();
+
+            // local stiffness
+
+            AssemblyElementalBoundary<elementShape_Type>::instance().stiffStrainBoundary (*M_localStiffBoundary,
+                                                                                          *M_stiffBoundaryCFE,
+                                                                                          *M_stiffBoundaryCBdFE,
+                                                                                          secondLame , ibFE, fieldDim);
+            AssemblyElementalBoundary<elementShape_Type>::instance().divDivBoundary (*M_localStiffBoundary,
+                                                                                     *M_stiffBoundaryCFE,
+                                                                                     *M_stiffBoundaryCBdFE,
+                                                                                     firstLame , ibFE, fieldDim);
+
+            // Assembly
+            for (UInt iFieldDim (0); iFieldDim < fieldDim; ++iFieldDim)
+            {
+                assembleMatrix ( matrix,
+                                 *M_localStiffBoundary,
+                                 *M_stiffBoundaryCFE,
+                                 *M_stiffBoundaryCFE,
+                                 M_uFESpace->dof(),
+                                 M_uFESpace->dof(),
+                                 iFieldDim, iFieldDim,
+                                 iFieldDim * nbTotalDof, iFieldDim * nbTotalDof );
+            }
         }
-        M_stiffBoundaryCFE->setQuadRule(faceQR1);
-	M_stiffBoundaryCFE->update( M_uFESpace->mesh()->element( ibE ),UPDATE_DPHI | UPDATE_WDET );
 
-	// Clean the local matrix
-        M_localStiffBoundary->zero();
-	
-        // local stiffness
-
-	AssemblyElementalBoundary<elementShape_Type>::instance().stiffStrainBoundary(*M_localStiffBoundary,
-								    *M_stiffBoundaryCFE,
-								    *M_stiffBoundaryCBdFE, 
-								    secondLame ,ibFE,fieldDim);
-	AssemblyElementalBoundary<elementShape_Type>::instance().divDivBoundary(*M_localStiffBoundary,*M_stiffBoundaryCFE,*M_stiffBoundaryCBdFE, firstLame ,ibFE,fieldDim);
-
-        // Assembly
-        for (UInt iFieldDim(0); iFieldDim<fieldDim; ++iFieldDim)
-        {
-            assembleMatrix( matrix,
-                            *M_localStiffBoundary,
-                            *M_stiffBoundaryCFE,
-                            *M_stiffBoundaryCFE,
-                            M_uFESpace->dof(),
-                            M_uFESpace->dof(),
-                            iFieldDim, iFieldDim,
-                            iFieldDim*nbTotalDof, iFieldDim*nbTotalDof );
-        }
-    }
-
-    }else /*P2*/ {
-
-    typedef RegionMesh<QuadraticTetra>::elementShape_Type elementShape_Type;
-
-    // Loop over the elements
-    for (UInt iterElement(0); iterElement < nbElements; ++iterElement)
-    {
-
-        // Pointer to the i-th identifier in the list
-        //pId = static_cast< const BCIdentifierNatural* >( bcH.findBCWithFlag(boundaryFlag)[ iterElement ] );
-        pId = static_cast< const BCIdentifierNatural* >( bcH[0][ iterElement ] );
-	
-	// Number of the current boundary face
-	ibF = pId->id();
-	ibE = M_uFESpace->mesh()->boundaryFace( ibF ).firstAdjacentElementIdentity();
-	ibFE = M_uFESpace->mesh()->boundaryFace( ibF ).firstAdjacentElementPosition(); // local id of the face in its adjacent element
-
-	// Updating the laplace Beltrami current BdFE and FE
-	M_stiffBoundaryCBdFE->updateMeasNormalQuadPt( M_uFESpace->mesh()->boundaryFace( ibF ) );
-	//M_stiffBoundaryCFE->updateFirstDeriv( M_uFESpace->mesh()->element( ibE ) );
-	M_stiffBoundaryCFE->update( M_uFESpace->mesh()->element( ibE ),UPDATE_ONLY_CELL_NODES );
-
-        QuadratureRule faceQR1("custom quad 1",TETRA,3,0,0);
-        for (UInt iQuad(0); iQuad< nbQuadPt; ++iQuad) // Here we do not use UInt because of KNM, but we should
-        {
-            Real x(0.0),y(0.0),z(0.0);
-            M_stiffBoundaryCFE->coorBackMap( M_stiffBoundaryCBdFE->quadPt(iQuad,0),
-                                       M_stiffBoundaryCBdFE->quadPt(iQuad,1),
-                                       M_stiffBoundaryCBdFE->quadPt(iQuad,2),
-                                       x,y,z);
-            QuadraturePoint newPoint(x,y,z,M_uFESpace->bdQr().weight(iQuad));
-            faceQR1.addPoint(newPoint);
-        }
-        M_stiffBoundaryCFE->setQuadRule(faceQR1);
-	M_stiffBoundaryCFE->update( M_uFESpace->mesh()->element( ibE ),UPDATE_DPHI | UPDATE_WDET );
-
-	// Clean the local matrix
-        M_localStiffBoundary->zero();
-	
-        // local stiffness
-
-	AssemblyElementalBoundary<elementShape_Type>::instance().stiffStrainBoundary(*M_localStiffBoundary,
-								    *M_stiffBoundaryCFE,
-								    *M_stiffBoundaryCBdFE, 
-								    secondLame ,ibFE,fieldDim);
-	AssemblyElementalBoundary<elementShape_Type>::instance().divDivBoundary(*M_localStiffBoundary,
-										    *M_stiffBoundaryCFE,
-										    *M_stiffBoundaryCBdFE, 
-										    firstLame ,ibFE,fieldDim);
-
-        // Assembly
-        for (UInt iFieldDim(0); iFieldDim<fieldDim; ++iFieldDim)
-        {
-            assembleMatrix( matrix,
-                            *M_localStiffBoundary,
-                            *M_stiffBoundaryCFE,
-                            *M_stiffBoundaryCFE,
-                            M_uFESpace->dof(),
-                            M_uFESpace->dof(),
-                            iFieldDim, iFieldDim,
-                            iFieldDim*nbTotalDof, iFieldDim*nbTotalDof );
-        }
-    }
-    
     }
 }
 
 template< typename meshType, typename matrixType, typename vectorType>
 void
-OseenAssembler<meshType,matrixType,vectorType>::
-addGradPressure(matrixType& matrix, const UInt& offsetLeft, const UInt& offsetUp)
+OseenAssembler<meshType, matrixType, vectorType>::
+addGradPressure (matrixType& matrix, const UInt& offsetLeft, const UInt& offsetUp)
 {
     ASSERT (M_uFESpace != 0, "No velocity FE space for assembling the pressure gradient.");
     ASSERT (M_pFESpace != 0, "No pressure FE space for assembling the pressure gradient.");
@@ -990,7 +993,7 @@ addNewtonConvection ( matrixType& matrix, const vectorType& beta, const UInt& of
         // Clean the local matrix
         M_localConvection->zero();
 
-        localVector_Type betaLocal( M_uFESpace->fe().nbFEDof(), M_uFESpace->fieldDim() );
+        localVector_Type betaLocal ( M_uFESpace->fe().nbFEDof(), M_uFESpace->fieldDim() );
 
         // Create local vector
         for ( UInt iNode = 0 ; iNode < M_uFESpace->fe().nbFEDof() ; iNode++ )
@@ -1204,55 +1207,55 @@ addMass (matrixType& matrix, const Real& coefficient, const UInt& offsetLeft, co
 
 template< typename meshType, typename matrixType, typename vectorType>
 void
-OseenAssembler<meshType,matrixType,vectorType>::
-addWeightedMass(matrixType& matrix,  const Real& coefficient, const vectorType& beta)
+OseenAssembler<meshType, matrixType, vectorType>::
+addWeightedMass (matrixType& matrix,  const Real& coefficient, const vectorType& beta)
 {
 
-    ASSERT(M_uFESpace != 0, "No velocity FE space for assembling the mass.");
+    ASSERT (M_uFESpace != 0, "No velocity FE space for assembling the mass.");
 
     // Some constants
-    const UInt nbElements(M_uFESpace->mesh()->numElements());
-    const UInt fieldDim(M_uFESpace->fieldDim());
-    const UInt nbUTotalDof(M_uFESpace->dof().numTotalDof());
-    const UInt nbQuadPt(M_weightedMassCFE->nbQuadPt());
+    const UInt nbElements (M_uFESpace->mesh()->numElements() );
+    const UInt fieldDim (M_uFESpace->fieldDim() );
+    const UInt nbUTotalDof (M_uFESpace->dof().numTotalDof() );
+    const UInt nbQuadPt (M_weightedMassCFE->nbQuadPt() );
 
-    std::vector< std::vector< Real > > localBetaValue(nbQuadPt,std::vector<Real>(nDimensions,0.0));
+    std::vector< std::vector< Real > > localBetaValue (nbQuadPt, std::vector<Real> (nDimensions, 0.0) );
 
     // Loop over the elements
-    for (UInt iterElement(0); iterElement < nbElements; ++iterElement)
+    for (UInt iterElement (0); iterElement < nbElements; ++iterElement)
     {
         // Update the diffusion current FE
-        M_weightedMassCFE->update( M_uFESpace->mesh()->element(iterElement), UPDATE_PHI | UPDATE_WDET );
-	M_weightedMassBetaCFE->update( M_uFESpace->mesh()->element(iterElement), UPDATE_PHI );
-        
-	// Clean the local matrix
+        M_weightedMassCFE->update ( M_uFESpace->mesh()->element (iterElement), UPDATE_PHI | UPDATE_WDET );
+        M_weightedMassBetaCFE->update ( M_uFESpace->mesh()->element (iterElement), UPDATE_PHI );
+
+        // Clean the local matrix
         M_localMass->zero();
 
         // Interpolate
-        AssemblyElemental::interpolate(localBetaValue,*M_weightedMassBetaCFE,nDimensions,M_betaFESpace->dof(),iterElement,beta);
+        AssemblyElemental::interpolate (localBetaValue, *M_weightedMassBetaCFE, nDimensions, M_betaFESpace->dof(), iterElement, beta);
 
-	// local stiffness
-        AssemblyElemental::weightedMass(*M_localWeightedMass,*M_weightedMassCFE,coefficient,localBetaValue,fieldDim);
+        // local stiffness
+        AssemblyElemental::weightedMass (*M_localWeightedMass, *M_weightedMassCFE, coefficient, localBetaValue, fieldDim);
 
         // Assembly
-        for (UInt iFieldDim(0); iFieldDim<nDimensions; ++iFieldDim)
+        for (UInt iFieldDim (0); iFieldDim < nDimensions; ++iFieldDim)
         {
-            assembleMatrix( matrix,
-                            *M_localWeightedMass,
-                            *M_weightedMassCFE,
-                            *M_weightedMassCFE,
-                            M_uFESpace->dof(),
-                            M_uFESpace->dof(),
-                            iFieldDim, iFieldDim,
-                            iFieldDim*nbUTotalDof, iFieldDim*nbUTotalDof);
-                            }
+            assembleMatrix ( matrix,
+                             *M_localWeightedMass,
+                             *M_weightedMassCFE,
+                             *M_weightedMassCFE,
+                             M_uFESpace->dof(),
+                             M_uFESpace->dof(),
+                             iFieldDim, iFieldDim,
+                             iFieldDim * nbUTotalDof, iFieldDim * nbUTotalDof);
+        }
     }
 }
 
 template< typename meshType, typename matrixType, typename vectorType>
 void
-OseenAssembler<meshType,matrixType,vectorType>::
-addPressureMass(matrixType& matrix, const Real& coefficient, const UInt& offsetLeft, const UInt offsetUp)
+OseenAssembler<meshType, matrixType, vectorType>::
+addPressureMass (matrixType& matrix, const Real& coefficient, const UInt& offsetLeft, const UInt offsetUp)
 {
 
     ASSERT (M_pFESpace != 0, "No pressure FE space for assembling the mass.");

@@ -83,23 +83,23 @@ public:
     //@{
 
     //! Full constructor, with the expression and the specification of the position of the row to be extracted
-    ExpressionExtract2(const ExpressionType& ex, const UInt& i, const UInt& j)
+    ExpressionExtract2 (const ExpressionType& ex, const UInt& i, const UInt& j)
         : base_Type(),
-          M_ex(ex),
-          M_i(i),
-          M_j(j)
+          M_ex (ex),
+          M_i (i),
+          M_j (j)
     {}
 
     //! Copy constructor
-    ExpressionExtract2(const ExpressionExtract2<ExpressionType>& expr)
+    ExpressionExtract2 (const ExpressionExtract2<ExpressionType>& expr)
         : base_Type(),
-          M_ex(expr.M_ex),
-          M_i(expr.M_i),
-          M_j(expr.M_j)
+          M_ex (expr.M_ex),
+          M_i (expr.M_i),
+          M_j (expr.M_j)
     {}
 
     //! Destructor
-    ~ExpressionExtract2(){}
+    ~ExpressionExtract2() {}
 
     //@}
 
@@ -108,7 +108,11 @@ public:
     //@{
 
     //! Display method
-    static void display(std::ostream& out= std::cout){ out<<"Extraction from "; ExpressionType::display(out); }
+    static void display (std::ostream& out = std::cout)
+    {
+        out << "Extraction from ";
+        ExpressionType::display (out);
+    }
 
     //@}
 
@@ -117,13 +121,22 @@ public:
     //@{
 
     //! Getter for the row index
-    UInt indexI() const { return M_i; }
+    UInt indexI() const
+    {
+        return M_i;
+    }
 
     //! Getter for the column index
-    UInt indexJ() const { return M_j; }
+    UInt indexJ() const
+    {
+        return M_j;
+    }
 
     //! Getter for the expression from which we extract
-    const ExpressionType& exprEx() const { return M_ex; }
+    const ExpressionType& exprEx() const
+    {
+        return M_ex;
+    }
 
     //@}
 
@@ -166,9 +179,9 @@ private:
 
 template< typename ExpressionType >
 inline ExpressionExtract2<ExpressionType>
-extract(const ExpressionBase<ExpressionType>& ex, const UInt& i, const UInt& j)
+extract (const ExpressionBase<ExpressionType>& ex, const UInt& i, const UInt& j)
 {
-    return ExpressionExtract2<ExpressionType>(ex.cast(), i, j);
+    return ExpressionExtract2<ExpressionType> (ex.cast(), i, j);
 }
 
 

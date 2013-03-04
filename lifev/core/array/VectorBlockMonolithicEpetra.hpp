@@ -45,7 +45,8 @@
 
 #include <boost/shared_ptr.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! VectorBlockMonolithicEpetra - class of block vector
 /*!
@@ -103,7 +104,7 @@ public:
     //@{
 
     //! Constructor with the monolithic map
-    VectorBlockMonolithicEpetra( const map_type& map, const mapType_type& mapType = Unique);
+    VectorBlockMonolithicEpetra ( const map_type& map, const mapType_type& mapType = Unique);
 
     //! Construction with a vector of map
     /*!
@@ -111,19 +112,19 @@ public:
       vector. The monolithic map and vectors are also built by concanating the different maps
       in the vector.
      */
-    VectorBlockMonolithicEpetra( const mapVector_type& mapVector, const mapType_type& mapType = Unique);
+    VectorBlockMonolithicEpetra ( const mapVector_type& mapVector, const mapType_type& mapType = Unique);
 
     //! Copy constructor
-    VectorBlockMonolithicEpetra( const VectorBlockMonolithicEpetra& vector);
+    VectorBlockMonolithicEpetra ( const VectorBlockMonolithicEpetra& vector);
 
     //! Copy constructor with a specified map type (Repeated/Unique)
-    VectorBlockMonolithicEpetra( const VectorBlockMonolithicEpetra& vector, const mapType_type& mapType);
+    VectorBlockMonolithicEpetra ( const VectorBlockMonolithicEpetra& vector, const mapType_type& mapType);
 
     //! Copy constructor with specified map type and combine mode
-    VectorBlockMonolithicEpetra( const VectorBlockMonolithicEpetra& vector, const mapType_type& mapType, const combine_type& combineMode);
+    VectorBlockMonolithicEpetra ( const VectorBlockMonolithicEpetra& vector, const mapType_type& mapType, const combine_type& combineMode);
 
     //! Destructor
-    ~VectorBlockMonolithicEpetra(){}
+    ~VectorBlockMonolithicEpetra() {}
 
     //@}
 
@@ -134,7 +135,7 @@ public:
     /*! Set the size of the blocks of the vector
      *  @param blockSizes Sizes of the blocks
      */
-    void setBlockStructure( const std::vector<UInt>& blockSizes );
+    void setBlockStructure ( const std::vector<UInt>& blockSizes );
 
     //! Reset the block structure using the blocks of a vector of map
     /*
@@ -146,7 +147,7 @@ public:
       through this method, nor its map.
       @param The MapVector containing the maps
      */
-    void setBlockStructure( const mapVector_type& mapVector);
+    void setBlockStructure ( const mapVector_type& mapVector);
 
     //@}
 
@@ -159,9 +160,9 @@ public:
       @param index Index of the block
       @return size of the index-th block
      */
-    UInt blockSize(const UInt& index) const
+    UInt blockSize (const UInt& index) const
     {
-        ASSERT( index < M_blockSize.size(), "Invalid block index");
+        ASSERT ( index < M_blockSize.size(), "Invalid block index");
         return M_blockSize[index];
     }
 
@@ -170,14 +171,14 @@ public:
       @param index Index of the block
       @param blockView The blockView to be filled
      */
-    void blockView( const UInt& index, block_type& blockView);
+    void blockView ( const UInt& index, block_type& blockView);
 
     //! Getter for the block index
     /*!
       @param index Index of the block
       @return The index-th block
      */
-    block_ptrType block( const UInt& index);
+    block_ptrType block ( const UInt& index);
 
     //@}
 

@@ -61,16 +61,16 @@ template <typename LeftOperand, typename RightOperand>
 class OperationSmallOuterProduct
 {
 private:
-	//! @name Constructors and destructors
+    //! @name Constructors and destructors
     //@{
 
-	//! No default constructor
-	OperationSmallOuterProduct();
+    //! No default constructor
+    OperationSmallOuterProduct();
 
-	//! No destructor
-	~OperationSmallOuterProduct();
+    //! No destructor
+    ~OperationSmallOuterProduct();
 
-	//@}
+    //@}
 
 };
 
@@ -84,21 +84,21 @@ public:
     //! @name Public Types
     //@{
 
-	typedef MatrixSmall<Dim1, Dim1> result_Type;
+    typedef MatrixSmall<Dim1, Dim1> result_Type;
 
-	//@}
+    //@}
 
 private:
-	//! @name Constructors and destructors
+    //! @name Constructors and destructors
     //@{
 
-	//! No default constructor
-	OperationSmallOuterProduct();
+    //! No default constructor
+    OperationSmallOuterProduct();
 
-	//! No destructor
-	~OperationSmallOuterProduct();
+    //! No destructor
+    ~OperationSmallOuterProduct();
 
-	//@}
+    //@}
 };
 
 //! \endcond

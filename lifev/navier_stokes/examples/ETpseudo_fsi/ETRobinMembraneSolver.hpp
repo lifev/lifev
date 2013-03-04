@@ -70,11 +70,12 @@ enum TimeScheme { BDF_ORDER_ONE = 1, BDF_ORDER_TWO, BDF_ORDER_THREE };
  *  @author Claudia Colciago
  *  @see
  */
-namespace LifeV {
+namespace LifeV
+{
 
 class ETRobinMembraneSolver
-//     :
-//     public LifeV::Application
+    //     :
+    //     public LifeV::Application
 {
 public:
 
@@ -82,7 +83,7 @@ public:
     /** @name Typedefs
      */
     //@{
-  
+
     typedef RegionMesh<LinearTetra>                                mesh_type;
     typedef MatrixBlockMonolithicEpetra<Real>                      matrix_block_type;
     typedef VectorBlockMonolithicEpetra                            vector_block_type;
@@ -91,39 +92,39 @@ public:
     typedef boost::shared_ptr<matrix_type>                         matrixPtr_type;
     typedef boost::shared_ptr<mesh_type>                           meshPtr_type;
     typedef boost::shared_ptr<vector_type>                         vectorPtr_type;
- 
-    typedef boost::shared_ptr< TimeAdvance< vector_type > >        timeAdvancePtr_type;  
-    typedef OseenAssembler< mesh_type , matrix_type, vector_type > assembler_type; 
+
+    typedef boost::shared_ptr< TimeAdvance< vector_type > >        timeAdvancePtr_type;
+    typedef OseenAssembler< mesh_type , matrix_type, vector_type > assembler_type;
 
     //@}
 
     /** @name Constructors, destructor
      */
     //@{
-    ETRobinMembraneSolver( int argc,
-	    char** argv );
+    ETRobinMembraneSolver ( int argc,
+                            char** argv );
 
     ~ETRobinMembraneSolver()
-   
-        {}
+
+    {}
 
     //@}
 
     /** @name  Methods
      */
     //@{
-  
+
     //! initialize test
     void initialize();
 
     //! create interface map
-    void createInterfaceMap( vectorPtr_type checkVector, meshPtr_type& mesh ,const DOF& dof);
-    //void createInterfaceMap( std::map<ID, ID> const& locDofMap , const DOF& dof ); 
+    void createInterfaceMap ( vectorPtr_type checkVector, meshPtr_type& mesh , const DOF& dof);
+    //void createInterfaceMap( std::map<ID, ID> const& locDofMap , const DOF& dof );
 
     //! run test
     void run();
-  
- private:
+
+private:
 
     struct Private;
     boost::shared_ptr<Private>                                    M_d;

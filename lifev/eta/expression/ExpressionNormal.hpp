@@ -70,7 +70,7 @@ public:
     ExpressionNormal();
 
     //! Copy constructor
-    ExpressionNormal( const ExpressionNormal& );
+    ExpressionNormal ( const ExpressionNormal& );
 
     //! Destructor
     ~ExpressionNormal();
@@ -82,7 +82,7 @@ public:
     //@{
 
     //! Display method
-    static void display(std::ostream& out=std::cout);
+    static void display (std::ostream& out = std::cout);
 
     //@}
 };

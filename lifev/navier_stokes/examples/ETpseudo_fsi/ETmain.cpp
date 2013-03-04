@@ -60,40 +60,40 @@
 
 using namespace LifeV;
 
-std::set<UInt> parseList( const std::string& list )
+std::set<UInt> parseList ( const std::string& list )
 {
-     std::string stringList = list;
-     std::set<UInt> setList;
-     if ( list == "" )
-     {
-         return setList;
-     }
-     size_t commaPos = 0;
-     while ( commaPos != std::string::npos )
-     {
-         commaPos = stringList.find( "," );
-         setList.insert( atoi( stringList.substr( 0, commaPos ).c_str() ) );
-         stringList = stringList.substr( commaPos+1 );
-     }
-     setList.insert( atoi( stringList.c_str() ) );
-     return setList;
+    std::string stringList = list;
+    std::set<UInt> setList;
+    if ( list == "" )
+    {
+        return setList;
+    }
+    size_t commaPos = 0;
+    while ( commaPos != std::string::npos )
+    {
+        commaPos = stringList.find ( "," );
+        setList.insert ( atoi ( stringList.substr ( 0, commaPos ).c_str() ) );
+        stringList = stringList.substr ( commaPos + 1 );
+    }
+    setList.insert ( atoi ( stringList.c_str() ) );
+    return setList;
 }
 
 int
-main( int argc, char** argv )
+main ( int argc, char** argv )
 {
- #ifdef HAVE_MPI
-     MPI_Init(&argc, &argv);
- #endif
+#ifdef HAVE_MPI
+    MPI_Init (&argc, &argv);
+#endif
 
- //**************** cylinder
- //    MPI_Init(&argc,&argv);
+    //**************** cylinder
+    //    MPI_Init(&argc,&argv);
 
-     ETRobinMembraneSolver cyl( argc, argv );
-     cyl.run();
+    ETRobinMembraneSolver cyl ( argc, argv );
+    cyl.run();
 
- #ifdef HAVE_MPI
-     MPI_Finalize();
- #endif
-       return( EXIT_SUCCESS );
+#ifdef HAVE_MPI
+    MPI_Finalize();
+#endif
+    return ( EXIT_SUCCESS );
 }

@@ -66,10 +66,10 @@ public:
     //@{
 
     //! Empty and only constructor
-    QRAdapterBase(){}
+    QRAdapterBase() {}
 
     //! Destructor
-    virtual ~QRAdapterBase(){}
+    virtual ~QRAdapterBase() {}
 
     //@}
 
@@ -80,7 +80,7 @@ public:
     //! Method for accessing the actual implementation contained.
     const implementation_Type& implementation() const
     {
-        return static_cast<const implementation_Type&>(*this);
+        return static_cast<const implementation_Type&> (*this);
     }
 
     //@}
@@ -91,10 +91,10 @@ private:
     //@{
 
     //! No copy (avoid slicing)
-    QRAdapterBase( const QRAdapterBase<ImplementationType>&);
+    QRAdapterBase ( const QRAdapterBase<ImplementationType>&);
 
     //! No assignement (avoid slicing)
-    void operator=(const QRAdapterBase<ImplementationType>&);
+    void operator= (const QRAdapterBase<ImplementationType>&);
 
     //@}
 };
