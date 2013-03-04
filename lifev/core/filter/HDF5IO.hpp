@@ -72,7 +72,8 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-namespace LifeV {
+namespace LifeV
+{
 
 /*!
   @brief Convenience wrapper for the C interface of the HDF5 library
@@ -86,125 +87,127 @@ namespace LifeV {
   high performance parallel operations.
 
   Usage:
-  	  - open (or create) a file with HDF5IO::openFile
-  	  - create or open existing data table with HDF5IO::createTable or
-  	  	HDF5IO::openTable (you can have multiple open tables at one time)
-  	  - read or write blocks of data with HDF5IO::read or HDF5IO::write
-  	  - close the tables after you are finished, with HDF5::closeTable
-  	  - close the file: HDF5::closeFile
+      - open (or create) a file with HDF5IO::openFile
+      - create or open existing data table with HDF5IO::createTable or
+        HDF5IO::openTable (you can have multiple open tables at one time)
+      - read or write blocks of data with HDF5IO::read or HDF5IO::write
+      - close the tables after you are finished, with HDF5::closeTable
+      - close the file: HDF5::closeFile
 */
-class HDF5IO {
+class HDF5IO
+{
 public:
-	//! @name Public Types
-	//@{
-	typedef boost::shared_ptr<Epetra_Comm> commPtr_Type;
-	//@}
+    //! @name Public Types
+    //@{
+    typedef boost::shared_ptr<Epetra_Comm> commPtr_Type;
+    //@}
 
-	//! @name Constructors and Destructor
-	//@{
-	//! Default empty constructor
-	HDF5IO() {}
+    //! @name Constructors and Destructor
+    //@{
+    //! Default empty constructor
+    HDF5IO() {}
 
-	//! Constructor
-	/*!
-	 * Constructor
-	 * \param fileName the name of the HDF5 file to be used
-	 * \param comm pointer to Epetra_Comm
-	 * \param existing boolean flag indicating whether the file exists already
-	 * 		  or not. If it exists, data is appended
-	 */
-	HDF5IO(const std::string& fileName, const commPtr_Type& comm,
-		   const bool& existing);
+    //! Constructor
+    /*!
+     * Constructor
+     * \param fileName the name of the HDF5 file to be used
+     * \param comm pointer to Epetra_Comm
+     * \param existing boolean flag indicating whether the file exists already
+     *        or not. If it exists, data is appended
+     */
+    HDF5IO (const std::string& fileName, const commPtr_Type& comm,
+            const bool& existing);
 
-	//! Empty destructor
-	virtual ~HDF5IO() {}
-	//@}
+    //! Empty destructor
+    virtual ~HDF5IO() {}
+    //@}
 
-	//! @name Public Methods
-	//@{
-	//! Open
-	/*!
-	 * Create a file or open an existing file
-	 * \param fileName the name of the HDF5 file to be used
-	 * \param comm pointer to Epetra_Comm
-	 * \param existing boolean flag indicating whether the file exists already
-	 * 		  or not. If it exists, data is appended
-	 */
-	void openFile(const std::string& fileName, const commPtr_Type& comm,
-			  	  const bool& existing);
-	//! Create a new table
-	/*!
-	 * Create a new table in the open file
-	 * \param tableName a string containing the table name
-	 * \param fileDataType data type that is to be used in the HDF5 container
-	 * 		  should be a standard HDF5 type, not a machine native type;
-	 * 		  consult HDF5 documentation for more information
-	 * \param tableDimensions array of hsize_t of size 2 which holds the
-	 * 		  dimensions of the table
-	 */
-	void createTable(const std::string& tableName, hid_t& fileDataType,
-					 hsize_t tableDimensions[]);
-	//! Open a new table
-	/*!
-	 * Open a new table in the open file
-	 * \param tableName a string containing the table name
-	 * \param tableDimensions array of hsize_t of size 2 which will hold the
-	 * 		  dimensions of the table (output parameter)
-	 */
-	void openTable(const std::string& tableName, hsize_t tableDimensions[]);
-	//! Write
-	/*!
-	 * \param tableName a string containing the table name
-	 * \param memDataType the type (described as an HDF5 machine native type)
-	 * 		  of the data in the buffer that is to be written
-	 * \param currentCount an array of hsize_t of size two describing the shape
-	 *        of the block to be written (see HDF5 documentation)
-	 * \param currentOffset an array of hsize_t of size two describing the
-	 *        stride of the block to be written (see HDF5 documentation)
-	 * \param buffer pointer to a memory region containing the data to be
-	 * 		  written
-	 */
-	void write(const std::string& tableName,
-			   hid_t& memDataType, hsize_t currentCount[],
-			   hsize_t currentOffset[], void* buffer);
-	//! Write
-	/*!
-	 * \param tableName a string containing the table name
-	 * \param memDataType the type (described as an HDF5 machine native type)
-	 * 		  of the data in the destination buffer
-	 * \param currentCount an array of hsize_t of size two describing the shape
-	 *        of the block to be read (see HDF5 documentation)
-	 * \param currentOffset an array of hsize_t of size two describing the
-	 *        stride of the block to be read (see HDF5 documentation)
-	 * \param buffer pointer to a memory region that represents the destination
-	 * 		  of the read operation
-	 */
-	void read(const std::string& tableName,
-			  hid_t& memDataType, hsize_t currentCount[],
-			  hsize_t currentOffset[], void* buffer);
-	//! Write
-	/*!
-	 * \param tableName a string containing the table name
-	 */
-	void closeTable(const std::string& tableName);
-	//! Close an open file
-	/*!
-	 * Call this when finished operating with a file
-	 */
-	void closeFile();
-	//@}
+    //! @name Public Methods
+    //@{
+    //! Open
+    /*!
+     * Create a file or open an existing file
+     * \param fileName the name of the HDF5 file to be used
+     * \param comm pointer to Epetra_Comm
+     * \param existing boolean flag indicating whether the file exists already
+     *        or not. If it exists, data is appended
+     */
+    void openFile (const std::string& fileName, const commPtr_Type& comm,
+                   const bool& existing);
+    //! Create a new table
+    /*!
+     * Create a new table in the open file
+     * \param tableName a string containing the table name
+     * \param fileDataType data type that is to be used in the HDF5 container
+     *        should be a standard HDF5 type, not a machine native type;
+     *        consult HDF5 documentation for more information
+     * \param tableDimensions array of hsize_t of size 2 which holds the
+     *        dimensions of the table
+     */
+    void createTable (const std::string& tableName, hid_t& fileDataType,
+                      hsize_t tableDimensions[]);
+    //! Open a new table
+    /*!
+     * Open a new table in the open file
+     * \param tableName a string containing the table name
+     * \param tableDimensions array of hsize_t of size 2 which will hold the
+     *        dimensions of the table (output parameter)
+     */
+    void openTable (const std::string& tableName, hsize_t tableDimensions[]);
+    //! Write
+    /*!
+     * \param tableName a string containing the table name
+     * \param memDataType the type (described as an HDF5 machine native type)
+     *        of the data in the buffer that is to be written
+     * \param currentCount an array of hsize_t of size two describing the shape
+     *        of the block to be written (see HDF5 documentation)
+     * \param currentOffset an array of hsize_t of size two describing the
+     *        stride of the block to be written (see HDF5 documentation)
+     * \param buffer pointer to a memory region containing the data to be
+     *        written
+     */
+    void write (const std::string& tableName,
+                hid_t& memDataType, hsize_t currentCount[],
+                hsize_t currentOffset[], void* buffer);
+    //! Write
+    /*!
+     * \param tableName a string containing the table name
+     * \param memDataType the type (described as an HDF5 machine native type)
+     *        of the data in the destination buffer
+     * \param currentCount an array of hsize_t of size two describing the shape
+     *        of the block to be read (see HDF5 documentation)
+     * \param currentOffset an array of hsize_t of size two describing the
+     *        stride of the block to be read (see HDF5 documentation)
+     * \param buffer pointer to a memory region that represents the destination
+     *        of the read operation
+     */
+    void read (const std::string& tableName,
+               hid_t& memDataType, hsize_t currentCount[],
+               hsize_t currentOffset[], void* buffer);
+    //! Write
+    /*!
+     * \param tableName a string containing the table name
+     */
+    void closeTable (const std::string& tableName);
+    //! Close an open file
+    /*!
+     * Call this when finished operating with a file
+     */
+    void closeFile();
+    //@}
 
 private:
-	// typedef for internal use
-	typedef struct {
-		hid_t filespace;
-		hid_t dataset;
-		hid_t plist;
-	} tableHandle;
+    // typedef for internal use
+    typedef struct
+    {
+        hid_t filespace;
+        hid_t dataset;
+        hid_t plist;
+    } tableHandle;
 
     // Copy constructor and assignment operator are disabled
-    HDF5IO(const HDF5IO&);
-    HDF5IO& operator=(const HDF5IO&);
+    HDF5IO (const HDF5IO&);
+    HDF5IO& operator= (const HDF5IO&);
 
     //! Private Data Members
     //@{
