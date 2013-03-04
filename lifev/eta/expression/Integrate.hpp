@@ -61,7 +61,8 @@
 
 #include <boost/shared_ptr.hpp>
 
-namespace LifeV{
+namespace LifeV
+{
 
 /*!
   \namespace ExpressionAssembly
@@ -69,7 +70,8 @@ namespace LifeV{
   Namespace for the assembly via expressions
 
  */
-namespace ExpressionAssembly{
+namespace ExpressionAssembly
+{
 
 //! Integrate function for matricial expressions
 /*!

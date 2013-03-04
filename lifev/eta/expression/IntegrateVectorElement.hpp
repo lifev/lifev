@@ -106,16 +106,16 @@ public:
 
     //! Operator wrapping the addTo method
     template <typename VectorType>
-    inline void operator>>(VectorType& vector)
+    inline void operator>> (VectorType& vector)
     {
-        addTo(vector);
+        addTo (vector);
     }
 
     //! Operator wrapping the addTo method (for shared_ptr)
     template <typename VectorType>
-    inline void operator>>(boost::shared_ptr<VectorType> vector)
+    inline void operator>> (boost::shared_ptr<VectorType> vector)
     {
-        addTo(*vector);
+        addTo (*vector);
     }
 
 
@@ -220,7 +220,7 @@ IntegrateVectorElement( const IntegrateVectorElement < MeshType, TestSpaceType, 
 		M_testCFE_adapted(new ETCurrentFE<3,TestSpaceType::S_fieldDim>(M_testSpace->refFE(), M_testSpace->geoMap(),integrator.M_qrAdapter.standardQR())),
 
 
-		M_elementalVector(integrator.M_elementalVector)
+        M_elementalVector (integrator.M_elementalVector)
 {
     M_evaluation.setQuadrature(integrator.M_qrAdapter.standardQR());
     M_evaluation.setGlobalCFE(M_globalCFE_std);
@@ -248,10 +248,10 @@ IntegrateVectorElement < MeshType, TestSpaceType, ExpressionType, QRAdapterType>
 check(std::ostream& out)
 {
     out << " Checking the integration : " << std::endl;
-    M_evaluation.display(out);
+    M_evaluation.display (out);
     out << std::endl;
     out << " Elemental vector : " << std::endl;
-    M_elementalVector.showMe(out);
+    M_elementalVector.showMe (out);
     out << std::endl;
 }
 
@@ -369,7 +369,7 @@ addTo(VectorType& vec)
 
         }
 
-        M_elementalVector.pushToGlobal(vec);
+        M_elementalVector.pushToGlobal (vec);
     }
 }
 

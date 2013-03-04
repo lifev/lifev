@@ -53,17 +53,17 @@ namespace LifeV
 // ===================================================
 
 
-void RemoveMultiple( const std::list<ID> & listToTreat, std::list< std::pair<ID, ID> > & finalList )
+void RemoveMultiple ( const std::list<ID>& listToTreat, std::list< std::pair<ID, ID> >& finalList )
 {
     ID counter = 0;
-    std::list<ID> temporaryList( listToTreat );
+    std::list<ID> temporaryList ( listToTreat );
 
     //! Sort the list
     temporaryList.sort();
 
     //! initialize the new list
-    std::pair <ID, ID> p0( temporaryList.front() , counter );
-    finalList.push_back( p0 );
+    std::pair <ID, ID> p0 ( temporaryList.front() , counter );
+    finalList.push_back ( p0 );
 
     //! We remove the multiple occurences :
     for ( std::list<ID>::iterator it = temporaryList.begin() ; it != temporaryList.end() ; ++ it )
@@ -72,8 +72,8 @@ void RemoveMultiple( const std::list<ID> & listToTreat, std::list< std::pair<ID,
         {
             counter ++ ;
             //! Add to the list the new value
-            std::pair <ID, ID> p( ( *it ) , counter );
-            finalList.push_back( p );
+            std::pair <ID, ID> p ( ( *it ) , counter );
+            finalList.push_back ( p );
         }
     }
 }
@@ -82,8 +82,8 @@ void RemoveMultiple( const std::list<ID> & listToTreat, std::list< std::pair<ID,
 // Constructors & Destructor
 // ===================================================
 
-DOFInterface3Dto2D::DOFInterface3Dto2D( const DOFLocalPattern& refFE, const DOF& dof1 ) :
-        M_interfaceFlag( 0 ), M_refFE1( &refFE ), M_dof1( &dof1 )
+DOFInterface3Dto2D::DOFInterface3Dto2D ( const DOFLocalPattern& refFE, const DOF& dof1 ) :
+    M_interfaceFlag ( 0 ), M_refFE1 ( &refFE ), M_dof1 ( &dof1 )
 {
     M_finalized = false;
 }
@@ -93,7 +93,7 @@ DOFInterface3Dto2D::DOFInterface3Dto2D( const DOFLocalPattern& refFE, const DOF&
 // ===================================================
 
 void
-DOFInterface3Dto2D::setup( const DOFLocalPattern& refFE1, const DOF& dof1 )
+DOFInterface3Dto2D::setup ( const DOFLocalPattern& refFE1, const DOF& dof1 )
 {
     M_refFE1    = &refFE1;
     M_dof1      = &dof1;
@@ -107,14 +107,14 @@ void DOFInterface3Dto2D::clearLists()
     M_vertexList.clear();
 }
 
-std::ostream& DOFInterface3Dto2D::showMe( bool verbose, std::ostream& out ) const
+std::ostream& DOFInterface3Dto2D::showMe ( bool verbose, std::ostream& out ) const
 {
     out << "------------------------------" << std::endl;
     out << "myDofInterface reference: " << M_interfaceFlag << std::endl;
     out << "Number of face connections (M_faceList): " << M_faceList.size() << std::endl;
     if ( verbose )
     {
-        unsigned int count( 0 ), lines( 10 );
+        unsigned int count ( 0 ), lines ( 10 );
         out << "\tList of connections between Faces: (global, local)";
         for ( std::vector< std::pair<ID, ID> >::const_iterator i = M_faceList.begin(); i != M_faceList.end(); ++i )
         {
@@ -129,7 +129,7 @@ std::ostream& DOFInterface3Dto2D::showMe( bool verbose, std::ostream& out ) cons
     out << "Number of connections between Vertices (M_vertexList): " << M_vertexList.size() << std::endl;
     if ( verbose )
     {
-        unsigned int count( 0 ), lines( 10 );
+        unsigned int count ( 0 ), lines ( 10 );
         out << "\tList of connections between Vertices: (global, local)";
         for ( std::list< std::pair<ID, ID> >::const_iterator it = M_vertexList.begin(); it != M_vertexList.end(); ++it )
         {
@@ -142,7 +142,7 @@ std::ostream& DOFInterface3Dto2D::showMe( bool verbose, std::ostream& out ) cons
         out << std::endl;
     }
     //! print M_locDofMap
-    showMe( verbose, out );
+    showMe ( verbose, out );
 
     out << "------------------------------" << std::endl;
     return out;
@@ -155,13 +155,13 @@ std::ostream& DOFInterface3Dto2D::showMe( bool verbose, std::ostream& out ) cons
 
 ID DOFInterface3Dto2D::operator[] ( const UInt& i ) const
 {
-    ASSERT_PRE( M_finalized, "The face List should be finalised before being accessed" );
-    ASSERT_BD( i < M_faceList.size() );
+    ASSERT_PRE ( M_finalized, "The face List should be finalised before being accessed" );
+    ASSERT_BD ( i < M_faceList.size() );
     return M_faceList[ i ].first;  // M_faceList must be a vector!
 }
 
 
-DOFInterface3Dto2D & DOFInterface3Dto2D::operator=( const DOFInterface3Dto2D& dofi )
+DOFInterface3Dto2D& DOFInterface3Dto2D::operator= ( const DOFInterface3Dto2D& dofi )
 {
     M_interfaceFlag = dofi.M_interfaceFlag;
     M_refFE1 = dofi.M_refFE1;
@@ -180,15 +180,17 @@ DOFInterface3Dto2D & DOFInterface3Dto2D::operator=( const DOFInterface3Dto2D& do
 // Private Methods
 // ===================================================
 
-ID DOFInterface3Dto2D::vertex3Dto2D( const ID& idpoint3D ) const
+ID DOFInterface3Dto2D::vertex3Dto2D ( const ID& idpoint3D ) const
 {
-    ASSERT_PRE( M_finalized, "The list of vertices must be finalized before accessing to the interface vertices." );
+    ASSERT_PRE ( M_finalized, "The list of vertices must be finalized before accessing to the interface vertices." );
     for ( std::list< std::pair<ID, ID> >::const_iterator it = M_vertexList.begin(); it != M_vertexList.end(); ++it )
     {
         if ( it->first == idpoint3D )
+        {
             return it->second;
+        }
     }
-    ERROR_MSG( "There is no such 3D index of vertex in the M_vertexList." );
+    ERROR_MSG ( "There is no such 3D index of vertex in the M_vertexList." );
 
     return ID();
 }

@@ -113,16 +113,16 @@ public:
 
     //! Operator wrapping the addTo method
     template <typename MatrixType>
-    inline void operator>>(MatrixType& mat)
+    inline void operator>> (MatrixType& mat)
     {
-        addTo(mat);
+        addTo (mat);
     }
 
     //! Operator wrapping the addTo method (for shared_ptr)
     template <typename MatrixType>
-    inline void operator>>(boost::shared_ptr<MatrixType> mat)
+    inline void operator>> (boost::shared_ptr<MatrixType> mat)
     {
-        addTo(mat);
+        addTo (mat);
     }
 
     //@}
@@ -158,8 +158,8 @@ public:
     template <typename MatrixType>
     inline void addTo(boost::shared_ptr<MatrixType> mat)
     {
-        ASSERT(mat!=0," Cannot assemble with an empty matrix");
-        addTo(*mat);
+        ASSERT (mat != 0, " Cannot assemble with an empty matrix");
+        addTo (*mat);
     }
 
     //@}
@@ -289,10 +289,10 @@ IntegrateMatrixElement<MeshType,TestSpaceType,SolutionSpaceType,ExpressionType,Q
 check(std::ostream& out)
 {
     out << " Checking the integration : " << std::endl;
-    M_evaluation.display(out);
+    M_evaluation.display (out);
     out << std::endl;
     out << " Elemental matrix : " << std::endl;
-    M_elementalMatrix.showMe(out);
+    M_elementalMatrix.showMe (out);
     out << std::endl;
 }
 
@@ -444,7 +444,7 @@ addTo(MatrixType& mat)
 
         }
 
-        M_elementalMatrix.pushToGlobal(mat);
+        M_elementalMatrix.pushToGlobal (mat);
     }
 }
 

@@ -105,7 +105,7 @@ class FSI3DBoundaryAreaFunction;
  *
  */
 class MultiscaleModelFSI3D: public virtual multiscaleModel_Type,
-                            public virtual MultiscaleInterface
+    public virtual MultiscaleInterface
 {
 public:
 
@@ -196,7 +196,7 @@ public:
     /*!
      * @param fileName Name of data file.
      */
-    void setupData( const std::string& fileName );
+    void setupData ( const std::string& fileName );
 
     //! Setup the model.
     void setupModel();
@@ -237,14 +237,14 @@ public:
      * @param boundaryID ID of the boundary interface
      * @param function boundary condition function
      */
-    void imposeBoundaryFlowRate( const multiscaleID_Type& boundaryID, const function_Type& function );
+    void imposeBoundaryFlowRate ( const multiscaleID_Type& boundaryID, const function_Type& function );
 
     //! Impose the integral of the mean normal stress on a specific boundary interface of the model
     /*!
      * @param boundaryID ID of the boundary interface
      * @param function boundary condition function
      */
-    void imposeBoundaryMeanNormalStress( const multiscaleID_Type& boundaryID, const function_Type& function );
+    void imposeBoundaryMeanNormalStress ( const multiscaleID_Type& boundaryID, const function_Type& function );
 
     //! Impose the integral of the mean total normal stress on a specific boundary interface of the model
     /*!
@@ -253,9 +253,9 @@ public:
      * @param boundaryID ID of the boundary interface
      * @param function boundary condition function
      */
-    void imposeBoundaryMeanTotalNormalStress( const multiscaleID_Type& /*boundaryID*/, const function_Type& /*function*/ )
+    void imposeBoundaryMeanTotalNormalStress ( const multiscaleID_Type& /*boundaryID*/, const function_Type& /*function*/ )
     {
-        multiscaleErrorCheck( ModelInterface, "Invalid interface [MeanTotalNormalStress] for model type [" + enum2String( M_type, multiscaleModelsMap ) +"]", M_comm->MyPID() == 0 );
+        multiscaleErrorCheck ( ModelInterface, "Invalid interface [MeanTotalNormalStress] for model type [" + enum2String ( M_type, multiscaleModelsMap ) + "]", M_comm->MyPID() == 0 );
     }
 
     //! Impose the area on a specific boundary interface of the model
@@ -265,35 +265,41 @@ public:
      * @param boundaryID ID of the boundary interface
      * @param function boundary condition function
      */
-    void imposeBoundaryArea( const multiscaleID_Type& boundaryID, const function_Type& function );
+    void imposeBoundaryArea ( const multiscaleID_Type& boundaryID, const function_Type& function );
 
     //! Get the flow rate on a specific boundary interface of the model
     /*!
      * @param boundaryID ID of the boundary interface
      * @return flow rate value
      */
-    Real boundaryFlowRate( const multiscaleID_Type& boundaryID ) const { return M_FSIoperator->fluid().flux( boundaryFlag( boundaryID ), *M_stateVariable ); }
+    Real boundaryFlowRate ( const multiscaleID_Type& boundaryID ) const
+    {
+        return M_FSIoperator->fluid().flux ( boundaryFlag ( boundaryID ), *M_stateVariable );
+    }
 
     //! Get the integral of the mean normal stress on a specific boundary interface of the model
     /*!
      * @param boundaryID ID of the boundary interface
      * @return mean normal stress value
      */
-    Real boundaryMeanNormalStress( const multiscaleID_Type& boundaryID ) const;
+    Real boundaryMeanNormalStress ( const multiscaleID_Type& boundaryID ) const;
 
     //! Get the integral of the mean total normal stress on a specific boundary interface of the model
     /*!
      * @param boundaryID ID of the boundary interface
      * @return mean total normal stress value
      */
-    Real boundaryMeanTotalNormalStress( const multiscaleID_Type& boundaryID ) const;
+    Real boundaryMeanTotalNormalStress ( const multiscaleID_Type& boundaryID ) const;
 
     //! Get the area on a specific boundary interface of the model
     /*!
      * @param boundaryID ID of the boundary interface
      * @return area value
      */
-    Real boundaryArea( const multiscaleID_Type& boundaryID ) const { return M_FSIoperator->fluid().area( boundaryFlag( boundaryID ) ); }
+    Real boundaryArea ( const multiscaleID_Type& boundaryID ) const
+    {
+        return M_FSIoperator->fluid().area ( boundaryFlag ( boundaryID ) );
+    }
 
     //! Get the variation of the flow rate (on a specific boundary interface) using the linear model
     /*!
@@ -301,7 +307,7 @@ public:
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      * @return variation of the flow rate
      */
-    Real boundaryDeltaFlowRate( const multiscaleID_Type& boundaryID, bool& solveLinearSystem );
+    Real boundaryDeltaFlowRate ( const multiscaleID_Type& boundaryID, bool& solveLinearSystem );
 
     //! Get the variation of the integral of the mean normal stress (on a specific boundary interface) using the linear model
     /*!
@@ -309,7 +315,7 @@ public:
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      * @return variation of the mean normal stress
      */
-    Real boundaryDeltaMeanNormalStress( const multiscaleID_Type& boundaryID, bool& solveLinearSystem );
+    Real boundaryDeltaMeanNormalStress ( const multiscaleID_Type& boundaryID, bool& solveLinearSystem );
 
     //! Get the variation of the integral of the mean total normal stress (on a specific boundary interface) using the linear model
     /*!
@@ -318,7 +324,7 @@ public:
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      * @return variation of the mean total normal stress
      */
-    Real boundaryDeltaMeanTotalNormalStress( const multiscaleID_Type& boundaryID, bool& solveLinearSystem );
+    Real boundaryDeltaMeanTotalNormalStress ( const multiscaleID_Type& boundaryID, bool& solveLinearSystem );
 
     //! Get the variation of the integral of the area (on a specific boundary interface) using the linear model
     /*!
@@ -328,7 +334,10 @@ public:
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      * @return variation of the area
      */
-    Real boundaryDeltaArea( const multiscaleID_Type& /*boundaryID*/, bool& /*solveLinearSystem*/ ) { return NaN; }
+    Real boundaryDeltaArea ( const multiscaleID_Type& /*boundaryID*/, bool& /*solveLinearSystem*/ )
+    {
+        return NaN;
+    }
 
     //@}
 
@@ -340,45 +349,60 @@ public:
     /*!
      * @return FSI3D fluid bcHandler
      */
-    bc_Type& bcHandlerFluid() { return *M_fluidBC->handler(); }
+    bc_Type& bcHandlerFluid()
+    {
+        return *M_fluidBC->handler();
+    }
 
     //! Get the FSI3D solid bcHandler
     /*!
      * @return FSI3D solid bcHandler
      */
-    bc_Type& bcHandlerSolid() { return *M_solidBC->handler(); }
+    bc_Type& bcHandlerSolid()
+    {
+        return *M_solidBC->handler();
+    }
 
     //! Get the BCInterface container of the boundary conditions of the model
     /*!
      * @return BCInterface container
      */
-    bcInterface_Type& bcInterface() { return *M_fluidBC; }
+    bcInterface_Type& bcInterface()
+    {
+        return *M_fluidBC;
+    }
 
     //! Get the density on a specific boundary face of the model
     /*!
      * @return density value
      */
-    Real boundaryDensity() const { return M_FSIoperator->dataFluid()->density(); }
+    Real boundaryDensity() const
+    {
+        return M_FSIoperator->dataFluid()->density();
+    }
 
     //! Get the viscosity on a specific boundary face of the model
     /*!
      * @return viscosity value
      */
-    Real boundaryViscosity() const { return M_FSIoperator->dataFluid()->viscosity(); }
+    Real boundaryViscosity() const
+    {
+        return M_FSIoperator->dataFluid()->viscosity();
+    }
 
     //! Get the integral of the pressure (on a specific boundary face)
     /*!
      * @param boundaryID ID of the boundary interface
      * @return pressure value
      */
-    Real boundaryPressure( const multiscaleID_Type& boundaryID ) const;
+    Real boundaryPressure ( const multiscaleID_Type& boundaryID ) const;
 
     //! Get the integral of the total pressure (on a specific boundary face)
     /*!
      * @param boundaryID ID of the boundary interface
      * @return total pressure value
      */
-    Real boundaryTotalPressure( const multiscaleID_Type& boundaryID ) const;
+    Real boundaryTotalPressure ( const multiscaleID_Type& boundaryID ) const;
 
     //! Get the external wall pressure
     /*!
@@ -390,13 +414,19 @@ public:
     /*!
      * @return FSI3D data container
      */
-    const dataPtr_Type& data() const { return M_data; }
+    const dataPtr_Type& data() const
+    {
+        return M_data;
+    }
 
     //! Get the FSI3D operator
     /*!
      * @return FSI3D operator
      */
-    const FSIOperatorPtr_Type& solver() const { return M_FSIoperator; }
+    const FSIOperatorPtr_Type& solver() const
+    {
+        return M_FSIoperator;
+    }
 
     //@}
 
@@ -405,9 +435,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    MultiscaleModelFSI3D( const MultiscaleModelFSI3D& model );
+    MultiscaleModelFSI3D ( const MultiscaleModelFSI3D& model );
 
-    MultiscaleModelFSI3D& operator=( const MultiscaleModelFSI3D& model );
+    MultiscaleModelFSI3D& operator= ( const MultiscaleModelFSI3D& model );
 
     //@}
 
@@ -422,21 +452,21 @@ private:
      *
      * @param fileName File name of the specific model.
      */
-    void setupGlobalData( const std::string& fileName );
+    void setupGlobalData ( const std::string& fileName );
 
     //! Initialize the FSI solution.
     void initializeSolution();
 
     void setupCommunicator();
 
-    void setupBC( const std::string& fileName );
+    void setupBC ( const std::string& fileName );
     void updateBC();
 
-    void setupExporter( IOFilePtr_Type& exporter, const GetPot& dataFile, const std::string& label = "" );
-    void setupImporter( IOFilePtr_Type& exporter, const GetPot& dataFile, const std::string& label = "" );
+    void setupExporter ( IOFilePtr_Type& exporter, const GetPot& dataFile, const std::string& label = "" );
+    void setupImporter ( IOFilePtr_Type& exporter, const GetPot& dataFile, const std::string& label = "" );
 
-    void setExporterFluid( const IOFilePtr_Type& exporter );
-    void setExporterSolid( const IOFilePtr_Type& exporter );
+    void setExporterFluid ( const IOFilePtr_Type& exporter );
+    void setExporterSolid ( const IOFilePtr_Type& exporter );
 
     void exportFluidSolution();
     void exportSolidSolution();
@@ -448,7 +478,7 @@ private:
     void updateLinearModel();
 
     //! Solve the linear problem
-    void solveLinearModel( bool& solveLinearSystem );
+    void solveLinearModel ( bool& solveLinearSystem );
 
     //! Impose the coupling perturbation on the correct BC inside the BCHandler
     void imposePerturbation();
@@ -456,8 +486,14 @@ private:
     //! Reset all the coupling perturbations imposed on the BCHandler
     void resetPerturbation();
 
-    Real bcFunctionDeltaZero( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const UInt& /*id*/ ) { return 0.; }
-    Real bcFunctionDeltaOne( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const UInt& /*id*/ ) { return 1.; }
+    Real bcFunctionDeltaZero ( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const UInt& /*id*/ )
+    {
+        return 0.;
+    }
+    Real bcFunctionDeltaOne ( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const UInt& /*id*/ )
+    {
+        return 1.;
+    }
 
     //@}
 
@@ -565,9 +601,9 @@ public:
     /*!
      * @return evaluation of the function
      */
-    Real function( const Real& t, const Real& x, const Real& y, const Real& z, const UInt& id )
+    Real function ( const Real& t, const Real& x, const Real& y, const Real& z, const UInt& id )
     {
-        return M_function( t, x, y, z, id ) + M_delta;
+        return M_function ( t, x, y, z, id ) + M_delta;
     }
 
     //@}
@@ -580,13 +616,19 @@ public:
     /*!
      * @param delta offset to be applied to the boundary condition
      */
-    void setDelta( const Real& delta ) { M_delta = delta; }
+    void setDelta ( const Real& delta )
+    {
+        M_delta = delta;
+    }
 
     //! Set the area function
     /*!
      * @param function area function
      */
-    void setFunction( const function_Type& function ) { M_function = function; }
+    void setFunction ( const function_Type& function )
+    {
+        M_function = function;
+    }
 
     //@}
 
@@ -595,9 +637,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    FSI3DBoundaryStressFunction( const FSI3DBoundaryStressFunction& boundaryFunction );
+    FSI3DBoundaryStressFunction ( const FSI3DBoundaryStressFunction& boundaryFunction );
 
-    FSI3DBoundaryStressFunction& operator=( const FSI3DBoundaryStressFunction& boundaryFunction );
+    FSI3DBoundaryStressFunction& operator= ( const FSI3DBoundaryStressFunction& boundaryFunction );
 
     //@}
 
@@ -645,10 +687,13 @@ public:
         M_n                    (),
         M_area                 (),
         M_flowRateIsZero       ()
-        {}
+    {}
 
     //! Destructor
-    virtual ~FSI3DBoundaryFlowRateFunction() { /* M_FSI3D is deleted outside */ }
+    virtual ~FSI3DBoundaryFlowRateFunction()
+    {
+        /* M_FSI3D is deleted outside */
+    }
 
     //@}
 
@@ -663,7 +708,7 @@ public:
     void updateParameters()
     {
         // Updating the area
-        M_area = M_FSI3D->solver()->fluid().area( M_fluidFlag );
+        M_area = M_FSI3D->solver()->fluid().area ( M_fluidFlag );
 
         // Updating the BC
         switch ( M_boundaryFlowRateType )
@@ -671,7 +716,7 @@ public:
             case MultiscaleModelFSI3D::Strong:
             {
                 // Update the approximate surface normal direction for this b.c.
-                useNormalDirectionFlow( M_FSI3D->bcHandlerFluid().findBCWithFlag( M_fluidFlag ) );
+                useNormalDirectionFlow ( M_FSI3D->bcHandlerFluid().findBCWithFlag ( M_fluidFlag ) );
 
                 break;
             }
@@ -679,13 +724,13 @@ public:
             {
                 // Check if the flow rate is (almost) zero and impose b.c. accordingly:
                 // we use a cutoff to determine when the coupled flow rate is sufficiently small
-                M_flowRateIsZero = ( std::abs( M_function( M_FSI3D->data()->dataFluid()->dataTime()->time(), 0.0, 0.0, 0.0, 0 ) ) < 1e-8 );
+                M_flowRateIsZero = ( std::abs ( M_function ( M_FSI3D->data()->dataFluid()->dataTime()->time(), 0.0, 0.0, 0.0, 0 ) ) < 1e-8 );
 
                 BCFunctionBase base;
                 if ( M_flowRateIsZero )
                 {
                     // Impose essential Dirichlet
-                    M_FSI3D->bcHandlerFluid().modifyBC( M_fluidFlag, Essential );
+                    M_FSI3D->bcHandlerFluid().modifyBC ( M_fluidFlag, Essential );
 
                     /* In case of essential b.c. we must take care of the Lagrange multiplier, otherwise the global
                        system will be singular. For now we circumvent the problem by setting the corresponding diagonal
@@ -694,7 +739,7 @@ public:
                 else
                 {
                     // Impose weakly the flow rate
-                    M_FSI3D->bcHandlerFluid().modifyBC( M_fluidFlag, Flux );
+                    M_FSI3D->bcHandlerFluid().modifyBC ( M_fluidFlag, Flux );
                 }
 
                 break;
@@ -718,7 +763,7 @@ public:
      *
      *  @return evaluation of the function
      */
-    Real function( const Real& t, const Real& x, const Real& y, const Real& z, const UInt& id )
+    Real function ( const Real& t, const Real& x, const Real& y, const Real& z, const UInt& id )
     {
         /* CAUTION: Here lies a possible bug. The flat profile is assumed to extend to the boundary of the
          * surface patch, but if the user specific explicitly a no-slip condition on the ring then an error
@@ -727,9 +772,11 @@ public:
          * that value for the scaling. That way it is always mesh-independent. */
 
         if ( M_boundaryFlowRateType == MultiscaleModelFSI3D::Semiweak && M_flowRateIsZero )
+        {
             return 0;
+        }
 
-        Real flowRate = M_function( t, x, y, z, id );
+        Real flowRate = M_function ( t, x, y, z, id );
         Real meanVelocity = flowRate / M_area;
 
         return meanVelocity * M_n[id];
@@ -745,31 +792,46 @@ public:
     /*!
      * @param modelFSI3D a pointer to the FSI3D model
      */
-    void setModel( MultiscaleModelFSI3D* modelFSI3D ) { M_FSI3D = modelFSI3D; }
+    void setModel ( MultiscaleModelFSI3D* modelFSI3D )
+    {
+        M_FSI3D = modelFSI3D;
+    }
 
     //! Set the fluid flag of the boundary
     /*!
      * @param flag flag of the fluid boundary
      */
-    void setFluidFlag( const multiscaleID_Type& flag ) { M_fluidFlag = flag; }
+    void setFluidFlag ( const multiscaleID_Type& flag )
+    {
+        M_fluidFlag = flag;
+    }
 
     //! Set the outgoing normal of the fluid boundary
     /*!
      * @param normal outgoing normal of the fluid boundary
      */
-    void setNormal( const boost::array< Real, 3 >& normal ) { M_n = normal; }
+    void setNormal ( const boost::array< Real, 3 >& normal )
+    {
+        M_n = normal;
+    }
 
     //! Set the area function
     /*!
      * @param function area function
      */
-    void setFunction( const function_Type& function ) { M_function = function; }
+    void setFunction ( const function_Type& function )
+    {
+        M_function = function;
+    }
 
     //! Set the boundary flow rate type
     /*!
      * @param boundaryFlowRateType boundary flow rate type
      */
-    void setBoundaryFlowRateType( const FSI3DBoundaryFlowRate_Type& boundaryFlowRateType ) { M_boundaryFlowRateType = boundaryFlowRateType; }
+    void setBoundaryFlowRateType ( const FSI3DBoundaryFlowRate_Type& boundaryFlowRateType )
+    {
+        M_boundaryFlowRateType = boundaryFlowRateType;
+    }
 
     //@}
 
@@ -781,13 +843,19 @@ public:
     /*!
      * @return flag of the fluid boundary
      */
-    const multiscaleID_Type& fluidFlag() const { return M_fluidFlag; }
+    const multiscaleID_Type& fluidFlag() const
+    {
+        return M_fluidFlag;
+    }
 
     //! Get the boundary flow rate type
     /*!
      * @return boundary flow rate type
      */
-    const FSI3DBoundaryFlowRate_Type& boundaryFlowRateType() const { return M_boundaryFlowRateType; }
+    const FSI3DBoundaryFlowRate_Type& boundaryFlowRateType() const
+    {
+        return M_boundaryFlowRateType;
+    }
 
     //@}
 
@@ -797,9 +865,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    FSI3DBoundaryFlowRateFunction( const FSI3DBoundaryFlowRateFunction& boundaryFunction );
+    FSI3DBoundaryFlowRateFunction ( const FSI3DBoundaryFlowRateFunction& boundaryFunction );
 
-    FSI3DBoundaryFlowRateFunction& operator=( const FSI3DBoundaryFlowRateFunction& boundaryFunction );
+    FSI3DBoundaryFlowRateFunction& operator= ( const FSI3DBoundaryFlowRateFunction& boundaryFunction );
 
     //@}
 
@@ -807,15 +875,15 @@ private:
     //@{
 
     //! Impose a flow in the outgoing normal direction.
-    void useNormalDirectionFlow( const BCBase& boundaryID )
+    void useNormalDirectionFlow ( const BCBase& boundaryID )
     {
         // Use the PostProcessingBoundary utility class to extract the surface normals
-        PostProcessingBoundary<MultiscaleModelFSI3D::mesh_Type> normalExtraction( M_FSI3D->solver()->uFESpacePtr()->mesh(),
-                                                                                  &(M_FSI3D->solver()->uFESpacePtr()->feBd()),
-                                                                                  &(M_FSI3D->solver()->uFESpacePtr()->dof()),
-                                                                                  M_FSI3D->solver()->uFESpacePtr()->map() );
+        PostProcessingBoundary<MultiscaleModelFSI3D::mesh_Type> normalExtraction ( M_FSI3D->solver()->uFESpacePtr()->mesh(),
+                                                                                   & (M_FSI3D->solver()->uFESpacePtr()->feBd() ),
+                                                                                   & (M_FSI3D->solver()->uFESpacePtr()->dof() ),
+                                                                                   M_FSI3D->solver()->uFESpacePtr()->map() );
 
-        Vector approxNormal = normalExtraction.normal( boundaryID.flag() );
+        Vector approxNormal = normalExtraction.normal ( boundaryID.flag() );
 
         // Take the first surface normal direction
         M_n[0] = approxNormal[0];
@@ -872,10 +940,13 @@ public:
         M_t1              (),
         M_t2              (),
         M_function        ()
-        {}
+    {}
 
     //! Destructor
-    virtual ~FSI3DBoundaryAreaFunction() { /* M_FSI3D is deleted outside */ }
+    virtual ~FSI3DBoundaryAreaFunction()
+    {
+        /* M_FSI3D is deleted outside */
+    }
 
     //@}
 
@@ -887,28 +958,28 @@ public:
     /*!
      * @return displacement of a point
      */
-    Real function( const Real& t, const Real& x, const Real& y, const Real& z, const UInt& id )
+    Real function ( const Real& t, const Real& x, const Real& y, const Real& z, const UInt& id )
     {
-        return displacement( std::sqrt( M_function( t, x, y, z, id ) / M_referenceArea ) - 1, x , y, z, id );
+        return displacement ( std::sqrt ( M_function ( t, x, y, z, id ) / M_referenceArea ) - 1, x , y, z, id );
     }
 
     //! Evaluate the displacement of a point when solving the tangent problem
     /*!
      * @return displacement of a point
      */
-    Real functionLinear( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const UInt& id )
+    Real functionLinear ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const UInt& id )
     {
-        return displacement( std::sqrt( 1. / M_referenceArea ) - 1, x , y, z, id );
+        return displacement ( std::sqrt ( 1. / M_referenceArea ) - 1, x , y, z, id );
     }
 
     //! Setup main quantities
     void setup()
     {
         // Compute reference area
-        M_referenceArea = M_FSI3D->solver()->fluid().area( M_fluidFlag );
+        M_referenceArea = M_FSI3D->solver()->fluid().area ( M_fluidFlag );
 
         // Compute normal
-        Vector normal = M_FSI3D->solver()->fluid().normal( M_fluidFlag );
+        Vector normal = M_FSI3D->solver()->fluid().normal ( M_fluidFlag );
 
         M_n[0] = normal[0];
         M_n[1] = normal[1];
@@ -918,7 +989,7 @@ public:
         setupTangent();
 
         // Compute geometric center
-        Vector geometricCenter = M_FSI3D->solver()->fluid().geometricCenter( M_fluidFlag );
+        Vector geometricCenter = M_FSI3D->solver()->fluid().geometricCenter ( M_fluidFlag );
 
         M_geometricCenter[0] = geometricCenter[0];
         M_geometricCenter[1] = geometricCenter[1];
@@ -952,37 +1023,56 @@ public:
     /*!
      * @param modelFSI3D a pointer to the FSI3D model
      */
-    void setModel( const MultiscaleModelFSI3D* modelFSI3D ) { M_FSI3D = modelFSI3D; }
+    void setModel ( const MultiscaleModelFSI3D* modelFSI3D )
+    {
+        M_FSI3D = modelFSI3D;
+    }
 
     //! Set the fluid flag of the boundary
     /*!
      * @param flag flag of the fluid boundary
      */
-    void setFluidFlag( const multiscaleID_Type& flag ) { M_fluidFlag = flag; }
+    void setFluidFlag ( const multiscaleID_Type& flag )
+    {
+        M_fluidFlag = flag;
+    }
 
     //! Set the reference area the fluid boundary
     /*!
      * @param referenceArea reference area of the fluid boundary
      */
-    void setReferenceArea( const Real& referenceArea ) { M_referenceArea = referenceArea; }
+    void setReferenceArea ( const Real& referenceArea )
+    {
+        M_referenceArea = referenceArea;
+    }
 
     //! Set the geometric center of the fluid boundary
     /*!
      * @param geometricCenter the x-y-z coordinate of the geometric center of the fluid boundary
      */
-    void setGeometricCenter( const boost::array< Real, 3 >& geometricCenter ) { M_geometricCenter = geometricCenter; }
+    void setGeometricCenter ( const boost::array< Real, 3 >& geometricCenter )
+    {
+        M_geometricCenter = geometricCenter;
+    }
 
     //! Set the outgoing normal of the fluid boundary
     /*!
      * @param normal outgoing normal of the fluid boundary
      */
-    void setNormal( const boost::array< Real, 3 >& normal ) { M_n = normal; setupTangent(); }
+    void setNormal ( const boost::array< Real, 3 >& normal )
+    {
+        M_n = normal;
+        setupTangent();
+    }
 
     //! Set the area function
     /*!
      * @param function area function
      */
-    void setFunction( const function_Type& function ) { M_function = function; }
+    void setFunction ( const function_Type& function )
+    {
+        M_function = function;
+    }
 
     //@}
 
@@ -993,7 +1083,10 @@ public:
     /*!
      * @return flag of the fluid boundary
      */
-    const multiscaleID_Type& fluidFlag() const { return M_fluidFlag; }
+    const multiscaleID_Type& fluidFlag() const
+    {
+        return M_fluidFlag;
+    }
 
     //@}
 
@@ -1002,9 +1095,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    FSI3DBoundaryAreaFunction( const FSI3DBoundaryAreaFunction& boundaryFunction );
+    FSI3DBoundaryAreaFunction ( const FSI3DBoundaryAreaFunction& boundaryFunction );
 
-    FSI3DBoundaryAreaFunction& operator=( const FSI3DBoundaryAreaFunction& boundaryFunction );
+    FSI3DBoundaryAreaFunction& operator= ( const FSI3DBoundaryAreaFunction& boundaryFunction );
 
     //@}
 
@@ -1016,7 +1109,7 @@ private:
     void setupTangent()
     {
         // Normalization
-        Real module = std::sqrt( M_n[0] * M_n[0] + M_n[1] * M_n[1] + M_n[2] * M_n[2] );
+        Real module = std::sqrt ( M_n[0] * M_n[0] + M_n[1] * M_n[1] + M_n[2] * M_n[2] );
         M_n[0] = M_n[0] / module;
         M_n[1] = M_n[1] / module;
         M_n[2] = M_n[2] / module;
@@ -1041,7 +1134,7 @@ private:
      * @param id id of the component
      * @return displacement of a point
      */
-    Real displacement( const Real& scaleFactor, const Real& x, const Real& y, const Real& z, const UInt& id )
+    Real displacement ( const Real& scaleFactor, const Real& x, const Real& y, const Real& z, const UInt& id )
     {
         // Compute the RHS
         boost::array< Real, 3 > rhs;
@@ -1051,28 +1144,28 @@ private:
 
         // Compute the displacement
         Real determinant = M_n[0] * ( M_t1[1] * M_t2[2] - M_t1[2] * M_t2[1] )
-                         + M_n[1] * ( M_t1[2] * M_t2[0] - M_t1[0] * M_t2[2] )
-                         + M_n[2] * ( M_t1[0] * M_t2[1] - M_t1[1] * M_t2[0] );
+                           + M_n[1] * ( M_t1[2] * M_t2[0] - M_t1[0] * M_t2[2] )
+                           + M_n[2] * ( M_t1[0] * M_t2[1] - M_t1[1] * M_t2[0] );
         switch ( id )
         {
-        case 0:
-            return -( rhs[0] * ( M_t1[2] * M_t2[1] - M_t1[1] * M_t2[2] )
-                    + rhs[1] * ( M_n[1]  * M_t2[2] - M_n[2]  * M_t2[1] )
-                    + rhs[2] * ( M_n[2]  * M_t1[1] - M_n[1]  * M_t1[2] ) ) / determinant;
+            case 0:
+                return - ( rhs[0] * ( M_t1[2] * M_t2[1] - M_t1[1] * M_t2[2] )
+                           + rhs[1] * ( M_n[1]  * M_t2[2] - M_n[2]  * M_t2[1] )
+                           + rhs[2] * ( M_n[2]  * M_t1[1] - M_n[1]  * M_t1[2] ) ) / determinant;
 
-        case 1:
-            return  ( rhs[0] * ( M_t1[2] * M_t2[0] - M_t1[0] * M_t2[2] )
-                    + rhs[1] * ( M_n[0]  * M_t2[2] - M_n[2]  * M_t2[0] )
-                    + rhs[2] * ( M_n[2]  * M_t1[0] - M_n[0]  * M_t1[2] ) ) / determinant;
+            case 1:
+                return  ( rhs[0] * ( M_t1[2] * M_t2[0] - M_t1[0] * M_t2[2] )
+                          + rhs[1] * ( M_n[0]  * M_t2[2] - M_n[2]  * M_t2[0] )
+                          + rhs[2] * ( M_n[2]  * M_t1[0] - M_n[0]  * M_t1[2] ) ) / determinant;
 
-        case 2:
-            return -( rhs[0] * ( M_t1[1] * M_t2[0] - M_t1[0] * M_t2[1] )
-                    + rhs[1] * ( M_n[0]  * M_t2[1] - M_n[1]  * M_t2[0] )
-                    + rhs[2] * ( M_n[1]  * M_t1[0] - M_n[0]  * M_t1[1] ) ) / determinant;
+            case 2:
+                return - ( rhs[0] * ( M_t1[1] * M_t2[0] - M_t1[0] * M_t2[1] )
+                           + rhs[1] * ( M_n[0]  * M_t2[1] - M_n[1]  * M_t2[0] )
+                           + rhs[2] * ( M_n[1]  * M_t1[0] - M_n[0]  * M_t1[1] ) ) / determinant;
 
-        default:
+            default:
 
-            return 0.;
+                return 0.;
         }
     }
 

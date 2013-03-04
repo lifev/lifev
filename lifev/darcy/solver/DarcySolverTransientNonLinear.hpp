@@ -258,9 +258,9 @@ namespace LifeV
 */
 template < typename MeshType >
 class DarcySolverTransientNonLinear
-        :
-        public DarcySolverNonLinear < MeshType >,
-        public DarcySolverTransient < MeshType >
+    :
+public DarcySolverNonLinear < MeshType >,
+public DarcySolverTransient < MeshType >
 {
 
 public:
@@ -375,7 +375,7 @@ protected:
       @param elmatMix The local matrix in mixed form.
       @param elmatReactionTerm The local matrix for the reaction term.
     */
-    virtual void localMatrixComputation ( const UInt & iElem,
+    virtual void localMatrixComputation ( const UInt& iElem,
                                           MatrixElemental& elmatMix,
                                           MatrixElemental& elmatReactionTerm )
     {
@@ -389,7 +389,7 @@ protected:
       @param iElem Id of the current geometrical element.
       @param elvecMix The local vector in mixed form.
     */
-    virtual void localVectorComputation ( const UInt & iElem,
+    virtual void localVectorComputation ( const UInt& iElem,
                                           VectorElemental& elvecMix )
     {
         darcySolverTransient_Type::localVectorComputation ( iElem, elvecMix );
@@ -410,13 +410,13 @@ protected:
 // Complete constructor.
 template < typename MeshType >
 DarcySolverTransientNonLinear < MeshType >::
-DarcySolverTransientNonLinear ():
-        // Standard Darcy solver constructor.
-        darcySolverLinear_Type::DarcySolverLinear (),
-        // Non-linear Darcy solver constructor.
-        darcySolverNonLinear_Type::DarcySolverNonLinear (),
-        // Transient Darcy solver contructor.
-        darcySolverTransient_Type::DarcySolverTransient ()
+DarcySolverTransientNonLinear () :
+    // Standard Darcy solver constructor.
+    darcySolverLinear_Type::DarcySolverLinear (),
+    // Non-linear Darcy solver constructor.
+    darcySolverNonLinear_Type::DarcySolverNonLinear (),
+    // Transient Darcy solver contructor.
+    darcySolverTransient_Type::DarcySolverTransient ()
 {} // Constructor
 
 // ===================================================
@@ -453,7 +453,7 @@ solve ()
 
     // Put in M_rhsTimeAdvance the contribution for the right hand side coming
     // from the time scheme, without the time step.
-    *(this->M_rhsTimeAdvance) = this->M_timeAdvance->rhsContributionFirstDerivative ();
+    * (this->M_rhsTimeAdvance) = this->M_timeAdvance->rhsContributionFirstDerivative ();
 
     // Solve the problem with the fixed point scheme.
     this->fixedPoint ();

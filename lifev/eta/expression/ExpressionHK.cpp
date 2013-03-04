@@ -48,7 +48,7 @@ ExpressionHK::ExpressionHK()
     : base_Type()
 {}
 
-ExpressionHK::ExpressionHK( const ExpressionHK&)
+ExpressionHK::ExpressionHK ( const ExpressionHK&)
     : base_Type()
 {}
 
@@ -60,7 +60,7 @@ ExpressionHK::~ExpressionHK()
 // ===================================================
 
 void
-ExpressionHK::display( std::ostream& out )
+ExpressionHK::display ( std::ostream& out )
 {
     out << "h_K";
 }

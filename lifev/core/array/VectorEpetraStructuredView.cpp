@@ -34,7 +34,8 @@
 
 #include <lifev/core/array/VectorEpetraStructuredView.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 // ===================================================
 // Constructors & Destructor
@@ -49,11 +50,11 @@ VectorEpetraStructuredView()
 {}
 
 VectorEpetraStructuredView::
-VectorEpetraStructuredView( const VectorEpetraStructuredView& otherView)
-    : M_blockSize(otherView.M_blockSize),
-      M_firstIndex(otherView.M_firstIndex),
-      M_lastValidIndex(otherView.M_lastValidIndex),
-      M_vector(otherView.M_vector)
+VectorEpetraStructuredView ( const VectorEpetraStructuredView& otherView)
+    : M_blockSize (otherView.M_blockSize),
+      M_firstIndex (otherView.M_firstIndex),
+      M_lastValidIndex (otherView.M_lastValidIndex),
+      M_vector (otherView.M_vector)
 {}
 
 VectorEpetraStructuredView::
@@ -66,7 +67,7 @@ VectorEpetraStructuredView::
 
 void
 VectorEpetraStructuredView::
-showMe( std::ostream& output ) const
+showMe ( std::ostream& output ) const
 {
     output << "VectorBlockViewEpetra informations:" << std::endl
            << "Size = " << M_blockSize << std::endl
@@ -76,14 +77,14 @@ showMe( std::ostream& output ) const
 
 Int
 VectorEpetraStructuredView::
-sumIntoGlobalValues( const Int GID, const Real value ) const
+sumIntoGlobalValues ( const Int GID, const Real value ) const
 {
-    ASSERT(GID < static_cast<Int>(M_blockSize), " Error in assembling the block vector: global id to large for the block")
+    ASSERT (GID < static_cast<Int> (M_blockSize), " Error in assembling the block vector: global id to large for the block")
 
     // Compute the global ID in the monolithic vector:
     // size of the block + location in the block
-    const Int TotalGID(GID + M_firstIndex);
-    return M_vector->sumIntoGlobalValues( TotalGID, value );
+    const Int TotalGID (GID + M_firstIndex);
+    return M_vector->sumIntoGlobalValues ( TotalGID, value );
 }
 
 // ===================================================
@@ -92,12 +93,12 @@ sumIntoGlobalValues( const Int GID, const Real value ) const
 
 void
 VectorEpetraStructuredView::
-setup( const UInt& firstIndex, const UInt& blockSize, vector_Type* vector )
+setup ( const UInt& firstIndex, const UInt& blockSize, vector_Type* vector )
 {
-	M_blockSize = blockSize;
-	M_firstIndex = firstIndex;
-	M_lastValidIndex = firstIndex + blockSize -1;
-	M_vector = vector;
+    M_blockSize = blockSize;
+    M_firstIndex = firstIndex;
+    M_lastValidIndex = firstIndex + blockSize - 1;
+    M_vector = vector;
 }
 
 } // Namespace LifeV

@@ -136,9 +136,9 @@ public:
      * @param dataSection section in the data file
      * @param name name of the boundary condition
      */
-    void readBC( const std::string& fileName, const std::string& dataSection, const std::string& name )
+    void readBC ( const std::string& fileName, const std::string& dataSection, const std::string& name )
     {
-        M_data.readBC( fileName, dataSection, name );
+        M_data.readBC ( fileName, dataSection, name );
     }
 
     //! Insert the current boundary condition in the BChandler
@@ -154,7 +154,10 @@ public:
     /*!
      * @return the data container
      */
-    data_Type& dataContainer() { return M_data; }
+    data_Type& dataContainer()
+    {
+        return M_data;
+    }
 
     //@}
 
@@ -163,9 +166,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    BCInterface0D( const BCInterface0D& interface0D );
+    BCInterface0D ( const BCInterface0D& interface0D );
 
-    BCInterface0D& operator=( const BCInterface0D& interface0D );
+    BCInterface0D& operator= ( const BCInterface0D& interface0D );
 
     //@}
 
@@ -190,29 +193,29 @@ BCInterface0D< BcHandler, PhysicalSolverType >::insertBC()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 5020 ) << "BCInterface0D::insertBC\n";
+    debugStream ( 5020 ) << "BCInterface0D::insertBC\n";
 #endif
 
     switch ( M_data.base().second )
     {
-    case BCIFunctionParser:
-    case BCIFunctionParserFile:
-    case BCIFunctionParserSolver:
-    case BCIFunctionParserFileSolver:
-    case BCIFunctionUserDefined:
-    {
-        factory_Type factory;
-        this->M_vectorFunction.push_back( factory.createFunctionParser( M_data ) );
+        case BCIFunctionParser:
+        case BCIFunctionParserFile:
+        case BCIFunctionParserSolver:
+        case BCIFunctionParserFileSolver:
+        case BCIFunctionUserDefined:
+        {
+            factory_Type factory;
+            this->M_vectorFunction.push_back ( factory.createFunctionParser ( M_data ) );
 
-        addBcToHandler();
+            addBcToHandler();
 
-        return;
-    }
+            return;
+        }
 
-    default:
+        default:
 
-        std::cout << " !!! Error: " << M_data.base().first << " is not valid in BCInterface0D !!!" << std::endl;
-        break;
+            std::cout << " !!! Error: " << M_data.base().first << " is not valid in BCInterface0D !!!" << std::endl;
+            break;
     }
 }
 
@@ -226,9 +229,11 @@ inline void
 BCInterface0D< BcHandler, PhysicalSolverType >::addBcToHandler()
 {
     if ( !this->M_handler.get() ) // If BCHandler has not been created yet, we do it now
+    {
         this->createHandler();
+    }
 
-    this->M_handler->setBC( M_data.flag(), M_data.type(), boost::bind( &BCInterfaceFunction<PhysicalSolverType>::functionTime, this->M_vectorFunction.back(), _1 ) );
+    this->M_handler->setBC ( M_data.flag(), M_data.type(), boost::bind ( &BCInterfaceFunction<PhysicalSolverType>::functionTime, this->M_vectorFunction.back(), _1 ) );
 }
 
 } // Namespace LifeV

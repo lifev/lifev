@@ -47,32 +47,32 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 
-DOFInterface3Dto3D::DOFInterface3Dto3D( const ReferenceFE& refFE, const DOF& dof1,
-                                        const DOF& dof2 )
-        :
-        M_refFE1( &refFE ),
-        M_dof1( &dof1 ),
-        M_refFE2( &refFE ),
-        M_dof2( &dof2 ),
-        M_dof( new DOF( refFE ) )
+DOFInterface3Dto3D::DOFInterface3Dto3D ( const ReferenceFE& refFE, const DOF& dof1,
+                                         const DOF& dof2 )
+    :
+    M_refFE1 ( &refFE ),
+    M_dof1 ( &dof1 ),
+    M_refFE2 ( &refFE ),
+    M_dof2 ( &dof2 ),
+    M_dof ( new DOF ( refFE ) )
 {}
 
-DOFInterface3Dto3D::DOFInterface3Dto3D( const ReferenceFE& refFE1, const DOF& dof1, const ReferenceFE& refFE2,
-                                        const DOF& dof2 )
-        :
-        M_refFE1( &refFE1 ),
-        M_dof1( &dof1 ),
-        M_refFE2( &refFE2 ),
-        M_dof2( &dof2 ),
-        M_dof( new DOF( refFE1 ) )
+DOFInterface3Dto3D::DOFInterface3Dto3D ( const ReferenceFE& refFE1, const DOF& dof1, const ReferenceFE& refFE2,
+                                         const DOF& dof2 )
+    :
+    M_refFE1 ( &refFE1 ),
+    M_dof1 ( &dof1 ),
+    M_refFE2 ( &refFE2 ),
+    M_dof2 ( &dof2 ),
+    M_dof ( new DOF ( refFE1 ) )
 {}
 
-DOFInterface3Dto3D::DOFInterface3Dto3D( const ReferenceFE& refFE, const DOF& dof )
-        :
-        M_refFE1( & refFE ),
-        M_dof1( &dof ),
-        M_refFE2( & refFE ),
-        M_dof2( &dof )
+DOFInterface3Dto3D::DOFInterface3Dto3D ( const ReferenceFE& refFE, const DOF& dof )
+    :
+    M_refFE1 ( & refFE ),
+    M_dof1 ( &dof ),
+    M_refFE2 ( & refFE ),
+    M_dof2 ( &dof )
 {}
 
 // ===================================================
@@ -80,23 +80,23 @@ DOFInterface3Dto3D::DOFInterface3Dto3D( const ReferenceFE& refFE, const DOF& dof
 // ===================================================
 
 void
-DOFInterface3Dto3D::setup( const ReferenceFE& refFE, const DOF& dof1, const DOF& dof2 )
+DOFInterface3Dto3D::setup ( const ReferenceFE& refFE, const DOF& dof1, const DOF& dof2 )
 {
     M_refFE1 = &refFE;
     M_dof1 = &dof1;
     M_refFE2 = &refFE;
     M_dof2 = &dof2;
-    M_dof = boost::shared_ptr<DOF>( new DOF( refFE ) );
+    M_dof = boost::shared_ptr<DOF> ( new DOF ( refFE ) );
 }
 
 void
-DOFInterface3Dto3D::setup( const ReferenceFE& refFE1, const DOF& dof1, const ReferenceFE& refFE2, const DOF& dof2 )
+DOFInterface3Dto3D::setup ( const ReferenceFE& refFE1, const DOF& dof1, const ReferenceFE& refFE2, const DOF& dof2 )
 {
     M_refFE1 = &refFE1;
     M_dof1 = &dof1;
     M_refFE2 = &refFE2;
     M_dof2 = &dof2;
-    M_dof = boost::shared_ptr<DOF>( new DOF( refFE1 ) );
+    M_dof = boost::shared_ptr<DOF> ( new DOF ( refFE1 ) );
 }
 
 // ===================================================
@@ -104,11 +104,11 @@ DOFInterface3Dto3D::setup( const ReferenceFE& refFE1, const DOF& dof1, const Ref
 // ===================================================
 
 bool
-coincide( const std::vector<Real>& p1, const std::vector<Real>& p2, const Real& tol )
+coincide ( const std::vector<Real>& p1, const std::vector<Real>& p2, const Real& tol )
 {
-	 Real normDiff = fabs( p1[ 0 ] - p2[ 0 ]) + fabs( p1[ 1 ] - p2[ 1 ]) + fabs( p1[ 2 ] - p2[ 2 ]);
+    Real normDiff = fabs ( p1[ 0 ] - p2[ 0 ]) + fabs ( p1[ 1 ] - p2[ 1 ]) + fabs ( p1[ 2 ] - p2[ 2 ]);
 
-	return ( normDiff <= tol );
+    return ( normDiff <= tol );
 }
 
 }

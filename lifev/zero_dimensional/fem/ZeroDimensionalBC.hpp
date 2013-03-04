@@ -55,7 +55,7 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef boost::function<Real ( const Real&  )>                        function_Type;
+    typedef boost::function<Real ( const Real&  ) >                        function_Type;
     typedef ZeroDimensionalBCType                                         bcType_Type;
 
     //@}
@@ -67,9 +67,9 @@ public:
     //! Constructor
     explicit ZeroDimensionalBC() : M_function(), M_bcType() {}
 
-    ZeroDimensionalBC( const ZeroDimensionalBC& bc ) :
-                    M_function( bc.M_function ),
-                    M_bcType  ( bc.M_bcType ) {}
+    ZeroDimensionalBC ( const ZeroDimensionalBC& bc ) :
+        M_function ( bc.M_function ),
+        M_bcType  ( bc.M_bcType ) {}
 
     //! Destructor
     virtual ~ZeroDimensionalBC() {}
@@ -85,7 +85,10 @@ public:
      * @param time the current time of the simulation
      * @return the bc value
     */
-    Real evaluate( const Real& time ) const { return M_function( time ); }
+    Real evaluate ( const Real& time ) const
+    {
+        return M_function ( time );
+    }
 
     //@}
 
@@ -97,19 +100,29 @@ public:
     /*!
       @param function the user defined function
     */
-    void setBC( const bcType_Type& bcType, const function_Type& function ) { M_bcType = bcType; M_function = function; }
+    void setBC ( const bcType_Type& bcType, const function_Type& function )
+    {
+        M_bcType = bcType;
+        M_function = function;
+    }
 
     //! Set the function
     /*!
       @param function the user defined function
     */
-    void setFunction( const function_Type& function ) { M_function = function; }
+    void setFunction ( const function_Type& function )
+    {
+        M_function = function;
+    }
 
     //! Set the type
     /*!
       @param bcType the bc type
     */
-    void setBcType( const bcType_Type& bcType ) { M_bcType = bcType; }
+    void setBcType ( const bcType_Type& bcType )
+    {
+        M_bcType = bcType;
+    }
 
     //@}
 
@@ -121,13 +134,19 @@ public:
     /*!
       @return the user defined function
     */
-    const function_Type& function() const { return M_function; }
+    const function_Type& function() const
+    {
+        return M_function;
+    }
 
     //! Get the type
     /*!
       @return the bc type
     */
-    const bcType_Type& bcType() const { return M_bcType; }
+    const bcType_Type& bcType() const
+    {
+        return M_bcType;
+    }
 
     //@}
 

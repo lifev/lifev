@@ -70,8 +70,8 @@ class ConfinedOperator : public LinearOperator
 {
 public:
 
-	//! @name Public Typedefs and Enumerators
-	//@{
+    //! @name Public Typedefs and Enumerators
+    //@{
     typedef Epetra_Operator                        operator_Type;
     typedef boost::shared_ptr<operator_Type>       operatorPtr_Type;
     typedef VectorBlockStructure                   blockStructure_Type;
@@ -79,31 +79,31 @@ public:
     typedef boost::shared_ptr<vector_Type>         vectorPtr_Type;
     typedef Epetra_Comm                            comm_Type;
     typedef Epetra_Map                             map_Type;
-	//@}
+    //@}
 
-	//! null constructor and destructor
-	//@{
+    //! null constructor and destructor
+    //@{
 #ifdef HAVE_MPI
-    ConfinedOperator( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>( new Epetra_MpiComm( MPI_COMM_WORLD ) ) );
+    ConfinedOperator ( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm> ( new Epetra_MpiComm ( MPI_COMM_WORLD ) ) );
 #else
-    ConfinedOperator( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>( new Epetra_SerialComm ) );
+    ConfinedOperator ( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm> ( new Epetra_SerialComm ) );
 #endif
     ~ConfinedOperator();
-	//@}
+    //@}
 
     //! @name Attribute set methods
     //@{
 
     //! If set true, transpose of this operator will be applied.
-    virtual int SetUseTranspose( bool useTranspose );
+    virtual int SetUseTranspose ( bool useTranspose );
 
-    void setOperator( operatorPtr_Type oper );
+    void setOperator ( operatorPtr_Type oper );
 
-    void setFullMap( const MapEpetra& map );
+    void setFullMap ( const MapEpetra& map );
 
-    void setBlockStructure( const blockStructure_Type& blockStructure );
+    void setBlockStructure ( const blockStructure_Type& blockStructure );
 
-    void setBlockIndex( UInt index );
+    void setBlockIndex ( UInt index );
 
     //@}
 
@@ -111,10 +111,10 @@ public:
     //@{
 
     //! Returns the result of a Epetra_Operator applied to a vector_Type X in Y.
-    virtual int Apply( const vector_Type& X, vector_Type& Y ) const;
+    virtual int Apply ( const vector_Type& X, vector_Type& Y ) const;
 
     //! Returns the result of a Epetra_Operator inverse applied to an vector_Type X in Y.
-    virtual int ApplyInverse( const vector_Type& X, vector_Type& Y ) const;
+    virtual int ApplyInverse ( const vector_Type& X, vector_Type& Y ) const;
 
     //! Returns the infinity norm of the global matrix.
     double NormInf() const;
@@ -146,11 +146,11 @@ public:
 
 protected:
 
-	operatorPtr_Type               M_oper;
-	blockStructure_Type            M_blockStructure;
-	UInt                           M_blockIndex;
-	boost::shared_ptr<Epetra_Comm> M_comm;
-	boost::shared_ptr<map_Type>    M_map;
+    operatorPtr_Type               M_oper;
+    blockStructure_Type            M_blockStructure;
+    UInt                           M_blockIndex;
+    boost::shared_ptr<Epetra_Comm> M_comm;
+    boost::shared_ptr<map_Type>    M_map;
 
 };
 

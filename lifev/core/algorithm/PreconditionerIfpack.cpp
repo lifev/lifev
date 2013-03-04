@@ -44,12 +44,12 @@ namespace LifeV
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-PreconditionerIfpack::PreconditionerIfpack( boost::shared_ptr<Epetra_Comm> comm ):
-        super (),
-        M_preconditioner(),
-        M_comm( comm ),
-        M_overlapLevel(0),
-        M_operator()
+PreconditionerIfpack::PreconditionerIfpack ( boost::shared_ptr<Epetra_Comm> comm ) :
+    super (),
+    M_preconditioner(),
+    M_comm ( comm ),
+    M_overlapLevel (0),
+    M_operator()
 {
 
 }
@@ -64,28 +64,28 @@ PreconditionerIfpack::~PreconditionerIfpack()
 // Methods
 // ===================================================
 Int
-PreconditionerIfpack::buildPreconditioner( operator_type& matrix )
+PreconditionerIfpack::buildPreconditioner ( operator_type& matrix )
 {
     M_operator     = matrix->matrixPtr();
 
-    M_overlapLevel = this->M_list.get( "overlap level", -1 );
+    M_overlapLevel = this->M_list.get ( "overlap level", -1 );
 
-    M_precType     = this->M_list.get( "prectype", "Amesos" );
+    M_precType     = this->M_list.get ( "prectype", "Amesos" );
 
     Ifpack factory;
 
-    M_preconditioner.reset( factory.Create( M_precType, M_operator.get(), M_overlapLevel ) );
+    M_preconditioner.reset ( factory.Create ( M_precType, M_operator.get(), M_overlapLevel ) );
 
     M_precType += "_Ifpack";
 
     if ( !M_preconditioner.get() )
     {
-        ERROR_MSG( "Preconditioner not set, something went wrong in its computation\n" );
+        ERROR_MSG ( "Preconditioner not set, something went wrong in its computation\n" );
     }
 
-    IFPACK_CHK_ERR( M_preconditioner->SetParameters( this->M_list ) );
-    IFPACK_CHK_ERR( M_preconditioner->Initialize() );
-    IFPACK_CHK_ERR( M_preconditioner->Compute() );
+    IFPACK_CHK_ERR ( M_preconditioner->SetParameters ( this->M_list ) );
+    IFPACK_CHK_ERR ( M_preconditioner->Initialize() );
+    IFPACK_CHK_ERR ( M_preconditioner->Compute() );
 
     this->M_preconditionerCreated = true;
 
@@ -102,131 +102,131 @@ PreconditionerIfpack::resetPreconditioner()
 }
 
 void
-PreconditionerIfpack::createParametersList( list_Type&         list,
-                                  const GetPot&      dataFile,
-                                  const std::string& section,
-                                  const std::string& subSection )
+PreconditionerIfpack::createParametersList ( list_Type&         list,
+                                             const GetPot&      dataFile,
+                                             const std::string& section,
+                                             const std::string& subSection )
 {
-    createIfpackList( list, dataFile, section, subSection, M_comm->MyPID() == 0 );
+    createIfpackList ( list, dataFile, section, subSection, M_comm->MyPID() == 0 );
 }
 
 void
-PreconditionerIfpack::createIfpackList( list_Type&         list,
-                                        const GetPot&      dataFile,
-                                        const std::string& section,
-                                        const std::string& subSection,
-                                        const bool&        verbose )
+PreconditionerIfpack::createIfpackList ( list_Type&         list,
+                                         const GetPot&      dataFile,
+                                         const std::string& section,
+                                         const std::string& subSection,
+                                         const bool&        verbose )
 {
     // See http://trilinos.sandia.gov/packages/docs/r9.0/packages/ifpack/doc/html/index.html
     // for more informations on the parameters
 
-    Int overlapLevel     = dataFile( (section + "/" + subSection + "/overlap").data(), 0 );
+    Int overlapLevel     = dataFile ( (section + "/" + subSection + "/overlap").data(), 0 );
 
-    std::string precType = dataFile( (section + "/" + subSection + "/prectype").data(), "Amesos" );
+    std::string precType = dataFile ( (section + "/" + subSection + "/prectype").data(), "Amesos" );
 
-    list.set( "prectype", precType );
-    list.set( "overlap level", overlapLevel );
+    list.set ( "prectype", precType );
+    list.set ( "overlap level", overlapLevel );
 
-    bool displayList = dataFile( (section + "/displayList").data(), false );
+    bool displayList = dataFile ( (section + "/displayList").data(), false );
 
-    std::string relaxationType              = dataFile( (section + "/" + subSection + "/relaxation/type").data(), "Jacobi" );
-    Int         relaxationSweeps            = dataFile( (section + "/" + subSection + "/relaxation/sweeps").data(), 1 );
-    Real        relaxationDampingFactor     = dataFile( (section + "/" + subSection + "/relaxation/damping_factor").data(), 1.0 );
-    Real        relaxationMinDiagValue      = dataFile( (section + "/" + subSection + "/relaxation/min_diagonal_value").data(), 0.0 );
-    bool        relaxationZeroStartSolution = dataFile( (section + "/" + subSection + "/relaxation/zero_starting_solution").data(), true );
+    std::string relaxationType              = dataFile ( (section + "/" + subSection + "/relaxation/type").data(), "Jacobi" );
+    Int         relaxationSweeps            = dataFile ( (section + "/" + subSection + "/relaxation/sweeps").data(), 1 );
+    Real        relaxationDampingFactor     = dataFile ( (section + "/" + subSection + "/relaxation/damping_factor").data(), 1.0 );
+    Real        relaxationMinDiagValue      = dataFile ( (section + "/" + subSection + "/relaxation/min_diagonal_value").data(), 0.0 );
+    bool        relaxationZeroStartSolution = dataFile ( (section + "/" + subSection + "/relaxation/zero_starting_solution").data(), true );
 
-    list.set( "relaxation: type", relaxationType );
-    list.set( "relaxation: sweeps", relaxationSweeps );
-    list.set( "relaxation: damping factor", relaxationDampingFactor );
-    list.set( "relaxation: min diagonal value", relaxationMinDiagValue );
-    list.set( "relaxation: zero starting solution", relaxationZeroStartSolution );
+    list.set ( "relaxation: type", relaxationType );
+    list.set ( "relaxation: sweeps", relaxationSweeps );
+    list.set ( "relaxation: damping factor", relaxationDampingFactor );
+    list.set ( "relaxation: min diagonal value", relaxationMinDiagValue );
+    list.set ( "relaxation: zero starting solution", relaxationZeroStartSolution );
 
-    std::string partitionerType         = dataFile( (section + "/" + subSection + "/partitioner/type").data(), "metis" );
-    Int         partitionerOverlap      = dataFile( (section + "/" + subSection + "/partitioner/overlap").data(), 0 );
-    Int         partitionerLocalParts   = dataFile( (section + "/" + subSection + "/partitioner/local_parts").data(), 1 );
-    Int         partitionerRootNode     = dataFile( (section + "/" + subSection + "/partitioner/root_node").data(), 0 );
-    bool        partitionerUseSymmGraph = dataFile( (section + "/" + subSection + "/partitioner/use_symmetric_graph").data(), true );
+    std::string partitionerType         = dataFile ( (section + "/" + subSection + "/partitioner/type").data(), "metis" );
+    Int         partitionerOverlap      = dataFile ( (section + "/" + subSection + "/partitioner/overlap").data(), 0 );
+    Int         partitionerLocalParts   = dataFile ( (section + "/" + subSection + "/partitioner/local_parts").data(), 1 );
+    Int         partitionerRootNode     = dataFile ( (section + "/" + subSection + "/partitioner/root_node").data(), 0 );
+    bool        partitionerUseSymmGraph = dataFile ( (section + "/" + subSection + "/partitioner/use_symmetric_graph").data(), true );
 
-    list.set( "partitioner: type",                partitionerType );
-    list.set( "partitioner: overlap",             partitionerOverlap );
-    list.set( "partitioner: local parts",         partitionerLocalParts );
-    list.set( "partitioner: root node",           partitionerRootNode );
-    list.set( "partitioner: use symmetric graph", partitionerUseSymmGraph );
+    list.set ( "partitioner: type",                partitionerType );
+    list.set ( "partitioner: overlap",             partitionerOverlap );
+    list.set ( "partitioner: local parts",         partitionerLocalParts );
+    list.set ( "partitioner: root node",           partitionerRootNode );
+    list.set ( "partitioner: use symmetric graph", partitionerUseSymmGraph );
 
-    std::string amesosSolverType = dataFile( (section + "/" + subSection + "/amesos/solvertype").data(), "Amesos_KLU" );
+    std::string amesosSolverType = dataFile ( (section + "/" + subSection + "/amesos/solvertype").data(), "Amesos_KLU" );
 
-    list.set( "amesos: solver type", amesosSolverType );
+    list.set ( "amesos: solver type", amesosSolverType );
 
-    Int    levelOfFill     = dataFile( (section + "/" + subSection + "/fact/level-of-fill").data(),      4  );
-    Real   ILUTlevelOfFill = dataFile( (section + "/" + subSection + "/fact/ilut_level-of-fill").data(), 4. );
-    Real   athr            = dataFile( (section + "/" + subSection + "/fact/absolute_threshold").data(), 0. );
-    Real   rthr            = dataFile( (section + "/" + subSection + "/fact/relative_threshold").data(), 1. );
-    Real   relaxValue      = dataFile( (section + "/" + subSection + "/fact/relax_value").data(), 0. );
-    Real   dropTolerance   = dataFile( (section + "/" + subSection + "/fact/drop_tolerance").data(), 1e-5 );
+    Int    levelOfFill     = dataFile ( (section + "/" + subSection + "/fact/level-of-fill").data(),      4  );
+    Real   ILUTlevelOfFill = dataFile ( (section + "/" + subSection + "/fact/ilut_level-of-fill").data(), 4. );
+    Real   athr            = dataFile ( (section + "/" + subSection + "/fact/absolute_threshold").data(), 0. );
+    Real   rthr            = dataFile ( (section + "/" + subSection + "/fact/relative_threshold").data(), 1. );
+    Real   relaxValue      = dataFile ( (section + "/" + subSection + "/fact/relax_value").data(), 0. );
+    Real   dropTolerance   = dataFile ( (section + "/" + subSection + "/fact/drop_tolerance").data(), 1e-5 );
 
-    list.set( "fact: drop tolerance", dropTolerance );
-    list.set( "fact: level-of-fill", levelOfFill );
-    list.set( "fact: ilut level-of-fill", ILUTlevelOfFill );
-    list.set( "fact: absolute threshold", athr );
-    list.set( "fact: relative threshold", rthr );
-    list.set( "fact: relax value", relaxValue );
+    list.set ( "fact: drop tolerance", dropTolerance );
+    list.set ( "fact: level-of-fill", levelOfFill );
+    list.set ( "fact: ilut level-of-fill", ILUTlevelOfFill );
+    list.set ( "fact: absolute threshold", athr );
+    list.set ( "fact: relative threshold", rthr );
+    list.set ( "fact: relax value", relaxValue );
 
-    Int combineMode = dataFile( (section + "/" + subSection + "/schwarz/combine_mode").data(), 0 );
+    Int combineMode = dataFile ( (section + "/" + subSection + "/schwarz/combine_mode").data(), 0 );
     Epetra_CombineMode schwarzCombineMode;
 
     switch (combineMode)
     {
-    case 0 :
-        schwarzCombineMode = Add;
-        break;
-    case 1 :
-        schwarzCombineMode = Zero;
-        break;
-    case 2 :
-        schwarzCombineMode = Insert;
-        break;
-    case 3 :
-        schwarzCombineMode = Average;
-        break;
-    case 4 :
-        schwarzCombineMode = AbsMax;
-        break;
-    default:
-        schwarzCombineMode = Zero;
+        case 0 :
+            schwarzCombineMode = Add;
+            break;
+        case 1 :
+            schwarzCombineMode = Zero;
+            break;
+        case 2 :
+            schwarzCombineMode = Insert;
+            break;
+        case 3 :
+            schwarzCombineMode = Average;
+            break;
+        case 4 :
+            schwarzCombineMode = AbsMax;
+            break;
+        default:
+            schwarzCombineMode = Zero;
     }
 
-    bool schwarzComputeCondest        = dataFile( (section + "/" + subSection + "/schwarz/compute_condest").data(), true );
-    std::string schwarzReorderingType = dataFile( (section + "/" + subSection + "/schwarz/reordering_type").data(), "none" );
-    bool schwarzFilterSingletons      = dataFile( (section + "/" + subSection + "/schwarz/filter_singletons").data(), true );
+    bool schwarzComputeCondest        = dataFile ( (section + "/" + subSection + "/schwarz/compute_condest").data(), true );
+    std::string schwarzReorderingType = dataFile ( (section + "/" + subSection + "/schwarz/reordering_type").data(), "none" );
+    bool schwarzFilterSingletons      = dataFile ( (section + "/" + subSection + "/schwarz/filter_singletons").data(), true );
 
-    list.set( "schwarz: combine mode", schwarzCombineMode);
-    list.set( "schwarz: compute condest", schwarzComputeCondest);
-    list.set( "schwarz: reordering type", schwarzReorderingType);
-    list.set( "schwarz: filter singletons", schwarzFilterSingletons);
+    list.set ( "schwarz: combine mode", schwarzCombineMode);
+    list.set ( "schwarz: compute condest", schwarzComputeCondest);
+    list.set ( "schwarz: reordering type", schwarzReorderingType);
+    list.set ( "schwarz: filter singletons", schwarzFilterSingletons);
 
     if ( displayList && verbose )
     {
         std::cout << "Ifpack parameters list:" << std::endl;
         std::cout << "-----------------------------" << std::endl;
-        list.print( std::cout );
+        list.print ( std::cout );
         std::cout << "-----------------------------" << std::endl;
     }
 }
 
 Int
-PreconditionerIfpack::ApplyInverse( const Epetra_MultiVector& vector1, Epetra_MultiVector& vector2 ) const
+PreconditionerIfpack::ApplyInverse ( const Epetra_MultiVector& vector1, Epetra_MultiVector& vector2 ) const
 {
-    return M_preconditioner->ApplyInverse( vector1, vector2 );
+    return M_preconditioner->ApplyInverse ( vector1, vector2 );
 }
 
 Int
-PreconditionerIfpack::Apply( const Epetra_MultiVector& vector1, Epetra_MultiVector& vector2 ) const
+PreconditionerIfpack::Apply ( const Epetra_MultiVector& vector1, Epetra_MultiVector& vector2 ) const
 {
-    return M_preconditioner->Apply( vector1, vector2 );
+    return M_preconditioner->Apply ( vector1, vector2 );
 }
 
 void
-PreconditionerIfpack::showMe( std::ostream& output ) const
+PreconditionerIfpack::showMe ( std::ostream& output ) const
 {
     output << "showMe must be implemented for the PreconditionerIfpack class" << std::endl;
 }
@@ -235,16 +235,16 @@ PreconditionerIfpack::showMe( std::ostream& output ) const
 // Set Methods
 // ===================================================
 void
-PreconditionerIfpack::setDataFromGetPot( const GetPot&      dataFile,
-                                         const std::string& section )
+PreconditionerIfpack::setDataFromGetPot ( const GetPot&      dataFile,
+                                          const std::string& section )
 {
-    createIfpackList( this->M_list, dataFile, section, "ifpack", M_comm->MyPID() == 0 );
+    createIfpackList ( this->M_list, dataFile, section, "ifpack", M_comm->MyPID() == 0 );
 }
 
 Int
-PreconditionerIfpack::SetUseTranspose( bool useTranspose )
+PreconditionerIfpack::SetUseTranspose ( bool useTranspose )
 {
-    return M_preconditioner->SetUseTranspose( useTranspose );
+    return M_preconditioner->SetUseTranspose ( useTranspose );
 }
 
 // ===================================================
@@ -286,13 +286,13 @@ PreconditionerIfpack::UseTranspose()
     return M_preconditioner->UseTranspose();
 }
 
-const Epetra_Map &
+const Epetra_Map&
 PreconditionerIfpack::OperatorRangeMap() const
 {
     return M_preconditioner->OperatorRangeMap();
 }
 
-const Epetra_Map &
+const Epetra_Map&
 PreconditionerIfpack::OperatorDomainMap() const
 {
     return M_preconditioner->OperatorDomainMap();

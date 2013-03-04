@@ -95,13 +95,19 @@ public:
     /*!
      * @param base base of the 1D boundary condition
      */
-    void assignFunction( OneDFSIFunction& base ) { base.setFunction( functionSelectorTimeTimeStep() ); }
+    void assignFunction ( OneDFSIFunction& base )
+    {
+        base.setFunction ( functionSelectorTimeTimeStep() );
+    }
 
     //! Assign the function to the base of the 3D \c BCHandler
     /*!
      * @param base base of the 3D boundary condition
      */
-    void assignFunction( BCFunctionBase& base ) { base.setFunction( functionSelectorTimeSpaceID() ); }
+    void assignFunction ( BCFunctionBase& base )
+    {
+        base.setFunction ( functionSelectorTimeSpaceID() );
+    }
 
     //! Function of time
     /*!
@@ -109,7 +115,10 @@ public:
      * @param timeStep time step
      * @return boundary condition value
      */
-    Real functionTime( const Real& t ) { return functionSelectorTime()( t ); };
+    Real functionTime ( const Real& t )
+    {
+        return functionSelectorTime() ( t );
+    };
 
     //! Function of time and time step
     /*!
@@ -117,7 +126,10 @@ public:
      * @param timeStep time step
      * @return boundary condition value
      */
-    Real functionTimeTimeStep( const Real& t, const Real& timeStep ) { return functionSelectorTimeTimeStep()( t, timeStep ); };
+    Real functionTimeTimeStep ( const Real& t, const Real& timeStep )
+    {
+        return functionSelectorTimeTimeStep() ( t, timeStep );
+    };
 
     //! Function of time and space
     /*!
@@ -128,7 +140,10 @@ public:
      * @param id id of the boundary condition (not used)
      * @return boundary condition value
      */
-    Real functionTimeSpace( const Real& t, const Real& x, const Real& y, const Real& z, const ID& /*id*/) { return functionSelectorTimeSpaceID()( t, x, y, z, 0 ); };
+    Real functionTimeSpace ( const Real& t, const Real& x, const Real& y, const Real& z, const ID& /*id*/)
+    {
+        return functionSelectorTimeSpaceID() ( t, x, y, z, 0 );
+    };
 
     //! Function of time and space with ID
     /*!
@@ -139,7 +154,10 @@ public:
      * @param id id of the boundary condition
      * @return boundary condition value
      */
-    Real functionTimeSpaceID( const Real& t, const Real& x, const Real& y, const Real& z, const ID& id ) { return functionSelectorTimeSpaceID()( t, x, y, z, id ); };
+    Real functionTimeSpaceID ( const Real& t, const Real& x, const Real& y, const Real& z, const ID& id )
+    {
+        return functionSelectorTimeSpaceID() ( t, x, y, z, id );
+    };
 
 
     //@}
@@ -152,19 +170,28 @@ public:
     /*!
      * @param data boundary condition data loaded from \c GetPot file
      */
-    void setData( const BCInterfaceData0D& data ) { setGlobalData( data ); }
+    void setData ( const BCInterfaceData0D& data )
+    {
+        setGlobalData ( data );
+    }
 
     //! Set data for 1D boundary conditions
     /*!
      * @param data boundary condition data loaded from \c GetPot file
      */
-    void setData( const BCInterfaceData1D& data ) { setGlobalData( data ); }
+    void setData ( const BCInterfaceData1D& data )
+    {
+        setGlobalData ( data );
+    }
 
     //! Set data for 3D boundary conditions
     /*!
      * @param data boundary condition data loaded from \c GetPot file
      */
-    void setData( const BCInterfaceData3D& data ) { setGlobalData( data ); }
+    void setData ( const BCInterfaceData3D& data )
+    {
+        setGlobalData ( data );
+    }
 
     //@}
 
@@ -173,9 +200,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    BCInterfaceFunctionUserDefined( const BCInterfaceFunctionUserDefined& function);
+    BCInterfaceFunctionUserDefined ( const BCInterfaceFunctionUserDefined& function);
 
-    BCInterfaceFunctionUserDefined& operator=( const BCInterfaceFunctionUserDefined& function );
+    BCInterfaceFunctionUserDefined& operator= ( const BCInterfaceFunctionUserDefined& function );
 
     //@}
 
@@ -187,7 +214,7 @@ private:
     /*!
      * @param data boundary condition data loaded from \c GetPot file
      */
-    void setGlobalData( const BCInterfaceData& data );
+    void setGlobalData ( const BCInterfaceData& data );
 
     //! Get the selected function of time
     /*!
@@ -216,7 +243,7 @@ private:
      * @param id id of the boundary condition (not used)
      * @return boundary condition value
      */
-    Real functionSin( const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/ );
+    Real functionSin ( const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/ );
 
     //@}
 
@@ -246,13 +273,13 @@ inline BCInterfaceFunctionUserDefined< PhysicalSolverType >* createBCInterfaceFu
 // ===================================================
 template< typename PhysicalSolverType >
 BCInterfaceFunctionUserDefined< PhysicalSolverType >::BCInterfaceFunctionUserDefined() :
-        function_Type   (),
-        M_functionType  (),
-        M_parameters    ()
+    function_Type   (),
+    M_functionType  (),
+    M_parameters    ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 5026 ) << "BCInterfaceFunctionUserDefined::BCInterfaceFunctionUserDefined()" << "\n";
+    debugStream ( 5026 ) << "BCInterfaceFunctionUserDefined::BCInterfaceFunctionUserDefined()" << "\n";
 #endif
 
 }
@@ -262,7 +289,7 @@ BCInterfaceFunctionUserDefined< PhysicalSolverType >::BCInterfaceFunctionUserDef
 // ===================================================
 template< typename PhysicalSolverType >
 void
-BCInterfaceFunctionUserDefined< PhysicalSolverType >::setGlobalData( const BCInterfaceData& data )
+BCInterfaceFunctionUserDefined< PhysicalSolverType >::setGlobalData ( const BCInterfaceData& data )
 {
     //Set mapFunction
     std::map< std::string, userDefinedFunctions > mapFunction;
@@ -281,15 +308,15 @@ BCInterfaceFunctionUserDefined< PhysicalSolverType >::functionSelectorTime()
 {
     switch ( M_functionType )
     {
-    case Sin:
+        case Sin:
 
-        return boost::bind( &BCInterfaceFunctionUserDefined< PhysicalSolverType >::functionSin, this, _1, _1, _1, _1, _1 );
+            return boost::bind ( &BCInterfaceFunctionUserDefined< PhysicalSolverType >::functionSin, this, _1, _1, _1, _1, _1 );
 
-    default:
+        default:
 
-        std::cout << " !!! Warning: user defined function " << M_functionType << " not assigned !!!" << std::endl;
+            std::cout << " !!! Warning: user defined function " << M_functionType << " not assigned !!!" << std::endl;
 
-        return 0;
+            return 0;
     }
 }
 
@@ -299,15 +326,15 @@ BCInterfaceFunctionUserDefined< PhysicalSolverType >::functionSelectorTimeTimeSt
 {
     switch ( M_functionType )
     {
-    case Sin:
+        case Sin:
 
-        return boost::bind( &BCInterfaceFunctionUserDefined< PhysicalSolverType >::functionSin, this, _1, _2, _1, _1, _1 );
+            return boost::bind ( &BCInterfaceFunctionUserDefined< PhysicalSolverType >::functionSin, this, _1, _2, _1, _1, _1 );
 
-    default:
+        default:
 
-        std::cout << " !!! Warning: user defined function " << M_functionType << " not assigned !!!" << std::endl;
+            std::cout << " !!! Warning: user defined function " << M_functionType << " not assigned !!!" << std::endl;
 
-        return 0;
+            return 0;
     }
 }
 
@@ -317,23 +344,23 @@ BCInterfaceFunctionUserDefined< PhysicalSolverType >::functionSelectorTimeSpaceI
 {
     switch ( M_functionType )
     {
-    case Sin:
+        case Sin:
 
-        return boost::bind( &BCInterfaceFunctionUserDefined< PhysicalSolverType >::functionSin, this, _1, _2, _3, _4, _5 );
+            return boost::bind ( &BCInterfaceFunctionUserDefined< PhysicalSolverType >::functionSin, this, _1, _2, _3, _4, _5 );
 
-    default:
+        default:
 
-        std::cout << " !!! Warning: user defined function " << M_functionType << " not assigned !!!" << std::endl;
+            std::cout << " !!! Warning: user defined function " << M_functionType << " not assigned !!!" << std::endl;
 
-        return 0;
+            return 0;
     }
 }
 
 template< typename PhysicalSolverType >
 Real
-BCInterfaceFunctionUserDefined< PhysicalSolverType >::functionSin( const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/)
+BCInterfaceFunctionUserDefined< PhysicalSolverType >::functionSin ( const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/)
 {
-    return M_parameters[0] + M_parameters[1] * std::sin( M_parameters[2] + 2 * M_PI * t / M_parameters[3] );
+    return M_parameters[0] + M_parameters[1] * std::sin ( M_parameters[2] + 2 * M_PI * t / M_parameters[3] );
 }
 
 } // Namespace LifeV

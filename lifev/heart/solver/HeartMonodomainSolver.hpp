@@ -62,8 +62,8 @@ namespace LifeV
 
 //! monodomainSolver - Class featuring the usual solver for monodomain equations
 
-template< typename Mesh,
-          typename SolverType = LifeV::SolverAztecOO >
+template < typename Mesh,
+         typename SolverType = LifeV::SolverAztecOO >
 class HeartMonodomainSolver
 {
 
@@ -78,8 +78,8 @@ public:
                                  const Real& y,
                                  const Real& z,
                                  const ID& id );
-    typedef boost::function<Real ( Real const&, Real const&, Real const&,
-                                   Real const&, ID const& )> source_Type;
+    typedef boost::function < Real ( Real const&, Real const&, Real const&,
+                                     Real const&, ID const& ) > source_Type;
 
     typedef Mesh mesh_Type;
     typedef BCHandler                               bcHandlerRaw_Type;
@@ -93,7 +93,7 @@ public:
     typedef typename SolverType::prec_type          preconditioner_Type;
 
 
-     //@}
+    //@}
 
 
 
@@ -108,10 +108,10 @@ public:
      * @param Epetra communicator
      */
 
-    HeartMonodomainSolver( const data_type& dataType,
-                      FESpace<Mesh, MapEpetra>& uFESpace,
-                      BCHandler& bcHandler,
-                      boost::shared_ptr<Epetra_Comm>& comm);
+    HeartMonodomainSolver ( const data_type& dataType,
+                            FESpace<Mesh, MapEpetra>& uFESpace,
+                            BCHandler& bcHandler,
+                            boost::shared_ptr<Epetra_Comm>& comm);
 
     //! Destructor
     virtual ~HeartMonodomainSolver() {}
@@ -122,7 +122,7 @@ public:
     //@{
 
     //! Updates sources, bc treatment and solve the monodomain system
-    virtual void PDEiterate( bcHandlerRaw_Type& bch );
+    virtual void PDEiterate ( bcHandlerRaw_Type& bch );
 
     //! Sets up the system solver
     virtual void setup        ( const GetPot& dataFile );
@@ -131,57 +131,88 @@ public:
     virtual void buildSystem();
 
     //! Updates time dependent parts of PDE system
-    virtual void updatePDESystem(Real alpha, vector_Type&  sourceVec);
+    virtual void updatePDESystem (Real alpha, vector_Type&  sourceVec);
 
     //! Updates time dependent parts of PDE system
-    virtual void updatePDESystem( vector_Type& sourceVec );
+    virtual void updatePDESystem ( vector_Type& sourceVec );
 
     //! Initialize
-    void initialize( const source_Type& );
-    void initialize( const Function&  );
-    void initialize( const vector_Type& );
+    void initialize ( const source_Type& );
+    void initialize ( const Function&  );
+    void initialize ( const vector_Type& );
 
     //! Returns the local solution vector
-    const vector_Type& solutionTransmembranePotential() const {return M_solutionTransmembranePotential;}
+    const vector_Type& solutionTransmembranePotential() const
+    {
+        return M_solutionTransmembranePotential;
+    }
 
-    const vector_Type& fiberVector() const {return M_fiberVector;}
+    const vector_Type& fiberVector() const
+    {
+        return M_fiberVector;
+    }
 
     //! Returns the local residual vector
-    const vector_Type& residual() const {return M_residual;}
+    const vector_Type& residual() const
+    {
+        return M_residual;
+    }
 
     //! Returns u FE space
-    FESpace<Mesh, MapEpetra>& potentialFESpace() {return M_uFESpace;}
+    FESpace<Mesh, MapEpetra>& potentialFESpace()
+    {
+        return M_uFESpace;
+    }
 
     //! Setting of the boundary conditions
-    void setBC( BCHandler &BCh_u )
+    void setBC ( BCHandler& BCh_u )
     {
-        M_BChandlerElectric = &BCh_u; M_setBC = true;
+        M_BChandlerElectric = &BCh_u;
+        M_setBC = true;
     }
 
     //! Postprocessing
-    void postProcessing(bool _writeMesh = false);
+    void postProcessing (bool _writeMesh = false);
 
-    void resetPreconditioner() {M_resetPreconditioner = true;}
+    void resetPreconditioner()
+    {
+        M_resetPreconditioner = true;
+    }
 
     //! Return maps
-    Epetra_Map const& getRepeatedMapEpetra() const { return *M_localMap.map(Repeated); }
+    Epetra_Map const& getRepeatedMapEpetra() const
+    {
+        return *M_localMap.map (Repeated);
+    }
 
-    Epetra_Map const& getRepeatedMapEpetraVec() const { return *M_localMapVector.map(Repeated); }
+    Epetra_Map const& getRepeatedMapEpetraVec() const
+    {
+        return *M_localMapVector.map (Repeated);
+    }
 
-    MapEpetra const& getMap() const { return M_localMap; }
+    MapEpetra const& getMap() const
+    {
+        return M_localMap;
+    }
 
-    void recomputeMatrix(bool const recomp){M_recomputeMatrix = recomp;}
+    void recomputeMatrix (bool const recomp)
+    {
+        M_recomputeMatrix = recomp;
+    }
 
-    matrix_Type& massMatrix() { return *M_massMatrix; }
+    matrix_Type& massMatrix()
+    {
+        return *M_massMatrix;
+    }
 
     //@}
 protected:
 
-	//! Solves PDE system
+    //! Solves PDE system
     void solveSystem (  matrixPtr_Type matrFull, vector_Type&   rhsFull );
 
     //! Apply BC
-    void applyBoundaryConditions( matrix_Type& matrix, vector_Type& rhs, bcHandlerRaw_Type& BCh );
+    void applyBoundaryConditions ( matrix_Type& matrix, vector_Type& rhs, bcHandlerRaw_Type& BCh );
 
     //! Data
     const data_type&               M_data;
@@ -250,8 +281,11 @@ private:
     //! Elementary matrices
     MatrixElemental                        M_stiffnessElementaryMatrix;
     MatrixElemental                        M_massElementaryMatrix;
-    Real 						   massCoefficient;
-    UInt dim_u() const           { return M_uFESpace.dim(); }
+    Real                           massCoefficient;
+    UInt dim_u() const
+    {
+        return M_uFESpace.dim();
+    }
 
 }; // class MonodomainSolver
 
@@ -264,10 +298,10 @@ private:
 //! Constructors
 template<typename Mesh, typename SolverType>
 HeartMonodomainSolver<Mesh, SolverType>::
-HeartMonodomainSolver( const data_type&          dataType,
-                  FESpace<Mesh, MapEpetra>& uFESpace,
-                  BCHandler&                BCh_u,
-                  boost::shared_ptr<Epetra_Comm>&              comm ):
+HeartMonodomainSolver ( const data_type&          dataType,
+                        FESpace<Mesh, MapEpetra>& uFESpace,
+                        BCHandler&                BCh_u,
+                        boost::shared_ptr<Epetra_Comm>&              comm ) :
     M_data                   ( dataType ),
     M_uFESpace               ( uFESpace ),
     M_comm                   ( comm ),
@@ -275,9 +309,9 @@ HeartMonodomainSolver( const data_type&          dataType,
     M_BChandlerElectric      ( &BCh_u ),
     M_setBC                  ( true ),
     M_localMap               ( M_uFESpace.map() ),
-    M_localMapVector         (M_localMap+M_localMap+M_localMap),
+    M_localMapVector         (M_localMap + M_localMap + M_localMap),
     M_massMatrix             ( ),
-    M_stiffnessMatrix	     ( ),
+    M_stiffnessMatrix        ( ),
     M_matrNoBC               ( ),
     M_rhsNoBC                ( M_localMap ),
     M_solutionTransmembranePotential      ( M_localMap ),
@@ -295,59 +329,64 @@ HeartMonodomainSolver( const data_type&          dataType,
     M_massElementaryMatrix   ( M_uFESpace.fe().nbFEDof(), 1, 1 )
 {
 
-	if (M_data.hasFibers() )
-	    {
-	    	std::stringstream MyPID;
-	        ifstream fibers(M_data.fibersFile().c_str());
+    if (M_data.hasFibers() )
+    {
+        std::stringstream MyPID;
+        ifstream fibers (M_data.fibersFile().c_str() );
 
-	        std::cout << "fiber_file: " <<  M_data.fibersFile().c_str() << std::endl;
-	        UInt NumGlobalElements= M_localMapVector.map(Repeated)->NumGlobalElements();
-	        std::vector<Real> fiber_global_vector(NumGlobalElements);
+        std::cout << "fiber_file: " <<  M_data.fibersFile().c_str() << std::endl;
+        UInt NumGlobalElements = M_localMapVector.map (Repeated)->NumGlobalElements();
+        std::vector<Real> fiber_global_vector (NumGlobalElements);
 
-	        for( UInt i=0; i< NumGlobalElements; ++i)
-	    		fibers>>fiber_global_vector[i];
-	    	 UInt NumMyElements = M_localMapVector.map(Repeated)->NumMyElements();
-	    	for(UInt j=0; j< NumMyElements; ++j)
-	    	{
-	    		UInt ig= M_localMapVector.map(Repeated)->MyGlobalElements()[j];
-	    		M_fiberVector[ig]= fiber_global_vector[ig];
-	    		}
-	    	std::cout << std::endl;
-	    	fiber_global_vector.clear();
-	    }
+        for ( UInt i = 0; i < NumGlobalElements; ++i)
+        {
+            fibers >> fiber_global_vector[i];
+        }
+        UInt NumMyElements = M_localMapVector.map (Repeated)->NumMyElements();
+        for (UInt j = 0; j < NumMyElements; ++j)
+        {
+            UInt ig = M_localMapVector.map (Repeated)->MyGlobalElements() [j];
+            M_fiberVector[ig] = fiber_global_vector[ig];
+        }
+        std::cout << std::endl;
+        fiber_global_vector.clear();
+    }
 };
 
 
 template<typename Mesh, typename SolverType>
-void HeartMonodomainSolver<Mesh, SolverType>::setup( const GetPot& dataFile )
+void HeartMonodomainSolver<Mesh, SolverType>::setup ( const GetPot& dataFile )
 {
 
-    M_diagonalize = dataFile( "electric/space_discretization/diagonalize",  1. );
+    M_diagonalize = dataFile ( "electric/space_discretization/diagonalize",  1. );
 
-    M_reusePreconditioner   = dataFile( "electric/prec/reuse", true);
+    M_reusePreconditioner   = dataFile ( "electric/prec/reuse", true);
 
-    M_linearSolver.setCommunicator(M_comm);
+    M_linearSolver.setCommunicator (M_comm);
 
-    M_linearSolver.setDataFromGetPot( dataFile, "electric/solver" );
+    M_linearSolver.setDataFromGetPot ( dataFile, "electric/solver" );
 
-    M_maxIteration = dataFile( "electric/solver/max_iter", -1);
+    M_maxIteration = dataFile ( "electric/solver/max_iter", -1);
 
-    std::string precType = dataFile( "electric/prec/prectype", "Ifpack");
+    std::string precType = dataFile ( "electric/prec/prectype", "Ifpack");
 
-    M_preconditioner.reset( PRECFactory::instance().createObject( precType ) );
-    ASSERT(M_preconditioner.get() != 0, "monodomainSolver : Preconditioner not set");
+    M_preconditioner.reset ( PRECFactory::instance().createObject ( precType ) );
+    ASSERT (M_preconditioner.get() != 0, "monodomainSolver : Preconditioner not set");
 
-    M_preconditioner->setDataFromGetPot( dataFile, "electric/prec" );
+    M_preconditioner->setDataFromGetPot ( dataFile, "electric/prec" );
 }
 
 
 template<typename Mesh, typename SolverType>
 void HeartMonodomainSolver<Mesh, SolverType>::buildSystem()
 {
-    M_massMatrix.reset  ( new matrix_Type(M_localMap) );
-    M_stiffnessMatrix.reset( new matrix_Type(M_localMap) );
+    M_massMatrix.reset  ( new matrix_Type (M_localMap) );
+    M_stiffnessMatrix.reset ( new matrix_Type (M_localMap) );
 
-    if (M_verbose) std::cout << "  f-  Computing constant matrices ...        ";
+    if (M_verbose)
+    {
+        std::cout << "  f-  Computing constant matrices ...        ";
+    }
 
     LifeChrono chrono;
 
@@ -377,128 +416,128 @@ void HeartMonodomainSolver<Mesh, SolverType>::buildSystem()
         chronoZero.stop();
 
         chronoStiff.start();
-        switch(M_data.heartDiffusionFactor() )
+        switch (M_data.heartDiffusionFactor() )
         {
-        case 0:
-            M_uFESpace.fe().updateFirstDeriv( M_uFESpace.mesh()->volumeList( iVol ) );
-            if (M_data.hasFibers() )
-            {
-                stiff( M_data.longitudinalConductivity(),
-                       M_data.transversalConductivity(),
-                       M_fiberVector,
-                       M_stiffnessElementaryMatrix,
-                       M_uFESpace.fe(),
-                       M_uFESpace.dof(),
-                       0,
-                       0);
-            }
-            else
-            {
-                stiff( M_data.diffusivity(), M_stiffnessElementaryMatrix,  M_uFESpace.fe(), 0, 0 );
-            }
-	        break;
+            case 0:
+                M_uFESpace.fe().updateFirstDeriv ( M_uFESpace.mesh()->volumeList ( iVol ) );
+                if (M_data.hasFibers() )
+                {
+                    stiff ( M_data.longitudinalConductivity(),
+                            M_data.transversalConductivity(),
+                            M_fiberVector,
+                            M_stiffnessElementaryMatrix,
+                            M_uFESpace.fe(),
+                            M_uFESpace.dof(),
+                            0,
+                            0);
+                }
+                else
+                {
+                    stiff ( M_data.diffusivity(), M_stiffnessElementaryMatrix,  M_uFESpace.fe(), 0, 0 );
+                }
+                break;
 
-        	case 1:
-        		M_uFESpace.fe().updateFirstDerivQuadPt( M_uFESpace.mesh()->volumeList( iVol ) );
-        	    if (M_data.hasFibers() )
-        	    {
-        	        stiff( M_data.reducedConductivitySphere(),
-                           M_data.longitudinalConductivity(),
-                           M_data.transversalConductivity(),
-                           M_fiberVector,
-                           M_stiffnessElementaryMatrix,
-                           M_uFESpace.fe(),
-                           M_uFESpace.dof(), 0, 0);
-        	    }
-        	    else
-        	    {
-        	        stiff( M_data.reducedConductivitySphere(),
-                           M_data.diffusivity(), M_stiffnessElementaryMatrix,
-                           M_uFESpace.fe(),
-                           M_uFESpace.dof(),
-                           0,
-                           0);
-        	    }
-        		break;
-        case 2:
-            M_uFESpace.fe().updateFirstDerivQuadPt( M_uFESpace.mesh()->volumeList( iVol ) );
-            if (M_data.hasFibers() )
-            {
-                stiff( M_data.reducedConductivityCylinder(),
-                       M_data.longitudinalConductivity(),
-                       M_data.transversalConductivity(),
-                       M_fiberVector,
-                       M_stiffnessElementaryMatrix,
-                       M_uFESpace.fe(),
-                       M_uFESpace.dof(),
-                       0,
-                       0);
-            }
-            else
-            {
-                stiff( M_data.reducedConductivityCylinder(),
-                       M_data.diffusivity(),
-                       M_stiffnessElementaryMatrix,
-                       M_uFESpace.fe(),
-                       M_uFESpace.dof(),
-                       0,
-                       0);
-            }
-            break;
-        case 3:
-            M_uFESpace.fe().updateFirstDerivQuadPt( M_uFESpace.mesh()->volumeList( iVol ) );
-            if (M_data.hasFibers() )
-            {
-                stiff( M_data.reducedConductivityBox(),
-                       M_data.longitudinalConductivity(),
-                       M_data.transversalConductivity(),
-                       M_fiberVector,
-                       M_stiffnessElementaryMatrix,
-                       M_uFESpace.fe(),
-                       M_uFESpace.dof(),
-                       0,
-                       0);
-            }
-            else
-            {
-                stiff( M_data.reducedConductivityBox(),
-                       M_data.diffusivity(),
-                       M_stiffnessElementaryMatrix,
-                       M_uFESpace.fe(),
-                       M_uFESpace.dof(),
-                       0,
-                       0);
-            }
-            break;
+            case 1:
+                M_uFESpace.fe().updateFirstDerivQuadPt ( M_uFESpace.mesh()->volumeList ( iVol ) );
+                if (M_data.hasFibers() )
+                {
+                    stiff ( M_data.reducedConductivitySphere(),
+                            M_data.longitudinalConductivity(),
+                            M_data.transversalConductivity(),
+                            M_fiberVector,
+                            M_stiffnessElementaryMatrix,
+                            M_uFESpace.fe(),
+                            M_uFESpace.dof(), 0, 0);
+                }
+                else
+                {
+                    stiff ( M_data.reducedConductivitySphere(),
+                            M_data.diffusivity(), M_stiffnessElementaryMatrix,
+                            M_uFESpace.fe(),
+                            M_uFESpace.dof(),
+                            0,
+                            0);
+                }
+                break;
+            case 2:
+                M_uFESpace.fe().updateFirstDerivQuadPt ( M_uFESpace.mesh()->volumeList ( iVol ) );
+                if (M_data.hasFibers() )
+                {
+                    stiff ( M_data.reducedConductivityCylinder(),
+                            M_data.longitudinalConductivity(),
+                            M_data.transversalConductivity(),
+                            M_fiberVector,
+                            M_stiffnessElementaryMatrix,
+                            M_uFESpace.fe(),
+                            M_uFESpace.dof(),
+                            0,
+                            0);
+                }
+                else
+                {
+                    stiff ( M_data.reducedConductivityCylinder(),
+                            M_data.diffusivity(),
+                            M_stiffnessElementaryMatrix,
+                            M_uFESpace.fe(),
+                            M_uFESpace.dof(),
+                            0,
+                            0);
+                }
+                break;
+            case 3:
+                M_uFESpace.fe().updateFirstDerivQuadPt ( M_uFESpace.mesh()->volumeList ( iVol ) );
+                if (M_data.hasFibers() )
+                {
+                    stiff ( M_data.reducedConductivityBox(),
+                            M_data.longitudinalConductivity(),
+                            M_data.transversalConductivity(),
+                            M_fiberVector,
+                            M_stiffnessElementaryMatrix,
+                            M_uFESpace.fe(),
+                            M_uFESpace.dof(),
+                            0,
+                            0);
+                }
+                else
+                {
+                    stiff ( M_data.reducedConductivityBox(),
+                            M_data.diffusivity(),
+                            M_stiffnessElementaryMatrix,
+                            M_uFESpace.fe(),
+                            M_uFESpace.dof(),
+                            0,
+                            0);
+                }
+                break;
         }
         chronoStiff.stop();
 
         chronoMass.start();
-        mass( 1., M_massElementaryMatrix, M_uFESpace.fe(), 0, 0 );
+        mass ( 1., M_massElementaryMatrix, M_uFESpace.fe(), 0, 0 );
         chronoMass.stop();
 
 
         chronoStiffAssemble.start();
-        assembleMatrix( *M_stiffnessMatrix,
-                        M_stiffnessElementaryMatrix,
-                        M_uFESpace.fe(),
-                        M_uFESpace.fe(),
-                        M_uFESpace.dof(),
-                        M_uFESpace.dof(),
-                        0, 0,
-                        0, 0);
+        assembleMatrix ( *M_stiffnessMatrix,
+                         M_stiffnessElementaryMatrix,
+                         M_uFESpace.fe(),
+                         M_uFESpace.fe(),
+                         M_uFESpace.dof(),
+                         M_uFESpace.dof(),
+                         0, 0,
+                         0, 0);
         chronoStiffAssemble.stop();
 
 
         chronoMassAssemble.start();
-        assembleMatrix( *M_massMatrix,
-                        M_massElementaryMatrix,
-                        M_uFESpace.fe(),
-                        M_uFESpace.fe(),
-                        M_uFESpace.dof(),
-                        M_uFESpace.dof(),
-                        0, 0,
-                        0, 0);
+        assembleMatrix ( *M_massMatrix,
+                         M_massElementaryMatrix,
+                         M_uFESpace.fe(),
+                         M_uFESpace.fe(),
+                         M_uFESpace.dof(),
+                         M_uFESpace.dof(),
+                         0, 0,
+                         0, 0);
         chronoMassAssemble.stop();
 
     }
@@ -508,9 +547,15 @@ void HeartMonodomainSolver<Mesh, SolverType>::buildSystem()
     M_comm->Barrier();
 
     chrono.stop();
-    if (M_verbose) std::cout << "done in " << chrono.diff() << " s.\n" << std::flush;
+    if (M_verbose)
+    {
+        std::cout << "done in " << chrono.diff() << " s.\n" << std::flush;
+    }
 
-    if (M_verbose) std::cout << "  f-  Finalizing the matrices     ...        " << std::flush;
+    if (M_verbose)
+    {
+        std::cout << "  f-  Finalizing the matrices     ...        " << std::flush;
+    }
     chrono.start();
 
     M_stiffnessMatrix->globalAssemble();
@@ -518,18 +563,21 @@ void HeartMonodomainSolver<Mesh, SolverType>::buildSystem()
 
     M_comm->Barrier();
 
-    M_matrNoBC.reset(new matrix_Type(M_localMap, M_stiffnessMatrix->meanNumEntries() ));
+    M_matrNoBC.reset (new matrix_Type (M_localMap, M_stiffnessMatrix->meanNumEntries() ) );
 
     //! Computing 1/dt * M + K
 
     *M_matrNoBC += *M_stiffnessMatrix;
 
-    *M_matrNoBC += *M_massMatrix*massCoefficient;
+    *M_matrNoBC += *M_massMatrix * massCoefficient;
 
     M_matrNoBC->globalAssemble();
 
     chrono.stop();
-    if (M_verbose) std::cout << "done in " << chrono.diff() << " s." << std::endl;
+    if (M_verbose)
+    {
+        std::cout << "done in " << chrono.diff() << " s." << std::endl;
+    }
 
     if (false)
         std::cout << "partial times:  \n"
@@ -545,33 +593,33 @@ void HeartMonodomainSolver<Mesh, SolverType>::buildSystem()
 
 template<typename Mesh, typename SolverType>
 void HeartMonodomainSolver<Mesh, SolverType>::
-initialize( const source_Type& u0 )
+initialize ( const source_Type& u0 )
 {
 
-    vector_Type u(M_uFESpace.map());
+    vector_Type u (M_uFESpace.map() );
 
-    M_uFESpace.interpolate(u0, u, 0.);
+    M_uFESpace.interpolate (u0, u, 0.);
 
-    initialize(u);
+    initialize (u);
 }
 
 
 
 template<typename Mesh, typename SolverType>
 void HeartMonodomainSolver<Mesh, SolverType>::
-initialize( const Function& u0 )
+initialize ( const Function& u0 )
 {
 
-     vector_Type u(M_uFESpace.map());
-     M_uFESpace.interpolate(u0, u, 0.);
+    vector_Type u (M_uFESpace.map() );
+    M_uFESpace.interpolate (u0, u, 0.);
 
-     initialize(u);
+    initialize (u);
 }
 
 
 template<typename Mesh, typename SolverType>
 void HeartMonodomainSolver<Mesh, SolverType>::
-initialize( const vector_Type& u0 )
+initialize ( const vector_Type& u0 )
 {
 
     M_solutionTransmembranePotential = u0;
@@ -581,14 +629,14 @@ initialize( const vector_Type& u0 )
 
 template<typename Mesh, typename SolverType>
 void HeartMonodomainSolver<Mesh, SolverType>::
-updatePDESystem(Real         alpha,
-                vector_Type& sourceVec )
+updatePDESystem (Real         alpha,
+                 vector_Type& sourceVec )
 {
 
     LifeChrono chrono;
 
     if (M_verbose)
-            std::cout << "  f-  Updating mass term and right hand side... "
+        std::cout << "  f-  Updating mass term and right hand side... "
                   << std::flush;
 
     chrono.start();
@@ -599,29 +647,33 @@ updatePDESystem(Real         alpha,
     chrono.stop();
 
     if (M_verbose)
+    {
         std::cout << "done in " << chrono.diff() << " s.\n"  << std::flush;
+    }
 
     M_updated = false;
 
     if (M_recomputeMatrix)
+    {
         buildSystem();
+    }
 
     if (M_verbose)
-          std::cout << "  f-  Copying the matrices ...                 "
-                    << std::flush;
+        std::cout << "  f-  Copying the matrices ...                 "
+                  << std::flush;
 
     chrono.start();
 
-    M_matrNoBC.reset(new matrix_Type(M_localMap, M_stiffnessMatrix->meanNumEntries() ));
+    M_matrNoBC.reset (new matrix_Type (M_localMap, M_stiffnessMatrix->meanNumEntries() ) );
 
     *M_matrNoBC += *M_stiffnessMatrix;
 
-    *M_matrNoBC += *M_massMatrix*alpha;
+    *M_matrNoBC += *M_massMatrix * alpha;
 
 
     chrono.stop();
     if (M_verbose) std::cout << "done in " << chrono.diff() << " s.\n"
-                             << std::flush;
+                                 << std::flush;
 
 
 
@@ -632,13 +684,13 @@ updatePDESystem(Real         alpha,
 
 template<typename Mesh, typename SolverType>
 void HeartMonodomainSolver<Mesh, SolverType>::
-updatePDESystem(vector_Type& sourceVec )
+updatePDESystem (vector_Type& sourceVec )
 {
 
     LifeChrono chrono;
 
     if (M_verbose)
-            std::cout << "  f-  Updating right hand side... "
+        std::cout << "  f-  Updating right hand side... "
                   << std::flush;
 
     chrono.start();
@@ -649,20 +701,22 @@ updatePDESystem(vector_Type& sourceVec )
     chrono.stop();
 
     if (M_verbose)
+    {
         std::cout << "done in " << chrono.diff() << " s.\n"  << std::flush;
+    }
 
 }
 
 
 
 template<typename Mesh, typename SolverType>
-void HeartMonodomainSolver<Mesh, SolverType>::PDEiterate( bcHandlerRaw_Type& bch )
+void HeartMonodomainSolver<Mesh, SolverType>::PDEiterate ( bcHandlerRaw_Type& bch )
 {
 
     LifeChrono chrono;
     chrono.start();
 
-    matrixPtr_Type matrFull( new matrix_Type(*M_matrNoBC) );
+    matrixPtr_Type matrFull ( new matrix_Type (*M_matrNoBC) );
     vector_Type    rhsFull = M_rhsNoBC;
 
     chrono.stop();
@@ -674,20 +728,23 @@ void HeartMonodomainSolver<Mesh, SolverType>::PDEiterate( bcHandlerRaw_Type& bch
     // boundary conditions update
     M_comm->Barrier();
     if (M_verbose) std::cout << "  f-  Applying boundary conditions ...         "
-              << std::flush;
+                                 << std::flush;
 
     chrono.start();
 
-    applyBoundaryConditions( *matrFull, rhsFull, bch);
+    applyBoundaryConditions ( *matrFull, rhsFull, bch);
 
     chrono.stop();
 
     M_comm->Barrier();
 
-    if (M_verbose) std::cout << "done in " << chrono.diff() << " s.\n" << std::flush;
+    if (M_verbose)
+    {
+        std::cout << "done in " << chrono.diff() << " s.\n" << std::flush;
+    }
 
     //! Solving the system
-    solveSystem( matrFull, rhsFull );
+    solveSystem ( matrFull, rhsFull );
 
     //  M_residual  = M_rhsNoBC;
     //  M_residual -= *M_matrNoBC*M_solutionTransmembranePotential;
@@ -697,16 +754,18 @@ void HeartMonodomainSolver<Mesh, SolverType>::PDEiterate( bcHandlerRaw_Type& bch
 
 
 template<typename Mesh, typename SolverType>
-void HeartMonodomainSolver<Mesh, SolverType>::solveSystem( matrixPtr_Type  matrFull,
-                                                      vector_Type&    rhsFull )
+void HeartMonodomainSolver<Mesh, SolverType>::solveSystem ( matrixPtr_Type  matrFull,
+                                                            vector_Type&    rhsFull )
 {
     LifeChrono chrono;
 
     if (M_verbose)
+    {
         std::cout << "  f-  Setting up the solver ...                ";
+    }
 
     chrono.start();
-    M_linearSolver.setMatrix(*matrFull);
+    M_linearSolver.setMatrix (*matrFull);
     chrono.stop();
 
     if (M_verbose)
@@ -718,19 +777,21 @@ void HeartMonodomainSolver<Mesh, SolverType>::solveSystem( matrixPtr_Type  matrF
         chrono.start();
 
         if (M_verbose)
+        {
             std::cout << "  f-  Computing the precond ...                ";
+        }
 
-        M_preconditioner->buildPreconditioner(matrFull);
+        M_preconditioner->buildPreconditioner (matrFull);
 
         Real condest = M_preconditioner->condest();
 
-        M_linearSolver.setPreconditioner(M_preconditioner);
+        M_linearSolver.setPreconditioner (M_preconditioner);
 
         chrono.stop();
         if (M_verbose)
         {
             std::cout << "done in " << chrono.diff() << " s.\n";
-          	std::cout << "Estimated condition number = " << condest << "\n" <<  std::flush;
+            std::cout << "Estimated condition number = " << condest << "\n" <<  std::flush;
         }
 
         M_resetPreconditioner = false;
@@ -738,16 +799,20 @@ void HeartMonodomainSolver<Mesh, SolverType>::solveSystem( matrixPtr_Type  matrF
     else
     {
         if (M_verbose)
+        {
             std::cout << "f-  Reusing  precond ...                \n" <<  std::flush;
+        }
     }
 
 
     chrono.start();
 
     if (M_verbose)
+    {
         std::cout << "f-  Solving system ...                                ";
+    }
 
-    Int numIter = M_linearSolver.solve(M_solutionTransmembranePotential, rhsFull);
+    Int numIter = M_linearSolver.solve (M_solutionTransmembranePotential, rhsFull);
 
     chrono.stop();
 
@@ -771,29 +836,29 @@ void HeartMonodomainSolver<Mesh, SolverType>::solveSystem( matrixPtr_Type  matrF
 
 
 template<typename Mesh, typename SolverType>
-void HeartMonodomainSolver<Mesh, SolverType>::applyBoundaryConditions( matrix_Type&        matrix,
-                                                                  vector_Type&        rhs,
-                                                                  bcHandlerRaw_Type&  BCh )
+void HeartMonodomainSolver<Mesh, SolverType>::applyBoundaryConditions ( matrix_Type&        matrix,
+                                                                        vector_Type&        rhs,
+                                                                        bcHandlerRaw_Type&  BCh )
 {
 
     // BC manage for the PDE
     if ( !BCh.bcUpdateDone() )
     {
-        BCh.bcUpdate( *M_uFESpace.mesh(), M_uFESpace.feBd(), M_uFESpace.dof() );
+        BCh.bcUpdate ( *M_uFESpace.mesh(), M_uFESpace.feBd(), M_uFESpace.dof() );
     }
 
-    vector_Type rhsFull(M_rhsNoBC,Repeated, Zero);
+    vector_Type rhsFull (M_rhsNoBC, Repeated, Zero);
 
-    bcManage( matrix, rhs, *M_uFESpace.mesh(), M_uFESpace.dof(),
-              BCh, M_uFESpace.feBd(), 1.,M_data.time() );
+    bcManage ( matrix, rhs, *M_uFESpace.mesh(), M_uFESpace.dof(),
+               BCh, M_uFESpace.feBd(), 1., M_data.time() );
 
     rhs = rhsFull;
     if ( BCh.hasOnlyEssential() && M_diagonalize )
     {
-        matrix.diagonalize( 1*dim_u(),
-                            M_diagonalize,
-                            rhs,
-                            0.);
+        matrix.diagonalize ( 1 * dim_u(),
+                             M_diagonalize,
+                             rhs,
+                             0.);
     }
 
 } // applyBoundaryCondition

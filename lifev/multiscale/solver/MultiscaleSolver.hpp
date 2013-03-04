@@ -81,7 +81,7 @@ public:
      * @param problemName the name of the problem (used to save data in a specific folder).
      * @param coresPerNode number of cores for each node (this is mandatory when running on clusters for a correct distribution of the models among the nodes).
      */
-    void setupProblem( const std::string& fileName, const std::string& problemName, const UInt& coresPerNode );
+    void setupProblem ( const std::string& fileName, const std::string& problemName, const UInt& coresPerNode );
 
     //! Run the time-loop to solve the Multiscale problem
     /*!
@@ -90,7 +90,7 @@ public:
      * @param tolerance the tolerance to check the reference solution with respect to the computed one.
      * @return 0: EXIT_SUCCESS, 1: EXIT_FAILURE
      */
-    bool solveProblem( const Real& referenceSolution = -1., const Real& tolerance = 1e-8 );
+    bool solveProblem ( const Real& referenceSolution = -1., const Real& tolerance = 1e-8 );
 
     //! Display some information about the Multiscale problem (should be called after setupProblem)
     void showMe() const;
@@ -105,7 +105,10 @@ public:
     /*!
      * @param comm Epetra communicator
      */
-    void setCommunicator( const multiscaleCommPtr_Type& comm ) { M_comm = comm; }
+    void setCommunicator ( const multiscaleCommPtr_Type& comm )
+    {
+        M_comm = comm;
+    }
 
     //@}
 
@@ -114,9 +117,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    MultiscaleSolver( const MultiscaleSolver& solver );
+    MultiscaleSolver ( const MultiscaleSolver& solver );
 
-    MultiscaleSolver& operator=( const MultiscaleSolver& solver );
+    MultiscaleSolver& operator= ( const MultiscaleSolver& solver );
 
     //@}
 
@@ -132,8 +135,8 @@ private:
      * @param updateSolutionCPUTime CPU time to update the solution of the problem
      * @param saveCPUTime CPU time to save the solution
      */
-    void saveCPUTime( const Real& totalCPUTime, const Real& buildUpdateCPUTime, const Real& solveCPUTime,
-                      const Real& updateSolutionCPUTime, const Real& saveCPUTime ) const;
+    void saveCPUTime ( const Real& totalCPUTime, const Real& buildUpdateCPUTime, const Real& solveCPUTime,
+                       const Real& updateSolutionCPUTime, const Real& saveCPUTime ) const;
 
     //! Import iteration number from the CPU file
     void importIterationNumber();

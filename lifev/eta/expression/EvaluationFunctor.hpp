@@ -73,11 +73,11 @@ class EvaluationFunctor1
 {
 public:
 
-	//! @name Public Types
+    //! @name Public Types
     //@{
 
     //! Type of the values returned by this class
-	typedef typename FunctorType::return_Type return_Type;
+    typedef typename FunctorType::return_Type return_Type;
 
     //@}
 
@@ -85,14 +85,14 @@ public:
     //! @name Static constants
     //@{
 
-	//! Flag for the global current FE
+    //! Flag for the global current FE
     const static flag_Type S_globalUpdateFlag;
 
     //! Flag for the test current FE
-	const static flag_Type S_testUpdateFlag;
+    const static flag_Type S_testUpdateFlag;
 
     //! Flag for the solution current FE
-	const static flag_Type S_solutionUpdateFlag;
+    const static flag_Type S_solutionUpdateFlag;
 
     //@}
 
@@ -100,17 +100,17 @@ public:
     //! @name Constructors, destructor
     //@{
 
-	//! Copy constructor
-	EvaluationFunctor1(const EvaluationFunctor1<FunctorType,ArgumentEvaluationType>& eval)
-		: M_functor(eval.M_functor),
-          M_evaluation(eval.M_evaluation)
+    //! Copy constructor
+    EvaluationFunctor1 (const EvaluationFunctor1<FunctorType, ArgumentEvaluationType>& eval)
+        : M_functor (eval.M_functor),
+          M_evaluation (eval.M_evaluation)
     {}
 
-	//! Constructor from the corresponding expression
-	template<typename Argument>
-	explicit EvaluationFunctor1(const ExpressionFunctor1<FunctorType,Argument>& expression)
-		: M_functor(expression.functor()),
-          M_evaluation(expression.argument())
+    //! Constructor from the corresponding expression
+    template<typename Argument>
+    explicit EvaluationFunctor1 (const ExpressionFunctor1<FunctorType, Argument>& expression)
+        : M_functor (expression.functor() ),
+          M_evaluation (expression.argument() )
     {}
 
     //! Destructor
@@ -124,15 +124,17 @@ public:
     //@{
 
     //! Internal update
-	void update(const UInt& iElement)
-	{
-		M_evaluation.update(iElement);
-	}
+    void update (const UInt& iElement)
+    {
+        M_evaluation.update (iElement);
+    }
 
     //! Display method
-	static void display(std::ostream& out = std::cout)
-	{
-        out << "f( "; ArgumentEvaluationType::display(out); out << " )";
+    static void display (std::ostream& out = std::cout)
+    {
+        out << "f( ";
+        ArgumentEvaluationType::display (out);
+        out << " )";
     }
 
     //@}
@@ -142,31 +144,31 @@ public:
     //@{
 
     //! Setter for the global current FE
-	template< typename CFEType >
-	void setGlobalCFE(const CFEType* globalCFE)
-	{
-        M_evaluation.setGlobalCFE(globalCFE);
+    template< typename CFEType >
+    void setGlobalCFE (const CFEType* globalCFE)
+    {
+        M_evaluation.setGlobalCFE (globalCFE);
     }
 
     //! Setter for the test current FE
-	template< typename CFEType >
-	void setTestCFE(const CFEType* testCFE)
-	{
-        M_evaluation.setTestCFE(testCFE);
+    template< typename CFEType >
+    void setTestCFE (const CFEType* testCFE)
+    {
+        M_evaluation.setTestCFE (testCFE);
     }
 
     //! Setter for the solution current FE
-	template< typename CFEType >
-	void setSolutionCFE(const CFEType* solutionCFE)
-	{
-        M_evaluation.setSolutionCFE(solutionCFE);
+    template< typename CFEType >
+    void setSolutionCFE (const CFEType* solutionCFE)
+    {
+        M_evaluation.setSolutionCFE (solutionCFE);
     }
 
     //! Setter for the quadrature rule
-	void setQuadrature(const QuadratureRule& qr)
-	{
-		M_evaluation.setQuadrature(qr);
-	}
+    void setQuadrature (const QuadratureRule& qr)
+    {
+        M_evaluation.setQuadrature (qr);
+    }
 
     //@}
 
@@ -175,21 +177,21 @@ public:
     //@{
 
     //! Getter for a value
-	return_Type value_q(const UInt& q) const
+    return_Type value_q (const UInt& q) const
     {
-        return (*M_functor)(M_evaluation.value_q(q));
+        return (*M_functor) (M_evaluation.value_q (q) );
     }
 
     //! Getter for the value for a vector
-	return_Type value_qi(const UInt& q, const UInt& i) const
+    return_Type value_qi (const UInt& q, const UInt& i) const
     {
-        return (*M_functor)(M_evaluation.value_qi(q,i));
+        return (*M_functor) (M_evaluation.value_qi (q, i) );
     }
 
     //! Getter for the value for a matrix
-	return_Type value_qij(const UInt& q, const UInt& i, const UInt& j) const
+    return_Type value_qij (const UInt& q, const UInt& i, const UInt& j) const
     {
-        return (*M_functor)(M_evaluation.value_qij(q,i,j));
+        return (*M_functor) (M_evaluation.value_qij (q, i, j) );
     }
 
     //@}
@@ -199,28 +201,28 @@ private:
     //! @name Private Methods
     //@{
 
-	//! No empty constructor
-	EvaluationFunctor1();
+    //! No empty constructor
+    EvaluationFunctor1();
 
     //@}
 
-	// Internal storage
-	boost::shared_ptr<FunctorType> M_functor;
-	ArgumentEvaluationType M_evaluation;
+    // Internal storage
+    boost::shared_ptr<FunctorType> M_functor;
+    ArgumentEvaluationType M_evaluation;
 };
 
 
 template<typename FunctorType, typename ArgumentEvaluationType>
-const flag_Type EvaluationFunctor1<FunctorType,ArgumentEvaluationType>::S_globalUpdateFlag
-  = ArgumentEvaluationType::S_globalUpdateFlag;
+const flag_Type EvaluationFunctor1<FunctorType, ArgumentEvaluationType>::S_globalUpdateFlag
+    = ArgumentEvaluationType::S_globalUpdateFlag;
 
 template<typename FunctorType, typename ArgumentEvaluationType>
-const flag_Type EvaluationFunctor1<FunctorType,ArgumentEvaluationType>::S_testUpdateFlag
-  = ArgumentEvaluationType::S_testUpdateFlag;
+const flag_Type EvaluationFunctor1<FunctorType, ArgumentEvaluationType>::S_testUpdateFlag
+    = ArgumentEvaluationType::S_testUpdateFlag;
 
 template<typename FunctorType, typename ArgumentEvaluationType>
-const flag_Type EvaluationFunctor1<FunctorType,ArgumentEvaluationType>::S_solutionUpdateFlag
-  = ArgumentEvaluationType::S_solutionUpdateFlag;
+const flag_Type EvaluationFunctor1<FunctorType, ArgumentEvaluationType>::S_solutionUpdateFlag
+    = ArgumentEvaluationType::S_solutionUpdateFlag;
 
 
 
@@ -250,11 +252,11 @@ class EvaluationFunctor2
 {
 public:
 
-	//! @name Public Types
+    //! @name Public Types
     //@{
 
     //! Type returned by this class
-	typedef typename FunctorType::return_Type return_Type;
+    typedef typename FunctorType::return_Type return_Type;
 
     //@}
 
@@ -263,13 +265,13 @@ public:
     //@{
 
     //! Flag for the global current FE
-	const static flag_Type S_globalUpdateFlag;
+    const static flag_Type S_globalUpdateFlag;
 
     //! Flag for the test current FE
-	const static flag_Type S_testUpdateFlag;
+    const static flag_Type S_testUpdateFlag;
 
     //! Flag for the solution current FE
-	const static flag_Type S_solutionUpdateFlag;
+    const static flag_Type S_solutionUpdateFlag;
 
     //@}
 
@@ -277,19 +279,19 @@ public:
     //! @name Constructors, destructor
     //@{
 
-	//! Copy constructor
-	EvaluationFunctor2(const EvaluationFunctor2<FunctorType,Argument1EvaluationType,Argument2EvaluationType>& eval)
-		: M_functor(eval.M_functor),
-          M_evaluation1(eval.M_evaluation1),
-          M_evaluation2(eval.M_evaluation2)
+    //! Copy constructor
+    EvaluationFunctor2 (const EvaluationFunctor2<FunctorType, Argument1EvaluationType, Argument2EvaluationType>& eval)
+        : M_functor (eval.M_functor),
+          M_evaluation1 (eval.M_evaluation1),
+          M_evaluation2 (eval.M_evaluation2)
     {}
 
-	//! Constructor from the corresponding expression
-	template<typename Argument1, typename Argument2>
-	explicit EvaluationFunctor2(const ExpressionFunctor2<FunctorType,Argument1,Argument2>& expression)
-		: M_functor(expression.functor()),
-          M_evaluation1(expression.argument1()),
-          M_evaluation2(expression.argument2()) {}
+    //! Constructor from the corresponding expression
+    template<typename Argument1, typename Argument2>
+    explicit EvaluationFunctor2 (const ExpressionFunctor2<FunctorType, Argument1, Argument2>& expression)
+        : M_functor (expression.functor() ),
+          M_evaluation1 (expression.argument1() ),
+          M_evaluation2 (expression.argument2() ) {}
 
     //! Destructor
     ~EvaluationFunctor2()
@@ -302,19 +304,19 @@ public:
     //@{
 
     //! Internal update
-	void update(const UInt& iElement)
-	{
-		M_evaluation1.update(iElement);
-		M_evaluation2.update(iElement);
-	}
+    void update (const UInt& iElement)
+    {
+        M_evaluation1.update (iElement);
+        M_evaluation2.update (iElement);
+    }
 
     //! Display method
-	static void display(std::ostream& out = std::cout)
-	{
+    static void display (std::ostream& out = std::cout)
+    {
         out << "f( ";
-        Argument1EvaluationType::display(out);
+        Argument1EvaluationType::display (out);
         out << " , ";
-        Argument2EvaluationType::display(out);
+        Argument2EvaluationType::display (out);
         out << " )";
     }
 
@@ -325,35 +327,35 @@ public:
     //@{
 
     //! Setter for the global current FE
-	template< typename CFEType >
-	void setGlobalCFE(const CFEType* globalCFE)
-	{
-        M_evaluation1.setGlobalCFE(globalCFE);
-        M_evaluation2.setGlobalCFE(globalCFE);
+    template< typename CFEType >
+    void setGlobalCFE (const CFEType* globalCFE)
+    {
+        M_evaluation1.setGlobalCFE (globalCFE);
+        M_evaluation2.setGlobalCFE (globalCFE);
     }
 
     //! Setter for the test current FE
-	template< typename CFEType >
-	void setTestCFE(const CFEType* testCFE)
-	{
-        M_evaluation1.setTestCFE(testCFE);
-        M_evaluation2.setTestCFE(testCFE);
+    template< typename CFEType >
+    void setTestCFE (const CFEType* testCFE)
+    {
+        M_evaluation1.setTestCFE (testCFE);
+        M_evaluation2.setTestCFE (testCFE);
     }
 
     //! Setter for the solution current FE
-	template< typename CFEType >
-	void setSolutionCFE(const CFEType* solutionCFE)
-	{
-        M_evaluation1.setSolutionCFE(solutionCFE);
-        M_evaluation2.setSolutionCFE(solutionCFE);
+    template< typename CFEType >
+    void setSolutionCFE (const CFEType* solutionCFE)
+    {
+        M_evaluation1.setSolutionCFE (solutionCFE);
+        M_evaluation2.setSolutionCFE (solutionCFE);
     }
 
     //! Setter for the quadrature rule
-	void setQuadrature(const QuadratureRule& qr)
-	{
-		M_evaluation1.setQuadrature(qr);
-        M_evaluation2.setQuadrature(qr);
-	}
+    void setQuadrature (const QuadratureRule& qr)
+    {
+        M_evaluation1.setQuadrature (qr);
+        M_evaluation2.setQuadrature (qr);
+    }
 
     //@}
 
@@ -362,21 +364,21 @@ public:
     //@{
 
     //! Getter for a value
-	return_Type value_q(const UInt& q) const
+    return_Type value_q (const UInt& q) const
     {
-        return (*M_functor)(M_evaluation1.value_q(q),M_evaluation2.value_q(q));
+        return (*M_functor) (M_evaluation1.value_q (q), M_evaluation2.value_q (q) );
     }
 
     //! Getter for the value for a vector
-	return_Type value_qi(const UInt& q, const UInt& i) const
+    return_Type value_qi (const UInt& q, const UInt& i) const
     {
-        return (*M_functor)(M_evaluation1.value_qi(q,i),M_evaluation2.value_qi(q,i));
+        return (*M_functor) (M_evaluation1.value_qi (q, i), M_evaluation2.value_qi (q, i) );
     }
 
     //! Getter for the value for a matrix
-	return_Type value_qij(const UInt& q, const UInt& i, const UInt& j) const
+    return_Type value_qij (const UInt& q, const UInt& i, const UInt& j) const
     {
-        return (*M_functor)(M_evaluation1.value_qij(q,i,j),M_evaluation2.value_qij(q,i,j));
+        return (*M_functor) (M_evaluation1.value_qij (q, i, j), M_evaluation2.value_qij (q, i, j) );
     }
 
     //@}
@@ -387,29 +389,29 @@ private:
     //! @name Private Methods
     //@{
 
-	//! No empty constructor
-	EvaluationFunctor2();
+    //! No empty constructor
+    EvaluationFunctor2();
 
     //@}
 
-	// Internal storage
-	boost::shared_ptr<FunctorType> M_functor;
-	Argument1EvaluationType M_evaluation1;
+    // Internal storage
+    boost::shared_ptr<FunctorType> M_functor;
+    Argument1EvaluationType M_evaluation1;
     Argument2EvaluationType M_evaluation2;
 };
 
 
 template<typename FunctorType, typename Argument1EvaluationType, typename Argument2EvaluationType>
-const flag_Type EvaluationFunctor2<FunctorType,Argument1EvaluationType,Argument2EvaluationType>::S_globalUpdateFlag
-  = Argument1EvaluationType::S_globalUpdateFlag | Argument2EvaluationType::S_globalUpdateFlag;
+const flag_Type EvaluationFunctor2<FunctorType, Argument1EvaluationType, Argument2EvaluationType>::S_globalUpdateFlag
+    = Argument1EvaluationType::S_globalUpdateFlag | Argument2EvaluationType::S_globalUpdateFlag;
 
 template<typename FunctorType, typename Argument1EvaluationType, typename Argument2EvaluationType>
-const flag_Type EvaluationFunctor2<FunctorType,Argument1EvaluationType,Argument2EvaluationType>::S_testUpdateFlag
-  = Argument1EvaluationType::S_testUpdateFlag | Argument2EvaluationType::S_testUpdateFlag;
+const flag_Type EvaluationFunctor2<FunctorType, Argument1EvaluationType, Argument2EvaluationType>::S_testUpdateFlag
+    = Argument1EvaluationType::S_testUpdateFlag | Argument2EvaluationType::S_testUpdateFlag;
 
 template<typename FunctorType, typename Argument1EvaluationType, typename Argument2EvaluationType>
-const flag_Type EvaluationFunctor2<FunctorType,Argument1EvaluationType,Argument2EvaluationType>::S_solutionUpdateFlag
-  = Argument1EvaluationType::S_solutionUpdateFlag | Argument2EvaluationType::S_solutionUpdateFlag;
+const flag_Type EvaluationFunctor2<FunctorType, Argument1EvaluationType, Argument2EvaluationType>::S_solutionUpdateFlag
+    = Argument1EvaluationType::S_solutionUpdateFlag | Argument2EvaluationType::S_solutionUpdateFlag;
 
 } // Namespace ExpressionAssembly
 

@@ -53,7 +53,7 @@ ExpressionDivJ::ExpressionDivJ()
 {}
 
 
-ExpressionDivJ::ExpressionDivJ(const ExpressionDivJ&)
+ExpressionDivJ::ExpressionDivJ (const ExpressionDivJ&)
     : base_Type()
 {}
 
@@ -66,7 +66,7 @@ ExpressionDivJ::~ExpressionDivJ()
 // ===================================================
 
 void
-ExpressionDivJ::display(std::ostream& out)
+ExpressionDivJ::display (std::ostream& out)
 {
     out << "div_j";
 }

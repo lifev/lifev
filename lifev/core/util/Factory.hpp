@@ -68,7 +68,7 @@ struct FactoryDefaultError
         //! @name Constructor and destructor
         //@{
 
-        Exception( const std::string& id ) : std::exception(), M_exception()
+        Exception ( const std::string& id ) : std::exception(), M_exception()
         {
             std::ostringstream ex_str;
             ex_str << "[factory] Unknown Type : " + id;
@@ -83,7 +83,10 @@ struct FactoryDefaultError
         //! @name  Methods
         //@{
 
-        const char* what() const throw () { return M_exception.c_str(); }
+        const char* what() const throw ()
+        {
+            return M_exception.c_str();
+        }
 
         //@}
 
@@ -91,7 +94,10 @@ struct FactoryDefaultError
         std::string M_exception;
     };
 
-    static AbstractProduct* onUnknownType(const std::string& id ) { throw Exception( id ); }
+    static AbstractProduct* onUnknownType (const std::string& id )
+    {
+        throw Exception ( id );
+    }
 };
 
 
@@ -104,9 +110,9 @@ struct FactoryDefaultError
 
   @sa factoryDefaultError, factoryClone, FactoryTypeInfo
 */
-template <class AbstractProduct, typename IdentifierType,
-          typename ProductCreator = boost::function<AbstractProduct*()>,
-          template<class> class FactoryErrorPolicy = FactoryDefaultError>
+template < class AbstractProduct, typename IdentifierType,
+         typename ProductCreator = boost::function<AbstractProduct*() >,
+         template<class> class FactoryErrorPolicy = FactoryDefaultError >
 class Factory : public FactoryErrorPolicy<AbstractProduct>
 {
 public:
@@ -147,12 +153,12 @@ public:
      *
      * @return true if registration went fine, false otherwise
      */
-    bool registerProduct( const identifier_Type& id, creator_Type creator )
+    bool registerProduct ( const identifier_Type& id, creator_Type creator )
     {
 #ifdef HAVE_LIFEV_DEBUG
-        debugStream( 2200 ) << "Registered type with id : " << id << "\n";
+        debugStream ( 2200 ) << "Registered type with id : " << id << "\n";
 #endif
-        return M_associations.insert( typename productId_Type::value_type( id, creator ) ).second;
+        return M_associations.insert ( typename productId_Type::value_type ( id, creator ) ).second;
     }
 
     /**
@@ -162,12 +168,12 @@ public:
      * @sa registerProduct
      * @return true if unregistration went fine, false otherwise
      */
-    bool unregisterProduct( const identifier_Type& id )
+    bool unregisterProduct ( const identifier_Type& id )
     {
 #ifdef HAVE_LIFEV_DEBUG
-        debugStream( 2200 ) << "Unregistered type with id : " << id << "\n";
+        debugStream ( 2200 ) << "Unregistered type with id : " << id << "\n";
 #endif
-        return M_associations.erase( id ) == 1;
+        return M_associations.erase ( id ) == 1;
     }
 
     /**
@@ -178,20 +184,20 @@ public:
      *
      * @return the object associate with \c id
      */
-    product_Type* createObject( const identifier_Type& id )
+    product_Type* createObject ( const identifier_Type& id )
     {
-        typename productId_Type::const_iterator i = M_associations.find( id );
-        if (i != M_associations.end())
+        typename productId_Type::const_iterator i = M_associations.find ( id );
+        if (i != M_associations.end() )
         {
 #ifdef HAVE_LIFEV_DEBUG
             debugStream ( 2200 ) << "Creating type with id : " << id << "\n";
 #endif
-            return (i->second)();
+            return (i->second) ();
         }
 #ifdef HAVE_LIFEV_DEBUG
-        debugStream( 2200 ) << "Unknown type with id : " << id << "\n";
+        debugStream ( 2200 ) << "Unknown type with id : " << id << "\n";
 #endif
-        return super::onUnknownType( id );
+        return super::onUnknownType ( id );
     }
 
     /**
@@ -203,20 +209,20 @@ public:
      * @return the object associate with \c id
      */
     template< typename map_Type >
-    product_Type* createObject( const identifier_Type& id, const map_Type& map )
+    product_Type* createObject ( const identifier_Type& id, const map_Type& map )
     {
-        typename productId_Type::const_iterator i = M_associations.find( id );
+        typename productId_Type::const_iterator i = M_associations.find ( id );
         if ( i != M_associations.end() )
         {
 #ifdef HAVE_LIFEV_DEBUG
-            debugStream ( 2200 ) << "Creating type with id : " << enum2String( id, map ) << "\n";
+            debugStream ( 2200 ) << "Creating type with id : " << enum2String ( id, map ) << "\n";
 #endif
-            return (i->second)();
+            return (i->second) ();
         }
 #ifdef HAVE_LIFEV_DEBUG
-        debugStream( 2200 ) << "Unknown type with id : " << enum2String( id, map ) << "\n";
+        debugStream ( 2200 ) << "Unknown type with id : " << enum2String ( id, map ) << "\n";
 #endif
-        return super::onUnknownType( enum2String( id, map ) );
+        return super::onUnknownType ( enum2String ( id, map ) );
     }
 
     //@}

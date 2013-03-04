@@ -94,29 +94,29 @@ namespace LifeV
 typedef FSIOperator::fluid_Type fluid;
 typedef FSIOperator::solid_Type solid;
 
-FSIOperator::fluidBchandlerPtr_Type BCh_harmonicExtension(FSIOperator &_oper)
+FSIOperator::fluidBchandlerPtr_Type BCh_harmonicExtension (FSIOperator& _oper)
 {
 
     // Boundary condition for the mesh
-    debugStream( 10000 ) << "Boundary condition for the harmonic extension\n";
+    debugStream ( 10000 ) << "Boundary condition for the harmonic extension\n";
 
-    BCFunctionBase bcf(fZero);
+    BCFunctionBase bcf (fZero);
 
-    FSISolver::fluidBchandlerPtr_Type BCh_he(new FSIOperator::fluidBchandler_Type );
+    FSISolver::fluidBchandlerPtr_Type BCh_he (new FSIOperator::fluidBchandler_Type );
 
-    BCh_he->addBC("in", INLET, Essential, Full, bcf,   3);
-    BCh_he->addBC("in", INLETRING, Essential, Full, bcf,   3);
-    BCh_he->addBC("in", OUTLET, Essential, Full, bcf,   3);
-    BCh_he->addBC("out3", OUTLETRING, Essential, Full, bcf,   3);
+    BCh_he->addBC ("in", INLET, Essential, Full, bcf,   3);
+    BCh_he->addBC ("in", INLETRING, Essential, Full, bcf,   3);
+    BCh_he->addBC ("in", OUTLET, Essential, Full, bcf,   3);
+    BCh_he->addBC ("out3", OUTLETRING, Essential, Full, bcf,   3);
 
 
     if (_oper.data().method() == "monolithicGE")
     {
-        debugStream(10000) << "FSIMonolithic GCE harmonic extension\n";
-        FSIMonolithicGE *MOper = dynamic_cast<FSIMonolithicGE *>(&_oper);
-        MOper->setStructureDispToHarmonicExtension(_oper.lambdaFluidRepeated());
-        BCh_he->addBC("Interface", SOLIDINTERFACE, Essential, Full,
-                      *MOper->bcvStructureDispToHarmonicExtension(), 3);
+        debugStream (10000) << "FSIMonolithic GCE harmonic extension\n";
+        FSIMonolithicGE* MOper = dynamic_cast<FSIMonolithicGE*> (&_oper);
+        MOper->setStructureDispToHarmonicExtension (_oper.lambdaFluidRepeated() );
+        BCh_he->addBC ("Interface", SOLIDINTERFACE, Essential, Full,
+                       *MOper->bcvStructureDispToHarmonicExtension(), 3);
     }
     else if (_oper.data().method() == "monolithicGI")
     {
@@ -127,17 +127,17 @@ FSIOperator::fluidBchandlerPtr_Type BCh_harmonicExtension(FSIOperator &_oper)
 }
 
 
-FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFlux(bool /*isOpen=true*/)
+FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFlux (bool /*isOpen=true*/)
 {
-    FSIOperator::fluidBchandlerPtr_Type BCh_fluid( new FSIOperator::fluidBchandler_Type );
+    FSIOperator::fluidBchandlerPtr_Type BCh_fluid ( new FSIOperator::fluidBchandler_Type );
 
     BCFunctionBase flowAneurysm (fluxFunctionAneurysm);
     BCFunctionBase bcf      (fZero);
     //uncomment  to use fluxes
 
     //BCh_fluid->addBC("InFlow" , INLET,  Flux, Normal, flowAneurysm);
-//   if(!isOpen)
-//       BCh_fluid->addBC("InFlow" , INLET,  Flux,   Normal, bcf);
+    //   if(!isOpen)
+    //       BCh_fluid->addBC("InFlow" , INLET,  Flux,   Normal, bcf);
 
     //uncomment  to use fluxes
     //BCh_fluid->addBC("InFlow" , INLET,  Flux, Normal, flowAneurysm);
@@ -145,15 +145,17 @@ FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFlux(bool /*isOpen=true*/)
     return BCh_fluid;
 }
 
-FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFluid(FSIOperator &_oper, bool const & /*isOpen=true*/)
+FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFluid (FSIOperator& _oper, bool const& /*isOpen=true*/)
 {
     // Boundary conditions for the fluid velocity
-    debugStream( 10000 ) << "Boundary condition for the fluid\n";
+    debugStream ( 10000 ) << "Boundary condition for the fluid\n";
 
     if (! _oper.isFluid() )
+    {
         return FSIOperator::fluidBchandlerPtr_Type();
+    }
 
-    FSIOperator::fluidBchandlerPtr_Type BCh_fluid( new FSIOperator::fluidBchandler_Type );
+    FSIOperator::fluidBchandlerPtr_Type BCh_fluid ( new FSIOperator::fluidBchandler_Type );
 
     BCFunctionBase bcf      (fZero);
     BCFunctionBase in_flow  (uInterpolated);
@@ -165,51 +167,53 @@ FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFluid(FSIOperator &_oper, bool
     //BCFunctionBase bcfw0 (w0);
 
     //Inlets
-    BCh_fluid->addBC("InFlow" , INLET,  EssentialVertices, Full, InletVect, 3);
+    BCh_fluid->addBC ("InFlow" , INLET,  EssentialVertices, Full, InletVect, 3);
 
     //Outlets
 
     //Absorbing BC seemed not to work
     //Absorbing BC on outlet 2and3 caused instabilities
-    BCh_fluid->addBC("out3", OUTLET, Natural,  Normal, out_press3);
+    BCh_fluid->addBC ("out3", OUTLET, Natural,  Normal, out_press3);
     //BCh_fluid->addBC("out3", OUTLET, Natural,  Normal, bcf);
 
     return BCh_fluid;
 }
 
-FSIOperator::solidBchandlerPtr_Type BCh_monolithicSolid(FSIOperator &_oper)
+FSIOperator::solidBchandlerPtr_Type BCh_monolithicSolid (FSIOperator& _oper)
 {
 
     if (! _oper.isSolid() )
+    {
         return FSIOperator::solidBchandlerPtr_Type();
+    }
 
     // Boundary conditions for the solid displacement
-    debugStream( 10000 ) << "Boundary condition for the solid\n";
-    FSIOperator::solidBchandlerPtr_Type BCh_solid( new FSIOperator::solidBchandler_Type );
+    debugStream ( 10000 ) << "Boundary condition for the solid\n";
+    FSIOperator::solidBchandlerPtr_Type BCh_solid ( new FSIOperator::solidBchandler_Type );
 
-    BCFunctionBase bcf(fZero);
+    BCFunctionBase bcf (fZero);
 
     //Inlets & Outlets
-    BCh_solid->addBC("BORDERS",   INLETWALL, Essential, Full, bcf,  3);
-    BCh_solid->addBC("BORDERS-RIN",   INLETWALL_INTRING, Essential, Full, bcf,  3);
-    BCh_solid->addBC("BORDERS-ROUT",   INLETWALL_OUTRING, Essential, Full, bcf,  3);
-    BCh_solid->addBC("BORDERS",   OUTLETWALL, Essential, Full, bcf,  3);
-    BCh_solid->addBC("BORDERS-rin",   OUTLETWALL_INTRING, Essential, Full, bcf,  3);
-    BCh_solid->addBC("BORDERS-rout",   OUTLETWALL_OUTRING, Essential, Full, bcf,  3);
+    BCh_solid->addBC ("BORDERS",   INLETWALL, Essential, Full, bcf,  3);
+    BCh_solid->addBC ("BORDERS-RIN",   INLETWALL_INTRING, Essential, Full, bcf,  3);
+    BCh_solid->addBC ("BORDERS-ROUT",   INLETWALL_OUTRING, Essential, Full, bcf,  3);
+    BCh_solid->addBC ("BORDERS",   OUTLETWALL, Essential, Full, bcf,  3);
+    BCh_solid->addBC ("BORDERS-rin",   OUTLETWALL_INTRING, Essential, Full, bcf,  3);
+    BCh_solid->addBC ("BORDERS-rout",   OUTLETWALL_OUTRING, Essential, Full, bcf,  3);
 
     //aortaVelIn::S_timestep = _oper.dataFluid()->dataTime()->timeStep();
 
 
     //Robin BC
-    BCFunctionBase hyd(fZero);
+    BCFunctionBase hyd (fZero);
     BCFunctionBase young (E);
     //robin condition on the outer wall
-    _oper.setRobinOuterWall(hyd, young);
+    _oper.setRobinOuterWall (hyd, young);
     //BCh_solid->addBC("OuterWall", OUTERWALL, Robin, Normal, _oper.bcfRobinOuterWall());
 
 
     //First try: Homogeneous Neumann
-    BCh_solid->addBC("OuterWall", OUTERWALL, Natural, Normal, bcf);
+    BCh_solid->addBC ("OuterWall", OUTERWALL, Natural, Normal, bcf);
 
     return BCh_solid;
 }

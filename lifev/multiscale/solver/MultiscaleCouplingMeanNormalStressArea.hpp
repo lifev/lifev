@@ -101,9 +101,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    MultiscaleCouplingMeanNormalStressArea( const MultiscaleCouplingMeanNormalStressArea& coupling );
+    MultiscaleCouplingMeanNormalStressArea ( const MultiscaleCouplingMeanNormalStressArea& coupling );
 
-    MultiscaleCouplingMeanNormalStressArea& operator=( const MultiscaleCouplingMeanNormalStressArea& coupling );
+    MultiscaleCouplingMeanNormalStressArea& operator= ( const MultiscaleCouplingMeanNormalStressArea& coupling );
 
     //@}
 
@@ -116,14 +116,14 @@ private:
      * @param localCouplingVariableID id of the perturbed local coupling variable
      * @param perturbedModelsList list of models affected by the perturbation
      */
-    void exportListOfPerturbedModels( const UInt& localCouplingVariableID, multiscaleModelsContainer_Type& perturbedModelsList );
+    void exportListOfPerturbedModels ( const UInt& localCouplingVariableID, multiscaleModelsContainer_Type& perturbedModelsList );
 
 
     //! Insert constant coefficients into the Jacobian matrix
     /*!
      * @param jacobian the Jacobian matrix
      */
-    void insertJacobianConstantCoefficients( multiscaleMatrix_Type& jacobian );
+    void insertJacobianConstantCoefficients ( multiscaleMatrix_Type& jacobian );
 
     //! Insert the Jacobian coefficient(s) depending on a perturbation of the model, due to a specific variable (the column)
     /*!
@@ -132,7 +132,7 @@ private:
      * @param ID the global ID of the model which is perturbed by the variable
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      */
-    void insertJacobianDeltaCoefficients( multiscaleMatrix_Type& jacobian, const UInt& column, const UInt& ID, bool& solveLinearSystem );
+    void insertJacobianDeltaCoefficients ( multiscaleMatrix_Type& jacobian, const UInt& column, const UInt& ID, bool& solveLinearSystem );
 
     //@}
 

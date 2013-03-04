@@ -102,10 +102,10 @@ public:
     typedef typename boost::shared_ptr<data_Type>  dataPtr_Type;
     typedef typename boost::shared_ptr<const Displayer>    displayerPtr_Type;
 
-    typedef FactorySingleton<Factory<StructuralConstitutiveLaw<Mesh>,std::string> >  StructureMaterialFactory;
+    typedef FactorySingleton<Factory<StructuralConstitutiveLaw<Mesh>, std::string> >  StructureMaterialFactory;
 
     typedef RegionMesh<LinearTetra >                      mesh_Type;
-    typedef std::vector< mesh_Type::element_Type const *> vectorVolumes_Type;
+    typedef std::vector< mesh_Type::element_Type const*> vectorVolumes_Type;
 
     typedef std::map< UInt, vectorVolumes_Type>           mapMarkerVolumes_Type;
     typedef boost::shared_ptr<mapMarkerVolumes_Type>      mapMarkerVolumesPtr_Type;
@@ -135,18 +135,18 @@ public:
       \param monolithicMap: the MapEpetra
       \param offset: the offset parameter used assembling the matrices
     */
-    virtual void setup( const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
-                        const boost::shared_ptr<const MapEpetra>&   monolithicMap,
-                        const UInt offset, const dataPtr_Type& dataMaterial,
-                        const displayerPtr_Type& displayer  )=0;
+    virtual void setup ( const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
+                         const boost::shared_ptr<const MapEpetra>&   monolithicMap,
+                         const UInt offset, const dataPtr_Type& dataMaterial,
+                         const displayerPtr_Type& displayer  ) = 0;
 
 
     //! Computes the linear part of the stiffness matrix StructuralSolver::buildSystem
     /*!
       \param dataMaterial the class with Material properties data
     */
-    virtual  void computeLinearStiff( dataPtr_Type& dataMaterial,
-                                      const mapMarkerVolumesPtr_Type mapsMarkerVolumes  ) = 0;
+    virtual  void computeLinearStiff ( dataPtr_Type& dataMaterial,
+                                       const mapMarkerVolumesPtr_Type mapsMarkerVolumes  ) = 0;
 
     //! Updates the Jacobian matrix in StructuralSolver::updateJacobian
     /*!
@@ -155,9 +155,9 @@ public:
                            material coefficients (e.g. Young modulus, Poisson ratio..)
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
-    virtual  void updateJacobianMatrix( const vector_Type& disp, const dataPtr_Type& dataMaterial,
-                                        const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
-                                        const displayerPtr_Type& displayer ) = 0;
+    virtual  void updateJacobianMatrix ( const vector_Type& disp, const dataPtr_Type& dataMaterial,
+                                         const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                                         const displayerPtr_Type& displayer ) = 0;
 
     //! Computes the new Stiffness matrix in StructuralSolver given a certain displacement field.
     //! This function is used both in StructuralSolver::evalResidual and in
@@ -170,9 +170,9 @@ public:
                            material coefficients (e.g. Young modulus, Poisson ratio..)
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
-    virtual  void computeStiffness( const vector_Type& sol, Real factor, const dataPtr_Type& dataMaterial,
-                                    const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
-                                    const displayerPtr_Type& displayer ) = 0;
+    virtual  void computeStiffness ( const vector_Type& sol, Real factor, const dataPtr_Type& dataMaterial,
+                                     const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                                     const displayerPtr_Type& displayer ) = 0;
 
 
     //! Computes the deformation Gradient F, the cofactor of F Cof(F),
@@ -180,7 +180,7 @@ public:
     /*!
       \param dk_loc: local displacement vector
     */
-    virtual  void computeKinematicsVariables( const VectorElemental& dk_loc ) = 0;
+    virtual  void computeKinematicsVariables ( const VectorElemental& dk_loc ) = 0;
 
 
     //! Output of the class
@@ -188,7 +188,7 @@ public:
       \param fileNamelinearStiff the filename where to apply the spy method for the linear part of the Stiffness matrix
       \param fileNameStiff the filename where to apply the spy method for the Stiffness matrix
     */
-    virtual void showMe( std::string const& fileNameStiff, std::string const& fileNameJacobian ) = 0;
+    virtual void showMe ( std::string const& fileNameStiff, std::string const& fileNameJacobian ) = 0;
 
 
     //! @name Set Methods
@@ -204,13 +204,22 @@ public:
 
     //! Getters
     //! Get the Epetramap
-    MapEpetra   const& map()     const { return *M_localMap; }
+    MapEpetra   const& map()     const
+    {
+        return *M_localMap;
+    }
 
     //! Get the FESpace object
-    FESpace<Mesh, MapEpetra>& dFESpace()  {return M_FESpace;}
+    FESpace<Mesh, MapEpetra>& dFESpace()
+    {
+        return M_FESpace;
+    }
 
     //! Get the Stiffness matrix
-    matrixPtr_Type const jacobian()    const {return M_jacobian; }
+    matrixPtr_Type const jacobian()    const
+    {
+        return M_jacobian;
+    }
 
     //! Get the Stiffness matrix
     virtual matrixPtr_Type const stiffMatrix() const = 0;
@@ -218,8 +227,8 @@ public:
     //! Get the Stiffness matrix
     virtual vectorPtr_Type const stiffVector() const = 0;
 
-    virtual void apply( const vector_Type& sol, vector_Type& res,
-                        const mapMarkerVolumesPtr_Type mapsMarkerVolumes) =0;
+    virtual void apply ( const vector_Type& sol, vector_Type& res,
+                         const mapMarkerVolumesPtr_Type mapsMarkerVolumes) = 0;
 
     //@}
 
@@ -251,7 +260,7 @@ protected:
 //=====================================
 
 template <typename Mesh>
-StructuralConstitutiveLaw<Mesh>::StructuralConstitutiveLaw( ):
+StructuralConstitutiveLaw<Mesh>::StructuralConstitutiveLaw( ) :
     M_FESpace                    ( ),
     M_localMap                   ( ),
     M_jacobian                   ( ),

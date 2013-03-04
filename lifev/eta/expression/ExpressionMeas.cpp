@@ -48,7 +48,7 @@ ExpressionMeas::ExpressionMeas()
     : base_Type()
 {}
 
-ExpressionMeas::ExpressionMeas( const ExpressionMeas&)
+ExpressionMeas::ExpressionMeas ( const ExpressionMeas&)
     : base_Type()
 {}
 
@@ -60,7 +60,7 @@ ExpressionMeas::~ExpressionMeas()
 // ===================================================
 
 void
-ExpressionMeas::display( std::ostream& out )
+ExpressionMeas::display ( std::ostream& out )
 {
     out << "meas_K";
 }
