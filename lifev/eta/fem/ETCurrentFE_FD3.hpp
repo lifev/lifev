@@ -1,6 +1,5 @@
-#include <lifev/eta/array/MatrixSmall.hpp>
 
-namespace LifeV {
+//namespace LifeV {
 
 // forward declaration
 //template< UInt spaceDim, UInt FieldDim >
@@ -226,7 +225,7 @@ public:
     const array1D_Return_Type& divergence(const UInt& i, const UInt& q) const
     {
         ASSERT( M_isDivergenceUpdated, "Divergence of the basis functions have not been updated");
-        ASSERT( i < fiedlDim*M_nbFEDof, "No basis function with this index" );
+        ASSERT( i < fieldDim*M_nbFEDof, "No basis function with this index" );
         ASSERT( q < M_nbQuadPt, "No quadrature point with this index" );
 
         return ( M_divergence[q][i] );
@@ -842,139 +841,6 @@ updateJacobian(const UInt& iQuadPt)
     }
 }
 
-// Full specialization for the computation of the determinant
-template<>
-void
-ETCurrentFE<1,3>::
- updateDetJacobian(const UInt& iQuadPt)
-{
-    ASSERT(M_isJacobianUpdated,"Jacobian must be updated to compute its determinant");
-
-#ifndef NDEBUG
-    M_isDetJacobianUpdated=true;
-#endif
-
-    M_detJacobian[iQuadPt]=M_jacobian[iQuadPt][0][0];
-}
-
-// Full specialization for the computation of the determinant
-template<>
-void
-ETCurrentFE<2,3>::
-updateDetJacobian(const UInt& iQuadPt)
-{
-    ASSERT(M_isJacobianUpdated,"Jacobian must be updated to compute its determinant");
-
-#ifndef NDEBUG
-    M_isDetJacobianUpdated=true;
-#endif
-
-    M_detJacobian[iQuadPt]= M_jacobian[iQuadPt][0][0] * M_jacobian[iQuadPt][1][1]
-        - M_jacobian[iQuadPt][1][0] * M_jacobian[iQuadPt][0][1];
-}
-
-// Full specialization for the computation of the determinant
-template<>
-void
-ETCurrentFE<3,3>::
-updateDetJacobian(const UInt& iQuadPt)
-{
-    ASSERT(M_isJacobianUpdated,"Jacobian must be updated to compute its determinant");
-
-#ifndef NDEBUG
-    M_isDetJacobianUpdated=true;
-#endif
-
-    M_detJacobian[iQuadPt]=
-        M_jacobian[iQuadPt][0][0] * M_jacobian[iQuadPt][1][1] * M_jacobian[iQuadPt][2][2]
-        + M_jacobian[iQuadPt][0][1] * M_jacobian[iQuadPt][1][2] * M_jacobian[iQuadPt][2][0]
-        + M_jacobian[iQuadPt][0][2] * M_jacobian[iQuadPt][1][0] * M_jacobian[iQuadPt][2][1]
-        - M_jacobian[iQuadPt][0][0] * M_jacobian[iQuadPt][1][2] * M_jacobian[iQuadPt][2][1]
-        - M_jacobian[iQuadPt][0][1] * M_jacobian[iQuadPt][1][0] * M_jacobian[iQuadPt][2][2]
-        - M_jacobian[iQuadPt][0][2] * M_jacobian[iQuadPt][1][1] * M_jacobian[iQuadPt][2][0];
-}
-
-
-template<>
-void
-ETCurrentFE<1,3>::
-updateInverseJacobian(const UInt& iQuadPt)
-{
-
-    ASSERT(M_isJacobianUpdated,"Jacobian must be updated to compute its inverse");
-    ASSERT(M_isDetJacobianUpdated,"The determinant of the jacobian must be updated to compute its inverse");
-
-#ifndef NDEBUG
-    M_isInverseJacobianUpdated=true;
-#endif
-
-    M_tInverseJacobian[iQuadPt][0][0]=1.0/M_jacobian[iQuadPt][0][0];
-}
-
-
-template<>
-void
-ETCurrentFE<2,3>::
-updateInverseJacobian(const UInt& iQuadPt)
-{
-
-    ASSERT(M_isJacobianUpdated,"Jacobian must be updated to compute its inverse");
-    ASSERT(M_isDetJacobianUpdated,"The determinant of the jacobian must be updated to compute its inverse");
-
-#ifndef NDEBUG
-    M_isInverseJacobianUpdated=true;
-#endif
-
-    Real det= M_detJacobian[iQuadPt];
-
-    M_tInverseJacobian[iQuadPt][0][0] =  M_jacobian[iQuadPt][0][0] / det;
-    M_tInverseJacobian[iQuadPt][1][0] = -M_jacobian[iQuadPt][1][0] / det;
-    M_tInverseJacobian[iQuadPt][0][1] = -M_jacobian[iQuadPt][0][1] / det;
-    M_tInverseJacobian[iQuadPt][1][1] =  M_jacobian[iQuadPt][1][1] / det;
-}
-
-template<>
-void
-ETCurrentFE<3,3>::
-updateInverseJacobian(const UInt& iQuadPt)
-{
-    ASSERT(M_isJacobianUpdated,"Jacobian must be updated to compute its inverse");
-    ASSERT(M_isDetJacobianUpdated,"The determinant of the jacobian must be updated to compute its inverse");
-
-#ifndef NDEBUG
-    M_isInverseJacobianUpdated=true;
-#endif
-
-    Real det = M_detJacobian[iQuadPt];
-
-    M_tInverseJacobian[iQuadPt][0][0] = ( M_jacobian[iQuadPt][1][1] * M_jacobian[iQuadPt][2][2]
-                                          -M_jacobian[iQuadPt][1][2] * M_jacobian[iQuadPt][2][1])/det;
-
-    M_tInverseJacobian[iQuadPt][0][1] = ( M_jacobian[iQuadPt][1][2] * M_jacobian[iQuadPt][2][0]
-                                          -M_jacobian[iQuadPt][1][0] * M_jacobian[iQuadPt][2][2])/det;
-
-    M_tInverseJacobian[iQuadPt][0][2] = ( M_jacobian[iQuadPt][1][0] * M_jacobian[iQuadPt][2][1]
-                                          -M_jacobian[iQuadPt][1][1] * M_jacobian[iQuadPt][2][0])/det;
-
-    M_tInverseJacobian[iQuadPt][1][0] = ( M_jacobian[iQuadPt][0][2] * M_jacobian[iQuadPt][2][1]
-                                          -M_jacobian[iQuadPt][0][1] * M_jacobian[iQuadPt][2][2])/det;
-
-    M_tInverseJacobian[iQuadPt][1][1] = ( M_jacobian[iQuadPt][0][0] * M_jacobian[iQuadPt][2][2]
-                                          -M_jacobian[iQuadPt][0][2] * M_jacobian[iQuadPt][2][0])/det;
-
-    M_tInverseJacobian[iQuadPt][1][2] = ( M_jacobian[iQuadPt][0][1] * M_jacobian[iQuadPt][2][0]
-                                          -M_jacobian[iQuadPt][0][0] * M_jacobian[iQuadPt][2][1])/det;
-
-    M_tInverseJacobian[iQuadPt][2][0] = ( M_jacobian[iQuadPt][0][1] * M_jacobian[iQuadPt][1][2]
-                                          -M_jacobian[iQuadPt][0][2] * M_jacobian[iQuadPt][1][1])/det;
-
-    M_tInverseJacobian[iQuadPt][2][1] = ( M_jacobian[iQuadPt][0][2] * M_jacobian[iQuadPt][1][0]
-                                          -M_jacobian[iQuadPt][0][0] * M_jacobian[iQuadPt][1][2])/det;
-
-    M_tInverseJacobian[iQuadPt][2][2] = ( M_jacobian[iQuadPt][0][0] * M_jacobian[iQuadPt][1][1]
-                                          -M_jacobian[iQuadPt][0][1] * M_jacobian[iQuadPt][1][0])/det;
-}
-
 template< UInt spaceDim, UInt fieldDim >
 void ETCurrentFE< spaceDim, fieldDim >::updateWDet( const UInt& iQuadPt )
 {
@@ -1066,4 +932,4 @@ updateCellNode(const ElementType& element)
         }
     }
 }
-}
+//}
