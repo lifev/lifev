@@ -25,7 +25,7 @@
 //@HEADER
 /**
    @file ETA_VectorialADR2DTest.cpp
-   @author L. Pasquale <lgpasquale@gmail.com>
+   @author L. Pasquale <luca.pasquale@mail.polimi.it>
    @date 2012-11-20
 */
 
@@ -82,7 +82,7 @@
     @class ETA_VectorialADR2DTest
     @brief Simple ETA test to compare ETA to ADRAssembly in a 2D space with a 2D solution
 
-    @author L. Pasquale <lgpasquale@gmail.com>
+    @author L. Pasquale <luca.pasquale@mail.polimi.it>
 
     This test computes the matrix associated to the advection-diffusion-reaction linear operator: \n
     \f$

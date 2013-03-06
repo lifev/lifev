@@ -33,7 +33,7 @@ Simple ETA test to compute a block matrix associated to the Stokes problem
 
 /**
    @file main.hpp
-   @author L. Pasquale <lgpasquale@gmail.com>
+   @author L. Pasquale <luca.pasquale@mail.polimi.it>
    @date 2012-11-20
 */
 

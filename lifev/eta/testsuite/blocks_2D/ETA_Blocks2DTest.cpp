@@ -25,7 +25,7 @@
 //@HEADER
 /**
    @file ETA_Blocks2DTest.cpp
-   @author L. Pasquale <lgpasquale@gmail.com>
+   @author L. Pasquale <luca.pasquale@mail.polimi.it>
    @date 2012-11-20
  */
 
@@ -116,6 +116,7 @@ ETA_Blocks2DTest::run()
                    -0.0,  -0.0);
 
     MeshPartitioner< mesh_Type >   meshPart(fullMeshPtr, M_comm);
+    boost::shared_ptr< mesh_Type > meshPtr (meshPart.meshPartition());
 
     fullMeshPtr.reset();
 
@@ -133,7 +134,7 @@ ETA_Blocks2DTest::run()
 
     std::string uOrder("P2");
     boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > uSpace
-        ( new FESpace< mesh_Type, MapEpetra >(meshPart,uOrder, 1, M_comm));
+        ( new FESpace< mesh_Type, MapEpetra >(meshPtr,uOrder, 1, M_comm));
 
     boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 2, 2 > > ETuSpace
         ( new ETFESpace< mesh_Type, MapEpetra, 2, 2 >(meshPart,&feTriaP2,&(uSpace->fe().geoMap()), M_comm));

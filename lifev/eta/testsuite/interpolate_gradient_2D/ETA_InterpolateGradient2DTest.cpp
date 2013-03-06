@@ -25,7 +25,7 @@
 //@HEADER
 /**
    @file ETA_InterpolateGradient2DTest.cpp
-   @author L. Pasquale <lgpasquale@gmail.com>
+   @author L. Pasquale <luca.pasquale@mail.polimi.it>
    @date 2012-11-20
  */
 
@@ -112,6 +112,7 @@ ETA_InterpolateGradient2DTest::run()
                    -1.0,  -1.0);
 
     MeshPartitioner< mesh_Type >   meshPart(fullMeshPtr, M_comm);
+    boost::shared_ptr< mesh_Type > meshPtr (meshPart.meshPartition());
 
     fullMeshPtr.reset();
 
@@ -128,7 +129,7 @@ ETA_InterpolateGradient2DTest::run()
     std::string uOrder("P1");
 
     boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > uSpace
-        ( new FESpace< mesh_Type, MapEpetra >(meshPart,uOrder, 2, M_comm));
+        ( new FESpace< mesh_Type, MapEpetra >(meshPtr,uOrder, 2, M_comm));
 
     if (verbose) std::cout << " done ! " << std::endl;
     if (verbose) std::cout << " ---> Dofs: " << uSpace->dof().numTotalDof() << std::endl;

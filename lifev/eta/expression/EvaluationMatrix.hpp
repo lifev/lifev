@@ -31,7 +31,6 @@
 
      @date 06/2011
      @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
-     @contributor  Luca Pasquale <lgpasquale@gmail.com>
  */
 #ifndef EVALUATION_MATRIX_HPP
 #define EVALUATION_MATRIX_HPP
@@ -56,7 +55,6 @@ namespace ExpressionAssembly
 //! Evaluation for a vectorial constant
 /*!
   @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
-  @contributor  Luca Pasquale <lgpasquale@gmail.com>
 
   This class aims at representing a matrix constant in the assembly
 

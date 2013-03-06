@@ -25,7 +25,7 @@
 //@HEADER
 /**
    @file ETA_Blocks2DTest.cpp
-   @author L. Pasquale <lgpasquale@gmail.com>
+   @author L. Pasquale <luca.pasquale@mail.polimi.it>
    @date 2012-11-20
 */
 
@@ -77,7 +77,7 @@
     @class ETA_Blocks2DTest
     @brief Simple ETA test to compute a block matrix associated to the Stokes problem
 
-    @author L. Pasquale <lgpasquale@gmail.com>
+    @author L. Pasquale <luca.pasquale@mail.polimi.it>
 
     This test computes the matrix and teh RHS vector associated to the Stokes problem: \n
     \f$

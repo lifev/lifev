@@ -31,7 +31,7 @@
 
      @date 12/2012
      @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
-     @author Luca Pasquale <lgpasquale@gmail.com>
+     @author Luca Pasquale <luca.pasquale@mail.polimi.it>
  */
 
 #include <lifev/eta/fem/ETCurrentFE.hpp>

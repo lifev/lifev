@@ -25,7 +25,7 @@
 //@HEADER
 /**
    @file ETA_InterpolateGradient2DTest.cpp
-   @author L. Pasquale <lgpasquale@gmail.com>
+   @author L. Pasquale <luca.pasquale@mail.polimi.it>
    @date 2012-11-20
 */
 
@@ -82,7 +82,7 @@
     @class ETA_InterpolateGradient2DTest
     @brief Simple ETA to check the evaluation of a gradient interpolation and the use of SmallMatrix costants in expressions
 
-    @author L. Pasquale <lgpasquale@gmail.com>
+    @author L. Pasquale <luca.pasquale@mail.polimi.it>
 
     This test integrates the trace of the gradient of \f$u=\left(\begin{array}{c} x \\ 2y \end{array}\right)\f$ on the domain (-1,1)x(-1,1) and compares it to its expected value (12)
 */

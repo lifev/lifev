@@ -53,7 +53,6 @@ namespace ExpressionAssembly
 //! class ExpressionVector  Class representing a constant matrix value in an expression
 /*!
   @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
-  @contributor  Luca Pasquale <lgpasquale@gmail.com>
 
   <b> Template parameters </b>
 
