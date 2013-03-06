@@ -101,16 +101,16 @@ class EvaluationMeas;
   specialization of this class).
 
 */
-template <UInt spaceDim, UInt fieldDim>
-class ETCurrentFE
-{
-private:
-    ~ETCurrentFE();
-    ETCurrentFE();
-    ETCurrentFE(const ETCurrentFE&);
-    void operator=(const ETCurrentFE&);
-};
-
+//template <UInt spaceDim, UInt fieldDim>
+//class ETCurrentFE
+//{
+//private:
+    //~ETCurrentFE();
+    //ETCurrentFE();
+    //ETCurrentFE(const ETCurrentFE&);
+    //void operator=(const ETCurrentFE&);
+//};
+#include "ETCurrentFE_FD3.hpp"
 
 /*!
   The ETCurrentFE is the class to be used to compute quantities related
@@ -1264,6 +1264,6 @@ updateMeasure()
 /*
  * Including header for ETCurrentFE for fieldDim=3
  */
-#include "ETCurrentFE_FD3.hpp"
+//#include "ETCurrentFE_FD3.hpp"
 
 #endif /* ETCURRENTFE_HPP */
