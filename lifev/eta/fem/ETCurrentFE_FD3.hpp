@@ -1,18 +1,11 @@
-
-//namespace LifeV {
-
-// forward declaration
-//template< UInt spaceDim, UInt FieldDim >
-//class ETCurrentFE;
-
 ///*!
 // ETCurrenteFE is a template class.
-// Specialization for fieldDim = 3 case (using faster VectorSmall return objects)
+// This is the non-specialized class used with fieldDim = 3 or 2 (using faster VectorSmall return objects)
 //
 // */
 
 template< UInt spaceDim, UInt fieldDim >
-class ETCurrentFE//< spaceDim, 3 >
+class ETCurrentFE
 {
 
     //! @name Friends
@@ -932,4 +925,3 @@ updateCellNode(const ElementType& element)
         }
     }
 }
-//}

@@ -102,15 +102,7 @@ class EvaluationMeas;
   specialization of this class).
 
 */
-//template <UInt spaceDim, UInt fieldDim>
-//class ETCurrentFE
-//{
-//private:
-    //~ETCurrentFE();
-    //ETCurrentFE();
-    //ETCurrentFE(const ETCurrentFE&);
-    //void operator=(const ETCurrentFE&);
-//};
+// This header contains the non-specialized version of the class
 #include "ETCurrentFE_FD3.hpp"
 
 /*!
@@ -1129,10 +1121,5 @@ updateMeasure()
 
 
 } // Namespace LifeV
-
-/*
- * Including header for ETCurrentFE for fieldDim=3
- */
-//#include "ETCurrentFE_FD3.hpp"
 
 #endif /* ETCURRENTFE_HPP */
