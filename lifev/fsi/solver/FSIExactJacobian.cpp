@@ -60,7 +60,7 @@ void  FSIExactJacobian::solveJac(vector_Type         &_muk,
     if (this->isFluid() && this->isLeader()) std::cout << "  f- ";
     if (this->isSolid() && this->isLeader()) std::cout << "  s- ";
 
-    this->displayer().leaderPrint( "solveJac: NormInf res " , _res.normInf(), "\n" );
+    this->displayer().leaderPrint( "FSI --- solveJac: NormInf res " , _res.normInf(), "\n" );
     _muk *= 0.;
 
     M_linearSolver.setTolerance( _linearRelTol );
@@ -70,12 +70,12 @@ void  FSIExactJacobian::solveJac(vector_Type         &_muk,
 
     M_linearSolver.setOperator(M_epetraOper);
 
-    this->displayer().leaderPrint( "Solving Jacobian system... " );
+    this->displayer().leaderPrint( "FSI --- Solving Jacobian FSI system... " );
 
     M_recomputeShapeDer=true;
     M_linearSolver.solve(_muk, res);
 
-    this->displayer().leaderPrint( "Solving the Jacobian system done.\n" );
+    this->displayer().leaderPrint( "FSI --- Solving the Jacobian FSI system done.\n" );
 }
 
 void FSIExactJacobian::evalResidual(vector_Type&       res,
@@ -84,10 +84,10 @@ void FSIExactJacobian::evalResidual(vector_Type&       res,
 {
     if (this->isSolid())
     {
-        std::cout << "      Residual computation g(x_" << iter <<" )\n";
+        std::cout << "FSI ---      Residual computation g(x_" << iter <<" )\n";
     }
 
-    this->setLambdaSolidOld(disp);
+    setLambdaSolidOld(disp);
 
 
     eval(disp, iter);
@@ -95,9 +95,12 @@ void FSIExactJacobian::evalResidual(vector_Type&       res,
     res  = this->lambdaSolid();
     res -=  disp;
 
-    this->displayer().leaderPrint("      NormInf res        =                     " , res.normInf(), "\n" );
     if (this->isSolid())
-        this->displayer().leaderPrint("      NormInf res_d      =                     " , this->solid().getResidual().normInf(), "\n" );
+      M_solid->updateJacobian(M_solid->displacement());
+
+    this->displayer().leaderPrint("FSI ---      NormInf res        =                     " , res.normInf(), "\n" );
+    if (this->isSolid())
+        this->displayer().leaderPrint("FSI ---      NormInf res_d      =                     " , this->solid().residual().normInf(), "\n" );
 
 }
 
@@ -109,7 +112,7 @@ void  FSIExactJacobian::solveLinearFluid()
     dispFluidDomain.setCombineMode(Zero);
     vector_Type dispFluidMesh(this->derVeloFluidMesh().map(), Repeated);
 //if statement: in order not to iterate the mesh for each linear residual calculation, needed just for exact Jac case.
-    if (false && this->M_data->dataFluid()->isSemiImplicit()==true)// not working in parallel
+    if (false && this->M_data->dataFluid()->isSemiImplicit()==true)
     {//to be corrected: up to now also in the semi implicit case the harmonic extension eq.
         //is solved at each GMRES iteration
 
@@ -120,33 +123,34 @@ void  FSIExactJacobian::solveLinearFluid()
         //            vector_Type repLambdaSolid(lambdaSolid(), Repeated);
 
         //this->transferInterfaceOnFluid(repLambdaSolid, dispFluidMesh);
-        this->transferSolidOnFluid(this->M_solid->getDisplacement(), dispFluidMesh);
+        this->transferSolidOnFluid(this->M_solid->displacement(), dispFluidMesh);
     }
     else
     {
-
         this->transferMeshMotionOnFluid(M_meshMotion->disp(),
                                         dispFluidMesh);
     }
     //dispFluidDomainRep = dispFluidMesh;//import
     dispFluidDomain=dispFluidMesh;//import
+
+
     this->derVeloFluidMesh() = dispFluidMesh;
-    this->derVeloFluidMesh() *= 1./(M_data->dataFluid()->dataTime()->timeStep());
-    this->displayer().leaderPrint( " norm inf dw = " , this->derVeloFluidMesh().normInf(), "\n" );
+    this->derVeloFluidMesh() *= M_fluidTimeAdvance->coefficientFirstDerivative(0)/(M_data->dataFluid()->dataTime()->timeStep());
+    this->displayer().leaderPrint( " norm inf dw = " , derVeloFluidMesh().normInf(), "\n" );
     *M_rhsNew *= 0.;
 
-    double alpha = this->M_bdf->coefficientFirstDerivative( 0 ) / M_data->dataFluid()->dataTime()->timeStep();
+    double alpha = this->M_fluidTimeAdvance->coefficientFirstDerivative( 0 ) / M_data->dataFluid()->dataTime()->timeStep();
 
     if (!this->M_fluid->stabilization())//if using P1Bubble
     {
 
         this->M_fluid->updateLinearSystem( M_fluid->matrixNoBC(),
                                            alpha,
-                                           *M_un,
+                                           M_fluidTimeAdvance->singleElement(0),
                                            *M_fluid->solution(),
                                            dispFluidMesh,
-                                           this->veloFluidMesh(),
-                                           this->derVeloFluidMesh(),
+                                           veloFluidMesh(),
+                                           derVeloFluidMesh(),
                                            *M_rhsNew );
     }
     else
@@ -156,19 +160,19 @@ void  FSIExactJacobian::solveLinearFluid()
             M_recomputeShapeDer=false;
             M_matrShapeDer.reset(new matrix_Type(M_fluid->matrixNoBC().map()/*, M_mmFESpace->map()*/));
             this->M_fluid->updateShapeDerivatives(
-                *M_matrShapeDer,
-                alpha,
-                *M_un,
-                *M_fluid->solution(),
-                //dispFluidMesh,
-                this->veloFluidMesh(),
-                (UInt)0,
-                *M_mmFESpace,
-                true,
-                false
-                //this->derVeloFluidMesh(),
-                //*M_rhsNew
-            );
+                                                  *M_matrShapeDer,
+                                                  alpha,
+                                                  M_fluidTimeAdvance->singleElement(0),
+                                                  *M_fluid->solution(),
+                                                  //dispFluidMesh,
+                                                  veloFluidMesh(),
+                                                  (UInt)0,
+                                                  *M_mmFESpace,
+                                                  true,
+                                                  false
+                                                  //this->derVeloFluidMesh(),
+                                                  //*M_rhsNew
+                                                  );
             M_matrShapeDer->globalAssemble();
             *M_matrShapeDer*=-1;
             //M_matrShapeDer->spy("matrsd");
@@ -177,14 +181,13 @@ void  FSIExactJacobian::solveLinearFluid()
         M_fluid->updateLinearRightHandSideNoBC(*M_rhsNew);
     }
 
-
     this->M_fluid->solveLinearSystem( *this->M_BCh_du );
 }
 
 
 void  FSIExactJacobian::solveLinearSolid()
 {
-    this->M_solid->iterateLin( M_BCh_dz );
+    M_solid->iterateLin( M_BCh_dz );
 }
 
 void
@@ -228,8 +231,9 @@ FSIExactJacobian::setDataFile( const GetPot& dataFile )
 void FSIExactJacobian::registerMyProducts( )
 {
     FSIFactory_Type::instance().registerProduct( "exactJacobian", &createEJ );
-    solid_Type::StructureSolverFactory::instance().registerProduct( "LinearVenantKirchhof", &createLinearStructure );
-//solid_raw_type::StructureSolverFactory::instance().registerProduct( "NonLinearVenantKirchhof", &createNonLinearStructure );
+
+    solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "linearVenantKirchhoff", &super::createVenantKirchhoffLinear );
+    solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "nonLinearVenantKirchhoff", &super::createVenantKirchhoffNonLinear );
 }
 
 // ===================================================
@@ -291,51 +295,64 @@ void FSIExactJacobian::eval(const vector_Type& _disp,
     M_epetraWorldComm->Barrier();
     chronoFluid.start();
 
-    if (this->isFluid())
+    if (isFluid())
     {
-        this->M_meshMotion->iterate(*M_BCh_mesh);
-        this->M_meshMotion->updateDispDiff();
+        M_meshMotion->iterate(*M_BCh_mesh);
+        // M_meshMotion->updateDispDiff();
 
-        this->transferMeshMotionOnFluid(M_meshMotion->disp(),
-                                        this->veloFluidMesh());
 
-        this->veloFluidMesh()    -= dispFluidMeshOld();
-        this->veloFluidMesh()    *= 1./(M_data->dataFluid()->dataTime()->timeStep());
-
-        if ( iter==0 || !this->M_data->dataFluid()->isSemiImplicit() )
-        {
             // copying displacement to a repeated indeces displacement, otherwise the mesh wont know
             // the value of the displacement for some points
 
 
+        if ( iter==0 || !this->M_data->dataFluid()->isSemiImplicit() )
+        {
             *M_beta *= 0.;
 
-            vector_Type meshDisp( M_meshMotion->disp(), Repeated );
+            if( iter==0 )
+            {
+                M_ALETimeAdvance->updateRHSFirstDerivative(M_data->dataFluid()->dataTime()->timeStep());
+                M_ALETimeAdvance->shiftRight(M_meshMotion->disp());
+                M_ALETimeAdvance->extrapolation(M_meshMotion->disp());//closer initial solution
+            }
+            else
+            {
+                M_ALETimeAdvance->setSolution(M_meshMotion->disp());
+            }
 
-            this->moveMesh(meshDisp);
+            vector_Type meshDispRepeated( M_meshMotion->disp(), Repeated );
+            this->moveMesh(meshDispRepeated);
+            vector_Type vel ( this->M_ALETimeAdvance->firstDerivative( ) );
+            transferMeshMotionOnFluid( vel, veloFluidMesh() );
+            M_fluidTimeAdvance->extrapolation(*M_beta);//explicit
+            *M_beta -= veloFluidMesh();//implicit
 
-            vector_Type meshDispDiff( M_meshMotion->dispDiff(), Repeated );
-            this->interpolateVelocity(meshDispDiff, *M_beta);
 
-            *M_beta *= -1./M_data->dataFluid()->dataTime()->timeStep();
+	    //the conservative formulation as it is now is of order 1. To have higher order (TODO) we need to store the mass matrices computed at the previous time steps.
+	    if(M_data->dataFluid()->conservativeFormulation())
+	      //*M_rhs = M_fluid->matrixMass()*M_fluidTimeAdvance->rhsContributionFirstDerivative();
+	      *M_rhs = M_fluidMassTimeAdvance->rhsContributionFirstDerivative();
 
-            *M_beta  += *this->M_un;
 
             if (recomputeMatrices)
             {
-                double alpha = 1./M_data->dataFluid()->dataTime()->timeStep();
+                double alpha = M_fluidTimeAdvance->coefficientFirstDerivative(0)/M_data->dataFluid()->dataTime()->timeStep();
                 this->M_fluid->updateSystem( alpha, *M_beta, *M_rhs );
             }
             else
             {
                 this->M_fluid->updateRightHandSide( *M_rhs );
             }
+	    if(!M_data->dataFluid()->conservativeFormulation())
+	      {
+		*M_rhs = M_fluid->matrixMass()*M_fluidTimeAdvance->rhsContributionFirstDerivative();
+		this->M_fluid->updateRightHandSide( *M_rhs );
+	      }
         }
 
         this->M_fluid->iterate( *M_BCh_u );
 
         this->transferFluidOnInterface(this->M_fluid->residual(), sigmaFluidUnique);
-
     }
 
     M_epetraWorldComm->Barrier();
@@ -374,9 +391,6 @@ void FSIExactJacobian::eval(const vector_Type& _disp,
     if (this->isSolid())
     {
         this->M_solid->iterate( M_BCh_d );
-//         this->transferSolidOnInterface(this->M_solid->disp(),     lambdaSolidUnique);
-//         this->transferSolidOnInterface(this->M_solid->vel(),      lambdaDotSolidUnique);
-//         this->transferSolidOnInterface(this->M_solid->residual(), sigmaSolidUnique);
     }
 
     M_epetraWorldComm->Barrier();
@@ -387,9 +401,9 @@ void FSIExactJacobian::eval(const vector_Type& _disp,
 
     if (this->isSolid())
     {
-        this->transferSolidOnInterface(this->M_solid->getDisplacement(),     lambdaSolidUnique);
-        this->transferSolidOnInterface(this->M_solid->getVelocity(),      lambdaDotSolidUnique);
-        this->transferSolidOnInterface(this->M_solid->getResidual(), sigmaSolidUnique);
+        this->transferSolidOnInterface(this->M_solid->displacement(),     lambdaSolidUnique);
+        this->transferSolidOnInterface( this->M_solidTimeAdvance->firstDerivative( this->M_solid->displacement()), lambdaDotSolidUnique );
+        this->transferSolidOnInterface(this->M_solid->residual(), sigmaSolidUnique);
     }
 
     this->setLambdaSolid(    lambdaSolidUnique);
@@ -399,10 +413,6 @@ void FSIExactJacobian::eval(const vector_Type& _disp,
     chronoInterface.stop();
     this->displayer().leaderPrintMax("      Interface transfer total time:           ", chronoInterface.diffCumul() );
 
-    if ( false && this->isSolid() )
-    {
-        //this->solid().postProcess();
-    }
 
 // possibly unsafe when using more cpus, since both has repeated maps
 
@@ -416,8 +426,8 @@ void FSIExactJacobian::eval(const vector_Type& _disp,
         this->displayer().leaderPrint("      Max ResidualF      =                     " , M_fluid->residual().normInf(), "\n" );
     if ( this->isSolid() )
     {
-        this->displayer().leaderPrint("      NL2 Diplacement S. =                     " , M_solid->getDisplacement().norm2(), "\n" );
-        this->displayer().leaderPrint("      Max Residual Solid =                     " , M_solid->getResidual().normInf(), "\n" );
+        this->displayer().leaderPrint("      NL2 Diplacement S. =                     " , M_solid->displacement().norm2(), "\n" );
+        this->displayer().leaderPrint("      Max Residual Solid =                     " , M_solid->residual().normInf(), "\n" );
     }
 }
 
@@ -431,7 +441,7 @@ void FSIExactJacobian::eval(const vector_Type& _disp,
 // ===================================================
 
 // ===================================================
-// Constructors & Destructor
+// Constructors & Destructorxs
 // ===================================================
 
 FSIExactJacobian::Epetra_ExactJacobian::Epetra_ExactJacobian() :
@@ -539,7 +549,7 @@ int FSIExactJacobian::Epetra_ExactJacobian::Apply(const Epetra_MultiVector &X, E
         if (M_ej->isSolid())
         {
             M_ej->solveLinearSolid();
-            M_ej->transferSolidOnInterface(M_ej->solid().getDisplacement(), lambdaSolidUnique);
+            M_ej->transferSolidOnInterface(M_ej->solid().displacement(), lambdaSolidUnique);
         }
 
         M_comm->Barrier();
@@ -553,7 +563,6 @@ int FSIExactJacobian::Epetra_ExactJacobian::Apply(const Epetra_MultiVector &X, E
         M_ej->displayer().leaderPrintMax( "Interface linear transfer: total time : " , chronoInterface.diffCumul() );
 
         dz = lambdaSolidUnique.epetraVector();
-
     }
 
 

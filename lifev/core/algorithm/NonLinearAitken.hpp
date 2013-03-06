@@ -154,6 +154,7 @@ public:
     /*!
      * @param defaultOmegaFluid default value for the omega fluid parameter
      * @param defaultOmegaSolid default value for the omega solid parameter
+     * if defaultOmegaFluid is negative, set  M_useDefaultOmega  equal true
      */
     void setDefaultOmega( const Real& defaultOmegaFluid = 0.1, const Real& defaultOmegaSolid = 0.1 );
 
@@ -551,6 +552,9 @@ NonLinearAitken< VectorType >::setDefaultOmega( const Real& defaultOmegaFluid, c
 {
     M_defaultOmegaFluid = defaultOmegaFluid;
     M_defaultOmegaSolid = defaultOmegaSolid;
+
+    if (M_defaultOmegaFluid < 0 )
+      M_useDefaultOmega = true;
 }
 
 // ===================================================
@@ -560,14 +564,17 @@ template < class VectorType >
 inline void
 NonLinearAitken< VectorType >::checkRange( Real& omega )
 {
-    if ( std::fabs(omega) < std::fabs(M_rangeOmega[0]) )
+    //The division and multiplication is to make the range of Omega
+    //bigger. This changes was introduce in order to improve the convergence
+    //of the fsi_segregated solver using fixed point method for Dirichlet-Neumann
+    if ( std::fabs(omega) < std::fabs(M_rangeOmega[0])/1024. )
     {
         if ( omega < 0 )
             omega = -M_rangeOmega[0];
         else
             omega = M_rangeOmega[0];
     }
-    else if ( std::fabs(omega) > std::fabs(M_rangeOmega[1]) )
+    else if ( std::fabs(omega) > std::fabs(M_rangeOmega[1])*1024. )
     {
         if ( omega < 0 )
             omega = -M_rangeOmega[1];

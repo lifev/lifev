@@ -92,10 +92,12 @@ protected:
     typedef Teuchos::RCP<LinearProblem> LinearProblem_ptr;
     typedef Teuchos::RCP<SolverType>    SolverType_ptr;
 
+
     virtual int doApplyInverse( const vector_Type& X, vector_Type& Y ) const;
     virtual void doSetOperator();
     virtual void doSetPreconditioner();
     virtual void doSetParameterList();
+    virtual void doResetSolver();
     void allocateSolver( const SolverManagerType & solverManagerType );
     //! The linearProblem
     LinearProblem_ptr M_linProblem;

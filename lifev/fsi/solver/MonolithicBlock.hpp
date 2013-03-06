@@ -35,10 +35,14 @@
     @date 07 Jun 2010
  */
 
-#ifndef BLOCKINTERFACE_H
-#define BLOCKINTERFACE_H 1
+#ifndef MONOLITHICBLOCK_H
+#define MONOLITHICBLOCK_H 1
 
 #include <cstdarg>
+
+#include <Epetra_Comm.h>
+#include <Epetra_Operator.h>
+
 #include <lifev/core/filter/GetPot.hpp>
 #include <lifev/core/LifeV.hpp>
 
@@ -79,12 +83,9 @@ public:
     typedef matrix_Type::matrix_type/*matrix_Type*/                    epetraMatrix_Type;
     typedef SolverAztecOO                                              solver_Type;
     typedef boost::shared_ptr< SolverAztecOO >                         solverPtr_Type;
-    typedef boost::shared_ptr< FESpace<RegionMesh<LinearTetra>, MapEpetra> >  fespacePtr_Type;
-    //typedef fespacePtr_Type                                     fespacePtr_Type;
-    //    typedef FESpace<RegionMesh<LinearTetra>, MapEpetra>*                 fespacePtr_Type;
-    //typedef MapEpetra*                                                 mapPtr_Type;
+    typedef FESpace<RegionMesh<LinearTetra>, MapEpetra>                fespace_Type;
+    typedef boost::shared_ptr< fespace_Type >                          fespacePtr_Type;
     typedef boost::shared_ptr< MapEpetra >                             mapPtr_Type;
-    //typedef BCHandler*                                                 bchandlerPtr_Type;
     typedef boost::shared_ptr< BCHandler >                             bchandlerPtr_Type;
     //@}
 
@@ -110,10 +111,8 @@ public:
 //     {}
 
     //! Destructor
-    ~MonolithicBlock()
+    virtual ~MonolithicBlock()
     {
-//     free(M_offset);
-//     free(M_FESpace);
     }
     //@}
 
@@ -137,6 +136,14 @@ public:
         @param section string specifying the path in the data file where to find the options for the operator
      */
     virtual void setDataFromGetPot(const GetPot& data, const std::string& section)=0;
+
+
+    //! Sets the parameters needed by the preconditioner from data file
+    /*!
+        @param data GetPot object reading the text data file
+        @param section string specifying the path in the data file where to find the options for the operator
+     */
+    virtual void setupSolver(solver_Type& /*solver*/, const GetPot& /*data*/){}
 
     //! pushes a block at the end of the vector
     /*!
@@ -212,7 +219,9 @@ public:
     virtual void coupler(mapPtr_Type& map,
                          const std::map<ID, ID>& locDofMap,
                          const vectorPtr_Type& numerationInterface,
-                         const Real& timeStep)=0;
+                         const Real& timeStep,
+                         const Real& coefficient,
+                         const Real& rescaleFactor)=0;
 
 
 
@@ -236,11 +245,13 @@ public:
       @param couplingFlag: flag specifying which block must be coupled whith which block.
      */
     virtual void coupler(mapPtr_Type& map,
-                 const std::map<ID, ID>& locDofMap,
-                 const vectorPtr_Type& numerationInterface,
-                 const Real& timeStep,
-                 UInt couplingFlag
-                 )=0;
+                         const std::map<ID, ID>& locDofMap,
+                         const vectorPtr_Type& numerationInterface,
+                         const Real& timeStep,
+                         const Real& coefficient,
+                         const Real& rescaleFactor,
+                         UInt couplingFlag
+                         )=0;
 
     //! returns true if the operator is set
     /*!
@@ -351,7 +362,9 @@ public:
                         const std::map<ID, ID>& locDofMap,
                         const vectorPtr_Type& numerationInterface,
                         const Real& timeStep=1.e-3,
-                        const Real& value=1.); // not working with non-matching grids
+                        const Real& value=1.,
+                        const Real& coefficient=1.,
+                        const Real& rescaleFactor=1.); // not working with non-matching grids
 
 
     //!sets the vector of raw pointer to the BCHandler
@@ -437,6 +450,9 @@ public:
 
     //! returns the vector of the offsets (by const reference).
     const std::vector<UInt>&              offsetVector() {return M_offset;}
+
+    virtual const UInt whereIsBlock( UInt position )const =0;
+
     //@}
 
 protected:
@@ -518,4 +534,4 @@ MonolithicBlock::insert(std::vector<Operator>& vectorFrom, std::vector<Operator>
 
 } // Namespace LifeV
 
-#endif /* BLOCKINTERFACE_H */
+#endif /* MONOLITHICBLOCK_H */

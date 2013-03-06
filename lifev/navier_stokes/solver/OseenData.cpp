@@ -51,6 +51,7 @@ namespace LifeV
 
 OseenData::OseenData( ) :
         M_time                             ( ),
+        M_timeAdvance                      ( ),
         M_density                          ( ),
         M_viscosity                        ( ),
         M_uOrder                           ( ),
@@ -63,6 +64,8 @@ OseenData::OseenData( ) :
         M_stabMethod                       ( ),
         M_semiImplicit                     ( false ),
         M_shapeDerivatives                 ( false ),
+        M_domainVelImplicit                ( false ),
+        M_convectiveImplicit               ( false ),
         M_computeMeanValuesPerSection      ( ),
         M_NbZSections                      ( ),
         M_ToleranceSection                 ( ),
@@ -70,13 +73,15 @@ OseenData::OseenData( ) :
         M_ZSectionInit                     ( ),
         M_ZSectionFinal                    ( ),
         M_NbPolygonEdges                   ( ),
-        M_stabilizationList                ( "fluid/space_discretization/stabilization" )
+        M_stabilizationList                ( "fluid/space_discretization/stabilization" ),
+        M_conservativeFormulation          (true)
 {
 }
 
 
 OseenData::OseenData( const OseenData& oseenData ) :
         M_time                             ( oseenData.M_time ),
+        M_timeAdvance                      ( oseenData.M_timeAdvance ),
         M_fluidNumber                      ( oseenData.M_fluidNumber ),
         M_density                          ( oseenData.M_density ),
         M_viscosity                        ( oseenData.M_viscosity ),
@@ -90,6 +95,8 @@ OseenData::OseenData( const OseenData& oseenData ) :
         M_stabMethod                       ( oseenData.M_stabMethod ),
         M_semiImplicit                     ( false ),
         M_shapeDerivatives                 ( false ),
+        M_domainVelImplicit                ( false ),
+        M_convectiveImplicit               ( false ),
         M_computeMeanValuesPerSection      ( oseenData.M_computeMeanValuesPerSection ),
         M_NbZSections                      ( oseenData.M_NbZSections ),
         M_ToleranceSection                 ( oseenData.M_ToleranceSection ),
@@ -97,7 +104,8 @@ OseenData::OseenData( const OseenData& oseenData ) :
         M_ZSectionInit                     ( oseenData.M_ZSectionInit ),
         M_ZSectionFinal                    ( oseenData.M_ZSectionFinal ),
         M_NbPolygonEdges                   ( oseenData.M_NbPolygonEdges ),
-        M_stabilizationList                ( oseenData.M_stabilizationList )
+        M_stabilizationList                ( oseenData.M_stabilizationList ),
+        M_conservativeFormulation          ( false )
 {
 }
 
@@ -116,6 +124,7 @@ OseenData::operator=( const OseenData& oseenData )
     if ( this != &oseenData )
     {
         M_time                             = oseenData.M_time;
+        M_timeAdvance                      = oseenData.M_timeAdvance;
         M_fluidNumber                      = oseenData.M_fluidNumber;
         M_density                          = oseenData.M_density;
         M_viscosity                        = oseenData.M_viscosity;
@@ -129,6 +138,8 @@ OseenData::operator=( const OseenData& oseenData )
         M_stabMethod                       = oseenData.M_stabMethod;
         M_semiImplicit                     = oseenData.M_semiImplicit;
         M_shapeDerivatives                 = oseenData.M_shapeDerivatives;
+        M_domainVelImplicit                = oseenData.M_domainVelImplicit;
+        M_convectiveImplicit               = oseenData.M_convectiveImplicit;
         M_computeMeanValuesPerSection      = oseenData.M_computeMeanValuesPerSection;
         M_NbZSections                      = oseenData.M_NbZSections;
         M_ToleranceSection                 = oseenData.M_ToleranceSection;
@@ -137,6 +148,7 @@ OseenData::operator=( const OseenData& oseenData )
         M_ZSectionFinal                    = oseenData.M_ZSectionFinal;
         M_NbPolygonEdges                   = oseenData.M_NbPolygonEdges;
         M_stabilizationList                = oseenData.M_stabilizationList;
+        M_conservativeFormulation          = oseenData.M_conservativeFormulation;
     }
 
     return *this;
@@ -149,6 +161,9 @@ OseenData::setup( const GetPot& dataFile, const std::string& section )
     // If data time has not been set
     if ( !M_time.get() )
         M_time.reset( new time_Type( dataFile, section + "/time_discretization" ) );
+
+    if ( !M_timeAdvance.get() )
+        M_timeAdvance.reset( new timeAdvance_Type( dataFile, section + "/time_discretization" ) );
 
     M_stabilizationList.add( "ip", IP_STABILIZATION,   "interior penalty " );
     M_stabilizationList.add( "sd", SD_STABILIZATION,   "stream-line diffusion" );
@@ -196,9 +211,11 @@ OseenData::setup( const GetPot& dataFile, const std::string& section )
                                           dataFile( ( section + "/space_discretization/stabilization" ).data(), "none") ) );
 
     // Semi-implicit and shape derivatives
-    M_semiImplicit     = dataFile( ( section + "/semiImplicit" ).data(), false ) ;
     M_shapeDerivatives = dataFile( ( section + "/useShapeDerivatives" ).data(), false ) ;
-    setSemiImplicit( M_semiImplicit );
+    setSemiImplicit( dataFile( ( section + "/semiImplicit" ).data(), false ) );
+    M_domainVelImplicit= dataFile( (section + "/domainVelImplicit").data(), false );
+    M_convectiveImplicit= dataFile( (section + "/convectiveImplicit").data(), false );
+    M_conservativeFormulation   = dataFile( ( section + "/conservativeFormulation" ).data(), true );
 
     // Mean values per section
     M_computeMeanValuesPerSection = dataFile( ( section + "/valuespersection/computeMeanValuesPerSection" ).data(), 0 );
@@ -240,6 +257,7 @@ OseenData::showMe( std::ostream& output ) const
 
     output << "\n*** Values for data [fluid/time_discretization]\n\n";
     M_time->showMe( output );
+    M_timeAdvance->showMe( output );
 
     output << "stabilization = ";
     switch ( M_stabMethod )

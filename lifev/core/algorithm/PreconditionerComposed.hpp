@@ -78,7 +78,7 @@ public:
     typedef super_Type::operator_raw_type                              operator_Type;
     typedef boost::shared_ptr<operator_Type>                           operatorPtr_Type;
     typedef super_Type::list_Type                                      list_Type;
-    typedef boost::shared_ptr<Preconditioner>                          epetraPrec_Type;
+    //typedef boost::shared_ptr<Preconditioner>                          epetraPrec_Type;
 
 
     /** @name Constructors, destructor
@@ -87,12 +87,14 @@ public:
     //! default constructor.
     PreconditionerComposed( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>() );
 
+private: //set it private to be sure that it's never called
     //!Copy Constructor
     /**
        This copy constructor does not copy the matrices, but just the shared_ptrs. It calls the copy constructor of ComposedOperator.
      */
     PreconditionerComposed( PreconditionerComposed& P );
 
+public:
     //! constructor from matrix A.
     //! @param A MatrixEpetra<double> matrix upon which construct the preconditioner
     //    PreconditionerComposed(operatorPtr_Type& A);
@@ -194,8 +196,11 @@ public:
     //! returns a shared pointer to the preconditioner
     super_Type::prec_type              preconditionerPtr(){return M_prec;}
 
+    //! returns a shared pointer to the preconditioner
+    const precPtr_Type                 composedPreconditionerPtr(){return M_prec;}
+
     //! returns a string identifying the preconditioner type
-    std::string            preconditionerType() {return "composedPreconditioner";}
+    std::string            preconditionerType() {return "PreconditionerComposed";}
     //@}
 
     //!@name Static Methods

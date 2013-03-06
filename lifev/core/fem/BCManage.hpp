@@ -38,6 +38,7 @@
 #ifndef BCMANAGE_H
 #define BCMANAGE_H 1
 
+#include <lifev/core/array/MatrixEpetra.hpp>
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/fem/FESpace.hpp>
 #include <lifev/core/fem/BCManageNormal.hpp>
@@ -194,6 +195,27 @@ bcManageVector( VectorType&                     rightHandSide,
                 const BCHandler&                bcHandler,
                 const DataType&                 time,
                 const DataType&                 diagonalizeCoef );
+
+//! Prescribe boundary conditions. Case in which only the residual is available
+/*
+The residual and the right hand side are modified to take into account the boundary conditions
+@param res residual vector
+@param rhs right hand side
+@param sol the solution vector used to compute the residual. It must be a Unique VectorEpetra
+@param feSpace the finite element space
+@param bcHandler the boundary condition handler
+@param time the current time level
+@param diagonalizeCoef the coefficient put in the diagonal entry (of a matrix) when applying Dirichlet boundary conditions
+ */
+template <typename VectorType, typename DataType, typename Mesh, typename MapEpetra>
+void
+bcManageResidual( VectorType&                     res,
+                  VectorType&                     rhs,
+                  const VectorType&               sol,
+                  FESpace<Mesh, MapEpetra>&       feSpace,
+                  const BCHandler&                bcHandler,
+                  const DataType&                 time,
+                  const DataType&                 diagonalizeCoef );
 
 
 //! Prescribe boundary conditions. Case in which only the right hand side is modified
@@ -355,6 +377,30 @@ bcEssentialManageRhs( VectorType&     rightHandSide,
 
 
 
+//! Prescribe essential boundary conditions. Case in which only the residual is available
+/*
+The residual and the right hand side are modified to take into account the boundary conditions
+@param res residual vector
+@param rhs right hand side
+@param sol the solution vector used to compute the residual. It must be a Unique VectorEpetra
+@param dof the DOF instance
+@param boundaryCond the specific boundary condition (BCBase)
+@param time the current time level
+@param diagonalizeCoef the coefficient put in the diagonal entry (of a matrix) when applying Dirichlet boundary conditions
+@param offset the UInt offset for the boundary condition
+ */
+template <typename VectorType, typename DataType>
+void
+bcEssentialManageResidual(VectorType&     res,
+                          VectorType&     rhs,
+                          const VectorType&     sol,
+                          const DOF&      dof,
+                          const BCBase&   boundaryCond,
+                          const DataType& time,
+                          const DataType& diagonalizeCoef,
+                          UInt            offset );
+
+
 ///! Prescribe Essential boundary conditions.
 /*!
  * The matrix and the right hand side are modified to take into account the Essential boundary conditions
@@ -481,6 +527,35 @@ bcRobinManageMatrix( MatrixType& matrix,
                      UInt offset );
 
 
+
+
+//! Prescribe Robin boundary conditions. Case in which only the residual is available
+/*
+
+The residual and the right hand side are modified to take into account the boundary conditions
+@param res residual vector
+@param rhs right hand side
+@param sol the solution vector used to compute the residual. It must be a Unique VectorEpetra
+@param dof the DOF instance
+@param currentBdFE the current boundary finite element
+@param boundaryCond the specific boundary condition (BCBase)
+@param time the current time level
+@param diagonalizeCoef the coefficient put in the diagonal entry (of a matrix) when applying Dirichlet boundary conditions
+@param offset the UInt offset for the boundary condition
+ */
+template <typename VectorType, typename DataType, typename MeshType>
+void
+bcRobinManageResidual( VectorType& residual,
+                       VectorType& rightHandSide,
+                       const VectorType& solution,
+                       const MeshType& mesh,
+                       const DOF& dof,
+                       const BCBase& boundaryCond,
+                       CurrentBoundaryFE& currentBdFE,
+                       const DataType& time,
+                       UInt offset );
+
+
 //! Prescribe Robin boundary condition only on the rightHandSide
 /*!
  * The matrix is modified to take into account the Robin boundary condition
@@ -581,6 +656,34 @@ bcFluxManageMatrix( MatrixType&     matrix,
                     CurrentBoundaryFE&    currentBdFE,
                     const DataType& /*time*/,
                     UInt            offset );
+
+
+//! Prescribe Flux boundary conditions. Case in which only the residual is available
+/*
+The residual and the right hand side are modified to take into account the boundary conditions
+@param res residual vector
+@param rhs right hand side
+@param sol the solution vector used to compute the residual. It must be a Unique VectorEpetra
+@param dof the DOF instance
+@param currentBdFE the current boundary finite element
+@param boundaryCond the specific boundary condition (BCBase)
+@param time the current time level
+@param diagonalizeCoef the coefficient put in the diagonal entry (of a matrix) when applying Dirichlet boundary conditions
+@param offset the UInt offset for the boundary condition
+ */
+template <typename VectorType,
+typename MeshType,
+typename DataType>
+void
+bcFluxManageResidual( VectorType&     residual,
+                      VectorType&     rightHandSide,
+                      const VectorType&     solution,
+                      const MeshType& mesh,
+                      const DOF&      dof,
+                      const BCBase&   boundaryCond,
+                      CurrentBoundaryFE&    currentBdFE,
+                      const DataType& /*time*/,
+                      UInt            offset );
 // @}
 
 
@@ -960,6 +1063,55 @@ bcManageRhs( VectorType&      rightHandSide,
 }
 
 
+template <typename VectorType, typename MeshType, typename DataType>
+void
+bcManageResidual( VectorType&                     res,
+                  VectorType&                     rhs,
+                  const VectorType&                     sol,
+                  const MeshType&  mesh,
+                  const DOF&       dof,
+                  const BCHandler& bcHandler,
+                  CurrentBoundaryFE&     currentBdFE,
+                  const DataType&  time,
+                  const DataType&  diagonalizeCoef )
+{
+    VectorType rhsRepeated(rhs.map(),Repeated);
+
+    // Loop on boundary conditions
+    for ( ID i = 0; i < bcHandler.size(); ++i )
+    {
+
+        switch ( bcHandler[ i ].type() )
+        {
+        case Essential:  // Essential boundary conditions (Dirichlet)
+        case EssentialEdges:
+        case EssentialVertices:
+            if ( (bcHandler[ i ].mode() == Tangential) || (bcHandler[ i ].mode() == Normal) || (bcHandler[ i ].mode() == Directional) )
+            {
+                ERROR_MSG( "This BC mode is not yet implemented for this setting" );
+            }
+            bcEssentialManageResidual( res, rhs, sol, dof, bcHandler[ i ], time, diagonalizeCoef, bcHandler.offset() );
+            break;
+        case Natural:  // Natural boundary conditions (Neumann)
+            bcNaturalManage( rhs, mesh, dof, bcHandler[ i ], currentBdFE, time, bcHandler.offset() );
+            break;
+        case Robin:  // Robin boundary conditions (Robin) to be implemented
+            bcRobinManageResidual( res,   rhs, sol, mesh, dof, bcHandler[ i ], currentBdFE, time, bcHandler.offset());
+            break;
+        case Flux:  // Flux boundary conditions to be implemented
+            bcFluxManageResidual( res, rhs, sol,  mesh, dof, bcHandler[ i ], currentBdFE, time, bcHandler.offset()+bcHandler[i].offset() );
+            break;
+        default:
+            ERROR_MSG( "This BC type is not yet implemented" );
+        }
+    }
+
+    //    rhsRepeated.globalAssemble();
+
+    //rhs += rhsRepeated;
+}
+
+
 template <typename VectorType, typename DataType, typename Mesh, typename MapEpetra>
 void
 bcManageVector( VectorType&                     rightHandSide,
@@ -1051,24 +1203,17 @@ bcEssentialManage( MatrixType& matrix,
     if ( boundaryCond.isDataAVector() )
     { //! If BC is given under a vectorial form
 
-        const BCVectorInterface* pId = static_cast< const BCVectorInterface* > (boundaryCond.pointerToBCVector());
-        assert( pId != 0);
+        assert( static_cast< const BCVectorInterface* > (boundaryCond.pointerToBCVector()) != 0 );
 
         // Loop on BC identifiers
         for ( ID i = 0; i < boundaryCond.list_size(); ++i )
         {
-
-            if ( !pId->dofInterface().isMyInterfaceDof(boundaryCond[ i ] ->id()))
-            {
-                continue;
-            }
 
             // Loop on components involved in this boundary condition
             for ( ID j = 0; j < nComp; ++j )
             {
                 // Global Dof
                 idDof = boundaryCond[ i ]->id() + boundaryCond.component( j ) * totalDof + offset;
-
                 datumVec.push_back(boundaryCond( boundaryCond[ i ] ->id(), boundaryCond.component( j ) ));
                 idDofVec.push_back(idDof);
             }
@@ -1104,6 +1249,7 @@ bcEssentialManage( MatrixType& matrix,
     {
         // bcType has been changed Flux -> Essential, need to diagonalize also the Lagrange multiplier
        idDofVec.push_back(offset + boundaryCond.offset());
+       datumVec.push_back( 0. );
     }
 
     // Modifying matrix and right hand side
@@ -1193,7 +1339,6 @@ bcEssentialManageMatrix( MatrixType& matrix,
                          const DataType& diagonalizeCoef,
                          UInt offset )
 {
-
     ID idDof;
     UInt totalDof;
 
@@ -1220,14 +1365,13 @@ bcEssentialManageMatrix( MatrixType& matrix,
 
     // If there is an offset than there is a Lagrange multiplier (flux BC)
     if (boundaryCond.offset() > 0)
-    {
+      {
         // bcType has been changed Flux -> Essential, need to diagonalize also the Lagrange multiplier
         idDofVec.push_back(offset + boundaryCond.offset());
-    }
+      }
 
     // Modifying ONLY matrix
     matrix.diagonalize( idDofVec, diagonalizeCoef, offset);
-
 }
 
 
@@ -1353,6 +1497,95 @@ bcEssentialManageRhs( VectorType&     rightHandSide,
     }
 
     rightHandSide.setCoefficients( idDofVec, datumVec);
+}
+
+
+template <typename VectorType, typename DataType>
+void
+bcEssentialManageResidual(VectorType&     res,
+                          VectorType&     rhs,
+                          const VectorType&     sol,
+                          const DOF&      dof,
+                          const BCBase&   boundaryCond,
+                          const DataType& time,
+                          const DataType& diagonalizeCoef,
+                          UInt            offset )
+{
+
+    if(sol.mapType()==Unique)
+    {
+        std::cout<<"pass me a repeated solution"<<std::endl;
+        VectorType repeatedSolution(sol, Repeated);
+        bcEssentialManageResidual(  res,
+				    rhs,
+				    repeatedSolution,
+				    dof,
+				    boundaryCond,
+				    time,
+				    diagonalizeCoef,
+				    offset );
+        return;
+    }
+
+    ID idDof;
+    UInt totalDof;
+
+    // Number of total scalar Dof
+    totalDof = dof.numTotalDof();
+
+    // Number of components involved in this boundary condition
+    UInt nComp = boundaryCond.numberOfComponents();
+
+    std::vector<int>   idDofVec(0);
+    idDofVec.reserve(boundaryCond.list_size()*nComp);
+    std::vector<Real> datumVec(0);
+    datumVec.reserve(boundaryCond.list_size()*nComp);
+    std::vector<Real> rhsVec(0);
+    rhsVec.reserve(boundaryCond.list_size()*nComp);
+
+    if ( boundaryCond.isDataAVector() )
+    {  //! If BC is given under a vectorial form
+        // Loop on BC identifiers
+        for ( ID i = 0; i < boundaryCond.list_size(); ++i )
+        {
+            // Loop on components involved in this boundary condition
+            for ( ID j = 0; j < nComp; ++j )
+            {
+                // Global Dof
+                idDof = boundaryCond[ i ] ->id() + boundaryCond.component( j ) * totalDof + offset;
+                idDofVec.push_back( idDof );
+                datumVec.push_back( diagonalizeCoef*sol(idDof) );
+                rhsVec.push_back(diagonalizeCoef*boundaryCond( boundaryCond[ i ] ->id(), boundaryCond.component( j ) ));
+            }
+        }
+    }
+    else
+    {  //! If BC is given under a functional form
+        DataType x, y, z;
+        // Loop on BC identifiers
+        for ( ID i = 0; i < boundaryCond.list_size(); ++i )
+        {
+            // Coordinates of the node where we impose the value
+            x = static_cast< const BCIdentifierEssential* >( boundaryCond[ i ] ) ->x();
+            y = static_cast< const BCIdentifierEssential* >( boundaryCond[ i ] ) ->y();
+            z = static_cast< const BCIdentifierEssential* >( boundaryCond[ i ] ) ->z();
+
+            // Loop on components involved in this boundary condition
+            for ( ID j = 0; j < nComp; ++j )
+            {
+                // Global Dof
+
+                idDof = boundaryCond[ i ] ->id() + boundaryCond.component( j ) * totalDof + offset;
+                // Modifying right hand side
+                idDofVec.push_back(idDof);
+                datumVec.push_back( diagonalizeCoef*sol(idDof) );
+                rhsVec.push_back(diagonalizeCoef*boundaryCond( time, x, y, z, boundaryCond.component( j ) ));
+            }
+        }
+    }
+
+    res.setCoefficients( idDofVec, datumVec);
+    rhs.setCoefficients( idDofVec, rhsVec);
 }
 
 // ===================================================
@@ -2053,6 +2286,46 @@ bcRobinManageVector( VectorType& rightHandSide,
 
 
 
+
+template <typename VectorType, typename DataType, typename MeshType>
+void bcRobinManageResidual( VectorType& residual,
+                       VectorType& rightHandSide,
+                       const VectorType& solution, //solution must not be repeated
+                       const MeshType& mesh,
+                       const DOF& dof,
+                       const BCBase& boundaryCond,
+                       CurrentBoundaryFE& currentBdFE,
+                       const DataType& time,
+                       UInt offset )
+{
+
+    if(solution.mapType()==Repeated)
+    {
+        std::cout<<"pass me a non-repeated solution"<<std::endl;
+        VectorType uniqueSolution(solution, Unique, Zero);
+        bcRobinManageResidual(  residual,
+                                rightHandSide,
+                                uniqueSolution,
+                                mesh,
+                                dof,
+                                boundaryCond,
+                                currentBdFE,
+                                time,
+                                offset );
+        return;
+    }
+
+    MatrixEpetra<Real> matrix(solution.map());
+    bcRobinManage( matrix, rightHandSide, mesh, dof, boundaryCond, currentBdFE, time, offset );
+    matrix.globalAssemble();
+    residual += matrix*solution;
+}   //bcRobinManageResidual
+
+
+
+
+
+
 // ===================================================
 // Flux BC
 // ===================================================
@@ -2155,6 +2428,41 @@ bcFluxManageMatrix( MatrixType&     matrix,
         }
     }
 } // bcFluxManageMatrix
+
+template <typename VectorType,
+typename MeshType,
+typename DataType>
+void
+bcFluxManageResidual( VectorType&      residual,
+                      VectorType&      rightHandSide,
+                      const VectorType&     solution,
+                      const MeshType&  mesh,
+                      const DOF&       dof,
+                      const BCBase&    boundaryCond,
+                      CurrentBoundaryFE&    currentBdFE,
+                      const DataType&  time,
+                      UInt             offset )
+{
+    if(solution.mapType()==Repeated)
+    {
+        std::cout<<"pass me a non-repeated solution"<<std::endl;
+        VectorType uniqueSolution(solution, Unique, Zero);
+        bcFluxManageResidual(  residual,
+                               rightHandSide,
+                                uniqueSolution,
+                                mesh,
+                                dof,
+                                boundaryCond,
+                                currentBdFE,
+                                time,
+                                offset );
+        return;
+    }
+    MatrixEpetra<Real> matrix(solution.map());
+    bcFluxManage(matrix, rightHandSide, mesh, dof, boundaryCond, currentBdFE, time, offset );
+    matrix.globalAssemble();
+    residual += matrix*solution;
+}
 
 
 

@@ -44,11 +44,25 @@ void MonolithicBlockMatrixRN::setDataFromGetPot( const GetPot& data, const std::
 }
 
 void MonolithicBlockMatrixRN::coupler(mapPtr_Type& map,
-                            const std::map<ID, ID>& locDofMap,
-                            const vectorPtr_Type& numerationInterface,
-                            const Real& timeStep)
+                                      const std::map<ID, ID>& locDofMap,
+                                      const vectorPtr_Type& numerationInterface,
+                                      const Real& timeStep,
+                                      const Real& coefficient,
+                                      const Real& rescaleFactor,
+                                      UInt couplingFlag
+                                      )
 {
-    super_Type::coupler( map,/* M_FESpace[0], M_offset[0], M_FESpace[1], M_offset[1],*/ locDofMap, numerationInterface, timeStep );
+    super_Type::coupler( map, locDofMap, numerationInterface, timeStep ,  coefficient, rescaleFactor, couplingFlag);
+}
+
+void MonolithicBlockMatrixRN::coupler(mapPtr_Type& map,
+                                      const std::map<ID, ID>& locDofMap,
+                                      const vectorPtr_Type& numerationInterface,
+                                      const Real& timeStep,
+                                      const Real& coefficient,
+                                      const Real& rescaleFactor)
+{
+    super_Type::coupler(map, locDofMap, numerationInterface, timeStep, coefficient, rescaleFactor);
     M_robinCoupling.reset(new matrix_Type(M_coupling->map(), 0));
     robinCoupling( M_robinCoupling, M_alphaf, M_alphas, 7, M_FESpace[1], M_offset[1], M_FESpace[0], M_offset[0], locDofMap, numerationInterface );
     M_robinCoupling->globalAssemble( );

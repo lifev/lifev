@@ -57,7 +57,7 @@
 #include <lifev/core/filter/ExporterHDF5.hpp>
 #include <lifev/core/fem/ReferenceFE.hpp>
 #include <lifev/core/fem/QuadratureRule.hpp>
-#include <lifev/core/fem/TimeAdvanceBDFNavierStokes.hpp>
+#include <lifev/navier_stokes/fem/TimeAdvanceBDFNavierStokes.hpp>
 #include <lifev/navier_stokes/solver/OseenSolver.hpp>
 #include <lifev/navier_stokes/solver/OseenData.hpp>
 

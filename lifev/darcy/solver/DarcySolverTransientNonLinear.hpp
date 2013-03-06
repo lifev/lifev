@@ -448,9 +448,12 @@ solve ()
     // Reset the right hand side coming from the time advance scheme.
     this->M_rhsTimeAdvance.reset ( new vector_Type ( this->M_primalField->getFESpace().map() ) );
 
+    // Update the RHS
+    this->M_timeAdvance->updateRHSFirstDerivative();
+
     // Put in M_rhsTimeAdvance the contribution for the right hand side coming
     // from the time scheme, without the time step.
-    *(this->M_rhsTimeAdvance) = this->M_timeAdvance->updateRHSFirstDerivative ();
+    *(this->M_rhsTimeAdvance) = this->M_timeAdvance->rhsContributionFirstDerivative ();
 
     // Solve the problem with the fixed point scheme.
     this->fixedPoint ();

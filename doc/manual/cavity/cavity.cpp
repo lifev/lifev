@@ -319,8 +319,9 @@ int main(int argc, char** argv)
         iterChrono.start();
 
         double alpha = bdf.bdfVelocity().coefficientFirstDerivative( 0 ) / oseenData->dataTime()->timeStep();
-
-        beta = bdf.bdfVelocity().extrapolation(); // Extrapolation for the convective term
+	//Matteo
+	//	beta =bdf.bdfVelocity().extrapolation();
+        bdf.bdfVelocity().extrapolation( beta ); // Extrapolation for the convective term
         bdf.bdfVelocity().updateRHSContribution(oseenData->dataTime()->timeStep() );
         rhs  = fluid.matrixMass()*bdf.bdfVelocity().rhsContributionFirstDerivative();
 

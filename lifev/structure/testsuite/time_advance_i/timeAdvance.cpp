@@ -173,10 +173,10 @@ void
 problem::run()
 {
     typedef RegionMesh<LinearTetra>                                   mesh_Type;
-    typedef VenantKirchhoffViscoelasticSolver< mesh_Type >::vector_type vector_type;
-    typedef boost::shared_ptr<vector_type>                              vector_ptrtype;
+    typedef VenantKirchhoffViscoelasticSolver< mesh_Type >::vector_type vector_Type;
+    typedef boost::shared_ptr<vector_Type>                              vectorPtr_Type;
 
-    typedef boost::shared_ptr< TimeAdvance< vector_type > >             TimeAdvance_type;
+    typedef boost::shared_ptr< TimeAdvance< vector_Type > >             TimeAdvance_type;
 
     typedef FESpace< mesh_Type, MapEpetra >                             FESpace_type;
     typedef  boost::shared_ptr<FESpace_type>                            FESpace_ptrtype;
@@ -278,10 +278,10 @@ problem::run()
     //! initialization of parameters of time Advance method:
 
     if (TimeAdvanceMethod =="Newmark")
-        timeAdvance->setup( dataProblem->dataTime()->coefficientsNewmark() , OrderDev);
+        timeAdvance->setup( dataProblem->dataTimeAdvance()->coefficientsNewmark() , OrderDev);
 
     if (TimeAdvanceMethod =="BDF")
-        timeAdvance->setup(dataProblem->dataTime()->orderBDF() , OrderDev);
+        timeAdvance->setup(dataProblem->dataTimeAdvance()->orderBDF() , OrderDev);
 
     Real dt = dataProblem->dataTime()->timeStep();
     Real T  = dataProblem->dataTime()->endTime();
@@ -302,8 +302,8 @@ problem::run()
     MapEpetra uMap = problem.solution()->map();
 
     // computing the rhs
-    vector_type rhs ( uMap, Unique );
-    vector_type rhsV( uMap, Unique );
+    vector_Type rhs ( uMap, Unique );
+    vector_Type rhsV( uMap, Unique );
 
     // postProcess
     boost::shared_ptr< Exporter<mesh_Type > > exporter;
@@ -325,11 +325,11 @@ problem::run()
     exporter->setPostDir( "./" ); // This is a test to see if M_post_dir is working
     exporter->setMeshProcId( localMeshPtr,  members->comm->MyPID() );
 
-    vector_ptrtype U ( new vector_type(*problem.solution(), exporter->mapType() ) );
-    vector_ptrtype V  ( new vector_type(*problem.solution(),  exporter->mapType() ) );
-    vector_ptrtype Exact ( new vector_type(*problem.solution(), exporter->mapType() ) );
-    vector_ptrtype vExact  ( new vector_type(*problem.solution(),  exporter->mapType() ) );
-    vector_ptrtype RHS ( new vector_type(*problem.solution(), exporter->mapType() ) );
+    vectorPtr_Type U ( new vector_Type(*problem.solution(), exporter->mapType() ) );
+    vectorPtr_Type V  ( new vector_Type(*problem.solution(),  exporter->mapType() ) );
+    vectorPtr_Type Exact ( new vector_Type(*problem.solution(), exporter->mapType() ) );
+    vectorPtr_Type vExact  ( new vector_Type(*problem.solution(),  exporter->mapType() ) );
+    vectorPtr_Type RHS ( new vector_Type(*problem.solution(), exporter->mapType() ) );
     exporter->addVariable( ExporterData<mesh_Type>::ScalarField, "displacement",
                            feSpace, U, UInt(0) );
 
@@ -350,25 +350,34 @@ problem::run()
     feSpace->interpolate( static_cast<FESpace_type::function_Type>( d0 ), *U, 0.0 );
     feSpace->interpolate( static_cast<FESpace_type::function_Type>( v0 ), *V, 0.0 );
 
-//evaluate disp and vel as interpolate the bcFunction d0 and v0
+    //evaluate disp and vel as interpolate the bcFunction d0 and v0
 
-    std::vector<vector_type> uv0;
+    std::vector<vectorPtr_Type> uv0;
 
     if (TimeAdvanceMethod =="Newmark")
     {
-        uv0.push_back(*U);
-        uv0.push_back(*V);
+      uv0.push_back(U);
+      uv0.push_back(V);
     }
     if (TimeAdvanceMethod =="BDF")
     {
-        for ( UInt previousPass=0; previousPass < dataProblem->orderBDF() ; previousPass++)
+        for ( UInt previousPass=0; previousPass < dataProblem->dataTimeAdvance()->orderBDF() ; previousPass++)
         {
             Real previousTimeStep = -previousPass*dt;
-            feSpace->interpolate( static_cast<FESpace_type::function_Type>( uexact ), *U, previousTimeStep );
-            uv0.push_back(*U);
+// <<<<<<< HEAD
+            feSpace->interpolate(uexact, *U, previousTimeStep );
+            uv0.push_back(U);
+// =======
+            // feSpace->interpolate( static_cast<FESpace_type::function_Type>( uexact ), *U, previousTimeStep );
+            // uv0.push_back(*U);
+        //>>>>>>> master
         }
     }
 
+    //the uv0[0] should be the displacement
+    //the uv0[1] should be the velocity
+
+    //timeAdvance->setInitialCondition(uv0[0],uv0[1]);
     timeAdvance->setInitialCondition(uv0);
 
     timeAdvance-> setTimeStep(dataProblem->dataTime()->timeStep());
@@ -379,16 +388,16 @@ problem::run()
     feSpace->interpolate( static_cast<FESpace_type::function_Type>( v0 ), *vExact , 0);
 
     *U = timeAdvance->solution();
-    *V = timeAdvance->velocity();
+    *V = timeAdvance->firstDerivative();
 
     for (Real time = dt; time <= T; time += dt)
     {
-        dataProblem->setTime(time);
+        dataProblem->dataTime()->setTime(time);
 
         if (verbose)
         {
             std::cout << std::endl;
-            std::cout << " P - Now we are at time " << dataProblem->time() << " s." << std::endl;
+            std::cout << " P - Now we are at time " << dataProblem->dataTime()->time() << " s." << std::endl;
         }
 
         //evaluate rhs
@@ -411,14 +420,14 @@ problem::run()
         feSpace->interpolate( static_cast<FESpace_type::function_Type>( uexact ), *Exact , time);
         feSpace->interpolate( static_cast<FESpace_type::function_Type>( v0 ), *vExact , time);
         *U =  timeAdvance->solution();
-        *V  =timeAdvance->velocity();
+        *V  =timeAdvance->firstDerivative();
 
         //postProcess
         exporter->postProcess(time);
 
         // Error L2 and H1 Norms
         AnalyticalSol uExact;
-        vector_type u (*problem.solution(), Repeated);
+        vector_Type u (*problem.solution(), Repeated);
 
         Real H1_Error,  H1_RelError,  L2_Error, L2_RelError;
 

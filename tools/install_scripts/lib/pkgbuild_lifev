@@ -1,0 +1,78 @@
+#! /bin/bash
+#
+# author: Antonio Cervone <ant.cervone@gmail.com>
+# date:   09-01-2013
+#
+
+ver='3.2'
+
+download_lifev() {
+  pushd ${lifev_src} >/dev/null
+  if [ ! -d cmake ]; then
+    git clone https://github.com/lifev/cmake.git
+  fi
+  popd >/dev/null
+}
+
+unpack_lifev() {
+  # nothing to do here
+  :
+}
+
+build_lifev() {
+  pushd "${lifev_build}" >/dev/null
+  if [ $MOX_MACHINE ]; then
+    mox_extra="\
+      -D CMAKE_SYSTEM_PREFIX_PATH:PATH=$REPO "
+  fi
+
+  echo_dbg "checking hdf5 (set to ${hdf5})"
+  if [ "${hdf5}" != "NO" ]; then
+    lib_extra+=" -D TPL_ENABLE_HDF5:BOOL=ON \
+                 -D HDF5_INCLUDE_DIRS:PATH=${hdf5_include} \
+                 -D HDF5_LIBRARY_DIRS:PATH=${hdf5_lib} "
+  fi
+
+  echo_dbg "checking blas (blas_name = ${blas_name})"
+  if [ "${blas_name}" != "" ]; then
+    lib_extra+=" -D TPL_BLAS_LIBRARIES:FILEPATH=${blas_lib}/${blas_name} "
+  fi
+
+  echo_dbg "checking lapack (lapack_name = ${lapack_name})"
+  if [ "${lapack_name}" != "" ]; then
+    lib_extra+=" -D TPL_LAPACK_LIBRARIES:FILEPATH=${lapack_lib}/${lapack_name} "
+  fi
+
+  echo_dbg "checking mpi (mpi_base = ${mpi_base})"
+  if [ "${mpi_base}" != "/usr" ]; then
+    lib_extra+=" -D MPI_BASE_DIR:PATH=${mpi_base} "
+  fi
+
+  echo_dbg "final lib_extra = ${lib_extra}"
+
+  rm -rf CMake*
+
+  ${cmake_bin}/cmake \
+    -D CMAKE_INSTALL_PREFIX:PATH="${lifev_install}" \
+    -D LifeV_ENABLE_ALL_PACKAGES:BOOL=ON \
+    -D LifeV_ENABLE_TESTS:BOOL=ON \
+    -D LifeV_ENABLE_STRONG_CXX_COMPILE_WARNINGS:BOOL=ON \
+    -D Trilinos_INCLUDE_DIRS:PATH="${trilinos_include}" \
+    -D Trilinos_LIBRARY_DIRS:PATH="${trilinos_lib}" \
+    -D ParMETIS_INCLUDE_DIRS:PATH="${parmetis_include}" \
+    -D ParMETIS_LIBRARY_DIRS:PATH="${parmetis_lib}" \
+    -D Boost_INCLUDE_DIRS:PATH="${boost_include}" \
+    "${lib_extra}" \
+    ${mox_extra} \
+    "${lifev_src}"
+
+  make -j${NUM_PROC}
+  make -j${NUM_PROC} doc
+  popd >/dev/null
+}
+
+install_lifev() {
+  pushd "${lifev_build}" >/dev/null
+  make -j${NUM_PROC} install
+  popd >/dev/null
+}

@@ -47,7 +47,9 @@
 #include <BelosPCPGSolMgr.hpp>
 #include <BelosPseudoBlockCGSolMgr.hpp>
 #include <BelosPseudoBlockGmresSolMgr.hpp>
+#ifdef HAVE_TRILINOS_GT_10_6
 #include <BelosMinresSolMgr.hpp>
+#endif
 #include <BelosRCGSolMgr.hpp>
 #include <BelosTFQMRSolMgr.hpp>
 #include "Teuchos_RCPBoostSharedPtrConversions.hpp"
@@ -132,7 +134,7 @@ void BelosOperator::doSetPreconditioner()
     Teuchos::RCP<OP> tmpPtr( M_prec.get(), false );
     M_belosPrec = Teuchos::rcp( new Belos::EpetraPrecOp( tmpPtr ), true );
 
-    // The line below produces a memory link; It has been kept as an example to illustrate
+    // The line below produces a memory leak; It has been kept as an example to illustrate
     // why it has been changed.
     // M_belosPrec = Teuchos::rcp( new Belos::EpetraPrecOp( Teuchos::rcp( M_prec ) ), false );
 }
@@ -216,10 +218,12 @@ void BelosOperator::allocateSolver( const SolverManagerType & solverManagerType 
                 // Create TFQMR iteration
                 M_solverManager = rcp( new Belos::TFQMRSolMgr<Real,vector_Type,operator_Type>() );
                 break;
+#ifdef HAVE_TRILINOS_GT_10_6
             case MINRES:
                 // Create MINRES iteration
                 M_solverManager = rcp( new Belos::MinresSolMgr<Real,vector_Type,operator_Type>() );
                 break;
+#endif
             default:
                 ERROR_MSG("Belos solver not found!");
          }
@@ -264,5 +268,13 @@ BelosOperator::getPreconditionerSideFromString( const std::string& str )
         return None;
 }
 
-} /* end namespace Operators */
-} /* end namespace */
+void
+BelosOperator::doResetSolver()
+{
+    M_solverManager->reset(Belos::Problem);
+    M_belosPrec = Teuchos::null;
+}
+
+} // Namespace Operators
+
+} // Namespace LifeV

@@ -577,6 +577,18 @@ OneDFSISolver::boundaryValue( const solution_Type& solution, const bcType_Type& 
 
         return -(*solution.find("P")->second)( boundaryDof );
 
+    case OneDFSI::T:
+    {
+        Real P     = ( *solution.find("P")->second )( boundaryDof );
+        Real rho   = M_physicsPtr->data()->densityRho();
+        Real alpha = M_physicsPtr->data()->alpha( boundaryDof );
+        Real Q     = ( *solution.find("Q")->second )( boundaryDof );
+        Real A     = ( *solution.find("A")->second )( boundaryDof );
+
+        // Note that the kinetic contribution should account for the real velocity profile
+        // through the alpha coefficient (i.e., the Coriolis coefficient)
+        return -P - 0.5 * rho * alpha * Q * Q / ( A * A );
+    }
     default:
 
         std::cout << "Warning: bcType \"" << bcType << "\"not available!" << std::endl;

@@ -51,7 +51,6 @@ namespace LifeV
 //  Constructors & Destructors
 // ===================================================
 FSIOperator::FSIOperator():
-    M_mesh                               ( ),
     M_uFESpace                           ( ),
     M_pFESpace                           ( ),
     M_dFESpace                           ( ),
@@ -74,7 +73,13 @@ FSIOperator::FSIOperator():
     M_meshMotion                         ( ),
     //     M_fluidLin                           ( ),
     //     M_solidLin                           ( ),
-    M_bdf                                ( ),
+    M_fluidTimeAdvanceMethod             ( ),
+    M_solidTimeAdvanceMethod             ( ),
+    M_ALETimeAdvanceMethod               ( ),
+    M_fluidTimeAdvance                   ( ),
+    M_fluidMassTimeAdvance               ( ),
+    M_solidTimeAdvance                   ( ),
+    M_ALETimeAdvance                     ( ),
     M_dataFile                           ( ),
     M_meshDataFluid                      ( new MeshData()),
     M_meshDataSolid                      ( new MeshData()),
@@ -109,11 +114,10 @@ FSIOperator::FSIOperator():
     M_lambdaFluidRepeated                ( ),
     M_lambda                             ( ),
     M_lambdaDot                          ( ),
-    M_un                                 ( ),
     M_rhs                                ( ),
-    M_Alphaf                             ( ), //vector_Type, for alphaf robin
-    M_AlphafCoef                         ( 0 ),
-    M_betamedio                          ( ),
+    M_alphaF                             ( ), //vector_Type, for alphaf robin
+    M_alphaFCoef                         ( 0 ),
+    M_betaMean                           ( ),
     M_epetraComm                         ( ),
     M_epetraWorldComm                    ( ),
     //begin of private members
@@ -137,7 +141,8 @@ FSIOperator::FSIOperator():
     M_linearFluid                        ( false ),
     M_linearSolid                        ( false ),
     M_fluidLeader                        ( ),
-    M_solidLeader                        ( )
+    M_solidLeader                        ( ),
+    M_structureNonLinear                 (false)
 {
 }
 
@@ -152,7 +157,6 @@ FSIOperator::~FSIOperator()
 void
 FSIOperator::setDataFile( const GetPot& dataFile )
 {
-
     M_fluidMesh.reset( new mesh_Type( M_epetraComm ) );
     M_meshDataFluid->setup(dataFile, "fluid/space_discretization");
     readMesh(*M_fluidMesh, *M_meshDataFluid);
@@ -162,6 +166,12 @@ FSIOperator::setDataFile( const GetPot& dataFile )
     readMesh(*M_solidMesh, *M_meshDataSolid);
 
     M_dataFile = dataFile;
+
+    M_fluidTimeAdvanceMethod =  dataFile( "fluid/time_discretization/method", "BDF");
+    M_solidTimeAdvanceMethod =  dataFile( "solid/time_discretization/method", "BDF");
+    M_ALETimeAdvanceMethod = dataFile("mesh_motion/time_discretization/method", "BDF");
+    M_structureNonLinear   = M_data->dataSolid()->solidType().compare("linearVenantKirchhoff");
+    this->setupTimeAdvance( dataFile );
 }
 
 void
@@ -172,8 +182,11 @@ FSIOperator::setupFEspace()
 
     std::string uOrder = M_data->dataFluid()->uOrder();
     std::string pOrder = M_data->dataFluid()->pOrder();
-    std::string dOrder = M_data->dataSolid()->getOrder();
+    std::string dOrder = M_data->dataSolid()->order();
     std::string meshOrder = M_meshDataFluid->mOrder();
+
+
+    ASSERT( meshOrder.compare("P2"), "Only P1 FESpace can be used for the mesh motion!") ;
 
     const ReferenceFE*    refFE_vel(0);
     const QuadratureRule* qR_vel(0);
@@ -223,7 +236,6 @@ FSIOperator::setupFEspace()
     else if ( pOrder.compare("P1") == 0 )
     {
         refFE_press = &feTetraP1;
-//             qR_press    = &quadRuleTetra64pt;  // DoE 2
         qR_press    = qR_vel;  // DoE 2
         bdQr_press  = &quadRuleTria3pt;   // DoE 2
     }
@@ -363,7 +375,6 @@ FSIOperator::partitionMeshes()
         MeshPartitioner< mesh_Type > solidPartitioner(M_solidMesh, M_epetraComm);
         M_solidLocalMesh = solidPartitioner.meshPartition();
     }
-
 }
 
 #ifdef HAVE_HDF5
@@ -457,39 +468,23 @@ FSIOperator::setupFluidSolid( void )
 void
 FSIOperator::setupFluidSolid( UInt const fluxes )
 {
+    M_meshMotion.reset( new meshMotion_Type( *M_mmFESpace, M_epetraComm ) );
+
     if ( this->isFluid() )
     {
-        M_meshMotion.reset( new meshMotion_Type(               *M_mmFESpace,             M_epetraComm ) );
-        M_fluid.reset(      new fluid_Type(      M_data->dataFluid(), *M_uFESpace, *M_pFESpace, M_epetraComm, fluxes ) );
-        M_solid.reset( solid_Type::StructureSolverFactory::instance().createObject( M_data->dataSolid()->getSolidType( ) ) );
-        M_solid->setup( M_data->dataSolid(), M_dFESpace, M_epetraComm );
-
-//         if ( M_linearFluid )
-//             M_fluidLin.reset( new FSI::fluidlin_raw_type( *M_data->dataFluid(), *M_uFESpace, *M_pFESpace, M_epetraComm ) );
-
-//         if ( M_linearSolid )
-//             M_solidLin.reset( new FSI::solidlin_raw_type( *M_data->dataSolid(), *M_dFESpace, M_epetraComm ) );
+        M_fluid.reset( new fluid_Type( M_data->dataFluid(), *M_uFESpace, *M_pFESpace, M_epetraComm, fluxes ) );
 
         //Vector initialization
         M_rhs.reset( new vector_Type( M_fluid->getMap() ) );
     }
 
-    if ( this->isSolid() )
-    {
-//         M_fluid.reset( new fluid_Type( *M_data->dataFluid(), *M_uFESpace, *M_pFESpace, M_epetraComm ) );
-        M_meshMotion.reset( new meshMotion_Type(               *M_mmFESpace, M_epetraComm ) );
-        M_solid.reset(solid_Type::StructureSolverFactory::instance().createObject( M_data->dataSolid()->getSolidType( ) ) );
-        M_solid->setup( M_data->dataSolid(), M_dFESpace,  M_epetraComm );
-
-//         if ( M_linearFluid )
-//             M_fluidLin.reset( new FSI::fluidlin_raw_type( *M_data->dataFluid(), *M_uFESpace, *M_pFESpace, M_epetraComm ) );
-
-//         if ( M_linearSolid )
-//             M_solidLin.reset( new FSI::solidlin_raw_type( *M_data->dataSolid(), *M_dFESpace, M_epetraComm ) );
-    }
+    M_solid.reset( new solid_Type( ) );
+    M_solid->setup( M_data->dataSolid(), M_dFESpace, M_epetraComm );
 
     M_epetraWorldComm->Barrier();
 }
+
+
 
 void
 FSIOperator::setupSystem( void )
@@ -523,14 +518,15 @@ FSIOperator::buildSystem()
 //             M_fluidLin->buildSystem();
     }
 
-    if ( this->isSolid() )
-    {
-        M_solid->buildSystem();
-//         if (M_linearSolid)
-//             M_solidLin->buildSystem();
-    }
+    if (this->isSolid())
+      {
+    M_data->dataSolid()->showMe();
+    //initialize xi0 for timaAdvance method for solid
+    double  xi = M_solidTimeAdvance->coefficientSecondDerivative( 0 ) / ( M_data->dataSolid()->dataTime()->timeStep()*M_data->dataSolid()->dataTime()->timeStep() );
+    M_solid->buildSystem(xi);
+    M_solid->massMatrix()->globalAssemble();
+      }
 
-    M_epetraWorldComm->Barrier();
 }
 
 void
@@ -538,23 +534,27 @@ FSIOperator::updateSystem()
 {
     if ( this->isFluid() )
     {
-        this->M_bdf->shiftRight( *M_fluid->solution() );
+      M_ALETimeAdvance->updateRHSContribution(M_data->dataFluid()->dataTime()->timeStep() );
+      M_fluidTimeAdvance->updateRHSContribution(M_data->dataFluid()->dataTime()->timeStep() );
 
-        M_meshMotion->updateSystem();
+      if(M_data->dataFluid()->conservativeFormulation())
+	M_fluidMassTimeAdvance->updateRHSContribution(M_data->dataFluid()->dataTime()->timeStep() );
 
-        transferMeshMotionOnFluid(M_meshMotion->disp(), *this->M_dispFluidMeshOld);
+      transferMeshMotionOnFluid(M_meshMotion->disp(), *this->M_dispFluidMeshOld);
 
-        if ( M_fluid->solution().get() )
-            M_un.reset( new vector_Type( *M_fluid->solution() ) );
-        M_bdf->updateRHSContribution( M_data->dataFluid()->dataTime()->timeStep() );
-        *M_rhs = M_fluid->matrixMass()*M_bdf->rhsContributionFirstDerivative();
-    }
+  }
 
     if ( this->isSolid() )
     {
-        this->M_solid->updateSystem();
+        M_solid->updateSystem();
+        M_solidTimeAdvance->updateRHSContribution( M_data->dataSolid()->dataTime()->timeStep() );
+        vector_Type rhsW(M_dFESpace->map(), Repeated);
+        rhsW = (*M_solid->massMatrix() *  (M_solidTimeAdvance->rhsContributionSecondDerivative()) * M_data->dataSolid()->dataTime()->timeStep()*M_data->dataSolid()->dataTime()->timeStep()/M_solidTimeAdvance->coefficientSecondDerivative( 0 ));
+        M_solid->setRightHandSide( rhsW );  //for the solid rhs;
     }
-   this->couplingVariableExtrap( );
+
+   couplingVariableExtrap( );
+
 }
 
 
@@ -562,30 +562,40 @@ FSIOperator::updateSystem()
 void FSIOperator::couplingVariableExtrap( )
 {
     *M_lambda      = lambdaSolid();
+
     if (!M_lambdaDot.get())
     {
-        M_lambdaDot.reset        ( new vector_Type(*M_fluidInterfaceMap, Unique) );
+        M_lambdaDot.reset   ( new vector_Type(*M_fluidInterfaceMap, Unique) );
         *M_lambda     += M_data->dataFluid()->dataTime()->timeStep()*lambdaDotSolid();
     }
-    else
-    {
-        *M_lambda     += 1.5*M_data->dataFluid()->dataTime()->timeStep()*lambdaDotSolid(); // *1.5
-        *M_lambda     -= M_data->dataFluid()->dataTime()->timeStep()*0.5*(*M_lambdaDot);
-    }
-
-    *M_lambdaDot   = lambdaDotSolid();
-    displayer().leaderPrint("FSI-  norm( disp  ) init =                     ", M_lambda->normInf(), "\n" );
-    displayer().leaderPrint("FSI-  norm( velo )  init =                     ", M_lambdaDot->normInf(), "\n");
+     else
+      {
+    if ( this->isSolid() )
+      {
+        vector_Type solidDisp(M_solid->displacement());
+        vector_Type solidVel(M_solid->displacement());
+        M_solidTimeAdvance->extrapolation(solidDisp);
+        M_solidTimeAdvance->extrapolationFirstDerivative(solidVel);
+        transferSolidOnInterface(solidDisp, *M_lambda);
+        transferSolidOnInterface(solidVel, *M_lambdaDot);
+      }
+      }
+      displayer().leaderPrint("FSI-  norm( disp  ) init =                     ", M_lambda->normInf(), "\n" );
+      displayer().leaderPrint("FSI-  norm( velo )  init =                     ", M_lambdaDot->normInf(), "\n");
 }
 
 void
 FSIOperator::updateSolution( const vector_Type& solution )
 {
-    setSolution( solution );
     if ( this->isFluid() )
     {
-        this->M_bdf->shiftRight( *M_fluid->solution() );
+        M_ALETimeAdvance->shiftRight( this->M_meshMotion->disp() );
+        M_fluidTimeAdvance->shiftRight( *M_fluid->solution() );
+	if(M_data->dataFluid()->conservativeFormulation())
+	  M_fluidTimeAdvance->shiftRight( M_fluid->matrixMass()*(*M_fluid->solution()) );
     }
+    if ( this->isSolid())
+        M_solidTimeAdvance->shiftRight( M_solid->displacement() );
 }
 
 UInt
@@ -610,8 +620,8 @@ FSIOperator::imposedFluxes( void )
 void
 FSIOperator::initialize( fluidPtr_Type::value_type::function_Type const& u0,
                          fluidPtr_Type::value_type::function_Type const& p0,
-                         solidPtr_Type::value_type::Function const& d0,
-                         solidPtr_Type::value_type::Function const& w0,
+                         solidPtr_Type::value_type::function const& d0,
+                         solidPtr_Type::value_type::function const& w0,
                          fluidPtr_Type::value_type::function_Type const& /*df0*/ )
 {
     debugStream( 6220 ) << "FSI:: solid init \n";
@@ -623,41 +633,111 @@ FSIOperator::initialize( fluidPtr_Type::value_type::function_Type const& u0,
 }
 
 void
-FSIOperator::initialize( const vectorPtr_Type& fluidVelocityAndPressure,
-                         const vectorPtr_Type& fluidDisplacement,
-                         const vectorPtr_Type& solidVelocity,
-                         const vectorPtr_Type& solidDisplacement )
+FSIOperator::setupTimeAdvance( const dataFile_Type& dataFile )
 {
-    if ( M_isFluid )
-    {
-        M_fluid->initialize( *fluidVelocityAndPressure );
-        initializeBDF( *fluidVelocityAndPressure );
 
-        M_meshMotion->initialize( *fluidDisplacement );
-        moveMesh( *fluidDisplacement);
-    }
-    if ( M_isSolid )
+  if(this->isFluid())
     {
-        M_solid->initialize( solidDisplacement, solidVelocity );
-    }
-}
+        M_fluidTimeAdvance.reset( TimeAdvanceFactory::instance().createObject( M_fluidTimeAdvanceMethod ) );
+	if(M_data->dataFluid()->conservativeFormulation())
+	  M_fluidMassTimeAdvance.reset( TimeAdvanceFactory::instance().createObject( M_fluidTimeAdvanceMethod ) );
 
+
+      if (M_fluidTimeAdvanceMethod =="Newmark")
+    {
+      M_fluidTimeAdvance->setup(M_data->dataFluid()->dataTimeAdvance()->coefficientsNewmark() , 1);
+      if(M_data->dataFluid()->conservativeFormulation())
+	M_fluidMassTimeAdvance->setup(M_data->dataFluid()->dataTimeAdvance()->coefficientsNewmark() , 1);
+    }
+      if (M_fluidTimeAdvanceMethod =="BDF")
+    {
+      M_fluidTimeAdvance->setup( M_data->dataFluid()->dataTimeAdvance()->orderBDF(), 1 );
+      if(M_data->dataFluid()->conservativeFormulation())
+	M_fluidMassTimeAdvance->setup( M_data->dataFluid()->dataTimeAdvance()->orderBDF(), 1 );
+    }
+      M_ALETimeAdvance.reset( TimeAdvanceFactory::instance().createObject( M_ALETimeAdvanceMethod ) );
+
+      if (M_ALETimeAdvanceMethod =="Newmark")
+          M_ALETimeAdvance->setup( M_data->timeAdvanceDataALE()->coefficientsNewmark() , 2);
+
+      if (M_ALETimeAdvanceMethod =="BDF")
+          M_ALETimeAdvance->setup( M_data->timeAdvanceDataALE()->orderBDF(), 1 );
+
+      M_fluidTimeAdvance->setTimeStep( M_data->dataFluid()->dataTime()->timeStep());
+      if(M_data->dataFluid()->conservativeFormulation())
+	M_fluidMassTimeAdvance->setTimeStep( M_data->dataFluid()->dataTime()->timeStep());
+
+      M_ALETimeAdvance->setTimeStep( M_data->dataFluid()->dataTime()->timeStep());
+
+      if(this->isLeader())
+	{
+	  M_fluidTimeAdvance->showMe();
+	  //M_fluidMassTimeAdvance->showMe();
+	  M_ALETimeAdvance->showMe();
+	}
+    }
+  if( this->isSolid() )
+  {
+      M_solidTimeAdvance.reset( TimeAdvanceFactory::instance().createObject( M_solidTimeAdvanceMethod ) );
+
+      std::vector<Real> parameters(2);
+      parameters[0]  = dataFile("solid/time_discretization/theta", 0.25);
+      parameters[1]  = dataFile("solid/time_discretization/zeta", 0.5);
+      UInt order = dataFile("solid/time_discretization/BDF_order", 1);
+      Real rhoInfty = dataFile("solid/time_discretization/rhoInf", 1.);
+      std::string type    = dataFile("mesh_motion/time_discretization/typeOfGeneralizedAlpha", "HHT");
+
+
+      if (M_solidTimeAdvanceMethod =="Newmark")
+    M_solidTimeAdvance->setup( parameters, 2 );
+
+      if (M_solidTimeAdvanceMethod =="BDF")
+    M_solidTimeAdvance->setup( order , 2);
+
+      M_solidTimeAdvance->setTimeStep( M_data->dataSolid()->dataTime()->timeStep());
+      if(this->isLeader())
+    {
+      M_solidTimeAdvance->showMe();
+    }
+    }
+
+ }
 // ===================================================
 //  Public Methods
 // ===================================================
-void FSIOperator::initializeBDF( const vector_Type& un )
-{
-    M_bdf.reset( new TimeAdvanceBDF<vector_Type>( ));
-    M_bdf->setup(M_data->dataFluid()->dataTime()->orderBDF() ) ;
-    M_bdf->setInitialCondition( un );
-}
+  void FSIOperator::initializeTimeAdvance( const std::vector<vectorPtr_Type>& initialFluidVel, const std::vector<vectorPtr_Type>& initialSolidDisp,const std::vector<vectorPtr_Type>&  initialFluidDisp)
+  {
+      displayer().leaderPrint("initializeTimeAdvance start");
+
+      if ( this->isFluid() )
+      {
+          ASSERT( initialFluidVel.size() == M_fluidTimeAdvance->size(), "The number of vectors for initializing the time scheme for the fluid velocity is not consistent with the discretization chosen" );
+
+	  if(M_data->dataFluid()->conservativeFormulation())
+	    ASSERT( initialFluidVel.size() == M_fluidMassTimeAdvance->size(), "The number of vectors for initializing the time scheme for the fluid velocity is not consistent with the discretization chosen" );
+
+          ASSERT(initialFluidDisp.size() == M_ALETimeAdvance->size() , "The number of vectors for initializing the time discretization for the ALE map is not consistent with the discretization chosen");
+          this->M_fluidTimeAdvance->setInitialCondition(initialFluidVel);
+
+	  if(M_data->dataFluid()->conservativeFormulation())
+	    this->M_fluidMassTimeAdvance->setInitialCondition(initialFluidVel);
+
+
+          this->M_ALETimeAdvance->setInitialCondition(initialFluidDisp);
+      }
+      if ( this->isSolid() )
+      {
+          ASSERT(initialSolidDisp.size()== M_solidTimeAdvance->size(), "The number of vectors for initializing the time scheme for the structure displacement is not consistent with the discretization chosen" );
+          this->M_solidTimeAdvance->setInitialCondition(initialSolidDisp);
+      }
+      displayer().leaderPrint("initializeTimeAdvance end");
+ }
 
 void
 FSIOperator::initializeFluid( const vector_Type& velAndPressure,
                               const vector_Type& displacement )
 {
     this->fluid().initialize( velAndPressure );
-    this->meshMotion().initialize( displacement );
     this->moveMesh( displacement);
 }
 
@@ -740,8 +820,7 @@ void FSIOperator::createInterfaceMaps( std::map<ID, ID> const& locDofMap )
 
     disp.leaderPrint("FSI-  Variables initialization ...             \n");
 
-    //variablesInit( refFE_struct, bdQr_struct, qR_struct);
-    variablesInit( M_data->dataSolid()->getOrder() );
+    variablesInit( M_data->dataSolid()->order() );
 
     M_epetraWorldComm->Barrier();
 }
@@ -909,34 +988,49 @@ FSIOperator::transferInterfaceOnSolid(const vector_Type& _vec1, vector_Type& _ve
 }
 
 void
-FSIOperator::bcManageVectorRHS( const fluidBchandlerPtr_Type& bch, vector_Type& rhs )
+FSIOperator::bcManageVectorRHS( const fluidBchandlerPtr_Type& bcHandlerFluid, vector_Type& rhs )
 {
-    if ( !bch->bcUpdateDone() || M_fluid->recomputeMatrix() )
-        bch->bcUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
+    if ( !bcHandlerFluid->bcUpdateDone() || M_fluid->recomputeMatrix() )
+        bcHandlerFluid->bcUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
 
-    bcManageRhs( rhs, *M_uFESpace->mesh(), M_uFESpace->dof(),  *bch, M_uFESpace->feBd(), 0., 1. );
+    bcManageRhs( rhs, *M_uFESpace->mesh(), M_uFESpace->dof(),  *bcHandlerFluid, M_uFESpace->feBd(), 0., 1. );
+}
+
+void
+FSIOperator::bcManageVectorRHS( const fluidBchandlerPtr_Type& bcHandlerFluid, const solidBchandlerPtr_Type& bcHandlerSolid, vector_Type& rhs )
+{
+    if ( !bcHandlerFluid->bcUpdateDone() || M_fluid->recomputeMatrix() )
+        bcHandlerFluid->bcUpdate( *M_uFESpace->mesh(), M_uFESpace->feBd(), M_uFESpace->dof() );
+
+    bcManageRhs( rhs, *M_uFESpace->mesh(), M_uFESpace->dof(),  *bcHandlerFluid, M_uFESpace->feBd(), 1., 0. );
+
+    if ( !bcHandlerSolid->bcUpdateDone() )
+        bcHandlerSolid->bcUpdate( *M_dFESpace->mesh(), M_dFESpace->feBd(), M_dFESpace->dof() );
+
+    bcManageRhs( rhs, *M_dFESpace->mesh(), M_dFESpace->dof(),  *bcHandlerSolid, M_dFESpace->feBd(), 1., 0. );
 }
 
 void
 FSIOperator::setAlphafCoef( )
 {
     Real h=0.1, R=0.5;
-    M_AlphafCoef  = 2*(this->dataSolid()->getRho()*h)/this->dataFluid()->dataTime()->timeStep();
-    M_AlphafCoef += h*this->dataSolid()->getYoung(0)*this->dataFluid()->dataTime()->timeStep() /
-                    (2*pow(R,2) *(1-pow(dataSolid()->getPoisson(0),2)));
+    M_alphaFCoef  =  M_ALETimeAdvance->coefficientSecondDerivative( 0 )*(this->dataSolid()->rho()*h)/this->dataFluid()->dataTime()->timeStep();
+    M_alphaFCoef += h*M_data->dataSolid()->young(1)*this->dataFluid()->dataTime()->timeStep() /
+      (pow(R,2) *(1-pow(M_data->dataSolid()->poisson(1),2)));
+    M_alphaFCoef /= M_ALETimeAdvance->coefficientFirstDerivative( 0 );
 }
 
 void
-FSIOperator::setStructureToFluidParametres()
+FSIOperator::setStructureToFluidParameters()
 {
     this->setAlphafCoef();
     this->setAlphaf();
 
-    if (M_Alphaf.get()==0)
+    if (M_alphaF.get()==0)
     {
         this->setAlphafCoef();
-        M_bcvStructureToFluid->setRobinCoeff(M_AlphafCoef);
-        M_bcvStructureToFluid->setBetaCoeff(M_AlphafCoef);
+        M_bcvStructureToFluid->setRobinCoeff(M_alphaFCoef);
+        M_bcvStructureToFluid->setBetaCoeff(M_alphaFCoef);
     }
     else
     {
@@ -962,7 +1056,7 @@ FSIOperator::isLeader() const
     if ( M_solid.get() == 0 )
         return ( M_epetraComm->MyPID() == 0 );
 
-    return M_solid->getDisplayer().isLeader();
+    return M_solid->displayer().isLeader();
 }
 
 
@@ -976,7 +1070,7 @@ FSIOperator::displayer()
     if ( !isSolid() || !M_solid.get() )
         std::cout << "ERROR: displayer not ready" << std::endl;
 
-    return M_solid->getDisplayer();
+    return M_solid->displayer();
 }
 
 
@@ -1181,7 +1275,7 @@ FSIOperator::setAlphafbcf( const bcFunction_Type& alphafbcf )
 {
     vector_Type vec( M_fluid->velocityFESpace().map());
     M_fluid->velocityFESpace().interpolate( static_cast<FESpace<mesh_Type, MapEpetra>::function_Type>( alphafbcf ), vec, 0.0);
-    *M_Alphaf = vec ;
+    *M_alphaF = vec ;
 }
 
 
@@ -1332,7 +1426,7 @@ FSIOperator::variablesInit( const std::string& /*dOrder*/ )
     {
         M_dispFluidMeshOld.reset( new vector_Type(M_uFESpace->map(), Repeated) );
         M_veloFluidMesh.reset   ( new vector_Type(M_uFESpace->map(), Repeated) );
-        M_Alphaf.reset          ( new vector_Type(M_uFESpace->map(), Repeated));
+        M_alphaF.reset          ( new vector_Type(M_uFESpace->map(), Repeated));
 
         if ( M_linearFluid )
             M_derVeloFluidMesh.reset( new vector_Type(this->M_uFESpace->map(), Repeated) );
@@ -1412,8 +1506,8 @@ FSIOperator::interpolateVelocity( const vector_Type& _vec1, vector_Type& _vec2 )
     for ( ID iElem = 0; iElem < M_uFESpace->mesh()->numVolumes(); ++iElem )
     {
         UInt elemId = M_uFESpace->mesh()->volume( iElem ).localId();
-        if (elemId != iElem)
-            std::cout << " elemId = " << elemId << " iElem = " << iElem << std::endl;
+        //if (elemId != iElem)
+            // std::cout << " elemId = " << elemId << " iElem = " << iElem << std::endl;
 
         // Updating the local mesh velocity in this mesh elment
         for ( UInt icmp = 0; icmp < nDimensions; ++icmp )
@@ -1760,69 +1854,8 @@ FSIOperator::interpolateInterfaceDofs( const FESpace<mesh_Type, MapEpetra>& _fes
     }
 
 
-    //         // Face based Dof
-//         if ( nDofpF )
-//         {
-
-//             // loop on element faces
-//             for ( ID iFa = 0; iFa < nElemF; ++iFa )
-//             {
-
-//                 // Loop on number of DOF per face
-//                 for ( ID l = 0; l < nDofpF; ++l )
-//                 {
-
-//                     lDof = nDofElemE + nDofElemV + iFa * nDofpF + l; // Local dof in the adjacent Element
-
-//                     // Nodal coordinates
-//                     x = _fespace1.refFE().xi( lDof );
-//                     y = _fespace1.refFE().eta( lDof );
-//                     z = _fespace1.refFE().zeta( lDof );
-
-//                     // Loop on data vector components
-//                     for ( UInt icmp = 0; icmp < nDimensions; ++icmp )
-//                     {
-
-//                         // Interpolating data at the nodal point
-//                         Real __sum = 0;
-//                         for ( ID idof = 0; idof < nDofElemMesh; ++idof )  // Loop on local DOF on the adjacent element
-//                             __sum += wLoc( icmp * nDofElemMesh + idof ) * M_mmFESpace->refFE().phi( idof, x, y, z ); // Problem here with P2
-
-//                         // Updating interpolating vector
-//                         int iDof = icmp * _fespace1.dof().numTotalDof() + _fespace1.dof().localToGlobalMap( iElem, lDof);
-//                         _vec2.setCoefficient( iDof ,__sum);
-//                     }
-//                 }
-//             }
-//         }
-
-//         // Element based Dof
-//         // Loop on number of DOF per Element
-//         for ( ID l = 0; l < nDofpEl; ++l )
-//         {
-//             lDof = nDofElemF + nDofElemE + nDofElemV + l; // Local dof in the Element
-
-//             // Nodal coordinates
-//             x = _fespace1.refFE().xi( lDof );
-//             y = _fespace1.refFE().eta( lDof );
-//             z = _fespace1.refFE().zeta( lDof );
-
-//             // Loop on data vector components
-//             for ( UInt icmp = 0; icmp < nDimensions; ++icmp )
-//             {
-
-//                 // Interpolating data at the nodal point
-//                 Real __sum = 0;
-//                 for ( ID idof = 0; idof < nDofElemMesh; ++idof )  // Loop on local DOF on the adjacent element
-//                     __sum += wLoc( icmp * nDofElemMesh + idof ) * M_mmFESpace->refFE().phi( idof, x, y, z );
-
-//                 // Updating interpolating vector
-
-//                 int iDof = icmp * _fespace1.dof().numTotalDof() + _fespace1.dof().localToGlobalMap( elemId, lDof );
-//                 _vec2.setCoefficient( iDof, __sum);
-//             }
-//         }
 }
+
 
 } // Namespace LifeV
 

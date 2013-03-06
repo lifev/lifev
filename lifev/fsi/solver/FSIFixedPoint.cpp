@@ -54,15 +54,15 @@ void  FSIFixedPoint::solveJac(vector_Type        &muk,
                            const vector_Type  &res,
                            const Real   /*_linearRelTol*/)
 {
-    M_nonLinearAitken.restart();
+  //    M_nonLinearAitken.restart();
 
     if (M_data->algorithm()=="RobinNeumann")
     {
-        muk = M_nonLinearAitken.computeDeltaLambdaScalar(this->lambdaSolidOld(), res);
+      muk = res;
     }
     else
     {
-        muk = M_nonLinearAitken.computeDeltaLambdaScalar(this->lambdaSolidOld(), -1.*res);
+      muk = M_nonLinearAitken.computeDeltaLambdaScalar(this->lambdaSolidOld(), res);
     }
 }
 
@@ -147,11 +147,10 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
 
     if (iter == 0 && this->isFluid())
     {
-        this->M_fluid->resetPreconditioner();
+      M_nonLinearAitken.restart();
+      this->M_fluid->resetPreconditioner();
         //this->M_solid->resetPrec();
     }
-
-
 
     M_epetraWorldComm->Barrier();
 
@@ -169,45 +168,61 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
     {
         this->M_meshMotion->iterate(*M_BCh_mesh);
 
-        this->transferMeshMotionOnFluid(M_meshMotion->disp(),
-                                        this->veloFluidMesh());
-
-        this->veloFluidMesh()    -= this->dispFluidMeshOld();
-        this->veloFluidMesh()    *= 1./(M_data->dataFluid()->dataTime()->timeStep());
+	//        this->transferMeshMotionOnFluid(M_meshMotion->disp(),
+	//                              this->veloFluidMesh());
+	//this->veloFluidMesh()    -= this->dispFluidMeshOld();
+	// this->veloFluidMesh()    *= 1./(M_data->dataFluid()->dataTime()->timeStep());
 
         // copying displacement to a repeated indeces displacement, otherwise the mesh wont know
         // the value of the displacement for some points
 
-        vector_Type const meshDisplacement( M_meshMotion->disp(), Repeated );
-        this->moveMesh(meshDisplacement);
+	//	vector_Type const meshDisplacement( M_meshMotion->disp(), Repeated );
+	//	this->moveMesh(meshDisplacement);
         /*
         vector_Type const meshDisplacement( M_meshMotion->dispDiff(), Repeated );
         this->moveMesh(meshDispDiff);
         */
 
-        *M_beta *= 0.;
+	*M_beta =0;
 
-        this->transferMeshMotionOnFluid(M_meshMotion->dispDiff(),  *M_beta);
+	vector_Type meshDisp( M_meshMotion->disp(), Repeated );
+	this->moveMesh(meshDisp);
 
-        *M_beta *= -1./M_data->dataFluid()->dataTime()->timeStep();
+	if(iter==0)
+	  M_fluidTimeAdvance->extrapolation( *M_beta);//explicit treatment of u
+ 	else
+         *M_beta += *this->M_fluid->solution();
 
-        *M_beta += this->M_bdf->extrapolation();
+	vector_Type  meshVelocity( M_meshMotion->disp(), Repeated );
+	meshVelocity = M_ALETimeAdvance->firstDerivative(meshDisp);//implicit treatment of w (because I already did the shiftRight)
+	this->transferMeshMotionOnFluid(meshVelocity,
+					this->veloFluidMesh());
 
-        double alpha = this->M_bdf->coefficientFirstDerivative( 0 ) / M_data->dataFluid()->dataTime()->timeStep();
+	*M_beta -= this->veloFluidMesh();
 
-        //*M_rhsNew   = *this->M_rhs;
-        //*M_rhsNew  *= alpha;
+    double alpha = M_fluidTimeAdvance->coefficientFirstDerivative( 0 ) / M_data->dataFluid()->dataTime()->timeStep();
+
+    //*M_rhsNew   = *this->M_rhs;
+    //*M_rhsNew  *= alpha;
 
 
-        if (recomputeMatrices)
-        {
+    //the conservative formulation as it is now is of order 1. To have higher order (TODO) we need to store the mass matrices computed at the previous time steps.
+    if(M_data->dataFluid()->conservativeFormulation())
+      *M_rhs = M_fluidMassTimeAdvance->rhsContributionFirstDerivative();
+    if (recomputeMatrices)
+      {
 
-            this->M_fluid->updateSystem( alpha, *M_beta, *M_rhs );
+	this->M_fluid->updateSystem( alpha, *M_beta, *M_rhs );
         }
-        else
-        {
-            this->M_fluid->updateRightHandSide( *M_rhs );
-        }
+    else
+      {
+	this->M_fluid->updateRightHandSide( *M_rhs );
+      }
+    if(!M_data->dataFluid()->conservativeFormulation())
+      {
+	*M_rhs = M_fluid->matrixMass()*M_fluidTimeAdvance->rhsContributionFirstDerivative();
+	this->M_fluid->updateRightHandSide( *M_rhs );
+      }
 
         //	if(this->algorithm()=="RobinNeumann") this->updatealphaf(this->veloFluidMesh());// this->setAlphaf();
 
@@ -215,8 +230,7 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
 
         std::cout << "Finished iterate, transfering to interface \n" << std::flush;
 
-        this->transferFluidOnInterface(this->M_fluid->residual(), sigmaFluidUnique);
-
+         this->transferFluidOnInterface(this->M_fluid->residual(), sigmaFluidUnique);
     }
 
     M_epetraWorldComm->Barrier();
@@ -234,8 +248,6 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
 
     }
 
-
-
     this->setSigmaFluid( sigmaFluidUnique );
     this->setSigmaSolid( sigmaFluidUnique );
 
@@ -245,13 +257,12 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
     vector_Type lambdaSolidUnique   (this->lambdaSolid().map(),    Unique);
     vector_Type lambdaDotSolidUnique(this->lambdaDotSolid().map(), Unique);
     vector_Type sigmaSolidUnique    (this->sigmaSolid().map(),     Unique);
-
     if (this->isSolid())
     {
         this->M_solid->iterate( M_BCh_d );
-        this->transferSolidOnInterface(this->M_solid->getDisplacement(),     lambdaSolidUnique);
-        this->transferSolidOnInterface(this->M_solid->getVelocity(),      lambdaDotSolidUnique);
-        this->transferSolidOnInterface(this->M_solid->getResidual(), sigmaSolidUnique);
+        this->transferSolidOnInterface(this->M_solid->displacement(),     lambdaSolidUnique);
+	this->transferSolidOnInterface( M_solidTimeAdvance->firstDerivative( this->solid().displacement()), lambdaDotSolidUnique );
+        this->transferSolidOnInterface(this->M_solid->residual(), sigmaSolidUnique);
     }
 
     this->setLambdaSolid( lambdaSolidUnique );
@@ -292,11 +303,11 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
     }
     if (this->isSolid())
     {
-        norm = M_solid->getDisplacement().norm2();
+        norm = M_solid->displacement().norm2();
         if (this->isLeader())
             std::cout << "NL2 DiplacementS     = " << norm << std::endl;
 
-        norm = M_solid->getResidual().normInf();
+        norm = M_solid->residual().normInf();
 
         if (this->isLeader())
             std::cout << "Max ResidualS        = " << norm << std::endl;
@@ -310,8 +321,10 @@ void FSIFixedPoint::eval( const vector_Type& _disp,
 void FSIFixedPoint::registerMyProducts( )
 {
     FSIFactory_Type::instance().registerProduct( "fixedPoint", &createFP );
-    solid_Type::StructureSolverFactory::instance().registerProduct( "LinearVenantKirchhof", &FSIOperator::createLinearStructure );
-    //solid_Type::StructureSolverFactory::instance().registerProduct( "NonLinearVenantKirchhof", &FSI::createNonLinearStructure );
+
+    solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "linearVenantKirchhoff", &createVenantKirchhoffLinear );
+    solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct( "nonLinearVenantKirchhoff", &createVenantKirchhoffNonLinear );
+
 }
 
 }   // Namespace LifeV

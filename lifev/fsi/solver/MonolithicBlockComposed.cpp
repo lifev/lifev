@@ -43,9 +43,9 @@ void MonolithicBlockComposed::GlobalAssemble()
     {
         M_blocks[k]->globalAssemble();
     }
-    //             M_blocks[0]->spy("first");
-    //             M_blocks[1]->spy("second");
-//             M_blocks[2]->spy("third");
+//     M_blocks[0]->spy("first");
+//     M_blocks[1]->spy("second");
+//     M_blocks[2]->spy("third");
 //        M_blocks[3]->spy("fourth");
 }
 
@@ -67,10 +67,12 @@ void MonolithicBlockComposed::coupler( mapPtr_Type& map,
                                        const std::map<ID, ID>& locDofMap,
                                        const vectorPtr_Type& numerationInterface,
                                        const Real& timeStep,
+                                       const Real& coefficient,
+                                       const Real& rescaleFactor,
                                        UInt couplingBlock)
 {
     matrixPtr_Type coupling(new matrix_Type(*map));
-    couplingMatrix( coupling,  (*M_couplingFlags)[couplingBlock], M_FESpace, M_offset, locDofMap, numerationInterface, timeStep);
+    couplingMatrix( coupling,  (*M_couplingFlags)[couplingBlock], M_FESpace, M_offset, locDofMap, numerationInterface, timeStep, 1., coefficient, rescaleFactor);
     UInt totalDofs( map->map(Unique)->NumGlobalElements() );
 
     coupling->insertValueDiagonal( 1., 0 , M_offset[couplingBlock] );
@@ -164,5 +166,14 @@ void MonolithicBlockComposed::swap(const UInt i, const UInt j)
     this->M_offset[j] = tmpOffset;
 }
 
+const UInt MonolithicBlockComposed::whereIsBlock( UInt position ) const
+{
+    for (UInt i=0; i<M_blockReordering->size(); i++)
+    {
+        if((*M_blockReordering)[i]==position)
+            return i;
+    }
+    ERROR_MSG("requested a block that does not exist in MonolithicBlockComposed.cpp");
+}
 
 } // Namespace LifeV

@@ -127,7 +127,7 @@ public:
     //@{
 
     //! Constructor
-    explicit BCInterface1D();
+    explicit BCInterface1D() : bcInterface_Type(), M_data() {}
 
     //! Destructor
     virtual ~BCInterface1D() {}
@@ -232,21 +232,6 @@ private:
 };
 
 // ===================================================
-// Constructors & Destructor
-// ===================================================
-template< class BcHandler, class PhysicalSolverType >
-BCInterface1D< BcHandler, PhysicalSolverType >::BCInterface1D() :
-        bcInterface_Type          (),
-        M_data                    ()
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    debugStream( 5020 ) << "BCInterface1D::BCInterface1D" << "\n";
-#endif
-
-}
-
-// ===================================================
 // Methods
 // ===================================================
 template< class BcHandler, class PhysicalSolverType >
@@ -258,6 +243,11 @@ BCInterface1D< BcHandler, PhysicalSolverType >::insertBC()
     debugStream( 5020 ) << "BCInterface1D::insertBC\n";
 #endif
 
+    // Definitions
+    factory_Type factory;
+    OneDFSIFunction base;
+
+    // Define correct BCI type
     switch ( M_data.base().second )
     {
     case BCIFunctionParser:
@@ -266,33 +256,26 @@ BCInterface1D< BcHandler, PhysicalSolverType >::insertBC()
     case BCIFunctionParserFileSolver:
     case BCIFunctionUserDefined:
     {
-        factory_Type factory;
         this->M_vectorFunction.push_back( factory.createFunctionParser( M_data ) );
-
-        OneDFSIFunction base;
         this->M_vectorFunction.back()->assignFunction( base );
 
-        addBcToHandler( base );
-
-        return;
+        break;
     }
     case BCIFunctionSolverDefined:
     {
-        factory_Type factory;
         this->M_vectorFunctionSolverDefined.push_back( factory.createFunctionSolverDefined( M_data ) );
-
-        OneDFSIFunction base;
         this->M_vectorFunctionSolverDefined.back()->assignFunction( base );
 
-        addBcToHandler( base );
-
-        return;
+        break;
     }
     default:
 
         std::cout << " !!! Error: " << M_data.base().first << " is not valid in BCInterface1D !!!" << std::endl;
-        break;
+        return;
     }
+
+    // Add base to BCHandler
+    addBcToHandler( base );
 }
 
 // ===================================================
@@ -351,7 +334,7 @@ BCInterface1D< BcHandler, PhysicalSolverType >::addBcToHandler( BCBaseType& base
         debugStream( 5020 ) << "BCInterface1D::addBCManager" << "\n\n";
 #endif
 
-        this->M_handler->setBC( M_data.side(), M_data.line(), M_data.quantity(), base );
+    this->M_handler->setBC( M_data.side(), M_data.line(), M_data.quantity(), base );
 }
 
 } // Namespace LifeV
