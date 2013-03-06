@@ -179,13 +179,13 @@ private:
 
 
 template<UInt fieldDim, UInt spaceDim>
-const flag_Type EvaluationDphiI<fieldDim,spaceDim>::S_globalUpdateFlag=ET_UPDATE_NONE;
+const flag_Type EvaluationDphiI<fieldDim, spaceDim>::S_globalUpdateFlag = ET_UPDATE_NONE;
 
 template<UInt fieldDim, UInt spaceDim>
-const flag_Type EvaluationDphiI<fieldDim,spaceDim>::S_testUpdateFlag=ET_UPDATE_DPHI;
+const flag_Type EvaluationDphiI<fieldDim, spaceDim>::S_testUpdateFlag = ET_UPDATE_DPHI;
 
 template<UInt fieldDim, UInt spaceDim>
-const flag_Type EvaluationDphiI<fieldDim,spaceDim>::S_solutionUpdateFlag=ET_UPDATE_NONE;
+const flag_Type EvaluationDphiI<fieldDim, spaceDim>::S_solutionUpdateFlag = ET_UPDATE_NONE;
 
 
 //! Evaluation of the basis function dphi_i in the case of a scalar FE.

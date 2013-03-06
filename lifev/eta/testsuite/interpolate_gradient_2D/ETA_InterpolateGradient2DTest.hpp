@@ -87,8 +87,8 @@
     This test integrates the trace of the gradient of \f$u=\left(\begin{array}{c} x \\ 2y \end{array}\right)\f$ on the domain (-1,1)x(-1,1) and compares it to its expected value (12)
 */
 class ETA_InterpolateGradient2DTest
-//     :
-//     public LifeV::Application
+    //     :
+    //     public LifeV::Application
 {
 public:
 

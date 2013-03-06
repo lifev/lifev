@@ -276,8 +276,8 @@ private:
     fespacePtr_Type M_fespace;
     vector_Type M_vector;
 
-	QuadratureRule* M_quadrature;
-	ETCurrentFE<SpaceDim,1> M_currentFE;
+    QuadratureRule* M_quadrature;
+    ETCurrentFE<SpaceDim, 1> M_currentFE;
 
     std::vector<return_Type> M_interpolatedValues;
 };
@@ -499,7 +499,7 @@ private:
     QuadratureRule* M_quadrature;
 
     //! Structure for the computations
-	ETCurrentFE<SpaceDim,1> M_currentFE;
+    ETCurrentFE<SpaceDim, 1> M_currentFE;
 
     //! Storage for the temporary values
     std::vector<return_Type> M_interpolatedValues;

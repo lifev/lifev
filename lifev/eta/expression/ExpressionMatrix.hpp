@@ -60,14 +60,14 @@ namespace ExpressionAssembly
 
 */
 template < UInt MatrixDim1, UInt MatrixDim2 >
-class ExpressionMatrix : public ExpressionBase<ExpressionMatrix<MatrixDim1,MatrixDim2> >
+class ExpressionMatrix : public ExpressionBase<ExpressionMatrix<MatrixDim1, MatrixDim2> >
 {
 public:
 
     //! @name Public Types
     //@{
 
-	typedef ExpressionBase<ExpressionMatrix<MatrixDim1,MatrixDim2> > base_Type;
+    typedef ExpressionBase<ExpressionMatrix<MatrixDim1, MatrixDim2> > base_Type;
 
     //@}
 
@@ -76,15 +76,15 @@ public:
     //@{
 
     //! Constructor using the vector of values
-	ExpressionMatrix(const MatrixSmall<MatrixDim1,MatrixDim2>& myValue)
-	: base_Type(), M_value(myValue) {}
+    ExpressionMatrix (const MatrixSmall<MatrixDim1, MatrixDim2>& myValue)
+        : base_Type(), M_value (myValue) {}
 
     //! Copy constructor
-	ExpressionMatrix(const ExpressionMatrix<MatrixDim1,MatrixDim2>& expr)
-	: base_Type(), M_value(expr.M_value) {}
+    ExpressionMatrix (const ExpressionMatrix<MatrixDim1, MatrixDim2>& expr)
+        : base_Type(), M_value (expr.M_value) {}
 
     //! Destructor
-    ~ExpressionMatrix(){}
+    ~ExpressionMatrix() {}
 
     //@}
 
@@ -93,8 +93,10 @@ public:
     //@{
 
     //! Display method
-	static void display(std::ostream& out= std::cout)
-	{ out << "matrix[" << MatrixDim1 << "][" << MatrixDim2 << "] ";}
+    static void display (std::ostream& out = std::cout)
+    {
+        out << "matrix[" << MatrixDim1 << "][" << MatrixDim2 << "] ";
+    }
 
     //@}
 
@@ -103,7 +105,10 @@ public:
     //@{
 
     //! Getter for the vector of values
-	const MatrixSmall<MatrixDim1,MatrixDim2>& value() const { return M_value; }
+    const MatrixSmall<MatrixDim1, MatrixDim2>& value() const
+    {
+        return M_value;
+    }
 
     //@}
 
@@ -116,7 +121,7 @@ private:
 
     //@}
 
-	MatrixSmall<MatrixDim1,MatrixDim2> M_value;
+    MatrixSmall<MatrixDim1, MatrixDim2> M_value;
 };
 
 //! Simple function to be used in the construction of an expression
@@ -128,10 +133,10 @@ private:
   <i>MatrixDim1, MatrixDim2</i>: The dimensions (size) of the matrix to be represented.
 */
 template<UInt MatrixDim1, UInt MatrixDim2>
-inline ExpressionMatrix<MatrixDim1,MatrixDim2>
-value(const MatrixSmall<MatrixDim1,MatrixDim2>& myValue)
+inline ExpressionMatrix<MatrixDim1, MatrixDim2>
+value (const MatrixSmall<MatrixDim1, MatrixDim2>& myValue)
 {
-	return ExpressionMatrix<MatrixDim1,MatrixDim2>(myValue);
+    return ExpressionMatrix<MatrixDim1, MatrixDim2> (myValue);
 }
 
 

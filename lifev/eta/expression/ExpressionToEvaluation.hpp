@@ -213,13 +213,13 @@ private:
 
 // Specialized for matrix
 template<UInt testDim, UInt solutionDim, UInt spaceDim, UInt MatrixDim1, UInt MatrixDim2>
-class ExpressionToEvaluation<ExpressionMatrix<MatrixDim1,MatrixDim2>,testDim,solutionDim,spaceDim>
+class ExpressionToEvaluation<ExpressionMatrix<MatrixDim1, MatrixDim2>, testDim, solutionDim, spaceDim>
 {
 public:
-	typedef EvaluationMatrix<MatrixDim1,MatrixDim2> evaluation_Type;
+    typedef EvaluationMatrix<MatrixDim1, MatrixDim2> evaluation_Type;
 private:
-	ExpressionToEvaluation();
-	~ExpressionToEvaluation();
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
 };
 
 // Specialized for an interpolated value

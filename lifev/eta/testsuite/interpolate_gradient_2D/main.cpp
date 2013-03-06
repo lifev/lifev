@@ -55,32 +55,39 @@ using namespace LifeV;
 // ===================================================
 //! Main
 // ===================================================
-int main(int argc, char* argv[])
+int main (int argc, char* argv[])
 {
 
 #ifdef HAVE_MPI
-    MPI_Init(&argc, &argv);
-    boost::shared_ptr<Epetra_Comm> Comm(new Epetra_MpiComm(MPI_COMM_WORLD));
+    MPI_Init (&argc, &argv);
+    boost::shared_ptr<Epetra_Comm> Comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
 #else
-    boost::shared_ptr<Epetra_Comm> Comm(new Epetra_SerialComm);
+    boost::shared_ptr<Epetra_Comm> Comm (new Epetra_SerialComm);
 #endif
-    bool verbose(Comm->MyPID()==0);
+    bool verbose (Comm->MyPID() == 0);
 
     // Tolerance
-    const LifeV::Real tolerance( 1e-10 );
+    const LifeV::Real tolerance ( 1e-10 );
 
     ETA_InterpolateGradient2DTest eta_InterpolateGradient2DTest;
 
     // Error of the problem
     const LifeV::Real error = eta_InterpolateGradient2DTest.run();
     const bool unsuccess = std::fabs ( error ) > tolerance;
-    
+
     if (unsuccess)
     {
-        if (verbose) std::cout << "End Result: TEST NOT PASSED" << std::endl;
-    } else
+        if (verbose)
+        {
+            std::cout << "End Result: TEST NOT PASSED" << std::endl;
+        }
+    }
+    else
     {
-        if (verbose) std::cout << "End Result: TEST PASSED" << std::endl;
+        if (verbose)
+        {
+            std::cout << "End Result: TEST PASSED" << std::endl;
+        }
     }
 
 #ifdef HAVE_MPI
@@ -89,8 +96,12 @@ int main(int argc, char* argv[])
 
 
     if ( unsuccess )
+    {
         return ( EXIT_FAILURE );
+    }
     else
+    {
         return ( EXIT_SUCCESS );
+    }
 
 }

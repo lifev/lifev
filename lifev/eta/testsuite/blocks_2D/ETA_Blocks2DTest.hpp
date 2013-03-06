@@ -83,14 +83,14 @@
     \f$
         \left\{\begin{array}{ll}
         - \delta u + \nabla p = f \\
-        \nabla \cdot u=0  
+        \nabla \cdot u=0
     \end{array}\right. \mathrm{in} (-1,1)\mathrm{x}(-1,1)
     \f$ \n
     with \f$u\f$ a scalar field approximated with P2 functions and p approximated with P1 \n
 */
 class ETA_Blocks2DTest
-//     :
-//     public LifeV::Application
+    //     :
+    //     public LifeV::Application
 {
 public:
 

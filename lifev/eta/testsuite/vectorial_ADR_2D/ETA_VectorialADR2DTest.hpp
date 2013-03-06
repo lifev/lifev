@@ -94,8 +94,8 @@
     if the two matrices are assembled correctly, they should be almost exactly the same. \n
 */
 class ETA_VectorialADR2DTest
-//     :
-//     public LifeV::Application
+    //     :
+    //     public LifeV::Application
 {
 public:
 
