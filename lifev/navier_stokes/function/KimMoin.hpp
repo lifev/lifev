@@ -42,43 +42,43 @@ namespace LifeV
 class KimMoin
 {
 public:
-    static Real f( const Real& t, const Real& x, const Real& y,
-                   const Real& z, const ID& i );
-
-    static Real xexact( const Real& t, const Real& x, const Real& y,
-                        const Real& z, const ID& i );
-    static Real uexact( const Real& t, const Real& x, const Real& y,
-                        const Real& z, const ID& i );
-    static Real uderexact( const Real& t, const Real& x, const Real& y,
-                            const Real& z, const ID& i );
-    static Real pexact( const Real& t, const Real& x, const Real& y,
-                        const Real& z, const ID& i );
-
-    // Initial velocity
-    static Real x0( const Real& t, const Real& x, const Real& y,
+    static Real f ( const Real& t, const Real& x, const Real& y,
                     const Real& z, const ID& i );
 
-    static Real u0( const Real& t, const Real& x, const Real& y,
-                        const Real& z, const ID& i );
+    static Real xexact ( const Real& t, const Real& x, const Real& y,
+                         const Real& z, const ID& i );
+    static Real uexact ( const Real& t, const Real& x, const Real& y,
+                         const Real& z, const ID& i );
+    static Real uderexact ( const Real& t, const Real& x, const Real& y,
+                            const Real& z, const ID& i );
+    static Real pexact ( const Real& t, const Real& x, const Real& y,
+                         const Real& z, const ID& i );
 
-    static Real p0( const Real& t, const Real& x, const Real& y,
-                        const Real& z, const ID& i );
+    // Initial velocity
+    static Real x0 ( const Real& t, const Real& x, const Real& y,
+                     const Real& z, const ID& i );
 
-    static Real grad_u( const UInt& icoor, const Real& t, const Real& x, const Real& y,
-                                     const Real& z, const ID& i );
+    static Real u0 ( const Real& t, const Real& x, const Real& y,
+                     const Real& z, const ID& i );
 
-    static Real fNeumann( const Real& t, const Real& x, const Real& y,
-                          const Real& z, const ID& i );
+    static Real p0 ( const Real& t, const Real& x, const Real& y,
+                     const Real& z, const ID& i );
 
-    static Real normalVector( const Real& t, const Real& x, const Real& y,
-                          const Real& z, const ID& i );
+    static Real grad_u ( const UInt& icoor, const Real& t, const Real& x, const Real& y,
+                         const Real& z, const ID& i );
 
-    static Real fShearStress( const Real& t, const Real& x, const Real& y,
-                          const Real& z, const ID& i );
+    static Real fNeumann ( const Real& t, const Real& x, const Real& y,
+                           const Real& z, const ID& i );
 
-    static Real fWallShearStress( const Real& t, const Real& x, const Real& y,
-                          const Real& z, const ID& i );
-    static void setParamsFromGetPot( const GetPot& dataFile );
+    static Real normalVector ( const Real& t, const Real& x, const Real& y,
+                               const Real& z, const ID& i );
+
+    static Real fShearStress ( const Real& t, const Real& x, const Real& y,
+                               const Real& z, const ID& i );
+
+    static Real fWallShearStress ( const Real& t, const Real& x, const Real& y,
+                                   const Real& z, const ID& i );
+    static void setParamsFromGetPot ( const GetPot& dataFile );
 
     static bool flag_strain;
 

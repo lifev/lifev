@@ -52,7 +52,7 @@ Real k_rw ( const Real& S_w )
     // Define the effective saturation
     const Real barS_w = (S_w - S_wr) / (1. - S_wr - S_nr);
 
-    return std::pow( barS_w, (2. + 3.*lambda) / lambda );
+    return std::pow ( barS_w, (2. + 3.*lambda) / lambda );
 }
 
 // First derivative of the relative permeability for the wetting phase
@@ -61,7 +61,7 @@ Real Dk_rw ( const Real& S_w )
     // Define the effective saturation
     const Real barS_w = (S_w - S_wr) / (1. - S_wr - S_nr);
 
-    return (2. + 3.*lambda) / lambda * std::pow(barS_w, (2. + 3.*lambda) / lambda - 1.) / (1. - S_wr - S_nr);
+    return (2. + 3.*lambda) / lambda * std::pow (barS_w, (2. + 3.*lambda) / lambda - 1.) / (1. - S_wr - S_nr);
 }
 
 // Relative permeability for the non-wetting phase
@@ -70,7 +70,7 @@ Real k_rn ( const Real& S_n )
     // Define the effective saturation
     const Real barS_n = (S_n - S_nr) / (1. - S_wr - S_nr);
 
-    return std::pow( barS_n, 2.) * (1 - std::pow( 1 - barS_n, (2. + lambda) / lambda));
+    return std::pow ( barS_n, 2.) * (1 - std::pow ( 1 - barS_n, (2. + lambda) / lambda) );
 }
 
 // First derivative of the relative permeability for the non-wetting phase
@@ -79,8 +79,8 @@ Real Dk_rn ( const Real& S_n )
     // Define the effective saturation
     const Real barS_n = (S_n - S_nr) / (1. - S_wr - S_nr);
 
-    return ( 2.*barS_n * (1 - std::pow( 1 - barS_n, (2. + lambda) / lambda)) -
-             std::pow( barS_n, 2.) * (2. + lambda) / lambda * std::pow(1 - barS_n, (2. + lambda) / lambda - 1.) ) /
+    return ( 2.*barS_n * (1 - std::pow ( 1 - barS_n, (2. + lambda) / lambda) ) -
+             std::pow ( barS_n, 2.) * (2. + lambda) / lambda * std::pow (1 - barS_n, (2. + lambda) / lambda - 1.) ) /
            (1. - S_wr - S_nr);
 }
 
@@ -90,7 +90,7 @@ Real pc ( const Real& S_w ) // [Pa]
     // Define the effective saturation
     const Real barS_w = (S_w - S_wr) / (1. - S_wr - S_nr);
 
-    return pd * std::pow(barS_w, -1. / lambda);
+    return pd * std::pow (barS_w, -1. / lambda);
 }
 
 // First derivative of the capillary pressure
@@ -99,22 +99,22 @@ Real Dpc ( const Real& S_w ) // [Pa]
     // Define the effective saturation
     const Real barS_w = (S_w - S_wr) / (1. - S_wr - S_nr);
 
-    return pd / lambda * std::pow(barS_w, -1. / lambda - 1.) / (1. - S_wr - S_nr);
+    return pd / lambda * std::pow (barS_w, -1. / lambda - 1.) / (1. - S_wr - S_nr);
 }
 
 // Absolute inverse permeability
 const Matrix invK ( const Real& /* t */, const Real& x, const Real& y, const Real& /* z */ ) // [m^2]
 {
-    Matrix inversePermeabilityMatrix( static_cast<UInt>(3), static_cast<UInt>(3) );
+    Matrix inversePermeabilityMatrix ( static_cast<UInt> (3), static_cast<UInt> (3) );
 
     const Real highInvPermeability = 1e5;
     const Real lowInvPermeability = 1.;
 
     Real Entry00, Entry01, Entry02, Entry11, Entry12, Entry22;
 
-    if ( ((x > 1000) && (x < 1250) && (y > 0) &&  (y < 1250) )
-            || ((x > 2250) && (x < 2500) && (y > 1000) &&  (y < 3000))
-            || ((x > 3500) && (x < 3750) && (y > 500) &&  (y < 3000)) )
+    if ( ( (x > 1000) && (x < 1250) && (y > 0) &&  (y < 1250) )
+            || ( (x > 2250) && (x < 2500) && (y > 1000) &&  (y < 3000) )
+            || ( (x > 3500) && (x < 3750) && (y > 500) &&  (y < 3000) ) )
     {
         // First row
         Entry00 = highInvPermeability;
@@ -145,15 +145,15 @@ const Matrix invK ( const Real& /* t */, const Real& x, const Real& y, const Rea
     }
 
     // Fill in of the inversePermeabilityMatrix
-    inversePermeabilityMatrix( static_cast<UInt>(0), static_cast<UInt>(0) ) = Entry00;
-    inversePermeabilityMatrix( static_cast<UInt>(0), static_cast<UInt>(1) ) = Entry01;
-    inversePermeabilityMatrix( static_cast<UInt>(0), static_cast<UInt>(2) ) = Entry02;
-    inversePermeabilityMatrix( static_cast<UInt>(1), static_cast<UInt>(0) ) = Entry01;
-    inversePermeabilityMatrix( static_cast<UInt>(1), static_cast<UInt>(1) ) = Entry11;
-    inversePermeabilityMatrix( static_cast<UInt>(1), static_cast<UInt>(2) ) = Entry12;
-    inversePermeabilityMatrix( static_cast<UInt>(2), static_cast<UInt>(0) ) = Entry02;
-    inversePermeabilityMatrix( static_cast<UInt>(2), static_cast<UInt>(1) ) = Entry12;
-    inversePermeabilityMatrix( static_cast<UInt>(2), static_cast<UInt>(2) ) = Entry22;
+    inversePermeabilityMatrix ( static_cast<UInt> (0), static_cast<UInt> (0) ) = Entry00;
+    inversePermeabilityMatrix ( static_cast<UInt> (0), static_cast<UInt> (1) ) = Entry01;
+    inversePermeabilityMatrix ( static_cast<UInt> (0), static_cast<UInt> (2) ) = Entry02;
+    inversePermeabilityMatrix ( static_cast<UInt> (1), static_cast<UInt> (0) ) = Entry01;
+    inversePermeabilityMatrix ( static_cast<UInt> (1), static_cast<UInt> (1) ) = Entry11;
+    inversePermeabilityMatrix ( static_cast<UInt> (1), static_cast<UInt> (2) ) = Entry12;
+    inversePermeabilityMatrix ( static_cast<UInt> (2), static_cast<UInt> (0) ) = Entry02;
+    inversePermeabilityMatrix ( static_cast<UInt> (2), static_cast<UInt> (1) ) = Entry12;
+    inversePermeabilityMatrix ( static_cast<UInt> (2), static_cast<UInt> (2) ) = Entry22;
 
     return inversePermeabilityMatrix;
 
@@ -169,93 +169,93 @@ const Matrix invK ( const Real& /* t */, const Real& x, const Real& y, const Rea
         1 1 0
         0 0 1]
 */
-Matrix pressurePermeability( const Real& t,
-                             const Real& x,
-                             const Real& y,
-                             const Real& z,
-                             const std::vector<Real> & u )
+Matrix pressurePermeability ( const Real& t,
+                              const Real& x,
+                              const Real& y,
+                              const Real& z,
+                              const std::vector<Real>& u )
 {
 
     // Alias for the non-wetting phase saturation
     const Real& S_n = u[0];
 
     // Compute the phase mobility
-    const Real lambda_w = dataPhysical::k_rw( 1. - S_n ) / dataPhysical::mu_w;
-    const Real lambda_n = dataPhysical::k_rn( S_n ) / dataPhysical::mu_n;
+    const Real lambda_w = dataPhysical::k_rw ( 1. - S_n ) / dataPhysical::mu_w;
+    const Real lambda_n = dataPhysical::k_rn ( S_n ) / dataPhysical::mu_n;
 
-    return - dataPhysical::invK(t, x, y, z) / ( lambda_n + lambda_w );
+    return - dataPhysical::invK (t, x, y, z) / ( lambda_n + lambda_w );
 }
 
 // Source term
-Real pressureSource( const Real& /* t */,
-                     const Real& /* x */,
-                     const Real& /* y */,
-                     const Real& /* z */,
-                     const ID&   /* icomp */)
+Real pressureSource ( const Real& /* t */,
+                      const Real& /* x */,
+                      const Real& /* y */,
+                      const Real& /* z */,
+                      const ID&   /* icomp */)
 {
     return 0.;
 }
 
 // Boundary condition of Dirichlet
-Real pressureDirichlet1( const Real& /* t */,
-                         const Real& /* x */,
-                         const Real& /* y */,
-                         const Real& /* z */,
-                         const ID&   /* icomp */)
+Real pressureDirichlet1 ( const Real& /* t */,
+                          const Real& /* x */,
+                          const Real& /* y */,
+                          const Real& /* z */,
+                          const ID&   /* icomp */)
 {
     return 11000000.;
 }
 
 // Boundary condition of Dirichlet
-Real pressureDirichlet2( const Real& /* t */,
-                         const Real& /* x */,
-                         const Real& /* y */,
-                         const Real& /* z */,
-                         const ID&   /* icomp */)
+Real pressureDirichlet2 ( const Real& /* t */,
+                          const Real& /* x */,
+                          const Real& /* y */,
+                          const Real& /* z */,
+                          const ID&   /* icomp */)
 {
     return 10000000.;
 }
 
 // Boundary conditisaturationDirichletBDfunon of Dirichlet
-Real pressureDirichlet3( const Real& /* t */,
-                         const Real& /* x */,
-                         const Real& /* y */,
-                         const Real& /* z */,
-                         const ID&   /* icomp */)
+Real pressureDirichlet3 ( const Real& /* t */,
+                          const Real& /* x */,
+                          const Real& /* y */,
+                          const Real& /* z */,
+                          const ID&   /* icomp */)
 {
     return 10500000.;
 }
 
 // Boundary condition of Neumann
-Real pressureNeumann( const Real& /* t */,
-                      const Real& x,
-                      const Real& y,
-                      const Real& /* z */,
-                      const ID&   icomp)
+Real pressureNeumann ( const Real& /* t */,
+                       const Real& x,
+                       const Real& y,
+                       const Real& /* z */,
+                       const ID&   icomp)
 {
     return 0.;
 
     switch (icomp)
     {
-    case 0:   //! Dx
-        return  -1.*(4.*x*y*y + 2.*x*x*y + 12.);
-        break;
-    case 1:   //! Dy
-        return 0.;
-        break;
-    case 2:   //! Dz
-        return 0.;
-        break;
+        case 0:   //! Dx
+            return  -1.* (4.*x * y * y + 2.*x * x * y + 12.);
+            break;
+        case 1:   //! Dy
+            return 0.;
+            break;
+        case 2:   //! Dz
+            return 0.;
+            break;
     }
     return 0.;
 }
 
 // Boundary condition of Robin
-Real pressureRobin( const Real& /* t */,
-                    const Real& /* x */,
-                    const Real& /* y */,
-                    const Real& /* z */,
-                    const ID&   /* icomp */)
+Real pressureRobin ( const Real& /* t */,
+                     const Real& /* x */,
+                     const Real& /* y */,
+                     const Real& /* z */,
+                     const ID&   /* icomp */)
 {
     return 0.;
 }
@@ -272,62 +272,62 @@ K = [p^2+2 1   0
      1     1   0
      0     0   2]
 */
-Matrix saturationPermeability( const Real& t,
-                               const Real& x,
-                               const Real& y,
-                               const Real& z,
-                               const std::vector<Real> & u )
+Matrix saturationPermeability ( const Real& t,
+                                const Real& x,
+                                const Real& y,
+                                const Real& z,
+                                const std::vector<Real>& u )
 {
     // Alias for the non-wetting phase saturation
     const Real& S_n = u[0];
 
     // Compute the phase mobility
-    const Real lambda_w = dataPhysical::k_rw( 1. - S_n ) / dataPhysical::mu_w;
-    const Real lambda_n = dataPhysical::k_rn( S_n ) / dataPhysical::mu_n;
+    const Real lambda_w = dataPhysical::k_rw ( 1. - S_n ) / dataPhysical::mu_w;
+    const Real lambda_n = dataPhysical::k_rn ( S_n ) / dataPhysical::mu_n;
 
     // Compute the fractional flow
     const Real f_n = lambda_n / ( lambda_w + lambda_n );
 
-    return - dataPhysical::invK(t, x, y, z) / ( lambda_w * f_n * dataPhysical::Dpc ( 1. - S_n ) ) ;
+    return - dataPhysical::invK (t, x, y, z) / ( lambda_w * f_n * dataPhysical::Dpc ( 1. - S_n ) ) ;
 }
 
 // Physical flux function
-Vector saturationPhysicalFlux( const Real& t,
-                               const Real& x,
-                               const Real& y,
-                               const Real& z,
-                               const std::vector<Real>& u )
+Vector saturationPhysicalFlux ( const Real& t,
+                                const Real& x,
+                                const Real& y,
+                                const Real& z,
+                                const std::vector<Real>& u )
 {
-    Vector physicalFluxVector( static_cast<UInt>(3) );
+    Vector physicalFluxVector ( static_cast<UInt> (3) );
 
     // Alias for the non-wetting phase saturation
     const Real& S_n = u[0];
 
     // Compute the phase mobility
-    const Real lambda_w = dataPhysical::k_rw( 1. - S_n ) / dataPhysical::mu_w;
-    const Real lambda_n = dataPhysical::k_rn( S_n ) / dataPhysical::mu_n;
+    const Real lambda_w = dataPhysical::k_rw ( 1. - S_n ) / dataPhysical::mu_w;
+    const Real lambda_n = dataPhysical::k_rn ( S_n ) / dataPhysical::mu_n;
 
     // Compute the fractional flow
     const Real f_n = lambda_n / ( lambda_w + lambda_n );
 
     // Compute the last column of the inverse of the inverse permeability
-    const Matrix invK = dataPhysical::invK( t, x, y, z );
+    const Matrix invK = dataPhysical::invK ( t, x, y, z );
 
     // Compute the denominator of the last column of the inverse of the inverse permeability
-    const Real denominator = invK(0, 0) * invK(1, 1) * invK(2, 2)
-                             - invK(0, 0) * invK(1, 2) * invK(1, 2)
-                             - invK(0, 1) * invK(0, 1) * invK(2, 2)
-                             + 2. * invK(0, 1) * invK(0, 2) * invK(1, 2)
-                             - invK(0, 2) * invK(0, 2) * invK(1, 1);
+    const Real denominator = invK (0, 0) * invK (1, 1) * invK (2, 2)
+                             - invK (0, 0) * invK (1, 2) * invK (1, 2)
+                             - invK (0, 1) * invK (0, 1) * invK (2, 2)
+                             + 2. * invK (0, 1) * invK (0, 2) * invK (1, 2)
+                             - invK (0, 2) * invK (0, 2) * invK (1, 1);
 
     // Compute the first component of the last column of the inverse of the inverse permeability
-    const Real K02 = ( invK(0, 1) * invK(1, 2) - invK(0, 2) * invK(1, 1) ) / denominator;
+    const Real K02 = ( invK (0, 1) * invK (1, 2) - invK (0, 2) * invK (1, 1) ) / denominator;
 
     // Compute the second component of the last column of the inverse of the inverse permeability
-    const Real K12 = ( invK(0, 0) * invK(1, 2) - invK(0, 1) * invK(0, 2) ) / denominator;
+    const Real K12 = ( invK (0, 0) * invK (1, 2) - invK (0, 1) * invK (0, 2) ) / denominator;
 
     // Compute the third component of the last column of the inverse of the inverse permeability
-    const Real K22 = ( invK(0, 0) * invK(1, 1) - invK(0, 1) * invK(0, 1) ) / denominator;
+    const Real K22 = ( invK (0, 0) * invK (1, 1) - invK (0, 1) * invK (0, 1) ) / denominator;
 
     // Compute a common constant
     const Real lfrg = lambda_w * f_n * (dataPhysical::rho_w - dataPhysical::rho_n) * dataPhysical::g;
@@ -341,58 +341,58 @@ Vector saturationPhysicalFlux( const Real& t,
     // Third row
     const Real Entry2 = f_n * u[3] - lfrg * K22;
 
-    physicalFluxVector( static_cast<UInt>(0) ) = Entry0;
-    physicalFluxVector( static_cast<UInt>(1) ) = Entry1;
-    physicalFluxVector( static_cast<UInt>(2) ) = Entry2;
+    physicalFluxVector ( static_cast<UInt> (0) ) = Entry0;
+    physicalFluxVector ( static_cast<UInt> (1) ) = Entry1;
+    physicalFluxVector ( static_cast<UInt> (2) ) = Entry2;
 
     return physicalFluxVector;
 }
 
 // First derivative in u of the physical flux function
-Vector saturationFirstDerivativePhysicalFlux( const Real& t,
-                                              const Real& x,
-                                              const Real& y,
-                                              const Real& z,
-                                              const std::vector<Real>& u )
+Vector saturationFirstDerivativePhysicalFlux ( const Real& t,
+                                               const Real& x,
+                                               const Real& y,
+                                               const Real& z,
+                                               const std::vector<Real>& u )
 {
-    Vector firstDerivativePhysicalFluxVector( static_cast<UInt>(3) );
+    Vector firstDerivativePhysicalFluxVector ( static_cast<UInt> (3) );
 
     // Alias for the non-wetting phase saturation
     const Real& S_n = u[0];
 
     // Compute the phase mobility
-    const Real lambda_w = dataPhysical::k_rw( 1. - S_n ) / dataPhysical::mu_w;
-    const Real lambda_n = dataPhysical::k_rn( S_n ) / dataPhysical::mu_n;
+    const Real lambda_w = dataPhysical::k_rw ( 1. - S_n ) / dataPhysical::mu_w;
+    const Real lambda_n = dataPhysical::k_rn ( S_n ) / dataPhysical::mu_n;
 
     // Compute the first derivative of the phase mobility
-    const Real Dlambda_w = dataPhysical::Dk_rw( 1. - S_n ) / dataPhysical::mu_w;
-    const Real Dlambda_n = dataPhysical::Dk_rn( S_n ) / dataPhysical::mu_n;
+    const Real Dlambda_w = dataPhysical::Dk_rw ( 1. - S_n ) / dataPhysical::mu_w;
+    const Real Dlambda_n = dataPhysical::Dk_rn ( S_n ) / dataPhysical::mu_n;
 
     // Compute the fractional flow
     const Real f_n = lambda_n / ( lambda_w + lambda_n );
 
     // Compute the first derivative of the fractional flow
     const Real Df_n = (Dlambda_w * (lambda_w + lambda_n) - lambda_w * (Dlambda_w + Dlambda_n) ) /
-                      std::pow(lambda_w + lambda_n, 2);
+                      std::pow (lambda_w + lambda_n, 2);
 
     // Compute the last column of the inverse of the inverse permeability
-    const Matrix invK = dataPhysical::invK( t, x, y, z );
+    const Matrix invK = dataPhysical::invK ( t, x, y, z );
 
     // Compute the denominator of the last column of the inverse of the inverse permeability
-    const Real denominator = invK(0, 0) * invK(1, 1) * invK(2, 2)
-                             - invK(0, 0) * invK(1, 2) * invK(1, 2)
-                             - invK(0, 1) * invK(0, 1) * invK(2, 2)
-                             + 2. * invK(0, 1) * invK(0, 2) * invK(1, 2)
-                             - invK(0, 2) * invK(0, 2) * invK(1, 1);
+    const Real denominator = invK (0, 0) * invK (1, 1) * invK (2, 2)
+                             - invK (0, 0) * invK (1, 2) * invK (1, 2)
+                             - invK (0, 1) * invK (0, 1) * invK (2, 2)
+                             + 2. * invK (0, 1) * invK (0, 2) * invK (1, 2)
+                             - invK (0, 2) * invK (0, 2) * invK (1, 1);
 
     // Compute the first component of the last column of the inverse of the inverse permeability
-    const Real K02 = ( invK(0, 1) * invK(1, 2) - invK(0, 2) * invK(1, 1) ) / denominator;
+    const Real K02 = ( invK (0, 1) * invK (1, 2) - invK (0, 2) * invK (1, 1) ) / denominator;
 
     // Compute the second component of the last column of the inverse of the inverse permeability
-    const Real K12 = ( invK(0, 0) * invK(1, 2) - invK(0, 1) * invK(0, 2) ) / denominator;
+    const Real K12 = ( invK (0, 0) * invK (1, 2) - invK (0, 1) * invK (0, 2) ) / denominator;
 
     // Compute the third component of the last column of the inverse of the inverse permeability
-    const Real K22 = ( invK(0, 0) * invK(1, 1) - invK(0, 1) * invK(0, 1) ) / denominator;
+    const Real K22 = ( invK (0, 0) * invK (1, 1) - invK (0, 1) * invK (0, 1) ) / denominator;
 
     // Compute a common constant
     const Real lfrg = (Dlambda_w * f_n + lambda_w * Df_n) * (dataPhysical::rho_w - dataPhysical::rho_n) * dataPhysical::g;
@@ -406,106 +406,110 @@ Vector saturationFirstDerivativePhysicalFlux( const Real& t,
     // Third row
     Real Entry2 = u[3] * Df_n - lfrg * K22;
 
-    firstDerivativePhysicalFluxVector( static_cast<UInt>(0) ) = Entry0;
-    firstDerivativePhysicalFluxVector( static_cast<UInt>(1) ) = Entry1;
-    firstDerivativePhysicalFluxVector( static_cast<UInt>(2) ) = Entry2;
+    firstDerivativePhysicalFluxVector ( static_cast<UInt> (0) ) = Entry0;
+    firstDerivativePhysicalFluxVector ( static_cast<UInt> (1) ) = Entry1;
+    firstDerivativePhysicalFluxVector ( static_cast<UInt> (2) ) = Entry2;
 
     return firstDerivativePhysicalFluxVector;
 }
 
 // Source term
-Real saturationSource( const Real& /* t */,
-                       const Real& /* x */,
-                       const Real& /* y */,
-                       const Real& /* z */,
-                       const ID&   /* icomp */)
+Real saturationSource ( const Real& /* t */,
+                        const Real& /* x */,
+                        const Real& /* y */,
+                        const Real& /* z */,
+                        const ID&   /* icomp */)
 {
     return 0.;
 }
 
 // Initial condition
-Real saturationInitialCondition( const Real& /* t */,
-                                 const Real& /* x */,
-                                 const Real& /* y */,
-                                 const Real& /* z */,
-                                 const ID&   /* icomp */ )
+Real saturationInitialCondition ( const Real& /* t */,
+                                  const Real& /* x */,
+                                  const Real& /* y */,
+                                  const Real& /* z */,
+                                  const ID&   /* icomp */ )
 {
     return 0.1;
 }
 
 // Mass function
-Real saturationMass( const Real& /* t */,
-                     const Real& x,
-                     const Real& y,
-                     const Real& z,
-                     const ID&   /* icomp */ )
+Real saturationMass ( const Real& /* t */,
+                      const Real& x,
+                      const Real& y,
+                      const Real& z,
+                      const ID&   /* icomp */ )
 {
-    return dataPhysical::Phi( x, y, z );
+    return dataPhysical::Phi ( x, y, z );
 }
 
 // Boundary condition of Dirichlet
-Real saturationDirichlet1( const Real& t,
-                           const Real& /* x */,
-                           const Real& /* y */,
-                           const Real& /* z */,
-                           const ID&   /* icomp */)
+Real saturationDirichlet1 ( const Real& t,
+                            const Real& /* x */,
+                            const Real& /* y */,
+                            const Real& /* z */,
+                            const ID&   /* icomp */)
 {
     if ( t < 5.)
+    {
         return 0.8;
+    }
     else
+    {
         return 0.1;
+    }
 }
 
 // Boundary condition of Dirichlet
-Real saturationDirichlet2( const Real& /* t */,
-                           const Real& /* x */,
-                           const Real& /* y */,
-                           const Real& /* z */,
-                           const ID&   /* icomp */)
+Real saturationDirichlet2 ( const Real& /* t */,
+                            const Real& /* x */,
+                            const Real& /* y */,
+                            const Real& /* z */,
+                            const ID&   /* icomp */)
 {
     return 0.5;
 }
 
 // Boundary condition of Dirichlet
-Real saturationDirichlet3( const Real& /* t */,
-                           const Real& /* x */,
-                           const Real& /* y */,
-                           const Real& /* z */,
-                           const ID&   /* icomp */)
+Real saturationDirichlet3 ( const Real& /* t */,
+                            const Real& /* x */,
+                            const Real& /* y */,
+                            const Real& /* z */,
+                            const ID&   /* icomp */)
 {
     return 0.01;
 }
 
 // Boundary condition of Neumann
-Real saturationNeumann( const Real& /* t */,
-                        const Real& /* x */,
-                        const Real& /* y */,
-                        const Real& /* z */,
-                        const ID&   icomp)
+Real saturationNeumann ( const Real& /* t */,
+                         const Real& /* x */,
+                         const Real& /* y */,
+                         const Real& /* z */,
+                         const ID&   icomp)
 {
     return 0.;
 
     switch (icomp)
     {
-    case 0:   //! Dx
-        return 0.;
-        break;
-    case 1:   //! Dy
-        return 0.;
-        break;
-    case 2:   //! Dz
-        return 0.;
-        break;
+        case 0:   //! Dx
+            return 0.;
+            break;
+        case 1:   //! Dy
+            return 0.;
+            break;
+        case 2:   //! Dz
+            return 0.;
+            break;
     }
     return 0.;
 }
 
 // Boundary condition of Robin
-Real saturationRobin( const Real& /* t */,
-                      const Real& /* x */,
-                      const Real& /* y */,
-                      const Real& /* z */,
-                      const ID&   /* icomp */)
+Real saturationRobin ( const Real& /* t */,
+                       const Real& /* x */,
+                       const Real& /* y */,
+                       const Real& /* z */,
+                       const ID&   /* icomp */)
 {
     return 0.;
 }

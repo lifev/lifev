@@ -78,7 +78,7 @@ public:
     /*!
      * @param fileName Name of the data file.
      */
-    void setupData( const std::string& fileName );
+    void setupData ( const std::string& fileName );
 
     //! Perform sub-iteration on the coupling variables
     void subIterate();
@@ -90,9 +90,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    MultiscaleAlgorithmExplicit( const MultiscaleAlgorithmExplicit& algorithm );
+    MultiscaleAlgorithmExplicit ( const MultiscaleAlgorithmExplicit& algorithm );
 
-    MultiscaleAlgorithmExplicit& operator=( const MultiscaleAlgorithmExplicit& algorithm );
+    MultiscaleAlgorithmExplicit& operator= ( const MultiscaleAlgorithmExplicit& algorithm );
 
     //@}
 

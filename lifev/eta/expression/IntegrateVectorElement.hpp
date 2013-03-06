@@ -70,7 +70,7 @@ class IntegrateVectorElement
 {
 public:
 
-	//! @name Public Types
+    //! @name Public Types
     //@{
 
     //! Type of the Evaluation
@@ -86,13 +86,13 @@ public:
     //@{
 
     //! Full data constructor
-	IntegrateVectorElement(const boost::shared_ptr<MeshType>& mesh,
-						   const QuadratureRule& quadrature,
-						   const boost::shared_ptr<TestSpaceType>& testSpace,
-                           const ExpressionType& expression);
+    IntegrateVectorElement (const boost::shared_ptr<MeshType>& mesh,
+                            const QuadratureRule& quadrature,
+                            const boost::shared_ptr<TestSpaceType>& testSpace,
+                            const ExpressionType& expression);
 
     //! Copy constructor
-	IntegrateVectorElement( const IntegrateVectorElement < MeshType, TestSpaceType, ExpressionType> & integrator);
+    IntegrateVectorElement ( const IntegrateVectorElement < MeshType, TestSpaceType, ExpressionType>& integrator);
 
     //! Destructor
     ~IntegrateVectorElement();
@@ -105,16 +105,16 @@ public:
 
     //! Operator wrapping the addTo method
     template <typename VectorType>
-    inline void operator>>(VectorType& vector)
+    inline void operator>> (VectorType& vector)
     {
-        addTo(vector);
+        addTo (vector);
     }
 
     //! Operator wrapping the addTo method (for shared_ptr)
     template <typename VectorType>
-    inline void operator>>(boost::shared_ptr<VectorType> vector)
+    inline void operator>> (boost::shared_ptr<VectorType> vector)
     {
-        addTo(*vector);
+        addTo (*vector);
     }
 
 
@@ -124,7 +124,7 @@ public:
     //@{
 
     //! Ouput method
-	void check(std::ostream& out = std::cout);
+    void check (std::ostream& out = std::cout);
 
     //! Method that performs the assembly
     /*!
@@ -134,8 +134,8 @@ public:
       sum over the quadrature nodes, assemble in the global
       vector.
      */
-	template <typename VectorType>
-	void addTo(VectorType& vec);
+    template <typename VectorType>
+    void addTo (VectorType& vec);
 
     //@}
 
@@ -145,21 +145,21 @@ private:
     //@{
 
     // No default constructor
-	IntegrateVectorElement();
+    IntegrateVectorElement();
 
     //@}
 
     // Pointer on the mesh
-	boost::shared_ptr<MeshType> M_mesh;
+    boost::shared_ptr<MeshType> M_mesh;
 
     // Quadrature to be used
-	QuadratureRule M_quadrature;
+    QuadratureRule M_quadrature;
 
     // Shared pointer on the Space
-	boost::shared_ptr<TestSpaceType> M_testSpace;
+    boost::shared_ptr<TestSpaceType> M_testSpace;
 
     // Tree to compute the values for the assembly
-	evaluation_Type M_evaluation;
+    evaluation_Type M_evaluation;
 
 	ETCurrentFE<MeshType::S_geoDimensions,1>* M_globalCFE;
 	ETCurrentFE<TestSpaceType::S_spaceDim,TestSpaceType::S_fieldDim>* M_testCFE;
@@ -222,16 +222,16 @@ IntegrateVectorElement(const boost::shared_ptr<MeshType>& mesh,
 
 template < typename MeshType, typename TestSpaceType, typename ExpressionType>
 IntegrateVectorElement < MeshType, TestSpaceType, ExpressionType>::
-IntegrateVectorElement( const IntegrateVectorElement < MeshType, TestSpaceType, ExpressionType> & integrator)
-	:	M_mesh(integrator.M_mesh),
-		M_quadrature(integrator.M_quadrature),
-		M_testSpace(integrator.M_testSpace),
-		M_evaluation(integrator.M_evaluation),
+IntegrateVectorElement ( const IntegrateVectorElement < MeshType, TestSpaceType, ExpressionType>& integrator)
+    :   M_mesh (integrator.M_mesh),
+        M_quadrature (integrator.M_quadrature),
+        M_testSpace (integrator.M_testSpace),
+        M_evaluation (integrator.M_evaluation),
 
 	  	//M_globalCFE(new ETCurrentFE<3,1>(feTetraP0,geometricMapFromMesh<MeshType>(),M_quadrature)),
 		M_testCFE(new ETCurrentFE<TestSpaceType::S_spaceDim,TestSpaceType::S_fieldDim>(M_testSpace->refFE(), M_testSpace->geoMap(),M_quadrature)),
 
-		M_elementalVector(integrator.M_elementalVector)
+        M_elementalVector (integrator.M_elementalVector)
 {
     switch (MeshType::geoShape_Type::BasRefSha::S_shape)
     {
@@ -274,13 +274,13 @@ IntegrateVectorElement < MeshType, TestSpaceType, ExpressionType>::
 template < typename MeshType, typename TestSpaceType, typename ExpressionType>
 void
 IntegrateVectorElement < MeshType, TestSpaceType, ExpressionType>::
-check(std::ostream& out)
+check (std::ostream& out)
 {
     out << " Checking the integration : " << std::endl;
-    M_evaluation.display(out);
+    M_evaluation.display (out);
     out << std::endl;
     out << " Elemental vector : " << std::endl;
-    M_elementalVector.showMe(out);
+    M_elementalVector.showMe (out);
     out << std::endl;
 }
 
@@ -288,56 +288,56 @@ template < typename MeshType, typename TestSpaceType, typename ExpressionType>
 template <typename VectorType>
 void
 IntegrateVectorElement < MeshType, TestSpaceType, ExpressionType>::
-addTo(VectorType& vec)
+addTo (VectorType& vec)
 {
-    UInt nbElements(M_mesh->numElements());
-    UInt nbQuadPt(M_quadrature.nbQuadPt());
-    UInt nbTestDof(M_testSpace->refFE().nbDof());
+    UInt nbElements (M_mesh->numElements() );
+    UInt nbQuadPt (M_quadrature.nbQuadPt() );
+    UInt nbTestDof (M_testSpace->refFE().nbDof() );
 
-    for (UInt iElement(0); iElement< nbElements; ++iElement)
+    for (UInt iElement (0); iElement < nbElements; ++iElement)
     {
         // Zeros out the elemental vector
         M_elementalVector.zero();
 
         // Update the currentFEs
-        M_globalCFE->update(M_mesh->element(iElement),evaluation_Type::S_globalUpdateFlag | ET_UPDATE_WDET);
-        M_testCFE->update(M_mesh->element(iElement),evaluation_Type::S_testUpdateFlag);
+        M_globalCFE->update (M_mesh->element (iElement), evaluation_Type::S_globalUpdateFlag | ET_UPDATE_WDET);
+        M_testCFE->update (M_mesh->element (iElement), evaluation_Type::S_testUpdateFlag);
 
         // Update the evaluation
-        M_evaluation.update(iElement);
+        M_evaluation.update (iElement);
 
         // Loop on the blocks
 
-        for (UInt iblock(0); iblock < TestSpaceType::S_fieldDim; ++iblock)
+        for (UInt iblock (0); iblock < TestSpaceType::S_fieldDim; ++iblock)
         {
             // Set the row global indices in the local vector
-            for (UInt i(0); i<nbTestDof; ++i)
+            for (UInt i (0); i < nbTestDof; ++i)
             {
                 /*M_elementalVector.block(0).setRowIndex
-					(i + iblock*nbTestDof,
+                    (i + iblock*nbTestDof,
                     M_testSpace->dof().localToGlobalMap(iElement,i)+ iblock*M_testSpace->dof().numTotalDof());*/
                 M_elementalVector.setRowIndex
-					(i + iblock*nbTestDof,
-                     M_testSpace->dof().localToGlobalMap(iElement,i)+ iblock*M_testSpace->dof().numTotalDof());
+                (i + iblock * nbTestDof,
+                 M_testSpace->dof().localToGlobalMap (iElement, i) + iblock * M_testSpace->dof().numTotalDof() );
             }
 
             // Make the assembly
-            for (UInt iQuadPt(0); iQuadPt< nbQuadPt; ++iQuadPt)
+            for (UInt iQuadPt (0); iQuadPt < nbQuadPt; ++iQuadPt)
             {
-                for (UInt i(0); i<nbTestDof; ++i)
+                for (UInt i (0); i < nbTestDof; ++i)
                 {
                     /*M_elementalVector.block(0).element(i+iblock*nbTestDof) +=
-						M_evaluation.value_qi(iQuadPt,i+iblock*nbTestDof)
-						* M_globalCFE->wDet(iQuadPt);*/
-                    M_elementalVector.element(i+iblock*nbTestDof) +=
-						M_evaluation.value_qi(iQuadPt,i+iblock*nbTestDof)
-						* M_globalCFE->wDet(iQuadPt);
+                        M_evaluation.value_qi(iQuadPt,i+iblock*nbTestDof)
+                        * M_globalCFE->wDet(iQuadPt);*/
+                    M_elementalVector.element (i + iblock * nbTestDof) +=
+                        M_evaluation.value_qi (iQuadPt, i + iblock * nbTestDof)
+                        * M_globalCFE->wDet (iQuadPt);
 
                 }
             }
         }
 
-        M_elementalVector.pushToGlobal(vec);
+        M_elementalVector.pushToGlobal (vec);
     }
 }
 

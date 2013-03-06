@@ -59,58 +59,58 @@ namespace detail
 // Import function for 3D mesh
 template<typename Elt>
 void
-import3D( std::string const&  fileName,
-        MeshFormat const&   format,
-        RegionMesh<Elt>&  mesh,
-        markerID_Type     regionFlag )
+import3D ( std::string const&  fileName,
+           MeshFormat const&   format,
+           RegionMesh<Elt>&  mesh,
+           markerID_Type     regionFlag )
 {
     // Select the right mesh format
     switch ( format )
     {
-    case MESHPP:
-        readMppFile( mesh, fileName, regionFlag );
-        break;
+        case MESHPP:
+            readMppFile ( mesh, fileName, regionFlag );
+            break;
 
-    case INRIA:
-        readINRIAMeshFile( mesh, fileName, regionFlag );
-        break;
+        case INRIA:
+            readINRIAMeshFile ( mesh, fileName, regionFlag );
+            break;
 
-    case GMSH:
-        readGmshFile( mesh, fileName, regionFlag );
-        break;
+        case GMSH:
+            readGmshFile ( mesh, fileName, regionFlag );
+            break;
 
-    case NETGEN:
-        readNetgenMesh( mesh, fileName, regionFlag );
-        break;
-    default:
-		{
-		std::ostringstream ostr;
-		ostr << "Unsupported 2D file format";
-		throw std::invalid_argument( ostr.str() );
-		}
+        case NETGEN:
+            readNetgenMesh ( mesh, fileName, regionFlag );
+            break;
+        default:
+        {
+            std::ostringstream ostr;
+            ostr << "Unsupported 2D file format";
+            throw std::invalid_argument ( ostr.str() );
+        }
     }
 } // import
 
 //Import function for 2D mesh
 template<typename Elt>
 void
-import2D( std::string const& fileName,
-        MeshFormat const&  format,
-        RegionMesh<Elt>& mesh,
-        markerID_Type    regionFlag )
+import2D ( std::string const& fileName,
+           MeshFormat const&  format,
+           RegionMesh<Elt>& mesh,
+           markerID_Type    regionFlag )
 {
     // Select the right mesh format, only Gmsh allowed
     switch ( format )
     {
-    case FREEFEM:
-    	readFreeFemFile( mesh, fileName, regionFlag );
-    	break;
-    default:
-		{
-        std::ostringstream ostr;
-        ostr << "Unsupported 2D file format";
-        throw std::invalid_argument( ostr.str() );
-		}
+        case FREEFEM:
+            readFreeFemFile ( mesh, fileName, regionFlag );
+            break;
+        default:
+        {
+            std::ostringstream ostr;
+            ostr << "Unsupported 2D file format";
+            throw std::invalid_argument ( ostr.str() );
+        }
     }
 } // import
 
@@ -131,7 +131,7 @@ public:
     //@{
 
     //! Empty constructor, use GMSH as default mesh format
-    Importer():
+    Importer() :
         M_fileName ( ),
         M_format   ( GMSH )
     {}
@@ -141,7 +141,7 @@ public:
       @param filename mesh filename to import
       @param format format of the file
     */
-    Importer( std::string const& fileName, MeshFormat const&  format ):
+    Importer ( std::string const& fileName, MeshFormat const&  format ) :
         M_fileName ( fileName ),
         M_format   ( format )
     {}
@@ -150,7 +150,7 @@ public:
     /*!
       @param import Importer object to be copied
     */
-    Importer( const Importer& importer ):
+    Importer ( const Importer& importer ) :
         M_fileName ( importer.M_fileName ),
         M_format   ( importer.M_format )
     {}
@@ -176,7 +176,7 @@ public:
       @param mesh mesh data structure to fill in
       @param regionFlag marker for the region to load
     */
-    void import( RegionMesh<LinearTetra> & mesh, markerID_Type regionFlag );
+    void import ( RegionMesh<LinearTetra>& mesh, markerID_Type regionFlag );
 
 
     //! Import mesh with linear hexahedras
@@ -184,14 +184,14 @@ public:
       @param mesh mesh data structure to fill in
       @param regionFlag marker for the region to load
     */
-    void import( RegionMesh<LinearHexa> & mesh, markerID_Type regionFlag );
+    void import ( RegionMesh<LinearHexa>& mesh, markerID_Type regionFlag );
 
     //! Import mesh with linear triangles
     /*!
       @param mesh mesh data structure to fill in
       @param regionFlag marker for the region to load
     */
-    void import( RegionMesh<LinearTriangle> & mesh, markerID_Type regionFlag );
+    void import ( RegionMesh<LinearTriangle>& mesh, markerID_Type regionFlag );
 
 
     //! Import mesh with linear quadrangles
@@ -199,13 +199,13 @@ public:
       @param mesh mesh data structure to fill in
       @param regionFlag marker for the region to load
     */
-    void import( RegionMesh<LinearQuad> & mesh, markerID_Type regionFlag );
+    void import ( RegionMesh<LinearQuad>& mesh, markerID_Type regionFlag );
 
     //! Print attributes of the class
     /*!
       @param output Stream to put the output
     */
-    void showMe( std::ostream& output = std::cout ) const;
+    void showMe ( std::ostream& output = std::cout ) const;
 
     //@}
 
@@ -216,7 +216,7 @@ public:
     /*!
       @param fileName of the mesh file
     */
-    inline void setFileName( std::string const& fileName )
+    inline void setFileName ( std::string const& fileName )
     {
         M_fileName = fileName;
     }
@@ -225,7 +225,7 @@ public:
     /*!
       @param format format of the mesh file
     */
-    inline void setFormat( MeshFormat const& format )
+    inline void setFormat ( MeshFormat const& format )
     {
         M_format = format;
     }

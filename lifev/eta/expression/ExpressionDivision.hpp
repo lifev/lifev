@@ -68,7 +68,7 @@ namespace ExpressionAssembly
 
 */
 template <typename LExpressionType, typename RExpressionType>
-class ExpressionDivision : public ExpressionBase< ExpressionDivision<LExpressionType,RExpressionType> >
+class ExpressionDivision : public ExpressionBase< ExpressionDivision<LExpressionType, RExpressionType> >
 {
 public:
 
@@ -76,7 +76,7 @@ public:
     //@{
 
     // Not usefull, just for ease of coding
-	typedef ExpressionBase< ExpressionDivision <LExpressionType,RExpressionType> > base_Type;
+    typedef ExpressionBase< ExpressionDivision <LExpressionType, RExpressionType> > base_Type;
 
     //@}
 
@@ -85,15 +85,15 @@ public:
     //@{
 
     //! Full constructor using the two expressions
-	ExpressionDivision(const LExpressionType& l, const RExpressionType& r)
-	: base_Type(), M_l(l), M_r(r) {}
+    ExpressionDivision (const LExpressionType& l, const RExpressionType& r)
+        : base_Type(), M_l (l), M_r (r) {}
 
     //! Copy constructor
-	ExpressionDivision(const ExpressionDivision<LExpressionType,RExpressionType>& expression)
-	 : base_Type(), M_l(expression.M_l), M_r(expression.M_r) {}
+    ExpressionDivision (const ExpressionDivision<LExpressionType, RExpressionType>& expression)
+        : base_Type(), M_l (expression.M_l), M_r (expression.M_r) {}
 
     //! Destructor
-    ~ExpressionDivision(){}
+    ~ExpressionDivision() {}
 
     //@}
 
@@ -102,7 +102,12 @@ public:
     //@{
 
     //! Display method
-	static void display(std::ostream& out= std::cout){ LExpressionType::display(out); out << " / "; RExpressionType::display(out);}
+    static void display (std::ostream& out = std::cout)
+    {
+        LExpressionType::display (out);
+        out << " / ";
+        RExpressionType::display (out);
+    }
 
     //@}
 
@@ -111,10 +116,16 @@ public:
     //@{
 
     //! Getter for the left side of the division
-	const LExpressionType& left() const {return M_l;}
+    const LExpressionType& left() const
+    {
+        return M_l;
+    }
 
     //! Getter for the right side of the division
-	const RExpressionType& right() const {return M_r;}
+    const RExpressionType& right() const
+    {
+        return M_r;
+    }
 
     //@}
 
@@ -124,15 +135,15 @@ private:
     //@{
 
     //! No default constructor
-	ExpressionDivision();
+    ExpressionDivision();
 
     //@}
 
     // Left hand side
-	LExpressionType M_l;
+    LExpressionType M_l;
 
     // Right hand side
-	RExpressionType M_r;
+    RExpressionType M_r;
 };
 
 //! operator/  The generic operator for the division between expressions.
@@ -157,40 +168,40 @@ private:
 
 */
 template< typename LExpressionType, typename RExpressionType >
-ExpressionDivision<LExpressionType,RExpressionType>
-operator/(const ExpressionBase<LExpressionType>& l, const ExpressionBase<RExpressionType>& r)
+ExpressionDivision<LExpressionType, RExpressionType>
+operator/ (const ExpressionBase<LExpressionType>& l, const ExpressionBase<RExpressionType>& r)
 {
-	return ExpressionDivision<LExpressionType,RExpressionType>(l.cast(),r.cast());
+    return ExpressionDivision<LExpressionType, RExpressionType> (l.cast(), r.cast() );
 }
 
 // Specialization for the real constants
 template< typename LExpressionType >
 ExpressionDivision<LExpressionType, ExpressionScalar >
-operator/(const ExpressionBase<LExpressionType>& l, const Real& r)
+operator/ (const ExpressionBase<LExpressionType>& l, const Real& r)
 {
-    return ExpressionDivision<LExpressionType,ExpressionScalar>(l.cast(),ExpressionScalar(r));
+    return ExpressionDivision<LExpressionType, ExpressionScalar> (l.cast(), ExpressionScalar (r) );
 }
 
 template< typename RExpressionType >
-ExpressionDivision<ExpressionScalar,RExpressionType>
-operator/(const Real& l, const ExpressionBase<RExpressionType>& r)
+ExpressionDivision<ExpressionScalar, RExpressionType>
+operator/ (const Real& l, const ExpressionBase<RExpressionType>& r)
 {
-    return ExpressionDivision<ExpressionScalar,RExpressionType>(ExpressionScalar(l),r.cast());
+    return ExpressionDivision<ExpressionScalar, RExpressionType> (ExpressionScalar (l), r.cast() );
 }
 
 // Specialization for the vectorial constants
 template< typename RExpressionType , UInt Vdim>
-ExpressionDivision<ExpressionVector<Vdim>,RExpressionType>
-operator/(const VectorSmall<Vdim>& l, const ExpressionBase<RExpressionType>& r)
+ExpressionDivision<ExpressionVector<Vdim>, RExpressionType>
+operator/ (const VectorSmall<Vdim>& l, const ExpressionBase<RExpressionType>& r)
 {
-    return ExpressionDivision<ExpressionVector<Vdim>,RExpressionType>(ExpressionVector<Vdim>(l),r.cast());
+    return ExpressionDivision<ExpressionVector<Vdim>, RExpressionType> (ExpressionVector<Vdim> (l), r.cast() );
 }
 
 template< typename LExpressionType, UInt Vdim >
 ExpressionDivision<LExpressionType, ExpressionVector<Vdim> >
-operator/(const ExpressionBase<LExpressionType>& l, const VectorSmall<Vdim>& r)
+operator/ (const ExpressionBase<LExpressionType>& l, const VectorSmall<Vdim>& r)
 {
-    return ExpressionDivision<LExpressionType,ExpressionVector<Vdim> >(l.cast(),ExpressionVector<Vdim>(r));
+    return ExpressionDivision<LExpressionType, ExpressionVector<Vdim> > (l.cast(), ExpressionVector<Vdim> (r) );
 }
 
 

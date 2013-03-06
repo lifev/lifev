@@ -84,7 +84,7 @@ namespace Multiscale
  *  for 1D Fluid problem.
  */
 class MultiscaleModelFSI1D: public virtual multiscaleModel_Type,
-                         public virtual MultiscaleInterface
+    public virtual MultiscaleInterface
 {
 public:
 
@@ -153,7 +153,7 @@ public:
     /*!
      * @param fileName Name of data file.
      */
-    void setupData( const std::string& fileName );
+    void setupData ( const std::string& fileName );
 
     //! Setup the model.
     void setupModel();
@@ -195,14 +195,14 @@ public:
      * @param boundaryID ID of the boundary interface
      * @param function boundary condition function
      */
-    void imposeBoundaryFlowRate( const multiscaleID_Type& boundaryID, const function_Type& function );
+    void imposeBoundaryFlowRate ( const multiscaleID_Type& boundaryID, const function_Type& function );
 
     //! Impose the integral of the mean normal stress on a specific boundary interface of the model
     /*!
      * @param boundaryID ID of the boundary interface
      * @param function boundary condition function
      */
-    void imposeBoundaryMeanNormalStress( const multiscaleID_Type& boundaryID, const function_Type& function );
+    void imposeBoundaryMeanNormalStress ( const multiscaleID_Type& boundaryID, const function_Type& function );
 
     //! Impose the integral of the mean total normal stress on a specific boundary interface of the model
     /*!
@@ -211,9 +211,9 @@ public:
      * @param boundaryID ID of the boundary interface
      * @param function boundary condition function
      */
-    void imposeBoundaryMeanTotalNormalStress( const multiscaleID_Type& /*boundaryID*/, const function_Type& /*function*/ )
+    void imposeBoundaryMeanTotalNormalStress ( const multiscaleID_Type& /*boundaryID*/, const function_Type& /*function*/ )
     {
-        multiscaleErrorCheck( ModelInterface, "Invalid interface [MeanTotalNormalStress] for model type [" + enum2String( M_type, multiscaleModelsMap ) +"]", M_comm->MyPID() == 0 );
+        multiscaleErrorCheck ( ModelInterface, "Invalid interface [MeanTotalNormalStress] for model type [" + enum2String ( M_type, multiscaleModelsMap ) + "]", M_comm->MyPID() == 0 );
     }
 
     //! Impose the area on a specific boundary interface of the model
@@ -223,9 +223,9 @@ public:
      * @param boundaryID ID of the boundary interface
      * @param function boundary condition function
      */
-    void imposeBoundaryArea( const multiscaleID_Type& /*boundaryID*/, const function_Type& /*function*/ )
+    void imposeBoundaryArea ( const multiscaleID_Type& /*boundaryID*/, const function_Type& /*function*/ )
     {
-        multiscaleErrorCheck( ModelInterface, "Invalid interface [Area] for model type [" + enum2String( M_type, multiscaleModelsMap ) +"]", M_comm->MyPID() == 0 );
+        multiscaleErrorCheck ( ModelInterface, "Invalid interface [Area] for model type [" + enum2String ( M_type, multiscaleModelsMap ) + "]", M_comm->MyPID() == 0 );
     }
 
     //! Get the flow rate on a specific boundary interface of the model
@@ -233,28 +233,40 @@ public:
      * @param boundaryID ID of the boundary interface
      * @return flow rate value
      */
-    Real boundaryFlowRate( const multiscaleID_Type& boundaryID ) const { return M_solver->boundaryValue( *M_solution, OneDFSI::Q, flagConverter( boundaryID ) ); }
+    Real boundaryFlowRate ( const multiscaleID_Type& boundaryID ) const
+    {
+        return M_solver->boundaryValue ( *M_solution, OneDFSI::Q, flagConverter ( boundaryID ) );
+    }
 
     //! Get the integral of the mean normal stress on a specific boundary interface of the model
     /*!
      * @param boundaryID ID of the boundary interface
      * @return mean normal stress value
      */
-    Real boundaryMeanNormalStress( const multiscaleID_Type& boundaryID ) const { return M_solver->boundaryValue( *M_solution, OneDFSI::S, flagConverter( boundaryID ) ); }
+    Real boundaryMeanNormalStress ( const multiscaleID_Type& boundaryID ) const
+    {
+        return M_solver->boundaryValue ( *M_solution, OneDFSI::S, flagConverter ( boundaryID ) );
+    }
 
     //! Get the integral of the mean total normal stress on a specific boundary interface of the model
     /*!
      * @param boundaryID ID of the boundary interface
      * @return mean total normal stress value
      */
-    Real boundaryMeanTotalNormalStress( const multiscaleID_Type& boundaryID ) const { return M_solver->boundaryValue( *M_solution, OneDFSI::T, flagConverter( boundaryID ) ); }
+    Real boundaryMeanTotalNormalStress ( const multiscaleID_Type& boundaryID ) const
+    {
+        return M_solver->boundaryValue ( *M_solution, OneDFSI::T, flagConverter ( boundaryID ) );
+    }
 
     //! Get the area on a specific boundary interface of the model
     /*!
      * @param boundaryID ID of the boundary interface
      * @return area value
      */
-    Real boundaryArea( const multiscaleID_Type& boundaryID ) const { return M_solver->boundaryValue( *M_solution, OneDFSI::A, flagConverter( boundaryID ) ); }
+    Real boundaryArea ( const multiscaleID_Type& boundaryID ) const
+    {
+        return M_solver->boundaryValue ( *M_solution, OneDFSI::A, flagConverter ( boundaryID ) );
+    }
 
     //! Get the variation of the flow rate (on a specific boundary interface) using the linear model
     /*!
@@ -262,7 +274,7 @@ public:
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      * @return variation of the flow rate
      */
-    Real boundaryDeltaFlowRate( const multiscaleID_Type& boundaryID, bool& solveLinearSystem );
+    Real boundaryDeltaFlowRate ( const multiscaleID_Type& boundaryID, bool& solveLinearSystem );
 
     //! Get the variation of the integral of the mean normal stress (on a specific boundary interface) using the linear model
     /*!
@@ -270,7 +282,7 @@ public:
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      * @return variation of the mean normal stress
      */
-    Real boundaryDeltaMeanNormalStress( const multiscaleID_Type& boundaryID, bool& solveLinearSystem );
+    Real boundaryDeltaMeanNormalStress ( const multiscaleID_Type& boundaryID, bool& solveLinearSystem );
 
     //! Get the variation of the integral of the total normal stress (on a specific boundary face)
     /*!
@@ -278,7 +290,7 @@ public:
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      * @return variation of the mean total normal stress
      */
-    Real boundaryDeltaMeanTotalNormalStress( const multiscaleID_Type& boundaryID, bool& solveLinearSystem );
+    Real boundaryDeltaMeanTotalNormalStress ( const multiscaleID_Type& boundaryID, bool& solveLinearSystem );
 
     //! Get the variation of the integral of the area (on a specific boundary interface) using the linear model
     /*!
@@ -286,7 +298,7 @@ public:
      * @param solveLinearSystem a flag to which determine if the linear system has to be solved
      * @return variation of the area
      */
-    Real boundaryDeltaArea( const multiscaleID_Type& boundaryID, bool& solveLinearSystem );
+    Real boundaryDeltaArea ( const multiscaleID_Type& boundaryID, bool& solveLinearSystem );
 
     //@}
 
@@ -298,81 +310,120 @@ public:
     /*!
      * @return BC handler
      */
-    bc_Type& bc() const { return *( M_bc->handler() ); }
+    bc_Type& bc() const
+    {
+        return * ( M_bc->handler() );
+    }
 
     //! Get the BCInterface container of the boundary conditions of the model
     /*!
      * @return BCInterface container
      */
-    bcInterface_Type& bcInterface() const { return *M_bc; }
+    bcInterface_Type& bcInterface() const
+    {
+        return *M_bc;
+    }
 
     //! Get the density on a specific boundary face of the model
     /*!
      * @return density value
      */
-    Real boundaryDensity() const { return M_data->densityRho(); }
+    Real boundaryDensity() const
+    {
+        return M_data->densityRho();
+    }
 
     //! Get the viscosity on a specific boundary face of the model
     /*!
      * @return viscosity value
      */
-    Real boundaryViscosity() const { return M_data->viscosity(); }
+    Real boundaryViscosity() const
+    {
+        return M_data->viscosity();
+    }
 
     //! Get the integral of the pressure (on a specific boundary face)
     /*!
      * @param boundaryID ID of the boundary interface
      * @return pressure value
      */
-    Real boundaryPressure( const multiscaleID_Type& boundaryID ) const { return M_solver->boundaryValue( *M_solution, OneDFSI::P, flagConverter( boundaryID ) ); }
+    Real boundaryPressure ( const multiscaleID_Type& boundaryID ) const
+    {
+        return M_solver->boundaryValue ( *M_solution, OneDFSI::P, flagConverter ( boundaryID ) );
+    }
 
     //! Get the data container of the 1D model.
     /*!
      * @return 1D Model data container.
      */
-    data_Type& data() const { return *M_data; }
+    data_Type& data() const
+    {
+        return *M_data;
+    }
 
     //! Get the Physics of the 1D model.
     /*!
      * @return 1D Model physics.
      */
-    physicsPtr_Type physics() const { return M_physics; }
+    physicsPtr_Type physics() const
+    {
+        return M_physics;
+    }
 
     //! Get the Flux of the 1D model.
     /*!
      * @return 1D Model Flux.
      */
-    fluxPtr_Type flux() const { return M_flux; }
+    fluxPtr_Type flux() const
+    {
+        return M_flux;
+    }
 
     //! Get the Source of the 1D model.
     /*!
      * @return 1D Model Source.
      */
-    sourcePtr_Type source() const { return M_source; }
+    sourcePtr_Type source() const
+    {
+        return M_source;
+    }
 
     //! Get the FESpace of the 1D model.
     /*!
      * @return 1D model FESpace
      */
-    feSpacePtr_Type feSpace() const { return M_feSpace; }
+    feSpacePtr_Type feSpace() const
+    {
+        return M_feSpace;
+    }
 
     //! Get the Solver of the 1D model.
     /*!
      * @return 1D model solver.
      */
-    solverPtr_Type solver() const { return M_solver; }
+    solverPtr_Type solver() const
+    {
+        return M_solver;
+    }
 
     //! Get the solution container of the 1D model.
     /*!
      * @return 1D model solution.
      */
-    const solutionPtr_Type& solution() const { return M_solution; }
+    const solutionPtr_Type& solution() const
+    {
+        return M_solution;
+    }
 
     //! Get a specific quantity of the solution container of the 1D model.
     /*!
      * @param quantity solution quantity.
      * @return 1D model solution.
      */
-    const vectorPtr_Type& solution( const std::string& quantity) const { return (*M_solution)[quantity]; }
+    const vectorPtr_Type& solution ( const std::string& quantity) const
+    {
+        return (*M_solution) [quantity];
+    }
 
     //@}
 
@@ -381,9 +432,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    MultiscaleModelFSI1D( const MultiscaleModelFSI1D& model );
+    MultiscaleModelFSI1D ( const MultiscaleModelFSI1D& model );
 
-    MultiscaleModelFSI1D& operator=( const MultiscaleModelFSI1D& model );
+    MultiscaleModelFSI1D& operator= ( const MultiscaleModelFSI1D& model );
 
     //@}
 
@@ -398,7 +449,7 @@ private:
      *
      * @param fileName File name of the specific model.
      */
-    void setupGlobalData( const std::string& fileName );
+    void setupGlobalData ( const std::string& fileName );
 
     //! Initialize the solution.
     void initializeSolution();
@@ -413,7 +464,7 @@ private:
      * @param solution1 solution to be copied.
      * @param solution2 copy of solution1.
      */
-    void copySolution( const solution_Type& solution1, solution_Type& solution2 );
+    void copySolution ( const solution_Type& solution1, solution_Type& solution2 );
 
     //! Update BCInterface physical solver variables
     void updateBCPhysicalSolverVariables();
@@ -424,14 +475,17 @@ private:
      * @param solution solution container.
      * @param solverType string containing the prefix ID to display when solving the system.
      */
-    void solve( bc_Type& bc, solution_Type& solution, const std::string& solverType = " 1D-" );
+    void solve ( bc_Type& bc, solution_Type& solution, const std::string& solverType = " 1D-" );
 
     //! Convert the boundaryID to a bcSide type
     /*!
      * @param boundaryID ID of the boundary interface
      * @return boundary condition side.
      */
-    bcSide_Type flagConverter( const multiscaleID_Type& boundaryID ) const { return ( boundaryFlag( boundaryID ) == 0) ? OneDFSI::left : OneDFSI::right; }
+    bcSide_Type flagConverter ( const multiscaleID_Type& boundaryID ) const
+    {
+        return ( boundaryFlag ( boundaryID ) == 0) ? OneDFSI::left : OneDFSI::right;
+    }
 
 #ifdef JACOBIAN_WITH_FINITEDIFFERENCE
 
@@ -439,7 +493,7 @@ private:
     void createLinearBC();
 
     //! Update linear BC
-    void updateLinearBC( const solution_Type& solution );
+    void updateLinearBC ( const solution_Type& solution );
 
     //! Setup the linear model
     void setupLinearModel();
@@ -448,7 +502,7 @@ private:
     void updateLinearModel();
 
     //! Solve the linear problem
-    void solveLinearModel( bool& solveLinearSystem );
+    void solveLinearModel ( bool& solveLinearSystem );
 
     //! Impose the coupling perturbation on the correct BC inside the BCHandler
     void imposePerturbation();
@@ -456,7 +510,7 @@ private:
     //! Reset all the coupling perturbations imposed on the BCHandler
     void resetPerturbation();
 
-    Real bcFunctionDelta( const Real& t );
+    Real bcFunctionDelta ( const Real& t );
 
 #else
 
@@ -466,7 +520,7 @@ private:
      * @param bcOutputType type of the quantity to be computed.
      * @return Jacobian coefficient.
      */
-    Real tangentProblem( const bcSide_Type& bcOutputSide, const bcType_Type& bcOutputType );
+    Real tangentProblem ( const bcSide_Type& bcOutputSide, const bcType_Type& bcOutputType );
 
     //! Solve the tangent problem formulation
     /*!
@@ -474,7 +528,7 @@ private:
      * @param bcNode node of the quantity to be computed.
      * @return solution of the tangent problem at specific node.
      */
-    Real solveTangentProblem( solver_Type::vector_Type& rhs, const UInt& bcNode );
+    Real solveTangentProblem ( solver_Type::vector_Type& rhs, const UInt& bcNode );
 
 #endif
     //@}

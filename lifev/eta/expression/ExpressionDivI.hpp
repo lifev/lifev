@@ -60,7 +60,7 @@ public:
     //! @name Public Types
     //@{
 
-	typedef ExpressionBase<ExpressionDivI> base_Type;
+    typedef ExpressionBase<ExpressionDivI> base_Type;
 
     //@}
 
@@ -69,10 +69,10 @@ public:
     //@{
 
     //! Empty constructor
-	ExpressionDivI();
+    ExpressionDivI();
 
     //! Copy constructor
-	ExpressionDivI(const ExpressionDivI&);
+    ExpressionDivI (const ExpressionDivI&);
 
     //! Destructor
     ~ExpressionDivI();
@@ -83,7 +83,7 @@ public:
     //@{
 
     //! Display method
-	static void display(std::ostream& out= std::cout);
+    static void display (std::ostream& out = std::cout);
 
     //@}
 };
@@ -93,9 +93,9 @@ public:
   @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
 */
 inline ExpressionDivI
-div(const ExpressionPhiI& /*exp*/)
+div (const ExpressionPhiI& /*exp*/)
 {
-	return ExpressionDivI();
+    return ExpressionDivI();
 }
 
 

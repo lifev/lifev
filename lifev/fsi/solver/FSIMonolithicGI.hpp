@@ -40,7 +40,8 @@
 
 #include <lifev/fsi/solver/FSIMonolithic.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 #ifdef OBSOLETE
 class Epetra_FullMonolithic;
 #endif
@@ -103,10 +104,10 @@ public:
     /**
      Sets the parameters read from data file
      */
-    void setup( const GetPot& dataFile );
+    void setup ( const GetPot& dataFile );
 
     //! initializes the fluid and mesh problems, creates the map of the global matrix
-    void setupFluidSolid( UInt const fluxes );
+    void setupFluidSolid ( UInt const fluxes );
 
     //! builds the constant part of the fluid-structure-mesh motion matrix
     void buildSystem();
@@ -117,7 +118,7 @@ public:
      \param _sol: fluid domain displacement solution
      \param iter: current NonLinearRichardson (block Gauss Seidel for the tangent system) iteration
      */
-    void evalResidual( vector_Type& res, const vector_Type& sol, const UInt iter );
+    void evalResidual ( vector_Type& res, const vector_Type& sol, const UInt iter );
 
     //!Apply the boundary conditions to each block composing the monolithic problem
     /**
@@ -127,54 +128,60 @@ public:
      */
     void applyBoundaryConditions();
 
-    void updateSolution( const vector_Type& solution )
-       {
-           super_Type::updateSolution( solution );
+    void updateSolution ( const vector_Type& solution )
+    {
+        super_Type::updateSolution ( solution );
 
-           //The size of the vectors for the ALE is = dimension of the ALE problem
-           //To do the shift right we first need to extract the fluid displacement
-           //And then push it into the ALE timeAdvance class.
-           vectorPtr_Type displacementToSave( new vector_Type(M_mmFESpace->map()) );
-           UInt offset( M_solidAndFluidDim + nDimensions*M_interface );
-           displacementToSave->subset(solution, offset);
+        //The size of the vectors for the ALE is = dimension of the ALE problem
+        //To do the shift right we first need to extract the fluid displacement
+        //And then push it into the ALE timeAdvance class.
+        vectorPtr_Type displacementToSave ( new vector_Type (M_mmFESpace->map() ) );
+        UInt offset ( M_solidAndFluidDim + nDimensions * M_interface );
+        displacementToSave->subset (solution, offset);
 
-           //This updateRHSFirstDerivative has to be done before the shiftRight
-           //In fact it updates the right hand side of the velocity using the
-           //previous times. The method velocity() uses it and then, the compuation
-           //of the velocity is done using the current time and the previous times.
-           M_ALETimeAdvance->updateRHSFirstDerivative( M_data->dataFluid()->dataTime()->timeStep() );
-           M_ALETimeAdvance->shiftRight( *displacementToSave );
-       }
+        //This updateRHSFirstDerivative has to be done before the shiftRight
+        //In fact it updates the right hand side of the velocity using the
+        //previous times. The method velocity() uses it and then, the compuation
+        //of the velocity is done using the current time and the previous times.
+        //M_ALETimeAdvance->updateRHSFirstDerivative ( M_data->dataFluid()->dataTime()->timeStep() );
+        M_ALETimeAdvance->shiftRight ( *displacementToSave );
+    }
 
     //! Set vectors for restart
     /*!
      *  Set vectors for restart
      */
-    void setALEVectorInStencil(const vectorPtr_Type& fluidDisp,
-                               const UInt iter,
-                               const bool lastVector);
+    void setALEVectorInStencil (const vectorPtr_Type& fluidDisp,
+                                const UInt iter,
+                                const bool lastVector);
 
 
     //!@name Get Methods
     //@{
 
     //! get the current solution vector.
-    LIFEV_DEPRECATED( const vector_Type& solution() const )
+    LIFEV_DEPRECATED ( const vector_Type& solution() const )
     {
         if ( M_epetraWorldComm->MyPID() == 0 )
         {
             std::cerr << std::endl << "Warning: FSIMonolithic::solution() is deprecated!" << std::endl
-                                   << "         You should not access the solution inside FSIOperator or FSIMonolithic!" << std::endl;
+                      << "         You should not access the solution inside FSIOperator or FSIMonolithic!" << std::endl;
         }
 
-        return  M_fluidTimeAdvance->singleElement(0);
+        return  M_fluidTimeAdvance->singleElement (0);
     }
 
     //! getter for the map of fluid-structure-interface (without the mesh motion)
-    const MapEpetra& mapWithoutMesh() const { return *M_mapWithoutMesh; }
+    const MapEpetra& mapWithoutMesh() const
+    {
+        return *M_mapWithoutMesh;
+    }
 
     //! getter for the global matrix of the system
-    const matrixPtr_Type matrixPtr() const { return M_monolithicMatrix->matrix(); }
+    const matrixPtr_Type matrixPtr() const
+    {
+        return M_monolithicMatrix->matrix();
+    }
 
     static bool S_register;
 
@@ -196,10 +203,10 @@ private:
     //@{
 
     //! Factory method for the system matrix, of type MonolithicBlockBase
-    void createOperator( std::string& operType )
+    void createOperator ( std::string& operType )
     {
-        M_monolithicMatrix.reset( MonolithicBlockMatrix::Factory_Type::instance().createObject( operType ) );
-        M_monolithicMatrix.reset( MonolithicBlockMatrix::Factory_Type::instance().createObject( operType ) );
+        M_monolithicMatrix.reset ( MonolithicBlockMatrix::Factory_Type::instance().createObject ( operType ) );
+        M_monolithicMatrix.reset ( MonolithicBlockMatrix::Factory_Type::instance().createObject ( operType ) );
     }
 
     /**
@@ -207,14 +214,14 @@ private:
      (not in a right hand side representing the matrix-vector multiplication)
      \param sdMatrix: output. Shape derivatives block to be summed to the Jacobian matrix.
      */
-    void shapeDerivatives( FSIOperator::fluidPtr_Type::value_type::matrixPtr_Type sdMatrix );
+    void shapeDerivatives ( FSIOperator::fluidPtr_Type::value_type::matrixPtr_Type sdMatrix );
 
     //! assembles the mesh motion matrix.
     /*!In Particular it diagonalize the part of the matrix corresponding to the
      Dirichlet condition expressing the coupling
      \param iter: current iteration: used as flag to distinguish the first nonlinear iteration from the others
      */
-    void assembleMeshBlock( UInt iter );
+    void assembleMeshBlock ( UInt iter );
 
     //@}
 

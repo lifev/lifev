@@ -50,7 +50,7 @@ public:
     //typedef Tab2d matrix_type;
 
     ~MatrixElemental();
-    MatrixElemental( UInt nNode1, UInt nbr1, UInt nbc1 ); // constructor for 1 finite element
+    MatrixElemental ( UInt nNode1, UInt nbr1, UInt nbc1 ); // constructor for 1 finite element
 
     //! This is the constructor for the local matrix involving 2 finite elements
     /*!
@@ -67,11 +67,11 @@ public:
       and nbc1 are 3 (components for the velocity), nbr2 and nbc2 are 1 (pressure
       is scalar)).
      */
-    MatrixElemental( UInt nNode1, UInt nbr1, UInt nbc1,
-             UInt nNode2, UInt nbr2, UInt nbc2 );
-    MatrixElemental( UInt nNode1, UInt nbr1, UInt nbc1,
-             UInt nNode2, UInt nbr2, UInt nbc2,
-             UInt nNode3, UInt nbr3, UInt nbc3 ); // constructor for 3 finite elements
+    MatrixElemental ( UInt nNode1, UInt nbr1, UInt nbc1,
+                      UInt nNode2, UInt nbr2, UInt nbc2 );
+    MatrixElemental ( UInt nNode1, UInt nbr1, UInt nbc1,
+                      UInt nNode2, UInt nbr2, UInt nbc2,
+                      UInt nNode3, UInt nbr3, UInt nbc3 ); // constructor for 3 finite elements
     matrix_type& mat()
     {
         return _mat;
@@ -86,10 +86,10 @@ public:
     }
 
     //Tab2dView block( UInt i, UInt j )
-    matrix_view block( UInt i, UInt j )
+    matrix_view block ( UInt i, UInt j )
     {
-        return _mat( SubArray( _nRow[ i ], _firstRow[ i ] ),
-                     SubArray( _nCol[ j ], _firstCol[ j ] ) );
+        return _mat ( SubArray ( _nRow[ i ], _firstRow[ i ] ),
+                      SubArray ( _nCol[ j ], _firstCol[ j ] ) );
         //Tab2dView __mr (_mat, TabRange(_firstRow[i], _nRow[i]), TabRange(_firstCol[j], _nCol[j]));
         //return __mr;
     }
@@ -98,7 +98,7 @@ public:
         //_mat = ZeroMatrix( _mat.size1(), _mat.size2() );
         _mat = 0.0;
     };
-    void showMe( std::ostream& c = std::cout );
+    void showMe ( std::ostream& c = std::cout );
 
     void   operator *= (Real coef)
     {

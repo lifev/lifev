@@ -101,7 +101,7 @@ public:
     /*!
      * @param PhysicalData MultiscaleGlobalData
      */
-    explicit MultiscaleGlobalData( const MultiscaleGlobalData& data );
+    explicit MultiscaleGlobalData ( const MultiscaleGlobalData& data );
 
     //! Destructor
     virtual ~MultiscaleGlobalData() {}
@@ -117,7 +117,7 @@ public:
      * @param PhysicalData MultiscaleGlobalData
      * @return reference to a copy of the class
      */
-    MultiscaleGlobalData& operator=( const MultiscaleGlobalData& data );
+    MultiscaleGlobalData& operator= ( const MultiscaleGlobalData& data );
 
     //@}
 
@@ -129,7 +129,7 @@ public:
     /*!
      * @param dataFile GetPot file
      */
-    void readData( const GetPot& dataFile );
+    void readData ( const GetPot& dataFile );
 
     //! Display some information about the physical quantities
     void showMe();
@@ -144,43 +144,64 @@ public:
     /*!
      * @return time container
      */
-    timePtr_Type dataTime() const { return M_timeData; }
+    timePtr_Type dataTime() const
+    {
+        return M_timeData;
+    }
 
     //! Get the global fluid density.
     /*!
      * @return density of the fluid.
      */
-    const Real& fluidDensity() const { return M_fluidDensity; }
+    const Real& fluidDensity() const
+    {
+        return M_fluidDensity;
+    }
 
     //! Get the global fluid viscosity.
     /*!
      * @return viscosity of the fluid.
      */
-    const Real& fluidViscosity() const { return M_fluidViscosity; }
+    const Real& fluidViscosity() const
+    {
+        return M_fluidViscosity;
+    }
 
     //! Get the global fluid venous pressure.
     /*!
      * @return venous pressure of the fluid.
      */
-    const Real& fluidVenousPressure() const { return M_fluidVenousPressure; }
+    const Real& fluidVenousPressure() const
+    {
+        return M_fluidVenousPressure;
+    }
 
     //! Get the global fluid reference pressure (used by 1D model).
     /*!
      * @return reference pressure of the fluid.
      */
-    const Real& solidExternalPressure() const { return M_solidExternalPressure; }
+    const Real& solidExternalPressure() const
+    {
+        return M_solidExternalPressure;
+    }
 
     //! Get the global structural Poisson coefficient.
     /*!
      * @return Poisson coefficient of the solid.
      */
-    const Real& solidDensity() const { return M_solidDensity; }
+    const Real& solidDensity() const
+    {
+        return M_solidDensity;
+    }
 
     //! Get the global structural density.
     /*!
      * @return density of the solid.
      */
-    const Real& solidPoissonCoefficient() const { return M_solidPoissonCoefficient; }
+    const Real& solidPoissonCoefficient() const
+    {
+        return M_solidPoissonCoefficient;
+    }
 
     // //! Get the global structural thickness.
     // /*!
@@ -192,19 +213,28 @@ public:
     /*!
      * @return Young modulus of the solid.
      */
-    const Real& solidYoungModulus() const { return M_solidYoungModulus; }
+    const Real& solidYoungModulus() const
+    {
+        return M_solidYoungModulus;
+    }
 
     //! Get the global resistance scaling factor.
     /*!
      * @return resistance scaling factor.
      */
-    const Real& scalingFactorResistance() const { return M_scalingFactorResistance; }
+    const Real& scalingFactorResistance() const
+    {
+        return M_scalingFactorResistance;
+    }
 
     //! Get the global compliance scaling factor.
     /*!
      * @return compliance scaling factor.
      */
-    const Real& scalingFactorCompliance() const { return M_scalingFactorCompliance; }
+    const Real& scalingFactorCompliance() const
+    {
+        return M_scalingFactorCompliance;
+    }
 
     //@}
 
@@ -219,7 +249,7 @@ private:
     Real                                M_solidExternalPressure;
     Real                                M_solidDensity;
     Real                                M_solidPoissonCoefficient;
-//    Real                                M_structureThickness;
+    //    Real                                M_structureThickness;
     Real                                M_solidYoungModulus;
 
     Real                                M_scalingFactorResistance;

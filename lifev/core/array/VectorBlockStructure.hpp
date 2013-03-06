@@ -40,7 +40,8 @@
 #include <lifev/core/array/MapEpetra.hpp>
 #include <lifev/core/array/MapVector.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! VectorBlockStructure - class representing the structure of a vector
 /*!
@@ -79,7 +80,7 @@ public:
     VectorBlockStructure();
 
     //! Constructor with the monolithic map
-    VectorBlockStructure( const map_Type& map );
+    VectorBlockStructure ( const map_Type& map );
 
     //! Construction with a map
     /*!
@@ -87,13 +88,13 @@ public:
       vector. The monolithic map and vectors are also built by concatenating the different maps
       in the vector.
      */
-    VectorBlockStructure( const mapVector_Type& mapVector );
+    VectorBlockStructure ( const mapVector_Type& mapVector );
 
     //! Copy constructor
-    VectorBlockStructure( const VectorBlockStructure& blockStructure );
+    VectorBlockStructure ( const VectorBlockStructure& blockStructure );
 
     //! Destructor
-    ~VectorBlockStructure(){}
+    ~VectorBlockStructure() {}
 
     //@}
 
@@ -104,7 +105,7 @@ public:
     /*! Set the size of the blocks of the vector
      *  @param blockSizes Sizes of the blocks
      */
-    void setBlockStructure( const std::vector<UInt>& blockSizes );
+    void setBlockStructure ( const std::vector<UInt>& blockSizes );
 
     //! Reset the block structure using the blocks of a vector of map
     /*
@@ -116,12 +117,12 @@ public:
       through this method, nor its map.
       @param The MapVector containing the maps
      */
-    void setBlockStructure( const mapVector_Type& mapVector );
+    void setBlockStructure ( const mapVector_Type& mapVector );
 
     /*! Set the block structure using a block structure
      *  @param blockStructure Structure of the vector
      */
-    void setBlockStructure( const VectorBlockStructure& blockStructure );
+    void setBlockStructure ( const VectorBlockStructure& blockStructure );
 
     //@}
 
@@ -134,9 +135,9 @@ public:
       @param index Index of the block
       @return size of the index-th block
      */
-    UInt blockSize( const UInt& index ) const
+    UInt blockSize ( const UInt& index ) const
     {
-        ASSERT( index < M_blockSize.size(), "Invalid block index" );
+        ASSERT ( index < M_blockSize.size(), "Invalid block index" );
         return M_blockSize[index];
     }
 
@@ -144,9 +145,9 @@ public:
       @param index Index of the block
       @return index of the first entry in the index-th block
      */
-    UInt blockFirstIndex( const UInt& index ) const
+    UInt blockFirstIndex ( const UInt& index ) const
     {
-        ASSERT( index < M_blockFirstIndex.size(), "Invalid block index" );
+        ASSERT ( index < M_blockFirstIndex.size(), "Invalid block index" );
         return M_blockFirstIndex[index];
     }
 

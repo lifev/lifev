@@ -120,7 +120,7 @@ class EvaluationMeas;
 
 */
 template <UInt spaceDim>
-class ETCurrentFE<spaceDim,1>
+class ETCurrentFE<spaceDim, 1>
 {
 
     //! @name Friends
@@ -180,20 +180,20 @@ public:
       @param geoMap The geometric map from the reference element to the current element
       @param qr The quadrature rule
      */
-    ETCurrentFE(const ReferenceFE& refFE, const GeometricMap& geoMap, const QuadratureRule& qr);
+    ETCurrentFE (const ReferenceFE& refFE, const GeometricMap& geoMap, const QuadratureRule& qr);
 
     //! Constructor without quadrature rule
     /*!
       @param refFE The reference element for the FE
       @param geoMap The geometric map from the reference element to the current element
      */
-    ETCurrentFE(const ReferenceFE& refFE, const GeometricMap& geoMap);
+    ETCurrentFE (const ReferenceFE& refFE, const GeometricMap& geoMap);
 
     //! Copy constructor
     /*!
       @param otherFE The currentFE to be copied
      */
-    ETCurrentFE(const ETCurrentFE<spaceDim,1>& otherFE);
+    ETCurrentFE (const ETCurrentFE<spaceDim, 1>& otherFE);
 
     //! Destructor
     virtual ~ETCurrentFE();
@@ -222,13 +222,13 @@ public:
       the identifier (local); has a method point(UInt i) that returns the ith point.
      */
     template<typename elementType>
-    void update(const elementType& element, const flag_Type& flag);
+    void update (const elementType& element, const flag_Type& flag);
 
     //! ShowMe method
     /*!
       @param out Output stream were to print the informations
      */
-    void showMe(std::ostream& out = std::cout) const;
+    void showMe (std::ostream& out = std::cout) const;
 
     //@}
 
@@ -244,7 +244,7 @@ public:
 
       @param qr The new quadrature to use.
      */
-    void setQuadratureRule(const QuadratureRule& qr);
+    void setQuadratureRule (const QuadratureRule& qr);
 
     //@}
 
@@ -267,10 +267,10 @@ public:
       @param q The index of the quadrature node
       @return The value of the ith basis function in the qth quadrature node
      */
-    Real phi(const UInt& i, const UInt& q) const
+    Real phi (const UInt& i, const UInt& q) const
     {
-        ASSERT( i < M_nbFEDof,"No basis function with this index");
-        ASSERT( q < M_nbQuadPt,"No quadrature point with this index");
+        ASSERT ( i < M_nbFEDof, "No basis function with this index");
+        ASSERT ( q < M_nbQuadPt, "No quadrature point with this index");
         return M_phi[q][i];
     }
 
@@ -280,11 +280,11 @@ public:
       @param coord The coordinate required
       @return The coordth component of the coordinate of the qth quadrature point
      */
-    Real quadNode(const UInt& q, const UInt& coord) const
+    Real quadNode (const UInt& q, const UInt& coord) const
     {
-        ASSERT( M_isQuadNodeUpdated, "Quadrature nodes have not been updated");
-        ASSERT( q < M_nbQuadPt,"No quadrature point with this index");
-        ASSERT( coord < spaceDim, "No such coordinate index");
+        ASSERT ( M_isQuadNodeUpdated, "Quadrature nodes have not been updated");
+        ASSERT ( q < M_nbQuadPt, "No quadrature point with this index");
+        ASSERT ( coord < spaceDim, "No such coordinate index");
         return M_quadNode[q][coord];
     }
 
@@ -293,10 +293,10 @@ public:
       @param q The index of the quadrature point
       @return The weighted determinant of the jacobian transform in the qth quadrature node
      */
-    Real wDet(const UInt& q) const
+    Real wDet (const UInt& q) const
     {
-        ASSERT( M_isWDetUpdated, "Weighted determinant has not been updated");
-        ASSERT( q < M_nbQuadPt,"No quadrature point with this index");
+        ASSERT ( M_isWDetUpdated, "Weighted determinant has not been updated");
+        ASSERT ( q < M_nbQuadPt, "No quadrature point with this index");
         return M_wDet[q];
     }
 
@@ -307,12 +307,12 @@ public:
       @param q The index of the quadrature node
       @return The value of the ith basis function derived w.r. to dxi, in the qth quadrature node.
      */
-    Real dphi(const UInt& i, const UInt& dxi, const UInt& q) const
+    Real dphi (const UInt& i, const UInt& dxi, const UInt& q) const
     {
-        ASSERT( M_isDphiUpdated, "Derivative of the basis functions have not been updated");
-        ASSERT( i < M_nbFEDof, "No basis function with this index");
-        ASSERT( dxi < spaceDim, "No such coordinate index");
-        ASSERT( q < M_nbQuadPt,"No quadrature point with this index");
+        ASSERT ( M_isDphiUpdated, "Derivative of the basis functions have not been updated");
+        ASSERT ( i < M_nbFEDof, "No basis function with this index");
+        ASSERT ( dxi < spaceDim, "No such coordinate index");
+        ASSERT ( q < M_nbQuadPt, "No quadrature point with this index");
         return M_dphi[q][i][dxi];
     }
 
@@ -322,7 +322,7 @@ public:
      */
     UInt currentId() const
     {
-        ASSERT(M_isCellNodeUpdated, "Cell has not been updated");
+        ASSERT (M_isCellNodeUpdated, "Cell has not been updated");
         return M_currentId;
     }
 
@@ -332,7 +332,7 @@ public:
     */
     Real diameter() const
     {
-        ASSERT(M_isDiameterUpdated, "Diameter has not been updated");
+        ASSERT (M_isDiameterUpdated, "Diameter has not been updated");
         return M_diameter;
     }
 
@@ -374,14 +374,14 @@ private:
     ETCurrentFE();
 
     //! No assignement
-    void operator=(const ETCurrentFE<spaceDim,1>&);
+    void operator= (const ETCurrentFE<spaceDim, 1>&);
 
     //! Resize all the internal containers w.r. to the stored data and compute the constant values
     void setupInternalConstants();
 
     //! Update the cell nodes
     template< typename ElementType >
-    void updateCellNode(const ElementType& element);
+    void updateCellNode (const ElementType& element);
 
     //! Update the cell nodes with a std::vector of points
     /*!
@@ -391,7 +391,7 @@ private:
       method (which represents a better match in case the right arguments
       are passed).
      */
-    void updateCellNode(const std::vector<VectorSmall<spaceDim> >& ptsCoordinates);
+    void updateCellNode (const std::vector<VectorSmall<spaceDim> >& ptsCoordinates);
 
     //! Update the diameter of the cell
     void updateDiameter();
@@ -400,22 +400,22 @@ private:
     void updateMeasure();
 
     //! Update the quadrature nodes
-    void updateQuadNode(const UInt& iQuadPt);
+    void updateQuadNode (const UInt& iQuadPt);
 
     //! Update Jacobian
-    void updateJacobian(const UInt& iQuadPt);
+    void updateJacobian (const UInt& iQuadPt);
 
     //! Update DetJacobian
-    void updateDetJacobian(const UInt& iQuadPt);
+    void updateDetJacobian (const UInt& iQuadPt);
 
     //! Update InverseJacobian
-    void updateInverseJacobian(const UInt& iQuadPt);
+    void updateInverseJacobian (const UInt& iQuadPt);
 
     //! Update WeightedJacobian
-    void updateWDet(const UInt& iQuadPt);
+    void updateWDet (const UInt& iQuadPt);
 
     //! Update Dphi
-    void updateDphi(const UInt& iQuadPt);
+    void updateDphi (const UInt& iQuadPt);
 
     //@}
 
@@ -510,11 +510,11 @@ private:
 
 
 template <UInt spaceDim>
-const UInt ETCurrentFE<spaceDim,1>::
+const UInt ETCurrentFE<spaceDim, 1>::
 S_spaceDimension = spaceDim;
 
 template <UInt spaceDim>
-const UInt ETCurrentFE<spaceDim,1>::
+const UInt ETCurrentFE<spaceDim, 1>::
 S_fieldDimension = 1;
 
 
@@ -524,16 +524,16 @@ S_fieldDimension = 1;
 
 
 template< UInt spaceDim>
-ETCurrentFE<spaceDim,1>::
-ETCurrentFE(const ReferenceFE& refFE, const GeometricMap& geoMap, const QuadratureRule& qr)
+ETCurrentFE<spaceDim, 1>::
+ETCurrentFE (const ReferenceFE& refFE, const GeometricMap& geoMap, const QuadratureRule& qr)
     :
-    M_referenceFE(&refFE),
-    M_geometricMap(&geoMap),
-    M_quadratureRule(new QuadratureRule(qr)),
+    M_referenceFE (&refFE),
+    M_geometricMap (&geoMap),
+    M_quadratureRule (new QuadratureRule (qr) ),
 
-    M_nbFEDof(M_referenceFE->nbDof()),
-    M_nbMapDof(M_geometricMap->nbDof()),
-    M_nbQuadPt(M_quadratureRule->nbQuadPt()),
+    M_nbFEDof (M_referenceFE->nbDof() ),
+    M_nbMapDof (M_geometricMap->nbDof() ),
+    M_nbQuadPt (M_quadratureRule->nbQuadPt() ),
 
     M_currentId(),
     M_currentLocalId(),
@@ -554,15 +554,15 @@ ETCurrentFE(const ReferenceFE& refFE, const GeometricMap& geoMap, const Quadratu
     M_dphi()
 
 #ifndef NDEBUG
-    ,M_isCellNodeUpdated(false),
-    M_isDiameterUpdated(false),
-    M_isMeasureUpdated(false),
-    M_isQuadNodeUpdated(false),
-    M_isJacobianUpdated(false),
-    M_isDetJacobianUpdated(false),
-    M_isInverseJacobianUpdated(false),
-    M_isWDetUpdated(false),
-    M_isDphiUpdated(false)
+    , M_isCellNodeUpdated (false),
+    M_isDiameterUpdated (false),
+    M_isMeasureUpdated (false),
+    M_isQuadNodeUpdated (false),
+    M_isJacobianUpdated (false),
+    M_isDetJacobianUpdated (false),
+    M_isInverseJacobianUpdated (false),
+    M_isWDetUpdated (false),
+    M_isDphiUpdated (false)
 #endif
 
 
@@ -573,16 +573,16 @@ ETCurrentFE(const ReferenceFE& refFE, const GeometricMap& geoMap, const Quadratu
 
 
 template< UInt spaceDim>
-ETCurrentFE<spaceDim,1>::
-ETCurrentFE(const ReferenceFE& refFE, const GeometricMap& geoMap)
+ETCurrentFE<spaceDim, 1>::
+ETCurrentFE (const ReferenceFE& refFE, const GeometricMap& geoMap)
     :
-    M_referenceFE(&refFE),
-    M_geometricMap(&geoMap),
-    M_quadratureRule(0),
+    M_referenceFE (&refFE),
+    M_geometricMap (&geoMap),
+    M_quadratureRule (0),
 
-    M_nbFEDof(M_referenceFE->nbDof()),
-    M_nbMapDof(M_geometricMap->nbDof()),
-    M_nbQuadPt(0),
+    M_nbFEDof (M_referenceFE->nbDof() ),
+    M_nbMapDof (M_geometricMap->nbDof() ),
+    M_nbQuadPt (0),
 
     M_currentId(),
     M_currentLocalId(),
@@ -603,15 +603,15 @@ ETCurrentFE(const ReferenceFE& refFE, const GeometricMap& geoMap)
     M_dphi()
 
 #ifndef NDEBUG
-    ,M_isCellNodeUpdated(false),
-    M_isDiameterUpdated(false),
-    M_isMeasureUpdated(false),
-    M_isQuadNodeUpdated(false),
-    M_isJacobianUpdated(false),
-    M_isDetJacobianUpdated(false),
-    M_isInverseJacobianUpdated(false),
-    M_isWDetUpdated(false),
-    M_isDphiUpdated(false)
+    , M_isCellNodeUpdated (false),
+    M_isDiameterUpdated (false),
+    M_isMeasureUpdated (false),
+    M_isQuadNodeUpdated (false),
+    M_isJacobianUpdated (false),
+    M_isDetJacobianUpdated (false),
+    M_isInverseJacobianUpdated (false),
+    M_isWDetUpdated (false),
+    M_isDphiUpdated (false)
 #endif
 
 {
@@ -619,56 +619,59 @@ ETCurrentFE(const ReferenceFE& refFE, const GeometricMap& geoMap)
 }
 
 template< UInt spaceDim>
-ETCurrentFE<spaceDim,1>::
-ETCurrentFE(const ETCurrentFE<spaceDim,1>& otherFE)
+ETCurrentFE<spaceDim, 1>::
+ETCurrentFE (const ETCurrentFE<spaceDim, 1>& otherFE)
     :
-    M_referenceFE(otherFE.M_referenceFE),
-    M_geometricMap(otherFE.M_geometricMap),
-    M_quadratureRule(new QuadratureRule(*otherFE.M_quadratureRule)),
+    M_referenceFE (otherFE.M_referenceFE),
+    M_geometricMap (otherFE.M_geometricMap),
+    M_quadratureRule (new QuadratureRule (*otherFE.M_quadratureRule) ),
 
-    M_nbFEDof(otherFE.M_nbFEDof),
-    M_nbMapDof(otherFE.M_nbMapDof),
-    M_nbQuadPt(otherFE.M_nbQuadPt),
+    M_nbFEDof (otherFE.M_nbFEDof),
+    M_nbMapDof (otherFE.M_nbMapDof),
+    M_nbQuadPt (otherFE.M_nbQuadPt),
 
-    M_currentId(otherFE.M_currentId),
-    M_currentLocalId(otherFE.M_currentLocalId),
+    M_currentId (otherFE.M_currentId),
+    M_currentLocalId (otherFE.M_currentLocalId),
 
-    M_diameter(otherFE.M_diameter),
-    M_measure(otherFE.M_measure),
-    M_phi(otherFE.M_phi),
-    M_phiMap(otherFE.M_phiMap),
-    M_dphiReferenceFE(otherFE.M_dphiReferenceFE),
-    M_dphiGeometricMap(otherFE.M_dphiGeometricMap),
+    M_diameter (otherFE.M_diameter),
+    M_measure (otherFE.M_measure),
+    M_phi (otherFE.M_phi),
+    M_phiMap (otherFE.M_phiMap),
+    M_dphiReferenceFE (otherFE.M_dphiReferenceFE),
+    M_dphiGeometricMap (otherFE.M_dphiGeometricMap),
 
-    M_cellNode(otherFE.M_cellNode),
-    M_quadNode(otherFE.M_quadNode),
-    M_jacobian(otherFE.M_jacobian),
-    M_detJacobian(otherFE.M_detJacobian),
-    M_wDet(otherFE.M_wDet),
-    M_tInverseJacobian(otherFE.M_tInverseJacobian),
-    M_dphi(otherFE.M_dphi)
+    M_cellNode (otherFE.M_cellNode),
+    M_quadNode (otherFE.M_quadNode),
+    M_jacobian (otherFE.M_jacobian),
+    M_detJacobian (otherFE.M_detJacobian),
+    M_wDet (otherFE.M_wDet),
+    M_tInverseJacobian (otherFE.M_tInverseJacobian),
+    M_dphi (otherFE.M_dphi)
 
 #ifndef NDEBUG
     //Beware for the comma at the begining of this line!
-    ,M_isCellNodeUpdated( otherFE.M_isCellNodeUpdated ),
-    M_isDiameterUpdated( otherFE.M_isDiameterUpdated ),
-    M_isMeasureUpdated( otherFE.M_isMeasureUpdated ),
-    M_isQuadNodeUpdated( otherFE.M_isQuadNodeUpdated ),
-    M_isJacobianUpdated( otherFE.M_isJacobianUpdated ),
-    M_isDetJacobianUpdated( otherFE.M_isDetJacobianUpdated ),
-    M_isInverseJacobianUpdated( otherFE.M_isInverseJacobianUpdated ),
-    M_isWDetUpdated( otherFE.M_isWDetUpdated ),
-    M_isDphiUpdated( otherFE.M_isDphiUpdated )
+    , M_isCellNodeUpdated ( otherFE.M_isCellNodeUpdated ),
+    M_isDiameterUpdated ( otherFE.M_isDiameterUpdated ),
+    M_isMeasureUpdated ( otherFE.M_isMeasureUpdated ),
+    M_isQuadNodeUpdated ( otherFE.M_isQuadNodeUpdated ),
+    M_isJacobianUpdated ( otherFE.M_isJacobianUpdated ),
+    M_isDetJacobianUpdated ( otherFE.M_isDetJacobianUpdated ),
+    M_isInverseJacobianUpdated ( otherFE.M_isInverseJacobianUpdated ),
+    M_isWDetUpdated ( otherFE.M_isWDetUpdated ),
+    M_isDphiUpdated ( otherFE.M_isDphiUpdated )
 #endif
 
 {}
 
 
 template< UInt spaceDim>
-ETCurrentFE<spaceDim,1>::
+ETCurrentFE<spaceDim, 1>::
 ~ETCurrentFE()
 {
-    if (M_quadratureRule!=0) delete M_quadratureRule;
+    if (M_quadratureRule != 0)
+    {
+        delete M_quadratureRule;
+    }
 }
 
 
@@ -680,50 +683,77 @@ ETCurrentFE<spaceDim,1>::
 template< UInt spaceDim>
 template<typename elementType>
 void
-ETCurrentFE<spaceDim,1>::
-update(const elementType& element, const flag_Type& flag)
+ETCurrentFE<spaceDim, 1>::
+update (const elementType& element, const flag_Type& flag)
 {
-    ASSERT(M_referenceFE != 0, "No reference FE for the update");
-    ASSERT(M_geometricMap != 0, "No geometric mapping for the update");
-    ASSERT(M_quadratureRule !=0, "No quadrature rule for the update");
+    ASSERT (M_referenceFE != 0, "No reference FE for the update");
+    ASSERT (M_geometricMap != 0, "No geometric mapping for the update");
+    ASSERT (M_quadratureRule != 0, "No quadrature rule for the update");
 
 #ifndef NDEBUG
     // Reset all the flags to false
-    M_isCellNodeUpdated=false;
-    M_isDiameterUpdated=false;
-    M_isMeasureUpdated=false;
-    M_isQuadNodeUpdated=false;
-    M_isJacobianUpdated=false;
-    M_isDetJacobianUpdated=false;
-    M_isInverseJacobianUpdated=false;
-    M_isWDetUpdated=false;
-    M_isDphiUpdated=false;
+    M_isCellNodeUpdated = false;
+    M_isDiameterUpdated = false;
+    M_isMeasureUpdated = false;
+    M_isQuadNodeUpdated = false;
+    M_isJacobianUpdated = false;
+    M_isDetJacobianUpdated = false;
+    M_isInverseJacobianUpdated = false;
+    M_isWDetUpdated = false;
+    M_isDphiUpdated = false;
 #endif
 
     // update the cell informations if required
-    if ( flag & ET_UPDATE_ONLY_CELL_NODE ) updateCellNode(element);
-    if ( flag & ET_UPDATE_ONLY_DIAMETER ) updateDiameter();
-
-    // Loop over the quadrature nodes
-    for (UInt i(0); i<M_nbQuadPt; ++i)
+    if ( flag & ET_UPDATE_ONLY_CELL_NODE )
     {
-        // and update the required quantities
-        if ( flag & ET_UPDATE_ONLY_QUAD_NODE ) updateQuadNode(i);
-        if ( flag & ET_UPDATE_ONLY_JACOBIAN ) updateJacobian(i);
-        if ( flag & ET_UPDATE_ONLY_DET_JACOBIAN ) updateDetJacobian(i);
-        if ( flag & ET_UPDATE_ONLY_T_INVERSE_JACOBIAN ) updateInverseJacobian(i);
-        if ( flag & ET_UPDATE_ONLY_W_DET_JACOBIAN ) updateWDet(i);
-        if ( flag & ET_UPDATE_ONLY_DPHI ) updateDphi(i);
+        updateCellNode (element);
+    }
+    if ( flag & ET_UPDATE_ONLY_DIAMETER )
+    {
+        updateDiameter();
     }
 
-    if ( flag & ET_UPDATE_ONLY_MEASURE ) updateMeasure();
+    // Loop over the quadrature nodes
+    for (UInt i (0); i < M_nbQuadPt; ++i)
+    {
+        // and update the required quantities
+        if ( flag & ET_UPDATE_ONLY_QUAD_NODE )
+        {
+            updateQuadNode (i);
+        }
+        if ( flag & ET_UPDATE_ONLY_JACOBIAN )
+        {
+            updateJacobian (i);
+        }
+        if ( flag & ET_UPDATE_ONLY_DET_JACOBIAN )
+        {
+            updateDetJacobian (i);
+        }
+        if ( flag & ET_UPDATE_ONLY_T_INVERSE_JACOBIAN )
+        {
+            updateInverseJacobian (i);
+        }
+        if ( flag & ET_UPDATE_ONLY_W_DET_JACOBIAN )
+        {
+            updateWDet (i);
+        }
+        if ( flag & ET_UPDATE_ONLY_DPHI )
+        {
+            updateDphi (i);
+        }
+    }
+
+    if ( flag & ET_UPDATE_ONLY_MEASURE )
+    {
+        updateMeasure();
+    }
 }
 
 
 template<UInt spaceDim>
 void
-ETCurrentFE<spaceDim,1>::
-showMe(std::ostream& out) const
+ETCurrentFE<spaceDim, 1>::
+showMe (std::ostream& out) const
 {
     out << " Number of FE Dof   : " << M_nbFEDof << std::endl;
     out << " Number of Map Dof  : " << M_nbMapDof << std::endl;
@@ -731,9 +761,9 @@ showMe(std::ostream& out) const
     out << std::endl;
 
     out << " Cell Nodes : " << std::endl;
-    for ( UInt i(0); i < M_nbMapDof; ++i )
+    for ( UInt i (0); i < M_nbMapDof; ++i )
     {
-        for ( UInt icoor(0); icoor < S_spaceDimension; ++icoor)
+        for ( UInt icoor (0); icoor < S_spaceDimension; ++icoor)
         {
             out << M_cellNode[i][icoor] << " ";
         }
@@ -742,11 +772,11 @@ showMe(std::ostream& out) const
     out << std::endl;
 
     out << " Jacobian : " << std::endl;
-    for (UInt iQuad(0); iQuad < M_nbQuadPt; ++iQuad)
+    for (UInt iQuad (0); iQuad < M_nbQuadPt; ++iQuad)
     {
-        for (UInt iDim(0); iDim< S_spaceDimension; ++iDim)
+        for (UInt iDim (0); iDim < S_spaceDimension; ++iDim)
         {
-            for (UInt jDim(0); jDim< S_spaceDimension; ++jDim)
+            for (UInt jDim (0); jDim < S_spaceDimension; ++jDim)
             {
                 out << M_jacobian[iQuad][iDim][jDim] << " ";
             }
@@ -756,18 +786,18 @@ showMe(std::ostream& out) const
     }
 
     out << " Det jacobian : " << std::endl;
-    for (UInt iQuad(0); iQuad < M_nbQuadPt; ++iQuad)
+    for (UInt iQuad (0); iQuad < M_nbQuadPt; ++iQuad)
     {
         out << M_detJacobian[iQuad] << " ";
     }
     out << std::endl;
 
     out << " T inverse Jacobian : " << std::endl;
-    for (UInt iQuad(0); iQuad < M_nbQuadPt; ++iQuad)
+    for (UInt iQuad (0); iQuad < M_nbQuadPt; ++iQuad)
     {
-        for (UInt iDim(0); iDim< S_spaceDimension; ++iDim)
+        for (UInt iDim (0); iDim < S_spaceDimension; ++iDim)
         {
-            for (UInt jDim(0); jDim< S_spaceDimension; ++jDim)
+            for (UInt jDim (0); jDim < S_spaceDimension; ++jDim)
             {
                 out << M_tInverseJacobian[iQuad][iDim][jDim] << " ";
             }
@@ -777,11 +807,11 @@ showMe(std::ostream& out) const
     }
 
     out << " DPhi : " << std::endl;
-    for (UInt iQuad(0); iQuad<M_nbQuadPt; ++iQuad)
+    for (UInt iQuad (0); iQuad < M_nbQuadPt; ++iQuad)
     {
-        for (UInt iDof(0); iDof<M_nbFEDof; ++iDof)
+        for (UInt iDof (0); iDof < M_nbFEDof; ++iDof)
         {
-            for (UInt iCoor(0); iCoor < S_spaceDimension; ++iCoor)
+            for (UInt iCoor (0); iCoor < S_spaceDimension; ++iCoor)
             {
                 out << M_dphi[iQuad][iDof][iCoor] << " ";
             }
@@ -797,11 +827,14 @@ showMe(std::ostream& out) const
 
 template< UInt spaceDim>
 void
-ETCurrentFE<spaceDim,1>::
-setQuadratureRule(const QuadratureRule& qr)
+ETCurrentFE<spaceDim, 1>::
+setQuadratureRule (const QuadratureRule& qr)
 {
-    if (M_quadratureRule!=0) delete M_quadratureRule;
-    M_quadratureRule = new QuadratureRule(qr);
+    if (M_quadratureRule != 0)
+    {
+        delete M_quadratureRule;
+    }
+    M_quadratureRule = new QuadratureRule (qr);
     M_nbQuadPt = qr.nbQuadPt();
     setupInternalConstants();
 }
@@ -814,60 +847,60 @@ setQuadratureRule(const QuadratureRule& qr)
 
 template< UInt spaceDim >
 void
-ETCurrentFE<spaceDim,1>::
+ETCurrentFE<spaceDim, 1>::
 setupInternalConstants()
 {
     // The first group of values can be computed as it
     // it does not depend on the current element
 
     // PHI
-    M_phi.resize(M_nbQuadPt);
-    for (UInt q(0); q< M_nbQuadPt; ++q)
+    M_phi.resize (M_nbQuadPt);
+    for (UInt q (0); q < M_nbQuadPt; ++q)
     {
-        M_phi[q].resize(M_nbFEDof);
-        for (UInt j(0); j< M_nbFEDof; ++j)
+        M_phi[q].resize (M_nbFEDof);
+        for (UInt j (0); j < M_nbFEDof; ++j)
         {
-            M_phi[q][j]=M_referenceFE->phi(j,M_quadratureRule->quadPointCoor(q));
+            M_phi[q][j] = M_referenceFE->phi (j, M_quadratureRule->quadPointCoor (q) );
         }
     }
 
     // PHI MAP
-    M_phiMap.resize(M_nbQuadPt);
-    for (UInt q(0); q<M_nbQuadPt; ++q)
+    M_phiMap.resize (M_nbQuadPt);
+    for (UInt q (0); q < M_nbQuadPt; ++q)
     {
-        M_phiMap[q].resize(M_nbMapDof);
-        for (UInt i(0); i<M_nbMapDof; ++i)
+        M_phiMap[q].resize (M_nbMapDof);
+        for (UInt i (0); i < M_nbMapDof; ++i)
         {
-            M_phiMap[q][i]=M_geometricMap->phi(i,M_quadratureRule->quadPointCoor(q));
+            M_phiMap[q][i] = M_geometricMap->phi (i, M_quadratureRule->quadPointCoor (q) );
         }
     }
 
     // DPHIREFERENCEFE
-    M_dphiReferenceFE.resize(M_nbQuadPt);
-    for (UInt q(0); q< M_nbQuadPt; ++q)
+    M_dphiReferenceFE.resize (M_nbQuadPt);
+    for (UInt q (0); q < M_nbQuadPt; ++q)
     {
-        M_dphiReferenceFE[q].resize(M_nbFEDof);
-        for (UInt i(0); i< M_nbFEDof; ++i)
+        M_dphiReferenceFE[q].resize (M_nbFEDof);
+        for (UInt i (0); i < M_nbFEDof; ++i)
         {
-            M_dphiReferenceFE[q][i].resize(spaceDim);
-            for (UInt j(0); j<spaceDim; ++j)
+            M_dphiReferenceFE[q][i].resize (spaceDim);
+            for (UInt j (0); j < spaceDim; ++j)
             {
-                M_dphiReferenceFE[q][i][j] = M_referenceFE->dPhi(i,j,M_quadratureRule->quadPointCoor(q));
+                M_dphiReferenceFE[q][i][j] = M_referenceFE->dPhi (i, j, M_quadratureRule->quadPointCoor (q) );
             }
         }
     }
 
     // DPHIGEOMETRICMAP
-    M_dphiGeometricMap.resize(M_nbQuadPt);
-    for (UInt q(0); q< M_nbQuadPt; ++q)
+    M_dphiGeometricMap.resize (M_nbQuadPt);
+    for (UInt q (0); q < M_nbQuadPt; ++q)
     {
-        M_dphiGeometricMap[q].resize(M_nbMapDof);
-        for (UInt i(0); i< M_nbMapDof; ++i)
+        M_dphiGeometricMap[q].resize (M_nbMapDof);
+        for (UInt i (0); i < M_nbMapDof; ++i)
         {
-            M_dphiGeometricMap[q][i].resize(spaceDim);
-            for (UInt j(0); j<spaceDim; ++j)
+            M_dphiGeometricMap[q][i].resize (spaceDim);
+            for (UInt j (0); j < spaceDim; ++j)
             {
-                M_dphiGeometricMap[q][i][j] = M_geometricMap->dPhi(i,j,M_quadratureRule->quadPointCoor(q));
+                M_dphiGeometricMap[q][i][j] = M_geometricMap->dPhi (i, j, M_quadratureRule->quadPointCoor (q) );
             }
         }
     }
@@ -877,52 +910,52 @@ setupInternalConstants()
     // So, we just make space for it.
 
     // Cell nodes
-    M_cellNode.resize(M_nbMapDof);
-    for (UInt i(0); i<M_nbMapDof; ++i)
+    M_cellNode.resize (M_nbMapDof);
+    for (UInt i (0); i < M_nbMapDof; ++i)
     {
-        M_cellNode[i].resize(spaceDim);
+        M_cellNode[i].resize (spaceDim);
     }
 
     // Quad nodes
-    M_quadNode.resize(M_nbQuadPt);
+    M_quadNode.resize (M_nbQuadPt);
     /*for (UInt i(0); i<M_nbQuadPt; ++i)
     {
         M_quadNode[i].resize(spaceDim);
         }*/
 
     // Jacobian
-    M_jacobian.resize(M_nbQuadPt);
-    for (UInt i(0); i<M_nbQuadPt; ++i)
+    M_jacobian.resize (M_nbQuadPt);
+    for (UInt i (0); i < M_nbQuadPt; ++i)
     {
-        M_jacobian[i].resize(spaceDim);
-        for (UInt j(0); j<spaceDim; ++j)
+        M_jacobian[i].resize (spaceDim);
+        for (UInt j (0); j < spaceDim; ++j)
         {
-            M_jacobian[i][j].resize(spaceDim);
+            M_jacobian[i][j].resize (spaceDim);
         }
     }
 
     // Det jacobian
-    M_detJacobian.resize(M_nbQuadPt);
+    M_detJacobian.resize (M_nbQuadPt);
 
     // wDet
-    M_wDet.resize(M_nbQuadPt);
+    M_wDet.resize (M_nbQuadPt);
 
     // tInverseJacobian
-    M_tInverseJacobian.resize(M_nbQuadPt);
-    for (UInt i(0); i<M_nbQuadPt; ++i)
+    M_tInverseJacobian.resize (M_nbQuadPt);
+    for (UInt i (0); i < M_nbQuadPt; ++i)
     {
-        M_tInverseJacobian[i].resize(spaceDim);
-        for (UInt j(0); j<spaceDim; ++j)
+        M_tInverseJacobian[i].resize (spaceDim);
+        for (UInt j (0); j < spaceDim; ++j)
         {
-            M_tInverseJacobian[i][j].resize(spaceDim);
+            M_tInverseJacobian[i][j].resize (spaceDim);
         }
     }
 
     // dphi
-    M_dphi.resize(M_nbQuadPt);
-    for (UInt i(0); i<M_nbQuadPt; ++i)
+    M_dphi.resize (M_nbQuadPt);
+    for (UInt i (0); i < M_nbQuadPt; ++i)
     {
-        M_dphi[i].resize(M_nbFEDof);
+        M_dphi[i].resize (M_nbFEDof);
     }
 
 }
@@ -930,24 +963,24 @@ setupInternalConstants()
 
 template <UInt spaceDim>
 void
-ETCurrentFE<spaceDim,1>::
-updateQuadNode(const UInt& iQuadPt)
+ETCurrentFE<spaceDim, 1>::
+updateQuadNode (const UInt& iQuadPt)
 {
     // Check the requirements
-    ASSERT(M_isCellNodeUpdated,"Cell must be updated to compute the quadrature node position");
+    ASSERT (M_isCellNodeUpdated, "Cell must be updated to compute the quadrature node position");
 
     // Set the check boolean
 #ifndef NDEBUG
-    M_isQuadNodeUpdated=true;
+    M_isQuadNodeUpdated = true;
 #endif
 
-    for (UInt iDim(0); iDim< S_spaceDimension; ++iDim)
+    for (UInt iDim (0); iDim < S_spaceDimension; ++iDim)
     {
-        M_quadNode[iQuadPt][iDim]=0.0;
+        M_quadNode[iQuadPt][iDim] = 0.0;
 
-        for (UInt iDof(0); iDof< M_nbMapDof; ++iDof)
+        for (UInt iDof (0); iDof < M_nbMapDof; ++iDof)
         {
-            M_quadNode[iQuadPt][iDim] += M_cellNode[iDof][iDim]* M_phiMap[iQuadPt][iDof];
+            M_quadNode[iQuadPt][iDim] += M_cellNode[iDof][iDim] * M_phiMap[iQuadPt][iDof];
         }
     }
 }
@@ -955,26 +988,26 @@ updateQuadNode(const UInt& iQuadPt)
 
 template< UInt spaceDim>
 void
-ETCurrentFE<spaceDim,1>::
-updateJacobian(const UInt& iQuadPt)
+ETCurrentFE<spaceDim, 1>::
+updateJacobian (const UInt& iQuadPt)
 {
     // Check the requirements
-    ASSERT(M_isCellNodeUpdated, "Cell must be updated to compute the jacobian");
+    ASSERT (M_isCellNodeUpdated, "Cell must be updated to compute the jacobian");
 
     // Set the check boolean
 #ifndef NDEBUG
-    M_isJacobianUpdated=true;
+    M_isJacobianUpdated = true;
 #endif
 
-    Real partialSum(0.0);
-    for (UInt iDim(0); iDim< S_spaceDimension; ++iDim)
+    Real partialSum (0.0);
+    for (UInt iDim (0); iDim < S_spaceDimension; ++iDim)
     {
-        for (UInt jDim(0); jDim< S_spaceDimension; ++jDim)
+        for (UInt jDim (0); jDim < S_spaceDimension; ++jDim)
         {
             partialSum = 0.0;
-            for (UInt iterNode(0); iterNode < M_nbMapDof; ++iterNode)
+            for (UInt iterNode (0); iterNode < M_nbMapDof; ++iterNode)
             {
-                partialSum += M_cellNode[iterNode][iDim]* M_dphiGeometricMap[iQuadPt][iterNode][jDim];
+                partialSum += M_cellNode[iterNode][iDim] * M_dphiGeometricMap[iQuadPt][iterNode][jDim];
             }
 
             M_jacobian[iQuadPt][iDim][jDim] = partialSum;
@@ -985,39 +1018,39 @@ updateJacobian(const UInt& iQuadPt)
 
 template< UInt spaceDim>
 void
-ETCurrentFE<spaceDim,1>::
-updateWDet(const UInt& iQuadPt)
+ETCurrentFE<spaceDim, 1>::
+updateWDet (const UInt& iQuadPt)
 {
-    ASSERT(M_isDetJacobianUpdated, "Determinant of the jacobian must be updated to compute WDet");
+    ASSERT (M_isDetJacobianUpdated, "Determinant of the jacobian must be updated to compute WDet");
 
 #ifndef NDEBUG
-    M_isWDetUpdated=true;
+    M_isWDetUpdated = true;
 #endif
 
-    M_wDet[iQuadPt] = M_detJacobian[iQuadPt] * M_quadratureRule->weight(iQuadPt);
+    M_wDet[iQuadPt] = M_detJacobian[iQuadPt] * M_quadratureRule->weight (iQuadPt);
 }
 
 
 template< UInt spaceDim>
 void
-ETCurrentFE<spaceDim,1>::
-updateDphi(const UInt& iQuadPt)
+ETCurrentFE<spaceDim, 1>::
+updateDphi (const UInt& iQuadPt)
 {
-    ASSERT(M_isInverseJacobianUpdated,
-           "Inverse jacobian must be updated to compute the derivative of the basis functions");
+    ASSERT (M_isInverseJacobianUpdated,
+            "Inverse jacobian must be updated to compute the derivative of the basis functions");
 
 #ifndef NDEBUG
-    M_isDphiUpdated=true;
+    M_isDphiUpdated = true;
 #endif
 
-    Real partialSum(0.0);
+    Real partialSum (0.0);
 
-    for (UInt iDof(0); iDof< M_nbFEDof; ++iDof)
+    for (UInt iDof (0); iDof < M_nbFEDof; ++iDof)
     {
-        for (UInt iCoor(0); iCoor < S_spaceDimension; ++iCoor)
+        for (UInt iCoor (0); iCoor < S_spaceDimension; ++iCoor)
         {
-            partialSum=0.0;
-            for (UInt jCoor(0); jCoor< S_spaceDimension; ++jCoor)
+            partialSum = 0.0;
+            for (UInt jCoor (0); jCoor < S_spaceDimension; ++jCoor)
             {
                 partialSum += M_tInverseJacobian[iQuadPt][iCoor][jCoor] * M_dphiReferenceFE[iQuadPt][iDof][jCoor];
             }
@@ -1030,40 +1063,40 @@ updateDphi(const UInt& iQuadPt)
 template< UInt spaceDim>
 template< typename ElementType >
 void
-ETCurrentFE<spaceDim,1>::
-updateCellNode(const ElementType& element)
+ETCurrentFE<spaceDim, 1>::
+updateCellNode (const ElementType& element)
 {
 
 #ifndef NDEBUG
-    M_isCellNodeUpdated=true;
+    M_isCellNodeUpdated = true;
 #endif
 
     M_currentId      = element.id();
     M_currentLocalId = element.localId();
 
-    for ( UInt i(0); i < M_nbMapDof; ++i )
+    for ( UInt i (0); i < M_nbMapDof; ++i )
     {
-        for ( UInt icoor(0); icoor < S_spaceDimension; ++icoor)
+        for ( UInt icoor (0); icoor < S_spaceDimension; ++icoor)
         {
-            M_cellNode[i][icoor] = element.point(i).coordinate(icoor);
+            M_cellNode[i][icoor] = element.point (i).coordinate (icoor);
         }
     }
 }
 
 template< UInt spaceDim >
 void
-ETCurrentFE<spaceDim,1>::
-updateCellNode(const std::vector<VectorSmall<spaceDim> >& ptsCoordinates)
+ETCurrentFE<spaceDim, 1>::
+updateCellNode (const std::vector<VectorSmall<spaceDim> >& ptsCoordinates)
 {
 #ifndef NDEBUG
-    M_isCellNodeUpdated=true;
+    M_isCellNodeUpdated = true;
 #endif
 
-    ASSERT( ptsCoordinates.size() == M_nbMapDof, "Number of points does not define the right geometric shape.");
+    ASSERT ( ptsCoordinates.size() == M_nbMapDof, "Number of points does not define the right geometric shape.");
 
-    for ( UInt i(0); i < M_nbMapDof; ++i )
+    for ( UInt i (0); i < M_nbMapDof; ++i )
     {
-        for ( UInt icoor(0); icoor < S_spaceDimension; ++icoor)
+        for ( UInt icoor (0); icoor < S_spaceDimension; ++icoor)
         {
             M_cellNode[i][icoor] = ptsCoordinates[i][icoor];
         }
@@ -1072,50 +1105,50 @@ updateCellNode(const std::vector<VectorSmall<spaceDim> >& ptsCoordinates)
 
 template< UInt spaceDim>
 void
-ETCurrentFE<spaceDim,1>::
+ETCurrentFE<spaceDim, 1>::
 updateDiameter()
 {
-    ASSERT(M_isCellNodeUpdated, "Cell must be updated to compute the diameter");
+    ASSERT (M_isCellNodeUpdated, "Cell must be updated to compute the diameter");
 
 #ifndef NDEBUG
-    M_isDiameterUpdated=true;
+    M_isDiameterUpdated = true;
 #endif
 
-    M_diameter=0.0;
+    M_diameter = 0.0;
     Real dist;
 
-    for ( UInt i(0); i < M_nbMapDof; ++i )
+    for ( UInt i (0); i < M_nbMapDof; ++i )
     {
-        for ( UInt j(i+1); j < M_nbMapDof; ++j)
+        for ( UInt j (i + 1); j < M_nbMapDof; ++j)
         {
             dist = 0.0;
-            for ( UInt icoor(0); icoor < S_spaceDimension; ++icoor)
+            for ( UInt icoor (0); icoor < S_spaceDimension; ++icoor)
             {
-                dist += (M_cellNode[i][icoor]- M_cellNode[j][icoor])*(M_cellNode[i][icoor]- M_cellNode[j][icoor]);
+                dist += (M_cellNode[i][icoor] - M_cellNode[j][icoor]) * (M_cellNode[i][icoor] - M_cellNode[j][icoor]);
             }
-            M_diameter = std::max(M_diameter,dist);
+            M_diameter = std::max (M_diameter, dist);
         }
     }
 
-    M_diameter = std::sqrt(M_diameter);
+    M_diameter = std::sqrt (M_diameter);
 }
 
 template< UInt spaceDim>
 void
-ETCurrentFE<spaceDim,1>::
+ETCurrentFE<spaceDim, 1>::
 updateMeasure()
 {
-    ASSERT(M_isWDetUpdated, "Wdet must be updated to compute the measure");
+    ASSERT (M_isWDetUpdated, "Wdet must be updated to compute the measure");
 
 #ifndef NDEBUG
-    M_isMeasureUpdated=true;
+    M_isMeasureUpdated = true;
 #endif
 
-    M_measure=0.0;
+    M_measure = 0.0;
 
-    for (UInt iq(0); iq<M_nbQuadPt; ++iq)
+    for (UInt iq (0); iq < M_nbQuadPt; ++iq)
     {
-        M_measure +=M_wDet[iq];
+        M_measure += M_wDet[iq];
     }
 }
 

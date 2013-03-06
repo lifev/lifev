@@ -102,27 +102,27 @@ public:
       @param map Row map. The column map will be defined in MatrixEpetra<DataType>::GlobalAssemble(...,...)
       @param graph A sparse compressed row graph.
      */
-    MatrixEpetra( const MapEpetra& map, const Epetra_CrsGraph& graph, bool ignoreNonLocalValues=false );
+    MatrixEpetra ( const MapEpetra& map, const Epetra_CrsGraph& graph, bool ignoreNonLocalValues = false );
 
     //! Constructor for square and rectangular matrices
     /*!
       @param map Row map. The column map will be defined in MatrixEpetra<DataType>::GlobalAssemble(...,...)
       @param numEntries The average number of entries for each row.
      */
-    MatrixEpetra( const MapEpetra& map, Int numEntries = 50 );
+    MatrixEpetra ( const MapEpetra& map, Int numEntries = 50 );
 
     //! Copy Constructor
     /*!
       @param matrix Matrix used to create the new occurence
      */
-    MatrixEpetra( const MatrixEpetra& matrix);
+    MatrixEpetra ( const MatrixEpetra& matrix);
 
     //! Copies the matrix to a matrix which resides only on the processor
     /*!
       @param matrix Matrix where the content of the matrix should be stored
       @param reduceToProc Processor where the matrix should be stored
      */
-    MatrixEpetra( const MatrixEpetra& matrix, const UInt reduceToProc );
+    MatrixEpetra ( const MatrixEpetra& matrix, const UInt reduceToProc );
 
     //! Constructs an MatrixEpetra view of an Epetra_FECrsMatrix.
     /*!
@@ -130,7 +130,7 @@ public:
       using a method of the class MatrixEpetra
       @param crsMatrixPtr Pointer on a Epetra_FECrsMatrix of Trilinos
      */
-    LIFEV_DEPRECATED( MatrixEpetra( matrix_ptrtype crsMatrixPtr) );
+    LIFEV_DEPRECATED ( MatrixEpetra ( matrix_ptrtype crsMatrixPtr) );
 
     //! Constructs an MatrixEpetra view of an Epetra_FECrsMatrix.
     /*!
@@ -139,7 +139,7 @@ public:
       @param map Row map. The column map will be defined in MatrixEpetra<DataType>::GlobalAssemble(...,...)
       @param crsMatrixPtr Pointer on a Epetra_FECrsMatrix of Trilinos
      */
-    MatrixEpetra( const MapEpetra & map, matrix_ptrtype crsMatrixPtr);
+    MatrixEpetra ( const MapEpetra& map, matrix_ptrtype crsMatrixPtr);
 
     //! Destructor
     ~MatrixEpetra() {};
@@ -203,13 +203,13 @@ public:
     /*!
       @param matrixPtr pointer on the matrix
      */
-    void swapCrsMatrix( matrix_ptrtype& matrixPtr );
+    void swapCrsMatrix ( matrix_ptrtype& matrixPtr );
 
     //! Swap the matrix with the one given as argument
     /*!
       @param matrix matrix which is swapped
      */
-    void swapCrsMatrix( MatrixEpetra<DataType>& matrix );
+    void swapCrsMatrix ( MatrixEpetra<DataType>& matrix );
 
     //! Multiply the MatrixEpetra by the first given matrix and put the result in the second given matrix
     /*!
@@ -219,11 +219,11 @@ public:
       @param result Matrix to store the result
       @param callFillCompleteOnResult If true, the matrix "result" will be filled (i.e. closed) after the multiplication
      */
-    Int multiply( bool transposeCurrent,
-                  const MatrixEpetra<DataType> &matrix,
-                  bool transposeMatrix,
-                  MatrixEpetra<DataType> &result,
-                  bool callFillCompleteOnResult=true ) const;
+    Int multiply ( bool transposeCurrent,
+                   const MatrixEpetra<DataType>& matrix,
+                   bool transposeMatrix,
+                   MatrixEpetra<DataType>& result,
+                   bool callFillCompleteOnResult = true ) const;
 
     //! Multiply the first VectorEpetra given as a parameter by the MatrixEpetra and put the result into the second given VectorEpetra
     /*!
@@ -231,7 +231,7 @@ public:
       @param vector1 Vector that will be multiply by the MatrixEpetra
       @param vector2 Vector that will store the result
      */
-    Int multiply( bool transposeCurrent, const vector_type& vector1, vector_type& vector2 ) const;
+    Int multiply ( bool transposeCurrent, const vector_type& vector1, vector_type& vector2 ) const;
 
     //! Add to the matrix a dyadic product: \f[ C += A \otimes B + \f], where \f[ C \f] is the matrix.
     /*!
@@ -239,17 +239,17 @@ public:
      *  @param vector1 unique vector A
      *  @param vector2 unique vector B
      */
-    void addDyadicProduct( const vector_type& uniqueVector1, const vector_type& uniqueVector2 );
+    void addDyadicProduct ( const vector_type& uniqueVector1, const vector_type& uniqueVector2 );
 
     //! Add a multiple of a given matrix:  *this += scalar*matrix
     /*!
       @param scalar Scalar which multiplies the matrix
       @param matrix Matrix to be added
      */
-    void add( const DataType scalar, const MatrixEpetra& matrix );
+    void add ( const DataType scalar, const MatrixEpetra& matrix );
 
-      //! Returns a pointer to a new matrix which contains the transpose of the current matrix
-     boost::shared_ptr<MatrixEpetra<DataType> > transpose( );
+    //! Returns a pointer to a new matrix which contains the transpose of the current matrix
+    boost::shared_ptr<MatrixEpetra<DataType> > transpose( );
 
     //! Set entries (rVec(i),rVec(i)) to coefficient and the rest of the row entries to zero
     /*!
@@ -275,11 +275,11 @@ public:
       @param datumVector vector of values to constrain entry r of the solution at
       @param offset Offset used for the indices
      */
-    void diagonalize( std::vector<UInt> rVec,
-                      DataType const coefficient,
-                      vector_type &rhs,
-                      std::vector<DataType> datumVector,
-                      UInt offset = 0 );
+    void diagonalize ( std::vector<UInt> rVec,
+                       DataType const coefficient,
+                       vector_type& rhs,
+                       std::vector<DataType> datumVector,
+                       UInt offset = 0 );
 
     //! apply constraint on row "row"
     /*!
@@ -289,22 +289,22 @@ public:
       @param datumVector value to constrain entry r of the solution at
       @param offset Offset used for the indices
      */
-    void diagonalize( UInt const row, DataType const coefficient, vector_type &rhs,
-                      DataType datum,
-                      UInt offset = 0 );
+    void diagonalize ( UInt const row, DataType const coefficient, vector_type& rhs,
+                       DataType datum,
+                       UInt offset = 0 );
 
     //! Save the matrix into a MatrixMarket (.mtx) file
     /*!
       @param filename file where the matrix will be saved
       @param headers boolean to write the MM headers or not
      */
-    void matrixMarket( std::string const &fileName, const bool headers = true );
+    void matrixMarket ( std::string const& fileName, const bool headers = true );
 
     //! Save the matrix into a Matlab (.m) file
     /*!
       @param filename file where the matrix will be saved
      */
-    void spy( std::string const &fileName );
+    void spy ( std::string const& fileName );
 
 #ifdef HAVE_HDF5
     //! Save the matrix into a HDF5 (.h5) file
@@ -313,21 +313,21 @@ public:
       @param matrixName Name of the matrix in the HDF5 file
       @param truncate True if the file has to be truncated; False if the file already exist and should not be truncated
      */
-    void exportToHDF5( std::string const &fileName, std::string const &matrixName = "matrix", bool const& truncate = true );
+    void exportToHDF5 ( std::string const& fileName, std::string const& matrixName = "matrix", bool const& truncate = true );
 
     //! Read a matrix from a HDF5 (.h5) file
     /*!
       @param fileName Name of the file where the matrix will be saved, without extension (.h5)
       @param matrixName Name of the matrix in the HDF5 file
      */
-    void importFromHDF5( std::string const &fileName, std::string const &matrixName = "matrix" );
+    void importFromHDF5 ( std::string const& fileName, std::string const& matrixName = "matrix" );
 #endif
 
     //! Print the contents of the matrix
     /*!
       @param output Stream where the informations must be printed
      */
-    void showMe( std::ostream& output = std::cout ) const;
+    void showMe ( std::ostream& output = std::cout ) const;
 
     //! Global assemble of a square matrix with default domain and range map
     /*
@@ -352,8 +352,8 @@ public:
      @param domainMap The domain map
      @param rangeMap The range map
      */
-    Int globalAssemble( const boost::shared_ptr<const MapEpetra> & domainMap,
-                        const boost::shared_ptr<const MapEpetra> & rangeMap );
+    Int globalAssemble ( const boost::shared_ptr<const MapEpetra>& domainMap,
+                         const boost::shared_ptr<const MapEpetra>& rangeMap );
 
     //! insert the given value into the diagonal
     /*!
@@ -367,7 +367,7 @@ public:
       @param Map The MapEpetra
       @param offset An offset for the insertion of the diagonal entries
     */
-    void insertValueDiagonal( const DataType entry, const MapEpetra& Map, const UInt offset = 0 );
+    void insertValueDiagonal ( const DataType entry, const MapEpetra& Map, const UInt offset = 0 );
 
     //! insert the given value into the diagonal
     /*!
@@ -385,7 +385,7 @@ public:
       @param from Starting row
       @param to Ending row
     */
-    void insertValueDiagonal( const DataType& value, Int from = -1, Int to = -2 );
+    void insertValueDiagonal ( const DataType& value, Int from = -1, Int to = -2 );
 
     //! insert ones into the diagonal to ensure the matrix' graph has a entry there
     /*
@@ -402,7 +402,7 @@ public:
       @param from Starting row
       @param to Ending row
     */
-    void insertOneDiagonal( Int from = -1, Int to = -2 );
+    void insertOneDiagonal ( Int from = -1, Int to = -2 );
 
     //! insert zeros into the diagonal to ensure the matrix' graph has a entry there
     /*!
@@ -417,7 +417,7 @@ public:
       @param from Starting row
       @param to Ending row
     */
-    void insertZeroDiagonal( Int from = -1, Int to = -2 );
+    void insertZeroDiagonal ( Int from = -1, Int to = -2 );
 
     //! Compute the norm 1 of the global matrix
     /*!
@@ -438,7 +438,10 @@ public:
     //@{
 
     //! set zero in all the matrix entries
-    void zero() {M_epetraCrs->PutScalar(0.);}
+    void zero()
+    {
+        M_epetraCrs->PutScalar (0.);
+    }
 
     //! Set a set of values to the corresponding set of coefficient in the matrix
     /*!
@@ -449,17 +452,17 @@ public:
       @param localValues 2D array containing the coefficient related to "rowIndices" and "columnIndices"
       @param format Format of the matrix (Epetra_FECrsMatrix::COLUMN_MAJOR or Epetra_FECrsMatrix::ROW_MAJOR)
      */
-    void setCoefficients( Int const numRows, Int const numColumns,
-                            std::vector<Int> const& rowIndices, std::vector<Int> const& columnIndices,
-                            DataType* const* const localValues,
-                            Int format = Epetra_FECrsMatrix::COLUMN_MAJOR );
+    void setCoefficients ( Int const numRows, Int const numColumns,
+                           std::vector<Int> const& rowIndices, std::vector<Int> const& columnIndices,
+                           DataType* const* const localValues,
+                           Int format = Epetra_FECrsMatrix::COLUMN_MAJOR );
 
     //! Set a coefficient of the matrix
     /*!
       @param row Row index of the coefficient
       @param column column index of the coefficient
      */
-    void setCoefficient( UInt row, UInt column, DataType localValue );
+    void setCoefficient ( UInt row, UInt column, DataType localValue );
 
     //! Add a set of values to the corresponding set of coefficient in the matrix
     /*!
@@ -470,10 +473,10 @@ public:
       @param localValues 2D array containing the coefficient related to "rowIndices" and "columnIndices"
       @param format Format of the matrix (Epetra_FECrsMatrix::COLUMN_MAJOR or Epetra_FECrsMatrix::ROW_MAJOR)
      */
-    void addToCoefficients( Int const numRows, Int const numColumns,
-                            std::vector<Int> const& rowIndices, std::vector<Int> const& columnIndices,
-                            DataType* const* const localValues,
-                            Int format = Epetra_FECrsMatrix::COLUMN_MAJOR );
+    void addToCoefficients ( Int const numRows, Int const numColumns,
+                             std::vector<Int> const& rowIndices, std::vector<Int> const& columnIndices,
+                             DataType* const* const localValues,
+                             Int format = Epetra_FECrsMatrix::COLUMN_MAJOR );
 
     //! Add a value at a coefficient of the matrix
     /*!
@@ -481,13 +484,16 @@ public:
       @param column Column index of the value to be added
       @param localValue Value to be added to the coefficient
      */
-    void addToCoefficient( UInt const row, UInt const column, DataType const localValue );
+    void addToCoefficient ( UInt const row, UInt const column, DataType const localValue );
 
     //! If set true, transpose of this operator will be applied.
     /*!
       @param transpose flag to identify whether to transpose or not
      */
-    void setUseTranspose( const bool& transpose = false ) { M_epetraCrs->SetUseTranspose( transpose ); }
+    void setUseTranspose ( const bool& transpose = false )
+    {
+        M_epetraCrs->SetUseTranspose ( transpose );
+    }
 
     //@}
 
@@ -496,13 +502,22 @@ public:
     //@{
 
     //! Return the shared_pointer of the Epetra_FECrsMatrix
-    matrix_ptrtype& matrixPtr(){ return M_epetraCrs; }
+    matrix_ptrtype& matrixPtr()
+    {
+        return M_epetraCrs;
+    }
 
     //! Return the shared_pointer of the Epetra_Map
-    boost::shared_ptr<MapEpetra> mapPtr(){ return M_map; }
+    boost::shared_ptr<MapEpetra> mapPtr()
+    {
+        return M_map;
+    }
 
     //! Return the const shared_pointer of the Epetra_FECrsMatrix
-    const matrix_ptrtype& matrixPtr() const{ return M_epetraCrs; }
+    const matrix_ptrtype& matrixPtr() const
+    {
+        return M_epetraCrs;
+    }
 
     //! Return the mean number of entries in the matrix rows
     Int meanNumEntries() const ;
@@ -537,12 +552,12 @@ public:
     //! RAP matrix matrix multiplication result = R * A * P
     //! User is responsible to wrap the row pointer returned by this method with his favorite pointer
     template <typename DType>
-    friend MatrixEpetra<DType> * RAP(const MatrixEpetra<DType> & R, const MatrixEpetra<DType> & A, const MatrixEpetra<DType> & P);
+    friend MatrixEpetra<DType>* RAP (const MatrixEpetra<DType>& R, const MatrixEpetra<DType>& A, const MatrixEpetra<DType>& P);
 
     //! PtAP matrix matrix multiplication result = Pt * A * P
     //! User is responsible to wrap the row pointer returned by this method with his favorite pointer
     template <typename DType>
-    friend MatrixEpetra<DType> * PtAP(const MatrixEpetra<DType> & A, const MatrixEpetra<DType> & P);
+    friend MatrixEpetra<DType>* PtAP (const MatrixEpetra<DType>& A, const MatrixEpetra<DType>& P);
     //@}
 private:
 
@@ -577,50 +592,50 @@ private:
 // Constructors & Destructor
 // ===================================================
 template <typename DataType>
-MatrixEpetra<DataType>::MatrixEpetra( const MapEpetra& map, const Epetra_CrsGraph& graph, bool ignoreNonLocalValues ) :
-    M_map       ( new MapEpetra( map ) ),
-    M_epetraCrs ( new matrix_type( Copy, graph, ignoreNonLocalValues ) )
+MatrixEpetra<DataType>::MatrixEpetra ( const MapEpetra& map, const Epetra_CrsGraph& graph, bool ignoreNonLocalValues ) :
+    M_map       ( new MapEpetra ( map ) ),
+    M_epetraCrs ( new matrix_type ( Copy, graph, ignoreNonLocalValues ) )
 {
 
 }
 
 template <typename DataType>
-MatrixEpetra<DataType>::MatrixEpetra( const MapEpetra& map, Int numEntries ) :
-    M_map       ( new MapEpetra( map ) ),
-    M_epetraCrs ( new matrix_type( Copy, *M_map->map( Unique ), numEntries, false) )
+MatrixEpetra<DataType>::MatrixEpetra ( const MapEpetra& map, Int numEntries ) :
+    M_map       ( new MapEpetra ( map ) ),
+    M_epetraCrs ( new matrix_type ( Copy, *M_map->map ( Unique ), numEntries, false) )
 {
 
 }
 
 template <typename DataType>
-MatrixEpetra<DataType>::MatrixEpetra( const MatrixEpetra& matrix ) :
-        M_map      ( matrix.M_map ),
-        M_domainMap( matrix.M_domainMap ),
-        M_rangeMap ( matrix.M_rangeMap ),
-        M_epetraCrs( new matrix_type( *matrix.M_epetraCrs ) )
+MatrixEpetra<DataType>::MatrixEpetra ( const MatrixEpetra& matrix ) :
+    M_map      ( matrix.M_map ),
+    M_domainMap ( matrix.M_domainMap ),
+    M_rangeMap ( matrix.M_rangeMap ),
+    M_epetraCrs ( new matrix_type ( *matrix.M_epetraCrs ) )
 {
 
 }
 
 template <typename DataType>
-MatrixEpetra<DataType>::MatrixEpetra( const MatrixEpetra& matrix, const UInt reduceToProc ) :
-    M_map      ( matrix.getMap().createRootMap( reduceToProc ) ),
-    M_epetraCrs( new matrix_type( Copy, *M_map->map( Unique ),
-                                  numEntries( matrix.M_epetraCrs->Map().Comm().MyPID() == reduceToProc ) * 20,
-                                  false ) )
+MatrixEpetra<DataType>::MatrixEpetra ( const MatrixEpetra& matrix, const UInt reduceToProc ) :
+    M_map      ( matrix.getMap().createRootMap ( reduceToProc ) ),
+    M_epetraCrs ( new matrix_type ( Copy, *M_map->map ( Unique ),
+                                    numEntries ( matrix.M_epetraCrs->Map().Comm().MyPID() == reduceToProc ) * 20,
+                                    false ) )
 {
-    Epetra_Export reducedExport( M_epetraCrs->Map(), matrix.M_epetraCrs->Map() );
-    M_epetraCrs->Import( *matrix.M_epetraCrs, reducedExport, Add );
+    Epetra_Export reducedExport ( M_epetraCrs->Map(), matrix.M_epetraCrs->Map() );
+    M_epetraCrs->Import ( *matrix.M_epetraCrs, reducedExport, Add );
 
-    if (M_epetraCrs->Filled())
+    if (M_epetraCrs->Filled() )
     {
-        M_domainMap = matrix.getDomainMap().createRootMap(reduceToProc);
-        M_rangeMap  = matrix.getRangeMap().createRootMap(reduceToProc);
+        M_domainMap = matrix.getDomainMap().createRootMap (reduceToProc);
+        M_rangeMap  = matrix.getRangeMap().createRootMap (reduceToProc);
     }
 }
 
 template <typename DataType>
-MatrixEpetra<DataType>::MatrixEpetra( matrix_ptrtype CRSMatrixPtr ):
+MatrixEpetra<DataType>::MatrixEpetra ( matrix_ptrtype CRSMatrixPtr ) :
     M_map( ),
     M_domainMap(),
     M_rangeMap()
@@ -629,8 +644,8 @@ MatrixEpetra<DataType>::MatrixEpetra( matrix_ptrtype CRSMatrixPtr ):
 }
 
 template <typename DataType>
-MatrixEpetra<DataType>::MatrixEpetra(const MapEpetra& map, matrix_ptrtype CRSMatrixPtr ):
-    M_map( new MapEpetra(map) ),
+MatrixEpetra<DataType>::MatrixEpetra (const MapEpetra& map, matrix_ptrtype CRSMatrixPtr ) :
+    M_map ( new MapEpetra (map) ),
     M_domainMap(),
     M_rangeMap()
 {
@@ -646,18 +661,18 @@ template <typename DataType>
 MatrixEpetra<DataType>&
 MatrixEpetra<DataType>::operator += ( const MatrixEpetra& matrix )
 {
-    EpetraExt::MatrixMatrix::Add( *matrix.matrixPtr(), false, 1., *this->matrixPtr(), 1. );
+    EpetraExt::MatrixMatrix::Add ( *matrix.matrixPtr(), false, 1., *this->matrixPtr(), 1. );
 
     return *this;
 }
 
 template<typename DataType>
-MatrixEpetra<DataType>&  MatrixEpetra<DataType>::operator=( const MatrixEpetra& matrix )
+MatrixEpetra<DataType>&  MatrixEpetra<DataType>::operator= ( const MatrixEpetra& matrix )
 {
     M_map        = matrix.M_map;
     M_domainMap  = matrix.M_domainMap;
     M_rangeMap   = matrix.M_rangeMap;
-    *M_epetraCrs = *( matrix.M_epetraCrs );
+    *M_epetraCrs = * ( matrix.M_epetraCrs );
 
     return *this;
 }
@@ -666,15 +681,15 @@ template<typename DataType>
 typename MatrixEpetra<DataType>::vector_type
 MatrixEpetra<DataType>::operator * ( const vector_type& vector ) const
 {
-    ASSERT_PRE( M_epetraCrs->Filled(),
-                "MatrixEpetra::Operator*: globalAssemble(...) should be called first" );
-    ASSERT_PRE( vector.map().mapsAreSimilar(*M_domainMap),
-                "MatrixEpetra::Operator*: the map of vec is not the same of domainMap" );
-    ASSERT_PRE( M_rangeMap.get(),
-                "MatrixEpetra::Operator*: the rangeMap is not set" );
+    ASSERT_PRE ( M_epetraCrs->Filled(),
+                 "MatrixEpetra::Operator*: globalAssemble(...) should be called first" );
+    ASSERT_PRE ( vector.map().mapsAreSimilar (*M_domainMap),
+                 "MatrixEpetra::Operator*: the map of vec is not the same of domainMap" );
+    ASSERT_PRE ( M_rangeMap.get(),
+                 "MatrixEpetra::Operator*: the rangeMap is not set" );
 
-     vector_type result(*M_rangeMap);
-    M_epetraCrs->Apply( vector.epetraVector(), result.epetraVector() );
+    vector_type result (*M_rangeMap);
+    M_epetraCrs->Apply ( vector.epetraVector(), result.epetraVector() );
 
     return result;
 }
@@ -684,7 +699,7 @@ template<typename DataType>
 MatrixEpetra<DataType>&
 MatrixEpetra<DataType>::operator *= ( const DataType value )
 {
-    M_epetraCrs->Scale( value );
+    M_epetraCrs->Scale ( value );
     return *this;
 }
 
@@ -692,7 +707,7 @@ template<typename DataType>
 MatrixEpetra<DataType>
 MatrixEpetra<DataType>::operator * ( const DataType scalar ) const
 {
-    MatrixEpetra<DataType> matrix( *this );
+    MatrixEpetra<DataType> matrix ( *this );
     return matrix *= scalar;
 }
 
@@ -705,10 +720,10 @@ void MatrixEpetra<DataType>::openCrsMatrix()
     if ( M_epetraCrs->Filled() )
     {
         Int meanNumEntries = this->meanNumEntries();
-        matrix_ptrtype tmp( M_epetraCrs );
-        M_epetraCrs.reset( new matrix_type( Copy, M_epetraCrs->RowMap(), meanNumEntries ) );
+        matrix_ptrtype tmp ( M_epetraCrs );
+        M_epetraCrs.reset ( new matrix_type ( Copy, M_epetraCrs->RowMap(), meanNumEntries ) );
 
-        EpetraExt::MatrixMatrix::Add( *tmp, false, 1., *M_epetraCrs, 1. );
+        EpetraExt::MatrixMatrix::Add ( *tmp, false, 1., *M_epetraCrs, 1. );
 
         M_domainMap.reset();
         M_rangeMap.reset();
@@ -729,9 +744,9 @@ void MatrixEpetra<DataType>::removeZeros()
         Int NumEntries;
         Real* Values;
         Int* Indices;
-        Int row(0);
+        Int row (0);
 
-        for ( Int i(0); i<tmp->NumGlobalRows(); ++i )
+        for ( Int i (0); i < tmp->NumGlobalRows(); ++i )
         {
             row = tmp->LRID( i );
             // Check if the row belong to this process
@@ -739,15 +754,15 @@ void MatrixEpetra<DataType>::removeZeros()
                 continue;
             tmp->ExtractMyRowView( row, NumEntries, Values, Indices );
 
-            std::vector<Int> Indices2( NumEntries );
-            std::vector<Real> Values2( NumEntries );
-            Int NumEntries2(0);
+            std::vector<Int> Indices2 ( NumEntries );
+            std::vector<Real> Values2 ( NumEntries );
+            Int NumEntries2 (0);
 
-            for (Int j(0); j<NumEntries; ++j)
+            for (Int j (0); j < NumEntries; ++j)
             {
                 if (Values[j] != 0.0)
                 {
-                    Indices2[NumEntries2] = tmp->GCID(Indices[j]);
+                    Indices2[NumEntries2] = tmp->GCID (Indices[j]);
                     Values2[NumEntries2]  = Values[j];
                     NumEntries2++;
                 }
@@ -760,116 +775,130 @@ void MatrixEpetra<DataType>::removeZeros()
 }
 
 template <typename DataType>
-void MatrixEpetra<DataType>::swapCrsMatrix( matrix_ptrtype& matrixPtr )
+void MatrixEpetra<DataType>::swapCrsMatrix ( matrix_ptrtype& matrixPtr )
 {
-    M_epetraCrs.swap( matrixPtr );
+    M_epetraCrs.swap ( matrixPtr );
 }
 
 
 template <typename DataType>
-void MatrixEpetra<DataType>::swapCrsMatrix( MatrixEpetra<DataType>& matrix )
+void MatrixEpetra<DataType>::swapCrsMatrix ( MatrixEpetra<DataType>& matrix )
 {
-    M_epetraCrs.swap( matrix.M_epetraCrs );
+    M_epetraCrs.swap ( matrix.M_epetraCrs );
 }
 
 template <typename DataType>
-Int MatrixEpetra<DataType>::multiply( bool transposeCurrent,
-                                      const MatrixEpetra<DataType> &matrix, bool transposeMatrix,
-                                      MatrixEpetra<DataType> &result, bool callFillCompleteOnResult ) const
+Int MatrixEpetra<DataType>::multiply ( bool transposeCurrent,
+                                       const MatrixEpetra<DataType>& matrix, bool transposeMatrix,
+                                       MatrixEpetra<DataType>& result, bool callFillCompleteOnResult ) const
 {
-    Int errCode = EpetraExt::MatrixMatrix::Multiply( *M_epetraCrs, transposeCurrent,
-                                                     *matrix.matrixPtr(), transposeMatrix,
-                                                     *result.matrixPtr(), false );
+    Int errCode = EpetraExt::MatrixMatrix::Multiply ( *M_epetraCrs, transposeCurrent,
+                                                      *matrix.matrixPtr(), transposeMatrix,
+                                                      *result.matrixPtr(), false );
     if (callFillCompleteOnResult)
     {
         boost::shared_ptr<const MapEpetra> domainMap, rangeMap;
-        if(transposeCurrent)
+        if (transposeCurrent)
+        {
             rangeMap = M_domainMap;
+        }
         else
+        {
             rangeMap = M_rangeMap;
+        }
 
-        if(transposeMatrix)
+        if (transposeMatrix)
+        {
             domainMap = matrix.M_rangeMap;
+        }
         else
+        {
             domainMap  = matrix.M_domainMap;
+        }
 
-        result.globalAssemble(domainMap, rangeMap);
+        result.globalAssemble (domainMap, rangeMap);
     }
 
     return errCode;
 }
 
 template <typename DataType>
-Int MatrixEpetra<DataType>::multiply( bool transposeCurrent, const vector_type& vector1, vector_type &vector2 ) const
+Int MatrixEpetra<DataType>::multiply ( bool transposeCurrent, const vector_type& vector1, vector_type& vector2 ) const
 {
-    ASSERT_PRE( M_epetraCrs->Filled(),
-                "MatrixEpetra<DataType>::Multiply: GlobalAssemble(...) must be called first" );
-    ASSERT_PRE( transposeCurrent ? vector1.map().mapsAreSimilar(*M_rangeMap) : vector1.map().mapsAreSimilar(*M_domainMap),
-                "MatrixEpetra<DataType>::Multiply: x map is different from M_domainMap (or M_rangeMap if transposeCurrent == true)" );
-    ASSERT_PRE( transposeCurrent ? vector2.map().mapsAreSimilar(*M_domainMap) : vector2.map().mapsAreSimilar(*M_rangeMap),
-                "MatrixEpetra<DataType>::Multiply: y map is different from M_rangeMap (or M_domainMap if transposeCurrent == true)" );
+    ASSERT_PRE ( M_epetraCrs->Filled(),
+                 "MatrixEpetra<DataType>::Multiply: GlobalAssemble(...) must be called first" );
+    ASSERT_PRE ( transposeCurrent ? vector1.map().mapsAreSimilar (*M_rangeMap) : vector1.map().mapsAreSimilar (*M_domainMap),
+                 "MatrixEpetra<DataType>::Multiply: x map is different from M_domainMap (or M_rangeMap if transposeCurrent == true)" );
+    ASSERT_PRE ( transposeCurrent ? vector2.map().mapsAreSimilar (*M_domainMap) : vector2.map().mapsAreSimilar (*M_rangeMap),
+                 "MatrixEpetra<DataType>::Multiply: y map is different from M_rangeMap (or M_domainMap if transposeCurrent == true)" );
 
 
-    return M_epetraCrs->Multiply( transposeCurrent, vector1.epetraVector(), vector2.epetraVector() );
+    return M_epetraCrs->Multiply ( transposeCurrent, vector1.epetraVector(), vector2.epetraVector() );
 }
 
 template <typename DataType>
-void MatrixEpetra<DataType>::addDyadicProduct( const vector_type& uniqueVector1, const vector_type& uniqueVector2 )
+void MatrixEpetra<DataType>::addDyadicProduct ( const vector_type& uniqueVector1, const vector_type& uniqueVector2 )
 {
     // Check if the matrix is open
     if ( M_epetraCrs->Filled() )
     {
         if ( M_epetraCrs->Comm().MyPID() == 0 )
+        {
             std::cout << "ERROR: Matrix already filled: cannot add dyadic product!" << std::endl;
+        }
         return;
     }
 
     // Build a repeated list of globalElements
-    std::vector<Int> myGlobalElements( uniqueVector2.size() );
+    std::vector<Int> myGlobalElements ( uniqueVector2.size() );
     for ( UInt i = 0 ; i < myGlobalElements.size() ; ++i )
+    {
         myGlobalElements[i] = i;
+    }
 
     // Build a repeated map
-    MapEpetra repeatedMap( -1, static_cast< Int > ( myGlobalElements.size() ), &myGlobalElements[0], uniqueVector2.map().commPtr() );
+    MapEpetra repeatedMap ( -1, static_cast< Int > ( myGlobalElements.size() ), &myGlobalElements[0], uniqueVector2.map().commPtr() );
 
     // Create a fully repeated copy of uniqueVector2
-    VectorEpetra repeatedVector2( repeatedMap, Repeated );
+    VectorEpetra repeatedVector2 ( repeatedMap, Repeated );
     repeatedVector2 = uniqueVector2;
 
     // Fill the matrix with the result of the dyadic Product
-    for( Int row(0); row < M_epetraCrs->NumMyRows(); ++row )
-        for( Int column(0); column < M_epetraCrs->NumGlobalCols(); ++column )
-            addToCoefficient( M_epetraCrs->GRID( row ), column, uniqueVector1[M_epetraCrs->GRID( row )] * repeatedVector2[column] );
+    for ( Int row (0); row < M_epetraCrs->NumMyRows(); ++row )
+        for ( Int column (0); column < M_epetraCrs->NumGlobalCols(); ++column )
+        {
+            addToCoefficient ( M_epetraCrs->GRID ( row ), column, uniqueVector1[M_epetraCrs->GRID ( row )] * repeatedVector2[column] );
+        }
 }
 
 template <typename DataType>
 void MatrixEpetra<DataType>::add ( const DataType scalar, const MatrixEpetra& matrix )
 {
-    EpetraExt::MatrixMatrix::Add( *matrix.matrixPtr(), false, scalar, *this->matrixPtr(), 1. );
+    EpetraExt::MatrixMatrix::Add ( *matrix.matrixPtr(), false, scalar, *this->matrixPtr(), 1. );
 }
 
 template <typename DataType>
 boost::shared_ptr<MatrixEpetra<DataType> > MatrixEpetra<DataType>::transpose( )
 {
-    ASSERT_PRE(M_epetraCrs->Filled(),"The transpose can be formed only if the matrix is already filled!");
+    ASSERT_PRE (M_epetraCrs->Filled(), "The transpose can be formed only if the matrix is already filled!");
     boost::shared_ptr<Epetra_FECrsMatrix> transposedFE;
-    transposedFE.reset(new Epetra_FECrsMatrix(Copy,M_epetraCrs->OperatorDomainMap(),M_epetraCrs->OperatorRangeMap(),0,false));
+    transposedFE.reset (new Epetra_FECrsMatrix (Copy, M_epetraCrs->OperatorDomainMap(), M_epetraCrs->OperatorRangeMap(), 0, false) );
     EpetraExt::RowMatrix_Transpose transposer;
-    *dynamic_cast<Epetra_CrsMatrix*>(&(*transposedFE)) = dynamic_cast<Epetra_CrsMatrix&>(transposer(*M_epetraCrs));
+    *dynamic_cast<Epetra_CrsMatrix*> (& (*transposedFE) ) = dynamic_cast<Epetra_CrsMatrix&> (transposer (*M_epetraCrs) );
     transposedFE->FillComplete();
-    boost::shared_ptr<MatrixEpetra<DataType> > transposedMatrix(new MatrixEpetra<DataType>(*M_domainMap));
-    transposedMatrix->globalAssemble(M_rangeMap,M_domainMap);
+    boost::shared_ptr<MatrixEpetra<DataType> > transposedMatrix (new MatrixEpetra<DataType> (*M_domainMap) );
+    transposedMatrix->globalAssemble (M_rangeMap, M_domainMap);
     transposedMatrix->matrixPtr() = transposedFE;
 
     return transposedMatrix;
 }
 
 template <typename DataType>
-void MatrixEpetra<DataType>::diagonalize( std::vector<UInt> rVec, DataType const coefficient, UInt offset )
+void MatrixEpetra<DataType>::diagonalize ( std::vector<UInt> rVec, DataType const coefficient, UInt offset )
 {
 
-    const Epetra_Comm&  Comm( M_epetraCrs->Comm() );
-    Int numProcs( Comm.NumProc() );
+    const Epetra_Comm&  Comm ( M_epetraCrs->Comm() );
+    Int numProcs ( Comm.NumProc() );
     Int MyPID   ( Comm.MyPID() );
     Int i;
 
@@ -882,11 +911,11 @@ void MatrixEpetra<DataType>::diagonalize( std::vector<UInt> rVec, DataType const
 
 
     // loop on all proc
-    for ( Int p(0); p < numProcs; p++ )
+    for ( Int p (0); p < numProcs; p++ )
     {
-        Int sizeVec( rVec.size() );
+        Int sizeVec ( rVec.size() );
 
-        Comm.Broadcast( &sizeVec, 1, p );
+        Comm.Broadcast ( &sizeVec, 1, p );
 
         if ( p == MyPID )
         {
@@ -899,10 +928,12 @@ void MatrixEpetra<DataType>::diagonalize( std::vector<UInt> rVec, DataType const
 
         r = (Int*) Ur;
 
-        Comm.Broadcast( r, sizeVec, p );
+        Comm.Broadcast ( r, sizeVec, p );
 
-        for ( i=0; i < sizeVec; i++ )
-            diagonalize( Ur[i], coefficient, offset );
+        for ( i = 0; i < sizeVec; i++ )
+        {
+            diagonalize ( Ur[i], coefficient, offset );
+        }
 
         if ( p != MyPID )
         {
@@ -914,24 +945,25 @@ void MatrixEpetra<DataType>::diagonalize( std::vector<UInt> rVec, DataType const
 }
 
 template <typename DataType>
-void MatrixEpetra<DataType>::diagonalize( UInt const row,
-                                          DataType const coefficient,
-                                          UInt offset )
+void MatrixEpetra<DataType>::diagonalize ( UInt const row,
+                                           DataType const coefficient,
+                                           UInt offset )
 {
 
     if ( !M_epetraCrs->Filled() )
-    { // if not filled, I do not know how to diagonalize.
-        ERROR_MSG( "if not filled, I do not know how to diagonalize\n" );
+    {
+        // if not filled, I do not know how to diagonalize.
+        ERROR_MSG ( "if not filled, I do not know how to diagonalize\n" );
     }
 
-    const Epetra_Map& rowMap( M_epetraCrs->RowMap() );
-    const Epetra_Map& colMap( M_epetraCrs->ColMap() );
+    const Epetra_Map& rowMap ( M_epetraCrs->RowMap() );
+    const Epetra_Map& colMap ( M_epetraCrs->ColMap() );
 
 
-    Int myCol = colMap.LID( row + offset );
+    Int myCol = colMap.LID ( row + offset );
 
     // row: if r is mine, zero out values
-    Int myRow = rowMap.LID( row + offset );
+    Int myRow = rowMap.LID ( row + offset );
 
     if ( myRow >= 0 )  // I have this row
     {
@@ -939,30 +971,30 @@ void MatrixEpetra<DataType>::diagonalize( UInt const row,
         Real* Values;
         Int* Indices;
 
-        M_epetraCrs->ExtractMyRowView( myRow, NumEntries, Values, Indices );
+        M_epetraCrs->ExtractMyRowView ( myRow, NumEntries, Values, Indices );
 
-        for (Int i(0); i <  NumEntries; i++)
+        for (Int i (0); i <  NumEntries; i++)
         {
             Values[i] = 0;
         }
 
-        DataType coeff( coefficient );
-        M_epetraCrs->ReplaceMyValues( myRow, 1, &coeff, &myCol ); // A(r,r) = coefficient
+        DataType coeff ( coefficient );
+        M_epetraCrs->ReplaceMyValues ( myRow, 1, &coeff, &myCol ); // A(r,r) = coefficient
     }
 
 }
 
 template <typename DataType>
-void MatrixEpetra<DataType>::diagonalize( std::vector<UInt> rVec,
-                                          DataType const coefficient,
-                                          vector_type &rhs,
-                                          std::vector<DataType> datumVec,
-                                          UInt offset )
+void MatrixEpetra<DataType>::diagonalize ( std::vector<UInt> rVec,
+                                           DataType const coefficient,
+                                           vector_type& rhs,
+                                           std::vector<DataType> datumVec,
+                                           UInt offset )
 {
 
 
-    const Epetra_Comm&  Comm( M_epetraCrs->Comm() );
-    Int numProcs( Comm.NumProc() );
+    const Epetra_Comm&  Comm ( M_epetraCrs->Comm() );
+    Int numProcs ( Comm.NumProc() );
     Int MyPID   ( Comm.MyPID() );
     Int i;
 
@@ -987,26 +1019,26 @@ void MatrixEpetra<DataType>::diagonalize( std::vector<UInt> rVec,
     std::map<Int, Real>           localBC;
     std::map<Int, Real>::iterator im;
 
-    const Epetra_Map& rowMap( M_epetraCrs->RowMap() );
+    const Epetra_Map& rowMap ( M_epetraCrs->RowMap() );
 
 
     //Comm.Barrier();
     // we want to know which IDs are our or not
 
-    for ( Int ii = 0; ii < (Int)rVec.size(); ++ii )
+    for ( Int ii = 0; ii < (Int) rVec.size(); ++ii )
     {
-        Int lID = rowMap.LID(rVec[ii]);
-        if ( !( lID < 0 ) )
+        Int lID = rowMap.LID (rVec[ii]);
+        if ( ! ( lID < 0 ) )
         {
 
-            localIDs.push_back( rVec[ii] );
-            localData.push_back( datumVec[ii] );
-            localBC.insert( std::pair<Int, Real>( rVec[ii], datumVec[ii] ) );
+            localIDs.push_back ( rVec[ii] );
+            localData.push_back ( datumVec[ii] );
+            localBC.insert ( std::pair<Int, Real> ( rVec[ii], datumVec[ii] ) );
         }
         else
         {
-            remoteIDs.push_back( rVec[ii] );
-            remoteData.push_back( datumVec[ii] );
+            remoteIDs.push_back ( rVec[ii] );
+            remoteData.push_back ( datumVec[ii] );
         }
     }
 
@@ -1019,71 +1051,71 @@ void MatrixEpetra<DataType>::diagonalize( std::vector<UInt> rVec,
     Int* PIDList = new Int[numIDs];
     Int* LIDList = new Int[numIDs];
 
-    rowMap.RemoteIDList( numIDs,
-                         &remoteIDs[0],
-                         PIDList,
-                         LIDList );
+    rowMap.RemoteIDList ( numIDs,
+                          &remoteIDs[0],
+                          PIDList,
+                          LIDList );
 
     std::vector< std::vector<Int> > procToID  ( Comm.NumProc() );
-    std::vector< std::vector<Real> > procToData( Comm.NumProc() );
+    std::vector< std::vector<Real> > procToData ( Comm.NumProc() );
 
     for ( Int ii = 0; ii < numIDs; ++ii )
     {
         Int pi = PIDList[ii];
-        procToID[pi].push_back( remoteIDs[ii] );
-        procToData[pi].push_back( remoteData[ii] );
+        procToID[pi].push_back ( remoteIDs[ii] );
+        procToData[pi].push_back ( remoteData[ii] );
     }
 
     // then, we send all the nodes where they belong
 
-    const Epetra_MpiComm* comm = dynamic_cast<Epetra_MpiComm const*>( &Comm );
+    const Epetra_MpiComm* comm = dynamic_cast<Epetra_MpiComm const*> ( &Comm );
 
-    assert( comm != 0 );
+    assert ( comm != 0 );
 
-    for ( Int ii = 0; ii < (Int)procToID.size(); ++ii )
+    for ( Int ii = 0; ii < (Int) procToID.size(); ++ii )
     {
         if ( ii != me )
         {
             Int length;
             length = procToID[ii].size();
-            MPI_Send( &length, 1, MPI_INT, ii, 666, comm->Comm() );
+            MPI_Send ( &length, 1, MPI_INT, ii, 666, comm->Comm() );
             if ( length > 0 )
             {
-                MPI_Send( &procToID[ii][0], length, MPI_INT, ii, 667, comm->Comm() );
-                MPI_Send( &procToData[ii][0], length, MPI_DOUBLE, ii, 668, comm->Comm() );
+                MPI_Send ( &procToID[ii][0], length, MPI_INT, ii, 667, comm->Comm() );
+                MPI_Send ( &procToData[ii][0], length, MPI_DOUBLE, ii, 668, comm->Comm() );
             }
         }
 
     }
 
-    for ( Int ii = 0; ii < (Int)procToID.size(); ++ii )
+    for ( Int ii = 0; ii < (Int) procToID.size(); ++ii )
     {
         if ( ii != me )
         {
             Int length;
             MPI_Status status;
-            MPI_Recv( &length, 1, MPI_INT, ii, 666, comm->Comm(), &status );
+            MPI_Recv ( &length, 1, MPI_INT, ii, 666, comm->Comm(), &status );
 
 
             if ( length > 0 )
             {
                 Int* bufferID = new Int[length];
-                Int* ptrID(0);//    = new Int[length];
+                Int* ptrID (0); //    = new Int[length];
 
-                MPI_Recv( bufferID, length, MPI_INT, ii, 667, comm->Comm(), &status );
+                MPI_Recv ( bufferID, length, MPI_INT, ii, 667, comm->Comm(), &status );
 
                 ptrID = bufferID;
 
                 Real* bufferData = new Real[length];
-                Real* ptrData(0);
+                Real* ptrData (0);
 
-                MPI_Recv( bufferData, length, MPI_DOUBLE, ii, 668, comm->Comm(), &status );
+                MPI_Recv ( bufferData, length, MPI_DOUBLE, ii, 668, comm->Comm(), &status );
                 ptrData = bufferData;
 
                 for ( Int ii = 0; ii < length; ++ii, ++ptrID, ++ptrData )
                 {
-                    localBC.insert( std::pair<Int, Real>
-                                    ( *ptrID, *ptrData ) );
+                    localBC.insert ( std::pair<Int, Real>
+                                     ( *ptrID, *ptrData ) );
                 }
 
                 delete[] bufferID;
@@ -1099,7 +1131,7 @@ void MatrixEpetra<DataType>::diagonalize( std::vector<UInt> rVec,
 
     for ( im = localBC.begin(); im != localBC.end(); ++im )
     {
-        diagonalize( im->first, coefficient, rhs, im->second, offset );
+        diagonalize ( im->first, coefficient, rhs, im->second, offset );
     }
 
     return;
@@ -1107,16 +1139,16 @@ void MatrixEpetra<DataType>::diagonalize( std::vector<UInt> rVec,
 
 
     // loop on all proc
-    for ( Int p(0); p < numProcs; p++ )
+    for ( Int p (0); p < numProcs; p++ )
     {
-        Int sizeVec(rVec.size());
-        if ( sizeVec != Int(datumVec.size()))
+        Int sizeVec (rVec.size() );
+        if ( sizeVec != Int (datumVec.size() ) )
         {
             // vectors must be of the same size
-            ERROR_MSG( "diagonalize: vectors must be of the same size\n" );
+            ERROR_MSG ( "diagonalize: vectors must be of the same size\n" );
         }
 
-        Comm.Broadcast( &sizeVec, 1, p );
+        Comm.Broadcast ( &sizeVec, 1, p );
 
         if ( p == MyPID )
         {
@@ -1131,11 +1163,13 @@ void MatrixEpetra<DataType>::diagonalize( std::vector<UInt> rVec,
 
         r = (Int*) Ur;
 
-        Comm.Broadcast( r,    sizeVec, p );
-        Comm.Broadcast( datum,sizeVec, p );
+        Comm.Broadcast ( r,    sizeVec, p );
+        Comm.Broadcast ( datum, sizeVec, p );
 
-        for( i=0; i < sizeVec; i++ )
-            diagonalize( Ur[i], coefficient, rhs, datum[i], offset );
+        for ( i = 0; i < sizeVec; i++ )
+        {
+            diagonalize ( Ur[i], coefficient, rhs, datum[i], offset );
+        }
 
         if ( p != MyPID )
         {
@@ -1148,38 +1182,40 @@ void MatrixEpetra<DataType>::diagonalize( std::vector<UInt> rVec,
 }
 
 template <typename DataType>
-void MatrixEpetra<DataType>::diagonalize( UInt const row,
-                                          DataType const coefficient,
-                                          vector_type &rhs,
-                                          DataType datum,
-                                          UInt offset )
+void MatrixEpetra<DataType>::diagonalize ( UInt const row,
+                                           DataType const coefficient,
+                                           vector_type& rhs,
+                                           DataType datum,
+                                           UInt offset )
 {
 
     if ( !M_epetraCrs->Filled() )
     {
         // if not filled, I do not know how to diagonalize.
-        ERROR_MSG( "if not filled, I do not know how to diagonalize\n" );
+        ERROR_MSG ( "if not filled, I do not know how to diagonalize\n" );
     }
 
-    const Epetra_Map& rowMap( M_epetraCrs->RowMap() );
-    const Epetra_Map& colMap( M_epetraCrs->ColMap() );
+    const Epetra_Map& rowMap ( M_epetraCrs->RowMap() );
+    const Epetra_Map& colMap ( M_epetraCrs->ColMap() );
 
 
-    Int myCol = colMap.LID( row + offset );
+    Int myCol = colMap.LID ( row + offset );
 
 #ifdef EPETRAMATRIX_SYMMETRIC_DIAGONALIZE
     if ( myCol >= 0 )  // I have this column
     {
-        Real zero(0);
-        for ( Int i(0); i < rowMap.NumMyElements(); i++ )
+        Real zero (0);
+        for ( Int i (0); i < rowMap.NumMyElements(); i++ )
             // Note that if a value is not already present for the specified location in the matrix,
             // the input value will be ignored and a positive warning code will be returned.
-            M_epetraCrs->ReplaceMyValues(i,1, &zero, &myCol);
+        {
+            M_epetraCrs->ReplaceMyValues (i, 1, &zero, &myCol);
+        }
     }
 #endif
 
     // row: if r is mine, zero out values
-    Int myRow = rowMap.LID( row + offset );
+    Int myRow = rowMap.LID ( row + offset );
 
     if ( myRow >= 0 )  // I have this row
     {
@@ -1187,16 +1223,16 @@ void MatrixEpetra<DataType>::diagonalize( UInt const row,
         Real* Values;
         Int* Indices;
 
-        M_epetraCrs->ExtractMyRowView( myRow, NumEntries, Values, Indices );
+        M_epetraCrs->ExtractMyRowView ( myRow, NumEntries, Values, Indices );
 
-        for ( Int i(0); i <  NumEntries; i++ )
+        for ( Int i (0); i <  NumEntries; i++ )
         {
             Values[i] = 0;
         }
 
-        DataType coeff( coefficient );
+        DataType coeff ( coefficient );
 
-        M_epetraCrs->ReplaceMyValues( myRow, 1, &coeff, &myCol ); // A(r,r) = coeff
+        M_epetraCrs->ReplaceMyValues ( myRow, 1, &coeff, &myCol ); // A(r,r) = coeff
         rhs[row + offset] = coefficient * datum; // correct right hand side for row r
 
     }
@@ -1204,7 +1240,7 @@ void MatrixEpetra<DataType>::diagonalize( UInt const row,
 }
 
 template <typename DataType>
-void MatrixEpetra<DataType>::matrixMarket( std::string const &fileName, const bool headers )
+void MatrixEpetra<DataType>::matrixMarket ( std::string const& fileName, const bool headers )
 {
     // Purpose: Matlab dumping and spy
     std::string name = fileName;
@@ -1212,16 +1248,16 @@ void MatrixEpetra<DataType>::matrixMarket( std::string const &fileName, const bo
 
     name = fileName + ".mtx";
 
-    EpetraExt::RowMatrixToMatrixMarketFile( name.c_str(),
-                                            *M_epetraCrs,
-                                            name.c_str(),
-                                            desc.c_str(),
-                                            headers
-                                          );
+    EpetraExt::RowMatrixToMatrixMarketFile ( name.c_str(),
+                                             *M_epetraCrs,
+                                             name.c_str(),
+                                             desc.c_str(),
+                                             headers
+                                           );
 }
 
 template <typename DataType>
-void MatrixEpetra<DataType>::spy( std::string const &fileName )
+void MatrixEpetra<DataType>::spy ( std::string const& fileName )
 {
     // Purpose: Matlab dumping and spy
     std::string name = fileName, uti = " , ";
@@ -1231,25 +1267,25 @@ void MatrixEpetra<DataType>::spy( std::string const &fileName )
     myStream << me;
     name = fileName + ".m";
 
-    EpetraExt::RowMatrixToMatlabFile( name.c_str(), *M_epetraCrs );
+    EpetraExt::RowMatrixToMatlabFile ( name.c_str(), *M_epetraCrs );
 
 }
 
 #ifdef HAVE_HDF5
 template <typename DataType>
-void MatrixEpetra<DataType>::exportToHDF5( std::string const &fileName, std::string const &matrixName, bool const &truncate )
+void MatrixEpetra<DataType>::exportToHDF5 ( std::string const& fileName, std::string const& matrixName, bool const& truncate )
 {
-    EpetraExt::HDF5 HDF5( M_epetraCrs->Comm() );
+    EpetraExt::HDF5 HDF5 ( M_epetraCrs->Comm() );
 
     if ( truncate )
     {
         // Create and open the file / Truncate and open the file
-        HDF5.Create( ( fileName + ".h5" ).data() );
+        HDF5.Create ( ( fileName + ".h5" ).data() );
     }
     else
     {
         // Open an existing file without truncating it
-        HDF5.Open( ( fileName + ".h5" ).data() );
+        HDF5.Open ( ( fileName + ".h5" ).data() );
     }
 
     // Check if the file is created
@@ -1260,7 +1296,7 @@ void MatrixEpetra<DataType>::exportToHDF5( std::string const &fileName, std::str
     }
 
     // Save the matrix into the file
-    HDF5.Write( matrixName.data(), *M_epetraCrs );
+    HDF5.Write ( matrixName.data(), *M_epetraCrs );
 
     // Close the file
     HDF5.Close();
@@ -1268,12 +1304,12 @@ void MatrixEpetra<DataType>::exportToHDF5( std::string const &fileName, std::str
 } // exportToHDF5
 
 template <typename DataType>
-void MatrixEpetra<DataType>::importFromHDF5( std::string const &fileName, std::string const &matrixName )
+void MatrixEpetra<DataType>::importFromHDF5 ( std::string const& fileName, std::string const& matrixName )
 {
-    EpetraExt::HDF5 HDF5( M_epetraCrs->Comm() );
+    EpetraExt::HDF5 HDF5 ( M_epetraCrs->Comm() );
 
     // Open an existing file
-    HDF5.Open( ( fileName + ".h5" ).data() );
+    HDF5.Open ( ( fileName + ".h5" ).data() );
 
     // Check if the file is created
     if ( !HDF5.IsOpen () )
@@ -1283,11 +1319,11 @@ void MatrixEpetra<DataType>::importFromHDF5( std::string const &fileName, std::s
     }
 
     // Read the matrix from the file
-    Epetra_CrsMatrix* importedMatrix(0);
-    HDF5.Read( matrixName.data(), M_epetraCrs->DomainMap(), M_epetraCrs->RangeMap(), importedMatrix );
+    Epetra_CrsMatrix* importedMatrix (0);
+    HDF5.Read ( matrixName.data(), M_epetraCrs->DomainMap(), M_epetraCrs->RangeMap(), importedMatrix );
 
     // Copy the loaded matrix to the member object
-    M_epetraCrs.reset( new matrix_type( *dynamic_cast< Epetra_FECrsMatrix* > ( importedMatrix ) ) );
+    M_epetraCrs.reset ( new matrix_type ( *dynamic_cast< Epetra_FECrsMatrix* > ( importedMatrix ) ) );
 
     // Close the file
     HDF5.Close();
@@ -1296,7 +1332,7 @@ void MatrixEpetra<DataType>::importFromHDF5( std::string const &fileName, std::s
 #endif
 
 template <typename DataType>
-void MatrixEpetra<DataType>::showMe( std::ostream& output ) const
+void MatrixEpetra<DataType>::showMe ( std::ostream& output ) const
 {
     output << "showMe must be implemented for the MatrixEpetra class" << std::endl;
 }
@@ -1314,11 +1350,11 @@ Int MatrixEpetra<DataType>::globalAssemble()
 }
 
 template <typename DataType>
-Int MatrixEpetra<DataType>::globalAssemble( const boost::shared_ptr<const MapEpetra> & domainMap,
-                                            const boost::shared_ptr<const MapEpetra> & rangeMap )
+Int MatrixEpetra<DataType>::globalAssemble ( const boost::shared_ptr<const MapEpetra>& domainMap,
+                                             const boost::shared_ptr<const MapEpetra>& rangeMap )
 {
 
-    if ( !M_epetraCrs->Filled() && domainMap->mapsAreSimilar( *rangeMap) )
+    if ( !M_epetraCrs->Filled() && domainMap->mapsAreSimilar ( *rangeMap) )
     {
         insertZeroDiagonal();
     }
@@ -1326,30 +1362,35 @@ Int MatrixEpetra<DataType>::globalAssemble( const boost::shared_ptr<const MapEpe
 
     M_domainMap = domainMap;
     M_rangeMap  = rangeMap;
-    return  M_epetraCrs->GlobalAssemble( *domainMap->map(Unique), *rangeMap->map(Unique) );
+    return  M_epetraCrs->GlobalAssemble ( *domainMap->map (Unique), *rangeMap->map (Unique) );
 }
 
 template <typename DataType>
 void
-MatrixEpetra<DataType>::insertValueDiagonal( const DataType entry, const MapEpetra& Map, const UInt offset )
+MatrixEpetra<DataType>::insertValueDiagonal ( const DataType entry, const MapEpetra& Map, const UInt offset )
 {
-    for ( Int i=0 ; i<Map.map(Unique)->NumMyElements(); ++i )
+    for ( Int i = 0 ; i < Map.map (Unique)->NumMyElements(); ++i )
     {
-        addToCoefficient( offset + Map.map(Unique)->GID(i) , offset + Map.map(Unique)->GID(i), entry );
+        addToCoefficient ( offset + Map.map (Unique)->GID (i) , offset + Map.map (Unique)->GID (i), entry );
     }
 }
 
 template <typename DataType>
-void MatrixEpetra<DataType>::insertValueDiagonal( const DataType& value, Int from, Int to )
+void MatrixEpetra<DataType>::insertValueDiagonal ( const DataType& value, Int from, Int to )
 {
     if ( M_epetraCrs->Filled() )
     {
         if ( M_epetraCrs->Comm().MyPID() == 0 )
+        {
             std::cout << "Matrix is already filled, it is impossible to insert the diagonal now" << std::endl;
+        }
         return;
     }
 
-    if ( to == from ) return;
+    if ( to == from )
+    {
+        return;
+    }
 
     if ( to < from ) // do all entries
     {
@@ -1360,26 +1401,32 @@ void MatrixEpetra<DataType>::insertValueDiagonal( const DataType& value, Int fro
     Int* p =  M_epetraCrs->RowMap().MyGlobalElements();
     Int ierr;
 
-    for ( Int i(0); i <  M_epetraCrs->RowMap().NumMyElements(); ++i, ++p )
+    for ( Int i (0); i <  M_epetraCrs->RowMap().NumMyElements(); ++i, ++p )
     {
-        if ( *p < from || *p >= to ) continue;
+        if ( *p < from || *p >= to )
+        {
+            continue;
+        }
 
-        ierr = M_epetraCrs->InsertGlobalValues( 1, p, 1, p, &value );
+        ierr = M_epetraCrs->InsertGlobalValues ( 1, p, 1, p, &value );
 
-        if( ierr < 0 ) std::cerr << " error in matrix insertion " << ierr << std::endl;
+        if ( ierr < 0 )
+        {
+            std::cerr << " error in matrix insertion " << ierr << std::endl;
+        }
     }
 }
 
 template <typename DataType>
-void MatrixEpetra<DataType>::insertOneDiagonal( Int from, Int to )
+void MatrixEpetra<DataType>::insertOneDiagonal ( Int from, Int to )
 {
-    insertValueDiagonal( 1.0, from, to );
+    insertValueDiagonal ( 1.0, from, to );
 }
 
 template <typename DataType>
-void MatrixEpetra<DataType>::insertZeroDiagonal( Int from, Int to )
+void MatrixEpetra<DataType>::insertZeroDiagonal ( Int from, Int to )
 {
-    insertValueDiagonal( 0.0, from, to );
+    insertValueDiagonal ( 0.0, from, to );
 }
 
 template <typename DataType>
@@ -1400,71 +1447,73 @@ Real MatrixEpetra<DataType>::normInf() const
 // ===================================================
 template <typename DataType>
 void MatrixEpetra<DataType>::
-setCoefficients( Int const numRows, Int const numColumns,
-                   std::vector<Int> const& rowIndices, std::vector<Int> const& columnIndices,
-                   DataType* const* const localValues,
-                   Int format )
+setCoefficients ( Int const numRows, Int const numColumns,
+                  std::vector<Int> const& rowIndices, std::vector<Int> const& columnIndices,
+                  DataType* const* const localValues,
+                  Int format )
 {
     Int ierr;
-    ierr = M_epetraCrs->ReplaceGlobalValues( numRows, &rowIndices[0], numColumns, &columnIndices[0], localValues, format );
+    ierr = M_epetraCrs->ReplaceGlobalValues ( numRows, &rowIndices[0], numColumns, &columnIndices[0], localValues, format );
 
     if ( ierr < 0 ) std::cout << " error in matrix insertion [setCoefficients] " << ierr
-                    << " when inserting in (" << rowIndices[0] << ", " << columnIndices[0] << ")" << std::endl;
+                                  << " when inserting in (" << rowIndices[0] << ", " << columnIndices[0] << ")" << std::endl;
 }
 
 
 
 template <typename DataType>
 void MatrixEpetra<DataType>::
-setCoefficient( UInt row, UInt column, DataType localValue )
+setCoefficient ( UInt row, UInt column, DataType localValue )
 {
-    Int irow(    row );
-    Int icol( column );
+    Int irow (    row );
+    Int icol ( column );
 
-    Int ierr=M_epetraCrs->ReplaceGlobalValues( 1, &irow, 1, &icol, &localValue );
-    if (ierr!=0)
-        { std::cerr << " error in matrix replacement " << ierr << std::endl; }
+    Int ierr = M_epetraCrs->ReplaceGlobalValues ( 1, &irow, 1, &icol, &localValue );
+    if (ierr != 0)
+    {
+        std::cerr << " error in matrix replacement " << ierr << std::endl;
+    }
 
 }
 
 template <typename DataType>
 void MatrixEpetra<DataType>::
-addToCoefficient( UInt const row, UInt const column, DataType const localValue )
+addToCoefficient ( UInt const row, UInt const column, DataType const localValue )
 {
 
-    Int irow = static_cast<Int>(row);
-    Int icol = static_cast<Int>(column);
+    Int irow = static_cast<Int> (row);
+    Int icol = static_cast<Int> (column);
 
     Int ierr = ( M_epetraCrs->Filled() )   ?
-                    M_epetraCrs->SumIntoGlobalValues( 1, &irow, 1, &icol, &localValue )
-                    :
-                    M_epetraCrs->InsertGlobalValues( 1, &irow, 1, &icol, &localValue );
+               M_epetraCrs->SumIntoGlobalValues ( 1, &irow, 1, &icol, &localValue )
+               :
+               M_epetraCrs->InsertGlobalValues ( 1, &irow, 1, &icol, &localValue );
 
     std::stringstream errorMessage;
     errorMessage << " error in matrix insertion [addToCoefficient] " << ierr
                  << " when inserting " << localValue << " in (" << irow << ", " << icol << ")" << std::endl;
-    ASSERT( ierr >= 0, errorMessage.str() );
+    ASSERT ( ierr >= 0, errorMessage.str() );
 
 }
 
 template <typename DataType>
 void MatrixEpetra<DataType>::
-addToCoefficients( Int const numRows, Int const numColumns,
-                   std::vector<Int> const& rowIndices, std::vector<Int> const& columnIndices,
-                   DataType* const* const localValues,
-                   Int format )
+addToCoefficients ( Int const numRows, Int const numColumns,
+                    std::vector<Int> const& rowIndices, std::vector<Int> const& columnIndices,
+                    DataType* const* const localValues,
+                    Int format )
 {
     Int ierr = ( M_epetraCrs->Filled() ) ?
-                    M_epetraCrs->SumIntoGlobalValues( numRows, &rowIndices[0], numColumns,
-                                                      &columnIndices[0], localValues, format )
-                    :
-                    M_epetraCrs->InsertGlobalValues( numRows, &rowIndices[0], numColumns,
-                                                     &columnIndices[0], localValues, format );
+               M_epetraCrs->SumIntoGlobalValues ( numRows, &rowIndices[0], numColumns,
+                                                  &columnIndices[0], localValues, format )
+               :
+               M_epetraCrs->InsertGlobalValues ( numRows, &rowIndices[0], numColumns,
+                                                 &columnIndices[0], localValues, format );
 
     std::stringstream errorMessage;
     errorMessage << " error in matrix insertion [addToCoefficients] " << ierr
                  << " when inserting in (" << rowIndices[0] << ", " << columnIndices[0] << ")" << std::endl;
-    ASSERT( ierr >= 0, errorMessage.str() );
+    ASSERT ( ierr >= 0, errorMessage.str() );
 
 }
 
@@ -1474,13 +1523,17 @@ addToCoefficients( Int const numRows, Int const numColumns,
 template <typename DataType>
 Int MatrixEpetra<DataType>::meanNumEntries() const
 {
-    const Int minEntries = M_epetraCrs->MaxNumEntries()/2;
+    const Int minEntries = M_epetraCrs->MaxNumEntries() / 2;
     if ( !M_epetraCrs->NumMyRows() )
+    {
         return minEntries;
+    }
 
-    Int meanNumEntries = M_epetraCrs->NumMyNonzeros()/M_epetraCrs->NumMyRows();
-    if ( meanNumEntries < minEntries || meanNumEntries > 2*minEntries )
+    Int meanNumEntries = M_epetraCrs->NumMyNonzeros() / M_epetraCrs->NumMyRows();
+    if ( meanNumEntries < minEntries || meanNumEntries > 2 * minEntries )
+    {
         return minEntries;
+    }
     return meanNumEntries;
 }
 
@@ -1493,45 +1546,45 @@ Int MatrixEpetra<DataType>::processorId()
 template <typename DataType>
 const MapEpetra& MatrixEpetra<DataType>::map() const
 {
-    ASSERT( M_map.get() != 0, "MatrixEpetra::getMap: Error: M_map pointer is null" );
+    ASSERT ( M_map.get() != 0, "MatrixEpetra::getMap: Error: M_map pointer is null" );
     return *M_map;
 }
 
 template <typename DataType>
 const MapEpetra& MatrixEpetra<DataType>::domainMap() const
 {
-    ASSERT( M_domainMap.get() != 0, "MatrixEpetra::getdomainMap: Error: M_domainMap pointer is null" );
+    ASSERT ( M_domainMap.get() != 0, "MatrixEpetra::getdomainMap: Error: M_domainMap pointer is null" );
     return *M_domainMap;
 }
 
 template <typename DataType>
 const MapEpetra& MatrixEpetra<DataType>::rangeMap() const
 {
-    ASSERT( M_rangeMap.get() != 0, "MatrixEpetra::getRangeMap: Error: M_rangeMap pointer is null" );
+    ASSERT ( M_rangeMap.get() != 0, "MatrixEpetra::getRangeMap: Error: M_rangeMap pointer is null" );
     return *M_rangeMap;
 }
 
 template <typename DType>
-MatrixEpetra<DType> * RAP(const MatrixEpetra<DType> & R, const MatrixEpetra<DType> & A, const MatrixEpetra<DType> & P)
+MatrixEpetra<DType>* RAP (const MatrixEpetra<DType>& R, const MatrixEpetra<DType>& A, const MatrixEpetra<DType>& P)
 {
     //Optimized implementation requires Trilinos 10.8
-/*
-    typename MatrixEpetra<DType>::matrix_type * result = NULL;
-    ML_Epetra::ML_Epetra_RAP (*A.matrixPtr(), *P.matrixPtr(), *R.matrixPtr(), result, true);
+    /*
+        typename MatrixEpetra<DType>::matrix_type * result = NULL;
+        ML_Epetra::ML_Epetra_RAP (*A.matrixPtr(), *P.matrixPtr(), *R.matrixPtr(), result, true);
 
-    MatrixEpetra<DType> * matrix(new MatrixEpetra<DType>(P.map()));
-    matrix->M_epetraCrs.reset(result);
-    matrix->M_domainMap = P.M_domainMap;
-    matrix->M_rangeMap = R.M_rangeMap;
+        MatrixEpetra<DType> * matrix(new MatrixEpetra<DType>(P.map()));
+        matrix->M_epetraCrs.reset(result);
+        matrix->M_domainMap = P.M_domainMap;
+        matrix->M_rangeMap = R.M_rangeMap;
 
-    return result;
+        return result;
 
-*/
-// Slower implementation (no prerequisites on Trilinos)
-    MatrixEpetra<DType> * result(new MatrixEpetra<DType>( *R.M_rangeMap ) );
-    MatrixEpetra<DType> tmp(A.map());
-    EpetraExt::MatrixMatrix::Multiply(*A.matrixPtr(), false, *P.matrixPtr(), false, *tmp.matrixPtr(), true);
-    EpetraExt::MatrixMatrix::Multiply(*R.matrixPtr(), false, *tmp.matrixPtr(), false, *(result->matrixPtr()), true);
+    */
+    // Slower implementation (no prerequisites on Trilinos)
+    MatrixEpetra<DType>* result (new MatrixEpetra<DType> ( *R.M_rangeMap ) );
+    MatrixEpetra<DType> tmp (A.map() );
+    EpetraExt::MatrixMatrix::Multiply (*A.matrixPtr(), false, *P.matrixPtr(), false, *tmp.matrixPtr(), true);
+    EpetraExt::MatrixMatrix::Multiply (*R.matrixPtr(), false, *tmp.matrixPtr(), false, * (result->matrixPtr() ), true);
 
     result->M_domainMap = P.M_domainMap;
     result->M_rangeMap = R.M_rangeMap;
@@ -1540,12 +1593,12 @@ MatrixEpetra<DType> * RAP(const MatrixEpetra<DType> & R, const MatrixEpetra<DTyp
 }
 
 template <typename DType>
-MatrixEpetra<DType> * PtAP(const MatrixEpetra<DType> & A, const MatrixEpetra<DType> & P)
+MatrixEpetra<DType>* PtAP (const MatrixEpetra<DType>& A, const MatrixEpetra<DType>& P)
 {
-    typename MatrixEpetra<DType>::matrix_type * result = NULL;
+    typename MatrixEpetra<DType>::matrix_type* result = NULL;
     ML_Epetra::ML_Epetra_PtAP (*A.matrixPtr(), *P.matrixPtr(), result, true);
-    MatrixEpetra<DType> * matrix(new MatrixEpetra<DType>(P.M_domainMap));
-    matrix->M_epetraCrs.reset(result);
+    MatrixEpetra<DType>* matrix (new MatrixEpetra<DType> (P.M_domainMap) );
+    matrix->M_epetraCrs.reset (result);
     matrix->M_domainMap = P.M_domainMap;
     matrix->M_rangeMap = P.M_domainMap;
 

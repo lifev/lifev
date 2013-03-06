@@ -61,11 +61,11 @@ private:
     //! @name Constructors, destructor
     //@{
 
-	//! Empty constructor
-	EvaluationDivI();
+    //! Empty constructor
+    EvaluationDivI();
 
-	//! Copy constructor
-	EvaluationDivI(const EvaluationDivI& provider);
+    //! Copy constructor
+    EvaluationDivI (const EvaluationDivI& provider);
 
     //! Destructor
     ~EvaluationDivI();
@@ -84,7 +84,7 @@ private:
   required to work within the Evaluation trees.
  */
 template <UInt spaceDim>
-class EvaluationDivI<3,spaceDim>
+class EvaluationDivI<3, spaceDim>
 {
 public:
 
@@ -116,16 +116,16 @@ public:
     //@{
 
     //! Empty constructor
-    EvaluationDivI(){}
+    EvaluationDivI() {}
 
     //! Copy constructor
-    EvaluationDivI(const EvaluationDivI<3,spaceDim>& provider) : M_valuesPtr(provider.M_valuesPtr) {}
+    EvaluationDivI (const EvaluationDivI<3, spaceDim>& provider) : M_valuesPtr (provider.M_valuesPtr) {}
 
     //! Expression-based constructor
-    explicit EvaluationDivI(const ExpressionDivI& /*expression*/) {}
+    explicit EvaluationDivI (const ExpressionDivI& /*expression*/) {}
 
     //! Destructor
-    ~EvaluationDivI(){}
+    ~EvaluationDivI() {}
 
     //@}
 
@@ -134,10 +134,13 @@ public:
     //@{
 
     //! Do nothing internal update
-    void update(const UInt& /*iElement*/){}
+    void update (const UInt& /*iElement*/) {}
 
     //! Display method
-    static void display(std::ostream& out = std::cout) { out << "div_i";}
+    static void display (std::ostream& out = std::cout)
+    {
+        out << "div_i";
+    }
 
     //@}
 
@@ -147,22 +150,22 @@ public:
 
     //! Do nothing setter for the global current FE
     template< typename CFEType >
-    void setGlobalCFE(const CFEType* /*globalCFE*/){}
+    void setGlobalCFE (const CFEType* /*globalCFE*/) {}
 
     //! Setter for the test current FE
     template< typename CFEType >
-    void setTestCFE(const CFEType* testCFE)
+    void setTestCFE (const CFEType* testCFE)
     {
-        ASSERT(testCFE != 0, "Nul pointer to the testCFE cannot be set");
-        M_valuesPtr = &(testCFE->M_divergence);
+        ASSERT (testCFE != 0, "Nul pointer to the testCFE cannot be set");
+        M_valuesPtr = & (testCFE->M_divergence);
     }
 
     //! Do nothing setter for the solution current FE
     template< typename CFEType >
-    void setSolutionCFE(const CFEType* /*solutionCFE*/){}
+    void setSolutionCFE (const CFEType* /*solutionCFE*/) {}
 
     //! Do nothing setter for the quadrature rule
-    void setQuadrature(const QuadratureRule&){}
+    void setQuadrature (const QuadratureRule&) {}
 
     //@}
 
@@ -171,19 +174,19 @@ public:
     //@{
 
     //! Getter for the value for a vector
-    const return_Type& value_qi(const UInt& q, const UInt& i) const
+    const return_Type& value_qi (const UInt& q, const UInt& i) const
     {
-        ASSERT( q < M_valuesPtr->size(), "Quadrature point index invalid");
-        ASSERT( i < (*M_valuesPtr)[q].size(), "Dof index invalid");
-        return (*M_valuesPtr)[q][i];
+        ASSERT ( q < M_valuesPtr->size(), "Quadrature point index invalid");
+        ASSERT ( i < (*M_valuesPtr) [q].size(), "Dof index invalid");
+        return (*M_valuesPtr) [q][i];
     }
 
     //! Getter for the value for a matrix
-    const return_Type& value_qij(const UInt& q, const UInt& i, const UInt& /*j*/) const
+    const return_Type& value_qij (const UInt& q, const UInt& i, const UInt& /*j*/) const
     {
-        ASSERT( q < M_valuesPtr->size(), "Quadrature point index invalid");
-        ASSERT( i < (*M_valuesPtr)[q].size(), "Dof index invalid");
-        return (*M_valuesPtr)[q][i];
+        ASSERT ( q < M_valuesPtr->size(), "Quadrature point index invalid");
+        ASSERT ( i < (*M_valuesPtr) [q].size(), "Dof index invalid");
+        return (*M_valuesPtr) [q][i];
     }
 
     //@}
@@ -191,19 +194,19 @@ public:
 private:
 
     //! Storage of the pointer to the data
-    std::vector< std::vector < return_Type > > const * M_valuesPtr;
+    std::vector< std::vector < return_Type > > const* M_valuesPtr;
 
 };
 
 
 template<UInt spaceDim>
-const flag_Type EvaluationDivI<3,spaceDim>::S_globalUpdateFlag=ET_UPDATE_NONE;
+const flag_Type EvaluationDivI<3, spaceDim>::S_globalUpdateFlag = ET_UPDATE_NONE;
 
 template<UInt spaceDim>
-const flag_Type EvaluationDivI<3,spaceDim>::S_testUpdateFlag=ET_UPDATE_DIVERGENCE;
+const flag_Type EvaluationDivI<3, spaceDim>::S_testUpdateFlag = ET_UPDATE_DIVERGENCE;
 
 template<UInt spaceDim>
-const flag_Type EvaluationDivI<3,spaceDim>::S_solutionUpdateFlag=ET_UPDATE_NONE;
+const flag_Type EvaluationDivI<3, spaceDim>::S_solutionUpdateFlag = ET_UPDATE_NONE;
 
 
 //! Evaluation of the basis function divergence in the case of a 2D vectorial FE.

@@ -87,7 +87,8 @@
 #include <lifev/zero_dimensional/solver/ZeroDimensionalRythmosSolverInterface.hpp>
 #include <lifev/zero_dimensional/solver/ZeroDimensionalData.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! Rhytmos methods
 enum EMethod { METHOD_FE, METHOD_BE, METHOD_ERK, METHOD_BDF, METHOD_IRK };
@@ -102,17 +103,17 @@ class ZeroDimensionalSolver
 public:
 
     //! Constructor
-    explicit ZeroDimensionalSolver( Int numCircuitElements,
-                                    boost::shared_ptr< Epetra_Comm> comm,
-                                    zeroDimensionalCircuitDataPtr_Type circuitData );
+    explicit ZeroDimensionalSolver ( Int numCircuitElements,
+                                     boost::shared_ptr< Epetra_Comm> comm,
+                                     zeroDimensionalCircuitDataPtr_Type circuitData );
     //! Destructor
     virtual ~ZeroDimensionalSolver() {}
 
     //! setup solver
-    void setup( const ZeroDimensionalData::solverData_Type& data );
+    void setup ( const ZeroDimensionalData::solverData_Type& data );
 
     //! integrate the system between t1 and t2
-    void takeStep(Real t1, Real t2);
+    void takeStep (Real t1, Real t2);
 
 private:
 
@@ -141,17 +142,17 @@ class ZeroDimensionalSolver
 public:
 
     //! Constructor
-    explicit ZeroDimensionalSolver(Int /*numCircuitElements*/,
-                                   boost::shared_ptr<Epetra_Comm> /*comm*/,
-                                   zeroDimensionalCircuitDataPtr_Type /*circuitData*/) {}
+    explicit ZeroDimensionalSolver (Int /*numCircuitElements*/,
+                                    boost::shared_ptr<Epetra_Comm> /*comm*/,
+                                    zeroDimensionalCircuitDataPtr_Type /*circuitData*/) {}
     //! Destructor
     virtual ~ZeroDimensionalSolver() {}
 
     //! setup solver
-    void setup(const ZeroDimensionalData::solverData_Type& /*data*/) {}
+    void setup (const ZeroDimensionalData::solverData_Type& /*data*/) {}
 
     //! integrate the system between t1 and t2
-    void takeStep(Real /*t1*/, Real /*t2*/) {}
+    void takeStep (Real /*t1*/, Real /*t2*/) {}
 };
 
 #endif /* HAVE_NOX_THYRA && HAVE_TRILINOS_RYTHMOS */
