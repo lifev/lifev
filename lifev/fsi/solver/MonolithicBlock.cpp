@@ -70,15 +70,9 @@ void MonolithicBlock::couplingMatrix(matrixPtr_Type & bigMatrix,
         {
             for ( ITrow = locDofMap.begin(); ITrow != locDofMap.end() ; ++ITrow )
             {
-                Int destRow(solidFluidInterface + ITrow->first + dim*problem[2]->dof().numTotalDof());
-                Int destCol(offset[0] + ITrow->second + dim* problem[0]->dof().numTotalDof());
-                std::vector<Int> destIndices(1,destCol);
-                std::vector<Real> destValues(1,(-value)*rescaleFactor);
-		  
-                if(bigMatrix->matrixPtr()->Map().MyGID(destRow))
+                if ( numerationInterface->map().map (Unique)->LID (ITrow->second /*+ dim*solidDim*/) >= 0 ) //to avoid repeated stuff
                 {
-                    Int errorCode = bigMatrix->matrixPtr()->InsertGlobalValues(destRow,1,&destValues[0],&destIndices[0]);
-                    ASSERT(errorCode >=0, " Error in block copy: insertion failed");
+                    bigMatrix->addToCoefficient (solidFluidInterface + ITrow->first + dim * problem[2]->dof().numTotalDof(), offset[0] + ITrow->second + dim * problem[0]->dof().numTotalDof(), (-value) *rescaleFactor/*scaling of the solid matrix*/);
                 }
             }
         }
