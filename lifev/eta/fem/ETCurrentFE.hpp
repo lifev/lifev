@@ -51,7 +51,6 @@
 
 #include <lifev/core/fem/QuadratureRule.hpp>
 
-#include <lifev/eta/array/MatrixSmall.hpp>
 
 #include <vector>
 
@@ -102,52 +101,68 @@ class EvaluationMeas;
   specialization of this class).
 
 */
-template< UInt spaceDim, UInt fieldDim >
+template <UInt spaceDim, UInt fieldDim>
 class ETCurrentFE
+{
+private:
+    ~ETCurrentFE();
+    ETCurrentFE();
+    ETCurrentFE(const ETCurrentFE&);
+    void operator=(const ETCurrentFE&);
+};
+
+
+/*!
+  The ETCurrentFE is the class to be used to compute quantities related
+  to the quadrature and the basis functions in a real element (current element).
+
+  These quantities are computed using the update method.
+  The update is managed through a system of flags that have to be passed to that method
+  to require some of the quantities to be computed.
+
+  The access to the data, getters have to be used (excepted for some specific classes
+  which have a direct access to the stored data through friendship).
+
+  This is the partial specialization of the generic ETCurrentFE for scalar finite element spaces.
+
+*/
+template <UInt spaceDim>
+class ETCurrentFE<spaceDim,1>
 {
 
     //! @name Friends
     //@{
 
     //!Friend to allow direct access to the raw data
-    template< UInt dim >
+    template <UInt dim>
     friend class ExpressionAssembly::EvaluationPhiI;
 
     //!Friend to allow direct access to the raw data
-    template< UInt dim >
+    template <UInt dim>
     friend class ExpressionAssembly::EvaluationPhiJ;
 
     //!Friend to allow direct access to the raw data
-    template< UInt dim, UInt FSpaceDim >
+    template <UInt dim, UInt FSpaceDim>
     friend class ExpressionAssembly::EvaluationDphiI;
 
     //!Friend to allow direct access to the raw data
-    template< UInt dim, UInt FSpaceDim >
+    template <UInt dim, UInt FSpaceDim>
     friend class ExpressionAssembly::EvaluationDphiJ;
 
     //!Friend to allow direct access to the raw data
-    template< UInt dim, UInt FSpaceDim >
-    friend class ExpressionAssembly::EvaluationDivI;
+    template <UInt dim>
+    friend class ExpressionAssembly::EvaluationHK;
 
     //!Friend to allow direct access to the raw data
-    template< UInt dim, UInt FSpaceDim >
-    friend class ExpressionAssembly::EvaluationDivJ;
+    template <UInt dim>
+    friend class ExpressionAssembly::EvaluationPosition;
+
+    //!Friend to allow direct access to the raw data
+    template <UInt dim>
+    friend class ExpressionAssembly::EvaluationMeas;
+
 
     //@}
-
-private:
-
-    // Vector return type for phi
-    typedef VectorSmall< fieldDim > array1D_Return_Type;
-
-    // Matrix return type for dphi
-    typedef MatrixSmall< fieldDim, spaceDim > matrix_Return_Type;
-
-    //Private typedefs for the 2D array of vector
-    typedef std::vector< std::vector< array1D_Return_Type > > array2D_vector_Type;
-
-    //Private typedefs for the 3D array of vector
-    typedef std::vector< std::vector< matrix_Return_Type > > array2D_matrix_Type;
 
 public:
 
@@ -157,10 +172,11 @@ public:
     //! Static value for the space dimension
     static const UInt S_spaceDimension; // = spaceDim;
 
-    //! Static value for the dimension of the field (fieldDim here as it is a vectorial FE)
-    static const UInt S_fieldDimension; // = fieldDim;
+    //! Static value for the dimension of the field (1 here as it is a scalar FE)
+    static const UInt S_fieldDimension; // = 1;
 
     //@}
+
 
     //! @name Constructors, destructor
     //@{
@@ -184,12 +200,13 @@ public:
     /*!
       @param otherFE The currentFE to be copied
      */
-    ETCurrentFE(const ETCurrentFE<spaceDim,fieldDim>& otherFE);
+    ETCurrentFE(const ETCurrentFE<spaceDim,1>& otherFE);
 
     //! Destructor
     virtual ~ETCurrentFE();
 
     //@}
+
 
     //! @name Methods
     //@{
@@ -222,6 +239,7 @@ public:
 
     //@}
 
+
     //! @name Set Methods
     //@{
 
@@ -236,6 +254,7 @@ public:
     void setQuadratureRule(const QuadratureRule& qr);
 
     //@}
+
 
     //! @name Get Methods
     //@{
@@ -253,14 +272,13 @@ public:
     /*!
       @param i The index of the basis function
       @param q The index of the quadrature node
-      @return The vector<3> of the ith basis function in the qth quadrature node
+      @return The value of the ith basis function in the qth quadrature node
      */
-    const array1D_Return_Type& phi(const UInt& i, const UInt& q) const
+    Real phi(const UInt& i, const UInt& q) const
     {
-        ASSERT( i < fieldDim*M_nbFEDof, "No basis function with this index" );
-        ASSERT( q < M_nbQuadPt, "No quadrature point with this index" );
-
-        return ( M_phi[q][i] );
+        ASSERT( i < M_nbFEDof,"No basis function with this index");
+        ASSERT( q < M_nbQuadPt,"No quadrature point with this index");
+        return M_phi[q][i];
     }
 
     //! Getter for the coordinates of the quadrature nodes in the current element
@@ -292,39 +310,18 @@ public:
     //! Getter for the derivatives of the basis function in the quadrature nodes (current element)
     /*!
       @param i The index of the basis function
-      @param iCoor The vector component of which we want the derivative (0, 1, ..., fieldDim)
       @param dxi The direction of the derivative required (0 for d/dx, 1 for d/dy...)
       @param q The index of the quadrature node
-      @return The vector<3> of the ith basis function derived w.r. to dxi, in the qth quadrature node.
+      @return The value of the ith basis function derived w.r. to dxi, in the qth quadrature node.
      */
-    //const array1D_Return_Type& dphi(const UInt& i, const UInt& dxi, const UInt& q) const
-    const Real& dphi(const UInt& i, const UInt& iCoor, const UInt& dxi, const UInt& q) const
+    Real dphi(const UInt& i, const UInt& dxi, const UInt& q) const
     {
         ASSERT( M_isDphiUpdated, "Derivative of the basis functions have not been updated");
-        ASSERT( i < fieldDim*M_nbFEDof, "No basis function with this index");
-        ASSERT( iCoor < fieldDim, "No such coordinate index");
+        ASSERT( i < M_nbFEDof, "No basis function with this index");
         ASSERT( dxi < spaceDim, "No such coordinate index");
         ASSERT( q < M_nbQuadPt,"No quadrature point with this index");
-
-        //return M_dphi[q][i][dxi];
-        return M_dphi[q][i][iCoor][dxi];
+        return M_dphi[q][i][dxi];
     }
-
-    //! Getter for the divergence of the basis functions in the quadrature nodes in the current element
-    /*!
-      @param i The index of the basis function
-      @param q The index of the quadrature node
-      @return The divergence of the ith basis function in the qth quadrature node
-     */
-    const array1D_Return_Type& divergence(const UInt& i, const UInt& q) const
-    {
-        ASSERT( M_isDivergenceUpdated, "Divergence of the basis functions have not been updated");
-        ASSERT( i < fieldDim*M_nbFEDof, "No basis function with this index" );
-        ASSERT( q < M_nbQuadPt, "No quadrature point with this index" );
-
-        return ( M_divergence[q][i] );
-    }
-
 
     //! Getter for the identifier of the current element
     /*!
@@ -335,6 +332,28 @@ public:
         ASSERT(M_isCellNodeUpdated, "Cell has not been updated");
         return M_currentId;
     }
+
+    //! Getter for the diameter of the current element
+    /*!
+      @return The diameter of the current element
+    */
+    Real diameter() const
+    {
+        ASSERT(M_isDiameterUpdated, "Diameter has not been updated");
+        return M_diameter;
+    }
+
+    //! Getter for the measure of the current element
+    /*!
+      @return The measure of the current element
+    */
+    Real measure() const
+    {
+        //ASSERT(M_isMeasure, "Measure has not been updated");
+
+        return M_measure;
+    }
+
 
     //@}
 
@@ -349,6 +368,12 @@ private:
     //Private typedefs for the 3D array (array of 2D array)
     typedef std::vector< array2D_Type > array3D_Type;
 
+    //Private typedefs for the 1D array of vector
+    typedef std::vector< VectorSmall<spaceDim> > array1D_vector_Type;
+
+    //Private typedefs for the 2D array of vector
+    typedef std::vector< std::vector< VectorSmall<spaceDim> > > array2D_vector_Type;
+
     //! @name Private Methods
     //@{
 
@@ -356,7 +381,7 @@ private:
     ETCurrentFE();
 
     //! No assignement
-    void operator=( const ETCurrentFE< spaceDim, fieldDim >& );
+    void operator=(const ETCurrentFE<spaceDim,1>&);
 
     //! Resize all the internal containers w.r. to the stored data and compute the constant values
     void setupInternalConstants();
@@ -365,6 +390,22 @@ private:
     template< typename ElementType >
     void updateCellNode(const ElementType& element);
 
+    //! Update the cell nodes with a std::vector of points
+    /*!
+      Note here that this method is NOT a template specialization (which
+      is impossible in this case, full specialization being forbidden in
+      non specialized template classes), but an overload of the template
+      method (which represents a better match in case the right arguments
+      are passed).
+     */
+    void updateCellNode(const std::vector<VectorSmall<spaceDim> >& ptsCoordinates);
+
+    //! Update the diameter of the cell
+    void updateDiameter();
+
+    //! Update the measure of the cell
+    void updateMeasure();
+
     //! Update the quadrature nodes
     void updateQuadNode(const UInt& iQuadPt);
 
@@ -372,108 +413,130 @@ private:
     void updateJacobian(const UInt& iQuadPt);
 
     //! Update DetJacobian
-    void updateDetJacobian( const UInt& iQuadPt );
+    void updateDetJacobian(const UInt& iQuadPt);
 
     //! Update InverseJacobian
-    void updateInverseJacobian( const UInt& iQuadPt );
+    void updateInverseJacobian(const UInt& iQuadPt);
 
     //! Update WeightedJacobian
-    void updateWDet( const UInt& iQuadPt );
+    void updateWDet(const UInt& iQuadPt);
 
     //! Update Dphi
-    void updateDphi( const UInt& iQuadPt );
-
-    //! Update Divergence
-    void updateDivergence(const UInt& iQuadPt);
+    void updateDphi(const UInt& iQuadPt);
 
     //@}
 
+
     // Pointer on the reference FE
     const ReferenceFE* M_referenceFE;
+
     // Pointer on the geometric map
     const GeometricMap* M_geometricMap;
+
     // Pointer on the quadrature rule
     const QuadratureRule* M_quadratureRule;
 
     // Number of FE dof (current element)
     UInt M_nbFEDof;
+
     // Number of dof for the geometric map
     UInt M_nbMapDof;
+
     // Number of quadrature point
     UInt M_nbQuadPt;
 
     // Global identifier
     UInt M_currentId;
+
     // Local identifier
     UInt M_currentLocalId;
 
+    // Diameter of the element
+    Real M_diameter;
+
+    // Measure of the element
+    Real M_measure;
+
     // Storage for the values of the basis functions
-    array2D_vector_Type M_phi;
+    array2D_Type M_phi;
 
     // Storage for the values of the geometric map
     array2D_Type M_phiMap;
+
     // Storage for the derivatives of the basis functions
     array3D_Type M_dphiReferenceFE;
+
     // Storage for the derivatives of the geometric map
     array3D_Type M_dphiGeometricMap;
 
     // Storage for the coordinates of the nodes of the current element
     array2D_Type M_cellNode;
+
     // Storage for the position the quadrature nodes (current element)
-    array2D_Type M_quadNode;
+    array1D_vector_Type M_quadNode;
+
     // Storage for the jacobian of the transformation
     array3D_Type M_jacobian;
+
     // Storage for the determinant of the jacobian of the transformation
     array1D_Type M_detJacobian;
+
     // Storage for the weighted determinant
     array1D_Type M_wDet;
+
     // Storage for the inverse of the jacobian
     array3D_Type M_tInverseJacobian;
 
     // Storage for the derivative of the basis functions
-    array2D_matrix_Type M_dphi;
-
-    // Storage for the divergence of the basis functions
-    array2D_Type M_divergence;
+    array2D_vector_Type M_dphi;
 
 #ifndef NDEBUG
     // Debug informations, defined only if the code
     // is compiled in debug mode. These booleans store the
     // information about what the last call to "update"
     // has actually computed (names are self explanatory)
+
     bool M_isCellNodeUpdated;
+    bool M_isDiameterUpdated;
+    bool M_isMeasureUpdated;
     bool M_isQuadNodeUpdated;
     bool M_isJacobianUpdated;
     bool M_isDetJacobianUpdated;
     bool M_isInverseJacobianUpdated;
     bool M_isWDetUpdated;
     bool M_isDphiUpdated;
-    bool M_isDivergenceUpdated;
+
 #endif
 
 };
+
 
 // ===================================================
 // IMPLEMENTATION
 // ===================================================
 
-template< UInt spaceDim, UInt fieldDim >
-const UInt ETCurrentFE< spaceDim, fieldDim >::S_spaceDimension = spaceDim;
 
-template< UInt spaceDim, UInt fieldDim >
-const UInt ETCurrentFE< spaceDim, fieldDim >::S_fieldDimension = fieldDim;
+template <UInt spaceDim>
+const UInt ETCurrentFE<spaceDim,1>::
+S_spaceDimension = spaceDim;
+
+template <UInt spaceDim>
+const UInt ETCurrentFE<spaceDim,1>::
+S_fieldDimension = 1;
+
 
 // ===================================================
 // Constructors & Destructor
 // ===================================================
 
-template< UInt spaceDim, UInt fieldDim >
-ETCurrentFE<spaceDim,fieldDim>::
+
+template< UInt spaceDim>
+ETCurrentFE<spaceDim,1>::
 ETCurrentFE(const ReferenceFE& refFE, const GeometricMap& geoMap, const QuadratureRule& qr)
     :
     M_referenceFE(&refFE),
     M_geometricMap(&geoMap),
-    M_quadratureRule(&qr),
+    M_quadratureRule(new QuadratureRule(qr)),
 
     M_nbFEDof(M_referenceFE->nbDof()),
     M_nbMapDof(M_geometricMap->nbDof()),
@@ -482,6 +545,8 @@ ETCurrentFE(const ReferenceFE& refFE, const GeometricMap& geoMap, const Quadratu
     M_currentId(),
     M_currentLocalId(),
 
+    M_diameter(),
+    M_measure(),
     M_phi(),
     M_phiMap(),
     M_dphiReferenceFE(),
@@ -493,27 +558,29 @@ ETCurrentFE(const ReferenceFE& refFE, const GeometricMap& geoMap, const Quadratu
     M_detJacobian(),
     M_wDet(),
     M_tInverseJacobian(),
-    M_dphi(),
-    M_divergence()
+    M_dphi()
 
 #ifndef NDEBUG
     ,M_isCellNodeUpdated(false),
+    M_isDiameterUpdated(false),
+    M_isMeasureUpdated(false),
     M_isQuadNodeUpdated(false),
     M_isJacobianUpdated(false),
     M_isDetJacobianUpdated(false),
     M_isInverseJacobianUpdated(false),
     M_isWDetUpdated(false),
-    M_isDphiUpdated(false),
-    M_isDivergenceUpdated(false)
+    M_isDphiUpdated(false)
 #endif
+
 
 {
     // Everything's there, so reshape the arrays
     setupInternalConstants();
 }
 
-template< UInt spaceDim, UInt fieldDim >
-ETCurrentFE<spaceDim,fieldDim>::
+
+template< UInt spaceDim>
+ETCurrentFE<spaceDim,1>::
 ETCurrentFE(const ReferenceFE& refFE, const GeometricMap& geoMap)
     :
     M_referenceFE(&refFE),
@@ -527,6 +594,8 @@ ETCurrentFE(const ReferenceFE& refFE, const GeometricMap& geoMap)
     M_currentId(),
     M_currentLocalId(),
 
+    M_diameter(),
+    M_measure(),
     M_phi(),
     M_phiMap(),
     M_dphiReferenceFE(),
@@ -538,31 +607,31 @@ ETCurrentFE(const ReferenceFE& refFE, const GeometricMap& geoMap)
     M_detJacobian(),
     M_wDet(),
     M_tInverseJacobian(),
-    M_dphi(),
-    M_divergence()
+    M_dphi()
 
 #ifndef NDEBUG
     ,M_isCellNodeUpdated(false),
+    M_isDiameterUpdated(false),
+    M_isMeasureUpdated(false),
     M_isQuadNodeUpdated(false),
     M_isJacobianUpdated(false),
     M_isDetJacobianUpdated(false),
     M_isInverseJacobianUpdated(false),
     M_isWDetUpdated(false),
-    M_isDphiUpdated(false),
-    M_isDivergenceUpdated(false)
+    M_isDphiUpdated(false)
 #endif
 
 {
     // Miss the QR, so no reshape
 }
 
-template< UInt spaceDim, UInt fieldDim >
-ETCurrentFE<spaceDim,fieldDim>::
-ETCurrentFE(const ETCurrentFE<spaceDim,fieldDim>& otherFE)
+template< UInt spaceDim>
+ETCurrentFE<spaceDim,1>::
+ETCurrentFE(const ETCurrentFE<spaceDim,1>& otherFE)
     :
     M_referenceFE(otherFE.M_referenceFE),
     M_geometricMap(otherFE.M_geometricMap),
-    M_quadratureRule(otherFE.M_quadratureRule),
+    M_quadratureRule(new QuadratureRule(*otherFE.M_quadratureRule)),
 
     M_nbFEDof(otherFE.M_nbFEDof),
     M_nbMapDof(otherFE.M_nbMapDof),
@@ -571,6 +640,8 @@ ETCurrentFE(const ETCurrentFE<spaceDim,fieldDim>& otherFE)
     M_currentId(otherFE.M_currentId),
     M_currentLocalId(otherFE.M_currentLocalId),
 
+    M_diameter(otherFE.M_diameter),
+    M_measure(otherFE.M_measure),
     M_phi(otherFE.M_phi),
     M_phiMap(otherFE.M_phiMap),
     M_dphiReferenceFE(otherFE.M_dphiReferenceFE),
@@ -582,36 +653,41 @@ ETCurrentFE(const ETCurrentFE<spaceDim,fieldDim>& otherFE)
     M_detJacobian(otherFE.M_detJacobian),
     M_wDet(otherFE.M_wDet),
     M_tInverseJacobian(otherFE.M_tInverseJacobian),
-    M_dphi(otherFE.M_dphi),
-    M_divergence(otherFE.M_divergence)
+    M_dphi(otherFE.M_dphi)
 
 #ifndef NDEBUG
     //Beware for the comma at the begining of this line!
     ,M_isCellNodeUpdated( otherFE.M_isCellNodeUpdated ),
+    M_isDiameterUpdated( otherFE.M_isDiameterUpdated ),
+    M_isMeasureUpdated( otherFE.M_isMeasureUpdated ),
     M_isQuadNodeUpdated( otherFE.M_isQuadNodeUpdated ),
     M_isJacobianUpdated( otherFE.M_isJacobianUpdated ),
     M_isDetJacobianUpdated( otherFE.M_isDetJacobianUpdated ),
     M_isInverseJacobianUpdated( otherFE.M_isInverseJacobianUpdated ),
     M_isWDetUpdated( otherFE.M_isWDetUpdated ),
-    M_isDphiUpdated( otherFE.M_isDphiUpdated ),
-    M_isDivergenceUpdated( otherFE.M_isDivergenceUpdated )
+    M_isDphiUpdated( otherFE.M_isDphiUpdated )
 #endif
 
 {}
 
-template< UInt spaceDim, UInt fieldDim >
-ETCurrentFE<spaceDim,fieldDim>::
+
+template< UInt spaceDim>
+ETCurrentFE<spaceDim,1>::
 ~ETCurrentFE()
-{}
+{
+    if (M_quadratureRule!=0) delete M_quadratureRule;
+}
+
 
 // ===================================================
 // Methods
 // ===================================================
 
-template< UInt spaceDim, UInt fieldDim >
+
+template< UInt spaceDim>
 template<typename elementType>
 void
-ETCurrentFE<spaceDim,fieldDim>::
+ETCurrentFE<spaceDim,1>::
 update(const elementType& element, const flag_Type& flag)
 {
     ASSERT(M_referenceFE != 0, "No reference FE for the update");
@@ -621,20 +697,19 @@ update(const elementType& element, const flag_Type& flag)
 #ifndef NDEBUG
     // Reset all the flags to false
     M_isCellNodeUpdated=false;
+    M_isDiameterUpdated=false;
+    M_isMeasureUpdated=false;
     M_isQuadNodeUpdated=false;
     M_isJacobianUpdated=false;
     M_isDetJacobianUpdated=false;
     M_isInverseJacobianUpdated=false;
     M_isWDetUpdated=false;
     M_isDphiUpdated=false;
-    M_isDivergenceUpdated=false;
 #endif
 
     // update the cell informations if required
-    if (flag & ET_UPDATE_ONLY_CELL_NODE)
-    {
-        updateCellNode(element);
-    }
+    if ( flag & ET_UPDATE_ONLY_CELL_NODE ) updateCellNode(element);
+    if ( flag & ET_UPDATE_ONLY_DIAMETER ) updateDiameter();
 
     // Loop over the quadrature nodes
     for (UInt i(0); i<M_nbQuadPt; ++i)
@@ -646,13 +721,15 @@ update(const elementType& element, const flag_Type& flag)
         if ( flag & ET_UPDATE_ONLY_T_INVERSE_JACOBIAN ) updateInverseJacobian(i);
         if ( flag & ET_UPDATE_ONLY_W_DET_JACOBIAN ) updateWDet(i);
         if ( flag & ET_UPDATE_ONLY_DPHI ) updateDphi(i);
-        if ( flag & ET_UPDATE_ONLY_DIVERGENCE ) updateDivergence(i);
     }
+
+    if ( flag & ET_UPDATE_ONLY_MEASURE ) updateMeasure();
 }
 
-template<UInt spaceDim, UInt fieldDim >
+
+template<UInt spaceDim>
 void
-ETCurrentFE<spaceDim,fieldDim>::
+ETCurrentFE<spaceDim,1>::
 showMe(std::ostream& out) const
 {
     out << " Number of FE Dof   : " << M_nbFEDof << std::endl;
@@ -713,69 +790,51 @@ showMe(std::ostream& out) const
         {
             for (UInt iCoor(0); iCoor < S_spaceDimension; ++iCoor)
             {
-                for (UInt jCoor(0); jCoor < S_spaceDimension; ++jCoor)
-                {
-                    out << M_dphi[iQuad][iDof][iCoor][jCoor] << " ";
-                }
+                out << M_dphi[iQuad][iDof][iCoor] << " ";
             }
             out << std::endl;
         }
         out << std::endl;
     }
-
-    out << " Divergence : " << std::endl;
-    for (UInt iQuad(0); iQuad<M_nbQuadPt; ++iQuad)
-    {
-        for (UInt iDof(0); iDof<fieldDim*M_nbFEDof; ++iDof)
-        {
-            out << M_divergence[iQuad][iDof] << " ";
-        }
-        out << std::endl;
-    }
-
 }
 
 // ===================================================
 // Set Methods
 // ===================================================
 
-template< UInt spaceDim, UInt fieldDim >
+template< UInt spaceDim>
 void
-ETCurrentFE<spaceDim,fieldDim>::
+ETCurrentFE<spaceDim,1>::
 setQuadratureRule(const QuadratureRule& qr)
 {
-    M_quadratureRule = &qr;
+    if (M_quadratureRule!=0) delete M_quadratureRule;
+    M_quadratureRule = new QuadratureRule(qr);
     M_nbQuadPt = qr.nbQuadPt();
     setupInternalConstants();
 }
+
 
 // ===================================================
 // Private Methods
 // ===================================================
 
-template< UInt spaceDim, UInt fieldDim >
+
+template< UInt spaceDim >
 void
-ETCurrentFE<spaceDim,fieldDim>::
+ETCurrentFE<spaceDim,1>::
 setupInternalConstants()
 {
     // The first group of values can be computed as it
     // it does not depend on the current element
 
     // PHI
-    M_phi.resize( M_nbQuadPt );
-    for ( UInt q( 0 ); q < M_nbQuadPt; ++q )
+    M_phi.resize(M_nbQuadPt);
+    for (UInt q(0); q< M_nbQuadPt; ++q)
     {
-        // we have M_nbFEDof * 3 basis functions
-        M_phi[q].resize( M_nbFEDof * 3 );
-
-        // set only appropriate values, other are initialized to 0 by default constructor (of VectorSmall)
-        for ( UInt j( 0 ); j < M_nbFEDof; ++j )
+        M_phi[q].resize(M_nbFEDof);
+        for (UInt j(0); j< M_nbFEDof; ++j)
         {
-            M_phi[q][j][0] = M_referenceFE->phi( j, M_quadratureRule->quadPointCoor( q ) );
-            
-            // copy other values according to the vectorial basis functions
-            for ( UInt k( 1 ); k < S_fieldDimension; ++k )
-                M_phi[q][k * M_nbFEDof + j][k] = M_phi[q][j][0];
+            M_phi[q][j]=M_referenceFE->phi(j,M_quadratureRule->quadPointCoor(q));
         }
     }
 
@@ -823,6 +882,7 @@ setupInternalConstants()
     // The second group of values cannot be computed
     // now because it depends on the current element.
     // So, we just make space for it.
+
     // Cell nodes
     M_cellNode.resize(M_nbMapDof);
     for (UInt i(0); i<M_nbMapDof; ++i)
@@ -832,10 +892,10 @@ setupInternalConstants()
 
     // Quad nodes
     M_quadNode.resize(M_nbQuadPt);
-    for (UInt i(0); i<M_nbQuadPt; ++i)
+    /*for (UInt i(0); i<M_nbQuadPt; ++i)
     {
         M_quadNode[i].resize(spaceDim);
-    }
+        }*/
 
     // Jacobian
     M_jacobian.resize(M_nbQuadPt);
@@ -869,22 +929,15 @@ setupInternalConstants()
     M_dphi.resize(M_nbQuadPt);
     for (UInt i(0); i<M_nbQuadPt; ++i)
     {
-        // we have fieldDim * DoF basis functions
-        M_dphi[i].resize( fieldDim * M_nbFEDof );
+        M_dphi[i].resize(M_nbFEDof);
     }
 
-    // divergence
-    M_divergence.resize(M_nbQuadPt);
-    for (UInt i(0); i<M_nbQuadPt; ++i)
-    {
-        // we have fieldDim * DoF basis functions
-        M_divergence[i].resize( fieldDim * M_nbFEDof );
-    }
 }
 
-template <UInt spaceDim, UInt fieldDim >
+
+template <UInt spaceDim>
 void
-ETCurrentFE<spaceDim,fieldDim>::
+ETCurrentFE<spaceDim,1>::
 updateQuadNode(const UInt& iQuadPt)
 {
     // Check the requirements
@@ -906,9 +959,10 @@ updateQuadNode(const UInt& iQuadPt)
     }
 }
 
-template< UInt spaceDim, UInt fieldDim >
+
+template< UInt spaceDim>
 void
-ETCurrentFE<spaceDim,fieldDim>::
+ETCurrentFE<spaceDim,1>::
 updateJacobian(const UInt& iQuadPt)
 {
     // Check the requirements
@@ -935,79 +989,187 @@ updateJacobian(const UInt& iQuadPt)
     }
 }
 
-template< UInt spaceDim, UInt fieldDim >
-void ETCurrentFE< spaceDim, fieldDim >::updateWDet( const UInt& iQuadPt )
+// Full specialization for the computation of the determinant
+template<>
+void
+ETCurrentFE<1,1>::
+ updateDetJacobian(const UInt& iQuadPt)
 {
-    ASSERT( M_isDetJacobianUpdated,
-            "Determinant of the jacobian must be updated to compute WDet" );
+    ASSERT(M_isJacobianUpdated,"Jacobian must be updated to compute its determinant");
 
 #ifndef NDEBUG
-    M_isWDetUpdated = true;
+    M_isDetJacobianUpdated=true;
 #endif
 
-    M_wDet[iQuadPt] = M_detJacobian[iQuadPt] * M_quadratureRule->weight( iQuadPt );
+    M_detJacobian[iQuadPt]=M_jacobian[iQuadPt][0][0];
 }
 
-template< UInt spaceDim, UInt fieldDim >
-void ETCurrentFE< spaceDim, fieldDim >::updateDphi( const UInt& iQuadPt )
+// Full specialization for the computation of the determinant
+template<>
+void
+ETCurrentFE<2,1>::
+updateDetJacobian(const UInt& iQuadPt)
 {
-    ASSERT( M_isInverseJacobianUpdated,
-            "Inverse jacobian must be updated to compute the derivative of the basis functions" );
+    ASSERT(M_isJacobianUpdated,"Jacobian must be updated to compute its determinant");
 
 #ifndef NDEBUG
-    M_isDphiUpdated = true;
+    M_isDetJacobianUpdated=true;
 #endif
 
-    Real partialSum( 0.0 );
+    M_detJacobian[iQuadPt]= M_jacobian[iQuadPt][0][0] * M_jacobian[iQuadPt][1][1]
+        - M_jacobian[iQuadPt][1][0] * M_jacobian[iQuadPt][0][1];
+}
 
-    for ( UInt iDof( 0 ); iDof < M_nbFEDof; ++iDof )
+// Full specialization for the computation of the determinant
+template<>
+void
+ETCurrentFE<3,1>::
+updateDetJacobian(const UInt& iQuadPt)
+{
+    ASSERT(M_isJacobianUpdated,"Jacobian must be updated to compute its determinant");
+
+#ifndef NDEBUG
+    M_isDetJacobianUpdated=true;
+#endif
+
+    M_detJacobian[iQuadPt]=
+        M_jacobian[iQuadPt][0][0] * M_jacobian[iQuadPt][1][1] * M_jacobian[iQuadPt][2][2]
+        + M_jacobian[iQuadPt][0][1] * M_jacobian[iQuadPt][1][2] * M_jacobian[iQuadPt][2][0]
+        + M_jacobian[iQuadPt][0][2] * M_jacobian[iQuadPt][1][0] * M_jacobian[iQuadPt][2][1]
+        - M_jacobian[iQuadPt][0][0] * M_jacobian[iQuadPt][1][2] * M_jacobian[iQuadPt][2][1]
+        - M_jacobian[iQuadPt][0][1] * M_jacobian[iQuadPt][1][0] * M_jacobian[iQuadPt][2][2]
+        - M_jacobian[iQuadPt][0][2] * M_jacobian[iQuadPt][1][1] * M_jacobian[iQuadPt][2][0];
+}
+
+
+template<>
+void
+ETCurrentFE<1,1>::
+updateInverseJacobian(const UInt& iQuadPt)
+{
+
+    ASSERT(M_isJacobianUpdated,"Jacobian must be updated to compute its inverse");
+    ASSERT(M_isDetJacobianUpdated,"The determinant of the jacobian must be updated to compute its inverse");
+
+#ifndef NDEBUG
+    M_isInverseJacobianUpdated=true;
+#endif
+
+    M_tInverseJacobian[iQuadPt][0][0]=1.0/M_jacobian[iQuadPt][0][0];
+}
+
+
+template<>
+void
+ETCurrentFE<2,1>::
+updateInverseJacobian(const UInt& iQuadPt)
+{
+
+    ASSERT(M_isJacobianUpdated,"Jacobian must be updated to compute its inverse");
+    ASSERT(M_isDetJacobianUpdated,"The determinant of the jacobian must be updated to compute its inverse");
+
+#ifndef NDEBUG
+    M_isInverseJacobianUpdated=true;
+#endif
+
+    Real det= M_detJacobian[iQuadPt];
+
+    M_tInverseJacobian[iQuadPt][0][0] =  M_jacobian[iQuadPt][0][0] / det;
+    M_tInverseJacobian[iQuadPt][1][0] = -M_jacobian[iQuadPt][1][0] / det;
+    M_tInverseJacobian[iQuadPt][0][1] = -M_jacobian[iQuadPt][0][1] / det;
+    M_tInverseJacobian[iQuadPt][1][1] =  M_jacobian[iQuadPt][1][1] / det;
+}
+
+template<>
+void
+ETCurrentFE<3,1>::
+updateInverseJacobian(const UInt& iQuadPt)
+{
+    ASSERT(M_isJacobianUpdated,"Jacobian must be updated to compute its inverse");
+    ASSERT(M_isDetJacobianUpdated,"The determinant of the jacobian must be updated to compute its inverse");
+
+#ifndef NDEBUG
+    M_isInverseJacobianUpdated=true;
+#endif
+
+    Real det = M_detJacobian[iQuadPt];
+
+    M_tInverseJacobian[iQuadPt][0][0] = ( M_jacobian[iQuadPt][1][1] * M_jacobian[iQuadPt][2][2]
+                                          -M_jacobian[iQuadPt][1][2] * M_jacobian[iQuadPt][2][1])/det;
+
+    M_tInverseJacobian[iQuadPt][0][1] = ( M_jacobian[iQuadPt][1][2] * M_jacobian[iQuadPt][2][0]
+                                          -M_jacobian[iQuadPt][1][0] * M_jacobian[iQuadPt][2][2])/det;
+
+    M_tInverseJacobian[iQuadPt][0][2] = ( M_jacobian[iQuadPt][1][0] * M_jacobian[iQuadPt][2][1]
+                                          -M_jacobian[iQuadPt][1][1] * M_jacobian[iQuadPt][2][0])/det;
+
+    M_tInverseJacobian[iQuadPt][1][0] = ( M_jacobian[iQuadPt][0][2] * M_jacobian[iQuadPt][2][1]
+                                          -M_jacobian[iQuadPt][0][1] * M_jacobian[iQuadPt][2][2])/det;
+
+    M_tInverseJacobian[iQuadPt][1][1] = ( M_jacobian[iQuadPt][0][0] * M_jacobian[iQuadPt][2][2]
+                                          -M_jacobian[iQuadPt][0][2] * M_jacobian[iQuadPt][2][0])/det;
+
+    M_tInverseJacobian[iQuadPt][1][2] = ( M_jacobian[iQuadPt][0][1] * M_jacobian[iQuadPt][2][0]
+                                          -M_jacobian[iQuadPt][0][0] * M_jacobian[iQuadPt][2][1])/det;
+
+    M_tInverseJacobian[iQuadPt][2][0] = ( M_jacobian[iQuadPt][0][1] * M_jacobian[iQuadPt][1][2]
+                                          -M_jacobian[iQuadPt][0][2] * M_jacobian[iQuadPt][1][1])/det;
+
+    M_tInverseJacobian[iQuadPt][2][1] = ( M_jacobian[iQuadPt][0][2] * M_jacobian[iQuadPt][1][0]
+                                          -M_jacobian[iQuadPt][0][0] * M_jacobian[iQuadPt][1][2])/det;
+
+    M_tInverseJacobian[iQuadPt][2][2] = ( M_jacobian[iQuadPt][0][0] * M_jacobian[iQuadPt][1][1]
+                                          -M_jacobian[iQuadPt][0][1] * M_jacobian[iQuadPt][1][0])/det;
+}
+
+template< UInt spaceDim>
+void
+ETCurrentFE<spaceDim,1>::
+updateWDet(const UInt& iQuadPt)
+{
+    ASSERT(M_isDetJacobianUpdated, "Determinant of the jacobian must be updated to compute WDet");
+
+#ifndef NDEBUG
+    M_isWDetUpdated=true;
+#endif
+
+    M_wDet[iQuadPt] = M_detJacobian[iQuadPt] * M_quadratureRule->weight(iQuadPt);
+}
+
+
+template< UInt spaceDim>
+void
+ETCurrentFE<spaceDim,1>::
+updateDphi(const UInt& iQuadPt)
+{
+    ASSERT(M_isInverseJacobianUpdated,
+           "Inverse jacobian must be updated to compute the derivative of the basis functions");
+
+#ifndef NDEBUG
+    M_isDphiUpdated=true;
+#endif
+
+    Real partialSum(0.0);
+
+    for (UInt iDof(0); iDof< M_nbFEDof; ++iDof)
     {
-        for ( UInt iCoor( 0 ); iCoor < S_spaceDimension; ++iCoor )
+        for (UInt iCoor(0); iCoor < S_spaceDimension; ++iCoor)
         {
-            partialSum = 0.0;
-            for ( UInt jCoor( 0 ); jCoor < S_spaceDimension; ++jCoor )
+            partialSum=0.0;
+            for (UInt jCoor(0); jCoor< S_spaceDimension; ++jCoor)
             {
                 partialSum += M_tInverseJacobian[iQuadPt][iCoor][jCoor] * M_dphiReferenceFE[iQuadPt][iDof][jCoor];
             }
-
-            // set only appropriate values, other are initialized to 0 by default constructor (of VectorSmall)
-            M_dphi[iQuadPt][iDof][0][iCoor] = partialSum;
-
-            // copy other values according to the vectorial basis functions
-            for ( UInt k( 1 ); k < fieldDim; ++k)
-                M_dphi[iQuadPt][k * M_nbFEDof+iDof][k][iCoor] = partialSum;
+            M_dphi[iQuadPt][iDof][iCoor] = partialSum;
         }
     }
 }
 
-template< UInt spaceDim, UInt fieldDim >
-void ETCurrentFE< spaceDim, fieldDim >::updateDivergence( const UInt& iQuadPt )
-{
-    ASSERT( M_isDphiUpdated,
-            "Basis function derivatives must be updated to compute the divergence" );
 
-#ifndef NDEBUG
-    M_isDivergenceUpdated = true;
-#endif
-
-    Real partialSum( 0.0 );
-
-    for ( UInt iDof( 0 ); iDof < fieldDim*M_nbFEDof; ++iDof )
-    {
-        partialSum = 0.0;
-        for ( UInt iCoor( 0 ); iCoor < S_spaceDimension; ++iCoor )
-        {
-            partialSum += M_dphi[iQuadPt][iDof][iCoor][iCoor];
-        }
-        M_divergence[iQuadPt][iDof] = partialSum;
-    }
-}
-
-
-template< UInt spaceDim, UInt fieldDim>
+template< UInt spaceDim>
 template< typename ElementType >
 void
-ETCurrentFE<spaceDim,fieldDim>::
+ETCurrentFE<spaceDim,1>::
 updateCellNode(const ElementType& element)
 {
 
@@ -1027,11 +1189,81 @@ updateCellNode(const ElementType& element)
     }
 }
 
+template< UInt spaceDim >
+void
+ETCurrentFE<spaceDim,1>::
+updateCellNode(const std::vector<VectorSmall<spaceDim> >& ptsCoordinates)
+{
+#ifndef NDEBUG
+    M_isCellNodeUpdated=true;
+#endif
+
+    ASSERT( ptsCoordinates.size() == M_nbMapDof, "Number of points does not define the right geometric shape.");
+
+    for ( UInt i(0); i < M_nbMapDof; ++i )
+    {
+        for ( UInt icoor(0); icoor < S_spaceDimension; ++icoor)
+        {
+            M_cellNode[i][icoor] = ptsCoordinates[i][icoor];
+        }
+    }
+}
+
+template< UInt spaceDim>
+void
+ETCurrentFE<spaceDim,1>::
+updateDiameter()
+{
+    ASSERT(M_isCellNodeUpdated, "Cell must be updated to compute the diameter");
+
+#ifndef NDEBUG
+    M_isDiameterUpdated=true;
+#endif
+
+    M_diameter=0.0;
+    Real dist;
+
+    for ( UInt i(0); i < M_nbMapDof; ++i )
+    {
+        for ( UInt j(i+1); j < M_nbMapDof; ++j)
+        {
+            dist = 0.0;
+            for ( UInt icoor(0); icoor < S_spaceDimension; ++icoor)
+            {
+                dist += (M_cellNode[i][icoor]- M_cellNode[j][icoor])*(M_cellNode[i][icoor]- M_cellNode[j][icoor]);
+            }
+            M_diameter = std::max(M_diameter,dist);
+        }
+    }
+
+    M_diameter = std::sqrt(M_diameter);
+}
+
+template< UInt spaceDim>
+void
+ETCurrentFE<spaceDim,1>::
+updateMeasure()
+{
+    ASSERT(M_isWDetUpdated, "Wdet must be updated to compute the measure");
+
+#ifndef NDEBUG
+    M_isMeasureUpdated=true;
+#endif
+
+    M_measure=0.0;
+
+    for (UInt iq(0); iq<M_nbQuadPt; ++iq)
+    {
+        M_measure +=M_wDet[iq];
+    }
+}
+
+
 } // Namespace LifeV
 
 /*
- * Including header for ETCurrentFE for fieldDim=1
+ * Including header for ETCurrentFE for fieldDim=3
  */
-#include "ETCurrentFE_FD1.hpp"
+#include "ETCurrentFE_FD3.hpp"
 
 #endif /* ETCURRENTFE_HPP */
