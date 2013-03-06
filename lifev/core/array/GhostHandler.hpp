@@ -111,16 +111,23 @@ public:
 
     //! Node to node neighbor map
     neighborList_Type const & nodeNodeNeighborsList()
-    { 
-      ASSERT( !M_nodeNodeNeighborsList.empty(), "M_nodeNodeNeighborsList is empty" );
-      return M_nodeNodeNeighborsList;
+    {
+        ASSERT( !M_nodeNodeNeighborsList.empty(), "M_nodeNodeNeighborsList is empty" );
+        return M_nodeNodeNeighborsList;
+    }
+
+    //! Node to edge neighbor map
+    neighborList_Type const & nodeEdgeNeighborsList()
+    {
+        ASSERT( !M_nodeEdgeNeighborsList.empty(), "M_nodeEdgeNeighborsList is empty" );
+        return M_nodeEdgeNeighborsList;
     }
 
     //! Node to element neighbor map
     neighborList_Type const & nodeElementNeighborsList()
-    { 
-      ASSERT( !M_nodeElementNeighborsList.empty(), "M_nodeElementNeighborsList is empty" );
-      return M_nodeElementNeighborsList; 
+    {
+        ASSERT( !M_nodeElementNeighborsList.empty(), "M_nodeElementNeighborsList is empty" );
+        return M_nodeElementNeighborsList;
     }
 
     //@}
@@ -228,10 +235,6 @@ protected:
     mapPtr_Type M_ghostMapOnEdges;
     mapPtr_Type M_ghostMapOnElementsP0;
     mapPtr_Type M_ghostMapOnElementsP1;
-    mapList_Type M_ghostMapOnNodesMap;
-    mapList_Type M_ghostMapOnEdgesMap;
-    mapList_Type M_ghostMapOnElementsP0Map;
-    mapList_Type M_ghostMapOnElementsP1Map;
 
     //@}
 
@@ -370,19 +373,18 @@ void writeNeighborMap( EpetraExt::HDF5 & file, neighborList_Type & list, std::st
     file.Write( name, "valueSize", static_cast<Int>( values.size() ) );
     file.Write( name, "values", H5T_NATIVE_INT, values.size(), &values[ 0 ] );
 
-    /*
-    // DEBUG
-    std::cerr << name << std::endl;
-    for ( UInt i ( 0 ); i < map.size(); i++ )
-    {
-        std::cerr << i << "> ";
-        for ( neighborList_Type::const_iterator j ( map[ i ].begin() ); j != map[ i ].end(); ++j )
-        {
-            std::cerr << *j << " ";
-        }
-        std::cerr <<std::endl;
-    }
-    */
+//#ifdef HAVE_LIFEV_DEBUG
+//    std::cerr << name << std::endl;
+//    for ( UInt i ( 0 ); i < map.size(); i++ )
+//    {
+//        std::cerr << i << "> ";
+//        for ( neighborList_Type::const_iterator j ( map[ i ].begin() ); j != map[ i ].end(); ++j )
+//        {
+//            std::cerr << *j << " ";
+//        }
+//        std::cerr <<std::endl;
+//    }
+//#endif
 }
 
 void readNeighborMap( EpetraExt::HDF5 & file, neighborList_Type & list, std::string const & name )
@@ -407,19 +409,18 @@ void readNeighborMap( EpetraExt::HDF5 & file, neighborList_Type & list, std::str
         }
     }
 
-    /*
-    // DEBUG
-    std::cerr << name << std::endl;
-    for ( UInt i ( 0 ); i < map.size(); i++ )
-    {
-        std::cerr << i << "> ";
-        for ( neighborList_Type::const_iterator j ( map[ i ].begin() ); j != map[ i ].end(); ++j )
-        {
-            std::cerr << *j << " ";
-        }
-        std::cerr <<std::endl;
-    }
-    */
+//#ifdef HAVE_LIFEV_DEBUG
+//    std::cerr << name << std::endl;
+//    for ( UInt i ( 0 ); i < map.size(); i++ )
+//    {
+//        std::cerr << i << "> ";
+//        for ( neighborList_Type::const_iterator j ( map[ i ].begin() ); j != map[ i ].end(); ++j )
+//        {
+//            std::cerr << *j << " ";
+//        }
+//        std::cerr <<std::endl;
+//    }
+//#endif
 }
 
 }
@@ -743,9 +744,6 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnNodes()
     map_Type::map_ptrtype repeatedMap ( new Epetra_Map( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_comm ) );
     ghostMap.setMap( repeatedMap, Repeated );
 
-    // memorize the map in the list
-    //    M_ghostMapOnNodesMap[ 1 ] = M_ghostMapOnNodes;
-
     return *M_ghostMapOnNodes;
 }
 
@@ -808,9 +806,6 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnNodes( UIn
     map_Type::map_ptrtype repeatedMap ( new Epetra_Map( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_comm ) );
     ghostMap.setMap( repeatedMap, Repeated );
 
-    // memorize the map in the list
-    //M_ghostMapOnNodesMap[ overlap ] = M_ghostMapOnNodes;
-
     return *M_ghostMapOnNodes;
 }
 
@@ -829,16 +824,6 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnEdges( UIn
         this->createNodeEdgeNeighborsMap();
     }
 
-    // Modified version 25 Jan 2013
-    // loop on local mesh edges
-    //std::vector<Int> myGlobalElements;
-    //myGlobalElements.reserve( M_localMesh->numEdges() );
-    // for ( ID ie = 0; ie < M_localMesh->numEdges(); ie++ )
-    // {
-    //     myGlobalElements.push_back( M_localMesh->edge( ie ).id() );
-    // }
-
-    // Original GhostMapEpetra
     // set up Unique (first) and Repeated edges based on the OWNED flag
     std::pair< std::vector<Int>, std::vector<Int> > myGlobalElements;
     myGlobalElements.first.reserve( M_localMesh->numEdges() );
@@ -851,11 +836,6 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnEdges( UIn
             myGlobalElements.first.push_back( M_localMesh->edge( ie ).id() );
     }
 
-    // Modified Version
-    // create map
-    // M_ghostMapOnEdges.reset ( new map_Type( -1, myGlobalElements.size(), &myGlobalElements[0], M_comm ) );
-
-    //Original
     M_ghostMapOnEdges.reset ( new map_Type( myGlobalElements, M_comm ) );
 
     if ( overlap > 0 )
@@ -865,16 +845,6 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnEdges( UIn
         std::set<Int> myGlobalElementsSet;
         std::set<Int> addedElementsSet;
 
-	// Modified Version
-        // for (  UInt k ( 0 ); k < myGlobalElements.size(); k++ )
-        // {
-        //     typename mesh_Type::EdgeType const & edge = M_fullMesh->edge ( myGlobalElements[ k ] );
-        //     for ( UInt edgePoint = 0; edgePoint < mesh_Type::EdgeType::S_numPoints; edgePoint++ )
-        //         addedElementsSet.insert( edge.point( edgePoint ).id() );
-        // }
-        // ( myGlobalElements.begin(), myGlobalElements.end() );
-
-	//Original
         for (  UInt k ( 0 ); k < myGlobalElements.second.size(); k++ )
         {
             typename mesh_Type::edge_Type const & edge = M_fullMesh->edge ( myGlobalElements.second[ k ] );
@@ -913,23 +883,11 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnEdges( UIn
             }
         }
 
-	// Modified Version
-        // myGlobalElements.assign( myGlobalElementsSet.begin(), myGlobalElementsSet.end() );
-
-	//Original
         myGlobalElements.second.assign( myGlobalElementsSet.begin(), myGlobalElementsSet.end() );
-	
-	//Modified Version
-        // generate map
-        //map_Type::map_ptrtype repeatedMap ( new Epetra_Map( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_comm ) );
 
-	//Original
         map_Type::map_ptrtype repeatedMap ( new Epetra_Map( -1, myGlobalElements.second.size(), &myGlobalElements.second[0], 0, *M_comm ) );
         ghostMap.setMap( repeatedMap, Repeated );
     }
-
-    // memorize the map in the list
-    //M_ghostMapOnEdgesMap[ overlap ] = M_ghostMapOnEdges;
 
     return *M_ghostMapOnEdges;
 }
@@ -977,9 +935,6 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnElementsP0
     // generate map
     map_Type::map_ptrtype repeatedMap ( new Epetra_Map( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_comm ) );
     ghostMap.setMap( repeatedMap, Repeated );
-
-    // memorize the map in the list
-    //M_ghostMapOnElementsP0Map[ 1 ] = M_ghostMapOnElementsP0;
 
     return *M_ghostMapOnElementsP0;
 }
@@ -1061,15 +1016,13 @@ typename GhostHandler<Mesh>::map_Type & GhostHandler<Mesh>::ghostMapOnElementsP1
     map_Type::map_ptrtype repeatedMap ( new Epetra_Map( -1, myGlobalElements.size(), &myGlobalElements[0], 0, *M_comm ) );
     ghostMap.setMap( repeatedMap, Repeated );
 
-    // memorize the map in the list
-    M_ghostMapOnElementsP1Map[ overlap ] = M_ghostMapOnElementsP1;
-
     return *M_ghostMapOnElementsP1;
 }
 
 template <typename Mesh>
 void GhostHandler<Mesh>::fillEntityPID( graphPtr_Type elemGraph, std::vector<std::vector<UInt> >& entityPID )
 {
+    //@todo: this routine does not belong here, should be moved to MeshPartitioner
     if ( M_verbose ) std::cout << " GH- fillEntityPID()" << std::endl;
 
     // initialize pointPID to NumProc
