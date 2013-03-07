@@ -37,17 +37,17 @@
 
 namespace LifeV
 {
-void Flag::showMe ( flag_Type const & flag, std::ostream & out )
+void Flag::showMe ( flag_Type const& flag, std::ostream& out )
 {
     out << "Flag -- ";
     flag_Type bit = 0x01;
-    for ( UInt i = 0; i < sizeof( flag_Type )*8; i++ )
+    for ( UInt i = 0; i < sizeof ( flag_Type ) * 8; i++ )
     {
         out << static_cast<bool> ( flag & bit );
         bit <<= 1;
     }
     out << std::endl;
 }
-const UInt nDimensions(NDIM);
+const UInt nDimensions (NDIM);
 } //end namespace LifeV
 

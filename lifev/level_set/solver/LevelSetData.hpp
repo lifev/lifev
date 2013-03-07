@@ -171,10 +171,10 @@ public:
     /*!
       Using this method overrides all the previously stored informations!
      */
-    void setup( const GetPot& dataFile, const std::string& section="level-set");
+    void setup ( const GetPot& dataFile, const std::string& section = "level-set");
 
     //! ShowMe method
-    void showMe(std::ostream& out = std::cout) const ;
+    void showMe (std::ostream& out = std::cout) const ;
 
     //@}
 
@@ -186,13 +186,19 @@ public:
     /*!
      * @param TimeData shared_ptr to TimeData container
      */
-    void setTimeData( const timePtr_Type timeData ) { M_time = timeData; }
+    void setTimeData ( const timePtr_Type timeData )
+    {
+        M_time = timeData;
+    }
 
     //! Set data time advance container
     /*!
      * @param timeAdvanceData shared_ptr to TimeAdvanceData container
      */
-    void setTimeAdvanceData( const timeAdvancePtr_Type timeAdvanceData ) { M_timeAdvance = timeAdvanceData; }
+    void setTimeAdvanceData ( const timeAdvancePtr_Type timeAdvanceData )
+    {
+        M_timeAdvance = timeAdvanceData;
+    }
 
     //! Set the stabilization type
     /*!
@@ -201,10 +207,13 @@ public:
       @Warning: prefer using the other version of setStabilization
       that is not sensible to typos.
     */
-    void setStabilization(const std::string& stab);
+    void setStabilization (const std::string& stab);
 
     //! Set the stabilization type
-    inline void setStabilization(const stabilization_type& stab) { M_stabilization = stab; }
+    inline void setStabilization (const stabilization_type& stab)
+    {
+        M_stabilization = stab;
+    }
 
     //! Set the treatment for the IP stabilization
     /*!
@@ -213,13 +222,19 @@ public:
       @Warning: prefer using the other version of setIPTreatment
       that is not sensible to typos.
     */
-    void setIPTreatment(const std::string& treat);
+    void setIPTreatment (const std::string& treat);
 
     //! Set the IP treatment
-    void setIPTreatment(const IPTreatment_type& treat) { M_IPTreatment = treat; }
+    void setIPTreatment (const IPTreatment_type& treat)
+    {
+        M_IPTreatment = treat;
+    }
 
     //! Set the IP coefficient
-    inline void setIPCoef(const Real& coef) { M_IPCoef = coef; };
+    inline void setIPCoef (const Real& coef)
+    {
+        M_IPCoef = coef;
+    };
 
     //@}
 
@@ -231,29 +246,44 @@ public:
     /*!
      * @return shared_ptr to TimeData container
      */
-    timePtr_Type dataTime() const { return M_time; }
+    timePtr_Type dataTime() const
+    {
+        return M_time;
+    }
 
     //! Get data time advance container
     /*!
      * @return shared_ptr to TimeAdvanceData container
      */
-    timeAdvancePtr_Type dataTimeAdvance() const { return M_timeAdvance; }
+    timeAdvancePtr_Type dataTimeAdvance() const
+    {
+        return M_timeAdvance;
+    }
 
     //! Getter for the stabilization type
-    inline stabilization_type stabilization() const { return M_stabilization; };
+    inline stabilization_type stabilization() const
+    {
+        return M_stabilization;
+    };
 
     //! Getter for the IP treatment
-    inline IPTreatment_type IPTreatment() const { return M_IPTreatment; };
+    inline IPTreatment_type IPTreatment() const
+    {
+        return M_IPTreatment;
+    };
 
     //! Getter for the IP coefficient
-    inline Real IPCoef() const { return M_IPCoef; };
+    inline Real IPCoef() const
+    {
+        return M_IPCoef;
+    };
 
     //@}
 
 private:
 
     // No copy
-    DataLevelSet(const DataLevelSet&);
+    DataLevelSet (const DataLevelSet&);
 
     // Data for the time
     timePtr_Type        M_time;

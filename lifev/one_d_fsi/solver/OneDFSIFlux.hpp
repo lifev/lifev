@@ -88,7 +88,7 @@ public:
     /*!
      * @param physicsPtr pointer to the physics of the problem
      */
-    explicit OneDFSIFlux( const physicsPtr_Type physicsPtr ) : M_physicsPtr( physicsPtr ) {}
+    explicit OneDFSIFlux ( const physicsPtr_Type physicsPtr ) : M_physicsPtr ( physicsPtr ) {}
 
     //! Do nothing destructor
     virtual ~OneDFSIFlux() {}
@@ -106,7 +106,7 @@ public:
      *  @param row row of the flux term
      *  @param iNode node of the mesh
      */
-    virtual Real flux( const Real& A, const Real& Q, const ID& row, const UInt& iNode ) const = 0;
+    virtual Real flux ( const Real& A, const Real& Q, const ID& row, const UInt& iNode ) const = 0;
 
 
     //! Evaluate the derivative of the flux term
@@ -117,7 +117,7 @@ public:
      *  @param column column of the derivative of the flux term
      *  @param iNode node of the mesh
      */
-    virtual Real dFdU( const Real& A, const Real& Q, const ID& row, const ID& column, const UInt& iNode ) const  = 0;
+    virtual Real dFdU ( const Real& A, const Real& Q, const ID& row, const ID& column, const UInt& iNode ) const  = 0;
 
     //! Eigenvalues and eigenvectors of the Jacobian matrix
     /*!
@@ -128,11 +128,11 @@ public:
      *  @param leftEigenvector2 second row of the left eigenvector matrix
      *  @param iNode node of the mesh
      */
-    virtual void eigenValuesEigenVectors( const Real& A, const Real& Q,
-                                          container2D_Type& eigenvalues,
-                                          container2D_Type& leftEigenvector1,
-                                          container2D_Type& leftEigenvector2,
-                                          const UInt& iNode ) const = 0;
+    virtual void eigenValuesEigenVectors ( const Real& A, const Real& Q,
+                                           container2D_Type& eigenvalues,
+                                           container2D_Type& leftEigenvector1,
+                                           container2D_Type& leftEigenvector2,
+                                           const UInt& iNode ) const = 0;
 
     //! Derivatives of the eigenvalues and eigenvectors of the derivative of the Jacobian matrix
     /*!
@@ -143,11 +143,11 @@ public:
      *  @param deltaLeftEigenvector2 derivative of the second row of the left eigenvector matrix
      *  @param iNode node of the mesh
      */
-    virtual void deltaEigenValuesEigenVectors( const Real& A, const Real& Q,
-                                               container2D_Type& deltaEigenvalues,
-                                               container2D_Type& deltaLeftEigenvector1,
-                                               container2D_Type& deltaLeftEigenvector2,
-                                               const UInt& iNode ) const = 0;
+    virtual void deltaEigenValuesEigenVectors ( const Real& A, const Real& Q,
+                                                container2D_Type& deltaEigenvalues,
+                                                container2D_Type& deltaLeftEigenvector1,
+                                                container2D_Type& deltaLeftEigenvector2,
+                                                const UInt& iNode ) const = 0;
 
     //@}
 
@@ -159,7 +159,10 @@ public:
     /*!
      * @param physicsPtr pointer to the physics of the problem
      */
-    void setPhysics( const physicsPtr_Type& physicsPtr ) { M_physicsPtr = physicsPtr; }
+    void setPhysics ( const physicsPtr_Type& physicsPtr )
+    {
+        M_physicsPtr = physicsPtr;
+    }
 
     //@}
 
@@ -171,7 +174,10 @@ public:
     /*!
      * @return physics of the problem
      */
-    physicsPtr_Type physics() const { return M_physicsPtr; }
+    physicsPtr_Type physics() const
+    {
+        return M_physicsPtr;
+    }
 
     //@}
 
@@ -184,9 +190,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    explicit OneDFSIFlux( const OneDFSIFlux& flux );
+    explicit OneDFSIFlux ( const OneDFSIFlux& flux );
 
-    OneDFSIFlux& operator=( const OneDFSIFlux& flux );
+    OneDFSIFlux& operator= ( const OneDFSIFlux& flux );
 
     //@}
 

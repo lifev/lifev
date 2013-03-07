@@ -69,14 +69,14 @@ public:
     //! @name Static constants
     //@{
 
-	//! Flag for the global current FE
-	const static flag_Type S_globalUpdateFlag;
+    //! Flag for the global current FE
+    const static flag_Type S_globalUpdateFlag;
 
-	//! Flag for the test current FE
-	const static flag_Type S_testUpdateFlag;
+    //! Flag for the test current FE
+    const static flag_Type S_testUpdateFlag;
 
-	//! Flag for the solution current FE
-	const static flag_Type S_solutionUpdateFlag;
+    //! Flag for the solution current FE
+    const static flag_Type S_solutionUpdateFlag;
 
     //@}
 
@@ -84,19 +84,19 @@ public:
     //! @name Constructors, destructor
     //@{
 
-	//! Empty constructor
-	EvaluationHK(){}
+    //! Empty constructor
+    EvaluationHK() {}
 
-	//! Copy constructor
-	EvaluationHK(const EvaluationHK<spaceDim>& evaluation)
-        : M_valuePtr(evaluation.M_valuePtr)
+    //! Copy constructor
+    EvaluationHK (const EvaluationHK<spaceDim>& evaluation)
+        : M_valuePtr (evaluation.M_valuePtr)
     {}
 
-	//! Expression-based constructor
-	explicit EvaluationHK(const ExpressionHK& /*expression*/) {}
+    //! Expression-based constructor
+    explicit EvaluationHK (const ExpressionHK& /*expression*/) {}
 
     //! Destructor
-    ~EvaluationHK(){}
+    ~EvaluationHK() {}
 
     //@}
 
@@ -105,10 +105,10 @@ public:
     //@{
 
     //! Do nothing update
-	void update(const UInt& /*iElement*/){}
+    void update (const UInt& /*iElement*/) {}
 
     //! Display method
-	static void display(ostream& out=std::cout)
+    static void display (ostream& out = std::cout)
     {
         out << "h_K";
     }
@@ -120,23 +120,23 @@ public:
     //@{
 
     //! Do nothing setter for the global current FE
-	template< typename CFEType >
-	void setGlobalCFE(const CFEType* globalCFE)
+    template< typename CFEType >
+    void setGlobalCFE (const CFEType* globalCFE)
     {
-        ASSERT(globalCFE != 0, "Nul pointer to the globalCFE cannot be set");
-        M_valuePtr = &(globalCFE->M_diameter);
+        ASSERT (globalCFE != 0, "Nul pointer to the globalCFE cannot be set");
+        M_valuePtr = & (globalCFE->M_diameter);
     }
 
     //! Setter for the test current FE
-	template< typename CFEType >
-	void setTestCFE(const CFEType* /*testCFE*/){}
+    template< typename CFEType >
+    void setTestCFE (const CFEType* /*testCFE*/) {}
 
     //! Do nothing setter for the solution current FE
-	template< typename CFEType >
-	void setSolutionCFE(const CFEType* /*solutionCFE*/){}
+    template< typename CFEType >
+    void setSolutionCFE (const CFEType* /*solutionCFE*/) {}
 
     //! Do nothing setter for the quadrature rule
-	void setQuadrature(const QuadratureRule&){}
+    void setQuadrature (const QuadratureRule&) {}
 
     //@}
 
@@ -145,19 +145,19 @@ public:
     //@{
 
     //! Getter for the value for a value
-    return_Type value_q(const UInt& /*q*/) const
+    return_Type value_q (const UInt& /*q*/) const
     {
         return *M_valuePtr;
     }
 
     //! Getter for the value for a vector
-	return_Type value_qi(const UInt& /*q*/, const UInt& /*i*/) const
+    return_Type value_qi (const UInt& /*q*/, const UInt& /*i*/) const
     {
         return *M_valuePtr;
     }
 
     //! Getter for the value for a matrix
-	return_Type value_qij(const UInt& /*q*/, const UInt& /*i*/, const UInt& /*j*/) const
+    return_Type value_qij (const UInt& /*q*/, const UInt& /*i*/, const UInt& /*j*/) const
     {
         return *M_valuePtr;
     }
@@ -167,18 +167,18 @@ public:
 private:
 
     //! Storage for the pointer to the data
-    Real const * M_valuePtr;
+    Real const* M_valuePtr;
 
 };
 
 template<UInt spaceDim>
-const flag_Type EvaluationHK<spaceDim>::S_globalUpdateFlag=ET_UPDATE_DIAMETER;
+const flag_Type EvaluationHK<spaceDim>::S_globalUpdateFlag = ET_UPDATE_DIAMETER;
 
 template<UInt spaceDim>
-const flag_Type EvaluationHK<spaceDim>::S_testUpdateFlag=ET_UPDATE_NONE;
+const flag_Type EvaluationHK<spaceDim>::S_testUpdateFlag = ET_UPDATE_NONE;
 
 template<UInt spaceDim>
-const flag_Type EvaluationHK<spaceDim>::S_solutionUpdateFlag=ET_UPDATE_NONE;
+const flag_Type EvaluationHK<spaceDim>::S_solutionUpdateFlag = ET_UPDATE_NONE;
 
 
 } // Namespace ExpressionAssembly

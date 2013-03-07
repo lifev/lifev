@@ -47,9 +47,9 @@ namespace
 
 using namespace LifeV;
 
-typedef boost::function<Vector ( const Real&, const Real&,
-                                 const Real&, const Real&,
-                                 const std::vector<Real>& )>
+typedef boost::function < Vector ( const Real&, const Real&,
+                                   const Real&, const Real&,
+                                   const std::vector<Real>& ) >
 vectorFunction;
 
 // Compute plus or minus the function dot normal vector
@@ -63,9 +63,9 @@ Real functionDotNormal ( const Real&              unknown,
                          const Real&              plusMinus,
                          const std::vector<Real>& fieldsValues )
 {
-    Real valueFunctionDotNormal(0);
-    const UInt problemDimension( normal.size() );
-    std::vector<Real> unknownAndFields( 1, 0. );
+    Real valueFunctionDotNormal (0);
+    const UInt problemDimension ( normal.size() );
+    std::vector<Real> unknownAndFields ( 1, 0. );
 
     // Add to the vector unknownAndFields the values of the unknown then the value of the external fields.
     unknownAndFields[0] = unknown;
@@ -73,9 +73,9 @@ Real functionDotNormal ( const Real&              unknown,
                               fieldsValues.begin(), fieldsValues.end() );
 
     // Compute  \sum_{i} physicalFlux(i) * n(i)
-    for ( UInt nDim(0); nDim < problemDimension; ++nDim )
+    for ( UInt nDim (0); nDim < problemDimension; ++nDim )
     {
-        valueFunctionDotNormal += plusMinus * function( t, x, y, z, unknownAndFields )[nDim] * normal[nDim];
+        valueFunctionDotNormal += plusMinus * function ( t, x, y, z, unknownAndFields ) [nDim] * normal[nDim];
     }
 
     return valueFunctionDotNormal;
@@ -92,9 +92,9 @@ Real absFunctionDotNormal ( const Real&              unknown,
                             const Real&              plusMinus,
                             const std::vector<Real>& fieldsValues)
 {
-    Real valueFunctionDotNormal(0);
-    const UInt problemDimension( normal.size() );
-    std::vector<Real> unknownAndFields( fieldsValues.size() + 1, 0. );
+    Real valueFunctionDotNormal (0);
+    const UInt problemDimension ( normal.size() );
+    std::vector<Real> unknownAndFields ( fieldsValues.size() + 1, 0. );
 
     // Add to the vector unknownAndFields the values of the unknown then the value of the external fields.
     unknownAndFields[0] = unknown;
@@ -102,12 +102,12 @@ Real absFunctionDotNormal ( const Real&              unknown,
                               fieldsValues.begin(), fieldsValues.end() );
 
     // Compute \sum_{i} physicalFlux(i) * n(i)
-    for ( LifeV::UInt nDim(0); nDim < problemDimension; ++nDim )
+    for ( LifeV::UInt nDim (0); nDim < problemDimension; ++nDim )
     {
-        valueFunctionDotNormal += function( t, x, y, z, unknownAndFields )[nDim] * normal[nDim];
+        valueFunctionDotNormal += function ( t, x, y, z, unknownAndFields ) [nDim] * normal[nDim];
     }
 
-    return plusMinus * std::fabs( valueFunctionDotNormal );
+    return plusMinus * std::fabs ( valueFunctionDotNormal );
 }
 
 }
@@ -132,8 +132,8 @@ namespace LifeV
   @note In the implementation of the physical flux \f$ \mathbf{F} \f$ we suppose that the first parameter of the vector is the unknown.
         See the test case for an example.
 */
-template< typename Mesh,
-          typename SolverType = LifeV::SolverAztecOO >
+template < typename Mesh,
+         typename SolverType = LifeV::SolverAztecOO >
 class AbstractNumericalFlux
 {
 
@@ -142,9 +142,9 @@ public:
     //! @name Public Types
     //@{
 
-    typedef boost::function<Vector ( const Real&, const Real&,
-                                     const Real&, const Real&,
-                                     const std::vector<Real>& )>
+    typedef boost::function < Vector ( const Real&, const Real&,
+                                       const Real&, const Real&,
+                                       const std::vector<Real>& ) >
     vectorFunction_Type;
 
     typedef boost::function< Real ( const Real& ) > scalarFunction_Type;
@@ -220,9 +220,9 @@ public:
       Add one extra field for the dependece from \f$ \mathbf{F} \f$.
       @param field The filed to be added.
     */
-    inline void setExternalField ( const vectorPtr_Type & field )
+    inline void setExternalField ( const vectorPtr_Type& field )
     {
-        M_fields.push_back( &field );
+        M_fields.push_back ( &field );
     }
 
     //@}
@@ -401,13 +401,13 @@ AbstractNumericalFlux ( const vectorFunction_Type&       physicalFlux,
                         const vectorFunction_Type&       firstDerivativePhysicalFlux,
                         const FESpace<Mesh, MapEpetra>&  fESpace,
                         const dataFile_Type&             data,
-                        const std::string&               section ):
-        M_physicalFlux                ( physicalFlux ),
-        M_firstDerivativePhysicalFlux ( firstDerivativePhysicalFlux ),
-        M_CFLBrentToll                ( data( ( section + "CFL/brent_toll" ).data(), 1e-4 ) ),
-        M_CFLBrentMaxIter             ( data( ( section + "CFL/brent_maxIter" ).data(), 20 ) ),
-        M_fESpace                     ( fESpace ),
-        M_fields                      ( std::vector< const vectorPtr_Type* >(0) )
+                        const std::string&               section ) :
+    M_physicalFlux                ( physicalFlux ),
+    M_firstDerivativePhysicalFlux ( firstDerivativePhysicalFlux ),
+    M_CFLBrentToll                ( data ( ( section + "CFL/brent_toll" ).data(), 1e-4 ) ),
+    M_CFLBrentMaxIter             ( data ( ( section + "CFL/brent_maxIter" ).data(), 20 ) ),
+    M_fESpace                     ( fESpace ),
+    M_fields                      ( std::vector< const vectorPtr_Type* > (0) )
 {
 
 } // Constructor
@@ -429,21 +429,21 @@ template< typename Mesh, typename SolverType >
 Real
 AbstractNumericalFlux<Mesh, SolverType>::
 normInfinity ( const Real& leftState, const Real& rightState, const normal_Type& normal, const UInt& iElem,
-            const Real& t, const Real& x, const Real& y, const Real& z ) const
+               const Real& t, const Real& x, const Real& y, const Real& z ) const
 {
 
     std::vector<Real> values ( M_fields.size() * M_fESpace.fieldDim(), 0 );
-    const UInt totalDofsPresent( M_fESpace.dof().numTotalDof() );
-    const UInt fieldDim( M_fESpace.fieldDim() );
+    const UInt totalDofsPresent ( M_fESpace.dof().numTotalDof() );
+    const UInt fieldDim ( M_fESpace.fieldDim() );
     scalarFunction_Type absFunctionDotNormalBound;
 
     // Takes the value of all the external fields in the current element.
-    for ( UInt i(0); i < M_fields.size(); ++i )
+    for ( UInt i (0); i < M_fields.size(); ++i )
     {
         // Select if the external field is a scalar or vector field
-        for ( UInt iComponent(0); iComponent < fieldDim; ++iComponent )
+        for ( UInt iComponent (0); iComponent < fieldDim; ++iComponent )
         {
-            values[ i*fieldDim + iComponent ] = (*( *(M_fields)[i] ))[ iComponent*totalDofsPresent + M_fESpace.dof().localToGlobalMap( iElem, 0)  ];
+            values[ i * fieldDim + iComponent ] = (* ( * (M_fields) [i] ) ) [ iComponent * totalDofsPresent + M_fESpace.dof().localToGlobalMap ( iElem, 0)  ];
         }
 
     }
@@ -454,8 +454,8 @@ normInfinity ( const Real& leftState, const Real& rightState, const normal_Type&
                                               normal, t, x, y, z, -1, values );
 
     // Compute the minumum of minus absFunctionDotNormal
-    const Real maxValue = NonLinearBrent( absFunctionDotNormalBound, leftState, rightState,
-                                 M_CFLBrentToll, M_CFLBrentMaxIter );
+    const Real maxValue = NonLinearBrent ( absFunctionDotNormalBound, leftState, rightState,
+                                           M_CFLBrentToll, M_CFLBrentMaxIter );
 
     // Return minus the value
     return - absFunctionDotNormalBound ( maxValue );
@@ -471,17 +471,17 @@ computeFunctionDotNormal ( const vectorFunction_Type& function, const normal_Typ
 {
 
     std::vector<Real> values ( M_fields.size() * M_fESpace.fieldDim(), 0 );
-    const UInt totalDofsPresent( M_fESpace.dof().numTotalDof() );
-    const UInt fieldDim( M_fESpace.fieldDim() );
+    const UInt totalDofsPresent ( M_fESpace.dof().numTotalDof() );
+    const UInt fieldDim ( M_fESpace.fieldDim() );
     scalarFunction_Type functionDotNormalBound;
 
     // Takes the value of all the external fields in the current element.
-    for ( UInt i(0); i < M_fields.size(); ++i )
+    for ( UInt i (0); i < M_fields.size(); ++i )
     {
         // Select if the external field is a scalar or vector field
-        for ( UInt iComponent(0); iComponent < fieldDim; ++iComponent )
+        for ( UInt iComponent (0); iComponent < fieldDim; ++iComponent )
         {
-            values[ i*fieldDim + iComponent ] = (*( *(M_fields)[i] ))[ iComponent*totalDofsPresent + M_fESpace.dof().localToGlobalMap( iElem, 0)  ];
+            values[ i * fieldDim + iComponent ] = (* ( * (M_fields) [i] ) ) [ iComponent * totalDofsPresent + M_fESpace.dof().localToGlobalMap ( iElem, 0)  ];
         }
 
     }
@@ -522,8 +522,8 @@ computeFunctionDotNormal ( const vectorFunction_Type& function, const normal_Typ
   @note In the implementation of the physical flux \f$ \mathbf{F} \f$ we suppose that the first parameter of the vector is the unknown.
         See the test case for an example.
 */
-template< typename Mesh,
-typename SolverType = LifeV::SolverAztecOO >
+template < typename Mesh,
+         typename SolverType = LifeV::SolverAztecOO >
 class GodunovNumericalFlux : public AbstractNumericalFlux<Mesh, SolverType>
 {
 
@@ -615,14 +615,14 @@ GodunovNumericalFlux ( const vectorFunction_Type&       physicalFlux,
                        const vectorFunction_Type&       firstDerivativePhysicalFlux,
                        const FESpace<Mesh, MapEpetra>&  fESpace,
                        const dataFile_Type&             data,
-                       const std::string&               section ):
+                       const std::string&               section ) :
     AbstractNumericalFlux<Mesh, SolverType>::AbstractNumericalFlux  ( physicalFlux,
                                                                       firstDerivativePhysicalFlux,
                                                                       fESpace,
                                                                       data,
                                                                       section ),
-    M_brentToll                                   ( data( ( section + "godunov/brent_toll" ).data(), 1e-4 ) ),
-    M_brentMaxIter                                ( data( ( section + "godunov/brent_maxIter" ).data(), 20) )
+    M_brentToll                                   ( data ( ( section + "godunov/brent_toll" ).data(), 1e-4 ) ),
+    M_brentMaxIter                                ( data ( ( section + "godunov/brent_maxIter" ).data(), 20) )
 {
 
 } // Constructor
@@ -647,10 +647,10 @@ operator() ( const Real& leftState, const Real& rightState, const normal_Type& n
 {
 
     // It will store the value of the flux
-    Real fluxValue( static_cast<Real>(0) );
+    Real fluxValue ( static_cast<Real> (0) );
 
     // It will store the argmin or argmax of flux dot normal
-    Real minMax( static_cast<Real>(0) );
+    Real minMax ( static_cast<Real> (0) );
 
     // The normal flux function
     scalarFunction_Type normalFlux;
@@ -659,24 +659,24 @@ operator() ( const Real& leftState, const Real& rightState, const normal_Type& n
     if ( rightState > leftState )
     {
         // Create the function f \cdot n
-        normalFlux = this->computeFunctionDotNormal( this->M_physicalFlux, normal, iElem, t, x, y, z, +1 );
+        normalFlux = this->computeFunctionDotNormal ( this->M_physicalFlux, normal, iElem, t, x, y, z, +1 );
 
         // Compute the argmin f \cdot n
-        minMax = NonLinearBrent( normalFlux, leftState, rightState, M_brentToll, M_brentMaxIter );
+        minMax = NonLinearBrent ( normalFlux, leftState, rightState, M_brentToll, M_brentMaxIter );
 
         // Compute the flux value
-        fluxValue = normalFlux( minMax );
+        fluxValue = normalFlux ( minMax );
     }
     else
     {
         // Create the function - f \cdot n
-        normalFlux = this->computeFunctionDotNormal( this->M_physicalFlux, normal, iElem, t, x, y, z, -1 );
+        normalFlux = this->computeFunctionDotNormal ( this->M_physicalFlux, normal, iElem, t, x, y, z, -1 );
 
         // Compute the argmin - f \cdot n
-        minMax = NonLinearBrent( normalFlux, leftState, rightState, M_brentToll, M_brentMaxIter );
+        minMax = NonLinearBrent ( normalFlux, leftState, rightState, M_brentToll, M_brentMaxIter );
 
         // Compute the flux value
-        fluxValue = - normalFlux( minMax );
+        fluxValue = - normalFlux ( minMax );
     }
 
     return fluxValue;

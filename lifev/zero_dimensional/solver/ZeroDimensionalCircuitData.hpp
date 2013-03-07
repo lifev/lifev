@@ -56,7 +56,7 @@ namespace LifeV
 //! A container class for all node objects
 class ZeroDimensionalNodeS;
 
-  //! A container class for all element obkects
+//! A container class for all element obkects
 class ZeroDimensionalElementS;
 
 typedef boost::shared_ptr< ZeroDimensionalElementS >                    zeroDimensionalElementSPtr_Type;
@@ -96,37 +96,37 @@ public:
     //@{
 
     //! Display some information.
-    virtual void showMe( const Int& flag = 0 );
+    virtual void showMe ( const Int& flag = 0 );
 
-    const std::string enum2string( const ZeroDimensionalElementType & type );
+    const std::string enum2string ( const ZeroDimensionalElementType& type );
 
     //! Connect elements to the nodes.
     /*!
      * After all emenets and nodes are created, each element will call this
      * method to connect itse;f to the nodes.
      */
-    virtual void connectElement( zeroDimensionalNodeSPtr_Type& nodes ) = 0;
+    virtual void connectElement ( zeroDimensionalNodeSPtr_Type& nodes ) = 0;
 
     //! Contribution of the element of matrix \bf{A} and \bf{B} and vector \bf{C}.
     /*!
      * After updating the BCs ( or Terminal nodes ) this each element will invoke
      * this method to compute it's contribution on matrices.
      */
-    virtual void buildABC( matrix_Type& /*A*/, matrix_Type& /*B*/, vector_Type& /*C*/, const zeroDimensionalNodeSPtr_Type& /*Nodes*/ ) {}
+    virtual void buildABC ( matrix_Type& /*A*/, matrix_Type& /*B*/, vector_Type& /*C*/, const zeroDimensionalNodeSPtr_Type& /*Nodes*/ ) {}
 
     //! Compute outputs (currents and voltages) from the solution vector after each succesful iteration.
     /*!
      * After each time step, when Rythmos solver is succesfully finishes, this method will compute
      * finial outputs ( for exmple currents) from the finial solution vector.
      */
-    virtual void extractSolution( const ZeroDimensionalNodeS& /*nodes*/ ) {}
+    virtual void extractSolution ( const ZeroDimensionalNodeS& /*nodes*/ ) {}
 
     //! This method specifies the convention of current direction in an element.
     /*!
      * @param A node index connected to the element.
      * @return +1 if the current convention is toward the iniput node and -1 otherwise.
      */
-    virtual Real direction( const Int & nodeId ) const = 0;
+    virtual Real direction ( const Int& nodeId ) const = 0;
 
     //@}
 
@@ -134,12 +134,21 @@ public:
     //! @name Set Methods
     //@{
 
-    void setId(const Int& id ) { M_id = id; }
+    void setId (const Int& id )
+    {
+        M_id = id;
+    }
 
-    void setCurrent(const Real& current ) { M_current = current; }
+    void setCurrent (const Real& current )
+    {
+        M_current = current;
+    }
 
     //! Set derivative of current respect to time.
-    void setDeltaCurrent(const Real& deltaCurrent ) { M_deltaCurrent= deltaCurrent; }
+    void setDeltaCurrent (const Real& deltaCurrent )
+    {
+        M_deltaCurrent = deltaCurrent;
+    }
 
     //@}
 
@@ -147,14 +156,26 @@ public:
     //! @name Get Methods
     //@{
 
-    const Int& id() const { return M_id; }
+    const Int& id() const
+    {
+        return M_id;
+    }
 
-    const ZeroDimensionalElementType& type() const { return M_type; }
+    const ZeroDimensionalElementType& type() const
+    {
+        return M_type;
+    }
 
-    const Real& current() const { return M_current; }
+    const Real& current() const
+    {
+        return M_current;
+    }
 
     //! Get derivative of current respect to time.
-    const Real& deltaCurrent() const { return M_deltaCurrent; }
+    const Real& deltaCurrent() const
+    {
+        return M_deltaCurrent;
+    }
 
     //@}
 
@@ -197,10 +218,10 @@ public:
     //@{
 
     //! Show some information.
-    void showMe( const Int& flag = 0 );
+    void showMe ( const Int& flag = 0 );
 
     //! Impleaments the abstarct class for passive elements.
-    void connectElement( zeroDimensionalNodeSPtr_Type & nodes );
+    void connectElement ( zeroDimensionalNodeSPtr_Type& nodes );
 
     //@}
 
@@ -209,13 +230,19 @@ public:
     //@{
 
     //! set parameter (1/R, 1/L, C, 1/R_{eff})
-    void setParameter( const Real & parameter ) { M_parameter = parameter; }
+    void setParameter ( const Real& parameter )
+    {
+        M_parameter = parameter;
+    }
 
     //! add the node to the list.
     /*!
      * @param node index.
      */
-    void setNodeIndex( const Int& index ) { M_nodeIndex.push_back(index); }
+    void setNodeIndex ( const Int& index )
+    {
+        M_nodeIndex.push_back (index);
+    }
 
     //@}
 
@@ -224,16 +251,22 @@ public:
     //@{
 
     //! get the parameter (1/R, 1/L, C, 1/R_{eff})
-    const Real& parameter() const { return M_parameter; }
+    const Real& parameter() const
+    {
+        return M_parameter;
+    }
 
     //! get the node index connected to the node.
     /*!
      * @param \it{i}th node connected to the elelemt.
      * @return  Index of \it{i}th node connected to the element.
      */
-    const Int& nodeIndex( const Int& position ) const { return M_nodeIndex.at(position); }
+    const Int& nodeIndex ( const Int& position ) const
+    {
+        return M_nodeIndex.at (position);
+    }
 
-    Real direction( const Int& nodeId )const;
+    Real direction ( const Int& nodeId ) const;
 
     //@}
 
@@ -272,11 +305,11 @@ public:
     //! @name Methods
     //@{
 
-    void showMe( const Int& flag = 0 );
+    void showMe ( const Int& flag = 0 );
 
-    void buildABC( matrix_Type& A, matrix_Type& B, vector_Type& C, const zeroDimensionalNodeSPtr_Type& Nodes );
+    void buildABC ( matrix_Type& A, matrix_Type& B, vector_Type& C, const zeroDimensionalNodeSPtr_Type& Nodes );
 
-    void extractSolution( const ZeroDimensionalNodeS& nodes );
+    void extractSolution ( const ZeroDimensionalNodeS& nodes );
 
     //@}
 };
@@ -306,11 +339,11 @@ public:
     //! @name Methods
     //@{
 
-    void showMe( const Int& flag = 0 );
+    void showMe ( const Int& flag = 0 );
 
-    void extractSolution( const ZeroDimensionalNodeS& nodes );
+    void extractSolution ( const ZeroDimensionalNodeS& nodes );
 
-    void buildABC( matrix_Type& A, matrix_Type& B, vector_Type& C, const zeroDimensionalNodeSPtr_Type& Nodes );
+    void buildABC ( matrix_Type& A, matrix_Type& B, vector_Type& C, const zeroDimensionalNodeSPtr_Type& Nodes );
 
     //@}
 
@@ -319,11 +352,20 @@ public:
     //@{
 
     //!current = beta * exp(alpha * (voltage - forwardBias )) - (beta * exp(alpha * ( - forwardBias )))
-    void setalpha(const Real& alpha ) { M_alpha = alpha; }
+    void setalpha (const Real& alpha )
+    {
+        M_alpha = alpha;
+    }
 
-    void setbeta(const Real& beta ) { M_beta = beta; }
+    void setbeta (const Real& beta )
+    {
+        M_beta = beta;
+    }
 
-    void setforwardBias(const Real& forwardBias ) { M_forwardBias = forwardBias; }
+    void setforwardBias (const Real& forwardBias )
+    {
+        M_forwardBias = forwardBias;
+    }
 
     //@}
 
@@ -331,11 +373,20 @@ public:
     //! @name Get Methods
     //@{
 
-    const Real& alpha() const { return M_alpha; }
+    const Real& alpha() const
+    {
+        return M_alpha;
+    }
 
-    const Real& beta() const { return M_beta; }
+    const Real& beta() const
+    {
+        return M_beta;
+    }
 
-    const Real& forwardBias() const { return M_forwardBias; }
+    const Real& forwardBias() const
+    {
+        return M_forwardBias;
+    }
 
     //@}
 
@@ -346,7 +397,7 @@ protected:
      * @param voltage difference
      * @return effective ressitance
      */
-    void calculateEffectiveResistance(const Real& voltage);
+    void calculateEffectiveResistance (const Real& voltage);
 
     Real            M_alpha; //current = beta * exp(alpha * (voltage - forwardBias )) - (beta * exp(alpha * ( - forwardBias )))
     Real            M_beta;
@@ -378,11 +429,11 @@ public:
     //! @name Methods
     //@{
 
-    void showMe( const Int& flag = 0 );
+    void showMe ( const Int& flag = 0 );
 
-    void extractSolution( const ZeroDimensionalNodeS& nodes );
+    void extractSolution ( const ZeroDimensionalNodeS& nodes );
 
-    void buildABC( matrix_Type& A, matrix_Type& B, vector_Type& C, const zeroDimensionalNodeSPtr_Type& Nodes );
+    void buildABC ( matrix_Type& A, matrix_Type& B, vector_Type& C, const zeroDimensionalNodeSPtr_Type& Nodes );
 
     //@}
 };
@@ -415,11 +466,11 @@ public:
     /*!
      *Current in Inductor is an unknown.
      */
-    virtual void assignVariableIndex( const Int& index );
+    virtual void assignVariableIndex ( const Int& index );
 
-    void showMe( const Int& flag = 0 );
+    void showMe ( const Int& flag = 0 );
 
-    void buildABC( matrix_Type& A, matrix_Type& B, vector_Type& C, const zeroDimensionalNodeSPtr_Type& Nodes );
+    void buildABC ( matrix_Type& A, matrix_Type& B, vector_Type& C, const zeroDimensionalNodeSPtr_Type& Nodes );
 
     //@}
 
@@ -428,10 +479,16 @@ public:
     //@{
 
     //! get equation row for in matrix A,B and C.
-    const Int& equationRow() const { return M_equationRow; }
+    const Int& equationRow() const
+    {
+        return M_equationRow;
+    }
 
     //! get variable index in solution vector  x  and \dot{x}
-    const Int& variableIndex() const { return M_variableIndex; }
+    const Int& variableIndex() const
+    {
+        return M_variableIndex;
+    }
 
     //@}
 
@@ -466,7 +523,7 @@ public:
     //! @name Methods
     //@{
 
-    void showMe( const Int& flag = 0 );
+    void showMe ( const Int& flag = 0 );
 
     //@}
 
@@ -474,10 +531,16 @@ public:
     //! @name Set Methods
     //@{
 
-    void setNodeIndex(const Real & index ) { M_nodeIndex = index; }
+    void setNodeIndex (const Real& index )
+    {
+        M_nodeIndex = index;
+    }
 
     //! Set BC handler.
-    void setBC( const bcPtr_Type& bc) { M_bc = bc; }
+    void setBC ( const bcPtr_Type& bc)
+    {
+        M_bc = bc;
+    }
 
     //@}
 
@@ -485,9 +548,15 @@ public:
     //! @name Get Methods
     //@{
 
-    Int nodeIndex() const { return M_nodeIndex; }
+    Int nodeIndex() const
+    {
+        return M_nodeIndex;
+    }
 
-    Real direction( const Int& /*nodeId*/ ) const { return -1.0; }
+    Real direction ( const Int& /*nodeId*/ ) const
+    {
+        return -1.0;
+    }
 
     //@}
 
@@ -523,13 +592,13 @@ public:
     //! @name Get Methods
     //@{
 
-    void connectElement(zeroDimensionalNodeSPtr_Type & Nodes);
+    void connectElement (zeroDimensionalNodeSPtr_Type& Nodes);
 
     //! calculate current passing outward in voltage source.
     /*!
      *  This method can be called after all elements invoked extractSolution method.
      */
-    void calculateCurrent( const ZeroDimensionalNodeS& Nodes,const ZeroDimensionalElementS& Elements );
+    void calculateCurrent ( const ZeroDimensionalNodeS& Nodes, const ZeroDimensionalElementS& Elements );
 
     //@}
 
@@ -538,10 +607,16 @@ public:
     //@{
 
     //! Update voltage source by time.
-    void setVoltageByTime( const Real& time ) { M_voltage = M_bc->bc( M_nodeIndex ).evaluate(time); }
+    void setVoltageByTime ( const Real& time )
+    {
+        M_voltage = M_bc->bc ( M_nodeIndex ).evaluate (time);
+    }
 
     //! Update \frac{\partial voltage}{\partial t} by time.
-    void setDeltaVoltageByTime( const Real& time ) { M_deltaVoltage = M_bc->bc( M_nodeIndex + BC_CONSTANT ).evaluate(time); }
+    void setDeltaVoltageByTime ( const Real& time )
+    {
+        M_deltaVoltage = M_bc->bc ( M_nodeIndex + BC_CONSTANT ).evaluate (time);
+    }
 
     //@}
 
@@ -549,13 +624,25 @@ public:
     //! @name Get Methods
     //@{
 
-    const Real& voltage() const { return M_voltage; }
+    const Real& voltage() const
+    {
+        return M_voltage;
+    }
 
-    Real deltaVoltage() const { return M_deltaVoltage; }
+    Real deltaVoltage() const
+    {
+        return M_deltaVoltage;
+    }
 
-    Real voltageByTime(const Real & time) const { return M_bc->bc( M_nodeIndex ).evaluate(time); }
+    Real voltageByTime (const Real& time) const
+    {
+        return M_bc->bc ( M_nodeIndex ).evaluate (time);
+    }
 
-    Real deltaVoltageByTime(const Real & time) const { return M_bc->bc( M_nodeIndex + BC_CONSTANT ).evaluate(time); }
+    Real deltaVoltageByTime (const Real& time) const
+    {
+        return M_bc->bc ( M_nodeIndex + BC_CONSTANT ).evaluate (time);
+    }
 
     //@}
 
@@ -591,9 +678,9 @@ public:
     //! @name Methods
     //@{
 
-    void connectElement( zeroDimensionalNodeSPtr_Type & Nodes );
+    void connectElement ( zeroDimensionalNodeSPtr_Type& Nodes );
 
-    void buildABC( matrix_Type& A, matrix_Type& B, vector_Type& C, const zeroDimensionalNodeSPtr_Type& Nodes );
+    void buildABC ( matrix_Type& A, matrix_Type& B, vector_Type& C, const zeroDimensionalNodeSPtr_Type& Nodes );
 
     //@}
 
@@ -601,7 +688,10 @@ public:
     //! @name set Methods
     //@{
 
-    void setCurrentByTime(const Real& time ) { M_current = M_bc->bc( M_nodeIndex ).evaluate(time); }
+    void setCurrentByTime (const Real& time )
+    {
+        M_current = M_bc->bc ( M_nodeIndex ).evaluate (time);
+    }
 
     //@}
 
@@ -609,9 +699,15 @@ public:
     //! @name Get Methods
     //@{
 
-    Real currentByTime(const Real& time ) const { return M_bc->bc( M_nodeIndex ).evaluate(time); }
+    Real currentByTime (const Real& time ) const
+    {
+        return M_bc->bc ( M_nodeIndex ).evaluate (time);
+    }
 
-    Real current() const { return M_current; }
+    Real current() const
+    {
+        return M_current;
+    }
 
     //@}
 
@@ -688,9 +784,9 @@ public:
     /*!
      * After updating current in all elements, we can verify the balance of current flow at each node.
      */
-    void calculateCurrentBalance( const ZeroDimensionalElementS& Elements );
+    void calculateCurrentBalance ( const ZeroDimensionalElementS& Elements );
 
-    virtual void showMe( const Int& flag = 0 );
+    virtual void showMe ( const Int& flag = 0 );
 
     //@}
 
@@ -698,23 +794,38 @@ public:
     //! @name Set Methods
     //@{
 
-    const std::string enum2string( const ZeroDimensionalNodeType & type ) const;
+    const std::string enum2string ( const ZeroDimensionalNodeType& type ) const;
 
-    void setId( const Int& id ) { M_id = id; }
+    void setId ( const Int& id )
+    {
+        M_id = id;
+    }
 
     //! add an element index to the elelemt list.
-    void setElementListIndex( const Int& index ) { M_elementListIndex.push_back(index); }
+    void setElementListIndex ( const Int& index )
+    {
+        M_elementListIndex.push_back (index);
+    }
 
     //! add an node index which is connected by an element in element list.
     /*!
      * Each elelemnt in element list, coonects this node to another node ( except source elementt). nodeList is a container for conecting nodes.
      * If the element connected to this node has only one terminal ( like voltage source and current source), the connecting index would be -1.
      */
-    void setNodeListIndex(const Int& index ) { M_nodeListIndex.push_back(index); }
+    void setNodeListIndex (const Int& index )
+    {
+        M_nodeListIndex.push_back (index);
+    }
 
-    virtual void setVoltage(const Real& voltage ) { M_voltage = voltage; }
+    virtual void setVoltage (const Real& voltage )
+    {
+        M_voltage = voltage;
+    }
 
-    virtual void setDeltaVoltage(const Real& deltaVoltage ) { M_deltaVoltage = deltaVoltage; }
+    virtual void setDeltaVoltage (const Real& deltaVoltage )
+    {
+        M_deltaVoltage = deltaVoltage;
+    }
 
     //@}
 
@@ -722,21 +833,45 @@ public:
     //! @name Get Methods
     //@{
 
-    const Int& id() const { return M_id; }
+    const Int& id() const
+    {
+        return M_id;
+    }
 
-    const ZeroDimensionalNodeType& type() const { return M_type; }
+    const ZeroDimensionalNodeType& type() const
+    {
+        return M_type;
+    }
 
-    const Int& elementListIndexAt( const Int& position ) const { return M_elementListIndex.at(position); }
+    const Int& elementListIndexAt ( const Int& position ) const
+    {
+        return M_elementListIndex.at (position);
+    }
 
-    const vecInt_Type& elementListIndex() const { return M_elementListIndex; }
+    const vecInt_Type& elementListIndex() const
+    {
+        return M_elementListIndex;
+    }
 
-    const Int& nodeListIndexAt( const Int& position ) const { return M_nodeListIndex.at(position); }
+    const Int& nodeListIndexAt ( const Int& position ) const
+    {
+        return M_nodeListIndex.at (position);
+    }
 
-    virtual const Real& voltage() const { return M_voltage; }
+    virtual const Real& voltage() const
+    {
+        return M_voltage;
+    }
 
-    virtual Real deltaVoltage() const { return M_deltaVoltage;}
+    virtual Real deltaVoltage() const
+    {
+        return M_deltaVoltage;
+    }
 
-    const Real& currentBalance() const{ return M_currentBalance; }
+    const Real& currentBalance() const
+    {
+        return M_currentBalance;
+    }
 
     //@}
 
@@ -775,7 +910,7 @@ public:
     //! @name Methods
     //@{
 
-    void showMe( const Int& flag = 0 );
+    void showMe ( const Int& flag = 0 );
 
     //@}
 
@@ -784,7 +919,7 @@ public:
     //@{
 
     //! assign the index of the unknown voltage.
-    void assignVariableIndex(const Int & index) ;
+    void assignVariableIndex (const Int& index) ;
 
     //@}
 
@@ -792,9 +927,15 @@ public:
     //! @name Get Methods
     //@{
 
-    const Int& variableIndex() const { return M_variableIndex; }
+    const Int& variableIndex() const
+    {
+        return M_variableIndex;
+    }
 
-    const Int& equationRow() const { return M_equationRow; }
+    const Int& equationRow() const
+    {
+        return M_equationRow;
+    }
 
     //@}
 
@@ -823,7 +964,7 @@ public:
     /*!
      *@param Voltage Source connected to the knwn node.
      */
-    ZeroDimensionalNodeKnown( const zeroDimensionalElementVoltageSourcePtr_Type & theElement );
+    ZeroDimensionalNodeKnown ( const zeroDimensionalElementVoltageSourcePtr_Type& theElement );
 
 
     //! Destructor
@@ -836,17 +977,37 @@ public:
     //@{
 
     //!Set the VoltageSource Element which is connected to the Node
-    void setElement( const zeroDimensionalElementVoltageSourcePtr_Type &element ) { M_element=element; }
+    void setElement ( const zeroDimensionalElementVoltageSourcePtr_Type& element )
+    {
+        M_element = element;
+    }
 
-    void setVoltageByTime(const Real& time ) { M_voltage = M_element->voltageByTime(time); M_element->setVoltageByTime(time); }
+    void setVoltageByTime (const Real& time )
+    {
+        M_voltage = M_element->voltageByTime (time);
+        M_element->setVoltageByTime (time);
+    }
 
-    void setDeltaVoltageByTime(const Real& time ) { M_deltaVoltage = M_element->deltaVoltageByTime(time); M_element->setDeltaVoltageByTime(time); }
+    void setDeltaVoltageByTime (const Real& time )
+    {
+        M_deltaVoltage = M_element->deltaVoltageByTime (time);
+        M_element->setDeltaVoltageByTime (time);
+    }
 
-    const Real& voltage() const { return M_element->voltage(); }
+    const Real& voltage() const
+    {
+        return M_element->voltage();
+    }
 
-    Real  voltageByTime(Real& time) const { return M_element->voltageByTime(time); }
+    Real  voltageByTime (Real& time) const
+    {
+        return M_element->voltageByTime (time);
+    }
 
-    Real  deltaVoltageByTime(Real& time) const { return M_element->deltaVoltageByTime(time); }
+    Real  deltaVoltageByTime (Real& time) const
+    {
+        return M_element->deltaVoltageByTime (time);
+    }
 
     //@}
 
@@ -892,69 +1053,141 @@ public:
     //! Destructor
     virtual ~ZeroDimensionalElementS() {}
 
-    void showMe( const Int& flag = 0 );
+    void showMe ( const Int& flag = 0 );
 
     //! add element to the list.
-    void setelementList(const zeroDimensionalElementPtr_Type& theElement ) { M_elementList->push_back(theElement);}
+    void setelementList (const zeroDimensionalElementPtr_Type& theElement )
+    {
+        M_elementList->push_back (theElement);
+    }
 
     //! get element.
     /*!
      *@param element index
      *@return element
      */
-    const zeroDimensionalElementPtr_Type& elementListAt( const Int & index ) const { return M_elementList->at(index); }
+    const zeroDimensionalElementPtr_Type& elementListAt ( const Int& index ) const
+    {
+        return M_elementList->at (index);
+    }
 
-    const ptrVecZeroDimensionalElementPtr_Type& elementList() const { return M_elementList; }
+    const ptrVecZeroDimensionalElementPtr_Type& elementList() const
+    {
+        return M_elementList;
+    }
 
-    const ptrVecZeroDimensionalElementPassiveResistorPtr_Type& resistorList() const { return M_resistorList; }
+    const ptrVecZeroDimensionalElementPassiveResistorPtr_Type& resistorList() const
+    {
+        return M_resistorList;
+    }
 
-    const ptrVecZeroDimensionalElementPassiveCapacitorPtr_Type& capacitorList() const { return M_capacitorList; }
+    const ptrVecZeroDimensionalElementPassiveCapacitorPtr_Type& capacitorList() const
+    {
+        return M_capacitorList;
+    }
 
-    const ptrVecZeroDimensionalElementPassiveInductorPtr_Type& inductorList() const { return M_inductorList; }
+    const ptrVecZeroDimensionalElementPassiveInductorPtr_Type& inductorList() const
+    {
+        return M_inductorList;
+    }
 
-    const ptrVecZeroDimensionalElementPassiveDiodePtr_Type& diodeList() const { return M_diodeList; }
+    const ptrVecZeroDimensionalElementPassiveDiodePtr_Type& diodeList() const
+    {
+        return M_diodeList;
+    }
 
-    const ptrVecZeroDimensionalElementVoltageSourcePtr_Type& voltageSourceList() const { return M_voltageSourceList; }
+    const ptrVecZeroDimensionalElementVoltageSourcePtr_Type& voltageSourceList() const
+    {
+        return M_voltageSourceList;
+    }
 
-    const ptrVecZeroDimensionalElementCurrentSourcePtr_Type& currentSourceList() const { return M_currentSourceList; }
+    const ptrVecZeroDimensionalElementCurrentSourcePtr_Type& currentSourceList() const
+    {
+        return M_currentSourceList;
+    }
 
     //! total number of elements including sources.
-   Int elementCounter() const { return M_elementList->size(); }//TODO Why when I use CONST I get a warning??
+    Int elementCounter() const
+    {
+        return M_elementList->size();    //TODO Why when I use CONST I get a warning??
+    }
 
-   Int resistorCounter() const { return M_resistorList->size(); }
+    Int resistorCounter() const
+    {
+        return M_resistorList->size();
+    }
 
-   Int capacitorCounter() const { return M_capacitorList->size(); }
+    Int capacitorCounter() const
+    {
+        return M_capacitorList->size();
+    }
 
-   Int inductorCounter() const { return M_inductorList->size(); }
+    Int inductorCounter() const
+    {
+        return M_inductorList->size();
+    }
 
-   Int diodeCounter() const { return M_diodeList->size(); }
+    Int diodeCounter() const
+    {
+        return M_diodeList->size();
+    }
 
-   Int voltageSourceCounter() const { return M_voltageSourceList->size(); }
+    Int voltageSourceCounter() const
+    {
+        return M_voltageSourceList->size();
+    }
 
-   Int currentSourceCounter() const { return M_currentSourceList->size(); }
+    Int currentSourceCounter() const
+    {
+        return M_currentSourceList->size();
+    }
 
-   //! add resistor to the resistor list.
-    void  setResistorList(const zeroDimensionalElementPassiveResistorPtr_Type & resistorPtr ) { M_resistorList->push_back(resistorPtr); }
+    //! add resistor to the resistor list.
+    void  setResistorList (const zeroDimensionalElementPassiveResistorPtr_Type& resistorPtr )
+    {
+        M_resistorList->push_back (resistorPtr);
+    }
 
     //! add capacitor to the capacitor list.
-    void  setCapacitorList(const zeroDimensionalElementPassiveCapacitorPtr_Type & capacitorPtr ) { M_capacitorList->push_back(capacitorPtr); }
+    void  setCapacitorList (const zeroDimensionalElementPassiveCapacitorPtr_Type& capacitorPtr )
+    {
+        M_capacitorList->push_back (capacitorPtr);
+    }
 
     //! add inductor to the inductor list.
-    void  setInductorList(const zeroDimensionalElementPassiveInductorPtr_Type& inductorPtr ) { M_inductorList->push_back(inductorPtr); }
+    void  setInductorList (const zeroDimensionalElementPassiveInductorPtr_Type& inductorPtr )
+    {
+        M_inductorList->push_back (inductorPtr);
+    }
 
     //! add diode to the diode list.
-    void  setDiodeList(const zeroDimensionalElementPassiveDiodePtr_Type& diodePtr ) { M_diodeList->push_back(diodePtr); }
+    void  setDiodeList (const zeroDimensionalElementPassiveDiodePtr_Type& diodePtr )
+    {
+        M_diodeList->push_back (diodePtr);
+    }
 
     //! add currentSource to the current Source list.
-    void  setCurrentSourceList(const zeroDimensionalElementCurrentSourcePtr_Type& currentSourcePtr ) { M_currentSourceList->push_back(currentSourcePtr); }
+    void  setCurrentSourceList (const zeroDimensionalElementCurrentSourcePtr_Type& currentSourcePtr )
+    {
+        M_currentSourceList->push_back (currentSourcePtr);
+    }
 
     //! add voltgeSource to the voltage source list.
-    void  setVoltageSourceList(const zeroDimensionalElementVoltageSourcePtr_Type& voltageSourcePtr ) { M_voltageSourceList->push_back(voltageSourcePtr); }
+    void  setVoltageSourceList (const zeroDimensionalElementVoltageSourcePtr_Type& voltageSourcePtr )
+    {
+        M_voltageSourceList->push_back (voltageSourcePtr);
+    }
 
     //! add object to the map from voltage source index to the voltage source object.
-    void setVoltageSourceMap(const Int & id, const zeroDimensionalElementVoltageSourcePtr_Type & voltageSource) {(*M_voltageSourceMap)[id]= voltageSource;}
+    void setVoltageSourceMap (const Int& id, const zeroDimensionalElementVoltageSourcePtr_Type& voltageSource)
+    {
+        (*M_voltageSourceMap) [id] = voltageSource;
+    }
 
-    const zeroDimensionalElementVoltageSourcePtr_Type voltageSourceMap(Int& id) const {return (*M_voltageSourceMap)[id] ;}
+    const zeroDimensionalElementVoltageSourcePtr_Type voltageSourceMap (Int& id) const
+    {
+        return (*M_voltageSourceMap) [id] ;
+    }
 
 protected:
 
@@ -994,44 +1227,92 @@ public:
     //! Destructor
     virtual ~ZeroDimensionalNodeS() {}
 
-    virtual void showMe( const Int& flag = 0 );
+    virtual void showMe ( const Int& flag = 0 );
 
-    const zeroDimensionalNodePtr_Type& nodeListAt( const Int & index ) const { return M_nodeList->at(index); }
+    const zeroDimensionalNodePtr_Type& nodeListAt ( const Int& index ) const
+    {
+        return M_nodeList->at (index);
+    }
 
-    const zeroDimensionalNodeUnknownPtr_Type unknownNodeListAt( const Int & Index) const { return M_unknownNodeList->at(Index); }
+    const zeroDimensionalNodeUnknownPtr_Type unknownNodeListAt ( const Int& Index) const
+    {
+        return M_unknownNodeList->at (Index);
+    }
 
-    const zeroDimensionalNodeKnownPtr_Type knownNodeListAt( const Int & Index) const { return M_knownNodeList->at(Index); }
+    const zeroDimensionalNodeKnownPtr_Type knownNodeListAt ( const Int& Index) const
+    {
+        return M_knownNodeList->at (Index);
+    }
 
-    const ptrVecZeroDimensionalNodePtr_Type nodeList() const { return M_nodeList; }
+    const ptrVecZeroDimensionalNodePtr_Type nodeList() const
+    {
+        return M_nodeList;
+    }
 
-    const ptrVecZeroDimensionalNodeUnknownPtr_Type& unknownNodeList() const { return M_unknownNodeList;}
+    const ptrVecZeroDimensionalNodeUnknownPtr_Type& unknownNodeList() const
+    {
+        return M_unknownNodeList;
+    }
 
-    const ptrVecZeroDimensionalNodeKnownPtr_Type knownNodeList() const { return M_knownNodeList; }
+    const ptrVecZeroDimensionalNodeKnownPtr_Type knownNodeList() const
+    {
+        return M_knownNodeList;
+    }
 
-    const zeroDimensionalNodeKnownPtr_Type knownNodeMapAt(Int& id) const { return (*M_knownNodeMap)[id]; }
+    const zeroDimensionalNodeKnownPtr_Type knownNodeMapAt (Int& id) const
+    {
+        return (*M_knownNodeMap) [id];
+    }
 
-    const zeroDimensionalNodeUnknownPtr_Type unknownNodeMapAt(Int& id) const { return (*M_unknownNodeMap)[id]; }
+    const zeroDimensionalNodeUnknownPtr_Type unknownNodeMapAt (Int& id) const
+    {
+        return (*M_unknownNodeMap) [id];
+    }
 
     //! add node to the list
-    void setnodeList(const zeroDimensionalNodePtr_Type& theNode ) {M_nodeList->push_back(theNode);}
+    void setnodeList (const zeroDimensionalNodePtr_Type& theNode )
+    {
+        M_nodeList->push_back (theNode);
+    }
 
     //! add unknownNode to the unknwnNode List
-    void setunknownNodeList( const zeroDimensionalNodeUnknownPtr_Type & unknownNode) { M_unknownNodeList->push_back(unknownNode); }
+    void setunknownNodeList ( const zeroDimensionalNodeUnknownPtr_Type& unknownNode)
+    {
+        M_unknownNodeList->push_back (unknownNode);
+    }
 
     //! add knownNode to the knwnNode List
-    void setknownNodeList( const zeroDimensionalNodeKnownPtr_Type& knownNode) {M_knownNodeList->push_back(knownNode); }
+    void setknownNodeList ( const zeroDimensionalNodeKnownPtr_Type& knownNode)
+    {
+        M_knownNodeList->push_back (knownNode);
+    }
 
     //! add knownNode to the map. A map from the index (id) to the object.
-    void setknownNodeMap( const Int & id, const zeroDimensionalNodeKnownPtr_Type& knownNode) { (*M_knownNodeMap)[id] = knownNode; }
+    void setknownNodeMap ( const Int& id, const zeroDimensionalNodeKnownPtr_Type& knownNode)
+    {
+        (*M_knownNodeMap) [id] = knownNode;
+    }
 
     //! add unknownNode to the map. A map from the index (id) to the object.
-    void setunknownNodeMap( const Int & id, const zeroDimensionalNodeUnknownPtr_Type & unknownNode) { (*M_unknownNodeMap)[id]= unknownNode; }
+    void setunknownNodeMap ( const Int& id, const zeroDimensionalNodeUnknownPtr_Type& unknownNode)
+    {
+        (*M_unknownNodeMap) [id] = unknownNode;
+    }
 
-    Int unknownNodeCounter() const {return M_unknownNodeList->size(); }
+    Int unknownNodeCounter() const
+    {
+        return M_unknownNodeList->size();
+    }
 
-    Int knownNodeCounter() const {return M_knownNodeList->size(); }
+    Int knownNodeCounter() const
+    {
+        return M_knownNodeList->size();
+    }
 
-    Int nodeCounter() const {return M_nodeList->size(); }
+    Int nodeCounter() const
+    {
+        return M_nodeList->size();
+    }
 
 protected:
 
@@ -1067,20 +1348,26 @@ public:
 
     //@}
 
-    void showMe( const Int& flag = 0 );
+    void showMe ( const Int& flag = 0 );
 
     //! create the circuit.
     /*!
      * @param circuit file
      * @param BC handler
      */
-    void buildCircuit (const char *fileName, bcPtr_Type bc);
+    void buildCircuit (const char* fileName, bcPtr_Type bc);
 
     //! get element container object.
-    const zeroDimensionalElementSPtr_Type Elements() const { return M_Elements; }
+    const zeroDimensionalElementSPtr_Type Elements() const
+    {
+        return M_Elements;
+    }
 
     //! get node container object.
-    const zeroDimensionalNodeSPtr_Type Nodes() const { return M_Nodes; }
+    const zeroDimensionalNodeSPtr_Type Nodes() const
+    {
+        return M_Nodes;
+    }
 
     //! (shallow) update the circuit data from the solution.
     /*!
@@ -1088,35 +1375,35 @@ public:
      * This method updates the circuit data which is dependent on time or solution vector. For example
      * source elements are function of time and diode R_{eff} are function of voltage difference.
      */
-    void updateCircuitDataFromY(const Real& t, const Epetra_Vector* y,const Epetra_Vector* yp);
+    void updateCircuitDataFromY (const Real& t, const Epetra_Vector* y, const Epetra_Vector* yp);
 
     //! create matrix A,B and C.
     /*!
      * before calling this method, updateCircuitDataFromY method should be invoked.
      */
-    void updateABC(matrix_Type& A,matrix_Type& B,vector_Type& C);
+    void updateABC (matrix_Type& A, matrix_Type& B, vector_Type& C);
 
 
     //! (deep) update the circuit data from solution.
     /*!
      * This methed is invoked after Rythoms step is finished. This method computes currents.
      */
-    void extractSolutionFromY(const Real& t, const Epetra_Vector& y,const Epetra_Vector& yp);
+    void extractSolutionFromY (const Real& t, const Epetra_Vector& y, const Epetra_Vector& yp);
 
 protected:
 
     // set BCs to source elements
-    void fixBC(bcPtr_Type bc);
+    void fixBC (bcPtr_Type bc);
 
-    void createElementResistor(Int ID,Int node1,Int node2,Real parameter);
-    void createElementCapacitor(Int ID,Int node1,Int node2,Real parameter );
-    void createElementInductor(Int ID,Int node1,Int node2,Real parameter);
-    void createElementDiode(Int ID, Int node1, Int node2, Real forwardBias, Real alpha, Real beta);
-    Int createElementVoltageSource(Int node1);
-    void createElementCurrentSource(Int node1);
-    void createUnknownNode(const Int& id);
-    void createKnownNode(const Int& id);
-    void createKnownNode(const Int& id, const zeroDimensionalElementVoltageSourcePtr_Type & theElement);
+    void createElementResistor (Int ID, Int node1, Int node2, Real parameter);
+    void createElementCapacitor (Int ID, Int node1, Int node2, Real parameter );
+    void createElementInductor (Int ID, Int node1, Int node2, Real parameter);
+    void createElementDiode (Int ID, Int node1, Int node2, Real forwardBias, Real alpha, Real beta);
+    Int createElementVoltageSource (Int node1);
+    void createElementCurrentSource (Int node1);
+    void createUnknownNode (const Int& id);
+    void createKnownNode (const Int& id);
+    void createKnownNode (const Int& id, const zeroDimensionalElementVoltageSourcePtr_Type& theElement);
 
     zeroDimensionalElementSPtr_Type  M_Elements;
     zeroDimensionalNodeSPtr_Type     M_Nodes;
@@ -1139,17 +1426,17 @@ class OutPutFormat
 public:
 
     //! Constructor
-    explicit OutPutFormat( std::string  width, std::string  precision, std::string  whiteSpace, Int bufferSize);
+    explicit OutPutFormat ( std::string  width, std::string  precision, std::string  whiteSpace, Int bufferSize);
 
     //! Destructor
     virtual ~OutPutFormat();
 
     enum EndLine { newLine, space, nothing };
 
-    void writeDataFormat(const Real& number, std::ofstream & stream, const EndLine& flag);
-    void writeDataFormat(const Int& number,std::ofstream & stream, const EndLine& flag);
-    void writeDataFormat(const string& text,std::ofstream & stream, const EndLine& flag);
-    void writeNewLine(std::ofstream & stream);
+    void writeDataFormat (const Real& number, std::ofstream& stream, const EndLine& flag);
+    void writeDataFormat (const Int& number, std::ofstream& stream, const EndLine& flag);
+    void writeDataFormat (const string& text, std::ofstream& stream, const EndLine& flag);
+    void writeNewLine (std::ofstream& stream);
 
 private:
 
@@ -1160,7 +1447,7 @@ private:
     std::string  M_formatDouble;
     std::string  M_formatInteger;
     std::string  M_formatString;
-    char         *M_buffer;
+    char*         M_buffer;
 };
 
 } // LifeV namespace

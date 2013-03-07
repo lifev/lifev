@@ -48,7 +48,8 @@
 
 #include <boost/shared_ptr.hpp>
 
-namespace LifeV{
+namespace LifeV
+{
 
 /*!
   \namespace ExpressionAssembly
@@ -56,7 +57,8 @@ namespace LifeV{
   Namespace for the assembly via expressions
 
  */
-namespace ExpressionAssembly{
+namespace ExpressionAssembly
+{
 
 //! Integrate function for matricial expressions
 /*!
@@ -67,15 +69,15 @@ namespace ExpressionAssembly{
   with a loop on the elements.
  */
 template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
-IntegrateMatrixElement<MeshType,TestSpaceType,SolutionSpaceType,ExpressionType>
-integrate( const RequestLoopElement<MeshType>& request,
-			const QuadratureRule& quadrature,
-			const boost::shared_ptr<TestSpaceType>& testSpace,
-			const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
-			const ExpressionType& expression)
+IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType>
+integrate ( const RequestLoopElement<MeshType>& request,
+            const QuadratureRule& quadrature,
+            const boost::shared_ptr<TestSpaceType>& testSpace,
+            const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
+            const ExpressionType& expression)
 {
-	return IntegrateMatrixElement<MeshType,TestSpaceType,SolutionSpaceType,ExpressionType>
-		(request.mesh(),quadrature,testSpace,solutionSpace,expression);
+    return IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType>
+           (request.mesh(), quadrature, testSpace, solutionSpace, expression);
 }
 
 //! Integrate function for vectorial expressions
@@ -87,14 +89,14 @@ integrate( const RequestLoopElement<MeshType>& request,
   with a loop on the elements.
  */
 template < typename MeshType, typename TestSpaceType, typename ExpressionType>
-IntegrateVectorElement<MeshType,TestSpaceType,ExpressionType>
-integrate( const RequestLoopElement<MeshType>& request,
-			const QuadratureRule& quadrature,
-			const boost::shared_ptr<TestSpaceType>& testSpace,
-			const ExpressionType& expression)
+IntegrateVectorElement<MeshType, TestSpaceType, ExpressionType>
+integrate ( const RequestLoopElement<MeshType>& request,
+            const QuadratureRule& quadrature,
+            const boost::shared_ptr<TestSpaceType>& testSpace,
+            const ExpressionType& expression)
 {
-	return IntegrateVectorElement<MeshType,TestSpaceType,ExpressionType>
-		(request.mesh(),quadrature,testSpace,expression);
+    return IntegrateVectorElement<MeshType, TestSpaceType, ExpressionType>
+           (request.mesh(), quadrature, testSpace, expression);
 }
 
 //! Integrate function for benchmark expressions
@@ -106,13 +108,13 @@ integrate( const RequestLoopElement<MeshType>& request,
   with a loop on the elements.
  */
 template < typename MeshType, typename ExpressionType>
-IntegrateValueElement<MeshType,ExpressionType>
-integrate( const RequestLoopElement<MeshType>& request,
-			const QuadratureRule& quadrature,
-			const ExpressionType& expression)
+IntegrateValueElement<MeshType, ExpressionType>
+integrate ( const RequestLoopElement<MeshType>& request,
+            const QuadratureRule& quadrature,
+            const ExpressionType& expression)
 {
-	return IntegrateValueElement<MeshType,ExpressionType>
-		(request.mesh(),quadrature,expression);
+    return IntegrateValueElement<MeshType, ExpressionType>
+           (request.mesh(), quadrature, expression);
 }
 
 

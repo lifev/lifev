@@ -48,21 +48,21 @@ namespace LifeV
 FactoryTypeInfo::FactoryTypeInfo()
 {
     class Nil {};
-    M_info = &typeid(Nil);
-    assert( M_info != 0 );
+    M_info = &typeid (Nil);
+    assert ( M_info != 0 );
 
 }
 
-FactoryTypeInfo::FactoryTypeInfo(const std::type_info& ti):
-    M_info(&ti)
+FactoryTypeInfo::FactoryTypeInfo (const std::type_info& ti) :
+    M_info (&ti)
 {
-    assert( M_info != 0 );
+    assert ( M_info != 0 );
 }
 
-FactoryTypeInfo::FactoryTypeInfo( FactoryTypeInfo const& ti ):
-    M_info( ti.M_info )
+FactoryTypeInfo::FactoryTypeInfo ( FactoryTypeInfo const& ti ) :
+    M_info ( ti.M_info )
 {
-    assert( M_info != 0 );
+    assert ( M_info != 0 );
 }
 
 FactoryTypeInfo::~FactoryTypeInfo()
@@ -74,10 +74,10 @@ FactoryTypeInfo::~FactoryTypeInfo()
 // ===============================
 
 bool
-FactoryTypeInfo::before(const FactoryTypeInfo& rhs) const
+FactoryTypeInfo::before (const FactoryTypeInfo& rhs) const
 {
-    assert( M_info != 0 );
-    return M_info->before(*rhs.M_info);
+    assert ( M_info != 0 );
+    return M_info->before (*rhs.M_info);
 }
 
 // ======================
@@ -87,14 +87,14 @@ FactoryTypeInfo::before(const FactoryTypeInfo& rhs) const
 const std::type_info&
 FactoryTypeInfo::typeInfo() const
 {
-    assert( M_info != 0 );
+    assert ( M_info != 0 );
     return *M_info;
 }
 
 const char*
 FactoryTypeInfo::name() const
 {
-    assert( M_info != 0 );
+    assert ( M_info != 0 );
     return M_info->name();
 }
 

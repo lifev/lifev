@@ -54,10 +54,10 @@ using namespace LifeV;
 
 template < class VectorType >
 UInt
-TestFunction( boost::shared_ptr<VectorType> A1, boost::shared_ptr<VectorType> B1,
-              boost::shared_ptr<VectorType> A2, boost::shared_ptr<VectorType> B2,
-              boost::shared_ptr<VectorType> A3, boost::shared_ptr<VectorType> B3,
-              boost::shared_ptr<VectorType> A4, boost::shared_ptr<VectorType> B4 )
+TestFunction ( boost::shared_ptr<VectorType> A1, boost::shared_ptr<VectorType> B1,
+               boost::shared_ptr<VectorType> A2, boost::shared_ptr<VectorType> B2,
+               boost::shared_ptr<VectorType> A3, boost::shared_ptr<VectorType> B3,
+               boost::shared_ptr<VectorType> A4, boost::shared_ptr<VectorType> B4 )
 {
     //CONTAINER OF BASE VECTORS
     typedef VectorContainer< VectorType >                ContainerOfBaseVectors;
@@ -66,33 +66,33 @@ TestFunction( boost::shared_ptr<VectorType> A1, boost::shared_ptr<VectorType> B1
     ContainerOfBaseVectors_ptr V1, V2, V3, V4;
     Real scalar = 1.0;
 
-    V1.reset( new ContainerOfBaseVectors() );
-    V1->push_back( A1 );
-    V1->push_back( B1 );
+    V1.reset ( new ContainerOfBaseVectors() );
+    V1->push_back ( A1 );
+    V1->push_back ( B1 );
     std::cout << "V1" << std::endl;
     V1->showMe();
 
-    V2.reset( new ContainerOfBaseVectors() );
-    V2->push_back( A2 );
-    V2->push_back( B2 );
+    V2.reset ( new ContainerOfBaseVectors() );
+    V2->push_back ( A2 );
+    V2->push_back ( B2 );
     std::cout << "V2" << std::endl;
     V2->showMe();
 
-    V3.reset( new ContainerOfBaseVectors() );
-    V3->push_back( A3 );
-    V3->push_back( B3 );
+    V3.reset ( new ContainerOfBaseVectors() );
+    V3->push_back ( A3 );
+    V3->push_back ( B3 );
     std::cout << "V3" << std::endl;
     V3->showMe();
 
-    V4.reset( new ContainerOfBaseVectors() );
-    V4->push_back( A4 );
-    V4->push_back( B4 );
+    V4.reset ( new ContainerOfBaseVectors() );
+    V4->push_back ( A4 );
+    V4->push_back ( B4 );
     std::cout << "V4" << std::endl;
     V4->showMe();
 
     // Test operator= (initialize a vector as a copy of another vector)
     ContainerOfBaseVectors_ptr VV1, VV2, VV3;
-    VV1.reset( new ContainerOfBaseVectors() );
+    VV1.reset ( new ContainerOfBaseVectors() );
     *VV1 = *V1;
     std::cout << "VV1 = V1" << std::endl;
     VV1->showMe();
@@ -120,19 +120,19 @@ TestFunction( boost::shared_ptr<VectorType> A1, boost::shared_ptr<VectorType> B1
     VV1->showMe();
 
     // Test operator* (scalar product multiplication)
-    scalar = VV1->dot( *V1 );
+    scalar = VV1->dot ( *V1 );
     std::cout << "scalarProduct = VV1.Dot(V1) = " << scalar << std::endl << std::endl;
 
     // Concatenate two vector of vectors
-    VV1->push_back( *V1 );
-    VV1->push_back( *V2 );
+    VV1->push_back ( *V1 );
+    VV1->push_back ( *V2 );
     std::cout << "VV1->push_back( V1 ); VV1->push_back( V2 )" << std::endl;
     VV1->showMe();
 
-    VV2.reset( new ContainerOfBaseVectors() );
-    VV2->push_back( *V3 );
-    VV2->push_back( *V4 );
-    VV2->push_back( *V3 );
+    VV2.reset ( new ContainerOfBaseVectors() );
+    VV2->push_back ( *V3 );
+    VV2->push_back ( *V4 );
+    VV2->push_back ( *V3 );
     std::cout << "VV2->push_back( V3 ); VV2->push_back( V4 ); VV2->push_back( V3 )" << std::endl;
     VV2->showMe();
 
@@ -156,7 +156,7 @@ TestFunction( boost::shared_ptr<VectorType> A1, boost::shared_ptr<VectorType> B1
 
     // Element by element Comparison ==
     std::cout << "VV1 == 0" << std::endl;
-    VV3.reset( new ContainerOfBaseVectors() );
+    VV3.reset ( new ContainerOfBaseVectors() );
     *VV3 = ( *VV1 == 0.0 );
     VV3->showMe();
 
@@ -172,7 +172,7 @@ TestFunction( boost::shared_ptr<VectorType> A1, boost::shared_ptr<VectorType> B1
     VV2->showMe();
 
     std::cout << "VV2->abs( *VV3 )" << std::endl;
-    VV2->abs( *VV3 );
+    VV2->abs ( *VV3 );
     std::cout << "VV2:" << std::endl;
     VV2->showMe();
     std::cout << "VV3:" << std::endl;
@@ -186,7 +186,7 @@ TestFunction( boost::shared_ptr<VectorType> A1, boost::shared_ptr<VectorType> B1
 
     // Replace a vector
     UInt pos = 2;
-    (*VV1)( pos ) = B1;
+    (*VV1) ( pos ) = B1;
     std::cout << "VV1( 2 ) = B1" << std::endl;
     VV1->showMe();
 
@@ -196,10 +196,10 @@ TestFunction( boost::shared_ptr<VectorType> A1, boost::shared_ptr<VectorType> B1
 
     // operator!
     std::cout << "!VV1 " << std::endl;
-    (!(*VV1)).showMe();
+    (! (*VV1) ).showMe();
 
     std::cout << "!VV3 " << std::endl;
-    (!(*VV3)).showMe();
+    (! (*VV3) ).showMe();
 
     return EXIT_SUCCESS;
 }

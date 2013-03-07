@@ -110,9 +110,9 @@ public:
       @param fESpace Finite element space where the field is defined.
       @param vector vector witch represent the solution.
     */
-    FEField ( const FESpacePtr_Type& fESpace, const vectorPtr_Type& vector ):
-    M_FESpace ( fESpace ),
-    M_vector ( vector )
+    FEField ( const FESpacePtr_Type& fESpace, const vectorPtr_Type& vector ) :
+        M_FESpace ( fESpace ),
+        M_vector ( vector )
     {}
 
     //! Constructor for the class without the vector.
@@ -122,18 +122,18 @@ public:
       @param fESpace Finite element space where the field is defined.
       @param mapType Specify wether the map is Unique or Repeated. Default value: Repeated.
     */
-    FEField ( const FESpacePtr_Type& fESpace, const MapEpetraType& mapType = Repeated ):
-    M_FESpace ( fESpace ),
-    M_vector ( new vector_Type ( M_FESpace->map(), mapType ) )
+    FEField ( const FESpacePtr_Type& fESpace, const MapEpetraType& mapType = Repeated ) :
+        M_FESpace ( fESpace ),
+        M_vector ( new vector_Type ( M_FESpace->map(), mapType ) )
     {}
 
     //! Copy constructor.
     /*!
       @param field Finite element field to be copied.
     */
-    FEField ( const FEField& field ):
-    M_FESpace ( field.M_FESpace ),
-    M_vector ( field.M_vector )
+    FEField ( const FEField& field ) :
+        M_FESpace ( field.M_FESpace ),
+        M_vector ( field.M_vector )
     {}
 
     //! Virtual destructor.
@@ -144,7 +144,7 @@ public:
     //! @name Operators
     //@{
 
-    FEField & operator = ( const FEField& field )
+    FEField& operator = ( const FEField& field )
     {
         if ( this != & field )
         {
@@ -309,7 +309,7 @@ protected:
 */
 template < typename MeshType, typename MapType >
 class FEScalarField :
-public FEField < MeshType, MapType, Real >
+    public FEField < MeshType, MapType, Real >
 {
 public:
 
@@ -332,7 +332,7 @@ public:
     //! @name Constructors and destructor
     //@{
 
-     //! Empty constructor for the class.
+    //! Empty constructor for the class.
     FEScalarField ( )
     {}
 
@@ -341,8 +341,8 @@ public:
       @param fESpace Finite element space where the field is defined.
       @param vector vector witch represent the solution.
     */
-    FEScalarField ( const FESpacePtr_Type& fESpace, const vectorPtr_Type& vector ):
-    FEField_Type ( fESpace, vector )
+    FEScalarField ( const FESpacePtr_Type& fESpace, const vectorPtr_Type& vector ) :
+        FEField_Type ( fESpace, vector )
     {}
 
     //! Constructor for the class without the vector.
@@ -352,16 +352,16 @@ public:
       @param fESpace Finite element space where the field is defined.
       @param mapType Specify wether the map is Unique or Repeated. Default value: Repeated.
     */
-    FEScalarField ( const FESpacePtr_Type& fESpace, const MapEpetraType& mapType = Repeated ):
-    FEField_Type ( fESpace, mapType )
+    FEScalarField ( const FESpacePtr_Type& fESpace, const MapEpetraType& mapType = Repeated ) :
+        FEField_Type ( fESpace, mapType )
     {}
 
     //! Copy constructor.
     /*!
       @param field Finite element field to be copied.
     */
-    FEScalarField ( const FEScalarField& field ):
-    FEField_Type ( field )
+    FEScalarField ( const FEScalarField& field ) :
+        FEField_Type ( field )
     {}
 
     //! Virtual destructor.
@@ -393,7 +393,7 @@ FEScalarField < MeshType, MapType >::
 eval ( const UInt& iElem, const point_Type& P, const Real& /*time*/ ) const
 {
     // Evaluate the field using a method implemented in FESpace
-    return this->M_FESpace->feInterpolateValue( iElem, *(this->M_vector), P );
+    return this->M_FESpace->feInterpolateValue ( iElem, * (this->M_vector), P );
 } // eval
 
 
@@ -407,7 +407,7 @@ eval ( const UInt& iElem, const point_Type& P, const Real& /*time*/ ) const
 */
 template < typename MeshType, typename MapType >
 class FEVectorField :
-public FEField < MeshType, MapType, Vector >
+    public FEField < MeshType, MapType, Vector >
 {
 
 public:
@@ -440,8 +440,8 @@ public:
       @param fESpace Finite element space where the field is defined.
       @param vector vector witch represent the solution.
     */
-    FEVectorField ( const FESpacePtr_Type& fESpace, const vectorPtr_Type& vector ):
-    FEField_Type ( fESpace, vector )
+    FEVectorField ( const FESpacePtr_Type& fESpace, const vectorPtr_Type& vector ) :
+        FEField_Type ( fESpace, vector )
     {}
 
     //! Constructor for the class without the vector.
@@ -451,16 +451,16 @@ public:
       @param fESpace Finite element space where the field is defined.
       @param mapType Specify wether the map is Unique or Repeated. Default value: Repeated.
     */
-    FEVectorField ( const FESpacePtr_Type& fESpace, const MapEpetraType& mapType = Repeated ):
-    FEField_Type ( fESpace, mapType )
+    FEVectorField ( const FESpacePtr_Type& fESpace, const MapEpetraType& mapType = Repeated ) :
+        FEField_Type ( fESpace, mapType )
     {}
 
     //! Copy constructor.
     /*!
       @param field Finite element field to be copied.
     */
-    FEVectorField ( const FEVectorField& field ):
-    FEField_Type ( field )
+    FEVectorField ( const FEVectorField& field ) :
+        FEField_Type ( field )
     {}
 
     //! Virtual destructor.
@@ -489,12 +489,12 @@ inline Vector
 FEVectorField < MeshType, MapType >::
 eval ( const UInt& iElem, const point_Type& P, const Real& /*time*/ ) const
 {
-    Vector value( P.size() );
+    Vector value ( P.size() );
 
     // Evaluate each component of the vector field with a method in the class FESpace.
     for ( UInt i = 0; i < P.size(); ++i )
     {
-        value(i) = this->M_FESpace->feInterpolateValue( iElem, *(this->M_vector), P, i );
+        value (i) = this->M_FESpace->feInterpolateValue ( iElem, * (this->M_vector), P, i );
     }
     return value;
 

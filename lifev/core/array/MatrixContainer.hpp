@@ -46,20 +46,20 @@ public:
     //@}
 
     //! Empty constructor
-    MatrixContainer():M_pList(new Teuchos::ParameterList) {};
+    MatrixContainer() : M_pList (new Teuchos::ParameterList) {};
 
     //! @name setters
     //@{
-    void  set(const KeyType & _name, const MatrixType_ptr & _matrix);
+    void  set (const KeyType& _name, const MatrixType_ptr& _matrix);
     template<typename T>
-    void setParameter(const std::string & _name, const T & par);
+    void setParameter (const std::string& _name, const T& par);
     //@}
     //! @name getters
     //@{
-    MatrixType_ptr    getMatrix(const KeyType & _name) const;
-    MatrixRawType_ptr get(const KeyType & _name) const;
+    MatrixType_ptr    getMatrix (const KeyType& _name) const;
+    MatrixRawType_ptr get (const KeyType& _name) const;
     template<typename T>
-    T getParameter(const std::string & _name, const T & dpar) const;
+    T getParameter (const std::string& _name, const T& dpar) const;
     //@}
 
 private:
@@ -70,44 +70,44 @@ private:
 };
 
 template<typename KEYTYPE>
-void MatrixContainer<KEYTYPE>::set(const KeyType & _name, const MatrixType_ptr & _matrix)
+void MatrixContainer<KEYTYPE>::set (const KeyType& _name, const MatrixType_ptr& _matrix)
 {
-    ASSERT_PRE(_matrix.get() != 0, "Setting a null pointer to matrix");
-    ValuePair valuePair(_name, _matrix);
-    M_container.insert(valuePair);
+    ASSERT_PRE (_matrix.get() != 0, "Setting a null pointer to matrix");
+    ValuePair valuePair (_name, _matrix);
+    M_container.insert (valuePair);
 }
 
 template<typename KEYTYPE>
-boost::shared_ptr<MatrixEpetra<double> > MatrixContainer<KEYTYPE>::getMatrix(const KeyType & _name) const
+boost::shared_ptr<MatrixEpetra<double> > MatrixContainer<KEYTYPE>::getMatrix (const KeyType& _name) const
 {
-    CIterator it(M_container.find(_name));
-    ASSERT_POS(it != M_container.end(), "Matrix not found");
+    CIterator it (M_container.find (_name) );
+    ASSERT_POS (it != M_container.end(), "Matrix not found");
     return it->second;
 }
 
 template<typename KEYTYPE>
-boost::shared_ptr<Epetra_CrsMatrix> MatrixContainer<KEYTYPE>::get(const KeyType & _name) const
+boost::shared_ptr<Epetra_CrsMatrix> MatrixContainer<KEYTYPE>::get (const KeyType& _name) const
 {
-    CIterator it(M_container.find(_name));
-    ASSERT_POS(it != M_container.end(), "Matrix not found");
-    return boost::shared_dynamic_cast<Epetra_CrsMatrix>(it->second->getMatrixPtr());
+    CIterator it (M_container.find (_name) );
+    ASSERT_POS (it != M_container.end(), "Matrix not found");
+    return boost::shared_dynamic_cast<Epetra_CrsMatrix> (it->second->getMatrixPtr() );
 }
 
 
 template<typename KEYTYPE>
 template<typename T>
-void MatrixContainer<KEYTYPE>::setParameter(const std::string & _name, const T & par)
+void MatrixContainer<KEYTYPE>::setParameter (const std::string& _name, const T& par)
 {
-    M_pList->set(_name, par);
+    M_pList->set (_name, par);
 }
 
 template<typename KEYTYPE>
 template<typename T>
-T MatrixContainer<KEYTYPE>::getParameter(const std::string & _name, const T & dpar) const
+T MatrixContainer<KEYTYPE>::getParameter (const std::string& _name, const T& dpar) const
 {
     // get should be a const method but it is not.
     //This is the reason why I'm using a shared_ptr and not an object.
-    return M_pList->get(_name, dpar);
+    return M_pList->get (_name, dpar);
 }
 
 

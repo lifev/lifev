@@ -67,13 +67,13 @@ public:
      * @param dataFile GetPot data file
      * @param section the section on the data file that contains the information on the time discretization
      */
-    TimeAdvanceData( const GetPot& dataFile, const std::string& section = "time_discretization" );
+    TimeAdvanceData ( const GetPot& dataFile, const std::string& section = "time_discretization" );
 
     //! Copy constructor
     /*!
      * @param TimeAdvanceData - TimeAdvanceData class
      */
-    TimeAdvanceData( const TimeAdvanceData& TimeAdvanceData);
+    TimeAdvanceData ( const TimeAdvanceData& TimeAdvanceData);
 
     //! Virtual destructor
     virtual ~TimeAdvanceData() {}
@@ -89,13 +89,13 @@ public:
      * @param dataFile data file
      * @param section section of the file
      */
-    void setup( const GetPot& dfile, const std::string& section = "time_discretization" );
+    void setup ( const GetPot& dfile, const std::string& section = "time_discretization" );
 
     //! Display general information about the content of the class
     /*!
         @param output - specify the output format (std::cout by default)
      */
-    void showMe( std::ostream& output = std::cout ) const;
+    void showMe ( std::ostream& output = std::cout ) const;
 
     //@}
 
@@ -107,19 +107,28 @@ public:
     /*!
      * @param order BDF order
      */
-    void setOrderBDF( const UInt& orderBDF ) { M_orderBDF = orderBDF; }
+    void setOrderBDF ( const UInt& orderBDF )
+    {
+        M_orderBDF = orderBDF;
+    }
 
     //! Set the theta of TimeAdvanceNewmark scheme
     /*!
      * @param theta - coefficient of TimeAdvanceNewmark scheme
      */
-    void setTheta( const Real& theta ) { M_theta = theta; }
+    void setTheta ( const Real& theta )
+    {
+        M_theta = theta;
+    }
 
     //! Set the theta of TimeAdvanceNewmark scheme
     /*!
      * @param gamma- coefficient of TimeAdvanceNewmark scheme
      */
-    void setGamma( const Real& gamma ) { M_gamma = gamma; }
+    void setGamma ( const Real& gamma )
+    {
+        M_gamma = gamma;
+    }
 
     //@}
 
@@ -131,19 +140,28 @@ public:
     /*!
      * @return BDF order value
      */
-    const UInt& orderBDF() const { return M_orderBDF; }
+    const UInt& orderBDF() const
+    {
+        return M_orderBDF;
+    }
 
     //! Return theta parameter of TimeAdvanceNewmark scheme
     /*!
      * @return theta value
      */
-    const Real& theta() const { return M_theta; }
+    const Real& theta() const
+    {
+        return M_theta;
+    }
 
     //! Return gamma of TimeAdvanceNewmark scheme
     /*!
      * @return gamma value
      */
-    const Real& gamma() const { return M_gamma; }
+    const Real& gamma() const
+    {
+        return M_gamma;
+    }
 
     //! Return TimeAdvanceNewmark parameters (\f$theta\f$, \f$\gamma\f$)
     /*!

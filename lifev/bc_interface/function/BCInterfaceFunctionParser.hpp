@@ -128,20 +128,26 @@ public:
     /*!
      * @param base base of the 1D boundary condition
      */
-    void assignFunction( OneDFSIFunction& base ) { base.setFunction( functionSelectorTimeTimeStep() ); }
+    void assignFunction ( OneDFSIFunction& base )
+    {
+        base.setFunction ( functionSelectorTimeTimeStep() );
+    }
 
     //! Assign the function to the base of the 3D \c BCHandler
     /*!
      * @param base base of the 3D boundary condition
      */
-    void assignFunction( BCFunctionBase& base ) { base.setFunction( functionSelectorTimeSpaceID() ); }
+    void assignFunction ( BCFunctionBase& base )
+    {
+        base.setFunction ( functionSelectorTimeSpaceID() );
+    }
 
     //! Function of time
     /*!
      * @param t time
      * @return boundary condition value
      */
-    Real functionTime( const Real& t );
+    Real functionTime ( const Real& t );
 
     //! Function of time and time step
     /*!
@@ -149,7 +155,7 @@ public:
      * @param timeStep time step
      * @return boundary condition value
      */
-    Real functionTimeTimeStep( const Real& t, const Real& timeStep );
+    Real functionTimeTimeStep ( const Real& t, const Real& timeStep );
 
     //! Function of time and space
     /*!
@@ -160,7 +166,7 @@ public:
      * @param id id of the boundary condition (not used)
      * @return boundary condition value
      */
-    Real functionTimeSpace( const Real& t, const Real& x, const Real& y, const Real& z, const ID& /*id*/);
+    Real functionTimeSpace ( const Real& t, const Real& x, const Real& y, const Real& z, const ID& /*id*/);
 
     //! Function of time and space with ID
     /*!
@@ -171,7 +177,7 @@ public:
      * @param id id of the boundary condition
      * @return boundary condition value
      */
-    Real functionTimeSpaceID( const Real& t, const Real& x, const Real& y, const Real& z, const ID& id );
+    Real functionTimeSpaceID ( const Real& t, const Real& x, const Real& y, const Real& z, const ID& id );
 
     //@}
 
@@ -183,19 +189,19 @@ public:
     /*!
      * @param data boundary condition data loaded from \c GetPot file
      */
-    virtual void setData( const BCInterfaceData0D& data );
+    virtual void setData ( const BCInterfaceData0D& data );
 
     //! Set data for 1D boundary conditions
     /*!
      * @param data boundary condition data loaded from \c GetPot file
      */
-    virtual void setData( const BCInterfaceData1D& data );
+    virtual void setData ( const BCInterfaceData1D& data );
 
     //! Set data for 3D boundary conditions
     /*!
      * @param data boundary condition data loaded from \c GetPot file
      */
-    virtual void setData( const BCInterfaceData3D& data );
+    virtual void setData ( const BCInterfaceData3D& data );
 
     //@}
 
@@ -216,9 +222,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    BCInterfaceFunctionParser( const BCInterfaceFunctionParser& function );
+    BCInterfaceFunctionParser ( const BCInterfaceFunctionParser& function );
 
-    BCInterfaceFunctionParser& operator=( const BCInterfaceFunctionParser& function );
+    BCInterfaceFunctionParser& operator= ( const BCInterfaceFunctionParser& function );
 
     //@}
 
@@ -229,7 +235,7 @@ private:
     /*!
      * @param data boundary condition data loaded from \c GetPot file
      */
-    void setupParser( const BCInterfaceData& data );
+    void setupParser ( const BCInterfaceData& data );
 
     //! Get the selected function for of time and time step
     /*!
@@ -264,13 +270,13 @@ inline BCInterfaceFunctionParser< PhysicalSolverType >* createBCInterfaceFunctio
 // ===================================================
 template< typename PhysicalSolverType >
 BCInterfaceFunctionParser< PhysicalSolverType >::BCInterfaceFunctionParser() :
-        function_Type   (),
-        M_parser        (),
-        M_mapID         ()
+    function_Type   (),
+    M_parser        (),
+    M_mapID         ()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 5021 ) << "BCInterfaceFunction::BCInterfaceFunction()" << "\n";
+    debugStream ( 5021 ) << "BCInterfaceFunction::BCInterfaceFunction()" << "\n";
 #endif
 
 }
@@ -280,101 +286,101 @@ BCInterfaceFunctionParser< PhysicalSolverType >::BCInterfaceFunctionParser() :
 // ===================================================
 template< typename PhysicalSolverType >
 Real
-BCInterfaceFunctionParser< PhysicalSolverType >::functionTime( const Real& t )
+BCInterfaceFunctionParser< PhysicalSolverType >::functionTime ( const Real& t )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 5021 ) << "BCInterfaceFunction::functionTime: " << "\n";
-    debugStream( 5021 ) << "                                                           t: " << t << "\n";
+    debugStream ( 5021 ) << "BCInterfaceFunction::functionTime: " << "\n";
+    debugStream ( 5021 ) << "                                                           t: " << t << "\n";
 #endif
 
-    M_parser->setVariable( "t", t );
+    M_parser->setVariable ( "t", t );
 
     this->dataInterpolation();
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 5021 ) << "                                                evaluate( 0 ) : " << M_parser->evaluate( 0 ) << "\n";
+    debugStream ( 5021 ) << "                                                evaluate( 0 ) : " << M_parser->evaluate ( 0 ) << "\n";
 #endif
 
-    return M_parser->evaluate( 0 );
+    return M_parser->evaluate ( 0 );
 }
 
 template< typename PhysicalSolverType >
 Real
-BCInterfaceFunctionParser< PhysicalSolverType >::functionTimeTimeStep( const Real& t, const Real& timeStep )
+BCInterfaceFunctionParser< PhysicalSolverType >::functionTimeTimeStep ( const Real& t, const Real& timeStep )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 5021 ) << "BCInterfaceFunction::functionTime: " << "\n";
-    debugStream( 5021 ) << "                                                           t: " << t << "\n";
-    debugStream( 5021 ) << "                                                           timeStep: " << timeStep << "\n";
+    debugStream ( 5021 ) << "BCInterfaceFunction::functionTime: " << "\n";
+    debugStream ( 5021 ) << "                                                           t: " << t << "\n";
+    debugStream ( 5021 ) << "                                                           timeStep: " << timeStep << "\n";
 #endif
 
-    M_parser->setVariable( "t", t );
-    M_parser->setVariable( "timeStep", timeStep );
+    M_parser->setVariable ( "t", t );
+    M_parser->setVariable ( "timeStep", timeStep );
 
     this->dataInterpolation();
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 5021 ) << "                                                evaluate( 0 ) : " << M_parser->evaluate( 0 ) << "\n";
+    debugStream ( 5021 ) << "                                                evaluate( 0 ) : " << M_parser->evaluate ( 0 ) << "\n";
 #endif
 
-    return M_parser->evaluate( 0 );
+    return M_parser->evaluate ( 0 );
 }
 
 template< typename PhysicalSolverType >
 Real
-BCInterfaceFunctionParser< PhysicalSolverType >::functionTimeSpace( const Real& t, const Real& x, const Real& y, const Real& z, const ID& /*id*/)
+BCInterfaceFunctionParser< PhysicalSolverType >::functionTimeSpace ( const Real& t, const Real& x, const Real& y, const Real& z, const ID& /*id*/)
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 5021 ) << "BCInterfaceFunction::functionTimeSpace: " << "\n";
-    debugStream( 5021 ) << "                                                           x: " << x << "\n";
-    debugStream( 5021 ) << "                                                           y: " << y << "\n";
-    debugStream( 5021 ) << "                                                           z: " << z << "\n";
-    debugStream( 5021 ) << "                                                           t: " << t << "\n";
+    debugStream ( 5021 ) << "BCInterfaceFunction::functionTimeSpace: " << "\n";
+    debugStream ( 5021 ) << "                                                           x: " << x << "\n";
+    debugStream ( 5021 ) << "                                                           y: " << y << "\n";
+    debugStream ( 5021 ) << "                                                           z: " << z << "\n";
+    debugStream ( 5021 ) << "                                                           t: " << t << "\n";
 #endif
 
-    M_parser->setVariable( "t", t );
-    M_parser->setVariable( "x", x );
-    M_parser->setVariable( "y", y );
-    M_parser->setVariable( "z", z );
+    M_parser->setVariable ( "t", t );
+    M_parser->setVariable ( "x", x );
+    M_parser->setVariable ( "y", y );
+    M_parser->setVariable ( "z", z );
 
     this->dataInterpolation();
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 5021 ) << "                                                evaluate( 0 ) : " << M_parser->evaluate( 0 ) << "\n";
+    debugStream ( 5021 ) << "                                                evaluate( 0 ) : " << M_parser->evaluate ( 0 ) << "\n";
 #endif
 
-    return M_parser->evaluate( 0 );
+    return M_parser->evaluate ( 0 );
 }
 
 template< typename PhysicalSolverType >
 Real
-BCInterfaceFunctionParser< PhysicalSolverType >::functionTimeSpaceID( const Real& t, const Real& x, const Real& y, const Real& z, const ID& id )
+BCInterfaceFunctionParser< PhysicalSolverType >::functionTimeSpaceID ( const Real& t, const Real& x, const Real& y, const Real& z, const ID& id )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 5021 ) << "BCInterfaceFunction::functionTimeSpaceID: " << "\n";
-    debugStream( 5021 ) << "                                                           x: " << x << "\n";
-    debugStream( 5021 ) << "                                                           y: " << y << "\n";
-    debugStream( 5021 ) << "                                                           z: " << z << "\n";
-    debugStream( 5021 ) << "                                                           t: " << t << "\n";
-    debugStream( 5021 ) << "                                                          id: " << id << "\n";
+    debugStream ( 5021 ) << "BCInterfaceFunction::functionTimeSpaceID: " << "\n";
+    debugStream ( 5021 ) << "                                                           x: " << x << "\n";
+    debugStream ( 5021 ) << "                                                           y: " << y << "\n";
+    debugStream ( 5021 ) << "                                                           z: " << z << "\n";
+    debugStream ( 5021 ) << "                                                           t: " << t << "\n";
+    debugStream ( 5021 ) << "                                                          id: " << id << "\n";
 #endif
 
-    M_parser->setVariable( "t", t );
-    M_parser->setVariable( "x", x );
-    M_parser->setVariable( "y", y );
-    M_parser->setVariable( "z", z );
+    M_parser->setVariable ( "t", t );
+    M_parser->setVariable ( "x", x );
+    M_parser->setVariable ( "y", y );
+    M_parser->setVariable ( "z", z );
 
     this->dataInterpolation();
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 5021 ) << "                                                evaluate(" << M_mapID[id] << ") : " << M_parser->evaluate( M_mapID[id] ) << "\n";
+    debugStream ( 5021 ) << "                                                evaluate(" << M_mapID[id] << ") : " << M_parser->evaluate ( M_mapID[id] ) << "\n";
 #endif
 
-    return M_parser->evaluate( M_mapID[id] );
+    return M_parser->evaluate ( M_mapID[id] );
 }
 
 // ===================================================
@@ -382,38 +388,38 @@ BCInterfaceFunctionParser< PhysicalSolverType >::functionTimeSpaceID( const Real
 // ===================================================
 template< typename PhysicalSolverType >
 void
-BCInterfaceFunctionParser< PhysicalSolverType >::setData( const BCInterfaceData0D& data )
+BCInterfaceFunctionParser< PhysicalSolverType >::setData ( const BCInterfaceData0D& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 5022 ) << "BCInterfaceFunction::setData" << "\n";
+    debugStream ( 5022 ) << "BCInterfaceFunction::setData" << "\n";
 #endif
 
-    setupParser( data );
+    setupParser ( data );
 }
 
 template< typename PhysicalSolverType >
 void
-BCInterfaceFunctionParser< PhysicalSolverType >::setData( const BCInterfaceData1D& data )
+BCInterfaceFunctionParser< PhysicalSolverType >::setData ( const BCInterfaceData1D& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 5022 ) << "BCInterfaceFunction::setData" << "\n";
+    debugStream ( 5022 ) << "BCInterfaceFunction::setData" << "\n";
 #endif
 
-    setupParser( data );
+    setupParser ( data );
 }
 
 template< typename PhysicalSolverType >
 void
-BCInterfaceFunctionParser< PhysicalSolverType >::setData( const BCInterfaceData3D& data )
+BCInterfaceFunctionParser< PhysicalSolverType >::setData ( const BCInterfaceData3D& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 5022 ) << "BCInterfaceFunction::setData" << "\n";
+    debugStream ( 5022 ) << "BCInterfaceFunction::setData" << "\n";
 #endif
 
-    setupParser( data );
+    setupParser ( data );
 
     /*
      * MODE          COMPONENT     FUNCTION      |      COMV.SIZE     ARGUMENTS     INTERFACEFUNCTION
@@ -428,20 +434,24 @@ BCInterfaceFunctionParser< PhysicalSolverType >::setData( const BCInterfaceData3
      */
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 5021 ) << "BCInterfaceFunction::setData                arguments: " << M_parser->countSubstring( "," ) << "\n";
+    debugStream ( 5021 ) << "BCInterfaceFunction::setData                arguments: " << M_parser->countSubstring ( "," ) << "\n";
 #endif
 
     // Note: the map ID is used only for 3D handler.
-    if ( M_parser->countSubstring( "," ) )
+    if ( M_parser->countSubstring ( "," ) )
     {
         //Create the ID map
         if ( data.componentsVector().size() > 1 ) // Component
-            for ( ID i( 0 ); i < static_cast< ID > ( data.componentsVector().size() ); ++i )
-                M_mapID[data.componentsVector()[i]] = i + 1;
+            for ( ID i ( 0 ); i < static_cast< ID > ( data.componentsVector().size() ); ++i )
+            {
+                M_mapID[data.componentsVector() [i]] = i + 1;
+            }
         else
             // if ( data.componentsVector().front() == arguments )  Full
-            for ( ID i( 0 ); i < data.componentsVector().front(); ++i )
-                M_mapID[i+1] = i+1;
+            for ( ID i ( 0 ); i < data.componentsVector().front(); ++i )
+            {
+                M_mapID[i + 1] = i + 1;
+            }
     }
 }
 
@@ -450,34 +460,42 @@ BCInterfaceFunctionParser< PhysicalSolverType >::setData( const BCInterfaceData3
 // ===================================================
 template< typename PhysicalSolverType >
 void
-BCInterfaceFunctionParser< PhysicalSolverType >::setupParser( const BCInterfaceData& data )
+BCInterfaceFunctionParser< PhysicalSolverType >::setupParser ( const BCInterfaceData& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 5022 ) << "BCInterfaceFunction::setParser" << "\n";
+    debugStream ( 5022 ) << "BCInterfaceFunction::setParser" << "\n";
 #endif
 
     if ( M_parser )
-        M_parser->setString( data.baseString() );
+    {
+        M_parser->setString ( data.baseString() );
+    }
     else
-        M_parser.reset( new parser_Type( data.baseString() ) );
+    {
+        M_parser.reset ( new parser_Type ( data.baseString() ) );
+    }
 }
 
 template< typename PhysicalSolverType >
 typename BCInterfaceFunctionParser< PhysicalSolverType >::boundaryFunctionTimeTimeStep_Type
 BCInterfaceFunctionParser< PhysicalSolverType >::functionSelectorTimeTimeStep()
 {
-    return boost::bind( &BCInterfaceFunctionParser< PhysicalSolverType >::functionTimeTimeStep, this, _1, _2 );
+    return boost::bind ( &BCInterfaceFunctionParser< PhysicalSolverType >::functionTimeTimeStep, this, _1, _2 );
 }
 
 template< typename PhysicalSolverType >
 typename BCInterfaceFunctionParser< PhysicalSolverType >::boundaryFunctionTimeSpaceID_Type
 BCInterfaceFunctionParser< PhysicalSolverType >::functionSelectorTimeSpaceID()
 {
-    if ( M_parser->countSubstring( "," ) )
-        return boost::bind( &BCInterfaceFunctionParser< PhysicalSolverType >::functionTimeSpaceID, this, _1, _2, _3, _4, _5 );
+    if ( M_parser->countSubstring ( "," ) )
+    {
+        return boost::bind ( &BCInterfaceFunctionParser< PhysicalSolverType >::functionTimeSpaceID, this, _1, _2, _3, _4, _5 );
+    }
     else
-        return boost::bind( &BCInterfaceFunctionParser< PhysicalSolverType >::functionTimeSpace, this, _1, _2, _3, _4, _5 );
+    {
+        return boost::bind ( &BCInterfaceFunctionParser< PhysicalSolverType >::functionTimeSpace, this, _1, _2, _3, _4, _5 );
+    }
 }
 
 } // Namespace LifeV

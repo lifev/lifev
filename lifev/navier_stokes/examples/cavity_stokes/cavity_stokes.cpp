@@ -69,63 +69,63 @@ const int RIGHT  = 4;
 const int BOTTOM = 5;
 const int TOP    = 6;
 
-Real lidBC(const Real& /*t*/,
-           const Real& /*x*/,
-           const Real& /*y*/,
-           const Real& /*z*/,
-           const ID& i)
+Real lidBC (const Real& /*t*/,
+            const Real& /*x*/,
+            const Real& /*y*/,
+            const Real& /*z*/,
+            const ID& i)
 {
     switch (i)
     {
-    case 1:
-        return 1.0;
-    default:
-        return 0.0;
+        case 1:
+            return 1.0;
+        default:
+            return 0.0;
     }
 }
 
-Real fZero( const Real& /* t */,
-            const Real& /* x */,
-            const Real& /* y */,
-            const Real& /* z */,
-            const ID& /* i */ )
+Real fZero ( const Real& /* t */,
+             const Real& /* x */,
+             const Real& /* y */,
+             const Real& /* z */,
+             const ID& /* i */ )
 {
     return 0.0;
 }
 
-int main(int argc, char** argv)
+int main (int argc, char** argv)
 {
 
     // +-----------------------------------------------+
     // |            Initialization of MPI              |
     // +-----------------------------------------------+
 #ifdef HAVE_MPI
-    MPI_Init(&argc, &argv);
+    MPI_Init (&argc, &argv);
 #endif
 
     boost::shared_ptr<Epetra_Comm>   comm;
 #ifdef EPETRA_MPI
-    comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
+    comm.reset ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
     int nproc;
-    MPI_Comm_size(MPI_COMM_WORLD, &nproc);
+    MPI_Comm_size (MPI_COMM_WORLD, &nproc);
 #else
-    comm.reset( new Epetra_SerialComm() );
+    comm.reset ( new Epetra_SerialComm() );
 #endif
 
-    bool verbose(false);
+    bool verbose (false);
     if (comm->MyPID() == 0)
     {
         verbose = true;
         std::cout
-            << " +-----------------------------------------------+" << std::endl
-            << " |           Cavity example for LifeV            |" << std::endl
-            << " +-----------------------------------------------+" << std::endl
-            << std::endl
-            << " +-----------------------------------------------+" << std::endl
-            << " |           Author: Gwenol Grandperrin          |" << std::endl
-            << " |             Date: October 25, 2010            |" << std::endl
-            << " +-----------------------------------------------+" << std::endl
-            << std::endl;
+                << " +-----------------------------------------------+" << std::endl
+                << " |           Cavity example for LifeV            |" << std::endl
+                << " +-----------------------------------------------+" << std::endl
+                << std::endl
+                << " +-----------------------------------------------+" << std::endl
+                << " |           Author: Gwenol Grandperrin          |" << std::endl
+                << " |             Date: October 25, 2010            |" << std::endl
+                << " +-----------------------------------------------+" << std::endl
+                << std::endl;
 
         std::cout << "[Initilization of MPI]" << std::endl;
 #ifdef HAVE_MPI
@@ -142,129 +142,169 @@ int main(int argc, char** argv)
     // +-----------------------------------------------+
     // |               Loading the data                |
     // +-----------------------------------------------+
-    if (verbose) std::cout << std::endl << "[Loading the data]" << std::endl;
-    GetPot command_line(argc,argv);
-    const std::string dataFileName = command_line.follow("data", 2, "-f","--file");
-    GetPot dataFile(dataFileName);
+    if (verbose)
+    {
+        std::cout << std::endl << "[Loading the data]" << std::endl;
+    }
+    GetPot command_line (argc, argv);
+    const std::string dataFileName = command_line.follow ("data", 2, "-f", "--file");
+    GetPot dataFile (dataFileName);
 
     // +-----------------------------------------------+
     // |               Loading the mesh                |
     // +-----------------------------------------------+
-    if (verbose) std::cout << std::endl << "[Loading the mesh]" << std::endl;
+    if (verbose)
+    {
+        std::cout << std::endl << "[Loading the mesh]" << std::endl;
+    }
     MeshData meshData;
-    meshData.setup(dataFile, "fluid/space_discretization");
-    if (verbose) std::cout << "Mesh file: " << meshData.meshDir() << meshData.meshFile() << std::endl;
-    boost::shared_ptr< mesh_Type > fullMeshPtr(new mesh_Type);
-    readMesh(*fullMeshPtr, meshData);
+    meshData.setup (dataFile, "fluid/space_discretization");
+    if (verbose)
+    {
+        std::cout << "Mesh file: " << meshData.meshDir() << meshData.meshFile() << std::endl;
+    }
+    boost::shared_ptr< mesh_Type > fullMeshPtr (new mesh_Type);
+    readMesh (*fullMeshPtr, meshData);
     // Split the mesh between processors
-    MeshPartitioner< mesh_Type >   meshPart(fullMeshPtr, comm);
+    MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, comm);
 
     // +-----------------------------------------------+
     // |            Creating the FE spaces             |
     // +-----------------------------------------------+
-    if (verbose) std::cout << std::endl << "[Creating the FE spaces]" << std::endl;
-    std::string uOrder =  dataFile( "fluid/space_discretization/vel_order",   "P2");
-    std::string pOrder =  dataFile( "fluid/space_discretization/press_order", "P1");
+    if (verbose)
+    {
+        std::cout << std::endl << "[Creating the FE spaces]" << std::endl;
+    }
+    std::string uOrder =  dataFile ( "fluid/space_discretization/vel_order",   "P2");
+    std::string pOrder =  dataFile ( "fluid/space_discretization/press_order", "P1");
     if (verbose) std::cout << "FE for the velocity: " << uOrder << std::endl
                                << "FE for the pressure: " << pOrder << std::endl;
 
-    if (verbose) std::cout << "Building the velocity FE space... " << std::flush;
-    feSpacePtr_Type uFESpacePtr( new feSpace_Type(meshPart, uOrder, 3, comm) );
     if (verbose)
+    {
+        std::cout << "Building the velocity FE space... " << std::flush;
+    }
+    feSpacePtr_Type uFESpacePtr ( new feSpace_Type (meshPart, uOrder, 3, comm) );
+    if (verbose)
+    {
         std::cout << "ok." << std::endl;
+    }
 
-    if (verbose) std::cout << "Building the pressure FE space... " << std::flush;
-    feSpacePtr_Type pFESpacePtr( new feSpace_Type(meshPart,pOrder,1,comm) );
-    if (verbose) std::cout << "ok." << std::endl;
+    if (verbose)
+    {
+        std::cout << "Building the pressure FE space... " << std::flush;
+    }
+    feSpacePtr_Type pFESpacePtr ( new feSpace_Type (meshPart, pOrder, 1, comm) );
+    if (verbose)
+    {
+        std::cout << "ok." << std::endl;
+    }
 
     // Total degrees of freedom (elements of matrix)
-    UInt totalVelDof   = uFESpacePtr->map().map(Unique)->NumGlobalElements();
-    UInt totalPressDof = pFESpacePtr->map().map(Unique)->NumGlobalElements();
+    UInt totalVelDof   = uFESpacePtr->map().map (Unique)->NumGlobalElements();
+    UInt totalPressDof = pFESpacePtr->map().map (Unique)->NumGlobalElements();
 
-    if (verbose) std::cout << "Total Velocity Dof: " << totalVelDof << std::endl;
-    if (verbose) std::cout << "Total Pressure Dof: " << totalPressDof << std::endl;
+    if (verbose)
+    {
+        std::cout << "Total Velocity Dof: " << totalVelDof << std::endl;
+    }
+    if (verbose)
+    {
+        std::cout << "Total Pressure Dof: " << totalPressDof << std::endl;
+    }
 
     // +-----------------------------------------------+
     // |             Boundary conditions               |
     // +-----------------------------------------------+
-    if (verbose) std::cout<< std::endl << "[Boundary conditions]" << std::endl;
+    if (verbose)
+    {
+        std::cout << std::endl << "[Boundary conditions]" << std::endl;
+    }
 
-    BCFunctionBase uZero(fZero);
-    BCFunctionBase uLid(lidBC);
+    BCFunctionBase uZero (fZero);
+    BCFunctionBase uLid (lidBC);
 
-    std::vector<ID> xComp(1);
+    std::vector<ID> xComp (1);
     xComp[0] = 1;
 
     BCHandler bcH;
     // A boundary condition in every face
-    bcH.addBC( "Top"   , TOP   , Essential, Full     , uLid , 3     );
-    bcH.addBC( "Left"  , LEFT  , Essential, Full     , uZero, 3     );
-    bcH.addBC( "Front" , FRONT , Essential, Component, uZero, xComp );
-    bcH.addBC( "Right" , RIGHT , Essential, Full     , uZero, 3     );
-    bcH.addBC( "Back"  , BACK  , Essential, Component, uZero, xComp );
-    bcH.addBC( "Bottom", BOTTOM, Essential, Full     , uZero, 3     );
+    bcH.addBC ( "Top"   , TOP   , Essential, Full     , uLid , 3     );
+    bcH.addBC ( "Left"  , LEFT  , Essential, Full     , uZero, 3     );
+    bcH.addBC ( "Front" , FRONT , Essential, Component, uZero, xComp );
+    bcH.addBC ( "Right" , RIGHT , Essential, Full     , uZero, 3     );
+    bcH.addBC ( "Back"  , BACK  , Essential, Component, uZero, xComp );
+    bcH.addBC ( "Bottom", BOTTOM, Essential, Full     , uZero, 3     );
 
     // Get the number of Lagrange Multiplyers (LM) and set the offsets
-    std::vector<bcName_Type> fluxVector = bcH.findAllBCWithType( Flux );
-    UInt numLM = static_cast<UInt>( fluxVector.size() );
+    std::vector<bcName_Type> fluxVector = bcH.findAllBCWithType ( Flux );
+    UInt numLM = static_cast<UInt> ( fluxVector.size() );
 
-    UInt offset = uFESpacePtr->map().map(Unique)->NumGlobalElements()
-                         + pFESpacePtr->map().map(Unique)->NumGlobalElements();
+    UInt offset = uFESpacePtr->map().map (Unique)->NumGlobalElements()
+                  + pFESpacePtr->map().map (Unique)->NumGlobalElements();
 
     for ( UInt i = 0; i < numLM; ++i )
-        bcH.setOffset( fluxVector[i], offset + i );
+    {
+        bcH.setOffset ( fluxVector[i], offset + i );
+    }
 
     // +-----------------------------------------------+
     // |             Creating the problem              |
     // +-----------------------------------------------+
-    if (verbose) std::cout<< std::endl << "[Creating the problem]" << std::endl;
-    boost::shared_ptr< OseenData > oseenData(new OseenData);
-    oseenData->setup( dataFile );
+    if (verbose)
+    {
+        std::cout << std::endl << "[Creating the problem]" << std::endl;
+    }
+    boost::shared_ptr< OseenData > oseenData (new OseenData);
+    oseenData->setup ( dataFile );
 
     // The problem (matrix and rhs) is packed in an object called fluid
     OseenSolver< mesh_Type > fluid (oseenData,
-                                           *uFESpacePtr,
-                                           *pFESpacePtr,
-                                           comm,
-                                           numLM);
+                                    *uFESpacePtr,
+                                    *pFESpacePtr,
+                                    comm,
+                                    numLM);
 
     // Gets inputs from the data file
-    fluid.setUp(dataFile);
+    fluid.setUp (dataFile);
 
     // Assemble the matrices
     fluid.buildSystem();
 
     // Communication map
-    MapEpetra fullMap(fluid.getMap());
+    MapEpetra fullMap (fluid.getMap() );
 
-    vector_Type beta( fullMap );
+    vector_Type beta ( fullMap );
     vector_Type rhs ( fullMap );
-    double alpha=0.;
+    double alpha = 0.;
     beta *= 0.;
     rhs  *= 0.;
-    fluid.updateSystem(alpha,beta,rhs);
-    fluid.iterate(bcH);
+    fluid.updateSystem (alpha, beta, rhs);
+    fluid.iterate (bcH);
 
     boost::shared_ptr< ExporterHDF5<mesh_Type> > exporter;
 
-    std::string const exporterType =  dataFile( "exporter/type", "ensight");
+    std::string const exporterType =  dataFile ( "exporter/type", "ensight");
 
-    exporter.reset( new ExporterHDF5<mesh_Type> ( dataFile, "cavity_stokes_example" ) );
-    exporter->setPostDir( "./" ); // This is a test to see if M_post_dir is working
-    exporter->setMeshProcId( meshPart.meshPartition(), comm->MyPID() );
+    exporter.reset ( new ExporterHDF5<mesh_Type> ( dataFile, "cavity_stokes_example" ) );
+    exporter->setPostDir ( "./" ); // This is a test to see if M_post_dir is working
+    exporter->setMeshProcId ( meshPart.meshPartition(), comm->MyPID() );
 
     vectorPtr_Type velAndPressure;
-    velAndPressure.reset( new vector_Type(*fluid.solution(), exporter->mapType() ) );
+    velAndPressure.reset ( new vector_Type (*fluid.solution(), exporter->mapType() ) );
 
-    exporter->addVariable( ExporterData<mesh_Type>::VectorField, "velocity", uFESpacePtr,
-                           velAndPressure, UInt(0) );
+    exporter->addVariable ( ExporterData<mesh_Type>::VectorField, "velocity", uFESpacePtr,
+                            velAndPressure, UInt (0) );
 
-    exporter->addVariable( ExporterData<mesh_Type>::ScalarField, "pressure", pFESpacePtr,
-                           velAndPressure, UInt(3*uFESpacePtr->dof().numTotalDof()) );
-    exporter->postProcess( 0 );
+    exporter->addVariable ( ExporterData<mesh_Type>::ScalarField, "pressure", pFESpacePtr,
+                            velAndPressure, UInt (3 * uFESpacePtr->dof().numTotalDof() ) );
+    exporter->postProcess ( 0 );
 
     globalChrono.stop();
-    if (verbose) std::cout << "Total simulation time:  " << globalChrono.diff() << " s." << std::endl;
+    if (verbose)
+    {
+        std::cout << "Total simulation time:  " << globalChrono.diff() << " s." << std::endl;
+    }
 
     exporter->closeFile();
 

@@ -70,21 +70,21 @@ using namespace LifeV;
 // ===================================================
 //! Main
 // ===================================================
-int main(int argc, char** argv)
+int main (int argc, char** argv)
 {
 
 #ifdef HAVE_MPI
 
-    MPI_Init( &argc, &argv );
+    MPI_Init ( &argc, &argv );
 
     std::cout << "MPI Initialization" << std::endl;
 
 #endif
 
     // Tolerance between the error and the errorKnown
-    const LifeV::Real tolerance( 1e-8 );
+    const LifeV::Real tolerance ( 1e-8 );
 
-    fefct Fefct( argc, argv );
+    fefct Fefct ( argc, argv );
 
     // Error of the problem
     const LifeV::Real error = Fefct.run();

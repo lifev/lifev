@@ -20,16 +20,24 @@ class tab_check : public inspector
 public:
 
     tab_check();
-    virtual const char * name() const { return "tab-check"; }
-    virtual const char * desc() const { return "tabs in file"; }
+    virtual const char* name() const
+    {
+        return "tab-check";
+    }
+    virtual const char* desc() const
+    {
+        return "tabs in file";
+    }
 
-    virtual void inspect(
-        const std::string & library_name,
-        const path & full_path,
-        const std::string & contents );
+    virtual void inspect (
+        const std::string& library_name,
+        const path& full_path,
+        const std::string& contents );
 
     virtual ~tab_check()
-    { std::cout << "  " << m_files_with_errors << " files with tabs\n"; }
+    {
+        std::cout << "  " << m_files_with_errors << " files with tabs\n";
+    }
 };
 }
 }

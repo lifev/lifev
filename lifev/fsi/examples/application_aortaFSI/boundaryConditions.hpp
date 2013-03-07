@@ -143,26 +143,26 @@ namespace LifeV
 typedef FSIOperator::fluid_Type fluid;
 typedef FSIOperator::solid_Type solid;
 
-FSIOperator::fluidBchandlerPtr_Type BCh_harmonicExtension(FSIOperator &_oper)
+FSIOperator::fluidBchandlerPtr_Type BCh_harmonicExtension (FSIOperator& _oper)
 {
 
     // Boundary condition for the mesh
-    debugStream( 10000 ) << "Boundary condition for the harmonic extension\n";
+    debugStream ( 10000 ) << "Boundary condition for the harmonic extension\n";
 
-    BCFunctionBase bcf(fZero);
+    BCFunctionBase bcf (fZero);
 
-    FSISolver::fluidBchandlerPtr_Type BCh_he(new FSIOperator::fluidBchandler_Type );
+    FSISolver::fluidBchandlerPtr_Type BCh_he (new FSIOperator::fluidBchandler_Type );
 
 
-    BCh_he->addBC("Base",  INLET,     Essential, Full, bcf,   3);
+    BCh_he->addBC ("Base",  INLET,     Essential, Full, bcf,   3);
 
     if (_oper.data().method() == "monolithicGE")
     {
-        debugStream(10000) << "FSIMonolithic GCE harmonic extension\n";
-        FSIMonolithicGE *MOper = dynamic_cast<FSIMonolithicGE *>(&_oper);
-        MOper->setStructureDispToHarmonicExtension(_oper.lambdaFluidRepeated());
-        BCh_he->addBC("Interface", SOLIDINTERFACE, Essential, Full,
-                      *MOper->bcvStructureDispToHarmonicExtension(), 3);
+        debugStream (10000) << "FSIMonolithic GCE harmonic extension\n";
+        FSIMonolithicGE* MOper = dynamic_cast<FSIMonolithicGE*> (&_oper);
+        MOper->setStructureDispToHarmonicExtension (_oper.lambdaFluidRepeated() );
+        BCh_he->addBC ("Interface", SOLIDINTERFACE, Essential, Full,
+                       *MOper->bcvStructureDispToHarmonicExtension(), 3);
     }
 
     return BCh_he;
@@ -173,7 +173,7 @@ FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFlux()
 {
     // Boundary conditions for the fluid velocity
 
-    FSIOperator::fluidBchandlerPtr_Type BCh_fluid( new FSIOperator::fluidBchandler_Type );
+    FSIOperator::fluidBchandlerPtr_Type BCh_fluid ( new FSIOperator::fluidBchandler_Type );
 
     BCFunctionBase flow_in (aortaFluxIn);
     BCFunctionBase flow_3 (linearFlux3_);
@@ -187,29 +187,31 @@ FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFlux()
     //     BCFunctionBase flow_jean (aortaFluxJean);
 
     //uncomment  to use fluxes
-    BCh_fluid->addBC("InFlow" , INLET,  Flux, /*Full/**/Normal, flow_in);
-    BCh_fluid->addBC("OutFlow" , OUTLET,  Flux/*Essential*/, Normal, flow_3);
+    BCh_fluid->addBC ("InFlow" , INLET,  Flux, /*Full/**/Normal, flow_in);
+    BCh_fluid->addBC ("OutFlow" , OUTLET,  Flux/*Essential*/, Normal, flow_3);
 
     //BCh_fluid->addBC("Flow4" , 4,  Flux/*Essential*/, Normal, flow_4);
-    BCh_fluid->addBC("Flow4" , LSUBCA,  Flux/*Essential*/, Normal, flow_4);
-    BCh_fluid->addBC("Flow7" , RCSUBCA,  Flux/*Essential*/, Normal, flow_7);
-    BCh_fluid->addBC("Flow6" , RCSUBSUBCA,  Flux/*Essential*/, Normal, flow_6);
-    BCh_fluid->addBC("Flow5" , RCCA,  Flux/*Essential*/, Normal, flow_5);
-    BCh_fluid->addBC("Flow8" , LCCA,  Flux/*Essential*/, Normal, flow_8);
-    BCh_fluid->addBC("Flow9" , LSUBSUBCA,  Flux/*Essential*/, Normal, flow_9);
+    BCh_fluid->addBC ("Flow4" , LSUBCA,  Flux/*Essential*/, Normal, flow_4);
+    BCh_fluid->addBC ("Flow7" , RCSUBCA,  Flux/*Essential*/, Normal, flow_7);
+    BCh_fluid->addBC ("Flow6" , RCSUBSUBCA,  Flux/*Essential*/, Normal, flow_6);
+    BCh_fluid->addBC ("Flow5" , RCCA,  Flux/*Essential*/, Normal, flow_5);
+    BCh_fluid->addBC ("Flow8" , LCCA,  Flux/*Essential*/, Normal, flow_8);
+    BCh_fluid->addBC ("Flow9" , LSUBSUBCA,  Flux/*Essential*/, Normal, flow_9);
 
     return BCh_fluid;
 }
 
-FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFluid(FSIOperator &_oper)
+FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFluid (FSIOperator& _oper)
 {
     // Boundary conditions for the fluid velocity
-    debugStream( 10000 ) << "Boundary condition for the fluid\n";
+    debugStream ( 10000 ) << "Boundary condition for the fluid\n";
 
     if (! _oper.isFluid() )
+    {
         return FSIOperator::fluidBchandlerPtr_Type();
+    }
 
-    FSIOperator::fluidBchandlerPtr_Type BCh_fluid( new FSIOperator::fluidBchandler_Type );
+    FSIOperator::fluidBchandlerPtr_Type BCh_fluid ( new FSIOperator::fluidBchandler_Type );
 
     BCFunctionBase bcf      (fZero);
     //BCFunctionBase pressure_out(FlowConditions::outPressure0);
@@ -224,26 +226,28 @@ FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFluid(FSIOperator &_oper)
 }
 
 
-FSIOperator::solidBchandlerPtr_Type BCh_monolithicSolid(FSIOperator &_oper)
+FSIOperator::solidBchandlerPtr_Type BCh_monolithicSolid (FSIOperator& _oper)
 {
     // Boundary conditions for the solid displacement
 
     if (! _oper.isSolid() )
+    {
         return FSIOperator::solidBchandlerPtr_Type();
+    }
 
-    FSIOperator::solidBchandlerPtr_Type BCh_solid( new FSIOperator::solidBchandler_Type );
+    FSIOperator::solidBchandlerPtr_Type BCh_solid ( new FSIOperator::solidBchandler_Type );
 
-    BCFunctionBase bcf(fZero);
+    BCFunctionBase bcf (fZero);
 
 
     BCFunctionBase young (E);
 
     //robin condition on the outer wall
-    _oper.setRobinOuterWall(bcf, young);
-    BCh_solid->addBC("OuterWall", OUTERWALL, Robin, Normal, _oper.bcfRobinOuterWall());
+    _oper.setRobinOuterWall (bcf, young);
+    BCh_solid->addBC ("OuterWall", OUTERWALL, Robin, Normal, _oper.bcfRobinOuterWall() );
 
     //BCh_solid->addBC("Top",  OUTLET, Essential, Full, bcf, 3);
-    BCh_solid->addBC("Base",  INLET, Essential, Full, bcf, 3);
+    BCh_solid->addBC ("Base",  INLET, Essential, Full, bcf, 3);
 
     return BCh_solid;
 }

@@ -45,7 +45,7 @@
 
 namespace LifeV
 {
-    typedef boost::numeric::ublas::vector<Real> GeoVector;
+typedef boost::numeric::ublas::vector<Real> GeoVector;
 
 //! ReferenceElement - The basis class for the geometric mapping and the reference finite elements.
 /*!
@@ -90,9 +90,9 @@ public:
       @param d2Phi Array of the second derivatives of the basis functions
       @param refCoor Array of the reference coordinates for this reference element
      */
-    ReferenceElement( std::string name, ReferenceShapes shape, UInt nbDof, UInt nbCoor, UInt feDim,
-            const function_Type* phi, const function_Type* dPhi, const function_Type* d2Phi,
-            const function_Type* divPhi, const Real* refCoor);
+    ReferenceElement ( std::string name, ReferenceShapes shape, UInt nbDof, UInt nbCoor, UInt feDim,
+                       const function_Type* phi, const function_Type* dPhi, const function_Type* d2Phi,
+                       const function_Type* divPhi, const Real* refCoor);
 
     //! Destructor
     virtual ~ReferenceElement();
@@ -105,63 +105,63 @@ public:
     //@{
 
     //! return the first local coordinate of the i-th node of the reference element
-    Real xi( UInt i ) const
+    Real xi ( UInt i ) const
     {
-        ASSERT_BD( i < M_nbDof )
+        ASSERT_BD ( i < M_nbDof )
         return M_refCoor[ 3 * i ];
     }
     //! return the second local coordinate of the i-th node of the reference element
-    Real eta( UInt i ) const
+    Real eta ( UInt i ) const
     {
-        ASSERT_BD( i < M_nbDof )
+        ASSERT_BD ( i < M_nbDof )
         return M_refCoor[ 3 * i + 1 ];
     }
     //! return the third local coordinate of the i-th node of the reference element
-    Real zeta( UInt i ) const
+    Real zeta ( UInt i ) const
     {
-        ASSERT_BD( i < M_nbDof )
+        ASSERT_BD ( i < M_nbDof )
         return M_refCoor[ 3 * i + 2 ];
     }
     //! return the icoor-th local coordinate of the i-th node of the reference element
-    Real refCoor( UInt i, UInt icoor ) const
+    Real refCoor ( UInt i, UInt icoor ) const
     {
-        ASSERT_BD( i < M_nbDof && icoor < M_nbCoor )
+        ASSERT_BD ( i < M_nbDof && icoor < M_nbCoor )
         return M_refCoor[ 3 * i + icoor ];
     }
     //! return the coordinates of the reference element
     std::vector<GeoVector> refCoor() const;
 
     //! Return the value of the i-th basis function in the point v
-    Real phi( UInt i, const GeoVector& v ) const
+    Real phi ( UInt i, const GeoVector& v ) const
     {
-        ASSERT_BD( i < M_nbDof )
+        ASSERT_BD ( i < M_nbDof )
         return M_phi[ i ] ( v );
     }
 
     //! return the value of the component icoor-th of the i-th basis function on point v.
-    Real phi( UInt i, UInt icoor, const GeoVector& v ) const
+    Real phi ( UInt i, UInt icoor, const GeoVector& v ) const
     {
-        ASSERT_BD( i < M_nbDof && icoor < M_feDim )
+        ASSERT_BD ( i < M_nbDof && icoor < M_feDim )
         return M_phi[ i * M_feDim + icoor ] ( v );
     }
 
     //! return the value of the icoor-th derivative of the i-th basis function on point v
-    Real dPhi( UInt i, UInt icoor, const GeoVector& v ) const
+    Real dPhi ( UInt i, UInt icoor, const GeoVector& v ) const
     {
-        ASSERT_BD( i < M_nbDof && icoor < M_nbCoor )
+        ASSERT_BD ( i < M_nbDof && icoor < M_nbCoor )
         return M_dPhi[ i * M_nbCoor + icoor ] ( v );
     }
 
     //!  return the value of the (icoor,jcoor)-th second derivative of the i-th basis function on point v
-    Real d2Phi( UInt i, UInt icoor, UInt jcoor, const GeoVector& v ) const
+    Real d2Phi ( UInt i, UInt icoor, UInt jcoor, const GeoVector& v ) const
     {
-        ASSERT_BD( i < M_nbDof && icoor < M_nbCoor && jcoor < M_nbCoor )
+        ASSERT_BD ( i < M_nbDof && icoor < M_nbCoor && jcoor < M_nbCoor )
         return M_d2Phi[ ( i * M_nbCoor + icoor ) * M_nbCoor + jcoor ] ( v );
     }
     //! return the value of the divergence of the i-th basis function on point v.
-    Real divPhi( UInt i, const GeoVector& v ) const
+    Real divPhi ( UInt i, const GeoVector& v ) const
     {
-        ASSERT_BD( i < M_nbDof )
+        ASSERT_BD ( i < M_nbDof )
         return M_divPhi[ i ] ( v );
     }
 
@@ -169,22 +169,22 @@ public:
     //! Check if the refEle has phi functions
     bool hasPhi() const
     {
-        return ( M_phi != static_cast<function_Type*>(NULL) );
+        return ( M_phi != static_cast<function_Type*> (NULL) );
     }
     //! Check if the refEle has dPhi functions
     bool hasDPhi() const
     {
-        return ( M_dPhi != static_cast<function_Type*>(NULL) );
+        return ( M_dPhi != static_cast<function_Type*> (NULL) );
     }
     //! Check if the refEle has d2Phi functions
     bool hasD2Phi() const
     {
-        return ( M_d2Phi != static_cast<function_Type*>(NULL) );
+        return ( M_d2Phi != static_cast<function_Type*> (NULL) );
     }
     //! Check if the refEle has divPhi functions
     bool hasDivPhi() const
     {
-        return ( M_divPhi != static_cast<function_Type*>(NULL) );
+        return ( M_divPhi != static_cast<function_Type*> (NULL) );
     }
 
     //! Method for transforming nodal values into FE values
@@ -206,14 +206,14 @@ public:
       If one tries to use this method with a non nodal finite element, an
       error will be displayed and the program will stop running.
      */
-    virtual std::vector<Real> nodalToFEValues(const std::vector<Real>& /*nodalValues*/) const
+    virtual std::vector<Real> nodalToFEValues (const std::vector<Real>& /*nodalValues*/) const
     {
         //By default, it is not possible to use it.
         std::cerr << " Trying to access nodal values via nodalToFEValues function. " << std::endl;
         std::cerr << " This FE is not nodal, impossible operation! " << std::endl;
         abort();
-    std::vector<Real> dummy;
-    return dummy;
+        std::vector<Real> dummy;
+        return dummy;
     }
 
     //@}
@@ -259,55 +259,55 @@ public:
     //@{
 
     //! return the value of the i-th basis function on point (x,y,z)
-    inline Real phi( UInt i, const Real& x, const Real& y, const Real& z ) const
+    inline Real phi ( UInt i, const Real& x, const Real& y, const Real& z ) const
     {
-        ASSERT_BD( i < M_nbDof )
-        GeoVector v(3);
-        v[0]=x;
-        v[1]=y;
-        v[2]=z;
+        ASSERT_BD ( i < M_nbDof )
+        GeoVector v (3);
+        v[0] = x;
+        v[1] = y;
+        v[2] = z;
         return M_phi[ i ] ( v );
     }
 
     //! return the value of the component icoor-th of the i-th basis function on point (x,y,z).
-    inline Real phi( UInt i, UInt icoor, const Real& x, const Real& y, const Real& z ) const
+    inline Real phi ( UInt i, UInt icoor, const Real& x, const Real& y, const Real& z ) const
     {
-        ASSERT_BD( i < M_nbDof && icoor < M_feDim )
-        GeoVector v(3);
-        v[0]=x;
-        v[1]=y;
-        v[2]=z;
+        ASSERT_BD ( i < M_nbDof && icoor < M_feDim )
+        GeoVector v (3);
+        v[0] = x;
+        v[1] = y;
+        v[2] = z;
         return M_phi[ i * M_feDim + icoor ] ( v );
     }
 
     //! return the value of the icoor-th derivative of the i-th basis function on point (x,y,z)
-    inline Real dPhi( UInt i, UInt icoor, const Real& x, const Real& y, const Real& z ) const
+    inline Real dPhi ( UInt i, UInt icoor, const Real& x, const Real& y, const Real& z ) const
     {
-        ASSERT_BD( i < M_nbDof && icoor < M_nbCoor )
-        GeoVector v(3);
-        v[0]=x;
-        v[1]=y;
-        v[2]=z;
+        ASSERT_BD ( i < M_nbDof && icoor < M_nbCoor )
+        GeoVector v (3);
+        v[0] = x;
+        v[1] = y;
+        v[2] = z;
         return M_dPhi[ i * M_nbCoor + icoor ] ( v );
     }
     //!  return the value of the (icoor,jcoor)-th second derivative of the i-th basis function on point (x,y,z)
-    inline Real d2Phi( UInt i, UInt icoor, UInt jcoor, const Real& x, const Real& y, const Real& z ) const
+    inline Real d2Phi ( UInt i, UInt icoor, UInt jcoor, const Real& x, const Real& y, const Real& z ) const
     {
-        ASSERT_BD( i < M_nbDof && icoor < M_nbCoor && jcoor < M_nbCoor )
-        GeoVector v(3);
-        v[0]=x;
-        v[1]=y;
-        v[2]=z;
+        ASSERT_BD ( i < M_nbDof && icoor < M_nbCoor && jcoor < M_nbCoor )
+        GeoVector v (3);
+        v[0] = x;
+        v[1] = y;
+        v[2] = z;
         return M_d2Phi[ ( i * M_nbCoor + icoor ) * M_nbCoor + jcoor ] ( v );
     }
     //! return the value of the divergence of the i-th basis function on point (x,y,z).
-    inline Real divPhi( UInt i, const Real& x, const Real& y, const Real& z ) const
+    inline Real divPhi ( UInt i, const Real& x, const Real& y, const Real& z ) const
     {
-        ASSERT_BD( i < M_nbDof )
-        GeoVector v(3);
-        v[0]=x;
-        v[1]=y;
-        v[2]=z;
+        ASSERT_BD ( i < M_nbDof )
+        GeoVector v (3);
+        v[0] = x;
+        v[1] = y;
+        v[2] = z;
         return M_divPhi[ i ] ( v );
     }
 
@@ -322,7 +322,7 @@ private:
     ReferenceElement();
 
     //! No way to use the copy constuctor
-    ReferenceElement(const ReferenceElement&);
+    ReferenceElement (const ReferenceElement&);
 
     //@}
 
@@ -375,9 +375,9 @@ private:
                            1
 */
 
-Real fct1_P0_0D( const GeoVector& );
-Real derfct1_P0_0D( const GeoVector & );
-Real der2fct1_P0_0D( const GeoVector & );
+Real fct1_P0_0D ( const GeoVector& );
+Real derfct1_P0_0D ( const GeoVector& );
+Real der2fct1_P0_0D ( const GeoVector& );
 
 static const Real refcoor_P0_0D[ 3 ] =
 {
@@ -407,11 +407,11 @@ static const ReferenceElement::function_Type der2fct_P0_0D[ 1 ] =
 /*
                            --1--
 */
-Real fct1_P0_1D( const GeoVector& v );
+Real fct1_P0_1D ( const GeoVector& v );
 
-Real derfct1_1_P0_1D( const GeoVector & );
+Real derfct1_1_P0_1D ( const GeoVector& );
 
-Real der2fct1_P0_1D( const GeoVector& );
+Real der2fct1_P0_1D ( const GeoVector& );
 
 static const Real refcoor_P0_1D[ 3 ] =
 {
@@ -439,13 +439,13 @@ static const ReferenceElement::function_Type der2fct_P0_1D[ 1 ] =
 /*
                            1-----2
 */
-Real fct1_P1_1D( const GeoVector& v );
-Real fct2_P1_1D( const GeoVector& v );
+Real fct1_P1_1D ( const GeoVector& v );
+Real fct2_P1_1D ( const GeoVector& v );
 
-Real derfct1_1_P1_1D( const GeoVector & );
-Real derfct2_1_P1_1D( const GeoVector& );
+Real derfct1_1_P1_1D ( const GeoVector& );
+Real derfct2_1_P1_1D ( const GeoVector& );
 
-Real der2fct1_P1_1D( const GeoVector& );
+Real der2fct1_P1_1D ( const GeoVector& );
 
 static const Real refcoor_P1_1D[ 6 ] =
 {
@@ -474,17 +474,17 @@ static const ReferenceElement::function_Type der2fct_P1_1D[ 2 ] =
 /*
                            1--3--2
 */
-Real fct1_P2_1D( const GeoVector& v );
-Real fct2_P2_1D( const GeoVector& v );
-Real fct3_P2_1D( const GeoVector& v );
+Real fct1_P2_1D ( const GeoVector& v );
+Real fct2_P2_1D ( const GeoVector& v );
+Real fct3_P2_1D ( const GeoVector& v );
 
-Real derfct1_1_P2_1D( const GeoVector& v );
-Real derfct2_1_P2_1D( const GeoVector& v );
-Real derfct3_1_P2_1D( const GeoVector& v );
+Real derfct1_1_P2_1D ( const GeoVector& v );
+Real derfct2_1_P2_1D ( const GeoVector& v );
+Real derfct3_1_P2_1D ( const GeoVector& v );
 
-Real der2fct1_11_P2_1D( const GeoVector& v );
-Real der2fct2_11_P2_1D( const GeoVector& v );
-Real der2fct3_11_P2_1D( const GeoVector& v );
+Real der2fct1_11_P2_1D ( const GeoVector& v );
+Real der2fct2_11_P2_1D ( const GeoVector& v );
+Real der2fct3_11_P2_1D ( const GeoVector& v );
 
 static const Real refcoor_P2_1D[ 9 ] =
 {
@@ -517,10 +517,10 @@ static const ReferenceElement::function_Type der2fct_P2_1D[ 3 ] =
                            | 1\
                             ---
 */
-Real fct1_P0_2D( const GeoVector& v );
+Real fct1_P0_2D ( const GeoVector& v );
 // First and Second derivatives are both equal (to 0).
-Real derfct1_P0_2D( const GeoVector & );
-Real der2fct1_P0_2D( const GeoVector & );
+Real derfct1_P0_2D ( const GeoVector& );
+Real der2fct1_P0_2D ( const GeoVector& );
 
 static const Real refcoor_P0_2D[ 3 ] =
 {
@@ -556,19 +556,19 @@ static const ReferenceElement::function_Type der2fct_P0_2D[ 4 ] =
                            |  \
                            1---2
 */
-Real fct1_P1_2D( const GeoVector& v );
-Real fct2_P1_2D( const GeoVector& v );
-Real fct3_P1_2D( const GeoVector& v );
+Real fct1_P1_2D ( const GeoVector& v );
+Real fct2_P1_2D ( const GeoVector& v );
+Real fct3_P1_2D ( const GeoVector& v );
 
-Real derfct1_1_P1_2D( const GeoVector& );
-Real derfct1_2_P1_2D( const GeoVector& );
-Real derfct2_1_P1_2D( const GeoVector& );
-Real derfct2_2_P1_2D( const GeoVector& );
-Real derfct3_1_P1_2D( const GeoVector& );
-Real derfct3_2_P1_2D( const GeoVector& );
+Real derfct1_1_P1_2D ( const GeoVector& );
+Real derfct1_2_P1_2D ( const GeoVector& );
+Real derfct2_1_P1_2D ( const GeoVector& );
+Real derfct2_2_P1_2D ( const GeoVector& );
+Real derfct3_1_P1_2D ( const GeoVector& );
+Real derfct3_2_P1_2D ( const GeoVector& );
 
 // Second derivatives
-Real der2fctx_xx_P1_2D( const GeoVector& );
+Real der2fctx_xx_P1_2D ( const GeoVector& );
 
 static const Real refcoor_P1_2D[ 9 ] =
 {
@@ -606,33 +606,33 @@ static const ReferenceElement::function_Type der2fct_P1_2D[ 12 ] =
                            |4.\
                            1---2
 */
-Real fct1_P1bubble_2D( const GeoVector& v );
-Real fct2_P1bubble_2D( const GeoVector& v );
-Real fct3_P1bubble_2D( const GeoVector& v );
-Real fct4_P1bubble_2D( const GeoVector& v );
+Real fct1_P1bubble_2D ( const GeoVector& v );
+Real fct2_P1bubble_2D ( const GeoVector& v );
+Real fct3_P1bubble_2D ( const GeoVector& v );
+Real fct4_P1bubble_2D ( const GeoVector& v );
 
-Real derfct1_1_P1bubble_2D( const GeoVector& );
-Real derfct1_2_P1bubble_2D( const GeoVector& );
-Real derfct2_1_P1bubble_2D( const GeoVector& );
-Real derfct2_2_P1bubble_2D( const GeoVector& );
-Real derfct3_1_P1bubble_2D( const GeoVector& );
-Real derfct3_2_P1bubble_2D( const GeoVector& );
-Real derfct4_1_P1bubble_2D( const GeoVector& );
-Real derfct4_2_P1bubble_2D( const GeoVector& );
+Real derfct1_1_P1bubble_2D ( const GeoVector& );
+Real derfct1_2_P1bubble_2D ( const GeoVector& );
+Real derfct2_1_P1bubble_2D ( const GeoVector& );
+Real derfct2_2_P1bubble_2D ( const GeoVector& );
+Real derfct3_1_P1bubble_2D ( const GeoVector& );
+Real derfct3_2_P1bubble_2D ( const GeoVector& );
+Real derfct4_1_P1bubble_2D ( const GeoVector& );
+Real derfct4_2_P1bubble_2D ( const GeoVector& );
 
 // Second derivatives
-Real der2fctx_xx_P1bubble_2D( const GeoVector& );
-Real der2fct4_11_P1bubble_2D( const GeoVector& );
-Real der2fct4_12_P1bubble_2D( const GeoVector& );
-Real der2fct4_21_P1bubble_2D( const GeoVector& );
-Real der2fct4_22_P1bubble_2D( const GeoVector& );
+Real der2fctx_xx_P1bubble_2D ( const GeoVector& );
+Real der2fct4_11_P1bubble_2D ( const GeoVector& );
+Real der2fct4_12_P1bubble_2D ( const GeoVector& );
+Real der2fct4_21_P1bubble_2D ( const GeoVector& );
+Real der2fct4_22_P1bubble_2D ( const GeoVector& );
 
 static const Real refcoor_P1bubble_2D[ 12 ] =
 {
     0. , 0. , 0.,
     1. , 0. , 0.,
     0. , 1. , 0.,
-    1./3., 1./3., 1./3.
+    1. / 3., 1. / 3., 1. / 3.
 };
 
 static const ReferenceElement::function_Type fct_P1bubble_2D[ 4 ] =
@@ -668,55 +668,55 @@ static const ReferenceElement::function_Type der2fct_P1bubble_2D[ 16 ] =
                            |  \
                            1-4-2
 */
-Real fct1_P2_2D( const GeoVector& v );
-Real fct2_P2_2D( const GeoVector& v );
-Real fct3_P2_2D( const GeoVector& v );
-Real fct4_P2_2D( const GeoVector& v );
-Real fct5_P2_2D( const GeoVector& v );
-Real fct6_P2_2D( const GeoVector& v );
+Real fct1_P2_2D ( const GeoVector& v );
+Real fct2_P2_2D ( const GeoVector& v );
+Real fct3_P2_2D ( const GeoVector& v );
+Real fct4_P2_2D ( const GeoVector& v );
+Real fct5_P2_2D ( const GeoVector& v );
+Real fct6_P2_2D ( const GeoVector& v );
 
-Real derfct1_1_P2_2D( const GeoVector& v );
-Real derfct1_2_P2_2D( const GeoVector& v );
-Real derfct2_1_P2_2D( const GeoVector& v );
-Real derfct2_2_P2_2D( const GeoVector& v );
-Real derfct3_1_P2_2D( const GeoVector& v );
-Real derfct3_2_P2_2D( const GeoVector& v );
-Real derfct4_1_P2_2D( const GeoVector& v );
-Real derfct4_2_P2_2D( const GeoVector& v );
-Real derfct5_1_P2_2D( const GeoVector& v );
-Real derfct5_2_P2_2D( const GeoVector& v );
-Real derfct6_1_P2_2D( const GeoVector& v );
-Real derfct6_2_P2_2D( const GeoVector& v );
+Real derfct1_1_P2_2D ( const GeoVector& v );
+Real derfct1_2_P2_2D ( const GeoVector& v );
+Real derfct2_1_P2_2D ( const GeoVector& v );
+Real derfct2_2_P2_2D ( const GeoVector& v );
+Real derfct3_1_P2_2D ( const GeoVector& v );
+Real derfct3_2_P2_2D ( const GeoVector& v );
+Real derfct4_1_P2_2D ( const GeoVector& v );
+Real derfct4_2_P2_2D ( const GeoVector& v );
+Real derfct5_1_P2_2D ( const GeoVector& v );
+Real derfct5_2_P2_2D ( const GeoVector& v );
+Real derfct6_1_P2_2D ( const GeoVector& v );
+Real derfct6_2_P2_2D ( const GeoVector& v );
 
-Real der2fct1_11_P2_2D( const GeoVector& v );
-Real der2fct1_12_P2_2D( const GeoVector& v );
-Real der2fct1_21_P2_2D( const GeoVector& v );
-Real der2fct1_22_P2_2D( const GeoVector& v );
+Real der2fct1_11_P2_2D ( const GeoVector& v );
+Real der2fct1_12_P2_2D ( const GeoVector& v );
+Real der2fct1_21_P2_2D ( const GeoVector& v );
+Real der2fct1_22_P2_2D ( const GeoVector& v );
 
-Real der2fct2_11_P2_2D( const GeoVector& v );
-Real der2fct2_12_P2_2D( const GeoVector& v );
-Real der2fct2_21_P2_2D( const GeoVector& v );
-Real der2fct2_22_P2_2D( const GeoVector& v );
+Real der2fct2_11_P2_2D ( const GeoVector& v );
+Real der2fct2_12_P2_2D ( const GeoVector& v );
+Real der2fct2_21_P2_2D ( const GeoVector& v );
+Real der2fct2_22_P2_2D ( const GeoVector& v );
 
-Real der2fct3_11_P2_2D( const GeoVector& v );
-Real der2fct3_12_P2_2D( const GeoVector& v );
-Real der2fct3_21_P2_2D( const GeoVector& v );
-Real der2fct3_22_P2_2D( const GeoVector& v );
+Real der2fct3_11_P2_2D ( const GeoVector& v );
+Real der2fct3_12_P2_2D ( const GeoVector& v );
+Real der2fct3_21_P2_2D ( const GeoVector& v );
+Real der2fct3_22_P2_2D ( const GeoVector& v );
 
-Real der2fct4_11_P2_2D( const GeoVector& v );
-Real der2fct4_12_P2_2D( const GeoVector& v );
-Real der2fct4_21_P2_2D( const GeoVector& v );
-Real der2fct4_22_P2_2D( const GeoVector& v );
+Real der2fct4_11_P2_2D ( const GeoVector& v );
+Real der2fct4_12_P2_2D ( const GeoVector& v );
+Real der2fct4_21_P2_2D ( const GeoVector& v );
+Real der2fct4_22_P2_2D ( const GeoVector& v );
 
-Real der2fct5_11_P2_2D( const GeoVector& v );
-Real der2fct5_12_P2_2D( const GeoVector& v );
-Real der2fct5_21_P2_2D( const GeoVector& v );
-Real der2fct5_22_P2_2D( const GeoVector& v );
+Real der2fct5_11_P2_2D ( const GeoVector& v );
+Real der2fct5_12_P2_2D ( const GeoVector& v );
+Real der2fct5_21_P2_2D ( const GeoVector& v );
+Real der2fct5_22_P2_2D ( const GeoVector& v );
 
-Real der2fct6_11_P2_2D( const GeoVector& v );
-Real der2fct6_12_P2_2D( const GeoVector& v );
-Real der2fct6_21_P2_2D( const GeoVector& v );
-Real der2fct6_22_P2_2D( const GeoVector& v );
+Real der2fct6_11_P2_2D ( const GeoVector& v );
+Real der2fct6_12_P2_2D ( const GeoVector& v );
+Real der2fct6_21_P2_2D ( const GeoVector& v );
+Real der2fct6_22_P2_2D ( const GeoVector& v );
 
 static const Real refcoor_P2_2D[ 18 ] =
 {
@@ -774,21 +774,21 @@ facet 2: 2, 3
 facet 3: 3, 1
 */
 
-Real fct1_RT0_1_TRIA_2D( const GeoVector& v );
-Real fct1_RT0_2_TRIA_2D( const GeoVector& v );
-Real fct1_RT0_3_TRIA_2D( const GeoVector& v );
+Real fct1_RT0_1_TRIA_2D ( const GeoVector& v );
+Real fct1_RT0_2_TRIA_2D ( const GeoVector& v );
+Real fct1_RT0_3_TRIA_2D ( const GeoVector& v );
 
-Real fct2_RT0_1_TRIA_2D( const GeoVector& v );
-Real fct2_RT0_2_TRIA_2D( const GeoVector& v );
-Real fct2_RT0_3_TRIA_2D( const GeoVector& v );
+Real fct2_RT0_1_TRIA_2D ( const GeoVector& v );
+Real fct2_RT0_2_TRIA_2D ( const GeoVector& v );
+Real fct2_RT0_3_TRIA_2D ( const GeoVector& v );
 
-Real fct3_RT0_1_TRIA_2D( const GeoVector& v );
-Real fct3_RT0_2_TRIA_2D( const GeoVector& v );
-Real fct3_RT0_3_TRIA_2D( const GeoVector& v );
+Real fct3_RT0_1_TRIA_2D ( const GeoVector& v );
+Real fct3_RT0_2_TRIA_2D ( const GeoVector& v );
+Real fct3_RT0_3_TRIA_2D ( const GeoVector& v );
 
-Real fct1_DIV_RT0_TRIA_2D( const GeoVector& v );
-Real fct2_DIV_RT0_TRIA_2D( const GeoVector& v );
-Real fct3_DIV_RT0_TRIA_2D( const GeoVector& v );
+Real fct1_DIV_RT0_TRIA_2D ( const GeoVector& v );
+Real fct2_DIV_RT0_TRIA_2D ( const GeoVector& v );
+Real fct3_DIV_RT0_TRIA_2D ( const GeoVector& v );
 
 static const Real refcoor_RT0_TRIA_2D[ 9 ] =
 {
@@ -824,10 +824,10 @@ static const ReferenceElement::function_Type fct_DIV_RT0_TRIA_2D[ 3 ] =
                             -------
 
 */
-Real fct1_Q0_2D( const GeoVector& v );
-Real derfct1_Q0_2D( const GeoVector& v );
+Real fct1_Q0_2D ( const GeoVector& v );
+Real derfct1_Q0_2D ( const GeoVector& v );
 // The second derivative is equal to the first : both = 0.
-Real der2fct1_Q0_2D( const GeoVector& v );
+Real der2fct1_Q0_2D ( const GeoVector& v );
 
 static const Real refcoor_Q0_2D[ 3 ] =
 {
@@ -862,22 +862,22 @@ static const ReferenceElement::function_Type der2fct_Q0_2D[ 4 ] =
                            |       |
                            1-------2
 */
-Real fct1_Q1_2D( const GeoVector& v );
-Real fct2_Q1_2D( const GeoVector& v );
-Real fct3_Q1_2D( const GeoVector& v );
-Real fct4_Q1_2D( const GeoVector& v );
+Real fct1_Q1_2D ( const GeoVector& v );
+Real fct2_Q1_2D ( const GeoVector& v );
+Real fct3_Q1_2D ( const GeoVector& v );
+Real fct4_Q1_2D ( const GeoVector& v );
 
-Real derfct1_1_Q1_2D( const GeoVector& v );
-Real derfct1_2_Q1_2D( const GeoVector& v );
-Real derfct2_1_Q1_2D( const GeoVector& v );
-Real derfct2_2_Q1_2D( const GeoVector& v );
-Real derfct3_1_Q1_2D( const GeoVector& v );
-Real derfct3_2_Q1_2D( const GeoVector& v );
-Real derfct4_1_Q1_2D( const GeoVector& v );
-Real derfct4_2_Q1_2D( const GeoVector& v );
+Real derfct1_1_Q1_2D ( const GeoVector& v );
+Real derfct1_2_Q1_2D ( const GeoVector& v );
+Real derfct2_1_Q1_2D ( const GeoVector& v );
+Real derfct2_2_Q1_2D ( const GeoVector& v );
+Real derfct3_1_Q1_2D ( const GeoVector& v );
+Real derfct3_2_Q1_2D ( const GeoVector& v );
+Real derfct4_1_Q1_2D ( const GeoVector& v );
+Real derfct4_2_Q1_2D ( const GeoVector& v );
 
 // Second derivatives
-Real der2fctx_xx_Q1_2D( const GeoVector& );
+Real der2fctx_xx_Q1_2D ( const GeoVector& );
 
 static const Real refcoor_Q1_2D[ 12 ] =
 {
@@ -919,79 +919,79 @@ static const ReferenceElement::function_Type der2fct_Q1_2D[ 16 ] =
                            |       |
                            1---5---2
 */
-Real fct1_Q2_2D( const GeoVector& v );
-Real fct5_Q2_2D( const GeoVector& v );
-Real fct2_Q2_2D( const GeoVector& v );
-Real fct6_Q2_2D( const GeoVector& v );
-Real fct3_Q2_2D( const GeoVector& v );
-Real fct7_Q2_2D( const GeoVector& v );
-Real fct4_Q2_2D( const GeoVector& v );
-Real fct8_Q2_2D( const GeoVector& v );
-Real fct9_Q2_2D( const GeoVector& v );
+Real fct1_Q2_2D ( const GeoVector& v );
+Real fct5_Q2_2D ( const GeoVector& v );
+Real fct2_Q2_2D ( const GeoVector& v );
+Real fct6_Q2_2D ( const GeoVector& v );
+Real fct3_Q2_2D ( const GeoVector& v );
+Real fct7_Q2_2D ( const GeoVector& v );
+Real fct4_Q2_2D ( const GeoVector& v );
+Real fct8_Q2_2D ( const GeoVector& v );
+Real fct9_Q2_2D ( const GeoVector& v );
 
-Real derfct1_1_Q2_2D( const GeoVector& v );
-Real derfct1_2_Q2_2D( const GeoVector& v );
-Real derfct5_1_Q2_2D( const GeoVector& v );
-Real derfct5_2_Q2_2D( const GeoVector& v );
-Real derfct2_1_Q2_2D( const GeoVector& v );
-Real derfct2_2_Q2_2D( const GeoVector& v );
-Real derfct6_1_Q2_2D( const GeoVector& v );
-Real derfct6_2_Q2_2D( const GeoVector& v );
-Real derfct3_1_Q2_2D( const GeoVector& v );
-Real derfct3_2_Q2_2D( const GeoVector& v );
-Real derfct7_1_Q2_2D( const GeoVector& v );
-Real derfct7_2_Q2_2D( const GeoVector& v );
-Real derfct4_1_Q2_2D( const GeoVector& v );
-Real derfct4_2_Q2_2D( const GeoVector& v );
-Real derfct8_1_Q2_2D( const GeoVector& v );
-Real derfct8_2_Q2_2D( const GeoVector& v );
-Real derfct9_1_Q2_2D( const GeoVector& v );
-Real derfct9_2_Q2_2D( const GeoVector& v );
+Real derfct1_1_Q2_2D ( const GeoVector& v );
+Real derfct1_2_Q2_2D ( const GeoVector& v );
+Real derfct5_1_Q2_2D ( const GeoVector& v );
+Real derfct5_2_Q2_2D ( const GeoVector& v );
+Real derfct2_1_Q2_2D ( const GeoVector& v );
+Real derfct2_2_Q2_2D ( const GeoVector& v );
+Real derfct6_1_Q2_2D ( const GeoVector& v );
+Real derfct6_2_Q2_2D ( const GeoVector& v );
+Real derfct3_1_Q2_2D ( const GeoVector& v );
+Real derfct3_2_Q2_2D ( const GeoVector& v );
+Real derfct7_1_Q2_2D ( const GeoVector& v );
+Real derfct7_2_Q2_2D ( const GeoVector& v );
+Real derfct4_1_Q2_2D ( const GeoVector& v );
+Real derfct4_2_Q2_2D ( const GeoVector& v );
+Real derfct8_1_Q2_2D ( const GeoVector& v );
+Real derfct8_2_Q2_2D ( const GeoVector& v );
+Real derfct9_1_Q2_2D ( const GeoVector& v );
+Real derfct9_2_Q2_2D ( const GeoVector& v );
 
-Real der2fct1_11_Q2_2D( const GeoVector& v );
-Real der2fct1_12_Q2_2D( const GeoVector& v );
-Real der2fct1_21_Q2_2D( const GeoVector& v );
-Real der2fct1_22_Q2_2D( const GeoVector& v );
+Real der2fct1_11_Q2_2D ( const GeoVector& v );
+Real der2fct1_12_Q2_2D ( const GeoVector& v );
+Real der2fct1_21_Q2_2D ( const GeoVector& v );
+Real der2fct1_22_Q2_2D ( const GeoVector& v );
 
-Real der2fct5_11_Q2_2D( const GeoVector& v );
-Real der2fct5_12_Q2_2D( const GeoVector& v );
-Real der2fct5_21_Q2_2D( const GeoVector& v );
-Real der2fct5_22_Q2_2D( const GeoVector& v );
+Real der2fct5_11_Q2_2D ( const GeoVector& v );
+Real der2fct5_12_Q2_2D ( const GeoVector& v );
+Real der2fct5_21_Q2_2D ( const GeoVector& v );
+Real der2fct5_22_Q2_2D ( const GeoVector& v );
 
-Real der2fct2_11_Q2_2D( const GeoVector& v );
-Real der2fct2_12_Q2_2D( const GeoVector& v );
-Real der2fct2_21_Q2_2D( const GeoVector& v );
-Real der2fct2_22_Q2_2D( const GeoVector& v );
+Real der2fct2_11_Q2_2D ( const GeoVector& v );
+Real der2fct2_12_Q2_2D ( const GeoVector& v );
+Real der2fct2_21_Q2_2D ( const GeoVector& v );
+Real der2fct2_22_Q2_2D ( const GeoVector& v );
 
-Real der2fct6_11_Q2_2D( const GeoVector& v );
-Real der2fct6_12_Q2_2D( const GeoVector& v );
-Real der2fct6_21_Q2_2D( const GeoVector& v );
-Real der2fct6_22_Q2_2D( const GeoVector& v );
+Real der2fct6_11_Q2_2D ( const GeoVector& v );
+Real der2fct6_12_Q2_2D ( const GeoVector& v );
+Real der2fct6_21_Q2_2D ( const GeoVector& v );
+Real der2fct6_22_Q2_2D ( const GeoVector& v );
 
-Real der2fct3_11_Q2_2D( const GeoVector& v );
-Real der2fct3_12_Q2_2D( const GeoVector& v );
-Real der2fct3_21_Q2_2D( const GeoVector& v );
-Real der2fct3_22_Q2_2D( const GeoVector& v );
+Real der2fct3_11_Q2_2D ( const GeoVector& v );
+Real der2fct3_12_Q2_2D ( const GeoVector& v );
+Real der2fct3_21_Q2_2D ( const GeoVector& v );
+Real der2fct3_22_Q2_2D ( const GeoVector& v );
 
-Real der2fct7_11_Q2_2D( const GeoVector& v );
-Real der2fct7_12_Q2_2D( const GeoVector& v );
-Real der2fct7_21_Q2_2D( const GeoVector& v );
-Real der2fct7_22_Q2_2D( const GeoVector& v );
+Real der2fct7_11_Q2_2D ( const GeoVector& v );
+Real der2fct7_12_Q2_2D ( const GeoVector& v );
+Real der2fct7_21_Q2_2D ( const GeoVector& v );
+Real der2fct7_22_Q2_2D ( const GeoVector& v );
 
-Real der2fct4_11_Q2_2D( const GeoVector& v );
-Real der2fct4_12_Q2_2D( const GeoVector& v );
-Real der2fct4_21_Q2_2D( const GeoVector& v );
-Real der2fct4_22_Q2_2D( const GeoVector& v );
+Real der2fct4_11_Q2_2D ( const GeoVector& v );
+Real der2fct4_12_Q2_2D ( const GeoVector& v );
+Real der2fct4_21_Q2_2D ( const GeoVector& v );
+Real der2fct4_22_Q2_2D ( const GeoVector& v );
 
-Real der2fct8_11_Q2_2D( const GeoVector& v );
-Real der2fct8_12_Q2_2D( const GeoVector& v );
-Real der2fct8_21_Q2_2D( const GeoVector& v );
-Real der2fct8_22_Q2_2D( const GeoVector& v );
+Real der2fct8_11_Q2_2D ( const GeoVector& v );
+Real der2fct8_12_Q2_2D ( const GeoVector& v );
+Real der2fct8_21_Q2_2D ( const GeoVector& v );
+Real der2fct8_22_Q2_2D ( const GeoVector& v );
 
-Real der2fct9_11_Q2_2D( const GeoVector& v );
-Real der2fct9_12_Q2_2D( const GeoVector& v );
-Real der2fct9_21_Q2_2D( const GeoVector& v );
-Real der2fct9_22_Q2_2D( const GeoVector& v );
+Real der2fct9_11_Q2_2D ( const GeoVector& v );
+Real der2fct9_12_Q2_2D ( const GeoVector& v );
+Real der2fct9_21_Q2_2D ( const GeoVector& v );
+Real der2fct9_22_Q2_2D ( const GeoVector& v );
 
 
 static const Real refcoor_Q2_2D[ 27 ] =
@@ -1055,12 +1055,12 @@ static const ReferenceElement::function_Type der2fct_Q2_2D[ 36 ] =
            /.       \!
            ----------
 */
-Real fct1_P0_3D( const GeoVector& v );
+Real fct1_P0_3D ( const GeoVector& v );
 
-Real derfct1_P0_3D( const GeoVector& );
+Real derfct1_P0_3D ( const GeoVector& );
 
 // Second derivatives
-Real der2fct1_P0_3D( const GeoVector& );
+Real der2fct1_P0_3D ( const GeoVector& );
 
 static const Real refcoor_P0_3D[ 3 ] =
 {
@@ -1097,26 +1097,26 @@ static const ReferenceElement::function_Type der2fct_P0_3D[ 9 ] =
            /.       \!
          1 ----------2
 */
-Real fct1_P1_3D( const GeoVector& v );
-Real fct2_P1_3D( const GeoVector& v );
-Real fct3_P1_3D( const GeoVector& v );
-Real fct4_P1_3D( const GeoVector& v );
+Real fct1_P1_3D ( const GeoVector& v );
+Real fct2_P1_3D ( const GeoVector& v );
+Real fct3_P1_3D ( const GeoVector& v );
+Real fct4_P1_3D ( const GeoVector& v );
 
-Real derfct1_1_P1_3D( const GeoVector& );
-Real derfct1_2_P1_3D( const GeoVector& );
-Real derfct1_3_P1_3D( const GeoVector& );
-Real derfct2_1_P1_3D( const GeoVector& );
-Real derfct2_2_P1_3D( const GeoVector& );
-Real derfct2_3_P1_3D( const GeoVector& );
-Real derfct3_1_P1_3D( const GeoVector& );
-Real derfct3_2_P1_3D( const GeoVector& );
-Real derfct3_3_P1_3D( const GeoVector& );
-Real derfct4_1_P1_3D( const GeoVector& );
-Real derfct4_2_P1_3D( const GeoVector& );
-Real derfct4_3_P1_3D( const GeoVector& );
+Real derfct1_1_P1_3D ( const GeoVector& );
+Real derfct1_2_P1_3D ( const GeoVector& );
+Real derfct1_3_P1_3D ( const GeoVector& );
+Real derfct2_1_P1_3D ( const GeoVector& );
+Real derfct2_2_P1_3D ( const GeoVector& );
+Real derfct2_3_P1_3D ( const GeoVector& );
+Real derfct3_1_P1_3D ( const GeoVector& );
+Real derfct3_2_P1_3D ( const GeoVector& );
+Real derfct3_3_P1_3D ( const GeoVector& );
+Real derfct4_1_P1_3D ( const GeoVector& );
+Real derfct4_2_P1_3D ( const GeoVector& );
+Real derfct4_3_P1_3D ( const GeoVector& );
 
 // Second derivatives
-Real der2fctx_xx_P1_3D( const GeoVector& );
+Real der2fctx_xx_P1_3D ( const GeoVector& );
 
 static const Real refcoor_P1_3D[ 12 ] =
 {
@@ -1164,39 +1164,39 @@ static const ReferenceElement::function_Type der2fct_P1_3D[ 36 ] =
            /.       \!
          1 ----------2
 */
-Real fct1_P1bubble_3D( const GeoVector& v );
-Real fct2_P1bubble_3D( const GeoVector& v );
-Real fct3_P1bubble_3D( const GeoVector& v );
-Real fct4_P1bubble_3D( const GeoVector& v );
-Real fct5_P1bubble_3D( const GeoVector& v );
+Real fct1_P1bubble_3D ( const GeoVector& v );
+Real fct2_P1bubble_3D ( const GeoVector& v );
+Real fct3_P1bubble_3D ( const GeoVector& v );
+Real fct4_P1bubble_3D ( const GeoVector& v );
+Real fct5_P1bubble_3D ( const GeoVector& v );
 
-Real derfct1_1_P1bubble_3D( const GeoVector& );
-Real derfct1_2_P1bubble_3D( const GeoVector& );
-Real derfct1_3_P1bubble_3D( const GeoVector& );
-Real derfct2_1_P1bubble_3D( const GeoVector& );
-Real derfct2_2_P1bubble_3D( const GeoVector& );
-Real derfct2_3_P1bubble_3D( const GeoVector& );
-Real derfct3_1_P1bubble_3D( const GeoVector& );
-Real derfct3_2_P1bubble_3D( const GeoVector& );
-Real derfct3_3_P1bubble_3D( const GeoVector& );
-Real derfct4_1_P1bubble_3D( const GeoVector& );
-Real derfct4_2_P1bubble_3D( const GeoVector& );
-Real derfct4_3_P1bubble_3D( const GeoVector& );
-Real derfct5_1_P1bubble_3D( const GeoVector& );
-Real derfct5_2_P1bubble_3D( const GeoVector& );
-Real derfct5_3_P1bubble_3D( const GeoVector& );
+Real derfct1_1_P1bubble_3D ( const GeoVector& );
+Real derfct1_2_P1bubble_3D ( const GeoVector& );
+Real derfct1_3_P1bubble_3D ( const GeoVector& );
+Real derfct2_1_P1bubble_3D ( const GeoVector& );
+Real derfct2_2_P1bubble_3D ( const GeoVector& );
+Real derfct2_3_P1bubble_3D ( const GeoVector& );
+Real derfct3_1_P1bubble_3D ( const GeoVector& );
+Real derfct3_2_P1bubble_3D ( const GeoVector& );
+Real derfct3_3_P1bubble_3D ( const GeoVector& );
+Real derfct4_1_P1bubble_3D ( const GeoVector& );
+Real derfct4_2_P1bubble_3D ( const GeoVector& );
+Real derfct4_3_P1bubble_3D ( const GeoVector& );
+Real derfct5_1_P1bubble_3D ( const GeoVector& );
+Real derfct5_2_P1bubble_3D ( const GeoVector& );
+Real derfct5_3_P1bubble_3D ( const GeoVector& );
 
 // Second derivatives
-Real der2fctx_xx_P1bubble_3D( const GeoVector& );
-Real der2fct5_11_P1bubble_3D( const GeoVector& );
-Real der2fct5_12_P1bubble_3D( const GeoVector& );
-Real der2fct5_13_P1bubble_3D( const GeoVector& );
-Real der2fct5_21_P1bubble_3D( const GeoVector& );
-Real der2fct5_22_P1bubble_3D( const GeoVector& );
-Real der2fct5_23_P1bubble_3D( const GeoVector& );
-Real der2fct5_31_P1bubble_3D( const GeoVector& );
-Real der2fct5_32_P1bubble_3D( const GeoVector& );
-Real der2fct5_33_P1bubble_3D( const GeoVector& );
+Real der2fctx_xx_P1bubble_3D ( const GeoVector& );
+Real der2fct5_11_P1bubble_3D ( const GeoVector& );
+Real der2fct5_12_P1bubble_3D ( const GeoVector& );
+Real der2fct5_13_P1bubble_3D ( const GeoVector& );
+Real der2fct5_21_P1bubble_3D ( const GeoVector& );
+Real der2fct5_22_P1bubble_3D ( const GeoVector& );
+Real der2fct5_23_P1bubble_3D ( const GeoVector& );
+Real der2fct5_31_P1bubble_3D ( const GeoVector& );
+Real der2fct5_32_P1bubble_3D ( const GeoVector& );
+Real der2fct5_33_P1bubble_3D ( const GeoVector& );
 
 static const Real refcoor_P1bubble_3D[ 15 ] =
 {
@@ -1253,158 +1253,158 @@ static const ReferenceElement::function_Type der2fct_P1bubble_3D[ 45 ] =
            /.       \!
          1 -----5----2
 */
-Real fct1_P2_3D( const GeoVector& v );
-Real fct2_P2_3D( const GeoVector& v );
-Real fct3_P2_3D( const GeoVector& v );
-Real fct4_P2_3D( const GeoVector& v );
-Real fct5_P2_3D( const GeoVector& v );
-Real fct6_P2_3D( const GeoVector& v );
-Real fct7_P2_3D( const GeoVector& v );
-Real fct8_P2_3D( const GeoVector& v );
-Real fct9_P2_3D( const GeoVector& v );
-Real fct10_P2_3D( const GeoVector& v );
+Real fct1_P2_3D ( const GeoVector& v );
+Real fct2_P2_3D ( const GeoVector& v );
+Real fct3_P2_3D ( const GeoVector& v );
+Real fct4_P2_3D ( const GeoVector& v );
+Real fct5_P2_3D ( const GeoVector& v );
+Real fct6_P2_3D ( const GeoVector& v );
+Real fct7_P2_3D ( const GeoVector& v );
+Real fct8_P2_3D ( const GeoVector& v );
+Real fct9_P2_3D ( const GeoVector& v );
+Real fct10_P2_3D ( const GeoVector& v );
 
 
-Real derfct1_1_P2_3D( const GeoVector& v );
-Real derfct1_2_P2_3D( const GeoVector& v );
-Real derfct1_3_P2_3D( const GeoVector& v );
+Real derfct1_1_P2_3D ( const GeoVector& v );
+Real derfct1_2_P2_3D ( const GeoVector& v );
+Real derfct1_3_P2_3D ( const GeoVector& v );
 
-Real derfct2_1_P2_3D( const GeoVector& v );
-Real derfct2_2_P2_3D( const GeoVector& v );
-Real derfct2_3_P2_3D( const GeoVector& v );
+Real derfct2_1_P2_3D ( const GeoVector& v );
+Real derfct2_2_P2_3D ( const GeoVector& v );
+Real derfct2_3_P2_3D ( const GeoVector& v );
 
-Real derfct3_1_P2_3D( const GeoVector& v );
-Real derfct3_2_P2_3D( const GeoVector& v );
-Real derfct3_3_P2_3D( const GeoVector& v );
+Real derfct3_1_P2_3D ( const GeoVector& v );
+Real derfct3_2_P2_3D ( const GeoVector& v );
+Real derfct3_3_P2_3D ( const GeoVector& v );
 
-Real derfct4_1_P2_3D( const GeoVector& v );
-Real derfct4_2_P2_3D( const GeoVector& v );
-Real derfct4_3_P2_3D( const GeoVector& v );
+Real derfct4_1_P2_3D ( const GeoVector& v );
+Real derfct4_2_P2_3D ( const GeoVector& v );
+Real derfct4_3_P2_3D ( const GeoVector& v );
 
-Real derfct5_1_P2_3D( const GeoVector& v );
-Real derfct5_2_P2_3D( const GeoVector& v );
-Real derfct5_3_P2_3D( const GeoVector& v );
+Real derfct5_1_P2_3D ( const GeoVector& v );
+Real derfct5_2_P2_3D ( const GeoVector& v );
+Real derfct5_3_P2_3D ( const GeoVector& v );
 
-Real derfct6_1_P2_3D( const GeoVector& v );
-Real derfct6_2_P2_3D( const GeoVector& v );
-Real derfct6_3_P2_3D( const GeoVector& v );
+Real derfct6_1_P2_3D ( const GeoVector& v );
+Real derfct6_2_P2_3D ( const GeoVector& v );
+Real derfct6_3_P2_3D ( const GeoVector& v );
 
-Real derfct7_1_P2_3D( const GeoVector& v );
-Real derfct7_2_P2_3D( const GeoVector& v );
-Real derfct7_3_P2_3D( const GeoVector& v );
+Real derfct7_1_P2_3D ( const GeoVector& v );
+Real derfct7_2_P2_3D ( const GeoVector& v );
+Real derfct7_3_P2_3D ( const GeoVector& v );
 
-Real derfct8_1_P2_3D( const GeoVector& v );
-Real derfct8_2_P2_3D( const GeoVector& v );
-Real derfct8_3_P2_3D( const GeoVector& v );
+Real derfct8_1_P2_3D ( const GeoVector& v );
+Real derfct8_2_P2_3D ( const GeoVector& v );
+Real derfct8_3_P2_3D ( const GeoVector& v );
 
-Real derfct9_1_P2_3D( const GeoVector& v );
-Real derfct9_2_P2_3D( const GeoVector& v );
-Real derfct9_3_P2_3D( const GeoVector& v );
+Real derfct9_1_P2_3D ( const GeoVector& v );
+Real derfct9_2_P2_3D ( const GeoVector& v );
+Real derfct9_3_P2_3D ( const GeoVector& v );
 
-Real derfct10_1_P2_3D( const GeoVector& v );
-Real derfct10_2_P2_3D( const GeoVector& v );
-Real derfct10_3_P2_3D( const GeoVector& v );
+Real derfct10_1_P2_3D ( const GeoVector& v );
+Real derfct10_2_P2_3D ( const GeoVector& v );
+Real derfct10_3_P2_3D ( const GeoVector& v );
 
 
-Real der2fct1_11_P2_3D( const GeoVector& v );
-Real der2fct1_12_P2_3D( const GeoVector& v );
-Real der2fct1_13_P2_3D( const GeoVector& v );
-Real der2fct1_21_P2_3D( const GeoVector& v );
-Real der2fct1_22_P2_3D( const GeoVector& v );
-Real der2fct1_23_P2_3D( const GeoVector& v );
-Real der2fct1_31_P2_3D( const GeoVector& v );
-Real der2fct1_32_P2_3D( const GeoVector& v );
-Real der2fct1_33_P2_3D( const GeoVector& v );
+Real der2fct1_11_P2_3D ( const GeoVector& v );
+Real der2fct1_12_P2_3D ( const GeoVector& v );
+Real der2fct1_13_P2_3D ( const GeoVector& v );
+Real der2fct1_21_P2_3D ( const GeoVector& v );
+Real der2fct1_22_P2_3D ( const GeoVector& v );
+Real der2fct1_23_P2_3D ( const GeoVector& v );
+Real der2fct1_31_P2_3D ( const GeoVector& v );
+Real der2fct1_32_P2_3D ( const GeoVector& v );
+Real der2fct1_33_P2_3D ( const GeoVector& v );
 
-Real der2fct2_11_P2_3D( const GeoVector& v );
-Real der2fct2_12_P2_3D( const GeoVector& v );
-Real der2fct2_13_P2_3D( const GeoVector& v );
-Real der2fct2_21_P2_3D( const GeoVector& v );
-Real der2fct2_22_P2_3D( const GeoVector& v );
-Real der2fct2_23_P2_3D( const GeoVector& v );
-Real der2fct2_31_P2_3D( const GeoVector& v );
-Real der2fct2_32_P2_3D( const GeoVector& v );
-Real der2fct2_33_P2_3D( const GeoVector& v );
+Real der2fct2_11_P2_3D ( const GeoVector& v );
+Real der2fct2_12_P2_3D ( const GeoVector& v );
+Real der2fct2_13_P2_3D ( const GeoVector& v );
+Real der2fct2_21_P2_3D ( const GeoVector& v );
+Real der2fct2_22_P2_3D ( const GeoVector& v );
+Real der2fct2_23_P2_3D ( const GeoVector& v );
+Real der2fct2_31_P2_3D ( const GeoVector& v );
+Real der2fct2_32_P2_3D ( const GeoVector& v );
+Real der2fct2_33_P2_3D ( const GeoVector& v );
 
-Real der2fct3_11_P2_3D( const GeoVector& v );
-Real der2fct3_12_P2_3D( const GeoVector& v );
-Real der2fct3_13_P2_3D( const GeoVector& v );
-Real der2fct3_21_P2_3D( const GeoVector& v );
-Real der2fct3_22_P2_3D( const GeoVector& v );
-Real der2fct3_23_P2_3D( const GeoVector& v );
-Real der2fct3_31_P2_3D( const GeoVector& v );
-Real der2fct3_32_P2_3D( const GeoVector& v );
-Real der2fct3_33_P2_3D( const GeoVector& v );
+Real der2fct3_11_P2_3D ( const GeoVector& v );
+Real der2fct3_12_P2_3D ( const GeoVector& v );
+Real der2fct3_13_P2_3D ( const GeoVector& v );
+Real der2fct3_21_P2_3D ( const GeoVector& v );
+Real der2fct3_22_P2_3D ( const GeoVector& v );
+Real der2fct3_23_P2_3D ( const GeoVector& v );
+Real der2fct3_31_P2_3D ( const GeoVector& v );
+Real der2fct3_32_P2_3D ( const GeoVector& v );
+Real der2fct3_33_P2_3D ( const GeoVector& v );
 
-Real der2fct4_11_P2_3D( const GeoVector& v );
-Real der2fct4_12_P2_3D( const GeoVector& v );
-Real der2fct4_13_P2_3D( const GeoVector& v );
-Real der2fct4_21_P2_3D( const GeoVector& v );
-Real der2fct4_22_P2_3D( const GeoVector& v );
-Real der2fct4_23_P2_3D( const GeoVector& v );
-Real der2fct4_31_P2_3D( const GeoVector& v );
-Real der2fct4_32_P2_3D( const GeoVector& v );
-Real der2fct4_33_P2_3D( const GeoVector& v );
+Real der2fct4_11_P2_3D ( const GeoVector& v );
+Real der2fct4_12_P2_3D ( const GeoVector& v );
+Real der2fct4_13_P2_3D ( const GeoVector& v );
+Real der2fct4_21_P2_3D ( const GeoVector& v );
+Real der2fct4_22_P2_3D ( const GeoVector& v );
+Real der2fct4_23_P2_3D ( const GeoVector& v );
+Real der2fct4_31_P2_3D ( const GeoVector& v );
+Real der2fct4_32_P2_3D ( const GeoVector& v );
+Real der2fct4_33_P2_3D ( const GeoVector& v );
 
-Real der2fct5_11_P2_3D( const GeoVector& v );
-Real der2fct5_12_P2_3D( const GeoVector& v );
-Real der2fct5_13_P2_3D( const GeoVector& v );
-Real der2fct5_21_P2_3D( const GeoVector& v );
-Real der2fct5_22_P2_3D( const GeoVector& v );
-Real der2fct5_23_P2_3D( const GeoVector& v );
-Real der2fct5_31_P2_3D( const GeoVector& v );
-Real der2fct5_32_P2_3D( const GeoVector& v );
-Real der2fct5_33_P2_3D( const GeoVector& v );
+Real der2fct5_11_P2_3D ( const GeoVector& v );
+Real der2fct5_12_P2_3D ( const GeoVector& v );
+Real der2fct5_13_P2_3D ( const GeoVector& v );
+Real der2fct5_21_P2_3D ( const GeoVector& v );
+Real der2fct5_22_P2_3D ( const GeoVector& v );
+Real der2fct5_23_P2_3D ( const GeoVector& v );
+Real der2fct5_31_P2_3D ( const GeoVector& v );
+Real der2fct5_32_P2_3D ( const GeoVector& v );
+Real der2fct5_33_P2_3D ( const GeoVector& v );
 
-Real der2fct6_11_P2_3D( const GeoVector& v );
-Real der2fct6_12_P2_3D( const GeoVector& v );
-Real der2fct6_13_P2_3D( const GeoVector& v );
-Real der2fct6_21_P2_3D( const GeoVector& v );
-Real der2fct6_22_P2_3D( const GeoVector& v );
-Real der2fct6_23_P2_3D( const GeoVector& v );
-Real der2fct6_31_P2_3D( const GeoVector& v );
-Real der2fct6_32_P2_3D( const GeoVector& v );
-Real der2fct6_33_P2_3D( const GeoVector& v );
+Real der2fct6_11_P2_3D ( const GeoVector& v );
+Real der2fct6_12_P2_3D ( const GeoVector& v );
+Real der2fct6_13_P2_3D ( const GeoVector& v );
+Real der2fct6_21_P2_3D ( const GeoVector& v );
+Real der2fct6_22_P2_3D ( const GeoVector& v );
+Real der2fct6_23_P2_3D ( const GeoVector& v );
+Real der2fct6_31_P2_3D ( const GeoVector& v );
+Real der2fct6_32_P2_3D ( const GeoVector& v );
+Real der2fct6_33_P2_3D ( const GeoVector& v );
 
-Real der2fct7_11_P2_3D( const GeoVector& v );
-Real der2fct7_12_P2_3D( const GeoVector& v );
-Real der2fct7_13_P2_3D( const GeoVector& v );
-Real der2fct7_21_P2_3D( const GeoVector& v );
-Real der2fct7_22_P2_3D( const GeoVector& v );
-Real der2fct7_23_P2_3D( const GeoVector& v );
-Real der2fct7_31_P2_3D( const GeoVector& v );
-Real der2fct7_32_P2_3D( const GeoVector& v );
-Real der2fct7_33_P2_3D( const GeoVector& v );
+Real der2fct7_11_P2_3D ( const GeoVector& v );
+Real der2fct7_12_P2_3D ( const GeoVector& v );
+Real der2fct7_13_P2_3D ( const GeoVector& v );
+Real der2fct7_21_P2_3D ( const GeoVector& v );
+Real der2fct7_22_P2_3D ( const GeoVector& v );
+Real der2fct7_23_P2_3D ( const GeoVector& v );
+Real der2fct7_31_P2_3D ( const GeoVector& v );
+Real der2fct7_32_P2_3D ( const GeoVector& v );
+Real der2fct7_33_P2_3D ( const GeoVector& v );
 
-Real der2fct8_11_P2_3D( const GeoVector& v );
-Real der2fct8_12_P2_3D( const GeoVector& v );
-Real der2fct8_13_P2_3D( const GeoVector& v );
-Real der2fct8_21_P2_3D( const GeoVector& v );
-Real der2fct8_22_P2_3D( const GeoVector& v );
-Real der2fct8_23_P2_3D( const GeoVector& v );
-Real der2fct8_31_P2_3D( const GeoVector& v );
-Real der2fct8_32_P2_3D( const GeoVector& v );
-Real der2fct8_33_P2_3D( const GeoVector& v );
+Real der2fct8_11_P2_3D ( const GeoVector& v );
+Real der2fct8_12_P2_3D ( const GeoVector& v );
+Real der2fct8_13_P2_3D ( const GeoVector& v );
+Real der2fct8_21_P2_3D ( const GeoVector& v );
+Real der2fct8_22_P2_3D ( const GeoVector& v );
+Real der2fct8_23_P2_3D ( const GeoVector& v );
+Real der2fct8_31_P2_3D ( const GeoVector& v );
+Real der2fct8_32_P2_3D ( const GeoVector& v );
+Real der2fct8_33_P2_3D ( const GeoVector& v );
 
-Real der2fct9_11_P2_3D( const GeoVector& v );
-Real der2fct9_12_P2_3D( const GeoVector& v );
-Real der2fct9_13_P2_3D( const GeoVector& v );
-Real der2fct9_21_P2_3D( const GeoVector& v );
-Real der2fct9_22_P2_3D( const GeoVector& v );
-Real der2fct9_23_P2_3D( const GeoVector& v );
-Real der2fct9_31_P2_3D( const GeoVector& v );
-Real der2fct9_32_P2_3D( const GeoVector& v );
-Real der2fct9_33_P2_3D( const GeoVector& v );
+Real der2fct9_11_P2_3D ( const GeoVector& v );
+Real der2fct9_12_P2_3D ( const GeoVector& v );
+Real der2fct9_13_P2_3D ( const GeoVector& v );
+Real der2fct9_21_P2_3D ( const GeoVector& v );
+Real der2fct9_22_P2_3D ( const GeoVector& v );
+Real der2fct9_23_P2_3D ( const GeoVector& v );
+Real der2fct9_31_P2_3D ( const GeoVector& v );
+Real der2fct9_32_P2_3D ( const GeoVector& v );
+Real der2fct9_33_P2_3D ( const GeoVector& v );
 
-Real der2fct10_11_P2_3D( const GeoVector& v );
-Real der2fct10_12_P2_3D( const GeoVector& v );
-Real der2fct10_13_P2_3D( const GeoVector& v );
-Real der2fct10_21_P2_3D( const GeoVector& v );
-Real der2fct10_22_P2_3D( const GeoVector& v );
-Real der2fct10_23_P2_3D( const GeoVector& v );
-Real der2fct10_31_P2_3D( const GeoVector& v );
-Real der2fct10_32_P2_3D( const GeoVector& v );
-Real der2fct10_33_P2_3D( const GeoVector& v );
+Real der2fct10_11_P2_3D ( const GeoVector& v );
+Real der2fct10_12_P2_3D ( const GeoVector& v );
+Real der2fct10_13_P2_3D ( const GeoVector& v );
+Real der2fct10_21_P2_3D ( const GeoVector& v );
+Real der2fct10_22_P2_3D ( const GeoVector& v );
+Real der2fct10_23_P2_3D ( const GeoVector& v );
+Real der2fct10_31_P2_3D ( const GeoVector& v );
+Real der2fct10_32_P2_3D ( const GeoVector& v );
+Real der2fct10_33_P2_3D ( const GeoVector& v );
 
 
 static const Real refcoor_P2_3D[ 30 ] =
@@ -1497,173 +1497,173 @@ static const ReferenceElement::function_Type der2fct_P2_3D[ 90 ] =
            /.       \!
          1 -----5----2
 */
-Real fct1_P2tilde_3D( const GeoVector& v );
-Real fct2_P2tilde_3D( const GeoVector& v );
-Real fct3_P2tilde_3D( const GeoVector& v );
-Real fct4_P2tilde_3D( const GeoVector& v );
-Real fct5_P2tilde_3D( const GeoVector& v );
-Real fct6_P2tilde_3D( const GeoVector& v );
-Real fct7_P2tilde_3D( const GeoVector& v );
-Real fct8_P2tilde_3D( const GeoVector& v );
-Real fct9_P2tilde_3D( const GeoVector& v );
-Real fct10_P2tilde_3D( const GeoVector& v );
-Real fct11_P2tilde_3D( const GeoVector& v );
+Real fct1_P2tilde_3D ( const GeoVector& v );
+Real fct2_P2tilde_3D ( const GeoVector& v );
+Real fct3_P2tilde_3D ( const GeoVector& v );
+Real fct4_P2tilde_3D ( const GeoVector& v );
+Real fct5_P2tilde_3D ( const GeoVector& v );
+Real fct6_P2tilde_3D ( const GeoVector& v );
+Real fct7_P2tilde_3D ( const GeoVector& v );
+Real fct8_P2tilde_3D ( const GeoVector& v );
+Real fct9_P2tilde_3D ( const GeoVector& v );
+Real fct10_P2tilde_3D ( const GeoVector& v );
+Real fct11_P2tilde_3D ( const GeoVector& v );
 
 
-Real derfct1_1_P2tilde_3D( const GeoVector& v );
-Real derfct1_2_P2tilde_3D( const GeoVector& v );
-Real derfct1_3_P2tilde_3D( const GeoVector& v );
+Real derfct1_1_P2tilde_3D ( const GeoVector& v );
+Real derfct1_2_P2tilde_3D ( const GeoVector& v );
+Real derfct1_3_P2tilde_3D ( const GeoVector& v );
 
-Real derfct2_1_P2tilde_3D( const GeoVector& v );
-Real derfct2_2_P2tilde_3D( const GeoVector& v );
-Real derfct2_3_P2tilde_3D( const GeoVector& v );
+Real derfct2_1_P2tilde_3D ( const GeoVector& v );
+Real derfct2_2_P2tilde_3D ( const GeoVector& v );
+Real derfct2_3_P2tilde_3D ( const GeoVector& v );
 
-Real derfct3_1_P2tilde_3D( const GeoVector& v );
-Real derfct3_2_P2tilde_3D( const GeoVector& v );
-Real derfct3_3_P2tilde_3D( const GeoVector& v );
+Real derfct3_1_P2tilde_3D ( const GeoVector& v );
+Real derfct3_2_P2tilde_3D ( const GeoVector& v );
+Real derfct3_3_P2tilde_3D ( const GeoVector& v );
 
-Real derfct4_1_P2tilde_3D( const GeoVector& v );
-Real derfct4_2_P2tilde_3D( const GeoVector& v );
-Real derfct4_3_P2tilde_3D( const GeoVector& v );
+Real derfct4_1_P2tilde_3D ( const GeoVector& v );
+Real derfct4_2_P2tilde_3D ( const GeoVector& v );
+Real derfct4_3_P2tilde_3D ( const GeoVector& v );
 
-Real derfct5_1_P2tilde_3D( const GeoVector& v );
-Real derfct5_2_P2tilde_3D( const GeoVector& v );
-Real derfct5_3_P2tilde_3D( const GeoVector& v );
+Real derfct5_1_P2tilde_3D ( const GeoVector& v );
+Real derfct5_2_P2tilde_3D ( const GeoVector& v );
+Real derfct5_3_P2tilde_3D ( const GeoVector& v );
 
-Real derfct6_1_P2tilde_3D( const GeoVector& v );
-Real derfct6_2_P2tilde_3D( const GeoVector& v );
-Real derfct6_3_P2tilde_3D( const GeoVector& v );
+Real derfct6_1_P2tilde_3D ( const GeoVector& v );
+Real derfct6_2_P2tilde_3D ( const GeoVector& v );
+Real derfct6_3_P2tilde_3D ( const GeoVector& v );
 
-Real derfct7_1_P2tilde_3D( const GeoVector& v );
-Real derfct7_2_P2tilde_3D( const GeoVector& v );
-Real derfct7_3_P2tilde_3D( const GeoVector& v );
+Real derfct7_1_P2tilde_3D ( const GeoVector& v );
+Real derfct7_2_P2tilde_3D ( const GeoVector& v );
+Real derfct7_3_P2tilde_3D ( const GeoVector& v );
 
-Real derfct8_1_P2tilde_3D( const GeoVector& v );
-Real derfct8_2_P2tilde_3D( const GeoVector& v );
-Real derfct8_3_P2tilde_3D( const GeoVector& v );
+Real derfct8_1_P2tilde_3D ( const GeoVector& v );
+Real derfct8_2_P2tilde_3D ( const GeoVector& v );
+Real derfct8_3_P2tilde_3D ( const GeoVector& v );
 
-Real derfct9_1_P2tilde_3D( const GeoVector& v );
-Real derfct9_2_P2tilde_3D( const GeoVector& v );
-Real derfct9_3_P2tilde_3D( const GeoVector& v );
+Real derfct9_1_P2tilde_3D ( const GeoVector& v );
+Real derfct9_2_P2tilde_3D ( const GeoVector& v );
+Real derfct9_3_P2tilde_3D ( const GeoVector& v );
 
-Real derfct10_1_P2tilde_3D( const GeoVector& v );
-Real derfct10_2_P2tilde_3D( const GeoVector& v );
-Real derfct10_3_P2tilde_3D( const GeoVector& v );
+Real derfct10_1_P2tilde_3D ( const GeoVector& v );
+Real derfct10_2_P2tilde_3D ( const GeoVector& v );
+Real derfct10_3_P2tilde_3D ( const GeoVector& v );
 
-Real derfct11_1_P2tilde_3D( const GeoVector& v );
-Real derfct11_2_P2tilde_3D( const GeoVector& v );
-Real derfct11_3_P2tilde_3D( const GeoVector& v );
+Real derfct11_1_P2tilde_3D ( const GeoVector& v );
+Real derfct11_2_P2tilde_3D ( const GeoVector& v );
+Real derfct11_3_P2tilde_3D ( const GeoVector& v );
 
 
-Real der2fct1_11_P2tilde_3D( const GeoVector& v );
-Real der2fct1_12_P2tilde_3D( const GeoVector& v );
-Real der2fct1_13_P2tilde_3D( const GeoVector& v );
-Real der2fct1_21_P2tilde_3D( const GeoVector& v );
-Real der2fct1_22_P2tilde_3D( const GeoVector& v );
-Real der2fct1_23_P2tilde_3D( const GeoVector& v );
-Real der2fct1_31_P2tilde_3D( const GeoVector& v );
-Real der2fct1_32_P2tilde_3D( const GeoVector& v );
-Real der2fct1_33_P2tilde_3D( const GeoVector& v );
+Real der2fct1_11_P2tilde_3D ( const GeoVector& v );
+Real der2fct1_12_P2tilde_3D ( const GeoVector& v );
+Real der2fct1_13_P2tilde_3D ( const GeoVector& v );
+Real der2fct1_21_P2tilde_3D ( const GeoVector& v );
+Real der2fct1_22_P2tilde_3D ( const GeoVector& v );
+Real der2fct1_23_P2tilde_3D ( const GeoVector& v );
+Real der2fct1_31_P2tilde_3D ( const GeoVector& v );
+Real der2fct1_32_P2tilde_3D ( const GeoVector& v );
+Real der2fct1_33_P2tilde_3D ( const GeoVector& v );
 
-Real der2fct2_11_P2tilde_3D( const GeoVector& v );
-Real der2fct2_12_P2tilde_3D( const GeoVector& v );
-Real der2fct2_13_P2tilde_3D( const GeoVector& v );
-Real der2fct2_21_P2tilde_3D( const GeoVector& v );
-Real der2fct2_22_P2tilde_3D( const GeoVector& v );
-Real der2fct2_23_P2tilde_3D( const GeoVector& v );
-Real der2fct2_31_P2tilde_3D( const GeoVector& v );
-Real der2fct2_32_P2tilde_3D( const GeoVector& v );
-Real der2fct2_33_P2tilde_3D( const GeoVector& v );
+Real der2fct2_11_P2tilde_3D ( const GeoVector& v );
+Real der2fct2_12_P2tilde_3D ( const GeoVector& v );
+Real der2fct2_13_P2tilde_3D ( const GeoVector& v );
+Real der2fct2_21_P2tilde_3D ( const GeoVector& v );
+Real der2fct2_22_P2tilde_3D ( const GeoVector& v );
+Real der2fct2_23_P2tilde_3D ( const GeoVector& v );
+Real der2fct2_31_P2tilde_3D ( const GeoVector& v );
+Real der2fct2_32_P2tilde_3D ( const GeoVector& v );
+Real der2fct2_33_P2tilde_3D ( const GeoVector& v );
 
-Real der2fct3_11_P2tilde_3D( const GeoVector& v );
-Real der2fct3_12_P2tilde_3D( const GeoVector& v );
-Real der2fct3_13_P2tilde_3D( const GeoVector& v );
-Real der2fct3_21_P2tilde_3D( const GeoVector& v );
-Real der2fct3_22_P2tilde_3D( const GeoVector& v );
-Real der2fct3_23_P2tilde_3D( const GeoVector& v );
-Real der2fct3_31_P2tilde_3D( const GeoVector& v );
-Real der2fct3_32_P2tilde_3D( const GeoVector& v );
-Real der2fct3_33_P2tilde_3D( const GeoVector& v );
+Real der2fct3_11_P2tilde_3D ( const GeoVector& v );
+Real der2fct3_12_P2tilde_3D ( const GeoVector& v );
+Real der2fct3_13_P2tilde_3D ( const GeoVector& v );
+Real der2fct3_21_P2tilde_3D ( const GeoVector& v );
+Real der2fct3_22_P2tilde_3D ( const GeoVector& v );
+Real der2fct3_23_P2tilde_3D ( const GeoVector& v );
+Real der2fct3_31_P2tilde_3D ( const GeoVector& v );
+Real der2fct3_32_P2tilde_3D ( const GeoVector& v );
+Real der2fct3_33_P2tilde_3D ( const GeoVector& v );
 
-Real der2fct4_11_P2tilde_3D( const GeoVector& v );
-Real der2fct4_12_P2tilde_3D( const GeoVector& v );
-Real der2fct4_13_P2tilde_3D( const GeoVector& v );
-Real der2fct4_21_P2tilde_3D( const GeoVector& v );
-Real der2fct4_22_P2tilde_3D( const GeoVector& v );
-Real der2fct4_23_P2tilde_3D( const GeoVector& v );
-Real der2fct4_31_P2tilde_3D( const GeoVector& v );
-Real der2fct4_32_P2tilde_3D( const GeoVector& v );
-Real der2fct4_33_P2tilde_3D( const GeoVector& v );
+Real der2fct4_11_P2tilde_3D ( const GeoVector& v );
+Real der2fct4_12_P2tilde_3D ( const GeoVector& v );
+Real der2fct4_13_P2tilde_3D ( const GeoVector& v );
+Real der2fct4_21_P2tilde_3D ( const GeoVector& v );
+Real der2fct4_22_P2tilde_3D ( const GeoVector& v );
+Real der2fct4_23_P2tilde_3D ( const GeoVector& v );
+Real der2fct4_31_P2tilde_3D ( const GeoVector& v );
+Real der2fct4_32_P2tilde_3D ( const GeoVector& v );
+Real der2fct4_33_P2tilde_3D ( const GeoVector& v );
 
-Real der2fct5_11_P2tilde_3D( const GeoVector& v );
-Real der2fct5_12_P2tilde_3D( const GeoVector& v );
-Real der2fct5_13_P2tilde_3D( const GeoVector& v );
-Real der2fct5_21_P2tilde_3D( const GeoVector& v );
-Real der2fct5_22_P2tilde_3D( const GeoVector& v );
-Real der2fct5_23_P2tilde_3D( const GeoVector& v );
-Real der2fct5_31_P2tilde_3D( const GeoVector& v );
-Real der2fct5_32_P2tilde_3D( const GeoVector& v );
-Real der2fct5_33_P2tilde_3D( const GeoVector& v );
+Real der2fct5_11_P2tilde_3D ( const GeoVector& v );
+Real der2fct5_12_P2tilde_3D ( const GeoVector& v );
+Real der2fct5_13_P2tilde_3D ( const GeoVector& v );
+Real der2fct5_21_P2tilde_3D ( const GeoVector& v );
+Real der2fct5_22_P2tilde_3D ( const GeoVector& v );
+Real der2fct5_23_P2tilde_3D ( const GeoVector& v );
+Real der2fct5_31_P2tilde_3D ( const GeoVector& v );
+Real der2fct5_32_P2tilde_3D ( const GeoVector& v );
+Real der2fct5_33_P2tilde_3D ( const GeoVector& v );
 
-Real der2fct6_11_P2tilde_3D( const GeoVector& v );
-Real der2fct6_12_P2tilde_3D( const GeoVector& v );
-Real der2fct6_13_P2tilde_3D( const GeoVector& v );
-Real der2fct6_21_P2tilde_3D( const GeoVector& v );
-Real der2fct6_22_P2tilde_3D( const GeoVector& v );
-Real der2fct6_23_P2tilde_3D( const GeoVector& v );
-Real der2fct6_31_P2tilde_3D( const GeoVector& v );
-Real der2fct6_32_P2tilde_3D( const GeoVector& v );
-Real der2fct6_33_P2tilde_3D( const GeoVector& v );
+Real der2fct6_11_P2tilde_3D ( const GeoVector& v );
+Real der2fct6_12_P2tilde_3D ( const GeoVector& v );
+Real der2fct6_13_P2tilde_3D ( const GeoVector& v );
+Real der2fct6_21_P2tilde_3D ( const GeoVector& v );
+Real der2fct6_22_P2tilde_3D ( const GeoVector& v );
+Real der2fct6_23_P2tilde_3D ( const GeoVector& v );
+Real der2fct6_31_P2tilde_3D ( const GeoVector& v );
+Real der2fct6_32_P2tilde_3D ( const GeoVector& v );
+Real der2fct6_33_P2tilde_3D ( const GeoVector& v );
 
-Real der2fct7_11_P2tilde_3D( const GeoVector& v );
-Real der2fct7_12_P2tilde_3D( const GeoVector& v );
-Real der2fct7_13_P2tilde_3D( const GeoVector& v );
-Real der2fct7_21_P2tilde_3D( const GeoVector& v );
-Real der2fct7_22_P2tilde_3D( const GeoVector& v );
-Real der2fct7_23_P2tilde_3D( const GeoVector& v );
-Real der2fct7_31_P2tilde_3D( const GeoVector& v );
-Real der2fct7_32_P2tilde_3D( const GeoVector& v );
-Real der2fct7_33_P2tilde_3D( const GeoVector& v );
+Real der2fct7_11_P2tilde_3D ( const GeoVector& v );
+Real der2fct7_12_P2tilde_3D ( const GeoVector& v );
+Real der2fct7_13_P2tilde_3D ( const GeoVector& v );
+Real der2fct7_21_P2tilde_3D ( const GeoVector& v );
+Real der2fct7_22_P2tilde_3D ( const GeoVector& v );
+Real der2fct7_23_P2tilde_3D ( const GeoVector& v );
+Real der2fct7_31_P2tilde_3D ( const GeoVector& v );
+Real der2fct7_32_P2tilde_3D ( const GeoVector& v );
+Real der2fct7_33_P2tilde_3D ( const GeoVector& v );
 
-Real der2fct8_11_P2tilde_3D( const GeoVector& v );
-Real der2fct8_12_P2tilde_3D( const GeoVector& v );
-Real der2fct8_13_P2tilde_3D( const GeoVector& v );
-Real der2fct8_21_P2tilde_3D( const GeoVector& v );
-Real der2fct8_22_P2tilde_3D( const GeoVector& v );
-Real der2fct8_23_P2tilde_3D( const GeoVector& v );
-Real der2fct8_31_P2tilde_3D( const GeoVector& v );
-Real der2fct8_32_P2tilde_3D( const GeoVector& v );
-Real der2fct8_33_P2tilde_3D( const GeoVector& v );
+Real der2fct8_11_P2tilde_3D ( const GeoVector& v );
+Real der2fct8_12_P2tilde_3D ( const GeoVector& v );
+Real der2fct8_13_P2tilde_3D ( const GeoVector& v );
+Real der2fct8_21_P2tilde_3D ( const GeoVector& v );
+Real der2fct8_22_P2tilde_3D ( const GeoVector& v );
+Real der2fct8_23_P2tilde_3D ( const GeoVector& v );
+Real der2fct8_31_P2tilde_3D ( const GeoVector& v );
+Real der2fct8_32_P2tilde_3D ( const GeoVector& v );
+Real der2fct8_33_P2tilde_3D ( const GeoVector& v );
 
-Real der2fct9_11_P2tilde_3D( const GeoVector& v );
-Real der2fct9_12_P2tilde_3D( const GeoVector& v );
-Real der2fct9_13_P2tilde_3D( const GeoVector& v );
-Real der2fct9_21_P2tilde_3D( const GeoVector& v );
-Real der2fct9_22_P2tilde_3D( const GeoVector& v );
-Real der2fct9_23_P2tilde_3D( const GeoVector& v );
-Real der2fct9_31_P2tilde_3D( const GeoVector& v );
-Real der2fct9_32_P2tilde_3D( const GeoVector& v );
-Real der2fct9_33_P2tilde_3D( const GeoVector& v );
+Real der2fct9_11_P2tilde_3D ( const GeoVector& v );
+Real der2fct9_12_P2tilde_3D ( const GeoVector& v );
+Real der2fct9_13_P2tilde_3D ( const GeoVector& v );
+Real der2fct9_21_P2tilde_3D ( const GeoVector& v );
+Real der2fct9_22_P2tilde_3D ( const GeoVector& v );
+Real der2fct9_23_P2tilde_3D ( const GeoVector& v );
+Real der2fct9_31_P2tilde_3D ( const GeoVector& v );
+Real der2fct9_32_P2tilde_3D ( const GeoVector& v );
+Real der2fct9_33_P2tilde_3D ( const GeoVector& v );
 
-Real der2fct10_11_P2tilde_3D( const GeoVector& v );
-Real der2fct10_12_P2tilde_3D( const GeoVector& v );
-Real der2fct10_13_P2tilde_3D( const GeoVector& v );
-Real der2fct10_21_P2tilde_3D( const GeoVector& v );
-Real der2fct10_22_P2tilde_3D( const GeoVector& v );
-Real der2fct10_23_P2tilde_3D( const GeoVector& v );
-Real der2fct10_31_P2tilde_3D( const GeoVector& v );
-Real der2fct10_32_P2tilde_3D( const GeoVector& v );
-Real der2fct10_33_P2tilde_3D( const GeoVector& v );
+Real der2fct10_11_P2tilde_3D ( const GeoVector& v );
+Real der2fct10_12_P2tilde_3D ( const GeoVector& v );
+Real der2fct10_13_P2tilde_3D ( const GeoVector& v );
+Real der2fct10_21_P2tilde_3D ( const GeoVector& v );
+Real der2fct10_22_P2tilde_3D ( const GeoVector& v );
+Real der2fct10_23_P2tilde_3D ( const GeoVector& v );
+Real der2fct10_31_P2tilde_3D ( const GeoVector& v );
+Real der2fct10_32_P2tilde_3D ( const GeoVector& v );
+Real der2fct10_33_P2tilde_3D ( const GeoVector& v );
 
-Real der2fct11_11_P2tilde_3D( const GeoVector& v );
-Real der2fct11_12_P2tilde_3D( const GeoVector& v );
-Real der2fct11_13_P2tilde_3D( const GeoVector& v );
-Real der2fct11_21_P2tilde_3D( const GeoVector& v );
-Real der2fct11_22_P2tilde_3D( const GeoVector& v );
-Real der2fct11_23_P2tilde_3D( const GeoVector& v );
-Real der2fct11_31_P2tilde_3D( const GeoVector& v );
-Real der2fct11_32_P2tilde_3D( const GeoVector& v );
-Real der2fct11_33_P2tilde_3D( const GeoVector& v );
+Real der2fct11_11_P2tilde_3D ( const GeoVector& v );
+Real der2fct11_12_P2tilde_3D ( const GeoVector& v );
+Real der2fct11_13_P2tilde_3D ( const GeoVector& v );
+Real der2fct11_21_P2tilde_3D ( const GeoVector& v );
+Real der2fct11_22_P2tilde_3D ( const GeoVector& v );
+Real der2fct11_23_P2tilde_3D ( const GeoVector& v );
+Real der2fct11_31_P2tilde_3D ( const GeoVector& v );
+Real der2fct11_32_P2tilde_3D ( const GeoVector& v );
+Real der2fct11_33_P2tilde_3D ( const GeoVector& v );
 
 
 static const Real refcoor_P2tilde_3D[ 33 ] =
@@ -1764,10 +1764,10 @@ static const ReferenceElement::function_Type der2fct_P2tilde_3D[ 99 ] =
      |_______|
 
 */
-Real fct1_Q0_3D( const GeoVector& v );
-Real derfct1_Q0_3D( const GeoVector& v );
+Real fct1_Q0_3D ( const GeoVector& v );
+Real derfct1_Q0_3D ( const GeoVector& v );
 // The second derivative is equal to the first : both = 0.
-Real der2fct1_Q0_3D( const GeoVector& v );
+Real der2fct1_Q0_3D ( const GeoVector& v );
 
 static const Real refcoor_Q0_3D[ 3 ] =
 {
@@ -1808,119 +1808,119 @@ static const ReferenceElement::function_Type der2fct_Q0_3D[ 9 ] =
      |.      |/
      1_______2
 */
-Real fct1_Q1_3D( const GeoVector& v );
-Real fct2_Q1_3D( const GeoVector& v );
-Real fct3_Q1_3D( const GeoVector& v );
-Real fct4_Q1_3D( const GeoVector& v );
-Real fct5_Q1_3D( const GeoVector& v );
-Real fct6_Q1_3D( const GeoVector& v );
-Real fct7_Q1_3D( const GeoVector& v );
-Real fct8_Q1_3D( const GeoVector& v );
+Real fct1_Q1_3D ( const GeoVector& v );
+Real fct2_Q1_3D ( const GeoVector& v );
+Real fct3_Q1_3D ( const GeoVector& v );
+Real fct4_Q1_3D ( const GeoVector& v );
+Real fct5_Q1_3D ( const GeoVector& v );
+Real fct6_Q1_3D ( const GeoVector& v );
+Real fct7_Q1_3D ( const GeoVector& v );
+Real fct8_Q1_3D ( const GeoVector& v );
 
-Real derfct1_1_Q1_3D( const GeoVector& v );
-Real derfct1_2_Q1_3D( const GeoVector& v );
-Real derfct1_3_Q1_3D( const GeoVector& v );
-Real derfct2_1_Q1_3D( const GeoVector& v );
-Real derfct2_2_Q1_3D( const GeoVector& v );
-Real derfct2_3_Q1_3D( const GeoVector& v );
-Real derfct3_1_Q1_3D( const GeoVector& v );
-Real derfct3_2_Q1_3D( const GeoVector& v );
-Real derfct3_3_Q1_3D( const GeoVector& v );
-Real derfct4_1_Q1_3D( const GeoVector& v );
-Real derfct4_2_Q1_3D( const GeoVector& v );
-Real derfct4_3_Q1_3D( const GeoVector& v );
-Real derfct5_1_Q1_3D( const GeoVector& v );
-Real derfct5_2_Q1_3D( const GeoVector& v );
-Real derfct5_3_Q1_3D( const GeoVector& v );
-Real derfct6_1_Q1_3D( const GeoVector& v );
-Real derfct6_2_Q1_3D( const GeoVector& v );
-Real derfct6_3_Q1_3D( const GeoVector& v );
-Real derfct7_1_Q1_3D( const GeoVector& v );
-Real derfct7_2_Q1_3D( const GeoVector& v );
-Real derfct7_3_Q1_3D( const GeoVector& v );
-Real derfct8_1_Q1_3D( const GeoVector& v );
-Real derfct8_2_Q1_3D( const GeoVector& v );
-Real derfct8_3_Q1_3D( const GeoVector& v );
+Real derfct1_1_Q1_3D ( const GeoVector& v );
+Real derfct1_2_Q1_3D ( const GeoVector& v );
+Real derfct1_3_Q1_3D ( const GeoVector& v );
+Real derfct2_1_Q1_3D ( const GeoVector& v );
+Real derfct2_2_Q1_3D ( const GeoVector& v );
+Real derfct2_3_Q1_3D ( const GeoVector& v );
+Real derfct3_1_Q1_3D ( const GeoVector& v );
+Real derfct3_2_Q1_3D ( const GeoVector& v );
+Real derfct3_3_Q1_3D ( const GeoVector& v );
+Real derfct4_1_Q1_3D ( const GeoVector& v );
+Real derfct4_2_Q1_3D ( const GeoVector& v );
+Real derfct4_3_Q1_3D ( const GeoVector& v );
+Real derfct5_1_Q1_3D ( const GeoVector& v );
+Real derfct5_2_Q1_3D ( const GeoVector& v );
+Real derfct5_3_Q1_3D ( const GeoVector& v );
+Real derfct6_1_Q1_3D ( const GeoVector& v );
+Real derfct6_2_Q1_3D ( const GeoVector& v );
+Real derfct6_3_Q1_3D ( const GeoVector& v );
+Real derfct7_1_Q1_3D ( const GeoVector& v );
+Real derfct7_2_Q1_3D ( const GeoVector& v );
+Real derfct7_3_Q1_3D ( const GeoVector& v );
+Real derfct8_1_Q1_3D ( const GeoVector& v );
+Real derfct8_2_Q1_3D ( const GeoVector& v );
+Real derfct8_3_Q1_3D ( const GeoVector& v );
 
-Real der2fct1_11_Q1_3D( const GeoVector& v );
-Real der2fct1_12_Q1_3D( const GeoVector& v );
-Real der2fct1_13_Q1_3D( const GeoVector& v );
-Real der2fct1_21_Q1_3D( const GeoVector& v );
-Real der2fct1_22_Q1_3D( const GeoVector& v );
-Real der2fct1_23_Q1_3D( const GeoVector& v );
-Real der2fct1_31_Q1_3D( const GeoVector& v );
-Real der2fct1_32_Q1_3D( const GeoVector& v );
-Real der2fct1_33_Q1_3D( const GeoVector& v );
+Real der2fct1_11_Q1_3D ( const GeoVector& v );
+Real der2fct1_12_Q1_3D ( const GeoVector& v );
+Real der2fct1_13_Q1_3D ( const GeoVector& v );
+Real der2fct1_21_Q1_3D ( const GeoVector& v );
+Real der2fct1_22_Q1_3D ( const GeoVector& v );
+Real der2fct1_23_Q1_3D ( const GeoVector& v );
+Real der2fct1_31_Q1_3D ( const GeoVector& v );
+Real der2fct1_32_Q1_3D ( const GeoVector& v );
+Real der2fct1_33_Q1_3D ( const GeoVector& v );
 
-Real der2fct2_11_Q1_3D( const GeoVector& v );
-Real der2fct2_12_Q1_3D( const GeoVector& v );
-Real der2fct2_13_Q1_3D( const GeoVector& v );
-Real der2fct2_21_Q1_3D( const GeoVector& v );
-Real der2fct2_22_Q1_3D( const GeoVector& v );
-Real der2fct2_23_Q1_3D( const GeoVector& v );
-Real der2fct2_31_Q1_3D( const GeoVector& v );
-Real der2fct2_32_Q1_3D( const GeoVector& v );
-Real der2fct2_33_Q1_3D( const GeoVector& v );
+Real der2fct2_11_Q1_3D ( const GeoVector& v );
+Real der2fct2_12_Q1_3D ( const GeoVector& v );
+Real der2fct2_13_Q1_3D ( const GeoVector& v );
+Real der2fct2_21_Q1_3D ( const GeoVector& v );
+Real der2fct2_22_Q1_3D ( const GeoVector& v );
+Real der2fct2_23_Q1_3D ( const GeoVector& v );
+Real der2fct2_31_Q1_3D ( const GeoVector& v );
+Real der2fct2_32_Q1_3D ( const GeoVector& v );
+Real der2fct2_33_Q1_3D ( const GeoVector& v );
 
-Real der2fct3_11_Q1_3D( const GeoVector& v );
-Real der2fct3_12_Q1_3D( const GeoVector& v );
-Real der2fct3_13_Q1_3D( const GeoVector& v );
-Real der2fct3_21_Q1_3D( const GeoVector& v );
-Real der2fct3_22_Q1_3D( const GeoVector& v );
-Real der2fct3_23_Q1_3D( const GeoVector& v );
-Real der2fct3_31_Q1_3D( const GeoVector& v );
-Real der2fct3_32_Q1_3D( const GeoVector& v );
-Real der2fct3_33_Q1_3D( const GeoVector& v );
+Real der2fct3_11_Q1_3D ( const GeoVector& v );
+Real der2fct3_12_Q1_3D ( const GeoVector& v );
+Real der2fct3_13_Q1_3D ( const GeoVector& v );
+Real der2fct3_21_Q1_3D ( const GeoVector& v );
+Real der2fct3_22_Q1_3D ( const GeoVector& v );
+Real der2fct3_23_Q1_3D ( const GeoVector& v );
+Real der2fct3_31_Q1_3D ( const GeoVector& v );
+Real der2fct3_32_Q1_3D ( const GeoVector& v );
+Real der2fct3_33_Q1_3D ( const GeoVector& v );
 
-Real der2fct4_11_Q1_3D( const GeoVector& v );
-Real der2fct4_12_Q1_3D( const GeoVector& v );
-Real der2fct4_13_Q1_3D( const GeoVector& v );
-Real der2fct4_21_Q1_3D( const GeoVector& v );
-Real der2fct4_22_Q1_3D( const GeoVector& v );
-Real der2fct4_23_Q1_3D( const GeoVector& v );
-Real der2fct4_31_Q1_3D( const GeoVector& v );
-Real der2fct4_32_Q1_3D( const GeoVector& v );
-Real der2fct4_33_Q1_3D( const GeoVector& v );
+Real der2fct4_11_Q1_3D ( const GeoVector& v );
+Real der2fct4_12_Q1_3D ( const GeoVector& v );
+Real der2fct4_13_Q1_3D ( const GeoVector& v );
+Real der2fct4_21_Q1_3D ( const GeoVector& v );
+Real der2fct4_22_Q1_3D ( const GeoVector& v );
+Real der2fct4_23_Q1_3D ( const GeoVector& v );
+Real der2fct4_31_Q1_3D ( const GeoVector& v );
+Real der2fct4_32_Q1_3D ( const GeoVector& v );
+Real der2fct4_33_Q1_3D ( const GeoVector& v );
 
-Real der2fct5_11_Q1_3D( const GeoVector& v );
-Real der2fct5_12_Q1_3D( const GeoVector& v );
-Real der2fct5_13_Q1_3D( const GeoVector& v );
-Real der2fct5_21_Q1_3D( const GeoVector& v );
-Real der2fct5_22_Q1_3D( const GeoVector& v );
-Real der2fct5_23_Q1_3D( const GeoVector& v );
-Real der2fct5_31_Q1_3D( const GeoVector& v );
-Real der2fct5_32_Q1_3D( const GeoVector& v );
-Real der2fct5_33_Q1_3D( const GeoVector& v );
+Real der2fct5_11_Q1_3D ( const GeoVector& v );
+Real der2fct5_12_Q1_3D ( const GeoVector& v );
+Real der2fct5_13_Q1_3D ( const GeoVector& v );
+Real der2fct5_21_Q1_3D ( const GeoVector& v );
+Real der2fct5_22_Q1_3D ( const GeoVector& v );
+Real der2fct5_23_Q1_3D ( const GeoVector& v );
+Real der2fct5_31_Q1_3D ( const GeoVector& v );
+Real der2fct5_32_Q1_3D ( const GeoVector& v );
+Real der2fct5_33_Q1_3D ( const GeoVector& v );
 
-Real der2fct6_11_Q1_3D( const GeoVector& v );
-Real der2fct6_12_Q1_3D( const GeoVector& v );
-Real der2fct6_13_Q1_3D( const GeoVector& v );
-Real der2fct6_21_Q1_3D( const GeoVector& v );
-Real der2fct6_22_Q1_3D( const GeoVector& v );
-Real der2fct6_23_Q1_3D( const GeoVector& v );
-Real der2fct6_31_Q1_3D( const GeoVector& v );
-Real der2fct6_32_Q1_3D( const GeoVector& v );
-Real der2fct6_33_Q1_3D( const GeoVector& v );
+Real der2fct6_11_Q1_3D ( const GeoVector& v );
+Real der2fct6_12_Q1_3D ( const GeoVector& v );
+Real der2fct6_13_Q1_3D ( const GeoVector& v );
+Real der2fct6_21_Q1_3D ( const GeoVector& v );
+Real der2fct6_22_Q1_3D ( const GeoVector& v );
+Real der2fct6_23_Q1_3D ( const GeoVector& v );
+Real der2fct6_31_Q1_3D ( const GeoVector& v );
+Real der2fct6_32_Q1_3D ( const GeoVector& v );
+Real der2fct6_33_Q1_3D ( const GeoVector& v );
 
-Real der2fct7_11_Q1_3D( const GeoVector& v );
-Real der2fct7_12_Q1_3D( const GeoVector& v );
-Real der2fct7_13_Q1_3D( const GeoVector& v );
-Real der2fct7_21_Q1_3D( const GeoVector& v );
-Real der2fct7_22_Q1_3D( const GeoVector& v );
-Real der2fct7_23_Q1_3D( const GeoVector& v );
-Real der2fct7_31_Q1_3D( const GeoVector& v );
-Real der2fct7_32_Q1_3D( const GeoVector& v );
-Real der2fct7_33_Q1_3D( const GeoVector& v );
+Real der2fct7_11_Q1_3D ( const GeoVector& v );
+Real der2fct7_12_Q1_3D ( const GeoVector& v );
+Real der2fct7_13_Q1_3D ( const GeoVector& v );
+Real der2fct7_21_Q1_3D ( const GeoVector& v );
+Real der2fct7_22_Q1_3D ( const GeoVector& v );
+Real der2fct7_23_Q1_3D ( const GeoVector& v );
+Real der2fct7_31_Q1_3D ( const GeoVector& v );
+Real der2fct7_32_Q1_3D ( const GeoVector& v );
+Real der2fct7_33_Q1_3D ( const GeoVector& v );
 
-Real der2fct8_11_Q1_3D( const GeoVector& v );
-Real der2fct8_12_Q1_3D( const GeoVector& v );
-Real der2fct8_13_Q1_3D( const GeoVector& v );
-Real der2fct8_21_Q1_3D( const GeoVector& v );
-Real der2fct8_22_Q1_3D( const GeoVector& v );
-Real der2fct8_23_Q1_3D( const GeoVector& v );
-Real der2fct8_31_Q1_3D( const GeoVector& v );
-Real der2fct8_32_Q1_3D( const GeoVector& v );
-Real der2fct8_33_Q1_3D( const GeoVector& v );
+Real der2fct8_11_Q1_3D ( const GeoVector& v );
+Real der2fct8_12_Q1_3D ( const GeoVector& v );
+Real der2fct8_13_Q1_3D ( const GeoVector& v );
+Real der2fct8_21_Q1_3D ( const GeoVector& v );
+Real der2fct8_22_Q1_3D ( const GeoVector& v );
+Real der2fct8_23_Q1_3D ( const GeoVector& v );
+Real der2fct8_31_Q1_3D ( const GeoVector& v );
+Real der2fct8_32_Q1_3D ( const GeoVector& v );
+Real der2fct8_33_Q1_3D ( const GeoVector& v );
 
 static const Real refcoor_Q1_3D[ 24 ] =
 {
@@ -2016,36 +2016,36 @@ face 6: 5,6,7,8
 
 */
 
-Real fct1_RT0_1_HEXA_3D( const GeoVector& v );
-Real fct1_RT0_2_HEXA_3D( const GeoVector& v );
-Real fct1_RT0_3_HEXA_3D( const GeoVector& v );
+Real fct1_RT0_1_HEXA_3D ( const GeoVector& v );
+Real fct1_RT0_2_HEXA_3D ( const GeoVector& v );
+Real fct1_RT0_3_HEXA_3D ( const GeoVector& v );
 
-Real fct2_RT0_1_HEXA_3D( const GeoVector& v );
-Real fct2_RT0_2_HEXA_3D( const GeoVector& v );
-Real fct2_RT0_3_HEXA_3D( const GeoVector& v );
+Real fct2_RT0_1_HEXA_3D ( const GeoVector& v );
+Real fct2_RT0_2_HEXA_3D ( const GeoVector& v );
+Real fct2_RT0_3_HEXA_3D ( const GeoVector& v );
 
-Real fct3_RT0_1_HEXA_3D( const GeoVector& v );
-Real fct3_RT0_2_HEXA_3D( const GeoVector& v );
-Real fct3_RT0_3_HEXA_3D( const GeoVector& v );
+Real fct3_RT0_1_HEXA_3D ( const GeoVector& v );
+Real fct3_RT0_2_HEXA_3D ( const GeoVector& v );
+Real fct3_RT0_3_HEXA_3D ( const GeoVector& v );
 
-Real fct4_RT0_1_HEXA_3D( const GeoVector& v );
-Real fct4_RT0_2_HEXA_3D( const GeoVector& v );
-Real fct4_RT0_3_HEXA_3D( const GeoVector& v );
+Real fct4_RT0_1_HEXA_3D ( const GeoVector& v );
+Real fct4_RT0_2_HEXA_3D ( const GeoVector& v );
+Real fct4_RT0_3_HEXA_3D ( const GeoVector& v );
 
-Real fct5_RT0_1_HEXA_3D( const GeoVector& v );
-Real fct5_RT0_2_HEXA_3D( const GeoVector& v );
-Real fct5_RT0_3_HEXA_3D( const GeoVector& v );
+Real fct5_RT0_1_HEXA_3D ( const GeoVector& v );
+Real fct5_RT0_2_HEXA_3D ( const GeoVector& v );
+Real fct5_RT0_3_HEXA_3D ( const GeoVector& v );
 
-Real fct6_RT0_1_HEXA_3D( const GeoVector& v );
-Real fct6_RT0_2_HEXA_3D( const GeoVector& v );
-Real fct6_RT0_3_HEXA_3D( const GeoVector& v );
+Real fct6_RT0_1_HEXA_3D ( const GeoVector& v );
+Real fct6_RT0_2_HEXA_3D ( const GeoVector& v );
+Real fct6_RT0_3_HEXA_3D ( const GeoVector& v );
 
-Real fct1_DIV_RT0_HEXA_3D( const GeoVector& v );
-Real fct2_DIV_RT0_HEXA_3D( const GeoVector& v );
-Real fct3_DIV_RT0_HEXA_3D( const GeoVector& v );
-Real fct4_DIV_RT0_HEXA_3D( const GeoVector& v );
-Real fct5_DIV_RT0_HEXA_3D( const GeoVector& v );
-Real fct6_DIV_RT0_HEXA_3D( const GeoVector& v );
+Real fct1_DIV_RT0_HEXA_3D ( const GeoVector& v );
+Real fct2_DIV_RT0_HEXA_3D ( const GeoVector& v );
+Real fct3_DIV_RT0_HEXA_3D ( const GeoVector& v );
+Real fct4_DIV_RT0_HEXA_3D ( const GeoVector& v );
+Real fct5_DIV_RT0_HEXA_3D ( const GeoVector& v );
+Real fct6_DIV_RT0_HEXA_3D ( const GeoVector& v );
 
 static const Real refcoor_RT0_HEXA_3D[ 18 ] =
 {
@@ -2102,27 +2102,27 @@ face 3: 1, 2, 4
 face 4: 1, 3, 2
 */
 
-Real fct1_RT0_1_TETRA_3D( const GeoVector& v );
-Real fct1_RT0_2_TETRA_3D( const GeoVector& v );
-Real fct1_RT0_3_TETRA_3D( const GeoVector& v );
+Real fct1_RT0_1_TETRA_3D ( const GeoVector& v );
+Real fct1_RT0_2_TETRA_3D ( const GeoVector& v );
+Real fct1_RT0_3_TETRA_3D ( const GeoVector& v );
 
-Real fct2_RT0_1_TETRA_3D( const GeoVector& v );
-Real fct2_RT0_2_TETRA_3D( const GeoVector& v );
-Real fct2_RT0_3_TETRA_3D( const GeoVector& v );
+Real fct2_RT0_1_TETRA_3D ( const GeoVector& v );
+Real fct2_RT0_2_TETRA_3D ( const GeoVector& v );
+Real fct2_RT0_3_TETRA_3D ( const GeoVector& v );
 
-Real fct3_RT0_1_TETRA_3D( const GeoVector& v );
-Real fct3_RT0_2_TETRA_3D( const GeoVector& v );
-Real fct3_RT0_3_TETRA_3D( const GeoVector& v );
+Real fct3_RT0_1_TETRA_3D ( const GeoVector& v );
+Real fct3_RT0_2_TETRA_3D ( const GeoVector& v );
+Real fct3_RT0_3_TETRA_3D ( const GeoVector& v );
 
-Real fct4_RT0_1_TETRA_3D( const GeoVector& v );
-Real fct4_RT0_2_TETRA_3D( const GeoVector& v );
-Real fct4_RT0_3_TETRA_3D( const GeoVector& v );
+Real fct4_RT0_1_TETRA_3D ( const GeoVector& v );
+Real fct4_RT0_2_TETRA_3D ( const GeoVector& v );
+Real fct4_RT0_3_TETRA_3D ( const GeoVector& v );
 
 
-Real fct1_DIV_RT0_TETRA_3D( const GeoVector& v );
-Real fct2_DIV_RT0_TETRA_3D( const GeoVector& v );
-Real fct3_DIV_RT0_TETRA_3D( const GeoVector& v );
-Real fct4_DIV_RT0_TETRA_3D( const GeoVector& v );
+Real fct1_DIV_RT0_TETRA_3D ( const GeoVector& v );
+Real fct2_DIV_RT0_TETRA_3D ( const GeoVector& v );
+Real fct3_DIV_RT0_TETRA_3D ( const GeoVector& v );
+Real fct4_DIV_RT0_TETRA_3D ( const GeoVector& v );
 
 
 static const Real refcoor_RT0_TETRA_3D[ 12 ] =

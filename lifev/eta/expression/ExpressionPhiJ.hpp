@@ -59,7 +59,7 @@ public:
     //! @name Public Types
     //@{
 
-	typedef ExpressionBase<ExpressionPhiJ> base_Type;
+    typedef ExpressionBase<ExpressionPhiJ> base_Type;
 
     //@}
 
@@ -68,10 +68,10 @@ public:
     //@{
 
     //! Empty constructor
-	ExpressionPhiJ();
+    ExpressionPhiJ();
 
     //! Copy constructor
-	ExpressionPhiJ(const ExpressionPhiJ&);
+    ExpressionPhiJ (const ExpressionPhiJ&);
 
     //! Destructor
     ~ExpressionPhiJ();
@@ -83,7 +83,7 @@ public:
     //@{
 
     //! Display method
-	static void display(std::ostream& out= std::cout);
+    static void display (std::ostream& out = std::cout);
 
     //@}
 };
@@ -96,7 +96,7 @@ public:
 /*inline ExpressionPhiJ
 phi_j()
 {
-	return ExpressionPhiJ();
+    return ExpressionPhiJ();
     };*/
 
 const ExpressionPhiJ phi_j;

@@ -46,14 +46,14 @@ namespace Multiscale
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-MultiscaleModel0D::MultiscaleModel0D():
-        M_data          ( new data_Type() ),
-        M_solver        (),
-        M_bc            ( new bcInterface_Type() )
+MultiscaleModel0D::MultiscaleModel0D() :
+    M_data          ( new data_Type() ),
+    M_solver        (),
+    M_bc            ( new bcInterface_Type() )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 8160 ) << "MultiscaleModel0D::MultiscaleModel0D() \n";
+    debugStream ( 8160 ) << "MultiscaleModel0D::MultiscaleModel0D() \n";
 #endif
 
     M_type = ZeroDimensional;
@@ -63,28 +63,30 @@ MultiscaleModel0D::MultiscaleModel0D():
 // MultiscaleModel Methods
 // ===================================================
 void
-MultiscaleModel0D::setupData( const std::string& fileName )
+MultiscaleModel0D::setupData ( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 8160 ) << "MultiscaleModel0D::setupData( fileName ) \n";
+    debugStream ( 8160 ) << "MultiscaleModel0D::setupData( fileName ) \n";
 #endif
 
-    GetPot dataFile( fileName );
+    GetPot dataFile ( fileName );
 
-    std::string circuitDataFile = dataFile( "0D_Model/CircuitDataFile", "./inputFile.dat" );
+    std::string circuitDataFile = dataFile ( "0D_Model/CircuitDataFile", "./inputFile.dat" );
     M_bc->createHandler();
-    M_bc->fillHandler( circuitDataFile, "Files" );
+    M_bc->fillHandler ( circuitDataFile, "Files" );
 
-    M_data->setup(dataFile, M_bc->handler() );
+    M_data->setup (dataFile, M_bc->handler() );
     if ( M_globalData.get() )
-        setupGlobalData( fileName );
+    {
+        setupGlobalData ( fileName );
+    }
 
     // The 0D solver requires Rythmos/NOX/Thyra for now
-    #if ( defined(HAVE_NOX_THYRA) && defined(HAVE_TRILINOS_RYTHMOS) )
-    M_solver.reset( new solver_Type( M_data->unknownCounter(), M_comm, M_data->circuitData()  ) );
-    M_solver->setup( M_data->solverData() );
-    #endif
+#if ( defined(HAVE_NOX_THYRA) && defined(HAVE_TRILINOS_RYTHMOS) )
+    M_solver.reset ( new solver_Type ( M_data->unknownCounter(), M_comm, M_data->circuitData()  ) );
+    M_solver->setup ( M_data->solverData() );
+#endif
 }
 
 void
@@ -92,7 +94,7 @@ MultiscaleModel0D::setupModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 8160 ) << "MultiscaleModel0D::setupModel() \n";
+    debugStream ( 8160 ) << "MultiscaleModel0D::setupModel() \n";
 #endif
 
     M_data->initializeSolution();
@@ -103,7 +105,7 @@ MultiscaleModel0D::buildModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 8160 ) << "MultiscaleModel0D::buildModel() \n";
+    debugStream ( 8160 ) << "MultiscaleModel0D::buildModel() \n";
 #endif
 
 }
@@ -113,7 +115,7 @@ MultiscaleModel0D::updateModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 8160 ) << "MultiscaleModel0D::updateModel() \n";
+    debugStream ( 8160 ) << "MultiscaleModel0D::updateModel() \n";
 #endif
 
 }
@@ -123,12 +125,12 @@ MultiscaleModel0D::solveModel()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 8160 ) << "MultiscaleModel0D::solveModel() \n";
+    debugStream ( 8160 ) << "MultiscaleModel0D::solveModel() \n";
 #endif
 
-// The 0D solver requires Rythmos/NOX/Thyra for now
+    // The 0D solver requires Rythmos/NOX/Thyra for now
 #if ( defined(HAVE_NOX_THYRA) && defined(HAVE_TRILINOS_RYTHMOS) )
-    M_solver->takeStep( M_data->dataTime()->previousTime(), M_data->dataTime()->time() );
+    M_solver->takeStep ( M_data->dataTime()->previousTime(), M_data->dataTime()->time() );
 #endif
 
 }
@@ -138,7 +140,7 @@ MultiscaleModel0D::updateSolution()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 8160 ) << "MultiscaleModel0D::updateSolution() \n";
+    debugStream ( 8160 ) << "MultiscaleModel0D::updateSolution() \n";
 #endif
 
 }
@@ -148,7 +150,7 @@ MultiscaleModel0D::saveSolution()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 8160 ) << "MultiscaleModel0D::saveSolution() \n";
+    debugStream ( 8160 ) << "MultiscaleModel0D::saveSolution() \n";
 #endif
 
     M_data->saveSolution();
@@ -168,7 +170,7 @@ MultiscaleModel0D::showMe()
 Real
 MultiscaleModel0D::checkSolution() const
 {
-    return M_data->circuitData()->Nodes()->nodeListAt( 1 )->voltage() + M_data->circuitData()->Elements()->elementListAt( 1 )->current();
+    return M_data->circuitData()->Nodes()->nodeListAt ( 1 )->voltage() + M_data->circuitData()->Elements()->elementListAt ( 1 )->current();
 }
 
 
@@ -177,17 +179,17 @@ MultiscaleModel0D::checkSolution() const
 // Private Methods
 // ===================================================
 void
-MultiscaleModel0D::setupGlobalData( const std::string& fileName )
+MultiscaleModel0D::setupGlobalData ( const std::string& fileName )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream( 8160 ) << "MultiscaleModel0D::setupGlobalData( fileName ) \n";
+    debugStream ( 8160 ) << "MultiscaleModel0D::setupGlobalData( fileName ) \n";
 #endif
 
-    GetPot dataFile( fileName );
+    GetPot dataFile ( fileName );
 
     //Global data time
-    M_data->setTimeData( M_globalData->dataTime() );
+    M_data->setTimeData ( M_globalData->dataTime() );
 }
 
 } // Namespace Multiscale
