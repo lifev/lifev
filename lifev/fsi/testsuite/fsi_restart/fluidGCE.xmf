@@ -57,7 +57,7 @@
                1050 3
            </DataStructure>
            <DataStructure  Format="HDF"
-                           Dimensions="1050 3"
+                           Dimensions="7257 3"
                            DataType="Float"
                            Precision="8">
                fluidGCE.h5:/f-velocity.00000/Values
@@ -161,7 +161,7 @@
                1050 3
            </DataStructure>
            <DataStructure  Format="HDF"
-                           Dimensions="1050 3"
+                           Dimensions="7257 3"
                            DataType="Float"
                            Precision="8">
                fluidGCE.h5:/f-velocity.00001/Values
@@ -265,7 +265,7 @@
                1050 3
            </DataStructure>
            <DataStructure  Format="HDF"
-                           Dimensions="1050 3"
+                           Dimensions="7257 3"
                            DataType="Float"
                            Precision="8">
                fluidGCE.h5:/f-velocity.00002/Values
@@ -369,7 +369,7 @@
                1050 3
            </DataStructure>
            <DataStructure  Format="HDF"
-                           Dimensions="1050 3"
+                           Dimensions="7257 3"
                            DataType="Float"
                            Precision="8">
                fluidGCE.h5:/f-velocity.00003/Values
@@ -473,7 +473,7 @@
                1050 3
            </DataStructure>
            <DataStructure  Format="HDF"
-                           Dimensions="1050 3"
+                           Dimensions="7257 3"
                            DataType="Float"
                            Precision="8">
                fluidGCE.h5:/f-velocity.00004/Values
@@ -577,7 +577,7 @@
                1050 3
            </DataStructure>
            <DataStructure  Format="HDF"
-                           Dimensions="1050 3"
+                           Dimensions="7257 3"
                            DataType="Float"
                            Precision="8">
                fluidGCE.h5:/f-velocity.00005/Values
@@ -681,7 +681,7 @@
                1050 3
            </DataStructure>
            <DataStructure  Format="HDF"
-                           Dimensions="1050 3"
+                           Dimensions="7257 3"
                            DataType="Float"
                            Precision="8">
                fluidGCE.h5:/f-velocity.00006/Values
@@ -785,7 +785,7 @@
                1050 3
            </DataStructure>
            <DataStructure  Format="HDF"
-                           Dimensions="1050 3"
+                           Dimensions="7257 3"
                            DataType="Float"
                            Precision="8">
                fluidGCE.h5:/f-velocity.00007/Values
@@ -889,7 +889,7 @@
                1050 3
            </DataStructure>
            <DataStructure  Format="HDF"
-                           Dimensions="1050 3"
+                           Dimensions="7257 3"
                            DataType="Float"
                            Precision="8">
                fluidGCE.h5:/f-velocity.00008/Values
@@ -937,110 +937,6 @@
                            DataType="Float"
                            Precision="8">
                fluidGCE.h5:/f-displacement.00008/Values
-           </DataStructure>
-         </DataStructure>
-      </Attribute>
-
-    </Grid>
-
-<!-- Time 0.009 Iteration 00009 -->
-    <Grid Name="Mesh 0.009">
-      <Time TimeType="Single" Value="0.009" />
-      <Topology
-         Type="Tetrahedron"
-         NumberOfElements="4680"
-         BaseOffset="0">
-         <DataStructure Format="HDF"
-                        Dimensions="4680 4"
-                        DataType="Int"
-                        Precision="8">
-             fluidGCE.h5:/Connections/Values
-         </DataStructure>
-      </Topology>
-      <Geometry Type="X_Y_Z">
-         <DataStructure Format="HDF"
-                        Dimensions="1050"
-                        DataType="Float"
-                        Precision="8">
-             fluidGCE.h5:/PointsX/Values
-         </DataStructure>
-         <DataStructure Format="HDF"
-                        Dimensions="1050"
-                        DataType="Float"
-                        Precision="8">
-             fluidGCE.h5:/PointsY/Values
-         </DataStructure>
-         <DataStructure Format="HDF"
-                        Dimensions="1050"
-                        DataType="Float"
-                        Precision="8">
-             fluidGCE.h5:/PointsZ/Values
-         </DataStructure>
-      </Geometry>
-
-
-      <Attribute
-         Type="Vector"
-         Center="Node"
-         Name="f-velocity">
-         <DataStructure ItemType="HyperSlab"
-                        Dimensions="1050 3"
-                        Type="HyperSlab">
-           <DataStructure  Dimensions="3 2"
-                           Format="XML">
-               0    0
-               1    1
-               1050 3
-           </DataStructure>
-           <DataStructure  Format="HDF"
-                           Dimensions="1050 3"
-                           DataType="Float"
-                           Precision="8">
-               fluidGCE.h5:/f-velocity.00009/Values
-           </DataStructure>
-         </DataStructure>
-      </Attribute>
-
-      <Attribute
-         Type="Scalar"
-         Center="Node"
-         Name="f-pressure">
-         <DataStructure ItemType="HyperSlab"
-                        Dimensions="1050 1"
-                        Type="HyperSlab">
-           <DataStructure  Dimensions="3 2"
-                           Format="XML">
-               0    0
-               1    1
-               1050 1
-           </DataStructure>
-           <DataStructure  Format="HDF"
-                           Dimensions="1050 1"
-                           DataType="Float"
-                           Precision="8">
-               fluidGCE.h5:/f-pressure.00009/Values
-           </DataStructure>
-         </DataStructure>
-      </Attribute>
-
-      <Attribute
-         Type="Vector"
-         Center="Node"
-         Name="f-displacement">
-         <DataStructure ItemType="HyperSlab"
-                        Dimensions="1050 3"
-                        Type="HyperSlab">
-           <DataStructure  Dimensions="3 2"
-                           Format="XML">
-               0    0
-               1    1
-               1050 3
-           </DataStructure>
-           <DataStructure  Format="HDF"
-                           Dimensions="1050 3"
-                           DataType="Float"
-                           Precision="8">
-               fluidGCE.h5:/f-displacement.00009/Values
            </DataStructure>
          </DataStructure>
       </Attribute>
