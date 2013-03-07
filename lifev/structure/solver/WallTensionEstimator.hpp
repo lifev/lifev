@@ -85,7 +85,7 @@
 //Materials
 #include <lifev/structure/solver/VenantKirchhoffMaterialLinear.hpp>
 // #include <lifev/structure/solver/VenantKirchhoffMaterialNonLinear.hpp>
-// #include <lifev/structure/solver/ExponentialMaterialNonLinear.hpp>
+#include <lifev/structure/solver/ExponentialMaterialNonLinear.hpp>
 // #include <lifev/structure/solver/NeoHookeanMaterialNonLinear.hpp>
 
 #include <lifev/eta/fem/ETFESpace.hpp>
