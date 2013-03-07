@@ -357,7 +357,7 @@ public:
      */
     void initializeTimeAdvance ( const std::vector<vectorPtr_Type>& initialFluidVel, const std::vector<vectorPtr_Type>& initialSolidDisp, const std::vector<vectorPtr_Type>&  initialFluiDisp);
 
-    virtual void initializeMonolithicOperator( std::vector< vectorPtr_Type> u0, std::vector< vectorPtr_Type> ds0, std::vector< vectorPtr_Type> df0) {}
+    virtual void initializeMonolithicOperator( std::vector< vectorPtr_Type> /*u0*/, std::vector< vectorPtr_Type> /*ds0*/, std::vector< vectorPtr_Type> /*df0*/) {}
 
     //! initializes the fluid solver with vectors
     /**
