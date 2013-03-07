@@ -615,7 +615,7 @@ FSIMonolithic::assembleSolidBlock ( UInt iter, const vector_Type& solution )
 
         //Multiplying it by the rescale factor
         *solidPortion *= M_solid->rescaleFactor();
-        M_solid->material()->computeStiffness(*solidPortion, 1., M_data->dataSolid(), M_solid->mapMarkersVolumes(), M_solid->displayerPtr());
+        M_solid->material()->computeStiffness(*solidPortion, 1., M_data->dataSolid(), M_solid->mapMarkersVolumes(), M_solid->mapMarkersIndexes(), M_solid->displayerPtr());
 
         // resetting the M_solidBlockPrec
         M_solidBlockPrec.reset(new matrix_Type(*M_monolithicMap, 1));
@@ -682,7 +682,7 @@ FSIMonolithic::assembleSolidBlock ( UInt iter, const vector_Type& solution )
     // case of formulation vector (i.e. all the nonlinear laws)
     else
     {
-      M_solid->material()->updateJacobianMatrix( solution*M_solid->rescaleFactor(), dataSolid(), M_solid->mapMarkersVolumes(), M_solid->displayerPtr() ); // computing the derivatives if nonlinear (comment this for inexact Newton);
+      M_solid->material()->updateJacobianMatrix( solution*M_solid->rescaleFactor(), dataSolid(), M_solid->mapMarkersVolumes(), M_solid->mapMarkersIndexes(), M_solid->displayerPtr() ); // computing the derivatives if nonlinear (comment this for inexact Newton);
         M_solidBlockPrec.reset(new matrix_Type(*M_monolithicMap, 1));
 
         *M_solidBlockPrec += *M_solid->massMatrix();

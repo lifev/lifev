@@ -1063,14 +1063,14 @@ FSIOperator::bcManageVectorRHS ( const fluidBchandlerPtr_Type& bcHandlerFluid, c
     }
 
     bcManageRhs ( rhs, *M_dFESpace->mesh(), M_dFESpace->dof(),  *bcHandlerSolid, M_dFESpace->feBd(), 1., 0. );
-
+}
 void
 FSIOperator::setAlphafCoef( )
 {
     Real h = 0.1, R = 0.5;
     M_alphaFCoef  =  M_ALETimeAdvance->coefficientSecondDerivative ( 0 ) * (this->dataSolid()->rho() * h) / this->dataFluid()->dataTime()->timeStep();
     M_alphaFCoef += h * M_data->dataSolid()->young (1) * this->dataFluid()->dataTime()->timeStep() /
-                    (pow (R, 2) * (1 - pow (M_data->dataSolid()->poisson (1), 2) ) );
+        (std::pow (R, 2) * (1 - std::pow (M_data->dataSolid()->poisson (1), 2) ) );
     M_alphaFCoef /= M_ALETimeAdvance->coefficientFirstDerivative ( 0 );
 }
 
