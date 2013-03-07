@@ -329,26 +329,28 @@ HeartMonodomainSolver ( const data_type&          dataType,
     M_massElementaryMatrix   ( M_uFESpace.fe().nbFEDof(), 1, 1 )
 {
 
-	if (M_data.hasFibers() )
-	    {
-	    	std::stringstream MyPID;
-	        ifstream fibers(M_data.fibersFile().c_str());
+    if (M_data.hasFibers() )
+    {
+        std::stringstream MyPID;
+        ifstream fibers (M_data.fibersFile().c_str() );
 
-	        std::cout << "fiber_file: " <<  M_data.fibersFile().c_str() << std::endl;
-	        UInt NumGlobalElements= M_localMapVector.map(Repeated)->NumGlobalElements();
-	        std::vector<Real> fiber_global_vector(NumGlobalElements);
+        std::cout << "fiber_file: " <<  M_data.fibersFile().c_str() << std::endl;
+        UInt NumGlobalElements = M_localMapVector.map (Repeated)->NumGlobalElements();
+        std::vector<Real> fiber_global_vector (NumGlobalElements);
 
-	        for( UInt i=0; i< NumGlobalElements; ++i)
-	    		fibers>>fiber_global_vector[i];
-	    	 UInt NumMyElements = M_localMapVector.map(Repeated)->NumMyElements();
-	    	for(UInt j=0; j< NumMyElements; ++j)
-	    	{
-	    		UInt ig= M_localMapVector.map(Repeated)->MyGlobalElements()[j];
-	    		M_fiberVector[ig]= fiber_global_vector[ig];
-	    		}
-	    	std::cout << std::endl;
-	    	fiber_global_vector.clear();
-	    }
+        for ( UInt i = 0; i < NumGlobalElements; ++i)
+        {
+            fibers >> fiber_global_vector[i];
+        }
+        UInt NumMyElements = M_localMapVector.map (Repeated)->NumMyElements();
+        for (UInt j = 0; j < NumMyElements; ++j)
+        {
+            UInt ig = M_localMapVector.map (Repeated)->MyGlobalElements() [j];
+            M_fiberVector[ig] = fiber_global_vector[ig];
+        }
+        std::cout << std::endl;
+        fiber_global_vector.clear();
+    }
 }
 
 

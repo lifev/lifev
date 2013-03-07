@@ -961,12 +961,12 @@ updateShapeDerivatives ( matrix_Type&                   matrix,
 
             if ( convectiveTermDerivative )
             {
-                elementMatrixConvective.reset( new MatrixElemental( this->M_velocityFESpace.fe().nbFEDof(),
-                                                            nDimensions,
-                                                            0,
-                                                            this->M_velocityFESpace.fe().nbFEDof(),
-                                                            0,
-                                                            nDimensions ) );
+                elementMatrixConvective.reset ( new MatrixElemental ( this->M_velocityFESpace.fe().nbFEDof(),
+                                                                      nDimensions,
+                                                                      0,
+                                                                      this->M_velocityFESpace.fe().nbFEDof(),
+                                                                      0,
+                                                                      nDimensions ) );
                 elementMatrixConvective->zero();
             }
 
@@ -1017,25 +1017,25 @@ updateShapeDerivatives ( matrix_Type&                   matrix,
                 // p^iNode local
                 M_elementPressure[ iLocal ] = ukRepeated[ iGlobal ];
             }
-	    
-	    shape_terms( //M_elementDisplacement,
-			this->M_oseenData->density(),
-			this->M_oseenData->viscosity(),
-			M_u_loc,
-			M_elementVelocity,
-			M_elementMeshVelocity,
-			M_elementConvectionVelocity,
-			M_elementPressure,
-			*elementMatrixVelocity,
-			mmFESpace.fe(),
-			this->M_pressureFESpace.fe(),
-			(ID) mmFESpace.fe().nbFEDof(),
-			*elementMatrixPressure,
-			0,
-			wImplicit,
-			alpha//,
-			//elementMatrixConvective
-			 );
+
+            shape_terms ( //M_elementDisplacement,
+                this->M_oseenData->density(),
+                this->M_oseenData->viscosity(),
+                M_u_loc,
+                M_elementVelocity,
+                M_elementMeshVelocity,
+                M_elementConvectionVelocity,
+                M_elementPressure,
+                *elementMatrixVelocity,
+                mmFESpace.fe(),
+                this->M_pressureFESpace.fe(),
+                (ID) mmFESpace.fe().nbFEDof(),
+                *elementMatrixPressure,
+                0,
+                wImplicit,
+                alpha//,
+                //elementMatrixConvective
+            );
 
             //elementMatrixVelocity->showMe(std::cout);
 
@@ -1047,12 +1047,12 @@ updateShapeDerivatives ( matrix_Type&                   matrix,
                           alpha );
             */
 
-            source_press( 1.0,
-                          M_elementVelocity,
-                          *elementMatrixPressure,
-                          mmFESpace.fe(),
-                          this->M_pressureFESpace.fe(),
-                          (ID) mmFESpace.fe().nbFEDof() );
+            source_press ( 1.0,
+                           M_elementVelocity,
+                           *elementMatrixPressure,
+                           mmFESpace.fe(),
+                           this->M_pressureFESpace.fe(),
+                           (ID) mmFESpace.fe().nbFEDof() );
 
             //derivative of the convective term
             if ( convectiveTermDerivative )
@@ -1079,16 +1079,16 @@ updateShapeDerivatives ( matrix_Type&                   matrix,
             {
                 for ( UInt jComponent = 0; jComponent < numVelocityComponent; ++jComponent )
                 {
-                    assembleMatrix( matrix,
-                                    *elementMatrixVelocity,
-                                    this->M_velocityFESpace.fe(),
-                                    mmFESpace.fe(),
-                                    this->M_velocityFESpace.dof(),
-                                    mmFESpace.dof(),
-                                    iComponent,
-                                    jComponent,
-                                    iComponent * velocityTotalDof,
-                                    offset + jComponent * meshTotalDof );
+                    assembleMatrix ( matrix,
+                                     *elementMatrixVelocity,
+                                     this->M_velocityFESpace.fe(),
+                                     mmFESpace.fe(),
+                                     this->M_velocityFESpace.dof(),
+                                     mmFESpace.dof(),
+                                     iComponent,
+                                     jComponent,
+                                     iComponent * velocityTotalDof,
+                                     offset + jComponent * meshTotalDof );
 
                     //assembling the derivative of the convective term
                     if ( convectiveTermDerivative )
@@ -1104,16 +1104,16 @@ updateShapeDerivatives ( matrix_Type&                   matrix,
                                          jComponent * velocityTotalDof );
                 }
 
-	    assembleMatrix( matrix,
-			    *elementMatrixPressure,
-			    this->M_pressureFESpace.fe(),
-			    mmFESpace.fe(),
-			    this->M_pressureFESpace.dof(),
-			    mmFESpace.dof(),
-			    (UInt) 0,
-			    iComponent,
-			    (UInt) numVelocityComponent * velocityTotalDof,
-			    offset + iComponent * meshTotalDof );
+                assembleMatrix ( matrix,
+                                 *elementMatrixPressure,
+                                 this->M_pressureFESpace.fe(),
+                                 mmFESpace.fe(),
+                                 this->M_pressureFESpace.dof(),
+                                 mmFESpace.dof(),
+                                 (UInt) 0,
+                                 iComponent,
+                                 (UInt) numVelocityComponent * velocityTotalDof,
+                                 offset + iComponent * meshTotalDof );
             }
         }
     }

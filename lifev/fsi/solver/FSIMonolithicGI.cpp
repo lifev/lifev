@@ -390,17 +390,17 @@ void FSIMonolithicGI::shapeDerivatives ( FSIOperator::fluidPtr_Type::value_type:
 
     //The last two flags are consistent with the currect interface.
     //When this class is used, they should not be changed.
-    M_fluid->updateShapeDerivatives( *sdMatrix, alpha,
-                                     un,
-                                     uk,
-                                     veloFluidMesh, //(xk-xn)/dt (FI), or (xn-xn-1)/dt (CE)//Repeated
-                                     M_solidAndFluidDim + M_interface * nDimensions,
-                                     *M_mmFESpace,
-                                     true /*This flag tells the method to consider the velocity of the domain implicitly*/,
-                                     true /*This flag tells the method to consider the convective term implicitly */ );
+    M_fluid->updateShapeDerivatives ( *sdMatrix, alpha,
+                                      un,
+                                      uk,
+                                      veloFluidMesh, //(xk-xn)/dt (FI), or (xn-xn-1)/dt (CE)//Repeated
+                                      M_solidAndFluidDim + M_interface * nDimensions,
+                                      *M_mmFESpace,
+                                      true /*This flag tells the method to consider the velocity of the domain implicitly*/,
+                                      true /*This flag tells the method to consider the convective term implicitly */ );
 }
 
-void FSIMonolithicGI::assembleMeshBlock( UInt /*iter*/ )
+void FSIMonolithicGI::assembleMeshBlock ( UInt /*iter*/ )
 {
 
     M_meshBlock.reset ( new matrix_Type ( *M_monolithicMap ) );
@@ -432,7 +432,7 @@ void FSIMonolithicGI::assembleMeshBlock( UInt /*iter*/ )
         {
             int i = ITrow->first;
             int iRow =  i + offset + dim * M_mmFESpace->dof().numTotalDof();
-            if( M_meshBlock->mapPtr()->map(Unique)->MyGID(iRow) )
+            if ( M_meshBlock->mapPtr()->map (Unique)->MyGID (iRow) )
             {
                 M_meshBlock->diagonalize ( iRow, 1. );
             }
@@ -442,7 +442,7 @@ void FSIMonolithicGI::assembleMeshBlock( UInt /*iter*/ )
                 myValues[0] = -1;
                 int myIndices[1];
                 myIndices[0] = iRow;
-                diagFilter->matrixPtr()->SumIntoGlobalValues( iRow, 1, myValues, myIndices );
+                diagFilter->matrixPtr()->SumIntoGlobalValues ( iRow, 1, myValues, myIndices );
             }
         }
     }
@@ -451,13 +451,13 @@ void FSIMonolithicGI::assembleMeshBlock( UInt /*iter*/ )
     // Processor informations
     Int  numLocalEntries = diagFilter->matrixPtr()->RowMap().NumMyElements();
     Int* globalEntries   = diagFilter->matrixPtr()->RowMap().MyGlobalElements();
-    UInt globalRowIndex(0);
+    UInt globalRowIndex (0);
 
     // Source informations handlers
-    double * diagValue;
+    double* diagValue;
     Int* indices;
     Int srcRow (0);
-    Int controlValue(0); // This value should be one since it is a diagonal matrix
+    Int controlValue (0); // This value should be one since it is a diagonal matrix
 
     for (Int i (0); i < numLocalEntries; ++i)
     {
@@ -468,8 +468,8 @@ void FSIMonolithicGI::assembleMeshBlock( UInt /*iter*/ )
         srcRow = diagFilter->matrixPtr()->LRID (globalRowIndex);
         diagFilter->matrixPtr()->ExtractMyRowView (srcRow, controlValue, diagValue, indices);
 
-        ASSERT( controlValue == 1,"Error: The matrix should be diagonal.");
-        if(diagValue[0] < 0.0)
+        ASSERT ( controlValue == 1, "Error: The matrix should be diagonal.");
+        if (diagValue[0] < 0.0)
         {
             M_meshBlock->diagonalize ( globalRowIndex, 1. );
         }

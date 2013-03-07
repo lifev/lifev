@@ -1142,11 +1142,11 @@ protected:
     /**
        The two vectors can have different numeration, for different discretizations this method is not tested.
     */
-    void interpolateInterfaceDofs(const FESpace<mesh_Type, MapEpetra>& _fespace1,
-                                  const vector_Type&                   _vec1,
-                                  const FESpace<mesh_Type, MapEpetra>& _fespace2,
-                                  vector_Type&                         _vec2,
-                                  dofInterface3DPtr_Type&              _dofInterface);
+    void interpolateInterfaceDofs (const FESpace<mesh_Type, MapEpetra>& _fespace1,
+                                   const vector_Type&                   _vec1,
+                                   const FESpace<mesh_Type, MapEpetra>& _fespace2,
+                                   vector_Type&                         _vec2,
+                                   dofInterface3DPtr_Type&              _dofInterface);
 
     //@}
 
