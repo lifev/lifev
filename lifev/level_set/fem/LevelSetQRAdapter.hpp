@@ -199,8 +199,9 @@ LevelSetQRAdapter (FESpaceType_Ptr fespace, const VectorType& vect, const Quadra
     M_isAdaptedElement (false),
     M_adaptedQR (new QuadratureRule (qr) )
 {
-    ASSERT ( M_lsFESpace->fieldDim() == 1, "Quadrature adaptation only for scalar fields!");
-    ASSERT ( M_lsFESpace->spaceDim() == 3, "Quadrature adaptation only 3D cases for the moment!");
+
+    ASSERT ( FESpaceType::field_dim == 1, "Quadrature adaptation only for scalar fields!");
+    ASSERT ( FESpaceType::space_dim == 3, "Quadrature adaptation only 3D cases for the moment!");
 }
 
 template< typename FESpaceType, typename VectorType >

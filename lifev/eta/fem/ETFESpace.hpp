@@ -252,7 +252,7 @@ public:
     /*!
       @return The dimension of the space in which this FE space is defined
      */
-    const UInt& spaceDim() const
+    const UInt spaceDim() const
     {
         return space_dim;
     }
@@ -261,7 +261,7 @@ public:
     /*!
       @return The dimension of the field represented.
      */
-    const UInt& fieldDim() const
+    const UInt fieldDim() const
     {
         return field_dim;
     }
@@ -329,6 +329,7 @@ ETFESpace (const meshPtr_Type& mesh, const ReferenceFE* refFE, commPtr_Type& com
       M_dof ( new DOF ( *M_mesh, *M_referenceFE ) ),
       M_map (new MapType() )
 {
+
     createMap (commptr);
 }
 
