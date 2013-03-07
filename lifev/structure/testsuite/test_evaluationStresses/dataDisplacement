@@ -33,7 +33,8 @@ poisson   	= 0.49
 bulk		= 1.3333e+8
 alpha 		= 2.684564e+6
 gamma		= 1.0
-solidType 	= exponential		# linearVenantKirchhoff / nonlinearVenantKirchhoff / neoHookean / expoenential
+solidType 	= exponential		# linearVenantKirchhoff / nonlinearVenantKirchhoff / neoHookean / expoenentia
+lawType     = nonlinear
 
 [../time_discretization]
 initialtime 	= 0.

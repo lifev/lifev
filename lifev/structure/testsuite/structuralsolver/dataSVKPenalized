@@ -34,6 +34,7 @@ bulk		= 1.3333e+8
 alpha 		= 2.684564e+6
 gamma		= 1.0
 solidType 	= nonLinearVenantKirchhoffPenalized		# linearVenantKirchhoff / nonLinearVenantKirchhoff / neoHookean / expoenential
+lawType     = nonlinear
 
 [../time_discretization]
 initialtime 	= 0.

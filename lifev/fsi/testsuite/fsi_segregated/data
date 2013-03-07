@@ -207,6 +207,7 @@ filter_singletons      = false
 [./physics]
 material_flag   = '1' # '1 2'
 solidType       = linearVenantKirchhoff
+lawType         = linear
 young           = 4.0E6 #,1.9E9
 poisson         = 0.45 #,0.30
 density         = 1.2					# density
@@ -251,6 +252,7 @@ reuse           = true
 [../prec]
 prectype        = Ifpack
 overlap         = 2
+xmlName                 = xmlParameters.xml
 
 [./ifpack]
 
