@@ -711,7 +711,7 @@ FSIMonolithic::assembleSolidBlock ( UInt iter, const vector_Type& solution )
     }
 
     // In the case of LE it does not do anything.
-    M_solid->material()->updateJacobianMatrix( *solidPortion, dataSolid(), M_solid->mapMarkersVolumes(), M_solid->displayerPtr() ); // computing the derivatives if nonlinear (comment this for inexact Newton);
+    M_solid->material()->updateJacobianMatrix( *solidPortion, dataSolid(), M_solid->mapMarkersVolumes(), M_solid->mapMarkersIndexes(), M_solid->displayerPtr() ); // computing the derivatives if nonlinear (comment this for inexact Newton);
 
     //Need to inglobe it into a boost::shared to avoid memeory leak
     boost::shared_ptr<MatrixEpetra<Real> >  solidMatrix(new MatrixEpetra<Real>( M_solid->map(), 1 ));

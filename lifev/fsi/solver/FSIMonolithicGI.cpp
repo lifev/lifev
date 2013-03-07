@@ -291,8 +291,8 @@ void FSIMonolithicGI::setupBlockPrec()
     //The following part accounts for a possibly nonlinear structure model, should not be run when linear
     //elasticity is used
 
-    case of exponential and neohookean model
-    todo: pass to boolean variable for Nonlinear models ( i.e. for vector formulation )
+    // case of exponential and neohookean model
+    // todo: pass to boolean variable for Nonlinear models ( i.e. for vector formulation )
     if ( M_data->dataSolid()->getUseExactJacobian() && ( M_data->dataSolid()->solidType().compare( "exponential" )
     							 && M_data->dataSolid()->solidType().compare( "neoHookean" ) ) )
     {
