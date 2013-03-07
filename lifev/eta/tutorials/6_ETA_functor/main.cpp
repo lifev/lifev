@@ -369,8 +369,6 @@ int main ( int argc, char** argv )
 
         boost::shared_ptr<normFunctor> norm ( new normFunctor);
 
-        boost::shared_ptr<normFunctor> norm ( new normFunctor);
-
         norm->setExponent (2);
 
         integrate ( elements (ETuSpace->mesh() ),

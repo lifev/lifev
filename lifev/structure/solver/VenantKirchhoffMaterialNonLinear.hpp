@@ -419,9 +419,9 @@ void VenantKirchhoffMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( 
     //     Real mu = dataMaterial->mu(marker);
 
     //Macros to make the assembly more readable
-#define F ( grad( this->M_dispETFESpace,  disp, this->M_offset) + value(this->M_identity) )
-#define RIGHTCAUCHYGREEN transpose(F) * F
-#define IC trace( RIGHTCAUCHYGREEN )
+#define deformationGradientTensor ( grad( this->M_dispETFESpace,  disp, this->M_offset) + value(this->M_identity) )
+#define RIGHTCAUCHYGREEN transpose(deformationGradientTensor) * deformationGradientTensor
+#define firstInvariantC trace( RIGHTCAUCHYGREEN )
 
     // //Assembling the Isochoric Part
     // //! 1. Stiffness matrix : int { (lambda/2.0) * ( 2* F:dF) * ( F : \nabla \v ) }
@@ -429,7 +429,7 @@ void VenantKirchhoffMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( 
                 this->M_dispFESpace->qr(),
                 this->M_dispETFESpace,
                 this->M_dispETFESpace,
-                parameter ( (* (this->M_vectorsParameters) ) [0] ) * dot ( F, grad (phi_j) ) * dot ( F, grad (phi_i) )
+                parameter ( (* (this->M_vectorsParameters) ) [0] ) * dot ( deformationGradientTensor, grad (phi_j) ) * dot ( deformationGradientTensor, grad (phi_i) )
               ) >> jacobian;
 
     //! 2. Stiffness matrix : int { (lambda/2.0) * ( Ic-3.0 ) * ( dF : \nabla \v ) }
@@ -437,7 +437,7 @@ void VenantKirchhoffMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( 
                 this->M_dispFESpace->qr(),
                 this->M_dispETFESpace,
                 this->M_dispETFESpace,
-                value ( 1.0 / 2.0 ) *parameter ( (* (this->M_vectorsParameters) ) [0] ) * ( IC - value (3.0) ) * dot ( grad (phi_j), grad (phi_i) )
+                value ( 1.0 / 2.0 ) *parameter ( (* (this->M_vectorsParameters) ) [0] ) * ( firstInvariantC - value (3.0) ) * dot ( grad (phi_j), grad (phi_i) )
               ) >> jacobian;
 
     // //! 3. Stiffness matrix : int { - mu * ( dF : \nabla \v )}
@@ -461,7 +461,7 @@ void VenantKirchhoffMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( 
                 this->M_dispFESpace->qr(),
                 this->M_dispETFESpace,
                 this->M_dispETFESpace,
-                parameter ( (* (this->M_vectorsParameters) ) [1]) * dot ( F * F * transpose (grad (phi_j) ) , grad (phi_i) )
+                parameter ( (* (this->M_vectorsParameters) ) [1]) * dot ( deformationGradientTensor * deformationGradientTensor * transpose (grad (phi_j) ) , grad (phi_i) )
               ) >> jacobian;
 
     // //! 6. Stiffness matrix : int { mu * ( ( F * F^T * transpose(dF) ) : \nabla \v ) }
@@ -469,7 +469,7 @@ void VenantKirchhoffMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( 
                 this->M_dispFESpace->qr(),
                 this->M_dispETFESpace,
                 this->M_dispETFESpace,
-                parameter ( (* (this->M_vectorsParameters) ) [1] ) *  dot ( F * transpose (F) * grad (phi_j) , grad (phi_i) )
+                parameter ( (* (this->M_vectorsParameters) ) [1] ) *  dot ( deformationGradientTensor * transpose (deformationGradientTensor) * grad (phi_j) , grad (phi_i) )
               ) >> jacobian;
 
     jacobian->globalAssemble();
@@ -524,7 +524,7 @@ void VenantKirchhoffMaterialNonLinear<MeshType>::computeStiffness ( const vector
     integrate ( elements ( this->M_dispETFESpace->mesh() ) ,
                 this->M_dispFESpace->qr(),
                 this->M_dispETFESpace,
-                value ( 1.0 / 2.0 ) * parameter ( (* (this->M_vectorsParameters) ) [0] ) * ( IC - 3.0 ) * dot ( F, grad (phi_i) )
+                value ( 1.0 / 2.0 ) * parameter ( (* (this->M_vectorsParameters) ) [0] ) * ( firstInvariantC - 3.0 ) * dot ( deformationGradientTensor, grad (phi_i) )
               ) >> M_stiff;
 
     //Computation of the isochoric part
@@ -532,7 +532,7 @@ void VenantKirchhoffMaterialNonLinear<MeshType>::computeStiffness ( const vector
     integrate ( elements ( this->M_dispETFESpace->mesh() ) ,
                 this->M_dispFESpace->qr(),
                 this->M_dispETFESpace,
-                value (-1.0) * parameter ( (* (this->M_vectorsParameters) ) [1] ) * dot ( F , grad (phi_i) )
+                value (-1.0) * parameter ( (* (this->M_vectorsParameters) ) [1] ) * dot ( deformationGradientTensor , grad (phi_i) )
               ) >> M_stiff;
 
     //Computation of the isochoric part
@@ -540,7 +540,7 @@ void VenantKirchhoffMaterialNonLinear<MeshType>::computeStiffness ( const vector
     integrate ( elements ( this->M_dispETFESpace->mesh() ) ,
                 this->M_dispFESpace->qr(),
                 this->M_dispETFESpace,
-                parameter ( (* (this->M_vectorsParameters) ) [1] ) * dot ( F * RIGHTCAUCHYGREEN , grad (phi_i) )
+                parameter ( (* (this->M_vectorsParameters) ) [1] ) * dot ( deformationGradientTensor * RIGHTCAUCHYGREEN , grad (phi_i) )
               ) >> M_stiff;
     //}
 

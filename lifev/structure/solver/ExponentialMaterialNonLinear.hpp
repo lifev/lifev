@@ -442,12 +442,12 @@ void ExponentialMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( matr
     // Real gamma = dataMaterial->gamma(marker);
 
     //Macros to make the assembly more readable
-#define F ( grad( this->M_dispETFESpace,  disp, this->M_offset) + value(this->M_identity) )
-#define J det( F )
-#define F_T  minusT(F)
-#define RIGHTCAUCHYGREEN transpose(F) * F
-#define IC trace( RIGHTCAUCHYGREEN )
-#define ICbar pow( J, (-2.0/3.0) ) * IC
+#define deformationGradientTensor ( grad( this->M_dispETFESpace,  disp, this->M_offset) + value(this->M_identity) )
+#define detDeformationGradientTensor det( deformationGradientTensor )
+#define deformationGradientTensor_T  minusT(deformationGradientTensor)
+#define RIGHTCAUCHYGREEN transpose(deformationGradientTensor) * deformationGradientTensor
+#define firstInvariantC trace( RIGHTCAUCHYGREEN )
+#define firstInvariantCbar pow( detDeformationGradientTensor, (-2.0/3.0) ) * firstInvariantC
 
 
     //Assembling Volumetric Part
@@ -455,14 +455,14 @@ void ExponentialMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( matr
                 this->M_dispFESpace->qr(),
                 this->M_dispETFESpace,
                 this->M_dispETFESpace,
-                value ( 1.0 / 2.0 ) * parameter ( (* (this->M_vectorsParameters) ) [2] ) * ( value (2.0) *pow (J, 2.0) - J + value (1.0) ) * dot ( F_T, grad (phi_j) ) * dot ( F_T, grad (phi_i) )
+                value ( 1.0 / 2.0 ) * parameter ( (* (this->M_vectorsParameters) ) [2] ) * ( value (2.0) *pow (detDeformationGradientTensor, 2.0) - detDeformationGradientTensor + value (1.0) ) * dot ( deformationGradientTensor_T, grad (phi_j) ) * dot ( deformationGradientTensor_T, grad (phi_i) )
               ) >> jacobian;
 
     integrate ( elements ( this->M_dispETFESpace->mesh() ),
                 this->M_dispFESpace->qr(),
                 this->M_dispETFESpace,
                 this->M_dispETFESpace,
-                value ( -1.0 / 2.0 ) * parameter ( (* (this->M_vectorsParameters) ) [2] ) * ( pow (J, 2.0) - J + log (J) ) * dot ( F_T * transpose (grad (phi_j) ) * F_T,  grad (phi_i) )
+                value ( -1.0 / 2.0 ) * parameter ( (* (this->M_vectorsParameters) ) [2] ) * ( pow (detDeformationGradientTensor, 2.0) - detDeformationGradientTensor + log (detDeformationGradientTensor) ) * dot ( deformationGradientTensor_T * transpose (grad (phi_j) ) * deformationGradientTensor_T,  grad (phi_i) )
               ) >> jacobian;
 
     // //Assembling the Isochoric Part
@@ -473,9 +473,9 @@ void ExponentialMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( matr
                 this->M_dispETFESpace,
                 this->M_dispETFESpace,
                 value (-2.0 / 3.0) * parameter ( (* (this->M_vectorsParameters) ) [0]) *
-                pow (J, -2.0 / 3.0) * exp ( parameter ( (* (this->M_vectorsParameters) ) [1] ) * ( ICbar - value (3.0) ) ) *
-                ( value (1.0) + parameter ( (* (this->M_vectorsParameters) ) [1]) * ICbar) *
-                dot ( F_T, grad (phi_j) ) * dot ( F, grad (phi_i) )
+                pow (detDeformationGradientTensor, -2.0 / 3.0) * exp ( parameter ( (* (this->M_vectorsParameters) ) [1] ) * ( firstInvariantCbar - value (3.0) ) ) *
+                ( value (1.0) + parameter ( (* (this->M_vectorsParameters) ) [1]) * firstInvariantCbar) *
+                dot ( deformationGradientTensor_T, grad (phi_j) ) * dot ( deformationGradientTensor, grad (phi_i) )
               ) >> jacobian;
 
     //! 2. Stiffness matrix : int { 2 * alpha * gamma * J^(-4/3) * exp( gamma*( Ic_iso - 3) ) *
@@ -484,8 +484,8 @@ void ExponentialMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( matr
                 this->M_dispFESpace->qr(),
                 this->M_dispETFESpace,
                 this->M_dispETFESpace,
-                value (2.0) * parameter ( (* (this->M_vectorsParameters) ) [0] ) * parameter ( (* (this->M_vectorsParameters) ) [1]) * pow (J, -4.0 / 3.0) * exp ( parameter ( (* (this->M_vectorsParameters) ) [1] ) * ( ICbar - value (3.0) ) ) *
-                dot ( F, grad (phi_j) ) * dot ( F, grad (phi_i) )
+                value (2.0) * parameter ( (* (this->M_vectorsParameters) ) [0] ) * parameter ( (* (this->M_vectorsParameters) ) [1]) * pow (detDeformationGradientTensor, -4.0 / 3.0) * exp ( parameter ( (* (this->M_vectorsParameters) ) [1] ) * ( firstInvariantCbar - value (3.0) ) ) *
+                dot ( deformationGradientTensor, grad (phi_j) ) * dot ( deformationGradientTensor, grad (phi_i) )
               ) >> jacobian;
 
     // //! 3. Stiffness matrix : int { 2.0/9.0 *  alpha *  Ic_iso * exp( gamma*( Ic_iso - 3) )*
@@ -494,19 +494,19 @@ void ExponentialMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( matr
                 this->M_dispFESpace->qr(),
                 this->M_dispETFESpace,
                 this->M_dispETFESpace,
-                value (2.0 / 9.0) * parameter ( (* (this->M_vectorsParameters) ) [0]) * ICbar * exp ( parameter ( (* (this->M_vectorsParameters) ) [1]) * ( ICbar - value (3.0) ) ) * ( value (1.0) + parameter ( (* (this->M_vectorsParameters) ) [1]) * ICbar) *
-                dot ( F_T, grad (phi_j) ) * dot ( F_T, grad (phi_i) )
+                value (2.0 / 9.0) * parameter ( (* (this->M_vectorsParameters) ) [0]) * firstInvariantCbar * exp ( parameter ( (* (this->M_vectorsParameters) ) [1]) * ( firstInvariantCbar - value (3.0) ) ) * ( value (1.0) + parameter ( (* (this->M_vectorsParameters) ) [1]) * firstInvariantCbar) *
+                dot ( deformationGradientTensor_T, grad (phi_j) ) * dot ( deformationGradientTensor_T, grad (phi_i) )
               ) >> jacobian;
 
     // //! 4. Stiffness matrix : int { -2.0/3.0 *  alpha * J^(-2/3) * exp( gamma*( Ic_iso - 3) )
-    // //!                    * ( 1. + gamma * Ic_iso )( F : \nabla \delta ) ( F^-T : \nabla \v ) }
+    // //!                    * ( 1. + gamma * Ic_iso )( deformationGradientTensor : \nabla \delta ) ( F^-T : \nabla \v ) }
     integrate ( elements ( this->M_dispETFESpace->mesh() ),
                 this->M_dispFESpace->qr(),
                 this->M_dispETFESpace,
                 this->M_dispETFESpace,
-                value (-2.0 / 3.0) * parameter ( (* (this->M_vectorsParameters) ) [0]) * pow (J, -2.0 / 3.0) * exp ( parameter ( (* (this->M_vectorsParameters) ) [1] ) * ( ICbar - value (3.0) ) ) *
-                ( value (1.0) + parameter ( (* (this->M_vectorsParameters) ) [1]) * ICbar) *
-                dot ( F, grad (phi_j) ) * dot ( F_T, grad (phi_i) )
+                value (-2.0 / 3.0) * parameter ( (* (this->M_vectorsParameters) ) [0]) * pow (detDeformationGradientTensor, -2.0 / 3.0) * exp ( parameter ( (* (this->M_vectorsParameters) ) [1] ) * ( firstInvariantCbar - value (3.0) ) ) *
+                ( value (1.0) + parameter ( (* (this->M_vectorsParameters) ) [1]) * firstInvariantCbar) *
+                dot ( deformationGradientTensor, grad (phi_j) ) * dot ( deformationGradientTensor_T, grad (phi_i) )
               ) >> jacobian;
 
 
@@ -515,8 +515,8 @@ void ExponentialMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( matr
                 this->M_dispFESpace->qr(),
                 this->M_dispETFESpace,
                 this->M_dispETFESpace,
-                parameter ( (* (this->M_vectorsParameters) ) [0]) * pow (J, -2.0 / 3.0) *
-                exp ( parameter ( (* (this->M_vectorsParameters) ) [1] ) * ( ICbar - value (3.0) ) ) *
+                parameter ( (* (this->M_vectorsParameters) ) [0]) * pow (detDeformationGradientTensor, -2.0 / 3.0) *
+                exp ( parameter ( (* (this->M_vectorsParameters) ) [1] ) * ( firstInvariantCbar - value (3.0) ) ) *
                 dot ( grad (phi_j), grad (phi_i) )
               ) >> jacobian;
 
@@ -527,9 +527,9 @@ void ExponentialMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( matr
                 this->M_dispFESpace->qr(),
                 this->M_dispETFESpace,
                 this->M_dispETFESpace,
-                value (1.0 / 3.0) * parameter ( (* (this->M_vectorsParameters) ) [0]) * ICbar *
-                exp ( parameter ( (* (this->M_vectorsParameters) ) [1] ) * ( ICbar - value (3.0) ) ) *
-                dot ( F_T * transpose (grad (phi_j) ) * F_T , grad (phi_i) )
+                value (1.0 / 3.0) * parameter ( (* (this->M_vectorsParameters) ) [0]) * firstInvariantCbar *
+                exp ( parameter ( (* (this->M_vectorsParameters) ) [1] ) * ( firstInvariantCbar - value (3.0) ) ) *
+                dot ( deformationGradientTensor_T * transpose (grad (phi_j) ) * deformationGradientTensor_T , grad (phi_i) )
               ) >> jacobian;
 
 
@@ -586,16 +586,16 @@ void ExponentialMaterialNonLinear<MeshType>::computeStiffness ( const vector_Typ
     integrate ( elements ( this->M_dispETFESpace->mesh() ) ,
                 this->M_dispFESpace->qr(),
                 this->M_dispETFESpace,
-                value (1.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [2] ) * ( pow ( J , 2.0) - J + log (J) ) * dot (  F_T, grad (phi_i) )
+                value (1.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [2] ) * ( pow ( detDeformationGradientTensor , 2.0) - detDeformationGradientTensor + log (detDeformationGradientTensor) ) * dot (  deformationGradientTensor_T, grad (phi_i) )
               ) >> M_stiff;
 
     //Computation of the isochoric part
     integrate ( elements ( this->M_dispETFESpace->mesh() ) ,
                 this->M_dispFESpace->qr(),
                 this->M_dispETFESpace,
-                parameter ( (* (this->M_vectorsParameters) ) [0] ) * pow (J, -2.0 / 3.0) *
-                exp ( parameter ( (* (this->M_vectorsParameters) ) [1] ) * ( ICbar  - value (3.0) ) )  *
-                (dot ( F - value (1.0 / 3.0) * IC * F_T, grad (phi_i) ) )
+                parameter ( (* (this->M_vectorsParameters) ) [0] ) * pow (detDeformationGradientTensor, -2.0 / 3.0) *
+                exp ( parameter ( (* (this->M_vectorsParameters) ) [1] ) * ( firstInvariantCbar  - value (3.0) ) )  *
+                (dot ( deformationGradientTensor - value (1.0 / 3.0) * firstInvariantC * deformationGradientTensor_T, grad (phi_i) ) )
               ) >> M_stiff;
     //}
 
