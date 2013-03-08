@@ -50,7 +50,7 @@
 #include <vector>
 
 #ifdef _MSC_VER
-    #include <iso646.h>
+#include <iso646.h>
 #endif
 
 // BOOST
@@ -78,7 +78,7 @@ namespace LifeV
 {
 
 enum ZeroDimensionalElementType
-    {
+{
     resistor,
     capacitor,
     inductor,

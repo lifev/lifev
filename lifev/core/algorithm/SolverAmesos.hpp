@@ -96,10 +96,13 @@ public:
     /*!
      * @param comm The communicator.
      */
-    SolverAmesos( const commPtr_Type& comm );
+    SolverAmesos ( const commPtr_Type& comm );
 
     //! Destructor
-    ~SolverAmesos() { delete M_solver; }
+    ~SolverAmesos()
+    {
+        delete M_solver;
+    }
 
     //@}
 
@@ -112,7 +115,7 @@ public:
       @param solution Solution vector
       @param rhs Right hand side of the system
      */
-    Real computeResidual( const vector_type& solution, const vector_type& rhs );
+    Real computeResidual ( const vector_type& solution, const vector_type& rhs );
 
     //! Solves the system and returns the number of iterations.
     /*!
@@ -121,9 +124,9 @@ public:
       @param  rhsFull Right hand side vector
       @param  solution Vector to store the solution
     */
-    Int solveSystem( vector_type&    rhsFull,
-                     vector_type&    solution,
-                     const matrix_ptrtype& /* unused */ );
+    Int solveSystem ( vector_type&    rhsFull,
+                      vector_type&    solution,
+                      const matrix_ptrtype& /* unused */ );
 
     //! Display status of the solver
     void printStatus();
@@ -146,17 +149,17 @@ public:
       @param dataFile GetPot object which contains the data about the preconditioner
       @param section Section the GetPot structure where to find the informations about the preconditioner
      */
-    void setupPreconditioner( const GetPot& dataFile,  const std::string& section );
+    void setupPreconditioner ( const GetPot& dataFile,  const std::string& section );
 
     //! Specify if the preconditioner should be reuse or not
     /*!
       Note: This method is empty
       @param reusePreconditioner If set to true, do not recompute the preconditioner
      */
-    void setReusePreconditioner( const bool& /*reusePreconditioner*/ );
+    void setReusePreconditioner ( const bool& /*reusePreconditioner*/ );
 
     //! Print informations about the solver
-    void showMe( std::ostream& output = std::cout ) const;
+    void showMe ( std::ostream& output = std::cout ) const;
 
     //@}
 
@@ -168,19 +171,19 @@ public:
     /*!
       @param matrix Matrix of the system
      */
-    Int setMatrix( const matrix_type& matrix );
+    Int setMatrix ( const matrix_type& matrix );
 
     //! Method to set a general linear operator (of class derived from Epetra_Operator) defining the linear system
     /*!
       @param oper Operator for the system
      */
-    void setOperator( const Epetra_Operator& oper );
+    void setOperator ( const Epetra_Operator& oper );
 
     //! Method to setup the solver using GetPot
     /*!
       @param dataFile GetPot object which contains the data about the solver
      */
-    void setDataFromGetPot( const GetPot& dataFile, const std::string& section );
+    void setDataFromGetPot ( const GetPot& dataFile, const std::string& section );
 
     //! Set a parameter in the list
     /*!
@@ -188,7 +191,10 @@ public:
      *  @param value value of the parameter
      */
     template <typename ParameterType>
-    void setParameter( const std::string& name, const ParameterType value ) { M_trilinosParameterList.set( name, value ); }
+    void setParameter ( const std::string& name, const ParameterType value )
+    {
+        M_trilinosParameterList.set ( name, value );
+    }
 
     //! Set the current parameters with the internal parameters list
     /*!
@@ -201,19 +207,22 @@ public:
     /*!
      *  @param list Teuchos parameters list
      */
-    void setParametersList( const Teuchos::ParameterList& list ) { M_trilinosParameterList = list; }
+    void setParametersList ( const Teuchos::ParameterList& list )
+    {
+        M_trilinosParameterList = list;
+    }
 
     //! Set the tolerance of the solver
     /*!
       @param tolerance Tolerance for the solver
     */
-    void setTolerance( const Real tolerance );
+    void setTolerance ( const Real tolerance );
 
     //! Set the tolerance and the maximum number of iterations
     /*!
      * @param maxIter Maximum number of iteration
      */
-    void setMaxNumIterations( const Int maxIter = -1 );
+    void setMaxNumIterations ( const Int maxIter = -1 );
 
     //@}
 
@@ -231,7 +240,10 @@ public:
     /*!
      * @return Teuchos parameters list
      */
-    const Teuchos::ParameterList& parametersList() const { return M_trilinosParameterList; }
+    const Teuchos::ParameterList& parametersList() const
+    {
+        return M_trilinosParameterList;
+    }
 
     //@}
 
@@ -244,7 +256,7 @@ private:
     /*!
       @param solverType String containing the name of the solver
      */
-    void createSolver( const std::string& solverType );
+    void createSolver ( const std::string& solverType );
 
     //@}
 

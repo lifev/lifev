@@ -48,13 +48,14 @@ namespace LifeV
 /*!
  * This class will communicate with with Rythmos solver and model interface.
  */
-class RythmosSolverInterface : public EpetraExt::ModelEvaluator {
+class RythmosSolverInterface : public EpetraExt::ModelEvaluator
+{
 public:
 
     // Constructor
-    RythmosSolverInterface(Int numCircuitElements,
-            Teuchos::RCP<Epetra_Comm> &epetra_comm_ptr,
-            rythmosModelInterfacePtrRCP_Type theModel);
+    RythmosSolverInterface (Int numCircuitElements,
+                            Teuchos::RCP<Epetra_Comm>& epetra_comm_ptr,
+                            rythmosModelInterfacePtrRCP_Type theModel);
 
     // Initialization
     void initialize();
@@ -73,7 +74,7 @@ public:
 
     OutArgs createOutArgs() const;
 
-    void evalModel( const InArgs& inArgs, const OutArgs& outArgs ) const;
+    void evalModel ( const InArgs& inArgs, const OutArgs& outArgs ) const;
 
 private:
 

@@ -103,7 +103,7 @@ public:
       \param interfaceMap - Epetra_Map*
       \param interfaceMapRep - Epetra_Map*
     */
-    MeshPartitioner ( meshPtr_Type &mesh,
+    MeshPartitioner ( meshPtr_Type& mesh,
                       boost::shared_ptr<Epetra_Comm>& comm,
                       Epetra_Map* interfaceMap = 0,
                       Epetra_Map* interfaceMapRep = 0 );
@@ -127,7 +127,7 @@ public:
       @param interfaceMapRep - Epetra_Map*
       @note This method is meant to be used with the empty constructor.
     */
-    void doPartition ( meshPtr_Type &mesh,
+    void doPartition ( meshPtr_Type& mesh,
                        boost::shared_ptr<Epetra_Comm>& comm,
                        Epetra_Map* interfaceMap = 0,
                        Epetra_Map* interfaceMapRep = 0 );
@@ -141,7 +141,7 @@ public:
       \param numPartitions - UInt - the number of partitions desired, in the offline case
       \param _comm - Epetra_Comm& - reference of the Epetra communicator used
     */
-    void setup(UInt numPartitions, boost::shared_ptr<Epetra_Comm> comm);
+    void setup (UInt numPartitions, boost::shared_ptr<Epetra_Comm> comm);
 
     //! Call update() method after loading the graph, to rebuild all data structures
     /*!
@@ -159,8 +159,8 @@ public:
       \param interfaceMap - Epetra_Map* - pointer to the interface map (default value 0)
       \param interfaceMapRep - Epetra_Map* - pointer to the repeated interface map (default value 0)
     */
-    void attachUnpartitionedMesh(meshPtr_Type &mesh, Epetra_Map* interfaceMap = 0,
-                                 Epetra_Map* interfaceMapRep = 0);
+    void attachUnpartitionedMesh (meshPtr_Type& mesh, Epetra_Map* interfaceMap = 0,
+                                  Epetra_Map* interfaceMapRep = 0);
 
     //! Releases the original unpartitioned mesh
     /*!
@@ -183,45 +183,75 @@ public:
 
     // Next method should be renamed and become a regular method
     //! Return a pointer to the mesh partition with rank k
-    const meshPtr_Type&      getPartition(Int k)    const {return (*M_meshPartitions)[k];}
+    const meshPtr_Type&      getPartition (Int k)    const
+    {
+        return (*M_meshPartitions) [k];
+    }
 
     //! Clean structures that are not needed after partitioning
     void cleanUp();
 
     //! Prints information about the state (data) of the object
-    void showMe(std::ostream& output = std::cout) const;
+    void showMe (std::ostream& output = std::cout) const;
     //@}
 
     //! \name Get Methods
     //@{
     //! Return a reference to M_vertexDistribution
-    const std::vector<Int>&  vertexDistribution()   const {return M_vertexDistribution;}
+    const std::vector<Int>&  vertexDistribution()   const
+    {
+        return M_vertexDistribution;
+    }
     //! Return a const pointer to M_meshPartitions[0] - for parallel
-    const meshPtr_Type&      meshPartition()        const {return (*M_meshPartitions)[0];}
-    meshPtr_Type&            meshPartition()              {return (*M_meshPartitions)[0];}
+    const meshPtr_Type&      meshPartition()        const
+    {
+        return (*M_meshPartitions) [0];
+    }
+    meshPtr_Type&            meshPartition()
+    {
+        return (*M_meshPartitions) [0];
+    }
     //! Return a pointer to M_meshPartitions
-    const partMeshPtr_Type&  meshPartitions()       const {return M_meshPartitions;}
+    const partMeshPtr_Type&  meshPartitions()       const
+    {
+        return M_meshPartitions;
+    }
     //! Return a pointer to M_graphVertexLocations
-    const std::vector<Int>&  graphVertexLocations() const {return M_graphVertexLocations;}
+    const std::vector<Int>&  graphVertexLocations() const
+    {
+        return M_graphVertexLocations;
+    }
     //! Return a pointer to M_elementDomains
-    const graphPtr_Type&     elementDomains()       const {return M_elementDomains;}
-    graphPtr_Type&           elementDomains()             {return M_elementDomains;}
+    const graphPtr_Type&     elementDomains()       const
+    {
+        return M_elementDomains;
+    }
+    graphPtr_Type&           elementDomains()
+    {
+        return M_elementDomains;
+    }
     //! Return a pointer to the communicator M_comm
-    const boost::shared_ptr<Epetra_Comm> & comm()   const { return M_comm; }
+    const boost::shared_ptr<Epetra_Comm>& comm()   const
+    {
+        return M_comm;
+    }
     //@}
 
     //! @name Set methos
     //@{
 
     //! Set M_buildOverlappingPartitions
-    void setPartitionOverlap( UInt const overlap ) { M_partitionOverlap = overlap; }
+    void setPartitionOverlap ( UInt const overlap )
+    {
+        M_partitionOverlap = overlap;
+    }
 
     //@}
 
 private:
     // Private copy constructor and assignment operator. No implementation
-    MeshPartitioner(const MeshPartitioner&);
-    MeshPartitioner& operator=(const MeshPartitioner&);
+    MeshPartitioner (const MeshPartitioner&);
+    MeshPartitioner& operator= (const MeshPartitioner&);
     //! Private Methods
     //@{
 
@@ -242,7 +272,7 @@ private:
       used by ParMETIS (the number of processes started for MPI
       \param numElements - UInt - number of elements in the mesh
     */
-    void distributeElements(UInt numElements);
+    void distributeElements (UInt numElements);
     //! Find faces on the boundaries between domains (FSI)
     /*!
       Identifies the element faces that are common to both the fluid and the solid
@@ -261,7 +291,7 @@ private:
       Updates: M_graphVertexLocations, M_elementDomains
       \param numParts - unsigned int - number of partitions for the graph cutting process
     */
-    void partitionConnectivityGraph(UInt numParts);
+    void partitionConnectivityGraph (UInt numParts);
 
     //! Updates the map between elements and processors in FSI
     /*!
@@ -386,7 +416,7 @@ MeshPartitioner()
 
 template < typename MeshType >
 MeshPartitioner < MeshType >::
-MeshPartitioner ( meshPtr_Type &mesh, boost::shared_ptr<Epetra_Comm>& comm,
+MeshPartitioner ( meshPtr_Type& mesh, boost::shared_ptr<Epetra_Comm>& comm,
                   Epetra_Map* interfaceMap, Epetra_Map* interfaceMapRep)
 {
     init ();
@@ -409,7 +439,7 @@ init ()
     M_nBoundaryRidges.resize ( M_numPartitions );
     M_nBoundaryFacets.resize ( M_numPartitions );
     M_elementDomains.reset ( new graph_Type );
-    M_entityPID.resize( 4 );
+    M_entityPID.resize ( 4 );
     M_serialMode = false;
     M_partitionOverlap = 0;
 
@@ -428,7 +458,7 @@ init ()
 template < typename MeshType >
 void
 MeshPartitioner < MeshType >::
-doPartition ( meshPtr_Type &mesh, boost::shared_ptr<Epetra_Comm>& comm,
+doPartition ( meshPtr_Type& mesh, boost::shared_ptr<Epetra_Comm>& comm,
               Epetra_Map* interfaceMap, Epetra_Map* interfaceMapRep )
 {
     M_comm = comm;
@@ -438,9 +468,9 @@ doPartition ( meshPtr_Type &mesh, boost::shared_ptr<Epetra_Comm>& comm,
 
     M_me = M_comm->MyPID();
 
-    meshPtr_Type newMesh ( new MeshType( comm ) );
-    newMesh->setIsPartitioned( true );
-    M_meshPartitions.reset ( new partMesh_Type( M_numPartitions, newMesh ) );
+    meshPtr_Type newMesh ( new MeshType ( comm ) );
+    newMesh->setIsPartitioned ( true );
+    M_meshPartitions.reset ( new partMesh_Type ( M_numPartitions, newMesh ) );
     newMesh.reset();
 
     execute();
@@ -452,7 +482,7 @@ doPartition ( meshPtr_Type &mesh, boost::shared_ptr<Epetra_Comm>& comm,
 // =================================
 
 template<typename MeshType>
-void MeshPartitioner<MeshType>::setup(UInt numPartitions, boost::shared_ptr<Epetra_Comm> comm)
+void MeshPartitioner<MeshType>::setup (UInt numPartitions, boost::shared_ptr<Epetra_Comm> comm)
 {
     M_serialMode = true;
     M_comm = comm;
@@ -460,27 +490,27 @@ void MeshPartitioner<MeshType>::setup(UInt numPartitions, boost::shared_ptr<Epet
 
     M_numPartitions = numPartitions;
 
-    M_meshPartitions.reset(new partMesh_Type);
+    M_meshPartitions.reset (new partMesh_Type);
     meshPtr_Type newMesh;
     for (UInt i = 0; i < M_numPartitions; ++i)
     {
-        newMesh.reset( new MeshType( comm ) );
-        newMesh->setIsPartitioned( true );
-        M_meshPartitions->push_back(newMesh);
+        newMesh.reset ( new MeshType ( comm ) );
+        newMesh->setIsPartitioned ( true );
+        M_meshPartitions->push_back (newMesh);
     }
     newMesh.reset();
 
-    M_elementDomains.reset(new graph_Type);
+    M_elementDomains.reset (new graph_Type);
 
-    M_localNodes.resize(M_numPartitions);
-    M_localRidges.resize(M_numPartitions);
-    M_localFacets.resize(M_numPartitions);
-    M_localElements.resize(M_numPartitions);
-    M_globalToLocalNode.resize(M_numPartitions);
-    M_globalToLocalElement.resize(M_numPartitions);
-    M_nBoundaryPoints.resize(M_numPartitions);
-    M_nBoundaryRidges.resize(M_numPartitions);
-    M_nBoundaryFacets.resize(M_numPartitions);
+    M_localNodes.resize (M_numPartitions);
+    M_localRidges.resize (M_numPartitions);
+    M_localFacets.resize (M_numPartitions);
+    M_localElements.resize (M_numPartitions);
+    M_globalToLocalNode.resize (M_numPartitions);
+    M_globalToLocalElement.resize (M_numPartitions);
+    M_nBoundaryPoints.resize (M_numPartitions);
+    M_nBoundaryRidges.resize (M_numPartitions);
+    M_nBoundaryFacets.resize (M_numPartitions);
 }
 
 template<typename MeshType>
@@ -492,26 +522,26 @@ void MeshPartitioner<MeshType>::update()
 
     for (UInt i = 0; i < M_numPartitions; ++i)
     {
-        numElements += (*M_elementDomains)[i].size();
+        numElements += (*M_elementDomains) [i].size();
     }
 
     // Rebuild M_graphVertexLocations
-    M_graphVertexLocations.resize(numElements);
+    M_graphVertexLocations.resize (numElements);
     for (std::vector<std::vector<Int> >::iterator it1 = M_elementDomains->begin();
-         it1 != M_elementDomains->end(); ++it1)
+            it1 != M_elementDomains->end(); ++it1)
     {
         for (std::vector<Int>::iterator it2 = it1->begin();
-             it2 != it1->end(); ++it2)
+                it2 != it1->end(); ++it2)
         {
-            M_graphVertexLocations[*it2] = static_cast<Int>((it1 - M_elementDomains->begin()));
+            M_graphVertexLocations[*it2] = static_cast<Int> ( (it1 - M_elementDomains->begin() ) );
         }
     }
 }
 
 template<typename MeshType>
-void MeshPartitioner<MeshType>::attachUnpartitionedMesh(meshPtr_Type &mesh,
-                                                  Epetra_Map* interfaceMap,
-                                                  Epetra_Map* interfaceMapRep)
+void MeshPartitioner<MeshType>::attachUnpartitionedMesh (meshPtr_Type& mesh,
+                                                         Epetra_Map* interfaceMap,
+                                                         Epetra_Map* interfaceMapRep)
 {
     M_originalMesh = mesh;
     M_interfaceMap = interfaceMap;
@@ -529,12 +559,12 @@ void MeshPartitioner<MeshType>::releaseUnpartitionedMesh()
 template<typename MeshType>
 void MeshPartitioner<MeshType>::doPartitionGraph()
 {
-    distributeElements(M_originalMesh->numElements());
+    distributeElements (M_originalMesh->numElements() );
     if (M_interfaceMap)
     {
         findRepeatedFacesFSI();
     }
-    partitionConnectivityGraph(M_numPartitions);
+    partitionConnectivityGraph (M_numPartitions);
     if (M_interfaceMap)
     {
         matchFluidPartitionsFSI();
@@ -582,7 +612,7 @@ void MeshPartitioner<MeshType>::doPartitionMesh()
 }
 
 template<typename MeshType>
-void MeshPartitioner<MeshType>::showMe(std::ostream& output) const
+void MeshPartitioner<MeshType>::showMe (std::ostream& output) const
 {
     output << "Number of partitions: " << M_numPartitions << std::endl;
     output << "Serial mode:" << M_serialMode << std::endl;
@@ -593,7 +623,7 @@ void MeshPartitioner<MeshType>::showMe(std::ostream& output) const
 // =================================
 
 template<typename MeshType>
-void MeshPartitioner<MeshType>::distributeElements(UInt numElements)
+void MeshPartitioner<MeshType>::distributeElements (UInt numElements)
 {
     // ParMETIS is able to work in parallel: how many processors does it have at hand?
     Int numProcessors = M_comm->NumProc();
@@ -602,7 +632,7 @@ void MeshPartitioner<MeshType>::distributeElements(UInt numElements)
     // CAREFUL: ParMetis works on a graph abstraction.
     // A graph is built over the data structure to be split, each vertex being a mesh element
     // so hereby a "vertex" is actually a _graph_ vertex, i. e. a mesh element
-    M_vertexDistribution.resize(numProcessors + 1);
+    M_vertexDistribution.resize (numProcessors + 1);
     M_vertexDistribution[0] = 0;
 
     UInt k = numElements;
@@ -614,7 +644,7 @@ void MeshPartitioner<MeshType>::distributeElements(UInt numElements)
         M_vertexDistribution[i + 1] = M_vertexDistribution[i] + l;
         k -= l;
     }
-    ASSERT(k == 0, "At this point we should have 0 volumes left") ;
+    ASSERT (k == 0, "At this point we should have 0 volumes left") ;
 }
 
 template<typename MeshType>
@@ -623,14 +653,14 @@ void MeshPartitioner<MeshType>::findRepeatedFacesFSI()
     std::vector<Int>                    myRepeatedFacet; // used for the solid partitioning
     boost::shared_ptr<std::vector<Int> > myIsOnProc;     // used for the solid partitioning
 
-    myIsOnProc.reset(new std::vector<Int>(M_originalMesh->numElements()));
+    myIsOnProc.reset (new std::vector<Int> (M_originalMesh->numElements() ) );
 
     bool myFacetRep;
-    bool myFacet(false);
+    bool myFacet (false);
     short count;
     for (UInt h = 0; h < M_originalMesh->numElements(); ++h)
     {
-        (*myIsOnProc)[h] = -1;
+        (*myIsOnProc) [h] = -1;
     }
 
     // This loop is throughout the whole unpartitioned mesh,
@@ -641,25 +671,25 @@ void MeshPartitioner<MeshType>::findRepeatedFacesFSI()
     {
         for (UInt ifacet = 0; ifacet < M_elementFacets; ++ifacet)
         {
-            UInt facet = M_originalMesh->localFacetId(ie, ifacet);
-            UInt vol  = M_originalMesh->facet(facet).firstAdjacentElementIdentity();
+            UInt facet = M_originalMesh->localFacetId (ie, ifacet);
+            UInt vol  = M_originalMesh->facet (facet).firstAdjacentElementIdentity();
             if (vol == ie)
             {
-                vol = M_originalMesh->facet(facet).secondAdjacentElementIdentity();
+                vol = M_originalMesh->facet (facet).secondAdjacentElementIdentity();
             }
             if (vol != NotAnId)
             {
                 myFacet = false;
                 myFacetRep = false;
                 count = 0;
-                for (Int ipoint = 0; ipoint < static_cast<Int>(M_facetVertices); ++ipoint) // vertex-based dofs
+                for (Int ipoint = 0; ipoint < static_cast<Int> (M_facetVertices); ++ipoint) // vertex-based dofs
                 {
-                    myFacetRep = ((M_interfaceMap->LID(M_originalMesh->facet(facet).point(ipoint).id())
-                                  /* first is fluid */ == -1) &&
-                                 (M_interfaceMapRep->LID(M_originalMesh->facet(facet).point(ipoint).id())
-                                  /* first is fluid */ != -1));
+                    myFacetRep = ( (M_interfaceMap->LID (M_originalMesh->facet (facet).point (ipoint).id() )
+                                    /* first is fluid */ == -1) &&
+                                   (M_interfaceMapRep->LID (M_originalMesh->facet (facet).point (ipoint).id() )
+                                    /* first is fluid */ != -1) );
                     myFacet = myFacet ||
-                        (M_interfaceMap->LID(M_originalMesh->facet(facet).point(ipoint).id()) != -1);
+                              (M_interfaceMap->LID (M_originalMesh->facet (facet).point (ipoint).id() ) != -1);
                     if (myFacetRep)
                     {
                         ++count;
@@ -667,38 +697,38 @@ void MeshPartitioner<MeshType>::findRepeatedFacesFSI()
                 }
                 if (count > 1)
                 {
-                    myRepeatedFacet.push_back(1);
+                    myRepeatedFacet.push_back (1);
                 }
                 else
                 {
-                    myRepeatedFacet.push_back(0);
+                    myRepeatedFacet.push_back (0);
                 }
             }
             if (myFacet)
             {
-                (*myIsOnProc)[ie] = M_me;
+                (*myIsOnProc) [ie] = M_me;
             }
         }
     }
 
-    M_repeatedFacet.reset(new std::vector<Int> (myRepeatedFacet.size()));
-    M_isOnProc.reset(new std::vector<Int> (*myIsOnProc));
+    M_repeatedFacet.reset (new std::vector<Int> (myRepeatedFacet.size() ) );
+    M_isOnProc.reset (new std::vector<Int> (*myIsOnProc) );
 
     // Lot of communication here!!
     boost::shared_ptr<Epetra_MpiComm> mpiComm = boost::dynamic_pointer_cast <Epetra_MpiComm> ( M_comm );
-    MPI_Allreduce( &myRepeatedFacet[0], &(*M_repeatedFacet)[0], myRepeatedFacet.size(),
-                  MPI_INT, MPI_SUM, mpiComm->Comm() );
-    MPI_Allreduce( &(*myIsOnProc)[0], &(*M_isOnProc)[0], myIsOnProc->size(),
-                  MPI_INT, MPI_MAX, mpiComm->Comm() );
+    MPI_Allreduce ( &myRepeatedFacet[0], & (*M_repeatedFacet) [0], myRepeatedFacet.size(),
+                    MPI_INT, MPI_SUM, mpiComm->Comm() );
+    MPI_Allreduce ( & (*myIsOnProc) [0], & (*M_isOnProc) [0], myIsOnProc->size(),
+                    MPI_INT, MPI_MAX, mpiComm->Comm() );
 }
 
 template<typename MeshType>
-void MeshPartitioner<MeshType>::partitionConnectivityGraph(UInt numParts)
+void MeshPartitioner<MeshType>::partitionConnectivityGraph (UInt numParts)
 {
     // This array's size is equal to the number of locally-stored vertices:
     // at the end of the partitioning process, "M_graphVertexLocations" will contain the partitioning array:
     // M_graphVertexLocations[m] = n; means that graph vertex m belongs to subdomain n
-    M_graphVertexLocations.resize( M_vertexDistribution[M_comm->NumProc()] - M_vertexDistribution[0], M_comm->NumProc() );
+    M_graphVertexLocations.resize ( M_vertexDistribution[M_comm->NumProc()] - M_vertexDistribution[0], M_comm->NumProc() );
 
     // Now each processor will take care of its own graph vertices (i. e. mesh elements).
     // Nothing guarantees about the neighbor elements distribution across the processors,
@@ -712,8 +742,8 @@ void MeshPartitioner<MeshType>::partitionConnectivityGraph(UInt numParts)
     // it is set to null if it is not used.
     std::vector<Int> graphEdgeWeights;
 
-    M_adjacencyGraphKeys.resize(0);
-    M_adjacencyGraphKeys.push_back(0);
+    M_adjacencyGraphKeys.resize (0);
+    M_adjacencyGraphKeys.push_back (0);
 
     UInt sum = 0;
 
@@ -722,28 +752,28 @@ void MeshPartitioner<MeshType>::partitionConnectivityGraph(UInt numParts)
         for (UInt ifacet = 0; ifacet < M_elementFacets; ++ifacet)
         {
             // global ID of the ifacet-th facet in element ie
-            UInt facet = M_originalMesh->localFacetId(ie, ifacet);
+            UInt facet = M_originalMesh->localFacetId (ie, ifacet);
             // first adjacent element to face "facet"
-            UInt elem = M_originalMesh->facet(facet).firstAdjacentElementIdentity();
+            UInt elem = M_originalMesh->facet (facet).firstAdjacentElementIdentity();
             if (elem == ie)
             {
-                elem = M_originalMesh->facet(facet).secondAdjacentElementIdentity();
+                elem = M_originalMesh->facet (facet).secondAdjacentElementIdentity();
             }
             if (elem != NotAnId)
             {
                 // this is the list of adjacency
                 // for each graph vertex, simply push back the ID of its neighbors
-                M_adjacencyGraphValues.push_back(elem);
+                M_adjacencyGraphValues.push_back (elem);
                 ++sum;
                 if (M_interfaceMap) // if I'm partitioning the solid in FSI
                 {
-                    if ((*M_repeatedFacet)[sum])
+                    if ( (*M_repeatedFacet) [sum])
                     {
-                        graphEdgeWeights.push_back(0);
+                        graphEdgeWeights.push_back (0);
                     }
                     else
                     {
-                        graphEdgeWeights.push_back(10);
+                        graphEdgeWeights.push_back (10);
                     }
                 }
             }
@@ -751,7 +781,7 @@ void MeshPartitioner<MeshType>::partitionConnectivityGraph(UInt numParts)
         // this is the list of "keys" to access M_adjacencyGraphValues
         // graph element i has neighbors M_adjacencyGraphValues[ k ],
         // with M_adjacencyGraphKeys[i] <= k < M_adjacencyGraphKeys[i+1]
-        M_adjacencyGraphKeys.push_back(sum);
+        M_adjacencyGraphKeys.push_back (sum);
     }
 
     // **************
@@ -778,22 +808,22 @@ void MeshPartitioner<MeshType>::partitionConnectivityGraph(UInt numParts)
     Int cutGraphEdges; // here will be stored the number of edges cut in the partitioning process
 
     // additional options
-    std::vector<Int>  options(3,0);
+    std::vector<Int>  options (3, 0);
     options[0] = 1; // means that additional options are actually passed
     options[1] = 3; // level of information to be returned during execution (see ParMETIS's defs.h file)
     options[2] = 1; // random number seed for the ParMETIS routine
 
     // fraction of vertex weight to be distributed to each subdomain.
     // here we want the subdomains to be of the same size
-    std::vector<float> tpwgts(ncon * numParts, 1. / numParts);
+    std::vector<float> tpwgts (ncon * numParts, 1. / numParts);
     // imbalance tolerance for each vertex weight
-    std::vector<float> ubvec(ncon, 1.05);
+    std::vector<float> ubvec (ncon, 1.05);
 
     boost::shared_ptr<Epetra_MpiComm> mpiComm = boost::dynamic_pointer_cast <Epetra_MpiComm> (M_comm);
     MPI_Comm MPIcomm = mpiComm->Comm();
 
     Int nprocs;
-    MPI_Comm_size(MPIcomm, &nprocs);
+    MPI_Comm_size (MPIcomm, &nprocs);
 
     /*
       (from ParMETIS v 3.1 manual)
@@ -804,18 +834,18 @@ void MeshPartitioner<MeshType>::partitionConnectivityGraph(UInt numParts)
 
     Int numberParts = (Int) numParts;
 
-    Int* adjwgtPtr(0);
+    Int* adjwgtPtr (0);
     if (graphEdgeWeights.size() > 0)
     {
-        adjwgtPtr = static_cast<Int*>(&graphEdgeWeights[0]);
+        adjwgtPtr = static_cast<Int*> (&graphEdgeWeights[0]);
     }
-    ParMETIS_V3_PartKway(static_cast<Int*>(&M_vertexDistribution[0]),
-                         static_cast<Int*>(&M_adjacencyGraphKeys[0]),
-                         static_cast<Int*>(&M_adjacencyGraphValues[0]),
-                         weightVector, adjwgtPtr, &weightFlag, &numflag,
-                         &ncon, &numberParts, &tpwgts[0], &ubvec[0],
-                         &options[0], &cutGraphEdges, &M_graphVertexLocations[localStart],
-                         &MPIcomm);
+    ParMETIS_V3_PartKway (static_cast<Int*> (&M_vertexDistribution[0]),
+                          static_cast<Int*> (&M_adjacencyGraphKeys[0]),
+                          static_cast<Int*> (&M_adjacencyGraphValues[0]),
+                          weightVector, adjwgtPtr, &weightFlag, &numflag,
+                          &ncon, &numberParts, &tpwgts[0], &ubvec[0],
+                          &options[0], &cutGraphEdges, &M_graphVertexLocations[localStart],
+                          &MPIcomm);
 
     M_comm->Barrier();
 
@@ -831,13 +861,13 @@ void MeshPartitioner<MeshType>::partitionConnectivityGraph(UInt numParts)
 
     // this is a vector of subdomains: each component is
     // the list of vertices belonging to the specific subdomain
-    (*M_elementDomains).resize(numParts);
+    (*M_elementDomains).resize (numParts);
 
     // cycling on locally stored vertices
     for (UInt ii = 0; ii < M_graphVertexLocations.size(); ++ii)
     {
         // here we are associating the vertex global ID to the subdomain ID
-        (*M_elementDomains)[ M_graphVertexLocations[ ii ] ].push_back( ii );
+        (*M_elementDomains) [ M_graphVertexLocations[ ii ] ].push_back ( ii );
     }
 }
 
@@ -847,35 +877,35 @@ void MeshPartitioner<MeshType>::matchFluidPartitionsFSI()
     boost::shared_ptr<Epetra_MpiComm> mpiComm = boost::dynamic_pointer_cast <Epetra_MpiComm> (M_comm);
     MPI_Comm MPIcomm = mpiComm->Comm();
     Int numProcesses;
-    MPI_Comm_size(MPIcomm, &numProcesses);
+    MPI_Comm_size (MPIcomm, &numProcesses);
 
-    std::vector<Int> procOrder(numProcesses);
-    std::vector<std::vector<UInt> > myMatchesForProc(numProcesses);
-    std::vector<std::vector<UInt> > matchesForProc(numProcesses);
-    std::vector<bool> orderingError(numProcesses);
+    std::vector<Int> procOrder (numProcesses);
+    std::vector<std::vector<UInt> > myMatchesForProc (numProcesses);
+    std::vector<std::vector<UInt> > matchesForProc (numProcesses);
+    std::vector<bool> orderingError (numProcesses);
 
-    for (Int i=0; i<numProcesses ; ++i)
+    for (Int i = 0; i < numProcesses ; ++i)
     {
-        orderingError[i]=false;
-        for (Int j=0; j<numProcesses ; ++j)
+        orderingError[i] = false;
+        for (Int j = 0; j < numProcesses ; ++j)
         {
-            myMatchesForProc[i].push_back(0);
-            matchesForProc[i].push_back(0);
+            myMatchesForProc[i].push_back (0);
+            matchesForProc[i].push_back (0);
         }
     }
 
-    for (UInt kk=0; kk<M_graphVertexLocations.size(); ++kk)
+    for (UInt kk = 0; kk < M_graphVertexLocations.size(); ++kk)
     {
-        if ((*M_isOnProc)[kk+M_vertexDistribution[M_me]]!=-1)
+        if ( (*M_isOnProc) [kk + M_vertexDistribution[M_me]] != -1)
         {
-            ++myMatchesForProc[M_graphVertexLocations[kk]][(*M_isOnProc)[kk+M_vertexDistribution[M_me]]];
+            ++myMatchesForProc[M_graphVertexLocations[kk]][ (*M_isOnProc) [kk + M_vertexDistribution[M_me]]];
         }
     }
 
-    for (UInt j=0; (Int)j<numProcesses; ++j)
+    for (UInt j = 0; (Int) j < numProcesses; ++j)
     {
-        MPI_Allreduce(&myMatchesForProc[j][0], &matchesForProc[j][0], numProcesses,
-                      MPI_INT, MPI_SUM, MPIcomm);
+        MPI_Allreduce (&myMatchesForProc[j][0], &matchesForProc[j][0], numProcesses,
+                       MPI_INT, MPI_SUM, MPIcomm);
     }
 
     M_comm->Barrier();
@@ -883,7 +913,7 @@ void MeshPartitioner<MeshType>::matchFluidPartitionsFSI()
     Int suitableProcess = -1;
     UInt max = 0;
 
-    for (Int ii = 0; ii<numProcesses; ++ii)
+    for (Int ii = 0; ii < numProcesses; ++ii)
     {
         if (matchesForProc[M_me][ii] > max)
         {
@@ -892,43 +922,43 @@ void MeshPartitioner<MeshType>::matchFluidPartitionsFSI()
         }
     }
 
-    ASSERT(suitableProcess != -1, "one partition is without interface nodes!");
+    ASSERT (suitableProcess != -1, "one partition is without interface nodes!");
     procOrder[M_me] = suitableProcess;
 
     M_comm->Barrier();
 
-    std::vector<UInt> maxs(numProcesses);
+    std::vector<UInt> maxs (numProcesses);
     maxs[M_me] = max;
     for (Int j = 0; j < numProcesses ; ++j) // Allgather
     {
-        MPI_Bcast(&maxs[j], 1, MPI_INT, j, MPIcomm); // perhaps generates errors
+        MPI_Bcast (&maxs[j], 1, MPI_INT, j, MPIcomm); // perhaps generates errors
     }
 
-    std::vector<std::pair<UInt, Int> > procIndex(numProcesses);
+    std::vector<std::pair<UInt, Int> > procIndex (numProcesses);
     for (Int k = 0; k < numProcesses; ++k)
     {
-        procIndex[k] = std::make_pair( maxs[k], k);
+        procIndex[k] = std::make_pair ( maxs[k], k);
     }
 
-    std::sort(procIndex.begin(), procIndex.end() /*, &booleanCondition::reordering*/);
+    std::sort (procIndex.begin(), procIndex.end() /*, &booleanCondition::reordering*/);
 
-    for (Int l=0; l<numProcesses; ++l)
+    for (Int l = 0; l < numProcesses; ++l)
     {
-        for (Int l=0; l<numProcesses; ++l)
+        for (Int l = 0; l < numProcesses; ++l)
         {
-            for (Int j=0; j<numProcesses ; ++j) // Allgather
+            for (Int j = 0; j < numProcesses ; ++j) // Allgather
             {
-                MPI_Bcast( &procOrder[j], 1, MPI_INT, j, MPIcomm); // perhaps generates errors
+                MPI_Bcast ( &procOrder[j], 1, MPI_INT, j, MPIcomm); // perhaps generates errors
             }
         }
     }
 
-    std::vector< std::vector<Int> > locProc2((*M_elementDomains));
+    std::vector< std::vector<Int> > locProc2 ( (*M_elementDomains) );
     for (Int j = numProcesses - 1; j >= 0 ; --j)
     {
         if (orderingError[procOrder[procIndex[j].second]] == false)
         {
-            (*M_elementDomains)[procOrder[procIndex[j].second]] = locProc2[procIndex[j].second];
+            (*M_elementDomains) [procOrder[procIndex[j].second]] = locProc2[procIndex[j].second];
         }
         else
         {
@@ -938,10 +968,10 @@ void MeshPartitioner<MeshType>::matchFluidPartitionsFSI()
             for (Int i = numProcesses - 1; i >= 0; --i)
             {
                 if (orderingError[procIndex[i].second] == false) // means that i is the first
-                                                                     // proc not assigned
+                    // proc not assigned
                 {
                     procOrder[procIndex[j].second] = procIndex[i].second;
-                    (*M_elementDomains)[procIndex[i].second] = locProc2[procIndex[j].second];
+                    (*M_elementDomains) [procIndex[i].second] = locProc2[procIndex[j].second];
                     break;
                 }
             }
@@ -956,11 +986,11 @@ void MeshPartitioner<MeshType>::redistributeElements()
     boost::shared_ptr<Epetra_MpiComm> mpiComm = boost::dynamic_pointer_cast <Epetra_MpiComm> (M_comm);
     MPI_Comm MPIcomm = mpiComm->Comm();
     Int numProcesses;
-    MPI_Comm_size(MPIcomm, &numProcesses);
+    MPI_Comm_size (MPIcomm, &numProcesses);
 
     Int maxInt (1000);
-    std::vector<Int> sendSize( numProcesses );
-    std::vector<Int> receiveSize( numProcesses );
+    std::vector<Int> sendSize ( numProcesses );
+    std::vector<Int> receiveSize ( numProcesses );
     // cycling on subdomains
     // TODO: Matteo please comment this part :)
 
@@ -972,13 +1002,13 @@ void MeshPartitioner<MeshType>::redistributeElements()
 
     for (Int iproc = 0; iproc < numProcesses; ++iproc)
     {
-        sendSize[iproc] = (*M_elementDomains)[iproc].size();
+        sendSize[iproc] = (*M_elementDomains) [iproc].size();
     }
-    MPI_Alltoall( &sendSize[ 0 ], 1, MPI_INT, &receiveSize[ 0 ], 1, MPI_INT, MPIcomm );
+    MPI_Alltoall ( &sendSize[ 0 ], 1, MPI_INT, &receiveSize[ 0 ], 1, MPI_INT, MPIcomm );
 
     for (Int iproc = 0; iproc < numProcesses; ++iproc)
     {
-        if (static_cast<Int>(M_me) != iproc)
+        if (static_cast<Int> (M_me) != iproc)
         {
             size = sendSize[iproc];
             // workaround for huge data to be passed
@@ -995,32 +1025,32 @@ void MeshPartitioner<MeshType>::redistributeElements()
                     sizePart = size / incr;
                 }
 
-                MPI_Send(&incr, 1, MPI_INT, iproc, 20, MPIcomm);
-                MPI_Send(&sizePart, 1, MPI_INT, iproc, 30, MPIcomm);
+                MPI_Send (&incr, 1, MPI_INT, iproc, 20, MPIcomm);
+                MPI_Send (&sizePart, 1, MPI_INT, iproc, 30, MPIcomm);
 
                 for (Int kk = 0; kk < incr; ++kk)
                 {
-                    MPI_Send(&pos, 1, MPI_INT, iproc, 100+kk, MPIcomm);
-                    MPI_Send(&(*M_elementDomains)[iproc][pos], sizePart, MPI_INT, iproc,
-                             5000000+kk, MPIcomm);
+                    MPI_Send (&pos, 1, MPI_INT, iproc, 100 + kk, MPIcomm);
+                    MPI_Send (& (*M_elementDomains) [iproc][pos], sizePart, MPI_INT, iproc,
+                              5000000 + kk, MPIcomm);
                     pos = pos + sizePart;
                 }
 
                 Int resto = size % incr;
 
-                MPI_Send(&resto, 1, MPI_INT, iproc, 80, MPIcomm);
+                MPI_Send (&resto, 1, MPI_INT, iproc, 80, MPIcomm);
 
                 if (resto != 0)
                 {
-                    MPI_Send(&pos, 1, MPI_INT, iproc, 40, MPIcomm);
-                    MPI_Send(&(*M_elementDomains)[iproc][pos], resto, MPI_INT, iproc, 50, MPIcomm);
+                    MPI_Send (&pos, 1, MPI_INT, iproc, 40, MPIcomm);
+                    MPI_Send (& (*M_elementDomains) [iproc][pos], resto, MPI_INT, iproc, 50, MPIcomm);
                 }
             }
             else
             {
                 if (size != 0)
                 {
-                    MPI_Send(&(*M_elementDomains)[iproc][0], size, MPI_INT, iproc, 60, MPIcomm);
+                    MPI_Send (& (*M_elementDomains) [iproc][0], size, MPI_INT, iproc, 60, MPIcomm);
                 }
             }
         }
@@ -1031,39 +1061,39 @@ void MeshPartitioner<MeshType>::redistributeElements()
                 if (jproc != iproc)
                 {
                     size = receiveSize[jproc];
-                    std::vector<Int> stack(size, 0);
+                    std::vector<Int> stack (size, 0);
 
                     if (size > maxInt)
                     {
                         Int sizePart, pos, incr;
 
-                        MPI_Recv(&incr, 1, MPI_INT, jproc, 20, MPIcomm, &status);
-                        MPI_Recv(&sizePart, 1, MPI_INT, jproc, 30, MPIcomm, &status);
+                        MPI_Recv (&incr, 1, MPI_INT, jproc, 20, MPIcomm, &status);
+                        MPI_Recv (&sizePart, 1, MPI_INT, jproc, 30, MPIcomm, &status);
 
                         for (Int kk = 0; kk < incr; ++kk)
                         {
-                            MPI_Recv(&pos, 1, MPI_INT, jproc, 100+kk, MPIcomm, &status);
-                            MPI_Recv(&stack[pos], sizePart , MPI_INT, jproc, 5000000+kk, MPIcomm, &status);
+                            MPI_Recv (&pos, 1, MPI_INT, jproc, 100 + kk, MPIcomm, &status);
+                            MPI_Recv (&stack[pos], sizePart , MPI_INT, jproc, 5000000 + kk, MPIcomm, &status);
                         }
                         Int resto = 0;
-                        MPI_Recv(&resto, 1, MPI_INT, jproc, 80, MPIcomm, &status);
+                        MPI_Recv (&resto, 1, MPI_INT, jproc, 80, MPIcomm, &status);
 
                         if (resto != 0)
                         {
-                            MPI_Recv(&pos, 1, MPI_INT, jproc, 40, MPIcomm, &status);
-                            MPI_Recv(&stack[pos],  resto, MPI_INT, jproc, 50, MPIcomm, &status);
+                            MPI_Recv (&pos, 1, MPI_INT, jproc, 40, MPIcomm, &status);
+                            MPI_Recv (&stack[pos],  resto, MPI_INT, jproc, 50, MPIcomm, &status);
                         }
                     }
                     else
                     {
                         if (size != 0)
                         {
-                            MPI_Recv(&stack[0], size , MPI_INT, jproc, 60, MPIcomm, &status);
+                            MPI_Recv (&stack[0], size , MPI_INT, jproc, 60, MPIcomm, &status);
                         }
                     }
                     for (Int jj = 0; jj < size; ++jj)
                     {
-                        (*M_elementDomains)[M_me].push_back(stack[jj]);
+                        (*M_elementDomains) [M_me].push_back (stack[jj]);
                     }
                 }
             }
@@ -1092,24 +1122,24 @@ void MeshPartitioner<MeshType>::constructLocalMesh()
 
         UInt me = M_serialMode ? i : M_me;
 
-        for (UInt jj = 0; jj < (*M_elementDomains)[me].size(); ++jj)
+        for (UInt jj = 0; jj < (*M_elementDomains) [me].size(); ++jj)
         {
-            ielem = (*M_elementDomains)[me][jj];
-            M_localElements[i].push_back(ielem);
+            ielem = (*M_elementDomains) [me][jj];
+            M_localElements[i].push_back (ielem);
 
             // cycle on element's vertices
             for (UInt ii = 0; ii < M_elementVertices; ++ii)
             {
-                inode = M_originalMesh->element(ielem).point(ii).id();
-                im    = M_globalToLocalNode[i].find(inode);
+                inode = M_originalMesh->element (ielem).point (ii).id();
+                im    = M_globalToLocalNode[i].find (inode);
 
                 // if the node is not yet present in the list of local vertices, then add it
-                if (im == M_globalToLocalNode[i].end())
+                if (im == M_globalToLocalNode[i].end() )
                 {
-                    M_globalToLocalNode[i].insert(std::make_pair(inode, count));
+                    M_globalToLocalNode[i].insert (std::make_pair (inode, count) );
                     ++count;
                     // store here the global numbering of the node
-                    M_localNodes[i].push_back(M_originalMesh->element(ielem).point(ii).id());
+                    M_localNodes[i].push_back (M_originalMesh->element (ielem).point (ii).id() );
                 }
             }
 
@@ -1117,14 +1147,14 @@ void MeshPartitioner<MeshType>::constructLocalMesh()
             for (UInt ii = 0; ii < M_elementRidges; ++ii)
             {
                 // store here the global numbering of the ridge
-                M_localRidges[i].insert(M_originalMesh->localRidgeId(ielem, ii));
+                M_localRidges[i].insert (M_originalMesh->localRidgeId (ielem, ii) );
             }
 
             // cycle on element's facets
             for (UInt ii = 0; ii < M_elementFacets; ++ii)
             {
                 // store here the global numbering of the facet
-                M_localFacets[i].insert(M_originalMesh->localFacetId(ielem, ii));
+                M_localFacets[i].insert (M_originalMesh->localFacetId (ielem, ii) );
             }
         }
     }
@@ -1139,27 +1169,27 @@ void MeshPartitioner<MeshType>::constructNodes()
         std::vector<Int>::iterator it;
 
         M_nBoundaryPoints[i] = 0;
-        (*M_meshPartitions)[i]->pointList.reserve(M_localNodes[i].size());
+        (*M_meshPartitions) [i]->pointList.reserve (M_localNodes[i].size() );
         // guessing how many boundary points on this processor.
-        (*M_meshPartitions)[i]->_bPoints.reserve(M_originalMesh->numBPoints() * M_localNodes[i].size() /
-                                                 M_originalMesh->numBPoints());
+        (*M_meshPartitions) [i]->_bPoints.reserve (M_originalMesh->numBPoints() * M_localNodes[i].size() /
+                                                   M_originalMesh->numBPoints() );
 
         inode = 0;
 
-        typename MeshType::point_Type *pp = 0;
+        typename MeshType::point_Type* pp = 0;
 
         // loop in the list of local vertices:
         // in this loop inode is the local numbering of the points
         for (it = M_localNodes[i].begin(); it != M_localNodes[i].end(); ++it, ++inode)
         {
             // create a boundary point in the local mesh, if needed
-            bool boundary = M_originalMesh->isBoundaryPoint(*it);
+            bool boundary = M_originalMesh->isBoundaryPoint (*it);
             M_nBoundaryPoints[i] += boundary;
 
-            pp = &(*M_meshPartitions)[i]->addPoint( boundary, false );
-            *pp = M_originalMesh->point( *it );
+            pp = & (*M_meshPartitions) [i]->addPoint ( boundary, false );
+            *pp = M_originalMesh->point ( *it );
 
-            pp->setLocalId( inode );
+            pp->setLocalId ( inode );
         }
     }
 }
@@ -1176,29 +1206,29 @@ void MeshPartitioner<MeshType>::constructElements()
         count = 0;
         UInt inode;
 
-        typename MeshType::element_Type * pv = 0;
+        typename MeshType::element_Type* pv = 0;
 
-        (*M_meshPartitions)[i]->elementList().reserve(M_localElements[i].size());
+        (*M_meshPartitions) [i]->elementList().reserve (M_localElements[i].size() );
 
         // loop in the list of local elements
         // CAREFUL! in this loop inode is the global numbering of the points
         // We insert the local numbering of the vertices in the local volume list
         for (it = M_localElements[i].begin(); it != M_localElements[i].end(); ++it, ++count)
         {
-            pv = &((*M_meshPartitions)[i]->addElement());
-            *pv = M_originalMesh->element(*it);
-            pv->setLocalId(count);
+            pv = & ( (*M_meshPartitions) [i]->addElement() );
+            *pv = M_originalMesh->element (*it);
+            pv->setLocalId (count);
 
-            M_globalToLocalElement[i].insert(std::make_pair( pv->id(), pv -> localId() ) );
+            M_globalToLocalElement[i].insert (std::make_pair ( pv->id(), pv -> localId() ) );
 
             for (ID id = 0; id < M_elementVertices; ++id)
             {
-                inode = M_originalMesh->element(*it).point(id).id();
+                inode = M_originalMesh->element (*it).point (id).id();
                 // im is an iterator to a map element
                 // im->first is the key (i. e. the global ID "inode")
                 // im->second is the value (i. e. the local ID "count")
-                im = M_globalToLocalNode[i].find(inode);
-                pv->setPoint(id, (*M_meshPartitions)[i]->point( (*im).second ));
+                im = M_globalToLocalNode[i].find (inode);
+                pv->setPoint (id, (*M_meshPartitions) [i]->point ( (*im).second ) );
             }
         }
     }
@@ -1207,9 +1237,11 @@ void MeshPartitioner<MeshType>::constructElements()
 template<typename MeshType>
 void MeshPartitioner<MeshType>::constructRidges()
 {
-    if(mesh_Type::S_geoDimensions == 2)
+    if (mesh_Type::S_geoDimensions == 2)
+    {
         M_nBoundaryRidges = M_nBoundaryPoints;
-    else if(mesh_Type::S_geoDimensions == 3)
+    }
+    else if (mesh_Type::S_geoDimensions == 3)
     {
         Int count;
         for (UInt i = 0; i < M_numPartitions; ++i)
@@ -1217,35 +1249,35 @@ void MeshPartitioner<MeshType>::constructRidges()
             std::map<Int, Int>::iterator im;
             std::set<Int>::iterator is;
 
-            typename MeshType::ridge_Type * pe;
+            typename MeshType::ridge_Type* pe;
             UInt inode;
             count = 0;
 
             M_nBoundaryRidges[i] = 0;
-            (*M_meshPartitions)[i]->ridgeList().reserve(M_localRidges[i].size());
+            (*M_meshPartitions) [i]->ridgeList().reserve (M_localRidges[i].size() );
 
             // loop in the list of local ridges
             for (is = M_localRidges[i].begin(); is != M_localRidges[i].end(); ++is, ++count)
             {
                 // create a boundary ridge in the local mesh, if needed
-                bool boundary = (M_originalMesh->isBoundaryRidge(*is));
+                bool boundary = (M_originalMesh->isBoundaryRidge (*is) );
 
                 // create a boundary ridge in the local mesh, if needed
                 M_nBoundaryRidges[i] += boundary;
 
-                pe = &(*M_meshPartitions)[i]->addRidge(boundary);
-                *pe = M_originalMesh->ridge( *is );
+                pe = & (*M_meshPartitions) [i]->addRidge (boundary);
+                *pe = M_originalMesh->ridge ( *is );
 
-                pe->setLocalId(count);
+                pe->setLocalId (count);
 
                 for (ID id = 0; id < 2; ++id)
                 {
-                    inode = M_originalMesh->ridge(*is).point(id).id();
+                    inode = M_originalMesh->ridge (*is).point (id).id();
                     // im is an iterator to a map element
                     // im->first is the key (i. e. the global ID "inode")
                     // im->second is the value (i. e. the local ID "count")
-                    im = M_globalToLocalNode[i].find(inode);
-                    pe->setPoint(id, (*M_meshPartitions)[i]->pointList((*im).second));
+                    im = M_globalToLocalNode[i].find (inode);
+                    pe->setPoint (id, (*M_meshPartitions) [i]->pointList ( (*im).second) );
                 }
             }
         }
@@ -1262,32 +1294,32 @@ void MeshPartitioner<MeshType>::constructFacets()
         std::map<Int, Int>::iterator im;
         std::set<Int>::iterator      is;
 
-        typename MeshType::facet_Type * pf = 0;
+        typename MeshType::facet_Type* pf = 0;
 
         UInt inode;
         count = 0;
 
         M_nBoundaryFacets[i] = 0;
-        (*M_meshPartitions)[i]->facetList().reserve(M_localFacets[i].size());
+        (*M_meshPartitions) [i]->facetList().reserve (M_localFacets[i].size() );
 
         // loop in the list of local faces
         for (is = M_localFacets[i].begin(); is != M_localFacets[i].end(); ++is, ++count)
         {
             // create a boundary facet in the local mesh, if needed
-            bool boundary = (M_originalMesh->isBoundaryFacet(*is));
+            bool boundary = (M_originalMesh->isBoundaryFacet (*is) );
 
             M_nBoundaryFacets[i] += boundary;
 
 
-            Int elem1 = M_originalMesh->facet(*is).firstAdjacentElementIdentity();
-            Int elem2 = M_originalMesh->facet(*is).secondAdjacentElementIdentity();
+            Int elem1 = M_originalMesh->facet (*is).firstAdjacentElementIdentity();
+            Int elem2 = M_originalMesh->facet (*is).secondAdjacentElementIdentity();
 
             // find the mesh elements adjacent to the facet
-            im =  M_globalToLocalElement[i].find(elem1);
+            im =  M_globalToLocalElement[i].find (elem1);
 
             ID localElem1;
 
-            if (im == M_globalToLocalElement[i].end())
+            if (im == M_globalToLocalElement[i].end() )
             {
                 localElem1 = NotAnId;
             }
@@ -1296,10 +1328,10 @@ void MeshPartitioner<MeshType>::constructFacets()
                 localElem1 = (*im).second;
             }
 
-            im =  M_globalToLocalElement[i].find(elem2);
+            im =  M_globalToLocalElement[i].find (elem2);
 
             ID localElem2;
-            if (im == M_globalToLocalElement[i].end())
+            if (im == M_globalToLocalElement[i].end() )
             {
                 localElem2 = NotAnId;
             }
@@ -1308,16 +1340,16 @@ void MeshPartitioner<MeshType>::constructFacets()
                 localElem2 = (*im).second;
             }
 
-            pf =  &(*M_meshPartitions)[i]->addFacet(boundary);
-            *pf = M_originalMesh->facet( *is );
+            pf =  & (*M_meshPartitions) [i]->addFacet (boundary);
+            *pf = M_originalMesh->facet ( *is );
 
-            pf->setLocalId( count );
+            pf->setLocalId ( count );
 
-            for (ID id = 0; id < M_originalMesh->facet(*is).S_numLocalVertices; ++id)
+            for (ID id = 0; id < M_originalMesh->facet (*is).S_numLocalVertices; ++id)
             {
-                inode = pf->point(id).id();
-                im = M_globalToLocalNode[i].find(inode);
-                pf->setPoint(id, (*M_meshPartitions)[i]->pointList((*im).second));
+                inode = pf->point (id).id();
+                im = M_globalToLocalNode[i].find (inode);
+                pf->setPoint (id, (*M_meshPartitions) [i]->pointList ( (*im).second) );
             }
 
             // true if we are on a subdomain border
@@ -1326,11 +1358,11 @@ void MeshPartitioner<MeshType>::constructFacets()
             if ( !boundary && ( localElem1 == NotAnId || localElem2 == NotAnId ) )
             {
                 // set the flag for faces on the subdomain border
-                pf->setFlag( EntityFlags::SUBDOMAIN_INTERFACE );
+                pf->setFlag ( EntityFlags::SUBDOMAIN_INTERFACE );
                 // set the flag for all points on that face
                 for ( UInt pointOnFacet = 0; pointOnFacet < MeshType::facet_Type::S_numLocalPoints; pointOnFacet++ )
                 {
-                    (*M_meshPartitions)[i]->point( pf->point( pointOnFacet ).localId() ).setFlag( EntityFlags::SUBDOMAIN_INTERFACE );
+                    (*M_meshPartitions) [i]->point ( pf->point ( pointOnFacet ).localId() ).setFlag ( EntityFlags::SUBDOMAIN_INTERFACE );
                 }
 
             }
@@ -1344,73 +1376,73 @@ void MeshPartitioner<MeshType>::constructFacets()
             // with P2)
 
             // NEW CODE
-            ASSERT((localElem1 != NotAnId)||(localElem2 != NotAnId),"A hanging facet in mesh partitioner!");
+            ASSERT ( (localElem1 != NotAnId) || (localElem2 != NotAnId), "A hanging facet in mesh partitioner!");
 
             // todo: move this to a switch ( if...else ) on the EntityFlag
-//            switch ( pf->flag() )
-//            {
-//                case ( EntityFlags::DEFAULT ):
-//                {
-//                    pf->firstAdjacentElementIdentity()  = localElem1;
-//                    pf->firstAdjacentElementPosition()  = M_originalMesh->face(*is).firstAdjacentElementPosition();
-//                    pf->secondAdjacentElementIdentity() = localElem2;
-//                    pf->secondAdjacentElementPosition() = M_originalMesh->face(*is).secondAdjacentElementPosition();
-//                    break;
-//                }
-//                case ( EntityFlags::PHYSICAL_BOUNDARY ):
-//                {
-//                    pf->firstAdjacentElementIdentity()  = localElem1;
-//                    pf->firstAdjacentElementPosition()  = M_originalMesh->face(*is).firstAdjacentElementPosition();
-//                    pf->secondAdjacentElementIdentity() = localElem2;
-//                    pf->secondAdjacentElementPosition() = M_originalMesh->face(*is).secondAdjacentElementPosition();
-//                    break;
-//                }
-//                case ( EntityFlags::SUBDOMAIN_INTERFACE ):
-//                {
-//                    if ( localElem2 != NotAnId )
-//                    {
-//                        pf->firstAdjacentElementIdentity()  = localElem2;
-//                        pf->firstAdjacentElementPosition()  = M_originalMesh->face(*is).secondAdjacentElementPosition();
-//                        pf->secondAdjacentElementIdentity() = ghostElem;
-//                        pf->secondAdjacentElementPosition() = M_originalMesh->face(*is).firstAdjacentElementPosition();
-//                    }
-//                    else
-//                    {
-//                        pf->firstAdjacentElementIdentity()  = localElem1;
-//                        pf->firstAdjacentElementPosition()  = M_originalMesh->face(*is).firstAdjacentElementPosition();
-//                        pf->secondAdjacentElementIdentity() = ghostElem;
-//                        pf->secondAdjacentElementPosition() = M_originalMesh->face(*is).secondAdjacentElementPosition();
-//                    }
-//                    break;
-//                }
-//
-//            }
+            //            switch ( pf->flag() )
+            //            {
+            //                case ( EntityFlags::DEFAULT ):
+            //                {
+            //                    pf->firstAdjacentElementIdentity()  = localElem1;
+            //                    pf->firstAdjacentElementPosition()  = M_originalMesh->face(*is).firstAdjacentElementPosition();
+            //                    pf->secondAdjacentElementIdentity() = localElem2;
+            //                    pf->secondAdjacentElementPosition() = M_originalMesh->face(*is).secondAdjacentElementPosition();
+            //                    break;
+            //                }
+            //                case ( EntityFlags::PHYSICAL_BOUNDARY ):
+            //                {
+            //                    pf->firstAdjacentElementIdentity()  = localElem1;
+            //                    pf->firstAdjacentElementPosition()  = M_originalMesh->face(*is).firstAdjacentElementPosition();
+            //                    pf->secondAdjacentElementIdentity() = localElem2;
+            //                    pf->secondAdjacentElementPosition() = M_originalMesh->face(*is).secondAdjacentElementPosition();
+            //                    break;
+            //                }
+            //                case ( EntityFlags::SUBDOMAIN_INTERFACE ):
+            //                {
+            //                    if ( localElem2 != NotAnId )
+            //                    {
+            //                        pf->firstAdjacentElementIdentity()  = localElem2;
+            //                        pf->firstAdjacentElementPosition()  = M_originalMesh->face(*is).secondAdjacentElementPosition();
+            //                        pf->secondAdjacentElementIdentity() = ghostElem;
+            //                        pf->secondAdjacentElementPosition() = M_originalMesh->face(*is).firstAdjacentElementPosition();
+            //                    }
+            //                    else
+            //                    {
+            //                        pf->firstAdjacentElementIdentity()  = localElem1;
+            //                        pf->firstAdjacentElementPosition()  = M_originalMesh->face(*is).firstAdjacentElementPosition();
+            //                        pf->secondAdjacentElementIdentity() = ghostElem;
+            //                        pf->secondAdjacentElementPosition() = M_originalMesh->face(*is).secondAdjacentElementPosition();
+            //                    }
+            //                    break;
+            //                }
+            //
+            //            }
             if ( localElem1 == NotAnId )
-             {
-                 pf->firstAdjacentElementIdentity()  = localElem2;
-                 pf->firstAdjacentElementPosition()  = M_originalMesh->facet(*is).secondAdjacentElementPosition();
-                 pf->secondAdjacentElementIdentity() = ghostElem;
-                 pf->secondAdjacentElementPosition() = NotAnId;
-                 pf->reversePoints();
-             }
+            {
+                pf->firstAdjacentElementIdentity()  = localElem2;
+                pf->firstAdjacentElementPosition()  = M_originalMesh->facet (*is).secondAdjacentElementPosition();
+                pf->secondAdjacentElementIdentity() = ghostElem;
+                pf->secondAdjacentElementPosition() = NotAnId;
+                pf->reversePoints();
+            }
             else if ( localElem2 == NotAnId )
             {
                 pf->firstAdjacentElementIdentity()  = localElem1;
-                pf->firstAdjacentElementPosition()  = M_originalMesh->facet(*is).firstAdjacentElementPosition();
+                pf->firstAdjacentElementPosition()  = M_originalMesh->facet (*is).firstAdjacentElementPosition();
                 pf->secondAdjacentElementIdentity() = ghostElem;
                 pf->secondAdjacentElementPosition() = NotAnId;
             }
             else
             {
                 pf->firstAdjacentElementIdentity()  = localElem1;
-                pf->firstAdjacentElementPosition()  = M_originalMesh->facet(*is).firstAdjacentElementPosition();
+                pf->firstAdjacentElementPosition()  = M_originalMesh->facet (*is).firstAdjacentElementPosition();
                 pf->secondAdjacentElementIdentity() = localElem2;
-                pf->secondAdjacentElementPosition() = M_originalMesh->facet(*is).secondAdjacentElementPosition();
+                pf->secondAdjacentElementPosition() = M_originalMesh->facet (*is).secondAdjacentElementPosition();
             }
 
         }
-        (*M_meshPartitions)[i]->setLinkSwitch("HAS_ALL_FACETS");
-        (*M_meshPartitions)[i]->setLinkSwitch("FACETS_HAVE_ADIACENCY");
+        (*M_meshPartitions) [i]->setLinkSwitch ("HAS_ALL_FACETS");
+        (*M_meshPartitions) [i]->setLinkSwitch ("FACETS_HAVE_ADIACENCY");
     }
 
 }
@@ -1425,38 +1457,40 @@ void MeshPartitioner<MeshType>::finalSetup()
         UInt nRidges   = M_localRidges[i].size();
         UInt nFacets   = M_localFacets[i].size();
 
-        (*M_meshPartitions)[i]->setMaxNumPoints (nNodes, true);
-        (*M_meshPartitions)[i]->setMaxNumRidges  (nRidges, true);
-        (*M_meshPartitions)[i]->setMaxNumFacets  (nFacets, true);
-        (*M_meshPartitions)[i]->setMaxNumElements( nElements, true);
+        (*M_meshPartitions) [i]->setMaxNumPoints (nNodes, true);
+        (*M_meshPartitions) [i]->setMaxNumRidges  (nRidges, true);
+        (*M_meshPartitions) [i]->setMaxNumFacets  (nFacets, true);
+        (*M_meshPartitions) [i]->setMaxNumElements ( nElements, true);
 
-        (*M_meshPartitions)[i]->setMaxNumGlobalPoints (M_originalMesh->numPoints());
-        (*M_meshPartitions)[i]->setNumGlobalVertices  (M_originalMesh->numVertices());
-        (*M_meshPartitions)[i]->setMaxNumGlobalRidges  (M_originalMesh->numRidges());
-        (*M_meshPartitions)[i]->setMaxNumGlobalFacets  (M_originalMesh->numFacets());
+        (*M_meshPartitions) [i]->setMaxNumGlobalPoints (M_originalMesh->numPoints() );
+        (*M_meshPartitions) [i]->setNumGlobalVertices  (M_originalMesh->numVertices() );
+        (*M_meshPartitions) [i]->setMaxNumGlobalRidges  (M_originalMesh->numRidges() );
+        (*M_meshPartitions) [i]->setMaxNumGlobalFacets  (M_originalMesh->numFacets() );
 
-        (*M_meshPartitions)[i]->setMaxNumGlobalElements(M_originalMesh->numElements());
-        (*M_meshPartitions)[i]->setNumBoundaryFacets    (M_nBoundaryFacets[i]);
+        (*M_meshPartitions) [i]->setMaxNumGlobalElements (M_originalMesh->numElements() );
+        (*M_meshPartitions) [i]->setNumBoundaryFacets    (M_nBoundaryFacets[i]);
 
-        (*M_meshPartitions)[i]->setNumBPoints   (M_nBoundaryPoints[i]);
-        (*M_meshPartitions)[i]->setNumBoundaryRidges    (M_nBoundaryRidges[i]);
+        (*M_meshPartitions) [i]->setNumBPoints   (M_nBoundaryPoints[i]);
+        (*M_meshPartitions) [i]->setNumBoundaryRidges    (M_nBoundaryRidges[i]);
 
-        (*M_meshPartitions)[i]->setNumVertices (nNodes );
-        (*M_meshPartitions)[i]->setNumBVertices(M_nBoundaryPoints[i]);
+        (*M_meshPartitions) [i]->setNumVertices (nNodes );
+        (*M_meshPartitions) [i]->setNumBVertices (M_nBoundaryPoints[i]);
 
-        if(MeshType::S_geoDimensions == 3)
-            (*M_meshPartitions)[i]->updateElementRidges();
+        if (MeshType::S_geoDimensions == 3)
+        {
+            (*M_meshPartitions) [i]->updateElementRidges();
+        }
 
-        (*M_meshPartitions)[i]->updateElementFacets();
+        (*M_meshPartitions) [i]->updateElementFacets();
 
 #ifdef HAVE_LIFEV_DEBUG
         if (M_serialMode)
         {
-            debugStream(4000) << "Created local mesh number " << i << "\n";
+            debugStream (4000) << "Created local mesh number " << i << "\n";
         }
         else
         {
-            debugStream(4000) << "Rank " << M_me << " created local mesh.\n";
+            debugStream (4000) << "Rank " << M_me << " created local mesh.\n";
         }
 #endif
     }
@@ -1468,7 +1502,7 @@ void MeshPartitioner<MeshType>::execute()
 
     // Build graph vertex distribution vector. Graph vertex represents one element
     // in the mesh.
-    distributeElements(M_originalMesh->numElements());
+    distributeElements (M_originalMesh->numElements() );
 
 
     // In fluid-structure interaction:
@@ -1492,7 +1526,7 @@ void MeshPartitioner<MeshType>::execute()
     //////////////////// END OF SOLID PARTITION PART ////////////////////////
 
     // Partition connectivity graph
-    partitionConnectivityGraph(M_comm->NumProc());
+    partitionConnectivityGraph (M_comm->NumProc() );
 
     //////////////// BEGIN OF SOLID PARTITION PART ////////////////
     if (M_interfaceMap)
@@ -1502,16 +1536,16 @@ void MeshPartitioner<MeshType>::execute()
     ////////////////// END OF SOLID PARTITION PART /////////////////////
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream(4000) << M_me << " has " << (*M_elementDomains)[M_me].size() << " elements.\n";
+    debugStream (4000) << M_me << " has " << (*M_elementDomains) [M_me].size() << " elements.\n";
 #endif
 
-    if( M_partitionOverlap )
+    if ( M_partitionOverlap )
     {
-        GhostHandler<mesh_Type> gh( M_originalMesh, M_comm );
-//        gh.createNodeElementNeighborsMap();
-        gh.fillEntityPID( M_elementDomains, M_entityPID );
-        gh.ghostMapOnElementsP1( M_elementDomains, M_entityPID[ 3 ], 1 );
-     }
+        GhostHandler<mesh_Type> gh ( M_originalMesh, M_comm );
+        //        gh.createNodeElementNeighborsMap();
+        gh.fillEntityPID ( M_elementDomains, M_entityPID );
+        gh.ghostMapOnElementsP1 ( M_elementDomains, M_entityPID[ 3 ], 1 );
+    }
 
     doPartitionMesh();
 
@@ -1531,60 +1565,72 @@ void MeshPartitioner<MeshType>::execute()
 template<typename MeshType>
 void MeshPartitioner<MeshType>::markEntityOwnership()
 {
-    if( M_partitionOverlap )
+    if ( M_partitionOverlap )
     {
         // mark owned entities by each partition as described in M_entityPID
         //@todo: does not work for offline partitioning!
         //M_entityPID or flags should be exported and read back to make it work
         for (UInt i = 0; i < M_numPartitions; ++i)
         {
-            for( UInt e = 0; e < (*M_meshPartitions)[ i ]->numElements(); e++ )
+            for ( UInt e = 0; e < (*M_meshPartitions) [ i ]->numElements(); e++ )
             {
-                typename MeshType::element_Type & element = (*M_meshPartitions)[ i ]->element( e );
-                if( M_entityPID[ 0 ][ element.id() ] != static_cast<UInt>( M_me ) ) element.unSetFlag( EntityFlags::OWNED );
+                typename MeshType::element_Type& element = (*M_meshPartitions) [ i ]->element ( e );
+                if ( M_entityPID[ 0 ][ element.id() ] != static_cast<UInt> ( M_me ) )
+                {
+                    element.unSetFlag ( EntityFlags::OWNED );
+                }
             }
 
-            for( UInt f = 0; f < (*M_meshPartitions)[ i ]->numFacets(); f++ )
+            for ( UInt f = 0; f < (*M_meshPartitions) [ i ]->numFacets(); f++ )
             {
-                typename MeshType::facet_Type & facet = (*M_meshPartitions)[ i ]->facet( f );
-                if( M_entityPID[ 1 ][ facet.id() ] != static_cast<UInt>( M_me ) ) facet.unSetFlag( EntityFlags::OWNED );
+                typename MeshType::facet_Type& facet = (*M_meshPartitions) [ i ]->facet ( f );
+                if ( M_entityPID[ 1 ][ facet.id() ] != static_cast<UInt> ( M_me ) )
+                {
+                    facet.unSetFlag ( EntityFlags::OWNED );
+                }
             }
 
-            for( UInt r = 0; r < (*M_meshPartitions)[ i ]->numRidges(); r++ )
+            for ( UInt r = 0; r < (*M_meshPartitions) [ i ]->numRidges(); r++ )
             {
-                typename MeshType::ridge_Type & ridge = (*M_meshPartitions)[ i ]->ridge( r );
-                if( M_entityPID[ 2 ][ ridge.id() ] != static_cast<UInt>( M_me ) ) ridge.unSetFlag( EntityFlags::OWNED );
+                typename MeshType::ridge_Type& ridge = (*M_meshPartitions) [ i ]->ridge ( r );
+                if ( M_entityPID[ 2 ][ ridge.id() ] != static_cast<UInt> ( M_me ) )
+                {
+                    ridge.unSetFlag ( EntityFlags::OWNED );
+                }
             }
 
-            for( UInt p = 0; p < (*M_meshPartitions)[ i ]->numPoints(); p++ )
+            for ( UInt p = 0; p < (*M_meshPartitions) [ i ]->numPoints(); p++ )
             {
-                typename MeshType::point_Type & point = (*M_meshPartitions)[ i ]->point( p );
-                if( M_entityPID[ 3 ][ point.id() ] != static_cast<UInt>( M_me ) ) point.unSetFlag( EntityFlags::OWNED );
+                typename MeshType::point_Type& point = (*M_meshPartitions) [ i ]->point ( p );
+                if ( M_entityPID[ 3 ][ point.id() ] != static_cast<UInt> ( M_me ) )
+                {
+                    point.unSetFlag ( EntityFlags::OWNED );
+                }
             }
         }
-        clearVector( M_entityPID[ 0 ] );
-        clearVector( M_entityPID[ 1 ] );
-        clearVector( M_entityPID[ 2 ] );
-        clearVector( M_entityPID[ 3 ] );
+        clearVector ( M_entityPID[ 0 ] );
+        clearVector ( M_entityPID[ 1 ] );
+        clearVector ( M_entityPID[ 2 ] );
+        clearVector ( M_entityPID[ 3 ] );
     }
 }
 
 template<typename MeshType>
 void MeshPartitioner<MeshType>::cleanUp()
 {
-    clearVector( M_vertexDistribution );
-    clearVector( M_adjacencyGraphKeys );
-    clearVector( M_adjacencyGraphValues );
-    clearVector( M_localNodes );
-    clearVector( M_localRidges );
-    clearVector( M_localFacets );
-    clearVector( M_localElements );
-    clearVector( M_nBoundaryPoints );
-    clearVector( M_nBoundaryRidges );
-    clearVector( M_nBoundaryFacets );
-    clearVector( M_graphVertexLocations );
-    clearVector( M_globalToLocalNode );
-    clearVector( M_globalToLocalElement );
+    clearVector ( M_vertexDistribution );
+    clearVector ( M_adjacencyGraphKeys );
+    clearVector ( M_adjacencyGraphValues );
+    clearVector ( M_localNodes );
+    clearVector ( M_localRidges );
+    clearVector ( M_localFacets );
+    clearVector ( M_localElements );
+    clearVector ( M_nBoundaryPoints );
+    clearVector ( M_nBoundaryRidges );
+    clearVector ( M_nBoundaryFacets );
+    clearVector ( M_graphVertexLocations );
+    clearVector ( M_globalToLocalNode );
+    clearVector ( M_globalToLocalElement );
 }
 
 }

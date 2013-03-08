@@ -74,8 +74,8 @@ enum DebugLevels
 struct DebugStream::Private
 {
     Private() :
-            debug( false ),
-            flushFunction( 0 )
+        debug ( false ),
+        flushFunction ( 0 )
     {}
 
     bool debug;
@@ -122,8 +122,8 @@ void initDebugAreas ()
             if ( fin.fail() )
             {
                 Warning() << "The file debug.areas was not found.\n"
-                << "                 searched at ../debug.areas and\n"
-                << "                 " << path.str() << "\n";
+                          << "                 searched at ../debug.areas and\n"
+                          << "                 " << path.str() << "\n";
             }
         }
         while ( fin )
@@ -134,16 +134,18 @@ void initDebugAreas ()
                     line[ 0 ] == '\n' ||
                     line[ 0 ] == '#' ||
                     isspace ( line[ 0 ] ) )
+            {
                 continue;
+            }
             std::istringstream sentry ( line );
             std::vector<std::string> l;
-            std::copy ( std::istream_iterator<std::string,char> ( sentry ),
-                        std::istream_iterator<std::string,char> (),
+            std::copy ( std::istream_iterator<std::string, char> ( sentry ),
+                        std::istream_iterator<std::string, char> (),
                         std::back_inserter ( l ) );
             DebugAreas->insert ( std::make_pair ( std::atoi ( l[0].c_str() ), l[2] ) );
         }
 
-        char * env = getenv("DEBUG");
+        char* env = getenv ("DEBUG");
         if ( env )
         {
             *DEBUG_AREA = env;
@@ -151,8 +153,8 @@ void initDebugAreas ()
         std::istringstream is ( *DEBUG_AREA );
 
 
-        std::copy ( std::istream_iterator<int,char> ( is ),
-                    std::istream_iterator<int,char> (),
+        std::copy ( std::istream_iterator<int, char> ( is ),
+                    std::istream_iterator<int, char> (),
                     std::back_inserter ( *AREAS ) );
 
         DebugAreas->insert ( std::make_pair ( 0, "" ) );
@@ -162,14 +164,20 @@ void initDebugAreas ()
 std::string getDescription ( unsigned int area )
 {
     if ( DebugAreas->empty() )
-        return std::string( "Area " ) + boost::lexical_cast<std::string>(area);
+    {
+        return std::string ( "Area " ) + boost::lexical_cast<std::string> (area);
+    }
 
     std::map<unsigned int, std::string>::iterator entry_it = DebugAreas->find ( area );
 
     if ( entry_it != DebugAreas->end() )
+    {
         return entry_it->second;
+    }
     else
-        return std::string( "Area " ) + boost::lexical_cast<std::string>(area);
+    {
+        return std::string ( "Area " ) + boost::lexical_cast<std::string> (area);
+    }
 
 
 }
@@ -179,37 +187,39 @@ std::string getDescription ( unsigned int area )
 // DebugStream - Constructors
 // =============================================
 
-DebugStream::DebugStream( int area, int /*level*/, bool print )
-        :
-        M_data( new Private )
+DebugStream::DebugStream ( int area, int /*level*/, bool print )
+    :
+    M_data ( new Private )
 {
     initDebugAreas ();
 
     if ( DEBUG_AREA && ! DEBUG_AREA->empty() )
     {
         M_data->debug =  ( std::find ( AREAS->begin (), AREAS->end (), area ) != AREAS->end() &&
-                        print ) ||
-                      ( !area );
+                           print ) ||
+                         ( !area );
     }
     else
     {
         M_data->debug =  ( print && !area );
     }
     if ( M_data->debug )
+    {
         M_data->M_output << getDescription ( area ) << ": ";
+    }
 
 }
 
-DebugStream::DebugStream( const char* initialString, int area, int /*level*/, bool print )
-        :
-        M_data( new Private )
+DebugStream::DebugStream ( const char* initialString, int area, int /*level*/, bool print )
+    :
+    M_data ( new Private )
 {
     initDebugAreas ();
     if ( DEBUG_AREA && ! DEBUG_AREA->empty() )
     {
         M_data->debug =  ( std::find ( AREAS->begin (), AREAS->end (), area ) != AREAS->end() &&
-                        print ) ||
-                      ( !area );
+                           print ) ||
+                         ( !area );
     }
     else
     {
@@ -217,12 +227,12 @@ DebugStream::DebugStream( const char* initialString, int area, int /*level*/, bo
     }
     if ( M_data->debug )
         M_data->M_output << getDescription ( area ) << ": "
-        << initialString;
+                         << initialString;
 }
 
-DebugStream::DebugStream( const DebugStream& sd )
-        :
-        M_data( new Private )
+DebugStream::DebugStream ( const DebugStream& sd )
+    :
+    M_data ( new Private )
 {
     M_data->debug = sd.M_data->debug;
     M_data->flushFunction = sd.M_data->flushFunction;
@@ -236,16 +246,20 @@ DebugStream::~DebugStream()
 // DebugStream Operators
 // ========================================
 
-DebugStream& DebugStream::operator<<( char const* s)
+DebugStream& DebugStream::operator<< ( char const* s)
 {
     if ( M_data->debug )
+    {
         M_data->M_output  << s;
-    if ( s[strlen(s)-1] == '\n')
+    }
+    if ( s[strlen (s) - 1] == '\n')
+    {
         flush();
+    }
     return *this;
 }
 
-DebugStream& DebugStream::operator<<( double s)
+DebugStream& DebugStream::operator<< ( double s)
 {
     if ( M_data->debug )
     {
@@ -255,20 +269,24 @@ DebugStream& DebugStream::operator<<( double s)
     return *this;
 }
 
-DebugStream& DebugStream::operator<<( std::string const& s)
-{
-    if ( M_data->debug )
-        M_data->M_output  << s;
-    if ( s[s.size() -1] == '\n')
-        flush();
-    return *this;
-}
-
-DebugStream& DebugStream::operator<<( LifeV::LManipFunction f )
+DebugStream& DebugStream::operator<< ( std::string const& s)
 {
     if ( M_data->debug )
     {
-        (*f)( *this );
+        M_data->M_output  << s;
+    }
+    if ( s[s.size() - 1] == '\n')
+    {
+        flush();
+    }
+    return *this;
+}
+
+DebugStream& DebugStream::operator<< ( LifeV::LManipFunction f )
+{
+    if ( M_data->debug )
+    {
+        (*f) ( *this );
     }
     return *this;
 }
@@ -277,7 +295,7 @@ DebugStream& DebugStream::operator<<( LifeV::LManipFunction f )
 // DebugStream Public Methods
 // ==============================================
 
-void DebugStream::setFlush( stprintf func )
+void DebugStream::setFlush ( stprintf func )
 {
     M_data->flushFunction = func;
 }
@@ -296,9 +314,9 @@ void DebugStream::flush(  )
         }
         else
         {
-            M_data->flushFunction( "%s", M_data->M_output.str().c_str() );
+            M_data->flushFunction ( "%s", M_data->M_output.str().c_str() );
         }
-        M_data->M_output.str( "" );
+        M_data->M_output.str ( "" );
     }
 
 }
@@ -310,7 +328,7 @@ void DebugStream::flush(  )
 bool DebugStream::Private::S_attached = false;
 std::ofstream DebugStream::Private::S_logfile;
 
-void DebugStream::attach( std::string const& logfile )
+void DebugStream::attach ( std::string const& logfile )
 {
     std::ostringstream filename;
     filename <<  logfile;
@@ -320,7 +338,7 @@ void DebugStream::attach( std::string const& logfile )
         Private::S_logfile.close();
     }
 
-    Private::S_logfile.open( filename.str().c_str(), std::ios::out );
+    Private::S_logfile.open ( filename.str().c_str(), std::ios::out );
 
     if ( Private::S_logfile.fail() )
     {
@@ -335,11 +353,11 @@ void DebugStream::attach( std::string const& logfile )
     }
 }
 
-void DebugStream::attach( std::string const& /*logfile*/, int /*area*/ )
+void DebugStream::attach ( std::string const& /*logfile*/, int /*area*/ )
 {
 }
 
-void DebugStream::detach( std::string const& /*logfile*/, int /*area*/ )
+void DebugStream::detach ( std::string const& /*logfile*/, int /*area*/ )
 {
 }
 
@@ -349,84 +367,100 @@ void DebugStream::detachAll()
 
 #ifndef NDEBUG_OLD
 DebugStream
-Debug( int area, DebugStream::stprintf func )
+Debug ( int area, DebugStream::stprintf func )
 {
-    return debugStream( area, func );
+    return debugStream ( area, func );
 }
 
 DebugStream
-debugStream( int area, DebugStream::stprintf func )
+debugStream ( int area, DebugStream::stprintf func )
 {
-    DebugStream s( area, DEBUG_INFO );
-    s.setFlush( func );
+    DebugStream s ( area, DEBUG_INFO );
+    s.setFlush ( func );
     return s;
 }
 
 DebugStream
-Debug( bool cond, int area, DebugStream::stprintf func )
+Debug ( bool cond, int area, DebugStream::stprintf func )
 {
-    return debugStream( cond, area, func );
+    return debugStream ( cond, area, func );
 }
 
-DebugStream debugStream( bool cond, int area, DebugStream::stprintf /*func*/ )
+DebugStream debugStream ( bool cond, int area, DebugStream::stprintf /*func*/ )
 {
     if ( cond )
-        return DebugStream( area, DEBUG_INFO );
+    {
+        return DebugStream ( area, DEBUG_INFO );
+    }
     else
-        return DebugStream( 0, 0, false );
+    {
+        return DebugStream ( 0, 0, false );
+    }
 }
 #endif
 
-DebugStream Warning( int area )
+DebugStream Warning ( int area )
 {
-    return DebugStream( "WARNING: ", area, DEBUG_WARN );
+    return DebugStream ( "WARNING: ", area, DEBUG_WARN );
 }
 
-DebugStream Warning( bool cond, int area )
+DebugStream Warning ( bool cond, int area )
 {
     if ( cond )
-        return DebugStream( "WARNING: ", area, DEBUG_WARN );
+    {
+        return DebugStream ( "WARNING: ", area, DEBUG_WARN );
+    }
     else
-        return DebugStream( 0, 0, false );
+    {
+        return DebugStream ( 0, 0, false );
+    }
 
 }
 
-DebugStream Error( int area )
+DebugStream Error ( int area )
 {
     //debugStream () << LBacktrace() << "\n";
-    return DebugStream( "ERROR: ", area, DEBUG_ERROR );
+    return DebugStream ( "ERROR: ", area, DEBUG_ERROR );
 }
 
-DebugStream Error( bool cond, int area )
+DebugStream Error ( bool cond, int area )
 {
     //debugStream () << LBacktrace() << "\n";
     if ( cond )
-        return DebugStream( "ERROR: ", area, DEBUG_ERROR );
+    {
+        return DebugStream ( "ERROR: ", area, DEBUG_ERROR );
+    }
     else
-        return DebugStream( 0, 0, false );
+    {
+        return DebugStream ( 0, 0, false );
+    }
 
 }
 
-DebugStream Fatal( int area )
+DebugStream Fatal ( int area )
 {
     //LBacktrace();
-    return DebugStream( "FATAL: ", area, DEBUG_FATAL );
+    return DebugStream ( "FATAL: ", area, DEBUG_FATAL );
 }
 
-DebugStream Fatal( bool cond, int area )
+DebugStream Fatal ( bool cond, int area )
 {
     //LBacktrace();
     if ( cond )
-        return DebugStream( "FATAL: ", area, DEBUG_FATAL );
+    {
+        return DebugStream ( "FATAL: ", area, DEBUG_FATAL );
+    }
     else
-        return DebugStream( 0, 0, false );
+    {
+        return DebugStream ( 0, 0, false );
+    }
 }
 
 #ifdef HAVE_BACKTRACE
 std::string backtrace ()
 {
     // show all backtrace
-    return backtrace( -1 );
+    return backtrace ( -1 );
 }
 
 std::string backtrace ( int levels )
@@ -438,11 +472,15 @@ std::string backtrace ( int levels )
     char** strings = backtrace_symbols ( trace, n );
 
     if ( levels != -1 )
+    {
         n = ( std::min ) ( n, levels );
+    }
     os << "[\n";
 
     for (int i = 0; i < n; ++i)
+    {
         os << i << ": " << strings[i] << "\n";
+    }
     os << "]\n";
     free (strings);
 
@@ -452,19 +490,19 @@ std::string backtrace ( int levels )
 
 } // Namespace LifeV
 
-LifeV::DebugStream& perror( LifeV::DebugStream& s )
+LifeV::DebugStream& perror ( LifeV::DebugStream& s )
 {
-    s << " " << strerror( errno );
+    s << " " << strerror ( errno );
     return s;
 }
 
-LifeV::DebugStream& endl( LifeV::DebugStream& s )
+LifeV::DebugStream& endl ( LifeV::DebugStream& s )
 {
     s << "\n";
     return s;
 }
 
-LifeV::DebugStream& flush( LifeV::DebugStream& s )
+LifeV::DebugStream& flush ( LifeV::DebugStream& s )
 {
     s.flush();
     return s;

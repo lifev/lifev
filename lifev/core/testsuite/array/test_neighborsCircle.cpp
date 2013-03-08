@@ -49,19 +49,19 @@
 using namespace LifeV;
 using namespace std;
 
-int main( int argc, char* argv[] ) 
+int main ( int argc, char* argv[] )
 {
     boost::shared_ptr<Epetra_Comm> Comm;
 #ifdef HAVE_MPI
-  MPI_Init(&argc, &argv);
-    Comm.reset(new Epetra_MpiComm(MPI_COMM_WORLD) );
+    MPI_Init (&argc, &argv);
+    Comm.reset (new Epetra_MpiComm (MPI_COMM_WORLD) );
 #else
-    comm.reset( new Epetra_SerialComm() );
+    comm.reset ( new Epetra_SerialComm() );
 #endif
-    
-    GetPot command_line(argc, argv);
-    GetPot dataFile( command_line.follow("data", 2, "-f", "--file" ));
-    
+
+    GetPot command_line (argc, argv);
+    GetPot dataFile ( command_line.follow ("data", 2, "-f", "--file" ) );
+
     typedef LinearTriangle                     geoElement_Type;
     typedef RegionMesh < geoElement_Type >     mesh_Type;
     typedef boost::shared_ptr < mesh_Type >    meshPtr_Type;
@@ -69,22 +69,22 @@ int main( int argc, char* argv[] )
     typedef boost::shared_ptr<vector_Type>     vectorPtr_Type;
 
     MeshData meshData;
-    meshData.setup(dataFile, "space_discretization");
+    meshData.setup (dataFile, "space_discretization");
 
-    boost::shared_ptr<mesh_Type> fullMeshPtr( new mesh_Type( Comm ) );
-    readMesh(*fullMeshPtr, meshData);
+    boost::shared_ptr<mesh_Type> fullMeshPtr ( new mesh_Type ( Comm ) );
+    readMesh (*fullMeshPtr, meshData);
 
     MeshPartitioner<mesh_Type> meshPart;
     boost::shared_ptr<mesh_Type> localMeshPtr;
 
     // Partitioning the mesh with a number of overlapping regions equal to leveloverlap
     int levelOverlap = 0;
-    meshPart.setPartitionOverlap(levelOverlap);
-    meshPart.doPartition(fullMeshPtr, Comm);
+    meshPart.setPartitionOverlap (levelOverlap);
+    meshPart.doPartition (fullMeshPtr, Comm);
     localMeshPtr = meshPart.meshPartition();
 
     // Creating and setting up a GhostHandler object
-    boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > FESpaceP1(new FESpace<mesh_Type, MapEpetra>(localMeshPtr, "P1", 1, Comm));
+    boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > FESpaceP1 (new FESpace<mesh_Type, MapEpetra> (localMeshPtr, "P1", 1, Comm) );
     GhostHandler<mesh_Type> ghostObj ( fullMeshPtr, localMeshPtr, FESpaceP1->mapPtr(), Comm );
     ghostObj.setUp();
 
@@ -118,28 +118,32 @@ int main( int argc, char* argv[] )
     std::set<ID> Neighbors;
     UInt nc = 2;
 
-    Neighbors = ghostObj.createCircleNodeNodeNeighborsMap(nc, fullMeshPtr->point(ID_trial).id());
-    Neighbors.insert(fullMeshPtr->point(ID_trial).id());
+    Neighbors = ghostObj.createCircleNodeNodeNeighborsMap (nc, fullMeshPtr->point (ID_trial).id() );
+    Neighbors.insert (fullMeshPtr->point (ID_trial).id() );
 
     // createCircleNodeNodeNeighborsMap takes both the number of circles (nc) where to find the neighbors, and the
     // globalID of the grid node localMeshPtr->point(i).id()() for which we are looking for its neighbors.
     // As output the method returns a set Neighbors[i] containing the globalID of each neighbor.
 
     // EXPORTING THE RESULT FOR ONE NODE (with globalID: ID_trial), IN ORDER TO VISUALIZE THE RESULT WITH PARAVIEW
-    vectorPtr_Type TrialOutput(new vector_Type(FESpaceP1->map(), Unique));
+    vectorPtr_Type TrialOutput (new vector_Type (FESpaceP1->map(), Unique) );
 
     for (std::set<ID>::iterator ii = Neighbors.begin(); ii != Neighbors.end(); ++ii)
-        if(TrialOutput->blockMap().LID(*ii) != -1)
-            if(*ii == ID_trial)
-                (*TrialOutput)[*ii] = -1;
+        if (TrialOutput->blockMap().LID (*ii) != -1)
+            if (*ii == ID_trial)
+            {
+                (*TrialOutput) [*ii] = -1;
+            }
             else
-                (*TrialOutput)[*ii] =  1;
+            {
+                (*TrialOutput) [*ii] =  1;
+            }
 
-    ExporterHDF5<mesh_Type> exporter(dataFile, localMeshPtr, "Output_test_neighborsCircle", Comm->MyPID());
+    ExporterHDF5<mesh_Type> exporter (dataFile, localMeshPtr, "Output_test_neighborsCircle", Comm->MyPID() );
     exporter.setMeshProcId (localMeshPtr, Comm->MyPID() );
-    exporter.exportPID(localMeshPtr, Comm, true );
-    exporter.addVariable(ExporterData<mesh_Type>::ScalarField, "Neighbors, red color", FESpaceP1, TrialOutput, UInt(0));
-    exporter.postProcess(0);
+    exporter.exportPID (localMeshPtr, Comm, true );
+    exporter.addVariable (ExporterData<mesh_Type>::ScalarField, "Neighbors, red color", FESpaceP1, TrialOutput, UInt (0) );
+    exporter.postProcess (0);
     exporter.closeFile();
 
 #ifdef HAVE_MPI

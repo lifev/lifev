@@ -46,7 +46,7 @@ namespace LifeV
 //          Constructors & Destructor            //
 // ============================================= //
 
-BCIdentifierBase::BCIdentifierBase(const BCIdentifierBase & id): M_id( id.M_id )
+BCIdentifierBase::BCIdentifierBase (const BCIdentifierBase& id) : M_id ( id.M_id )
 {
     // Nothing to be done here
 }
@@ -55,9 +55,9 @@ BCIdentifierBase::BCIdentifierBase(const BCIdentifierBase & id): M_id( id.M_id )
 //            Methods            //
 // ============================= //
 
-void BCIdentifierBase::showMe( std::ostream& output) const
+void BCIdentifierBase::showMe ( std::ostream& output) const
 {
-	output << "\n Node id: " << M_id << '\n';
+    output << "\n Node id: " << M_id << '\n';
 }
 
 /////////////////////////
@@ -68,10 +68,10 @@ void BCIdentifierBase::showMe( std::ostream& output) const
 //          Constructors & Destructor            //
 // ============================================= //
 
-BCIdentifierEssential::BCIdentifierEssential( BCIdentifierEssential const & id ) : BCIdentifierBase ( id ),
-                                                                             M_x( id.M_x ),
-                                                                             M_y( id.M_y ),
-                                                                             M_z( id.M_z )
+BCIdentifierEssential::BCIdentifierEssential ( BCIdentifierEssential const& id ) : BCIdentifierBase ( id ),
+    M_x ( id.M_x ),
+    M_y ( id.M_y ),
+    M_z ( id.M_z )
 {
     // Nothing to be done here
 }
@@ -80,13 +80,13 @@ BCIdentifierEssential::BCIdentifierEssential( BCIdentifierEssential const & id )
 //            Methods            //
 // ============================= //
 
-void BCIdentifierEssential::showMe( std::ostream& output) const
+void BCIdentifierEssential::showMe ( std::ostream& output) const
 {
-	output << "\nNode id:" << M_id << '\n';
-	output << "Node coordinates:\n";
-	output << "              x = " << M_x;
-	output << "              y = " << M_y;
-	output << "              z = " << M_z;
+    output << "\nNode id:" << M_id << '\n';
+    output << "Node coordinates:\n";
+    output << "              x = " << M_x;
+    output << "              y = " << M_y;
+    output << "              z = " << M_z;
 }
 
 ///////////////////////
@@ -97,19 +97,19 @@ void BCIdentifierEssential::showMe( std::ostream& output) const
 //          Constructors & Destructor            //
 // ============================================= //
 
-BCIdentifierNatural::BCIdentifierNatural( const ID& id, const std::vector<ID>& localToGlobal ) : BCIdentifierBase( id )
+BCIdentifierNatural::BCIdentifierNatural ( const ID& id, const std::vector<ID>& localToGlobal ) : BCIdentifierBase ( id )
 {
-    M_localToGlobal.reserve( localToGlobal.size() );
-    M_localToGlobal.insert( M_localToGlobal.end(), localToGlobal.begin(), localToGlobal.end() );
+    M_localToGlobal.reserve ( localToGlobal.size() );
+    M_localToGlobal.insert ( M_localToGlobal.end(), localToGlobal.begin(), localToGlobal.end() );
 }
 
-BCIdentifierNatural::BCIdentifierNatural( const ID& id ) : BCIdentifierBase( id )
+BCIdentifierNatural::BCIdentifierNatural ( const ID& id ) : BCIdentifierBase ( id )
 {
     // Nothing to be done here
 }
 
-BCIdentifierNatural::BCIdentifierNatural( BCIdentifierNatural const & id ) : BCIdentifierBase( id ),
-                                                                       M_localToGlobal( id.M_localToGlobal )
+BCIdentifierNatural::BCIdentifierNatural ( BCIdentifierNatural const& id ) : BCIdentifierBase ( id ),
+    M_localToGlobal ( id.M_localToGlobal )
 {
     // Nothing to be done here
 }
@@ -118,14 +118,16 @@ BCIdentifierNatural::BCIdentifierNatural( BCIdentifierNatural const & id ) : BCI
 //            Methods            //
 // ============================= //
 
-void BCIdentifierNatural::showMe( std::ostream & output) const
+void BCIdentifierNatural::showMe ( std::ostream& output) const
 {
-	output << "\nNode id:" << M_id << '\n';
-	output << "Local-to-global map:\n";
+    output << "\nNode id:" << M_id << '\n';
+    output << "Local-to-global map:\n";
 
-	int i(0);
-	for( std::vector<ID>::const_iterator it = M_localToGlobal.begin(); it != M_localToGlobal.end(); ++it, ++i )
-		output << "Local id: " << i << "  -->  Global id: " << *it << '\n';
+    int i (0);
+    for ( std::vector<ID>::const_iterator it = M_localToGlobal.begin(); it != M_localToGlobal.end(); ++it, ++i )
+    {
+        output << "Local id: " << i << "  -->  Global id: " << *it << '\n';
+    }
 }
 
 } // Namespace LifeV

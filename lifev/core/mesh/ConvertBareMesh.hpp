@@ -54,34 +54,42 @@ struct converter
     typedef typename mesh_t::facet_Type    facet_t;
     typedef typename mesh_t::element_Type  element_t;
 
-    static bool convert(bmesh_t& baremesh, mesh_t& mesh, bool verbose = false)
+    static bool convert (bmesh_t& baremesh, mesh_t& mesh, bool verbose = false)
     {
         // make sure global id are stored when the mesh is unpartitioned
-        if( !baremesh.isPartitioned )
+        if ( !baremesh.isPartitioned )
         {
-            if( baremesh.pointIDs.size() == 0 )
+            if ( baremesh.pointIDs.size() == 0 )
             {
-                baremesh.pointIDs.resize( baremesh.points.numberOfColumns() );
+                baremesh.pointIDs.resize ( baremesh.points.numberOfColumns() );
                 for ( UInt i = 0; i < baremesh.points.numberOfColumns(); ++i )
+                {
                     baremesh.pointIDs[i] = i;
+                }
             }
-            if( baremesh.ridgeIDs.size() == 0 )
+            if ( baremesh.ridgeIDs.size() == 0 )
             {
-                baremesh.ridgeIDs.resize( baremesh.ridges.numberOfColumns() );
+                baremesh.ridgeIDs.resize ( baremesh.ridges.numberOfColumns() );
                 for ( UInt i = 0; i < baremesh.ridges.numberOfColumns(); ++i )
+                {
                     baremesh.ridgeIDs[i] = i;
+                }
             }
-            if( baremesh.facetIDs.size() == 0 )
+            if ( baremesh.facetIDs.size() == 0 )
             {
-                baremesh.facetIDs.resize( baremesh.facets.numberOfColumns() );
+                baremesh.facetIDs.resize ( baremesh.facets.numberOfColumns() );
                 for ( UInt i = 0; i < baremesh.facets.numberOfColumns(); ++i )
+                {
                     baremesh.facetIDs[i] = i;
+                }
             }
-            if( baremesh.elementIDs.size() == 0 )
+            if ( baremesh.elementIDs.size() == 0 )
             {
-                baremesh.elementIDs.resize( baremesh.elements.numberOfColumns() );
+                baremesh.elementIDs.resize ( baremesh.elements.numberOfColumns() );
                 for ( UInt i = 0; i < baremesh.elements.numberOfColumns(); ++i )
+                {
                     baremesh.elementIDs[i] = i;
+                }
             }
         }
 
@@ -91,27 +99,27 @@ struct converter
         {
             UInt numberPoints = baremesh.points.numberOfColumns();
 
-            mesh.setIsPartitioned(baremesh.isPartitioned);
+            mesh.setIsPartitioned (baremesh.isPartitioned);
             // Update mesh containers
-            mesh.setMaxNumPoints(numberPoints, true);
-            mesh.setMaxNumGlobalPoints(numberPoints);
-            mesh.setNumVertices( baremesh.numVertices );
-            mesh.setNumGlobalVertices( baremesh.numVertices );
-            mesh.setNumBPoints( baremesh.numBoundaryPoints );
-            mesh.setNumBVertices( baremesh.numBoundaryVertices );
+            mesh.setMaxNumPoints (numberPoints, true);
+            mesh.setMaxNumGlobalPoints (numberPoints);
+            mesh.setNumVertices ( baremesh.numVertices );
+            mesh.setNumGlobalVertices ( baremesh.numVertices );
+            mesh.setNumBPoints ( baremesh.numBoundaryPoints );
+            mesh.setNumBVertices ( baremesh.numBoundaryVertices );
             // Add the points
             for (UInt i = 0; i < numberPoints; ++i)
             {
                 // Add a generic point (vertex selection is made later)
-                point_t& p = mesh.addPoint(false, false);
+                point_t& p = mesh.addPoint (false, false);
                 // Coordinates
-                p.x() = baremesh.points(0, i);
-                p.y() = baremesh.points(1, i);
-                p.z() = baremesh.points(2, i);
+                p.x() = baremesh.points (0, i);
+                p.y() = baremesh.points (1, i);
+                p.z() = baremesh.points (2, i);
                 // global Id
-                p.setId(baremesh.pointIDs[i]);
+                p.setId (baremesh.pointIDs[i]);
                 // Marker
-                p.setMarkerID(baremesh.pointMarkers[i]);
+                p.setMarkerID (baremesh.pointMarkers[i]);
             }
         }
         if (verbose)
@@ -126,28 +134,30 @@ struct converter
             UInt numberElements = baremesh.elements.numberOfColumns();
             mesh.setMaxNumGlobalElements (numberElements);
             mesh.setMaxNumElements (numberElements, true);
-            mesh.setNumElements(numberElements);
+            mesh.setNumElements (numberElements);
             for (UInt i = 0; i < numberElements; ++i)
             {
                 // Add the element
                 element_t& e = mesh.addElement();
-                e.setId(baremesh.elementIDs[i]);
-                e.setMarkerID(baremesh.elementMarkers[i]);
+                e.setId (baremesh.elementIDs[i]);
+                e.setMarkerID (baremesh.elementMarkers[i]);
                 // Points
                 for (UInt j = 0; j < element_t::S_numPoints; ++j)
                 {
-                    UInt pid = baremesh.elements(j, i);
-                    e.setPoint(j, mesh.point(pid));
+                    UInt pid = baremesh.elements (j, i);
+                    e.setPoint (j, mesh.point (pid) );
                     // Mark vertices
                     if (j < element_t::S_numVertices)
-                        mesh.pointList(pid).setFlag(LifeV::EntityFlags::VERTEX);
+                    {
+                        mesh.pointList (pid).setFlag (LifeV::EntityFlags::VERTEX);
+                    }
                 }
             }
             // Update number of vertices
-            UInt numVertices = mesh.pointList.countElementsWithFlag(
-                        LifeV::EntityFlags::VERTEX,
-                        &LifeV::Flag::testAllSet);
-            mesh.setNumVertices(numVertices);
+            UInt numVertices = mesh.pointList.countElementsWithFlag (
+                                   LifeV::EntityFlags::VERTEX,
+                                   &LifeV::Flag::testAllSet);
+            mesh.setNumVertices (numVertices);
         }
         if (verbose)
             std::cout << "[INFO:convertBareMesh] Added "
@@ -156,17 +166,17 @@ struct converter
                       << mesh.numVertices() << " vertices." << std::endl;
 
         // Set the region marker
-        mesh.setMarkerID(baremesh.regionMarkerID);
-        mesh.setId(baremesh.regionMarkerID);
+        mesh.setMarkerID (baremesh.regionMarkerID);
+        mesh.setId (baremesh.regionMarkerID);
 
         // dimension specific entities
-        convert_spec<S::S_nDimensions>::add_facets(baremesh, mesh, verbose);
-        convert_spec<S::S_nDimensions>::add_ridges(baremesh, mesh, verbose);
+        convert_spec<S::S_nDimensions>::add_facets (baremesh, mesh, verbose);
+        convert_spec<S::S_nDimensions>::add_ridges (baremesh, mesh, verbose);
 
         // discard baremesh
         baremesh.clear();
 
-        return convert_spec<S::S_nDimensions>::check(mesh, verbose);
+        return convert_spec<S::S_nDimensions>::check (mesh, verbose);
 
     }
 
@@ -178,7 +188,7 @@ struct convert_spec
 {
 
     template <class S, class MC>
-    static void add_facets(BareMesh<S>& baremesh, RegionMesh<S, MC>& mesh, bool verbose)
+    static void add_facets (BareMesh<S>& baremesh, RegionMesh<S, MC>& mesh, bool verbose)
     {
         // ============
         // begin.FACETS
@@ -197,20 +207,20 @@ struct convert_spec
         for (UInt i = 0; i < numberFacets; ++i)
         {
             // Add the facet
-            facet_t& f = mesh.addFacet(false);
-            f.setId(baremesh.facetIDs[i]);
-            f.setMarkerID(baremesh.facetMarkers[i]);
+            facet_t& f = mesh.addFacet (false);
+            f.setId (baremesh.facetIDs[i]);
+            f.setMarkerID (baremesh.facetMarkers[i]);
             // Points
             for (UInt j = 0; j < facet_t::S_numPoints; ++j)
             {
-                UInt pid = baremesh.facets(j, i);
-                f.setPoint(j, mesh.point(pid));
+                UInt pid = baremesh.facets (j, i);
+                f.setPoint (j, mesh.point (pid) );
             }
         }
     }
 
     template <class S, class MC>
-    static void add_ridges(BareMesh<S>& baremesh, RegionMesh<S, MC>& mesh, bool verbose)
+    static void add_ridges (BareMesh<S>& baremesh, RegionMesh<S, MC>& mesh, bool verbose)
     {
         // ============
         // begin.RIDGES
@@ -229,25 +239,25 @@ struct convert_spec
         for (UInt i = 0; i < numberRidges; ++i)
         {
             // Add the facet
-            ridge_t& r = mesh.addRidge(false);
-            r.setId(baremesh.ridgeIDs[i]);
-            r.setMarkerID(baremesh.ridgeMarkers[i]);
+            ridge_t& r = mesh.addRidge (false);
+            r.setId (baremesh.ridgeIDs[i]);
+            r.setMarkerID (baremesh.ridgeMarkers[i]);
             // Points
             for (UInt j = 0; j < ridge_t::S_numPoints; ++j)
             {
-                UInt pid = baremesh.ridges(j, i);
-                r.setPoint(j, mesh.point(pid));
+                UInt pid = baremesh.ridges (j, i);
+                r.setPoint (j, mesh.point (pid) );
             }
         }
     }
 
     template <class S, class MC>
-    static bool check(RegionMesh<S, MC>& mesh, bool verbose)
+    static bool check (RegionMesh<S, MC>& mesh, bool verbose)
     {
         Switch sw;
         std::stringstream discardedLog;
         std::ostream& oStr = verbose ? std::cout : discardedLog;
-        return checkMesh3D(mesh, sw, true, verbose,oStr,std::cerr,oStr);
+        return checkMesh3D (mesh, sw, true, verbose, oStr, std::cerr, oStr);
     }
 
 };
@@ -257,17 +267,17 @@ template <>
 struct convert_spec<2>
 {
     template <class S, class MC>
-    static void add_facets(BareMesh<S>& baremesh, RegionMesh<S, MC>& mesh, bool verbose)
+    static void add_facets (BareMesh<S>& baremesh, RegionMesh<S, MC>& mesh, bool verbose)
     {
-        convert_spec<3>::template add_facets(baremesh, mesh, verbose);
+        convert_spec<3>::template add_facets (baremesh, mesh, verbose);
     }
 
     template <class S, class MC>
-    static void add_ridges(BareMesh<S>&, RegionMesh<S, MC>&, bool)
+    static void add_ridges (BareMesh<S>&, RegionMesh<S, MC>&, bool)
     {}
 
     template <class S, class MC>
-    static bool check(RegionMesh<S, MC>&, bool)
+    static bool check (RegionMesh<S, MC>&, bool)
     {
         return true;
     }
@@ -279,15 +289,15 @@ template <>
 struct convert_spec<1>
 {
     template <class S, class MC>
-    static void add_facets(BareMesh<S>&, RegionMesh<S, MC>&, bool)
+    static void add_facets (BareMesh<S>&, RegionMesh<S, MC>&, bool)
     {}
 
     template <class S, class MC>
-    static void add_ridges(BareMesh<S>&, RegionMesh<S, MC>&, bool)
+    static void add_ridges (BareMesh<S>&, RegionMesh<S, MC>&, bool)
     {}
 
     template <class S, class MC>
-    static bool check(RegionMesh<S, MC>&, bool)
+    static bool check (RegionMesh<S, MC>&, bool)
     {
         return true;
     }
@@ -307,11 +317,11 @@ struct convert_spec<1>
 */
 template <typename GeoShapeType, typename MCType>
 bool
-convertBareMesh ( BareMesh<GeoShapeType> & bareMesh,
+convertBareMesh ( BareMesh<GeoShapeType>& bareMesh,
                   RegionMesh<GeoShapeType, MCType>&  mesh,
                   bool                       verbose = false)
 {
-    return converter<GeoShapeType, MCType>::convert(bareMesh, mesh, verbose);
+    return converter<GeoShapeType, MCType>::convert (bareMesh, mesh, verbose);
 }// Function convertBareMesh
 
 } // Namespace LifeV

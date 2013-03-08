@@ -95,25 +95,28 @@ public:
     /*!
      * @param data boundary condition data loaded from \c GetPot file
      */
-    void exportData( BCInterfaceData0D& /*data*/ ) {}
+    void exportData ( BCInterfaceData0D& /*data*/ ) {}
 
     //! Copy the stored parameters in the 1D data container
     /*!
      * @param data boundary condition data loaded from \c GetPot file
      */
-    void exportData( BCInterfaceData1D& /*data*/ ) {}
+    void exportData ( BCInterfaceData1D& /*data*/ ) {}
 
     //! Copy the stored parameters in the 3D data container
     /*!
      * @param data boundary condition data loaded from \c GetPot file
      */
-    void exportData( BCInterfaceData3D& /*data*/ ) {}
+    void exportData ( BCInterfaceData3D& /*data*/ ) {}
 
     //! Detect the correct base type
     /*!
      * @param bcBaseType the type of the base
      */
-    baseContainer_Type baseType() const { return BASEDefault; }
+    baseContainer_Type baseType() const
+    {
+        return BASEDefault;
+    }
 
     //! Assign a boundary function to the boundary condition vector base
     /*!
@@ -121,7 +124,7 @@ public:
      * @param base boundary condition base
      */
     template< class BCBaseType >
-    void assignFunction( BCBaseType& /*base*/ ) {}
+    void assignFunction ( BCBaseType& /*base*/ ) {}
 
     //! Update the solver variables
     void updatePhysicalSolverVariables() {}
@@ -137,25 +140,25 @@ public:
     /*!
      * @param data boundary condition data loaded from \c GetPot file
      */
-    void setData( const BCInterfaceData0D& /*data*/ ) {}
+    void setData ( const BCInterfaceData0D& /*data*/ ) {}
 
     //! Set data for 1D boundary conditions
     /*!
      * @param data boundary condition data loaded from \c GetPot file
      */
-    void setData( const BCInterfaceData1D& /*data*/ ) {}
+    void setData ( const BCInterfaceData1D& /*data*/ ) {}
 
     //! Set data for 3D boundary conditions
     /*!
      * @param data boundary condition data loaded from \c GetPot file
      */
-    void setData( const BCInterfaceData3D& /*data*/ ) {}
+    void setData ( const BCInterfaceData3D& /*data*/ ) {}
 
     //! Set the physical solver
     /*!
      * @param physicalSolver physical solver
      */
-    void setPhysicalSolver( const boost::shared_ptr< PhysicalSolverType >& /*physicalSolver*/ ) {}
+    void setPhysicalSolver ( const boost::shared_ptr< PhysicalSolverType >& /*physicalSolver*/ ) {}
 
     //@}
 
@@ -164,9 +167,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    BCInterfaceFunctionSolverDefined( const BCInterfaceFunctionSolverDefined& function);
+    BCInterfaceFunctionSolverDefined ( const BCInterfaceFunctionSolverDefined& function);
 
-    BCInterfaceFunctionSolverDefined& operator=( const BCInterfaceFunctionSolverDefined& function );
+    BCInterfaceFunctionSolverDefined& operator= ( const BCInterfaceFunctionSolverDefined& function );
 
     //@}
 
@@ -260,7 +263,7 @@ public:
     /*!
      * @param data boundary condition data loaded from \c GetPot file
      */
-    void exportData( BCInterfaceData3D& data );
+    void exportData ( BCInterfaceData3D& data );
 
     //! Assign a boundary function to the boundary condition vector base
     /*!
@@ -268,7 +271,7 @@ public:
      * @param base boundary condition base
      */
     template< class BCBaseType >
-    void assignFunction( BCBaseType& base );
+    void assignFunction ( BCBaseType& base );
 
     //! Update the solver variables
     void updatePhysicalSolverVariables();
@@ -283,13 +286,16 @@ public:
     /*!
      * @param data boundary condition data loaded from \c GetPot file
      */
-    void setData( const BCInterfaceData3D& data );
+    void setData ( const BCInterfaceData3D& data );
 
     //! Set the physical solver
     /*!
      * @param physicalSolver physical solver
      */
-    void setPhysicalSolver( const physicalSolverPtr_Type& physicalSolver ) { M_physicalSolver = physicalSolver; }
+    void setPhysicalSolver ( const physicalSolverPtr_Type& physicalSolver )
+    {
+        M_physicalSolver = physicalSolver;
+    }
 
     //@}
 
@@ -310,9 +316,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    BCInterfaceFunctionSolverDefined( const BCInterfaceFunctionSolverDefined& function );
+    BCInterfaceFunctionSolverDefined ( const BCInterfaceFunctionSolverDefined& function );
 
-    BCInterfaceFunctionSolverDefined& operator=( const BCInterfaceFunctionSolverDefined& function );
+    BCInterfaceFunctionSolverDefined& operator= ( const BCInterfaceFunctionSolverDefined& function );
 
     //@}
 
@@ -321,13 +327,13 @@ private:
     //@{
 
     template< class MethodType >
-    void checkFunction( BCVectorInterface& base );
+    void checkFunction ( BCVectorInterface& base );
 
     template< class MethodType >
-    void checkFunction( BCVector& base );
+    void checkFunction ( BCVector& base );
 
     template< class MethodType >
-    void checkFunction( BCFunctionBase& base );
+    void checkFunction ( BCFunctionBase& base );
 
     //@}
 
@@ -378,7 +384,7 @@ private:
 // ===================================================
 template< class BCBaseType >
 inline void
-BCInterfaceFunctionSolverDefined< FSIOperator >::assignFunction( BCBaseType& base )
+BCInterfaceFunctionSolverDefined< FSIOperator >::assignFunction ( BCBaseType& base )
 {
     //Set mapMethod
     std::map< std::string, FSIMethod > mapMethod;
@@ -390,51 +396,51 @@ BCInterfaceFunctionSolverDefined< FSIOperator >::assignFunction( BCBaseType& bas
 
     switch ( mapMethod[M_physicalSolver->data().method()] )
     {
-    case EXACTJACOBIAN:
+        case EXACTJACOBIAN:
 
 #ifdef HAVE_LIFEV_DEBUG
-        debugStream( 5025 ) << "BCInterfaceFunctionSolverDefined::checkMethod                            exactJacobian" << "\n";
+            debugStream ( 5025 ) << "BCInterfaceFunctionSolverDefined::checkMethod                            exactJacobian" << "\n";
 #endif
 
-        checkFunction< FSIExactJacobian > ( base );
+            checkFunction< FSIExactJacobian > ( base );
 
-        break;
+            break;
 
-    case FIXEDPOINT:
+        case FIXEDPOINT:
 
 #ifdef HAVE_LIFEV_DEBUG
-        debugStream( 5025 ) << "BCInterfaceFunctionSolverDefined::checkMethod                            fixedPoint" << "\n";
+            debugStream ( 5025 ) << "BCInterfaceFunctionSolverDefined::checkMethod                            fixedPoint" << "\n";
 #endif
 
-        checkFunction< FSIFixedPoint > ( base );
+            checkFunction< FSIFixedPoint > ( base );
 
-        break;
+            break;
 
-    case MONOLITHIC_GE:
+        case MONOLITHIC_GE:
 
 #ifdef HAVE_LIFEV_DEBUG
-        debugStream( 5025 ) << "BCInterfaceFunctionSolverDefined::checkMethod                            monolithicGE" << "\n";
+            debugStream ( 5025 ) << "BCInterfaceFunctionSolverDefined::checkMethod                            monolithicGE" << "\n";
 #endif
 
-        checkFunction< FSIMonolithicGE >( base );
+            checkFunction< FSIMonolithicGE > ( base );
 
-        break;
+            break;
 
-    case MONOLITHIC_GI:
+        case MONOLITHIC_GI:
 
 #ifdef HAVE_LIFEV_DEBUG
-        debugStream( 5025 ) << "BCInterfaceFunctionSolverDefined::checkMethod                            monolithicGI" << "\n";
+            debugStream ( 5025 ) << "BCInterfaceFunctionSolverDefined::checkMethod                            monolithicGI" << "\n";
 #endif
 
-        checkFunction< FSIMonolithicGI >( base );
+            checkFunction< FSIMonolithicGI > ( base );
 
-        break;
+            break;
 
-    default:
+        default:
 
-        std::cout << " !!! Warning:" << mapMethod[M_physicalSolver->data().method()] << " not assigned !!!" << std::endl;
+            std::cout << " !!! Warning:" << mapMethod[M_physicalSolver->data().method()] << " not assigned !!!" << std::endl;
 
-        break;
+            break;
 
     }
 }
@@ -443,218 +449,236 @@ BCInterfaceFunctionSolverDefined< FSIOperator >::assignFunction( BCBaseType& bas
 // Private functions
 // ===================================================
 template< class MethodType >
-inline void BCInterfaceFunctionSolverDefined< FSIOperator >::checkFunction( BCVectorInterface& base )
+inline void BCInterfaceFunctionSolverDefined< FSIOperator >::checkFunction ( BCVectorInterface& base )
 {
     boost::shared_ptr< MethodType > operMethod = boost::dynamic_pointer_cast< MethodType > ( M_physicalSolver );
 
     switch ( M_FSIFunction )
     {
-    case DerFluidLoadToFluid:
+        case DerFluidLoadToFluid:
 
 #ifdef HAVE_LIFEV_DEBUG
-        debugStream( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          DerFluidLoadToFluid" << "\n";
+            debugStream ( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          DerFluidLoadToFluid" << "\n";
 #endif
 
-        break;
+            break;
 
-    case DerFluidLoadToStructure:
+        case DerFluidLoadToStructure:
 
 #ifdef HAVE_LIFEV_DEBUG
-        debugStream( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          DerFluidLoadToStructure" << "\n";
+            debugStream ( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          DerFluidLoadToStructure" << "\n";
 #endif
-        if ( !operMethod->isSolid() )
-            return;
+            if ( !operMethod->isSolid() )
+            {
+                return;
+            }
 
-        operMethod->setDerFluidLoadToStructure( operMethod->sigmaSolidRepeated() );
+            operMethod->setDerFluidLoadToStructure ( operMethod->sigmaSolidRepeated() );
 
-        base = *operMethod->bcvDerFluidLoadToStructure();
+            base = *operMethod->bcvDerFluidLoadToStructure();
 
-        break;
+            break;
 
-    case DerHarmonicExtensionVelToFluid:
+        case DerHarmonicExtensionVelToFluid:
 
 #ifdef HAVE_LIFEV_DEBUG
-        debugStream( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          DerHarmonicExtensionVelToFluid" << "\n";
+            debugStream ( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          DerHarmonicExtensionVelToFluid" << "\n";
 #endif
 
-        if ( !operMethod->isFluid() )
-            return;
+            if ( !operMethod->isFluid() )
+            {
+                return;
+            }
 
-        operMethod->setDerHarmonicExtensionVelToFluid( operMethod->derVeloFluidMesh() );
+            operMethod->setDerHarmonicExtensionVelToFluid ( operMethod->derVeloFluidMesh() );
 
-        base = *operMethod->bcvDerHarmonicExtensionVelToFluid();
+            base = *operMethod->bcvDerHarmonicExtensionVelToFluid();
 
-        break;
+            break;
 
-    case DerStructureDispToSolid:
+        case DerStructureDispToSolid:
 
 #ifdef HAVE_LIFEV_DEBUG
-        debugStream( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          DerStructureDispToSolid" << "\n";
+            debugStream ( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          DerStructureDispToSolid" << "\n";
 #endif
 
-        break;
+            break;
 
-    case FluidInterfaceDisp:
+        case FluidInterfaceDisp:
 
 #ifdef HAVE_LIFEV_DEBUG
-        debugStream( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          FluidInterfaceDisp" << "\n";
+            debugStream ( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          FluidInterfaceDisp" << "\n";
 #endif
 
-        //operMethod->FluidInterfaceDisp( (LifeV::Vector&) operMethod->lambdaFluidRepeated() );
+            //operMethod->FluidInterfaceDisp( (LifeV::Vector&) operMethod->lambdaFluidRepeated() );
 
-        //base = *operMethod->bcvFluidInterfaceDisp();
+            //base = *operMethod->bcvFluidInterfaceDisp();
 
-        break;
+            break;
 
-    case FluidLoadToStructure:
+        case FluidLoadToStructure:
 
 #ifdef HAVE_LIFEV_DEBUG
-        debugStream( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          FluidLoadToStructure" << "\n";
+            debugStream ( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          FluidLoadToStructure" << "\n";
 #endif
 
-        if ( !operMethod->isSolid() )
-            return;
+            if ( !operMethod->isSolid() )
+            {
+                return;
+            }
 
-        operMethod->setFluidLoadToStructure( operMethod->sigmaSolidRepeated() );
+            operMethod->setFluidLoadToStructure ( operMethod->sigmaSolidRepeated() );
 
-        base = *operMethod->bcvFluidLoadToStructure();
+            base = *operMethod->bcvFluidLoadToStructure();
 
-        break;
+            break;
 
-    case HarmonicExtensionVelToFluid:
+        case HarmonicExtensionVelToFluid:
 
 #ifdef HAVE_LIFEV_DEBUG
-        debugStream( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          HarmonicExtensionVelToFluid" << "\n";
+            debugStream ( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          HarmonicExtensionVelToFluid" << "\n";
 #endif
 
-        if ( !operMethod->isFluid() )
-            return;
+            if ( !operMethod->isFluid() )
+            {
+                return;
+            }
 
-        operMethod->setHarmonicExtensionVelToFluid( operMethod->veloFluidMesh() );
+            operMethod->setHarmonicExtensionVelToFluid ( operMethod->veloFluidMesh() );
 
-        base = *operMethod->bcvHarmonicExtensionVelToFluid();
+            base = *operMethod->bcvHarmonicExtensionVelToFluid();
 
-        break;
+            break;
 
-    case SolidLoadToStructure:
+        case SolidLoadToStructure:
 
 #ifdef HAVE_LIFEV_DEBUG
-        debugStream( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          SolidLoadToStructure" << "\n";
+            debugStream ( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          SolidLoadToStructure" << "\n";
 #endif
-        if ( !operMethod->isFluid() )
-            return;
+            if ( !operMethod->isFluid() )
+            {
+                return;
+            }
 
-        operMethod->setSolidLoadToStructure( operMethod->minusSigmaFluidRepeated() );
+            operMethod->setSolidLoadToStructure ( operMethod->minusSigmaFluidRepeated() );
 
-        base = *operMethod->bcvSolidLoadToStructure();
+            base = *operMethod->bcvSolidLoadToStructure();
 
-        break;
+            break;
 
-    case StructureDispToHarmonicExtension:
+        case StructureDispToHarmonicExtension:
 
 #ifdef HAVE_LIFEV_DEBUG
-        debugStream( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          StructureDispToHarmonicExtension" << "\n";
+            debugStream ( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          StructureDispToHarmonicExtension" << "\n";
 #endif
 
-        if ( !operMethod->isFluid() )
-            return;
+            if ( !operMethod->isFluid() )
+            {
+                return;
+            }
 
-        operMethod->setStructureDispToHarmonicExtension( operMethod->lambdaFluidRepeated() );
+            operMethod->setStructureDispToHarmonicExtension ( operMethod->lambdaFluidRepeated() );
 
-        base = *operMethod->bcvStructureDispToHarmonicExtension();
+            base = *operMethod->bcvStructureDispToHarmonicExtension();
 
-        break;
+            break;
 
-    case StructureDispToSolid:
+        case StructureDispToSolid:
 
 #ifdef HAVE_LIFEV_DEBUG
-        debugStream( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          StructureDispToSolid" << "\n";
+            debugStream ( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          StructureDispToSolid" << "\n";
 #endif
 
-        break;
+            break;
 
-    case StructureToFluid:
+        case StructureToFluid:
 
 #ifdef HAVE_LIFEV_DEBUG
-        debugStream( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          StructureToFluid" << "\n";
+            debugStream ( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          StructureToFluid" << "\n";
 #endif
 
-        if ( !operMethod->isFluid() )
-            return;
+            if ( !operMethod->isFluid() )
+            {
+                return;
+            }
 
-        operMethod->setStructureToFluid( operMethod->veloFluidMesh() );
-        operMethod->setStructureToFluidParameters();
+            operMethod->setStructureToFluid ( operMethod->veloFluidMesh() );
+            operMethod->setStructureToFluidParameters();
 
-        base = *operMethod->bcvStructureToFluid();
+            base = *operMethod->bcvStructureToFluid();
 
-        break;
+            break;
 
-    default:
+        default:
 
-        std::cout << " !!! Error: " << M_FSIFunction << " is not available as a BCVectorInterface !!!" << std::endl;
+            std::cout << " !!! Error: " << M_FSIFunction << " is not available as a BCVectorInterface !!!" << std::endl;
 
-        break;
+            break;
     }
 }
 
 template< class MethodType >
-inline void BCInterfaceFunctionSolverDefined< FSIOperator >::checkFunction( BCVector& base )
+inline void BCInterfaceFunctionSolverDefined< FSIOperator >::checkFunction ( BCVector& base )
 {
     boost::shared_ptr< MethodType > operMethod = boost::dynamic_pointer_cast< MethodType > ( M_physicalSolver );
 
     switch ( M_FSIFunction )
     {
-    case RobinWall:
+        case RobinWall:
 
 #ifdef HAVE_LIFEV_DEBUG
-        debugStream( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          RobinWall" << "\n";
+            debugStream ( 5025 ) << "BCInterfaceFunctionSolverDefined::checkFunction                          RobinWall" << "\n";
 #endif
 
-        if ( !operMethod->isSolid() )
-            return;
+            if ( !operMethod->isSolid() )
+            {
+                return;
+            }
 
-        // Define the vectors
-        M_robinRHS.reset( new physicalSolver_Type::vector_Type( operMethod->dFESpace().map(), Repeated, Zero ) );
-        M_robinAlphaCoefficient.reset( new physicalSolver_Type::vector_Type( operMethod->dFESpace().map(), Repeated, Zero ) );
-        M_robinBetaCoefficient.reset( new physicalSolver_Type::vector_Type( operMethod->dFESpace().map(), Repeated, Zero ) );
+            // Define the vectors
+            M_robinRHS.reset ( new physicalSolver_Type::vector_Type ( operMethod->dFESpace().map(), Repeated, Zero ) );
+            M_robinAlphaCoefficient.reset ( new physicalSolver_Type::vector_Type ( operMethod->dFESpace().map(), Repeated, Zero ) );
+            M_robinBetaCoefficient.reset ( new physicalSolver_Type::vector_Type ( operMethod->dFESpace().map(), Repeated, Zero ) );
 
-        // Set the vectors (still empty)
-        base.setRhsVector( *M_robinRHS, operMethod->dFESpace().dof().numTotalDof(), 0 );
-        base.setRobinCoeffVector( *M_robinAlphaCoefficient );
-        base.setBetaCoeffVector( *M_robinBetaCoefficient );
+            // Set the vectors (still empty)
+            base.setRhsVector ( *M_robinRHS, operMethod->dFESpace().dof().numTotalDof(), 0 );
+            base.setRobinCoeffVector ( *M_robinAlphaCoefficient );
+            base.setBetaCoeffVector ( *M_robinBetaCoefficient );
 
-        // Set the physical solver in the Robin functions for alpha and beta
-        for ( UInt i( 0 ); i < M_vectorFunctionRobin.size(); ++i )
-        {
-            boost::shared_ptr< BCInterfaceFunctionParserSolver< physicalSolver_Type > > castedFunctionSolver =
-                boost::dynamic_pointer_cast< BCInterfaceFunctionParserSolver< physicalSolver_Type > > ( M_vectorFunctionRobin[i] );
+            // Set the physical solver in the Robin functions for alpha and beta
+            for ( UInt i ( 0 ); i < M_vectorFunctionRobin.size(); ++i )
+            {
+                boost::shared_ptr< BCInterfaceFunctionParserSolver< physicalSolver_Type > > castedFunctionSolver =
+                    boost::dynamic_pointer_cast< BCInterfaceFunctionParserSolver< physicalSolver_Type > > ( M_vectorFunctionRobin[i] );
 
-            if ( castedFunctionSolver != 0 )
-                castedFunctionSolver->setPhysicalSolver( M_physicalSolver );
-        }
+                if ( castedFunctionSolver != 0 )
+                {
+                    castedFunctionSolver->setPhysicalSolver ( M_physicalSolver );
+                }
+            }
 
-        break;
+            break;
 
-    default:
+        default:
 
-        std::cout << " !!! Error: " << M_FSIFunction << " is not available as a BCVector !!!" << std::endl;
+            std::cout << " !!! Error: " << M_FSIFunction << " is not available as a BCVector !!!" << std::endl;
 
-        break;
+            break;
     }
 }
 
 template< class MethodType >
-inline void BCInterfaceFunctionSolverDefined< FSIOperator >::checkFunction( BCFunctionBase& /*base*/ )
+inline void BCInterfaceFunctionSolverDefined< FSIOperator >::checkFunction ( BCFunctionBase& /*base*/ )
 {
     boost::shared_ptr< MethodType > operMethod = boost::dynamic_pointer_cast< MethodType > ( M_physicalSolver );
 
     switch ( M_FSIFunction )
     {
-    default:
+        default:
 
-        std::cout << " !!! Error: " << M_FSIFunction << " is not available as a BCFunction !!!" << std::endl;
+            std::cout << " !!! Error: " << M_FSIFunction << " is not available as a BCFunction !!!" << std::endl;
 
-        return;
+            return;
     }
 }
 
@@ -722,7 +746,7 @@ public:
     /*!
      * @param base base of the bc
      */
-    void assignFunction( OneDFSIFunction& base );
+    void assignFunction ( OneDFSIFunction& base );
 
     //! Update the solver variables
     void updatePhysicalSolverVariables() {}
@@ -737,26 +761,32 @@ public:
     /*!
      * @param data BC data loaded from GetPot file
      */
-    void setData( const BCInterfaceData1D& data );
+    void setData ( const BCInterfaceData1D& data );
 
     //! Set flux and source
     /*!
      * @param flux flux object of the 1D model
      * @param source source object of the 1D model
      */
-    void setFluxSource( const fluxPtr_Type& flux, const sourcePtr_Type& source ) { M_function->setFluxSource( flux, source ); }
+    void setFluxSource ( const fluxPtr_Type& flux, const sourcePtr_Type& source )
+    {
+        M_function->setFluxSource ( flux, source );
+    }
 
     //! Set solution
     /*!
      * @param solution solution container of the 1D model
      */
-    void setSolution( const solutionPtr_Type& solution ) { M_function->setSolution( solution ); }
+    void setSolution ( const solutionPtr_Type& solution )
+    {
+        M_function->setSolution ( solution );
+    }
 
     //! Set the physical solver
     /*!
      * @param physicalSolver physical solver
      */
-    void setPhysicalSolver( const physicalSolverPtr_Type& /*physicalSolver*/ ) {}
+    void setPhysicalSolver ( const physicalSolverPtr_Type& /*physicalSolver*/ ) {}
 
     //@}
 
@@ -768,7 +798,10 @@ public:
     /*!
      * @param bcBaseType the type of the base
      */
-    baseContainer_Type baseType() const { return BASEFunction1D; }
+    baseContainer_Type baseType() const
+    {
+        return BASEFunction1D;
+    }
 
     //@}
 
@@ -777,9 +810,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    BCInterfaceFunctionSolverDefined( const BCInterfaceFunctionSolverDefined& function );
+    BCInterfaceFunctionSolverDefined ( const BCInterfaceFunctionSolverDefined& function );
 
-    BCInterfaceFunctionSolverDefined& operator=( const BCInterfaceFunctionSolverDefined& function );
+    BCInterfaceFunctionSolverDefined& operator= ( const BCInterfaceFunctionSolverDefined& function );
 
     //@}
 

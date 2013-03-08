@@ -28,7 +28,7 @@
     @file
     @brief File contains classes to holds the FE vectors used for prescribing boundary conditions
 
-	@author Miguel Fernandez <miguel.fernandez@inria.fr>
+    @author Miguel Fernandez <miguel.fernandez@inria.fr>
     @author Christophe Prud'homme <christophe.prudhomme@epfl.ch>
     @author Vincent Martin <vincent.martin@inria.fr>
     @contributor Mauro Perego <perego.mauro@gmail.com>
@@ -58,10 +58,10 @@ namespace LifeV
   In the case of Essential boundary condition, we want to prescribe u = v on part of the boundary ( u is the solution, v the given FE vector).
   In the case of Natural boundary condition, depending on the type, we want to add to the right hand side of the equation one of the following terms:
 
-  type 0: 	v, 				in this case v is a quantity integrated on the boundary (i.e. a residual) <br>
-  type 1: ( v, n phi)_bd  	with v scalar and phi vector <br>
-  type 2: ( v n, phi)_bd  	v vector, phi scalar <br>
-  type 3: ( v, phi)_bd   	v and phi can be both vectors or scalars  (not yet implemented)
+  type 0:   v,              in this case v is a quantity integrated on the boundary (i.e. a residual) <br>
+  type 1: ( v, n phi)_bd    with v scalar and phi vector <br>
+  type 2: ( v n, phi)_bd    v vector, phi scalar <br>
+  type 3: ( v, phi)_bd      v and phi can be both vectors or scalars  (not yet implemented)
 
   here ( . , . )_bd  denote the L2 inner product on the boundary, n is the normal, v the given FE vector
 
@@ -102,11 +102,11 @@ public:
       @param type The type can assume the following values (0, 1, 2); see BCVector class description for their meaning
     */
 
-    BCVectorBase( const vector_Type& rightHandSideVector, const UInt numberOfTotalDof, UInt type = 0 );
+    BCVectorBase ( const vector_Type& rightHandSideVector, const UInt numberOfTotalDof, UInt type = 0 );
 
 
     //! Copy Constructor
-    BCVectorBase( const BCVectorBase& bcVectorBase);
+    BCVectorBase ( const BCVectorBase& bcVectorBase);
 
 
     //! Destructor
@@ -122,7 +122,7 @@ public:
     //@{
 
     //! Assignment operator
-    virtual BCVectorBase& operator=( BCVectorBase const& );
+    virtual BCVectorBase& operator= ( BCVectorBase const& );
 
     //! Return the value of the selected component of rightHandSideVector at position globalDofID
     /*!
@@ -151,7 +151,7 @@ public:
       @param globalDofId The global DOF id
       @param component The vector component
     */
-    virtual Real robinCoeffVector( const ID& globalDofId, const ID& component ) const;
+    virtual Real robinCoeffVector ( const ID& globalDofId, const ID& component ) const;
 
 
     //!  Return the value of the selected component of the beta coefficient vector at position dofID
@@ -159,7 +159,7 @@ public:
       @param globalDofId The global DOF id
       @param component The vector component
     */
-    virtual Real betaCoeffVector( const ID& globalDofId, const ID& component ) const;
+    virtual Real betaCoeffVector ( const ID& globalDofId, const ID& component ) const;
 
 
     //! showMe
@@ -167,7 +167,7 @@ public:
      * @param verbose The verbosity
      * @param out The output stream (default: cout)
      */
-    virtual std::ostream & showMe( bool /*verbose = false*/, std::ostream & out = std::cout ) const
+    virtual std::ostream& showMe ( bool /*verbose = false*/, std::ostream& out = std::cout ) const
     {
         out << "not implemented in parent class, use derived class implementation!" << std::endl;
         return out;
@@ -180,38 +180,65 @@ public:
     //@{
 
     //! Return the underlying data structure for the RHS vector
-    inline const vector_Type& rhsVector( ) const {return *M_rightHandSideVectorPtr;};
+    inline const vector_Type& rhsVector( ) const
+    {
+        return *M_rightHandSideVectorPtr;
+    };
 
 
     //! Return the number of total DOF
-    inline UInt nbTotalDOF() const { return M_numberOfTotalDof; }
+    inline UInt nbTotalDOF() const
+    {
+        return M_numberOfTotalDof;
+    }
 
 
     //! Return the type of conditions (see BCVector class description)
-    inline UInt type() const { return M_type; }
+    inline UInt type() const
+    {
+        return M_type;
+    }
 
 
     //! determine whether the BCVector is updated
-    inline bool isFinalized() const { return M_finalized;}
+    inline bool isFinalized() const
+    {
+        return M_finalized;
+    }
 
 
     //! determine whether the boundary mass coefficient for Robin bc is a Vector
-    inline bool isRobinCoeffAVector() const  {return M_isRobinBdMassCoeffAVector;}
+    inline bool isRobinCoeffAVector() const
+    {
+        return M_isRobinBdMassCoeffAVector;
+    }
 
 
     //true if beta coefficient is a Vector
-    inline bool isBetaCoeffAVector() const  {return M_isBetaCoeffAVector;}
+    inline bool isBetaCoeffAVector() const
+    {
+        return M_isBetaCoeffAVector;
+    }
 
     //! Return the value of the boundary mass coefficient of Robin conditions
-    inline Real robinCoeff() const { return M_robinBoundaryMassCoeff; }
+    inline Real robinCoeff() const
+    {
+        return M_robinBoundaryMassCoeff;
+    }
 
 
     //! Return the value of the resistance coefficient
-    inline Real resistanceCoeff() const { return M_resistanceCoeff; }
+    inline Real resistanceCoeff() const
+    {
+        return M_resistanceCoeff;
+    }
 
 
     //! Return the value of the beta coefficient
-    inline Real betaCoeff() const { return M_betaCoeff; }
+    inline Real betaCoeff() const
+    {
+        return M_betaCoeff;
+    }
 
     //@}
 
@@ -219,11 +246,14 @@ public:
     //! @name Set Methods
     //@{
 
-   //! set the boundary mass coefficient of Robin bc
+    //! set the boundary mass coefficient of Robin bc
     /*!
       @param robinBoundaryMassCoeff The boundary mass coefficient of robin conditions
      */
-    inline void setRobinCoeff( const Real& robinBoundaryMassCoeff ) { M_robinBoundaryMassCoeff = robinBoundaryMassCoeff;}
+    inline void setRobinCoeff ( const Real& robinBoundaryMassCoeff )
+    {
+        M_robinBoundaryMassCoeff = robinBoundaryMassCoeff;
+    }
 
 
     //! set the Resistance coefficient
@@ -231,7 +261,10 @@ public:
       @param robinBoundaryMassCoeff The boundary mass coefficient of robin conditions
      */
 
-    inline void setResistanceCoeff( const Real& resistanceCoeff ) { M_resistanceCoeff = resistanceCoeff; }
+    inline void setResistanceCoeff ( const Real& resistanceCoeff )
+    {
+        M_resistanceCoeff = resistanceCoeff;
+    }
 
 
     //! set the Beta coefficient FE vector
@@ -239,7 +272,10 @@ public:
       @param betaCoeff The beta coefficient
      */
 
-    inline void setBetaCoeff( const Real& betaCoeff ) { M_betaCoeff = betaCoeff;}
+    inline void setBetaCoeff ( const Real& betaCoeff )
+    {
+        M_betaCoeff = betaCoeff;
+    }
 
 
     //! set the boundary mass coefficient FE vector for Robin boundary conditions
@@ -247,7 +283,7 @@ public:
       @param robinBoundaryMassCoeff The boundary mass coefficient of robin conditions
      */
 
-    void setRobinCoeffVector( const vector_Type& robinBoundaryMassCoeffVector );
+    void setRobinCoeffVector ( const vector_Type& robinBoundaryMassCoeffVector );
 
 
 
@@ -255,7 +291,7 @@ public:
     /*!
       @param betaCoeffVector The beta coefficient FE vector
      */
-    void setBetaCoeffVector( const vector_Type& betaCoeffVector );
+    void setBetaCoeffVector ( const vector_Type& betaCoeffVector );
 
 
     //! set the right hand side FE vector
@@ -264,7 +300,7 @@ public:
       @param numberOfTotalDOF
       @param type
      */
-    void setRhsVector( const vector_Type& righHandSideVector, UInt numberOfTotalDOF, UInt type=0 );
+    void setRhsVector ( const vector_Type& righHandSideVector, UInt numberOfTotalDOF, UInt type = 0 );
 
     //@}
 
@@ -321,10 +357,10 @@ protected:
   In the case of Essential boundary condition, we want to prescribe u = v on part of the boundary ( u is the solution, v the given FE vector).
   In the case of Natural boundary condition, depending on the type, we want to add to the right hand side of the equation one of the following terms:
 
-  type 0: @c	v, 				in this case v is a quantity integrated on the boundary (i.e. a residual) <br>
-  type 1: @c ( v, n phi)_bd  	with v scalar and phi vector <br>
-  type 2: @c ( v n, phi)_bd  	v vector, phi scalar  <br>
-  type 3: @c ( v, phi)_bd   	v and phi can be both vectors or scalars  (not yet implemented)
+  type 0: @c    v,              in this case v is a quantity integrated on the boundary (i.e. a residual) <br>
+  type 1: @c ( v, n phi)_bd     with v scalar and phi vector <br>
+  type 2: @c ( v n, phi)_bd     v vector, phi scalar  <br>
+  type 3: @c ( v, phi)_bd       v and phi can be both vectors or scalars  (not yet implemented)
 
   here ( . , . )_bd  denote the the L2 inner product on the boundary, n is the normal, v the given FE vector and phi the FE test function
 
@@ -343,7 +379,7 @@ protected:
 */
 
 class BCVector:
-        public BCVectorBase
+    public BCVectorBase
 {
 public:
 
@@ -367,15 +403,15 @@ public:
 
     //! Constructor
     /*!
-    	@param rightHandSideVector The given Finite Element vector holding data to prescribe on boundary
-    	@param numberOfTotalDof number of total dof in the vector of data
-    	@param type The type can assume the following values (0, 1, 2); see BCVector class description for their meaning
+        @param rightHandSideVector The given Finite Element vector holding data to prescribe on boundary
+        @param numberOfTotalDof number of total dof in the vector of data
+        @param type The type can assume the following values (0, 1, 2); see BCVector class description for their meaning
     */
-    BCVector( const vector_Type& rightHandSideVector, UInt const numberOfTotalDof, UInt type=0 );
+    BCVector ( const vector_Type& rightHandSideVector, UInt const numberOfTotalDof, UInt type = 0 );
 
 
     //Copy Constructor
-    BCVector( const BCVector& bcVector );
+    BCVector ( const BCVector& bcVector );
 
     //! Destructor
     virtual ~BCVector( ) {}
@@ -384,7 +420,7 @@ public:
     //! @name Operators
     //@{
     //! Assignment operator for BCVector
-    BCVector & operator=( const BCVector & bcVector );
+    BCVector& operator= ( const BCVector& bcVector );
 
     //@}
 
@@ -396,7 +432,7 @@ public:
     * @param verbose The verbosity
     * @param out The output stream (default: cout)
     */
-    std::ostream & showMe( bool verbose = false, std::ostream & out = std::cout ) const;
+    std::ostream& showMe ( bool verbose = false, std::ostream& out = std::cout ) const;
 
     //@}
 };
@@ -415,10 +451,10 @@ public:
   In the case of Essential boundary condition, we want to prescribe u = v on part of the boundary ( u is the solution, v the given FE vector).
   In the case of Natural boundary condition, depending on the type, we want to add to the right hand side of the equation one of the following terms:
 
-  type 0: 	v, 				in this case v is a quantity integrated on the boundary (i.e. a residual) <br>
-  type 1: ( v, n phi)_bd  	with v scalar and phi vector  <br>
-  type 2: ( v n, phi)_bd  	v vector, phi scalar  <br>
-  type 3: ( v, phi)_bd   	v and phi can be both vectors or scalars  (not yet implemented)
+  type 0:   v,              in this case v is a quantity integrated on the boundary (i.e. a residual) <br>
+  type 1: ( v, n phi)_bd    with v scalar and phi vector  <br>
+  type 2: ( v n, phi)_bd    v vector, phi scalar  <br>
+  type 3: ( v, phi)_bd      v and phi can be both vectors or scalars  (not yet implemented)
 
   here ( . , . )_bd  denote the L2 inner product on the boundary, n is the normal, v the given FE vector
 
@@ -437,8 +473,8 @@ public:
 */
 
 class BCVectorInterface
-        :
-        public BCVectorBase
+    :
+public BCVectorBase
 {
 public:
 
@@ -471,11 +507,11 @@ public:
       @param interfaceDofPtr The pointer to the container of connections between the DOFs on two matching meshes
       @param type The type can assume the following values (0, 1, 2); see BCVector class description for their meaning
     */
-    BCVectorInterface( const vector_Type& rightHandSideVector, UInt numberOfTotalDof, const dofInterfacePtr_Type& interfaceDofPtr, UInt type=0 );
+    BCVectorInterface ( const vector_Type& rightHandSideVector, UInt numberOfTotalDof, const dofInterfacePtr_Type& interfaceDofPtr, UInt type = 0 );
 
 
     //! Copy Constructor
-    BCVectorInterface( const BCVectorInterface & bcVectorInterface );
+    BCVectorInterface ( const BCVectorInterface& bcVectorInterface );
 
 
     //!Destructor
@@ -490,7 +526,7 @@ public:
     //@{
 
     //! Assignment operator for BCVectorInterface
-    BCVectorInterface & operator=( const BCVectorInterface & bcVectorInterface );
+    BCVectorInterface& operator= ( const BCVectorInterface& bcVectorInterface );
 
 
     //! Return the value of the selected component of rightHandSideVector at position globalDofID
@@ -513,7 +549,7 @@ public:
           @param interfaceDofPtr The pointer to the container of connections between the DOFs on two matching meshes
           @param type The type can assume the following values (0, 1, 2); see BCVectorInterface class description for their meaning
         */
-    void setup ( const vector_Type& rightHandSideVector, UInt numberOfTotalDof, const dofInterfacePtr_Type& interfaceDofPtr, UInt type=0 );
+    void setup ( const vector_Type& rightHandSideVector, UInt numberOfTotalDof, const dofInterfacePtr_Type& interfaceDofPtr, UInt type = 0 );
 
 
     //! set the BC vector (after default construction)
@@ -523,7 +559,7 @@ public:
       @param interfaceDofPtr The pointer to the container of connections between the DOFs on two matching meshes
       @param type The type can assume the following values (0, 1, 2); see BCVectorInterface class description for their meaning
     */
-    void setRhsVector( const vector_Type& rightHandSideVector, UInt numberOfTotalDof, const dofInterfacePtr_Type& interfaceDofPtr, UInt type=0);
+    void setRhsVector ( const vector_Type& rightHandSideVector, UInt numberOfTotalDof, const dofInterfacePtr_Type& interfaceDofPtr, UInt type = 0);
 
 
 
@@ -536,16 +572,16 @@ public:
     */
     BCVectorBase::BCVectorBasePtr_Type clone() const
     {
-        BCVectorBase::BCVectorBasePtr_Type copy ( new BCVectorInterface( *this ) );
+        BCVectorBase::BCVectorBasePtr_Type copy ( new BCVectorInterface ( *this ) );
         return copy;
     }
 
-   //!  Return the value of the selected component of the boundary mass coefficient vector at position dofID
+    //!  Return the value of the selected component of the boundary mass coefficient vector at position dofID
     /*!
       @param globalDofId The global DOF id
       @param component The vector component
     */
-    Real robinCoeffVector( const ID& globalDofId, const ID& component ) const;
+    Real robinCoeffVector ( const ID& globalDofId, const ID& component ) const;
 
 
     //!  Return the value of the selected component of the beta coefficient vector at position dofID
@@ -553,7 +589,7 @@ public:
       @param globalDofId The global DOF id
       @param component The vector component
     */
-    Real betaCoeffVector( const ID& globalDofId, const ID& component ) const;
+    Real betaCoeffVector ( const ID& globalDofId, const ID& component ) const;
 
 
     //! showMe
@@ -561,11 +597,14 @@ public:
     * @param verbose The verbosity
     * @param out The output stream (default: cout)
     */
-    std::ostream & showMe( bool verbose = false, std::ostream & out = std::cout ) const;
+    std::ostream& showMe ( bool verbose = false, std::ostream& out = std::cout ) const;
 
 
     //! Return reference to  DOFInterface object, the container of connection of DOFs
-    inline DOFInterface const & dofInterface() const { return *M_interfaceDofPtr; }
+    inline DOFInterface const& dofInterface() const
+    {
+        return *M_interfaceDofPtr;
+    }
 
     //@}
 

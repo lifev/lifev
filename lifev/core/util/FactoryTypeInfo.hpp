@@ -47,15 +47,15 @@ public:
     //! @name Constructors, destructor
     //@{
     FactoryTypeInfo();
-    FactoryTypeInfo(const std::type_info&); // non-explicit
-    FactoryTypeInfo( FactoryTypeInfo const & );
+    FactoryTypeInfo (const std::type_info&); // non-explicit
+    FactoryTypeInfo ( FactoryTypeInfo const& );
     virtual ~FactoryTypeInfo();
     //@}
 
     //! @name Methods
     //@{
     //! Compatibility functions
-    bool before(const FactoryTypeInfo& rhs) const;
+    bool before (const FactoryTypeInfo& rhs) const;
     //@}
 
     //! @name Get methods
@@ -69,23 +69,35 @@ private:
     const std::type_info* M_info;
 };
 
-inline bool operator==(const FactoryTypeInfo& lhs, const FactoryTypeInfo& rhs)
-{ return lhs.typeInfo() == rhs.typeInfo(); }
+inline bool operator== (const FactoryTypeInfo& lhs, const FactoryTypeInfo& rhs)
+{
+    return lhs.typeInfo() == rhs.typeInfo();
+}
 
-inline bool operator<(const FactoryTypeInfo& lhs, const FactoryTypeInfo& rhs)
-{ return lhs.before(rhs); }
+inline bool operator< (const FactoryTypeInfo& lhs, const FactoryTypeInfo& rhs)
+{
+    return lhs.before (rhs);
+}
 
-inline bool operator!=(const FactoryTypeInfo& lhs, const FactoryTypeInfo& rhs)
-{ return !(lhs == rhs); }
+inline bool operator!= (const FactoryTypeInfo& lhs, const FactoryTypeInfo& rhs)
+{
+    return ! (lhs == rhs);
+}
 
-inline bool operator>(const FactoryTypeInfo& lhs, const FactoryTypeInfo& rhs)
-{ return rhs < lhs; }
+inline bool operator> (const FactoryTypeInfo& lhs, const FactoryTypeInfo& rhs)
+{
+    return rhs < lhs;
+}
 
-inline bool operator<=(const FactoryTypeInfo& lhs, const FactoryTypeInfo& rhs)
-{ return !(lhs > rhs); }
+inline bool operator<= (const FactoryTypeInfo& lhs, const FactoryTypeInfo& rhs)
+{
+    return ! (lhs > rhs);
+}
 
-inline bool operator>=(const FactoryTypeInfo& lhs, const FactoryTypeInfo& rhs)
-{ return !(lhs < rhs); }
+inline bool operator>= (const FactoryTypeInfo& lhs, const FactoryTypeInfo& rhs)
+{
+    return ! (lhs < rhs);
+}
 
 } // Namespace LifeV
 

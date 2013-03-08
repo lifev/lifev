@@ -71,7 +71,7 @@ public:
     /*!
      * @param data BCInterfaceData
      */
-    BCInterfaceData( const BCInterfaceData& data );
+    BCInterfaceData ( const BCInterfaceData& data );
 
     //! Destructor
     virtual ~BCInterfaceData() {}
@@ -87,7 +87,7 @@ public:
      * @param data BCInterfaceData
      * @return reference to a copy of the class
      */
-    BCInterfaceData& operator=( const BCInterfaceData& data );
+    BCInterfaceData& operator= ( const BCInterfaceData& data );
 
     //@}
 
@@ -101,13 +101,13 @@ public:
      * @param dataSection BC section
      * @param name name of the boundary condition
      */
-    void readBC( const std::string& fileName, const std::string& dataSection, const std::string& name );
+    void readBC ( const std::string& fileName, const std::string& dataSection, const std::string& name );
 
     //! Display general information about the content of the class
     /*!
      * @param output specify the output format (std::cout by default)
      */
-    void showMe( std::ostream& output = std::cout ) const;
+    void showMe ( std::ostream& output = std::cout ) const;
 
     //@}
 
@@ -119,13 +119,16 @@ public:
     /*!
      * @param baseString Boundary condition base string
      */
-    void setBaseString( const std::string& baseString );
+    void setBaseString ( const std::string& baseString );
 
     //! Set the base type of the boundary condition
     /*!
      * @param base Boundary condition base type
      */
-    void setBase( const std::pair< std::string, baseList_Type >& base ) { M_base = base; }
+    void setBase ( const std::pair< std::string, baseList_Type >& base )
+    {
+        M_base = base;
+    }
 
     //@}
 
@@ -137,25 +140,37 @@ public:
     /*!
      * @return Boundary condition base string
      */
-    const std::string& baseString() const { return M_baseString; }
+    const std::string& baseString() const
+    {
+        return M_baseString;
+    }
 
     //! Get the base type of the boundary condition
     /*!
      * @return Boundary condition base
      */
-    const std::pair< std::string, baseList_Type >& base() const { return M_base; }
+    const std::pair< std::string, baseList_Type >& base() const
+    {
+        return M_base;
+    }
 
     //! Get the base map of the boundary condition
     /*!
      * @return Boundary condition base map
      */
-    const std::map< std::string, baseList_Type >& mapBase() const { return M_mapBase; }
+    const std::map< std::string, baseList_Type >& mapBase() const
+    {
+        return M_mapBase;
+    }
 
     //! Get the parameters vector {A, B, C, ...}
     /*!
      * @return Boundary condition parameters vector
      */
-    const parametersContainer_Type& parameters() const { return M_parameters; }
+    const parametersContainer_Type& parameters() const
+    {
+        return M_parameters;
+    }
 
     //@}
 
@@ -164,11 +179,11 @@ protected:
     //! @name Private Methods
     //@{
 
-    void readBase( const GetPot& dataFile, const std::string& path, std::pair< std::string, baseList_Type >& base, std::string& baseString );
+    void readBase ( const GetPot& dataFile, const std::string& path, std::pair< std::string, baseList_Type >& base, std::string& baseString );
 
-    bool isBase( const GetPot& dataFile, const char* base, std::string& baseString );
+    bool isBase ( const GetPot& dataFile, const char* base, std::string& baseString );
 
-    void readParameters( const GetPot& dataFile, const char* parameters );
+    void readParameters ( const GetPot& dataFile, const char* parameters );
 
     //@}
 

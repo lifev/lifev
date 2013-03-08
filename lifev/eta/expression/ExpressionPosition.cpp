@@ -48,7 +48,7 @@ ExpressionPosition::ExpressionPosition()
     : base_Type()
 {}
 
-ExpressionPosition::ExpressionPosition( const ExpressionPosition&)
+ExpressionPosition::ExpressionPosition ( const ExpressionPosition&)
     : base_Type()
 {}
 
@@ -60,7 +60,7 @@ ExpressionPosition::~ExpressionPosition()
 // ===================================================
 
 void
-ExpressionPosition::display( std::ostream& out )
+ExpressionPosition::display ( std::ostream& out )
 {
     out << "X";
 }

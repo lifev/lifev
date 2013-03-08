@@ -42,8 +42,8 @@ enum TimeScheme { BDF_ORDER_ONE = 1, BDF_ORDER_TWO, BDF_ORDER_THREE };
  *  @see
  */
 class Cylinder
-//     :
-//     public LifeV::Application
+    //     :
+    //     public LifeV::Application
 {
 public:
 
@@ -52,7 +52,7 @@ public:
      */
     //@{
 
-//    typedef LifeV::Application super;
+    //    typedef LifeV::Application super;
 
     //@}
 
@@ -60,8 +60,8 @@ public:
      */
     //@{
 
-    Cylinder( int argc,
-              char** argv );
+    Cylinder ( int argc,
+               char** argv );
 
     ~Cylinder()
     {}

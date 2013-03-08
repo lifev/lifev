@@ -103,7 +103,7 @@ public:
      * strongerst Flag of the adjacent boundary faces.
      * It returns a Null Marker ID if any of the entity a or b ha a null Marker ID
     */
-    static markerID_Type strongerMarkerID( markerID_Type const & a, markerID_Type const & b );
+    static markerID_Type strongerMarkerID ( markerID_Type const& a, markerID_Type const& b );
 
     //! Selects the weaker Marker ID between marker IDs
     /*
@@ -114,13 +114,13 @@ public:
       Nodes generated on high order elements.
       It returns a null Marker ID if any of the entity a or b has a Null Marker ID.
     */
-    static markerID_Type weakerMarkerID( markerID_Type const & a, markerID_Type const & b );
+    static markerID_Type weakerMarkerID ( markerID_Type const& a, markerID_Type const& b );
 
     //! Equality operator.
     /*
         It is needed in order to select markers with the same Marker ID
     */
-    static bool equalMarkerID(const markerID_Type& a, const markerID_Type& b);
+    static bool equalMarkerID (const markerID_Type& a, const markerID_Type& b);
 
 };
 
@@ -144,7 +144,7 @@ public:
 
  */
 
-template <typename MarkerIDPolicy=MarkerIDStandardPolicy>
+template <typename MarkerIDPolicy = MarkerIDStandardPolicy>
 class Marker
 {
 public:
@@ -162,10 +162,10 @@ public:
     Marker();
 
     //! Constructor given the marker ID
-    explicit Marker( markerID_Type & p );
+    explicit Marker ( markerID_Type& p );
 
     //! Copy Constructor
-    Marker( Marker<MarkerIDPolicy> const & markerBase );
+    Marker ( Marker<MarkerIDPolicy> const& markerBase );
 
     //! Destructor
     virtual ~Marker()
@@ -187,10 +187,10 @@ public:
     /*!
         It returns true if the marker ID is equal to the argument
     */
-    inline bool hasEqualMarkerID(markerID_Type const & markerID ) const;
+    inline bool hasEqualMarkerID (markerID_Type const& markerID ) const;
 
     //! Display information about the marker object
-    virtual void showMe( std::ostream & output = std::cout ) const;
+    virtual void showMe ( std::ostream& output = std::cout ) const;
 
     //@}
 
@@ -198,16 +198,16 @@ public:
     //@{
 
     //! Set marker to the given value
-    inline markerID_Type setMarkerID( markerID_Type const & markerID );
+    inline markerID_Type setMarkerID ( markerID_Type const& markerID );
 
     //! Set marker to the given value only if unset
-    markerID_Type updateMarkerID( markerID_Type const & markerID );
+    markerID_Type updateMarkerID ( markerID_Type const& markerID );
 
     //! Sets the marker ID to the stronger marker ID of two given markers
-    markerID_Type setStrongerMarkerID( markerID_Type const & markerID1, markerID_Type const & markerID2 );
+    markerID_Type setStrongerMarkerID ( markerID_Type const& markerID1, markerID_Type const& markerID2 );
 
     //! Sets the marker ID to the weaker marker ID of two given markers
-    markerID_Type setWeakerMarkerID( markerID_Type const & markerID1, markerID_Type const & markerID2 );
+    markerID_Type setWeakerMarkerID ( markerID_Type const& markerID1, markerID_Type const& markerID2 );
 
     //! Sets to the strongest marker ID
     /*!
@@ -215,7 +215,7 @@ public:
         it sets it to  the stronger ID between the stored one
         and the one provided by the argument.
      */
-    markerID_Type setStrongerMarkerID( markerID_Type const & markerID );
+    markerID_Type setStrongerMarkerID ( markerID_Type const& markerID );
 
     //! Sets to the weaker marker ID
     /*!
@@ -223,7 +223,7 @@ public:
         it sets it to  the weaker ID between the stored one
         and the one provided by the argument.
      */
-    markerID_Type setWeakerMarkerID( markerID_Type const & markerID );
+    markerID_Type setWeakerMarkerID ( markerID_Type const& markerID );
 
     //! Put marker to NULLFLAG
     inline void unsetMarkerID(); //const;
@@ -243,7 +243,7 @@ public:
 
     //! Returns the null marker ID
 
-    static markerID_Type const & nullMarkerID();
+    static markerID_Type const& nullMarkerID();
 
     //@}
 
@@ -258,19 +258,19 @@ protected:
 //  ***********************************************************************************************************
 
 template <typename MarkerIDPolicy>
-Marker<MarkerIDPolicy>::Marker() : M_markerID( MarkerIDPolicy::S_NULLMARKERID )
+Marker<MarkerIDPolicy>::Marker() : M_markerID ( MarkerIDPolicy::S_NULLMARKERID )
 {
     // nothing to be done here
 }
 
 template <typename MarkerIDPolicy>
-Marker<MarkerIDPolicy>::Marker( markerID_Type & markerID ) : M_markerID( markerID )
+Marker<MarkerIDPolicy>::Marker ( markerID_Type& markerID ) : M_markerID ( markerID )
 {
     // nothing to be done here
 }
 
 template <typename MarkerIDPolicy>
-Marker<MarkerIDPolicy>::Marker( Marker<MarkerIDPolicy> const & markerBase ) : M_markerID( markerBase.markerID() )
+Marker<MarkerIDPolicy>::Marker ( Marker<MarkerIDPolicy> const& markerBase ) : M_markerID ( markerBase.markerID() )
 {
     // nothing to be done here
 }
@@ -282,52 +282,58 @@ markerID_Type Marker<MarkerIDPolicy>::markerID() const
 }
 
 template <typename MarkerIDPolicy>
-markerID_Type const & Marker<MarkerIDPolicy>::nullMarkerID()
+markerID_Type const& Marker<MarkerIDPolicy>::nullMarkerID()
 {
     return MarkerIDPolicy::S_NULLMARKERID;
 }
 
 template <typename MarkerIDPolicy>
-markerID_Type Marker<MarkerIDPolicy>::setMarkerID( markerID_Type const & markerID )
+markerID_Type Marker<MarkerIDPolicy>::setMarkerID ( markerID_Type const& markerID )
 {
     return M_markerID = markerID;
 }
 
 template <typename MarkerIDPolicy>
-markerID_Type Marker<MarkerIDPolicy>::updateMarkerID( markerID_Type const & markerID )
+markerID_Type Marker<MarkerIDPolicy>::updateMarkerID ( markerID_Type const& markerID )
 {
     if ( M_markerID == nullMarkerID() )
-        return setMarkerID( markerID );
+    {
+        return setMarkerID ( markerID );
+    }
 }
 
 template <typename MarkerIDPolicy>
-markerID_Type Marker<MarkerIDPolicy>::setStrongerMarkerID( markerID_Type const & markerID1,
-                                                           markerID_Type const & markerID2 )
+markerID_Type Marker<MarkerIDPolicy>::setStrongerMarkerID ( markerID_Type const& markerID1,
+                                                            markerID_Type const& markerID2 )
 {
-    return setMarkerID( MarkerIDPolicy::strongerMarkerID( markerID1, markerID2 ) );
+    return setMarkerID ( MarkerIDPolicy::strongerMarkerID ( markerID1, markerID2 ) );
 }
 
 template <typename MarkerIDPolicy>
-markerID_Type Marker<MarkerIDPolicy>::setWeakerMarkerID( markerID_Type const & markerID1,
-                                                         markerID_Type const & markerID2 )
+markerID_Type Marker<MarkerIDPolicy>::setWeakerMarkerID ( markerID_Type const& markerID1,
+                                                          markerID_Type const& markerID2 )
 {
-    return setMarkerID( MarkerIDPolicy::weakerMarkerID( markerID1, markerID2 ) );
+    return setMarkerID ( MarkerIDPolicy::weakerMarkerID ( markerID1, markerID2 ) );
 }
 
 template <typename MarkerIDPolicy>
-markerID_Type Marker<MarkerIDPolicy>::setStrongerMarkerID( markerID_Type const & markerID )
-{
-    if ( isMarkerUnset() )
-        return M_markerID = markerID;
-    return setMarkerID( MarkerIDPolicy::strongerMarkerID( this->markerID(), markerID ) );
-}
-
-template <typename MarkerIDPolicy>
-markerID_Type Marker<MarkerIDPolicy>::setWeakerMarkerID( markerID_Type const & markerID )
+markerID_Type Marker<MarkerIDPolicy>::setStrongerMarkerID ( markerID_Type const& markerID )
 {
     if ( isMarkerUnset() )
+    {
         return M_markerID = markerID;
-    return setMarkerID( MarkerIDPolicy::weakerMarkerID( this->markerID(), markerID ) );
+    }
+    return setMarkerID ( MarkerIDPolicy::strongerMarkerID ( this->markerID(), markerID ) );
+}
+
+template <typename MarkerIDPolicy>
+markerID_Type Marker<MarkerIDPolicy>::setWeakerMarkerID ( markerID_Type const& markerID )
+{
+    if ( isMarkerUnset() )
+    {
+        return M_markerID = markerID;
+    }
+    return setMarkerID ( MarkerIDPolicy::weakerMarkerID ( this->markerID(), markerID ) );
 }
 
 template <typename MarkerIDPolicy>
@@ -349,18 +355,22 @@ void Marker<MarkerIDPolicy>::unsetMarkerID()
 }
 
 template <typename MarkerIDPolicy>
-bool Marker<MarkerIDPolicy>::hasEqualMarkerID(markerID_Type const & markerID) const
+bool Marker<MarkerIDPolicy>::hasEqualMarkerID (markerID_Type const& markerID) const
 {
-    return MarkerIDPolicy::EqualFlags(markerID,M_markerID);
+    return MarkerIDPolicy::EqualFlags (markerID, M_markerID);
 }
 
 template <typename MarkerIDPolicy>
-void Marker<MarkerIDPolicy>::showMe( std::ostream & output) const
+void Marker<MarkerIDPolicy>::showMe ( std::ostream& output) const
 {
-	if ( M_markerID == nullMarkerID() )
-		output << "UNSET";
-	else
-		output << M_markerID;
+    if ( M_markerID == nullMarkerID() )
+    {
+        output << "UNSET";
+    }
+    else
+    {
+        output << M_markerID;
+    }
 }
 
 } //Namespace LifeV

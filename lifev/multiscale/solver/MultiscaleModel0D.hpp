@@ -101,7 +101,7 @@ public:
     /*!
      * @param fileName Name of data file.
      */
-    void setupData( const std::string& fileName );
+    void setupData ( const std::string& fileName );
 
     //! Setup the model.
     void setupModel();
@@ -149,19 +149,28 @@ public:
     /*!
      * @return BCInterface container
      */
-    bcInterface_Type& bcInterface() { return *M_bc; }
+    bcInterface_Type& bcInterface()
+    {
+        return *M_bc;
+    }
 
     //! Get the data container of the model
     /*!
      * @return data container
      */
-    data_Type& data() const { return *M_data; }
+    data_Type& data() const
+    {
+        return *M_data;
+    }
 
     //! Get the solver of the model
     /*!
      * @return solver
      */
-    solver_Type& solver() const { return *M_solver; }
+    solver_Type& solver() const
+    {
+        return *M_solver;
+    }
 
     //@}
 
@@ -177,7 +186,7 @@ private:
      *
      * @param fileName File name of the specific model.
      */
-    void setupGlobalData( const std::string& fileName );
+    void setupGlobalData ( const std::string& fileName );
 
     //@}
 

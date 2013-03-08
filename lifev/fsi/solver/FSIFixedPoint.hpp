@@ -79,17 +79,17 @@ public:
     //typedef super::fluid_Type               fluid_Type;
     typedef super::solid_Type               solid_Type;
 
-//     //! OBSOLETE typedefs
-//     //typedef super::fluidBchandler_Type      fluidBchandler_Type;
+    //     //! OBSOLETE typedefs
+    //     //typedef super::fluidBchandler_Type      fluidBchandler_Type;
 
-//     typedef super::fluid_Type               fluid_type;
-//     typedef super::solid_Type               solid_type;
-//     typedef super::vector_Type              vector_Type;
+    //     typedef super::fluid_Type               fluid_type;
+    //     typedef super::solid_Type               solid_type;
+    //     typedef super::vector_Type              vector_Type;
 
-//     typedef super::fluidBchandler_Type      bchandler_type;
+    //     typedef super::fluidBchandler_Type      bchandler_type;
 
-//     typedef fluid_Type::matrix_Type         matrix_types;
-//     typedef fluid_Type::matrixPtr_Type      matrix_ptrtype;
+    //     typedef fluid_Type::matrix_Type         matrix_types;
+    //     typedef fluid_Type::matrixPtr_Type      matrix_ptrtype;
 
     //@}
 
@@ -126,9 +126,9 @@ public:
        \param disp: current unknown solution
        \param iter: nonlinear iteration counter. The part of th rhs related to the time discretization is computed only for iter=0
     */
-    void evalResidual(vector_Type&        _res,
-                      const vector_Type&  _disp,
-                      const UInt           _iter);
+    void evalResidual (vector_Type&        _res,
+                       const vector_Type&  _disp,
+                       const UInt           _iter);
 
 
     //! sets the space discretization parameters
@@ -145,7 +145,7 @@ public:
     void setupFluidSolid();
 
     //! initializes the GetPot data file
-    void setDataFile( GetPot const& data );
+    void setDataFile ( GetPot const& data );
 
     //! register the product for the factory
     void registerMyProducts( );
@@ -161,7 +161,7 @@ private:
     //! @name Private Methods
     //@{
 
-    void eval( const vector_Type& disp, UInt status );
+    void eval ( const vector_Type& disp, UInt status );
 
     //@}
 
@@ -174,7 +174,10 @@ private:
 }; // end class fixedPointBase
 
 
-inline FSIOperator* createFP() { return new FSIFixedPoint();}
+inline FSIOperator* createFP()
+{
+    return new FSIFixedPoint();
+}
 namespace
 {
 //static bool registerFP = FSIOperator::FSIFactory_Type::instance().registerProduct( "fixedPoint", &createFP );
