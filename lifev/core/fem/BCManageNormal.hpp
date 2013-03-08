@@ -118,17 +118,6 @@ public:
     //! Build the rotation matrix
     /*!
      *  This method calculates the normal and tangential vectors and builds the rotation matrix
-        @param dof The DOF object
-        @param currentBdFE the current boundary finite element
-        @param systemMatrix The system matrix
-        @param offset The boundary condition offset
-        @param commPtr pointer to Epetra_Comm object
-     */
-    void build (const DOF& dof, CurrentFEManifold& currentBdFE, matrix_Type& systemMatrix, UInt offset, MapEpetra::comm_ptrtype& commPtr);
-
-    //! Build the rotation matrix
-    /*!
-     *  This method calculates the normal and tangential vectors and builds the rotation matrix
         @param mesh The mesh
         @param dof The DOF object
         @param currentBdFE the current boundary finite element
