@@ -67,7 +67,7 @@ int main ( int argc, char* argv[] )
 
     // Loading data
     GetPot command_line (argc, argv);
-    GetPot dataFile ( command_line.follow ("data", 2, "-f", "--file" ) );
+    GetPot dataFile ( command_line.follow ("data_neighborsRadius", 2, "-f", "--file" ) );
 
     // Loading mesh
     MeshData meshData;
