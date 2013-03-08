@@ -447,10 +447,9 @@ void FSIMonolithic::setVectorInStencils ( const vectorPtr_Type& vel,
 
 }
 
-
 void FSIMonolithic::setFluidVectorInStencil ( const vectorPtr_Type& vel,
                                               const vectorPtr_Type& pressure,
-                                              const UInt iter)
+                                              const UInt /*iter*/ )
 {
 
     //The fluid and solid TimeAdvance classes have a stencil of dimension
