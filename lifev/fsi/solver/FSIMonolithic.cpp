@@ -161,6 +161,8 @@ FSIMonolithic::setupFluidSolid( )
     M_BCh_flux = M_BCh_u; // For the moment M_BCh_u contains only the fluxes.
     M_fluxes = M_BCh_u->size( );
 
+    std::cout << "I AM SETTING THE FLUXES " << std::endl;
+
     setupFluidSolid ( M_fluxes );
 
     M_BCh_flux->setOffset (M_offset - M_fluxes);
@@ -204,6 +206,8 @@ FSIMonolithic::setupFluidSolid ( UInt const fluxes )
     M_offset = M_uFESpace->dof().numTotalDof() * nDimensions + fluxes +  M_pFESpace->dof().numTotalDof();
     M_solidAndFluidDim = M_offset + M_dFESpace->dof().numTotalDof() * nDimensions;
     M_BCh_d->setOffset (M_offset);
+
+    M_fluxes = fluxes;
 }
 
 // ===================================================
@@ -675,6 +679,7 @@ FSIMonolithic::assembleSolidBlock ( UInt iter, const vector_Type& solution )
 
     // Resetting the solidBlockPrec term
     M_solidBlockPrec.reset(new matrix_Type(*M_monolithicMap, 1));
+    *M_solidBlockPrec *= 0.0;
 
     // When ET for structures is used, there is not offset parameter. This is why
     // we need to extract portions of vector and mount them in the proper parts.
@@ -740,7 +745,6 @@ FSIMonolithic::assembleSolidBlock ( UInt iter, const vector_Type& solution )
     M_solidBlockPrec->globalAssemble();
 
     *M_solidBlockPrec *= M_solid->rescaleFactor();
-    //M_solidBlockPrec->spy("solidBlockMatrix");
 }
 
 void
