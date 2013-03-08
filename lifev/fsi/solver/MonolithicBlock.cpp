@@ -73,7 +73,7 @@ void MonolithicBlock::couplingMatrix (matrixPtr_Type& bigMatrix,
             {
                 if ( numerationInterface->map().map (Unique)->LID (ITrow->second /*+ dim*solidDim*/) >= 0 ) //to avoid repeated stuff
                 {
-                    bigMatrix->addToCoefficient (solidFluidInterface + ITrow->first + dim * problem[2]->dof().numTotalDof(), offset[0] + ITrow->second + dim * problem[0]->dof().numTotalDof(), (-value) *rescaleFactor/*scaling of the solid matrix*/ );
+                    bigMatrix->addToCoefficient (solidFluidInterface + ITrow->first + dim * problem[2]->dof().numTotalDof(), offset[0] + ITrow->second + dim * problem[0]->dof().numTotalDof(), (-value) *rescaleFactor/*scaling of the solid matrix*/);
                 }
             }
         }

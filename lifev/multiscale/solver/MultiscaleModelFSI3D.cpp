@@ -684,7 +684,7 @@ MultiscaleModelFSI3D::initializeSolution()
         }
 
         // Read first fluid displacement
-        M_importerSolid->importFromTime ( M_data->dataSolid()->dataTime()->initialTime() );
+        M_importerFluid->importFromTime ( M_data->dataSolid()->dataTime()->initialTime() );
 
         //This is ugly but it's the only way I have figured out at the moment
         if ( M_data->method().compare ("monolithicGI") == 0 )
