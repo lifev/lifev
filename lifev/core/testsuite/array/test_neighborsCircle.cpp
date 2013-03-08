@@ -60,7 +60,7 @@ int main ( int argc, char* argv[] )
 #endif
 
     GetPot command_line (argc, argv);
-    GetPot dataFile ( command_line.follow ("data", 2, "-f", "--file" ) );
+    GetPot dataFile ( command_line.follow ("data_neighborsCircle", 2, "-f", "--file" ) );
 
     typedef LinearTriangle                     geoElement_Type;
     typedef RegionMesh < geoElement_Type >     mesh_Type;

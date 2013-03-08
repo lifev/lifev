@@ -12,24 +12,21 @@
 ### DATA FILE #####################################################################################
 ###################################################################################################
 
-    [problem]
+[space_discretization]
+mesh_dir      = ./                    # the directory where the mesh file is
+mesh_file     = unstructured_square.msh
+mesh_type     = .msh
+mesh_faces    = all
+verbose       = 0                     # verbose during mesh-reading
+# 0 -> tetra, 1 -> hexa
+element_shape = 0
+[../]
 
-    [space_discretization]
-    mesh_dir      = ./                    # the directory where the mesh file is
-    mesh_file     = unstructured_square.msh
-    mesh_type     = .msh
-    mesh_faces    = all
-    verbose       = 0                     # verbose during mesh-reading
-    # 0 -> tetra, 1 -> hexa
-    element_shape = 0
-    [../]
-
-    [exporter]
-    type       = hdf5
-    folder     = ./
-    multimesh  = false
-    start      = 0
-    save       = 1
-    file_name  = Neighbors
-    [../]
-
+[exporter]
+type       = hdf5
+folder     = ./
+multimesh  = false
+start      = 0
+save       = 1
+file_name  = Neighbors
+[../]
