@@ -156,7 +156,7 @@ int main (int argc, char** argv )
     vectorPtr_Type Fluid_solution (new vector_Type (Fluid_fieldFESpace->map(), Unique) );
     vectorPtr_Type Fluid_solution_rbf (new vector_Type (Fluid_fieldFESpace->map(), Unique) );
 
-    /*
+
     // INITIALIZATION: THE FIRST TWO ARGUMENTS ARE RELATED TO THE MESHES WHERE WE KNOW THE FUNCTION. THE 3RD AND THE 4TH TO THE MESHES WHERE
     // WE ARE GOING TO EVALUATE THE FUNCTION. THE LAST IS USED TO SPECIFY THE FLAGS, SO THOSE PARTS OF THE MESHES THAT WE ARE CONSIDERING.
     interpolationPtr_Type RBFInterpolant ( new interpolation_Type ( Solid_mesh_ptr,
@@ -164,7 +164,7 @@ int main (int argc, char** argv )
                                                                     Fluid_mesh_ptr,
                                                                     Fluid_localMesh,
                                                                     flags) );
-    */
+
     /*
     // IN QUESTO CASO USI IL RAGGIO E NON LA SELEZIONE AUTOMATICA, SOLO CHE DIVIDI SEMPRE PER L'INTERPOLANTE DI 1
     double radius = 2*(double)MeshUtility::MeshStatistics::computeSize(*Solid_mesh_ptr).minH; // maxH, meanH
@@ -176,6 +176,7 @@ int main (int argc, char** argv )
                                                                       radius) );
 
     */
+    /*
     // IN QUESTO CASO USI IL RAGGIO E NON LA SELEZIONE AUTOMATICA, SOLO CHE DIVIDI SEMPRE PER L'INTERPOLANTE DI 1
     double radius = (double)MeshUtility::MeshStatistics::computeSize (*Solid_mesh_ptr).minH; // maxH, meanH
     interpolationSPtr_Type RBFInterpolant ( new interpolationS_Type ( Solid_mesh_ptr,
@@ -184,7 +185,7 @@ int main (int argc, char** argv )
                                                                       Fluid_localMesh,
                                                                       flags,
                                                                       radius) );
-
+    */
 
     // LOADING INFORMATION ABOUT THE TWO VECTORS INVOLVED IN THE INTERPOLATION PROCESS
     RBFInterpolant->setupRBFData (Solid_vector, Fluid_solution, dataFile, belosList);

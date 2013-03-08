@@ -313,7 +313,7 @@ void RBFInterpolationStandard<Mesh>::InterpolationOperator()
     delete GlobalID;
 
     M_interpolationOperator.reset (new matrix_Type (*M_interpolationOperatorMap, InterpolationOperator) );
-    M_interpolationOperator->spy ("M_interpolationOperator.m");
+    M_interpolationOperator->spy ("M_interpolationOperator");
 
 }
 

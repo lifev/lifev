@@ -370,7 +370,7 @@ void RBFInterpolationRadius<Mesh>::ProjectionOperator()
     delete GlobalID;
 
     M_projectionOperator.reset (new matrix_Type (*M_projectionOperatorMap, ProjectionOperator) );
-    M_projectionOperator->spy ("M_projectionOperator.m");
+    M_projectionOperator->spy ("M_projectionOperator");
 }
 
 template <typename Mesh>
