@@ -713,15 +713,15 @@ void Problem::checkResultGI (const LifeV::Real& time)
 
     //Extract the previous solution
     LifeV::Real dispNorm = M_fsi->displacement().norm2();
-    if (time == 0.006 &&      ( (dispNorm - 103036) / dispNorm * (dispNorm - 103036) / dispNorm < 1e-5 ) )
+    if (time == 0.006 &&      ( (dispNorm - 104264) / dispNorm * (dispNorm - 104264) / dispNorm < 1e-5 ) )
     {
         resultCorrect (time);
     }
-    else if (time == 0.007 && ( (dispNorm - 99720.8) / dispNorm * (dispNorm - 99720.8) / dispNorm < 1e-5 ) )
+    else if (time == 0.007 && ( (dispNorm - 101014) / dispNorm * (dispNorm - 101014) / dispNorm < 1e-5 ) )
     {
         resultCorrect (time);
     }
-    else if (time == 0.008 && ( (dispNorm - 97007.4) / dispNorm * (dispNorm - 97007.4) / dispNorm < 1e-5 ) )
+    else if (time == 0.008 && ( (dispNorm - 98183.7) / dispNorm * (dispNorm - 98183.7) / dispNorm < 1e-5 ) )
     {
         resultCorrect (time);
     }
