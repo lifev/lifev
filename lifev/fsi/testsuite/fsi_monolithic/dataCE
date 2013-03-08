@@ -98,11 +98,11 @@ type       = hdf5    # format of the exported solution (ensight, hdf5, vtk)
 
 ** #exporter for the fluid
     [./fluid]
-    filename   = fluid # name of the postprocessed file
+    filename   = fluidGI # name of the postprocessed file
 
 ** #exporter for the solid
     [../solid]
-    filename   = solid  # name of the postprocessed file
+    filename   = solidGI  # name of the postprocessed file
     [../] # solid
 [../] # exporter
 

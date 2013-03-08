@@ -713,15 +713,15 @@ void Problem::checkResultGI (const LifeV::Real& time)
 
     //Extract the previous solution
     LifeV::Real dispNorm = M_fsi->displacement().norm2();
-    if (time == 0.006 &&      ( (dispNorm - 120614) / dispNorm * (dispNorm - 120614) / dispNorm < 1e-5 ) )
+    if (time == 0.006 &&      ( (dispNorm - 104264) / dispNorm * (dispNorm - 104264) / dispNorm < 1e-5 ) )
     {
         resultCorrect (time);
     }
-    else if (time == 0.007 && ( (dispNorm - 116469) / dispNorm * (dispNorm - 116469) / dispNorm < 1e-5 ) )
+    else if (time == 0.007 && ( (dispNorm - 101014) / dispNorm * (dispNorm - 101014) / dispNorm < 1e-5 ) )
     {
         resultCorrect (time);
     }
-    else if (time == 0.008 && ( (dispNorm - 112765) / dispNorm * (dispNorm - 112765) / dispNorm < 1e-5 ) )
+    else if (time == 0.008 && ( (dispNorm - 98183.7) / dispNorm * (dispNorm - 98183.7) / dispNorm < 1e-5 ) )
     {
         resultCorrect (time);
     }
@@ -732,15 +732,15 @@ void Problem::checkResultGCE (const LifeV::Real& time)
 
     //Extract the previous solution
     LifeV::Real dispNorm = M_fsi->displacement().norm2();
-    if (time == 0.006 &&      (dispNorm - 120293) / dispNorm * (dispNorm - 120293) / dispNorm < 1e-5)
+    if (time == 0.006 &&      (dispNorm - 89122.6) / dispNorm * (dispNorm - 89122.6) / dispNorm < 1e-5)
     {
         resultCorrect (time);
     }
-    else if (time == 0.007 && (dispNorm - 116022) / dispNorm * (dispNorm - 116022) / dispNorm < 1e-5)
+    else if (time == 0.007 && (dispNorm - 83260.4) / dispNorm * (dispNorm - 83260.4) / dispNorm < 1e-5)
     {
         resultCorrect (time);
     }
-    else if (time == 0.008 && (dispNorm - 112186) / dispNorm * (dispNorm - 112186) / dispNorm < 1e-5)
+    else if (time == 0.008 && (dispNorm - 79342.5) / dispNorm * (dispNorm - 79342.5) / dispNorm < 1e-5)
     {
         resultCorrect (time);
     }

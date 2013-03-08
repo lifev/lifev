@@ -129,7 +129,7 @@ FSIMonolithicGE::evalResidual ( vector_Type&       res,
         this->moveMesh (meshDispRepeated);
 
         //here should use extrapolationFirstDerivative instead of velocity
-        vector_Type meshVelocityRepeated ( this->M_ALETimeAdvance->nextFirstDerivative (  M_meshMotion->disp() ), Repeated );
+        vector_Type meshVelocityRepeated ( this->M_ALETimeAdvance->firstDerivative (  M_meshMotion->disp() ), Repeated );
         vector_Type interpolatedMeshVelocity (this->M_uFESpace->map() );
 
         interpolateVelocity ( meshVelocityRepeated, interpolatedMeshVelocity );
@@ -211,7 +211,7 @@ void FSIMonolithicGE::setALEVectorInStencil (const vectorPtr_Type& fluidDisp, co
 {
 
     //ALE problem
-    //The shared_pointer for the vectors has to be trasformed into a pointer to VectorEpetra
+    //The shared_pointer for the vectors has to be transformed into a pointer to VectorEpetra
     //That is the type of pointers that are used in TimeAdvance
     vector_Type* normalPointerToALEVector ( new vector_Type (*fluidDisp) );
     (M_ALETimeAdvance->stencil() ).push_back ( normalPointerToALEVector );
@@ -224,9 +224,9 @@ void FSIMonolithicGE::updateSolution ( const vector_Type& solution )
 
     //This updateRHSFirstDerivative has to be done before the shiftRight
     //In fact it updates the right hand side of the velocity using the
-    //previous times. The method velocity() uses it and then, the compuation
+    //previous times. The method velocity() uses it and then, the computation
     //of the velocity is done using the current time and the previous times.
-    M_ALETimeAdvance->updateRHSFirstDerivative ( M_data->dataFluid()->dataTime()->timeStep() );
+    //M_ALETimeAdvance->updateRHSFirstDerivative ( M_data->dataFluid()->dataTime()->timeStep() );
     M_ALETimeAdvance->shiftRight ( this->M_meshMotion->disp() );
 }
 

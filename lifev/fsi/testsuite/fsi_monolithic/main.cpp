@@ -485,19 +485,19 @@ void Problem::checkCEResult (const LifeV::Real& time)
     {
         Problem::resultCorrect (time);
     }
-    else if (time == 0.001 && (dispNorm - 147017) / dispNorm * (dispNorm - 147017) / dispNorm < 1e-3)
+    else if (time == 0.001 && (dispNorm - 147532) / dispNorm * (dispNorm - 147532) / dispNorm < 1e-3)
     {
         Problem::resultCorrect (time);
     }
-    else if (time == 0.002 && (dispNorm - 108341) / dispNorm * (dispNorm - 108341) / dispNorm < 1e-3)
+    else if (time == 0.002 && (dispNorm - 108216) / dispNorm * (dispNorm - 108216) / dispNorm < 1e-3)
     {
         Problem::resultCorrect (time);
     }
-    else if (time == 0.003 && (dispNorm - 106092) / dispNorm * (dispNorm - 106092) / dispNorm < 1e-3)
+    else if (time == 0.003 && (dispNorm - 105437) / dispNorm * (dispNorm - 105437) / dispNorm < 1e-3)
     {
         Problem::resultCorrect (time);
     }
-    else if (time == 0.004 && (dispNorm - 105614) / dispNorm * (dispNorm - 105614) / dispNorm < 1e-3)
+    else if (time == 0.004 && (dispNorm - 104585) / dispNorm * (dispNorm - 104585) / dispNorm < 1e-3)
     {
         Problem::resultCorrect (time);
     }
@@ -516,15 +516,15 @@ void Problem::checkGCEResult (const LifeV::Real& time)
     {
         Problem::resultCorrect (time);
     }
-    else if (time == 0.002 && (dispNorm - 90957) / dispNorm * (dispNorm - 90957) / dispNorm < 1e-5)
+    else if (time == 0.002 && (dispNorm - 91003.1) / dispNorm * (dispNorm - 91003.1) / dispNorm < 1e-5)
     {
         Problem::resultCorrect (time);
     }
-    else if (time == 0.003 && (dispNorm - 90070.5) / dispNorm * (dispNorm - 90070.5) / dispNorm < 1e-5)
+    else if (time == 0.003 && (dispNorm - 90179.9) / dispNorm * (dispNorm - 90179.9) / dispNorm < 1e-5)
     {
         Problem::resultCorrect (time);
     }
-    else if (time == 0.004 && (dispNorm - 88162.4) / dispNorm * (dispNorm - 88162.4) / dispNorm < 1e-5)
+    else if (time == 0.004 && (dispNorm - 88319.3) / dispNorm * (dispNorm - 88319.3) / dispNorm < 1e-5)
     {
         Problem::resultCorrect (time);
     }

@@ -392,7 +392,7 @@ public:
      */
     void exportSolidVelocity ( vector_Type& solidVelocity )
     {
-        solidVelocity = M_solidTimeAdvance->firstDerivative();
+        solidVelocity.subset ( M_solidTimeAdvance->firstDerivative(), M_offset );
         solidVelocity *= M_solid->rescaleFactor();
     }
 
@@ -403,7 +403,7 @@ public:
      */
     void exportSolidAcceleration ( vector_Type& solidAcceleration )
     {
-        solidAcceleration = M_solidTimeAdvance->secondDerivative();
+        solidAcceleration.subset ( M_solidTimeAdvance->secondDerivative(), M_offset );
         solidAcceleration *= M_solid->rescaleFactor();
     }
 

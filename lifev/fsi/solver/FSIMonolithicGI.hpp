@@ -146,7 +146,7 @@ public:
         //In fact it updates the right hand side of the velocity using the
         //previous times. The method velocity() uses it and then, the compuation
         //of the velocity is done using the current time and the previous times.
-        M_ALETimeAdvance->updateRHSFirstDerivative ( M_data->dataFluid()->dataTime()->timeStep() );
+        //M_ALETimeAdvance->updateRHSFirstDerivative ( M_data->dataFluid()->dataTime()->timeStep() );
         M_ALETimeAdvance->shiftRight ( *displacementToSave );
     }
 

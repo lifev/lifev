@@ -143,6 +143,7 @@ FSIOperator::FSIOperator() :
     M_linearSolid                        ( false ),
     M_fluidLeader                        ( ),
     M_solidLeader                        ( ),
+    M_aleOrder                           ( std::string ("P1") ),
     M_structureNonLinear                 (false)
 {
 }
@@ -169,9 +170,10 @@ FSIOperator::setDataFile ( const GetPot& dataFile )
     M_dataFile = dataFile;
 
     M_fluidTimeAdvanceMethod =  dataFile ( "fluid/time_discretization/method", "BDF");
+    M_aleOrder               =  dataFile ( "fluid/space_discretization/ale_order", "P1");
     M_solidTimeAdvanceMethod =  dataFile ( "solid/time_discretization/method", "BDF");
-    M_ALETimeAdvanceMethod = dataFile ("mesh_motion/time_discretization/method", "BDF");
-    M_structureNonLinear   = M_data->dataSolid()->solidType().compare ("linearVenantKirchhoff");
+    M_ALETimeAdvanceMethod   = dataFile ("mesh_motion/time_discretization/method", "BDF");
+    M_structureNonLinear     = M_data->dataSolid()->solidType().compare ("linearVenantKirchhoff");
     this->setupTimeAdvance ( dataFile );
 }
 
@@ -179,15 +181,21 @@ void
 FSIOperator::setupFEspace()
 {
     Displayer disp (M_epetraComm);
-    disp.leaderPrint ("FSI-  Setting ReferenceFE and QuadratureRule ...           ");
+    disp.leaderPrint ("FSI-  Setting ReferenceFE and QuadratureRule ...           \n");
 
     std::string uOrder = M_data->dataFluid()->uOrder();
     std::string pOrder = M_data->dataFluid()->pOrder();
     std::string dOrder = M_data->dataSolid()->order();
-    std::string meshOrder = M_meshDataFluid->mOrder();
 
+    ASSERT ( ! ( (!uOrder.compare ("P2") && !dOrder.compare ("P1") ) ), "You are using P2 FE for the fluid velocity and P1 FE for the structure: when the coupling is enforced only in the P1 nodes, the energy is not conserved across the interface." );
+    ASSERT ( ! ( (!uOrder.compare ("P1") && !dOrder.compare ("P2") ) ), "You are using P1 FE for the fluid velocity and P2 FE for the structure: when the coupling is enforced only in the P1 nodes, the energy is not conserved across the interface." );
+    ASSERT ( ! ( (!uOrder.compare ("P1Bubble") && !dOrder.compare ("P2") ) ), "You are using P2 FE for the fluid velocity and P1 FE for the structure: when the coupling is enforced only in the P1 nodes, the energy is not conserved across the interface." );
 
-    ASSERT ( meshOrder.compare ("P2"), "Only P1 FESpace can be used for the mesh motion!") ;
+    if ( M_aleOrder.compare ( M_meshDataFluid->mOrder() ) )
+    {
+        disp.leaderPrint ("FSI-  WARNING! The mesh order is different\n");
+        disp.leaderPrint ("      => The nodes of the mesh will not entirely follow the computed displacement.\n");
+    }
 
     const ReferenceFE*    refFE_vel (0);
     const QuadratureRule* qR_vel (0);
@@ -262,22 +270,27 @@ FSIOperator::setupFEspace()
         ERROR_MSG (dOrder + " structure FE not implemented yet.");
     }
 
-
-    if ( meshOrder.compare ("P2") == 0 )
+    if ( M_aleOrder.compare ("P2") == 0 )
     {
         refFE_mesh = &feTetraP2;
         qR_mesh    = &quadRuleTetra15pt; // DoE 5
         bdQr_mesh  = &quadRuleTria3pt;   // DoE 2
     }
-    else if ( meshOrder.compare ("P1") == 0 )
+    else if ( M_aleOrder.compare ("P1") == 0 )
     {
         refFE_mesh = &feTetraP1;
         qR_mesh    = &quadRuleTetra4pt;  // DoE 2
         bdQr_mesh  = &quadRuleTria3pt;   // DoE 2
     }
+    else if ( M_aleOrder.compare ("P1Bubble") == 0 )
+    {
+        refFE_mesh = &feTetraP1bubble;
+        qR_mesh    = &quadRuleTetra64pt; // DoE 2
+        bdQr_mesh  = &quadRuleTria3pt;   // DoE 2
+    }
     else
     {
-        ERROR_MSG (dOrder + " mesh FE not implemented yet.");
+        ERROR_MSG (M_aleOrder + " mesh FE not implemented yet.");
     }
 
     disp.leaderPrint ("done\n");
@@ -600,7 +613,7 @@ void FSIOperator::couplingVariableExtrap( )
 }
 
 void
-FSIOperator::updateSolution ( const vector_Type& solution )
+FSIOperator::updateSolution ( const vector_Type& /* solution */ )
 {
     if ( this->isFluid() )
     {
@@ -719,7 +732,7 @@ FSIOperator::setupTimeAdvance ( const dataFile_Type& dataFile )
         parameters[0]  = dataFile ("solid/time_discretization/theta", 0.25);
         parameters[1]  = dataFile ("solid/time_discretization/zeta", 0.5);
         UInt order = dataFile ("solid/time_discretization/BDF_order", 1);
-        Real rhoInfty = dataFile ("solid/time_discretization/rhoInf", 1.);
+        // Real rhoInfty = dataFile("solid/time_discretization/rhoInf", 1.);
         std::string type    = dataFile ("mesh_motion/time_discretization/typeOfGeneralizedAlpha", "HHT");
 
 
