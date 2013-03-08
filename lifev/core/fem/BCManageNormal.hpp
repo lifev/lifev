@@ -231,7 +231,7 @@ private:
         @param systemMatrix the matrix of the problem
         @param offset that will be used if there is more than one unknown to recover the global ID
      */
-    void M_buildRotationMatrix (const MapEpetra& map, UInt offset);
+    void M_buildRotationMatrix (const MapEpetra& systemMatrixMap, UInt offset = 0);
     //@}
 
     //! true when there are stored normals
