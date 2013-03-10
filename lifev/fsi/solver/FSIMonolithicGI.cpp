@@ -112,7 +112,7 @@ FSIMonolithicGI::evalResidual ( vector_Type&       res,
                                 const UInt          iter )
 {
     // disp here is the current solution guess (u,p,ds,df)
-
+ 
     res = 0.;//this is important. Don't remove it!
 
     M_uk.reset (new vector_Type ( disp ) );
@@ -297,23 +297,23 @@ void FSIMonolithicGI::setupBlockPrec()
 
     // case of exponential and neohookean model
     // todo: pass to boolean variable for Nonlinear models ( i.e. for vector formulation )
-    if ( M_data->dataSolid()->getUseExactJacobian() && ( M_data->dataSolid()->solidType().compare( "exponential" )
-    							 && M_data->dataSolid()->solidType().compare( "neoHookean" ) ) )
-    {
-        M_solid->material()->updateJacobianMatrix ( *M_uk * M_solid->rescaleFactor(),
-                                                    dataSolid(),
-                                                    M_solid->mapMarkersVolumes(),
-                                                    M_solid->mapMarkersIndexes(),
-                                                    M_solid->displayerPtr() ); // computing the derivatives if nonlinear (comment this for inexact Newton);
-        M_solidBlockPrec.reset ( new matrix_Type ( *M_monolithicMap,
-                                                   1 ) );
-        *M_solidBlockPrec += *M_solid->massMatrix();
-        *M_solidBlockPrec += *M_solid->material()->jacobian();
-        M_solidBlockPrec->globalAssemble();
-        *M_solidBlockPrec *= M_solid->rescaleFactor();
+    // if ( M_data->dataSolid()->getUseExactJacobian() && ( M_data->dataSolid()->solidType().compare( "exponential" )
+    // 							 && M_data->dataSolid()->solidType().compare( "neoHookean" ) ) )
+    // {
+    //     M_solid->material()->updateJacobianMatrix ( *M_uk * M_solid->rescaleFactor(),
+    //                                                 dataSolid(),
+    //                                                 M_solid->mapMarkersVolumes(),
+    //                                                 M_solid->mapMarkersIndexes(),
+    //                                                 M_solid->displayerPtr() ); // computing the derivatives if nonlinear (comment this for inexact Newton);
+    //     M_solidBlockPrec.reset ( new matrix_Type ( *M_monolithicMap,
+    //                                                1 ) );
+    //     *M_solidBlockPrec += *M_solid->massMatrix();
+    //     *M_solidBlockPrec += *M_solid->material()->jacobian();
+    //     M_solidBlockPrec->globalAssemble();
+    //     *M_solidBlockPrec *= M_solid->rescaleFactor();
 
-        M_monolithicMatrix->replace_matrix ( M_solidBlockPrec, 0 );
-    }
+    //     M_monolithicMatrix->replace_matrix ( M_solidBlockPrec, 0 );
+    // }
 
     M_monolithicMatrix->blockAssembling();
 
@@ -326,7 +326,7 @@ void FSIMonolithicGI::setupBlockPrec()
         M_monolithicMatrix->addToGlobalMatrix ( M_shapeDerivativesBlock );
     }
 
-    if ( M_data->dataFluid()->useShapeDerivatives() /* || M_data->dataSolid()->getUseExactJacobian()*/ )
+    if ( M_data->dataFluid()->useShapeDerivatives() || M_data->dataSolid()->getUseExactJacobian() )
     {
         if ( !M_BCh_u->bcUpdateDone() )
             M_BCh_u->bcUpdate ( *M_uFESpace->mesh(),

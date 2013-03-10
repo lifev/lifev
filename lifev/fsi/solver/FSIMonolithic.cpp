@@ -161,8 +161,6 @@ FSIMonolithic::setupFluidSolid( )
     M_BCh_flux = M_BCh_u; // For the moment M_BCh_u contains only the fluxes.
     M_fluxes = M_BCh_u->size( );
 
-    std::cout << "I AM SETTING THE FLUXES " << std::endl;
-
     setupFluidSolid ( M_fluxes );
 
     M_BCh_flux->setOffset (M_offset - M_fluxes);
@@ -689,7 +687,6 @@ FSIMonolithic::assembleSolidBlock ( UInt iter, const vector_Type& solution )
 
     //Multiplying it by the rescale factor
     *solidPortion *= M_solid->rescaleFactor();
-    M_solid->material()->computeStiffness(*solidPortion, 1., M_data->dataSolid(), M_solid->mapMarkersVolumes(), M_solid->mapMarkersIndexes(), M_solid->displayerPtr());
 
     // Start building a block matrix to handle easily the assembled part
     // in the structure module.
