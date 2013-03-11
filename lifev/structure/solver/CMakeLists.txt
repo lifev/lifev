@@ -1,15 +1,7 @@
 SET(solver_HEADERS
-  solver/VenantKirchhoffViscoelasticData.hpp
   solver/StructuralConstitutiveLawData.hpp
   solver/VenantKirchhoffViscoelasticSolver.hpp
-  solver/StructuralConstitutiveLaw.hpp
   solver/StructuralOperator.hpp
-  solver/NeoHookeanMaterialNonLinear.hpp
-  solver/ExponentialMaterialNonLinear.hpp
-  solver/SecondOrderExponentialMaterialNonLinear.hpp
-  solver/VenantKirchhoffMaterialLinear.hpp
-  solver/VenantKirchhoffMaterialNonLinear.hpp
-  solver/VenantKirchhoffMaterialNonLinearPenalized.hpp
   solver/WallTensionEstimator.hpp
   solver/WallTensionEstimatorCylindricalCoordinates.hpp
   solver/WallTensionEstimatorData.hpp
@@ -20,7 +12,6 @@ SET(solver_SOURCES
   solver/StructuralConstitutiveLawData.cpp
   solver/WallTensionEstimatorData.cpp
 CACHE INTERNAL "")
-
 
 SET(LOCAL_HEADERS)
 FOREACH(INC ${solver_HEADERS})
