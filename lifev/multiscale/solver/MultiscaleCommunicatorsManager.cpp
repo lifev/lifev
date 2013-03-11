@@ -334,7 +334,10 @@ MultiscaleCommunicatorsManager::parallelProcessesDistribution ( std::vector<Real
                     if ( totalResources > 0 )
                     {
                         Int availableSlot = multiscaleCoresPerNode - std::fmod ( localNumberOfProcesses[i], multiscaleCoresPerNode );
-                        for ( ; ( availableSlot > 0 && totalResources > 0 ) ; ++localNumberOfProcesses[i], --totalResources );
+                        for ( ; ( availableSlot > 0 && totalResources > 0 ) ; ++localNumberOfProcesses[i], --totalResources )
+                        {
+                            ;
+                        }
                     }
 
                     unoptimized[i] = false;
