@@ -36,8 +36,8 @@
  *
  */
 
-#ifndef _WALLTENSIONCYLINDRICAL_H_
-#define _WALLTENSIONCYLINDRICAL_H_ 1
+#ifndef WALLTENSIONCYLINDRICAL_H
+#define WALLTENSIONCYLINDRICAL_H 1
 
 #include <string>
 #include <sstream>
@@ -74,7 +74,6 @@
 #endif
 #include <lifev/core/filter/ExporterEmpty.hpp>
 
-
 // Structure module include
 #include <lifev/structure/fem/AssemblyElementalStructure.hpp>
 #include <lifev/structure/solver/StructuralConstitutiveLawData.hpp>
@@ -82,8 +81,6 @@
 //Mother class
 #include <lifev/structure/solver/WallTensionEstimatorData.hpp>
 #include <lifev/structure/solver/WallTensionEstimator.hpp>
-
-#include <lifev/eta/fem/ETFESpace.hpp>
 
 namespace LifeV
 {
@@ -107,34 +104,40 @@ public:
     // Data classes
     typedef WallTensionEstimator<Mesh>                    super;
 
+    // Communicator
+    typedef typename super::comm_Type                     comm_Type;
+    typedef typename super::commPtr_Type                  commPtr_Type;
+
+    // FE space
+    typedef typename super::feSpace_Type                  feSpace_Type;
+    typedef typename super::feSpacePtr_Type               feSpacePtr_Type;
+
+    typedef typename super::feSpaceET_Type                feSpaceET_Type;
+    typedef typename super::feSpaceETPtr_Type             feSpaceETPtr_Type;
+
     typedef StructuralConstitutiveLawData                 data_Type;
     typedef WallTensionEstimatorData                      analysisData_Type;
     typedef typename boost::shared_ptr<data_Type>         dataPtr_Type;
     typedef typename boost::shared_ptr<analysisData_Type> analysisDataPtr_Type;
 
     //Matrices 3x3 and std::vector for the invariants
-    typedef Epetra_SerialDenseMatrix                     matrix_Type;
-    typedef boost::shared_ptr<matrix_Type>               matrixPtr_Type;
-    typedef std::vector<LifeV::Real>                     vector_Type;
-    typedef boost::shared_ptr<vector_Type>               vectorPtr_Type;
+    typedef Epetra_SerialDenseMatrix                      matrix_Type;
+    typedef boost::shared_ptr<matrix_Type>                matrixPtr_Type;
+    typedef std::vector<LifeV::Real>                      vector_Type;
+    typedef boost::shared_ptr<vector_Type>                vectorPtr_Type;
 
     // These two are to handle the vector displacement read from hdf5
-    typedef VectorEpetra                                 solutionVect_Type;
-    typedef boost::shared_ptr<VectorEpetra>              solutionVectPtr_Type;
+    typedef VectorEpetra                                  solutionVect_Type;
+    typedef boost::shared_ptr<VectorEpetra>               solutionVectPtr_Type;
 
     // Displayer and Exporter classes
     typedef typename boost::shared_ptr<const Displayer>   displayerPtr_Type;
     typedef typename boost::shared_ptr< Exporter<Mesh> >  exporterPtr_Type;
 
     // Materials
-    typedef StructuralConstitutiveLaw<Mesh>                material_Type;
-    typedef boost::shared_ptr<material_Type>               materialPtr_Type;
+    typedef StructuralConstitutiveLaw<Mesh>               material_Type;
+    typedef boost::shared_ptr<material_Type>              materialPtr_Type;
 
-    typedef ETFESpace< RegionMesh<LinearTetra>, MapEpetra, 3, 3 >  ETFESpace_Type;
-    typedef boost::shared_ptr<ETFESpace_Type>                      ETFESpacePtr_Type;
-
-    typedef FESpace< RegionMesh<LinearTetra>, MapEpetra >          FESpace_Type;
-    typedef boost::shared_ptr<FESpace_Type>                        FESpacePtr_Type;
     //@}
 
 
@@ -146,6 +149,7 @@ public:
     virtual ~WallTensionEstimatorCylindricalCoordinates() {};
 
     //@}
+
 
     //!@name Methods
     //@{
@@ -159,9 +163,9 @@ public:
     */
     void setup ( const dataPtr_Type& dataMaterial,
                  const analysisDataPtr_Type& tensionData,
-                 const FESpacePtr_Type& dFESpace,
-                 const ETFESpacePtr_Type&      dETFESpace,
-                 boost::shared_ptr<Epetra_Comm>&     comm,
+                 const feSpacePtr_Type& FESpace,
+                 const feSpaceETPtr_Type& ETFESpace,
+                 const commPtr_Type& comm,
                  UInt marker);
 
 
@@ -170,25 +174,28 @@ public:
     /*!
       \param NONE FESpace<Mesh, MapEpetra>& copyFESpace
     */
-    void analyzeTensions( );
+    void analyzeTensions();
 
     //! Analyze Tensions: This method computes the Cauchy stress tensor and its principal values. It uses the displacement vector that has to be set
     /*!
       \param NONE
     */
-    void analyzeTensionsRecoveryDisplacementCylindrical ( void );
+    void analyzeTensionsRecoveryDisplacementCylindrical();
 
     //! Analyze Tensions: This method computes the Cauchy stress tensor and its principal values. It uses the displacement vector that has to be set
     /*!
       \param NONE
     */
-    void analyzeTensionsRecoveryEigenvaluesCylindrical ( void );
+    void analyzeTensionsRecoveryEigenvaluesCylindrical();
 
     //! Analyze Tensions: This method computes the Cauchy stress tensor and its principal values. It uses the displacement vector that has to be set
     /*!
       \param NONE
     */
-    void analyzeTensionsRecoveryCauchyStressesCylindrical ( void );
+    void analyzeTensionsRecoveryCauchyStressesCylindrical();
+
+    //@}
+
 
     //! @name Set Methods
     //@{
@@ -220,17 +227,16 @@ protected:
     /*!
       \param NONE
     */
-    void constructGlobalStressVector ( solutionVect_Type& sigmaX, solutionVect_Type& sigmaY, solutionVect_Type& sigmaZ );
+    void constructGlobalStressVector();
 
     //@}
+
 
     //! @name Protected members
     //@{
 
-
-
     //! Elementary matrix for the tensor F
-    matrixPtr_Type                                 M_deformationCylindricalF;
+    matrixPtr_Type M_deformationCylindricalF;
 
     //Construct the matrix of change of variables given the position of the DOF
     matrixPtr_Type M_changeOfVariableMatrix;
@@ -260,13 +266,12 @@ template <typename Mesh>
 void
 WallTensionEstimatorCylindricalCoordinates<Mesh >::setup ( const dataPtr_Type& dataMaterial,
                                                            const analysisDataPtr_Type& tensionData,
-                                                           const FESpacePtr_Type&        dFESpace,
-                                                           const ETFESpacePtr_Type&      dETFESpace,
-                                                           boost::shared_ptr<Epetra_Comm>&     comm,
-                                                           UInt marker)
-
+                                                           const feSpacePtr_Type& FESpace,
+                                                           const feSpaceETPtr_Type& ETFESpace,
+                                                           const commPtr_Type& comm,
+                                                           UInt marker )
 {
-    super::setup (dataMaterial, tensionData, dFESpace, dETFESpace, comm, marker);
+    super::setup (dataMaterial, tensionData, FESpace, ETFESpace, comm, marker);
     M_deformationCylindricalF.reset  ( new matrix_Type ( this->M_FESpace->fieldDim(), this->M_FESpace->fieldDim() ) );
     M_changeOfVariableMatrix.reset   ( new matrix_Type (this->M_FESpace->fieldDim(), this->M_FESpace->fieldDim() ) );
 }
@@ -276,7 +281,7 @@ void
 WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensions ( void )
 {
     //Initialize the global vector to zero
-    * (this->M_globalEigen) *= 0.0;
+    * (this->M_globalEigenvalues) *= 0.0;
     if ( !this->M_analysisData->recoveryVariable().compare ("displacement") )
     {
         analyzeTensionsRecoveryDisplacementCylindrical();
@@ -302,9 +307,9 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensionsRecoveryDispla
     this->M_displayer->leaderPrint ("   Performing the analysis recovering the displacement..., ", this->M_dataMaterial->solidType() );
     this->M_displayer->leaderPrint (" \n*********************************\n  ");
 
-    solutionVectPtr_Type grDisplX ( new solutionVect_Type (* (this->M_localMap) ) );
-    solutionVectPtr_Type grDisplY ( new solutionVect_Type (* (this->M_localMap) ) );
-    solutionVectPtr_Type grDisplZ ( new solutionVect_Type (* (this->M_localMap) ) );
+    solutionVectPtr_Type grDisplX ( new solutionVect_Type (* (this->M_FESpace->mapPtr() ) ) );
+    solutionVectPtr_Type grDisplY ( new solutionVect_Type (* (this->M_FESpace->mapPtr() ) ) );
+    solutionVectPtr_Type grDisplZ ( new solutionVect_Type (* (this->M_FESpace->mapPtr() ) ) );
 
     //Compute the deformation gradient tensor F of the displ field
     super::computeDisplacementGradient ( grDisplX, grDisplY, grDisplZ);
@@ -312,15 +317,14 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensionsRecoveryDispla
     solutionVect_Type grXRep (*grDisplX, Repeated);
     solutionVect_Type grYRep (*grDisplY, Repeated);
     solutionVect_Type grZRep (*grDisplZ, Repeated);
-    solutionVect_Type dRep (* (this->M_displ), Repeated);
+    solutionVect_Type dRep (* (this->M_displacement), Repeated);
 
     //For each of the DOF, the Cauchy tensor is computed.
     //Therefore the tensor C,P, \sigma are computed for each DOF
-    UInt dim = this->M_FESpace->dim();
 
     chrono.start();
 
-    for ( UInt i = 0; i < this->M_FESpace->mesh()->numVolumes(); ++i )
+    for ( UInt i (0); i < this->M_FESpace->mesh()->numVolumes(); ++i )
     {
 
         //Setup quantities
@@ -369,14 +373,14 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensionsRecoveryDispla
             //The Cauchy tensor is symmetric and therefore, the eigenvalues are real
             //Check on the imaginary part of eigen values given by the Lapack method
             Real sum (0);
-            for ( int i = 0; i < this->M_eigenvaluesI.size(); i++ )
+            for ( UInt j (0); j < this->M_eigenvaluesI.size(); ++j )
             {
-                sum += std::abs ( this->M_eigenvaluesI[i] );
+                sum += std::abs ( this->M_eigenvaluesI[j] );
             }
 
             ASSERT ( sum < 1e-6 , "The eigenvalues of the Cauchy stress tensors have to be real!" );
 
-            super::orderEigenvalues ( this->M_eigenvaluesR );
+            std::sort ( this->M_eigenvaluesR.begin(), this->M_eigenvaluesR.end() );
 
             std::cout << "Saving eigenvalues" << i << std::endl;
 
@@ -384,11 +388,11 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensionsRecoveryDispla
             for ( UInt icoor = 0; icoor < this->M_FESpace->fieldDim(); ++icoor )
             {
                 UInt ig = this->M_FESpace->dof().localToGlobalMap ( eleID, iloc ) + icoor * this->M_FESpace->dim() + this->M_offset;
-                (* (this->M_globalEigen) ) (ig) = this->M_eigenvaluesR[icoor];
-                // Int LIDid = this->M_displ->blockMap().LID(ig);
-                // if( this->M_globalEigen->blockMap().LID(ig) != -1  )
+                (* (this->M_globalEigenvalues) ) (ig) = this->M_eigenvaluesR[icoor];
+                // Int LIDid = this->M_displacement->blockMap().LID(ig);
+                // if( this->M_globalEigenvalues->blockMap().LID(ig) != -1  )
                 // {
-                //     Int GIDid = this->M_globalEigen->blockMap().GID(LIDid);
+                //     Int GIDid = this->M_globalEigenvalues->blockMap().GID(LIDid);
 
                 // }
             }
@@ -412,7 +416,7 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensionsRecoveryEigenv
     this->M_displayer->leaderPrint ("   Performing the analysis recovering the tensions..., ", this->M_dataMaterial->solidType() );
     this->M_displayer->leaderPrint (" \n*********************************\n  ");
 
-    solutionVect_Type patchArea (* (this->M_displ), Unique, Add);
+    solutionVect_Type patchArea (* (this->M_displacement), Unique, Add);
     patchArea *= 0.0;
 
     super::constructPatchAreaVector ( patchArea );
@@ -446,7 +450,7 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensionsRecoveryEigenv
     //Vectors for the deformation tensor
     std::vector<matrix_Type> vectorDeformationF (this->M_FESpace->fe().nbFEDof(), * (this->M_deformationF) );
     //Copying the displacement field into a vector with repeated map for parallel computations
-    solutionVect_Type dRep (* (this->M_displ), Repeated);
+    solutionVect_Type dRep (* (this->M_displacement), Repeated);
 
     VectorElemental elVecTens (this->M_FESpace->fe().nbFEDof(), this->M_FESpace->fieldDim() );
 
@@ -516,7 +520,7 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensionsRecoveryEigenv
             }
             ASSERT_PRE ( sum < 1e-6 , "The eigenvalues of the Cauchy stress tensors have to be real!" );
 
-            super::orderEigenvalues ( this->M_eigenvaluesR );
+            std::sort ( this->M_eigenvaluesR.begin(), this->M_eigenvaluesR.end() );
 
             //Assembling the local vector
             for ( int coor = 0; coor < this->M_eigenvaluesR.size(); coor++ )
@@ -525,16 +529,16 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensionsRecoveryEigenv
             }
         }
 
-        super::reconstructElementaryVector ( elVecTens, patchAreaR, i );
+        super::reconstructElementaryVector ( elVecTens, patchAreaR, *this->M_FESpace );
 
         //Assembling the local into global vector
         for ( UInt ic = 0; ic < this->M_FESpace->fieldDim(); ++ic )
         {
-            assembleVector (* (this->M_globalEigen), elVecTens, this->M_FESpace->fe(), this->M_FESpace->dof(), ic, this->M_offset +  ic * totalDof );
+            assembleVector (* (this->M_globalEigenvalues), elVecTens, this->M_FESpace->fe(), this->M_FESpace->dof(), ic, this->M_offset +  ic * totalDof );
         }
     }
 
-    this->M_globalEigen->globalAssemble();
+    this->M_globalEigenvalues->globalAssemble();
 
     chrono.stop();
     this->M_displayer->leaderPrint ("Analysis done in: ", chrono.diff() );
@@ -550,18 +554,13 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensionsRecoveryCauchy
     chrono.start();
     UInt dim = this->M_FESpace->dim();
 
-    //Construction of the global tensionsVector
-    solutionVectPtr_Type sigmaX ( new solutionVect_Type (* (this->M_localMap) ) );
-    solutionVectPtr_Type sigmaY ( new solutionVect_Type (* (this->M_localMap) ) );
-    solutionVectPtr_Type sigmaZ ( new solutionVect_Type (* (this->M_localMap) ) );
-
-    constructGlobalStressVector (*sigmaX, *sigmaY, *sigmaZ);
+    constructGlobalStressVector();
 
 
     for ( UInt iDOF = 0; iDOF < ( UInt ) this->M_FESpace->dof().numTotalDof(); iDOF++ )
     {
 
-        if ( this->M_displ->blockMap().LID (iDOF) != -1 ) // The Global ID is on the calling processors
+        if ( this->M_displacement->blockMap().LID (iDOF) != -1 ) // The Global ID is on the calling processors
         {
 
             (* (this->M_sigma) ).Scale (0.0);
@@ -569,11 +568,11 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensionsRecoveryCauchy
             //Extracting the gradient of U on the current DOF
             for ( UInt iComp = 0; iComp < this->M_FESpace->fieldDim(); ++iComp )
             {
-                Int LIDid = this->M_displ->blockMap().LID (iDOF + iComp * dim + this->M_offset);
-                Int GIDid = this->M_displ->blockMap().GID (LIDid);
-                (* (this->M_sigma) ) (iComp, 0) = (*sigmaX) (GIDid); // (d_xX,d_yX,d_zX)
-                (* (this->M_sigma) ) (iComp, 1) = (*sigmaY) (GIDid); // (d_xY,d_yY,d_zY)
-                (* (this->M_sigma) ) (iComp, 2) = (*sigmaZ) (GIDid); // (d_xZ,d_yZ,d_zZ)
+                Int LIDid = this->M_displacement->blockMap().LID (iDOF + iComp * dim + this->M_offset);
+                Int GIDid = this->M_displacement->blockMap().GID (LIDid);
+                (* (this->M_sigma) ) (iComp, 0) = (*this->M_sigmaX) (GIDid); // (d_xX,d_yX,d_zX)
+                (* (this->M_sigma) ) (iComp, 1) = (*this->M_sigmaY) (GIDid); // (d_xY,d_yY,d_zY)
+                (* (this->M_sigma) ) (iComp, 2) = (*this->M_sigmaZ) (GIDid); // (d_xZ,d_yZ,d_zZ)
             }
 
             //Compute the eigenvalue
@@ -588,14 +587,14 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensionsRecoveryCauchy
             }
             ASSERT_PRE ( sum < 1e-6 , "The eigenvalues of the Cauchy stress tensors have to be real!" );
 
-            super::orderEigenvalues ( this->M_eigenvaluesR );
+            std::sort ( this->M_eigenvaluesR.begin(), this->M_eigenvaluesR.end() );
 
             //Save the eigenvalues in the global vector
             for ( UInt icoor = 0; icoor < this->M_FESpace->fieldDim(); ++icoor )
             {
-                Int LIDid = this->M_displ->blockMap().LID (iDOF + icoor * dim + this->M_offset);
-                Int GIDid = this->M_displ->blockMap().GID (LIDid);
-                (* (this->M_globalEigen) ) (GIDid) = this->M_eigenvaluesR[icoor];
+                Int LIDid = this->M_displacement->blockMap().LID (iDOF + icoor * dim + this->M_offset);
+                Int GIDid = this->M_displacement->blockMap().GID (LIDid);
+                (* (this->M_globalEigenvalues) ) (GIDid) = this->M_eigenvaluesR[icoor];
             }
 
         }
@@ -608,7 +607,7 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::analyzeTensionsRecoveryCauchy
 
 template <typename Mesh>
 void
-WallTensionEstimatorCylindricalCoordinates<Mesh >::constructGlobalStressVector ( solutionVect_Type& sigmaX, solutionVect_Type& sigmaY, solutionVect_Type& sigmaZ )
+WallTensionEstimatorCylindricalCoordinates<Mesh >::constructGlobalStressVector()
 {
 
     //Creating the local stress tensors
@@ -619,7 +618,7 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::constructGlobalStressVector (
     LifeChrono chrono;
 
     //Constructing the patch area vector for reconstruction purposes
-    solutionVect_Type patchArea (* (this->M_displ), Unique, Add);
+    solutionVect_Type patchArea (* (this->M_displacement), Unique, Add);
     patchArea *= 0.0;
 
     super::constructPatchAreaVector ( patchArea );
@@ -657,7 +656,7 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::constructGlobalStressVector (
     //Vectors for the deformation tensor
     std::vector<matrix_Type> vectorDeformationF (this->M_FESpace->fe().nbFEDof(), * (this->M_deformationF) );
     //Copying the displacement field into a vector with repeated map for parallel computations
-    solutionVect_Type dRep (* (this->M_displ), Repeated);
+    solutionVect_Type dRep (* (this->M_displacement), Repeated);
 
     chrono.start();
 
@@ -737,23 +736,23 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::constructGlobalStressVector (
 
         }
 
-        super::reconstructElementaryVector ( elVecSigmaX, patchAreaR, i );
-        super::reconstructElementaryVector ( elVecSigmaY, patchAreaR, i );
-        super::reconstructElementaryVector ( elVecSigmaZ, patchAreaR, i );
+        super::reconstructElementaryVector ( elVecSigmaX, patchAreaR, *this->M_FESpace );
+        super::reconstructElementaryVector ( elVecSigmaY, patchAreaR, *this->M_FESpace );
+        super::reconstructElementaryVector ( elVecSigmaZ, patchAreaR, *this->M_FESpace );
 
         //Assembling the three elemental vector in the three global
         for ( UInt ic = 0; ic < this->M_FESpace->fieldDim(); ++ic )
         {
-            assembleVector (sigmaX, elVecSigmaX, this->M_FESpace->fe(), this->M_FESpace->dof(), ic, this->M_offset +  ic * totalDof );
-            assembleVector (sigmaY, elVecSigmaY, this->M_FESpace->fe(), this->M_FESpace->dof(), ic, this->M_offset +  ic * totalDof );
-            assembleVector (sigmaZ, elVecSigmaZ, this->M_FESpace->fe(), this->M_FESpace->dof(), ic, this->M_offset +  ic * totalDof );
+            assembleVector (*this->M_sigmaX, elVecSigmaX, this->M_FESpace->fe(), this->M_FESpace->dof(), ic, this->M_offset +  ic * totalDof );
+            assembleVector (*this->M_sigmaY, elVecSigmaY, this->M_FESpace->fe(), this->M_FESpace->dof(), ic, this->M_offset +  ic * totalDof );
+            assembleVector (*this->M_sigmaZ, elVecSigmaZ, this->M_FESpace->fe(), this->M_FESpace->dof(), ic, this->M_offset +  ic * totalDof );
         }
     }
 
 
-    sigmaX.globalAssemble();
-    sigmaY.globalAssemble();
-    sigmaZ.globalAssemble();
+    this->M_sigmaX->globalAssemble();
+    this->M_sigmaY->globalAssemble();
+    this->M_sigmaZ->globalAssemble();
 }
 
 template <typename Mesh>
@@ -777,7 +776,7 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::moveToCylindricalCoordinates 
     this->M_FESpace->fe().coorMap (x, y, z, xi, eta, zeta);
 
     // Defining the new variables
-    Real radius = std::sqrt ( x * x + y * y  );
+    //Real radius= std::sqrt( x*x + y*y  );
     Real theta = std::atan ( y / x );
 
     //Filling the change of variable Matrix and its derivative with respect to theta
@@ -804,4 +803,4 @@ WallTensionEstimatorCylindricalCoordinates<Mesh >::moveToCylindricalCoordinates 
 
 }
 
-#endif /*_WALLTENSIONCYLINDRICAL_H_ 1*/
+#endif /*WALLTENSIONCYLINDRICAL_H 1*/
