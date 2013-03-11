@@ -681,13 +681,22 @@ public:
         return M_pFESpace;
     }
     //!getter for the solid displacement FESpace
-    const FESpace<mesh_Type, MapEpetra>& dFESpace()               const
+    const FESpace<mesh_Type, MapEpetra>& dFESpace() const
     {
         return *M_dFESpace;
     }
     boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > dFESpacePtr() const
     {
         return M_dFESpace;
+    }
+    //!getter for the solid displacement FESpace
+    const ETFESpace<mesh_Type, MapEpetra, 3, 3>& dFESpaceET() const
+    {
+        return *M_dETFESpace;
+    }
+    boost::shared_ptr<ETFESpace<mesh_Type, MapEpetra, 3, 3> > dFESpaceETPtr() const
+    {
+        return M_dETFESpace;
     }
     //!getter for the harmonic extension solution FESpace
     const FESpace<mesh_Type, MapEpetra>& mmFESpace()              const
