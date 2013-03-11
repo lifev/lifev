@@ -39,11 +39,10 @@ build_clang() {
 #        -D FFI_LIBRARY_DIR:PATH="/usr/lib/i386-linux-gnu" \
 #        \
 
-  make -j${NUM_PROC} || return 1
-
+  make || return 1
 }
 
 install_clang() {
-  make -j${NUM_PROC} install || return 1
+  make install || return 1
 }
 

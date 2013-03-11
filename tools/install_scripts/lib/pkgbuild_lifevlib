@@ -4,7 +4,7 @@
 # date:   13-02-2013
 #
 
-ver='3.1'
+ver='3.4.4'
 
 download_lifevlib() {
   cp ${lifevlib_src}/lifev{,-cmake}.zip $src_dir || return 1
@@ -66,10 +66,10 @@ build_lifevlib() {
     $mox_extra \
     $src_dir || return 1
 
-  make -j$NUM_PROC || return 1
+  make || return 1
 }
 
 install_lifevlib() {
-  make -j$NUM_PROC install || return 1
+  make install || return 1
 }
 

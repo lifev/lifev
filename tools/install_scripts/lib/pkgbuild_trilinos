@@ -113,10 +113,10 @@ build_trilinos() {
     \
     ${src_dir}/trilinos-$ver-Source || return 1
 
-  make -j$NUM_PROC || return 1
+  make || return 1
 }
 
 install_trilinos() {
-  make -j$NUM_PROC install || return 1
+  make install || return 1
 }
 

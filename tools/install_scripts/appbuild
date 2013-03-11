@@ -7,6 +7,9 @@
 # include configuration file
 source libpath
 
+# set globally the number of processes to use
+export MAKEFLAGS="-j$NUM_PROC"
+
 pushd app > /dev/null # app
 
   SRC_DIR=${PWD}
@@ -22,7 +25,7 @@ pushd app > /dev/null # app
     -D LifeV_DIR:PATH=${INSTALL_DIR}/lib/lifevlib \
     ${SRC_DIR} || exit
 
-  make -j${NUM_PROC} || exit
+  make || exit
 
   popd > /dev/null # ${BUILD_DIR}/app
 

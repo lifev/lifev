@@ -23,12 +23,12 @@ build_cmake() {
 
 #    --system-libs \
 
-  make -j${NUM_PROC} || return 1
+  make || return 1
   popd >/dev/null
 }
 
 install_cmake() {
   cd ${src_dir}/cmake-${ver}
-  make -j${NUM_PROC} install || return 1
+  make install || return 1
 }
 

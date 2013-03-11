@@ -26,10 +26,10 @@ build_hdf5() {
     --enable-shared \
     --with-pic || return 1
 
-  make || return 1
+  make -j1 || return 1
 }
 
 install_hdf5() {
-  make -j$NUM_PROC install || return 1
+  make install || return 1
 }
 

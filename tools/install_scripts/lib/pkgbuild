@@ -31,6 +31,9 @@ echo
 
 package_root=$PWD
 
+# set globally the number of processes to use
+export MAKEFLAGS="-j$NUM_PROC"
+
 # iterate on packages
 for(( i=0; i < $package_number; i++ )); do
 

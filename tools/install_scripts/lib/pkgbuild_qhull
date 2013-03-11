@@ -33,11 +33,11 @@ build_qhull() {
     \
     ${src_dir}/qhull-$ver || return 1
   
-  make -j$NUM_PROC || return 1
+  make || return 1
 }
 
 install_qhull() {
-  make -j$NUM_PROC install || return 1
+  make install || return 1
 }
 
 

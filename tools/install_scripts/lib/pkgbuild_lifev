@@ -68,13 +68,13 @@ build_lifev() {
     ${mox_extra} \
     "${lifev_src}" || return 1
 
-  make -j${NUM_PROC}  || return 1
-  make -j${NUM_PROC} doc
+  make || return 1
+  make doc
   popd >/dev/null
 }
 
 install_lifev() {
   pushd "${lifev_build}" >/dev/null
-  make -j${NUM_PROC} install || return 1
+  make install || return 1
   popd >/dev/null
 }
