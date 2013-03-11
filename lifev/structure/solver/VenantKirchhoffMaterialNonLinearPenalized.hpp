@@ -473,7 +473,7 @@ void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::updateNonLinearJacobia
                 this->M_dispETFESpace,
                 this->M_dispETFESpace,
                 value ( - 2.0 / 3.0 ) * pow ( detDeformationGradientTensor, - (2.0 / 3.0) ) * ( value ( 1.0 / 2.0 ) * parameter ( (* (this->M_vectorsParameters) ) [0] ) * firstInvariantCbar -
-                                                                     ( value (3.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [0] ) + parameter ( (* (this->M_vectorsParameters) ) [1] ) ) ) *
+                        ( value (3.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [0] ) + parameter ( (* (this->M_vectorsParameters) ) [1] ) ) ) *
                 dot ( deformationGradientTensor_T, grad (phi_j) ) * dot ( deformationGradientTensor + value (-1.0 / 3.0) * firstInvariantC * deformationGradientTensor_T, grad (phi_i) )
               ) >> jacobian;
 
@@ -520,7 +520,7 @@ void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::updateNonLinearJacobia
                 this->M_dispETFESpace,
                 this->M_dispETFESpace,
                 pow ( detDeformationGradientTensor, - (2.0 / 3.0) ) * ( value ( 1.0 / 2.0 ) * parameter ( (* (this->M_vectorsParameters) ) [0] ) * firstInvariantCbar -
-                                             (value (3.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [0] ) + parameter ( (* (this->M_vectorsParameters) ) [1] ) ) ) *
+                                                                        (value (3.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [0] ) + parameter ( (* (this->M_vectorsParameters) ) [1] ) ) ) *
                 dot (  grad (phi_j) , grad (phi_i) )
               ) >> jacobian;
 
@@ -531,7 +531,7 @@ void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::updateNonLinearJacobia
                 this->M_dispETFESpace,
                 this->M_dispETFESpace,
                 pow ( detDeformationGradientTensor, - (2.0 / 3.0) ) * ( value ( 1.0 / 2.0 ) * parameter ( (* (this->M_vectorsParameters) ) [0] ) * firstInvariantCbar -
-                                             (value (3.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [0] ) + parameter ( (* (this->M_vectorsParameters) ) [1] ) ) ) * value (-2.0 / 3.0) *
+                                                                        (value (3.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [0] ) + parameter ( (* (this->M_vectorsParameters) ) [1] ) ) ) * value (-2.0 / 3.0) *
                 dot (  deformationGradientTensor, grad (phi_j) ) * dot ( deformationGradientTensor_T , grad (phi_i) )
               ) >> jacobian;
 
@@ -543,7 +543,7 @@ void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::updateNonLinearJacobia
                 this->M_dispETFESpace,
                 this->M_dispETFESpace,
                 pow ( detDeformationGradientTensor, - (2.0 / 3.0) ) * ( value ( 1.0 / 2.0 ) * parameter ( (* (this->M_vectorsParameters) ) [0] ) * firstInvariantCbar -
-                                             (value (3.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [0] ) + parameter ( (* (this->M_vectorsParameters) ) [1] ) ) ) * value (1.0 / 3.0) * firstInvariantC *
+                                                                        (value (3.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [0] ) + parameter ( (* (this->M_vectorsParameters) ) [1] ) ) ) * value (1.0 / 3.0) * firstInvariantC *
                 dot (  deformationGradientTensor_T * transpose (grad (phi_j) ) * deformationGradientTensor_T , grad (phi_i) )
               ) >> jacobian;
 
@@ -677,7 +677,7 @@ void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::computeStiffness ( con
                 this->M_dispFESpace->qr(),
                 this->M_dispETFESpace,
                 pow ( detDeformationGradientTensor , (-2.0 / 3.0) ) * ( value (1.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [0] ) * firstInvariantCbar -
-                                             value (3.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [0]) - parameter ( (* (this->M_vectorsParameters) ) [1]  ) ) *
+                                                                        value (3.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [0]) - parameter ( (* (this->M_vectorsParameters) ) [1]  ) ) *
                 dot (  deformationGradientTensor + value ( (-1.0 / 3.0) ) * firstInvariantC *  deformationGradientTensor_T, grad (phi_i) )
               ) >> M_stiff;
 

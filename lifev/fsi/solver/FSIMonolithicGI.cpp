@@ -90,12 +90,12 @@ void FSIMonolithicGI::setupFluidSolid ( UInt const fluxes )
                                        fluxes) );
     M_solid.reset (new solid_Type() );
 
-    M_solid->setup(M_data->dataSolid(),
-                   M_dFESpace,
-                   M_dETFESpace,
-                   M_epetraComm,
-                   M_dFESpace->mapPtr(),
-                   UInt(0)
+    M_solid->setup (M_data->dataSolid(),
+                    M_dFESpace,
+                    M_dETFESpace,
+                    M_epetraComm,
+                    M_dFESpace->mapPtr(),
+                    UInt (0)
                    );
 }
 
@@ -112,7 +112,7 @@ FSIMonolithicGI::evalResidual ( vector_Type&       res,
                                 const UInt          iter )
 {
     // disp here is the current solution guess (u,p,ds,df)
- 
+
     res = 0.;//this is important. Don't remove it!
 
     M_uk.reset (new vector_Type ( disp ) );
@@ -134,9 +134,9 @@ FSIMonolithicGI::evalResidual ( vector_Type&       res,
     vector_Type meshVelocityRepeated ( this->M_ALETimeAdvance->firstDerivative ( *meshDisp ), Repeated );
     vector_Type interpolatedMeshVelocity (this->M_uFESpace->map() );
 
-    interpolateVelocity( meshVelocityRepeated, interpolatedMeshVelocity );
-    vectorPtr_Type fluid( new vector_Type( M_uFESpace->map() ) );
-    M_beta->subset( disp,0 );
+    interpolateVelocity ( meshVelocityRepeated, interpolatedMeshVelocity );
+    vectorPtr_Type fluid ( new vector_Type ( M_uFESpace->map() ) );
+    M_beta->subset ( disp, 0 );
 
     *M_beta -= interpolatedMeshVelocity; // convective term, u^(n+1) - w^(n+1)
 
@@ -180,15 +180,17 @@ FSIMonolithicGI::evalResidual ( vector_Type&       res,
 
     // formulation matrix * vector (i.e. linear elastic )
     // todo: pass to boolean for nonlinear structures
-    if( !(M_data->dataSolid()->lawType().compare("linear") ) )
+    if ( ! (M_data->dataSolid()->lawType().compare ("linear") ) )
+    {
         applyBoundaryConditions();
+    }
 
     M_monolithicMatrix->GlobalAssemble();
 
-    super_Type::evalResidual( disp, M_rhsFull, res, false );
+    super_Type::evalResidual ( disp, M_rhsFull, res, false );
 
     //case for nonlinear laws which are formulated in the residual form
-    if ( !( M_data->dataSolid()->lawType().compare( "nonlinear" ) ) )
+    if ( ! ( M_data->dataSolid()->lawType().compare ( "nonlinear" ) ) )
     {
         res += *M_meshBlock * disp;
 
@@ -298,7 +300,7 @@ void FSIMonolithicGI::setupBlockPrec()
     // case of exponential and neohookean model
     // todo: pass to boolean variable for Nonlinear models ( i.e. for vector formulation )
     // if ( M_data->dataSolid()->getUseExactJacobian() && ( M_data->dataSolid()->solidType().compare( "exponential" )
-    // 							 && M_data->dataSolid()->solidType().compare( "neoHookean" ) ) )
+    //                           && M_data->dataSolid()->solidType().compare( "neoHookean" ) ) )
     // {
     //     M_solid->material()->updateJacobianMatrix ( *M_uk * M_solid->rescaleFactor(),
     //                                                 dataSolid(),

@@ -507,10 +507,16 @@ public:
     }
 
     //! Get the FESpace object
-    FESpace_Type& dispFESpace() {return *M_dispFESpace;}
+    FESpace_Type& dispFESpace()
+    {
+        return *M_dispFESpace;
+    }
 
     //! Get the ETFESpace object
-    ETFESpace_Type& dispETFESpace() {return *M_dispETFESpace;}
+    ETFESpace_Type& dispETFESpace()
+    {
+        return *M_dispETFESpace;
+    }
 
     //! Get the bCHandler object
     bcHandler_Type const& bcHandler() const

@@ -354,34 +354,34 @@ FSIOperator::setupFEspace()
     disp.leaderPrint ("FSI-  Building solid FESpace ...               \n");
     if (this->isSolid() )
     {
-        M_dFESpace.reset( new FESpace<mesh_Type, MapEpetra>( M_solidLocalMesh,
-                                                             dOrder,
-                                                             //*refFE_struct,
-                                                             //*qR_struct,
-                                                             //*bdQr_struct,
-                                                             3,
-                                                             M_epetraComm));
+        M_dFESpace.reset ( new FESpace<mesh_Type, MapEpetra> ( M_solidLocalMesh,
+                                                               dOrder,
+                                                               //*refFE_struct,
+                                                               //*qR_struct,
+                                                               //*bdQr_struct,
+                                                               3,
+                                                               M_epetraComm) );
 
-        M_dETFESpace.reset( new ETFESpace<mesh_Type, MapEpetra,3,3>( M_solidLocalMesh,
-                                                                     &(M_dFESpace->refFE()),
-                                                                     &(M_dFESpace->fe().geoMap()),
-                                                                     M_epetraComm));
+        M_dETFESpace.reset ( new ETFESpace<mesh_Type, MapEpetra, 3, 3> ( M_solidLocalMesh,
+                                                                         & (M_dFESpace->refFE() ),
+                                                                         & (M_dFESpace->fe().geoMap() ),
+                                                                         M_epetraComm) );
 
     }
     else
     {
-        M_dFESpace.reset(new FESpace<mesh_Type, MapEpetra>(M_solidMesh,
-                                                           //dOrder,
-                                                           *refFE_struct,
-                                                           *qR_struct,
-                                                           *bdQr_struct,
-                                                           3,
-                                                           M_epetraComm));
+        M_dFESpace.reset (new FESpace<mesh_Type, MapEpetra> (M_solidMesh,
+                                                             //dOrder,
+                                                             *refFE_struct,
+                                                             *qR_struct,
+                                                             *bdQr_struct,
+                                                             3,
+                                                             M_epetraComm) );
 
-        M_dETFESpace.reset(new ETFESpace<mesh_Type, MapEpetra,3,3>(M_solidMesh,
-                                                                 &(M_dFESpace->refFE()),
-                                                                 &(M_dFESpace->fe().geoMap()),
-                                                                 M_epetraComm));
+        M_dETFESpace.reset (new ETFESpace<mesh_Type, MapEpetra, 3, 3> (M_solidMesh,
+                                                                       & (M_dFESpace->refFE() ),
+                                                                       & (M_dFESpace->fe().geoMap() ),
+                                                                       M_epetraComm) );
 
     }
     M_epetraWorldComm->Barrier();
@@ -504,8 +504,8 @@ FSIOperator::setupFluidSolid ( UInt const fluxes )
         M_rhs.reset ( new vector_Type ( M_fluid->getMap() ) );
     }
 
-    M_solid.reset( new solid_Type( ) );
-    M_solid->setup( M_data->dataSolid(), M_dFESpace, M_dETFESpace, M_epetraComm );
+    M_solid.reset ( new solid_Type( ) );
+    M_solid->setup ( M_data->dataSolid(), M_dFESpace, M_dETFESpace, M_epetraComm );
 
     M_epetraWorldComm->Barrier();
 }
@@ -654,18 +654,22 @@ FSIOperator::imposedFluxes ( void )
 }
 
 void
-FSIOperator::initialize( fluidPtr_Type::value_type::function_Type const& u0,
-                         fluidPtr_Type::value_type::function_Type const& p0,
-                         solidPtr_Type::value_type::function const& d0,
-                         solidPtr_Type::value_type::function const& /*w0*/,
-                         fluidPtr_Type::value_type::function_Type const& /*df0*/ )
+FSIOperator::initialize ( fluidPtr_Type::value_type::function_Type const& u0,
+                          fluidPtr_Type::value_type::function_Type const& p0,
+                          solidPtr_Type::value_type::function const& d0,
+                          solidPtr_Type::value_type::function const& /*w0*/,
+                          fluidPtr_Type::value_type::function_Type const& /*df0*/ )
 {
-    debugStream( 6220 ) << "FSI:: solid init \n";
-    if (this->isSolid())
-        solid().initialize(d0 /*, w0, w0*/);
-    debugStream( 6220 ) << "FSI:: fluid init \n";
-    if (this->isFluid())
-        fluid().initialize(u0, p0);
+    debugStream ( 6220 ) << "FSI:: solid init \n";
+    if (this->isSolid() )
+    {
+        solid().initialize (d0 /*, w0, w0*/);
+    }
+    debugStream ( 6220 ) << "FSI:: fluid init \n";
+    if (this->isFluid() )
+    {
+        fluid().initialize (u0, p0);
+    }
 }
 
 void
@@ -798,20 +802,20 @@ FSIOperator::initializeFluid ( const vector_Type& velAndPressure,
 }
 
 void
-FSIOperator::initializeSolid( vectorPtr_Type displacement,
-                              vectorPtr_Type /*velocity*/ )
+FSIOperator::initializeSolid ( vectorPtr_Type displacement,
+                               vectorPtr_Type /*velocity*/ )
 {
-    this->solid().initialize( displacement /*, velocity*/);
+    this->solid().initialize ( displacement /*, velocity*/);
 }
 
 void
 FSIOperator::moveMesh ( const vector_Type& dep )
 {
-    displayer().leaderPrint("FSI-  Moving the mesh ...                      ");
-    M_fluidLocalMesh->meshTransformer().moveMesh(dep,  this->M_mmFESpace->dof().numTotalDof());
-    displayer().leaderPrint( "done\n" );
+    displayer().leaderPrint ("FSI-  Moving the mesh ...                      ");
+    M_fluidLocalMesh->meshTransformer().moveMesh (dep,  this->M_mmFESpace->dof().numTotalDof() );
+    displayer().leaderPrint ( "done\n" );
 
-    M_fluid->setRecomputeMatrix( true );
+    M_fluid->setRecomputeMatrix ( true );
 }
 
 void FSIOperator::createInterfaceMaps ( std::map<ID, ID> const& locDofMap )
@@ -1084,7 +1088,7 @@ FSIOperator::setAlphafCoef( )
     Real h = 0.1, R = 0.5;
     M_alphaFCoef  =  M_ALETimeAdvance->coefficientSecondDerivative ( 0 ) * (this->dataSolid()->rho() * h) / this->dataFluid()->dataTime()->timeStep();
     M_alphaFCoef += h * M_data->dataSolid()->young (1) * this->dataFluid()->dataTime()->timeStep() /
-        (std::pow (R, 2) * (1 - std::pow (M_data->dataSolid()->poisson (1), 2) ) );
+                    (std::pow (R, 2) * (1 - std::pow (M_data->dataSolid()->poisson (1), 2) ) );
     M_alphaFCoef /= M_ALETimeAdvance->coefficientFirstDerivative ( 0 );
 }
 

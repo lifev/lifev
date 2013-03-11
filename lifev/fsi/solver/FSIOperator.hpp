@@ -300,11 +300,11 @@ public:
      * \param d0: initial solid displacement
      * \param w0: initial mesh velocity
      */
-    virtual void initialize( fluidPtr_Type::value_type::function_Type const& u0,
-                             fluidPtr_Type::value_type::function_Type const& p0,
-                             solidPtr_Type::value_type::function const& d0,
-                             solidPtr_Type::value_type::function const& /*w0*/,
-                             fluidPtr_Type::value_type::function_Type const& df0 );
+    virtual void initialize ( fluidPtr_Type::value_type::function_Type const& u0,
+                              fluidPtr_Type::value_type::function_Type const& p0,
+                              solidPtr_Type::value_type::function const& d0,
+                              solidPtr_Type::value_type::function const& /*w0*/,
+                              fluidPtr_Type::value_type::function_Type const& df0 );
 
     //@}
 
@@ -357,7 +357,7 @@ public:
      */
     void initializeTimeAdvance ( const std::vector<vectorPtr_Type>& initialFluidVel, const std::vector<vectorPtr_Type>& initialSolidDisp, const std::vector<vectorPtr_Type>&  initialFluiDisp);
 
-    virtual void initializeMonolithicOperator( std::vector< vectorPtr_Type> /*u0*/, std::vector< vectorPtr_Type> /*ds0*/, std::vector< vectorPtr_Type> /*df0*/) {}
+    virtual void initializeMonolithicOperator ( std::vector< vectorPtr_Type> /*u0*/, std::vector< vectorPtr_Type> /*ds0*/, std::vector< vectorPtr_Type> /*df0*/) {}
 
     //! initializes the fluid solver with vectors
     /**
@@ -371,7 +371,7 @@ public:
        \param displacement: initial vector containing the structure displacement
        \param velocity: initial vector containing the velocity, used for the initialization of the TimeAdvanceNewmark scheme
      */
-    void initializeSolid( vectorPtr_Type displacement, vectorPtr_Type /*velocity*/ );
+    void initializeSolid ( vectorPtr_Type displacement, vectorPtr_Type /*velocity*/ );
 
     //!moves the mesh using the solution of the harmonic extension equation
     /**
@@ -1159,7 +1159,7 @@ protected:
     boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > M_uFESpace;
     boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > M_pFESpace;
     boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > M_dFESpace;
-    boost::shared_ptr<ETFESpace<mesh_Type, MapEpetra,3,3> > M_dETFESpace;
+    boost::shared_ptr<ETFESpace<mesh_Type, MapEpetra, 3, 3> > M_dETFESpace;
     boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > M_mmFESpace;
 
     boost::shared_ptr<mesh_Type>                      M_fluidMesh;

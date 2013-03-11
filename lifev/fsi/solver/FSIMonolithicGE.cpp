@@ -67,12 +67,12 @@ void FSIMonolithicGE::setupFluidSolid ( UInt const fluxes )
 
     M_solid.reset (new solid_Type() );
 
-    M_solid->setup(M_data->dataSolid(),
-                   M_dFESpace,
-                   M_dETFESpace,
-                   M_epetraComm,
-                   M_dFESpace->mapPtr(),
-                   UInt(0)
+    M_solid->setup (M_data->dataSolid(),
+                    M_dFESpace,
+                    M_dETFESpace,
+                    M_epetraComm,
+                    M_dFESpace->mapPtr(),
+                    UInt (0)
                    );
 }
 

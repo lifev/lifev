@@ -355,7 +355,10 @@ public:
     /*!
      * @return law type
      */
-    const std::string& lawType() { return M_lawType; }
+    const std::string& lawType()
+    {
+        return M_lawType;
+    }
 
     //! Get whether to use or not exact Jacobian
     /*!
