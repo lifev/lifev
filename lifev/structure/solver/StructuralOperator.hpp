@@ -1006,12 +1006,6 @@ template <typename Mesh>
 void
 StructuralOperator<Mesh>::computeMassMatrix ( const Real factor)
 {
-
-    LifeChrono time;
-
-    std::cout << "Assembling Mass..... " << std::endl;
-    time.start();
-
     using namespace ExpressionAssembly;
 
     UInt totalDof = M_dispFESpace->dof().numTotalDof();
@@ -1033,9 +1027,6 @@ StructuralOperator<Mesh>::computeMassMatrix ( const Real factor)
 
     M_massMatrix->globalAssemble();
 
-    time.stop();
-
-    std::cout << "Assembed Mass.....: " << time.diff() << std::endl;
     //M_massMatrix->spy("massMatrixStructure.m");
 
     //*massStiff *= factor; //M_data.dataTime()->timeStep() * M_rescaleFactor;
