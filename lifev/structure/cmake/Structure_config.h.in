@@ -1,0 +1,2 @@
+/* Define to disable the anisotropic folder */
+#cmakedefine ENABLE_ANISOTROPIC_LAW
