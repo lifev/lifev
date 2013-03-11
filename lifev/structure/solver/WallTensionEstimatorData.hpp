@@ -32,19 +32,29 @@
  *  @date 19-04-2012
  *  @author Paolo Tricerri
  *
- *  @contributor Paolo Tricerri <paolo.tricerri@epfl.ch>
  *  @maintainer  Paolo Tricerri <paolo.tricerri@epfl.ch>
  */
 
 #ifndef WallTensionEstimatorData_H
 #define WallTensionEstimatorData_H
 
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+// STL classes
 #include <string>
 #include <iostream>
 #include <map>
 
+// Boost classes
 #include <boost/shared_ptr.hpp>
 
+// Tell the compiler to restore the warning previously silented
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
+
+// LifeV core includes
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/util/StringUtility.hpp>
 #include <lifev/core/filter/GetPot.hpp>
@@ -61,7 +71,8 @@ public:
     //@{
 
     typedef  std::vector<std::string > iteration_Type;
-    typedef  std::vector<LifeV::Real > time_Type;
+    typedef  std::vector< Real >       time_Type;
+
     //@}
 
 
