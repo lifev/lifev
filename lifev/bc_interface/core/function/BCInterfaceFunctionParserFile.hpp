@@ -36,7 +36,7 @@
 #ifndef BCInterfaceFunctionParserFile_H
 #define BCInterfaceFunctionParserFile_H 1
 
-#include <lifev/bc_interface/function/BCInterfaceFunctionParser.hpp>
+#include <lifev/bc_interface/core/function/BCInterfaceFunctionParser.hpp>
 
 namespace LifeV
 {

@@ -38,11 +38,11 @@
 #define BCInterfaceFunctionSolverDefined_H 1
 
 // BCInterface includes
-#include <lifev/bc_interface/fem/BCInterfaceData0D.hpp>
-#include <lifev/bc_interface/fem/BCInterfaceData1D.hpp>
-#include <lifev/bc_interface/fem/BCInterfaceData3D.hpp>
+#include <lifev/bc_interface/0D/bc/BCInterfaceData0D.hpp>
+#include <lifev/bc_interface/1D/bc/BCInterfaceData1D.hpp>
+#include <lifev/bc_interface/3D/bc/BCInterfaceData3D.hpp>
 
-#include <lifev/bc_interface/function/BCInterfaceFactory.hpp>
+#include <lifev/bc_interface/core/function/BCInterfaceFactory.hpp>
 
 namespace LifeV
 {

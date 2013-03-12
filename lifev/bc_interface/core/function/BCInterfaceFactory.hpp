@@ -37,20 +37,20 @@
 #ifndef BCInterfaceFactory_H
 #define BCInterfaceFactory_H 1
 
-#include <lifev/bc_interface/fem/BCInterfaceData.hpp>
+#include <lifev/bc_interface/core/bc/BCInterfaceData.hpp>
 
-#include <lifev/bc_interface/function/BCInterfaceFunctionParser.hpp>
-#include <lifev/bc_interface/function/BCInterfaceFunctionParserFile.hpp>
-//#include <lifev/bc_interface/function/BCInterfaceFunctionParserSolver.hpp>
-#include <lifev/bc_interface/function/BCInterfaceFunctionParserSolver0D.hpp>
-#include <lifev/bc_interface/function/BCInterfaceFunctionParserSolverFSI1D.hpp>
-#include <lifev/bc_interface/function/BCInterfaceFunctionParserSolverFSI3D.hpp>
-#include <lifev/bc_interface/function/BCInterfaceFunctionParserSolverFluid3D.hpp>
-#include <lifev/bc_interface/function/BCInterfaceFunctionParserFileSolver.hpp>
-#include <lifev/bc_interface/function/BCInterfaceFunctionUserDefined.hpp>
-#include <lifev/bc_interface/function/BCInterfaceFunctionSolverDefined.hpp>
-//#include <lifev/bc_interface/function/BCInterfaceFunctionSolverDefinedFSI1D.hpp>
-//#include <lifev/bc_interface/function/BCInterfaceFunctionSolverDefinedFSI3D.hpp>
+#include <lifev/bc_interface/core/function/BCInterfaceFunctionParser.hpp>
+#include <lifev/bc_interface/core/function/BCInterfaceFunctionParserFile.hpp>
+//#include <lifev/bc_interface/core/function/BCInterfaceFunctionParserSolver.hpp>
+#include <lifev/bc_interface/0D/function/BCInterfaceFunctionParserSolver0D.hpp>
+#include <lifev/bc_interface/1D/function/BCInterfaceFunctionParserSolver1D.hpp>
+#include <lifev/bc_interface/3D/function/fsi/BCInterfaceFunctionParserSolverFSI3D.hpp>
+#include <lifev/bc_interface/3D/function/fluid/BCInterfaceFunctionParserSolverFluid3D.hpp>
+#include <lifev/bc_interface/core/function/BCInterfaceFunctionParserFileSolver.hpp>
+#include <lifev/bc_interface/core/function/BCInterfaceFunctionUserDefined.hpp>
+#include <lifev/bc_interface/core/function/BCInterfaceFunctionSolverDefined.hpp>
+//#include <lifev/bc_interface/1D/function/BCInterfaceFunctionSolverDefinedFSI1D.hpp>
+//#include <lifev/bc_interface/3D/function/fsi/BCInterfaceFunctionSolverDefinedFSI3D.hpp>
 
 namespace LifeV
 {

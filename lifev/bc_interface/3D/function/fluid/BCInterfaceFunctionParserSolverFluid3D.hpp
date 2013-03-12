@@ -41,7 +41,7 @@
 #include <lifev/navier_stokes/solver/OseenSolverShapeDerivative.hpp>
 
 // BCInterface includes
-#include <lifev/bc_interface/function/BCInterfaceFunctionParserSolver.hpp>
+#include <lifev/bc_interface/core/function/BCInterfaceFunctionParserSolver.hpp>
 
 namespace LifeV
 {

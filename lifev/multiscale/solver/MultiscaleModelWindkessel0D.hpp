@@ -38,7 +38,7 @@
 #ifndef MultiscaleModelWindkessel0D_H
 #define MultiscaleModelWindkessel0D_H 1
 
-#include <lifev/bc_interface/fem/BCInterface0D.hpp>
+#include <lifev/bc_interface/0D/bc/BCInterface0D.hpp>
 
 #include <lifev/zero_dimensional/solver/ZeroDimensionalData.hpp>
 

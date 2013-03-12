@@ -59,7 +59,7 @@
 #endif
 
 #include <lifev/core/algorithm/NonLinearRichardson.hpp>
-#include <lifev/bc_interface/fem/BCInterface3D.hpp>
+#include <lifev/bc_interface/3D/bc/BCInterface3D.hpp>
 
 #include <lifev/fsi/solver/FSIMonolithic.hpp>
 #include <lifev/fsi/solver/FSIMonolithicGE.hpp>

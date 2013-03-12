@@ -35,7 +35,7 @@
  */
 
 // BCInterface includes
-#include <lifev/bc_interface/function/BCInterfaceFunctionParserSolver0D.hpp>
+#include <lifev/bc_interface/0D/function/BCInterfaceFunctionParserSolver0D.hpp>
 
 namespace LifeV
 {
