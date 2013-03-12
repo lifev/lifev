@@ -41,10 +41,16 @@
 
 #include <lifev/bc_interface/function/BCInterfaceFunctionParser.hpp>
 #include <lifev/bc_interface/function/BCInterfaceFunctionParserFile.hpp>
-#include <lifev/bc_interface/function/BCInterfaceFunctionParserSolver.hpp>
+//#include <lifev/bc_interface/function/BCInterfaceFunctionParserSolver.hpp>
+#include <lifev/bc_interface/function/BCInterfaceFunctionParserSolver0D.hpp>
+#include <lifev/bc_interface/function/BCInterfaceFunctionParserSolverFSI1D.hpp>
+#include <lifev/bc_interface/function/BCInterfaceFunctionParserSolverFSI3D.hpp>
+#include <lifev/bc_interface/function/BCInterfaceFunctionParserSolverFluid3D.hpp>
 #include <lifev/bc_interface/function/BCInterfaceFunctionParserFileSolver.hpp>
 #include <lifev/bc_interface/function/BCInterfaceFunctionUserDefined.hpp>
 #include <lifev/bc_interface/function/BCInterfaceFunctionSolverDefined.hpp>
+//#include <lifev/bc_interface/function/BCInterfaceFunctionSolverDefinedFSI1D.hpp>
+//#include <lifev/bc_interface/function/BCInterfaceFunctionSolverDefinedFSI3D.hpp>
 
 namespace LifeV
 {

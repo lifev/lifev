@@ -43,6 +43,9 @@
 // BCInterface includes
 #include <lifev/bc_interface/fem/BCInterface.hpp>
 
+// Template specializations
+#include <lifev/bc_interface/function/BCInterfaceFunctionSolverDefinedFSI3D.hpp>
+
 namespace LifeV
 {
 

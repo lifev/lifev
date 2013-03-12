@@ -34,7 +34,7 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <lifev/bc_interface/function/BCInterfaceFunctionSolverDefined.hpp>
+#include <lifev/bc_interface/function/BCInterfaceFunctionSolverDefinedFSI3D.hpp>
 
 namespace LifeV
 {
@@ -239,110 +239,6 @@ BCInterfaceFunctionSolverDefined< FSIOperator >::baseType() const
 
             std::cout << " !!! Error: " << M_FSIFunction << " is not available as a FSIFunction !!!" << std::endl;
             return BASEDefault;
-    }
-}
-
-
-
-
-
-// ===================================================
-// Constructors
-// ===================================================
-BCInterfaceFunctionSolverDefined< OneDFSISolver >::BCInterfaceFunctionSolverDefined() :
-    M_defaultFunction (),
-    M_function        ()
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    debugStream ( 5025 ) << "BCInterfaceFunctionSolverDefined::BCInterfaceFunctionSolverDefined()" << "\n";
-#endif
-
-}
-
-// ===================================================
-// Methods
-// ===================================================
-void
-BCInterfaceFunctionSolverDefined< OneDFSISolver >::assignFunction ( OneDFSIFunction& base )
-{
-    switch ( M_defaultFunction )
-    {
-        case Riemann:
-
-            base.setFunction ( boost::bind ( &OneDFSIFunctionSolverDefinedRiemann::operator(),
-                                             dynamic_cast<OneDFSIFunctionSolverDefinedRiemann*> ( & ( *M_function ) ), _1, _2 ) );
-
-            break;
-
-        case Compatibility:
-
-            base.setFunction ( boost::bind ( &OneDFSIFunctionSolverDefinedCompatibility::operator(),
-                                             dynamic_cast<OneDFSIFunctionSolverDefinedCompatibility*> ( & ( *M_function ) ), _1, _2 ) );
-
-            break;
-
-        case Absorbing:
-
-            base.setFunction ( boost::bind ( &OneDFSIFunctionSolverDefinedAbsorbing::operator(),
-                                             dynamic_cast<OneDFSIFunctionSolverDefinedAbsorbing*> ( & ( *M_function ) ), _1, _2 ) );
-
-            break;
-
-        case Resistance:
-
-            base.setFunction ( boost::bind ( &OneDFSIFunctionSolverDefinedResistance::operator(),
-                                             dynamic_cast<OneDFSIFunctionSolverDefinedResistance*> ( & ( *M_function ) ), _1, _2 ) );
-
-            break;
-    }
-}
-
-// ===================================================
-// Set Methods
-// ===================================================
-void
-BCInterfaceFunctionSolverDefined< OneDFSISolver >::setData ( const BCInterfaceData1D& data )
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    debugStream ( 5025 ) << "BCInterfaceFunctionSolverDefined::setData( data )" << "\n";
-#endif
-
-    //Set mapFunction
-    std::map< std::string, solverDefinedFunctions > mapFunction;
-    mapFunction["Riemann"]       = Riemann;
-    mapFunction["Compatibility"] = Compatibility;
-    mapFunction["Absorbing"]     = Absorbing;
-    mapFunction["Resistance"]    = Resistance;
-
-    M_defaultFunction = mapFunction[data.baseString()];
-
-    switch ( M_defaultFunction )
-    {
-        case Riemann:
-
-            M_function.reset ( new OneDFSIFunctionSolverDefinedRiemann ( data.side(), data.quantity() ) );
-
-            break;
-
-        case Compatibility:
-
-            M_function.reset ( new OneDFSIFunctionSolverDefinedCompatibility ( data.side(), data.quantity() ) );
-
-            break;
-
-        case Absorbing:
-
-            M_function.reset ( new OneDFSIFunctionSolverDefinedAbsorbing ( data.side(), data.quantity() ) );
-
-            break;
-
-        case Resistance:
-
-            M_function.reset ( new OneDFSIFunctionSolverDefinedResistance ( data.side(), data.quantity(), data.resistance() [0] ) );
-
-            break;
     }
 }
 

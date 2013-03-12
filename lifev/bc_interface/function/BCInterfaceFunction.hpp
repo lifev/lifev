@@ -60,7 +60,7 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef PhysicalSolverType                                                                      physicalSolver_Type;
+    typedef PhysicalSolverType                                                                       physicalSolver_Type;
 
     typedef boost::function<Real ( const Real& ) >                                                   boundaryFunctionTime_Type;
     typedef boost::function<Real ( const Real&, const Real& ) >                                      boundaryFunctionTimeTimeStep_Type;
