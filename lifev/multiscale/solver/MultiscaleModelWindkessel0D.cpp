@@ -50,6 +50,7 @@ MultiscaleModelWindkessel0D::MultiscaleModelWindkessel0D() :
     MultiscaleInterface            (),
     M_outputFile                   (),
     M_bc                           ( new bcInterface_Type() ),
+    M_data                         ( new data_Type() ),
     M_pressureLeft_tn              (),
     M_flowRateLeft_tn              (),
     M_pressureLeft                 (),
@@ -114,7 +115,7 @@ MultiscaleModelWindkessel0D::setupModel()
 
     initializeSolution();
 
-    M_bc->setPhysicalSolver ( M_globalData );
+    M_bc->setPhysicalSolver ( M_data );
 
     // Safety check
     if ( M_bc->handler()->bc ( 1 ).bcType() != Voltage )
@@ -281,10 +282,14 @@ MultiscaleModelWindkessel0D::setupGlobalData ( const std::string& fileName )
 {
     GetPot dataFile ( fileName );
 
+    //Global data time
+    M_data->setTimeData ( M_globalData->dataTime() );
+
     if ( !dataFile.checkVariable ( "Coefficients/VenousPressure" ) )
     {
         M_pressureRight = M_globalData->fluidVenousPressure();
     }
+    M_data->setVenousPressure( M_pressureRight );
 }
 
 void

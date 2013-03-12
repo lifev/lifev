@@ -40,6 +40,8 @@
 
 #include <lifev/bc_interface/fem/BCInterface0D.hpp>
 
+#include <lifev/zero_dimensional/solver/ZeroDimensionalData.hpp>
+
 #include <lifev/multiscale/solver/MultiscaleModel.hpp>
 #include <lifev/multiscale/solver/MultiscaleInterface.hpp>
 
@@ -70,7 +72,10 @@ public:
     typedef ZeroDimensionalBCHandler                                        bc_Type;
     typedef boost::shared_ptr< bc_Type >                                    bcPtr_Type;
 
-    typedef BCInterface0D< bc_Type, MultiscaleGlobalData >                  bcInterface_Type;
+    typedef ZeroDimensionalData                                             data_Type;
+    typedef boost::shared_ptr< data_Type >                                  dataPtr_Type;
+
+    typedef BCInterface0D< bc_Type, data_Type >                             bcInterface_Type;
     typedef boost::shared_ptr< bcInterface_Type >                           bcInterfacePtr_Type;
 
     //@}
@@ -350,6 +355,8 @@ private:
     std::ofstream          M_outputFile;
 
     bcInterfacePtr_Type    M_bc;
+
+    dataPtr_Type           M_data;
 
     Real                   M_pressureLeft_tn;  // pressure left (P1) @ t=t(n)
     Real                   M_flowRateLeft_tn;  // flowRate left (Q1) @ t=t(n)
