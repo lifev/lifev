@@ -351,7 +351,7 @@ HeartMonodomainSolver ( const data_type&          dataType,
         std::cout << std::endl;
         fiber_global_vector.clear();
     }
-};
+}
 
 
 template<typename Mesh, typename SolverType>

@@ -1481,11 +1481,6 @@ void MeshPartitioner<MeshType>::finalSetup()
             (*M_meshPartitions) [i]->updateElementRidges();
         }
 
-        if (MeshType::S_geoDimensions == 3)
-        {
-            (*M_meshPartitions) [i]->updateElementRidges();
-        }
-
         (*M_meshPartitions) [i]->updateElementFacets();
 
 #ifdef HAVE_LIFEV_DEBUG

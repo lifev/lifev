@@ -496,7 +496,7 @@ MultiscaleModelFSI3D::boundaryMeanNormalStress ( const multiscaleID_Type& bounda
 #ifdef FSI_WITH_EXTERNALPRESSURE
     return M_FSIoperator->fluid().meanNormalStress ( boundaryFlag ( boundaryID ), *M_fluidBC->handler(), *M_stateVariable );
 #else
-    return M_FSIoperator->fluid().meanNormalStress ( boundaryFlag ( boundaryID ), *M_fluidBC->handler(), *M_stateVariable ) + M_externalPressureScalar;
+    return M_FSIoperator->fluid().meanNormalStress ( boundaryFlag ( boundaryID ), *M_fluidBC->handler(), *M_stateVariable ) - M_externalPressureScalar;
 #endif
 }
 
@@ -506,7 +506,7 @@ MultiscaleModelFSI3D::boundaryMeanTotalNormalStress ( const multiscaleID_Type& b
 #ifdef FSI_WITH_EXTERNALPRESSURE
     return M_FSIoperator->fluid().meanTotalNormalStress ( boundaryFlag ( boundaryID ), *M_fluidBC->handler(), *M_stateVariable );
 #else
-    return M_FSIoperator->fluid().meanTotalNormalStress ( boundaryFlag ( boundaryID ), *M_fluidBC->handler(), *M_stateVariable ) + M_externalPressureScalar;
+    return M_FSIoperator->fluid().meanTotalNormalStress ( boundaryFlag ( boundaryID ), *M_fluidBC->handler(), *M_stateVariable ) - M_externalPressureScalar;
 #endif
 }
 
@@ -634,10 +634,6 @@ MultiscaleModelFSI3D::initializeSolution()
     debugStream ( 8140 ) << "MultiscaleModelFSI3D::initializeSolution() \n";
 #endif
 
-    // Initialize the external pressure vector
-    vector_Type fluidExternalPressure ( M_FSIoperator->pFESpace().map(), Unique );
-    fluidExternalPressure = M_data->dataSolid()->externalPressure();
-
 #ifndef FSI_WITH_EXTERNALPRESSURE
     // Initialize the external pressure scalar
     M_externalPressureScalar = M_data->dataSolid()->externalPressure();
@@ -688,7 +684,7 @@ MultiscaleModelFSI3D::initializeSolution()
         }
 
         // Read first fluid displacement
-        M_importerSolid->importFromTime ( M_data->dataSolid()->dataTime()->initialTime() );
+        M_importerFluid->importFromTime ( M_data->dataSolid()->dataTime()->initialTime() );
 
         //This is ugly but it's the only way I have figured out at the moment
         if ( M_data->method().compare ("monolithicGI") == 0 )

@@ -198,7 +198,7 @@ public:
       @param timeStep defined the  time step need to compute the
       @returns rhsV
     */
-    void RHSFirstDerivative (const Real& timeStep, feVectorType& rhsContribution, int const shift = 0 ) const;
+    void RHSFirstDerivative (const Real& timeStep, feVectorType& rhsContribution ) const;
 
     //! Update the right hand side \f$ f_W \f$ of the time derivative formula
     /*!
@@ -340,14 +340,14 @@ TimeAdvanceBDF<feVectorType>::shiftRight (feVector_Type const&  solution )
 
 template<typename feVectorType>
 void
-TimeAdvanceBDF<feVectorType>::RHSFirstDerivative (const Real& timeStep, feVectorType& rhsContribution, int const shift ) const
+TimeAdvanceBDF<feVectorType>::RHSFirstDerivative (const Real& timeStep, feVectorType& rhsContribution ) const
 {
 
     rhsContribution *= (this->M_alpha[ 1 ] / timeStep);
 
     for ( UInt i = 1; i < this->M_order; ++i )
     {
-        rhsContribution += (this->M_alpha[ i + 1 ] / timeStep) * *this->M_unknowns[ i - shift ];
+        rhsContribution += (this->M_alpha[ i + 1 ] / timeStep) * *this->M_unknowns[ i ];
     }
 }
 
@@ -658,9 +658,28 @@ template<typename feVectorType>
 feVectorType
 TimeAdvanceBDF<feVectorType>::firstDerivative() const
 {
-    return (*this->M_unknowns[0])
-           * this->M_alpha[ 0 ] / this->M_timeStep
-           -  ( *this->M_rhsContribution[0] );
+    // Note by Cristiano Malossi - 13/02/2013
+    //
+    // This method is valid only if
+    //
+    // 1) shiftRight has been called
+    // 2) updateRHSFirstDerivative has NOT been called
+    //
+    // TODO In case both shiftRight and updateRHSFirstDerivative have been called
+    // a possible implementation is the one commented below.
+    //
+    //    feVector_Type derivative( *this->M_unknowns[ 0 ] * this->M_alpha[ 0 ] );
+    //    for ( UInt i = 1; i <= this->M_order; ++i )
+    //    {
+    //        derivative -= *this->M_unknowns[ i ] * this->M_alpha[ i ];
+    //    }
+    //
+    //    return derivative / this->M_timeStep;
+    //
+    // Before going in this direction the design of the TimeAdvance needs to be discussed.
+    // The same consideration is valid for the second derivative.
+    return *this->M_unknowns[0] * this->M_alpha[ 0 ] / this->M_timeStep
+           - ( *this->M_rhsContribution[0] );
 }
 
 template<typename feVectorType>
