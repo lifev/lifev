@@ -165,9 +165,10 @@ int main (int argc, char** argv )
                                                                     Fluid_localMesh,
                                                                     flags) );
 
+
     /*
     // IN QUESTO CASO USI IL RAGGIO E NON LA SELEZIONE AUTOMATICA, SOLO CHE DIVIDI SEMPRE PER L'INTERPOLANTE DI 1
-    double radius = 2*(double)MeshUtility::MeshStatistics::computeSize(*Solid_mesh_ptr).minH; // maxH, meanH
+    double radius = 2*(double)MeshUtility::MeshStatistics::computeSize(*Solid_mesh_ptr).meanH; // maxH, meanH
     interpolationRPtr_Type RBFInterpolant ( new interpolationR_Type ( Solid_mesh_ptr,
                                                                       Solid_localMesh,
                                                                       Fluid_mesh_ptr,
@@ -178,7 +179,7 @@ int main (int argc, char** argv )
     */
     /*
     // IN QUESTO CASO USI IL RAGGIO E NON LA SELEZIONE AUTOMATICA, SOLO CHE DIVIDI SEMPRE PER L'INTERPOLANTE DI 1
-    double radius = (double)MeshUtility::MeshStatistics::computeSize (*Solid_mesh_ptr).minH; // maxH, meanH
+    double radius = (double)MeshUtility::MeshStatistics::computeSize (*Solid_mesh_ptr).meanH; // maxH, meanH
     interpolationSPtr_Type RBFInterpolant ( new interpolationS_Type ( Solid_mesh_ptr,
                                                                       Solid_localMesh,
                                                                       Fluid_mesh_ptr,
@@ -240,12 +241,12 @@ int main (int argc, char** argv )
     Fluid_exporter.postProcess (0);
     Fluid_exporter.closeFile();
 
-    std::cout << "MinH = " <<  (double)MeshUtility::MeshStatistics::computeSize(*Solid_mesh_ptr).minH << std::endl;
-    std::cout << "MeanH = " <<  (double)MeshUtility::MeshStatistics::computeSize(*Solid_mesh_ptr).meanH << std::endl;
-    std::cout << "MaxH = " <<  (double)MeshUtility::MeshStatistics::computeSize(*Solid_mesh_ptr).maxH << std::endl;
+    std::cout << "MinH = " <<  (double) MeshUtility::MeshStatistics::computeSize (*Solid_mesh_ptr).minH << std::endl;
+    std::cout << "MeanH = " <<  (double) MeshUtility::MeshStatistics::computeSize (*Solid_mesh_ptr).meanH << std::endl;
+    std::cout << "MaxH = " <<  (double) MeshUtility::MeshStatistics::computeSize (*Solid_mesh_ptr).maxH << std::endl;
     std::cout << "Number of vertices = " << Solid_mesh_ptr->numVertices() << std::endl;
     std::cout << "Norm Inf = " << myError->normInf() << std::endl;
-    std::cout << "Norm 2 = " << ( myError->norm2()/Fluid_exact_solution->norm2() ) << std::endl;//x* 1/Solid_mesh_ptr->numVertices() << std::endl;
+    std::cout << "Norm 2 = " << ( myError->norm2() / Fluid_exact_solution->norm2() ) << std::endl; //x* 1/Solid_mesh_ptr->numVertices() << std::endl;
 
 #ifdef HAVE_MPI
     MPI_Finalize();

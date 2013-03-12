@@ -86,10 +86,10 @@ public:
 
     //! Constructor
     RBFInterpolationVectorial ( meshPtr_Type fullMeshKnown,
-				meshPtr_Type localMeshKnown,
-				meshPtr_Type fullMeshUnknown,
-				meshPtr_Type localMeshUnknown,
-				flagContainer_Type flags); 
+                                meshPtr_Type localMeshKnown,
+                                meshPtr_Type fullMeshUnknown,
+                                meshPtr_Type localMeshUnknown,
+                                flagContainer_Type flags);
 
     //! Destructor
     ~RBFInterpolationVectorial() {}
@@ -163,18 +163,18 @@ private:
 
 template <typename Mesh>
 RBFInterpolationVectorial<Mesh>::RBFInterpolationVectorial ( meshPtr_Type fullMeshKnown,
-							     meshPtr_Type localMeshKnown,
-							     meshPtr_Type fullMeshUnknown,
-							     meshPtr_Type localMeshUnknown,
-							     flagContainer_Type flags) :
-  M_fullMeshKnown ( fullMeshKnown ),
-  M_localMeshKnown ( localMeshKnown ),
-  M_fullMeshUnknown ( fullMeshUnknown ),
-  M_localMeshUnknown ( localMeshUnknown ),
-  M_flags ( flags )
+                                                             meshPtr_Type localMeshKnown,
+                                                             meshPtr_Type fullMeshUnknown,
+                                                             meshPtr_Type localMeshUnknown,
+                                                             flagContainer_Type flags) :
+    M_fullMeshKnown ( fullMeshKnown ),
+    M_localMeshKnown ( localMeshKnown ),
+    M_fullMeshUnknown ( fullMeshUnknown ),
+    M_localMeshUnknown ( localMeshUnknown ),
+    M_flags ( flags )
 {
 }
-  
+
 
 template <typename Mesh>
 void RBFInterpolationVectorial<Mesh>::setupRBFData (vectorPtr_Type KnownField, vectorPtr_Type UnknownField, GetPot datafile, parameterList_Type belosList)
@@ -366,8 +366,8 @@ void RBFInterpolationVectorial<Mesh>::buildRhs()
     M_RhsOne.reset (new vector_Type (*M_interpolationOperatorMap) );
 
     M_RhsF1->subset (*M_knownField, *M_interpolationOperatorMap, 0, 0);
-    M_RhsF2->subset (*M_knownField, *M_interpolationOperatorMap, M_knownField->size()/3, 0);
-    M_RhsF3->subset (*M_knownField, *M_interpolationOperatorMap, M_knownField->size()/3*2, 0);
+    M_RhsF2->subset (*M_knownField, *M_interpolationOperatorMap, M_knownField->size() / 3, 0);
+    M_RhsF3->subset (*M_knownField, *M_interpolationOperatorMap, M_knownField->size() / 3 * 2, 0);
     *M_RhsOne += 1;
 }
 
@@ -444,7 +444,7 @@ void RBFInterpolationVectorial<Mesh>::interpolate()
     solverRBF3.setOperator (M_interpolationOperator);
     solverRBF3.setRightHandSide (M_RhsF3);
     solverRBF3.solve (gamma_f3);
-    
+
 
     vectorPtr_Type rbf_f1;
     rbf_f1.reset (new vector_Type (*M_projectionOperatorMap) );
@@ -478,15 +478,15 @@ void RBFInterpolationVectorial<Mesh>::interpolate()
 
     *solution3 = *rbf_f3;
     *solution3 /= *M_rbf_one;
-    
+
     M_unknownField_rbf.reset (new vector_Type (M_unknownField->map() ) );
     M_unknownField_rbf->subset (*rbf_f1, *M_projectionOperatorMap, 0, 0);
-    M_unknownField_rbf->subset (*rbf_f2, *M_projectionOperatorMap, 0, M_unknownField->size()/3);
-    M_unknownField_rbf->subset (*rbf_f3, *M_projectionOperatorMap, 0, M_unknownField->size()/3*2);
+    M_unknownField_rbf->subset (*rbf_f2, *M_projectionOperatorMap, 0, M_unknownField->size() / 3);
+    M_unknownField_rbf->subset (*rbf_f3, *M_projectionOperatorMap, 0, M_unknownField->size() / 3 * 2);
 
     M_unknownField->subset (*solution1, *M_projectionOperatorMap, 0, 0);
-    M_unknownField->subset (*solution2, *M_projectionOperatorMap, 0, M_unknownField->size()/3);
-    M_unknownField->subset (*solution3, *M_projectionOperatorMap, 0, M_unknownField->size()/3*2);
+    M_unknownField->subset (*solution2, *M_projectionOperatorMap, 0, M_unknownField->size() / 3);
+    M_unknownField->subset (*solution3, *M_projectionOperatorMap, 0, M_unknownField->size() / 3 * 2);
 
 }
 
