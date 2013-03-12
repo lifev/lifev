@@ -64,8 +64,6 @@
 #include <lifev/core/mesh/MeshData.hpp>
 #include <lifev/core/mesh/MeshPartitioner.hpp>
 #include <lifev/core/filter/MeshWriter.hpp>
-#include <lifev/core/fem/FESpace.hpp>
-#include <lifev/structure/solver/StructuralConstitutiveLawData.hpp>
 
 #include <iostream>
 
@@ -188,8 +186,6 @@ class Structure
 public:
 
     typedef RegionMesh<LifeV::LinearTetra >                       mesh_Type;
-    typedef FESpace< RegionMesh<LinearTetra>, MapEpetra >         solidFESpace_Type;
-    typedef boost::shared_ptr<solidFESpace_Type>                  solidFESpacePtr_Type;
 
     /** @name Constructors, destructor
      */
@@ -226,7 +222,6 @@ private:
 private:
     struct Private;
     boost::shared_ptr<Private> parameters;
-    solidFESpacePtr_Type dFESpace;
 
 };
 
@@ -250,27 +245,12 @@ struct Structure::Private
 Structure::Structure ( int                                   argc,
                        char**                                argv,
                        boost::shared_ptr<Epetra_Comm>        structComm) :
-    parameters ( new Private() ),
-    dFESpace()
+    parameters ( new Private() )
 {
     GetPot command_line (argc, argv);
     string data_file_name = command_line.follow ("data", 2, "-f", "--file");
     GetPot dataFile ( data_file_name );
     parameters->data_file_name = data_file_name;
-
-    parameters->rho     = dataFile ( "solid/physics/density", 1. );
-    parameters->young   = dataFile ( "solid/physics/young",   1. );
-    parameters->poisson = dataFile ( "solid/physics/poisson", 1. );
-    parameters->bulk    = dataFile ( "solid/physics/bulk",    1. );
-    parameters->alpha   = dataFile ( "solid/physics/alpha",   1. );
-    parameters->gamma   = dataFile ( "solid/physics/gamma",   1. );
-
-    std::cout << "density = " << parameters->rho     << std::endl
-              << "young   = " << parameters->young   << std::endl
-              << "poisson = " << parameters->poisson << std::endl
-              << "bulk    = " << parameters->bulk    << std::endl
-              << "alpha   = " << parameters->alpha   << std::endl
-              << "gamma   = " << parameters->gamma   << std::endl;
 
     parameters->comm = structComm;
     int ntasks = parameters->comm->NumProc();
@@ -297,14 +277,8 @@ Structure::run3d()
 
     bool verbose = (parameters->comm->MyPID() == 0);
 
-    //! Number of boundary conditions for the velocity and mesh motion
-    boost::shared_ptr<BCHandler> BCh ( new BCHandler() );
-
     //! dataElasticStructure
     GetPot dataFile ( parameters->data_file_name.c_str() );
-
-    boost::shared_ptr<StructuralConstitutiveLawData> dataStructure (new StructuralConstitutiveLawData( ) );
-    dataStructure->setup (dataFile);
 
     MeshData             meshData;
     meshData.setup (dataFile, "solid/space_discretization");
@@ -320,8 +294,8 @@ Structure::run3d()
     }
 
     //Geometrical Infos on the sphere
-    Vector3D center (0.0, 0.55, 8.0);
-    Real     radius (0.7);
+    Vector3D center (0.0, 0.275, 2.5);
+    Real     radius (0.4);
 
     //Count how many volumes are in the sphere
     //Create the Predicate
