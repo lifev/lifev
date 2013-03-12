@@ -132,10 +132,20 @@ StructuralConstitutiveLawData::setup ( const GetPot& dataFile, const std::string
     }
 
     // physics
-    M_solidType = dataFile ( ( section + "/physics/solidType" ).data(), "NO_DEFAULT_SOLID_TYPE" );
-    M_lawType = dataFile ( ( section + "/physics/lawType" ).data(), "NO_DEFAULT_LAW_TYPE" );
+    M_solidTypeIsotropic = dataFile ( ( section + "/physics/solidTypeIsotropic" ).data(), "NO_DEFAULT_SOLID_TYPE" );
+    M_solidTypeAnisotropic = dataFile ( ( section + "/physics/solidTypeAnisotropic" ).data(), "none" );
+    
+    if( !M_solidType.compare("linearVenantKirchhoff") )
+      {
+           M_lawType = "linear";
+      }
+    else
+      {
+	   M_lawType = "nonlinear";
+      }
 
-    ASSERT ( M_lawType.compare ("NO_DEFAULT_LAW_TYPE"), "Set the type of law (linear or nonlinear) in [solid]/physics");
+
+    ASSERT ( !( M_lawType.compare ("linear") && M_solidTypeAnisotropic.compare("none") ), "The Linear Elastic law cannot be used with anisotropic laws");
 
     M_externalPressure = dataFile ( ( section + "/physics/externalPressure" ).data(), 0. );
     M_density   = dataFile ( ( section + "/physics/density"   ).data(), 1. );

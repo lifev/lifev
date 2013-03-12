@@ -32,6 +32,11 @@
  *  @date 01-01-2010
  *  @author Paolo Tricerri
  *  @author Gianmarco Mengaldo
+ *
+ *  @version 2.0
+ *  @date 12-03-2010
+ *  @author Paolo Tricerri
+ * 
  *  @maintainer  Paolo Tricerri <paolo.tricerri@epfl.ch>
  *  @contributor  Gianmarco Mengaldo <gianmarco.mengaldo@gmail.com>
  */
@@ -74,6 +79,12 @@
 
 #include <lifev/structure/solver/StructuralConstitutiveLawData.hpp>
 
+#include <lifev/structure/solver/isotropic/StructuralIsotropicConstitutiveLaw.hpp>
+
+#ifdef ENABLE_ANISOTROPIC_LAW
+#include <lifev/structure/solver/anisotropic/StructuralAnisotropicConstitutiveLaw.hpp>
+#endif
+
 //ET include for assemblings
 #include <lifev/eta/fem/ETFESpace.hpp>
 #include <lifev/eta/expression/Integrate.hpp>
@@ -95,6 +106,15 @@ public:
     //!@name Type definitions
     //@{
     typedef StructuralConstitutiveLawData          data_Type;
+
+    typedef typename StructuralIsotropicConstitutiveLaw<MeshType>          isotropicLaw_Type;
+
+#ifdef ENABLE_ANISOTROPIC_LAW
+    typedef typename StructuralAnisotropicConstitutiveLaw<MeshType>        anisotropicLaw_Type;
+#endif
+
+    typedef boost::shared<isotropicLaw_Type>                               isotropicLawPtr_Type; 
+    typedef boost::shared<anisotropicLaw_Type>                             anisotropicLawPtr_Type;
 
     typedef MatrixEpetra<Real>            matrix_Type;
     typedef boost::shared_ptr<matrix_Type>         matrixPtr_Type;
@@ -149,20 +169,20 @@ public:
       \param monolithicMap: the MapEpetra
       \param offset: the offset parameter used assembling the matrices
     */
-    virtual void setup ( const FESpacePtr_Type& dFESpace,
-                         const ETFESpacePtr_Type& ETFESpace,
-                         const boost::shared_ptr<const MapEpetra>&   monolithicMap,
-                         const UInt offset, const dataPtr_Type& dataMaterial,
-                         const displayerPtr_Type& displayer  ) = 0;
+    void setup ( const FESpacePtr_Type& dFESpace,
+		 const ETFESpacePtr_Type& ETFESpace,
+		 const boost::shared_ptr<const MapEpetra>&   monolithicMap,
+		 const UInt offset, const dataPtr_Type& dataMaterial,
+		 const displayerPtr_Type& displayer  );
 
 
     //! Computes the linear part of the stiffness matrix StructuralSolver::buildSystem
     /*!
       \param dataMaterial the class with Material properties data
     */
-    virtual  void computeLinearStiff ( dataPtr_Type& dataMaterial,
-                                       const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
-                                       const mapMarkerIndexesPtr_Type /*mapsMarkerIndexes*/ ) = 0;
+    void computeLinearStiff ( dataPtr_Type& dataMaterial,
+			      const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
+			      const mapMarkerIndexesPtr_Type /*mapsMarkerIndexes*/ );
 
     //! Updates the Jacobian matrix in StructuralSolver::updateJacobian
     /*!
@@ -171,10 +191,10 @@ public:
                            material coefficients (e.g. Young modulus, Poisson ratio..)
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
-    virtual  void updateJacobianMatrix ( const vector_Type& disp, const dataPtr_Type& dataMaterial,
-                                         const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
-                                         const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
-                                         const displayerPtr_Type& displayer ) = 0;
+    void updateJacobianMatrix ( const vector_Type& disp, const dataPtr_Type& dataMaterial,
+				const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+				const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
+				const displayerPtr_Type& displayer );
 
     //! Computes the new Stiffness matrix in StructuralSolver given a certain displacement field.
     //! This function is used both in StructuralSolver::evalResidual and in
@@ -187,10 +207,10 @@ public:
                            material coefficients (e.g. Young modulus, Poisson ratio..)
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
-    virtual  void computeStiffness ( const vector_Type& sol, Real factor, const dataPtr_Type& dataMaterial,
-                                     const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
-                                     const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
-                                     const displayerPtr_Type& displayer ) = 0;
+    void computeStiffness ( const vector_Type& sol, Real factor, const dataPtr_Type& dataMaterial,
+			    const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+			    const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
+			    const displayerPtr_Type& displayer );
 
 
     //! Computes the deformation Gradient F, the cofactor of F Cof(F),
@@ -198,7 +218,7 @@ public:
     /*!
       \param dk_loc: local displacement vector
     */
-    virtual  void computeKinematicsVariables ( const VectorElemental& dk_loc ) = 0;
+    void computeKinematicsVariables ( const VectorElemental& /*dk_loc*/ ) {}
 
 
     //! Output of the class
@@ -206,8 +226,7 @@ public:
        \param fileNamelinearStiff the filename where to apply the spy method for the linear part of the Stiffness matrix
        \param fileNameStiff the filename where to apply the spy method for the Stiffness matrix
     */
-    virtual void showMe ( std::string const& fileNameStiff, std::string const& fileNameJacobian ) = 0;
-
+    void showMe ( std::string const& fileNameStiff, std::string const& fileNameJacobian );
 
     //! Compute the First Piola Kirchhoff Tensor
     /*!
@@ -217,11 +236,11 @@ public:
        \param invariants std::vector with the invariants of C and the detF
        \param material UInt number to get the material parameteres form the VenantElasticData class
     */
-    virtual void computeLocalFirstPiolaKirchhoffTensor ( Epetra_SerialDenseMatrix& firstPiola,
-                                                         const Epetra_SerialDenseMatrix& tensorF,
-                                                         const Epetra_SerialDenseMatrix& cofactorF,
-                                                         const std::vector<Real>& invariants,
-                                                         const UInt material) = 0;
+    void computeLocalFirstPiolaKirchhoffTensor ( Epetra_SerialDenseMatrix& firstPiola,
+						 const Epetra_SerialDenseMatrix& tensorF,
+						 const Epetra_SerialDenseMatrix& cofactorF,
+						 const std::vector<Real>& invariants,
+						 const UInt material);
 
 
     //! @name Set Methods
@@ -245,7 +264,13 @@ public:
     //! Get the FESpace object
     FESpace_Type& dFESpace()
     {
-        return M_dispFESpace;
+        return *M_dispFESpace;
+    }
+
+    //! Get the FESpace object
+    ETFESpace_Type& dETFESpace()
+    {
+        return *M_dispETFESpace;
     }
 
     //! Get the Stiffness matrix
@@ -254,27 +279,19 @@ public:
         return M_jacobian;
     }
 
-    //! Get the Stiffness matrix
-    virtual matrixPtr_Type const stiffMatrix() const = 0;
+    //! Get the Stiffness matrix (linear case)
+    matrixPtr_Type const stiffMatrix() const;
 
-    //! Get the Stiffness matrix
-    virtual vectorPtr_Type const stiffVector() const = 0;
+    //! Get the Stiffness vector (nonlinear case)
+    vectorPtr_Type const stiffVector() const;
 
-    virtual void apply ( const vector_Type& sol, vector_Type& res,
-                         const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
-                         const mapMarkerIndexesPtr_Type mapsMarkerIndexes) = 0;
+    void apply ( const vector_Type& sol, vector_Type& res,
+		 const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+		 const mapMarkerIndexesPtr_Type mapsMarkerIndexes);
 
     //@}
 
 protected:
-
-
-    //! construct the vectors for the parameters
-    /*!
-      \param VOID
-      \return VOID
-    */
-    virtual void setupVectorsParameters ( void ) = 0;
 
     //!Protected Members
 
@@ -292,10 +309,17 @@ protected:
 
     dataPtr_Type                                   M_dataMaterial;
 
+    isotropicPtr_Type                              M_isotropicLaw;
+
+#ifdef ENABLE_ANISOTROPIC_LAW
+    anisotropicPtr_Type                            M_anisotropicLaw;
+#endif
+
     displayerPtr_Type                              M_displayer;
 
-    //! Map between markers and volumes on the mesh
-    vectorsParametersPtr_Type           M_vectorsParameters;
+    matrixPtr_Type                                 M_matrixStiffness;
+
+    vectorPtr_Type                                 M_vectorStiffness;
 };
 
 //=====================================
@@ -309,10 +333,190 @@ StructuralConstitutiveLaw<MeshType>::StructuralConstitutiveLaw( ) :
     M_localMap                   ( ),
     M_jacobian                   ( ),
     M_offset                     ( 0 ),
-    M_vectorsParameters          ( )
+    M_dataMaterial               ( ),
+    M_isotropicLaw               ( ),
+#ifdef ENABLE_ANISOTROPIC_LAW
+    M_anisotropicLaw             ( ),
+#endif
+    M_displayer                  ( )
 {
     //    std::cout << "I am in the constructor of StructuralConstitutiveLaw" << std::endl;
 }
+
+template <typename MeshType>
+void
+StructuralConstitutiveLaw<MeshType>::setup (const FESpacePtr_Type& dFESpace,
+					    const ETFESpacePtr_Type& dETFESpace,
+					    const boost::shared_ptr<const MapEpetra>&  monolithicMap,
+					    const UInt offset, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer
+					    )
+{
+    M_dispFESpace                   = dFESpace;
+    M_dispETFESpace                 = dETFESpace;
+    M_localMap                      = monolithicMap;
+    M_jacobian.reset                (new matrix_Type (*this->M_localMap) );
+    M_offset                        = offset;
+    M_dataMaterial                  = dataMaterial;
+
+    // Creation of the abstract classes for the isotropic and anisotropic laws
+    M_isotropicLaw.reset ( isotropicLaw_Type::IsotropicStructureMaterialFactory::instance().createObject ( M_data->solidTypeIsotropic() ) );
+#ifdef ENABLE_ANISOTROPIC_LAW
+    M_anisotropicLaw.reset ( anisotropicLaw_Type::AnsotropicStructureMaterialFactory::instance().createObject ( M_data->solidTypeAnsotropic() ) );
+#endif
+
+    M_displayer = displayer;
+
+    // Setting the isotropic and anisotropic part
+    M_isotropicLaw->setup();
+#ifdef ENABLE_ANISOTROPIC_LAW
+    M_anisotropicLaw->setup();
+#endif
+}
+
+template <typename MeshType>
+void StructuralConstitutiveLaw<MeshType>::computeLinearStiff (dataPtr_Type& dataMaterial,
+							      const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+							      const mapMarkerIndexesPtr_Type mapsMarkerIndexes)
+{
+
+  M_isotropicLaw->computeLinearStiffness(dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes);
+
+  // The anisotropic part has no need for such a method since it is for sure nonlinear.
+
+}
+
+
+template <typename MeshType>
+void StructuralConstitutiveLaw<MeshType>::updateJacobianMatrix (const vector_Type& disp,
+								const dataPtr_Type& dataMaterial,
+								const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+								const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
+								const displayerPtr_Type& displayer)
+{
+    // Resetting and initializing the pointer to the Jacobian 
+    M_jacobian.reset (new matrix_Type (*M_localMap) );
+    *M_jacobian *= 0.0;
+    
+    // Isotropic part
+    M_displayer->leaderPrint ("  S-  Updating the Jacobian Matrix ( isotropic part )\n");
+    M_isotropicLaw->updateJacobianMatrix ( disp, dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
+
+    *M_jacobian += M_isotropicLaw->jacobian();
+
+#ifdef ENABLE_ANISOTROPIC_LAW
+    // Anisotropic part
+    M_displayer->leaderPrint ("  S-  Updating the Jacobian Matrix ( anisotropic part )\n");
+
+    M_anisotropicLaw->updateJacobianMatrix (disp, dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
+
+    *M_jacobian += M_anisotropicLaw->jacobian();
+#endif 
+
+    M_jacobian->globalAssemble();
+}
+
+template <typename MeshType>
+void StructuralConstitutiveLaw<MeshType>::computeStiffness ( const vector_Type& sol, Real factor, const dataPtr_Type& dataMaterial,
+							     const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+							     const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
+							     const displayerPtr_Type& displayer )
+{
+
+    // For the linear elastic case the compute stiffness is an empty method. 
+    // We use the general interface but then we get the vector using stiffVector
+
+    // Resetting and initializing the pointer to the vector 
+    M_vectorStiffness.reset (new vector_Type (*M_localMap) );
+    *M_vectorStiffness *= 0.0;
+    
+    // Isotropic part
+    M_displayer->leaderPrint ("  S-  Updating the VectorStiffness Matrix ( isotropic part )\n");
+    M_isotropicLaw->computeStiffness ( disp, factor, dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
+
+    *M_vectorStiffness += M_isotropicLaw->stiffVector();
+
+#ifdef ENABLE_ANISOTROPIC_LAW
+    // Anisotropic part
+    displayer->leaderPrint ("  S-  Updating the Jacobian Matrix ( anisotropic part )\n");
+
+    M_anisotropicLaw->computeStiffnes (disp, factor, dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
+
+    *M_vectorStiffness += M_anisotropicLaw->stiffVector();
+#endif 
+
+    M_vectorStiffness->globalAssemble();
+}
+
+
+
+template <typename MeshType>
+void
+StructuralConstitutiveLaw<MeshType>::showMe ( std::string const& fileNameStiff,
+					      std::string const& fileNameJacobian
+					      )
+{
+    // Spying the isotropic part 
+    M_isotropicLaw->showMe ( fileNameStiff, fileNameJacobian);
+
+#ifdef ENABLE_ANISOTROPIC_LAW
+    // Spying the anisotropic part 
+    M_anisotropicLaw->showMe ( fileNameStiff, fileNameJacobian);
+#endif
+
+}
+
+template <typename MeshType>
+void
+StructuralConstitutiveLaw<MeshType>::computeLocalFirstPiolaKirchhoffTensor ( Epetra_SerialDenseMatrix& firstPiola,
+									     const Epetra_SerialDenseMatrix& tensorF,
+									     const Epetra_SerialDenseMatrix& cofactorF,
+									     const std::vector<Real>& invariants,
+									     const UInt marker)
+{
+    firstPiola.Scale(0.0);
+
+    // Computing the first part
+    M_isotropicLaw->computeLocalFirstPiolaKirchhoffTensor ( tensorF, cofactorF, invariants, marker);
+
+    firstPiola += M_isotropicLaw->firstPiola( );
+
+#ifdef ENABLE_ANISOTROPIC_LAW
+    // Computing the first part
+    M_anisotropicLaw->computeLocalFirstPiolaKirchhoffTensor ( tensorF, cofactorF, invariants, marker);
+
+    firstPiola += M_anisotropicLaw->firstPiola( );
+#endif
+}
+
+template <typename MeshType>
+matrixPtr_Type const StructuralConstitutiveLaw<MeshType>::stiffMatrix() const
+{
+    // Verify that the law that is being using is coherent with the formulation: linear <-> matrix, nonlinear <-> vector
+    ASSERT( !M_data->solidTypeIsotropic().compare("linearVenantKirchhoff"), " No Stiffness Matrix defined for the nonlinear case! ");
+
+    M_stiffMatrix.reset (new matrix_Type (*M_localMap) );
+    *M_stiffMatrix *= 0.0;
+
+    *M_stiffMatrix += M_isotropicLaw->stiffMatrix();
+}
+
+
+template <typename MeshType>
+vectorPtr_Type const StructuralConstitutiveLaw<MeshType>::stiffVector() const
+{
+    // Verify that the law that is being using is coherent with the formulation: linear <-> matrix, nonlinear <-> vector
+    ASSERT( M_data->solidTypeIsotropic().compare("linearVenantKirchhoff"), " No Stiffness Vector defined for the linear case! ");
+
+    M_vectorStiffness.reset (new vector_Type (*M_localMap) );
+    *M_vectorStiffness *= 0.0;
+
+    *M_vectorStiffness += M_isotropicLaw->vectorStiffness();
+
+#ifdef ENABLE_ANISOTROPIC_LAW
+    *M_vectorStiffness += M_anisotropicLaw->vectorStiffness();
+#endif
+}
+
 
 }
 #endif /*_STRUCTURALMATERIAL_H*/

@@ -342,14 +342,26 @@ public:
         return M_verbose;
     }
 
-    //! Get solid type
+    //! Get isotropic law 
     /*!
-     * @return solid type
+     * @return solid type isotropic
      */
-    const std::string& solidType()
+    const std::string& solidTypeIsotropic()
     {
-        return M_solidType;
+        return M_solidTypeIsotropic;
     }
+
+    //! Get anisotropic law
+    /*!
+     * @return solid type anisotropic
+     */
+
+#ifdef ENABLE_ANISOTROPIC_LAW
+    const std::string& solidTypeAnisotropic()
+    {
+        return M_solidTypeAnisotropic;
+    }
+#endif
 
     //! Get law type
     /*!
@@ -409,7 +421,10 @@ private:
     //! Miscellaneous
     UInt                   M_verbose; // temporal output verbose
 
-    std::string            M_solidType;
+    std::string            M_solidTypeIsotropic;
+#ifdef ENABLE_ANISOTROPIC_LAW
+    std::string            M_solidTypeAnisotropic;
+#endif
     std::string            M_lawType;
     bool                   M_useExactJacobian;
 
