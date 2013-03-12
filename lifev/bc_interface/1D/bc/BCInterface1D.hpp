@@ -41,6 +41,7 @@
 #include <lifev/bc_interface/core/bc/BCInterface.hpp>
 
 // Template specializations
+#include <lifev/bc_interface/1D/function/BCInterfaceFunctionParserSolver1D.hpp>
 #include <lifev/bc_interface/1D/function/BCInterfaceFunctionSolverDefined1D.hpp>
 
 namespace LifeV
