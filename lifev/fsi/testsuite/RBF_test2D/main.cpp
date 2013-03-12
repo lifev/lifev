@@ -90,7 +90,7 @@ int main (int argc, char** argv )
     MPI_Init (&argc, &argv);
     Comm.reset (new Epetra_MpiComm (MPI_COMM_WORLD) );
 #else
-    comm.reset ( new Epetra_SerialComm() );
+    Comm.reset ( new Epetra_SerialComm() );
 #endif
 
     // DATAFILE
