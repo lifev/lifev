@@ -36,8 +36,8 @@
  *  @contributor  Gianmarco Mengaldo <gianmarco.mengaldo@gmail.com>
  */
 
-#ifndef _STRUCTURALCONSTITUTIVELAW_H_
-#define _STRUCTURALCONSTITUTIVELAW_H_ 1
+#ifndef _STRUCTURALISOTROPICCONSTITUTIVELAW_H_
+#define _STRUCTURALISOTROPICCONSTITUTIVELAW_H_ 1
 
 #include <string>
 #include <sstream>
@@ -70,8 +70,6 @@
 #include <lifev/core/util/Factory.hpp>
 #include <lifev/core/util/FactorySingleton.hpp>
 
-#include <lifev/core/algorithm/SolverAztecOO.hpp>
-
 #include <lifev/structure/solver/StructuralConstitutiveLawData.hpp>
 
 //ET include for assemblings
@@ -88,7 +86,7 @@ namespace LifeV
 */
 
 template <typename MeshType>
-class StructuralConstitutiveLaw
+class StructuralIsotropicConstitutiveLaw
 {
 public:
 
@@ -104,7 +102,7 @@ public:
     typedef typename boost::shared_ptr<data_Type>  dataPtr_Type;
     typedef typename boost::shared_ptr<const Displayer>    displayerPtr_Type;
 
-    typedef FactorySingleton<Factory<StructuralConstitutiveLaw<MeshType>, std::string> >  StructureMaterialFactory;
+    typedef FactorySingleton<Factory<StructuralIsotropicConstitutiveLaw<MeshType>, std::string> >  StructureMaterialFactory;
 
     typedef std::vector< typename MeshType::element_Type* > vectorVolumes_Type;
 
@@ -132,9 +130,9 @@ public:
     //! @name Constructor &  Deconstructor
     //@{
 
-    StructuralConstitutiveLaw();
+    StructuralIsotropicConstitutiveLaw();
 
-    virtual ~StructuralConstitutiveLaw() {}
+    virtual ~StructuralIsotropicConstitutiveLaw() {}
 
     //@}
 
@@ -143,7 +141,7 @@ public:
     //!@name Methods
     //@{
 
-    //! Setup the created object of the class StructuralConstitutiveLaw
+    //! Setup the created object of the class StructuralIsotropicConstitutiveLaw
     /*!
       \param dFespace: the FiniteElement Space
       \param monolithicMap: the MapEpetra
@@ -221,7 +219,7 @@ public:
                                                          const Epetra_SerialDenseMatrix& tensorF,
                                                          const Epetra_SerialDenseMatrix& cofactorF,
                                                          const std::vector<Real>& invariants,
-                                                         const UInt material) = 0;
+                                                         const UInt material, const dataPtr_Type& dataMaterial) = 0;
 
 
     //! @name Set Methods
@@ -274,7 +272,7 @@ protected:
       \param VOID
       \return VOID
     */
-    virtual void setupVectorsParameters ( void ) = 0;
+    virtual void setupVectorsParameters ( const dataPtr_Type& dataMaterial ) = 0;
 
     //!Protected Members
 
@@ -290,10 +288,6 @@ protected:
     //! The Offset parameter
     UInt                                           M_offset;
 
-    dataPtr_Type                                   M_dataMaterial;
-
-    displayerPtr_Type                              M_displayer;
-
     //! Map between markers and volumes on the mesh
     vectorsParametersPtr_Type           M_vectorsParameters;
 };
@@ -303,7 +297,7 @@ protected:
 //=====================================
 
 template <typename MeshType>
-StructuralConstitutiveLaw<MeshType>::StructuralConstitutiveLaw( ) :
+StructuralIsotropicConstitutiveLaw<MeshType>::StructuralIsotropicConstitutiveLaw( ) :
     M_dispFESpace                ( ),
     M_dispETFESpace              ( ),
     M_localMap                   ( ),
@@ -311,8 +305,8 @@ StructuralConstitutiveLaw<MeshType>::StructuralConstitutiveLaw( ) :
     M_offset                     ( 0 ),
     M_vectorsParameters          ( )
 {
-    //    std::cout << "I am in the constructor of StructuralConstitutiveLaw" << std::endl;
+    //    std::cout << "I am in the constructor of StructuralIsotropicConstitutiveLaw" << std::endl;
 }
 
 }
-#endif /*_STRUCTURALMATERIAL_H*/
+#endif /*_STRUCTURALISOTROPICCONSTITUTIVELAW_H_*/

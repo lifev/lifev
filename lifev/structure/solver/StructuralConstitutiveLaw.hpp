@@ -45,7 +45,7 @@
 #define _STRUCTURALCONSTITUTIVELAW_H_ 1
 
 #include <string>
-#include <sstream>
+//#include <sstream>
 #include <iostream>
 #include <stdexcept>
 #include <boost/scoped_ptr.hpp>
@@ -60,22 +60,14 @@
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-#include <lifev/core/array/MatrixElemental.hpp>
-#include <lifev/core/array/VectorElemental.hpp>
 #include <lifev/core/array/MatrixEpetra.hpp>
 #include <lifev/core/array/VectorEpetra.hpp>
 
-#include <lifev/core/fem/Assembly.hpp>
-#include <lifev/core/fem/AssemblyElemental.hpp>
 #include <lifev/structure/fem/AssemblyElementalStructure.hpp>
 #include <lifev/core/fem/FESpace.hpp>
 
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/util/Displayer.hpp>
-#include <lifev/core/util/Factory.hpp>
-#include <lifev/core/util/FactorySingleton.hpp>
-
-#include <lifev/core/algorithm/SolverAztecOO.hpp>
 
 #include <lifev/structure/solver/StructuralConstitutiveLawData.hpp>
 
@@ -211,14 +203,6 @@ public:
 			    const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
 			    const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
 			    const displayerPtr_Type& displayer );
-
-
-    //! Computes the deformation Gradient F, the cofactor of F Cof(F),
-    //! the determinant of F J = det(F), the trace of C Tr(C).
-    /*!
-      \param dk_loc: local displacement vector
-    */
-    void computeKinematicsVariables ( const VectorElemental& /*dk_loc*/ ) {}
 
 
     //! Output of the class
@@ -367,9 +351,9 @@ StructuralConstitutiveLaw<MeshType>::setup (const FESpacePtr_Type& dFESpace,
     M_displayer = displayer;
 
     // Setting the isotropic and anisotropic part
-    M_isotropicLaw->setup();
+    M_isotropicLaw->setup( dFESpace, dETFESpace, monolithicMap, offset );
 #ifdef ENABLE_ANISOTROPIC_LAW
-    M_anisotropicLaw->setup();
+    M_anisotropicLaw->setup( dFESpace, dETFESpace, monolithicMap, offset );
 #endif
 }
 
@@ -447,8 +431,6 @@ void StructuralConstitutiveLaw<MeshType>::computeStiffness ( const vector_Type& 
     M_vectorStiffness->globalAssemble();
 }
 
-
-
 template <typename MeshType>
 void
 StructuralConstitutiveLaw<MeshType>::showMe ( std::string const& fileNameStiff,
@@ -517,6 +499,33 @@ vectorPtr_Type const StructuralConstitutiveLaw<MeshType>::stiffVector() const
 #endif
 }
 
+template <typename MeshType>
+void StructuralConstitutiveLaw<MeshType>::apply ( const vector_Type& sol, vector_Type& res,
+						  const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+						  const mapMarkerIndexesPtr_Type mapsMarkerIndexes)
+{
+  // Creating vectors for the isotropic and anisotropic vector which will be summed
+  vector_Type copyResIsotropic(res);
+
+#ifdef ENABLE_ANISOTROPIC_LAW
+  vector_Type copyResAnisotropic(res);
+#endif
+  
+  M_isotropicLaw->apply ( sol, copyResIsotropic, mapsMarkerVolumes, mapsMarkerIndexes);
+  
+#ifdef ENABLE_ANISOTROPIC_LAW
+  M_isotropicLaw->apply ( sol, copyResAnisotropic, mapsMarkerVolumes, mapsMarkerIndexes);
+#endif
+
+  *res *= 0.0;
+
+  res += copyResIsotropic;
+
+#ifdef ENABLE_ANISOTROPIC_LAW
+  res += copyResAnisotropic;
+#endif
+
+}
 
 }
 #endif /*_STRUCTURALMATERIAL_H*/

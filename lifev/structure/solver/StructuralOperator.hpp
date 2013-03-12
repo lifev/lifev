@@ -865,8 +865,6 @@ StructuralOperator<Mesh>::setup (boost::shared_ptr<data_Type>        data,
     M_jacobian.reset                  (new matrix_Type (*M_localMap) );
 
     M_offset                          = offset;
-
-    M_material.reset ( material_Type::StructureMaterialFactory::instance().createObject ( M_data->solidType() ) );
     M_material->setup ( dFESpace, dETFESpace, M_localMap, M_offset, M_data, M_Displayer );
 
     if ( M_data->verbose() )
