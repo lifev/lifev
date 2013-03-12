@@ -44,6 +44,8 @@
 #include <lifev/bc_interface/core/bc/BCInterface.hpp>
 
 // Template specializations
+#include <lifev/bc_interface/3D/function/fluid/BCInterfaceFunctionParserSolverFluid3D.hpp>
+#include <lifev/bc_interface/3D/function/fsi/BCInterfaceFunctionParserSolverFSI3D.hpp>
 #include <lifev/bc_interface/3D/function/fsi/BCInterfaceFunctionSolverDefinedFSI3D.hpp>
 
 namespace LifeV

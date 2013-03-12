@@ -40,6 +40,9 @@
 // BCInterface includes
 #include <lifev/bc_interface/core/bc/BCInterface.hpp>
 
+// Template specializations
+#include <lifev/bc_interface/0D/function/BCInterfaceFunctionParserSolver0D.hpp>
+
 namespace LifeV
 {
 
