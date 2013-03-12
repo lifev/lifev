@@ -1,7 +1,13 @@
 SET(function_HEADERS
   function/BCInterfaceFunctionParser.hpp
   function/BCInterfaceFunctionSolverDefined.hpp
+  function/BCInterfaceFunctionSolverDefinedFSI1D.hpp
+  function/BCInterfaceFunctionSolverDefinedFSI3D.hpp
   function/BCInterfaceFunctionParserSolver.hpp
+  function/BCInterfaceFunctionParserSolver0D.hpp
+  function/BCInterfaceFunctionParserSolverFSI1D.hpp
+  function/BCInterfaceFunctionParserSolverFSI3D.hpp
+  function/BCInterfaceFunctionParserSolverFluid3D.hpp
   function/BCInterfaceFunctionUserDefined.hpp
   function/BCInterfaceFactory.hpp
   function/BCInterfaceFunctionParserFileSolver.hpp
@@ -10,7 +16,12 @@ SET(function_HEADERS
 CACHE INTERNAL "")
 
 SET(function_SOURCES
-  function/BCInterfaceFunctionSolverDefined.cpp
+  function/BCInterfaceFunctionParserSolver0D.cpp
+  function/BCInterfaceFunctionParserSolverFSI1D.cpp
+  function/BCInterfaceFunctionParserSolverFSI3D.cpp
+  function/BCInterfaceFunctionParserSolverFluid3D.cpp
+  function/BCInterfaceFunctionSolverDefinedFSI1D.cpp
+  function/BCInterfaceFunctionSolverDefinedFSI3D.cpp
 CACHE INTERNAL "")
 
 
