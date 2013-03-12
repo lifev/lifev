@@ -1,0 +1,20 @@
+SET(fluid_HEADERS
+  fluid/BCInterfaceFunctionParserSolverFluid3D.hpp
+CACHE INTERNAL "")
+
+SET(fluid_SOURCES
+  fluid/BCInterfaceFunctionParserSolverFluid3D.cpp
+CACHE INTERNAL "")
+
+
+SET(LOCAL_HEADERS)
+FOREACH(INC ${fluid_HEADERS})
+  STRING(REPLACE "fluid/" "" LOCAL_INC ${INC})
+  SET(LOCAL_HEADERS ${LOCAL_HEADERS} ${LOCAL_INC})
+ENDFOREACH()
+
+INSTALL(
+  FILES ${LOCAL_HEADERS}
+  DESTINATION "${${PROJECT_NAME}_INSTALL_INCLUDE_DIR}/lifev/bc_interface/3D/function/fluid"
+  COMPONENT ${PACKAGE_NAME}
+)
