@@ -45,7 +45,7 @@
 #include <lifev/fsi/solver/FSIMonolithicGI.hpp>
 
 // BCInterface includes
-#include <lifev/bc_interface/function/BCInterfaceFunctionSolverDefined.hpp>
+#include <lifev/bc_interface/core/function/BCInterfaceFunctionSolverDefined.hpp>
 
 namespace LifeV
 {

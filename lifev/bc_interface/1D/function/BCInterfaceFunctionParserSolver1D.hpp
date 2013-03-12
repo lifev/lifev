@@ -41,7 +41,7 @@
 #include <lifev/one_d_fsi/solver/OneDFSISolver.hpp>
 
 // BCInterface includes
-#include <lifev/bc_interface/function/BCInterfaceFunctionParserSolver.hpp>
+#include <lifev/bc_interface/core/function/BCInterfaceFunctionParserSolver.hpp>
 
 namespace LifeV
 {

@@ -41,10 +41,10 @@
 #include <lifev/core/fem/BCDataInterpolator.hpp>
 
 // BCInterface includes
-#include <lifev/bc_interface/fem/BCInterface.hpp>
+#include <lifev/bc_interface/core/bc/BCInterface.hpp>
 
 // Template specializations
-#include <lifev/bc_interface/function/BCInterfaceFunctionSolverDefinedFSI3D.hpp>
+#include <lifev/bc_interface/3D/function/fsi/BCInterfaceFunctionSolverDefinedFSI3D.hpp>
 
 namespace LifeV
 {
