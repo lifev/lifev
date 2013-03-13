@@ -39,9 +39,12 @@
 
 // BCInterface includes
 #include <lifev/bc_interface/core/bc/BCInterface.hpp>
+#include <lifev/bc_interface/0D/bc/BCInterfaceData0D.hpp>
 
 // Template specializations
+#include <lifev/bc_interface/0D/function/BCInterfaceFunctionParser0D.hpp>
 #include <lifev/bc_interface/0D/function/BCInterfaceFunctionParserSolver0D.hpp>
+#include <lifev/bc_interface/0D/function/BCInterfaceFunctionUserDefined0D.hpp>
 
 namespace LifeV
 {
@@ -179,7 +182,8 @@ private:
     //! @name Private Methods
     //@{
 
-    void addBcToHandler();
+    template< class BCBaseType >
+    void addBcToHandler( BCBaseType& base );
 
     //@}
 
@@ -199,6 +203,8 @@ BCInterface0D< BcHandler, PhysicalSolverType >::insertBC()
     debugStream ( 5020 ) << "BCInterface0D::insertBC\n";
 #endif
 
+    ZeroDimensionalFunction base;
+
     switch ( M_data.base().second )
     {
         case BCIFunctionParser:
@@ -209,8 +215,9 @@ BCInterface0D< BcHandler, PhysicalSolverType >::insertBC()
         {
             factory_Type factory;
             this->M_vectorFunction.push_back ( factory.createFunctionParser ( M_data ) );
+            this->M_vectorFunction.back()->assignFunction ( base );
 
-            addBcToHandler();
+            addBcToHandler( base );
 
             return;
         }
@@ -227,16 +234,16 @@ BCInterface0D< BcHandler, PhysicalSolverType >::insertBC()
 // ===================================================
 // Private Methods
 // ===================================================
-template< class BcHandler, class PhysicalSolverType >
+template< class BcHandler, class PhysicalSolverType > template< class BCBaseType >
 inline void
-BCInterface0D< BcHandler, PhysicalSolverType >::addBcToHandler()
+BCInterface0D< BcHandler, PhysicalSolverType >::addBcToHandler( BCBaseType& base )
 {
     if ( !this->M_handler.get() ) // If BCHandler has not been created yet, we do it now
     {
         this->createHandler();
     }
-
-    this->M_handler->setBC ( M_data.flag(), M_data.type(), boost::bind ( &BCInterfaceFunction<BcHandler, PhysicalSolverType>::functionTime, this->M_vectorFunction.back(), _1 ) );
+    //boost::bind ( &BCInterfaceFunction<BcHandler, PhysicalSolverType>::functionTime, this->M_vectorFunction.back(), _1 )
+    this->M_handler->setBC ( M_data.flag(), M_data.type(), base );
 }
 
 } // Namespace LifeV

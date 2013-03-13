@@ -34,8 +34,8 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef BCInterfaceFunctionSolverDefinedFSI1D_H
-#define BCInterfaceFunctionSolverDefinedFSI1D_H 1
+#ifndef BCInterfaceFunctionSolverDefined1D_H
+#define BCInterfaceFunctionSolverDefined1D_H 1
 
 // OneDFSI includes
 #include <lifev/one_d_fsi/solver/OneDFSISolver.hpp>
@@ -191,4 +191,4 @@ private:
 
 } // Namespace LifeV
 
-#endif /* BCInterfaceFunctionSolverDefinedFSI1D_H */
+#endif /* BCInterfaceFunctionSolverDefined1D_H */

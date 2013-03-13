@@ -34,14 +34,14 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef BCInterfaceFunctionParserSolver1D_H
-#define BCInterfaceFunctionParserSolver1D_H 1
+#ifndef BCInterfaceFunctionParserFluid3D_H
+#define BCInterfaceFunctionParserFluid3D_H 1
 
-// OneDFSI includes
-#include <lifev/one_d_fsi/solver/OneDFSISolver.hpp>
+// Oseen includes
+#include <lifev/navier_stokes/solver/OseenSolverShapeDerivative.hpp>
 
 // BCInterface includes
-#include <lifev/bc_interface/core/function/BCInterfaceFunctionParserSolver.hpp>
+#include <lifev/bc_interface/core/function/BCInterfaceFunctionParser.hpp>
 
 namespace LifeV
 {
@@ -51,15 +51,12 @@ namespace LifeV
 // ===================================================
 template< >
 void
-BCInterfaceFunctionParserSolver< OneDFSIBCHandler, OneDFSISolver >::updatePhysicalSolverVariables();
+BCInterfaceFunctionParser< BCHandler, OseenSolver< RegionMesh< LinearTetra > > >::assignFunction ( bcBase_Type& base );
 
-// ===================================================
-// Protected Methods
-// ===================================================
 template< >
 void
-BCInterfaceFunctionParserSolver< OneDFSIBCHandler, OneDFSISolver >::createAccessList ( const BCInterfaceData& data );
+BCInterfaceFunctionParser< BCHandler, OseenSolverShapeDerivative< RegionMesh< LinearTetra > > >::assignFunction ( bcBase_Type& base );
 
 } // Namespace LifeV
 
-#endif /* BCInterfaceFunctionParserSolver1D_H */
+#endif /* BCInterfaceFunctionParserFluid3D_H */

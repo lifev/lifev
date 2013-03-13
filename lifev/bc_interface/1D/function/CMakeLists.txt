@@ -1,11 +1,15 @@
 SET(function_HEADERS
+  function/BCInterfaceFunctionParser1D.hpp
   function/BCInterfaceFunctionParserSolver1D.hpp
   function/BCInterfaceFunctionSolverDefined1D.hpp
+  function/BCInterfaceFunctionUserDefined1D.hpp
 CACHE INTERNAL "")
 
 SET(function_SOURCES
+  function/BCInterfaceFunctionParser1D.cpp
   function/BCInterfaceFunctionParserSolver1D.cpp
   function/BCInterfaceFunctionSolverDefined1D.cpp
+  function/BCInterfaceFunctionUserDefined1D.cpp
 CACHE INTERNAL "")
 
 

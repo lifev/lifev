@@ -40,6 +40,9 @@
 // 3D BCHandler include
 #include <lifev/core/fem/BCHandler.hpp>
 
+// Data interpolator include
+#include <lifev/core/fem/BCDataInterpolator.hpp>
+
 // BCInterface includes
 #include <lifev/bc_interface/core/bc/BCInterfaceData.hpp>
 

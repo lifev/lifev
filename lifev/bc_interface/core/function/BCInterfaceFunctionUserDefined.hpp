@@ -76,6 +76,7 @@ public:
     typedef typename function_Type::boundaryFunctionTimeSpaceID_Type               boundaryFunctionTimeSpaceID_Type;
     typedef BCInterfaceData::parametersContainer_Type                              parametersContainer_Type;
 
+    typedef typename function_Type::bcBase_Type                                    bcBase_Type;
 
     //@}
 
@@ -93,23 +94,11 @@ public:
     //! @name Methods
     //@{
 
-    //! Assign the function to the base of the 1D \c BCHandler
+    //! Assign the function to the base of the \c BCHandler
     /*!
-     * @param base base of the 1D boundary condition
+     * @param base base of the boundary condition
      */
-    void assignFunction ( OneDFSIFunction& base )
-    {
-        base.setFunction ( functionSelectorTimeTimeStep() );
-    }
-
-    //! Assign the function to the base of the 3D \c BCHandler
-    /*!
-     * @param base base of the 3D boundary condition
-     */
-    void assignFunction ( BCFunctionBase& base )
-    {
-        base.setFunction ( functionSelectorTimeSpaceID() );
-    }
+    void assignFunction ( bcBase_Type& base );
 
     //! Function of time
     /*!

@@ -63,6 +63,8 @@ public:
     typedef BcHandlerType                                                                            bcHandler_Type;
     typedef PhysicalSolverType                                                                       physicalSolver_Type;
 
+    typedef typename bcHandler_Type::bcFunction_Type                                                 bcBase_Type;
+
     typedef boost::function<Real ( const Real& ) >                                                   boundaryFunctionTime_Type;
     typedef boost::function<Real ( const Real&, const Real& ) >                                      boundaryFunctionTimeTimeStep_Type;
     typedef boost::function<Real ( const Real&, const Real&, const Real&, const Real&, const ID& ) > boundaryFunctionTimeSpaceID_Type;
@@ -85,17 +87,11 @@ public:
     //! @name Methods
     //@{
 
-    //! Assign the function to the base of the 1D \c BCHandler
+    //! Assign the function to the base of the \c BCHandler
     /*!
-     * @param base base of the 1D boundary condition
+     * @param base base of the boundary condition
      */
-    virtual void assignFunction ( OneDFSIFunction& base ) = 0;
-
-    //! Assign the function to the base of the 3D \c BCHandler
-    /*!
-     * @param base base of the 3D boundary condition
-     */
-    virtual void assignFunction ( BCFunctionBase& base ) = 0;
+    virtual void assignFunction ( bcBase_Type& base ) = 0;
 
     //! Function of time
     /*!

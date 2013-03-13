@@ -108,6 +108,8 @@ public:
     typedef typename function_Type::boundaryFunctionTimeSpaceID_Type               boundaryFunctionTimeSpaceID_Type;
     typedef Parser                                                                 parser_Type;
 
+    typedef typename function_Type::bcBase_Type                                    bcBase_Type;
+
     //@}
 
 
@@ -126,23 +128,11 @@ public:
     //! @name Methods
     //@{
 
-    //! Assign the function to the base of the 1D \c BCHandler
+    //! Assign the function to the base of the \c BCHandler
     /*!
-     * @param base base of the 1D boundary condition
+     * @param base base of the boundary condition
      */
-    void assignFunction ( OneDFSIFunction& base )
-    {
-        base.setFunction ( functionSelectorTimeTimeStep() );
-    }
-
-    //! Assign the function to the base of the 3D \c BCHandler
-    /*!
-     * @param base base of the 3D boundary condition
-     */
-    void assignFunction ( BCFunctionBase& base )
-    {
-        base.setFunction ( functionSelectorTimeSpaceID() );
-    }
+    void assignFunction ( bcBase_Type& base );
 
     //! Function of time
     /*!
@@ -239,7 +229,13 @@ private:
      */
     void setupParser ( const BCInterfaceData& data );
 
-    //! Get the selected function for of time and time step
+    //! Get the selected function of time
+    /*!
+     * @return boundary function
+     */
+    boundaryFunctionTime_Type functionSelectorTime();
+
+    //! Get the selected function of time and time step
     /*!
      * @return boundary function
      */
@@ -477,6 +473,13 @@ BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >::setupParser ( co
     {
         M_parser.reset ( new parser_Type ( data.baseString() ) );
     }
+}
+
+template< typename BcHandlerType, typename PhysicalSolverType >
+typename BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >::boundaryFunctionTime_Type
+BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >::functionSelectorTime()
+{
+    return boost::bind ( &BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >::functionTime, this, _1 );
 }
 
 template< typename BcHandlerType, typename PhysicalSolverType >
