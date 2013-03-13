@@ -69,12 +69,6 @@ void FlowConditions::initParameters ( FSIOperator&  Oper,
     Epetra_SerialDenseVector fluidQuantities (1); // M_area0
     Epetra_SerialDenseVector solidQuantities (2); // M_beta and M_rhos
 
-    /*
-        std::cout << "Here I am " << std::endl;
-        int n1;
-        std::cin >> n1;
-    */
-
 
     if (Oper.isFluid() )
     {
@@ -114,7 +108,8 @@ void FlowConditions::initParameters ( FSIOperator&  Oper,
 }
 
 void FlowConditions::renewParameters ( FSISolver&  oper_,
-                                       const int&    outflowFlag)
+                                       const int&    outflowFlag,
+                                       const FSIOperator::vector_Type& fluidSolution)
 {
 
     Epetra_SerialDenseVector fluidQuantities (2); // Flux and Area
@@ -123,7 +118,7 @@ void FlowConditions::renewParameters ( FSISolver&  oper_,
 
     if (Oper->isFluid() )
     {
-        fluidQuantities (0) = Oper->fluid().flux (outflowFlag, *Oper->fluid().solution() );
+        fluidQuantities (0) = Oper->fluid().flux (outflowFlag, fluidSolution );
         fluidQuantities (1) = Oper->fluid().area (outflowFlag);
     }
 
@@ -137,7 +132,7 @@ void FlowConditions::renewParameters ( FSISolver&  oper_,
 
     qn   = fluidQuantities (0);
     area = fluidQuantities (1);
-    area0 = 0.193529;
+    area0 = 0.7854;
     // Fluid density
     // Real density = 1.0;
     UInt flag   = 1;

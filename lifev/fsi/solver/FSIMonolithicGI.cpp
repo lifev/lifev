@@ -120,10 +120,11 @@ FSIMonolithicGI::evalResidual ( vector_Type&       res,
     UInt offset ( M_solidAndFluidDim + nDimensions * M_interface );
 
     vectorPtr_Type meshDisp ( new vector_Type (M_mmFESpace->map() ) );
-    vectorPtr_Type mmRep ( new vector_Type (M_mmFESpace->map(), Repeated ) );
 
     meshDisp->subset (disp, offset); //if the conv. term is to be condidered implicitly
-    mmRep = meshDisp;
+
+    vectorPtr_Type mmRep ( new vector_Type (*meshDisp, Repeated ) );
+
     moveMesh ( *mmRep );
 
     //here should use extrapolationFirstDerivative instead of velocity

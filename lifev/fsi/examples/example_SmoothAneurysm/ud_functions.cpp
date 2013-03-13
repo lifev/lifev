@@ -658,7 +658,7 @@ Real fluxFunctionAneurysm (const Real& t, const Real& /*x*/, const Real& /*y*/, 
     Real rampAmpl (0.4);
     Real dt (0.001);
 
-    if ( t <= 0.4 )
+    if ( t <= rampAmpl )
     {
         fluxFinal = (1.8334 / 0.4) * t;
     }
@@ -671,7 +671,7 @@ Real fluxFunctionAneurysm (const Real& t, const Real& /*x*/, const Real& /*y*/, 
         //Simone's area
         //const Real area       = 0.0907122;
         //const Real area       = 0.0777195; //FluidSmooth
-        const Real area = 0.193529; // BigMesh
+        const Real area = 0.7854; // BigMesh
 
         const Real areaFactor = area / ( (0.6 / 2) * (0.6 / 2) * pi);
         const Real Average = (48.21 * pow (area, 1.84) ) * 60; //Mean Cebral's Flux per minut
@@ -703,7 +703,7 @@ Real fluxFunctionAneurysm (const Real& t, const Real& /*x*/, const Real& /*y*/, 
         }
 
         //return - (flux * areaFactor * unitFactor);
-        fluxFinal =  (flux * volumetric * unitFactor);
+        fluxFinal =  (flux * areaFactor * unitFactor);
 
     }
 
@@ -713,28 +713,14 @@ Real fluxFunctionAneurysm (const Real& t, const Real& /*x*/, const Real& /*y*/, 
 
 Real aneurismFluxInVectorial (const Real&  t, const Real& x, const Real& y, const Real& z, const ID& i)
 {
-    //Components for Simone's mesh
-    /*
-      Real n1(-0.000019768882940);
-      Real n2(-0.978289616345544);
-      Real n3( 0.207242433298975);
-    */
-    /*
-      Real n1(-0.67460);
-      Real n2(-0.19888);
-      Real n3(-0.17089);
-    */
-    Real n1 (-0.671731456);
-    Real n2 (-0.204172511);
-    Real n3 (-0.712102827);
+    Real n1 (0.0);
+    Real n2 (0.0);
+    Real n3 (1.0);
 
 
     Real flux (fluxFunctionAneurysm (t, x, y, z, i) );
-    //Simone's area
-    //Real area(0.0907122); // Computed with the triangle on the INLET boundary
 
-    //Real area(0.0777195); //fluidsmooth
-    Real area (0.193529); //fluidBig
+    Real area (0.7854); //fluidBig
     switch (i)
     {
         case 0:
