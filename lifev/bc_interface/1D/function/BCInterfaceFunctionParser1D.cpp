@@ -34,14 +34,8 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef BCInterfaceFunctionParserSolver1D_H
-#define BCInterfaceFunctionParserSolver1D_H 1
-
-// OneDFSI includes
-#include <lifev/one_d_fsi/solver/OneDFSISolver.hpp>
-
 // BCInterface includes
-#include <lifev/bc_interface/core/function/BCInterfaceFunctionParserSolver.hpp>
+#include <lifev/bc_interface/1D/function/BCInterfaceFunctionParser1D.hpp>
 
 namespace LifeV
 {
@@ -51,15 +45,9 @@ namespace LifeV
 // ===================================================
 template< >
 void
-BCInterfaceFunctionParserSolver< OneDFSIBCHandler, OneDFSISolver >::updatePhysicalSolverVariables();
-
-// ===================================================
-// Protected Methods
-// ===================================================
-template< >
-void
-BCInterfaceFunctionParserSolver< OneDFSIBCHandler, OneDFSISolver >::createAccessList ( const BCInterfaceData& data );
+BCInterfaceFunctionParser< OneDFSIBCHandler, OneDFSISolver >::assignFunction ( bcBase_Type& base )
+{
+    base.setFunction ( functionSelectorTimeTimeStep() );
+}
 
 } // Namespace LifeV
-
-#endif /* BCInterfaceFunctionParserSolver1D_H */

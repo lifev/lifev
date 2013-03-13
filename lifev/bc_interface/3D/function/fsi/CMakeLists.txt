@@ -1,11 +1,15 @@
 SET(fsi_HEADERS
+  fsi/BCInterfaceFunctionParserFSI3D.hpp
   fsi/BCInterfaceFunctionParserSolverFSI3D.hpp
   fsi/BCInterfaceFunctionSolverDefinedFSI3D.hpp
+  fsi/BCInterfaceFunctionUserDefinedFSI3D.hpp
 CACHE INTERNAL "")
 
 SET(fsi_SOURCES
+  fsi/BCInterfaceFunctionParserFSI3D.cpp
   fsi/BCInterfaceFunctionParserSolverFSI3D.cpp
   fsi/BCInterfaceFunctionSolverDefinedFSI3D.cpp
+  fsi/BCInterfaceFunctionUserDefinedFSI3D.cpp
 CACHE INTERNAL "")
 
 

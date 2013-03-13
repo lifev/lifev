@@ -1,9 +1,13 @@
 SET(function_HEADERS
+  function/BCInterfaceFunctionParser0D.hpp
   function/BCInterfaceFunctionParserSolver0D.hpp
+  function/BCInterfaceFunctionUserDefined0D.hpp
 CACHE INTERNAL "")
 
 SET(function_SOURCES
+  function/BCInterfaceFunctionParser0D.cpp
   function/BCInterfaceFunctionParserSolver0D.cpp
+  function/BCInterfaceFunctionUserDefined0D.cpp
 CACHE INTERNAL "")
 
 

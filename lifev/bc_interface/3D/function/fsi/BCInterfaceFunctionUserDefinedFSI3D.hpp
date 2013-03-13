@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the BCInterfaceFunctionParserSolver class
+ *  @brief File containing the BCInterfaceFunctionUserDefinedSolver class
  *
  *  @date 24-08-2009
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -34,14 +34,14 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#ifndef BCInterfaceFunctionParserSolver1D_H
-#define BCInterfaceFunctionParserSolver1D_H 1
+#ifndef BCInterfaceFunctionUserDefinedFSI3D_H
+#define BCInterfaceFunctionUserDefinedFSI3D_H 1
 
-// OneDFSI includes
-#include <lifev/one_d_fsi/solver/OneDFSISolver.hpp>
+// FSI includes
+#include <lifev/fsi/solver/FSIOperator.hpp>
 
 // BCInterface includes
-#include <lifev/bc_interface/core/function/BCInterfaceFunctionParserSolver.hpp>
+#include <lifev/bc_interface/core/function/BCInterfaceFunctionUserDefined.hpp>
 
 namespace LifeV
 {
@@ -51,15 +51,8 @@ namespace LifeV
 // ===================================================
 template< >
 void
-BCInterfaceFunctionParserSolver< OneDFSIBCHandler, OneDFSISolver >::updatePhysicalSolverVariables();
-
-// ===================================================
-// Protected Methods
-// ===================================================
-template< >
-void
-BCInterfaceFunctionParserSolver< OneDFSIBCHandler, OneDFSISolver >::createAccessList ( const BCInterfaceData& data );
+BCInterfaceFunctionUserDefined< BCHandler, FSIOperator >::assignFunction ( bcBase_Type& base );
 
 } // Namespace LifeV
 
-#endif /* BCInterfaceFunctionParserSolver1D_H */
+#endif /* BCInterfaceFunctionUserDefinedFSI3D_H */

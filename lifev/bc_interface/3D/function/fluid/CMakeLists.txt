@@ -1,9 +1,13 @@
 SET(fluid_HEADERS
+  fluid/BCInterfaceFunctionParserFluid3D.hpp
   fluid/BCInterfaceFunctionParserSolverFluid3D.hpp
+  fluid/BCInterfaceFunctionUserDefinedFluid3D.hpp
 CACHE INTERNAL "")
 
 SET(fluid_SOURCES
+  fluid/BCInterfaceFunctionParserFluid3D.cpp
   fluid/BCInterfaceFunctionParserSolverFluid3D.cpp
+  fluid/BCInterfaceFunctionUserDefinedFluid3D.cpp
 CACHE INTERNAL "")
 
 

@@ -37,16 +37,19 @@
 #ifndef BCInterface3D_H
 #define BCInterface3D_H 1
 
-// Data interpolator include
-#include <lifev/core/fem/BCDataInterpolator.hpp>
-
 // BCInterface includes
 #include <lifev/bc_interface/core/bc/BCInterface.hpp>
+#include <lifev/bc_interface/3D/bc/BCInterfaceData3D.hpp>
 
 // Template specializations
+#include <lifev/bc_interface/3D/function/fluid/BCInterfaceFunctionParserFluid3D.hpp>
 #include <lifev/bc_interface/3D/function/fluid/BCInterfaceFunctionParserSolverFluid3D.hpp>
+#include <lifev/bc_interface/3D/function/fluid/BCInterfaceFunctionUserDefinedFluid3D.hpp>
+
+#include <lifev/bc_interface/3D/function/fsi/BCInterfaceFunctionParserFSI3D.hpp>
 #include <lifev/bc_interface/3D/function/fsi/BCInterfaceFunctionParserSolverFSI3D.hpp>
 #include <lifev/bc_interface/3D/function/fsi/BCInterfaceFunctionSolverDefinedFSI3D.hpp>
+#include <lifev/bc_interface/3D/function/fsi/BCInterfaceFunctionUserDefinedFSI3D.hpp>
 
 namespace LifeV
 {

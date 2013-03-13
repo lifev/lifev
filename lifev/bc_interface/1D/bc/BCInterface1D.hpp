@@ -39,10 +39,13 @@
 
 // BCInterface includes
 #include <lifev/bc_interface/core/bc/BCInterface.hpp>
+#include <lifev/bc_interface/1D/bc/BCInterfaceData1D.hpp>
 
 // Template specializations
+#include <lifev/bc_interface/1D/function/BCInterfaceFunctionParser1D.hpp>
 #include <lifev/bc_interface/1D/function/BCInterfaceFunctionParserSolver1D.hpp>
 #include <lifev/bc_interface/1D/function/BCInterfaceFunctionSolverDefined1D.hpp>
+#include <lifev/bc_interface/1D/function/BCInterfaceFunctionUserDefined1D.hpp>
 
 namespace LifeV
 {
