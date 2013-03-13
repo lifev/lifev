@@ -239,13 +239,19 @@ MultiscaleModelWindkessel0D::checkSolution() const
 void
 MultiscaleModelWindkessel0D::imposeBoundaryFlowRate ( const multiscaleID_Type& boundaryID, const function_Type& function )
 {
-    M_bc->handler()->setBC ( boundaryFlag ( boundaryID ), Current, boost::bind ( function, _1, _1, _1, _1, _1 ) );
+    ZeroDimensionalFunction base;
+    base.setFunction ( boost::bind ( function, _1, _1, _1, _1, _1 ) );
+
+    M_bc->handler()->setBC ( boundaryFlag ( boundaryID ), Current, base );
 }
 
 void
 MultiscaleModelWindkessel0D::imposeBoundaryMeanNormalStress ( const multiscaleID_Type& boundaryID, const function_Type& function )
 {
-    M_bc->handler()->setBC ( boundaryFlag ( boundaryID ), Voltage, boost::bind ( function, _1, _1, _1, _1, _1 ) );
+    ZeroDimensionalFunction base;
+    base.setFunction ( boost::bind ( function, _1, _1, _1, _1, _1 ) );
+
+    M_bc->handler()->setBC ( boundaryFlag ( boundaryID ), Voltage, base );
 }
 
 Real
