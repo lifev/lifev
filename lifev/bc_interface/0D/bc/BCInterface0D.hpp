@@ -236,7 +236,7 @@ BCInterface0D< BcHandler, PhysicalSolverType >::addBcToHandler()
         this->createHandler();
     }
 
-    this->M_handler->setBC ( M_data.flag(), M_data.type(), boost::bind ( &BCInterfaceFunction<PhysicalSolverType>::functionTime, this->M_vectorFunction.back(), _1 ) );
+    this->M_handler->setBC ( M_data.flag(), M_data.type(), boost::bind ( &BCInterfaceFunction<BcHandler, PhysicalSolverType>::functionTime, this->M_vectorFunction.back(), _1 ) );
 }
 
 } // Namespace LifeV

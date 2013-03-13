@@ -42,7 +42,7 @@ namespace LifeV
 // ===================================================
 // Constructors
 // ===================================================
-BCInterfaceFunctionSolverDefined< FSIOperator >::BCInterfaceFunctionSolverDefined() :
+BCInterfaceFunctionSolverDefined< BCHandler, FSIOperator >::BCInterfaceFunctionSolverDefined() :
     M_FSIFunction           (),
     M_physicalSolver        (),
     M_name                  (),
@@ -66,7 +66,7 @@ BCInterfaceFunctionSolverDefined< FSIOperator >::BCInterfaceFunctionSolverDefine
 // Methods
 // ===================================================
 void
-BCInterfaceFunctionSolverDefined< FSIOperator >::exportData ( BCInterfaceData3D& data )
+BCInterfaceFunctionSolverDefined< BCHandler, FSIOperator >::exportData ( BCInterfaceData3D& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -81,7 +81,7 @@ BCInterfaceFunctionSolverDefined< FSIOperator >::exportData ( BCInterfaceData3D&
 }
 
 void
-BCInterfaceFunctionSolverDefined< FSIOperator >::updatePhysicalSolverVariables()
+BCInterfaceFunctionSolverDefined< BCHandler, FSIOperator >::updatePhysicalSolverVariables()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -100,8 +100,7 @@ BCInterfaceFunctionSolverDefined< FSIOperator >::updatePhysicalSolverVariables()
             // Update the physical solver variables
             for ( UInt i ( 0 ); i < M_vectorFunctionRobin.size(); ++i )
             {
-                boost::shared_ptr< BCInterfaceFunctionParserSolver< physicalSolver_Type > > castedFunctionSolver =
-                    boost::dynamic_pointer_cast< BCInterfaceFunctionParserSolver< physicalSolver_Type > > ( M_vectorFunctionRobin[i] );
+                functionParserSolverPtr_Type castedFunctionSolver = boost::dynamic_pointer_cast< functionParserSolver_Type > ( M_vectorFunctionRobin[i] );
 
                 if ( castedFunctionSolver != 0 )
                 {
@@ -161,7 +160,7 @@ BCInterfaceFunctionSolverDefined< FSIOperator >::updatePhysicalSolverVariables()
 // Set Methods
 // ===================================================
 void
-BCInterfaceFunctionSolverDefined< FSIOperator >::setData ( const BCInterfaceData3D& data )
+BCInterfaceFunctionSolverDefined< BCHandler, FSIOperator >::setData ( const BCInterfaceData3D& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -213,7 +212,7 @@ BCInterfaceFunctionSolverDefined< FSIOperator >::setData ( const BCInterfaceData
 // Get Methods
 // ===================================================
 baseContainer_Type
-BCInterfaceFunctionSolverDefined< FSIOperator >::baseType() const
+BCInterfaceFunctionSolverDefined< BCHandler, FSIOperator >::baseType() const
 {
     switch ( M_FSIFunction )
     {

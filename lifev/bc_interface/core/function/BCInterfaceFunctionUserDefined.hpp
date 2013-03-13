@@ -59,20 +59,22 @@ namespace LifeV
  *      <li> Sin
  *  </ol>
  */
-template< class PhysicalSolverType >
-class BCInterfaceFunctionUserDefined: public virtual BCInterfaceFunction< PhysicalSolverType >
+template< typename BcHandlerType, typename PhysicalSolverType >
+class BCInterfaceFunctionUserDefined: public virtual BCInterfaceFunction< BcHandlerType, PhysicalSolverType >
 {
 public:
 
     //! @name Type definitions
     //@{
 
-    typedef PhysicalSolverType                                                    physicalSolver_Type;
-    typedef BCInterfaceFunction< physicalSolver_Type >                            function_Type;
-    typedef typename function_Type::boundaryFunctionTime_Type                     boundaryFunctionTime_Type;
-    typedef typename function_Type::boundaryFunctionTimeTimeStep_Type             boundaryFunctionTimeTimeStep_Type;
-    typedef typename function_Type::boundaryFunctionTimeSpaceID_Type              boundaryFunctionTimeSpaceID_Type;
-    typedef BCInterfaceData::parametersContainer_Type                             parametersContainer_Type;
+    typedef BcHandlerType                                                          bcHandler_Type;
+    typedef PhysicalSolverType                                                     physicalSolver_Type;
+
+    typedef BCInterfaceFunction< bcHandler_Type, physicalSolver_Type >             function_Type;
+    typedef typename function_Type::boundaryFunctionTime_Type                      boundaryFunctionTime_Type;
+    typedef typename function_Type::boundaryFunctionTimeTimeStep_Type              boundaryFunctionTimeTimeStep_Type;
+    typedef typename function_Type::boundaryFunctionTimeSpaceID_Type               boundaryFunctionTimeSpaceID_Type;
+    typedef BCInterfaceData::parametersContainer_Type                              parametersContainer_Type;
 
 
     //@}
@@ -262,17 +264,17 @@ private:
 // Factory
 // ===================================================
 //! Factory create function
-template< typename PhysicalSolverType >
-inline BCInterfaceFunctionUserDefined< PhysicalSolverType >* createBCInterfaceFunctionUserDefined()
+template< typename BcHandlerType, typename PhysicalSolverType >
+inline BCInterfaceFunctionUserDefined< BcHandlerType, PhysicalSolverType >* createBCInterfaceFunctionUserDefined()
 {
-    return new BCInterfaceFunctionUserDefined< PhysicalSolverType > ();
+    return new BCInterfaceFunctionUserDefined< BcHandlerType, PhysicalSolverType > ();
 }
 
 // ===================================================
 // Constructor
 // ===================================================
-template< typename PhysicalSolverType >
-BCInterfaceFunctionUserDefined< PhysicalSolverType >::BCInterfaceFunctionUserDefined() :
+template< typename BcHandlerType, typename PhysicalSolverType >
+BCInterfaceFunctionUserDefined< BcHandlerType, PhysicalSolverType >::BCInterfaceFunctionUserDefined() :
     function_Type   (),
     M_functionType  (),
     M_parameters    ()
@@ -287,9 +289,9 @@ BCInterfaceFunctionUserDefined< PhysicalSolverType >::BCInterfaceFunctionUserDef
 // ===================================================
 // Private methods
 // ===================================================
-template< typename PhysicalSolverType >
+template< typename BcHandlerType, typename PhysicalSolverType >
 void
-BCInterfaceFunctionUserDefined< PhysicalSolverType >::setGlobalData ( const BCInterfaceData& data )
+BCInterfaceFunctionUserDefined< BcHandlerType, PhysicalSolverType >::setGlobalData ( const BCInterfaceData& data )
 {
     //Set mapFunction
     std::map< std::string, userDefinedFunctions > mapFunction;
@@ -302,15 +304,15 @@ BCInterfaceFunctionUserDefined< PhysicalSolverType >::setGlobalData ( const BCIn
     M_parameters = data.parameters();
 }
 
-template< typename PhysicalSolverType >
-typename BCInterfaceFunctionUserDefined< PhysicalSolverType >::boundaryFunctionTime_Type
-BCInterfaceFunctionUserDefined< PhysicalSolverType >::functionSelectorTime()
+template< typename BcHandlerType, typename PhysicalSolverType >
+typename BCInterfaceFunctionUserDefined< BcHandlerType, PhysicalSolverType >::boundaryFunctionTime_Type
+BCInterfaceFunctionUserDefined< BcHandlerType, PhysicalSolverType >::functionSelectorTime()
 {
     switch ( M_functionType )
     {
         case Sin:
 
-            return boost::bind ( &BCInterfaceFunctionUserDefined< PhysicalSolverType >::functionSin, this, _1, _1, _1, _1, _1 );
+            return boost::bind ( &BCInterfaceFunctionUserDefined< BcHandlerType, PhysicalSolverType >::functionSin, this, _1, _1, _1, _1, _1 );
 
         default:
 
@@ -320,15 +322,15 @@ BCInterfaceFunctionUserDefined< PhysicalSolverType >::functionSelectorTime()
     }
 }
 
-template< typename PhysicalSolverType >
-typename BCInterfaceFunctionUserDefined< PhysicalSolverType >::boundaryFunctionTimeTimeStep_Type
-BCInterfaceFunctionUserDefined< PhysicalSolverType >::functionSelectorTimeTimeStep()
+template< typename BcHandlerType, typename PhysicalSolverType >
+typename BCInterfaceFunctionUserDefined< BcHandlerType, PhysicalSolverType >::boundaryFunctionTimeTimeStep_Type
+BCInterfaceFunctionUserDefined< BcHandlerType, PhysicalSolverType >::functionSelectorTimeTimeStep()
 {
     switch ( M_functionType )
     {
         case Sin:
 
-            return boost::bind ( &BCInterfaceFunctionUserDefined< PhysicalSolverType >::functionSin, this, _1, _2, _1, _1, _1 );
+            return boost::bind ( &BCInterfaceFunctionUserDefined< BcHandlerType, PhysicalSolverType >::functionSin, this, _1, _2, _1, _1, _1 );
 
         default:
 
@@ -338,15 +340,15 @@ BCInterfaceFunctionUserDefined< PhysicalSolverType >::functionSelectorTimeTimeSt
     }
 }
 
-template< typename PhysicalSolverType >
-typename BCInterfaceFunctionUserDefined< PhysicalSolverType >::boundaryFunctionTimeSpaceID_Type
-BCInterfaceFunctionUserDefined< PhysicalSolverType >::functionSelectorTimeSpaceID()
+template< typename BcHandlerType, typename PhysicalSolverType >
+typename BCInterfaceFunctionUserDefined< BcHandlerType, PhysicalSolverType >::boundaryFunctionTimeSpaceID_Type
+BCInterfaceFunctionUserDefined< BcHandlerType, PhysicalSolverType >::functionSelectorTimeSpaceID()
 {
     switch ( M_functionType )
     {
         case Sin:
 
-            return boost::bind ( &BCInterfaceFunctionUserDefined< PhysicalSolverType >::functionSin, this, _1, _2, _3, _4, _5 );
+            return boost::bind ( &BCInterfaceFunctionUserDefined< BcHandlerType, PhysicalSolverType >::functionSin, this, _1, _2, _3, _4, _5 );
 
         default:
 
@@ -356,9 +358,9 @@ BCInterfaceFunctionUserDefined< PhysicalSolverType >::functionSelectorTimeSpaceI
     }
 }
 
-template< typename PhysicalSolverType >
+template< typename BcHandlerType, typename PhysicalSolverType >
 Real
-BCInterfaceFunctionUserDefined< PhysicalSolverType >::functionSin ( const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/)
+BCInterfaceFunctionUserDefined< BcHandlerType, PhysicalSolverType >::functionSin ( const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*id*/)
 {
     return M_parameters[0] + M_parameters[1] * std::sin ( M_parameters[2] + 2 * M_PI * t / M_parameters[3] );
 }

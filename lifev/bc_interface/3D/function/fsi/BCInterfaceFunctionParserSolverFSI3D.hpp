@@ -51,14 +51,14 @@ namespace LifeV
 // ===================================================
 template< >
 void
-BCInterfaceFunctionParserSolver< FSIOperator >::updatePhysicalSolverVariables();
+BCInterfaceFunctionParserSolver< BCHandler, FSIOperator >::updatePhysicalSolverVariables();
 
 // ===================================================
 // Protected Methods
 // ===================================================
 template< >
 void
-BCInterfaceFunctionParserSolver< FSIOperator >::createAccessList ( const BCInterfaceData& data );
+BCInterfaceFunctionParserSolver< BCHandler, FSIOperator >::createAccessList ( const BCInterfaceData& data );
 
 } // Namespace LifeV
 

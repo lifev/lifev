@@ -45,7 +45,7 @@ namespace LifeV
 // ===================================================
 template< >
 void
-BCInterfaceFunctionParserSolver< OneDFSISolver >::updatePhysicalSolverVariables()
+BCInterfaceFunctionParserSolver< OneDFSIBCHandler, OneDFSISolver >::updatePhysicalSolverVariables()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -187,7 +187,7 @@ BCInterfaceFunctionParserSolver< OneDFSISolver >::updatePhysicalSolverVariables(
 // ===================================================
 template< >
 void
-BCInterfaceFunctionParserSolver< OneDFSISolver >::createAccessList ( const BCInterfaceData& data )
+BCInterfaceFunctionParserSolver< OneDFSIBCHandler, OneDFSISolver >::createAccessList ( const BCInterfaceData& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG

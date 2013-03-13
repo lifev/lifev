@@ -114,6 +114,9 @@ public:
     typedef typename bcInterface_Type::bcFunctionPtr_Type               bcFunctionPtr_Type;
     typedef typename bcInterface_Type::vectorFunction_Type              vectorFunction_Type;
 
+    typedef typename bcInterface_Type::bcFunctionParserSolver_Type      bcFunctionParserSolver_Type;
+    typedef typename bcInterface_Type::bcFunctionParserSolverPtr_Type   bcFunctionParserSolverPtr_Type;
+
     typedef typename bcInterface_Type::bcFunctionSolverDefinedPtr_Type  bcFunctionSolverDefinedPtr_Type;
     typedef typename bcInterface_Type::vectorFunctionSolverDefined_Type vectorFunctionSolverDefined_Type;
 
@@ -307,8 +310,7 @@ BCInterface1D< BcHandler, PhysicalSolverType >::setSolution ( const solutionPtr_
     //for ( typename vectorFunction_Type::const_iterator i = M_vectorFunction.begin() ; i < M_vectorFunction.end() ; ++i )
     for ( UInt i ( 0 ); i < this->M_vectorFunction.size(); ++i )
     {
-        boost::shared_ptr< BCInterfaceFunctionParserSolver< physicalSolver_Type > > castedFunctionSolver =
-            boost::dynamic_pointer_cast< BCInterfaceFunctionParserSolver< physicalSolver_Type > > ( this->M_vectorFunction[i] );
+        bcFunctionParserSolverPtr_Type castedFunctionSolver = boost::dynamic_pointer_cast< bcFunctionParserSolver_Type > ( this->M_vectorFunction[i] );
 
         if ( castedFunctionSolver != 0 )
         {

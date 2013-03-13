@@ -81,19 +81,21 @@ namespace LifeV
  *
  *    Of course, some of those variables are available only for fluid problems, other only for solid problems.
  */
-template< class PhysicalSolverType >
-class BCInterfaceFunctionParserSolver: public virtual BCInterfaceFunctionParser< PhysicalSolverType >
+template< typename BcHandlerType, typename PhysicalSolverType >
+class BCInterfaceFunctionParserSolver: public virtual BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >
 {
 public:
 
     //! @name Type definitions
     //@{
 
-    typedef PhysicalSolverType                                                    physicalSolver_Type;
-    typedef boost::shared_ptr< physicalSolver_Type >                              physicalSolverPtr_Type;
-    typedef BCInterfaceFunction< physicalSolver_Type >                            function_Type;
-    typedef BCInterfaceFunctionParser< physicalSolver_Type >                      functionParser_Type;
-    typedef typename PhysicalSolverType::solutionPtr_Type                         solutionPtr_Type;
+    typedef BcHandlerType                                                          bcHandler_Type;
+    typedef PhysicalSolverType                                                     physicalSolver_Type;
+
+    typedef boost::shared_ptr< physicalSolver_Type >                               physicalSolverPtr_Type;
+    typedef BCInterfaceFunction< bcHandler_Type, physicalSolver_Type >             function_Type;
+    typedef BCInterfaceFunctionParser< bcHandler_Type, physicalSolver_Type >       functionParser_Type;
+    typedef typename PhysicalSolverType::solutionPtr_Type                          solutionPtr_Type;
 
     //@}
 
@@ -248,17 +250,17 @@ private:
 // Factory
 // ===================================================
 //! Factory create function
-template< typename PhysicalSolverType >
-inline BCInterfaceFunctionParser< PhysicalSolverType >* createBCInterfaceFunctionParserSolver()
+template< typename BcHandlerType, typename PhysicalSolverType >
+inline BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >* createBCInterfaceFunctionParserSolver()
 {
-    return new BCInterfaceFunctionParserSolver< PhysicalSolverType > ();
+    return new BCInterfaceFunctionParserSolver< BcHandlerType, PhysicalSolverType > ();
 }
 
 // ===================================================
 // Constructors
 // ===================================================
-template< class PhysicalSolverType >
-BCInterfaceFunctionParserSolver< PhysicalSolverType >::BCInterfaceFunctionParserSolver() :
+template< typename BcHandlerType, typename PhysicalSolverType >
+BCInterfaceFunctionParserSolver< BcHandlerType, PhysicalSolverType >::BCInterfaceFunctionParserSolver() :
     function_Type                    (),
     functionParser_Type              (),
     M_physicalSolver                 (),
@@ -279,9 +281,9 @@ BCInterfaceFunctionParserSolver< PhysicalSolverType >::BCInterfaceFunctionParser
 // ===================================================
 // Set Methods
 // ===================================================
-template< class PhysicalSolverType >
+template< typename BcHandlerType, typename PhysicalSolverType >
 inline void
-BCInterfaceFunctionParserSolver< PhysicalSolverType >::setData ( const BCInterfaceData0D& data )
+BCInterfaceFunctionParserSolver< BcHandlerType, PhysicalSolverType >::setData ( const BCInterfaceData0D& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -295,9 +297,9 @@ BCInterfaceFunctionParserSolver< PhysicalSolverType >::setData ( const BCInterfa
     createAccessList ( data );
 }
 
-template< class PhysicalSolverType >
+template< typename BcHandlerType, typename PhysicalSolverType >
 inline void
-BCInterfaceFunctionParserSolver< PhysicalSolverType >::setData ( const BCInterfaceData1D& data )
+BCInterfaceFunctionParserSolver< BcHandlerType, PhysicalSolverType >::setData ( const BCInterfaceData1D& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -311,9 +313,9 @@ BCInterfaceFunctionParserSolver< PhysicalSolverType >::setData ( const BCInterfa
     createAccessList ( data );
 }
 
-template< class PhysicalSolverType >
+template< typename BcHandlerType, typename PhysicalSolverType >
 inline void
-BCInterfaceFunctionParserSolver< PhysicalSolverType >::setData ( const BCInterfaceData3D& data )
+BCInterfaceFunctionParserSolver< BcHandlerType, PhysicalSolverType >::setData ( const BCInterfaceData3D& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -332,9 +334,9 @@ BCInterfaceFunctionParserSolver< PhysicalSolverType >::setData ( const BCInterfa
 // ===================================================
 // Private Methods
 // ===================================================
-template< class PhysicalSolverType >
+template< typename BcHandlerType, typename PhysicalSolverType >
 inline void
-BCInterfaceFunctionParserSolver< PhysicalSolverType >::createFluidMap ( std::map< std::string, physicalSolverList >& mapList )
+BCInterfaceFunctionParserSolver< BcHandlerType, PhysicalSolverType >::createFluidMap ( std::map< std::string, physicalSolverList >& mapList )
 {
     mapList["f_timeStep"]       = f_timeStep;
     mapList["f_area"]           = f_area;
@@ -345,9 +347,9 @@ BCInterfaceFunctionParserSolver< PhysicalSolverType >::createFluidMap ( std::map
     mapList["f_venousPressure"] = f_venousPressure;
 }
 
-template< class PhysicalSolverType >
+template< typename BcHandlerType, typename PhysicalSolverType >
 inline void
-BCInterfaceFunctionParserSolver< PhysicalSolverType >::createSolidMap ( std::map< std::string, physicalSolverList >& mapList )
+BCInterfaceFunctionParserSolver< BcHandlerType, PhysicalSolverType >::createSolidMap ( std::map< std::string, physicalSolverList >& mapList )
 {
     mapList["s_density"]          = s_density;
     mapList["s_poisson"]          = s_poisson;
@@ -356,9 +358,9 @@ BCInterfaceFunctionParserSolver< PhysicalSolverType >::createSolidMap ( std::map
     mapList["s_externalPressure"] = s_externalPressure;
 }
 
-template< class PhysicalSolverType >
+template< typename BcHandlerType, typename PhysicalSolverType >
 inline void
-BCInterfaceFunctionParserSolver< PhysicalSolverType >::createList ( const std::map< std::string, physicalSolverList >& mapList, const BCInterfaceData& data )
+BCInterfaceFunctionParserSolver< BcHandlerType, PhysicalSolverType >::createList ( const std::map< std::string, physicalSolverList >& mapList, const BCInterfaceData& data )
 {
     M_list.clear();
     for ( typename std::map< std::string, physicalSolverList >::const_iterator j = mapList.begin(); j != mapList.end(); ++j )
@@ -369,11 +371,5 @@ BCInterfaceFunctionParserSolver< PhysicalSolverType >::createList ( const std::m
 }
 
 } // Namespace LifeV
-
-// Include template specializations
-//#include <lifev/bc_interface/function/BCInterfaceFunctionParserSolver0D.hpp>
-//#include <lifev/bc_interface/function/BCInterfaceFunctionParserSolverFSI1D.hpp>
-//#include <lifev/bc_interface/function/BCInterfaceFunctionParserSolverFSI3D.hpp>
-//#include <lifev/bc_interface/function/BCInterfaceFunctionParserSolverFluid3D.hpp>
 
 #endif /* BCInterfaceFunctionParserSolver_H */

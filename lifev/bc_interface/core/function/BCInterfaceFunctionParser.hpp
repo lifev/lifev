@@ -91,20 +91,22 @@ namespace LifeV
  *
  *  However the second way is more efficient during execution.
  */
-template< typename PhysicalSolverType >
-class BCInterfaceFunctionParser: public virtual BCInterfaceFunction< PhysicalSolverType >
+template< typename BcHandlerType, typename PhysicalSolverType >
+class BCInterfaceFunctionParser: public virtual BCInterfaceFunction< BcHandlerType, PhysicalSolverType >
 {
 public:
 
     //! @name Type definitions
     //@{
 
-    typedef PhysicalSolverType                                                    physicalSolver_Type;
-    typedef BCInterfaceFunction< physicalSolver_Type >                            function_Type;
-    typedef typename function_Type::boundaryFunctionTime_Type                     boundaryFunctionTime_Type;
-    typedef typename function_Type::boundaryFunctionTimeTimeStep_Type             boundaryFunctionTimeTimeStep_Type;
-    typedef typename function_Type::boundaryFunctionTimeSpaceID_Type              boundaryFunctionTimeSpaceID_Type;
-    typedef Parser                                                                parser_Type;
+    typedef BcHandlerType                                                          bcHandler_Type;
+    typedef PhysicalSolverType                                                     physicalSolver_Type;
+
+    typedef BCInterfaceFunction< bcHandler_Type, physicalSolver_Type >             function_Type;
+    typedef typename function_Type::boundaryFunctionTime_Type                      boundaryFunctionTime_Type;
+    typedef typename function_Type::boundaryFunctionTimeTimeStep_Type              boundaryFunctionTimeTimeStep_Type;
+    typedef typename function_Type::boundaryFunctionTimeSpaceID_Type               boundaryFunctionTimeSpaceID_Type;
+    typedef Parser                                                                 parser_Type;
 
     //@}
 
@@ -259,17 +261,17 @@ private:
 // Factory
 // ===================================================
 //! Factory create function
-template< typename PhysicalSolverType >
-inline BCInterfaceFunctionParser< PhysicalSolverType >* createBCInterfaceFunctionParser()
+template< typename BcHandlerType, typename PhysicalSolverType >
+inline BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >* createBCInterfaceFunctionParser()
 {
-    return new BCInterfaceFunctionParser< PhysicalSolverType > ();
+    return new BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType > ();
 }
 
 // ===================================================
 // Constructor
 // ===================================================
-template< typename PhysicalSolverType >
-BCInterfaceFunctionParser< PhysicalSolverType >::BCInterfaceFunctionParser() :
+template< typename BcHandlerType, typename PhysicalSolverType >
+BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >::BCInterfaceFunctionParser() :
     function_Type   (),
     M_parser        (),
     M_mapID         ()
@@ -284,9 +286,9 @@ BCInterfaceFunctionParser< PhysicalSolverType >::BCInterfaceFunctionParser() :
 // ===================================================
 // Methods
 // ===================================================
-template< typename PhysicalSolverType >
+template< typename BcHandlerType, typename PhysicalSolverType >
 Real
-BCInterfaceFunctionParser< PhysicalSolverType >::functionTime ( const Real& t )
+BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >::functionTime ( const Real& t )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -305,9 +307,9 @@ BCInterfaceFunctionParser< PhysicalSolverType >::functionTime ( const Real& t )
     return M_parser->evaluate ( 0 );
 }
 
-template< typename PhysicalSolverType >
+template< typename BcHandlerType, typename PhysicalSolverType >
 Real
-BCInterfaceFunctionParser< PhysicalSolverType >::functionTimeTimeStep ( const Real& t, const Real& timeStep )
+BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >::functionTimeTimeStep ( const Real& t, const Real& timeStep )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -328,9 +330,9 @@ BCInterfaceFunctionParser< PhysicalSolverType >::functionTimeTimeStep ( const Re
     return M_parser->evaluate ( 0 );
 }
 
-template< typename PhysicalSolverType >
+template< typename BcHandlerType, typename PhysicalSolverType >
 Real
-BCInterfaceFunctionParser< PhysicalSolverType >::functionTimeSpace ( const Real& t, const Real& x, const Real& y, const Real& z, const ID& /*id*/)
+BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >::functionTimeSpace ( const Real& t, const Real& x, const Real& y, const Real& z, const ID& /*id*/)
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -355,9 +357,9 @@ BCInterfaceFunctionParser< PhysicalSolverType >::functionTimeSpace ( const Real&
     return M_parser->evaluate ( 0 );
 }
 
-template< typename PhysicalSolverType >
+template< typename BcHandlerType, typename PhysicalSolverType >
 Real
-BCInterfaceFunctionParser< PhysicalSolverType >::functionTimeSpaceID ( const Real& t, const Real& x, const Real& y, const Real& z, const ID& id )
+BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >::functionTimeSpaceID ( const Real& t, const Real& x, const Real& y, const Real& z, const ID& id )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -386,9 +388,9 @@ BCInterfaceFunctionParser< PhysicalSolverType >::functionTimeSpaceID ( const Rea
 // ===================================================
 // Set Methods
 // ===================================================
-template< typename PhysicalSolverType >
+template< typename BcHandlerType, typename PhysicalSolverType >
 void
-BCInterfaceFunctionParser< PhysicalSolverType >::setData ( const BCInterfaceData0D& data )
+BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >::setData ( const BCInterfaceData0D& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -398,9 +400,9 @@ BCInterfaceFunctionParser< PhysicalSolverType >::setData ( const BCInterfaceData
     setupParser ( data );
 }
 
-template< typename PhysicalSolverType >
+template< typename BcHandlerType, typename PhysicalSolverType >
 void
-BCInterfaceFunctionParser< PhysicalSolverType >::setData ( const BCInterfaceData1D& data )
+BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >::setData ( const BCInterfaceData1D& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -410,9 +412,9 @@ BCInterfaceFunctionParser< PhysicalSolverType >::setData ( const BCInterfaceData
     setupParser ( data );
 }
 
-template< typename PhysicalSolverType >
+template< typename BcHandlerType, typename PhysicalSolverType >
 void
-BCInterfaceFunctionParser< PhysicalSolverType >::setData ( const BCInterfaceData3D& data )
+BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >::setData ( const BCInterfaceData3D& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -458,9 +460,9 @@ BCInterfaceFunctionParser< PhysicalSolverType >::setData ( const BCInterfaceData
 // ===================================================
 // Private Methods
 // ===================================================
-template< typename PhysicalSolverType >
+template< typename BcHandlerType, typename PhysicalSolverType >
 void
-BCInterfaceFunctionParser< PhysicalSolverType >::setupParser ( const BCInterfaceData& data )
+BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >::setupParser ( const BCInterfaceData& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -477,24 +479,24 @@ BCInterfaceFunctionParser< PhysicalSolverType >::setupParser ( const BCInterface
     }
 }
 
-template< typename PhysicalSolverType >
-typename BCInterfaceFunctionParser< PhysicalSolverType >::boundaryFunctionTimeTimeStep_Type
-BCInterfaceFunctionParser< PhysicalSolverType >::functionSelectorTimeTimeStep()
+template< typename BcHandlerType, typename PhysicalSolverType >
+typename BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >::boundaryFunctionTimeTimeStep_Type
+BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >::functionSelectorTimeTimeStep()
 {
-    return boost::bind ( &BCInterfaceFunctionParser< PhysicalSolverType >::functionTimeTimeStep, this, _1, _2 );
+    return boost::bind ( &BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >::functionTimeTimeStep, this, _1, _2 );
 }
 
-template< typename PhysicalSolverType >
-typename BCInterfaceFunctionParser< PhysicalSolverType >::boundaryFunctionTimeSpaceID_Type
-BCInterfaceFunctionParser< PhysicalSolverType >::functionSelectorTimeSpaceID()
+template< typename BcHandlerType, typename PhysicalSolverType >
+typename BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >::boundaryFunctionTimeSpaceID_Type
+BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >::functionSelectorTimeSpaceID()
 {
     if ( M_parser->countSubstring ( "," ) )
     {
-        return boost::bind ( &BCInterfaceFunctionParser< PhysicalSolverType >::functionTimeSpaceID, this, _1, _2, _3, _4, _5 );
+        return boost::bind ( &BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >::functionTimeSpaceID, this, _1, _2, _3, _4, _5 );
     }
     else
     {
-        return boost::bind ( &BCInterfaceFunctionParser< PhysicalSolverType >::functionTimeSpace, this, _1, _2, _3, _4, _5 );
+        return boost::bind ( &BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >::functionTimeSpace, this, _1, _2, _3, _4, _5 );
     }
 }
 

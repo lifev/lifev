@@ -51,22 +51,22 @@ namespace LifeV
 // ===================================================
 template< >
 void
-BCInterfaceFunctionParserSolver< OseenSolver< RegionMesh< LinearTetra > > >::updatePhysicalSolverVariables();
+BCInterfaceFunctionParserSolver< BCHandler, OseenSolver< RegionMesh< LinearTetra > > >::updatePhysicalSolverVariables();
 
 template< >
 void
-BCInterfaceFunctionParserSolver< OseenSolverShapeDerivative< RegionMesh< LinearTetra > > >::updatePhysicalSolverVariables();
+BCInterfaceFunctionParserSolver< BCHandler, OseenSolverShapeDerivative< RegionMesh< LinearTetra > > >::updatePhysicalSolverVariables();
 
 // ===================================================
 // Protected Methods
 // ===================================================
 template< >
 void
-BCInterfaceFunctionParserSolver< OseenSolver< RegionMesh< LinearTetra > > >::createAccessList ( const BCInterfaceData& data );
+BCInterfaceFunctionParserSolver< BCHandler, OseenSolver< RegionMesh< LinearTetra > > >::createAccessList ( const BCInterfaceData& data );
 
 template< >
 void
-BCInterfaceFunctionParserSolver< OseenSolverShapeDerivative< RegionMesh< LinearTetra > > >::createAccessList ( const BCInterfaceData& data );
+BCInterfaceFunctionParserSolver< BCHandler, OseenSolverShapeDerivative< RegionMesh< LinearTetra > > >::createAccessList ( const BCInterfaceData& data );
 
 } // Namespace LifeV
 

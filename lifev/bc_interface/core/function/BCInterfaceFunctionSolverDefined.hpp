@@ -54,7 +54,7 @@ namespace LifeV
  *  This class provides the base interfaces for the implementation of solver defined boundary functions
  *  through template specializations.
  */
-template< class PhysicalSolverType >
+template< typename BcHandlerType, typename PhysicalSolverType >
 class BCInterfaceFunctionSolverDefined
 {
 public:
@@ -62,8 +62,10 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef PhysicalSolverType                                    physicalSolver_Type;
-    typedef boost::shared_ptr< physicalSolver_Type >              physicalSolverPtr_Type;
+    typedef BcHandlerType                                                          bcHandler_Type;
+    typedef PhysicalSolverType                                                     physicalSolver_Type;
+
+    typedef boost::shared_ptr< physicalSolver_Type >                               physicalSolverPtr_Type;
 
     //@}
 
@@ -169,10 +171,10 @@ private:
 // Factory
 // ===================================================
 //! Factory create function
-template< typename PhysicalSolverType >
-inline BCInterfaceFunctionSolverDefined< PhysicalSolverType >* createBCInterfaceFunctionSolverDefined()
+template< typename BcHandlerType, typename PhysicalSolverType >
+inline BCInterfaceFunctionSolverDefined< BcHandlerType, PhysicalSolverType >* createBCInterfaceFunctionSolverDefined()
 {
-    return new BCInterfaceFunctionSolverDefined< PhysicalSolverType > ();
+    return new BCInterfaceFunctionSolverDefined< BcHandlerType, PhysicalSolverType > ();
 }
 
 } // Namespace LifeV
