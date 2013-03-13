@@ -865,6 +865,8 @@ StructuralOperator<Mesh>::setup (boost::shared_ptr<data_Type>        data,
     M_jacobian.reset                  (new matrix_Type (*M_localMap) );
 
     M_offset                          = offset;
+
+    M_material.reset( new material_Type() );
     M_material->setup ( dFESpace, dETFESpace, M_localMap, M_offset, M_data, M_Displayer );
 
     if ( M_data->verbose() )
@@ -945,15 +947,17 @@ void StructuralOperator<Mesh>::updateSystem ( matrixPtr_Type& mat_stiff)
     LifeChrono chrono;
     chrono.start();
 
-    //Compute the new Stiffness Matrix
-    M_material->computeStiffness (*M_disp, M_rescaleFactor, M_data, M_mapMarkersVolumes, M_mapMarkersIndexes, M_Displayer);
-
     if ( M_data->lawType() == "linear" )
     {
         *mat_stiff += *M_material->stiffMatrix();
         mat_stiff->globalAssemble();
     }
-
+    else
+    {
+        //Compute the new Stiffness Matrix
+        // The method computeStiffness is done inside the nonlinear case. In the linear case it is empty
+        M_material->computeStiffness (*M_disp, M_rescaleFactor, M_data, M_mapMarkersVolumes, M_mapMarkersIndexes, M_Displayer);
+    }
 
     chrono.stop();
     M_Displayer->leaderPrintMax ("done in ", chrono.diff() );
@@ -1130,16 +1134,18 @@ void StructuralOperator<Mesh>::computeMatrix ( matrixPtr_Type& stiff, const vect
     LifeChrono chrono;
     chrono.start();
 
-    //! It is right to do globalAssemble() inside the M_material class
-    M_material->computeStiffness ( sol, 1., M_data, M_mapMarkersVolumes, M_mapMarkersIndexes, M_Displayer);
-
     if ( M_data->lawType() == "linear" )
     {
         *stiff = *M_material->stiffMatrix();
         *stiff += *M_massMatrix;
         stiff->globalAssemble();
     }
-
+    else
+    {
+        //! It is right to do globalAssemble() inside the M_material class
+        // The method computeStiffness is done inside the nonlinear case. In the linear case it is empty
+        M_material->computeStiffness ( sol, 1., M_data, M_mapMarkersVolumes, M_mapMarkersIndexes, M_Displayer);
+    }
     chrono.stop();
     M_Displayer->leaderPrintMax ("done in ", chrono.diff() );
 }

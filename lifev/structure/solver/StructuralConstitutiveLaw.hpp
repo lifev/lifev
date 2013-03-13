@@ -261,10 +261,10 @@ public:
     }
 
     //! Get the Stiffness matrix (linear case)
-    const matrixPtr_Type  stiffMatrix() const;
+    const matrixPtr_Type  stiffMatrix();
 
     //! Get the Stiffness vector (nonlinear case)
-    const vectorPtr_Type  stiffVector() const;
+    const vectorPtr_Type  stiffVector();
 
     void apply ( const vector_Type& sol, vector_Type& res,
                  const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
@@ -384,14 +384,14 @@ void StructuralConstitutiveLaw<MeshType>::updateJacobianMatrix (const vector_Typ
     *M_jacobian *= 0.0;
 
     // Isotropic part
-    M_displayer->leaderPrint ("  S-  Updating the Jacobian Matrix ( isotropic part )\n");
+    M_displayer->leaderPrint ("\n  S-  Updating the Jacobian Matrix ( isotropic part )\n");
     M_isotropicLaw->updateJacobianMatrix ( disp, dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
 
     *M_jacobian += *M_isotropicLaw->jacobian();
 
 #ifdef ENABLE_ANISOTROPIC_LAW
     // Anisotropic part
-    M_displayer->leaderPrint ("  S-  Updating the Jacobian Matrix ( anisotropic part )\n");
+    M_displayer->leaderPrint ("\n  S-  Updating the Jacobian Matrix ( anisotropic part )\n");
 
     M_anisotropicLaw->updateJacobianMatrix (disp, dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
 
@@ -416,14 +416,14 @@ void StructuralConstitutiveLaw<MeshType>::computeStiffness ( const vector_Type& 
     *M_vectorStiffness *= 0.0;
 
     // Isotropic part
-    M_displayer->leaderPrint ("  S-  Updating the VectorStiffness Matrix ( isotropic part )\n");
+    M_displayer->leaderPrint ("\n  S-  Updating the VectorStiffness Matrix ( isotropic part )\n");
     M_isotropicLaw->computeStiffness ( sol, factor, dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
 
     *M_vectorStiffness += *M_isotropicLaw->stiffVector();
 
 #ifdef ENABLE_ANISOTROPIC_LAW
     // Anisotropic part
-    displayer->leaderPrint ("  S-  Updating the Jacobian Matrix ( anisotropic part )\n");
+    displayer->leaderPrint ("\n  S-  Updating the Jacobian Matrix ( anisotropic part )\n");
 
     M_anisotropicLaw->computeStiffnes (disp, factor, dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
 
@@ -479,10 +479,19 @@ StructuralConstitutiveLaw<MeshType>::computeLocalFirstPiolaKirchhoffTensor ( Epe
 }
 
 template <typename MeshType>
-const typename StructuralConstitutiveLaw<MeshType>::matrixPtr_Type StructuralConstitutiveLaw<MeshType>::stiffMatrix() const
+const typename StructuralConstitutiveLaw<MeshType>::matrixPtr_Type StructuralConstitutiveLaw<MeshType>::stiffMatrix()
 {
     // Verify that the law that is being using is coherent with the formulation: linear <-> matrix, nonlinear <-> vector
     ASSERT( !M_dataMaterial->solidTypeIsotropic().compare("linearVenantKirchhoff"), " No Stiffness Matrix defined for the nonlinear case! ");
+
+    // Resetting and initializing the pointer to the vector
+    M_matrixStiffness.reset (new matrix_Type(*M_localMap) );
+    *M_matrixStiffness *= 0.0;
+
+    // Isotropic part
+    *M_matrixStiffness += *M_isotropicLaw->stiffMatrix();
+    
+    M_matrixStiffness->globalAssemble();
 
     // Here we have just the return
     return M_matrixStiffness;
@@ -490,10 +499,24 @@ const typename StructuralConstitutiveLaw<MeshType>::matrixPtr_Type StructuralCon
 
 
 template <typename MeshType>
-const typename StructuralConstitutiveLaw<MeshType>::vectorPtr_Type StructuralConstitutiveLaw<MeshType>::stiffVector() const
+const typename StructuralConstitutiveLaw<MeshType>::vectorPtr_Type StructuralConstitutiveLaw<MeshType>::stiffVector()
 {
     // Verify that the law that is being using is coherent with the formulation: linear <-> matrix, nonlinear <-> vector
     ASSERT( M_dataMaterial->solidTypeIsotropic().compare("linearVenantKirchhoff"), " No Stiffness Vector defined for the linear case! ");
+
+    // Resetting and initializing the pointer to the vector
+    M_vectorStiffness.reset (new vector_Type (*M_localMap) );
+    *M_vectorStiffness *= 0.0;
+
+    // Isotropic part
+    *M_vectorStiffness += *M_isotropicLaw->stiffVector();
+
+#ifdef ENABLE_ANISOTROPIC_LAW
+    // Anisotropic part
+    *M_vectorStiffness += *M_anisotropicLaw->stiffVector();
+#endif
+
+    M_vectorStiffness->globalAssemble();
 
     // Here we have just the return
     return M_vectorStiffness;

@@ -468,6 +468,7 @@ WallTensionEstimator<Mesh >::setup ( const dataPtr_Type& dataMaterial,
     M_eigenvaluesI.resize ( M_FESpace->fieldDim() );
 
     // Materials
+    M_material.reset( new material_Type() );
     M_material->setup ( dFESpace, dETFESpace, M_localMap, M_offset, M_dataMaterial, M_displayer );
 }
 
