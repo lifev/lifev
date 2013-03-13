@@ -42,7 +42,7 @@ namespace LifeV
 // ===================================================
 // Constructors
 // ===================================================
-BCInterfaceFunctionSolverDefined< OneDFSISolver >::BCInterfaceFunctionSolverDefined() :
+BCInterfaceFunctionSolverDefined< OneDFSIBCHandler, OneDFSISolver >::BCInterfaceFunctionSolverDefined() :
     M_defaultFunction (),
     M_function        ()
 {
@@ -57,7 +57,7 @@ BCInterfaceFunctionSolverDefined< OneDFSISolver >::BCInterfaceFunctionSolverDefi
 // Methods
 // ===================================================
 void
-BCInterfaceFunctionSolverDefined< OneDFSISolver >::assignFunction ( OneDFSIFunction& base )
+BCInterfaceFunctionSolverDefined< OneDFSIBCHandler, OneDFSISolver >::assignFunction ( OneDFSIFunction& base )
 {
     switch ( M_defaultFunction )
     {
@@ -95,7 +95,7 @@ BCInterfaceFunctionSolverDefined< OneDFSISolver >::assignFunction ( OneDFSIFunct
 // Set Methods
 // ===================================================
 void
-BCInterfaceFunctionSolverDefined< OneDFSISolver >::setData ( const BCInterfaceData1D& data )
+BCInterfaceFunctionSolverDefined< OneDFSIBCHandler, OneDFSISolver >::setData ( const BCInterfaceData1D& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG

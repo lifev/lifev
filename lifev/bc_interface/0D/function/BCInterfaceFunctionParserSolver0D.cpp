@@ -45,11 +45,11 @@ namespace LifeV
 // ===================================================
 template< >
 void
-BCInterfaceFunctionParserSolver< ZeroDimensionalData >::updatePhysicalSolverVariables()
+BCInterfaceFunctionParserSolver< ZeroDimensionalBCHandler, ZeroDimensionalData >::updatePhysicalSolverVariables()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream ( 5023 ) << "BCInterfaceFunctionSolver<ZeroDimensionalData>::updatePhysicalSolverVariables" << "\n";
+    debugStream ( 5023 ) << "BCInterfaceFunctionSolver<ZeroDimensionalBCHandler, ZeroDimensionalData>::updatePhysicalSolverVariables" << "\n";
 #endif
 
     // Create/Update variables
@@ -90,11 +90,11 @@ BCInterfaceFunctionParserSolver< ZeroDimensionalData >::updatePhysicalSolverVari
 // ===================================================
 template< >
 void
-BCInterfaceFunctionParserSolver< ZeroDimensionalData >::createAccessList ( const BCInterfaceData& data )
+BCInterfaceFunctionParserSolver< ZeroDimensionalBCHandler, ZeroDimensionalData >::createAccessList ( const BCInterfaceData& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream ( 5023 ) << "BCInterfaceFunctionSolver<ZeroDimensionalData>::createAccessList( data )" << "\n";
+    debugStream ( 5023 ) << "BCInterfaceFunctionSolver<ZeroDimensionalBCHandler, ZeroDimensionalData>::createAccessList( data )" << "\n";
 #endif
 
     std::map< std::string, physicalSolverList > mapList;

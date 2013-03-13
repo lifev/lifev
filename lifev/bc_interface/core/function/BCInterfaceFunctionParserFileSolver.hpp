@@ -55,20 +55,22 @@ namespace LifeV
  *
  *  See \c BCInterfaceFunctionParser, \c BCInterfaceFunctionParserFile, and \c BCInterfaceFunctionParserSolver classes for more details.
  */
-template< class PhysicalSolverType >
-class BCInterfaceFunctionParserFileSolver: public virtual BCInterfaceFunctionParserFile< PhysicalSolverType > ,
-    public virtual BCInterfaceFunctionParserSolver< PhysicalSolverType >
+template< typename BcHandlerType, typename PhysicalSolverType >
+class BCInterfaceFunctionParserFileSolver: public virtual BCInterfaceFunctionParserFile< BcHandlerType, PhysicalSolverType > ,
+    public virtual BCInterfaceFunctionParserSolver< BcHandlerType, PhysicalSolverType >
 {
 public:
 
     //! @name Type definitions
     //@{
 
-    typedef PhysicalSolverType                                                    physicalSolver_Type;
-    typedef BCInterfaceFunction< physicalSolver_Type >                            function_Type;
-    typedef BCInterfaceFunctionParser< physicalSolver_Type >                      functionParser_Type;
-    typedef BCInterfaceFunctionParserFile< physicalSolver_Type >                  functionParserFile_Type;
-    typedef BCInterfaceFunctionParserSolver< physicalSolver_Type >                functionParserSolver_Type;
+    typedef BcHandlerType                                                          bcHandler_Type;
+    typedef PhysicalSolverType                                                     physicalSolver_Type;
+
+    typedef BCInterfaceFunction< bcHandler_Type, physicalSolver_Type >             function_Type;
+    typedef BCInterfaceFunctionParser< bcHandler_Type, physicalSolver_Type >       functionParser_Type;
+    typedef BCInterfaceFunctionParserFile< bcHandler_Type, physicalSolver_Type >   functionParserFile_Type;
+    typedef BCInterfaceFunctionParserSolver< bcHandler_Type, physicalSolver_Type > functionParserSolver_Type;
 
     //@}
 
@@ -125,17 +127,17 @@ private:
 // Factory
 // ===================================================
 //! Factory create function
-template< typename PhysicalSolverType >
-inline BCInterfaceFunctionParser< PhysicalSolverType >* createBCInterfaceFunctionParserFileSolver()
+template< typename BcHandlerType, typename PhysicalSolverType >
+inline BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >* createBCInterfaceFunctionParserFileSolver()
 {
-    return new BCInterfaceFunctionParserFileSolver< PhysicalSolverType > ();
+    return new BCInterfaceFunctionParserFileSolver< BcHandlerType, PhysicalSolverType > ();
 }
 
 // ===================================================
 // Constructors
 // ===================================================
-template< class PhysicalSolverType >
-BCInterfaceFunctionParserFileSolver< PhysicalSolverType >::BCInterfaceFunctionParserFileSolver() :
+template< typename BcHandlerType, typename PhysicalSolverType >
+BCInterfaceFunctionParserFileSolver< BcHandlerType, PhysicalSolverType >::BCInterfaceFunctionParserFileSolver() :
     function_Type                (),
     functionParser_Type          (),
     functionParserFile_Type      (),
@@ -151,9 +153,9 @@ BCInterfaceFunctionParserFileSolver< PhysicalSolverType >::BCInterfaceFunctionPa
 // ===================================================
 // Set Methods
 // ===================================================
-template< class PhysicalSolverType >
+template< typename BcHandlerType, typename PhysicalSolverType >
 void
-BCInterfaceFunctionParserFileSolver< PhysicalSolverType >::setData ( const BCInterfaceData0D& data )
+BCInterfaceFunctionParserFileSolver< BcHandlerType, PhysicalSolverType >::setData ( const BCInterfaceData0D& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -167,9 +169,9 @@ BCInterfaceFunctionParserFileSolver< PhysicalSolverType >::setData ( const BCInt
     functionParserSolver_Type::createAccessList ( data );
 }
 
-template< class PhysicalSolverType >
+template< typename BcHandlerType, typename PhysicalSolverType >
 void
-BCInterfaceFunctionParserFileSolver< PhysicalSolverType >::setData ( const BCInterfaceData1D& data )
+BCInterfaceFunctionParserFileSolver< BcHandlerType, PhysicalSolverType >::setData ( const BCInterfaceData1D& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -183,9 +185,9 @@ BCInterfaceFunctionParserFileSolver< PhysicalSolverType >::setData ( const BCInt
     functionParserSolver_Type::createAccessList ( data );
 }
 
-template< class PhysicalSolverType >
+template< typename BcHandlerType, typename PhysicalSolverType >
 void
-BCInterfaceFunctionParserFileSolver< PhysicalSolverType >::setData ( const BCInterfaceData3D& data )
+BCInterfaceFunctionParserFileSolver< BcHandlerType, PhysicalSolverType >::setData ( const BCInterfaceData3D& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG

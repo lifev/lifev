@@ -162,21 +162,24 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef BcHandler                                               bcHandler_Type;
-    typedef boost::shared_ptr< bcHandler_Type >                     bcHandlerPtr_Type;
+    typedef BcHandler                                                 bcHandler_Type;
+    typedef boost::shared_ptr< bcHandler_Type >                       bcHandlerPtr_Type;
 
-    typedef PhysicalSolverType                                      physicalSolver_Type;
-    typedef boost::shared_ptr< physicalSolver_Type >                physicalSolverPtr_Type;
+    typedef PhysicalSolverType                                        physicalSolver_Type;
+    typedef boost::shared_ptr< physicalSolver_Type >                  physicalSolverPtr_Type;
 
-    typedef BCInterfaceFactory< physicalSolver_Type >               factory_Type;
+    typedef BCInterfaceFactory< bcHandler_Type, physicalSolver_Type > factory_Type;
 
-    typedef typename factory_Type::bcFunctionPtr_Type               bcFunctionPtr_Type;
-    typedef std::vector< bcFunctionPtr_Type >                       vectorFunction_Type;
+    typedef typename factory_Type::bcFunctionPtr_Type                 bcFunctionPtr_Type;
+    typedef std::vector< bcFunctionPtr_Type >                         vectorFunction_Type;
 
-    typedef typename factory_Type::bcFunctionSolverDefinedPtr_Type  bcFunctionSolverDefinedPtr_Type;
-    typedef std::vector< bcFunctionSolverDefinedPtr_Type >          vectorFunctionSolverDefined_Type;
+    typedef typename factory_Type::bcFunctionParserSolver_Type        bcFunctionParserSolver_Type;
+    typedef typename factory_Type::bcFunctionParserSolverPtr_Type     bcFunctionParserSolverPtr_Type;
 
-    typedef BCInterfaceData                                         data_Type;
+    typedef typename factory_Type::bcFunctionSolverDefinedPtr_Type    bcFunctionSolverDefinedPtr_Type;
+    typedef std::vector< bcFunctionSolverDefinedPtr_Type >            vectorFunctionSolverDefined_Type;
+
+    typedef BCInterfaceData                                           data_Type;
 
     //@}
 
@@ -340,8 +343,7 @@ BCInterface< BcHandler, PhysicalSolverType >::updatePhysicalSolverVariables()
 
     for ( UInt i ( 0 ); i < M_vectorFunction.size(); ++i )
     {
-        boost::shared_ptr< BCInterfaceFunctionParserSolver< physicalSolver_Type > > castedFunctionSolver =
-            boost::dynamic_pointer_cast< BCInterfaceFunctionParserSolver< physicalSolver_Type > > ( M_vectorFunction[i] );
+        bcFunctionParserSolverPtr_Type castedFunctionSolver = boost::dynamic_pointer_cast< bcFunctionParserSolver_Type > ( M_vectorFunction[i] );
 
         if ( castedFunctionSolver != 0 )
         {
@@ -365,8 +367,7 @@ BCInterface< BcHandler, PhysicalSolverType >::setPhysicalSolver ( const physical
     //for ( typename vectorFunction_Type::const_iterator i = M_vectorFunction.begin() ; i < M_vectorFunction.end() ; ++i )
     for ( UInt i ( 0 ); i < M_vectorFunction.size(); ++i )
     {
-        boost::shared_ptr< BCInterfaceFunctionParserSolver< physicalSolver_Type > > castedFunctionSolver =
-            boost::dynamic_pointer_cast< BCInterfaceFunctionParserSolver< physicalSolver_Type > > ( M_vectorFunction[i] );
+        bcFunctionParserSolverPtr_Type castedFunctionSolver = boost::dynamic_pointer_cast< bcFunctionParserSolver_Type > ( M_vectorFunction[i] );
 
         if ( castedFunctionSolver != 0 )
         {

@@ -78,16 +78,14 @@ enum baseList_Type
 enum baseContainer_Type
 {
     BASEDefault,
-#ifdef LIFEV_HAS_ONEDFSI
     BASEFunction1D,
-#endif
     BASEFunction3D,
     BASEVector3D,
     BASEVectorInterface3D
 };
 
 // Forward class declarations
-template< class PhysicalSolverType >
+template< typename BcHandlerType, typename PhysicalSolverType >
 class BCInterfaceFactory;
 
 } // Namespace LifeV

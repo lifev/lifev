@@ -52,7 +52,7 @@ namespace LifeV
  *
  *  \cond \TODO It may be a good idea (or not) to use this interface also for the \c BCInterfaceFunctionSolverDefined functions \endcond
  */
-template< typename PhysicalSolverType >
+template< typename BcHandlerType, typename PhysicalSolverType >
 class BCInterfaceFunction
 {
 public:
@@ -60,6 +60,7 @@ public:
     //! @name Type definitions
     //@{
 
+    typedef BcHandlerType                                                                            bcHandler_Type;
     typedef PhysicalSolverType                                                                       physicalSolver_Type;
 
     typedef boost::function<Real ( const Real& ) >                                                   boundaryFunctionTime_Type;

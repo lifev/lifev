@@ -83,17 +83,19 @@ namespace LifeV
  *               1.000000000      4.00'      <BR>
  *  </CODE>
  */
-template< typename PhysicalSolverType >
-class BCInterfaceFunctionParserFile: public virtual BCInterfaceFunctionParser< PhysicalSolverType >
+template< typename BcHandlerType, typename PhysicalSolverType >
+class BCInterfaceFunctionParserFile: public virtual BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >
 {
 public:
 
     //! @name Type definitions
     //@{
 
-    typedef PhysicalSolverType                                                    physicalSolver_Type;
-    typedef BCInterfaceFunction< physicalSolver_Type >                            function_Type;
-    typedef BCInterfaceFunctionParser< physicalSolver_Type >                      functionParser_Type;
+    typedef BcHandlerType                                                          bcHandler_Type;
+    typedef PhysicalSolverType                                                     physicalSolver_Type;
+
+    typedef BCInterfaceFunction< bcHandler_Type, physicalSolver_Type >             function_Type;
+    typedef BCInterfaceFunctionParser< bcHandler_Type, physicalSolver_Type >       functionParser_Type;
 
     //@}
 
@@ -182,17 +184,17 @@ private:
 // Factory
 // ===================================================
 //! Factory create function
-template< typename PhysicalSolverType >
-inline BCInterfaceFunctionParser< PhysicalSolverType >* createBCInterfaceFunctionParserFile()
+template< typename BcHandlerType, typename PhysicalSolverType >
+inline BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >* createBCInterfaceFunctionParserFile()
 {
-    return new BCInterfaceFunctionParserFile< PhysicalSolverType > ();
+    return new BCInterfaceFunctionParserFile< BcHandlerType, PhysicalSolverType > ();
 }
 
 // ===================================================
 // Constructors
 // ===================================================
-template< typename PhysicalSolverType >
-BCInterfaceFunctionParserFile< PhysicalSolverType >::BCInterfaceFunctionParserFile() :
+template< typename BcHandlerType, typename PhysicalSolverType >
+BCInterfaceFunctionParserFile< BcHandlerType, PhysicalSolverType >::BCInterfaceFunctionParserFile() :
     function_Type                    (),
     functionParser_Type              (),
     M_variables                      (),
@@ -210,9 +212,9 @@ BCInterfaceFunctionParserFile< PhysicalSolverType >::BCInterfaceFunctionParserFi
 // ===================================================
 // Private Methods
 // ===================================================
-template< typename PhysicalSolverType > template< typename DataType >
+template< typename BcHandlerType, typename PhysicalSolverType > template< typename DataType >
 inline void
-BCInterfaceFunctionParserFile< PhysicalSolverType >::loadData ( DataType data )
+BCInterfaceFunctionParserFile< BcHandlerType, PhysicalSolverType >::loadData ( DataType data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -318,9 +320,9 @@ BCInterfaceFunctionParserFile< PhysicalSolverType >::loadData ( DataType data )
 
 }
 
-template< typename PhysicalSolverType >
+template< typename BcHandlerType, typename PhysicalSolverType >
 inline void
-BCInterfaceFunctionParserFile< PhysicalSolverType >::dataInterpolation()
+BCInterfaceFunctionParserFile< BcHandlerType, PhysicalSolverType >::dataInterpolation()
 {
     //Get variable
     Real X = functionParser_Type::M_parser->variable ( M_variables[0] );

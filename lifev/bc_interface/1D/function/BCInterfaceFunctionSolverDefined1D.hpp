@@ -65,17 +65,18 @@ namespace LifeV
  *  </ol>
  */
 template< >
-class BCInterfaceFunctionSolverDefined< OneDFSISolver >
+class BCInterfaceFunctionSolverDefined< OneDFSIBCHandler, OneDFSISolver >
 {
 public:
 
     //! @name Type definitions
     //@{
 
+    typedef OneDFSIBCHandler                                      bcHandler_Type;
     typedef OneDFSISolver                                         physicalSolver_Type;
     typedef boost::shared_ptr< physicalSolver_Type >              physicalSolverPtr_Type;
 
-    typedef OneDFSIBC                                             bc_Type;
+    typedef bcHandler_Type::bc_Type                               bc_Type;
     typedef bc_Type::bcFunctionSolverDefinedPtr_Type              bcFunctionSolverDefinedPtr_Type;
 
     typedef bc_Type::vectorPtrContainer_Type                      vectorPtrContainer_Type;

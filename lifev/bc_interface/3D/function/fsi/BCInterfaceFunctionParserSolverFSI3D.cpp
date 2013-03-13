@@ -45,11 +45,11 @@ namespace LifeV
 // ===================================================
 template< >
 void
-BCInterfaceFunctionParserSolver< FSIOperator >::updatePhysicalSolverVariables()
+BCInterfaceFunctionParserSolver< BCHandler, FSIOperator >::updatePhysicalSolverVariables()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream ( 5023 ) << "BCInterfaceFunctionSolver<FSIOperator>::updatePhysicalSolverVariables" << "\n";
+    debugStream ( 5023 ) << "BCInterfaceFunctionSolver<BCHandler, FSIOperator>::updatePhysicalSolverVariables" << "\n";
 #endif
 
     // Create/Update variables
@@ -189,11 +189,11 @@ BCInterfaceFunctionParserSolver< FSIOperator >::updatePhysicalSolverVariables()
 // ===================================================
 template< >
 void
-BCInterfaceFunctionParserSolver< FSIOperator >::createAccessList ( const BCInterfaceData& data )
+BCInterfaceFunctionParserSolver< BCHandler, FSIOperator >::createAccessList ( const BCInterfaceData& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream ( 5023 ) << "BCInterfaceFunctionSolver<FSIOperator>::createAccessList( data )" << "\n";
+    debugStream ( 5023 ) << "BCInterfaceFunctionSolver<BCHandler, FSIOperator>::createAccessList( data )" << "\n";
 #endif
 
     std::map< std::string, physicalSolverList > mapList;

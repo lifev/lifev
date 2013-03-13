@@ -45,11 +45,11 @@ namespace LifeV
 // ===================================================
 template< >
 void
-BCInterfaceFunctionParserSolver< OseenSolver< RegionMesh< LinearTetra > > >::updatePhysicalSolverVariables()
+BCInterfaceFunctionParserSolver< BCHandler, OseenSolver< RegionMesh< LinearTetra > > >::updatePhysicalSolverVariables()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream ( 5023 ) << "BCInterfaceFunctionSolver<OseenSolver>::updatePhysicalSolverVariables" << "\n";
+    debugStream ( 5023 ) << "BCInterfaceFunctionSolver<BCHandler, OseenSolver>::updatePhysicalSolverVariables" << "\n";
 #endif
 
     // Create/Update variables
@@ -123,11 +123,11 @@ BCInterfaceFunctionParserSolver< OseenSolver< RegionMesh< LinearTetra > > >::upd
 
 template< >
 void
-BCInterfaceFunctionParserSolver< OseenSolverShapeDerivative< RegionMesh< LinearTetra > > >::updatePhysicalSolverVariables()
+BCInterfaceFunctionParserSolver< BCHandler, OseenSolverShapeDerivative< RegionMesh< LinearTetra > > >::updatePhysicalSolverVariables()
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream ( 5023 ) << "BCInterfaceFunctionSolver<OseenSolverShapeDerivative>::updatePhysicalSolverVariables" << "\n";
+    debugStream ( 5023 ) << "BCInterfaceFunctionSolver<BCHandler, OseenSolverShapeDerivative>::updatePhysicalSolverVariables" << "\n";
 #endif
 
     // Create/Update variables
@@ -204,11 +204,11 @@ BCInterfaceFunctionParserSolver< OseenSolverShapeDerivative< RegionMesh< LinearT
 // ===================================================
 template< >
 void
-BCInterfaceFunctionParserSolver< OseenSolver< RegionMesh< LinearTetra > > >::createAccessList ( const BCInterfaceData& data )
+BCInterfaceFunctionParserSolver< BCHandler, OseenSolver< RegionMesh< LinearTetra > > >::createAccessList ( const BCInterfaceData& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream ( 5023 ) << "BCInterfaceFunctionSolver<OseenSolver>::createAccessList( data )" << "\n";
+    debugStream ( 5023 ) << "BCInterfaceFunctionSolver<BCHandler, OseenSolver>::createAccessList( data )" << "\n";
 #endif
 
     std::map< std::string, physicalSolverList > mapList;
@@ -224,11 +224,11 @@ BCInterfaceFunctionParserSolver< OseenSolver< RegionMesh< LinearTetra > > >::cre
 
 template< >
 void
-BCInterfaceFunctionParserSolver< OseenSolverShapeDerivative< RegionMesh< LinearTetra > > >::createAccessList ( const BCInterfaceData& data )
+BCInterfaceFunctionParserSolver< BCHandler, OseenSolverShapeDerivative< RegionMesh< LinearTetra > > >::createAccessList ( const BCInterfaceData& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream ( 5023 ) << "BCInterfaceFunctionSolver<OseenSolverShapeDerivative>::createAccessList( data )" << "\n";
+    debugStream ( 5023 ) << "BCInterfaceFunctionSolver<BCHandler, OseenSolverShapeDerivative>::createAccessList( data )" << "\n";
 #endif
 
     std::map< std::string, physicalSolverList > mapList;
