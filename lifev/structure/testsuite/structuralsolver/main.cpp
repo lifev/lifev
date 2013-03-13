@@ -72,12 +72,12 @@
 
 #include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
 #include <lifev/structure/solver/StructuralOperator.hpp>
-#include <lifev/structure/solver/VenantKirchhoffMaterialLinear.hpp>
-#include <lifev/structure/solver/VenantKirchhoffMaterialNonLinear.hpp>
-#include <lifev/structure/solver/ExponentialMaterialNonLinear.hpp>
-#include <lifev/structure/solver/VenantKirchhoffMaterialNonLinearPenalized.hpp>
-#include <lifev/structure/solver/SecondOrderExponentialMaterialNonLinear.hpp>
-#include <lifev/structure/solver/NeoHookeanMaterialNonLinear.hpp>
+#include <lifev/structure/solver/isotropic/VenantKirchhoffMaterialLinear.hpp>
+#include <lifev/structure/solver/isotropic/VenantKirchhoffMaterialNonLinear.hpp>
+#include <lifev/structure/solver/isotropic/ExponentialMaterialNonLinear.hpp>
+#include <lifev/structure/solver/isotropic/VenantKirchhoffMaterialNonLinearPenalized.hpp>
+#include <lifev/structure/solver/isotropic/SecondOrderExponentialMaterialNonLinear.hpp>
+#include <lifev/structure/solver/isotropic/NeoHookeanMaterialNonLinear.hpp>
 
 #include <lifev/core/filter/ExporterEnsight.hpp>
 #ifdef HAVE_HDF5
@@ -348,7 +348,7 @@ Structure::run3d()
     BCFunctionBase zero (Private::bcZero);
     BCFunctionBase nonZero;
 
-    if ( dataStructure->solidType().compare ("secondOrderExponential") )
+    if ( dataStructure->solidTypeIsotropic().compare ("secondOrderExponential") )
     {
         nonZero.setFunction (Private::bcNonZero);
     }
@@ -413,7 +413,7 @@ Structure::run3d()
 
     vectorPtr_Type initialDisplacement (new vector_Type (solid.displacement(), Unique) );
 
-    if ( !dataStructure->solidType().compare ("secondOrderExponential") )
+    if ( !dataStructure->solidTypeIsotropic().compare ("secondOrderExponential") )
     {
         dFESpace->interpolate ( static_cast<solidFESpace_Type::function_Type> ( Private::d0 ), *initialDisplacement, 0.0 );
     }
@@ -426,7 +426,7 @@ Structure::run3d()
         {
             Real previousTimeStep = tZero - previousPass * dt;
             std::cout << "BDF " << previousTimeStep << "\n";
-            if ( !dataStructure->solidType().compare ("secondOrderExponential") )
+            if ( !dataStructure->solidTypeIsotropic().compare ("secondOrderExponential") )
             {
                 uv0.push_back (initialDisplacement);
             }
@@ -443,7 +443,7 @@ Structure::run3d()
 
     timeAdvance->updateRHSContribution ( dt );
 
-    if ( !dataStructure->solidType().compare ("secondOrderExponential") )
+    if ( !dataStructure->solidTypeIsotropic().compare ("secondOrderExponential") )
     {
         solid.initialize ( initialDisplacement );
     }
@@ -595,23 +595,23 @@ Structure::run3d()
         std::cout << "The norm 2 of the displacement field is: " << normVect << std::endl;
 
         ///////// CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
-        if (!dataStructure->solidType().compare ("linearVenantKirchhoff") )
+        if (!dataStructure->solidTypeIsotropic().compare ("linearVenantKirchhoff") )
         {
             CheckResultLE (normVect, dataStructure->dataTime()->time() );
         }
-        else if (!dataStructure->solidType().compare ("nonLinearVenantKirchhoff") )
+        else if (!dataStructure->solidTypeIsotropic().compare ("nonLinearVenantKirchhoff") )
         {
             CheckResultSVK (normVect, dataStructure->dataTime()->time() );
         }
-        else if (!dataStructure->solidType().compare ("nonLinearVenantKirchhoffPenalized") )
+        else if (!dataStructure->solidTypeIsotropic().compare ("nonLinearVenantKirchhoffPenalized") )
         {
             CheckResultSVKPenalized (normVect, dataStructure->dataTime()->time() );
         }
-        else if (!dataStructure->solidType().compare ("exponential") )
+        else if (!dataStructure->solidTypeIsotropic().compare ("exponential") )
         {
             CheckResultEXP (normVect, dataStructure->dataTime()->time() );
         }
-        else if (!dataStructure->solidType().compare ("secondOrderExponential") )
+        else if (!dataStructure->solidTypeIsotropic().compare ("secondOrderExponential") )
         {
             CheckResult2ndOrderExponential (normVect, dataStructure->dataTime()->time() );
         }

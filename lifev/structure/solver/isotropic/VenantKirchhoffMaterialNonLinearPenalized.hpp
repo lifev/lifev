@@ -42,18 +42,18 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
 
-#include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
+#include <lifev/structure/solver/isotropic/StructuralIsotropicConstitutiveLaw.hpp>
 
 namespace LifeV
 {
 template <typename MeshType>
-class VenantKirchhoffMaterialNonLinearPenalized : public StructuralConstitutiveLaw<MeshType>
+class VenantKirchhoffMaterialNonLinearPenalized : public StructuralIsotropicConstitutiveLaw<MeshType>
 {
     //!@name Type definitions
     //@{
 
 public:
-    typedef StructuralConstitutiveLaw<MeshType>                 super;
+    typedef StructuralIsotropicConstitutiveLaw<MeshType>                 super;
 
     typedef typename super::data_Type                data_Type;
 
@@ -105,7 +105,7 @@ public:
     //!@name Methods
     //@{
 
-    //! Setup the created object of the class StructuralConstitutiveLaw
+    //! Setup the created object of the class StructuralIsotropicConstitutiveLaw
     /*!
       \param dFespace: the FiniteElement Space
       \param monolithicMap: the MapEpetra
@@ -114,7 +114,7 @@ public:
     void setup ( const FESpacePtr_Type& dFESpace,
                  const ETFESpacePtr_Type& dETFESpace,
                  const boost::shared_ptr<const MapEpetra>&  monolithicMap,
-                 const UInt offset, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer );
+                 const UInt offset, const dataPtr_Type& dataMaterial);
 
 
     //! Compute the Stiffness matrix in StructuralSolver::buildSystem()
@@ -185,7 +185,7 @@ public:
     //                     const displayerPtr_Type& displayer );
 
     //! Computes the deformation gradient F, the cofactor matrix Cof(F), the determinant of F (J = det(F)), the trace of right Cauchy-Green tensor tr(C)
-    //! This function is used in StructuralConstitutiveLaw::computeStiffness
+    //! This function is used in StructuralIsotropicConstitutiveLaw::computeStiffness
     /*!
       \param dk_loc: the elemental displacement
     */
@@ -235,7 +235,8 @@ public:
     }
 
     void apply ( const vector_Type& sol, vector_Type& res, const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
-                 const mapMarkerIndexesPtr_Type mapsMarkerIndexes);
+                 const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
+                 const displayerPtr_Type displayer);
 
     //@}
 
@@ -287,13 +288,9 @@ void
 VenantKirchhoffMaterialNonLinearPenalized<MeshType>::setup ( const FESpacePtr_Type&                       dFESpace,
                                                              const ETFESpacePtr_Type&                     dETFESpace,
                                                              const boost::shared_ptr<const MapEpetra>&            monolithicMap,
-                                                             const UInt  offset,
-                                                             const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer  )
+                                                             const UInt  offset, const dataPtr_Type& dataMaterial)
 {
-    this->M_displayer = displayer;
-    this->M_dataMaterial  = dataMaterial;
-    //    std::cout<<"I am setting up the Material"<<std::endl;
-
+    this->M_dataMaterial                = dataMaterial;
     this->M_dispFESpace                 = dFESpace;
     this->M_dispETFESpace               = dETFESpace;
     this->M_localMap                    = monolithicMap;
@@ -383,7 +380,7 @@ void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::updateJacobianMatrix (
     this->M_jacobian.reset (new matrix_Type (*this->M_localMap) );
 
     displayer->leaderPrint (" \n************************************************\n ");
-    updateNonLinearJacobianTerms (this->M_jacobian, sol, dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
+    updateNonLinearJacobianTerms (this->M_jacobian, sol, this->M_dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
     displayer->leaderPrint (" \n************************************************\n ");
 
 }
@@ -855,9 +852,9 @@ void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::showMe ( std::string c
 
 template <typename MeshType>
 void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::apply ( const vector_Type& sol, vector_Type& res, const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
-                                                                  const mapMarkerIndexesPtr_Type mapsMarkerIndexes )
+                                                                  const mapMarkerIndexesPtr_Type mapsMarkerIndexes,const displayerPtr_Type displayer )
 {
-    computeStiffness (sol, 0, this->M_dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, this->M_displayer);
+    computeStiffness (sol, 0, this->M_dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
     res += *M_stiff;
 }
 
@@ -906,14 +903,14 @@ void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::computeLocalFirstPiola
 }
 
 template <typename MeshType>
-inline StructuralConstitutiveLaw<MeshType>* createVenantKirchhoffMaterialNonLinearPenalized()
+inline StructuralIsotropicConstitutiveLaw<MeshType>* createVenantKirchhoffMaterialNonLinearPenalized()
 {
     return new VenantKirchhoffMaterialNonLinearPenalized<MeshType >();
 }
 
 namespace
 {
-static bool registerVKP = StructuralConstitutiveLaw<LifeV::RegionMesh<LinearTetra> >::StructureMaterialFactory::instance().registerProduct ( "nonLinearVenantKirchhoffPenalized", &createVenantKirchhoffMaterialNonLinearPenalized<LifeV::RegionMesh<LinearTetra> > );
+static bool registerVKP = StructuralIsotropicConstitutiveLaw<LifeV::RegionMesh<LinearTetra> >::StructureIsotropicMaterialFactory::instance().registerProduct ( "nonLinearVenantKirchhoffPenalized", &createVenantKirchhoffMaterialNonLinearPenalized<LifeV::RegionMesh<LinearTetra> > );
 }
 
 } //Namespace LifeV

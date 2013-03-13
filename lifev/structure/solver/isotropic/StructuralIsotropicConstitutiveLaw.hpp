@@ -102,7 +102,7 @@ public:
     typedef typename boost::shared_ptr<data_Type>  dataPtr_Type;
     typedef typename boost::shared_ptr<const Displayer>    displayerPtr_Type;
 
-    typedef FactorySingleton<Factory<StructuralIsotropicConstitutiveLaw<MeshType>, std::string> >  StructureMaterialFactory;
+    typedef FactorySingleton<Factory<StructuralIsotropicConstitutiveLaw<MeshType>, std::string> >  StructureIsotropicMaterialFactory;
 
     typedef std::vector< typename MeshType::element_Type* > vectorVolumes_Type;
 
@@ -150,8 +150,7 @@ public:
     virtual void setup ( const FESpacePtr_Type& dFESpace,
                          const ETFESpacePtr_Type& ETFESpace,
                          const boost::shared_ptr<const MapEpetra>&   monolithicMap,
-                         const UInt offset, const dataPtr_Type& dataMaterial,
-                         const displayerPtr_Type& displayer  ) = 0;
+                         const UInt offset, const dataPtr_Type& dataMaterial ) = 0;
 
 
     //! Computes the linear part of the stiffness matrix StructuralSolver::buildSystem
@@ -219,7 +218,7 @@ public:
                                                          const Epetra_SerialDenseMatrix& tensorF,
                                                          const Epetra_SerialDenseMatrix& cofactorF,
                                                          const std::vector<Real>& invariants,
-                                                         const UInt material, const dataPtr_Type& dataMaterial) = 0;
+                                                         const UInt material) = 0;
 
 
     //! @name Set Methods
@@ -260,7 +259,8 @@ public:
 
     virtual void apply ( const vector_Type& sol, vector_Type& res,
                          const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
-                         const mapMarkerIndexesPtr_Type mapsMarkerIndexes) = 0;
+                         const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
+                         const displayerPtr_Type displayer) = 0;
 
     //@}
 
@@ -272,9 +272,10 @@ protected:
       \param VOID
       \return VOID
     */
-    virtual void setupVectorsParameters ( const dataPtr_Type& dataMaterial ) = 0;
+    virtual void setupVectorsParameters ( void ) = 0;
 
     //!Protected Members
+    dataPtr_Type                                   M_dataMaterial;
 
     FESpacePtr_Type                                M_dispFESpace;
 
@@ -289,7 +290,7 @@ protected:
     UInt                                           M_offset;
 
     //! Map between markers and volumes on the mesh
-    vectorsParametersPtr_Type           M_vectorsParameters;
+    vectorsParametersPtr_Type                      M_vectorsParameters;
 };
 
 //=====================================
@@ -298,6 +299,7 @@ protected:
 
 template <typename MeshType>
 StructuralIsotropicConstitutiveLaw<MeshType>::StructuralIsotropicConstitutiveLaw( ) :
+    M_dataMaterial               ( ),
     M_dispFESpace                ( ),
     M_dispETFESpace              ( ),
     M_localMap                   ( ),

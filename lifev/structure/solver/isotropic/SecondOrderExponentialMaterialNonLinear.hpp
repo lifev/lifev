@@ -41,18 +41,18 @@
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-#include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
+#include <lifev/structure/solver/isotropic/StructuralIsotropicConstitutiveLaw.hpp>
 
 namespace LifeV
 {
 template <typename MeshType>
-class SecondOrderExponentialMaterialNonLinear : public StructuralConstitutiveLaw<MeshType>
+class SecondOrderExponentialMaterialNonLinear : public StructuralIsotropicConstitutiveLaw<MeshType>
 {
     //!@name Type definitions
     //@{
 
 public:
-    typedef StructuralConstitutiveLaw<MeshType>       super;
+    typedef StructuralIsotropicConstitutiveLaw<MeshType>       super;
 
     typedef typename super::data_Type                data_Type;
 
@@ -104,7 +104,7 @@ public:
     //!@name Methods
     //@{
 
-    //! Setup the created object of the class StructuralConstitutiveLaw
+    //! Setup the created object of the class StructuralIsotropicConstitutiveLaw
     /*!
       \param dFespace: the FiniteElement Space
       \param monolithicMap: the MapEpetra
@@ -113,7 +113,7 @@ public:
     void setup ( const FESpacePtr_Type&                       dFESpace,
                  const ETFESpacePtr_Type&                     dETFESpace,
                  const boost::shared_ptr<const MapEpetra>&  monolithicMap,
-                 const UInt offset, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer );
+                 const UInt offset, const dataPtr_Type& dataMaterial);
 
 
     //! Compute the Stiffness matrix in StructuralSolver::buildSystem()
@@ -180,7 +180,7 @@ public:
 
 
     //! Computes the deformation gradient F, the cofactor matrix Cof(F), the determinant of F (J = det(F)), the trace of right Cauchy-Green tensor tr(C)
-    //! This function is used in StructuralConstitutiveLaw::computeStiffness
+    //! This function is used in StructuralIsotropicConstitutiveLaw::computeStiffness
     /*!
       \param dk_loc: the elemental displacement
     */
@@ -229,7 +229,10 @@ public:
         return M_stiff;
     }
 
-    void apply ( const vector_Type& sol, vector_Type& res, const mapMarkerVolumesPtr_Type mapsMarkerVolumes, const mapMarkerIndexesPtr_Type mapsMarkerIndexes) ;
+    void apply ( const vector_Type& sol, vector_Type& res,
+                 const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                 const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
+                 const displayerPtr_Type displayer) ;
 
     //@}
 
@@ -281,10 +284,9 @@ SecondOrderExponentialMaterialNonLinear<MeshType>::setup (const FESpacePtr_Type&
                                                           const ETFESpacePtr_Type&                     dETFESpace,
                                                           const boost::shared_ptr<const MapEpetra>&    monolithicMap,
                                                           const UInt                                   offset,
-                                                          const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer  )
+                                                          const dataPtr_Type& dataMaterial)
 {
 
-    this->M_displayer = displayer;
     this->M_dataMaterial  = dataMaterial;
     //    std::cout<<"I am setting up the Material"<<std::endl;
 
@@ -369,7 +371,7 @@ void SecondOrderExponentialMaterialNonLinear<MeshType>::updateJacobianMatrix ( c
     this->M_jacobian.reset (new matrix_Type (*this->M_localMap) );
 
     displayer->leaderPrint (" \n************************************************\n ");
-    updateNonLinearJacobianTerms (this->M_jacobian, disp, dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes,  displayer);
+    updateNonLinearJacobianTerms (this->M_jacobian, disp, this->M_dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes,  displayer);
     displayer->leaderPrint (" \n************************************************\n ");
 }
 
@@ -718,9 +720,9 @@ void SecondOrderExponentialMaterialNonLinear<MeshType>::showMe ( std::string con
 
 
 template <typename MeshType>
-void SecondOrderExponentialMaterialNonLinear<MeshType>::apply ( const vector_Type& sol, vector_Type& res, const mapMarkerVolumesPtr_Type mapsMarkerVolumes,  const mapMarkerIndexesPtr_Type mapsMarkerIndexes )
+void SecondOrderExponentialMaterialNonLinear<MeshType>::apply ( const vector_Type& sol, vector_Type& res, const mapMarkerVolumesPtr_Type mapsMarkerVolumes,  const mapMarkerIndexesPtr_Type mapsMarkerIndexes,const displayerPtr_Type displayer )
 {
-    computeStiffness (sol, 0, this->M_dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, this->M_displayer);
+    computeStiffness (sol, 0, this->M_dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
     res += *M_stiff;
 }
 
@@ -737,14 +739,14 @@ void SecondOrderExponentialMaterialNonLinear<MeshType>::computeLocalFirstPiolaKi
 }
 
 template <typename MeshType>
-inline StructuralConstitutiveLaw<MeshType>* createSecondOrderExponentialMaterialNonLinear()
+inline StructuralIsotropicConstitutiveLaw<MeshType>* createSecondOrderExponentialMaterialNonLinear()
 {
     return new SecondOrderExponentialMaterialNonLinear<MeshType >();
 }
 
 namespace
 {
-static bool registerSOEXP = StructuralConstitutiveLaw<LifeV::RegionMesh<LinearTetra> >::StructureMaterialFactory::instance().registerProduct ( "secondOrderExponential", &createSecondOrderExponentialMaterialNonLinear<LifeV::RegionMesh<LinearTetra> > );
+static bool registerSOEXP = StructuralIsotropicConstitutiveLaw<LifeV::RegionMesh<LinearTetra> >::StructureIsotropicMaterialFactory::instance().registerProduct ( "secondOrderExponential", &createSecondOrderExponentialMaterialNonLinear<LifeV::RegionMesh<LinearTetra> > );
 }
 
 } //Namespace LifeV

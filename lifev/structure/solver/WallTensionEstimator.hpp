@@ -83,10 +83,10 @@
 #include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
 
 //Materials
-#include <lifev/structure/solver/VenantKirchhoffMaterialLinear.hpp>
-// #include <lifev/structure/solver/VenantKirchhoffMaterialNonLinear.hpp>
-#include <lifev/structure/solver/ExponentialMaterialNonLinear.hpp>
-// #include <lifev/structure/solver/NeoHookeanMaterialNonLinear.hpp>
+#include <lifev/structure/solver/isotropic/VenantKirchhoffMaterialLinear.hpp>
+// #include <lifev/structure/solver/isotropic/VenantKirchhoffMaterialNonLinear.hpp>
+#include <lifev/structure/solver/isotropic/ExponentialMaterialNonLinear.hpp>
+// #include <lifev/structure/solver/isotropic/NeoHookeanMaterialNonLinear.hpp>
 
 #include <lifev/eta/fem/ETFESpace.hpp>
 
@@ -468,7 +468,6 @@ WallTensionEstimator<Mesh >::setup ( const dataPtr_Type& dataMaterial,
     M_eigenvaluesI.resize ( M_FESpace->fieldDim() );
 
     // Materials
-    M_material.reset ( material_Type::StructureMaterialFactory::instance().createObject ( M_dataMaterial->solidType() ) );
     M_material->setup ( dFESpace, dETFESpace, M_localMap, M_offset, M_dataMaterial, M_displayer );
 }
 
@@ -527,7 +526,7 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryDisplacement ( void )
     LifeChrono chrono;
 
     this->M_displayer->leaderPrint (" \n*********************************\n  ");
-    this->M_displayer->leaderPrint ("   Performing the analysis recovering the displacement..., ", M_dataMaterial->solidType() );
+    this->M_displayer->leaderPrint ("   Performing the analysis recovering the displacement..., ");
     this->M_displayer->leaderPrint (" \n*********************************\n  ");
 
     chrono.start();
@@ -666,7 +665,7 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryEigenvalues ( void )
     M_FESpace->setQuadRule (fakeQuadratureRule);
 
     this->M_displayer->leaderPrint (" \n*********************************\n  ");
-    this->M_displayer->leaderPrint ("   Performing the analysis recovering the tensions..., ", M_dataMaterial->solidType() );
+    this->M_displayer->leaderPrint ("   Performing the analysis recovering the tensions..., " );
     this->M_displayer->leaderPrint (" \n*********************************\n  ");
 
     UInt totalDof = M_FESpace->dof().numTotalDof();
@@ -946,7 +945,7 @@ WallTensionEstimator<Mesh >::constructGlobalStressVector ( solutionVect_Type& si
     M_FESpace->setQuadRule (fakeQuadratureRule);
 
     this->M_displayer->leaderPrint (" \n*********************************\n  ");
-    this->M_displayer->leaderPrint ("   Performing the analysis recovering the Cauchy stresses..., ", M_dataMaterial->solidType() );
+    this->M_displayer->leaderPrint ("   Performing the analysis recovering the Cauchy stresses..., ");
     this->M_displayer->leaderPrint (" \n*********************************\n  ");
 
     UInt totalDof = M_FESpace->dof().numTotalDof();

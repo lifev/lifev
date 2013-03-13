@@ -67,11 +67,10 @@
 #include <lifev/core/algorithm/NonLinearAitken.hpp>
 
 #include <lifev/structure/solver/StructuralOperator.hpp>
-#include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
-#include <lifev/structure/solver/VenantKirchhoffMaterialNonLinear.hpp>
-#include <lifev/structure/solver/VenantKirchhoffMaterialLinear.hpp>
-#include <lifev/structure/solver/ExponentialMaterialNonLinear.hpp>
-#include <lifev/structure/solver/NeoHookeanMaterialNonLinear.hpp>
+#include <lifev/structure/solver/isotropic/VenantKirchhoffMaterialNonLinear.hpp>
+#include <lifev/structure/solver/isotropic/VenantKirchhoffMaterialLinear.hpp>
+#include <lifev/structure/solver/isotropic/ExponentialMaterialNonLinear.hpp>
+#include <lifev/structure/solver/isotropic/NeoHookeanMaterialNonLinear.hpp>
 
 #include <lifev/core/fem/DOFInterface3Dto3D.hpp>
 #include <lifev/core/fem/DOFInterface3Dto2D.hpp>
@@ -324,21 +323,21 @@ public:
 
     //!@name Factory Methods
     //@{
-    static StructuralConstitutiveLaw< FSIOperator::mesh_Type >*    createVenantKirchhoffLinear()
+    static StructuralIsotropicConstitutiveLaw< FSIOperator::mesh_Type >*    createVenantKirchhoffLinear()
     {
         return new VenantKirchhoffMaterialLinear< FSIOperator::mesh_Type >();
     }
 
-    static StructuralConstitutiveLaw< FSIOperator::mesh_Type >*    createVenantKirchhoffNonLinear()
+    static StructuralIsotropicConstitutiveLaw< FSIOperator::mesh_Type >*    createVenantKirchhoffNonLinear()
     {
         return new VenantKirchhoffMaterialNonLinear< FSIOperator::mesh_Type >();
     }
-    static StructuralConstitutiveLaw< FSIOperator::mesh_Type >*    createExponentialMaterialNonLinear()
+    static StructuralIsotropicConstitutiveLaw< FSIOperator::mesh_Type >*    createExponentialMaterialNonLinear()
     {
         return new ExponentialMaterialNonLinear< FSIOperator::mesh_Type >();
     }
 
-    static StructuralConstitutiveLaw< FSIOperator::mesh_Type >*    createNeoHookeanMaterialNonLinear()
+    static StructuralIsotropicConstitutiveLaw< FSIOperator::mesh_Type >*    createNeoHookeanMaterialNonLinear()
     {
         return new NeoHookeanMaterialNonLinear< FSIOperator::mesh_Type >();
     }

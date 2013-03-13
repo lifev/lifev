@@ -108,7 +108,7 @@ public:
     void setup (const FESpacePtr_Type& dFESpace,
                 const ETFESpacePtr_Type& ETFESpace,
                 const boost::shared_ptr<const MapEpetra>&  monolithicMap,
-                const UInt offset);
+                const UInt offset,const dataPtr_Type& dataMaterial);
 
 
     //! Compute the Stiffness matrix in StructuralSolver::buildSystem()
@@ -208,7 +208,8 @@ public:
 
     void apply ( const vector_Type& sol, vector_Type& res,
                  const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
-                 const mapMarkerIndexesPtr_Type /*mapsMarkerIndexes*/)
+                 const mapMarkerIndexesPtr_Type /*mapsMarkerIndexes*/,
+                 const displayerPtr_Type /*displayer*/)
     {
         res += *M_stiff * sol;
     }
@@ -222,7 +223,7 @@ protected:
       \param VOID
       \return VOID
     */
-    void setupVectorsParameters ( const dataPtr_Type& dataMaterial );
+    void setupVectorsParameters ( void);
 
     //! Protected members
 
@@ -252,8 +253,9 @@ void
 VenantKirchhoffMaterialLinear<MeshType>::setup (const FESpacePtr_Type& dFESpace,
                                                 const ETFESpacePtr_Type& dETFESpace,
                                                 const boost::shared_ptr<const MapEpetra>&  monolithicMap,
-                                                const UInt offset, const dataPtr_Type& dataMaterial)
+                                                const UInt offset,const dataPtr_Type& dataMaterial)
 {
+    this->M_dataMaterial                  = dataMaterial;
     this->M_dispFESpace                   = dFESpace;
     this->M_dispETFESpace                 = dETFESpace;
     this->M_localMap                      = monolithicMap;
@@ -265,14 +267,14 @@ VenantKirchhoffMaterialLinear<MeshType>::setup (const FESpacePtr_Type& dFESpace,
     // in the data file to get the right size. Note the comment below.
     this->M_vectorsParameters.reset ( new vectorsParameters_Type ( 2 ) );
 
-    this->setupVectorsParameters( dataMaterial );
+    this->setupVectorsParameters( );
 
 }
 
 
 template <typename MeshType>
 void
-VenantKirchhoffMaterialLinear<MeshType>::setupVectorsParameters ( const dataPtr_Type& dataMaterial )
+VenantKirchhoffMaterialLinear<MeshType>::setupVectorsParameters ( void )
 {
     // Paolo Tricerri: February, 20th
     // In each class, the name of the parameters has to inserted in the law
@@ -295,8 +297,8 @@ VenantKirchhoffMaterialLinear<MeshType>::setupVectorsParameters ( const dataPtr_
         // Extracting the marker
         UInt markerID = this->M_dispFESpace->mesh()->element ( i ).markerID();
 
-        Real lambda = dataMaterial->lambda ( markerID );
-        Real mu = dataMaterial->mu ( markerID );
+        Real lambda = this->M_dataMaterial->lambda ( markerID );
+        Real mu = this->M_dataMaterial->mu ( markerID );
 
         ( (* (this->M_vectorsParameters) ) [0]) [ i ] = lambda;
         ( (* (this->M_vectorsParameters) ) [1]) [ i ] = mu;
@@ -351,7 +353,7 @@ void VenantKirchhoffMaterialLinear<MeshType>::updateJacobianMatrix (const vector
     //displayer->leaderPrint(" \n*********************************\n  ");
 
     //displayer->leaderPrint(" \n*********************************\n  ");
-    updateNonLinearJacobianTerms (this->M_jacobian, disp, dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
+    updateNonLinearJacobianTerms (this->M_jacobian, disp, this->M_dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
     //displayer->leaderPrint(" \n*********************************\n  ");
 
 }
@@ -404,13 +406,12 @@ VenantKirchhoffMaterialLinear<MeshType>::computeLocalFirstPiolaKirchhoffTensor (
 										 const Epetra_SerialDenseMatrix& tensorF,
 										 const Epetra_SerialDenseMatrix& cofactorF,
 										 const std::vector<Real>& invariants,
-										 const UInt marker,
-										 const dataPtr_Type dataMaterial)
+										 const UInt marker)
 {
 
     //Get the material parameters
-    Real lambda   = dataMaterial->lambda (marker);
-    Real mu       = dataMaterial->mu (marker);
+    Real lambda   = this->M_dataMaterial->lambda (marker);
+    Real mu       = this->M_dataMaterial->mu (marker);
 
     Epetra_SerialDenseMatrix copyF (tensorF);
     Epetra_SerialDenseMatrix identity (nDimensions, nDimensions);
@@ -447,7 +448,7 @@ inline StructuralIsotropicConstitutiveLaw<MeshType>* createVenantKirchhoffLinear
 }
 namespace
 {
-static bool registerVKL = StructuralIsotropicConstitutiveLaw<LifeV::RegionMesh<LinearTetra> >::StructureMaterialFactory::instance().registerProduct ( "linearVenantKirchhoff", &createVenantKirchhoffLinear<LifeV::RegionMesh<LinearTetra> > );
+static bool registerVKL = StructuralIsotropicConstitutiveLaw<LifeV::RegionMesh<LinearTetra> >::StructureIsotropicMaterialFactory::instance().registerProduct ( "linearVenantKirchhoff", &createVenantKirchhoffLinear<LifeV::RegionMesh<LinearTetra> > );
 }
 
 } //Namespace LifeV

@@ -43,20 +43,20 @@
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-#include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
+#include <lifev/structure/solver/isotropic/StructuralIsotropicConstitutiveLaw.hpp>
 
 namespace LifeV
 {
 
 template <typename MeshType>
 class NeoHookeanMaterialNonLinear :
-    public StructuralConstitutiveLaw<MeshType>
+    public StructuralIsotropicConstitutiveLaw<MeshType>
 {
     //!@name Type definitions
     //@{
 
 public:
-    typedef StructuralConstitutiveLaw<MeshType>          super;
+    typedef StructuralIsotropicConstitutiveLaw<MeshType>          super;
 
     typedef StructuralConstitutiveLawData            data_Type;
 
@@ -106,7 +106,7 @@ public:
     //!@name Methods
     //@{
 
-    //! Setup the created object of the class StructuralConstitutiveLaw
+    //! Setup the created object of the class StructuralIsotropicConstitutiveLaw
     /*!
       \param dFespace: the FiniteElement Space
       \param monolithicMap: the MapEpetra
@@ -115,7 +115,7 @@ public:
     void setup ( const FESpacePtr_Type& dFESpace,
                  const ETFESpacePtr_Type& dETFESpace,
                  const boost::shared_ptr<const MapEpetra>&  monolithicMap,
-                 const UInt offset, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer );
+                 const UInt offset, const dataPtr_Type& dataMaterial);
 
 
     //! Compute the Stiffness matrix in StructuralSolver::buildSystem()
@@ -189,7 +189,7 @@ public:
 
     //! Computes the deformation gradient F, the cofactor matrix Cof(F),
     //! the determinant of F (J = det(F)), the trace of right Cauchy-Green tensor tr(C)
-    //! This function is used in StructuralConstitutiveLaw::computeStiffness
+    //! This function is used in StructuralIsotropicConstitutiveLaw::computeStiffness
     /*!
       \param dk_loc: the elemental displacement
     */
@@ -234,7 +234,8 @@ public:
 
     void apply ( const vector_Type& sol, vector_Type& res,
                  const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
-                 const mapMarkerIndexesPtr_Type mapsMarkerIndexes);
+                 const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
+                 const displayerPtr_Type displayer);
 
     //@}
 
@@ -283,20 +284,13 @@ NeoHookeanMaterialNonLinear<MeshType>::setup ( const FESpacePtr_Type&           
                                                const ETFESpacePtr_Type&                    dETFESpace,
                                                const boost::shared_ptr<const MapEpetra>&   monolithicMap,
                                                const UInt                                  offset,
-                                               const dataPtr_Type&                         dataMaterial,
-                                               const displayerPtr_Type&                    displayer)
+                                               const dataPtr_Type& dataMaterial)
 {
-    this->M_displayer = displayer;
-    this->M_dataMaterial  = dataMaterial;
-
-    //    std::cout<<"I am setting up the Material"<<std::endl;
-
+    this->M_dataMaterial                    = dataMaterial;
     this->M_dispFESpace                     = dFESpace;
     this->M_dispETFESpace                     = dETFESpace;
     this->M_localMap                    = monolithicMap;
     this->M_offset                      = offset;
-    this->M_dataMaterial                = dataMaterial;
-    this->M_displayer                   = displayer;
     M_stiff.reset                   ( new vector_Type (*this->M_localMap) );
 
     M_identity (0, 0) = 1.0;
@@ -370,7 +364,7 @@ void NeoHookeanMaterialNonLinear<MeshType>::updateJacobianMatrix ( const vector_
     this->M_jacobian.reset (new matrix_Type (*this->M_localMap) );
 
     displayer->leaderPrint (" \n*********************************\n  ");
-    updateNonLinearJacobianTerms (this->M_jacobian, disp, dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
+    updateNonLinearJacobianTerms (this->M_jacobian, disp, this->M_dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
     displayer->leaderPrint (" \n*********************************\n  ");
     std::cout << std::endl;
 }
@@ -490,9 +484,10 @@ void NeoHookeanMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( matri
 template <typename MeshType>
 void NeoHookeanMaterialNonLinear<MeshType>::apply ( const vector_Type& sol, vector_Type& res,
                                                     const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
-                                                    const mapMarkerIndexesPtr_Type mapsMarkerIndexes)
+                                                    const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
+                                                    const displayerPtr_Type displayer)
 {
-    computeStiffness (sol, 0., this->M_dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, this->M_displayer);
+    computeStiffness (sol, 0., this->M_dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
     res += *M_stiff;
 }
 
@@ -602,13 +597,13 @@ void NeoHookeanMaterialNonLinear<MeshType>::computeLocalFirstPiolaKirchhoffTenso
 
 
 template <typename MeshType>
-inline StructuralConstitutiveLaw<MeshType>* createNeoHookeanMaterialNonLinear()
+inline StructuralIsotropicConstitutiveLaw<MeshType>* createNeoHookeanMaterialNonLinear()
 {
     return new NeoHookeanMaterialNonLinear<MeshType >();
 }
 namespace
 {
-static bool registerNH = StructuralConstitutiveLaw<LifeV::RegionMesh<LinearTetra> >::StructureMaterialFactory::instance().registerProduct ( "neoHookean", &createNeoHookeanMaterialNonLinear<LifeV::RegionMesh<LinearTetra> > );
+static bool registerNH = StructuralIsotropicConstitutiveLaw<LifeV::RegionMesh<LinearTetra> >::StructureIsotropicMaterialFactory::instance().registerProduct ( "neoHookean", &createNeoHookeanMaterialNonLinear<LifeV::RegionMesh<LinearTetra> > );
 }
 
 } //Namespace LifeV

@@ -948,7 +948,7 @@ void StructuralOperator<Mesh>::updateSystem ( matrixPtr_Type& mat_stiff)
     //Compute the new Stiffness Matrix
     M_material->computeStiffness (*M_disp, M_rescaleFactor, M_data, M_mapMarkersVolumes, M_mapMarkersIndexes, M_Displayer);
 
-    if ( M_data->solidType() == "linearVenantKirchhoff" )
+    if ( M_data->lawType() == "linear" )
     {
         *mat_stiff += *M_material->stiffMatrix();
         mat_stiff->globalAssemble();
@@ -1133,7 +1133,7 @@ void StructuralOperator<Mesh>::computeMatrix ( matrixPtr_Type& stiff, const vect
     //! It is right to do globalAssemble() inside the M_material class
     M_material->computeStiffness ( sol, 1., M_data, M_mapMarkersVolumes, M_mapMarkersIndexes, M_Displayer);
 
-    if ( M_data->solidType() == "linearVenantKirchhoff" )
+    if ( M_data->lawType() == "linear" )
     {
         *stiff = *M_material->stiffMatrix();
         *stiff += *M_massMatrix;
@@ -1408,7 +1408,7 @@ StructuralOperator<Mesh>::evalResidual ( vector_Type& residual, const vector_Typ
     }
 
     // ignoring non-local entries, Otherwise they are summed up lately
-    if ( M_data->solidType() == "linearVenantKirchhoff" )
+    if ( M_data->lawType() == "linear" )
     {
         chrono.start();
 
@@ -1465,7 +1465,7 @@ StructuralOperator<Mesh>::evalResidualDisplacement ( const vector_Type& solution
     LifeChrono chrono;
     chrono.start();
 
-    if ( M_data->solidType() == "linearVenantKirchhoff" )
+    if ( M_data->lawType() == "linear" )
     {
         M_residual_d.reset (new vector_Type ( *M_systemMatrix * solution ) );
         *M_residual_d -= *M_rhsNoBC;

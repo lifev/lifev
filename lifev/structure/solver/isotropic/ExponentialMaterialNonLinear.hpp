@@ -44,18 +44,18 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
 
-#include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
+#include <lifev/structure/solver/isotropic/StructuralIsotropicConstitutiveLaw.hpp>
 
 namespace LifeV
 {
 template <typename MeshType>
-class ExponentialMaterialNonLinear : public StructuralConstitutiveLaw<MeshType>
+class ExponentialMaterialNonLinear : public StructuralIsotropicConstitutiveLaw<MeshType>
 {
     //!@name Type definitions
     //@{
 
 public:
-    typedef StructuralConstitutiveLaw<MeshType>           super;
+    typedef StructuralIsotropicConstitutiveLaw<MeshType>           super;
 
     typedef typename super::data_Type                data_Type;
 
@@ -107,7 +107,7 @@ public:
     //!@name Methods
     //@{
 
-    //! Setup the created object of the class StructuralConstitutiveLaw
+    //! Setup the created object of the class StructuralIsotropicConstitutiveLaw
     /*!
       \param dFespace: the FiniteElement Space
       \param monolithicMap: the MapEpetra
@@ -116,7 +116,7 @@ public:
     void setup ( const FESpacePtr_Type& dFESpace,
                  const ETFESpacePtr_Type& dETFESpace,
                  const boost::shared_ptr<const MapEpetra>&  monolithicMap,
-                 const UInt offset, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer );
+                 const UInt offset,const dataPtr_Type& dataMaterial);
 
 
     //! Compute the Stiffness matrix in StructuralSolver::buildSystem()
@@ -194,7 +194,7 @@ public:
 
     //! Computes the deformation gradient F, the cofactor matrix Cof(F),
     //! the determinant of F (J = det(F)), the trace of right Cauchy-Green tensor tr(C)
-    //! This function is used in StructuralConstitutiveLaw::computeStiffness
+    //! This function is used in StructuralIsotropicConstitutiveLaw::computeStiffness
     /*!
       \param dk_loc: the elemental displacement
     */
@@ -246,7 +246,8 @@ public:
 
     void apply ( const vector_Type& sol, vector_Type& res,
                  const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
-                 const mapMarkerIndexesPtr_Type mapsMarkerIndexes) ;
+                 const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
+                 const displayerPtr_Type displayer) ;
 
     //@}
 
@@ -300,13 +301,10 @@ ExponentialMaterialNonLinear<MeshType>::setup ( const FESpacePtr_Type&          
                                                 const ETFESpacePtr_Type&                     dETFESpace,
                                                 const boost::shared_ptr<const MapEpetra>&   monolithicMap,
                                                 const UInt                                  offset,
-                                                const dataPtr_Type&                         dataMaterial,
-                                                const displayerPtr_Type&                    displayer  )
+                                                const dataPtr_Type& dataMaterial)
 {
-    this->M_displayer = displayer;
-    this->M_dataMaterial  = dataMaterial;
-    //    std::cout<<"I am setting up the Material"<<std::endl;
 
+    this->M_dataMaterial                = dataMaterial;
     this->M_dispFESpace                 = dFESpace;
     this->M_dispETFESpace               = dETFESpace;
     this->M_localMap                    = monolithicMap;
@@ -330,7 +328,7 @@ ExponentialMaterialNonLinear<MeshType>::setup ( const FESpacePtr_Type&          
     this->M_vectorsParameters.reset ( new vectorsParameters_Type ( 3 ) );
 
 
-    this->setupVectorsParameters();
+    this->setupVectorsParameters( );
 }
 
 
@@ -364,7 +362,7 @@ ExponentialMaterialNonLinear<MeshType>::setupVectorsParameters ( void )
 
         Real alpha = this->M_dataMaterial->alpha ( markerID );
         Real gamma = this->M_dataMaterial->gamma ( markerID );
-        Real bulk = this->M_dataMaterial->bulk ( markerID );
+        Real bulk  = this->M_dataMaterial->bulk ( markerID );
 
         ( (* (this->M_vectorsParameters) ) [0]) [ i ] = alpha;
         ( (* (this->M_vectorsParameters) ) [1]) [ i ] = gamma;
@@ -396,7 +394,7 @@ void ExponentialMaterialNonLinear<MeshType>::updateJacobianMatrix ( const vector
     this->M_jacobian.reset (new matrix_Type (*this->M_localMap) );
 
     displayer->leaderPrint (" \n*********************************\n  ");
-    updateNonLinearJacobianTerms (this->M_jacobian, disp, dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
+    updateNonLinearJacobianTerms (this->M_jacobian, disp, this->M_dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
     displayer->leaderPrint (" \n*********************************\n  ");
     std::cout << std::endl;
 
@@ -615,19 +613,19 @@ void ExponentialMaterialNonLinear<MeshType>::showMe ( std::string const& fileNam
 template <typename MeshType>
 void ExponentialMaterialNonLinear<MeshType>::apply ( const vector_Type& sol,
                                                      vector_Type& res, const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
-                                                     const mapMarkerIndexesPtr_Type mapsMarkerIndexes )
+                                                     const mapMarkerIndexesPtr_Type mapsMarkerIndexes,const displayerPtr_Type displayer)
 {
-    computeStiffness (sol, 0, this->M_dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, this->M_displayer);
+    computeStiffness (sol, 0, this->M_dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
     res += *M_stiff;
 }
 
 
 template <typename MeshType>
 void ExponentialMaterialNonLinear<MeshType>::computeLocalFirstPiolaKirchhoffTensor ( Epetra_SerialDenseMatrix& firstPiola,
-        const Epetra_SerialDenseMatrix& tensorF,
-        const Epetra_SerialDenseMatrix& cofactorF,
-        const std::vector<Real>& invariants,
-        const UInt marker)
+                                                                                     const Epetra_SerialDenseMatrix& tensorF,
+                                                                                     const Epetra_SerialDenseMatrix& cofactorF,
+                                                                                     const std::vector<Real>& invariants,
+                                                                                     const UInt marker)
 {
 
     //Get the material parameters
@@ -666,14 +664,14 @@ void ExponentialMaterialNonLinear<MeshType>::computeLocalFirstPiolaKirchhoffTens
 }
 
 template <typename MeshType>
-inline StructuralConstitutiveLaw<MeshType>* createExponentialMaterialNonLinear()
+inline StructuralIsotropicConstitutiveLaw<MeshType>* createExponentialMaterialNonLinear()
 {
     return new ExponentialMaterialNonLinear<MeshType >();
 }
 
 namespace
 {
-static bool registerEXP = StructuralConstitutiveLaw<LifeV::RegionMesh<LinearTetra> >::StructureMaterialFactory::instance().registerProduct ( "exponential", &createExponentialMaterialNonLinear<LifeV::RegionMesh<LinearTetra> > );
+static bool registerEXP = StructuralIsotropicConstitutiveLaw<LifeV::RegionMesh<LinearTetra> >::StructureIsotropicMaterialFactory::instance().registerProduct ( "exponential", &createExponentialMaterialNonLinear<LifeV::RegionMesh<LinearTetra> > );
 }
 
 } //Namespace LifeV
