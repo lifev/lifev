@@ -26,155 +26,133 @@
 
 /*!
     @file
-    @brief FSIData - File containing the implementation of Radial Basis Functions suited for interpolation
-                     between non-matching grids
+    @brief A short description of the file content
 
-    @author Davide Forti <davide.forti@epfl.ch>
-    @date 01-31-2010
+    @author Davide Forti <forti@mathicsepc48.epfl.ch>
+    @date 13 Mar 2013
 
-    @maintainer Davide Forti <davide.Forti@epfl.ch>
+    A more detailed description of the file (if necessary)
  */
 
-#ifndef RBF_INTERPOLATION_HPP
-#define RBF_INTERPOLATION_HPP
+#ifndef RBFLOCALLYRESCALEDSCALAR_H
+#define RBFLOCALLYRESCALEDSCALAR_H 1
 
-#include <lifev/core/LifeV.hpp>
-#include <Epetra_Vector.h>
-#include <lifev/core/array/MatrixEpetra.hpp>
-#include <lifev/core/array/GhostHandler.hpp>
-#include <Epetra_FECrsMatrix.h>
-#include <lifev/core/algorithm/PreconditionerIfpack.hpp>
-#include <lifev/core/algorithm/LinearSolver.hpp>
-#include <Teuchos_ParameterList.hpp>
-#include <Teuchos_XMLParameterListHelpers.hpp>
-#include <Teuchos_RCP.hpp>
+#include <lifev/core/interpolation/RBFInterpolation.hpp>
 
 namespace LifeV
 {
-template <typename Mesh>
-class RBFInterpolation
-{
 
+template <typename mesh_Type>
+class RBFlocallyRescaledScalar: public RBFInterpolation<mesh_Type>
+{
 public:
 
-    typedef Mesh                                              mesh_Type;
-    typedef boost::shared_ptr<mesh_Type>                      meshPtr_Type;
+    typedef boost::shared_ptr<mesh_Type>                                          meshPtr_Type;
 
-    typedef VectorEpetra                                      vector_Type;
-    typedef boost::shared_ptr<vector_Type >                   vectorPtr_Type;
+    typedef VectorEpetra                                                          vector_Type;
+    typedef boost::shared_ptr<vector_Type >                                       vectorPtr_Type;
 
-    typedef MatrixEpetra<double>                              matrix_Type;
-    typedef boost::shared_ptr<matrix_Type>                    matrixPtr_Type;
+    typedef MatrixEpetra<double>                                                  matrix_Type;
+    typedef boost::shared_ptr<matrix_Type>                                        matrixPtr_Type;
 
-    typedef std::vector<int>                                  flagContainer_Type;
+    typedef std::vector<int>                                                      flagContainer_Type;
 
-    typedef std::set<ID>                                      idContainer_Type;
+    typedef std::set<ID>                                                          idContainer_Type;
 
-    typedef MapEpetra                                         map_Type;
-    typedef boost::shared_ptr<MapEpetra>                      mapPtr_Type;
+    typedef MapEpetra                                                             map_Type;
+    typedef boost::shared_ptr<MapEpetra>                                          mapPtr_Type;
 
-    typedef GhostHandler<mesh_Type>                           neighbors_Type;
-    typedef boost::shared_ptr<neighbors_Type>                 neighborsPtr_Type;
+    typedef GhostHandler<mesh_Type>                                               neighbors_Type;
+    typedef boost::shared_ptr<neighbors_Type>                                     neighborsPtr_Type;
 
-    typedef LifeV::Preconditioner                             basePrec_Type;
-    typedef boost::shared_ptr<basePrec_Type>                  basePrecPtr_Type;
+    typedef LifeV::Preconditioner                                                 basePrec_Type;
+    typedef boost::shared_ptr<basePrec_Type>                                      basePrecPtr_Type;
 
-    typedef LifeV::PreconditionerIfpack                       prec_Type;
-    typedef boost::shared_ptr<prec_Type>                      precPtr_Type;
+    typedef LifeV::PreconditionerIfpack                                           prec_Type;
+    typedef boost::shared_ptr<prec_Type>                                          precPtr_Type;
 
-    typedef Teuchos::RCP< Teuchos::ParameterList >            parameterList_Type;
+    typedef Teuchos::RCP< Teuchos::ParameterList >                                parameterList_Type;
 
-    //! Constructor
-    RBFInterpolation ( meshPtr_Type fullMeshKnown,
-                       meshPtr_Type localMeshKnown,
-                       meshPtr_Type fullMeshUnknown,
-                       meshPtr_Type localMeshUnknown,
-                       flagContainer_Type flags);
-
-    //! Destructor
-    ~RBFInterpolation() {}
-
-    //! Setup the RBF data
-    void setupRBFData (vectorPtr_Type KnownField, vectorPtr_Type UnknownField, GetPot datafile, Teuchos::RCP< Teuchos::ParameterList > belosList);
+    typedef FactorySingleton<Factory<RBFInterpolation<mesh_Type>, std::string> >  InterpolationFactory;
 
 
-    //! Build the RBF Operators, namely the interpolant and the projection ones.
+    RBFlocallyRescaledScalar();
+
+    virtual ~RBFlocallyRescaledScalar();
+
+    void setup ( meshPtr_Type fullMeshKnown, meshPtr_Type localMeshKnown, meshPtr_Type fullMeshUnknown, meshPtr_Type localMeshUnknown, flagContainer_Type flags );
+
+    void setupRBFData (vectorPtr_Type KnownField, vectorPtr_Type UnknownField, GetPot datafile, parameterList_Type belosList);
+
     void buildOperators();
 
-    //! Build the RBF interpolant
     void InterpolationOperator();
 
-    //! Identifies nodes with an assigned markerID
-    void identifyNodes (meshPtr_Type LocalMesh, std::set<ID>& GID_nodes, vectorPtr_Type CheckVector);
-
-    //! Check if the point with markerID pointMarker has to be selected
-    bool isInside (ID pointMarker, flagContainer_Type Flags);
-
-    //! Evaluate the RBF radius
-    double computeRBFradius (meshPtr_Type MeshNeighbors, meshPtr_Type MeshGID, idContainer_Type Neighbors, ID GlobalID);
-
-    //! Evaluation of the RBF
-    double rbf (double x1, double y1, double z1, double x2, double y2, double z2, double radius);
-
-    //! Build the projection operator
     void ProjectionOperator();
 
-    //! Prepare Rhs
     void buildRhs();
 
-    //! Manages the solution of the interpolation problem
-    void interpolate();
-
-    //! Manages the solution of the interpolation problem, namely the costant (c=1) field.
     void interpolateCostantField();
 
-    //! Getter for the solution
+    void identifyNodes (meshPtr_Type LocalMesh, std::set<ID>& GID_nodes, vectorPtr_Type CheckVector);
+
+    bool isInside (ID pointMarker, flagContainer_Type Flags);
+
+    double computeRBFradius (meshPtr_Type MeshNeighbors, meshPtr_Type MeshGID, idContainer_Type Neighbors, ID GlobalID);
+
+    double rbf (double x1, double y1, double z1, double x2, double y2, double z2, double radius);
+
+    void interpolate();
+
     void solution (vectorPtr_Type& Solution);
 
-    //! Getter for the solution obtained by a pure RBF approach
     void solutionrbf (vectorPtr_Type& Solution_rbf);
 
 private:
 
-    meshPtr_Type                M_fullMeshKnown;
-    meshPtr_Type                M_localMeshKnown;
-    meshPtr_Type                M_fullMeshUnknown;
-    meshPtr_Type                M_localMeshUnknown;
-    matrixPtr_Type              M_interpolationOperator;
-    matrixPtr_Type              M_projectionOperator;
-    flagContainer_Type          M_flags;
-    vectorPtr_Type              M_knownField;
-    vectorPtr_Type              M_unknownField;
-    idContainer_Type            M_GIdsKnownMesh;
-    idContainer_Type            M_GIdsUnknownMesh;
-    vectorPtr_Type              M_RhsF;
-    vectorPtr_Type              M_RhsOne;
-    vectorPtr_Type              M_rbf_one;
-    mapPtr_Type                 M_interpolationOperatorMap;
-    mapPtr_Type                 M_projectionOperatorMap;
-    neighborsPtr_Type           M_neighbors;
-    vectorPtr_Type              M_unknownField_rbf;
-    GetPot                      M_datafile;
-    parameterList_Type          M_belosList;
+    meshPtr_Type        M_fullMeshKnown;
+    meshPtr_Type        M_localMeshKnown;
+    meshPtr_Type        M_fullMeshUnknown;
+    meshPtr_Type        M_localMeshUnknown;
+    flagContainer_Type  M_flags;
+    vectorPtr_Type      M_knownField;
+    vectorPtr_Type      M_unknownField;
+    GetPot              M_datafile;
+    parameterList_Type  M_belosList;
+    idContainer_Type    M_GIdsKnownMesh;
+    idContainer_Type    M_GIdsUnknownMesh;
+    matrixPtr_Type      M_interpolationOperator;
+    matrixPtr_Type      M_projectionOperator;
+    vectorPtr_Type      M_RhsF;
+    vectorPtr_Type      M_RhsOne;
+    vectorPtr_Type      M_rbf_one;
+    mapPtr_Type         M_interpolationOperatorMap;
+    mapPtr_Type         M_projectionOperatorMap;
+    neighborsPtr_Type   M_neighbors;
+    vectorPtr_Type      M_unknownField_rbf;
+
 };
 
-template <typename Mesh>
-RBFInterpolation<Mesh>::RBFInterpolation ( meshPtr_Type fullMeshKnown,
-                                           meshPtr_Type localMeshKnown,
-                                           meshPtr_Type fullMeshUnknown,
-                                           meshPtr_Type localMeshUnknown,
-                                           flagContainer_Type flags) :
-    M_fullMeshKnown ( fullMeshKnown ),
-    M_localMeshKnown ( localMeshKnown ),
-    M_fullMeshUnknown ( fullMeshUnknown ),
-    M_localMeshUnknown ( localMeshUnknown ),
-    M_flags ( flags )
+template <typename mesh_Type>
+RBFlocallyRescaledScalar<mesh_Type>::RBFlocallyRescaledScalar()
+{}
+
+template <typename mesh_Type>
+RBFlocallyRescaledScalar<mesh_Type>::~RBFlocallyRescaledScalar()
+{}
+
+template <typename mesh_Type>
+void RBFlocallyRescaledScalar<mesh_Type>::setup ( meshPtr_Type fullMeshKnown, meshPtr_Type localMeshKnown, meshPtr_Type fullMeshUnknown, meshPtr_Type localMeshUnknown, flagContainer_Type flags )
 {
+    M_fullMeshKnown = fullMeshKnown;
+    M_localMeshKnown = localMeshKnown;
+    M_fullMeshUnknown = fullMeshUnknown;
+    M_localMeshUnknown = localMeshUnknown;
+    M_flags = flags;
 }
 
-
-template <typename Mesh>
-void RBFInterpolation<Mesh>::setupRBFData (vectorPtr_Type KnownField, vectorPtr_Type UnknownField, GetPot datafile, parameterList_Type belosList)
+template <typename mesh_Type>
+void RBFlocallyRescaledScalar<mesh_Type>::setupRBFData (vectorPtr_Type KnownField, vectorPtr_Type UnknownField, GetPot datafile, parameterList_Type belosList)
 {
     M_knownField   = KnownField;
     M_unknownField = UnknownField;
@@ -182,9 +160,8 @@ void RBFInterpolation<Mesh>::setupRBFData (vectorPtr_Type KnownField, vectorPtr_
     M_belosList    = belosList;
 }
 
-
 template <typename Mesh>
-void RBFInterpolation<Mesh>::buildOperators()
+void RBFlocallyRescaledScalar<Mesh>::buildOperators()
 {
     this->InterpolationOperator();
     this->ProjectionOperator();
@@ -193,7 +170,7 @@ void RBFInterpolation<Mesh>::buildOperators()
 }
 
 template <typename Mesh>
-void RBFInterpolation<Mesh>::InterpolationOperator()
+void RBFlocallyRescaledScalar<Mesh>::InterpolationOperator()
 {
     this->identifyNodes (M_localMeshKnown, M_GIdsKnownMesh, M_knownField);
     M_neighbors.reset ( new neighbors_Type ( M_fullMeshKnown, M_localMeshKnown, M_knownField->mapPtr(), M_knownField->mapPtr()->commPtr() ) );
@@ -253,15 +230,14 @@ void RBFInterpolation<Mesh>::InterpolationOperator()
         M_interpolationOperator->insertGlobalValues (GlobalID[i], k, Values, Indices);
     }
     M_interpolationOperator->globalAssemble();
-
     delete Indices;
     delete Values;
     delete ElementsPerRow;
     delete GlobalID;
 }
 
-template <typename Mesh>
-void RBFInterpolation<Mesh>::ProjectionOperator()
+template <typename mesh_Type>
+void RBFlocallyRescaledScalar<mesh_Type>::ProjectionOperator()
 {
 
     this->identifyNodes (M_localMeshUnknown, M_GIdsUnknownMesh, M_unknownField);
@@ -331,15 +307,14 @@ void RBFInterpolation<Mesh>::ProjectionOperator()
         M_projectionOperator->insertGlobalValues (GlobalID[i], k, Values, Indices);
     }
     M_projectionOperator->globalAssemble (M_interpolationOperatorMap, M_projectionOperatorMap);
-
     delete Indices;
     delete Values;
     delete ElementsPerRow;
     delete GlobalID;
 }
 
-template <typename Mesh>
-double RBFInterpolation<Mesh>::computeRBFradius (meshPtr_Type MeshNeighbors, meshPtr_Type MeshGID, idContainer_Type Neighbors, ID GlobalID)
+template <typename mesh_Type>
+double RBFlocallyRescaledScalar<mesh_Type>::computeRBFradius (meshPtr_Type MeshNeighbors, meshPtr_Type MeshGID, idContainer_Type Neighbors, ID GlobalID)
 {
     double r = 0;
     double r_max = 0;
@@ -353,9 +328,8 @@ double RBFInterpolation<Mesh>::computeRBFradius (meshPtr_Type MeshNeighbors, mes
     return r_max;
 }
 
-
-template <typename Mesh>
-void RBFInterpolation<Mesh>::buildRhs()
+template <typename mesh_Type>
+void RBFlocallyRescaledScalar<mesh_Type>::buildRhs()
 {
     M_RhsF.reset (new vector_Type (*M_interpolationOperatorMap) );
     M_RhsOne.reset (new vector_Type (*M_interpolationOperatorMap) );
@@ -364,8 +338,8 @@ void RBFInterpolation<Mesh>::buildRhs()
     *M_RhsOne += 1;
 }
 
-template <typename Mesh>
-void RBFInterpolation<Mesh>::interpolateCostantField()
+template <typename mesh_Type>
+void RBFlocallyRescaledScalar<mesh_Type>::interpolateCostantField()
 {
     vectorPtr_Type gamma_one;
     gamma_one.reset (new vector_Type (*M_interpolationOperatorMap) );
@@ -392,8 +366,8 @@ void RBFInterpolation<Mesh>::interpolateCostantField()
 
 }
 
-template <typename Mesh>
-void RBFInterpolation<Mesh>::interpolate()
+template <typename mesh_Type>
+void RBFlocallyRescaledScalar<mesh_Type>::interpolate()
 {
     vectorPtr_Type gamma_f;
     gamma_f.reset (new vector_Type (*M_interpolationOperatorMap) );
@@ -432,9 +406,8 @@ void RBFInterpolation<Mesh>::interpolate()
 
 }
 
-
-template <typename Mesh>
-void RBFInterpolation<Mesh>::identifyNodes (meshPtr_Type LocalMesh, std::set<ID>& GID_nodes, vectorPtr_Type CheckVector)
+template <typename mesh_Type>
+void RBFlocallyRescaledScalar<mesh_Type>::identifyNodes (meshPtr_Type LocalMesh, std::set<ID>& GID_nodes, vectorPtr_Type CheckVector)
 {
     if (M_flags[0] == -1)
     {
@@ -455,8 +428,8 @@ void RBFInterpolation<Mesh>::identifyNodes (meshPtr_Type LocalMesh, std::set<ID>
     }
 }
 
-template <typename Mesh>
-bool RBFInterpolation<Mesh>::isInside (ID pointMarker, flagContainer_Type flags)
+template <typename mesh_Type>
+bool RBFlocallyRescaledScalar<mesh_Type>::isInside (ID pointMarker, flagContainer_Type flags)
 {
     int check = 0;
     for (UInt i = 0; i < flags.size(); ++i)
@@ -468,26 +441,37 @@ bool RBFInterpolation<Mesh>::isInside (ID pointMarker, flagContainer_Type flags)
 }
 
 
-template <typename Mesh>
-double RBFInterpolation<Mesh>::rbf (double x1, double y1, double z1, double x2, double y2, double z2, double radius)
+template <typename mesh_Type>
+double RBFlocallyRescaledScalar<mesh_Type>::rbf (double x1, double y1, double z1, double x2, double y2, double z2, double radius)
 {
     double distance = sqrt ( pow (x1 - x2, 2) + pow (y1 - y2, 2) + pow (z1 - z2, 2) );
     return pow (1 - distance / radius, 4) * (4 * distance / radius + 1);
 }
 
-template <typename Mesh>
-void RBFInterpolation<Mesh>::solution (vectorPtr_Type& Solution)
+template <typename mesh_Type>
+void RBFlocallyRescaledScalar<mesh_Type>::solution (vectorPtr_Type& Solution)
 {
     Solution = M_unknownField;
 }
 
-
-template <typename Mesh>
-void RBFInterpolation<Mesh>::solutionrbf (vectorPtr_Type& Solution_rbf)
+template <typename mesh_Type>
+void RBFlocallyRescaledScalar<mesh_Type>::solutionrbf (vectorPtr_Type& Solution_rbf)
 {
     Solution_rbf = M_unknownField_rbf;
 }
 
-} // namespace LifeV
+//! Factory create function
+template <typename mesh_Type>
+inline RBFInterpolation<mesh_Type> * createRBFlocallyRescaledScalar()
+{
+    return new RBFlocallyRescaledScalar< mesh_Type > ();
+}
+namespace
+{
+static bool S_registerTri = RBFInterpolation<LifeV::RegionMesh<LinearTriangle > >::InterpolationFactory::instance().registerProduct ( "RBFlocallyRescaledScalar", &createRBFlocallyRescaledScalar<LifeV::RegionMesh<LinearTriangle > > );
+static bool S_registerTet = RBFInterpolation<LifeV::RegionMesh<LinearTetra > >::InterpolationFactory::instance().registerProduct ( "RBFlocallyRescaledScalar", &createRBFlocallyRescaledScalar<LifeV::RegionMesh<LinearTetra > > );
+}
 
-#endif // RBF_INTERPOLATION_HPP
+} // Namespace LifeV
+
+#endif /* RBFLOCALLYRESCALEDSCALAR_H */
