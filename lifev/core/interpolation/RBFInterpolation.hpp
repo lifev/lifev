@@ -92,19 +92,19 @@ public:
 
     virtual void buildOperators() = 0;
 
-    virtual void InterpolationOperator() = 0;
+    virtual void interpolationOperator() = 0;
 
-    virtual void ProjectionOperator() = 0;
+    virtual void projectionOperator() = 0;
 
     virtual void buildRhs() = 0;
 
-    virtual void interpolateCostantField() = 0;
+    virtual void interpolateCostantField() {};
 
     virtual void identifyNodes (meshPtr_Type LocalMesh, std::set<ID>& GID_nodes, vectorPtr_Type CheckVector) = 0;
 
     virtual bool isInside (ID pointMarker, flagContainer_Type Flags) = 0;
 
-    virtual double computeRBFradius (meshPtr_Type MeshNeighbors, meshPtr_Type MeshGID, idContainer_Type Neighbors, ID GlobalID) = 0;
+    virtual double computeRBFradius (meshPtr_Type , meshPtr_Type , idContainer_Type , ID ) {};
 
     virtual double rbf (double x1, double y1, double z1, double x2, double y2, double z2, double radius) = 0;
 
@@ -112,7 +112,11 @@ public:
 
     virtual void solution (vectorPtr_Type& Solution) = 0;
 
-    virtual void solutionrbf (vectorPtr_Type& Solution_rbf) = 0;
+    virtual void solutionrbf (vectorPtr_Type & ) {};
+
+    virtual void updateRhs(vectorPtr_Type newRhs) = 0;
+
+    virtual void setRadius ( double ){};
 
 private:
 

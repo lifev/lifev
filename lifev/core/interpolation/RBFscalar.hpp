@@ -29,21 +29,20 @@
     @brief A short description of the file content
 
     @author Davide Forti <forti@mathicsepc48.epfl.ch>
-    @date 13 Mar 2013
+    @date 14 Mar 2013
 
     A more detailed description of the file (if necessary)
  */
 
-#ifndef RBFLOCALLYRESCALEDSCALAR_H
-#define RBFLOCALLYRESCALEDSCALAR_H 1
+#ifndef RBFSCALAR_H
+#define RBFSCALAR_H 1
 
 #include <lifev/core/interpolation/RBFInterpolation.hpp>
 
-namespace LifeV
-{
+namespace LifeV {
 
 template <typename mesh_Type>
-class RBFlocallyRescaledScalar: public RBFInterpolation<mesh_Type>
+class RBFscalar: public RBFInterpolation<mesh_Type>
 {
 public:
 
@@ -73,9 +72,9 @@ public:
 
     typedef Teuchos::RCP< Teuchos::ParameterList >                                parameterList_Type;
 
-    RBFlocallyRescaledScalar();
+    RBFscalar();
 
-    virtual ~RBFlocallyRescaledScalar();
+    virtual ~RBFscalar();
 
     void setup ( meshPtr_Type fullMeshKnown, meshPtr_Type localMeshKnown, meshPtr_Type fullMeshUnknown, meshPtr_Type localMeshUnknown, flagContainer_Type flags );
 
@@ -89,13 +88,9 @@ public:
 
     void buildRhs();
 
-    void interpolateCostantField();
-
     void identifyNodes (meshPtr_Type LocalMesh, std::set<ID>& GID_nodes, vectorPtr_Type CheckVector);
 
     bool isInside (ID pointMarker, flagContainer_Type Flags);
-
-    double computeRBFradius (meshPtr_Type MeshNeighbors, meshPtr_Type MeshGID, idContainer_Type Neighbors, ID GlobalID);
 
     double rbf (double x1, double y1, double z1, double x2, double y2, double z2, double radius);
 
@@ -103,9 +98,9 @@ public:
 
     void solution (vectorPtr_Type& Solution);
 
-    void solutionrbf (vectorPtr_Type& Solution_rbf);
-
     void updateRhs(vectorPtr_Type newRhs);
+
+    void setRadius ( double radius );
 
 private:
 
@@ -129,18 +124,20 @@ private:
     mapPtr_Type         M_projectionOperatorMap;
     neighborsPtr_Type   M_neighbors;
     vectorPtr_Type      M_unknownField_rbf;
+    double              M_radius;
 };
 
 template <typename mesh_Type>
-RBFlocallyRescaledScalar<mesh_Type>::RBFlocallyRescaledScalar()
+RBFscalar<mesh_Type>::RBFscalar():
+    M_radius(0)
 {}
 
 template <typename mesh_Type>
-RBFlocallyRescaledScalar<mesh_Type>::~RBFlocallyRescaledScalar()
+RBFscalar<mesh_Type>::~RBFscalar()
 {}
 
 template <typename mesh_Type>
-void RBFlocallyRescaledScalar<mesh_Type>::setup ( meshPtr_Type fullMeshKnown, meshPtr_Type localMeshKnown, meshPtr_Type fullMeshUnknown, meshPtr_Type localMeshUnknown, flagContainer_Type flags )
+void RBFscalar<mesh_Type>::setup ( meshPtr_Type fullMeshKnown, meshPtr_Type localMeshKnown, meshPtr_Type fullMeshUnknown, meshPtr_Type localMeshUnknown, flagContainer_Type flags )
 {
     M_fullMeshKnown = fullMeshKnown;
     M_localMeshKnown = localMeshKnown;
@@ -150,7 +147,7 @@ void RBFlocallyRescaledScalar<mesh_Type>::setup ( meshPtr_Type fullMeshKnown, me
 }
 
 template <typename mesh_Type>
-void RBFlocallyRescaledScalar<mesh_Type>::setupRBFData (vectorPtr_Type KnownField, vectorPtr_Type UnknownField, GetPot datafile, parameterList_Type belosList)
+void RBFscalar<mesh_Type>::setupRBFData (vectorPtr_Type KnownField, vectorPtr_Type UnknownField, GetPot datafile, parameterList_Type belosList)
 {
     M_knownField   = KnownField;
     M_unknownField = UnknownField;
@@ -158,18 +155,24 @@ void RBFlocallyRescaledScalar<mesh_Type>::setupRBFData (vectorPtr_Type KnownFiel
     M_belosList    = belosList;
 }
 
-template <typename Mesh>
-void RBFlocallyRescaledScalar<Mesh>::buildOperators()
+template <typename mesh_Type>
+void RBFscalar<mesh_Type>::setRadius ( double radius )
+{
+    M_radius = radius;
+}
+
+template <typename mesh_Type>
+void RBFscalar<mesh_Type>::buildOperators()
 {
     this->interpolationOperator();
     this->projectionOperator();
     this->buildRhs();
-    this->interpolateCostantField();
 }
 
-template <typename Mesh>
-void RBFlocallyRescaledScalar<Mesh>::interpolationOperator()
+template <typename mesh_Type>
+void RBFscalar<mesh_Type>::interpolationOperator()
 {
+    ASSERT(M_radius!=0, "Please set the basis radius using RBFscalar<mesh_Type>::setRadius(double radius)")
     this->identifyNodes (M_localMeshKnown, M_GIdsKnownMesh, M_knownField);
     M_neighbors.reset ( new neighbors_Type ( M_fullMeshKnown, M_localMeshKnown, M_knownField->mapPtr(), M_knownField->mapPtr()->commPtr() ) );
     if (M_flags[0] == -1)
@@ -183,7 +186,6 @@ void RBFlocallyRescaledScalar<Mesh>::interpolationOperator()
 
     int LocalNodesNumber = M_GIdsKnownMesh.size();
 
-    std::vector<double>   RBF_radius (LocalNodesNumber);
     std::vector<std::set<ID> > MatrixGraph (LocalNodesNumber);
     int* ElementsPerRow = new int[LocalNodesNumber];
     int* GlobalID = new int[LocalNodesNumber];
@@ -193,9 +195,8 @@ void RBFlocallyRescaledScalar<Mesh>::interpolationOperator()
     for (std::set<ID>::iterator it = M_GIdsKnownMesh.begin(); it != M_GIdsKnownMesh.end(); ++it)
     {
         GlobalID[k] = *it;
-        MatrixGraph[k] = M_neighbors->nodeNodeNeighborsList() [GlobalID[k]];
+        MatrixGraph[k] = M_neighbors->createNodeNodeNeighborsMapWithinRadius (M_radius, GlobalID[k]);
         MatrixGraph[k].insert (GlobalID[k]);
-        RBF_radius[k] = computeRBFradius ( M_fullMeshKnown, M_fullMeshKnown, MatrixGraph[k], GlobalID[k]);
         ElementsPerRow[k] = MatrixGraph[k].size();
         if (ElementsPerRow[k] > Max_entries)
         {
@@ -222,7 +223,7 @@ void RBFlocallyRescaledScalar<Mesh>::interpolationOperator()
                                M_fullMeshKnown->point (*it).x(),
                                M_fullMeshKnown->point (*it).y(),
                                M_fullMeshKnown->point (*it).z(),
-                               RBF_radius[i]);
+                               M_radius);
             ++k;
         }
         M_interpolationOperator->insertGlobalValues (GlobalID[i], k, Values, Indices);
@@ -235,14 +236,13 @@ void RBFlocallyRescaledScalar<Mesh>::interpolationOperator()
 }
 
 template <typename mesh_Type>
-void RBFlocallyRescaledScalar<mesh_Type>::projectionOperator()
+void RBFscalar<mesh_Type>::projectionOperator()
 {
 
     this->identifyNodes (M_localMeshUnknown, M_GIdsUnknownMesh, M_unknownField);
 
     int LocalNodesNumber = M_GIdsUnknownMesh.size();
 
-    std::vector<double>   RBF_radius (LocalNodesNumber);
     std::vector<std::set<ID> > MatrixGraph (LocalNodesNumber);
     int* ElementsPerRow = new int[LocalNodesNumber];
     int* GlobalID = new int[LocalNodesNumber];
@@ -270,9 +270,9 @@ void RBFlocallyRescaledScalar<mesh_Type>::projectionOperator()
                 }
             }
         }
-        MatrixGraph[k] = M_neighbors->nodeNodeNeighborsList() [nearestPoint];
+
+        MatrixGraph[k] = M_neighbors->createNodeNodeNeighborsMapWithinRadius (M_radius, nearestPoint);
         MatrixGraph[k].insert (nearestPoint);
-        RBF_radius[k] = computeRBFradius ( M_fullMeshKnown, M_fullMeshUnknown, MatrixGraph[k], GlobalID[k]);
         ElementsPerRow[k] = MatrixGraph[k].size();
         if (ElementsPerRow[k] > Max_entries)
         {
@@ -299,7 +299,7 @@ void RBFlocallyRescaledScalar<mesh_Type>::projectionOperator()
                                M_fullMeshKnown->point (*it).x(),
                                M_fullMeshKnown->point (*it).y(),
                                M_fullMeshKnown->point (*it).z(),
-                               RBF_radius[i]);
+                               M_radius);
             ++k;
         }
         M_projectionOperator->insertGlobalValues (GlobalID[i], k, Values, Indices);
@@ -312,58 +312,14 @@ void RBFlocallyRescaledScalar<mesh_Type>::projectionOperator()
 }
 
 template <typename mesh_Type>
-double RBFlocallyRescaledScalar<mesh_Type>::computeRBFradius (meshPtr_Type MeshNeighbors, meshPtr_Type MeshGID, idContainer_Type Neighbors, ID GlobalID)
-{
-    double r = 0;
-    double r_max = 0;
-    for (idContainer_Type::iterator it = Neighbors.begin(); it != Neighbors.end(); ++it)
-    {
-        r = std::sqrt ( pow ( MeshGID->point ( GlobalID ).x() - MeshNeighbors->point ( *it ).x(), 2 )
-                        + pow ( MeshGID->point ( GlobalID ).y() - MeshNeighbors->point ( *it ).y(), 2 )
-                        + pow ( MeshGID->point ( GlobalID ).z() - MeshNeighbors->point ( *it ).z(), 2 ) );
-        r_max = ( r > r_max ) ? r : r_max;
-    }
-    return r_max;
-}
-
-template <typename mesh_Type>
-void RBFlocallyRescaledScalar<mesh_Type>::buildRhs()
+void RBFscalar<mesh_Type>::buildRhs()
 {
     M_RhsF.reset (new vector_Type (*M_interpolationOperatorMap) );
-    M_RhsOne.reset (new vector_Type (*M_interpolationOperatorMap) );
-
     M_RhsF->subset (*M_knownField, *M_interpolationOperatorMap, 0, 0);
-    *M_RhsOne += 1;
 }
 
 template <typename mesh_Type>
-void RBFlocallyRescaledScalar<mesh_Type>::interpolateCostantField()
-{
-    vectorPtr_Type gamma_one;
-    gamma_one.reset (new vector_Type (*M_interpolationOperatorMap) );
-
-    // Preconditioner
-    prec_Type* precRawPtr;
-    basePrecPtr_Type precPtr;
-    precRawPtr = new prec_Type;
-    precRawPtr->setDataFromGetPot ( M_datafile, "prec" );
-    precPtr.reset ( precRawPtr );
-
-    LinearSolver solverOne;
-    solverOne.setCommunicator ( M_knownField->mapPtr()->commPtr() );
-    solverOne.setParameters ( *M_belosList );
-    solverOne.setPreconditioner ( precPtr );
-
-    solverOne.setOperator (M_interpolationOperator);
-    solverOne.setRightHandSide ( M_RhsOne );
-    solverOne.solve ( gamma_one );
-
-    M_rbf_one.reset (new vector_Type (*M_projectionOperatorMap) );
-    M_projectionOperator->multiply (false, *gamma_one, *M_rbf_one);
-}
-
-template <typename mesh_Type>
-void RBFlocallyRescaledScalar<mesh_Type>::interpolate()
+void RBFscalar<mesh_Type>::interpolate()
 {
     vectorPtr_Type gamma_f;
     gamma_f.reset (new vector_Type (*M_interpolationOperatorMap) );
@@ -384,26 +340,17 @@ void RBFlocallyRescaledScalar<mesh_Type>::interpolate()
     solverRBF.setRightHandSide (M_RhsF);
     solverRBF.solve (gamma_f);
 
-    vectorPtr_Type rbf_f;
-    rbf_f.reset (new vector_Type (*M_projectionOperatorMap) );
-
     vectorPtr_Type solution;
     solution.reset (new vector_Type (*M_projectionOperatorMap) );
 
-    M_projectionOperator->multiply (false, *gamma_f, *rbf_f);
-
-    *solution = *rbf_f;
-    *solution /= *M_rbf_one;
-
-    M_unknownField_rbf.reset (new vector_Type (M_unknownField->map() ) );
-    M_unknownField_rbf->subset (*rbf_f, *M_projectionOperatorMap, 0, 0);
-
+    M_projectionOperator->multiply (false, *gamma_f, *solution);
     M_unknownField->subset (*solution, *M_projectionOperatorMap, 0, 0);
 }
 
 template <typename mesh_Type>
-void RBFlocallyRescaledScalar<mesh_Type>::identifyNodes (meshPtr_Type LocalMesh, std::set<ID>& GID_nodes, vectorPtr_Type CheckVector)
+void RBFscalar<mesh_Type>::identifyNodes (meshPtr_Type LocalMesh, std::set<ID>& GID_nodes, vectorPtr_Type CheckVector)
 {
+
     if (M_flags[0] == -1)
     {
         for ( UInt i = 0; i < LocalMesh->numVertices(); ++i )
@@ -421,10 +368,11 @@ void RBFlocallyRescaledScalar<mesh_Type>::identifyNodes (meshPtr_Type LocalMesh,
                     GID_nodes.insert (LocalMesh->point (i).id() );
                 }
     }
+
 }
 
 template <typename mesh_Type>
-bool RBFlocallyRescaledScalar<mesh_Type>::isInside (ID pointMarker, flagContainer_Type flags)
+bool RBFscalar<mesh_Type>::isInside (ID pointMarker, flagContainer_Type flags)
 {
     int check = 0;
     for (UInt i = 0; i < flags.size(); ++i)
@@ -437,43 +385,37 @@ bool RBFlocallyRescaledScalar<mesh_Type>::isInside (ID pointMarker, flagContaine
 
 
 template <typename mesh_Type>
-double RBFlocallyRescaledScalar<mesh_Type>::rbf (double x1, double y1, double z1, double x2, double y2, double z2, double radius)
+double RBFscalar<mesh_Type>::rbf (double x1, double y1, double z1, double x2, double y2, double z2, double radius)
 {
     double distance = sqrt ( pow (x1 - x2, 2) + pow (y1 - y2, 2) + pow (z1 - z2, 2) );
     return pow (1 - distance / radius, 4) * (4 * distance / radius + 1);
 }
 
 template <typename mesh_Type>
-void RBFlocallyRescaledScalar<mesh_Type>::updateRhs(vectorPtr_Type newRhs)
+void RBFscalar<mesh_Type>::updateRhs(vectorPtr_Type newRhs)
 {
     *M_RhsF *= 0;
     *M_RhsF = *newRhs;
 }
 
 template <typename mesh_Type>
-void RBFlocallyRescaledScalar<mesh_Type>::solution (vectorPtr_Type& Solution)
+void RBFscalar<mesh_Type>::solution (vectorPtr_Type& Solution)
 {
     Solution = M_unknownField;
 }
 
-template <typename mesh_Type>
-void RBFlocallyRescaledScalar<mesh_Type>::solutionrbf (vectorPtr_Type& Solution_rbf)
-{
-    Solution_rbf = M_unknownField_rbf;
-}
-
 //! Factory create function
 template <typename mesh_Type>
-inline RBFInterpolation<mesh_Type> * createRBFlocallyRescaledScalar()
+inline RBFInterpolation<mesh_Type> * createRBFscalar()
 {
-    return new RBFlocallyRescaledScalar< mesh_Type > ();
+    return new RBFscalar< mesh_Type > ();
 }
 namespace
 {
-static bool S_registerTriLRS = RBFInterpolation<LifeV::RegionMesh<LinearTriangle > >::InterpolationFactory::instance().registerProduct ( "RBFlocallyRescaledScalar", &createRBFlocallyRescaledScalar<LifeV::RegionMesh<LinearTriangle > > );
-static bool S_registerTetLRS = RBFInterpolation<LifeV::RegionMesh<LinearTetra > >::InterpolationFactory::instance().registerProduct ( "RBFlocallyRescaledScalar", &createRBFlocallyRescaledScalar<LifeV::RegionMesh<LinearTetra > > );
+static bool S_registerTriS = RBFInterpolation<LifeV::RegionMesh<LinearTriangle > >::InterpolationFactory::instance().registerProduct ( "RBFscalar", &createRBFscalar<LifeV::RegionMesh<LinearTriangle > > );
+static bool S_registerTetS = RBFInterpolation<LifeV::RegionMesh<LinearTetra > >::InterpolationFactory::instance().registerProduct ( "RBFscalar", &createRBFscalar<LifeV::RegionMesh<LinearTetra > > );
 }
 
 } // Namespace LifeV
 
-#endif /* RBFLOCALLYRESCALEDSCALAR_H */
+#endif /* RBFSCALAR_H */
