@@ -134,7 +134,7 @@ public:
     /*!
      * @param boundaryID boundary ID
      */
-    void boundaryID( const ID& boundaryID)
+    void boundaryID ( const ID& boundaryID)
     {
         M_boundaryID = boundaryID;
     }

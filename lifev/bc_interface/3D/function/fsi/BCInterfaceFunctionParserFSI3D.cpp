@@ -81,9 +81,9 @@ BCInterfaceFunctionParser< BCHandler, FSIOperator >::setData ( const boost::shar
          * COMPONENT     '1 3'         (x,y)         |      2             2             functionID
          */
 
-    #ifdef HAVE_LIFEV_DEBUG
+#ifdef HAVE_LIFEV_DEBUG
         debugStream ( 5021 ) << "BCInterfaceFunction::setData                arguments: " << M_parser->countSubstring ( "," ) << "\n";
-    #endif
+#endif
 
         // Note: the map ID is used only for 3D handler.
         if ( M_parser->countSubstring ( "," ) )
@@ -103,7 +103,9 @@ BCInterfaceFunctionParser< BCHandler, FSIOperator >::setData ( const boost::shar
         }
     }
     else
+    {
         std::cerr << "!!! ERROR: BCInterface wrong data cast !!!" << std::endl;
+    }
 }
 
 } // Namespace LifeV

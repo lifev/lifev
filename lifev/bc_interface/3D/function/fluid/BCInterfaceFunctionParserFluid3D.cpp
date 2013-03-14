@@ -88,9 +88,9 @@ BCInterfaceFunctionParser< BCHandler, OseenSolver< RegionMesh< LinearTetra > > >
          * COMPONENT     '1 3'         (x,y)         |      2             2             functionID
          */
 
-    #ifdef HAVE_LIFEV_DEBUG
+#ifdef HAVE_LIFEV_DEBUG
         debugStream ( 5021 ) << "BCInterfaceFunction::setData                arguments: " << M_parser->countSubstring ( "," ) << "\n";
-    #endif
+#endif
 
         // Note: the map ID is used only for 3D handler.
         if ( M_parser->countSubstring ( "," ) )
@@ -110,7 +110,9 @@ BCInterfaceFunctionParser< BCHandler, OseenSolver< RegionMesh< LinearTetra > > >
         }
     }
     else
+    {
         std::cerr << "!!! ERROR: BCInterface wrong data cast !!!" << std::endl;
+    }
 }
 
 template< >
@@ -141,9 +143,9 @@ BCInterfaceFunctionParser< BCHandler, OseenSolverShapeDerivative< RegionMesh< Li
          * COMPONENT     '1 3'         (x,y)         |      2             2             functionID
          */
 
-    #ifdef HAVE_LIFEV_DEBUG
+#ifdef HAVE_LIFEV_DEBUG
         debugStream ( 5021 ) << "BCInterfaceFunction::setData                arguments: " << M_parser->countSubstring ( "," ) << "\n";
-    #endif
+#endif
 
         // Note: the map ID is used only for 3D handler.
         if ( M_parser->countSubstring ( "," ) )
@@ -163,7 +165,9 @@ BCInterfaceFunctionParser< BCHandler, OseenSolverShapeDerivative< RegionMesh< Li
         }
     }
     else
+    {
         std::cerr << "!!! ERROR: BCInterface wrong data cast !!!" << std::endl;
+    }
 }
 
 } // Namespace LifeV

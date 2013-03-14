@@ -134,7 +134,7 @@ public:
     /*!
      * @param venous pressure of the fluid.
      */
-    void setVenousPressure( const Real& venousPressure )
+    void setVenousPressure ( const Real& venousPressure )
     {
         M_venousPressure = venousPressure;
     }
