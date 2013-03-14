@@ -21,9 +21,9 @@ CACHE INTERNAL "")
 SET(couplingsArea_HEADERS "")
 SET(couplingsArea_SOURCES "")
 
-IF (LIFEV_HAS_FSI)
+IF (LifeV_ENABLE_FSI)
 
-IF (LIFEV_HAS_ONEDFSI)
+IF (LifeV_ENABLE_OneDFSI)
 
 SET(couplingsArea_HEADERS
   couplings/MultiscaleCouplingMeanNormalStressArea.hpp
