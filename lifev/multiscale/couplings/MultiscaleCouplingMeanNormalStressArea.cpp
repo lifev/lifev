@@ -34,7 +34,7 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <lifev/multiscale/solver/MultiscaleCouplingMeanNormalStressArea.hpp>
+#include <lifev/multiscale/couplings/MultiscaleCouplingMeanNormalStressArea.hpp>
 
 namespace LifeV
 {

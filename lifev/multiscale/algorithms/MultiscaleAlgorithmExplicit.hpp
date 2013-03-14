@@ -37,7 +37,7 @@
 #ifndef MultiscaleAlgorithmExplicit_H
 #define MultiscaleAlgorithmExplicit_H 1
 
-#include <lifev/multiscale/solver/MultiscaleAlgorithm.hpp>
+#include <lifev/multiscale/algorithms/MultiscaleAlgorithm.hpp>
 
 namespace LifeV
 {

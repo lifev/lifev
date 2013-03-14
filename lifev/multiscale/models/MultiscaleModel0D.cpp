@@ -36,7 +36,7 @@
  *  @mantainer    Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <lifev/multiscale/solver/MultiscaleModel0D.hpp>
+#include <lifev/multiscale/models/MultiscaleModel0D.hpp>
 
 namespace LifeV
 {

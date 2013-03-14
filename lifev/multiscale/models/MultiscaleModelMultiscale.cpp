@@ -34,21 +34,21 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <lifev/multiscale/solver/MultiscaleModelMultiscale.hpp>
+#include <lifev/multiscale/models/MultiscaleModelMultiscale.hpp>
 
-#include <lifev/multiscale/solver/MultiscaleAlgorithmAitken.hpp>
-#include <lifev/multiscale/solver/MultiscaleAlgorithmBroyden.hpp>
-#include <lifev/multiscale/solver/MultiscaleAlgorithmExplicit.hpp>
-#include <lifev/multiscale/solver/MultiscaleAlgorithmNewton.hpp>
+#include <lifev/multiscale/algorithms/MultiscaleAlgorithmAitken.hpp>
+#include <lifev/multiscale/algorithms/MultiscaleAlgorithmBroyden.hpp>
+#include <lifev/multiscale/algorithms/MultiscaleAlgorithmExplicit.hpp>
+#include <lifev/multiscale/algorithms/MultiscaleAlgorithmNewton.hpp>
 
-#include <lifev/multiscale/solver/MultiscaleCouplingBoundaryCondition.hpp>
-#include <lifev/multiscale/solver/MultiscaleCouplingMeanNormalStress.hpp>
-#include <lifev/multiscale/solver/MultiscaleCouplingMeanNormalStressValve.hpp>
-#include <lifev/multiscale/solver/MultiscaleCouplingMeanTotalNormalStress.hpp>
+#include <lifev/multiscale/couplings/MultiscaleCouplingBoundaryCondition.hpp>
+#include <lifev/multiscale/couplings/MultiscaleCouplingMeanNormalStress.hpp>
+#include <lifev/multiscale/couplings/MultiscaleCouplingMeanNormalStressValve.hpp>
+#include <lifev/multiscale/couplings/MultiscaleCouplingMeanTotalNormalStress.hpp>
 
 #if defined(LIFEV_HAS_ONEDFSI) && defined(LIFEV_HAS_FSI)
-#include <lifev/multiscale/solver/MultiscaleCouplingMeanNormalStressArea.hpp>
-#include <lifev/multiscale/solver/MultiscaleCouplingMeanTotalNormalStressArea.hpp>
+#include <lifev/multiscale/couplings/MultiscaleCouplingMeanNormalStressArea.hpp>
+#include <lifev/multiscale/couplings/MultiscaleCouplingMeanTotalNormalStressArea.hpp>
 #endif
 
 namespace LifeV

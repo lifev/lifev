@@ -39,7 +39,7 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include "MultiscaleModelFSI1D.hpp"
+#include <lifev/multiscale/models/MultiscaleModelFSI1D.hpp>
 
 namespace LifeV
 {

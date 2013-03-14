@@ -34,7 +34,7 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <lifev/multiscale/solver/MultiscaleCouplingBoundaryCondition.hpp>
+#include <lifev/multiscale/couplings/MultiscaleCouplingBoundaryCondition.hpp>
 
 namespace LifeV
 {

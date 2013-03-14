@@ -43,7 +43,7 @@
 
 #include <lifev/core/algorithm/LinearSolver.hpp>
 
-#include <lifev/multiscale/solver/MultiscaleAlgorithm.hpp>
+#include <lifev/multiscale/algorithms/MultiscaleAlgorithm.hpp>
 
 namespace LifeV
 {

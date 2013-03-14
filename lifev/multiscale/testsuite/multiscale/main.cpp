@@ -83,7 +83,7 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/LifeV.hpp>
-#include <lifev/multiscale/solver/MultiscaleSolver.hpp>
+#include <lifev/multiscale/framework/MultiscaleSolver.hpp>
 
 using namespace LifeV;
 using namespace Multiscale;

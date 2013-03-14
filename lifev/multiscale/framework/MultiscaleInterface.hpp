@@ -37,7 +37,7 @@
 #ifndef MultiscaleInterface_H
 #define MultiscaleInterface_H 1
 
-#include <lifev/multiscale/solver/MultiscaleDefinitions.hpp>
+#include <lifev/multiscale/framework/MultiscaleDefinitions.hpp>
 
 namespace LifeV
 {
