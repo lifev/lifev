@@ -113,24 +113,7 @@ MultiscaleCouplingBoundaryCondition::setupCoupling()
             if ( myModel ( i ) )
                 switch ( M_models[i]->type() )
                 {
-                    case Fluid3D:
-
-                        applyBoundaryConditions3D< MultiscaleModelFluid3D > ( i );
-
-                        break;
-
-                    case FSI3D:
-
-                        applyBoundaryConditions3D< MultiscaleModelFSI3D > ( i );
-
-                        break;
-
-                    case FSI1D:
-
-                        applyBoundaryConditions1D< MultiscaleModelFSI1D > ( i );
-
-                        break;
-
+#if defined(LIFEV_HAS_ZERODIMENSIONAL)
                     case Windkessel0D:
 
                         applyBoundaryConditions0D< MultiscaleModelWindkessel0D > ( i );
@@ -142,7 +125,28 @@ MultiscaleCouplingBoundaryCondition::setupCoupling()
                         applyBoundaryConditions0D< MultiscaleModel0D > ( i );
 
                         break;
+#endif
+#if defined(LIFEV_HAS_ONEDFSI)
+                    case FSI1D:
 
+                        applyBoundaryConditions1D< MultiscaleModelFSI1D > ( i );
+
+                        break;
+#endif
+#if defined(LIFEV_HAS_NAVIERSTOKES)
+                    case Fluid3D:
+
+                        applyBoundaryConditions3D< MultiscaleModelFluid3D > ( i );
+
+                        break;
+#endif
+#if defined(LIFEV_HAS_FSI)
+                    case FSI3D:
+
+                        applyBoundaryConditions3D< MultiscaleModelFSI3D > ( i );
+
+                        break;
+#endif
                     default:
 
                         switchErrorMessage ( M_models[i] );
