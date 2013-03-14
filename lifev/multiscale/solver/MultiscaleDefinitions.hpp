@@ -197,19 +197,29 @@ typedef boost::shared_ptr< multiscaleData_Type >                                
 inline void
 multiscaleMapsDefinition()
 {
+#if defined(LIFEV_HAS_NAVIERSTOKES)
     multiscaleModelsMap["Fluid3D"]         = Fluid3D;
+#endif
+#if defined(LIFEV_HAS_ONEDFSI)
     multiscaleModelsMap["FSI1D"]           = FSI1D;
+#endif
+#if defined(LIFEV_HAS_FSI)
     multiscaleModelsMap["FSI3D"]           = FSI3D;
+#endif
     multiscaleModelsMap["Multiscale"]      = Multiscale;
+#if defined(LIFEV_HAS_ZERODIMENSIONAL)
     multiscaleModelsMap["Windkessel0D"]    = Windkessel0D;
     multiscaleModelsMap["ZeroDimensional"] = ZeroDimensional;
+#endif
 
     multiscaleCouplingsMap["BoundaryCondition"]         = BoundaryCondition;
     multiscaleCouplingsMap["MeanNormalStress"]          = MeanNormalStress;
-    multiscaleCouplingsMap["MeanNormalStressArea"]      = MeanNormalStressArea;
     multiscaleCouplingsMap["MeanNormalStressValve"]     = MeanNormalStressValve;
     multiscaleCouplingsMap["MeanTotalNormalStress"]     = MeanTotalNormalStress;
+#if defined(LIFEV_HAS_ONEDFSI) && defined(LIFEV_HAS_FSI)
+    multiscaleCouplingsMap["MeanNormalStressArea"]      = MeanNormalStressArea;
     multiscaleCouplingsMap["MeanTotalNormalStressArea"] = MeanTotalNormalStressArea;
+#endif
 
     multiscaleAlgorithmsMap["Aitken"]   = Aitken;
     multiscaleAlgorithmsMap["Broyden"]  = Broyden;

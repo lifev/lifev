@@ -65,12 +65,20 @@ MultiscaleSolver::MultiscaleSolver() :
     multiscaleMapsDefinition();
 
     //Register the available models
-    multiscaleModelFactory_Type::instance().registerProduct ( Fluid3D,         &createMultiscaleModelFluid3D );
-    multiscaleModelFactory_Type::instance().registerProduct ( FSI3D,           &createMultiscaleModelFSI3D );
-    multiscaleModelFactory_Type::instance().registerProduct ( FSI1D,           &createMultiscaleModelFSI1D );
     multiscaleModelFactory_Type::instance().registerProduct ( Multiscale,      &createMultiscaleModelMultiscale );
+#if defined(LIFEV_HAS_NAVIERSTOKES)
+    multiscaleModelFactory_Type::instance().registerProduct ( Fluid3D,         &createMultiscaleModelFluid3D );
+#endif
+#if defined(LIFEV_HAS_FSI)
+    multiscaleModelFactory_Type::instance().registerProduct ( FSI3D,           &createMultiscaleModelFSI3D );
+#endif
+#if defined(LIFEV_HAS_ONEDFSI)
+    multiscaleModelFactory_Type::instance().registerProduct ( FSI1D,           &createMultiscaleModelFSI1D );
+#endif
+#if defined(LIFEV_HAS_ZERODIMENSIONAL)
     multiscaleModelFactory_Type::instance().registerProduct ( Windkessel0D,    &createMultiscaleModelWindkessel0D );
     multiscaleModelFactory_Type::instance().registerProduct ( ZeroDimensional, &createMultiscaleModelZeroDimensional );
+#endif
 }
 
 // ===================================================

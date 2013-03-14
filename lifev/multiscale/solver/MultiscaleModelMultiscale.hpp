@@ -44,11 +44,23 @@
 #include <lifev/multiscale/solver/MultiscaleCoupling.hpp>
 
 #include <lifev/multiscale/solver/MultiscaleModel.hpp>
-#include <lifev/multiscale/solver/MultiscaleModelFluid3D.hpp>
-#include <lifev/multiscale/solver/MultiscaleModelFSI3D.hpp>
-#include <lifev/multiscale/solver/MultiscaleModelFSI1D.hpp>
+
+#if defined(LIFEV_HAS_ZERODIMENSIONAL)
 #include <lifev/multiscale/solver/MultiscaleModelWindkessel0D.hpp>
 #include <lifev/multiscale/solver/MultiscaleModel0D.hpp>
+#endif
+
+#if defined(LIFEV_HAS_ONEDFSI)
+#include <lifev/multiscale/solver/MultiscaleModelFSI1D.hpp>
+#endif
+
+#if defined(LIFEV_HAS_NAVIERSTOKES)
+#include <lifev/multiscale/solver/MultiscaleModelFluid3D.hpp>
+#endif
+
+#if defined(LIFEV_HAS_FSI)
+#include <lifev/multiscale/solver/MultiscaleModelFSI3D.hpp>
+#endif
 
 namespace LifeV
 {

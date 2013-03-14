@@ -43,10 +43,13 @@
 
 #include <lifev/multiscale/solver/MultiscaleCouplingBoundaryCondition.hpp>
 #include <lifev/multiscale/solver/MultiscaleCouplingMeanNormalStress.hpp>
-#include <lifev/multiscale/solver/MultiscaleCouplingMeanNormalStressArea.hpp>
 #include <lifev/multiscale/solver/MultiscaleCouplingMeanNormalStressValve.hpp>
 #include <lifev/multiscale/solver/MultiscaleCouplingMeanTotalNormalStress.hpp>
+
+#if defined(LIFEV_HAS_ONEDFSI) && defined(LIFEV_HAS_FSI)
+#include <lifev/multiscale/solver/MultiscaleCouplingMeanNormalStressArea.hpp>
 #include <lifev/multiscale/solver/MultiscaleCouplingMeanTotalNormalStressArea.hpp>
+#endif
 
 namespace LifeV
 {
@@ -77,10 +80,13 @@ MultiscaleModelMultiscale::MultiscaleModelMultiscale() :
 
     multiscaleCouplingFactory_Type::instance().registerProduct (  BoundaryCondition,         &createMultiscaleCouplingBoundaryCondition );
     multiscaleCouplingFactory_Type::instance().registerProduct (  MeanNormalStress,          &createMultiscaleCouplingMeanNormalStress );
-    multiscaleCouplingFactory_Type::instance().registerProduct (  MeanNormalStressArea,      &createMultiscaleCouplingMeanNormalStressArea );
     multiscaleCouplingFactory_Type::instance().registerProduct (  MeanNormalStressValve,     &createMultiscaleCouplingMeanNormalStressValve );
     multiscaleCouplingFactory_Type::instance().registerProduct (  MeanTotalNormalStress,     &createMultiscaleCouplingMeanTotalNormalStress );
+
+#if defined(LIFEV_HAS_ONEDFSI) && defined(LIFEV_HAS_FSI)
+    multiscaleCouplingFactory_Type::instance().registerProduct (  MeanNormalStressArea,      &createMultiscaleCouplingMeanNormalStressArea );
     multiscaleCouplingFactory_Type::instance().registerProduct (  MeanTotalNormalStressArea, &createMultiscaleCouplingMeanTotalNormalStressArea );
+#endif
 }
 
 MultiscaleModelMultiscale::~MultiscaleModelMultiscale()

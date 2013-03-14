@@ -37,16 +37,36 @@
 #ifndef MultiscaleCouplingBoundaryCondition_H
 #define MultiscaleCouplingBoundaryCondition_H 1
 
+#if defined(LIFEV_HAS_ZERODIMENSIONAL)
 #include <lifev/bc_interface/0D/bc/BCInterface0D.hpp>
+#endif
+
+#if defined(LIFEV_HAS_ONEDFSI)
 #include <lifev/bc_interface/1D/bc/BCInterface1D.hpp>
+#endif
+
+#if defined(LIFEV_HAS_FSI) || defined(LIFEV_HAS_NAVIERSTOKES)
 #include <lifev/bc_interface/3D/bc/BCInterface3D.hpp>
+#endif
 
 #include <lifev/multiscale/solver/MultiscaleCoupling.hpp>
-#include <lifev/multiscale/solver/MultiscaleModelFluid3D.hpp>
-#include <lifev/multiscale/solver/MultiscaleModelFSI3D.hpp>
-#include <lifev/multiscale/solver/MultiscaleModelFSI1D.hpp>
+
+#if defined(LIFEV_HAS_ZERODIMENSIONAL)
 #include <lifev/multiscale/solver/MultiscaleModelWindkessel0D.hpp>
 #include <lifev/multiscale/solver/MultiscaleModel0D.hpp>
+#endif
+
+#if defined(LIFEV_HAS_ONEDFSI)
+#include <lifev/multiscale/solver/MultiscaleModelFSI1D.hpp>
+#endif
+
+#if defined(LIFEV_HAS_NAVIERSTOKES)
+#include <lifev/multiscale/solver/MultiscaleModelFluid3D.hpp>
+#endif
+
+#if defined(LIFEV_HAS_FSI)
+#include <lifev/multiscale/solver/MultiscaleModelFSI3D.hpp>
+#endif
 
 namespace LifeV
 {
@@ -142,18 +162,23 @@ private:
     //! @name Private Methods
     //@{
 
+#if defined(LIFEV_HAS_ZERODIMENSIONAL)
     //! Apply the boundary condition to the specific 0D model
     template< class ModelType >
     void applyBoundaryConditions0D ( const UInt& i );
+#endif
 
+#if defined(LIFEV_HAS_ONEDFSI)
     //! Apply the boundary condition to the specific 1D model
     template< class ModelType >
     void applyBoundaryConditions1D ( const UInt& i );
+#endif
 
+#if defined(LIFEV_HAS_FSI) || defined(LIFEV_HAS_NAVIERSTOKES)
     //! Apply the boundary condition to the specific 3D model
     template< class ModelType >
     void applyBoundaryConditions3D ( const UInt& i );
-
+#endif
     //@}
 
 
@@ -181,6 +206,7 @@ inline multiscaleCoupling_Type* createMultiscaleCouplingBoundaryCondition()
 // ===================================================
 // Template implementation
 // ===================================================
+#if defined(LIFEV_HAS_ZERODIMENSIONAL)
 template< class ModelType >
 inline void
 MultiscaleCouplingBoundaryCondition::applyBoundaryConditions0D ( const UInt& i )
@@ -197,7 +223,9 @@ MultiscaleCouplingBoundaryCondition::applyBoundaryConditions0D ( const UInt& i )
         model->bcInterface().insertBC();
     }
 }
+#endif
 
+#if defined(LIFEV_HAS_ONEDFSI)
 template< class ModelType >
 inline void
 MultiscaleCouplingBoundaryCondition::applyBoundaryConditions1D ( const UInt& i )
@@ -214,7 +242,9 @@ MultiscaleCouplingBoundaryCondition::applyBoundaryConditions1D ( const UInt& i )
         model->bcInterface().insertBC();
     }
 }
+#endif
 
+#if defined(LIFEV_HAS_FSI) || defined(LIFEV_HAS_NAVIERSTOKES)
 template< class ModelType >
 inline void
 MultiscaleCouplingBoundaryCondition::applyBoundaryConditions3D ( const UInt& i )
@@ -232,6 +262,7 @@ MultiscaleCouplingBoundaryCondition::applyBoundaryConditions3D ( const UInt& i )
         model->bcInterface().insertBC();
     }
 }
+#endif
 
 } // Namespace Multiscale
 } // Namespace LifeV
