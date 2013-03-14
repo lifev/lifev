@@ -51,8 +51,8 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/core/filter/ExporterHDF5.hpp>
 #include <lifev/core/interpolation/RBFInterpolation.hpp>
 #include <lifev/core/interpolation/RBFlocallyRescaledVectorial.hpp>
-//#include <lifev/core/interpolation/RBFrescaledScalar.hpp>
-//#include <lifev/core/interpolation/RBFscalar.hpp>
+#include <lifev/core/interpolation/RBFrescaledVectorial.hpp>
+#include <lifev/core/interpolation/RBFvectorial.hpp>
 #include <Teuchos_ParameterList.hpp>
 #include <Teuchos_XMLParameterListHelpers.hpp>
 #include <Teuchos_RCP.hpp>
@@ -65,16 +65,14 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 using namespace LifeV;
 
-// f -> function to be interpolated
-
 double fx (double x, double y, double z)
 {
-    return sin (2 * PI * x) * cos (3 * PI * y) + exp (x * y);
+    return sin (2 * PI * x) * cos (3 * PI * y) + exp (x * y) + z;
 }
 
 double fy (double x, double y, double z)
 {
-    return sin (4 * PI * y) * cos ( PI * x * y) + exp (x * 2);
+    return sin (4 * PI * y) * cos ( PI * x * y) + exp (x * 2) + z;
 }
 
 double fz (double x, double y, double z)
@@ -180,7 +178,7 @@ int main (int argc, char** argv )
     RBFinterpolant.reset ( interpolation_Type::InterpolationFactory::instance().createObject (dataFile("interpolation/interpolation_Type","none")));
 
     RBFinterpolant->setup(Solid_mesh_ptr, Solid_localMesh, Fluid_mesh_ptr, Fluid_localMesh, flags);
-    if(dataFile("interpolation/interpolation_Type","none")=="RBFvectorial")
+    if(dataFile("interpolation/interpolation_Type","none")!="RBFlocallyRescaledVectorial")
         RBFinterpolant->setRadius((double) MeshUtility::MeshStatistics::computeSize (*Solid_mesh_ptr).maxH);
     RBFinterpolant->setupRBFData (Solid_vector, Fluid_solution, dataFile, belosList);
     RBFinterpolant->buildOperators();
