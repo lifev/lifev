@@ -295,7 +295,7 @@ MultiscaleModelWindkessel0D::setupGlobalData ( const std::string& fileName )
     {
         M_pressureRight = M_globalData->fluidVenousPressure();
     }
-    M_data->setVenousPressure( M_pressureRight );
+    M_data->setVenousPressure ( M_pressureRight );
 }
 
 void

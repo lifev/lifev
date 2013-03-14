@@ -196,7 +196,7 @@ BCInterfaceFunctionParserFile< BcHandlerType, PhysicalSolverType >::setData ( co
 #endif
 
     // Create a true copy
-    dataPtr_Type dataCopy ( new data_Type( *data ) );
+    dataPtr_Type dataCopy ( new data_Type ( *data ) );
 
     std::vector< std::string > stringsVector;
     boost::split ( stringsVector, dataCopy->baseString(), boost::is_any_of ( "[" ) );

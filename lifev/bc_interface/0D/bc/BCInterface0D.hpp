@@ -126,7 +126,7 @@ public:
     //@{
 
     //! Constructor
-    explicit BCInterface0D() : bcInterface_Type(), M_data( new data_Type() ) {}
+    explicit BCInterface0D() : bcInterface_Type(), M_data ( new data_Type() ) {}
 
     //! Destructor
     virtual ~BCInterface0D() {}
@@ -184,7 +184,7 @@ private:
     //@{
 
     template< class BCBaseType >
-    void addBcToHandler( BCBaseType& base );
+    void addBcToHandler ( BCBaseType& base );
 
     //@}
 
@@ -218,7 +218,7 @@ BCInterface0D< BcHandler, PhysicalSolverType >::insertBC()
             this->M_vectorFunction.push_back ( factory.createFunctionParser ( M_data ) );
             this->M_vectorFunction.back()->assignFunction ( base );
 
-            addBcToHandler( base );
+            addBcToHandler ( base );
 
             return;
         }
@@ -237,7 +237,7 @@ BCInterface0D< BcHandler, PhysicalSolverType >::insertBC()
 // ===================================================
 template< class BcHandler, class PhysicalSolverType > template< class BCBaseType >
 inline void
-BCInterface0D< BcHandler, PhysicalSolverType >::addBcToHandler( BCBaseType& base )
+BCInterface0D< BcHandler, PhysicalSolverType >::addBcToHandler ( BCBaseType& base )
 {
     if ( !this->M_handler.get() ) // If BCHandler has not been created yet, we do it now
     {

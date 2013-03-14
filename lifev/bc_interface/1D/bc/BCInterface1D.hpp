@@ -138,7 +138,7 @@ public:
     //@{
 
     //! Constructor
-    explicit BCInterface1D() : bcInterface_Type(), M_data( new data_Type() ) {}
+    explicit BCInterface1D() : bcInterface_Type(), M_data ( new data_Type() ) {}
 
     //! Destructor
     virtual ~BCInterface1D() {}
