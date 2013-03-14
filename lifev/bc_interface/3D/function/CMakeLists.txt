@@ -1,5 +1,7 @@
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
 
+
+IF (LifeV_ENABLE_NavierStokes)
 SET(HEADERS "")
 SET(SOURCES "")
 
@@ -13,7 +15,6 @@ TRIBITS_EXCLUDE_AUTOTOOLS_FILES()
 TRIBITS_EXCLUDE_FILES()
 
 # Add library target
-IF (LIFEV_HAS_NAVIERSTOKES)
 TRIBITS_ADD_LIBRARY(
   lifevbcinterface3Dfluid
   HEADERS ${HEADERS}
@@ -22,6 +23,7 @@ TRIBITS_ADD_LIBRARY(
 )
 ENDIF()
 
+IF (LifeV_ENABLE_FSI)
 SET(HEADERS "")
 SET(SOURCES "")
 
@@ -34,9 +36,7 @@ TRIBITS_EXCLUDE_AUTOTOOLS_FILES()
 # This is the list of files excluded from the tarball
 TRIBITS_EXCLUDE_FILES()
 
-
 # Add library target
-IF (LIFEV_HAS_FSI)
 TRIBITS_ADD_LIBRARY(
   lifevbcinterface3Dfsi
   HEADERS ${HEADERS}

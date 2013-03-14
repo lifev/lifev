@@ -12,7 +12,7 @@ CACHE INTERNAL "")
 
 
 
-IF (LIFEV_HAS_ZERODIMENSIONAL)
+IF (LifeV_ENABLE_ZeroDimensional)
 
 SET(models0D_HEADERS
   models/MultiscaleModel0D.hpp
@@ -35,7 +35,7 @@ ENDIF()
 
 
 
-IF (LIFEV_HAS_ONEDFSI)
+IF (LifeV_ENABLE_OneDFSI)
 
 SET(models1D_HEADERS
   models/MultiscaleModelFSI1D.hpp
@@ -56,7 +56,7 @@ ENDIF()
 
 
 
-IF (LIFEV_HAS_NAVIERSTOKES)
+IF (LifeV_ENABLE_NavierStokes)
 
 SET(modelsFluid3D_HEADERS
   models/MultiscaleModelFluid3D.hpp
@@ -77,7 +77,7 @@ ENDIF()
 
 
 
-IF (LIFEV_HAS_FSI)
+IF (LifeV_ENABLE_FSI)
 
 SET(modelsFSI3D_HEADERS
   models/MultiscaleModelFSI3D.hpp
