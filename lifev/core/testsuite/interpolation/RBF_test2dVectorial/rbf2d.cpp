@@ -184,7 +184,7 @@ int main (int argc, char** argv )
     RBFinterpolant->buildOperators();
     RBFinterpolant->interpolate();
     RBFinterpolant->solution (Fluid_solution);
-    if(dataFile("interpolation/interpolation_Type","none")!="RBFvecorial")
+    if(dataFile("interpolation/interpolation_Type","none")!="RBFvectorial")
         RBFinterpolant->solutionrbf (Fluid_solution_rbf);
 
     // COMPUTING THE ERROR
