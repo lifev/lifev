@@ -37,8 +37,8 @@
 #ifndef MultiscaleSolver_H
 #define MultiscaleSolver_H 1
 
-#include <lifev/multiscale/solver/MultiscaleDefinitions.hpp>
-#include <lifev/multiscale/solver/MultiscaleModelMultiscale.hpp>
+#include <lifev/multiscale/framework/MultiscaleDefinitions.hpp>
+#include <lifev/multiscale/models/MultiscaleModelMultiscale.hpp>
 
 namespace LifeV
 {

@@ -34,7 +34,7 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <lifev/multiscale/solver/MultiscaleGlobalData.hpp>
+#include <lifev/multiscale/framework/MultiscaleGlobalData.hpp>
 
 namespace LifeV
 {

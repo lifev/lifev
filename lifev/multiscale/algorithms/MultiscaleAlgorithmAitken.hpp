@@ -39,7 +39,7 @@
 
 #include <lifev/core/algorithm/NonLinearAitken.hpp>
 
-#include <lifev/multiscale/solver/MultiscaleAlgorithm.hpp>
+#include <lifev/multiscale/algorithms/MultiscaleAlgorithm.hpp>
 
 namespace LifeV
 {

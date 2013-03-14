@@ -69,7 +69,7 @@
 #include <lifev/core/array/VectorEpetra.hpp>
 #include <lifev/core/array/MatrixEpetra.hpp>
 
-#include <lifev/multiscale/solver/MultiscaleGlobalData.hpp>
+#include <lifev/multiscale/framework/MultiscaleGlobalData.hpp>
 
 namespace LifeV
 {

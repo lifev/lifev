@@ -42,8 +42,8 @@
 
 #include <lifev/zero_dimensional/solver/ZeroDimensionalData.hpp>
 
-#include <lifev/multiscale/solver/MultiscaleModel.hpp>
-#include <lifev/multiscale/solver/MultiscaleInterface.hpp>
+#include <lifev/multiscale/models/MultiscaleModel.hpp>
+#include <lifev/multiscale/framework/MultiscaleInterface.hpp>
 
 namespace LifeV
 {

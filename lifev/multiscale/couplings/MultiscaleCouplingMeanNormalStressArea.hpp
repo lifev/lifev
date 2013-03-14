@@ -37,7 +37,7 @@
 #ifndef MultiscaleCouplingMeanNormalStressArea_H
 #define MultiscaleCouplingMeanNormalStressArea_H 1
 
-#include <lifev/multiscale/solver/MultiscaleCouplingMeanNormalStress.hpp>
+#include <lifev/multiscale/couplings/MultiscaleCouplingMeanNormalStress.hpp>
 
 namespace LifeV
 {

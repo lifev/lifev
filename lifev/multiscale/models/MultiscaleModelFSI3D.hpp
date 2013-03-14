@@ -71,8 +71,8 @@
 #include <lifev/fsi/solver/MonolithicBlockComposedNN.hpp>
 #include <lifev/fsi/solver/MonolithicBlockComposedDNND.hpp>
 
-#include <lifev/multiscale/solver/MultiscaleModel.hpp>
-#include <lifev/multiscale/solver/MultiscaleInterface.hpp>
+#include <lifev/multiscale/models/MultiscaleModel.hpp>
+#include <lifev/multiscale/framework/MultiscaleInterface.hpp>
 
 namespace LifeV
 {

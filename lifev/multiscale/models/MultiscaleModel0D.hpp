@@ -43,7 +43,7 @@
 #include <lifev/zero_dimensional/solver/ZeroDimensionalData.hpp>
 #include <lifev/zero_dimensional/solver/ZeroDimensionalSolver.hpp>
 
-#include <lifev/multiscale/solver/MultiscaleModel.hpp>
+#include <lifev/multiscale/models/MultiscaleModel.hpp>
 
 namespace LifeV
 {

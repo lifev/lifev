@@ -52,8 +52,8 @@
 #include <lifev/navier_stokes/fem/TimeAdvanceBDFNavierStokes.hpp>
 #include <lifev/navier_stokes/solver/OseenSolverShapeDerivative.hpp>
 
-#include <lifev/multiscale/solver/MultiscaleModel.hpp>
-#include <lifev/multiscale/solver/MultiscaleInterface.hpp>
+#include <lifev/multiscale/models/MultiscaleModel.hpp>
+#include <lifev/multiscale/framework/MultiscaleInterface.hpp>
 
 namespace LifeV
 {

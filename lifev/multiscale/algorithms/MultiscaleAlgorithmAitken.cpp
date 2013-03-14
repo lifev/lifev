@@ -34,7 +34,7 @@
  *  @maintainer Cristiano Malossi <cristiano.malossi@epfl.ch>
  */
 
-#include <lifev/multiscale/solver/MultiscaleAlgorithmAitken.hpp>
+#include <lifev/multiscale/algorithms/MultiscaleAlgorithmAitken.hpp>
 
 namespace LifeV
 {

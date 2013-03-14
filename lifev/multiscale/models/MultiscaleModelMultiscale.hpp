@@ -37,29 +37,29 @@
 #ifndef MultiscaleModelMultiscale_H
 #define MultiscaleModelMultiscale_H 1
 
-#include <lifev/multiscale/solver/MultiscaleCommunicatorsManager.hpp>
+#include <lifev/multiscale/framework/MultiscaleCommunicatorsManager.hpp>
 
-#include <lifev/multiscale/solver/MultiscaleAlgorithm.hpp>
+#include <lifev/multiscale/algorithms/MultiscaleAlgorithm.hpp>
 
-#include <lifev/multiscale/solver/MultiscaleCoupling.hpp>
+#include <lifev/multiscale/couplings/MultiscaleCoupling.hpp>
 
-#include <lifev/multiscale/solver/MultiscaleModel.hpp>
+#include <lifev/multiscale/models/MultiscaleModel.hpp>
 
 #if defined(LIFEV_HAS_ZERODIMENSIONAL)
-#include <lifev/multiscale/solver/MultiscaleModelWindkessel0D.hpp>
-#include <lifev/multiscale/solver/MultiscaleModel0D.hpp>
+#include <lifev/multiscale/models/MultiscaleModelWindkessel0D.hpp>
+#include <lifev/multiscale/models/MultiscaleModel0D.hpp>
 #endif
 
 #if defined(LIFEV_HAS_ONEDFSI)
-#include <lifev/multiscale/solver/MultiscaleModelFSI1D.hpp>
+#include <lifev/multiscale/models/MultiscaleModelFSI1D.hpp>
 #endif
 
 #if defined(LIFEV_HAS_NAVIERSTOKES)
-#include <lifev/multiscale/solver/MultiscaleModelFluid3D.hpp>
+#include <lifev/multiscale/models/MultiscaleModelFluid3D.hpp>
 #endif
 
 #if defined(LIFEV_HAS_FSI)
-#include <lifev/multiscale/solver/MultiscaleModelFSI3D.hpp>
+#include <lifev/multiscale/models/MultiscaleModelFSI3D.hpp>
 #endif
 
 namespace LifeV

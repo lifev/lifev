@@ -37,23 +37,23 @@
 #ifndef MultiscaleCouplingMeanTotalNormalStress_H
 #define MultiscaleCouplingMeanTotalNormalStress_H 1
 
-#include <lifev/multiscale/solver/MultiscaleCoupling.hpp>
+#include <lifev/multiscale/couplings/MultiscaleCoupling.hpp>
 
 #if defined(LIFEV_HAS_ZERODIMENSIONAL)
-#include <lifev/multiscale/solver/MultiscaleModelWindkessel0D.hpp>
-#include <lifev/multiscale/solver/MultiscaleModel0D.hpp>
+#include <lifev/multiscale/models/MultiscaleModelWindkessel0D.hpp>
+#include <lifev/multiscale/models/MultiscaleModel0D.hpp>
 #endif
 
 #if defined(LIFEV_HAS_ONEDFSI)
-#include <lifev/multiscale/solver/MultiscaleModelFSI1D.hpp>
+#include <lifev/multiscale/models/MultiscaleModelFSI1D.hpp>
 #endif
 
 #if defined(LIFEV_HAS_NAVIERSTOKES)
-#include <lifev/multiscale/solver/MultiscaleModelFluid3D.hpp>
+#include <lifev/multiscale/models/MultiscaleModelFluid3D.hpp>
 #endif
 
 #if defined(LIFEV_HAS_FSI)
-#include <lifev/multiscale/solver/MultiscaleModelFSI3D.hpp>
+#include <lifev/multiscale/models/MultiscaleModelFSI3D.hpp>
 #endif
 
 namespace LifeV

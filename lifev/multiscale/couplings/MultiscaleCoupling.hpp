@@ -37,11 +37,11 @@
 #ifndef MultiscaleCoupling_H
 #define MultiscaleCoupling_H 1
 
-#include <lifev/multiscale/solver/MultiscaleDefinitions.hpp>
-#include <lifev/multiscale/solver/MultiscaleGlobalData.hpp>
-#include <lifev/multiscale/solver/MultiscaleModel.hpp>
+#include <lifev/multiscale/framework/MultiscaleDefinitions.hpp>
+#include <lifev/multiscale/framework/MultiscaleGlobalData.hpp>
+#include <lifev/multiscale/models/MultiscaleModel.hpp>
 
-#include <lifev/multiscale/solver/MultiscaleInterface.hpp> // This should not be here
+#include <lifev/multiscale/framework/MultiscaleInterface.hpp> // This should not be here
 
 namespace LifeV
 {
