@@ -117,6 +117,7 @@ public:
     typedef typename bcInterface_Type::vectorFunctionSolverDefined_Type vectorFunctionSolverDefined_Type;
 
     typedef BCInterfaceData0D                                           data_Type;
+    typedef boost::shared_ptr< data_Type >                              dataPtr_Type;
 
     //@}
 
@@ -125,7 +126,7 @@ public:
     //@{
 
     //! Constructor
-    explicit BCInterface0D() : bcInterface_Type(), M_data() {}
+    explicit BCInterface0D() : bcInterface_Type(), M_data( new data_Type() ) {}
 
     //! Destructor
     virtual ~BCInterface0D() {}
@@ -144,7 +145,7 @@ public:
      */
     void readBC ( const std::string& fileName, const std::string& dataSection, const std::string& name )
     {
-        M_data.readBC ( fileName, dataSection, name );
+        M_data->readBC ( fileName, dataSection, name );
     }
 
     //! Insert the current boundary condition in the BChandler
@@ -162,7 +163,7 @@ public:
      */
     data_Type& dataContainer()
     {
-        return M_data;
+        return *M_data;
     }
 
     //@}
@@ -188,7 +189,7 @@ private:
     //@}
 
     // Data
-    data_Type                       M_data;
+    dataPtr_Type                       M_data;
 };
 
 // ===================================================
@@ -205,7 +206,7 @@ BCInterface0D< BcHandler, PhysicalSolverType >::insertBC()
 
     ZeroDimensionalFunction base;
 
-    switch ( M_data.base().second )
+    switch ( M_data->base().second )
     {
         case BCIFunctionParser:
         case BCIFunctionParserFile:
@@ -224,7 +225,7 @@ BCInterface0D< BcHandler, PhysicalSolverType >::insertBC()
 
         default:
 
-            std::cout << " !!! Error: " << M_data.base().first << " is not valid in BCInterface0D !!!" << std::endl;
+            std::cout << " !!! Error: " << M_data->base().first << " is not valid in BCInterface0D !!!" << std::endl;
             break;
     }
 }
@@ -242,8 +243,8 @@ BCInterface0D< BcHandler, PhysicalSolverType >::addBcToHandler( BCBaseType& base
     {
         this->createHandler();
     }
-    //boost::bind ( &BCInterfaceFunction<BcHandler, PhysicalSolverType>::functionTime, this->M_vectorFunction.back(), _1 )
-    this->M_handler->setBC ( M_data.flag(), M_data.type(), base );
+
+    this->M_handler->setBC ( M_data->flag(), M_data->type(), base );
 }
 
 } // Namespace LifeV

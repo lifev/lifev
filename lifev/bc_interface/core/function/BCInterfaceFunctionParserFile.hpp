@@ -97,6 +97,9 @@ public:
     typedef BCInterfaceFunction< bcHandler_Type, physicalSolver_Type >             function_Type;
     typedef BCInterfaceFunctionParser< bcHandler_Type, physicalSolver_Type >       functionParser_Type;
 
+    typedef typename function_Type::data_Type                                      data_Type;
+    typedef typename function_Type::dataPtr_Type                                   dataPtr_Type;
+
     //@}
 
 
@@ -115,32 +118,11 @@ public:
     //! @name Set Methods
     //@{
 
-    //! Set data for 0D boundary conditions
+    //! Set data for boundary conditions
     /*!
      * @param data boundary condition data loaded from \c GetPot file
      */
-    virtual void setData ( const BCInterfaceData0D& data )
-    {
-        loadData ( data );
-    }
-
-    //! Set data for 1D boundary conditions
-    /*!
-     * @param data boundary condition data loaded from \c GetPot file
-     */
-    virtual void setData ( const BCInterfaceData1D& data )
-    {
-        loadData ( data );
-    }
-
-    //! Set data for 3D boundary conditions
-    /*!
-     * @param data boundary condition data loaded from \c GetPot file
-     */
-    virtual void setData ( const BCInterfaceData3D& data )
-    {
-        loadData ( data );
-    }
+    virtual void setData ( const dataPtr_Type& data );
 
     //@}
 
@@ -158,16 +140,6 @@ private:
 
     //! @name Private methods
     //@{
-
-    //! Load data from a \c GetPot file
-    /*!
-     * Note that this method makes a copy of the input data.
-     * This is done on porpuse.
-     *
-     * @param data boundary condition data loaded from a \c GetPot file
-     */
-    template< typename DataType >
-    void loadData ( DataType data );
 
     //! Linear interpolation (extrapolation) between two values of the data.
     void dataInterpolation();
@@ -209,20 +181,25 @@ BCInterfaceFunctionParserFile< BcHandlerType, PhysicalSolverType >::BCInterfaceF
 
 }
 
+
+
 // ===================================================
-// Private Methods
+// Set Methods
 // ===================================================
-template< typename BcHandlerType, typename PhysicalSolverType > template< typename DataType >
+template< typename BcHandlerType, typename PhysicalSolverType >
 inline void
-BCInterfaceFunctionParserFile< BcHandlerType, PhysicalSolverType >::loadData ( DataType data )
+BCInterfaceFunctionParserFile< BcHandlerType, PhysicalSolverType >::setData ( const dataPtr_Type& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream ( 5022 ) << "BCInterfaceFunctionFile::loadData            fileName: " << data.baseString() << "\n";
+    debugStream ( 5022 ) << "BCInterfaceFunctionFile::loadData            fileName: " << data->baseString() << "\n";
 #endif
 
+    // Create a true copy
+    dataPtr_Type dataCopy ( new data_Type( *data ) );
+
     std::vector< std::string > stringsVector;
-    boost::split ( stringsVector, data.baseString(), boost::is_any_of ( "[" ) );
+    boost::split ( stringsVector, dataCopy->baseString(), boost::is_any_of ( "[" ) );
 
     //Load data from file
     GetPot dataFile ( stringsVector[0] );
@@ -303,23 +280,27 @@ BCInterfaceFunctionParserFile< BcHandlerType, PhysicalSolverType >::loadData ( D
     //Update the data container (IT IS A COPY!) with the correct base string for the BCInterfaceFunctionParser
     if ( stringsVector.size() < 2 )
     {
-        data.setBaseString ( dataFile ( "function", "Undefined" ) );
+        dataCopy->setBaseString ( dataFile ( "function", "Undefined" ) );
     }
     else
     {
         boost::replace_all ( stringsVector[1], "]", "" );
-        data.setBaseString ( dataFile ( ( "function" + stringsVector[1] ).c_str(), "Undefined" ) );
+        dataCopy->setBaseString ( dataFile ( ( "function" + stringsVector[1] ).c_str(), "Undefined" ) );
     }
 
     // Now data contains the real base string
-    functionParser_Type::setData ( data );
+    functionParser_Type::setData ( dataCopy );
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream ( 5022 ) << "                                             function: " << data.baseString() << "\n";
+    debugStream ( 5022 ) << "                                             function: " << dataCopy->baseString() << "\n";
 #endif
 
 }
 
+
+// ===================================================
+// Private Methods
+// ===================================================
 template< typename BcHandlerType, typename PhysicalSolverType >
 inline void
 BCInterfaceFunctionParserFile< BcHandlerType, PhysicalSolverType >::dataInterpolation()

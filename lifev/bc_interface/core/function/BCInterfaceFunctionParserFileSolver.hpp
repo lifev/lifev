@@ -72,6 +72,9 @@ public:
     typedef BCInterfaceFunctionParserFile< bcHandler_Type, physicalSolver_Type >   functionParserFile_Type;
     typedef BCInterfaceFunctionParserSolver< bcHandler_Type, physicalSolver_Type > functionParserSolver_Type;
 
+    typedef typename function_Type::data_Type                                      data_Type;
+    typedef typename function_Type::dataPtr_Type                                   dataPtr_Type;
+
     //@}
 
 
@@ -90,23 +93,11 @@ public:
     //! @name Set Methods
     //@{
 
-    //! Set data for 0D boundary conditions
+    //! Set data for boundary conditions
     /*!
      * @param data boundary condition data loaded from \c GetPot file
      */
-    virtual void setData ( const BCInterfaceData0D& data );
-
-    //! Set data for 1D boundary conditions
-    /*!
-     * @param data boundary condition data loaded from \c GetPot file
-     */
-    virtual void setData ( const BCInterfaceData1D& data );
-
-    //! Set data for 3D boundary conditions
-    /*!
-     * @param data boundary condition data loaded from \c GetPot file
-     */
-    virtual void setData ( const BCInterfaceData3D& data );
+    virtual void setData ( const dataPtr_Type& data );
 
     //@}
 
@@ -150,53 +141,18 @@ BCInterfaceFunctionParserFileSolver< BcHandlerType, PhysicalSolverType >::BCInte
 
 }
 
-// ===================================================
-// Set Methods
-// ===================================================
 template< typename BcHandlerType, typename PhysicalSolverType >
 void
-BCInterfaceFunctionParserFileSolver< BcHandlerType, PhysicalSolverType >::setData ( const BCInterfaceData0D& data )
+BCInterfaceFunctionParserFileSolver< BcHandlerType, PhysicalSolverType >::setData ( const dataPtr_Type& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
     debugStream ( 5024 ) << "BCInterfaceFunctionFileSolver::setData" << "\n";
 #endif
+
     functionParserFile_Type::setData ( data );
 
-    //functionParserSolver_Type::setData( data ); Cannot call directly, because it call again BCInterfaceFunctionParser::setup( data )
-    functionParserSolver_Type::M_flag = data.flag();
-
-    functionParserSolver_Type::createAccessList ( data );
-}
-
-template< typename BcHandlerType, typename PhysicalSolverType >
-void
-BCInterfaceFunctionParserFileSolver< BcHandlerType, PhysicalSolverType >::setData ( const BCInterfaceData1D& data )
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    debugStream ( 5024 ) << "BCInterfaceFunctionFileSolver::setData" << "\n";
-#endif
-    functionParserFile_Type::setData ( data );
-
-    //functionParserSolver_Type::setData( data ); Cannot call directly, because it call again BCInterfaceFunctionParser::setup( data )
-    functionParserSolver_Type::M_side = data.side();
-
-    functionParserSolver_Type::createAccessList ( data );
-}
-
-template< typename BcHandlerType, typename PhysicalSolverType >
-void
-BCInterfaceFunctionParserFileSolver< BcHandlerType, PhysicalSolverType >::setData ( const BCInterfaceData3D& data )
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    debugStream ( 5024 ) << "BCInterfaceFunctionFileSolver::setData" << "\n";
-#endif
-    functionParserFile_Type::setData ( data );
-
-    //functionParserSolver_Type::setData( data ); Cannot call directly, because it call again BCInterfaceFunctionParser::setup( data )
-    functionParserSolver_Type::M_flag = data.flag();
+    functionParserSolver_Type::M_boundaryID = data->boundaryID();
 
     functionParserSolver_Type::createAccessList ( data );
 }

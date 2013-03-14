@@ -38,9 +38,7 @@
 #define BCInterfaceFunctionSolverDefined_H 1
 
 // BCInterface includes
-#include <lifev/bc_interface/0D/bc/BCInterfaceData0D.hpp>
-#include <lifev/bc_interface/1D/bc/BCInterfaceData1D.hpp>
-#include <lifev/bc_interface/3D/bc/BCInterfaceData3D.hpp>
+#include <lifev/bc_interface/core/bc/BCInterfaceData.hpp>
 
 #include <lifev/bc_interface/core/function/BCInterfaceFactory.hpp>
 
@@ -67,14 +65,19 @@ public:
 
     typedef boost::shared_ptr< physicalSolver_Type >                               physicalSolverPtr_Type;
 
+    typedef BCInterfaceData                                                        data_Type;
+    typedef boost::shared_ptr< data_Type >                                         dataPtr_Type;
+
     //@}
 
 
     //! @name Constructors & Destructor
     //@{
 
+    //! Constructor
     explicit BCInterfaceFunctionSolverDefined() {}
 
+    //! Destructor
     virtual ~BCInterfaceFunctionSolverDefined() {}
 
     //@}
@@ -83,23 +86,47 @@ public:
     //! @name Methods
     //@{
 
-    //! Copy the stored parameters in the 0D data container
+    //! Copy the stored parameters in the data container
     /*!
      * @param data boundary condition data loaded from \c GetPot file
      */
-    void exportData ( BCInterfaceData0D& /*data*/ ) {}
+    template< typename DataPtrType >
+    void exportData ( DataPtrType& /*data*/ ) {}
 
-    //! Copy the stored parameters in the 1D data container
+    //! Assign a boundary function to the boundary condition vector base
     /*!
-     * @param data boundary condition data loaded from \c GetPot file
+     * @param physicalSolver FSI physical solver,
+     * @param base boundary condition base
      */
-    void exportData ( BCInterfaceData1D& /*data*/ ) {}
+    template< typename BCBaseType >
+    void assignFunction ( BCBaseType& /*base*/ ) {}
 
-    //! Copy the stored parameters in the 3D data container
+    //! Update the solver variables
+    void updatePhysicalSolverVariables() {}
+
+    //@}
+
+
+    //! @name Set methods
+    //@{
+
+    //! Set data
     /*!
      * @param data boundary condition data loaded from \c GetPot file
      */
-    void exportData ( BCInterfaceData3D& /*data*/ ) {}
+    void setData ( const dataPtr_Type& /*data*/ ) {}
+
+    //! Set the physical solver
+    /*!
+     * @param physicalSolver physical solver
+     */
+    void setPhysicalSolver ( const physicalSolverPtr_Type& /*physicalSolver*/ ) {}
+
+    //@}
+
+
+    //! @name Get methods
+    //@{
 
     //! Detect the correct base type
     /*!
@@ -110,48 +137,6 @@ public:
         return BASEDefault;
     }
 
-    //! Assign a boundary function to the boundary condition vector base
-    /*!
-     * @param physicalSolver FSI physical solver,
-     * @param base boundary condition base
-     */
-    template< class BCBaseType >
-    void assignFunction ( BCBaseType& /*base*/ ) {}
-
-    //! Update the solver variables
-    void updatePhysicalSolverVariables() {}
-
-
-    //@}
-
-
-    //! @name Set Methods
-    //@{
-
-    //! Set data for 0D boundary conditions
-    /*!
-     * @param data boundary condition data loaded from \c GetPot file
-     */
-    void setData ( const BCInterfaceData0D& /*data*/ ) {}
-
-    //! Set data for 1D boundary conditions
-    /*!
-     * @param data boundary condition data loaded from \c GetPot file
-     */
-    void setData ( const BCInterfaceData1D& /*data*/ ) {}
-
-    //! Set data for 3D boundary conditions
-    /*!
-     * @param data boundary condition data loaded from \c GetPot file
-     */
-    void setData ( const BCInterfaceData3D& /*data*/ ) {}
-
-    //! Set the physical solver
-    /*!
-     * @param physicalSolver physical solver
-     */
-    void setPhysicalSolver ( const boost::shared_ptr< PhysicalSolverType >& /*physicalSolver*/ ) {}
-
     //@}
 
 private:
@@ -159,7 +144,7 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    BCInterfaceFunctionSolverDefined ( const BCInterfaceFunctionSolverDefined& function);
+    BCInterfaceFunctionSolverDefined ( const BCInterfaceFunctionSolverDefined& function );
 
     BCInterfaceFunctionSolverDefined& operator= ( const BCInterfaceFunctionSolverDefined& function );
 

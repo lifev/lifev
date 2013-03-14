@@ -122,11 +122,11 @@ public:
 
     //! Set the side of the boundary condition
     /*!
-     * @param flag Boundary condition side
+     * @param side Boundary condition side
      */
     void setSide ( const OneDFSI::bcSide_Type& side )
     {
-        M_side = side;
+        M_boundaryID = ( side == OneDFSI::left ) ? 0 : 1;
     }
 
     //! Set the line of the boundary condition
@@ -157,9 +157,9 @@ public:
     /*!
      * @return Boundary condition side
      */
-    const OneDFSI::bcSide_Type& side() const
+    OneDFSI::bcSide_Type side() const
     {
-        return M_side;
+        return ( M_boundaryID == 0 ) ? OneDFSI::left : OneDFSI::right;
     }
 
     //! Get the mode of the boundary condition
@@ -207,7 +207,7 @@ private:
 
     void readSide ( const GetPot& dataFile, const char* side )
     {
-        M_side = M_mapSide[dataFile ( side, "left" )];
+        M_boundaryID = ( M_mapSide[dataFile ( side, "left" )] == OneDFSI::left ) ? 0 : 1;
     }
 
     void readLine ( const GetPot& dataFile, const char* line )
@@ -233,7 +233,6 @@ private:
     //! @name Private Members
     //@{
 
-    OneDFSI::bcSide_Type                                           M_side;
     OneDFSI::bcLine_Type                                           M_line;
     OneDFSI::bcType_Type                                           M_quantity;
 

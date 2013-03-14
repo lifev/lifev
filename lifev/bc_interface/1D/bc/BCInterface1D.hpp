@@ -124,6 +124,7 @@ public:
     typedef typename bcInterface_Type::vectorFunctionSolverDefined_Type vectorFunctionSolverDefined_Type;
 
     typedef BCInterfaceData1D                                           data_Type;
+    typedef boost::shared_ptr< data_Type >                              dataPtr_Type;
 
     typedef typename bcHandler_Type::solutionPtr_Type                   solutionPtr_Type;
     typedef typename bcHandler_Type::fluxPtr_Type                       fluxPtr_Type;
@@ -137,7 +138,7 @@ public:
     //@{
 
     //! Constructor
-    explicit BCInterface1D() : bcInterface_Type(), M_data() {}
+    explicit BCInterface1D() : bcInterface_Type(), M_data( new data_Type() ) {}
 
     //! Destructor
     virtual ~BCInterface1D() {}
@@ -156,7 +157,7 @@ public:
      */
     void readBC ( const std::string& fileName, const std::string& dataSection, const std::string& name )
     {
-        M_data.readBC ( fileName, dataSection, name );
+        M_data->readBC ( fileName, dataSection, name );
     }
 
     //! Insert the current boundary condition in the BChandler
@@ -212,7 +213,7 @@ public:
      */
     data_Type& dataContainer()
     {
-        return M_data;
+        return *M_data;
     }
 
     //@}
@@ -241,7 +242,7 @@ private:
     //@}
 
     // Data
-    data_Type                       M_data;
+    dataPtr_Type                       M_data;
 };
 
 // ===================================================
@@ -261,7 +262,7 @@ BCInterface1D< BcHandler, PhysicalSolverType >::insertBC()
     OneDFSIFunction base;
 
     // Define correct BCI type
-    switch ( M_data.base().second )
+    switch ( M_data->base().second )
     {
         case BCIFunctionParser:
         case BCIFunctionParserFile:
@@ -283,7 +284,7 @@ BCInterface1D< BcHandler, PhysicalSolverType >::insertBC()
         }
         default:
 
-            std::cout << " !!! Error: " << M_data.base().first << " is not valid in BCInterface1D !!!" << std::endl;
+            std::cout << " !!! Error: " << M_data->base().first << " is not valid in BCInterface1D !!!" << std::endl;
             return;
     }
 
@@ -354,7 +355,7 @@ BCInterface1D< BcHandler, PhysicalSolverType >::addBcToHandler ( BCBaseType& bas
     debugStream ( 5020 ) << "BCInterface1D::addBCManager" << "\n\n";
 #endif
 
-    this->M_handler->setBC ( M_data.side(), M_data.line(), M_data.quantity(), base );
+    this->M_handler->setBC ( M_data->side(), M_data->line(), M_data->quantity(), base );
 }
 
 } // Namespace LifeV

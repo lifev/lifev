@@ -69,9 +69,9 @@ BCInterfaceFunctionParserSolver< BCHandler, FSIOperator >::updatePhysicalSolverV
             case f_area:
 
 #ifdef HAVE_LIFEV_DEBUG
-                debugStream ( 5023 ) << "                                              f_area(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->fluid().area ( M_flag ) << "\n";
+                debugStream ( 5023 ) << "                                              f_area(" << static_cast<Real> (M_boundaryID) << "): " << M_physicalSolver->fluid().area ( M_boundaryID ) << "\n";
 #endif
-                setVariable ( "f_area", M_physicalSolver->fluid().area ( M_flag ) );
+                setVariable ( "f_area", M_physicalSolver->fluid().area ( M_boundaryID ) );
 
                 break;
 
@@ -97,9 +97,9 @@ BCInterfaceFunctionParserSolver< BCHandler, FSIOperator >::updatePhysicalSolverV
                 else
                 {
 #ifdef HAVE_LIFEV_DEBUG
-                    debugStream ( 5023 ) << "                                              f_flux(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->fluid().flux ( M_flag, *M_physicalSolver->fluid().solution() ) << "\n";
+                    debugStream ( 5023 ) << "                                              f_flux(" << static_cast<Real> (M_boundaryID) << "): " << M_physicalSolver->fluid().flux ( M_boundaryID, *M_physicalSolver->fluid().solution() ) << "\n";
 #endif
-                    setVariable ( "f_flux", M_physicalSolver->fluid().flux ( M_flag, *M_physicalSolver->fluid().solution() ) );
+                    setVariable ( "f_flux", M_physicalSolver->fluid().flux ( M_boundaryID, *M_physicalSolver->fluid().solution() ) );
                 }
 
                 break;
@@ -107,10 +107,10 @@ BCInterfaceFunctionParserSolver< BCHandler, FSIOperator >::updatePhysicalSolverV
             case f_pressure:
 
 #ifdef HAVE_LIFEV_DEBUG
-                debugStream ( 5023 ) << "                                              f_pressure(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->fluid().pressure ( M_flag, *M_physicalSolver->fluid().solution() ) << "\n";
+                debugStream ( 5023 ) << "                                              f_pressure(" << static_cast<Real> (M_boundaryID) << "): " << M_physicalSolver->fluid().pressure ( M_boundaryID, *M_physicalSolver->fluid().solution() ) << "\n";
 #endif
 
-                setVariable ( "f_pressure", M_physicalSolver->fluid().pressure ( M_flag, *M_physicalSolver->fluid().solution() ) );
+                setVariable ( "f_pressure", M_physicalSolver->fluid().pressure ( M_boundaryID, *M_physicalSolver->fluid().solution() ) );
 
                 break;
 
@@ -189,7 +189,7 @@ BCInterfaceFunctionParserSolver< BCHandler, FSIOperator >::updatePhysicalSolverV
 // ===================================================
 template< >
 void
-BCInterfaceFunctionParserSolver< BCHandler, FSIOperator >::createAccessList ( const BCInterfaceData& data )
+BCInterfaceFunctionParserSolver< BCHandler, FSIOperator >::createAccessList ( const boost::shared_ptr< BCInterfaceData >& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG

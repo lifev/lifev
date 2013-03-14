@@ -119,15 +119,15 @@ public:
     /*!
      * @param data data container
      */
-    template< typename DataType >
-    bcFunctionPtr_Type createFunctionParser ( const DataType& data );
+    template< typename DataPtrType >
+    bcFunctionPtr_Type createFunctionParser ( const DataPtrType& data );
 
     //! Create a user defined function
     /*!
      * @param data data container
      */
-    template< typename DataType >
-    bcFunctionSolverDefinedPtr_Type createFunctionSolverDefined ( const DataType& data );
+    template< typename DataPtrType >
+    bcFunctionSolverDefinedPtr_Type createFunctionSolverDefined ( const DataPtrType& data );
 
     //@}
 
@@ -166,22 +166,22 @@ BCInterfaceFactory< BcHandlerType, PhysicalSolverType >::BCInterfaceFactory()
 // ===================================================
 // Methods
 // ===================================================
-template< typename BcHandlerType, typename PhysicalSolverType > template< typename DataType >
+template< typename BcHandlerType, typename PhysicalSolverType > template< typename DataPtrType >
 inline typename BCInterfaceFactory< BcHandlerType, PhysicalSolverType >::bcFunctionPtr_Type
-BCInterfaceFactory< BcHandlerType, PhysicalSolverType >::createFunctionParser ( const DataType& data )
+BCInterfaceFactory< BcHandlerType, PhysicalSolverType >::createFunctionParser ( const DataPtrType& data )
 {
-    bcFunctionPtr_Type function ( factoryFunction_Type::instance().createObject ( data.base().second, data.mapBase() ) );
+    bcFunctionPtr_Type function ( factoryFunction_Type::instance().createObject ( data->base().second, data->mapBase() ) );
 
     function->setData ( data );
 
     return function;
 }
 
-template< typename BcHandlerType, typename PhysicalSolverType > template< typename DataType >
+template< typename BcHandlerType, typename PhysicalSolverType > template< typename DataPtrType >
 inline typename BCInterfaceFactory< BcHandlerType, PhysicalSolverType >::bcFunctionSolverDefinedPtr_Type
-BCInterfaceFactory< BcHandlerType, PhysicalSolverType >::createFunctionSolverDefined ( const DataType& data )
+BCInterfaceFactory< BcHandlerType, PhysicalSolverType >::createFunctionSolverDefined ( const DataPtrType& data )
 {
-    bcFunctionSolverDefinedPtr_Type function ( factoryFunctionSolverDefined_Type::instance().createObject ( data.base().second, data.mapBase() ) );
+    bcFunctionSolverDefinedPtr_Type function ( factoryFunctionSolverDefined_Type::instance().createObject ( data->base().second, data->mapBase() ) );
 
     function->setData ( data );
 

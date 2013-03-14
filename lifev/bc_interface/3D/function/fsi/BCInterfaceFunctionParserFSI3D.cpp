@@ -50,4 +50,60 @@ BCInterfaceFunctionParser< BCHandler, FSIOperator >::assignFunction ( bcBase_Typ
     base.setFunction ( functionSelectorTimeSpaceID() );
 }
 
+// ===================================================
+// Set Methods
+// ===================================================
+template< >
+void
+BCInterfaceFunctionParser< BCHandler, FSIOperator >::setData ( const boost::shared_ptr< BCInterfaceData >& data )
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    debugStream ( 5022 ) << "BCInterfaceFunction::setData" << "\n";
+#endif
+
+    setupParser ( data );
+
+    boost::shared_ptr< BCInterfaceData3D > castedData = boost::dynamic_pointer_cast< BCInterfaceData3D > ( data );
+
+    if ( castedData != 0 )
+    {
+
+        /*
+         * MODE          COMPONENT     FUNCTION      |      COMV.SIZE     ARGUMENTS     INTERFACEFUNCTION
+         * ------------------------------------------|---------------------------------------------------
+         *                                           |
+         * COMPONENT     2             x*y*z         |      1             1             function
+         * FULL          3             x*y*z         |      1             1             function
+         * FULL          1             x*y*z         |      1             1             function
+         * FULL          3             (y*z,x*z,x*y) |      1             3             functionID
+         * FULL          2             (x,y)         |      1             2             functionID
+         * COMPONENT     '1 3'         (x,y)         |      2             2             functionID
+         */
+
+    #ifdef HAVE_LIFEV_DEBUG
+        debugStream ( 5021 ) << "BCInterfaceFunction::setData                arguments: " << M_parser->countSubstring ( "," ) << "\n";
+    #endif
+
+        // Note: the map ID is used only for 3D handler.
+        if ( M_parser->countSubstring ( "," ) )
+        {
+            //Create the ID map
+            if ( castedData->componentsVector().size() > 1 ) // Component
+                for ( ID i ( 0 ); i < static_cast< ID > ( castedData->componentsVector().size() ); ++i )
+                {
+                    M_mapID[castedData->componentsVector() [i]] = i + 1;
+                }
+            else
+                // if ( castedData->componentsVector().front() == arguments )  Full
+                for ( ID i ( 0 ); i < castedData->componentsVector().front(); ++i )
+                {
+                    M_mapID[i + 1] = i + 1;
+                }
+        }
+    }
+    else
+        std::cerr << "!!! ERROR: BCInterface wrong data cast !!!" << std::endl;
+}
+
 } // Namespace LifeV

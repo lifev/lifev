@@ -41,6 +41,7 @@
 #include <lifev/one_d_fsi/solver/OneDFSISolver.hpp>
 
 // BCInterface includes
+#include <lifev/bc_interface/1D/bc/BCInterfaceData1D.hpp>
 #include <lifev/bc_interface/core/function/BCInterfaceFunctionParser.hpp>
 
 namespace LifeV
@@ -52,6 +53,13 @@ namespace LifeV
 template< >
 void
 BCInterfaceFunctionParser< OneDFSIBCHandler, OneDFSISolver >::assignFunction ( bcBase_Type& base );
+
+// ===================================================
+// Set Methods
+// ===================================================
+template<  >
+void
+BCInterfaceFunctionParser< OneDFSIBCHandler, OneDFSISolver >::setData ( const boost::shared_ptr< BCInterfaceData >& data );
 
 } // Namespace LifeV
 

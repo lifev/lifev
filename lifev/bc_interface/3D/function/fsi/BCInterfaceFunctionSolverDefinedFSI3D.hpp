@@ -45,6 +45,7 @@
 #include <lifev/fsi/solver/FSIMonolithicGI.hpp>
 
 // BCInterface includes
+#include <lifev/bc_interface/3D/bc/BCInterfaceData3D.hpp>
 #include <lifev/bc_interface/core/function/BCInterfaceFunctionSolverDefined.hpp>
 
 namespace LifeV
@@ -107,6 +108,9 @@ public:
     typedef BCInterfaceFunctionParserSolver< bcHandler_Type, physicalSolver_Type > functionParserSolver_Type;
     typedef boost::shared_ptr< functionParserSolver_Type >                         functionParserSolverPtr_Type;
 
+    typedef BCInterfaceData3D                                                      data_Type;
+    typedef boost::shared_ptr< data_Type >                                         dataPtr_Type;
+
     //@}
 
 
@@ -129,7 +133,7 @@ public:
     /*!
      * @param data boundary condition data loaded from \c GetPot file
      */
-    void exportData ( BCInterfaceData3D& data );
+    void exportData ( dataPtr_Type& data );
 
     //! Assign a boundary function to the boundary condition vector base
     /*!
@@ -152,7 +156,7 @@ public:
     /*!
      * @param data boundary condition data loaded from \c GetPot file
      */
-    void setData ( const BCInterfaceData3D& data );
+    void setData ( const dataPtr_Type& data );
 
     //! Set the physical solver
     /*!

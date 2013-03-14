@@ -180,6 +180,7 @@ public:
     typedef std::vector< bcFunctionSolverDefinedPtr_Type >            vectorFunctionSolverDefined_Type;
 
     typedef BCInterfaceData                                           data_Type;
+    typedef boost::shared_ptr< data_Type >                            dataPtr_Type;
 
     //@}
 

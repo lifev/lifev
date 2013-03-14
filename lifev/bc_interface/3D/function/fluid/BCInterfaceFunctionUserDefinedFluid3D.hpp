@@ -38,6 +38,7 @@
 #define BCInterfaceFunctionUserDefinedFluid3D_H 1
 
 // Oseen includes
+#include <lifev/core/mesh/RegionMesh.hpp>
 #include <lifev/navier_stokes/solver/OseenSolverShapeDerivative.hpp>
 
 // BCInterface includes

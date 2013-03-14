@@ -41,6 +41,7 @@
 #include <lifev/zero_dimensional/solver/ZeroDimensionalData.hpp>
 
 // BCInterface includes
+#include <lifev/bc_interface/0D/bc/BCInterfaceData0D.hpp>
 #include <lifev/bc_interface/core/function/BCInterfaceFunctionParser.hpp>
 
 namespace LifeV
@@ -52,6 +53,13 @@ namespace LifeV
 template< >
 void
 BCInterfaceFunctionParser< ZeroDimensionalBCHandler, ZeroDimensionalData >::assignFunction ( bcBase_Type& base );
+
+// ===================================================
+// Set Methods
+// ===================================================
+template< >
+void
+BCInterfaceFunctionParser< ZeroDimensionalBCHandler, ZeroDimensionalData >::setData ( const boost::shared_ptr< BCInterfaceData >& data );
 
 } // Namespace LifeV
 

@@ -41,6 +41,7 @@
 #include <lifev/one_d_fsi/solver/OneDFSISolver.hpp>
 
 // BCInterface includes
+#include <lifev/bc_interface/1D/bc/BCInterfaceData1D.hpp>
 #include <lifev/bc_interface/core/function/BCInterfaceFunctionSolverDefined.hpp>
 
 namespace LifeV
@@ -72,18 +73,21 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef OneDFSIBCHandler                                      bcHandler_Type;
-    typedef OneDFSISolver                                         physicalSolver_Type;
-    typedef boost::shared_ptr< physicalSolver_Type >              physicalSolverPtr_Type;
+    typedef OneDFSIBCHandler                                                       bcHandler_Type;
+    typedef OneDFSISolver                                                          physicalSolver_Type;
+    typedef boost::shared_ptr< physicalSolver_Type >                               physicalSolverPtr_Type;
 
-    typedef bcHandler_Type::bc_Type                               bc_Type;
-    typedef bc_Type::bcFunctionSolverDefinedPtr_Type              bcFunctionSolverDefinedPtr_Type;
+    typedef bcHandler_Type::bc_Type                                                bc_Type;
+    typedef bc_Type::bcFunctionSolverDefinedPtr_Type                               bcFunctionSolverDefinedPtr_Type;
 
-    typedef bc_Type::vectorPtrContainer_Type                      vectorPtrContainer_Type;
+    typedef bc_Type::vectorPtrContainer_Type                                       vectorPtrContainer_Type;
 
-    typedef bc_Type::fluxPtr_Type                                 fluxPtr_Type;
-    typedef bc_Type::sourcePtr_Type                               sourcePtr_Type;
-    typedef bc_Type::solutionPtr_Type                             solutionPtr_Type;
+    typedef BCInterfaceData1D                                                      data_Type;
+    typedef boost::shared_ptr< data_Type >                                         dataPtr_Type;
+
+    typedef bc_Type::fluxPtr_Type                                                  fluxPtr_Type;
+    typedef bc_Type::sourcePtr_Type                                                sourcePtr_Type;
+    typedef bc_Type::solutionPtr_Type                                              solutionPtr_Type;
 
     //@}
 
@@ -122,7 +126,7 @@ public:
     /*!
      * @param data BC data loaded from GetPot file
      */
-    void setData ( const BCInterfaceData1D& data );
+    void setData ( const dataPtr_Type& data );
 
     //! Set flux and source
     /*!
