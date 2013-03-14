@@ -46,6 +46,7 @@ BCInterfaceData::BCInterfaceData() :
     M_base                  (),
     M_baseString            (),
     M_mapBase               (),
+    M_boundaryID            (),
     M_parameters            ()
 {
     //Set mapBase
@@ -62,6 +63,7 @@ BCInterfaceData::BCInterfaceData ( const BCInterfaceData& data ) :
     M_base                  ( data.M_base ),
     M_baseString            ( data.M_baseString ),
     M_mapBase               ( data.M_mapBase ),
+    M_boundaryID            ( data.M_boundaryID ),
     M_parameters            ( data.M_parameters )
 {
 }
@@ -77,6 +79,7 @@ BCInterfaceData::operator= ( const BCInterfaceData& data )
         M_base       = data.M_base;
         M_baseString = data.M_baseString;
         M_mapBase    = data.M_mapBase;
+        M_boundaryID = data.M_boundaryID;
         M_parameters = data.M_parameters;
     }
 
@@ -103,6 +106,8 @@ BCInterfaceData::showMe ( std::ostream& output ) const
 {
     output << "baseString        = " << M_baseString << std::endl;
     output << "base              = " << M_base.second << std::endl;
+
+    output << "boundary ID       = " << M_boundaryID << std::endl;
 
     output << "Parameters        = ";
     for ( UInt i (0); i < static_cast<UInt> ( M_parameters.size() ); ++i )

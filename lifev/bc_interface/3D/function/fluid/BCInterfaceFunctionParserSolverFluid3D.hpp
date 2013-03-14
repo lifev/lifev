@@ -37,10 +37,8 @@
 #ifndef BCInterfaceFunctionParserSolverFluid3D_H
 #define BCInterfaceFunctionParserSolverFluid3D_H 1
 
-// Oseen includes
-#include <lifev/navier_stokes/solver/OseenSolverShapeDerivative.hpp>
-
 // BCInterface includes
+#include <lifev/bc_interface/3D/function/fluid/BCInterfaceFunctionParserFluid3D.hpp>
 #include <lifev/bc_interface/core/function/BCInterfaceFunctionParserSolver.hpp>
 
 namespace LifeV
@@ -62,11 +60,11 @@ BCInterfaceFunctionParserSolver< BCHandler, OseenSolverShapeDerivative< RegionMe
 // ===================================================
 template< >
 void
-BCInterfaceFunctionParserSolver< BCHandler, OseenSolver< RegionMesh< LinearTetra > > >::createAccessList ( const BCInterfaceData& data );
+BCInterfaceFunctionParserSolver< BCHandler, OseenSolver< RegionMesh< LinearTetra > > >::createAccessList ( const boost::shared_ptr< BCInterfaceData >& data );
 
 template< >
 void
-BCInterfaceFunctionParserSolver< BCHandler, OseenSolverShapeDerivative< RegionMesh< LinearTetra > > >::createAccessList ( const BCInterfaceData& data );
+BCInterfaceFunctionParserSolver< BCHandler, OseenSolverShapeDerivative< RegionMesh< LinearTetra > > >::createAccessList ( const boost::shared_ptr< BCInterfaceData >& data );
 
 } // Namespace LifeV
 

@@ -44,7 +44,6 @@ namespace LifeV
 // ===================================================
 BCInterfaceData1D::BCInterfaceData1D() :
     BCInterfaceData         (),
-    M_side                  (),
     M_line                  (),
     M_quantity              (),
     M_resistance            (),
@@ -72,7 +71,6 @@ BCInterfaceData1D::BCInterfaceData1D() :
 
 BCInterfaceData1D::BCInterfaceData1D ( const BCInterfaceData1D& data ) :
     BCInterfaceData         ( data ),
-    M_side                  ( data.M_side ),
     M_line                  ( data.M_line ),
     M_quantity              ( data.M_quantity ),
     M_resistance            ( data.M_resistance ),
@@ -92,7 +90,6 @@ BCInterfaceData1D::operator= ( const BCInterfaceData1D& data )
     if ( this != &data )
     {
         BCInterfaceData::operator= ( data );
-        M_side                  = data.M_side;
         M_line                  = data.M_line;
         M_quantity              = data.M_quantity;
         M_resistance            = data.M_resistance;
@@ -131,7 +128,6 @@ BCInterfaceData1D::showMe ( std::ostream& output ) const
     dataContainer_Type::showMe ( output );
 
     // Show 1D data
-    output << "Side              = " << M_side << std::endl;
     output << "Line              = " << M_line << std::endl;
     output << "Quantity          = " << M_quantity << std::endl;
     output << "Resistance        = ";

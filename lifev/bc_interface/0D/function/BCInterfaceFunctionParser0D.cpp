@@ -50,4 +50,19 @@ BCInterfaceFunctionParser< ZeroDimensionalBCHandler, ZeroDimensionalData >::assi
     base.setFunction ( functionSelectorTime() );
 }
 
+// ===================================================
+// Set Methods
+// ===================================================
+template< >
+void
+BCInterfaceFunctionParser< ZeroDimensionalBCHandler, ZeroDimensionalData >::setData ( const boost::shared_ptr< BCInterfaceData >& data )
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    debugStream ( 5022 ) << "BCInterfaceFunction::setData" << "\n";
+#endif
+
+    setupParser ( data );
+}
+
 } // Namespace LifeV

@@ -97,6 +97,9 @@ public:
     typedef BCInterfaceFunctionParser< bcHandler_Type, physicalSolver_Type >       functionParser_Type;
     typedef typename PhysicalSolverType::solutionPtr_Type                          solutionPtr_Type;
 
+    typedef typename function_Type::data_Type                                      data_Type;
+    typedef typename function_Type::dataPtr_Type                                   dataPtr_Type;
+
     //@}
 
 
@@ -130,23 +133,11 @@ public:
     //! @name Set Methods
     //@{
 
-    //! Set data for 0D boundary conditions
+    //! Set data for boundary conditions
     /*!
      * @param data BC data loaded from GetPot file
      */
-    virtual void setData ( const BCInterfaceData0D& data );
-
-    //! Set data for 1D boundary conditions
-    /*!
-     * @param data BC data loaded from GetPot file
-     */
-    virtual void setData ( const BCInterfaceData1D& data );
-
-    //! Set data for 3D boundary conditions
-    /*!
-     * @param data BC data loaded from GetPot file
-     */
-    virtual void setData ( const BCInterfaceData3D& data );
+    virtual void setData ( const dataPtr_Type& data );
 
     //! Set the physical solver
     /*!
@@ -187,7 +178,7 @@ protected:
     /*!
      *  NOTE: A template specialization of this method should be provided for each solver.
      */
-    void createAccessList ( const BCInterfaceData& /*data*/ )
+    void createAccessList ( const dataPtr_Type& /*data*/ )
     {
         std::cout << " !!! WARNING: createAccessList() is not defined for the selected solver. !!!" << std::endl;
     }
@@ -214,8 +205,7 @@ protected:
     physicalSolverPtr_Type                     M_physicalSolver;
     solutionPtr_Type                           M_solution;
 
-    OneDFSI::bcSide_Type                       M_side;
-    bcFlag_Type                                M_flag;
+    ID                                         M_boundaryID;
     std::set< physicalSolverList >             M_list;
 
 private:
@@ -235,7 +225,7 @@ private:
 
     void createFluidMap ( std::map< std::string, physicalSolverList >& mapList );
     void createSolidMap ( std::map< std::string, physicalSolverList >& mapList );
-    void createList ( const std::map< std::string, physicalSolverList >& mapList, const BCInterfaceData& data );
+    void createList ( const std::map< std::string, physicalSolverList >& mapList, const dataPtr_Type& data );
 
     void switchErrorMessage ( const std::string& operatorType )
     {
@@ -265,8 +255,7 @@ BCInterfaceFunctionParserSolver< BcHandlerType, PhysicalSolverType >::BCInterfac
     functionParser_Type              (),
     M_physicalSolver                 (),
     M_solution                       (),
-    M_side                           (),
-    M_flag                           (),
+    M_boundaryID                     (),
     M_list                           ()
 {
 
@@ -282,47 +271,15 @@ BCInterfaceFunctionParserSolver< BcHandlerType, PhysicalSolverType >::BCInterfac
 // Set Methods
 // ===================================================
 template< typename BcHandlerType, typename PhysicalSolverType >
-inline void
-BCInterfaceFunctionParserSolver< BcHandlerType, PhysicalSolverType >::setData ( const BCInterfaceData0D& data )
+void
+BCInterfaceFunctionParserSolver< BcHandlerType, PhysicalSolverType >::setData ( const dataPtr_Type& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
     debugStream ( 5023 ) << "BCInterfaceFunctionSolver::setData( data )" << "\n";
 #endif
 
-    M_flag = data.flag();
-
-    functionParser_Type::setData ( data );
-
-    createAccessList ( data );
-}
-
-template< typename BcHandlerType, typename PhysicalSolverType >
-inline void
-BCInterfaceFunctionParserSolver< BcHandlerType, PhysicalSolverType >::setData ( const BCInterfaceData1D& data )
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    debugStream ( 5023 ) << "BCInterfaceFunctionSolver::setData( data )" << "\n";
-#endif
-
-    M_side = data.side();
-
-    functionParser_Type::setData ( data );
-
-    createAccessList ( data );
-}
-
-template< typename BcHandlerType, typename PhysicalSolverType >
-inline void
-BCInterfaceFunctionParserSolver< BcHandlerType, PhysicalSolverType >::setData ( const BCInterfaceData3D& data )
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    debugStream ( 5023 ) << "BCInterfaceFunctionSolver::setData( data )" << "\n";
-#endif
-
-    M_flag = data.flag();
+    M_boundaryID = data->boundaryID();
 
     functionParser_Type::setData ( data );
 
@@ -360,11 +317,11 @@ BCInterfaceFunctionParserSolver< BcHandlerType, PhysicalSolverType >::createSoli
 
 template< typename BcHandlerType, typename PhysicalSolverType >
 inline void
-BCInterfaceFunctionParserSolver< BcHandlerType, PhysicalSolverType >::createList ( const std::map< std::string, physicalSolverList >& mapList, const BCInterfaceData& data )
+BCInterfaceFunctionParserSolver< BcHandlerType, PhysicalSolverType >::createList ( const std::map< std::string, physicalSolverList >& mapList, const dataPtr_Type& data )
 {
     M_list.clear();
     for ( typename std::map< std::string, physicalSolverList >::const_iterator j = mapList.begin(); j != mapList.end(); ++j )
-        if ( boost::find_first ( data.baseString(), j->first ) )
+        if ( boost::find_first ( data->baseString(), j->first ) )
         {
             M_list.insert ( j->second );
         }

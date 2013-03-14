@@ -95,7 +95,7 @@ BCInterfaceFunctionSolverDefined< OneDFSIBCHandler, OneDFSISolver >::assignFunct
 // Set Methods
 // ===================================================
 void
-BCInterfaceFunctionSolverDefined< OneDFSIBCHandler, OneDFSISolver >::setData ( const BCInterfaceData1D& data )
+BCInterfaceFunctionSolverDefined< OneDFSIBCHandler, OneDFSISolver >::setData ( const dataPtr_Type& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -109,31 +109,31 @@ BCInterfaceFunctionSolverDefined< OneDFSIBCHandler, OneDFSISolver >::setData ( c
     mapFunction["Absorbing"]     = Absorbing;
     mapFunction["Resistance"]    = Resistance;
 
-    M_defaultFunction = mapFunction[data.baseString()];
+    M_defaultFunction = mapFunction[data->baseString()];
 
     switch ( M_defaultFunction )
     {
         case Riemann:
 
-            M_function.reset ( new OneDFSIFunctionSolverDefinedRiemann ( data.side(), data.quantity() ) );
+            M_function.reset ( new OneDFSIFunctionSolverDefinedRiemann ( data->side(), data->quantity() ) );
 
             break;
 
         case Compatibility:
 
-            M_function.reset ( new OneDFSIFunctionSolverDefinedCompatibility ( data.side(), data.quantity() ) );
+            M_function.reset ( new OneDFSIFunctionSolverDefinedCompatibility ( data->side(), data->quantity() ) );
 
             break;
 
         case Absorbing:
 
-            M_function.reset ( new OneDFSIFunctionSolverDefinedAbsorbing ( data.side(), data.quantity() ) );
+            M_function.reset ( new OneDFSIFunctionSolverDefinedAbsorbing ( data->side(), data->quantity() ) );
 
             break;
 
         case Resistance:
 
-            M_function.reset ( new OneDFSIFunctionSolverDefinedResistance ( data.side(), data.quantity(), data.resistance() [0] ) );
+            M_function.reset ( new OneDFSIFunctionSolverDefinedResistance ( data->side(), data->quantity(), data->resistance() [0] ) );
 
             break;
     }

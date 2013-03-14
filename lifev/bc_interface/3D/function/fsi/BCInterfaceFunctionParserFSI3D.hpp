@@ -41,6 +41,7 @@
 #include <lifev/fsi/solver/FSIOperator.hpp>
 
 // BCInterface includes
+#include <lifev/bc_interface/3D/bc/BCInterfaceData3D.hpp>
 #include <lifev/bc_interface/core/function/BCInterfaceFunctionParser.hpp>
 
 namespace LifeV
@@ -52,6 +53,13 @@ namespace LifeV
 template< >
 void
 BCInterfaceFunctionParser< BCHandler, FSIOperator >::assignFunction ( bcBase_Type& base );
+
+// ===================================================
+// Set Methods
+// ===================================================
+template< >
+void
+BCInterfaceFunctionParser< BCHandler, FSIOperator >::setData ( const boost::shared_ptr< BCInterfaceData >& data );
 
 } // Namespace LifeV
 

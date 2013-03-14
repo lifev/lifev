@@ -41,6 +41,7 @@
 #include <lifev/fsi/solver/FSIOperator.hpp>
 
 // BCInterface includes
+#include <lifev/bc_interface/3D/function/fsi/BCInterfaceFunctionParserFSI3D.hpp>
 #include <lifev/bc_interface/core/function/BCInterfaceFunctionParserSolver.hpp>
 
 namespace LifeV
@@ -58,7 +59,7 @@ BCInterfaceFunctionParserSolver< BCHandler, FSIOperator >::updatePhysicalSolverV
 // ===================================================
 template< >
 void
-BCInterfaceFunctionParserSolver< BCHandler, FSIOperator >::createAccessList ( const BCInterfaceData& data );
+BCInterfaceFunctionParserSolver< BCHandler, FSIOperator >::createAccessList ( const boost::shared_ptr< BCInterfaceData >& data );
 
 } // Namespace LifeV
 

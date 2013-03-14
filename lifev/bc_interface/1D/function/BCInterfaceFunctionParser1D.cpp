@@ -50,4 +50,19 @@ BCInterfaceFunctionParser< OneDFSIBCHandler, OneDFSISolver >::assignFunction ( b
     base.setFunction ( functionSelectorTimeTimeStep() );
 }
 
+// ===================================================
+// Set Methods
+// ===================================================
+template<  >
+void
+BCInterfaceFunctionParser< OneDFSIBCHandler, OneDFSISolver >::setData ( const boost::shared_ptr< BCInterfaceData >& data )
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    debugStream ( 5022 ) << "BCInterfaceFunction::setData" << "\n";
+#endif
+
+    setupParser ( data );
+}
+
 } // Namespace LifeV

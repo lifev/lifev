@@ -78,6 +78,9 @@ public:
 
     typedef typename function_Type::bcBase_Type                                    bcBase_Type;
 
+    typedef typename function_Type::data_Type                                      data_Type;
+    typedef typename function_Type::dataPtr_Type                                   dataPtr_Type;
+
     //@}
 
 
@@ -157,32 +160,11 @@ public:
     //! @name Set Methods
     //@{
 
-    //! Set data for 0D boundary conditions
+    //! Set data for boundary conditions
     /*!
      * @param data boundary condition data loaded from \c GetPot file
      */
-    void setData ( const BCInterfaceData0D& data )
-    {
-        setGlobalData ( data );
-    }
-
-    //! Set data for 1D boundary conditions
-    /*!
-     * @param data boundary condition data loaded from \c GetPot file
-     */
-    void setData ( const BCInterfaceData1D& data )
-    {
-        setGlobalData ( data );
-    }
-
-    //! Set data for 3D boundary conditions
-    /*!
-     * @param data boundary condition data loaded from \c GetPot file
-     */
-    void setData ( const BCInterfaceData3D& data )
-    {
-        setGlobalData ( data );
-    }
+    void setData ( const dataPtr_Type& data );
 
     //@}
 
@@ -200,12 +182,6 @@ private:
 
     //! @name Private Methods
     //@{
-
-    //! Set data for boundary conditions
-    /*!
-     * @param data boundary condition data loaded from \c GetPot file
-     */
-    void setGlobalData ( const BCInterfaceData& data );
 
     //! Get the selected function of time
     /*!
@@ -280,17 +256,17 @@ BCInterfaceFunctionUserDefined< BcHandlerType, PhysicalSolverType >::BCInterface
 // ===================================================
 template< typename BcHandlerType, typename PhysicalSolverType >
 void
-BCInterfaceFunctionUserDefined< BcHandlerType, PhysicalSolverType >::setGlobalData ( const BCInterfaceData& data )
+BCInterfaceFunctionUserDefined< BcHandlerType, PhysicalSolverType >::setData ( const dataPtr_Type& data )
 {
     //Set mapFunction
     std::map< std::string, userDefinedFunctions > mapFunction;
     mapFunction["Sin"] = Sin;
 
     // Retrieving the strings
-    M_functionType = mapFunction[ data.baseString() ];
+    M_functionType = mapFunction[ data->baseString() ];
 
     // Set parameters
-    M_parameters = data.parameters();
+    M_parameters = data->parameters();
 }
 
 template< typename BcHandlerType, typename PhysicalSolverType >

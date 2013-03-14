@@ -51,7 +51,6 @@ BCInterfaceData3D::BCInterfaceData3D() :
     M_baseDirectional       (),
     M_baseStringDirectional (),
     M_name                  (),
-    M_flag                  (),
     M_type                  (),
     M_mode                  (),
     M_componentsVector      (),
@@ -85,7 +84,6 @@ BCInterfaceData3D::BCInterfaceData3D ( const BCInterfaceData3D& data ) :
     M_baseDirectional       ( data.M_baseDirectional ),
     M_baseStringDirectional ( data.M_baseStringDirectional ),
     M_name                  ( data.M_name ),
-    M_flag                  ( data.M_flag ),
     M_type                  ( data.M_type ),
     M_mode                  ( data.M_mode ),
     M_componentsVector      ( data.M_componentsVector ),
@@ -110,7 +108,6 @@ BCInterfaceData3D::operator= ( const BCInterfaceData3D& data )
         M_baseDirectional       = data.M_baseDirectional;
         M_baseStringDirectional = data.M_baseStringDirectional;
         M_name                  = data.M_name;
-        M_flag                  = data.M_flag;
         M_type                  = data.M_type;
         M_mode                  = data.M_mode;
         M_componentsVector      = data.M_componentsVector;
@@ -159,7 +156,6 @@ BCInterfaceData3D::showMe ( std::ostream& output ) const
     dataContainer_Type::showMe ( output );
 
     // Show 3D data
-    output << "Flag              = " << static_cast< Real > ( M_flag ) << std::endl;
     output << "Type              = " << M_type << std::endl;
     output << "Mode              = " << M_mode << std::endl;
     output << "Components Vector = ";

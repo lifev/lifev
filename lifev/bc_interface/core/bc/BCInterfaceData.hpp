@@ -101,13 +101,13 @@ public:
      * @param dataSection BC section
      * @param name name of the boundary condition
      */
-    void readBC ( const std::string& fileName, const std::string& dataSection, const std::string& name );
+    virtual void readBC ( const std::string& fileName, const std::string& dataSection, const std::string& name );
 
     //! Display general information about the content of the class
     /*!
      * @param output specify the output format (std::cout by default)
      */
-    void showMe ( std::ostream& output = std::cout ) const;
+    virtual void showMe ( std::ostream& output = std::cout ) const;
 
     //@}
 
@@ -128,6 +128,15 @@ public:
     void setBase ( const std::pair< std::string, baseList_Type >& base )
     {
         M_base = base;
+    }
+
+    //! Set the boundary ID
+    /*!
+     * @param boundaryID boundary ID
+     */
+    void boundaryID( const ID& boundaryID)
+    {
+        M_boundaryID = boundaryID;
     }
 
     //@}
@@ -163,6 +172,15 @@ public:
         return M_mapBase;
     }
 
+    //! Get the boundary ID
+    /*!
+     * @return boundaryID
+     */
+    const ID& boundaryID() const
+    {
+        return M_boundaryID;
+    }
+
     //! Get the parameters vector {A, B, C, ...}
     /*!
      * @return Boundary condition parameters vector
@@ -195,6 +213,8 @@ protected:
     std::string                                                    M_baseString;
 
     std::map< std::string, baseList_Type >                         M_mapBase;
+
+    ID                                                             M_boundaryID;
 
     parametersContainer_Type                                       M_parameters;
 

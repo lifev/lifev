@@ -52,6 +52,7 @@ BCInterfaceFunctionParserSolver< OneDFSIBCHandler, OneDFSISolver >::updatePhysic
     debugStream ( 5023 ) << "BCInterfaceFunctionSolver<FSI>::updatePhysicalSolverVariables" << "\n";
 #endif
 
+    OneDFSI::bcSide_Type side = ( M_boundaryID == 0 ) ? OneDFSI::left : OneDFSI::right;
     // Create/Update variables
     for ( std::set< physicalSolverList >::iterator j = M_list.begin(); j != M_list.end(); ++j )
         switch ( *j )
@@ -69,9 +70,9 @@ BCInterfaceFunctionParserSolver< OneDFSIBCHandler, OneDFSISolver >::updatePhysic
             case f_area:
 
 #ifdef HAVE_LIFEV_DEBUG
-                debugStream ( 5023 ) << "                                              f_area(" << static_cast<Real> (M_side) << "): " << M_physicalSolver->boundaryValue ( *M_solution, OneDFSI::A, M_side ) << "\n";
+                debugStream ( 5023 ) << "                                              f_area(" << static_cast<Real> (side) << "): " << M_physicalSolver->boundaryValue ( *M_solution, OneDFSI::A, side ) << "\n";
 #endif
-                setVariable ( "f_area", M_physicalSolver->boundaryValue ( *M_solution, OneDFSI::A, M_side ) );
+                setVariable ( "f_area", M_physicalSolver->boundaryValue ( *M_solution, OneDFSI::A, side ) );
 
                 break;
 
@@ -87,20 +88,20 @@ BCInterfaceFunctionParserSolver< OneDFSIBCHandler, OneDFSISolver >::updatePhysic
             case f_flux:
 
 #ifdef HAVE_LIFEV_DEBUG
-                debugStream ( 5023 ) << "                                              f_flux(" << static_cast<Real> (M_side) << "): " << M_physicalSolver->boundaryValue ( *M_solution, OneDFSI::Q, M_side ) << "\n";
+                debugStream ( 5023 ) << "                                              f_flux(" << static_cast<Real> (side) << "): " << M_physicalSolver->boundaryValue ( *M_solution, OneDFSI::Q, side ) << "\n";
 #endif
 
-                setVariable ( "f_flux", M_physicalSolver->boundaryValue ( *M_solution, OneDFSI::Q, M_side ) );
+                setVariable ( "f_flux", M_physicalSolver->boundaryValue ( *M_solution, OneDFSI::Q, side ) );
 
                 break;
 
             case f_pressure:
 
 #ifdef HAVE_LIFEV_DEBUG
-                debugStream ( 5023 ) << "                                              f_pressure(" << static_cast<Real> (M_side) << "): " << M_physicalSolver->boundaryValue ( *M_solution, OneDFSI::P, M_side ) << "\n";
+                debugStream ( 5023 ) << "                                              f_pressure(" << static_cast<Real> (side) << "): " << M_physicalSolver->boundaryValue ( *M_solution, OneDFSI::P, side ) << "\n";
 #endif
 
-                setVariable ( "f_pressure", M_physicalSolver->boundaryValue ( *M_solution, OneDFSI::P, M_side ) );
+                setVariable ( "f_pressure", M_physicalSolver->boundaryValue ( *M_solution, OneDFSI::P, side ) );
 
                 break;
 
@@ -146,10 +147,10 @@ BCInterfaceFunctionParserSolver< OneDFSIBCHandler, OneDFSISolver >::updatePhysic
             case s_thickness:
 
 #ifdef HAVE_LIFEV_DEBUG
-                debugStream ( 5023 ) << "                                              s_thickness: " << M_physicalSolver->physics()->data()->thickness ( M_physicalSolver->boundaryDOF ( M_side ) ) << "\n";
+                debugStream ( 5023 ) << "                                              s_thickness: " << M_physicalSolver->physics()->data()->thickness ( M_physicalSolver->boundaryDOF ( side ) ) << "\n";
 #endif
 
-                setVariable ( "s_thickness", M_physicalSolver->physics()->data()->thickness ( M_physicalSolver->boundaryDOF ( M_side ) ) );
+                setVariable ( "s_thickness", M_physicalSolver->physics()->data()->thickness ( M_physicalSolver->boundaryDOF ( side ) ) );
 
                 break;
 
@@ -187,7 +188,7 @@ BCInterfaceFunctionParserSolver< OneDFSIBCHandler, OneDFSISolver >::updatePhysic
 // ===================================================
 template< >
 void
-BCInterfaceFunctionParserSolver< OneDFSIBCHandler, OneDFSISolver >::createAccessList ( const BCInterfaceData& data )
+BCInterfaceFunctionParserSolver< OneDFSIBCHandler, OneDFSISolver >::createAccessList ( const boost::shared_ptr< BCInterfaceData >& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG

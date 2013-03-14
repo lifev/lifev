@@ -69,9 +69,9 @@ BCInterfaceFunctionParserSolver< BCHandler, OseenSolver< RegionMesh< LinearTetra
             case f_area:
 
 #ifdef HAVE_LIFEV_DEBUG
-                debugStream ( 5023 ) << "                                              f_area(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->area ( M_flag ) << "\n";
+                debugStream ( 5023 ) << "                                              f_area(" << static_cast<Real> (M_boundaryID) << "): " << M_physicalSolver->area ( M_boundaryID ) << "\n";
 #endif
-                setVariable ( "f_area", M_physicalSolver->area ( M_flag ) );
+                setVariable ( "f_area", M_physicalSolver->area ( M_boundaryID ) );
 
                 break;
 
@@ -87,20 +87,20 @@ BCInterfaceFunctionParserSolver< BCHandler, OseenSolver< RegionMesh< LinearTetra
             case f_flux:
 
 #ifdef HAVE_LIFEV_DEBUG
-                debugStream ( 5023 ) << "                                              f_flux(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->flux ( M_flag ) << "\n";
+                debugStream ( 5023 ) << "                                              f_flux(" << static_cast<Real> (M_boundaryID) << "): " << M_physicalSolver->flux ( M_boundaryID ) << "\n";
 #endif
 
-                setVariable ( "f_flux", M_physicalSolver->flux ( M_flag ) );
+                setVariable ( "f_flux", M_physicalSolver->flux ( M_boundaryID ) );
 
                 break;
 
             case f_pressure:
 
 #ifdef HAVE_LIFEV_DEBUG
-                debugStream ( 5023 ) << "                                              f_pressure(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->pressure ( M_flag ) << "\n";
+                debugStream ( 5023 ) << "                                              f_pressure(" << static_cast<Real> (M_boundaryID) << "): " << M_physicalSolver->pressure ( M_boundaryID ) << "\n";
 #endif
 
-                setVariable ( "f_pressure", M_physicalSolver->pressure ( M_flag ) );
+                setVariable ( "f_pressure", M_physicalSolver->pressure ( M_boundaryID ) );
 
                 break;
 
@@ -147,9 +147,9 @@ BCInterfaceFunctionParserSolver< BCHandler, OseenSolverShapeDerivative< RegionMe
             case f_area:
 
 #ifdef HAVE_LIFEV_DEBUG
-                debugStream ( 5023 ) << "                                              f_area(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->area ( M_flag ) << "\n";
+                debugStream ( 5023 ) << "                                              f_area(" << static_cast<Real> (M_boundaryID) << "): " << M_physicalSolver->area ( M_boundaryID ) << "\n";
 #endif
-                setVariable ( "f_area", M_physicalSolver->area ( M_flag ) );
+                setVariable ( "f_area", M_physicalSolver->area ( M_boundaryID ) );
 
                 break;
 
@@ -165,20 +165,20 @@ BCInterfaceFunctionParserSolver< BCHandler, OseenSolverShapeDerivative< RegionMe
             case f_flux:
 
 #ifdef HAVE_LIFEV_DEBUG
-                debugStream ( 5023 ) << "                                              f_flux(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->flux ( M_flag ) << "\n";
+                debugStream ( 5023 ) << "                                              f_flux(" << static_cast<Real> (M_boundaryID) << "): " << M_physicalSolver->flux ( M_boundaryID ) << "\n";
 #endif
 
-                setVariable ( "f_flux", M_physicalSolver->flux ( M_flag ) );
+                setVariable ( "f_flux", M_physicalSolver->flux ( M_boundaryID ) );
 
                 break;
 
             case f_pressure:
 
 #ifdef HAVE_LIFEV_DEBUG
-                debugStream ( 5023 ) << "                                              f_pressure(" << static_cast<Real> (M_flag) << "): " << M_physicalSolver->pressure ( M_flag ) << "\n";
+                debugStream ( 5023 ) << "                                              f_pressure(" << static_cast<Real> (M_boundaryID) << "): " << M_physicalSolver->pressure ( M_boundaryID ) << "\n";
 #endif
 
-                setVariable ( "f_pressure", M_physicalSolver->pressure ( M_flag ) );
+                setVariable ( "f_pressure", M_physicalSolver->pressure ( M_boundaryID ) );
 
                 break;
 
@@ -199,12 +199,14 @@ BCInterfaceFunctionParserSolver< BCHandler, OseenSolverShapeDerivative< RegionMe
         }
 }
 
+
+
 // ===================================================
 // Protected Methods
 // ===================================================
 template< >
 void
-BCInterfaceFunctionParserSolver< BCHandler, OseenSolver< RegionMesh< LinearTetra > > >::createAccessList ( const BCInterfaceData& data )
+BCInterfaceFunctionParserSolver< BCHandler, OseenSolver< RegionMesh< LinearTetra > > >::createAccessList ( const boost::shared_ptr< BCInterfaceData >& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -224,7 +226,7 @@ BCInterfaceFunctionParserSolver< BCHandler, OseenSolver< RegionMesh< LinearTetra
 
 template< >
 void
-BCInterfaceFunctionParserSolver< BCHandler, OseenSolverShapeDerivative< RegionMesh< LinearTetra > > >::createAccessList ( const BCInterfaceData& data )
+BCInterfaceFunctionParserSolver< BCHandler, OseenSolverShapeDerivative< RegionMesh< LinearTetra > > >::createAccessList ( const boost::shared_ptr< BCInterfaceData >& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG

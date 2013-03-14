@@ -107,6 +107,10 @@ public:
     typedef typename function_Type::boundaryFunctionTimeTimeStep_Type              boundaryFunctionTimeTimeStep_Type;
     typedef typename function_Type::boundaryFunctionTimeSpaceID_Type               boundaryFunctionTimeSpaceID_Type;
     typedef Parser                                                                 parser_Type;
+    typedef boost::shared_ptr< parser_Type >                                       parserPtr_Type;
+
+    typedef typename function_Type::data_Type                                      data_Type;
+    typedef typename function_Type::dataPtr_Type                                   dataPtr_Type;
 
     typedef typename function_Type::bcBase_Type                                    bcBase_Type;
 
@@ -177,23 +181,11 @@ public:
     //! @name Set Methods
     //@{
 
-    //! Set data for 0D boundary conditions
+    //! Set data for boundary conditions
     /*!
      * @param data boundary condition data loaded from \c GetPot file
      */
-    virtual void setData ( const BCInterfaceData0D& data );
-
-    //! Set data for 1D boundary conditions
-    /*!
-     * @param data boundary condition data loaded from \c GetPot file
-     */
-    virtual void setData ( const BCInterfaceData1D& data );
-
-    //! Set data for 3D boundary conditions
-    /*!
-     * @param data boundary condition data loaded from \c GetPot file
-     */
-    virtual void setData ( const BCInterfaceData3D& data );
+    virtual void setData ( const dataPtr_Type& data );
 
     //@}
 
@@ -207,7 +199,7 @@ protected:
 
     //@}
 
-    boost::shared_ptr< parser_Type > M_parser;
+    parserPtr_Type M_parser;
 
 private:
 
@@ -227,7 +219,7 @@ private:
     /*!
      * @param data boundary condition data loaded from \c GetPot file
      */
-    void setupParser ( const BCInterfaceData& data );
+    void setupParser ( const dataPtr_Type& data );
 
     //! Get the selected function of time
     /*!
@@ -382,83 +374,11 @@ BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >::functionTimeSpac
 }
 
 // ===================================================
-// Set Methods
-// ===================================================
-template< typename BcHandlerType, typename PhysicalSolverType >
-void
-BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >::setData ( const BCInterfaceData0D& data )
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    debugStream ( 5022 ) << "BCInterfaceFunction::setData" << "\n";
-#endif
-
-    setupParser ( data );
-}
-
-template< typename BcHandlerType, typename PhysicalSolverType >
-void
-BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >::setData ( const BCInterfaceData1D& data )
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    debugStream ( 5022 ) << "BCInterfaceFunction::setData" << "\n";
-#endif
-
-    setupParser ( data );
-}
-
-template< typename BcHandlerType, typename PhysicalSolverType >
-void
-BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >::setData ( const BCInterfaceData3D& data )
-{
-
-#ifdef HAVE_LIFEV_DEBUG
-    debugStream ( 5022 ) << "BCInterfaceFunction::setData" << "\n";
-#endif
-
-    setupParser ( data );
-
-    /*
-     * MODE          COMPONENT     FUNCTION      |      COMV.SIZE     ARGUMENTS     INTERFACEFUNCTION
-     * ------------------------------------------|---------------------------------------------------
-     *                                           |
-     * COMPONENT     2             x*y*z         |      1             1             function
-     * FULL          3             x*y*z         |      1             1             function
-     * FULL          1             x*y*z         |      1             1             function
-     * FULL          3             (y*z,x*z,x*y) |      1             3             functionID
-     * FULL          2             (x,y)         |      1             2             functionID
-     * COMPONENT     '1 3'         (x,y)         |      2             2             functionID
-     */
-
-#ifdef HAVE_LIFEV_DEBUG
-    debugStream ( 5021 ) << "BCInterfaceFunction::setData                arguments: " << M_parser->countSubstring ( "," ) << "\n";
-#endif
-
-    // Note: the map ID is used only for 3D handler.
-    if ( M_parser->countSubstring ( "," ) )
-    {
-        //Create the ID map
-        if ( data.componentsVector().size() > 1 ) // Component
-            for ( ID i ( 0 ); i < static_cast< ID > ( data.componentsVector().size() ); ++i )
-            {
-                M_mapID[data.componentsVector() [i]] = i + 1;
-            }
-        else
-            // if ( data.componentsVector().front() == arguments )  Full
-            for ( ID i ( 0 ); i < data.componentsVector().front(); ++i )
-            {
-                M_mapID[i + 1] = i + 1;
-            }
-    }
-}
-
-// ===================================================
 // Private Methods
 // ===================================================
 template< typename BcHandlerType, typename PhysicalSolverType >
 void
-BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >::setupParser ( const BCInterfaceData& data )
+BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >::setupParser ( const dataPtr_Type& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -467,11 +387,11 @@ BCInterfaceFunctionParser< BcHandlerType, PhysicalSolverType >::setupParser ( co
 
     if ( M_parser )
     {
-        M_parser->setString ( data.baseString() );
+        M_parser->setString ( data->baseString() );
     }
     else
     {
-        M_parser.reset ( new parser_Type ( data.baseString() ) );
+        M_parser.reset ( new parser_Type ( data->baseString() ) );
     }
 }
 

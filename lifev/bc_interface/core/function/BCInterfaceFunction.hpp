@@ -37,9 +37,7 @@
 #ifndef BCInterfaceFunction_H
 #define BCInterfaceFunction_H 1
 
-#include <lifev/bc_interface/0D/bc/BCInterfaceData0D.hpp>
-#include <lifev/bc_interface/1D/bc/BCInterfaceData1D.hpp>
-#include <lifev/bc_interface/3D/bc/BCInterfaceData3D.hpp>
+#include <lifev/bc_interface/core/bc/BCInterfaceData.hpp>
 
 namespace LifeV
 {
@@ -64,6 +62,9 @@ public:
     typedef PhysicalSolverType                                                                       physicalSolver_Type;
 
     typedef typename bcHandler_Type::bcFunction_Type                                                 bcBase_Type;
+
+    typedef BCInterfaceData                                                                          data_Type;
+    typedef boost::shared_ptr< data_Type >                                                           dataPtr_Type;
 
     typedef boost::function<Real ( const Real& ) >                                                   boundaryFunctionTime_Type;
     typedef boost::function<Real ( const Real&, const Real& ) >                                      boundaryFunctionTimeTimeStep_Type;
@@ -136,24 +137,11 @@ public:
     //! @name Set Methods
     //@{
 
-    //! Set data for 0D boundary conditions
+    //! Set data for boundary conditions
     /*!
      * @param data boundary condition data loaded from \c GetPot file
      */
-    virtual void setData ( const BCInterfaceData0D& data ) = 0;
-
-
-    //! Set data for 1D boundary conditions
-    /*!
-     * @param data boundary condition data loaded from \c GetPot file
-     */
-    virtual void setData ( const BCInterfaceData1D& data ) = 0;
-
-    //! Set data for 3D boundary conditions
-    /*!
-     * @param data boundary condition data loaded from \c GetPot file
-     */
-    virtual void setData ( const BCInterfaceData3D& data ) = 0;
+    virtual void setData ( const dataPtr_Type& data ) = 0;
 
     //@}
 

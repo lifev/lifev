@@ -126,7 +126,7 @@ public:
      */
     void setFlag ( const bcFlag_Type& flag )
     {
-        M_flag = flag;
+        M_boundaryID = flag;
     }
 
     //! Set the type of the boundary condition
@@ -150,7 +150,7 @@ public:
      */
     const bcFlag_Type& flag() const
     {
-        return M_flag;
+        return M_boundaryID;
     }
 
     //! Get the type of the boundary condition
@@ -171,7 +171,7 @@ private:
 
     void readFlag ( const GetPot& dataFile, const char* flag )
     {
-        M_flag = dataFile ( flag, 0 );
+        M_boundaryID = dataFile ( flag, 0 );
     }
 
     void readType ( const GetPot& dataFile, const char* type )
@@ -186,7 +186,6 @@ private:
     //@{
 
 
-    bcFlag_Type                                                    M_flag;
     bcType_Type                                                    M_type;
 
 

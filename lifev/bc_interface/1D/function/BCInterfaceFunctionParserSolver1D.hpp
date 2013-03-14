@@ -41,6 +41,7 @@
 #include <lifev/one_d_fsi/solver/OneDFSISolver.hpp>
 
 // BCInterface includes
+#include <lifev/bc_interface/1D/function/BCInterfaceFunctionParser1D.hpp>
 #include <lifev/bc_interface/core/function/BCInterfaceFunctionParserSolver.hpp>
 
 namespace LifeV
@@ -58,7 +59,7 @@ BCInterfaceFunctionParserSolver< OneDFSIBCHandler, OneDFSISolver >::updatePhysic
 // ===================================================
 template< >
 void
-BCInterfaceFunctionParserSolver< OneDFSIBCHandler, OneDFSISolver >::createAccessList ( const BCInterfaceData& data );
+BCInterfaceFunctionParserSolver< OneDFSIBCHandler, OneDFSISolver >::createAccessList ( const boost::shared_ptr< BCInterfaceData >& data );
 
 } // Namespace LifeV
 

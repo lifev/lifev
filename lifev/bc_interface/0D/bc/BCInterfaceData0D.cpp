@@ -44,7 +44,6 @@ namespace LifeV
 // ===================================================
 BCInterfaceData0D::BCInterfaceData0D() :
     BCInterfaceData         (),
-    M_flag                  (),
     M_type                  (),
     M_mapType               ()
 {
@@ -55,7 +54,6 @@ BCInterfaceData0D::BCInterfaceData0D() :
 
 BCInterfaceData0D::BCInterfaceData0D ( const BCInterfaceData0D& data ) :
     BCInterfaceData         ( data ),
-    M_flag                  ( data.M_flag ),
     M_type                  ( data.M_type ),
     M_mapType               ( data.M_mapType )
 {
@@ -70,7 +68,6 @@ BCInterfaceData0D::operator= ( const BCInterfaceData0D& data )
     if ( this != &data )
     {
         BCInterfaceData::operator= ( data );
-        M_flag                  = data.M_flag;
         M_type                  = data.M_type;
         M_mapType               = data.M_mapType;
     }
@@ -101,7 +98,6 @@ BCInterfaceData0D::showMe ( std::ostream& output ) const
     dataContainer_Type::showMe ( output );
 
     // Show 0D data
-    output << "Flag              = " << static_cast< Real > ( M_flag ) << std::endl;
     output << "Type              = " << M_type << std::endl;
 }
 

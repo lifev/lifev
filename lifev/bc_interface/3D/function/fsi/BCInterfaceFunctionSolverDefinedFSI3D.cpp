@@ -66,18 +66,18 @@ BCInterfaceFunctionSolverDefined< BCHandler, FSIOperator >::BCInterfaceFunctionS
 // Methods
 // ===================================================
 void
-BCInterfaceFunctionSolverDefined< BCHandler, FSIOperator >::exportData ( BCInterfaceData3D& data )
+BCInterfaceFunctionSolverDefined< BCHandler, FSIOperator >::exportData ( dataPtr_Type& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
     debugStream ( 5025 ) << "BCInterfaceFunctionSolverDefined::exportData" << "\n";
 #endif
 
-    data.setName ( M_name );
-    data.setFlag ( M_flag );
-    data.setType ( M_type );
-    data.setMode ( M_mode );
-    data.setComponentsVector ( M_componentsVector );
+    data->setName ( M_name );
+    data->setFlag ( M_flag );
+    data->setType ( M_type );
+    data->setMode ( M_mode );
+    data->setComponentsVector ( M_componentsVector );
 }
 
 void
@@ -160,7 +160,7 @@ BCInterfaceFunctionSolverDefined< BCHandler, FSIOperator >::updatePhysicalSolver
 // Set Methods
 // ===================================================
 void
-BCInterfaceFunctionSolverDefined< BCHandler, FSIOperator >::setData ( const BCInterfaceData3D& data )
+BCInterfaceFunctionSolverDefined< BCHandler, FSIOperator >::setData ( const dataPtr_Type& data )
 {
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -183,26 +183,26 @@ BCInterfaceFunctionSolverDefined< BCHandler, FSIOperator >::setData ( const BCIn
     mapFunction["RobinWall"]                        = RobinWall;
 
     // Retrieving the strings
-    M_FSIFunction = mapFunction[ data.baseString() ];
+    M_FSIFunction = mapFunction[ data->baseString() ];
 
-    M_name = data.name();
-    M_flag = data.flag();
-    M_type = data.type();
-    M_mode = data.mode();
-    M_componentsVector = data.componentsVector();
+    M_name = data->name();
+    M_flag = data->flag();
+    M_type = data->type();
+    M_mode = data->mode();
+    M_componentsVector = data->componentsVector();
 
     if ( M_FSIFunction == RobinWall )
     {
         factory_Type factory;
         M_vectorFunctionRobin.reserve (2);
-        BCInterfaceData3D temporaryData ( data );
+        dataPtr_Type temporaryData ( new data_Type ( *data ) );
 
         // Create the mass term function
-        temporaryData.setRobinBaseAlpha();
+        temporaryData->setRobinBaseAlpha();
         M_vectorFunctionRobin.push_back ( factory.createFunctionParser ( temporaryData ) );
 
         // Create the RHS
-        temporaryData.setRobinBaseBeta();
+        temporaryData->setRobinBaseBeta();
         M_vectorFunctionRobin.push_back ( factory.createFunctionParser ( temporaryData ) );
     }
 }
