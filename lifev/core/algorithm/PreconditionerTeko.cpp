@@ -36,16 +36,17 @@
 
 #include "PreconditionerTeko.hpp"
 
-namespace LifeV {
+namespace LifeV
+{
 
-PreconditionerTeko::PreconditionerTeko( const boost::shared_ptr<Epetra_Comm>& comm ):
-    PreconditionerBlock( comm ), M_prec()
+PreconditionerTeko::PreconditionerTeko ( const boost::shared_ptr<Epetra_Comm>& comm ) :
+    PreconditionerBlock ( comm ), M_prec()
 {
 
 }
 
-PreconditionerTeko::PreconditionerTeko( PreconditionerTeko& P, const boost::shared_ptr<Epetra_Comm>& comm ):
-    PreconditionerBlock( P, comm )
+PreconditionerTeko::PreconditionerTeko ( PreconditionerTeko& P, const boost::shared_ptr<Epetra_Comm>& comm ) :
+    PreconditionerBlock ( P, comm )
 {
 
 }
@@ -83,9 +84,9 @@ PreconditionerTeko::isPreconditionerSet() const
 }
 
 int
-PreconditionerTeko::SetUseTranspose( const bool useTranspose )
+PreconditionerTeko::SetUseTranspose ( const bool useTranspose )
 {
-    return M_prec->SetUseTranspose( useTranspose );
+    return M_prec->SetUseTranspose ( useTranspose );
 }
 
 bool
@@ -94,15 +95,15 @@ PreconditionerTeko::UseTranspose()
     return M_prec->UseTranspose();
 }
 int
-PreconditionerTeko::ApplyInverse( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const
+PreconditionerTeko::ApplyInverse ( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const
 {
-    return M_prec->ApplyInverse( X, Y );
+    return M_prec->ApplyInverse ( X, Y );
 }
 
 int
-PreconditionerTeko::Apply( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const
+PreconditionerTeko::Apply ( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const
 {
-    return M_prec->Apply( X, Y );
+    return M_prec->Apply ( X, Y );
 }
 
 const Epetra_Map&
@@ -118,29 +119,29 @@ PreconditionerTeko::OperatorDomainMap() const
 }
 
 void
-PreconditionerTeko::buildBlockGIDs( std::vector<std::vector<int> > & gids,
-                                    const MapEpetra & map,
-                                    const std::vector<int>& blockSizes )
+PreconditionerTeko::buildBlockGIDs ( std::vector<std::vector<int> >& gids,
+                                     const MapEpetra& map,
+                                     const std::vector<int>& blockSizes )
 {
-    int numLocal = map.map( Unique )->NumMyElements();
+    int numLocal = map.map ( Unique )->NumMyElements();
     int numBlocks = blockSizes.size();
 
     gids.clear();
-    gids.resize( blockSizes.size() );
+    gids.resize ( blockSizes.size() );
 
     int gid = -1;
     int cumulBlocksSizes = 0;
 
-    for ( int i( 0 );i<numLocal;++i )
+    for ( int i ( 0 ); i < numLocal; ++i )
     {
-        gid = map.map( Unique )->GID( i );
+        gid = map.map ( Unique )->GID ( i );
         cumulBlocksSizes = 0;
-        for ( int j( 0 ); j < numBlocks; ++j )
+        for ( int j ( 0 ); j < numBlocks; ++j )
         {
-	        cumulBlocksSizes += blockSizes[j];
-	        if ( gid <= cumulBlocksSizes )
+            cumulBlocksSizes += blockSizes[j];
+            if ( gid <= cumulBlocksSizes )
             {
-	            gids[j].push_back( gid );
+                gids[j].push_back ( gid );
                 break;
             }
         }
@@ -148,30 +149,31 @@ PreconditionerTeko::buildBlockGIDs( std::vector<std::vector<int> > & gids,
 }
 
 void
-PreconditionerTeko::buildPreconditionerTeko( RCP<Teko::BlockPreconditionerFactory> precFact,
-                                             matrixPtr_Type& oper,
-                                             const std::vector<int>& blockSizes )
+PreconditionerTeko::buildPreconditionerTeko ( RCP<Teko::BlockPreconditionerFactory> precFact,
+                                              matrixPtr_Type& oper,
+                                              const std::vector<int>& blockSizes )
 {
     // Building the preconditioner
-    Teko::Epetra::EpetraBlockPreconditioner* prec = new Teko::Epetra::EpetraBlockPreconditioner( precFact );
+    Teko::Epetra::EpetraBlockPreconditioner* prec = new Teko::Epetra::EpetraBlockPreconditioner ( precFact );
 
     M_oper = oper->matrixPtr();
 
     std::vector<std::vector<int> > vec;
-    buildBlockGIDs( vec,oper->rangeMap(), blockSizes );
+    buildBlockGIDs ( vec, oper->rangeMap(), blockSizes );
 
     // Building the block operator from the matrix
     Teuchos::RCP<Teko::Epetra::BlockedEpetraOperator> sA
-        = Teuchos::rcp( new Teko::Epetra::BlockedEpetraOperator( vec, Teuchos::rcp( M_oper ) ) );
+        = Teuchos::rcp ( new Teko::Epetra::BlockedEpetraOperator ( vec, Teuchos::rcp ( M_oper ) ) );
 
-    M_prec.reset( prec );
+    M_prec.reset ( prec );
 
     //Building explicitly the preconditioner
-    M_prec->buildPreconditioner( sA );
+    M_prec->buildPreconditioner ( sA );
 
     if ( !M_prec.get() )
-    { //! if not filled, I do not know how to diagonalize.
-        ERROR_MSG( "Preconditioner not set, something went wrong in its computation\n" );
+    {
+        //! if not filled, I do not know how to diagonalize.
+        ERROR_MSG ( "Preconditioner not set, something went wrong in its computation\n" );
     }
 
     this->M_preconditionerCreated = true;

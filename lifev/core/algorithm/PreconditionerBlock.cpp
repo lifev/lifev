@@ -36,16 +36,17 @@
 
 #include "PreconditionerBlock.hpp"
 
-namespace LifeV {
+namespace LifeV
+{
 
-PreconditionerBlock::PreconditionerBlock( const boost::shared_ptr<Epetra_Comm>& comm ):
-  Preconditioner( comm )
+PreconditionerBlock::PreconditionerBlock ( const boost::shared_ptr<Epetra_Comm>& comm ) :
+    Preconditioner ( comm )
 {
 
 }
 
-PreconditionerBlock::PreconditionerBlock( PreconditionerBlock& P, const boost::shared_ptr<Epetra_Comm>& comm ):
-  Preconditioner( P, comm )
+PreconditionerBlock::PreconditionerBlock ( PreconditionerBlock& P, const boost::shared_ptr<Epetra_Comm>& comm ) :
+    Preconditioner ( P, comm )
 {
 
 }

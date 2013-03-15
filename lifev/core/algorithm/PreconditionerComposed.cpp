@@ -33,8 +33,8 @@ namespace LifeV
 // ===================================================
 PreconditionerComposed::PreconditionerComposed ( boost::shared_ptr<Epetra_Comm> comm) :
     super_Type (comm ),
-    M_operVector(0),
-    M_prec(new prec_Type(comm))
+    M_operVector (0),
+    M_prec (new prec_Type (comm) )
     //M_precType()
 {
 }
@@ -168,7 +168,7 @@ void
 PreconditionerComposed::resetPreconditioner()
 {
     //M_operVector.reset();
-    M_prec.reset(new prec_Type(M_displayer.comm()));
+    M_prec.reset (new prec_Type (M_displayer.comm() ) );
 
     this->M_preconditionerCreated = false;
 }

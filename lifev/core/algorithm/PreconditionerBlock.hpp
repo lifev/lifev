@@ -42,7 +42,8 @@
 #include <lifev/core/algorithm/Preconditioner.hpp>
 #include <lifev/core/array/MapEpetra.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! PreconditionerBlock
 /*!
@@ -52,7 +53,7 @@ namespace LifeV {
  *  defines the interfaces for a typical block preconditioner
  */
 class PreconditionerBlock:
-        public Preconditioner
+    public Preconditioner
 {
 public:
 
@@ -60,10 +61,10 @@ public:
      */
     //@{
     //! default constructor.
-    PreconditionerBlock( const boost::shared_ptr<Epetra_Comm>& comm = boost::shared_ptr<Epetra_Comm>() );
+    PreconditionerBlock ( const boost::shared_ptr<Epetra_Comm>& comm = boost::shared_ptr<Epetra_Comm>() );
 
     /** Copy constructor*/
-    PreconditionerBlock( PreconditionerBlock& P, const boost::shared_ptr<Epetra_Comm>& comm = boost::shared_ptr<Epetra_Comm>() );
+    PreconditionerBlock ( PreconditionerBlock& P, const boost::shared_ptr<Epetra_Comm>& comm = boost::shared_ptr<Epetra_Comm>() );
 
     //! default virtual destructor
     virtual ~PreconditionerBlock();
@@ -80,7 +81,7 @@ protected:
 
 };
 
-void buildBlockGIDs( std::vector<std::vector<int> > & gids, const MapEpetra & map, const std::vector<int>& blockSizes );
+void buildBlockGIDs ( std::vector<std::vector<int> >& gids, const MapEpetra& map, const std::vector<int>& blockSizes );
 
 } // namespace LifeV
 

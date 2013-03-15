@@ -57,7 +57,8 @@
 #include <lifev/core/array/MapEpetra.hpp>
 #include <lifev/core/array/VectorBlockStructure.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! PreconditionerComposition - Class to manage preconditioners composed by matrices multiplication.
 /*!
@@ -66,7 +67,7 @@ namespace LifeV {
     This class makes use of ComposedOperator to handle matrices composition.
  */
 class PreconditionerComposition:
-        public Preconditioner
+    public Preconditioner
 {
 public:
 
@@ -94,9 +95,9 @@ public:
         @param comm Communicator (boost::shared_ptr<Epetra_Comm>() by default)
      */
 #ifdef HAVE_MPI
-    PreconditionerComposition( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>( new Epetra_MpiComm( MPI_COMM_WORLD ) ) );
+    PreconditionerComposition ( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm> ( new Epetra_MpiComm ( MPI_COMM_WORLD ) ) );
 #else
-    PreconditionerComposition( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>( new Epetra_SerialComm ) );
+    PreconditionerComposition ( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm> ( new Epetra_SerialComm ) );
 #endif
 
 private:
@@ -105,7 +106,7 @@ private:
     /*!
         @param precComp PreconditionerComposition
      */
-    PreconditionerComposition( const PreconditionerComposition& precComp );
+    PreconditionerComposition ( const PreconditionerComposition& precComp );
 
 public:
     //! Destructor
@@ -116,16 +117,16 @@ public:
     //! @name Methods
     //@{
 
-    virtual void createParametersList( list_Type& list,
-                                       const GetPot& dataFile,
-                                       const std::string& section,
-                                       const std::string& subSection ) = 0;
+    virtual void createParametersList ( list_Type& list,
+                                        const GetPot& dataFile,
+                                        const std::string& section,
+                                        const std::string& subSection ) = 0;
 
     //! Build the preconditioner
     /*!
       @param A the base matrix for computing the preconditioner
     */
-    virtual int buildPreconditioner( matrixPtr_Type& A ) = 0;
+    virtual int buildPreconditioner ( matrixPtr_Type& A ) = 0;
 
     //! Reset the preconditioner
     void resetPreconditioner();
@@ -138,11 +139,11 @@ public:
     //! @name Epetra Operator Interface Methods
     //@{
 
-    Int SetUseTranspose( const bool useTranspose = false );
+    Int SetUseTranspose ( const bool useTranspose = false );
 
-    Int Apply( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const;
+    Int Apply ( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const;
 
-    Int ApplyInverse( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const;
+    Int ApplyInverse ( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const;
 
     bool UseTranspose();
 
@@ -169,12 +170,12 @@ public:
     /*!
         @param list Teuchos::ParameterList object
      */
-    virtual void setParameters( Teuchos::ParameterList& list ) = 0;
+    virtual void setParameters ( Teuchos::ParameterList& list ) = 0;
 
     /*!
         copies the shared_ptr to the communicator in the member M_comm and builds a new instance
     */
-    void setComm( boost::shared_ptr<Epetra_Comm> comm );
+    void setComm ( boost::shared_ptr<Epetra_Comm> comm );
 
     //@}
 
@@ -212,37 +213,37 @@ protected:
     //@{
 
     //! Add A to the right of the composition
-    int pushBack( matrixPtr_Type A,
-                  const bool useInverse   = false,
-                  const bool useTranspose = false );
+    int pushBack ( matrixPtr_Type A,
+                   const bool useInverse   = false,
+                   const bool useTranspose = false );
 
-    int pushBack( operatorPtr_Type oper,
-                  const bool useInverse     = false,
-                  const bool useTranspose   = false,
-                  matrixPtr_Type baseMatrix = matrixPtr_Type() );
-
-    //! Use a preconditioner to build the inverse of A and add it to the right of the composition
-    int pushBack( matrixPtr_Type A,
-                  superPtr_Type preconditioner,
-                  const bool useInverse   = false,
-                  const bool useTranspose = false );
+    int pushBack ( operatorPtr_Type oper,
+                   const bool useInverse     = false,
+                   const bool useTranspose   = false,
+                   matrixPtr_Type baseMatrix = matrixPtr_Type() );
 
     //! Use a preconditioner to build the inverse of A and add it to the right of the composition
-    int pushBack( matrixPtr_Type embeddedA,
-                  superPtr_Type preconditioner,
-                  const VectorBlockStructure& blockStructure,
-                  const UInt& blockIndex,
-                  const MapEpetra& fullMap,
-                  const bool useInverse   = false,
-                  const bool useTranspose = false,
-                  const bool buildPreconditioner = true );
+    int pushBack ( matrixPtr_Type A,
+                   superPtr_Type preconditioner,
+                   const bool useInverse   = false,
+                   const bool useTranspose = false );
 
-    int pushBack( operatorPtr_Type embeddedOperator,
-                  const VectorBlockStructure& blockStructure,
-                  const UInt& blockIndex,
-                  const MapEpetra& fullMap,
-                  const bool useInverse,
-                  const bool useTranspose );
+    //! Use a preconditioner to build the inverse of A and add it to the right of the composition
+    int pushBack ( matrixPtr_Type embeddedA,
+                   superPtr_Type preconditioner,
+                   const VectorBlockStructure& blockStructure,
+                   const UInt& blockIndex,
+                   const MapEpetra& fullMap,
+                   const bool useInverse   = false,
+                   const bool useTranspose = false,
+                   const bool buildPreconditioner = true );
+
+    int pushBack ( operatorPtr_Type embeddedOperator,
+                   const VectorBlockStructure& blockStructure,
+                   const UInt& blockIndex,
+                   const MapEpetra& fullMap,
+                   const bool useInverse,
+                   const bool useTranspose );
 
     //@}
 

@@ -72,7 +72,7 @@ namespace LifeV
   @maintainer Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
 */
 class PreconditionerML2:
-        public Preconditioner
+    public Preconditioner
 {
 public:
 
@@ -89,7 +89,7 @@ public:
 
     typedef RegionMesh<LinearTetra>              mesh_Type;
     typedef MapEpetra                            map_Type;
-    typedef boost::shared_ptr<FESpace<mesh_Type,map_Type> >  FESpacePtr_Type;
+    typedef boost::shared_ptr<FESpace<mesh_Type, map_Type> >  FESpacePtr_Type;
     typedef MatrixEpetra<Real>                   matrix_Type;
     typedef boost::shared_ptr<matrix_Type>       matrixPtr_Type;
     //@}
@@ -99,9 +99,9 @@ public:
     //@{
     //! Empty constructor
 #ifdef HAVE_MPI
-    PreconditionerML2( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>( new Epetra_MpiComm( MPI_COMM_WORLD ) ) );
+    PreconditionerML2 ( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm> ( new Epetra_MpiComm ( MPI_COMM_WORLD ) ) );
 #else
-    PreconditionerML2( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>( new Epetra_SerialComm ) );
+    PreconditionerML2 ( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm> ( new Epetra_SerialComm ) );
 #endif
 
     //! destructor.
@@ -111,31 +111,34 @@ public:
 
     //! @name Methods
     //@{
-    void createParametersList( list_Type&         list,
-                               const GetPot&      dataFile,
-                               const std::string& section,
-                               const std::string& subSection );
+    void createParametersList ( list_Type&         list,
+                                const GetPot&      dataFile,
+                                const std::string& section,
+                                const std::string& subSection );
 
     //! Build a preconditioner based on the given matrix
     /*!
       @param matrix Matrix upon which construct the preconditioner
      */
-    Int buildPreconditioner( operator_type& matrix );
+    Int buildPreconditioner ( operator_type& matrix );
 
     //! Reset the preconditioner
     void resetPreconditioner();
 
     //! Returns true if the preconditioner is set
-    bool  isPreconditionerSet() const {return M_preconditioner;}
+    bool  isPreconditionerSet() const
+    {
+        return M_preconditioner;
+    }
 
     //! Apply the inverse of the preconditioner on vector1 and store the result in vector2
     /*!
       @param vector1 Vector to which we apply the preconditioner
       @param vector2 Vector to the store the result
      */
-    virtual Int ApplyInverse( const Epetra_MultiVector& vector1, Epetra_MultiVector& vector2 ) const
+    virtual Int ApplyInverse ( const Epetra_MultiVector& vector1, Epetra_MultiVector& vector2 ) const
     {
-        return M_preconditioner->ApplyInverse( vector1, vector2 );
+        return M_preconditioner->ApplyInverse ( vector1, vector2 );
     }
 
     //! Apply the preconditioner on vector1 and store the result in vector2
@@ -143,13 +146,13 @@ public:
       @param vector1 Vector to which we apply the preconditioner
       @param vector2 Vector to the store the result
      */
-    virtual Int Apply( const Epetra_MultiVector& vector1, Epetra_MultiVector& vector2 ) const
+    virtual Int Apply ( const Epetra_MultiVector& vector1, Epetra_MultiVector& vector2 ) const
     {
-        return M_preconditioner->Apply( vector1, vector2 );
+        return M_preconditioner->Apply ( vector1, vector2 );
     }
 
     //! Show informations about the preconditioner
-    virtual void showMe( std::ostream& output = std::cout ) const;
+    virtual void showMe ( std::ostream& output = std::cout ) const;
 
     //@}
 
@@ -169,13 +172,16 @@ public:
     /*!
       @param list ParameterList from Teuchos
      */
-    void setParameters( Teuchos::ParameterList& list );
+    void setParameters ( Teuchos::ParameterList& list );
 
     //! Set the matrix to be used transposed (or not)
     /*!
       @param useTranspose If true the preconditioner is transposed
      */
-    Int SetUseTranspose( bool useTranspose=false ) { return M_preconditioner->SetUseTranspose(useTranspose); }
+    Int SetUseTranspose ( bool useTranspose = false )
+    {
+        return M_preconditioner->SetUseTranspose (useTranspose);
+    }
 
     //! Setter for the FESpace
     /*!
@@ -184,7 +190,7 @@ public:
         @param uFESpace Boost::shared_ptr on the FESpace for the velocity
         @param pFESpace Boost::shared_ptr on the FESpace for the pressure
      */
-    void setFESpace( FESpacePtr_Type uFESpace, FESpacePtr_Type pFESpace );
+    void setFESpace ( FESpacePtr_Type uFESpace, FESpacePtr_Type pFESpace );
 
     //@}
 
@@ -199,21 +205,34 @@ public:
     super::prec_raw_type* preconditioner();
 
     //! Return a shared pointer on the preconditioner
-    super::prec_type preconditionerPtr() { return M_preconditioner; }
+    super::prec_type preconditionerPtr()
+    {
+        return M_preconditioner;
+    }
 
     //! Return the type of preconditioner
-    std::string preconditionerType() { return M_precType; }
+    std::string preconditionerType()
+    {
+        return M_precType;
+    }
 
     //! Return true if the preconditioner is transposed
-    bool UseTranspose() { return M_preconditioner->UseTranspose(); }
+    bool UseTranspose()
+    {
+        return M_preconditioner->UseTranspose();
+    }
 
     //! Return the Range map of the operator
-    const Epetra_Map & OperatorRangeMap() const
-    { return M_preconditioner->OperatorRangeMap(); }
+    const Epetra_Map& OperatorRangeMap() const
+    {
+        return M_preconditioner->OperatorRangeMap();
+    }
 
     //! Return the Domain map of the operator
-    const Epetra_Map & OperatorDomainMap() const
-    { return M_preconditioner->OperatorDomainMap(); }
+    const Epetra_Map& OperatorDomainMap() const
+    {
+        return M_preconditioner->OperatorDomainMap();
+    }
 
     //@}
 
@@ -232,10 +251,13 @@ protected:
 };
 
 
-inline Preconditioner* createML2() {return new PreconditionerML2(); }
+inline Preconditioner* createML2()
+{
+    return new PreconditionerML2();
+}
 namespace
 {
-static bool registerML2 = PRECFactory::instance().registerProduct( "ML2", &createML2 );
+static bool registerML2 = PRECFactory::instance().registerProduct ( "ML2", &createML2 );
 }
 
 

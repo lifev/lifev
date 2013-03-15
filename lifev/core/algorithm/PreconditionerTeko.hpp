@@ -69,7 +69,8 @@
 using Teuchos::RCP;
 using Teuchos::rcp;
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! PreconditionerTeko
 /*!
@@ -79,7 +80,7 @@ namespace LifeV {
  *  block preconditioners implimented with the Teko package
  */
 class PreconditionerTeko:
-        public PreconditionerBlock
+    public PreconditionerBlock
 {
 public:
 
@@ -103,10 +104,10 @@ public:
      */
     //@{
     //! default constructor.
-    PreconditionerTeko( const boost::shared_ptr<Epetra_Comm>& comm = boost::shared_ptr<Epetra_Comm>() );
+    PreconditionerTeko ( const boost::shared_ptr<Epetra_Comm>& comm = boost::shared_ptr<Epetra_Comm>() );
 
     /** Copy constructor*/
-    PreconditionerTeko( PreconditionerTeko& P, const boost::shared_ptr<Epetra_Comm>& comm = boost::shared_ptr<Epetra_Comm>() );
+    PreconditionerTeko ( PreconditionerTeko& P, const boost::shared_ptr<Epetra_Comm>& comm = boost::shared_ptr<Epetra_Comm>() );
 
     //! default virtual destructor
     virtual ~PreconditionerTeko();
@@ -129,21 +130,21 @@ public:
     //! returns true if prec exists
     bool isPreconditionerSet() const;
 
-    virtual int SetUseTranspose( const bool useTranspose = false );
+    virtual int SetUseTranspose ( const bool useTranspose = false );
     virtual bool UseTranspose();
-    virtual int ApplyInverse( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const;
-    virtual int Apply( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const;
-    virtual const Epetra_Map & OperatorRangeMap() const;
-    virtual const Epetra_Map & OperatorDomainMap() const;
+    virtual int ApplyInverse ( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const;
+    virtual int Apply ( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const;
+    virtual const Epetra_Map& OperatorRangeMap() const;
+    virtual const Epetra_Map& OperatorDomainMap() const;
 
 protected:
 
-    void buildBlockGIDs( std::vector<std::vector<int> > & gids,
-                         const MapEpetra & map,
-                         const std::vector<int>& blockSizes);
-    void buildPreconditionerTeko( RCP<Teko::BlockPreconditionerFactory> precFact,
-                                  matrixPtr_Type& oper,
-                                  const std::vector<int>& blockSizes );
+    void buildBlockGIDs ( std::vector<std::vector<int> >& gids,
+                          const MapEpetra& map,
+                          const std::vector<int>& blockSizes);
+    void buildPreconditionerTeko ( RCP<Teko::BlockPreconditionerFactory> precFact,
+                                   matrixPtr_Type& oper,
+                                   const std::vector<int>& blockSizes );
 
     preconditionerPtr_Type M_prec;
 

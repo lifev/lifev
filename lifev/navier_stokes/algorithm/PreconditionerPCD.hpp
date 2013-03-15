@@ -59,7 +59,8 @@
 #include <lifev/core/fem/BCBase.hpp>
 #include <lifev/core/mesh/RegionMesh.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! PreconditionerPCD
 /*!
@@ -68,7 +69,7 @@ namespace LifeV {
  *  The PreconditionerPCD class provides the PCD block preconditioner
  */
 class PreconditionerPCD:
-        public PreconditionerComposition
+    public PreconditionerComposition
 {
 public:
 
@@ -90,7 +91,7 @@ public:
     typedef ComposedOperator<Preconditioner>        preconditioner_Type;
     typedef boost::shared_ptr<preconditioner_Type>  preconditionerPtr_Type;
 
-    typedef boost::shared_ptr<FESpace<mesh_Type,map_Type> >  FESpacePtr_Type;
+    typedef boost::shared_ptr<FESpace<mesh_Type, map_Type> >  FESpacePtr_Type;
     typedef boost::shared_ptr<BCHandler>            BCHandlerPtr_Type;
 
     typedef Teuchos::ParameterList                  list_Type;
@@ -101,9 +102,9 @@ public:
     //@{
     //! default constructor
 #ifdef HAVE_MPI
-    PreconditionerPCD( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>( new Epetra_MpiComm( MPI_COMM_WORLD ) ) );
+    PreconditionerPCD ( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm> ( new Epetra_MpiComm ( MPI_COMM_WORLD ) ) );
 #else
-    PreconditionerPCD( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>( new Epetra_SerialComm ) );
+    PreconditionerPCD ( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm> ( new Epetra_SerialComm ) );
 #endif
 
     //! constructor from matrix A.
@@ -117,10 +118,10 @@ public:
 
     //! @name  Methods
     //@{
-    void createParametersList( list_Type&         list,
-                               const GetPot&      dataFile,
-                               const std::string& section,
-                               const std::string& subsection = "PCD" );
+    void createParametersList ( list_Type&         list,
+                                const GetPot&      dataFile,
+                                const std::string& section,
+                                const std::string& subsection = "PCD" );
 
     //! Return an estimation of the conditionement number of the preconditioner
     double condest ();
@@ -130,11 +131,11 @@ public:
         This method updates the value of beta.
         @param beta New vector beta to be used to built the convective term
      */
-    void updateBeta( const vector_Type& beta );
+    void updateBeta ( const vector_Type& beta );
 
 
     //! Build the preconditioner
-    int buildPreconditioner( matrixPtr_type& A );
+    int buildPreconditioner ( matrixPtr_type& A );
 
     //@}
 
@@ -153,14 +154,14 @@ public:
         @param dataFile is a GetPot dataFile
         @param section is the section containing the data
      */
-    void setDataFromGetPot( const GetPot&      dataFile,
-                            const std::string& section );
+    void setDataFromGetPot ( const GetPot&      dataFile,
+                             const std::string& section );
 
     //! Method to setup the solver using Teuchos::ParameterList
     /*!
         @param list Teuchos::ParameterList object
      */
-    virtual void setParameters( Teuchos::ParameterList& list );
+    virtual void setParameters ( Teuchos::ParameterList& list );
 
     //! Setter for the FESpace
     /*!
@@ -169,7 +170,7 @@ public:
         @param uFESpace Boost::shared_ptr on the FESpace for the velocity
         @param pFESpace Boost::shared_ptr on the FESpace for the pressure
      */
-    void setFESpace( FESpacePtr_Type uFESpace, FESpacePtr_Type pFESpace );
+    void setFESpace ( FESpacePtr_Type uFESpace, FESpacePtr_Type pFESpace );
 
     //! Setter for the BCHandler
     /*!
@@ -177,34 +178,34 @@ public:
         for the construction of the operators Ap, Fp and Mp.
         @param bchPtr pointer to a BCHandler boject
     */
-    void setBCHandler( BCHandlerPtr_Type bchPtr );
+    void setBCHandler ( BCHandlerPtr_Type bchPtr );
 
     //! Setter for the timestep
     /*!
         This method set the timestep used to compute Fp.
         @param timestep Timestep used to compute the solution of the Navier-Stokes equations
      */
-    void setTimestep( const Real& timestep );
+    void setTimestep ( const Real& timestep );
 
     //! Setter for the viscosity
     /*!
         This method set the viscosity used to compute Fp.
         @param viscosity Viscosity used to compute the solution of the Navier-Stokes equations
      */
-    void setViscosity( const Real& viscosity );
+    void setViscosity ( const Real& viscosity );
 
     //! Setter for the density
     /*!
         This method set the density used to compute Fp.
         @param density Density used to compute the solution of the Navier-Stokes equations
      */
-    void setDensity( const Real& density );
+    void setDensity ( const Real& density );
 
     //! Setter to know if we used B or -B in the discretization of the Navier-Stokes equations
     /*!
         @param useMinusDivergence is true if -B has been used.
      */
-    void setUseMinusDivergence( const bool& useMinusDivergence );
+    void setUseMinusDivergence ( const bool& useMinusDivergence );
 
     //@}
 
@@ -220,8 +221,8 @@ protected:
     Real        M_density;
     vectorPtr_Type  M_beta;
 
-    ADRAssembler<mesh_Type,matrixBlock_Type,vector_Type> M_adrPressureAssembler;
-    ADRAssembler<mesh_Type,matrixBlock_Type,vector_Type> M_adrVelocityAssembler;
+    ADRAssembler<mesh_Type, matrixBlock_Type, vector_Type> M_adrPressureAssembler;
+    ADRAssembler<mesh_Type, matrixBlock_Type, vector_Type> M_adrVelocityAssembler;
 
     // todo: Remove the member dataFile (bad programmation)
     GetPot      M_dataFile;
@@ -251,33 +252,36 @@ protected:
     vectorPtr_Type M_normalVectors;
 
 private:
-    PreconditionerPCD( const PreconditionerPCD& P ):
-        PreconditionerComposition( P.M_comm ){}
-    PreconditionerPCD( const boost::shared_ptr<PreconditionerPCD>& /*P*/ ){}
+    PreconditionerPCD ( const PreconditionerPCD& P ) :
+        PreconditionerComposition ( P.M_comm ) {}
+    PreconditionerPCD ( const boost::shared_ptr<PreconditionerPCD>& /*P*/ ) {}
 
     void computeNormalVectors();
 
     vectorPtr_Type computeRobinCoefficient();
 
-    static Real fZero( const Real& /* t */,
-                       const Real& /* x */,
-                       const Real& /* y */,
-                       const Real& /* z */,
-                       const ID& /* i */ )
+    static Real fZero ( const Real& /* t */,
+                        const Real& /* x */,
+                        const Real& /* y */,
+                        const Real& /* z */,
+                        const ID& /* i */ )
     {
         return 0.0;
     }
 
-    void setBCByBoundaryType( matrixPtr_type Ap, UInt ApOffset,
-                              matrixPtr_type Fp, UInt FpOffset,
-                              matrixPtr_type Mp, UInt MpOffset );
+    void setBCByBoundaryType ( matrixPtr_type Ap, UInt ApOffset,
+                               matrixPtr_type Fp, UInt FpOffset,
+                               matrixPtr_type Mp, UInt MpOffset );
 
 };
 
-inline Preconditioner* createPCD(){ return new PreconditionerPCD(); }
+inline Preconditioner* createPCD()
+{
+    return new PreconditionerPCD();
+}
 namespace
 {
-	static bool registerPCD = PRECFactory::instance().registerProduct( "PCD", &createPCD );
+static bool registerPCD = PRECFactory::instance().registerProduct ( "PCD", &createPCD );
 }
 
 } // namespace LifeV

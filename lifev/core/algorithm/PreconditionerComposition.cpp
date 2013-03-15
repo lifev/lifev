@@ -56,24 +56,25 @@
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
-namespace LifeV {
+namespace LifeV
+{
 
 // ===================================================
 // Constructors & Destructor
 // ===================================================
 
-PreconditionerComposition::PreconditionerComposition( boost::shared_ptr<Epetra_Comm> comm ):
-    super_Type( comm ),
-    M_comm( comm ),
-    M_prec( new prec_Type( comm ) )
+PreconditionerComposition::PreconditionerComposition ( boost::shared_ptr<Epetra_Comm> comm ) :
+    super_Type ( comm ),
+    M_comm ( comm ),
+    M_prec ( new prec_Type ( comm ) )
 {
 
 }
 
-PreconditionerComposition::PreconditionerComposition( const PreconditionerComposition& precComp ):
-    super_Type( precComp, precComp.M_comm ),
-    M_comm( precComp.M_comm ),
-    M_prec( new prec_Type( *( precComp.M_prec.get() ) ) )
+PreconditionerComposition::PreconditionerComposition ( const PreconditionerComposition& precComp ) :
+    super_Type ( precComp, precComp.M_comm ),
+    M_comm ( precComp.M_comm ),
+    M_prec ( new prec_Type ( * ( precComp.M_prec.get() ) ) )
 {
 
 }
@@ -91,7 +92,7 @@ PreconditionerComposition::~PreconditionerComposition()
 void
 PreconditionerComposition::resetPreconditioner()
 {
-    M_prec.reset( new prec_Type( M_comm ) );
+    M_prec.reset ( new prec_Type ( M_comm ) );
     M_precBaseOperators.clear();
     this->M_preconditionerCreated = false;
 }
@@ -108,21 +109,21 @@ PreconditionerComposition::condest()
 // Epetra Operator Interface Methods
 // ===================================================
 int
-PreconditionerComposition::SetUseTranspose( const bool useTranspose )
+PreconditionerComposition::SetUseTranspose ( const bool useTranspose )
 {
-    return M_prec->SetUseTranspose( useTranspose );
+    return M_prec->SetUseTranspose ( useTranspose );
 }
 
 int
-PreconditionerComposition::Apply( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const
+PreconditionerComposition::Apply ( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const
 {
-    return M_prec->Apply( X, Y );
+    return M_prec->Apply ( X, Y );
 }
 
 int
-PreconditionerComposition::ApplyInverse( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const
+PreconditionerComposition::ApplyInverse ( const Epetra_MultiVector& X, Epetra_MultiVector& Y ) const
 {
-    return M_prec->ApplyInverse( X, Y );
+    return M_prec->ApplyInverse ( X, Y );
 }
 
 bool
@@ -147,10 +148,10 @@ PreconditionerComposition::OperatorDomainMap() const
 // Set Methods
 // ===================================================
 void
-PreconditionerComposition::setComm( boost::shared_ptr<Epetra_Comm> comm )
+PreconditionerComposition::setComm ( boost::shared_ptr<Epetra_Comm> comm )
 {
     M_comm = comm;
-    M_prec->setComm( comm );
+    M_prec->setComm ( comm );
 }
 
 // ===================================================
@@ -190,96 +191,98 @@ PreconditionerComposition::numOperators() const
 // Protected Methods
 // ===================================================
 int
-PreconditionerComposition::pushBack( matrixPtr_Type A,
-                                     const bool useInverse,
-                                     const bool useTranspose )
+PreconditionerComposition::pushBack ( matrixPtr_Type A,
+                                      const bool useInverse,
+                                      const bool useTranspose )
 {
     //std::cout << "[DEBUG] pushBack() matrix version" << std::endl;
-    M_prec->push_back( boost::dynamic_pointer_cast<operator_Type>( A->matrixPtr() ), useInverse, useTranspose );
+    M_prec->push_back ( boost::dynamic_pointer_cast<operator_Type> ( A->matrixPtr() ), useInverse, useTranspose );
 
     return EXIT_SUCCESS;
 }
 
 int
-PreconditionerComposition::pushBack( operatorPtr_Type oper,
-                                     const bool useInverse,
-                                     const bool useTranspose,
-                                     matrixPtr_Type baseMatrix )
+PreconditionerComposition::pushBack ( operatorPtr_Type oper,
+                                      const bool useInverse,
+                                      const bool useTranspose,
+                                      matrixPtr_Type baseMatrix )
 {
-    if( baseMatrix.get() != 0 )
-        M_precBaseOperators.push_back( baseMatrix );
-    M_prec->push_back( oper, useInverse, useTranspose );
+    if ( baseMatrix.get() != 0 )
+    {
+        M_precBaseOperators.push_back ( baseMatrix );
+    }
+    M_prec->push_back ( oper, useInverse, useTranspose );
 
     return EXIT_SUCCESS;
 }
 
 int
-PreconditionerComposition::pushBack( matrixPtr_Type A,
-                                     superPtr_Type preconditioner,
-                                     const bool useInverse,
-                                     const bool useTranspose )
+PreconditionerComposition::pushBack ( matrixPtr_Type A,
+                                      superPtr_Type preconditioner,
+                                      const bool useInverse,
+                                      const bool useTranspose )
 {
     //std::cout << "[DEBUG] pushBack() preconditioner version" << std::endl;
-    M_precBaseOperators.push_back( A );
-    preconditioner->buildPreconditioner( A );
-    operatorPtr_Type oper( preconditioner->preconditionerPtr() );
-    M_prec->push_back( oper,useInverse, useTranspose );
+    M_precBaseOperators.push_back ( A );
+    preconditioner->buildPreconditioner ( A );
+    operatorPtr_Type oper ( preconditioner->preconditionerPtr() );
+    M_prec->push_back ( oper, useInverse, useTranspose );
 
     return EXIT_SUCCESS;
 }
 
 int
-PreconditionerComposition::pushBack( matrixPtr_Type embeddedA,
-                                     superPtr_Type preconditioner,
-                                     const VectorBlockStructure& blockStructure,
-                                     const UInt& blockIndex,
-                                     const MapEpetra& fullMap,
-                                     const bool useInverse,
-                                     const bool useTranspose,
-                                     const bool buildPreconditioner )
+PreconditionerComposition::pushBack ( matrixPtr_Type embeddedA,
+                                      superPtr_Type preconditioner,
+                                      const VectorBlockStructure& blockStructure,
+                                      const UInt& blockIndex,
+                                      const MapEpetra& fullMap,
+                                      const bool useInverse,
+                                      const bool useTranspose,
+                                      const bool buildPreconditioner )
 {
     // Add the operator
-    M_precBaseOperators.push_back( embeddedA );
+    M_precBaseOperators.push_back ( embeddedA );
 
     // Build the preconditioner
-    if( buildPreconditioner )
+    if ( buildPreconditioner )
     {
-        preconditioner->buildPreconditioner( embeddedA );
+        preconditioner->buildPreconditioner ( embeddedA );
     }
-    operatorPtr_Type precOper( preconditioner->preconditionerPtr() );
+    operatorPtr_Type precOper ( preconditioner->preconditionerPtr() );
 
     // Wrap the preconditioner in a ConfinedOperator
-    Operators::ConfinedOperator* confinedOperator = new Operators::ConfinedOperator( M_comm );
-    confinedOperator->setOperator( precOper );
-    confinedOperator->setFullMap( fullMap );
-    confinedOperator->setBlockStructure( blockStructure );
-    confinedOperator->setBlockIndex( blockIndex );
-    operatorPtr_Type oper( confinedOperator );
+    Operators::ConfinedOperator* confinedOperator = new Operators::ConfinedOperator ( M_comm );
+    confinedOperator->setOperator ( precOper );
+    confinedOperator->setFullMap ( fullMap );
+    confinedOperator->setBlockStructure ( blockStructure );
+    confinedOperator->setBlockIndex ( blockIndex );
+    operatorPtr_Type oper ( confinedOperator );
 
     // Add the operator
-    M_prec->push_back( oper, useInverse, useTranspose );
+    M_prec->push_back ( oper, useInverse, useTranspose );
 
     return EXIT_SUCCESS;
 }
 
 int
-PreconditionerComposition::pushBack( operatorPtr_Type embeddedOperator,
-                                     const VectorBlockStructure& blockStructure,
-                                     const UInt& blockIndex,
-                                     const MapEpetra& fullMap,
-                                     const bool useInverse,
-                                     const bool useTranspose )
+PreconditionerComposition::pushBack ( operatorPtr_Type embeddedOperator,
+                                      const VectorBlockStructure& blockStructure,
+                                      const UInt& blockIndex,
+                                      const MapEpetra& fullMap,
+                                      const bool useInverse,
+                                      const bool useTranspose )
 {
     // Wrap the preconditioner in a ConfinedOperator
-    Operators::ConfinedOperator* confinedOperator = new Operators::ConfinedOperator( M_comm );
-    confinedOperator->setOperator( embeddedOperator );
-    confinedOperator->setFullMap( fullMap );
-    confinedOperator->setBlockStructure( blockStructure );
-    confinedOperator->setBlockIndex( blockIndex );
-    operatorPtr_Type oper( confinedOperator );
+    Operators::ConfinedOperator* confinedOperator = new Operators::ConfinedOperator ( M_comm );
+    confinedOperator->setOperator ( embeddedOperator );
+    confinedOperator->setFullMap ( fullMap );
+    confinedOperator->setBlockStructure ( blockStructure );
+    confinedOperator->setBlockIndex ( blockIndex );
+    operatorPtr_Type oper ( confinedOperator );
 
     // Add the operator
-    M_prec->push_back( oper, useInverse, useTranspose );
+    M_prec->push_back ( oper, useInverse, useTranspose );
 
     return EXIT_SUCCESS;
 }

@@ -34,14 +34,15 @@
 
 #include "PreconditionerLSC.hpp"
 
-namespace LifeV {
+namespace LifeV
+{
 
-PreconditionerLSC::PreconditionerLSC( boost::shared_ptr<Epetra_Comm> comm ):
-        PreconditionerTeko  (),
-        M_precType          ( "" ),
-        M_velocityBlockSize ( -1 ),
-        M_pressureBlockSize ( -1 ),
-        M_comm( comm )
+PreconditionerLSC::PreconditionerLSC ( boost::shared_ptr<Epetra_Comm> comm ) :
+    PreconditionerTeko  (),
+    M_precType          ( "" ),
+    M_velocityBlockSize ( -1 ),
+    M_pressureBlockSize ( -1 ),
+    M_comm ( comm )
 {
 
 }
@@ -52,21 +53,21 @@ PreconditionerLSC::~PreconditionerLSC()
 }
 
 void
-PreconditionerLSC::setDataFromGetPot( const GetPot& dataFile,
-                                      const std::string& section )
+PreconditionerLSC::setDataFromGetPot ( const GetPot& dataFile,
+                                       const std::string& section )
 {
-    this->createParametersList( M_list, dataFile, section, "LSC" );
-    this->setParameters( M_list );
+    this->createParametersList ( M_list, dataFile, section, "LSC" );
+    this->setParameters ( M_list );
 }
 
 void
-PreconditionerLSC::setParameters( Teuchos::ParameterList& list )
+PreconditionerLSC::setParameters ( Teuchos::ParameterList& list )
 {
-    M_precType          = list.get( "prectype", "LSC" );
+    M_precType          = list.get ( "prectype", "LSC" );
 }
 
 void
-PreconditionerLSC::setFESpace( FESpacePtr_Type uFESpace, FESpacePtr_Type pFESpace )
+PreconditionerLSC::setFESpace ( FESpacePtr_Type uFESpace, FESpacePtr_Type pFESpace )
 {
     // We setup the size of the blocks
     M_velocityBlockSize = uFESpace->fieldDim() * uFESpace->dof().numTotalDof();
@@ -74,59 +75,59 @@ PreconditionerLSC::setFESpace( FESpacePtr_Type uFESpace, FESpacePtr_Type pFESpac
 }
 
 int
-PreconditionerLSC::buildPreconditioner( matrixPtr_Type& oper )
+PreconditionerLSC::buildPreconditioner ( matrixPtr_Type& oper )
 {
     if ( ( M_velocityBlockSize < 0 ) || ( M_pressureBlockSize < 0 ) )
     {
         std::cout << "You must specify manually the pointers to the FESpaces" << std::endl;
-        exit( -1 );
+        exit ( -1 );
     }
 
     // Creating the InverseLibrary from Stratimikos
     RCP<Teko::InverseLibrary> invLib = Teko::InverseLibrary::buildFromStratimikos();
 
     // build the inverse factory needed by the example preconditioner
-    RCP<Teko::InverseFactory> inverse = invLib->getInverseFactory( "Ifpack" );
+    RCP<Teko::InverseFactory> inverse = invLib->getInverseFactory ( "Ifpack" );
 
     // Building the LSC strategy
-    RCP<Teko::NS::LSCStrategy> strategy = rcp( new Teko::NS::InvLSCStrategy( inverse, true ) );
+    RCP<Teko::NS::LSCStrategy> strategy = rcp ( new Teko::NS::InvLSCStrategy ( inverse, true ) );
 
     // Building the LSC preconditioner factory
     RCP<Teko::BlockPreconditionerFactory> precFact
-        = rcp(new Teko::NS::LSCPreconditionerFactory( strategy ) );
+        = rcp (new Teko::NS::LSCPreconditionerFactory ( strategy ) );
 
     // Building Block sizes
     std::vector<int> blockSizes;
-    blockSizes.push_back( M_velocityBlockSize );
-    blockSizes.push_back( M_pressureBlockSize );
+    blockSizes.push_back ( M_velocityBlockSize );
+    blockSizes.push_back ( M_pressureBlockSize );
 
     // Building the LSC preconditioner
-    buildPreconditionerTeko( precFact, oper, blockSizes );
+    buildPreconditionerTeko ( precFact, oper, blockSizes );
 
     return ( EXIT_SUCCESS );
 }
 
 void
-PreconditionerLSC::createParametersList( list_Type&         list,
-                                         const GetPot&      dataFile,
-                                         const std::string& section,
-                                         const std::string& /* subSection */ )
+PreconditionerLSC::createParametersList ( list_Type&         list,
+                                          const GetPot&      dataFile,
+                                          const std::string& section,
+                                          const std::string& /* subSection */ )
 {
-    bool verbose( M_comm->MyPID() == 0 );
+    bool verbose ( M_comm->MyPID() == 0 );
 
     //! See http://trilinos.sandia.gov/packages/docs/r9.0/packages/ifpack/doc/html/index.html
     //! for more informations on the parameters
 
-    bool displayList = dataFile( ( section + "/displayList" ).data(), false );
+    bool displayList = dataFile ( ( section + "/displayList" ).data(), false );
 
-    std::string precType = dataFile( ( section + "/prectype" ).data(), "LSC" );
-    list.set( "prectype", precType );
+    std::string precType = dataFile ( ( section + "/prectype" ).data(), "LSC" );
+    list.set ( "prectype", precType );
 
     if ( displayList && verbose )
     {
         std::cout << "LSC parameters list:" << std::endl;
         std::cout << "-----------------------------" << std::endl;
-        list.print( std::cout );
+        list.print ( std::cout );
         std::cout << "-----------------------------" << std::endl;
     }
 }

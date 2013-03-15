@@ -67,7 +67,8 @@
 using Teuchos::RCP;
 using Teuchos::rcp;
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! PreconditionerLSC
 /*!
@@ -77,7 +78,7 @@ namespace LifeV {
  *  available in the Teko package of Trilinos
  */
 class PreconditionerLSC:
-        public PreconditionerTeko
+    public PreconditionerTeko
 {
 public:
 
@@ -90,7 +91,7 @@ public:
     typedef boost::shared_ptr<preconditioner_Type>  preconditionerPtr_Type;
     typedef RegionMesh<LinearTetra>                 mesh_Type;
     typedef MapEpetra                               map_Type;
-    typedef boost::shared_ptr<FESpace<mesh_Type,map_Type> >  FESpacePtr_Type;
+    typedef boost::shared_ptr<FESpace<mesh_Type, map_Type> >  FESpacePtr_Type;
     typedef MatrixEpetra<Real>                      matrix_Type;
     typedef boost::shared_ptr<matrix_Type>          matrixPtr_Type;
 
@@ -103,9 +104,9 @@ public:
     //@{
     //! default constructor.
 #ifdef HAVE_MPI
-    PreconditionerLSC( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>( new Epetra_MpiComm( MPI_COMM_WORLD ) ) );
+    PreconditionerLSC ( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm> ( new Epetra_MpiComm ( MPI_COMM_WORLD ) ) );
 #else
-    PreconditionerLSC( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>( new Epetra_SerialComm ) );
+    PreconditionerLSC ( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm> ( new Epetra_SerialComm ) );
 #endif
 
     //! constructor from matrix A.
@@ -134,24 +135,27 @@ public:
     /*!
         @param list Teuchos::ParameterList object
      */
-    virtual void setParameters( Teuchos::ParameterList& list );
+    virtual void setParameters ( Teuchos::ParameterList& list );
 
-    void setFESpace( FESpacePtr_Type uFESpace,
-                     FESpacePtr_Type pFESpace );
+    void setFESpace ( FESpacePtr_Type uFESpace,
+                      FESpacePtr_Type pFESpace );
 
-    void createParametersList( list_Type&         list,
-                               const GetPot&      dataFile,
-                               const std::string& section,
-                               const std::string& subSection = "LSC" );
+    void createParametersList ( list_Type&         list,
+                                const GetPot&      dataFile,
+                                const std::string& section,
+                                const std::string& subSection = "LSC" );
 
     //! Return an estimation of the conditionement number of the preconditioner
     double condest ();
 
     //! Return the name of the preconditioner to be used in the factory
-    std::string preconditionerType(){ return M_precType; }
+    std::string preconditionerType()
+    {
+        return M_precType;
+    }
 
     //! Build the preconditioner
-    int buildPreconditioner( matrixPtr_Type& A );
+    int buildPreconditioner ( matrixPtr_Type& A );
 
     int numBlocksRows() const;
     int numBlocksCols() const;
@@ -165,10 +169,13 @@ protected:
 
 };
 
-inline Preconditioner* createLSC(){ return new PreconditionerLSC(); }
+inline Preconditioner* createLSC()
+{
+    return new PreconditionerLSC();
+}
 namespace
 {
-	static bool registerLSC = PRECFactory::instance().registerProduct( "LSC", &createLSC );
+static bool registerLSC = PRECFactory::instance().registerProduct ( "LSC", &createLSC );
 }
 
 } // namespace LifeV

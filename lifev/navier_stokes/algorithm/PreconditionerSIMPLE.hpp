@@ -58,7 +58,8 @@
 #include <lifev/core/fem/FESpace.hpp>
 #include <lifev/core/mesh/RegionMesh.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! PreconditionerSIMPLE
 /*!
@@ -67,7 +68,7 @@ namespace LifeV {
  *  The PreconditionerSIMPLE class provides the SIMPLE block preconditioner
  */
 class PreconditionerSIMPLE:
-        public PreconditionerComposition
+    public PreconditionerComposition
 {
 public:
 
@@ -89,7 +90,7 @@ public:
     typedef ComposedOperator<Preconditioner>        preconditioner_Type;
     typedef boost::shared_ptr<preconditioner_Type>  preconditionerPtr_Type;
 
-    typedef boost::shared_ptr<FESpace<mesh_Type,map_Type> >  FESpacePtr_Type;
+    typedef boost::shared_ptr<FESpace<mesh_Type, map_Type> >  FESpacePtr_Type;
 
     typedef Teuchos::ParameterList                  list_Type;
     //@}
@@ -99,9 +100,9 @@ public:
     //@{
     //! default constructor
 #ifdef HAVE_MPI
-    PreconditionerSIMPLE( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>( new Epetra_MpiComm( MPI_COMM_WORLD ) ) );
+    PreconditionerSIMPLE ( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm> ( new Epetra_MpiComm ( MPI_COMM_WORLD ) ) );
 #else
-    PreconditionerSIMPLE( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm>( new Epetra_SerialComm ) );
+    PreconditionerSIMPLE ( boost::shared_ptr<Epetra_Comm> comm = boost::shared_ptr<Epetra_Comm> ( new Epetra_SerialComm ) );
 #endif
 
     //! constructor from matrix A.
@@ -115,16 +116,16 @@ public:
 
     //! @name  Methods
     //@{
-    void createParametersList( list_Type&         list,
-                               const GetPot&      dataFile,
-                               const std::string& section,
-                               const std::string& subsection = "SIMPLE" );
+    void createParametersList ( list_Type&         list,
+                                const GetPot&      dataFile,
+                                const std::string& section,
+                                const std::string& subsection = "SIMPLE" );
 
     //! Return an estimation of the conditionement number of the preconditioner
     double condest ();
 
     //! Build the preconditioner
-    int buildPreconditioner( matrixPtr_Type& A );
+    int buildPreconditioner ( matrixPtr_Type& A );
 
     //@}
 
@@ -150,7 +151,7 @@ public:
     /*!
         @param list Teuchos::ParameterList object
      */
-    virtual void setParameters( Teuchos::ParameterList& list );
+    virtual void setParameters ( Teuchos::ParameterList& list );
 
     //! Setter for the FESpace
     /*!
@@ -159,14 +160,14 @@ public:
         @param uFESpace Boost::shared_ptr on the FESpace for the velocity
         @param pFESpace Boost::shared_ptr on the FESpace for the pressure
      */
-    void setFESpace( FESpacePtr_Type uFESpace, FESpacePtr_Type pFESpace );
+    void setFESpace ( FESpacePtr_Type uFESpace, FESpacePtr_Type pFESpace );
 
     //! Setter for the damping factor
     /*!
         This method set damping factor used to build the preconditioner
         @param dampingFactor Damping factor
     */
-    void setDampingFactor( const Real& dampingFactor );
+    void setDampingFactor ( const Real& dampingFactor );
 
     //@}
 
@@ -189,16 +190,19 @@ protected:
     string          M_schurDataSection;
 
 private:
-    PreconditionerSIMPLE( const PreconditionerSIMPLE& P ):
-        PreconditionerComposition( P.M_comm ){}
-    PreconditionerSIMPLE( const boost::shared_ptr<PreconditionerSIMPLE>& /*P*/ ){}
+    PreconditionerSIMPLE ( const PreconditionerSIMPLE& P ) :
+        PreconditionerComposition ( P.M_comm ) {}
+    PreconditionerSIMPLE ( const boost::shared_ptr<PreconditionerSIMPLE>& /*P*/ ) {}
 
 };
 
-inline Preconditioner* createSIMPLE(){ return new PreconditionerSIMPLE(); }
+inline Preconditioner* createSIMPLE()
+{
+    return new PreconditionerSIMPLE();
+}
 namespace
 {
-	static bool registerSIMPLE = PRECFactory::instance().registerProduct( "SIMPLE", &createSIMPLE );
+static bool registerSIMPLE = PRECFactory::instance().registerProduct ( "SIMPLE", &createSIMPLE );
 }
 
 } // namespace LifeV

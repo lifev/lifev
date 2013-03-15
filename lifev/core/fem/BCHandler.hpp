@@ -277,7 +277,7 @@ public:
     /*!
       @param bcBase a BCBase object
     */
-    void addBC( const BCBase& bcBase );
+    void addBC ( const BCBase& bcBase );
 
 
     //! Modify the boundary condition @c name, assigning the function @c bcFunction

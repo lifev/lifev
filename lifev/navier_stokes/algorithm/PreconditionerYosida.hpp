@@ -58,7 +58,8 @@
 #include <lifev/core/fem/FESpace.hpp>
 #include <lifev/core/mesh/RegionMesh.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! PreconditionerYosida
 /*!
@@ -67,7 +68,7 @@ namespace LifeV {
  *  The PreconditionerYosida is inspired by the Yosida method
  */
 class PreconditionerYosida:
-        public PreconditionerComposition
+    public PreconditionerComposition
 {
 public:
 
@@ -89,7 +90,7 @@ public:
     typedef ComposedOperator<Preconditioner>        preconditioner_Type;
     typedef boost::shared_ptr<preconditioner_Type>  preconditionerPtr_Type;
 
-    typedef boost::shared_ptr<FESpace<mesh_Type,map_Type> >  FESpacePtr_Type;
+    typedef boost::shared_ptr<FESpace<mesh_Type, map_Type> >  FESpacePtr_Type;
 
     typedef Teuchos::ParameterList                  list_Type;
     //@}
@@ -98,7 +99,7 @@ public:
     //! @name Constructors, destructor
     //@{
     //! default constructor.
-    PreconditionerYosida( const  boost::shared_ptr<Epetra_Comm>& comm = boost::shared_ptr<Epetra_Comm>() );
+    PreconditionerYosida ( const  boost::shared_ptr<Epetra_Comm>& comm = boost::shared_ptr<Epetra_Comm>() );
 
     //! constructor from matrix A.
     //! @param A EpetraMatrix<double> matrix upon which construct the preconditioner
@@ -111,16 +112,16 @@ public:
 
     //! @name  Methods
     //@{
-    void createParametersList( list_Type&         list,
-                               const GetPot&      dataFile,
-                               const std::string& section,
-                               const std::string& subsection = "Yosida" );
+    void createParametersList ( list_Type&         list,
+                                const GetPot&      dataFile,
+                                const std::string& section,
+                                const std::string& subsection = "Yosida" );
 
     //! Return an estimation of the conditionement number of the preconditioner
     double condest ();
 
     //! Build the preconditioner
-    int buildPreconditioner( matrixPtr_Type& A );
+    int buildPreconditioner ( matrixPtr_Type& A );
 
     //@}
 
@@ -146,7 +147,7 @@ public:
     /*!
         @param list Teuchos::ParameterList object
      */
-    virtual void setParameters( Teuchos::ParameterList& list );
+    virtual void setParameters ( Teuchos::ParameterList& list );
 
     //! Setter for the FESpace
     /*!
@@ -155,14 +156,14 @@ public:
         @param uFESpace Boost::shared_ptr on the FESpace for the velocity
         @param pFESpace Boost::shared_ptr on the FESpace for the pressure
      */
-    void setFESpace( FESpacePtr_Type uFESpace, FESpacePtr_Type pFESpace );
+    void setFESpace ( FESpacePtr_Type uFESpace, FESpacePtr_Type pFESpace );
 
     //! Setter for the timestep
     /*!
         This method set the timestep used to compute the approximate Schur complement.
         @param timestep Timestep used to compute the solution of the Navier-Stokes equations
      */
-    void setTimestep( const Real& timestep );
+    void setTimestep ( const Real& timestep );
 
     //@}
 
@@ -175,7 +176,7 @@ protected:
     FESpacePtr_Type M_pFESpace;
     Real            M_timestep;
 
-    ADRAssembler<mesh_Type,matrixBlock_Type,vector_Type> M_adrVelocityAssembler;
+    ADRAssembler<mesh_Type, matrixBlock_Type, vector_Type> M_adrVelocityAssembler;
 
     // todo: Remove the member dataFile (bad programmation)
     GetPot          M_dataFile;
@@ -185,16 +186,19 @@ protected:
     string          M_schurDataSection;
 
 private:
-    PreconditionerYosida( const PreconditionerYosida& P ):
-        PreconditionerComposition( P.M_comm ){}
-    PreconditionerYosida( const boost::shared_ptr<PreconditionerYosida>& /*P*/ ){}
+    PreconditionerYosida ( const PreconditionerYosida& P ) :
+        PreconditionerComposition ( P.M_comm ) {}
+    PreconditionerYosida ( const boost::shared_ptr<PreconditionerYosida>& /*P*/ ) {}
 
 };
 
-inline Preconditioner* createYosida(){ return new PreconditionerYosida(); }
+inline Preconditioner* createYosida()
+{
+    return new PreconditionerYosida();
+}
 namespace
 {
-    static bool registerYosida = PRECFactory::instance().registerProduct( "Yosida", &createYosida );
+static bool registerYosida = PRECFactory::instance().registerProduct ( "Yosida", &createYosida );
 }
 
 } // namespace LifeV
