@@ -1,20 +1,16 @@
-INCLUDE(TribitsAddExecutableAndTest)
-INCLUDE(TribitsCopyFilesToBinaryDir)
+
+INCLUDE(TribitsAddExecutable)
 
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
 
-TRIBITS_ADD_EXECUTABLE_AND_TEST(
+TRIBITS_ADD_EXECUTABLE(
   TensionsDisplCyl
-  NAME StressDisplCyl
-  SOURCES main.cpp
-  ARGS "-f dataCylindrical"
-  NUM_MPI_PROCS 2
+  SOURCES main.cpp ud_functions.cpp
   COMM serial mpi
   )
 
-TRIBITS_COPY_FILES_TO_BINARY_DIR(dataCylindrical
-  SOURCE_FILES dataCylindrical
-  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
-  CREATE_SYMLINK
-)
-
+# TRIBITS_COPY_FILES_TO_BINARY_DIR(dataCylindrical
+#   SOURCE_FILES dataCylindrical
+#   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
+#   CREATE_SYMLINK
+# )

@@ -32,7 +32,6 @@
  *  @date 19-04-2012
  *  @author Paolo Tricerri
  *
- *  @contributor Paolo Tricerri <paolo.tricerri@epfl.ch>
  *  @maintainer  Paolo Tricerri <paolo.tricerri@epfl.ch>
  */
 
@@ -119,7 +118,7 @@ WallTensionEstimatorData::setup ( const GetPot& dataFile, const std::string& sec
     M_iterStart.resize (timesNumber);
     M_iterEnd.resize (timesNumber);
 
-    for ( UInt i (0); i < timesNumber ; i++)
+    for ( UInt i (0); i < timesNumber ; ++i)
     {
         M_initialTime[i] = dataFile ( ( section + "/analysis/start" ).data(), 0., i );
         M_finalTime[i]   = dataFile ( ( section + "/analysis/end"   ).data(), 0., i );
@@ -127,7 +126,6 @@ WallTensionEstimatorData::setup ( const GetPot& dataFile, const std::string& sec
         M_iterStart[i] = dataFile ( ( section + "/analysis/iterationStart" ).data(), "00000", i );
         M_iterEnd[i]   = dataFile ( ( section + "/analysis/iterationEnd"   ).data(), "00000", i );
     }
-
 }
 
 void
@@ -141,9 +139,8 @@ WallTensionEstimatorData::showMe ( std::ostream& output ) const
     output << "Recovery Variable        = " << M_recoveryVariable << std::endl;
     output << "The numbers of intervals is =  " << M_initialTime.size() << std::endl;
 
-    for ( UInt i (0); i < M_initialTime.size() ; i++ )
+    for ( UInt i (0); i < M_initialTime.size() ; ++i )
     {
-
         output <<  i + 1 << "  Interval: " <<  std::endl;
         output << "initial Time " << i + 1 << "  = " << M_initialTime[i] << std::endl;
         output << "final  Time " << i + 1 << "   = " << M_finalTime[i] << std::endl;

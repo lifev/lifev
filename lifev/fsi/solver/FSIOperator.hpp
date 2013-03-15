@@ -67,10 +67,12 @@
 #include <lifev/core/algorithm/NonLinearAitken.hpp>
 
 #include <lifev/structure/solver/StructuralOperator.hpp>
+
 #include <lifev/structure/solver/isotropic/VenantKirchhoffMaterialNonLinear.hpp>
 #include <lifev/structure/solver/isotropic/VenantKirchhoffMaterialLinear.hpp>
 #include <lifev/structure/solver/isotropic/ExponentialMaterialNonLinear.hpp>
 #include <lifev/structure/solver/isotropic/NeoHookeanMaterialNonLinear.hpp>
+#include <lifev/structure/solver/isotropic/VenantKirchhoffMaterialNonLinearPenalized.hpp>
 
 #include <lifev/core/fem/DOFInterface3Dto3D.hpp>
 #include <lifev/core/fem/DOFInterface3Dto2D.hpp>
@@ -341,6 +343,11 @@ public:
     {
         return new NeoHookeanMaterialNonLinear< FSIOperator::mesh_Type >();
     }
+    static StructuralConstitutiveLaw< FSIOperator::mesh_Type >*    createVenantKirchhoffNonLinearPenalized()
+    {
+        return new VenantKirchhoffMaterialNonLinearPenalized< FSIOperator::mesh_Type >();
+    }
+
 
     //@}
 
@@ -680,13 +687,22 @@ public:
         return M_pFESpace;
     }
     //!getter for the solid displacement FESpace
-    const FESpace<mesh_Type, MapEpetra>& dFESpace()               const
+    const FESpace<mesh_Type, MapEpetra>& dFESpace() const
     {
         return *M_dFESpace;
     }
     boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > dFESpacePtr() const
     {
         return M_dFESpace;
+    }
+    //!getter for the solid displacement FESpace
+    const ETFESpace<mesh_Type, MapEpetra, 3, 3>& dFESpaceET() const
+    {
+        return *M_dETFESpace;
+    }
+    boost::shared_ptr<ETFESpace<mesh_Type, MapEpetra, 3, 3> > dFESpaceETPtr() const
+    {
+        return M_dETFESpace;
     }
     //!getter for the harmonic extension solution FESpace
     const FESpace<mesh_Type, MapEpetra>& mmFESpace()              const

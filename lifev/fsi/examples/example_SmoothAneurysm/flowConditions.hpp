@@ -65,7 +65,7 @@ public:
 
     void initParameters      ( FSIOperator&  oper, const int&    outflowFlag);
 
-    void renewParameters     ( FSISolver&  oper, const int&    outflowFlag);
+    void renewParameters     ( FSISolver&  oper, const int&    outflowFlag, const FSIOperator::vector_Type& fluidSolution);
 
     Real fZero               (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
 

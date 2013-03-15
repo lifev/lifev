@@ -910,6 +910,18 @@ VectorEpetra::abs ( VectorEpetra& vector )
     vector.M_epetraVector->Abs ( *M_epetraVector );
 }
 
+void
+VectorEpetra::sqrt ()
+{
+    for ( Int i (0); i < M_epetraVector->NumVectors(); ++i )
+    {
+        for ( Int j (0); j < M_epetraVector->MyLength(); ++j )
+        {
+            (*M_epetraVector) [i][j] = std::sqrt ( (*M_epetraVector) [i][j] );
+        }
+    }
+}
+
 // Scalar Products
 VectorEpetra::data_type
 VectorEpetra::dot ( const VectorEpetra& vector ) const
