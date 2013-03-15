@@ -227,7 +227,7 @@ void RBFlocallyRescaledVectorial<Mesh>::interpolationOperator()
                                RBF_radius[i]);
             ++k;
         }
-        M_interpolationOperator->insertGlobalValues (GlobalID[i], k, Values, Indices);
+        M_interpolationOperator->matrixPtr()->InsertGlobalValues (GlobalID[i], k, Values, Indices);
     }
     M_interpolationOperator->globalAssemble();
     delete Indices;
@@ -304,7 +304,7 @@ void RBFlocallyRescaledVectorial<mesh_Type>::projectionOperator()
                                RBF_radius[i]);
             ++k;
         }
-        M_projectionOperator->insertGlobalValues (GlobalID[i], k, Values, Indices);
+        M_projectionOperator->matrixPtr()->InsertGlobalValues (GlobalID[i], k, Values, Indices);
     }
     M_projectionOperator->globalAssemble (M_interpolationOperatorMap, M_projectionOperatorMap);
     delete Indices;

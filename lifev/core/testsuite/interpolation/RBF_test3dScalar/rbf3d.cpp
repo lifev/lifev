@@ -151,7 +151,7 @@ int main (int argc, char** argv )
     RBFinterpolant.reset ( interpolation_Type::InterpolationFactory::instance().createObject (dataFile("interpolation/interpolation_Type","none")));
 
     RBFinterpolant->setup(Fluid_mesh_ptr, Fluid_localMesh, Solid_mesh_ptr, Solid_localMesh, flags);
-    if(dataFile("interpolation/interpolation_Type","none")=="RBFscalar")
+    if(dataFile("interpolation/interpolation_Type","none")!="RBFlocallyRescaledScalar")
         RBFinterpolant->setRadius((double) MeshUtility::MeshStatistics::computeSize (*Fluid_mesh_ptr).maxH);
     RBFinterpolant->setupRBFData (Fluid_vector, Solid_solution, dataFile, belosList);
     RBFinterpolant->buildOperators();

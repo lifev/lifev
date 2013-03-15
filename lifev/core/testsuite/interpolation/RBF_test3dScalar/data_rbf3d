@@ -25,7 +25,7 @@
        	mesh_type                = .mesh
 
 [interpolation]
-    interpolation_Type           = RBFscalar # RBFlocallyRescaledScalar, RBFrescaledScalar, RBFscalar
+    interpolation_Type           = RBFrescaledScalar # RBFlocallyRescaledScalar, RBFrescaledScalar, RBFscalar
 
 [prec]
     prectype                     = Ifpack # Ifpack or ML

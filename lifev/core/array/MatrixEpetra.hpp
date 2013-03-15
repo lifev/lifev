@@ -116,7 +116,7 @@ public:
     //! Constructor for square and rectangular matrices, knowing the number of entries per row
     /*!
       @param map Row map. The column map will be defined in MatrixEpetra<DataType>::GlobalAssemble(...,...)
-      @param numEntries The average number of entries for each row.
+      @param numEntriesPerRow Contains the number of entries for each row.
      */
     MatrixEpetra ( const MapEpetra& map, Int* numEntriesPerRow, bool ignoreNonLocalValues = false );
 
@@ -384,15 +384,6 @@ public:
       @param entry The entry that is inserted in the diagonal
       @param Map The MapEpetra
       @param offset An offset for the insertion of the diagonal entries
-    */
-
-    void insertGlobalValues (int GlobalRow, int NumEntries, const double* Values, const int* Indices);
-    //! insert values into the matrix
-    /*!
-      @param GlobalRow The global row-index
-      @param NumEntries number of entries per row
-      @param Values The values to be inserted
-      @param Indices The global column-index
     */
 
     void insertValueDiagonal ( const DataType entry, const MapEpetra& Map, const UInt offset = 0 );
@@ -1426,12 +1417,6 @@ void MatrixEpetra<DataType>::insertValueDiagonal ( const DataType entry, const M
     {
         addToCoefficient ( offset + Map.map (Unique)->GID (i) , offset + Map.map (Unique)->GID (i), entry );
     }
-}
-
-template <typename DataType>
-void MatrixEpetra<DataType>::insertGlobalValues (int GlobalRow, int NumEntries, const double* Values, const int* Indices)
-{
-    M_epetraCrs->InsertGlobalValues (GlobalRow, NumEntries, Values, Indices);
 }
 
 template <typename DataType>
