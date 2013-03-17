@@ -34,28 +34,27 @@
  *  @author Gianmarco Mengaldo
  *
  *  @maintainer  Paolo Tricerri      <paolo.tricerri@epfl.ch>
- *  @contributor Gianmarco Mengaldo  <gianmarco.mengaldo@gmail.com>
  */
 
-#ifndef _EXPONENTIALMATERIAL_H_
-#define _EXPONENTIALMATERIAL_H_
+#ifndef _HOLZAPFELMATERIAL_H_
+#define _HOLZAPFELMATERIAL_H_
 
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
 
-#include <lifev/structure/solver/isotropic/StructuralIsotropicConstitutiveLaw.hpp>
+#include <lifev/structure/solver/anisotropic/StructuralAnisotropicConstitutiveLaw.hpp>
 
 namespace LifeV
 {
 template <typename MeshType>
-class ExponentialMaterialNonLinear : public StructuralIsotropicConstitutiveLaw<MeshType>
+class HolzapfelMaterialNonLinear : public StructuralAnisotropicConstitutiveLaw<MeshType>
 {
     //!@name Type definitions
     //@{
 
 public:
-    typedef StructuralIsotropicConstitutiveLaw<MeshType>           super;
+    typedef StructuralAnisotropicConstitutiveLaw<MeshType>           super;
 
     typedef typename super::data_Type                data_Type;
 
@@ -89,6 +88,12 @@ public:
     typedef typename super::vectorsParametersPtr_Type    vectorsParametersPtr_Type;
 
     typedef MatrixSmall<3, 3>                          matrixSmall_Type;
+
+    typedef super::fiberFunction_Type                fiberFunction_Type;
+    typedef super::fiberFunctionPtr_Type             fiberFunction_Type;
+
+    typedef super::vectorFiberFunction_Type          vectorFiberFunction_Type;
+    typedef super::vectorFiberFunctionPtr_Type          vectorFiberFunctionPtr_Type;
     //@}
 
 
@@ -96,9 +101,9 @@ public:
     //! @name Constructor &  Destructor
     //@{
 
-    ExponentialMaterialNonLinear();
+    HolzapfelMaterialNonLinear();
 
-    virtual  ~ExponentialMaterialNonLinear();
+    virtual  ~HolzapfelMaterialNonLinear();
 
     //@}
 
@@ -175,7 +180,7 @@ public:
                             const displayerPtr_Type& displayer );
 
 
-    //! Computes the new Stiffness vector for Neo-Hookean and Exponential materials in StructuralSolver
+    //! Computes the new Stiffness vector for Neo-Hookean and Holzapfel materials in StructuralSolver
     //! given a certain displacement field.
     //! This function is used both in StructuralSolver::evalResidual and in StructuralSolver::updateSystem
     //! since the matrix is the expression of the matrix is the same.
@@ -186,11 +191,6 @@ public:
                            the material coefficients (e.g. Young modulus, Poisson ratio..)
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
-    // void computeVector( const vector_Type& sol,
-    //                     Real factor,
-    //                     const dataPtr_Type& dataMaterial,
-    //                     const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
-    //                     const displayerPtr_Type& displayer );
 
     //! Computes the deformation gradient F, the cofactor matrix Cof(F),
     //! the determinant of F (J = det(F)), the trace of right Cauchy-Green tensor tr(C)
@@ -226,6 +226,8 @@ public:
                                                  const std::vector<Real>& invariants,
                                                  const UInt marker);
 
+
+    void setupFiberFunctionsDirection( vectorFiberFunctionPtr_Type vectorOfFibers );
     //@}
 
     //! @name Get Methods
@@ -276,10 +278,10 @@ protected:
 
 
 template <typename MeshType>
-ExponentialMaterialNonLinear<MeshType>::ExponentialMaterialNonLinear() :
+HolzapfelMaterialNonLinear<MeshType>::HolzapfelMaterialNonLinear() :
     super            ( ),
     M_stiff          ( ),
-    M_identity         ( )
+    M_identity       ( )
 {
 }
 
@@ -288,7 +290,7 @@ ExponentialMaterialNonLinear<MeshType>::ExponentialMaterialNonLinear() :
 
 
 template <typename MeshType>
-ExponentialMaterialNonLinear<MeshType>::~ExponentialMaterialNonLinear()
+HolzapfelMaterialNonLinear<MeshType>::~HolzapfelMaterialNonLinear()
 {}
 
 
@@ -297,7 +299,7 @@ ExponentialMaterialNonLinear<MeshType>::~ExponentialMaterialNonLinear()
 
 template <typename MeshType>
 void
-ExponentialMaterialNonLinear<MeshType>::setup ( const FESpacePtr_Type&                       dFESpace,
+HolzapfelMaterialNonLinear<MeshType>::setup ( const FESpacePtr_Type&                       dFESpace,
                                                 const ETFESpacePtr_Type&                     dETFESpace,
                                                 const boost::shared_ptr<const MapEpetra>&   monolithicMap,
                                                 const UInt                                  offset,
@@ -332,47 +334,70 @@ ExponentialMaterialNonLinear<MeshType>::setup ( const FESpacePtr_Type&          
 }
 
 
+// template <typename MeshType>
+// void
+// HolzapfelMaterialNonLinear<MeshType>::setupVectorsParameters ( void )
+// {
+//     // Paolo Tricerri: February, 20th
+//     // In each class, the name of the parameters has to inserted in the law
+//     // TODO: move the saving of the material parameters to more abstract objects
+//     //       such that in the class of the material we do not need to call explicitly
+//     //       the name of the parameter.
+
+//     // Number of volume on the local part of the mesh
+//     UInt nbElements = this->M_dispFESpace->mesh()->numVolumes();
+
+//     // Parameter alpha
+//     // 1. resize the vector in the first element of the vector.
+//     (* (this->M_vectorsParameters) ) [0].resize ( nbElements );
+
+//     // Parameter gamma
+//     (* (this->M_vectorsParameters) ) [1].resize ( nbElements );
+
+//     // Parameter bulk
+//     (* (this->M_vectorsParameters) ) [2].resize ( nbElements );
+
+//     for (UInt i (0); i < nbElements; i++ )
+//     {
+//         // Extracting the marker
+//         UInt markerID = this->M_dispFESpace->mesh()->element ( i ).markerID();
+
+//         Real alpha = this->M_dataMaterial->alpha ( markerID );
+//         Real gamma = this->M_dataMaterial->gamma ( markerID );
+//         Real bulk  = this->M_dataMaterial->bulk ( markerID );
+
+//         ( (* (this->M_vectorsParameters) ) [0]) [ i ] = alpha;
+//         ( (* (this->M_vectorsParameters) ) [1]) [ i ] = gamma;
+//         ( (* (this->M_vectorsParameters) ) [2]) [ i ] = bulk;
+//     }
+// }
+
+
 template <typename MeshType>
 void
-ExponentialMaterialNonLinear<MeshType>::setupVectorsParameters ( void )
+HolzapfelMaterialNonLinear<MeshType>::setupFiberFunctionsDirection ( vectorFiberFunctionPtr_Type vectorOfFibers  )
 {
-    // Paolo Tricerri: February, 20th
-    // In each class, the name of the parameters has to inserted in the law
-    // TODO: move the saving of the material parameters to more abstract objects
-    //       such that in the class of the material we do not need to call explicitly
-    //       the name of the parameter.
+
+    // In this method, the vector of fiber functions has to be properly set  in the main
+    // of the test. The functions are then projected on a FESpace for the integration
 
     // Number of volume on the local part of the mesh
-    UInt nbElements = this->M_dispFESpace->mesh()->numVolumes();
+    UInt nbFamilies = (*vectorOfFibers).size();
 
-    // Parameter alpha
-    // 1. resize the vector in the first element of the vector.
-    (* (this->M_vectorsParameters) ) [0].resize ( nbElements );
+    ASSERT( nbFamilies == M_dataMaterial->numberFibersFamilies(), 
+	    " The number of families set in the test is different from the one in the data" );
 
-    // Parameter gamma
-    (* (this->M_vectorsParameters) ) [1].resize ( nbElements );
+    M_vectorOfFibers->resize( nbFamilies );
 
-    // Parameter bulk
-    (* (this->M_vectorsParameters) ) [2].resize ( nbElements );
-
-    for (UInt i (0); i < nbElements; i++ )
+    for( UInt k(0); k < nbFamilies; k++ )
     {
-        // Extracting the marker
-        UInt markerID = this->M_dispFESpace->mesh()->element ( i ).markerID();
-
-        Real alpha = this->M_dataMaterial->alpha ( markerID );
-        Real gamma = this->M_dataMaterial->gamma ( markerID );
-        Real bulk  = this->M_dataMaterial->bulk ( markerID );
-
-        ( (* (this->M_vectorsParameters) ) [0]) [ i ] = alpha;
-        ( (* (this->M_vectorsParameters) ) [1]) [ i ] = gamma;
-        ( (* (this->M_vectorsParameters) ) [2]) [ i ] = bulk;
+      ( *M_vectorOfFibers )[ k ] = ( *vectorOfFibers )[ k ];
     }
 }
 
 
 template <typename MeshType>
-void ExponentialMaterialNonLinear<MeshType>::computeLinearStiff (dataPtr_Type& /*dataMaterial*/,
+void HolzapfelMaterialNonLinear<MeshType>::computeLinearStiff (dataPtr_Type& /*dataMaterial*/,
                                                                  const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
                                                                  const mapMarkerIndexesPtr_Type /*mapsMarkerIndexes*/)
 {
@@ -384,7 +409,7 @@ void ExponentialMaterialNonLinear<MeshType>::computeLinearStiff (dataPtr_Type& /
 
 
 template <typename MeshType>
-void ExponentialMaterialNonLinear<MeshType>::updateJacobianMatrix ( const vector_Type&       disp,
+void HolzapfelMaterialNonLinear<MeshType>::updateJacobianMatrix ( const vector_Type&       disp,
                                                                     const dataPtr_Type&      dataMaterial,
                                                                     const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
                                                                     const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
@@ -401,7 +426,7 @@ void ExponentialMaterialNonLinear<MeshType>::updateJacobianMatrix ( const vector
 }
 
 template <typename MeshType>
-void ExponentialMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( matrixPtr_Type&         jacobian,
+void HolzapfelMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( matrixPtr_Type&         jacobian,
                                                                             const vector_Type&     disp,
                                                                             const dataPtr_Type&     dataMaterial,
                                                                             const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
@@ -410,7 +435,7 @@ void ExponentialMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( matr
 {
     using namespace ExpressionAssembly;
 
-    displayer->leaderPrint ("   Non-Linear S-  updating non linear terms in the Jacobian Matrix (Exponential)");
+    displayer->leaderPrint ("   Non-Linear S-  updating non linear terms in the Jacobian Matrix (Holzapfel)");
 
     * (jacobian) *= 0.0;
 
@@ -541,7 +566,7 @@ void ExponentialMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( matr
 
 
 template <typename MeshType>
-void ExponentialMaterialNonLinear<MeshType>::computeStiffness ( const vector_Type& disp,
+void HolzapfelMaterialNonLinear<MeshType>::computeStiffness ( const vector_Type& disp,
                                                                 Real /*factor*/,
                                                                 const dataPtr_Type& dataMaterial,
                                                                 const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
@@ -555,7 +580,7 @@ void ExponentialMaterialNonLinear<MeshType>::computeStiffness ( const vector_Typ
     * (M_stiff) *= 0.0;
 
     displayer->leaderPrint (" \n*********************************\n  ");
-    displayer->leaderPrint (" Non-Linear S-  Computing the Exponential nonlinear stiffness vector ");
+    displayer->leaderPrint (" Non-Linear S-  Computing the Holzapfel nonlinear stiffness vector ");
     displayer->leaderPrint (" \n*********************************\n  ");
 
     // mapIterator_Type it;
@@ -602,7 +627,7 @@ void ExponentialMaterialNonLinear<MeshType>::computeStiffness ( const vector_Typ
 
 
 template <typename MeshType>
-void ExponentialMaterialNonLinear<MeshType>::showMe ( std::string const& fileNameStiff,
+void HolzapfelMaterialNonLinear<MeshType>::showMe ( std::string const& fileNameStiff,
                                                       std::string const& fileNameJacobian )
 {
     this->M_stiff->spy (fileNameStiff);
@@ -611,7 +636,7 @@ void ExponentialMaterialNonLinear<MeshType>::showMe ( std::string const& fileNam
 
 
 template <typename MeshType>
-void ExponentialMaterialNonLinear<MeshType>::apply ( const vector_Type& sol,
+void HolzapfelMaterialNonLinear<MeshType>::apply ( const vector_Type& sol,
                                                      vector_Type& res, const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
                                                      const mapMarkerIndexesPtr_Type mapsMarkerIndexes,const displayerPtr_Type displayer)
 {
@@ -621,57 +646,26 @@ void ExponentialMaterialNonLinear<MeshType>::apply ( const vector_Type& sol,
 
 
 template <typename MeshType>
-void ExponentialMaterialNonLinear<MeshType>::computeLocalFirstPiolaKirchhoffTensor ( Epetra_SerialDenseMatrix& firstPiola,
+void HolzapfelMaterialNonLinear<MeshType>::computeLocalFirstPiolaKirchhoffTensor ( Epetra_SerialDenseMatrix& firstPiola,
                                                                                      const Epetra_SerialDenseMatrix& tensorF,
                                                                                      const Epetra_SerialDenseMatrix& cofactorF,
                                                                                      const std::vector<Real>& invariants,
                                                                                      const UInt marker)
 {
 
-    //Get the material parameters
-    Real alpha    = this->M_dataMaterial->alpha (marker);
-    Real gamma    = this->M_dataMaterial->gamma (marker);
-    Real bulk     = this->M_dataMaterial->bulk (marker);
-
-
-    //Computing the first term \alphaJ^{-2/3}[F-(1/3)tr(C)F^{-T}]exp(\gamma(tr(Ciso) - 3)
-    Epetra_SerialDenseMatrix firstTerm (tensorF);
-    Epetra_SerialDenseMatrix copyCofactorF (cofactorF);
-
-    Real scale (0.0);
-    scale = -invariants[0] / 3.0;
-    copyCofactorF.Scale ( scale );
-    firstTerm += copyCofactorF;
-
-    //Computation trace of the isochoric C
-    Real trCiso (0.0);
-    trCiso = std::pow (invariants[3], - (2.0 / 3.0) ) * invariants[0];
-
-    Real coef ( 0.0 );
-    coef = alpha * std::pow (invariants[3], - (2.0 / 3.0) ) * std::exp ( gamma * ( trCiso - 3 ) );
-    firstTerm.Scale ( coef );
-
-    //Computing the second term (volumetric part) J*(bulk/2)(J-1+(1/J)*ln(J))F^{-T}
-    Epetra_SerialDenseMatrix secondTerm (cofactorF);
-    Real secCoef (0);
-    secCoef = invariants[3] * (bulk / 2.0) * (invariants[3] - 1 + (1.0 / invariants[3]) * std::log (invariants[3]) );
-
-    secondTerm.Scale ( secCoef );
-
-    firstPiola += firstTerm;
-    firstPiola += secondTerm;
+  // Still Need to Define P
 
 }
 
 template <typename MeshType>
-inline StructuralIsotropicConstitutiveLaw<MeshType>* createExponentialMaterialNonLinear()
+inline StructuralIsotropicConstitutiveLaw<MeshType>* createHolzapfelMaterialNonLinear()
 {
-    return new ExponentialMaterialNonLinear<MeshType >();
+    return new HolzapfelMaterialNonLinear<MeshType >();
 }
 
 namespace
 {
-static bool registerEXP = StructuralIsotropicConstitutiveLaw<LifeV::RegionMesh<LinearTetra> >::StructureIsotropicMaterialFactory::instance().registerProduct ( "exponential", &createExponentialMaterialNonLinear<LifeV::RegionMesh<LinearTetra> > );
+static bool registerHL = StructuralIsotropicConstitutiveLaw<LifeV::RegionMesh<LinearTetra> >::StructureIsotropicMaterialFactory::instance().registerProduct ( "holzapfel", &createHolzapfelMaterialNonLinear<LifeV::RegionMesh<LinearTetra> > );
 }
 
 } //Namespace LifeV

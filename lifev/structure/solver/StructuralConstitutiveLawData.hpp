@@ -363,7 +363,7 @@ public:
         return M_solidTypeAnisotropic;
     }
 
-    const UInt numberFibers()
+    const UInt numberFibersFamilies()
     {
         return M_numberFibers;
     }
