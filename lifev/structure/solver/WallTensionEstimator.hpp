@@ -617,7 +617,7 @@ WallTensionEstimator<Mesh >::setup ( const dataPtr_Type& dataMaterial,
 
     // Materials
     M_material.reset( new material_Type() );
-    M_material->setup ( dFESpace, dETFESpace, M_localMap, M_offset, M_dataMaterial, M_displayer );
+    M_material->setup ( feSpace, feSpaceET, M_FESpace->mapPtr(), M_offset, M_dataMaterial, M_displayer );
 
 }
 
