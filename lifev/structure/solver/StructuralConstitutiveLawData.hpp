@@ -74,6 +74,7 @@ public:
     typedef std::map<UInt, Real>                   materialContainer_Type;
     typedef materialContainer_Type::const_iterator materialContainerIterator_Type;
     typedef std::vector<UInt>                      vectorFlags_Type;
+    typedef std::vector<Real>                      vectorParameters_Type;
 
     //@}
 
@@ -361,7 +362,24 @@ public:
     {
         return M_solidTypeAnisotropic;
     }
+
+    const UInt numberFibers()
+    {
+        return M_numberFibers;
+    }
+
+    const Real ithStiffnessParameterFibers( const UInt i )
+    {
+        return M_stiffnessParametersFibers[ i ];
+    }
+
+    const Real ithNonlinearityParameterFibers( const UInt i )
+    {
+        return M_nonlinearityParametersFibers[ i ];
+    }
 #endif
+
+
 
     //! Get law type
     /*!
@@ -424,6 +442,9 @@ private:
     std::string            M_solidTypeIsotropic;
 #ifdef ENABLE_ANISOTROPIC_LAW
     std::string            M_solidTypeAnisotropic;
+    UInt                   M_numberFibers;
+    vectorParameters_Type  M_stiffnessParametersFibers;
+    vectorParameters_Type  M_nonlinearityParametersFibers;
 #endif
     std::string            M_lawType;
     bool                   M_useExactJacobian;

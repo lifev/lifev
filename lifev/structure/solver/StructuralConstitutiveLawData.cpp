@@ -65,6 +65,15 @@ StructuralConstitutiveLawData::StructuralConstitutiveLawData() :
     M_gamma                            ( ),
     M_order                            ( ),
     M_verbose                          ( ),
+    M_solidTypeIsotropic               ( ),
+#ifdef ENABLE_ANISOTROPIC_LAW
+    M_solidTypeAnisotropic             ( ),
+    M_numberFibers                     ( 0 ),
+    M_stiffnessParametersFibers        ( ),
+    M_nonlinearityParametersFibers     ( ),
+#endif
+    M_lawType                          ( ),
+    M_useExactJacobian                 ( false ),
     M_vectorMaterialFlags              ( )
 {
 }
@@ -83,6 +92,15 @@ StructuralConstitutiveLawData::StructuralConstitutiveLawData ( const StructuralC
     M_gamma                            ( structuralConstitutiveLawData.M_gamma ),
     M_order                            ( structuralConstitutiveLawData.M_order ),
     M_verbose                          ( structuralConstitutiveLawData.M_verbose ),
+    M_solidTypeIsotropic               ( structuralConstitutiveLawData.M_solidTypeIsotropic ),
+#ifdef ENABLE_ANISOTROPIC_LAW
+    M_solidTypeAnisotropic             ( structuralConstitutiveLawData.M_solidTypeAnisotropic ),
+    M_numberFibers                     ( structuralConstitutiveLawData.M_numberFibers ),
+    M_stiffnessParametersFibers        ( structuralConstitutiveLawData.M_stiffnessParametersFibers ),
+    M_nonlinearityParametersFibers     ( structuralConstitutiveLawData.M_nonlinearityParametersFibers ),
+#endif
+    M_lawType                          ( structuralConstitutiveLawData.M_lawType ),
+    M_useExactJacobian                 ( structuralConstitutiveLawData.M_useExactJacobian ),
     M_vectorMaterialFlags              ( structuralConstitutiveLawData.M_vectorMaterialFlags )
 {
 }
@@ -108,6 +126,15 @@ StructuralConstitutiveLawData::operator= ( const StructuralConstitutiveLawData& 
         M_gamma                            = structuralConstitutiveLawData.M_gamma;
         M_order                            = structuralConstitutiveLawData.M_order;
         M_verbose                          = structuralConstitutiveLawData.M_verbose;
+        M_solidTypeIsotropic               = structuralConstitutiveLawData.M_solidTypeIsotropic;
+#ifdef ENABLE_ANISOTROPIC_LAW
+        M_solidTypeAnisotropic             = structuralConstitutiveLawData.M_solidTypeAnisotropic;
+        M_numberFibers                     = structuralConstitutiveLawData.M_numberFibers;
+        M_stiffnessParametersFibers        = structuralConstitutiveLawData.M_stiffnessParametersFibers;
+        M_nonlinearityParametersFibers     = structuralConstitutiveLawData.M_nonlinearityParametersFibers;
+#endif
+        M_lawType                          = structuralConstitutiveLawData.M_lawType;
+        M_useExactJacobian                 = structuralConstitutiveLawData.M_useExactJacobian;
         M_vectorMaterialFlags              = structuralConstitutiveLawData.M_vectorMaterialFlags;
     }
 
@@ -134,8 +161,12 @@ StructuralConstitutiveLawData::setup ( const GetPot& dataFile, const std::string
     // physics
     M_solidTypeIsotropic = dataFile ( ( section + "/physics/solidTypeIsotropic" ).data(), "NO_DEFAULT_SOLID_TYPE_ISOTROPIC" );
 
+    // Reading the type of anisotropic part and the number of fibers
 #ifdef ENABLE_ANISOTROPIC_LAW
     M_solidTypeAnisotropic = dataFile ( ( section + "/physics/solidTypeAnisotropic" ).data(), "NO_DEFAULT_SOLID_TYPE_ANISOTROPIC" );
+    M_numberFibers = dataFile ( ( section + "/physics/fibers/numberFamilies" ).data(), 0 );
+
+    ASSERT( M_numberFibers, " The number of fibers of the anisotropic law has to be different from 0!" );
 #endif
 
     // The check can be done on the isotropic part since the anisotropic is for sure nonlinear
@@ -159,6 +190,14 @@ StructuralConstitutiveLawData::setup ( const GetPot& dataFile, const std::string
 
     UInt materialsNumber = dataFile.vector_variable_size ( ( section + "/physics/material_flag" ).data() );
 
+#ifdef ENABLE_ANISOTROPIC_LAW
+    UInt numberOfStiffnesses = dataFile.vector_variable_size ( ( section + "/physics/fibers/stiffness" ).data() );
+    UInt numberOfNonlinearities = dataFile.vector_variable_size ( ( section + "/physics/fibers/nonlinearity" ).data() );
+
+    ASSERT( ( M_numberFibers == numberOfStiffnesses ) && ( M_numberFibers == numberOfNonlinearities ), " Inconsistency in the set up of the fiber parameters" );
+#endif
+
+    // Reading the material for isotropic laws
     ASSERT ( materialsNumber, "Set the materrial_flag variable in [solid]/physics");
 
     if ( materialsNumber == 0 )
@@ -200,6 +239,18 @@ StructuralConstitutiveLawData::setup ( const GetPot& dataFile, const std::string
             M_gamma[material] = dataFile ( ( section + "/physics/gamma"       ).data(), 0.8, i );
         }
     }
+
+
+#ifdef ENABLE_ANISOTROPIC_LAW
+    for ( UInt i (0) ; i < M_numberFibers ; ++i )
+    {
+         M_stiffnessParametersFibers .resize ( M_numberFibers  );
+         M_nonlinearityParametersFibers .resize ( M_numberFibers  );
+
+         M_stiffnessParametersFibers[ i ]      = dataFile ( ( section + "/physics/fibers/stiffness"    ).data(), 0., i );
+         M_nonlinearityParametersFibers[ i ]   = dataFile ( ( section + "/physics/fibers/nonlinearity" ).data(), 0., i );
+     }
+#endif 
 
     // space_discretization
     M_order            = dataFile ( ( section + "/space_discretization/order" ).data(), "P1" );
@@ -262,6 +313,20 @@ StructuralConstitutiveLawData::showMe ( std::ostream& output ) const
     output << "\n*** Values for data [solid/time_discretization]\n\n";
     M_time->showMe ( output );
     M_timeAdvance->showMe ( output );
+
+    output << " Informations on the constitutive law " << std::endl;
+    output << " Isotropic Part:  " << M_solidTypeIsotropic << std::endl;
+
+#ifdef ENABLE_ANISOTROPIC_LAW
+    output << " Anisotropic Part:  " << M_solidTypeIsotropic << std::endl;
+
+    for ( UInt i (0) ; i < M_numberFibers ; ++i )
+    {
+         std::cout << i<< "-th fiber family stiffness parameter" << M_stiffnessParametersFibers[ i ] << std::endl;
+	 std::cout << i<< "-th fiber family nonlinear parameter" << M_nonlinearityParametersFibers[ i ] << std::endl;
+     }
+
+#endif
 }
 
 // ===================================================
