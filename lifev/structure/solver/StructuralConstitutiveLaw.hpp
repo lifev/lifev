@@ -344,7 +344,7 @@ StructuralConstitutiveLaw<MeshType>::setup (const FESpacePtr_Type& dFESpace,
     // Creation of the abstract classes for the isotropic and anisotropic laws
     M_isotropicLaw.reset ( isotropicLaw_Type::StructureIsotropicMaterialFactory::instance().createObject ( M_dataMaterial->solidTypeIsotropic() ) );
 #ifdef ENABLE_ANISOTROPIC_LAW
-    M_anisotropicLaw.reset ( anisotropicLaw_Type::StructureAnisotropicMaterialFactory::instance().createObject ( M_dataMaterial->solidTypeAnsotropic() ) );
+    M_anisotropicLaw.reset ( anisotropicLaw_Type::StructureAnisotropicMaterialFactory::instance().createObject ( M_dataMaterial->solidTypeAnisotropic() ) );
 #endif
 
     M_displayer = displayer;
@@ -425,7 +425,7 @@ void StructuralConstitutiveLaw<MeshType>::computeStiffness ( const vector_Type& 
     // Anisotropic part
     displayer->leaderPrint ("\n  S-  Updating the Jacobian Matrix ( anisotropic part )\n");
 
-    M_anisotropicLaw->computeStiffnes (disp, factor, dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
+    M_anisotropicLaw->computeStiffness (sol, factor, dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
 
     *M_vectorStiffness += *M_anisotropicLaw->stiffVector();
 #endif
