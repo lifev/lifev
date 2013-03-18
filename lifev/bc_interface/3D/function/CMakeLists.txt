@@ -23,6 +23,28 @@ TRIBITS_ADD_LIBRARY(
 )
 ENDIF()
 
+IF (LifeV_ENABLE_Structure)
+SET(HEADERS "")
+SET(SOURCES "")
+
+ADD_SUBDIRECTORY(solid)
+
+SET(HEADERS ${HEADERS} ${solid_HEADERS})
+SET(SOURCES ${SOURCES} ${solid_SOURCES})
+
+TRIBITS_EXCLUDE_AUTOTOOLS_FILES()
+# This is the list of files excluded from the tarball
+TRIBITS_EXCLUDE_FILES()
+
+# Add library target
+TRIBITS_ADD_LIBRARY(
+  lifevbcinterface3Dsolid
+  HEADERS ${HEADERS}
+  SOURCES ${SOURCES}
+  DEPLIBS lifevbcinterface3D
+)
+ENDIF()
+
 IF (LifeV_ENABLE_FSI)
 SET(HEADERS "")
 SET(SOURCES "")
