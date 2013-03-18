@@ -56,9 +56,11 @@ ADD_SUBDIRECTORY(fem)
 SET(HEADERS ${HEADERS} ${fem_HEADERS})
 SET(SOURCES ${SOURCES} ${fem_SOURCES})
 
-ADD_SUBDIRECTORY(solver/anisotropic)
-SET(HEADERS ${HEADERS} ${solverAnisotropic_HEADERS})
-SET(SOURCES ${SOURCES} ${solverAnisotropic_SOURCES})
+IF(ENABLE_ANISOTROPIC_LAW)
+  ADD_SUBDIRECTORY(solver/anisotropic)
+  SET(HEADERS ${HEADERS} ${solverAnisotropic_HEADERS})
+  SET(SOURCES ${SOURCES} ${solverAnisotropic_SOURCES})
+ENDIF()
 
 TRIBITS_EXCLUDE_AUTOTOOLS_FILES()
 # This is the list of files excluded from the tarball
