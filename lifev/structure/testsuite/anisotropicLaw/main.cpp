@@ -146,7 +146,7 @@ public:
 
     // typedefs for fibers
     // Boost function for fiber direction
-    typedef boost::function<Real ( Real const&, Real const&, Real const&, ID const& ) > fiberFunction_Type;
+    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > fiberFunction_Type;
     typedef boost::shared_ptr<fiberFunction_Type> fiberFunctionPtr_Type;
 
     typedef std::vector<fiberFunctionPtr_Type>             vectorFiberFunction_Type;

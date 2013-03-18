@@ -62,18 +62,18 @@ Real bcNonZero (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const 
 Real bcNonZeroSecondOrderExponential (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/);
 
 //Fiber Directions
-Real Family1 ( const Real& x, const Real& y, const Real& z, const ID& i);
-Real Family2 ( const Real& x, const Real& y, const Real& z, const ID& i);
-Real Family3 ( const Real& x, const Real& y, const Real& z, const ID& i);
-Real Family4 ( const Real& x, const Real& y, const Real& z, const ID& i);
-Real Family5 ( const Real& x, const Real& y, const Real& z, const ID& i);
-Real Family6 ( const Real& x, const Real& y, const Real& z, const ID& i);
+Real Family1 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i);
+Real Family2 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i);
+Real Family3 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i);
+Real Family4 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i);
+Real Family5 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i);
+Real Family6 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i);
 
 class fibersDirectionList
 {
 public:
 
-    typedef boost::function<Real ( Real const&, Real const&, Real const&, ID const& ) > fiberFunction_Type;
+    typedef boost::function<Real (  Real const&, Real const&, Real const&, Real const&, ID const& ) > fiberFunction_Type;
     typedef boost::shared_ptr<fiberFunction_Type>                                       fiberFunctionPtr_Type;
     typedef std::map< std::string, fiberFunctionPtr_Type>                               mapNameDefinitionFiberFunction_Type;
 

@@ -159,7 +159,7 @@ Real bcNonZeroSecondOrderExponential (const Real& /*t*/, const Real&  /*X*/, con
 
 
 //----------------------------------------------Fibers Directions--------------
-Real Family1 ( const Real& x, const Real& y, const Real& z, const ID& i)
+Real Family1 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
 {
     switch (i)
     {
@@ -179,28 +179,7 @@ Real Family1 ( const Real& x, const Real& y, const Real& z, const ID& i)
     }
 }
 
-Real Family2 ( const Real& x, const Real& y, const Real& z, const ID& i)
-{
-
-    switch (i)
-    {
-        case 0:
-            return 0.0;
-            break;
-        case 1:
-            return 0.0;
-            break;
-        case 2:
-            return 0.0;
-            break;
-        default:
-            ERROR_MSG ("This entrie is not allowed: ud_functions.hpp");
-            return 0.;
-            break;
-    }
-}
-
-Real Family3 ( const Real& x, const Real& y, const Real& z, const ID& i)
+Real Family2 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
 {
 
     switch (i)
@@ -221,8 +200,7 @@ Real Family3 ( const Real& x, const Real& y, const Real& z, const ID& i)
     }
 }
 
-
-Real Family4 ( const Real& x, const Real& y, const Real& z, const ID& i)
+Real Family3 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
 {
 
     switch (i)
@@ -244,7 +222,7 @@ Real Family4 ( const Real& x, const Real& y, const Real& z, const ID& i)
 }
 
 
-Real Family5 ( const Real& x, const Real& y, const Real& z, const ID& i)
+Real Family4 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
 {
 
     switch (i)
@@ -265,7 +243,29 @@ Real Family5 ( const Real& x, const Real& y, const Real& z, const ID& i)
     }
 }
 
-Real Family6 ( const Real& x, const Real& y, const Real& z, const ID& i)
+
+Real Family5 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
+{
+
+    switch (i)
+    {
+        case 0:
+            return 0.0;
+            break;
+        case 1:
+            return 0.0;
+            break;
+        case 2:
+            return 0.0;
+            break;
+        default:
+            ERROR_MSG ("This entrie is not allowed: ud_functions.hpp");
+            return 0.;
+            break;
+    }
+}
+
+Real Family6 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
 {
 
     switch (i)

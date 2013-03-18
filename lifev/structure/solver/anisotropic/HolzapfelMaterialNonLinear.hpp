@@ -80,6 +80,7 @@ public:
     typedef std::vector<UInt>                        vectorIndexes_Type;
     typedef boost::shared_ptr<vectorIndexes_Type>    vectorIndexesPtr_Type;
 
+    typedef typename super::FESpace_Type             FESpace_Type;
     typedef typename super::FESpacePtr_Type          FESpacePtr_Type;
     typedef typename super::ETFESpacePtr_Type        ETFESpacePtr_Type;
 
@@ -388,6 +389,17 @@ HolzapfelMaterialNonLinear<MeshType>::setupFiberDirections ( vectorFiberFunction
     {
         ( *(this->M_vectorOfFibers) )[ k ] = ( *vectorOfFibers )[ k ];
     }
+
+    // Setting the vectors that will be used
+    this->M_vectorInterpolated.resize( nbFamilies );
+
+    for( UInt k(0); k < nbFamilies; k++ )
+    {
+        this->M_dispFESpace->interpolate ( *( ( *(this->M_vectorOfFibers) )[ k ] ) ,
+                                           * ( ( this->M_vectorInterpolated )[ k ] ),
+                                           0.0 );
+    }
+
 }
 
 
@@ -429,6 +441,8 @@ void HolzapfelMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( matrix
                                                                             const displayerPtr_Type& displayer )
 {
     using namespace ExpressionAssembly;
+
+    // Update the heaviside function for the stretch of the fibers
 
     displayer->leaderPrint ("   Non-Linear S-  updating non linear terms in the Jacobian Matrix (Holzapfel)");
 

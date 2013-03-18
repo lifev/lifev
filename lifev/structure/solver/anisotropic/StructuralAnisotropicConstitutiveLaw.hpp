@@ -115,7 +115,6 @@ public:
     typedef std::map< UInt, vectorIndexes_Type>           mapMarkerIndexes_Type;
     typedef boost::shared_ptr<mapMarkerIndexes_Type>      mapMarkerIndexesPtr_Type;
 
-
     typedef ETFESpace<MeshType, MapEpetra, 3, 3 >         ETFESpace_Type;
     typedef boost::shared_ptr<ETFESpace_Type>             ETFESpacePtr_Type;
 
@@ -128,12 +127,14 @@ public:
 
 
     // Boost function for fiber direction
-    typedef boost::function<Real ( Real const&, Real const&, Real const&, ID const& ) > fiberFunction_Type;
+    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > fiberFunction_Type;
     typedef boost::shared_ptr<fiberFunction_Type> fiberFunctionPtr_Type;
-
 
     typedef std::vector<fiberFunctionPtr_Type>             vectorFiberFunction_Type;
     typedef boost::shared_ptr<vectorFiberFunction_Type>    vectorFiberFunctionPtr_Type;
+
+    // Vector to store the interpolated fiber direction
+    typedef std::vector<vectorPtr_Type>                    vectorInterpolatedFibers_Type;
     //@}
 
 
@@ -264,6 +265,13 @@ public:
         return M_jacobian;
     }
 
+    // Used to export the fibers families
+    const vector_Type& const ithFiberVector( const UInt i ) const
+    {
+        ASSERT( i < M_vectorInterpolated.size(), " No such fiber family in the class" );
+        return *( M_vectorInterpolated[ i ] )
+    }
+
     //! Get the Stiffness matrix
     virtual matrixPtr_Type const stiffMatrix() const = 0;
 
@@ -310,6 +318,10 @@ protected:
 
     //! Boost::shared to the vector of fibers
     vectorFiberFunctionPtr_Type                    M_vectorOfFibers;
+
+    //! std::vector to store the vector of the interpolation of the
+    //! fiber direction.
+    vectorInterpolatedFibers_Type                  M_vectorInterpolated;
 };
 
 //=====================================
@@ -323,7 +335,8 @@ StructuralAnisotropicConstitutiveLaw<MeshType>::StructuralAnisotropicConstitutiv
     M_localMap                   ( ),
     M_jacobian                   ( ),
     M_offset                     ( 0 ),
-    M_vectorOfFibers             ( )
+    M_vectorOfFibers             ( ),
+    M_vectorInterpolated         ( )
 {
     //    std::cout << "I am in the constructor of StructuralAnisotropicConstitutiveLaw" << std::endl;
 }
