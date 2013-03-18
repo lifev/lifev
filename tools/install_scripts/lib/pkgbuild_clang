@@ -7,16 +7,16 @@
 ver="3.1"
 
 download_clang() {
-    wget -c http://llvm.org/releases/${ver}/llvm-${ver}.src.tar.gz || return 1
-    wget -c http://llvm.org/releases/${ver}/clang-${ver}.src.tar.gz || return 1
-    wget -c http://llvm.org/releases/${ver}/compiler-rt-${ver}.src.tar.gz || return 1
+    wget -c http://llvm.org/releases/${ver}/llvm-${ver}.src.tar.gz
+    wget -c http://llvm.org/releases/${ver}/clang-${ver}.src.tar.gz
+    wget -c http://llvm.org/releases/${ver}/compiler-rt-${ver}.src.tar.gz
 }
 
 unpack_clang() {
-    tar xzf llvm-${ver}.src.tar.gz || return 1
-    tar xzf clang-${ver}.src.tar.gz || return 1
+    tar xzf llvm-${ver}.src.tar.gz
+    tar xzf clang-${ver}.src.tar.gz
     mv clang-${ver}.src llvm-${ver}.src/tools/clang
-    tar xzf compiler-rt-${ver}.src.tar.gz || return 1
+    tar xzf compiler-rt-${ver}.src.tar.gz
     mv compiler-rt-${ver}.src llvm-${ver}.src/projects/compiler-rt
 }
 
@@ -31,7 +31,7 @@ build_clang() {
         -D CMAKE_BUILD_TYPE:STRING="Release" \
         -D CMAKE_INSTALL_PREFIX:PATH=${install_dir} \
         \
-        ${src_dir}/llvm-${ver}.src || return 1
+        ${src_dir}/llvm-${ver}.src
 
 #        -D LLVM_ENABLE_FFI:BOOL=ON \
 #        \
@@ -39,10 +39,10 @@ build_clang() {
 #        -D FFI_LIBRARY_DIR:PATH="/usr/lib/i386-linux-gnu" \
 #        \
 
-  make || return 1
+  make
 }
 
 install_clang() {
-  make install || return 1
+  make install
 }
 

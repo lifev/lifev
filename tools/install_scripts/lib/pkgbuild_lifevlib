@@ -7,14 +7,14 @@
 ver='3.4.4'
 
 download_lifevlib() {
-  cp ${lifevlib_src}/lifev{,-cmake}.zip $src_dir || return 1
+  cp ${lifevlib_src}/lifev{,-cmake}.zip $src_dir
 }
 
 unpack_lifevlib() {
-  unzip lifev.zip || return 1
+  unzip lifev.zip
   mkdir -p cmake
   cd cmake
-  unzip ../lifev-cmake.zip || return 1
+  unzip ../lifev-cmake.zip
 }
 
 build_lifevlib() {
@@ -64,12 +64,12 @@ build_lifevlib() {
     -D Boost_INCLUDE_DIRS:PATH=${boost_include} \
     $lib_extra \
     $mox_extra \
-    $src_dir || return 1
+    $src_dir
 
-  make || return 1
+  make
 }
 
 install_lifevlib() {
-  make install || return 1
+  make install
 }
 

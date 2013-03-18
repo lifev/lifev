@@ -8,18 +8,18 @@
 ver='2010.1'
 
 download_qhull() {
-  wget -c "http://www.qhull.org/download/qhull-${ver}-src.tgz" || return 1
-  cp ${package_root}/qhull.patch . || return 1
+  wget -c "http://www.qhull.org/download/qhull-${ver}-src.tgz"
+  cp ${package_root}/qhull.patch .
 }
 
 unpack_qhull() { 
-  tar xzf qhull-${ver}-src.tgz || return 1
+  tar xzf qhull-${ver}-src.tgz
 }
 
 build_qhull() {
 
   pushd ${src_dir}/qhull-${ver}
-    patch -p1 < ${src_dir}/qhull.patch || return 1
+    patch -p1 < ${src_dir}/qhull.patch
   popd
     
   rm -f CMakeCache.txt
@@ -31,13 +31,13 @@ build_qhull() {
     -DCMAKE_CFLAGS="${CFLAGS} -fno-strict-aliasing -ansi" \
     -DCMAKE_CXXFLAGS="${CXXFLAGS} -fno-strict-aliasing -ansi" \
     \
-    ${src_dir}/qhull-$ver || return 1
+    ${src_dir}/qhull-$ver
   
-  make || return 1
+  make
 }
 
 install_qhull() {
-  make install || return 1
+  make install
 }
 
 

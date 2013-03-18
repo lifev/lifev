@@ -31,11 +31,11 @@ OBJS=\$(SRCS:.cpp=.o)
 
 all: libdummy.a(\$(OBJS))
 EOF
-  make || return 1
+  make
 }
 
 install_dummy() {
-  install -m 755 -d $install_dir || return 1
+  install -m 755 -d $install_dir
   install -m 755 -d $install_dir/include
   install -m 644 libdummy.hpp $install_dir/include
   install -m 755 -d $install_dir/lib

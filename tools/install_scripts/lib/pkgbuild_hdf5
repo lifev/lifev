@@ -6,11 +6,11 @@
 
 ver='1.8.9'
 download_hdf5() {
-  wget -c "http://www.hdfgroup.org/ftp/HDF5/releases/hdf5-${ver}/src/hdf5-${ver}.tar.bz2" || return 1
+  wget -c "http://www.hdfgroup.org/ftp/HDF5/releases/hdf5-${ver}/src/hdf5-${ver}.tar.bz2"
 }
 
 unpack_hdf5() {
-  tar xjf hdf5-${ver}.tar.bz2 || return 1
+  tar xjf hdf5-${ver}.tar.bz2
 }
 
 build_hdf5() {
@@ -24,12 +24,12 @@ build_hdf5() {
     --enable-linux-lfs \
     --enable-production \
     --enable-shared \
-    --with-pic || return 1
+    --with-pic
 
-  make -j1 || return 1
+  make -j1
 }
 
 install_hdf5() {
-  make install || return 1
+  make install
 }
 

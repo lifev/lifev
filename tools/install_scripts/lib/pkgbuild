@@ -5,7 +5,7 @@
 #
 
 # include configuration file
-source ../config || return 1
+source ../config
 
 # abort if no package is specified
 if [ $# -lt 1 ]; then
@@ -56,7 +56,7 @@ build_package() {
 
   # load package specific functions
   echo_dbg "loading pkgbuild_$package script"
-  source pkgbuild_$package || return 1
+  source pkgbuild_$package
 
   # redirect stdout to log file is requested
   if [ $LOG ]; then exec >$BUILD_DIR/scratch/$package.log; fi
@@ -70,29 +70,29 @@ build_package() {
     install_dir=$INSTALL_DIR/lib/$package
 
     # download library sources
-    mkdir -p $src_dir || return 1
+    mkdir -p $src_dir
     pushd $src_dir >/dev/null
       if [ $DOWNLOAD ]; then
         echo_dbg "downloading $package package"
-        download_$package || return 1
+        download_$package
       fi
 
       # unpack
       if [ $UNPACK ]; then
         echo_dbg "unpacking $package package"
-        unpack_$package || return 1
+        unpack_$package
       fi
     popd >/dev/null # $src_dir
 
     # build
-    mkdir -p $build_dir || return 1
+    mkdir -p $build_dir
     pushd $build_dir >/dev/null
       echo_dbg "building $package package"
-      build_$package || return 1
+      build_$package
 
       # install
       echo_dbg "installing $package package to $install_dir"
-      install_$package || return 1
+      install_$package
     popd >/dev/null # $build_dir
 
   popd >/dev/null # $BUILD_DIR/scratch/$package

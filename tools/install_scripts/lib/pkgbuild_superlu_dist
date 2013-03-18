@@ -7,11 +7,11 @@
 ver='2.4'
 
 download_superlu_dist() {
-  wget -c "http://crd.lbl.gov/~xiaoye/SuperLU/superlu_dist_${ver}.tar.gz" || return 1
+  wget -c "http://crd.lbl.gov/~xiaoye/SuperLU/superlu_dist_${ver}.tar.gz"
 }
 
 unpack_superlu_dist() {
-  tar xzf superlu_dist_${ver}.tar.gz || return 1
+  tar xzf superlu_dist_${ver}.tar.gz
 }
 
 build_superlu_dist() {
@@ -39,12 +39,12 @@ build_superlu_dist() {
     BLASLIB="${_blas}" \
     CDEFS="-DAdd_" NOOPTS="-fPIC" \
     ARCH="ar" ARCHFLAGS="cr" RANLIB="ranlib" \
-    DSUPERLULIB=${build_dir}/static/libsuperlu_dist.a || return 1
+    DSUPERLULIB=${build_dir}/static/libsuperlu_dist.a
   popd >/dev/null
 }
 
 install_superlu_dist() {
-  mkdir -p ${install_dir} || return 1
+  mkdir -p ${install_dir}
   pushd ${install_dir} >/dev/null
   install -d -m 775 {lib,include}
   install -m 664 ${build_dir}/static/libsuperlu_dist.a lib

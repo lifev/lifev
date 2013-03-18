@@ -7,24 +7,24 @@
 ver="1.48.0"
 
 download_boostlib() {
-    wget -c http://gitorious.org/boost/cmake/archive-tarball/cmake-$ver || return 1
+    wget -c http://gitorious.org/boost/cmake/archive-tarball/cmake-$ver
 }
 
 unpack_boostlib() {
   mv cmake-$ver boost-cmake-${ver}.tar.gz
-  tar xvf boost-cmake-${ver}.tar.gz || return 1
+  tar xvf boost-cmake-${ver}.tar.gz
 }
 
 build_boostlib() {
   cmake \
     -DCMAKE_INSTALL_PREFIX=${install_dir} \
     -DINSTALL_VERSIONED:BOOL=OFF \
-    ${src_dir}/boost-cmake || return 1
+    ${src_dir}/boost-cmake
 
-  make || return 1
+  make
 
 }
 
 install_boostlib() {
-  make install || return 1
+  make install
 }

@@ -7,17 +7,17 @@
 ver="3.1.1"
 
 download_parmetis() {
-  wget -c http://glaros.dtc.umn.edu/gkhome/fetch/sw/parmetis/OLD/ParMetis-$ver.tar.gz || return 1
+  wget -c http://glaros.dtc.umn.edu/gkhome/fetch/sw/parmetis/OLD/ParMetis-$ver.tar.gz
 }
 
 unpack_parmetis() {
-  tar xzf ParMetis-$ver.tar.gz || return 1
+  tar xzf ParMetis-$ver.tar.gz
 }
 
 build_parmetis() {
 
   # no support for off-source building
-  cd $src_dir/ParMetis-$ver || return 1
+  cd $src_dir/ParMetis-$ver
 
   cat > Makefile.in <<EOF
 CC = ${mpi_bin}/mpicc
@@ -26,12 +26,12 @@ LD = ${mpi_bin}/mpicc
 AR = ar rv
 RANLIB = ar -ts
 EOF
-  make clean || return 1
-  make || return 1
+  make clean
+  make
 }
 
 install_parmetis() {
-  install -m 775 -d ${install_dir}/{lib,include} || return 1
+  install -m 775 -d ${install_dir}/{lib,include}
   install -m 664 lib{metis,parmetis}.a ${install_dir}/lib
   install -m 775 -d ${install_dir}/include/metis
   install -m 664 METISLib/*.h ${install_dir}/include/metis
