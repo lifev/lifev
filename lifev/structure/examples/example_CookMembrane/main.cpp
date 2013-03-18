@@ -221,7 +221,7 @@ struct Structure::Private
         return  0.;
     }
 
-    static Real bcNonZero (const Real& t, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& i)
+    static Real bcNonZero (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& i)
     {
         switch (i)
         {
@@ -239,7 +239,7 @@ struct Structure::Private
         return 0;
     }
 
-    static Real bcPressure (const Real& t, const Real&  x, const Real& y, const Real& /*Z*/, const ID& i)
+    static Real bcPressure (const Real& /*t*/, const Real&  x, const Real& y, const Real& /*Z*/, const ID& i)
     {
         Real radius = 0.5;
         Real pressure = 5000;
@@ -261,7 +261,7 @@ struct Structure::Private
 
     }
 
-    static Real pressureUsingNormal (const Real& t, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
+    static Real pressureUsingNormal (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
     {
 
         return -5000;
@@ -449,7 +449,7 @@ Structure::run3d()
         std::string const importerType =  dataFile ( "importer/type", "ensight");
         std::string const fileName     =  dataFile ( "importer/filename", "structure");
         std::string const initialLoaded     =  dataFile ( "importer/initialSol", "NO_DEFAULT_VALUE");
-        LifeV::Real initialTime        =  dataFile ( "importer/initialTime", 0.0);
+        //LifeV::Real initialTime        =  dataFile ( "importer/initialTime", 0.0);
 
         //Creating the importer for the case P2 if vtk is used.
         //For other exporters we have to go from P1 to P2

@@ -243,7 +243,7 @@ struct Structure::Private
 
     }
 
-    static Real pressureUsingNormal (const Real& t, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
+    static Real pressureUsingNormal (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
     {
 
         return -5000;
@@ -451,7 +451,7 @@ Structure::run3d()
         std::string const importerType =  dataFile ( "importer/type", "ensight");
         std::string const fileName     =  dataFile ( "importer/filename", "structure");
         std::string const initialLoaded     =  dataFile ( "importer/initialSol", "NO_DEFAULT_VALUE");
-        LifeV::Real initialTime        =  dataFile ( "importer/initialTime", 0.0);
+        //LifeV::Real initialTime        =  dataFile ( "importer/initialTime", 0.0);
 
         //Creating the importer
 #ifdef HAVE_HDF5

@@ -312,7 +312,7 @@ VenantKirchhoffMaterialLinear<MeshType>::setupVectorsParameters ( void )
 
 
 template <typename MeshType>
-void VenantKirchhoffMaterialLinear<MeshType>::computeLinearStiff (dataPtr_Type& dataMaterial,
+void VenantKirchhoffMaterialLinear<MeshType>::computeLinearStiff (dataPtr_Type& /*dataMaterial*/,
                                                                   const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
                                                                   const mapMarkerIndexesPtr_Type /*mapsMarkerIndexes*/)
 {
@@ -416,8 +416,8 @@ template <typename MeshType>
 void
 VenantKirchhoffMaterialLinear<MeshType>::computeLocalFirstPiolaKirchhoffTensor ( Epetra_SerialDenseMatrix& firstPiola,
         const Epetra_SerialDenseMatrix& tensorF,
-        const Epetra_SerialDenseMatrix& cofactorF,
-        const std::vector<Real>& invariants,
+        const Epetra_SerialDenseMatrix& /*cofactorF*/,
+        const std::vector<Real>& /*invariants*/,
         const UInt marker)
 {
 

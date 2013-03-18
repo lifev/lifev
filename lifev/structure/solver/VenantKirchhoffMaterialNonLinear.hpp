@@ -382,9 +382,9 @@ void VenantKirchhoffMaterialNonLinear<MeshType>::updateJacobianMatrix ( const ve
 template <typename MeshType>
 void VenantKirchhoffMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( matrixPtr_Type&         jacobian,
                                                                                 const vector_Type&     disp,
-                                                                                const dataPtr_Type&     dataMaterial,
-                                                                                const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
-                                                                                const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
+                                                                                const dataPtr_Type&     /*dataMaterial*/,
+                                                                                const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
+                                                                                const mapMarkerIndexesPtr_Type /*mapsMarkerIndexes*/,
                                                                                 const displayerPtr_Type& displayer )
 {
 
@@ -482,9 +482,9 @@ void VenantKirchhoffMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( 
 template <typename MeshType>
 void VenantKirchhoffMaterialNonLinear<MeshType>::computeStiffness ( const vector_Type& disp,
                                                                     Real /*factor*/,
-                                                                    const dataPtr_Type& dataMaterial,
-                                                                    const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
-                                                                    const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
+                                                                    const dataPtr_Type& /*dataMaterial*/,
+                                                                    const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
+                                                                    const mapMarkerIndexesPtr_Type /*mapsMarkerIndexes*/,
                                                                     const displayerPtr_Type& displayer )
 {
 
@@ -569,7 +569,7 @@ void VenantKirchhoffMaterialNonLinear<MeshType>::apply ( const vector_Type& sol,
 template <typename MeshType>
 void VenantKirchhoffMaterialNonLinear<MeshType>::computeLocalFirstPiolaKirchhoffTensor ( Epetra_SerialDenseMatrix& firstPiola,
         const Epetra_SerialDenseMatrix& tensorF,
-        const Epetra_SerialDenseMatrix& cofactorF,
+        const Epetra_SerialDenseMatrix& /*cofactorF*/,
         const std::vector<Real>& invariants,
         const UInt marker)
 {

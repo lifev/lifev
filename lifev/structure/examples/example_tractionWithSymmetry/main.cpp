@@ -385,7 +385,7 @@ Structure::run3d()
 
     //! 5. Initial data
     Real dt = dataStructure->dataTime()->timeStep();
-    Real T  = dataStructure->dataTime()->endTime();
+    //Real T  = dataStructure->dataTime()->endTime();
 
     vectorPtr_Type rhs (new vector_Type (solid.displacement(), Unique) );
     vectorPtr_Type disp (new vector_Type (solid.displacement(), Unique) );
@@ -404,7 +404,7 @@ Structure::run3d()
         std::string const importerType =  dataFile ( "importer/type", "ensight");
         std::string const fileName     =  dataFile ( "importer/filename", "structure");
         std::string const initialLoaded     =  dataFile ( "importer/initialSol", "NO_DEFAULT_VALUE");
-        LifeV::Real initialTime        =  dataFile ( "importer/initialTime", 0.0);
+        //LifeV::Real initialTime        =  dataFile ( "importer/initialTime", 0.0);
 
         //Creating the importer
 #ifdef HAVE_HDF5

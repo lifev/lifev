@@ -1033,10 +1033,10 @@ StructuralOperator<Mesh>::computeMassMatrix ( const Real factor)
 {
     using namespace ExpressionAssembly;
 
-    UInt totalDof = M_dispFESpace->dof().numTotalDof();
+    //UInt totalDof = M_dispFESpace->dof().numTotalDof();
 
     //! Number of displacement components
-    UInt nc = nDimensions;
+    /*UInt nc = nDimensions;*/
     const Real factorMassMatrix = factor * M_data->rho();
 
     //Assembling using the Expression Template

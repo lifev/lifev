@@ -2353,7 +2353,7 @@ void  stiff_Jac_P1iso_SecondOrderExp_4term ( Real coef, Real  coefExp,
                                              const boost::multi_array<Real, 3 >& Fk,
                                              const std::vector<Real>&   Jk ,
                                              const std::vector<Real>&   Ic_isok,
-                                             const std::vector<Real>&   Ic_k,
+                                             const std::vector<Real>&   /*Ic_k*/,
                                              MatrixElemental&         elmat,
                                              const CurrentFE& fe )
 {
