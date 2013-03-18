@@ -89,11 +89,11 @@ public:
 
     typedef MatrixSmall<3, 3>                          matrixSmall_Type;
 
-    typedef super::fiberFunction_Type                fiberFunction_Type;
-    typedef super::fiberFunctionPtr_Type             fiberFunction_Type;
+    typedef typename super::fiberFunction_Type                fiberFunction_Type;
+    typedef typename super::fiberFunctionPtr_Type             fiberFunctionPtr_Type;
 
-    typedef super::vectorFiberFunction_Type          vectorFiberFunction_Type;
-    typedef super::vectorFiberFunctionPtr_Type          vectorFiberFunctionPtr_Type;
+    typedef typename super::vectorFiberFunction_Type          vectorFiberFunction_Type;
+    typedef typename super::vectorFiberFunctionPtr_Type          vectorFiberFunctionPtr_Type;
     //@}
 
 
@@ -324,13 +324,8 @@ HolzapfelMaterialNonLinear<MeshType>::setup ( const FESpacePtr_Type&            
     M_identity (2, 1) = 0.0;
     M_identity (2, 2) = 1.0;
 
-    // The 3 is because the law uses three parameters (alpha, gamma, bulk).
-    // another way would be to set up the number of constitutive parameters of the law
-    // in the data file to get the right size. Note the comment below.
-    this->M_vectorsParameters.reset ( new vectorsParameters_Type ( 3 ) );
 
-
-    this->setupVectorsParameters( );
+    //this->setupVectorsParameters( );
 }
 
 
@@ -384,14 +379,14 @@ HolzapfelMaterialNonLinear<MeshType>::setupFiberFunctionsDirection ( vectorFiber
     // Number of volume on the local part of the mesh
     UInt nbFamilies = (*vectorOfFibers).size();
 
-    ASSERT( nbFamilies == M_dataMaterial->numberFibersFamilies(), 
+    ASSERT( nbFamilies == this->M_dataMaterial->numberFibersFamilies(),
 	    " The number of families set in the test is different from the one in the data" );
 
-    M_vectorOfFibers->resize( nbFamilies );
+    this->M_vectorOfFibers->resize( nbFamilies );
 
     for( UInt k(0); k < nbFamilies; k++ )
     {
-      ( *M_vectorOfFibers )[ k ] = ( *vectorOfFibers )[ k ];
+        ( *(this->M_vectorOfFibers) )[ k ] = ( *vectorOfFibers )[ k ];
     }
 }
 
@@ -439,124 +434,6 @@ void HolzapfelMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( matrix
 
     * (jacobian) *= 0.0;
 
-    //! Nonlinear part of jacobian
-    //! loop on volumes (i)
-
-    // mapIterator_Type it;
-    // //mapIteratorIndex_Type itIndex;
-
-    // vectorVolumesPtr_Type pointerListOfVolumes;
-    // vectorIndexesPtr_Type pointerListOfIndexes;
-
-    // for( it = (*mapsMarkerVolumes).begin(); it != (*mapsMarkerVolumes).end(); it++ )
-    // {
-    //Given the marker pointed by the iterator, let's extract the material parameters
-    //        UInt marker = it->first;
-
-    // Debug
-    // UInt markerIndex = itIndex->first;
-    // ASSERT( marker == markerIndex, "The list of volumes is referring to a marker that is not the same as the marker of index!!!");
-
-    // pointerListOfVolumes.reset( new vectorVolumes_Type(it->second) );
-    // pointerListOfIndexes.reset( new vectorIndexes_Type( (*mapsMarkerIndexes)[marker] ) );
-
-    // Real bulk = dataMaterial->bulk(marker);
-    // Real alpha = dataMaterial->alpha(marker);
-    // Real gamma = dataMaterial->gamma(marker);
-
-    //Macros to make the assembly more readable
-#define deformationGradientTensor ( grad( this->M_dispETFESpace,  disp, this->M_offset) + value(this->M_identity) )
-#define detDeformationGradientTensor det( deformationGradientTensor )
-#define deformationGradientTensor_T  minusT(deformationGradientTensor)
-#define RIGHTCAUCHYGREEN transpose(deformationGradientTensor) * deformationGradientTensor
-#define firstInvariantC trace( RIGHTCAUCHYGREEN )
-#define firstInvariantCbar pow( detDeformationGradientTensor, (-2.0/3.0) ) * firstInvariantC
-
-
-    //Assembling Volumetric Part
-    integrate ( elements ( this->M_dispETFESpace->mesh() ),
-                this->M_dispFESpace->qr(),
-                this->M_dispETFESpace,
-                this->M_dispETFESpace,
-                value ( 1.0 / 2.0 ) * parameter ( (* (this->M_vectorsParameters) ) [2] ) * ( value (2.0) *pow (detDeformationGradientTensor, 2.0) - detDeformationGradientTensor + value (1.0) ) * dot ( deformationGradientTensor_T, grad (phi_j) ) * dot ( deformationGradientTensor_T, grad (phi_i) )
-              ) >> jacobian;
-
-    integrate ( elements ( this->M_dispETFESpace->mesh() ),
-                this->M_dispFESpace->qr(),
-                this->M_dispETFESpace,
-                this->M_dispETFESpace,
-                value ( -1.0 / 2.0 ) * parameter ( (* (this->M_vectorsParameters) ) [2] ) * ( pow (detDeformationGradientTensor, 2.0) - detDeformationGradientTensor + log (detDeformationGradientTensor) ) * dot ( deformationGradientTensor_T * transpose (grad (phi_j) ) * deformationGradientTensor_T,  grad (phi_i) )
-              ) >> jacobian;
-
-    // //Assembling the Isochoric Part
-    // //! 1. Stiffness matrix : int { - 2/3 * alpha * J^(-2/3) * exp( gamma*( Ic_iso - 3) )* ( 1. + coefExp * Ic_iso )
-    // //!                      *( F^-T : \nabla \delta ) ( F : \nabla \v ) }
-    integrate ( elements ( this->M_dispETFESpace->mesh() ),
-                this->M_dispFESpace->qr(),
-                this->M_dispETFESpace,
-                this->M_dispETFESpace,
-                value (-2.0 / 3.0) * parameter ( (* (this->M_vectorsParameters) ) [0]) *
-                pow (detDeformationGradientTensor, -2.0 / 3.0) * exp ( parameter ( (* (this->M_vectorsParameters) ) [1] ) * ( firstInvariantCbar - value (3.0) ) ) *
-                ( value (1.0) + parameter ( (* (this->M_vectorsParameters) ) [1]) * firstInvariantCbar) *
-                dot ( deformationGradientTensor_T, grad (phi_j) ) * dot ( deformationGradientTensor, grad (phi_i) )
-              ) >> jacobian;
-
-    //! 2. Stiffness matrix : int { 2 * alpha * gamma * J^(-4/3) * exp( gamma*( Ic_iso - 3) ) *
-    //!             ( F : \nabla \delta ) ( F : \nabla \v ) }
-    integrate ( elements ( this->M_dispETFESpace->mesh() ),
-                this->M_dispFESpace->qr(),
-                this->M_dispETFESpace,
-                this->M_dispETFESpace,
-                value (2.0) * parameter ( (* (this->M_vectorsParameters) ) [0] ) * parameter ( (* (this->M_vectorsParameters) ) [1]) * pow (detDeformationGradientTensor, -4.0 / 3.0) * exp ( parameter ( (* (this->M_vectorsParameters) ) [1] ) * ( firstInvariantCbar - value (3.0) ) ) *
-                dot ( deformationGradientTensor, grad (phi_j) ) * dot ( deformationGradientTensor, grad (phi_i) )
-              ) >> jacobian;
-
-    // //! 3. Stiffness matrix : int { 2.0/9.0 *  alpha *  Ic_iso * exp( gamma*( Ic_iso - 3) )*
-    // //!                       ( 1. + gamma * Ic_iso )( F^-T : \nabla \delta ) ( F^-T : \nabla \v )}
-    integrate ( elements ( this->M_dispETFESpace->mesh() ) ,
-                this->M_dispFESpace->qr(),
-                this->M_dispETFESpace,
-                this->M_dispETFESpace,
-                value (2.0 / 9.0) * parameter ( (* (this->M_vectorsParameters) ) [0]) * firstInvariantCbar * exp ( parameter ( (* (this->M_vectorsParameters) ) [1]) * ( firstInvariantCbar - value (3.0) ) ) * ( value (1.0) + parameter ( (* (this->M_vectorsParameters) ) [1]) * firstInvariantCbar) *
-                dot ( deformationGradientTensor_T, grad (phi_j) ) * dot ( deformationGradientTensor_T, grad (phi_i) )
-              ) >> jacobian;
-
-    // //! 4. Stiffness matrix : int { -2.0/3.0 *  alpha * J^(-2/3) * exp( gamma*( Ic_iso - 3) )
-    // //!                    * ( 1. + gamma * Ic_iso )( deformationGradientTensor : \nabla \delta ) ( F^-T : \nabla \v ) }
-    integrate ( elements ( this->M_dispETFESpace->mesh() ),
-                this->M_dispFESpace->qr(),
-                this->M_dispETFESpace,
-                this->M_dispETFESpace,
-                value (-2.0 / 3.0) * parameter ( (* (this->M_vectorsParameters) ) [0]) * pow (detDeformationGradientTensor, -2.0 / 3.0) * exp ( parameter ( (* (this->M_vectorsParameters) ) [1] ) * ( firstInvariantCbar - value (3.0) ) ) *
-                ( value (1.0) + parameter ( (* (this->M_vectorsParameters) ) [1]) * firstInvariantCbar) *
-                dot ( deformationGradientTensor, grad (phi_j) ) * dot ( deformationGradientTensor_T, grad (phi_i) )
-              ) >> jacobian;
-
-
-    // //! 5. Stiffness matrix : int {  alpha * J^(-2/3) * exp( gamma*( Ic_iso - 3)) (\nabla \delta: \nabla \v)}
-    integrate ( elements ( this->M_dispETFESpace->mesh() ),
-                this->M_dispFESpace->qr(),
-                this->M_dispETFESpace,
-                this->M_dispETFESpace,
-                parameter ( (* (this->M_vectorsParameters) ) [0]) * pow (detDeformationGradientTensor, -2.0 / 3.0) *
-                exp ( parameter ( (* (this->M_vectorsParameters) ) [1] ) * ( firstInvariantCbar - value (3.0) ) ) *
-                dot ( grad (phi_j), grad (phi_i) )
-              ) >> jacobian;
-
-
-    // //! 6. Stiffness matrix : int { 1.0/3.0 * alpha * Ic_iso *  exp(gamma*( Ic_iso - 3)) *
-    // //!                       (F^-T [\nabla \delta]^t F^-T ) : \nabla \v  }
-    integrate ( elements ( this->M_dispETFESpace->mesh() ),
-                this->M_dispFESpace->qr(),
-                this->M_dispETFESpace,
-                this->M_dispETFESpace,
-                value (1.0 / 3.0) * parameter ( (* (this->M_vectorsParameters) ) [0]) * firstInvariantCbar *
-                exp ( parameter ( (* (this->M_vectorsParameters) ) [1] ) * ( firstInvariantCbar - value (3.0) ) ) *
-                dot ( deformationGradientTensor_T * transpose (grad (phi_j) ) * deformationGradientTensor_T , grad (phi_i) )
-              ) >> jacobian;
-
-
-    //}
 
     jacobian->globalAssemble();
 }
@@ -583,45 +460,6 @@ void HolzapfelMaterialNonLinear<MeshType>::computeStiffness ( const vector_Type&
     displayer->leaderPrint (" Non-Linear S-  Computing the Holzapfel nonlinear stiffness vector ");
     displayer->leaderPrint (" \n*********************************\n  ");
 
-    // mapIterator_Type it;
-    // //mapIteratorIndex_Type itIndex;
-    // vectorVolumesPtr_Type pointerListOfVolumes;
-    // vectorIndexesPtr_Type pointerListOfIndexes;
-
-    // for( it = (*mapsMarkerVolumes).begin(); it != (*mapsMarkerVolumes).end(); it++ )
-    // {
-
-    //     //Given the marker pointed by the iterator, let's extract the material parameters
-    //     UInt marker = it->first;
-
-    //     //Debug reason
-    //     // UInt markerIndex = itIndex->first;
-    //     // ASSERT( marker == markerIndex, "The list of volumes is referring to a marker that is not the same as the marker of index!!!");
-
-    //     pointerListOfVolumes.reset( new vectorVolumes_Type(it->second) );
-    //     pointerListOfIndexes.reset( new vectorIndexes_Type( (*mapsMarkerIndexes)[marker] ) );
-
-    //     Real bulk = dataMaterial->bulk(marker);
-    //     Real alpha = dataMaterial->alpha(marker);
-    //     Real gamma = dataMaterial->gamma(marker);
-
-    //Computation of the volumetric part
-    integrate ( elements ( this->M_dispETFESpace->mesh() ) ,
-                this->M_dispFESpace->qr(),
-                this->M_dispETFESpace,
-                value (1.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [2] ) * ( pow ( detDeformationGradientTensor , 2.0) - detDeformationGradientTensor + log (detDeformationGradientTensor) ) * dot (  deformationGradientTensor_T, grad (phi_i) )
-              ) >> M_stiff;
-
-    //Computation of the isochoric part
-    integrate ( elements ( this->M_dispETFESpace->mesh() ) ,
-                this->M_dispFESpace->qr(),
-                this->M_dispETFESpace,
-                parameter ( (* (this->M_vectorsParameters) ) [0] ) * pow (detDeformationGradientTensor, -2.0 / 3.0) *
-                exp ( parameter ( (* (this->M_vectorsParameters) ) [1] ) * ( firstInvariantCbar  - value (3.0) ) )  *
-                (dot ( deformationGradientTensor - value (1.0 / 3.0) * firstInvariantC * deformationGradientTensor_T, grad (phi_i) ) )
-              ) >> M_stiff;
-    //}
-
     this->M_stiff->globalAssemble();
 }
 
@@ -637,8 +475,9 @@ void HolzapfelMaterialNonLinear<MeshType>::showMe ( std::string const& fileNameS
 
 template <typename MeshType>
 void HolzapfelMaterialNonLinear<MeshType>::apply ( const vector_Type& sol,
-                                                     vector_Type& res, const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
-                                                     const mapMarkerIndexesPtr_Type mapsMarkerIndexes,const displayerPtr_Type displayer)
+                                                   vector_Type& res, const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                                                   const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
+                                                   const displayerPtr_Type displayer)
 {
     computeStiffness (sol, 0, this->M_dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
     res += *M_stiff;
@@ -658,14 +497,14 @@ void HolzapfelMaterialNonLinear<MeshType>::computeLocalFirstPiolaKirchhoffTensor
 }
 
 template <typename MeshType>
-inline StructuralIsotropicConstitutiveLaw<MeshType>* createHolzapfelMaterialNonLinear()
+inline StructuralAnisotropicConstitutiveLaw<MeshType>* createHolzapfelMaterialNonLinear()
 {
     return new HolzapfelMaterialNonLinear<MeshType >();
 }
 
 namespace
 {
-static bool registerHL = StructuralIsotropicConstitutiveLaw<LifeV::RegionMesh<LinearTetra> >::StructureIsotropicMaterialFactory::instance().registerProduct ( "holzapfel", &createHolzapfelMaterialNonLinear<LifeV::RegionMesh<LinearTetra> > );
+static bool registerHL = StructuralAnisotropicConstitutiveLaw<LifeV::RegionMesh<LinearTetra> >::StructureAnisotropicMaterialFactory::instance().registerProduct ( "holzapfel", &createHolzapfelMaterialNonLinear<LifeV::RegionMesh<LinearTetra> > );
 }
 
 } //Namespace LifeV

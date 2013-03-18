@@ -125,7 +125,7 @@ public:
     //Vector for vector parameters
     typedef std::vector<std::vector<Real> >           vectorsParameters_Type;
     typedef boost::shared_ptr<vectorsParameters_Type> vectorsParametersPtr_Type;
-   
+
 
     // Boost function for fiber direction
     typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > fiberFunction_Type;
@@ -233,7 +233,7 @@ public:
 
 
     virtual void setupFiberFunctionsDirection( vectorFiberFunctionPtr_Type vectorOfFibers ) = 0;
-  
+
     //! @name Set Methods
     //@{
 
@@ -272,7 +272,8 @@ public:
 
     virtual void apply ( const vector_Type& sol, vector_Type& res,
                          const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
-                         const mapMarkerIndexesPtr_Type mapsMarkerIndexes) = 0;
+                         const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
+                         const displayerPtr_Type displayer ) = 0;
 
     //@}
 
@@ -306,7 +307,7 @@ protected:
 
     //! Map between markers and volumes on the mesh
     //vectorsParametersPtr_Type                      M_vectorsParameters;
-  
+
     //! Boost::shared to the vector of fibers
     vectorFiberFunctionPtr_Type                    M_vectorOfFibers;
 };
@@ -322,7 +323,6 @@ StructuralAnisotropicConstitutiveLaw<MeshType>::StructuralAnisotropicConstitutiv
     M_localMap                   ( ),
     M_jacobian                   ( ),
     M_offset                     ( 0 ),
-    M_vectorsParameters          ( ),
     M_vectorOfFibers             ( )
 {
     //    std::cout << "I am in the constructor of StructuralAnisotropicConstitutiveLaw" << std::endl;
