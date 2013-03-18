@@ -80,6 +80,7 @@
 #include <lifev/structure/solver/isotropic/NeoHookeanMaterialNonLinear.hpp>
 
 #ifdef ENABLE_ANISOTROPIC_LAW
+#include <lifev/structure/solver/anisotropic/StructuralAnisotropicConstitutiveLaw.hpp>
 #include <lifev/structure/solver/anisotropic/HolzapfelMaterialNonLinear.hpp>
 #endif
 
@@ -93,6 +94,8 @@
 #include <lifev/eta/fem/ETFESpace.hpp>
 
 #include <iostream>
+
+#include "ud_functions.hpp"
 
 
 using namespace LifeV;
@@ -130,6 +133,25 @@ std::set<UInt> parseList ( const std::string& list )
 class Structure
 {
 public:
+
+    // Public typedefs
+    typedef StructuralOperator< RegionMesh<LinearTetra> >::vector_Type  vector_Type;
+    typedef boost::shared_ptr<vector_Type>                              vectorPtr_Type;
+    typedef boost::shared_ptr< TimeAdvance< vector_Type > >             timeAdvance_Type;
+    typedef FESpace< RegionMesh<LinearTetra>, MapEpetra >               solidFESpace_Type;
+    typedef boost::shared_ptr<solidFESpace_Type>                        solidFESpacePtr_Type;
+
+    typedef ETFESpace< RegionMesh<LinearTetra>, MapEpetra, 3, 3 >       solidETFESpace_Type;
+    typedef boost::shared_ptr<solidETFESpace_Type>                      solidETFESpacePtr_Type;
+
+    // typedefs for fibers
+    // Boost function for fiber direction
+    typedef boost::function<Real ( Real const&, Real const&, Real const&, ID const& ) > fiberFunction_Type;
+    typedef boost::shared_ptr<fiberFunction_Type> fiberFunctionPtr_Type;
+
+    typedef std::vector<fiberFunctionPtr_Type>             vectorFiberFunction_Type;
+    typedef boost::shared_ptr<vectorFiberFunction_Type>    vectorFiberFunctionPtr_Type;
+
 
     /** @name Constructors, destructor
      */
@@ -182,50 +204,11 @@ struct Structure::Private
     Private() :
         rho (1), poisson (1), young (1), bulk (1), alpha (1), gamma (1)
     {}
-    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > fct_type;
     double rho, poisson, young, bulk, alpha, gamma;
 
     std::string data_file_name;
 
     boost::shared_ptr<Epetra_Comm>     comm;
-
-    static Real bcZero (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
-    {
-        return  0.;
-    }
-
-    static Real bcNonZero (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
-    {
-        return  300000.;
-    }
-
-    static Real bcNonZeroSecondOrderExponential (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
-    {
-        return  19180.;
-    }
-
-    static Real d0 (const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
-    {
-
-        switch (i)
-        {
-            case 0:
-                return  0.088002 * ( x + 0.5 );
-                break;
-            case 1:
-                return - ( 0.02068 * 2.0 ) * ( y );
-                break;
-            case 2:
-                return - ( 0.02068 * 2.0 ) * ( z );
-                break;
-            default:
-                ERROR_MSG ("This entry is not allowed: ud_functions.hpp");
-                return 0.;
-                break;
-        }
-
-    }
-
 };
 
 
@@ -239,20 +222,6 @@ Structure::Structure ( int                                   argc,
     string data_file_name = command_line.follow ("data", 2, "-f", "--file");
     GetPot dataFile ( data_file_name );
     parameters->data_file_name = data_file_name;
-
-    parameters->rho     = dataFile ( "solid/physics/density", 1. );
-    parameters->young   = dataFile ( "solid/physics/young",   1. );
-    parameters->poisson = dataFile ( "solid/physics/poisson", 1. );
-    parameters->bulk    = dataFile ( "solid/physics/bulk",    1. );
-    parameters->alpha   = dataFile ( "solid/physics/alpha",   1. );
-    parameters->gamma   = dataFile ( "solid/physics/gamma",   1. );
-
-    std::cout << "density = " << parameters->rho     << std::endl
-              << "young   = " << parameters->young   << std::endl
-              << "poisson = " << parameters->poisson << std::endl
-              << "bulk    = " << parameters->bulk    << std::endl
-              << "alpha   = " << parameters->alpha   << std::endl
-              << "gamma   = " << parameters->gamma   << std::endl;
 
     parameters->comm = structComm;
     int ntasks = parameters->comm->NumProc();
@@ -276,16 +245,6 @@ Structure::run2d()
 void
 Structure::run3d()
 {
-    typedef StructuralOperator< RegionMesh<LinearTetra> >::vector_Type  vector_Type;
-    typedef boost::shared_ptr<vector_Type>                              vectorPtr_Type;
-    typedef boost::shared_ptr< TimeAdvance< vector_Type > >             timeAdvance_Type;
-    typedef FESpace< RegionMesh<LinearTetra>, MapEpetra >               solidFESpace_Type;
-    typedef boost::shared_ptr<solidFESpace_Type>                        solidFESpacePtr_Type;
-
-    typedef ETFESpace< RegionMesh<LinearTetra>, MapEpetra, 3, 3 >       solidETFESpace_Type;
-    typedef boost::shared_ptr<solidETFESpace_Type>                      solidETFESpacePtr_Type;
-
-
     bool verbose = (parameters->comm->MyPID() == 0);
 
     //! Number of boundary conditions for the velocity and mesh motion
@@ -349,16 +308,16 @@ Structure::run3d()
     compyz[0] = 1;
     compyz[1] = 2;
 
-    BCFunctionBase zero (Private::bcZero);
+    BCFunctionBase zero (bcZero);
     BCFunctionBase nonZero;
 
     if ( dataStructure->solidTypeIsotropic().compare ("secondOrderExponential") )
     {
-        nonZero.setFunction (Private::bcNonZero);
+        nonZero.setFunction (bcNonZero);
     }
     else
     {
-        nonZero.setFunction (Private::bcNonZeroSecondOrderExponential);
+        nonZero.setFunction (bcNonZeroSecondOrderExponential);
     }
 
 
@@ -419,7 +378,7 @@ Structure::run3d()
 
     if ( !dataStructure->solidTypeIsotropic().compare ("secondOrderExponential") )
     {
-        dFESpace->interpolate ( static_cast<solidFESpace_Type::function_Type> ( Private::d0 ), *initialDisplacement, 0.0 );
+        dFESpace->interpolate ( static_cast<solidFESpace_Type::function_Type> ( d0 ), *initialDisplacement, 0.0 );
     }
 
     if (timeAdvanceMethod == "BDF")

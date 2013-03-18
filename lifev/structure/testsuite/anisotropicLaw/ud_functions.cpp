@@ -76,24 +76,26 @@ Real InternalPressure (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, 
 }
 
 // Initial displacement and velocity
-Real d0 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+Real d0 (const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
 {
+
     switch (i)
     {
-        case 0:
-            return 0.;
-            break;
-        case 1:
-            return 0.;
-            break;
-        case 2:
-            return 0.;
-            break;
-        default:
-            ERROR_MSG ("This entrie is not allowed: ud_functions.hpp");
-            return 0.;
-            break;
+    case 0:
+        return  0.088002 * ( x + 0.5 );
+        break;
+    case 1:
+        return - ( 0.02068 * 2.0 ) * ( y );
+        break;
+    case 2:
+        return - ( 0.02068 * 2.0 ) * ( z );
+        break;
+    default:
+        ERROR_MSG ("This entry is not allowed: ud_functions.hpp");
+        return 0.;
+        break;
     }
+
 }
 
 Real w0 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
@@ -140,19 +142,35 @@ Real a0 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*
 
 
 //----------------------------------------------Boundary Conditions--------------
+Real bcZero (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
+{
+    return  0.;
+}
 
-Real g1 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+Real bcNonZero (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
+{
+    return  300000.;
+}
+
+Real bcNonZeroSecondOrderExponential (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
+{
+    return  19180.;
+}
+
+
+//----------------------------------------------Fibers Directions--------------
+Real Family1 ( const Real& x, const Real& y, const Real& z, const ID& i)
 {
     switch (i)
     {
         case 0:
-            return 0.;
+            return 0.0;
             break;
         case 1:
-            return 0.;
+            return 0.0;
             break;
         case 2:
-            return 0.;
+            return 0.0;
             break;
         default:
             ERROR_MSG ("This entrie is not allowed: ud_functions.hpp");
@@ -161,18 +179,19 @@ Real g1 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*
     }
 }
 
-Real g2 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+Real Family2 ( const Real& x, const Real& y, const Real& z, const ID& i)
 {
+
     switch (i)
     {
         case 0:
-            return 0.;
+            return 0.0;
             break;
         case 1:
-            return 0.;
+            return 0.0;
             break;
         case 2:
-            return 1.e+5;
+            return 0.0;
             break;
         default:
             ERROR_MSG ("This entrie is not allowed: ud_functions.hpp");
@@ -181,18 +200,19 @@ Real g2 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*
     }
 }
 
-Real g3 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+Real Family3 ( const Real& x, const Real& y, const Real& z, const ID& i)
 {
+
     switch (i)
     {
         case 0:
-            return 0.;
+            return 0.0;
             break;
         case 1:
-            return 0.;
+            return 0.0;
             break;
         case 2:
-            return 0.;
+            return 0.0;
             break;
         default:
             ERROR_MSG ("This entrie is not allowed: ud_functions.hpp");
@@ -201,5 +221,28 @@ Real g3 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*
     }
 }
 
+
+Real Family4 ( const Real& x, const Real& y, const Real& z, const ID& i)
+{
+
+    switch (i)
+    {
+        case 0:
+            return 0.0;
+            break;
+        case 1:
+            return 0.0;
+            break;
+        case 2:
+            return 0.0;
+            break;
+        default:
+            ERROR_MSG ("This entrie is not allowed: ud_functions.hpp");
+            return 0.;
+            break;
+    }
 }
 
+
+
+}

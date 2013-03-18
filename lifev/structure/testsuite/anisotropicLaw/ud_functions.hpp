@@ -38,8 +38,8 @@
  *  if the functions to assign is vectorial and the boundary condition is of type \c Full \c.
  */
 
-#ifndef UDF_HPP
-#define UDF_HPP
+#ifndef UDF_ANISOTROPIC_HPP
+#define UDF_ANISOTROPIC_HPP
 
 #include <lifev/core/LifeV.hpp>
 
@@ -52,14 +52,21 @@ Real InternalPressure (const Real& t, const Real& /*x*/, const Real& /*y*/, cons
 Real fzero_scalar (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
 
 // Initial displacement and velocity
-Real d0 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
+Real d0 (const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i);
 Real w0 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
 Real a0 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
 
 //Boundary Conditions
-Real g1 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
-Real g2 (const Real& t, const Real& /*x*/, const Real& y, const Real& /*z*/, const ID& /*i*/);
-Real g3 (const Real& t, const Real& /*x*/, const Real& y, const Real& /*z*/, const ID& /*i*/);
+Real bcZero (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/);
+Real bcNonZero (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/);
+Real bcNonZeroSecondOrderExponential (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/);
+
+//Fiber Directions
+Real Family1 ( const Real& x, const Real& y, const Real& z, const ID& i);
+Real Family2 ( const Real& x, const Real& y, const Real& z, const ID& i);
+Real Family3 ( const Real& x, const Real& y, const Real& z, const ID& i);
+Real Family4 ( const Real& x, const Real& y, const Real& z, const ID& i);
+
 
 }
 
