@@ -56,7 +56,7 @@ BCInterfaceFunctionParserSolver< BCHandler, StructuralOperator<RegionMesh <Linea
     for ( std::set< physicalSolverList >::iterator j = M_list.begin(); j != M_list.end(); ++j )
         switch ( *j )
         {
-            // s_ -> SOLID
+                // s_ -> SOLID
             case s_density:
 
 #ifdef HAVE_LIFEV_DEBUG
@@ -70,7 +70,7 @@ BCInterfaceFunctionParserSolver< BCHandler, StructuralOperator<RegionMesh <Linea
             case s_poisson:
 
 #ifdef HAVE_LIFEV_DEBUG
-                debugStream ( 5023 ) << "                                              s_poisson: " << M_physicalSolver->data()->poisson(1) << "\n";
+                debugStream ( 5023 ) << "                                              s_poisson: " << M_physicalSolver->data()->poisson (1) << "\n";
 #endif
 
                 setVariable ( "s_poisson", M_physicalSolver->data()->poisson (1) );
@@ -90,7 +90,7 @@ BCInterfaceFunctionParserSolver< BCHandler, StructuralOperator<RegionMesh <Linea
             case s_young:
 
 #ifdef HAVE_LIFEV_DEBUG
-                debugStream ( 5023 ) << "                                              s_young: " << M_physicalSolver->data()->young(1) << "\n";
+                debugStream ( 5023 ) << "                                              s_young: " << M_physicalSolver->data()->young (1) << "\n";
 #endif
 
                 setVariable ( "s_young", M_physicalSolver->data()->young (1) );
