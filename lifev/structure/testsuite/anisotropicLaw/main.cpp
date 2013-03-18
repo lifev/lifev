@@ -270,6 +270,28 @@ Structure::run3d()
     solidFESpacePtr_Type dFESpace ( new solidFESpace_Type (meshPart, dOrder, 3, parameters->comm) );
     solidETFESpacePtr_Type dETFESpace ( new solidETFESpace_Type (meshPart, & (dFESpace->refFE() ), & (dFESpace->fe().geoMap() ), parameters->comm) );
 
+
+    // Setting the fibers
+    vectorFiberFunctionPtr_Type pointerToVectorOfFamilies( new vectorFiberFunction_Type( ) );
+    pointerToVectorOfFamilies->resize( dataStructure->numberFibersFamilies( ) );
+
+    // Setting the vector of fibers functions
+    for( UInt k(0); k < pointerToVectorOfFamilies->size( ); k++ )
+    {
+        // Setting up the name of the function to define the family
+        std::string family="Family";
+        // adding the number of the family
+        std::string familyNumber;
+        std::ostringstream number;
+        number << ( k );
+        familyNumber = number.str();
+
+        // Name of the function to create
+        std::string creationString = family + familyNumber;
+
+
+    }
+
     if (verbose)
     {
         std::cout << std::endl;

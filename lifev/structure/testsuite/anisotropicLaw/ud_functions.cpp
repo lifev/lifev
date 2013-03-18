@@ -244,5 +244,110 @@ Real Family4 ( const Real& x, const Real& y, const Real& z, const ID& i)
 }
 
 
+Real Family5 ( const Real& x, const Real& y, const Real& z, const ID& i)
+{
+
+    switch (i)
+    {
+        case 0:
+            return 0.0;
+            break;
+        case 1:
+            return 0.0;
+            break;
+        case 2:
+            return 0.0;
+            break;
+        default:
+            ERROR_MSG ("This entrie is not allowed: ud_functions.hpp");
+            return 0.;
+            break;
+    }
+}
+
+Real Family6 ( const Real& x, const Real& y, const Real& z, const ID& i)
+{
+
+    switch (i)
+    {
+        case 0:
+            return 0.0;
+            break;
+        case 1:
+            return 0.0;
+            break;
+        case 2:
+            return 0.0;
+            break;
+        default:
+            ERROR_MSG ("This entrie is not allowed: ud_functions.hpp");
+            return 0.;
+            break;
+    }
+}
+
+// Method for the definition of the fibers
+fibersDirectionList::fibersDirectionList() :
+    M_mapNameDefinition( )
+{}
+
+fibersDirectionList::~fibersDirectionList()
+{}
+
+void fibersDirectionList::setupFiberDefinitions( const UInt nbFamilies )
+{
+    // At the moment the creation of the table of fiber functions is done
+    // manually. There should be a way to make it automatically. Btw, only
+    // the first nbFamilies that are set in the data file are taken into account
+
+    ASSERT( nbFamilies < 6, "At the moment, a maximum number = 6 of families can be used! If you want more \n modifiy the file ud_functions.hpp in the application folder." );
+
+    // Creation of the database of functions
+    fiberFunctionPtr_Type pointerToFunction( new fiberFunction_Type( Family1 ) );
+    M_mapNameDefinition.insert( std::pair<std::string, fiberFunctionPtr_Type>
+                                  ( "Family1", pointerToFunction ) );
+
+    pointerToFunction.reset( new fiberFunction_Type( Family2 ) );
+    M_mapNameDefinition.insert( std::pair<std::string, fiberFunctionPtr_Type>
+                                  ( "Family2", pointerToFunction ) );
+
+    pointerToFunction.reset( new fiberFunction_Type( Family3 ) );
+    M_mapNameDefinition.insert( std::pair<std::string, fiberFunctionPtr_Type>
+                                  ( "Family3", pointerToFunction ) );
+
+    pointerToFunction.reset( new fiberFunction_Type( Family4 ) );
+    M_mapNameDefinition.insert( std::pair<std::string, fiberFunctionPtr_Type>
+                                  ( "Family4", pointerToFunction ) );
+
+    pointerToFunction.reset( new fiberFunction_Type( Family5 ) );
+    M_mapNameDefinition.insert( std::pair<std::string, fiberFunctionPtr_Type>
+                                  ( "Family5", pointerToFunction ) );
+
+    pointerToFunction.reset( new fiberFunction_Type( Family6 ) );
+    M_mapNameDefinition.insert( std::pair<std::string, fiberFunctionPtr_Type>
+                                  ( "Family6", pointerToFunction ) );
+
+
+}
+
+fibersDirectionList::fiberFunctionPtr_Type fibersDirectionList::fiberDefinition( const std::string nameFamily )
+{
+
+    mapNameDefinitionFiberFunction_Type::const_iterator IT;
+
+    IT = M_mapNameDefinition.find ( nameFamily );
+
+    if ( IT != M_mapNameDefinition.end() )
+    {
+        return IT->second;
+    }
+    else
+    {
+        std::cout << " Wrong identification of the fiber function! " << std::endl;
+        fiberFunctionPtr_Type pointerToFunction( new fiberFunction_Type() );
+
+        return pointerToFunction;
+    }
+}
 
 }
