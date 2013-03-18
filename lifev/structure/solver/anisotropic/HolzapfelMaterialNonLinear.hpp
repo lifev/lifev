@@ -227,7 +227,7 @@ public:
                                                  const UInt marker);
 
 
-    void setupFiberFunctionsDirection( vectorFiberFunctionPtr_Type vectorOfFibers );
+    void setupFiberDirections( vectorFiberFunctionPtr_Type vectorOfFibers );
     //@}
 
     //! @name Get Methods
@@ -370,7 +370,7 @@ HolzapfelMaterialNonLinear<MeshType>::setup ( const FESpacePtr_Type&            
 
 template <typename MeshType>
 void
-HolzapfelMaterialNonLinear<MeshType>::setupFiberFunctionsDirection ( vectorFiberFunctionPtr_Type vectorOfFibers  )
+HolzapfelMaterialNonLinear<MeshType>::setupFiberDirections ( vectorFiberFunctionPtr_Type vectorOfFibers  )
 {
 
     // In this method, the vector of fiber functions has to be properly set  in the main

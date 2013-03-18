@@ -128,7 +128,7 @@ public:
 
 
     // Boost function for fiber direction
-    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > fiberFunction_Type;
+    typedef boost::function<Real ( Real const&, Real const&, Real const&, ID const& ) > fiberFunction_Type;
     typedef boost::shared_ptr<fiberFunction_Type> fiberFunctionPtr_Type;
 
 
@@ -232,7 +232,7 @@ public:
                                                          const UInt material) = 0;
 
 
-    virtual void setupFiberFunctionsDirection( vectorFiberFunctionPtr_Type vectorOfFibers ) = 0;
+    virtual void setupFiberDirections( vectorFiberFunctionPtr_Type vectorOfFibers ) = 0;
 
     //! @name Set Methods
     //@{

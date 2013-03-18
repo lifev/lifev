@@ -270,10 +270,12 @@ Structure::run3d()
     solidFESpacePtr_Type dFESpace ( new solidFESpace_Type (meshPart, dOrder, 3, parameters->comm) );
     solidETFESpacePtr_Type dETFESpace ( new solidETFESpace_Type (meshPart, & (dFESpace->refFE() ), & (dFESpace->fe().geoMap() ), parameters->comm) );
 
-
     // Setting the fibers
     vectorFiberFunctionPtr_Type pointerToVectorOfFamilies( new vectorFiberFunction_Type( ) );
     pointerToVectorOfFamilies->resize( dataStructure->numberFibersFamilies( ) );
+
+    fibersDirectionList setOfFiberFunctions;
+    setOfFiberFunctions.setupFiberDefinitions( dataStructure->numberFibersFamilies( ) );
 
     // Setting the vector of fibers functions
     for( UInt k(0); k < pointerToVectorOfFamilies->size( ); k++ )
@@ -288,8 +290,7 @@ Structure::run3d()
 
         // Name of the function to create
         std::string creationString = family + familyNumber;
-
-
+        (*pointerToVectorOfFamilies)[ k ] = setOfFiberFunctions.fiberDefinition( familyNumber );
     }
 
     if (verbose)
@@ -362,6 +363,9 @@ Structure::run3d()
 
     //! 3. Setting data from getPot
     solid.setDataFromGetPot (dataFile);
+
+    //! 3.b Setting the fibers in the abstract class of Anisotropic materials
+    solid.material()->anisotropicLaw()->setupFiberDirections( pointerToVectorOfFamilies );
 
     //! 4. Building system using TimeAdvance class
     double timeAdvanceCoefficient = timeAdvance->coefficientSecondDerivative ( 0 ) / (dataStructure->dataTime()->timeStep() * dataStructure->dataTime()->timeStep() );

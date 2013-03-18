@@ -260,6 +260,16 @@ public:
         return M_jacobian;
     }
 
+    isotropicLawPtr_Type isotropicLaw( ) const
+    {
+        return M_isotropicLaw;
+    }
+
+    anisotropicLawPtr_Type anisotropicLaw( ) const
+    {
+        return M_anisotropicLaw;
+    }
+
     //! Get the Stiffness matrix (linear case)
     const matrixPtr_Type  stiffMatrix();
 
@@ -290,10 +300,10 @@ protected:
 
     dataPtr_Type                                   M_dataMaterial;
 
-    isotropicLawPtr_Type                              M_isotropicLaw;
+    isotropicLawPtr_Type                           M_isotropicLaw;
 
 #ifdef ENABLE_ANISOTROPIC_LAW
-    anisotropicLawPtr_Type                            M_anisotropicLaw;
+    anisotropicLawPtr_Type                         M_anisotropicLaw;
 #endif
 
     displayerPtr_Type                              M_displayer;
@@ -490,7 +500,7 @@ const typename StructuralConstitutiveLaw<MeshType>::matrixPtr_Type StructuralCon
 
     // Isotropic part
     *M_matrixStiffness += *M_isotropicLaw->stiffMatrix();
-    
+
     M_matrixStiffness->globalAssemble();
 
     // Here we have just the return
