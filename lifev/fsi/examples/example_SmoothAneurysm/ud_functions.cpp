@@ -717,18 +717,31 @@ Real aneurismFluxInVectorial (const Real&  t, const Real& x, const Real& y, cons
     Real n2 (0.0);
     Real n3 (1.0);
 
+    Real x0 (0.0);
+    Real y0 (0.0);
+
 
     Real flux (fluxFunctionAneurysm (t, x, y, z, i) );
 
     Real area (0.7854); //fluidBig
+
+    Real radius(0.5);
+    Real radiusSquared = radius * radius;
+
+    Real peak(0);
+    peak = ( 2.0 * flux ) / ( 3.1415962 * radiusSquared );
+
     switch (i)
     {
         case 0:
-            return n1 * flux / area;
+            return n1 * std::max(0.0,( peak * ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) )) ;
+                // Flat profile: flux / area;
         case 1:
-            return n2 * flux / area;
+            return n2 * std::max(0.0,( peak * ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) )) ;
+                // Flat profile: flux / area;
         case 2:
-            return n3 * flux / area;
+            return n3 * std::max(0.0,( peak * ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) )) ;
+                // Flat profile: flux / area;
         default:
             return 0.0;
     }
