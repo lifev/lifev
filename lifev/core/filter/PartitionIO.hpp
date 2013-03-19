@@ -243,7 +243,6 @@ private:
     //@{
     boost::shared_ptr<Epetra_Comm> M_comm;
     UInt M_myRank;
-    UInt M_numProc;
     std::string M_fileName;
     bool M_transposeInFile;
     meshPartsPtr_Type M_meshPartsOut;
@@ -287,7 +286,6 @@ inline LifeV::PartitionIO<MeshType>::PartitionIO (const std::string& fileName,
     M_faceNodes = MeshType::elementShape_Type::GeoBShape::S_numPoints;
 
     M_myRank = M_comm->MyPID();
-    M_numProc = M_comm->NumProc();
 }
 
 template<typename MeshType>
