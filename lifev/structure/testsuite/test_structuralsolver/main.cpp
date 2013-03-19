@@ -360,7 +360,7 @@ Structure::run3d()
 
     //! 5. Initial data
     Real dt = dataStructure->dataTime()->timeStep();
-    Real T  = dataStructure->dataTime()->endTime();
+    // Real T  = dataStructure->dataTime()->endTime();
 
     vectorPtr_Type rhs (new vector_Type (solid.displacement(), Unique) );
     vectorPtr_Type disp (new vector_Type (solid.displacement(), Unique) );

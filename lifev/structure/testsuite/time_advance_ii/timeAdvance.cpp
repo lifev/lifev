@@ -385,13 +385,8 @@ problem::run()
         for ( UInt previousPass = 0; previousPass < dataProblem->dataTimeAdvance()->orderBDF() ; previousPass++)
         {
             Real previousTimeStep = -previousPass * dt;
-            // <<<<<<< HEAD
-            feSpace->interpolate (uexact, *U, previousTimeStep );
+            feSpace->interpolate (static_cast<FESpace_type::function_Type> ( uexact ), *U, previousTimeStep );
             uv0.push_back (U);
-            // =======
-            // feSpace->interpolate( static_cast<FESpace_type::function_Type>( uexact ), *U, previousTimeStep);
-            // uv0.push_back(*U);
-            //>>>>>>> master
         }
     }
 
