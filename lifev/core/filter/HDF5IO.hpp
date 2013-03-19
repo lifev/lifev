@@ -47,6 +47,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <map>
 #include <string>
 
+#ifdef LIFEV_HAS_HDF5
 #ifdef HAVE_MPI
 
 #ifndef H5Dcreate_vers
@@ -216,5 +217,6 @@ private:
 } /* namespace LifeV */
 
 #endif /* HAVE_MPI */
+#endif /* LIFEV_HAS_HDF5 */
 
 #endif /* HDF5_IO_H_ */

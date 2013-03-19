@@ -44,6 +44,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <Epetra_config.h>
 
+#ifdef LIFEV_HAS_HDF5
 #ifdef HAVE_MPI
 
 #include <Epetra_MpiComm.h>
@@ -1130,4 +1131,5 @@ void PartitionIO<MeshType>::readElements()
 } /* namespace LifeV */
 
 #endif /* HAVE_MPI */
+#endif /* LIFEV_HAS_HDF5 */
 #endif /* PARTITION_IO_H_ */
