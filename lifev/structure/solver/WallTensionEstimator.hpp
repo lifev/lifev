@@ -949,10 +949,6 @@ WallTensionEstimator<Mesh >::analyzeTensionsRecoveryVonMisesStress ()
     //Construct stress tensor
     constructGlobalStressVector ();
 
-    std::cout << "SigmaX norm2()" << M_sigmaX->norm2() << std::endl;
-    std::cout << "SigmaY norm2()" << M_sigmaY->norm2() << std::endl;
-    std::cout << "SigmaZ norm2()" << M_sigmaZ->norm2() << std::endl;
-
     //Compute Von Mises stress
     *M_sigmaVonMises *= 0.;
 
