@@ -36,8 +36,6 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef PARTITION_IO_H_
 #define PARTITION_IO_H_
 
-#ifdef HAVE_MPI
-
 #include <algorithm>
 
 // Tell the compiler to ignore specific kind of warnings:
@@ -46,8 +44,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <Epetra_config.h>
 
-#include <hdf5.h>
-#include <mpi.h>
+#ifdef HAVE_MPI
 
 #include <Epetra_MpiComm.h>
 

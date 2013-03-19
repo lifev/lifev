@@ -38,18 +38,16 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <lifev/core/LifeV.hpp>
 
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
 #include <Epetra_config.h>
 
 #include <map>
 #include <string>
 
 #ifdef HAVE_MPI
-
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-
-#include <mpi.h>
 
 #ifndef H5Dcreate_vers
 #define H5Dcreate_vers 2
@@ -64,7 +62,6 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #endif
 #include <hdf5.h>
 
-#include <boost/shared_ptr.hpp>
 #include <Epetra_MpiComm.h>
 
 //Tell the compiler to restore the warning previously silented
