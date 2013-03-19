@@ -115,7 +115,7 @@ public:
      *        or not. If it exists, data is appended
      */
     HDF5IO (const std::string& fileName, const commPtr_Type& comm,
-            const bool& existing);
+            const bool& existing = false);
 
     //! Empty destructor
     virtual ~HDF5IO() {}
