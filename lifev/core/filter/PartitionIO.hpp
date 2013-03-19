@@ -268,12 +268,10 @@ private:
     //@}
 }; // class PartitionIO
 
-} /* namespace LifeV */
-
 template<typename MeshType>
-inline LifeV::PartitionIO<MeshType>::PartitionIO (const std::string& fileName,
-                                                  const commPtr_Type& comm,
-                                                  const bool transposeInFile) :
+inline PartitionIO<MeshType>::PartitionIO (const std::string& fileName,
+                                           const commPtr_Type& comm,
+                                           const bool transposeInFile) :
     M_comm (comm),
     M_fileName (fileName),
     M_transposeInFile (transposeInFile),
@@ -289,9 +287,9 @@ inline LifeV::PartitionIO<MeshType>::PartitionIO (const std::string& fileName,
 }
 
 template<typename MeshType>
-inline void LifeV::PartitionIO<MeshType>::setup (const std::string& fileName,
-                                                 const commPtr_Type& comm,
-                                                 const bool transposeInFile)
+inline void PartitionIO<MeshType>::setup (const std::string& fileName,
+                                          const commPtr_Type& comm,
+                                          const bool transposeInFile)
 {
     M_comm = comm;
     M_fileName = fileName;
@@ -306,7 +304,7 @@ inline void LifeV::PartitionIO<MeshType>::setup (const std::string& fileName,
 }
 
 template<typename MeshType>
-void LifeV::PartitionIO<MeshType>::write (const meshPartsPtr_Type& meshParts)
+void PartitionIO<MeshType>::write (const meshPartsPtr_Type& meshParts)
 {
     M_meshPartsOut = meshParts;
     M_numParts = M_meshPartsOut->size();
@@ -323,7 +321,7 @@ void LifeV::PartitionIO<MeshType>::write (const meshPartsPtr_Type& meshParts)
 }
 
 template<typename MeshType>
-void LifeV::PartitionIO<MeshType>::read (meshPtr_Type& meshPart)
+void PartitionIO<MeshType>::read (meshPtr_Type& meshPart)
 {
     meshPart.reset();
     M_meshPartIn.reset (new mesh_Type);
@@ -341,7 +339,7 @@ void LifeV::PartitionIO<MeshType>::read (meshPtr_Type& meshPart)
 }
 
 template<typename MeshType>
-void LifeV::PartitionIO<MeshType>::writeStats()
+void PartitionIO<MeshType>::writeStats()
 {
     // Write mesh partition stats (N = number of parts)
     // This is an N x 15 table of int
@@ -423,7 +421,7 @@ void LifeV::PartitionIO<MeshType>::writeStats()
 }
 
 template<typename MeshType>
-void LifeV::PartitionIO<MeshType>::writePoints()
+void PartitionIO<MeshType>::writePoints()
 {
     // Write points (N = number of parts)
     // Two tables: one is (3 * N) x max_num_points of int
@@ -505,7 +503,7 @@ void LifeV::PartitionIO<MeshType>::writePoints()
 }
 
 template<typename MeshType>
-void LifeV::PartitionIO<MeshType>::writeEdges()
+void PartitionIO<MeshType>::writeEdges()
 {
     // Write edges (N = number of parts)
     // Table is (5 * N) x max_num_edges of int
@@ -581,7 +579,7 @@ void LifeV::PartitionIO<MeshType>::writeEdges()
 }
 
 template<typename MeshType>
-void LifeV::PartitionIO<MeshType>::writeFaces()
+void PartitionIO<MeshType>::writeFaces()
 {
     // Write faces (N = number of parts)
     // Table is ((7 + num_face_nodes * N) x max_num_faces of int
@@ -678,7 +676,7 @@ void LifeV::PartitionIO<MeshType>::writeFaces()
 }
 
 template<typename MeshType>
-void LifeV::PartitionIO<MeshType>::writeElements()
+void PartitionIO<MeshType>::writeElements()
 {
     // Write elements (N = number of parts)
     // Table is ((3 + num_element_nodes * N) x max_num_elements of int
@@ -759,7 +757,7 @@ void LifeV::PartitionIO<MeshType>::writeElements()
 }
 
 template<typename MeshType>
-void LifeV::PartitionIO<MeshType>::readStats()
+void PartitionIO<MeshType>::readStats()
 {
     // Write mesh partition stats (N = number of parts)
     // This is an N x 15 table of int
@@ -822,7 +820,7 @@ void LifeV::PartitionIO<MeshType>::readStats()
 }
 
 template<typename MeshType>
-void LifeV::PartitionIO<MeshType>::readPoints()
+void PartitionIO<MeshType>::readPoints()
 {
     // Read mesh points (N = number of parts)
     // There are two tables: a (3 * N) x max_num_points table of int and
@@ -900,7 +898,7 @@ void LifeV::PartitionIO<MeshType>::readPoints()
 }
 
 template<typename MeshType>
-void LifeV::PartitionIO<MeshType>::readEdges()
+void PartitionIO<MeshType>::readEdges()
 {
     // Read mesh edges (N = number of parts)
     // Read a (5 * N) x max_num_edges table of int and
@@ -965,7 +963,7 @@ void LifeV::PartitionIO<MeshType>::readEdges()
 }
 
 template<typename MeshType>
-void LifeV::PartitionIO<MeshType>::readFaces()
+void PartitionIO<MeshType>::readFaces()
 {
     // read mesh faces (N = number of parts)
     // Read a ((7 + num_face_points) * N) x max_num_faces table of int
@@ -1057,7 +1055,7 @@ void LifeV::PartitionIO<MeshType>::readFaces()
 }
 
 template<typename MeshType>
-void LifeV::PartitionIO<MeshType>::readElements()
+void PartitionIO<MeshType>::readElements()
 {
     // Read mesh elements (N = number of parts)
     // Read a ((3 + num_element_points) * N) x max_num_elements table of int
@@ -1131,6 +1129,8 @@ void LifeV::PartitionIO<MeshType>::readElements()
     M_meshPartIn->updateElementEdges (false, false);
     M_meshPartIn->updateElementFaces (false, false);
 }
+
+} /* namespace LifeV */
 
 #endif /* HAVE_MPI */
 #endif /* PARTITION_IO_H_ */
