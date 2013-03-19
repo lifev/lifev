@@ -36,7 +36,6 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef PARTITION_IO_H_
 #define PARTITION_IO_H_
 
-#ifdef HAVE_HDF5
 #ifdef HAVE_MPI
 
 #include <algorithm>
@@ -1136,5 +1135,4 @@ void LifeV::PartitionIO<MeshType>::readElements()
 }
 
 #endif /* HAVE_MPI */
-#endif /* HAVE_HDF5 */
 #endif /* PARTITION_IO_H_ */

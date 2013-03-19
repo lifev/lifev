@@ -35,7 +35,6 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <lifev/core/filter/HDF5IO.hpp>
 
-#ifdef HAVE_HDF5
 #ifdef HAVE_MPI
 
 // ===================================================
@@ -158,4 +157,3 @@ void LifeV::HDF5IO::closeFile()
 }
 
 #endif /* HAVE_MPI */
-#endif /* HAVE_HDF5 */

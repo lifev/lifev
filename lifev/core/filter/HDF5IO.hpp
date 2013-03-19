@@ -43,7 +43,6 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <map>
 #include <string>
 
-#ifdef HAVE_HDF5
 #ifdef HAVE_MPI
 
 // Tell the compiler to ignore specific kind of warnings:
@@ -217,8 +216,8 @@ private:
     //@}
 }; // class HDF5IO
 
-#endif /* HAVE_MPI */
-#endif /* HAVE_HDF5 */
-
 } /* namespace LifeV */
+
+#endif /* HAVE_MPI */
+
 #endif /* HDF5_IO_H_ */
