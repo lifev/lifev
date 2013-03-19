@@ -104,6 +104,11 @@ public:
                              std::vector<Int> const& blockRowIndices, std::vector<Int> const& blockColumnIndices,
                              DataType* const* const localValues,
                              Int format = Epetra_FECrsMatrix::COLUMN_MAJOR ) const;
+    //! Function to assemble an elemental matrix in a block (for closed matrices)
+    void sumIntoCoefficients ( UInt const numRows, UInt const numColumns,
+                               std::vector<Int> const& blockRowIndices, std::vector<Int> const& blockColumnIndices,
+                               DataType* const* const localValues,
+                               Int format = Epetra_FECrsMatrix::COLUMN_MAJOR ) const;
     //@}
 
     //! @name  Set Methods
@@ -159,6 +164,12 @@ public:
     UInt lastColumnIndex() const
     {
         return M_lastColumnIndex;
+    }
+
+    //! Return the fill-complete status of the inner Epetra_FECrsMatrix
+    bool filled() const
+    {
+    	return M_matrix->matrixPtr()->Filled();
     }
 
     //! Return the pointer of the full matrix
@@ -266,6 +277,31 @@ addToCoefficients ( UInt const numRows, UInt const numColumns,
                                  localValues, format);
 }
 
+template<typename DataType>
+void
+MatrixEpetraStructuredView<DataType>::
+sumIntoCoefficients ( UInt const numRows, UInt const numColumns,
+                      std::vector<Int> const& blockRowIndices,
+                      std::vector<Int> const& blockColumnIndices,
+                      DataType* const* const localValues,
+                      Int format) const
+{
+    std::vector<Int> rowIndices (blockRowIndices);
+    std::vector<Int> columnIndices (blockColumnIndices);
+
+    for (UInt i (0); i < numRows; ++i)
+    {
+        rowIndices[i] += M_firstRowIndex;
+    }
+    for (UInt i (0); i < numColumns; ++i)
+    {
+        columnIndices[i] += M_firstColumnIndex;
+    }
+
+    M_matrix->sumIntoCoefficients (numRows, numColumns,
+                                   rowIndices, columnIndices,
+                                   localValues, format);
+}
 
 // ===================================================
 // Set Methods

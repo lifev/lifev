@@ -109,14 +109,22 @@ public:
     template <typename MatrixType>
     inline void operator>> (MatrixType& mat)
     {
-        addTo (mat);
+    	if (mat.filled()) {
+    		addToClosed (mat);
+    	} else {
+    		addTo (mat);
+    	}
     }
 
     //! Operator wrapping the addTo method (for shared_ptr)
     template <typename MatrixType>
     inline void operator>> (boost::shared_ptr<MatrixType> mat)
     {
-        addTo (mat);
+    	if (mat->filled()) {
+    		addToClosed (mat);
+    	} else {
+    		addTo (mat);
+    	}
     }
 
     //@}
@@ -146,6 +154,18 @@ public:
       performed: update the values, update the local matrix,
       sum over the quadrature nodes, assemble in the global
       matrix.
+      The method is used for closed matrices
+     */
+    template <typename MatrixType>
+    void addToClosed (MatrixType& mat);
+
+    //! Method that performs the assembly
+    /*!
+      The loop over the elements is located right
+      in this method. Everything for the assembly is then
+      performed: update the values, update the local matrix,
+      sum over the quadrature nodes, assemble in the global
+      matrix.
 
       Specialized for the case where the matrix is passed as a shared_ptr
      */
@@ -156,6 +176,23 @@ public:
         addTo (*mat);
     }
 
+    //! Method that performs the assembly
+    /*!
+      The loop over the elements is located right
+      in this method. Everything for the assembly is then
+      performed: update the values, update the local matrix,
+      sum over the quadrature nodes, assemble in the global
+      matrix.
+      This method is used with closed matrices.
+
+      Specialized for the case where the matrix is passed as a shared_ptr
+     */
+    template <typename MatrixType>
+    inline void addToClosed (boost::shared_ptr<MatrixType> mat)
+    {
+        ASSERT (mat != 0, " Cannot assemble with an empty matrix");
+        addToClosed (*mat);
+    }
     //@}
 
 private:
@@ -339,6 +376,72 @@ addTo (MatrixType& mat)
     }
 }
 
+template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
+template <typename MatrixType>
+void
+IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType>::
+addToClosed (MatrixType& mat)
+{
+    UInt nbElements (M_mesh->numElements() );
+    UInt nbQuadPt (M_quadrature.nbQuadPt() );
+    UInt nbTestDof (M_testSpace->refFE().nbDof() );
+    UInt nbSolutionDof (M_solutionSpace->refFE().nbDof() );
+
+    for (UInt iElement (0); iElement < nbElements; ++iElement)
+    {
+        // Zeros out the matrix
+        M_elementalMatrix.zero();
+
+        // Update the currentFEs
+        M_globalCFE->update (M_mesh->element (iElement), evaluation_Type::S_globalUpdateFlag | ET_UPDATE_WDET);
+        M_testCFE->update (M_mesh->element (iElement), evaluation_Type::S_testUpdateFlag);
+        M_solutionCFE->update (M_mesh->element (iElement), evaluation_Type::S_solutionUpdateFlag);
+
+        // Update the evaluation
+        M_evaluation.update (iElement);
+
+        // Loop on the blocks
+
+        for (UInt iblock (0); iblock < TestSpaceType::S_fieldDim; ++iblock)
+        {
+            for (UInt jblock (0); jblock < SolutionSpaceType::S_fieldDim; ++jblock)
+            {
+
+                // Set the row global indices in the local matrix
+                for (UInt i (0); i < nbTestDof; ++i)
+                {
+                    M_elementalMatrix.setRowIndex
+                    (i + iblock * nbTestDof,
+                     M_testSpace->dof().localToGlobalMap (iElement, i) + iblock * M_testSpace->dof().numTotalDof() );
+                }
+
+                // Set the column global indices in the local matrix
+                for (UInt j (0); j < nbSolutionDof; ++j)
+                {
+                    M_elementalMatrix.setColumnIndex
+                    (j + jblock * nbSolutionDof,
+                     M_solutionSpace->dof().localToGlobalMap (iElement, j) + jblock * M_solutionSpace->dof().numTotalDof() );
+                }
+
+                for (UInt iQuadPt (0); iQuadPt < nbQuadPt; ++iQuadPt)
+                {
+                    for (UInt i (0); i < nbTestDof; ++i)
+                    {
+                        for (UInt j (0); j < nbSolutionDof; ++j)
+                        {
+                            M_elementalMatrix.element (i + iblock * nbTestDof, j + jblock * nbSolutionDof) +=
+                                M_evaluation.value_qij (iQuadPt, i + iblock * nbTestDof, j + jblock * nbSolutionDof)
+                                * M_globalCFE->wDet (iQuadPt);
+
+                        }
+                    }
+                }
+            }
+        }
+
+        M_elementalMatrix.pushToClosedGlobal (mat);
+    }
+}
 
 } // Namespace ExpressionAssembly
 
