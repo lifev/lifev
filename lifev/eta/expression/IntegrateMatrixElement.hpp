@@ -203,6 +203,17 @@ private:
     //! No empty constructor
     IntegrateMatrixElement();
 
+    //! Perform the computations for a single element
+    /*!
+     * This method computes the elemental matrix for a given element
+     * index
+     */
+    void integrateElement(const UInt iElement,
+    					  const UInt nbElements,
+    					  const UInt nbQuadPt,
+    					  const UInt nbTestDof,
+    					  const UInt nbSolutionDof);
+
     //@}
 
     // Pointer on the mesh
@@ -308,6 +319,63 @@ check (std::ostream& out)
     out << std::endl;
 }
 
+template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
+void
+IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType>::
+integrateElement (const UInt iElement, const UInt nbElements,
+		  	  	  const UInt nbQuadPt, const UInt nbTestDof,
+		  	  	  const UInt nbSolutionDof)
+{
+    // Zeros out the matrix
+    M_elementalMatrix.zero();
+
+    // Update the currentFEs
+    M_globalCFE->update (M_mesh->element (iElement), evaluation_Type::S_globalUpdateFlag | ET_UPDATE_WDET);
+    M_testCFE->update (M_mesh->element (iElement), evaluation_Type::S_testUpdateFlag);
+    M_solutionCFE->update (M_mesh->element (iElement), evaluation_Type::S_solutionUpdateFlag);
+
+    // Update the evaluation
+    M_evaluation.update (iElement);
+
+    // Loop on the blocks
+
+    for (UInt iblock (0); iblock < TestSpaceType::S_fieldDim; ++iblock)
+    {
+        for (UInt jblock (0); jblock < SolutionSpaceType::S_fieldDim; ++jblock)
+        {
+
+            // Set the row global indices in the local matrix
+            for (UInt i (0); i < nbTestDof; ++i)
+            {
+                M_elementalMatrix.setRowIndex
+                (i + iblock * nbTestDof,
+                 M_testSpace->dof().localToGlobalMap (iElement, i) + iblock * M_testSpace->dof().numTotalDof() );
+            }
+
+            // Set the column global indices in the local matrix
+            for (UInt j (0); j < nbSolutionDof; ++j)
+            {
+                M_elementalMatrix.setColumnIndex
+                (j + jblock * nbSolutionDof,
+                 M_solutionSpace->dof().localToGlobalMap (iElement, j) + jblock * M_solutionSpace->dof().numTotalDof() );
+            }
+
+            for (UInt iQuadPt (0); iQuadPt < nbQuadPt; ++iQuadPt)
+            {
+                for (UInt i (0); i < nbTestDof; ++i)
+                {
+                    for (UInt j (0); j < nbSolutionDof; ++j)
+                    {
+                        M_elementalMatrix.element (i + iblock * nbTestDof, j + jblock * nbSolutionDof) +=
+                            M_evaluation.value_qij (iQuadPt, i + iblock * nbTestDof, j + jblock * nbSolutionDof)
+                            * M_globalCFE->wDet (iQuadPt);
+
+                    }
+                }
+            }
+        }
+    }
+}
 
 template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
 template <typename MatrixType>
@@ -322,55 +390,8 @@ addTo (MatrixType& mat)
 
     for (UInt iElement (0); iElement < nbElements; ++iElement)
     {
-        // Zeros out the matrix
-        M_elementalMatrix.zero();
-
-        // Update the currentFEs
-        M_globalCFE->update (M_mesh->element (iElement), evaluation_Type::S_globalUpdateFlag | ET_UPDATE_WDET);
-        M_testCFE->update (M_mesh->element (iElement), evaluation_Type::S_testUpdateFlag);
-        M_solutionCFE->update (M_mesh->element (iElement), evaluation_Type::S_solutionUpdateFlag);
-
-        // Update the evaluation
-        M_evaluation.update (iElement);
-
-        // Loop on the blocks
-
-        for (UInt iblock (0); iblock < TestSpaceType::S_fieldDim; ++iblock)
-        {
-            for (UInt jblock (0); jblock < SolutionSpaceType::S_fieldDim; ++jblock)
-            {
-
-                // Set the row global indices in the local matrix
-                for (UInt i (0); i < nbTestDof; ++i)
-                {
-                    M_elementalMatrix.setRowIndex
-                    (i + iblock * nbTestDof,
-                     M_testSpace->dof().localToGlobalMap (iElement, i) + iblock * M_testSpace->dof().numTotalDof() );
-                }
-
-                // Set the column global indices in the local matrix
-                for (UInt j (0); j < nbSolutionDof; ++j)
-                {
-                    M_elementalMatrix.setColumnIndex
-                    (j + jblock * nbSolutionDof,
-                     M_solutionSpace->dof().localToGlobalMap (iElement, j) + jblock * M_solutionSpace->dof().numTotalDof() );
-                }
-
-                for (UInt iQuadPt (0); iQuadPt < nbQuadPt; ++iQuadPt)
-                {
-                    for (UInt i (0); i < nbTestDof; ++i)
-                    {
-                        for (UInt j (0); j < nbSolutionDof; ++j)
-                        {
-                            M_elementalMatrix.element (i + iblock * nbTestDof, j + jblock * nbSolutionDof) +=
-                                M_evaluation.value_qij (iQuadPt, i + iblock * nbTestDof, j + jblock * nbSolutionDof)
-                                * M_globalCFE->wDet (iQuadPt);
-
-                        }
-                    }
-                }
-            }
-        }
+    	integrateElement(iElement, nbElements, nbQuadPt, nbTestDof,
+    					 nbSolutionDof);
 
         M_elementalMatrix.pushToGlobal (mat);
     }
@@ -389,55 +410,8 @@ addToClosed (MatrixType& mat)
 
     for (UInt iElement (0); iElement < nbElements; ++iElement)
     {
-        // Zeros out the matrix
-        M_elementalMatrix.zero();
-
-        // Update the currentFEs
-        M_globalCFE->update (M_mesh->element (iElement), evaluation_Type::S_globalUpdateFlag | ET_UPDATE_WDET);
-        M_testCFE->update (M_mesh->element (iElement), evaluation_Type::S_testUpdateFlag);
-        M_solutionCFE->update (M_mesh->element (iElement), evaluation_Type::S_solutionUpdateFlag);
-
-        // Update the evaluation
-        M_evaluation.update (iElement);
-
-        // Loop on the blocks
-
-        for (UInt iblock (0); iblock < TestSpaceType::S_fieldDim; ++iblock)
-        {
-            for (UInt jblock (0); jblock < SolutionSpaceType::S_fieldDim; ++jblock)
-            {
-
-                // Set the row global indices in the local matrix
-                for (UInt i (0); i < nbTestDof; ++i)
-                {
-                    M_elementalMatrix.setRowIndex
-                    (i + iblock * nbTestDof,
-                     M_testSpace->dof().localToGlobalMap (iElement, i) + iblock * M_testSpace->dof().numTotalDof() );
-                }
-
-                // Set the column global indices in the local matrix
-                for (UInt j (0); j < nbSolutionDof; ++j)
-                {
-                    M_elementalMatrix.setColumnIndex
-                    (j + jblock * nbSolutionDof,
-                     M_solutionSpace->dof().localToGlobalMap (iElement, j) + jblock * M_solutionSpace->dof().numTotalDof() );
-                }
-
-                for (UInt iQuadPt (0); iQuadPt < nbQuadPt; ++iQuadPt)
-                {
-                    for (UInt i (0); i < nbTestDof; ++i)
-                    {
-                        for (UInt j (0); j < nbSolutionDof; ++j)
-                        {
-                            M_elementalMatrix.element (i + iblock * nbTestDof, j + jblock * nbSolutionDof) +=
-                                M_evaluation.value_qij (iQuadPt, i + iblock * nbTestDof, j + jblock * nbSolutionDof)
-                                * M_globalCFE->wDet (iQuadPt);
-
-                        }
-                    }
-                }
-            }
-        }
+    	integrateElement(iElement, nbElements, nbQuadPt, nbTestDof,
+    					 nbSolutionDof);
 
         M_elementalMatrix.pushToClosedGlobal (mat);
     }
