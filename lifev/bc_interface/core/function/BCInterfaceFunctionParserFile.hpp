@@ -195,11 +195,8 @@ BCInterfaceFunctionParserFile< BcHandlerType, PhysicalSolverType >::setData ( co
     debugStream ( 5022 ) << "BCInterfaceFunctionFile::loadData            fileName: " << data->baseString() << "\n";
 #endif
 
-    // Create a true copy
-    dataPtr_Type dataCopy ( new data_Type ( *data ) );
-
     std::vector< std::string > stringsVector;
-    boost::split ( stringsVector, dataCopy->baseString(), boost::is_any_of ( "[" ) );
+    boost::split ( stringsVector, data->baseString(), boost::is_any_of ( "[" ) );
 
     //Load data from file
     GetPot dataFile ( stringsVector[0] );
@@ -280,19 +277,19 @@ BCInterfaceFunctionParserFile< BcHandlerType, PhysicalSolverType >::setData ( co
     //Update the data container (IT IS A COPY!) with the correct base string for the BCInterfaceFunctionParser
     if ( stringsVector.size() < 2 )
     {
-        dataCopy->setBaseString ( dataFile ( "function", "Undefined" ) );
+        data->setBaseString ( dataFile ( "function", "Undefined" ) );
     }
     else
     {
         boost::replace_all ( stringsVector[1], "]", "" );
-        dataCopy->setBaseString ( dataFile ( ( "function" + stringsVector[1] ).c_str(), "Undefined" ) );
+        data->setBaseString ( dataFile ( ( "function" + stringsVector[1] ).c_str(), "Undefined" ) );
     }
 
     // Now data contains the real base string
-    functionParser_Type::setData ( dataCopy );
+    functionParser_Type::setData ( data );
 
 #ifdef HAVE_LIFEV_DEBUG
-    debugStream ( 5022 ) << "                                             function: " << dataCopy->baseString() << "\n";
+    debugStream ( 5022 ) << "                                             function: " << data->baseString() << "\n";
 #endif
 
 }
