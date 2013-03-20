@@ -459,7 +459,7 @@ public:
 
     //!Setters
     //! Set the BCHandler object
-    void setBC (bcHandler_Type& BCd)
+    void setBC (const bcHandler_Type& BCd)
     {
         M_BCh = BCd;
     }
