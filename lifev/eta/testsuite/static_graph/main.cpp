@@ -35,6 +35,8 @@
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
+#include <cstdlib>
+
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
 #include <mpi.h>
@@ -83,13 +85,20 @@ int main ( int argc, char** argv )
 
     const bool verbose (Comm->MyPID() == 0);
 
+    if (argc != 2) {
+    	if (verbose) {
+    		std::cout << "Please run program as " << argv[0]
+					  << " " << "<num_elements>\n";
+    		return EXIT_FAILURE;
+    	}
+    }
+
+    const UInt Nelements = std::atoi(argv[1]);
 
     if (verbose)
     {
         std::cout << " -- Building and partitioning the mesh ... " << std::flush;
     }
-
-    const UInt Nelements (10);
 
     boost::shared_ptr< mesh_Type > fullMeshPtr (new mesh_Type);
 
