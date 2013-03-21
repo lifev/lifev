@@ -314,7 +314,7 @@ public:
     /*!
       \param bch BCHander object containing the boundary conditions
     */
-    void iterate ( bcHandler_Type& bch );
+    void iterate ( const bcHandler_Type& bch );
 
     //! Solve the linearized problem. Used in FSI segregated in ExactJacobian
     /*!
@@ -1059,7 +1059,7 @@ StructuralOperator<Mesh>::computeMassMatrix ( const Real factor)
 
 template <typename Mesh>
 void
-StructuralOperator<Mesh>::iterate ( bcHandler_Type& bch )
+StructuralOperator<Mesh>::iterate ( const bcHandler_Type& bch )
 {
     LifeChrono chrono;
 
