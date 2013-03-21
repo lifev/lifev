@@ -1542,8 +1542,12 @@ sumIntoCoefficients ( Int const numRows, Int const numColumns,
                       DataType* const* const localValues,
                       Int format )
 {
-	Int ierr = M_epetraCrs->SumIntoGlobalValues ( numRows, &rowIndices[0], numColumns,
-                                       	   	   	  &columnIndices[0], localValues, format );
+	Int ierr;
+#pragma omp critical
+	{
+	ierr = M_epetraCrs->SumIntoGlobalValues ( numRows, &rowIndices[0], numColumns,
+                                       	   	  &columnIndices[0], localValues, format );
+	}
 
     std::stringstream errorMessage;
     errorMessage << " error in matrix insertion [addToCoefficients] " << ierr
