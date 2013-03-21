@@ -42,6 +42,8 @@
 
 #include <lifev/core/LifeV.hpp>
 
+#include <lifev/core/util/OpenMPParameters.hpp>
+
 #include <lifev/eta/expression/RequestLoopElement.hpp>
 
 #include <lifev/core/fem/QuadratureRule.hpp>
@@ -88,7 +90,7 @@ buildGraph ( const RequestLoopElement<MeshType>& request,
     					SolutionSpaceType,
     					ExpressionType>
            (request.mesh(), quadrature, testSpace, solutionSpace, expression,
-            1);
+            OpenMPParameters());
 }
 
 template < typename MeshType,
@@ -104,14 +106,14 @@ buildGraph ( const RequestLoopElement<MeshType>& request,
 			 const boost::shared_ptr<TestSpaceType>& testSpace,
 			 const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
 			 const ExpressionType& expression,
-			 const Int numThreads)
+			 const OpenMPParameters& ompParams)
 {
     return GraphElement<MeshType,
     					TestSpaceType,
     					SolutionSpaceType,
     					ExpressionType>
            (request.mesh(), quadrature, testSpace, solutionSpace, expression,
-            numThreads);
+            ompParams);
 }
 
 } // Namespace ExpressionAssembly

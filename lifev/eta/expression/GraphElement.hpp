@@ -41,6 +41,7 @@
 #endif
 
 #include <lifev/core/LifeV.hpp>
+#include <lifev/core/util/OpenMPParameters.hpp>
 
 #include <lifev/core/fem/QuadratureRule.hpp>
 #include <lifev/eta/fem/ETCurrentFE.hpp>
@@ -97,7 +98,7 @@ public:
                   const boost::shared_ptr<TestSpaceType>& testSpace,
                   const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
                   const ExpressionType& expression,
-                  const Int numThreads);
+                  const OpenMPParameters& ompParams);
 
     //! Copy constructor
     GraphElement (const GraphElement<MeshType,
@@ -175,7 +176,7 @@ private:
     boost::shared_ptr<SolutionSpaceType> M_solutionSpace;
 
     // For multi-threading
-    Int M_numThreads;
+    OpenMPParameters M_ompParams;
 };
 
 
@@ -194,12 +195,12 @@ GraphElement (const boost::shared_ptr<MeshType>& mesh,
                         const boost::shared_ptr<TestSpaceType>& testSpace,
                         const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
                         const ExpressionType& /*expression*/,
-                        const Int numThreads)
+                        const OpenMPParameters& ompParams)
     :   M_mesh (mesh),
         M_quadrature (quadrature),
         M_testSpace (testSpace),
         M_solutionSpace (solutionSpace),
-        M_numThreads (numThreads)
+        M_ompParams (ompParams)
 {
 }
 
@@ -210,7 +211,7 @@ GraphElement (const GraphElement<MeshType, TestSpaceType, SolutionSpaceType, Exp
         M_quadrature (integrator.M_quadrature),
         M_testSpace (integrator.M_testSpace),
         M_solutionSpace (integrator.M_solutionSpace),
-        M_numThreads (integrator.M_numThreads)
+        M_ompParams (integrator.M_ompParams)
 {
 }
 
@@ -243,15 +244,14 @@ addTo (GraphType& graph)
     UInt nbSolutionDof (M_solutionSpace->refFE().nbDof() );
 
     // OpenMP setup and pragmas around the loop
-#ifdef _OPENMP
-    omp_set_num_threads(M_numThreads);
-#endif
+    M_ompParams.apply();
+
 #pragma omp parallel
     {
 		ETMatrixElemental elementalMatrix(TestSpaceType::S_fieldDim * M_testSpace->refFE().nbDof(),
 										  SolutionSpaceType::S_fieldDim * M_solutionSpace->refFE().nbDof() );
 
-#pragma omp for
+#pragma omp for schedule(runtime)
 		for (UInt iElement = 0; iElement < nbElements; ++iElement)
 		{
 			// Zeros out the matrix

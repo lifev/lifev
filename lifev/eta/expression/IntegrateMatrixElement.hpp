@@ -42,6 +42,8 @@
 
 #include <lifev/core/LifeV.hpp>
 
+#include <lifev/core/util/OpenMPParameters.hpp>
+
 #include <lifev/core/fem/QuadratureRule.hpp>
 #include <lifev/eta/fem/ETCurrentFE.hpp>
 #include <lifev/eta/fem/MeshGeometricMap.hpp>
@@ -103,7 +105,7 @@ public:
                             const boost::shared_ptr<TestSpaceType>& testSpace,
                             const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
                             const ExpressionType& expression,
-                            const Int numThreads);
+                            const OpenMPParameters& ompParams);
 
     //! Copy constructor
     IntegrateMatrixElement (const IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType>& integrator);
@@ -249,7 +251,7 @@ private:
     evaluation_Type M_evaluation;
 
     // Data for multi-threaded assembly
-    Int M_numThreads;
+    OpenMPParameters M_ompParams;
 };
 
 
@@ -276,7 +278,7 @@ IntegrateMatrixElement (const boost::shared_ptr<MeshType>& mesh,
         M_testCFE (new ETCurrentFE<3, TestSpaceType::S_fieldDim> (testSpace->refFE(), testSpace->geoMap(), quadrature) ),
         M_solutionCFE (new ETCurrentFE<3, SolutionSpaceType::S_fieldDim> (solutionSpace->refFE(), testSpace->geoMap(), quadrature) ),
         M_evaluation (expression),
-	    M_numThreads(1)
+	    M_ompParams()
 {
 	M_evaluation.setQuadrature (quadrature);
 	M_evaluation.setGlobalCFE (M_globalCFE);
@@ -291,7 +293,7 @@ IntegrateMatrixElement (const boost::shared_ptr<MeshType>& mesh,
                         const boost::shared_ptr<TestSpaceType>& testSpace,
                         const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
                         const ExpressionType& expression,
-                        const Int numThreads)
+                        const OpenMPParameters& ompParams)
     :   M_mesh (mesh),
         M_quadrature (quadrature),
         M_testSpace (testSpace),
@@ -300,7 +302,7 @@ IntegrateMatrixElement (const boost::shared_ptr<MeshType>& mesh,
         M_testCFE (new ETCurrentFE<3, TestSpaceType::S_fieldDim> (testSpace->refFE(), testSpace->geoMap(), quadrature) ),
         M_solutionCFE (new ETCurrentFE<3, SolutionSpaceType::S_fieldDim> (solutionSpace->refFE(), testSpace->geoMap(), quadrature) ),
         M_evaluation (expression),
-	    M_numThreads(numThreads)
+	    M_ompParams(ompParams)
 {
 	M_evaluation.setQuadrature (quadrature);
 	M_evaluation.setGlobalCFE (M_globalCFE);
@@ -319,7 +321,7 @@ IntegrateMatrixElement (const IntegrateMatrixElement<MeshType, TestSpaceType, So
         M_testCFE (new ETCurrentFE<3, TestSpaceType::S_fieldDim> (M_testSpace->refFE(), M_testSpace->geoMap(), M_quadrature) ),
         M_solutionCFE (new ETCurrentFE<3, SolutionSpaceType::S_fieldDim> (M_solutionSpace->refFE(), M_solutionSpace->geoMap(), M_quadrature) ),
         M_evaluation (integrator.M_evaluation),
-        M_numThreads(integrator.M_numThreads)
+        M_ompParams(integrator.M_ompParams)
 {
 	M_evaluation.setQuadrature (M_quadrature);
 	M_evaluation.setGlobalCFE (M_globalCFE);
@@ -463,9 +465,7 @@ addToClosed (MatrixType& mat)
     UInt nbSolutionDof (M_solutionSpace->refFE().nbDof() );
 
     // OpenMP setup and pragmas around the loop
-#ifdef _OPENMP
-    omp_set_num_threads(M_numThreads);
-#endif
+    M_ompParams.apply();
 
 #pragma omp parallel
     {
@@ -489,7 +489,7 @@ addToClosed (MatrixType& mat)
 		ETMatrixElemental elementalMatrix (TestSpaceType::S_fieldDim * M_testSpace->refFE().nbDof(),
 						   SolutionSpaceType::S_fieldDim * M_solutionSpace->refFE().nbDof() );
 
-#pragma omp for
+#pragma omp for schedule(runtime)
 		for (UInt iElement = 0; iElement < nbElements; ++iElement)
 		{
 			integrateElement(iElement, nbQuadPt, nbTestDof, nbSolutionDof,

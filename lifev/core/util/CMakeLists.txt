@@ -17,6 +17,7 @@ SET(util_HEADERS
   util/ParserDefinitions.hpp
   util/FactoryPolicy.hpp
   util/WallClock.hpp
+  util/OpenMPParameters.hpp
 CACHE INTERNAL "")
 
 SET(util_SOURCES

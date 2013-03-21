@@ -38,6 +38,8 @@
 
 #include <lifev/core/LifeV.hpp>
 
+#include <lifev/core/util/OpenMPParameters.hpp>
+
 #include <lifev/eta/expression/RequestLoopElement.hpp>
 
 #include <lifev/core/fem/QuadratureRule.hpp>
@@ -98,11 +100,11 @@ integrate ( const RequestLoopElement<MeshType>& request,
             const boost::shared_ptr<TestSpaceType>& testSpace,
             const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
             const ExpressionType& expression,
-            const Int numThreads)
+            const OpenMPParameters& ompParams)
 {
     return IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType>
            (request.mesh(), quadrature, testSpace, solutionSpace, expression,
-           	numThreads);
+           	ompParams);
 }
 
 //! Integrate function for vectorial expressions

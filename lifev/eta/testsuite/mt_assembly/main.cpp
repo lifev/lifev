@@ -52,6 +52,7 @@
 
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/util/WallClock.hpp>
+#include <lifev/core/util/OpenMPParameters.hpp>
 
 #include <lifev/core/mesh/MeshPartitioner.hpp>
 #include <lifev/core/mesh/RegionMesh3DStructured.hpp>
@@ -85,16 +86,23 @@ int main ( int argc, char** argv )
 
     const bool verbose (Comm->MyPID() == 0);
 
-    if (argc != 3) {
+    if (argc != 5) {
     	if (verbose) {
     		std::cout << "Please run program as " << argv[0]
-					  << " " << "<num_elements> " << "<num_threads>\n";
+					  << " " << "<num_elements> " << "<num_threads>"
+					  << " " << "<scheduler> " << "<chunkSize>\n";
     		return EXIT_FAILURE;
     	}
     }
 
+    OpenMPParameters ompParams;
+
     const UInt Nelements = std::atoi(argv[1]);
-    Int numThreads = std::atoi(argv[2]);
+    ompParams.numThreads = std::atoi(argv[2]);
+#ifdef _OPENMP
+    ompParams.scheduler = static_cast<omp_sched_t>(std::atoi(argv[3]));
+#endif
+    ompParams.chunkSize = std::atoi(argv[4]);
 
     if (verbose)
     {
@@ -155,7 +163,7 @@ int main ( int argc, char** argv )
                      quadRuleTetra4pt,
                      uSpace,
                      uSpace,
-                     dot ( grad (phi_i) , grad (phi_j) ), 1
+                     dot ( grad (phi_i) , grad (phi_j) )
                    ) >> matrixGraph;
     }
     timer.stop();
@@ -184,7 +192,7 @@ int main ( int argc, char** argv )
                      quadRuleTetra4pt,
                      uSpace,
                      uSpace,
-                     dot ( grad (phi_i) , grad (phi_j) ), numThreads
+                     dot ( grad (phi_i) , grad (phi_j) ), ompParams
                   ) >> closedSystemMatrix;
 
         closedSystemMatrix->globalAssemble();
