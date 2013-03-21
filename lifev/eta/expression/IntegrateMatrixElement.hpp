@@ -241,6 +241,10 @@ private:
     boost::shared_ptr<TestSpaceType> M_testSpace;
     boost::shared_ptr<SolutionSpaceType> M_solutionSpace;
 
+    ETCurrentFE<3, 1>* M_globalCFE;
+    ETCurrentFE<3, TestSpaceType::S_fieldDim>* M_testCFE;
+    ETCurrentFE<3, SolutionSpaceType::S_fieldDim>* M_solutionCFE;
+
     // Tree to compute the values for the assembly
     evaluation_Type M_evaluation;
 
@@ -268,9 +272,16 @@ IntegrateMatrixElement (const boost::shared_ptr<MeshType>& mesh,
         M_quadrature (quadrature),
         M_testSpace (testSpace),
         M_solutionSpace (solutionSpace),
+        M_globalCFE (new ETCurrentFE<3, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), quadrature) ),
+        M_testCFE (new ETCurrentFE<3, TestSpaceType::S_fieldDim> (testSpace->refFE(), testSpace->geoMap(), quadrature) ),
+        M_solutionCFE (new ETCurrentFE<3, SolutionSpaceType::S_fieldDim> (solutionSpace->refFE(), testSpace->geoMap(), quadrature) ),
         M_evaluation (expression),
 	    M_numThreads(1)
 {
+	M_evaluation.setQuadrature (quadrature);
+	M_evaluation.setGlobalCFE (M_globalCFE);
+	M_evaluation.setTestCFE (M_testCFE);
+	M_evaluation.setSolutionCFE (M_solutionCFE);
 }
 
 template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
@@ -285,9 +296,16 @@ IntegrateMatrixElement (const boost::shared_ptr<MeshType>& mesh,
         M_quadrature (quadrature),
         M_testSpace (testSpace),
         M_solutionSpace (solutionSpace),
+        M_globalCFE (new ETCurrentFE<3, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), quadrature) ),
+        M_testCFE (new ETCurrentFE<3, TestSpaceType::S_fieldDim> (testSpace->refFE(), testSpace->geoMap(), quadrature) ),
+        M_solutionCFE (new ETCurrentFE<3, SolutionSpaceType::S_fieldDim> (solutionSpace->refFE(), testSpace->geoMap(), quadrature) ),
         M_evaluation (expression),
 	    M_numThreads(numThreads)
 {
+	M_evaluation.setQuadrature (quadrature);
+	M_evaluation.setGlobalCFE (M_globalCFE);
+	M_evaluation.setTestCFE (M_testCFE);
+	M_evaluation.setSolutionCFE (M_solutionCFE);
 }
 
 template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
@@ -297,15 +315,25 @@ IntegrateMatrixElement (const IntegrateMatrixElement<MeshType, TestSpaceType, So
         M_quadrature (integrator.M_quadrature),
         M_testSpace (integrator.M_testSpace),
         M_solutionSpace (integrator.M_solutionSpace),
+        M_globalCFE (new ETCurrentFE<3, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), M_quadrature) ),
+        M_testCFE (new ETCurrentFE<3, TestSpaceType::S_fieldDim> (M_testSpace->refFE(), M_testSpace->geoMap(), M_quadrature) ),
+        M_solutionCFE (new ETCurrentFE<3, SolutionSpaceType::S_fieldDim> (M_solutionSpace->refFE(), M_solutionSpace->geoMap(), M_quadrature) ),
         M_evaluation (integrator.M_evaluation),
         M_numThreads(integrator.M_numThreads)
 {
+	M_evaluation.setQuadrature (M_quadrature);
+	M_evaluation.setGlobalCFE (M_globalCFE);
+	M_evaluation.setTestCFE (M_testCFE);
+	M_evaluation.setSolutionCFE (M_solutionCFE);
 }
 
 template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
 IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType>::
 ~IntegrateMatrixElement()
 {
+	delete M_globalCFE;
+	delete M_testCFE;
+	delete M_solutionCFE;
 }
 
 // ===================================================
@@ -317,6 +345,9 @@ void
 IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType>::
 check (std::ostream& out)
 {
+	out << " Checking the integration : " << std::endl;
+	M_evaluation.display (out);
+	out << std::endl;
 }
 
 template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
