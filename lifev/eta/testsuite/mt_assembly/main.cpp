@@ -155,7 +155,7 @@ int main ( int argc, char** argv )
                      quadRuleTetra4pt,
                      uSpace,
                      uSpace,
-                     dot ( grad (phi_i) , grad (phi_j) ), numThreads
+                     dot ( grad (phi_i) , grad (phi_j) ), 1
                    ) >> matrixGraph;
     }
     timer.stop();
