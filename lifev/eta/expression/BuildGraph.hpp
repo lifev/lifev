@@ -81,8 +81,15 @@ buildGraph ( const RequestLoopElement<MeshType>& request,
              const QuadratureRule& quadrature,
              const boost::shared_ptr<TestSpaceType>& testSpace,
              const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
-             const ExpressionType& expression,
-             const Int numThreads = 1);
+             const ExpressionType& expression)
+{
+    return GraphElement<MeshType,
+    					TestSpaceType,
+    					SolutionSpaceType,
+    					ExpressionType>
+           (request.mesh(), quadrature, testSpace, solutionSpace, expression,
+            1);
+}
 
 template < typename MeshType,
 		   typename TestSpaceType,
