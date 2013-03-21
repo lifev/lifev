@@ -51,7 +51,7 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/LifeV.hpp>
-#include <lifev/core/util/LifeChrono.hpp>
+#include <lifev/core/util/WallClock.hpp>
 
 #include <lifev/core/mesh/MeshPartitioner.hpp>
 #include <lifev/core/mesh/RegionMesh3DStructured.hpp>
@@ -85,22 +85,22 @@ int main ( int argc, char** argv )
 
     const bool verbose (Comm->MyPID() == 0);
 
-    if (argc != 2) {
+    if (argc != 3) {
     	if (verbose) {
-    		std::cout << "Please run program with an argument, representing"
-    					 " the number of threads to use for assembly\n.";
+    		std::cout << "Please run program as " << argv[0]
+					  << " " << "<num_elements> " << "<num_threads>\n";
     		return EXIT_FAILURE;
     	}
     }
 
-    Int numThreads = std::atoi(argv[1]);
+    const UInt Nelements = std::atoi(argv[1]);
+    Int numThreads = std::atoi(argv[2]);
 
     if (verbose)
     {
         std::cout << " -- Building and partitioning the mesh ... " << std::flush;
     }
 
-    const UInt Nelements (10);
 
     boost::shared_ptr< mesh_Type > fullMeshPtr (new mesh_Type);
 
@@ -142,8 +142,8 @@ int main ( int argc, char** argv )
         std::cout << " -- Precomputing matrix graph ... " << std::flush;
     }
 
-    LifeChrono feLoopTimer;
-    feLoopTimer.start();
+    WallClock timer;
+    timer.start();
     boost::shared_ptr<Epetra_FECrsGraph> matrixGraph;
     {
         using namespace ExpressionAssembly;
@@ -158,11 +158,11 @@ int main ( int argc, char** argv )
                      dot ( grad (phi_i) , grad (phi_j) )
                    ) >> matrixGraph;
     }
-    feLoopTimer.stop();
+    timer.stop();
 
     if (verbose)
     {
-        std::cout << " done in " << feLoopTimer.diff() << "s." << std::endl;
+        std::cout << " done in " << timer.elapsedTime() << "s." << std::endl;
     }
 
     if (verbose)
@@ -170,7 +170,7 @@ int main ( int argc, char** argv )
         std::cout << " -- Assembling the Laplace matrix with a precomputed graph ... " << std::flush;
     }
 
-    feLoopTimer.start();
+    timer.start();
     {
         using namespace ExpressionAssembly;
 
@@ -189,11 +189,11 @@ int main ( int argc, char** argv )
 
         closedSystemMatrix->globalAssemble();
     }
-    feLoopTimer.stop();
+    timer.stop();
 
     if (verbose)
     {
-        std::cout << " done in " << feLoopTimer.diff() << "s." << std::endl;
+        std::cout << " done in " << timer.elapsedTime() << "s." << std::endl;
     }
 
     Real closedMatrixNorm ( closedSystemMatrix->normInf() );
