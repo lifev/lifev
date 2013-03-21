@@ -232,10 +232,11 @@ addTo (GraphType& graph)
     UInt nbTestDof (M_testSpace->refFE().nbDof() );
     UInt nbSolutionDof (M_solutionSpace->refFE().nbDof() );
 
+	ETMatrixElemental elementalMatrix(TestSpaceType::S_fieldDim * M_testSpace->refFE().nbDof(),
+									  SolutionSpaceType::S_fieldDim * M_solutionSpace->refFE().nbDof() );
+
 	for (UInt iElement = 0; iElement < nbElements; ++iElement)
 	{
-		ETMatrixElemental elementalMatrix(TestSpaceType::S_fieldDim * M_testSpace->refFE().nbDof(),
-										  SolutionSpaceType::S_fieldDim * M_solutionSpace->refFE().nbDof() );
 		// Zeros out the matrix
 		elementalMatrix.zero();
 
