@@ -33,16 +33,16 @@
      @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
  */
 
-#ifndef EVALUTATION_POWER_HPP
-#define EVALUTATION_POWER_HPP
+#ifndef EVALUTATION_ARCTAN_HPP
+#define EVALUTATION_ARCTAN_HPP
 
 #include <lifev/core/LifeV.hpp>
-
-#include <lifev/eta/array/OperationSmallPower.hpp>
 
 #include <lifev/eta/expression/ExpressionPower.hpp>
 
 #include <lifev/core/fem/QuadratureRule.hpp>
+
+#define PI 3.14159265359
 
 namespace LifeV
 {
@@ -60,7 +60,7 @@ namespace ExpressionAssembly
   required to work within the Evaluation trees.
  */
 template <typename EvaluationBaseType>
-class EvaluationPower
+class EvaluationArcTan
 {
 public:
 
@@ -68,12 +68,8 @@ public:
     //@{
 
     //! Type of the value returned by the left operand
-    typedef typename EvaluationBaseType::return_Type BaseReturn_Type;
-    typedef Real exponentType;
+    typedef Real return_Type;
 
-
-    //! Type of the value returned by this class
-    typedef typename OperationSmallPower<BaseReturn_Type, exponentType>::result_Type return_Type;
     //@}
 
 
@@ -96,20 +92,20 @@ public:
     //@{
 
     //! Copy constructor
-    EvaluationPower (const EvaluationPower& eval)
+    EvaluationArcTan (const EvaluationArcTan& eval)
         : M_evaluationBase (eval.M_evaluationBase),
-          M_exponent (eval.M_exponent)
+          M_epsilon (eval.M_epsilon)
     {}
 
     //! Constructor from the corresponding expression
     template <typename BaseExpressionType>
-    explicit EvaluationPower (const ExpressionPower<BaseExpressionType>& expression)
+    explicit EvaluationArcTan (const ExpressionPower<BaseExpressionType>& expression)
         : M_evaluationBase (expression.base() ),
-          M_exponent (expression.exponent() )
+          M_epsilon (expression.epsilon() )
     {}
 
     //! Destructor
-    ~EvaluationPower() {}
+    ~EvaluationArcTan() {}
 
     //@}
 
@@ -126,7 +122,7 @@ public:
     //! Display method
     static void display (ostream& out = std::cout )
     {
-        out << " pow( " ;
+        out << " atan ( " ;
         EvaluationBaseType::display (out);
         out << ")";
     }
@@ -173,19 +169,19 @@ public:
     //! Getter a value
     return_Type value_q (const UInt& q) const
     {
-        return std::pow (M_evaluationBase.value_q (q), M_exponent);
+        return ( 1.0 / PI ) * std::atan ( M_epsilon * ( M_evaluationBase.value_q (q) ) ) + ( 1.0 / 2.0 );
     }
 
     //! Getter for the value for a vector
     return_Type value_qi (const UInt& q, const UInt& i) const
     {
-        return std::pow (M_evaluationBase.value_qi (q, i), M_exponent);
+        return ( 1.0 / PI ) * std::atan ( M_epsilon * ( M_evaluationBase.value_qi (q, i) ) ) + ( 1.0 / 2.0 );
     }
 
     //! Getter for the value for a matrix
     return_Type value_qij (const UInt& q, const UInt& i, const UInt& j) const
     {
-        return std::pow (M_evaluationBase.value_qij (q, i, j), M_exponent);
+        return ( 1.0 / PI ) * std::atan ( M_epsilon * ( M_evaluationBase.value_qij (q, i, j) ) ) + ( 1.0 / 2.0 );
     }
 
     //@}
@@ -196,25 +192,25 @@ private:
     //@{
 
     //! No empty constructor
-    EvaluationPower();
+    EvaluationArcTan();
 
     //@}
 
     //! Internal storage
     EvaluationBaseType M_evaluationBase;
-    Real M_exponent;
+    Real M_epsilon;
 };
 
 template< typename EvaluationBaseType>
-const flag_Type EvaluationPower<EvaluationBaseType>::S_globalUpdateFlag
+const flag_Type EvaluationArcTan<EvaluationBaseType>::S_globalUpdateFlag
     = EvaluationBaseType::S_globalUpdateFlag;
 
 template< typename EvaluationBaseType>
-const flag_Type EvaluationPower<EvaluationBaseType>::S_testUpdateFlag
+const flag_Type EvaluationArcTan<EvaluationBaseType>::S_testUpdateFlag
     = EvaluationBaseType::S_testUpdateFlag;
 
 template< typename EvaluationBaseType>
-const flag_Type EvaluationPower<EvaluationBaseType>::S_solutionUpdateFlag
+const flag_Type EvaluationArcTan<EvaluationBaseType>::S_solutionUpdateFlag
     = EvaluationBaseType::S_solutionUpdateFlag;
 
 } // Namespace ExpressionAssembly

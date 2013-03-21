@@ -21,6 +21,7 @@ SET(expression_HEADERS
 	expression/EvaluationPosition.hpp
 	expression/EvaluationProduct.hpp
 	expression/EvaluationPower.hpp
+	expression/EvaluationArcTan.hpp
 	expression/EvaluationLogarithm.hpp
 	expression/EvaluationExponential.hpp
 	expression/EvaluationNormal.hpp
@@ -55,6 +56,7 @@ SET(expression_HEADERS
 	expression/ExpressionNormal.hpp
 	expression/ExpressionProduct.hpp
 	expression/ExpressionPower.hpp
+	expression/ExpressionArcTan.hpp
 	expression/ExpressionLogarithm.hpp
 	expression/ExpressionExponential.hpp
 	expression/ExpressionScalar.hpp

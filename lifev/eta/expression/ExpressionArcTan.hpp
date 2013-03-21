@@ -33,14 +33,12 @@
     @date 07-2011
  */
 
-#ifndef EXPRESSION_POWER_HPP
-#define EXPRESSION_POWER_HPP
+#ifndef EXPRESSION_ARCTAN_HPP
+#define EXPRESSION_ARCTAN_HPP
 
 #include <lifev/core/LifeV.hpp>
 
 #include <lifev/eta/expression/ExpressionBase.hpp>
-#include <lifev/eta/expression/ExpressionDeterminant.hpp>
-#include <lifev/eta/expression/ExpressionTrace.hpp>
 
 namespace LifeV
 {
@@ -68,7 +66,7 @@ namespace ExpressionAssembly
 
 */
 template <typename BaseExpressionType>
-class ExpressionPower : public ExpressionBase< ExpressionPower<BaseExpressionType> >
+class ExpressionArcTan : public ExpressionBase< ExpressionArcTan<BaseExpressionType> >
 {
 public:
 
@@ -76,7 +74,7 @@ public:
     //@{
 
     // No direct use, just ease of coding
-    typedef ExpressionBase< ExpressionPower <BaseExpressionType> > base_Type;
+    typedef ExpressionBase< ExpressionArcTan <BaseExpressionType> > base_Type;
 
     //@}
 
@@ -84,15 +82,15 @@ public:
     //@{
 
     //! Full constructor using the two expressions
-    ExpressionPower (const BaseExpressionType& l, const Real exponent)
-        : base_Type(), M_l (l), M_exponent (exponent) {}
+    ExpressionArcTan (const BaseExpressionType& l, const Real epsilon)
+        : base_Type(), M_l (l), M_epsilon (epsilon) {}
 
     //! Copy constructor
-    ExpressionPower (const ExpressionPower<BaseExpressionType>& expression)
-        : base_Type(), M_l (expression.M_l), M_exponent (expression.M_exponent) {}
+    ExpressionArcTan (const ExpressionArcTan<BaseExpressionType>& expression)
+        : base_Type(), M_l (expression.M_l), M_epsilon (expression.M_epsilon) {}
 
     //! Destructor
-    ~ExpressionPower() {}
+    ~ExpressionArcTan() {}
 
     //@}
 
@@ -103,8 +101,9 @@ public:
     //! Display method
     static void display (std::ostream& out = std::cout)
     {
+        out << " atan ( ";
         BaseExpressionType::display (out);
-        out << " ^ ";
+        out << " ) ";
     }
 
     //@}
@@ -120,9 +119,9 @@ public:
     }
 
     //! Getter for the right hand side
-    const Real& exponent() const
+    const Real& epsilon() const
     {
-        return M_exponent;
+        return M_epsilon;
     }
 
     //@}
@@ -132,7 +131,7 @@ private:
     //! @name Private Methods
     //@{
 
-    ExpressionPower();
+    ExpressionArcTan();
 
     //@}
 
@@ -141,7 +140,7 @@ private:
     BaseExpressionType M_l;
 
     // Right hand side
-    Real M_exponent;
+    Real M_epsilon;
 };
 
 
@@ -168,10 +167,10 @@ private:
 */
 
 template< typename  ExpressionType>
-ExpressionPower<ExpressionType>
-pow (const ExpressionBase<ExpressionType>& l, const Real& r)
+ExpressionArcTan<ExpressionType>
+atan (const ExpressionBase<ExpressionType>& l, const Real& epsilon)
 {
-    return ExpressionPower<ExpressionType> (l.cast(), r);
+    return ExpressionArcTan<ExpressionType> (l.cast(), r);
 }
 
 

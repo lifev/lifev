@@ -51,6 +51,7 @@
 #include <lifev/eta/expression/ExpressionSubstraction.hpp>
 #include <lifev/eta/expression/ExpressionProduct.hpp>
 #include <lifev/eta/expression/ExpressionPower.hpp>
+#include <lifev/eta/expression/ExpressionArcTan.hpp>
 #include <lifev/eta/expression/ExpressionLogarithm.hpp>
 #include <lifev/eta/expression/ExpressionExponential.hpp>
 #include <lifev/eta/expression/ExpressionDot.hpp>
@@ -93,6 +94,7 @@
 #include <lifev/eta/expression/EvaluationSubstraction.hpp>
 #include <lifev/eta/expression/EvaluationProduct.hpp>
 #include <lifev/eta/expression/EvaluationPower.hpp>
+#include <lifev/eta/expression/EvaluationArcTan.hpp>
 #include <lifev/eta/expression/EvaluationLogarithm.hpp>
 #include <lifev/eta/expression/EvaluationExponential.hpp>
 #include <lifev/eta/expression/EvaluationDot.hpp>
@@ -510,6 +512,21 @@ private:
     ExpressionToEvaluation();
     ~ExpressionToEvaluation();
 };
+
+
+// Specialized for the atan
+template<typename ExpressionBase, UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation<ExpressionArcTan<ExpressionBase>, testDim, solutionDim, spaceDim>
+{
+public:
+    typedef EvaluationArcTan <
+    typename ExpressionToEvaluation<ExpressionBase, testDim, solutionDim, spaceDim>::evaluation_Type
+    > evaluation_Type;
+private:
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
+};
+
 
 // Specialized for a logarithm
 template<typename ExpressionBase, UInt testDim, UInt solutionDim, UInt spaceDim>
