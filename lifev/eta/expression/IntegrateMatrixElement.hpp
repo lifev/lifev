@@ -271,7 +271,10 @@ private:
     					    const UInt nbTestDof,
     					    const UInt nbSolutionDof,
     					    ETMatrixElemental& elementalMatrix,
-    					    evaluation_Type& evaluation);
+    					    evaluation_Type& evaluation,
+    						ETCurrentFE<3, 1>& globalCFE,
+    						ETCurrentFE<3, TestSpaceType::S_fieldDim>& testCFE,
+    						ETCurrentFE<3, SolutionSpaceType::S_fieldDim>& solutionCFE);
     //@}
 
     // Pointer on the mesh
@@ -473,29 +476,18 @@ IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionTyp
 integrateElementMT (const UInt iElement, const UInt nbQuadPt,
 					const UInt nbTestDof, const UInt nbSolutionDof,
 					ETMatrixElemental& elementalMatrix,
-					evaluation_Type& evaluation)
+					evaluation_Type& evaluation,
+					ETCurrentFE<3, 1>& globalCFE,
+					ETCurrentFE<3, TestSpaceType::S_fieldDim>& testCFE,
+					ETCurrentFE<3, SolutionSpaceType::S_fieldDim>& solutionCFE)
 {
     // Zeros out the matrix
     elementalMatrix.zero();
 
-    // Update the currentFEs
-    ETCurrentFE<3, 1>
-    	globalCFE (feTetraP0, geometricMapFromMesh<MeshType>(), M_quadrature);
-    ETCurrentFE<3, TestSpaceType::S_fieldDim>
-    	testCFE (M_testSpace->refFE(), M_testSpace->geoMap(), M_quadrature);
-
-    ETCurrentFE<3, SolutionSpaceType::S_fieldDim>
-    	solutionCFE (M_solutionSpace->refFE(), M_testSpace->geoMap(),
-    				 M_quadrature);
 
     globalCFE.update (M_mesh->element (iElement), evaluation_Type::S_globalUpdateFlag | ET_UPDATE_WDET);
     testCFE.update (M_mesh->element (iElement), evaluation_Type::S_testUpdateFlag);
     solutionCFE.update (M_mesh->element (iElement), evaluation_Type::S_solutionUpdateFlag);
-
-    // Update the evaluation
-    evaluation.setGlobalCFE (&globalCFE);
-    evaluation.setTestCFE (&testCFE);
-    evaluation.setSolutionCFE (&solutionCFE);
 
     evaluation.update (iElement);
 
@@ -592,8 +584,23 @@ addToClosedMT (MatrixType& mat)
     omp_set_num_threads(M_numThreads);
 #pragma omp parallel
     {
+        // Update the currentFEs
+        ETCurrentFE<3, 1>
+        	globalCFE (feTetraP0, geometricMapFromMesh<MeshType>(), M_quadrature);
+        ETCurrentFE<3, TestSpaceType::S_fieldDim>
+        	testCFE (M_testSpace->refFE(), M_testSpace->geoMap(), M_quadrature);
+
+        ETCurrentFE<3, SolutionSpaceType::S_fieldDim>
+        	solutionCFE (M_solutionSpace->refFE(), M_testSpace->geoMap(),
+        				 M_quadrature);
+
     	evaluation_Type evaluation(M_evaluation);
+        // Update the evaluation
         evaluation.setQuadrature (M_quadrature);
+        evaluation.setGlobalCFE (&globalCFE);
+        evaluation.setTestCFE (&testCFE);
+        evaluation.setSolutionCFE (&solutionCFE);
+
 #pragma omp for
 		for (UInt iElement = 0; iElement < nbElements; ++iElement)
 		{
@@ -601,7 +608,8 @@ addToClosedMT (MatrixType& mat)
 							   SolutionSpaceType::S_fieldDim * M_solutionSpace->refFE().nbDof() );
 
 			integrateElementMT(iElement, nbQuadPt, nbTestDof, nbSolutionDof,
-							   elementalMatrix, evaluation);
+							   elementalMatrix, evaluation, globalCFE,
+							   testCFE, solutionCFE);
 
 			elementalMatrix.pushToClosedGlobal (mat);
 		}
