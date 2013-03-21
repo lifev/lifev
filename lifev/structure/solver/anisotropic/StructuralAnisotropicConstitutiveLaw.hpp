@@ -266,10 +266,10 @@ public:
     }
 
     // Used to export the fibers families
-    const vector_Type& const ithFiberVector( const UInt i ) const
+    const vector_Type&  ithFiberVector( const UInt i ) const
     {
         ASSERT( i < M_vectorInterpolated.size(), " No such fiber family in the class" );
-        return *( M_vectorInterpolated[ i ] )
+        return *( M_vectorInterpolated[ i ] );
     }
 
     //! Get the Stiffness matrix
