@@ -92,7 +92,8 @@ public:
                   const QuadratureRule& quadrature,
                   const boost::shared_ptr<TestSpaceType>& testSpace,
                   const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
-                  const ExpressionType& expression);
+                  const ExpressionType& expression,
+                  const Int numThreads);
 
     //! Copy constructor
     GraphElement (const GraphElement<MeshType,
@@ -169,6 +170,8 @@ private:
     boost::shared_ptr<TestSpaceType> M_testSpace;
     boost::shared_ptr<SolutionSpaceType> M_solutionSpace;
 
+    // For multi-threading
+    Int M_numThreads;
 };
 
 
@@ -186,11 +189,13 @@ GraphElement (const boost::shared_ptr<MeshType>& mesh,
                         const QuadratureRule& quadrature,
                         const boost::shared_ptr<TestSpaceType>& testSpace,
                         const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
-                        const ExpressionType& /*expression*/)
+                        const ExpressionType& /*expression*/,
+                        const Int numThreads)
     :   M_mesh (mesh),
         M_quadrature (quadrature),
         M_testSpace (testSpace),
-        M_solutionSpace (solutionSpace)
+        M_solutionSpace (solutionSpace),
+        M_numThreads (numThreads)
 {
 }
 
@@ -200,7 +205,8 @@ GraphElement (const GraphElement<MeshType, TestSpaceType, SolutionSpaceType, Exp
     :   M_mesh (integrator.M_mesh),
         M_quadrature (integrator.M_quadrature),
         M_testSpace (integrator.M_testSpace),
-        M_solutionSpace (integrator.M_solutionSpace)
+        M_solutionSpace (integrator.M_solutionSpace),
+        M_numThreads (integrator.M_numThreads)
 {
 }
 
@@ -232,43 +238,52 @@ addTo (GraphType& graph)
     UInt nbTestDof (M_testSpace->refFE().nbDof() );
     UInt nbSolutionDof (M_solutionSpace->refFE().nbDof() );
 
-	ETMatrixElemental elementalMatrix(TestSpaceType::S_fieldDim * M_testSpace->refFE().nbDof(),
-									  SolutionSpaceType::S_fieldDim * M_solutionSpace->refFE().nbDof() );
+    // OpenMP setup and pragmas around the loop
+    omp_set_num_threads(M_numThreads);
+#pragma omp parallel
+    {
+		ETMatrixElemental elementalMatrix(TestSpaceType::S_fieldDim * M_testSpace->refFE().nbDof(),
+										  SolutionSpaceType::S_fieldDim * M_solutionSpace->refFE().nbDof() );
 
-	for (UInt iElement = 0; iElement < nbElements; ++iElement)
-	{
-		// Zeros out the matrix
-		elementalMatrix.zero();
-
-		// Loop on the blocks
-		for (UInt iblock (0); iblock < TestSpaceType::S_fieldDim; ++iblock)
+#pragma omp for
+		for (UInt iElement = 0; iElement < nbElements; ++iElement)
 		{
-			for (UInt jblock (0); jblock < SolutionSpaceType::S_fieldDim; ++jblock)
+			// Zeros out the matrix
+			elementalMatrix.zero();
+
+			// Loop on the blocks
+			for (UInt iblock (0); iblock < TestSpaceType::S_fieldDim; ++iblock)
 			{
-
-				// Set the row global indices in the local matrix
-				for (UInt i (0); i < nbTestDof; ++i)
+				for (UInt jblock (0); jblock < SolutionSpaceType::S_fieldDim; ++jblock)
 				{
-					elementalMatrix.setRowIndex
-					(i + iblock * nbTestDof,
-					M_testSpace->dof().localToGlobalMap (iElement, i) + iblock * M_testSpace->dof().numTotalDof() );
-				}
 
-				// Set the column global indices in the local matrix
-				for (UInt j (0); j < nbSolutionDof; ++j)
-				{
-					elementalMatrix.setColumnIndex
-					(j + jblock * nbSolutionDof,
-					M_solutionSpace->dof().localToGlobalMap (iElement, j) + jblock * M_solutionSpace->dof().numTotalDof() );
+					// Set the row global indices in the local matrix
+					for (UInt i (0); i < nbTestDof; ++i)
+					{
+						elementalMatrix.setRowIndex
+						(i + iblock * nbTestDof,
+						M_testSpace->dof().localToGlobalMap (iElement, i) + iblock * M_testSpace->dof().numTotalDof() );
+					}
+
+					// Set the column global indices in the local matrix
+					for (UInt j (0); j < nbSolutionDof; ++j)
+					{
+						elementalMatrix.setColumnIndex
+						(j + jblock * nbSolutionDof,
+						M_solutionSpace->dof().localToGlobalMap (iElement, j) + jblock * M_solutionSpace->dof().numTotalDof() );
+					}
 				}
 			}
-		}
 
-		const std::vector<Int>& rowIdx = elementalMatrix.rowIndices();
-		const std::vector<Int>& colIdx = elementalMatrix.columnIndices();
-		graph.InsertGlobalIndices(rowIdx.size(), &rowIdx[0],
-								  colIdx.size(), &colIdx[0]);
-	}
+			const std::vector<Int>& rowIdx = elementalMatrix.rowIndices();
+			const std::vector<Int>& colIdx = elementalMatrix.columnIndices();
+#pragma omp critical
+			{
+				graph.InsertGlobalIndices(rowIdx.size(), &rowIdx[0],
+									  	  colIdx.size(), &colIdx[0]);
+			}
+		}
+    }
     graph.GlobalAssemble();
 }
 

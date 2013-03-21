@@ -81,13 +81,30 @@ buildGraph ( const RequestLoopElement<MeshType>& request,
              const QuadratureRule& quadrature,
              const boost::shared_ptr<TestSpaceType>& testSpace,
              const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
-             const ExpressionType& expression)
+             const ExpressionType& expression,
+             const Int numThreads = 1);
+
+template < typename MeshType,
+		   typename TestSpaceType,
+		   typename SolutionSpaceType,
+		   typename ExpressionType>
+GraphElement<MeshType,
+			 TestSpaceType,
+			 SolutionSpaceType,
+			 ExpressionType>
+buildGraph ( const RequestLoopElement<MeshType>& request,
+			 const QuadratureRule& quadrature,
+			 const boost::shared_ptr<TestSpaceType>& testSpace,
+			 const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
+			 const ExpressionType& expression,
+			 const Int numThreads)
 {
     return GraphElement<MeshType,
     					TestSpaceType,
     					SolutionSpaceType,
     					ExpressionType>
-           (request.mesh(), quadrature, testSpace, solutionSpace, expression);
+           (request.mesh(), quadrature, testSpace, solutionSpace, expression,
+            numThreads);
 }
 
 } // Namespace ExpressionAssembly
