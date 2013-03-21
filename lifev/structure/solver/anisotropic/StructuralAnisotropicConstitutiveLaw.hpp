@@ -122,8 +122,8 @@ public:
     typedef boost::shared_ptr<FESpace_Type>               FESpacePtr_Type;
 
     //Vector for vector parameters
-    typedef std::vector<std::vector<Real> >           vectorsParameters_Type;
-    typedef boost::shared_ptr<vectorsParameters_Type> vectorsParametersPtr_Type;
+    typedef std::vector<std::vector<Real> >               vectorsParameters_Type;
+    typedef boost::shared_ptr<vectorsParameters_Type>     vectorsParametersPtr_Type;
 
 
     // Boost function for fiber direction
@@ -305,6 +305,9 @@ protected:
 
     //! Matrix jacobian
     matrixPtr_Type                                 M_jacobian;
+
+    //! To store the fourth Invariant
+    vectorPtr_Type                                 M_fourthInvariant;
 
     //! The Offset parameter
     UInt                                           M_offset;

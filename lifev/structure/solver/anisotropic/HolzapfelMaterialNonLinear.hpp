@@ -313,7 +313,8 @@ HolzapfelMaterialNonLinear<MeshType>::setup ( const FESpacePtr_Type&            
     this->M_localMap                    = monolithicMap;
     this->M_offset                      = offset;
 
-    M_stiff.reset                     (new vector_Type (*this->M_localMap) );
+    this->M_fourthInvariant.reset       (new vector_Type (*this->M_localMap) );
+    M_stiff.reset                       (new vector_Type (*this->M_localMap) );
 
     M_identity (0, 0) = 1.0;
     M_identity (0, 1) = 0.0;
@@ -444,8 +445,14 @@ void HolzapfelMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( matrix
 
     // Update the heaviside function for the stretch of the fibers
 
-    displayer->leaderPrint ("   Non-Linear S-  updating non linear terms in the Jacobian Matrix (Holzapfel)");
+    displayer->leaderPrint ("   Non-Linear S - updating non linear terms in the Jacobian Matrix (Holzapfel)");
+    displayer->leaderPrint ("               1- computing the condition ( IV - 1 ) at the DOFs: ");
 
+    // evaluateScalarExpression( elements ( this->M_dispETFESpace->mesh() ),
+    //                           this->ETFESpace,
+    //                           expression ) >> M_fourthInvariant;
+
+    displayer->leaderPrint ("               2- computing the jacobian matrix");
     * (jacobian) *= 0.0;
 
 
