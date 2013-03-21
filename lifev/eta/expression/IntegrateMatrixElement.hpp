@@ -493,13 +493,11 @@ integrateElementMT (const UInt iElement, const UInt nbQuadPt,
     solutionCFE.update (M_mesh->element (iElement), evaluation_Type::S_solutionUpdateFlag);
 
     // Update the evaluation
-    evaluation_Type localEvaluation(evaluation);
-    localEvaluation.setQuadrature (M_quadrature);
-    localEvaluation.setGlobalCFE (&globalCFE);
-    localEvaluation.setTestCFE (&testCFE);
-    localEvaluation.setSolutionCFE (&solutionCFE);
+    evaluation.setGlobalCFE (&globalCFE);
+    evaluation.setTestCFE (&testCFE);
+    evaluation.setSolutionCFE (&solutionCFE);
 
-    localEvaluation.update (iElement);
+    evaluation.update (iElement);
 
     // Loop on the blocks
 
@@ -531,7 +529,7 @@ integrateElementMT (const UInt iElement, const UInt nbQuadPt,
                     for (UInt j (0); j < nbSolutionDof; ++j)
                     {
                         elementalMatrix.element (i + iblock * nbTestDof, j + jblock * nbSolutionDof) +=
-                            localEvaluation.value_qij (iQuadPt, i + iblock * nbTestDof, j + jblock * nbSolutionDof)
+                            evaluation.value_qij (iQuadPt, i + iblock * nbTestDof, j + jblock * nbSolutionDof)
                             * globalCFE.wDet (iQuadPt);
 
                     }
@@ -594,6 +592,8 @@ addToClosedMT (MatrixType& mat)
     omp_set_num_threads(M_numThreads);
 #pragma omp parallel
     {
+    	evaluation_Type evaluation(M_evaluation);
+        evaluation.setQuadrature (M_quadrature);
 #pragma omp for
 		for (UInt iElement = 0; iElement < nbElements; ++iElement)
 		{
@@ -601,7 +601,7 @@ addToClosedMT (MatrixType& mat)
 							   SolutionSpaceType::S_fieldDim * M_solutionSpace->refFE().nbDof() );
 
 			integrateElementMT(iElement, nbQuadPt, nbTestDof, nbSolutionDof,
-							   elementalMatrix, M_evaluation);
+							   elementalMatrix, evaluation);
 
 			elementalMatrix.pushToClosedGlobal (mat);
 		}
