@@ -36,6 +36,10 @@
 #ifndef GRAPH_ELEMENT_HPP
 #define GRAPH_ELEMENT_HPP
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 #include <lifev/core/LifeV.hpp>
 
 #include <lifev/core/fem/QuadratureRule.hpp>
@@ -239,7 +243,9 @@ addTo (GraphType& graph)
     UInt nbSolutionDof (M_solutionSpace->refFE().nbDof() );
 
     // OpenMP setup and pragmas around the loop
+#ifdef _OPENMP
     omp_set_num_threads(M_numThreads);
+#endif
 #pragma omp parallel
     {
 		ETMatrixElemental elementalMatrix(TestSpaceType::S_fieldDim * M_testSpace->refFE().nbDof(),
