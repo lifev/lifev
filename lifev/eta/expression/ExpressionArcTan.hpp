@@ -170,7 +170,7 @@ template< typename  ExpressionType>
 ExpressionArcTan<ExpressionType>
 atan (const ExpressionBase<ExpressionType>& l, const Real& epsilon)
 {
-    return ExpressionArcTan<ExpressionType> (l.cast(), r);
+    return ExpressionArcTan<ExpressionType> (l.cast(), epsilon);
 }
 
 

@@ -38,7 +38,8 @@
 
 #include <lifev/core/LifeV.hpp>
 
-#include <lifev/eta/expression/ExpressionPower.hpp>
+#include <lifev/eta/array/OperationSmallArcTan.hpp>
+#include <lifev/eta/expression/ExpressionArcTan.hpp>
 
 #include <lifev/core/fem/QuadratureRule.hpp>
 
@@ -66,9 +67,11 @@ public:
 
     //! @name Public Types
     //@{
+    typedef typename EvaluationBaseType::return_Type BaseReturn_Type;
 
-    //! Type of the value returned by the left operand
-    typedef Real return_Type;
+    //! Type of the value returned by this class
+    typedef typename OperationSmallArcTan<BaseReturn_Type>::result_Type return_Type;
+
 
     //@}
 
@@ -99,7 +102,7 @@ public:
 
     //! Constructor from the corresponding expression
     template <typename BaseExpressionType>
-    explicit EvaluationArcTan (const ExpressionPower<BaseExpressionType>& expression)
+    explicit EvaluationArcTan (const ExpressionArcTan<BaseExpressionType>& expression)
         : M_evaluationBase (expression.base() ),
           M_epsilon (expression.epsilon() )
     {}
