@@ -3,7 +3,7 @@ LifeV 3.6.1:
 
 Added Multiscale module. Cf documentation.
 
-Merged branch xmlForDarcy
+Increase the way the Darcy solvers handle the xml parameter lists.
 
 Fixed bug in FSI:
 
