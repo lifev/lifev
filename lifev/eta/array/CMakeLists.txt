@@ -17,6 +17,7 @@ SET(array_HEADERS
   array/OperationSmallDeterminant.hpp
   array/OperationSmallTrace.hpp
   array/OperationSmallPower.hpp
+  array/OperationArcTan.hpp
 CACHE INTERNAL "")
 
 SET(array_SOURCES ""
