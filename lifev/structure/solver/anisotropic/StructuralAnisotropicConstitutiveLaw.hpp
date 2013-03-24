@@ -33,7 +33,6 @@
  *  @author Paolo Tricerri
  *  @author Gianmarco Mengaldo
  *  @maintainer  Paolo Tricerri <paolo.tricerri@epfl.ch>
- *  @contributor  Gianmarco Mengaldo <gianmarco.mengaldo@gmail.com>
  */
 
 #ifndef _STRUCTURALANISOTROPICCONSTITUTIVELAW_H_
@@ -235,6 +234,10 @@ public:
 
     virtual void setupFiberDirections( vectorFiberFunctionPtr_Type vectorOfFibers ) = 0;
 
+
+    virtual void evaluateActivationFibers( const vector_Type&  displacement,
+					   vector_Type&  fourthInvariant) = 0;
+
     //! @name Set Methods
     //@{
 
@@ -306,9 +309,6 @@ protected:
     //! Matrix jacobian
     matrixPtr_Type                                 M_jacobian;
 
-    //! To store the fourth Invariant
-    vectorPtr_Type                                 M_fourthInvariant;
-
     //! The Offset parameter
     UInt                                           M_offset;
 
@@ -325,6 +325,9 @@ protected:
     //! std::vector to store the vector of the interpolation of the
     //! fiber direction.
     vectorInterpolatedFibers_Type                  M_vectorInterpolated;
+
+    // Smoothness parameter for the fiber activation
+    Real                                           M_epsilon;
 };
 
 //=====================================
@@ -339,7 +342,8 @@ StructuralAnisotropicConstitutiveLaw<MeshType>::StructuralAnisotropicConstitutiv
     M_jacobian                   ( ),
     M_offset                     ( 0 ),
     M_vectorOfFibers             ( ),
-    M_vectorInterpolated         ( )
+    M_vectorInterpolated         ( ),
+    M_epsilon                    ( 0 )
 {
     //    std::cout << "I am in the constructor of StructuralAnisotropicConstitutiveLaw" << std::endl;
 }

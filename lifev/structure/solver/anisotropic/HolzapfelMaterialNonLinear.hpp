@@ -30,8 +30,7 @@
  *
  *  @version 1.0
  *  @date 29-07-2010
- *  @author Paolo Tricerri,
- *  @author Gianmarco Mengaldo
+ *  @author Paolo Tricerri
  *
  *  @maintainer  Paolo Tricerri      <paolo.tricerri@epfl.ch>
  */
@@ -229,6 +228,10 @@ public:
 
 
     void setupFiberDirections( vectorFiberFunctionPtr_Type vectorOfFibers );
+
+
+    void evaluateActivationFibers( const vector_Type&  displacement,
+				   vector_Type&  fourthInvariant){}
     //@}
 
     //! @name Get Methods
@@ -263,7 +266,7 @@ protected:
       \param VOID
       \return VOID
     */
-    void setupVectorsParameters ( void );
+    // void setupVectorsParameters ( void );
 
 
     //! Vector: stiffness non-linear
@@ -301,10 +304,10 @@ HolzapfelMaterialNonLinear<MeshType>::~HolzapfelMaterialNonLinear()
 template <typename MeshType>
 void
 HolzapfelMaterialNonLinear<MeshType>::setup ( const FESpacePtr_Type&                       dFESpace,
-                                                const ETFESpacePtr_Type&                     dETFESpace,
-                                                const boost::shared_ptr<const MapEpetra>&   monolithicMap,
-                                                const UInt                                  offset,
-                                                const dataPtr_Type& dataMaterial)
+					      const ETFESpacePtr_Type&                     dETFESpace,
+					      const boost::shared_ptr<const MapEpetra>&   monolithicMap,
+					      const UInt                                  offset,
+					      const dataPtr_Type& dataMaterial)
 {
 
     this->M_dataMaterial                = dataMaterial;
@@ -313,7 +316,6 @@ HolzapfelMaterialNonLinear<MeshType>::setup ( const FESpacePtr_Type&            
     this->M_localMap                    = monolithicMap;
     this->M_offset                      = offset;
 
-    this->M_fourthInvariant.reset       (new vector_Type (*this->M_localMap) );
     M_stiff.reset                       (new vector_Type (*this->M_localMap) );
 
     M_identity (0, 0) = 1.0;
@@ -326,7 +328,7 @@ HolzapfelMaterialNonLinear<MeshType>::setup ( const FESpacePtr_Type&            
     M_identity (2, 1) = 0.0;
     M_identity (2, 2) = 1.0;
 
-
+    this->M_epsilon = this->M_dataMaterial->smoothness();
     //this->setupVectorsParameters( );
 }
 
@@ -429,7 +431,6 @@ void HolzapfelMaterialNonLinear<MeshType>::updateJacobianMatrix ( const vector_T
     displayer->leaderPrint (" \n*********************************\n  ");
     updateNonLinearJacobianTerms (this->M_jacobian, disp, this->M_dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
     displayer->leaderPrint (" \n*********************************\n  ");
-    std::cout << std::endl;
 
 }
 
@@ -446,13 +447,7 @@ void HolzapfelMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( matrix
     // Update the heaviside function for the stretch of the fibers
 
     displayer->leaderPrint ("   Non-Linear S - updating non linear terms in the Jacobian Matrix (Holzapfel)");
-    displayer->leaderPrint ("               1- computing the condition ( IV - 1 ) at the DOFs: ");
 
-    // evaluateScalarExpression( elements ( this->M_dispETFESpace->mesh() ),
-    //                           this->ETFESpace,
-    //                           expression ) >> M_fourthInvariant;
-
-    displayer->leaderPrint ("               2- computing the jacobian matrix");
     * (jacobian) *= 0.0;
 
 
@@ -480,6 +475,65 @@ void HolzapfelMaterialNonLinear<MeshType>::computeStiffness ( const vector_Type&
     displayer->leaderPrint (" \n*********************************\n  ");
     displayer->leaderPrint (" Non-Linear S-  Computing the Holzapfel nonlinear stiffness vector ");
     displayer->leaderPrint (" \n*********************************\n  ");
+
+    // For anisotropic part of the Piola-Kirchhoff is assemble summing up the parts of the 
+    // Piola-Kirchhoff using the fiber index
+#define deformationTensor ( grad( this->M_dispETFESpace,  disp, this->M_offset) + value(this->M_identity) )
+#define detDeformationTensor det( deformationGradientTensor )
+#define detPowered pow( detDeformationTensor, ( -2.0/3.0 ) )
+#define deformationTensor_T  minusT(deformationGradientTensor)
+#define tensorC transpose(deformationGradientTensor) * deformationGradientTensor
+
+
+    // Here the fiber vector at the quadrature node is deduced using the method
+    // Interpolate value of the expression template. 
+
+    for( UInt i(0); i < this->M_vectorInterpolated.size() ; i++ )
+      {
+
+	// First term:
+	// 2 alpha_i J^(-2.0/3.0) ( \bar{I_4} - 1 ) exp( gamma_i * (\bar{I_4} - 1)^2 ) * F M : \grad phi_i
+	// where alpha_i and gamma_i are the fiber parameters and M is the 2nd order tensor of type f_i \otimes \ f_i
+	integrate ( elements ( this->M_dispETFESpace->mesh() ),
+		    this->M_dispFESpace->qr(),
+		    this->M_dispETFESpace,
+		    atan( ( detPowered * dot( tensorC, outerProduct( value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ), 
+								     value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ) ) ) ) - value(1.0) , this->M_epsilon ) *
+		    value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * pow( detDeformationTensor, (-2.0/3.0) ) *
+		    ( detPowered * dot( tensorC, outerProduct( value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ), 
+							       value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ) ) )  - value(1.0) ) * 
+		    exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) )
+			 * ( detPowered *  dot( tensorC, outerProduct( value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ), 
+								       value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ) ) )  - value(1.0)  ) *
+ 			   ( detPowered *  dot( tensorC, outerProduct( value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ), 
+								       value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ) ) )  - value(1.0)  ) ) *
+		    dot( deformationTensor * ( outerProduct( value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ), 
+							     value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ) ) ), grad( phi_i ) )
+                  ) >> this->M_stiff;
+
+	// Second term:
+	// 2 alpha_i J^(-2.0/3.0) ( \bar{I_4} - 1 ) exp( gamma_i * (\bar{I_4} - 1)^2 ) * ( 1.0/3.0 * I_4 ) F^-T : \grad phi_i
+	// where alpha_i and gamma_i are the fiber parameters and M is the 2nd order tensor of type f_i \otimes \ f_i
+	integrate ( elements ( this->M_dispETFESpace->mesh() ),
+		    this->M_dispFESpace->qr(),
+		    this->M_dispETFESpace,
+		    atan( ( detPowered * dot( tensorC, outerProduct( value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ), 
+								     value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ) ) ) ) - value(1.0) , this->M_epsilon ) *
+		    value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * pow( detDeformationTensor, (-2.0/3.0) ) *
+		    ( detPowered * dot( tensorC, outerProduct( value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ), 
+							       value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ) ) )  - value(1.0) ) * 
+		    exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) )
+			 * ( detPowered *  dot( tensorC, outerProduct( value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ), 
+								       value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ) ) )  - value(1.0)  ) *
+ 			   ( detPowered *  dot( tensorC, outerProduct( value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ), 
+								       value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ) ) )  - value(1.0)  ) ) *
+		    value( -1.0/3.0 ) * dot( tensorC, outerProduct( value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ), 
+								    value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ) ) ) *
+		    dot( deformationTensor_T , grad( phi_i ) )
+		    ) >> this->M_stiff;
+
+
+      }
 
     this->M_stiff->globalAssemble();
 }

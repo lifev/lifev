@@ -366,7 +366,6 @@ void NeoHookeanMaterialNonLinear<MeshType>::updateJacobianMatrix ( const vector_
     displayer->leaderPrint (" \n*********************************\n  ");
     updateNonLinearJacobianTerms (this->M_jacobian, disp, this->M_dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
     displayer->leaderPrint (" \n*********************************\n  ");
-    std::cout << std::endl;
 }
 
 

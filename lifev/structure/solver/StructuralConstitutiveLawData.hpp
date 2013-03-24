@@ -368,14 +368,19 @@ public:
         return M_numberFibers;
     }
 
-    const Real ithStiffnessParameterFibers( const UInt i )
+    const Real ithStiffnessFibers( const UInt i )
     {
         return M_stiffnessParametersFibers[ i ];
     }
 
-    const Real ithNonlinearityParameterFibers( const UInt i )
+    const Real ithNonlinearityFibers( const UInt i )
     {
         return M_nonlinearityParametersFibers[ i ];
+    }
+
+    const Real smoothness( void )
+    {
+        return M_epsilon;
     }
 #endif
 
@@ -445,6 +450,7 @@ private:
     UInt                   M_numberFibers;
     vectorParameters_Type  M_stiffnessParametersFibers;
     vectorParameters_Type  M_nonlinearityParametersFibers;
+    Real                   M_epsilon;
 #endif
     std::string            M_lawType;
     bool                   M_useExactJacobian;

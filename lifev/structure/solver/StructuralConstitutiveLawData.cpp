@@ -71,6 +71,7 @@ StructuralConstitutiveLawData::StructuralConstitutiveLawData() :
     M_numberFibers                     ( 0 ),
     M_stiffnessParametersFibers        ( ),
     M_nonlinearityParametersFibers     ( ),
+    M_epsilon                          ( 0 ),
 #endif
     M_lawType                          ( ),
     M_useExactJacobian                 ( false ),
@@ -98,6 +99,7 @@ StructuralConstitutiveLawData::StructuralConstitutiveLawData ( const StructuralC
     M_numberFibers                     ( structuralConstitutiveLawData.M_numberFibers ),
     M_stiffnessParametersFibers        ( structuralConstitutiveLawData.M_stiffnessParametersFibers ),
     M_nonlinearityParametersFibers     ( structuralConstitutiveLawData.M_nonlinearityParametersFibers ),
+    M_epsilon                          ( structuralConstitutiveLawData.M_epsilon ),
 #endif
     M_lawType                          ( structuralConstitutiveLawData.M_lawType ),
     M_useExactJacobian                 ( structuralConstitutiveLawData.M_useExactJacobian ),
@@ -132,6 +134,7 @@ StructuralConstitutiveLawData::operator= ( const StructuralConstitutiveLawData& 
         M_numberFibers                     = structuralConstitutiveLawData.M_numberFibers;
         M_stiffnessParametersFibers        = structuralConstitutiveLawData.M_stiffnessParametersFibers;
         M_nonlinearityParametersFibers     = structuralConstitutiveLawData.M_nonlinearityParametersFibers;
+        M_epsilon                          = structuralConstitutiveLawData.M_epsilon;
 #endif
         M_lawType                          = structuralConstitutiveLawData.M_lawType;
         M_useExactJacobian                 = structuralConstitutiveLawData.M_useExactJacobian;
@@ -251,6 +254,7 @@ StructuralConstitutiveLawData::setup ( const GetPot& dataFile, const std::string
          M_stiffnessParametersFibers[ i ]      = dataFile ( ( section + "/fibers/stiffness"    ).data(), 0., i );
          M_nonlinearityParametersFibers[ i ]   = dataFile ( ( section + "/fibers/nonlinearity" ).data(), 0., i );
      }
+     M_epsilon = dataFile ( ( section + "/fibers/smoothness"   ).data(), 0. );
 #endif 
 
     // space_discretization
