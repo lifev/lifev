@@ -436,20 +436,60 @@ void HolzapfelMaterialNonLinear<MeshType>::updateJacobianMatrix ( const vector_T
 
 template <typename MeshType>
 void HolzapfelMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( matrixPtr_Type&         jacobian,
-                                                                            const vector_Type&     disp,
-                                                                            const dataPtr_Type&     dataMaterial,
-                                                                            const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
-                                                                            const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
-                                                                            const displayerPtr_Type& displayer )
+                                                                          const vector_Type&     disp,
+                                                                          const dataPtr_Type&     dataMaterial,
+                                                                          const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                                                                          const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
+                                                                          const displayerPtr_Type& displayer )
 {
     using namespace ExpressionAssembly;
+#define deformationTensor ( grad( this->M_dispETFESpace,  disp, this->M_offset) + value(this->M_identity) )
+#define detDeformationTensor det( deformationGradientTensor )
+#define detPowered pow( detDeformationTensor, ( -2.0/3.0 ) )
+#define deformationTensor_T  minusT(deformationGradientTensor)
+#define tensorC transpose(deformationGradientTensor) * deformationGradientTensor
 
     // Update the heaviside function for the stretch of the fibers
-
-    displayer->leaderPrint ("   Non-Linear S - updating non linear terms in the Jacobian Matrix (Holzapfel)");
-
     * (jacobian) *= 0.0;
 
+    displayer->leaderPrint ("   Non-Linear S - updating non linear terms in the Jacobian Matrix (Holzapfel):");
+
+    displayer->leaderPrint ("              1 - Updating the terms of the derivative of the atan function");
+
+    for( UInt i(0); i < this->M_vectorInterpolated.size(); i++ )
+    {
+        // first term:
+        // (-4.0/3.0) * aplha_i * (epsilon / PI) * ( 1/ (1 + ( \bar{I_4} - 1 )^2 ) ) * J^(-2.0/3.0) *
+        // \bar{I_4} * ( \bar{I_4} - 1 ) * exp( gamma_i * ( \bar{I_4} - 1 )^2 ) * ( F^-T : dF ) ( F*M : d\phi )
+        integrate ( elements ( this->M_dispETFESpace->mesh() ),
+                    this->M_dispFESpace->qr(),
+                    this->M_dispETFESpace,
+                    this->M_dispETFESpace,
+                    value( -4.0/3.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * // -4.0/3.0 * alpha_i
+
+                    derAtan(  pow( detDeformationTensor, (-2.0/3.0) ) *
+                              dot( tensorC, outerProduct( value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ), value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ) ) ) - value(1.0), this->M_epsilon ) * // (epsilon / PI) * ( 1/ (1 + ( \bar{I_4} - 1 )^2 ) )
+
+                    pow( detDeformationTensor, (-2.0/3.0) ) * // J^(-2.0/3.0)
+
+                    pow( detDeformationTensor, (-2.0/3.0) ) * dot( tensorC, outerProduct( value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ), value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ) ) ) * // \bar{I_4}
+
+                    ( pow( detDeformationTensor, (-2.0/3.0) ) * dot( tensorC, outerProduct( value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ), value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ) ) ) - value(1.0) ) * // ( \bar{I_4} - 1 )
+
+                    exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) )
+                         * ( detPowered *  dot( tensorC, outerProduct( value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ),
+                                                                       value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ) ) )  - value(1.0)  ) *
+                         ( detPowered *  dot( tensorC, outerProduct( value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ),
+                                                                     value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ) ) )  - value(1.0)  ) ) * // exp( gamma_i * ( \bar{I_4} - 1 )^2 )
+
+                    dot( deformationTensor_T, grad(phi_j) ) * // F^-T : dF
+
+                    dot( deformationTensor * outerProduct( value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ), value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ) ) , grad(phi_i) ) // F*M : d\phi
+                    ) >> jacobian;
+
+
+
+    }
 
     jacobian->globalAssemble();
 }
@@ -476,17 +516,11 @@ void HolzapfelMaterialNonLinear<MeshType>::computeStiffness ( const vector_Type&
     displayer->leaderPrint (" Non-Linear S-  Computing the Holzapfel nonlinear stiffness vector ");
     displayer->leaderPrint (" \n*********************************\n  ");
 
-    // For anisotropic part of the Piola-Kirchhoff is assemble summing up the parts of the 
+    // For anisotropic part of the Piola-Kirchhoff is assemble summing up the parts of the
     // Piola-Kirchhoff using the fiber index
-#define deformationTensor ( grad( this->M_dispETFESpace,  disp, this->M_offset) + value(this->M_identity) )
-#define detDeformationTensor det( deformationGradientTensor )
-#define detPowered pow( detDeformationTensor, ( -2.0/3.0 ) )
-#define deformationTensor_T  minusT(deformationGradientTensor)
-#define tensorC transpose(deformationGradientTensor) * deformationGradientTensor
-
 
     // Here the fiber vector at the quadrature node is deduced using the method
-    // Interpolate value of the expression template. 
+    // Interpolate value of the expression template.
 
     for( UInt i(0); i < this->M_vectorInterpolated.size() ; i++ )
       {
@@ -497,17 +531,17 @@ void HolzapfelMaterialNonLinear<MeshType>::computeStiffness ( const vector_Type&
 	integrate ( elements ( this->M_dispETFESpace->mesh() ),
 		    this->M_dispFESpace->qr(),
 		    this->M_dispETFESpace,
-		    atan( ( detPowered * dot( tensorC, outerProduct( value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ), 
+		    atan( ( detPowered * dot( tensorC, outerProduct( value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ),
 								     value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ) ) ) ) - value(1.0) , this->M_epsilon ) *
 		    value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * pow( detDeformationTensor, (-2.0/3.0) ) *
-		    ( detPowered * dot( tensorC, outerProduct( value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ), 
-							       value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ) ) )  - value(1.0) ) * 
+		    ( detPowered * dot( tensorC, outerProduct( value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ),
+							       value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ) ) )  - value(1.0) ) *
 		    exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) )
-			 * ( detPowered *  dot( tensorC, outerProduct( value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ), 
-								       value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ) ) )  - value(1.0)  ) *
- 			   ( detPowered *  dot( tensorC, outerProduct( value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ), 
-								       value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ) ) )  - value(1.0)  ) ) *
-		    dot( deformationTensor * ( outerProduct( value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ), 
+                 * ( detPowered *  dot( tensorC, outerProduct( value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ),
+                                                           value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ) ) )  - value(1.0)  ) *
+                 ( detPowered *  dot( tensorC, outerProduct( value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ),
+                                                           value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ) ) )  - value(1.0)  ) ) *
+		    dot( deformationTensor * ( outerProduct( value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ),
 							     value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ) ) ), grad( phi_i ) )
                   ) >> this->M_stiff;
 
@@ -517,17 +551,17 @@ void HolzapfelMaterialNonLinear<MeshType>::computeStiffness ( const vector_Type&
 	integrate ( elements ( this->M_dispETFESpace->mesh() ),
 		    this->M_dispFESpace->qr(),
 		    this->M_dispETFESpace,
-		    atan( ( detPowered * dot( tensorC, outerProduct( value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ), 
+		    atan( ( detPowered * dot( tensorC, outerProduct( value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ),
 								     value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ) ) ) ) - value(1.0) , this->M_epsilon ) *
 		    value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * pow( detDeformationTensor, (-2.0/3.0) ) *
-		    ( detPowered * dot( tensorC, outerProduct( value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ), 
-							       value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ) ) )  - value(1.0) ) * 
+		    ( detPowered * dot( tensorC, outerProduct( value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ),
+							       value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ) ) )  - value(1.0) ) *
 		    exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) )
-			 * ( detPowered *  dot( tensorC, outerProduct( value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ), 
+			 * ( detPowered *  dot( tensorC, outerProduct( value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ),
 								       value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ) ) )  - value(1.0)  ) *
- 			   ( detPowered *  dot( tensorC, outerProduct( value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ), 
+ 			   ( detPowered *  dot( tensorC, outerProduct( value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ),
 								       value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ) ) )  - value(1.0)  ) ) *
-		    value( -1.0/3.0 ) * dot( tensorC, outerProduct( value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ), 
+		    value( -1.0/3.0 ) * dot( tensorC, outerProduct( value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ),
 								    value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ) ) ) *
 		    dot( deformationTensor_T , grad( phi_i ) )
 		    ) >> this->M_stiff;

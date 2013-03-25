@@ -172,13 +172,13 @@ public:
     //! Getter a value
     return_Type value_q (const UInt& q) const
     {
-        return ( M_epsilon / PI ) * ( 1.0/ ( 1.0 + ( M_evaluationBase.value_qij (q, i, j) * M_evaluationBase.value_qij (q, i, j) ) ) );
+        return ( M_epsilon / PI ) * ( 1.0/ ( 1.0 + ( M_evaluationBase.value_q (q) * M_evaluationBase.value_q (q) ) ) );
     }
 
     //! Getter for the value for a vector
     return_Type value_qi (const UInt& q, const UInt& i) const
     {
-        return ( M_epsilon / PI ) * ( 1.0/ ( 1.0 + ( M_evaluationBase.value_qij (q, i, j) * M_evaluationBase.value_qij (q, i, j) ) ) );
+        return ( M_epsilon / PI ) * ( 1.0/ ( 1.0 + ( M_evaluationBase.value_qi (q, i) * M_evaluationBase.value_qi (q, i) ) ) );
     }
 
     //! Getter for the value for a matrix
