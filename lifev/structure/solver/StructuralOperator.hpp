@@ -1301,7 +1301,7 @@ template <typename Mesh, typename SolverType>
 void
 StructuralOperator<Mesh, SolverType>::initialize ( const function& d0, const function& w0, const function& a0 )
 {
-    M_FESpace->interpolate (d0, *M_disp, 0.0);
+    M_FESpace->interpolate ( static_cast<typename FESpace<Mesh, MapEpetra>::function_Type> ( d0 ), *M_disp, 0.0);
     //M_FESpace->interpolate(w0, *M_vel , 0.0);
     // M_FESpace->interpolate(a0, *M_acc , 0.0);
 }

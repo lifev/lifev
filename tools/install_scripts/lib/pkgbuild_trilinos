@@ -7,7 +7,7 @@
 ver='10.12.2'
 
 download_trilinos() {
-  wget "http://trilinos.sandia.gov/download/files/trilinos-${ver}-Source.tar.gz"
+  wget -c "http://trilinos.sandia.gov/download/files/trilinos-${ver}-Source.tar.gz"
 }
 
 unpack_trilinos() {
@@ -113,10 +113,10 @@ build_trilinos() {
     \
     ${src_dir}/trilinos-$ver-Source
 
-  make -j$NUM_PROC
+  make
 }
 
 install_trilinos() {
-  make -j$NUM_PROC install
+  make install
 }
 

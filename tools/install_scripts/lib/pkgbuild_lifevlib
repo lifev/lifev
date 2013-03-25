@@ -1,23 +1,23 @@
 #! /bin/bash
 #
 # author: Antonio Cervone <ant.cervone@gmail.com>
-# date:   28-03-2012
+# date:   13-02-2013
 #
 
-ver='3.1'
+ver='3.4.4'
 
-download_lifev() {
-  cp ${lifev_src}/lifev{,-cmake}.zip $src_dir
+download_lifevlib() {
+  cp ${lifevlib_src}/lifev{,-cmake}.zip $src_dir
 }
 
-unpack_lifev() {
+unpack_lifevlib() {
   unzip lifev.zip
   mkdir -p cmake
   cd cmake
   unzip ../lifev-cmake.zip
 }
 
-build_lifev() {
+build_lifevlib() {
 
   if [ $MOX_MACHINE ]; then
     mox_extra="\
@@ -56,6 +56,7 @@ build_lifev() {
     -D LifeV_ENABLE_Darcy:BOOL=ON \
     -D LifeV_ENABLE_TESTS:BOOL=OFF \
     -D LifeV_ENABLE_STRONG_CXX_COMPILE_WARNINGS:BOOL=OFF \
+    -D LifeV_EXTRA_LINK_FLAGS:STRING="${lifev_flags}" \
     -D Trilinos_INCLUDE_DIRS:PATH=${trilinos_include} \
     -D Trilinos_LIBRARY_DIRS:PATH=${trilinos_lib} \
     -D ParMETIS_INCLUDE_DIRS:PATH=${parmetis_include} \
@@ -65,9 +66,10 @@ build_lifev() {
     $mox_extra \
     $src_dir
 
-  make -j$NUM_PROC
+  make
 }
 
-install_lifev() {
-  make -j$NUM_PROC install
+install_lifevlib() {
+  make install
 }
+

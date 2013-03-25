@@ -1,3 +1,20 @@
+LifeV 3.6.1:
+============
+
+Added Multiscale module. Cf documentation.
+
+Increase the way the Darcy solvers handle the xml parameter lists.
+
+Fixed bug in FSI:
+
+* Removing spikes in the harmonic extension (within the implicit fsi_monolithic).
+* Fixing a problem related to the assembly of the shape derivative
+* Adding some assert to avoid wrong sets of parameters
+* It now possible to choose P2 finite element for the harmonic extension (the mesh remains a P1 mesh ⇒ only the P1 nodes are moved! In this case a warning menton this fact).
+* Removing a few warnings.
+
+
+
 LifeV 3.4.4:
 ============
 Bug fixes in ExporterVTK:
