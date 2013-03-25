@@ -33,8 +33,8 @@
     @date 07-2011
  */
 
-#ifndef EXPRESSION_ARCTAN_HPP
-#define EXPRESSION_ARCTAN_HPP
+#ifndef EXPRESSION_DERIVATIVEARCTAN_HPP
+#define EXPRESSION_DERIVATIVEARCTAN_HPP
 
 #include <lifev/core/LifeV.hpp>
 
@@ -66,7 +66,7 @@ namespace ExpressionAssembly
 
 */
 template <typename BaseExpressionType>
-class ExpressionArcTan : public ExpressionBase< ExpressionArcTan<BaseExpressionType> >
+class ExpressionDerivativeArcTan : public ExpressionBase< ExpressionDerivativeArcTan<BaseExpressionType> >
 {
 public:
 
@@ -74,7 +74,7 @@ public:
     //@{
 
     // No direct use, just ease of coding
-    typedef ExpressionBase< ExpressionArcTan <BaseExpressionType> > base_Type;
+    typedef ExpressionBase< ExpressionDerivativeArcTan <BaseExpressionType> > base_Type;
 
     //@}
 
@@ -82,15 +82,15 @@ public:
     //@{
 
     //! Full constructor using the two expressions
-    ExpressionArcTan (const BaseExpressionType& l, const Real epsilon)
+    ExpressionDerivativeArcTan (const BaseExpressionType& l, const Real epsilon)
         : base_Type(), M_l (l), M_epsilon (epsilon) {}
 
     //! Copy constructor
-    ExpressionArcTan (const ExpressionArcTan<BaseExpressionType>& expression)
+    ExpressionDerivativeArcTan (const ExpressionDerivativeArcTan<BaseExpressionType>& expression)
         : base_Type(), M_l (expression.M_l), M_epsilon (expression.M_epsilon) {}
 
     //! Destructor
-    ~ExpressionArcTan() {}
+    ~ExpressionDerivativeArcTan() {}
 
     //@}
 
@@ -101,7 +101,7 @@ public:
     //! Display method
     static void display (std::ostream& out = std::cout)
     {
-        out << " atan ( ";
+        out << " derAtan ( ";
         BaseExpressionType::display (out);
         out << " ) ";
     }
@@ -131,7 +131,7 @@ private:
     //! @name Private Methods
     //@{
 
-    ExpressionArcTan();
+    ExpressionDerivativeArcTan();
 
     //@}
 
@@ -167,10 +167,10 @@ private:
 */
 
 template< typename  ExpressionType>
-ExpressionArcTan<ExpressionType>
-atan (const ExpressionBase<ExpressionType>& l, const Real& epsilon)
+ExpressionDerivativeArcTan<ExpressionType>
+derAtan (const ExpressionBase<ExpressionType>& l, const Real& epsilon)
 {
-    return ExpressionArcTan<ExpressionType> (l.cast(), epsilon);
+    return ExpressionDerivativeArcTan<ExpressionType> (l.cast(), epsilon);
 }
 
 

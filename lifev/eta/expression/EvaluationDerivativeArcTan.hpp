@@ -33,13 +33,13 @@
      @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
  */
 
-#ifndef EVALUTATION_ARCTAN_HPP
-#define EVALUTATION_ARCTAN_HPP
+#ifndef EVALUTATION_DERIVATIVEARCTAN_HPP
+#define EVALUTATION_DERIVATIVEARCTAN_HPP
 
 #include <lifev/core/LifeV.hpp>
 
-#include <lifev/eta/array/OperationSmallArcTan.hpp>
-#include <lifev/eta/expression/ExpressionArcTan.hpp>
+#include <lifev/eta/array/OperationSmallDerivativeArcTan.hpp>
+#include <lifev/eta/expression/ExpressionDerivativeArcTan.hpp>
 
 #include <lifev/core/fem/QuadratureRule.hpp>
 
@@ -61,7 +61,7 @@ namespace ExpressionAssembly
   required to work within the Evaluation trees.
  */
 template <typename EvaluationBaseType>
-class EvaluationArcTan
+class EvaluationDerivativeArcTan
 {
 public:
 
@@ -95,20 +95,20 @@ public:
     //@{
 
     //! Copy constructor
-    EvaluationArcTan (const EvaluationArcTan& eval)
+    EvaluationDerivativeArcTan (const EvaluationDerivativeArcTan& eval)
         : M_evaluationBase (eval.M_evaluationBase),
           M_epsilon (eval.M_epsilon)
     {}
 
     //! Constructor from the corresponding expression
     template <typename BaseExpressionType>
-    explicit EvaluationArcTan (const ExpressionArcTan<BaseExpressionType>& expression)
+    explicit EvaluationDerivativeArcTan (const ExpressionDerivativeArcTan<BaseExpressionType>& expression)
         : M_evaluationBase (expression.base() ),
           M_epsilon (expression.epsilon() )
     {}
 
     //! Destructor
-    ~EvaluationArcTan() {}
+    ~EvaluationDerivativeArcTan() {}
 
     //@}
 
@@ -172,19 +172,19 @@ public:
     //! Getter a value
     return_Type value_q (const UInt& q) const
     {
-        return ( 1.0 / PI ) * std::atan ( M_epsilon * ( M_evaluationBase.value_q (q) ) ) + ( 1.0 / 2.0 );
+        return ( M_epsilon / PI ) * ( 1.0/ ( 1.0 + ( M_evaluationBase.value_qij (q, i, j) * M_evaluationBase.value_qij (q, i, j) ) ) );
     }
 
     //! Getter for the value for a vector
     return_Type value_qi (const UInt& q, const UInt& i) const
     {
-        return ( 1.0 / PI ) * std::atan ( M_epsilon * ( M_evaluationBase.value_qi (q, i) ) ) + ( 1.0 / 2.0 );
+        return ( M_epsilon / PI ) * ( 1.0/ ( 1.0 + ( M_evaluationBase.value_qij (q, i, j) * M_evaluationBase.value_qij (q, i, j) ) ) );
     }
 
     //! Getter for the value for a matrix
     return_Type value_qij (const UInt& q, const UInt& i, const UInt& j) const
     {
-        return ( 1.0 / PI ) * std::atan ( M_epsilon * ( M_evaluationBase.value_qij (q, i, j) ) ) + ( 1.0 / 2.0 );
+        return ( M_epsilon / PI ) * ( 1.0/ ( 1.0 + ( M_evaluationBase.value_qij (q, i, j) * M_evaluationBase.value_qij (q, i, j) ) ) );
     }
 
     //@}
@@ -195,7 +195,7 @@ private:
     //@{
 
     //! No empty constructor
-    EvaluationArcTan();
+    EvaluationDerivativeArcTan();
 
     //@}
 
@@ -205,15 +205,15 @@ private:
 };
 
 template< typename EvaluationBaseType>
-const flag_Type EvaluationArcTan<EvaluationBaseType>::S_globalUpdateFlag
+const flag_Type EvaluationDerivativeArcTan<EvaluationBaseType>::S_globalUpdateFlag
     = EvaluationBaseType::S_globalUpdateFlag;
 
 template< typename EvaluationBaseType>
-const flag_Type EvaluationArcTan<EvaluationBaseType>::S_testUpdateFlag
+const flag_Type EvaluationDerivativeArcTan<EvaluationBaseType>::S_testUpdateFlag
     = EvaluationBaseType::S_testUpdateFlag;
 
 template< typename EvaluationBaseType>
-const flag_Type EvaluationArcTan<EvaluationBaseType>::S_solutionUpdateFlag
+const flag_Type EvaluationDerivativeArcTan<EvaluationBaseType>::S_solutionUpdateFlag
     = EvaluationBaseType::S_solutionUpdateFlag;
 
 } // Namespace ExpressionAssembly
