@@ -1543,7 +1543,9 @@ sumIntoCoefficients ( Int const numRows, Int const numColumns,
                       Int format )
 {
 	Int ierr;
+#ifdef LIFEV_MT_CRITICAL_UPDATES
 #pragma omp critical
+#endif
 	{
 	ierr = M_epetraCrs->SumIntoGlobalValues ( numRows, &rowIndices[0], numColumns,
                                        	   	  &columnIndices[0], localValues, format );
