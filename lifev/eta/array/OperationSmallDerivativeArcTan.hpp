@@ -33,8 +33,8 @@
      @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
  */
 
-#ifndef OPERATION_SMALL_ARCTAN_HPP
-#define OPERATION_SMALL_ARCTAN_HPP
+#ifndef OPERATION_SMALL_DERIVATIVEARCTAN_HPP
+#define OPERATION_SMALL_DERIVATIVEARCTAN_HPP
 
 #include <lifev/core/LifeV.hpp>
 
@@ -58,17 +58,17 @@ namespace LifeV
 
 */
 template <typename Base>
-class OperationSmallArcTan
+class OperationSmallDerivativeArcTan
 {
 private:
     //! @name Constructors and destructors
     //@{
 
     //! No default constructor
-    OperationSmallArcTan();
+    OperationSmallDerivativeArcTan();
 
     //! No destructor
-    ~OperationSmallArcTan();
+    ~OperationSmallDerivativeArcTan();
 
     //@}
 };
@@ -76,7 +76,7 @@ private:
 //! \cond
 
 template <>
-class OperationSmallArcTan<Real>
+class OperationSmallDerivativeArcTan<Real>
 {
 public:
 
@@ -92,10 +92,10 @@ private:
     //@{
 
     //! No default constructor
-    OperationSmallArcTan();
+    OperationSmallDerivativeArcTan();
 
     //! No destructor
-    ~OperationSmallArcTan();
+    ~OperationSmallDerivativeArcTan();
 
     //@}
 };
