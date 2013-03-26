@@ -265,11 +265,12 @@ public:
         return M_isotropicLaw;
     }
 
+#ifdef ENABLE_ANISOTROPIC_LAW
     anisotropicLawPtr_Type anisotropicLaw( ) const
     {
         return M_anisotropicLaw;
     }
-
+#endif
     //! Get the Stiffness matrix (linear case)
     const matrixPtr_Type  stiffMatrix();
 

@@ -580,18 +580,22 @@ void ExponentialMaterialNonLinear<MeshType>::computeStiffness ( const vector_Typ
     //     Real alpha = dataMaterial->alpha(marker);
     //     Real gamma = dataMaterial->gamma(marker);
 
+    ExpressionDeterminant<ExpressionAddition<
+        ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >
+        J( grad( this->M_dispETFESpace,  disp, this->M_offset) + value(this->M_identity) );
+
     //Computation of the volumetric part
     integrate ( elements ( this->M_dispETFESpace->mesh() ) ,
                 this->M_dispFESpace->qr(),
                 this->M_dispETFESpace,
-                value (1.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [2] ) * ( pow ( detDeformationGradientTensor , 2.0) - detDeformationGradientTensor + log (detDeformationGradientTensor) ) * dot (  deformationGradientTensor_T, grad (phi_i) )
+                value (1.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [2] ) * ( pow ( J , 2.0) - J + log (J) ) * dot (  deformationGradientTensor_T, grad (phi_i) )
               ) >> M_stiff;
 
     //Computation of the isochoric part
     integrate ( elements ( this->M_dispETFESpace->mesh() ) ,
                 this->M_dispFESpace->qr(),
                 this->M_dispETFESpace,
-                parameter ( (* (this->M_vectorsParameters) ) [0] ) * pow (detDeformationGradientTensor, -2.0 / 3.0) *
+                parameter ( (* (this->M_vectorsParameters) ) [0] ) * pow (J, -2.0 / 3.0) *
                 exp ( parameter ( (* (this->M_vectorsParameters) ) [1] ) * ( firstInvariantCbar  - value (3.0) ) )  *
                 (dot ( deformationGradientTensor - value (1.0 / 3.0) * firstInvariantC * deformationGradientTensor_T, grad (phi_i) ) )
               ) >> M_stiff;
