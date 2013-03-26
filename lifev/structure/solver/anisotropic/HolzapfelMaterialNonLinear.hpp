@@ -443,11 +443,33 @@ void HolzapfelMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( matrix
                                                                           const displayerPtr_Type& displayer )
 {
     using namespace ExpressionAssembly;
-#define deformationTensor ( grad( this->M_dispETFESpace,  disp, this->M_offset) + value(this->M_identity) )
-#define detDeformationTensor det( deformationGradientTensor )
-#define detPowered pow( detDeformationTensor, ( -2.0/3.0 ) )
-#define deformationTensor_T  minusT(deformationGradientTensor)
-#define tensorC transpose(deformationGradientTensor) * deformationGradientTensor
+
+    // In the following definitions, the critical template argument is MapEpetra
+    // When other maps will be available in LifeV, the Holzapfel class and its mother
+    // should have as template the MeshType and the MapType.
+
+    // Definition of F
+    ExpressionAddition<
+        ExpressionInterpolateGradient<MeshType, MapEpetra, 3, 3>, ExpressionMatrix<3,3> >
+        F( grad( this->M_dispETFESpace,  disp, this->M_offset), value(this->M_identity));
+
+    // Definition of J
+    ExpressionDeterminant<ExpressionAddition<
+        ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >
+        J( F );
+
+    // Definition of tensor C
+    ExpressionProduct<
+        ExpressionTranspose<
+            ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
+            ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> >
+        >
+        C( transpose(F), F );
+
+    // Definition of F^-T
+    ExpressionMinusTransposed<
+        ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >
+        F_T( F );
 
     // Update the heaviside function for the stretch of the fibers
     * (jacobian) *= 0.0;
@@ -458,6 +480,10 @@ void HolzapfelMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( matrix
 
     for( UInt i(0); i < this->M_vectorInterpolated.size(); i++ )
     {
+        // Defining the expression for the i-th fiber
+
+
+
         // first term:
         // (-4.0/3.0) * aplha_i * (epsilon / PI) * ( 1/ (1 + ( \bar{I_4} - 1 )^2 ) ) * J^(-2.0/3.0) *
         // \bar{I_4} * ( \bar{I_4} - 1 ) * exp( gamma_i * ( \bar{I_4} - 1 )^2 ) * ( F^-T : dF ) ( F*M : d\phi )
@@ -486,6 +512,10 @@ void HolzapfelMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( matrix
 
                     dot( deformationTensor * outerProduct( value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ), value( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) ) ) , grad(phi_i) ) // F*M : d\phi
                     ) >> jacobian;
+
+        // second term
+        // ( 4.0/9.0 ) * alpha_i * (epsilon/PI) * ( 1.0 / ( 1.0 + ( \bar{I_4} - 1.0 )^2 )) * J^(-2.0/3.0) *
+        // \bar{I_4} * ( \bar{I_4} - 1.0 ) * exp( gamma_i* ( \bar{I_4} - 1.0 )^2 ) * ( F^-T : dF )
 
 
 
