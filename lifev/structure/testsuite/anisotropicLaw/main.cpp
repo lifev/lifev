@@ -79,10 +79,10 @@
 #include <lifev/structure/solver/isotropic/SecondOrderExponentialMaterialNonLinear.hpp>
 #include <lifev/structure/solver/isotropic/NeoHookeanMaterialNonLinear.hpp>
 
-#ifdef ENABLE_ANISOTROPIC_LAW
+
 #include <lifev/structure/solver/anisotropic/StructuralAnisotropicConstitutiveLaw.hpp>
 #include <lifev/structure/solver/anisotropic/HolzapfelMaterialNonLinear.hpp>
-#endif
+
 
 #include <lifev/core/filter/ExporterEnsight.hpp>
 #ifdef HAVE_HDF5
