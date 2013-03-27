@@ -166,7 +166,7 @@ int main ( int argc, char** argv )
                      dot ( grad (phi_i) , grad (phi_j) )
                    ) >> matrixGraph;
     }
-    matrixGraph->GlobalAssembly();
+    matrixGraph->GlobalAssemble();
     timer.stop();
 
     if (verbose)
