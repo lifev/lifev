@@ -427,14 +427,14 @@ void StructuralConstitutiveLaw<MeshType>::computeStiffness ( const vector_Type& 
     *M_vectorStiffness *= 0.0;
 
     // Isotropic part
-    M_displayer->leaderPrint ("\n  S-  Updating the VectorStiffness Matrix ( isotropic part )\n");
+    M_displayer->leaderPrint ("\n  S-  Updating the VectorStiffness ( isotropic part )\n");
     M_isotropicLaw->computeStiffness ( sol, factor, dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
 
     *M_vectorStiffness += *M_isotropicLaw->stiffVector();
 
 #ifdef ENABLE_ANISOTROPIC_LAW
     // Anisotropic part
-    displayer->leaderPrint ("\n  S-  Updating the Jacobian Matrix ( anisotropic part )\n");
+    displayer->leaderPrint ("\n  S-  Updating the VectorStiffness ( anisotropic part )\n");
 
     M_anisotropicLaw->computeStiffness (sol, factor, dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
 
