@@ -280,7 +280,6 @@ addTo (GraphType& graph)
 					}
 				}
 			}
-
 			const std::vector<Int>& rowIdx = elementalMatrix.rowIndices();
 			const std::vector<Int>& colIdx = elementalMatrix.columnIndices();
 #pragma omp critical
@@ -290,7 +289,6 @@ addTo (GraphType& graph)
 			}
 		}
     }
-    graph.GlobalAssemble();
 }
 
 

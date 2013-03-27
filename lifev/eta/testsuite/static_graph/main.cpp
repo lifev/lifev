@@ -157,6 +157,7 @@ int main ( int argc, char** argv )
                      dot ( grad (phi_i) , grad (phi_j) )
                    ) >> matrixGraph;
     }
+    matrixGraph->GlobalAssemble();
     feLoopTimer.stop();
 
     if (verbose)
