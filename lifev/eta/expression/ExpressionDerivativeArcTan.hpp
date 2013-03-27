@@ -82,12 +82,12 @@ public:
     //@{
 
     //! Full constructor using the two expressions
-    ExpressionDerivativeArcTan (const BaseExpressionType& l, const Real epsilon)
-        : base_Type(), M_l (l), M_epsilon (epsilon) {}
+    ExpressionDerivativeArcTan (const BaseExpressionType& l, const Real epsilon, const Real K)
+        : base_Type(), M_l (l), M_epsilon (epsilon), M_K (K) {}
 
     //! Copy constructor
     ExpressionDerivativeArcTan (const ExpressionDerivativeArcTan<BaseExpressionType>& expression)
-        : base_Type(), M_l (expression.M_l), M_epsilon (expression.M_epsilon) {}
+        : base_Type(), M_l (expression.M_l), M_epsilon (expression.M_epsilon), M_K (expression.M_K) {}
 
     //! Destructor
     ~ExpressionDerivativeArcTan() {}
@@ -124,6 +124,12 @@ public:
         return M_epsilon;
     }
 
+    //! Getter for the right hand side
+    const Real& K() const
+    {
+        return M_K;
+    }
+
     //@}
 
 private:
@@ -139,8 +145,9 @@ private:
     // Left hand side
     BaseExpressionType M_l;
 
-    // Right hand side
     Real M_epsilon;
+
+    Real M_K;
 };
 
 
@@ -168,9 +175,9 @@ private:
 
 template< typename  ExpressionType>
 ExpressionDerivativeArcTan<ExpressionType>
-derAtan (const ExpressionBase<ExpressionType>& l, const Real& epsilon)
+derAtan (const ExpressionBase<ExpressionType>& l, const Real& epsilon, const Real& K)
 {
-    return ExpressionDerivativeArcTan<ExpressionType> (l.cast(), epsilon);
+    return ExpressionDerivativeArcTan<ExpressionType> (l.cast(), epsilon, K);
 }
 
 

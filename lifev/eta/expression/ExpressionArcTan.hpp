@@ -82,12 +82,18 @@ public:
     //@{
 
     //! Full constructor using the two expressions
-    ExpressionArcTan (const BaseExpressionType& l, const Real epsilon)
-        : base_Type(), M_l (l), M_epsilon (epsilon) {}
+    ExpressionArcTan (const BaseExpressionType& l, const Real epsilon, const Real K, const Real delta)
+        : base_Type(), M_l (l), M_epsilon (epsilon), M_K(K), M_delta(delta) {}
 
     //! Copy constructor
     ExpressionArcTan (const ExpressionArcTan<BaseExpressionType>& expression)
-        : base_Type(), M_l (expression.M_l), M_epsilon (expression.M_epsilon) {}
+        :
+        base_Type(),
+        M_l (expression.M_l),
+        M_epsilon (expression.M_epsilon),
+        M_K (expression.M_K),
+        M_delta (expression.M_delta)
+    {}
 
     //! Destructor
     ~ExpressionArcTan() {}
@@ -124,6 +130,18 @@ public:
         return M_epsilon;
     }
 
+    //! Getter for the right hand side
+    const Real& K() const
+    {
+        return M_K;
+    }
+
+    //! Getter for the right hand side
+    const Real& delta() const
+    {
+        return M_delta;
+    }
+
     //@}
 
 private:
@@ -139,8 +157,12 @@ private:
     // Left hand side
     BaseExpressionType M_l;
 
-    // Right hand side
     Real M_epsilon;
+
+    Real M_K;
+
+    Real M_delta;
+
 };
 
 
@@ -164,13 +186,18 @@ private:
 
   <i>RExpressionType</i>: Same as in LifeV::ExpressionProduct
 
+  The expression that is built is:
+
+  K * atan( \epsilon * ( ExpressionBase ) ) + delta
+
 */
 
 template< typename  ExpressionType>
 ExpressionArcTan<ExpressionType>
-atan (const ExpressionBase<ExpressionType>& l, const Real& epsilon)
+atan (const ExpressionBase<ExpressionType>& l, const Real& epsilon,
+      const Real& K, const Real& delta)
 {
-    return ExpressionArcTan<ExpressionType> (l.cast(), epsilon);
+    return ExpressionArcTan<ExpressionType> (l.cast(), epsilon, K, delta);
 }
 
 

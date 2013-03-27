@@ -43,8 +43,6 @@
 
 #include <lifev/core/fem/QuadratureRule.hpp>
 
-#define PI 3.14159265359
-
 namespace LifeV
 {
 
@@ -97,14 +95,16 @@ public:
     //! Copy constructor
     EvaluationDerivativeArcTan (const EvaluationDerivativeArcTan& eval)
         : M_evaluationBase (eval.M_evaluationBase),
-          M_epsilon (eval.M_epsilon)
+          M_epsilon (eval.M_epsilon),
+          M_K (eval.M_K)
     {}
 
     //! Constructor from the corresponding expression
     template <typename BaseExpressionType>
     explicit EvaluationDerivativeArcTan (const ExpressionDerivativeArcTan<BaseExpressionType>& expression)
         : M_evaluationBase (expression.base() ),
-          M_epsilon (expression.epsilon() )
+          M_epsilon (expression.epsilon() ),
+          M_K (expression.K() )
     {}
 
     //! Destructor
@@ -172,19 +172,19 @@ public:
     //! Getter a value
     return_Type value_q (const UInt& q) const
     {
-        return ( M_epsilon / PI ) * ( 1.0/ ( 1.0 + ( M_evaluationBase.value_q (q) * M_evaluationBase.value_q (q) ) ) );
+        return ( M_epsilon * M_K ) * ( 1.0/ ( 1.0 + ( M_evaluationBase.value_q (q) * M_evaluationBase.value_q (q) ) ) );
     }
 
     //! Getter for the value for a vector
     return_Type value_qi (const UInt& q, const UInt& i) const
     {
-        return ( M_epsilon / PI ) * ( 1.0/ ( 1.0 + ( M_evaluationBase.value_qi (q, i) * M_evaluationBase.value_qi (q, i) ) ) );
+        return ( M_epsilon * M_K ) * ( 1.0/ ( 1.0 + ( M_evaluationBase.value_qi (q, i) * M_evaluationBase.value_qi (q, i) ) ) );
     }
 
     //! Getter for the value for a matrix
     return_Type value_qij (const UInt& q, const UInt& i, const UInt& j) const
     {
-        return ( M_epsilon / PI ) * ( 1.0/ ( 1.0 + ( M_evaluationBase.value_qij (q, i, j) * M_evaluationBase.value_qij (q, i, j) ) ) );
+        return ( M_epsilon * M_K ) * ( 1.0/ ( 1.0 + ( M_evaluationBase.value_qij (q, i, j) * M_evaluationBase.value_qij (q, i, j) ) ) );
     }
 
     //@}
@@ -202,6 +202,7 @@ private:
     //! Internal storage
     EvaluationBaseType M_evaluationBase;
     Real M_epsilon;
+    Real M_K;
 };
 
 template< typename EvaluationBaseType>

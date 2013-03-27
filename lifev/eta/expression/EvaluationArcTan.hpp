@@ -43,8 +43,6 @@
 
 #include <lifev/core/fem/QuadratureRule.hpp>
 
-#define PI 3.14159265359
-
 namespace LifeV
 {
 
@@ -97,14 +95,18 @@ public:
     //! Copy constructor
     EvaluationArcTan (const EvaluationArcTan& eval)
         : M_evaluationBase (eval.M_evaluationBase),
-          M_epsilon (eval.M_epsilon)
+          M_epsilon (eval.M_epsilon),
+          M_K (eval.M_K),
+          M_delta (eval.M_delta)
     {}
 
     //! Constructor from the corresponding expression
     template <typename BaseExpressionType>
     explicit EvaluationArcTan (const ExpressionArcTan<BaseExpressionType>& expression)
         : M_evaluationBase (expression.base() ),
-          M_epsilon (expression.epsilon() )
+          M_epsilon (expression.epsilon() ),
+          M_K (expression.K() ),
+          M_delta (expression.delta() )
     {}
 
     //! Destructor
@@ -172,19 +174,19 @@ public:
     //! Getter a value
     return_Type value_q (const UInt& q) const
     {
-        return ( 1.0 / PI ) * std::atan ( M_epsilon * ( M_evaluationBase.value_q (q) ) ) + ( 1.0 / 2.0 );
+        return ( M_K ) * std::atan ( M_epsilon * ( M_evaluationBase.value_q (q) ) ) + ( M_delta );
     }
 
     //! Getter for the value for a vector
     return_Type value_qi (const UInt& q, const UInt& i) const
     {
-        return ( 1.0 / PI ) * std::atan ( M_epsilon * ( M_evaluationBase.value_qi (q, i) ) ) + ( 1.0 / 2.0 );
+        return ( M_K ) * std::atan ( M_epsilon * ( M_evaluationBase.value_qi (q, i) ) ) + ( M_delta );
     }
 
     //! Getter for the value for a matrix
     return_Type value_qij (const UInt& q, const UInt& i, const UInt& j) const
     {
-        return ( 1.0 / PI ) * std::atan ( M_epsilon * ( M_evaluationBase.value_qij (q, i, j) ) ) + ( 1.0 / 2.0 );
+        return ( M_K ) * std::atan ( M_epsilon * ( M_evaluationBase.value_qij (q, i, j) ) ) + ( M_delta );
     }
 
     //@}
@@ -202,6 +204,8 @@ private:
     //! Internal storage
     EvaluationBaseType M_evaluationBase;
     Real M_epsilon;
+    Real M_K;
+    Real M_delta;
 };
 
 template< typename EvaluationBaseType>
