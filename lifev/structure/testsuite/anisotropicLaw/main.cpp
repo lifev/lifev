@@ -272,13 +272,15 @@ Structure::run3d()
 
     // Setting the fibers
     vectorFiberFunctionPtr_Type pointerToVectorOfFamilies( new vectorFiberFunction_Type( ) );
-    pointerToVectorOfFamilies->resize( dataStructure->numberFibersFamilies( ) );
+    (*pointerToVectorOfFamilies).resize( dataStructure->numberFibersFamilies( ) );
+
+    std::cout << "Size of the number of families: " << (*pointerToVectorOfFamilies).size() << std::endl;
 
     fibersDirectionList setOfFiberFunctions;
     setOfFiberFunctions.setupFiberDefinitions( dataStructure->numberFibersFamilies( ) );
 
     // Setting the vector of fibers functions
-    for( UInt k(0); k < pointerToVectorOfFamilies->size( ); k++ )
+    for( UInt k(1); k <= pointerToVectorOfFamilies->size( ); k++ )
     {
         // Setting up the name of the function to define the family
         std::string family="Family";
@@ -290,7 +292,8 @@ Structure::run3d()
 
         // Name of the function to create
         std::string creationString = family + familyNumber;
-        (*pointerToVectorOfFamilies)[ k ] = setOfFiberFunctions.fiberDefinition( familyNumber );
+        (*pointerToVectorOfFamilies)[ k-1 ].reset( new fiberFunction_Type() );
+        (*pointerToVectorOfFamilies)[ k-1 ] = setOfFiberFunctions.fiberDefinition( creationString );
     }
 
     if (verbose)

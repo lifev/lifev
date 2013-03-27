@@ -378,6 +378,8 @@ template <typename MeshType>
 void
 HolzapfelMaterialNonLinear<MeshType>::setupFiberDirections ( vectorFiberFunctionPtr_Type vectorOfFibers  )
 {
+    // Allocating the right space for the vector of fiber function
+    this->M_vectorOfFibers.reset( new vectorFiberFunction_Type( ) );
 
     // In this method, the vector of fiber functions has to be properly set  in the main
     // of the test. The functions are then projected on a FESpace for the integration
@@ -400,6 +402,7 @@ HolzapfelMaterialNonLinear<MeshType>::setupFiberDirections ( vectorFiberFunction
 
     for( UInt k(0); k < nbFamilies; k++ )
     {
+        this->M_vectorInterpolated[ k ].reset( new vector_Type(*this->M_localMap) );
         this->M_dispFESpace->interpolate ( *( ( *(this->M_vectorOfFibers) )[ k ] ) ,
                                            * ( ( this->M_vectorInterpolated )[ k ] ),
                                            0.0 );
@@ -485,9 +488,7 @@ void HolzapfelMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( matrix
     // Update the heaviside function for the stretch of the fibers
     * (jacobian) *= 0.0;
 
-    displayer->leaderPrint ("   Non-Linear S - updating non linear terms in the Jacobian Matrix (Holzapfel):");
-
-    displayer->leaderPrint ("              1 - Updating the terms of the derivative of the atan function");
+    displayer->leaderPrint ("   Non-Linear S - updating non linear terms in the Jacobian Matrix (Holzapfel): \n");
 
     for( UInt i(0); i < this->M_vectorInterpolated.size(); i++ )
     {
