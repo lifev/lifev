@@ -263,13 +263,11 @@ addTo (GraphType& graph)
 				}
 			}
 		}
-
 		const std::vector<Int>& rowIdx = elementalMatrix.rowIndices();
 		const std::vector<Int>& colIdx = elementalMatrix.columnIndices();
 		graph.InsertGlobalIndices(rowIdx.size(), &rowIdx[0],
 								  colIdx.size(), &colIdx[0]);
 	}
-    graph.GlobalAssemble();
 }
 
 
