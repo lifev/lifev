@@ -106,6 +106,8 @@ public:
 
     virtual double computeRBFradius (meshPtr_Type , meshPtr_Type , idContainer_Type , ID ) {};
 
+    virtual void setBasis (const std::string &) {};
+
     virtual double rbf (double x1, double y1, double z1, double x2, double y2, double z2, double radius) = 0;
 
     virtual void interpolate() = 0;

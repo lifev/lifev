@@ -161,8 +161,13 @@ void RBFlocallyRescaledScalar<mesh_Type>::setupRBFData (vectorPtr_Type KnownFiel
 template <typename Mesh>
 void RBFlocallyRescaledScalar<Mesh>::buildOperators()
 {
+    LifeChrono TimeBuilding;
+    TimeBuilding.start();
     this->interpolationOperator();
     this->projectionOperator();
+    TimeBuilding.stop();
+    std::cout << "Time to assembly operators = " << TimeBuilding.diff() << std::endl;
+    
     this->buildRhs();
     this->interpolateCostantField();
 }
