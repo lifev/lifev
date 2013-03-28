@@ -406,27 +406,50 @@ void NeoHookeanMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( matri
     //     Real mu     = dataMaterial->mu(marker);
     //     Real bulk   = dataMaterial->bulk(marker);
 
-    //Macros to make the assembly more readable
-#define deformationGradientTensor ( grad( this->M_dispETFESpace,  disp, this->M_offset) + value(this->M_identity) )
-#define detDeformationGradientTensor det( deformationGradientTensor )
-#define deformationGradientTensor_T  minusT(deformationGradientTensor)
-#define RIGHTCAUCHYGREEN transpose(deformationGradientTensor) * deformationGradientTensor
-#define firstInvariantC trace( RIGHTCAUCHYGREEN )
-#define firstInvariantCbar pow( detDeformationGradientTensor, (-2.0/3.0) ) * firstInvariantC
+    // Definition of F
+    ExpressionAddition<
+        ExpressionInterpolateGradient<MeshType, MapEpetra, 3, 3>, ExpressionMatrix<3,3> >
+        F( grad( this->M_dispETFESpace,  disp, this->M_offset), value(this->M_identity));
+
+    // Definition of J
+    ExpressionDeterminant<ExpressionAddition<
+        ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >
+        J( F );
+
+    // Definition of tensor C
+    ExpressionProduct<
+        ExpressionTranspose<
+            ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
+        ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> >
+        >
+    C( transpose(F), F );
+
+    // Definition of F^-T
+    ExpressionMinusTransposed<
+        ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> >
+        >
+    F_T( F );
+
+    // Definition of tr( C )
+    ExpressionTrace<
+        ExpressionProduct<ExpressionTranspose<ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
+                          ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >
+        >
+    I_C( C );
 
     //Assembling Volumetric Part
     integrate ( elements ( this->M_dispETFESpace->mesh() ) ,
                 this->M_dispFESpace->qr(),
                 this->M_dispETFESpace,
                 this->M_dispETFESpace,
-                value ( 1.0 / 2.0 ) * parameter ( (* (this->M_vectorsParameters) ) [1] ) * ( value (2.0) *pow (detDeformationGradientTensor, 2.0) - detDeformationGradientTensor + value (1.0) ) * dot ( deformationGradientTensor_T, grad (phi_j) ) * dot ( deformationGradientTensor_T, grad (phi_i) )
+                value ( 1.0 / 2.0 ) * parameter ( (* (this->M_vectorsParameters) ) [1] ) * ( value (2.0) *pow (J, 2.0) - J + value (1.0) ) * dot ( F_T, grad (phi_j) ) * dot ( F_T, grad (phi_i) )
               ) >> jacobian;
 
     integrate ( elements ( this->M_dispETFESpace->mesh() ) ,
                 this->M_dispFESpace->qr(),
                 this->M_dispETFESpace,
                 this->M_dispETFESpace,
-                value ( - 1.0 / 2.0 ) * parameter ( (* (this->M_vectorsParameters) ) [1] ) * ( pow (detDeformationGradientTensor, 2.0) - detDeformationGradientTensor + log (detDeformationGradientTensor) ) * dot ( deformationGradientTensor_T * transpose (grad (phi_j) ) * deformationGradientTensor_T,  grad (phi_i) )
+                value ( - 1.0 / 2.0 ) * parameter ( (* (this->M_vectorsParameters) ) [1] ) * ( pow (J, 2.0) - J + log (J) ) * dot ( F_T * transpose (grad (phi_j) ) * F_T,  grad (phi_i) )
               ) >> jacobian;
 
 
@@ -436,7 +459,7 @@ void NeoHookeanMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( matri
                 this->M_dispFESpace->qr(),
                 this->M_dispETFESpace,
                 this->M_dispETFESpace,
-                value (-2.0 / 3.0) * parameter ( (* (this->M_vectorsParameters) ) [0] ) * pow (detDeformationGradientTensor, - (2.0 / 3.0) )  * dot ( deformationGradientTensor_T , grad (phi_j) ) * dot ( deformationGradientTensor , grad (phi_i) )
+                value (-2.0 / 3.0) * parameter ( (* (this->M_vectorsParameters) ) [0] ) * pow (J, - (2.0 / 3.0) )  * dot ( F_T , grad (phi_j) ) * dot ( F , grad (phi_i) )
               ) >> jacobian;
 
 
@@ -445,7 +468,8 @@ void NeoHookeanMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( matri
                 this->M_dispFESpace->qr(),
                 this->M_dispETFESpace,
                 this->M_dispETFESpace,
-                value (2.0 / 9.0) * parameter ( (* (this->M_vectorsParameters) ) [0] ) * firstInvariantCbar  * dot ( deformationGradientTensor_T , grad (phi_j) ) * dot ( deformationGradientTensor_T , grad (phi_i) )
+                value (2.0 / 9.0) * parameter ( (* (this->M_vectorsParameters) ) [0] ) *
+                pow( J, (-2.0/3.0) ) * I_C  * dot ( F_T , grad (phi_j) ) * dot ( F_T , grad (phi_i) )
               ) >> jacobian;
 
     //! 3. Stiffness matrix : int { mu * J^(-2/3) (\nabla \delta : \nabla \v)}
@@ -453,7 +477,7 @@ void NeoHookeanMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( matri
                 this->M_dispFESpace->qr(),
                 this->M_dispETFESpace,
                 this->M_dispETFESpace,
-                parameter ( (* (this->M_vectorsParameters) ) [0] ) * pow (detDeformationGradientTensor, - (2.0 / 3.0) )  * dot ( grad (phi_j), grad (phi_i) )
+                parameter ( (* (this->M_vectorsParameters) ) [0] ) * pow (J, - (2.0 / 3.0) )  * dot ( grad (phi_j), grad (phi_i) )
               ) >> jacobian;
 
     //! 4. Stiffness matrix : int { -2/3 * mu * J^(-2/3) ( F : \nabla \delta ) ( F^-T : \nabla \v ) }
@@ -461,7 +485,8 @@ void NeoHookeanMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( matri
                 this->M_dispFESpace->qr(),
                 this->M_dispETFESpace,
                 this->M_dispETFESpace,
-                value (-2.0 / 3.0) * parameter ( (* (this->M_vectorsParameters) ) [0] ) * pow (detDeformationGradientTensor, - (2.0 / 3.0) )  * dot ( deformationGradientTensor , grad (phi_j) ) * dot ( deformationGradientTensor_T , grad (phi_i) )
+                value (-2.0 / 3.0) * parameter ( (* (this->M_vectorsParameters) ) [0] ) *
+                pow (J, - (2.0 / 3.0) )  * dot ( F , grad (phi_j) ) * dot ( F_T , grad (phi_i) )
               ) >> jacobian;
 
 
@@ -471,7 +496,8 @@ void NeoHookeanMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( matri
                 this->M_dispFESpace->qr(),
                 this->M_dispETFESpace,
                 this->M_dispETFESpace,
-                value (1.0 / 3.0) * parameter ( (* (this->M_vectorsParameters) ) [0] ) * firstInvariantCbar  * dot ( ( deformationGradientTensor_T * transpose (grad (phi_j) ) *deformationGradientTensor_T ), grad (phi_i) )
+                value (1.0 / 3.0) * parameter ( (* (this->M_vectorsParameters) ) [0] ) *
+                pow( J, -2.0/3.0) * I_C  * dot ( ( F_T * transpose (grad (phi_j) ) * F_T ), grad (phi_i) )
               ) >> jacobian;
 
     //    }
@@ -532,19 +558,51 @@ void NeoHookeanMaterialNonLinear<MeshType>::computeStiffness ( const vector_Type
     //     Real mu     = dataMaterial->mu(marker);
     //     Real bulk   = dataMaterial->bulk(marker);
 
+    // Definition of F
+    ExpressionAddition<
+        ExpressionInterpolateGradient<MeshType, MapEpetra, 3, 3>, ExpressionMatrix<3,3> >
+        F( grad( this->M_dispETFESpace,  disp, this->M_offset), value(this->M_identity));
+
+    // Definition of J
+    ExpressionDeterminant<ExpressionAddition<
+        ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >
+        J( F );
+
+    // Definition of tensor C
+    ExpressionProduct<
+        ExpressionTranspose<
+            ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
+        ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> >
+        >
+    C( transpose(F), F );
+
+    // Definition of F^-T
+    ExpressionMinusTransposed<
+        ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> >
+        >
+    F_T( F );
+
+    // Definition of tr( C )
+    ExpressionTrace<
+        ExpressionProduct<ExpressionTranspose<ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
+                          ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >
+        >
+    I_C( C );
+
+
     //Computation of the volumetric part
     //
     integrate ( elements ( this->M_dispETFESpace->mesh() ),
                 this->M_dispFESpace->qr(),
                 this->M_dispETFESpace,
-                value (1.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [1] ) * ( pow ( detDeformationGradientTensor , 2.0) - detDeformationGradientTensor + log (detDeformationGradientTensor) ) * dot (  deformationGradientTensor_T, grad (phi_i) )
+                value (1.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [1] ) * ( pow ( J , 2.0) - J + log (J) ) * dot (  F_T, grad (phi_i) )
               ) >> M_stiff;
 
     //Computation of the isochoric part
     integrate ( elements ( this->M_dispETFESpace->mesh() ),
                 this->M_dispFESpace->qr(),
                 this->M_dispETFESpace,
-                parameter ( (* (this->M_vectorsParameters) ) [0] ) * pow (detDeformationGradientTensor, -2.0 / 3.0) * (dot ( deformationGradientTensor - value (1.0 / 3.0) * firstInvariantC * deformationGradientTensor_T, grad (phi_i) ) )
+                parameter ( (* (this->M_vectorsParameters) ) [0] ) * pow (J, -2.0 / 3.0) * (dot ( F - value (1.0 / 3.0) * I_C * F_T, grad (phi_i) ) )
               ) >> M_stiff;
 
     //    }
