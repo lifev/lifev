@@ -531,11 +531,9 @@ void HolzapfelMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( matrix
             >
             IVithBar( Jel, IVith );
 
-
-
         // first term:
         // (-4.0/3.0) * aplha_i * J^(-2.0/3.0) * \bar{I_4} * ( \bar{I_4} - 1 ) * exp( gamma_i * ( \bar{I_4} - 1 )^2 ) *
-        // (epsilon / PI) * ( 1/ (1 + ( \bar{I_4} - 1 )^2 ) ) * ( F^-T : dF ) ( ( F * M - (1.0/3.0) * I_4 * F^-T ) : d\phi )
+        // (epsilon / PI) * ( 1/ (1 + epsilon^2 * ( \bar{I_4} - 1 )^2 ) ) * ( F^-T : dF ) ( ( F * M - (1.0/3.0) * I_4 * F^-T ) : d\phi )
         integrate( elements ( this->M_dispETFESpace->mesh() ),
                    this->M_dispFESpace->qr(),
                    this->M_dispETFESpace,
@@ -543,7 +541,7 @@ void HolzapfelMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( matrix
                    value( -4.0/3.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * Jel *
                    IVithBar * ( IVithBar - value(1.0) ) *
                    exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value(1.0) ) * ( IVithBar- value(1.0) ) ) *
-                   derAtan( IVithBar - value(1.0), this->M_epsilon, ( 1 / PI ) ) *
+                   derAtan( IVithBar - value(1.0), this->M_epsilon, ( 1.0 / PI ) ) *
                    dot( F_T, grad(phi_j) ) *
                    dot( F * Mith - value(1.0/3.0) * IVith * F_T, grad(phi_i) )
                    ) >> jacobian;
@@ -551,7 +549,7 @@ void HolzapfelMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( matrix
 
         // second term
         // 2.0 * aplha_i * J^(-4.0/3.0) * ( \bar{I_4} - 1 ) * exp( gamma_i * ( \bar{I_4} - 1 )^2 ) *
-        // (epsilon / PI) * ( 1/ (1 + ( \bar{I_4} - 1 )^2 ) ) * ( dF^T*F : M + F^T*dF:M ) ( ( F * M - (1.0/3.0) * I_4 * F^-T ) : d\phi )
+        // (epsilon / PI) * ( 1/ (1 + epsilon^2 * ( \bar{I_4} - 1 )^2 ) ) * ( dF^T*F : M + F^T*dF:M ) ( ( F * M - (1.0/3.0) * I_4 * F^-T ) : d\phi )
         integrate( elements ( this->M_dispETFESpace->mesh() ),
                    this->M_dispFESpace->qr(),
                    this->M_dispETFESpace,
@@ -559,7 +557,7 @@ void HolzapfelMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( matrix
                    value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) *
                    ( IVithBar - value(1.0) ) * Jel * Jel *
                    exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value(1.0) ) * ( IVithBar- value(1.0) ) ) *
-                   derAtan( IVithBar - value(1.0), this->M_epsilon, ( 1 / PI ) ) *
+                   derAtan( IVithBar - value(1.0), this->M_epsilon, ( 1.0 / PI ) ) *
                    dot( transpose( grad(phi_j) ) * F + transpose(F) * grad(phi_j) , Mith ) *
                    dot( F * Mith - value(1.0/3.0) * IVith * F_T, grad(phi_i) )
                    ) >> jacobian;
@@ -655,13 +653,13 @@ void HolzapfelMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( matrix
                    ) >> jacobian;
 
         // eleventh term
-        // (-2.0/3.0) * aplha_i * \bar{I_4} * ( \bar{I_4} - 1.0 ) *  exp( gamma_i * ( \bar{I_4} - 1 )^2 ) *
+        // (2.0/3.0) * aplha_i * \bar{I_4} * ( \bar{I_4} - 1.0 ) *  exp( gamma_i * ( \bar{I_4} - 1 )^2 ) *
         // ( ( 1 / PI ) * atan(\epsilon(\bar{I_4} - 1)) + 1/2  ) * ( F^-T * dF^T * F^-T  : d\phi )
         integrate( elements ( this->M_dispETFESpace->mesh() ),
                    this->M_dispFESpace->qr(),
                    this->M_dispETFESpace,
                    this->M_dispETFESpace,
-                   value( -2.0/3.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * IVithBar *  ( IVithBar - value(1.0) ) *
+                   value( 2.0/3.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * IVithBar *  ( IVithBar - value(1.0) ) *
                    exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value(1.0) ) * ( IVithBar- value(1.0) ) ) *
                    atan( IVithBar - value(1.0), this->M_epsilon, ( 1 / PI ), (1.0/2.0) ) *
                    dot( F_T * transpose( grad(phi_j) ) * F_T, grad(phi_i) )
