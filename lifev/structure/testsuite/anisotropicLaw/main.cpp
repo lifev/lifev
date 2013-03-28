@@ -482,9 +482,9 @@ Structure::run3d()
     exporter->setPostDir ( "./" );
     exporter->setMeshProcId ( meshPart.meshPartition(), parameters->comm->MyPID() );
 
-    vectorPtr_Type solidDisp ( new vector_Type (solid.displacement(),  Unique ) );
-    vectorPtr_Type solidVel  ( new vector_Type (solid.displacement(),  Unique ) );
-    vectorPtr_Type solidAcc  ( new vector_Type (solid.displacement(),  Unique ) );
+    vectorPtr_Type solidDisp ( new vector_Type (solid.displacement(),  exporter->mapType() ) );
+    vectorPtr_Type solidVel  ( new vector_Type (solid.displacement(),  exporter->mapType() ) );
+    vectorPtr_Type solidAcc  ( new vector_Type (solid.displacement(),  exporter->mapType() ) );
 
     exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "displacement", dFESpace, solidDisp, UInt (0) );
     exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "velocity",     dFESpace, solidVel,  UInt (0) );
