@@ -127,7 +127,11 @@ FSIMonolithicGI::evalResidual ( vector_Type&       res,
     moveMesh ( *mmRep );
 
     //here should use extrapolationFirstDerivative instead of velocity
-    vector_Type meshVelocityRepeated ( this->M_ALETimeAdvance->nextFirstDerivative ( *meshDisp ), Repeated );
+    if (iter == 0)
+    {
+        M_ALETimeAdvance->updateRHSFirstDerivative (M_data->dataFluid()->dataTime()->timeStep() );
+    }
+    vector_Type meshVelocityRepeated ( this->M_ALETimeAdvance->firstDerivative ( *meshDisp ), Repeated );
     vector_Type interpolatedMeshVelocity (this->M_uFESpace->map() );
 
     interpolateVelocity ( meshVelocityRepeated, interpolatedMeshVelocity );
@@ -395,12 +399,12 @@ void FSIMonolithicGI::shapeDerivatives ( FSIOperator::fluidPtr_Type::value_type:
                                       uk,
                                       veloFluidMesh, //(xk-xn)/dt (FI), or (xn-xn-1)/dt (CE)//Repeated
                                       M_solidAndFluidDim + M_interface * nDimensions,
-                                      *M_uFESpace,
+                                      *M_mmFESpace,
                                       true /*This flag tells the method to consider the velocity of the domain implicitly*/,
                                       true /*This flag tells the method to consider the convective term implicitly */ );
 }
 
-void FSIMonolithicGI::assembleMeshBlock ( UInt iter)
+void FSIMonolithicGI::assembleMeshBlock ( UInt /*iter*/ )
 {
 
     M_meshBlock.reset ( new matrix_Type ( *M_monolithicMap ) );
@@ -408,7 +412,7 @@ void FSIMonolithicGI::assembleMeshBlock ( UInt iter)
     M_meshBlock->globalAssemble();
     UInt offset ( M_solidAndFluidDim + nDimensions * M_interface );
     std::map< ID, ID >::const_iterator ITrow;
-    std::map< ID, ID > locdofmap ( M_dofStructureToHarmonicExtension->localDofMap() );
+    std::map< ID, ID > locdofmap ( M_dofStructureToFluid->localDofMap() );
 
     /******************alternative way************************/
     //     BCFunctionBase bcf(fZero);
@@ -424,12 +428,56 @@ void FSIMonolithicGI::assembleMeshBlock ( UInt iter)
     //     bcManage( *M_meshBlock, *M_rhsFull, *M_mmFESpace->mesh(), M_mmFESpace->dof(), *BCh, M_mmFESpace->feBd(), 1., dataFluid()->dataTime()->time());
     /********************************************************/
 
+    matrixPtr_Type diagFilter (new matrix_Type (*M_monolithicMap) );
+    diagFilter->insertZeroDiagonal ();
     for ( ID dim = 0; dim < nDimensions; ++dim )
+    {
         for ( ITrow = locdofmap.begin(); ITrow != locdofmap.end(); ++ITrow )
         {
-            UInt i = ITrow->first;
-            M_meshBlock->diagonalize ( i + offset + dim * M_mmFESpace->dof().numTotalDof(), 1. );
+            int i = ITrow->first;
+            int iRow =  i + offset + dim * M_mmFESpace->dof().numTotalDof();
+            if ( M_meshBlock->mapPtr()->map (Unique)->MyGID (iRow) )
+            {
+                M_meshBlock->diagonalize ( iRow, 1. );
+            }
+            else
+            {
+                double myValues[1];
+                myValues[0] = -1;
+                int myIndices[1];
+                myIndices[0] = iRow;
+                diagFilter->matrixPtr()->SumIntoGlobalValues ( iRow, 1, myValues, myIndices );
+            }
         }
+    }
+
+    diagFilter->globalAssemble();
+    // Processor informations
+    Int  numLocalEntries = diagFilter->matrixPtr()->RowMap().NumMyElements();
+    Int* globalEntries   = diagFilter->matrixPtr()->RowMap().MyGlobalElements();
+    UInt globalRowIndex (0);
+
+    // Source informations handlers
+    double* diagValue;
+    Int* indices;
+    Int srcRow (0);
+    Int controlValue (0); // This value should be one since it is a diagonal matrix
+
+    for (Int i (0); i < numLocalEntries; ++i)
+    {
+        // Collecting the data from the source
+        globalRowIndex = globalEntries[i];
+
+        // Get the data of the row
+        srcRow = diagFilter->matrixPtr()->LRID (globalRowIndex);
+        diagFilter->matrixPtr()->ExtractMyRowView (srcRow, controlValue, diagValue, indices);
+
+        ASSERT ( controlValue == 1, "Error: The matrix should be diagonal.");
+        if (diagValue[0] < 0.0)
+        {
+            M_meshBlock->diagonalize ( globalRowIndex, 1. );
+        }
+    }
 }
 
 // ===================================================

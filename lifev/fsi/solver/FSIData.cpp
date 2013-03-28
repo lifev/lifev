@@ -155,8 +155,8 @@ FSIData::setup ( const GetPot& dataFile, const std::string& section )
     M_updateEvery = dataFile ( ( section + "/updateEvery" ).data(), 1);
 
     // Interface
-    M_fluidInterfaceFlag     = dataFile ( "interface/fluid_flag",     1 );
-    M_structureInterfaceFlag = dataFile ( "interface/structure_flag", M_fluidInterfaceFlag );
+    M_fluidInterfaceFlag     = dataFile ( "interface/fluid_flag", 1 );
+    M_structureInterfaceFlag = dataFile ( "interface/solid_flag", M_fluidInterfaceFlag );
 
     Int vertexFlag;
     vertexFlag               = dataFile ( "interface/edgeFlag",      -1 );
