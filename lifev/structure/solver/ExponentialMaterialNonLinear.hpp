@@ -676,6 +676,14 @@ namespace
 static bool registerEXP = StructuralConstitutiveLaw<LifeV::RegionMesh<LinearTetra> >::StructureMaterialFactory::instance().registerProduct ( "exponential", &createExponentialMaterialNonLinear<LifeV::RegionMesh<LinearTetra> > );
 }
 
+#undef deformationGradientTensor
+#undef detDeformationGradientTensor
+#undef deformationGradientTensor_T
+#undef RIGHTCAUCHYGREEN
+#undef firstInvariantC
+#undef firstInvariantCbar
+
+
 } //Namespace LifeV
 
 #endif /* __EXPONENTIALMATERIAL_H */

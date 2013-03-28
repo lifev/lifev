@@ -434,7 +434,7 @@ void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::updateNonLinearJacobia
     //     Real lambda = dataMaterial->lambda(marker);
 
     //Macros to make the assembly more readable
-#define deformationGradientTensor ( grad( this->M_dispETFESpace,  sol, this->M_offset) + value(this->M_identity) )
+#define deformationGradientTensor ( grad( this->M_dispETFESpace, sol, this->M_offset) + value(this->M_identity) )
 #define detDeformationGradientTensor det( deformationGradientTensor )
 #define deformationGradientTensor_T  minusT(deformationGradientTensor)
 #define RIGHTCAUCHYGREEN transpose(deformationGradientTensor) * deformationGradientTensor
@@ -915,6 +915,15 @@ namespace
 {
 static bool registerVKP = StructuralConstitutiveLaw<LifeV::RegionMesh<LinearTetra> >::StructureMaterialFactory::instance().registerProduct ( "nonLinearVenantKirchhoffPenalized", &createVenantKirchhoffMaterialNonLinearPenalized<LifeV::RegionMesh<LinearTetra> > );
 }
+
+#undef deformationGradientTensor
+#undef detDeformationGradientTensor
+#undef deformationGradientTensor_T
+#undef RIGHTCAUCHYGREEN
+#undef firstInvariantC
+#undef firstInvariantCsquared
+#undef firstInvariantCbar
+
 
 } //Namespace LifeV
 

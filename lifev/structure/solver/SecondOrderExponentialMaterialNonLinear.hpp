@@ -747,6 +747,15 @@ namespace
 static bool registerSOEXP = StructuralConstitutiveLaw<LifeV::RegionMesh<LinearTetra> >::StructureMaterialFactory::instance().registerProduct ( "secondOrderExponential", &createSecondOrderExponentialMaterialNonLinear<LifeV::RegionMesh<LinearTetra> > );
 }
 
+#undef deformationGradientTensor
+#undef detDeformationGradientTensor
+#undef deformationGradientTensor_T
+#undef RIGHTCAUCHYGREEN
+#undef firstInvariantC
+#undef firstInvariantCsquared
+#undef firstInvariantCbar
+
+
 } //Namespace LifeV
 
 #endif /* __SECONDORDEREXPONENTIALMATERIAL_H */

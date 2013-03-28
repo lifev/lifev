@@ -617,6 +617,10 @@ namespace
 static bool registerVKNL = StructuralConstitutiveLaw<LifeV::RegionMesh<LinearTetra> >::StructureMaterialFactory::instance().registerProduct ( "nonLinearVenantKirchhoff", &createVenantKirchhoffNonLinear<LifeV::RegionMesh<LinearTetra> > );
 }
 
+#undef deformationGradientTensor
+#undef RIGHTCAUCHYGREEN
+#undef firstInvariantC
+
 } //Namespace LifeV
 
 #endif /* __NONLINVENANTKIRCHHOFF_H */
