@@ -116,7 +116,10 @@ int main ( int argc, char** argv )
                     2.0,   2.0,   2.0,
                     -1.0,  -1.0,  -1.0);
 
-    MeshPartitioner< mesh_Type >  meshPart (fullMeshPtr, Comm);
+//    MeshPartitioner< mesh_Type >  meshPart (fullMeshPtr, Comm);
+    MeshPartitioner< mesh_Type >   meshPart;
+    meshPart.setPartitionOverlap ( 1 );
+    meshPart.doPartition ( fullMeshPtr, Comm );
 
     fullMeshPtr.reset();
 
@@ -157,7 +160,7 @@ int main ( int argc, char** argv )
         using namespace ExpressionAssembly;
 
         // We first build a static graph for our problem matrix
-        matrixGraph.reset(new Epetra_FECrsGraph(Copy, *(uSpace->map().map(Unique)), 0));
+        matrixGraph.reset(new Epetra_FECrsGraph(Copy, *(uSpace->map().map(Unique)), 0, true, false));
 
         buildGraph ( elements (uSpace->mesh() ),
                      quadRuleTetra4pt,
@@ -184,7 +187,7 @@ int main ( int argc, char** argv )
         using namespace ExpressionAssembly;
 
         // We build the system matrix using the precomputed graph
-        closedSystemMatrix.reset(new matrix_Type ( uSpace->map(), *matrixGraph ) );
+        closedSystemMatrix.reset(new matrix_Type ( uSpace->map(), *matrixGraph , true, true) );
         *closedSystemMatrix *= 0.0;
 
         // Finally, we perform the FE assembly, which should be faster with

@@ -47,6 +47,7 @@
 
 #include <Epetra_MpiComm.h>
 #include <Epetra_FECrsMatrix.h>
+#include <Epetra_FECrsGraph.h>
 #include <EpetraExt_MatrixMatrix.h>
 #include <EpetraExt_Transpose_RowMatrix.h>
 #include <EpetraExt_RowMatrixOut.h>
@@ -103,6 +104,14 @@ public:
       @param graph A sparse compressed row graph.
      */
     MatrixEpetra ( const MapEpetra& map, const Epetra_CrsGraph& graph, bool ignoreNonLocalValues = false );
+
+    //! Constructor from a FE graph
+    /*!
+      @param map Row map. The column map will be defined in MatrixEpetra<DataType>::GlobalAssemble(...,...)
+      @param graph A sparse compressed row FE graph.
+     */
+    MatrixEpetra ( const MapEpetra& map, const Epetra_FECrsGraph& graph, bool ignoreNonLocalValues = false,
+    		       bool overlap = false);
 
     //! Constructor for square and rectangular matrices
     /*!
@@ -621,7 +630,16 @@ MatrixEpetra<DataType>::MatrixEpetra ( const MapEpetra& map, const Epetra_CrsGra
 }
 
 template <typename DataType>
-MatrixEpetra<DataType>::MatrixEpetra ( const MapEpetra& map, Int numEntries ) :
+MatrixEpetra<DataType>::MatrixEpetra ( const MapEpetra& map, const Epetra_FECrsGraph& graph, bool ignoreNonLocalValues,
+									   bool overlap) :
+    M_map       ( new MapEpetra ( map ) ),
+    M_epetraCrs ( new matrix_type ( Copy, graph, ignoreNonLocalValues, overlap ) )
+{
+
+}
+
+template <typename DataType>
+MatrixEpetra<DataType>::MatrixEpetra ( const MapEpetra& map, Int numEntries, bool ignoreNonLocalValues ) :
     M_map       ( new MapEpetra ( map ) ),
     M_epetraCrs ( new matrix_type ( Copy, *M_map->map ( Unique ), numEntries, false) )
 {
