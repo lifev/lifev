@@ -149,9 +149,10 @@ public:
     typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > fiberFunction_Type;
     typedef boost::shared_ptr<fiberFunction_Type> fiberFunctionPtr_Type;
 
-    typedef std::vector<fiberFunctionPtr_Type>             vectorFiberFunction_Type;
-    typedef boost::shared_ptr<vectorFiberFunction_Type>    vectorFiberFunctionPtr_Type;
+    typedef std::vector<fiberFunctionPtr_Type>                          vectorFiberFunction_Type;
+    typedef boost::shared_ptr<vectorFiberFunction_Type>                 vectorFiberFunctionPtr_Type;
 
+    typedef std::vector<vectorPtr_Type>                                 listOfFiberDirections_Type;
 
     /** @name Constructors, destructor
      */
@@ -274,27 +275,13 @@ Structure::run3d()
     vectorFiberFunctionPtr_Type pointerToVectorOfFamilies( new vectorFiberFunction_Type( ) );
     (*pointerToVectorOfFamilies).resize( dataStructure->numberFibersFamilies( ) );
 
+    listOfFiberDirections_Type fiberDirections;
+    fiberDirections.resize( dataStructure->numberFibersFamilies( ) );
+
     std::cout << "Size of the number of families: " << (*pointerToVectorOfFamilies).size() << std::endl;
 
     fibersDirectionList setOfFiberFunctions;
     setOfFiberFunctions.setupFiberDefinitions( dataStructure->numberFibersFamilies( ) );
-
-    // Setting the vector of fibers functions
-    for( UInt k(1); k <= pointerToVectorOfFamilies->size( ); k++ )
-    {
-        // Setting up the name of the function to define the family
-        std::string family="Family";
-        // adding the number of the family
-        std::string familyNumber;
-        std::ostringstream number;
-        number << ( k );
-        familyNumber = number.str();
-
-        // Name of the function to create
-        std::string creationString = family + familyNumber;
-        (*pointerToVectorOfFamilies)[ k-1 ].reset( new fiberFunction_Type() );
-        (*pointerToVectorOfFamilies)[ k-1 ] = setOfFiberFunctions.fiberDefinition( creationString );
-    }
 
     if (verbose)
     {
@@ -366,6 +353,25 @@ Structure::run3d()
 
     //! 3. Setting data from getPot
     solid.setDataFromGetPot (dataFile);
+
+    // Setting the vector of fibers functions
+    for( UInt k(1); k <= pointerToVectorOfFamilies->size( ); k++ )
+    {
+        // Setting up the name of the function to define the family
+        std::string family="Family";
+        // adding the number of the family
+        std::string familyNumber;
+        std::ostringstream number;
+        number << ( k );
+        familyNumber = number.str();
+
+        // Name of the function to create
+        std::string creationString = family + familyNumber;
+        (*pointerToVectorOfFamilies)[ k-1 ].reset( new fiberFunction_Type() );
+        (*pointerToVectorOfFamilies)[ k-1 ] = setOfFiberFunctions.fiberDefinition( creationString );
+
+        fiberDirections[ k-1 ].reset( new vector_Type(solid.displacement(), Unique) );
+    }
 
     //! 3.b Setting the fibers in the abstract class of Anisotropic materials
     solid.material()->anisotropicLaw()->setupFiberDirections( pointerToVectorOfFamilies );
@@ -476,13 +482,34 @@ Structure::run3d()
     exporter->setPostDir ( "./" );
     exporter->setMeshProcId ( meshPart.meshPartition(), parameters->comm->MyPID() );
 
-    vectorPtr_Type solidDisp ( new vector_Type (solid.displacement(),  exporter->mapType() ) );
-    vectorPtr_Type solidVel  ( new vector_Type (solid.displacement(),  exporter->mapType() ) );
-    vectorPtr_Type solidAcc  ( new vector_Type (solid.displacement(),  exporter->mapType() ) );
+    vectorPtr_Type solidDisp ( new vector_Type (solid.displacement(),  Unique ) );
+    vectorPtr_Type solidVel  ( new vector_Type (solid.displacement(),  Unique ) );
+    vectorPtr_Type solidAcc  ( new vector_Type (solid.displacement(),  Unique ) );
 
     exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "displacement", dFESpace, solidDisp, UInt (0) );
     exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "velocity",     dFESpace, solidVel,  UInt (0) );
     exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "acceleration", dFESpace, solidAcc,  UInt (0) );
+
+    // Adding the fibers vectors
+    // Setting the vector of fibers functions
+    for( UInt k(1); k <= pointerToVectorOfFamilies->size( ); k++ )
+    {
+        // Setting up the name of the function to define the family
+        std::string family="Family-";
+        // adding the number of the family
+        std::string familyNumber;
+        std::ostringstream number;
+        number << ( k );
+        familyNumber = number.str();
+
+        // Name of the function to create
+        std::string creationString = family + familyNumber;
+        exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, creationString, dFESpace, fiberDirections[ k-1 ], UInt (0) );
+
+        // Extracting the fibers vectors
+        *(fiberDirections[ k-1 ]) = solid.material()->anisotropicLaw()->ithFiberVector( k );
+    }
+
 
     exporter->postProcess ( 0 );
     /*

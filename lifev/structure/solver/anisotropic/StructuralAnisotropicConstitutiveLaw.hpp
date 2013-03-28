@@ -236,7 +236,7 @@ public:
 
 
     virtual void evaluateActivationFibers( const vector_Type&  displacement,
-					   vector_Type&  fourthInvariant) = 0;
+                                           vector_Type&  fourthInvariant) = 0;
 
     //! @name Set Methods
     //@{
@@ -271,8 +271,11 @@ public:
     // Used to export the fibers families
     const vector_Type&  ithFiberVector( const UInt i ) const
     {
-        ASSERT( i < M_vectorInterpolated.size(), " No such fiber family in the class" );
-        return *( M_vectorInterpolated[ i ] );
+        ASSERT( i <= M_vectorInterpolated.size(), " No such fiber family in the class" );
+
+        // The minus one is becase std::vector numbering starts from 0
+        // while the user starts counting from 1
+        return *( M_vectorInterpolated[ i - 1 ] );
     }
 
     //! Get the Stiffness matrix
