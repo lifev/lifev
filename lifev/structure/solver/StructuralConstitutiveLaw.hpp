@@ -355,7 +355,7 @@ StructuralConstitutiveLaw<MeshType>::setup (const FESpacePtr_Type& dFESpace,
     // Creation of the abstract classes for the isotropic and anisotropic laws
     M_isotropicLaw.reset ( isotropicLaw_Type::StructureIsotropicMaterialFactory::instance().createObject ( M_dataMaterial->solidTypeIsotropic() ) );
 #ifdef ENABLE_ANISOTROPIC_LAW
-    if( !M_dataMaterial->constitutiveLaw().compare("anisotropic ") )
+    if( !M_dataMaterial->constitutiveLaw().compare("anisotropic") )
       {
 	M_anisotropicLaw.reset ( anisotropicLaw_Type::StructureAnisotropicMaterialFactory::instance().createObject ( M_dataMaterial->solidTypeAnisotropic() ) );
       }
@@ -369,7 +369,7 @@ StructuralConstitutiveLaw<MeshType>::setup (const FESpacePtr_Type& dFESpace,
     // Setting the isotropic and anisotropic part
     M_isotropicLaw->setup( dFESpace, dETFESpace, monolithicMap, offset, M_dataMaterial );
 #ifdef ENABLE_ANISOTROPIC_LAW
-    if( !M_dataMaterial->constitutiveLaw().compare("anisotropic ") )
+    if( !M_dataMaterial->constitutiveLaw().compare("anisotropic") )
       {
 	M_anisotropicLaw->setup( dFESpace, dETFESpace, monolithicMap, offset, M_dataMaterial );
       }
@@ -407,7 +407,7 @@ void StructuralConstitutiveLaw<MeshType>::updateJacobianMatrix (const vector_Typ
     *M_jacobian += *M_isotropicLaw->jacobian();
 
 #ifdef ENABLE_ANISOTROPIC_LAW
-    if( !M_dataMaterial->constitutiveLaw().compare("anisotropic ") )
+    if( !M_dataMaterial->constitutiveLaw().compare("anisotropic") )
       {
 	// Anisotropic part
 	M_displayer->leaderPrint ("\n  S-  Updating the Jacobian Matrix ( anisotropic part )\n");
@@ -442,7 +442,7 @@ void StructuralConstitutiveLaw<MeshType>::computeStiffness ( const vector_Type& 
     *M_vectorStiffness += *M_isotropicLaw->stiffVector();
 
 #ifdef ENABLE_ANISOTROPIC_LAW
-    if( !M_dataMaterial->constitutiveLaw().compare("anisotropic ") )
+    if( !M_dataMaterial->constitutiveLaw().compare("anisotropic") )
       {
 	// Anisotropic part
 	displayer->leaderPrint ("\n  S-  Updating the VectorStiffness ( anisotropic part )\n");
@@ -466,7 +466,7 @@ StructuralConstitutiveLaw<MeshType>::showMe ( std::string const& fileNameStiff,
     M_isotropicLaw->showMe ( fileNameStiff, fileNameJacobian);
 
 #ifdef ENABLE_ANISOTROPIC_LAW
-    if( !M_dataMaterial->constitutiveLaw().compare("anisotropic ") )
+    if( !M_dataMaterial->constitutiveLaw().compare("anisotropic") )
       {
 	// Spying the anisotropic part
 	M_anisotropicLaw->showMe ( fileNameStiff, fileNameJacobian);
@@ -497,7 +497,7 @@ StructuralConstitutiveLaw<MeshType>::computeLocalFirstPiolaKirchhoffTensor ( Epe
     firstPiola += isotropicFirstPiola;
 
 #ifdef ENABLE_ANISOTROPIC_LAW
-    if( !M_dataMaterial->constitutiveLaw().compare("anisotropic ") )
+    if( !M_dataMaterial->constitutiveLaw().compare("anisotropic") )
       {
 	// Computing the first part
 	M_anisotropicLaw->computeLocalFirstPiolaKirchhoffTensor ( anisotropicFirstPiola, tensorF, cofactorF, invariants, marker);
@@ -541,7 +541,7 @@ const typename StructuralConstitutiveLaw<MeshType>::vectorPtr_Type StructuralCon
     *M_vectorStiffness += *M_isotropicLaw->stiffVector();
 
 #ifdef ENABLE_ANISOTROPIC_LAW
-    if( !M_dataMaterial->constitutiveLaw().compare("anisotropic ") )
+    if( !M_dataMaterial->constitutiveLaw().compare("anisotropic") )
       {
 	// Anisotropic part
 	*M_vectorStiffness += *M_anisotropicLaw->stiffVector();
@@ -571,7 +571,7 @@ void StructuralConstitutiveLaw<MeshType>::apply ( const vector_Type& sol, vector
   res += copyResIsotropic;
 
 #ifdef ENABLE_ANISOTROPIC_LAW
-  if( !M_dataMaterial->constitutiveLaw().compare("anisotropic ") )
+  if( !M_dataMaterial->constitutiveLaw().compare("anisotropic") )
     {     
       vector_Type copyResAnisotropic(res);
       M_anisotropicLaw->apply ( sol, copyResAnisotropic, mapsMarkerVolumes, mapsMarkerIndexes, M_displayer);

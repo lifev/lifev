@@ -28,6 +28,9 @@ save       = 1
 [./physics]
 density   	= 1.2
 material_flag   = 101
+
+[../model]
+constitutiveLaw = anisotropic
 young     	= 8.e+6
 poisson   	= 0.49
 bulk		= 1.3333e+8
@@ -36,14 +39,15 @@ gamma		= 1.0
 solidTypeIsotropic 	= neoHookean		# linearVenantKirchhoff / nonLinearVenantKirchhoff / neoHookean / expoenential
 solidTypeAnisotropic = holzapfel
 
-[../fibers]
+[./fibers]
 numberFamilies  = 1
 stiffness       = 2.684564e+6
 nonlinearity    = 1.0
 smoothness      = 0.1
+[./]
 
 
-[../time_discretization]
+[../../time_discretization]
 initialtime 	= 0.
 endtime     	= 0.4
 timestep    	= 0.1
@@ -57,16 +61,13 @@ mesh_dir  	= ./
 mesh_file 	= cubeHolzapfel.mesh
 order     	= P1
 
-
 [../miscellaneous]
 factor    	= 1
 verbose   	= 1
 
-
 [../newton]
 maxiter 	= 1
 reltol  	= 1.e-8
-
 
 [../solver]
 solver          = gmres

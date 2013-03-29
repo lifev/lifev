@@ -257,6 +257,8 @@ Structure::run3d()
     boost::shared_ptr<StructuralConstitutiveLawData> dataStructure (new StructuralConstitutiveLawData( ) );
     dataStructure->setup (dataFile);
 
+    dataStructure->showMe();
+
     MeshData             meshData;
     meshData.setup (dataFile, "solid/space_discretization");
 

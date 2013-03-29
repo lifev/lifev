@@ -336,6 +336,7 @@ StructuralConstitutiveLawData::showMe ( std::ostream& output ) const
     M_timeAdvance->showMe ( output );
 
     output << " Informations on the constitutive law " << std::endl;
+    output << " Type of constitutive law " << M_constitutiveLaw << std::endl;
     output << " Isotropic Part:  " << M_solidTypeIsotropic << std::endl;
 
 #ifdef ENABLE_ANISOTROPIC_LAW
