@@ -358,6 +358,10 @@ public:
      */
 
 #ifdef ENABLE_ANISOTROPIC_LAW
+    const std::string& constitutiveLaw()
+    {
+        return M_constitutiveLaw;
+    }
     const std::string& solidTypeAnisotropic()
     {
         return M_solidTypeAnisotropic;
@@ -446,6 +450,7 @@ private:
 
     std::string            M_solidTypeIsotropic;
 #ifdef ENABLE_ANISOTROPIC_LAW
+    std::string            M_constitutiveLaw;
     std::string            M_solidTypeAnisotropic;
     UInt                   M_numberFibers;
     vectorParameters_Type  M_stiffnessParametersFibers;

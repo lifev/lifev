@@ -67,6 +67,7 @@ StructuralConstitutiveLawData::StructuralConstitutiveLawData() :
     M_verbose                          ( ),
     M_solidTypeIsotropic               ( ),
 #ifdef ENABLE_ANISOTROPIC_LAW
+    M_constitutiveLaw                  ( ),
     M_solidTypeAnisotropic             ( ),
     M_numberFibers                     ( 0 ),
     M_stiffnessParametersFibers        ( ),
@@ -95,6 +96,7 @@ StructuralConstitutiveLawData::StructuralConstitutiveLawData ( const StructuralC
     M_verbose                          ( structuralConstitutiveLawData.M_verbose ),
     M_solidTypeIsotropic               ( structuralConstitutiveLawData.M_solidTypeIsotropic ),
 #ifdef ENABLE_ANISOTROPIC_LAW
+    M_constitutiveLaw                  ( structuralConstitutiveLawData.M_constitutiveLaw ),
     M_solidTypeAnisotropic             ( structuralConstitutiveLawData.M_solidTypeAnisotropic ),
     M_numberFibers                     ( structuralConstitutiveLawData.M_numberFibers ),
     M_stiffnessParametersFibers        ( structuralConstitutiveLawData.M_stiffnessParametersFibers ),
@@ -130,6 +132,7 @@ StructuralConstitutiveLawData::operator= ( const StructuralConstitutiveLawData& 
         M_verbose                          = structuralConstitutiveLawData.M_verbose;
         M_solidTypeIsotropic               = structuralConstitutiveLawData.M_solidTypeIsotropic;
 #ifdef ENABLE_ANISOTROPIC_LAW
+        M_constitutiveLaw                  = structuralConstitutiveLawData.M_constitutiveLaw;
         M_solidTypeAnisotropic             = structuralConstitutiveLawData.M_solidTypeAnisotropic;
         M_numberFibers                     = structuralConstitutiveLawData.M_numberFibers;
         M_stiffnessParametersFibers        = structuralConstitutiveLawData.M_stiffnessParametersFibers;
@@ -162,14 +165,18 @@ StructuralConstitutiveLawData::setup ( const GetPot& dataFile, const std::string
     }
 
     // physics
-    M_solidTypeIsotropic = dataFile ( ( section + "/physics/solidTypeIsotropic" ).data(), "NO_DEFAULT_SOLID_TYPE_ISOTROPIC" );
+    M_solidTypeIsotropic = dataFile ( ( section + "/model/solidTypeIsotropic" ).data(), "NO_DEFAULT_SOLID_TYPE_ISOTROPIC" );
 
     // Reading the type of anisotropic part and the number of fibers
 #ifdef ENABLE_ANISOTROPIC_LAW
-    M_solidTypeAnisotropic = dataFile ( ( section + "/physics/solidTypeAnisotropic" ).data(), "NO_DEFAULT_SOLID_TYPE_ANISOTROPIC" );
-    M_numberFibers = dataFile ( ( section + "/fibers/numberFamilies" ).data(), 0 );
+    M_constitutiveLaw = dataFile ( ( section + "/model/constitutiveLaw" ).data(), "isotropic" );
+    if(  M_constitutiveLaw.compare("isotropic") ) // anisotropic laws
+      {
+	M_solidTypeAnisotropic = dataFile ( ( section + "/model/solidTypeAnisotropic" ).data(), "NO_DEFAULT_SOLID_TYPE_ANISOTROPIC" );
+	M_numberFibers = dataFile ( ( section + "/model/fibers/numberFamilies" ).data(), 0 );
 
-    ASSERT( M_numberFibers, " The number of fibers of the anisotropic law has to be different from 0!" );
+	ASSERT( M_numberFibers, " The number of fibers of the anisotropic law has to be different from 0!" );
+      }
 #endif
 
     // The check can be done on the isotropic part since the anisotropic is for sure nonlinear
@@ -183,8 +190,10 @@ StructuralConstitutiveLawData::setup ( const GetPot& dataFile, const std::string
       }
 
 #ifdef ENABLE_ANISOTROPIC_LAW
-    ASSERT ( M_lawType.compare ("linear"), "The Linear Elastic law cannot be used with anisotropic laws");
-    ASSERT ( M_solidTypeAnisotropic.compare ("NO_DEFAULT_SOLID_TYPE_ANISOTROPIC"), "The ANISOTROPIC_LAW flag is set, therefore you should set an anisotropic part");
+    if(  !M_constitutiveLaw.compare("anisotropic") ) // anisotropic laws => no LE
+      {
+	  ASSERT ( M_lawType.compare ("linear"), "The Linear Elastic law cannot be used with anisotropic laws");
+      }
 #endif
 
     M_externalPressure = dataFile ( ( section + "/physics/externalPressure" ).data(), 0. );
@@ -195,10 +204,14 @@ StructuralConstitutiveLawData::setup ( const GetPot& dataFile, const std::string
     UInt materialsNumber = dataFile.vector_variable_size ( ( section + "/physics/material_flag" ).data() );
 
 #ifdef ENABLE_ANISOTROPIC_LAW
-    UInt numberOfStiffnesses = dataFile.vector_variable_size ( ( section + "/fibers/stiffness" ).data() );
-    UInt numberOfNonlinearities = dataFile.vector_variable_size ( ( section + "/fibers/nonlinearity" ).data() );
-
-    ASSERT( ( M_numberFibers == numberOfStiffnesses ) && ( M_numberFibers == numberOfNonlinearities ), " Inconsistency in the set up of the fiber parameters" );
+    if( !M_constitutiveLaw.compare("anisotropic") )
+      {
+	UInt numberOfStiffnesses = dataFile.vector_variable_size ( ( section + "/model/fibers/stiffness" ).data() );
+	UInt numberOfNonlinearities = dataFile.vector_variable_size ( ( section + "/model/fibers/nonlinearity" ).data() );
+	
+	ASSERT( M_numberFibers  , " The number of fiber families is equal to zero, change the variable constitutiveLaw from anisotropic to isotropic " );
+	ASSERT( ( M_numberFibers == numberOfStiffnesses ) && ( M_numberFibers == numberOfNonlinearities ), " Inconsistency in the set up of the fiber parameters" );
+      }
 #endif
 
     // Reading the material for isotropic laws
@@ -212,12 +225,12 @@ StructuralConstitutiveLawData::setup ( const GetPot& dataFile, const std::string
         M_vectorMaterialFlags.resize (1);
 
         M_vectorMaterialFlags[0] = 1;
-        M_young[1]   = dataFile ( ( section + "/physics/young"   ).data(), 0. );
-        M_poisson[1] = dataFile ( ( section + "/physics/poisson" ).data(), 0. );
+        M_young[1]   = dataFile ( ( section + "/model/young"   ).data(), 0. );
+        M_poisson[1] = dataFile ( ( section + "/model/poisson" ).data(), 0. );
 
-        M_bulk[1] = dataFile ( ( section + "/physics/bulk"   ).data(), 1e9 );
-        M_alpha[1] = dataFile ( ( section + "/physics/alpha" ).data(), 3e6 );
-        M_gamma[1] = dataFile ( ( section + "/physics/gamma" ).data(), 0.8 );
+        M_bulk[1] = dataFile ( ( section + "/model/bulk"   ).data(), 0. );
+        M_alpha[1] = dataFile ( ( section + "/model/alpha" ).data(), 0. );
+        M_gamma[1] = dataFile ( ( section + "/model/gamma" ).data(), 0. );
     }
     else
     {
@@ -235,26 +248,29 @@ StructuralConstitutiveLawData::setup ( const GetPot& dataFile, const std::string
             material            = dataFile ( ( section + "/physics/material_flag" ).data(), 0., i );
 
             M_vectorMaterialFlags[i] = material;
-            M_young[material]   = dataFile ( ( section + "/physics/young"         ).data(), 0., i );
-            M_poisson[material] = dataFile ( ( section + "/physics/poisson"       ).data(), 0., i );
+            M_young[material]   = dataFile ( ( section + "/model/young"         ).data(), 0., i );
+            M_poisson[material] = dataFile ( ( section + "/model/poisson"       ).data(), 0., i );
 
-            M_bulk[material] = dataFile ( ( section + "/physics/bulk"         ).data(), 1e9, i );
-            M_alpha[material] = dataFile ( ( section + "/physics/alpha"       ).data(), 3e6, i );
-            M_gamma[material] = dataFile ( ( section + "/physics/gamma"       ).data(), 0.8, i );
+            M_bulk[material] = dataFile ( ( section + "/model/bulk"         ).data(), 0.0, i );
+            M_alpha[material] = dataFile ( ( section + "/model/alpha"       ).data(), 0.0, i );
+            M_gamma[material] = dataFile ( ( section + "/model/gamma"       ).data(), 0.0, i );
         }
     }
 
 
 #ifdef ENABLE_ANISOTROPIC_LAW
-    for ( UInt i (0) ; i < M_numberFibers ; ++i )
-    {
-         M_stiffnessParametersFibers .resize ( M_numberFibers  );
-         M_nonlinearityParametersFibers .resize ( M_numberFibers  );
+    if( !M_constitutiveLaw.compare("anisotropic") )
+      {
+	for ( UInt i (0) ; i < M_numberFibers ; ++i )
+	  {
+	    M_stiffnessParametersFibers .resize ( M_numberFibers  );
+	    M_nonlinearityParametersFibers .resize ( M_numberFibers  );
 
-         M_stiffnessParametersFibers[ i ]      = dataFile ( ( section + "/fibers/stiffness"    ).data(), 0., i );
-         M_nonlinearityParametersFibers[ i ]   = dataFile ( ( section + "/fibers/nonlinearity" ).data(), 0., i );
-     }
-     M_epsilon = dataFile ( ( section + "/fibers/smoothness"   ).data(), 0. );
+	    M_stiffnessParametersFibers[ i ]      = dataFile ( ( section + "/model/fibers/stiffness"    ).data(), 0., i );
+	    M_nonlinearityParametersFibers[ i ]   = dataFile ( ( section + "/model/fibers/nonlinearity" ).data(), 0., i );
+	  }
+	M_epsilon = dataFile ( ( section + "/model/fibers/smoothness"   ).data(), 0. );
+      }
 #endif 
 
     // space_discretization
@@ -323,13 +339,16 @@ StructuralConstitutiveLawData::showMe ( std::ostream& output ) const
     output << " Isotropic Part:  " << M_solidTypeIsotropic << std::endl;
 
 #ifdef ENABLE_ANISOTROPIC_LAW
-    output << " Anisotropic Part:  " << M_solidTypeAnisotropic << std::endl;
+    if( !M_constitutiveLaw.compare("anisotropic") )
+      {
+	output << " Anisotropic Part:  " << M_solidTypeAnisotropic << std::endl;
 
-    for ( UInt i (0) ; i < M_numberFibers ; ++i )
-    {
-         std::cout << i + 1 << "-th coupled of parameters ( stiffness, nonlinearity ) : ( " << M_stiffnessParametersFibers[ i ] 
-		   << ", " << M_nonlinearityParametersFibers[ i ] << " ); " << std::endl;
-     }
+	for ( UInt i (0) ; i < M_numberFibers ; ++i )
+	  {
+	    std::cout << i + 1 << "-th coupled of parameters ( stiffness, nonlinearity ) : ( " << M_stiffnessParametersFibers[ i ] 
+		      << ", " << M_nonlinearityParametersFibers[ i ] << " ); " << std::endl;
+	  }
+      }
 #endif
 }
 
