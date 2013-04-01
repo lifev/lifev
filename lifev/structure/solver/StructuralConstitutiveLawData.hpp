@@ -276,6 +276,48 @@ public:
         return M_thickness;
     }
 
+    //! Get solid thickness
+    /*!
+     * @return Solid thickness
+     */
+    const UInt maxSubIterationNumber() const
+    {
+        return M_maxSubIterationNumber;
+    }
+    //! Get solid thickness
+    /*!
+     * @return Solid thickness
+     */
+    const Real absoluteTolerance() const
+    {
+        return M_absoluteTolerance;
+    }
+    //! Get solid reltol newton 
+    /*!
+     * @return Solid reltol newton
+     */
+    const Real relativeTolerance() const
+    {
+        return M_relativeTolerance;
+    }
+    //! Get solid etamax
+    /*!
+     * @return Solid etamax
+     */
+    const Real errorTolerance() const
+    {
+        return M_errorTolerance;
+    }
+    //! Get solid nonLinear Line Search ofr Newton
+    /*!
+     * @return nonLinearLineSearch
+     */
+    const UInt NonLinearLineSearch() const
+    {
+        return M_NonLinearLineSearch;
+    }
+
+
     //! Get solid poisson coefficient
     /*!
      * @param material material ID (1 by default)
@@ -461,6 +503,12 @@ private:
     bool                   M_useExactJacobian;
 
     vectorFlags_Type       M_vectorMaterialFlags;
+
+    UInt                   M_maxSubIterationNumber;
+    Real                   M_absoluteTolerance;
+    Real                   M_relativeTolerance;
+    Real                   M_errorTolerance;
+    UInt                   M_NonLinearLineSearch;
 };
 
 } // end namespace LifeV

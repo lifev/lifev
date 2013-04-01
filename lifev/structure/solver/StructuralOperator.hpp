@@ -1045,11 +1045,11 @@ StructuralOperator<Mesh>::iterate ( bcHandler_Type& bch )
 
     M_BCh = bch;
 
-    Real abstol  = 1.e-7;
-    Real reltol  = 1.e-7;
-    UInt maxiter = 200;
-    Real etamax  = 1e-7;
-    Int NonLinearLineSearch = 0;
+    Real abstol  = M_data->absoluteTolerance();
+    Real reltol  = M_data->relativeTolerance();
+    UInt maxiter = M_data->maxSubIterationNumber();
+    Real etamax  = M_data->errorTolerance();
+    Int NonLinearLineSearch = M_data->NonLinearLineSearch();
 
     Real time = M_data->dataTime()->time();
 

@@ -76,7 +76,12 @@ StructuralConstitutiveLawData::StructuralConstitutiveLawData() :
 #endif
     M_lawType                          ( ),
     M_useExactJacobian                 ( false ),
-    M_vectorMaterialFlags              ( )
+    M_vectorMaterialFlags              ( ),
+    M_maxSubIterationNumber            ( ),
+    M_absoluteTolerance                ( ),
+    M_relativeTolerance                ( ),
+    M_errorTolerance                   ( ),
+    M_NonLinearLineSearch              ( )
 {
 }
 
@@ -105,7 +110,13 @@ StructuralConstitutiveLawData::StructuralConstitutiveLawData ( const StructuralC
 #endif
     M_lawType                          ( structuralConstitutiveLawData.M_lawType ),
     M_useExactJacobian                 ( structuralConstitutiveLawData.M_useExactJacobian ),
-    M_vectorMaterialFlags              ( structuralConstitutiveLawData.M_vectorMaterialFlags )
+    M_vectorMaterialFlags              ( structuralConstitutiveLawData.M_vectorMaterialFlags ),
+    M_maxSubIterationNumber            ( structuralConstitutiveLawData.M_maxSubIterationNumber ),
+    M_absoluteTolerance                ( structuralConstitutiveLawData.M_absoluteTolerance ),
+    M_relativeTolerance                ( structuralConstitutiveLawData.M_relativeTolerance ),
+    M_errorTolerance                   ( structuralConstitutiveLawData.M_errorTolerance ),
+    M_NonLinearLineSearch              ( structuralConstitutiveLawData.M_NonLinearLineSearch )
+
 {
 }
 
@@ -142,6 +153,11 @@ StructuralConstitutiveLawData::operator= ( const StructuralConstitutiveLawData& 
         M_lawType                          = structuralConstitutiveLawData.M_lawType;
         M_useExactJacobian                 = structuralConstitutiveLawData.M_useExactJacobian;
         M_vectorMaterialFlags              = structuralConstitutiveLawData.M_vectorMaterialFlags;
+        M_maxSubIterationNumber            = structuralConstitutiveLawData.M_maxSubIterationNumber;
+        M_absoluteTolerance                = structuralConstitutiveLawData.M_absoluteTolerance;
+        M_relativeTolerance                = structuralConstitutiveLawData.M_relativeTolerance;
+        M_errorTolerance                   = structuralConstitutiveLawData.M_errorTolerance;
+        M_NonLinearLineSearch              = structuralConstitutiveLawData.M_NonLinearLineSearch;
     }
 
     return *this;
@@ -279,6 +295,14 @@ StructuralConstitutiveLawData::setup ( const GetPot& dataFile, const std::string
     // miscellaneous
     M_verbose          = dataFile ( ( section + "/miscellaneous/verbose" ).data(), 0 );
     M_useExactJacobian = dataFile ( ( section + "/useExactJacobian"      ).data(), false );
+
+    // Problem - Non Linear Richardson Parameters
+    M_maxSubIterationNumber = dataFile ( ( section + "/newton/maxSubIter" ).data(), 300 );
+    M_absoluteTolerance = dataFile ( ( section + "/newton/abstol" ).data(), 1.e-07 );
+    M_relativeTolerance = dataFile ( ( section + "/newton/reltol" ).data(), 1.e-07 );
+    M_errorTolerance = dataFile ( ( section + "/newton/etamax" ).data(), 1.e-03 );
+    M_NonLinearLineSearch = static_cast<Int> ( dataFile ( ( section + "/newton/NonLinearLineSearch" ).data(), 0 ) );
+
 }
 
 void
