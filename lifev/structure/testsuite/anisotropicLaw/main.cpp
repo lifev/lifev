@@ -326,14 +326,8 @@ Structure::run3d()
     BCFunctionBase zero (bcZero);
     BCFunctionBase nonZero;
 
-    if ( dataStructure->solidTypeIsotropic().compare ("secondOrderExponential") )
-    {
-        nonZero.setFunction (bcNonZero);
-    }
-    else
-    {
-        nonZero.setFunction (bcNonZeroSecondOrderExponential);
-    }
+    nonZero.setFunction (bcNonZero);
+
 
 
     //! =================================================================================
@@ -341,6 +335,15 @@ Structure::run3d()
     //! =================================================================================
     BCh->addBC ("EdgesIn",      20,  Natural,   Component, nonZero, compx);
     BCh->addBC ("EdgesIn",      40,  Essential, Component, zero,    compx);
+
+    //! Symmetry BC
+    BCh->addBC ("EdgesIn",      500,   EssentialVertices, Component, zero, compxz);
+    BCh->addBC ("EdgesIn",      300,   EssentialVertices, Component, zero, compxy);
+    BCh->addBC ("EdgesIn",      800,   EssentialVertices, Component, zero, compyz);
+    BCh->addBC ("EdgesIn",      1000,  EssentialVertices,  Full, zero, 3);
+
+    BCh->addBC ("EdgesIn",      7, Essential, Component , zero, compy);
+    BCh->addBC ("EdgesIn",      3, Essential, Component , zero, compz);
     //! =================================================================================
 
     //! 1. Constructor of the structuralSolver
