@@ -179,12 +179,21 @@ int main (int argc, char** argv )
     RBFinterpolant.reset ( interpolation_Type::InterpolationFactory::instance().createObject (dataFile("interpolation/interpolation_Type","none")));
 
     RBFinterpolant->setup(Solid_mesh_ptr, Solid_localMesh, Fluid_mesh_ptr, Fluid_localMesh, flags);
+
+    if(dataFile("interpolation/interpolation_Type","none")=="RBFvectorial")
+        RBFinterpolant->setBasis(dataFile("interpolation/basis","none"));
+
     if(dataFile("interpolation/interpolation_Type","none")!="RBFlocallyRescaledVectorial")
         RBFinterpolant->setRadius((double) MeshUtility::MeshStatistics::computeSize (*Solid_mesh_ptr).maxH);
+
     RBFinterpolant->setupRBFData (Solid_vector, Fluid_solution, dataFile, belosList);
+
     RBFinterpolant->buildOperators();
+
     RBFinterpolant->interpolate();
+
     RBFinterpolant->solution (Fluid_solution);
+
     if(dataFile("interpolation/interpolation_Type","none")!="RBFvectorial")
         RBFinterpolant->solutionrbf (Fluid_solution_rbf);
 
@@ -216,6 +225,15 @@ int main (int argc, char** argv )
                         (*rbfError) [rbfError->blockMap().GID (i) + Fluid_exact_solution->size()/3*j ] = (*Fluid_exact_solution) [Fluid_exact_solution->blockMap().GID (i) + Fluid_exact_solution->size()/3*j ] - (*Fluid_solution_rbf) [Fluid_solution_rbf->blockMap().GID (i) + Fluid_exact_solution->size()/3*j ];
 
                 }
+
+    Real err_Inf = myError->normInf();
+    Real err_L2  = myError->norm2()/Solid_mesh_ptr->numVertices();
+
+    if(Comm->MyPID()==0)
+    {
+        std::cout << "Error, norm_Inf = " <<  err_Inf  << std::endl;
+        std::cout << "Error, normL2   = " <<  err_L2   << std::endl;
+    }
 
     // EXPORTING THE SOLUTION
     ExporterHDF5<mesh_Type> Fluid_exporter (dataFile, Fluid_localMesh, "Results", Comm->MyPID() );

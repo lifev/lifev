@@ -169,8 +169,14 @@ void RBFrescaledScalar<mesh_Type>::setupRBFData (vectorPtr_Type KnownField, vect
 template <typename mesh_Type>
 void RBFrescaledScalar<mesh_Type>::buildOperators()
 {
+    LifeChrono TimeBuilding;
+    TimeBuilding.start();
     this->interpolationOperator();
     this->projectionOperator();
+    TimeBuilding.stop();
+    if(M_knownField->mapPtr()->commPtr()->MyPID()==0)
+        std::cout << "Time to assembly operators = " << TimeBuilding.diff() << std::endl;
+
     this->buildRhs();
     this->interpolateCostantField();
 }
@@ -235,7 +241,6 @@ void RBFrescaledScalar<mesh_Type>::interpolationOperator()
         M_interpolationOperator->matrixPtr()->InsertGlobalValues (GlobalID[i], k, Values, Indices);
     }
     M_interpolationOperator->globalAssemble();
-    M_interpolationOperator->spy("interpolationRescaled");
     delete Indices;
     delete Values;
     delete ElementsPerRow;
@@ -312,7 +317,6 @@ void RBFrescaledScalar<mesh_Type>::projectionOperator()
         M_projectionOperator->matrixPtr()->InsertGlobalValues (GlobalID[i], k, Values, Indices);
     }
     M_projectionOperator->globalAssemble (M_interpolationOperatorMap, M_projectionOperatorMap);
-    M_projectionOperator->spy("projectionRescaled");
     delete Indices;
     delete Values;
     delete ElementsPerRow;

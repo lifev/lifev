@@ -21,11 +21,12 @@
 [solid]
     [./space_discretization]
        	mesh_dir                 = ./
-       	mesh_file                = Th31.msh #solid2d_rbf.msh
+       	mesh_file                = solid2d_rbf.msh
        	mesh_type                = .msh
 
 [interpolation]
     interpolation_Type           = RBFlocallyRescaledScalar # RBFlocallyRescaledScalar, RBFrescaledScalar, RBFscalar
+    basis 			             = TPS                      # BW, TPS, IMQ to be used only when using RBFscalar
 
 [prec]
     prectype                     = Ifpack # Ifpack or ML

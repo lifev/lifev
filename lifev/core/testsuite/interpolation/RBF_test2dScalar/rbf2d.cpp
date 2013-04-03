@@ -156,21 +156,16 @@ int main (int argc, char** argv )
         RBFinterpolant->setBasis(dataFile("interpolation/basis","none"));
 
     if(dataFile("interpolation/interpolation_Type","none")!="RBFlocallyRescaledScalar")
-        RBFinterpolant->setRadius((double) MeshUtility::MeshStatistics::computeSize (*Solid_mesh_ptr).minH);
+        RBFinterpolant->setRadius((double) MeshUtility::MeshStatistics::computeSize (*Solid_mesh_ptr).maxH);
+
     RBFinterpolant->setupRBFData (Solid_vector, Fluid_solution, dataFile, belosList);
 
     RBFinterpolant->buildOperators();
 
-    std::cout << (double) MeshUtility::MeshStatistics::computeSize (*Solid_mesh_ptr).minH << std::endl;
-    std::cout << (double) MeshUtility::MeshStatistics::computeSize (*Solid_mesh_ptr).meanH << std::endl;
-
-    LifeChrono TimeS;
-    TimeS.start();
     RBFinterpolant->interpolate();
-    TimeS.stop();
-    std::cout << "Time to solve the system = " << TimeS.diff() << std::endl;
 
     RBFinterpolant->solution (Fluid_solution);
+
     if(dataFile("interpolation/interpolation_Type","none")!="RBFscalar")
         RBFinterpolant->solutionrbf (Fluid_solution_rbf);
 
@@ -192,8 +187,14 @@ int main (int argc, char** argv )
 
         }
 
-    std::cout << "normInf = " << myError->normInf() << std::endl;
-    std::cout << "normL2 = " << myError->norm2()/Solid_mesh_ptr->numVertices()  << std::endl;
+    Real err_Inf = myError->normInf();
+    Real err_L2  = myError->norm2()/Solid_mesh_ptr->numVertices();
+
+    if(Comm->MyPID()==0)
+    {
+        std::cout << "Error, norm_Inf = " <<  err_Inf  << std::endl;
+        std::cout << "Error, normL2   = " <<  err_L2   << std::endl;
+    }
 
     // EXPORTING THE SOLUTION
     ExporterHDF5<mesh_Type> Fluid_exporter (dataFile, Fluid_localMesh, "Results", Comm->MyPID() );

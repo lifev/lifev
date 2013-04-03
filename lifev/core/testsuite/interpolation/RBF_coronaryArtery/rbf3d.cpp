@@ -68,7 +68,7 @@ using namespace LifeV;
 double f (double x, double y, double z)
 {
     double r = std::sqrt (x * x + y * y);
-    return sin (z) + sin (r);
+    return sin (z);
 }
 
 int main (int argc, char** argv )
@@ -109,13 +109,13 @@ int main (int argc, char** argv )
     // PARTITIONING MESHES
     MeshPartitioner<mesh_Type>   Solid_mesh_part;
     boost::shared_ptr<mesh_Type> Solid_localMesh;
-    Solid_mesh_part.setPartitionOverlap (1);
+    Solid_mesh_part.setPartitionOverlap (0);
     Solid_mesh_part.doPartition (Solid_mesh_ptr, Comm);
     Solid_localMesh = Solid_mesh_part.meshPartition();
 
     MeshPartitioner<mesh_Type>   Fluid_mesh_part;
     boost::shared_ptr<mesh_Type> Fluid_localMesh;
-    Fluid_mesh_part.setPartitionOverlap (1);
+    Fluid_mesh_part.setPartitionOverlap (0);
     Fluid_mesh_part.doPartition (Fluid_mesh_ptr, Comm);
     Fluid_localMesh = Fluid_mesh_part.meshPartition();
 
@@ -144,14 +144,15 @@ int main (int argc, char** argv )
 
     int nFlags = 1;
     std::vector<int> flags (nFlags);
-    flags[0] = 5;
+    flags[0] = -1;
 
     interpolationPtr_Type RBFinterpolant;
     RBFinterpolant.reset ( interpolation_Type::InterpolationFactory::instance().createObject (dataFile("interpolation/interpolation_Type","none")));
 
     RBFinterpolant->setup(Fluid_mesh_ptr, Fluid_localMesh, Solid_mesh_ptr, Solid_localMesh, flags);
-    if(dataFile("interpolation/interpolation_Type","none")!="RBFlocallyRescaledScalar")
-        RBFinterpolant->setRadius((double) MeshUtility::MeshStatistics::computeSize (*Fluid_mesh_ptr).maxH);
+    //if(dataFile("interpolation/interpolation_Type","none")!="RBFlocallyRescaledScalar")
+        RBFinterpolant->setRadius((double) MeshUtility::MeshStatistics::computeSize (*Fluid_mesh_ptr).meanH);
+
     RBFinterpolant->setupRBFData (Fluid_vector, Solid_solution, dataFile, belosList);
     RBFinterpolant->buildOperators();
     RBFinterpolant->interpolate();
@@ -164,19 +165,19 @@ int main (int argc, char** argv )
     vectorPtr_Type myError (new vector_Type (Solid_fieldFESpace->map(), Unique) );
     vectorPtr_Type rbfError (new vector_Type (Solid_fieldFESpace->map(), Unique) );
 
+    //if (Solid_mesh_ptr->point (Solid_exact_solution->blockMap().GID (i) ).markerID() == 5 )
     for ( UInt i = 0; i < Solid_exact_solution->epetraVector().MyLength(); ++i )
-        if (Solid_mesh_ptr->point (Solid_exact_solution->blockMap().GID (i) ).markerID() == 5 )
-            if (Solid_exact_solution->blockMap().LID (Solid_exact_solution->blockMap().GID (i) ) != -1)
-            {
-                (*Solid_exact_solution) [Solid_exact_solution->blockMap().GID (i)] = f ( Solid_mesh_ptr->point (Solid_exact_solution->blockMap().GID (i) ).x(),
-                                                                                         Solid_mesh_ptr->point (Solid_exact_solution->blockMap().GID (i) ).y(),
-                                                                                         Solid_mesh_ptr->point (Solid_exact_solution->blockMap().GID (i) ).z() );
+        if (Solid_exact_solution->blockMap().LID (Solid_exact_solution->blockMap().GID (i) ) != -1)
+        {
+            (*Solid_exact_solution) [Solid_exact_solution->blockMap().GID (i)] = f ( Solid_mesh_ptr->point (Solid_exact_solution->blockMap().GID (i) ).x(),
+                                                                                     Solid_mesh_ptr->point (Solid_exact_solution->blockMap().GID (i) ).y(),
+                                                                                     Solid_mesh_ptr->point (Solid_exact_solution->blockMap().GID (i) ).z() );
 
-                (*myError) [myError->blockMap().GID (i)] = (*Solid_exact_solution) [Solid_exact_solution->blockMap().GID (i)] - (*Solid_solution) [Solid_solution->blockMap().GID (i)];
-                if(dataFile("interpolation/interpolation_Type","none")!="RBFscalar")
-                    (*rbfError) [rbfError->blockMap().GID (i)] = (*Solid_exact_solution) [Solid_exact_solution->blockMap().GID (i)] - (*Solid_solution_rbf) [Solid_solution_rbf->blockMap().GID (i)];
+            (*myError) [myError->blockMap().GID (i)] = (*Solid_exact_solution) [Solid_exact_solution->blockMap().GID (i)] - (*Solid_solution) [Solid_solution->blockMap().GID (i)];
+            if(dataFile("interpolation/interpolation_Type","none")!="RBFscalar")
+                (*rbfError) [rbfError->blockMap().GID (i)] = (*Solid_exact_solution) [Solid_exact_solution->blockMap().GID (i)] - (*Solid_solution_rbf) [Solid_solution_rbf->blockMap().GID (i)];
 
-            }
+        }
 
     // EXPORTING THE SOLUTION
     ExporterHDF5<mesh_Type> Solid_exporter (dataFile, Solid_localMesh, "Results", Comm->MyPID() );
@@ -192,6 +193,9 @@ int main (int argc, char** argv )
     }
     Solid_exporter.postProcess (0);
     Solid_exporter.closeFile();
+
+    Real myerror = myError->normInf();
+    std::cout << myerror << std::endl;
 
 #ifdef HAVE_MPI
     MPI_Finalize();

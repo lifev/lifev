@@ -15,17 +15,18 @@
 [fluid]
     [./space_discretization]
        	mesh_dir                 = ./
-       	mesh_file                = tube20.mesh
+       	mesh_file                = tube20_circ.mesh
        	mesh_type                = .mesh
 
 [solid]
     [./space_discretization]
        	mesh_dir                 = ./
-       	mesh_file                = vessel20_circ.mesh
+       	mesh_file                = vessel20.mesh
        	mesh_type                = .mesh
 
 [interpolation]
-    interpolation_Type           = RBFrescaledVectorial # RBFlocallyRescaledVectorial, RBFrescaledVectorial, RBFvectorial
+    interpolation_Type           = RBFlocallyRescaledVectorial # RBFlocallyRescaledVectorial, RBFrescaledVectorial, RBFvectorial
+    basis 			             = TPS                         # BW, TPS, IMQ to be used only when using RBFvectorial
 
 [prec]
     prectype                     = Ifpack # Ifpack or ML

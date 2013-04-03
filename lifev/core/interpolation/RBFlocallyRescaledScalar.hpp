@@ -107,6 +107,8 @@ public:
 
     void updateRhs(vectorPtr_Type newRhs);
 
+    void setRadius ( double radius );
+
 private:
 
     meshPtr_Type        M_fullMeshKnown;
@@ -129,6 +131,7 @@ private:
     mapPtr_Type         M_projectionOperatorMap;
     neighborsPtr_Type   M_neighbors;
     vectorPtr_Type      M_unknownField_rbf;
+    double              M_radius;
 };
 
 template <typename mesh_Type>
@@ -158,6 +161,12 @@ void RBFlocallyRescaledScalar<mesh_Type>::setupRBFData (vectorPtr_Type KnownFiel
     M_belosList    = belosList;
 }
 
+template <typename mesh_Type>
+void RBFlocallyRescaledScalar<mesh_Type>::setRadius ( double radius )
+{
+    M_radius = radius;
+}
+
 template <typename Mesh>
 void RBFlocallyRescaledScalar<Mesh>::buildOperators()
 {
@@ -166,8 +175,9 @@ void RBFlocallyRescaledScalar<Mesh>::buildOperators()
     this->interpolationOperator();
     this->projectionOperator();
     TimeBuilding.stop();
-    std::cout << "Time to assembly operators = " << TimeBuilding.diff() << std::endl;
-    
+    if(M_knownField->mapPtr()->commPtr()->MyPID()==0)
+        std::cout << "Time to assembly operators = " << TimeBuilding.diff() << std::endl;
+
     this->buildRhs();
     this->interpolateCostantField();
 }
@@ -247,7 +257,7 @@ void RBFlocallyRescaledScalar<mesh_Type>::projectionOperator()
 
     int LocalNodesNumber = M_GIdsUnknownMesh.size();
 
-    std::vector<double>   RBF_radius (LocalNodesNumber);
+    std::vector<double>        RBF_radius (LocalNodesNumber);
     std::vector<std::set<ID> > MatrixGraph (LocalNodesNumber);
     int* ElementsPerRow = new int[LocalNodesNumber];
     int* GlobalID = new int[LocalNodesNumber];

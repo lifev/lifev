@@ -151,12 +151,21 @@ int main (int argc, char** argv )
     RBFinterpolant.reset ( interpolation_Type::InterpolationFactory::instance().createObject (dataFile("interpolation/interpolation_Type","none")));
 
     RBFinterpolant->setup(Fluid_mesh_ptr, Fluid_localMesh, Solid_mesh_ptr, Solid_localMesh, flags);
+
     if(dataFile("interpolation/interpolation_Type","none")!="RBFlocallyRescaledScalar")
         RBFinterpolant->setRadius((double) MeshUtility::MeshStatistics::computeSize (*Fluid_mesh_ptr).maxH);
+
     RBFinterpolant->setupRBFData (Fluid_vector, Solid_solution, dataFile, belosList);
+
+    if(dataFile("interpolation/interpolation_Type","none")=="RBFscalar")
+        RBFinterpolant->setBasis(dataFile("interpolation/basis","none"));
+
     RBFinterpolant->buildOperators();
+
     RBFinterpolant->interpolate();
+
     RBFinterpolant->solution (Solid_solution);
+
     if(dataFile("interpolation/interpolation_Type","none")!="RBFscalar")
         RBFinterpolant->solutionrbf (Solid_solution_rbf);
 
@@ -193,6 +202,15 @@ int main (int argc, char** argv )
     }
     Solid_exporter.postProcess (0);
     Solid_exporter.closeFile();
+
+    Real err_Inf = myError->normInf();
+    Real err_L2  = myError->norm2()/Solid_mesh_ptr->numVertices();
+
+    if(Comm->MyPID()==0)
+    {
+        std::cout << "Error, norm_Inf = " <<  err_Inf  << std::endl;
+        std::cout << "Error, normL2   = " <<  err_L2   << std::endl;
+    }
 
 #ifdef HAVE_MPI
     MPI_Finalize();

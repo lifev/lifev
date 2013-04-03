@@ -128,6 +128,7 @@ private:
     vectorPtr_Type      M_unknownField_rbf;
     double              M_radius;
     std::string         M_basis;
+    int                 M_globalNodesNumber;
 };
 
 template <typename mesh_Type>
@@ -176,10 +177,19 @@ void RBFscalar<mesh_Type>::buildOperators()
     LifeChrono TimeBuilding;
     TimeBuilding.start();
     this->interpolationOperator();
-    this->projectionOperator();
     TimeBuilding.stop();
-    std::cout << "Time to assembly operators = " << TimeBuilding.diff() << std::endl;
+    if(M_knownField->mapPtr()->commPtr()->MyPID()==0)
+        std::cout << "Time to assembly operators = " << TimeBuilding.diff() << std::endl;
+
+    LifeChrono TimeBuildingp;
+    TimeBuildingp.start();
+    this->projectionOperator();
+    TimeBuildingp.stop();
+    if(M_knownField->mapPtr()->commPtr()->MyPID()==0)
+        std::cout << "Time to assembly operators = " << TimeBuildingp.diff() << std::endl;
+
     this->buildRhs();
+
 }
 
 template <typename mesh_Type>
@@ -190,39 +200,42 @@ void RBFscalar<mesh_Type>::interpolationOperator()
     if(M_basis=="TPS"||M_basis=="IMQ"){
         this->identifyNodes (M_localMeshKnown, M_GIdsKnownMesh, M_knownField);
         int LocalNodesNumber = M_GIdsKnownMesh.size();
-        std::vector<std::set<ID> > MatrixGraph (LocalNodesNumber);
+        M_globalNodesNumber = 0;
+        MPI_Allreduce(&LocalNodesNumber,&M_globalNodesNumber,1,MPI_INT,MPI_SUM,MPI_COMM_WORLD);
         int* ElementsPerRow = new int[LocalNodesNumber];
         int* GlobalID = new int[LocalNodesNumber];
         int k = 0;
-        int Max_entries = M_fullMeshKnown->numVertices();
 
         for (std::set<ID>::iterator it = M_GIdsKnownMesh.begin(); it != M_GIdsKnownMesh.end(); ++it)
         {
             GlobalID[k] = *it;
-            ElementsPerRow[k] = Max_entries;
+            ElementsPerRow[k] = M_globalNodesNumber;
             ++k;
         }
 
         M_interpolationOperatorMap.reset (new map_Type (-1, LocalNodesNumber, GlobalID, M_knownField->mapPtr()->commPtr() ) );
         M_interpolationOperator.reset (new matrix_Type (*M_interpolationOperatorMap, ElementsPerRow) );
 
-        int* Indices = new int[Max_entries];
-        double* Values = new double[Max_entries];
+        int* Indices = new int[M_globalNodesNumber];
+        double* Values = new double[M_globalNodesNumber];
 
         for ( int i = 0 ; i < LocalNodesNumber; ++i )
         {
             k = 0;
-            for ( int j = 0; j < Max_entries; ++j)//std::set<ID>::iterator it = MatrixGraph[i].begin(); it != MatrixGraph[i].end(); ++it)
+            for ( int j = 0; j < M_fullMeshKnown->numVertices(); ++j)
             {
-                Indices[k] = j;
-                Values[k]  = rbf ( M_fullMeshKnown->point (GlobalID[i]).x(),
-                                   M_fullMeshKnown->point (GlobalID[i]).y(),
-                                   M_fullMeshKnown->point (GlobalID[i]).z(),
-                                   M_fullMeshKnown->point (j).x(),
-                                   M_fullMeshKnown->point (j).y(),
-                                   M_fullMeshKnown->point (j).z(),
-                                   M_radius);
-                ++k;
+                if(isInside(M_fullMeshKnown->point (j).markerID(),M_flags))
+                {
+                    Indices[k] = j;
+                    Values[k]  = rbf ( M_fullMeshKnown->point (GlobalID[i]).x(),
+                                       M_fullMeshKnown->point (GlobalID[i]).y(),
+                                       M_fullMeshKnown->point (GlobalID[i]).z(),
+                                       M_fullMeshKnown->point (j).x(),
+                                       M_fullMeshKnown->point (j).y(),
+                                       M_fullMeshKnown->point (j).z(),
+                                       M_radius);
+                    ++k;
+                }
             }
             M_interpolationOperator->matrixPtr()->InsertGlobalValues (GlobalID[i], k, Values, Indices);
         }
@@ -307,35 +320,37 @@ void RBFscalar<mesh_Type>::projectionOperator()
         int* ElementsPerRow = new int[LocalNodesNumber];
         int* GlobalID = new int[LocalNodesNumber];
         int k = 0;
-        int Max_entries = M_fullMeshKnown->numVertices();
 
         for (std::set<ID>::iterator it = M_GIdsUnknownMesh.begin(); it != M_GIdsUnknownMesh.end(); ++it)
         {
             GlobalID[k] = *it;
-            ElementsPerRow[k] = Max_entries;
+            ElementsPerRow[k] = M_globalNodesNumber;
             ++k;
         }
 
         M_projectionOperatorMap.reset (new map_Type (-1, LocalNodesNumber, GlobalID, M_unknownField->mapPtr()->commPtr() ) );
         M_projectionOperator.reset (new matrix_Type (*M_projectionOperatorMap, ElementsPerRow) );
 
-        int* Indices = new int[Max_entries];
-        double* Values = new double[Max_entries];
+        int* Indices = new int[M_globalNodesNumber];
+        double* Values = new double[M_globalNodesNumber];
 
         for ( int i = 0 ; i < LocalNodesNumber; ++i )
         {
             k = 0;
-            for ( int j = 0; j < Max_entries; ++j)//std::set<ID>::iterator it = MatrixGraph[i].begin(); it != MatrixGraph[i].end(); ++it)
+            for ( int j = 0; j < M_fullMeshKnown->numVertices(); ++j)
             {
-                Indices[k] = j;
-                Values[k]  = rbf ( M_fullMeshUnknown->point (GlobalID[i]).x(),
-                                   M_fullMeshUnknown->point (GlobalID[i]).y(),
-                                   M_fullMeshUnknown->point (GlobalID[i]).z(),
-                                   M_fullMeshKnown->point (j).x(),
-                                   M_fullMeshKnown->point (j).y(),
-                                   M_fullMeshKnown->point (j).z(),
-                                   M_radius);
-                ++k;
+                if(isInside(M_fullMeshKnown->point(j).markerID(),M_flags))
+                {
+                    Indices[k] = j;
+                    Values[k]  = rbf ( M_fullMeshUnknown->point (GlobalID[i]).x(),
+                                       M_fullMeshUnknown->point (GlobalID[i]).y(),
+                                       M_fullMeshUnknown->point (GlobalID[i]).z(),
+                                       M_fullMeshKnown->point (j).x(),
+                                       M_fullMeshKnown->point (j).y(),
+                                       M_fullMeshKnown->point (j).z(),
+                                       M_radius);
+                    ++k;
+                }
             }
             M_projectionOperator->matrixPtr()->InsertGlobalValues (GlobalID[i], k, Values, Indices);
         }
@@ -447,11 +462,13 @@ void RBFscalar<mesh_Type>::interpolate()
     solverRBF.setRightHandSide (M_RhsF);
     solverRBF.solve (gamma_f);
 
+    /*
     vectorPtr_Type solution;
     solution.reset (new vector_Type (*M_projectionOperatorMap) );
 
     M_projectionOperator->multiply (false, *gamma_f, *solution);
     M_unknownField->subset (*solution, *M_projectionOperatorMap, 0, 0);
+    */
 }
 
 template <typename mesh_Type>
@@ -482,14 +499,18 @@ template <typename mesh_Type>
 bool RBFscalar<mesh_Type>::isInside (ID pointMarker, flagContainer_Type flags)
 {
     int check = 0;
-    for (UInt i = 0; i < flags.size(); ++i)
-        if (pointMarker == flags[i])
-        {
-            ++check;
-        }
-    return (check > 0) ? true : false;
+    if(flags[0]==-1)
+        return true;
+    else
+    {
+        for (UInt i = 0; i < flags.size(); ++i)
+            if (pointMarker == flags[i])
+            {
+                ++check;
+            }
+        return (check > 0) ? true : false;
+    }
 }
-
 
 template <typename mesh_Type>
 double RBFscalar<mesh_Type>::rbf (double x1, double y1, double z1, double x2, double y2, double z2, double radius)
