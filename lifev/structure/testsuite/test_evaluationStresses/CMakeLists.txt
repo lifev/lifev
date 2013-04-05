@@ -33,30 +33,11 @@ TRIBITS_COPY_FILES_TO_BINARY_DIR(h5DataStructure
   SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/structure/testsuite/test_evaluationStresses/
 )
 
-
-TRIBITS_ADD_EXECUTABLE_AND_TEST(
-  TensionsTens
-  NAME StressTensions
-  SOURCES main.cpp
-  ARGS "-f dataTensions"
-  NUM_MPI_PROCS 2
-  COMM serial mpi
-  )
-
 TRIBITS_COPY_FILES_TO_BINARY_DIR(dataTensions
   SOURCE_FILES dataTensions
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
   CREATE_SYMLINK
 )
-
-TRIBITS_ADD_EXECUTABLE_AND_TEST(
-  TensionsEigen
-  NAME StressEigenvalues
-  SOURCES main.cpp
-  ARGS "-f dataEigenvalues"
-  NUM_MPI_PROCS 2
-  COMM serial mpi
-  )
 
 TRIBITS_COPY_FILES_TO_BINARY_DIR(dataEigenvalues
   SOURCE_FILES dataEigenvalues
