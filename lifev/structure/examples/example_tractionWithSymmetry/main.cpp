@@ -73,7 +73,7 @@
 #include <lifev/structure/solver/VenantKirchhoffMaterialNonLinearPenalized.hpp>
 #include <lifev/structure/solver/NeoHookeanMaterialNonLinear.hpp>
 #include <lifev/structure/solver/ExponentialMaterialNonLinear.hpp>
-//#include <lifev/structure/solver/SecondOrderExponentialMaterialNonLinear.hpp>
+#include <lifev/structure/solver/SecondOrderExponentialMaterialNonLinear.hpp>
 
 #include <lifev/core/filter/ExporterEnsight.hpp>
 #ifdef HAVE_HDF5
@@ -183,7 +183,7 @@ struct Structure::Private
 
     static Real bcNonZero (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
     {
-        return  300000; //136400.0;
+        return  70000; //136400.0
     }
 
     static Real d0 (const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
@@ -191,10 +191,10 @@ struct Structure::Private
         switch (i)
         {
             case 0:
-                return ( 0.256942 / 2 ) * x;
+                return - 0.058549 * ( x - 0.5 );
                 break;
             case 1:
-                return - 0.058549 * ( y - 0.5 );
+                return  ( 0.256942 / 2 ) * y;
                 break;
             case 2:
                 return - 0.058549 * ( z + 0.5);
@@ -510,8 +510,8 @@ Structure::run3d()
             {
                 Real previousTimeStep = tZero - previousPass * dt;
                 std::cout << "BDF " << previousTimeStep << "\n";
-                uv0.push_back(disp);
-                //uv0.push_back (initialDisplacement);
+                //uv0.push_back(disp);
+                uv0.push_back (initialDisplacement);
             }
         }
 
@@ -538,21 +538,21 @@ Structure::run3d()
         // std::cout << "Acceleration 2: " << accInitialize.norm2() << std::endl;
 
         //In the case of non-zero displacement
-        solid.initialize( disp );
-        //solid.initialize ( initialDisplacement );
+        //solid.initialize( disp );
+        solid.initialize ( initialDisplacement );
         //Let's verify that the set displacement is the one I expect
         //Creation of Exporter to check the loaded solution (working only for HDF5)
-        // std::string expVerFile = "verificationDisplExporter";
-        // LifeV::ExporterHDF5<RegionMesh<LinearTetra> > exporter ( dataFile, meshPart.meshPartition(), expVerFile, parameters->comm->MyPID() );
-        // vectorPtr_Type vectVer ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
+        std::string expVerFile = "verificationDisplExporter";
+        LifeV::ExporterHDF5<RegionMesh<LinearTetra> > exporter ( dataFile, meshPart.meshPartition(), expVerFile, parameters->comm->MyPID() );
+        vectorPtr_Type vectVer ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
 
-        // exporter.addVariable ( ExporterData<mesh_Type >::VectorField, "displVer", dFESpace, vectVer, UInt (0) );
+        exporter.addVariable ( ExporterData<mesh_Type >::VectorField, "displVer", dFESpace, vectVer, UInt (0) );
 
-        // //Let's get the initial displacement and velocity
-        // exporter.postProcess (0.0);
+        //Let's get the initial displacement and velocity
+        exporter.postProcess (0.0);
 
-        // *vectVer = *disp; //*initialDisplacement;
-        // exporter.postProcess ( 1.0 );
+        *vectVer = *initialDisplacement; //*disp;
+        exporter.postProcess ( 1.0 );
 
     }
     MPI_Barrier (MPI_COMM_WORLD);
