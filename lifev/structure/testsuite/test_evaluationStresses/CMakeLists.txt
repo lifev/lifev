@@ -4,8 +4,8 @@ INCLUDE(TribitsCopyFilesToBinaryDir)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
 
 TRIBITS_ADD_EXECUTABLE_AND_TEST(
-  TensionsDispl
-  NAME StressDispl
+  Tensions
+  NAME reconstructDisplacement
   SOURCES main.cpp
   ARGS "-f dataDisplacement"
   NUM_MPI_PROCS 2
@@ -33,14 +33,95 @@ TRIBITS_COPY_FILES_TO_BINARY_DIR(h5DataStructure
   SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/structure/testsuite/test_evaluationStresses/
 )
 
+TRIBITS_ADD_TEST(
+  Tensions
+  NAME reconstructTensions
+  ARGS "-f dataTensions"
+  NUM_MPI_PROCS 2
+  COMM serial mpi
+  )
+
 TRIBITS_COPY_FILES_TO_BINARY_DIR(dataTensions
   SOURCE_FILES dataTensions
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
   CREATE_SYMLINK
 )
 
+TRIBITS_ADD_TEST(
+  Tensions
+  NAME reconstructEigenvalues
+  ARGS "-f dataEigenvalues"
+  NUM_MPI_PROCS 2
+  COMM serial mpi
+  )
+
 TRIBITS_COPY_FILES_TO_BINARY_DIR(dataEigenvalues
   SOURCE_FILES dataEigenvalues
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
   CREATE_SYMLINK
+)
+
+TRIBITS_ADD_TEST(
+  Tensions
+  NAME LE
+  ARGS "-f dataLE"
+  NUM_MPI_PROCS 2
+  COMM serial mpi
+  )
+
+TRIBITS_COPY_FILES_TO_BINARY_DIR(dataStressLE
+  SOURCE_FILES dataLE
+  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+TRIBITS_ADD_TEST(
+  Tensions
+  NAME SVK
+  ARGS "-f dataSVK"
+  NUM_MPI_PROCS 2
+  COMM serial mpi
+  )
+
+TRIBITS_COPY_FILES_TO_BINARY_DIR(dataStressSVK
+  SOURCE_FILES dataSVK
+  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+TRIBITS_ADD_TEST(
+  Tensions
+  NAME SVKPenalized
+  ARGS "-f dataSVKPenalized"
+  NUM_MPI_PROCS 2
+  COMM serial mpi
+  )
+
+TRIBITS_COPY_FILES_TO_BINARY_DIR(dataStressSVKPenalized
+  SOURCE_FILES dataSVKPenalized
+  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+TRIBITS_ADD_TEST(
+  Tensions
+  NAME NH
+  ARGS "-f dataNH"
+  NUM_MPI_PROCS 2
+  COMM serial mpi
+  )
+
+TRIBITS_COPY_FILES_TO_BINARY_DIR(dataStressNH
+  SOURCE_FILES dataNH
+  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+TRIBITS_ADD_TEST(
+  Tensions
+  NAME 2ndExponential
+  ARGS "-f data2ndExpo"
+  NUM_MPI_PROCS 2
+  COMM serial mpi
+  )
+
+TRIBITS_COPY_FILES_TO_BINARY_DIR(dataStress2ndExpo
+  SOURCE_FILES data2ndExpo
+  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
 )
