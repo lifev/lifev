@@ -183,7 +183,7 @@ struct Structure::Private
 
     static Real bcNonZero (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
     {
-        return  70000; //136400.0;
+        return  300000; //136400.0;
     }
 
     static Real d0 (const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
@@ -327,8 +327,6 @@ Structure::run3d()
     }
 
     timeAdvance->setTimeStep (dataStructure->dataTime()->timeStep() );
-    //timeAdvance->showMe();
-
 
     //! #################################################################################
     //! BOUNDARY CONDITIONS
@@ -349,15 +347,15 @@ Structure::run3d()
     //! =================================================================================
     //! BC for StructuredCube4_test_structuralsolver.mesh
     //! =================================================================================
-    BCh->addBC ("EdgesIn",      20,  Natural,   Component, nonZero, compx);
-    BCh->addBC ("EdgesIn",      40,  Essential, Component, zero,    compx);
+    BCh->addBC ("EdgesIn",      20,  Natural,   Component, nonZero, compy);
+    BCh->addBC ("EdgesIn",      40,  Essential, Component, zero,    compy);
 
-    BCh->addBC ("SymmetryX",    7,  Essential, Component, zero,    compy);
+    BCh->addBC ("SymmetryX",    5,  Essential, Component, zero,    compx);
     BCh->addBC ("SymmetryY",    3,  Essential, Component, zero,    compz);
-    BCh->addBC ("edgeone",      1000,  EssentialVertices, Full, zero, 3);
-    BCh->addBC ("edgetwo",      500,  EssentialVertices, Component, zero,    compxz);
-    BCh->addBC ("edgetwo",      300,  EssentialVertices, Component, zero,    compxy);
-    BCh->addBC ("edgetwo",      800,  EssentialVertices, Component, zero,    compyz);
+    BCh->addBC ("edgeone",      100,  EssentialVertices, Full, zero, 3);
+    BCh->addBC ("edgetwo",      50,  EssentialVertices, Component, zero,    compxy);
+    BCh->addBC ("edgetwo",      30,  EssentialVertices, Component, zero,    compyz);
+    BCh->addBC ("edgetwo",      80,  EssentialVertices, Component, zero,    compxz);
 
 
     //! 1. Constructor of the structuralSolver
@@ -512,8 +510,8 @@ Structure::run3d()
             {
                 Real previousTimeStep = tZero - previousPass * dt;
                 std::cout << "BDF " << previousTimeStep << "\n";
-                //uv0.push_back(disp);
-                uv0.push_back (initialDisplacement);
+                uv0.push_back(disp);
+                //uv0.push_back (initialDisplacement);
             }
         }
 
@@ -540,23 +538,21 @@ Structure::run3d()
         // std::cout << "Acceleration 2: " << accInitialize.norm2() << std::endl;
 
         //In the case of non-zero displacement
-        //solid.initialize( disp );
-        solid.initialize ( initialDisplacement );
+        solid.initialize( disp );
+        //solid.initialize ( initialDisplacement );
         //Let's verify that the set displacement is the one I expect
         //Creation of Exporter to check the loaded solution (working only for HDF5)
-        std::string expVerFile = "verificationDisplExporter";
-        LifeV::ExporterHDF5<RegionMesh<LinearTetra> > exporter ( dataFile, meshPart.meshPartition(), expVerFile, parameters->comm->MyPID() );
-        vectorPtr_Type vectVer ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
+        // std::string expVerFile = "verificationDisplExporter";
+        // LifeV::ExporterHDF5<RegionMesh<LinearTetra> > exporter ( dataFile, meshPart.meshPartition(), expVerFile, parameters->comm->MyPID() );
+        // vectorPtr_Type vectVer ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
 
-        exporter.addVariable ( ExporterData<mesh_Type >::VectorField, "displVer", dFESpace, vectVer, UInt (0) );
+        // exporter.addVariable ( ExporterData<mesh_Type >::VectorField, "displVer", dFESpace, vectVer, UInt (0) );
 
-        //Let's get the initial displacement and velocity
-        exporter.postProcess (0.0);
+        // //Let's get the initial displacement and velocity
+        // exporter.postProcess (0.0);
 
-        *vectVer = *initialDisplacement;//*disp;
-        exporter.postProcess ( 1.0 );
-
-
+        // *vectVer = *disp; //*initialDisplacement;
+        // exporter.postProcess ( 1.0 );
 
     }
     MPI_Barrier (MPI_COMM_WORLD);
@@ -567,16 +563,16 @@ Structure::run3d()
     }
 
     boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporter;
-    boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterCheck;
+    //    boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterCheck;
 
     std::string const exporterType =  dataFile ( "exporter/type", "ensight");
     std::string const exporterName =  dataFile ( "exporter/name", "structure");
-    std::string const exporterCheckName =  dataFile ( "exporter/nameCheck", "verifyVectors");
+    //    std::string const exporterCheckName =  dataFile ( "exporter/nameCheck", "verifyVectors");
 #ifdef HAVE_HDF5
     if (exporterType.compare ("hdf5") == 0)
     {
         exporter.reset ( new ExporterHDF5<RegionMesh<LinearTetra> > ( dataFile, exporterName ) );
-        exporterCheck.reset ( new ExporterHDF5<RegionMesh<LinearTetra> > ( dataFile, exporterCheckName ) );
+        //        exporterCheck.reset ( new ExporterHDF5<RegionMesh<LinearTetra> > ( dataFile, exporterCheckName ) );
     }
     else
 #endif
@@ -593,23 +589,24 @@ Structure::run3d()
     }
 
     exporter->setPostDir ( "./" );
-    exporterCheck->setPostDir ( "./" );
     exporter->setMeshProcId ( meshPart.meshPartition(), parameters->comm->MyPID() );
-    exporterCheck->setMeshProcId ( meshPart.meshPartition(), parameters->comm->MyPID() );
+
+    // exporterCheck->setPostDir ( "./" );
+    // exporterCheck->setMeshProcId ( meshPart.meshPartition(), parameters->comm->MyPID() );
 
     vectorPtr_Type solidDisp ( new vector_Type (solid.displacement(),  exporter->mapType() ) );
     vectorPtr_Type solidVel  ( new vector_Type (solid.displacement(),  exporter->mapType() ) );
     vectorPtr_Type solidAcc  ( new vector_Type (solid.displacement(),  exporter->mapType() ) );
 
-    vectorPtr_Type rhsCopy ( new vector_Type (solid.displacement(),  exporterCheck->mapType() ) );
-    vectorPtr_Type residualCopy ( new vector_Type (solid.displacement(),  exporterCheck->mapType() ) );
+    // vectorPtr_Type rhsCopy ( new vector_Type (solid.displacement(),  exporterCheck->mapType() ) );
+    // vectorPtr_Type residualCopy ( new vector_Type (solid.displacement(),  exporterCheck->mapType() ) );
 
     exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "displacement", dFESpace, solidDisp, UInt (0) );
     exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "velocity",     dFESpace, solidVel,  UInt (0) );
     exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "acceleration", dFESpace, solidAcc,  UInt (0) );
 
-    exporterCheck->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "rhs", dFESpace, rhsCopy,  UInt (0) );
-    exporterCheck->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "residual", dFESpace, residualCopy,  UInt (0) );
+    // exporterCheck->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "rhs", dFESpace, rhsCopy,  UInt (0) );
+    // exporterCheck->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "residual", dFESpace, residualCopy,  UInt (0) );
 
     //Let's get the initial quantities
     *solidDisp = solid.displacement();
@@ -617,41 +614,18 @@ Structure::run3d()
     *solidAcc = timeAdvance->secondDerivative();
 
     exporter->postProcess ( 0 );
-    exporterCheck->postProcess ( 0 );
+    //exporterCheck->postProcess ( 0 );
 
 
     //!--------------------------------------------------------------------------------------------
     //! MATLAB FILE WITH DISPLACEMENT OF A CHOSEN POINT
     //!--------------------------------------------------------------------------------------------
     cout.precision (16);
-    // ofstream file_comp( "Displacement_components_NL.m" );
-    // if ( !file_comp )
-    // {
-    //   std::cout <<" Unable to open file! You need to specify the output folder in the data file " << std::endl;
-    // }
 
-    // int IDPoint = 618; // StructuredCube4
-    // //int IDPoint = 401; // StructuredCube8
-    // //int IDPoint = 2593; // StructuredCube16
-
-    // //int IDPoint = 74;// cube4x4.mesh
-    // //int IDPoint = 315;// cube8x8.mesh
-    // //int IDPoint = 1526;// cube16x16.mesh
-
-    // file_comp << " % TEST NONLINEAR ELASTICITY" << endl;
-    // file_comp << " % Displacement components of ID node  " << IDPoint << " :" << endl;
-    // file_comp << " % Each row is a time step" << endl;
-    // file_comp << " % First column = comp x, second = comp y and third = comp z. " << endl;
-    // file_comp <<  endl;
-    // file_comp << " SolidDisp_NL = [ " ;
-
-    // for ( UInt k = IDPoint - 1; k <= solid.displacement().size() - 1; k = k + solid.displacement().size()/nDimensions )
-    // {
-    // file_comp<< solid.displacement()[ k ] << " ";
-    // }
-
-    // file_comp<< endl;
-
+    // Used to debug
+    int IDPoint = 158;
+    // This one depends on the direction of the deformation
+    int indexPoint = IDPoint - 1 + dFESpace->dof().numTotalDof();
     //!--------------------------------------------------------------------------------------------
     //!The update of the RHS is done by the TimeAdvance class
     //solid.updateSystem();
@@ -688,54 +662,20 @@ Structure::run3d()
         *solidVel  = timeAdvance->firstDerivative();
         *solidAcc  = timeAdvance->secondDerivative();
 
-
-        *rhsCopy = solid.rhsCopy();
-        *residualCopy = solid.residualCopy();
+        // *rhsCopy = solid.rhsCopy();
+        // *residualCopy = solid.residualCopy();
 
         exporter->postProcess ( dataStructure->dataTime()->time() );
-        exporterCheck->postProcess ( dataStructure->dataTime()->time() );
+        //exporterCheck->postProcess ( dataStructure->dataTime()->time() );
 
-        // // This part lets to save the displacement at one point of the mesh and to check the result
-        // //  w.r.t. manufactured solution.
-        // //!--------------------------------------------------------------------------------------------------
-        // //! MATLAB FILE WITH DISPLACEMENT OF A CHOOSEN POINT
-        // //!--------------------------------------------------------------------------------------------------
-        // cout <<"*******  DISPLACEMENT COMPONENTS of ID node "<< IDPoint << " *******"<< std::endl;
-        // for ( UInt k = IDPoint - 1 ; k <= solid.displacement().size() - 1; k = k + solid.displacement().size()/nDimensions )
-        // {
-        //     file_comp<< solid.displacement()[ k ] << " ";
-        //     cout.precision(16);
-        //     cout <<"*********************************************************"<< std::endl;
-        //     cout <<" solid.disp()[ "<< k <<" ] = "<<  solid.displacement()[ k ]  << std::endl;
-        //     cout <<"*********************************************************"<< std::endl;
-        // }
-        // file_comp<< endl;
+        cout <<"*********************************************************"<< std::endl;
+        cout <<" solid.disp()[ "<< indexPoint  <<" ] = "<<  solid.displacement()[ indexPoint ]  << std::endl;
+        cout <<"*********************************************************"<< std::endl;
 
 
         Real normVect;
         normVect =  solid.displacement().norm2();
         std::cout << "The norm 2 of the displacement field is: " << normVect << std::endl;
-
-        ///////// CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
-        if (!dataStructure->solidType().compare ("linearVenantKirchhoff") )
-        {
-            CheckResultLE (normVect, dataStructure->dataTime()->time() );
-        }
-        else if (!dataStructure->solidType().compare ("nonLinearVenantKirchhoff") )
-        {
-            CheckResultSVK (normVect, dataStructure->dataTime()->time() );
-        }
-        else if (!dataStructure->solidType().compare ("exponential") )
-        {
-            CheckResultEXP (normVect, dataStructure->dataTime()->time() );
-        }
-        else
-        {
-            CheckResultNH (normVect, dataStructure->dataTime()->time() );
-        }
-
-        ///////// END OF CHECK
-
 
         //!--------------------------------------------------------------------------------------------------
 
