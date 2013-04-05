@@ -58,12 +58,6 @@
 
 #include <lifev/structure/solver/StructuralConstitutiveLawData.hpp>
 
-#include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
-#include <lifev/structure/solver/VenantKirchhoffMaterialLinear.hpp>
-// #include <lifev/structure/solver/VenantKirchhoffMaterialNonLinear.hpp>
-// #include <lifev/structure/solver/NeoHookeanMaterialNonLinear.hpp>
-#include <lifev/structure/solver/ExponentialMaterialNonLinear.hpp>
-
 #include <lifev/structure/solver/WallTensionEstimator.hpp>
 #include <lifev/structure/solver/WallTensionEstimatorData.hpp>
 
@@ -141,7 +135,12 @@ public:
     void CheckResultDisplacement (const Real tensNorm);
     void CheckResultEigenvalues (const Real tensNorm);
     void CheckResultTensions (const Real tensNorm);
-    void resultChanged ( void );
+    void checkLinearElastic (const Real tensNorm);
+    void checkVenantKirchhoff (const Real tensNorm);
+    void checkVenantKirchhoffPenalized (const Real tensNorm);
+    void checkNeoHookean (const Real tensNorm);
+    void check2ndOrderExponential (const Real tensNorm);
+    void resultCorrect ( void );
     //@}
 
 protected:
@@ -180,6 +179,109 @@ struct Structure::Private
     typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > fct_type;
     double rho, poisson, young, bulk, alpha, gamma;
 
+    static Real displacementLinearElastic (const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
+    {
+
+        switch (i)
+        {
+            case 0:
+                return - 0.01837 * ( x - 0.5 );
+                break;
+            case 1:
+                return  0.0749999 / 2.0  * ( y );
+                break;
+            case 2:
+                return - 0.01837  * ( z + 0.5  );
+                break;
+            default:
+                ERROR_MSG ("This entry is not allowed: ud_functions.hpp");
+                return 0.;
+                break;
+        }
+
+    }
+
+    static Real displacementVenantKirchhoff (const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
+    {
+        switch (i)
+        {
+            case 0:
+                return -  0.0179039 * ( x - 0.5 );
+                break;
+            case 1:
+                return  0.07115742 / 2.0  * ( y );
+                break;
+            case 2:
+                return - 0.0179039  * ( z + 0.5  );
+                break;
+            default:
+                ERROR_MSG ("This entry is not allowed: ud_functions.hpp");
+                return 0.;
+                break;
+        }
+    }
+
+    static Real displacementVenantKirchhoffPenalized (const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
+    {
+        switch (i)
+        {
+            case 0:
+                return - 0.01649141 * ( x - 0.5 );
+                break;
+            case 1:
+                return  0.069238236 / 2.0  * ( y );
+                break;
+            case 2:
+                return - 0.01649141  * ( z + 0.5  );
+                break;
+            default:
+                ERROR_MSG ("This entry is not allowed: ud_functions.hpp");
+                return 0.;
+                break;
+        }
+    }
+
+    static Real displacementNeoHookean (const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
+    {
+        switch (i)
+        {
+            case 0:
+                return - 0.018542821 * ( x - 0.5 );
+                break;
+            case 1:
+                return  0.077904116 / 2.0  * ( y );
+                break;
+            case 2:
+                return - 0.018542821  * ( z + 0.5  );
+                break;
+            default:
+                ERROR_MSG ("This entry is not allowed: ud_functions.hpp");
+                return 0.;
+                break;
+        }
+    }
+
+    static Real displacementSecondOrderExponential (const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
+    {
+        switch (i)
+        {
+            case 0:
+                return - 0.055120902 * ( x - 0.5 );
+                break;
+            case 1:
+                return  0.240591303 / 2.0  * ( y );
+                break;
+            case 2:
+                return - 0.055120902  * ( z + 0.5  );
+                break;
+            default:
+                ERROR_MSG ("This entry is not allowed: ud_functions.hpp");
+                return 0.;
+                break;
+        }
+    }
+
+
     std::string data_file_name;
 
     boost::shared_ptr<Epetra_Comm>     comm;
@@ -197,20 +299,6 @@ Structure::Structure ( int                                   argc,
     string data_file_name = command_line.follow ("data", 2, "-f", "--file");
     GetPot dataFile ( data_file_name );
     parameters->data_file_name = data_file_name;
-
-    parameters->rho     = dataFile ( "solid/physics/density", 1. );
-    parameters->young   = dataFile ( "solid/physics/young",   1. );
-    parameters->poisson = dataFile ( "solid/physics/poisson", 1. );
-    parameters->bulk    = dataFile ( "solid/physics/bulk",    1. );
-    parameters->alpha   = dataFile ( "solid/physics/alpha",   1. );
-    parameters->gamma   = dataFile ( "solid/physics/gamma",   1. );
-
-    std::cout << "density = " << parameters->rho     << std::endl
-              << "young   = " << parameters->young   << std::endl
-              << "poisson = " << parameters->poisson << std::endl
-              << "bulk    = " << parameters->bulk    << std::endl
-              << "alpha   = " << parameters->alpha   << std::endl
-              << "gamma   = " << parameters->gamma   << std::endl;
 
     parameters->comm = structComm;
     int ntasks = parameters->comm->NumProc();
@@ -361,35 +449,35 @@ Structure::run3d()
 
 
     //Post processing for the displacement gradient
-    boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterX;
-    boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterY;
-    boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterZ;
+    // boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterX;
+    // boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterY;
+    // boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterZ;
 
-    //Setting pointers
-    exporterX.reset ( new ExporterHDF5<RegionMesh<LinearTetra> > ( dataFile, "gradX" ) );
-    exporterY.reset ( new ExporterHDF5<RegionMesh<LinearTetra> > ( dataFile, "gradY" ) );
-    exporterZ.reset ( new ExporterHDF5<RegionMesh<LinearTetra> > ( dataFile, "gradZ" ) );
+    // //Setting pointers
+    // exporterX.reset ( new ExporterHDF5<RegionMesh<LinearTetra> > ( dataFile, "gradX" ) );
+    // exporterY.reset ( new ExporterHDF5<RegionMesh<LinearTetra> > ( dataFile, "gradY" ) );
+    // exporterZ.reset ( new ExporterHDF5<RegionMesh<LinearTetra> > ( dataFile, "gradZ" ) );
 
-    exporterX->setMeshProcId (solid->dFESpace().mesh(), solid->dFESpace().map().comm().MyPID() );
-    exporterY->setMeshProcId (solid->dFESpace().mesh(), solid->dFESpace().map().comm().MyPID() );
-    exporterZ->setMeshProcId (solid->dFESpace().mesh(), solid->dFESpace().map().comm().MyPID() );
+    // exporterX->setMeshProcId (solid->dFESpace().mesh(), solid->dFESpace().map().comm().MyPID() );
+    // exporterY->setMeshProcId (solid->dFESpace().mesh(), solid->dFESpace().map().comm().MyPID() );
+    // exporterZ->setMeshProcId (solid->dFESpace().mesh(), solid->dFESpace().map().comm().MyPID() );
 
-    //Defining the vectors
-    vectorPtr_Type gradX ( new vector_Type (solid->gradientX(),  M_exporter->mapType() ) );
-    vectorPtr_Type gradY ( new vector_Type (solid->gradientY(),  M_exporter->mapType() ) );
-    vectorPtr_Type gradZ ( new vector_Type (solid->gradientZ(),  M_exporter->mapType() ) );
+    // //Defining the vectors
+    // vectorPtr_Type gradX ( new vector_Type (solid->gradientX(),  M_exporter->mapType() ) );
+    // vectorPtr_Type gradY ( new vector_Type (solid->gradientY(),  M_exporter->mapType() ) );
+    // vectorPtr_Type gradZ ( new vector_Type (solid->gradientZ(),  M_exporter->mapType() ) );
 
-    //Adding variable
-    exporterX->addVariable ( ExporterData<mesh_Type >::VectorField, "gradX", solid->dFESpacePtr(),
-                             gradX, UInt (0) );
-    exporterY->addVariable ( ExporterData<mesh_Type >::VectorField, "gradY", solid->dFESpacePtr(),
-                             gradY, UInt (0) );
-    exporterZ->addVariable ( ExporterData<mesh_Type >::VectorField, "gradZ", solid->dFESpacePtr(),
-                             gradZ, UInt (0) );
+    // //Adding variable
+    // exporterX->addVariable ( ExporterData<mesh_Type >::VectorField, "gradX", solid->dFESpacePtr(),
+    //                          gradX, UInt (0) );
+    // exporterY->addVariable ( ExporterData<mesh_Type >::VectorField, "gradY", solid->dFESpacePtr(),
+    //                          gradY, UInt (0) );
+    // exporterZ->addVariable ( ExporterData<mesh_Type >::VectorField, "gradZ", solid->dFESpacePtr(),
+    //                          gradZ, UInt (0) );
 
-    exporterX->postProcess ( 0.0 );
-    exporterY->postProcess ( 0.0 );
-    exporterZ->postProcess ( 0.0 );
+    // exporterX->postProcess ( 0.0 );
+    // exporterY->postProcess ( 0.0 );
+    // exporterZ->postProcess ( 0.0 );
 
 
     //! =================================================================================
@@ -408,25 +496,55 @@ Structure::run3d()
         iterationString = tensionData->iterStart (0);
         LifeV::Real startTime = tensionData->initialTime (0);
 
-        /*!Definition of the ExporterData, used to load the solution inside the previously defined vectors*/
-        LifeV::ExporterData<mesh_Type> solutionDispl  (LifeV::ExporterData<mesh_Type>::VectorField, nameField + "." + iterationString, solid->dFESpacePtr(), solidDisp, UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
+        // In the case of Exponential law we are checking the three ways
+        if( !dataStructure->solidType().compare("exponential") )
+        {
+            /*!Definition of the ExporterData, used to load the solution inside the previously defined vectors*/
+            LifeV::ExporterData<mesh_Type> solutionDispl  (LifeV::ExporterData<mesh_Type>::VectorField, nameField + "." + iterationString, solid->dFESpacePtr(), solidDisp, UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
 
-        //Read the variable
-        M_importer->readVariable (solutionDispl);
-        M_importer->closeFile();
+            //Read the variable
+            M_importer->readVariable (solutionDispl);
+            M_importer->closeFile();
+        }
+        else if ( !dataStructure->solidType().compare("linearVenantKirchhoff") ) // LE
+        {
+            dFESpace->interpolate( static_cast<solidFESpace_Type::function_Type> ( Private::displacementLinearElastic ),
+                                   *solidDisp, 0.0 );
+        }
+        else if ( !dataStructure->solidType().compare("nonLinearVenantKirchhoff") ) // SVK
+        {
+            dFESpace->interpolate( static_cast<solidFESpace_Type::function_Type> ( Private::displacementVenantKirchhoff ),
+                                   *solidDisp, 0.0 );
+        }
+        else if ( !dataStructure->solidType().compare("nonLinearVenantKirchhoffPenalized") ) // SVKP
+        {
+            dFESpace->interpolate( static_cast<solidFESpace_Type::function_Type> ( Private::displacementVenantKirchhoffPenalized ),
+                                   *solidDisp, 0.0 );
+        }
+        else if ( !dataStructure->solidType().compare("neoHookean") ) // NH
+        {
+            dFESpace->interpolate( static_cast<solidFESpace_Type::function_Type> ( Private::displacementNeoHookean ),
+                                   *solidDisp, 0.0 );
+        }
+        else
+        {
+            dFESpace->interpolate( static_cast<solidFESpace_Type::function_Type> ( Private::displacementSecondOrderExponential ),
+                                   *solidDisp, 0.0 );
+        }
 
 
-        //Create and exporter to check importing
-        std::string expVerFile = "verificationDisplExporter";
-        LifeV::ExporterHDF5<RegionMesh<LinearTetra> > exporter ( dataFile, meshPart.meshPartition(), expVerFile, parameters->comm->MyPID() );
-        vectorPtr_Type vectVer ( new vector_Type (solid->displacement(),  exporter.mapType() ) );
 
-        exporter.addVariable ( ExporterData<mesh_Type >::VectorField, "displVer", solid->dFESpacePtr(),
-                               vectVer, UInt (0) );
+        // //Create and exporter to check importing
+        // std::string expVerFile = "verificationDisplExporter";
+        // LifeV::ExporterHDF5<RegionMesh<LinearTetra> > exporter ( dataFile, meshPart.meshPartition(), expVerFile, parameters->comm->MyPID() );
+        // vectorPtr_Type vectVer ( new vector_Type (solid->displacement(),  exporter.mapType() ) );
 
-        exporter.postProcess (0.0);
-        *vectVer = *solidDisp;
-        exporter.postProcess (startTime);
+        // exporter.addVariable ( ExporterData<mesh_Type >::VectorField, "displVer", solid->dFESpacePtr(),
+        //                        vectVer, UInt (0) );
+
+        // exporter.postProcess (0.0);
+        // *vectVer = *solidDisp;
+        // exporter.postProcess (startTime);
 
 
         //Set the current solution as the displacement vector to use
@@ -437,14 +555,14 @@ Structure::run3d()
         //Perform the analysis
         solid->analyzeTensions();
 
-        //Extracting the gradient
-        *gradX = solid->gradientX();
-        *gradY = solid->gradientY();
-        *gradZ = solid->gradientZ();
+        // //Extracting the gradient
+        // *gradX = solid->gradientX();
+        // *gradY = solid->gradientY();
+        // *gradZ = solid->gradientZ();
 
-        exporterX->postProcess ( startTime );
-        exporterY->postProcess ( startTime );
-        exporterZ->postProcess ( startTime );
+        // exporterX->postProcess ( startTime );
+        // exporterY->postProcess ( startTime );
+        // exporterZ->postProcess ( startTime );
 
         //Extracting the tensions
         std::cout << std::endl;
@@ -458,28 +576,54 @@ Structure::run3d()
             std::cout << "Analysis Completed!" << std::endl;
         }
 
-        ///////// CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
-        if ( !tensionData->recoveryVariable().compare ("displacement")  )
+        returnValue = EXIT_FAILURE;
+
+        if( !dataStructure->solidType().compare("exponential") )
         {
-            CheckResultDisplacement ( solid->principalStresses().norm2()  );
+            ///////// CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
+            if ( !tensionData->recoveryVariable().compare ("displacement")  )
+            {
+                CheckResultDisplacement ( solid->principalStresses().norm2()  );
+            }
+            else if ( !tensionData->recoveryVariable().compare ("eigenvalues") )
+            {
+                CheckResultEigenvalues ( solid->principalStresses().norm2() );
+            }
+            else
+            {
+                CheckResultTensions ( solid->principalStresses().norm2()  );
+            }
         }
-        else if ( !tensionData->recoveryVariable().compare ("eigenvalues") )
+        else if ( !dataStructure->solidType().compare("linearVenantKirchhoff") ) // LE
         {
-            CheckResultEigenvalues ( solid->principalStresses().norm2() );
+            checkLinearElastic( solid->principalStresses().norm2() );
+        }
+        else if ( !dataStructure->solidType().compare("nonLinearVenantKirchhoff") ) // SVK
+        {
+            checkVenantKirchhoff( solid->principalStresses().norm2() );
+        }
+        else if ( !dataStructure->solidType().compare("nonLinearVenantKirchhoffPenalized") ) // SVKP
+        {
+            checkVenantKirchhoffPenalized( solid->principalStresses().norm2() );
+        }
+        else if ( !dataStructure->solidType().compare("neoHookean") ) // NH
+        {
+            checkNeoHookean( solid->principalStresses().norm2() );
         }
         else
         {
-            CheckResultTensions ( solid->principalStresses().norm2()  );
+            check2ndOrderExponential( solid->principalStresses().norm2() );
         }
+
 
         ///////// END OF CHECK
 
         //Closing files
         M_exporter->closeFile();
-        exporterX->closeFile();
-        exporterY->closeFile();
-        exporterZ->closeFile();
-        exporter.closeFile();
+        // exporterX->closeFile();
+        // exporterY->closeFile();
+        // exporterZ->closeFile();
+        // exporter.closeFile();
 
 
     }
@@ -501,7 +645,7 @@ void Structure::CheckResultDisplacement (const Real tensNorm)
 {
     if ( ( (std::fabs (tensNorm - 4.67086e6) / 4.67086e6) <= 1e-5 ) )
     {
-        this->resultChanged( );
+        this->resultCorrect( );
     }
 }
 
@@ -509,7 +653,7 @@ void Structure::CheckResultEigenvalues (const Real tensNorm)
 {
     if ( ( (std::fabs (tensNorm - 4.67086e6) / 4.67086e6) <= 1e-5 ) )
     {
-        this->resultChanged( );
+        this->resultCorrect( );
     }
 }
 
@@ -517,11 +661,52 @@ void Structure::CheckResultTensions (const Real tensNorm)
 {
     if ( ( ( std::fabs (tensNorm - 4.67086e6) / 4.67086e6) <= 1e-5 ) )
     {
-        this->resultChanged( );
+        this->resultCorrect( );
     }
 }
 
-void Structure::resultChanged ( void )
+void Structure::checkLinearElastic (const Real tensNorm)
+{
+    if ( ( ( std::fabs (tensNorm - 4.69045e+6) / 4.69045e+6) <= 1e-5 ) )
+    {
+        this->resultCorrect( );
+    }
+}
+
+void Structure::checkVenantKirchhoff (const Real tensNorm)
+{
+    if ( ( ( std::fabs (tensNorm - 4.66588e+6) / 4.66588e+6) <= 1e-5 ) )
+    {
+        this->resultCorrect( );
+    }
+}
+
+void Structure::checkVenantKirchhoffPenalized (const Real tensNorm)
+{
+    if ( ( ( std::fabs (tensNorm - 4.65222e+6) / 4.65222e+6) <= 1e-5 ) )
+    {
+        this->resultCorrect( );
+    }
+}
+
+void Structure::checkNeoHookean (const Real tensNorm)
+{
+    if ( ( ( std::fabs (tensNorm - 4.67165e+6) / 4.67165e+6) <= 1e-5 ) )
+    {
+        this->resultCorrect( );
+    }
+}
+
+void Structure::check2ndOrderExponential (const Real tensNorm)
+{
+    if ( ( ( std::fabs (tensNorm - 1.17608e+6) / 1.17608e+6) <= 1e-5 ) )
+    {
+        this->resultCorrect( );
+    }
+}
+
+
+void Structure::resultCorrect ( void )
 {
     std::cout << "Correct Result after the Analysis" << std::endl;
     returnValue = EXIT_SUCCESS;
