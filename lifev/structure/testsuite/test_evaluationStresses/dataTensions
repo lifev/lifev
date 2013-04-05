@@ -53,7 +53,7 @@ order     	= P1
 [../analysis]
 nameFile                = structure
 nameField               = displacement
-recoveryVariable        = displacement
+recoveryVariable        = tensions
 typeFile                = hdf5
 analysisType            = istant
 start                   = 3.8
