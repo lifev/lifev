@@ -497,7 +497,7 @@ Structure::run3d()
         LifeV::Real startTime = tensionData->initialTime (0);
 
         // In the case of Exponential law we are checking the three ways
-        if( !dataStructure->solidType().compare("exponential") )
+        if( !dataStructure->solidTypeIsotropic().compare("exponential") )
         {
             /*!Definition of the ExporterData, used to load the solution inside the previously defined vectors*/
             LifeV::ExporterData<mesh_Type> solutionDispl  (LifeV::ExporterData<mesh_Type>::VectorField, nameField + "." + iterationString, solid->dFESpacePtr(), solidDisp, UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
@@ -506,22 +506,22 @@ Structure::run3d()
             M_importer->readVariable (solutionDispl);
             M_importer->closeFile();
         }
-        else if ( !dataStructure->solidType().compare("linearVenantKirchhoff") ) // LE
+        else if ( !dataStructure->solidTypeIsotropic().compare("linearVenantKirchhoff") ) // LE
         {
             dFESpace->interpolate( static_cast<solidFESpace_Type::function_Type> ( Private::displacementLinearElastic ),
                                    *solidDisp, 0.0 );
         }
-        else if ( !dataStructure->solidType().compare("nonLinearVenantKirchhoff") ) // SVK
+        else if ( !dataStructure->solidTypeIsotropic().compare("nonLinearVenantKirchhoff") ) // SVK
         {
             dFESpace->interpolate( static_cast<solidFESpace_Type::function_Type> ( Private::displacementVenantKirchhoff ),
                                    *solidDisp, 0.0 );
         }
-        else if ( !dataStructure->solidType().compare("nonLinearVenantKirchhoffPenalized") ) // SVKP
+        else if ( !dataStructure->solidTypeIsotropic().compare("nonLinearVenantKirchhoffPenalized") ) // SVKP
         {
             dFESpace->interpolate( static_cast<solidFESpace_Type::function_Type> ( Private::displacementVenantKirchhoffPenalized ),
                                    *solidDisp, 0.0 );
         }
-        else if ( !dataStructure->solidType().compare("neoHookean") ) // NH
+        else if ( !dataStructure->solidTypeIsotropic().compare("neoHookean") ) // NH
         {
             dFESpace->interpolate( static_cast<solidFESpace_Type::function_Type> ( Private::displacementNeoHookean ),
                                    *solidDisp, 0.0 );
@@ -578,7 +578,7 @@ Structure::run3d()
 
         returnValue = EXIT_FAILURE;
 
-        if( !dataStructure->solidType().compare("exponential") )
+        if( !dataStructure->solidTypeIsotropic().compare("exponential") )
         {
             ///////// CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
             if ( !tensionData->recoveryVariable().compare ("displacement")  )
@@ -594,19 +594,19 @@ Structure::run3d()
                 CheckResultTensions ( solid->principalStresses().norm2()  );
             }
         }
-        else if ( !dataStructure->solidType().compare("linearVenantKirchhoff") ) // LE
+        else if ( !dataStructure->solidTypeIsotropic().compare("linearVenantKirchhoff") ) // LE
         {
             checkLinearElastic( solid->principalStresses().norm2() );
         }
-        else if ( !dataStructure->solidType().compare("nonLinearVenantKirchhoff") ) // SVK
+        else if ( !dataStructure->solidTypeIsotropic().compare("nonLinearVenantKirchhoff") ) // SVK
         {
             checkVenantKirchhoff( solid->principalStresses().norm2() );
         }
-        else if ( !dataStructure->solidType().compare("nonLinearVenantKirchhoffPenalized") ) // SVKP
+        else if ( !dataStructure->solidTypeIsotropic().compare("nonLinearVenantKirchhoffPenalized") ) // SVKP
         {
             checkVenantKirchhoffPenalized( solid->principalStresses().norm2() );
         }
-        else if ( !dataStructure->solidType().compare("neoHookean") ) // NH
+        else if ( !dataStructure->solidTypeIsotropic().compare("neoHookean") ) // NH
         {
             checkNeoHookean( solid->principalStresses().norm2() );
         }

@@ -88,14 +88,14 @@
 
 //Materials
 #include <lifev/structure/solver/isotropic/VenantKirchhoffMaterialLinear.hpp>
-// #include <lifev/structure/solver/isotropic/VenantKirchhoffMaterialNonLinear.hpp>
+#include <lifev/structure/solver/isotropic/VenantKirchhoffMaterialNonLinear.hpp>
 #include <lifev/structure/solver/isotropic/ExponentialMaterialNonLinear.hpp>
-// #include <lifev/structure/solver/isotropic/NeoHookeanMaterialNonLinear.hpp>
+#include <lifev/structure/solver/isotropic/NeoHookeanMaterialNonLinear.hpp>
 
 #include <lifev/eta/fem/ETFESpace.hpp>
 
-#include <lifev/structure/solver/VenantKirchhoffMaterialNonLinearPenalized.hpp>
-#include <lifev/structure/solver/SecondOrderExponentialMaterialNonLinear.hpp>
+#include <lifev/structure/solver/isotropic/VenantKirchhoffMaterialNonLinearPenalized.hpp>
+#include <lifev/structure/solver/isotropic/SecondOrderExponentialMaterialNonLinear.hpp>
 
 namespace LifeV
 {
