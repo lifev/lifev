@@ -25,12 +25,12 @@ TRIBITS_COPY_FILES_TO_BINARY_DIR(cubeY4.mesh_Structure
 
 TRIBITS_COPY_FILES_TO_BINARY_DIR(xmfDataStructure
   SOURCE_FILES structure.xmf
-  SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/structure/testsuite/test_evaluationStresses/
+  SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/structure/testsuite/principalTensions/
 )
 
 TRIBITS_COPY_FILES_TO_BINARY_DIR(h5DataStructure
   SOURCE_FILES structure.h5
-  SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/structure/testsuite/test_evaluationStresses/
+  SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/structure/testsuite/principalTensions/
 )
 
 TRIBITS_ADD_TEST(
@@ -63,7 +63,7 @@ TRIBITS_COPY_FILES_TO_BINARY_DIR(dataEigenvalues
 
 TRIBITS_ADD_TEST(
   Tensions
-  NAME LE
+  NAME VonMises-LE
   ARGS "-f dataLE"
   NUM_MPI_PROCS 2
   COMM serial mpi
@@ -76,7 +76,7 @@ TRIBITS_COPY_FILES_TO_BINARY_DIR(dataStressLE
 
 TRIBITS_ADD_TEST(
   Tensions
-  NAME SVK
+  NAME VonMises-SVK
   ARGS "-f dataSVK"
   NUM_MPI_PROCS 2
   COMM serial mpi
@@ -89,7 +89,7 @@ TRIBITS_COPY_FILES_TO_BINARY_DIR(dataStressSVK
 
 TRIBITS_ADD_TEST(
   Tensions
-  NAME SVKPenalized
+  NAME VonMises-SVKPenalized
   ARGS "-f dataSVKPenalized"
   NUM_MPI_PROCS 2
   COMM serial mpi
@@ -102,7 +102,7 @@ TRIBITS_COPY_FILES_TO_BINARY_DIR(dataStressSVKPenalized
 
 TRIBITS_ADD_TEST(
   Tensions
-  NAME NH
+  NAME VonMises-NH
   ARGS "-f dataNH"
   NUM_MPI_PROCS 2
   COMM serial mpi
