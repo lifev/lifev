@@ -89,6 +89,11 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/eta/fem/ETFESpace.hpp>
 #include <lifev/eta/expression/Integrate.hpp>
 
+// Time Advance includes
+#include <lifev/core/fem/TimeAdvance.hpp>
+#include <lifev/core/fem/TimeAdvanceNewmark.hpp>
+#include <lifev/core/fem/TimeAdvanceBDF.hpp>
+
 namespace LifeV
 {
 
@@ -153,8 +158,10 @@ public:
     typedef boost::shared_ptr<matrix_Type>                matrixPtr_Type;
     typedef typename solver_Type::vector_Type             vector_Type;
     typedef boost::shared_ptr<vector_Type>                vectorPtr_Type;
+    typedef vector_Type                                   solution_Type;
+    typedef boost::shared_ptr<solution_Type>              solutionPtr_Type;
 
-    typedef StructuralConstitutiveLawData                data_Type;
+    typedef StructuralConstitutiveLawData                 data_Type;
 
     typedef RegionMesh<LinearTetra >                      mesh_Type;
     typedef std::vector< mesh_Type::element_Type* >       vectorVolumes_Type;
@@ -186,6 +193,11 @@ public:
     typedef boost::shared_ptr<precIfpack_Type>      precIfpackPtr_Type;
     typedef LifeV::PreconditionerML                 precML_Type;
     typedef boost::shared_ptr<precML_Type>          precMLPtr_Type;
+
+    // Time advance
+    typedef TimeAdvance< vector_Type >                                  timeAdvance_Type;
+    typedef boost::shared_ptr< timeAdvance_Type >                       timeAdvancePtr_Type;
+
     //@}
 
 
@@ -302,7 +314,7 @@ public:
     /*!
       \param bch BCHander object containing the boundary conditions
     */
-    void iterate ( bcHandler_Type& bch );
+    void iterate ( const bcHandler_Type& bch );
 
     //! Solve the linearized problem. Used in FSI segregated in ExactJacobian
     /*!
@@ -447,7 +459,7 @@ public:
 
     //!Setters
     //! Set the BCHandler object
-    void setBC (bcHandler_Type& BCd)
+    void setBC (const bcHandler_Type& BCd)
     {
         M_BCh = BCd;
     }
@@ -472,6 +484,11 @@ public:
 
     //! Set the data fields with the Getpot data file for preconditioners and solver
     void setDataFromGetPot ( const GetPot& dataFile );
+
+    void setTimeAdvance( const timeAdvancePtr_Type& timeAdvancePtr )
+    {
+        M_timeAdvance = timeAdvancePtr;
+    }
 
     //@}
 
@@ -625,7 +642,7 @@ public:
     }
 
     //! Get the data container
-    boost::shared_ptr<data_Type> data()       const
+    const boost::shared_ptr<data_Type>& data() const
     {
         return M_data;
     }
@@ -643,6 +660,12 @@ public:
     {
         return M_mapMarkersIndexes;
     }
+
+    const timeAdvancePtr_Type& timeAdvancePtr() const
+    {
+        return M_timeAdvance;
+    }
+
     //@}
 
 protected:
@@ -771,6 +794,7 @@ protected:
     vectorInvariants_Type                M_invariants;
 #endif
 
+    timeAdvancePtr_Type                  M_timeAdvance;
 };
 
 //====================================
@@ -809,7 +833,8 @@ StructuralOperator<Mesh>::StructuralOperator( ) :
     M_invariants                 ( ),
 #endif
     M_mapMarkersVolumes          ( ),
-    M_mapMarkersIndexes          ( )
+    M_mapMarkersIndexes          ( ),
+    M_timeAdvance                ( )
 {
 
     //    M_Displayer->leaderPrint("I am in the constructor for the solver");
@@ -1010,10 +1035,10 @@ StructuralOperator<Mesh>::computeMassMatrix ( const Real factor)
 {
     using namespace ExpressionAssembly;
 
-    UInt totalDof = M_dispFESpace->dof().numTotalDof();
+    //UInt totalDof = M_dispFESpace->dof().numTotalDof();
 
     //! Number of displacement components
-    UInt nc = nDimensions;
+    /*UInt nc = nDimensions;*/
     const Real factorMassMatrix = factor * M_data->rho();
 
     //Assembling using the Expression Template
@@ -1036,7 +1061,7 @@ StructuralOperator<Mesh>::computeMassMatrix ( const Real factor)
 
 template <typename Mesh>
 void
-StructuralOperator<Mesh>::iterate ( bcHandler_Type& bch )
+StructuralOperator<Mesh>::iterate ( const bcHandler_Type& bch )
 {
     LifeChrono chrono;
 
@@ -1505,8 +1530,9 @@ template <typename Mesh>
 void
 StructuralOperator<Mesh>::initialize ( const function& d0 )
 {
-    M_dispFESpace->interpolate (d0, *M_disp, 0.0);
-
+    M_dispFESpace->interpolate ( static_cast<typename FESpace<Mesh, MapEpetra>::function_Type> ( d0 ), *M_disp, 0.0);
+    //M_FESpace->interpolate(w0, *M_vel , 0.0);
+    // M_FESpace->interpolate(a0, *M_acc , 0.0);
 }
 
 template<typename Mesh>

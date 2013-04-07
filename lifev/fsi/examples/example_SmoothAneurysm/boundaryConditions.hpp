@@ -77,7 +77,7 @@ namespace LifeV
 typedef FSIOperator::fluid_Type fluid;
 typedef FSIOperator::solid_Type solid;
 
-FSIOperator::fluidBchandlerPtr_Type BCh_harmonicExtension (FSIOperator& _oper)
+FSIOperator::fluidBchandlerPtr_Type BCh_harmonicExtension (FSIOperator& /*_oper*/)
 {
 
     // Boundary condition for the mesh

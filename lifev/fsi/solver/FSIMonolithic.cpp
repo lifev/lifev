@@ -744,6 +744,8 @@ FSIMonolithic::assembleSolidBlock ( UInt iter, const vector_Type& solution )
     M_solidBlockPrec->globalAssemble();
 
     *M_solidBlockPrec *= M_solid->rescaleFactor();
+
+    delete rawPointerToMatrix;
 }
 
 void

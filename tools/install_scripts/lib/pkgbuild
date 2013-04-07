@@ -31,6 +31,9 @@ echo
 
 package_root=$PWD
 
+# set globally the number of processes to use
+export MAKEFLAGS="-j$NUM_PROC"
+
 # iterate on packages
 for(( i=0; i < $package_number; i++ )); do
 
@@ -41,6 +44,9 @@ for(( i=0; i < $package_number; i++ )); do
 
   build_package $package || exit
 
+  # set the package as already installed
+  sed -i "s/^$package=INSTALL$/$package=YES/" ../libpath
+
 done
 }
 
@@ -50,7 +56,7 @@ build_package() {
 
   # load package specific functions
   echo_dbg "loading pkgbuild_$package script"
-  source pkgbuild_$package || return 1
+  source pkgbuild_$package
 
   # redirect stdout to log file is requested
   if [ $LOG ]; then exec >$BUILD_DIR/scratch/$package.log; fi
@@ -65,28 +71,28 @@ build_package() {
 
     # download library sources
     mkdir -p $src_dir
-    pushd src >/dev/null
+    pushd $src_dir >/dev/null
       if [ $DOWNLOAD ]; then
         echo_dbg "downloading $package package"
-        download_$package || return 1
+        download_$package
       fi
 
       # unpack
       if [ $UNPACK ]; then
         echo_dbg "unpacking $package package"
-        unpack_$package || return 1
+        unpack_$package
       fi
     popd >/dev/null # $src_dir
 
     # build
     mkdir -p $build_dir
-    pushd build >/dev/null
+    pushd $build_dir >/dev/null
       echo_dbg "building $package package"
-      build_$package || return 1
+      build_$package
 
       # install
       echo_dbg "installing $package package to $install_dir"
-      install_$package || return 1
+      install_$package
     popd >/dev/null # $build_dir
 
   popd >/dev/null # $BUILD_DIR/scratch/$package

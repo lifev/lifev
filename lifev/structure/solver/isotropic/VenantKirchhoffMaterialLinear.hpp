@@ -404,8 +404,8 @@ template <typename MeshType>
 void
 VenantKirchhoffMaterialLinear<MeshType>::computeLocalFirstPiolaKirchhoffTensor ( Epetra_SerialDenseMatrix& firstPiola,
 										 const Epetra_SerialDenseMatrix& tensorF,
-										 const Epetra_SerialDenseMatrix& cofactorF,
-										 const std::vector<Real>& invariants,
+										 const Epetra_SerialDenseMatrix& /*cofactorF*/,
+										 const std::vector<Real>& /*invariants*/,
 										 const UInt marker)
 {
 

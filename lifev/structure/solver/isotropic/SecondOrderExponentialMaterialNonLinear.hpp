@@ -781,7 +781,38 @@ void SecondOrderExponentialMaterialNonLinear<MeshType>::computeLocalFirstPiolaKi
         const std::vector<Real>& invariants,
         const UInt marker)
 {
+    //Get the material parameters
+    Real alpha    = this->M_dataMaterial->alpha (marker);
+    Real gamma    = this->M_dataMaterial->gamma (marker);
+    Real bulk     = this->M_dataMaterial->bulk (marker);
 
+
+    //Computing the first term \alphaJ^{-2/3}[F-(1/3)tr(C)F^{-T}]exp(\gamma(tr(Ciso) - 3)
+    Epetra_SerialDenseMatrix firstTerm (tensorF);
+    Epetra_SerialDenseMatrix copyCofactorF (cofactorF);
+
+    Real scale (0.0);
+    scale = -invariants[0] / 3.0;
+    copyCofactorF.Scale ( scale );
+    firstTerm += copyCofactorF;
+
+    //Computation trace of the isochoric C
+    Real trCiso (0.0);
+    trCiso = std::pow (invariants[3], - (2.0 / 3.0) ) * invariants[0];
+
+    Real coef ( 0.0 );
+    coef = 2.0 * alpha * std::pow (invariants[3], - (2.0 / 3.0) ) * ( trCiso - 3.0 ) * std::exp ( gamma * ( trCiso - 3 ) * ( trCiso - 3 )  );
+    firstTerm.Scale ( coef );
+
+    //Computing the second term (volumetric part) J*(bulk/2)(J-1+(1/J)*ln(J))F^{-T}
+    Epetra_SerialDenseMatrix secondTerm (cofactorF);
+    Real secCoef (0);
+    secCoef = invariants[3] * (bulk / 2.0) * (invariants[3] - 1 + (1.0 / invariants[3]) * std::log (invariants[3]) );
+
+    secondTerm.Scale ( secCoef );
+
+    firstPiola += firstTerm;
+    firstPiola += secondTerm;
 
 }
 
@@ -795,6 +826,15 @@ namespace
 {
 static bool registerSOEXP = StructuralIsotropicConstitutiveLaw<LifeV::RegionMesh<LinearTetra> >::StructureIsotropicMaterialFactory::instance().registerProduct ( "secondOrderExponential", &createSecondOrderExponentialMaterialNonLinear<LifeV::RegionMesh<LinearTetra> > );
 }
+
+#undef deformationGradientTensor
+#undef detDeformationGradientTensor
+#undef deformationGradientTensor_T
+#undef RIGHTCAUCHYGREEN
+#undef firstInvariantC
+#undef firstInvariantCsquared
+#undef firstInvariantCbar
+
 
 } //Namespace LifeV
 

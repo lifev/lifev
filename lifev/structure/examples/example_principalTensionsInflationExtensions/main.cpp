@@ -394,7 +394,7 @@ Structure::run3d()
     MPI_Barrier (MPI_COMM_WORLD);
 
     //! 5. For each interval, the analysis is performed
-    LifeV::Real dt =  dataFile ( "solid/time_discretization/timestep", 0.0);
+    //LifeV::Real dt =  dataFile ( "solid/time_discretization/timestep", 0.0);
     std::string const nameField =  dataFile ( "solid/analysis/nameField", "NO_DEFAULT_VALUE");
 
     if ( !tensionData->analysisType().compare ("istant") )

@@ -28,16 +28,13 @@ save       = 1
 [./physics]
 density   	= 1.2
 material_flag   = 1
-thickness       = 1
-
-[../model]
-constitutiveLaw = isotropic
 young     	= 8.e+6
 poisson   	= 0.49
 bulk		= 1.3333e+8
 alpha 		= 2.684564e+6
 gamma		= 1.0
-solidTypeIsotropic 	= exponential		# linearVenantKirchhoff / nonlinearVenantKirchhoff / neoHookean / expoenential
+solidType 	= nonLinearVenantKirchhoff		# linearVenantKirchhoff / nonlinearVenantKirchhoff / neoHookean / expoenentia
+lawType     = nonlinear
 
 [../time_discretization]
 initialtime 	= 0.

@@ -1,0 +1,113 @@
+###################################################################################################
+#
+#                       This file is part of the LifeV Library
+#                Copyright (C) 2004, 2005, 2007 EPFL, Politecnico di Milano, INRIA
+#                Copyright (C) 2010 EPFL, Politecnico di Milano, Emory University
+#
+#      Author(s): Umberto Villa <uvilla@emory.edu>
+#                 Tiziano Passerini <tiziano@mathcs.emory.edu>
+#           Date: 10-12-2010
+#  License Terms: GNU LGPL
+#
+###################################################################################################
+### TESTSUITE: STRUCTURE MECHANICS ################################################################
+###################################################################################################
+#-------------------------------------------------
+#      Data file for Structure Solver
+#-------------------------------------------------
+
+
+[exporter]
+type       = hdf5 			# hdf5 (if library compiled with hdf5 support) or ensight
+multimesh  = false
+start      = 0
+save       = 1
+
+[solid]
+
+[./physics]
+density   	= 1.2
+material_flag   = 1
+young     	= 8.e+6
+poisson   	= 0.49
+bulk		= 1.3333e+8
+alpha 		= 2.684564e+6
+gamma		= 1.0
+solidType 	= secondOrderExponential		# linearVenantKirchhoff / nonlinearVenantKirchhoff / neoHookean / expoenentia
+lawType     = nonlinear
+
+[../time_discretization]
+initialtime 	= 0.
+endtime     	= 0.4
+timestep    	= 0.1
+theta       	= 0.35
+zeta        	= 0.75
+BDF_order   	= 2
+
+[../space_discretization]
+mesh_type = .mesh
+mesh_dir  	= ./
+mesh_file 	= cubeY4.mesh
+order     	= P1
+
+[../analysis]
+nameFile                = structure
+nameField               = displacement
+recoveryVariable        = displacement
+typeFile                = hdf5
+analysisType            = istant
+start                   = 3.8
+end                     = 3.8
+iterationStart          = 00038 #Number of iteration
+iterationEnd            = 00038
+
+
+
+[../miscellaneous]
+factor    	= 1
+verbose   	= 1
+
+
+[../newton]
+maxiter 	= 1
+reltol  	= 1.e-8
+
+
+[../solver]
+solver          = gmres
+scaling         = none
+output          = all 			# none
+conv            = rhs
+max_iter        = 500
+reuse           = true
+max_iter_reuse  = 200
+kspace          = 200
+tol             = 1.e-10    		# AztecOO tolerance
+
+[../prec]
+prectype        = Ifpack	 		# Ifpack or ML
+displayList     = true
+
+[./ifpack]
+overlap  	= 2
+
+[./fact]
+ilut_level-of-fill 	= 1
+drop_tolerance          = 1.e-5
+relax_value             = 0
+
+[../amesos]
+solvertype 		=  Amesos_Umfpack 	# Amesos_KLU or Amesos_Umfpack
+
+[../partitioner]
+overlap 		= 2
+
+[../schwarz]
+reordering_type 	= none 			# metis, rcm, none
+filter_singletons 	= true
+
+[../]
+[../]
+
+
+

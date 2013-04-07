@@ -516,7 +516,7 @@ void StabilizationSD<MeshType, DofType>::computeParameters (const Real dt, const
     // first, get the local velocity into beta
     for ( UInt iNode = 0; iNode < M_fe.nbNode; ++iNode )
     {
-        for ( UInt iCoor = 0; iCoor < M_fe.nbCoor(); ++iCoor )
+        for ( UInt iCoor = 0; iCoor < M_fe.nbLocalCoor(); ++iCoor )
         {
             UInt ig = M_dof.localToGlobalMap ( iVol, iNode ) + iCoor * nDof;
             beta.vec() [ iCoor * M_fe.nbNode + iNode ] = state[ig];
@@ -525,7 +525,7 @@ void StabilizationSD<MeshType, DofType>::computeParameters (const Real dt, const
 
     // second, calculate its max norm
     Real bmax = std::fabs ( beta.vec() [ 0 ] );
-    for ( UInt l = 1; l < UInt ( M_fe.nbCoor() *M_fe.nbNode ); ++l )
+    for ( UInt l = 1; l < UInt ( M_fe.nbLocalCoor() *M_fe.nbNode ); ++l )
     {
         if ( bmax < std::fabs ( beta.vec() [ l ] ) )
         {
@@ -548,14 +548,14 @@ void StabilizationSD<MeshType, DofType>::gradp_bgradv (const Real& coef, VectorE
     ASSERT_PRE (fe.hasFirstDeriv(),
                 "advection_grad  matrix needs at least the first derivatives");
 
-    MatrixElemental::matrix_type v (fe.nbCoor(), fe.nbQuadPt() );
+    MatrixElemental::matrix_type v (fe.nbLocalCoor(), fe.nbQuadPt() );
     Real s;
 
 
     // local velocity at quadrature points
     for (UInt ig (0); ig < fe.nbQuadPt(); ++ig)
     {
-        for (UInt icoor (0); icoor < fe.nbCoor(); ++icoor)
+        for (UInt icoor (0); icoor < fe.nbLocalCoor(); ++icoor)
         {
             VectorElemental::vector_view velicoor = vel.block (icoor);
             v (icoor, ig) = 0.;
@@ -566,17 +566,17 @@ void StabilizationSD<MeshType, DofType>::gradp_bgradv (const Real& coef, VectorE
         }
     }
 
-    for (UInt ic (0); ic < fe.nbCoor(); ++ic)
+    for (UInt ic (0); ic < fe.nbLocalCoor(); ++ic)
     {
-        MatrixElemental::matrix_view mat_ic3 = elmat.block (ic, fe.nbCoor() );
-        MatrixElemental::matrix_view mat_3ic = elmat.block (fe.nbCoor(), ic);
+        MatrixElemental::matrix_view mat_ic3 = elmat.block (ic, fe.nbLocalCoor() );
+        MatrixElemental::matrix_view mat_3ic = elmat.block (fe.nbLocalCoor(), ic);
         for (UInt i = 0; i < fe.nbNode; ++i)
         {
             for (UInt j = 0; j < fe.nbNode; ++j)
             {
                 s = 0.0;
                 for (UInt ig (0); ig < fe.nbQuadPt(); ++ig)
-                    for (UInt jcoor (0); jcoor < fe.nbCoor(); ++jcoor)
+                    for (UInt jcoor (0); jcoor < fe.nbLocalCoor(); ++jcoor)
                     {
                         s += fe.phiDer (j, ic, ig) * v (jcoor, ig) * fe.phiDer (i, jcoor, ig) * fe.weightDet (ig);
                     }
@@ -597,14 +597,14 @@ void StabilizationSD<MeshType, DofType>::bgradu_bgradv (const Real& coef, Vector
 
 
     MatrixElemental::matrix_type mat_tmp (fe.nbNode, fe.nbNode);
-    MatrixElemental::matrix_type v ( fe.nbCoor(), fe.nbQuadPt() );
+    MatrixElemental::matrix_type v ( fe.nbLocalCoor(), fe.nbQuadPt() );
     Real s;
 
 
     // compute local vectors values
     for (UInt ig (0); ig < fe.nbQuadPt(); ++ig)
     {
-        for (UInt icoor (0); icoor < fe.nbCoor(); ++icoor)
+        for (UInt icoor (0); icoor < fe.nbLocalCoor(); ++icoor)
         {
             VectorElemental::vector_view velicoor = vel.block (icoor);
             v (icoor, ig) = 0.;
@@ -622,8 +622,8 @@ void StabilizationSD<MeshType, DofType>::bgradu_bgradv (const Real& coef, Vector
             s = 0.0;
 
             for (UInt ig (0); ig < fe.nbQuadPt(); ++ig)
-                for (UInt icoor (0); icoor < fe.nbCoor(); ++icoor)
-                    for (UInt jcoor (0); jcoor < fe.nbCoor(); ++jcoor)
+                for (UInt icoor (0); icoor < fe.nbLocalCoor(); ++icoor)
+                    for (UInt jcoor (0); jcoor < fe.nbLocalCoor(); ++jcoor)
                     {
                         s += fe.phiDer (i, jcoor, ig) * v (jcoor, ig) * v (icoor, ig) * fe.phiDer (j, icoor, ig) * fe.weightDet (ig);
                     }
@@ -660,14 +660,14 @@ void StabilizationSD<MeshType, DofType>::lapu_bgradv (const Real& coef, VectorEl
                 "lapu_bgradv matrix needs second derivatives");
 
     MatrixElemental::matrix_type mat_tmp (fe.nbNode, fe.nbNode);
-    MatrixElemental::matrix_type v ( fe.nbCoor(), fe.nbQuadPt() );
+    MatrixElemental::matrix_type v ( fe.nbLocalCoor(), fe.nbQuadPt() );
     Real s;
 
 
     // compute local vectors values at quadrature points
     for (UInt ig (0); ig < fe.nbQuadPt(); ++ig)
     {
-        for (UInt icoor (0); icoor < fe.nbCoor(); ++icoor)
+        for (UInt icoor (0); icoor < fe.nbLocalCoor(); ++icoor)
         {
             VectorElemental::vector_view velicoor = vel.block (icoor);
             v (icoor, ig) = 0.;
@@ -686,8 +686,8 @@ void StabilizationSD<MeshType, DofType>::lapu_bgradv (const Real& coef, VectorEl
         {
             s = 0.0;
             for (UInt ig (0); ig < fe.nbQuadPt(); ++ig)
-                for (UInt icoor (0); icoor < fe.nbCoor(); ++icoor)
-                    for (UInt jcoor (0); jcoor < fe.nbCoor(); ++jcoor)
+                for (UInt icoor (0); icoor < fe.nbLocalCoor(); ++icoor)
+                    for (UInt jcoor (0); jcoor < fe.nbLocalCoor(); ++jcoor)
                     {
                         s += fe.phiDer2 (j, icoor, icoor, ig) * v (jcoor, ig) * fe.phiDer (i, jcoor, ig) * fe.weightDet (ig);
                     }
@@ -722,9 +722,9 @@ void StabilizationSD<MeshType, DofType>::lapu_gradq (const Real& coef, MatrixEle
 
     Real s;
 
-    for (UInt jc (0); jc < fe.nbCoor(); ++jc) // loop on column blocks
+    for (UInt jc (0); jc < fe.nbLocalCoor(); ++jc) // loop on column blocks
     {
-        MatrixElemental::matrix_view mat_view = elmat.block (fe.nbCoor(), jc);
+        MatrixElemental::matrix_view mat_view = elmat.block (fe.nbLocalCoor(), jc);
         for (UInt i (0); i < fe.nbNode; ++i) // local rows
         {
             for (UInt j (0); j < fe.nbNode; ++j) // local columns
@@ -732,7 +732,7 @@ void StabilizationSD<MeshType, DofType>::lapu_gradq (const Real& coef, MatrixEle
                 s = 0.0;
                 // quadrature formula
                 for (UInt ig (0); ig < fe.nbQuadPt(); ++ig)
-                    for (UInt jcoor (0); jcoor < fe.nbCoor(); ++jcoor) // lap
+                    for (UInt jcoor (0); jcoor < fe.nbLocalCoor(); ++jcoor) // lap
                     {
                         s += fe.phiDer2 (j, jcoor, jcoor, ig) * fe.phiDer (i, jc, ig) * fe.weightDet (ig);
                     }
@@ -752,14 +752,14 @@ void StabilizationSD<MeshType, DofType>::f_bgradv (const Real& coef, SourceType&
     ASSERT_PRE (fe.hasFirstDeriv(),
                 "f_bgradv  vector needs at least the first derivatives");
 
-    MatrixElemental::matrix_type v (fe.nbCoor(), fe.nbQuadPt() );
+    MatrixElemental::matrix_type v (fe.nbLocalCoor(), fe.nbQuadPt() );
     Real s;
 
 
     // local velocity at quadrature points
     for (UInt ig (0); ig < fe.nbQuadPt(); ++ig)
     {
-        for (UInt icoor (0); icoor < fe.nbCoor(); ++icoor)
+        for (UInt icoor (0); icoor < fe.nbLocalCoor(); ++icoor)
         {
             VectorElemental::vector_view velicoor = vel.block (icoor);
             v (icoor, ig) = 0.;
@@ -771,14 +771,14 @@ void StabilizationSD<MeshType, DofType>::f_bgradv (const Real& coef, SourceType&
     }
 
     // local vector per block
-    for (UInt ic (0); ic < fe.nbCoor(); ++ic)
+    for (UInt ic (0); ic < fe.nbLocalCoor(); ++ic)
     {
         VectorElemental::vector_view vec_ic = elvec.block (ic + iblock);
         for (UInt i (0); i < fe.nbNode; ++i)
         {
             s = 0.0;
             for (UInt ig (0); ig < fe.nbQuadPt(); ++ig)
-                for (UInt jcoor (0); jcoor < fe.nbCoor(); ++jcoor)
+                for (UInt jcoor (0); jcoor < fe.nbLocalCoor(); ++jcoor)
                     s += source (time, fe.quadPt (ig, 0), fe.quadPt (ig, 1), fe.quadPt (ig, 2), ic + 1)
                          * fe.phiDer (i, jcoor, ig) * v (jcoor, ig) * fe.weightDet (ig);
             vec_ic (i) += coef * s;
@@ -803,7 +803,7 @@ void StabilizationSD<MeshType, DofType>::f_gradq (const Real& coef, SourceType& 
     {
         s = 0.0;
         for (UInt ig = 0; ig < fe.nbQuadPt(); ++ig)
-            for (UInt jcoor (0); jcoor < fe.nbCoor(); ++jcoor)
+            for (UInt jcoor (0); jcoor < fe.nbLocalCoor(); ++jcoor)
                 s += source (time, fe.quadPt (ig, 0), fe.quadPt (ig, 1), fe.quadPt (ig, 2), jcoor + 1)
                      * fe.phiDer (i, jcoor, ig) * fe.weightDet (ig);
         vec_ic (i) += coef * s;

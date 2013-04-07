@@ -7,7 +7,7 @@
 ver='2.4'
 
 download_superlu_dist() {
-  wget "http://crd.lbl.gov/~xiaoye/SuperLU/superlu_dist_${ver}.tar.gz"
+  wget -c "http://crd.lbl.gov/~xiaoye/SuperLU/superlu_dist_${ver}.tar.gz"
 }
 
 unpack_superlu_dist() {
@@ -39,7 +39,7 @@ build_superlu_dist() {
     BLASLIB="${_blas}" \
     CDEFS="-DAdd_" NOOPTS="-fPIC" \
     ARCH="ar" ARCHFLAGS="cr" RANLIB="ranlib" \
-    DSUPERLULIB=${build_dir}/static/libsuperlu_dist.a || return 1
+    DSUPERLULIB=${build_dir}/static/libsuperlu_dist.a
   popd >/dev/null
 }
 
