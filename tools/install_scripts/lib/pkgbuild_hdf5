@@ -1,17 +1,16 @@
 #! /bin/bash
 #
 # author: Antonio Cervone <ant.cervone@gmail.com>
-# date:   11-12-2012
+# date:   06-02-2013
 #
 
-ver='1.8.8'
-
+ver='1.8.9'
 download_hdf5() {
-  wget "ftp://ftp.hdfgroup.org/HDF5/releases/hdf5-${ver}/src/hdf5-${ver}.tar.gz"
+  wget -c "http://www.hdfgroup.org/ftp/HDF5/releases/hdf5-${ver}/src/hdf5-${ver}.tar.bz2"
 }
 
 unpack_hdf5() {
-  tar xzf hdf5-${ver}.tar.gz
+  tar xjf hdf5-${ver}.tar.bz2
 }
 
 build_hdf5() {
@@ -27,10 +26,10 @@ build_hdf5() {
     --enable-shared \
     --with-pic
 
-  make
+  make -j1
 }
 
 install_hdf5() {
-  make -j$NUM_PROC install
+  make install
 }
 

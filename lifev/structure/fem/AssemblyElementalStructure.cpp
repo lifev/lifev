@@ -142,9 +142,9 @@ void stiff_derdiv ( Real coef, const boost::multi_array<Real, 3>&  gradientLocal
     //
     // blocks (icoor,jcoor) of elmat
     //
-    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
+    for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); ++icoor )
     {
-        for ( UInt jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
+        for ( UInt jcoor = 0; jcoor < fe.nbLocalCoor(); ++jcoor )
         {
 
             MatrixElemental::matrix_view mat = elmat.block ( icoor, jcoor );
@@ -154,7 +154,7 @@ void stiff_derdiv ( Real coef, const boost::multi_array<Real, 3>&  gradientLocal
                 for ( UInt j = 0; j < fe.nbFEDof(); ++j )
                 {
                     s = 0;
-                    for ( UInt k = 0; k < fe.nbCoor(); ++k )
+                    for ( UInt k = 0; k < fe.nbLocalCoor(); ++k )
                         for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
                         {
                             s += fe.phiDer ( i, icoor, ig ) * gradientLocalDisplacement[ jcoor ][ k ][ ig ]
@@ -180,9 +180,9 @@ void stiff_dergradbis ( Real coef, const boost::multi_array<Real, 3>&  gradientL
     // blocks (icoor,jcoor) of elmat
     //
 
-    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
+    for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); ++icoor )
     {
-        for ( UInt jcoor = 0; jcoor <  fe.nbCoor(); ++jcoor )
+        for ( UInt jcoor = 0; jcoor <  fe.nbLocalCoor(); ++jcoor )
         {
 
             MatrixElemental::matrix_view mat = elmat.block ( icoor, jcoor );
@@ -192,7 +192,7 @@ void stiff_dergradbis ( Real coef, const boost::multi_array<Real, 3>&  gradientL
                 for ( UInt j = 0; j < fe.nbFEDof(); ++j )
                 {
                     s = 0;
-                    for ( UInt k = 0; k < fe.nbCoor(); ++k )
+                    for ( UInt k = 0; k < fe.nbLocalCoor(); ++k )
                         for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
                             s += fe.phiDer ( i, k, ig ) * gradientLocalDisplacement[ jcoor][ icoor ][ ig ] *
                                  fe.phiDer ( j, k, ig ) * fe.weightDet ( ig );
@@ -219,7 +219,7 @@ void stiff_divgrad ( Real coef, const VectorElemental& uk_loc, MatrixElemental& 
     {
         s = 0;
         // loop on space coordinates
-        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
+        for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
         {
             for ( UInt i = 0; i < fe.nbFEDof(); i++ )
             {
@@ -237,7 +237,7 @@ void stiff_divgrad ( Real coef, const VectorElemental& uk_loc, MatrixElemental& 
         for ( UInt j = 0; j < fe.nbFEDof(); ++j )
         {
             s = 0.0;
-            for ( UInt k = 0; k < fe.nbCoor(); ++k )
+            for ( UInt k = 0; k < fe.nbLocalCoor(); ++k )
             {
                 for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
                 {
@@ -248,7 +248,7 @@ void stiff_divgrad ( Real coef, const VectorElemental& uk_loc, MatrixElemental& 
         }
     }
 
-    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
+    for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); ++icoor )
     {
         MatrixElemental::matrix_view mat = elmat.block ( icoor, icoor );
         mat += mat_tmp;
@@ -269,9 +269,9 @@ void stiff_gradgrad ( Real coef, const VectorElemental& uk_loc, MatrixElemental&
     {
         s = 0;
         // loop on space coordinates
-        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
+        for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
         {
-            for ( UInt l = 0; l < fe.nbCoor(); l++ )
+            for ( UInt l = 0; l < fe.nbLocalCoor(); l++ )
             {
                 s1 = 0;
                 for ( UInt i = 0; i < fe.nbFEDof(); i++ )
@@ -291,7 +291,7 @@ void stiff_gradgrad ( Real coef, const VectorElemental& uk_loc, MatrixElemental&
         for ( UInt j = 0; j < fe.nbFEDof(); ++j )
         {
             s = 0.0;
-            for ( UInt k = 0; k < fe.nbCoor(); ++k )
+            for ( UInt k = 0; k < fe.nbLocalCoor(); ++k )
             {
                 for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
                 {
@@ -302,7 +302,7 @@ void stiff_gradgrad ( Real coef, const VectorElemental& uk_loc, MatrixElemental&
         }
     }
 
-    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
+    for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); ++icoor )
     {
         MatrixElemental::matrix_view mat = elmat.block ( icoor, icoor );
         mat += mat_tmp;
@@ -319,9 +319,9 @@ void stiff_dergrad_gradbis ( Real coef, const boost::multi_array<Real, 3>&  grad
     // blocks (icoor,jcoor) of elmat
     //
 
-    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
+    for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); ++icoor )
     {
-        for ( UInt jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
+        for ( UInt jcoor = 0; jcoor < fe.nbLocalCoor(); ++jcoor )
         {
 
             MatrixElemental::matrix_view mat = elmat.block ( icoor, jcoor );
@@ -331,7 +331,7 @@ void stiff_dergrad_gradbis ( Real coef, const boost::multi_array<Real, 3>&  grad
                 for ( UInt j = 0; j < fe.nbFEDof(); ++j )
                 {
                     s = 0.0;
-                    for ( UInt k = 0; k < fe.nbCoor(); ++k )
+                    for ( UInt k = 0; k < fe.nbLocalCoor(); ++k )
                     {
                         for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
                             s += gradientLocalDisplacement[ icoor ][ jcoor ][ ig ] * fe.phiDer ( i, k, ig ) *
@@ -356,9 +356,9 @@ void stiff_dergrad_gradbis_Tr ( Real coef, const boost::multi_array<Real, 3>&  g
     // blocks (icoor,jcoor) of elmat
     //
 
-    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
+    for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); ++icoor )
     {
-        for ( UInt jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
+        for ( UInt jcoor = 0; jcoor < fe.nbLocalCoor(); ++jcoor )
         {
 
             MatrixElemental::matrix_view mat = elmat.block ( icoor, jcoor );
@@ -368,7 +368,7 @@ void stiff_dergrad_gradbis_Tr ( Real coef, const boost::multi_array<Real, 3>&  g
                 for ( UInt j = 0; j < fe.nbFEDof(); ++j )
                 {
                     s = 0.0;
-                    for ( UInt k = 0; k < fe.nbCoor(); ++k )
+                    for ( UInt k = 0; k < fe.nbLocalCoor(); ++k )
                     {
                         for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
                             s += gradientLocalDisplacement[ icoor ][ k ][ ig ]  * fe.phiDer ( j, k, ig ) *
@@ -390,22 +390,22 @@ void stiff_gradgradTr_gradbis ( Real coef, const VectorElemental& uk_loc, Matrix
     Real s;
 
     //! \grad u^k  [\grad u^k]^T  at each quadrature poInt
-    //Real guk_gukT[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];
-    boost::multi_array<Real, 3> guk_gukT (boost::extents[fe.nbCoor()][fe.nbCoor()][fe.nbQuadPt()]);
+    //Real guk_gukT[ fe.nbLocalCoor() ][ fe.nbLocalCoor() ][ fe.nbQuadPt() ];
+    boost::multi_array<Real, 3> guk_gukT (boost::extents[fe.nbLocalCoor()][fe.nbLocalCoor()][fe.nbQuadPt()]);
 
     // loop on quadrature poInts
     for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
 
         // loop on space coordinates
-        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
+        for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
         {
 
             // loop  on space coordinates
-            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+            for ( UInt jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
             {
                 s = 0.0;
-                for ( UInt n = 0; n < fe.nbCoor(); n++ )
+                for ( UInt n = 0; n < fe.nbLocalCoor(); n++ )
                 {
                     for ( UInt i = 0; i < fe.nbFEDof(); i++ )
                     {
@@ -422,9 +422,9 @@ void stiff_gradgradTr_gradbis ( Real coef, const VectorElemental& uk_loc, Matrix
         }
     }
 
-    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
+    for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); ++icoor )
     {
-        for ( UInt jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
+        for ( UInt jcoor = 0; jcoor < fe.nbLocalCoor(); ++jcoor )
         {
 
             MatrixElemental::matrix_view mat = elmat.block ( icoor, jcoor );
@@ -434,7 +434,7 @@ void stiff_gradgradTr_gradbis ( Real coef, const VectorElemental& uk_loc, Matrix
                 for ( UInt j = 0; j < fe.nbFEDof(); ++j )
                 {
                     s = 0;
-                    for ( UInt k = 0; k < fe.nbCoor(); ++k )
+                    for ( UInt k = 0; k < fe.nbLocalCoor(); ++k )
                         for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
                             s += fe.phiDer ( i, k, ig ) * guk_gukT[ icoor ][ jcoor ][ ig ] *
                                  fe.phiDer ( j, k, ig ) * fe.weightDet ( ig );
@@ -455,9 +455,9 @@ void stiff_dergrad ( Real coef, const boost::multi_array<Real, 3>& gradientLocal
 
     Real s;
 
-    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
+    for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); ++icoor )
     {
-        for ( UInt jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
+        for ( UInt jcoor = 0; jcoor < fe.nbLocalCoor(); ++jcoor )
         {
 
             MatrixElemental::matrix_view mat = elmat.block ( icoor, jcoor );
@@ -467,7 +467,7 @@ void stiff_dergrad ( Real coef, const boost::multi_array<Real, 3>& gradientLocal
                 for ( UInt j = 0; j < fe.nbFEDof(); ++j )
                 {
                     s = 0;
-                    for ( UInt k = 0; k < fe.nbCoor(); ++k )
+                    for ( UInt k = 0; k < fe.nbLocalCoor(); ++k )
                         for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
                         {
                             s += fe.phiDer ( i, k, ig ) *
@@ -494,9 +494,9 @@ void stiff_divgrad_2 ( Real coef, const boost::multi_array<Real, 3>& gradientLoc
     // blocks (icoor,jcoor) of elmat
     //
 
-    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
+    for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); ++icoor )
     {
-        for ( UInt jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
+        for ( UInt jcoor = 0; jcoor < fe.nbLocalCoor(); ++jcoor )
         {
             MatrixElemental::matrix_view mat = elmat.block ( icoor, jcoor );
 
@@ -505,7 +505,7 @@ void stiff_divgrad_2 ( Real coef, const boost::multi_array<Real, 3>& gradientLoc
                 for ( UInt j = 0; j < fe.nbFEDof(); ++j )
                 {
                     s = 0;
-                    for ( UInt k = 0; k < fe.nbCoor(); ++k )
+                    for ( UInt k = 0; k < fe.nbLocalCoor(); ++k )
                         for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
                             s += fe.phiDer ( j, jcoor, ig ) *
                                  gradientLocalDisplacement[ icoor ][ k ][ ig ] *
@@ -522,9 +522,9 @@ void stiff_gradgrad_2 ( Real coef, const boost::multi_array<Real, 3>&  gradientL
 {
     Real s;
 
-    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
+    for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); ++icoor )
     {
-        for ( UInt jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
+        for ( UInt jcoor = 0; jcoor < fe.nbLocalCoor(); ++jcoor )
         {
             MatrixElemental::matrix_view mat = elmat.block ( icoor, jcoor );
 
@@ -533,9 +533,9 @@ void stiff_gradgrad_2 ( Real coef, const boost::multi_array<Real, 3>&  gradientL
                 for ( UInt j = 0; j < fe.nbFEDof(); ++j )
                 {
                     s = 0.0;
-                    for ( UInt k = 0; k < fe.nbCoor(); ++k )
+                    for ( UInt k = 0; k < fe.nbLocalCoor(); ++k )
                     {
-                        for ( UInt l = 0; l < fe.nbCoor(); ++l )
+                        for ( UInt l = 0; l < fe.nbLocalCoor(); ++l )
                         {
                             for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
                                 s += gradientLocalDisplacement[ jcoor ][ l ][ ig ] * fe.phiDer ( j, l, ig ) *
@@ -567,9 +567,9 @@ void stiff_dergrad_gradbis_2 ( Real coef, const boost::multi_array<Real, 3>&  gr
         for ( UInt j = 0; j < fe.nbFEDof(); ++j )
         {
             s = 0.0;
-            for ( UInt l = 0; l < fe.nbCoor(); ++l )
+            for ( UInt l = 0; l < fe.nbLocalCoor(); ++l )
             {
-                for ( UInt k = 0; k < fe.nbCoor(); ++k )
+                for ( UInt k = 0; k < fe.nbLocalCoor(); ++k )
                 {
                     for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
                         s += gradientLocalDisplacement[ l ][ k ][ ig ] * fe.phiDer ( i, k, ig ) *
@@ -580,7 +580,7 @@ void stiff_dergrad_gradbis_2 ( Real coef, const boost::multi_array<Real, 3>&  gr
         }
     }
 
-    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
+    for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); ++icoor )
     {
         MatrixElemental::matrix_view mat = elmat.block ( icoor, icoor );
         mat += mat_tmp;
@@ -602,9 +602,9 @@ void stiff_dergrad_gradbis_Tr_2 ( Real coef, const boost::multi_array<Real, 3>& 
         for ( UInt j = 0; j < fe.nbFEDof(); ++j )
         {
             s = 0.0;
-            for ( UInt l = 0; l < fe.nbCoor(); ++l )
+            for ( UInt l = 0; l < fe.nbLocalCoor(); ++l )
             {
-                for ( UInt k = 0; k < fe.nbCoor(); ++k )
+                for ( UInt k = 0; k < fe.nbLocalCoor(); ++k )
                 {
                     for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
                     {
@@ -617,7 +617,7 @@ void stiff_dergrad_gradbis_Tr_2 ( Real coef, const boost::multi_array<Real, 3>& 
         }
     }
 
-    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
+    for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); ++icoor )
     {
         MatrixElemental::matrix_view mat = elmat.block ( icoor, icoor );
         mat += mat_tmp;
@@ -636,9 +636,9 @@ void stiff_gradgradTr_gradbis_2 ( Real coef, const boost::multi_array<Real, 3>& 
     //
     // blocks (icoor,jcoor) of elmat
     //
-    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
+    for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); ++icoor )
     {
-        for ( UInt jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
+        for ( UInt jcoor = 0; jcoor < fe.nbLocalCoor(); ++jcoor )
         {
 
             MatrixElemental::matrix_view mat = elmat.block ( icoor, jcoor ); // it extracts the (icoor, jcoor) block
@@ -648,9 +648,9 @@ void stiff_gradgradTr_gradbis_2 ( Real coef, const boost::multi_array<Real, 3>& 
                 for ( UInt j = 0; j < fe.nbFEDof(); ++j )
                 {
                     s = 0;
-                    for ( UInt l = 0; l < fe.nbCoor(); ++l )
+                    for ( UInt l = 0; l < fe.nbLocalCoor(); ++l )
                     {
-                        for ( UInt k = 0; k < fe.nbCoor(); ++k )
+                        for ( UInt k = 0; k < fe.nbLocalCoor(); ++k )
                         {
                             for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
                             {
@@ -673,22 +673,22 @@ void stiff_gradgradTr_gradbis_3 ( Real coef, const VectorElemental& uk_loc,
 
     Real s;
     // \grad u^k  [\grad u^k]^T  at each quadrature poInt
-    //Real guk_gukT[ fe.nbCoor() ][ fe.nbCoor() ][ fe.nbQuadPt() ];
-    boost::multi_array<Real, 3> guk_gukT (boost::extents[fe.nbCoor()][fe.nbCoor()][fe.nbQuadPt()]);
+    //Real guk_gukT[ fe.nbLocalCoor() ][ fe.nbLocalCoor() ][ fe.nbQuadPt() ];
+    boost::multi_array<Real, 3> guk_gukT (boost::extents[fe.nbLocalCoor()][fe.nbLocalCoor()][fe.nbQuadPt()]);
 
     // loop on quadrature poInts                                                // (\grad u^k  [\grad u^k]^T )^T
     for ( UInt ig = 0; ig < fe.nbQuadPt(); ig++ )
     {
 
         // loop on space coordinates
-        for ( UInt icoor = 0; icoor < fe.nbCoor(); icoor++ )
+        for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); icoor++ )
         {
 
             // loop  on space coordinates
-            for ( UInt jcoor = 0; jcoor < fe.nbCoor(); jcoor++ )
+            for ( UInt jcoor = 0; jcoor < fe.nbLocalCoor(); jcoor++ )
             {
                 s = 0.0;
-                for ( UInt n = 0; n < fe.nbCoor(); n++ )
+                for ( UInt n = 0; n < fe.nbLocalCoor(); n++ )
                 {
                     for ( UInt i = 0; i < fe.nbFEDof(); i++ )
                     {
@@ -715,9 +715,9 @@ void stiff_gradgradTr_gradbis_3 ( Real coef, const VectorElemental& uk_loc,
         for ( UInt j = 0; j < fe.nbFEDof(); ++j )
         {
             s = 0.0;
-            for ( UInt l = 0; l < fe.nbCoor(); ++l )
+            for ( UInt l = 0; l < fe.nbLocalCoor(); ++l )
             {
-                for ( UInt k = 0; k < fe.nbCoor(); ++k )
+                for ( UInt k = 0; k < fe.nbLocalCoor(); ++k )
                 {
                     for ( UInt ig = 0; ig < fe.nbQuadPt(); ++ig )
                     {
@@ -729,7 +729,7 @@ void stiff_gradgradTr_gradbis_3 ( Real coef, const VectorElemental& uk_loc,
         }
     }
 
-    for ( UInt icoor = 0; icoor < fe.nbCoor(); ++icoor )
+    for ( UInt icoor = 0; icoor < fe.nbLocalCoor(); ++icoor )
     {
         MatrixElemental::matrix_view mat = elmat.block ( icoor, icoor );
         mat += mat_tmp;

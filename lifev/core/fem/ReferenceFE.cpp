@@ -46,12 +46,12 @@ namespace LifeV
 
 ReferenceFE::ReferenceFE ( std::string name, FE_TYPE type, ReferenceShapes shape,
                            Int nbDofPerVertex, Int nbDofPerEdge, Int nbDofPerFace,
-                           Int nbDofPerVolume, Int nbDof, Int nbCoor, Int FEDim, const function_Type* phi,
+                           Int nbDofPerVolume, Int nbDof, Int nbLocalCoor, Int FEDim, const function_Type* phi,
                            const function_Type* dPhi, const function_Type* d2Phi, const function_Type* divPhi , const Real* refCoor,
                            DofPatternType patternType,
                            const ReferenceFE* bdRefFE ) :
-    ReferenceElement ( name, shape, nbDof, nbCoor, FEDim, phi, dPhi, d2Phi, divPhi, refCoor ),
-    DOFLocalPattern ( nbDof, nbDofPerVertex, nbDofPerEdge, nbDofPerFace, nbDofPerVolume, patternType, nbCoor ),
+    ReferenceElement ( name, shape, nbDof, nbLocalCoor, FEDim, phi, dPhi, d2Phi, divPhi, refCoor ),
+    DOFLocalPattern ( nbDof, nbDofPerVertex, nbDofPerEdge, nbDofPerFace, nbDofPerVolume, patternType, nbLocalCoor ),
     M_boundaryFE ( bdRefFE ), M_type ( type )
 {}
 

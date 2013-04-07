@@ -1526,7 +1526,10 @@ template <typename Mesh>
 void
 StructuralOperator<Mesh>::initialize ( const function& d0 )
 {
-    M_dispFESpace->interpolate (d0, *M_disp, 0.0);
+    M_FESpace->interpolate ( static_cast<typename FESpace<Mesh, MapEpetra>::function_Type> ( d0 ), *M_disp, 0.0);
+    //M_FESpace->interpolate(w0, *M_vel , 0.0);
+    // M_FESpace->interpolate(a0, *M_acc , 0.0);
+}
 
 }
 

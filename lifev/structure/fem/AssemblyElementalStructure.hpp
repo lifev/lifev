@@ -53,7 +53,7 @@
 
 #include <lifev/core/LifeV.hpp>
 
-#include <lifev/core/fem/CurrentBoundaryFE.hpp>
+#include <lifev/core/fem/CurrentFEManifold.hpp>
 #include <lifev/core/fem/CurrentFE.hpp>
 #include <lifev/core/fem/DOF.hpp>
 
