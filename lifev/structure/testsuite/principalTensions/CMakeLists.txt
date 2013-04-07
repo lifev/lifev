@@ -115,7 +115,7 @@ TRIBITS_COPY_FILES_TO_BINARY_DIR(dataStressNH
 
 TRIBITS_ADD_TEST(
   Tensions
-  NAME 2ndExponential
+  NAME VonMises-2ndExponential
   ARGS "-f data2ndExpo"
   NUM_MPI_PROCS 2
   COMM serial mpi
