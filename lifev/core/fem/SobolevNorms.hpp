@@ -132,7 +132,7 @@ elementaryH1NormSquare ( const VectorType& u, const CurrentFE& fe, const DOF& do
     UInt eleID (fe.currentLocalId() );
     Real sum (0.0);
     Real sum2 (0.0);
-    std::vector<Real> graduQuadPt (fe.nbCoor(), 0.0);
+    std::vector<Real> graduQuadPt (fe.nbLocalCoor(), 0.0);
     Real uQuadPt (0.0);
 
     for (UInt iComp (0); iComp < nbComp; ++iComp )
@@ -141,7 +141,7 @@ elementaryH1NormSquare ( const VectorType& u, const CurrentFE& fe, const DOF& do
         {
 
             uQuadPt = 0.0;
-            for (UInt iCoor (0); iCoor < fe.nbCoor(); ++iCoor)
+            for (UInt iCoor (0); iCoor < fe.nbLocalCoor(); ++iCoor)
             {
                 graduQuadPt[iCoor] = 0.0;
             }
@@ -150,14 +150,14 @@ elementaryH1NormSquare ( const VectorType& u, const CurrentFE& fe, const DOF& do
             {
                 UInt dofID = dof.localToGlobalMap ( eleID, iDof ) + iComp * dof.numTotalDof();
                 uQuadPt += u ( dofID ) * fe.phi ( iDof, iQuadPt );
-                for (UInt iCoor (0); iCoor < fe.nbCoor(); ++iCoor)
+                for (UInt iCoor (0); iCoor < fe.nbLocalCoor(); ++iCoor)
                 {
                     graduQuadPt[iCoor] += u ( dofID ) * fe.dphi ( iDof, iCoor, iQuadPt );
                 }
             }
 
             sum2 = uQuadPt * uQuadPt;
-            for (UInt icoor = 0; icoor < fe.nbCoor(); icoor++)
+            for (UInt icoor = 0; icoor < fe.nbLocalCoor(); icoor++)
             {
                 sum2 += graduQuadPt[icoor] * graduQuadPt[icoor];
             }
@@ -185,7 +185,7 @@ elementaryFctH1NormSquare ( const FunctionType& fct, const CurrentFE& fe )
         z = fe.quadNode (iQuadPt, 2);
 
         sum2 = std::pow (fct ( x, y, z ), 2);
-        for (UInt iCoor (0); iCoor < fe.nbCoor(); ++iCoor)
+        for (UInt iCoor (0); iCoor < fe.nbLocalCoor(); ++iCoor)
         {
             sum2 += std::pow (fct.grad (iCoor, x, y, z), 2);
         }
@@ -213,7 +213,7 @@ Real elementaryFctH1NormSquare ( const FunctionType& fct, const CurrentFE& fe, c
         {
             sum2 = std::pow (fct (t, x, y, z, iComp ), 2);
 
-            for (UInt iCoor = 0; iCoor < fe.nbCoor(); ++iCoor)
+            for (UInt iCoor = 0; iCoor < fe.nbLocalCoor(); ++iCoor)
             {
                 sum2 += std::pow (fct.grad (iCoor, t, x, y, z, iComp), 2);
             }
@@ -309,7 +309,7 @@ Real elementaryDifferenceH1NormSquare ( const VectorType& u, const UsrFct& fct, 
     for (UInt iQuadPt (0); iQuadPt < fe.nbQuadPt(); ++iQuadPt )
     {
         uQuadPt = 0.0;
-        Vector graduQuadPt = ZeroVector (fe.nbCoor() );
+        Vector graduQuadPt = ZeroVector (fe.nbLocalCoor() );
 
         x = fe.quadNode (iQuadPt, 0);
         y = fe.quadNode (iQuadPt, 1);
@@ -320,7 +320,7 @@ Real elementaryDifferenceH1NormSquare ( const VectorType& u, const UsrFct& fct, 
         {
             UInt dofID = dof.localToGlobalMap ( eleID, iDof );
             uQuadPt += u ( dofID ) * fe.phi ( iDof, iQuadPt );
-            for (UInt iCoor (0); iCoor < fe.nbCoor(); ++iCoor)
+            for (UInt iCoor (0); iCoor < fe.nbLocalCoor(); ++iCoor)
             {
                 graduQuadPt (iCoor) += u ( dofID ) * fe.dphi ( iDof, iCoor, iQuadPt );
             }
@@ -329,12 +329,12 @@ Real elementaryDifferenceH1NormSquare ( const VectorType& u, const UsrFct& fct, 
         diffQuadPt = uQuadPt - fct ( x, y, z );
 
         Vector diffGradQuadPt = graduQuadPt;
-        for (UInt iCoor (0); iCoor < fe.nbCoor(); ++iCoor)
+        for (UInt iCoor (0); iCoor < fe.nbLocalCoor(); ++iCoor)
         {
             diffGradQuadPt (iCoor) -= fct.grad (iCoor, x, y, z);
         }
         Real sum2 = diffQuadPt * diffQuadPt;
-        for (UInt iCoor (0); iCoor < fe.nbCoor(); ++iCoor)
+        for (UInt iCoor (0); iCoor < fe.nbLocalCoor(); ++iCoor)
         {
             sum2 += diffGradQuadPt (iCoor) * diffGradQuadPt (iCoor);
         }
@@ -366,13 +366,13 @@ Real elementaryDifferenceH1NormSquare ( const VectorType& u, const UsrFct& fct, 
         for (UInt iComp (0); iComp < nbComp; ++iComp )
         {
             uQuadPt = 0.0;
-            Vector graduQuadPt = ZeroVector (fe.nbCoor() );
+            Vector graduQuadPt = ZeroVector (fe.nbLocalCoor() );
 
             for (UInt iDof (0); iDof < fe.nbFEDof(); ++iDof )
             {
                 UInt dofID = dof.localToGlobalMap ( eleID, iDof ) + iComp * dof.numTotalDof();
                 uQuadPt += u ( dofID ) * fe.phi ( iDof, iQuadPt );
-                for (UInt iCoor (0); iCoor < fe.nbCoor(); ++iCoor)
+                for (UInt iCoor (0); iCoor < fe.nbLocalCoor(); ++iCoor)
                 {
                     graduQuadPt (iCoor) += u ( dofID ) * fe.dphi ( iDof, iCoor, iQuadPt );
                 }
@@ -381,13 +381,13 @@ Real elementaryDifferenceH1NormSquare ( const VectorType& u, const UsrFct& fct, 
             diffQuadPt = uQuadPt - fct (t, x, y, z, iComp);
 
             Vector diffGradQuadPt = graduQuadPt;
-            for (UInt iCoor (0); iCoor < fe.nbCoor(); ++iCoor)
+            for (UInt iCoor (0); iCoor < fe.nbLocalCoor(); ++iCoor)
             {
                 diffGradQuadPt (iCoor) -= fct.grad (iCoor, t, x, y, z, iComp);
             }
 
             sum2 = diffQuadPt * diffQuadPt;
-            for (UInt iCoor (0); iCoor < fe.nbCoor(); ++iCoor)
+            for (UInt iCoor (0); iCoor < fe.nbLocalCoor(); ++iCoor)
             {
                 sum2 += diffGradQuadPt (iCoor) * diffGradQuadPt (iCoor);
             }

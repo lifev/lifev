@@ -49,7 +49,7 @@
 #include <lifev/core/fem/DOFInterface.hpp>
 #include <lifev/core/fem/ReferenceFE.hpp>
 #include <lifev/core/fem/DOF.hpp>
-#include <lifev/core/fem/CurrentBoundaryFE.hpp>
+#include <lifev/core/fem/CurrentFEManifold.hpp>
 #include <lifev/core/util/LifeChrono.hpp>
 
 namespace LifeV
@@ -564,16 +564,16 @@ template <typename Mesh>
 void DOFInterface3Dto3D::updateDofConnections ( const Mesh& mesh1, const DOF& dof1,
                                                 const Mesh& mesh2, const DOF& dof2, const Real& tol, const fct& coupled, Int const* const flag3)
 {
-    CurrentBoundaryFE feBd1 ( M_refFE1->boundaryFE(), getGeometricMap ( mesh1 ).boundaryMap() );
-    CurrentBoundaryFE feBd2 ( M_refFE2->boundaryFE(), getGeometricMap ( mesh2 ).boundaryMap() );
+    CurrentFEManifold feBd1 ( M_refFE1->boundaryFE(), getGeometricMap ( mesh1 ).boundaryMap() );
+    CurrentFEManifold feBd2 ( M_refFE2->boundaryFE(), getGeometricMap ( mesh2 ).boundaryMap() );
 
     std::vector<Real> p1 ( nDimensions ), p2 ( nDimensions );
 
     // Loop on facets at the interface (matching facets)
     for ( Iterator i = M_facetToFacetConnectionList.begin(); i != M_facetToFacetConnectionList.end(); ++i )
     {
-        feBd1.update ( mesh1.boundaryFacet ( i->first ) ); // Updating facet information on mesh1
-        feBd2.update ( mesh2.boundaryFacet ( i->second ) ); // Updating facet information on mesh2
+        feBd1.update ( mesh1.boundaryFacet ( i->first ), UPDATE_ONLY_CELL_NODES ); // Updating facet information on mesh1
+        feBd2.update ( mesh2.boundaryFacet ( i->second ), UPDATE_ONLY_CELL_NODES ); // Updating facet information on mesh2
 
         std::vector<ID> localToGlobalMapOnBFacet1 = dof1.localToGlobalMapOnBdFacet (i->first);
         std::vector<ID> localToGlobalMapOnBFacet2 = dof2.localToGlobalMapOnBdFacet (i->second);
@@ -585,12 +585,12 @@ void DOFInterface3Dto3D::updateDofConnections ( const Mesh& mesh1, const DOF& do
                 continue;
             }
             ID gDof1 = localToGlobalMapOnBFacet1[lDof1];
-            feBd1.coorMap ( p1[0], p1[1], p1[2], feBd1.refFE.xi ( lDof1 ), feBd1.refFE.eta ( lDof1 ) ); // Nodal coordinates on the current facet (mesh1)
+            feBd1.coorMap ( p1[0], p1[1], p1[2], feBd1.refFE().xi ( lDof1 ), feBd1.refFE().eta ( lDof1 ) ); // Nodal coordinates on the current facet (mesh1)
 
             for (ID lDof2 = 0; lDof2 < localToGlobalMapOnBFacet2.size(); lDof2++)
             {
                 ID gDof2 = localToGlobalMapOnBFacet2[lDof2];
-                feBd2.coorMap ( p2[0], p2[1], p2[2], feBd2.refFE.xi ( lDof2 ), feBd2.refFE.eta ( lDof2 ) );
+                feBd2.coorMap ( p2[0], p2[1], p2[2], feBd2.refFE().xi ( lDof2 ), feBd2.refFE().eta ( lDof2 ) );
 
                 if ( coupled ( p1, p2, tol ) )
                 {

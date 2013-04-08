@@ -664,7 +664,7 @@ CFL()
             const UInt iGlobalFace ( M_FESpace.mesh()->localFacetId ( iElem, iFace ) );
 
             // Update the normal vector of the current face in each quadrature point
-            M_FESpace.feBd().updateMeasNormalQuadPt ( M_FESpace.mesh()->boundaryFacet ( iGlobalFace ) );
+            M_FESpace.feBd().update ( M_FESpace.mesh()->boundaryFacet ( iGlobalFace ), UPDATE_W_ROOT_DET_METRIC | UPDATE_NORMALS | UPDATE_QUAD_NODES );
 
             // Take the left element to the face, see regionMesh for the meaning of left element
             const UInt leftElement ( M_FESpace.mesh()->faceElement ( iGlobalFace, 0 ) );
@@ -829,6 +829,13 @@ localEvolve ( const UInt& iElem )
     // Clean the local flux
     M_localFlux.zero();
 
+    // Check if the boundary conditions were updated.
+    if ( !M_BCh->bcUpdateDone() )
+    {
+        // Update the boundary conditions handler. We use the finite element of the boundary of the dual variable.
+        M_BCh->bcUpdate ( *M_FESpace.mesh(), M_FESpace.feBd(), M_FESpace.dof() );
+    }
+
     // Loop on the faces of the element iElem and compute the local contribution
     for ( UInt iFace (0); iFace < M_FESpace.mesh()->numLocalFaces(); ++iFace )
     {
@@ -842,7 +849,7 @@ localEvolve ( const UInt& iElem )
         const UInt rightElement ( M_FESpace.mesh()->faceElement ( iGlobalFace, 1 ) );
 
         // Update the normal vector of the current face in each quadrature point
-        M_FESpace.feBd().updateMeasNormalQuadPt ( M_FESpace.mesh()->boundaryFacet ( iGlobalFace ) );
+        M_FESpace.feBd().update ( M_FESpace.mesh()->boundaryFacet ( iGlobalFace ), UPDATE_W_ROOT_DET_METRIC | UPDATE_NORMALS | UPDATE_QUAD_NODES );
 
         // Local flux of a face times the integration weight
         VectorElemental localFaceFluxWeight ( M_FESpace.refFE().nbDof(), 1 );
@@ -882,13 +889,6 @@ localEvolve ( const UInt& iElem )
             // Clean the value of the right element
             rightValue.zero();
 
-            // Check if the boundary conditions were updated.
-            if ( !M_BCh->bcUpdateDone() )
-            {
-                // Update the boundary conditions handler. We use the finite element of the boundary of the dual variable.
-                M_BCh->bcUpdate ( *M_FESpace.mesh(), M_FESpace.feBd(), M_FESpace.dof() );
-            }
-
             // Take the boundary marker for the current boundary face
             const ID faceMarker ( M_FESpace.mesh()->boundaryFacet ( iGlobalFace ).markerID() );
 
@@ -926,7 +926,7 @@ localEvolve ( const UInt& iElem )
                                                quadPoint (2),
                                                rightValue[ 0 ] );
                     // Update the local flux of the current face with the quadrature weight
-                    localFaceFluxWeight[0] += localFaceFlux * M_FESpace.feBd().weightMeas ( ig );
+                    localFaceFluxWeight[0] += localFaceFlux * M_FESpace.feBd().wRootDetMetric ( ig );
                 }
 
             }
@@ -984,7 +984,7 @@ localEvolve ( const UInt& iElem )
                                                             quadPoint (2) );
 
             // Update the local flux of the current face with the quadrature weight
-            localFaceFluxWeight[0] += localFaceFlux * M_FESpace.feBd().weightMeas ( ig );
+            localFaceFluxWeight[0] += localFaceFlux * M_FESpace.feBd().wRootDetMetric ( ig );
 
         }
 

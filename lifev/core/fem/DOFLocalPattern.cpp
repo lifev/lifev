@@ -44,8 +44,8 @@ namespace LifeV
 // constructor
 DOFLocalPattern::DOFLocalPattern ( const UInt& nbLocalDof, const UInt& nbDofPerVertex,
                                    const UInt& nbDofPerEdge, const UInt& nbDofPerFace,
-                                   const UInt& nbDofPerVolume, const DofPatternType& patternType, UInt nbCoor  ) :
-    M_dim (nbCoor), M_nbLocalDof ( nbLocalDof ), M_nbDofPerDimEntity (std::vector< UInt> (4) ),
+                                   const UInt& nbDofPerVolume, const DofPatternType& patternType, UInt nbLocalCoor  ) :
+    M_dim (nbLocalCoor), M_nbLocalDof ( nbLocalDof ), M_nbDofPerDimEntity (std::vector< UInt> (4) ),
     M_patternType ( patternType )
 {
     // Store the location of the dofs
