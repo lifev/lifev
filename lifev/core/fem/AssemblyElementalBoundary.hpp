@@ -42,7 +42,7 @@
 
 #include <lifev/core/LifeV.hpp>
 
-#include <lifev/core/fem/CurrentBoundaryFE.hpp>
+#include <lifev/core/fem/CurrentFEManifold.hpp>
 #include <lifev/core/fem/CurrentFE.hpp>
 #include <lifev/core/fem/DOF.hpp>
 
@@ -95,14 +95,14 @@ public:
 
     void laplaceBeltrami (MatrixElemental& localLB,
                           const CurrentFE& LBCFE,
-                          const CurrentBoundaryFE& LBCBdFE,
+                          const CurrentFEManifold& LBCBdFE,
                           const Real& coefficient,
                           const ID    LBCFEID,
                           const UInt& fieldDim);
 
     void stiffStrainBoundary (MatrixElemental& localLB,
                               const CurrentFE& LBCFE,
-                              const CurrentBoundaryFE& LBCBdFE,
+                              const CurrentFEManifold& LBCBdFE,
                               const Real& coefficient,
                               const ID    LBCFEID,
                               const UInt& fieldDim);
@@ -110,7 +110,7 @@ public:
 
     void divDivBoundary (MatrixElemental& localLB,
                          const CurrentFE& LBCFE,
-                         const CurrentBoundaryFE& LBCBdFE,
+                         const CurrentFEManifold& LBCBdFE,
                          const Real& coefficient,
                          const ID    LBCFEID,
                          const UInt& fieldDim);
@@ -121,7 +121,7 @@ public:
 template<typename GeoShapeType>
 void AssemblyElementalBoundary<GeoShapeType>::laplaceBeltrami (MatrixElemental& localLB,
                                                                const CurrentFE& LBCFE,
-                                                               const CurrentBoundaryFE& LBCBdFE,
+                                                               const CurrentFEManifold& LBCBdFE,
                                                                const Real& coefficient,
                                                                const ID    LBCFEID,
                                                                const UInt& fieldDim)
@@ -129,7 +129,7 @@ void AssemblyElementalBoundary<GeoShapeType>::laplaceBeltrami (MatrixElemental& 
 
     typedef GeoShapeType geoShape_Type;
 
-    const UInt nbFEDof (LBCBdFE.nbNode() );
+    const UInt nbFEDof (LBCBdFE.nbFEDof() );
     const UInt nbQuadPt (LBCBdFE.nbQuadPt() );
     Real localValue (0);
     Real normalGradj (0);
@@ -174,7 +174,7 @@ void AssemblyElementalBoundary<GeoShapeType>::laplaceBeltrami (MatrixElemental& 
                     {
                         localValue += ( LBCFE.dphi (iDofE, iDim, iQuadPt) - normalGradi * LBCBdFE.normal ( iDim, iQuadPt) )
                                       * ( LBCFE.dphi (jDofE, iDim, iQuadPt) - normalGradj * LBCBdFE.normal ( iDim, iQuadPt) )
-                                      * LBCBdFE.weightMeas (iQuadPt);
+                                      * LBCBdFE.wRootDetMetric (iQuadPt);
                     }
                 }
 
@@ -196,7 +196,7 @@ void AssemblyElementalBoundary<GeoShapeType>::laplaceBeltrami (MatrixElemental& 
 template<typename GeoShapeType>
 void AssemblyElementalBoundary<GeoShapeType>::divDivBoundary (MatrixElemental& localLB,
                                                               const CurrentFE& LBCFE,
-                                                              const CurrentBoundaryFE& LBCBdFE,
+                                                              const CurrentFEManifold& LBCBdFE,
                                                               const Real& coefficient,
                                                               const ID    LBCFEID,
                                                               const UInt& fieldDim)
@@ -204,7 +204,7 @@ void AssemblyElementalBoundary<GeoShapeType>::divDivBoundary (MatrixElemental& l
 
     typedef GeoShapeType geoShape_Type;
 
-    const UInt nbFEDof (LBCBdFE.nbNode() );
+    const UInt nbFEDof (LBCBdFE.nbFEDof() );
     const UInt nbQuadPt (LBCBdFE.nbQuadPt() );
     Real localValue (0);
     Real normalGradj (0);
@@ -250,7 +250,7 @@ void AssemblyElementalBoundary<GeoShapeType>::divDivBoundary (MatrixElemental& l
     //                             normalGradi * LBCBdFE.normal( iterFDim, iQuadPt) )
     //                     * ( LBCFE.dphi(jDofE,iterFDim,iQuadPt)-
     //                             normalGradj * LBCBdFE.normal( iterFDim, iQuadPt)  )
-    //                                   * LBCBdFE.weightMeas(iQuadPt);
+    //                                   * LBCBdFE.wRootDetMetric(iQuadPt);
     //             }
 
     //             localValue*=coefficient;
@@ -299,7 +299,7 @@ void AssemblyElementalBoundary<GeoShapeType>::divDivBoundary (MatrixElemental& l
                                         normalGradi * LBCBdFE.normal ( iFDim, iQuadPt) )
                                       * ( LBCFE.dphi (jDofE, jFDim, iQuadPt) -
                                           normalGradj * LBCBdFE.normal ( jFDim, iQuadPt)  )
-                                      * LBCBdFE.weightMeas (iQuadPt);
+                                      * LBCBdFE.wRootDetMetric (iQuadPt);
 
                     }
 
@@ -314,14 +314,14 @@ void AssemblyElementalBoundary<GeoShapeType>::divDivBoundary (MatrixElemental& l
 template<typename GeoShapeType>
 void AssemblyElementalBoundary<GeoShapeType>::stiffStrainBoundary (MatrixElemental& localLB,
                                                                    const CurrentFE& LBCFE,
-                                                                   const CurrentBoundaryFE& LBCBdFE,
+                                                                   const CurrentFEManifold& LBCBdFE,
                                                                    const Real& coefficient,
                                                                    const ID    LBCFEID,
                                                                    const UInt& fieldDim)
 {
     typedef GeoShapeType geoShape_Type;
 
-    const UInt nbFEDof (LBCBdFE.nbNode() );
+    const UInt nbFEDof (LBCBdFE.nbFEDof() );
     const UInt nbQuadPt (LBCBdFE.nbQuadPt() );
     Real localValue (0);
     const Real newCoefficient (coefficient * 0.5);
@@ -368,7 +368,7 @@ void AssemblyElementalBoundary<GeoShapeType>::stiffStrainBoundary (MatrixElement
                     {
                         localValue += ( LBCFE.dphi (iDofE, iDim, iQuadPt) - normalGradi * LBCBdFE.normal ( iDim, iQuadPt) )
                                       * ( LBCFE.dphi (jDofE, iDim, iQuadPt) - normalGradj * LBCBdFE.normal ( iDim, iQuadPt) )
-                                      * LBCBdFE.weightMeas (iQuadPt);
+                                      * LBCBdFE.wRootDetMetric (iQuadPt);
 
                     }
                 }
@@ -417,7 +417,7 @@ void AssemblyElementalBoundary<GeoShapeType>::stiffStrainBoundary (MatrixElement
 
                         localValue += ( LBCFE.dphi (jDofE, iFDim, iQuadPt) - normalGradi * LBCBdFE.normal ( iFDim, iQuadPt) )
                                       * ( LBCFE.dphi (iDofE, jFDim, iQuadPt) - normalGradj * LBCBdFE.normal ( jFDim, iQuadPt) )
-                                      * LBCBdFE.weightMeas (iQuadPt);
+                                      * LBCBdFE.wRootDetMetric (iQuadPt);
                     }
 
                     localView ( iDofE, jDofE ) += newCoefficient * localValue;
