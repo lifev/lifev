@@ -73,11 +73,11 @@ each time step and with the BDF method!!
 
 #include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
 #include <lifev/structure/solver/StructuralOperator.hpp>
-#include <lifev/structure/solver/VenantKirchhoffMaterialLinear.hpp>
-#include <lifev/structure/solver/VenantKirchhoffMaterialNonLinear.hpp>
-#include <lifev/structure/solver/NeoHookeanMaterialNonLinear.hpp>
-#include <lifev/structure/solver/ExponentialMaterialNonLinear.hpp>
-#include <lifev/structure/solver/VenantKirchhoffMaterialNonLinearPenalized.hpp>
+#include <lifev/structure/solver/isotropic/VenantKirchhoffMaterialLinear.hpp>
+#include <lifev/structure/solver/isotropic/VenantKirchhoffMaterialNonLinear.hpp>
+#include <lifev/structure/solver/isotropic/NeoHookeanMaterialNonLinear.hpp>
+#include <lifev/structure/solver/isotropic/ExponentialMaterialNonLinear.hpp>
+#include <lifev/structure/solver/isotropic/VenantKirchhoffMaterialNonLinearPenalized.hpp>
 
 #include <lifev/core/filter/Exporter.hpp>
 #include <lifev/core/filter/ExporterEnsight.hpp>
