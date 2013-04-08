@@ -63,7 +63,7 @@
 
 #include <lifev/core/array/MatrixEpetra.hpp>
 #include <lifev/core/array/VectorEpetra.hpp>
-#include <lifev/core/array/MatrixBlockMonolithicEpetra.hpp>
+#include <lifev/core/array/MatrixEpetraStructured.hpp>
 #include <lifev/core/array/VectorBlockMonolithicEpetra.hpp>
 
 
@@ -93,7 +93,7 @@ typedef MatrixEpetra<Real> matrix_Type;
 typedef VectorEpetra vector_Type;
 typedef boost::shared_ptr<VectorEpetra> vectorPtr_Type;
 
-typedef MatrixBlockMonolithicEpetra<Real> matrix_block_type;
+typedef MatrixEpetraStructured<Real> matrix_block_type;
 typedef VectorBlockMonolithicEpetra vector_block_type;
 typedef boost::shared_ptr<VectorBlockMonolithicEpetra> vector_blockPtr_type;
 

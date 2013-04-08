@@ -56,7 +56,7 @@
 #include <lifev/core/algorithm/PreconditionerML.hpp>
 #include <lifev/core/algorithm/SolverAztecOO.hpp>
 
-#include <lifev/core/array/MatrixBlockMonolithicEpetra.hpp>
+#include <lifev/core/array/MatrixEpetraStructured.hpp>
 #include <lifev/core/array/VectorBlockMonolithicEpetra.hpp>
 
 #include <lifev/core/util/LifeChrono.hpp>
@@ -483,7 +483,7 @@ static bool regML = (PRECFactory::instance().registerProduct ( "ML", &createML )
 
 /* Some typedef */
 typedef RegionMesh<LinearTetra> mesh_Type;
-typedef MatrixBlockMonolithicEpetra<Real> matrix_block_type;
+typedef MatrixEpetraStructured<Real> matrix_block_type;
 typedef VectorBlockMonolithicEpetra vector_block_type;
 typedef MatrixEpetra<Real> matrix_type;
 typedef VectorEpetra vector_type;
