@@ -53,6 +53,9 @@ CMAKE_MINIMUM_REQUIRED(VERSION ${TRIBITS_CMAKE_MINIMUM_REQUIRED})
 # Add documentation
 ADD_SUBDIRECTORY(doc)
 
+# Add source dir to includes
+INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
+
 # Do all of the processing for this Tribits project
 TRIBITS_PROJECT()
 
