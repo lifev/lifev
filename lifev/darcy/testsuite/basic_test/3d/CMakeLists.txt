@@ -2,9 +2,6 @@
 INCLUDE(TribitsAddExecutableAndTest)
 INCLUDE(TribitsCopyFilesToBinaryDir)
 
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
-
-
 TRIBITS_ADD_EXECUTABLE_AND_TEST(
   BasicTest_3D
   SOURCES main.cpp  user_fun.cpp darcy.cpp

@@ -1,7 +1,5 @@
 INCLUDE(TribitsAddExecutableAndTest)
 
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
-
 TRIBITS_ADD_EXECUTABLE_AND_TEST(
   restartFSI
   SOURCES main.cpp ud_functions.cpp flowConditions.cpp
