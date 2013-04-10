@@ -18,7 +18,7 @@
 
 
 [exporter]
-type       = ensight 			# hdf5 (if library compiled with hdf5 support) or ensight
+type       = hdf5 			# hdf5 (if library compiled with hdf5 support) or ensight
 multimesh  = false
 start      = 0
 save       = 1
@@ -40,16 +40,16 @@ solidTypeIsotropic 	= neoHookean		# linearVenantKirchhoff / nonLinearVenantKirch
 solidTypeAnisotropic = holzapfel
 
 [./fibers]
-numberFamilies  = 2
-stiffness       = '2.684564e+6 2.684564e+6'
-nonlinearity    = '1.0 1.0'
-smoothness      = 0.001
+numberFamilies  = 3
+stiffness       = '2.684564e+6 2.684564e+6 2.684564e+6'
+nonlinearity    = '1.0 1.0 1.0'
+smoothness      = 1000
 [./]
 
 
 [../../time_discretization]
 initialtime 	= 0.
-endtime     	= 0.4
+endtime     	= 5.0
 timestep    	= 0.1
 theta       	= 0.35
 zeta        	= 0.75

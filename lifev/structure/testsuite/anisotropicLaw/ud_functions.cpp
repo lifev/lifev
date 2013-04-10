@@ -40,6 +40,8 @@
 
 #include "ud_functions.hpp"
 
+#define PI 3.14159265359
+
 namespace LifeV
 {
 
@@ -149,7 +151,7 @@ Real bcZero (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Rea
 
 Real bcNonZero (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
 {
-    return  100000.;
+    return  500000.;
 }
 
 Real bcNonZeroSecondOrderExponential (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
@@ -164,10 +166,10 @@ Real Family1 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, c
     switch (i)
     {
         case 0:
-            return 1.0;
+	    return 1.0;
             break;
         case 1:
-            return 0.0;
+	    return 0.0;
             break;
         case 2:
             return 0.0;
@@ -185,10 +187,10 @@ Real Family2 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, c
     switch (i)
     {
         case 0:
-            return 0.0;
+	    return 0.0;
             break;
         case 1:
-            return 1.0;
+	    return -1.0;
             break;
         case 2:
             return 0.0;
@@ -212,7 +214,7 @@ Real Family3 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, c
             return 0.0;
             break;
         case 2:
-            return 0.0;
+            return -1.0;
             break;
         default:
             ERROR_MSG ("This entrie is not allowed: ud_functions.hpp");

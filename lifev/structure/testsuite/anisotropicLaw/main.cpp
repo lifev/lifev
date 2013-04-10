@@ -170,12 +170,7 @@ public:
     {
         run3d();
     }
-    void CheckResultLE (const Real& dispNorm, const Real& time);
-    void CheckResultSVK (const Real& dispNorm, const Real& time);
-    void CheckResultSVKPenalized (const Real& dispNorm, const Real& time);
-    void CheckResultEXP (const Real& dispNorm, const Real& time);
     void CheckResultNH (const Real& dispNorm, const Real& time);
-    void CheckResult2ndOrderExponential (const Real& dispNorm, const Real& time);
     void resultChanged (Real time);
     //@}
 
@@ -517,18 +512,23 @@ Structure::run3d()
 
 
     exporter->postProcess ( 0 );
+    cout.precision(16);
+
+    int IDPointX = 618;
+    int IDPointY = 331;
+
     /*
     //!--------------------------------------------------------------------------------------------
     //! MATLAB FILE WITH DISPLACEMENT OF A CHOSEN POINT
     //!--------------------------------------------------------------------------------------------
-    cout.precision(16);
+    
     ofstream file_comp( "Displacement_components_NL.m" );
     if ( !file_comp )
     {
       std::cout <<" Unable to open file! You need to specify the output folder in the data file " << std::endl;
     }
 
-    int IDPoint = 73; // StructuredCube4
+ 
     //int IDPoint = 401; // StructuredCube8
     //int IDPoint = 2593; // StructuredCube16
 
@@ -614,122 +614,25 @@ Structure::run3d()
            file_comp<< endl;
         */
 
+	cout <<"*********************************************************"<< std::endl;
+	cout <<" solid.disp()[ "<< IDPointX - 1  <<" ] = "<<  solid.displacement()[ IDPointX - 1 ]  << std::endl;
+	cout <<" solid.disp()[ "<< IDPointX - 1 + dFESpace->dof().numTotalDof() <<" ] = "<<  solid.displacement()[ IDPointX - 1 + dFESpace->dof().numTotalDof() ]  << std::endl;
+	cout <<"*********************************************************"<< std::endl;
+
+
+
         Real normVect;
         normVect =  solid.displacement().norm2();
         std::cout << "The norm 2 of the displacement field is: " << normVect << std::endl;
 
-        ///////// CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
-        if (!dataStructure->solidTypeIsotropic().compare ("linearVenantKirchhoff") )
-        {
-            CheckResultLE (normVect, dataStructure->dataTime()->time() );
-        }
-        else if (!dataStructure->solidTypeIsotropic().compare ("nonLinearVenantKirchhoff") )
-        {
-            CheckResultSVK (normVect, dataStructure->dataTime()->time() );
-        }
-        else if (!dataStructure->solidTypeIsotropic().compare ("nonLinearVenantKirchhoffPenalized") )
-        {
-            CheckResultSVKPenalized (normVect, dataStructure->dataTime()->time() );
-        }
-        else if (!dataStructure->solidTypeIsotropic().compare ("exponential") )
-        {
-            CheckResultEXP (normVect, dataStructure->dataTime()->time() );
-        }
-        else if (!dataStructure->solidTypeIsotropic().compare ("secondOrderExponential") )
-        {
-            CheckResult2ndOrderExponential (normVect, dataStructure->dataTime()->time() );
-        }
-        else
-        {
-            CheckResultNH (normVect, dataStructure->dataTime()->time() );
-        }
+	// Check
+	CheckResultNH (normVect, dataStructure->dataTime()->time() );
 
-        ///////// END OF CHECK
 
 
         //!--------------------------------------------------------------------------------------------------
 
         MPI_Barrier (MPI_COMM_WORLD);
-    }
-}
-
-
-
-void Structure::CheckResultLE (const Real& dispNorm, const Real& time)
-{
-    if ( time == 0.1  && std::fabs (dispNorm - 0.276527) <= 1e-5 )
-    {
-        this->resultChanged (time);
-    }
-    if ( time == 0.2  && std::fabs (dispNorm - 0.276536) <= 1e-5 )
-    {
-        this->resultChanged (time);
-    }
-    if ( time == 0.3  && std::fabs (dispNorm - 0.276529) <= 1e-5 )
-    {
-        this->resultChanged (time);
-    }
-    if ( time == 0.4  && std::fabs (dispNorm - 0.276531) <= 1e-5 )
-    {
-        this->resultChanged (time);
-    }
-}
-
-void Structure::CheckResultSVK (const Real& dispNorm, const Real& time)
-{
-    if ( time == 0.1  && std::fabs (dispNorm - 0.263348) <= 1e-5 )
-    {
-        this->resultChanged (time);
-    }
-    if ( time == 0.2  && std::fabs (dispNorm - 0.263350) <= 1e-5 )
-    {
-        this->resultChanged (time);
-    }
-    if ( time == 0.3  && std::fabs (dispNorm - 0.263350) <= 1e-5 )
-    {
-        this->resultChanged (time);
-    }
-    if ( time == 0.4  && std::fabs (dispNorm - 0.263351) <= 1e-5 )
-    {
-        this->resultChanged (time);
-    }
-}
-void Structure::CheckResultSVKPenalized (const Real& dispNorm, const Real& time)
-{
-    if ( time == 0.1  && std::fabs (dispNorm - 0.254316) <= 1e-5 )
-    {
-        this->resultChanged (time);
-    }
-    if ( time == 0.2  && std::fabs (dispNorm - 0.254322) <= 1e-5 )
-    {
-        this->resultChanged (time);
-    }
-    if ( time == 0.3  && std::fabs (dispNorm - 0.254317) <= 1e-5 )
-    {
-        this->resultChanged (time);
-    }
-    if ( time == 0.4  && std::fabs (dispNorm - 0.254318) <= 1e-5 )
-    {
-        this->resultChanged (time);
-    }
-}
-void Structure::CheckResultEXP (const Real& dispNorm, const Real& time)
-{
-    if ( time == 0.1  && std::fabs (dispNorm - 0.284844) <= 1e-5 )
-    {
-        this->resultChanged (time);
-    }
-    if ( time == 0.2  && std::fabs (dispNorm - 0.284853) <= 1e-5 )
-    {
-        this->resultChanged (time);
-    }
-    if ( time == 0.3  && std::fabs (dispNorm - 0.284846) <= 1e-5 )
-    {
-        this->resultChanged (time);
-    }
-    if ( time == 0.4  && std::fabs (dispNorm - 0.284848) <= 1e-5 )
-    {
-        this->resultChanged (time);
     }
 }
 
@@ -748,27 +651,6 @@ void Structure::CheckResultNH (const Real& dispNorm, const Real& time)
         this->resultChanged (time);
     }
     if ( time == 0.4  && std::fabs (dispNorm - 0.286123) <= 1e-5 )
-    {
-        this->resultChanged (time);
-    }
-}
-
-
-void Structure::CheckResult2ndOrderExponential (const Real& dispNorm, const Real& time)
-{
-    if ( time == 0.1  && std::fabs (dispNorm - 0.561523) <= 1e-5 )
-    {
-        this->resultChanged (time);
-    }
-    if ( time == 0.2  && std::fabs (dispNorm - 0.561496) <= 1e-5 )
-    {
-        this->resultChanged (time);
-    }
-    if ( time == 0.3  && std::fabs (dispNorm - 0.561517) <= 1e-5 )
-    {
-        this->resultChanged (time);
-    }
-    if ( time == 0.4  && std::fabs (dispNorm - 0.561512) <= 1e-5 )
     {
         this->resultChanged (time);
     }
