@@ -1,0 +1,23 @@
+INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR})
+
+SET(HEADERS "")
+SET(SOURCES "")
+
+ADD_SUBDIRECTORY(bc)
+
+SET(HEADERS ${HEADERS} ${bc_HEADERS})
+SET(SOURCES ${SOURCES} ${bc_SOURCES})
+
+TRIBITS_EXCLUDE_AUTOTOOLS_FILES()
+# This is the list of files excluded from the tarball
+TRIBITS_EXCLUDE_FILES()
+
+# Add library target
+TRIBITS_ADD_LIBRARY(
+  lifevbcinterface3D
+  HEADERS ${HEADERS}
+  SOURCES ${SOURCES}
+  DEPLIBS lifevbcinterfacecore
+)
+
+ADD_SUBDIRECTORY(function)
