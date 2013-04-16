@@ -31,7 +31,7 @@ material_flag   = 101
 
 [../model]
 constitutiveLaw = anisotropic
-young     	= 8.e+6
+young     	= 8.e+5
 poisson   	= 0.49
 bulk		= 1.3333e+8
 alpha 		= 2.684564e+6
@@ -41,7 +41,7 @@ solidTypeAnisotropic = holzapfel
 
 [./fibers]
 numberFamilies  = 3
-stiffness       = '2.684564e+6 2.684564e+6 2.684564e+6'
+stiffness       = '2.684564e+5 2.684564e+5 2.684564e+5'
 nonlinearity    = '1.0 1.0 1.0'
 smoothness      = 1000
 [./]
