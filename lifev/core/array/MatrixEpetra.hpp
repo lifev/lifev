@@ -697,7 +697,7 @@ template <typename DataType>
 MatrixEpetra<DataType>&
 MatrixEpetra<DataType>::operator -= ( const MatrixEpetra& matrix )
 {
-    EpetraExt::MatrixMatrix::Add ( *matrix.matrixPtr(), false, 1., *this->matrixPtr(), -1. );
+    EpetraExt::MatrixMatrix::Add ( *matrix.matrixPtr(), false, -1., *this->matrixPtr(), 1. );
 
     return *this;
 }

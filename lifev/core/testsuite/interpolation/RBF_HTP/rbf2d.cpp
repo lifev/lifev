@@ -50,7 +50,6 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/core/mesh/MeshData.hpp>
 #include <lifev/core/filter/ExporterHDF5.hpp>
 #include <lifev/core/interpolation/RBFInterpolation.hpp>
-#include <lifev/core/interpolation/RBFhtp.hpp>
 #include <lifev/core/interpolation/RBFlocallyRescaledScalar.hpp>
 #include <lifev/core/interpolation/RBFrescaledScalar.hpp>
 #include <lifev/core/interpolation/RBFscalar.hpp>
@@ -167,9 +166,13 @@ int main (int argc, char** argv )
 
     RBFinterpolant->solution (Fluid_solution);
 
+    if(dataFile("interpolation/interpolation_Type","none")!="RBFscalar")
+        RBFinterpolant->solutionrbf (Fluid_solution_rbf);
+
     // COMPUTING THE ERROR
     vectorPtr_Type Fluid_exact_solution (new vector_Type (Fluid_fieldFESpace->map(), Unique) );
     vectorPtr_Type myError (new vector_Type (Fluid_fieldFESpace->map(), Unique) );
+    vectorPtr_Type rbfError (new vector_Type (Fluid_fieldFESpace->map(), Unique) );
 
     for ( UInt i = 0; i < Fluid_exact_solution->epetraVector().MyLength(); ++i )
         if (Fluid_exact_solution->blockMap().LID (Fluid_exact_solution->blockMap().GID (i) ) != -1)
@@ -179,6 +182,9 @@ int main (int argc, char** argv )
                                                                                      Fluid_mesh_ptr->point (Fluid_exact_solution->blockMap().GID (i) ).z() );
 
             (*myError) [myError->blockMap().GID (i)] = (*Fluid_exact_solution) [Fluid_exact_solution->blockMap().GID (i)] - (*Fluid_solution) [Fluid_solution->blockMap().GID (i)];
+            if(dataFile("interpolation/interpolation_Type","none")!="RBFscalar")
+                (*rbfError) [rbfError->blockMap().GID (i)] = (*Fluid_exact_solution) [Fluid_exact_solution->blockMap().GID (i)] - (*Fluid_solution_rbf) [Fluid_solution_rbf->blockMap().GID (i)];
+
         }
 
     Real err_Inf = myError->normInf();
@@ -197,6 +203,11 @@ int main (int argc, char** argv )
     Fluid_exporter.addVariable (ExporterData<mesh_Type>::ScalarField, "Exact solution", Fluid_fieldFESpace, Fluid_exact_solution, UInt (0) );
     Fluid_exporter.addVariable (ExporterData<mesh_Type>::ScalarField, "Solution", Fluid_fieldFESpace, Fluid_solution, UInt (0) );
     Fluid_exporter.addVariable (ExporterData<mesh_Type>::ScalarField, "Error", Fluid_fieldFESpace, myError, UInt (0) );
+    if(dataFile("interpolation/interpolation_Type","none")!="RBFscalar")
+    {
+        Fluid_exporter.addVariable (ExporterData<mesh_Type>::ScalarField, "RBF's solution", Fluid_fieldFESpace, Fluid_solution_rbf, UInt (0) );
+        Fluid_exporter.addVariable (ExporterData<mesh_Type>::ScalarField, "RBF's error", Fluid_fieldFESpace, rbfError, UInt (0) );
+    }
     Fluid_exporter.postProcess (0);
     Fluid_exporter.closeFile();
 

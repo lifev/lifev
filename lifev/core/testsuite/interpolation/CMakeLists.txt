@@ -7,5 +7,6 @@ ADD_SUBDIRECTORIES(
   RBF_test2dVectorial
   RBF_test3dVectorial
   RBF_coronaryArtery
+  RBF_HTP
   )
 

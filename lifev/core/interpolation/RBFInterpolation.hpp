@@ -120,6 +120,8 @@ public:
 
     virtual void setRadius ( double ){};
 
+    virtual void approximateInverse ( ) {};
+
 private:
 
 };
