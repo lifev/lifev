@@ -76,7 +76,8 @@ public:
     typedef MeshType mesh_Type;
     typedef boost::shared_ptr<mesh_Type> meshPtr_Type;
     typedef boost::shared_ptr<Epetra_Comm>       commPtr_Type;
-    typedef boost::shared_ptr<GraphCutterBase<MeshType> > graphCutterPtr_Type;
+    typedef boost::shared_ptr<
+    		std::vector<std::vector<Int> > > graph_Type;
     //@}
 
     //! \name Constructors & Destructors
@@ -89,7 +90,7 @@ public:
      *
      * \param mesh - shared pointer to the global uncut mesh
     */
-    MeshPartBuilder (const meshPtr_Type& mesh, const graphCutterPtr_Type& graph,
+    MeshPartBuilder (const meshPtr_Type& mesh,
                      const UInt overlap,
                      const commPtr_Type& comm);
 
@@ -109,8 +110,8 @@ public:
      *                      element IDs associated with this mesh part
      */
     void run (const meshPtr_Type& meshPart,
-              const std::vector<Int>& elementList,
-              const UInt partIndex);
+    		  const graph_Type& graph,
+    		  const UInt partIndex);
     //@}
 
     //! \name Get Methods
@@ -187,7 +188,6 @@ private:
     std::map<Int, Int>                         M_globalToLocalElement;
     meshPtr_Type                               M_originalMesh;
     meshPtr_Type                               M_meshPart;
-    graphCutterPtr_Type                        M_graph;
     UInt                                       M_partIndex;
     UInt                                       M_overlap;
     std::vector<std::vector<UInt> >            M_entityPID;
@@ -199,7 +199,6 @@ private:
 
 template<typename MeshType>
 MeshPartBuilder<MeshType>::MeshPartBuilder (const meshPtr_Type& mesh,
-                                            const graphCutterPtr_Type& graph,
                                             const UInt overlap,
                                             const commPtr_Type& comm)
     : M_nBoundaryVertices (0),
@@ -211,7 +210,6 @@ MeshPartBuilder<MeshType>::MeshPartBuilder (const meshPtr_Type& mesh,
       M_facetVertices (MeshType::facetShape_Type::S_numVertices),
       M_originalMesh (mesh),
       M_meshPart(),
-      M_graph (graph),
       M_partIndex (0),
       M_overlap (overlap),
       M_entityPID (4),
@@ -220,17 +218,19 @@ MeshPartBuilder<MeshType>::MeshPartBuilder (const meshPtr_Type& mesh,
 
 template<typename MeshType>
 void MeshPartBuilder<MeshType>::run (const meshPtr_Type& meshPart,
-                                     const std::vector<Int>& elementList,
-                                     const UInt partIndex)
+									 const graph_Type& graph,
+									 const UInt partIndex)
 {
     M_meshPart = meshPart;
     M_partIndex = partIndex;
 
+    const std::vector<Int>& elementList((*graph)[partIndex]);
+
     if ( M_overlap != 0)
     {
         GhostHandler<mesh_Type> gh ( M_originalMesh, M_comm );
-        gh.fillEntityPID ( M_graph, M_entityPID );
-        gh.ghostMapOnElementsP1 ( M_graph, M_entityPID[ 3 ], 1 );
+        gh.fillEntityPID ( graph, M_entityPID );
+        gh.ghostMapOnElementsP1 ( graph, M_entityPID[ 3 ], 1, M_partIndex );
     }
 
     constructLocalMesh (elementList);

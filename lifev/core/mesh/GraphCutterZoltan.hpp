@@ -39,6 +39,7 @@
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
+#include <vector>
 #include <boost/shared_ptr.hpp>
 #include <boost/lexical_cast.hpp>
 #include <Epetra_Comm.h>
@@ -92,6 +93,7 @@ public:
     typedef boost::shared_ptr<Epetra_Comm>                  commPtr_Type;
     typedef MeshType                                        mesh_Type;
     typedef boost::shared_ptr<mesh_Type>                    meshPtr_Type;
+    typedef boost::shared_ptr<std::vector<std::vector<Int> > > graph_Type;
     typedef std::map<Int, std::vector<Int> >                table_Type;
     //@}
 
@@ -112,7 +114,7 @@ public:
                        pList_Type& parameters);
 
     //! Destructor
-    ~GraphCutterZoltan() {}
+    virtual ~GraphCutterZoltan() {}
     //@}
 
     //! @name Public methods
@@ -131,6 +133,25 @@ public:
     virtual std::vector<Int>& getPart (const UInt i)
     {
         return M_partitionTable.find (i)->second;
+    }
+
+	//! Get the entire partitioned graph, wrapped in a smart pointer
+	virtual graph_Type getGraph()
+	{
+		boost::shared_ptr<std::vector<std::vector<Int> > >
+			graph(new std::vector<std::vector<Int> >(numParts()));
+
+		for (UInt i = 0; i < numParts(); ++i) {
+			(*graph)[i] = getPart(i);
+		}
+
+		return graph;
+	}
+
+    //! Return the number of parts
+    virtual const UInt numParts() const
+    {
+    	return M_partitionTable.size();
     }
 
     //! Get number of stored graph elements

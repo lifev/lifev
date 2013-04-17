@@ -82,6 +82,8 @@ public:
     //! @name Public Types
     //@{
     typedef MeshType                             mesh_Type;
+    typedef boost::shared_ptr<
+    		std::vector<std::vector<Int> > >	 graph_Type;
     typedef GraphCutterType<MeshType>            graphCutter_Type;
     typedef MeshPartBuilderType<MeshType>        meshPartBuilder_Type;
     typedef boost::shared_ptr<mesh_Type>         meshPtr_Type;
@@ -195,7 +197,7 @@ MeshPartitionTool < MeshType,
                       M_meshPart(),
                       M_allMeshParts(),
                       M_graphCutter (new graphCutter_Type (M_originalMesh, M_comm, M_parameters) ),
-                      M_meshPartBuilder (new meshPartBuilder_Type (M_originalMesh, M_graphCutter,
+                      M_meshPartBuilder (new meshPartBuilder_Type (M_originalMesh,
                                                                    M_parameters.get<UInt> ("overlap", 0), M_comm) ),
                       M_success (false)
 {
@@ -224,6 +226,10 @@ void MeshPartitionTool < MeshType,
         return;
     }
 
+    // Extract the graph from the graphCutter and dispose of the cutter
+    graph_Type graph = M_graphCutter->getGraph();
+    M_graphCutter.reset();
+
     if (!M_myPID)
     {
         std::cout << "Building mesh parts ..." << std::endl;
@@ -234,8 +240,7 @@ void MeshPartitionTool < MeshType,
     {
         // Online partitioning
         M_meshPart.reset (new mesh_Type);
-        const std::vector<Int>& myElements = M_graphCutter->getPart (M_myPID);
-        M_meshPartBuilder->run (M_meshPart, myElements, M_myPID);
+        M_meshPartBuilder->run (M_meshPart, graph, M_myPID);
 
         // Mark the partition as successful
         M_success = true;
@@ -254,15 +259,26 @@ void MeshPartitionTool < MeshType,
         else
         {
             Int numParts = M_parameters.get<Int> ("num_parts");
+        	/*
+        	 * In offline partitioning mode, with overlap, we must make sure
+        	 * that each time the M_meshPartBuilder is run, which modifies the
+        	 * partition graph, it modifies the original graph, not the
+        	 * augmented graph from the previous part.
+        	 */
+
             M_allMeshParts.reset (new partMesh_Type (numParts) );
             for (Int curPart = 0; curPart < numParts; ++curPart)
             {
+            	// Backup the elements of the current graph part
+            	std::vector<Int> backup((*graph)[curPart]);
                 M_allMeshParts->at (curPart).reset (new mesh_Type);
-                const std::vector<Int>& curElements
-                    = M_graphCutter->getPart (curPart);
                 M_meshPartBuilder->run (M_allMeshParts->at (curPart),
-                                        curElements, curPart);
+                						graph,
+                                        curPart);
 
+                // At this point (*graph)[curPart] has been modified. Restore
+                // to the original state
+                (*graph)[curPart] = backup;
                 // Mark the partition as successful
                 M_success = true;
             }
@@ -273,8 +289,6 @@ void MeshPartitionTool < MeshType,
     {
         std::cout << "Mesh partition complete." << std::endl;
     }
-    // Destroy the graph partitioner to clear memory
-    M_graphCutter.reset();
     // Destroy the mesh part builder to clear memory
     M_meshPartBuilder.reset();
     // Release the pointer to the original uncut mesh

@@ -83,6 +83,7 @@ public:
     typedef boost::shared_ptr<mesh_Type>           meshPtr_Type;
     typedef std::vector <
     boost::shared_ptr<std::vector<Int> > > vertexPartition_Type;
+    typedef boost::shared_ptr<std::vector<std::vector<Int> > > graph_Type;
     typedef boost::bimap<UInt, UInt>               biMap_Type;
     typedef biMap_Type::value_type                 biMapValue_Type;
     //@}
@@ -104,7 +105,7 @@ public:
                          pList_Type& parameters);
 
     //! Destructor
-    ~GraphCutterParMETIS() {}
+    virtual ~GraphCutterParMETIS() {}
     //@}
 
     //! @name Public methods
@@ -124,6 +125,26 @@ public:
     {
         return * (M_vertexPartition[i]);
     }
+
+    //! Return the number of parts
+    virtual const UInt numParts() const
+    {
+    	return M_vertexPartition.size();
+    }
+
+	//! Get the entire partitioned graph, wrapped in a smart pointer
+	virtual graph_Type getGraph()
+	{
+		boost::shared_ptr<std::vector<std::vector<Int> > >
+			graph(new std::vector<std::vector<Int> >(M_vertexPartition.size()));
+
+		for (UInt i = 0; i < M_vertexPartition.size(); ++i) {
+			(*graph)[i] = getPart(i);
+		}
+
+		return graph;
+	}
+
     //@}
 
 private:
