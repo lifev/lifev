@@ -28,8 +28,8 @@
     @file
     @brief
 
-    @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
-    @date 08-10-2010
+    @author Antonio Cervone <ant.cervone@gmail.com>
+    @date 2013-04-17
  */
 
 // Tell the compiler to ignore specific kind of warnings:
@@ -50,82 +50,41 @@
 
 #include <lifev/core/LifeV.hpp>
 
-
-#include <lifev/core/algorithm/PreconditionerIfpack.hpp>
-#include <lifev/core/algorithm/PreconditionerML.hpp>
-
-#include <lifev/core/algorithm/SolverAztecOO.hpp>
-
 #include <lifev/core/array/MatrixEpetra.hpp>
 
-#include <lifev/core/filter/ExporterEnsight.hpp>
-
 #include <lifev/core/fem/FESpace.hpp>
-#include <lifev/core/fem/BCManage.hpp>
 
 #include <lifev/core/mesh/MeshPartitioner.hpp>
 #include <lifev/core/mesh/RegionMesh3DStructured.hpp>
 #include <lifev/core/mesh/RegionMesh.hpp>
+#include <lifev/core/mesh/MeshData.hpp>
 
 #include <lifev/core/solver/ADRAssembler.hpp>
-#include <lifev/core/mesh/MeshData.hpp>
+
+#ifdef HAVE_HDF5
+#include <lifev/core/filter/ExporterHDF5.hpp>
+#endif
 
 using namespace LifeV;
 
-namespace
-{
-static bool regIF = (PRECFactory::instance().registerProduct ( "Ifpack", &createIfpack ) );
-static bool regML = (PRECFactory::instance().registerProduct ( "ML", &createML ) );
-}
 
-//#define TEST_MASS
-//#define TEST_ADVECTION
-#define TEST_RHS
-
-
-#ifdef TEST_MASS
 Real epsilon (1);
 
-Real exactSolution ( const Real& /* t */, const Real& x, const Real& /* y */, const Real& /* z */ , const ID& /* i */ )
+Real exactSolution ( const Real& /* t */, const Real& x, const Real& y, const Real& /* z */, const ID& /* i */ )
 {
-    Real seps (sqrt (epsilon) );
-    return  exp (seps * x) / (exp (seps) - exp (-seps) );
-}
-#endif
-
-#ifdef TEST_ADVECTION
-Real epsilon (1);
-
-Real exactSolution ( const Real& /* t */, const Real& x, const Real& /* y */, const Real& /* z */, const ID& /* i */ )
-{
-    return  (exp (x / epsilon) - 1 ) / ( exp (1 / epsilon) - 1);
+    return  sin ( x ) + y * y / 2.;
 }
 
-Real betaFct ( const Real& /* t */, const Real& /* x */, const Real& /* y */, const Real& /* z */, const ID& i )
+Real fRhs ( const Real& /* t */, const Real& x, const Real& /* y */, const Real& /* z */ , const ID& /* i */ )
 {
-    return Real (i == 0);
-}
-#endif
-
-#ifdef TEST_RHS
-Real epsilon (1);
-
-Real exactSolution ( const Real& /* t */, const Real& x, const Real& y, const Real& z , const ID& /* i */ )
-{
-    return  sin (x + y) + z * z / 2;
+    return  sin ( x ) - 1.;
 }
 
-
-Real fRhs ( const Real& /* t */, const Real& x, const Real& y, const Real& /* z */ , const ID& /* i */ )
-{
-    return  2 * sin (x + y) - 1;
-}
-#endif
-
-
-typedef RegionMesh<LinearTetra> mesh_type;
-typedef MatrixEpetra<Real> matrix_type;
-typedef VectorEpetra vector_type;
+typedef RegionMesh<LinearTetra> mesh_Type;
+typedef MatrixEpetra<Real> matrix_Type;
+typedef VectorEpetra vector_Type;
+typedef FESpace<mesh_Type, MapEpetra> feSpace_Type;
+typedef boost::shared_ptr<feSpace_Type> feSpacePtr_Type;
 
 int
 main ( int argc, char** argv )
@@ -133,406 +92,286 @@ main ( int argc, char** argv )
 
 #ifdef HAVE_MPI
     MPI_Init (&argc, &argv);
-    boost::shared_ptr<Epetra_Comm> Comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
+#endif
+
+    // introducing a local scope in order to properly destroy all objects
+    // before calling MPI_Finalize()
+    {
+
+#ifdef HAVE_MPI
+        boost::shared_ptr<Epetra_Comm> comm ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
 #else
-    boost::shared_ptr<Epetra_Comm> Comm (new Epetra_SerialComm);
+        boost::shared_ptr<Epetra_Comm> comm ( new Epetra_SerialComm );
 #endif
 
-    const bool verbose (Comm->MyPID() == 0);
+        GetPot dataFile ( "data" );
+        const bool isLeader ( comm->MyPID() == 0 );
+        const bool verbose ( dataFile ( "miscellaneous/verbose", 0 ) && isLeader );
 
-    // Read first the data needed
-
-    if (verbose)
-    {
-        std::cout << " -- Reading the data ... " << std::flush;
-    }
-    GetPot dataFile ( "data" );
-    if (verbose)
-    {
-        std::cout << " done ! " << std::endl;
-    }
-
-    const UInt Nelements (dataFile ("mesh/nelements", 10) );
-    if (verbose)
-    {
-        std::cout << " ---> Number of elements : " << Nelements << std::endl;
-    }
-
-    // Build and partition the mesh
-
-    if (verbose)
-    {
-        std::cout << " -- Building the mesh ... " << std::flush;
-    }
-    boost::shared_ptr< mesh_type > fullMeshPtr (new RegionMesh<LinearTetra>);
-    regularMesh3D ( *fullMeshPtr, 1, Nelements, Nelements, Nelements, false,
-                    2.0,   2.0,   2.0,
-                    -1.0,  -1.0,  -1.0);
-    if (verbose)
-    {
-        std::cout << " done ! " << std::endl;
-    }
-
-    if (verbose)
-    {
-        std::cout << " -- Partitioning the mesh ... " << std::flush;
-    }
-    MeshPartitioner< mesh_type >   meshPart (fullMeshPtr, Comm);
-    if (verbose)
-    {
-        std::cout << " done ! " << std::endl;
-    }
-
-    if (verbose)
-    {
-        std::cout << " -- Freeing the global mesh ... " << std::flush;
-    }
-    fullMeshPtr.reset();
-    if (verbose)
-    {
-        std::cout << " done ! " << std::endl;
-    }
-
-    // Build the FESpaces
-
-    if (verbose)
-    {
-        std::cout << " -- Building FESpaces ... " << std::flush;
-    }
-    std::string uOrder ("P1");
-    std::string bOrder ("P1");
-    boost::shared_ptr<FESpace< mesh_type, MapEpetra > > uFESpace ( new FESpace< mesh_type, MapEpetra > (meshPart, uOrder, 1, Comm) );
-    boost::shared_ptr<FESpace< mesh_type, MapEpetra > > betaFESpace ( new FESpace< mesh_type, MapEpetra > (meshPart, bOrder, 3, Comm) );
-    if (verbose)
-    {
-        std::cout << " done ! " << std::endl;
-    }
-    if (verbose)
-    {
-        std::cout << " ---> Dofs: " << uFESpace->dof().numTotalDof() << std::endl;
-    }
-
-    // Build the assembler and the matrices
-
-    if (verbose)
-    {
-        std::cout << " -- Building assembler ... " << std::flush;
-    }
-    ADRAssembler<mesh_type, matrix_type, vector_type> adrAssembler;
-    if (verbose)
-    {
-        std::cout << " done! " << std::endl;
-    }
-
-    if (verbose)
-    {
-        std::cout << " -- Setting up assembler ... " << std::flush;
-    }
-    adrAssembler.setup (uFESpace, betaFESpace);
-    if (verbose)
-    {
-        std::cout << " done! " << std::endl;
-    }
-
-    if (verbose)
-    {
-        std::cout << " -- Defining the matrix ... " << std::flush;
-    }
-    boost::shared_ptr<matrix_type> systemMatrix (new matrix_type ( uFESpace->map() ) );
-    *systemMatrix *= 0.0;
-    if (verbose)
-    {
-        std::cout << " done! " << std::endl;
-    }
-
-    // Perform the assembly of the matrix
-
-    if (verbose)
-    {
-        std::cout << " -- Adding the diffusion ... " << std::flush;
-    }
-    adrAssembler.addDiffusion (systemMatrix, epsilon);
-    if (verbose)
-    {
-        std::cout << " done! " << std::endl;
-    }
-    if (verbose)
-    {
-        std::cout << " Time needed : " << adrAssembler.diffusionAssemblyChrono().diffCumul() << std::endl;
-    }
-
-#ifdef TEST_ADVECTION
-    if (verbose)
-    {
-        std::cout << " -- Adding the advection ... " << std::flush;
-    }
-    vector_type beta (betaFESpace->map(), Repeated);
-    betaFESpace->interpolate (betaFct, beta, 0.0);
-    adrAssembler.addAdvection (systemMatrix, beta);
-    if (verbose)
-    {
-        std::cout << " done! " << std::endl;
-    }
-#endif
-#ifdef TEST_MASS
-    if (verbose)
-    {
-        std::cout << " -- Adding the mass ... " << std::flush;
-    }
-    adrAssembler.addMass (systemMatrix, 1.0);
-    if (verbose)
-    {
-        std::cout << " done! " << std::endl;
-    }
+#ifdef HAVE_LIFEV_DEBUG
+        std::ofstream debugOut (
+            ( "rm3d." +
+              ( comm->NumProc() > 1 ? boost::lexical_cast<std::string> ( comm->MyPID() ) : "s" ) +
+              ".out" ).c_str() );
+#else
+        std::ofstream debugOut ( "/dev/null" );
 #endif
 
-    if (verbose)
-    {
-        std::cout << " -- Closing the matrix ... " << std::flush;
-    }
-    systemMatrix->globalAssemble();
-    if (verbose)
-    {
-        std::cout << " done ! " << std::endl;
-    }
+        // Build and partition the mesh
 
-#ifdef TEST_RHS
-    Real matrixNorm (systemMatrix->norm1() );
-    if (verbose)
-    {
-        std::cout << " ---> Norm 1 : " << matrixNorm << std::endl;
-    }
-    if ( std::fabs (matrixNorm - 1.68421 ) > 1e-3)
-    {
-        std::cout << " <!> Matrix has changed !!! <!> " << std::endl;
-        return EXIT_FAILURE;
-    }
+        if ( verbose )
+        {
+            std::cout << " -- Reading the mesh ... " << std::flush;
+        }
+        boost::shared_ptr< mesh_Type > fullMeshPtr (new mesh_Type() );
+        if ( dataFile ( "mesh/mesh_type", "structured" ) == "structured" )
+        {
+            regularMesh3D ( *fullMeshPtr, 0,
+                            dataFile ( "mesh/nx", 8 ), dataFile ( "mesh/ny", 8 ), dataFile ( "mesh/nz", 8 ),
+                            dataFile ( "mesh/verbose", false ),
+                            dataFile ( "mesh/lx", 1. ), dataFile ( "mesh/ly", 1. ), dataFile ( "mesh/lz", 1. ) );
+        }
+        else
+        {
+            MeshData meshData (dataFile, "mesh");
+            readMesh (*fullMeshPtr, meshData);
+        }
+        if ( verbose )
+        {
+            std::cout << " done ! " << std::endl;
+        }
+        if ( isLeader )
+        {
+            std::cout << "mesh elements = " << fullMeshPtr->numElements() << "\n"
+                      << "mesh points   = " << fullMeshPtr->numPoints() << std::endl;
+        }
+
+        if ( verbose )
+        {
+            std::cout << " -- Partitioning the mesh ... " << std::flush;
+        }
+
+        LifeChrono partTime;
+        partTime.start();
+        boost::shared_ptr< mesh_Type > localMesh;
+        {
+            MeshPartitioner< mesh_Type >   meshPart;
+            meshPart.doPartition ( fullMeshPtr, comm );
+            localMesh = meshPart.meshPartition();
+        }
+        partTime.stop();
+        if ( isLeader )
+        {
+            std::cout << "partitioning time  = " << partTime.diff() << std::endl;
+        }
+        if ( isLeader )
+        {
+            std::cout << "part mesh elements = " << localMesh->numElements() << "\n"
+                      << "part mesh points   = " << localMesh->numPoints() << std::endl;
+        }
+
+        // localMesh->mesh_Type::showMe( true, debugOut );
+
+        LifeChrono partTimeR;
+        partTimeR.start();
+        boost::shared_ptr< mesh_Type > localMeshR;
+        {
+            MeshPartitioner< mesh_Type >   meshPartR;
+            meshPartR.setPartitionOverlap ( 1 );
+            meshPartR.doPartition ( fullMeshPtr, comm );
+            localMeshR = meshPartR.meshPartition();
+        }
+        partTimeR.stop();
+        if ( isLeader )
+        {
+            std::cout << "partitioningR time = " << partTimeR.diff() << std::endl;
+        }
+
+        // debugOut << "============================" << std::endl;
+        // localMeshR->mesh_Type::showMe( true, debugOut );
+        if ( verbose )
+        {
+            std::cout << " done ! " << std::endl;
+        }
+
+        if ( verbose )
+        {
+            std::cout << " -- Freeing the global mesh ... " << std::flush;
+        }
+        fullMeshPtr.reset();
+        if ( verbose )
+        {
+            std::cout << " done ! " << std::endl;
+        }
+
+        // Build the FESpaces
+
+        if ( verbose )
+        {
+            std::cout << " -- Building FESpaces ... " << std::flush;
+        }
+        std::string uOrder ( "P1" );
+        feSpacePtr_Type uFESpace ( new feSpace_Type ( localMesh, uOrder, 1, comm ) );
+        feSpacePtr_Type uFESpaceR ( new feSpace_Type ( localMeshR, uOrder, 1, comm ) );
+        if ( verbose )
+        {
+            std::cout << " done ! " << std::endl;
+        }
+        if ( verbose )
+        {
+            std::cout << " ---> Dofs: " << uFESpaceR->dof().numTotalDof() << std::endl;
+        }
+
+        // Build the assembler and the matrices
+
+        if ( verbose )
+        {
+            std::cout << " -- Building assembler ... " << std::flush;
+        }
+        ADRAssembler<mesh_Type, matrix_Type, vector_Type> adrAssembler;
+        ADRAssembler<mesh_Type, matrix_Type, vector_Type> adrAssemblerR;
+        if ( verbose )
+        {
+            std::cout << " done! " << std::endl;
+        }
+
+        if ( verbose )
+        {
+            std::cout << " -- Setting up assembler ... " << std::flush;
+        }
+        adrAssembler.setFespace ( uFESpace );
+        adrAssemblerR.setFespace ( uFESpaceR );
+        if ( verbose )
+        {
+            std::cout << " done! " << std::endl;
+        }
+
+        if ( verbose )
+        {
+            std::cout << " -- Defining the matrix ... " << std::flush;
+        }
+        boost::shared_ptr<matrix_Type> systemMatrix ( new matrix_Type ( uFESpace->map() ) );
+        boost::shared_ptr<matrix_Type> systemMatrixR ( new matrix_Type ( uFESpaceR->map(), 50, true ) );
+        if ( verbose )
+        {
+            std::cout << " done! " << std::endl;
+        }
+
+        // Perform the assembly of the matrix
+
+        if ( verbose )
+        {
+            std::cout << " -- Adding the diffusion ... " << std::flush;
+        }
+        if ( verbose )
+        {
+            std::cout << " done! " << std::endl;
+        }
+
+        LifeChrono assemblyTime;
+        assemblyTime.start();
+        adrAssembler.addDiffusion ( systemMatrix, epsilon );
+
+        if ( verbose )
+        {
+            std::cout << " -- Closing the matrix ... " << std::flush;
+        }
+        systemMatrix->globalAssemble();
+        if ( verbose )
+        {
+            std::cout << " done ! " << std::endl;
+        }
+        assemblyTime.stop();
+        if ( isLeader )
+        {
+            std::cout << "assembly time  = " << assemblyTime.diff() << std::endl;
+        }
+        LifeChrono assemblyTimeR;
+        assemblyTimeR.start();
+        adrAssemblerR.addDiffusion ( systemMatrixR, epsilon );
+        systemMatrixR->fillComplete();
+        assemblyTimeR.stop();
+        if ( isLeader )
+        {
+            std::cout << "assemblyR time = " << assemblyTimeR.diff() << std::endl;
+        }
+
+        if ( verbose )
+        {
+            std::cout << " Time needed : " << adrAssembler.diffusionAssemblyChrono().diffCumul() << std::endl;
+        }
+        if ( verbose )
+        {
+            std::cout << " Time needed : " << adrAssemblerR.diffusionAssemblyChrono().diffCumul() << std::endl;
+        }
+
+        // === SPY ====
+        //        systemMatrix->spy ("matrixNoBC");
+        //        systemMatrixR->spy ("matrixNoBCR");
+
+        // check that the assembled matrices are the same
+
+        matrix_Type matrixDiff ( *systemMatrix );
+        matrixDiff -= *systemMatrixR;
+
+        Real diffNorm = matrixDiff.normInf();
+
+        if ( isLeader )
+        {
+            std::cout << "Norm of the difference between the 2 matrices = " << diffNorm << std::endl;
+        }
+
+        if ( verbose )
+        {
+            std::cout << " -- Building the RHS ... " << std::flush;
+        }
+        vector_Type rhs ( uFESpace->map(), Unique );
+        vector_Type rhsR ( uFESpaceR->map(), Unique );
+
+        adrAssembler.addMassRhs ( rhs, fRhs, 0. );
+        rhs.globalAssemble();
+        adrAssemblerR.addMassRhs ( rhsR, fRhs, 0. );
+        rhsR.globalAssemble ( Zero );
+
+        vector_Type vectorDiff ( rhs );
+        vectorDiff -= rhsR;
+
+        Real diffNormV = vectorDiff.normInf();
+
+        //        debugOut << "rhs\n" << rhs.epetraVector() << std::endl;
+        //        debugOut << "rhsR\n" << rhsR.epetraVector() << std::endl;
+
+
+        // test exporting of a repeated mesh
+#ifdef HAVE_HDF5
+        ExporterHDF5<mesh_Type> exporter ( dataFile, localMeshR, "pid", comm->MyPID() );
+        exporter.exportPID ( localMeshR, comm, true );
+        exporter.postProcess ( 0. );
 #endif
 
-    // Definition and assembly of the RHS
+        if ( isLeader )
+        {
+            std::cout << "Norm of the difference between the 2 vectors = " << diffNormV << std::endl;
+        }
 
-    if (verbose)
-    {
-        std::cout << " -- Building the RHS ... " << std::flush;
-    }
-    //vector_type rhs(uFESpace->map(),Unique);
-    vector_type rhs (uFESpace->map(), Repeated);
-    rhs *= 0.0;
+        diffNorm += diffNormV;
 
-#ifdef TEST_RHS
-    vector_type fInterpolated (uFESpace->map(), Repeated);
-    fInterpolated *= 0.0;
-    uFESpace->interpolate (fRhs, fInterpolated, 0.0);
-    adrAssembler.addMassRhs (rhs, fInterpolated);
-    rhs.globalAssemble();
-#endif
-
-    if (verbose)
-    {
-        std::cout << " done ! " << std::endl;
-    }
-
-    // Definition and application of the BCs
-
-    if (verbose)
-    {
-        std::cout << " -- Building the BCHandler ... " << std::flush;
-    }
-    BCHandler bchandler;
-    BCFunctionBase BCu ( exactSolution );
-    bchandler.addBC ("Dirichlet", 1, Essential, Full, BCu, 1);
-    for (UInt i (2); i <= 6; ++i)
-    {
-        bchandler.addBC ("Dirichlet", i, Essential, Full, BCu, 1);
-    }
-    if (verbose)
-    {
-        std::cout << " done ! " << std::endl;
-    }
-
-    if (verbose)
-    {
-        std::cout << " -- Updating the BCs ... " << std::flush;
-    }
-    bchandler.bcUpdate (*uFESpace->mesh(), uFESpace->feBd(), uFESpace->dof() );
-    if (verbose)
-    {
-        std::cout << " done ! " << std::endl;
-    }
-
-    if (verbose)
-    {
-        std::cout << " -- Applying the BCs ... " << std::flush;
-    }
-    vector_type rhsBC (rhs, Unique);
-    bcManage (*systemMatrix, rhsBC, *uFESpace->mesh(), uFESpace->dof(), bchandler, uFESpace->feBd(), 1.0, 0.0);
-    rhs = rhsBC;
-    if (verbose)
-    {
-        std::cout << " done ! " << std::endl;
-    }
-
-    //************* SPY ***********
-    //systemMatrix->spy("matrix");
-    //rhs.spy("vector");
-    //*****************************
-
-    // Definition of the solver
-
-    if (verbose)
-    {
-        std::cout << " -- Building the solver ... " << std::flush;
-    }
-    SolverAztecOO linearSolver;
-    if (verbose)
-    {
-        std::cout << " done ! " << std::endl;
-    }
-
-    if (verbose)
-    {
-        std::cout << " -- Setting up the solver ... " << std::flush;
-    }
-    linearSolver.setDataFromGetPot (dataFile, "solver");
-    linearSolver.setupPreconditioner (dataFile, "prec");
-    if (verbose)
-    {
-        std::cout << " done ! " << std::endl;
-    }
-
-    if (verbose)
-    {
-        std::cout << " -- Setting matrix in the solver ... " << std::flush;
-    }
-    linearSolver.setMatrix (*systemMatrix);
-    if (verbose)
-    {
-        std::cout << " done ! " << std::endl;
-    }
-
-    linearSolver.setCommunicator (Comm);
-
-    // Definition of the solution
-
-    if (verbose)
-    {
-        std::cout << " -- Defining the solution ... " << std::flush;
-    }
-    vector_type solution (uFESpace->map(), Unique);
-    solution *= 0.0;
-    if (verbose)
-    {
-        std::cout << " done ! " << std::endl;
-    }
-
-    // Solve the solution
-
-    if (verbose)
-    {
-        std::cout << " -- Solving the system ... " << std::flush;
-    }
-    linearSolver.solveSystem (rhsBC, solution, systemMatrix);
-    if (verbose)
-    {
-        std::cout << " done ! " << std::endl;
-    }
-
-    //************* SPY ***********
-    //solution.spy("solution");
-    //*****************************
-
-    // Error computation
-
-    if (verbose)
-    {
-        std::cout << " -- Computing the error ... " << std::flush;
-    }
-    vector_type solutionErr (solution);
-    solutionErr *= 0.0;
-    uFESpace->interpolate (exactSolution, solutionErr, 0.0);
-    solutionErr -= solution;
-    solutionErr.abs();
-    Real l2error (uFESpace->l2Error (exactSolution, vector_type (solution, Repeated), 0.0) );
-    if (verbose)
-    {
-        std::cout << " -- done ! " << std::endl;
-    }
-    if (verbose)
-    {
-        std::cout << " ---> Norm L2  : " << l2error << std::endl;
-    }
-    Real linferror ( solutionErr.normInf() );
-    if (verbose)
-    {
-        std::cout << " ---> Norm Inf : " << linferror << std::endl;
-    }
-
-
-    if (l2error > 0.0055)
-    {
-        std::cout << " <!> Solution has changed !!! <!> " << std::endl;
-        return EXIT_FAILURE;
-    }
-    if (linferror > 0.0046)
-    {
-        std::cout << " <!> Solution has changed !!! <!> " << std::endl;
-        return EXIT_FAILURE;
-    }
-
-    // Exporter definition and use
-
-    if (verbose)
-    {
-        std::cout << " -- Defining the exporter ... " << std::flush;
-    }
-    ExporterEnsight<mesh_type> exporter ( dataFile, meshPart.meshPartition(), "solution", Comm->MyPID() ) ;
-    if (verbose)
-    {
-        std::cout << " done ! " << std::endl;
-    }
-
-    if (verbose)
-    {
-        std::cout << " -- Defining the exported quantities ... " << std::flush;
-    }
-    boost::shared_ptr<vector_type> solutionPtr (new vector_type (solution, Repeated) );
-    boost::shared_ptr<vector_type> solutionErrPtr (new vector_type (solutionErr, Repeated) );
-    if (verbose)
-    {
-        std::cout << " done ! " << std::endl;
-    }
-
-    if (verbose)
-    {
-        std::cout << " -- Updating the exporter ... " << std::flush;
-    }
-    exporter.addVariable ( ExporterData<mesh_type>::ScalarField, "solution", uFESpace, solutionPtr, UInt (0) );
-    exporter.addVariable ( ExporterData<mesh_type>::ScalarField, "error", uFESpace, solutionErrPtr, UInt (0) );
-    if (verbose)
-    {
-        std::cout << " done ! " << std::endl;
-    }
-
-    if (verbose)
-    {
-        std::cout << " -- Exporting ... " << std::flush;
-    }
-    exporter.postProcess (0);
-    if (verbose)
-    {
-        std::cout << " done ! " << std::endl;
-    }
-
-    if (verbose)
-    {
-        std::cout << "End Result: TEST PASSED" << std::endl;
+        if ( diffNorm < 1.e-14 )
+        {
+            if ( isLeader )
+            {
+                std::cout << "End Result: TEST PASSED" << std::endl;
+            }
+        }
+        else
+        {
+            return EXIT_FAILURE;
+        }
     }
 
 #ifdef HAVE_MPI
     MPI_Finalize();
 #endif
 
-    return ( EXIT_SUCCESS );
+    return EXIT_SUCCESS;
 }
-
-
