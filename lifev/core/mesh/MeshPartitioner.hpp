@@ -1544,7 +1544,7 @@ void MeshPartitioner<MeshType>::execute()
         GhostHandler<mesh_Type> gh ( M_originalMesh, M_comm );
         //        gh.createNodeElementNeighborsMap();
         gh.fillEntityPID ( M_elementDomains, M_entityPID );
-        gh.ghostMapOnElementsP1 ( M_elementDomains, M_entityPID[ 3 ], 1 );
+        gh.ghostMapOnElementsP1 ( M_elementDomains, M_entityPID[ 3 ], M_partitionOverlap );
     }
 
     doPartitionMesh();
