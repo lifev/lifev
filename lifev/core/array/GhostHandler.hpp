@@ -1290,15 +1290,11 @@ void GhostHandler<Mesh>::ghostMapOnElementsP1 ( graphPtr_Type elemGraph,
     }
 #endif
 
-    // initialize a bool vector to know if a point is in current partition
-    std::vector<bool> isInPartition ( M_fullMesh->numPoints(), false );
-    for ( UInt e = 0; e < (*elemGraph) [ M_me ].size(); e++ )
+    // initialize a bool vector that tells if an element is in the current partition
+    std::vector<bool> isInPartition ( M_fullMesh->numElements(), false );
+    for ( UInt e = 0; e < myElems.size(); e++ )
     {
-        for ( UInt k = 0; k < mesh_Type::element_Type::S_numPoints; k++ )
-        {
-            const ID& pointID = M_fullMesh->element ( (*elemGraph) [ M_me ][ e ] ).point ( k ).id();
-            isInPartition[ pointID ] = true;
-        }
+        isInPartition[ myElems[ e ] ] = true;
     }
 
     // find subdomain interface nodes
@@ -1310,9 +1306,9 @@ void GhostHandler<Mesh>::ghostMapOnElementsP1 ( graphPtr_Type elemGraph,
         if ( pointPID[ currentPoint ] == M_me )
         {
 
-            // check if all neighbors are on this proc
-            for ( neighbors_Type::const_iterator neighborIt = M_nodeNodeNeighborsList[ currentPoint ].begin();
-                    neighborIt != M_nodeNodeNeighborsList[ currentPoint ].end(); ++neighborIt )
+            // check if all element neighbors are on this proc
+            for ( neighbors_Type::const_iterator neighborIt = M_nodeElementNeighborsList[ currentPoint ].begin();
+                    neighborIt != M_nodeElementNeighborsList[ currentPoint ].end(); ++neighborIt )
             {
                 // add the point if a neighbor is missing
                 if ( !isInPartition[ *neighborIt ] )
