@@ -1746,10 +1746,17 @@ createMap (const commPtr_Type& commptr)
 {
     // Against dummies
     ASSERT_PRE (this->M_dof->numTotalDof() > 0, " Cannot create FeSpace with no degrees of freedom");
+
     // get globalElements list from DOF
-    std::vector<Int> myGlobalElements ( this->M_dof->globalElements ( *this->M_mesh ) );
+    std::vector<Int> myGlobalElements = this->M_dof->globalElements ( *this->M_mesh );
     // Create the map
     MapType map ( -1, myGlobalElements.size(), &myGlobalElements[0], commptr );
+/*
+    // get globalElements list from DOF
+    typename MapType::mapData_Type mapData = this->M_dof->createMapData( *this->M_mesh );
+    // Create the map
+    MapType map ( mapData, commptr );
+*/
     // Store the map. If more than one field is present the map is
     // duplicated by offsetting the DOFs
     for ( UInt ii = 0; ii < M_fieldDim; ++ii )
