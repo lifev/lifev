@@ -115,7 +115,7 @@ public:
         M_id ( NotAnId ),
         M_localId ( NotAnId ),
         M_flag ( EntityFlags::DEFAULT )
-    {};
+    {}
 
     //! Constructor with a single value for both identifiers.
     /*!
@@ -126,7 +126,7 @@ public:
         M_id ( id ),
         M_localId ( id ),
         M_flag ( flag )
-    {};
+    {}
 
     //! Full constructor, where both identifiers are specified.
     /*!
@@ -138,7 +138,7 @@ public:
         M_id ( id ),
         M_localId ( lid ),
         M_flag ( flag )
-    {};
+    {}
 
     //! backward-compatible constructor
     /*!
@@ -154,10 +154,10 @@ public:
         // this can be done as
         // M_flag = static_cast<flag_Type> boundary;
         M_flag = boundary ? EntityFlags::PHYSICAL_BOUNDARY : EntityFlags::DEFAULT;
-    };
+    }
 
     //! Destructor
-    virtual ~MeshEntity() {};
+    virtual ~MeshEntity() {}
 
     //@}
 
@@ -179,7 +179,7 @@ public:
     inline void setId ( const ID& id)
     {
         M_id = id;
-    };
+    }
 
     //! Method to set the local identifier.
     /*!
@@ -188,7 +188,7 @@ public:
     inline void setLocalId ( const ID& id)
     {
         M_localId = id;
-    };
+    }
 
     //! Set method for the boundary indicator
     /*!
@@ -204,7 +204,7 @@ public:
         {
             M_flag = Flag::turnOff ( M_flag, EntityFlags::PHYSICAL_BOUNDARY );
         }
-    };
+    }
 
     //! Replace method for the entity flag
     /*!
@@ -214,7 +214,7 @@ public:
     void replaceFlag ( const flag_Type& flag )
     {
         M_flag = flag;
-    };
+    }
 
     //! Sets a flag
     /**
@@ -223,7 +223,7 @@ public:
     void setFlag ( const flag_Type& flag )
     {
         M_flag = Flag::turnOn (flag, M_flag);
-    };
+    }
     //! Remove a flag
     /**
      * @param flag The flag to be removed
@@ -231,7 +231,7 @@ public:
     void unSetFlag ( const flag_Type& flag )
     {
         M_flag = Flag::turnOff (M_flag, flag);
-    };
+    }
 
     //@}
 
@@ -246,7 +246,7 @@ public:
     inline const ID& id() const
     {
         return M_id;
-    };
+    }
 
     //! Method to get the local identifier.
     /*!
@@ -255,13 +255,13 @@ public:
     inline const ID& localId() const
     {
         return M_localId;
-    };
+    }
 
     //! Tells if it is on the boundary
     bool boundary() const
     {
         return Flag::testOneSet ( M_flag, EntityFlags::PHYSICAL_BOUNDARY );
-    };
+    }
 
     //! Tells if the entity is owned by current process
     bool isOwned() const
@@ -273,7 +273,7 @@ public:
     const flag_Type& flag() const
     {
         return M_flag;
-    };
+    }
 
     //@}
 
