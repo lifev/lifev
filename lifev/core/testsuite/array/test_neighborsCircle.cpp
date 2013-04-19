@@ -71,11 +71,11 @@ int main ( int argc, char* argv[] )
     MeshData meshData;
     meshData.setup (dataFile, "space_discretization");
 
-    boost::shared_ptr<mesh_Type> fullMeshPtr ( new mesh_Type ( Comm ) );
+    meshPtr_Type fullMeshPtr ( new mesh_Type ( Comm ) );
     readMesh (*fullMeshPtr, meshData);
 
     MeshPartitioner<mesh_Type> meshPart;
-    boost::shared_ptr<mesh_Type> localMeshPtr;
+    meshPtr_Type localMeshPtr;
 
     // Partitioning the mesh with a number of overlapping regions equal to leveloverlap
     int levelOverlap = 0;

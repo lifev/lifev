@@ -133,9 +133,7 @@ void test_bdf::run()
 {
 
     //Useful typedef
-    typedef SolverAztecOO solver_type;
     typedef VectorEpetra vector_type;
-    typedef boost::shared_ptr<vector_type> vector_ptrtype;
 
     // Reading from data file
     GetPot dataFile (Members->data_file_name.c_str() );
