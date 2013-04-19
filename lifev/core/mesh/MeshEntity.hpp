@@ -54,7 +54,7 @@ const flag_Type SUBDOMAIN_INTERFACE ( 0x04 );
 const flag_Type OVERLAP             ( 0x08 );
 const flag_Type CUTTED              ( 0x10 );
 const flag_Type VERTEX              ( 0x20 );
-const flag_Type OWNED               ( 0x40 );
+const flag_Type GHOST               ( 0x40 );
 // @note remember to update ALL value in order to encompass all flags
 const flag_Type ALL                 ( 0x7F );
 
@@ -265,7 +265,7 @@ public:
     //! Tells if the entity is owned by current process
     bool isOwned() const
     {
-        return Flag::testOneSet ( M_flag, EntityFlags::OWNED );
+        return Flag::testOneNotSet ( M_flag, EntityFlags::GHOST );
     }
 
     //! returns the entity flag

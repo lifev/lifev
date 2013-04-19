@@ -880,7 +880,7 @@ typename GhostHandler<Mesh>::map_Type& GhostHandler<Mesh>::ghostMapOnEdges ( UIn
         this->createNodeEdgeNeighborsMap();
     }
 
-    // set up Unique (first) and Repeated edges based on the OWNED flag
+    // set up Unique (first) and Repeated edges based on the GHOST flag
     std::pair< std::vector<Int>, std::vector<Int> > myGlobalElements;
     myGlobalElements.first.reserve ( M_localMesh->numEdges() );
     myGlobalElements.second.reserve ( M_localMesh->numEdges() );

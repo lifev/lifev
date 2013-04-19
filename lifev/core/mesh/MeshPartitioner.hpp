@@ -343,16 +343,13 @@ private:
     */
     void finalSetup();
 
-    //! Mark entity ownership
+    //! Mark ghost entities
     /*!
-      Mark all owned entities in the partition with EntityFlag::OWNED
-      to properly build map members in DOF::GlobalElements().
-      If the assembly is parallel( M_buildOverlappingPartitions == false ),
-      all partition entities are marked as OWNED, while with
-      M_buildOverlappingPartitions == true only the partition that
-      will perform the assembly on that entity has it marked.
+      Mark all ghost entities that have been added for overlapping partitions
+      with the EntityFlags::GHOST flag in order to properly build the dof
+      map in DOF::GlobalElements().
     */
-    void markEntityOwnership();
+    void markGhostEntities();
 
     //@}
     //! Private Data Members
@@ -608,7 +605,7 @@ void MeshPartitioner<MeshType>::doPartitionMesh()
     // ******************
     finalSetup();
 
-    markEntityOwnership();
+    markGhostEntities();
 }
 
 template<typename MeshType>
@@ -1563,11 +1560,11 @@ void MeshPartitioner<MeshType>::execute()
 }
 
 template<typename MeshType>
-void MeshPartitioner<MeshType>::markEntityOwnership()
+void MeshPartitioner<MeshType>::markGhostEntities()
 {
     if ( M_partitionOverlap )
     {
-        // mark owned entities by each partition as described in M_entityPID
+        // mark ghost entities by each partition as described in M_entityPID
         //@todo: does not work for offline partitioning!
         //M_entityPID or flags should be exported and read back to make it work
         for (UInt i = 0; i < M_numPartitions; ++i)
@@ -1577,7 +1574,7 @@ void MeshPartitioner<MeshType>::markEntityOwnership()
                 typename MeshType::element_Type& element = (*M_meshPartitions) [ i ]->element ( e );
                 if ( M_entityPID[ 0 ][ element.id() ] != static_cast<UInt> ( M_me ) )
                 {
-                    element.unSetFlag ( EntityFlags::OWNED );
+                    element.setFlag ( EntityFlags::GHOST );
                 }
             }
 
@@ -1586,7 +1583,7 @@ void MeshPartitioner<MeshType>::markEntityOwnership()
                 typename MeshType::facet_Type& facet = (*M_meshPartitions) [ i ]->facet ( f );
                 if ( M_entityPID[ 1 ][ facet.id() ] != static_cast<UInt> ( M_me ) )
                 {
-                    facet.unSetFlag ( EntityFlags::OWNED );
+                    facet.setFlag ( EntityFlags::GHOST );
                 }
             }
 
@@ -1595,7 +1592,7 @@ void MeshPartitioner<MeshType>::markEntityOwnership()
                 typename MeshType::ridge_Type& ridge = (*M_meshPartitions) [ i ]->ridge ( r );
                 if ( M_entityPID[ 2 ][ ridge.id() ] != static_cast<UInt> ( M_me ) )
                 {
-                    ridge.unSetFlag ( EntityFlags::OWNED );
+                    ridge.setFlag ( EntityFlags::GHOST );
                 }
             }
 
@@ -1604,7 +1601,7 @@ void MeshPartitioner<MeshType>::markEntityOwnership()
                 typename MeshType::point_Type& point = (*M_meshPartitions) [ i ]->point ( p );
                 if ( M_entityPID[ 3 ][ point.id() ] != static_cast<UInt> ( M_me ) )
                 {
-                    point.unSetFlag ( EntityFlags::OWNED );
+                    point.setFlag ( EntityFlags::GHOST );
                 }
             }
         }

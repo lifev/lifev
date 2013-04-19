@@ -1030,7 +1030,7 @@ void ExporterHDF5<MeshType>::writeGeometry()
     UInt numberOfPoints = MeshType::elementShape_Type::S_numPoints;
 
     std::vector<Int> elementList;
-    UInt ownedElements = this->M_mesh->elementList().countElementsWithFlag ( EntityFlags::OWNED, &Flag::testOneSet );
+    UInt ownedElements = this->M_mesh->elementList().countElementsWithFlag ( EntityFlags::GHOST, &Flag::testOneNotSet );
     elementList.reserve ( ownedElements * numberOfPoints );
     UInt elementCount = 0;
     for ( ID i = 0; i < this->M_mesh->numElements(); ++i )
