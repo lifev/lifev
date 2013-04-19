@@ -104,6 +104,28 @@ MapEpetra::MapEpetra ( std::pair< std::vector<Int>, std::vector<Int> > myGlobalE
                                                  *M_commPtr ) );
 }
 
+MapEpetra::MapEpetra ( MapEpetraData const & mapData, comm_ptrtype const & commPtr ):
+    M_repeatedMapEpetra(),
+    M_uniqueMapEpetra(),
+    M_exporter(),
+    M_importer(),
+    M_commPtr ( commPtr )
+{
+    MapEpetraData::idList_Type const& myGlobalElementsUnique = mapData.idList( Unique );
+    MapEpetraData::idList_Type const& myGlobalElementsRepeated = mapData.idList( Repeated );
+
+    M_uniqueMapEpetra.reset ( new Epetra_Map ( -1,
+                                               myGlobalElementsUnique.size(),
+                                               &myGlobalElementsUnique[ 0 ],
+                                               0,
+                                               *M_commPtr ) );
+    M_repeatedMapEpetra.reset ( new Epetra_Map ( -1,
+                                                 myGlobalElementsRepeated.size(),
+                                                 &myGlobalElementsRepeated[ 0 ],
+                                                 0,
+                                                 *M_commPtr ) );
+
+}
 
 MapEpetra::MapEpetra ( const Int numGlobalElements,
                        const Int /*notUsed*/,
