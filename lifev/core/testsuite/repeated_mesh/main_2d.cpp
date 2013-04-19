@@ -334,6 +334,13 @@ main ( int argc, char** argv )
         adrAssemblerR.addMassRhs ( rhsR, fRhs, 0. );
         rhsR.globalAssemble ( Zero );
 
+        // test exporting of a repeated mesh
+#ifdef HAVE_HDF5
+        ExporterHDF5<mesh_Type> exporter ( dataFile, localMeshR, "pid", comm->MyPID() );
+        exporter.exportPID ( localMeshR, comm, true );
+        exporter.postProcess ( 0. );
+#endif
+
         vector_Type vectorDiff ( rhs );
         vectorDiff -= rhsR;
 
@@ -360,13 +367,6 @@ main ( int argc, char** argv )
         {
             return EXIT_FAILURE;
         }
-
-        // test exporting of a repeated mesh
-#ifdef HAVE_HDF5
-        ExporterHDF5<mesh_Type> exporter ( dataFile, localMeshR, "pid", comm->MyPID() );
-        exporter.exportPID ( localMeshR, comm, true );
-        exporter.postProcess ( 0. );
-#endif
     }
 
 #ifdef HAVE_MPI
