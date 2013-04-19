@@ -263,6 +263,11 @@ public:
         return Flag::testOneSet ( M_flag, EntityFlags::PHYSICAL_BOUNDARY );
     };
 
+    //! Tells if the entity is owned by current process
+    bool isOwned() const
+    {
+        return Flag::testOneSet ( M_flag, EntityFlags::OWNED );
+    }
 
     //! returns the entity flag
     const flag_Type& flag() const
