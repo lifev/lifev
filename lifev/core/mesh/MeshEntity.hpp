@@ -55,11 +55,10 @@ const flag_Type OVERLAP             ( 0x08 );
 const flag_Type CUTTED              ( 0x10 );
 const flag_Type VERTEX              ( 0x20 );
 const flag_Type OWNED               ( 0x40 );
-const flag_Type GHOST_ENTITY        ( 0x80 );
 // @note remember to update ALL value in order to encompass all flags
-const flag_Type ALL                 ( 0xFF );
+const flag_Type ALL                 ( 0x7F );
 
-const UInt number                   (    8 );
+const UInt number                   (    7 );
 
 std::string name ( const flag_Type& flag );
 
