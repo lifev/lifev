@@ -218,6 +218,12 @@ inline bool testOneSet ( flag_Type const& inputFlag, flag_Type const& refFlag )
     return inputFlag  & refFlag;
 }
 
+//! returns false if at least one flag set in refFlag is set in inputFlag
+inline bool testOneNotSet ( flag_Type const& inputFlag, flag_Type const& refFlag )
+{
+    return ! (inputFlag & refFlag);
+}
+
 //! turns on the refFlag active bits in inputFlag
 inline flag_Type turnOn  ( flag_Type const& inputFlag, flag_Type const& refFlag )
 {
