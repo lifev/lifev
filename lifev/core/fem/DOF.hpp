@@ -532,7 +532,7 @@ std::vector<Int> DOF::globalElements ( MeshType& mesh )
         for ( UInt k = 0; k < element.S_numPoints; k++ )
         {
             const typename MeshType::point_Type point = element.point ( k );
-            if ( Flag::testOneSet ( point.flag(), EntityFlags::OWNED ) )
+            if ( point.isOwned() )
             {
                 for ( UInt d = 0; d < M_elementDofPattern.nbDofPerPeak(); d++ )
                 {
@@ -545,7 +545,7 @@ std::vector<Int> DOF::globalElements ( MeshType& mesh )
         for ( UInt k = 0; k < element.S_numRidges; k++ )
         {
             const typename MeshType::ridge_Type ridge = mesh.ridge ( mesh.localRidgeId ( i, k ) );
-            if ( Flag::testOneSet ( ridge.flag(), EntityFlags::OWNED ) )
+            if ( ridge.isOwned() )
             {
                 for ( UInt d = 0; d < M_elementDofPattern.nbDofPerRidge(); d++ )
                 {
@@ -558,7 +558,7 @@ std::vector<Int> DOF::globalElements ( MeshType& mesh )
         for ( UInt k = 0; k < element.S_numFacets; k++ )
         {
             const typename MeshType::facet_Type facet = mesh.facet ( mesh.localFacetId ( i, k ) );
-            if ( Flag::testOneSet ( facet.flag(), EntityFlags::OWNED ) )
+            if ( facet.isOwned() )
             {
                 for ( UInt d = 0; d < M_elementDofPattern.nbDofPerFacet(); d++ )
                 {
@@ -568,7 +568,7 @@ std::vector<Int> DOF::globalElements ( MeshType& mesh )
         }
 
         // elem block
-        if ( Flag::testOneSet ( element.flag(), EntityFlags::OWNED ) )
+        if ( element.isOwned() )
         {
             for ( UInt d = 0; d < M_elementDofPattern.nbDofPerElement(); d++ )
             {

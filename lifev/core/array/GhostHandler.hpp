@@ -888,7 +888,7 @@ typename GhostHandler<Mesh>::map_Type& GhostHandler<Mesh>::ghostMapOnEdges ( UIn
     for ( ID ie = 0; ie < M_localMesh->numEdges(); ie++ )
     {
         myGlobalElements.second.push_back ( M_localMesh->edge ( ie ).id() );
-        if ( Flag::testOneSet ( M_localMesh->edge ( ie ).flag(), EntityFlags::OWNED ) )
+        if ( M_localMesh->edge ( ie ).isOwned() )
         {
             myGlobalElements.first.push_back ( M_localMesh->edge ( ie ).id() );
         }

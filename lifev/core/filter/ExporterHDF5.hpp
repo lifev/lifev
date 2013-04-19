@@ -1036,7 +1036,7 @@ void ExporterHDF5<MeshType>::writeGeometry()
     for ( ID i = 0; i < this->M_mesh->numElements(); ++i )
     {
         typename MeshType::element_Type const& element (this->M_mesh->element (i) );
-        if ( Flag::testOneSet ( element.flag(), EntityFlags::OWNED ) )
+        if ( element.isOwned() )
         {
             UInt lid = elementCount * numberOfPoints;
             for (ID j = 0; j < numberOfPoints; ++j, ++lid)
@@ -1057,7 +1057,7 @@ void ExporterHDF5<MeshType>::writeGeometry()
     for (ID i = 0; i < this->M_mesh->numElements(); ++i)
     {
         typename MeshType::element_Type const& element (this->M_mesh->element (i) );
-        if ( Flag::testOneSet ( element.flag(), EntityFlags::OWNED ) )
+        if ( element.isOwned() )
         {
             UInt lid = elementCount * numberOfPoints;
             for (ID j = 0; j < numberOfPoints; ++j, ++lid)
@@ -1144,7 +1144,7 @@ void ExporterHDF5<MeshType>::writeGeometry()
             point = this->M_mesh->meshTransformer().pointInitial (i);
         }
 
-        if ( Flag::testOneSet ( point.flag(), EntityFlags::OWNED ) )
+        if ( point.isOwned() )
         {
 
             gid = point.id();
