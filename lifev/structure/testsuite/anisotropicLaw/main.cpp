@@ -62,7 +62,6 @@
 #include <lifev/core/array/MapEpetra.hpp>
 
 #include <lifev/core/fem/TimeAdvance.hpp>
-#include <lifev/core/fem/TimeAdvanceNewmark.hpp>
 #include <lifev/core/fem/TimeAdvanceBDF.hpp>
 
 #include <lifev/core/mesh/MeshData.hpp>
@@ -285,22 +284,13 @@ Structure::run3d()
         std::cout << std::endl;
     }
 
-    std::string timeAdvanceMethod =  dataFile ( "solid/time_discretization/method", "Newmark");
+    std::string timeAdvanceMethod =  dataFile ( "solid/time_discretization/method", "BDF");
 
     timeAdvance_Type  timeAdvance ( TimeAdvanceFactory::instance().createObject ( timeAdvanceMethod ) );
 
     UInt OrderDev = 2;
 
-    //! initialization of parameters of time Advance method:
-    if (timeAdvanceMethod == "Newmark")
-    {
-        timeAdvance->setup ( dataStructure->dataTimeAdvance()->coefficientsNewmark() , OrderDev);
-    }
-
-    if (timeAdvanceMethod == "BDF")
-    {
-        timeAdvance->setup (dataStructure->dataTimeAdvance()->orderBDF() , OrderDev);
-    }
+    timeAdvance->setup (dataStructure->dataTimeAdvance()->orderBDF() , OrderDev);
 
     timeAdvance->setTimeStep (dataStructure->dataTime()->timeStep() );
     //timeAdvance->showMe();
@@ -328,16 +318,17 @@ Structure::run3d()
     //! =================================================================================
     //! BC for StructuredCube4_test_structuralsolver.mesh
     //! =================================================================================
-    BCh->addBC ("EdgesIn",      20,  Natural,   Component, nonZero, compx);
-    BCh->addBC ("EdgesIn",      40,  Essential, Component, zero,    compx);
+    BCh->addBC ("EdgesIn",      20,  Natural,   Component, nonZero, compy);
+    BCh->addBC ("EdgesIn",      20,  Essential, Component, zero,    compxz);
+    BCh->addBC ("EdgesIn",      40,  Essential, Component, zero,    compy);
 
     //! Symmetry BC
-    BCh->addBC ("EdgesIn",      500,   EssentialVertices, Component, zero, compxz);
-    BCh->addBC ("EdgesIn",      300,   EssentialVertices, Component, zero, compxy);
-    BCh->addBC ("EdgesIn",      800,   EssentialVertices, Component, zero, compyz);
-    BCh->addBC ("EdgesIn",      1000,  EssentialVertices,  Full, zero, 3);
+    BCh->addBC ("EdgesIn",      50,   EssentialVertices, Component, zero, compyz);
+    BCh->addBC ("EdgesIn",      30,   EssentialVertices, Component, zero, compyz);
+    BCh->addBC ("EdgesIn",      80,   EssentialVertices, Component, zero, compxz);
+    BCh->addBC ("EdgesIn",      100,  EssentialVertices,  Full, zero, 3);
 
-    BCh->addBC ("EdgesIn",      7, Essential, Component , zero, compy);
+    BCh->addBC ("EdgesIn",      7, Essential, Component , zero, compx);
     BCh->addBC ("EdgesIn",      3, Essential, Component , zero, compz);
     //! =================================================================================
 
@@ -388,7 +379,6 @@ Structure::run3d()
 
     //! 5. Initial data
     Real dt = dataStructure->dataTime()->timeStep();
-    // Real T  = dataStructure->dataTime()->endTime();
 
     vectorPtr_Type rhs (new vector_Type (solid.displacement(), Unique) );
     vectorPtr_Type disp (new vector_Type (solid.displacement(), Unique) );
@@ -521,14 +511,14 @@ Structure::run3d()
     //!--------------------------------------------------------------------------------------------
     //! MATLAB FILE WITH DISPLACEMENT OF A CHOSEN POINT
     //!--------------------------------------------------------------------------------------------
-    
+
     ofstream file_comp( "Displacement_components_NL.m" );
     if ( !file_comp )
     {
       std::cout <<" Unable to open file! You need to specify the output folder in the data file " << std::endl;
     }
 
- 
+
     //int IDPoint = 401; // StructuredCube8
     //int IDPoint = 2593; // StructuredCube16
 

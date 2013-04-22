@@ -149,9 +149,38 @@ Real bcZero (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Rea
     return  0.;
 }
 
-Real bcNonZero (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
+Real bcNonZero (const Real& t, const Real&  X, const Real& Y, const Real& Z, const ID& i)
 {
-    return  100000.;
+    Real pressure(0);
+
+	Real highestPressure(6.666e+6);
+	Real totalTime = 20.0;
+	Real halfTime = totalTime / 2.0;
+
+	Real a = ( highestPressure / 2 ) * ( 1/ ((totalTime/2)*(totalTime/2)) );
+
+	if ( t <= halfTime )
+	    pressure = a * t*t;
+
+	if ( t > halfTime )
+	    pressure = - a * (t - totalTime)*(t - totalTime) + highestPressure;
+
+    switch (i)
+    {
+        case 0:
+            return 0.0;
+            break;
+        case 1:
+            return pressure;
+            break;
+        case 2:
+            return 0.0;
+            break;
+        default:
+            ERROR_MSG ("This entrie is not allowed: ud_functions.hpp");
+            return 0.;
+            break;
+    }
 }
 
 Real bcNonZeroSecondOrderExponential (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
@@ -166,10 +195,10 @@ Real Family1 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, c
     switch (i)
     {
         case 0:
-	    return 1.0;
+            return std::sin( 0.8723155 );
             break;
         case 1:
-	    return 0.0;
+            return std::cos( 0.8723155 );
             break;
         case 2:
             return 0.0;
@@ -187,10 +216,10 @@ Real Family2 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, c
     switch (i)
     {
         case 0:
-	    return 0.0;
+            return std::sin( - 0.8723155 );
             break;
         case 1:
-	    return -1.0;
+            return std::cos( - 0.8723155 );
             break;
         case 2:
             return 0.0;
