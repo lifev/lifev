@@ -106,6 +106,8 @@ int main (int argc, char** argv)
     boost::shared_ptr<mesh_Type> fullMeshPtr (new mesh_Type ( comm ) );
     readMesh (*fullMeshPtr, meshData);
 
+    fullMeshPtr->showMe();
+
     //Creation object mesh partitioner
     MeshPartitioner<mesh_Type> meshPart;
     meshPart.setup (numParts, comm);

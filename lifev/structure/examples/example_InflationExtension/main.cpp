@@ -190,7 +190,7 @@ private:
     filterPtr_Type importerSolid;
     filterPtr_Type exporterSolid;
 
-    filterPtr_Type checkExporter;
+    //filterPtr_Type checkExporter;
 
 
 };
@@ -243,7 +243,41 @@ struct Structure::Private
 
     }
 
-    static Real pressureUsingNormal (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
+    static Real smoothPressure(const Real& t, const Real&  x, const Real& y, const Real& /*Z*/, const ID& i)
+    {
+        Real radius = 0.1;
+        Real pressure(0);
+
+	Real highestPressure(146630);
+	Real totalTime = 3.0;
+	Real halfTime = totalTime / 2.0;
+
+	Real a = ( highestPressure / 2 ) * ( 1/ ((totalTime/2)*(totalTime/2)) );
+
+	if ( t <= halfTime )
+	    pressure = a * t*t;
+
+	if ( t > halfTime )
+	    pressure = - a * (t - totalTime)*(t - totalTime) + highestPressure;
+
+        switch (i)
+        {
+        case 0:
+            return  pressure *  ( x / radius ) ;
+            break;
+        case 1:
+            return  pressure *  ( y / radius ) ;
+            break;
+        case 2:
+            return 0.0;
+            break;
+
+        }
+        return 0;
+
+    }
+
+    static Real pressureUsingNormal (const Real& t, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
     {
 
         return -5000;
@@ -274,13 +308,6 @@ Structure::Structure ( int                                   argc,
     parameters->bulk    = dataFile ( "solid/physics/bulk",    1. );
     parameters->alpha   = dataFile ( "solid/physics/alpha",   1. );
     parameters->gamma   = dataFile ( "solid/physics/gamma",   1. );
-
-    std::cout << "density = " << parameters->rho     << std::endl
-              << "young   = " << parameters->young   << std::endl
-              << "poisson = " << parameters->poisson << std::endl
-              << "bulk    = " << parameters->bulk    << std::endl
-              << "alpha   = " << parameters->alpha   << std::endl
-              << "gamma   = " << parameters->gamma   << std::endl;
 
     parameters->comm = structComm;
     int ntasks = parameters->comm->NumProc();
@@ -390,7 +417,7 @@ Structure::run3d()
 
     BCFunctionBase zero (Private::bcZero);
     BCFunctionBase nonZero (Private::bcNonZero);
-    BCFunctionBase pressure (Private::bcPressure);
+    BCFunctionBase pressure (Private::smoothPressure);
     // BCFunctionBase pressureNormal(Private::pressureUsingNormal);
 
 
@@ -398,25 +425,10 @@ Structure::run3d()
     //! BC for StructuredCube4_test_structuralsolver.mesh
     //! =================================================================================
     //Condition for Inflation
-    BCh->addBC ("EdgesIn",      200, Natural,  Full, pressure, 3);
-    BCh->addBC ("EdgesIn",      40,  Natural,  Full, zero, 3);
-    BCh->addBC ("EdgesIn",      70,  Essential,   Component, zero, compz);
-    BCh->addBC ("EdgesIn",      60,  Essential, Component, zero, compz);
-
-    //BCs for quarter
-    BCh->addBC ("EdgesIn",      50,  Essential, Component, zero, compx);
-    BCh->addBC ("EdgesIn",      30,  Essential, Component, zero, compy);
-
-    // //Condition for Extension
-    // BCh->addBC("EdgesIn",      200, Natural,  Full, zero, 3);
-    // BCh->addBC("EdgesIn",      40,  Natural,  Full, zero, 3);
-    // BCh->addBC("EdgesIn",      70,  Natural,   Component, nonZero, compz);
-    // BCh->addBC("EdgesIn",      60,  Essential, Component, zero, compz);
-
-    // //BCs for quarter
-    // BCh->addBC("EdgesIn",      50,  Essential, Component, zero, compx);
-    // BCh->addBC("EdgesIn",      30,  Essential, Component, zero, compy);
-
+    BCh->addBC ("EdgesIn",      200, Natural,   Full, pressure, 3);
+    BCh->addBC ("EdgesIn",      40,  Natural,   Full, zero, 3);
+    BCh->addBC ("EdgesIn",      70,  Essential, Full, zero, 3);
+    BCh->addBC ("EdgesIn",      60,  Essential, Full, zero, 3);
 
     //! 1. Constructor of the structuralSolver
     StructuralOperator< RegionMesh<LinearTetra> > solid;
@@ -571,18 +583,18 @@ Structure::run3d()
 
     boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterSolid;
 
-    boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterCheck;
+    //boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterCheck;
 
 
     std::string const exporterType =  dataFile ( "exporter/type", "ensight");
     std::string const exportFileName = dataFile ( "exporter/nameFile", "structure");
 
-    std::string const exportCheckName = "checkExporter";
+    //std::string const exportCheckName = "checkExporter";
 #ifdef HAVE_HDF5
     if (exporterType.compare ("hdf5") == 0)
     {
         exporterSolid.reset ( new hdf5Filter_Type ( dataFile, exportFileName ) );
-        exporterCheck.reset ( new hdf5Filter_Type ( dataFile, exportCheckName ) ); //The check is done in hdf5 for sake of brevity.
+        //exporterCheck.reset ( new hdf5Filter_Type ( dataFile, exportCheckName ) ); //The check is done in hdf5 for sake of brevity.
     }
 
     else
@@ -600,19 +612,19 @@ Structure::run3d()
 
     exporterSolid->setPostDir ( "./" );
     exporterSolid->setMeshProcId ( pointerToMesh, parameters->comm->MyPID() );
-    exporterCheck->setMeshProcId ( pointerToMesh, parameters->comm->MyPID() );
+    //exporterCheck->setMeshProcId ( pointerToMesh, parameters->comm->MyPID() );
 
     vectorPtr_Type solidDisp ( new vector_Type (solid.displacement(),  Unique ) );
     vectorPtr_Type solidVel  ( new vector_Type (solid.displacement(),  Unique ) );
     vectorPtr_Type solidAcc  ( new vector_Type (solid.displacement(),  Unique ) );
 
-    vectorPtr_Type rhsVector ( new vector_Type (solid.rhsCopy(),  Unique ) );
+    //vectorPtr_Type rhsVector ( new vector_Type (solid.rhsCopy(),  Unique ) );
 
     exporterSolid->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "displacement", dFESpace, solidDisp, UInt (0) );
     exporterSolid->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "velocity",     dFESpace, solidVel,  UInt (0) );
     exporterSolid->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "acceleration", dFESpace, solidAcc,  UInt (0) );
 
-    exporterCheck->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "rhs", dFESpace, rhsVector,  UInt (0) );
+    //exporterCheck->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "rhs", dFESpace, rhsVector,  UInt (0) );
     * solidDisp = solid.displacement();
     *solidVel = timeAdvance->firstDerivative();
     *solidAcc = timeAdvance->secondDerivative();
@@ -630,7 +642,14 @@ Structure::run3d()
     Real T  = dataStructure->dataTime()->endTime();
 
     exporterSolid->postProcess ( dataStructure->dataTime()->initialTime() );
-    exporterCheck->postProcess ( 0 );
+    //exporterCheck->postProcess ( 0 );
+
+    //! 6. Setting the pillow saving for restart
+    UInt tol = dataStructure->dataTimeAdvance()->orderBDF() + 1;
+    UInt saveEvery = dataFile( "exporter/saveEvery", 1);
+    UInt r(0);
+    UInt d(0);
+    UInt iter(0);
 
     //! =============================================================================
     //! Temporal loop
@@ -669,10 +688,18 @@ Structure::run3d()
         // std::cout << "The norm 2 of the velocity field is: "<< timeAdvance->velocity().norm2() << std::endl;
         // std::cout << "The norm 2 of the acceleration field is: "<< timeAdvance->acceleration().norm2() << std::endl;
 
-        *rhsVector = solid.rhsCopy();
+        //*rhsVector = solid.rhsCopy();
 
-        exporterSolid->postProcess ( time );
-        exporterCheck->postProcess ( time );
+	iter = iter + 1;
+
+	r = iter % saveEvery;
+        d = iter - r;
+
+	if ( (iter - d) <= tol || ( (std::floor(d/saveEvery) + 1)*saveEvery - iter ) <= tol )
+        {
+	    exporterSolid->postProcess( time );
+	    //exporterCheck->postProcess( time );
+	}
 
         //!--------------------------------------------------------------------------------------------------
 
@@ -680,7 +707,7 @@ Structure::run3d()
     }
 
     exporterSolid->closeFile();
-    exporterCheck->closeFile();
+    //exporterCheck->closeFile();
 }
 
 

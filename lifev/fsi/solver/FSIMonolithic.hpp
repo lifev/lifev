@@ -113,6 +113,8 @@ public:
     typedef FSIOperator                                               super_Type;
     typedef FSIOperator::fluidPtr_Type::value_type::matrix_Type       matrix_Type;
     typedef boost::shared_ptr<matrix_Type>                            matrixPtr_Type;
+    typedef super_Type::solution_Type                                 solution_Type;
+    typedef super_Type::solutionPtr_Type                              solutionPtr_Type;
     typedef MonolithicBlock                                           prec_Type;
     typedef boost::shared_ptr<prec_Type>                              precPtr_Type;
     typedef MonolithicBlockMatrix                                     blockMatrix_Type;

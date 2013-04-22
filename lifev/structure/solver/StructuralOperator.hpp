@@ -559,7 +559,7 @@ public:
         return *M_disp;
     }
 
-    vector_Type& displacementPtr()
+    vectorPtr_Type displacementPtr()
     {
         return M_disp;
     }

@@ -54,20 +54,20 @@
 
 
 //Regular mesh
-#define INLET 3
-#define INLETRING 30
-#define OUTLET 2
-#define OUTLETRING 20
-#define FLUIDINTERFACE 1
+#define INLET 2
+#define INLETRING 20
+#define OUTLET 3
+#define OUTLETRING 30
+#define FLUIDINTERFACE 100
 
-#define SOLIDINTERFACE 1
+#define SOLIDINTERFACE 100
 #define INLETWALL 2
 #define INLETWALL_INTRING 20
 
 #define OUTLETWALL 3
 #define OUTLETWALL_INTRING 30
 
-#define OUTERWALL 10
+#define OUTERWALL 1000
 
 
 
@@ -88,9 +88,7 @@ FSIOperator::fluidBchandlerPtr_Type BCh_harmonicExtension (FSIOperator& /*_oper*
     FSISolver::fluidBchandlerPtr_Type BCh_he (new FSIOperator::fluidBchandler_Type );
 
     BCh_he->addBC ("in", INLET, Essential, Full, bcf,   3);
-    BCh_he->addBC ("in", INLETRING, EssentialVertices, Full, bcf,   3);
     BCh_he->addBC ("in", OUTLET, Essential, Full, bcf,   3);
-    BCh_he->addBC ("out3", OUTLETRING, EssentialVertices, Full, bcf,   3);
 
     return BCh_he;
 }
@@ -164,9 +162,9 @@ FSIOperator::solidBchandlerPtr_Type BCh_monolithicSolid (FSIOperator& _oper)
 
     //Inlets & Outlets
     BCh_solid->addBC ("BORDERS",   INLETWALL, Essential, Full, bcf,  3);
-    BCh_solid->addBC ("BORDERS-RIN",   INLETWALL_INTRING, Essential, Full, bcf,  3);
+    BCh_solid->addBC ("BORDERS-RIN",   INLETWALL_INTRING, EssentialVertices, Full, bcf,  3);
     BCh_solid->addBC ("BORDERS",   OUTLETWALL, Essential, Full, bcf,  3);
-    BCh_solid->addBC ("BORDERS-rin",   OUTLETWALL_INTRING, Essential, Full, bcf,  3);
+    BCh_solid->addBC ("BORDERS-rin",   OUTLETWALL_INTRING, EssentialVertices, Full, bcf,  3);
 
     //Robin BC
     BCFunctionBase hyd (fZero);
