@@ -125,7 +125,9 @@ int main (int argc, char** argv)
     }
     else
     {
-        PartitionIO<mesh_Type> partitionIO (partsFileName, comm);
+        boost::shared_ptr<Epetra_MpiComm> mpiComm =
+            boost::dynamic_pointer_cast<Epetra_MpiComm>(comm);
+        PartitionIO<mesh_Type> partitionIO (partsFileName, mpiComm);
         partitionIO.write (meshPart.meshPartitions() );
     }
 

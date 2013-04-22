@@ -156,7 +156,7 @@ public:
     // write the graph to the HDF5 container
     // typedef std::vector<std::vector<Int> > table_Type;
     // typedef boost::shared_ptr<table_Type> tablePtr_Type;
-    typedef boost::shared_ptr<Epetra_Comm> commPtr_Type;
+    typedef boost::shared_ptr<Epetra_MpiComm> commPtr_Type;
     //@}
 
     //! \name Constructors & Destructors
@@ -239,7 +239,7 @@ private:
 
     //! Private Data Members
     //@{
-    boost::shared_ptr<Epetra_Comm> M_comm;
+    commPtr_Type M_comm;
     UInt M_myRank;
     std::string M_fileName;
     bool M_transposeInFile;

@@ -106,7 +106,7 @@ main ( int argc, char** argv )
 #ifdef HAVE_MPI
 
     MPI_Init (&argc, &argv);
-    boost::shared_ptr<Epetra_Comm> comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
+    boost::shared_ptr<Epetra_MpiComm> comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
 
     const bool verbose (comm->MyPID() == 0);
 

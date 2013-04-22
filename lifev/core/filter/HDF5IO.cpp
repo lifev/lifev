@@ -57,12 +57,7 @@ void LifeV::HDF5IO::openFile (const std::string& fileName,
                               const bool& existing)
 {
     hid_t plistId;
-    MPI_Comm mpiComm;
-    boost::shared_ptr<Epetra_MpiComm> tempComm =
-        boost::dynamic_pointer_cast<Epetra_MpiComm> (comm);
-    ASSERT ( tempComm, "Error: the casting of M_comm has failed" );
-
-    mpiComm = tempComm->Comm();
+    MPI_Comm mpiComm = comm->Comm();
     MPI_Info info = MPI_INFO_NULL;
 
     // Set up file access property list with parallel I/O access
