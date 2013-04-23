@@ -128,6 +128,27 @@ private:
 
 }; // Marker selector
 
+
+class sourceFunctor
+{
+public:
+    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > volumeForce_Type;
+
+    sourceFunctor ( const volumicForce_Type volumeSource )
+        : M_volumeSource ( )
+    {}
+
+    Real operator() ( const Real t, const Real x, const Real y, const Real z, const ID i )
+    {
+        //Extract the flag from the mesh entity
+        Real value( *M_volumeSource( t, x, y, z, i) );
+        return value;
+    }
+
+private:
+    const volumeSource_Type M_volumeSource;
+}; // sourceFunctor
+
 /*!
   \class StructuralSolver
   \brief
@@ -142,9 +163,6 @@ public:
 
     //!@name Type definitions
     //@{
-    typedef Real ( *function ) ( const Real&, const Real&, const Real&, const Real&, const ID& );
-
-    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > source_Type;
 
     typedef StructuralConstitutiveLaw<Mesh>               material_Type;
     typedef boost::shared_ptr<material_Type>              materialPtr_Type;
@@ -198,15 +216,17 @@ public:
     typedef TimeAdvance< vector_Type >                                  timeAdvance_Type;
     typedef boost::shared_ptr< timeAdvance_Type >                       timeAdvancePtr_Type;
 
-    //@}
-
-
 #ifdef COMPUTATION_JACOBIAN
     typedef Epetra_SerialDenseMatrix                     matrixSerialDense_Type;
     typedef boost::shared_ptr<matrixSerialDense_Type>    matrixSerialDensePtr_Type;
     typedef std::vector<LifeV::Real>                     vectorInvariants_Type;
     typedef boost::shared_ptr<vectorInvariants_Type>     vectorInvariantsPtr_Type;
 #endif
+
+
+    // Source term
+    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > volumeForce_Type;
+    typedef sourceFunctor                                sourceFunctor_Type;
     //@}
 
     //! @name Constructor & Destructor
@@ -273,18 +293,9 @@ public:
 
     //! Updates the system at the end of each time step given a source term
     /*!
-      \param source volumic source
-      \param time present time
+      \param rhsTimeAdvance the portion of the rhs of the discrete equation which comes from TA.
     */
-    void updateSystem ( source_Type const& source );
-
-
-    //! Updates the system at the end of each time step given a source term
-    /*!
-      \param source volumic source
-      \param time present time
-    */
-    void updateSourceTerm ( source_Type const& source );
+    void updateRightHandSideWithBodyForce ( const vector_Type& rhsTimeAdvance );
 
     //! Updates the rhs at the start of each time step
     /*!
@@ -465,9 +476,15 @@ public:
     }
 
     //! Set the source object
-    void setSourceTerm ( source_Type const& s )
+    void setSourceTerm ( const volumeForce_Type& s )
     {
-        M_source = s;
+        M_source.reset( new sourceFunctor_Type( s ) );
+    }
+
+    //! Set the source object
+    void setHavingSourceTerm ( const bool havingSource )
+    {
+        M_havingSource = havingSource;
     }
 
     // //! Set the preconditioner
@@ -548,10 +565,11 @@ public:
     }
 
     //! Get the source term
-    source_Type const& sourceTerm() const
+    const bool havingSourceTerm() const
     {
-        return M_source;
+        return M_havingSource;
     }
+
 
     //! Get the displacement
     vector_Type& displacement()
@@ -772,7 +790,8 @@ protected:
     //! level of recursion for Aztec (has a sens with FSI coupling)
     UInt                                 M_recur;
 
-    source_Type                          M_source;
+    bool                                 M_havingSource;
+    sourceFunctor_Type                   M_source;
 
     UInt                                 M_offset;
     Real                                 M_rescaleFactor;
@@ -824,7 +843,8 @@ StructuralOperator<Mesh>::StructuralOperator( ) :
     M_systemMatrix               ( ),
     M_jacobian                   ( ),
     M_recur                      ( ),
-    M_source                     ( ),
+    M_havingSource               ( false ),
+    M_source                     ( )
     M_offset                     ( 0 ),
     M_rescaleFactor              ( 1. ),
     M_material                   ( ),
@@ -990,27 +1010,20 @@ void StructuralOperator<Mesh>::updateSystem ( matrixPtr_Type& mat_stiff)
 }
 
 template <typename Mesh>
-void StructuralOperator<Mesh>::updateSourceTerm ( source_Type const& source )
+void StructuralOperator<Mesh>::updateRightHandSideWithBodyForce ( const vector_Type& rhsTimeAdvance )
 {
-    vector_Type rhs (vector_Type (*M_localMap) );
+    using namespace ExpressionAssembly;
 
-    VectorElemental M_elvec (M_dispFESpace->fe().nbFEDof(), nDimensions);
-    UInt nc = nDimensions;
+    vectorPtr_Type rhs ( new vector_Type (*M_localMap) );
 
-    // loop on volumes: assembling source term
-    for ( UInt i = 1; i <= M_dispFESpace->mesh()->numVolumes(); ++i )
-    {
+    integrate ( elements ( this->M_dispETFESpace->mesh() ) ,
+                this->M_dispFESpace->qr(),
+                this->M_dispETFESpace,
+                value ( M_data->rho() ) * dot (  value( M_source ), phi_i )
+                ) >> rhs;
 
-        M_dispFESpace->fe().updateFirstDerivQuadPt ( M_dispFESpace->mesh()->volumeList ( i ) );
+    *rhs += rhsTimeAdvance;
 
-        M_elvec.zero();
-
-        for ( UInt ic = 0; ic < nc; ++ic )
-        {
-            //compute_vec( source, M_elvec, M_dispFESpace->fe(),  M_data->dataTime()->time(), ic ); // compute local vector
-            assembleVector ( *rhs, M_elvec, M_dispFESpace->fe(), M_dispFESpace->dof(), ic, ic * M_dispFESpace->fieldDim() ); // assemble local vector into global one
-        }
-    }
     M_rhsNoBC += rhs;
 }
 

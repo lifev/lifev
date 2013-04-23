@@ -10,5 +10,6 @@ ADD_SUBDIRECTORIES(
   example_principalTensionsInflationExtensions
   example_partitionMesh
   example_computationNorm
+  example_bodyForces
 )
 
