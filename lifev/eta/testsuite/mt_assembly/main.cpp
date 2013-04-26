@@ -160,7 +160,7 @@ int main ( int argc, char** argv )
         using namespace ExpressionAssembly;
 
         // We first build a static graph for our problem matrix
-        matrixGraph.reset(new Epetra_FECrsGraph(Copy, *(uSpace->map().map(Unique)), 0, true, false));
+        matrixGraph.reset(new Epetra_FECrsGraph(Copy, *(uSpace->map().map(Unique)), 0, true));
 
         buildGraph ( elements (uSpace->mesh() ),
                      quadRuleTetra4pt,
@@ -187,7 +187,7 @@ int main ( int argc, char** argv )
         using namespace ExpressionAssembly;
 
         // We build the system matrix using the precomputed graph
-        closedSystemMatrix.reset(new matrix_Type ( uSpace->map(), *matrixGraph , true, true) );
+        closedSystemMatrix.reset(new matrix_Type ( uSpace->map(), *matrixGraph , true) );
         *closedSystemMatrix *= 0.0;
 
         // Finally, we perform the FE assembly, which should be faster with
