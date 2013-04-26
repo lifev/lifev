@@ -5,7 +5,7 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
 
 TRIBITS_ADD_EXECUTABLE(
   bodyForces
-  SOURCES main.cpp ud_function.cpp
+  SOURCES main.cpp ud_functions.cpp
   COMM serial mpi
   )
 

@@ -148,6 +148,10 @@ public:
     typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > analyticalFunction_Type;
     typedef boost::shared_ptr<analyticalFunction_Type> analyticalFunctionPtr_Type;
 
+    typedef boost::function<VectorSmall<3> ( Real const&, Real const&, Real const&, Real const& ) > bodyFunction_Type;
+    typedef boost::shared_ptr<bodyFunction_Type> bodyFunctionPtr_Type;
+
+
     typedef std::vector<analyticalFunctionPtr_Type>                          vectorFiberFunction_Type;
     typedef boost::shared_ptr<vectorFiberFunction_Type>                 vectorFiberFunctionPtr_Type;
 
@@ -327,15 +331,6 @@ Structure::run3d()
     BCh->addBC ("EdgesIn",      7, Essential, Component , zero, compx);
     BCh->addBC ("EdgesIn",      3, Essential, Component , zero, compz);
 
-    // Comment this part in order not to have body force in the RHS of the equation
-    bool bodyForce = dataFile ( ( "solid/physics/bodyForce").data(), false );
-    if( bodyForce )
-    {
-        solid.setHavingSource(  bodyForce );
-        analyticalFunctionPtr_Type bodyTerm( new analyticalFunction_Type( f ) );
-
-        solid.setSourceTerm( *bodyTerm );
-    }
     //! =================================================================================
 
     //! 1. Constructor of the structuralSolver
@@ -350,6 +345,17 @@ Structure::run3d()
 
     //! 3. Setting data from getPot
     solid.setDataFromGetPot (dataFile);
+
+    // Comment this part in order not to have body force in the RHS of the equation
+    bool bodyForce = dataFile ( "solid/physics/bodyForce" , false );
+    if( bodyForce )
+    {
+        solid.setHavingSourceTerm(  bodyForce );
+        bodyFunctionPtr_Type bodyTerm( new bodyFunction_Type( f ) );
+
+        solid.setSourceTerm( bodyTerm );
+    }
+
 
 #ifdef ENABLE_ANISOTROPIC_LAW
     // Setting the vector of fibers functions
@@ -498,13 +504,13 @@ Structure::run3d()
         timeAdvance->updateRHSContribution ( dt );
         *rhs += *solid.massMatrix() * timeAdvance->rhsContributionSecondDerivative() / timeAdvanceCoefficient;
 
-        if( !solid.havingSource( ) )
+        if( !solid.havingSourceTerm() )
         {
             solid.setRightHandSide ( *rhs );
         }
         else
         {
-            solid.updateSystem( *rhs );
+            solid.updateRightHandSideWithBodyForce( dataStructure->dataTime()->time(), *rhs );
         }
 
         //! 7. Iterate --> Calling Newton
