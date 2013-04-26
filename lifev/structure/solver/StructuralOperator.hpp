@@ -129,24 +129,32 @@ private:
 }; // Marker selector
 
 
-class sourceFunctor
+// Note that the functor is specialized for 3D problems.
+class sourceVectorialFunctor
 {
 public:
-    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > volumeForce_Type;
+    typedef boost::function<VectorSmall<3> ( Real const&, Real const&, Real const&, Real const& ) > volumeForce_Type;
+    typedef boost::shared_ptr<volumeForce_Type >                                                    volumeForcePtr_Type;
+    typedef VectorSmall<3>              return_Type;
 
-    sourceFunctor ( const volumicForce_Type volumeSource )
-        : M_volumeSource ( )
+    sourceVectorialFunctor ( const volumeForcePtr_Type volumeSource )
+    : M_volumeSource ( volumeSource ), M_currentTime( 0.0 )
     {}
 
-    Real operator() ( const Real t, const Real x, const Real y, const Real z, const ID i )
+    void setCurrentTime( const Real time )
+    {
+        M_currentTime = time;
+    }
+
+    return_Type operator() ( const VectorSmall<3> spaceCoordinates )
     {
         //Extract the flag from the mesh entity
-        Real value( *M_volumeSource( t, x, y, z, i) );
-        return value;
+        return (*M_volumeSource)( M_currentTime, spaceCoordinates[0], spaceCoordinates[1], spaceCoordinates[2] );
     }
 
 private:
-    const volumeSource_Type M_volumeSource;
+    volumeForcePtr_Type M_volumeSource;
+    Real  M_currentTime;
 }; // sourceFunctor
 
 /*!
@@ -163,7 +171,7 @@ public:
 
     //!@name Type definitions
     //@{
-
+    typedef Real ( *function ) ( const Real&, const Real&, const Real&, const Real&, const ID& );
     typedef StructuralConstitutiveLaw<Mesh>               material_Type;
     typedef boost::shared_ptr<material_Type>              materialPtr_Type;
 
@@ -225,8 +233,10 @@ public:
 
 
     // Source term
-    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > volumeForce_Type;
-    typedef sourceFunctor                                sourceFunctor_Type;
+    typedef boost::function<VectorSmall<3> ( Real const&, const Real&, const Real&, const Real& ) > volumeForce_Type;
+    typedef boost::shared_ptr<volumeForce_Type>                                                     volumeForcePtr_Type;
+    typedef sourceVectorialFunctor                                       sourceFunctor_Type;
+    typedef boost::shared_ptr<sourceFunctor_Type> sourceFunctorPtr_Type;
     //@}
 
     //! @name Constructor & Destructor
@@ -295,7 +305,7 @@ public:
     /*!
       \param rhsTimeAdvance the portion of the rhs of the discrete equation which comes from TA.
     */
-    void updateRightHandSideWithBodyForce ( const vector_Type& rhsTimeAdvance );
+    void updateRightHandSideWithBodyForce ( const Real currentTime, const vector_Type& rhsTimeAdvance );
 
     //! Updates the rhs at the start of each time step
     /*!
@@ -476,7 +486,7 @@ public:
     }
 
     //! Set the source object
-    void setSourceTerm ( const volumeForce_Type& s )
+    void setSourceTerm ( const volumeForcePtr_Type s )
     {
         M_source.reset( new sourceFunctor_Type( s ) );
     }
@@ -791,7 +801,7 @@ protected:
     UInt                                 M_recur;
 
     bool                                 M_havingSource;
-    sourceFunctor_Type                   M_source;
+    sourceFunctorPtr_Type                   M_source;
 
     UInt                                 M_offset;
     Real                                 M_rescaleFactor;
@@ -844,7 +854,7 @@ StructuralOperator<Mesh>::StructuralOperator( ) :
     M_jacobian                   ( ),
     M_recur                      ( ),
     M_havingSource               ( false ),
-    M_source                     ( )
+    M_source                     ( ),
     M_offset                     ( 0 ),
     M_rescaleFactor              ( 1. ),
     M_material                   ( ),
@@ -1010,21 +1020,23 @@ void StructuralOperator<Mesh>::updateSystem ( matrixPtr_Type& mat_stiff)
 }
 
 template <typename Mesh>
-void StructuralOperator<Mesh>::updateRightHandSideWithBodyForce ( const vector_Type& rhsTimeAdvance )
+void StructuralOperator<Mesh>::updateRightHandSideWithBodyForce ( const Real currentTime, const vector_Type& rhsTimeAdvance )
 {
     using namespace ExpressionAssembly;
+
+    M_source->setCurrentTime( currentTime );
 
     vectorPtr_Type rhs ( new vector_Type (*M_localMap) );
 
     integrate ( elements ( this->M_dispETFESpace->mesh() ) ,
                 this->M_dispFESpace->qr(),
                 this->M_dispETFESpace,
-                value ( M_data->rho() ) * dot (  value( M_source ), phi_i )
+                value ( M_data->rho() ) * dot (  eval( M_source, X ), phi_i )
                 ) >> rhs;
 
     *rhs += rhsTimeAdvance;
 
-    M_rhsNoBC += rhs;
+    *M_rhsNoBC += *rhs;
 }
 
 template <typename Mesh>
@@ -1544,8 +1556,6 @@ void
 StructuralOperator<Mesh>::initialize ( const function& d0 )
 {
     M_dispFESpace->interpolate ( static_cast<typename FESpace<Mesh, MapEpetra>::function_Type> ( d0 ), *M_disp, 0.0);
-    //M_FESpace->interpolate(w0, *M_vel , 0.0);
-    // M_FESpace->interpolate(a0, *M_acc , 0.0);
 }
 
 template<typename Mesh>
