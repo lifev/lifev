@@ -110,8 +110,7 @@ public:
       @param map Row map. The column map will be defined in MatrixEpetra<DataType>::GlobalAssemble(...,...)
       @param graph A sparse compressed row FE graph.
      */
-    MatrixEpetra ( const MapEpetra& map, const Epetra_FECrsGraph& graph, bool ignoreNonLocalValues = false,
-    		       bool overlap = false);
+    MatrixEpetra ( const MapEpetra& map, const Epetra_FECrsGraph& graph, bool ignoreNonLocalValues = false);
 
     //! Constructor for square and rectangular matrices
     /*!
@@ -630,10 +629,9 @@ MatrixEpetra<DataType>::MatrixEpetra ( const MapEpetra& map, const Epetra_CrsGra
 }
 
 template <typename DataType>
-MatrixEpetra<DataType>::MatrixEpetra ( const MapEpetra& map, const Epetra_FECrsGraph& graph, bool ignoreNonLocalValues,
-									   bool overlap) :
+MatrixEpetra<DataType>::MatrixEpetra ( const MapEpetra& map, const Epetra_FECrsGraph& graph, bool ignoreNonLocalValues) :
     M_map       ( new MapEpetra ( map ) ),
-    M_epetraCrs ( new matrix_type ( Copy, graph, ignoreNonLocalValues, overlap ) )
+    M_epetraCrs ( new matrix_type ( Copy, graph, ignoreNonLocalValues) )
 {
 
 }
