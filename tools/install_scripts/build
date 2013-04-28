@@ -12,6 +12,9 @@
 # - NO      : the package will not be used
 # BEWARE! some packages are required and cannot be set to NO!!
 
+# exit on every error
+set -e
+
 source libpath
 
 package_install=()

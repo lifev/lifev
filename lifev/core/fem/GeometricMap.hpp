@@ -77,7 +77,7 @@ public:
       @param name : the name of the f.e.
       @param shape : the geometry belongs to enum ReferenceShapes {NONE, POINT, LINE, TRIANGLE, QUAD, HEXA, PRISM, TETRA}; (see ElementShapes.h)
       @param nbDof : the total number of d.o.f.
-      @param nbCoor : number of local coordinates
+      @param nbLocalCoor : number of local coordinates
       @param phi : the static array containing the basis functions (defined in refEle.h)
       @param dPhi : the static array containing the derivatives of the basis functions (defined in refEle.h)
       @param d2Phi : the static array containing the second derivatives of the basis functions (defined in refEle.h)
@@ -87,7 +87,7 @@ public:
     GeometricMap ( std::string          name,
                    ReferenceShapes      shape,
                    UInt                 nbDof,
-                   UInt                 nbCoor,
+                   UInt                 nbLocalCoor,
                    const function_Type* phi,
                    const function_Type* dPhi,
                    const function_Type* d2Phi,
