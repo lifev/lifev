@@ -1,0 +1,81 @@
+diff -ur qhull-2010.1/CMakeLists.txt qhull-2010.1.orig/CMakeLists.txt
+--- qhull-2010.1/CMakeLists.txt 2010-01-10 03:07:32.000000000 +0300
++++ qhull-2010.1.orig/CMakeLists.txt  2010-12-21 21:10:00.000000000 +0300
+@@ -6,3 +6,7 @@
+ 
+ add_subdirectory(src)
+ 
++install(DIRECTORY html DESTINATION share/doc/qhull) 
++install(FILES html/qhull.man DESTINATION share/man/man1 RENAME qhull.1) 
++install(FILES html/rbox.man DESTINATION share/man/man1 RENAME rbox.1)
++
+diff -ur qhull-2010.1/src/CMakeLists.txt qhull-2010.1.orig/src/CMakeLists.txt
+--- qhull-2010.1/src/CMakeLists.txt 2010-01-10 03:07:32.000000000 +0300
++++ qhull-2010.1.orig/src/CMakeLists.txt  2010-12-21 21:11:47.000000000 +0300
+@@ -1,5 +1,8 @@
+ project(qhull_lib)
+ 
++set(qhull_SOVERSION 5) 
++set(qhull_VERSION ${qhull_SOVERSION}.0.0)
++
+ # Order object files by frequency of execution.  Small files at end.
+ set(
+     qhull_src
+@@ -23,9 +26,19 @@
+ 
+ file(GLOB qhull_hdr *.h)
+ 
+-add_library(qhull ${qhull_src})
++add_library(qhull SHARED ${qhull_src})
+ target_link_libraries(qhull m)
+ 
++set_target_properties(qhull PROPERTIES SOVERSION ${qhull_SOVERSION} VERSION ${qhull_VERSION}) 
++set_target_properties(qhull PROPERTIES 
++                        INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib" 
++                        INSTALL_RPATH_USE_LINK_PATH TRUE 
++                        BUILD_WITH_INSTALL_RPATH FALSE) 
++#endif(UNIX) 
++ 
++add_library(qhullstatic STATIC ${qhull_src}) 
++set_property(TARGET qhullstatic PROPERTY OUTPUT_NAME "qhull")
++
+ set(qhullcmd_SOURCES  unix.c)
+ set(rbox_SOURCES  rbox.c)
+ set(qconvex_SOURCES  qconvex.c)
+@@ -33,22 +46,17 @@
+ set(qvoronoi_SOURCES  qvoronoi.c)
+ set(qhalf_SOURCES  qhalf.c)
+ 
+-
+-add_executable(qhullcmd ${qhullcmd_SOURCES})
+-target_link_libraries(qhullcmd qhull)
+-
+-add_executable(rbox ${rbox_SOURCES})
+-target_link_libraries(rbox qhull)
+-
+-add_executable(qconvex ${qconvex_SOURCES})
+-target_link_libraries(qconvex qhull)
+-
+-add_executable(qdelaunay ${qdelaunay_SOURCES})
+-target_link_libraries(qdelaunay qhull)
+-
+-add_executable(qvoronoi ${qvoronoi_SOURCES})
+-target_link_libraries(qvoronoi qhull)
+-
+-add_executable(qhalf ${qhalf_SOURCES})
+-target_link_libraries(qhalf qhull)
++set(PROGS qhullcmd rbox qconvex qdelaunay qvoronoi qhalf) 
++foreach(PROG ${PROGS}) 
++        add_executable(${PROG} ${${PROG}_SOURCES}) 
++        target_link_libraries(${PROG} qhull) 
++endforeach(PROG ${PROGS}) 
++ 
++set_property(TARGET qhullcmd PROPERTY OUTPUT_NAME "qhull") 
++ 
++install(TARGETS qhull qhullstatic ${PROGS} 
++        RUNTIME DESTINATION bin 
++        LIBRARY DESTINATION lib 
++        ARCHIVE DESTINATION lib) 
++install(FILES ${qhull_hdr} DESTINATION include/qhull)
+
+

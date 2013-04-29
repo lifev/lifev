@@ -31,7 +31,7 @@ OBJS=\$(SRCS:.cpp=.o)
 
 all: libdummy.a(\$(OBJS))
 EOF
-  make || return 1
+  make
 }
 
 install_dummy() {
