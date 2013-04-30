@@ -45,7 +45,6 @@
 #include <lifev/core/fem/Assembly.hpp>
 #include <lifev/core/fem/FESpace.hpp>
 #include <lifev/core/fem/AssemblyElemental.hpp>
-#include <lifev/core/fem/AssemblyElementalBoundary.hpp>
 #include <lifev/core/fem/BCHandler.hpp>
 #include <lifev/core/fem/QuadratureRuleProvider.hpp>
 
@@ -138,9 +137,6 @@ public:
 
     //! Add the stiff strain using the given offsets
     void addStiffStrain (matrixType& matrix, const Real& viscosity, const UInt& offsetLeft, const UInt& offsetUp);
-
-    //! Add the stiff strain on the boundary in the standard block
-    void addStiffStrainBoundary (matrixType& matrix, const Real& boundaryFlag, const Real& firstLame, const Real& secondLame);
 
     //! Add the term involved in the gradient of the pressure term
     void addGradPressure (matrixType& matrix)
@@ -270,9 +266,7 @@ public:
 private:
 
     typedef CurrentFE                            currentFE_Type;
-    typedef CurrentBoundaryFE                    currentBdFE_Type;
     typedef boost::scoped_ptr<currentFE_Type>    currentFEPtr_Type;
-    typedef boost::scoped_ptr<currentBdFE_Type>  currentBdFEPtr_Type;
 
     typedef MatrixElemental                              localMatrix_Type;
     typedef boost::scoped_ptr<localMatrix_Type>          localMatrixPtr_Type;
@@ -298,11 +292,8 @@ private:
     // Beta FE space
     fespacePtr_Type M_betaFESpace;
 
-
     // CurrentFE
     currentFEPtr_Type M_viscousCFE;
-    currentFEPtr_Type M_stiffBoundaryCFE;
-    currentBdFEPtr_Type M_stiffBoundaryCBdFE;
 
     currentFEPtr_Type M_gradPressureUCFE;
     currentFEPtr_Type M_gradPressurePCFE;
@@ -312,8 +303,6 @@ private:
 
     currentFEPtr_Type M_massCFE;
     currentFEPtr_Type M_massBetaCFE;
-    currentFEPtr_Type M_weightedMassCFE;
-    currentFEPtr_Type M_weightedMassBetaCFE;
     currentFEPtr_Type M_massPressureCFE;
 
     currentFEPtr_Type M_convectionUCFE;
@@ -327,14 +316,12 @@ private:
 
     // Local matrix
     localMatrixPtr_Type M_localViscous;
-    localMatrixPtr_Type M_localStiffBoundary;
 
     localMatrixPtr_Type M_localGradPressure;
 
     localMatrixPtr_Type M_localDivergence;
 
     localMatrixPtr_Type M_localMass;
-    localMatrixPtr_Type M_localWeightedMass;
     localMatrixPtr_Type M_localMassPressure;
 
     localMatrixPtr_Type M_localConvection;
@@ -354,16 +341,12 @@ OseenAssembler() :
     M_betaFESpace(),
 
     M_viscousCFE(),
-    M_stiffBoundaryCFE(),
-    M_stiffBoundaryCBdFE(),
     M_gradPressureUCFE(),
     M_gradPressurePCFE(),
     M_divergenceUCFE(),
     M_divergencePCFE(),
     M_massCFE(),
     M_massBetaCFE(),
-    M_weightedMassCFE(),
-    M_weightedMassBetaCFE(),
     M_massPressureCFE(),
     M_convectionUCFE(),
     M_convectionBetaCFE(),
@@ -371,7 +354,6 @@ OseenAssembler() :
     M_massRhsCFE(),
 
     M_localViscous(),
-    M_localStiffBoundary(),
     M_localGradPressure(),
     M_localDivergence(),
     M_localMass(),
@@ -409,18 +391,6 @@ setup (const fespacePtr_Type& uFESpace, const fespacePtr_Type& pFESpace, const f
                                             M_uFESpace->fe().geoMap(),
                                             QuadratureRuleProvider::provideExactness (TETRA, 2 * uDegree - 2) ) );
 
-    // M_stiffBoundaryCFE.reset(new currentFE_Type(M_uFESpace->refFE(),
-    // 						      M_uFESpace->fe().geoMap(),
-    // 						QuadratureRuleProvider::provideExactness(TETRA,2*uDegree-2)));
-
-    // M_stiffBoundaryCBdFE.reset(new currentBdFE_Type(M_uFESpace->refFE().boundaryFE(),
-						      // 	  M_uFESpace->fe().geoMap().boundaryMap(),
-						      // QuadratureRuleProvider::provideExactness(TRIANGLE,2*uDegree-2)));
-
-    M_stiffBoundaryCBdFE.reset (new currentBdFE_Type (M_uFESpace->refFE().boundaryFE(),
-                                                      M_uFESpace->fe().geoMap().boundaryMap(),
-                                                      QuadratureRuleProvider::provideExactness (TRIANGLE, 2 * uDegree - 2) ) );
-
     M_gradPressureUCFE.reset (new currentFE_Type (M_uFESpace->refFE(),
                                                   M_uFESpace->fe().geoMap(),
                                                   QuadratureRuleProvider::provideExactness (TETRA, uDegree + pDegree - 1) ) );
@@ -446,15 +416,6 @@ setup (const fespacePtr_Type& uFESpace, const fespacePtr_Type& pFESpace, const f
                                              M_uFESpace->fe().geoMap(),
                                              QuadratureRuleProvider::provideExactness (TETRA, 2 * uDegree) ) );
 
-    M_weightedMassCFE.reset (new currentFE_Type (M_uFESpace->refFE(),
-                                                 M_uFESpace->fe().geoMap(),
-                                                 QuadratureRuleProvider::provideExactness (TETRA, 2 * uDegree) ) );
-
-    M_weightedMassBetaCFE.reset (new currentFE_Type (M_betaFESpace->refFE(),
-                                                     M_uFESpace->fe().geoMap(),
-                                                     QuadratureRuleProvider::provideExactness (TETRA, 2 * uDegree) ) );
-
-
     M_massPressureCFE.reset (new currentFE_Type (M_pFESpace->refFE(),
                                                  M_pFESpace->fe().geoMap(),
                                                  QuadratureRuleProvider::provideExactness (TETRA, 2 * pDegree) ) );
@@ -475,10 +436,6 @@ setup (const fespacePtr_Type& uFESpace, const fespacePtr_Type& pFESpace, const f
                                                 M_uFESpace->fieldDim(),
                                                 M_uFESpace->fieldDim() ) );
 
-    M_localStiffBoundary.reset (new localMatrix_Type (M_uFESpace->fe().nbFEDof(),
-                                                      M_uFESpace->fieldDim(),
-                                                      M_uFESpace->fieldDim() ) );
-
     M_localGradPressure.reset (new localMatrix_Type (M_uFESpace->fe().nbFEDof(), nDimensions, 0,
                                                      M_pFESpace->fe().nbFEDof(), 0, 1) );
 
@@ -489,9 +446,6 @@ setup (const fespacePtr_Type& uFESpace, const fespacePtr_Type& pFESpace, const f
                                              M_uFESpace->fieldDim(),
                                              M_uFESpace->fieldDim() ) );
 
-    M_localWeightedMass.reset (new localMatrix_Type (M_uFESpace->fe().nbFEDof(),
-                                                     M_uFESpace->fieldDim(),
-                                                     M_uFESpace->fieldDim() ) );
     M_localMassPressure.reset (new localMatrix_Type (M_pFESpace->fe().nbFEDof(),
                                                      M_pFESpace->fieldDim(),
                                                      M_pFESpace->fieldDim() ) );
