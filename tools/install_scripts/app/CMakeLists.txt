@@ -29,9 +29,9 @@ endif()
 
 # LIFEV
 find_package(LIFEV REQUIRED)
-message(STATUS "LifeV include dirs: " ${LIFEV_INCLUDE_DIRS})
+message(STATUS "LifeV include dirs: " "${LIFEV_INCLUDE_DIRS}")
 include_directories(${LIFEV_INCLUDE_DIRS})
-message(STATUS "LifeV libraries: " ${LIFEV_LIBRARIES})
+message(STATUS "LifeV libraries: " "${LIFEV_LIBRARIES}")
 set(LIBS ${LIBS} ${LIFEV_LIBRARIES})
 
 # dummy test application

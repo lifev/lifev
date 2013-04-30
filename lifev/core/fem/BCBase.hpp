@@ -75,7 +75,7 @@
 #include <lifev/core/fem/BCIdentifier.hpp>
 #include <lifev/core/fem/DOF.hpp>
 #include <lifev/core/fem/CurrentFE.hpp>
-#include <lifev/core/fem/CurrentBoundaryFE.hpp>
+#include <lifev/core/fem/CurrentFEManifold.hpp>
 #include <lifev/core/fem/BCVector.hpp>
 #include <lifev/core/fem/BCFunction.hpp>
 

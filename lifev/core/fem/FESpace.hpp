@@ -51,7 +51,7 @@
 
 #include <lifev/core/fem/BCHandler.hpp>
 #include <lifev/core/fem/CurrentFE.hpp>
-#include <lifev/core/fem/CurrentBoundaryFE.hpp>
+#include <lifev/core/fem/CurrentFEManifold.hpp>
 #include <lifev/core/fem/DOF.hpp>
 #include <lifev/core/fem/SobolevNorms.hpp>
 
@@ -422,7 +422,7 @@ public:
     }
 
     //! Returns the current boundary FE
-    CurrentBoundaryFE&      feBd()
+    CurrentFEManifold&      feBd()
     {
         return *M_feBd;
     }
@@ -559,7 +559,7 @@ private:
 
     //! Current FE
     boost::shared_ptr<CurrentFE>            M_fe;
-    boost::shared_ptr<CurrentBoundaryFE>    M_feBd;
+    boost::shared_ptr<CurrentFEManifold>    M_feBd;
 
     //! Map
     mapPtr_Type                             M_map;
@@ -1766,7 +1766,7 @@ resetBoundaryFE()
 {
     if (M_refFE->hasBoundaryFE() )
     {
-        M_feBd.reset (new CurrentBoundaryFE ( M_refFE->boundaryFE(), getGeometricMap ( *M_mesh ).boundaryMap(), *M_bdQr ) );
+        M_feBd.reset (new CurrentFEManifold ( M_refFE->boundaryFE(), getGeometricMap ( *M_mesh ).boundaryMap(), *M_bdQr ) );
     }
 }
 

@@ -7,7 +7,7 @@
 ver="3.1.1"
 
 download_parmetis() {
-  wget http://glaros.dtc.umn.edu/gkhome/fetch/sw/parmetis/OLD/ParMetis-$ver.tar.gz
+  wget -c http://glaros.dtc.umn.edu/gkhome/fetch/sw/parmetis/OLD/ParMetis-$ver.tar.gz
 }
 
 unpack_parmetis() {
@@ -17,7 +17,7 @@ unpack_parmetis() {
 build_parmetis() {
 
   # no support for off-source building
-  cd $src_dir/ParMetis-$ver || return 1
+  cd $src_dir/ParMetis-$ver
 
   cat > Makefile.in <<EOF
 CC = ${mpi_bin}/mpicc
@@ -26,8 +26,8 @@ LD = ${mpi_bin}/mpicc
 AR = ar rv
 RANLIB = ar -ts
 EOF
-  make clean || return 1
-  make || return 1
+  make clean
+  make
 }
 
 install_parmetis() {
