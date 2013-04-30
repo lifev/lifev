@@ -958,8 +958,8 @@ PreconditionerPCD::computeNormalVectors()
     for ( UInt iFace = 0; iFace < numBoundaryFacets; ++iFace )
     {
         //Update the currentBdFE with the face data
-        M_pFESpace->feBd().updateMeasNormalQuadPt ( M_pFESpace->mesh()->boundaryFacet ( iFace ) );
-        UInt nDofF = M_pFESpace->feBd().nbNode();
+        M_pFESpace->feBd().update ( M_pFESpace->mesh()->boundaryFacet ( iFace ), UPDATE_NORMALS | UPDATE_W_ROOT_DET_METRIC );
+        UInt nDofF = M_pFESpace->feBd().nbFEDof();
 
         //For each node on the face
         for ( UInt icheck = 0; icheck < nDofF; ++icheck )
@@ -1254,7 +1254,7 @@ PreconditionerPCD::setBCByBoundaryType ( matrixPtr_type Ap, UInt ApOffset,
     for ( ID iBoundaryElement = 0 ; iBoundaryElement < M_pFESpace->mesh()->numBoundaryFacets(); ++iBoundaryElement )
     {
         // construction of localToGlobalMapOnBElem (this part should be moved in DOF.hpp)
-        M_pFESpace->feBd().updateMeas ( M_pFESpace->mesh()->boundaryFacet ( iBoundaryElement ) ); // updating finite element information
+        M_pFESpace->feBd().update ( M_pFESpace->mesh()->boundaryFacet ( iBoundaryElement ), UPDATE_W_ROOT_DET_METRIC ); // updating finite element information
         elementMarker = M_pFESpace->mesh()->boundaryFacet ( iBoundaryElement ).markerID(); // We keep the element marker
 
 
