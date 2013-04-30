@@ -122,6 +122,14 @@ public:
 
     virtual void approximateInverse ( ) {};
 
+    virtual void getinterpolationOperatorMap(mapPtr_Type&){ };
+
+    virtual void getprojectionOperatorMap(mapPtr_Type& ){ };
+
+    virtual void getSolutionOnGamma(vectorPtr_Type& ) { };
+
+    virtual void buildUnknownVectorialInterfaceMap(){};
+
 private:
 
 };

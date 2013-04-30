@@ -462,13 +462,11 @@ void RBFscalar<mesh_Type>::interpolate()
     solverRBF.setRightHandSide (M_RhsF);
     solverRBF.solve (gamma_f);
 
-    /*
     vectorPtr_Type solution;
     solution.reset (new vector_Type (*M_projectionOperatorMap) );
 
     M_projectionOperator->multiply (false, *gamma_f, *solution);
     M_unknownField->subset (*solution, *M_projectionOperatorMap, 0, 0);
-    */
 }
 
 template <typename mesh_Type>

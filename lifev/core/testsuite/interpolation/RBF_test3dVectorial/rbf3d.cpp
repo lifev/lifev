@@ -50,6 +50,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/core/mesh/MeshData.hpp>
 #include <lifev/core/filter/ExporterHDF5.hpp>
 #include <lifev/core/interpolation/RBFInterpolation.hpp>
+#include <lifev/core/interpolation/RBFhtpVectorial.hpp>
 #include <lifev/core/interpolation/RBFlocallyRescaledVectorial.hpp>
 #include <lifev/core/interpolation/RBFrescaledVectorial.hpp>
 #include <lifev/core/interpolation/RBFvectorial.hpp>
@@ -168,7 +169,6 @@ int main (int argc, char** argv )
 
     boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > Fluid_fieldFESpace (new FESpace<mesh_Type, MapEpetra> (Fluid_localMesh, "P1", 3, Comm) );
     vectorPtr_Type Fluid_solution (new vector_Type (Fluid_fieldFESpace->map(), Unique) );
-    vectorPtr_Type Fluid_solution_rbf (new vector_Type (Fluid_fieldFESpace->map(), Unique) );
 
     int nFlags = 2;
     std::vector<int> flags (nFlags);
@@ -195,9 +195,6 @@ int main (int argc, char** argv )
 
     RBFinterpolant->solution (Fluid_solution);
 
-    if(dataFile("interpolation/interpolation_Type","none")!="RBFvectorial")
-        RBFinterpolant->solutionrbf (Fluid_solution_rbf);
-
     // COMPUTING THE ERROR
     vectorPtr_Type Fluid_exact_solution (new vector_Type (Fluid_fieldFESpace->map(), Unique) );
     vectorPtr_Type myError (new vector_Type (Fluid_fieldFESpace->map(), Unique) );
@@ -223,8 +220,6 @@ int main (int argc, char** argv )
                         }
 
                         (*myError) [myError->blockMap().GID (i) + Fluid_exact_solution->size()/3*j ] = (*Fluid_exact_solution) [Fluid_exact_solution->blockMap().GID (i) + Fluid_exact_solution->size()/3*j ] - (*Fluid_solution) [Fluid_solution->blockMap().GID (i) + Fluid_exact_solution->size()/3*j ];
-                        if(dataFile("interpolation/interpolation_Type","none")!="RBFvectorial")
-                            (*rbfError) [rbfError->blockMap().GID (i) + Fluid_exact_solution->size()/3*j ] = (*Fluid_exact_solution) [Fluid_exact_solution->blockMap().GID (i) + Fluid_exact_solution->size()/3*j ] - (*Fluid_solution_rbf) [Fluid_solution_rbf->blockMap().GID (i) + Fluid_exact_solution->size()/3*j ];
                     }
 
     Real err_Inf = myError->normInf();
@@ -243,11 +238,6 @@ int main (int argc, char** argv )
     Fluid_exporter.addVariable (ExporterData<mesh_Type>::VectorField, "Exact solution", Fluid_fieldFESpace, Fluid_exact_solution, UInt (0) );
     Fluid_exporter.addVariable (ExporterData<mesh_Type>::VectorField, "Solution", Fluid_fieldFESpace, Fluid_solution, UInt (0) );
     Fluid_exporter.addVariable (ExporterData<mesh_Type>::VectorField, "Error", Fluid_fieldFESpace, myError, UInt (0) );
-    if(dataFile("interpolation/interpolation_Type","none")!="RBFvectorial")
-    {
-        Fluid_exporter.addVariable (ExporterData<mesh_Type>::VectorField, "RBF's solution", Fluid_fieldFESpace, Fluid_solution_rbf, UInt (0) );
-        Fluid_exporter.addVariable (ExporterData<mesh_Type>::VectorField, "RBF's error", Fluid_fieldFESpace, rbfError, UInt (0) );
-    }
     Fluid_exporter.postProcess (0);
     Fluid_exporter.closeFile();
 

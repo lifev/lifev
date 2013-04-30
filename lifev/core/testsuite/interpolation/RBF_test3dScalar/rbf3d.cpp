@@ -50,6 +50,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/core/mesh/MeshData.hpp>
 #include <lifev/core/filter/ExporterHDF5.hpp>
 #include <lifev/core/interpolation/RBFInterpolation.hpp>
+#include <lifev/core/interpolation/RBFhtp.hpp>
 #include <lifev/core/interpolation/RBFlocallyRescaledScalar.hpp>
 #include <lifev/core/interpolation/RBFrescaledScalar.hpp>
 #include <lifev/core/interpolation/RBFscalar.hpp>

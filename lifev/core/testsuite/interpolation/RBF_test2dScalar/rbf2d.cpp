@@ -58,7 +58,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <Teuchos_XMLParameterListHelpers.hpp>
 #include <Teuchos_RCP.hpp>
 
-#define PI 3.14159265
+#define PI 3.14159265 
 
 //Tell the compiler to restore the warning previously silented
 #pragma GCC diagnostic warning "-Wunused-variable"

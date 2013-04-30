@@ -5,7 +5,7 @@
         <Parameter name="Quit On Failure" type="bool" value="false"/>
         <Parameter name="Silent" type="bool" value="false"/>
 	<Parameter name="Solver Type" type="string" value="Belos"/>
-	<Parameter name="Maximum Iterations" type="int" value="200"/>
+        <Parameter name="Block Size" type="int" value="2"/>
 	
 	<!-- Operator specific parameters (Belos) -->
 	<ParameterList name="Solver: Operator List">
@@ -18,9 +18,9 @@
 	    	<Parameter name="Convergence Tolerance" type="double" value="1e-10"/>
     		<Parameter name="Maximum Iterations" type="int" value="1000"/>
 	    	<Parameter name="Output Frequency" type="int" value="1"/>
-    		<Parameter name="Block Size" type="int" value="2"/>
-	    	<Parameter name="Num Blocks" type="int" value="100"/>
-    		<Parameter name="Maximum Restarts" type="int" value="1"/>
+    		<Parameter name="Block Size" type="int" value="1"/>
+	    	<Parameter name="Num Blocks" type="int" value="1000"/>
+    		<Parameter name="Maximum Restarts" type="int" value="0"/>
 	    	<Parameter name="Output Style" type="int" value="1"/>
     		<Parameter name="Verbosity" type="int" value="35"/>
     	</ParameterList>

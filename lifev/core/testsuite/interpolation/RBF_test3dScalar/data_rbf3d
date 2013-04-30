@@ -25,7 +25,7 @@
        	mesh_type                = .mesh
 
 [interpolation]
-    interpolation_Type           = RBFlocallyrescaledScalar # RBFlocallyRescaledScalar, RBFrescaledScalar, RBFscalar
+    interpolation_Type           = RBFlocallyRescaledScalar # RBFlocallyRescaledScalar, RBFrescaledScalar, RBFscalar, RBFhtp
     basis                        = TPS                      # BW, TPS, IMQ to be used only when using RBFscalar
 
 [prec]

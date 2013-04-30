@@ -109,6 +109,10 @@ public:
 
     void setRadius ( double radius );
 
+    void getinterpolationOperatorMap(mapPtr_Type& map){ map.reset(new map_Type(*M_interpolationOperatorMap)); }
+
+    void getprojectionOperatorMap(mapPtr_Type& map){ map.reset(new map_Type(*M_projectionOperatorMap)); }
+
 private:
 
     meshPtr_Type        M_fullMeshKnown;
@@ -243,6 +247,7 @@ void RBFlocallyRescaledScalar<Mesh>::interpolationOperator()
         M_interpolationOperator->matrixPtr()->InsertGlobalValues (GlobalID[i], k, Values, Indices);
     }
     M_interpolationOperator->globalAssemble();
+    M_interpolationOperator->spy("TEST");
     delete Indices;
     delete Values;
     delete ElementsPerRow;
