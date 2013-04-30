@@ -22,6 +22,12 @@ Real fZero (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real&
     return 0.0;
 }
 
+
+Real E (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
+{
+    return 500.0;
+}
+
 Real inletCylinder (Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
     if (t <= 0   + 0.02)
@@ -259,7 +265,8 @@ Real linearInletCylinder ( Real  t, const Real& /*x*/, const Real& /*y*/, const 
         tNew = ( ( (int) floor (t * 10000) ) % 11000) / 10000.0;
     }
     //Real dt =  static_cast<int>( std::floor(tNew * 100) )% 2 / 100.0;
-    Real ti = tNew;
+    Real dt = ( int(floor (tNew * 1000.0) ) % 20 )/ 1000.0;
+    Real ti = tNew - dt;
     Real tii = ti + 0.02;
     return - ( (inletCylinder (tii, 0, 0, 0, 0) - inletCylinder (ti, 0, 0, 0, 0) ) / (0.02) * (tNew - (ti) ) + inletCylinder (ti, 0, 0, 0, 0) );
 }
@@ -273,17 +280,17 @@ Real linearVelInletCylinder ( Real  t, const Real& x, const Real& y, const Real&
     Real n2 (0.0);
     Real n3 (-1.0);
 
-    Real flux (linearInletCylinder (t, x, y, z, i) );
+    Real flux (1.0 * linearInletCylinder (t, x, y, z, i) );
     //Center for the aneurym with one IO
     Real x0 (0);
     Real y0 (0);
-    Real area (0.5 * 0.5 * 3.141592653589793); //fluidBig
+    Real area (0.3 * 0.3 * 3.141592653589793); //fluidBig
 
     Real radiusSquared (0);
     radiusSquared = 0.5 * 0.5; //* 3.1415962;
 
     Real peak (0);
-    peak = ( 2.0 * flux ) / ( area );
+    peak = ( 2.0  * flux ) / ( area );
 
     switch (i)
     {
@@ -1125,26 +1132,3 @@ Real linearPontdist ( Real  t, const Real& /*x*/, const Real& /*y*/, const Real&
 
 
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -30,14 +30,38 @@ namespace LifeV
 {
 Real fZero (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
 
+Real E (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
+
 Real inletCylinder (Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
 Real linearInletCylinder ( Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
 Real linearVelInletCylinder ( Real  t, const Real& x, const Real& y, const Real& z, const ID& i);
 Real linearPontdist ( Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
 Real pont_dist ( const Real  t, const Real& x = 0, const Real& y = 0, const Real& z = 0, const ID& i = 0);
 
+
+
+/* NormalizeFct */
+class NormalizeFct
+{
+public:
+    typedef VectorSmall<3> return_Type;
+
+    return_Type operator() (const VectorSmall<3>& value)
+    {
+        Real norm (sqrt ( value[0]*value[0] + value[1]*value[1] + value[2]*value[2]) );
+
+        if (norm > 0)
+        {
+            return value * (1.0 / norm);
+        }
+        return value;
+    }
+
+    NormalizeFct() {}
+    NormalizeFct (const NormalizeFct&) {}
+    ~NormalizeFct() {}
+};
+
 }
-
-
 
 #endif

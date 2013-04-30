@@ -118,8 +118,8 @@ public:
     void initialize();
 
     //! create interface map
-    void createInterfaceMap ( vectorPtr_type checkVector, meshPtr_type& mesh , const DOF& dof);
-    //void createInterfaceMap( std::map<ID, ID> const& locDofMap , const DOF& dof );
+    //void createInterfaceMap ( vectorPtr_type checkVector, meshPtr_type& mesh , const DOF& dof);
+    void createInterfaceMap( std::map<ID, ID> const& locDofMap , const DOF& dof );
 
     //! run test
     void run();
@@ -129,6 +129,7 @@ private:
     struct Private;
     boost::shared_ptr<Private>                                    M_d;
     boost::shared_ptr<FESpace<mesh_type, MapEpetra> >             M_uFESpace;
+    boost::shared_ptr<FESpace<mesh_type, MapEpetra> >             M_uCompFESpace;
     boost::shared_ptr<FESpace<mesh_type, MapEpetra> >             M_pFESpace;
     boost::shared_ptr<FESpace<mesh_type, MapEpetra> >             M_mFESpace;
     boost::shared_ptr<ETFESpace<mesh_type, MapEpetra , 3 , 3 > >  M_ETuFESpace;

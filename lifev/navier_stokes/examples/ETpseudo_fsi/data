@@ -8,8 +8,8 @@
 multimesh  = false
 start      = 0000
 save       = 1
-filename   = cylinderP1
-each       = 1
+filename   = cylinderP1P1_SUP
+each       = 5
 
 
 [importer]
@@ -21,35 +21,39 @@ each       = 1
     [./physics]
         density_sol     = 1.0
         young           = 4.07E6
-        poisson         = 0.45
-        wall_thickness  = 0.1
+        poisson         = 0.5
+        wall_thickness  = 0.03
 
 
 [fluid]
 
     [./problem]
-    numLM           = 1
-    centered        = 1
-    initial_sol     = none        # stokes, none
+    numLM               = 0
+    centered            = 1
+    initial_sol         = none        # stokes, none
+    transpiration_order = 0
+    stabilization       = sup
+    
+	[./boundary_flags]
+	outlet   = 3
+	inlet    = 2
+	wall     = 1
+	ring_in  = 20
+	ring_out = 30
+	[../]
 
-
-	[../physics]
+    [../physics]
 	Re              = 1
     	D               = 0.6
     	H               = 12
 	density         = 1.06           # density   [kg/m^3]
 	viscosity       = 0.035			# viscosity [kg/m/s]
 
-	[../geometry]
-	dataType	= file
-	gaussCurvature  = gauss_curv_smoothedLB.dat
-	meanCurvature   = mean_curv_smoothedLB.dat
-	gidSurface	= gid_surface_bypass.dat
 
-	[../time_discretization]
+    [../time_discretization]
 	  initialtime           = 0.0
- 	  endtime               = 0.08
-	  timestep              = 0.0008
+ 	  endtime               = 1.1
+	  timestep              = 0.001
 	   method                = BDF   #BDF o Newmark (theta methodo)
   	  BDF_order                 = 1
  
@@ -57,10 +61,10 @@ each       = 1
   	theta                   = 0.5  #0.5
   	zeta                    = 1 #1
  	
-	[../space_discretization]
+    [../space_discretization]
 	#mesh_dir        = ../../../../../../cmcs-mesh-2/AortaFSI_Claudia/
-	mesh_dir = ../cylinder/ ##pseudo_fsi/
-	mesh_file = tube20.mesh
+	mesh_dir = ./ ##../cylinder/ #../pseudo_fsi/
+	mesh_file = tubeLong2.mesh
 	#mesh_file       = Aorta_fluid_30K_NE.mesh 
 	#mesh_file       = tube008_fluid.mesh   #tube008_fluid.mesh #tube_curve20.mesh  
 	mesh_type       = .mesh
@@ -69,14 +73,17 @@ each       = 1
         linearized      = 0
         diagonalize     = 0 # weight, 0=off. for P2P1 better to be on=1
 	div_beta_u_v    = 1             # 1=on, 0=off
-	vel_order       = P2  	# P1, P1Bubble, P2
+	vel_order       = P1 	# P1, P1Bubble, P2
 	press_order     = P1		    # P1, P2
+	supg_coeff      = 0.001
+	pspg_coeff      = 0.001
+	divdiv_coeff    = 0.05
 
     [../miscellaneous]
-    verbose         = 1
-    steady          = 0
-    aleNonConservative = false
-    #aleStabilitation   = true		
+        verbose         = 1
+    	steady          = 0
+    	aleNonConservative = false
+    	#aleStabilitation   = true		
 
 [prec]
 	prectype                = Ifpack # Ifpack or ML
@@ -118,7 +125,7 @@ each       = 1
 
         # ifpack
         [../ifpack]
-        overlap		= 2
+        overlap		= 4
 
            	[./fact]
 		level-of-fill                 = 10
@@ -136,8 +143,10 @@ each       = 1
            	reordering_type = none #metis, rcm, none
            	filter_singletons = true
 
-			[../]
 		[../]
+	[../]
+
+
 [solver]
     solver          = gmres
     scaling         = none
@@ -149,11 +158,11 @@ each       = 1
     kspace          = 100
     tol             = 1.e-7   # AztecOO tolerance
 
-	[../ipstab]
-	gammaBeta       = 1.0 ##.125 ##1#0.125
-	gammaDiv        = 0.2 ##.2
-	gammaPress      = 0.5 ##.05 #0.03125
-	reuse           = true
-    	max_iter_reuse  = 10
+[ipstab]
+    gammaBeta       = 0.5 ##.125 ##1#0.125
+    gammaDiv        = 0.2 ##.2
+    gammaPress      = 0.1 ##.05 #0.03125
+    reuse           = false
+    max_iter_reuse  = 10
     		    
 

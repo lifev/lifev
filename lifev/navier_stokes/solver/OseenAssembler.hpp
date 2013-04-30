@@ -409,9 +409,13 @@ setup (const fespacePtr_Type& uFESpace, const fespacePtr_Type& pFESpace, const f
                                             M_uFESpace->fe().geoMap(),
                                             QuadratureRuleProvider::provideExactness (TETRA, 2 * uDegree - 2) ) );
 
-    M_stiffBoundaryCFE.reset (new currentFE_Type (M_uFESpace->refFE(),
-                                                  M_uFESpace->fe().geoMap(),
-                                                  QuadratureRuleProvider::provideExactness (TETRA, 2 * uDegree - 2) ) );
+    // M_stiffBoundaryCFE.reset(new currentFE_Type(M_uFESpace->refFE(),
+    // 						      M_uFESpace->fe().geoMap(),
+    // 						QuadratureRuleProvider::provideExactness(TETRA,2*uDegree-2)));
+
+    // M_stiffBoundaryCBdFE.reset(new currentBdFE_Type(M_uFESpace->refFE().boundaryFE(),
+						      // 	  M_uFESpace->fe().geoMap().boundaryMap(),
+						      // QuadratureRuleProvider::provideExactness(TRIANGLE,2*uDegree-2)));
 
     M_stiffBoundaryCBdFE.reset (new currentBdFE_Type (M_uFESpace->refFE().boundaryFE(),
                                                       M_uFESpace->fe().geoMap().boundaryMap(),
@@ -599,165 +603,6 @@ addStiffStrain (matrixType& matrix, const Real& viscosity, const UInt& offsetLef
     }
 }
 
-template< typename meshType, typename matrixType, typename vectorType>
-void
-OseenAssembler<meshType, matrixType, vectorType>::
-addStiffStrainBoundary (matrixType& matrix, const Real& boundaryFlag, const Real& firstLame, const Real& secondLame)
-{
-    ASSERT (M_uFESpace != 0, "No FE space for assembling the stiff strain.");
-    ASSERT ( M_uFESpace->dof().numTotalDof() * (M_uFESpace->fieldDim() ) <=
-             UInt (matrix.matrixPtr()->NumGlobalCols() ),
-             " The matrix is too small (columns) for the assembly of the stiff strain");
-    ASSERT ( M_uFESpace->dof().numTotalDof() * (M_uFESpace->fieldDim() ) <=
-             UInt (matrix.matrixPtr()->NumGlobalRows() ),
-             " The matrix is too small (rows) for the assembly of the stiff strain");
-
-    BCHandler bcH;
-    BCFunctionBase uNull;
-    bcH.addBC ( "LB",  boundaryFlag,     Natural,   Full,     uNull, 3 );
-    bcH.bcUpdate (* (M_uFESpace->mesh() ), M_uFESpace->feBd(), M_uFESpace->dof() );
-
-    // Some constants
-    const UInt nbElements (bcH[0].list_size() );
-    const UInt fieldDim (M_uFESpace->fieldDim() );
-    const UInt nbTotalDof (M_uFESpace->dof().numTotalDof() );
-    const UInt nbQuadPt (M_uFESpace->bdQr().nbQuadPt() );
-
-
-    const BCIdentifierNatural* pId;
-    ID ibF, ibE, ibFE;
-
-    //std::cout<<"Numero di nodi sulla faccia: "<< M_laplaceBeltramiCBdFE->nbNode()<<std::endl;
-
-    if ( M_stiffBoundaryCBdFE->nbNode() == 3 /*P1*/)
-    {
-
-        typedef RegionMesh<LinearTetra>::elementShape_Type elementShape_Type;
-
-        // Loop over the elements
-        for (UInt iterElement (0); iterElement < nbElements; ++iterElement)
-        {
-
-            // Pointer to the i-th identifier in the list
-            pId = static_cast< const BCIdentifierNatural* > ( bcH.findBCWithFlag (boundaryFlag) [ iterElement ] );
-
-            // Number of the current boundary face
-            ibF = pId->id();
-            ibE = M_uFESpace->mesh()->boundaryFace ( ibF ).firstAdjacentElementIdentity();
-            ibFE = M_uFESpace->mesh()->boundaryFace ( ibF ).firstAdjacentElementPosition(); // local id of the face in its adjacent element
-
-            // Updating the laplace Beltrami current BdFE and FE
-            M_stiffBoundaryCBdFE->updateMeasNormalQuadPt ( M_uFESpace->mesh()->boundaryFace ( ibF ) );
-            //M_stiffBoundaryCFE->updateFirstDeriv( M_uFESpace->mesh()->element( ibE ) );
-            M_stiffBoundaryCFE->update ( M_uFESpace->mesh()->element ( ibE ), UPDATE_ONLY_CELL_NODES );
-
-            QuadratureRule faceQR1 ("custom quad 1", TETRA, 3, 0, 0);
-            for (UInt iQuad (0); iQuad < nbQuadPt; ++iQuad) // Here we do not use UInt because of KNM, but we should
-            {
-                Real x (0.0), y (0.0), z (0.0);
-                M_stiffBoundaryCFE->coorBackMap ( M_stiffBoundaryCBdFE->quadPt (iQuad, 0),
-                                                  M_stiffBoundaryCBdFE->quadPt (iQuad, 1),
-                                                  M_stiffBoundaryCBdFE->quadPt (iQuad, 2),
-                                                  x, y, z);
-                QuadraturePoint newPoint (x, y, z, M_uFESpace->bdQr().weight (iQuad) );
-                faceQR1.addPoint (newPoint);
-            }
-            M_stiffBoundaryCFE->setQuadRule (faceQR1);
-            M_stiffBoundaryCFE->update ( M_uFESpace->mesh()->element ( ibE ), UPDATE_DPHI | UPDATE_WDET );
-
-            // Clean the local matrix
-            M_localStiffBoundary->zero();
-
-            // local stiffness
-
-            AssemblyElementalBoundary<elementShape_Type>::instance().stiffStrainBoundary (*M_localStiffBoundary,
-                                                                                          *M_stiffBoundaryCFE,
-                                                                                          *M_stiffBoundaryCBdFE,
-                                                                                          secondLame , ibFE, fieldDim);
-            AssemblyElementalBoundary<elementShape_Type>::instance().divDivBoundary (*M_localStiffBoundary, *M_stiffBoundaryCFE, *M_stiffBoundaryCBdFE, firstLame , ibFE, fieldDim);
-
-            // Assembly
-            for (UInt iFieldDim (0); iFieldDim < fieldDim; ++iFieldDim)
-            {
-                assembleMatrix ( matrix,
-                                 *M_localStiffBoundary,
-                                 *M_stiffBoundaryCFE,
-                                 *M_stiffBoundaryCFE,
-                                 M_uFESpace->dof(),
-                                 M_uFESpace->dof(),
-                                 iFieldDim, iFieldDim,
-                                 iFieldDim * nbTotalDof, iFieldDim * nbTotalDof );
-            }
-        }
-
-    }
-    else /*P2*/
-    {
-
-        typedef RegionMesh<QuadraticTetra>::elementShape_Type elementShape_Type;
-
-        // Loop over the elements
-        for (UInt iterElement (0); iterElement < nbElements; ++iterElement)
-        {
-
-            // Pointer to the i-th identifier in the list
-            //pId = static_cast< const BCIdentifierNatural* >( bcH.findBCWithFlag(boundaryFlag)[ iterElement ] );
-            pId = static_cast< const BCIdentifierNatural* > ( bcH[0][ iterElement ] );
-
-            // Number of the current boundary face
-            ibF = pId->id();
-            ibE = M_uFESpace->mesh()->boundaryFace ( ibF ).firstAdjacentElementIdentity();
-            ibFE = M_uFESpace->mesh()->boundaryFace ( ibF ).firstAdjacentElementPosition(); // local id of the face in its adjacent element
-
-            // Updating the laplace Beltrami current BdFE and FE
-            M_stiffBoundaryCBdFE->updateMeasNormalQuadPt ( M_uFESpace->mesh()->boundaryFace ( ibF ) );
-            //M_stiffBoundaryCFE->updateFirstDeriv( M_uFESpace->mesh()->element( ibE ) );
-            M_stiffBoundaryCFE->update ( M_uFESpace->mesh()->element ( ibE ), UPDATE_ONLY_CELL_NODES );
-
-            QuadratureRule faceQR1 ("custom quad 1", TETRA, 3, 0, 0);
-            for (UInt iQuad (0); iQuad < nbQuadPt; ++iQuad) // Here we do not use UInt because of KNM, but we should
-            {
-                Real x (0.0), y (0.0), z (0.0);
-                M_stiffBoundaryCFE->coorBackMap ( M_stiffBoundaryCBdFE->quadPt (iQuad, 0),
-                                                  M_stiffBoundaryCBdFE->quadPt (iQuad, 1),
-                                                  M_stiffBoundaryCBdFE->quadPt (iQuad, 2),
-                                                  x, y, z);
-                QuadraturePoint newPoint (x, y, z, M_uFESpace->bdQr().weight (iQuad) );
-                faceQR1.addPoint (newPoint);
-            }
-            M_stiffBoundaryCFE->setQuadRule (faceQR1);
-            M_stiffBoundaryCFE->update ( M_uFESpace->mesh()->element ( ibE ), UPDATE_DPHI | UPDATE_WDET );
-
-            // Clean the local matrix
-            M_localStiffBoundary->zero();
-
-            // local stiffness
-
-            AssemblyElementalBoundary<elementShape_Type>::instance().stiffStrainBoundary (*M_localStiffBoundary,
-                                                                                          *M_stiffBoundaryCFE,
-                                                                                          *M_stiffBoundaryCBdFE,
-                                                                                          secondLame , ibFE, fieldDim);
-            AssemblyElementalBoundary<elementShape_Type>::instance().divDivBoundary (*M_localStiffBoundary,
-                                                                                     *M_stiffBoundaryCFE,
-                                                                                     *M_stiffBoundaryCBdFE,
-                                                                                     firstLame , ibFE, fieldDim);
-
-            // Assembly
-            for (UInt iFieldDim (0); iFieldDim < fieldDim; ++iFieldDim)
-            {
-                assembleMatrix ( matrix,
-                                 *M_localStiffBoundary,
-                                 *M_stiffBoundaryCFE,
-                                 *M_stiffBoundaryCFE,
-                                 M_uFESpace->dof(),
-                                 M_uFESpace->dof(),
-                                 iFieldDim, iFieldDim,
-                                 iFieldDim * nbTotalDof, iFieldDim * nbTotalDof );
-            }
-        }
-
-    }
-}
 
 template< typename meshType, typename matrixType, typename vectorType>
 void
