@@ -37,7 +37,6 @@ SET(fem_HEADERS
   fem/BCDataInterpolator.hpp
   fem/HyperbolicFluxNumerical.hpp
   fem/AssemblyElemental.hpp
-  fem/AssemblyElementalBoundary.hpp
   fem/ReferenceFE.hpp
   fem/BCHandler.hpp
   fem/QRKeast.hpp
