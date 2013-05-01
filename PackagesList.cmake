@@ -86,7 +86,7 @@ SET( LifeV_PACKAGES_AND_DIRS_AND_CLASSIFICATIONS
   Multiscale            lifev/multiscale                  PS
   Dummy                 lifev/dummy                       EX
   LevelSet              lifev/level_set                   PS
-  ReducedBasis          lifev/reduced_basis               PS
+  ##ReducedBasis          lifev/reduced_basis               PS
 )
 
 

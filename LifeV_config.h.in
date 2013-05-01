@@ -12,5 +12,5 @@
 #cmakedefine LIFEV_HAS_DUMMY
 #cmakedefine LIFEV_HAS_MULTISCALE
 #cmakedefine H5_USE_16_API
-#cmakedefine LIFEV_HAS_REDUCEDBASIS
+//#cmakedefine LIFEV_HAS_REDUCEDBASIS
 
