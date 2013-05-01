@@ -253,7 +253,7 @@ public:
             resultVector[i] = 0;
             for ( UInt j = 0; j < Dim2; j++ )
             {
-                resultVector[i] += vector[j] * (*this) [i][j];
+                resultVector[i] += vector[j] * M_coords[i][j];
             }
         }
         return (resultVector);
