@@ -8,10 +8,10 @@
 #DBG=1
 
 # select library installation path
-INSTALL_DIR=${HOME}/lifev/install
+INSTALL_DIR=${HOME}/lifev
 
 # select temporary build directory
-BUILD_DIR=${HOME}/lifev/build
+BUILD_DIR=${HOME}/lifev
 
 # comment next line to keep build files
 RM_TMP=1

@@ -46,7 +46,6 @@ restart    = false   # restart the computations (see also importer)
 [interface] # mesh dependent flags for the interface.
 fluid_flag      =  1 # default: 1
 #solid_flag      =  1 # default: fluid_flag
-#structure_flag  =  1 # default: fluid_flag
 #harmonic_flag   =  1 # default: fluid_flag
 tolerance       =  0 # how far points are to be considered the same on the interface
 

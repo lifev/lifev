@@ -7,8 +7,7 @@
 ver="1.48.0"
 
 download_boostlib() {
-#  wget http://gitorious.org/boost/cmake/archive-tarball/cmake-$ver
-  : # empty functions are not allowed!
+    wget -c http://gitorious.org/boost/cmake/archive-tarball/cmake-$ver
 }
 
 unpack_boostlib() {
@@ -20,13 +19,12 @@ build_boostlib() {
   cmake \
     -DCMAKE_INSTALL_PREFIX=${install_dir} \
     -DINSTALL_VERSIONED:BOOL=OFF \
-    ${src_dir}/boost-cmake || return 1
+    ${src_dir}/boost-cmake
 
-  make -j${NUM_PROC} || return 1
+  make
 
 }
 
 install_boostlib() {
-  make -j${NUM_PROC} install || return 1
+  make install
 }
-

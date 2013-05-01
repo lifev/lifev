@@ -1158,7 +1158,7 @@ addFluxTerms ( vectorType&     vector,
         const BCBase&    boundaryCond (bcHandler[ hCounter ]);
 
         // Number of local DOF in this facet
-        UInt nDofF = M_uFESpace->feBd().nbNode();
+        UInt nDofF = M_uFESpace->feBd().nbFEDof();
 
         // Number of total scalar Dof
         UInt totalDof = M_uFESpace->dof().numTotalDof();
@@ -1180,7 +1180,7 @@ addFluxTerms ( vectorType&     vector,
                 // Number of the current boundary facet
                 ibF = pId->id();
                 // Updating facet stuff
-                M_uFESpace->feBd().updateMeasNormalQuadPt ( M_uFESpace->mesh()->boundaryFacet ( ibF ) );
+                M_uFESpace->feBd().update ( M_uFESpace->mesh()->boundaryFacet ( ibF ), UPDATE_W_ROOT_DET_METRIC | UPDATE_NORMALS | UPDATE_QUAD_NODES );
 
                 for ( ID idofF = 0; idofF < nDofF; ++idofF )
                 {
@@ -1193,7 +1193,7 @@ addFluxTerms ( vectorType&     vector,
                         {
                             sum += M_uFESpace->feBd().phi ( int ( idofF ), iq ) *
                                    M_uFESpace->feBd().normal (ic , iq) *
-                                   M_uFESpace->feBd().weightMeas (iq);
+                                   M_uFESpace->feBd().wRootDetMetric (iq);
                         }
 
                         vector.sumIntoGlobalValues (idDof, sum);
