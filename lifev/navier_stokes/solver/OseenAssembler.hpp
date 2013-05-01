@@ -1,4 +1,3 @@
-
 //@HEADER
 /*
 ************************************************************************
@@ -179,9 +178,6 @@ public:
         addMass (matrix, coefficient, 0, 0);
     };
 
-    //! Add the mass
-    void addWeightedMass (matrixType& matrix, const Real& coefficient, const vectorType& beta );
-
     //! Add the mass using offsets
     void addMass (matrixType& matrix, const Real& coefficient, const UInt& offsetLeft, const UInt offsetUp);
 
@@ -357,7 +353,6 @@ OseenAssembler() :
     M_localGradPressure(),
     M_localDivergence(),
     M_localMass(),
-    M_localWeightedMass(),
     M_localMassPressure(),
     M_localConvection(),
     M_localConvectionRhs(),
@@ -1000,53 +995,6 @@ addMass (matrixType& matrix, const Real& coefficient, const UInt& offsetLeft, co
                              M_uFESpace->dof(),
                              iFieldDim, iFieldDim,
                              iFieldDim * nbUTotalDof + offsetUp, iFieldDim * nbUTotalDof + offsetLeft);
-        }
-    }
-}
-
-template< typename meshType, typename matrixType, typename vectorType>
-void
-OseenAssembler<meshType, matrixType, vectorType>::
-addWeightedMass (matrixType& matrix,  const Real& coefficient, const vectorType& beta)
-{
-
-    ASSERT (M_uFESpace != 0, "No velocity FE space for assembling the mass.");
-
-    // Some constants
-    const UInt nbElements (M_uFESpace->mesh()->numElements() );
-    const UInt fieldDim (M_uFESpace->fieldDim() );
-    const UInt nbUTotalDof (M_uFESpace->dof().numTotalDof() );
-    const UInt nbQuadPt (M_weightedMassCFE->nbQuadPt() );
-
-    std::vector< std::vector< Real > > localBetaValue (nbQuadPt, std::vector<Real> (nDimensions, 0.0) );
-
-    // Loop over the elements
-    for (UInt iterElement (0); iterElement < nbElements; ++iterElement)
-    {
-        // Update the diffusion current FE
-        M_weightedMassCFE->update ( M_uFESpace->mesh()->element (iterElement), UPDATE_PHI | UPDATE_WDET );
-        M_weightedMassBetaCFE->update ( M_uFESpace->mesh()->element (iterElement), UPDATE_PHI );
-
-        // Clean the local matrix
-        M_localMass->zero();
-
-        // Interpolate
-        AssemblyElemental::interpolate (localBetaValue, *M_weightedMassBetaCFE, nDimensions, M_betaFESpace->dof(), iterElement, beta);
-
-        // local stiffness
-        AssemblyElemental::weightedMass (*M_localWeightedMass, *M_weightedMassCFE, coefficient, localBetaValue, fieldDim);
-
-        // Assembly
-        for (UInt iFieldDim (0); iFieldDim < nDimensions; ++iFieldDim)
-        {
-            assembleMatrix ( matrix,
-                             *M_localWeightedMass,
-                             *M_weightedMassCFE,
-                             *M_weightedMassCFE,
-                             M_uFESpace->dof(),
-                             M_uFESpace->dof(),
-                             iFieldDim, iFieldDim,
-                             iFieldDim * nbUTotalDof, iFieldDim * nbUTotalDof);
         }
     }
 }
