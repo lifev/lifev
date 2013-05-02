@@ -37,7 +37,7 @@
 #ifndef ZeroDimensionalBC_H
 #define ZeroDimensionalBC_H 1
 
-#include <lifev/zero_dimensional/solver/ZeroDimensionalDefinitions.hpp>
+#include <lifev/zero_dimensional/function/ZeroDimensionalFunction.hpp>
 
 namespace LifeV
 {
@@ -55,8 +55,8 @@ public:
     //! @name Type definitions
     //@{
 
-    typedef boost::function<Real ( const Real&  ) >                        function_Type;
-    typedef ZeroDimensionalBCType                                         bcType_Type;
+    typedef ZeroDimensionalFunction                                        bcFunction_Type;
+    typedef ZeroDimensionalBCType                                          bcType_Type;
 
     //@}
 
@@ -65,11 +65,11 @@ public:
     //@{
 
     //! Constructor
-    explicit ZeroDimensionalBC() : M_function(), M_bcType() {}
+    explicit ZeroDimensionalBC() : M_bcType(), M_bcFunction() {}
 
     ZeroDimensionalBC ( const ZeroDimensionalBC& bc ) :
-        M_function ( bc.M_function ),
-        M_bcType  ( bc.M_bcType ) {}
+        M_bcType  ( bc.M_bcType ),
+        M_bcFunction ( bc.M_bcFunction ) {}
 
     //! Destructor
     virtual ~ZeroDimensionalBC() {}
@@ -87,7 +87,7 @@ public:
     */
     Real evaluate ( const Real& time ) const
     {
-        return M_function ( time );
+        return M_bcFunction ( time );
     }
 
     //@}
@@ -100,19 +100,19 @@ public:
     /*!
       @param function the user defined function
     */
-    void setBC ( const bcType_Type& bcType, const function_Type& function )
+    void setBC ( const bcType_Type& bcType, const bcFunction_Type& bcFunction )
     {
         M_bcType = bcType;
-        M_function = function;
+        M_bcFunction = bcFunction;
     }
 
     //! Set the function
     /*!
       @param function the user defined function
     */
-    void setFunction ( const function_Type& function )
+    void setBCFunction ( const bcFunction_Type& function )
     {
-        M_function = function;
+        M_bcFunction = function;
     }
 
     //! Set the type
@@ -130,15 +130,6 @@ public:
     //! @name Get Methods
     //@{
 
-    //! Get the function
-    /*!
-      @return the user defined function
-    */
-    const function_Type& function() const
-    {
-        return M_function;
-    }
-
     //! Get the type
     /*!
       @return the bc type
@@ -148,12 +139,21 @@ public:
         return M_bcType;
     }
 
+    //! Get the bc function
+    /*!
+      @return the user defined bc function
+    */
+    const bcFunction_Type& bcFunction() const
+    {
+        return M_bcFunction;
+    }
+
     //@}
 
 private:
 
-    function_Type               M_function;
     bcType_Type                 M_bcType;
+    bcFunction_Type             M_bcFunction;
 };
 
 } // Namespace LifeV
