@@ -299,11 +299,11 @@ public:
      * \param d0: initial solid displacement
      * \param w0: initial mesh velocity
      */
-    virtual void initialize ( fluidPtr_Type::value_type::function_Type const& u0,
-                              fluidPtr_Type::value_type::function_Type const& p0,
-                              solidPtr_Type::value_type::function const& d0,
-                              solidPtr_Type::value_type::function const& w0,
-                              fluidPtr_Type::value_type::function_Type const& df0 );
+    virtual void initialize ( fluidPtr_Type::element_type::function_Type const& u0,
+                              fluidPtr_Type::element_type::function_Type const& p0,
+                              solidPtr_Type::element_type::function const& d0,
+                              solidPtr_Type::element_type::function const& w0,
+                              fluidPtr_Type::element_type::function_Type const& df0 );
 
     //@}
 
@@ -599,24 +599,24 @@ public:
 
     //! Getter-Setter for the fluid solver
     /** \todo{mark as deprecated}*/
-    fluidPtr_Type::value_type& fluid()
+    fluidPtr_Type::element_type& fluid()
     {
         return *M_fluid;
     }
     //! Getter-Setter for the solid solver
     /** \todo{mark as deprecated}*/
-    solidPtr_Type::value_type& solid()
+    solidPtr_Type::element_type& solid()
     {
         return *M_solid;
     }
     //! Getter-Setter for the mesh motion solver
     /** \todo{mark as deprecated}*/
-    meshMotionPtr_Type::value_type& meshMotion()
+    meshMotionPtr_Type::element_type& meshMotion()
     {
         return *M_meshMotion;
     }
-    //     fluidLinPtr_Type::value_type& fluidLin()                               { return *M_fluidLin; }
-    //     solidLinPtr_Type::value_type& solidLin()                               { return *M_solidLin; }
+    //     fluidLinPtr_Type::element_type& fluidLin()                               { return *M_fluidLin; }
+    //     solidLinPtr_Type::element_type& solidLin()                               { return *M_solidLin; }
 
     //!getter for the FSI data container
     const data_Type& data()                                       const
