@@ -142,7 +142,7 @@ public:
     //! @name Methods
     //@{
 
-    //! Interpolate a given velocity function nodally onto a velocity vector
+    //! Interpolate a given function nodally onto a vector
     template<typename vector_type>
     void interpolate ( const function_Type& fct, vector_type& vect, const Real time = 0.);
 
@@ -373,11 +373,11 @@ public:
     //    const mesh_type& mesh() const {return *M_mesh;}
     //    mesh_type& mesh() {return *M_mesh;}
 
-    const meshPtr_Type  mesh()  const
+    const meshPtr_Type& mesh()  const
     {
         return M_mesh;
     }
-    meshPtr_Type        mesh()
+    meshPtr_Type&       mesh()
     {
         return M_mesh;
     }
@@ -457,9 +457,7 @@ public:
 
     //@}
 
-
-
-private:
+protected:
 
     //! @name Private Methods
     //@{
@@ -533,7 +531,7 @@ private:
 
 
     //! Set space Map (useful for switch syntax with strings)
-    enum spaceData {P1, P1_HIGH, P1Bubble, P2, P2_HIGH};
+    enum spaceData {P0 = 1, P1 = 10, P1_HIGH = 15, P1Bubble = 16, P2 = 20, P2_HIGH = 25, P2Bubble = 26};
     std::map<std::string, spaceData>        M_spaceMap;
 
     //! reference to the mesh
@@ -609,11 +607,13 @@ FESpace ( MeshPartitioner<MeshType>& mesh,
     M_map           ( new map_Type() )
 {
     // Set spaceMap
+    M_spaceMap["P0"]        = P0;
     M_spaceMap["P1"]        = P1;
     M_spaceMap["P1_HIGH"]   = P1_HIGH;
     M_spaceMap["P1Bubble"]  = P1Bubble;
     M_spaceMap["P2"]        = P2;
     M_spaceMap["P2_HIGH"]   = P2_HIGH;
+    M_spaceMap["P2Bubble"]  = P2Bubble;
 
     // Set space
     setSpace ( space, mesh_Type::S_geoDimensions );
@@ -665,11 +665,13 @@ FESpace ( meshPtr_Type         mesh,
     M_map           ( new map_Type() )
 {
     // Set spaceMap
+    M_spaceMap["P0"]        = P0;
     M_spaceMap["P1"]        = P1;
     M_spaceMap["P1_HIGH"]   = P1_HIGH;
     M_spaceMap["P1Bubble"]  = P1Bubble;
     M_spaceMap["P2"]        = P2;
     M_spaceMap["P2_HIGH"]   = P2_HIGH;
+    M_spaceMap["P2Bubble"]  = P2Bubble;
 
     // Set space
     setSpace ( space, mesh_Type::S_geoDimensions );
@@ -1633,11 +1635,52 @@ template <typename MeshType, typename MapType>
 inline void
 FESpace<MeshType, MapType>::setSpace ( const std::string& space, UInt dimension )
 {
-
-    if (dimension == 2)
+    if (dimension == 1)
     {
         switch ( M_spaceMap[space] )
         {
+            case P0 :
+                M_refFE = &feSegP0;
+                M_Qr    = &quadRuleSeg1pt;
+                M_bdQr  = &quadRuleNode1pt;
+            case P1 :
+                M_refFE = &feSegP1;
+                M_Qr    = &quadRuleSeg2pt;
+                M_bdQr  = &quadRuleNode1pt;
+                break;
+
+            case P1_HIGH :
+                M_refFE = &feSegP1;
+                M_Qr    = &quadRuleSeg3pt;
+                M_bdQr  = &quadRuleNode1pt;
+                break;
+
+            case P1Bubble :
+            case P2 :
+                M_refFE = &feSegP2;
+                M_Qr    = &quadRuleSeg3pt;
+                M_bdQr  = &quadRuleNode1pt;
+                break;
+
+            case P2_HIGH :
+                M_refFE = &feSegP2;
+                M_Qr    = &quadRuleSeg4pt;
+                M_bdQr  = &quadRuleNode1pt;
+                break;
+
+            default :
+                std::cout << "!!! WARNING: Space " << space << "not implemented for " << dimension << "D FESpaces!" << std::endl;
+                break;
+        }
+    }
+    else if (dimension == 2)
+    {
+        switch ( M_spaceMap[space] )
+        {
+            case P0 :
+                M_refFE = &feTriaP0;
+                M_Qr    = &quadRuleTria3pt;
+                M_bdQr  = &quadRuleSeg2pt;
             case P1 :
                 M_refFE = &feTriaP1;
                 M_Qr    = &quadRuleTria3pt;
@@ -1669,13 +1712,20 @@ FESpace<MeshType, MapType>::setSpace ( const std::string& space, UInt dimension 
                 break;
 
             default :
-                std::cout << "!!! WARNING: Space " << space << "not implemented in FESpace class !!!" << std::endl;
+                std::cout << "!!! WARNING: Space " << space << "not implemented for " << dimension << "D FESpaces!" << std::endl;
+                break;
         }
     }
     else
     {
         switch ( M_spaceMap[space] )
         {
+            case P0 :
+                M_refFE = &feTetraP0;
+                M_Qr    = &quadRuleTetra4pt;
+                M_bdQr  = &quadRuleTria3pt;
+                break;
+
             case P1 :
                 M_refFE = &feTetraP1;
                 M_Qr    = &quadRuleTetra4pt;
@@ -1706,8 +1756,16 @@ FESpace<MeshType, MapType>::setSpace ( const std::string& space, UInt dimension 
                 M_bdQr  = &quadRuleTria4pt;
                 break;
 
+            case P2Bubble :
+                M_refFE = &feTetraP2tilde;
+                M_Qr    = &quadRuleTetra64pt;
+                M_bdQr  = &quadRuleTria4pt;
+                break;
+
+
             default :
-                std::cout << "!!! WARNING: Space " << space << "not implemented in FESpace class !!!" << std::endl;
+                std::cout << "!!! WARNING: Space " << space << "not implemented for " << dimension << "D FESpaces!" << std::endl;
+                break;
         }
     }
 }
