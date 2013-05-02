@@ -50,17 +50,6 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #ifdef LIFEV_HAS_HDF5
 #ifdef HAVE_MPI
 
-#ifndef H5Dcreate_vers
-#define H5Dcreate_vers 2
-#endif
-
-#ifndef H5Dopen_vers
-#define H5Dopen_vers 2
-#endif
-
-#ifndef H5Gcreate_vers
-#define H5Gcreate_vers 2
-#endif
 #include <hdf5.h>
 
 #include <Epetra_MpiComm.h>
