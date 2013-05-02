@@ -598,6 +598,7 @@ public:
         return M_rhsNoBC;
     }
 
+#ifdef EXPORTVECTORS_DEBUG
     //! Get the right hand. The member rhsCopy is used for Debug purposes!
     vector_Type& rhsCopy()
     {
@@ -607,6 +608,11 @@ public:
     {
         return *M_residualCopy;
     }
+    vector_Type& bodyForce()
+    {
+        return *M_bodyForceVector;
+    }
+#endif
 
     //! Get the comunicator object
     boost::shared_ptr<Epetra_Comm> const& comunicator() const
@@ -764,8 +770,12 @@ protected:
 
     //! right  hand  side displacement
     vectorPtr_Type                       M_rhs;
+
+#ifdef EXPORTVECTORS_DEBUG
     vectorPtr_Type                       M_rhsCopy;
     vectorPtr_Type                       M_residualCopy;
+    vectorPtr_Type                       M_bodyForceVector;
+#endif
 
     //! right  hand  side
     vectorPtr_Type                       M_rhsNoBC;
@@ -842,8 +852,11 @@ StructuralOperator<Mesh>::StructuralOperator( ) :
     M_elmatM                     ( ),
     M_disp                       ( ),
     M_rhsNoBC                    ( ),
+#ifdef EXPORTVECTORS_DEBUG
     M_rhsCopy                    ( ),
     M_residualCopy               ( ),
+    M_bodyForceVector            ( ),
+#endif
     M_residual_d                 ( ),
     M_out_iter                   ( ),
     M_out_res                    ( ),
@@ -892,8 +905,11 @@ StructuralOperator<Mesh>::setup (boost::shared_ptr<data_Type>        data,
     setup ( data, dFESpace, dETFESpace, comm, dFESpace->mapPtr(), (UInt) 0 );
 
     M_rhs.reset                        ( new vector_Type (*M_localMap) );
+#ifdef EXPORTVECTORS_DEBUG
     M_rhsCopy.reset                    ( new vector_Type (*M_localMap) );
     M_residualCopy.reset               ( new vector_Type (*M_localMap) );
+    M_bodyForceVector.reset            ( new vector_Type (*M_localMap) );
+#endif
     M_rhsNoBC.reset                    ( new vector_Type (*M_localMap) );
     M_linearSolver.reset               ( new LinearSolver ( comm ) );
     M_disp.reset                       ( new vector_Type (*M_localMap) );
@@ -1033,6 +1049,11 @@ void StructuralOperator<Mesh>::updateRightHandSideWithBodyForce ( const Real cur
                 this->M_dispETFESpace,
                 value ( M_data->rho() ) * dot (  eval( M_source, X ), phi_i )
                 ) >> rhs;
+
+#ifdef EXPORTVECTORS_DEBUG
+    std::cout << "saving" << std::endl;
+    M_bodyForceVector = rhs;
+#endif
 
     *rhs += rhsTimeAdvance;
 
@@ -1467,13 +1488,14 @@ StructuralOperator<Mesh>::evalResidual ( vector_Type& residual, const vector_Typ
 
             bcManageVector ( *M_rhs, *M_dispFESpace->mesh(), M_dispFESpace->dof(), *M_BCh, M_dispFESpace->feBd(),  M_data->dataTime()->time(), 1.0 );
 
+#ifdef EXPORTVECTORS_DEBUG
             //To export for check
             M_rhsCopy = M_rhs;
-
             // std::string nameFile="residualAfterBC";
             // M_rhs->spy(nameFile);
             // int n;
             // std::cin >> n;
+#endif
         }
 
         bcManageMatrix ( matrixFull, *M_dispFESpace->mesh(), M_dispFESpace->dof(), *M_BCh, M_dispFESpace->feBd(), 1.0 );
@@ -1496,11 +1518,13 @@ StructuralOperator<Mesh>::evalResidual ( vector_Type& residual, const vector_Typ
         M_Displayer->leaderPrintMax ("done in ", chrono.diff() );
     }
 
+#ifdef EXPORTVECTORS_DEBUG
     if ( iter == 0 )
     {
         *M_residualCopy = residual;
         M_rhsCopy = M_rhs;
     }
+#endif
 }
 
 template <typename Mesh>

@@ -424,13 +424,17 @@ Structure::run3d()
     MPI_Barrier (MPI_COMM_WORLD);
 
     boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporter;
+    boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporterCheck;
 
     std::string const exporterType =  dataFile ( "exporter/type", "ensight");
     std::string const exporterNameFile =  dataFile ( "exporter/nameFile", "structure");
+    std::string const exporterCheckName =  dataFile ( "exporter/nameCheck", "verifyVectors");
+
 #ifdef HAVE_HDF5
     if (exporterType.compare ("hdf5") == 0)
     {
         exporter.reset ( new ExporterHDF5<RegionMesh<LinearTetra> > ( dataFile, exporterNameFile ) );
+        exporterCheck.reset ( new ExporterHDF5<RegionMesh<LinearTetra> > ( dataFile, exporterCheckName ) );
     }
     else
 #endif
@@ -448,6 +452,10 @@ Structure::run3d()
 
     exporter->setPostDir ( "./" );
     exporter->setMeshProcId ( meshPart.meshPartition(), parameters->comm->MyPID() );
+    exporterCheck->setPostDir ( "./" );
+    exporterCheck->setMeshProcId ( meshPart.meshPartition(), parameters->comm->MyPID() );
+
+    vectorPtr_Type bodyForceVector ( new vector_Type (solid.displacement(),  exporterCheck->mapType() ) );
 
     vectorPtr_Type solidDisp ( new vector_Type (solid.displacement(),  exporter->mapType() ) );
     vectorPtr_Type solidVel  ( new vector_Type (solid.displacement(),  exporter->mapType() ) );
@@ -457,6 +465,7 @@ Structure::run3d()
     exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "velocity",     dFESpace, solidVel,  UInt (0) );
     exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "acceleration", dFESpace, solidAcc,  UInt (0) );
 
+    exporterCheck->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "bodyForce", dFESpace, bodyForceVector,  UInt (0) );
 
 #ifdef ENABLE_ANISOTROPIC_LAW
     // Adding the fibers vectors
@@ -481,16 +490,10 @@ Structure::run3d()
 #endif
 
     exporter->postProcess ( 0 );
+    exporterCheck->postProcess ( 0 );
     cout.precision(16);
 
-    //!--------------------------------------------------------------------------------------------
-    //!The update of the RHS is done by the TimeAdvance class
-    //solid.updateSystem();
-    //! =================================================================================
-
     Real normVect;
-
-
 
     //! =============================================================================
     //! Temporal loop
@@ -513,6 +516,15 @@ Structure::run3d()
             solid.updateRightHandSideWithBodyForce( dataStructure->dataTime()->time(), *rhs );
         }
 
+        //debug
+        *bodyForceVector = solid.bodyForce();
+
+        exporterCheck->postProcess ( dataStructure->dataTime()->time() );
+        if( verbose )
+        {
+            std::cout << "Just exported!" << std::endl;
+        }
+
         //! 7. Iterate --> Calling Newton
         solid.iterate ( BCh );
 
@@ -523,7 +535,6 @@ Structure::run3d()
         *solidAcc  = timeAdvance->secondDerivative();
 
         exporter->postProcess ( dataStructure->dataTime()->time() );
-
         //!--------------------------------------------------------------------------------------------------
 
         MPI_Barrier (MPI_COMM_WORLD);
