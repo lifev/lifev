@@ -69,11 +69,12 @@ public:
     //! @name Public Typedefs and Enumerators
     //@{
 
-    enum PreconditionerSide{ None, Left, Right };
+    enum PreconditionerSide { None, Left, Right };
 
     enum SolverManagerType { NotAValidSolverManager, BlockCG, PseudoBlockCG, RCG,
                              BlockGmres, PseudoBlockGmres, GmresPoly,
-                             GCRODR, PCPG, TFQMR, MINRES };
+                             GCRODR, PCPG, TFQMR, MINRES
+                           };
 
     //@}
 
@@ -87,16 +88,18 @@ protected:
 
     typedef Epetra_MultiVector MV;
     typedef Epetra_Operator    OP;
-    typedef Belos::LinearProblem<double,MV,OP> LinearProblem;
-    typedef Belos::SolverManager<double,MV,OP> SolverType;
+    typedef Belos::LinearProblem<double, MV, OP> LinearProblem;
+    typedef Belos::SolverManager<double, MV, OP> SolverType;
     typedef Teuchos::RCP<LinearProblem> LinearProblem_ptr;
     typedef Teuchos::RCP<SolverType>    SolverType_ptr;
 
-    virtual int doApplyInverse( const vector_Type& X, vector_Type& Y ) const;
+
+    virtual int doApplyInverse ( const vector_Type& X, vector_Type& Y ) const;
     virtual void doSetOperator();
     virtual void doSetPreconditioner();
     virtual void doSetParameterList();
-    void allocateSolver( const SolverManagerType & solverManagerType );
+    virtual void doResetSolver();
+    void allocateSolver ( const SolverManagerType& solverManagerType );
     //! The linearProblem
     LinearProblem_ptr M_linProblem;
     //! The linearSolver
@@ -105,14 +108,17 @@ protected:
     Teuchos::RCP<Belos::EpetraPrecOp> M_belosPrec;
 
     static SolverManagerType  getSolverManagerTypeFromString ( const std::string& str );
-    static PreconditionerSide getPreconditionerSideFromString( const std::string& str );
+    static PreconditionerSide getPreconditionerSideFromString ( const std::string& str );
 
 };
 
-inline SolverOperator* createBelosOperator() { return new BelosOperator(); }
+inline SolverOperator* createBelosOperator()
+{
+    return new BelosOperator();
+}
 namespace
 {
-    static bool registerBelos = SolverOperatorFactory::instance().registerProduct( "Belos", &createBelosOperator );
+static bool registerBelos = SolverOperatorFactory::instance().registerProduct ( "Belos", &createBelosOperator );
 }
 
 

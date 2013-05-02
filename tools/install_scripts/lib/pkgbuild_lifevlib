@@ -1,0 +1,75 @@
+#! /bin/bash
+#
+# author: Antonio Cervone <ant.cervone@gmail.com>
+# date:   13-02-2013
+#
+
+ver='3.4.4'
+
+download_lifevlib() {
+  cp ${lifevlib_src}/lifev{,-cmake}.zip $src_dir
+}
+
+unpack_lifevlib() {
+  unzip lifev.zip
+  mkdir -p cmake
+  cd cmake
+  unzip ../lifev-cmake.zip
+}
+
+build_lifevlib() {
+
+  if [ $MOX_MACHINE ]; then
+    mox_extra="\
+      -D CMAKE_SYSTEM_PREFIX_PATH:PATH=$REPO "
+  fi
+
+  echo_dbg "checking hdf5 (set to ${hdf5})"
+  if [ "${hdf5}" != "NO" ]; then
+    lib_extra+=" -D TPL_ENABLE_HDF5:BOOL=ON \
+                 -D HDF5_INCLUDE_DIRS:PATH=${hdf5_include} \
+                 -D HDF5_LIBRARY_DIRS:PATH=${hdf5_lib} "
+  fi
+
+  echo_dbg "checking blas (blas_name = ${blas_name})"
+  if [ "${blas_name}" != "" ]; then
+    lib_extra+=" -D TPL_BLAS_LIBRARIES:FILEPATH=${blas_lib}/${blas_name} "
+  fi
+
+  echo_dbg "checking lapack (lapack_name = ${lapack_name})"
+  if [ "${lapack_name}" != "" ]; then
+    lib_extra+=" -D TPL_LAPACK_LIBRARIES:FILEPATH=${lapack_lib}/${lapack_name} "
+  fi
+
+  echo_dbg "checking mpi (mpi_base = ${mpi_base})"
+  if [ "${mpi_base}" != "/usr" ]; then
+    lib_extra+=" -D MPI_BASE_DIR:PATH=${mpi_base} "
+  fi
+
+  echo_dbg "final lib_extra = $lib_extra"
+
+  rm -f CMakeCache.txt
+  rm -rf CMakeFiles
+
+  ${cmake_bin}/cmake \
+    -D CMAKE_INSTALL_PREFIX:PATH=${install_dir} \
+    -D LifeV_ENABLE_Darcy:BOOL=ON \
+    -D LifeV_ENABLE_TESTS:BOOL=OFF \
+    -D LifeV_ENABLE_STRONG_CXX_COMPILE_WARNINGS:BOOL=OFF \
+    -D LifeV_EXTRA_LINK_FLAGS:STRING="${lifev_flags}" \
+    -D Trilinos_INCLUDE_DIRS:PATH=${trilinos_include} \
+    -D Trilinos_LIBRARY_DIRS:PATH=${trilinos_lib} \
+    -D ParMETIS_INCLUDE_DIRS:PATH=${parmetis_include} \
+    -D ParMETIS_LIBRARY_DIRS:PATH=${parmetis_lib} \
+    -D Boost_INCLUDE_DIRS:PATH=${boost_include} \
+    $lib_extra \
+    $mox_extra \
+    $src_dir
+
+  make
+}
+
+install_lifevlib() {
+  make install
+}
+

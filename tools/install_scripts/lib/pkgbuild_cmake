@@ -1,0 +1,34 @@
+#! /bin/bash
+#
+# author: Antonio Cervone <ant.cervone@gmail.com>
+# date:   11-12-2012
+#
+
+ver="2.8.10"
+
+download_cmake() {
+  wget -c http://www.cmake.org/files/v2.8/cmake-${ver}.tar.gz
+}
+
+unpack_cmake() {
+  tar xzf cmake-${ver}.tar.gz
+}
+
+build_cmake() {
+
+  pushd ${src_dir}/cmake-${ver} >/dev/null
+
+  ./bootstrap --prefix=${install_dir} \
+    --parallel=${NUM_PROC}
+
+#    --system-libs \
+
+  make
+  popd >/dev/null
+}
+
+install_cmake() {
+  cd ${src_dir}/cmake-${ver}
+  make install
+}
+

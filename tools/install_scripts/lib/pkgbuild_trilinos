@@ -1,0 +1,122 @@
+#! /bin/bash
+#
+# author: Antonio Cervone <ant.cervone@gmail.com>
+# date:   27-03-2012
+#
+
+ver='10.12.2'
+
+download_trilinos() {
+  wget -c "http://trilinos.sandia.gov/download/files/trilinos-${ver}-Source.tar.gz"
+}
+
+unpack_trilinos() {
+  tar xzf trilinos-${ver}-Source.tar.gz
+}
+
+build_trilinos() {
+
+  if [ $MOX_MACHINE ]; then
+    mox_extra="\
+    -D CMAKE_SYSTEM_PREFIX_PATH:PATH=${REPO} \
+    -D SuperLU_INCLUDE_DIRS:PATH=${REPO}/include/superlu \
+    -D SuperLUDist_INCLUDE_DIRS:PATH=${REPO}/include/superlu_dist \
+  "
+  fi
+
+#  lib_names=( hdf5 amd umfpack superlu superludist )
+#  trilinos_names=( HDF5 AMD UMFPACK SuperLU SuperLUDist )
+#  lib_number=${#libnamse[@]}
+#  for(( i=0; i < $lib_number; i++ )); do
+#    if [ ${!libnames[i]} -ne NO ]; then
+#      echo_dbg adding ${libnames[i]}
+#      tlib=${trilinos_names[i]}
+#      echo_ ${!tlib_lib}
+#      lib_extra+=" -DTPL_ENABLE_${tlib}:BOOL=ON \
+#-D${trilinos_names[i]}_LIBRARY_PATH=${!tlib_lib}"
+#    fi
+#  done
+
+  echo_dbg "checking superlu_dist (set to ${superlu_dist})"
+  if [ "${superlu_dist}" != "NO" ]; then
+    lib_extra+=" -D TPL_ENABLE_SuperLUDist:BOOL=ON \
+                 -D SuperLUDist_INCLUDE_DIRS:PATH=${superlu_dist_include} \
+                 -D SuperLUDist_LIBRARY_DIRS:PATH=${superlu_dist_lib} "
+  fi
+
+  echo_dbg "checking suitesparse (set to ${suitesparse})"
+  if [ "${suitesparse}" != "NO" ]; then
+    lib_extra+=" -D TPL_ENABLE_AMD:BOOL=ON \
+                 -D AMD_INCLUDE_DIRS:PATH=${suitesparse_include} \
+                 -D AMD_LIBRARY_DIRS:PATH=${suitesparse_lib} \
+                 -D TPL_ENABLE_UMFPACK:BOOL=ON \
+                 -D UMFPACK_INCLUDE_DIRS:PATH=${suitesparse_include} \
+                 -D UMFPACK_LIBRARY_DIRS:PATH=${suitesparse_lib} "
+  fi
+
+  echo_dbg "checking hdf5 (set to ${hdf5})"
+  if [ "${hdf5}" != "NO" ]; then
+    lib_extra+=" -D TPL_ENABLE_HDF5:BOOL=ON \
+                 -D HDF5_INCLUDE_DIRS:PATH=${hdf5_include} \
+                 -D HDF5_LIBRARY_DIRS:PATH=${hdf5_lib} "
+  fi
+
+  echo_dbg "checking blas (blas_name = ${blas_name})"
+  if [ "${blas_name}" != "" ]; then
+    lib_extra+=" -D TPL_BLAS_LIBRARIES:FILEPATH=${blas_lib}/${blas_name} "
+  fi
+
+  echo_dbg "checking lapack (lapack_name = ${lapack_name})"
+  if [ "${lapack_name}" != "" ]; then
+    lib_extra+=" -D TPL_LAPACK_LIBRARIES:FILEPATH=${lapack_lib}/${lapack_name} "
+  fi
+
+  echo_dbg "checking mpi (mpi_base = ${mpi_base})"
+  if [ "${mpi_base}" != "/usr" ]; then
+    lib_extra+=" -D MPI_BASE_DIR:PATH=${mpi_base} "
+  fi
+
+  echo_dbg "final lib_extra = $lib_extra"
+
+  rm -f CMakeCache.txt
+  rm -rf CMakeFiles
+
+  ${cmake_bin}/cmake \
+    -D CMAKE_BUILD_TYPE:STRING=RELEASE \
+    -D CMAKE_INSTALL_PREFIX:PATH=${install_dir} \
+    -D TPL_ENABLE_MPI:BOOL=ON \
+    -D TPL_ENABLE_Boost:BOOL=ON \
+    -D Boost_INCLUDE_DIRS:PATH=${boost_include} \
+    -D TPL_ENABLE_ParMETIS:BOOL=ON \
+    -D ParMETIS_INCLUDE_DIRS:PATH=${parmetis_include} \
+    -D ParMETIS_LIBRARY_DIRS:PATH=${parmetis_lib} \
+    -D TPL_ENABLE_TBB:BOOL=OFF \
+    -D TPL_ENABLE_BLAS:BOOL=ON \
+    -D TPL_ENABLE_LAPACK:BOOL=ON \
+    $lib_extra \
+    -D TPL_ENABLE_Zlib:BOOL=ON \
+    -D TPL_ENABLE_Pthread:BOOL=ON \
+    \
+    -D Trilinos_ENABLE_NOX:BOOL=ON \
+    -D Trilinos_ENABLE_Thyra:BOOL=ON \
+    -D Trilinos_ENABLE_Rythmos:BOOL=ON \
+    -D Trilinos_ENABLE_ML:BOOL=ON \
+    -D Trilinos_ENABLE_Ifpack:BOOL=ON \
+    -D Trilinos_ENABLE_Amesos:BOOL=ON \
+    -D Trilinos_ENABLE_Anasazi:BOOL=ON \
+    -D Trilinos_ENABLE_Belos:BOOL=ON \
+    -D Trilinos_ENABLE_AztecOO:BOOL=ON \
+    -D Trilinos_ENABLE_Zoltan:BOOL=ON \
+    -D Trilinos_ENABLE_EpetraExt:BOOL=ON \
+    -D Trilinos_ENABLE_Epetra:BOOL=ON \
+    -D Trilinos_ENABLE_Teuchos:BOOL=ON \
+    \
+    ${src_dir}/trilinos-$ver-Source
+
+  make
+}
+
+install_trilinos() {
+  make install
+}
+

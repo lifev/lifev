@@ -24,8 +24,6 @@
 */
 
 #include <lifev/core/algorithm/PreconditionerComposed.hpp>
-#include <lifev/core/algorithm/PreconditionerIfpack.hpp>
-#include <lifev/core/algorithm/PreconditionerML.hpp>
 
 namespace LifeV
 {
@@ -33,22 +31,14 @@ namespace LifeV
 // ===================================================
 // Constructurs and Destructor
 // ===================================================
-PreconditionerComposed::PreconditionerComposed( boost::shared_ptr<Epetra_Comm> comm):
+PreconditionerComposed::PreconditionerComposed ( boost::shared_ptr<Epetra_Comm> comm) :
     super_Type (comm ),
-    M_prec(new prec_Type(comm)),
-    M_operVector(0)
+    M_prec (new prec_Type (comm) ),
+    M_operVector (0)
     //M_precType()
 {
 }
 
-PreconditionerComposed::PreconditionerComposed(PreconditionerComposed& P):
-    super_Type(P, boost::dynamic_pointer_cast<ComposedOperator<Ifpack_Preconditioner> >(P.preconditionerPtr())->commPtr()),
-    M_prec(new prec_Type(*boost::dynamic_pointer_cast<prec_Type>(P.preconditionerPtr()))),
-    M_operVector(P.operVector())
-    //M_precType(P.preconditionerType())
-{
-    //    *M_prec=*P.preconditioner();
-}
 PreconditionerComposed::~PreconditionerComposed()
 {}
 
@@ -57,28 +47,27 @@ PreconditionerComposed::~PreconditionerComposed()
 // Public Methods
 // ===================================================
 void
-PreconditionerComposed::setDataFromGetPot( const GetPot&      dataFile,
-                                           const std::string& section )
+PreconditionerComposed::setDataFromGetPot ( const GetPot&      dataFile,
+                                            const std::string& section )
 {
-    list_Type LIFEV_DEPRECATED(uselessList);
-    createParametersList( uselessList, dataFile, section, "Composed" );
+    list_Type LIFEV_DEPRECATED (uselessList);
+    createParametersList ( uselessList, dataFile, section, "Composed" );
 }
 
 void
-PreconditionerComposed::createParametersList(       list_Type& /*list*/,
-                                          const GetPot&      dataFile,
-                                          const std::string& section,
-                                          const std::string& subSection )
+PreconditionerComposed::createParametersList (       list_Type& /*list*/,
+                                                     const GetPot&      dataFile,
+                                                     const std::string& section,
+                                                     const std::string& subSection )
 {
-    //M_list.resize(listNumber);
     //! See http://trilinos.sandia.gov/packages/docs/r9.0/packages/ifpack/doc/html/index.html
     //! for more informations on the parameters
-    ASSERT( !M_prec->number(), "Error, when initializing the preconditioner, it must be empty" );
-    for ( UInt i(0); i < dataFile.vector_variable_size( ( section + "/" + subSection + "/list" ).data() ); ++i )
+    ASSERT ( !M_prec->number(), "Error, when initializing the preconditioner, it must be empty" );
+    for ( UInt i (0); i < dataFile.vector_variable_size ( ( section + "/" + subSection + "/list" ).data() ); ++i )
     {
-        epetraPrec_Type tmp( PRECFactory::instance().createObject( dataFile( ( section + "/" + subSection + "/list" ).data(), "ML", i ) ) );
-        M_prec->push_back(tmp);
-        M_prec->OperatorView()[i]->createParametersList(M_prec->OperatorView()[i]->parametersList(), dataFile, section, dataFile( ( section + "/" + subSection + "/sections" ).data(), "ML", i ));
+        epetraPrecPtr_Type tmp ( PRECFactory::instance().createObject ( dataFile ( ( section + "/" + subSection + "/list" ).data(), "ML", i ) ) );
+        M_prec->push_back (tmp);
+        M_prec->OperatorView() [i]->createParametersList (M_prec->OperatorView() [i]->parametersList(), dataFile, section, dataFile ( ( section + "/" + subSection + "/sections" ).data(), "ML", i ) );
     }
 }
 
@@ -95,64 +84,68 @@ PreconditionerComposed::preconditioner()
 }
 
 int
-PreconditionerComposed::buildPreconditioner(operatorPtr_Type& oper)
+PreconditionerComposed::buildPreconditioner (operatorPtr_Type& oper)
 {
     //M_prec.reset(new prec_raw_type(M_displayer.comm()));
-    return push_back(oper);
+    return push_back (oper);
 }
 
 int
-PreconditionerComposed::buildPreconditioner(operatorPtr_Type& oper,
-                                        const bool useInverse,
-                                        const bool useTranspose)
+PreconditionerComposed::buildPreconditioner (operatorPtr_Type& oper,
+                                             const bool useInverse,
+                                             const bool useTranspose)
 {
     //M_prec.reset(new prec_raw_type(M_displayer.comm()));
-    return push_back(oper, useInverse, useTranspose);
+    return push_back (oper, useInverse, useTranspose);
 }
 
 int
-PreconditionerComposed::push_back(operatorPtr_Type& oper,
-                              const bool useInverse,
-                              const bool useTranspose
-                              )
+PreconditionerComposed::push_back (operatorPtr_Type& oper,
+                                   const bool useInverse,
+                                   const bool useTranspose
+                                  )
 {
-    if(!M_prec.get())
-        M_prec.reset(new prec_Type(M_displayer.comm()));
-    M_operVector.push_back(oper);
+    if (!M_prec.get() )
+    {
+        M_prec.reset (new prec_Type (M_displayer.comm() ) );
+    }
+    M_operVector.push_back (oper);
     LifeChrono chrono;
     epetraPrecPtr_Type prec;
 
-    this->M_displayer.leaderPrint( std::string("ICP-  Preconditioner type:                     ") + M_prec->Operator()[M_operVector.size()-1]->preconditionerType() + std::string("\n") );
-    this->M_displayer.leaderPrint( "ICP-  Computing preconditioner ...             " );
+    this->M_displayer.leaderPrint ( std::string ("ICP-  Preconditioner type:                     ") + M_prec->Operator() [M_operVector.size() - 1]->preconditionerType() + std::string ("\n") );
+    this->M_displayer.leaderPrint ( "ICP-  Computing preconditioner ...             " );
     chrono.start();
-    createPrec(oper, M_prec->OperatorView()[M_operVector.size()-1]);
+    createPrec (oper, M_prec->OperatorView() [M_operVector.size() - 1]);
     chrono.stop();
-    this->M_displayer.leaderPrintMax("done in ", chrono.diff());
-    M_prec->replace(prec, useInverse, useTranspose);// \TODO to reset as push_back
-    if( M_prec->Operator().size() == M_operVector.size() )
-        this->M_preconditionerCreated=true;
+    this->M_displayer.leaderPrintMax ("done in ", chrono.diff() );
+    M_prec->replace (prec, useInverse, useTranspose); // \TODO to reset as push_back
+    if ( M_prec->Operator().size() == M_operVector.size() )
+    {
+        this->M_preconditionerCreated = true;
+    }
     return EXIT_SUCCESS;
 }
 
 int
-PreconditionerComposed::replace(operatorPtr_Type& oper,
-                            const UInt index,
-                            const bool useInverse,
-                            const bool useTranspose)
+PreconditionerComposed::replace (operatorPtr_Type& oper,
+                                 const UInt index,
+                                 const bool useInverse,
+                                 const bool useTranspose)
 {
-    ASSERT(index <= M_operVector.size(), "PreconditionerComposed::replace: index too large");
+    ASSERT (index <= M_operVector.size(), "PreconditionerComposed::replace: index too large");
 
     M_operVector[index] = oper;
     LifeChrono chrono;
     //ifpack_prec_type prec;
-    this->M_displayer.leaderPrint( std::string("ICP-  Preconditioner type:                     ") + M_prec->Operator()[index]->preconditionerType() + std::string("\n") );
-    this->M_displayer.leaderPrint( "ICP-  Computing preconditioner ...             " );
+    this->M_displayer.leaderPrint ( std::string ("ICP-  Preconditioner type:                     ") + M_prec->Operator() [index]->preconditionerType() + std::string ("\n") );
+    this->M_displayer.leaderPrint ( "ICP-  Computing preconditioner ...             " );
     chrono.start();
-    createPrec(oper, M_prec->OperatorView()[index]);
+    createPrec (oper, M_prec->OperatorView() [index]);
     chrono.stop();
-    this->M_displayer.leaderPrintMax("done in ", chrono.diff());
+    this->M_displayer.leaderPrintMax ("done in ", chrono.diff() );
 
-    M_prec->replace(M_prec->Operator()[index], index, useInverse, useTranspose);
+    M_prec->replace (M_prec->Operator() [index], index, useInverse, useTranspose);
 
     return EXIT_SUCCESS;
 }
@@ -171,14 +164,14 @@ PreconditionerComposed::resetPreconditioner()
 // Private Methods
 // ===================================================
 Int
-PreconditionerComposed::createPrec(operator_type& oper,
-                                   boost::shared_ptr<Preconditioner> & prec )
+PreconditionerComposed::createPrec (operator_type& oper,
+                                    boost::shared_ptr<Preconditioner>& prec )
 {
-    return prec->buildPreconditioner( oper );
+    return prec->buildPreconditioner ( oper );
 }
 
 
 
-bool PreconditionerComposed::registerComposed = PRECFactory::instance().registerProduct( "Composed", &PreconditionerComposed::createComposedPreconditioner );
+bool PreconditionerComposed::registerComposed = PRECFactory::instance().registerProduct ( "Composed", &PreconditionerComposed::createComposedPreconditioner );
 
 } // namespace LifeV

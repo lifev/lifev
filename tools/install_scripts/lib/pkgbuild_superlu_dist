@@ -1,0 +1,54 @@
+#! /bin/bash
+#
+# author: Alessio Fumagalli <alessio.fumagalli@mail.polimi.it>
+# date:   27-03-2012
+#
+
+ver='2.4'
+
+download_superlu_dist() {
+  wget -c "http://crd.lbl.gov/~xiaoye/SuperLU/superlu_dist_${ver}.tar.gz"
+}
+
+unpack_superlu_dist() {
+  tar xzf superlu_dist_${ver}.tar.gz
+}
+
+build_superlu_dist() {
+
+  _blas="-lblas"
+  if [ "${blas_name}" != "" ]; then
+    _blas="${blas_lib}/${blas_name}"
+  fi
+
+  ln -s ${src_dir}/SuperLU_DIST_${ver}/MAKE_INC/make.i386_linux make.inc
+
+  # Compiling static library
+  mkdir -p static
+  pushd static >/dev/null
+  make $MAKEFLAGS -f ${src_dir}/SuperLU_DIST_${ver}/SRC/Makefile \
+    VPATH=${src_dir}/SuperLU_DIST_${ver}/SRC \
+    CC=${mpi_bin}/mpicc \
+    FORTRAN=${mpi_bin}/mpif77 \
+    CFLAGS="$CFLAGS" \
+    FFLAGS="$FFLAGS" \
+    PLAT="" \
+    BLASDEF="" \
+    METISLIB="-L${parmetis_lib} -lmetis" \
+    PARMETISLIB="-L${parmetis_lib} -lparmetis" \
+    BLASLIB="${_blas}" \
+    CDEFS="-DAdd_" NOOPTS="-fPIC" \
+    ARCH="ar" ARCHFLAGS="cr" RANLIB="ranlib" \
+    DSUPERLULIB=${build_dir}/static/libsuperlu_dist.a
+  popd >/dev/null
+}
+
+install_superlu_dist() {
+  mkdir -p ${install_dir}
+  pushd ${install_dir} >/dev/null
+  install -d -m 775 {lib,include}
+  install -m 664 ${build_dir}/static/libsuperlu_dist.a lib
+  install -m 664 ${src_dir}/SuperLU_DIST_${ver}/SRC/*.h include
+  popd >/dev/null
+}
+

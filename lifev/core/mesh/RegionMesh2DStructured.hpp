@@ -48,32 +48,32 @@ namespace LifeV
 // Labels for the structured 2D mesh
 namespace Structured2DLabel
 {
-    //! Label for the internal entities
-    const markerID_Type INTERNAL = 0;
+//! Label for the internal entities
+const markerID_Type INTERNAL = 0;
 
-    //! Label for the bottom boundary edge
-    const markerID_Type BOTTOM = 1;
+//! Label for the bottom boundary edge
+const markerID_Type BOTTOM = 1;
 
-    //! Label for the left boundary edge
-    const markerID_Type LEFT = 2;
+//! Label for the left boundary edge
+const markerID_Type LEFT = 2;
 
-    //! Label for the top boundary edge
-    const markerID_Type TOP = 3;
+//! Label for the top boundary edge
+const markerID_Type TOP = 3;
 
-    //! Label for the right boundary edge
-    const markerID_Type RIGHT = 4;
+//! Label for the right boundary edge
+const markerID_Type RIGHT = 4;
 
-    //! Label for the top and left boundary corner
-    const markerID_Type TOP_LEFT = 7;
+//! Label for the top and left boundary corner
+const markerID_Type TOP_LEFT = 7;
 
-    //! Label for the bottom and right boundary corner
-    const markerID_Type BOTTOM_RIGHT = 5;
+//! Label for the bottom and right boundary corner
+const markerID_Type BOTTOM_RIGHT = 5;
 
-    //! Label for the bottom and left boundary corner
-    const markerID_Type BOTTOM_LEFT = 8;
+//! Label for the bottom and left boundary corner
+const markerID_Type BOTTOM_LEFT = 8;
 
-    //! Label for the top and right boundary corner
-    const markerID_Type TOP_RIGHT = 6;
+//! Label for the top and right boundary corner
+const markerID_Type TOP_RIGHT = 6;
 
 }
 
@@ -85,10 +85,10 @@ namespace Structured2DLabel
   @param n_x Number of elements along the length
   @param n_y Number of elements along the width
 */
-markerID_Type regularMeshPointPosition2D( const UInt& i_x,
-                                          const UInt& i_y,
-                                          const UInt& n_x,
-                                          const UInt& n_y );
+markerID_Type regularMeshPointPosition2D ( const UInt& i_x,
+                                           const UInt& i_y,
+                                           const UInt& n_x,
+                                           const UInt& n_y );
 
 
 /*!
@@ -105,10 +105,10 @@ markerID_Type regularMeshPointPosition2D( const UInt& i_x,
   </ul>
   For the edges the labels are:
   <ul>
-  <li> BOTTOM = 1, i.e. \f$ x = 0 \f$ </li>
-  <li> LEFT = 2, i.e. \f$ y = 0 \f$ </li>
-  <li> TOP = 3, i.e. \f$ x = 1 \f$ </li>
-  <li> RIGHT = 4, i.e. \f$ y = 1 \f$ </li>
+  <li> LEFT    = 1, i.e. \f$ x = 0 \f$ </li>
+  <li> BOTTOM  = 2, i.e. \f$ y = 0 \f$ </li>
+  <li> RIGHT   = 3, i.e. \f$ x = 1 \f$ </li>
+  <li> TOP     = 4, i.e. \f$ y = 1 \f$ </li>
   </ul>
 
   @param mesh The mesh that we want to generate
@@ -121,52 +121,55 @@ markerID_Type regularMeshPointPosition2D( const UInt& i_x,
   @param t_x translation of the mesh along the x-axis
   @param t_y translation of the mesh along the y-axis
 */
-template <typename MC>
-void regularMesh2D( RegionMesh < LinearTriangle, MC >& mesh,
-                    markerID_Type regionFlag,
-                    const UInt& m_x,
-                    const UInt& m_y,
-                    bool verbose = false,
-                    const Real& l_x = 1.0,
-                    const Real& l_y = 1.0,
-                    const Real& t_x = 0.0,
-                    const Real& t_y = 0.0 )
+template <typename MeshType>
+void regularMesh2D ( MeshType& mesh,
+                     markerID_Type regionFlag,
+                     const UInt& m_x,
+                     const UInt& m_y,
+                     bool verbose = false,
+                     const Real& l_x = 1.0,
+                     const Real& l_y = 1.0,
+                     const Real& t_x = 0.0,
+                     const Real& t_y = 0.0 )
 {
+    typedef MeshType mesh_Type;
+    typedef typename mesh_Type::geoShape_Type geoShape_Type;
 
-    typedef LinearTriangle geoShape_Type;
-    typedef RegionMesh < geoShape_Type, MC > mesh_Type;
+    ASSERT ( ( geoShape_Type::S_shape == TRIANGLE )
+             || ( geoShape_Type::S_shape == QUAD ),
+             "Type of 2d structured mesh not available." );
 
     // discretization
-    const Real dx( l_x / m_x );
-    const Real dy( l_y / m_y );
+    const Real dx ( l_x / m_x );
+    const Real dy ( l_y / m_y );
 
     // Number of nodes along the side of the rectangle
-    const UInt n_x( m_x + 1 );
-    const UInt n_y( m_y + 1 );
+    const UInt n_x ( m_x + 1 );
+    const UInt n_y ( m_y + 1 );
 
     // Incremental values in order to get the indices of the nodes
     // Due to the structure, if we add N_i to the number of the
     // current node, we end up with the number of the next point
     // in the i axis.
-    const UInt N_x( 1 );
-    const UInt N_y( n_x );
+    const UInt N_x ( 1 );
+    const UInt N_y ( n_x );
 
     // Data about the mesh
 
     //Total-inside points
-    const UInt verticesNumber( n_x * n_y );
-    const UInt boundaryVerticesNumber( verticesNumber - ( n_x - 2 ) * ( n_y - 2 ) );
-    const UInt boundaryEdgesNumber(2 * ( m_x + m_y ) );
-    const UInt edgesNumber(
-                            // Edges that draws the rectangles
-                            m_x * n_y +
-                            n_x * m_y +
-                            // Edges that go accross the rectangles
-                            m_x * m_y
-                          );
+    const UInt verticesNumber ( n_x * n_y );
+    const UInt boundaryVerticesNumber ( verticesNumber - ( n_x - 2 ) * ( n_y - 2 ) );
+    const UInt boundaryEdgesNumber (2 * ( m_x + m_y ) );
+    const UInt edgesNumber (
+        // Edges that draws the rectangles
+        m_x * n_y +
+        n_x * m_y +
+        // Edges that go accross the rectangles
+        m_x * m_y
+    );
 
     // Faces
-    const UInt elementsNumber( 2*( m_x * m_y ) );
+    const UInt elementsNumber ( 2 * ( m_x * m_y ) );
 
     // Set the data
 
@@ -177,29 +180,29 @@ void regularMesh2D( RegionMesh < LinearTriangle, MC >& mesh,
     // About points:
     mesh.setNumBoundaryRidges ( boundaryVerticesNumber );
     mesh.setMaxNumRidges      ( verticesNumber, true );
-    mesh.setMaxNumGlobalRidges( verticesNumber );
+    mesh.setMaxNumGlobalRidges ( verticesNumber );
 
     // About vertices:
     mesh.setNumVertices      ( verticesNumber );
-    mesh.setNumGlobalVertices( verticesNumber );
+    mesh.setNumGlobalVertices ( verticesNumber );
     mesh.setNumBVertices     ( boundaryVerticesNumber );
 
     // About edges:
     mesh.setNumFacets         ( edgesNumber );
-    mesh.setnumBoundaryFacets ( boundaryEdgesNumber );
+    mesh.setNumBoundaryFacets ( boundaryEdgesNumber );
     mesh.setMaxNumFacets      ( edgesNumber );
-    mesh.setMaxNumGlobalFacets( edgesNumber );
+    mesh.setMaxNumGlobalFacets ( edgesNumber );
 
     // About faces:
     mesh.setMaxNumElements      ( elementsNumber );
-    mesh.setMaxNumGlobalElements( elementsNumber );
+    mesh.setMaxNumGlobalElements ( elementsNumber );
 
     mesh.setMaxNumFaces      ( elementsNumber );
-    mesh.setMaxNumGlobalFaces( elementsNumber );
+    mesh.setMaxNumGlobalFaces ( elementsNumber );
     mesh.setNumFaces         ( elementsNumber );
 
 
-    mesh.setMarker( regionFlag );
+    mesh.setMarkerID ( regionFlag );
 
     // Declaration of pointers on the different mesh entities
     typename mesh_Type::ridge_Type*   pointPtr   = 0;
@@ -207,10 +210,10 @@ void regularMesh2D( RegionMesh < LinearTriangle, MC >& mesh,
     typename mesh_Type::element_Type* elementPtr = 0;
 
     // Build the points of the mesh
-    Real xPosition( 0.0 ), yPosition( 0.0 ), zPosition( 0.0 );
-    markerID_Type nodeFlag( 0 );
-    UInt nodeID( 0 );
-    UInt P0( 0 ), P1( 0 ), P2( 0 ), P3( 0 );
+    Real xPosition ( 0.0 ), yPosition ( 0.0 ), zPosition ( 0.0 );
+    markerID_Type nodeFlag ( 0 );
+    UInt nodeID ( 0 );
+    UInt P0 ( 0 ), P1 ( 0 ), P2 ( 0 ), P3 ( 0 );
 
     /*
          P3___P2
@@ -219,32 +222,24 @@ void regularMesh2D( RegionMesh < LinearTriangle, MC >& mesh,
         P0     P1
     */
 
-    for ( UInt j(0); j<n_y; ++j )
+    for ( UInt j (0); j < n_y; ++j )
     {
         yPosition = dy * j;
 
-        for ( UInt i(0); i<n_x; ++i )
+        for ( UInt i (0); i < n_x; ++i )
         {
             xPosition = dx * i;
-            nodeFlag = regularMeshPointPosition2D(i, j, n_x, n_y );
+            nodeFlag = regularMeshPointPosition2D (i, j, n_x, n_y );
 
             // We create the point
-            if ( nodeFlag>0 )
-            {
-                pointPtr = &mesh.addRidge( true ); //it is a boundary point
-            }
-            else
-            {
-                pointPtr = &mesh.addRidge( false );
-            }
+            pointPtr = &mesh.addRidge ( nodeFlag > 0 ); // node flag determines if the point is on boundary
 
 
             // We set the point properties
             nodeID = j * N_y + i;
-            pointPtr->setId( nodeID );
-            pointPtr->setLocalId( nodeID );
+            pointPtr->setId ( nodeID );
 
-            pointPtr->setMarker( nodeFlag );
+            pointPtr->setMarkerID ( nodeFlag );
             pointPtr->x() = xPosition + t_x;
             pointPtr->y() = yPosition + t_y;
             pointPtr->z() = zPosition;
@@ -252,11 +247,11 @@ void regularMesh2D( RegionMesh < LinearTriangle, MC >& mesh,
     }
 
     // Build the faces
-    UInt faceID(0);
+    UInt faceID (0);
 
-    for ( UInt j(0); j<m_y; ++j )
+    for ( UInt j (0); j < m_y; ++j )
     {
-        for ( UInt i(0); i<m_x; ++i )
+        for ( UInt i (0); i < m_x; ++i )
         {
             faceID = ( j * m_x + i ) * 2;
 
@@ -268,21 +263,19 @@ void regularMesh2D( RegionMesh < LinearTriangle, MC >& mesh,
 
             // Triangle 1
             elementPtr = &mesh.addElement();
-            elementPtr->setId( faceID );
-            elementPtr->setLocalId( faceID );
-            elementPtr->setPoint( 0, mesh.point(P1) );
-            elementPtr->setPoint( 1, mesh.point(P2) );
-            elementPtr->setPoint( 2, mesh.point(P0) );
-            elementPtr->setMarker( regionFlag );
+            elementPtr->setId ( faceID );
+            elementPtr->setPoint ( 0, mesh.point (P1) );
+            elementPtr->setPoint ( 1, mesh.point (P2) );
+            elementPtr->setPoint ( 2, mesh.point (P0) );
+            elementPtr->setMarkerID ( regionFlag );
 
             // Triangle 2
             elementPtr = &mesh.addElement();
-            elementPtr->setId( faceID + 1 );
-            elementPtr->setLocalId( faceID + 1 );
-            elementPtr->setPoint( 0, mesh.point(P3) );
-            elementPtr->setPoint( 1, mesh.point(P0) );
-            elementPtr->setPoint( 2, mesh.point(P2) );
-            elementPtr->setMarker( regionFlag );
+            elementPtr->setId ( faceID + 1 );
+            elementPtr->setPoint ( 0, mesh.point (P3) );
+            elementPtr->setPoint ( 1, mesh.point (P0) );
+            elementPtr->setPoint ( 2, mesh.point (P2) );
+            elementPtr->setMarkerID ( regionFlag );
         }
     }
 
@@ -293,53 +286,56 @@ void regularMesh2D( RegionMesh < LinearTriangle, MC >& mesh,
         UInt adjID = 0;
         UInt pos = 0;
 
-        if(i < m_x)
+        if (i < m_x)
         {
             nodeID = i;
             P0 = nodeID;
             P1 = nodeID + 1;
             edgeLabel = Structured2DLabel::BOTTOM; //BOTTOMEDGE
-            adjID = 2*i;
+            adjID = 2 * i;
             pos = 2;
 
-        }else if(i < m_x + m_y)
+        }
+        else if (i < m_x + m_y)
         {
-            nodeID = (i + 1 - m_x)*n_x -1;
+            nodeID = (i + 1 - m_x) * n_x - 1;
             P0 = nodeID;
             P1 = nodeID + n_x;
             edgeLabel = Structured2DLabel::RIGHT; //RIGHTEDGE
-            adjID =  ((i - m_x)*m_x + m_x - 1)*2;
+            adjID =  ( (i - m_x) * m_x + m_x - 1) * 2;
             pos = 0;
         }
-        else if(i < 2*m_x + m_y)
+        else if (i < 2 * m_x + m_y)
         {
-            nodeID = n_x*n_y - 1 - (i - m_x - m_y);
+            nodeID = n_x * n_y - 1 - (i - m_x - m_y);
             P0 = nodeID;
             P1 = nodeID - 1;
             edgeLabel = Structured2DLabel::TOP; //TOPEDGE
-            adjID = 2*m_x*m_y-(i - m_x - m_y)*2 -1;
+            adjID = 2 * m_x * m_y - (i - m_x - m_y) * 2 - 1;
             pos = 2;
         }
-        else{
-            nodeID =  n_x*n_y - 1 - m_x - (i - 2*m_x - m_y)*n_x ;
+        else
+        {
+            nodeID =  n_x * n_y - 1 - m_x - (i - 2 * m_x - m_y) * n_x ;
             P0 = nodeID;
             P1 = nodeID - n_x ;
             edgeLabel = Structured2DLabel::LEFT; //LEFTEDGE
-            adjID = -(i - 2*m_x - m_y)*(2*m_x) + (m_x*(m_y-1))*2 + 1;
+            adjID = - (i - 2 * m_x - m_y) * (2 * m_x) + (m_x * (m_y - 1) ) * 2 + 1;
             pos = 0;
         }
 
 
-        edgePtr = &mesh.addFacet( true ) ;
-        edgePtr->setMarker( edgeLabel );
-        edgePtr->setPoint( 0, mesh.point( P0 ));
-        edgePtr->setPoint( 1, mesh.point( P1 ));
+        edgePtr = &mesh.addFacet ( true ) ;
+        edgePtr->setId ( mesh.facetList().size() - 1 );
+        edgePtr->setMarkerID ( edgeLabel );
+        edgePtr->setPoint ( 0, mesh.point ( P0 ) );
+        edgePtr->setPoint ( 1, mesh.point ( P1 ) );
         edgePtr->firstAdjacentElementIdentity() = adjID;
         edgePtr->firstAdjacentElementPosition() = pos;
-     }
+    }
 
     // edges update
-    mesh.updateElementFacets( true, verbose, edgesNumber );
+    mesh.updateElementFacets ( true, verbose, edgesNumber );
 
 }
 

@@ -86,7 +86,7 @@ public:
     /*!
       @param A the base matrix for computing the preconditioner
      */
-    Int buildPreconditioner( operator_type& matrix );
+    Int buildPreconditioner ( operator_type& matrix );
 
     //! Reset the preconditioner
     void resetPreconditioner();
@@ -98,10 +98,10 @@ public:
       @param section The section in "dataFile" where to find data about the preconditioner
       @param subSection The subsection in "dataFile" where to find data about the preconditioner
      */
-    void createParametersList( list_Type& list, const GetPot& dataFile, const std::string& section, const std::string& subSection );
+    void createParametersList ( list_Type& list, const GetPot& dataFile, const std::string& section, const std::string& subSection );
 
     //! Show informations about the preconditioner
-    virtual void showMe( std::ostream& output = std::cout ) const;
+    virtual void showMe ( std::ostream& output = std::cout ) const;
 
     //! Compute the condition number of the preconditioner
     /*!
@@ -126,7 +126,10 @@ public:
     /*!
       @param solver reference to the AztecOO solver
      */
-    void setSolver( SolverAztecOO& solver ) { M_solver = &solver; }
+    void setSolver ( SolverAztecOO& solver )
+    {
+        M_solver = &solver;
+    }
 
     //@}
 
@@ -150,7 +153,10 @@ public:
     /*!
       @return "AztecOO"
      */
-    std::string preconditionerType() { return "AztecOO"; }
+    std::string preconditionerType()
+    {
+        return "AztecOO";
+    }
 
     //@}
 
@@ -166,7 +172,7 @@ inline Preconditioner* createPreconditionerAztecOO()
 
 namespace
 {
-static bool registerAztecOO = PRECFactory::instance().registerProduct( "AztecOO", &createPreconditionerAztecOO );
+static bool registerAztecOO = PRECFactory::instance().registerProduct ( "AztecOO", &createPreconditionerAztecOO );
 }
 
 } // namespace LifeV

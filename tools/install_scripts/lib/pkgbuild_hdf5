@@ -1,0 +1,35 @@
+#! /bin/bash
+#
+# author: Antonio Cervone <ant.cervone@gmail.com>
+# date:   06-02-2013
+#
+
+ver='1.8.9'
+download_hdf5() {
+  wget -c "http://www.hdfgroup.org/ftp/HDF5/releases/hdf5-${ver}/src/hdf5-${ver}.tar.bz2"
+}
+
+unpack_hdf5() {
+  tar xjf hdf5-${ver}.tar.bz2
+}
+
+build_hdf5() {
+
+  ${src_dir}/hdf5-${ver}/configure \
+    CC=${mpi_bin}/mpicc \
+    CXX=${mpi_bin}/mpicxx \
+    --prefix=${install_dir} \
+    --enable-parallel \
+    --enable-hl \
+    --enable-linux-lfs \
+    --enable-production \
+    --enable-shared \
+    --with-pic
+
+  make -j1
+}
+
+install_hdf5() {
+  make install
+}
+

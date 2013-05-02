@@ -66,8 +66,8 @@ namespace LifeV
 
 */
 
-template< typename Mesh,
-typename SolverType = LifeV::SolverAztecOO>
+template < typename Mesh,
+         typename SolverType = LifeV::SolverAztecOO >
 class HarmonicExtensionSolver
 {
 public:
@@ -76,10 +76,12 @@ public:
     //@{
 
     typedef SolverType                             solver_Type;
+    typedef boost::shared_ptr<solver_Type>         solverPtr_Type;
 
     typedef typename solver_Type::matrix_type      matrix_Type;
     typedef typename solver_Type::matrix_ptrtype   matrixPtr_Type;
     typedef typename solver_Type::vector_type      vector_Type;
+    typedef typename solver_Type::vector_ptrtype   vectorPtr_Type;
 
     // OBSOLETE typedefs
     typedef SolverType                             solver_type;
@@ -99,8 +101,8 @@ public:
       \param comm  the Epetra_Comm to be used for communication
     */
 
-    HarmonicExtensionSolver( FESpace<Mesh, MapEpetra>&       mmFESpace,
-                             boost::shared_ptr<Epetra_Comm>  comm);
+    HarmonicExtensionSolver ( FESpace<Mesh, MapEpetra>&       mmFESpace,
+                              boost::shared_ptr<Epetra_Comm>  comm);
 
     //! Constructors for an harmonics extensions with offset
     /*!
@@ -109,11 +111,11 @@ public:
       \param localMap use localMap instead of M_FESpace.map()
       \param offset use this offset to fill the matrix (both: row and column offset)
     */
-    HarmonicExtensionSolver( FESpace<Mesh, MapEpetra>&      mmFESpace,
-                             boost::shared_ptr<Epetra_Comm> comm,
-                             MapEpetra&                     localMap,
-                             UInt                           offset =0
-                           );
+    HarmonicExtensionSolver ( FESpace<Mesh, MapEpetra>&      mmFESpace,
+                              boost::shared_ptr<Epetra_Comm> comm,
+                              MapEpetra&                     localMap,
+                              UInt                           offset = 0
+                            );
 
     //! virtual destructor
     virtual ~HarmonicExtensionSolver() {};
@@ -127,25 +129,13 @@ public:
     /*!
         @param dataFile GetPot object
      */
-    void setUp( const GetPot& dataFile );
-
-    //! Initialize with velocityFunction and pressureFunction
-    /*!
-        @param disp vector of displacements to initialize the simulation
-     */
-    void initialize( const vector_Type& disp )  { setDispOld(disp); }
-
-    //! Update system
-    /*!
-      No argument is needd to update the system
-     */
-    void updateSystem();
+    void setUp ( const GetPot& dataFile );
 
     //! Update convective term, boundary condition and solve the linearized ns system
     /*!
         @param bcHandler BC handler
      */
-    void iterate(BCHandler& BCh);
+    void iterate (BCHandler& BCh);
 
     //! returns wheter this processor is the leader.
     bool isLeader() const
@@ -154,42 +144,64 @@ public:
     }
 
     //! prepare to recompute the preconditioner.
-    void resetPrec(bool reset = true) { if (reset) M_linearSolver.precReset(); }
+    void resetPrec (bool reset = true)
+    {
+        if (reset)
+        {
+            M_linearSolver->precReset();
+        }
+    }
 
     //! manually rescale the system matrix by dt
-    void rescaleMatrix(Real& dt) {*M_matrHE *= dt;}
+    void rescaleMatrix (Real& dt)
+    {
+        *M_matrHE *= dt;
+    }
 
     //! Adds the system matrix to the argument
-    void addSystemMatrixTo(matrixPtr_Type matr) const {*matr += *M_matrHE;}
+    void addSystemMatrixTo (matrixPtr_Type matr) const
+    {
+        *matr += *M_matrHE;
+    }
 
     //! Apply boundary conditions.
     /*!
         @param rightHandSide
         @param bcHandler
      */
-    void applyBoundaryConditions(vector_Type& rhs, BCHandler& BCh);
+    void applyBoundaryConditions (vector_Type& rhs, BCHandler& BCh);
 
     void computeMatrix();
     void updateDispDiff();
 
     //@}
 
-    //! @name Set Methods
-    //@{
-    void setDisplacement(const vector_Type &disp) { M_disp = disp;}
-    void setDispOld(const vector_Type &disp)  {    M_dispOld=disp;  }
 
     //! @name Get Methods
     //@{
+    vector_Type const& disp()     const
+    {
+        return *M_disp;
+    }
+    vector_Type& disp()
+    {
+        return *M_disp;
+    }
 
-    vector_Type const& dispOld() const  {return M_dispOld;}
+    MapEpetra const& getMap() const
+    {
+        return M_localMap;
+    }
 
-    vector_Type const& dispDiff() const {return M_dispDiff;}
-    vector_Type const& disp()     const {return M_disp;}
+    FESpace<Mesh, MapEpetra> const& mFESpace() const
+    {
+        return M_FESpace;
+    }
 
-    MapEpetra const& getMap() const { return M_localMap; }
-
-    const boost::shared_ptr<Epetra_Comm>& comm() const {return M_Displayer.comm();}
+    const boost::shared_ptr<Epetra_Comm>& comm() const
+    {
+        return M_displayer.comm();
+    }
     //@}
 
 private:
@@ -204,7 +216,7 @@ private:
     //! The matrix holding the values
     matrixPtr_Type                 M_matrHE;
 
-    Displayer                      M_Displayer;
+    Displayer                      M_displayer;
     int                            M_me;
     bool                           M_verbose;
 
@@ -212,15 +224,13 @@ private:
     MatrixElemental                        M_elmat;
 
     //! The actual extension of the displacement
-    vector_Type                    M_disp;
-    vector_Type                    M_dispOld;
-    vector_Type                    M_dispDiff;
+    vectorPtr_Type                    M_disp;
 
     //! Auxiliary vector holding the second right hand of the system
-    vector_Type                    M_secondRHS;
+    vectorPtr_Type                    M_secondRHS;
 
     //! The linear solver
-    solver_Type                    M_linearSolver;
+    solverPtr_Type                    M_linearSolver;
 
     //! Diffusion coefficient for the laplacian operator
     Real                           M_diffusion;
@@ -235,45 +245,40 @@ private:
 
 template <typename Mesh, typename SolverType>
 HarmonicExtensionSolver<Mesh, SolverType>::
-HarmonicExtensionSolver( FESpace<Mesh, MapEpetra>& mmFESpace,
-                         boost::shared_ptr<Epetra_Comm>    comm ):
-        M_FESpace               ( mmFESpace ),
-        M_localMap              ( M_FESpace.map() ),
-        M_matrHE                ( new matrix_Type (M_localMap ) ),
-        M_Displayer              ( comm ),
-        M_me                    ( comm->MyPID() ),
-        M_verbose               ( M_me == 0 ),
-        M_elmat                 ( M_FESpace.fe().nbFEDof(), nDimensions, nDimensions ),
-        M_disp                  ( M_localMap ),
-        M_dispOld               ( M_localMap ),
-        M_dispDiff              ( M_localMap ),
-        M_secondRHS             ( M_localMap ),
-        M_linearSolver          ( comm ),
-        M_diffusion             ( 1. ),
-        M_offset                (0)
+HarmonicExtensionSolver ( FESpace<Mesh, MapEpetra>& mmFESpace,
+                          boost::shared_ptr<Epetra_Comm>    comm ) :
+    M_FESpace               ( mmFESpace ),
+    M_localMap              ( M_FESpace.map() ),
+    M_matrHE                ( new matrix_Type (M_localMap ) ),
+    M_displayer              ( comm ),
+    M_me                    ( comm->MyPID() ),
+    M_verbose               ( M_me == 0 ),
+    M_elmat                 ( M_FESpace.fe().nbFEDof(), nDimensions, nDimensions ),
+    M_disp                  ( ),
+    M_secondRHS             ( ),
+    M_linearSolver          ( ),
+    M_diffusion             ( 1. ),
+    M_offset                (0)
 {
 }
 
 template <typename Mesh, typename SolverType>
 HarmonicExtensionSolver<Mesh, SolverType>::
-HarmonicExtensionSolver( FESpace<Mesh, MapEpetra>& mmFESpace,
-                         boost::shared_ptr<Epetra_Comm>              comm ,
-                         MapEpetra& localMap,
-                         UInt offset):
-        M_FESpace               ( mmFESpace ),
-        M_localMap              ( localMap),
-        M_matrHE                ( new matrix_Type (M_localMap ) ),
-        M_Displayer              ( comm ),
-        M_me                    ( comm->MyPID() ),
-        M_verbose               ( M_me == 0 ),
-        M_elmat                 ( M_FESpace.fe().nbFEDof(), nDimensions, nDimensions ),
-        M_disp                  ( mmFESpace.map() ),
-        M_dispOld               ( M_disp.map() ),
-        M_dispDiff              ( M_disp.map() ),
-        M_secondRHS             ( M_disp.map() ),
-        M_linearSolver          ( comm ),
-        M_diffusion             ( 1. ),
-        M_offset                (offset)
+HarmonicExtensionSolver ( FESpace<Mesh, MapEpetra>& mmFESpace,
+                          boost::shared_ptr<Epetra_Comm>              comm ,
+                          MapEpetra& localMap,
+                          UInt offset) :
+    M_FESpace               ( mmFESpace ),
+    M_localMap              ( localMap),
+    M_matrHE                ( new matrix_Type (M_localMap ) ),
+    M_displayer              ( comm ),
+    M_me                    ( comm->MyPID() ),
+    M_verbose               ( M_me == 0 ),
+    M_elmat                 ( M_FESpace.fe().nbFEDof(), nDimensions, nDimensions ),
+    M_secondRHS             ( ),
+    M_linearSolver          ( ),
+    M_diffusion             ( 1. ),
+    M_offset                (offset)
 {
 }
 
@@ -283,52 +288,44 @@ HarmonicExtensionSolver( FESpace<Mesh, MapEpetra>& mmFESpace,
 
 
 template <typename Mesh, typename SolverType>
-void HarmonicExtensionSolver<Mesh, SolverType>::setUp( const GetPot& dataFile )
+void HarmonicExtensionSolver<Mesh, SolverType>::setUp ( const GetPot& dataFile )
 {
-    M_linearSolver.setDataFromGetPot( dataFile, "mesh_motion/solver" );
-    M_linearSolver.setupPreconditioner(dataFile, "mesh_motion/prec");
+    M_linearSolver.reset (new solver_Type (M_displayer.comm() ) );
+    M_linearSolver->setDataFromGetPot ( dataFile, "mesh_motion/solver" );
+    M_linearSolver->setupPreconditioner (dataFile, "mesh_motion/prec");
 
-    M_diffusion = dataFile("mesh_motion/diffusion",1.0);
+    M_diffusion = dataFile ("mesh_motion/diffusion", 1.0);
 
     computeMatrix( );
-    M_linearSolver.setMatrix( *M_matrHE );
+    M_linearSolver->setMatrix ( *M_matrHE );
+    M_secondRHS.reset (new vector_Type (M_FESpace.map() ) );
+    M_disp.reset (new vector_Type (M_FESpace.map() ) );
 } // end setUp
 
 
 template <typename Mesh, typename SolverType>
 void
-HarmonicExtensionSolver<Mesh, SolverType>::updateSystem()
-{
-    M_Displayer.leaderPrint(" HE-  Updating the system ...                  ");
-
-    M_dispOld = M_disp;
-
-    M_Displayer.leaderPrint("done \n");
-}
-
-template <typename Mesh, typename SolverType>
-void
-HarmonicExtensionSolver<Mesh, SolverType>::iterate( BCHandler& BCh )
+HarmonicExtensionSolver<Mesh, SolverType>::iterate ( BCHandler& BCh )
 {
     LifeChrono chrono;
 
     // matrix and vector assembling communication
-    M_Displayer.leaderPrint(" HE-  Applying boundary conditions ...         ");
+    M_displayer.leaderPrint (" HE-  Applying boundary conditions ...         ");
     chrono.start();
 
-    M_secondRHS *= 0.;
-    applyBoundaryConditions(M_secondRHS, BCh);
+    *M_secondRHS *= 0.;
+    applyBoundaryConditions (*M_secondRHS, BCh);
 
     chrono.stop();
-    M_Displayer.leaderPrintMax("done in " , chrono.diff() );
+    M_displayer.leaderPrintMax ("done in " , chrono.diff() );
 
     // solving the system. Note: setMatrix(M_matrHE) done in setUp()
-    M_linearSolver.solveSystem( M_secondRHS, M_disp, M_matrHE );
+    M_linearSolver->solveSystem ( *M_secondRHS, *M_disp, M_matrHE );
 }
 
 template <typename Mesh, typename SolverType>
 void
-HarmonicExtensionSolver<Mesh, SolverType>::applyBoundaryConditions(vector_Type& rhs, BCHandler& BCh)
+HarmonicExtensionSolver<Mesh, SolverType>::applyBoundaryConditions (vector_Type& rhs, BCHandler& BCh)
 {
 
     // CHANGED BY S. QUINODOZ !
@@ -337,19 +334,19 @@ HarmonicExtensionSolver<Mesh, SolverType>::applyBoundaryConditions(vector_Type& 
     if (  ! BCh.bcUpdateDone() )
     {
         // BC boundary information update
-        BCh.bcUpdate( *M_FESpace.mesh(), M_FESpace.feBd(), M_FESpace.dof() );
+        BCh.bcUpdate ( *M_FESpace.mesh(), M_FESpace.feBd(), M_FESpace.dof() );
     }
 
-    if (M_offset)//mans that this is the fullMonolithic case
+    if (M_offset) //mans that this is the fullMonolithic case
     {
-        BCh.setOffset(M_offset);
+        BCh.setOffset (M_offset);
     }
     else
     {
-        bcManageRhs(rhs, *M_FESpace.mesh(), M_FESpace.dof(), BCh, M_FESpace.feBd(), 1., 0.0);
+        bcManageRhs (rhs, *M_FESpace.mesh(), M_FESpace.dof(), BCh, M_FESpace.feBd(), 1., 0.0);
     }
 
-    bcManageMatrix( *M_matrHE, *M_FESpace.mesh(), M_FESpace.dof(), BCh, M_FESpace.feBd(), 1.0, 0. );
+    bcManageMatrix ( *M_matrHE, *M_FESpace.mesh(), M_FESpace.dof(), BCh, M_FESpace.feBd(), 1.0, 0. );
 }
 
 template <typename Mesh, typename SolverType>
@@ -357,39 +354,30 @@ void HarmonicExtensionSolver<Mesh, SolverType>::computeMatrix( )
 {
     LifeChrono chrono;
     chrono.start();
-    M_Displayer.leaderPrint(" HE-  Computing constant matrices ...          ");
+    M_displayer.leaderPrint (" HE-  Computing constant matrices ...          ");
 
-    M_matrHE.reset( new matrix_Type (M_localMap ) );
+    M_matrHE.reset ( new matrix_Type (M_localMap ) );
 
     UInt totalDof   = M_FESpace.dof().numTotalDof();
     // Loop on elements
     for ( UInt i = 0; i < M_FESpace.mesh()->numVolumes(); ++i )
     {
         // Updating derivatives
-        M_FESpace.fe().updateFirstDerivQuadPt( M_FESpace.mesh()->volumeList( i ) );
+        M_FESpace.fe().updateFirstDerivQuadPt ( M_FESpace.mesh()->volumeList ( i ) );
         M_elmat.zero();
-        stiff( M_diffusion, M_elmat, M_FESpace.fe(), 0, 0, 3 );
+        stiff ( M_diffusion, M_elmat, M_FESpace.fe(), 0, 0, 3 );
         // Assembling
         for ( UInt j = 0; j < M_FESpace.fieldDim(); ++j )
         {
-            assembleMatrix( *M_matrHE, M_elmat, M_FESpace.fe(), M_FESpace.dof(), j, j, j*totalDof+M_offset, j*totalDof+M_offset );
+            assembleMatrix ( *M_matrHE, M_elmat, M_FESpace.fe(), M_FESpace.dof(), j, j, j * totalDof + M_offset, j * totalDof + M_offset );
         }
     }
 
     M_matrHE->globalAssemble();
 
     chrono.stop();
-    M_Displayer.leaderPrintMax("done in " , chrono.diff() );
+    M_displayer.leaderPrintMax ("done in " , chrono.diff() );
 
-}
-
-
-template <typename Mesh, typename SolverType>
-void
-HarmonicExtensionSolver<Mesh, SolverType>::updateDispDiff()
-{
-    M_dispDiff =  M_disp ;
-    M_dispDiff -= M_dispOld;
 }
 
 

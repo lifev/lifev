@@ -46,17 +46,17 @@ namespace LifeV
 // ==========================================
 // Constructor & Destructor
 // ==========================================
-MeshVertex::MeshVertex():M_coordinates()
+MeshVertex::MeshVertex() : M_coordinates()
 {
 }
 
-MeshVertex::MeshVertex( ID identity, bool boundary )
-        :MeshEntity( identity, boundary ), M_coordinates()
+MeshVertex::MeshVertex ( ID identity, bool boundary )
+    : MeshEntity ( identity, boundary ), M_coordinates()
 {
 }
 
-MeshVertex::MeshVertex( ID identity, Real x, Real y, Real z, bool boundary )
-        :MeshEntity( identity, boundary ), M_coordinates( x, y, z )
+MeshVertex::MeshVertex ( ID identity, Real x, Real y, Real z, bool boundary )
+    : MeshEntity ( identity, boundary ), M_coordinates ( x, y, z )
 {
 }
 
@@ -68,23 +68,23 @@ MeshVertex::MeshVertex( ID identity, Real x, Real y, Real z, bool boundary )
 // ==========================================
 // Methods
 // ==========================================
-std::ostream &
-MeshVertex::showMe( bool verbose, std::ostream & out ) const
+std::ostream&
+MeshVertex::showMe ( bool verbose, std::ostream& out ) const
 {
-    out.setf( std::ios::scientific, std::ios::floatfield );
+    out.setf ( std::ios::scientific, std::ios::floatfield );
     out << "----- MeshVertex object -----" << std::endl;
     if ( verbose )
     {
-        unsigned i;
+        UInt i;
         out << " Coordinates:" << std::endl;
-        Real const * coordinateVector = coordinatesArray();
-        for ( i = 0; i < nDimensions-1; i++ )
+        Real const* coordinateVector = coordinatesArray();
+        for ( i = 0; i < nDimensions - 1; i++ )
         {
             out << coordinateVector[ i ] << ",  ";
         }
         out << coordinateVector[ i ] << std::endl << std::endl;
     }
-    MeshEntity::showMe( out );
+    MeshEntity::showMe ( out );
 
     out << "----- END OF MeshVertex data ---" << std::endl << std::endl;
     return out;

@@ -59,7 +59,7 @@ public:
 
     //! @name Public Types
     //@{
-    typedef std::map<ID,ID> flagsMap_Type;
+    typedef std::map<ID, ID> flagsMap_Type;
     typedef std::map<ID, Vector > versorsMap_Type;
     typedef MatrixType matrix_Type;
     typedef boost::shared_ptr<matrix_Type> matrixPtr_Type;
@@ -80,7 +80,7 @@ public:
      * All the stored data are copied so that the pointers of bcManageNormal and this do not share the same objects
        @param bcManageNormal BCManageNormal
      */
-    BCManageNormal( BCManageNormal const& bcManageNormal );
+    BCManageNormal ( BCManageNormal const& bcManageNormal );
 
 
     //! Destructor
@@ -113,18 +113,7 @@ public:
         @param boundaryCondition A BCBase object
         @param time The actual time
      */
-    void init(const BCBase& boundaryCondition, const Real& time);
-
-    //! Build the rotation matrix
-    /*!
-     *  This method calculates the normal and tangential vectors and builds the rotation matrix
-        @param dof The DOF object
-        @param currentBdFE the current boundary finite element
-        @param systemMatrix The system matrix
-        @param offset The boundary condition offset
-        @param commPtr pointer to Epetra_Comm object
-     */
-    void build(const DOF& dof, CurrentBoundaryFE& currentBdFE, matrix_Type& systemMatrix, UInt offset, MapEpetra::comm_ptrtype& commPtr);
+    void init (const BCBase& boundaryCondition, const Real& time);
 
     //! Build the rotation matrix
     /*!
@@ -137,7 +126,7 @@ public:
         @param commPtr pointer to Epetra_Comm object
      */
     template<typename MeshType>
-    void build(const MeshType& mesh, const DOF& dof, CurrentBoundaryFE& currentBdFE, matrix_Type& systemMatrix, UInt offset, MapEpetra::comm_ptrtype& commPtr);
+    void build (const MeshType& mesh, const DOF& dof, CurrentFEManifold& currentBdFE, const MapEpetra& map, UInt offset);
 
     //! This function modify the system matrix to apply a change of basis from the Cartesian coordinate system to the local coordinate system given by tangents and normals to the boundary
     /*!
@@ -149,7 +138,7 @@ public:
         @param rightHandSide the right hand side
      */
     template <typename VectorType>
-    void bcShiftToNormalTangentialCoordSystem(matrix_Type& systemMatrix, VectorType& rightHandSide) const;
+    void bcShiftToNormalTangentialCoordSystem (matrix_Type& systemMatrix, VectorType& rightHandSide) const;
 
     //! This function modify the system matrix to apply a change of basis from the local coordinate system given by tangents and normals to the boundary to the Cartesian coordinate system
     /*!
@@ -160,7 +149,7 @@ public:
         @param rightHandSide the right hand side
      */
     template <typename VectorType>
-    void bcShiftToCartesianCoordSystem(matrix_Type& systemMatrix, VectorType& rightHandSide) const;
+    void bcShiftToCartesianCoordSystem (matrix_Type& systemMatrix, VectorType& rightHandSide) const;
 
     //! This method computes the normals to the domain boundary
     /*!
@@ -171,13 +160,13 @@ public:
         @param mesh The mesh
      */
     template <typename VectorType, typename MeshType>
-    void computeIntegratedNormals(const DOF& dof, CurrentBoundaryFE& currentBdFE, VectorType& normals,  const MeshType& mesh);
+    void computeIntegratedNormals (const DOF& dof, CurrentFEManifold& currentBdFE, VectorType& normals,  const MeshType& mesh);
 
     //! Export in the vtk format the tangential and normal vectors (t1, t2, n) for each DOF on the domain boundary
     /*!
         @param fileName The name of the file where the data are exported
      */
-    void exportToParaview(std::string fileName) const;
+    void exportToParaview (std::string fileName) const;
 
 
     //@}
@@ -191,14 +180,14 @@ private:
        @param mesh The mesh
      */
     template<typename MeshType>
-    void M_calculateCoordinates(const MeshType& mesh);
+    void M_calculateCoordinates (const MeshType& mesh);
 
     //! Add point to the map of flags
     /*!
          @param ID boundaryCondition A BCBase object
          @param time The actual time
       */
-    void M_addBoundaryPoint(const ID& dofId,const ID& flag);
+    void M_addBoundaryPoint (const ID& dofId, const ID& flag);
 
     //! Add point to the map of flags
     /*!
@@ -207,7 +196,7 @@ private:
         @param ny The y component of the unit vector
         @param nz The z component of the unit vector
      */
-    void M_addVersor(const ID& dofId,const Real& vx,const Real& vy, const Real& vz);
+    void M_addVersor (const ID& dofId, const Real& vx, const Real& vy, const Real& vz);
 
     //! Calculate the normal vectors
     /*!
@@ -215,7 +204,7 @@ private:
         @param currentBdFE the current boundary finite element
      */
     template<typename MeshType>
-    void M_calculateNormals(const MeshType& mesh, const DOF& dof,CurrentBoundaryFE& currentBdFE);
+    void M_calculateNormals (const MeshType& mesh, const DOF& dof, CurrentFEManifold& currentBdFE);
 
     //! Store in *M_normalPtr the versors given by the user
     /*!
@@ -231,14 +220,15 @@ private:
         @param systemMatrix the matrix of the problem
         @param offset that will be used if there is more than one unknown to recover the global ID
      */
-    void M_buildRotationMatrix(matrix_Type& systemMatrix, UInt offset=0);
+    void M_buildRotationMatrix (const MapEpetra& systemMatrixMap, UInt offset = 0);
     //@}
 
     //! true when there are stored normals
     bool          M_dataBuilt;
 
-    //! Shared pointer to the rotation matrix
+    //! Shared pointer to the rotation matrix and its transpose
     matrixPtr_Type M_rotationMatrixPtr;
+    matrixPtr_Type M_rotationMatrixTransposePtr;
 
     //! Shared pointer to the local Map
     epetraMapPtr_Type M_localMapEpetraPtr;
@@ -278,28 +268,28 @@ private:
 
 //Empty Constructor
 template<typename MatrixType>
-BCManageNormal<MatrixType>::BCManageNormal():
-        M_dataBuilt(false),
-        M_numDof(0),
-        M_numInvoledDof(0)
+BCManageNormal<MatrixType>::BCManageNormal() :
+    M_dataBuilt (false),
+    M_numDof (0),
+    M_numInvoledDof (0)
 {
     // Nothing to be done here
 }
 
 //Copy Constructor
 template<typename MatrixType>
-BCManageNormal<MatrixType>::BCManageNormal( const BCManageNormal & bcManageNormal ):
-        M_dataBuilt(bcManageNormal.M_dataBuilt),
-        M_rotationMatrixPtr(new matrix_Type(*bcManageNormal.M_rotationMatrixPtr) ),
-        M_localMapEpetraPtr(new MapEpetra(*bcManageNormal.M_localMapEpetraPtr) ),
-        M_firstTangentPtr(new VectorEpetra(*bcManageNormal.M_firstTangentPtr) ),
-        M_secondTangentPtr(new VectorEpetra(*bcManageNormal.M_secondTangentPtr) ),
-        M_normalPtr(new VectorEpetra(*bcManageNormal.M_normalPtr) ),
-        M_coordPtr(new VectorEpetra(*bcManageNormal.M_coordPtr) ),
-        M_numDof(bcManageNormal.M_numDof),
-        M_numInvoledDof(bcManageNormal.M_numInvoledDof),
-        M_flags(bcManageNormal.M_flags),
-        M_givenVersors(bcManageNormal.M_givenVersors)
+BCManageNormal<MatrixType>::BCManageNormal ( const BCManageNormal& bcManageNormal ) :
+    M_dataBuilt (bcManageNormal.M_dataBuilt),
+    M_rotationMatrixPtr (new matrix_Type (*bcManageNormal.M_rotationMatrixPtr) ),
+    M_localMapEpetraPtr (new MapEpetra (*bcManageNormal.M_localMapEpetraPtr) ),
+    M_firstTangentPtr (new VectorEpetra (*bcManageNormal.M_firstTangentPtr) ),
+    M_secondTangentPtr (new VectorEpetra (*bcManageNormal.M_secondTangentPtr) ),
+    M_normalPtr (new VectorEpetra (*bcManageNormal.M_normalPtr) ),
+    M_coordPtr (new VectorEpetra (*bcManageNormal.M_coordPtr) ),
+    M_numDof (bcManageNormal.M_numDof),
+    M_numInvoledDof (bcManageNormal.M_numInvoledDof),
+    M_flags (bcManageNormal.M_flags),
+    M_givenVersors (bcManageNormal.M_givenVersors)
 {
     // Nothing to be done here
 }
@@ -318,17 +308,17 @@ BCManageNormal<MatrixType>::~BCManageNormal()
 // Assignment operator
 template<typename MatrixType>
 BCManageNormal<MatrixType>&
-BCManageNormal<MatrixType>::operator= ( const BCManageNormal & bcManageNormal )
+BCManageNormal<MatrixType>::operator= ( const BCManageNormal& bcManageNormal )
 {
     if (this != &bcManageNormal)
     {
-        M_dataBuilt(bcManageNormal.M_dataBuilt);
-        M_rotationMatrixPtr.reset(new matrix_Type(*bcManageNormal.M_rotationMatrixPtr) );
-        M_localMapEpetraPtr.reset(new MapEpetra(*bcManageNormal.M_localMapEpetraPtr) );
-        M_firstTangentPtr.reset(new VectorEpetra(*bcManageNormal.M_firstTangentPtr) );
-        M_secondTangentPtr.reset(new VectorEpetra(*bcManageNormal.M_secondTangentPtr) );
-        M_normalPtr.reset(new VectorEpetra(*bcManageNormal.M_normalPtr) );
-        M_coordPtr.reset(new VectorEpetra(*bcManageNormal.M_coordPtr) );
+        M_dataBuilt (bcManageNormal.M_dataBuilt);
+        M_rotationMatrixPtr.reset (new matrix_Type (*bcManageNormal.M_rotationMatrixPtr) );
+        M_localMapEpetraPtr.reset (new MapEpetra (*bcManageNormal.M_localMapEpetraPtr) );
+        M_firstTangentPtr.reset (new VectorEpetra (*bcManageNormal.M_firstTangentPtr) );
+        M_secondTangentPtr.reset (new VectorEpetra (*bcManageNormal.M_secondTangentPtr) );
+        M_normalPtr.reset (new VectorEpetra (*bcManageNormal.M_normalPtr) );
+        M_coordPtr.reset (new VectorEpetra (*bcManageNormal.M_coordPtr) );
         M_numDof = bcManageNormal.M_numDof;
         M_numInvoledDof = bcManageNormal.M_numInvoledDof;
         M_flags = bcManageNormal.M_flags;
@@ -342,25 +332,25 @@ BCManageNormal<MatrixType>::operator= ( const BCManageNormal & bcManageNormal )
 //==============================================
 
 template<typename MatrixType>
-void BCManageNormal<MatrixType>::init(const BCBase& boundaryCondition,const Real& time)
+void BCManageNormal<MatrixType>::init (const BCBase& boundaryCondition, const Real& time)
 {
     // Loop on BC identifiers
     for ( ID i = 0; i < boundaryCondition.list_size(); ++i )
     {
-        const BCIdentifierEssential* pId = static_cast< const BCIdentifierEssential* >( boundaryCondition[ i ] );
+        const BCIdentifierEssential* pId = static_cast< const BCIdentifierEssential* > ( boundaryCondition[ i ] );
 
-        if (boundaryCondition.mode()==Directional)
+        if (boundaryCondition.mode() == Directional)
         {
-            const BCFunctionDirectional* pBcF = static_cast<const BCFunctionDirectional*>( boundaryCondition.pointerToFunctor() );
-            Real nx(pBcF->vectFct(time,pId->x(),pId->y(),pId->z(),0));
-            Real ny(pBcF->vectFct(time,pId->x(),pId->y(),pId->z(),1));
-            Real nz(pBcF->vectFct(time,pId->x(),pId->y(),pId->z(),2));
+            const BCFunctionDirectional* pBcF = static_cast<const BCFunctionDirectional*> ( boundaryCondition.pointerToFunctor() );
+            Real nx (pBcF->vectFct (time, pId->x(), pId->y(), pId->z(), 0) );
+            Real ny (pBcF->vectFct (time, pId->x(), pId->y(), pId->z(), 1) );
+            Real nz (pBcF->vectFct (time, pId->x(), pId->y(), pId->z(), 2) );
 
-            M_addVersor(boundaryCondition[i]->id(),nx,ny,nz);
+            M_addVersor (boundaryCondition[i]->id(), nx, ny, nz);
         }
         else
         {
-            M_addBoundaryPoint(boundaryCondition[i]->id(),boundaryCondition.flag());
+            M_addBoundaryPoint (boundaryCondition[i]->id(), boundaryCondition.flag() );
         }
     }
     M_dataBuilt = true; //Since vectors has been given we must apply the basis change.
@@ -368,7 +358,7 @@ void BCManageNormal<MatrixType>::init(const BCBase& boundaryCondition,const Real
 
 template<typename MatrixType>
 template<typename MeshType>
-void BCManageNormal<MatrixType>::build(const MeshType& mesh, const DOF& dof,CurrentBoundaryFE& currentBdFE,MatrixType& systemMatrix, UInt offset,MapEpetra::comm_ptrtype& commPtr)
+void BCManageNormal<MatrixType>::build (const MeshType& mesh, const DOF& dof, CurrentFEManifold& currentBdFE, const MapEpetra& map, UInt offset)
 {
     if (M_dataBuilt)
     {
@@ -377,9 +367,9 @@ void BCManageNormal<MatrixType>::build(const MeshType& mesh, const DOF& dof,Curr
         //-----------------------------------------------------
 
         //First we build the map
-        UInt nbPoints(M_flags.size()+M_givenVersors.size());
-        UInt i(0);
-        std::vector<Int> idList(3*nbPoints); //3 times because we want 3 coordinates
+        UInt nbPoints (M_flags.size() + M_givenVersors.size() );
+        UInt i (0);
+        std::vector<Int> idList (3 * nbPoints); //3 times because we want 3 coordinates
 
         //We store the number of Degrees of Freedom
         M_numDof = dof.numTotalDof();
@@ -389,126 +379,125 @@ void BCManageNormal<MatrixType>::build(const MeshType& mesh, const DOF& dof,Curr
         versorsMap_Type::iterator mapIt2;
 
         //Building the list
-        for ( mapIt=M_flags.begin() ; mapIt != M_flags.end(); mapIt++ )
+        for ( mapIt = M_flags.begin() ; mapIt != M_flags.end(); mapIt++ )
         {
             idList[i] = (*mapIt).first;
-            idList[i+nbPoints] = (*mapIt).first+M_numDof;
-            idList[i+2*nbPoints] = (*mapIt).first+2*M_numDof;
+            idList[i + nbPoints] = (*mapIt).first + M_numDof;
+            idList[i + 2 * nbPoints] = (*mapIt).first + 2 * M_numDof;
             ++i;
         }
-        for ( mapIt2=M_givenVersors.begin() ; mapIt2 != M_givenVersors.end(); mapIt2++ )
+        for ( mapIt2 = M_givenVersors.begin() ; mapIt2 != M_givenVersors.end(); mapIt2++ )
         {
             idList[i] = (*mapIt2).first;
-            idList[i+nbPoints] = (*mapIt2).first+M_numDof;
-            idList[i+2*nbPoints] = (*mapIt2).first+2*M_numDof;
+            idList[i + nbPoints] = (*mapIt2).first + M_numDof;
+            idList[i + 2 * nbPoints] = (*mapIt2).first + 2 * M_numDof;
             ++i;
         }
 
-        M_localMapEpetraPtr.reset( new MapEpetra(-1,3*nbPoints,&idList[0],commPtr) );
+        M_localMapEpetraPtr.reset ( new MapEpetra (-1, 3 * nbPoints, &idList[0], map.commPtr() ) );
 
         //-----------------------------------------------------
         // STEP 2: Compute normals and tangents
         //-----------------------------------------------------
-        M_calculateNormals(mesh, dof,currentBdFE);
+        M_calculateNormals (mesh, dof, currentBdFE);
         M_storeGivenVersors();
 
         //this is used only for exporting the normals in vtk format.. should be put elsewhere?
-        M_calculateCoordinates(mesh);
+        M_calculateCoordinates (mesh);
         M_calculateTangentVectors();
-        M_buildRotationMatrix(systemMatrix,offset);
+        M_buildRotationMatrix (map, offset);
     }
 }
 
 template<typename MatrixType>
 template <typename VectorType>
-void BCManageNormal<MatrixType>::bcShiftToNormalTangentialCoordSystem(matrix_Type& systemMatrix, VectorType& rightHandSide) const
+void BCManageNormal<MatrixType>::bcShiftToNormalTangentialCoordSystem (matrix_Type& systemMatrix, VectorType& rightHandSide) const
 {
     if (M_dataBuilt)
     {
         //Shift to tangential system
 
         //C = R*A
-        matrix_Type C(systemMatrix.map(), systemMatrix.meanNumEntries());
-        M_rotationMatrixPtr->multiply(false,systemMatrix,false,C);
+        matrix_Type C (systemMatrix.map(), systemMatrix.meanNumEntries() );
+        M_rotationMatrixPtr->multiply (false, systemMatrix, false, C);
 
         //A = C*Rt"
-        matrix_Type D(systemMatrix.map(), systemMatrix.meanNumEntries());
-        C.multiply(false,*M_rotationMatrixPtr,true,D);
-        systemMatrix.swapCrsMatrix(D);
+        matrix_Type D (systemMatrix.map(), systemMatrix.meanNumEntries() );
+        C.multiply (false, *M_rotationMatrixTransposePtr, false, D);
+        systemMatrix.swapCrsMatrix (D);
 
         //b = R*b
-        VectorType c(rightHandSide);
-        M_rotationMatrixPtr->multiply(false,c,rightHandSide);
+        VectorType c (rightHandSide);
+        M_rotationMatrixPtr->multiply (false, c, rightHandSide);
     }
 }
 
 template<typename MatrixType>
 template <typename VectorType>
-void BCManageNormal<MatrixType>::bcShiftToCartesianCoordSystem(matrix_Type& systemMatrix, VectorType& rightHandSide) const
+void BCManageNormal<MatrixType>::bcShiftToCartesianCoordSystem (matrix_Type& systemMatrix, VectorType& rightHandSide) const
 {
     if (M_dataBuilt)
     {
         // C = Rt*A;
-        matrix_Type C(systemMatrix.map(), systemMatrix.meanNumEntries());
-        M_rotationMatrixPtr->multiply(true,systemMatrix,false,C);
+        matrix_Type C (systemMatrix.map(), systemMatrix.meanNumEntries() );
+        M_rotationMatrixTransposePtr->multiply (false, systemMatrix, false, C);
 
         // A = C*R";
-        matrix_Type D(systemMatrix.map(), systemMatrix.meanNumEntries());
-        C.multiply(false,*M_rotationMatrixPtr,false,D);
-        systemMatrix.swapCrsMatrix(D);
+        matrix_Type D (systemMatrix.map(), systemMatrix.meanNumEntries() );
+        C.multiply (false, *M_rotationMatrixPtr, false, D);
+        systemMatrix.swapCrsMatrix (D);
 
         // b = Rt*b;
-        VectorType c(rightHandSide);
-        M_rotationMatrixPtr->multiply(true,c,rightHandSide);
+        VectorType c (rightHandSide);
+        M_rotationMatrixTransposePtr->multiply (false, c, rightHandSide);
     }
 }
 
 template<typename MatrixType>
 template<typename VectorType, typename MeshType>
-void BCManageNormal<MatrixType>::computeIntegratedNormals(const DOF& dof,CurrentBoundaryFE& currentBdFE, VectorType& normals,  const MeshType& mesh)
+void BCManageNormal<MatrixType>::computeIntegratedNormals (const DOF& dof, CurrentFEManifold& currentBdFE, VectorType& normals,  const MeshType& mesh)
 {
 
     //-----------------------------------------------------
     // STEP 1: Calculating the normals
     //-----------------------------------------------------
 
-
-    VectorType repNormals(normals.map(), Repeated);
+    VectorType repNormals (normals.map(), Repeated);
     //Loop on the Faces
-    for ( UInt iFace = 0; iFace< mesh.numBoundaryFacets(); ++iFace )
+    for ( UInt iFace = 0; iFace < mesh.numBoundaryFacets(); ++iFace )
     {
         //Update the currentBdFE with the face data
-        currentBdFE.updateMeasNormalQuadPt( mesh.boundaryFacet( iFace ) );
-        UInt nDofF = currentBdFE.nbNode();
+        currentBdFE.update ( mesh.boundaryFacet ( iFace ), UPDATE_NORMALS | UPDATE_W_ROOT_DET_METRIC );
+        UInt nDofF = currentBdFE.nbFEDof();
 
         //For each node on the face
-        for (UInt icheck = 0; icheck< nDofF; ++icheck)
+        for (UInt icheck = 0; icheck < nDofF; ++icheck)
         {
-            ID idf = dof.localToGlobalMapByBdFacet(iFace,icheck);
+            ID idf = dof.localToGlobalMapByBdFacet (iFace, icheck);
 
             //If the face exists and the point is on this processor
-            if (M_flags.find(idf) != M_flags.end())
+            if (M_flags.find (idf) != M_flags.end() )
             {
                 ID flag = M_flags[idf];
 
                 //if the normal is not already calculated
                 //and the marker correspond to the flag of the point
-                if ((flag == mesh.boundaryFacet(iFace).marker())||(flag == 0))
+                if ( (flag == mesh.boundaryFacet (iFace).markerID() ) || (flag == 0) )
                 {
                     //Warning: the normal is taken in the first Gauss point
                     //since the normal is the same over the triangle
                     //(not true in the case of quadratic and bilinear maps)
-                    Real nx(currentBdFE.normal(0,0));
-                    Real ny(currentBdFE.normal(1,0));
-                    Real nz(currentBdFE.normal(2,0));
+                    Real nx (currentBdFE.normal (0, 0) );
+                    Real ny (currentBdFE.normal (1, 0) );
+                    Real nz (currentBdFE.normal (2, 0) );
 
                     //We get the area
-                    Real area(currentBdFE.measure());
+                    Real area (currentBdFE.measure() );
 
                     //We update the normal component of the boundary point
-                    (repNormals)[idf] += nx * area;
-                    (repNormals)[idf+dof.numTotalDof()] += ny * area;
-                    (repNormals)[idf+2*dof.numTotalDof()] += nz * area;
+                    (repNormals) [idf] += nx * area;
+                    (repNormals) [idf + dof.numTotalDof()] += ny * area;
+                    (repNormals) [idf + 2 * dof.numTotalDof()] += nz * area;
                 }
             }
         }
@@ -518,16 +507,16 @@ void BCManageNormal<MatrixType>::computeIntegratedNormals(const DOF& dof,Current
     // STEP 2: Gathering the data from others processors
     //-----------------------------------------------------
 
-    normals = VectorType(repNormals,Unique);
+    normals = VectorType (repNormals, Unique);
 
     //-----------------------------------------------------
     // STEP 3: Normalizing the vectors
     //-----------------------------------------------------
 
     //We obtain the ID of the element
-    Int NumMyElements = normals.map().map(Unique)->NumMyElements();
-    std::vector<Int> MyGlobalElements(NumMyElements);
-    normals.map().map(Unique)->MyGlobalElements(&(MyGlobalElements[0]));
+    Int NumMyElements = normals.map().map (Unique)->NumMyElements();
+    std::vector<Int> MyGlobalElements (NumMyElements);
+    normals.map().map (Unique)->MyGlobalElements (& (MyGlobalElements[0]) );
 
     //We normalize the normal
     Real norm;
@@ -535,44 +524,44 @@ void BCManageNormal<MatrixType>::computeIntegratedNormals(const DOF& dof,Current
 
     //Need to run only over the first third of MyGlobalElements
     //(the larger values are the y and z components)
-    for ( Int i(0); i<NumMyElements/static_cast<Int> ( nDimensions ); ++i )
+    for ( Int i (0); i < NumMyElements / static_cast<Int> ( nDimensions ); ++i )
     {
         id = MyGlobalElements[i];
-        Real nx( (normals)[id] );
-        Real ny( (normals)[id+dof.numTotalDof()] );
-        Real nz( (normals)[id+2*dof.numTotalDof()] );
-        norm = sqrt( nx*nx + ny*ny + nz*nz );
-        (normals)[id]            /= norm;
-        (normals)[id+dof.numTotalDof()]   /= norm;
-        (normals)[id+2*dof.numTotalDof()] /= norm;
+        Real nx ( (normals) [id] );
+        Real ny ( (normals) [id + dof.numTotalDof()] );
+        Real nz ( (normals) [id + 2 * dof.numTotalDof()] );
+        norm = std::sqrt ( nx * nx + ny * ny + nz * nz );
+        (normals) [id]            /= norm;
+        (normals) [id + dof.numTotalDof()]   /= norm;
+        (normals) [id + 2 * dof.numTotalDof()] /= norm;
     }
 }
 
 //TODO this function can be improved using the vtk writers
 template<typename MatrixType>
-void BCManageNormal<MatrixType>::exportToParaview(std::string fileName) const
+void BCManageNormal<MatrixType>::exportToParaview (std::string fileName) const
 {
     if (M_dataBuilt)
     {
-        fileName.append("_proc");
+        fileName.append ("_proc");
         std::ostringstream ossMyPid;
         ossMyPid << M_localMapEpetraPtr->comm().MyPID();
-        fileName.append( ossMyPid.str() );
-        fileName.append(".vtk");
-        std::ofstream file(fileName.c_str());
+        fileName.append ( ossMyPid.str() );
+        fileName.append (".vtk");
+        std::ofstream file (fileName.c_str() );
 
         //Is the file open?
-        if (file.fail())
+        if (file.fail() )
         {
             std::cerr << "Error: The file " << fileName << " is not opened " << std::endl;
         }
         else
         {
             //We obtain the ID of the element
-            Int NumMyElements = M_localMapEpetraPtr->map(Unique)->NumMyElements();
-            std::vector<Int> MyGlobalElements(NumMyElements);
-            M_localMapEpetraPtr->map(Unique)->MyGlobalElements(&MyGlobalElements[0]);
-            ID idof(0);
+            Int NumMyElements = M_localMapEpetraPtr->map (Unique)->NumMyElements();
+            std::vector<Int> MyGlobalElements (NumMyElements);
+            M_localMapEpetraPtr->map (Unique)->MyGlobalElements (&MyGlobalElements[0]);
+            ID idof (0);
 
             //Writing the header
             file << "# vtk DataFile Version 2.0" << std::endl;
@@ -585,13 +574,13 @@ void BCManageNormal<MatrixType>::exportToParaview(std::string fileName) const
 
             //Need to run only over the first third of MyGlobalElements
             //(the larger values are the y and z components)
-            for ( Int i(0); i<NumMyElements/static_cast<Int> ( nDimensions ); ++i )
+            for ( Int i (0); i < NumMyElements / static_cast<Int> ( nDimensions ); ++i )
             {
                 idof = MyGlobalElements[i];
 
-                file << (*M_coordPtr)[idof] << "\t";
-                file << (*M_coordPtr)[idof+M_numDof] << "\t";
-                file << (*M_coordPtr)[idof+2*M_numDof] << std::endl;
+                file << (*M_coordPtr) [idof] << "\t";
+                file << (*M_coordPtr) [idof + M_numDof] << "\t";
+                file << (*M_coordPtr) [idof + 2 * M_numDof] << std::endl;
             }
 
             //Starting the data part of the file
@@ -602,13 +591,13 @@ void BCManageNormal<MatrixType>::exportToParaview(std::string fileName) const
 
             //Need to run only over the first third of MyGlobalElements
             //(the larger values are the y and z components)
-            for ( Int i(0); i<NumMyElements/static_cast<Int> ( nDimensions ); ++i )
+            for ( Int i (0); i < NumMyElements / static_cast<Int> ( nDimensions ); ++i )
             {
                 idof = MyGlobalElements[i];
 
-                file << (*M_firstTangentPtr)[idof] << "\t";
-                file << (*M_firstTangentPtr)[idof+M_numDof] << "\t";
-                file << (*M_firstTangentPtr)[idof+2*M_numDof] << std::endl;
+                file << (*M_firstTangentPtr) [idof] << "\t";
+                file << (*M_firstTangentPtr) [idof + M_numDof] << "\t";
+                file << (*M_firstTangentPtr) [idof + 2 * M_numDof] << std::endl;
             }
 
             //Writing t2
@@ -616,13 +605,13 @@ void BCManageNormal<MatrixType>::exportToParaview(std::string fileName) const
 
             //Need to run only over the first third of MyGlobalElements
             //(the larger values are the y and z components)
-            for ( Int i(0); i<NumMyElements/static_cast<Int> ( nDimensions ); ++i )
+            for ( Int i (0); i < NumMyElements / static_cast<Int> ( nDimensions ); ++i )
             {
                 idof = MyGlobalElements[i];
 
-                file << (*M_secondTangentPtr)[idof] << "\t";
-                file << (*M_secondTangentPtr)[idof+M_numDof] << "\t";
-                file << (*M_secondTangentPtr)[idof+2*M_numDof] << std::endl;
+                file << (*M_secondTangentPtr) [idof] << "\t";
+                file << (*M_secondTangentPtr) [idof + M_numDof] << "\t";
+                file << (*M_secondTangentPtr) [idof + 2 * M_numDof] << std::endl;
             }
 
             //Writing n
@@ -630,13 +619,13 @@ void BCManageNormal<MatrixType>::exportToParaview(std::string fileName) const
 
             //Need to run only over the first third of MyGlobalElements
             //(the larger values are the y and z components)
-            for ( Int i(0); i<NumMyElements/static_cast<Int> ( nDimensions ); ++i )
+            for ( Int i (0); i < NumMyElements / static_cast<Int> ( nDimensions ); ++i )
             {
                 idof = MyGlobalElements[i];
 
-                file << (*M_normalPtr)[idof] << "\t";
-                file << (*M_normalPtr)[idof+M_numDof] << "\t";
-                file << (*M_normalPtr)[idof+2*M_numDof] << std::endl;
+                file << (*M_normalPtr) [idof] << "\t";
+                file << (*M_normalPtr) [idof + M_numDof] << "\t";
+                file << (*M_normalPtr) [idof + 2 * M_numDof] << std::endl;
             }
 
             //Closing the file
@@ -651,65 +640,64 @@ void BCManageNormal<MatrixType>::exportToParaview(std::string fileName) const
 
 template< typename MatrixType>
 template< typename MeshType >
-void BCManageNormal<MatrixType>::M_calculateCoordinates(MeshType const& mesh)
+void BCManageNormal<MatrixType>::M_calculateCoordinates (MeshType const& mesh)
 {
-    M_coordPtr.reset( new VectorEpetra(*M_localMapEpetraPtr,Unique) );
+    M_coordPtr.reset ( new VectorEpetra (*M_localMapEpetraPtr, Unique) );
 
     //We obtain the ID of the element
-    Int NumMyElements = M_localMapEpetraPtr->map(Unique)->NumMyElements();
-    std::vector<Int> MyGlobalElements(NumMyElements);
-    M_localMapEpetraPtr->map(Unique)->MyGlobalElements(&MyGlobalElements[0]);
+    Int NumMyElements = M_localMapEpetraPtr->map (Unique)->NumMyElements();
+    std::vector<Int> MyGlobalElements (NumMyElements);
+    M_localMapEpetraPtr->map (Unique)->MyGlobalElements (&MyGlobalElements[0]);
 
     UInt id;
 
     //Need to run only over the first third of MyGlobalElements
     //(the larger values are the y and z components)
-    for ( Int i(0); i<NumMyElements/static_cast<Int> ( nDimensions ); ++i )
+    for ( Int i (0); i < NumMyElements / static_cast<Int> ( nDimensions ); ++i )
     {
         id = MyGlobalElements[i];
 
-        for (UInt j(0); j<mesh.pointList.size(); ++j)
+        for (UInt j (0); j < mesh.pointList.size(); ++j)
         {
-            if (id==mesh.pointList[j].id())
+            if (id == mesh.pointList[j].id() )
             {
-                (*M_coordPtr)[id]            = mesh.pointList[j].x();
-                (*M_coordPtr)[id+M_numDof]   = mesh.pointList[j].y();
-                (*M_coordPtr)[id+2*M_numDof] = mesh.pointList[j].z();
-                j=mesh.pointList.size();
+                (*M_coordPtr) [id]            = mesh.pointList[j].x();
+                (*M_coordPtr) [id + M_numDof]   = mesh.pointList[j].y();
+                (*M_coordPtr) [id + 2 * M_numDof] = mesh.pointList[j].z();
+                j = mesh.pointList.size();
             }
         }
     }
 }
 
 template<typename MatrixType>
-void BCManageNormal<MatrixType>::M_addBoundaryPoint(const ID& idof,const ID& flag)
+void BCManageNormal<MatrixType>::M_addBoundaryPoint (const ID& idof, const ID& flag)
 {
-    M_flags.insert(std::pair<ID,ID>(idof,flag));
+    M_flags.insert (std::pair<ID, ID> (idof, flag) );
 }
 
 
 template<typename MatrixType>
-void BCManageNormal<MatrixType>::M_addVersor(const ID& idof,const Real& vx,const Real& vy, const Real& vz)
+void BCManageNormal<MatrixType>::M_addVersor (const ID& idof, const Real& vx, const Real& vy, const Real& vz)
 {
-    Vector n(3);
+    Vector n (3);
     n[0] = vx;
     n[1] = vy;
     n[2] = vz;
-    M_givenVersors.insert(std::pair<ID, Vector>(idof,n));
+    M_givenVersors.insert (std::pair<ID, Vector> (idof, n) );
 }
 
 template< typename MatrixType>
 template< typename MeshType>
-void BCManageNormal< MatrixType>::M_calculateNormals(const MeshType& mesh, const DOF& dof,CurrentBoundaryFE& currentBdFE)
+void BCManageNormal< MatrixType>::M_calculateNormals (const MeshType& mesh, const DOF& dof, CurrentFEManifold& currentBdFE)
 {
     //-----------------------------------------------------
     // STEP 1: Calculating the normals
     //-----------------------------------------------------
 
-    M_normalPtr.reset ( new VectorEpetra(*M_localMapEpetraPtr,Repeated) );
+    M_normalPtr.reset ( new VectorEpetra (*M_localMapEpetraPtr, Repeated) );
     //(*M_normalPtr)*=0;
-    computeIntegratedNormals(dof, currentBdFE, *M_normalPtr, mesh);
-
+    computeIntegratedNormals (dof, currentBdFE, *M_normalPtr, mesh);
 
     //-----------------------------------------------------
     // STEP 4: Cleaning the memory
@@ -727,9 +715,9 @@ void BCManageNormal<MatrixType>::M_storeGivenVersors()
     //-----------------------------------------------------
 
     //We obtain the ID of the element
-    Int NumMyElements = M_localMapEpetraPtr->map(Unique)->NumMyElements();
-    std::vector<Int> MyGlobalElements(NumMyElements);
-    M_localMapEpetraPtr->map(Unique)->MyGlobalElements(&MyGlobalElements[0]);
+    Int NumMyElements = M_localMapEpetraPtr->map (Unique)->NumMyElements();
+    std::vector<Int> MyGlobalElements (NumMyElements);
+    M_localMapEpetraPtr->map (Unique)->MyGlobalElements (&MyGlobalElements[0]);
 
     //We normalize the normal
     Real norm;
@@ -737,19 +725,19 @@ void BCManageNormal<MatrixType>::M_storeGivenVersors()
 
     //Need to run only over the first third of MyGlobalElements
     //(the larger values are the y and z components)
-    for ( Int i(0); i<NumMyElements/static_cast<Int> ( nDimensions ); ++i )
+    for ( Int i (0); i < NumMyElements / static_cast<Int> ( nDimensions ); ++i )
     {
         id = MyGlobalElements[i];
 
-        if ( M_givenVersors.find(id)!=M_givenVersors.end() )
+        if ( M_givenVersors.find (id) != M_givenVersors.end() )
         {
-            Real nx( (M_givenVersors)[id][0] );
-            Real ny( (M_givenVersors)[id][1] );
-            Real nz( (M_givenVersors)[id][2] );
-            norm = sqrt( nx*nx + ny*ny + nz*nz );
-            (*M_normalPtr)[id]            = nx/norm;
-            (*M_normalPtr)[id+M_numDof]   = ny/norm;
-            (*M_normalPtr)[id+2*M_numDof] = nz/norm;
+            Real nx ( (M_givenVersors) [id][0] );
+            Real ny ( (M_givenVersors) [id][1] );
+            Real nz ( (M_givenVersors) [id][2] );
+            norm = std::sqrt ( nx * nx + ny * ny + nz * nz );
+            (*M_normalPtr) [id]            = nx / norm;
+            (*M_normalPtr) [id + M_numDof]   = ny / norm;
+            (*M_normalPtr) [id + 2 * M_numDof] = nz / norm;
         }
     }
 
@@ -769,15 +757,15 @@ void BCManageNormal<MatrixType>::M_calculateTangentVectors()
     //-----------------------------------------------------
 
     //We obtain the ID of the element
-    Int NumMyElements = M_localMapEpetraPtr->map(Unique)->NumMyElements();
-    std::vector<Int> MyGlobalElements(NumMyElements);
-    M_localMapEpetraPtr->map(Unique)->MyGlobalElements(&MyGlobalElements[0]);
+    Int NumMyElements = M_localMapEpetraPtr->map (Unique)->NumMyElements();
+    std::vector<Int> MyGlobalElements (NumMyElements);
+    M_localMapEpetraPtr->map (Unique)->MyGlobalElements (&MyGlobalElements[0]);
 
     //Building the tangential vectors
-    M_firstTangentPtr.reset ( new VectorEpetra(*M_localMapEpetraPtr,Unique) );
-    (*M_firstTangentPtr)*=0;
-    M_secondTangentPtr.reset ( new VectorEpetra(*M_localMapEpetraPtr,Unique) );
-    (*M_secondTangentPtr)*=0;
+    M_firstTangentPtr.reset ( new VectorEpetra (*M_localMapEpetraPtr, Unique) );
+    (*M_firstTangentPtr) *= 0;
+    M_secondTangentPtr.reset ( new VectorEpetra (*M_localMapEpetraPtr, Unique) );
+    (*M_secondTangentPtr) *= 0;
 
     //We are going to use the loop to count the number
     //of imposed DOF because since the VectorEpetra is
@@ -793,7 +781,7 @@ void BCManageNormal<MatrixType>::M_calculateTangentVectors()
 
     //Need to run only over the first third of MyGlobalElements
     //(the larger values are the y and z components)
-    for ( Int i(0); i<NumMyElements/static_cast<Int> ( nDimensions ); ++i )
+    for ( Int i (0); i < NumMyElements / static_cast<Int> ( nDimensions ); ++i )
     {
         id = MyGlobalElements[i];
 
@@ -803,68 +791,67 @@ void BCManageNormal<MatrixType>::M_calculateTangentVectors()
         //We take max{|n x i|,|n x j|,|n x k|}
         //            =max{sqrt(ny^2+nz^2),sqrt(nx^2+nz^2),sqrt(nx^2+ny^2)}
         //            =max{r1,r2,r3}
-        Real nx( (*M_normalPtr)[id] );
-        Real ny( (*M_normalPtr)[id+M_numDof] );
-        Real nz( (*M_normalPtr)[id+2*M_numDof] );
-        Real nxi=sqrt(ny*ny+nz*nz);
-        Real nxj=sqrt(nx*nx+nz*nz);
-        Real nxk=sqrt(nx*nx+ny*ny);
+        Real nx ( (*M_normalPtr) [id] );
+        Real ny ( (*M_normalPtr) [id + M_numDof] );
+        Real nz ( (*M_normalPtr) [id + 2 * M_numDof] );
+        Real nxi = std::sqrt (ny * ny + nz * nz);
+        Real nxj = std::sqrt (nx * nx + nz * nz);
+        Real nxk = std::sqrt (nx * nx + ny * ny);
 
-        if ((nxi>=nxj)&&(nxi>=nxk)) //max = |n x i|
+        if ( (nxi >= nxj) && (nxi >= nxk) ) //max = |n x i|
         {
             //We create t1
-            (*M_firstTangentPtr)[id]            = 0;
-            (*M_firstTangentPtr)[id+M_numDof]   = nz/nxi;
-            (*M_firstTangentPtr)[id+2*M_numDof] = -ny/nxi;
+            (*M_firstTangentPtr) [id]            = 0;
+            (*M_firstTangentPtr) [id + M_numDof]   = nz / nxi;
+            (*M_firstTangentPtr) [id + 2 * M_numDof] = -ny / nxi;
 
             //We create t2
-            (*M_secondTangentPtr)[id]            = -nxi;
-            (*M_secondTangentPtr)[id+M_numDof]   = nx*ny/nxi;
-            (*M_secondTangentPtr)[id+2*M_numDof] = nx*nz/nxi;
+            (*M_secondTangentPtr) [id]            = -nxi;
+            (*M_secondTangentPtr) [id + M_numDof]   = nx * ny / nxi;
+            (*M_secondTangentPtr) [id + 2 * M_numDof] = nx * nz / nxi;
         }
-        else if ((nxj>=nxi)&&(nxj>=nxk)) //max = |n x j|
+        else if ( (nxj >= nxi) && (nxj >= nxk) ) //max = |n x j|
         {
             //We create t1
-            (*M_firstTangentPtr)[id]            = -nz/nxj;
-            (*M_firstTangentPtr)[id+M_numDof]   = 0;
-            (*M_firstTangentPtr)[id+2*M_numDof] = nx/nxj;
+            (*M_firstTangentPtr) [id]            = -nz / nxj;
+            (*M_firstTangentPtr) [id + M_numDof]   = 0;
+            (*M_firstTangentPtr) [id + 2 * M_numDof] = nx / nxj;
 
             //We create t2
-            (*M_secondTangentPtr)[id]            = nx*ny/nxj;
-            (*M_secondTangentPtr)[id+M_numDof]   = -nxj;
-            (*M_secondTangentPtr)[id+2*M_numDof] = ny*nz/nxj;
+            (*M_secondTangentPtr) [id]            = nx * ny / nxj;
+            (*M_secondTangentPtr) [id + M_numDof]   = -nxj;
+            (*M_secondTangentPtr) [id + 2 * M_numDof] = ny * nz / nxj;
         }
         else //max = |n x k|
         {
             //We create t1
-            (*M_firstTangentPtr)[id]            = ny/nxk;
-            (*M_firstTangentPtr)[id+M_numDof]   = -nx/nxk;
-            (*M_firstTangentPtr)[id+2*M_numDof] = 0;
+            (*M_firstTangentPtr) [id]            = ny / nxk;
+            (*M_firstTangentPtr) [id + M_numDof]   = -nx / nxk;
+            (*M_firstTangentPtr) [id + 2 * M_numDof] = 0;
 
             //We create t2
-            (*M_secondTangentPtr)[id]            = nx*nz/nxk;
-            (*M_secondTangentPtr)[id+M_numDof]   = ny*nz/nxk;
-            (*M_secondTangentPtr)[id+2*M_numDof] = -nxk;
+            (*M_secondTangentPtr) [id]            = nx * nz / nxk;
+            (*M_secondTangentPtr) [id + M_numDof]   = ny * nz / nxk;
+            (*M_secondTangentPtr) [id + 2 * M_numDof] = -nxk;
         }
     }
 }
 
-
 template<typename MatrixType>
-void BCManageNormal<MatrixType>::M_buildRotationMatrix(matrix_Type& systemMatrix, UInt offset)
+void BCManageNormal<MatrixType>::M_buildRotationMatrix (const MapEpetra& map, UInt offset)
 {
     //Initialization of the map to store the normal vectors
-    std::map< ID,std::vector< Real > >::iterator mapIt;
+    std::map< ID, std::vector< Real > >::iterator mapIt;
 
     //Creating the matrix
-    M_rotationMatrixPtr.reset( new matrix_Type(systemMatrix.map(), systemMatrix.meanNumEntries() ) );
+    M_rotationMatrixPtr.reset ( new matrix_Type (map, 3) );
 
     //Adding one to the diagonal
     M_rotationMatrixPtr->insertOneDiagonal();
 
-    static const Int nbRows(3);
-    static const Int nbCols(3);
-    std::vector<Real*> values(nbCols);
+    static const Int nbRows (3);
+    static const Int nbCols (3);
+    std::vector<Real*> values (nbCols);
     Int Indices[3];
     for ( Int n = 0; n < nbCols; ++n )
     {
@@ -879,15 +866,15 @@ void BCManageNormal<MatrixType>::M_buildRotationMatrix(matrix_Type& systemMatrix
     std::vector<Int> cols;
 
     //We obtain the ID of the element
-    Int NumMyElements = M_localMapEpetraPtr->map(Unique)->NumMyElements();
-    std::vector<Int> MyGlobalElements(NumMyElements);
-    M_localMapEpetraPtr->map(Unique)->MyGlobalElements(&MyGlobalElements[0]);
+    Int NumMyElements = M_localMapEpetraPtr->map (Unique)->NumMyElements();
+    std::vector<Int> MyGlobalElements (NumMyElements);
+    M_localMapEpetraPtr->map (Unique)->MyGlobalElements (&MyGlobalElements[0]);
 
     UInt id;
 
     //Need to run only over the first third of MyGlobalElements
     //(the larger values are the y and z components)
-    for ( Int i(0); i<NumMyElements/static_cast<Int> ( nDimensions ); ++i )
+    for ( Int i (0); i < NumMyElements / static_cast<Int> ( nDimensions ); ++i )
     {
         id = MyGlobalElements[i];
 
@@ -900,40 +887,40 @@ void BCManageNormal<MatrixType>::M_buildRotationMatrix(matrix_Type& systemMatrix
         Indices[2] = id + 2 * M_numDof + offset;
 
         cols.clear();
-        cols.push_back(Indices[0]);
-        cols.push_back(Indices[1]);
-        cols.push_back(Indices[2]);
+        cols.push_back (Indices[0]);
+        cols.push_back (Indices[1]);
+        cols.push_back (Indices[2]);
 
         rows.clear();
-        rows.push_back(Indices[0]);
-        rows.push_back(Indices[1]);
-        rows.push_back(Indices[2]);
+        rows.push_back (Indices[0]);
+        rows.push_back (Indices[1]);
+        rows.push_back (Indices[2]);
 
         //Line i (first tangential vector)
-        values[0][0] = (*M_firstTangentPtr)[id];
-        values[1][0] = (*M_firstTangentPtr)[id+M_numDof];
-        values[2][0] = (*M_firstTangentPtr)[id+2*M_numDof];
+        values[0][0] = (*M_firstTangentPtr) [id];
+        values[1][0] = (*M_firstTangentPtr) [id + M_numDof];
+        values[2][0] = (*M_firstTangentPtr) [id + 2 * M_numDof];
 
         //-1 because we added one to the diagonal
-        M_rotationMatrixPtr->addToCoefficient(Indices[0],Indices[0],-1.0);
+        M_rotationMatrixPtr->addToCoefficient (Indices[0], Indices[0], -1.0);
 
         //Line j (second tangential vector)
-        values[0][1] = (*M_secondTangentPtr)[id];
-        values[1][1] = (*M_secondTangentPtr)[id+M_numDof];
-        values[2][1]= (*M_secondTangentPtr)[id+2*M_numDof];
+        values[0][1] = (*M_secondTangentPtr) [id];
+        values[1][1] = (*M_secondTangentPtr) [id + M_numDof];
+        values[2][1] = (*M_secondTangentPtr) [id + 2 * M_numDof];
 
         //-1 because we added one to the diagonal
-        M_rotationMatrixPtr->addToCoefficient(Indices[1],Indices[1],-1.0);
+        M_rotationMatrixPtr->addToCoefficient (Indices[1], Indices[1], -1.0);
 
         //Line k (normal vector)
-        values[0][2] = (*M_normalPtr)[id];
-        values[1][2] = (*M_normalPtr)[id+M_numDof];
-        values[2][2] = (*M_normalPtr)[id+2*M_numDof];
+        values[0][2] = (*M_normalPtr) [id];
+        values[1][2] = (*M_normalPtr) [id + M_numDof];
+        values[2][2] = (*M_normalPtr) [id + 2 * M_numDof];
 
         //-1 because we added one to the diagonal
-        M_rotationMatrixPtr->addToCoefficient(Indices[2],Indices[2],-1.0);
+        M_rotationMatrixPtr->addToCoefficient (Indices[2], Indices[2], -1.0);
 
-        M_rotationMatrixPtr->addToCoefficients(nbCols, nbRows, cols, rows, &values[0]);
+        M_rotationMatrixPtr->addToCoefficients (nbCols, nbRows, cols, rows, &values[0]);
     }
 
     for ( Int n = 0; n < nbRows; ++n )
@@ -942,6 +929,7 @@ void BCManageNormal<MatrixType>::M_buildRotationMatrix(matrix_Type& systemMatrix
     }
 
     M_rotationMatrixPtr->globalAssemble();
+    M_rotationMatrixTransposePtr = M_rotationMatrixPtr->transpose();
 }
 
 } //end of namespace LifeV

@@ -87,8 +87,8 @@ where \f$M\f$ is mass matrix, \f$A\f$  stiffness matrix and \f$D\f$ is  damping 
  we use the time advancing scheme  defined in TimeAdvanceBase class for details see TimeAdvanceBase.pdf notes.
 */
 
-template <typename Mesh,
-typename SolverType = LifeV::SolverAztecOO >
+template < typename Mesh,
+         typename SolverType = LifeV::SolverAztecOO >
 
 class VenantKirchhoffViscoelasticSolver
 {
@@ -98,7 +98,7 @@ public:
     //@{
 
     typedef Real ( *Function ) ( const Real&, const Real&, const Real&, const Real&, const ID& );
-    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& )> source_type;
+    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > source_type;
 
     typedef BCHandler                                                        bchandler_raw_type;
     typedef boost::shared_ptr<bchandler_raw_type>  bchandler_type;
@@ -137,10 +137,10 @@ public:
     @param feSpace finite element space
     @param comm communicator
     */
-    void setup( boost::shared_ptr<data_type> data,
-                const boost::shared_ptr< FESpace<Mesh, MapEpetra> >&   feSpace,
-                boost::shared_ptr<Epetra_Comm>&     comm
-              );
+    void setup ( boost::shared_ptr<data_type> data,
+                 const boost::shared_ptr< FESpace<Mesh, MapEpetra> >&   feSpace,
+                 boost::shared_ptr<Epetra_Comm>&     comm
+               );
 
     //!  class setup
     /*!
@@ -149,11 +149,11 @@ public:
     @param BCh boundary condition
     @param comm communicator
     */
-    void setup( boost::shared_ptr<data_type> data,
-                const boost::shared_ptr< FESpace<Mesh, MapEpetra> >&   feSpace,
-                bchandler_type&       BCh,
-                boost::shared_ptr<Epetra_Comm>&     comm
-              );
+    void setup ( boost::shared_ptr<data_type> data,
+                 const boost::shared_ptr< FESpace<Mesh, MapEpetra> >&   feSpace,
+                 bchandler_type&       BCh,
+                 boost::shared_ptr<Epetra_Comm>&     comm
+               );
 
 
     //! class setup
@@ -164,11 +164,11 @@ public:
     @param epetraMap  epetra vector
     @param offset
     */
-    virtual void setup( boost::shared_ptr<data_type> data,
-                const boost::shared_ptr< FESpace<Mesh, MapEpetra> >&   feSpace,
-                boost::shared_ptr<Epetra_Comm>&     comm,
-                const boost::shared_ptr<const MapEpetra>&      epetraMap,
-                UInt       offset=0   );
+    virtual void setup ( boost::shared_ptr<data_type> data,
+                         const boost::shared_ptr< FESpace<Mesh, MapEpetra> >&   feSpace,
+                         boost::shared_ptr<Epetra_Comm>&     comm,
+                         const boost::shared_ptr<const MapEpetra>&      epetraMap,
+                         UInt       offset = 0   );
 
 
     //! buildSystem
@@ -177,14 +177,14 @@ public:
      @param alpha is the coefficient of damping term defined as \f$\alpha^0/dt\f$;
      @note by default \f$xi\f$ is equal to 1 and \f$alpha\f$ is equal to 0;
      */
-     void buildSystem(const Real& xi = 1, const  Real & alpha=0);
+    void buildSystem (const Real& xi = 1, const  Real& alpha = 0);
 
     //! buildSystem
     /*!
     @param matrix is the Mass \f$ + \f$  Damping \f$+\f$ Stiffness
     @param xi is the coefficient of mass term defined as \f$\xi^0/dt^2\f$;
     */
-    void buildSystem(matrix_ptrtype matrix, const Real& xi);
+    void buildSystem (matrix_ptrtype matrix, const Real& xi);
 
     //! build Damping matrix
     /*!
@@ -195,7 +195,7 @@ public:
     @notes alpha can be 1 and we can introduce
     the time advancing coefficient in the updateSystem
     */
-    void buildDamping(matrix_ptrtype damping, const Real& alpha);
+    void buildDamping (matrix_ptrtype damping, const Real& alpha);
 
     //!updateSystem with coefficients of time advance methods
     /*
@@ -205,9 +205,9 @@ public:
     @note: this method must be used when we call buildSystem(1,1);
     in this case we must set the coefficients of time advancing scheme;
     */
-    void updateSystem(const vector_type& rhs,
-                      const Real& xi =0,
-                      const Real& alpha =0 );
+    void updateSystem (const vector_type& rhs,
+                       const Real& xi = 0,
+                       const Real& alpha = 0 );
 
     //! compute the start solution
     /*! we consider the system \f$M w + D v + A u = f\f$;
@@ -218,41 +218,44 @@ public:
     @param bch the boundary condition respect to \f$w\f$;
     @param rhs is \f$f^0 - D v^0 -A u^0\f$
     */
-    void computeStartValue( vector_type& solution, const  bchandler_raw_type& bch, const vector_type & rhs );
+    void computeStartValue ( vector_type& solution, const  bchandler_raw_type& bch, const vector_type& rhs );
 
     //! Solve the system
     /*!
     solve the system
     @param  bch is boundary condition;
     */
-    void iterate( bchandler_raw_type& bch );
+    void iterate ( bchandler_raw_type& bch );
 
     //! update source term
     /*!
     @param source is the vector where we evaluate the source term;
     */
-    void updateSourceTerm(const vector_type&  source);
+    void updateSourceTerm (const vector_type&  source);
 
     //! updateRHS
     /*!
     @param rhs is the right and side;
     */
-    inline void updateRHS(const vector_type& rhs)
+    inline void updateRHS (const vector_type& rhs)
     {
-      M_displayer->leaderPrint("  P-  Updating right hand side... ");
+        M_displayer->leaderPrint ("  P-  Updating right hand side... ");
 
-      LifeChrono chrono;
-      chrono.start();
+        LifeChrono chrono;
+        chrono.start();
 
-     *M_rhsNoBC = rhs;
-      M_rhsNoBC->globalAssemble();
+        *M_rhsNoBC = rhs;
+        M_rhsNoBC->globalAssemble();
 
-      chrono.stop();
-      M_displayer->leaderPrintMax("done in ", chrono.diff());
+        chrono.stop();
+        M_displayer->leaderPrintMax ("done in ", chrono.diff() );
     }
 
     //! reset the Prec
-    void resetPrec() {M_resetPrec = true;}
+    void resetPrec()
+    {
+        M_resetPrec = true;
+    }
 
     //@}
 
@@ -263,14 +266,17 @@ public:
     /*!
     @param source is function
     */
-    void setSourceTerm( source_type const& source ) { M_source = source; }
+    void setSourceTerm ( source_type const& source )
+    {
+        M_source = source;
+    }
 
     //! Set parameters
     /*!
     @param dataFile is the file contains the parameters of problem
     this method must be removed
     */
-    void setDataFromGetPot( const GetPot& dataFile );
+    void setDataFromGetPot ( const GetPot& dataFile );
 
     //@}
 
@@ -281,98 +287,149 @@ public:
     /*!
      @returns epetraMap
      */
-    MapEpetra   const& map()       const { return M_localMap; }
+    MapEpetra   const& map()       const
+    {
+        return M_localMap;
+    }
 
     //! Return the  map
     /*!
      @returns  displayer
      */
-    Displayer   const& displayer() const { return M_displayer; }
+    Displayer   const& displayer() const
+    {
+        return M_displayer;
+    }
 
     //!Return the mass matrix
     /*!
      @returns the mass matrix (it doesn't divided by \f$\xi/dt^2\f$)
      */
-    matrix_type const matrMass()   const { return *M_matrMass; }
+    matrix_type const matrMass()   const
+    {
+        return *M_matrMass;
+    }
 
     //!Return the damping matrix
     /*!
     @returns the damping matrix (it doesn't divided by \f$\alpha/dt\f$)
     */
-    matrix_ptrtype const matrDamping()  const { return M_matrDamping; }
+    matrix_ptrtype const matrDamping()  const
+    {
+        return M_matrDamping;
+    }
 
     //!Return the damping matrix
     /*!
     @returns the system matrix given by Stiffness + Damping \f$\alpha/dt\f$ + Mass \f$\xi/dt^2\f$
     */
-    matrix_ptrtype const matrSystem()   const { return M_matrSystem; }
+    matrix_ptrtype const matrSystem()   const
+    {
+        return M_matrSystem;
+    }
 
     //!Return the Stiffness matrix
     /*!
     @returns the stiffness matrix
     */
-    matrix_ptrtype const matrLinearStiff() const { return M_matrLinearStiffness; }
+    matrix_ptrtype const matrLinearStiff() const
+    {
+        return M_matrLinearStiffness;
+    }
 
     //! Return FESpace
-    FESpace<Mesh, MapEpetra>& feSpace() {return M_FESpace;}
+    FESpace<Mesh, MapEpetra>& feSpace()
+    {
+        return M_FESpace;
+    }
 
     //! BCHandler getter and setter
     /*!
      @returns the boundary conditions
      */
-    BCHandler const & BChandler() const {return M_BCh;}
+    BCHandler const& BChandler() const
+    {
+        return M_BCh;
+    }
 
-     //! Return the solution
+    //! Return the solution
     /*!
      @returns the solution
      */
-    vector_ptrtype&  solution()   { return M_solution; }
+    vector_ptrtype&  solution()
+    {
+        return M_solution;
+    }
 
     //! Return residual
     /*
      @returns the residual
      */
-     vector_ptrtype& residual()   {return M_residual;}
+    vector_ptrtype& residual()
+    {
+        return M_residual;
+    }
 
     //!Return right hand side without boundary conditions
     /*
     @returns the right hand side without boundary conditions;
     */
-    vector_ptrtype& rhsContributionSecondDerivativeithoutBC() { return M_rhsNoBC; }
+    vector_ptrtype& rhsContributionSecondDerivativeithoutBC()
+    {
+        return M_rhsNoBC;
+    }
 
     //!return the communicator
     /*!
     @returns the communicator
     */
-    boost::shared_ptr<Epetra_Comm> const& comm()   const {return M_displayer->comm();}
+    boost::shared_ptr<Epetra_Comm> const& comm()   const
+    {
+        return M_displayer->comm();
+    }
 
     //! Return offset;
     /*
     @returns offset;
     */
-    const UInt& offset() const { return M_offset; }
+    const UInt& offset() const
+    {
+        return M_offset;
+    }
 
     //!thickness
-     /*!
-     @returns the thickness
-     */
-    inline const Real& thickness() const { return M_data->thickness(); }
+    /*!
+    @returns the thickness
+    */
+    inline const Real& thickness() const
+    {
+        return M_data->thickness();
+    }
     //!density
     /*!
     @returns the density
      */
-    inline const Real& density()   const { return M_data->rho(); }
+    inline const Real& density()   const
+    {
+        return M_data->rho();
+    }
 
     //!young
     /*!
     @returns the young
     */
-    inline const Real& young()     const { return M_data->young(); }
-     //!poisson
-     /*!
-     @returns the poisson
-     */
-    inline const Real& poisson()   const { return M_data->poisson(); }
+    inline const Real& young()     const
+    {
+        return M_data->young();
+    }
+    //!poisson
+    /*!
+    @returns the poisson
+    */
+    inline const Real& poisson()   const
+    {
+        return M_data->poisson();
+    }
 
     //@}
 
@@ -386,10 +443,10 @@ private:
     @param BCh boundary condition;
     @param offset
      */
-    void applyBoundaryConditions(matrix_type &matrix,
-                                 vector_type &rhs,
-                                 bchandler_raw_type& BCh,
-                                 UInt         offset=0);
+    void applyBoundaryConditions (matrix_type& matrix,
+                                  vector_type& rhs,
+                                  bchandler_raw_type& BCh,
+                                  UInt         offset = 0);
 
     //@name Attributes
 
@@ -483,31 +540,31 @@ protected :
 template <typename Mesh, typename SolverType>
 VenantKirchhoffViscoelasticSolver<Mesh, SolverType>::
 VenantKirchhoffViscoelasticSolver( ) :
-        M_data                             (    ),
-        M_FESpace                          (    ),
-        M_displayer                        (    ),
-        M_me                               ( 0  ),
-        M_BCh                              (    ),
-        M_localMap                         (    ),
-        M_matrMass                         (    ),
-        M_matrLinearStiffness              (    ),
-        M_matrSystem                       (    ),
-        M_matrDamping                      (    ),
-        M_elmatK                           (    ),
-        M_elmatM                           (    ),
-        M_elmatC                           (    ),
-        M_elmatD                           (    ),
-        M_solution                         (    ),
-        M_rhs                              (    ),
-        M_rhsNoBC                          (    ),
-        M_residual                         (    ),
-        M_source                           (    ),
-        M_linearSolver                     (    ),
-        M_reusePrec                        (    ),
-        M_maxIterForReuse                  (    ),
-        M_resetPrec                        (    ),
-        M_maxIterSolver                    (    ),
-        M_offset                           (    )
+    M_data                             (    ),
+    M_FESpace                          (    ),
+    M_displayer                        (    ),
+    M_me                               ( 0  ),
+    M_BCh                              (    ),
+    M_localMap                         (    ),
+    M_matrMass                         (    ),
+    M_matrLinearStiffness              (    ),
+    M_matrSystem                       (    ),
+    M_matrDamping                      (    ),
+    M_elmatK                           (    ),
+    M_elmatM                           (    ),
+    M_elmatC                           (    ),
+    M_elmatD                           (    ),
+    M_solution                         (    ),
+    M_rhs                              (    ),
+    M_rhsNoBC                          (    ),
+    M_residual                         (    ),
+    M_source                           (    ),
+    M_linearSolver                     (    ),
+    M_reusePrec                        (    ),
+    M_maxIterForReuse                  (    ),
+    M_resetPrec                        (    ),
+    M_maxIterSolver                    (    ),
+    M_offset                           (    )
 
 {
 }
@@ -518,7 +575,7 @@ VenantKirchhoffViscoelasticSolver( ) :
 
 template <typename Mesh, typename SolverType>
 void
-VenantKirchhoffViscoelasticSolver<Mesh, SolverType>::setup(
+VenantKirchhoffViscoelasticSolver<Mesh, SolverType>::setup (
     boost::shared_ptr<data_type>        data,
     const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& feSpace,
     boost::shared_ptr<Epetra_Comm>&     comm,
@@ -528,87 +585,87 @@ VenantKirchhoffViscoelasticSolver<Mesh, SolverType>::setup(
 {
     M_data                                        = data;
     M_FESpace                                 = feSpace;
-    M_displayer.reset                      (new Displayer(comm));
+    M_displayer.reset                      (new Displayer (comm) );
     M_me                                           = comm->MyPID();
-    M_elmatK.reset                           ( new MatrixElemental( M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
-    M_elmatM.reset                           ( new MatrixElemental( M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
-    M_elmatC.reset                           ( new MatrixElemental( M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
-    M_elmatD.reset                           ( new MatrixElemental( M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
+    M_elmatK.reset                           ( new MatrixElemental ( M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
+    M_elmatM.reset                           ( new MatrixElemental ( M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
+    M_elmatC.reset                           ( new MatrixElemental ( M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
+    M_elmatD.reset                           ( new MatrixElemental ( M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
     M_localMap                                   = epetraMap;
-    M_solution.reset                          (new vector_type(*M_localMap));
-    M_rhsNoBC.reset                         ( new vector_type(*M_localMap));
-    M_matrMass.reset                       (new matrix_type(*M_localMap));
-    M_matrLinearStiffness.reset     (new matrix_type(*M_localMap));
-    M_matrDamping.reset               (new matrix_type(*M_localMap));
-    M_matrSystem.reset                  (new matrix_type(*M_localMap));
+    M_solution.reset                          (new vector_type (*M_localMap) );
+    M_rhsNoBC.reset                         ( new vector_type (*M_localMap) );
+    M_matrMass.reset                       (new matrix_type (*M_localMap) );
+    M_matrLinearStiffness.reset     (new matrix_type (*M_localMap) );
+    M_matrDamping.reset               (new matrix_type (*M_localMap) );
+    M_matrSystem.reset                  (new matrix_type (*M_localMap) );
     M_offset                                        = offset;
 }
 
 template <typename Mesh, typename SolverType>
 void
-VenantKirchhoffViscoelasticSolver<Mesh, SolverType>::setup(
+VenantKirchhoffViscoelasticSolver<Mesh, SolverType>::setup (
     boost::shared_ptr<data_type>        data,
     const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& feSpace,
     boost::shared_ptr<Epetra_Comm>&     comm
 )
 {
-    setup( data, feSpace, comm, feSpace->mapPtr(), (UInt)0 );
-    M_rhs.reset                              ( new vector_type(*M_localMap));
-    M_residual.reset                     ( new vector_type(*M_localMap));
-    M_linearSolver.reset              ( new SolverType( comm ) );
+    setup ( data, feSpace, comm, feSpace->mapPtr(), (UInt) 0 );
+    M_rhs.reset                              ( new vector_type (*M_localMap) );
+    M_residual.reset                     ( new vector_type (*M_localMap) );
+    M_linearSolver.reset              ( new SolverType ( comm ) );
 
- }
+}
 
 template <typename Mesh, typename SolverType>
 void
-VenantKirchhoffViscoelasticSolver<Mesh, SolverType>::setup(
+VenantKirchhoffViscoelasticSolver<Mesh, SolverType>::setup (
     boost::shared_ptr<data_type>          data,
     const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& feSpace,
     bchandler_type&                BCh,
     boost::shared_ptr<Epetra_Comm>&              comm
 )
 {
-    setup(data, feSpace, comm);
+    setup (data, feSpace, comm);
     M_BCh = BCh;
 }
 
 template <typename Mesh, typename SolverType>
 void
-VenantKirchhoffViscoelasticSolver<Mesh, SolverType>::setDataFromGetPot( const GetPot& dataFile )
+VenantKirchhoffViscoelasticSolver<Mesh, SolverType>::setDataFromGetPot ( const GetPot& dataFile )
 {
-    M_linearSolver->setDataFromGetPot( dataFile, "problem/solver" );
-    M_linearSolver->setupPreconditioner(dataFile, "problem/prec");
+    M_linearSolver->setDataFromGetPot ( dataFile, "problem/solver" );
+    M_linearSolver->setupPreconditioner (dataFile, "problem/prec");
 }
 
 template <typename Mesh, typename SolverType>
 void
 VenantKirchhoffViscoelasticSolver<Mesh, SolverType>::
-buildSystem(const Real& xi, const Real& alpha)
+buildSystem (const Real& xi, const Real& alpha)
 {
- M_displayer->leaderPrint("  P-  Computing constant matrices ...          ");
- LifeChrono chrono;
- chrono.start();
+    M_displayer->leaderPrint ("  P-  Computing constant matrices ...          ");
+    LifeChrono chrono;
+    chrono.start();
 
- // these lines must be removed next week
- this->buildSystem(M_matrSystem, xi);
+    // these lines must be removed next week
+    this->buildSystem (M_matrSystem, xi);
 
- if(M_data->damping())
-   {
-     M_matrDamping.reset(new matrix_type(*M_localMap));
-   this->buildDamping(M_matrSystem, alpha);
-   }
- M_matrSystem->globalAssemble();
+    if (M_data->damping() )
+    {
+        M_matrDamping.reset (new matrix_type (*M_localMap) );
+        this->buildDamping (M_matrSystem, alpha);
+    }
+    M_matrSystem->globalAssemble();
 
- chrono.stop();
- M_displayer->leaderPrintMax( "done in ", chrono.diff() );
+    chrono.stop();
+    M_displayer->leaderPrintMax ( "done in ", chrono.diff() );
 }
 
 template <typename Mesh, typename SolverType>
 void
 VenantKirchhoffViscoelasticSolver<Mesh, SolverType>::
-buildSystem(matrix_ptrtype matrSystem, const Real& xi)
+buildSystem (matrix_ptrtype matrSystem, const Real& xi)
 {
-     M_displayer->leaderPrint( "P-  Building the system             ... ");
+    M_displayer->leaderPrint ( "P-  Building the system             ... ");
 
     LifeChrono chrono;
     chrono.start();
@@ -618,212 +675,218 @@ buildSystem(matrix_ptrtype matrSystem, const Real& xi)
 
     for ( UInt iVol = 0; iVol < this->M_FESpace->mesh()->numVolumes(); ++iVol )
     {
-        this->M_FESpace->fe().updateFirstDeriv( this->M_FESpace->mesh()->element( iVol ) );
+        this->M_FESpace->fe().updateFirstDeriv ( this->M_FESpace->mesh()->element ( iVol ) );
 
-       Int marker    = this->M_FESpace->mesh()->volumeList( iVol ).marker();
+        Int marker    = this->M_FESpace->mesh()->volumeList ( iVol ).markerID();
 
         this->M_elmatK->zero();
         this->M_elmatM->zero();
 
         // building stiffness matrix
-        stiff_strain(   2 * M_data->mu(marker), *this->M_elmatK, this->M_FESpace->fe() );
-        stiff_div   ( M_data->lambda(marker), *this->M_elmatK, M_FESpace->fe() );
+        stiff_strain (   2 * M_data->mu (marker), *this->M_elmatK, this->M_FESpace->fe() );
+        stiff_div   ( M_data->lambda (marker), *this->M_elmatK, M_FESpace->fe() );
 
         this->M_elmatC->mat() = this->M_elmatK->mat();
 
         // mass*xi to compute mass+stiff
 
-        mass( xi * M_data->rho(), *this->M_elmatM, this->M_FESpace->fe(), 0, 0, nDimensions );
+        mass ( xi * M_data->rho(), *this->M_elmatM, this->M_FESpace->fe(), 0, 0, nDimensions );
 
         this->M_elmatC->mat() += this->M_elmatM->mat();
 
         //mass
         this->M_elmatM->zero();
-        mass(M_data->rho(), *this->M_elmatM, this->M_FESpace->fe(), 0, 0, nDimensions );
+        mass (M_data->rho(), *this->M_elmatM, this->M_FESpace->fe(), 0, 0, nDimensions );
 
-        assembleMatrix( *M_matrLinearStiffness,
-                        *this->M_elmatC,
-                        this->M_FESpace->fe(),
-                        this->M_FESpace->fe(),
-                        this->M_FESpace->dof(),
-                        this->M_FESpace->dof(),
-                        0, 0, 0, 0);
+        assembleMatrix ( *M_matrLinearStiffness,
+                         *this->M_elmatC,
+                         this->M_FESpace->fe(),
+                         this->M_FESpace->fe(),
+                         this->M_FESpace->dof(),
+                         this->M_FESpace->dof(),
+                         0, 0, 0, 0);
 
-        assembleMatrix( *matrSystem,
-                        *this->M_elmatC,
-                        this->M_FESpace->fe(),
-                        this->M_FESpace->fe(),
-                        this->M_FESpace->dof(),
-                        this->M_FESpace->dof(),
-                        0, 0, 0, 0);
+        assembleMatrix ( *matrSystem,
+                         *this->M_elmatC,
+                         this->M_FESpace->fe(),
+                         this->M_FESpace->fe(),
+                         this->M_FESpace->dof(),
+                         this->M_FESpace->dof(),
+                         0, 0, 0, 0);
 
-        assembleMatrix( *this->M_matrMass,
-                        *this->M_elmatM,
-                        this->M_FESpace->fe(),
-                        this->M_FESpace->fe(),
-                        this->M_FESpace->dof(),
-                        this->M_FESpace->dof(),
-                        0, 0, 0, 0);
+        assembleMatrix ( *this->M_matrMass,
+                         *this->M_elmatM,
+                         this->M_FESpace->fe(),
+                         this->M_FESpace->fe(),
+                         this->M_FESpace->dof(),
+                         this->M_FESpace->dof(),
+                         0, 0, 0, 0);
     }
 
     M_matrMass->globalAssemble();
     M_matrLinearStiffness->globalAssemble();
     chrono.stop();
-    M_displayer->leaderPrintMax("done in ", chrono.diff());
+    M_displayer->leaderPrintMax ("done in ", chrono.diff() );
 
 }
 
 template <typename Mesh, typename SolverType>
 void VenantKirchhoffViscoelasticSolver<Mesh, SolverType>::
-buildDamping(matrix_ptrtype damping, const Real& alpha)
+buildDamping (matrix_ptrtype damping, const Real& alpha)
 {
     LifeChrono chrono;
     chrono.start();
 
-    M_displayer->leaderPrint( "P-  Building the system   Damping matrix          ... ");
+    M_displayer->leaderPrint ( "P-  Building the system   Damping matrix          ... ");
 
-     // Elementary computation and matrix assembling
-     // Loop on elements
-     for ( UInt iVol = 0; iVol < this->M_FESpace->mesh()->numVolumes(); ++iVol )
-     {
-      this->M_FESpace->fe().updateFirstDeriv( this->M_FESpace->mesh()->element( iVol ) );
+    // Elementary computation and matrix assembling
+    // Loop on elements
+    for ( UInt iVol = 0; iVol < this->M_FESpace->mesh()->numVolumes(); ++iVol )
+    {
+        this->M_FESpace->fe().updateFirstDeriv ( this->M_FESpace->mesh()->element ( iVol ) );
 
-      Int marker    = this->M_FESpace->mesh()->volumeList( iVol ).marker();
+        Int marker    = this->M_FESpace->mesh()->volumeList ( iVol ).markerID();
 
-      Real gamma = M_data->gamma(marker);
-      Real beta  = M_data->beta(marker);
+        Real gamma = M_data->gamma (marker);
+        Real beta  = M_data->beta (marker);
 
-      //building damping matrix
+        //building damping matrix
 
-      this->M_elmatD->zero();
+        this->M_elmatD->zero();
 
-      stiff_strain( 2.0 * M_data->mu(marker) * gamma , *this->M_elmatD, this->M_FESpace->fe() );
-      stiff_div   ( M_data->lambda(marker) * gamma, *this->M_elmatD, this->M_FESpace->fe() );
-      mass( beta * M_data->rho(), *this->M_elmatD, this->M_FESpace->fe(), 0, 0);
+        stiff_strain ( 2.0 * M_data->mu (marker) * gamma , *this->M_elmatD, this->M_FESpace->fe() );
+        stiff_div   ( M_data->lambda (marker) * gamma, *this->M_elmatD, this->M_FESpace->fe() );
+        mass ( beta * M_data->rho(), *this->M_elmatD, this->M_FESpace->fe(), 0, 0);
 
-      assembleMatrix( *damping,
-                      *this->M_elmatD,
-                       this->M_FESpace->fe(),
-                       this->M_FESpace->fe(),
-                       this->M_FESpace->dof(),
-                       this->M_FESpace->dof(),
-                       0, 0, 0, 0);
-     }
+        assembleMatrix ( *damping,
+                         *this->M_elmatD,
+                         this->M_FESpace->fe(),
+                         this->M_FESpace->fe(),
+                         this->M_FESpace->dof(),
+                         this->M_FESpace->dof(),
+                         0, 0, 0, 0);
+    }
 
-     *M_matrSystem += *damping * alpha;
-     *M_matrDamping = *damping;
+    *M_matrSystem += *damping * alpha;
+    *M_matrDamping = *damping;
 
-     M_matrDamping->globalAssemble();
-     M_displayer->leaderPrintMax( " done in ", chrono.diff() );
+    M_matrDamping->globalAssemble();
+    M_displayer->leaderPrintMax ( " done in ", chrono.diff() );
 }
 
 template <typename Mesh, typename SolverType>
 void VenantKirchhoffViscoelasticSolver<Mesh, SolverType>::
-updateSystem(const vector_type& rhs,
-             const Real&        xi,
-             const Real&        alpha)
+updateSystem (const vector_type& rhs,
+              const Real&        xi,
+              const Real&        alpha)
 {
 
     LifeChrono chrono;
 
-    updateRHS(rhs);
+    updateRHS (rhs);
 
-    if(xi == 0 & alpha == 0 )
-     M_displayer->leaderPrint("P - use the same System matrix ...  \n ");
+    if (xi == 0 & alpha == 0 )
+    {
+        M_displayer->leaderPrint ("P - use the same System matrix ...  \n ");
+    }
     else
     {
-    M_displayer->leaderPrint("P - updating the System matrix ....      ");
-    chrono.start();
-    M_matrSystem = M_matrLinearStiffness;
+        M_displayer->leaderPrint ("P - updating the System matrix ....      ");
+        chrono.start();
+        M_matrSystem = M_matrLinearStiffness;
 
-    if (xi!= 0. )
-        *M_matrSystem += *M_matrMass * xi;
+        if (xi != 0. )
+        {
+            *M_matrSystem += *M_matrMass * xi;
+        }
 
-    if(alpha!=0)
-        *M_matrSystem += *M_matrDamping * alpha;
+        if (alpha != 0)
+        {
+            *M_matrSystem += *M_matrDamping * alpha;
+        }
 
-    M_matrSystem->GlobalAssemble();
+        M_matrSystem->GlobalAssemble();
 
-    chrono.stop();
-    M_displayer->leaderPrintMax("done in ", chrono.diff());
+        chrono.stop();
+        M_displayer->leaderPrintMax ("done in ", chrono.diff() );
     }
 
 }
 
 template <typename Mesh, typename SolverType>
 void VenantKirchhoffViscoelasticSolver<Mesh, SolverType>::
-computeStartValue( vector_type& solution, const  bchandler_raw_type& bch, const vector_type& rhs )
+computeStartValue ( vector_type& solution, const  bchandler_raw_type& bch, const vector_type& rhs )
 {
-  vector_type rhsFull(rhs);
+    vector_type rhsFull (rhs);
 
-  prec_type prec;
+    prec_type prec;
 
-  std::string precType ="Ifpack" ;
+    std::string precType = "Ifpack" ;
 
-  prec.reset( PRECFactory::instance().createObject(precType) );
+    prec.reset ( PRECFactory::instance().createObject (precType) );
 
-  prec->buildPreconditioner(M_matrMass);
+    prec->buildPreconditioner (M_matrMass);
 
-  Real condest = prec->Condest();
+    Real condest = prec->Condest();
 
-  M_linearSolver->setPreconditioner(prec);
+    M_linearSolver->setPreconditioner (prec);
 
-  M_linearSolver->setMatrix(*M_matrMass);
+    M_linearSolver->setMatrix (*M_matrMass);
 
-  Int numIter =  M_linearSolver->solve(solution, rhs);
+    Int numIter =  M_linearSolver->solve (solution, rhs);
 }
 
 template <typename Mesh, typename SolverType>
 void VenantKirchhoffViscoelasticSolver<Mesh, SolverType>::
-updateSourceTerm(const  vector_type&  source)
+updateSourceTerm (const  vector_type&  source)
 {
-  M_displayer->leaderPrint("P - updating the Source Term....      ");
-  LifeChrono chrono;
-  chrono.start();
+    M_displayer->leaderPrint ("P - updating the Source Term....      ");
+    LifeChrono chrono;
+    chrono.start();
 
-  for ( UInt iVol = 0; iVol < this->M_FESpace->mesh()->numVolumes(); ++iVol )
+    for ( UInt iVol = 0; iVol < this->M_FESpace->mesh()->numVolumes(); ++iVol )
     {
-      //  M_elvecSource.zero();
-      Real f, x, y, z;
+        //  M_elvecSource.zero();
+        Real f, x, y, z;
 
-      UInt i, inod, ig, ic;
-      UInt eleID = this->M_FESpace->fe().currentLocalId();
-      Real u_ig;
-      for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
+        UInt i, inod, ig, ic;
+        UInt eleID = this->M_FESpace->fe().currentLocalId();
+        Real u_ig;
+        for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
         {
-          for ( ig = 0; ig < this->M_FESpace->fe().nbQuadPt(); ++ig )
-          {
-          this->M_FESpace->fe().coorQuadPt( x, y, z, ig );
-          f = M_source(M_data->dataTime()->time(), x, y, z, iComp + 1 );
-          u_ig = 0.;
-
-          for ( i = 0;i < M_FESpace->fe().nbFEDof(); ++i )
+            for ( ig = 0; ig < this->M_FESpace->fe().nbQuadPt(); ++ig )
             {
-              inod = this->M_FESpace->dof().localToGlobalMap( eleID, i ) + iComp * this->M_FESpace->dof().numTotalDof();
-              u_ig = f*this->M_FESpace->fe().phi( i, ig );
-              source.sumIntoGlobalValues(inod, u_ig * this->M_FESpace->fe().weightDet( ig ));
+                this->M_FESpace->fe().coorQuadPt ( x, y, z, ig );
+                f = M_source (M_data->dataTime()->time(), x, y, z, iComp + 1 );
+                u_ig = 0.;
+
+                for ( i = 0; i < M_FESpace->fe().nbFEDof(); ++i )
+                {
+                    inod = this->M_FESpace->dof().localToGlobalMap ( eleID, i ) + iComp * this->M_FESpace->dof().numTotalDof();
+                    u_ig = f * this->M_FESpace->fe().phi ( i, ig );
+                    source.sumIntoGlobalValues (inod, u_ig * this->M_FESpace->fe().weightDet ( ig ) );
+                }
             }
-          }
         }
     }
-  source.GlobalAssemble();
+    source.GlobalAssemble();
 
-  chrono.stop();
-  M_displayer->leaderPrintMax("done on ", chrono.diff() );
+    chrono.stop();
+    M_displayer->leaderPrintMax ("done on ", chrono.diff() );
 }
 
 template <typename Mesh, typename SolverType>
 void VenantKirchhoffViscoelasticSolver<Mesh, SolverType>::
-iterate( bchandler_raw_type& bch )
+iterate ( bchandler_raw_type& bch )
 {
     LifeChrono chrono;
 
     // matrix and vector assembling communication
-    M_displayer->leaderPrint("  P-  Solving the system ... \n");
+    M_displayer->leaderPrint ("  P-  Solving the system ... \n");
 
     chrono.start();
 
-    matrix_ptrtype matrFull( new matrix_type(*M_localMap,M_matrSystem->meanNumEntries()));
+    matrix_ptrtype matrFull ( new matrix_type (*M_localMap, M_matrSystem->meanNumEntries() ) );
     *matrFull += *M_matrSystem;
 
     M_rhsNoBC->globalAssemble();
@@ -831,23 +894,23 @@ iterate( bchandler_raw_type& bch )
     vector_type rhsFull (*M_rhsNoBC);
 
     // boundary conditions update
-    M_displayer->leaderPrint("  P-  Applying boundary conditions ...         ");
+    M_displayer->leaderPrint ("  P-  Applying boundary conditions ...         ");
 
     chrono.start();
-    this->applyBoundaryConditions(*matrFull, rhsFull, bch);
+    this->applyBoundaryConditions (*matrFull, rhsFull, bch);
 
     chrono.stop();
 
-    M_displayer->leaderPrintMax("done in " , chrono.diff());
+    M_displayer->leaderPrintMax ("done in " , chrono.diff() );
 
     M_linearSolver->resetPreconditioner();
     M_resetPrec = false;
 
     // solving the system
-    M_linearSolver->setMatrix(*matrFull);
-    Real numIter = M_linearSolver->solveSystem( rhsFull, *M_solution, matrFull);
+    M_linearSolver->setMatrix (*matrFull);
+    Real numIter = M_linearSolver->solveSystem ( rhsFull, *M_solution, matrFull);
 
-    numIter = std::abs(numIter);
+    numIter = std::abs (numIter);
 
     if (numIter >= M_maxIterForReuse || numIter >= M_maxIterSolver)
     {
@@ -865,20 +928,24 @@ iterate( bchandler_raw_type& bch )
 
 template<typename Mesh, typename SolverType>
 void VenantKirchhoffViscoelasticSolver<Mesh, SolverType>::
-applyBoundaryConditions(matrix_type&        matrix,
-                        vector_type&        rhs,
-                        bchandler_raw_type& BCh,
-                        UInt                offset)
+applyBoundaryConditions (matrix_type&        matrix,
+                         vector_type&        rhs,
+                         bchandler_raw_type& BCh,
+                         UInt                offset)
 {
     if (offset)
-        BCh.setOffset(offset);
+    {
+        BCh.setOffset (offset);
+    }
 
     if ( !BCh.bcUpdateDone() )
-        BCh.bcUpdate( *this->M_FESpace->mesh(), this->M_FESpace->feBd(), this->M_FESpace->dof() );
+    {
+        BCh.bcUpdate ( *this->M_FESpace->mesh(), this->M_FESpace->feBd(), this->M_FESpace->dof() );
+    }
 
-     vector_type rhsFull(rhs, Unique);  // bcManages now manages the also repeated parts
+    vector_type rhsFull (rhs, Unique); // bcManages now manages the also repeated parts
 
-    bcManage( matrix, rhsFull, *this->M_FESpace->mesh(), this->M_FESpace->dof(), BCh, this->M_FESpace->feBd(), 1., M_data->dataTime()->time());
+    bcManage ( matrix, rhsFull, *this->M_FESpace->mesh(), this->M_FESpace->dof(), BCh, this->M_FESpace->feBd(), 1., M_data->dataTime()->time() );
 
     // matrix should be GlobalAssembled by  bcManage
 

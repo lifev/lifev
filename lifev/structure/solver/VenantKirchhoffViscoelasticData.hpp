@@ -54,6 +54,7 @@
 #include <lifev/core/filter/GetPot.hpp>
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/fem/TimeData.hpp>
+#include <lifev/core/fem/TimeAdvanceData.hpp>
 
 
 namespace LifeV
@@ -61,24 +62,26 @@ namespace LifeV
 /*!
   \class VenantKirchhoffViscoelasticData
 */
-class VenantKirchhoffViscoelasticData:
-      public TimeData
+class VenantKirchhoffViscoelasticData
 {
 public:
     //! @name Type definitions
     //@{
 
-    typedef TimeData                                 Time_Type;
-    typedef boost::shared_ptr< Time_Type >           Time_ptrType;
+    typedef TimeData                               time_Type;
+    typedef boost::shared_ptr<time_Type>           timePtr_Type;
 
-    typedef std::map<UInt, Real>                    MaterialContainer_Type;
-    typedef MaterialContainer_Type::const_iterator  MaterialContainer_ConstIterator;
+    typedef TimeAdvanceData                        timeAdvance_Type;
+    typedef boost::shared_ptr<timeAdvance_Type>    timeAdvancePtr_Type;
+
+    typedef std::map<UInt, Real>                   MaterialContainer_Type;
+    typedef MaterialContainer_Type::const_iterator MaterialContainer_ConstIterator;
 
     //@}
 
     //! Constructor
     VenantKirchhoffViscoelasticData();
-    VenantKirchhoffViscoelasticData( const VenantKirchhoffViscoelasticData& VenantKirchhoffViscoelasticData);
+    VenantKirchhoffViscoelasticData ( const VenantKirchhoffViscoelasticData& VenantKirchhoffViscoelasticData);
 
     //! @name Operators
     //@{
@@ -87,7 +90,7 @@ public:
     /*!
      * @param VenantKirchhoffViscoelasticData - VenantKirchhoffViscoelasticData
      */
-    VenantKirchhoffViscoelasticData& operator=( const VenantKirchhoffViscoelasticData& VenantKirchhoffViscoelasticData );
+    VenantKirchhoffViscoelasticData& operator= ( const VenantKirchhoffViscoelasticData& VenantKirchhoffViscoelasticData );
 
     //@}
     //! @name Methods
@@ -98,10 +101,10 @@ public:
      * @param dataFile data file
      * @param section section of the file
      */
-    void setup( const GetPot& dataFile, const std::string& section = "solid" );
+    void setup ( const GetPot& dataFile, const std::string& section = "solid" );
 
     //! Display the values
-    void showMe( std::ostream& output = std::cout ) const;
+    void showMe ( std::ostream& output = std::cout ) const;
 
     //@}
 
@@ -112,50 +115,62 @@ public:
     /*!
      * @param TimeData shared_ptr to TimeData container
      */
-    void setTimeData( const Time_ptrType TimeData );
+    void setTimeData ( const timePtr_Type timeData )
+    {
+        M_time = timeData;
+    }
+
+    //! Set data time advance container
+    /*!
+     * @param timeAdvanceData shared_ptr to TimeAdvanceData container
+     */
+    void setTimeAdvanceData ( const timeAdvancePtr_Type timeAdvanceData )
+    {
+        M_timeAdvance = timeAdvanceData;
+    }
 
     //! Set density
     /*!
      * @param density solid density value
      */
-    void setDensity( const Real& density );
+    void setDensity ( const Real& density );
 
     //! Set gamma
     /*!
      * @param gamma damping coefficient.
      */
-    void setGamma( const Real& gamma );
+    void setGamma ( const Real& gamma );
 
-    void setGamma( const Real& gamma, const UInt& material );
+    void setGamma ( const Real& gamma, const UInt& material );
 
     //! Set beta
     /*!
      * @param beta damping coefficient.
      */
-    void setBeta( const Real& beta);
+    void setBeta ( const Real& beta);
 
-    void setBeta( const Real& beta, const UInt& material);
+    void setBeta ( const Real& beta, const UInt& material);
 
 
     //! Set thickness
     /*!
      * @param thickness solid thickness value
      */
-    void setThickness( const Real& thickness );
+    void setThickness ( const Real& thickness );
 
     //! Set poisson
     /*!
      * @param poisson solid poisson value
      * @param material material ID (1 by default)
      */
-    void setPoisson( const Real& poisson, const UInt& material = 1 );
+    void setPoisson ( const Real& poisson, const UInt& material = 1 );
 
     //! Set Young modulus
     /*!
      * @param Young solid young modulus value
      * @param material material ID (1 by default)
      */
-    void setYoung( const Real& young, const UInt& material = 1 );
+    void setYoung ( const Real& young, const UInt& material = 1 );
 
     //@}
 
@@ -166,7 +181,19 @@ public:
     /*!
      * @return shared_ptr to TimeData container
      */
-    Time_ptrType dataTime() const;
+    timePtr_Type dataTime() const
+    {
+        return M_time;
+    }
+
+    //! Get data time container
+    /*!
+     * @return shared_ptr to TimeAdvanceData container
+     */
+    timeAdvancePtr_Type dataTimeAdvance() const
+    {
+        return M_timeAdvance;
+    }
 
     //! Get solid density
     /*!
@@ -185,39 +212,39 @@ public:
      * @param material material ID (1 by default)
      * @return Solid poisson coefficient
      */
-    Real poisson( const UInt& material = 1 ) const;
+    Real poisson ( const UInt& material = 1 ) const;
 
     //! Get solid young modulus
     /*!
      * @param material material ID (1 by default)
      * @return Solid young modulus
      */
-    Real young( const UInt& material = 1 ) const;
+    Real young ( const UInt& material = 1 ) const;
 
     //! Get solid first lame coefficient
     /*!
      * @param material material ID (1 by default)
      * @return Solid first Lame coefficient
      */
-    Real lambda( const UInt& material = 1 ) const;
+    Real lambda ( const UInt& material = 1 ) const;
 
     //! Get solid second Lame coefficient
     /*!
      * @param material material ID (1 by default)
      * @return Solid second Lame coefficient
      */
-    Real mu( const UInt& material = 1 ) const;
+    Real mu ( const UInt& material = 1 ) const;
 
     //! Get damping coefficients
     /*!
      * @return gamma damping coefficient
      */
-    const Real& gamma( const UInt& material = 1 ) const;
+    const Real& gamma ( const UInt& material = 1 ) const;
 
     /*!
     * @return beta damping coefficient
     */
-    const Real& beta( const UInt& material = 1 ) const;
+    const Real& beta ( const UInt& material = 1 ) const;
 
     //! Get FE order
     /*!
@@ -250,7 +277,8 @@ public:
 private:
 
     //! Data containers for time and mesh
-    Time_ptrType           M_time;
+    timePtr_Type        M_time;
+    timeAdvancePtr_Type M_timeAdvance;
 
     //@name Physics
     //@{
@@ -273,8 +301,6 @@ private:
     MaterialContainer_Type  M_beta;
     //@}
 
-    //! Miscellaneous
-    Real                   M_factor; // amplification factor for deformed mesh
     //!verbose
     UInt                   M_verbose; // temporal output verbose
     //! order

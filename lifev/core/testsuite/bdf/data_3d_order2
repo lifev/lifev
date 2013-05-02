@@ -13,6 +13,7 @@
     order     = P2
     mesh_dir  = ./  # the directory where the mesh file is
     mesh_file = cube4x4.mesh      # mesh file
+    mesh_type = .mesh
 
     [../prec]
     prectype                = ML # ML or Ifpack

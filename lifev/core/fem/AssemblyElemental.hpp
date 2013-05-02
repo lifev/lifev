@@ -58,7 +58,8 @@
 #include <lifev/core/array/MatrixElemental.hpp>
 #include <lifev/core/array/VectorElemental.hpp>
 
-#include <lifev/core/fem/CurrentBoundaryFE.hpp>
+#include <lifev/core/fem/CurrentFEManifold.hpp>
+#include <lifev/core/fem/ReferenceFEHybrid.hpp>
 #include <lifev/core/fem/CurrentFE.hpp>
 #include <lifev/core/fem/DOF.hpp>
 
@@ -83,8 +84,8 @@ namespace AssemblyElemental
 //! @name Public typedefs
 //@{
 //! Use the portable syntax of the boost function
-typedef boost::function5< const Real,  const Real&, const Real&,
-                          const Real&, const Real&, const ID&  > function_Type;
+typedef boost::function5 < const Real,  const Real&, const Real&,
+        const Real&, const Real&, const ID&  > function_Type;
 //@}
 
 //! Elementary mass for constant mass coefficient
@@ -97,10 +98,10 @@ typedef boost::function5< const Real,  const Real&, const Real&,
   @param coefficient The mass coefficient
   @param fieldDim The dimension of the FE space (scalar/vectorial)
  */
-void mass(MatrixElemental& localMass,
-          const CurrentFE& massCFE,
-          const Real& coefficient,
-          const UInt& fieldDim);
+void mass (MatrixElemental& localMass,
+           const CurrentFE& massCFE,
+           const Real& coefficient,
+           const UInt& fieldDim);
 
 //! Elementary stiffness for constant coefficient
 /*!
@@ -112,38 +113,38 @@ void mass(MatrixElemental& localMass,
   @param coefficient The coefficient
   @param fieldDim The dimension of the FE space (scalar/vectorial)
  */
-void stiffness(MatrixElemental& localStiff,
-               const CurrentFE& stiffCFE,
-               const Real& coefficient,
-               const UInt& fieldDim);
+void stiffness (MatrixElemental& localStiff,
+                const CurrentFE& stiffCFE,
+                const Real& coefficient,
+                const UInt& fieldDim);
 
 
 //! Interpolation procedure
 template<typename localVector, typename globalVector>
-void interpolate(localVector& localValues,
-                 const CurrentFE& interpCFE,
-                 const UInt& spaceDim,
-                 const DOF& betaDof,
-                 const UInt& elementID,
-                 const globalVector& beta)
+void interpolate (localVector& localValues,
+                  const CurrentFE& interpCFE,
+                  const UInt& spaceDim,
+                  const DOF& betaDof,
+                  const UInt& elementID,
+                  const globalVector& beta)
 {
-    const UInt nbQuadPt(interpCFE.nbQuadPt());
-    const UInt nbFEDof(interpCFE.nbFEDof());
-    const UInt totalDof(betaDof.numTotalDof());
+    const UInt nbQuadPt (interpCFE.nbQuadPt() );
+    const UInt nbFEDof (interpCFE.nbFEDof() );
+    const UInt totalDof (betaDof.numTotalDof() );
 
-    for (UInt iterDim(0); iterDim<spaceDim; ++iterDim)
+    for (UInt iterDim (0); iterDim < spaceDim; ++iterDim)
     {
         // Loop on the quadrature nodes
-        for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
+        for (UInt iQuadPt (0); iQuadPt < nbQuadPt; ++iQuadPt)
         {
-            localValues[iQuadPt][iterDim]=0.0;
+            localValues[iQuadPt][iterDim] = 0.0;
 
             // Loop over the basis functions
-            for (UInt iDof(0); iDof < nbFEDof ; ++iDof)
+            for (UInt iDof (0); iDof < nbFEDof ; ++iDof)
             {
                 localValues[iQuadPt][iterDim] +=
-                    beta[ betaDof.localToGlobalMap(elementID,iDof) + iterDim*totalDof]
-                    * interpCFE.phi(iDof,iQuadPt);
+                    beta[ betaDof.localToGlobalMap (elementID, iDof) + iterDim * totalDof]
+                    * interpCFE.phi (iDof, iQuadPt);
             }
         }
     }
@@ -151,30 +152,30 @@ void interpolate(localVector& localValues,
 
 //! Interpolation of the gradient
 template<typename localVector, typename globalVector>
-void interpolateGradient(localVector& localGradient,
-                         const CurrentFE& interpCFE,
-                         const UInt& spaceDim,
-                         const DOF& betaDof,
-                         const UInt& elementID,
-                         const globalVector& beta)
+void interpolateGradient (localVector& localGradient,
+                          const CurrentFE& interpCFE,
+                          const UInt& spaceDim,
+                          const DOF& betaDof,
+                          const UInt& elementID,
+                          const globalVector& beta)
 {
-    const UInt nbQuadPt(interpCFE.nbQuadPt());
-    const UInt nbFEDof(interpCFE.nbFEDof());
-    const UInt totalDof(betaDof.numTotalDof());
+    const UInt nbQuadPt (interpCFE.nbQuadPt() );
+    const UInt nbFEDof (interpCFE.nbFEDof() );
+    const UInt totalDof (betaDof.numTotalDof() );
 
-    for (UInt iterDim(0); iterDim<spaceDim; ++iterDim)
+    for (UInt iterDim (0); iterDim < spaceDim; ++iterDim)
     {
         // Loop on the quadrature nodes
-        for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
+        for (UInt iQuadPt (0); iQuadPt < nbQuadPt; ++iQuadPt)
         {
 
-            for (UInt jDim(0); jDim<nDimensions; ++jDim)
-                //for ( jcoor = 0; jcoor < fe.nbCoor(); ++jcoor )
+            for (UInt jDim (0); jDim < nDimensions; ++jDim)
+                //for ( jcoor = 0; jcoor < fe.nbLocalCoor(); ++jcoor )
             {
                 localGradient[ iQuadPt ][ iterDim ][ jDim ] = 0.0;
                 for ( UInt i = 0; i < nbFEDof; ++i )
-                    localGradient[ iQuadPt ][ iterDim ][ jDim ] += interpCFE.phiDer( i, jDim, iQuadPt ) *
-                        beta[ betaDof.localToGlobalMap(elementID,i) + iterDim*totalDof];
+                    localGradient[ iQuadPt ][ iterDim ][ jDim ] += interpCFE.phiDer ( i, jDim, iQuadPt ) *
+                                                                   beta[ betaDof.localToGlobalMap (elementID, i) + iterDim * totalDof];
             }
         }
     }
@@ -184,27 +185,27 @@ void interpolateGradient(localVector& localGradient,
 
 //! Interpolation of the divergence
 template<typename localVector, typename globalVector>
-void interpolateDivergence(localVector& localDivergence,
-                           const CurrentFE& interpCFE,
-                           const DOF& betaDof,
-                           const UInt& elementID,
-                           const globalVector& beta)
+void interpolateDivergence (localVector& localDivergence,
+                            const CurrentFE& interpCFE,
+                            const DOF& betaDof,
+                            const UInt& elementID,
+                            const globalVector& beta)
 {
-    const UInt nbQuadPt(interpCFE.nbQuadPt());
-    const UInt nbFEDof(interpCFE.nbFEDof());
-    const UInt totalDof(betaDof.numTotalDof());
+    const UInt nbQuadPt (interpCFE.nbQuadPt() );
+    const UInt nbFEDof (interpCFE.nbFEDof() );
+    const UInt totalDof (betaDof.numTotalDof() );
 
     // Loop on the quadrature nodes
-    for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
+    for (UInt iQuadPt (0); iQuadPt < nbQuadPt; ++iQuadPt)
     {
         localDivergence[ iQuadPt ] = 0.0;
 
         for ( UInt i = 0; i < nbFEDof; ++i )
         {
-            for (UInt jDim(0); jDim<nDimensions; ++jDim)
-                localDivergence[ iQuadPt ] += interpCFE.phiDer( i, jDim, iQuadPt ) *
-                // here we are assuming that beta belongs to the FE space of interpCFE
-                beta[ betaDof.localToGlobalMap(elementID,i) + jDim*totalDof ];
+            for (UInt jDim (0); jDim < nDimensions; ++jDim)
+                localDivergence[ iQuadPt ] += interpCFE.phiDer ( i, jDim, iQuadPt ) *
+                                              // here we are assuming that beta belongs to the FE space of interpCFE
+                                              beta[ betaDof.localToGlobalMap (elementID, i) + jDim * totalDof ];
         }
     }
 
@@ -212,48 +213,48 @@ void interpolateDivergence(localVector& localDivergence,
 
 
 template<typename localVector>
-void massDivW(MatrixElemental& localMass,
-              const CurrentFE& massCFE,
-              const Real& coefficient,
-              const localVector& localValues,
-              const UInt& fieldDim)
+void massDivW (MatrixElemental& localMass,
+               const CurrentFE& massCFE,
+               const Real& coefficient,
+               const localVector& localValues,
+               const UInt& fieldDim)
 {
-    const UInt nbFEDof(massCFE.nbFEDof());
-    const UInt nbQuadPt(massCFE.nbQuadPt());
-    Real localValue(0);
+    const UInt nbFEDof (massCFE.nbFEDof() );
+    const UInt nbQuadPt (massCFE.nbQuadPt() );
+    Real localValue (0);
 
     // Assemble the local mass
-    for (UInt iterFDim(0); iterFDim<fieldDim; ++iterFDim)
+    for (UInt iterFDim (0); iterFDim < fieldDim; ++iterFDim)
     {
         // Extract the view of the matrix
-        MatrixElemental::matrix_view localView = localMass.block(iterFDim,iterFDim);
+        MatrixElemental::matrix_view localView = localMass.block (iterFDim, iterFDim);
 
         // Loop over the basis functions
-        for (UInt iDof(0); iDof < nbFEDof ; ++iDof)
+        for (UInt iDof (0); iDof < nbFEDof ; ++iDof)
         {
             // Build the local matrix only where needed:
             // Lower triangular + diagonal parts
-            for (UInt jDof(0); jDof <= iDof; ++jDof)
+            for (UInt jDof (0); jDof <= iDof; ++jDof)
             {
                 localValue = 0.0;
 
                 // Loop on the quadrature nodes
-                for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
+                for (UInt iQuadPt (0); iQuadPt < nbQuadPt; ++iQuadPt)
                 {
                     localValue += localValues[iQuadPt]
-                                  * massCFE.phi(iDof,iQuadPt)
-                                  * massCFE.phi(jDof,iQuadPt)
-                                  * massCFE.wDetJacobian(iQuadPt);
+                                  * massCFE.phi (iDof, iQuadPt)
+                                  * massCFE.phi (jDof, iQuadPt)
+                                  * massCFE.wDetJacobian (iQuadPt);
                 }
 
-                localValue*=coefficient;
+                localValue *= coefficient;
 
                 // Add on the local matrix
-                localView(iDof,jDof)+=localValue;
+                localView (iDof, jDof) += localValue;
 
-                if (iDof!=jDof)
+                if (iDof != jDof)
                 {
-                    localView(jDof,iDof)+=localValue;
+                    localView (jDof, iDof) += localValue;
                 }
             }
         }
@@ -262,48 +263,48 @@ void massDivW(MatrixElemental& localMass,
 
 //! Elementary advection \beta \grad u v
 template<typename localVector>
-void advection(MatrixElemental& localAdv,
-               const CurrentFE& advCFE,
-               const Real& coefficient,
-               const localVector& localValues,
-               const UInt& fieldDim)
+void advection (MatrixElemental& localAdv,
+                const CurrentFE& advCFE,
+                const Real& coefficient,
+                const localVector& localValues,
+                const UInt& fieldDim)
 {
-    const UInt nbFEDof(advCFE.nbFEDof());
-    const UInt nbQuadPt(advCFE.nbQuadPt());
-    Real localValue(0.0), advGrad(0.0);
-    MatrixElemental matTmp( nbFEDof, 1, 1 );
+    const UInt nbFEDof (advCFE.nbFEDof() );
+    const UInt nbQuadPt (advCFE.nbQuadPt() );
+    Real localValue (0.0), advGrad (0.0);
+    MatrixElemental matTmp ( nbFEDof, 1, 1 );
     matTmp.zero();
-    MatrixElemental::matrix_view matTmpView = matTmp.block(0,0);
+    MatrixElemental::matrix_view matTmpView = matTmp.block (0, 0);
 
     // Loop over the basis functions
-    for (UInt iDof(0); iDof < nbFEDof ; ++iDof)
+    for (UInt iDof (0); iDof < nbFEDof ; ++iDof)
     {
         // Build the local matrix
-        for (UInt jDof(0); jDof < nbFEDof; ++jDof)
+        for (UInt jDof (0); jDof < nbFEDof; ++jDof)
         {
             localValue = 0.0;
 
             // Loop on the quadrature nodes
-            for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
+            for (UInt iQuadPt (0); iQuadPt < nbQuadPt; ++iQuadPt)
             {
                 advGrad = 0.;
-                for (UInt iDim(0); iDim<advCFE.nbCoor(); ++iDim)
+                for (UInt iDim (0); iDim < advCFE.nbLocalCoor(); ++iDim)
                 {
                     advGrad += localValues[iQuadPt][iDim]
-                                 * advCFE.dphi(jDof,iDim,iQuadPt);
+                               * advCFE.dphi (jDof, iDim, iQuadPt);
                 }
 
-                localValue += advGrad * advCFE.phi(iDof,iQuadPt)
-                                 * advCFE.wDetJacobian(iQuadPt);
+                localValue += advGrad * advCFE.phi (iDof, iQuadPt)
+                              * advCFE.wDetJacobian (iQuadPt);
             }
             // Add on the local matrix
-            matTmpView(iDof,jDof) = coefficient*localValue;
+            matTmpView (iDof, jDof) = coefficient * localValue;
         }
     }
-    for (UInt iterFDim(0); iterFDim<fieldDim; ++iterFDim)
+    for (UInt iterFDim (0); iterFDim < fieldDim; ++iterFDim)
     {
         // Extract the view of the matrix
-        MatrixElemental::matrix_view localView = localAdv.block(iterFDim,iterFDim);
+        MatrixElemental::matrix_view localView = localAdv.block (iterFDim, iterFDim);
 
         // Copy on the components
         localView = matTmpView;
@@ -314,80 +315,80 @@ void advection(MatrixElemental& localAdv,
  * Added by Gwenol Grandperrin, August 2011
  */
 //! Assemble the term \f$ \int_\Omega \phi_j\cdot\mathbf{u}\phi_i\f$
-void advectionNewton( Real coef, VectorElemental& vel,
-                      MatrixElemental& elmat, const CurrentFE& fe,
-                      int iblock, int jblock );
+void advectionNewton ( Real coef, VectorElemental& vel,
+                       MatrixElemental& elmat, const CurrentFE& fe,
+                       int iblock, int jblock );
 
 //! Elementary advection, term u\grad \beta v
 template<typename localTensor>
-void symmetrizedAdvection(MatrixElemental& localAdv,
-                          const CurrentFE& advCFE,
-                          const Real& coefficient,
-                          const localTensor& localGradient,
-                          const UInt& fieldDim)
+void symmetrizedAdvection (MatrixElemental& localAdv,
+                           const CurrentFE& advCFE,
+                           const Real& coefficient,
+                           const localTensor& localGradient,
+                           const UInt& fieldDim)
 {
-    const UInt nbFEDof(advCFE.nbFEDof());
-    const UInt nbQuadPt(advCFE.nbQuadPt());
-    Real localValue(0.0);
+    const UInt nbFEDof (advCFE.nbFEDof() );
+    const UInt nbQuadPt (advCFE.nbQuadPt() );
+    Real localValue (0.0);
 
     ASSERT (fieldDim == nDimensions, "Symmetrized operator works only with vectors of the same dimension as the space" );
 
 
-    for (UInt iCoor(0); iCoor<fieldDim; ++iCoor)
+    for (UInt iCoor (0); iCoor < fieldDim; ++iCoor)
     {
-        for (UInt jCoor(0); jCoor<fieldDim; ++jCoor)
+        for (UInt jCoor (0); jCoor < fieldDim; ++jCoor)
         {
             // Extract the view of the matrix
-            MatrixElemental::matrix_view localView = localAdv.block(iCoor,jCoor);
+            MatrixElemental::matrix_view localView = localAdv.block (iCoor, jCoor);
 
             // Loop over the basis functions
-            for (UInt iDof(0); iDof < nbFEDof ; ++iDof)
+            for (UInt iDof (0); iDof < nbFEDof ; ++iDof)
             {
                 // Build the local matrix
-                for (UInt jDof(0); jDof < nbFEDof; ++jDof)
+                for (UInt jDof (0); jDof < nbFEDof; ++jDof)
                 {
                     localValue = 0.0;
 
                     // Loop on the quadrature nodes
-                    for (UInt iQuadPt(0); iQuadPt < nbQuadPt; ++iQuadPt)
+                    for (UInt iQuadPt (0); iQuadPt < nbQuadPt; ++iQuadPt)
                     {
                         localValue +=
                             localGradient[iQuadPt][iCoor][jCoor]
-                            * advCFE.phi(jDof,iQuadPt)
-                            * advCFE.phi(iDof,iQuadPt)
-                            * advCFE.wDetJacobian(iQuadPt);
+                            * advCFE.phi (jDof, iQuadPt)
+                            * advCFE.phi (iDof, iQuadPt)
+                            * advCFE.wDetJacobian (iQuadPt);
 
                     }
 
                     // Add on the local matrix
-                    localView(iDof,jDof)=coefficient*localValue;
+                    localView (iDof, jDof) = coefficient * localValue;
                 }
             }
         }
     }
 }
 
-void grad(MatrixElemental& localGrad,
-          const CurrentFE& uCFE,
-          const CurrentFE& pCFE,
-          const UInt& fieldDim);
+void grad (MatrixElemental& localGrad,
+           const CurrentFE& uCFE,
+           const CurrentFE& pCFE,
+           const UInt& fieldDim);
 
-void divergence(MatrixElemental& localDivergence,
-                const CurrentFE& uCFE,
-                const CurrentFE& pCFE,
-                const UInt& fieldDim,
-                const Real& coefficient=1.0);
+void divergence (MatrixElemental& localDivergence,
+                 const CurrentFE& uCFE,
+                 const CurrentFE& pCFE,
+                 const UInt& fieldDim,
+                 const Real& coefficient = 1.0);
 
-void stiffStrain(MatrixElemental& localStiff,
-                 const CurrentFE& stiffCFE,
-                 const Real& coefficient,
+void stiffStrain (MatrixElemental& localStiff,
+                  const CurrentFE& stiffCFE,
+                  const Real& coefficient,
+                  const UInt& fieldDim);
+
+void bodyForces (VectorElemental& localForce,
+                 const CurrentFE& massRhsCFE,
+                 const function_Type& fun,
+                 const Real& t,
                  const UInt& fieldDim);
-
-void bodyForces(VectorElemental& localForce,
-                const CurrentFE& massRhsCFE,
-                const function_Type& fun,
-                const Real& t,
-                const UInt& fieldDim);
 }
 
 //----------------------------------------------------------------------
@@ -397,117 +398,119 @@ void bodyForces(VectorElemental& localForce,
 //----------------------------------------------------------------------
 //!coef(t,x,y,z,u)
 
-void mass( Real coef, MatrixElemental& elmat, const CurrentFE& fe,
-           int iblock = 0, int jblock = 0 );
-void mass( Real coef, MatrixElemental& elmat, const CurrentFE& fe,
-           int iblock, int jblock, UInt nb );
-//! Mass term with coefficients given for each quadrature point
-void mass( const std::vector<Real>& qpt_coef, MatrixElemental& elmat, const CurrentFE& fe,
-           int iblock, int jblock, UInt nb );
-
-void stiff( Real coef, MatrixElemental& elmat, const CurrentFE& fe,
+void mass ( Real coef, MatrixElemental& elmat, const CurrentFE& fe,
             int iblock = 0, int jblock = 0 );
-void stiff( Real coef, Real ( *fct ) ( Real, Real, Real ), MatrixElemental& elmat,
-            const CurrentFE& fe, int iblock, int jblock );
-void stiff( Real coef, MatrixElemental& elmat, const CurrentFE& fe,
-            int iblock, int jblock, int nb );
+void mass ( Real coef, MatrixElemental& elmat, const CurrentFE& fe,
+            int iblock, int jblock, UInt nb );
+//! Mass term with coefficients given for each quadrature point
+void mass ( const std::vector<Real>& qpt_coef, MatrixElemental& elmat, const CurrentFE& fe,
+            int iblock, int jblock, UInt nb );
+
+void stiff ( Real coef, MatrixElemental& elmat, const CurrentFE& fe,
+             int iblock = 0, int jblock = 0 );
+void stiff ( Real coef, Real ( *fct ) ( Real, Real, Real ), MatrixElemental& elmat,
+             const CurrentFE& fe, int iblock, int jblock );
+void stiff ( Real coef, MatrixElemental& elmat, const CurrentFE& fe,
+             int iblock, int jblock, int nb );
 //! Stiff term with coefficient given for each quadrature node
-void stiff( const std::vector<Real>& qpt_coef, MatrixElemental& elmat, const CurrentFE& fe,
-            int iblock, int jblock, int nb );
-void stiff_curl( Real coef, MatrixElemental& elmat, const CurrentFE& fe,
-                 int iblock, int jblock, int nb );
+void stiff ( const std::vector<Real>& qpt_coef, MatrixElemental& elmat, const CurrentFE& fe,
+             int iblock, int jblock, int nb );
+void stiff_curl ( Real coef, MatrixElemental& elmat, const CurrentFE& fe,
+                  int iblock, int jblock, int nb );
 
 
 
 
 
 //! \f$ coef \cdot ( e(u) , e(v) )\f$
-void stiff_strain( Real coef, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_strain ( Real coef, MatrixElemental& elmat, const CurrentFE& fe );
 
 //! \f$ coef \cdot ( div u , div v )\f$
-void stiff_div( Real coef, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_div ( Real coef, MatrixElemental& elmat, const CurrentFE& fe );
 
 //! \f$ coef \cdot ( [\nabla u^k]^T \nabla u : \nabla v  )\f$
-void stiff_dergradbis( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_dergradbis ( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
 
 //! \f$ coef \cdot ( [\nabla u]^T \nabla u^k + [\nabla u^k]^T \nabla u : \nabla v  )\f$ for Newton on St-Venant
-void stiff_dergrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_dergrad ( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
 
 //! \f$ coef \cdot ( trace { [\nabla u^k]^T \nabla u }, \nabla\cdot  v  ) \f$ for Newton on St-Venant
-void stiff_derdiv( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_derdiv ( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
 
 // -----------added Rita 2008   for non linear St-Venant----------------------------------------------------------
 
 // coef * ( (\div u_k) \grad u : \grad v  )--------------------------------------------------------------------controllato!!!
-void stiff_divgrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_divgrad ( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
 
 // coef * ( (\div u) \grad u_k : \grad v  )
 // part of the jacobian of stiff_divgrad
-void stiff_divgrad_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_divgrad_2 ( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
 
 // coef * ( \grad u_k : \grad u_k) * ( \grad u : \grad v  )---------------------------------------------controllato!!!
-void stiff_gradgrad( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_gradgrad ( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
 
 // coef * ( \grad u_k : \grad u) *( \grad u_k : \grad v  )
 // part of the jacobian stiff_gradgrad
-void stiff_gradgrad_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_gradgrad_2 ( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
 
 // coef * ( \grad u^k \grad u : \grad v  )------------------------------------------------------------------controllato!!!
-void stiff_dergrad_gradbis( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_dergrad_gradbis ( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
 
 // coef * ( \grad \delta u \grad u^k : \grad v  )
 // part of the jacobian of stiff_dergrad_gradbis
-void stiff_dergrad_gradbis_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_dergrad_gradbis_2 ( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
 
 // coef * ( \grad u^k [\grad u]^T : \grad v  )------------------------------------------------------------controllato!!!
-void stiff_dergrad_gradbis_Tr( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_dergrad_gradbis_Tr ( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
 
 // coef * ( \grad \delta u [\grad u^k]^T : \grad v  )------------------------------------------------------------controllato!!!
 // part of the jacobian of stiff_dergrad_gradbis_Tr
-void stiff_dergrad_gradbis_Tr_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_dergrad_gradbis_Tr_2 ( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
 
 // coef * (  \grad u^k [\grad u^k]^T \grad u : \grad v  )------------------------------------------------------------controllato!!!
-void stiff_gradgradTr_gradbis( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_gradgradTr_gradbis ( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
 
 // coef * (  \grad u^k [\grad u]^T \grad u^k : \grad v  )------------------------------------------------------------controllato!!!
 // part of the jacobian of  stiff_gradgradTr_gradbis
-void stiff_gradgradTr_gradbis_2( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_gradgradTr_gradbis_2 ( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
 
 //  coef * (  \grad u [\grad u^k]^T \grad u^k : \grad v  )------------------------------------------------------------controllato!!!
 // secondo part of the jacobian of stiff_gradgradTr_gradbis
-void stiff_gradgradTr_gradbis_3( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
+void stiff_gradgradTr_gradbis_3 ( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat, const CurrentFE& fe );
 
 //------------------------------------------------------------------------------------------------------------------------------------------
 
 
-void grad( const int icoor, Real coef, MatrixElemental& elmat,
+void grad ( const int icoor, Real coef, MatrixElemental& elmat,
+            const CurrentFE& fe_u, const CurrentFE& fe_p,
+            int iblock = 0, int jblock = 0 );
+void div ( const int icoor, Real coef, MatrixElemental& elmat,
            const CurrentFE& fe_u, const CurrentFE& fe_p,
            int iblock = 0, int jblock = 0 );
-void div( const int icoor, Real coef, MatrixElemental& elmat,
-          const CurrentFE& fe_u, const CurrentFE& fe_p,
-          int iblock = 0, int jblock = 0 );
-void grad_div( Real coef_grad, Real coef_div, MatrixElemental& elmat,
-               const CurrentFE& fe_u, const CurrentFE& fe_p,
-               int block_pres );
+void grad_div ( Real coef_grad, Real coef_div, MatrixElemental& elmat,
+                const CurrentFE& fe_u, const CurrentFE& fe_p,
+                int block_pres );
 
 template<typename UsrFct>
-void advection( Real coef, const UsrFct & beta,
-                MatrixElemental& elmat, const CurrentFE& fe, int iblock, int jblock, int nb, Real t=0. )
+void advection ( Real coef, const UsrFct& beta,
+                 MatrixElemental& elmat, const CurrentFE& fe, int iblock, int jblock, int nb, Real t = 0. )
 {
-    Matrix mat_tmp( fe.nbFEDof(), fe.nbFEDof() );
+    Matrix mat_tmp ( fe.nbFEDof(), fe.nbFEDof() );
     Real v, s;
-    Real x,y,z;
-    Matrix v_grad(ZeroMatrix(fe.nbFEDof(), fe.nbQuadPt()));
+    Real x, y, z;
+    Matrix v_grad (ZeroMatrix (fe.nbFEDof(), fe.nbQuadPt() ) );
 
     //Evaluate the velocity field at the quadrature nodes
     for ( UInt iq = 0; iq < fe.nbQuadPt(); iq++ )
     {
-        fe.coorQuadPt(x,y,z,iq);
+        fe.coorQuadPt (x, y, z, iq);
         for ( UInt icoor = 0; icoor < nDimensions; icoor++ )
         {
-            v = beta(t,x,y,z,icoor);
-            for ( UInt j = 0; j<fe.nbFEDof(); ++j)
-                v_grad(j, iq) += v*fe.phiDer(j, icoor, iq );
+            v = beta (t, x, y, z, icoor);
+            for ( UInt j = 0; j < fe.nbFEDof(); ++j)
+            {
+                v_grad (j, iq) += v * fe.phiDer (j, icoor, iq );
+            }
         }
     }
 
@@ -520,39 +523,39 @@ void advection( Real coef, const UsrFct & beta,
             s = 0.;
             for ( UInt iq = 0; iq < fe.nbQuadPt(); iq++ )
             {
-                s += v_grad(j, iq) * fe.phi( i, iq ) * fe.weightDet( iq );
+                s += v_grad (j, iq) * fe.phi ( i, iq ) * fe.weightDet ( iq );
             }
-            mat_tmp( i, j ) = s*coef;
+            mat_tmp ( i, j ) = s * coef;
         }
     }
 
     // copy on the components
     for ( int icomp = 0; icomp < nb; icomp++ )
     {
-        MatrixElemental::matrix_view mat_icomp = elmat.block( iblock + icomp, jblock + icomp );
+        MatrixElemental::matrix_view mat_icomp = elmat.block ( iblock + icomp, jblock + icomp );
         for ( UInt i = 0; i < fe.nbDiag(); i++ )
         {
             for ( UInt j = 0; j < fe.nbDiag(); j++ )
             {
-                mat_icomp( i, j ) += mat_tmp( i, j );
+                mat_icomp ( i, j ) += mat_tmp ( i, j );
             }
         }
     }
 }
 
-void stab_stokes( Real visc, Real coef_stab, MatrixElemental& elmat,
-                  const CurrentFE& fe, int block_pres );
-void advection( Real coef, VectorElemental& vel, MatrixElemental& elmat,
-                const CurrentFE& fe, int iblock, int jblock, int nb );
+void stab_stokes ( Real visc, Real coef_stab, MatrixElemental& elmat,
+                   const CurrentFE& fe, int block_pres );
+void advection ( Real coef, VectorElemental& vel, MatrixElemental& elmat,
+                 const CurrentFE& fe, int iblock, int jblock, int nb );
 
-void source( Real constant, VectorElemental& elvec, const CurrentFE& fe, int iblock );
+void source ( Real constant, VectorElemental& elvec, const CurrentFE& fe, int iblock );
 
-void source( Real constant, VectorElemental& elvec, const CurrentFE& fe, Real t, int iblock );
+void source ( Real constant, VectorElemental& elvec, const CurrentFE& fe, Real t, int iblock );
 
 
 // right-hand sides for Chorin-Teman projection scheme
-void source_divuq(Real alpha, VectorElemental& uLoc,  VectorElemental& elvec, const CurrentFE& fe_u, const CurrentFE& fe_p, int iblock = 0 );
-void source_gradpv(Real alpha, VectorElemental& pLoc,  VectorElemental& elvec, const CurrentFE& fe_p, const CurrentFE& fe_u, int iblock );
+void source_divuq (Real alpha, VectorElemental& uLoc,  VectorElemental& elvec, const CurrentFE& fe_u, const CurrentFE& fe_p, int iblock = 0 );
+void source_gradpv (Real alpha, VectorElemental& pLoc,  VectorElemental& elvec, const CurrentFE& fe_p, const CurrentFE& fe_u, int iblock );
 
 //! Assembly for the source term \f$ \int c v \f$ where \f$c\f$ is a given by the values in the quadrature nodes.
 /*!
@@ -564,7 +567,7 @@ void source_gradpv(Real alpha, VectorElemental& pLoc,  VectorElemental& elvec, c
   @param currentFe The currentFE associated to the cell where to assemble
   @param iblock The component of v that is concerned
 */
-void source_mass(const std::vector<Real>& constant, VectorElemental& elvec, const CurrentFE& currentFe, const int& iblock);
+void source_mass (const std::vector<Real>& constant, VectorElemental& elvec, const CurrentFE& currentFe, const int& iblock);
 
 //! Assembly for the source term \f$ \int \nabla c \cdot \nabla v \f$ where \f$c\f$ is a given by the values in the quadrature nodes.
 /*!
@@ -576,7 +579,7 @@ void source_mass(const std::vector<Real>& constant, VectorElemental& elvec, cons
   @param currentFe The currentFE associated to the cell where to assemble
   @param iblock The component of v that is concerned
 */
-void source_stiff(const std::vector<Real>& constant, VectorElemental& elvec, const CurrentFE& currentFe, const int& iblock);
+void source_stiff (const std::vector<Real>& constant, VectorElemental& elvec, const CurrentFE& currentFe, const int& iblock);
 
 //!@}
 //!@name Elementary operations for the interior penalty stabilization
@@ -584,43 +587,43 @@ void source_stiff(const std::vector<Real>& constant, VectorElemental& elvec, con
 //
 
 //! \f$ coef < \nabla p1, \nabla q2 >\f$
-void ipstab_grad( const Real coef, MatrixElemental& elmat,
-                  const CurrentFE& fe1, const CurrentFE& fe2,
-                  const CurrentBoundaryFE& bdfe, int iblock = 0, int jblock = 0 );
+void ipstab_grad ( const Real coef, MatrixElemental& elmat,
+                   const CurrentFE& fe1, const CurrentFE& fe2,
+                   const CurrentFEManifold& bdfe, int iblock = 0, int jblock = 0 );
 
 //! \f$ coef < \nabla u1, \nabla v2 >\f$
-void ipstab_grad( const Real coef, MatrixElemental& elmat,
-                  const CurrentFE& fe1, const CurrentFE& fe2,
-                  const CurrentBoundaryFE& bdfe, int iblock, int jblock, int nb );
+void ipstab_grad ( const Real coef, MatrixElemental& elmat,
+                   const CurrentFE& fe1, const CurrentFE& fe2,
+                   const CurrentFEManifold& bdfe, int iblock, int jblock, int nb );
 
 //! \f$ coef < \nabla\cdot  u1, \nabla\cdot  v2 >\f$
-void ipstab_div( const Real coef, MatrixElemental& elmat,
-                 const CurrentFE& fe1, const CurrentFE& fe2,
-                 const CurrentBoundaryFE& bdfe, int iblock = 0, int jblock = 0 );
+void ipstab_div ( const Real coef, MatrixElemental& elmat,
+                  const CurrentFE& fe1, const CurrentFE& fe2,
+                  const CurrentFEManifold& bdfe, int iblock = 0, int jblock = 0 );
 //! \f$ coef < \beta1 . \nabla u1, \beta2 . \nabla v2 >\f$
-void ipstab_bgrad( const Real coef, MatrixElemental& elmat,
-                   const CurrentFE& fe1, const CurrentFE& fe2,
-                   const VectorElemental& beta, const CurrentBoundaryFE& bdfe,
-                   int iblock, int jblock, int nb );
-//! \f$ coef < |\beta . n|^2 / |\beta| \nabla p1, \nabla q2 >\f$
-void ipstab_bagrad( const Real coef, MatrixElemental& elmat,
+void ipstab_bgrad ( const Real coef, MatrixElemental& elmat,
                     const CurrentFE& fe1, const CurrentFE& fe2,
-                    const VectorElemental& beta, const CurrentBoundaryFE& bdfe,
-                    int iblock = 0, int jblock = 0 );
+                    const VectorElemental& beta, const CurrentFEManifold& bdfe,
+                    int iblock, int jblock, int nb );
+//! \f$ coef < |\beta . n|^2 / |\beta| \nabla p1, \nabla q2 >\f$
+void ipstab_bagrad ( const Real coef, MatrixElemental& elmat,
+                     const CurrentFE& fe1, const CurrentFE& fe2,
+                     const VectorElemental& beta, const CurrentFEManifold& bdfe,
+                     int iblock = 0, int jblock = 0 );
 
 //!\f$ coef < |\beta\cdot n| \nabla p1, \nabla q2 >\f$
 //! p1 lives in fe1
 //! q2 lives in fe2
 //! beta lives in fe3
 
-void ipstab_bagrad( const Real           coef,
-                    MatrixElemental&             elmat,
-                    const CurrentFE&     fe1,
-                    const CurrentFE&     fe2,
-                    const CurrentFE&     fe3,
-                    const VectorElemental&       beta,
-                    const CurrentBoundaryFE&   bdfe,
-                    int iblock = 0, int jblock = 0 );
+void ipstab_bagrad ( const Real           coef,
+                     MatrixElemental&             elmat,
+                     const CurrentFE&     fe1,
+                     const CurrentFE&     fe2,
+                     const CurrentFE&     fe3,
+                     const VectorElemental&       beta,
+                     const CurrentFEManifold&   bdfe,
+                     int iblock = 0, int jblock = 0 );
 
 //!@}
 ///////////////////////////////////////
@@ -628,14 +631,14 @@ void ipstab_bagrad( const Real           coef,
 
 ////////////////////////////////////////
 //! Convective term with a local vector coefficient (useful for Navier-Stokes problem)
-void grad( const int icoor, const VectorElemental& vec_loc, MatrixElemental& elmat,
-           const CurrentFE& fe1, const CurrentFE& fe2,
-           int iblock, int jblock );
+void grad ( const int icoor, const VectorElemental& vec_loc, MatrixElemental& elmat,
+            const CurrentFE& fe1, const CurrentFE& fe2,
+            int iblock, int jblock );
 
 //! Convective term with a local vector coefficient (useful for Navier-Stokes problem+adv-diff)
-void grad( const int icoor, const VectorElemental& vec_loc, MatrixElemental& elmat,
-           const CurrentFE& fe1, const CurrentFE& fe2, const CurrentFE& fe3,
-           int iblock = 0, int jblock = 0 );
+void grad ( const int icoor, const VectorElemental& vec_loc, MatrixElemental& elmat,
+            const CurrentFE& fe1, const CurrentFE& fe2, const CurrentFE& fe3,
+            int iblock = 0, int jblock = 0 );
 
 //! Conective term with a local vector given by quadrature node
 /*!
@@ -643,38 +646,38 @@ void grad( const int icoor, const VectorElemental& vec_loc, MatrixElemental& elm
   If there are nQ quadrature nodes, the i-th component (starting from 0) of the velocity in the iq-th quadrature node
   (also starting from 0) has to be stored in the ( i*nQ + iq)-th element of the std::vector.
 */
-void grad( const int& icoor, const std::vector<Real>& localVector, MatrixElemental& elmat,
-           const CurrentFE& currentFE1, const CurrentFE& currentFE2,
-           const int& iblock=0, const int& jblock=0);
+void grad ( const int& icoor, const std::vector<Real>& localVector, MatrixElemental& elmat,
+            const CurrentFE& currentFE1, const CurrentFE& currentFE2,
+            const int& iblock = 0, const int& jblock = 0);
 
 //! Convective term with a local vector coefficient for Navier-Stokes problem in Skew-Symmetric form
-void grad_ss( const int icoor, const VectorElemental& vec_loc, MatrixElemental& elmat,
-              const CurrentFE& fe1, const CurrentFE& fe2,
-              int iblock = 0, int jblock = 0 );
+void grad_ss ( const int icoor, const VectorElemental& vec_loc, MatrixElemental& elmat,
+               const CurrentFE& fe1, const CurrentFE& fe2,
+               int iblock = 0, int jblock = 0 );
 
 //! StreamLine Diffusion
-void stiff_sd( Real coef, const VectorElemental& vec_loc, MatrixElemental& elmat, const CurrentFE& fe,
-               const CurrentFE& fe2, int iblock = 0, int jblock = 0, int nb = 1 );
+void stiff_sd ( Real coef, const VectorElemental& vec_loc, MatrixElemental& elmat, const CurrentFE& fe,
+                const CurrentFE& fe2, int iblock = 0, int jblock = 0, int nb = 1 );
 
 /////////////////////////////////////////////
 //
 //! source  \f$ \int fct \phi_i \f$
 //
 template <typename UsrFct>
-void source( const UsrFct& fct, VectorElemental& elvec, const CurrentFE& fe, int iblock = 0 )
+void source ( const UsrFct& fct, VectorElemental& elvec, const CurrentFE& fe, int iblock = 0 )
 {
     UInt i, ig;
-    VectorElemental::vector_view vec = elvec.block( iblock );
+    VectorElemental::vector_view vec = elvec.block ( iblock );
     Real s;
     for ( i = 0; i < fe.nbFEDof(); i++ )
     {
         s = 0;
         for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
-            s += fe.phi( i, ig ) * fct( fe.quadPt( ig, 0 ), fe.quadPt( ig, 1 ), fe.quadPt( ig, 2 ),
-                                        iblock) * fe.weightDet( ig );
+            s += fe.phi ( i, ig ) * fct ( fe.quadPt ( ig, 0 ), fe.quadPt ( ig, 1 ), fe.quadPt ( ig, 2 ),
+                                          iblock) * fe.weightDet ( ig );
         }
-        vec( i ) += s;
+        vec ( i ) += s;
     }
 }
 
@@ -683,33 +686,33 @@ void source( const UsrFct& fct, VectorElemental& elvec, const CurrentFE& fe, int
 //! source  \f$ \int fct(t) \phi_i\f$
 //
 template <typename UsrFct>
-void source( const UsrFct& fct, VectorElemental& elvec, const CurrentFE& fe, Real t, int iblock = 0 )
+void source ( const UsrFct& fct, VectorElemental& elvec, const CurrentFE& fe, Real t, int iblock = 0 )
 {
     UInt i, ig;
-    VectorElemental::vector_view vec = elvec.block( iblock );
+    VectorElemental::vector_view vec = elvec.block ( iblock );
     Real s;
     for ( i = 0; i < fe.nbFEDof(); i++ )
     {
         s = 0;
         for ( ig = 0; ig < fe.nbQuadPt(); ig++ )
         {
-            s += fe.phi( i, ig ) * fct(t, fe.quadPt( ig, 0 ), fe.quadPt( ig, 1 ), fe.quadPt( ig, 2 ),
-                                       iblock ) * fe.weightDet( ig );
+            s += fe.phi ( i, ig ) * fct (t, fe.quadPt ( ig, 0 ), fe.quadPt ( ig, 1 ), fe.quadPt ( ig, 2 ),
+                                         iblock ) * fe.weightDet ( ig );
         }
-        vec( i ) += s;
+        vec ( i ) += s;
     }
 }
 
 
-void source( Real coef, VectorElemental& f, VectorElemental& elvec, const CurrentFE& fe,
-             int fblock = 0, int eblock = 0 );
+void source ( Real coef, VectorElemental& f, VectorElemental& elvec, const CurrentFE& fe,
+              int fblock = 0, int eblock = 0 );
 
-void source_fhn( Real coef_f, Real coef_a, VectorElemental& u, VectorElemental& elvec, const CurrentFE& fe,
-                 int fblock = 0, int eblock = 0 );
+void source_fhn ( Real coef_f, Real coef_a, VectorElemental& u, VectorElemental& elvec, const CurrentFE& fe,
+                  int fblock = 0, int eblock = 0 );
 
 //! \f$( beta\cdot\nabla u^k, v  )\f$
-void source_advection( const Real& coefficient, const VectorElemental& beta_loc, const VectorElemental& uk_loc,
-                       VectorElemental& elvec, const CurrentFE& fe );
+void source_advection ( const Real& coefficient, const VectorElemental& beta_loc, const VectorElemental& uk_loc,
+                        VectorElemental& elvec, const CurrentFE& fe );
 
 //!@name Shape derivative terms for Newton FSI
 //!@{
@@ -718,25 +721,25 @@ void source_advection( const Real& coefficient, const VectorElemental& beta_loc,
 //
 //! Remark: convect = \f$u^n-w^k\f$
 //
-void source_mass1( Real coef,
-                   const VectorElemental& uk_loc,
-                   const VectorElemental& wk_loc,
-                   const VectorElemental& convect_loc,
-                   const VectorElemental& d_loc,
-                   VectorElemental& elvec,
-                   const CurrentFE& fe );
+void source_mass1 ( Real coef,
+                    const VectorElemental& uk_loc,
+                    const VectorElemental& wk_loc,
+                    const VectorElemental& convect_loc,
+                    const VectorElemental& d_loc,
+                    VectorElemental& elvec,
+                    const CurrentFE& fe );
 
 //
 //! \f$coef \cdot ( \nabla u^k dw, v  )\f$ for Newton FSI
 //
 //
-void source_mass2( Real coef, const VectorElemental& uk_loc, const VectorElemental& dw_loc,
-                   VectorElemental& elvec, const CurrentFE& fe );
-
-
-
-void  source_mass3( Real coef, const VectorElemental& un_loc, const VectorElemental& uk_loc, const VectorElemental& d_loc,
+void source_mass2 ( Real coef, const VectorElemental& uk_loc, const VectorElemental& dw_loc,
                     VectorElemental& elvec, const CurrentFE& fe );
+
+
+
+void  source_mass3 ( Real coef, const VectorElemental& un_loc, const VectorElemental& uk_loc, const VectorElemental& d_loc,
+                     VectorElemental& elvec, const CurrentFE& fe );
 
 
 
@@ -745,14 +748,14 @@ void  source_mass3( Real coef, const VectorElemental& un_loc, const VectorElemen
 //
 //! \f$coef \cdot ( [-p^k I + 2\mu e(u^k)] [I\nabla\cdot d - (\nabla d)^T] , \nabla v  )\f$ for Newton FSI
 //
-void source_stress( Real coef, Real mu, const VectorElemental& uk_loc, const VectorElemental& pk_loc,
-                    const VectorElemental& d_loc, VectorElemental& elvec, const CurrentFE& fe_u,
-                    const CurrentFE& fe_p );
+void source_stress ( Real coef, Real mu, const VectorElemental& uk_loc, const VectorElemental& pk_loc,
+                     const VectorElemental& d_loc, VectorElemental& elvec, const CurrentFE& fe_u,
+                     const CurrentFE& fe_p );
 
 //
 //! \f$+ \mu ( \nabla u^k \nabla d + [\nabla d]^T[\nabla u^k]^T : \nabla v )\f$
 //
-void source_stress2( Real coef, const VectorElemental& uk_loc, const VectorElemental& d_loc, VectorElemental& elvec, const CurrentFE& fe_u );
+void source_stress2 ( Real coef, const VectorElemental& uk_loc, const VectorElemental& d_loc, VectorElemental& elvec, const CurrentFE& fe_u );
 
 
 
@@ -766,7 +769,7 @@ void source_stress2( Real coef, const VectorElemental& uk_loc, const VectorEleme
  *Note that the term \c source_mass2\c is not considered if the fluid domain velocity \f w\f is trated explicitly.
  *This method is currently tested only for the P1-P1 stabilized space discretization.
  */
-void shape_terms(
+void shape_terms (
     //const VectorElemental& d_loc,
     Real coef,
     Real mu,
@@ -780,29 +783,29 @@ void shape_terms(
     const CurrentFE& fe_p,
     ID mmDim,
     MatrixElemental& /*elmatP*/,
-    int iblock=0,
-    bool wImplicit=false,
-    Real alpha=0.,
-    boost::shared_ptr<MatrixElemental> elmat_convect=boost::shared_ptr<MatrixElemental>()
+    int iblock = 0,
+    bool wImplicit = false,
+    Real alpha = 0.,
+    boost::shared_ptr<MatrixElemental> elmat_convect = boost::shared_ptr<MatrixElemental>()
 );
 
 //
 //! \f$coef * (  (\nabla u^k):[I\nabla\cdot  d - (\nabla d)^T] , q  )\f$ for Newton FSI
 //
-void source_press( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat,
-                   const CurrentFE& fe_u, const CurrentFE& fe_p, ID mmDim, int iblock=0 );
+void source_press ( Real coef, const VectorElemental& uk_loc, MatrixElemental& elmat,
+                    const CurrentFE& fe_u, const CurrentFE& fe_p, ID mmDim, int iblock = 0 );
 
 
 
 //
 //! \f$coef * (  (\nabla u^k):[I\nabla\cdot  d - (\nabla d)^T] , q  )\f$ for Newton FSI
 //
-void source_press( Real coef, const VectorElemental& uk_loc, const VectorElemental& d_loc, VectorElemental& elvec,
-                   const CurrentFE& fe_u, const CurrentFE& fe_p, int iblock=0 );
+void source_press ( Real coef, const VectorElemental& uk_loc, const VectorElemental& d_loc, VectorElemental& elvec,
+                    const CurrentFE& fe_u, const CurrentFE& fe_p, int iblock = 0 );
 
 
-void source_press2( Real coef, const VectorElemental& p_loc, const VectorElemental& d_loc, VectorElemental& elvec,
-                    const CurrentFE& fe, int iblock=0 );
+void source_press2 ( Real coef, const VectorElemental& p_loc, const VectorElemental& d_loc, VectorElemental& elvec,
+                     const CurrentFE& fe, int iblock = 0 );
 //@}
 //!@name Mass matrix
 //!@{
@@ -812,15 +815,15 @@ void source_press2( Real coef, const VectorElemental& p_loc, const VectorElement
   (i.e. \f$K^{-1} = coef \cdot Id\f$, coef being the inverse of the permeability).
 */
 
-void mass_divw( Real coef, const VectorElemental& w_loc, MatrixElemental& elmat, const CurrentFE& fe,
-                int iblock, int jblock, UInt nb );
+void mass_divw ( Real coef, const VectorElemental& w_loc, MatrixElemental& elmat, const CurrentFE& fe,
+                 int iblock, int jblock, UInt nb );
 
 //! Idem \c mass_divw \c, but with coefficient given by quadrature node
-void mass_divw(const std::vector<Real>& coef, const VectorElemental& w_loc, MatrixElemental& elmat, const CurrentFE& fe,
-               int iblock, int jblock, UInt nb );
+void mass_divw (const std::vector<Real>& coef, const VectorElemental& w_loc, MatrixElemental& elmat, const CurrentFE& fe,
+                int iblock, int jblock, UInt nb );
 
 
-void mass_gradu( Real coef, const VectorElemental& u0_loc, MatrixElemental& elmat, const CurrentFE& fe );
+void mass_gradu ( Real coef, const VectorElemental& u0_loc, MatrixElemental& elmat, const CurrentFE& fe );
 
 
 
@@ -832,8 +835,8 @@ void mass_gradu( Real coef, const VectorElemental& u0_loc, MatrixElemental& elma
 /*!
   Cholesky decomposition and solution for a KNM matrix.
 */
-void choldc( KNM<Real> &a, KN<Real> &p );
-void cholsl( KNM<Real> &a, KN<Real> &p, KN<Real> &b, KN<Real> &x );
+void choldc ( KNM<Real>& a, KN<Real>& p );
+void cholsl ( KNM<Real>& a, KN<Real>& p, KN<Real>& b, KN<Real>& x );
 //!@}
 
 
@@ -856,8 +859,8 @@ for \f$ q \in L^2(K) \f$, \f$ w \in H(div, K) \f$ and \f$ \mathrm{coef} \f$ a re
 @param iblock Subarray index where to store the integral just computed.
 @param jblock Subarray index where to store the integral just computed.
 */
-void grad_Hdiv( Real coef, MatrixElemental& elmat, const CurrentFE& dualFE, const CurrentFE& primalFE,
-                int iblock = 0, int jblock = 0 );
+void grad_Hdiv ( Real coef, MatrixElemental& elmat, const CurrentFE& dualFE, const CurrentFE& primalFE,
+                 int iblock = 0, int jblock = 0 );
 
 // Divergence matrix.
 /*!
@@ -874,8 +877,8 @@ for \f$ q \in L^2(K) \f$, \f$ w \in H(div, K) \f$ and \f$ \mathrm{coef} \f$ a re
 @param iblock Subarray index where to store the integral just computed.
 @param jblock Subarray index where to store the integral just computed.
 */
-void div_Hdiv( Real coef, MatrixElemental& elmat, const CurrentFE& dualFE, const CurrentFE& primalFE,
-               int iblock = 0, int jblock = 0 );
+void div_Hdiv ( Real coef, MatrixElemental& elmat, const CurrentFE& dualFE, const CurrentFE& primalFE,
+                int iblock = 0, int jblock = 0 );
 
 // Hybrid variable times dual dot product outward unit normal.
 /*!
@@ -912,8 +915,8 @@ REFERENCE HEXA  -> 6 REFERENCE QUAD.
 TP_TP_Hdiv(coef, elmat, hybridFE, iblock, jblock);
 \endcode
 */
-void TP_VdotN_Hdiv( Real coef, MatrixElemental& elmat, const ReferenceFEHybrid& hybridFE,
-                    const ReferenceFEHybrid& dualDotNFE, int iblock = 0, int jblock = 0 );
+void TP_VdotN_Hdiv ( Real coef, MatrixElemental& elmat, const ReferenceFEHybrid& hybridFE,
+                     const ReferenceFEHybrid& dualDotNFE, int iblock = 0, int jblock = 0 );
 
 // Mass matrix for the hybrid variable.
 /*!
@@ -944,7 +947,7 @@ REFERENCE HEXA  -> 6 REFERENCE QUAD.
 @param jblock Subarray index where to store the integral just computed.
 @note This is an obsolete function, call TP_VdotN_Hdiv instead.
 */
-void TP_TP_Hdiv( Real coef, MatrixElemental& elmat, const ReferenceFEHybrid& hybridFE, int iblock = 0, int jblock = 0);
+void TP_TP_Hdiv ( Real coef, MatrixElemental& elmat, const ReferenceFEHybrid& hybridFE, int iblock = 0, int jblock = 0);
 
 // Mass matrix for dual variable with constant real permeability.
 /*!
@@ -965,7 +968,7 @@ Weighted Mass matrix with a permeability tensor which is a constant scalar matri
 @param jblock Subarray index where to store the integral just computed.
 @note \f$ \mathrm{coeff} \f$ is the inverse of the permeability coefficient.
 */
-void mass_Hdiv( Real coef, MatrixElemental& elmat, const CurrentFE& dualFE, int iblock = 0, int jblock = 0 );
+void mass_Hdiv ( Real coef, MatrixElemental& elmat, const CurrentFE& dualFE, int iblock = 0, int jblock = 0 );
 
 // Mass matrix for dual variable with constant matrix permeability.
 /*!
@@ -986,8 +989,8 @@ and already inverted, with Lapack LU or Choleski for instance.
 @param jblock Subarray index where to store the integral just computed.
 @note \f$ \mathrm{Invperm} \f$ is the inverse of the permeability matrix.
 */
-void mass_Hdiv( Matrix const& Invperm, MatrixElemental& elmat, const CurrentFE& dualFE,
-                int iblock = 0, int jblock = 0 );
+void mass_Hdiv ( Matrix const& Invperm, MatrixElemental& elmat, const CurrentFE& dualFE,
+                 int iblock = 0, int jblock = 0 );
 
 // Mass matrix for dual variable with real function permeability.
 /*!
@@ -1008,8 +1011,8 @@ permeability that is provided directly \f$ \mathrm{InvpermFun} = K^{-1} \f$.
 @param jblock Subarray index where to store the integral just computed.
 @note \f$ \mathrm{InvpermFun} \f$ is the inverse of the permeability function.
 */
-void mass_Hdiv( Real ( *InvpermFun ) ( const Real&, const Real&, const Real& ),
-                MatrixElemental& elmat, const CurrentFE& dualFE, int iblock = 0, int jblock = 0 );
+void mass_Hdiv ( Real ( *InvpermFun ) ( const Real&, const Real&, const Real& ),
+                 MatrixElemental& elmat, const CurrentFE& dualFE, int iblock = 0, int jblock = 0 );
 
 // Source vector for dual variable with constant vector source.
 /*!
@@ -1025,7 +1028,7 @@ for \f$ w \in H(div, K) \f$ and \f$ g \f$ a constant vector.
 @param dualFE Current dual finite element in \f$ H(div, K) \f$.
 @param iblock Subarray index where to store the integral just computed.
 */
-void source_Hdiv( const Vector& source , VectorElemental& elvec, const CurrentFE& dualFE, int iblock = 0 );
+void source_Hdiv ( const Vector& source , VectorElemental& elvec, const CurrentFE& dualFE, int iblock = 0 );
 
 //!@}
 

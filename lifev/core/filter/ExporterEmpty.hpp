@@ -59,17 +59,22 @@ public:
     //! @name Constructors
     //@{
     ExporterEmpty();
-    ExporterEmpty(const GetPot& dfile, meshPtr_Type mesh, const std::string& prefix, const int& procId);
-    ExporterEmpty(const GetPot& dfile, const std::string& prefix);
+    ExporterEmpty (const GetPot& dfile, meshPtr_Type mesh, const std::string& prefix, const int& procId);
+    ExporterEmpty (const GetPot& dfile, const std::string& prefix);
     //@}
 
     //! @name Public methods
     //@{
-    void postProcess(const Real& /*time*/) {}
-    void exportPID ( MeshPartitioner<MeshType> const & /*meshPart*/ ) {}
-    UInt importFromTime( const Real& /*time*/ ) { assert(false); return 0; }
-    void import(const Real& /*startTime*/, const Real& /*dt*/) {}
-    void import(const Real& /*startTime*/) {}
+    void postProcess (const Real& /*time*/) {}
+    void exportPID ( boost::shared_ptr<MeshType> /*mesh*/, boost::shared_ptr<Epetra_Comm> /*comm*/ ) {}
+    void exportRegionMarkerID ( boost::shared_ptr<MeshType> /*mesh*/, boost::shared_ptr<Epetra_Comm> /*comm*/  ) {}
+    UInt importFromTime ( const Real& /*time*/ )
+    {
+        assert (false);
+        return 0;
+    }
+    void import (const Real& /*startTime*/, const Real& /*dt*/) {}
+    void import (const Real& /*startTime*/) {}
     //@}
 
     //! @name Get methods
@@ -80,8 +85,8 @@ public:
 private:
     //! @name Private methods
     //@{
-    virtual void readScalar( ExporterData<MeshType>& /*dvar*/) {}
-    virtual void readVector( ExporterData<MeshType>& /*dvar*/) {}
+    virtual void readScalar ( ExporterData<MeshType>& /*dvar*/) {}
+    virtual void readVector ( ExporterData<MeshType>& /*dvar*/) {}
     //@}
 
 };
@@ -95,22 +100,22 @@ private:
 // ======================
 
 template<typename MeshType>
-ExporterEmpty<MeshType>::ExporterEmpty():
-        super()
+ExporterEmpty<MeshType>::ExporterEmpty() :
+    super()
 {
 }
 
 template<typename MeshType>
-ExporterEmpty<MeshType>::ExporterEmpty(const GetPot& dfile, meshPtr_Type mesh, const std::string& prefix,
-                                       const int& procId):
-        super(dfile, prefix)
+ExporterEmpty<MeshType>::ExporterEmpty (const GetPot& dfile, meshPtr_Type mesh, const std::string& prefix,
+                                        const int& procId) :
+    super (dfile, prefix)
 {
-    this->setMeshProcId(mesh, procId);
+    this->setMeshProcId (mesh, procId);
 }
 
 template<typename MeshType>
-ExporterEmpty<MeshType>::ExporterEmpty(const GetPot& dfile, const std::string& prefix):
-        super(dfile, prefix)
+ExporterEmpty<MeshType>::ExporterEmpty (const GetPot& dfile, const std::string& prefix) :
+    super (dfile, prefix)
 {
 }
 

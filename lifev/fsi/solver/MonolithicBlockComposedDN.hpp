@@ -73,7 +73,8 @@
 
 #include <lifev/fsi/solver/MonolithicBlockComposed.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! MonolithicBlockComposedDN - Short description of the class
 /*!
@@ -87,9 +88,9 @@ class MonolithicBlockComposedDN : public MonolithicBlockComposed
 public:
     typedef MonolithicBlockComposed super_Type;
 
-    MonolithicBlockComposedDN( const std::vector<Int>& flag, const std::vector<Int>& order):
-            super_Type( flag, order ),
-            M_blockPrecs()
+    MonolithicBlockComposedDN ( const std::vector<Int>& flag, const std::vector<Int>& order) :
+        super_Type ( flag, order ),
+        M_blockPrecs()
     {
     }
 
@@ -101,8 +102,8 @@ public:
       \param dataFile: GetPot data file
       \param section: string identifying the section in the data file
      */
-    void setDataFromGetPot( const GetPot& dataFile,
-                            const std::string& section );
+    void setDataFromGetPot ( const GetPot& dataFile,
+                             const std::string& section );
 
     //! Solves the preconditioned linear system
     /*!
@@ -112,7 +113,7 @@ public:
         @param result output result
         @param linearSolver the linear system
      */
-    int     solveSystem( const vector_Type& rhs, vector_Type& step, solverPtr_Type& linearSolver);
+    int     solveSystem ( const vector_Type& rhs, vector_Type& step, solverPtr_Type& linearSolver);
 
     //! Computes the coupling
     /*!
@@ -147,10 +148,12 @@ public:
       the subproblems
       @param numerationInterface vector containing the correspondence of the Lagrange multipliers with the interface dofs
      */
-    virtual void coupler(mapPtr_Type& map,
-                         const std::map<ID, ID>& locDofMap,
-                         const vectorPtr_Type& numerationInterface,
-                         const Real& timeStep);
+    virtual void coupler (mapPtr_Type& map,
+                          const std::map<ID, ID>& locDofMap,
+                          const vectorPtr_Type& numerationInterface,
+                          const Real& timeStep,
+                          const Real& coefficient,
+                          const Real& rescaleFactor);
 
     //!pushes back the preconditioner for a block
     /*!
@@ -158,7 +161,7 @@ public:
       which computes the AAS preconditioner for the input matrix
       \param Mat: input matrix
      */
-    virtual void    push_back_precs( matrixPtr_Type& Mat);
+    virtual void    push_back_precs ( matrixPtr_Type& Mat);
 
     //! returns the true if the preconditioner has at leas one factor computed
     bool set()
@@ -169,10 +172,15 @@ public:
     /*! copies the shared_ptr to the communicator in the member M_comm and builds the empty ComposedPreconditioneronditioner
     M_blockPrecs
     */
-    void setComm( boost::shared_ptr<Epetra_Comm> comm )
+    void setComm ( boost::shared_ptr<Epetra_Comm> comm )
     {
         M_comm = comm;
-        M_blockPrecs.reset( new PreconditionerComposed(M_comm));
+        M_blockPrecs.reset ( new PreconditionerComposed (M_comm) );
+    }
+
+    const std::vector<boost::shared_ptr<Preconditioner> >& blockPrecs() const
+    {
+        return M_blockPrecs->composedPreconditionerPtr()->Operator();
     }
 
     //@}
@@ -183,9 +191,9 @@ public:
     {
         const Int order[] = { MonolithicBlockComposed::solid, MonolithicBlockComposed::fluid};
         const Int couplingsDN[] = { 0, 7};
-        const std::vector<Int> couplingVectorDN(couplingsDN, couplingsDN+2);
-        const std::vector<Int> orderVector(order, order+2);
-        return new MonolithicBlockComposedDN(couplingVectorDN, orderVector);
+        const std::vector<Int> couplingVectorDN (couplingsDN, couplingsDN + 2);
+        const std::vector<Int> orderVector (order, order + 2);
+        return new MonolithicBlockComposedDN (couplingVectorDN, orderVector);
     }
 
 
@@ -193,28 +201,82 @@ public:
     {
         const Int order[] = { MonolithicBlockComposed::fluid, MonolithicBlockComposed::solid};
         const Int couplingsDN2[] = { 8, 6};
-        const std::vector<Int> couplingVectorDN2(couplingsDN2, couplingsDN2+2);
-        const std::vector<Int> orderVector(order, order+2);
-        return new MonolithicBlockComposedDN(couplingVectorDN2, orderVector);
+        const std::vector<Int> couplingVectorDN2 (couplingsDN2, couplingsDN2 + 2);
+        const std::vector<Int> orderVector (order, order + 2);
+        return new MonolithicBlockComposedDN (couplingVectorDN2, orderVector);
     }
 
     static MonolithicBlock* createComposedDNGI()
     {
-        const Int order[] = { MonolithicBlockComposed::solid, MonolithicBlockComposed::fluid, MonolithicBlockComposed::mesh };
-        const Int couplingsDNGI[] = { 0, 7, 16 };
-        const std::vector<Int> couplingVectorDNGI(couplingsDNGI, couplingsDNGI+3);
-        const std::vector<Int> orderVector(order, order+3);
-        return new MonolithicBlockComposedDN( couplingVectorDNGI, orderVector );
+        //! Factorization in three:
+        /*!
+        - Solid: Neumann
+        | I | 0 | 0 | 0 |
+        |---+---+---+---|
+        | 0 | S | 0 | 0 |
+        |---+---+---+---|
+        | 0 | 0 | I | 0 |
+        |---+---+---+---|
+        | 0 | 0 | 0 | I |
+        - ALE: Dirichlet
+        | I |  0 | 0 | 0 |
+        |---+----+---+---|
+        | 0 |  I | 0 | 0 |
+        |---+----+---+---|
+        | 0 |  0 | I | 0 |
+        |---+----+---+---|
+        | 0 | -C | 0 | H |
+        - Fluid: Dirichlet
+        | F | 0     | C | SD |
+        |---+-------+---+----|
+        | 0 | S     | 0 | 0  |
+        |---+-------+---+----|
+        | C | -C/dt | 0 | 0  |
+        |---+-------+---+----|
+        | 0 | 0     | 0 | I  |
+             */
+        const Int order[] = { MonolithicBlockComposed::solid, MonolithicBlockComposed::mesh, MonolithicBlockComposed::fluid };
+        const Int couplingsDNGI[] = { 0/*solid*/, 7/*fluid*/, 16/*ALE*/ };
+        const std::vector<Int> couplingVectorDNGI (couplingsDNGI, couplingsDNGI + 3);
+        const std::vector<Int> orderVector (order, order + 3);
+        return new MonolithicBlockComposedDN ( couplingVectorDNGI, orderVector );
     }
 
 
     static MonolithicBlock* createComposedDN2GI()
     {
-        const Int order[] = { MonolithicBlockComposed::fluid, MonolithicBlockComposed::solid, MonolithicBlockComposed::mesh };
+        //! Factorization in three:
+        /*!
+        - Fluid: Dirichlet
+               | F | 0 | 0 | SD |
+               |---+---+---+----|
+               | 0 | I | 0 |  0 |
+               |---+---+---+----|
+               | C | 0 | I |  0 |
+               |---+---+---+----|
+               | 0 | 0 | 0 |  I |
+        - Solid: Neumann
+               | I |     0 | 0 | 0 |
+               |---+-------+---+---|
+               | 0 |     S | C | 0 |
+               |---+-------+---+---|
+               | 0 | -C/dt | 0 | 0 |
+               |---+-------+---+---|
+               | 0 |     0 | 0 | I |
+        - ALE: Dirichlet
+               | I |  0 | 0 | 0 |
+               |---+----+---+---|
+               | 0 |  I | 0 | 0 |
+               |---+----+---+---|
+               | 0 |  0 | I | 0 |
+               |---+----+---+---|
+               | 0 | -C | 0 | H |
+             */
+        const Int order[] = {   MonolithicBlockComposed::fluid, MonolithicBlockComposed::solid, MonolithicBlockComposed::mesh };
         const Int couplingsDN2GI[] = { 8, 6, 16 };
-        const std::vector<Int> couplingVectorDN2GI(couplingsDN2GI, couplingsDN2GI+3);
-        const std::vector<Int> orderVector(order, order+3);
-        return new MonolithicBlockComposedDN( couplingVectorDN2GI, orderVector );
+        const std::vector<Int> couplingVectorDN2GI (couplingsDN2GI, couplingsDN2GI + 3);
+        const std::vector<Int> orderVector (order, order + 3);
+        return new MonolithicBlockComposedDN ( couplingVectorDN2GI, orderVector );
     }
 
     //@}
@@ -227,7 +289,7 @@ protected:
     /*!
       Replaces the preconditioner in M_blockPrecs with another one that is already constructed
     */
-    virtual void    replace_precs( matrixPtr_Type& Mat, UInt position);
+    virtual void    replace_precs ( matrixPtr_Type& Mat, UInt position);
     //@}
 
     //! @name Protected Members

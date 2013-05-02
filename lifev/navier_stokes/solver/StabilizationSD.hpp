@@ -77,12 +77,12 @@ public:
      * @param quadRule QuadratureRule     quadrature rule for the integration of the stabilization variational forms
      * @param viscosity viscosity   fluid viscosity  @f$\nu@f$
      */
-    StabilizationSD( const GetPot&   dataFile,
-                     const mesh_Type&     mesh,
-                     const dof_Type&      dof,
-                     const ReferenceFE&    refFE,
-                     const QuadratureRule& quadRule,
-                     Real      viscosity);
+    StabilizationSD ( const GetPot&   dataFile,
+                      const mesh_Type&     mesh,
+                      const dof_Type&      dof,
+                      const ReferenceFE&    refFE,
+                      const QuadratureRule& quadRule,
+                      Real      viscosity);
     //! ~Destructor
     virtual ~StabilizationSD() {};
     //@}
@@ -107,7 +107,7 @@ public:
      *  </ol>
      *  Both high Pechlet numbers and inf-sup incompatible FEM are stabilized.
      *
-     *	PREREQUISITE: The velocity and the pressure field should belong to the same finite element space
+     *  PREREQUISITE: The velocity and the pressure field should belong to the same finite element space
      *
      *  Parameters are the followings:
      *  @param dt     Real   timestep (INPUT)
@@ -115,7 +115,7 @@ public:
      *  @param state  VectorType velocity field for the linearization of the stabilization (INPUT)
      */
     template<typename MatrixType, typename VectorType>
-    void applySUPG(const Real dt, MatrixType& matrix, const VectorType& state );
+    void applySUPG (const Real dt, MatrixType& matrix, const VectorType& state );
 
     //! compute the SD stabilization terms and add them into the Momentum matrix
     /*!
@@ -126,7 +126,7 @@ public:
      *  @param state  VectorType velocity field for the linearization of the stabilization
      */
     template<typename MatrixType, typename VectorType>
-    void applySD(const Real dt, MatrixType& matrix, const VectorType& state );
+    void applySD (const Real dt, MatrixType& matrix, const VectorType& state );
 
     //! compute the SUPG stabilization terms and add them into the right and side
     /*!
@@ -143,19 +143,25 @@ public:
      *  @param time   REAL   the actual time in which source should be evaluated
      */
     template <typename VectorType, typename SourceType >
-    void applyRHS(const Real dt, VectorType& vector, const VectorType& state,
-                  const SourceType& source, const Real& time);
+    void applyRHS (const Real dt, VectorType& vector, const VectorType& state,
+                   const SourceType& source, const Real& time);
 
     //! Display class informations
-    void showMe(std::ostream & output = std::cout) const;
+    void showMe (std::ostream& output = std::cout) const;
     //@}
 
     //! @name Set Methods
     //@{
     //! Set the stabilization parameter @f$\gamma_\beta@f$ for @f$( \beta \nabla \mathbf{u} , \beta \nabla \mathbf{v})@f$
-    void setGammaBeta (const Real & gammaBeta) { M_gammaBeta  = gammaBeta;}
+    void setGammaBeta (const Real& gammaBeta)
+    {
+        M_gammaBeta  = gammaBeta;
+    }
     //! Set the stabilization parameter @f$\gamma_d@f$ for @f$( div \mathbf{u} , div \nabla \mathbf{v})@f$
-    void setGammaDiv  (const Real & gammaDiv)  { M_gammaDiv   = gammaDiv;}
+    void setGammaDiv  (const Real& gammaDiv)
+    {
+        M_gammaDiv   = gammaDiv;
+    }
     //@}
 private:
 
@@ -164,7 +170,7 @@ private:
     //! Default Constructor
     StabilizationSD();
     //! Copy Constructor
-    StabilizationSD(const StabilizationSD<mesh_Type, dof_Type> & original);
+    StabilizationSD (const StabilizationSD<mesh_Type, dof_Type>& original);
     //@}
 
     //! @name Private Methods
@@ -173,32 +179,32 @@ private:
 
     //! Compute the stabilization coefficients for each element
     template <typename VectorType>
-    void computeParameters(const Real dt, const UInt iVol, const VectorType& state,
-                           VectorElemental& beta,  Real& coeffBeta, Real& coeffDiv) const;
+    void computeParameters (const Real dt, const UInt iVol, const VectorType& state,
+                            VectorElemental& beta,  Real& coeffBeta, Real& coeffDiv) const;
 
     //!Evaluate the varf @f$(\beta \nabla \mathbf{u}, \beta \nabla \mathbf{v})@f$
-    void bgradu_bgradv(const Real& coef, VectorElemental& vel, ElemMat& elmat,const CurrentFE& fe,
-                       UInt iblock, UInt jblock, UInt nb) const;
+    void bgradu_bgradv (const Real& coef, VectorElemental& vel, ElemMat& elmat, const CurrentFE& fe,
+                        UInt iblock, UInt jblock, UInt nb) const;
 
     //! Evaluate the varf @f$(\Delta \mathbf{u}, \beta \nabla \mathbf{v})@f$
-    void lapu_bgradv(const Real& coef, VectorElemental& vel, MatrixElemental& elmat, const CurrentFE& fe,
-                     UInt iblock, UInt jblock, UInt nb) const;
+    void lapu_bgradv (const Real& coef, VectorElemental& vel, MatrixElemental& elmat, const CurrentFE& fe,
+                      UInt iblock, UInt jblock, UInt nb) const;
 
     //! Evaluate the varf @f$(\nabla p, \beta \nabla \mathbf{v})@f$
-    void gradp_bgradv(const Real& coef, VectorElemental& vel, MatrixElemental& elmat, const CurrentFE& fe) const;
+    void gradp_bgradv (const Real& coef, VectorElemental& vel, MatrixElemental& elmat, const CurrentFE& fe) const;
 
     //! Evaluate the varf @f$(\Delta \mathbf{u}, \nabla q)@f$
-    void lapu_gradq(const Real& coef, MatrixElemental& elmat, const CurrentFE& fe) const;
+    void lapu_gradq (const Real& coef, MatrixElemental& elmat, const CurrentFE& fe) const;
 
     //! Evaluate the varf @f$(f, \beta \nabla \mathbf{v})@f$
     template <typename SourceType>
-    void f_bgradv(const Real& coef, SourceType& source, VectorElemental& vel,
-                  VectorElemental& elvec, const CurrentFE& fe, UInt iblock, const Real& time) const;
+    void f_bgradv (const Real& coef, SourceType& source, VectorElemental& vel,
+                   VectorElemental& elvec, const CurrentFE& fe, UInt iblock, const Real& time) const;
 
     //! Evaluate the varf @f$(f, \nabla q)@f$
     template<typename SourceType>
-    void f_gradq(const Real& coef, SourceType& source, VectorElemental& elvec,
-                 const CurrentFE& fe, UInt iblock, const Real& time) const;
+    void f_gradq (const Real& coef, SourceType& source, VectorElemental& elvec,
+                  const CurrentFE& fe, UInt iblock, const Real& time) const;
     //@}
 
     //! @name Private Attributes
@@ -227,20 +233,20 @@ private:
 //=============================================================================
 
 template<typename MeshType, typename DofType>
-StabilizationSD<MeshType, DofType>::StabilizationSD( const GetPot& dataFile,
-                                                     const mesh_Type&     mesh,
-                                                     const dof_Type&      dof,
-                                                     const ReferenceFE&    refFE,
-                                                     const QuadratureRule& quadRule,
-                                                     Real            viscosity):
-        M_mesh( mesh ),
-        M_dof( dof ),
-        M_fe( refFE, getGeometricMap(mesh), quadRule ),
-        M_viscosity( viscosity ),
-        M_gammaBeta ( dataFile( "fluid/sdstab/gammaBeta", 0. ) ),
-        M_gammaDiv  ( dataFile( "fluid/sdstab/gammaDiv", 0. ) ),
-        M_elMat( M_fe.nbNode, nDimensions+1, nDimensions+1 ) ,
-        M_elVec( M_fe.nbNode, nDimensions+1 ) {}
+StabilizationSD<MeshType, DofType>::StabilizationSD ( const GetPot& dataFile,
+                                                      const mesh_Type&     mesh,
+                                                      const dof_Type&      dof,
+                                                      const ReferenceFE&    refFE,
+                                                      const QuadratureRule& quadRule,
+                                                      Real            viscosity) :
+    M_mesh ( mesh ),
+    M_dof ( dof ),
+    M_fe ( refFE, getGeometricMap (mesh), quadRule ),
+    M_viscosity ( viscosity ),
+    M_gammaBeta ( dataFile ( "fluid/sdstab/gammaBeta", 0. ) ),
+    M_gammaDiv  ( dataFile ( "fluid/sdstab/gammaDiv", 0. ) ),
+    M_elMat ( M_fe.nbNode, nDimensions + 1, nDimensions + 1 ) ,
+    M_elVec ( M_fe.nbNode, nDimensions + 1 ) {}
 
 //=============================================================================
 // Methods
@@ -248,10 +254,12 @@ StabilizationSD<MeshType, DofType>::StabilizationSD( const GetPot& dataFile,
 
 template<typename MeshType, typename DofType>
 template <typename MatrixType, typename VectorType>
-void StabilizationSD<MeshType, DofType>::applySUPG(const Real dt, MatrixType& matrix, const VectorType& state )
+void StabilizationSD<MeshType, DofType>::applySUPG (const Real dt, MatrixType& matrix, const VectorType& state )
 {
     if ( M_gammaBeta == 0 && M_gammaDiv == 0)
+    {
         return;
+    }
 
     Chrono chronoBeta;
     Chrono chronoUpdate;
@@ -262,18 +270,18 @@ void StabilizationSD<MeshType, DofType>::applySUPG(const Real dt, MatrixType& ma
     Real coeffBeta, coeffDiv;
 
     // local velocity
-    VectorElemental beta( M_fe.nbNode, nDimensions );
+    VectorElemental beta ( M_fe.nbNode, nDimensions );
 
     // loop on elements
     for ( UInt iVol = 0; iVol < M_mesh.numVolumes(); iVol++ )
     {
         chronoUpdate.start();
         // update current finite elements
-        M_fe.updateFirstSecondDeriv( M_mesh.volumeList( iVol ) );
+        M_fe.updateFirstSecondDeriv ( M_mesh.volumeList ( iVol ) );
 
         // stabilization parameters computation
         chronoBeta.start();
-        this->computeParameters(dt, iVol, state, beta, coeffBeta, coeffDiv);
+        this->computeParameters (dt, iVol, state, beta, coeffBeta, coeffDiv);
         chronoBeta.stop();
 
         chronoElemComp.start();
@@ -281,27 +289,27 @@ void StabilizationSD<MeshType, DofType>::applySUPG(const Real dt, MatrixType& ma
 
         // coeffBeta (\beta \nabla \mathbf{u} , \beta \nabla \mathbf{v})
         //
-        this->bgradu_bgradv(coeffBeta, beta, M_elMat, M_fe, 0, 0, nDimensions);
+        this->bgradu_bgradv (coeffBeta, beta, M_elMat, M_fe, 0, 0, nDimensions);
 
         // coeffBeta  ( (\beta \nabla \mathbf{u} , \nabla q) + (\nabla p , \beta \nabla \mathbf{v}) )
         //
-        this->gradp_bgradv(coeffBeta, beta, M_elMat, M_fe);
+        this->gradp_bgradv (coeffBeta, beta, M_elMat, M_fe);
 
         // coeffBeta (\nabla p , \nabla q)
         //
-        stiff( coeffBeta, M_elMat, M_fe, nDimensions, nDimensions );
+        stiff ( coeffBeta, M_elMat, M_fe, nDimensions, nDimensions );
 
         // coeffBeta ( - \mu L \mathbf{u} , \beta \nabla \mathbf{v} )
         //
-        this->lapu_bgradv(-coeffBeta*M_viscosity, beta, M_elMat, M_fe, 0, 0, nDimensions);
+        this->lapu_bgradv (-coeffBeta * M_viscosity, beta, M_elMat, M_fe, 0, 0, nDimensions);
 
         // coeffBeta ( - \mu L \mathbf{u} , \nabla q )
         //
-        this->lapu_gradq(-coeffBeta*M_viscosity, M_elMat, M_fe);
+        this->lapu_gradq (-coeffBeta * M_viscosity, M_elMat, M_fe);
 
         // coeffDiv ( div \mathbf{u} , div \nabla \mathbf{v})
         //
-        stiff_div(coeffDiv, M_elMat, M_fe );
+        stiff_div (coeffDiv, M_elMat, M_fe );
 
         chronoElemComp.stop();
 
@@ -309,23 +317,23 @@ void StabilizationSD<MeshType, DofType>::applySUPG(const Real dt, MatrixType& ma
         for ( UInt iComp = 0; iComp <= nDimensions; ++iComp )
             for ( UInt jComp = 0; jComp <= nDimensions; ++jComp )
                 //assemb_mat( matrix, M_elMat, M_fe, M_dof, iComp, jComp );
-                assembleMatrix( matrix, M_elMat, M_fe, M_dof,
-                                iComp, jComp,
-                                iComp*M_dof.numTotalDof(), jComp*M_dof.numTotalDof() );
+                assembleMatrix ( matrix, M_elMat, M_fe, M_dof,
+                                 iComp, jComp,
+                                 iComp * M_dof.numTotalDof(), jComp * M_dof.numTotalDof() );
         chronoAssembly.stop();
 
 
     }// loop on elements
 
-    debugStream(7100) << std::endl;
-    debugStream(7100) << "      Updating of element   done in "
-    << chronoUpdate.diffCumul()   << "s." << std::endl;
-    debugStream(7100) << "      Determination of parameters done in "
-    << chronoBeta.diffCumul()     << "s." << std::endl;
-    debugStream(7100) << "      Element computations  done in "
-    << chronoElemComp.diffCumul() << "s." << std::endl;
-    debugStream(7100) << "      Assembly              done in "
-    << chronoAssembly.diffCumul() << "s." << std::endl;
+    debugStream (7100) << std::endl;
+    debugStream (7100) << "      Updating of element   done in "
+                       << chronoUpdate.diffCumul()   << "s." << std::endl;
+    debugStream (7100) << "      Determination of parameters done in "
+                       << chronoBeta.diffCumul()     << "s." << std::endl;
+    debugStream (7100) << "      Element computations  done in "
+                       << chronoElemComp.diffCumul() << "s." << std::endl;
+    debugStream (7100) << "      Assembly              done in "
+                       << chronoAssembly.diffCumul() << "s." << std::endl;
 
 
 } // applySUPG(...)
@@ -333,10 +341,12 @@ void StabilizationSD<MeshType, DofType>::applySUPG(const Real dt, MatrixType& ma
 
 template<typename MeshType, typename DofType>
 template <typename MatrixType, typename VectorType>
-void StabilizationSD<MeshType, DofType>::applySD(const Real dt, MatrixType& matrix, const VectorType& state )
+void StabilizationSD<MeshType, DofType>::applySD (const Real dt, MatrixType& matrix, const VectorType& state )
 {
     if ( M_gammaBeta == 0 && M_gammaDiv == 0)
+    {
         return;
+    }
 
     Chrono chronoBeta;
     Chrono chronoUpdate;
@@ -347,18 +357,18 @@ void StabilizationSD<MeshType, DofType>::applySD(const Real dt, MatrixType& matr
     Real coeffBeta/*, coeffDiv*/;
 
     // local velocity
-    VectorElemental beta( M_fe.nbNode, nDimensions );
+    VectorElemental beta ( M_fe.nbNode, nDimensions );
 
     // loop on elements
     for ( UInt iVol = 0; iVol < M_mesh.numVolumes(); iVol++ )
     {
         chronoUpdate.start();
         // update current finite elements
-        M_fe.updateFirstSecondDeriv( M_mesh.volumeList( iVol ) );
+        M_fe.updateFirstSecondDeriv ( M_mesh.volumeList ( iVol ) );
 
         // stabilization parameters computation
         chronoBeta.start();
-        this->computeParameters(dt, iVol, state, beta, coeffBeta, coeffDiv);
+        this->computeParameters (dt, iVol, state, beta, coeffBeta, coeffDiv);
         chronoBeta.stop();
 
         chronoElemComp.start();
@@ -366,7 +376,7 @@ void StabilizationSD<MeshType, DofType>::applySD(const Real dt, MatrixType& matr
 
         // coeffBeta (\beta \nabla \mathbf{u} , \beta \nabla \mathbf{v})
         //
-        this->bgradu_bgradv(coeffBeta, beta, M_elMat, M_fe, 0, 0, nDimensions);
+        this->bgradu_bgradv (coeffBeta, beta, M_elMat, M_fe, 0, 0, nDimensions);
 
         // coeffBeta ( - \mu L \mathbf{u} , \beta \nabla \mathbf{v} )
         //
@@ -381,32 +391,36 @@ void StabilizationSD<MeshType, DofType>::applySD(const Real dt, MatrixType& matr
         chronoAssembly.start();
         for ( UInt iComp = 0; iComp < nDimensions; ++iComp )
             for ( UInt jComp = 0; jComp < nDimensions; ++jComp )
-                assemb_mat( matrix, M_elMat, M_fe, M_dof, iComp, jComp );
+            {
+                assemb_mat ( matrix, M_elMat, M_fe, M_dof, iComp, jComp );
+            }
         chronoAssembly.stop();
 
 
     }// loop on elements
 
-    debugStream(7100) << std::endl;
-    debugStream(7100) << "      Updating of element   done in "
-    << chronoUpdate.diffCumul()   << "s." << std::endl;
-    debugStream(7100) << "      Determination of parameters done in "
-    << chronoBeta.diffCumul()     << "s." << std::endl;
-    debugStream(7100) << "      Element computations  done in "
-    << chronoElemComp.diffCumul() << "s." << std::endl;
-    debugStream(7100) << "      Assembly              done in "
-    << chronoAssembly.diffCumul() << "s." << std::endl;
+    debugStream (7100) << std::endl;
+    debugStream (7100) << "      Updating of element   done in "
+                       << chronoUpdate.diffCumul()   << "s." << std::endl;
+    debugStream (7100) << "      Determination of parameters done in "
+                       << chronoBeta.diffCumul()     << "s." << std::endl;
+    debugStream (7100) << "      Element computations  done in "
+                       << chronoElemComp.diffCumul() << "s." << std::endl;
+    debugStream (7100) << "      Assembly              done in "
+                       << chronoAssembly.diffCumul() << "s." << std::endl;
 
 
 } // applySD(...)
 
 template<typename MeshType, typename DofType>
 template <typename VectorType, typename SourceType >
-void StabilizationSD<MeshType, DofType>::applyRHS(const Real dt, VectorType& vector, const VectorType& state,
-                                                  const SourceType& source, const Real& time)
+void StabilizationSD<MeshType, DofType>::applyRHS (const Real dt, VectorType& vector, const VectorType& state,
+                                                   const SourceType& source, const Real& time)
 {
     if ( M_gammaBeta == 0 )
+    {
         return;
+    }
 
 
     Chrono chronoBeta;
@@ -418,19 +432,19 @@ void StabilizationSD<MeshType, DofType>::applyRHS(const Real dt, VectorType& vec
     Real coeffBeta, coeffDiv;
 
     // local velocity
-    VectorElemental beta( M_fe.nbNode, nDimensions );
+    VectorElemental beta ( M_fe.nbNode, nDimensions );
 
     // loop on elements
     for ( UInt iVol = 0; iVol < M_mesh.numVolumes(); iVol++ )
     {
         chronoUpdate.start();
         // update current finite elements
-        M_fe.updateFirstDeriv( M_mesh.volumeList( iVol ) );
+        M_fe.updateFirstDeriv ( M_mesh.volumeList ( iVol ) );
         // local mesh parameters
         chronoUpdate.stop();
 
         chronoBeta.start();
-        this->computeParameters(dt, iVol, state, beta, coeffBeta, coeffDiv);
+        this->computeParameters (dt, iVol, state, beta, coeffBeta, coeffDiv);
         chronoBeta.stop();
 
         chronoElemComp.start();
@@ -438,44 +452,46 @@ void StabilizationSD<MeshType, DofType>::applyRHS(const Real dt, VectorType& vec
 
         // coeffBeta ( f , \beta \nabla \mathbf{v})
         //
-        this->f_bgradv(coeffBeta, source, beta, M_elVec, M_fe, 0, time);
+        this->f_bgradv (coeffBeta, source, beta, M_elVec, M_fe, 0, time);
 
         // coeffBeta  ( f , \nabla q )
         //
-        this->f_gradq(coeffBeta, source, M_elVec, M_fe, nDimensions, time);
+        this->f_gradq (coeffBeta, source, M_elVec, M_fe, nDimensions, time);
         chronoElemComp.stop();
 
         chronoAssembly.start();
         for ( UInt iComp = 0; iComp <= nDimensions; ++iComp )
             //assemb_vec( vector, M_elVec, M_fe, M_dof, iComp);
-            assembleVector( vector, M_elVec, M_fe, M_dof, iComp, iComp*M_dof.numTotalDof());
+        {
+            assembleVector ( vector, M_elVec, M_fe, M_dof, iComp, iComp * M_dof.numTotalDof() );
+        }
         chronoAssembly.stop();
 
 
     }// loop on elements
 
-    debugStream(7100) << std::endl;
-    debugStream(7100) << "      Updating of element   done in "
-    << chronoUpdate.diffCumul()   << "s." << std::endl;
-    debugStream(7100) << "      Determination of parameters done in "
-    << chronoBeta.diffCumul()     << "s." << std::endl;
-    debugStream(7100) << "      Element computations  done in "
-    << chronoElemComp.diffCumul() << "s." << std::endl;
-    debugStream(7100) << "      Assembly              done in "
-    << chronoAssembly.diffCumul() << "s." << std::endl;
+    debugStream (7100) << std::endl;
+    debugStream (7100) << "      Updating of element   done in "
+                       << chronoUpdate.diffCumul()   << "s." << std::endl;
+    debugStream (7100) << "      Determination of parameters done in "
+                       << chronoBeta.diffCumul()     << "s." << std::endl;
+    debugStream (7100) << "      Element computations  done in "
+                       << chronoElemComp.diffCumul() << "s." << std::endl;
+    debugStream (7100) << "      Assembly              done in "
+                       << chronoAssembly.diffCumul() << "s." << std::endl;
 
 
 } // applyRHS(...)
 
 template<typename MeshType, typename DofType>
-void StabilizationSD<MeshType, DofType>::showMe(std::ostream & output) const
+void StabilizationSD<MeshType, DofType>::showMe (std::ostream& output) const
 {
-    output << "StabilizationSD::showMe() " <<std::endl;
+    output << "StabilizationSD::showMe() " << std::endl;
     output << "Fluid Viscosity: " << M_viscosity << std::endl;
     output << "Stabilization coefficient SUPG/SD:  " << M_gammaBeta << std::endl;
-    output << "Stabilization coefficient div grad: "<< M_gammaDiv   << std::endl;
-    M_mesh.showMe(output);
-    M_dof.showMe(output);
+    output << "Stabilization coefficient div grad: " << M_gammaDiv   << std::endl;
+    M_mesh.showMe (output);
+    M_dof.showMe (output);
 }
 
 //=============================================================================
@@ -483,14 +499,14 @@ void StabilizationSD<MeshType, DofType>::showMe(std::ostream & output) const
 //=============================================================================
 template<typename MeshType, typename DofType>
 template<typename VectorType>
-void StabilizationSD<MeshType, DofType>::computeParameters(const Real dt, const UInt iVol, const VectorType& state,
-                                                           VectorElemental& beta, Real& coeffBeta, Real& coeffDiv) const
+void StabilizationSD<MeshType, DofType>::computeParameters (const Real dt, const UInt iVol, const VectorType& state,
+                                                            VectorElemental& beta, Real& coeffBeta, Real& coeffDiv) const
 {
 
     const UInt nDof = M_dof.numTotalDof();
 
     // square local mesh parameter in 1-norm
-    Real hK,hK2,hK4;
+    Real hK, hK2, hK4;
 
     hK = M_fe.diameter();
     hK2 = hK * hK;
@@ -500,68 +516,72 @@ void StabilizationSD<MeshType, DofType>::computeParameters(const Real dt, const 
     // first, get the local velocity into beta
     for ( UInt iNode = 0; iNode < M_fe.nbNode; ++iNode )
     {
-        for ( UInt iCoor = 0; iCoor < M_fe.nbCoor(); ++iCoor )
+        for ( UInt iCoor = 0; iCoor < M_fe.nbLocalCoor(); ++iCoor )
         {
-            UInt ig = M_dof.localToGlobalMap( iVol, iNode )+iCoor*nDof;
-            beta.vec()[ iCoor*M_fe.nbNode + iNode ] = state[ig];
+            UInt ig = M_dof.localToGlobalMap ( iVol, iNode ) + iCoor * nDof;
+            beta.vec() [ iCoor * M_fe.nbNode + iNode ] = state[ig];
         }
     }
 
     // second, calculate its max norm
-    Real bmax = std::fabs( beta.vec()[ 0 ] );
-    for ( UInt l = 1; l < UInt( M_fe.nbCoor()*M_fe.nbNode ); ++l )
+    Real bmax = std::fabs ( beta.vec() [ 0 ] );
+    for ( UInt l = 1; l < UInt ( M_fe.nbLocalCoor() *M_fe.nbNode ); ++l )
     {
-        if ( bmax < std::fabs( beta.vec()[ l ] ) )
-            bmax = std::fabs( beta.vec()[ l ] );
+        if ( bmax < std::fabs ( beta.vec() [ l ] ) )
+        {
+            bmax = std::fabs ( beta.vec() [ l ] );
+        }
     }
 
-    coeffBeta = M_gammaBeta  / sqrt( 4/( dt * dt)
-                                     + 4*bmax*bmax/hK2
-                                     + 16*M_viscosity*M_viscosity/hK4 );
+    coeffBeta = M_gammaBeta  / std::sqrt ( 4. / ( dt * dt)
+                                           + 4.*bmax * bmax / hK2
+                                           + 16.*M_viscosity * M_viscosity / hK4 );
     coeffDiv = M_gammaDiv * bmax * hK;
 
 }
 
 
 template<typename MeshType, typename DofType>
-void StabilizationSD<MeshType, DofType>::gradp_bgradv(const Real& coef, VectorElemental& vel,
-                                                      MatrixElemental& elmat,const CurrentFE& fe)  const
+void StabilizationSD<MeshType, DofType>::gradp_bgradv (const Real& coef, VectorElemental& vel,
+                                                       MatrixElemental& elmat, const CurrentFE& fe)  const
 {
-    ASSERT_PRE(fe.hasFirstDeriv(),
-               "advection_grad  matrix needs at least the first derivatives");
+    ASSERT_PRE (fe.hasFirstDeriv(),
+                "advection_grad  matrix needs at least the first derivatives");
 
-    MatrixElemental::matrix_type v(fe.nbCoor(),fe.nbQuadPt());
+    MatrixElemental::matrix_type v (fe.nbLocalCoor(), fe.nbQuadPt() );
     Real s;
 
 
     // local velocity at quadrature points
-    for (UInt ig(0); ig<fe.nbQuadPt(); ++ig)
+    for (UInt ig (0); ig < fe.nbQuadPt(); ++ig)
     {
-        for (UInt icoor(0); icoor<fe.nbCoor(); ++icoor)
+        for (UInt icoor (0); icoor < fe.nbLocalCoor(); ++icoor)
         {
-            VectorElemental::vector_view velicoor=vel.block(icoor);
-            v(icoor,ig)=0.;
-            for (UInt k(0); k<fe.nbNode; ++k)
+            VectorElemental::vector_view velicoor = vel.block (icoor);
+            v (icoor, ig) = 0.;
+            for (UInt k (0); k < fe.nbNode; ++k)
             {
-                v(icoor,ig) += velicoor(k)*fe.phi(k,ig); // velocity on the intgt point
+                v (icoor, ig) += velicoor (k) * fe.phi (k, ig); // velocity on the intgt point
             }
         }
     }
 
-    for (UInt ic(0); ic < fe.nbCoor(); ++ic)
+    for (UInt ic (0); ic < fe.nbLocalCoor(); ++ic)
     {
-        MatrixElemental::matrix_view mat_ic3 = elmat.block(ic,fe.nbCoor());
-        MatrixElemental::matrix_view mat_3ic = elmat.block(fe.nbCoor(),ic);
-        for (UInt i=0; i<fe.nbNode; ++i)
+        MatrixElemental::matrix_view mat_ic3 = elmat.block (ic, fe.nbLocalCoor() );
+        MatrixElemental::matrix_view mat_3ic = elmat.block (fe.nbLocalCoor(), ic);
+        for (UInt i = 0; i < fe.nbNode; ++i)
         {
-            for (UInt j=0; j<fe.nbNode; ++j)
+            for (UInt j = 0; j < fe.nbNode; ++j)
             {
                 s = 0.0;
-                for (UInt ig(0); ig<fe.nbQuadPt(); ++ig)
-                    for (UInt jcoor(0); jcoor<fe.nbCoor(); ++jcoor)
-                        s += fe.phiDer(j,ic,ig)*v(jcoor,ig)*fe.phiDer(i,jcoor,ig)*fe.weightDet(ig);
-                mat_ic3(i,j) += coef*s;
-                mat_3ic(j,i) += coef*s;
+                for (UInt ig (0); ig < fe.nbQuadPt(); ++ig)
+                    for (UInt jcoor (0); jcoor < fe.nbLocalCoor(); ++jcoor)
+                    {
+                        s += fe.phiDer (j, ic, ig) * v (jcoor, ig) * fe.phiDer (i, jcoor, ig) * fe.weightDet (ig);
+                    }
+                mat_ic3 (i, j) += coef * s;
+                mat_3ic (j, i) += coef * s;
             }
         }
     }
@@ -569,53 +589,57 @@ void StabilizationSD<MeshType, DofType>::gradp_bgradv(const Real& coef, VectorEl
 
 
 template<typename MeshType, typename DofType>
-void StabilizationSD<MeshType, DofType>::bgradu_bgradv(const Real& coef, VectorElemental& vel, MatrixElemental& elmat, const CurrentFE& fe,
-                                                       UInt iblock, UInt jblock, UInt nb)  const
+void StabilizationSD<MeshType, DofType>::bgradu_bgradv (const Real& coef, VectorElemental& vel, MatrixElemental& elmat, const CurrentFE& fe,
+                                                        UInt iblock, UInt jblock, UInt nb)  const
 {
-    ASSERT_PRE(fe.hasFirstDeriv(),
-               "advection (vect) matrix needs at least the first derivatives");
+    ASSERT_PRE (fe.hasFirstDeriv(),
+                "advection (vect) matrix needs at least the first derivatives");
 
 
-    MatrixElemental::matrix_type mat_tmp(fe.nbNode,fe.nbNode);
-    MatrixElemental::matrix_type v( fe.nbCoor(),fe.nbQuadPt() );
+    MatrixElemental::matrix_type mat_tmp (fe.nbNode, fe.nbNode);
+    MatrixElemental::matrix_type v ( fe.nbLocalCoor(), fe.nbQuadPt() );
     Real s;
 
 
     // compute local vectors values
-    for (UInt ig(0); ig<fe.nbQuadPt(); ++ig)
+    for (UInt ig (0); ig < fe.nbQuadPt(); ++ig)
     {
-        for (UInt icoor(0); icoor<fe.nbCoor(); ++icoor)
+        for (UInt icoor (0); icoor < fe.nbLocalCoor(); ++icoor)
         {
-            VectorElemental::vector_view velicoor=vel.block(icoor);
-            v(icoor,ig)=0.;
-            for (UInt k(0); k<fe.nbNode; k++)
-                v(icoor,ig) += velicoor(k)*fe.phi(k,ig); // velocity on the intgt point
+            VectorElemental::vector_view velicoor = vel.block (icoor);
+            v (icoor, ig) = 0.;
+            for (UInt k (0); k < fe.nbNode; k++)
+            {
+                v (icoor, ig) += velicoor (k) * fe.phi (k, ig);    // velocity on the intgt point
+            }
         }
     }
 
-    for (UInt i(0); i<fe.nbNode; ++i)
+    for (UInt i (0); i < fe.nbNode; ++i)
     {
-        for (UInt j(0); j<fe.nbNode; ++j)
+        for (UInt j (0); j < fe.nbNode; ++j)
         {
             s = 0.0;
 
-            for (UInt ig(0); ig<fe.nbQuadPt(); ++ig)
-                for (UInt icoor(0); icoor<fe.nbCoor(); ++icoor)
-                    for (UInt jcoor(0); jcoor<fe.nbCoor(); ++jcoor)
-                        s += fe.phiDer(i,jcoor,ig)*v(jcoor,ig)*v(icoor,ig)*fe.phiDer(j,icoor,ig)*fe.weightDet(ig);
-            mat_tmp(i,j) = coef*s;
+            for (UInt ig (0); ig < fe.nbQuadPt(); ++ig)
+                for (UInt icoor (0); icoor < fe.nbLocalCoor(); ++icoor)
+                    for (UInt jcoor (0); jcoor < fe.nbLocalCoor(); ++jcoor)
+                    {
+                        s += fe.phiDer (i, jcoor, ig) * v (jcoor, ig) * v (icoor, ig) * fe.phiDer (j, icoor, ig) * fe.weightDet (ig);
+                    }
+            mat_tmp (i, j) = coef * s;
         }
     }
 
     // copy on the components
-    for (UInt icomp(0); icomp<nb; icomp++)
+    for (UInt icomp (0); icomp < nb; icomp++)
     {
-        MatrixElemental::matrix_view mat_icomp = elmat.block(iblock+icomp,jblock+icomp);
-        for (UInt i(0); i<fe.nbDiag(); ++i)
+        MatrixElemental::matrix_view mat_icomp = elmat.block (iblock + icomp, jblock + icomp);
+        for (UInt i (0); i < fe.nbDiag(); ++i)
         {
-            for (UInt j(0); j<fe.nbDiag(); ++j)
+            for (UInt j (0); j < fe.nbDiag(); ++j)
             {
-                mat_icomp(i,j) += mat_tmp(i,j);
+                mat_icomp (i, j) += mat_tmp (i, j);
             }
         }
     }
@@ -624,58 +648,62 @@ void StabilizationSD<MeshType, DofType>::bgradu_bgradv(const Real& coef, VectorE
 
 
 template<typename MeshType, typename DofType>
-void StabilizationSD<MeshType, DofType>::lapu_bgradv(const Real& coef, VectorElemental& vel, MatrixElemental& elmat, const CurrentFE& fe,
-                                                     UInt iblock, UInt jblock, UInt nb)  const
+void StabilizationSD<MeshType, DofType>::lapu_bgradv (const Real& coef, VectorElemental& vel, MatrixElemental& elmat, const CurrentFE& fe,
+                                                      UInt iblock, UInt jblock, UInt nb)  const
 {
 
 
-    ASSERT_PRE(fe.hasFirstDeriv(),
-               "lapu_bgradv matrix needs first derivatives");
+    ASSERT_PRE (fe.hasFirstDeriv(),
+                "lapu_bgradv matrix needs first derivatives");
 
-    ASSERT_PRE(fe.hasSecondDeriv(),
-               "lapu_bgradv matrix needs second derivatives");
+    ASSERT_PRE (fe.hasSecondDeriv(),
+                "lapu_bgradv matrix needs second derivatives");
 
-    MatrixElemental::matrix_type mat_tmp(fe.nbNode,fe.nbNode);
-    MatrixElemental::matrix_type v( fe.nbCoor(),fe.nbQuadPt() );
+    MatrixElemental::matrix_type mat_tmp (fe.nbNode, fe.nbNode);
+    MatrixElemental::matrix_type v ( fe.nbLocalCoor(), fe.nbQuadPt() );
     Real s;
 
 
     // compute local vectors values at quadrature points
-    for (UInt ig(0); ig<fe.nbQuadPt(); ++ig)
+    for (UInt ig (0); ig < fe.nbQuadPt(); ++ig)
     {
-        for (UInt icoor(0); icoor<fe.nbCoor(); ++icoor)
+        for (UInt icoor (0); icoor < fe.nbLocalCoor(); ++icoor)
         {
-            VectorElemental::vector_view velicoor=vel.block(icoor);
-            v(icoor,ig)=0.;
-            for (UInt k(0); k<fe.nbNode; ++k)
-                v(icoor,ig) += velicoor(k)*fe.phi(k,ig); // velocity on the intgt point
+            VectorElemental::vector_view velicoor = vel.block (icoor);
+            v (icoor, ig) = 0.;
+            for (UInt k (0); k < fe.nbNode; ++k)
+            {
+                v (icoor, ig) += velicoor (k) * fe.phi (k, ig);    // velocity on the intgt point
+            }
         }
     }
 
 
     // numerical integration
-    for (UInt i(0); i<fe.nbNode; ++i)
+    for (UInt i (0); i < fe.nbNode; ++i)
     {
-        for (UInt j(0); j<fe.nbNode; ++j)
+        for (UInt j (0); j < fe.nbNode; ++j)
         {
             s = 0.0;
-            for (UInt ig(0); ig<fe.nbQuadPt(); ++ig)
-                for (UInt icoor(0); icoor<fe.nbCoor(); ++icoor)
-                    for (UInt jcoor(0); jcoor<fe.nbCoor(); ++jcoor)
-                        s += fe.phiDer2(j,icoor,icoor,ig)*v(jcoor,ig)*fe.phiDer(i,jcoor,ig)*fe.weightDet(ig);
-            mat_tmp(i,j) = coef*s;
+            for (UInt ig (0); ig < fe.nbQuadPt(); ++ig)
+                for (UInt icoor (0); icoor < fe.nbLocalCoor(); ++icoor)
+                    for (UInt jcoor (0); jcoor < fe.nbLocalCoor(); ++jcoor)
+                    {
+                        s += fe.phiDer2 (j, icoor, icoor, ig) * v (jcoor, ig) * fe.phiDer (i, jcoor, ig) * fe.weightDet (ig);
+                    }
+            mat_tmp (i, j) = coef * s;
         }
     }
 
     // copy on the components
-    for (UInt icomp(0); icomp<nb; ++icomp)
+    for (UInt icomp (0); icomp < nb; ++icomp)
     {
-        MatrixElemental::matrix_view mat_icomp = elmat.block(iblock+icomp,jblock+icomp);
-        for (UInt i(0); i<fe.nbDiag(); ++i)
+        MatrixElemental::matrix_view mat_icomp = elmat.block (iblock + icomp, jblock + icomp);
+        for (UInt i (0); i < fe.nbDiag(); ++i)
         {
-            for (UInt j(0); j<fe.nbDiag(); ++j)
+            for (UInt j (0); j < fe.nbDiag(); ++j)
             {
-                mat_icomp(i,j) += mat_tmp(i,j);
+                mat_icomp (i, j) += mat_tmp (i, j);
             }
         }
     }
@@ -683,30 +711,32 @@ void StabilizationSD<MeshType, DofType>::lapu_bgradv(const Real& coef, VectorEle
 
 
 template<typename MeshType, typename DofType>
-void StabilizationSD<MeshType, DofType>::lapu_gradq(const Real& coef, MatrixElemental& elmat,const CurrentFE& fe)  const
+void StabilizationSD<MeshType, DofType>::lapu_gradq (const Real& coef, MatrixElemental& elmat, const CurrentFE& fe)  const
 {
 
-    ASSERT_PRE(fe.hasFirstDeriv(),
-               "lapu_gradq matrix needs first derivatives");
+    ASSERT_PRE (fe.hasFirstDeriv(),
+                "lapu_gradq matrix needs first derivatives");
 
-    ASSERT_PRE(fe.hasSecondDeriv(),
-               "lapu_gradq matrix needs second derivatives");
+    ASSERT_PRE (fe.hasSecondDeriv(),
+                "lapu_gradq matrix needs second derivatives");
 
     Real s;
 
-    for (UInt jc(0); jc < fe.nbCoor(); ++jc) // loop on column blocks
+    for (UInt jc (0); jc < fe.nbLocalCoor(); ++jc) // loop on column blocks
     {
-        MatrixElemental::matrix_view mat_view = elmat.block(fe.nbCoor(),jc);
-        for (UInt i(0); i<fe.nbNode; ++i) // local rows
+        MatrixElemental::matrix_view mat_view = elmat.block (fe.nbLocalCoor(), jc);
+        for (UInt i (0); i < fe.nbNode; ++i) // local rows
         {
-            for (UInt j(0); j<fe.nbNode; ++j) // local columns
+            for (UInt j (0); j < fe.nbNode; ++j) // local columns
             {
                 s = 0.0;
                 // quadrature formula
-                for (UInt ig(0); ig<fe.nbQuadPt(); ++ig)
-                    for (UInt jcoor(0); jcoor<fe.nbCoor(); ++jcoor) // lap
-                        s += fe.phiDer2(j,jcoor,jcoor,ig)*fe.phiDer(i,jc,ig)*fe.weightDet(ig);
-                mat_view(i,j) += coef*s;
+                for (UInt ig (0); ig < fe.nbQuadPt(); ++ig)
+                    for (UInt jcoor (0); jcoor < fe.nbLocalCoor(); ++jcoor) // lap
+                    {
+                        s += fe.phiDer2 (j, jcoor, jcoor, ig) * fe.phiDer (i, jc, ig) * fe.weightDet (ig);
+                    }
+                mat_view (i, j) += coef * s;
             }
         }
     }
@@ -715,41 +745,43 @@ void StabilizationSD<MeshType, DofType>::lapu_gradq(const Real& coef, MatrixElem
 
 template<typename MeshType, typename DofType>
 template<typename SourceType>
-void StabilizationSD<MeshType, DofType>::f_bgradv(const Real& coef, SourceType& source, VectorElemental& vel,
-                                                  VectorElemental& elvec, const CurrentFE& fe, UInt iblock, const Real& time)  const
+void StabilizationSD<MeshType, DofType>::f_bgradv (const Real& coef, SourceType& source, VectorElemental& vel,
+                                                   VectorElemental& elvec, const CurrentFE& fe, UInt iblock, const Real& time)  const
 {
 
-    ASSERT_PRE(fe.hasFirstDeriv(),
-               "f_bgradv  vector needs at least the first derivatives");
+    ASSERT_PRE (fe.hasFirstDeriv(),
+                "f_bgradv  vector needs at least the first derivatives");
 
-    MatrixElemental::matrix_type v(fe.nbCoor(),fe.nbQuadPt());
+    MatrixElemental::matrix_type v (fe.nbLocalCoor(), fe.nbQuadPt() );
     Real s;
 
 
     // local velocity at quadrature points
-    for (UInt ig(0); ig<fe.nbQuadPt(); ++ig)
+    for (UInt ig (0); ig < fe.nbQuadPt(); ++ig)
     {
-        for (UInt icoor(0); icoor<fe.nbCoor(); ++icoor)
+        for (UInt icoor (0); icoor < fe.nbLocalCoor(); ++icoor)
         {
-            VectorElemental::vector_view velicoor=vel.block(icoor);
-            v(icoor,ig)=0.;
-            for (UInt k(0); k<fe.nbNode; ++k)
-                v(icoor,ig) += velicoor(k)*fe.phi(k,ig); // velocity on the intgt point
+            VectorElemental::vector_view velicoor = vel.block (icoor);
+            v (icoor, ig) = 0.;
+            for (UInt k (0); k < fe.nbNode; ++k)
+            {
+                v (icoor, ig) += velicoor (k) * fe.phi (k, ig);    // velocity on the intgt point
+            }
         }
     }
 
     // local vector per block
-    for (UInt ic(0); ic < fe.nbCoor(); ++ic)
+    for (UInt ic (0); ic < fe.nbLocalCoor(); ++ic)
     {
-        VectorElemental::vector_view vec_ic = elvec.block(ic+iblock);
-        for (UInt i(0); i<fe.nbNode; ++i)
+        VectorElemental::vector_view vec_ic = elvec.block (ic + iblock);
+        for (UInt i (0); i < fe.nbNode; ++i)
         {
             s = 0.0;
-            for (UInt ig(0); ig<fe.nbQuadPt(); ++ig)
-                for (UInt jcoor(0); jcoor<fe.nbCoor(); ++jcoor)
-                    s += source(time,fe.quadPt(ig,0),fe.quadPt(ig,1),fe.quadPt(ig,2),ic+1)
-                         *fe.phiDer(i,jcoor,ig)*v(jcoor,ig)*fe.weightDet(ig);
-            vec_ic(i) += coef*s;
+            for (UInt ig (0); ig < fe.nbQuadPt(); ++ig)
+                for (UInt jcoor (0); jcoor < fe.nbLocalCoor(); ++jcoor)
+                    s += source (time, fe.quadPt (ig, 0), fe.quadPt (ig, 1), fe.quadPt (ig, 2), ic + 1)
+                         * fe.phiDer (i, jcoor, ig) * v (jcoor, ig) * fe.weightDet (ig);
+            vec_ic (i) += coef * s;
         }
     }
 }
@@ -758,23 +790,23 @@ void StabilizationSD<MeshType, DofType>::f_bgradv(const Real& coef, SourceType& 
 
 template<typename MeshType, typename DofType>
 template<typename SourceType>
-void StabilizationSD<MeshType, DofType>::f_gradq(const Real& coef, SourceType& source, VectorElemental& elvec, const CurrentFE& fe, UInt iblock, const Real& time) const
+void StabilizationSD<MeshType, DofType>::f_gradq (const Real& coef, SourceType& source, VectorElemental& elvec, const CurrentFE& fe, UInt iblock, const Real& time) const
 {
 
-    ASSERT_PRE(fe.hasFirstDeriv(),
-               "f_gradq  vector needs at least the first derivatives");
+    ASSERT_PRE (fe.hasFirstDeriv(),
+                "f_gradq  vector needs at least the first derivatives");
 
     Real s;
 
-    VectorElemental::vector_view vec_ic = elvec.block(iblock);
-    for (UInt i(0); i<fe.nbNode; ++i)
+    VectorElemental::vector_view vec_ic = elvec.block (iblock);
+    for (UInt i (0); i < fe.nbNode; ++i)
     {
         s = 0.0;
-        for (UInt ig=0; ig<fe.nbQuadPt(); ++ig)
-            for (UInt jcoor(0); jcoor<fe.nbCoor(); ++jcoor)
-                s += source(time,fe.quadPt(ig,0),fe.quadPt(ig,1),fe.quadPt(ig,2),jcoor+1)
-                     *fe.phiDer(i,jcoor,ig)*fe.weightDet(ig);
-        vec_ic(i) += coef*s;
+        for (UInt ig = 0; ig < fe.nbQuadPt(); ++ig)
+            for (UInt jcoor (0); jcoor < fe.nbLocalCoor(); ++jcoor)
+                s += source (time, fe.quadPt (ig, 0), fe.quadPt (ig, 1), fe.quadPt (ig, 2), jcoor + 1)
+                     * fe.phiDer (i, jcoor, ig) * fe.weightDet (ig);
+        vec_ic (i) += coef * s;
     }
 }
 

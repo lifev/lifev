@@ -1,0 +1,132 @@
+#! /bin/bash
+#
+# author: Antonio Cervone <ant.cervone@gmail.com>
+# date:   05-12-2012
+#
+
+# list of packages
+# the key should be:
+# - INSTALL : the package will be installed by this script
+# - YES     : the package is already installed in the system, and its paths
+#             must be specified in the following variables
+# - NO      : the package will not be used
+# BEWARE! some packages are required and cannot be set to NO!!
+
+source config
+
+#####################
+# REQUIRED PACKAGES
+#####################
+
+# MPI
+# this package cannot be installed!
+# mpi_base and mpi_bin must always be set.
+# If the mpi installation comes from the system typically:
+# mpi_base=/usr
+mpi=YES
+mpi_base=/usr
+mpi_bin=${mpi_base}/bin
+
+# BLAS
+# this package cannot be installed!
+# If the installation is standard the blas_name can be left empty
+blas=YES
+blas_lib=/usr/lib
+blas_name=
+
+# LAPACK
+# this package cannot be installed!
+# If the installation is standard the lapack_name can be left empty
+lapack=YES
+lapack_lib=/usr/lib
+lapack_name=
+
+# CMAKE
+cmake=INSTALL
+cmake_bin=${INSTALL_DIR}/lib/cmake/bin
+
+# PARMETIS
+parmetis=INSTALL
+parmetis_include=${INSTALL_DIR}/lib/parmetis/include
+parmetis_lib=${INSTALL_DIR}/lib/parmetis/lib
+
+# BOOST
+boost=INSTALL
+boost_include=${INSTALL_DIR}/lib/boost/include
+
+# TRILINOS
+trilinos=INSTALL
+trilinos_include=${INSTALL_DIR}/lib/trilinos/include
+trilinos_lib=${INSTALL_DIR}/lib/trilinos/lib
+
+# LIFEV
+# this is for LifeV developers
+lifev=INSTALL
+lifev_src=${HOME}/lifev/src
+lifev_build=${HOME}/lifev/build
+lifev_install=${HOME}/lifev/install
+# additional flags for linking
+lifev_flags=
+
+#LIFEV LIB
+# this is to use LifeV as an external library
+lifevlib=NO
+lifevlib_include=${INSTALL_DIR}/lib/lifev/include
+lifevlib_lib=${INSTALL_DIR}/lib/lifev/lib
+lifevlib_src=/path/to/lifev_src
+# additional flags for linking
+lifevlib_flags=
+
+#####################
+# OPTIONAL PACKAGES
+#####################
+
+# HDF5
+hdf5=INSTALL
+hdf5_include=${INSTALL_DIR}/lib/hdf5/include
+hdf5_lib=${INSTALL_DIR}/lib/hdf5/lib
+
+# SUITESPARSE
+suitesparse=INSTALL
+suitesparse_include=${INSTALL_DIR}/lib/suitesparse/include
+suitesparse_lib=${INSTALL_DIR}/lib/suitesparse/lib
+
+# SUPERLU
+#superlu=NO
+#superlu_include=${INSTALL_DIR}/opt/superlu-4.0/include
+#superlu_lib=${INSTALL_DIR}/opt/superlu-4.0/lib
+
+# SUPERLU_DIST
+superlu_dist=INSTALL
+superlu_dist_include=${INSTALL_DIR}/lib/superlu_dist/include
+superlu_dist_lib=${INSTALL_DIR}/lib/superlu_dist/lib
+
+# QHULL
+qhull=INSTALL
+qhull_include=${INSTALL_DIR}/lib/qhull/include
+qhull_lib=${INSTALL_DIR}/lib/qhull/lib
+
+########################
+# EXPERIMENTAL PACKAGES
+########################
+
+# DUMMY
+dummy=NO
+dummy_include=
+dummy_lib=
+
+# CLANG
+clang=NO
+clang_bin=${INSTALL_DIR}/lib/clang/bin
+
+# OPENMPI
+openmpi=NO
+openmpi_bin=${INSTALL_DIR}/lib/openmpi/bin
+
+package_array=( clang openmpi mpi dummy blas lapack cmake boost parmetis hdf5
+                suitesparse superlu superlu_dist qhull trilinos lifev lifevlib )
+
+package_install=()
+package_yes=()
+package_no=()
+

@@ -1,0 +1,109 @@
+#! /bin/bash
+#
+# author: Antonio Cervone <ant.cervone@gmail.com>
+# date:   22-03-2012
+#
+
+# include configuration file
+source ../config
+
+# abort if no package is specified
+if [ $# -lt 1 ]; then
+  echo "usage: pkgbuild <package_list>"
+  exit
+fi
+
+# define list of library packages
+package_list=("$@")
+package_number=$#
+
+main() {
+
+# define list of library packages
+#package_list=( "boost" "parmetis" "trilinos" )
+#package_list=( "dummy" "parmetis" )
+#package_list=( "dummy" )
+
+echo
+echo "installing to $INSTALL_DIR"
+echo
+
+
+package_root=$PWD
+
+# set globally the number of processes to use
+export MAKEFLAGS="-j$NUM_PROC"
+
+# iterate on packages
+for(( i=0; i < $package_number; i++ )); do
+
+  package=${package_list[$i]}
+  echo "====================================="
+  echo "   $i: installing $package package"
+  echo "====================================="
+
+  build_package $package || exit
+
+  # set the package as already installed
+  sed -i "s/^$package=INSTALL$/$package=YES/" ../libpath
+
+done
+}
+
+build_package() {
+
+  package=$1
+
+  # load package specific functions
+  echo_dbg "loading pkgbuild_$package script"
+  source pkgbuild_$package
+
+  # redirect stdout to log file is requested
+  if [ $LOG ]; then exec >$BUILD_DIR/scratch/$package.log; fi
+
+  # set directory
+  mkdir -p $BUILD_DIR/scratch/$package
+  pushd $BUILD_DIR/scratch/$package >/dev/null
+
+    src_dir=$PWD/src
+    build_dir=$PWD/build
+    install_dir=$INSTALL_DIR/lib/$package
+
+    # download library sources
+    mkdir -p $src_dir
+    pushd $src_dir >/dev/null
+      if [ $DOWNLOAD ]; then
+        echo_dbg "downloading $package package"
+        download_$package
+      fi
+
+      # unpack
+      if [ $UNPACK ]; then
+        echo_dbg "unpacking $package package"
+        unpack_$package
+      fi
+    popd >/dev/null # $src_dir
+
+    # build
+    mkdir -p $build_dir
+    pushd $build_dir >/dev/null
+      echo_dbg "building $package package"
+      build_$package
+
+      # install
+      echo_dbg "installing $package package to $install_dir"
+      install_$package
+    popd >/dev/null # $build_dir
+
+  popd >/dev/null # $BUILD_DIR/scratch/$package
+
+  # clean build directory if RM_DIR defined
+  if [ $RM_TMP ]; then rm -rf $BUILD_DIR/scratch/$package; fi
+}
+
+echo_dbg() {
+  if [ $DBG ]; then echo "DBG: " $* >&2; fi
+}
+
+# execute main function
+main

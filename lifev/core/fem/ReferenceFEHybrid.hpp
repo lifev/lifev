@@ -39,7 +39,7 @@
 #ifndef REFFEHYBRID_H
 #define REFFEHYBRID_H 1
 
-#include <lifev/core/fem/CurrentBoundaryFEBase.hpp>
+#include <lifev/core/fem/CurrentFEManifold.hpp>
 
 namespace LifeV
 {
@@ -83,17 +83,17 @@ FE_PIPO = a_new_number
 extern const RefHybridFE fePipo;
   \endcode
 
-  @li In defQuadRuleFE.cc: you define a list of CurrentBoundaryFEBase with a command like:
+  @li In defQuadRuleFE.cc: you define a list of CurrentFEManifold with a command like:
   \code
   #define NB_BDFE_PIPO
-static const CurrentBoundaryFEBase BdFE_PIPO_1( feTriaP0, geoLinearTria, quadRuleTria4pt, refcoor_PIPO_1, 0 );
+static const CurrentFEManifold BdFE_PIPO_1( feTriaP0, geoLinearTria, quadRuleTria4pt, refcoor_PIPO_1, 0 );
 ...
   \endcode
 
-  @li In defQuadRuleFE.cc: you define a static array containing all the CurrentBoundaryFEBase
+  @li In defQuadRuleFE.cc: you define a static array containing all the CurrentFEManifold
   with a command like
   \code
-static const CurrentBoundaryFEBase HybPIPOList[ NB_BDFE_PIPO ] =
+static const CurrentFEManifold HybPIPOList[ NB_BDFE_PIPO ] =
 {
      BdFE_PIPO_1, BdFE_PIPO_2,
      ...
@@ -108,7 +108,7 @@ const ReferenceFEHybrid feTriaPipo("Pipo elements on a tetrahedron", FE_PIPO, TE
   See documentation of ReferenceFEHybrid::ReferenceFEHybrid(...) for a precise description of all arguments.
 */
 class ReferenceFEHybrid:
-        public ReferenceFE
+    public ReferenceFE
 {
 public:
 
@@ -127,7 +127,7 @@ public:
       @param nbDofPerFace Number of degrees of freedom per face
       @param nbDofPerVolume Number of degrees of freedom per volume
       @param nbDof Total number of degrees of freedom ( = nbDofPerVertex * nb vertex + nbDofPerEdge * nb edges + etc...)
-      @param nbCoor Number of local coordinates
+      @param nbLocalCoor Number of local coordinates
       @param refCoor Static array containing the coordinates of the nodes on the reference element
       @param numBoundaryFE Number of static boundary elements
       @param boundaryFEList List of static boundary elements
@@ -137,19 +137,19 @@ public:
       like P1isoP2 (to define a new pattern, add a new #define in refFE.h and
       code it in refFE.cc following the example of P1ISOP2_TRIA_PATTERN)
     */
-    ReferenceFEHybrid( std::string        name,
-                 FE_TYPE            type,
-                 ReferenceShapes    shape,
-                 UInt               nbDofPerVertex,
-                 UInt               nbDofPerEdge,
-                 UInt               nbDofPerFace,
-                 UInt               nbDofPerVolume,
-                 UInt               nbDof,
-                 UInt               nbCoor,
-                 const UInt&        numberBoundaryFE,
-                 const CurrentBoundaryFEBase*  boundaryFEList,
-                 const Real*        refCoor,
-                 DofPatternType     patternType = STANDARD_PATTERN );
+    ReferenceFEHybrid ( std::string        name,
+                        FE_TYPE            type,
+                        ReferenceShapes    shape,
+                        UInt               nbDofPerVertex,
+                        UInt               nbDofPerEdge,
+                        UInt               nbDofPerFace,
+                        UInt               nbDofPerVolume,
+                        UInt               nbDof,
+                        UInt                       nbLocalCoor,
+                        const UInt&        numberBoundaryFE,
+                        const CurrentFEManifold**  boundaryFEList,
+                        const Real*        refCoor,
+                        DofPatternType     patternType = STANDARD_PATTERN );
 
     //! Destructor.
     ~ReferenceFEHybrid();
@@ -160,11 +160,11 @@ public:
     //! @name Operators
     //@{
 
-    //! Extracting a CurrentBoundaryFEBase from the faces list.
-    const CurrentBoundaryFEBase& operator[] ( const ID& i ) const
+    //! Extracting a CurrentFEManifold from the faces list.
+    const CurrentFEManifold& operator[] ( const ID& i ) const
     {
-        ASSERT_BD( i < static_cast<ID>( M_numberBoundaryFE ) );
-        return M_boundaryFEList[ i ];
+        ASSERT_BD ( i < static_cast<ID> ( M_numberBoundaryFE ) );
+        return (*M_boundaryFEList) [ i ];
     }
 
     //@}
@@ -188,7 +188,7 @@ private:
     ReferenceFEHybrid();
 
     //! No copy constructor.
-    ReferenceFEHybrid( const ReferenceFEHybrid& );
+    ReferenceFEHybrid ( const ReferenceFEHybrid& );
 
     //! Number of boundary elements to be stored.
     const UInt M_numberBoundaryFE;
@@ -196,8 +196,8 @@ private:
     /*! List holding the stored boundary elements that live on the boundary faces (3D),
         or edges (2D), of the RefHybridFE element. The boundary elements of a reference
         element are not in general reference elements themselves, that is why
-        we use here the CurrentBoundaryFEBase rather that ReferenceFE. */
-    const CurrentBoundaryFEBase* M_boundaryFEList;
+        we use here the CurrentFEManifold rather that ReferenceFE. */
+    const CurrentFEManifold** M_boundaryFEList;
 };
 
 

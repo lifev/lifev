@@ -147,10 +147,11 @@
         </tr>
     </table>
     where N is the number of subdivisions for each boundary.
+    @image html darcy/3d.png "Example of the solution with N = 5."
 */
 class darcy_linear
-//     :
-//     public LifeV::Application
+    //     :
+    //     public LifeV::Application
 {
 public:
 

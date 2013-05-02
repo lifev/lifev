@@ -35,10 +35,14 @@
     @date 07 Jun 2010
  */
 
-#ifndef BLOCKINTERFACE_H
-#define BLOCKINTERFACE_H 1
+#ifndef MONOLITHICBLOCK_H
+#define MONOLITHICBLOCK_H 1
 
 #include <cstdarg>
+
+#include <Epetra_Comm.h>
+#include <Epetra_Operator.h>
+
 #include <lifev/core/filter/GetPot.hpp>
 #include <lifev/core/LifeV.hpp>
 
@@ -52,7 +56,8 @@
 
 #include <lifev/core/mesh/RegionMesh.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! MonolithicBlock - This is a pure virtual class for the linear operators with a block structure
 /*!    (i.e. block matrices and preconditioners).
@@ -79,12 +84,9 @@ public:
     typedef matrix_Type::matrix_type/*matrix_Type*/                    epetraMatrix_Type;
     typedef SolverAztecOO                                              solver_Type;
     typedef boost::shared_ptr< SolverAztecOO >                         solverPtr_Type;
-    typedef boost::shared_ptr< FESpace<RegionMesh<LinearTetra>, MapEpetra> >  fespacePtr_Type;
-    //typedef fespacePtr_Type                                     fespacePtr_Type;
-    //    typedef FESpace<RegionMesh<LinearTetra>, MapEpetra>*                 fespacePtr_Type;
-    //typedef MapEpetra*                                                 mapPtr_Type;
+    typedef FESpace<RegionMesh<LinearTetra>, MapEpetra>                fespace_Type;
+    typedef boost::shared_ptr< fespace_Type >                          fespacePtr_Type;
     typedef boost::shared_ptr< MapEpetra >                             mapPtr_Type;
-    //typedef BCHandler*                                                 bchandlerPtr_Type;
     typedef boost::shared_ptr< BCHandler >                             bchandlerPtr_Type;
     //@}
 
@@ -92,28 +94,26 @@ public:
     //! @name Constructor & Destructor
     //@{
     //! Empty Constructor
-    MonolithicBlock():
-            M_bch(),
-            M_blocks(),
-            M_FESpace(),
-            M_offset(),
-            M_numerationInterface(),
-            M_comm()
+    MonolithicBlock() :
+        M_bch(),
+        M_blocks(),
+        M_FESpace(),
+        M_offset(),
+        M_numerationInterface(),
+        M_comm()
     {}
 
-//     MonolithicBlock( Int flag ):
-//         M_bch(),
-//         M_blocks(),
-//         M_FESpace(),
-//         M_comm(),
-//         M_superCouplingFlag(flag)
-//     {}
+    //     MonolithicBlock( Int flag ):
+    //         M_bch(),
+    //         M_blocks(),
+    //         M_FESpace(),
+    //         M_comm(),
+    //         M_superCouplingFlag(flag)
+    //     {}
 
     //! Destructor
-    ~MonolithicBlock()
+    virtual ~MonolithicBlock()
     {
-//     free(M_offset);
-//     free(M_FESpace);
     }
     //@}
 
@@ -129,14 +129,22 @@ public:
         @param result output result
         @param linearSolver the linear system
      */
-    virtual int  solveSystem( const vector_Type& rhs, vector_Type& result, solverPtr_Type& linearSolver)=0;
+    virtual int  solveSystem ( const vector_Type& rhs, vector_Type& result, solverPtr_Type& linearSolver) = 0;
 
     //! Sets the parameters needed by the preconditioner from data file
     /*!
         @param data GetPot object reading the text data file
         @param section string specifying the path in the data file where to find the options for the operator
      */
-    virtual void setDataFromGetPot(const GetPot& data, const std::string& section)=0;
+    virtual void setDataFromGetPot (const GetPot& data, const std::string& section) = 0;
+
+
+    //! Sets the parameters needed by the preconditioner from data file
+    /*!
+        @param data GetPot object reading the text data file
+        @param section string specifying the path in the data file where to find the options for the operator
+     */
+    virtual void setupSolver (solver_Type& /*solver*/, const GetPot& /*data*/) {}
 
     //! pushes a block at the end of the vector
     /*!
@@ -144,7 +152,7 @@ public:
         @param Mat block matrix to push
         @param recompute flag stating wether the preconditioner for this block have to be recomputed at every time step
      */
-    virtual void push_back_matrix( const matrixPtr_Type& Mat, const bool recompute ) =0;
+    virtual void push_back_matrix ( const matrixPtr_Type& Mat, const bool recompute ) = 0;
 
     //!
     /*!
@@ -152,7 +160,7 @@ public:
         @param Mat block matrix to push
         @param recompute flag stating wether the preconditioner for this block have to be recomputed at every time step
      */
-    virtual void addToCoupling( const matrixPtr_Type& Mat, UInt position ) =0;
+    virtual void addToCoupling ( const matrixPtr_Type& Mat, UInt position ) = 0;
 
     //!
     /*!
@@ -161,10 +169,13 @@ public:
         @param row row for the insertion
         @param col colon for the insertion
      */
-    virtual void addToCoupling( const Real& entry , UInt row, UInt col, UInt position ) =0;
+    virtual void addToCoupling ( const Real& entry , UInt row, UInt col, UInt position ) = 0;
 
     //! If not present in the derived class it must not be called (gives an assertion fail)
-    virtual void setRecompute(UInt /*position*/, bool /*flag*/) {assert(false);}
+    virtual void setRecompute (UInt /*position*/, bool /*flag*/)
+    {
+        assert (false);
+    }
 
     //! replaces a block
     /*!
@@ -172,7 +183,7 @@ public:
         @param Mat block matrix to push
         @param index position in the vector
      */
-    virtual void replace_matrix( const matrixPtr_Type& Mat, UInt index)=0;
+    virtual void replace_matrix ( const matrixPtr_Type& Mat, UInt index) = 0;
 
 
     //! replaces a coupling block
@@ -181,20 +192,20 @@ public:
         @param Mat block matrix to push
         @param index position in the vector
      */
-    virtual void replace_coupling( const matrixPtr_Type& Mat, UInt index)=0;
+    virtual void replace_coupling ( const matrixPtr_Type& Mat, UInt index) = 0;
 
     //! runs GlobalAssemble on the blocks
     /*!
       closes and distributes all the matrices before computing the preconditioner
      */
-    virtual void GlobalAssemble()=0;
+    virtual void GlobalAssemble() = 0;
 
 
     //!sums the coupling matrices with the corresponding blocks
     /*!
       Everything (but the boundary conditions) must have been set before calling this
      */
-    virtual void blockAssembling(){}
+    virtual void blockAssembling() {}
 
     //! Computes the coupling
     /*!
@@ -209,10 +220,12 @@ public:
       the subproblems
       @param numerationInterface vector containing the correspondence of the Lagrange multipliers with the interface dofs
      */
-    virtual void coupler(mapPtr_Type& map,
-                         const std::map<ID, ID>& locDofMap,
-                         const vectorPtr_Type& numerationInterface,
-                         const Real& timeStep)=0;
+    virtual void coupler (mapPtr_Type& map,
+                          const std::map<ID, ID>& locDofMap,
+                          const vectorPtr_Type& numerationInterface,
+                          const Real& timeStep,
+                          const Real& coefficient,
+                          const Real& rescaleFactor) = 0;
 
 
 
@@ -235,20 +248,22 @@ public:
       for this flag correspond to.
       @param couplingFlag: flag specifying which block must be coupled whith which block.
      */
-    virtual void coupler(mapPtr_Type& map,
-                 const std::map<ID, ID>& locDofMap,
-                 const vectorPtr_Type& numerationInterface,
-                 const Real& timeStep,
-                 UInt couplingFlag
-                 )=0;
+    virtual void coupler (mapPtr_Type& map,
+                          const std::map<ID, ID>& locDofMap,
+                          const vectorPtr_Type& numerationInterface,
+                          const Real& timeStep,
+                          const Real& coefficient,
+                          const Real& rescaleFactor,
+                          UInt couplingFlag
+                         ) = 0;
 
     //! returns true if the operator is set
     /*!
     */
-    virtual bool set()=0;
+    virtual bool set() = 0;
 
     //! Pushes a new coupling matrix in the corresponding vector
-    virtual void push_back_coupling( matrixPtr_Type& coupling)=0;
+    virtual void push_back_coupling ( matrixPtr_Type& coupling) = 0;
     //@}
 
     //@name virtual methods
@@ -258,14 +273,18 @@ public:
       (only used if the operator is a preconditioner)
      */
     virtual void replace_precs ( const epetraOperatorPtr_Type& /*Mat*/, UInt /*index*/)
-    {ERROR_MSG("this method should not be implemented");}
+    {
+        ERROR_MSG ("this method should not be implemented");
+    }
 
     //!pushes back a block preconditioner
     /*!
       (only used if the operator is a preconditioner)
      */
     virtual void push_back_precs (const epetraOperatorPtr_Type& /*Mat*/)
-    {ERROR_MSG("this method should not be implemented");}
+    {
+        ERROR_MSG ("this method should not be implemented");
+    }
     //@}
 
     //!replaces a BCHandler
@@ -274,14 +293,14 @@ public:
       \param bch: input BCHandler to replace
       \param position: position
      */
-    virtual void replace_bch(bchandlerPtr_Type& /*bch*/, UInt /*position*/) {};
+    virtual void replace_bch (bchandlerPtr_Type& /*bch*/, UInt /*position*/) {};
 
     //!Applies the correspondent boundary conditions to every block
     /*!
       note that this method must be called after blockAssembling(), that sums the coupling conditions to the blocks
       \param time: time
      */
-    virtual void applyBoundaryConditions(const Real& time);
+    virtual void applyBoundaryConditions (const Real& time);
 
     //!Applies the correspondent boundary conditions to a specified block
     /*!
@@ -289,7 +308,7 @@ public:
       \param time: time
       \param block: number of the block
      */
-    virtual void applyBoundaryConditions(const Real& time, const UInt block);
+    virtual void applyBoundaryConditions (const Real& time, const UInt block);
 
 
     //!resets the blocks (frees the shared pointers)
@@ -303,7 +322,7 @@ public:
     //!sets the communicator
     /*!
      */
-    virtual void setComm(boost::shared_ptr<Epetra_Comm> comm )
+    virtual void setComm (boost::shared_ptr<Epetra_Comm> comm )
     {
         M_comm = comm;
     }
@@ -323,7 +342,7 @@ public:
     /*!
       Applies the robin preconditioners when needed, otherwise does nothing
      */
-    virtual void setRobin(matrixPtr_Type& /*mat*/, vectorPtr_Type& /*rhs*/){}
+    virtual void setRobin (matrixPtr_Type& /*mat*/, vectorPtr_Type& /*rhs*/) {}
 
 
     //! builds the coupling matrix.
@@ -344,14 +363,16 @@ public:
        \param numerationInterface vector containing the correspondence of the Lagrange multipliers with the interface dofs
        \param value value to insert in the coupling blocks
      */
-    void couplingMatrix(matrixPtr_Type& bigMatrix,
-                        Int flag,
-                        const std::vector<fespacePtr_Type>& problem,
-                        const std::vector<UInt>& offset,
-                        const std::map<ID, ID>& locDofMap,
-                        const vectorPtr_Type& numerationInterface,
-                        const Real& timeStep=1.e-3,
-                        const Real& value=1.); // not working with non-matching grids
+    void couplingMatrix (matrixPtr_Type& bigMatrix,
+                         Int flag,
+                         const std::vector<fespacePtr_Type>& problem,
+                         const std::vector<UInt>& offset,
+                         const std::map<ID, ID>& locDofMap,
+                         const vectorPtr_Type& numerationInterface,
+                         const Real& timeStep = 1.e-3,
+                         const Real& value = 1.,
+                         const Real& coefficient = 1.,
+                         const Real& rescaleFactor = 1.); // not working with non-matching grids
 
 
     //!sets the vector of raw pointer to the BCHandler
@@ -360,7 +381,7 @@ public:
       position in the vector of matrix pointers M_blocks. A vector of any size can be passed.
       \param vec: the vector of BCHandlers
      */
-    void setConditions(std::vector<bchandlerPtr_Type>& vec );
+    void setConditions (std::vector<bchandlerPtr_Type>& vec );
 
 
     //!sets the vector of raw pointer to the FESpaces
@@ -398,16 +419,16 @@ public:
       \param locDofMap: std::map with the correspondance between the numeration of the interface in the 2 FE spaces.
       \param numerationInterface:  vector containing the correspondence of the Lagrange multipliers with the interface dofs
      */
-    void robinCoupling( MonolithicBlock::matrixPtr_Type& matrix,
-                        Real& alphaf,
-                        Real& alphas,
-                        UInt coupling,
-                        const MonolithicBlock::fespacePtr_Type& FESpace1,
-                        const UInt& offset1,
-                        const MonolithicBlock::fespacePtr_Type& FESpace2,
-                        const UInt& offset2,
-                        const std::map<ID, ID>& locDofMap,
-                        const MonolithicBlock::vectorPtr_Type& numerationInterface );
+    void robinCoupling ( MonolithicBlock::matrixPtr_Type& matrix,
+                         Real& alphaf,
+                         Real& alphas,
+                         UInt coupling,
+                         const MonolithicBlock::fespacePtr_Type& FESpace1,
+                         const UInt& offset1,
+                         const MonolithicBlock::fespacePtr_Type& FESpace2,
+                         const UInt& offset2,
+                         const std::map<ID, ID>& locDofMap,
+                         const MonolithicBlock::vectorPtr_Type& numerationInterface );
 
 
     //!
@@ -416,27 +437,42 @@ public:
         @param Mat block matrix to push
         @param position position of the matrix to which we want to add Mat
      */
-    virtual void addToBlock( const matrixPtr_Type& Mat, UInt position );
+    virtual void addToBlock ( const matrixPtr_Type& Mat, UInt position );
 
     //! Pushes a new block
     /** Pushes a matrix, BCHandler, FESpace and offset in the correspondent vector*/
-    virtual void push_back_oper( MonolithicBlock& Oper);
+    virtual void push_back_oper ( MonolithicBlock& Oper);
 
     //@}
 
     //!@name Get Methods
     //@{
     //! returns the vector of pointers to the blocks (by const reference).
-    const std::vector<matrixPtr_Type>&    blockVector(){return M_blocks;}
+    const std::vector<matrixPtr_Type>&    blockVector()
+    {
+        return M_blocks;
+    }
 
     //! returns the vector of pointers to the BCHandlers (by const reference).
-    const std::vector<bchandlerPtr_Type>& BChVector() {return M_bch;}
+    const std::vector<bchandlerPtr_Type>& BChVector()
+    {
+        return M_bch;
+    }
 
     //! returns the vector of pointers to the FE spaces (by const reference).
-    const std::vector<fespacePtr_Type>&   FESpaceVector() {return M_FESpace;}
+    const std::vector<fespacePtr_Type>&   FESpaceVector()
+    {
+        return M_FESpace;
+    }
 
     //! returns the vector of the offsets (by const reference).
-    const std::vector<UInt>&              offsetVector() {return M_offset;}
+    const std::vector<UInt>&              offsetVector()
+    {
+        return M_offset;
+    }
+
+    virtual const UInt whereIsBlock ( UInt position ) const = 0;
+
     //@}
 
 protected:
@@ -448,7 +484,7 @@ protected:
     /*!
       Everything (but the boundary conditions) must have been set before calling this
      */
-    virtual void blockAssembling(const UInt /*k*/) {}
+    virtual void blockAssembling (const UInt /*k*/) {}
 
     //!swaps two boost::shared_ptr. The tamplate argument of the shared_ptr is templated
     /*!
@@ -457,7 +493,7 @@ protected:
      */
     template <typename Operator>
     void
-    swap(boost::shared_ptr<Operator>& operFrom, boost::shared_ptr<Operator>& OperTo);
+    swap (boost::shared_ptr<Operator>& operFrom, boost::shared_ptr<Operator>& OperTo);
 
     //!swaps two boost::shared_ptr. The tamplate argument of the shared_ptr is templated
     /*!
@@ -466,7 +502,7 @@ protected:
      */
     template <typename Operator>
     void
-    insert(std::vector<Operator>& operFrom, std::vector<Operator>& OperTo);
+    insert (std::vector<Operator>& operFrom, std::vector<Operator>& OperTo);
     //@}
 
     //! @name Protected Members
@@ -491,7 +527,7 @@ private:
       If you need a copy you should implement it, so that it copies the shared pointer one by one, without copying
       the content.
      */
-    MonolithicBlock( const MonolithicBlock& /*T*/){}
+    MonolithicBlock ( const MonolithicBlock& /*T*/) {}
     //@}
 };
 
@@ -500,7 +536,7 @@ typedef FactorySingleton<Factory<MonolithicBlock,  std::string> >     BlockPrecF
 
 template <typename Operator>
 void
-MonolithicBlock::swap(boost::shared_ptr<Operator>& operFrom, boost::shared_ptr<Operator>& operTo)
+MonolithicBlock::swap (boost::shared_ptr<Operator>& operFrom, boost::shared_ptr<Operator>& operTo)
 {
     boost::shared_ptr<Operator> tmp = operFrom;
     operFrom = operTo;
@@ -510,12 +546,12 @@ MonolithicBlock::swap(boost::shared_ptr<Operator>& operFrom, boost::shared_ptr<O
 
 template <typename Operator>
 void
-MonolithicBlock::insert(std::vector<Operator>& vectorFrom, std::vector<Operator>& vectorTo)
+MonolithicBlock::insert (std::vector<Operator>& vectorFrom, std::vector<Operator>& vectorTo)
 {
-    vectorTo.insert(vectorTo.end(), vectorFrom.begin(), vectorFrom.end());
+    vectorTo.insert (vectorTo.end(), vectorFrom.begin(), vectorFrom.end() );
 }
 
 
 } // Namespace LifeV
 
-#endif /* BLOCKINTERFACE_H */
+#endif /* MONOLITHICBLOCK_H */

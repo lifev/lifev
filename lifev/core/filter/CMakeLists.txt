@@ -10,14 +10,29 @@ SET(filter_HEADERS
   filter/ExporterVTK.hpp
   filter/ExporterHDF5.hpp
   filter/ImporterMesh2D.hpp
-  filter/PartitionIO.hpp
+  filter/ParserGmsh.hpp
+  filter/ParserINRIAMesh.hpp
 CACHE INTERNAL "")
+
+IF(TPL_ENABLE_HDF5)
+    SET(filter_HEADERS
+        ${filter_HEADERS}
+        filter/HDF5IO.hpp
+        filter/PartitionIO.hpp
+    CACHE INTERNAL "")
+ENDIF()
 
 SET(filter_SOURCES
   filter/Importer.cpp
   filter/ImporterMesh3D.cpp
 CACHE INTERNAL "")
 
+IF(TPL_ENABLE_HDF5)
+    SET(filter_SOURCES
+        ${filter_SOURCES}
+        filter/HDF5IO.cpp
+    CACHE INTERNAL "")
+ENDIF()
 
 SET(LOCAL_HEADERS)
 FOREACH(INC ${filter_HEADERS})

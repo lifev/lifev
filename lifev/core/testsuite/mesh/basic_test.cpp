@@ -48,6 +48,9 @@
 #include <Epetra_ConfigDefs.h>
 #ifdef HAVE_MPI
 #include <mpi.h>
+#include <Epetra_MpiComm.h>
+#else
+#include <Epetra_SerialComm.h>
 #endif
 
 //Tell the compiler to restore the warning previously silented
@@ -65,30 +68,40 @@
 // A dummy class to imitate a VectorEpetra
 class dummyVect:
     public std::vector<double>
+{
+public:
+    dummyVect() : std::vector<double>() {}
+    dummyVect (unsigned const int& n) : std::vector<double> (n) {}
+    dummyVect ( dummyVect v, LifeV::MapEpetraType ) : std::vector<double> (v) {}
+    bool isGlobalIDPresent (int ) const
     {
-    public:
-        dummyVect(): std::vector<double>(){}
-        dummyVect(unsigned const int & n): std::vector<double>(n){}
-        dummyVect( dummyVect v, LifeV::MapEpetraType ):std::vector<double>(v){}
-        bool isGlobalIDPresent(int )const {return true;}
-        LifeV::MapEpetraType mapType() const { return LifeV::Repeated; }
-    };
+        return true;
+    }
+    LifeV::MapEpetraType mapType() const
+    {
+        return LifeV::Repeated;
+    }
+};
 
 template<typename meshEntity>
 class ResetFlag
 {
 public:
-    void operator()(meshEntity &m){
-        m.replaceFlag(LifeV::EntityFlags::DEFAULT);
-        m.setMarker(0);
+    void operator() (meshEntity& m)
+    {
+        m.replaceFlag (LifeV::EntityFlags::DEFAULT);
+        m.setMarkerID (0);
     }
 };
 
-int main(int argc, char** argv)
+int main (int argc, char** argv)
 {
 #ifdef HAVE_MPI
-    MPI_Init(&argc, &argv);
+    MPI_Init (&argc, &argv);
     std::cout << "MPI Initialization" << std::endl;
+    boost::shared_ptr<Epetra_Comm> comm ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
+#else
+    boost::shared_ptr<Epetra_Comm> comm ( new Epetra_SerialComm );
 #endif
 
 
@@ -96,141 +109,148 @@ int main(int argc, char** argv)
     using namespace LifeV::MeshUtility;
     using namespace std;
 
-    GetPot datafile( "data" );
-    string dirname=datafile( "mesh_dir","." );//"../data/mesh/mesh++/";
-    string fname=dirname+datafile( "mesh_file","cube_47785.m++" );//dirname+"cube_47785.m++";
-    string outfile="testBuilders.dat";
-    ofstream ofile(outfile.c_str());
-    if (ofile.fail()) {cerr<<" Error: Cannot creat output file"<<endl; abort();}
+    GetPot datafile ( "data" );
+    string dirname = datafile ( "mesh_dir", "." ); //"../data/mesh/mesh++/";
+    string fname = dirname + datafile ( "mesh_file", "cube_47785.m++" ); //dirname+"cube_47785.m++";
+    string outfile = "testBuilders.dat";
+    ofstream ofile (outfile.c_str() );
+    if (ofile.fail() )
+    {
+        cerr << " Error: Cannot creat output file" << endl;
+        abort();
+    }
 
-    RegionMesh<LinearTetra> aMesh;
+    RegionMesh<LinearTetra> aMesh ( comm );
     typedef RegionMesh<LinearTetra> mesh_Type;
     //    aMesh.test3DBuilder();
     //    aMesh.readMppFile(mystream, id, m);
-    ID m=1;
-    readMppFile(aMesh,fname, m);
+    ID m = 1;
+    readMppFile (aMesh, fname, m);
 
-    cout <<" **********************************************************"<<endl;
+    cout << " **********************************************************" << endl;
 
-    cout<< "  ****************** CHECKING MESH WITH INTERNAL CHECKER"<<endl;
+    cout << "  ****************** CHECKING MESH WITH INTERNAL CHECKER" << endl;
 
-    aMesh.check(0,true,true);
+    aMesh.check (0, true, true);
     Switch sw;
 
 
-    cout <<" **********************************************************"<<endl;
+    cout << " **********************************************************" << endl;
 
-    cout<< "  ****************** CLEANING edges and faces "<<endl;
+    cout << "  ****************** CLEANING edges and faces " << endl;
 
     aMesh.edgeList.clear();
     aMesh.faceList.clear();
 
-    checkMesh3D(aMesh, sw,
-                true, true,
-                cerr, cout, ofile);
+    checkMesh3D (aMesh, sw,
+                 true, true,
+                 cerr, cout, ofile);
 
 
     aMesh.showMe();
 
 
-    cout<< " Now building local Edges/faces Stuff"<<endl<<endl;
+    cout << " Now building local Edges/faces Stuff" << endl << endl;
     aMesh.updateElementEdges();
     aMesh.updateElementFaces();
     aMesh.showMe();
-    cout<< " Now cleaning local Edges/faces Stuff"<<endl<<endl;
+    cout << " Now cleaning local Edges/faces Stuff" << endl << endl;
     aMesh.cleanElementRidges();
     aMesh.cleanElementFacets();
     aMesh.showMe();
-    cout <<" **********************************************************"<<endl;
+    cout << " **********************************************************" << endl;
 
-    cout<< "  ****************** BUILDING ALL EDGES"<<endl;
+    cout << "  ****************** BUILDING ALL EDGES" << endl;
     UInt bedges_found, iedges_found;
-    buildEdges(aMesh, ofile, cerr, bedges_found,
-               iedges_found, true, true,true);
-    cout <<" **********************************************************"<<endl;
+    buildEdges (aMesh, ofile, cerr, bedges_found,
+                iedges_found, true, true, true);
+    cout << " **********************************************************" << endl;
 
-    cout<< "  ****************** BUILDING ALL FACES"<<endl;
+    cout << "  ****************** BUILDING ALL FACES" << endl;
     UInt bfaces_found, ifaces_found;
-    buildFaces(aMesh, ofile, cerr, bfaces_found,
-               ifaces_found, true,true,true);
+    buildFaces (aMesh, ofile, cerr, bfaces_found,
+                ifaces_found, true, true, true);
 
     aMesh.showMe();
 
-    cout<< " Now building again local Edges/faces Stuff"<<endl<<endl;
+    cout << " Now building again local Edges/faces Stuff" << endl << endl;
     aMesh.updateElementEdges();
     aMesh.updateElementFaces();
     aMesh.showMe();
-    checkMesh3D(aMesh, sw,
-                true, true,
-                cerr, cout, ofile);
+    checkMesh3D (aMesh, sw,
+                 true, true,
+                 cerr, cout, ofile);
     ofile.close();
 
     ///THIS PART IS ONLY TO VERIFY IF THESE ROUTINES COMPILE PROPERLY
-    cerr<<"Fixing bpoints"<<endl;
+    cerr << "Fixing bpoints" << endl;
 
-    fixBoundaryPoints(aMesh, ofile,cerr, true);
-    cerr<<"Fixing edge markers"<<endl;
-    setBoundaryEdgesMarker(aMesh, ofile,cerr, true);
-    cerr<<"Fixing faces marker"<<endl;
-    setBoundaryFacesMarker(aMesh, ofile,cerr, true);
-    cerr<<"Fixing points marker"<<endl;
-    setBoundaryPointsMarker(aMesh, ofile,cerr, true);
-    cerr<<endl;
-    dummyVect disp(3*aMesh.numPoints());
-    MeshUtility::MeshTransformer<mesh_Type, mesh_Type::MarkerCommon > transformer(aMesh);
-    transformer.moveMesh(disp,3);
-    MeshUtility::MeshStatistics::meshSize sizes= MeshUtility::MeshStatistics::computeSize(aMesh);
-    cerr<<"Hmin ="<< sizes.minH<<" Hmax="<<sizes.maxH<<std::endl;
-    mesh_Type::points_Type newPointList=aMesh.pointList;
-    mesh_Type::faces_Type newFaceList=aMesh.faceList;
-    Utilities::fixAfterShallowCopy(newFaceList,newPointList);
-    for (mesh_Type::faces_Type::iterator i=newFaceList.begin();i<newFaceList.end();++i)
+    fixBoundaryPoints (aMesh, ofile, cerr, true);
+    cerr << "Fixing edge markers" << endl;
+    setBoundaryEdgesMarker (aMesh, ofile, cerr, true);
+    cerr << "Fixing faces marker" << endl;
+    setBoundaryFacesMarker (aMesh, ofile, cerr, true);
+    cerr << "Fixing points marker" << endl;
+    setBoundaryPointsMarker (aMesh, ofile, cerr, true);
+    cerr << endl;
+    dummyVect disp (3 * aMesh.numPoints() );
+    MeshUtility::MeshTransformer<mesh_Type> transformer (aMesh);
+    transformer.moveMesh (disp, 3);
+    MeshUtility::MeshStatistics::meshSize sizes = MeshUtility::MeshStatistics::computeSize (aMesh);
+    cerr << "Hmin =" << sizes.minH << " Hmax=" << sizes.maxH << std::endl;
+    mesh_Type::points_Type newPointList = aMesh.pointList;
+    mesh_Type::faces_Type newFaceList = aMesh.faceList;
+    Utilities::fixAfterShallowCopy (newFaceList, newPointList);
+    for (mesh_Type::faces_Type::iterator i = newFaceList.begin(); i < newFaceList.end(); ++i)
     {
-        ID theId=i->point(0).id();
-        if(&(i->point(0)) != &(newPointList[theId]) )
+        ID theId = i->point (0).id();
+        if (& (i->point (0) ) != & (newPointList[theId]) )
         {
-            cerr<<"ERROR: Error after renumbering Faces"<<std::endl;
+            cerr << "ERROR: Error after renumbering Faces" << std::endl;
             break;
         }
     }
-    aMesh.faceList[2].replaceFlag(EntityFlags::CUTTED);
-    aMesh.faceList.reorderAccordingToFlag(EntityFlags::CUTTED,&Flag::testOneSet);
-    if (aMesh.faceList[0].flag() != EntityFlags::CUTTED){
-        cerr<<"ERROR: Reordering is not working"<<std::endl;
+    aMesh.faceList[2].replaceFlag (EntityFlags::CUTTED);
+    aMesh.faceList.reorderAccordingToFlag (EntityFlags::CUTTED, &Flag::testOneSet);
+    if (aMesh.faceList[0].flag() != EntityFlags::CUTTED)
+    {
+        cerr << "ERROR: Reordering is not working" << std::endl;
     }
-    cout<<"Number of cutted faces (should be 1) "<<
-                    aMesh.faceList.countElementsWithFlag(EntityFlags::CUTTED,&Flag::testOneSet)<<std::endl;
+    cout << "Number of cutted faces (should be 1) " <<
+         aMesh.faceList.countElementsWithFlag (EntityFlags::CUTTED, &Flag::testOneSet) << std::endl;
     // Reset all flags to default
-    aMesh.edgeList.changeAccordingToFunctor(ResetFlag<mesh_Type::edge_Type>());
-    aMesh.edge(0).setMarker(10);
-    aMesh.edge(5).setMarker(10);
-    aMesh.edge(10).setMarker(15);
-    vector<ID> watermarks(2);
-    watermarks[0]=10;
-    watermarks[1]=15;
+    aMesh.edgeList.changeAccordingToFunctor (ResetFlag<mesh_Type::edge_Type>() );
+    aMesh.edge (0).setMarkerID (10);
+    aMesh.edge (5).setMarkerID (10);
+    aMesh.edge (10).setMarkerID (15);
+    vector<ID> watermarks (2);
+    watermarks[0] = 10;
+    watermarks[1] = 15;
     // change flags according to marker iD
-    SetFlagAccordingToWatermarks<mesh_Type::edge_Type> changeFlags(EntityFlags::CUTTED,watermarks);
-    aMesh.edgeList.changeAccordingToFunctor(changeFlags);
-    cout<<"Number of cutted edges (should be 3) "<<
-                     aMesh.edgeList.countElementsWithFlag(EntityFlags::CUTTED,&Flag::testOneSet)<<std::endl;
-    aMesh.edgeList.changeAccordingToFunctor(ResetFlag<mesh_Type::edge_Type>());
-    aMesh.edge(0).setMarker(10);
-    aMesh.edge(5).setMarker(12);
-    aMesh.edge(10).setMarker(15);
-    SetFlagAccordingToMarkerRanges<mesh_Type::edge_Type > changer(&Flag::turnOn); //I may use the default constructor
-    changer.insert(std::make_pair(10,12),EntityFlags::INTERNAL_INTERFACE);
-    changer.insert(std::make_pair(15,18),EntityFlags::CUTTED);
-    aMesh.edgeList.changeAccordingToFunctor(changer);
-    cout<<"Number of cutted edges (should be 1) "<<
-                     aMesh.edgeList.countElementsWithFlag(EntityFlags::CUTTED,&Flag::testOneSet)<<std::endl;
-    cout<<"Number of internal interface edges (should be 2) "<<
-                      aMesh.edgeList.countElementsWithFlag(EntityFlags::INTERNAL_INTERFACE,&Flag::testOneSet)<<std::endl;
+    SetFlagAccordingToWatermarks changeFlags (EntityFlags::CUTTED, watermarks);
+    aMesh.edgeList.changeAccordingToFunctor (changeFlags);
+    std::cout << "Number of cutted edges (should be 3) "
+              << aMesh.edgeList.countElementsWithFlag (EntityFlags::CUTTED, &Flag::testOneSet) << std::endl;
+    aMesh.edgeList.changeAccordingToFunctor ( ResetFlag<mesh_Type::edge_Type>() );
+    aMesh.edge (0).setMarkerID (10);
+    aMesh.edge (5).setMarkerID (12);
+    aMesh.edge (10).setMarkerID (15);
+    SetFlagAccordingToMarkerRanges changer ( &Flag::turnOn ); //I may use the default constructor
+    changer.insert (std::make_pair (10, 12), EntityFlags::INTERNAL_INTERFACE);
+    changer.insert (std::make_pair (15, 18), EntityFlags::CUTTED);
+    aMesh.edgeList.changeAccordingToFunctor (changer);
+    cout << "Number of cutted edges (should be 1) " <<
+         aMesh.edgeList.countElementsWithFlag (EntityFlags::CUTTED, &Flag::testOneSet) << std::endl;
+    cout << "Number of internal interface edges (should be 2) " <<
+         aMesh.edgeList.countElementsWithFlag (EntityFlags::INTERNAL_INTERFACE, &Flag::testOneSet) << std::endl;
 
+    SetFlagAccordingToWatermark<std::equal_to<markerID_Type> > changer2 (EntityFlags::INTERNAL_INTERFACE, 12000, Flag::turnOn);
+    aMesh.faceList.changeAccordingToFunctor (changer2);
 
 #ifdef HAVE_MPI
     MPI_Finalize();
 #endif
 
-    return( EXIT_SUCCESS );
+    return ( EXIT_SUCCESS );
 }
 

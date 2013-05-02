@@ -12,9 +12,11 @@ SET(mesh_HEADERS
   mesh/MarkerDefinitions.hpp
   mesh/MeshUtility.hpp
   mesh/BareMesh.hpp
+  mesh/ConvertBareMesh.hpp
   mesh/MeshElement.hpp
   mesh/MeshElementBare.hpp
   mesh/RegionMesh1DBuilders.hpp
+  mesh/RegionMesh1DStructured.hpp
   mesh/MeshChecks.hpp
   mesh/MeshElementMarked.hpp
   mesh/RegionMesh2DStructured.hpp
@@ -30,6 +32,7 @@ SET(mesh_SOURCES
   mesh/MeshUtility.cpp
   mesh/MeshData.cpp
   mesh/InternalEntitySelector.cpp
+  mesh/MeshEntity.cpp
   mesh/RegionMesh2DStructured.cpp
 CACHE INTERNAL "")
 

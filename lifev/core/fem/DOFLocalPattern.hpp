@@ -112,11 +112,11 @@ public:
     //@{
 
     //! Full constructor
-    DOFLocalPattern( const UInt& nbLocalDof, const UInt& nbDofPerVertex, const UInt& nbDofPerEdge,
-                     const UInt& nbDofPerFace, const UInt& nbDofPerVolume, const DofPatternType& patternType, UInt nbCoor );
+    DOFLocalPattern ( const UInt& nbLocalDof, const UInt& nbDofPerVertex, const UInt& nbDofPerEdge,
+                      const UInt& nbDofPerFace, const UInt& nbDofPerVolume, const DofPatternType& patternType, UInt nbLocalCoor );
 
     //! Simple copy constructor
-    DOFLocalPattern( const DOFLocalPattern& localDofPattern);
+    DOFLocalPattern ( const DOFLocalPattern& localDofPattern);
 
     //! Empty destructor
     virtual ~DOFLocalPattern()
@@ -129,21 +129,21 @@ public:
     //@{
 
     //!  patternFirst(i): row index in the element matrix of the i-th term of the pattern (the index starts from 0, not from 1 !).
-    const UInt& patternFirst(const UInt& i ) const
+    const UInt& patternFirst (const UInt& i ) const
     {
-        ASSERT_BD( i < M_nbPattern );
+        ASSERT_BD ( i < M_nbPattern );
         return M_pattern[i].first;
     }
 
     //! patternSecond(i): column index in the element matrix of the i-th term of the pattern (the index starts from 0, not from 1 !).
-    const UInt& patternSecond(const UInt& i ) const
+    const UInt& patternSecond (const UInt& i ) const
     {
-        ASSERT_BD( i < M_nbPattern );
+        ASSERT_BD ( i < M_nbPattern );
         return M_pattern[i].second;
     }
 
     //! The showMe method for the pattern
-    void showMe( std::ostream& output = std::cout ) const;
+    void showMe ( std::ostream& output = std::cout ) const;
 
     //@}
 
@@ -188,28 +188,28 @@ public:
     };
 
     //! Return the number of degrees of freedom located on the peak (vertex in 3D).
-	UInt nbDofPerPeak() const
-	{
-		return (M_dim >= 3) ? M_nbDofPerDimEntity[M_dim-3] : 0;
-	};
+    UInt nbDofPerPeak() const
+    {
+        return (M_dim >= 3) ? M_nbDofPerDimEntity[M_dim - 3] : 0;
+    };
 
-	//! Return the number of degrees of freedom located on the ridge. (edge in 3D)
+    //! Return the number of degrees of freedom located on the ridge. (edge in 3D)
     UInt nbDofPerRidge() const
-	{
-		return (M_dim >= 2) ? M_nbDofPerDimEntity[M_dim-2] : 0;
-	};
+    {
+        return (M_dim >= 2) ? M_nbDofPerDimEntity[M_dim - 2] : 0;
+    };
 
-	//! Return the number of degrees of freedom located on the facet. (face in 3D)
+    //! Return the number of degrees of freedom located on the facet. (face in 3D)
     UInt nbDofPerFacet() const
-	{
-		return (M_dim >= 1) ? M_nbDofPerDimEntity[M_dim-1] : 0;
-	};
-	
-	//! Return the number of degrees of freedom located on the element. (volume in 3D)
-	const UInt& nbDofPerElement() const
-	{
-		return M_nbDofPerDimEntity[M_dim];
-	};
+    {
+        return (M_dim >= 1) ? M_nbDofPerDimEntity[M_dim - 1] : 0;
+    };
+
+    //! Return the number of degrees of freedom located on the element. (volume in 3D)
+    const UInt& nbDofPerElement() const
+    {
+        return M_nbDofPerDimEntity[M_dim];
+    };
 
     //! Return the number of degrees of freedom located on the faces (2D structures).
     /*!Beware that in the 2D case, the face of a triangle is the triangle itself
@@ -230,9 +230,9 @@ public:
     /*! For example, if we want to access the vertices, structDim should be 0,
       if we want the edges, then it should be 1,...
      */
-    const UInt& nbDofPerDimStrut(const UInt & structDim) const
+    const UInt& nbDofPerDimStrut (const UInt& structDim) const
     {
-        ASSERT(structDim <= M_dim, "No structure with this dimension");
+        ASSERT (structDim <= M_dim, "No structure with this dimension");
         return M_nbDofPerDimEntity[structDim];
     };
 
@@ -242,10 +242,10 @@ public:
       1, edges 2 and vertices 3. This method could be useful to code "dimension-free" code.
       (for example, IP is built on edges in 2D, faces in 3D, so on objects with codimension 1).
      */
-    const UInt& nbDofPerCodimStrut(const UInt & structCodim) const
+    const UInt& nbDofPerCodimStrut (const UInt& structCodim) const
     {
-        ASSERT(structCodim <= M_dim, "No structure with this codimension");
-        return M_nbDofPerDimEntity[M_dim-structCodim];
+        ASSERT (structCodim <= M_dim, "No structure with this codimension");
+        return M_nbDofPerDimEntity[M_dim - structCodim];
     };
 
 
@@ -293,7 +293,7 @@ private:
     DofPatternType M_patternType;
 
     //! Pairs of couplings to appear in the pattern
-    std::vector< std::pair< UInt,UInt > > M_pattern;
+    std::vector< std::pair< UInt, UInt > > M_pattern;
 
     //! Number of non-zero terms in the element matrix
     UInt M_nbPattern;

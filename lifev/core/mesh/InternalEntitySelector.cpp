@@ -41,32 +41,65 @@
 
 namespace LifeV
 {
-// LF REGIONMESH
-// This class was meant to separate internal from boundary flags. With the
-// new way of selecting boundary entities this will be useless!
-const markerID_Type InternalEntitySelector::defMarkFlag(markerID_Type(100000));
+
+/*! @todo This class was meant to separate internal from boundary flags. With the
+ *  new way of selecting boundary entities this will be useless!
+ */
+const markerID_Type InternalEntitySelector::defMarkFlag ( markerID_Type ( 100000 ) );
 
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-
-InternalEntitySelector::InternalEntitySelector():
-M_watermarkFlag( defMarkFlag )
+InternalEntitySelector::InternalEntitySelector() :
+    M_watermarkFlag ( defMarkFlag )
 {}
 
-InternalEntitySelector::InternalEntitySelector(const markerID_Type & w):
-M_watermarkFlag( w )
+InternalEntitySelector::InternalEntitySelector ( const markerID_Type& w ) :
+    M_watermarkFlag ( w )
 {}
+
+SetFlagAccordingToWatermarks::SetFlagAccordingToWatermarks ( const flag_Type& flagToSet,
+                                                             const std::vector<markerID_Type>& watermarks,
+                                                             const flagPolicy_ptr& flagPolicy) :
+    M_flagToSet (flagToSet),
+    M_watermarks (watermarks),
+    M_flagPolicy (flagPolicy)
+{
+    std::sort (M_watermarks.begin(), M_watermarks.end() );
+}
 
 // ===================================================
 // Operators
 // ===================================================
-
-bool
-InternalEntitySelector::operator()(markerID_Type const & test) const
+bool InternalEntitySelector::operator() ( markerID_Type const& test ) const
 {
-    return (test==markerID_Type(0) || test > M_watermarkFlag );
+    return ( test == markerID_Type ( 0 ) || test > M_watermarkFlag );
 }
 
+//========================================================
+// Methods
+//========================================================
+void SetFlagAccordingToMarkerRanges::insert ( rangeID_Type const& key, flag_Type flag )
+{
+    M_map[ key ] = flag;
+}
+
+std::pair<flag_Type, bool> SetFlagAccordingToMarkerRanges::findFlag ( markerID_Type const& m ) const
+{
+    if ( !M_map.empty() )
+    {
+        const_iterator_Type it = M_map.upper_bound ( std::make_pair ( m, markerID_Type ( 0 ) ) );
+        if ( it-- != M_map.begin() ) // go back one
+        {
+            markerID_Type first  = it->first.first;
+            markerID_Type second = it->first.second;
+            if ( m >= first && m <= second )
+            {
+                return std::make_pair ( it->second, true );
+            }
+        }
+    }
+    return std::make_pair ( flag_Type ( 0 ), false );
+}
 
 } // Namespace LifeV

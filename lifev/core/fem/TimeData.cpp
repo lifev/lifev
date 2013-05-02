@@ -26,14 +26,13 @@
 
 /*!
     @file
-    @brief File containing a class for handling temporal discretization
+    @brief File containing a class for handling temporal data.
 
     @author M.A. Fernandez
     @author Cristiano Malossi <cristiano.malossi@epfl.ch>
     @date 01-06-2009
 
     @contributor Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
-
     @maintainer Matteo Pozzoli <matteo1.pozzoli@mail.polimi.it>
  */
 #include <lifev/core/fem/TimeData.hpp>
@@ -45,55 +44,46 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 TimeData::TimeData( ) :
-        M_initialTime   ( 0. ),
-        M_endTime       ( 1. ),
-        M_periodTime    ( 1. ),
-        M_time          ( M_initialTime ),
-        M_timeStep      ( M_endTime ),
-        M_timeStepNumber( 0 ),
-        M_orderBDF      ( 1 ),
-        M_theta         ( 0.25 ),
-        M_gamma         ( 0.5)
+    M_initialTime   ( 0. ),
+    M_endTime       ( 1. ),
+    M_periodTime    ( 1. ),
+    M_time          ( M_initialTime ),
+    M_timeStep      ( M_endTime ),
+    M_timeStepNumber ( 0 )
 {
 }
 
-TimeData::TimeData( const GetPot& dataFile, const std::string& section ) :
-        M_timeStepNumber( 0 )
+TimeData::TimeData ( const GetPot& dataFile, const std::string& section ) :
+    M_timeStepNumber ( 0 )
 {
-    setup( dataFile, section );
+    setup ( dataFile, section );
 }
 
-TimeData::TimeData( const TimeData& timeData )
+TimeData::TimeData ( const TimeData& timeData )
 {
     M_initialTime    = timeData.M_initialTime;
     M_endTime        = timeData.M_endTime;
-    M_periodTime    = timeData.M_periodTime;
-    M_time            = timeData.M_time;
-    M_timeStep        = timeData.M_timeStep;
-    M_timeStepNumber= timeData.M_timeStepNumber;
-    M_orderBDF        = timeData.M_orderBDF;
-    M_theta            = timeData.M_theta;
-    M_gamma         = timeData.M_gamma;
+    M_periodTime     = timeData.M_periodTime;
+    M_time           = timeData.M_time;
+    M_timeStep       = timeData.M_timeStep;
+    M_timeStepNumber = timeData.M_timeStepNumber;
 }
 
 // ===================================================
 // Methods
 // ===================================================
 void
-TimeData::setup( const GetPot& dataFile, const std::string& section )
+TimeData::setup ( const GetPot& dataFile, const std::string& section )
 {
-    M_initialTime = dataFile(( section + "/initialtime"  ).data(), 0.);
-    M_endTime = dataFile(( section + "/endtime"      ).data(), 1.);
-    M_periodTime = dataFile(( section + "/periodtime"      ).data(), 1.);
+    M_initialTime = dataFile ( ( section + "/initialtime"  ).data(), 0.);
+    M_endTime = dataFile ( ( section + "/endtime"      ).data(), 1.);
+    M_periodTime = dataFile ( ( section + "/periodtime"      ).data(), 1.);
     M_time = M_initialTime;
-    M_timeStep = dataFile(( section + "/timestep" ).data(), M_endTime );
-    M_orderBDF = dataFile(( section + "/BDF_order" ).data(), 1 );
-    M_theta = dataFile((section + "/theta").data(),0.25);
-    M_gamma = dataFile(( section + "/zeta").data(),0.5);
+    M_timeStep = dataFile ( ( section + "/timestep" ).data(), M_endTime );
 }
 
 void
-TimeData::showMe( std::ostream& output ) const
+TimeData::showMe ( std::ostream& output ) const
 {
     output << "\n*** TimeData: values for user-defined data\n";
 
@@ -103,32 +93,17 @@ TimeData::showMe( std::ostream& output ) const
     output << "Time           = " << M_time              << std::endl;
     output << "TimeStep       = " << M_timeStep          << std::endl;
     output << "TimeStepNumber = " << M_timeStepNumber << std::endl;
-    output << "BDF order      = " << M_orderBDF       << std::endl;
-    output << "theta          = " << M_theta          << std::endl;
-    output << "gamma          = " << M_gamma          << std::endl;
 }
 
-// ===================================================
-// Get Methods
-// ===================================================
-std::vector<Real>
-TimeData::coefficientsNewmark()
-{
-    std::vector<Real> coefficients;
 
-    coefficients.push_back( M_theta );
-    coefficients.push_back( M_gamma );
-
-    return  coefficients;
-}
 
 // ===================================================
-// Private Methods
+// Utility methods
 // ===================================================
 Real
-TimeData::round( const Real& n, const Int& decimal ) const
+TimeData::round ( const Real& n, const Int& decimal ) const
 {
-    return std::floor( n * std::pow(10.0, decimal) + 0.5 )  / std::pow(10.0, decimal);
+    return std::floor ( n * std::pow (10.0, decimal) + 0.5 )  / std::pow (10.0, decimal);
 }
 
 }

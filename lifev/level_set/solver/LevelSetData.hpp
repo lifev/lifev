@@ -42,6 +42,7 @@
 #include <lifev/core/LifeV.hpp>
 
 #include <lifev/core/fem/TimeData.hpp>
+#include <lifev/core/fem/TimeAdvanceData.hpp>
 
 #include <boost/shared_ptr.hpp>
 
@@ -127,8 +128,11 @@ public:
     //! @name Public Types
     //@{
 
-    typedef TimeData TimeData_type;
-    typedef boost::shared_ptr<TimeData_type> TimeData_ptrType;
+    typedef TimeData                               time_Type;
+    typedef boost::shared_ptr<time_Type>           timePtr_Type;
+
+    typedef TimeAdvanceData                        timeAdvance_Type;
+    typedef boost::shared_ptr<timeAdvance_Type>    timeAdvancePtr_Type;
 
     //! \enum Enumerated type for the stabilization
     enum stabilization_type
@@ -167,10 +171,10 @@ public:
     /*!
       Using this method overrides all the previously stored informations!
      */
-    void setup( const GetPot& dataFile, const std::string& section="level-set");
+    void setup ( const GetPot& dataFile, const std::string& section = "level-set");
 
     //! ShowMe method
-    void showMe(std::ostream& out = std::cout) const ;
+    void showMe (std::ostream& out = std::cout) const ;
 
     //@}
 
@@ -178,12 +182,23 @@ public:
     //! @name Set Methods
     //@{
 
-    //! Set the data time
+    //! Set data time container
     /*!
-      This method sets the TimeData to the one given.
-      @Warning: this copies the pointer, not the data!
+     * @param TimeData shared_ptr to TimeData container
      */
-    inline void setTimeData(const TimeData_ptrType& t) { M_TimeData = t; };
+    void setTimeData ( const timePtr_Type timeData )
+    {
+        M_time = timeData;
+    }
+
+    //! Set data time advance container
+    /*!
+     * @param timeAdvanceData shared_ptr to TimeAdvanceData container
+     */
+    void setTimeAdvanceData ( const timeAdvancePtr_Type timeAdvanceData )
+    {
+        M_timeAdvance = timeAdvanceData;
+    }
 
     //! Set the stabilization type
     /*!
@@ -192,10 +207,13 @@ public:
       @Warning: prefer using the other version of setStabilization
       that is not sensible to typos.
     */
-    void setStabilization(const std::string& stab);
+    void setStabilization (const std::string& stab);
 
     //! Set the stabilization type
-    inline void setStabilization(const stabilization_type& stab) { M_stabilization = stab; }
+    inline void setStabilization (const stabilization_type& stab)
+    {
+        M_stabilization = stab;
+    }
 
     //! Set the treatment for the IP stabilization
     /*!
@@ -204,13 +222,19 @@ public:
       @Warning: prefer using the other version of setIPTreatment
       that is not sensible to typos.
     */
-    void setIPTreatment(const std::string& treat);
+    void setIPTreatment (const std::string& treat);
 
     //! Set the IP treatment
-    void setIPTreatment(const IPTreatment_type& treat) { M_IPTreatment = treat; }
+    void setIPTreatment (const IPTreatment_type& treat)
+    {
+        M_IPTreatment = treat;
+    }
 
     //! Set the IP coefficient
-    inline void setIPCoef(const Real& coef) { M_IPCoef = coef; };
+    inline void setIPCoef (const Real& coef)
+    {
+        M_IPCoef = coef;
+    };
 
     //@}
 
@@ -218,27 +242,52 @@ public:
     //! @name Get Methods
     //@{
 
-    //! Getter for the TimeData structure
-    inline TimeData_ptrType dataTime() const { return M_TimeData; };
+    //! Get data time container
+    /*!
+     * @return shared_ptr to TimeData container
+     */
+    timePtr_Type dataTime() const
+    {
+        return M_time;
+    }
+
+    //! Get data time advance container
+    /*!
+     * @return shared_ptr to TimeAdvanceData container
+     */
+    timeAdvancePtr_Type dataTimeAdvance() const
+    {
+        return M_timeAdvance;
+    }
 
     //! Getter for the stabilization type
-    inline stabilization_type stabilization() const { return M_stabilization; };
+    inline stabilization_type stabilization() const
+    {
+        return M_stabilization;
+    };
 
     //! Getter for the IP treatment
-    inline IPTreatment_type IPTreatment() const { return M_IPTreatment; };
+    inline IPTreatment_type IPTreatment() const
+    {
+        return M_IPTreatment;
+    };
 
     //! Getter for the IP coefficient
-    inline Real IPCoef() const { return M_IPCoef; };
+    inline Real IPCoef() const
+    {
+        return M_IPCoef;
+    };
 
     //@}
 
 private:
 
     // No copy
-    DataLevelSet(const DataLevelSet&);
+    DataLevelSet (const DataLevelSet&);
 
     // Data for the time
-    TimeData_ptrType M_TimeData;
+    timePtr_Type        M_time;
+    timeAdvancePtr_Type M_timeAdvance;
 
     // Stabilization type
     stabilization_type M_stabilization;

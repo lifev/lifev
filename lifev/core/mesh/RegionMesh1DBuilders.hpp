@@ -39,75 +39,32 @@
 #define REGIONMESH1DBUILDER_HPP 1
 
 #include <lifev/core/LifeV.hpp>
-#include <lifev/core/mesh/RegionMesh.hpp>
-#include <lifev/core/mesh/MeshChecks.hpp>
-#include <fstream>
+#include <lifev/core/mesh/RegionMesh1DStructured.hpp>
 
 namespace LifeV
 {
 
 //! Build uniform mesh along the x axis.
-    /**
-     *  @param mesh Reference to the mesh
-     *  @param x_l Left end point
-     *  @param x_r Right end point
-     *  @param numberOfElements Number of elements inside the mesh.
-     *
-     *  Build 1D uniform mesh along the x axis, extending from x_l to x_r, with numberOfElements elements
-     */
+/**
+ *  @param mesh Reference to the mesh
+ *  @param x_l Left end point
+ *  @param x_r Right end point
+ *  @param numberOfElements Number of elements inside the mesh.
+ *
+ *  Build 1D uniform mesh along the x axis, extending from x_l to x_r, with numberOfElements elements
+ */
 template <typename MC>
-void uniformMesh1D( RegionMesh<LinearLine, MC>& mesh, const Real& x_l, const Real& x_r, const UInt& numberOfElements )
+void LIFEV_DEPRECATED ( uniformMesh1D ( RegionMesh<LinearLine, MC>& mesh,
+                                        const Real& x_l, const Real& x_r,
+                                        const UInt& numberOfElements ) );
+
+template <typename MC>
+void uniformMesh1D ( RegionMesh<LinearLine, MC>& mesh,
+                     const Real& x_l, const Real& x_r,
+                     const UInt& numberOfElements )
 {
-	typedef RegionMesh<LinearLine, MC> mesh_Type;
-	ASSERT_PRE( x_r > x_l, "uniformMesh1D problems! The left end point coordinate value should be less than right end point coordinate!");
-    ASSERT_PRE( numberOfElements > 0, "uniformMesh1D problems! The number of elements must be positive!");
-
-    mesh.setMaxNumPoints(numberOfElements + 1, true);
-    mesh.setNumBPoints(2);
-
-    Real deltax = (x_r - x_l) / numberOfElements;
-
-    typename mesh_Type::point_Type * pp = 0;
-
-    for (UInt it = 0; it < numberOfElements + 1; it++)
-    {
-    	bool isBoundary = (it == numberOfElements) || ( it == 0);
-        // insert a new Point1D in point list
-    	pp = &mesh.addPoint( isBoundary, false );
-        pp->x() = x_l + it*deltax;
-        pp->y() = pp->z() = 0.;
-        pp->setId(it);
-        pp->setLocalId(it);
-        if(isBoundary)
-        {
-        	pp->firstAdjacentElementIdentity() = it;
-        	pp->firstAdjacentElementPosition() = ID(it == numberOfElements);
-        }
-    }
-
-    mesh.setMaxNumEdges(numberOfElements, true);
-    mesh.setNumGlobalVertices( mesh.pointList.size() );
-    mesh.setNumVertices(mesh.pointList.size() );
-    mesh.setMaxNumPoints      ( mesh.pointList.size(), true );
-    mesh.setMaxNumGlobalPoints( mesh.pointList.size() );
-    mesh.numBVertices() = 2;
-    mesh.setNumBPoints( mesh.numBVertices() );
-
-    typename mesh_Type::edge_Type* pe = 0;
-
-    for (UInt it = 0; it < numberOfElements; it++)
-    {
-        pe = &mesh.addEdge( false );
-        pe->setPoint(0, mesh.point(it));
-        pe->setPoint(1, mesh.point(it + 1));
-        pe->setId(it);
-        pe->setLocalId(it);
-    }
-    mesh.setNumEdges(mesh.edgeList.size() );
-    mesh.setMaxNumGlobalEdges(mesh.edgeList.size() );
+    regularMesh1D ( mesh, 1, numberOfElements, false, x_r - x_l, x_l );
 }
-
-
 
 } // Namespace LifeV
 

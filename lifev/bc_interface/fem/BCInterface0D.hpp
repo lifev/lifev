@@ -26,7 +26,7 @@
 
 /*!
  *  @file
- *  @brief File containing the zero dimensional BCInterface
+ *  @brief File containing the BCInterface0D class
  *
  *  @date 30-03-2011
  *  @author Cristiano Malossi <cristiano.malossi@epfl.ch>
@@ -79,22 +79,12 @@ namespace LifeV
  *      <li> \c functionFile, which is implemented in \c BCInterfaceFunctionParserFile;
  *      <li> \c functionSolver, which is implemented in \c BCInterfaceFunctionParserSolver;
  *      <li> \c functionFileSolver, which is implemented in \c BCInterfaceFunctionParserFileSolver;
- *      <li> \c functionUD, which is implemented in \c BCInterfaceFunctionUserDefined;
- *      <li> \c functionSD, which is implemented in \c BCInterfaceFunctionSolverDefined;
+ *      <li> \c functionUD, which is implemented in \c BCInterfaceFunctionUserDefined.
  *  </ol>
  *
  *  All the parameters are case sensitive.
  *
  *  See \c BCInterface base class for more details.
- *
- *  <b>TODO LIST</b>
- *  Due to the splitting of BCInterface between LifeV and Mathcard there are some legacy that we cannot
- *  remove now. Here there is a list of think that should be done before porting the code to LifeV in
- *  order to remove these legacies:
- *
- *  <ol>
- *      <li> remove the legacy in LifeV and Mathcard marked with the MULTISCALE_IS_IN_LIFEV macro;
- *  </ol>
  */
 template< class BcHandler, class PhysicalSolverType >
 class BCInterface0D : public virtual BCInterface< BcHandler, PhysicalSolverType >
@@ -146,36 +136,13 @@ public:
      * @param dataSection section in the data file
      * @param name name of the boundary condition
      */
-    void readBC( const std::string& fileName, const std::string& dataSection, const std::string& name )
+    void readBC ( const std::string& fileName, const std::string& dataSection, const std::string& name )
     {
-        M_data.readBC( fileName, dataSection, name );
+        M_data.readBC ( fileName, dataSection, name );
     }
 
     //! Insert the current boundary condition in the BChandler
-    void insertBC()
-    {
-        switch ( M_data.base().second )
-        {
-        case BCIFunctionParser:
-        case BCIFunctionParserFile:
-        case BCIFunctionParserSolver:
-        case BCIFunctionParserFileSolver:
-        case BCIFunctionUserDefined:
-        {
-            factory_Type factory;
-            this->M_vectorFunction.push_back( factory.createFunctionParser( M_data ) );
-
-            addBcToHandler();
-
-            return;
-        }
-
-        default:
-
-            std::cout << " !!! Error: " << M_data.base().first << " is not valid in BCInterface0D !!!" << std::endl;
-            break;
-        }
-    }
+    void insertBC();
 
     //@}
 
@@ -187,23 +154,87 @@ public:
     /*!
      * @return the data container
      */
-    data_Type& dataContainer() { return M_data; }
+    data_Type& dataContainer()
+    {
+        return M_data;
+    }
 
     //@}
 
 private:
 
-    void addBcToHandler()
-    {
-        if ( !this->M_handler.get() )
-            this->createHandler();
+    //! @name Unimplemented Methods
+    //@{
 
-        this->M_handler->setBC( M_data.flag(), M_data.type(), boost::bind( &BCInterfaceFunction<PhysicalSolverType>::functionTime, this->M_vectorFunction.back(), _1 ) );
-    }
+    BCInterface0D ( const BCInterface0D& interface0D );
+
+    BCInterface0D& operator= ( const BCInterface0D& interface0D );
+
+    //@}
+
+
+    //! @name Private Methods
+    //@{
+
+    void addBcToHandler();
+
+    //@}
 
     // Data
     data_Type                       M_data;
 };
+
+// ===================================================
+// Methods
+// ===================================================
+template< class BcHandler, class PhysicalSolverType >
+inline void
+BCInterface0D< BcHandler, PhysicalSolverType >::insertBC()
+{
+
+#ifdef HAVE_LIFEV_DEBUG
+    debugStream ( 5020 ) << "BCInterface0D::insertBC\n";
+#endif
+
+    switch ( M_data.base().second )
+    {
+        case BCIFunctionParser:
+        case BCIFunctionParserFile:
+        case BCIFunctionParserSolver:
+        case BCIFunctionParserFileSolver:
+        case BCIFunctionUserDefined:
+        {
+            factory_Type factory;
+            this->M_vectorFunction.push_back ( factory.createFunctionParser ( M_data ) );
+
+            addBcToHandler();
+
+            return;
+        }
+
+        default:
+
+            std::cout << " !!! Error: " << M_data.base().first << " is not valid in BCInterface0D !!!" << std::endl;
+            break;
+    }
+}
+
+
+
+// ===================================================
+// Private Methods
+// ===================================================
+template< class BcHandler, class PhysicalSolverType >
+inline void
+BCInterface0D< BcHandler, PhysicalSolverType >::addBcToHandler()
+{
+    if ( !this->M_handler.get() ) // If BCHandler has not been created yet, we do it now
+    {
+        this->createHandler();
+    }
+
+    this->M_handler->setBC ( M_data.flag(), M_data.type(), boost::bind ( &BCInterfaceFunction<PhysicalSolverType>::functionTime, this->M_vectorFunction.back(), _1 ) );
+}
 
 } // Namespace LifeV
 

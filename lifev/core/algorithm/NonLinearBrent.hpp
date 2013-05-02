@@ -47,6 +47,8 @@
 
 #include <limits>
 
+#include <lifev/core/LifeV.hpp>
+
 namespace LifeV
 {
 //! Implementation of Brent's method for root finding.
@@ -69,54 +71,56 @@ namespace LifeV
 */
 
 template <class Function>
-Real NonLinearBrent( const Function& f, const Real& leftExtremeBase, const Real& rightExtremeBase, const Real& toll, const UInt& maxIter )
+Real NonLinearBrent ( const Function& f, const Real& leftExtremeBase, const Real& rightExtremeBase, const Real& toll, const UInt& maxIter )
 {
 
     // Trivial case
     if ( leftExtremeBase == rightExtremeBase )
+    {
         return leftExtremeBase;
+    }
 
     // Current left and right extreme of the interval
-    Real leftExtreme( leftExtremeBase ), rightExtreme( rightExtremeBase );
+    Real leftExtreme ( leftExtremeBase ), rightExtreme ( rightExtremeBase );
 
     if ( leftExtreme > rightExtreme )
     {
-        std::swap( leftExtreme, rightExtreme );
+        std::swap ( leftExtreme, rightExtreme );
     }
 
     // Current iteration
-    UInt numIter( static_cast<UInt>(0) );
+    UInt numIter ( static_cast<UInt> (0) );
 
     // Medium point of the current interval
-    Real midpoint( ( leftExtreme + rightExtreme ) / static_cast<Real>(2.) );
+    Real midpoint ( ( leftExtreme + rightExtreme ) / static_cast<Real> (2.) );
 
     // Gold
-    Real gold( static_cast<Real>( (3. - std::sqrt(5.)) / 2. ) );
+    Real gold ( static_cast<Real> ( (3. - std::sqrt (5.) ) / 2. ) );
 
     // Ausiliar variables
-    Real p(0), q(0), r(0);
-    Real x( leftExtreme + gold * ( rightExtreme - leftExtreme ) );
-    Real u(0), e(0), w(0), v(0), d(0);
-    Real fx( f(x) ), fv( fx ), fw( fx ), fu(0);
+    Real p (0), q (0), r (0);
+    Real x ( leftExtreme + gold * ( rightExtreme - leftExtreme ) );
+    Real u (0), e (0), w (0), v (0), d (0);
+    Real fx ( f (x) ), fv ( fx ), fw ( fx ), fu (0);
 
     // Relative tollerance
-    Real tollRelative( std::numeric_limits<Real>::epsilon() * std::fabs( x ) + toll );
+    Real tollRelative ( std::numeric_limits<Real>::epsilon() * std::fabs ( x ) + toll );
 
 
-    while ( std::fabs( x - midpoint) > ( static_cast<Real>(2.) * tollRelative - ( rightExtreme - leftExtreme ) / static_cast<Real>(2.) ) && numIter < maxIter )
+    while ( std::fabs ( x - midpoint) > ( static_cast<Real> (2.) * tollRelative - ( rightExtreme - leftExtreme ) / static_cast<Real> (2.) ) && numIter < maxIter )
     {
 
         // Clear some ausiliar variables
-        p = q = r = static_cast<Real>(0);
+        p = q = r = static_cast<Real> (0);
 
-        if ( std::fabs( e ) > tollRelative )
+        if ( std::fabs ( e ) > tollRelative )
         {
             r = ( x - w ) * ( fx - fv );
             q = ( x - v ) * ( fx - fw );
             p = ( x - v ) * q - ( x - w ) * r;
-            q = static_cast<Real>(2.) * ( q - r );
+            q = static_cast<Real> (2.) * ( q - r );
 
-            if ( q > static_cast<Real>(0.) )
+            if ( q > static_cast<Real> (0.) )
             {
                 p = - p;
             }
@@ -130,12 +134,12 @@ Real NonLinearBrent( const Function& f, const Real& leftExtremeBase, const Real&
         }
 
 
-        if ( std::fabs( p ) < std::fabs( q * r / static_cast<Real>(2.) ) && p > q * ( leftExtreme - x ) && p < q * ( rightExtreme - x ) )
+        if ( std::fabs ( p ) < std::fabs ( q * r / static_cast<Real> (2.) ) && p > q * ( leftExtreme - x ) && p < q * ( rightExtreme - x ) )
         {
             d = p / q;
             u = x + d;
 
-            if ( ( u - leftExtreme) < static_cast<Real>(2.) * tollRelative || ( rightExtreme - u ) < static_cast<Real>(2.) * tollRelative )
+            if ( ( u - leftExtreme) < static_cast<Real> (2.) * tollRelative || ( rightExtreme - u ) < static_cast<Real> (2.) * tollRelative )
             {
                 if ( x < midpoint )
                 {
@@ -161,13 +165,13 @@ Real NonLinearBrent( const Function& f, const Real& leftExtremeBase, const Real&
             d = gold * e;
         }
 
-        if ( std::fabs( d ) >= tollRelative )
+        if ( std::fabs ( d ) >= tollRelative )
         {
             u = x + d;
         }
         else
         {
-            if ( d > static_cast<Real>(0.) )
+            if ( d > static_cast<Real> (0.) )
             {
                 u = x + tollRelative;
             }
@@ -178,7 +182,7 @@ Real NonLinearBrent( const Function& f, const Real& leftExtremeBase, const Real&
         }
 
         // Compute the value of f in the point u
-        fu = f(u);
+        fu = f (u);
 
         if ( fu <= fx )
         {
@@ -227,10 +231,10 @@ Real NonLinearBrent( const Function& f, const Real& leftExtremeBase, const Real&
         }
 
         // Compute the midpoint of the interval
-        midpoint = ( leftExtreme + rightExtreme ) / static_cast<Real>(2.);
+        midpoint = ( leftExtreme + rightExtreme ) / static_cast<Real> (2.);
 
         // Compute the relative tollerance
-        tollRelative = std::numeric_limits<Real>::epsilon() * std::fabs( x ) + toll;
+        tollRelative = std::numeric_limits<Real>::epsilon() * std::fabs ( x ) + toll;
 
         // Increase the iterations number
         ++numIter;
@@ -242,7 +246,7 @@ Real NonLinearBrent( const Function& f, const Real& leftExtremeBase, const Real&
        << tollRelative << std::endl;
 
     // Check if the method reach the tollerance.
-    ASSERT( maxIter > numIter, os.str().c_str() );
+    ASSERT ( maxIter > numIter, os.str().c_str() );
 
     return x;
 

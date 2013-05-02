@@ -71,32 +71,32 @@ using namespace LifeV;
 // ===================================================
 //! Main
 // ===================================================
-int main(int argc, char** argv)
+int main (int argc, char** argv)
 {
 
 #ifdef HAVE_MPI
-    MPI_Init(&argc, &argv);
+    MPI_Init (&argc, &argv);
     std::cout << "MPI Initialization" << std::endl;
 #endif
 
-    GetPot command_line(argc, argv);
-    const string data_file_name = command_line.follow( "data_getPot", 2, "-f", "--file" );
+    GetPot command_line (argc, argv);
+    const string data_file_name = command_line.follow ( "data_getPot", 2, "-f", "--file" );
 
-    GetPot dataFile( data_file_name );
+    GetPot dataFile ( data_file_name );
 
-    int  A = dataFile( "variables/A", 0 );
+    int  A = dataFile ( "variables/A", 0 );
     std::cout << "A: " << A << std::endl;
 
-    Real B = dataFile( "variables/B", 0.0 );
+    Real B = dataFile ( "variables/B", 0.0 );
     std::cout << "B: " << B << std::endl;
 
-    bool C = dataFile( "variables/C", false );
+    bool C = dataFile ( "variables/C", false );
     std::cout << "C: " << C << std::endl;
 
-    std::string D = dataFile( "variables/D", "empty" );
+    std::string D = dataFile ( "variables/D", "empty" );
     std::cout << "D: " << D << std::endl;
 
-    std::string E = dataFile( "variables/E", "empty empty" );
+    std::string E = dataFile ( "variables/E", "empty empty" );
     std::cout << "E: " << E << std::endl;
 
 
@@ -105,5 +105,5 @@ int main(int argc, char** argv)
     std::cout << "MPI Finalization" << std::endl;
 #endif
 
-    return( EXIT_SUCCESS );
+    return ( EXIT_SUCCESS );
 }

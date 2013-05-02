@@ -46,45 +46,45 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 LinearSolver::LinearSolver() :
-        M_operator             (),
-        M_matrix               (),
-        M_baseMatrixForPreconditioner(),
-        M_preconditioner       (),
-        M_preconditionerOperator(),
-        M_solverType           ( UndefinedSolver ),
-        M_solverOperator       (),
-        M_parameterList        (),
-        M_displayer            ( new Displayer() ),
-        M_maxItersForReuse     ( 0 ),
-        M_reusePreconditioner  ( false ),
-        M_quitOnFailure        ( false ),
-        M_silent               ( false ),
-        M_lossOfPrecision      ( SolverOperator_Type::undefined ),
-        M_maxNumItersReached   ( SolverOperator_Type::undefined ),
-        M_converged            ( SolverOperator_Type::undefined ),
-        M_tolerance            ( -1. )
+    M_operator             (),
+    M_matrix               (),
+    M_baseMatrixForPreconditioner(),
+    M_preconditioner       (),
+    M_preconditionerOperator(),
+    M_solverType           ( UndefinedSolver ),
+    M_solverOperator       (),
+    M_parameterList        (),
+    M_displayer            ( new Displayer() ),
+    M_maxItersForReuse     ( 0 ),
+    M_reusePreconditioner  ( false ),
+    M_quitOnFailure        ( false ),
+    M_silent               ( false ),
+    M_lossOfPrecision      ( SolverOperator_Type::undefined ),
+    M_maxNumItersReached   ( SolverOperator_Type::undefined ),
+    M_converged            ( SolverOperator_Type::undefined ),
+    M_tolerance            ( -1. )
 {
 
 }
 
-LinearSolver::LinearSolver( const boost::shared_ptr<Epetra_Comm> commPtr ) :
-        M_operator             (),
-        M_matrix               (),
-        M_baseMatrixForPreconditioner(),
-        M_preconditioner       (),
-        M_preconditionerOperator(),
-        M_solverType           ( UndefinedSolver ),
-        M_solverOperator       (),
-        M_parameterList        (),
-        M_displayer            ( new Displayer( commPtr ) ),
-        M_maxItersForReuse     ( 0 ),
-        M_reusePreconditioner  ( false ),
-        M_quitOnFailure        ( false ),
-        M_silent               ( false ),
-        M_lossOfPrecision      ( SolverOperator_Type::undefined ),
-        M_maxNumItersReached   ( SolverOperator_Type::undefined ),
-        M_converged            ( SolverOperator_Type::undefined ),
-        M_tolerance            ( -1. )
+LinearSolver::LinearSolver ( const boost::shared_ptr<Epetra_Comm> commPtr ) :
+    M_operator             (),
+    M_matrix               (),
+    M_baseMatrixForPreconditioner(),
+    M_preconditioner       (),
+    M_preconditionerOperator(),
+    M_solverType           ( UndefinedSolver ),
+    M_solverOperator       (),
+    M_parameterList        (),
+    M_displayer            ( new Displayer ( commPtr ) ),
+    M_maxItersForReuse     ( 0 ),
+    M_reusePreconditioner  ( false ),
+    M_quitOnFailure        ( false ),
+    M_silent               ( false ),
+    M_lossOfPrecision      ( SolverOperator_Type::undefined ),
+    M_maxNumItersReached   ( SolverOperator_Type::undefined ),
+    M_converged            ( SolverOperator_Type::undefined ),
+    M_tolerance            ( -1. )
 {
 
 }
@@ -98,11 +98,11 @@ LinearSolver::~LinearSolver()
 // Methods
 // ===================================================
 Int
-LinearSolver::solve( vectorPtr_Type solutionPtr )
+LinearSolver::solve ( vectorPtr_Type solutionPtr )
 {
     // Build preconditioners if needed
-    bool retry( true );
-    if( !isPreconditionerSet() || !M_reusePreconditioner  )
+    bool retry ( true );
+    if ( !isPreconditionerSet() || !M_reusePreconditioner  )
     {
         buildPreconditioner();
 
@@ -111,15 +111,19 @@ LinearSolver::solve( vectorPtr_Type solutionPtr )
     }
     else
     {
-        if( !M_silent ) M_displayer->leaderPrint( "SLV-  Reusing precond ...\n" );
+        if ( !M_silent )
+        {
+            M_displayer->leaderPrint ( "SLV-  Reusing precond ...\n" );
+        }
     }
 
-    if( M_rhs.get() == 0 || M_operator == 0 ) {
-        M_displayer->leaderPrint( "SLV-  ERROR: LinearSolver failed to set up correctly!\n" );
+    if ( M_rhs.get() == 0 || M_operator == 0 )
+    {
+        M_displayer->leaderPrint ( "SLV-  ERROR: LinearSolver failed to set up correctly!\n" );
         return -1;
     }
 
-    // Setup the Solver Operator?? Really here??
+    // Setup the Solver Operator
     setupSolverOperator();
 
     // Reset status informations
@@ -131,11 +135,14 @@ LinearSolver::solve( vectorPtr_Type solutionPtr )
     LifeChrono chrono;
     chrono.start();
 
-    M_solverOperator->ApplyInverse( M_rhs->epetraVector(), solutionPtr->epetraVector() );
+    M_solverOperator->ApplyInverse ( M_rhs->epetraVector(), solutionPtr->epetraVector() );
     M_converged         = M_solverOperator->hasConverged();
     M_lossOfPrecision   = M_solverOperator->isLossOfAccuracyDetected();
     chrono.stop();
-    if( !M_silent ) M_displayer->leaderPrintMax( "SLV-  Solution time: " , chrono.diff(), " s." );
+    if ( !M_silent )
+    {
+        M_displayer->leaderPrintMax ( "SLV-  Solution time: " , chrono.diff(), " s." );
+    }
 
     // Getting informations post-solve
     Int numIters = M_solverOperator->numIterations();
@@ -143,82 +150,88 @@ LinearSolver::solve( vectorPtr_Type solutionPtr )
     // Second run recomputing the preconditioner
     // This is done only if the preconditioner has not been
     // already recomputed and if it is a LifeV preconditioner.
-    if( M_converged != SolverOperator_Type::yes
-         && retry
-         && M_preconditioner )
+    if ( M_converged != SolverOperator_Type::yes
+            && retry
+            && M_preconditioner )
     {
-        M_displayer->leaderPrint( "SLV-  Iterative solver failed, numiter = " , numIters, "\n" );
-        M_displayer->leaderPrint( "SLV-  retrying:\n" );
+        M_displayer->leaderPrint ( "SLV-  Iterative solver failed, numiter = " , numIters, "\n" );
+        M_displayer->leaderPrint ( "SLV-  retrying:\n" );
 
         buildPreconditioner();
 
         // Solving again, but only once (retry = false)
         chrono.start();
-        M_solverOperator->ApplyInverse( M_rhs->epetraVector(), solutionPtr->epetraVector() );
+        M_solverOperator->ApplyInverse ( M_rhs->epetraVector(), solutionPtr->epetraVector() );
         M_converged         = M_solverOperator->hasConverged();
         M_lossOfPrecision   = M_solverOperator->isLossOfAccuracyDetected();
         chrono.stop();
-        if( !M_silent ) M_displayer->leaderPrintMax( "SLV-  Solution time: " , chrono.diff(), " s." );
+        if ( !M_silent )
+        {
+            M_displayer->leaderPrintMax ( "SLV-  Solution time: " , chrono.diff(), " s." );
+        }
     }
 
-    if( M_lossOfPrecision == SolverOperator_Type::yes )
+    if ( M_lossOfPrecision == SolverOperator_Type::yes )
     {
-        M_displayer->leaderPrint( "SLV-  WARNING: Loss of accuracy detected!\n" );
+        M_displayer->leaderPrint ( "SLV-  WARNING: Loss of accuracy detected!\n" );
         failure = true;
     }
 
-    if( M_converged == SolverOperator_Type::yes )
+    if ( M_converged == SolverOperator_Type::yes )
     {
-        if( !M_silent ) M_displayer->leaderPrint( "SLV-  Convergence in " , numIters, " iterations\n" );
+        if ( !M_silent )
+        {
+            M_displayer->leaderPrint ( "SLV-  Convergence in " , numIters, " iterations\n" );
+        }
         M_maxNumItersReached = SolverOperator_Type::no;
     }
     else
     {
-        M_displayer->leaderPrint( "SLV-  WARNING: Solver failed to converged to the desired precision!\n" );
+        M_displayer->leaderPrint ( "SLV-  WARNING: Solver failed to converged to the desired precision!\n" );
         M_maxNumItersReached = SolverOperator_Type::yes;
         failure = true;
     }
 
     // If quitOnFailure is enabled and if some problems occur
     // the simulation is stopped
-    if( M_quitOnFailure && failure )
-        exit( -1 );
+    if ( M_quitOnFailure && failure )
+    {
+        exit ( -1 );
+    }
+
+    // Reset the solver to free the internal pointers
+    M_solverOperator->resetSolver();
 
     // If the number of iterations reaches the threshold of maxIterForReuse
     // we reset the preconditioners to force to solver to recompute it next
     // time
-    if( numIters > M_maxItersForReuse )
+    if ( numIters > M_maxItersForReuse )
+    {
         resetPreconditioner();
-
-    // <!-- TO BE RECODED IF POSSIBLE
-    // AztecOO and Belos contain pointers
-    // to some operators.
-    // ML is crashing for this reason.
-    M_solverOperator.reset();
-    // -->
+    }
 
     return numIters;
 }
 
 Real
-LinearSolver::computeResidual( vectorPtr_Type solutionPtr )
+LinearSolver::computeResidual ( vectorPtr_Type solutionPtr )
 {
-    if( !M_operator || !M_rhs )
+    if ( !M_operator || !M_rhs )
     {
-        M_displayer->leaderPrint( "SLV-  WARNING: LinearSolver can not compute the residual if the operator and the RHS are not set!\n" );
+        M_displayer->leaderPrint ( "SLV-  WARNING: LinearSolver can not compute the residual if the operator and the RHS are not set!\n" );
         return -1;
     }
 
     vector_Type Ax ( solutionPtr->map() );
-    vector_Type residual( *M_rhs );
+    vector_Type residual ( *M_rhs );
 
-    M_operator->Apply( solutionPtr->epetraVector(), Ax.epetraVector() );
+    M_operator->Apply ( solutionPtr->epetraVector(), Ax.epetraVector() );
 
-    residual.epetraVector().Update( 1, Ax.epetraVector(), -1 );
+    residual.epetraVector().Update ( 1, Ax.epetraVector(), -1 );
 
     Real residualNorm;
 
-    residual.norm2( &residualNorm );
+    residual.norm2 ( &residualNorm );
 
     return residualNorm;
 }
@@ -229,56 +242,83 @@ LinearSolver::printStatus()
     std::ostringstream stat;
     std::string str;
 
-    if( M_lossOfPrecision == SolverOperator_Type::yes )    stat << "Accuracy loss ";
-    if( M_maxNumItersReached == SolverOperator_Type::yes ) stat << "Maximum number of iterations reached ";
-    if( M_converged == SolverOperator_Type::yes ) stat << "The solver has converged ";
-    else if( M_converged == SolverOperator_Type::no ) stat << "The solver has not ";
+    if ( M_lossOfPrecision == SolverOperator_Type::yes )
+    {
+        stat << "Accuracy loss ";
+    }
+    if ( M_maxNumItersReached == SolverOperator_Type::yes )
+    {
+        stat << "Maximum number of iterations reached ";
+    }
+    if ( M_converged == SolverOperator_Type::yes )
+    {
+        stat << "The solver has converged ";
+    }
+    else if ( M_converged == SolverOperator_Type::no )
+    {
+        stat << "The solver has not ";
+    }
     str = stat.str();
     return str;
 }
 
 void
-LinearSolver::setPreconditionerFromGetPot( const GetPot& dataFile, const std::string& section )
+LinearSolver::setPreconditionerFromGetPot ( const GetPot& dataFile, const std::string& section )
 {
-    std::string precName = dataFile( ( section + "/prectype" ).data(), "Ifpack" );
+    std::string precName = dataFile ( ( section + "/prectype" ).data(), "Ifpack" );
 
-    M_preconditioner.reset( PRECFactory::instance().createObject( precName ) );
-    ASSERT( M_preconditioner.get() != 0, " Preconditioner not set" );
+    M_preconditioner.reset ( PRECFactory::instance().createObject ( precName ) );
+    ASSERT ( M_preconditioner.get() != 0, " Preconditioner not set" );
 
-    M_preconditioner->setDataFromGetPot( dataFile, section );
+    M_preconditioner->setDataFromGetPot ( dataFile, section );
 }
 
 void
 LinearSolver::buildPreconditioner()
 {
     LifeChrono chrono;
-    Real condest( -1 );
+    Real condest ( -1 );
 
-    if( M_preconditioner )
+    if ( M_preconditioner )
     {
-        if( M_matrix.get() == 0 )
+        if ( M_matrix.get() == 0 )
         {
-            M_displayer->leaderPrint( "SLV-  ERROR: LinearSolver requires a matrix to build the preconditioner!\n" );
-            exit( 1 );
+            M_displayer->leaderPrint ( "SLV-  ERROR: LinearSolver requires a matrix to build the preconditioner!\n" );
+            exit ( 1 );
         }
         else
         {
             chrono.start();
-            if( !M_silent ) M_displayer->leaderPrint( "SLV-  Computing the preconditioner...\n" );
+            if ( !M_silent )
+            {
+                M_displayer->leaderPrint ( "SLV-  Computing the preconditioner...\n" );
+            }
             if ( M_baseMatrixForPreconditioner.get() == 0 )
             {
-                if( !M_silent ) M_displayer->leaderPrint( "SLV-  Build the preconditioner using the problem matrix\n" );
-                M_preconditioner->buildPreconditioner( M_matrix );
+                if ( !M_silent )
+                {
+                    M_displayer->leaderPrint ( "SLV-  Build the preconditioner using the problem matrix\n" );
+                }
+                M_preconditioner->buildPreconditioner ( M_matrix );
             }
             else
             {
-                if( !M_silent ) M_displayer->leaderPrint( "SLV-  Build the preconditioner using the base matrix provided\n" );
-                M_preconditioner->buildPreconditioner( M_baseMatrixForPreconditioner );
+                if ( !M_silent )
+                {
+                    M_displayer->leaderPrint ( "SLV-  Build the preconditioner using the base matrix provided\n" );
+                }
+                M_preconditioner->buildPreconditioner ( M_baseMatrixForPreconditioner );
             }
             condest = M_preconditioner->condest();
             chrono.stop();
-            if( !M_silent ) M_displayer->leaderPrintMax( "SLV-  Preconditioner computed in " , chrono.diff(), " s." );
-            if( !M_silent ) M_displayer->leaderPrint( "SLV-  Estimated condition number               " , condest, "\n" );
+            if ( !M_silent )
+            {
+                M_displayer->leaderPrintMax ( "SLV-  Preconditioner computed in " , chrono.diff(), " s." );
+            }
+            if ( !M_silent )
+            {
+                M_displayer->leaderPrint ( "SLV-  Estimated condition number               " , condest, "\n" );
+            }
         }
     }
 }
@@ -286,15 +326,19 @@ LinearSolver::buildPreconditioner()
 void
 LinearSolver::resetPreconditioner()
 {
-    if( M_preconditioner )
+    if ( M_preconditioner )
+    {
         M_preconditioner->resetPreconditioner();
+    }
 }
 
 bool
 LinearSolver::isPreconditionerSet() const
 {
-    if( M_preconditionerOperator )
+    if ( M_preconditionerOperator )
+    {
         return true;
+    }
 
     return M_preconditioner.get() != 0 && M_preconditioner->preconditionerCreated();
 }
@@ -308,9 +352,9 @@ LinearSolver::resetStatus()
 }
 
 void
-LinearSolver::showMe( std::ostream& output ) const
+LinearSolver::showMe ( std::ostream& output ) const
 {
-    if( M_displayer->isLeader() )
+    if ( M_displayer->isLeader() )
     {
         output << "Solver parameters list:" << std::endl;
         output << "-----------------------------" << std::endl;
@@ -319,42 +363,86 @@ LinearSolver::showMe( std::ostream& output ) const
     }
 }
 
+void
+LinearSolver::setupSolverOperator()
+{
+    // Creation of a solver if there exists any
+    if ( !M_solverOperator )
+    {
+        switch ( M_solverType )
+        {
+            case Belos:
+                M_solverOperator.reset ( Operators::SolverOperatorFactory::instance().createObject ( "Belos" ) );
+                break;
+            case AztecOO:
+                M_solverOperator.reset ( Operators::SolverOperatorFactory::instance().createObject ( "AztecOO" ) );
+                break;
+            default:
+                M_displayer->leaderPrint ( "SLV-  ERROR: The type of solver is not recognized!\n" );
+                exit ( 1 );
+                break;
+        }
+    }
+
+    // Set the preconditioner operator in the SolverOperator object
+    if ( M_preconditioner )
+    {
+        M_solverOperator->setPreconditioner ( M_preconditioner->preconditionerPtr() );
+    }
+    else if ( M_preconditionerOperator )
+    {
+        M_solverOperator->setPreconditioner ( M_preconditionerOperator );
+    }
+
+    // Set the operator in the SolverOperator object
+    M_solverOperator->setOperator ( M_operator );
+
+    // Set the tolerance if it has been set
+    if ( M_tolerance > 0 )
+    {
+        M_solverOperator->setTolerance ( M_tolerance );
+    }
+
+    // Set the parameter inside the solver
+    M_solverOperator->setParameters ( M_parameterList.sublist ( "Solver: Operator List" ) );
+}
+
 // ===================================================
 // Set Methods
 // ===================================================
 void
-LinearSolver::setSolverType( const SolverType& solverType )
+LinearSolver::setSolverType ( const SolverType& solverType )
 {
     M_solverType = solverType;
 }
 
 void
-LinearSolver::setCommunicator( const boost::shared_ptr<Epetra_Comm> commPtr )
+LinearSolver::setCommunicator ( const boost::shared_ptr<Epetra_Comm> commPtr )
 {
-    M_displayer->setCommunicator( commPtr );
+    M_displayer->setCommunicator ( commPtr );
 }
 
-void LinearSolver::setOperator( matrixPtr_Type matrixPtr )
+void LinearSolver::setOperator ( matrixPtr_Type matrixPtr )
 {
     M_operator = matrixPtr->matrixPtr();
     M_matrix = matrixPtr;
 }
 
 void
-LinearSolver::setOperator( operatorPtr_Type operPtr )
+LinearSolver::setOperator ( operatorPtr_Type operPtr )
 {
     M_matrix.reset();
     M_operator = operPtr;
 }
 
 void
-LinearSolver::setRightHandSide( const vectorPtr_Type rhsPtr )
+LinearSolver::setRightHandSide ( const vectorPtr_Type rhsPtr )
 {
     M_rhs = rhsPtr;
 }
 
 void
-LinearSolver::setPreconditioner( preconditionerPtr_Type preconditionerPtr )
+LinearSolver::setPreconditioner ( preconditionerPtr_Type preconditionerPtr )
 {
     // If a preconditioner operator exists it must be deleted
     M_preconditionerOperator.reset();
@@ -363,10 +451,8 @@ LinearSolver::setPreconditioner( preconditionerPtr_Type preconditionerPtr )
 }
 
 void
-LinearSolver::setPreconditioner( operatorPtr_Type preconditionerPtr )
+LinearSolver::setPreconditioner ( operatorPtr_Type preconditionerPtr )
 {
-    // Does the solverOperator exists?
-
     // If a LifeV::Preconditioner exists it must be deleted
     M_preconditioner.reset();
 
@@ -374,25 +460,31 @@ LinearSolver::setPreconditioner( operatorPtr_Type preconditionerPtr )
 }
 
 void
-LinearSolver::setParameters( const Teuchos::ParameterList& list )
+LinearSolver::setBaseMatrixForPreconditioner ( matrixPtr_Type baseMatrixPtr )
 {
-    M_parameterList.setParameters( list );
+    M_baseMatrixForPreconditioner = baseMatrixPtr;
+}
+
+void
+LinearSolver::setParameters ( const Teuchos::ParameterList& list )
+{
+    M_parameterList.setParameters ( list );
     M_solverType = UndefinedSolver;
-    std::string solverName = M_parameterList.get<std::string>( "Solver Type" );
-    if( solverName == "Belos" )
+    std::string solverName = M_parameterList.get<std::string> ( "Solver Type" );
+    if ( solverName == "Belos" )
     {
         M_solverType = Belos;
     }
-    else if( solverName == "AztecOO" )
+    else if ( solverName == "AztecOO" )
     {
         M_solverType = AztecOO;
     }
 
-    M_reusePreconditioner  = M_parameterList.get( "Reuse Preconditioner"     , false );
-    Int maxIter            = M_parameterList.get( "Maximum Iterations"       , 200 );
-    M_maxItersForReuse     = M_parameterList.get( "Max Iterations For Reuse" , static_cast<Int> ( maxIter*8./10. ) );
-    M_quitOnFailure        = M_parameterList.get( "Quit On Failure"          , false );
-    M_silent               = M_parameterList.get( "Silent"                   , false );
+    M_reusePreconditioner  = M_parameterList.get ( "Reuse Preconditioner"     , false );
+    Int maxIter            = M_parameterList.get ( "Maximum Iterations"       , 200 );
+    M_maxItersForReuse     = M_parameterList.get ( "Max Iterations For Reuse" , static_cast<Int> ( maxIter * 8. / 10. ) );
+    M_quitOnFailure        = M_parameterList.get ( "Quit On Failure"          , false );
+    M_silent               = M_parameterList.get ( "Silent"                   , false );
 }
 
 void
@@ -402,19 +494,19 @@ LinearSolver::resetParameters()
 }
 
 void
-LinearSolver::setReusePreconditioner( const bool reusePreconditioner )
+LinearSolver::setReusePreconditioner ( const bool reusePreconditioner )
 {
     M_reusePreconditioner = reusePreconditioner;
 }
 
 void
-LinearSolver::setQuitOnFailure( const bool enable )
+LinearSolver::setQuitOnFailure ( const bool enable )
 {
     M_quitOnFailure = enable;
 }
 
 void
-LinearSolver::setTolerance( const Real& tolerance )
+LinearSolver::setTolerance ( const Real& tolerance )
 {
     M_tolerance = tolerance;
 }
@@ -433,7 +525,7 @@ LinearSolver::numIterations() const
 Real
 LinearSolver::recursiveResidual()
 {
-    M_displayer->leaderPrint( "SLV-  WARNING: LinearSoler::recursiveResidual is not yet implemented\n" );
+    M_displayer->leaderPrint ( "SLV-  WARNING: LinearSoler::recursiveResidual is not yet implemented\n" );
 
     /*
     if ( !M_problem->isProblemSet() )
@@ -519,45 +611,5 @@ LinearSolver::hasConverged() const
 // ===================================================
 // Private Methods
 // ===================================================
-
-void
-LinearSolver::setupSolverOperator()
-{
-    // If a SolverOperator already exists we simply clean it!
-    if( M_solverOperator )
-    {
-        M_solverOperator.reset();
-    }
-
-    switch( M_solverType )
-    {
-        case Belos:
-            M_solverOperator.reset( Operators::SolverOperatorFactory::instance().createObject( "Belos" ) );
-            break;
-        case AztecOO:
-            M_solverOperator.reset( Operators::SolverOperatorFactory::instance().createObject( "AztecOO" ) );
-            break;
-        default:
-            M_displayer->leaderPrint( "SLV-  ERROR: The type of solver is not recognized!\n" );
-            exit( 1 );
-            break;
-    }
-
-    // Set the operator in the SolverOperator object
-    M_solverOperator->setOperator( M_operator );
-
-    // Set the preconditioner operator in the SolverOperator object
-    if( M_preconditioner )
-        M_solverOperator->setPreconditioner( M_preconditioner->preconditionerPtr() );
-    else
-        M_solverOperator->setPreconditioner( M_preconditionerOperator );
-
-    // Set the tolerance if it has been set
-    if( M_tolerance > 0 )
-        M_solverOperator->setTolerance( M_tolerance );
-
-    // Set the parameter inside the solver
-    M_solverOperator->setParameters( M_parameterList.sublist( "Solver: Operator List", true, "" ) );
-}
 
 } // namespace LifeV

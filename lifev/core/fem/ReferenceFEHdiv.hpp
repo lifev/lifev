@@ -47,7 +47,7 @@ namespace LifeV
 //! ReferenceFEHdiv - Short description of the class
 
 class ReferenceFEHdiv
-        : public ReferenceFE
+    : public ReferenceFE
 {
 public:
 
@@ -76,7 +76,7 @@ public:
       @param nbDofPerVolume  the number of degrees of freedom per volume
       @param nbDof  the total number of d.o.f ( = nbDofPerVertex * nb vertex +
       nbDofPerEdge * nb edges + etc...)
-      @param nbCoor  number of local coordinates
+      @param nbLocalCoor  number of local coordinates
       @param phi  the static array containing the basis functions (defined in
       refEle.h)
       @param dPhi  the static array containing the derivatives of the basis
@@ -98,14 +98,14 @@ public:
                       Int                  nbDofPerFace,
                       Int                  nbDofPerVolume,
                       Int                  nbDof,
-                      Int                  nbCoor,
+                      Int                  nbLocalCoor,
                       const function_Type*           phi,
                       const function_Type*           divPhi,
                       const Real*          refCoor,
                       DofPatternType       patternType,
                       const ReferenceFE*         bdRefFE );
 
-    ~ReferenceFEHdiv(){};
+    ~ReferenceFEHdiv() {};
 
     //@}
 };

@@ -36,12 +36,22 @@
      @maintainer M. Kern <michel.kern@inria.fr>
  */
 
-#ifndef _DATADARCY_H_
-#define _DATADARCY_H_ 1
+#ifndef _DATADARCY_HPP_
+#define _DATADARCY_HPP_ 1
+
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+#include <Teuchos_XMLParameterListHelpers.hpp>
+#include <Teuchos_RCP.hpp>
+
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/mesh/MeshData.hpp>
 
 #include <lifev/core/fem/TimeData.hpp>
+#include <lifev/core/fem/TimeAdvanceData.hpp>
 
 // LifeV namespace
 namespace LifeV
@@ -49,7 +59,7 @@ namespace LifeV
 
 //! @class DarcyData This class contain the basic data for the Darcy solver.
 /*!
-  In particolar it stores the data as GetPot object, the data for the mesh and the data for the time schemes.
+  In particular it stores the data as GetPot object, the data for the mesh and the data for the time schemes.
 */
 template < typename MeshType >
 class DarcyData
@@ -57,7 +67,7 @@ class DarcyData
 public:
 
     // Policies.
-    //! @name Public policies
+    //! @name Public Types
     //@{
 
     //! Typedef for the mesh template.
@@ -69,11 +79,23 @@ public:
     //! Shared pointer for the data.
     typedef boost::shared_ptr < data_Type > dataPtr_Type;
 
+    //! Teuchos parameter list.
+    typedef Teuchos::ParameterList paramList_Type;
+
+    //! Shared pointer for the Teuchos parameter list.
+    typedef Teuchos::RCP< paramList_Type > paramListPtr_Type;
+
     //! Typedef for the time data.
     typedef TimeData timeData_Type;
 
     //! Shared pointer for the time data.
     typedef boost::shared_ptr < timeData_Type > timeDataPtr_Type;
+
+    //! Typedef for the time advance data.
+    typedef TimeAdvanceData timeAdvanceData_Type;
+
+    //! Shared pointer for the time advance data.
+    typedef boost::shared_ptr < timeAdvanceData_Type > timeAdvanceDataPtr_Type;
 
     //! Typedef for the mesh data.
     typedef MeshData meshData_Type;
@@ -91,35 +113,23 @@ public:
     //@{
 
     //! Empty Constructor.
-    DarcyData ();
+    DarcyData () :
+        M_verbose (0)
+    {}
 
     //! Constructor using a data file.
     /*!
-      @param dataFile GetPot data file for setup the problem.
+      @param dataFile GetPot data file for set-up the problem.
       @param section the section for the Darcy data.
     */
     DarcyData ( const data_Type& dataFile,
                 const std::string& section = "darcy" );
 
-    //! Copy constructor.
-    /*!
-      @param darcyData object to take a copy.
-    */
-    DarcyData ( const darcyData_Type &darcyData );
-
-    //@}
-
     // Methods.
     //! @name Methods
     //@{
 
-    //! Overloading of the operator =.
-    /*!
-       @param darcyData The DarcyData to be copied.
-    */
-    darcyData_Type& operator= ( const darcyData_Type& darcyData );
-
-    //! External setup.
+    //! External set-up.
     /*!
       @param dataFile The data file with all the data.
       @param section The global section.
@@ -133,23 +143,38 @@ public:
     //! @name Set methods
     //@{
 
+    //! Set Teuchos parameter list for linear algebra.
+    /*!
+      @param paramList Teuchos RCP with the parameter list.
+      @param linearSolver Section of the linear solver in the paramList.
+      @param precond Section of the preconditioner in the paramList.
+    */
+    void setLinearAlgebraList ( const paramListPtr_Type& linearAlgebraList,
+                                const std::string& linearSolver = "Linear Solver",
+                                const std::string& precond = "Preconditioner" )
+    {
+        M_linearAlgebraList = linearAlgebraList;
+        M_linearSolverSection = linearSolver;
+        M_precondSection = precond;
+    } // setLinearAlgebraList
+
     //! Set data time container.
     /*!
-      @param TimeData Boost shared_ptr to TimeData container
+      @param timeData Boost shared_ptr to timeData container
     */
-    void setTimeData ( const timeDataPtr_Type& TimeData )
+    void setTimeData ( const timeDataPtr_Type& timeData )
     {
-        M_time = TimeData;
-    }
+        M_time = timeData;
+    } // setTimeData
 
     //! Set mesh container.
     /*!
-      @param MeshData Boost shared_ptr to meshData container
+      @param meshData Boost shared_ptr to meshData container
     */
-    void setMeshData ( const meshDataPtr_Type& MeshData )
+    void setMeshData ( const meshDataPtr_Type& meshData )
     {
-        M_mesh = MeshData;
-    }
+        M_mesh = meshData;
+    } // setMeshData
 
     // Get methods.
     //! @name Get methods
@@ -159,13 +184,13 @@ public:
     UInt verbose () const
     {
         return M_verbose;
-    }
+    } // verbose
 
     //! Get the main section of the data file.
     std::string section () const
     {
         return M_section;
-    }
+    } // section
 
     //! Get the data file of the problem.
     /*!
@@ -174,7 +199,7 @@ public:
     const dataPtr_Type& dataFilePtr () const
     {
         return M_data;
-    }
+    } // dataFilePtr
 
     //! Get the data file of the problem.
     /*!
@@ -183,7 +208,7 @@ public:
     dataPtr_Type& dataFilePtr ()
     {
         return M_data;
-    }
+    } // dataFilePtr
 
     //! Get data time container.
     /*!
@@ -192,7 +217,7 @@ public:
     const timeDataPtr_Type& dataTimePtr () const
     {
         return M_time;
-    }
+    } // dataTimePtr
 
     //! Get data time container.
     /*!
@@ -201,6 +226,24 @@ public:
     timeDataPtr_Type& dataTimePtr ()
     {
         return M_time;
+    } // dataTimePtr
+
+    //! Get data time advance container.
+    /*!
+      @return shared_ptr to TimeAdvanceData container.
+    */
+    const timeAdvanceDataPtr_Type& dataTimeAdvancePtr () const
+    {
+        return M_timeAdvance;
+    }
+
+    //! Get data time advance container.
+    /*!
+       @return shared_ptr to TimeAdvanceData container.
+    */
+    timeAdvanceDataPtr_Type& dataTimeAdvancePtr ()
+    {
+        return M_timeAdvance;
     }
 
     //! Get mesh container
@@ -210,7 +253,7 @@ public:
     const meshDataPtr_Type& meshDataPtr () const
     {
         return M_mesh;
-    }
+    } // meshDataPtr
 
     //! Get mesh container
     /*!
@@ -219,68 +262,82 @@ public:
     meshDataPtr_Type& meshDataPtr ()
     {
         return M_mesh;
-    }
+    } // meshDataPtr
+
+    //! Get Teuchos parameter list for the linear solver.
+    /*!
+      @return Teuchos RCP with the parameter list for the linear solver.
+    */
+    const paramList_Type& linearSolverList () const
+    {
+        ASSERT ( M_linearAlgebraList.get(), "Parameter list not set." );
+        return M_linearAlgebraList->sublist ( M_linearSolverSection );
+    } // linearSolverList
+
+    //! Get Teuchos parameter list for the preconditioner.
+    /*!
+      @return Teuchos RCP with the parameter list for the preconditioner.
+    */
+    const paramList_Type& preconditionerList () const
+    {
+        ASSERT ( M_linearAlgebraList.get(), "Parameter list not set." );
+        return M_linearAlgebraList->sublist ( M_precondSection );
+    } // preconditionerList
 
     //@}
 
-
 private:
 
-    //! Data containers for time and mesh
+    //! @name Private Constructors
+    //@{
+
+    //! Inhibited copy constructor.
+    DarcyData ( const darcyData_Type& );
+
+    //@}
+
+    //! @name Private Operators
+    //@{
+
+    //! Inhibited assign operator.
+    darcyData_Type& operator= ( const darcyData_Type& );
+
+    //@}
+
+    //! Inhibited assign operator.
+
+    //! Data GetPot.
     dataPtr_Type M_data;
+
+    //! Section in GetPot file.
+    std::string M_section;
+
+    //! Data container for time.
     timeDataPtr_Type M_time;
+
+    //! Data container for time advance.
+    timeAdvanceDataPtr_Type M_timeAdvance;
+
+    //! Data container for mesh.
     meshDataPtr_Type M_mesh;
 
-    //! Miscellaneous
+    //! Teuchos paramter list for linear algebra.
+    paramListPtr_Type M_linearAlgebraList;
+
+    //! Section in the parameter list for linear solver.
+    std::string M_linearSolverSection;
+
+    //! Section in the parameter list for preconditioner.
+    std::string M_precondSection;
+
+    //! Output verbose.
     UInt M_verbose;
-    std::string M_section;
 
 };
 
 // ===================================================
 // Constructors
 // ===================================================
-
-template < typename MeshType >
-DarcyData < MeshType >::
-DarcyData ():
-        // Miscellaneous
-        M_verbose       ( static_cast<UInt>(0) )
-{}
-
-// Copy constructor
-template < typename MeshType >
-DarcyData < MeshType >::
-DarcyData ( const darcyData_Type &darcyData ):
-        // Data containers
-        M_data ( darcyData.M_data ),
-        M_time ( darcyData.M_time ),
-        M_mesh ( darcyData.M_mesh ),
-        // Miscellaneous
-        M_verbose ( darcyData.M_verbose ),
-        M_section ( darcyData.M_section )
-{}
-
-// Overloading of the operator =
-template < typename MeshType >
-DarcyData < MeshType >&
-DarcyData < MeshType >::
-operator= ( const darcyData_Type& darcyData )
-{
-    // Avoid auto-copy
-    if ( this != &darcyData )
-    {
-        // Data containers
-        M_data = darcyData.M_data;
-        M_time = darcyData.M_time;
-        M_mesh = darcyData.M_mesh;
-        // Mescellaneous
-        M_verbose = darcyData.M_verbose;
-    }
-
-    return *this;
-} // operator=
-
 
 // External set up method
 template < typename MeshType >
@@ -293,27 +350,33 @@ setup ( const data_Type& dataFile, const std::string& section )
     // If data has not been set
     if ( !M_data.get() )
     {
-        M_data.reset( new data_Type ( dataFile ) );
+        M_data.reset ( new data_Type ( dataFile ) );
     }
 
     // If data time has not been set
     if ( !M_time.get() )
     {
-        M_time.reset( new timeData_Type ( dataFile, M_section + "/time_discretization" ) );
+        M_time.reset ( new timeData_Type ( dataFile, M_section + "/time_discretization" ) );
+    }
+
+    // If data time has not been set
+    if ( !M_timeAdvance.get() )
+    {
+        M_timeAdvance.reset ( new timeAdvanceData_Type ( dataFile, M_section + "/time_discretization" ) );
     }
 
     // If data mesh has not been set
     if ( !M_mesh.get() )
     {
-        M_mesh.reset( new meshData_Type ( dataFile, M_section + "/space_discretization" ) );
+        M_mesh.reset ( new meshData_Type ( dataFile, M_section + "/space_discretization" ) );
     }
 
     // Miscellaneous
-    M_verbose = dataFile( ( M_section + "/miscellaneous/verbose" ).data(), 1 );
+    M_verbose = dataFile ( ( M_section + "/miscellaneous/verbose" ).data(), 1 );
 } // setup
 
 } // Namespace LifeV
 
-#endif // _DATADARCY_H_
+#endif // _DATADARCY_HPP_
 
 // -*- mode: c++ -*-

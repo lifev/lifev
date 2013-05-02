@@ -1,0 +1,48 @@
+#! /bin/bash
+#
+# author: Davide baroli <davide.baroli@gmail.com>
+# contributor: Antonio Cervone <ant.cervone@gmail.com>
+# date: 2013-03-11
+#
+
+ver='2010.1'
+
+download_qhull() {
+  wget -c "http://www.qhull.org/download/qhull-${ver}-src.tgz"
+  cp ${package_root}/qhull.patch .
+}
+
+unpack_qhull() { 
+  tar xzf qhull-${ver}-src.tgz
+}
+
+build_qhull() {
+
+  pushd ${src_dir}/qhull-${ver}
+    patch -p1 < ${src_dir}/qhull.patch
+  popd
+    
+  rm -f CMakeCache.txt
+  rm -rf CMakeFiles
+
+  ${cmake_bin}/cmake \
+    -DCMAKE_INSTALL_PREFIX=${install_dir} \
+    $EXTRAOPTS  \
+    -DCMAKE_CFLAGS="${CFLAGS} -fno-strict-aliasing -ansi" \
+    -DCMAKE_CXXFLAGS="${CXXFLAGS} -fno-strict-aliasing -ansi" \
+    \
+    ${src_dir}/qhull-$ver
+  
+  make
+}
+
+install_qhull() {
+  make install
+}
+
+
+
+
+
+
+

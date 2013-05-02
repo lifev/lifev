@@ -44,36 +44,44 @@ namespace LifeV
 //  ***********************************************************************************************************
 
 ///////////////////////
-// EntityFlagStandardPolicy //
+// MarkerIDStandardPolicy //
 ///////////////////////
 
-const markerID_Type EntityFlagStandardPolicy::S_NULLFLAG =
+const markerID_Type MarkerIDStandardPolicy::S_NULLMARKERID =
     std::numeric_limits<Int>::max();
 
 //MM: if you modify these changes here recheck function readNetgenMesh
 //        because it uses this changes
 
-markerID_Type EntityFlagStandardPolicy::strongerFlag( markerID_Type const & flag1, markerID_Type const & flag2 )
+markerID_Type MarkerIDStandardPolicy::strongerMarkerID ( markerID_Type const& markerID1, markerID_Type const& markerID2 )
 {
-    if ( flag1 == S_NULLFLAG )
-        return flag2;
-    if ( flag2 == S_NULLFLAG )
-        return flag1;
-    return flag1 > flag2 ? flag1 : flag2 ;
+    if ( markerID1 == S_NULLMARKERID )
+    {
+        return markerID2;
+    }
+    if ( markerID2 == S_NULLMARKERID )
+    {
+        return markerID1;
+    }
+    return markerID1 > markerID2 ? markerID1 : markerID2 ;
 }
 
-markerID_Type EntityFlagStandardPolicy::weakerFlag( markerID_Type const & flag1, markerID_Type const & flag2 )
+markerID_Type MarkerIDStandardPolicy::weakerMarkerID ( markerID_Type const& markerID1, markerID_Type const& markerID2 )
 {
-    if ( flag1 == S_NULLFLAG )
-        return flag2;
-    if ( flag2 == S_NULLFLAG )
-        return flag1;
-    return flag1 < flag2 ? flag1 : flag2 ;
+    if ( markerID1 == S_NULLMARKERID )
+    {
+        return markerID2;
+    }
+    if ( markerID2 == S_NULLMARKERID )
+    {
+        return markerID1;
+    }
+    return markerID1 < markerID2 ? markerID1 : markerID2 ;
 }
 
-bool EntityFlagStandardPolicy::EqualFlags(const markerID_Type& flag1, const markerID_Type& flag2)
+bool MarkerIDStandardPolicy::equalMarkerID (const markerID_Type& markerID1, const markerID_Type& markerID2)
 {
-    return flag1 == flag2;
+    return markerID1 == markerID2;
 }
 
 } // Namespace LifeV

@@ -40,6 +40,8 @@
 #define MONOLITHICBLOCKCOMPOSED_H 1
 
 #include <lifev/core/LifeV.hpp>
+#include <Epetra_Operator.h>
+#include <lifev/core/algorithm/ComposedOperator.hpp>
 #include <lifev/fsi/solver/MonolithicBlock.hpp>
 
 #include <boost/scoped_ptr.hpp>
@@ -84,12 +86,12 @@ public:
        \param flags: vector of flags specifying the type of coupling between the different blocks that we chose for this operator
        \param order: vector specifying the order of the blocks.
      */
-    MonolithicBlockComposed(const std::vector<Int>& flags, const std::vector<Int>& order):
-            super_Type(),
-            M_recompute(order.size()),
-            M_coupling(),
-            M_couplingFlags(new std::vector<Int>(flags)),// here I copy, so that the input param can be destroyed
-            M_blockReordering(new std::vector<Int>(order))
+    MonolithicBlockComposed (const std::vector<Int>& flags, const std::vector<Int>& order) :
+        super_Type(),
+        M_recompute (order.size() ),
+        M_coupling(),
+        M_couplingFlags (new std::vector<Int> (flags) ), // here I copy, so that the input param can be destroyed
+        M_blockReordering (new std::vector<Int> (order) )
     {}
 
 
@@ -106,20 +108,20 @@ public:
         @param result output result
         @param linearSolver the linear system
      */
-    virtual int   solveSystem( const vector_Type& rhs, vector_Type& step, solverPtr_Type& linearSolver)=0;
+    virtual int   solveSystem ( const vector_Type& rhs, vector_Type& step, solverPtr_Type& linearSolver) = 0;
 
     //! Sets the parameters needed by the preconditioner from data file
     /*!
         @param data GetPot object reading the text data file
         @param section string specifying the path in the data file where to find the options for the operator
      */
-    virtual void  setDataFromGetPot(const GetPot& data, const std::string& section)=0;
+    virtual void  setDataFromGetPot (const GetPot& data, const std::string& section) = 0;
 
     //! returns true if the operator is set
     /*!
       returns the length of the vector M_blocks
     */
-    virtual bool set()=0;
+    virtual bool set() = 0;
 
     //@}
     //!@name Public Methods
@@ -154,11 +156,14 @@ public:
       @param couplingBlock: flag specifying which block is considered (must not exceed the size of the vector of blocks,
       otherwise a std::bad_alloc exception is thrown). The coupling for each block is specified by a static vector passed to the constructor.
      */
-    void coupler(mapPtr_Type& map,
-                 const std::map<ID, ID>& locDofMap,
-                 const vectorPtr_Type& numerationInterface,
-                 const Real& timeStep,
-                 UInt couplingBlock);
+    void coupler (mapPtr_Type& map,
+                  const std::map<ID, ID>& locDofMap,
+                  const vectorPtr_Type& numerationInterface,
+                  const Real& timeStep,
+                  const Real& coefficient,
+                  const Real& rescaleFactor,
+                  UInt couplingBlock
+                 );
 
 
     //! pushes a block at the end of the vector
@@ -167,7 +172,7 @@ public:
         @param Mat: block matrix to push
         @param recompute: flag stating wether the preconditioner for this block have to be recomputed at every time step
      */
-    virtual void    push_back_matrix(const matrixPtr_Type& Mat, const bool recompute);
+    virtual void    push_back_matrix (const matrixPtr_Type& Mat, const bool recompute);
 
     //! Merges an input MonolithicBlockComposed operator with this one
     /*!
@@ -175,14 +180,14 @@ public:
        vector of coupling matrices.
       @param Oper: input operator
      */
-    virtual void push_back_oper( MonolithicBlockComposed& Oper);
+    virtual void push_back_oper ( MonolithicBlockComposed& Oper);
 
 
     //! Pushes an extra coupling matrix at the end of the vector of coupling matrices
     /*!
       @param coupling: extra coupling matrix
      */
-    virtual void push_back_coupling( matrixPtr_Type& coupling);
+    virtual void push_back_coupling ( matrixPtr_Type& coupling);
 
     //! replaces a block
     /*!
@@ -190,7 +195,7 @@ public:
         @param Mat: block matrix to push
         @param index: position in the vector
      */
-    virtual void replace_matrix( const matrixPtr_Type& oper, UInt position );//{M_blocks.replace(oper, position);}
+    virtual void replace_matrix ( const matrixPtr_Type& oper, UInt position ); //{M_blocks.replace(oper, position);}
 
 
     //! replaces a coupling block
@@ -199,7 +204,7 @@ public:
         @param Mat block matrix to push
         @param index position in the vector
      */
-    virtual void replace_coupling( const matrixPtr_Type& Mat, UInt index);
+    virtual void replace_coupling ( const matrixPtr_Type& Mat, UInt index);
 
     //! pushes a block at the end of the vector
     /*!
@@ -207,7 +212,7 @@ public:
         @param Mat block matrix to push
         @param recompute flag stating wether the preconditioner for this block have to be recomputed at every time step
      */
-    virtual void addToCoupling( const matrixPtr_Type& Mat, UInt position);
+    virtual void addToCoupling ( const matrixPtr_Type& Mat, UInt position);
 
     //!
     /*!
@@ -216,17 +221,23 @@ public:
         @param row row for the insertion
         @param col colon for the insertion
      */
-    void addToCoupling( const Real& entry , UInt row, UInt col, UInt position );
+    void addToCoupling ( const Real& entry , UInt row, UInt col, UInt position );
 
     //@}
 
     //!@name Get Methods
     //@{
     //! returns the vector of flags (by const reference).
-    const std::vector<bool>& recompute() {return M_recompute;}
+    const std::vector<bool>& recompute()
+    {
+        return M_recompute;
+    }
 
     //! returns the vector of pointers to the coupling blocks (by const reference).
-    const std::vector<matrixPtr_Type> couplingVector(){return M_coupling;}
+    const std::vector<matrixPtr_Type>& couplingVector() const
+    {
+        return M_coupling;
+    }
 
     //@}
 
@@ -234,7 +245,12 @@ public:
     //@{
 
     //! turns on/off the recomputation of the preconditioner for a specified factor
-    void setRecompute( UInt position, bool flag ) { M_recompute[position] = flag; }
+    void setRecompute ( UInt position, bool flag )
+    {
+        M_recompute[position] = flag;
+    }
+
+    const UInt whereIsBlock ( UInt position ) const;
 
     //@}
 protected:
@@ -246,7 +262,7 @@ protected:
     /*!
       Everything (but the boundary conditions assembling) must have been set before calling this
     */
-    void blockAssembling(const UInt k);
+    void blockAssembling (const UInt k);
 
 
     //! swaps the blocks
@@ -255,7 +271,7 @@ protected:
       \param i: element to swap
       \param j: element to swap
      */
-    virtual void swap(const UInt i, const UInt j);
+    virtual void swap (const UInt i, const UInt j);
     //@}
 
     //! @name Protected Members
@@ -281,6 +297,7 @@ protected:
     M_blocks of blocks. This vector is assigned in the coupler method of each class.
     */
     boost::scoped_ptr<std::vector<Int> >                      M_blockReordering;
+
     //@}
 
 private:

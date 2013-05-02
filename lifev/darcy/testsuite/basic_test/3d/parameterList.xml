@@ -98,7 +98,7 @@
             <Parameter name="repartition: min per proc" type="int" value="500"/>
 
             <Parameter name="energy minimization: enable" type="bool" value="true"/>
-            <Parameter name="energy minimization: type" type="int" value="3"/> -->
+            <Parameter name="energy minimization: type" type="int" value="3"/>
 
         </ParameterList>
 

@@ -54,33 +54,55 @@ const flag_Type SUBDOMAIN_INTERFACE ( 0x04 );
 const flag_Type OVERLAP             ( 0x08 );
 const flag_Type CUTTED              ( 0x10 );
 const flag_Type VERTEX              ( 0x20 );
-}
+const flag_Type GHOST_ENTITY        ( 0x40 );
+// @note remember to update ALL value in order to encompass all flags
+const flag_Type ALL                 ( 0x7F );
 
-//! This is the base class to store the identifiers.
+const UInt number                   (    7 );
+
+std::string name ( const flag_Type& flag );
+
+}// namespace EntityFlags
+
+//! This is the base class to store basic properties of any mesh entity
 /*!
+ * The basic properties of a mesh entity is to have identifiers and flags.
+ * Identifiers give information about the numbering of the entity (typically in a mesh)
+ * flags are attributes af the entity, like being on the boundary.
+ *
    In this class, there are two identifiers stored:
     <ol>
-        <li> The global identifier is defined for the whole mesh.
-        <li> The local identifier is defined as the identifier for
-             a particular processor.
+        <li> The global identifier, normally used to uniquely identify the
+         entity in the whole mesh.
+        <li> The local identifier, which is usually unique to the entity on a given
+        partition. If the entity is stored into a
+        meshEntityContainer, then localId must be the position
+        of the entity in the container.
     </ol>
 
     When running the code in serial (1 processor), the identifiers
-    are then the same.
+    are then the same (but this is not necessary)
 
-    This class provides the method and operators to handle easily
-    the identifiers.
+    This class provides the method and operators to handle local and global
+    identifiers easily.
 
     Note: Documentation by Samuel Quinodoz, implementation anterior
-    to the documentation, without name of author.
+    to the documentation: Luca Formaggia
 
-  The additional flag that is stored is used to specify geometrical properties of the entity
+  The additional fag that is stored is used to specify geometrical properties of the entity
   such as the ones specified above in the EntityFlags namespace.
+  @todo The marker ID should be taken away form marker class and added to the MeshEntity directly
  */
 
 class MeshEntity
 {
 public:
+    //! Indicator for local or global id
+    /*!
+     * This enum helps to develop methods to operate on local or globalID
+     *
+     */
+    enum SwitchId {LOCALID = 0, GLOBALID = 1};
     //! @name Constructors & Destructor
     //@{
 
@@ -88,17 +110,10 @@ public:
     /*!
        Using this constructor, both identifiers are set to NotAnId.
      */
-    MeshEntity():
-            M_id( NotAnId ),
-            M_localId( NotAnId ),
-            M_flag ( EntityFlags::DEFAULT )
-    {};
-
-    //! Copy Constructor
-    MeshEntity(const MeshEntity& meshEntity):
-            M_id     ( meshEntity.M_id ),
-            M_localId( meshEntity.M_localId ),
-            M_flag ( meshEntity.M_flag )
+    MeshEntity() :
+        M_id ( NotAnId ),
+        M_localId ( NotAnId ),
+        M_flag ( EntityFlags::DEFAULT )
     {};
 
     //! Constructor with a single value for both identifiers.
@@ -106,10 +121,10 @@ public:
        @param id The value for both identifers.
        @param flag The value of the flag to assign (optional)
      */
-    MeshEntity( const ID& id, const flag_Type& flag = EntityFlags::DEFAULT ):
-            M_id( id ),
-            M_localId( id ),
-            M_flag ( flag )
+    MeshEntity ( const ID& id, const flag_Type& flag = EntityFlags::DEFAULT ) :
+        M_id ( id ),
+        M_localId ( id ),
+        M_flag ( flag )
     {};
 
     //! Full constructor, where both identifiers are specified.
@@ -118,22 +133,21 @@ public:
        @param lid The value for the local ID.
        @param flag The value of the flag to assign (optional)
      */
-    MeshEntity( const ID& id, const ID& lid, const flag_Type& flag = EntityFlags::DEFAULT ):
-            M_id( id ),
-            M_localId( lid ),
-            M_flag ( flag )
+    MeshEntity ( const ID& id, const ID& lid, const flag_Type& flag = EntityFlags::DEFAULT ) :
+        M_id ( id ),
+        M_localId ( lid ),
+        M_flag ( flag )
     {};
 
     //! backward-compatible constructor
     /*!
-      This is the "full" constructor for this class.
       @param id The identifier to be set for both (global and local) identifiers. Use
       a set method if you want different identifiers.
       @param boundary The value of the boundary indicator.
     */
-    MeshEntity( const ID& id, const bool& boundary ) :
-        M_id( id ),
-        M_localId( id )
+    MeshEntity ( const ID& id, const bool& boundary ) :
+        M_id ( id ),
+        M_localId ( id )
     {
         // NOTE: this is conservative, if PHYSICAL_BOUNDARY = 0x01
         // this can be done as
@@ -142,73 +156,26 @@ public:
     };
 
     //! Destructor
-    virtual ~MeshEntity()
-    {};
+    virtual ~MeshEntity() {};
 
     //@}
 
     //! @name Methods
     //@{
     //! Displays the informations stored by this class
-    void showMe( std::ostream& output = std::cout ) const
-    {
-        output << " Global ID : " << M_id << " -- " << " Local ID " << M_localId << std::endl;
-        Flag::showMe( M_flag, output );
-        output << std::endl;
-    };
-
+    void showMe ( std::ostream& output = std::cout ) const;
     //@}
 
-    //! @name Operators
-    //@{
-
-    //! Equivalence operator that checks if BOTH identifiers are the same.
-    /*!
-      @param e The mesh entity to be compared with.
-     */
-    bool operator==(const MeshEntity & e ) const
-    {
-        bool res = ( ( M_id == e.id() ) && ( M_localId == e.M_localId ));
-        return res;
-    };
-
-    //! Relation operator that performs the same comparison on the GLOBAL identifier.
-    /*!
-      @param e The mesh entity to be compared with.
-    */
-    bool operator<=(const MeshEntity & e ) const
-    {
-        return M_id <= e.id();
-    };
-
-    //! Relation operator that performs the same comparison on the GLOBAL identifier.
-    /*!
-      @param e The mesh entity to be compared with.
-    */
-    bool operator<( const MeshEntity & e ) const
-    {
-        return M_id < e.id();
-    };
-
-    //! Relation operator that performs the same comparison on the GLOBAL identifier.
-    /*!
-      @param e The mesh entity to be compared with.
-    */
-    bool operator>=(const MeshEntity & e ) const
-    {
-        return M_id >= e.id();
-    };
-
-    //@}
 
     //! @name Set Methods
     //@{
 
     //! Method to set the global identifier.
     /*!
+     * @todo change the name in setGlobalId
       @param id The new global identifier.
     */
-    inline void setId( const ID& id)
+    inline void setId ( const ID& id)
     {
         M_id = id;
     };
@@ -217,7 +184,7 @@ public:
     /*!
       @param id The new local identifier.
     */
-    inline void setLocalId( const ID& id)
+    inline void setLocalId ( const ID& id)
     {
         M_localId = id;
     };
@@ -228,8 +195,14 @@ public:
     */
     void setBoundary (const bool& boundary)
     {
-        if ( boundary ) M_flag = Flag::turnOn  ( M_flag, EntityFlags::PHYSICAL_BOUNDARY );
-        else            M_flag = Flag::turnOff ( M_flag, EntityFlags::PHYSICAL_BOUNDARY );
+        if ( boundary )
+        {
+            M_flag = Flag::turnOn  ( M_flag, EntityFlags::PHYSICAL_BOUNDARY );
+        }
+        else
+        {
+            M_flag = Flag::turnOff ( M_flag, EntityFlags::PHYSICAL_BOUNDARY );
+        }
     };
 
     //! Replace method for the entity flag
@@ -248,7 +221,7 @@ public:
      */
     void setFlag ( const flag_Type& flag )
     {
-        M_flag = Flag::turnOn(flag,M_flag);
+        M_flag = Flag::turnOn (flag, M_flag);
     };
     //! Remove a flag
     /**
@@ -256,7 +229,7 @@ public:
      */
     void unSetFlag ( const flag_Type& flag )
     {
-        M_flag = Flag::turnOff(M_flag,flag);
+        M_flag = Flag::turnOff (M_flag, flag);
     };
 
     //@}
@@ -269,7 +242,7 @@ public:
     /*!
       @return The global identifier.
     */
-    inline const ID & id() const
+    inline const ID& id() const
     {
         return M_id;
     };
@@ -278,7 +251,7 @@ public:
     /*!
       @return The local identifier.
     */
-    inline const ID & localId() const
+    inline const ID& localId() const
     {
         return M_localId;
     };
@@ -291,7 +264,7 @@ public:
 
 
     //! returns the entity flag
-    const flag_Type & flag() const
+    const flag_Type& flag() const
     {
         return M_flag;
     };
@@ -304,6 +277,69 @@ private:
     flag_Type M_flag;
 };
 
+namespace MeshEntityUtility
+{
+/*! @defgroup MeshEntityUtilities
+ *  Utilities to get local or global ID according to a switch
+ *  The template parameter is in fact a MeshEntity::SwitchId
+ *  enumerator which takes values MeshEntity::LOCALID or
+ *  MeshEntity::GLOBALID.
+ *  Getters are also implemented as functors for efficiency reason
+ *  (allow inlining)
+ *  @todo Go to a separate file
+ * @{
+ */
+template<int Selector>
+inline ID getID (MeshEntity const&);
+//! Generic definition of setter
+template<int Selector>
+inline void setID (MeshEntity&, const ID);
+
+//! Specialization for global id
+template<>
+inline ID getID<MeshEntity::GLOBALID> (MeshEntity const& entity)
+{
+    return entity.id();
+}
+
+//! Specialization for local id
+template<>
+inline ID getID<MeshEntity::LOCALID> (MeshEntity const& entity)
+{
+    return entity.localId();
+}
+
+//! Specialization for global id
+template<>
+inline void setID<MeshEntity::GLOBALID> (MeshEntity& entity, const ID id)
+{
+    entity.setId (id);
+}
+
+//! Specialization for local id
+template<>
+inline void setID<MeshEntity::LOCALID> (MeshEntity& entity, const ID id)
+{
+    entity.setLocalId (id);
+}
+//! Generic definition of the functor to extract the local or global ID
+/*
+ * The functor is useful for allowing inlining and use it with
+ * std compliant containers.
+ */
+template<int Selector>
+struct IdGetter
+{
+    inline ID operator() (MeshEntity const& entity) const
+    {
+        return getID<Selector> (entity);
+    };
+};
+
+
+
+/** @} */ // end of MeshEntityUtilities
+} // end of namespace MeshEntityUtility
 
 //! Mesh Entity with an orientation
 /*! \note Not Used so far! */

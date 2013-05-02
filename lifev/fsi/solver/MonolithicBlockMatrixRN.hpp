@@ -75,9 +75,9 @@ public:
     //@{
 
     //! Empty Constructor
-    MonolithicBlockMatrixRN(UInt flag):
-            super_Type(flag),
-            superRobin()
+    MonolithicBlockMatrixRN (const std::vector<Int>& flags /*UInt flag*/) :
+        super_Type (flags),
+        superRobin()
     {}
 
     //! Destructor
@@ -89,13 +89,13 @@ public:
 
 
     //! sets the data relative to Robin (e.g. the coefficients \f$\alpha_f\f$ and \f$\alpha_s\f$).
-    void setDataFromGetPot( const GetPot& data, const std::string& section );
+    void setDataFromGetPot ( const GetPot& data, const std::string& section );
 
     //! Adds to the r.h.s. the part due to the Robin Coupling and runs MonolithicBlockMatrix::GlobalAssemble()
     void GlobalAssemble();
 
 
-    //! Computes the coupling
+    //! Computes the specific coupling for a block
     /*!
       computes all the coupling blocks specific for the chosen preconditioner. The coupling is handled
       through an augmented formulation, introducing new variables (multipliers). Needs as input: the global map of the problem,
@@ -107,11 +107,25 @@ public:
       @param locDofMap std::map with the correspondence between the interface dofs for the two different maps in
       the subproblems
       @param numerationInterface vector containing the correspondence of the Lagrange multipliers with the interface dofs
+      @param timeStep the time step
+      @param coefficient coefficient, usually is the term multiplying the mass in the time discretization
+      @param couplingFlag integer parameter identifying which block is coupled with which. See the method 'couplingMatrix' in @see MonolithicBlock class for a more detailed explanation.
      */
-    void coupler(mapPtr_Type& map,
-                 const std::map<ID, ID>& locDofMap,
-                 const vectorPtr_Type& numerationInterface,
-                 const Real& timeStep);
+    void coupler (mapPtr_Type& map,
+                  const std::map<ID, ID>& locDofMap,
+                  const vectorPtr_Type& numerationInterface,
+                  const Real& timeStep,
+                  const Real& coefficient,
+                  const Real& rescaleFactor,
+                  UInt        couplingFlag);
+
+    //!Computes the coupling
+    void coupler (mapPtr_Type& map,
+                  const std::map<ID, ID>& locDofMap,
+                  const vectorPtr_Type& numerationInterface,
+                  const Real& timeStep,
+                  const Real& coefficient,
+                  const Real& rescaleFactor);
 
     //! Sums all the blocks and the couplings into the system matrix, adds the robin coupling part
     void blockAssembling();
@@ -119,10 +133,17 @@ public:
     //! sets the matrix where the Robin contribution will be assembled (which have to passed from outside) and the
     /*! right hand side vector of the linear system, which will be updated with the Robin part.
      */
-    void setRobin( matrixPtr_Type& matrix, vectorPtr_Type& vec ){setRobinMatrix( matrix ); setRobinRhs( vec );}
+    void setRobin ( matrixPtr_Type& matrix, vectorPtr_Type& vec )
+    {
+        setRobinMatrix ( matrix );
+        setRobinRhs ( vec );
+    }
 
     //! sets the matrix where the Robin contribution will be assembled
-    void setRobin( matrixPtr_Type& matrix ){setRobinMatrix( matrix ); }
+    void setRobin ( matrixPtr_Type& matrix )
+    {
+        setRobinMatrix ( matrix );
+    }
     //@}
 
 
@@ -130,7 +151,9 @@ public:
     //@{
     static MonolithicBlockMatrix*    createAdditiveSchwarzRN()
     {
-        return new MonolithicBlockMatrixRN(15);
+        const Int couplings[] = { 15, 0, 16 };//to modify (15 to 7) to neglect the coupling (and solve Navier--Stokes)
+        const std::vector<Int> couplingVector (couplings, couplings + 3);
+        return new MonolithicBlockMatrixRN (couplingVector);
     }
     //@}
 

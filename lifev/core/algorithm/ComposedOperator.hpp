@@ -44,6 +44,7 @@
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <Epetra_Operator.h>
+#include <Epetra_MultiVector.h>
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
@@ -83,13 +84,13 @@ public:
        The constructor builds an empty chain of composed operators.
        The resulting operator shall be equal to the identity.
     */
-    ComposedOperator( const  boost::shared_ptr<Epetra_Comm>& comm );
+    ComposedOperator ( const  boost::shared_ptr<Epetra_Comm>& comm );
 
     /**
        Copy constructor: it doesn't make a real copy of the operators, it just copies the vector of shared pointer
        (note that the implementation is mandatory in order to avoid a bit-copy of the shared_ptr vector)
     */
-    ComposedOperator( const ComposedOperator<operator_Type>& P);
+    ComposedOperator ( const ComposedOperator<operator_Type>& P);
 
     virtual ~ComposedOperator();
     //@}
@@ -105,10 +106,10 @@ public:
        \param summed: flag specifying if we want the operator to be summed. Note that the operator would be "out
        of the vector", summed in a second step after all the multiplications.
     */
-    UInt push_back(operatorPtr_Type  P,
-                   const bool useInverse=false,
-                   const bool useTranspose=false,
-                   const bool summed=false);
+    UInt push_back (operatorPtr_Type  P,
+                    const bool useInverse = false,
+                    const bool useTranspose = false,
+                    const bool summed = false);
 
     /**
        Method to add an operator at the end of the operators list.
@@ -119,10 +120,10 @@ public:
        of the vector", summed in a second step after all the multiplications.
     */
 
-    UInt push_back(operator_Type*  P,
-                   const bool useInverse=false,
-                   const bool useTranspose=false,
-                   const bool summed=false);
+    UInt push_back (operator_Type*  P,
+                    const bool useInverse = false,
+                    const bool useTranspose = false,
+                    const bool summed = false);
 
     //! we expecte an external matrix shared pointer, we will not destroy the matrix!
     //! remember: P = M_operator(0) * ... * M_operator(Qp-1)
@@ -132,10 +133,10 @@ public:
        \param index: position (starting from 0)
        \param useInverse: flag specifying if the operator is already inverted (if AllpyInverse() is implemented)
     */
-    UInt replace(operatorPtr_Type  P,
-                 const UInt index,
-                 const bool useInverse=false,
-                 const bool useTranspose=false);
+    UInt replace (operatorPtr_Type  P,
+                  const UInt index,
+                  const bool useInverse = false,
+                  const bool useTranspose = false);
 
     //! Resets all the factors in the operator
     /**
@@ -149,14 +150,17 @@ public:
        \param first: first factor
        \param second: second factor
      */
-    void swap(UInt first, UInt second);
+    void swap (UInt first, UInt second);
 
     //! resets the sandard vector holding all the factors
     /**
        calls clear on the std::vector
        \todo change name in e.g. resetOperator
      */
-    void resetOperator(){M_operator.clear();}
+    void resetOperator()
+    {
+        M_operator.clear();
+    }
     //@}
 
     /** @name Implementation of Epetra_Operator Methods
@@ -165,17 +169,17 @@ public:
     /**
        Method to set the flag M_useTranspose, which specifies if the composed operator is to be transposed.
     */
-    int SetUseTranspose(bool UseTranspose);
+    int SetUseTranspose (bool UseTranspose);
 
     /**
        Method returning the result of applying the operator to a vector
        \param X: input vector
        \param Y: output vector
      */
-    int Apply(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const;
+    int Apply (const Epetra_MultiVector& X, Epetra_MultiVector& Y) const;
 
     // Simone:here use the ApplyInverse from the local operators.
-    int ApplyInverse(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const;
+    int ApplyInverse (const Epetra_MultiVector& X, Epetra_MultiVector& Y) const;
 
     /** Returns the quantity \f$ \| A \|_\infty\f$ such that
         \f[\| A \|_\infty = \max_{1\le i\le m} \sum_{j=1}^n |a_{ij}| \f].
@@ -193,7 +197,7 @@ public:
     /**
        Method returning a string identifying the type of operator
      */
-    const char * Label() const;
+    const char* Label() const;
 
     /**
        Returns true if all the operators composed have to be considered transpose (i.e. if M_allTranspose==true)
@@ -208,7 +212,7 @@ public:
     /**
        Returns the communicator
      */
-    const Epetra_Comm & Comm() const;
+    const Epetra_Comm& Comm() const;
 
     /**
        Returns a shared pointer to the communicator
@@ -218,12 +222,12 @@ public:
     /**
        returns the OperatorDomainMap of the operators contained
      */
-    const Epetra_Map & OperatorDomainMap() const;
+    const Epetra_Map& OperatorDomainMap() const;
 
     /**
        returns the OperatorRangeMap of the operators contained
      */
-    const Epetra_Map & OperatorRangeMap() const;
+    const Epetra_Map& OperatorRangeMap() const;
     //@}
 
     //! Public Get Methods
@@ -232,21 +236,33 @@ public:
     //!returns a const reference tor the std::vector of factors
     /**
      */
-    const std::vector<operatorPtr_Type>& Operator() const  {return M_operator;}
+    const std::vector<operatorPtr_Type>& Operator() const
+    {
+        return M_operator;
+    }
 
     //!returns the std::vector of factors by (non const) reference
     /**
      */
-    std::vector<operatorPtr_Type>& OperatorView() const {return M_operator;}
+    std::vector<operatorPtr_Type>& OperatorView() const
+    {
+        return M_operator;
+    }
 
     //! Returns true if the operator is transposed
     /**
        The operator transposed means that all its factors have to be considered transposed
      */
-    bool allTranspose() const {return M_allTranspose;}
+    bool allTranspose() const
+    {
+        return M_allTranspose;
+    }
 
     //! Returns a vector saying for each factor if it is considered transposed or not
-    const std::vector<bool>&  transpose() const {return M_transpose;}
+    const std::vector<bool>&  transpose() const
+    {
+        return M_transpose;
+    }
 
     //! Returns a vector of UInt specifying the form of the operator
     /**
@@ -254,24 +270,42 @@ public:
        Each element of the output vector says how many factors are there between two '+' operation. For instance for
        the operator AB+CDE the vector M_summed returned would be [2,3]
      */
-    const std::vector<ID>&  summed() const {return M_summed;}
+    const std::vector<ID>&  summed() const
+    {
+        return M_summed;
+    }
 
     //! Returns a vector saying which factors have to be considered as inverse
-    const std::vector<bool>& inverse() const {return M_inverse;}
+    const std::vector<bool>& inverse() const
+    {
+        return M_inverse;
+    }
     //! returns the number of factors present in the operator
-    UInt number() const {return M_set;}
+    UInt number() const
+    {
+        return M_set;
+    }
 
-    const double& meanIter() const {return M_meanIter;}
+    const double& meanIter() const
+    {
+        return M_meanIter;
+    }
 
-    int numCalled() const {return M_numCalled;}
+    int numCalled() const
+    {
+        return M_numCalled;
+    }
 
-    const Displayer& displayer(){return M_displayer;}
+    const Displayer& displayer()
+    {
+        return M_displayer;
+    }
     //@}
 
     //!@name Setter Methods
     //!{
     //! Sets the MPI communicator
-    void setComm(const boost::shared_ptr<Epetra_Comm> comm);
+    void setComm (const boost::shared_ptr<Epetra_Comm> comm);
     //!}
 
 protected:
@@ -279,9 +313,9 @@ protected:
     //!@name Protected Methods
     //!{
 
-    int Apply_DirectOperator(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const;
+    int Apply_DirectOperator (const Epetra_MultiVector& X, Epetra_MultiVector& Y) const;
 
-    int Apply_InverseOperator(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const;
+    int Apply_InverseOperator (const Epetra_MultiVector& X, Epetra_MultiVector& Y) const;
     //@}
 
     //!@name Protected Members
@@ -307,36 +341,36 @@ protected:
 // ===================================================
 
 template <typename operator_Type>
-ComposedOperator<operator_Type>::ComposedOperator( const boost::shared_ptr<Epetra_Comm>& comm)
+ComposedOperator<operator_Type>::ComposedOperator ( const boost::shared_ptr<Epetra_Comm>& comm)
     :
     M_operator(),
     M_inverse(),
     M_transpose(),
     M_summed(),
-    M_allTranspose(false),
-    M_set(0),
-    M_meanIter(0),
-    M_numCalled(0),
-    M_displayer(comm)
+    M_allTranspose (false),
+    M_set (0),
+    M_meanIter (0),
+    M_numCalled (0),
+    M_displayer (comm)
 {
 }
 
 template <typename operator_Type>
-ComposedOperator<operator_Type>::ComposedOperator( const ComposedOperator<operator_Type>& P)
+ComposedOperator<operator_Type>::ComposedOperator ( const ComposedOperator<operator_Type>& P)
     :
     M_operator(),
-    M_inverse(P.inverse()),
-    M_transpose(P.transpose()),
-    M_summed(P.summed()),
-    M_allTranspose(P.allTranspose()),
-    M_set(P.number()),
-    M_meanIter(P.meanIter()),
-    M_numCalled(P.numCalled()),
-    M_displayer(P.commPtr())
+    M_inverse (P.inverse() ),
+    M_transpose (P.transpose() ),
+    M_summed (P.summed() ),
+    M_allTranspose (P.allTranspose() ),
+    M_set (P.number() ),
+    M_meanIter (P.meanIter() ),
+    M_numCalled (P.numCalled() ),
+    M_displayer (P.commPtr() )
 {
-    for(UInt i=0; i<M_set; ++i)
+    for (UInt i = 0; i < M_set; ++i)
     {
-        M_operator.push_back(P.Operator()[i]);
+        M_operator.push_back (P.Operator() [i]);
     }
 }
 
@@ -352,77 +386,85 @@ ComposedOperator<operator_Type>::~ComposedOperator()
 
 template <typename operator_Type>
 UInt ComposedOperator<operator_Type>::
-push_back( operator_Type* P,
-           const bool useInverse,
-           const bool useTranspose,
-           const bool summed)
+push_back ( operator_Type* P,
+            const bool useInverse,
+            const bool useTranspose,
+            const bool summed)
 {
-    operatorPtr_Type prec(P);
-    return push_back(P, useInverse, useTranspose, summed);
+    operatorPtr_Type prec (P);
+    return push_back (P, useInverse, useTranspose, summed);
 }
 
 
 // we expect an external matrix pointer, we will not destroy the matrix!
 template <typename operator_Type>
 UInt ComposedOperator<operator_Type>::
-push_back( operatorPtr_Type  P,
-           const bool useInverse,
-           const bool useTranspose,
-           const bool summed)
+push_back ( operatorPtr_Type  P,
+            const bool useInverse,
+            const bool useTranspose,
+            const bool summed)
 {
     if (P.get() ==  0)
     {
-        M_displayer.leaderPrint(" CP-  Precondtioner not set:                 ", M_set, "\n");
-        return(M_set);
+        M_displayer.leaderPrint (" CP-  Precondtioner not set:                 ", M_set, "\n");
+        return (M_set);
     }
 
-    M_displayer.leaderPrint(" CP-  Previous number of call:                 ", M_numCalled, "\n");
-    M_displayer.leaderPrint(" CP-  Mean iters:                              ", M_meanIter, "\n" );
+    //     M_displayer.leaderPrint(" CP-  Previous number of call:                 ", M_numCalled, "\n");
+    //     M_displayer.leaderPrint(" CP-  Mean iters:                              ", M_meanIter, "\n" );
 
-    M_meanIter=0;
-    M_numCalled=0;
+    M_meanIter = 0;
+    M_numCalled = 0;
 
     // push back the nth operator
 
-    M_operator.        push_back(P);
-    M_inverse.  push_back(useInverse);
-    M_transpose.push_back(useTranspose);
-    if(summed)
-        M_summed.push_back(M_set);
+    M_operator.        push_back (P);
+    M_inverse.  push_back (useInverse);
+    M_transpose.push_back (useTranspose);
+    if (summed)
+    {
+        M_summed.push_back (M_set);
+    }
 
     //    if (useInverse && useTranspose) assert(false); // I am not sure I have coded this in the right way
 
     M_set++;
 
-    return(M_set);
+    return (M_set);
 }
 
 // we expect an external matrix pointer, we will not destroy the matrix!
 template <typename operator_Type>
 UInt ComposedOperator<operator_Type>::
-replace( operatorPtr_Type  P,
-         const UInt index,
-         const bool useInverse,
-         const bool useTranspose)
+replace ( operatorPtr_Type  P,
+          const UInt index,
+          const bool useInverse,
+          const bool useTranspose)
 {
-    if (P.get() ==  0)   return(M_set);
+    if (P.get() ==  0)
+    {
+        return (M_set);
+    }
 
-    ASSERT(index <= M_set, "ComposedOperator::replace: index too large");
+    ASSERT (index <= M_set, "ComposedOperator::replace: index too large");
 
-    M_displayer.leaderPrint(" CP-  Previous number of call:                 ", M_numCalled, "\n");
-    M_displayer.leaderPrint(" CP-  Mean iters:                              ", M_meanIter, "\n" );
+    M_displayer.leaderPrint (" CP-  Previous number of call:                 ", M_numCalled, "\n");
+    M_displayer.leaderPrint (" CP-  Mean iters:                              ", M_meanIter, "\n" );
 
-    M_meanIter=0;
-    M_numCalled=0;
+    M_meanIter = 0;
+    M_numCalled = 0;
 
     // replace the nth operator
     M_operator        [index] = P;
     M_inverse  [index] = useInverse;
     M_transpose[index] = useTranspose;
 
-    if (useInverse && useTranspose) assert(false); // I am not sure I have coded this in the right way
+    if (useInverse && useTranspose)
+    {
+        assert (false);    // I am not sure I have coded this in the right way
+    }
 
-    return(M_set);
+    return (M_set);
 
 }
 
@@ -430,7 +472,7 @@ replace( operatorPtr_Type  P,
 template <typename operator_Type>
 void ComposedOperator<operator_Type>::reset()
 {
-    for (UInt q(0); q<M_set ; q++)
+    for (UInt q (0); q < M_set ; q++)
     {
         M_operator[q].reset();
     }
@@ -438,7 +480,7 @@ void ComposedOperator<operator_Type>::reset()
 
 
 template <typename operator_Type>
-void ComposedOperator<operator_Type>::swap(UInt first, UInt second)
+void ComposedOperator<operator_Type>::swap (UInt first, UInt second)
 {
     operatorPtr_Type tmpPrec;
     tmpPrec = M_operator[first];
@@ -451,70 +493,77 @@ void ComposedOperator<operator_Type>::swap(UInt first, UInt second)
 // ===================================================
 
 template <typename operator_Type>
-int ComposedOperator<operator_Type>::SetUseTranspose(bool useTranspose)
+int ComposedOperator<operator_Type>::SetUseTranspose (bool useTranspose)
 {
-    if(useTranspose!=UseTranspose())
+    if (useTranspose != UseTranspose() )
     {
-        M_allTranspose=useTranspose;
-        int size=M_operator.size()-1;
-        if(size)
-            for(int i=0; i<size/2; ++i)
+        M_allTranspose = useTranspose;
+        int size = M_operator.size() - 1;
+        if (size)
+            for (int i = 0; i < size / 2; ++i)
             {
                 operatorPtr_Type swp;
-                swp=M_operator[i];
-                M_operator[i]=M_operator[size-i];
-                M_operator[size-i]=swp;
-                M_operator[i]->SetUseTranspose(!M_operator[i]->UseTranspose());
-                assert(M_operator[size-i]->SetUseTranspose(!M_operator[size-i]->UseTranspose())!=-1);
+                swp = M_operator[i];
+                M_operator[i] = M_operator[size - i];
+                M_operator[size - i] = swp;
+                M_operator[i]->SetUseTranspose (!M_operator[i]->UseTranspose() );
+                assert (M_operator[size - i]->SetUseTranspose (!M_operator[size - i]->UseTranspose() ) != -1);
             }
         else
-            assert(M_operator[0]->SetUseTranspose(!M_operator[0]->UseTranspose())!=-1);
-        M_operator[(int)(size/2)]->SetUseTranspose(!M_operator[(int)(size/2)]->UseTranspose());
+        {
+            assert (M_operator[0]->SetUseTranspose (!M_operator[0]->UseTranspose() ) != -1);
+        }
+        M_operator[ (int) (size / 2)]->SetUseTranspose (!M_operator[ (int) (size / 2)]->UseTranspose() );
     }
     return 0;
 }
 
 template <typename operator_Type>
 int ComposedOperator<operator_Type>::
-Apply(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
+Apply (const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
 {
-    return Apply_DirectOperator(X,Y);
+    return Apply_DirectOperator (X, Y);
 
 }
 
 template <typename operator_Type>
 int ComposedOperator<operator_Type>::
-ApplyInverse(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
+ApplyInverse (const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
 {
-    return Apply_InverseOperator(X,Y);
+    return Apply_InverseOperator (X, Y);
 }
 
 template <typename operator_Type>
 double ComposedOperator<operator_Type>::NormInf()  const
 {
-    assert(false);
-    return(EXIT_FAILURE);
+    assert (false);
+    return (EXIT_FAILURE);
 }
 
 template <typename operator_Type>
 double ComposedOperator<operator_Type>::Condest()  const
 {
-    double cond(1);
+    double cond (1);
 
-    for (UInt q(0); q<M_set ; q++) {
+    for (UInt q (0); q < M_set ; q++)
+    {
         if (M_inverse[q])
+        {
             cond = cond /  M_operator[q]->condest();
+        }
         else
+        {
             cond *= M_operator[q]->condest();
+        }
     }
-    return(cond);
+    return (cond);
 }
 
 template <typename operator_Type>
-const char * ComposedOperator<operator_Type>::
+const char* ComposedOperator<operator_Type>::
 Label() const
 {
-    return("Composed operator_Type P1*P2* ... *Pn");
+    return ("Composed operator_Type P1*P2* ... *Pn");
 }
 
 // ===================================================
@@ -524,50 +573,50 @@ Label() const
 template <typename operator_Type>
 bool ComposedOperator<operator_Type>::UseTranspose()  const
 {
-    return(M_allTranspose);
+    return (M_allTranspose);
 }
 
 template <typename operator_Type>
 bool ComposedOperator<operator_Type>::
 HasNormInf() const
 {
-    return(false);
+    return (false);
 }
 
 
 template <typename operator_Type>
-const Epetra_Comm & ComposedOperator<operator_Type>::
+const Epetra_Comm& ComposedOperator<operator_Type>::
 Comm() const
 {
     assert (M_set > 0);
     //cout << "Prec: M_setted = " << M_set << endl;
-    return( *M_displayer.comm());
+    return ( *M_displayer.comm() );
 }
 
 template <typename operator_Type>
 const boost::shared_ptr<Epetra_Comm> ComposedOperator<operator_Type>::
 commPtr() const
 {
-    return( M_displayer.comm());
+    return ( M_displayer.comm() );
 }
 
 
 template <typename operator_Type>
-const Epetra_Map & ComposedOperator<operator_Type>::
+const Epetra_Map& ComposedOperator<operator_Type>::
 OperatorDomainMap() const
 {
     // P = M_operator(0) * ... * M_operator(Qp-1)
     assert (M_set > 0 );
-    return( M_operator[M_set-1]->OperatorDomainMap());
+    return ( M_operator[M_set - 1]->OperatorDomainMap() );
 }
 
 template <typename operator_Type>
-const Epetra_Map & ComposedOperator<operator_Type>::
+const Epetra_Map& ComposedOperator<operator_Type>::
 OperatorRangeMap() const
 {
     // P = M_operator(0) * ... * M_operator(Qp-1)
-    assert(M_set > 0);
-    return( M_operator[0]->OperatorRangeMap() );
+    assert (M_set > 0);
+    return ( M_operator[0]->OperatorRangeMap() );
 
 }
 
@@ -576,10 +625,10 @@ OperatorRangeMap() const
 // ===================================================
 
 template <typename operator_Type> void
-ComposedOperator<operator_Type>::setComm(const boost::shared_ptr<Epetra_Comm> comm)
+ComposedOperator<operator_Type>::setComm (const boost::shared_ptr<Epetra_Comm> comm)
 {
     //this->M_comm=comm;//copy of the communicator
-    M_displayer.setCommunicator(comm);
+    M_displayer.setCommunicator (comm);
 }
 
 // ===================================================
@@ -588,111 +637,121 @@ ComposedOperator<operator_Type>::setComm(const boost::shared_ptr<Epetra_Comm> co
 
 template <typename operator_Type>
 int ComposedOperator<operator_Type>::
-Apply_DirectOperator(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
+Apply_DirectOperator (const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
 {
     assert (M_set > 0 );
 
     bool useTranspose;
-    Epetra_MultiVector Z(X);
+    Epetra_MultiVector Z (X);
 
     // P = M_operator(0) * ... * M_operator(Qp-1)
 
-    ID k=0;
-    for (Int q(M_set-1); q>=0 ; q--)
+    ID k = 0;
+    for (Int q (M_set - 1); q >= 0 ; q--)
     {
-        if(M_summed.size() && q==(Int)M_summed[k])
+        if (M_summed.size() && q == (Int) M_summed[k])
         {
             ++k;
         }
         else
         {
-            if (M_inverse[q]) {
+            if (M_inverse[q])
+            {
                 useTranspose = M_operator[q]->UseTranspose (); // storing original status
-                assert (M_operator[q]->SetUseTranspose(M_transpose[q]) != -1);
-                M_operator[q]->ApplyInverse(Z,Y);
-                M_operator[q]->SetUseTranspose(useTranspose); // put back to original status
-            } else {
+                assert (M_operator[q]->SetUseTranspose (M_transpose[q]) != -1);
+                M_operator[q]->ApplyInverse (Z, Y);
+                M_operator[q]->SetUseTranspose (useTranspose); // put back to original status
+            }
+            else
+            {
                 useTranspose = M_operator[q]->UseTranspose (); // storing original status
-                assert (M_operator[q]->SetUseTranspose(M_transpose[q]) != -1);
-                M_operator[q]->Apply(Z,Y);
-                M_operator[q]->SetUseTranspose(useTranspose); // put back to original status
+                assert (M_operator[q]->SetUseTranspose (M_transpose[q]) != -1);
+                M_operator[q]->Apply (Z, Y);
+                M_operator[q]->SetUseTranspose (useTranspose); // put back to original status
             }
             Z = Y;
         }
     }
 
-    for(UInt k=0; k<M_summed.size(); ++k)
+    for (UInt k = 0; k < M_summed.size(); ++k)
     {
-        if(M_inverse[M_summed[k]])
-            M_operator[M_summed[k]]->ApplyInverse(X,Y);
+        if (M_inverse[M_summed[k]])
+        {
+            M_operator[M_summed[k]]->ApplyInverse (X, Y);
+        }
         else
-            M_operator[M_summed[k]]->Apply(X,Y);
-        Z.Update(1., Y, 1.);
+        {
+            M_operator[M_summed[k]]->Apply (X, Y);
+        }
+        Z.Update (1., Y, 1.);
     }
 
-    Y=Z;
-    return(EXIT_SUCCESS);
+    Y = Z;
+    return (EXIT_SUCCESS);
 
 }
 
 template <typename operator_Type>
 int ComposedOperator<operator_Type>::
-Apply_InverseOperator(const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
+Apply_InverseOperator (const Epetra_MultiVector& X, Epetra_MultiVector& Y) const
 {
     assert (M_set > 0);
 
     // P = M_operator(0) * ... * M_operator(Qp-1)
 
     bool useTranspose;
-    Epetra_MultiVector Z(X);
-    ID k=0;
+    Epetra_MultiVector Z (X);
+    ID k = 0;
 
-    for (UInt q(0); q<M_set ; q++, Z = Y)
+    for (UInt q (0); q < M_set ; q++, Z = Y)
     {
-        if(M_summed.size() && q==M_summed[k])
+        if (M_summed.size() && q == M_summed[k])
         {
             ++k;
         }
         else
         {
-            if (M_inverse[q]) {
+            if (M_inverse[q])
+            {
                 useTranspose = M_operator[q]->UseTranspose (); // storing original status
-                ASSERT (M_operator[q]->SetUseTranspose(M_transpose[q]) != -1, "SetUseTranspose failed in the preconditioner of your choice");
-                M_operator[q]->Apply(Z,Y);//y+=Pi*z
-                M_operator[q]->SetUseTranspose(useTranspose); // put back to original status
-            } else {
+                ASSERT (M_operator[q]->SetUseTranspose (M_transpose[q]) != -1, "SetUseTranspose failed in the preconditioner of your choice");
+                M_operator[q]->Apply (Z, Y); //y+=Pi*z
+                M_operator[q]->SetUseTranspose (useTranspose); // put back to original status
+            }
+            else
+            {
                 useTranspose = M_operator[q]->UseTranspose (); // storing original status
                 //ifdef DEBUG
-                ASSERT(!M_transpose[q] || M_operator[q]->SetUseTranspose(M_transpose[q]) == -1, "Something went wrong in SetUseTranspose for your preconditioner.\n");
+                ASSERT (!M_transpose[q] || M_operator[q]->SetUseTranspose (M_transpose[q]) == -1, "Something went wrong in SetUseTranspose for your preconditioner.\n");
                 //#endif
-                M_operator[q]->ApplyInverse(Z,Y);//y+=Pi^(-1)*z
-                M_operator[q]->SetUseTranspose(useTranspose); // put back to original status
+                M_operator[q]->ApplyInverse (Z, Y); //y+=Pi^(-1)*z
+                M_operator[q]->SetUseTranspose (useTranspose); // put back to original status
             }
-            Z=Y;
+            Z = Y;
         }
     }
-    Y.Scale(0.);
-    for(UInt k=0; k<M_summed.size(); ++k)
+    Y.Scale (0.);
+    for (UInt k = 0; k < M_summed.size(); ++k)
     {
-        if(M_inverse[M_summed[k]])
+        if (M_inverse[M_summed[k]])
         {
             useTranspose = M_operator[M_summed[k]]->UseTranspose (); // storing original status
-            assert (M_operator[M_summed[k]]->SetUseTranspose(M_transpose[M_summed[k]]) != -1);
-            M_operator[M_summed[k]]->Apply(X,Y);
-            M_operator[M_summed[k]]->SetUseTranspose(useTranspose); // put back to original status
+            assert (M_operator[M_summed[k]]->SetUseTranspose (M_transpose[M_summed[k]]) != -1);
+            M_operator[M_summed[k]]->Apply (X, Y);
+            M_operator[M_summed[k]]->SetUseTranspose (useTranspose); // put back to original status
         }
         else
         {
             useTranspose = M_operator[M_summed[k]]->UseTranspose (); // storing original status
-            assert (M_operator[M_summed[k]]->SetUseTranspose(M_transpose[M_summed[k]]) != -1);
-            M_operator[M_summed[k]]->ApplyInverse(X,Y);
-            M_operator[M_summed[k]]->SetUseTranspose(useTranspose); // put back to original status
+            assert (M_operator[M_summed[k]]->SetUseTranspose (M_transpose[M_summed[k]]) != -1);
+            M_operator[M_summed[k]]->ApplyInverse (X, Y);
+            M_operator[M_summed[k]]->SetUseTranspose (useTranspose); // put back to original status
         }
-        Z.Update(1., Y, 1.);
+        Z.Update (1., Y, 1.);
     }
 
-    Y=Z;
-    return(EXIT_SUCCESS);
+    Y = Z;
+    return (EXIT_SUCCESS);
 }
 
 } // namespace LifeV

@@ -120,6 +120,13 @@
 #define LIFEV_DEPRECATED( func ) func
 #endif
 
+// macro to avoid warning in opt mode for variables that are only needed for
+// dbg mode
+// note: these problems arise when there is no clear separation between a
+// function that does some work and return some state, so it should be
+// avoided as much as possible.
+#define LIFEV_UNUSED(x) ((void)x)
+
 #include <lifev/core/util/LifeAssert.hpp>
 
 namespace LifeV
@@ -203,45 +210,45 @@ namespace Flag
  */
 //@{
 //! It returns true if all bit-flags common set in refFlag are also set in inputFlag
-inline bool testAllSet ( flag_Type const & inputFlag, flag_Type const & refFlag )
+inline bool testAllSet ( flag_Type const& inputFlag, flag_Type const& refFlag )
 {
     return ( inputFlag  & refFlag ) == refFlag;
 }
 
 //! returns true if at least one flag set in refFlag is set in inputFlag
-inline bool testOneSet ( flag_Type const & inputFlag, flag_Type const & refFlag )
+inline bool testOneSet ( flag_Type const& inputFlag, flag_Type const& refFlag )
 {
     return inputFlag  & refFlag;
 }
 
 //! turns on the refFlag active bits in inputFlag
-inline flag_Type turnOn  ( flag_Type const & inputFlag, flag_Type const & refFlag )
+inline flag_Type turnOn  ( flag_Type const& inputFlag, flag_Type const& refFlag )
 {
     return inputFlag  | refFlag;
 }
 
 //! turns off the refFlag active bits in inputFlag
-inline flag_Type turnOff ( flag_Type const & inputFlag, flag_Type const & refFlag )
+inline flag_Type turnOff ( flag_Type const& inputFlag, flag_Type const& refFlag )
 {
     return inputFlag  & ~refFlag;
 }
 
 //! switches the refFlag active bits in inputFlag
-inline flag_Type change ( flag_Type const & inputFlag, flag_Type const & refFlag )
+inline flag_Type change ( flag_Type const& inputFlag, flag_Type const& refFlag )
 {
     return inputFlag  ^ refFlag;
 }
 
 //! replaces the given flag with the reference one. This method is introduced with the same
 //! signature of the other methods in order to be used as a policy
-inline flag_Type replaceFlag  ( flag_Type const & /*inputFlag*/, flag_Type const & refFlag )
+inline flag_Type replaceFlag  ( flag_Type const& /*inputFlag*/, flag_Type const& refFlag )
 {
     return refFlag;
 }
 
 //! showMe method to print out flag status
 //! the flag is converted to its binary form ( right -> left corresponds to first -> last flag )
-void showMe ( flag_Type const & flag, std::ostream & out = std::cout );
+void showMe ( flag_Type const& flag, std::ostream& out = std::cout );
 //@}
 
 //end namespace Flag
@@ -261,9 +268,10 @@ const ID NotAnId = std::numeric_limits<Int>::max();
  * Useful when memory is an issue, since clear() does not free memory
  * */
 template<typename T>
-void clearVector(T & stdVector){
+void clearVector (T& stdVector)
+{
     stdVector.clear();
-    T().swap(stdVector);
+    T().swap (stdVector);
 }
 //! resizeVector
 /*!
@@ -272,9 +280,13 @@ void clearVector(T & stdVector){
  * Useful when memory is an issue, since resize() does not free memory
  */
 template<typename T>
-void resizeVector(T & stdVector, UInt const & newsize){
-    stdVector.resize(newsize);
-    if (stdVector.capacity() > stdVector.size())  T(stdVector).swap(stdVector);
+void resizeVector (T& stdVector, UInt const& newsize)
+{
+    stdVector.resize (newsize);
+    if (stdVector.capacity() > stdVector.size() )
+    {
+        T (stdVector).swap (stdVector);
+    }
 }
 
 } // end namespace LifeV

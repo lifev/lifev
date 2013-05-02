@@ -109,13 +109,13 @@ public:
     /*!
      * @param string expression to parse
      */
-    explicit Parser( const std::string& string );
+    explicit Parser ( const std::string& string );
 
     //! Copy constructor
     /*!
      * @param parser Parser
      */
-    explicit Parser( const Parser& parser );
+    explicit Parser ( const Parser& parser );
 
     //! Destructor
     virtual ~Parser() {}
@@ -133,7 +133,7 @@ public:
      * @param parser Parser
      * @return reference to a copy of the class
      */
-    Parser& operator=( const Parser& parser );
+    Parser& operator= ( const Parser& parser );
 
     //@}
 
@@ -146,14 +146,14 @@ public:
      * @param id expression index (starting from 0)
      * @return computed value
      */
-    const Real& evaluate( const ID& id = 0 );
+    const Real& evaluate ( const ID& id = 0 );
 
     //! Count how many substrings are present in the string (utility for BCInterfaceFunctionParser)
     /*!
      * @param substring string to find
      * @return number of substring
      */
-    UInt countSubstring( const std::string& substring ) const;
+    UInt countSubstring ( const std::string& substring ) const;
 
     //! Clear all the variables.
     void clearVariables();
@@ -169,14 +169,14 @@ public:
      * @param string Expression to evaluate
      * @param stringSeparator Separator identifier (default -> ";")
      */
-    void setString( const std::string& string, const std::string& stringSeparator = ";" );
+    void setString ( const std::string& string, const std::string& stringSeparator = ";" );
 
     //! Set/replace a variable
     /*!
      * @param name name of the parameter
      * @param value value of the parameter
      */
-    void setVariable( const std::string& name, const Real& value );
+    void setVariable ( const std::string& name, const Real& value );
 
     //@}
 
@@ -189,7 +189,7 @@ public:
      * @param name name of the parameter
      * @return value of the variable
      */
-    const Real& variable( const std::string& name );
+    const Real& variable ( const std::string& name );
 
     //@}
 

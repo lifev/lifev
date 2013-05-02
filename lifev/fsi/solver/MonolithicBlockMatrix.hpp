@@ -36,6 +36,7 @@
 #ifndef BLOCKMATRIX_H
 #define BLOCKMATRIX_H 1
 
+#include <boost/scoped_ptr.hpp>
 #include <lifev/fsi/solver/MonolithicBlock.hpp>
 
 namespace LifeV
@@ -73,14 +74,14 @@ public:
     //! @name Constructor & Destructor
     //@{
 
-    MonolithicBlockMatrix(UInt coupling):
-            super_Type(),
-            M_globalMatrix(),
-            M_coupling(),
-            M_interfaceMap(),
-            M_interface(0),
-            M_couplingFlag(coupling),
-            M_numerationInterface()
+    MonolithicBlockMatrix (const std::vector<Int>& flags/*UInt coupling*/) :
+        super_Type(),
+        M_globalMatrix(),
+        M_coupling(),
+        M_interfaceMap(),
+        M_interface (0),
+        M_couplingFlags (new std::vector<Int> (flags) ),
+        M_numerationInterface()
     {}
 
     ~MonolithicBlockMatrix() {}
@@ -93,7 +94,9 @@ public:
         @param data GetPot object reading the text data file
         @param section string specifying the path in the data file where to find the options for the operator
      */
-    virtual void  setDataFromGetPot( const GetPot& data, const std::string& section);
+    virtual void  setDataFromGetPot ( const GetPot& data, const std::string& section);
+
+    virtual void setupSolver (solver_Type& solver, const GetPot& data);
 
     //! runs GlobalAssemble on the blocks
     /*!
@@ -118,10 +121,12 @@ public:
       the subproblems
       @param numerationInterface vector containing the correspondence of the Lagrange multipliers with the interface dofs
      */
-    virtual void coupler(mapPtr_Type& map,
-                         const std::map<ID, ID>& locDofMap,
-                         const vectorPtr_Type& numerationInterface,
-                         const Real& timeStep);
+    virtual void coupler (mapPtr_Type& map,
+                          const std::map<ID, ID>& locDofMap,
+                          const vectorPtr_Type& numerationInterface,
+                          const Real& timeStep,
+                          const Real& coefficient,
+                          const Real& rescaleFactor);
 
 
     //! Adds a coupling part to the already existing coupling matrix
@@ -138,16 +143,22 @@ public:
       @param  unused flag kept for compliance with the base class
       @param couplingFlag flag specifying which block must be coupled whith which block.
      */
-    void coupler(mapPtr_Type& /*map*/,
-                 const std::map<ID, ID>& locDofMap,
-                 const vectorPtr_Type& numerationInterface,
-                 const Real& timeStep,
-                 UInt couplingFlag);
+    void coupler (mapPtr_Type& /*map*/,
+                  const std::map<ID, ID>& locDofMap,
+                  const vectorPtr_Type& numerationInterface,
+                  const Real& timeStep,
+                  const Real& coefficient,
+                  const Real& rescaleFactor,
+                  UInt couplingBlock
+                 );
 
     //! returns true if the operator has at least one block
     /*!
     */
-    virtual bool  set() {return (bool) super_Type::M_blocks.size();}
+    virtual bool  set()
+    {
+        return (bool) super_Type::M_blocks.size();
+    }
 
     //@}
     //! @name Public methods
@@ -161,7 +172,7 @@ public:
       @param result output result
       @param linearSolver the linear system
     */
-    int   solveSystem( const vector_Type& rhs, vector_Type& step, solverPtr_Type& linearSolver);
+    int   solveSystem ( const vector_Type& rhs, vector_Type& step, solverPtr_Type& linearSolver);
 
 
     //! pushes a block at the end of the vector
@@ -172,7 +183,7 @@ public:
         In this case it is not used since it is equal to the boolean specifying wether the whole preconditioner must be
         recomputed or not.
      */
-    void  push_back_matrix( const matrixPtr_Type& Mat, bool /*recompute*/);
+    void  push_back_matrix ( const matrixPtr_Type& Mat, bool /*recompute*/);
 
     //! replaces a block
     /*!
@@ -180,7 +191,7 @@ public:
         @param Mat block matrix to push
         @param index position in the vector
      */
-    void  replace_matrix( const matrixPtr_Type& Mat, UInt index);
+    void  replace_matrix ( const matrixPtr_Type& Mat, UInt index);
 
 
     //! replaces the coupling matrix without copies
@@ -188,7 +199,7 @@ public:
       this method is deprecated, it is implemented for compatibility with the base class
       \param Mat replacing matrix
      */
-    void replace_coupling( const matrixPtr_Type& /*Mat*/, UInt /*index*/)
+    void replace_coupling ( const matrixPtr_Type& /*Mat*/, UInt /*index*/)
     {
         // not used for matrices (only for preconditioners)
         /*M_coupling = Mat;*/
@@ -198,7 +209,7 @@ public:
     /*!
       runs assert(false) when called. This method is used only when the preconditioner is a composed operator
      */
-    void  replace_precs( const epetraOperatorPtr_Type& Mat, UInt index);
+    void  replace_precs ( const epetraOperatorPtr_Type& Mat, UInt index);
 
     //!sums the coupling matrix in the specified position with the global matrix
     /*!
@@ -209,7 +220,10 @@ public:
     //! returns the global matrix, with all the blocks and the coupling parts
     /*!
     */
-    matrixPtr_Type& matrix( ){return M_globalMatrix;}
+    matrixPtr_Type& matrix( )
+    {
+        return M_globalMatrix;
+    }
 
     //! multiplies the whole system times a matrix
     /*!
@@ -220,7 +234,7 @@ public:
       \param prec preconditioner matrix
       \param rhs right hand side of the system
     */
-    void applyPreconditioner(   matrixPtr_Type robinCoupling, matrixPtr_Type prec, vectorPtr_Type& rhs);
+    void applyPreconditioner (   matrixPtr_Type robinCoupling, matrixPtr_Type prec, vectorPtr_Type& rhs);
 
     //! multiplies two matrices
     /*!
@@ -228,7 +242,7 @@ public:
       \param robinCoupling the matrix that multiplies
       \param prec the matrix multiplied (modified)
      */
-    void applyPreconditioner( const matrixPtr_Type robinCoupling, matrixPtr_Type& prec );
+    void applyPreconditioner ( const matrixPtr_Type robinCoupling, matrixPtr_Type& prec );
 
 
     //! applies a matrix to the system
@@ -237,7 +251,7 @@ public:
       \param matrix the preconditioning matrix
       \param rhsFull the right hand side of the system
      */
-    void applyPreconditioner( const matrixPtr_Type matrix, vectorPtr_Type& rhsFull);
+    void applyPreconditioner ( const matrixPtr_Type matrix, vectorPtr_Type& rhsFull);
 
     //!creates the map for the coupling
     /*!
@@ -253,30 +267,30 @@ public:
       interfaceNodes)
       \param epetraWorldComm: The communicator
      */
-    void createInterfaceMap( const MapEpetra& interfaceMap,
-                             const std::map<ID, ID>& locDofMap,
-                             const UInt subdomainMaxId,
-                             const boost::shared_ptr<Epetra_Comm> epetraWorldComm );
+    void createInterfaceMap ( const MapEpetra& interfaceMap,
+                              const std::map<ID, ID>& locDofMap,
+                              const UInt subdomainMaxId,
+                              const boost::shared_ptr<Epetra_Comm> epetraWorldComm );
 
 
     //! applies the b.c. to every block
-    void applyBoundaryConditions(const Real& time);
+    void applyBoundaryConditions (const Real& time);
 
     //! applies the b.c. to a specific block
-    void applyBoundaryConditions(const Real& time, const UInt block );
+    void applyBoundaryConditions (const Real& time, const UInt block );
 
     //! applies all the b.c.s to the global matrix, updates the rhs
-    void applyBoundaryConditions(const Real& time, vectorPtr_Type& rhs);
+    void applyBoundaryConditions (const Real& time, vectorPtr_Type& rhs);
 
     //! applies the b.c. to the a specific block, updates the rhs
-    void applyBoundaryConditions(const Real& time, vectorPtr_Type& rhs, const UInt block);
+    void applyBoundaryConditions (const Real& time, vectorPtr_Type& rhs, const UInt block);
 
     //! adds a block to the coupling matrix
     /*!
       @param Mat: block added
       @param position of the block, unused here because there is only one coupling matrix
      */
-    void addToCoupling( const matrixPtr_Type& Mat, UInt /*position*/);
+    void addToCoupling ( const matrixPtr_Type& Mat, UInt /*position*/);
 
 
     //!
@@ -286,7 +300,7 @@ public:
         @param row row for the insertion
         @param col colon for the insertion
      */
-    void addToCoupling( const Real& entry , UInt row, UInt col, UInt position );
+    void addToCoupling ( const Real& entry , UInt row, UInt col, UInt position );
 
     //! adds a block to the coupling matrix
     /*!
@@ -294,22 +308,29 @@ public:
       to the global matrix
       @param Mat: block matrix to be added.
      */
-    void addToGlobalMatrix( const matrixPtr_Type& Mat)
+    void addToGlobalMatrix ( const matrixPtr_Type& Mat)
     {
-        matrixPtr_Type tmp(new matrix_Type(M_globalMatrix->map()));
-        *tmp += *M_globalMatrix;
-        *tmp += *Mat;
-        tmp->globalAssemble();
-        M_globalMatrix = tmp;
+        if (M_globalMatrix->matrixPtr()->Filled() )
+        {
+            matrixPtr_Type tmp (new matrix_Type (M_globalMatrix->map() ) );
+            *tmp += *M_globalMatrix;
+            *tmp += *Mat;
+            tmp->globalAssemble();
+            M_globalMatrix = tmp;
+        }
+        else
+        {
+            *M_globalMatrix += *Mat;
+        }
     }
 
     //! adds a coupling block to the coupling matrix
     /*!
       This method is kept for compatibility with the base class. It calls the method addToCoupling.
      */
-    void push_back_coupling( matrixPtr_Type& coupling)
+    void push_back_coupling ( matrixPtr_Type& coupling)
     {
-        addToCoupling(coupling, 0);
+        addToCoupling (coupling, 0);
     }
     //@}
 
@@ -319,16 +340,35 @@ public:
     /*!
       NOTE: it has to be multiplied times nDimensions to get the number of interface dofs
      */
-    UInt interface(){return M_interface;}
+    UInt interface()
+    {
+        return M_interface;
+    }
 
     //! returns the map built for theLagrange multipliers
-    mapPtr_Type interfaceMap() const { return M_interfaceMap; }
+    mapPtr_Type interfaceMap() const
+    {
+        return M_interfaceMap;
+    }
+
+    matrixPtr_Type coupling() const
+    {
+        return M_coupling;
+    }
 
     //! returns the numeration of the interface
     /*!
       \param numeration: output vector
      */
-    void numerationInterface( vectorPtr_Type& numeration ) { numeration =  M_numerationInterface; }
+    void numerationInterface ( vectorPtr_Type& numeration )
+    {
+        numeration =  M_numerationInterface;
+    }
+
+    const UInt whereIsBlock ( UInt /*position*/ ) const
+    {
+        return 0;
+    }
 
     //@}
 
@@ -336,7 +376,9 @@ public:
     //@{
     static MonolithicBlockMatrix*    createAdditiveSchwarz()
     {
-        return new MonolithicBlockMatrix(15);
+        const Int couplings[] = { 15, 0, 16 };//to modify (15 to 7, for DN, or 14, for DN2) to neglect the coupling (and solve Navier--Stokes)
+        const std::vector<Int> couplingVector (couplings, couplings + 3);
+        return new MonolithicBlockMatrix (couplingVector);
     }
 
     //@}
@@ -348,7 +390,7 @@ protected:
     //@{
     matrixPtr_Type                              M_globalMatrix;
     matrixPtr_Type                              M_coupling;
-    mapPtr_Type                          M_interfaceMap;
+    mapPtr_Type                                 M_interfaceMap;
     UInt                                        M_interface;
     //@}
 
@@ -356,7 +398,7 @@ private:
 
     //! @name Private Members
     //@{
-    const UInt                                  M_couplingFlag;
+    boost::scoped_ptr<std::vector<Int> >        M_couplingFlags;
     vectorPtr_Type                              M_numerationInterface;
     //@}
 };

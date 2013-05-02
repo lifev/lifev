@@ -38,19 +38,15 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <lifev/core/LifeV.hpp>
 
-#include <iostream>
-#include <string>
-
-#include "Epetra_config.h"
-
-#ifdef HAVE_HDF5
-#ifdef HAVE_MPI
+#ifdef LIFEV_HAS_HDF5
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-#include <mpi.h>
+#include "Epetra_config.h"
+
+#ifdef HAVE_MPI
 
 #include <Epetra_MpiComm.h>
 
@@ -66,46 +62,47 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 using namespace LifeV;
 
 #endif /* HAVE_MPI */
-#endif /* HAVE_HDF5 */
+#endif /* LIFEV_HAS_HDF5 */
 
-int main(int argc, char** argv)
+int main (int argc, char** argv)
 {
-#ifdef HAVE_HDF5
+#ifdef LIFEV_HAS_HDF5
 #ifdef HAVE_MPI
 
-	typedef RegionMesh<LinearTetra> mesh_Type;
+    typedef RegionMesh<LinearTetra> mesh_Type;
 
-    MPI_Init(&argc, &argv);
-    boost::shared_ptr<Epetra_Comm> comm(new Epetra_MpiComm(MPI_COMM_WORLD));
+    MPI_Init (&argc, &argv);
+    boost::shared_ptr<Epetra_Comm> comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
 
-    if (comm->NumProc() != 1) {
-    	std::cout << "This test needs to be run "
-    			  << "with a single process. Aborting."
-    			  << std::endl;
-    	return(EXIT_FAILURE);
+    if (comm->NumProc() != 1)
+    {
+        std::cout << "This test needs to be run "
+                  << "with a single process. Aborting."
+                  << std::endl;
+        return (EXIT_FAILURE);
     }
 
-    GetPot commandLine(argc, argv);
-    string dataFileName = commandLine.follow("data", 2, "-f", "--file");
-    GetPot dataFile(dataFileName);
+    GetPot commandLine (argc, argv);
+    string dataFileName = commandLine.follow ("data", 2, "-f", "--file");
+    GetPot dataFile (dataFileName);
 
-    const UInt numElements(dataFile("mesh/nelements",10));
-    const UInt numParts(dataFile("test/num_parts", 4));
-    const std::string partsFileName(dataFile("test/hdf5_file_name", "cube.h5"));
-    const std::string ioClass(dataFile("test/io_class", "new"));
+    const UInt numElements (dataFile ("mesh/nelements", 10) );
+    const UInt numParts (dataFile ("test/num_parts", 4) );
+    const std::string partsFileName (dataFile ("test/hdf5_file_name", "cube.h5") );
+    const std::string ioClass (dataFile ("test/io_class", "new") );
 
     std::cout << "Number of elements in mesh: " << numElements << std::endl;
     std::cout << "Number of parts: " << numParts << std::endl;
     std::cout << "Name of HDF5 container: " << partsFileName << std::endl;
 
-	boost::shared_ptr<mesh_Type> fullMeshPtr(new mesh_Type);
-	regularMesh3D(*fullMeshPtr, 1, numElements, numElements, numElements,
-				  false, 2.0, 2.0, 2.0, -1.0, -1.0, -1.0);
+    boost::shared_ptr<mesh_Type> fullMeshPtr (new mesh_Type ( comm ) );
+    regularMesh3D (*fullMeshPtr, 1, numElements, numElements, numElements,
+                   false, 2.0, 2.0, 2.0, -1.0, -1.0, -1.0);
 
     MeshPartitioner<mesh_Type> meshPart;
-    meshPart.setup(numParts, comm);
+    meshPart.setup (numParts, comm);
 
-    meshPart.attachUnpartitionedMesh(fullMeshPtr);
+    meshPart.attachUnpartitionedMesh (fullMeshPtr);
     meshPart.doPartitionGraph();
     meshPart.doPartitionMesh();
 
@@ -115,30 +112,35 @@ int main(int argc, char** argv)
     fullMeshPtr.reset();
 
     // Write mesh parts to HDF5 container
-    if (! ioClass.compare("old")) {
-        ExporterHDF5Mesh3D<mesh_Type> HDF5Output(dataFile,
-        										 meshPart.meshPartition(),
-        										 partsFileName,
-        										 comm->MyPID());
-    	HDF5Output.addPartitionGraph(meshPart.elementDomains(), comm);
-    	HDF5Output.addMeshPartitionAll(meshPart.meshPartitions(), comm);
-    	HDF5Output.postProcess(0);
-    	HDF5Output.closeFile();
-    } else {
-    	PartitionIO<mesh_Type> partitionIO(partsFileName, comm);
-    	partitionIO.write(meshPart.meshPartitions());
+    if (! ioClass.compare ("old") )
+    {
+        ExporterHDF5Mesh3D<mesh_Type> HDF5Output (dataFile,
+                                                  meshPart.meshPartition(),
+                                                  partsFileName,
+                                                  comm->MyPID() );
+        HDF5Output.addPartitionGraph (meshPart.elementDomains(), comm);
+        HDF5Output.addMeshPartitionAll (meshPart.meshPartitions(), comm);
+        HDF5Output.postProcess (0);
+        HDF5Output.closeFile();
+    }
+    else
+    {
+        boost::shared_ptr<Epetra_MpiComm> mpiComm =
+            boost::dynamic_pointer_cast<Epetra_MpiComm> (comm);
+        PartitionIO<mesh_Type> partitionIO (partsFileName, mpiComm);
+        partitionIO.write (meshPart.meshPartitions() );
     }
 
     MPI_Finalize();
 
 #else
     std::cout << "This test needs MPI to run. Aborting." << std::endl;
-	return(EXIT_FAILURE);
+    return (EXIT_FAILURE);
 #endif /* HAVE_MPI */
 #else
     std::cout << "This test needs HDF5 to run. Aborting." << std::endl;
-	return(EXIT_FAILURE);
-#endif /* HAVE_HDF5 */
+    return (EXIT_FAILURE);
+#endif /* LIFEV_HAS_HDF5 */
 
-    return(EXIT_SUCCESS);
+    return (EXIT_SUCCESS);
 }

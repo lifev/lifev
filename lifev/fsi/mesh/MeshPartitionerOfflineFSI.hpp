@@ -129,24 +129,24 @@ public:
       @param solidPartitionNumber Int
       @param velocityOrder std::string
       @param displacementOrder std::string
-      @param fluidInterfaceFlag LifeV::EntityFlagStandardPolicy::markerID_Type (Int)
-      @param solidInterfaceFlag LifeV::EntityFlagStandardPolicy::markerID_Type (Int)
+      @param fluidInterfaceFlag LifeV::MarkerIDStandardPolicy::markerID_Type (Int)
+      @param solidInterfaceFlag LifeV::MarkerIDStandardPolicy::markerID_Type (Int)
       @param interfaceTolerance Real
       @param fluidInterfaceVertexFlag Int
       @param comm boost::shared_ptr to a Epetra_Comm object
     */
-    void setup(const uncutMeshPtr_Type& uncutFluidMesh,
-               const uncutMeshPtr_Type& uncutSolidMesh,
-               const Int& fluidPartitionNumber,
-               const Int& solidPartitionNumber,
-               const std::string& velocityOrder,
-               const std::string& displacementOrder,
-               const markerID_Type& fluidInterfaceFlag,
-               const markerID_Type& solidInterfaceFlag,
-               const Real& interfaceTolerance,
-               const Int& fluidInterfaceVertexFlag,
-               const Int& solidInterfaceVertexFlag,
-               const commPtr_Type& comm);
+    void setup (const uncutMeshPtr_Type& uncutFluidMesh,
+                const uncutMeshPtr_Type& uncutSolidMesh,
+                const Int& fluidPartitionNumber,
+                const Int& solidPartitionNumber,
+                const std::string& velocityOrder,
+                const std::string& displacementOrder,
+                const markerID_Type& fluidInterfaceFlag,
+                const markerID_Type& solidInterfaceFlag,
+                const Real& interfaceTolerance,
+                const Int& fluidInterfaceVertexFlag,
+                const Int& solidInterfaceVertexFlag,
+                const commPtr_Type& comm);
 
     //! Execute the partitioning and create the interface map
     /*!
@@ -160,7 +160,7 @@ public:
       Displays the current value of the data members.
       @param output std::ostream - stream used for output
     */
-    void showMe(std::ostream& output = std::cout) const;
+    void showMe (std::ostream& output = std::cout) const;
 
     //@}
 
@@ -225,8 +225,8 @@ private:
     // because there is no need for such operations in this case.
     // As a safety measure, there are no definitions for these
     // functions, so any attempts to use them result in link errors.
-    MeshPartitionerOfflineFSI(const MeshPartitionerOfflineFSI&);
-    MeshPartitionerOfflineFSI& operator=(const MeshPartitionerOfflineFSI&);
+    MeshPartitionerOfflineFSI (const MeshPartitionerOfflineFSI&);
+    MeshPartitionerOfflineFSI& operator= (const MeshPartitionerOfflineFSI&);
 
     //! @name Private Methods
     //@{
@@ -297,18 +297,18 @@ private:
 // ===============================
 
 template<typename MeshType>
-void MeshPartitionerOfflineFSI<MeshType>::setup(const uncutMeshPtr_Type& uncutFluidMesh,
-                                            const uncutMeshPtr_Type& uncutSolidMesh,
-                                            const Int& fluidPartitionNumber,
-                                            const Int& solidPartitionNumber,
-                                            const std::string& velocityOrder,
-                                            const std::string& displacementOrder,
-                                            const markerID_Type& fluidInterfaceFlag,
-                                            const markerID_Type& solidInterfaceFlag,
-                                            const Real& interfaceTolerance,
-                                            const Int& fluidInterfaceVertexFlag,
-                                            const Int& solidInterfaceVertexFlag,
-                                            const commPtr_Type& comm)
+void MeshPartitionerOfflineFSI<MeshType>::setup (const uncutMeshPtr_Type& uncutFluidMesh,
+                                                 const uncutMeshPtr_Type& uncutSolidMesh,
+                                                 const Int& fluidPartitionNumber,
+                                                 const Int& solidPartitionNumber,
+                                                 const std::string& velocityOrder,
+                                                 const std::string& displacementOrder,
+                                                 const markerID_Type& fluidInterfaceFlag,
+                                                 const markerID_Type& solidInterfaceFlag,
+                                                 const Real& interfaceTolerance,
+                                                 const Int& fluidInterfaceVertexFlag,
+                                                 const Int& solidInterfaceVertexFlag,
+                                                 const commPtr_Type& comm)
 {
     M_comm = comm;
 
@@ -327,29 +327,29 @@ void MeshPartitionerOfflineFSI<MeshType>::setup(const uncutMeshPtr_Type& uncutFl
 
         if (fluidInterfaceVertexFlag > 0)
         {
-            M_fluidInterfaceVertexFlag.reset(new const Int(fluidInterfaceVertexFlag));
+            M_fluidInterfaceVertexFlag.reset (new const Int (fluidInterfaceVertexFlag) );
         }
         if (solidInterfaceVertexFlag > 0)
         {
-            M_solidInterfaceVertexFlag.reset(new const Int(solidInterfaceVertexFlag));
+            M_solidInterfaceVertexFlag.reset (new const Int (solidInterfaceVertexFlag) );
         }
 
         M_uncutFluidMesh = uncutFluidMesh;
         M_uncutSolidMesh = uncutSolidMesh;
 
         // Allocate and configure the mesh cutters
-        M_fluidMeshCutter.reset(new meshCutter_Type);
-        M_fluidMeshCutter->setup(M_fluidPartitionNumber, M_comm);
-        M_fluidMeshCutter->attachUnpartitionedMesh(M_uncutFluidMesh);
+        M_fluidMeshCutter.reset (new meshCutter_Type);
+        M_fluidMeshCutter->setup (M_fluidPartitionNumber, M_comm);
+        M_fluidMeshCutter->attachUnpartitionedMesh (M_uncutFluidMesh);
 
-        M_solidMeshCutter.reset(new meshCutter_Type);
-        M_solidMeshCutter->setup(M_solidPartitionNumber, M_comm);
-        M_solidMeshCutter->attachUnpartitionedMesh(M_uncutSolidMesh);
+        M_solidMeshCutter.reset (new meshCutter_Type);
+        M_solidMeshCutter->setup (M_solidPartitionNumber, M_comm);
+        M_solidMeshCutter->attachUnpartitionedMesh (M_uncutSolidMesh);
     }
     else
     {
-        ERROR_MSG("Offline FSI partitioning is designed to run"
-                  " with a single process.");
+        ERROR_MSG ("Offline FSI partitioning is designed to run"
+                   " with a single process.");
     }
 }
 
@@ -367,7 +367,7 @@ void MeshPartitionerOfflineFSI<MeshType>::execute()
 }
 
 template<typename MeshType>
-void MeshPartitionerOfflineFSI<MeshType>::showMe(std::ostream& output) const
+void MeshPartitionerOfflineFSI<MeshType>::showMe (std::ostream& output) const
 {
     output << std::endl;
     output << "=======================================" << std::endl;
@@ -388,12 +388,12 @@ void MeshPartitionerOfflineFSI<MeshType>::showMe(std::ostream& output) const
            << std::endl;
     output << "Interface tolerance: " << M_interfaceTolerance
            << std::endl;
-    if (M_fluidInterfaceVertexFlag.get())
+    if (M_fluidInterfaceVertexFlag.get() )
     {
         output << "Fluid interface vertex flag: " << *M_fluidInterfaceVertexFlag
                << std::endl;
     }
-    if (M_solidInterfaceVertexFlag.get())
+    if (M_solidInterfaceVertexFlag.get() )
     {
         output << "Solid interface vertex flag: " << *M_solidInterfaceVertexFlag
                << std::endl;
@@ -428,15 +428,15 @@ template<typename MeshType>
 void MeshPartitionerOfflineFSI<MeshType>::createSpaces()
 {
     // Set the appropriate reference elements and quad rules
-    const ReferenceFE*    refFE_vel(0);
-    const QuadratureRule* qR_vel(0);
-    const QuadratureRule* bdQr_vel(0);
+    const ReferenceFE*    refFE_vel (0);
+    const QuadratureRule* qR_vel (0);
+    const QuadratureRule* bdQr_vel (0);
 
-    const ReferenceFE*    refFE_disp(0);
-    const QuadratureRule* qR_disp(0);
-    const QuadratureRule* bdQr_disp(0);
+    const ReferenceFE*    refFE_disp (0);
+    const QuadratureRule* qR_disp (0);
+    const QuadratureRule* bdQr_disp (0);
 
-    if ( M_velocityOrder.compare("P2") == 0 )
+    if ( M_velocityOrder.compare ("P2") == 0 )
     {
         refFE_vel = &feTetraP2;
         qR_vel    = &quadRuleTetra15pt;
@@ -444,7 +444,7 @@ void MeshPartitionerOfflineFSI<MeshType>::createSpaces()
     }
     else
     {
-        if ( M_velocityOrder.compare("P1") == 0 )
+        if ( M_velocityOrder.compare ("P1") == 0 )
         {
             refFE_vel = &feTetraP1;
             qR_vel    = &quadRuleTetra4pt;
@@ -452,7 +452,7 @@ void MeshPartitionerOfflineFSI<MeshType>::createSpaces()
         }
         else
         {
-            if ( M_velocityOrder.compare("P1Bubble") == 0 )
+            if ( M_velocityOrder.compare ("P1Bubble") == 0 )
             {
                 refFE_vel = &feTetraP1bubble;
                 qR_vel    = &quadRuleTetra64pt;
@@ -460,12 +460,12 @@ void MeshPartitionerOfflineFSI<MeshType>::createSpaces()
             }
             else
             {
-                ERROR_MSG(M_velocityOrder + " velocity FE not implemented yet.");
+                ERROR_MSG (M_velocityOrder + " velocity FE not implemented yet.");
             }
         }
     }
 
-    if ( M_displacementOrder.compare("P2") == 0 )
+    if ( M_displacementOrder.compare ("P2") == 0 )
     {
         refFE_disp = &feTetraP2;
         qR_disp    = &quadRuleTetra15pt;
@@ -473,7 +473,7 @@ void MeshPartitionerOfflineFSI<MeshType>::createSpaces()
     }
     else
     {
-        if ( M_displacementOrder.compare("P1") == 0 )
+        if ( M_displacementOrder.compare ("P1") == 0 )
         {
             refFE_disp = &feTetraP1;
             qR_disp    = &quadRuleTetra4pt;
@@ -481,31 +481,31 @@ void MeshPartitionerOfflineFSI<MeshType>::createSpaces()
         }
         else
         {
-            ERROR_MSG(M_displacementOrder + " structure FE not implemented yet.");
+            ERROR_MSG (M_displacementOrder + " structure FE not implemented yet.");
         }
     }
 
     // Create finite element spaces for velocity and displacement
     std::cout << "Creating velocity finite element space... ";
-    M_velocityFESpaces.reset(new feSpaceVector_Type);
-    M_velocityFESpaces->resize(M_fluidPartitionNumber);
+    M_velocityFESpaces.reset (new feSpaceVector_Type);
+    M_velocityFESpaces->resize (M_fluidPartitionNumber);
     for (Int i = 0; i < M_fluidPartitionNumber; ++i)
     {
-        (*M_velocityFESpaces)[i].reset(new feSpace_Type(M_fluidMeshCutter->getPartition(i),
-                                                        *refFE_vel,
-                                                        *qR_vel,
-                                                        *bdQr_vel,
-                                                        3,
-                                                        M_comm));
+        (*M_velocityFESpaces) [i].reset (new feSpace_Type (M_fluidMeshCutter->getPartition (i),
+                                                           *refFE_vel,
+                                                           *qR_vel,
+                                                           *bdQr_vel,
+                                                           3,
+                                                           M_comm) );
     }
     std::cout << "done." << std::endl;
     std::cout << "Creating displacement finite element space... ";
-    M_displacementFESpace.reset(new feSpace_Type(M_uncutSolidMesh,
-                                                 *refFE_disp,
-                                                 *qR_disp,
-                                                 *bdQr_disp,
-                                                 3,
-                                                 M_comm));
+    M_displacementFESpace.reset (new feSpace_Type (M_uncutSolidMesh,
+                                                   *refFE_disp,
+                                                   *qR_disp,
+                                                   *bdQr_disp,
+                                                   3,
+                                                   M_comm) );
     std::cout << "done." << std::endl;
 }
 
@@ -520,21 +520,21 @@ void MeshPartitionerOfflineFSI<MeshType>::mapTheInterface()
     std::cout << "Solid interface flag is: " << M_solidInterfaceFlag << std::endl;
     std::cout << std::endl;
 
-    M_dofStructureToHarmonicExtension.reset(new interfaceVector_Type);
-    M_dofStructureToHarmonicExtension->resize(M_fluidPartitionNumber);
+    M_dofStructureToHarmonicExtension.reset (new interfaceVector_Type);
+    M_dofStructureToHarmonicExtension->resize (M_fluidPartitionNumber);
 
     for (Int i = 0; i < M_fluidPartitionNumber; ++i)
     {
-        interfacePtr_Type& ifPtr = (*M_dofStructureToHarmonicExtension)[i];
-        feSpacePtr_Type& velSpacePtr = (*M_velocityFESpaces)[i];
-        ifPtr.reset(new interface_Type);
-        ifPtr->setup(velSpacePtr->refFE(),
-                     velSpacePtr->dof(),
-                     M_displacementFESpace->refFE(),
-                     M_displacementFESpace->dof());
-        ifPtr->update(*(velSpacePtr->mesh()), M_fluidInterfaceFlag,
-                      *(M_displacementFESpace->mesh()), M_solidInterfaceFlag,
-                      M_interfaceTolerance, M_fluidInterfaceVertexFlag.get());
+        interfacePtr_Type& ifPtr = (*M_dofStructureToHarmonicExtension) [i];
+        feSpacePtr_Type& velSpacePtr = (*M_velocityFESpaces) [i];
+        ifPtr.reset (new interface_Type);
+        ifPtr->setup (velSpacePtr->refFE(),
+                      velSpacePtr->dof(),
+                      M_displacementFESpace->refFE(),
+                      M_displacementFESpace->dof() );
+        ifPtr->update (* (velSpacePtr->mesh() ), M_fluidInterfaceFlag,
+                       * (M_displacementFESpace->mesh() ), M_solidInterfaceFlag,
+                       M_interfaceTolerance, M_fluidInterfaceVertexFlag.get() );
     }
     std::cout << "dofStructureToHarmonicExtension done." << std::endl;
 

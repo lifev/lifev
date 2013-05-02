@@ -50,6 +50,9 @@ INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/cmake/tribits/package_arch/TribitsProject.cm
 # CMake requires this be in the top file and not in an include file :-(
 CMAKE_MINIMUM_REQUIRED(VERSION ${TRIBITS_CMAKE_MINIMUM_REQUIRED})
 
+# Add documentation
+ADD_SUBDIRECTORY(doc)
+
 # Do all of the processing for this Tribits project
 TRIBITS_PROJECT()
 
@@ -75,9 +78,6 @@ if (HDF5_IS_IN_TRILINOS AND NOT EpetraExt_FOUND)
     set(H5_USE_16_API 1)
   endif()
 endif()
-
-# Add documentation
-ADD_SUBDIRECTORY(doc)
 
 # Adding a new CMake variable for each of the enabled packages
 STRING(REPLACE " " ";" PACKAGE_LIST ${LifeV_ENABLED_PACKAGES})

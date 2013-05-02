@@ -138,10 +138,11 @@
         </tr>
     </table>
     where N is the number of subdivisions for each boundary.
+    @image html darcy/2d.png "Example of the solution with N = 10."
 */
 class darcy_nonlinear
-//     :
-//     public LifeV::Application
+    //     :
+    //     public LifeV::Application
 {
 public:
 

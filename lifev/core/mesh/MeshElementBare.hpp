@@ -153,14 +153,14 @@ struct BareVertex
     //! @name Constructor & Destructor
     //@{
     //! Empty Constructor
-    BareVertex() : first( NotAnId )
+    BareVertex() : first ( NotAnId )
     {}
     ;
     //! Constructor that takes the ID's as parameter
     /*!
         @param i ID of the point
      */
-    BareVertex( ID i ) : first( i )
+    BareVertex ( ID i ) : first ( i )
     {}
     ;
     //@}
@@ -178,7 +178,7 @@ struct BareEdge
     //! @name Constructor & Destructor
     //@{
     //! Empty Constructor
-    BareEdge() : first( NotAnId ), second( NotAnId )
+    BareEdge() : first ( NotAnId ), second ( NotAnId )
     {}
     ;
     //! Constructor that takes the ID's as parameter
@@ -186,7 +186,7 @@ struct BareEdge
         @param i ID of the first node of the edge
         @param j ID of the second node of the edge
      */
-    BareEdge( ID i, ID j ) : first( i ), second( j )
+    BareEdge ( ID i, ID j ) : first ( i ), second ( j )
     {}
     ;
     //@}
@@ -205,7 +205,7 @@ struct BareFace
     //! @name Constructor & Destructor
     //@{
     //! Empty Constructor
-    BareFace() : first( NotAnId ), second( NotAnId ), third( NotAnId )
+    BareFace() : first ( NotAnId ), second ( NotAnId ), third ( NotAnId )
     {}
     ;
     //! Constructor that takes the ID's as parameter
@@ -216,7 +216,7 @@ struct BareFace
      */
     /// LF TO BE CHANGED. THIS CONSTRUCTOR MAY MAKE COMPARISON OPERATOR USELESS
     //!
-    BareFace( ID i, ID j, ID k ) : first( i ), second( j ), third( k )
+    BareFace ( ID i, ID j, ID k ) : first ( i ), second ( j ), third ( k )
     {}
     ;
     //! Constructor that takes a BareEdge object and an ID. The face is then identified by the ID
@@ -226,7 +226,7 @@ struct BareFace
         @param id of the edgedefining the face
 
      */
-    BareFace( ID id, const BareEdge & edge ) : first( id ), second( edge.first ), third( edge.second )
+    BareFace ( ID id, const BareEdge& edge ) : first ( id ), second ( edge.first ), third ( edge.second )
     {}
     ;
     ID first;  //!< First ID which defines the BareFace
@@ -251,15 +251,15 @@ struct BareFace
   \pre i and j >=0, i!=j */
 inline
 std::pair<BareEdge, bool>
-makeBareEdge( ID const i, ID const j )
+makeBareEdge ( ID const i, ID const j )
 {
     if ( i < j )
     {
-        return std::make_pair( BareEdge( i, j ), true );
+        return std::make_pair ( BareEdge ( i, j ), true );
     }
     else
     {
-        return std::make_pair( BareEdge( j, i ), false );
+        return std::make_pair ( BareEdge ( j, i ), false );
         ;
     }
 }
@@ -277,7 +277,7 @@ makeBareEdge( ID const i, ID const j )
  */
 inline
 BareEdge
-setBareEdge( ID const i, ID const j )
+setBareEdge ( ID const i, ID const j )
 {
     BareEdge bareEdge;
     bareEdge.first = i < j ? i : j;
@@ -301,9 +301,9 @@ setBareEdge( ID const i, ID const j )
  */
 inline
 BareEdge
-setBareEdgeNo( ID const i, ID const j )
+setBareEdgeNo ( ID const i, ID const j )
 {
-    return BareEdge( i, j );
+    return BareEdge ( i, j );
 }
 
 
@@ -318,7 +318,7 @@ setBareEdgeNo( ID const i, ID const j )
   \pre i, j and k >0. i!=j!=k
 
  */
-std::pair<BareFace, bool> makeBareFace( ID const i, ID const j, ID const k );
+std::pair<BareFace, bool> makeBareFace ( ID const i, ID const j, ID const k );
 
 /*! \ingroup MeshElementBareBuilder
  \brief It creates Bare Face objects from four Point ID's. To be used with Quad faces.
@@ -333,7 +333,7 @@ std::pair<BareFace, bool> makeBareFace( ID const i, ID const j, ID const k );
   sequence. We then proceede as for the triangles.
 
  */
-std::pair<BareFace, bool> makeBareFace( ID const i, ID const j, ID const k, ID const l );
+std::pair<BareFace, bool> makeBareFace ( ID const i, ID const j, ID const k, ID const l );
 
 /*! \defgroup comparison Comparison Operators
   Operators for comparing MeshElementBare
@@ -344,7 +344,7 @@ std::pair<BareFace, bool> makeBareFace( ID const i, ID const j, ID const k, ID c
  */
 inline
 bool
-operator!=( const BareEdge & edge1 , const BareEdge & edge2 )
+operator!= ( const BareEdge& edge1 , const BareEdge& edge2 )
 {
     return edge1.first != edge2.first || edge1.second != edge2.second;
 }
@@ -354,7 +354,7 @@ operator!=( const BareEdge & edge1 , const BareEdge & edge2 )
  */
 inline
 bool
-operator==( const BareEdge & edge1 , const BareEdge & edge2 )
+operator== ( const BareEdge& edge1 , const BareEdge& edge2 )
 {
     return edge1.first == edge2.first && edge1.second == edge2.second;
 }
@@ -364,7 +364,7 @@ operator==( const BareEdge & edge1 , const BareEdge & edge2 )
  */
 inline
 bool
-operator>( const BareEdge & edge1 , const BareEdge & edge2 )
+operator> ( const BareEdge& edge1 , const BareEdge& edge2 )
 {
     return edge2.first > edge1.first || ( edge2.first == edge1.first && edge2.second > edge1.second );
 }
@@ -374,7 +374,7 @@ operator>( const BareEdge & edge1 , const BareEdge & edge2 )
  */
 inline
 bool
-operator>=( const BareEdge & edge1 , const BareEdge & edge2 )
+operator>= ( const BareEdge& edge1 , const BareEdge& edge2 )
 {
     return edge1 == edge2 || edge1 > edge2;
 }
@@ -384,7 +384,7 @@ operator>=( const BareEdge & edge1 , const BareEdge & edge2 )
  */
 inline
 bool
-operator<( const BareEdge & edge1 , const BareEdge & edge2 )
+operator< ( const BareEdge& edge1 , const BareEdge& edge2 )
 {
     return edge2.first < edge1.first || ( edge2.first == edge1.first && edge2.second < edge1.second );
 }
@@ -394,7 +394,7 @@ operator<( const BareEdge & edge1 , const BareEdge & edge2 )
  */
 inline
 bool
-operator<=( const BareEdge & edge1 , const BareEdge & edge2 )
+operator<= ( const BareEdge& edge1 , const BareEdge& edge2 )
 {
     return edge1 == edge2 || edge1 < edge2;
     ;
@@ -405,7 +405,7 @@ operator<=( const BareEdge & edge1 , const BareEdge & edge2 )
  */
 inline
 bool
-operator!=( const BareFace & face1 , const BareFace & face2 )
+operator!= ( const BareFace& face1 , const BareFace& face2 )
 {
     return face1.first != face2.first || face1.second != face2.second || face1.third != face2.third;
 }
@@ -416,7 +416,7 @@ operator!=( const BareFace & face1 , const BareFace & face2 )
  */
 inline
 bool
-operator==( const BareFace & face1 , const BareFace & face2 )
+operator== ( const BareFace& face1 , const BareFace& face2 )
 {
     return face1.first == face2.first && face1.second == face2.second && face1.third == face2.third;
 }
@@ -433,7 +433,7 @@ struct cmpBareItem;
 template <>
 struct cmpBareItem<BareVertex> //!< The actual comparison operator
 {
-    bool operator() ( const BareVertex & vertex1, const BareVertex & vertex2 ) const
+    bool operator() ( const BareVertex& vertex1, const BareVertex& vertex2 ) const
     {
         return vertex2.first > vertex1.first;
     }
@@ -445,7 +445,7 @@ struct cmpBareItem<BareVertex> //!< The actual comparison operator
 template <>
 struct cmpBareItem<BareEdge> //!< The actual comparison operator
 {
-    bool operator() ( const BareEdge & edge1, const BareEdge & edge2 ) const
+    bool operator() ( const BareEdge& edge1, const BareEdge& edge2 ) const
     {
         return edge2.first > edge1.first || ( edge2.first == edge1.first && edge2.second > edge1.second );
     }
@@ -457,16 +457,22 @@ struct cmpBareItem<BareEdge> //!< The actual comparison operator
 template <>
 struct cmpBareItem<BareFace>
 {
-    bool operator() ( const BareFace & face1, const BareFace & face2 ) const
+    bool operator() ( const BareFace& face1, const BareFace& face2 ) const
     {
         if ( face2.first > face1.first )
+        {
             return true;
+        }
         if ( face2.first == face1.first )
         {
             if ( face2.second > face1.second )
+            {
                 return true;
+            }
             if ( face2.second == face1.second )
+            {
                 return face2.third > face1.third;
+            }
         }
         return false;
     }
@@ -474,9 +480,9 @@ struct cmpBareItem<BareFace>
 
 inline
 bool
-operator<( const BareFace & f1 , const BareFace & f2 )
+operator< ( const BareFace& f1 , const BareFace& f2 )
 {
-    return cmpBareItem<BareFace>()(f1,f2);
+    return cmpBareItem<BareFace>() (f1, f2);
 }
 
 
@@ -495,27 +501,43 @@ template<typename Shape>
 class BareEntitySelector {};
 
 template<>
-struct BareEntitySelector<Point>{
-    static std::pair<BareVertex, bool> makeBareEntity(const ID points[]) {return std::make_pair(BareVertex(points[0]),true);}
+struct BareEntitySelector<Point>
+{
+    static std::pair<BareVertex, bool> makeBareEntity (const ID points[])
+    {
+        return std::make_pair (BareVertex (points[0]), true);
+    }
     typedef BareVertex bareEntity_Type;
 };
 
 template<>
-struct BareEntitySelector<Line>{
-    static std::pair<BareEdge, bool> makeBareEntity(const ID points[]) {return makeBareEdge(points[0], points[1]);}
+struct BareEntitySelector<Line>
+{
+    static std::pair<BareEdge, bool> makeBareEntity (const ID points[])
+    {
+        return makeBareEdge (points[0], points[1]);
+    }
     typedef BareEdge bareEntity_Type;
 };
 
 template<>
-struct BareEntitySelector<Triangle>{
+struct BareEntitySelector<Triangle>
+{
     typedef BareFace bareEntity_Type;
-    static std::pair<BareFace, bool> makeBareEntity(const ID points[]) {return makeBareFace(points[0], points[1], points[2]);}
+    static std::pair<BareFace, bool> makeBareEntity (const ID points[])
+    {
+        return makeBareFace (points[0], points[1], points[2]);
+    }
 };
 
 template<>
-struct BareEntitySelector<Quad>{
+struct BareEntitySelector<Quad>
+{
     typedef BareFace bareEntity_Type;
-    static std::pair<BareFace, bool> makeBareEntity(const ID points[]) {return makeBareFace(points[0], points[1], points[2], points[3]);}
+    static std::pair<BareFace, bool> makeBareEntity (const ID points[])
+    {
+        return makeBareFace (points[0], points[1], points[2], points[3]);
+    }
 };
 
 
@@ -558,14 +580,14 @@ public:
         @param item Item we are looking for
         @return True if the item has been found, False otherwise
      */
-    bool isThere( bareItem_Type const & item) const;
+    bool isThere ( bareItem_Type const& item) const;
 
     //! Method that adds a BareItem if it is not already there and automatically generates the ID
     /*!
         @param item Item to be added
         @return a pair composed of the ID of the added item and a boolean value which is True if the item has been successfully added and False otherwise
      */
-    std::pair<ID, bool> addIfNotThere( bareItem_Type const & item );
+    std::pair<ID, bool> addIfNotThere ( bareItem_Type const& item );
 
     //! Method that adds a bareItem_Type if it is not already there and assigns the ID
     /*!
@@ -573,14 +595,14 @@ public:
         @param id ID to be assigned to the item
         @return a pair composed of the ID of the added item and a boolean value which is True if the item has been successfully added and False otherwise
      */
-    std::pair<ID, bool> addIfNotThere( bareItem_Type const & item, const ID id );
+    std::pair<ID, bool> addIfNotThere ( bareItem_Type const& item, const ID id );
 
     //! Method that removes a bareItem_Type if it is there (the ID is then lost)
     /*!
         @param item Item to be removed
         @return True if the item has been erased and False otherwise
      */
-    bool deleteIfThere( bareItem_Type const & item);
+    bool deleteIfThere ( bareItem_Type const& item);
 
     //! Method that removes a bareItem_Type if it is there (the ID is then lost)
     /*!
@@ -588,7 +610,7 @@ public:
         @param item Item to be removed
         @return True if the item has been erased and False otherwise
      */
-    bool isThereDel( bareItem_Type const & item);
+    bool isThereDel ( bareItem_Type const& item);
 
     //! Method that counts how many items are stored
     /*!
@@ -615,7 +637,7 @@ public:
         @param item Item we are looking for
         @return ID of the item. 0 if the item doesn't exist
      */
-    ID id( bareItem_Type const & item ) const;
+    ID id ( bareItem_Type const& item ) const;
 
     //@}
 
@@ -627,7 +649,7 @@ public:
         @param id new ID to assign to item
         @return True if the item has been found and modified, False otherwise
      */
-    bool setId( bareItem_Type const & item, const ID& id );
+    bool setId ( bareItem_Type const& item, const ID& id );
 
     //! Method that returns the ID of a BareItem. It returns 0 if the item doesn't exist
     /*!
@@ -636,7 +658,7 @@ public:
         @param id new ID to assign to item
         @return True if the item has been found and modified, False otherwise
      */
-    bool setId( bareItem_Type const & item, ID const id );
+    bool setId ( bareItem_Type const& item, ID const id );
     //@}
 
     //! @name Get Methods
@@ -657,7 +679,7 @@ private:
 // ===================================================
 template <class BareItemType>
 MeshElementBareHandler<BareItemType>::MeshElementBareHandler() :
-        M_idCount( 0 )
+    M_idCount ( 0 )
 { }
 
 // ===================================================
@@ -666,36 +688,40 @@ MeshElementBareHandler<BareItemType>::MeshElementBareHandler() :
 template <class BareItemType>
 inline
 bool
-MeshElementBareHandler<BareItemType>::isThere( const bareItem_Type & item ) const
+MeshElementBareHandler<BareItemType>::isThere ( const bareItem_Type& item ) const
 {
-    return find( item ) != container_Type::end();
+    return find ( item ) != container_Type::end();
 }
 
 template <class BareItemType>
 inline
 std::pair<ID, bool>
-MeshElementBareHandler<BareItemType>::addIfNotThere( const bareItem_Type & item )
+MeshElementBareHandler<BareItemType>::addIfNotThere ( const bareItem_Type& item )
 {
-    std::pair<typename MeshElementBareHandler<BareItemType>::containerIterator_Type, bool> i( this->insert( std::make_pair( item, M_idCount ) ) );
+    std::pair<typename MeshElementBareHandler<BareItemType>::containerIterator_Type, bool> i ( this->insert ( std::make_pair ( item, M_idCount ) ) );
+
     if ( i.second )
+    {
         ++M_idCount;
-    return std::make_pair( ( i.first )->second, i.second );
+    }
+    return std::make_pair ( ( i.first )->second, i.second );
 }
 
 template <class BareItemType>
 inline
 std::pair<ID, bool>
-MeshElementBareHandler<BareItemType>::addIfNotThere( const bareItem_Type & item, const ID id )
+MeshElementBareHandler<BareItemType>::addIfNotThere ( const bareItem_Type& item, const ID id )
 {
-    std::pair<typename MeshElementBareHandler<BareItemType>::containerIterator_Type, bool> i( this->insert( std::make_pair( item, id ) ) );
+    std::pair<typename MeshElementBareHandler<BareItemType>::containerIterator_Type, bool> i ( this->insert ( std::make_pair ( item, id ) ) );
+
     ( i.first ) ->second = id; // Set new id in any case.
-    return std::make_pair( id, i.second ); // for consistency with other version.
+    return std::make_pair ( id, i.second ); // for consistency with other version.
 }
 template <class BareItemType>
 bool
-MeshElementBareHandler<BareItemType>::deleteIfThere( bareItem_Type const & item )
+MeshElementBareHandler<BareItemType>::deleteIfThere ( bareItem_Type const& item )
 {
-    return this->erase( item ) != 0;
+    return this->erase ( item ) != 0;
 }
 
 template <class BareItemType>
@@ -719,13 +745,17 @@ void MeshElementBareHandler<BareItemType>::showMe() const
 template <class BareItemType>
 inline
 ID
-MeshElementBareHandler<BareItemType>::id( const bareItem_Type & item ) const
+MeshElementBareHandler<BareItemType>::id ( const bareItem_Type& item ) const
 {
-    containerConstIterator_Type i = this->find( item );
+    containerConstIterator_Type i = this->find ( item );
     if ( i != container_Type::end() )
+    {
         return i->second;
+    }
     else
+    {
         return 0;
+    }
 }
 
 // ===================================================
@@ -735,9 +765,9 @@ MeshElementBareHandler<BareItemType>::id( const bareItem_Type & item ) const
 template <class BareItemType>
 inline
 bool
-MeshElementBareHandler<BareItemType>::setId( const bareItem_Type & item, ID const id )
+MeshElementBareHandler<BareItemType>::setId ( const bareItem_Type& item, ID const id )
 {
-    containerConstIterator_Type i = find( item );
+    containerConstIterator_Type i = find ( item );
     if ( i != container_Type::end() )
     {
         i->second = id;

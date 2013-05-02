@@ -37,17 +37,17 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 namespace LifeV
 {
-std::istream & eatLine( std::istream & s )    // eat a whole line from std::istream
+std::istream& eatLine ( std::istream& s )     // eat a whole line from std::istream
 {
     while ( s.get() != '\n' && s . good() )
-        {}
+    {}
     return s ;
 }
 
-std::istream & eatComments( std::istream & s )    //eat lines starting with '!%#;$'
+std::istream& eatComments ( std::istream& s )     //eat lines starting with '!%#;$'
 {
     char c = 'a';
-    s.get( c ) ;
+    s.get ( c ) ;
     while ( c == '!' ||
             c == '%' ||
             c == '#' ||
@@ -55,65 +55,65 @@ std::istream & eatComments( std::istream & s )    //eat lines starting with '!%#
             c == '$' )
     {
         s >> eatLine ;
-        s.get( c ) ;
+        s.get ( c ) ;
     }
-    return s.putback( c ) ;
+    return s.putback ( c ) ;
 }
 
-std::istream & nextGoodLine( std::istream & s, std::string & line )
+std::istream& nextGoodLine ( std::istream& s, std::string& line )
 {
     s >> eatComments;
-    getline( s, line );
+    getline ( s, line );
     return s;
 }
 
-std::string& setStringLength( std::string& s, unsigned int len, char c )
+std::string& setStringLength ( std::string& s, unsigned int len, char c )
 {
     /*
       always return a std::string with len characters
         - if the s has more than len characters : keep only the first len
         - if the s has less than len characters : complete with c until len
     */
-    std::string stmp( len, c );
+    std::string stmp ( len, c );
     if ( s.length() > len )
     {
-        s.erase( len, s.length() );
+        s.erase ( len, s.length() );
     }
-    stmp.replace( 0, s.length(), s );
+    stmp.replace ( 0, s.length(), s );
     s = stmp;
     return s;
 }
 
-int atoi( const std::string & s )
+int atoi ( const std::string& s )
 {
-    return ::atoi( s.c_str() );
+    return ::atoi ( s.c_str() );
 }
 
-std::string operator+( const std::string & str, const int i )
+std::string operator+ ( const std::string& str, const int i )
 {
-    int digits = std::abs( i ) / 10;
+    int digits = i==0 ? 2 : std::log10( std::abs(i) ) + 2;
     char* str_i = new char[ digits ];
-    sprintf( str_i, "%i", i );
+    sprintf ( str_i, "%i", i );
     std::string str2 = str + str_i;
     delete[] str_i;
     return str2;
 }
 
-std::string operator+( const std::string & str, const long i )
+std::string operator+ ( const std::string& str, const long i )
 {
-    int digits = std::abs( i ) / 10;
+    int digits = i==0 ? 2 : std::log10( std::abs(i) ) + 2;
     char* str_i = new char[ digits ];
-    sprintf( str_i, "%ld", i );
+    sprintf ( str_i, "%ld", i );
     std::string str2 = str + str_i;
     delete[] str_i;
     return str2;
 }
 
-std::string operator+( const std::string & str, const unsigned int i )
+std::string operator+ ( const std::string& str, const unsigned int i )
 {
-    int digits = i / 10;
+    int digits = i==0 ? 2 : std::log10(i) + 2;
     char* str_i = new char[ digits ];
-    sprintf( str_i, "%u", i );
+    sprintf ( str_i, "%u", i );
     std::string str2 = str + str_i;
     delete[] str_i;
     return str2;

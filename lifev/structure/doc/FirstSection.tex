@@ -1,0 +1,336 @@
+\section{Continuum mechanics and Constitutive laws} This section deals
+with the derivation and formulation of the conservation equation of
+linear momentum and the description of the constitutive laws available
+in \LV.
+
+\subsection{Continuum mechanics}
+\label{sct-Continuum} In order to describe the motion and deformations
+of a body, we embed it in a three-dimensional Euclidean space. Let
+\RefCon $\subseteq$ \Real be the \textit{reference configuration} of
+the body. This enables us to uniquely identify any arbitrary point
+$P(\posE)$, called \textit{material point}, in \RefCon by its position
+at the initial time $t_0=0$. When the body moves, at each time $t>0$,
+it will occupy a new configuration \CurCon, which will be called the
+\textit{current configuration}. In the study of the kinematics of a
+body, it is commonly assumed that the motion of an arbitrary material
+point, starting from \pos, can be described through a relationship of
+the form:
+\begin{equation}
+  \nposE=\chi(\posE,t)\qquad t\geq0,
+  \label{eq::deformation}
+\end{equation}
+where \npos is the new position of the point \pos,
+$\chi$ is a continuously differentiable function in all variables (at
+least up to the second derivatives). Moreover, we assume that at each
+time $t>0$, the following property on $\chi$ holds: for any \pos and
+corresponding point \npos, there are open balls $B_{\posE}$ (centered
+in \pos) and $B_{\nposE}$ (centered in \npos), both contained in
+\RefCon and \CurCon, such that points in $B_{\posE}$ are in one-to-one
+correspondance with points of $B_{\nposE}$.\\ Thanks to the map
+\eqref{eq::deformation} we can define the displacement of a point
+$P(\posE,t_0=0)$ at time $t>0$ as
+\begin{equation}
+  \displL=\nposE(\posE,t)-\posE
+  \label{eq::displacementL}
+\end{equation}
+It is worth noting that the displacement field has
+been defined in the Lagrangian framework. Its Eulerian description is
+given by:
+\begin{equation}
+  \displE=\nposE-\chi^{-1}(\nposE,t).
+  \label{eq::displacementE}
+\end{equation}
+According to these two representations, it is possible
+to define other kinematics quantities (e.g. velocity and acceleration
+fields) in each of the two coordinate systems.\\ The local deformation
+of a material point is characterized by a second order tensor, usually
+indicated by \F and called \textit{deformation gradient}, which is
+defined as:
+\begin{equation}
+  \F = \delOp\nposE,
+  \label{eq:tensorF}
+\end{equation}
+where the symbol $\delOp$ indicates that the
+derivatives are computed with respect to the coordinates in the
+reference configuration. In addition, the tensor \F{} allows defining
+other classical tensorial quantities, like the right Cauchy-Green and
+Green-Lagrange tensors, to quantify the stretches and strains during
+the deformation.\\
+
+\subsubsection{Conservation equation of linear momentum}
+\label{sct-Conservation} The postulate of balance of linear momentum
+states that the rate of change of linear momentum of a fixed mass of
+the body is equal to the sum of the forces acting on the body. These
+can be body forces or forces due to stress vectors acting on the
+surface of the body,
+\begin{equation}
+  \frac{d}{dt}\int_{\CurConE}\rho\velE dv =
+  \int_{\CurConE}\rho\underline{b}
+  dv+\int_{\partial\CurConE}\underline{t}da
+  \label{eq::BLM-IntegralFormEulerian}
+\end{equation}
+where $\rho$ is the density of the material in the
+current configuration (and it is related to its counterpart in \RefCon
+thanks to $\rho=J\rho_0$, where $J$ is the determinant of the deformation
+gradient \F) and $\velE$ is the Eulerian velocity. The
+vector $\underline{b}$ is the body force per unit of mass,
+$\underline{t}=\underline{t}(\nposE,t, \underline{n})$ is the surface
+force acting on the body in the current configuration per unit area of
+$\partial\CurConE$ and $\underline{n}$ is the outward unit normal to
+the surface $\partial\CurConE$ at \npos at time $t$. The first and the
+second integrals on the right hand side represent the contributions
+due to body forces and to surface forces, respectively.\\ The surface
+tension $\underline{t}$, thanks to the Cauchy lemma and the relation
+between the stress tensor and the stress vector, can be written as:
+\begin{equation}
+  \underline{t}=\underline{t}(\nposE,t,
+  \underline{n})=\T(\nposE,t)\underline{n}.
+  \label{eq::tension}
+\end{equation}
+Substituting \eqref{eq::tension} in
+\eqref{eq::BLM-IntegralFormEulerian} and using the divergence theorem,
+equation \eqref{eq::BLM-IntegralFormEulerian} becomes:
+\begin{equation}
+  \frac{d}{dt}\int_{\CurConE}\rho\velE dv =
+  \int_{\CurConE}\big(\rho\underline{b} +\text{div}\T \big)dv.
+  \label{eq::BLM-Eulerian}
+\end{equation}
+Equation \eqref{eq::BLM-Eulerian} is the Eulerian
+integral form of the conservation equation of linear momentum. In
+order to write it in its Lagrangian form we need to compute the
+integrals on the reference configuration \RefCon. Using the identities
+$dv=JdV$, $\rho=J\rho_0$, $da=J\F^{-T}dA$, where $J=\text{det}\F$, and
+remembering the definition of the First Piola-Kirchhoff tensor
+($\Piola=J\T\F^{-T}$), the Lagrangian form of
+\eqref{eq::BLM-IntegralFormEulerian} is:
+\begin{equation}
+  \frac{d}{dt}\int_{\RefConE}\rho_0\velL dV =
+  \int_{\RefConE}\big(\rho_0\underline{b}+\text{Div}\Piola \big)dV,
+\end{equation}
+where $\velL$ is the Lagrangian velocity and
+$\text{Div}(\cdot)$ is the divergence operator in the material
+coordinates. Assuming a constant density both in space and time, the
+local Lagrangian form of the conservation equation of linear momentum
+is:
+\begin{equation}
+  \rho_0\frac{\partial^2\displL}{\partial
+    t^2}=\rho_0\underline{b}+\text{Div}(\Piola) \qquad \forall \posE
+  \subseteq \RefConE, \quad t>0,
+  \label{eq::ConLinMom-Diff}
+\end{equation}
+which is then augmented with proper initial and boundary conditions.
+Subsequentely, the mechanical behaviour of the material is characterized
+by specifying a particular constitutive law for the Cauchy stress tensor.
+
+\subsection{Constitutive laws}
+\label{sct-Constitutive} Equation \eqref{eq::ConLinMom-Diff} must be
+closed by an adequate constitutive law in order to have a solveable
+mathematical problem. The closure equation relates the Cauchy stress
+tensor \T to the deformation gradient \F. The most general form of
+this kind of relation is:
+\begin{equation}
+  \T(\nposE)=\mathcal{G}\big(F(\nposE,t),\nposE\big).
+  \label{eq::GeneralCL}
+\end{equation}
+In the following we will consider Cauchy elastic
+materials (i.e. materials in which the current stresses in \CurCon are
+determined only by the current state of deformation) and homogeneous
+materials (i.e. the material behaviour is independent of the material
+point). Under these hypothesis, relation \eqref{eq::GeneralCL} reduces
+to the form
+\begin{equation}
+  \T(\nposE)=\mathcal{G}\big(F(\nposE,t)\big),
+  \label{eq::OurRelation}
+\end{equation} where $\mathcal{G}$ is called the response function.\\
+The structural models which have been implemented in the \SSol
+framework are for isotropic hyperelastic materials. A material is said
+to be hyperelastic when it does not dissipate energy during cyclic
+homogeneous deformations,
+\begin{equation}
+  \text{W}_{\text{cycle}} =
+  \int_{0}^{\text{T}}\int_{\RefConE}\,\mathbf{P}:\dot{\mathbf{F}}\,
+  d\RefConE\text{dt}
+  = 0,
+  \label{eq::energyDiss}
+\end{equation}
+along any deformation characterized by
+$\posE(t=T)=\posE(t=0)$ at any point of \RefCon. For hyperelastic
+materials, the stress power can be represented in the following way:
+\begin{equation}
+  \rho\frac{D\WE(\posE,t)}{Dt}=\T:\D
+  \label{eq::HyperSP}
+\end{equation}
+where \D is the velocity gradient tensor and \W is the
+\textit{strain energy density function}. This function characterizes
+one particular material from another. From the mathematical point of
+view, the strain energy function of an isotropic hyperelastic material
+is a function of the right Cauchy-Green tensor ($\C=\F^{T}\F$) and, in
+particular, without loss of generality, \W can be written in terms of
+the invariants of \C,
+\begin{equation}
+  \WE=\WE\big(I_{\C},II_{\C},III_{\C}\big).
+  \label{eq::WandInvariants}
+\end{equation}
+All the tensors (e.g. \F,\T,\Piola) that describe the
+mechanical response of this kind of materials can be computed by
+derivation of \W with respect to $I_{\C},II_{\C},III_{\C}$ and \C.This
+theory will not be discussed in depth in this report, but a more
+detailed explanation can be found in \cite{GM,Deluca} and references
+therein. We would, however, like to remind that in order to guarantee
+the well posedness of the structural mechanics problem
+\eqref{eq::ConLinMom-Diff} the strain energy function \W of the
+material has to satisfy the condition of policonvexity.\\ In the
+following we will characterize the strain energy function for all the
+four stress-strain relations that are available in \LV and we will
+give the corresponding expression of the first Piola-Kirchhoff
+tensor. In particular, the first two models that we analyze describe
+isotropic hyperelastic compressible materials and the second two
+isotropic hyperelastic nearly-incompressible materials. Since the
+applications in which we are interested concern models of incompressible
+materials, we will enforce the incompressibility constraint in our
+simulations:
+\begin{itemize}
+\item by using high Poisson ratios for the first two
+  models\footnote{The choice of high Poisson ratios may be critical in
+    terms of a well-known problem: locking [T. Hughes, \textit{The finite element method:
+        Linear Static and Dynamic Finite Element Analysis} - Englewood Cliffs - NJ : Prentice-Hall, 1987  ]}
+\item by recovering the common multiplicative decomposition of the
+  deformation gradient \F into an isochoric and volumetric part for the
+  second two (see \cite{BonetWood}).
+\end{itemize} In the following subsections, the computations for the
+definition of the first Piola-Kirchhoff tensor will not be detailed,
+but can be found in \cite{Deluca} and references therein.
+
+\subsubsection{St. Venant-Kirchhoff and Linear Elastic models} Both of
+these models take origin from the same strain energy function. The
+characteristic function \W for these two constitutive laws is:
+\begin{equation}
+  \WE\big(\Et\big)=\frac{\lambda}{2}(\text{tr}\Et)^2 +
+  \mu\Et:\Et
+  \label{eq::W-SVKLE}
+\end{equation}
+where \Et is the Green-Lagrange tensor and it is
+defined as $\Et=\frac{1}{2}\big(\C-\textbf{I}\big)$, and $\lambda$ and
+$\mu$ are the first Lam\'e constant and the shear modulus
+respectively. These two materials parameters are functions of the
+Young modulus E and Poisson ratio $\nu$ as follows:
+\begin{equation}
+  \lambda=\frac{\nu E}{\big(1+\nu \big)\big(1-2\nu
+    \big)}\qquad\qquad \mu=\frac{E}{2\big(1+\nu\big)}.
+  \label{eq::LameConst}
+\end{equation}
+Since the material is hyperelastic and isotropic, as we
+said earlier, \W can be written in terms of the invariants of \C,
+leading to the relation:
+\begin{equation}
+  \WE=\left(\frac{\lambda}{8}+\frac{\mu}{4}\right)I_{\C}^2 -
+  \left(\frac{3\lambda}{4}+\frac{\mu}{2}\right)I_{\C} -
+  \frac{\mu}{2}II_{\C}+\frac{9\lambda}{8}+\frac{3\mu}{4}
+  \label{eq::WSVK-Inv}
+\end{equation}
+For the St. Venant-Kirchhoff material the first
+Piola-Kirchhoff tensor is:
+\begin{equation}
+  \Piola = \frac{\lambda}{2}\big(I_{\C}-3\big)\F +
+  \mu\F +\mu\F\C
+  \label{eq::SVK-P}
+\end{equation}
+It is convenient to introduce the displacement field,
+$\displL$, which transforms the expression \eqref{eq::SVK-P} into:
+\begin{equation}
+  \begin{array}{llll} \Piola(\displL) = & \displaystyle
+    \lambda(\diver{\displL})\I + \mu\big(\delOp\displL +
+    \delOp\displL^T\big)
+    +\frac{\lambda}{2}\big(\delOp\displL:\delOp\displL\big)+ \\ \\ &
+    \displaystyle + \lambda\big(\diver{\displL}\big)\delOp\displL +
+    \frac{\lambda}{2}\big(\delOp\displL:\delOp\displL\big)\delOp\displL +
+    \mu\big(\delOp\displL^T \delOp\displL\big)+\\ \\ & \displaystyle +
+    \mu\delOp\displL\big(\delOp\displL\delOp\displL^T\big) +
+    \mu\delOp\displL\delOp\displL^T\delOp\displL.
+  \end{array}
+  \label{eq::SVK-P-displ}
+\end{equation}
+We insert \eqref{eq::SVK-P-displ} in \eqref{eq::ConLinMom-Diff} when we
+want to solve the structural
+dynamics problem using the St. Venant-Kirchhoff constitutive law.\\ The
+linear elastic model can be deduced from \eqref{eq::SVK-P-displ}
+considering only the linear terms. In this case, the tensor \Piola is:
+\begin{equation}
+  \Piola(\displL) = \lambda(\diver{\displL})\I +
+  \mu\big(\delOp\displL + \delOp\displL^T\big).
+  \label{eq::LE-P}
+\end{equation}
+It is worth noting that the St. Venant-Kirchhoff
+strain energy function \eqref{eq::W-SVKLE} does not satisfy the
+policonvexity condition for all the state of deformations. For this
+reason, it is not recommended when large compressive strains
+occur. More details can be found in \cite{Hozapfel}.
+
+\subsubsection{Neohookean model} The expression of \W in terms of the
+invariants for the Neo-Hookean material is:
+\begin{equation}
+  \WE=\frac{\mu}{2}\big(I_{\Cbar}-3\big)+\frac{\kappa}{4}\left[\big(J-1)^2
+    + (\text{ln}J)^2\right],
+  \label{eq::strainNH}
+\end{equation}
+where $I_{\Cbar}$ is the trace of the isochoric part of
+\C, $\mu$ is the shear modulus, $\kappa$ is the bulk modulus, and $J$
+is the determinant of \F. In this case, the tensor \Piola reads:
+\begin{equation}
+  \begin{array}{lll} \Piola = & \displaystyle \mu
+    J^{-\frac{2}{3}}\left(\F-\frac{1}{3}I_{\Cbar}\F^{-T}\right) +\\ \\ &
+    \displaystyle +
+    J\frac{\kappa}{2}\left(J-1+\frac{1}{J}\text{ln}J\right)\F^{-T}.
+  \end {array}
+  \label{eq::NH-P}
+\end{equation}
+The first term in Eq. \eqref{eq::NH-P} representes the
+isochoric part of \Piola, while the second is the volumetric
+part. This is due to the multiplicative decomposition of
+\F. Introducing the displacement field, the expression above becomes:
+\begin{equation}
+  \begin{array}{lll} \Piola(\displL) = & \displaystyle \mu
+    J^{-\frac{2}{3}}\left(\delOp\displL -
+      \frac{1}{3}\big(\delOp\displL:\delOp\displL+2\diver{\displL}+3\big)
+      \delOp\displL^{-T}\right)+\\
+    \\ & \displaystyle +
+    J\frac{\kappa}{2}\left(J-1+\frac{1}{J}\text{ln}J\right)\delOp\displL^{-T},
+  \end{array}
+  \label{eq::NH-P-displ}
+\end{equation}
+where we have used the identity:
+\begin{equation} I_{\Cbar}=\text{tr}\Cbar=\delOp\displL:\delOp\displL
+  + 2\diver{\displL}+3.
+  \label{eq::Id-trC-displ}
+\end{equation}
+The Neohookean material satisfies the policonvexity
+condition for all the states of deformations. Hence, the mathematical
+problems generated by Eq. \eqref{eq::ConLinMom-Diff} is well posed.
+
+\subsubsection{Exponential model} In this case, the relation between
+\W and the invariants of the isochoric part of \C is the following:
+\begin{equation}
+  \WE= \displaystyle
+  \frac{\alpha}{2\gamma}\left(e^{\gamma(\I_{\Cbar}-3)}-1\right) +
+  \frac{\kappa}{4}\left[\big(J-1)^2 + (\text{ln}J)^2\right],
+  \label{eq::strainExp}
+\end{equation}
+where $\alpha$ and $\gamma$ are material parameters and
+$\kappa$ is, as before, the bulk modulus. After some computations, the
+expression of the first Piola-Kirchhoff tensor is:
+\begin{equation}
+  \begin{array}{lll} \Piola = & \displaystyle \alpha
+    J^{-\frac{2}{3}}\left(\F-\frac{1}{3}I_{\Cbar}\F^{-T}\right)
+    e^{\gamma\big(I_{\Cbar}-3\big)}
+    +\\ \\ & \displaystyle +
+    J\frac{\kappa}{2}\left(J-1+\frac{1}{J}\text{ln}J\right)\F^{-T}.
+  \end {array}
+  \label{eq::EXP-P}
+\end{equation}
+Introducing in \eqref{eq::EXP-P} the displacement
+field, the expression of \Piola as a function of $\displL$ is
+obtained. The first term in Eq. \eqref{eq::EXP-P} is the isochoric
+contribution and the second one the volumetric. As for the Neohookean
+law, the policonvexity condition is satisfied for all the state of
+deformations leading to the well posedness of the mathematical problem
+\eqref{eq::ConLinMom-Diff}.

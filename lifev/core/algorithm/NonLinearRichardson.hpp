@@ -54,41 +54,43 @@
 namespace LifeV
 {
 //! Preconditioned relaxed solver for non linear problems.
-   /*!
-       Add more details about the constructor.
-       NOTE: short description is automatically added before this part.
-       @param sol            :  the solution
-       @param maxit          :  input: maximum iterations, output: nb of iterations
-       @param abstol, reltol :  the stoping criteria is abstol+reltol*norm(residual_0),
-       @param eta_max        :  Maximum error tolerance for residual in linear solver.
+/*!
+    Add more details about the constructor.
+    NOTE: short description is automatically added before this part.
+    @param sol            :  the solution
+    @param maxit          :  input: maximum iterations, output: nb of iterations
+    @param abstol, reltol :  the stoping criteria is abstol+reltol*norm(residual_0),
+    @param eta_max        :  Maximum error tolerance for residual in linear solver.
 
-       The linear solver terminates when the relative
-       linear residual is smaller than eta*| f(sol) |.
+    The linear solver terminates when the relative
+    linear residual is smaller than eta*| f(sol) |.
 
-       The value linear_rel_tol send for the relative tolerance
-       to the linear solver is therefore eta. eta is determined
-       by the modified Eisenstat-Walker formula if etamax > 0.
+    The value linear_rel_tol send for the relative tolerance
+    to the linear solver is therefore eta. eta is determined
+    by the modified Eisenstat-Walker formula if etamax > 0.
 
-       @param NonLinearLineSearch     :  for now consider only the case NonLinearLineSearch=0
-         (coded but not theoretically analysed)
+    @param NonLinearLineSearch     :  for now consider only the case NonLinearLineSearch=0
+      (coded but not theoretically analysed)
 
-       @param omega          :  default relaxation parameter to be passed to Aitken.
-       if omega is negative, then its absolute value is
-       taken as constant relaxation parameter
+    @param omega          :  default relaxation parameter to be passed to Aitken.
+    if omega is negative, then its absolute value is
+    taken as constant relaxation parameter
 
-    */
+ */
 
 template < class Fct >
-Int NonLinearRichardson( VectorEpetra& sol,
-                      Fct&        functional,
-                      Real        abstol,
-                      Real        reltol,
-                      UInt&       maxit,
-                      Real        eta_max,
-                      Int         NonLinearLineSearch,
-                      std::ofstream& out_res,
-                      const Real& time,
-                      UInt iter = UInt(0) )
+Int NonLinearRichardson ( VectorEpetra& sol,
+                          Fct&        functional,
+                          Real        abstol,
+                          Real        reltol,
+                          UInt&       maxit,
+                          Real        eta_max,
+                          Int         NonLinearLineSearch,
+                          UInt iter = UInt (0),
+                          UInt        verboseLevel = 0,
+                          std::ostream& output = std::cout,
+                          const Real& time = 0
+                        )
 {
     /*
         */
@@ -98,7 +100,7 @@ Int NonLinearRichardson( VectorEpetra& sol,
       before failure is reported
     */
 
-//    const Int max_increase_res = 5;
+    //    const Int max_increase_res = 5;
 
     /*
       Parameters for the linear solver, gamma: Default value = 0.9
@@ -108,9 +110,10 @@ Int NonLinearRichardson( VectorEpetra& sol,
 
     //----------------------------------------------------------------------
 
-    bool const verbose(sol.comm().MyPID() == 0);
-
-    //UInt iter = 0;
+    if ( sol.comm().MyPID() != 0 )
+    {
+        verboseLevel = 0;
+    }
 
     VectorEpetra residual ( sol.map() );
     VectorEpetra step     ( sol.map() );
@@ -119,21 +122,20 @@ Int NonLinearRichardson( VectorEpetra& sol,
 
     Real normResOld = 1;
 
-    if (verbose)
+    if ( verboseLevel > 0 )
     {
-        //std::cout << "------------------------------------------------------------------" << std::endl;
         std::cout << std::endl;
         std::cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << std::endl;
         std::cout << "      Non-Linear Richardson: starting          " << std::endl;
         std::cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << std::endl;
         std::cout << std::endl;
-        //std::cout << "------------------------------------------------------------------" << std::endl;
     }
-    functional.evalResidual( residual, sol, iter );
+
+    functional.evalResidual ( residual, sol, iter );
 
     Real normRes      = residual.normInf();
-    Real stop_tol     = abstol + reltol*normRes;
-    Real linearRelTol = std::fabs(eta_max);
+    Real stop_tol     = abstol + reltol * normRes;
+    Real linearRelTol = std::fabs (eta_max);
     Real eta_old;
     Real eta_new;
     Real ratio;
@@ -143,84 +145,84 @@ Int NonLinearRichardson( VectorEpetra& sol,
 
     //
 
-    Real solNormInf(sol.normInf());
+    Real solNormInf (sol.normInf() );
     Real stepNormInf;
-    if (verbose)
+    if ( verboseLevel > 1 )
     {
-        out_res << std::scientific;
-        out_res << "# time = ";
-        out_res << time << "   " << "initial norm_res " <<  normRes
-        << " stop tol = " << stop_tol
-        << "initial norm_sol "
-        << solNormInf << std::endl;
-        out_res << "#iter      disp_norm       step_norm       residual_norm" << std::endl;
+        output << std::scientific;
+        output << "# time = ";
+        output << time << "   " << "initial norm_res " <<  normRes
+               << " stop tol = " << stop_tol
+               << "initial norm_sol "
+               << solNormInf << std::endl;
+        output << "#iter      disp_norm       step_norm       residual_norm" << std::endl;
     }
     while ( normRes > stop_tol && iter < maxit )
     {
-        if (verbose)
+        if ( verboseLevel > 0 )
         {
             std::cout << std::endl;
-            //std::cout << "------------------------------------------------------------------" << std::endl;
             std::cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << std::endl;
             std::cout << "      Non-Linear Richardson: iteration  =      " << iter << std::endl
                       << "                             residual   =      " << normRes << std::endl
                       << "                             tolerance  =      " << stop_tol << std::endl;
             std::cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << std::endl;
             std::cout << std::endl;
-            //std::cout << "------------------------------------------------------------------" << std::endl;
-            //std::cout << std::endl;
         }
 
         iter++;
 
-        ratio      = normRes/normResOld;
+        ratio      = normRes / normResOld;
         normResOld = normRes;
         normRes    = residual.normInf();
 
         residual *= -1;
-        functional.solveJac(step, residual, linearRelTol); // J*step = -R
+
+        functional.solveJac (step, residual, linearRelTol); // J*step = -R
 
         solNormInf = sol.normInf();
         stepNormInf = step.normInf();
-        if (verbose)
+        if ( verboseLevel > 1 )
         {
-            out_res   << std::setw(5) << iter
-            << std::setw(15) << solNormInf
-            << std::setw(15) << stepNormInf;
+            output   << std::setw (5) << iter
+                     << std::setw (15) << solNormInf
+                     << std::setw (15) << stepNormInf;
         }
         linres = linearRelTol;
 
         lambda = 1.;
         slope  = normRes * normRes * ( linres * linres - 1 );
 
-        Int status(EXIT_SUCCESS);
+        Int status (EXIT_SUCCESS);
         switch ( NonLinearLineSearch )
         {
-        case 0: // no NonLinearLineSearch
-            sol += step;
-            functional.evalResidual( residual, sol, iter);
-//                normRes = residual.NormInf();
-            break;
-        case 1:
-            status = NonLinearLineSearchParabolic( functional, residual, sol, step, normRes, lambda, iter, verbose );
-            break;
-        case 2:  // recommended
-            status = NonLinearLineSearchCubic( functional, residual, sol, step, normRes, lambda, slope, iter, verbose );
-            break;
-        default:
-            std::cout << "Unknown NonLinearLineSearch \n";
-            status = EXIT_FAILURE;
+            case 0: // no NonLinearLineSearch
+                sol += step;
+                functional.evalResidual ( residual, sol, iter);
+                //                normRes = residual.NormInf();
+                break;
+            case 1:
+                status = NonLinearLineSearchParabolic ( functional, residual, sol, step, normRes, lambda, iter, verboseLevel );
+                break;
+            case 2:  // recommended
+                status = NonLinearLineSearchCubic ( functional, residual, sol, step, normRes, lambda, slope, iter, verboseLevel );
+                break;
+            default:
+                std::cout << "Unknown NonLinearLineSearch \n";
+                status = EXIT_FAILURE;
         }
 
         if (status == EXIT_FAILURE)
+        {
             return status;
-
-
+        }
 
         normRes = residual.normInf();
 
-        if (verbose)
-            out_res << std::setw(15) << normRes << std::endl;
+        if ( verboseLevel > 1 )
+        {
+            output << std::setw (15) << normRes << std::endl;
+        }
 
         if ( eta_max > 0 )
         {
@@ -228,36 +230,38 @@ Int NonLinearRichardson( VectorEpetra& sol,
             eta_new = gamma * ratio * ratio;
             if ( gamma * eta_old * eta_old > .1 )
             {
-                eta_new = std::max<Real>( eta_new, gamma * eta_old * eta_old );
+                eta_new = std::max<Real> ( eta_new, gamma * eta_old * eta_old );
             }
-            linearRelTol = std::min<Real>( eta_new, eta_max );
-            linearRelTol = std::min<Real>( eta_max,
-                                           std::max<Real>( linearRelTol,
-                                                           .5 * stop_tol / normRes ) );
-            //if (verbose)
+            linearRelTol = std::min<Real> ( eta_new, eta_max );
+            linearRelTol = std::min<Real> ( eta_max,
+                                            std::max<Real> ( linearRelTol,
+                                                             .5 * stop_tol / normRes ) );
+            //if ( verboseLevel > 0 )
             //    std::cout << "    Newton: forcing term eta = " << linearRelTol << std::endl;
+            //std::cout<<"\nVerbose = "<<verboseLevel<<std::endl;
         }
 
     }
 
     if ( normRes > stop_tol )
     {
-        if (verbose)
+        if ( verboseLevel > 0 )
+        {
             std::cout << "!!! NonLinRichardson: convergence fails" << std::endl;
+        }
         maxit = iter;
         return EXIT_FAILURE;
     }
 
-    if (verbose)
+
+    if ( verboseLevel > 0 )
     {
         std::cout << std::endl;
-        //std::cout << "------------------------------------------------------------------" << std::endl;
         std::cout << ">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>" << std::endl;
         std::cout << "      Non-Linear Richardson: convergence =     " << normRes << std::endl
                   << "                             iterations  =     " << iter << std::endl;
         std::cout << "<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<" << std::endl;
         std::cout << std::endl;
-        //std::cout << "------------------------------------------------------------------" << std::endl;
     }
     maxit = iter;
 

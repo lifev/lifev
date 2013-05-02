@@ -1,7 +1,7 @@
-
-INCLUDE(TribitsAddExecutableAndTest)
+INCLUDE(TribitsAddExecutable)
 INCLUDE(AddSubdirectories)
 
 ADD_SUBDIRECTORIES(
-  utility_meshReorder
+  utility_mesh_extractor
+  utility_mesh_reorder
 )

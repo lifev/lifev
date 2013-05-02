@@ -51,5 +51,5 @@ TRIBITS_COPY_FILES_TO_BINARY_DIR(data_bdf_2d_order3
 
 TRIBITS_COPY_FILES_TO_BINARY_DIR(bdf_3d_mesh
   SOURCE_FILES cube4x4.mesh
-  SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/navier_stokes/data/mesh/inria
+  SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/core/data/mesh/inria
 )

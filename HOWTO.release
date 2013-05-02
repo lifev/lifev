@@ -5,58 +5,30 @@ HOWTO to make a release X_Y_Z
 
 (this is a preliminary version for git)
 
+git remote add github git@github.com:lifev/lifev.git
+
+
    cd top_srcdir
 
-1- branch HEAD with the branchname LIFEV_X_2Y_BRANCH
-   git branch LIFEV_X_2Y_BRANCH
-   git checkout LIFEV_X_2Y_BRANCH
+1- update Version.cmake
 
-   and
+2- update NEWS
 
-   tag LIFEV_X_2Y_BRANCH with the tag LIFEV_X_2Y_Z
-   git tag LIFEV_X_2Y_Z
+3- commit Version.cmake and NEWS 
+   X_Y_Z=3.4.2
 
-   git push --tags
+   git commit -m"Releasing ${X_Y_Z}" Version.cmake NEWS.md 
+   
 
-2- update configure.in.in VERSION
+4- tag master with the tag LifeV-X.Y.Z
 
-3- update NEWS
+   git tag  LifeV-${X_Y_Z}
 
+   git push github  master:master
+   git push github  LifeV-${X_Y_Z}
+   git push origin  master:master
+   git push origin  LifeV-${X_Y_Z}
 
-4- run make distcheck
-   o you can try the following command to speed up this check
+5- add news on cmcsforge.epfl.ch and www.lifev.org
 
- make distcheck DISTCHECK_CONFIGURE_FLAGS="--enable-opt2" AM_MAKEFLAGS="-j <n>"
-
-    where <n> is the number of processes you want to launch concurrently
-
-e.g.:
-
- nohup make distcheck DISTCHECK_CONFIGURE_FLAGS="--with-trilinos=/u/cmcs/deparis/local/debug64-openmpi/trilinos-9 --prefix=/usr/scratch/deparis/lifev-clean/local --enable-debug --disable-shared --enable-static --with-hdf5=/usr --with-mpi --with-mpi=/usr/lib/openmpi --with-superlu=/usr --with-umfpack-include=-I/usr/include/suitesparse --with-libs='-lsuperlu -lumfpack -lamd'  F77=gfortran"
-
-e.g.:
-
- nohup make distcheck DISTCHECK_CONFIGURE_FLAGS="--prefix=/Users/simone/local/debug/lifev --with-trilinos=/Users/simone/local/debug/trilinos10.6 --with-mpi=/usr --with-parmetis=/Users/simone/local/opt/parmetis/ --with-boost-include=/Users/simone/local/opt/boost1.45.0/include --with-boost-lib=/Users/simone/local/opt/boost1.45.0/lib --with-hdf5=/Users/simone/local/opt/hdf5-1.8.5/ GCC=gcc-4.2 GXX=g++-4.2 F77=gfortran CPPFLAGS=-DH5_USE_16_API"
-
-
-
-   o ensures that the generated tarball is complete
-   o runs all tests from the tarball
-
-If step 3 went fine then
-
-5- if any changes/updates/bugfixes : tag again and go to 2
-
-   tag LIFEV_X_2Y_BRANCH with the tag LIFEV_X_2Y_Z
-   cd top_srcdir
-   git tag LIFEV_X_2Y_Z
-
-6- merge fixes to HEAD: cd lifev-head
-   (to do)
-
-7- upload the tarball on cmcsforge.epfl.ch
-
-8- add news on cmcsforge.epfl.ch and www.lifev.org
-
-9- send email on lifev-dev@ and eventually other lists like
-   cmcs.personnel@
+6- send email on lifev-dev@

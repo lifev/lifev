@@ -26,7 +26,7 @@
 
 /*!
     @file BareMesh.hpp
-    @brief Contains utility for importing meshes 
+    @brief Contains utility for importing meshes
 
     @date 16 Aug 2011
     @author: luca formaggia
@@ -49,19 +49,55 @@ namespace LifeV
  * a regionmesh
  * All SimpleArray have the first dimension the "shortest" one
  */
-struct RegionMeshBare{
+template <typename GeoShapeType>
+struct BareMesh
+{
     UInt nDimensions;
-    ReferenceGeometry geoShape;
-    ReferenceGeometry bGeoShape;
-    ArraySimple<UInt> points;
-    std::vector<ID> pointsMarkers;
-    ArraySimple<UInt> edges;
-    std::vector<ID> edgesMarkers;
-    ArraySimple<UInt> faces;
-    std::vector<ID> facesMarkers;
+    ID regionMarkerID;
+    ReferenceShapes refShape;
+    ReferenceShapes bRefShape;
+    UInt numBoundaryPoints;
+    UInt numVertices;
+    UInt numBoundaryVertices;
+    bool isPartitioned;
+    ArraySimple<Real> points;
+    std::vector<ID> pointMarkers;
+    std::vector<ID> pointIDs;
+    ArraySimple<UInt> ridges;
+    std::vector<ID> ridgeMarkers;
+    std::vector<ID> ridgeIDs;
+    UInt numBoundaryFacets;
+    ArraySimple<UInt> facets;
+    std::vector<ID> facetMarkers;
+    std::vector<ID> facetIDs;
     ArraySimple<UInt> elements;
-    std::vector<ID> elementsMarkers;
+    std::vector<ID> elementMarkers;
+    std::vector<ID> elementIDs;
 
+    BareMesh();
+    void clear();
 };
+
+template <typename GeoShapeType>
+BareMesh<GeoShapeType>::BareMesh() : isPartitioned (false) {}
+
+template <typename GeoShapeType>
+void BareMesh<GeoShapeType>::clear()
+{
+    clearVector ( points );
+    clearVector ( pointMarkers );
+    clearVector ( pointIDs );
+    clearVector ( ridges );
+    clearVector ( ridgeMarkers );
+    clearVector ( ridgeIDs );
+    clearVector ( facets );
+    clearVector ( facetMarkers );
+    clearVector ( facetIDs );
+    clearVector ( elements );
+    clearVector ( elementMarkers );
+    clearVector ( elementIDs );
+}
+
+}
 
 #endif /* BAREMESH_HPP_ */

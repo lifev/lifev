@@ -85,306 +85,458 @@ typedef LifeV::Preconditioner             basePrec_Type;
 typedef boost::shared_ptr<basePrec_Type>  basePrecPtr_Type;
 typedef LifeV::PreconditionerIfpack       prec_Type;
 typedef boost::shared_ptr<prec_Type>      precPtr_Type;
-typedef boost::function< Real( Real const &,
-                               Real const &,
-                               Real const &,
-                               Real const &,
-                               UInt const & ) > function_Type;
+typedef boost::function < Real ( Real const&,
+                                 Real const&,
+                                 Real const&,
+                                 Real const&,
+                                 UInt const& ) > function_Type;
 }
 
-void printErrors( const vector_Type& solution, fespacePtr_Type uFESpace, bool verbose )
+void printErrors ( const vector_Type& solution, fespacePtr_Type uFESpace, bool verbose )
 {
-    vector_Type velocity( solution, Repeated );
+    vector_Type velocity ( solution, Repeated );
     Real uRelativeError, uL2Error;
     uL2Error = uFESpace->l2Error (Laplacian::uexact, velocity, 0, &uRelativeError );
-    if( verbose ) std::cout << "Velocity" << std::endl;
-    if( verbose ) std::cout << "  L2 error      : " << uL2Error << std::endl;
-    if( verbose ) std::cout << "  Relative error: " << uRelativeError << std::endl;
+    if ( verbose )
+    {
+        std::cout << "Velocity" << std::endl;
+    }
+    if ( verbose )
+    {
+        std::cout << "  L2 error      : " << uL2Error << std::endl;
+    }
+    if ( verbose )
+    {
+        std::cout << "  Relative error: " << uRelativeError << std::endl;
+    }
 }
 
 
 int
-main( int argc, char** argv )
+main ( int argc, char** argv )
 {
     // +-----------------------------------------------+
     // |            Initialization of MPI              |
     // +-----------------------------------------------+
 #ifdef HAVE_MPI
-    MPI_Init(&argc, &argv);
+    MPI_Init (&argc, &argv);
 #endif
 
     {
 
 #ifdef HAVE_MPI
-    boost::shared_ptr<Epetra_Comm> Comm( new Epetra_MpiComm( MPI_COMM_WORLD ) );
+        boost::shared_ptr<Epetra_Comm> Comm ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
 #else
-    boost::shared_ptr<Epetra_Comm> Comm( new Epetra_SerialComm );
+        boost::shared_ptr<Epetra_Comm> Comm ( new Epetra_SerialComm );
 #endif
 
-    const bool verbose( Comm->MyPID() == 0 );
-    if( verbose ){
-        std::cout
-            << " +-----------------------------------------------+" << std::endl
-            << " |             LinearSolver Test                 |" << std::endl
-            << " +-----------------------------------------------+" << std::endl
-            << std::endl
-            << " +-----------------------------------------------+" << std::endl
-            << " |           Author: Gwenol Grandperrin          |" << std::endl
-            << " |             Date: 2010-08-03                  |" << std::endl
-            << " +-----------------------------------------------+" << std::endl
-            << std::endl;
+        const bool verbose ( Comm->MyPID() == 0 );
+        if ( verbose )
+        {
+            std::cout
+                    << " +-----------------------------------------------+" << std::endl
+                    << " |             LinearSolver Test                 |" << std::endl
+                    << " +-----------------------------------------------+" << std::endl
+                    << std::endl
+                    << " +-----------------------------------------------+" << std::endl
+                    << " |           Author: Gwenol Grandperrin          |" << std::endl
+                    << " |             Date: 2010-08-03                  |" << std::endl
+                    << " +-----------------------------------------------+" << std::endl
+                    << std::endl;
 
-        std::cout << "[Initilization of MPI]" << std::endl;
+            std::cout << "[Initilization of MPI]" << std::endl;
 #ifdef HAVE_MPI
-        std::cout << "Using MPI (" << Comm->NumProc() << " proc.)" << std::endl;
+            std::cout << "Using MPI (" << Comm->NumProc() << " proc.)" << std::endl;
 #else
-        std::cout << "Using serial version" << std::endl;
+            std::cout << "Using serial version" << std::endl;
 #endif
-    }
+        }
 
-    // +-----------------------------------------------+
-    // |               Loading the data                |
-    // +-----------------------------------------------+
-    if( verbose ) std::cout << std::endl << "[Loading the data]" << std::endl;
-    LifeChrono globalChrono;
+        // +-----------------------------------------------+
+        // |               Loading the data                |
+        // +-----------------------------------------------+
+        if ( verbose )
+        {
+            std::cout << std::endl << "[Loading the data]" << std::endl;
+        }
+        LifeChrono globalChrono;
 
-    globalChrono.start();
+        globalChrono.start();
 
-    // ********** GetPot **********
-    GetPot command_line( argc, argv );
-    const std::string dataFileName = command_line.follow( "data", 2, "-f", "--file" );
-    GetPot dataFile( dataFileName );
-    // ****************************
+        // ********** GetPot **********
+        GetPot command_line ( argc, argv );
+        const std::string dataFileName = command_line.follow ( "data", 2, "-f", "--file" );
+        GetPot dataFile ( dataFileName );
+        // ****************************
 
-    // Space discretization
-    const UInt numMeshElem    = dataFile( "mesh/num_elements", 10);
-    const std::string uOrder  = dataFile( "finite_element/velocity", "P1" );
+        // Space discretization
+        const UInt numMeshElem    = dataFile ( "mesh/num_elements", 10);
+        const std::string uOrder  = dataFile ( "finite_element/velocity", "P1" );
 
-    // Solution initialization
-    Laplacian::setModes( 1, 1, 1 );
+        // Solution initialization
+        Laplacian::setModes ( 1, 1, 1 );
 
-    // +-----------------------------------------------+
-    // |               Loading the mesh                |
-    // +-----------------------------------------------+
-    if( verbose ) std::cout << std::endl << "[Loading the mesh]" << std::endl;
+        // +-----------------------------------------------+
+        // |               Loading the mesh                |
+        // +-----------------------------------------------+
+        if ( verbose )
+        {
+            std::cout << std::endl << "[Loading the mesh]" << std::endl;
+        }
 
-    meshPtr_Type fullMeshPtr( new mesh_Type );
-    const UInt & geoDim = static_cast<UInt>( mesh_Type::S_geoDimensions );
-
-
-    // Building the mesh from the source
-
-    regularMesh3D( *fullMeshPtr,
-                   1,
-                   numMeshElem, numMeshElem, numMeshElem,
-                   false,
-                   1.0, 1.0, 1.0,
-                   0.0, 0.0, 0.0 );
-
-    if( verbose ) std::cout << "Mesh source: regular mesh("
-                           << numMeshElem << "x" << numMeshElem << "x" << numMeshElem << ")" << std::endl;
-
-    if( verbose ) std::cout << "Mesh size  : " << MeshUtility::MeshStatistics::computeSize( *fullMeshPtr ).maxH << std::endl;
-    if( verbose ) std::cout << "Partitioning the mesh ... " << std::endl;
-    MeshPartitioner< mesh_Type >   meshPart( fullMeshPtr, Comm );
-    fullMeshPtr.reset(); //Freeing the global mesh to save memory
-
-    // +-----------------------------------------------+
-    // |            Creating the FE spaces             |
-    // +-----------------------------------------------+
-    if( verbose ) std::cout << std::endl << "[Creating the FE spaces]" << std::endl;
-    if( verbose ) std::cout << "FE for the velocity: " << uOrder << std::endl;
-
-    if( verbose ) std::cout << "Building the velocity FE space ... " << std::flush;
-    fespacePtr_Type uFESpace( new fespace_Type( meshPart, uOrder, geoDim, Comm ) );
-    if( verbose ) std::cout << "ok." << std::endl;
-
-    // Pressure offset in the vector
-    UInt numDofs = geoDim * uFESpace->dof().numTotalDof();
-
-    if( verbose ) std::cout << "Total Velocity Dof: " << numDofs << std::endl;
-
-    // +-----------------------------------------------+
-    // |             Boundary conditions               |
-    // +-----------------------------------------------+
-    if( verbose ) std::cout << std::endl << "[Boundary conditions]" << std::endl;
-    BCHandler bcHandler;
-    BCFunctionBase uExact( Laplacian::uexact );
-    BCFunctionBase fRHS( Laplacian::f );
-
-    if( verbose ) std::cout << "Setting Dirichlet BC... " << std::flush;
-    for( UInt iDirichlet( 1 ); iDirichlet<=26; ++iDirichlet )
-    {
-        bcHandler.addBC( "Wall", iDirichlet, Essential, Full, uExact, geoDim );
-    }
-    if( verbose ) std::cout << "ok." << std::endl;
-
-    // Update the BCHandler (internal data related to FE)
-    bcHandler.bcUpdate( *uFESpace->mesh(), uFESpace->feBd(), uFESpace->dof() );
-
-    // +-----------------------------------------------+
-    // |              Matrices Assembly                |
-    // +-----------------------------------------------+
-    if( verbose ) std::cout << std::endl << "[Matrices Assembly]" << std::endl;
-
-    if( verbose ) std::cout << "Setting up assembler... " << std::flush;
-    ADRAssembler<mesh_Type,matrix_Type,vector_Type> adrAssembler;
-    adrAssembler.setup( uFESpace, uFESpace );
-    if( verbose ) std::cout << "done" << std::endl;
-
-    if( verbose ) std::cout << "Defining the matrices... " << std::flush;
-    boost::shared_ptr<matrix_Type> systemMatrix( new matrix_Type( uFESpace->map() ) );
-    if( verbose ) std::cout << "done" << std::endl;
-
-    if( verbose ) std::cout << "Adding the viscous stress... " << std::flush;
-    adrAssembler.addDiffusion( systemMatrix, 1.0 );
-    if( verbose ) std::cout << "done" << std::endl;
-
-    // +-----------------------------------------------+
-    // |            Solver initialization              |
-    // +-----------------------------------------------+
-    if( verbose ) std::cout << std::endl << "[Solvers initialization]" << std::endl;
-    prec_Type* precRawPtr;
-    basePrecPtr_Type precPtr;
-    precRawPtr = new prec_Type;
-    precRawPtr->setDataFromGetPot( dataFile, "prec" );
-    precPtr.reset( precRawPtr );
-
-    if( verbose ) std::cout << "Setting up SolverAztecOO... " << std::flush;
-    SolverAztecOO linearSolver1;
-    linearSolver1.setCommunicator( Comm );
-    linearSolver1.setDataFromGetPot( dataFile, "solver" );
-    linearSolver1.setTolerance( 1e-10 );
-    linearSolver1.setPreconditioner( precPtr );
-    if( verbose ) std::cout << "done" << std::endl;
-
-    if( verbose ) std::cout << "Setting up LinearSolver (Belos)... " << std::flush;
-    Teuchos::RCP< Teuchos::ParameterList > belosList2 = Teuchos::rcp ( new Teuchos::ParameterList );
-    belosList2 = Teuchos::getParametersFromXmlFile( "SolverParamList2.xml" );
-
-    LinearSolver linearSolver2;
-    linearSolver2.setCommunicator( Comm );
-    linearSolver2.setParameters( *belosList2 );
-    linearSolver2.setPreconditioner( precPtr );
-    if( verbose ) std::cout << "done" << std::endl;
-    linearSolver2.showMe();
-
-    if( verbose ) std::cout << "Setting up LinearSolver (AztecOO)... " << std::flush;
-    Teuchos::RCP< Teuchos::ParameterList > belosList3 = Teuchos::rcp ( new Teuchos::ParameterList );
-    belosList3 = Teuchos::getParametersFromXmlFile( "SolverParamList3.xml" );
-
-    LinearSolver linearSolver3;
-    linearSolver3.setCommunicator( Comm );
-    linearSolver3.setParameters( *belosList3 );
-    linearSolver3.setPreconditioner( precPtr );
-    if( verbose ) std::cout << "done" << std::endl;
-    linearSolver3.showMe();
-
-    // +-----------------------------------------------+
-    // |                   Simulation                  |
-    // +-----------------------------------------------+
-    if( verbose ) std::cout<< std::endl << "[Initialization of the simulation]" << std::endl;
-    if( verbose ) std::cout << "Creation of vectors... " << std::flush;
-
-    boost::shared_ptr<vector_Type> rhs;
-    rhs.reset( new vector_Type( uFESpace->map(), Repeated ) );
-
-    vector_Type fInterpolated( uFESpace->map(), Repeated );
-    adrAssembler.addMassRhs( *rhs, fRHS, 0.0 );
-    rhs->globalAssemble();
-    if( verbose ) std::cout << "done" << std::endl;
-
-    fInterpolated = 0.0;
-    uFESpace->interpolate( uExact, fInterpolated, 0.0 );
+        meshPtr_Type fullMeshPtr ( new mesh_Type ( Comm ) );
+        const UInt& geoDim = static_cast<UInt> ( mesh_Type::S_geoDimensions );
 
 
-    if( verbose ) std::cout << "Applying BC... " << std::flush;
-    systemMatrix->globalAssemble();
-    boost::shared_ptr<vector_Type> rhsBC;
-    rhsBC.reset( new vector_Type( *rhs, Unique ) );
-    bcManage( *systemMatrix, *rhsBC, *uFESpace->mesh(), uFESpace->dof(), bcHandler, uFESpace->feBd(), 1.0, 0.0 );
-    if( verbose ) std::cout << "done" << std::endl;
+        // Building the mesh from the source
 
-    if( verbose ) std::cout << std::endl << "Solving the system with SolverAztec00... " << std::endl;
-    boost::shared_ptr<vector_Type> solution;
-    solution.reset( new vector_Type( uFESpace->map(), Unique ) );
-    linearSolver1.setMatrix( *systemMatrix );
-    linearSolver1.solveSystem( *rhsBC, *solution, systemMatrix );
+        regularMesh3D ( *fullMeshPtr,
+                        1,
+                        numMeshElem, numMeshElem, numMeshElem,
+                        false,
+                        1.0, 1.0, 1.0,
+                        0.0, 0.0, 0.0 );
 
-    if( verbose ) std::cout << std::endl << "Solving the system with LinearSolver (Belos)... " << std::endl;
-    boost::shared_ptr<vector_Type> solution2;
-    solution2.reset( new vector_Type( uFESpace->map(), Unique ) );
-    linearSolver2.setOperator( systemMatrix );
-    linearSolver2.setRightHandSide( rhsBC );
-    linearSolver2.solve( solution2 );
+        if ( verbose ) std::cout << "Mesh source: regular mesh("
+                                     << numMeshElem << "x" << numMeshElem << "x" << numMeshElem << ")" << std::endl;
 
-    if( verbose ) std::cout << std::endl << "Solving the system with LinearSolver (AztecOO)... " << std::endl;
-    boost::shared_ptr<vector_Type> solution3;
-    solution3.reset( new vector_Type( uFESpace->map(), Unique ) );
-    linearSolver3.setOperator( systemMatrix );
-    linearSolver3.setRightHandSide( rhsBC );
-    linearSolver3.solve( solution3 );
+        if ( verbose )
+        {
+            std::cout << "Mesh size  : " << MeshUtility::MeshStatistics::computeSize ( *fullMeshPtr ).maxH << std::endl;
+        }
+        if ( verbose )
+        {
+            std::cout << "Partitioning the mesh ... " << std::endl;
+        }
+        meshPtr_Type meshPtr;
+        {
+            MeshPartitioner< mesh_Type > meshPart ( fullMeshPtr, Comm );
+            meshPtr = meshPart.meshPartition();
+        }
+        fullMeshPtr.reset(); //Freeing the global mesh to save memory
 
-    // +-----------------------------------------------+
-    // |             Computing the error               |
-    // +-----------------------------------------------+
-    if( verbose ) std::cout << std::endl << "[Errors computation]" << std::endl;
-    vector_Type solutionErr( *solution );
-    solutionErr *= 0.0;
-    uFESpace->interpolate( static_cast<function_Type>( Laplacian::uexact ), solutionErr, 0.0 );
-    solutionErr -= *solution;
-    solutionErr.abs();
+        // +-----------------------------------------------+
+        // |            Creating the FE spaces             |
+        // +-----------------------------------------------+
+        if ( verbose )
+        {
+            std::cout << std::endl << "[Creating the FE spaces]" << std::endl;
+        }
+        if ( verbose )
+        {
+            std::cout << "FE for the velocity: " << uOrder << std::endl;
+        }
 
-    vector_Type solution2Err( *solution2 );
-    solution2Err *= 0.0;
-    uFESpace->interpolate( static_cast<function_Type>( Laplacian::uexact ),solution2Err, 0.0 );
-    solution2Err -= *solution2;
-    solution2Err.abs();
+        if ( verbose )
+        {
+            std::cout << "Building the velocity FE space ... " << std::flush;
+        }
+        fespacePtr_Type uFESpace ( new fespace_Type ( meshPtr, uOrder, geoDim, Comm ) );
+        if ( verbose )
+        {
+            std::cout << "ok." << std::endl;
+        }
 
-    vector_Type solution3Err( *solution3 );
-    solution3Err *= 0.0;
-    uFESpace->interpolate( static_cast<function_Type>( Laplacian::uexact ), solution3Err, 0.0 );
-    solution3Err -= *solution3;
-    solution3Err.abs();
+        // Pressure offset in the vector
+        UInt numDofs = geoDim * uFESpace->dof().numTotalDof();
 
-    vector_Type solutionsDiff( *solution2 );
-    solutionsDiff -= *solution;
-    Real solutionsDiffNorm = solutionsDiff.norm2();
+        if ( verbose )
+        {
+            std::cout << "Total Velocity Dof: " << numDofs << std::endl;
+        }
 
-    vector_Type solutionsDiff2( *solution2 );
-    solutionsDiff2 -= *solution3;
-    Real solutionsDiffNorm2 = solutionsDiff2.norm2();
+        // +-----------------------------------------------+
+        // |             Boundary conditions               |
+        // +-----------------------------------------------+
+        if ( verbose )
+        {
+            std::cout << std::endl << "[Boundary conditions]" << std::endl;
+        }
+        BCHandler bcHandler;
+        BCFunctionBase uExact ( Laplacian::uexact );
+        BCFunctionBase fRHS ( Laplacian::f );
 
-    if( verbose ) std::cout << "AztecOO solver" << std::endl;
-    printErrors( *solution, uFESpace,verbose );
+        if ( verbose )
+        {
+            std::cout << "Setting Dirichlet BC... " << std::flush;
+        }
+        for ( UInt iDirichlet ( 1 ); iDirichlet <= 26; ++iDirichlet )
+        {
+            bcHandler.addBC ( "Wall", iDirichlet, Essential, Full, uExact, geoDim );
+        }
+        if ( verbose )
+        {
+            std::cout << "ok." << std::endl;
+        }
 
-    if( verbose ) std::cout << "Linear solver Belos" << std::endl;
-    printErrors( *solution2, uFESpace,verbose );
+        // Update the BCHandler (internal data related to FE)
+        bcHandler.bcUpdate ( *uFESpace->mesh(), uFESpace->feBd(), uFESpace->dof() );
 
-    if( verbose ) std::cout << "Linear solver AztecOO" << std::endl;
-    printErrors( *solution3, uFESpace,verbose );
+        // +-----------------------------------------------+
+        // |              Matrices Assembly                |
+        // +-----------------------------------------------+
+        if ( verbose )
+        {
+            std::cout << std::endl << "[Matrices Assembly]" << std::endl;
+        }
 
-    if( verbose ) std::cout << "Difference between the Azteco and the Belos solutions: " << solutionsDiffNorm << std::endl;
-    if( solutionsDiffNorm > TEST_TOLERANCE )
-    {
-        if( verbose ) std::cout << "The difference between the two solutions is too large." << std::endl;
-        if( verbose ) std::cout << "Test status: FAILED" << std::endl;
-        return( EXIT_FAILURE );
-    }
-    if( verbose ) std::cout << "Difference between the two AztecOO solvers solutions: " << solutionsDiffNorm2 << std::endl;
-    if( solutionsDiffNorm2 > TEST_TOLERANCE )
-    {
-        if( verbose ) std::cout << "The difference between the two solutions is too large." << std::endl;
-        if( verbose ) std::cout << "Test status: FAILED" << std::endl;
-        return( EXIT_FAILURE );
-    }
+        if ( verbose )
+        {
+            std::cout << "Setting up assembler... " << std::flush;
+        }
+        ADRAssembler<mesh_Type, matrix_Type, vector_Type> adrAssembler;
+        adrAssembler.setup ( uFESpace, uFESpace );
+        if ( verbose )
+        {
+            std::cout << "done" << std::endl;
+        }
 
-    // +-----------------------------------------------+
-    // |            Ending the simulation              |
-    // +-----------------------------------------------+
-    globalChrono.stop();
-    if( verbose ) std::cout << std::endl << "Total simulation time: " << globalChrono.diff() << " s." << std::endl;
-    if( verbose ) std::cout << std::endl << "[[END_SIMULATION]]" << std::endl;
+        if ( verbose )
+        {
+            std::cout << "Defining the matrices... " << std::flush;
+        }
+        boost::shared_ptr<matrix_Type> systemMatrix ( new matrix_Type ( uFESpace->map() ) );
+        if ( verbose )
+        {
+            std::cout << "done" << std::endl;
+        }
+
+        if ( verbose )
+        {
+            std::cout << "Adding the viscous stress... " << std::flush;
+        }
+        adrAssembler.addDiffusion ( systemMatrix, 1.0 );
+        if ( verbose )
+        {
+            std::cout << "done" << std::endl;
+        }
+
+        // +-----------------------------------------------+
+        // |            Solver initialization              |
+        // +-----------------------------------------------+
+        if ( verbose )
+        {
+            std::cout << std::endl << "[Solvers initialization]" << std::endl;
+        }
+        prec_Type* precRawPtr;
+        basePrecPtr_Type precPtr;
+        precRawPtr = new prec_Type;
+        precRawPtr->setDataFromGetPot ( dataFile, "prec" );
+        precPtr.reset ( precRawPtr );
+
+        if ( verbose )
+        {
+            std::cout << "Setting up SolverAztecOO... " << std::flush;
+        }
+        SolverAztecOO linearSolver1;
+        linearSolver1.setCommunicator ( Comm );
+        linearSolver1.setDataFromGetPot ( dataFile, "solver" );
+        linearSolver1.setTolerance ( 1e-10 );
+        linearSolver1.setPreconditioner ( precPtr );
+        if ( verbose )
+        {
+            std::cout << "done" << std::endl;
+        }
+
+        if ( verbose )
+        {
+            std::cout << "Setting up LinearSolver (Belos)... " << std::flush;
+        }
+        Teuchos::RCP< Teuchos::ParameterList > belosList2 = Teuchos::rcp ( new Teuchos::ParameterList );
+        belosList2 = Teuchos::getParametersFromXmlFile ( "SolverParamList2.xml" );
+
+        LinearSolver linearSolver2;
+        linearSolver2.setCommunicator ( Comm );
+        linearSolver2.setParameters ( *belosList2 );
+        linearSolver2.setPreconditioner ( precPtr );
+        if ( verbose )
+        {
+            std::cout << "done" << std::endl;
+        }
+        linearSolver2.showMe();
+
+        if ( verbose )
+        {
+            std::cout << "Setting up LinearSolver (AztecOO)... " << std::flush;
+        }
+        Teuchos::RCP< Teuchos::ParameterList > belosList3 = Teuchos::rcp ( new Teuchos::ParameterList );
+        belosList3 = Teuchos::getParametersFromXmlFile ( "SolverParamList3.xml" );
+
+        LinearSolver linearSolver3;
+        linearSolver3.setCommunicator ( Comm );
+        linearSolver3.setParameters ( *belosList3 );
+        linearSolver3.setPreconditioner ( precPtr );
+        if ( verbose )
+        {
+            std::cout << "done" << std::endl;
+        }
+        linearSolver3.showMe();
+
+        // +-----------------------------------------------+
+        // |                   Simulation                  |
+        // +-----------------------------------------------+
+        if ( verbose )
+        {
+            std::cout << std::endl << "[Initialization of the simulation]" << std::endl;
+        }
+        if ( verbose )
+        {
+            std::cout << "Creation of vectors... " << std::flush;
+        }
+
+        boost::shared_ptr<vector_Type> rhs;
+        rhs.reset ( new vector_Type ( uFESpace->map(), Repeated ) );
+
+        vector_Type fInterpolated ( uFESpace->map(), Repeated );
+        adrAssembler.addMassRhs ( *rhs, fRHS, 0.0 );
+        rhs->globalAssemble();
+        if ( verbose )
+        {
+            std::cout << "done" << std::endl;
+        }
+
+        fInterpolated = 0.0;
+        uFESpace->interpolate ( uExact, fInterpolated, 0.0 );
+
+
+        if ( verbose )
+        {
+            std::cout << "Applying BC... " << std::flush;
+        }
+        systemMatrix->globalAssemble();
+        boost::shared_ptr<vector_Type> rhsBC;
+        rhsBC.reset ( new vector_Type ( *rhs, Unique ) );
+        bcManage ( *systemMatrix, *rhsBC, *uFESpace->mesh(), uFESpace->dof(), bcHandler, uFESpace->feBd(), 1.0, 0.0 );
+        if ( verbose )
+        {
+            std::cout << "done" << std::endl;
+        }
+
+        if ( verbose )
+        {
+            std::cout << std::endl << "Solving the system with SolverAztec00... " << std::endl;
+        }
+        boost::shared_ptr<vector_Type> solution;
+        solution.reset ( new vector_Type ( uFESpace->map(), Unique ) );
+        linearSolver1.setMatrix ( *systemMatrix );
+        linearSolver1.solveSystem ( *rhsBC, *solution, systemMatrix );
+
+        if ( verbose )
+        {
+            std::cout << std::endl << "Solving the system with LinearSolver (Belos)... " << std::endl;
+        }
+        boost::shared_ptr<vector_Type> solution2;
+        solution2.reset ( new vector_Type ( uFESpace->map(), Unique ) );
+        linearSolver2.setOperator ( systemMatrix );
+        linearSolver2.setRightHandSide ( rhsBC );
+        linearSolver2.solve ( solution2 );
+
+        if ( verbose )
+        {
+            std::cout << std::endl << "Solving the system with LinearSolver (AztecOO)... " << std::endl;
+        }
+        boost::shared_ptr<vector_Type> solution3;
+        solution3.reset ( new vector_Type ( uFESpace->map(), Unique ) );
+        linearSolver3.setOperator ( systemMatrix );
+        linearSolver3.setRightHandSide ( rhsBC );
+        linearSolver3.solve ( solution3 );
+
+        // +-----------------------------------------------+
+        // |             Computing the error               |
+        // +-----------------------------------------------+
+        if ( verbose )
+        {
+            std::cout << std::endl << "[Errors computation]" << std::endl;
+        }
+        vector_Type solutionErr ( *solution );
+        solutionErr *= 0.0;
+        uFESpace->interpolate ( static_cast<function_Type> ( Laplacian::uexact ), solutionErr, 0.0 );
+        solutionErr -= *solution;
+        solutionErr.abs();
+
+        vector_Type solution2Err ( *solution2 );
+        solution2Err *= 0.0;
+        uFESpace->interpolate ( static_cast<function_Type> ( Laplacian::uexact ), solution2Err, 0.0 );
+        solution2Err -= *solution2;
+        solution2Err.abs();
+
+        vector_Type solution3Err ( *solution3 );
+        solution3Err *= 0.0;
+        uFESpace->interpolate ( static_cast<function_Type> ( Laplacian::uexact ), solution3Err, 0.0 );
+        solution3Err -= *solution3;
+        solution3Err.abs();
+
+        vector_Type solutionsDiff ( *solution2 );
+        solutionsDiff -= *solution;
+        Real solutionsDiffNorm = solutionsDiff.norm2();
+
+        vector_Type solutionsDiff2 ( *solution2 );
+        solutionsDiff2 -= *solution3;
+        Real solutionsDiffNorm2 = solutionsDiff2.norm2();
+
+        if ( verbose )
+        {
+            std::cout << "AztecOO solver" << std::endl;
+        }
+        printErrors ( *solution, uFESpace, verbose );
+
+        if ( verbose )
+        {
+            std::cout << "Linear solver Belos" << std::endl;
+        }
+        printErrors ( *solution2, uFESpace, verbose );
+
+        if ( verbose )
+        {
+            std::cout << "Linear solver AztecOO" << std::endl;
+        }
+        printErrors ( *solution3, uFESpace, verbose );
+
+        if ( verbose )
+        {
+            std::cout << "Difference between the Azteco and the Belos solutions: " << solutionsDiffNorm << std::endl;
+        }
+        if ( solutionsDiffNorm > TEST_TOLERANCE )
+        {
+            if ( verbose )
+            {
+                std::cout << "The difference between the two solutions is too large." << std::endl;
+            }
+            if ( verbose )
+            {
+                std::cout << "Test status: FAILED" << std::endl;
+            }
+            return ( EXIT_FAILURE );
+        }
+        if ( verbose )
+        {
+            std::cout << "Difference between the two AztecOO solvers solutions: " << solutionsDiffNorm2 << std::endl;
+        }
+        if ( solutionsDiffNorm2 > TEST_TOLERANCE )
+        {
+            if ( verbose )
+            {
+                std::cout << "The difference between the two solutions is too large." << std::endl;
+            }
+            if ( verbose )
+            {
+                std::cout << "Test status: FAILED" << std::endl;
+            }
+            return ( EXIT_FAILURE );
+        }
+
+        // +-----------------------------------------------+
+        // |            Ending the simulation              |
+        // +-----------------------------------------------+
+        globalChrono.stop();
+        if ( verbose )
+        {
+            std::cout << std::endl << "Total simulation time: " << globalChrono.diff() << " s." << std::endl;
+        }
+        if ( verbose )
+        {
+            std::cout << std::endl << "[[END_SIMULATION]]" << std::endl;
+        }
 
     }
 
@@ -394,7 +546,7 @@ main( int argc, char** argv )
 
     /*if( verbose )*/ std::cout << "Test status: SUCCESS" << std::endl;
 
-    return( EXIT_SUCCESS );
+    return ( EXIT_SUCCESS );
 }
 
 

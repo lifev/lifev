@@ -34,9 +34,9 @@
   the first is a Raviart-Thomas field, the second is a P1 vector field and the third is a
   P0 scalar field. Then the function is created, using the one written in user_fun.hpp,
   and the fields are added. After that there is a computation of an error between the FEFunction
-  and its "free function" equivalence. Since we want to export the FEFunction we need to 
+  and its "free function" equivalence. Since we want to export the FEFunction we need to
   interpolate it on a finite element space, in this case P0, so we call the interpolate over a new
-  field. The last part of the code contains the standard part to export the fields and the 
+  field. The last part of the code contains the standard part to export the fields and the
   interpolated function.
 */
 
@@ -48,7 +48,7 @@
 #include "user_fun.hpp"
 
 // ===================================================
-//!                    Namespaces 
+//!                    Namespaces
 // ===================================================
 
 using namespace LifeV;
@@ -72,24 +72,24 @@ struct fefct::Private
 //!                  Constructors
 // ===================================================
 
-fefct::fefct( int argc,
-              char** argv )
-        : Members( new Private )
+fefct::fefct ( int argc,
+               char** argv )
+    : Members ( new Private )
 {
-    GetPot command_line(argc, argv);
-    const string data_file_name = command_line.follow("data", 2, "-f", "--file");
-    GetPot dataFile( data_file_name );
+    GetPot command_line (argc, argv);
+    const string data_file_name = command_line.follow ("data", 2, "-f", "--file");
+    GetPot dataFile ( data_file_name );
 
     Members->data_file_name = data_file_name;
     Members->discretization_section = "fefct";
 
 #ifdef EPETRA_MPI
     std::cout << "Epetra Initialization" << std::endl;
-    Members->comm.reset( new Epetra_MpiComm( MPI_COMM_WORLD ) );
+    Members->comm.reset ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
     int ntasks;
-    MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
+    MPI_Comm_size (MPI_COMM_WORLD, &ntasks);
 #else
-    Members->comm.reset( new Epetra_SerialComm() );
+    Members->comm.reset ( new Epetra_SerialComm() );
 #endif
 
 }
@@ -116,7 +116,7 @@ fefct::run()
     chronoTotal.start();
 
     // Reading from data file
-    GetPot dataFile( Members->data_file_name.c_str() );
+    GetPot dataFile ( Members->data_file_name.c_str() );
 
     // Create the displayer
     Displayer displayer ( Members->comm );
@@ -130,16 +130,21 @@ fefct::run()
     MeshData meshData;
 
     // Set up the mesh file
-    meshData.setup( dataFile,  Members->discretization_section + "/space_discretization");
+    meshData.setup ( dataFile,  Members->discretization_section + "/space_discretization");
 
     // Create the the mesh
-    regionMeshPtr_Type fullMeshPtr( new regionMesh_Type );
+    regionMeshPtr_Type fullMeshPtr ( new regionMesh_Type ( Members->comm ) );
 
     // Set up the mesh
-    readMesh( *fullMeshPtr, meshData );
+    readMesh ( *fullMeshPtr, meshData );
 
-    // Partition the mesh using ParMetis
-    MeshPartitioner < regionMesh_Type >  meshPart( fullMeshPtr, Members->comm );
+    // Create local mesh using ParMetis partitioner
+    regionMeshPtr_Type meshPtr;
+    {
+        // local scope to properly delete the meshPart object
+        MeshPartitioner < regionMesh_Type >  meshPart ( fullMeshPtr, Members->comm );
+        meshPtr = meshPart.meshPartition();
+    }
 
     // Stop chronoReadAndPartitionMesh
     chronoReadAndPartitionMesh.stop();
@@ -154,19 +159,19 @@ fefct::run()
     chronoFiniteElementSpace.start();
 
     // Finite element space of the first scalar field - RT0
-    FESpacePtr_Type scalarField1_FESpace ( new FESpace_Type ( meshPart, feTetraP0, quadRuleTetra15pt, 
+    FESpacePtr_Type scalarField1_FESpace ( new FESpace_Type ( meshPtr, feTetraP0, quadRuleTetra15pt,
                                                               quadRuleTria4pt, 1, Members->comm ) );
 
     // Finite element space of the second scalar field - P1
-    FESpacePtr_Type scalarField2_FESpace ( new FESpace_Type ( meshPart, feTetraP1, quadRuleTetra15pt,
+    FESpacePtr_Type scalarField2_FESpace ( new FESpace_Type ( meshPtr, feTetraP1, quadRuleTetra15pt,
                                                               quadRuleTria4pt, 1, Members->comm ) );
 
     // Finite element space of the vector field - P0
-    FESpacePtr_Type vectorField_FESpace ( new FESpace_Type ( meshPart, feTetraP0, quadRuleTetra15pt,
+    FESpacePtr_Type vectorField_FESpace ( new FESpace_Type ( meshPtr, feTetraP0, quadRuleTetra15pt,
                                                              quadRuleTria4pt, 3, Members->comm ) );
 
     // Finite element space for the function visualization - P0
-    FESpacePtr_Type function_FESpace ( new FESpace_Type ( meshPart, feTetraP0, quadRuleTetra15pt,
+    FESpacePtr_Type function_FESpace ( new FESpace_Type ( meshPtr, feTetraP0, quadRuleTetra15pt,
                                                           quadRuleTria4pt, 1, Members->comm ) );
 
     // Stop chronoFiniteElementSpace
@@ -231,92 +236,92 @@ fefct::run()
 
     // Compute the error
     Real error = 0;
-    error = std::fabs( ( std::sin(1.) + 4. ) / 3. - function.eval( iElem, point, 0. ) );
+    error = std::fabs ( ( std::sin (1.) + 4. ) / 3. - function.eval ( iElem, point, 0. ) );
 
     // Interpolate the value of the function
-    function.interpolate( *scalarFieldFunction );
+    function.interpolate ( *scalarFieldFunction );
 
     // Set the exporter for the fields
     exporterPtr_Type exporter;
 
     // Type of the exporter
-    std::string const exporterType =  dataFile( "exporter/type", "hdf5");
+    std::string const exporterType =  dataFile ( "exporter/type", "hdf5");
 
     // Choose the exporter
 #ifdef HAVE_HDF5
-    if ( exporterType.compare("hdf5") == 0 )
+    if ( exporterType.compare ("hdf5") == 0 )
     {
-        exporter.reset( new ExporterHDF5< regionMesh_Type > ( dataFile, dataFile( "exporter/file_name", "FieldFunction" ) ) );
+        exporter.reset ( new ExporterHDF5< regionMesh_Type > ( dataFile, dataFile ( "exporter/file_name", "FieldFunction" ) ) );
 
         // Set directory where to save the solution
-        exporter->setPostDir( dataFile( "exporter/folder", "./" ) );
+        exporter->setPostDir ( dataFile ( "exporter/folder", "./" ) );
 
-        exporter->setMeshProcId( meshPart.meshPartition(), Members->comm->MyPID() );
+        exporter->setMeshProcId ( meshPtr, Members->comm->MyPID() );
     }
     else
 #endif
     {
-        if ( exporterType.compare("none") == 0 )
+        if ( exporterType.compare ("none") == 0 )
         {
-            exporter.reset( new ExporterEmpty< regionMesh_Type > ( dataFile, dataFile( "exporter/file_name", "FieldFunction" ) ) );
+            exporter.reset ( new ExporterEmpty< regionMesh_Type > ( dataFile, dataFile ( "exporter/file_name", "FieldFunction" ) ) );
 
             // Set directory where to save the solution
-            exporter->setPostDir( dataFile( "exporter/folder", "./" ) );
+            exporter->setPostDir ( dataFile ( "exporter/folder", "./" ) );
 
-            exporter->setMeshProcId( meshPart.meshPartition(), Members->comm->MyPID() );
+            exporter->setMeshProcId ( meshPtr, Members->comm->MyPID() );
         }
         else
         {
-            exporter.reset( new ExporterEnsight< regionMesh_Type > ( dataFile, dataFile( "exporter/file_name", "FieldFunction" ) ) );
+            exporter.reset ( new ExporterEnsight< regionMesh_Type > ( dataFile, dataFile ( "exporter/file_name", "FieldFunction" ) ) );
 
             // Set directory where to save the solution
-            exporter->setPostDir( dataFile( "exporter/folder", "./" ) );
+            exporter->setPostDir ( dataFile ( "exporter/folder", "./" ) );
 
-            exporter->setMeshProcId( meshPart.meshPartition(), Members->comm->MyPID() );
+            exporter->setMeshProcId ( meshPtr, Members->comm->MyPID() );
         }
     }
 
-    const std::string fieldName = dataFile( "exporter/name_field", "Field" );
+    const std::string fieldName = dataFile ( "exporter/name_field", "Field" );
 
     // Add the first scalar field to the exporter
-    exporter->addVariable( ExporterData< regionMesh_Type >::ScalarField,
-                           fieldName + "1",
-                           scalarField1_FESpace,
-                           scalarField1->getVectorPtr(),
-                           static_cast<UInt>( 0 ),
-                           ExporterData< regionMesh_Type >::UnsteadyRegime,
-                           ExporterData< regionMesh_Type >::Cell );
+    exporter->addVariable ( ExporterData< regionMesh_Type >::ScalarField,
+                            fieldName + "1",
+                            scalarField1_FESpace,
+                            scalarField1->getVectorPtr(),
+                            static_cast<UInt> ( 0 ),
+                            ExporterData< regionMesh_Type >::UnsteadyRegime,
+                            ExporterData< regionMesh_Type >::Cell );
 
     // Add the second scalar field to the exporter
-    exporter->addVariable( ExporterData< regionMesh_Type >::ScalarField,
-                           fieldName + "2",
-                           scalarField2_FESpace,
-                           scalarField2->getVectorPtr(),
-                           static_cast<UInt>( 0 ),
-                           ExporterData< regionMesh_Type >::UnsteadyRegime );
+    exporter->addVariable ( ExporterData< regionMesh_Type >::ScalarField,
+                            fieldName + "2",
+                            scalarField2_FESpace,
+                            scalarField2->getVectorPtr(),
+                            static_cast<UInt> ( 0 ),
+                            ExporterData< regionMesh_Type >::UnsteadyRegime );
 
     // Add the vector field to the exporter
-    exporter->addVariable( ExporterData< regionMesh_Type >::VectorField,
-                           fieldName + "3",
-                           vectorField_FESpace,
-                           vectorField->getVectorPtr(),
-                           static_cast<UInt>( 0 ),
-                           ExporterData< regionMesh_Type >::UnsteadyRegime,
-                           ExporterData< regionMesh_Type >::Cell );
+    exporter->addVariable ( ExporterData< regionMesh_Type >::VectorField,
+                            fieldName + "3",
+                            vectorField_FESpace,
+                            vectorField->getVectorPtr(),
+                            static_cast<UInt> ( 0 ),
+                            ExporterData< regionMesh_Type >::UnsteadyRegime,
+                            ExporterData< regionMesh_Type >::Cell );
 
-    const std::string fctName =  dataFile( "exporter/name_fct", "Function" );
+    const std::string fctName =  dataFile ( "exporter/name_fct", "Function" );
 
     // Add the scalar field representing the function to the exporter
-    exporter->addVariable( ExporterData< regionMesh_Type >::ScalarField,
-                           fctName + "1",
-                           function_FESpace,
-                           scalarFieldFunction->getVectorPtr(),
-                           static_cast<UInt>( 0 ),
-                           ExporterData< regionMesh_Type >::UnsteadyRegime,                           
-                           ExporterData< regionMesh_Type >::Cell );
+    exporter->addVariable ( ExporterData< regionMesh_Type >::ScalarField,
+                            fctName + "1",
+                            function_FESpace,
+                            scalarFieldFunction->getVectorPtr(),
+                            static_cast<UInt> ( 0 ),
+                            ExporterData< regionMesh_Type >::UnsteadyRegime,
+                            ExporterData< regionMesh_Type >::Cell );
 
     // Export all the solutions
-    exporter->postProcess(0);
+    exporter->postProcess (0);
 
     // Return the error
     return error;

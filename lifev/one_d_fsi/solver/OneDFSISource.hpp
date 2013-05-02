@@ -47,7 +47,7 @@ namespace LifeV
 /*!
  *  @author Vincent Martin, Cristiano Malossi
  *  @see Equations and networks of 1-D models \cite FormaggiaLamponi2003
- *  @see Geometrical multiscale coupling of 1-D models \cite Malossi2011Algorithms \cite Malossi2011Algorithms1D
+ *  @see Geometrical multiscale coupling of 1-D models \cite Malossi2011Algorithms \cite Malossi2011Algorithms1D \cite BonnemainMalossi2012LVAD
  *
  *  The conservative form of the generic hyperbolic problem is
  *
@@ -87,7 +87,7 @@ public:
     /*!
      * @param physicsPtr pointer to the physics of the problem
      */
-    explicit OneDFSISource( const physicsPtr_Type physicsPtr ) : M_physicsPtr( physicsPtr ) {}
+    explicit OneDFSISource ( const physicsPtr_Type physicsPtr ) : M_physicsPtr ( physicsPtr ) {}
 
     //! Do nothing destructor
     virtual ~OneDFSISource() {}
@@ -105,7 +105,7 @@ public:
      *  @param row row of the source term
      *  @param iNode node of the mesh
      */
-    virtual Real source( const Real& A, const Real& Q, const ID& row, const UInt& iNode ) const = 0;
+    virtual Real source ( const Real& A, const Real& Q, const ID& row, const UInt& iNode ) const = 0;
 
     //! Evaluate the derivative of the source term
     /*!
@@ -115,7 +115,7 @@ public:
      *  @param column column of the derivative of the source term
      *  @param iNode node of the mesh
      */
-    virtual Real dSdU( const Real& A, const Real& Q, const ID& row, const ID& column, const UInt& iNode ) const = 0;
+    virtual Real dSdU ( const Real& A, const Real& Q, const ID& row, const ID& column, const UInt& iNode ) const = 0;
 
     //! Evaluate the non-conservative form of the source term at the foot of the outgoing characteristic.
     /*!
@@ -128,8 +128,8 @@ public:
      *  @param bcNodes list of boundary nodes
      *  @param cfl cfl used to identify the foot of the characteristic
      */
-    virtual Real interpolatedNonConservativeSource( const Real& A, const Real& Q,
-                                                    const ID& row, const container2D_Type& bcNodes, const Real& cfl ) const = 0;
+    virtual Real interpolatedNonConservativeSource ( const Real& A, const Real& Q,
+                                                     const ID& row, const container2D_Type& bcNodes, const Real& cfl ) const = 0;
 
     //@}
 
@@ -141,7 +141,10 @@ public:
     /*!
      * @param physicsPtr pointer to physics of the problem
      */
-    void setPhysics( const physicsPtr_Type& physicsPtr ) { M_physicsPtr = physicsPtr; }
+    void setPhysics ( const physicsPtr_Type& physicsPtr )
+    {
+        M_physicsPtr = physicsPtr;
+    }
 
     //@}
 
@@ -153,7 +156,10 @@ public:
     /*!
      * @return physics of the problem
      */
-    physicsPtr_Type physics() const { return M_physicsPtr; }
+    physicsPtr_Type physics() const
+    {
+        return M_physicsPtr;
+    }
 
     //@}
 
@@ -166,9 +172,9 @@ private:
     //! @name Unimplemented Methods
     //@{
 
-    explicit OneDFSISource( const OneDFSISource& source );
+    explicit OneDFSISource ( const OneDFSISource& source );
 
-    OneDFSISource& operator=( const OneDFSISource& source );
+    OneDFSISource& operator= ( const OneDFSISource& source );
 
     //@}
 };

@@ -37,64 +37,70 @@ namespace LifeV
 //! Public Methods
 // ===================================================
 
-void MonolithicBlockComposedDN::setDataFromGetPot( const GetPot& dataFile,
-                                      const std::string& section )
+void MonolithicBlockComposedDN::setDataFromGetPot ( const GetPot& dataFile,
+                                                    const std::string& section )
 {
-    M_blockPrecs->setDataFromGetPot( dataFile, section );
+    M_blockPrecs->setDataFromGetPot ( dataFile, section );
 }
 
 
-int MonolithicBlockComposedDN::solveSystem( const vector_Type& rhs, vector_Type& step, solverPtr_Type& linearSolver )
+int MonolithicBlockComposedDN::solveSystem ( const vector_Type& rhs, vector_Type& step, solverPtr_Type& linearSolver )
 {
-    assert(M_blockPrecs.get());
+    assert (M_blockPrecs.get() );
 
-    if (!set())
+    if (!set() )
     {
-        for (UInt k=0; k < M_blocks.size(); ++k)
-            push_back_precs(M_blocks[(*M_blockReordering)[k]]);
+        for (UInt k = 0; k < M_blocks.size(); ++k)
+        {
+            push_back_precs (M_blocks[ (*M_blockReordering) [k]]);
+        }
     }
     else
     {
-        for (UInt k=0; k < M_blocks.size(); ++k)
+        for (UInt k = 0; k < M_blocks.size(); ++k)
         {
-            if (M_recompute[(*M_blockReordering)[k]])
+            if (M_recompute[ (*M_blockReordering) [k]])
             {
-                linearSolver->displayer()->leaderPrint("  M-  Computing preconditioner factor:         ", k, "\n");
-                replace_precs(M_blocks[(*M_blockReordering)[k]], k);
+                linearSolver->displayer()->leaderPrint ("  M-  Computing preconditioner factor:         ", k, "\n");
+                replace_precs (M_blocks[ (*M_blockReordering) [k]], k);
             }
             else
-                linearSolver->displayer()->leaderPrint("  M-  Reusing preconditioner factor:           ", k, "\n");
+            {
+                linearSolver->displayer()->leaderPrint ("  M-  Reusing preconditioner factor:           ", k, "\n");
+            }
         }
     }
-    return linearSolver->solveSystem(rhs, step, boost::static_pointer_cast<Preconditioner>(M_blockPrecs));
+    return linearSolver->solveSystem (rhs, step, boost::static_pointer_cast<Preconditioner> (M_blockPrecs) );
 }
 
 
-void MonolithicBlockComposedDN::coupler(mapPtr_Type& map,
-                         const std::map<ID, ID>& locDofMap,
-                         const vectorPtr_Type& numerationInterface,
-                         const Real& timeStep)
+void MonolithicBlockComposedDN::coupler (mapPtr_Type& map,
+                                         const std::map<ID, ID>& locDofMap,
+                                         const vectorPtr_Type& numerationInterface,
+                                         const Real& timeStep,
+                                         const Real& coefficient,
+                                         const Real& rescaleFactor)
 {
-    UInt totalDofs( map->map(Unique)->NumGlobalElements() );
-    UInt solidAndFluid(M_offset[solid]+M_FESpace[solid]->map().map(Unique)->NumGlobalElements());
+    UInt totalDofs ( map->map (Unique)->NumGlobalElements() );
+    UInt solidAndFluid (M_offset[solid] + M_FESpace[solid]->map().map (Unique)->NumGlobalElements() );
 
-    matrixPtr_Type coupling(new matrix_Type(*map));
-    couplingMatrix( coupling,  (*M_couplingFlags)[solid], M_FESpace, M_offset, locDofMap, numerationInterface, timeStep);
-    coupling->insertValueDiagonal( 1., M_offset[fluid], M_offset[solid] );
-    coupling->insertValueDiagonal( 1., solidAndFluid, totalDofs );
-    M_coupling.push_back(coupling);
+    matrixPtr_Type coupling (new matrix_Type (*map) );
+    couplingMatrix ( coupling,  (*M_couplingFlags) [solid], M_FESpace, M_offset, locDofMap, numerationInterface, timeStep, 1., coefficient, rescaleFactor);
+    coupling->insertValueDiagonal ( 1., M_offset[fluid], M_offset[solid] );
+    coupling->insertValueDiagonal ( 1., solidAndFluid, totalDofs );
+    M_coupling.push_back (coupling);
 
-    coupling.reset(new matrix_Type(*map));
-    couplingMatrix( coupling,  (*M_couplingFlags)[fluid], M_FESpace, M_offset, locDofMap, numerationInterface, timeStep);
-    coupling->insertValueDiagonal( 1. , M_offset[solid], solidAndFluid );
-    coupling->insertValueDiagonal( 1. , solidAndFluid + nDimensions*numerationInterface->map().map(Unique)->NumGlobalElements(), totalDofs );
-    M_coupling.push_back(coupling);
+    coupling.reset (new matrix_Type (*map) );
+    couplingMatrix ( coupling,  (*M_couplingFlags) [fluid], M_FESpace, M_offset, locDofMap, numerationInterface, timeStep, 1., coefficient, rescaleFactor);
+    coupling->insertValueDiagonal ( 1. , M_offset[solid], solidAndFluid );
+    coupling->insertValueDiagonal ( 1. , solidAndFluid + nDimensions * numerationInterface->map().map (Unique)->NumGlobalElements(), totalDofs );
+    M_coupling.push_back (coupling);
 
 }
 
-void MonolithicBlockComposedDN::push_back_precs( matrixPtr_Type& Mat )
+void MonolithicBlockComposedDN::push_back_precs ( matrixPtr_Type& Mat )
 {
-    M_blockPrecs->push_back(Mat);
+    M_blockPrecs->push_back (Mat);
 }
 
 
@@ -103,9 +109,9 @@ void MonolithicBlockComposedDN::push_back_precs( matrixPtr_Type& Mat )
 // ===================================================
 
 
-void MonolithicBlockComposedDN::replace_precs(  matrixPtr_Type& Mat, UInt position )
+void MonolithicBlockComposedDN::replace_precs (  matrixPtr_Type& Mat, UInt position )
 {
-    M_blockPrecs->replace(Mat, position);
+    M_blockPrecs->replace (Mat, position);
 }
 
 

@@ -252,13 +252,15 @@ namespace LifeV
     \f]
     @note In the code we do not use the matrix \f$ H \f$ and the vector \f$ G \f$, because all the boundary
     conditions are imposed via BCHandler class.
+    @note Example of usage can be found in darcy_nonlinear and darcy_linear.
+    Coupled with an hyperbolic solver in impes.
     @todo Insert any scientific publications that use this solver.
 */
 template < typename MeshType >
 class DarcySolverTransientNonLinear
-        :
-        public DarcySolverNonLinear < MeshType >,
-        public DarcySolverTransient < MeshType >
+    :
+public DarcySolverNonLinear < MeshType >,
+public DarcySolverTransient < MeshType >
 {
 
 public:
@@ -373,7 +375,7 @@ protected:
       @param elmatMix The local matrix in mixed form.
       @param elmatReactionTerm The local matrix for the reaction term.
     */
-    virtual void localMatrixComputation ( const UInt & iElem,
+    virtual void localMatrixComputation ( const UInt& iElem,
                                           MatrixElemental& elmatMix,
                                           MatrixElemental& elmatReactionTerm )
     {
@@ -387,7 +389,7 @@ protected:
       @param iElem Id of the current geometrical element.
       @param elvecMix The local vector in mixed form.
     */
-    virtual void localVectorComputation ( const UInt & iElem,
+    virtual void localVectorComputation ( const UInt& iElem,
                                           VectorElemental& elvecMix )
     {
         darcySolverTransient_Type::localVectorComputation ( iElem, elvecMix );
@@ -408,13 +410,13 @@ protected:
 // Complete constructor.
 template < typename MeshType >
 DarcySolverTransientNonLinear < MeshType >::
-DarcySolverTransientNonLinear ():
-        // Standard Darcy solver constructor.
-        darcySolverLinear_Type::DarcySolverLinear (),
-        // Non-linear Darcy solver constructor.
-        darcySolverNonLinear_Type::DarcySolverNonLinear (),
-        // Transient Darcy solver contructor.
-        darcySolverTransient_Type::DarcySolverTransient ()
+DarcySolverTransientNonLinear () :
+    // Standard Darcy solver constructor.
+    darcySolverLinear_Type::DarcySolverLinear (),
+    // Non-linear Darcy solver constructor.
+    darcySolverNonLinear_Type::DarcySolverNonLinear (),
+    // Transient Darcy solver contructor.
+    darcySolverTransient_Type::DarcySolverTransient ()
 {} // Constructor
 
 // ===================================================
@@ -428,7 +430,7 @@ DarcySolverTransientNonLinear < MeshType >::
 setup ()
 {
     // Call the DarcySolverLinear setup method for setting up the linear solver and preconditioner.
-    darcySolverNonLinear_Type::setup ();
+    darcySolverLinear_Type::setup ();
 
     // Call the DarcySolverTransient setup method for setting up the time data.
     darcySolverTransient_Type::setupTime ();
@@ -446,9 +448,12 @@ solve ()
     // Reset the right hand side coming from the time advance scheme.
     this->M_rhsTimeAdvance.reset ( new vector_Type ( this->M_primalField->getFESpace().map() ) );
 
+    // Update the RHS
+    this->M_timeAdvance->updateRHSFirstDerivative();
+
     // Put in M_rhsTimeAdvance the contribution for the right hand side coming
     // from the time scheme, without the time step.
-    *(this->M_rhsTimeAdvance) = this->M_timeAdvance->updateRHSFirstDerivative ();
+    * (this->M_rhsTimeAdvance) = this->M_timeAdvance->rhsContributionFirstDerivative ();
 
     // Solve the problem with the fixed point scheme.
     this->fixedPoint ();

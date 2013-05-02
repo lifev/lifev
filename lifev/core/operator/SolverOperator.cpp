@@ -36,19 +36,34 @@
 
 #include <lifev/core/operator/SolverOperator.hpp>
 
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wextra"
+
+#include <Teuchos_RCPBoostSharedPtrConversions.hpp>
+
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
+#pragma GCC diagnostic warning "-Wextra"
+
 namespace LifeV
 {
 
 namespace Operators
 {
 
-SolverOperator::SolverOperator():
-	M_name( "SolverOperator" ),
-	M_useTranspose( false ),
-	M_lossOfAccuracy( undefined ),
-    M_converged( undefined ),
-    M_numIterations( 0 ),
-    M_tolerance( -1. )
+SolverOperator::SolverOperator ( boost::shared_ptr<Epetra_Comm> comm ) :
+    M_name ( "SolverOperator" ),
+    M_useTranspose ( false ),
+    M_lossOfAccuracy ( undefined ),
+    M_converged ( undefined ),
+    M_numIterations ( 0 ),
+    M_numCumulIterations ( 0 ),
+    M_tolerance ( -1. ),
+    M_printSubiterationCount ( false ),
+    M_comm ( comm )
 { }
 
 SolverOperator::~SolverOperator()
@@ -57,61 +72,85 @@ SolverOperator::~SolverOperator()
     M_oper.reset();
 }
 
-int SolverOperator::SetUseTranspose( bool useTranspose )
+int SolverOperator::SetUseTranspose ( bool useTranspose )
 {
-	M_useTranspose = useTranspose;
+    M_useTranspose = useTranspose;
 
-	int ierr( 0 );
-	if( M_useTranspose )
-		ierr = -1;
+    int ierr ( 0 );
+    if ( M_useTranspose )
+    {
+        ierr = -1;
+    }
 
-	return ierr;
+    return ierr;
 }
 
-void SolverOperator::setOperator( operatorPtr_Type _oper )
+void SolverOperator::setOperator ( operatorPtr_Type _oper )
 {
-	ASSERT_PRE( _oper.get() != this, "Can't self assign" );
-	ASSERT_PRE( _oper.get() != 0, "Can't assign a null pointer" );
-	M_oper = _oper;
-	doSetOperator();
+    ASSERT_PRE ( _oper.get() != this, "Can't self assign" );
+    ASSERT_PRE ( _oper.get() != 0, "Can't assign a null pointer" );
+    M_oper = _oper;
+    doSetOperator();
 }
 
-void SolverOperator::setPreconditioner( operatorPtr_Type _prec )
+void SolverOperator::setPreconditioner ( operatorPtr_Type _prec )
 {
-	ASSERT_PRE( _prec.get() != this, "Self Assignment is forbidden" );
-	ASSERT_PRE( _prec.get() != 0, "Can't assign a null pointer" );
-	M_prec = _prec;
-	doSetPreconditioner();
+    ASSERT_PRE ( _prec.get() != this, "Self Assignment is forbidden" );
+    ASSERT_PRE ( _prec.get() != 0, "Can't assign a null pointer" );
+    M_prec = _prec;
+    doSetPreconditioner();
 }
 
-void SolverOperator::setParameters( const Teuchos::ParameterList& _pList )
+void SolverOperator::setParameters ( const Teuchos::ParameterList& _pList )
 {
-	M_pList = Teuchos::rcp( new Teuchos::ParameterList( _pList ), true );
-	doSetParameterList();
+    M_pList = Teuchos::rcp ( new Teuchos::ParameterList ( _pList ), true );
+    doSetParameterList();
 }
 
-void SolverOperator::setTolerance( const Real& tolerance )
+void SolverOperator::setTolerance ( const Real& tolerance )
 {
-	M_tolerance = tolerance;
+    M_tolerance = tolerance;
 }
 
-int SolverOperator::Apply( const vector_Type& X, vector_Type& Y ) const
+void SolverOperator::setUsedForPreconditioning ( const bool& enable )
 {
-	ASSERT_PRE( X.Map().SameAs( M_oper->OperatorDomainMap() ), "X and domain map do no coincide \n" );
-	ASSERT_PRE( Y.Map().SameAs( M_oper->OperatorRangeMap() ) , "Y and range map do no coincide \n" );
-
-	return M_oper->Apply( X, Y );
+    M_printSubiterationCount = enable;
 }
 
-int SolverOperator::ApplyInverse( const vector_Type& X, vector_Type& Y ) const
+void SolverOperator::resetSolver()
 {
-	ASSERT_PRE( Y.Map().SameAs( M_oper->OperatorDomainMap() ), "Y and domain map do no coincide \n" );
-	ASSERT_PRE( X.Map().SameAs( M_oper->OperatorRangeMap() ) , "X and range map do no coincide \n" );
+    doResetSolver();
+    M_prec.reset();
+    M_oper.reset();
+}
 
-	if ( M_useTranspose )
-		return -1;
+int SolverOperator::Apply ( const vector_Type& X, vector_Type& Y ) const
+{
+    ASSERT_PRE ( X.Map().SameAs ( M_oper->OperatorDomainMap() ), "X and domain map do no coincide \n" );
+    ASSERT_PRE ( Y.Map().SameAs ( M_oper->OperatorRangeMap() ) , "Y and range map do no coincide \n" );
 
-	return doApplyInverse( X, Y );
+    return M_oper->Apply ( X, Y );
+}
+
+int SolverOperator::ApplyInverse ( const vector_Type& X, vector_Type& Y ) const
+{
+    ASSERT_PRE ( Y.Map().SameAs ( M_oper->OperatorDomainMap() ), "Y and domain map do no coincide \n" );
+    ASSERT_PRE ( X.Map().SameAs ( M_oper->OperatorRangeMap() ) , "X and range map do no coincide \n" );
+
+    if ( M_useTranspose )
+    {
+        return -1;
+    }
+    int result = doApplyInverse ( X, Y );
+
+    M_numCumulIterations += M_numIterations;
+
+    if ( M_comm->MyPID() == 0 && M_printSubiterationCount )
+    {
+        std::cout << "> " << numIterations() << " subiterations" << std::endl;
+    }
+
+    return result;
 }
 
 } // Namespace Operators

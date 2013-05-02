@@ -240,14 +240,16 @@ namespace LifeV
     \sigma_K^{n+1} = -A^{-1} \left( B p_K^{n+1} + C \lambda_K^{n+1} \right) \,.
     \end{array}
     \f]
-    @note In the code we do not use the matrix \f$ H \f$ and the vector \f$ G \f$, because all the boundary
-    @note The initial time is not fix at zero.
-    conditions are imposed via BCHandler class.
+    @note In the code we do not use the matrix \f$ H \f$ and the vector \f$ G \f$,
+    because all the boundary conditions are imposed via BCHandler class.
+    @note The initial time is not fixed at zero.
+    @note Example of usage can be found in darcy_nonlinear and darcy_linear.
+    Coupled with an hyperbolic solver in impes.
     @todo Insert any scientific publications that use this solver.
 */
 template < typename MeshType >
 class DarcySolverTransient :
-        virtual public DarcySolverLinear < MeshType >
+    virtual public DarcySolverLinear < MeshType >
 {
 
 public:
@@ -355,7 +357,7 @@ protected:
       @param elmatMix The local matrix in mixed form.
       @param elmatReactionTerm The local matrix for the reaction term.
     */
-    virtual void localMatrixComputation ( const UInt & iElem,
+    virtual void localMatrixComputation ( const UInt& iElem,
                                           MatrixElemental& elmatMix,
                                           MatrixElemental& elmatReactionTerm );
 
@@ -366,7 +368,7 @@ protected:
       @param iElem Id of the current geometrical element.
       @param elvecMix The local vector in mixed form.
     */
-    virtual void localVectorComputation ( const UInt & iElem,
+    virtual void localVectorComputation ( const UInt& iElem,
                                           VectorElemental& elvecMix );
 
     //! Do some computation after the calculation of the primal and dual variable.
@@ -462,16 +464,16 @@ private:
 // Complete constructor.
 template < typename MeshType >
 DarcySolverTransient < MeshType >::
-DarcySolverTransient ():
-        // Standard Darcy solver constructor.
-        darcySolverLinear_Type::DarcySolverLinear (),
-        // Time advance data.
-        M_timeAdvance                 ( new timeAdvance_Type ),
-        // Linear solver.
-        M_reusePrec                   ( false ),
-        M_updated                     ( false ),
-        M_maxIterSolver               ( static_cast<UInt>(0) ),
-        M_recomputeMatrix             ( false )
+DarcySolverTransient () :
+    // Standard Darcy solver constructor.
+    darcySolverLinear_Type::DarcySolverLinear (),
+    // Time advance data.
+    M_timeAdvance                 ( new timeAdvance_Type ),
+    // Linear solver.
+    M_reusePrec                   ( false ),
+    M_updated                     ( false ),
+    M_maxIterSolver               ( static_cast<UInt> (0) ),
+    M_recomputeMatrix             ( false )
 {
 } // Constructor
 
@@ -501,7 +503,7 @@ DarcySolverTransient < MeshType >::
 setupTime ()
 {
 
-    const typename darcySolverLinear_Type::data_Type::data_Type& dataFile = *( this->M_data->dataFilePtr() );
+    const typename darcySolverLinear_Type::data_Type::data_Type& dataFile = * ( this->M_data->dataFilePtr() );
 
     // Set if the preconditioner is re-used.
     M_reusePrec = dataFile ( ( this->M_data->section() + "/solver/reuse" ).data(), false );
@@ -510,10 +512,10 @@ setupTime ()
     this->M_linearSolver.setReusePreconditioner ( M_reusePrec );
 
     // Set the max number of iteration to mantein the same preconditioner.
-    M_maxIterSolver = dataFile( ( this->M_data->section() + "/solver/max_iter_reuse" ).data(), static_cast<Int>(0) );
+    M_maxIterSolver = dataFile ( ( this->M_data->section() + "/solver/max_iter_reuse" ).data(), static_cast<Int> (0) );
 
     // Set up the time advance.
-    M_timeAdvance->setup ( this->M_data->dataTimePtr()->orderBDF(), 1 );
+    M_timeAdvance->setup ( this->M_data->dataTimeAdvancePtr()->orderBDF(), 1 );
 
 } // setupTime
 
@@ -552,9 +554,12 @@ solve ()
     // Reset the right hand side coming from the time advance scheme.
     M_rhsTimeAdvance.reset ( new vector_Type ( this->M_primalField->getFESpace().map() ) );
 
+    // Update the RHS
+    M_timeAdvance->updateRHSFirstDerivative ();
+
     // Put in M_rhsTimeAdvance the contribution for the right hand side coming
     // from the time scheme, without the time step.
-    *M_rhsTimeAdvance = M_timeAdvance->updateRHSFirstDerivative ();
+    *M_rhsTimeAdvance = M_timeAdvance->rhsContributionFirstDerivative ();
 
     // Solve the problem
     darcySolverLinear_Type::solve ();
@@ -586,7 +591,7 @@ setMass ( const scalarFctPtr_Type& massFct )
     Vector3D barycenter;
 
     //! Loop on all the volume elements.
-    for ( UInt iElem(0); iElem < meshNumberOfElements; ++iElem )
+    for ( UInt iElem (0); iElem < meshNumberOfElements; ++iElem )
     {
         // Element of current ID.
         element = this->M_primalField->getFESpace().mesh()->element ( iElem );
@@ -598,10 +603,10 @@ setMass ( const scalarFctPtr_Type& massFct )
         localMassMatrix.zero ();
 
         // Get the coordinates of the barycenter of the current element of ID iElem.
-        this->M_primalField->getFESpace().fe().barycenter( barycenter[0], barycenter[1], barycenter[2] );
+        this->M_primalField->getFESpace().fe().barycenter ( barycenter[0], barycenter[1], barycenter[2] );
 
         // Computes the value for the mass term.
-        const Real massValue = M_massFct->eval( iElem, barycenter );
+        const Real massValue = M_massFct->eval ( iElem, barycenter );
 
         // Compute the mass matrix for the primal variable.
         mass ( massValue, localMassMatrix, this->M_primalField->getFESpace().fe(), 0, 0);
@@ -616,7 +621,7 @@ setMass ( const scalarFctPtr_Type& massFct )
 template < typename MeshType >
 void
 DarcySolverTransient < MeshType >::
-localMatrixComputation ( const UInt & iElem, MatrixElemental& elmatMix,
+localMatrixComputation ( const UInt& iElem, MatrixElemental& elmatMix,
                          MatrixElemental& elmatReactionTerm )
 {
     // Call the Darcy solver local matrix computation.
@@ -642,7 +647,7 @@ localMatrixComputation ( const UInt & iElem, MatrixElemental& elmatMix,
 template < typename MeshType >
 void
 DarcySolverTransient < MeshType >::
-localVectorComputation ( const UInt & iElem, VectorElemental& elvecMix )
+localVectorComputation ( const UInt& iElem, VectorElemental& elvecMix )
 {
     /* Call the Darcy solver localVectorComputation to update the finite elements
        spaces and to compute the scalar and vector source term. */

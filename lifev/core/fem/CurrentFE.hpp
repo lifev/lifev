@@ -47,7 +47,6 @@
 
 #include <lifev/core/fem/ReferenceFEScalar.hpp>
 #include <lifev/core/fem/ReferenceFEHdiv.hpp>
-#include <lifev/core/fem/ReferenceFEHybrid.hpp>
 
 #include <lifev/core/fem/QuadratureRule.hpp>
 
@@ -145,55 +144,55 @@ namespace LifeV
 
 */
 
-const flag_Type UPDATE_ONLY_CELL_NODES(1);
-const flag_Type UPDATE_ONLY_QUAD_NODES(2);
-const flag_Type UPDATE_ONLY_PHI(4);
-const flag_Type UPDATE_ONLY_DPHI_GEO_MAP(8);
-const flag_Type UPDATE_ONLY_JACOBIAN(16);
-const flag_Type UPDATE_ONLY_T_INVERSE_JACOBIAN(32);
-const flag_Type UPDATE_ONLY_W_DET_JACOBIAN(64);
-const flag_Type UPDATE_ONLY_DPHI_REF(128);
-const flag_Type UPDATE_ONLY_DPHI(256);
-const flag_Type UPDATE_ONLY_D2PHI_REF(512);
-const flag_Type UPDATE_ONLY_D2PHI(1024);
-const flag_Type UPDATE_ONLY_PHI_VECT(2048);
-const flag_Type UPDATE_ONLY_DIV_PHI_REF(4096);
-const flag_Type UPDATE_ONLY_DET_JACOBIAN(8192);
+const flag_Type UPDATE_ONLY_CELL_NODES (1);
+const flag_Type UPDATE_ONLY_QUAD_NODES (2);
+const flag_Type UPDATE_ONLY_PHI (4);
+const flag_Type UPDATE_ONLY_DPHI_GEO_MAP (8);
+const flag_Type UPDATE_ONLY_JACOBIAN (16);
+const flag_Type UPDATE_ONLY_T_INVERSE_JACOBIAN (32);
+const flag_Type UPDATE_ONLY_W_DET_JACOBIAN (64);
+const flag_Type UPDATE_ONLY_DPHI_REF (128);
+const flag_Type UPDATE_ONLY_DPHI (256);
+const flag_Type UPDATE_ONLY_D2PHI_REF (512);
+const flag_Type UPDATE_ONLY_D2PHI (1024);
+const flag_Type UPDATE_ONLY_PHI_VECT (2048);
+const flag_Type UPDATE_ONLY_DIV_PHI_REF (4096);
+const flag_Type UPDATE_ONLY_DET_JACOBIAN (8192);
 
 
-const flag_Type UPDATE_QUAD_NODES(UPDATE_ONLY_CELL_NODES
-                                  |UPDATE_ONLY_QUAD_NODES);
+const flag_Type UPDATE_QUAD_NODES (UPDATE_ONLY_CELL_NODES
+                                   | UPDATE_ONLY_QUAD_NODES);
 
-const flag_Type UPDATE_PHI(UPDATE_ONLY_PHI
-                           |UPDATE_ONLY_CELL_NODES);
+const flag_Type UPDATE_PHI (UPDATE_ONLY_PHI
+                            | UPDATE_ONLY_CELL_NODES);
 
-const flag_Type UPDATE_DPHI(UPDATE_ONLY_CELL_NODES
-                            |UPDATE_ONLY_DPHI_GEO_MAP
-                            |UPDATE_ONLY_JACOBIAN
-                            |UPDATE_ONLY_T_INVERSE_JACOBIAN
-                            |UPDATE_ONLY_DPHI_REF
-                            |UPDATE_ONLY_DPHI);
+const flag_Type UPDATE_DPHI (UPDATE_ONLY_CELL_NODES
+                             | UPDATE_ONLY_DPHI_GEO_MAP
+                             | UPDATE_ONLY_JACOBIAN
+                             | UPDATE_ONLY_T_INVERSE_JACOBIAN
+                             | UPDATE_ONLY_DPHI_REF
+                             | UPDATE_ONLY_DPHI);
 
-const flag_Type UPDATE_D2PHI(UPDATE_ONLY_CELL_NODES
-                             |UPDATE_ONLY_DPHI_GEO_MAP
-                             |UPDATE_ONLY_JACOBIAN
-                             |UPDATE_ONLY_T_INVERSE_JACOBIAN
-                             |UPDATE_ONLY_D2PHI_REF
-                             |UPDATE_ONLY_D2PHI);
+const flag_Type UPDATE_D2PHI (UPDATE_ONLY_CELL_NODES
+                              | UPDATE_ONLY_DPHI_GEO_MAP
+                              | UPDATE_ONLY_JACOBIAN
+                              | UPDATE_ONLY_T_INVERSE_JACOBIAN
+                              | UPDATE_ONLY_D2PHI_REF
+                              | UPDATE_ONLY_D2PHI);
 
-const flag_Type UPDATE_WDET(UPDATE_ONLY_CELL_NODES
-                            |UPDATE_ONLY_DPHI_GEO_MAP
-                            |UPDATE_ONLY_JACOBIAN
-                            |UPDATE_ONLY_DET_JACOBIAN
-                            |UPDATE_ONLY_W_DET_JACOBIAN);
+const flag_Type UPDATE_WDET (UPDATE_ONLY_CELL_NODES
+                             | UPDATE_ONLY_DPHI_GEO_MAP
+                             | UPDATE_ONLY_JACOBIAN
+                             | UPDATE_ONLY_DET_JACOBIAN
+                             | UPDATE_ONLY_W_DET_JACOBIAN);
 
-const flag_Type UPDATE_PHI_VECT(UPDATE_ONLY_CELL_NODES
-                                |UPDATE_ONLY_DPHI_GEO_MAP
-                                |UPDATE_ONLY_JACOBIAN
-                                |UPDATE_ONLY_DET_JACOBIAN
-                                |UPDATE_ONLY_PHI_VECT);
+const flag_Type UPDATE_PHI_VECT (UPDATE_ONLY_CELL_NODES
+                                 | UPDATE_ONLY_DPHI_GEO_MAP
+                                 | UPDATE_ONLY_JACOBIAN
+                                 | UPDATE_ONLY_DET_JACOBIAN
+                                 | UPDATE_ONLY_PHI_VECT);
 
-const flag_Type UPDATE_DIV_PHI(UPDATE_ONLY_DIV_PHI_REF);
+const flag_Type UPDATE_DIV_PHI (UPDATE_ONLY_DIV_PHI_REF);
 
 
 
@@ -259,7 +258,7 @@ public:
       @param geoMap Geometric mapping used
       @param qr Quadrature rule for the computations
      */
-    CurrentFE( const ReferenceFE& refFE, const GeometricMap& geoMap, const QuadratureRule& qr );
+    CurrentFE ( const ReferenceFE& refFE, const GeometricMap& geoMap, const QuadratureRule& qr );
 
     //! Constructor without quadrature specification
     /*!
@@ -269,10 +268,13 @@ public:
       @param refFE Reference finite element used
       @param geoMap Geometric mapping used
      */
-    CurrentFE( const ReferenceFE& refFE, const GeometricMap& geoMap);
+    CurrentFE ( const ReferenceFE& refFE, const GeometricMap& geoMap);
 
     //! Destructor
-    ~CurrentFE() { delete M_quadRule;}
+    virtual ~CurrentFE()
+    {
+        delete M_quadRule;
+    }
 
     //@}
 
@@ -288,19 +290,19 @@ public:
       @param upFlag The flag to explain the quantities that we want to update
      */
     template<typename MeshElementMarkedType>
-    void update(const MeshElementMarkedType& geoele, const flag_Type& upFlag);
+    void update (const MeshElementMarkedType& geoele, flag_Type upFlag);
 
     //! Update method using only point coordinates. It used the flags, as defined in \ref update_procedure "this page".
-    void update(const std::vector<std::vector<Real> >& pts, const flag_Type& upFlag);
+    virtual void update (const std::vector<std::vector<Real> >& pts, flag_Type upFlag);
 
     //! Update method using only point coordinates. It used the flags, as defined in \ref update_procedure "this page".
-    void update(const std::vector<GeoVector>& pts, const flag_Type& upFlag);
+    void update (const std::vector<GeoVector>& pts, flag_Type upFlag);
 
     //! Return the measure of the current element
-    Real measure() const;
+    virtual Real measure() const;
 
     //! return the barycenter of the element
-    void barycenter( Real& x, Real& y, Real& z ) const;
+    void barycenter ( Real& x, Real& y, Real& z ) const;
 
     //! return the diameter of the element in the 1-norm
     Real diameter() const;
@@ -314,13 +316,13 @@ public:
       and   (x,y,z) the coor in the current element
       (if the code is compiled in 2D mode then z=0 and zeta is disgarded)
     */
-    void coorMap( Real& x, Real& y, Real& z, const Real & xi, const Real & eta, const Real & zeta ) const;
+    void coorMap ( Real& x, Real& y, Real& z, Real xi, Real eta, Real zeta ) const;
 
     /*!
       return the coordinates in the current element of the point
       P given in the reference frame.
     */
-    GeoVector coorMap(const GeoVector& P) const;
+    GeoVector coorMap (const GeoVector& P) const;
 
     //! Export the quadrature rule on the current FE
     /*!
@@ -330,7 +332,7 @@ public:
       is mapped on the current element, while it is still in the reference element
       for quadRule::VTKexport.
      */
-    void quadRuleVTKexport( const std::string& filename) const;
+    void quadRuleVTKexport ( const std::string& filename) const;
 
     //@}
 
@@ -343,7 +345,7 @@ public:
       expensive method. Use it only when it is really needed.
       @param newQuadRule The new quadrature rule
      */
-    void setQuadRule(const QuadratureRule& newQuadRule);
+    void setQuadRule (const QuadratureRule& newQuadRule);
 
     //@}
 
@@ -352,25 +354,31 @@ public:
     //@{
 
     //! Getter for the ID of the current cell
-    inline const UInt& currentId() const
+    inline UInt currentId() const
     {
         return M_currentId;
     }
 
     //! Getter for the local ID of the current cell
-    inline const UInt& currentLocalId() const
+    inline UInt currentLocalId() const
     {
         return M_currentLocalId;
     }
 
     //! Getter for the number of quadrature nodes
-    inline const UInt& nbQuadPt() const
+    inline UInt nbQuadPt() const
     {
         return M_nbQuadPt;
     }
 
+    //! Getter for the number of geometrical nodes
+    inline UInt nbGeoNode() const
+    {
+        return M_nbGeoNode;
+    }
+
     //! Getter for the number of nodes
-    inline const UInt& nbFEDof() const
+    inline UInt nbFEDof() const
     {
         return M_nbNode;
     }
@@ -394,27 +402,33 @@ public:
     };
 
     //! Getter for the number of entries in the pattern
-    inline const UInt& nbPattern() const
+    inline UInt nbPattern() const
     {
         return M_nbPattern;
     };
 
     //! Getter for the diagonal entries in the pattern
-    inline const UInt& nbDiag() const
+    inline UInt nbDiag() const
     {
         return M_nbDiag;
     };
 
     //! Getter for the number of entries in the pattern
-    inline const UInt& nbUpper() const
+    inline UInt nbUpper() const
     {
         return M_nbUpper;
     };
 
-    //! Getter for the number of coordinates
-    inline const UInt& nbCoor() const
+    //! Old getter for the number of local coordinates
+    inline LIFEV_DEPRECATED ( UInt ) nbCoor() const
     {
-        return M_nbCoor;
+        return M_nbLocalCoor;
+    };
+
+    //! Getter for the number of local coordinates
+    UInt nbLocalCoor () const
+    {
+        return M_nbLocalCoor;
     };
 
     //@}
@@ -424,75 +438,74 @@ public:
     //@{
 
     //! Getter for the nodes of the cell
-    inline const Real& cellNode(const UInt& node, const UInt& coordinate) const
+    inline Real cellNode (UInt node, UInt coordinate) const
     {
-        ASSERT(M_cellNodesUpdated,"Cell nodes are not updated!");
+        ASSERT (M_cellNodesUpdated, "Cell nodes are not updated!");
         return M_cellNodes[node][coordinate];
     };
 
     //! Getter for the quadrature nodes
-    inline const Real& quadNode(const UInt& node, const UInt& coordinate) const
+    inline Real quadNode (UInt node, UInt coordinate) const
     {
-        ASSERT(M_quadNodesUpdated,"Quad nodes are not updated!");
+        ASSERT (M_quadNodesUpdated, "Quad nodes are not updated!");
         return M_quadNodes[node][coordinate];
     };
 
     //! Getter for the determinant of the jacobian in a given quadrature node
-    inline const Real& detJacobian(const UInt& quadNode) const
+    inline Real detJacobian (UInt quadNode) const
     {
-        ASSERT(M_detJacobianUpdated,"Jacobian determinant is not updated!");
+        ASSERT (M_detJacobianUpdated, "Jacobian determinant is not updated!");
         return M_detJacobian[quadNode];
     };
 
     //! Getter for the weighted jacobian determinant
-    inline const Real& wDetJacobian(const UInt& quadNode) const
+    inline Real wDetJacobian (UInt quadNode) const
     {
-        ASSERT(M_wDetJacobianUpdated,"Weighted jacobian determinant is not updated!");
+        ASSERT (M_wDetJacobianUpdated, "Weighted jacobian determinant is not updated!");
         return M_wDetJacobian[quadNode];
     };
 
     //! Getter for the inverse of the jacobian
-    inline const Real& tInverseJacobian(const UInt& element1, const UInt& element2, const UInt& quadNode) const
+    inline Real tInverseJacobian (UInt element1, UInt element2, UInt quadNode) const
     {
-        ASSERT(M_tInverseJacobianUpdated,"Inverse jacobian is not updated!");
+        ASSERT (M_tInverseJacobianUpdated, "Inverse jacobian is not updated!");
         return M_tInverseJacobian[element1][element2][quadNode];
     };
 
     //! Getter for basis function values (scalar FE case)
-    inline const Real& phi(const UInt& node, const UInt& quadNode) const
+    inline Real phi (UInt node, UInt quadNode) const
     {
-        ASSERT(M_phiUpdated,"Function values are not updated!");
+        ASSERT (M_phiUpdated, "Function values are not updated!");
         return M_phi[node][0][quadNode];
     };
 
     //! Getter for basis function values (vectorial FE case)
-    inline const Real& phi(const UInt& node, const UInt& component, const UInt& quadNode) const
+    inline Real phi (UInt node, UInt component, UInt quadNode) const
     {
-        ASSERT(M_phiVectUpdated,"Function values are not updated!");
+        ASSERT (M_phiVectUpdated, "Function values are not updated!");
         return M_phiVect[node][component][quadNode];
     };
 
     //! Getter for the derivatives of the basis functions
-    inline const Real& dphi(const UInt& node, const UInt& derivative, const UInt& quadNode) const
+    inline Real dphi (UInt node, UInt derivative, UInt quadNode) const
     {
-        ASSERT(M_dphiUpdated,"Basis derivatives are not updated!");
+        ASSERT (M_dphiUpdated, "Basis derivatives are not updated!");
         return M_dphi[node][derivative][quadNode];
     };
 
     //! Getter for the second derivatives of the basis functions
-    inline const Real& d2phi(const UInt& node, const UInt& derivative1, const UInt& derivative2, const UInt& quadNode) const
+    inline Real d2phi (UInt node, UInt derivative1, UInt derivative2, UInt quadNode) const
     {
-        ASSERT(M_d2phiUpdated,"Basis second derivatives are not updated!");
+        ASSERT (M_d2phiUpdated, "Basis second derivatives are not updated!");
         return M_d2phi[node][derivative1][derivative2][quadNode];
     };
 
     //! Getter for the divergence of a vectorial FE in the reference frame.
-    inline const Real& divPhiRef(const UInt& node, const UInt& quadNode) const
+    inline Real divPhiRef (UInt node, UInt quadNode) const
     {
-        ASSERT(M_divPhiRefUpdated,"Basis divergence are not updated!");
+        ASSERT (M_divPhiRefUpdated, "Basis divergence are not updated!");
         return M_divPhiRef[node][quadNode];
     };
-
     //@}
 
 
@@ -501,69 +514,69 @@ public:
     //@{
 
     //! Old accessor, use cellNode instead.
-    inline const Real& point(const UInt& node, const UInt& coordinate) const
+    inline Real point (UInt node, UInt coordinate) const
     {
-        ASSERT(M_cellNodesUpdated,"Cell nodes are not updated!");
+        ASSERT (M_cellNodesUpdated, "Cell nodes are not updated!");
         return M_cellNodes[node][coordinate];
     };
 
     //! Old accessor, use quadNode instead
-    inline const Real& quadPt(const UInt& node, const UInt& coordinate) const
+    inline Real quadPt (UInt node, UInt coordinate) const
     {
-        ASSERT(M_quadNodesUpdated,"Quad nodes are not updated!");
+        ASSERT (M_quadNodesUpdated, "Quad nodes are not updated!");
         return M_quadNodes[node][coordinate];
     };
 
     //! Old accessor, use wDetJacobian instead
-    inline const Real& weightDet(const UInt& quadNode) const
+    inline Real weightDet (UInt quadNode) const
     {
-        ASSERT(M_wDetJacobianUpdated,"Weighted jacobian determinant is not updated!");
+        ASSERT (M_wDetJacobianUpdated, "Weighted jacobian determinant is not updated!");
         return M_wDetJacobian[quadNode];
     };
 
     //! Getter for the determinant of the jacobian in a given quadrature node
-    inline const Real& detJac(const UInt& quadNode) const
+    inline Real detJac (UInt quadNode) const
     {
-        ASSERT(M_detJacobianUpdated,"Jacobian determinant is not updated!");
+        ASSERT (M_detJacobianUpdated, "Jacobian determinant is not updated!");
         return M_detJacobian[quadNode];
     };
 
     //! Old accessor, use iInverseJacobian instead
-    inline const Real& tInvJac(const UInt& element1, const UInt& element2, const UInt& quadNode) const
+    inline Real tInvJac (UInt element1, UInt element2, UInt quadNode) const
     {
-        ASSERT(M_tInverseJacobianUpdated,"Inverse jacobian is not updated!");
+        ASSERT (M_tInverseJacobianUpdated, "Inverse jacobian is not updated!");
         return M_tInverseJacobian[element1][element2][quadNode];
     };
 
     //! Old accessor, use dphi instead
-    inline const Real& phiDer(const UInt& node, const UInt& derivative, const UInt& quadNode) const
+    inline Real phiDer (UInt node, UInt derivative, UInt quadNode) const
     {
-        ASSERT(M_dphiUpdated,"Basis derivatives are not updated!");
+        ASSERT (M_dphiUpdated, "Basis derivatives are not updated!");
         return M_dphi[node][derivative][quadNode];
     };
 
     //! Old accessor, use d2phi instead
-    inline const Real& phiDer2(const UInt& node, const UInt& derivative1, const UInt& derivative2, const UInt& quadNode) const
+    inline Real phiDer2 (UInt node, UInt derivative1, UInt derivative2, UInt quadNode) const
     {
-        ASSERT(M_d2phiUpdated,"Basis second derivatives are not updated!");
+        ASSERT (M_d2phiUpdated, "Basis second derivatives are not updated!");
         return M_d2phi[node][derivative1][derivative2][quadNode];
     };
 
     //@}
 
-
-
-
-private:
+protected:
+    // Default constructor is NOT implemented
     CurrentFE( );
-    CurrentFE( const CurrentFE& );
+
+    // Copy constructor possibly used only in derived classes
+    CurrentFE ( const CurrentFE& );
 
     //! Update the nodes of the cell to the current one.
     template<typename MeshElementMarkedType>
-    void computeCellNodes(const MeshElementMarkedType& geoele);
+    void computeCellNodes (const MeshElementMarkedType& geoele);
 
     //! Update only the nodes of the cells to the current one.
-    void computeCellNodes(const std::vector<std::vector< Real> >& pts);
+    void computeCellNodes (const std::vector<std::vector< Real> >& pts);
 
     //! Update the location of the quadrature in the current cell.
     void computeQuadNodes();
@@ -602,9 +615,8 @@ private:
     void computePhiVect();
 
     // Constants
-private:
     const UInt M_nbNode;
-    const UInt M_nbCoor;
+    const UInt M_nbLocalCoor;
     const UInt M_nbDiag;
     const UInt M_nbUpper;
     const UInt M_nbPattern;
@@ -625,24 +637,24 @@ private:
     // Internal storage for the data
 
     // Nodes of the current cell
-    boost::multi_array<Real,2> M_cellNodes;
-    boost::multi_array<Real,2> M_quadNodes;
+    boost::multi_array<Real, 2> M_cellNodes;
+    boost::multi_array<Real, 2> M_quadNodes;
 
-    boost::multi_array<Real,3> M_dphiGeometricMap;
-    boost::multi_array<Real,3> M_jacobian;
-    boost::multi_array<Real,1> M_detJacobian;
-    boost::multi_array<Real,1> M_wDetJacobian;
-    boost::multi_array<Real,3> M_tInverseJacobian;
+    boost::multi_array<Real, 3> M_dphiGeometricMap;
+    boost::multi_array<Real, 3> M_jacobian;
+    boost::multi_array<Real, 1> M_detJacobian;
+    boost::multi_array<Real, 1> M_wDetJacobian;
+    boost::multi_array<Real, 3> M_tInverseJacobian;
 
-    boost::multi_array<Real,3> M_phi;
-    boost::multi_array<Real,3> M_dphi;
-    boost::multi_array<Real,4> M_d2phi;
-    boost::multi_array<Real,3> M_phiVect;
+    boost::multi_array<Real, 3> M_phi;
+    boost::multi_array<Real, 3> M_dphi;
+    boost::multi_array<Real, 4> M_d2phi;
+    boost::multi_array<Real, 3> M_phiVect;
 
     // M_phiRef is useless because M_phi is already the same.
-    boost::multi_array<Real,3> M_dphiRef;
-    boost::multi_array<Real,4> M_d2phiRef;
-    boost::multi_array<Real,2> M_divPhiRef;
+    boost::multi_array<Real, 3> M_dphiRef;
+    boost::multi_array<Real, 4> M_d2phiRef;
+    boost::multi_array<Real, 2> M_divPhiRef;
 
     // Check
     bool M_cellNodesUpdated;
@@ -663,7 +675,7 @@ private:
     bool M_d2phiRefUpdated;
     bool M_divPhiRefUpdated;
 
-// OLD FUNCTIONS
+    // OLD FUNCTIONS
 
 public:
 
@@ -673,26 +685,26 @@ public:
     /*!
       compute the coordinate (xi,eta,zeta)=inv(F)(x,y,z)
     */
-    void coorBackMap(const Real& x, const Real& y, const Real& z,
-                     Real & xi, Real & eta, Real& zeta) const;
+    void coorBackMap (Real x, Real y, Real z,
+                      Real& xi, Real& eta, Real& zeta) const;
 
     /*!
       compute the jacobian at a given point : d x_compx / d zeta_compzeta
     */
-    Real pointJacobian(const Real& hat_x, const Real& hat_y, const Real& hat_z,
-                       int compx, int compzeta) const;
+    Real pointJacobian (Real hat_x, Real hat_y, Real hat_z,
+                        int compx, int compzeta) const;
 
     /*!
       compute the inverse jacobian
      */
 
-    Real pointInverseJacobian(const Real& hat_x, const Real& hat_y, const Real& hat_z,
-                              int compx, int compzeta) const;
+    Real pointInverseJacobian (Real hat_x, Real hat_y, Real hat_z,
+                               int compx, int compzeta) const;
 
     /*!
       compute the determinant of the Jacobian at a given point
      */
-    Real pointDetJacobian(const Real& hat_x, const Real& hat_y, const Real& hat_z) const;
+    Real pointDetJacobian (Real hat_x, Real hat_y, Real hat_z) const;
 
     /*!  return (x,y,z) = the global coordinates of the quadrature point ig
       in the current element. \warning this function is almost obsolete since if
@@ -701,20 +713,20 @@ public:
       been computed and may be obtained via quadPt(ig,icoor). This is usually
       much less expensive since it avoids many calls to coorQuadPt
     */
-    inline void coorQuadPt( Real& x, Real& y, Real& z, const int ig ) const
+    inline void coorQuadPt (Real& x, Real& y, Real& z, int ig ) const
     {
-        coorMap( x, y, z, M_quadRule->quadPointCoor( ig, 0 ), M_quadRule->quadPointCoor( ig, 1 ),
-                 M_quadRule->quadPointCoor( ig, 2 ) );
+        coorMap ( x, y, z, M_quadRule->quadPointCoor ( ig, 0 ), M_quadRule->quadPointCoor ( ig, 1 ),
+                  M_quadRule->quadPointCoor ( ig, 2 ) );
     }
     //!  patternFirst(i): row index in the element matrix of the i-th term of the pattern
-    inline int patternFirst( int i ) const
+    inline int patternFirst ( int i ) const
     {
-        return M_refFE->patternFirst( i );
+        return M_refFE->patternFirst ( i );
     }
     //! patternSecond(i): column index in the element matrix of the i-th term of the pattern
-    inline int patternSecond( int i ) const
+    inline int patternSecond ( int i ) const
     {
-        return M_refFE->patternSecond( i );
+        return M_refFE->patternSecond ( i );
     }
 
 
@@ -725,96 +737,94 @@ public:
       minimal update: we just identify the id of the current element
     */
     template <class MeshElementMarkedType>
-    void update( const MeshElementMarkedType& geoele );
+    void update ( const MeshElementMarkedType& geoele );
     /*!
       compute the arrays detJac, weightDet, jacobian on
       the current element
     */
     template <class MeshElementMarkedType>
-    void updateJac( const MeshElementMarkedType& geoele );
+    void updateJac ( const MeshElementMarkedType& geoele );
     /*!
       compute the arrays detJac, weightDet, jacobian and quadPt
       on the current element
     */
     template <class MeshElementMarkedType>
-    void updateJacQuadPt( const MeshElementMarkedType& geoele );
+    void updateJacQuadPt ( const MeshElementMarkedType& geoele );
     /*!
       compute the arrays detJac, weightDet, jacobian,
       tInvJac, phiDer on the current element
     */
     template <class MeshElementMarkedType>
-    void updateFirstDeriv( const MeshElementMarkedType& geoele );
+    void updateFirstDeriv ( const MeshElementMarkedType& geoele );
     /*!
       compute the arrays detJac, weightDet, jacobian,
       tInvJac, phiDer and quadPt on the current element
     */
     template <class MeshElementMarkedType>
-    void updateFirstDerivQuadPt( const MeshElementMarkedType& geoele );
+    void updateFirstDerivQuadPt ( const MeshElementMarkedType& geoele );
     /*!
       compute the arrays detJac, weightDet, jacobian,
       tInvJac, phiDer2 on the current element
     */
     template <class MeshElementMarkedType>
-    void updateSecondDeriv( const MeshElementMarkedType& geoele );
+    void updateSecondDeriv ( const MeshElementMarkedType& geoele );
     /*!
       compute the arrays detJac, weightDet, jacobian,
       tInvJac, phiDer2 on the current element
     */
     template <class MeshElementMarkedType>
-    void updateSecondDerivQuadPt( const MeshElementMarkedType& geoele );
+    void updateSecondDerivQuadPt ( const MeshElementMarkedType& geoele );
     /*!
       compute the arrays detJac, weightDet, jacobian,
       tInvJac, phiDer, phiDer2 on the current element
     */
     template <class MeshElementMarkedType>
-    void updateFirstSecondDeriv( const MeshElementMarkedType& geoele );
+    void updateFirstSecondDeriv ( const MeshElementMarkedType& geoele );
     /*!
       compute the arrays detJac, weightDet, jacobian,
       tInvJac, phiDer, phiDer2 on the current element
     */
     template <class MeshElementMarkedType>
-    void updateFirstSecondDerivQuadPt( const MeshElementMarkedType& geoele );
+    void updateFirstSecondDerivQuadPt ( const MeshElementMarkedType& geoele );
 
     //@}
 
 };
 
-
-
+// ==================================================== IMPLEMENTATION ====================================================== //
 
 template<typename MeshElementMarked>
-void CurrentFE::update(const MeshElementMarked& geoele, const flag_Type& upFlag)
+void CurrentFE::update (const MeshElementMarked& geoele, flag_Type upFlag)
 {
     M_currentId      = geoele.id();
     M_currentLocalId = geoele.localId();
 
-    std::vector< std::vector <Real> > pts(M_nbGeoNode, std::vector<Real>(M_nbCoor));
+    std::vector< std::vector <Real> > pts (M_nbGeoNode, std::vector<Real> (nDimensions) );
 
-    for ( UInt i(0); i < M_nbGeoNode; ++i )
+    for ( UInt i (0); i < M_nbGeoNode; ++i )
     {
-        for ( UInt icoor(0); icoor < M_nbCoor; ++icoor)
+        for ( UInt icoor (0); icoor < nDimensions; ++icoor)
         {
-            pts[i][icoor] = geoele.point(i).coordinate(icoor);
+            pts[i][icoor] = geoele.point (i).coordinate (icoor);
         }
     }
-    update(pts,upFlag);
+    update (pts, upFlag);
 }
 
-
 template<typename MeshElementMarked>
-void CurrentFE::computeCellNodes(const MeshElementMarked& geoele)
+void CurrentFE::computeCellNodes (const MeshElementMarked& geoele)
 {
-    std::vector< std::vector <Real> > pts(M_nbGeoNode, std::vector<Real>(M_nbCoor));
+    std::vector< std::vector <Real> > pts (M_nbGeoNode, std::vector<Real> (nDimensions) );
 
-    for ( UInt i(0); i < M_nbGeoNode; ++i )
+    for ( UInt i (0); i < M_nbGeoNode; ++i )
     {
-        for ( UInt icoor(0); icoor < M_nbCoor; ++icoor)
+        for ( UInt icoor (0); icoor < nDimensions; ++icoor)
         {
-            pts[i][icoor] = geoele.point(i).coordinate(icoor);
+            pts[i][icoor] = geoele.point (i).coordinate (icoor);
         }
 
     }
-    computeCellNodes(pts);
+    computeCellNodes (pts);
 }
 
 //---------------------------------------
@@ -825,7 +835,7 @@ void CurrentFE::computeCellNodes(const MeshElementMarked& geoele)
     minimal update: we just identify the id of the current element
   */
 template <class MeshElementMarkedType>
-void CurrentFE::update( const MeshElementMarkedType& geoele )
+void CurrentFE::update ( const MeshElementMarkedType& geoele )
 {
     M_currentId      = geoele.id();
     M_currentLocalId = geoele.localId();
@@ -836,13 +846,13 @@ void CurrentFE::update( const MeshElementMarkedType& geoele )
     the current element
 */
 template <class MeshElementMarkedType>
-void CurrentFE::updateJac( const MeshElementMarkedType& geoele )
+void CurrentFE::updateJac ( const MeshElementMarkedType& geoele )
 {
-    ASSERT(M_nbQuadPt!=0," No quadrature rule defined, cannot update!");
+    ASSERT (M_nbQuadPt != 0, " No quadrature rule defined, cannot update!");
     M_currentId      = geoele.id();
     M_currentLocalId = geoele.localId();
     //! compute the jacobian and its determinant...
-    computeCellNodes(geoele);
+    computeCellNodes (geoele);
     computeDphiGeometricMap();
     computeJacobian();
     computeDetJacobian();
@@ -854,13 +864,13 @@ void CurrentFE::updateJac( const MeshElementMarkedType& geoele )
     on the current element
 */
 template <class MeshElementMarkedType>
-void CurrentFE::updateJacQuadPt( const MeshElementMarkedType& geoele )
+void CurrentFE::updateJacQuadPt ( const MeshElementMarkedType& geoele )
 {
-    ASSERT(M_nbQuadPt!=0," No quadrature rule defined, cannot update!");
+    ASSERT (M_nbQuadPt != 0, " No quadrature rule defined, cannot update!");
     M_currentId      = geoele.id();
     M_currentLocalId = geoele.localId();
     // compute the jacobian and its determinant...
-    computeCellNodes(geoele);
+    computeCellNodes (geoele);
     computeDphiGeometricMap();
     computeJacobian();
     computeDetJacobian();
@@ -874,13 +884,13 @@ void CurrentFE::updateJacQuadPt( const MeshElementMarkedType& geoele )
     tInvJac, phiDer on the current element
 */
 template <class MeshElementMarkedType>
-void CurrentFE::updateFirstDeriv( const MeshElementMarkedType& geoele )
+void CurrentFE::updateFirstDeriv ( const MeshElementMarkedType& geoele )
 {
-    ASSERT(M_nbQuadPt!=0," No quadrature rule defined, cannot update!");
+    ASSERT (M_nbQuadPt != 0, " No quadrature rule defined, cannot update!");
     M_currentId      = geoele.id();
     M_currentLocalId = geoele.localId();
     //! compute the inverse jacobian...
-    computeCellNodes(geoele);
+    computeCellNodes (geoele);
     computeDphiGeometricMap();
     computeJacobian();
     computeDetJacobian();
@@ -896,13 +906,13 @@ void CurrentFE::updateFirstDeriv( const MeshElementMarkedType& geoele )
     tInvJac, phiDer and quadPt on the current element
 */
 template <class MeshElementMarkedType>
-void CurrentFE::updateFirstDerivQuadPt( const MeshElementMarkedType& geoele )
+void CurrentFE::updateFirstDerivQuadPt ( const MeshElementMarkedType& geoele )
 {
-    ASSERT(M_nbQuadPt!=0," No quadrature rule defined, cannot update!");
+    ASSERT (M_nbQuadPt != 0, " No quadrature rule defined, cannot update!");
     M_currentId      = geoele.id();
     M_currentLocalId = geoele.localId();
     //! compute the inverse jacobian...
-    computeCellNodes(geoele);
+    computeCellNodes (geoele);
     computeDphiGeometricMap();
     computeJacobian();
     computeDetJacobian();
@@ -921,13 +931,13 @@ void CurrentFE::updateFirstDerivQuadPt( const MeshElementMarkedType& geoele )
   tInvJac, phiDer2 on the current element
 */
 template <class MeshElementMarkedType>
-void CurrentFE::updateSecondDeriv( const MeshElementMarkedType& geoele )
+void CurrentFE::updateSecondDeriv ( const MeshElementMarkedType& geoele )
 {
-    ASSERT(M_nbQuadPt!=0," No quadrature rule defined, cannot update!");
+    ASSERT (M_nbQuadPt != 0, " No quadrature rule defined, cannot update!");
     M_currentId      = geoele.id();
     M_currentLocalId = geoele.localId();
     //! compute the inverse jacobian...
-    computeCellNodes(geoele);
+    computeCellNodes (geoele);
     computeDphiGeometricMap();
     computeJacobian();
     computeDetJacobian();
@@ -943,13 +953,13 @@ void CurrentFE::updateSecondDeriv( const MeshElementMarkedType& geoele )
     tInvJac, phiDer2 on the current element
   */
 template <class MeshElementMarkedType>
-void CurrentFE::updateSecondDerivQuadPt( const MeshElementMarkedType& geoele )
+void CurrentFE::updateSecondDerivQuadPt ( const MeshElementMarkedType& geoele )
 {
-    ASSERT(M_nbQuadPt!=0," No quadrature rule defined, cannot update!");
+    ASSERT (M_nbQuadPt != 0, " No quadrature rule defined, cannot update!");
     M_currentId      = geoele.id();
     M_currentLocalId = geoele.localId();
     //! compute the inverse jacobian...
-    computeCellNodes(geoele);
+    computeCellNodes (geoele);
     computeDphiGeometricMap();
     computeJacobian();
     computeDetJacobian();
@@ -966,13 +976,13 @@ void CurrentFE::updateSecondDerivQuadPt( const MeshElementMarkedType& geoele )
     tInvJac, phiDer, phiDer2 on the current element
   */
 template <class MeshElementMarkedType>
-void CurrentFE::updateFirstSecondDeriv( const MeshElementMarkedType& geoele )
+void CurrentFE::updateFirstSecondDeriv ( const MeshElementMarkedType& geoele )
 {
-    ASSERT(M_nbQuadPt!=0," No quadrature rule defined, cannot update!");
+    ASSERT (M_nbQuadPt != 0, " No quadrature rule defined, cannot update!");
     M_currentId      = geoele.id();
     M_currentLocalId = geoele.localId();
     //! compute the inverse jacobian...
-    computeCellNodes(geoele);
+    computeCellNodes (geoele);
     computeDphiGeometricMap();
     computeJacobian();
     computeDetJacobian();
@@ -989,13 +999,13 @@ void CurrentFE::updateFirstSecondDeriv( const MeshElementMarkedType& geoele )
     tInvJac, phiDer, phiDer2 on the current element
   */
 template <class MeshElementMarkedType>
-void CurrentFE::updateFirstSecondDerivQuadPt( const MeshElementMarkedType& geoele )
+void CurrentFE::updateFirstSecondDerivQuadPt ( const MeshElementMarkedType& geoele )
 {
-    ASSERT(M_nbQuadPt!=0," No quadrature rule defined, cannot update!");
+    ASSERT (M_nbQuadPt != 0, " No quadrature rule defined, cannot update!");
     M_currentId      = geoele.id();
     M_currentLocalId = geoele.localId();
     //! compute the inverse jacobian...
-    computeCellNodes(geoele);
+    computeCellNodes (geoele);
     computeDphiGeometricMap();
     computeJacobian();
     computeDetJacobian();
