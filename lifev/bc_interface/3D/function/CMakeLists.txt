@@ -65,4 +65,8 @@ TRIBITS_ADD_LIBRARY(
   SOURCES ${SOURCES}
   DEPLIBS lifevbcinterface3D
 )
+<<<<<<< HEAD
 ENDIF()
+=======
+ENDIF()
+>>>>>>> master
