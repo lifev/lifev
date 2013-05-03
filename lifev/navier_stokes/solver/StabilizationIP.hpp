@@ -322,7 +322,7 @@ void StabilizationIP<MeshType, DofType>::apply ( MatrixType& matrix,  const Vect
                 {
                     UInt ig ( M_dof->localToGlobalMap ( iElAd1, iloc ) + iCoor * nDof );
 
-                    if (state.blockMap().LID( static_cast<EpetraInt_Type>(ig) ) >= 0)
+                    if (state.blockMap().LID ( static_cast<EpetraInt_Type> (ig) ) >= 0)
                     {
                         beta.vec() [ iCoor * M_feBd->nbFEDof() + iNode ] = state ( ig);
                     }

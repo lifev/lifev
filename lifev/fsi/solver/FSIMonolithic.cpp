@@ -389,7 +389,7 @@ FSIMonolithic::couplingRhs (vectorPtr_Type rhs) // not working with non-matching
     {
         for ( ITrow = localDofMap.begin(); ITrow != localDofMap.end() ; ++ITrow)
         {
-            if(M_interfaceMap->map(Unique)->LID( static_cast<EpetraInt_Type>(ITrow->second /*+ dim*solidDim*/) ) >= 0 )//to avoid repeated stuff
+            if (M_interfaceMap->map (Unique)->LID ( static_cast<EpetraInt_Type> (ITrow->second /*+ dim*solidDim*/) ) >= 0 ) //to avoid repeated stuff
             {
                 if (rhs.get() )
                 {

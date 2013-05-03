@@ -699,12 +699,12 @@ void MeshPartitioner<MeshType>::findRepeatedFacesFSI()
                 count = 0;
                 for (Int ipoint = 0; ipoint < static_cast<Int> (M_facetVertices); ++ipoint) // vertex-based dofs
                 {
-                    myFacetRep = ((M_interfaceMap->LID( static_cast<EpetraInt_Type>(M_originalMesh->facet(facet).point(ipoint).id()) )
-                                  /* first is fluid */ == -1) &&
-                                 (M_interfaceMapRep->LID( static_cast<EpetraInt_Type>(M_originalMesh->facet(facet).point(ipoint).id()) )
-                                  /* first is fluid */ != -1));
+                    myFacetRep = ( (M_interfaceMap->LID ( static_cast<EpetraInt_Type> (M_originalMesh->facet (facet).point (ipoint).id() ) )
+                                    /* first is fluid */ == -1) &&
+                                   (M_interfaceMapRep->LID ( static_cast<EpetraInt_Type> (M_originalMesh->facet (facet).point (ipoint).id() ) )
+                                    /* first is fluid */ != -1) );
                     myFacet = myFacet ||
-                        (M_interfaceMap->LID( static_cast<EpetraInt_Type>(M_originalMesh->facet(facet).point(ipoint).id()) ) != -1);
+                              (M_interfaceMap->LID ( static_cast<EpetraInt_Type> (M_originalMesh->facet (facet).point (ipoint).id() ) ) != -1);
                     if (myFacetRep)
                     {
                         ++count;

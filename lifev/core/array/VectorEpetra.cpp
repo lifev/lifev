@@ -151,7 +151,7 @@ VectorEpetra::VectorEpetra ( const VectorEpetra& vector, const Int& reduceToProc
 VectorEpetra::data_type&
 VectorEpetra::operator[] ( const UInt row )
 {
-    Int lrow = blockMap().LID( static_cast<EpetraInt_Type>(row) );
+    Int lrow = blockMap().LID ( static_cast<EpetraInt_Type> (row) );
 
 #ifdef HAVE_LIFEV_DEBUG
     if ( lrow < 0 )
@@ -167,7 +167,7 @@ VectorEpetra::operator[] ( const UInt row )
 const VectorEpetra::data_type&
 VectorEpetra::operator[] ( const UInt row ) const
 {
-    Int lrow = blockMap().LID( static_cast<EpetraInt_Type>(row) );
+    Int lrow = blockMap().LID ( static_cast<EpetraInt_Type> (row) );
 
 #ifdef HAVE_LIFEV_DEBUG
     if ( lrow < 0 )
@@ -602,12 +602,12 @@ VectorEpetra::operator! ( void )
 // ===================================================
 bool VectorEpetra::isGlobalIDPresent (const UInt row) const
 {
-    return blockMap().LID( static_cast<EpetraInt_Type>(row) )>=0;
+    return blockMap().LID ( static_cast<EpetraInt_Type> (row) ) >= 0;
 }
 
 Int VectorEpetra::globalToLocalRowId ( const UInt row ) const
 {
-    Int lrow = blockMap().LID( static_cast<EpetraInt_Type>(row) );
+    Int lrow = blockMap().LID ( static_cast<EpetraInt_Type> (row) );
 
 #ifdef HAVE_LIFEV_DEBUG
     if ( lrow < 0 && blockMap().Comm().NumProc() == 1 )
@@ -768,8 +768,8 @@ VectorEpetra::subset ( const Epetra_MultiVector& vector,
     // eg:  p = (u,p) or u = (u,p)
     for ( UInt i = 0; i < numMyEntries; ++i )
     {
-        lid1 = vector.Map().LID( static_cast<EpetraInt_Type>(gids[i]+offset1) );
-        lid2 = blockMap().LID( static_cast<EpetraInt_Type>(gids[i]+offset2) );
+        lid1 = vector.Map().LID ( static_cast<EpetraInt_Type> (gids[i] + offset1) );
+        lid2 = blockMap().LID ( static_cast<EpetraInt_Type> (gids[i] + offset2) );
         ASSERT ( ( lid2 >= 0 ) && ( lid1 >= 0 ), "VectorEpetra::subset ERROR : !! lid < 0\n" );
         (*M_epetraVector) [0][lid2] = vector[column][lid1];
     }
