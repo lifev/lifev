@@ -128,6 +128,35 @@ private:
 
 }; // Marker selector
 
+
+// Note that the functor is specialized for 3D problems.
+class sourceVectorialFunctor
+{
+public:
+    typedef boost::function<VectorSmall<3> ( Real const&, Real const&, Real const&, Real const& ) > volumeForce_Type;
+    typedef boost::shared_ptr<volumeForce_Type >                                                    volumeForcePtr_Type;
+    typedef VectorSmall<3>              return_Type;
+
+    sourceVectorialFunctor ( const volumeForcePtr_Type volumeSource )
+    : M_volumeSource ( volumeSource ), M_currentTime( 0.0 )
+    {}
+
+    void setCurrentTime( const Real time )
+    {
+        M_currentTime = time;
+    }
+
+    return_Type operator() ( const VectorSmall<3> spaceCoordinates )
+    {
+        //Extract the flag from the mesh entity
+        return (*M_volumeSource)( M_currentTime, spaceCoordinates[0], spaceCoordinates[1], spaceCoordinates[2] );
+    }
+
+private:
+    volumeForcePtr_Type M_volumeSource;
+    Real  M_currentTime;
+}; // sourceFunctor
+
 /*!
   \class StructuralSolver
   \brief
@@ -143,9 +172,6 @@ public:
     //!@name Type definitions
     //@{
     typedef Real ( *function ) ( const Real&, const Real&, const Real&, const Real&, const ID& );
-
-    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > source_Type;
-
     typedef StructuralConstitutiveLaw<Mesh>               material_Type;
     typedef boost::shared_ptr<material_Type>              materialPtr_Type;
 
@@ -198,15 +224,19 @@ public:
     typedef TimeAdvance< vector_Type >                                  timeAdvance_Type;
     typedef boost::shared_ptr< timeAdvance_Type >                       timeAdvancePtr_Type;
 
-    //@}
-
-
 #ifdef COMPUTATION_JACOBIAN
     typedef Epetra_SerialDenseMatrix                     matrixSerialDense_Type;
     typedef boost::shared_ptr<matrixSerialDense_Type>    matrixSerialDensePtr_Type;
     typedef std::vector<LifeV::Real>                     vectorInvariants_Type;
     typedef boost::shared_ptr<vectorInvariants_Type>     vectorInvariantsPtr_Type;
 #endif
+
+
+    // Source term
+    typedef boost::function<VectorSmall<3> ( Real const&, const Real&, const Real&, const Real& ) > volumeForce_Type;
+    typedef boost::shared_ptr<volumeForce_Type>                                                     volumeForcePtr_Type;
+    typedef sourceVectorialFunctor                                       sourceFunctor_Type;
+    typedef boost::shared_ptr<sourceFunctor_Type> sourceFunctorPtr_Type;
     //@}
 
     //! @name Constructor & Destructor
@@ -273,18 +303,9 @@ public:
 
     //! Updates the system at the end of each time step given a source term
     /*!
-      \param source volumic source
-      \param time present time
+      \param rhsTimeAdvance the portion of the rhs of the discrete equation which comes from TA.
     */
-    void updateSystem ( source_Type const& source );
-
-
-    //! Updates the system at the end of each time step given a source term
-    /*!
-      \param source volumic source
-      \param time present time
-    */
-    void updateSourceTerm ( source_Type const& source );
+    void updateRightHandSideWithBodyForce ( const Real currentTime, const vector_Type& rhsTimeAdvance );
 
     //! Updates the rhs at the start of each time step
     /*!
@@ -465,9 +486,15 @@ public:
     }
 
     //! Set the source object
-    void setSourceTerm ( source_Type const& s )
+    void setSourceTerm ( const volumeForcePtr_Type s )
     {
-        M_source = s;
+        M_source.reset( new sourceFunctor_Type( s ) );
+    }
+
+    //! Set the source object
+    void setHavingSourceTerm ( const bool havingSource )
+    {
+        M_havingSource = havingSource;
     }
 
     // //! Set the preconditioner
@@ -489,7 +516,6 @@ public:
     {
         M_timeAdvance = timeAdvancePtr;
     }
-
     //@}
 
 
@@ -548,10 +574,11 @@ public:
     }
 
     //! Get the source term
-    source_Type const& sourceTerm() const
+    const bool havingSourceTerm() const
     {
-        return M_source;
+        return M_havingSource;
     }
+
 
     //! Get the displacement
     vector_Type& displacement()
@@ -570,6 +597,12 @@ public:
         return M_rhsNoBC;
     }
 
+    solver_Type& linearSolver()
+    {
+        M_linearSolver;
+    }
+
+#ifdef EXPORTVECTORS_DEBUG
     //! Get the right hand. The member rhsCopy is used for Debug purposes!
     vector_Type& rhsCopy()
     {
@@ -579,6 +612,11 @@ public:
     {
         return *M_residualCopy;
     }
+    vector_Type& bodyForce()
+    {
+        return *M_bodyForceVector;
+    }
+#endif
 
     //! Get the comunicator object
     boost::shared_ptr<Epetra_Comm> const& comunicator() const
@@ -736,8 +774,12 @@ protected:
 
     //! right  hand  side displacement
     vectorPtr_Type                       M_rhs;
+
+#ifdef EXPORTVECTORS_DEBUG
     vectorPtr_Type                       M_rhsCopy;
     vectorPtr_Type                       M_residualCopy;
+    vectorPtr_Type                       M_bodyForceVector;
+#endif
 
     //! right  hand  side
     vectorPtr_Type                       M_rhsNoBC;
@@ -772,7 +814,8 @@ protected:
     //! level of recursion for Aztec (has a sens with FSI coupling)
     UInt                                 M_recur;
 
-    source_Type                          M_source;
+    bool                                 M_havingSource;
+    sourceFunctorPtr_Type                   M_source;
 
     UInt                                 M_offset;
     Real                                 M_rescaleFactor;
@@ -813,8 +856,11 @@ StructuralOperator<Mesh>::StructuralOperator( ) :
     M_elmatM                     ( ),
     M_disp                       ( ),
     M_rhsNoBC                    ( ),
+#ifdef EXPORTVECTORS_DEBUG
     M_rhsCopy                    ( ),
     M_residualCopy               ( ),
+    M_bodyForceVector            ( ),
+#endif
     M_residual_d                 ( ),
     M_out_iter                   ( ),
     M_out_res                    ( ),
@@ -824,6 +870,7 @@ StructuralOperator<Mesh>::StructuralOperator( ) :
     M_systemMatrix               ( ),
     M_jacobian                   ( ),
     M_recur                      ( ),
+    M_havingSource               ( false ),
     M_source                     ( ),
     M_offset                     ( 0 ),
     M_rescaleFactor              ( 1. ),
@@ -862,8 +909,11 @@ StructuralOperator<Mesh>::setup (boost::shared_ptr<data_Type>        data,
     setup ( data, dFESpace, dETFESpace, comm, dFESpace->mapPtr(), (UInt) 0 );
 
     M_rhs.reset                        ( new vector_Type (*M_localMap) );
+#ifdef EXPORTVECTORS_DEBUG
     M_rhsCopy.reset                    ( new vector_Type (*M_localMap) );
     M_residualCopy.reset               ( new vector_Type (*M_localMap) );
+    M_bodyForceVector.reset            ( new vector_Type (*M_localMap) );
+#endif
     M_rhsNoBC.reset                    ( new vector_Type (*M_localMap) );
     M_linearSolver.reset               ( new LinearSolver ( comm ) );
     M_disp.reset                       ( new vector_Type (*M_localMap) );
@@ -990,28 +1040,27 @@ void StructuralOperator<Mesh>::updateSystem ( matrixPtr_Type& mat_stiff)
 }
 
 template <typename Mesh>
-void StructuralOperator<Mesh>::updateSourceTerm ( source_Type const& source )
+void StructuralOperator<Mesh>::updateRightHandSideWithBodyForce ( const Real currentTime, const vector_Type& rhsTimeAdvance )
 {
-    vector_Type rhs (vector_Type (*M_localMap) );
+    using namespace ExpressionAssembly;
 
-    VectorElemental M_elvec (M_dispFESpace->fe().nbFEDof(), nDimensions);
-    UInt nc = nDimensions;
+    M_source->setCurrentTime( currentTime );
 
-    // loop on volumes: assembling source term
-    for ( UInt i = 1; i <= M_dispFESpace->mesh()->numVolumes(); ++i )
-    {
+    vectorPtr_Type rhs ( new vector_Type (*M_localMap) );
 
-        M_dispFESpace->fe().updateFirstDerivQuadPt ( M_dispFESpace->mesh()->volumeList ( i ) );
+    integrate ( elements ( this->M_dispETFESpace->mesh() ) ,
+                this->M_dispFESpace->qr(),
+                this->M_dispETFESpace,
+                value ( M_data->rho() ) * dot (  eval( M_source, X ), phi_i )
+                ) >> rhs;
 
-        M_elvec.zero();
+#ifdef EXPORTVECTORS_DEBUG
+    M_bodyForceVector = rhs;
+#endif
 
-        for ( UInt ic = 0; ic < nc; ++ic )
-        {
-            //compute_vec( source, M_elvec, M_dispFESpace->fe(),  M_data->dataTime()->time(), ic ); // compute local vector
-            assembleVector ( *rhs, M_elvec, M_dispFESpace->fe(), M_dispFESpace->dof(), ic, ic * M_dispFESpace->fieldDim() ); // assemble local vector into global one
-        }
-    }
-    M_rhsNoBC += rhs;
+    *rhs += rhsTimeAdvance;
+
+    *M_rhsNoBC += *rhs;
 }
 
 template <typename Mesh>
@@ -1050,13 +1099,41 @@ StructuralOperator<Mesh>::computeMassMatrix ( const Real factor)
                 M_dispFESpace->qr(),
                 M_dispETFESpace,
                 M_dispETFESpace,
-                value (factorMassMatrix) *  dot ( phi_i , phi_j ) ) >> M_massMatrix;
+                value (factorMassMatrix) *  dot ( phi_j , phi_i ) ) >> M_massMatrix;
 
     M_massMatrix->globalAssemble();
 
     //M_massMatrix->spy("massMatrixStructure.m");
 
     //*massStiff *= factor; //M_data.dataTime()->timeStep() * M_rescaleFactor;
+
+    // UInt totalDof = M_dispFESpace->dof().numTotalDof();
+
+    // //! Number of displacement components
+    // UInt nc = nDimensions;
+    // const Real factorMassMatrix = factor * M_data->rho();
+
+    // //! Elementary computation and matrix assembling
+    // //! Loop on elements
+    // for ( UInt i = 0; i < M_dispFESpace->mesh()->numVolumes(); i++ )
+    // {
+
+    //     M_dispFESpace->fe().updateFirstDerivQuadPt ( M_dispFESpace->mesh()->volumeList ( i ) );
+
+    //     M_elmatM->zero();
+
+    //     // mass
+    //     // The method mass is implemented in AssemblyElemental.cpp
+    //     mass ( factorMassMatrix , *M_elmatM, M_dispFESpace->fe(), 0, 0, nDimensions );
+
+    //     //! assembling
+    //     for ( UInt ic = 0; ic < nc; ic++ )
+    //     {
+    //         //mass
+    //         assembleMatrix ( *M_massMatrix, *M_elmatM, M_dispFESpace->fe(), M_dispFESpace->dof(), ic, ic, M_offset +  ic * totalDof, M_offset +  ic * totalDof);
+    //     }
+    // }
+
 }
 
 template <typename Mesh>
@@ -1442,13 +1519,14 @@ StructuralOperator<Mesh>::evalResidual ( vector_Type& residual, const vector_Typ
 
             bcManageVector ( *M_rhs, *M_dispFESpace->mesh(), M_dispFESpace->dof(), *M_BCh, M_dispFESpace->feBd(),  M_data->dataTime()->time(), 1.0 );
 
+#ifdef EXPORTVECTORS_DEBUG
             //To export for check
             M_rhsCopy = M_rhs;
-
             // std::string nameFile="residualAfterBC";
             // M_rhs->spy(nameFile);
             // int n;
             // std::cin >> n;
+#endif
         }
 
         bcManageMatrix ( matrixFull, *M_dispFESpace->mesh(), M_dispFESpace->dof(), *M_BCh, M_dispFESpace->feBd(), 1.0 );
@@ -1471,11 +1549,13 @@ StructuralOperator<Mesh>::evalResidual ( vector_Type& residual, const vector_Typ
         M_Displayer->leaderPrintMax ("done in ", chrono.diff() );
     }
 
+#ifdef EXPORTVECTORS_DEBUG
     if ( iter == 0 )
     {
         *M_residualCopy = residual;
         M_rhsCopy = M_rhs;
     }
+#endif
 }
 
 template <typename Mesh>
@@ -1531,8 +1611,6 @@ void
 StructuralOperator<Mesh>::initialize ( const function& d0 )
 {
     M_dispFESpace->interpolate ( static_cast<typename FESpace<Mesh, MapEpetra>::function_Type> ( d0 ), *M_disp, 0.0);
-    //M_FESpace->interpolate(w0, *M_vel , 0.0);
-    // M_FESpace->interpolate(a0, *M_acc , 0.0);
 }
 
 template<typename Mesh>

@@ -20,58 +20,63 @@
 [exporter]
 type       = hdf5 			# hdf5 (if library compiled with hdf5 support) or ensight
 multimesh  = false
-name       = 2ndExpo
 start      = 0
 save       = 1
 
 [solid]
 
 [./physics]
-density   	= 1.2
+density   	= 1.0
 material_flag   = 101
-young     	= 8e+6
-poisson   	= 0.49
-bulk		= 1.3333e+8
+bodyForce   = true
+
+[../model]
+constitutiveLaw = isotropic
+young     	= 226144
+poisson   	= 0.48
+bulk		= 9e+6
 alpha 		= 2.684564e+6
 gamma		= 1.0
-solidType 	= secondOrderExponential
-lawType     = nonlinear
+solidTypeIsotropic 	= linearVenantKirchhoff		# linearVenantKirchhoff / nonLinearVenantKirchhoff / neoHookean / expoenential
 
-# linearVenantKirchhoff / nonLinearVenantKirchhoff / neoHookean / expoenential / secondOrderExponential / nonLinearVenantKirchhoffPenalized
+[./fibers]
+numberFamilies  = 2
+stiffness       = '9.996e+6 9.996e+6'
+nonlinearity    = '524.6 524.6'
+smoothness      = 1000
+[./]
 
-[../time_discretization]
+
+[../../time_discretization]
 method          = BDF
 initialtime 	= 0.
-endtime     	= 5.0
-timestep    	= 0.1
+endtime     	= 0.05
+timestep    	= 0.05
 BDF_order   	= 2
 
 [../space_discretization]
 mesh_type = .mesh
 mesh_dir  	= ./
-mesh_file 	= cubeY4.mesh
+mesh_file 	= cubeHolzapfel.mesh
 order     	= P1
-
 
 [../miscellaneous]
 factor    	= 1
 verbose   	= 1
 
-
 [../newton]
 maxiter 	= 1
 reltol  	= 1.e-8
-
 
 [../solver]
 solver          = gmres
 scaling         = none
 output          = all 			# none
 conv            = rhs
-max_iter        = 500
+max_iter        = 800
 reuse           = true
 max_iter_reuse  = 200
-kspace          = 200
+kspace          = 800
 tol             = 1.e-10    		# AztecOO tolerance
 
 [../prec]

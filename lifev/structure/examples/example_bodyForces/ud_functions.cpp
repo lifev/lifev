@@ -45,24 +45,16 @@
 namespace LifeV
 {
 
-Real f (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+VectorSmall<3> f (const Real& t, const Real& x, const Real& y, const Real& z)
 {
-    switch (i)
-    {
-        case 0:
-            return 0.0;
-            break;
-        case 1:
-            return 0.0;
-            break;
-        case 2:
-            return 0.0;
-            break;
-        default:
-            ERROR_MSG ("This entrie is not allowed: ud_functions.hpp");
-            return 0.;
-            break;
-    }
+    VectorSmall<3>   evaluationOfF;
+
+    evaluationOfF[ 0 ] = 1.0;
+    evaluationOfF[ 1 ] = 1.0;
+    evaluationOfF[ 2 ] = 1.0;
+
+    return evaluationOfF;
+
 }
 
 

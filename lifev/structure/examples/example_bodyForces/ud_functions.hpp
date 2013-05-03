@@ -38,16 +38,17 @@
  *  if the functions to assign is vectorial and the boundary condition is of type \c Full \c.
  */
 
-#ifndef UDF_ANISOTROPIC_HPP
-#define UDF_ANISOTROPIC_HPP
+#ifndef UDF_ANISOTROPICEXAMPLE_HPP
+#define UDF_ANISOTROPICEXAMPLE_HPP
 
 #include <lifev/core/LifeV.hpp>
+#include <lifev/core/array/VectorSmall.hpp>
 
 namespace LifeV
 {
 
 //Body Forces
-Real f (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
+VectorSmall<3> f (const Real& t, const Real& x, const Real& y, const Real& z);
 Real InternalPressure (const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
 Real fzero_scalar (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
 

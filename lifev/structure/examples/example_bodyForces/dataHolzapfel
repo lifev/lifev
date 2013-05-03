@@ -28,6 +28,7 @@ save       = 1
 [./physics]
 density   	= 1.2
 material_flag   = 101
+bodyForce   = true
 
 [../model]
 constitutiveLaw = anisotropic
@@ -50,7 +51,7 @@ smoothness      = 1000
 [../../time_discretization]
 method          = BDF
 initialtime 	= 0.
-endtime     	= 2.0
+endtime     	= 0.05
 timestep    	= 0.05
 BDF_order   	= 2
 

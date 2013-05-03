@@ -4,13 +4,13 @@ INCLUDE(TribitsAddExecutable)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
 
 TRIBITS_ADD_EXECUTABLE(
-  bodyForces
-  SOURCES main.cpp ud_functions.cpp
+  checkBodyForces
+  SOURCES main.cpp
   COMM serial mpi
   )
 
-TRIBITS_COPY_FILES_TO_BINARY_DIR(data_bodyForces
-  SOURCE_FILES dataHolzapfel
+TRIBITS_COPY_FILES_TO_BINARY_DIR(data_checkBodyForces
+  SOURCE_FILES data
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
   CREATE_SYMLINK
 )
