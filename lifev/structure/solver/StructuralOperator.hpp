@@ -516,7 +516,6 @@ public:
     {
         M_timeAdvance = timeAdvancePtr;
     }
-
     //@}
 
 
@@ -596,6 +595,11 @@ public:
     vectorPtr_Type& rhsWithoutBC()
     {
         return M_rhsNoBC;
+    }
+
+    solver_Type& linearSolver()
+    {
+        M_linearSolver;
     }
 
 #ifdef EXPORTVECTORS_DEBUG
@@ -1051,7 +1055,6 @@ void StructuralOperator<Mesh>::updateRightHandSideWithBodyForce ( const Real cur
                 ) >> rhs;
 
 #ifdef EXPORTVECTORS_DEBUG
-    std::cout << "saving" << std::endl;
     M_bodyForceVector = rhs;
 #endif
 
@@ -1096,13 +1099,41 @@ StructuralOperator<Mesh>::computeMassMatrix ( const Real factor)
                 M_dispFESpace->qr(),
                 M_dispETFESpace,
                 M_dispETFESpace,
-                value (factorMassMatrix) *  dot ( phi_i , phi_j ) ) >> M_massMatrix;
+                value (factorMassMatrix) *  dot ( phi_j , phi_i ) ) >> M_massMatrix;
 
     M_massMatrix->globalAssemble();
 
     //M_massMatrix->spy("massMatrixStructure.m");
 
     //*massStiff *= factor; //M_data.dataTime()->timeStep() * M_rescaleFactor;
+
+    // UInt totalDof = M_dispFESpace->dof().numTotalDof();
+
+    // //! Number of displacement components
+    // UInt nc = nDimensions;
+    // const Real factorMassMatrix = factor * M_data->rho();
+
+    // //! Elementary computation and matrix assembling
+    // //! Loop on elements
+    // for ( UInt i = 0; i < M_dispFESpace->mesh()->numVolumes(); i++ )
+    // {
+
+    //     M_dispFESpace->fe().updateFirstDerivQuadPt ( M_dispFESpace->mesh()->volumeList ( i ) );
+
+    //     M_elmatM->zero();
+
+    //     // mass
+    //     // The method mass is implemented in AssemblyElemental.cpp
+    //     mass ( factorMassMatrix , *M_elmatM, M_dispFESpace->fe(), 0, 0, nDimensions );
+
+    //     //! assembling
+    //     for ( UInt ic = 0; ic < nc; ic++ )
+    //     {
+    //         //mass
+    //         assembleMatrix ( *M_massMatrix, *M_elmatM, M_dispFESpace->fe(), M_dispFESpace->dof(), ic, ic, M_offset +  ic * totalDof, M_offset +  ic * totalDof);
+    //     }
+    // }
+
 }
 
 template <typename Mesh>

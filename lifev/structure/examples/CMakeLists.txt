@@ -13,3 +13,8 @@ ADD_SUBDIRECTORIES(
   example_bodyForces
 )
 
+IF(EXPORTVECTORS_DEBUG)
+  ADD_SUBDIRECTORIES(
+  example_checkigForceTerm
+)
+ENDIF()
