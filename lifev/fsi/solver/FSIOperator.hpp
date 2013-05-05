@@ -130,6 +130,8 @@ public:
     typedef boost::shared_ptr<solidLin_Type>                                        solidLinPtr_Type;
     typedef fluid_Type::vector_Type/*fluidPtr_Type::vector_Type*/                   vector_Type;
     typedef boost::shared_ptr<vector_Type>                                          vectorPtr_Type;
+    typedef vector_Type                                                             solution_Type;
+    typedef boost::shared_ptr<solution_Type>                                        solutionPtr_Type;
     typedef fluid_Type::source_Type/*fluidPtr_Type::source_Type*/                   fluidSource_Type;
     typedef solid_Type::source_Type                                                 solidSource_Type;
     typedef boost::function < Real ( const Real&, const Real&,

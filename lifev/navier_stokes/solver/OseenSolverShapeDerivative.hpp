@@ -79,6 +79,8 @@ public:
     typedef SolverType                                        linearSolver_Type;
     typedef OseenSolver< mesh_Type, linearSolver_Type >       oseenSolver_Type;
     typedef typename oseenSolver_Type::vector_Type            vector_Type;
+    typedef typename oseenSolver_Type::solution_Type          solution_Type;
+    typedef typename oseenSolver_Type::solutionPtr_Type       solutionPtr_Type;
     typedef typename oseenSolver_Type::matrix_Type            matrix_Type;
     typedef typename oseenSolver_Type::matrixPtr_Type         matrixPtr_Type;
     typedef typename oseenSolver_Type::data_Type              data_Type;
