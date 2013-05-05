@@ -366,7 +366,12 @@ Structure::run3d()
     {
         //Creating a mesh object from a partitioned mesh
         const std::string partsFileName (dataFile ("partitioningOffline/hdf5_file_name", "NO_DEFAULT_VALUE.h5") );
-        PartitionIO<mesh_Type > partitionIO (partsFileName, parameters->comm);
+
+        boost::shared_ptr<Epetra_MpiComm> mpiComm =
+            boost::dynamic_pointer_cast<Epetra_MpiComm>(parameters->comm);
+        PartitionIO<mesh_Type> partitionIO (partsFileName, mpiComm);
+
+
         partitionIO.read (pointerToMesh);
 
     }

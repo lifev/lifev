@@ -122,7 +122,11 @@ int main (int argc, char** argv)
     fullMeshPtr.reset();
 
     // Write mesh parts to HDF5 container
-    PartitionIO<mesh_Type> partitionIO (stringFileName, comm);
+
+    boost::shared_ptr<Epetra_MpiComm> mpiComm =
+        boost::dynamic_pointer_cast<Epetra_MpiComm>(comm);
+    PartitionIO<mesh_Type> partitionIO (stringFileName, mpiComm);
+
     partitionIO.write (meshPart.meshPartitions() );
 
     MPI_Finalize();
