@@ -1016,6 +1016,11 @@ WallTensionEstimator<Mesh >::constructGlobalStressVector ()
     LifeChrono chrono;
     chrono.start();
 
+    // Reset stress components
+    *M_sigmaX *= 0.;
+    *M_sigmaY *= 0.;
+    *M_sigmaZ *= 0.;
+
     //Constructing the patch area vector for reconstruction purposes
     solutionVect_Type patchArea (*M_displacement, Unique, Add);
     patchArea *= 0.0;
@@ -1056,6 +1061,7 @@ WallTensionEstimator<Mesh >::constructGlobalStressVector ()
     VectorElemental dk_loc (fakeFESpace.fe().nbFEDof(), fakeFESpace.fieldDim() );
 
     //Vectors for the deformation tensor
+    (*M_deformationF).Scale (0.0);
     std::vector<matrix_Type> vectorDeformationF (fakeFESpace.fe().nbFEDof(), *M_deformationF);
 
     //Copying the displacement field into a vector with repeated map for parallel computations

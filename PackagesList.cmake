@@ -77,7 +77,7 @@ SET( LifeV_PACKAGES_AND_DIRS_AND_CLASSIFICATIONS
   ETA                   lifev/eta                         EX
   BCInterface           lifev/bc_interface                PS
   OneDFSI               lifev/one_d_fsi                   PS
-  ZeroDimensional       lifev/zero_dimensional            PS  
+  ZeroDimensional       lifev/zero_dimensional            PS
   LevelSet              lifev/level_set                   PS
   Darcy                 lifev/darcy                       PS
   NavierStokes          lifev/navier_stokes               PS
