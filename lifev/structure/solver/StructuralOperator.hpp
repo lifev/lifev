@@ -602,7 +602,7 @@ public:
         M_linearSolver;
     }
 
-#ifdef EXPORTVECTORS_DEBUG
+#ifdef EXPORTVECTORS
     //! Get the right hand. The member rhsCopy is used for Debug purposes!
     vector_Type& rhsCopy()
     {
@@ -775,7 +775,7 @@ protected:
     //! right  hand  side displacement
     vectorPtr_Type                       M_rhs;
 
-#ifdef EXPORTVECTORS_DEBUG
+#ifdef EXPORTVECTORS
     vectorPtr_Type                       M_rhsCopy;
     vectorPtr_Type                       M_residualCopy;
     vectorPtr_Type                       M_bodyForceVector;
@@ -856,7 +856,7 @@ StructuralOperator<Mesh>::StructuralOperator( ) :
     M_elmatM                     ( ),
     M_disp                       ( ),
     M_rhsNoBC                    ( ),
-#ifdef EXPORTVECTORS_DEBUG
+#ifdef EXPORTVECTORS
     M_rhsCopy                    ( ),
     M_residualCopy               ( ),
     M_bodyForceVector            ( ),
@@ -909,7 +909,7 @@ StructuralOperator<Mesh>::setup (boost::shared_ptr<data_Type>        data,
     setup ( data, dFESpace, dETFESpace, comm, dFESpace->mapPtr(), (UInt) 0 );
 
     M_rhs.reset                        ( new vector_Type (*M_localMap) );
-#ifdef EXPORTVECTORS_DEBUG
+#ifdef EXPORTVECTORS
     M_rhsCopy.reset                    ( new vector_Type (*M_localMap) );
     M_residualCopy.reset               ( new vector_Type (*M_localMap) );
     M_bodyForceVector.reset            ( new vector_Type (*M_localMap) );
@@ -1054,7 +1054,7 @@ void StructuralOperator<Mesh>::updateRightHandSideWithBodyForce ( const Real cur
                 value ( M_data->rho() ) * dot (  eval( M_source, X ), phi_i )
                 ) >> rhs;
 
-#ifdef EXPORTVECTORS_DEBUG
+#ifdef EXPORTVECTORS
     M_bodyForceVector = rhs;
 #endif
 
@@ -1519,7 +1519,7 @@ StructuralOperator<Mesh>::evalResidual ( vector_Type& residual, const vector_Typ
 
             bcManageVector ( *M_rhs, *M_dispFESpace->mesh(), M_dispFESpace->dof(), *M_BCh, M_dispFESpace->feBd(),  M_data->dataTime()->time(), 1.0 );
 
-#ifdef EXPORTVECTORS_DEBUG
+#ifdef EXPORTVECTORS
             //To export for check
             M_rhsCopy = M_rhs;
             // std::string nameFile="residualAfterBC";
@@ -1549,7 +1549,7 @@ StructuralOperator<Mesh>::evalResidual ( vector_Type& residual, const vector_Typ
         M_Displayer->leaderPrintMax ("done in ", chrono.diff() );
     }
 
-#ifdef EXPORTVECTORS_DEBUG
+#ifdef EXPORTVECTORS
     if ( iter == 0 )
     {
         *M_residualCopy = residual;

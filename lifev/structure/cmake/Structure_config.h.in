@@ -8,4 +8,4 @@
 #cmakedefine COMPUTATION_JACOBIAN
 
 /* Define to export of vectors for debug purposes */
-#cmakedefine EXPORTVECTORS_DEBUG
+#cmakedefine EXPORTVECTORS
