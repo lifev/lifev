@@ -243,8 +243,8 @@ void FSIExactJacobian::registerMyProducts( )
 {
     FSIFactory_Type::instance().registerProduct ( "exactJacobian", &createEJ );
 
-    solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct ( "linearVenantKirchhoff", &super::createVenantKirchhoffLinear );
-    solid_Type::material_Type::StructureMaterialFactory::instance().registerProduct ( "nonLinearVenantKirchhoff", &super::createVenantKirchhoffNonLinear );
+    solid_Type::material_Type::isotropicLaw_Type::StructureIsotropicMaterialFactory::instance().registerProduct ( "linearVenantKirchhoff", &super::createVenantKirchhoffLinear );
+    solid_Type::material_Type::isotropicLaw_Type::StructureIsotropicMaterialFactory::instance().registerProduct ( "nonLinearVenantKirchhoff", &super::createVenantKirchhoffNonLinear );
 }
 
 // ===================================================

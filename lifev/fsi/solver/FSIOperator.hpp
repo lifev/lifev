@@ -345,7 +345,7 @@ public:
     {
         return new NeoHookeanMaterialNonLinear< FSIOperator::mesh_Type >();
     }
-    static StructuralConstitutiveLaw< FSIOperator::mesh_Type >*    createVenantKirchhoffNonLinearPenalized()
+    static StructuralIsotropicConstitutiveLaw< FSIOperator::mesh_Type >*    createVenantKirchhoffNonLinearPenalized()
     {
         return new VenantKirchhoffMaterialNonLinearPenalized< FSIOperator::mesh_Type >();
     }

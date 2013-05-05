@@ -172,6 +172,8 @@ public:
     //!@name Type definitions
     //@{
     typedef Real ( *function ) ( const Real&, const Real&, const Real&, const Real&, const ID& );
+    typedef boost::function<Real ( const Real&, const Real&, const Real&, const Real&, const ID& ) > source_Type;
+
     typedef StructuralConstitutiveLaw<Mesh>               material_Type;
     typedef boost::shared_ptr<material_Type>              materialPtr_Type;
 
@@ -483,6 +485,16 @@ public:
     void setBC (const bcHandler_Type& BCd)
     {
         M_BCh = BCd;
+    }
+
+    // Paolo Tricerri May, 5th 2013
+    // This version of the method is to make FSI compile
+    // It is not used at the moment and that is why it is commented inside
+
+    //! Set the source object
+    void setSourceTerm ( source_Type const& /*s*/ )
+    {
+        //M_source = s;
     }
 
     //! Set the source object
