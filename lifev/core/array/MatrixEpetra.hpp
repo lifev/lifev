@@ -44,7 +44,6 @@
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-pedantic"
 
 #include <Epetra_MpiComm.h>
 #include <Epetra_FECrsMatrix.h>
@@ -60,7 +59,6 @@
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
-#pragma GCC diagnostic warning "-pedantic"
 
 #include <lifev/core/array/VectorEpetra.hpp>
 
