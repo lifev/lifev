@@ -38,8 +38,8 @@
             </ParameterList>
             <!-- Solver parameters -->
             <ParameterList name="Solver: Parameter list">
-                <Parameter name="Resources path" type="string" value="./Resources/"/>
-                <Parameter name="Parameters file" type="string" value="SolverParamList/SolverParamList.xml"/>
+                <Parameter name="Resources path" type="string" value="./Resources"/>
+                <Parameter name="Parameters file" type="string" value="SolverParamList.xml"/>
             </ParameterList>
         </ParameterList>
         

@@ -1,0 +1,43 @@
+<ParameterList>
+	<!-- LinearSolver parameters -->
+	<Parameter name="Reuse Preconditioner" type="bool" value="false"/>
+    <Parameter name="Max Iterations For Reuse" type="int" value="80"/>
+    <Parameter name="Quit On Failure" type="bool" value="false"/>
+    <Parameter name="Silent" type="bool" value="false"/>
+	<Parameter name="Solver Type" type="string" value="Belos"/>
+	
+	<!-- Operator specific parameters (Belos) -->
+	<ParameterList name="Solver: Operator List">
+		<Parameter name="Solver Manager Type" type="string" value="BlockGmres"/>
+		<Parameter name="Preconditioner Side" type="string" value="Right"/>
+
+		<!-- Trilinos parameters -->
+		<ParameterList name="Trilinos: Belos List">
+		    <Parameter name="Flexible Gmres" type="bool" value="true"/>
+		    <Parameter name="Convergence Tolerance" type="double" value="1e-6"/>
+		    <Parameter name="Maximum Iterations" type="int" value="2000"/>
+		    <Parameter name="Output Frequency" type="int" value="1"/>
+		    <Parameter name="Block Size" type="int" value="1"/>
+		    <Parameter name="Num Blocks" type="int" value="2000"/>
+		    <Parameter name="Maximum Restarts" type="int" value="0"/>
+		    <Parameter name="Output Style" type="int" value="1"/>
+		    <Parameter name="Verbosity" type="int" value="35"/>
+    	</ParameterList>
+    	<!-- Trilinos parameters -->
+		<ParameterList name="Trilinos: AztecOO List">
+    		<Parameter name="solver" type="string" value="gmres"/>
+	    	<Parameter name="conv" type="string" value="rhs"/>
+    		<Parameter name="scaling" type="string" value="none"/>
+	    	<Parameter name="output" type="string" value="all"/>
+    		<Parameter name="tol" type="double" value="1.e-6"/>
+	    	<Parameter name="max_iter" type="int" value="2000"/>
+    		<Parameter name="kspace" type="int" value="2000"/>
+    		<!-- az_aztec_defs.h -->
+    		<!-- #define AZ_classic 0 /* Does double classic */ -->
+	    	<Parameter name="orthog" type="int" value="0"/>
+	    	<!-- az_aztec_defs.h -->
+	    	<!-- #define AZ_resid 0 -->
+    		<Parameter name="aux_vec" type="int" value="0"/>
+    	</ParameterList>
+    </ParameterList>
+</ParameterList>

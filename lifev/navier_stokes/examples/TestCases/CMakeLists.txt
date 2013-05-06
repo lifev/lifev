@@ -16,7 +16,12 @@ TRIBITS_COPY_FILES_TO_BINARY_DIR(datagetpot_nsframework
 )
 
 TRIBITS_COPY_FILES_TO_BINARY_DIR(dataxml_nsframework
-  SOURCE_FILES data.xml
+  SOURCE_SYMLINK data.xml
+  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
+)
+
+TRIBITS_COPY_FILES_TO_BINARY_DIR(solverxml_nsframework
+  SOURCE_SYMLINK Resources/SolverParamList.xml
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
 )
 
