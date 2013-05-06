@@ -313,22 +313,19 @@ Structure::run3d()
 
     nonZero.setFunction (bcNonZero);
 
-
-
     //! =================================================================================
     //! BC for StructuredCube4_test_structuralsolver.mesh
     //! =================================================================================
-    BCh->addBC ("EdgesIn",      20,  Natural,   Component, nonZero, compy);
-    BCh->addBC ("EdgesIn",      20,  Essential, Component, zero,    compxz);
-    BCh->addBC ("EdgesIn",      40,  Essential, Component, zero,    compy);
+    BCh->addBC ("EdgesIn",      20,  Natural,   Component, nonZero, compx);
+    BCh->addBC ("EdgesIn",      40,  Essential, Component, zero,    compx);
 
     //! Symmetry BC
-    BCh->addBC ("EdgesIn",      50,   EssentialVertices, Component, zero, compyz);
-    BCh->addBC ("EdgesIn",      30,   EssentialVertices, Component, zero, compyz);
-    BCh->addBC ("EdgesIn",      80,   EssentialVertices, Component, zero, compxz);
-    BCh->addBC ("EdgesIn",      100,  EssentialVertices,  Full, zero, 3);
+    BCh->addBC ("EdgesIn",      500,   EssentialVertices, Component, zero, compxz);
+    BCh->addBC ("EdgesIn",      300,   EssentialVertices, Component, zero, compxy);
+    BCh->addBC ("EdgesIn",      800,   EssentialVertices, Component, zero, compyz);
+    BCh->addBC ("EdgesIn",      1000,  EssentialVertices,  Full, zero, 3);
 
-    BCh->addBC ("EdgesIn",      7, Essential, Component , zero, compx);
+    BCh->addBC ("EdgesIn",      7, Essential, Component , zero, compy);
     BCh->addBC ("EdgesIn",      3, Essential, Component , zero, compz);
     //! =================================================================================
 
