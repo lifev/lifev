@@ -7,4 +7,5 @@ ADD_SUBDIRECTORIES(
   cavity_ns
   cavity_stokes
   cylinder
+  TestCases
 )

@@ -23,3 +23,9 @@ INSTALL(
   DESTINATION "${${PROJECT_NAME}_INSTALL_INCLUDE_DIR}/lifev/navier_stokes/solver"
   COMPONENT ${PACKAGE_NAME}
 )
+
+INCLUDE(AddSubdirectories)
+
+ADD_SUBDIRECTORIES(
+  NavierStokesSolver
+)
