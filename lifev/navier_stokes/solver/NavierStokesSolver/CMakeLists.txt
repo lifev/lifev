@@ -28,3 +28,15 @@ SET(NavierStokesSolver_SOURCES
     solver/NavierStokesSolver/NavierStokesProblem.cpp
     solver/NavierStokesSolver/SolverPolicyLinearSolver.cpp
     CACHE INTERNAL "")
+
+SET(NSLOCAL_HEADERS)
+FOREACH(INC ${NavierStokesSolver_HEADERS})
+  STRING(REPLACE "solver/NavierStokesSolver/" "" LOCAL_INC ${INC})
+  SET(NSLOCAL_HEADERS ${NSLOCAL_HEADERS} ${LOCAL_INC})
+ENDFOREACH()
+
+INSTALL(
+  FILES ${NSLOCAL_HEADERS}
+  DESTINATION "${${PROJECT_NAME}_INSTALL_INCLUDE_DIR}/lifev/navier_stokes/solver/NavierStokesSolver"
+  COMPONENT ${PACKAGE_NAME}
+)
