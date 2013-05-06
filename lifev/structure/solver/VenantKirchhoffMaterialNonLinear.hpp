@@ -375,7 +375,11 @@ void VenantKirchhoffMaterialNonLinear<MeshType>::updateJacobianMatrix ( const ve
     displayer->leaderPrint (" \n*********************************\n  ");
     updateNonLinearJacobianTerms (this->M_jacobian, disp, dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
     displayer->leaderPrint (" \n*********************************\n  ");
-    std::cout << std::endl;
+
+    // this->M_jacobian->spy("jacobian");
+    // std::cout << "Ciao";
+    // int n;
+    // std::cin >> n;
 
 }
 
@@ -390,7 +394,7 @@ void VenantKirchhoffMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( 
 
     using namespace ExpressionAssembly;
 
-    displayer->leaderPrint ("   Non-Linear S-  updating non linear terms in the Jacobian Matrix (Exponential)");
+    displayer->leaderPrint ("   Non-Linear S-  updating non linear terms in the Jacobian Matrix (St. Venant-Kirchhoff)");
 
     * (jacobian) *= 0.0;
 
@@ -461,7 +465,7 @@ void VenantKirchhoffMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( 
                 this->M_dispFESpace->qr(),
                 this->M_dispETFESpace,
                 this->M_dispETFESpace,
-                parameter ( (* (this->M_vectorsParameters) ) [1]) * dot ( deformationGradientTensor * deformationGradientTensor * transpose (grad (phi_j) ) , grad (phi_i) )
+                parameter ( (* (this->M_vectorsParameters) ) [1]) * dot ( deformationGradientTensor * transpose(grad (phi_j)) * deformationGradientTensor , grad (phi_i) )
               ) >> jacobian;
 
     // //! 6. Stiffness matrix : int { mu * ( ( F * F^T * transpose(dF) ) : \nabla \v ) }
