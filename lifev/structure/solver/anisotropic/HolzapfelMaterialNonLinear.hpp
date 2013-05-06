@@ -492,7 +492,8 @@ void HolzapfelMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( matrix
 
     for( UInt i(0); i < this->M_vectorInterpolated.size(); i++ )
     {
-      displayer->leaderPrint ("                 ", i + 1,"-th fiber family \n " );
+
+      displayer->leaderPrint ("                ", i + 1,"-th fiber family \n" );
         // Defining the expression for the i-th fiber
         // Definitions of the quantities which depend on the fiber directions e.g. I_4^i
         ExpressionInterpolateValue<MeshType, MapEpetra, 3, 3>
