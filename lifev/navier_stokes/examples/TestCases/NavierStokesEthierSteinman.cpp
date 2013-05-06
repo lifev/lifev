@@ -140,18 +140,16 @@ NavierStokesEthierSteinman::setDensity ( const Real& density )
 void
 NavierStokesEthierSteinman::mesh ( boost::shared_ptr< RegionMesh<LinearTetra> >& mesh ) const
 {
-    UInt numMeshElem ( M_refinement );
     if ( M_refinement == 0 )
     {
         std::cout << "ERROR: The mesh refinement requested is not valid." << std::endl;
         exit ( 0 );
     }
-    MeshUtility::fillWithStructuredMesh ( mesh,
-                                          1,
-                                          numMeshElem, numMeshElem, numMeshElem,
-                                          false,
-                                          2.0,   2.0,   2.0,
-                                          -1.0,  -1.0,  -1.0 );
+    std::vector<Real> width(3,-1.0);
+    std::vector<Real> shift(3,-1.0);
+    std::vector<UInt> numMeshElem(3,M_refinement);
+    MeshUtility::fillWithStructuredMesh ( mesh, 1, numMeshElem, false, width, shift );
+
 }
 
 void

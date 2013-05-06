@@ -93,6 +93,9 @@ struct AssemblyPolicyGeneralizedStokes
     typedef Preconditioner                           preconditioner_Type;
     typedef boost::shared_ptr<preconditioner_Type>   preconditionerPtr_Type;
 
+    AssemblyPolicyGeneralizedStokes(){}
+    virtual ~AssemblyPolicyGeneralizedStokes(){}
+
     enum { BDFOrder = 1 };
 
     void initAssembly ( Teuchos::ParameterList& list );
