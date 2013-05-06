@@ -41,7 +41,11 @@
 
 
 #include <Ifpack_ConfigDefs.h>
+#ifdef HAVE_IFPACK_DYNAMIC_FACTORY
+#include <Ifpack_DynamicFactory.h>
+#else
 #include <Ifpack.h>
+#endif
 #include <Ifpack_Preconditioner.h>
 #include <Ifpack_AdditiveSchwarz.h>
 #include <Ifpack_Amesos.h>

@@ -72,7 +72,11 @@ PreconditionerIfpack::buildPreconditioner ( operator_type& matrix )
 
     M_precType     = this->M_list.get ( "prectype", "Amesos" );
 
+#ifdef HAVE_IFPACK_DYNAMIC_FACTORY
+    Ifpack_DynamicFactory factory;
+#else
     Ifpack factory;
+#endif
 
     M_preconditioner.reset ( factory.Create ( M_precType, M_operator.get(), M_overlapLevel ) );
 
