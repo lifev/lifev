@@ -33,7 +33,7 @@
     @date 11-12-2012
  */
 
-#include <NavierStokesSolver/AssemblyPolicyGeneralizedStokes.hpp>
+#include <lifev/navier_stokes/solver/NavierStokesSolver/AssemblyPolicyGeneralizedStokes.hpp>
 
 #include <string>
 #include <lifev/core/util/LifeChrono.hpp>

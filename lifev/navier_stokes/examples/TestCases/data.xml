@@ -1,0 +1,55 @@
+<ParameterList>
+    <!-- Preconditioner for solving the problem -->
+    <Parameter name="Preconditioner for init" type="string" value="FromFile"/>
+    <Parameter name="Preconditioner" type="string" value="FromFile"/>
+
+    <!-- NS problem parameters -->
+    <ParameterList name="Navier-Stokes problem: Parameter list">
+        <Parameter name="Test case name" type="string" value="Cavity"/>
+        <Parameter name="Viscosity" type="double" value="0.035"/>
+        <Parameter name="Density" type="double" value="1."/>
+        <Parameter name="Mesh refinement" type="int" value="10"/>
+        <Parameter name="Resources path" type="string" value="./Resources"/>
+    </ParameterList>
+    
+    <!-- NS solver parameters -->
+    <ParameterList name="Navier-Stokes solver: Parameter list">
+        <Parameter name="Velocity FE" type="string" value="P2"/>
+        <Parameter name="Pressure FE" type="string" value="P1"/>
+        <Parameter name="Use previous solution as guess" type="bool" value="false"/>
+
+        <!-- Time parameters -->
+        <ParameterList name="Time: Parameter list">
+            <Parameter name="Initial time" type="double" value="0.0"/>
+            <Parameter name="Final time" type="double" value="1e-3"/>
+            <Parameter name="Timestep" type="double" value="1e-3"/>
+        </ParameterList>
+
+        <!-- Time iteration parameters -->
+        <ParameterList name="Time iteration: Parameter list">
+            <Parameter name="Compute exact residual" type="bool" value="false"/>
+            <Parameter name="Block type" type="string" value="Fluid"/>
+            <Parameter name="Nonlinear tolerance" type="double" value="1e-6"/>
+            <!-- Assembly parameters -->
+            <ParameterList name="Assembly: Parameter list">
+                <!-- "Viscous stress" or "Stiff strain" -->
+                <Parameter name="Diffusion type" type="string" value="Viscous stress"/>
+                <Parameter name="Use minus divergence" type="bool" value="true"/>
+            </ParameterList>
+            <!-- Solver parameters -->
+            <ParameterList name="Solver: Parameter list">
+                <Parameter name="Resources path" type="string" value="./Resources/"/>
+                <Parameter name="Parameters file" type="string" value="SolverParamList/SolverParamList.xml"/>
+            </ParameterList>
+        </ParameterList>
+        
+        <!-- Exporter parameters ok -->
+        <ParameterList name="Exporter: Parameter list">
+            <Parameter name="Output path" type="string" value="."/>
+            <Parameter name="Output filename" type="string" value="solution"/>
+            <Parameter name="Multiple mesh" type="bool" value="false"/>
+            <Parameter name="Start" type="int" value="0"/>
+            <Parameter name="Save" type="int" value="1"/>
+        </ParameterList>
+    </ParameterList>
+</ParameterList>

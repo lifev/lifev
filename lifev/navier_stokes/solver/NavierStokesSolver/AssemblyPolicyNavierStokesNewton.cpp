@@ -38,7 +38,7 @@
 
 #include <string>
 #include <lifev/core/util/LifeChrono.hpp>
-#include <lifev/navier_stokes/algorithm/PreconditionerPCD.hpp>
+// #include <lifev/navier_stokes/algorithm/PreconditionerPCD.hpp>
 
 namespace LifeV
 {
@@ -83,12 +83,11 @@ AssemblyPolicyNavierStokesNewton::assembleSystem ( matrixPtr_Type systemMatrix,
     M_assembler->addNewtonConvection ( *systemMatrix, beta );
     M_assembler->addConvectionRhs ( *rhs, 1.0, beta );
 
-    if ( preconditioner->preconditionerType() == "PCD" )
-    {
-        PreconditionerPCD* pcdPtr = dynamic_cast<PreconditionerPCD*> ( preconditioner.get() );
-        pcdPtr->updateBeta ( beta );
-    }
-
+//    if ( preconditioner->preconditionerType() == "PCD" )
+//    {
+//        PreconditionerPCD* pcdPtr = dynamic_cast<PreconditionerPCD*> ( preconditioner.get() );
+//        pcdPtr->updateBeta ( beta );
+//    }
 }
 
 } // namespace LifeV

@@ -71,7 +71,6 @@ namespace LifeV
 template<  class TimeIterationPolicy >
 struct InitPolicySolver : public virtual TimeIterationPolicy
 {
-
     typedef VectorEpetra                             vector_Type;
     typedef boost::shared_ptr<VectorEpetra>          vectorPtr_Type;
     typedef RegionMesh<LinearTetra>                  mesh_Type;
@@ -83,6 +82,9 @@ struct InitPolicySolver : public virtual TimeIterationPolicy
     typedef BCHandler                                bcContainer_Type;
     typedef boost::shared_ptr<bcContainer_Type>      bcContainerPtr_Type;
     typedef boost::shared_ptr< NavierStokesProblem > NSProblemPtr_Type;
+
+    InitPolicySolver(){}
+	virtual ~InitPolicySolver(){}
 
     void setupInit ( Teuchos::ParameterList& list );
 

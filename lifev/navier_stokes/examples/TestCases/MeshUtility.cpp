@@ -36,6 +36,7 @@
 #include <lifev/core/util/LifeChrono.hpp>
 #include <lifev/core/util/Displayer.hpp>
 #include <lifev/core/mesh/MeshData.hpp>
+#include <lifev/core/mesh/RegionMesh.hpp>
 #include <lifev/core/mesh/RegionMesh3DStructured.hpp>
 #include <lifev/core/mesh/MeshUtility.hpp>
 #include <lifev/core/filter/PartitionIO.hpp>

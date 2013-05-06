@@ -1,35 +1,30 @@
-# Define the header and sources files for the Navier-Stokes solver
+SET(NavierStokesSolver_HEADERS
+    solver/NavierStokesSolver/AssemblyPolicyGeneralizedStokes.hpp
+    solver/NavierStokesSolver/AssemblyPolicyStokes.hpp
+    solver/NavierStokesSolver/AssemblyPolicyNavierStokesSemiImplicit.hpp
+    solver/NavierStokesSolver/AssemblyPolicyNavierStokesNewton.hpp
+    solver/NavierStokesSolver/AssemblyPolicyNavierStokesPicard.hpp
+    solver/NavierStokesSolver/ExporterPolicyHDF5.hpp
+    solver/NavierStokesSolver/ExporterPolicyNoExporter.hpp
+    solver/NavierStokesSolver/InitPolicyInterpolation.hpp
+    solver/NavierStokesSolver/InitPolicyProjection.hpp
+    solver/NavierStokesSolver/InitPolicySolver.hpp
+    solver/NavierStokesSolver/NavierStokesProblem.hpp
+    solver/NavierStokesSolver/NavierStokesSolver.hpp
+    solver/NavierStokesSolver/SolverPolicyLinearSolver.hpp
+    solver/NavierStokesSolver/TimeIterationPolicyLinear.hpp
+    solver/NavierStokesSolver/TimeIterationPolicyNonlinear.hpp
+    solver/NavierStokesSolver/TimeIterationPolicyNonlinearIncremental.hpp
+    CACHE INTERNAL "")
 
-set(NavierStokesSolver_SOURCES
-    AssemblyPolicyGeneralizedStokes.cpp
-    AssemblyPolicyStokes.cpp
-    AssemblyPolicyNavierStokesSemiImplicit.cpp
-    AssemblyPolicyNavierStokesNewton.cpp
-    AssemblyPolicyNavierStokesPicard.cpp
-    ExporterPolicyHDF5.cpp
-    InitPolicyInterpolation.cpp
-    NavierStokesProblem.cpp
-    SolverPolicyLinearSolver.cpp
-    CACHE INTERNAL ""
-)
-set(NavierStokesSolver_HEADERS
-    AssemblyPolicyGeneralizedStokes.hpp
-    AssemblyPolicyStokes.hpp
-    AssemblyPolicyNavierStokesSemiImplicit.hpp
-    AssemblyPolicyNavierStokesNewton.hpp
-    AssemblyPolicyNavierStokesPicard.hpp
-    ExporterPolicyHDF5.hpp
-    ExporterPolicyNoExporter.hpp
-    InitPolicyInterpolation.hpp
-    InitPolicyProjection.hpp
-    InitPolicySolver.hpp
-    NavierStokesProblem.hpp
-    NavierStokesSolver.hpp
-    SolverPolicyLinearSolver.hpp
-    TimeIterationPolicyLinear.hpp
-    TimeIterationPolicyNonlinear.hpp
-    TimeIterationPolicyNonlinearIncremental.hpp
-    TimeIterationPolicyBlocksSolve.hpp
-    CACHE INTERNAL ""
-)
-
+SET(NavierStokesSolver_SOURCES
+    solver/NavierStokesSolver/AssemblyPolicyGeneralizedStokes.cpp
+    solver/NavierStokesSolver/AssemblyPolicyStokes.cpp
+    solver/NavierStokesSolver/AssemblyPolicyNavierStokesSemiImplicit.cpp
+    solver/NavierStokesSolver/AssemblyPolicyNavierStokesNewton.cpp
+    solver/NavierStokesSolver/AssemblyPolicyNavierStokesPicard.cpp
+    solver/NavierStokesSolver/ExporterPolicyHDF5.cpp
+    solver/NavierStokesSolver/InitPolicyInterpolation.cpp
+    solver/NavierStokesSolver/NavierStokesProblem.cpp
+    solver/NavierStokesSolver/SolverPolicyLinearSolver.cpp
+    CACHE INTERNAL "")

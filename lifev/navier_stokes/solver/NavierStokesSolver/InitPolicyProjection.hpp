@@ -64,7 +64,7 @@
 #include <lifev/core/fem/FESpace.hpp>
 #include <lifev/core/fem/TimeAdvanceBDF.hpp>
 #include <lifev/core/fem/BCHandler.hpp>
-#include <lifev/navier_stokes/algorithm/PreconditionerPCD.hpp>
+// #include <lifev/navier_stokes/algorithm/PreconditionerPCD.hpp>
 #include <lifev/navier_stokes/solver/NavierStokesSolver/NavierStokesProblem.hpp>
 #include <lifev/navier_stokes/solver/NavierStokesSolver/SolverPolicyLinearSolver.hpp>
 #include <lifev/navier_stokes/solver/NavierStokesSolver/AssemblyPolicyStokes.hpp>
@@ -91,6 +91,9 @@ struct InitPolicyProjection : public virtual SolverPolicy, public AssemblyPolicy
     typedef BCHandler                                bcContainer_Type;
     typedef boost::shared_ptr<bcContainer_Type>      bcContainerPtr_Type;
     typedef boost::shared_ptr< NavierStokesProblem > NSProblemPtr_Type;
+
+    InitPolicyProjection(){}
+    virtual ~InitPolicyProjection(){}
 
     void setupInit ( Teuchos::ParameterList& list );
 
@@ -185,13 +188,13 @@ initSimulation ( bcContainerPtr_Type bchandler,
         // We deal as in the semi-implicit way
         AssemblyPolicyStokes::M_assembler->addConvection ( *systemMatrix, 1.0, *solution );
 
-        if ( SolverPolicy::preconditioner()->preconditionerType() == "PCD" )
-        {
-            vector_Type beta ( systemMatrix->map(), Repeated );
-            beta += *solution;
-            PreconditionerPCD* pcdPtr = dynamic_cast<PreconditionerPCD*> ( SolverPolicy::preconditioner().get() );
-            pcdPtr->updateBeta ( beta );
-        }
+//        if ( SolverPolicy::preconditioner()->preconditionerType() == "PCD" )
+//        {
+//            vector_Type beta ( systemMatrix->map(), Repeated );
+//            beta += *solution;
+//            PreconditionerPCD* pcdPtr = dynamic_cast<PreconditionerPCD*> ( SolverPolicy::preconditioner().get() );
+//            pcdPtr->updateBeta ( beta );
+//        }
 
         displayer().leaderPrint ( "done\n" );
 
