@@ -151,9 +151,9 @@ Real bcZero (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Rea
 
 Real bcNonZero (const Real& t, const Real&  X, const Real& Y, const Real& Z, const ID& i)
 {
-    Real pressure(200000);
+  //Real pressure(200000);
 
-    return pressure;
+  return 500000;
 	// Real highestPressure(6.666e+6);
 	// Real totalTime = 20.0;
 	// Real halfTime = totalTime / 2.0;
@@ -196,10 +196,10 @@ Real Family1 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, c
     switch (i)
     {
         case 0:
-            return std::cos( PI / 6 );
+            return std::cos( PI / 2.0 );
             break;
         case 1:
-            return std::sin( PI / 6 );
+            return std::sin( PI / 2.0 );
             break;
         case 2:
             return 0.0;
@@ -217,10 +217,10 @@ Real Family2 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, c
     switch (i)
     {
         case 0:
-            return std::cos( - PI / 6 );
+            return std::cos( - PI / 2.0 );
             break;
         case 1:
-            return std::sin( - PI / 6 );
+            return std::sin( - PI / 2.0 );
             break;
         case 2:
             return 0.0;
