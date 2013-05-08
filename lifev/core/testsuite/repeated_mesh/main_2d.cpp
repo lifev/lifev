@@ -307,8 +307,8 @@ main ( int argc, char** argv )
         }
 
         // SPY
-        //        systemMatrix->spy("matrixNoBC");
-        //        systemMatrixR->spy("matrixNoBCR");
+        //systemMatrix->spy("matrixNoBC");
+        //systemMatrixR->spy("matrixNoBCR");
 
         // check that the assembled matrices are the same
 
@@ -326,28 +326,20 @@ main ( int argc, char** argv )
         {
             std::cout << " -- Building the RHS ... " << std::flush;
         }
+
         vector_Type rhs ( uFESpace->map(), Unique );
         vector_Type rhsR ( uFESpaceR->map(), Unique );
 
         adrAssembler.addMassRhs ( rhs, fRhs, 0. );
         rhs.globalAssemble();
+
         adrAssemblerR.addMassRhs ( rhsR, fRhs, 0. );
         rhsR.globalAssemble ( Zero );
-
-        // test exporting of a repeated mesh
-#ifdef HAVE_HDF5
-        ExporterHDF5<mesh_Type> exporter ( dataFile, localMeshR, "pid", comm->MyPID() );
-        exporter.exportPID ( localMeshR, comm, true );
-        exporter.postProcess ( 0. );
-#endif
 
         vector_Type vectorDiff ( rhs );
         vectorDiff -= rhsR;
 
         Real diffNormV = vectorDiff.normInf();
-
-        //        debugOut << "rhs\n" << rhs.epetraVector() << std::endl;
-        //        debugOut << "rhsR\n" << rhsR.epetraVector() << std::endl;
 
         if ( isLeader )
         {
@@ -356,18 +348,46 @@ main ( int argc, char** argv )
 
         diff += diffNormV;
 
+        vector_Type rhs2 ( uFESpace->map(), Unique );
+        vector_Type rhs2R ( uFESpaceR->map(), Unique );
+        vector_Type f( uFESpace->map(), Repeated );
+        uFESpace->interpolate ( static_cast<feSpace_Type::function_Type> ( fRhs ), f, 0.0 );
+        adrAssembler.addMassRhs ( rhs2, f );
+        rhs2.globalAssemble();
+        vector_Type fR( uFESpaceR->map(), Repeated );
+        uFESpaceR->interpolate ( static_cast<feSpace_Type::function_Type> ( fRhs ), fR, 0.0 );
+        adrAssemblerR.addMassRhs ( rhs2R, fR );
+        rhs2R.globalAssemble ( Zero );
+
+        vector_Type vectorDiff2 ( rhs2 );
+        vectorDiff2 -= rhs2R;
+
+        Real diffNormV2 = vectorDiff2.normInf();
+
+        if ( isLeader )
+        {
+            std::cout << "Norm of the difference between the 2 vectors = " << diffNormV2 << std::endl;
+        }
+
+        diff += diffNormV2;
+
+        // test exporting of a repeated mesh
+#ifdef HAVE_HDF5
+        ExporterHDF5<mesh_Type> exporter ( dataFile, localMeshR, "pid", comm->MyPID() );
+        exporter.exportPID ( localMeshR, comm, true );
+        exporter.postProcess ( 0. );
+#endif
+
         vector_Type rhsCopy( rhs, Repeated );
         vector_Type rhsCopyR( rhsR, Repeated );
         Real l2Error  = uFESpace->l2Error ( fRhs, rhsCopy, 0.0 );
         Real l2ErrorR = uFESpaceR->l2Error ( fRhs, rhsCopyR, 0.0 );
-        //debugOut << *(rhsCopyR.map().map(Unique)) << std::endl;
-        //debugOut << *(rhsCopyR.map().map(Repeated)) << std::endl;
+        Real diffL2Error = std::fabs( l2Error - l2ErrorR );
+
         if ( isLeader )
         {
-            std::cout << "l2error  = " << l2Error << std::endl;
-            std::cout << "l2errorR = " << l2ErrorR << std::endl;
+            std::cout << "difference in l2error  = " << diffL2Error << std::endl;
         }
-        Real diffL2Error = std::fabs( l2Error - l2ErrorR );
 
         diff += diffL2Error;
 
