@@ -315,11 +315,11 @@ main ( int argc, char** argv )
         matrix_Type matrixDiff ( *systemMatrix );
         matrixDiff -= *systemMatrixR;
 
-        Real diffNorm = matrixDiff.normInf();
+        Real diff = matrixDiff.normInf();
 
         if ( isLeader )
         {
-            std::cout << "Norm of the difference between the 2 matrices = " << diffNorm << std::endl;
+            std::cout << "Norm of the difference between the 2 matrices = " << diff << std::endl;
         }
 
         if ( verbose )
@@ -354,9 +354,24 @@ main ( int argc, char** argv )
             std::cout << "Norm of the difference between the 2 vectors = " << diffNormV << std::endl;
         }
 
-        diffNorm += diffNormV;
+        diff += diffNormV;
 
-        if ( diffNorm < 1.e-14 )
+        vector_Type rhsCopy( rhs, Repeated );
+        vector_Type rhsCopyR( rhsR, Repeated );
+        Real l2Error  = uFESpace->l2Error ( fRhs, rhsCopy, 0.0 );
+        Real l2ErrorR = uFESpaceR->l2Error ( fRhs, rhsCopyR, 0.0 );
+        //debugOut << *(rhsCopyR.map().map(Unique)) << std::endl;
+        //debugOut << *(rhsCopyR.map().map(Repeated)) << std::endl;
+        if ( isLeader )
+        {
+            std::cout << "l2error  = " << l2Error << std::endl;
+            std::cout << "l2errorR = " << l2ErrorR << std::endl;
+        }
+        Real diffL2Error = std::fabs( l2Error - l2ErrorR );
+
+        diff += diffL2Error;
+
+        if ( diff < 1.e-14 )
         {
             if ( isLeader )
             {
