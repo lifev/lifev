@@ -1536,11 +1536,10 @@ void MeshPartitioner<MeshType>::execute()
     debugStream (4000) << M_me << " has " << (*M_elementDomains) [M_me].size() << " elements.\n";
 #endif
 
-    if ( M_partitionOverlap )
+    GhostHandler<mesh_Type> gh ( M_originalMesh, M_comm );
+    gh.fillEntityPID ( M_elementDomains, M_entityPID );
+    if( M_partitionOverlap > 0 )
     {
-        GhostHandler<mesh_Type> gh ( M_originalMesh, M_comm );
-        //        gh.createNodeElementNeighborsMap();
-        gh.fillEntityPID ( M_elementDomains, M_entityPID );
         gh.ghostMapOnElementsP1 ( M_elementDomains, M_entityPID[ 3 ], M_partitionOverlap );
     }
 
@@ -1562,54 +1561,51 @@ void MeshPartitioner<MeshType>::execute()
 template<typename MeshType>
 void MeshPartitioner<MeshType>::markGhostEntities()
 {
-    if ( M_partitionOverlap )
+    // mark ghost entities by each partition as described in M_entityPID
+    //@todo: does not work for offline partitioning!
+    //M_entityPID or flags should be exported and read back to make it work
+    for (UInt i = 0; i < M_numPartitions; ++i)
     {
-        // mark ghost entities by each partition as described in M_entityPID
-        //@todo: does not work for offline partitioning!
-        //M_entityPID or flags should be exported and read back to make it work
-        for (UInt i = 0; i < M_numPartitions; ++i)
+        for ( UInt e = 0; e < (*M_meshPartitions) [ i ]->numElements(); e++ )
         {
-            for ( UInt e = 0; e < (*M_meshPartitions) [ i ]->numElements(); e++ )
+            typename MeshType::element_Type& element = (*M_meshPartitions) [ i ]->element ( e );
+            if ( M_entityPID[ 0 ][ element.id() ] != static_cast<UInt> ( M_me ) )
             {
-                typename MeshType::element_Type& element = (*M_meshPartitions) [ i ]->element ( e );
-                if ( M_entityPID[ 0 ][ element.id() ] != static_cast<UInt> ( M_me ) )
-                {
-                    element.setFlag ( EntityFlags::GHOST );
-                }
-            }
-
-            for ( UInt f = 0; f < (*M_meshPartitions) [ i ]->numFacets(); f++ )
-            {
-                typename MeshType::facet_Type& facet = (*M_meshPartitions) [ i ]->facet ( f );
-                if ( M_entityPID[ 1 ][ facet.id() ] != static_cast<UInt> ( M_me ) )
-                {
-                    facet.setFlag ( EntityFlags::GHOST );
-                }
-            }
-
-            for ( UInt r = 0; r < (*M_meshPartitions) [ i ]->numRidges(); r++ )
-            {
-                typename MeshType::ridge_Type& ridge = (*M_meshPartitions) [ i ]->ridge ( r );
-                if ( M_entityPID[ 2 ][ ridge.id() ] != static_cast<UInt> ( M_me ) )
-                {
-                    ridge.setFlag ( EntityFlags::GHOST );
-                }
-            }
-
-            for ( UInt p = 0; p < (*M_meshPartitions) [ i ]->numPoints(); p++ )
-            {
-                typename MeshType::point_Type& point = (*M_meshPartitions) [ i ]->point ( p );
-                if ( M_entityPID[ 3 ][ point.id() ] != static_cast<UInt> ( M_me ) )
-                {
-                    point.setFlag ( EntityFlags::GHOST );
-                }
+                element.setFlag ( EntityFlags::GHOST );
             }
         }
-        clearVector ( M_entityPID[ 0 ] );
-        clearVector ( M_entityPID[ 1 ] );
-        clearVector ( M_entityPID[ 2 ] );
-        clearVector ( M_entityPID[ 3 ] );
+
+        for ( UInt f = 0; f < (*M_meshPartitions) [ i ]->numFacets(); f++ )
+        {
+            typename MeshType::facet_Type& facet = (*M_meshPartitions) [ i ]->facet ( f );
+            if ( M_entityPID[ 1 ][ facet.id() ] != static_cast<UInt> ( M_me ) )
+            {
+                facet.setFlag ( EntityFlags::GHOST );
+            }
+        }
+
+        for ( UInt r = 0; r < (*M_meshPartitions) [ i ]->numRidges(); r++ )
+        {
+            typename MeshType::ridge_Type& ridge = (*M_meshPartitions) [ i ]->ridge ( r );
+            if ( M_entityPID[ 2 ][ ridge.id() ] != static_cast<UInt> ( M_me ) )
+            {
+                ridge.setFlag ( EntityFlags::GHOST );
+            }
+        }
+
+        for ( UInt p = 0; p < (*M_meshPartitions) [ i ]->numPoints(); p++ )
+        {
+            typename MeshType::point_Type& point = (*M_meshPartitions) [ i ]->point ( p );
+            if ( M_entityPID[ 3 ][ point.id() ] != static_cast<UInt> ( M_me ) )
+            {
+                point.setFlag ( EntityFlags::GHOST );
+            }
+        }
     }
+    clearVector ( M_entityPID[ 0 ] );
+    clearVector ( M_entityPID[ 1 ] );
+    clearVector ( M_entityPID[ 2 ] );
+    clearVector ( M_entityPID[ 3 ] );
 }
 
 template<typename MeshType>
