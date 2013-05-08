@@ -1669,7 +1669,7 @@ bcNaturalManage ( VectorType& rightHandSide,
                     ibF = pId->id();
 
                     // Updating face stuff
-                    currentBdFE.update ( mesh.boundaryFacet ( ibF ), UPDATE_W_ROOT_DET_METRIC );
+                    currentBdFE.update ( mesh.boundaryFacet ( ibF ), UPDATE_W_ROOT_DET_METRIC | UPDATE_NORMALS );
 
                     // Loop on total DOF per Face
                     for ( ID l = 0; l < nDofF; ++l )

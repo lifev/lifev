@@ -38,19 +38,15 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <lifev/core/LifeV.hpp>
 
-#include <iostream>
-#include <string>
-
-#include "Epetra_config.h"
-
-#ifdef HAVE_HDF5
-#ifdef HAVE_MPI
+#ifdef LIFEV_HAS_HDF5
 
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
-#include <mpi.h>
+#include "Epetra_config.h"
+
+#ifdef HAVE_MPI
 
 #include <Epetra_MpiComm.h>
 
@@ -66,11 +62,11 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 using namespace LifeV;
 
 #endif /* HAVE_MPI */
-#endif /* HAVE_HDF5 */
+#endif /* LIFEV_HAS_HDF5 */
 
 int main (int argc, char** argv)
 {
-#ifdef HAVE_HDF5
+#ifdef LIFEV_HAS_HDF5
 #ifdef HAVE_MPI
 
     typedef RegionMesh<LinearTetra> mesh_Type;
@@ -129,7 +125,9 @@ int main (int argc, char** argv)
     }
     else
     {
-        PartitionIO<mesh_Type> partitionIO (partsFileName, comm);
+        boost::shared_ptr<Epetra_MpiComm> mpiComm =
+            boost::dynamic_pointer_cast<Epetra_MpiComm> (comm);
+        PartitionIO<mesh_Type> partitionIO (partsFileName, mpiComm);
         partitionIO.write (meshPart.meshPartitions() );
     }
 
@@ -142,7 +140,7 @@ int main (int argc, char** argv)
 #else
     std::cout << "This test needs HDF5 to run. Aborting." << std::endl;
     return (EXIT_FAILURE);
-#endif /* HAVE_HDF5 */
+#endif /* LIFEV_HAS_HDF5 */
 
     return (EXIT_SUCCESS);
 }
