@@ -965,23 +965,26 @@ FESpace<MeshType, MapType>::l2Error ( const function_Type&    fexact,
 
     for ( UInt iVol  = 0; iVol < this->mesh()->numElements(); iVol++ )
     {
-        //this->fe().updateFirstDeriv( this->mesh()->element( iVol ) );
-
-        // CurrentFE newFE(this->fe().refFE(),this->fe().geoMap(),quadRuleTetra64pt);
-        this->fe().update (this->mesh()->element ( iVol ),  UPDATE_QUAD_NODES | UPDATE_PHI | UPDATE_WDET);
-
-        normU += elementaryDifferenceL2NormSquare ( vec, fexact,
-                                                    this->fe(),
-                                                    //newFE,
-                                                    this->dof(),
-                                                    time,
-                                                    M_fieldDim );
-        if (relError)
+        if( this->mesh()->element( iVol ).isOwned() )
         {
-            sumExact += elementaryFctL2NormSquare ( fexact,
-                                                    this->fe(),
-                                                    time,
-                                                    M_fieldDim );
+            //this->fe().updateFirstDeriv( this->mesh()->element( iVol ) );
+
+            // CurrentFE newFE(this->fe().refFE(),this->fe().geoMap(),quadRuleTetra64pt);
+            this->fe().update (this->mesh()->element ( iVol ),  UPDATE_QUAD_NODES | UPDATE_PHI | UPDATE_WDET);
+
+            normU += elementaryDifferenceL2NormSquare ( vec, fexact,
+                                                        this->fe(),
+                                                        //newFE,
+                                                        this->dof(),
+                                                        time,
+                                                        M_fieldDim );
+            if (relError)
+            {
+                sumExact += elementaryFctL2NormSquare ( fexact,
+                                                        this->fe(),
+                                                        time,
+                                                        M_fieldDim );
+            }
         }
     }
 
