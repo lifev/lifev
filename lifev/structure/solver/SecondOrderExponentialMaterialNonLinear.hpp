@@ -460,7 +460,7 @@ void SecondOrderExponentialMaterialNonLinear<MeshType>::updateNonLinearJacobianT
               ) >> jacobian;
 
 
-    //! 2. Stiffness matrix : int { 4 * alpha * J^(-2/3) * exp( gamma*( Ic_iso - 3)^2 ) * ( J^(-2./3.0) + 2 * gamma * (Ic_isoK - 3 )^2 ) *
+    //! 2. Stiffness matrix : int { 4 * alpha * J^(-4/3) * exp( gamma*( Ic_iso - 3)^2 ) * ( 1.0 + 2 * gamma * (Ic_isoK - 3 )^2 ) *
     //!                           ( F : \nabla \delta ) ( F : \nabla \v ) }
     integrate ( elements ( this->M_dispETFESpace->mesh() ),
                 this->M_dispFESpace->qr(),
@@ -473,7 +473,7 @@ void SecondOrderExponentialMaterialNonLinear<MeshType>::updateNonLinearJacobianT
               ) >> jacobian;
 
     //! 3. Stiffness matrix :
-    //!int { ( 4.0/9.0 *  alpha * J^-2 *  exp( gamma*( Ic_iso - 3)^2 ) * ( Ic_isoK + 2 * gamma * (Ic_isoK - 3)^2 * Ic_isoK + (Ic_isoK - 3) ) ) *
+    //!int { ( 4.0/9.0 *  alpha * Ic_isoK *  exp( gamma*( Ic_iso - 3)^2 ) * ( Ic_isoK + 2 * gamma * (Ic_isoK - 3)^2 * Ic_isoK + (Ic_isoK - 3) ) ) *
     //!     ( F^-T : \nabla \delta ) ( F^-T : \nabla \v )}
     integrate ( elements ( this->M_dispETFESpace->mesh() ) ,
                 this->M_dispFESpace->qr(),
@@ -495,7 +495,7 @@ void SecondOrderExponentialMaterialNonLinear<MeshType>::updateNonLinearJacobianT
                 this->M_dispETFESpace,
                 value (-4.0 / 3.0) * parameter ( (* (this->M_vectorsParameters) ) [0] ) * pow ( detDeformationGradientTensor, (-2.0 / 3.0) ) *
                 exp ( parameter ( (* (this->M_vectorsParameters) ) [1] ) * ( firstInvariantCbar - value (3.0) ) * ( firstInvariantCbar - value (3.0) ) ) *
-                ( firstInvariantCbar + ( firstInvariantCbar - value (3.0) ) * ( value ( 2.0) * parameter ( (* (this->M_vectorsParameters) ) [1] ) * ( firstInvariantCbar - value (3.0) ) * firstInvariantC + value (1.0) ) ) *
+                ( firstInvariantCbar + ( firstInvariantCbar - value (3.0) ) * ( value ( 2.0) * parameter ( (* (this->M_vectorsParameters) ) [1] ) * ( firstInvariantCbar - value (3.0) ) * firstInvariantCbar + value (1.0) ) ) *
                 ( dot ( deformationGradientTensor, grad (phi_j) ) * dot ( deformationGradientTensor_T, grad (phi_i) ) )
               ) >> jacobian;
 
