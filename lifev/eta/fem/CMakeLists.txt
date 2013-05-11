@@ -12,9 +12,8 @@ SET(fem_HEADERS
   fem/LevelSetBDQRAdapter.hpp
 CACHE INTERNAL "")
 
-SET(fem_SOURCES ""
+SET(fem_SOURCES
   fem/ETCurrentFE.cpp
-  fem/ETCurrentFE_FD3.cpp
 CACHE INTERNAL "")
 
 

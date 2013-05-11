@@ -14,6 +14,7 @@ SET(expression_HEADERS
 	expression/EvaluationIfCrossed.hpp
 	expression/EvaluationInterpolateGradient.hpp
 	expression/EvaluationInterpolateValue.hpp
+	expression/EvaluationMatrix.hpp
 	expression/EvaluationMeas.hpp
 	expression/EvaluationOuterProduct.hpp
 	expression/EvaluationPhiI.hpp
@@ -47,6 +48,7 @@ SET(expression_HEADERS
 	expression/ExpressionIfCrossed.hpp
 	expression/ExpressionInterpolateGradient.hpp
 	expression/ExpressionInterpolateValue.hpp
+	expression/ExpressionMatrix.hpp
 	expression/ExpressionMeas.hpp
 	expression/ExpressionOuterProduct.hpp
 	expression/ExpressionPhiI.hpp
@@ -84,6 +86,9 @@ SET(expression_HEADERS
 CACHE INTERNAL "")
 
 SET(expression_SOURCES ""
+	expression/EvaluationPhiI.cpp
+	expression/EvaluationPhiJ.cpp
+	expression/EvaluationScalar.cpp
 	expression/ExpressionDivI.cpp
 	expression/ExpressionDivJ.cpp
 	expression/ExpressionDphiI.cpp
