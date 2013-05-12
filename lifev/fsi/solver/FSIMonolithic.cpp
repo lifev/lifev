@@ -428,7 +428,6 @@ evalResidual ( const vector_Type& sol, const vectorPtr_Type& rhs, vector_Type& r
         // Computing residual
         M_solid->apply (*solidPart, *resSolidPart);
 
-        /* DF add */
         resSolidPart->globalAssemble();
 
         // reassembling them in the right places
@@ -436,14 +435,12 @@ evalResidual ( const vector_Type& sol, const vectorPtr_Type& rhs, vector_Type& r
         // sol.subset( *solidPart, solidPart->map(), UInt(0), M_offset);
         res.subset ( *resSolidPart, resSolidPart->map(), UInt (0), M_offset);
 
-        /* DF add */
         res.globalAssemble();
 
         M_fluidBlock->globalAssemble();
 
         res += ( (*M_fluidBlock) * sol);
 
-        /* DF add */
         M_monolithicMatrix->coupling()->globalAssemble();
 
         res += *M_monolithicMatrix->coupling() * sol;
