@@ -85,15 +85,17 @@ int main ( int argc, char** argv )
 
     const bool verbose (Comm->MyPID() == 0);
 
-    if (argc != 2) {
-    	if (verbose) {
-    		std::cout << "Please run program as " << argv[0]
-					  << " " << "<num_elements>\n";
-    		return EXIT_FAILURE;
-    	}
+    if (argc != 2)
+    {
+        if (verbose)
+        {
+            std::cout << "Please run program as " << argv[0]
+                      << " " << "<num_elements>\n";
+            return EXIT_FAILURE;
+        }
     }
 
-    const UInt Nelements = std::atoi(argv[1]);
+    const UInt Nelements = std::atoi (argv[1]);
 
     if (verbose)
     {
@@ -148,7 +150,7 @@ int main ( int argc, char** argv )
         using namespace ExpressionAssembly;
 
         // We first build a static graph for our problem matrix
-        matrixGraph.reset(new Epetra_FECrsGraph(Copy, *(uSpace->map().map(Unique)), 0));
+        matrixGraph.reset (new Epetra_FECrsGraph (Copy, * (uSpace->map().map (Unique) ), 0) );
 
         buildGraph ( elements (uSpace->mesh() ),
                      quadRuleTetra4pt,
@@ -175,7 +177,7 @@ int main ( int argc, char** argv )
         using namespace ExpressionAssembly;
 
         // We build the system matrix using the precomputed graph
-        closedSystemMatrix.reset(new matrix_Type ( uSpace->map(), *matrixGraph ) );
+        closedSystemMatrix.reset (new matrix_Type ( uSpace->map(), *matrixGraph ) );
         *closedSystemMatrix *= 0.0;
 
         // Finally, we perform the FE assembly, which should be faster with
@@ -205,7 +207,7 @@ int main ( int argc, char** argv )
     {
         using namespace ExpressionAssembly;
 
-        openSystemMatrix.reset(new matrix_Type ( uSpace->map() ) );
+        openSystemMatrix.reset (new matrix_Type ( uSpace->map() ) );
         *openSystemMatrix *= 0.0;
 
         // Finally, we perform the FE assembly, which should be faster with

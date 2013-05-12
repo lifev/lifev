@@ -519,7 +519,7 @@ public:
     //! Return the fill-complete status of the Epetra_FECrsMatrix
     bool filled() const
     {
-    	return M_epetraCrs->Filled();
+        return M_epetraCrs->Filled();
     }
 
     //! Return the shared_pointer of the Epetra_FECrsMatrix
@@ -1542,8 +1542,8 @@ sumIntoCoefficients ( Int const numRows, Int const numColumns,
                       DataType* const* const localValues,
                       Int format )
 {
-	Int ierr = M_epetraCrs->SumIntoGlobalValues ( numRows, &rowIndices[0], numColumns,
-                                       	   	   	  &columnIndices[0], localValues, format );
+    Int ierr = M_epetraCrs->SumIntoGlobalValues ( numRows, &rowIndices[0], numColumns,
+                                                  &columnIndices[0], localValues, format );
 
     std::stringstream errorMessage;
     errorMessage << " error in matrix insertion [addToCoefficients] " << ierr

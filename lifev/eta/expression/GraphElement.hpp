@@ -65,9 +65,9 @@ namespace ExpressionAssembly
   matrix
  */
 template < typename MeshType,
-		   typename TestSpaceType,
-		   typename SolutionSpaceType,
-		   typename ExpressionType>
+         typename TestSpaceType,
+         typename SolutionSpaceType,
+         typename ExpressionType >
 class GraphElement
 {
 public:
@@ -95,10 +95,10 @@ public:
                   const ExpressionType& expression);
 
     //! Copy constructor
-    GraphElement (const GraphElement<MeshType,
-    								 TestSpaceType,
-    								 SolutionSpaceType,
-    								 ExpressionType>& integrator);
+    GraphElement (const GraphElement < MeshType,
+                  TestSpaceType,
+                  SolutionSpaceType,
+                  ExpressionType > & integrator);
 
     //! Destructor
     ~GraphElement();
@@ -183,10 +183,10 @@ private:
 template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
 GraphElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType>::
 GraphElement (const boost::shared_ptr<MeshType>& mesh,
-                        const QuadratureRule& quadrature,
-                        const boost::shared_ptr<TestSpaceType>& testSpace,
-                        const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
-                        const ExpressionType& /*expression*/)
+              const QuadratureRule& quadrature,
+              const boost::shared_ptr<TestSpaceType>& testSpace,
+              const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
+              const ExpressionType& /*expression*/)
     :   M_mesh (mesh),
         M_quadrature (quadrature),
         M_testSpace (testSpace),
@@ -232,42 +232,42 @@ addTo (GraphType& graph)
     UInt nbTestDof (M_testSpace->refFE().nbDof() );
     UInt nbSolutionDof (M_solutionSpace->refFE().nbDof() );
 
-	ETMatrixElemental elementalMatrix(TestSpaceType::S_fieldDim * M_testSpace->refFE().nbDof(),
-									  SolutionSpaceType::S_fieldDim * M_solutionSpace->refFE().nbDof() );
+    ETMatrixElemental elementalMatrix (TestSpaceType::S_fieldDim * M_testSpace->refFE().nbDof(),
+                                       SolutionSpaceType::S_fieldDim * M_solutionSpace->refFE().nbDof() );
 
-	for (UInt iElement = 0; iElement < nbElements; ++iElement)
-	{
-		// Zeros out the matrix
-		elementalMatrix.zero();
+    for (UInt iElement = 0; iElement < nbElements; ++iElement)
+    {
+        // Zeros out the matrix
+        elementalMatrix.zero();
 
-		// Loop on the blocks
-		for (UInt iblock (0); iblock < TestSpaceType::S_fieldDim; ++iblock)
-		{
-			for (UInt jblock (0); jblock < SolutionSpaceType::S_fieldDim; ++jblock)
-			{
+        // Loop on the blocks
+        for (UInt iblock (0); iblock < TestSpaceType::S_fieldDim; ++iblock)
+        {
+            for (UInt jblock (0); jblock < SolutionSpaceType::S_fieldDim; ++jblock)
+            {
 
-				// Set the row global indices in the local matrix
-				for (UInt i (0); i < nbTestDof; ++i)
-				{
-					elementalMatrix.setRowIndex
-					(i + iblock * nbTestDof,
-					M_testSpace->dof().localToGlobalMap (iElement, i) + iblock * M_testSpace->dof().numTotalDof() );
-				}
+                // Set the row global indices in the local matrix
+                for (UInt i (0); i < nbTestDof; ++i)
+                {
+                    elementalMatrix.setRowIndex
+                    (i + iblock * nbTestDof,
+                     M_testSpace->dof().localToGlobalMap (iElement, i) + iblock * M_testSpace->dof().numTotalDof() );
+                }
 
-				// Set the column global indices in the local matrix
-				for (UInt j (0); j < nbSolutionDof; ++j)
-				{
-					elementalMatrix.setColumnIndex
-					(j + jblock * nbSolutionDof,
-					M_solutionSpace->dof().localToGlobalMap (iElement, j) + jblock * M_solutionSpace->dof().numTotalDof() );
-				}
-			}
-		}
-		const std::vector<Int>& rowIdx = elementalMatrix.rowIndices();
-		const std::vector<Int>& colIdx = elementalMatrix.columnIndices();
-		graph.InsertGlobalIndices(rowIdx.size(), &rowIdx[0],
-								  colIdx.size(), &colIdx[0]);
-	}
+                // Set the column global indices in the local matrix
+                for (UInt j (0); j < nbSolutionDof; ++j)
+                {
+                    elementalMatrix.setColumnIndex
+                    (j + jblock * nbSolutionDof,
+                     M_solutionSpace->dof().localToGlobalMap (iElement, j) + jblock * M_solutionSpace->dof().numTotalDof() );
+                }
+            }
+        }
+        const std::vector<Int>& rowIdx = elementalMatrix.rowIndices();
+        const std::vector<Int>& colIdx = elementalMatrix.columnIndices();
+        graph.InsertGlobalIndices (rowIdx.size(), &rowIdx[0],
+                                   colIdx.size(), &colIdx[0]);
+    }
 }
 
 

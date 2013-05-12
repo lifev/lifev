@@ -109,22 +109,28 @@ public:
     template <typename MatrixType>
     inline void operator>> (MatrixType& mat)
     {
-    	if (mat.filled()) {
-    		addToClosed (mat);
-    	} else {
-    		addTo (mat);
-    	}
+        if (mat.filled() )
+        {
+            addToClosed (mat);
+        }
+        else
+        {
+            addTo (mat);
+        }
     }
 
     //! Operator wrapping the addTo method (for shared_ptr)
     template <typename MatrixType>
     inline void operator>> (boost::shared_ptr<MatrixType> mat)
     {
-    	if (mat->filled()) {
-    		addToClosed (mat);
-    	} else {
-    		addTo (mat);
-    	}
+        if (mat->filled() )
+        {
+            addToClosed (mat);
+        }
+        else
+        {
+            addTo (mat);
+        }
     }
 
     //@}
@@ -208,11 +214,11 @@ private:
      * This method computes the elemental matrix for a given element
      * index
      */
-    void integrateElement(const UInt iElement,
-    					  const UInt nbElements,
-    					  const UInt nbQuadPt,
-    					  const UInt nbTestDof,
-    					  const UInt nbSolutionDof);
+    void integrateElement (const UInt iElement,
+                           const UInt nbElements,
+                           const UInt nbQuadPt,
+                           const UInt nbTestDof,
+                           const UInt nbSolutionDof);
 
     //@}
 
@@ -323,8 +329,8 @@ template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType
 void
 IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType>::
 integrateElement (const UInt iElement, const UInt nbElements,
-		  	  	  const UInt nbQuadPt, const UInt nbTestDof,
-		  	  	  const UInt nbSolutionDof)
+                  const UInt nbQuadPt, const UInt nbTestDof,
+                  const UInt nbSolutionDof)
 {
     // Zeros out the matrix
     M_elementalMatrix.zero();
@@ -390,8 +396,8 @@ addTo (MatrixType& mat)
 
     for (UInt iElement (0); iElement < nbElements; ++iElement)
     {
-    	integrateElement(iElement, nbElements, nbQuadPt, nbTestDof,
-    					 nbSolutionDof);
+        integrateElement (iElement, nbElements, nbQuadPt, nbTestDof,
+                          nbSolutionDof);
 
         M_elementalMatrix.pushToGlobal (mat);
     }
@@ -410,8 +416,8 @@ addToClosed (MatrixType& mat)
 
     for (UInt iElement (0); iElement < nbElements; ++iElement)
     {
-    	integrateElement(iElement, nbElements, nbQuadPt, nbTestDof,
-    					 nbSolutionDof);
+        integrateElement (iElement, nbElements, nbQuadPt, nbTestDof,
+                          nbSolutionDof);
 
         M_elementalMatrix.pushToClosedGlobal (mat);
     }

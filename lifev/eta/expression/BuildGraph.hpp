@@ -70,23 +70,23 @@ namespace ExpressionAssembly
   a FECrsMatrix in closed optimized form
  */
 template < typename MeshType,
-		   typename TestSpaceType,
-		   typename SolutionSpaceType,
-		   typename ExpressionType>
-GraphElement<MeshType,
-			 TestSpaceType,
-			 SolutionSpaceType,
-			 ExpressionType>
-buildGraph ( const RequestLoopElement<MeshType>& request,
-             const QuadratureRule& quadrature,
-             const boost::shared_ptr<TestSpaceType>& testSpace,
-             const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
-             const ExpressionType& expression)
+         typename TestSpaceType,
+         typename SolutionSpaceType,
+         typename ExpressionType >
+GraphElement < MeshType,
+             TestSpaceType,
+             SolutionSpaceType,
+             ExpressionType >
+             buildGraph ( const RequestLoopElement<MeshType>& request,
+                          const QuadratureRule& quadrature,
+                          const boost::shared_ptr<TestSpaceType>& testSpace,
+                          const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
+                          const ExpressionType& expression)
 {
-    return GraphElement<MeshType,
-    					TestSpaceType,
-    					SolutionSpaceType,
-    					ExpressionType>
+    return GraphElement < MeshType,
+           TestSpaceType,
+           SolutionSpaceType,
+           ExpressionType >
            (request.mesh(), quadrature, testSpace, solutionSpace, expression);
 }
 
