@@ -135,23 +135,24 @@ public:
         return M_partitionTable.find (i)->second;
     }
 
-	//! Get the entire partitioned graph, wrapped in a smart pointer
-	virtual graph_Type getGraph()
-	{
-		boost::shared_ptr<std::vector<std::vector<Int> > >
-			graph(new std::vector<std::vector<Int> >(numParts()));
+    //! Get the entire partitioned graph, wrapped in a smart pointer
+    virtual graph_Type getGraph()
+    {
+        boost::shared_ptr<std::vector<std::vector<Int> > >
+        graph (new std::vector<std::vector<Int> > (numParts() ) );
 
-		for (UInt i = 0; i < numParts(); ++i) {
-			(*graph)[i] = getPart(i);
-		}
+        for (UInt i = 0; i < numParts(); ++i)
+        {
+            (*graph) [i] = getPart (i);
+        }
 
-		return graph;
-	}
+        return graph;
+    }
 
     //! Return the number of parts
     virtual const UInt numParts() const
     {
-    	return M_partitionTable.size();
+        return M_partitionTable.size();
     }
 
     //! Get number of stored graph elements

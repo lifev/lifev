@@ -129,21 +129,22 @@ public:
     //! Return the number of parts
     virtual const UInt numParts() const
     {
-    	return M_vertexPartition.size();
+        return M_vertexPartition.size();
     }
 
-	//! Get the entire partitioned graph, wrapped in a smart pointer
-	virtual graph_Type getGraph()
-	{
-		boost::shared_ptr<std::vector<std::vector<Int> > >
-			graph(new std::vector<std::vector<Int> >(M_vertexPartition.size()));
+    //! Get the entire partitioned graph, wrapped in a smart pointer
+    virtual graph_Type getGraph()
+    {
+        boost::shared_ptr<std::vector<std::vector<Int> > >
+        graph (new std::vector<std::vector<Int> > (M_vertexPartition.size() ) );
 
-		for (UInt i = 0; i < M_vertexPartition.size(); ++i) {
-			(*graph)[i] = getPart(i);
-		}
+        for (UInt i = 0; i < M_vertexPartition.size(); ++i)
+        {
+            (*graph) [i] = getPart (i);
+        }
 
-		return graph;
-	}
+        return graph;
+    }
 
     //@}
 

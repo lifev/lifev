@@ -1177,7 +1177,7 @@ void GhostHandler<Mesh>::fillEntityPID (
     // @todo: check if parallel building + comm is faster
     for ( UInt p = 0; p < numParts; p++ )
     {
-        std::vector<Int>& currentPart = (*graph)[p];
+        std::vector<Int>& currentPart = (*graph) [p];
         for ( UInt e = 0; e < currentPart.size(); e++ )
         {
             // point block
@@ -1424,7 +1424,7 @@ void GhostHandler<Mesh>::ghostMapOnElementsP1 ( graphPtr_Type graph,
 
     const UInt numParts = graph->size();
 
-    std::vector<int>& myElems = (*graph)[partIndex];
+    std::vector<int>& myElems = (*graph) [partIndex];
 #ifdef HAVE_LIFEV_DEBUG
     // show own elements
     M_debugOut << "own elements on proc " << M_me << std::endl;
@@ -1440,7 +1440,7 @@ void GhostHandler<Mesh>::ghostMapOnElementsP1 ( graphPtr_Type graph,
     // @todo: check if parallel building + comm is faster
     for ( UInt p = 0; p < static_cast<UInt> ( numParts ); p++ )
     {
-        std::vector<Int>& currentPart = (*graph)[p];
+        std::vector<Int>& currentPart = (*graph) [p];
         std::set<int> localPointsSet;
         for ( UInt e = 0; e < currentPart.size(); e++ )
         {
@@ -1465,11 +1465,11 @@ void GhostHandler<Mesh>::ghostMapOnElementsP1 ( graphPtr_Type graph,
 
     // initialize a bool vector to know if a point is in current partition
     std::vector<bool> isInPartition ( M_fullMesh->numPoints(), false );
-    for ( UInt e = 0; e < (*graph)[partIndex].size(); e++ )
+    for ( UInt e = 0; e < (*graph) [partIndex].size(); e++ )
     {
         for ( UInt k = 0; k < mesh_Type::element_Type::S_numPoints; k++ )
         {
-            const ID& pointID = M_fullMesh->element ( (*graph)[partIndex][ e ] ).point ( k ).id();
+            const ID& pointID = M_fullMesh->element ( (*graph) [partIndex][ e ] ).point ( k ).id();
             isInPartition[ pointID ] = true;
         }
     }

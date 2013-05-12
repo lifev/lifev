@@ -76,8 +76,8 @@ public:
     typedef MeshType mesh_Type;
     typedef boost::shared_ptr<mesh_Type> meshPtr_Type;
     typedef boost::shared_ptr<Epetra_Comm>       commPtr_Type;
-    typedef boost::shared_ptr<
-    		std::vector<std::vector<Int> > > graph_Type;
+    typedef boost::shared_ptr <
+    std::vector<std::vector<Int> > > graph_Type;
     //@}
 
     //! \name Constructors & Destructors
@@ -110,8 +110,8 @@ public:
      *                      element IDs associated with this mesh part
      */
     void run (const meshPtr_Type& meshPart,
-    		  const graph_Type& graph,
-    		  const UInt partIndex);
+              const graph_Type& graph,
+              const UInt partIndex);
     //@}
 
     //! \name Get Methods
@@ -218,13 +218,13 @@ MeshPartBuilder<MeshType>::MeshPartBuilder (const meshPtr_Type& mesh,
 
 template<typename MeshType>
 void MeshPartBuilder<MeshType>::run (const meshPtr_Type& meshPart,
-									 const graph_Type& graph,
-									 const UInt partIndex)
+                                     const graph_Type& graph,
+                                     const UInt partIndex)
 {
     M_meshPart = meshPart;
     M_partIndex = partIndex;
 
-    const std::vector<Int>& elementList((*graph)[partIndex]);
+    const std::vector<Int>& elementList ( (*graph) [partIndex]);
 
     if ( M_overlap != 0)
     {

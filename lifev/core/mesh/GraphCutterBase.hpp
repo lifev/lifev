@@ -46,7 +46,8 @@
 
 #include <lifev/core/LifeV.hpp>
 
-namespace LifeV {
+namespace LifeV
+{
 
 //! Graph cutter base class (abstract)
 /*!
@@ -55,51 +56,54 @@ namespace LifeV {
  TODO: detailed class decription
  */
 template<typename MeshType>
-class GraphCutterBase {
+class GraphCutterBase
+{
 public:
-	//! @name Public Types
-	//@{
-	typedef Teuchos::ParameterList pList_Type;
-	typedef boost::shared_ptr<std::vector<std::vector<Int> > > graph_Type;
-	//@}
+    //! @name Public Types
+    //@{
+    typedef Teuchos::ParameterList pList_Type;
+    typedef boost::shared_ptr<std::vector<std::vector<Int> > > graph_Type;
+    //@}
 
-	//! @name Constructor & Destructor
-	//@{
-	//! Default constructor
-	GraphCutterBase() {
-	}
+    //! @name Constructor & Destructor
+    //@{
+    //! Default constructor
+    GraphCutterBase()
+    {
+    }
 
-	//! Destructor
-	virtual ~GraphCutterBase() {
-	}
-	//@}
+    //! Destructor
+    virtual ~GraphCutterBase()
+    {
+    }
+    //@}
 
-	//! @name Public methods
-	//@{
-	//! Performs the graph partitioning
-	virtual Int run() = 0;
-	//@}
+    //! @name Public methods
+    //@{
+    //! Performs the graph partitioning
+    virtual Int run() = 0;
+    //@}
 
-	//! @name Get Methods
-	//@{
-	//! Get a pointer to one of the partitions
-	virtual const std::vector<Int>& getPart(const UInt i) const = 0;
-	virtual std::vector<Int>& getPart(const UInt i) = 0;
+    //! @name Get Methods
+    //@{
+    //! Get a pointer to one of the partitions
+    virtual const std::vector<Int>& getPart (const UInt i) const = 0;
+    virtual std::vector<Int>& getPart (const UInt i) = 0;
 
-	//! Get the entire partitioned graph, wrapped in a smart pointer
-	virtual graph_Type getGraph() = 0;
+    //! Get the entire partitioned graph, wrapped in a smart pointer
+    virtual graph_Type getGraph() = 0;
 
-	//! Return the number of parts
-	virtual const UInt numParts() const = 0;
-	//@}
+    //! Return the number of parts
+    virtual const UInt numParts() const = 0;
+    //@}
 
 private:
-	//! @name Private methods
-	//@{
-	//! Set values for all the parameters, with default values where needed
-	virtual void setParameters(pList_Type& parameters) = 0;
+    //! @name Private methods
+    //@{
+    //! Set values for all the parameters, with default values where needed
+    virtual void setParameters (pList_Type& parameters) = 0;
 
-	//@}
+    //@}
 };
 
 } // Namespace LifeV

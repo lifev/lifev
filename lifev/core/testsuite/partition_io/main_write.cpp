@@ -128,7 +128,7 @@ int main (int argc, char** argv)
 
     // Write mesh parts to HDF5 container
     boost::shared_ptr<Epetra_MpiComm> mpiComm =
-        boost::dynamic_pointer_cast<Epetra_MpiComm>(comm);
+        boost::dynamic_pointer_cast<Epetra_MpiComm> (comm);
     PartitionIO<mesh_Type> partitionIO (partsFileName, mpiComm);
     partitionIO.write (meshCutter.allMeshParts() );
 
