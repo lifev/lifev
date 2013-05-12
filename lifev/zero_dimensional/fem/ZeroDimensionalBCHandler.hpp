@@ -57,7 +57,7 @@ public:
 
     typedef ZeroDimensionalBC                                             bc_Type;
     typedef bc_Type::bcType_Type                                          bcType_Type;
-    typedef bc_Type::function_Type                                        function_Type;
+    typedef bc_Type::bcFunction_Type                                      bcFunction_Type;
 
     typedef markerID_Type                                                 bcFlag_Type;
     typedef std::map< bcFlag_Type, bc_Type >                              bcContainer_Type;
@@ -84,11 +84,13 @@ public:
 
     //! Set the type
     /*!
+      @param flag the bc flag
       @param bcType the bc type
+      @param bcFunction the bc function
     */
-    void setBC ( const bcFlag_Type& flag, const bcType_Type& bcType, const function_Type& function )
+    void setBC ( const bcFlag_Type& flag, const bcType_Type& bcType, const bcFunction_Type& bcFunction )
     {
-        M_bc[flag].setBC ( bcType, function );
+        M_bc[flag].setBC ( bcType, bcFunction );
     }
 
     //@}
