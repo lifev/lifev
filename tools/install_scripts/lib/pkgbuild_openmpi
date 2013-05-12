@@ -12,7 +12,7 @@ export mpi_bin=${mpi_base}/bin
 ver="1.6.3"
 
 download_openmpi() {
-    wget http://www.open-mpi.org/software/ompi/v1.6/downloads/openmpi-${ver}.tar.bz2
+    wget -c http://www.open-mpi.org/software/ompi/v1.6/downloads/openmpi-${ver}.tar.bz2
 }
 
 unpack_openmpi() {
@@ -34,12 +34,12 @@ build_openmpi() {
         --enable-mca-no-build="ras_tm,pls_tm" \
         CC=${clang_bin}/clang \
         CXX=${clang_bin}/clang++ \
-        LDFLAGS='-Wl,-z,noexecstack' || return 1
+        LDFLAGS='-Wl,-z,noexecstack'
 
-    make -j${NUM_PROC}
+    make
 
 }
 
 install_openmpi() {
-    make -j${NUM_PROC} install
+    make install
 }

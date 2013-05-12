@@ -72,6 +72,9 @@ public:
     typedef TimeData                                                  time_Type;
     typedef boost::shared_ptr < time_Type >                           timePtr_Type;
 
+    // TODO: this is a temporary typedef, to be removed in the future
+    typedef boost::shared_ptr < Real >                                solutionPtr_Type;
+
     //! Constructor
     explicit ZeroDimensionalData();
 
@@ -100,7 +103,7 @@ public:
     void showMeVariables() ;
 
     //! set time
-    void setTimeData ( const timePtr_Type timeData )
+    void setTimeData ( const timePtr_Type& timeData )
     {
         M_time = timeData;
     }
@@ -127,6 +130,24 @@ public:
         return M_solverData;
     }
 
+    //! Set the fluid venous pressure.
+    /*!
+     * @param venous pressure of the fluid.
+     */
+    void setVenousPressure ( const Real& venousPressure )
+    {
+        M_venousPressure = venousPressure;
+    }
+
+    //! Get the fluid venous pressure.
+    /*!
+     * @return venous pressure of the fluid.
+     */
+    const Real& venousPressure() const
+    {
+        return M_venousPressure;
+    }
+
 private:
 
     // TODO: The output part should be rewritten following the example in the OneDFSI solver
@@ -142,6 +163,8 @@ private:
     std::ofstream                        M_balanceFileStream;
     Int                                  M_unknownCounter;
     solverData_Type                      M_solverData;
+
+    Real                                 M_venousPressure;
 };
 
 } // LifeV namespace

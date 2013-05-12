@@ -7,9 +7,9 @@
 ver="3.1"
 
 download_clang() {
-    wget http://llvm.org/releases/${ver}/llvm-${ver}.src.tar.gz
-    wget http://llvm.org/releases/${ver}/clang-${ver}.src.tar.gz
-    wget http://llvm.org/releases/${ver}/compiler-rt-${ver}.src.tar.gz
+    wget -c http://llvm.org/releases/${ver}/llvm-${ver}.src.tar.gz
+    wget -c http://llvm.org/releases/${ver}/clang-${ver}.src.tar.gz
+    wget -c http://llvm.org/releases/${ver}/compiler-rt-${ver}.src.tar.gz
 }
 
 unpack_clang() {
@@ -21,8 +21,7 @@ unpack_clang() {
 }
 
 build_clang() {
-
-# due to a bug in the compiler-rt package we need to add a fake CmakeLists.txt
+    # due to a bug in the compiler-rt package we need to add a fake CmakeLists.txt
     touch ${src_dir}/llvm-${ver}.src/projects/compiler-rt/test/CMakeLists.txt
 
     rm -f CMakeCache.txt
@@ -40,11 +39,10 @@ build_clang() {
 #        -D FFI_LIBRARY_DIR:PATH="/usr/lib/i386-linux-gnu" \
 #        \
 
-  make -j${NUM_PROC}
-
+  make
 }
 
 install_clang() {
-  make -j${NUM_PROC} install
+  make install
 }
 
