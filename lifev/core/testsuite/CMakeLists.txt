@@ -16,10 +16,15 @@ ADD_SUBDIRECTORIES(
   mesh
   repeated_mesh
   region_marker_id
-  partition_io
   template_test
   vector_container
 )
+
+IF(TPL_ENABLE_HDF5)
+    ADD_SUBDIRECTORIES(
+        partition_io
+        )
+ENDIF()
 
 IF(LifeV_${PACKAGE_NAME}_ENABLE_SPIRIT_PARSER)
   ADD_SUBDIRECTORY(parser)

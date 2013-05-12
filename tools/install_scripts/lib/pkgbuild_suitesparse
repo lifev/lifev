@@ -7,7 +7,7 @@
 ver='3.4.0'
 
 download_suitesparse() {
-  wget "http://www.cise.ufl.edu/research/sparse/SuiteSparse/SuiteSparse-${ver}.tar.gz"
+  wget -c "http://www.cise.ufl.edu/research/sparse/SuiteSparse/SuiteSparse-${ver}.tar.gz"
 }
 
 unpack_suitesparse() {
@@ -64,9 +64,9 @@ install_suitesparse() {
   # Installing
   install -m 775 -d ${install_dir}/{lib,include}
   install -m 664 {CAMD,COLAMD,LDL,CHOLMOD,SPQR,CXSparse,KLU,BTF,UMFPACK,CCOLAMD,AMD}/Include/*.h \
-    "${install_dir}/include" || return 1;
+    "${install_dir}/include";
   install -m 664 {CAMD,COLAMD,LDL,CHOLMOD,SPQR,CXSparse,KLU,BTF,UMFPACK,CCOLAMD,AMD}/Lib/*.a \
-    "${install_dir}/lib" || return 1;
-  install -m 664 UFconfig/UFconfig.h ${install_dir}/include || return 1;
+    "${install_dir}/lib";
+  install -m 664 UFconfig/UFconfig.h ${install_dir}/include;
 }
 

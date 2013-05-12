@@ -84,13 +84,13 @@ public:
       @param name Name of the reference element
       @param shape Shape related to this reference element
       @param nbDof Number of degrees of freedom
-      @param nbCoor Number of local coordinates
+      @param nbLocalCoor Number of local coordinates
       @param phi Array of the basis functions
       @param dPhi Array of the derivatives of the basis functions
       @param d2Phi Array of the second derivatives of the basis functions
       @param refCoor Array of the reference coordinates for this reference element
      */
-    ReferenceElement ( std::string name, ReferenceShapes shape, UInt nbDof, UInt nbCoor, UInt feDim,
+    ReferenceElement ( std::string name, ReferenceShapes shape, UInt nbDof, UInt nbLocalCoor, UInt feDim,
                        const function_Type* phi, const function_Type* dPhi, const function_Type* d2Phi,
                        const function_Type* divPhi, const Real* refCoor);
 
@@ -125,7 +125,7 @@ public:
     //! return the icoor-th local coordinate of the i-th node of the reference element
     Real refCoor ( UInt i, UInt icoor ) const
     {
-        ASSERT_BD ( i < M_nbDof && icoor < M_nbCoor )
+        ASSERT_BD ( i < M_nbDof && icoor < M_nbLocalCoor )
         return M_refCoor[ 3 * i + icoor ];
     }
     //! return the coordinates of the reference element
@@ -148,15 +148,15 @@ public:
     //! return the value of the icoor-th derivative of the i-th basis function on point v
     Real dPhi ( UInt i, UInt icoor, const GeoVector& v ) const
     {
-        ASSERT_BD ( i < M_nbDof && icoor < M_nbCoor )
-        return M_dPhi[ i * M_nbCoor + icoor ] ( v );
+        ASSERT_BD ( i < M_nbDof && icoor < M_nbLocalCoor )
+        return M_dPhi[ i * M_nbLocalCoor + icoor ] ( v );
     }
 
     //!  return the value of the (icoor,jcoor)-th second derivative of the i-th basis function on point v
     Real d2Phi ( UInt i, UInt icoor, UInt jcoor, const GeoVector& v ) const
     {
-        ASSERT_BD ( i < M_nbDof && icoor < M_nbCoor && jcoor < M_nbCoor )
-        return M_d2Phi[ ( i * M_nbCoor + icoor ) * M_nbCoor + jcoor ] ( v );
+        ASSERT_BD ( i < M_nbDof && icoor < M_nbLocalCoor && jcoor < M_nbLocalCoor )
+        return M_d2Phi[ ( i * M_nbLocalCoor + icoor ) * M_nbLocalCoor + jcoor ] ( v );
     }
     //! return the value of the divergence of the i-th basis function on point v.
     Real divPhi ( UInt i, const GeoVector& v ) const
@@ -235,10 +235,16 @@ public:
         return M_nbDof;
     }
 
-    //! Return the number of local coordinates
-    const UInt& nbCoor() const
+    //! OLD: Return the number of local coordinates
+    const LIFEV_DEPRECATED (UInt&) nbCoor() const
     {
-        return M_nbCoor;
+        return M_nbLocalCoor;
+    }
+
+    //! Return the number of local coordinates
+    const UInt& nbLocalCoor() const
+    {
+        return M_nbLocalCoor;
     }
 
     //! Return the dimension of the FE (scalar vs vectorial FE)
@@ -283,22 +289,22 @@ public:
     //! return the value of the icoor-th derivative of the i-th basis function on point (x,y,z)
     inline Real dPhi ( UInt i, UInt icoor, const Real& x, const Real& y, const Real& z ) const
     {
-        ASSERT_BD ( i < M_nbDof && icoor < M_nbCoor )
+        ASSERT_BD ( i < M_nbDof && icoor < M_nbLocalCoor )
         GeoVector v (3);
         v[0] = x;
         v[1] = y;
         v[2] = z;
-        return M_dPhi[ i * M_nbCoor + icoor ] ( v );
+        return M_dPhi[ i * M_nbLocalCoor + icoor ] ( v );
     }
     //!  return the value of the (icoor,jcoor)-th second derivative of the i-th basis function on point (x,y,z)
     inline Real d2Phi ( UInt i, UInt icoor, UInt jcoor, const Real& x, const Real& y, const Real& z ) const
     {
-        ASSERT_BD ( i < M_nbDof && icoor < M_nbCoor && jcoor < M_nbCoor )
+        ASSERT_BD ( i < M_nbDof && icoor < M_nbLocalCoor && jcoor < M_nbLocalCoor )
         GeoVector v (3);
         v[0] = x;
         v[1] = y;
         v[2] = z;
-        return M_d2Phi[ ( i * M_nbCoor + icoor ) * M_nbCoor + jcoor ] ( v );
+        return M_d2Phi[ ( i * M_nbLocalCoor + icoor ) * M_nbLocalCoor + jcoor ] ( v );
     }
     //! return the value of the divergence of the i-th basis function on point (x,y,z).
     inline Real divPhi ( UInt i, const Real& x, const Real& y, const Real& z ) const
@@ -354,7 +360,7 @@ private:
     const UInt M_nbDof;
 
     //! Number of local coordinates
-    const UInt M_nbCoor;
+    const UInt M_nbLocalCoor;
 
     //! Number of dimension of the FE (1 for scalar FE, more for vectorial FE)
     const UInt M_feDim;

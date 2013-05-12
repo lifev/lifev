@@ -62,16 +62,20 @@ trilinos_lib=${INSTALL_DIR}/lib/trilinos/lib
 # LIFEV
 # this is for LifeV developers
 lifev=INSTALL
-lifev_src=${HOME}/work/lifev/src-tmp
-lifev_build=${HOME}/work/lifev/build
-lifev_install=${HOME}/work/lifev/install
+lifev_src=${HOME}/lifev/src
+lifev_build=${HOME}/lifev/build
+lifev_install=${HOME}/lifev/install
+# additional flags for linking
+lifev_flags=
 
 #LIFEV LIB
 # this is to use LifeV as an external library
 lifevlib=NO
-lifev_include=${INSTALL_DIR}/lib/lifev/include
-lifev_lib=${INSTALL_DIR}/lib/lifev/lib
-lifev_src=/path/to/lifev_src
+lifevlib_include=${INSTALL_DIR}/lib/lifev/include
+lifevlib_lib=${INSTALL_DIR}/lib/lifev/lib
+lifevlib_src=/path/to/lifev_src
+# additional flags for linking
+lifevlib_flags=
 
 #####################
 # OPTIONAL PACKAGES

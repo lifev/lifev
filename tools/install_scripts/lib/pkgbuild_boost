@@ -9,7 +9,7 @@
 ver="1.48.0"
 
 download_boost() {
-  wget http://gitorious.org/boost/cmake/archive-tarball/cmake-${ver}
+  wget -c http://gitorious.org/boost/cmake/archive-tarball/cmake-${ver}
 }
 
 unpack_boost() {

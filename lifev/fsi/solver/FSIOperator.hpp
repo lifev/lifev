@@ -130,6 +130,8 @@ public:
     typedef boost::shared_ptr<solidLin_Type>                                        solidLinPtr_Type;
     typedef fluid_Type::vector_Type/*fluidPtr_Type::vector_Type*/                   vector_Type;
     typedef boost::shared_ptr<vector_Type>                                          vectorPtr_Type;
+    typedef vector_Type                                                             solution_Type;
+    typedef boost::shared_ptr<solution_Type>                                        solutionPtr_Type;
     typedef fluid_Type::source_Type/*fluidPtr_Type::source_Type*/                   fluidSource_Type;
     typedef solid_Type::source_Type                                                 solidSource_Type;
     typedef boost::function < Real ( const Real&, const Real&,
@@ -1146,7 +1148,7 @@ protected:
                                    const vector_Type&                   _vec1,
                                    const FESpace<mesh_Type, MapEpetra>& _fespace2,
                                    vector_Type&                         _vec2,
-                                   dofInterface3DPtr_Type&                _dofInterface);
+                                   dofInterface3DPtr_Type&              _dofInterface);
 
     //@}
 
@@ -1161,30 +1163,30 @@ protected:
     boost::shared_ptr<mesh_Type>                      M_fluidMesh;
     boost::shared_ptr<mesh_Type>                      M_solidMesh;
 
-    boost::shared_ptr<mesh_Type>                        M_fluidLocalMesh;
-    boost::shared_ptr<mesh_Type>                        M_solidLocalMesh;
+    boost::shared_ptr<mesh_Type>                      M_fluidLocalMesh;
+    boost::shared_ptr<mesh_Type>                      M_solidLocalMesh;
 
-    fluidBchandlerPtr_Type                              M_BCh_u;
-    solidBchandlerPtr_Type                              M_BCh_d;
-    fluidBchandlerPtr_Type                              M_BCh_mesh;
+    fluidBchandlerPtr_Type                            M_BCh_u;
+    solidBchandlerPtr_Type                            M_BCh_d;
+    fluidBchandlerPtr_Type                            M_BCh_mesh;
 
     // interface operators BCs
-    fluidBchandlerPtr_Type                              M_BCh_du;
-    fluidBchandlerPtr_Type                              M_BCh_du_inv;
+    fluidBchandlerPtr_Type                            M_BCh_du;
+    fluidBchandlerPtr_Type                            M_BCh_du_inv;
 
-    solidBchandlerPtr_Type                              M_BCh_dz;
-    solidBchandlerPtr_Type                              M_BCh_dz_inv;
+    solidBchandlerPtr_Type                            M_BCh_dz;
+    solidBchandlerPtr_Type                            M_BCh_dz_inv;
 
-    fluidBchandlerPtr_Type                              M_BCh_dp;
-    fluidBchandlerPtr_Type                              M_BCh_dp_inv;
+    fluidBchandlerPtr_Type                            M_BCh_dp;
+    fluidBchandlerPtr_Type                            M_BCh_dp_inv;
 
-    fluidPtr_Type                                        M_fluid;
-    solidPtr_Type                                        M_solid;
-    meshMotionPtr_Type                                   M_meshMotion;
+    fluidPtr_Type                                     M_fluid;
+    solidPtr_Type                                     M_solid;
+    meshMotionPtr_Type                                M_meshMotion;
 
-    std::string                                          M_fluidTimeAdvanceMethod;
-    std::string                                          M_solidTimeAdvanceMethod;
-    std::string                                          M_ALETimeAdvanceMethod;
+    std::string                                       M_fluidTimeAdvanceMethod;
+    std::string                                       M_solidTimeAdvanceMethod;
+    std::string                                       M_ALETimeAdvanceMethod;
 
     boost::shared_ptr<TimeAdvance<vector_Type> >      M_fluidTimeAdvance;
     boost::shared_ptr<TimeAdvance<vector_Type> >      M_fluidMassTimeAdvance;
@@ -1207,48 +1209,48 @@ protected:
     //!\todo{kill this attribute}
     boost::shared_ptr<MapEpetra>                      M_solidInterfaceMapOnZero;
 
-    dofInterface3DPtr_Type                              M_dofFluidToStructure; // Needed
-    //     dofInterface3DPtr_Type                              M_dofSolidToFluid;
-    dofInterface3DPtr_Type                              M_dofStructureToFluid; // Needed
-    dofInterface3DPtr_Type                              M_dofStructureToSolid; // Needed to construct M_bcvStructureDispToSolid
-    dofInterface3DPtr_Type                              M_dofStructureToHarmonicExtension; // Needed to construct interface maps
-    dofInterface3DPtr_Type                              M_dofHarmonicExtensionToFluid; // Needed to construct M_bcvStructureToFluid
-    //     dofInterface3DPtr_Type                              M_dofStructureToReducedFluid;
-    //     dofInterface3DPtr_Type                              M_dofReducedFluidToStructure;
+    dofInterface3DPtr_Type                            M_dofFluidToStructure; // Needed
+    // dofInterface3DPtr_Type                         M_dofSolidToFluid;
+    dofInterface3DPtr_Type                            M_dofStructureToFluid; // Needed
+    dofInterface3DPtr_Type                            M_dofStructureToSolid; // Needed to construct M_bcvStructureDispToSolid
+    dofInterface3DPtr_Type                            M_dofStructureToHarmonicExtension; // Needed to construct interface maps
+    dofInterface3DPtr_Type                            M_dofHarmonicExtensionToFluid; // Needed to construct M_bcvStructureToFluid
+    // dofInterface3DPtr_Type                         M_dofStructureToReducedFluid;
+    // dofInterface3DPtr_Type                         M_dofReducedFluidToStructure;
 
-    dofInterface2DPtr_Type                              M_dofFluid;
-    dofInterface2DPtr_Type                              M_dofSolid;
-    dofInterface2DPtr_Type                              M_dofFluidInv;
-    dofInterface2DPtr_Type                              M_dofSolidInv;
+    dofInterface2DPtr_Type                            M_dofFluid;
+    dofInterface2DPtr_Type                            M_dofSolid;
+    dofInterface2DPtr_Type                            M_dofFluidInv;
+    dofInterface2DPtr_Type                            M_dofSolidInv;
 
-    bcVectorInterfacePtr_Type                               M_bcvFluidInterfaceDisp;
-    bcVectorInterfacePtr_Type                               M_bcvFluidLoadToStructure;
-    bcVectorInterfacePtr_Type                               M_bcvSolidLoadToStructure;
-    bcVectorInterfacePtr_Type                               M_bcvStructureToFluid;
-    bcVectorInterfacePtr_Type                               M_bcvStructureDispToFluid;
-    bcVectorInterfacePtr_Type                               M_bcvStructureDispToSolid;
-    bcVectorInterfacePtr_Type                               M_bcvStructureDispToHarmonicExtension;
-    bcVectorInterfacePtr_Type                               M_bcvHarmonicExtensionVelToFluid;
-    //     bcVectorInterfacePtr_Type                               M_bcvStructureToReducedFluid;
-    //     bcVectorInterfacePtr_Type                               M_bcvReducedFluidToStructure;
+    bcVectorInterfacePtr_Type                         M_bcvFluidInterfaceDisp;
+    bcVectorInterfacePtr_Type                         M_bcvFluidLoadToStructure;
+    bcVectorInterfacePtr_Type                         M_bcvSolidLoadToStructure;
+    bcVectorInterfacePtr_Type                         M_bcvStructureToFluid;
+    bcVectorInterfacePtr_Type                         M_bcvStructureDispToFluid;
+    bcVectorInterfacePtr_Type                         M_bcvStructureDispToSolid;
+    bcVectorInterfacePtr_Type                         M_bcvStructureDispToHarmonicExtension;
+    bcVectorInterfacePtr_Type                         M_bcvHarmonicExtensionVelToFluid;
+    // bcVectorInterfacePtr_Type                      M_bcvStructureToReducedFluid;
+    // bcVectorInterfacePtr_Type                      M_bcvReducedFluidToStructure;
 
-    bcVectorInterfacePtr_Type                               M_bcvDerHarmonicExtensionVelToFluid;
-    bcVectorInterfacePtr_Type                               M_bcvDerFluidLoadToStructure;
-    bcVectorInterfacePtr_Type                               M_bcvDerFluidLoadToFluid;
-    bcVectorInterfacePtr_Type                               M_bcvDerStructureDispToSolid;
+    bcVectorInterfacePtr_Type                         M_bcvDerHarmonicExtensionVelToFluid;
+    bcVectorInterfacePtr_Type                         M_bcvDerFluidLoadToStructure;
+    bcVectorInterfacePtr_Type                         M_bcvDerFluidLoadToFluid;
+    bcVectorInterfacePtr_Type                         M_bcvDerStructureDispToSolid;
     BCFunctionRobin                                   M_bcfRobinOuterWall;
 
-    //     bcVectorInterfacePtr_Type                               M_bcvDerReducedFluidLoadToStructure;
-    //     bcVectorInterfacePtr_Type                               M_bcvDerStructureAccToReducedFluid;
+    // bcVectorInterfacePtr_Type                      M_bcvDerReducedFluidLoadToStructure;
+    // bcVectorInterfacePtr_Type                      M_bcvDerStructureAccToReducedFluid;
 
-    vectorPtr_Type                    M_lambdaFluid;
-    vectorPtr_Type                    M_lambdaFluidRepeated;
-    vectorPtr_Type                    M_lambda;
-    vectorPtr_Type                    M_lambdaDot;
+    vectorPtr_Type                                    M_lambdaFluid;
+    vectorPtr_Type                                    M_lambdaFluidRepeated;
+    vectorPtr_Type                                    M_lambda;
+    vectorPtr_Type                                    M_lambdaDot;
 
 
-    vectorPtr_Type                    M_rhs;
-    vectorPtr_Type                    M_alphaF;
+    vectorPtr_Type                                    M_rhs;
+    vectorPtr_Type                                    M_alphaF;
 
     Real                                              M_alphaFCoef;
     //\todo{try to set as deprecated}
@@ -1270,27 +1272,27 @@ private:
     //! @name Private Attributes
     //@{
     // displacement on the interface
-    vectorPtr_Type                    M_lambdaSolid;
-    vectorPtr_Type                    M_lambdaSolidRepeated;
+    vectorPtr_Type                                    M_lambdaSolid;
+    vectorPtr_Type                                    M_lambdaSolidRepeated;
 
-    vectorPtr_Type                    M_lambdaSolidOld;
-    vectorPtr_Type                    M_lambdaDotSolid;
-    vectorPtr_Type                    M_lambdaDotSolidRepeated;
+    vectorPtr_Type                                    M_lambdaSolidOld;
+    vectorPtr_Type                                    M_lambdaDotSolid;
+    vectorPtr_Type                                    M_lambdaDotSolidRepeated;
 
-    vectorPtr_Type                    M_sigmaFluid;
-    vectorPtr_Type                    M_sigmaSolid;
+    vectorPtr_Type                                    M_sigmaFluid;
+    vectorPtr_Type                                    M_sigmaSolid;
 
-    vectorPtr_Type                    M_sigmaFluidRepeated;
-    vectorPtr_Type                    M_sigmaSolidRepeated;
+    vectorPtr_Type                                    M_sigmaFluidRepeated;
+    vectorPtr_Type                                    M_sigmaSolidRepeated;
 
     //\todo{try to remove}
-    vectorPtr_Type                    M_minusSigmaFluid;
+    vectorPtr_Type                                    M_minusSigmaFluid;
     //\todo{try to remove}
-    vectorPtr_Type                    M_minusSigmaFluidRepeated;
+    vectorPtr_Type                                    M_minusSigmaFluidRepeated;
 
-    vectorPtr_Type                    M_dispFluidMeshOld;
-    vectorPtr_Type                    M_veloFluidMesh;
-    vectorPtr_Type                    M_derVeloFluidMesh;
+    vectorPtr_Type                                    M_dispFluidMeshOld;
+    vectorPtr_Type                                    M_veloFluidMesh;
+    vectorPtr_Type                                    M_derVeloFluidMesh;
 
     //\todo{try to set as deprecated}
     bool                                              M_mpi;
@@ -1303,6 +1305,8 @@ private:
 
     int                                               M_fluidLeader;
     int                                               M_solidLeader;
+
+    std::string                                       M_aleOrder;
     //@}
 
 };

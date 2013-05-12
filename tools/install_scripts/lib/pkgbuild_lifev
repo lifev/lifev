@@ -1,10 +1,10 @@
 #! /bin/bash
 #
 # author: Antonio Cervone <ant.cervone@gmail.com>
-# date:   09-01-2013
+# date:   13-02-2013
 #
 
-ver='3.2'
+ver=
 
 download_lifev() {
   pushd ${lifev_src} >/dev/null
@@ -20,6 +20,7 @@ unpack_lifev() {
 }
 
 build_lifev() {
+  mkdir -p "${lifev_build}"
   pushd "${lifev_build}" >/dev/null
   if [ $MOX_MACHINE ]; then
     mox_extra="\
@@ -57,6 +58,7 @@ build_lifev() {
     -D LifeV_ENABLE_ALL_PACKAGES:BOOL=ON \
     -D LifeV_ENABLE_TESTS:BOOL=ON \
     -D LifeV_ENABLE_STRONG_CXX_COMPILE_WARNINGS:BOOL=ON \
+    -D LifeV_EXTRA_LINK_FLAGS:STRING="${lifev_flags}" \
     -D Trilinos_INCLUDE_DIRS:PATH="${trilinos_include}" \
     -D Trilinos_LIBRARY_DIRS:PATH="${trilinos_lib}" \
     -D ParMETIS_INCLUDE_DIRS:PATH="${parmetis_include}" \
@@ -66,13 +68,13 @@ build_lifev() {
     ${mox_extra} \
     "${lifev_src}"
 
-  make -j${NUM_PROC}
-  make -j${NUM_PROC} doc
+  make
+  make doc
   popd >/dev/null
 }
 
 install_lifev() {
   pushd "${lifev_build}" >/dev/null
-  make -j${NUM_PROC} install
+  make install
   popd >/dev/null
 }

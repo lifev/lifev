@@ -195,7 +195,7 @@ public:
         return M_fe;
     }
     //! Returns the current boundary FE object
-    CurrentBoundaryFE&    getFeBd()
+    CurrentFEManifold&    getFeBd()
     {
         return M_feBd;
     }
@@ -250,7 +250,7 @@ private:
     CurrentFE                              M_fe;
 
     //! Current boundary FE
-    CurrentBoundaryFE                            M_feBd;
+    CurrentFEManifold                            M_feBd;
 
     //! The displacement
     PhysVectUnknown<Vector>                M_d;
