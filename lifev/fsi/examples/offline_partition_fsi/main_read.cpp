@@ -92,12 +92,12 @@ main ( int argc, char** argv )
     }
     GetPot dataFile ( "data" );
 
-    const std::string fluidHdf5File (dataFile("test/fluid_hdf5_file_name",
-    										  "fluid.h5"));
-    const std::string solidHdf5File (dataFile("test/solid_hdf5_file_name",
-    										  "fluid.h5"));
-    const std::string interfaceHdf5File (dataFile("test/interface_hdf5_file_name",
-    											  "interface.h5"));
+    const std::string fluidHdf5File (dataFile ("test/fluid_hdf5_file_name",
+                                               "fluid.h5") );
+    const std::string solidHdf5File (dataFile ("test/solid_hdf5_file_name",
+                                               "fluid.h5") );
+    const std::string interfaceHdf5File (dataFile ("test/interface_hdf5_file_name",
+                                                   "interface.h5") );
     if (verbose)
     {
         std::cout << " done ! " << std::endl;
@@ -108,56 +108,56 @@ main ( int argc, char** argv )
     boost::shared_ptr<std::map<UInt, UInt> > interfaceMap;
 
     {
-		// Load fluid mesh part from HDF5
-		if (verbose)
-		{
-			std::cout << " -- Reading the fluid mesh part ... " << std::endl;
-			std::cout << fluidHdf5File << std::endl;
-		}
-		PartitionIO<RegionMesh<LinearTetra> > partitionIO (fluidHdf5File, comm);
-		partitionIO.read (fluidMesh);
+        // Load fluid mesh part from HDF5
+        if (verbose)
+        {
+            std::cout << " -- Reading the fluid mesh part ... " << std::endl;
+            std::cout << fluidHdf5File << std::endl;
+        }
+        PartitionIO<RegionMesh<LinearTetra> > partitionIO (fluidHdf5File, comm);
+        partitionIO.read (fluidMesh);
 
-		fluidMesh->showMe();
+        fluidMesh->showMe();
 
-		if (verbose)
-		{
-			std::cout << " done ! " << std::endl;
-		}
+        if (verbose)
+        {
+            std::cout << " done ! " << std::endl;
+        }
     }
     {
-		// Load solid mesh part from HDF5
-		if (verbose)
-		{
-			std::cout << " -- Reading the solid mesh part ... " << std::endl;
-			std::cout << solidHdf5File << std::endl;
-		}
-		PartitionIO<RegionMesh<LinearTetra> > partitionIO (solidHdf5File, comm);
-		partitionIO.read (solidMesh);
+        // Load solid mesh part from HDF5
+        if (verbose)
+        {
+            std::cout << " -- Reading the solid mesh part ... " << std::endl;
+            std::cout << solidHdf5File << std::endl;
+        }
+        PartitionIO<RegionMesh<LinearTetra> > partitionIO (solidHdf5File, comm);
+        partitionIO.read (solidMesh);
 
-		solidMesh->showMe();
+        solidMesh->showMe();
 
-		if (verbose)
-		{
-			std::cout << " done ! " << std::endl;
-		}
+        if (verbose)
+        {
+            std::cout << " done ! " << std::endl;
+        }
     }
     {
-		// Load interface from HDF5
-		if (verbose)
-		{
-			std::cout << " -- Reading the interface ... " << std::endl;
-			std::cout << fluidHdf5File << std::endl;
-		}
-		DOFInterfaceIO interfaceIO (interfaceHdf5File, comm);
-		interfaceIO.read (interfaceMap);
+        // Load interface from HDF5
+        if (verbose)
+        {
+            std::cout << " -- Reading the interface ... " << std::endl;
+            std::cout << fluidHdf5File << std::endl;
+        }
+        DOFInterfaceIO interfaceIO (interfaceHdf5File, comm);
+        interfaceIO.read (interfaceMap);
 
-		std::cout << "Interface " << comm->MyPID()
-				  << " size: " << interfaceMap->size() << std::endl;
+        std::cout << "Interface " << comm->MyPID()
+                  << " size: " << interfaceMap->size() << std::endl;
 
-		if (verbose)
-		{
-			std::cout << " done ! " << std::endl;
-		}
+        if (verbose)
+        {
+            std::cout << " done ! " << std::endl;
+        }
     }
 
     MPI_Finalize();

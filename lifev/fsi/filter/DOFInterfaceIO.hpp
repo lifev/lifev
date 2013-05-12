@@ -94,7 +94,7 @@ public:
      * \param comm pointer to Epetra_Comm
      */
     DOFInterfaceIO (const std::string& fileName,
-                 	const commPtr_Type& comm);
+                    const commPtr_Type& comm);
 
     //! Empty destructor
     virtual ~DOFInterfaceIO() {}

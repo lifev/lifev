@@ -90,51 +90,51 @@ int main (int argc, char** argv)
 
     const UInt numParts (dataFile ("test/num_parts", 4) );
     const std::string fluidPartsFileName (dataFile ("test/fluid_hdf5_file_name",
-    												"fluid.h5") );
+                                                    "fluid.h5") );
     const std::string solidPartsFileName (dataFile ("test/solid_hdf5_file_name",
-    												"solid.h5") );
+                                                    "solid.h5") );
     const std::string interfacePartsFileName (dataFile ("test/interface_hdf5_file_name",
-    													"solid.h5") );
+                                                        "solid.h5") );
 
     std::cout << "Number of parts: " << numParts << std::endl;
     std::cout << "Name of fluid HDF5 container: "
-    		  << fluidPartsFileName << std::endl;
+              << fluidPartsFileName << std::endl;
     std::cout << "Name of solid HDF5 container: "
-    		  << solidPartsFileName << std::endl;
+              << solidPartsFileName << std::endl;
     std::cout << "Name of interface HDF5 container: "
-    		  << interfacePartsFileName << std::endl;
+              << interfacePartsFileName << std::endl;
 
     boost::shared_ptr<mesh_Type> fluidMeshPtr (new mesh_Type ( comm ) );
     boost::shared_ptr<mesh_Type> solidMeshPtr (new mesh_Type ( comm ) );
 
-	//Fluid
-	MeshData fluidMeshData(dataFile, "fluid_mesh");
-	readMesh(*fluidMeshPtr, fluidMeshData);
+    //Fluid
+    MeshData fluidMeshData (dataFile, "fluid_mesh");
+    readMesh (*fluidMeshPtr, fluidMeshData);
 
-	//Solid
-	MeshData solidMeshData(dataFile, "solid_mesh");
-	readMesh(*solidMeshPtr, solidMeshData);
+    //Solid
+    MeshData solidMeshData (dataFile, "solid_mesh");
+    readMesh (*solidMeshPtr, solidMeshData);
 
-	// Create the FSI partitioner
-	MeshPartitionerOfflineFSI<mesh_Type> fsiPartitioner(
-		fluidMeshPtr, solidMeshPtr, numParts, numParts, "P1", "P1",
-		1, 1, 0, 0,	0, comm);
+    // Create the FSI partitioner
+    MeshPartitionerOfflineFSI<mesh_Type> fsiPartitioner (
+        fluidMeshPtr, solidMeshPtr, numParts, numParts, "P1", "P1",
+        1, 1, 0, 0, 0, comm);
 
-	// Release the original mesh from the MeshPartitioner object and
-	// delete the RegionMesh object
-	fluidMeshPtr.reset();
-	solidMeshPtr.reset();
+    // Release the original mesh from the MeshPartitioner object and
+    // delete the RegionMesh object
+    fluidMeshPtr.reset();
+    solidMeshPtr.reset();
 
-	// Write fluid, solid, and interface parts
-	boost::shared_ptr<Epetra_MpiComm> mpiComm =
-		boost::dynamic_pointer_cast<Epetra_MpiComm>(comm);
+    // Write fluid, solid, and interface parts
+    boost::shared_ptr<Epetra_MpiComm> mpiComm =
+        boost::dynamic_pointer_cast<Epetra_MpiComm> (comm);
 
-	PartitionIO<mesh_Type> fluidPartitionIO (fluidPartsFileName, mpiComm);
-	fluidPartitionIO.write (fsiPartitioner.fluidPartitions() );
-	PartitionIO<mesh_Type> solidPartitionIO (solidPartsFileName, mpiComm);
-	solidPartitionIO.write (fsiPartitioner.solidPartitions() );
-	DOFInterfaceIO interfaceIO (interfacePartsFileName, mpiComm);
-	interfaceIO.write(fsiPartitioner.dofStructureToHarmonicExtension());
+    PartitionIO<mesh_Type> fluidPartitionIO (fluidPartsFileName, mpiComm);
+    fluidPartitionIO.write (fsiPartitioner.fluidPartitions() );
+    PartitionIO<mesh_Type> solidPartitionIO (solidPartsFileName, mpiComm);
+    solidPartitionIO.write (fsiPartitioner.solidPartitions() );
+    DOFInterfaceIO interfaceIO (interfacePartsFileName, mpiComm);
+    interfaceIO.write (fsiPartitioner.dofStructureToHarmonicExtension() );
 
     MPI_Finalize();
 
