@@ -211,7 +211,6 @@ IntegrateMatrixElement (const boost::shared_ptr<MeshType>& mesh,
         M_solutionSpace (solutionSpace),
         M_evaluation (expression),
 
-        //M_globalCFE(new ETCurrentFE<SolutionSpaceType::S_spaceDim,1>(feTetraP0,geometricMapFromMesh<MeshType>(),quadrature)),
         M_testCFE (new ETCurrentFE<TestSpaceType::S_spaceDim, TestSpaceType::S_fieldDim> (testSpace->refFE(), testSpace->geoMap(), quadrature) ),
         M_solutionCFE (new ETCurrentFE<SolutionSpaceType::S_spaceDim, SolutionSpaceType::S_fieldDim> (solutionSpace->refFE(), testSpace->geoMap(), quadrature) ),
 
@@ -253,7 +252,6 @@ IntegrateMatrixElement (const IntegrateMatrixElement<MeshType, TestSpaceType, So
         M_solutionSpace (integrator.M_solutionSpace),
         M_evaluation (integrator.M_evaluation),
 
-        //M_globalCFE(new ETCurrentFE<SolutionSpaceType::S_spaceDim,1>(feTetraP0,geometricMapFromMesh<MeshType>(),M_quadrature)),
         M_testCFE (new ETCurrentFE<TestSpaceType::S_spaceDim, TestSpaceType::S_fieldDim> (M_testSpace->refFE(), M_testSpace->geoMap(), M_quadrature) ),
         M_solutionCFE (new ETCurrentFE<SolutionSpaceType::S_spaceDim, SolutionSpaceType::S_fieldDim> (M_solutionSpace->refFE(), M_solutionSpace->geoMap(), M_quadrature) ),
 

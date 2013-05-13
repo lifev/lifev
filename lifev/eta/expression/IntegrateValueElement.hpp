@@ -166,8 +166,6 @@ IntegrateValueElement (const boost::shared_ptr<MeshType>& mesh,
         M_quadrature (quadrature),
         M_evaluation (expression)
 
-        //M_globalCFE(new ETCurrentFE<3,1>(feTetraP0,geometricMapFromMesh<MeshType>(),quadrature))
-
 {
     switch (MeshType::geoShape_Type::BasRefSha::S_shape)
     {
@@ -200,8 +198,6 @@ IntegrateValueElement ( const IntegrateValueElement < MeshType, ExpressionType>&
     :   M_mesh (integrator.M_mesh),
         M_quadrature (integrator.M_quadrature),
         M_evaluation (integrator.M_evaluation)
-
-        //M_globalCFE(new ETCurrentFE<3,1>(feTetraP0,geometricMapFromMesh<MeshType>(),M_quadrature))
 
 {
     switch (MeshType::geoShape_Type::BasRefSha::S_shape)

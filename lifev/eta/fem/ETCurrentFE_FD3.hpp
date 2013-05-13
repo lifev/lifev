@@ -194,9 +194,10 @@ public:
     //! Getter for the derivatives of the basis function in the quadrature nodes (current element)
     /*!
       @param i The index of the basis function
+      @param iCoor The component of the basis function to be derived
       @param dxi The direction of the derivative required (0 for d/dx, 1 for d/dy...)
       @param q The index of the quadrature node
-      @return The vector<3> of the ith basis function derived w.r. to dxi, in the qth quadrature node.
+      @return The iCoor component of the ith basis function derived w.r. to dxi, in the qth quadrature node.
      */
     const Real& dphi (const UInt& i, const UInt& iCoor, const UInt& dxi, const UInt& q) const
     {

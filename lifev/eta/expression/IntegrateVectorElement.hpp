@@ -188,10 +188,8 @@ IntegrateVectorElement (const boost::shared_ptr<MeshType>& mesh,
         M_testSpace (testSpace),
         M_evaluation (expression),
 
-        //M_globalCFE(new ETCurrentFE<3,1>(feTetraP0,geometricMapFromMesh<MeshType>(),quadrature)),
         M_testCFE (new ETCurrentFE<TestSpaceType::S_spaceDim, TestSpaceType::S_fieldDim> (testSpace->refFE(), testSpace->geoMap(), quadrature) ),
 
-        //M_elementalVector(testSpace->refFE().nbDof())
         M_elementalVector (TestSpaceType::S_fieldDim * testSpace->refFE().nbDof() )
 {
     switch (MeshType::geoShape_Type::BasRefSha::S_shape)
@@ -228,7 +226,6 @@ IntegrateVectorElement ( const IntegrateVectorElement < MeshType, TestSpaceType,
         M_testSpace (integrator.M_testSpace),
         M_evaluation (integrator.M_evaluation),
 
-        //M_globalCFE(new ETCurrentFE<3,1>(feTetraP0,geometricMapFromMesh<MeshType>(),M_quadrature)),
         M_testCFE (new ETCurrentFE<TestSpaceType::S_spaceDim, TestSpaceType::S_fieldDim> (M_testSpace->refFE(), M_testSpace->geoMap(), M_quadrature) ),
 
         M_elementalVector (integrator.M_elementalVector)
