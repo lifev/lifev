@@ -624,11 +624,12 @@ public:
     {
         return *M_residualCopy;
     }
+#endif
+
     vector_Type& bodyForce()
     {
         return *M_bodyForceVector;
     }
-#endif
 
     //! Get the comunicator object
     boost::shared_ptr<Epetra_Comm> const& comunicator() const
@@ -790,12 +791,12 @@ protected:
 #ifdef EXPORTVECTORS
     vectorPtr_Type                       M_rhsCopy;
     vectorPtr_Type                       M_residualCopy;
-    vectorPtr_Type                       M_bodyForceVector;
 #endif
 
     //! right  hand  side
     vectorPtr_Type                       M_rhsNoBC;
 
+    vectorPtr_Type                       M_bodyForceVector;
     //! right  hand  side
     //boost::shared_ptr<vector_Type>       M_f;
 
@@ -868,10 +869,10 @@ StructuralOperator<Mesh>::StructuralOperator( ) :
     M_elmatM                     ( ),
     M_disp                       ( ),
     M_rhsNoBC                    ( ),
+    M_bodyForceVector            ( ),
 #ifdef EXPORTVECTORS
     M_rhsCopy                    ( ),
     M_residualCopy               ( ),
-    M_bodyForceVector            ( ),
 #endif
     M_residual_d                 ( ),
     M_out_iter                   ( ),
@@ -924,9 +925,9 @@ StructuralOperator<Mesh>::setup (boost::shared_ptr<data_Type>        data,
 #ifdef EXPORTVECTORS
     M_rhsCopy.reset                    ( new vector_Type (*M_localMap) );
     M_residualCopy.reset               ( new vector_Type (*M_localMap) );
-    M_bodyForceVector.reset            ( new vector_Type (*M_localMap) );
 #endif
     M_rhsNoBC.reset                    ( new vector_Type (*M_localMap) );
+    M_bodyForceVector.reset            ( new vector_Type (*M_localMap) );
     M_linearSolver.reset               ( new LinearSolver ( comm ) );
     M_disp.reset                       ( new vector_Type (*M_localMap) );
 }
@@ -1066,9 +1067,7 @@ void StructuralOperator<Mesh>::updateRightHandSideWithBodyForce ( const Real cur
                 value ( M_data->rho() ) * dot (  eval( M_source, X ), phi_i )
                 ) >> rhs;
 
-#ifdef EXPORTVECTORS
     M_bodyForceVector = rhs;
-#endif
 
     *rhs += rhsTimeAdvance;
 

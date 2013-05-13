@@ -517,7 +517,7 @@ Structure::run3d()
         }
 
         //debug
-        *bodyForceVector = solid.bodyForce();
+        //*bodyForceVector = solid.bodyForce();
 
         exporterCheck->postProcess ( dataStructure->dataTime()->time() );
         if( verbose )

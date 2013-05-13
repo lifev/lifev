@@ -292,7 +292,7 @@ public:
     {
         return M_absoluteTolerance;
     }
-    //! Get solid reltol newton 
+    //! Get solid reltol newton
     /*!
      * @return Solid reltol newton
      */
@@ -385,7 +385,7 @@ public:
         return M_verbose;
     }
 
-    //! Get isotropic law 
+    //! Get isotropic law
     /*!
      * @return solid type isotropic
      */
@@ -399,11 +399,11 @@ public:
      * @return solid type anisotropic
      */
 
-#ifdef ENABLE_ANISOTROPIC_LAW
     const std::string& constitutiveLaw()
     {
         return M_constitutiveLaw;
     }
+#ifdef ENABLE_ANISOTROPIC_LAW
     const std::string& solidTypeAnisotropic()
     {
         return M_solidTypeAnisotropic;
@@ -491,8 +491,8 @@ private:
     UInt                   M_verbose; // temporal output verbose
 
     std::string            M_solidTypeIsotropic;
-#ifdef ENABLE_ANISOTROPIC_LAW
     std::string            M_constitutiveLaw;
+#ifdef ENABLE_ANISOTROPIC_LAW
     std::string            M_solidTypeAnisotropic;
     UInt                   M_numberFibers;
     vectorParameters_Type  M_stiffnessParametersFibers;

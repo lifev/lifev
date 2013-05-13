@@ -66,8 +66,8 @@ StructuralConstitutiveLawData::StructuralConstitutiveLawData() :
     M_order                            ( ),
     M_verbose                          ( ),
     M_solidTypeIsotropic               ( ),
-#ifdef ENABLE_ANISOTROPIC_LAW
     M_constitutiveLaw                  ( ),
+#ifdef ENABLE_ANISOTROPIC_LAW
     M_solidTypeAnisotropic             ( ),
     M_numberFibers                     ( 0 ),
     M_stiffnessParametersFibers        ( ),
@@ -100,8 +100,8 @@ StructuralConstitutiveLawData::StructuralConstitutiveLawData ( const StructuralC
     M_order                            ( structuralConstitutiveLawData.M_order ),
     M_verbose                          ( structuralConstitutiveLawData.M_verbose ),
     M_solidTypeIsotropic               ( structuralConstitutiveLawData.M_solidTypeIsotropic ),
-#ifdef ENABLE_ANISOTROPIC_LAW
     M_constitutiveLaw                  ( structuralConstitutiveLawData.M_constitutiveLaw ),
+#ifdef ENABLE_ANISOTROPIC_LAW
     M_solidTypeAnisotropic             ( structuralConstitutiveLawData.M_solidTypeAnisotropic ),
     M_numberFibers                     ( structuralConstitutiveLawData.M_numberFibers ),
     M_stiffnessParametersFibers        ( structuralConstitutiveLawData.M_stiffnessParametersFibers ),
@@ -142,8 +142,8 @@ StructuralConstitutiveLawData::operator= ( const StructuralConstitutiveLawData& 
         M_order                            = structuralConstitutiveLawData.M_order;
         M_verbose                          = structuralConstitutiveLawData.M_verbose;
         M_solidTypeIsotropic               = structuralConstitutiveLawData.M_solidTypeIsotropic;
-#ifdef ENABLE_ANISOTROPIC_LAW
         M_constitutiveLaw                  = structuralConstitutiveLawData.M_constitutiveLaw;
+#ifdef ENABLE_ANISOTROPIC_LAW
         M_solidTypeAnisotropic             = structuralConstitutiveLawData.M_solidTypeAnisotropic;
         M_numberFibers                     = structuralConstitutiveLawData.M_numberFibers;
         M_stiffnessParametersFibers        = structuralConstitutiveLawData.M_stiffnessParametersFibers;
@@ -184,8 +184,8 @@ StructuralConstitutiveLawData::setup ( const GetPot& dataFile, const std::string
     M_solidTypeIsotropic = dataFile ( ( section + "/model/solidTypeIsotropic" ).data(), "NO_DEFAULT_SOLID_TYPE_ISOTROPIC" );
 
     // Reading the type of anisotropic part and the number of fibers
-#ifdef ENABLE_ANISOTROPIC_LAW
     M_constitutiveLaw = dataFile ( ( section + "/model/constitutiveLaw" ).data(), "isotropic" );
+#ifdef ENABLE_ANISOTROPIC_LAW
     if(  M_constitutiveLaw.compare("isotropic") ) // anisotropic laws
       {
 	M_solidTypeAnisotropic = dataFile ( ( section + "/model/solidTypeAnisotropic" ).data(), "NO_DEFAULT_SOLID_TYPE_ANISOTROPIC" );
@@ -224,7 +224,7 @@ StructuralConstitutiveLawData::setup ( const GetPot& dataFile, const std::string
       {
 	UInt numberOfStiffnesses = dataFile.vector_variable_size ( ( section + "/model/fibers/stiffness" ).data() );
 	UInt numberOfNonlinearities = dataFile.vector_variable_size ( ( section + "/model/fibers/nonlinearity" ).data() );
-	
+
 	ASSERT( M_numberFibers  , " The number of fiber families is equal to zero, change the variable constitutiveLaw from anisotropic to isotropic " );
 	ASSERT( ( M_numberFibers == numberOfStiffnesses ) && ( M_numberFibers == numberOfNonlinearities ), " Inconsistency in the set up of the fiber parameters" );
       }
@@ -287,7 +287,7 @@ StructuralConstitutiveLawData::setup ( const GetPot& dataFile, const std::string
 	  }
 	M_epsilon = dataFile ( ( section + "/model/fibers/smoothness"   ).data(), 0. );
       }
-#endif 
+#endif
 
     // space_discretization
     M_order            = dataFile ( ( section + "/space_discretization/order" ).data(), "P1" );
@@ -370,7 +370,7 @@ StructuralConstitutiveLawData::showMe ( std::ostream& output ) const
 
 	for ( UInt i (0) ; i < M_numberFibers ; ++i )
 	  {
-	    std::cout << i + 1 << "-th coupled of parameters ( stiffness, nonlinearity ) : ( " << M_stiffnessParametersFibers[ i ] 
+	    std::cout << i + 1 << "-th coupled of parameters ( stiffness, nonlinearity ) : ( " << M_stiffnessParametersFibers[ i ]
 		      << ", " << M_nonlinearityParametersFibers[ i ] << " ); " << std::endl;
 	  }
       }

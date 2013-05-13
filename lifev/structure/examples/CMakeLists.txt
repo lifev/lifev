@@ -10,11 +10,16 @@ ADD_SUBDIRECTORIES(
   example_principalTensionsInflationExtensions
   example_partitionMesh
   example_computationNorm
-  example_bodyForces
 )
 
 IF(EXPORTVECTORS_DEBUG)
   ADD_SUBDIRECTORIES(
   example_checkigForceTerm
+)
+ENDIF()
+
+IF(ENABLE_ANISOTROPIC_LAW)
+  ADD_SUBDIRECTORIES(
+    example_bodyForces
 )
 ENDIF()
