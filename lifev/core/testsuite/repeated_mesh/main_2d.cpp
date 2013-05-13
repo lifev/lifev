@@ -350,11 +350,11 @@ main ( int argc, char** argv )
 
         vector_Type rhs2 ( uFESpace->map(), Unique );
         vector_Type rhs2R ( uFESpaceR->map(), Unique );
-        vector_Type f( uFESpace->map(), Repeated );
+        vector_Type f ( uFESpace->map(), Repeated );
         uFESpace->interpolate ( static_cast<feSpace_Type::function_Type> ( fRhs ), f, 0.0 );
         adrAssembler.addMassRhs ( rhs2, f );
         rhs2.globalAssemble();
-        vector_Type fR( uFESpaceR->map(), Repeated );
+        vector_Type fR ( uFESpaceR->map(), Repeated );
         uFESpaceR->interpolate ( static_cast<feSpace_Type::function_Type> ( fRhs ), fR, 0.0 );
         adrAssemblerR.addMassRhs ( rhs2R, fR );
         rhs2R.globalAssemble ( Zero );
@@ -378,11 +378,11 @@ main ( int argc, char** argv )
         exporter.postProcess ( 0. );
 #endif
 
-        vector_Type rhsCopy( rhs, Repeated );
-        vector_Type rhsCopyR( rhsR, Repeated );
+        vector_Type rhsCopy ( rhs, Repeated );
+        vector_Type rhsCopyR ( rhsR, Repeated );
         Real l2Error  = uFESpace->l2Error ( fRhs, rhsCopy, 0.0 );
         Real l2ErrorR = uFESpaceR->l2Error ( fRhs, rhsCopyR, 0.0 );
-        Real diffL2Error = std::fabs( l2Error - l2ErrorR );
+        Real diffL2Error = std::fabs ( l2Error - l2ErrorR );
 
         if ( isLeader )
         {

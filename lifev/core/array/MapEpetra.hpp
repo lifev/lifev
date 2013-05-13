@@ -125,7 +125,7 @@ public:
     MapEpetra ( std::pair<std::vector<Int>, std::vector<Int> > myGlobalElements,
                 const comm_ptrtype& commPtr );
 
-    MapEpetra ( MapEpetraData const & mapData, comm_ptrtype const& commPtr );
+    MapEpetra ( MapEpetraData const& mapData, comm_ptrtype const& commPtr );
 
     //! Constructor
     /*

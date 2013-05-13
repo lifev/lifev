@@ -967,7 +967,7 @@ FESpace<MeshType, MapType>::l2Error ( const function_Type&    fexact,
 
     for ( UInt iVol  = 0; iVol < this->mesh()->numElements(); iVol++ )
     {
-        if( this->mesh()->element( iVol ).isOwned() )
+        if ( this->mesh()->element ( iVol ).isOwned() )
         {
             //this->fe().updateFirstDeriv( this->mesh()->element( iVol ) );
 
@@ -1640,7 +1640,7 @@ FESpace<MeshType, MapType>::setSpace ( const std::string& space, UInt dimension 
 {
     switch (dimension)
     {
-        // 1D case
+            // 1D case
         case 1:
             switch ( M_spaceMap[space] )
             {
@@ -1660,7 +1660,7 @@ FESpace<MeshType, MapType>::setSpace ( const std::string& space, UInt dimension 
                     M_bdQr  = &quadRuleNode1pt;
                     break;
 
-                // In 1D, P1Bubble are "somehow" equivalent to P2, so just use those (same pattern, same dimension of the system).
+                    // In 1D, P1Bubble are "somehow" equivalent to P2, so just use those (same pattern, same dimension of the system).
                 case P1Bubble :
                 case P2 :
                     M_refFE = &feSegP2;
@@ -1680,7 +1680,7 @@ FESpace<MeshType, MapType>::setSpace ( const std::string& space, UInt dimension 
             }
             break;
 
-        // 2D case
+            // 2D case
         case 2:
             switch ( M_spaceMap[space] )
             {
@@ -1724,7 +1724,7 @@ FESpace<MeshType, MapType>::setSpace ( const std::string& space, UInt dimension 
             }
             break;
 
-        // 3D case
+            // 3D case
         case 3:
             switch ( M_spaceMap[space] )
             {
@@ -1776,9 +1776,9 @@ FESpace<MeshType, MapType>::setSpace ( const std::string& space, UInt dimension 
             }
             break;
 
-        // Other dimensions not supported
+            // Other dimensions not supported
         default:
-            ERROR_MSG("Error! This dimension is not supported by LifeV.\n");
+            ERROR_MSG ("Error! This dimension is not supported by LifeV.\n");
     }
 }
 
@@ -1818,7 +1818,7 @@ createMap (const commPtr_Type& commptr)
     ASSERT_PRE (this->M_dof->numTotalDof() > 0, " Cannot create FeSpace with no degrees of freedom");
 
     // get globalElements list from DOF
-    typename MapType::mapData_Type mapData = this->M_dof->createMapData( *this->M_mesh );
+    typename MapType::mapData_Type mapData = this->M_dof->createMapData ( *this->M_mesh );
     // Create the map
     MapType map ( mapData, commptr );
 
