@@ -71,7 +71,7 @@ bcManage ( MatrixType& matrix,
            MeshType const& mesh,
            DOF const& dof,
            BCHandler const& bcHandler,
-           CurrentBoundaryFE& currentBdFE,
+           CurrentFEManifold& currentBdFE,
            DataType const& diagonalizeCoef,
            DataType const& time = 0 );
 
@@ -99,7 +99,7 @@ bcManage ( Real (*mu) (Real time, Real x, Real y, Real z, Real u),
            const MeshType& mesh,
            const DOF& dof,
            const BCHandler& bcHandler,
-           CurrentBoundaryFE& currentBdFE,
+           CurrentFEManifold& currentBdFE,
            const DataType diagonalizeCoef,
            const DataType& time,
            VectorType& feVec );
@@ -120,13 +120,13 @@ bcManage ( Real (*mu) (Real time, Real x, Real y, Real z, Real u),
  */
 template <typename MatrixType, typename MeshType, typename DataType>
 void
-bcManageMatrix ( MatrixType&      matrix,
-                 const MeshType&  mesh,
-                 const DOF&       dof,
-                 const BCHandler& bcHandler,
-                 CurrentBoundaryFE&     currentBdFE,
-                 const DataType&  diagonalizeCoef,
-                 const DataType&  time = 0 );
+bcManageMatrix ( MatrixType&        matrix,
+                 const MeshType&    mesh,
+                 const DOF&         dof,
+                 const BCHandler&   bcHandler,
+                 CurrentFEManifold& currentBdFE,
+                 const DataType&    diagonalizeCoef,
+                 const DataType&    time = 0 );
 
 
 
@@ -149,7 +149,7 @@ bcManageVector ( VectorType&      rightHandSide,
                  const MeshType&  mesh,
                  const DOF&       dof,
                  const BCHandler& bcHandler,
-                 CurrentBoundaryFE&     currentBdFE,
+                 CurrentFEManifold&     currentBdFE,
                  const DataType&  time,
                  const DataType&  diagonalizeCoef );
 
@@ -171,7 +171,7 @@ bcManageRhs ( VectorType&      rightHandSide,
               const MeshType&  mesh,
               const DOF&       dof,
               const BCHandler& bcHandler,
-              CurrentBoundaryFE&     currentBdFE,
+              CurrentFEManifold&     currentBdFE,
               const DataType&  diagonalizeCoef,
               const DataType&  time );
 
@@ -263,7 +263,7 @@ bcEssentialManage ( MatrixType& matrix,
                     const MeshType& /*mesh*/,
                     const DOF& dof,
                     const BCBase& boundaryCond,
-                    const CurrentBoundaryFE& /*currentBdFE*/,
+                    const CurrentFEManifold& /*currentBdFE*/,
                     const DataType& diagonalizeCoef,
                     const DataType& time,
                     UInt offset );
@@ -291,7 +291,7 @@ bcEssentialManageUDep ( MatrixType& matrix,
                         const MeshType& /*mesh*/,
                         const DOF& dof,
                         const BCBase& boundaryCond,
-                        const CurrentBoundaryFE& /*currentBdFE*/,
+                        const CurrentFEManifold& /*currentBdFE*/,
                         const DataType& diagonalizeCoef,
                         const DataType& time,
                         const VectorType& feVec ,
@@ -423,7 +423,6 @@ bcManageMtimeUDep ( MatrixType& matrix,
 // @{
 // ===================================================
 
-
 //! Prescribe Natural boundary condition
 /*!
  * The right hand side is modified to take into account the Natural boundary condition
@@ -441,7 +440,7 @@ bcNaturalManage ( VectorType& rightHandSide,
                   const MeshType& mesh,
                   const DOF& dof, const
                   BCBase& boundaryCond,
-                  CurrentBoundaryFE& currentBdFE,
+                  CurrentFEManifold& currentBdFE,
                   const DataType& time,
                   UInt offset );
 
@@ -467,19 +466,17 @@ bcNaturalManageUDep ( Real (*mu) (Real time, Real x, Real y, Real z, Real u),
                       const MeshType& mesh,
                       const DOF& dof,
                       const BCBase& boundaryCond,
-                      CurrentBoundaryFE& currentBdFE,
+                      CurrentFEManifold& currentBdFE,
                       const DataType& time,
                       const VectorType& feVec,
                       UInt offset );
 
 // @}
 
-
 // ===================================================
 //! @name Robin BC
 // @{
 // ===================================================
-
 
 //! Prescribe Robin boundary condition
 /*!
@@ -500,7 +497,7 @@ bcRobinManage ( MatrixType& matrix,
                 const MeshType& mesh,
                 const DOF& dof,
                 const BCBase& boundaryCond,
-                CurrentBoundaryFE& currentBdFE,
+                CurrentFEManifold& currentBdFE,
                 const DataType& time,
                 UInt offset );
 
@@ -522,7 +519,7 @@ bcRobinManageMatrix ( MatrixType& matrix,
                       const MeshType& mesh,
                       const DOF& dof,
                       const BCBase& boundaryCond,
-                      CurrentBoundaryFE& currentBdFE,
+                      CurrentFEManifold& currentBdFE,
                       const DataType& time,
                       UInt offset );
 
@@ -551,7 +548,7 @@ bcRobinManageResidual ( VectorType& residual,
                         const MeshType& mesh,
                         const DOF& dof,
                         const BCBase& boundaryCond,
-                        CurrentBoundaryFE& currentBdFE,
+                        CurrentFEManifold& currentBdFE,
                         const DataType& time,
                         UInt offset );
 
@@ -573,18 +570,16 @@ bcRobinManageVector ( VectorType& rightHandSide,
                       const MeshType& mesh,
                       const DOF& dof,
                       const BCBase& boundaryCond,
-                      CurrentBoundaryFE& currentBdFE,
+                      CurrentFEManifold& currentBdFE,
                       const DataType& time,
                       UInt offset );
 
 // @}
 
-
 // ===================================================
 //!@name Flux BC
 //@{
 // ===================================================
-
 
 //! Prescribe Flux boundary condition only on the matrix
 /*!
@@ -608,7 +603,7 @@ bcFluxManage ( MatrixType&     matrix,
                const MeshType& mesh,
                const DOF&      dof,
                const BCBase&   boundaryCond,
-               CurrentBoundaryFE&    currentBdFE,
+               CurrentFEManifold&    currentBdFE,
                const DataType& time,
                UInt            offset);
 
@@ -624,8 +619,7 @@ bcFluxManage ( MatrixType&     matrix,
  * @param time The time
  * @param offset The boundary condition offset
  */
-template < typename VectorType,
-         typename DataType >
+template < typename VectorType, typename DataType >
 void
 bcFluxManageVector (
     VectorType&    rightHandSide,
@@ -653,7 +647,7 @@ bcFluxManageMatrix ( MatrixType&     matrix,
                      const MeshType& mesh,
                      const DOF&      dof,
                      const BCBase&   boundaryCond,
-                     CurrentBoundaryFE&    currentBdFE,
+                     CurrentFEManifold&    currentBdFE,
                      const DataType& /*time*/,
                      UInt            offset );
 
@@ -681,18 +675,15 @@ bcFluxManageResidual ( VectorType&     residual,
                        const MeshType& mesh,
                        const DOF&      dof,
                        const BCBase&   boundaryCond,
-                       CurrentBoundaryFE&    currentBdFE,
+                       CurrentFEManifold&    currentBdFE,
                        const DataType& /*time*/,
                        UInt            offset );
 // @}
-
-
 
 // ===================================================
 //!@name Resistance BC
 // @{
 // ===================================================
-
 
 //! Prescribe Resistance boundary condition
 /*!
@@ -712,7 +703,7 @@ bcResistanceManage ( MatrixType& matrix,
                      const MeshType& mesh,
                      const DOF& dof,
                      const BCBase& boundaryCond,
-                     CurrentBoundaryFE& currentBdFE,
+                     CurrentFEManifold& currentBdFE,
                      const DataType& /*time*/,
                      UInt offset );
 template <typename VectorType, typename DataType, typename MeshType>
@@ -721,7 +712,7 @@ bcResistanceManageVector ( VectorType& rightHandSide,
                            const MeshType& mesh,
                            const DOF& dof,
                            const BCBase& boundaryCond,
-                           CurrentBoundaryFE& currentBdFE,
+                           CurrentFEManifold& currentBdFE,
                            const DataType& /*time*/,
                            UInt offset );
 template <typename MatrixType, typename DataType, typename MeshType>
@@ -730,18 +721,11 @@ bcResistanceManageMatrix ( MatrixType& matrix,
                            const MeshType& mesh,
                            const DOF& dof,
                            const BCBase& boundaryCond,
-                           CurrentBoundaryFE& currentBdFE,
+                           CurrentFEManifold& currentBdFE,
                            const DataType& /*time*/,
                            UInt offset );
 
 // @}
-
-
-
-
-
-
-
 
 // ===================================================
 // Implementation
@@ -759,16 +743,14 @@ bcManage ( MatrixType& matrix,
            MeshType const& mesh,
            DOF const& dof,
            BCHandler const& bcHandler,
-           CurrentBoundaryFE& currentBdFE,
+           CurrentFEManifold& currentBdFE,
            DataType const& diagonalizeCoef,
            DataType const& time )
 {
 
     bool globalassemble = false;
 
-
     BCManageNormal<MatrixType> bcManageNormal;
-
 
     // Loop on boundary conditions
     for ( ID i = 0; i < bcHandler.size(); ++i )
@@ -811,7 +793,7 @@ bcManage ( MatrixType& matrix,
     }
 
     //Build the internal structure, if needed
-    bcManageNormal.build (mesh, dof, currentBdFE, matrix, bcHandler.offset(), rightHandSide.mapPtr()->commPtr() );
+    bcManageNormal.build (mesh, dof, currentBdFE, matrix.map(), bcHandler.offset() );
     bcManageNormal.exportToParaview ("normalAndTangents");
 
     //Applying the basis change, if needed
@@ -841,8 +823,6 @@ bcManage ( MatrixType& matrix,
     bcManageNormal.bcShiftToCartesianCoordSystem (matrix, rightHandSide);
 }
 
-
-
 template <typename MatrixType, typename VectorType, typename MeshType, typename DataType>
 void
 bcManage ( Real (*mu) (Real time, Real x, Real y, Real z, Real u),
@@ -851,7 +831,7 @@ bcManage ( Real (*mu) (Real time, Real x, Real y, Real z, Real u),
            const MeshType& mesh,
            const DOF& dof,
            const BCHandler& bcHandler,
-           CurrentBoundaryFE& currentBdFE,
+           CurrentFEManifold& currentBdFE,
            const DataType diagonalizeCoef,
            const DataType& time,
            VectorType& feVec )
@@ -934,14 +914,13 @@ bcManage ( Real (*mu) (Real time, Real x, Real y, Real z, Real u),
     }
 }
 
-
 template <typename MatrixType, typename MeshType, typename DataType>
 void
 bcManageMatrix ( MatrixType&      matrix,
                  const MeshType&  mesh,
                  const DOF&       dof,
                  const BCHandler& bcHandler,
-                 CurrentBoundaryFE&     currentBdFE,
+                 CurrentFEManifold&     currentBdFE,
                  const DataType&  diagonalizeCoef,
                  const DataType&  time )
 {
@@ -1011,14 +990,13 @@ bcManageMatrix ( MatrixType&      matrix,
     }
 }
 
-
 template <typename VectorType, typename MeshType, typename DataType>
 void
 bcManageVector ( VectorType&      rightHandSide,
                  const MeshType&  mesh,
                  const DOF&       dof,
                  const BCHandler& bcHandler,
-                 CurrentBoundaryFE&     currentBdFE,
+                 CurrentFEManifold&     currentBdFE,
                  const DataType&  time,
                  const DataType&  diagonalizeCoef )
 {
@@ -1037,7 +1015,7 @@ bcManageRhs ( VectorType&      rightHandSide,
               const MeshType&  mesh,
               const DOF&       dof,
               const BCHandler& bcHandler,
-              CurrentBoundaryFE&     currentBdFE,
+              CurrentFEManifold&     currentBdFE,
               const DataType&  diagonalizeCoef,
               const DataType&  time )
 {
@@ -1085,7 +1063,7 @@ bcManageResidual ( VectorType&                     res,
                    const MeshType&  mesh,
                    const DOF&       dof,
                    const BCHandler& bcHandler,
-                   CurrentBoundaryFE&     currentBdFE,
+                   CurrentFEManifold&     currentBdFE,
                    const DataType&  time,
                    const DataType&  diagonalizeCoef )
 {
@@ -1180,8 +1158,6 @@ bcManageRhs ( VectorType&                     rightHandSide,
 
 }
 
-
-
 // ===================================================
 // Essential BC
 // ===================================================
@@ -1193,7 +1169,7 @@ bcEssentialManage ( MatrixType& matrix,
                     const MeshType& /*mesh*/,
                     const DOF& dof,
                     const BCBase& boundaryCond,
-                    const CurrentBoundaryFE& /*currentBdFE*/,
+                    const CurrentFEManifold& /*currentBdFE*/,
                     const DataType& diagonalizeCoef,
                     const DataType& time,
                     UInt offset )
@@ -1281,7 +1257,7 @@ bcEssentialManageUDep ( MatrixType& matrix,
                         const MeshType& /*mesh*/,
                         const DOF& dof,
                         const BCBase& boundaryCond,
-                        const CurrentBoundaryFE& /*currentBdFE*/,
+                        const CurrentFEManifold& /*currentBdFE*/,
                         const DataType& diagonalizeCoef,
                         const DataType& time,
                         const VectorType& feVec ,
@@ -1446,7 +1422,6 @@ bcEssentialManageRhs ( VectorType&     rightHandSide,
     }
 
 }
-
 
 template <typename VectorType, typename DataType>
 void
@@ -1614,20 +1589,19 @@ bcEssentialManageResidual (VectorType&     res,
 // Natural BC
 // ===================================================
 
-
 template <typename VectorType, typename MeshType, typename DataType>
 void
 bcNaturalManage ( VectorType& rightHandSide,
                   const MeshType& mesh,
                   const DOF& dof, const
                   BCBase& boundaryCond,
-                  CurrentBoundaryFE& currentBdFE,
+                  CurrentFEManifold& currentBdFE,
                   const DataType& time,
                   UInt offset )
 {
 
     // Number of local DOF (i.e. nodes) in this face
-    UInt nDofF = currentBdFE.nbNode();
+    UInt nDofF = currentBdFE.nbFEDof();
 
     // Number of total scalar Dof
     UInt totalDof = dof.numTotalDof();
@@ -1695,7 +1669,7 @@ bcNaturalManage ( VectorType& rightHandSide,
                     ibF = pId->id();
 
                     // Updating face stuff
-                    currentBdFE.updateMeasNormal ( mesh.boundaryFacet ( ibF ) );
+                    currentBdFE.update ( mesh.boundaryFacet ( ibF ), UPDATE_W_ROOT_DET_METRIC | UPDATE_NORMALS );
 
                     // Loop on total DOF per Face
                     for ( ID l = 0; l < nDofF; ++l )
@@ -1709,17 +1683,17 @@ bcNaturalManage ( VectorType& rightHandSide,
                             icDof = gDof + ic * totalDof + offset;
 
                             // Loop on quadrature points
-                            for ( int iq = 0; iq < (int) currentBdFE.nbQuadPt(); ++iq )
+                            for ( UInt iq = 0; iq < currentBdFE.nbQuadPt(); ++iq )
                             {
                                 sum = 0.0;
                                 // data on quadrature point
                                 for ( ID m = 0; m < nDofF; ++m )
                                 {
-                                    sum +=  boundaryCond ( pId->boundaryLocalToGlobalMap ( m ) , 0 ) * currentBdFE.phi ( int ( m ), iq );
+                                    sum +=  boundaryCond ( pId->boundaryLocalToGlobalMap ( m ) , 0 ) * currentBdFE.phi ( m, iq );
                                 }
                                 // Adding right hand side contribution
-                                rhsRepeated[ icDof ] += sum * currentBdFE.phi ( int ( l ), iq ) * currentBdFE.normal ( int ( ic ), iq )
-                                                        * currentBdFE.weightMeas ( iq );
+                                rhsRepeated[ icDof ] += sum * currentBdFE.phi ( l, iq ) * currentBdFE.normal ( ic, iq )
+                                                        * currentBdFE.wRootDetMetric ( iq );
                             }
                         }
                     }
@@ -1744,7 +1718,7 @@ bcNaturalManage ( VectorType& rightHandSide,
                     ibF = pId->id();
 
                     // Updating face stuff
-                    currentBdFE.updateMeas ( mesh.boundaryFacet ( ibF ) );
+                    currentBdFE.update ( mesh.boundaryFacet ( ibF ), UPDATE_W_ROOT_DET_METRIC );
 
                     // Loop on total DOF per Face
                     for ( ID idofF = 0; idofF < nDofF; ++idofF )
@@ -1759,18 +1733,18 @@ bcNaturalManage ( VectorType& rightHandSide,
                             icDof = gDof +  boundaryCond.component ( ic ) * totalDof + offset; //Components passed separately
 
                             // Loop on quadrature points
-                            for ( int iq = 0; iq < (int) currentBdFE.nbQuadPt(); ++iq )
+                            for ( UInt iq = 0; iq < currentBdFE.nbQuadPt(); ++iq )
                             {
                                 sum = 0;
                                 // data on quadrature point
                                 for ( ID m = 0; m < nDofF; ++m )
                                 {
-                                    sum +=  boundaryCond ( pId->boundaryLocalToGlobalMap ( m ) , boundaryCond.component ( ic ) ) * currentBdFE.phi ( int ( m ), iq );    //Components passed separatedly
+                                    sum +=  boundaryCond ( pId->boundaryLocalToGlobalMap ( m ) , boundaryCond.component ( ic ) ) * currentBdFE.phi ( m, iq );    //Components passed separatedly
                                 }
 
                                 // Adding right hand side contribution
-                                rhsRepeated[ icDof ] += sum *  currentBdFE.phi ( int ( idofF ), iq ) *
-                                                        currentBdFE.weightMeas ( iq );
+                                rhsRepeated[ icDof ] += sum *  currentBdFE.phi ( idofF, iq ) *
+                                                        currentBdFE.wRootDetMetric ( iq );
                             }
                         }
                     }
@@ -1800,7 +1774,7 @@ bcNaturalManage ( VectorType& rightHandSide,
             // Number of the current boundary face
             ibF = pId->id();
             // Updating face stuff
-            currentBdFE.updateMeasNormalQuadPt ( mesh.boundaryFacet ( ibF ) );
+            currentBdFE.update ( mesh.boundaryFacet ( ibF ), UPDATE_W_ROOT_DET_METRIC | UPDATE_NORMALS | UPDATE_QUAD_NODES );
             // Loop on total DOF per Face
             for ( ID idofF = 0; idofF < nDofF; ++idofF )
             {
@@ -1809,7 +1783,7 @@ bcNaturalManage ( VectorType& rightHandSide,
                     //global Dof
                     idDof = pId->boundaryLocalToGlobalMap ( idofF ) + boundaryCond.component ( j ) * totalDof + offset;
                     // Loop on quadrature points
-                    for ( int iq = 0; iq < (int) currentBdFE.nbQuadPt(); ++iq )
+                    for ( UInt iq = 0; iq < currentBdFE.nbQuadPt(); ++iq )
                     {
                         // quadrature point coordinates
                         x = currentBdFE.quadPt (iq, 0);
@@ -1819,17 +1793,17 @@ bcNaturalManage ( VectorType& rightHandSide,
                         switch (boundaryCond.mode() )
                         {
                             case Full:
-                                rhsRepeated[ idDof ] += currentBdFE.phi ( int ( idofF ), iq ) * boundaryCond ( time, x, y, z, boundaryCond.component ( j ) ) *
-                                                        currentBdFE.weightMeas ( iq );
+                                rhsRepeated[ idDof ] += currentBdFE.phi ( idofF, iq ) * boundaryCond ( time, x, y, z, boundaryCond.component ( j ) ) *
+                                                        currentBdFE.wRootDetMetric ( iq );
                                 break;
                             case Component:
-                                rhsRepeated[ idDof ] += currentBdFE.phi ( int ( idofF ), iq ) * boundaryCond ( time, x, y, z, boundaryCond.component ( j ) ) *
-                                                        currentBdFE.weightMeas ( iq );
+                                rhsRepeated[ idDof ] += currentBdFE.phi ( idofF, iq ) * boundaryCond ( time, x, y, z, boundaryCond.component ( j ) ) *
+                                                        currentBdFE.wRootDetMetric ( iq );
                                 break;
                             case Normal:
                                 rhsRepeated[ idDof ] += boundaryCond ( time, x, y, z, boundaryCond.component ( j ) ) *
-                                                        currentBdFE.phi ( int ( idofF ), iq ) *
-                                                        currentBdFE.weightMeas ( iq ) * currentBdFE.normal ( int (j), iq );
+                                                        currentBdFE.phi ( idofF, iq ) *
+                                                        currentBdFE.wRootDetMetric ( iq ) * currentBdFE.normal ( j, iq );
                                 break;
                             default:
                                 ERROR_MSG ( "This BC mode is not (yet) implemented" );
@@ -1845,8 +1819,6 @@ bcNaturalManage ( VectorType& rightHandSide,
     }
 } // bcNaturalManage
 
-
-
 template <typename VectorType, typename MeshType, typename DataType>
 void
 bcNaturalManageUDep ( Real (*mu) (Real time, Real x, Real y, Real z, Real u),
@@ -1854,14 +1826,14 @@ bcNaturalManageUDep ( Real (*mu) (Real time, Real x, Real y, Real z, Real u),
                       const MeshType& mesh,
                       const DOF& dof,
                       const BCBase& boundaryCond,
-                      CurrentBoundaryFE& currentBdFE,
+                      CurrentFEManifold& currentBdFE,
                       const DataType& time,
                       const VectorType& feVec,
                       UInt offset )
 {
 
     // Number of local DOF (i.e. nodes) in this face
-    UInt nDofF = currentBdFE.nbNode();
+    UInt nDofF = currentBdFE.nbFEDof();
 
     // Number of total scalar Dof
     UInt totalDof = dof.numTotalDof();
@@ -1900,7 +1872,7 @@ bcNaturalManageUDep ( Real (*mu) (Real time, Real x, Real y, Real z, Real u),
             ibF = pId->id();
 
             // Updating face stuff
-            currentBdFE.updateMeasQuadPt ( mesh.boundaryFacet ( ibF ) );
+            currentBdFE.update ( mesh.boundaryFacet ( ibF ), UPDATE_W_ROOT_DET_METRIC | UPDATE_QUAD_NODES );
 
             std::vector<Real> locU (nDofF);   //assumes feVec is a vec of reals, TODO: deal with more comp
             Real uPt;            //value in the point
@@ -1922,7 +1894,7 @@ bcNaturalManageUDep ( Real (*mu) (Real time, Real x, Real y, Real z, Real u),
                     idDof = pId->boundaryLocalToGlobalMap ( idofF ) + boundaryCond.component ( j ) * totalDof + offset;
 
                     // Loop on quadrature points
-                    for ( int l = 0; l < (int) currentBdFE.nbQuadPt(); ++l )
+                    for (UInt l = 0; l < currentBdFE.nbQuadPt(); ++l )
                     {
                         // quadrature point coordinates
                         x = currentBdFE.quadPt (l, 0);
@@ -1932,12 +1904,12 @@ bcNaturalManageUDep ( Real (*mu) (Real time, Real x, Real y, Real z, Real u),
                         uPt = 0.0;
                         for (ID idofLocU = 0; idofLocU < nDofF; idofLocU++)
                         {
-                            uPt += locU[idofLocU] * currentBdFE.phi ( int ( idofLocU  ), l );
+                            uPt += locU[idofLocU] * currentBdFE.phi ( idofLocU , l );
                         }
 
                         // Adding right hand side contribution
-                        rhsRepeated[ idDof ] += currentBdFE.phi ( int ( idofF ), l ) * boundaryCond ( time, x, y, z, boundaryCond.component ( j ), uPt ) *
-                                                mu (time, x, y, z, uPt) * currentBdFE.weightMeas ( l );
+                        rhsRepeated[ idDof ] += currentBdFE.phi ( idofF, l ) * boundaryCond ( time, x, y, z, boundaryCond.component ( j ), uPt ) *
+                                                mu (time, x, y, z, uPt) * currentBdFE.wRootDetMetric ( l );
                     }
                 }
             }
@@ -1949,13 +1921,9 @@ bcNaturalManageUDep ( Real (*mu) (Real time, Real x, Real y, Real z, Real u),
     }
 }
 
-
-
-
 // ===================================================
 // Robin BC
 // ===================================================
-
 
 template <typename MatrixType, typename VectorType, typename DataType, typename MeshType>
 void
@@ -1964,7 +1932,7 @@ bcRobinManage ( MatrixType& matrix,
                 const MeshType& mesh,
                 const DOF& dof,
                 const BCBase& boundaryCond,
-                CurrentBoundaryFE& currentBdFE,
+                CurrentFEManifold& currentBdFE,
                 const DataType& time,
                 UInt offset )
 {
@@ -1979,7 +1947,7 @@ bcRobinManageMatrix ( MatrixType& matrix,
                       const MeshType& mesh,
                       const DOF& dof,
                       const BCBase& boundaryCond,
-                      CurrentBoundaryFE& currentBdFE,
+                      CurrentFEManifold& currentBdFE,
                       const DataType& time,
                       UInt offset )
 {
@@ -1990,7 +1958,7 @@ bcRobinManageMatrix ( MatrixType& matrix,
     }
 
     // Number of local DOF in this face
-    UInt nDofF = currentBdFE.nbNode();
+    UInt nDofF = currentBdFE.nbFEDof();
 
     // Number of total scalar Dof
     UInt totalDof = dof.numTotalDof();
@@ -2021,7 +1989,7 @@ bcRobinManageMatrix ( MatrixType& matrix,
             ibF = pId->id();
 
             // Updating face stuff
-            currentBdFE.updateMeas ( mesh.boundaryFacet ( ibF ) );
+            currentBdFE.update ( mesh.boundaryFacet ( ibF ), UPDATE_W_ROOT_DET_METRIC );
 
             // Loop on total DOF per Face
             for ( ID idofF = 0; idofF < nDofF; ++idofF )
@@ -2053,7 +2021,7 @@ bcRobinManageMatrix ( MatrixType& matrix,
                         }
 
                         // Contribution to the diagonal entry of the elementary boundary mass matrix
-                        sum += mcoef * currentBdFE.phi ( idofF, l ) * currentBdFE.phi ( idofF, l ) * currentBdFE.weightMeas ( l );
+                        sum += mcoef * currentBdFE.phi ( idofF, l ) * currentBdFE.phi ( idofF, l ) * currentBdFE.wRootDetMetric ( l );
                     }
 
                     // Assembling diagonal entry
@@ -2090,7 +2058,7 @@ bcRobinManageMatrix ( MatrixType& matrix,
 
                             // Upper diagonal entry of the elementary boundary mass matrix
                             sum += mcoef * currentBdFE.phi ( idofF, l ) * currentBdFE.phi ( k, l ) *
-                                   currentBdFE.weightMeas ( l );
+                                   currentBdFE.wRootDetMetric ( l );
                         }
 
                         // Globals DOF: row and columns
@@ -2125,7 +2093,7 @@ bcRobinManageMatrix ( MatrixType& matrix,
             ibF = pId->id();
 
             // Updating face stuff
-            currentBdFE.updateMeasQuadPt ( mesh.boundaryFacet ( ibF ) );
+            currentBdFE.update ( mesh.boundaryFacet ( ibF ), UPDATE_W_ROOT_DET_METRIC | UPDATE_QUAD_NODES );
 
             // Loop on total DOF per Face
             for ( ID idofF = 0; idofF < nDofF; ++idofF )
@@ -2148,7 +2116,7 @@ bcRobinManageMatrix ( MatrixType& matrix,
 
                         // Contribution to the diagonal entry of the elementary boundary mass matrix
                         sum += pBcF->coef ( time, x, y, z, boundaryCond.component (j) ) * currentBdFE.phi ( idofF, l ) * currentBdFE.phi ( idofF, l ) *
-                               currentBdFE.weightMeas ( l );
+                               currentBdFE.wRootDetMetric ( l );
                     }
 
 
@@ -2176,7 +2144,7 @@ bcRobinManageMatrix ( MatrixType& matrix,
 
                             // Upper diagonal entry of the elementary boundary mass matrix
                             sum += pBcF->coef ( time, x, y, z, boundaryCond.component ( j )  ) * currentBdFE.phi ( idofF, l ) * currentBdFE.phi ( k, l ) *
-                                   currentBdFE.weightMeas ( l );
+                                   currentBdFE.wRootDetMetric ( l );
                         }
 
                         // Globals DOF: row and columns
@@ -2193,21 +2161,19 @@ bcRobinManageMatrix ( MatrixType& matrix,
     }
 }   //bcRobinManageMatrix
 
-
-
 template <typename VectorType, typename DataType, typename MeshType>
 void
 bcRobinManageVector ( VectorType& rightHandSide,
                       const MeshType& mesh,
                       const DOF& dof,
                       const BCBase& boundaryCond,
-                      CurrentBoundaryFE& currentBdFE,
+                      CurrentFEManifold& currentBdFE,
                       const DataType& time,
                       UInt offset )
 {
 
     // Number of local DOF in this face
-    UInt nDofF = currentBdFE.nbNode();
+    UInt nDofF = currentBdFE.nbFEDof();
 
     // Number of total scalar Dof
     UInt totalDof = dof.numTotalDof();
@@ -2238,7 +2204,7 @@ bcRobinManageVector ( VectorType& rightHandSide,
             ibF = pId->id();
 
             // Updating face stuff
-            currentBdFE.updateMeas ( mesh.boundaryFacet ( ibF ) );
+            currentBdFE.update ( mesh.boundaryFacet ( ibF ), UPDATE_W_ROOT_DET_METRIC );
 
             // Loop on total DOF per Face
             for ( ID idofF = 0; idofF < nDofF; ++idofF )
@@ -2267,7 +2233,7 @@ bcRobinManageVector ( VectorType& rightHandSide,
                         }
 
                         // Adding right hand side contribution
-                        rhsRepeated[ idDof ] += currentBdFE.phi ( idofF, l ) * mbcb * currentBdFE.weightMeas ( l );
+                        rhsRepeated[ idDof ] += currentBdFE.phi ( idofF, l ) * mbcb * currentBdFE.wRootDetMetric ( l );
                     }
                 }
             }
@@ -2296,7 +2262,7 @@ bcRobinManageVector ( VectorType& rightHandSide,
             ibF = pId->id();
 
             // Updating face stuff
-            currentBdFE.updateMeasQuadPt ( mesh.boundaryFacet ( ibF ) );
+            currentBdFE.update ( mesh.boundaryFacet ( ibF ), UPDATE_W_ROOT_DET_METRIC | UPDATE_QUAD_NODES );
 
             // Loop on total DOF per Face
             for ( ID idofF = 0; idofF < nDofF; ++idofF )
@@ -2318,7 +2284,7 @@ bcRobinManageVector ( VectorType& rightHandSide,
 
                         // Adding right hand side contribution
                         rhsRepeated[ idDof ] += currentBdFE.phi ( idofF, l ) * boundaryCond ( time, x, y, z, boundaryCond.component ( j ) ) *
-                                                currentBdFE.weightMeas ( l );
+                                                currentBdFE.wRootDetMetric ( l );
                     }
                 }
             }
@@ -2339,7 +2305,7 @@ void bcRobinManageResidual ( VectorType& residual,
                              const MeshType& mesh,
                              const DOF& dof,
                              const BCBase& boundaryCond,
-                             CurrentBoundaryFE& currentBdFE,
+                             CurrentFEManifold& currentBdFE,
                              const DataType& time,
                              UInt offset )
 {
@@ -2386,7 +2352,7 @@ bcFluxManage ( MatrixType&     matrix,
                const MeshType& mesh,
                const DOF&      dof,
                const BCBase&   boundaryCond,
-               CurrentBoundaryFE&    currentBdFE,
+               CurrentFEManifold&    currentBdFE,
                const DataType& time,
                UInt            offset)
 
@@ -2418,7 +2384,7 @@ bcFluxManageMatrix ( MatrixType&     matrix,
                      const MeshType& mesh,
                      const DOF&      dof,
                      const BCBase&   boundaryCond,
-                     CurrentBoundaryFE&    currentBdFE,
+                     CurrentFEManifold&    currentBdFE,
                      const DataType& /*time*/,
                      UInt            offset )
 {
@@ -2428,7 +2394,7 @@ bcFluxManageMatrix ( MatrixType&     matrix,
     }
 
     // Number of local DOF in this face
-    UInt nDofF = currentBdFE.nbNode();
+    UInt nDofF = currentBdFE.nbFEDof();
 
     // Number of total scalar Dof
     UInt totalDof = dof.numTotalDof();
@@ -2450,20 +2416,20 @@ bcFluxManageMatrix ( MatrixType&     matrix,
             // Number of the current boundary face
             ibF = pId->id();
             // Updating face stuff
-            currentBdFE.updateMeasNormal ( mesh.boundaryFacet ( ibF ) );
+            currentBdFE.update ( mesh.boundaryFacet ( ibF ), UPDATE_W_ROOT_DET_METRIC | UPDATE_NORMALS );
 
             for ( ID idofF = 0; idofF < nDofF; ++idofF )
             {
-                for ( int ic = 0; ic < (int) nComp; ++ic)
+                for ( UInt ic = 0; ic < nComp; ++ic)
                 {
                     idDof = pId->boundaryLocalToGlobalMap ( idofF ) + ic * totalDof;
 
                     sum = 0.;
-                    for ( int iq = 0; iq < (int) currentBdFE.nbQuadPt(); ++iq )
+                    for ( UInt iq = 0; iq < currentBdFE.nbQuadPt(); ++iq )
                     {
-                        sum += currentBdFE.phi ( int ( idofF ), iq ) *
+                        sum += currentBdFE.phi ( idofF, iq ) *
                                currentBdFE.normal (ic , iq) *
-                               currentBdFE.weightMeas (iq);
+                               currentBdFE.wRootDetMetric (iq);
                     }
 
                     jdDof = offset;
@@ -2486,7 +2452,7 @@ bcFluxManageResidual ( VectorType&      residual,
                        const MeshType&  mesh,
                        const DOF&       dof,
                        const BCBase&    boundaryCond,
-                       CurrentBoundaryFE&    currentBdFE,
+                       CurrentFEManifold&    currentBdFE,
                        const DataType&  time,
                        UInt             offset )
 {
@@ -2520,7 +2486,7 @@ bcResistanceManage ( MatrixType& matrix,
                      const MeshType& mesh,
                      const DOF& dof,
                      const BCBase& boundaryCond,
-                     CurrentBoundaryFE& currentBdFE,
+                     CurrentFEManifold& currentBdFE,
                      const DataType& time,
                      UInt offset )
 {
@@ -2528,19 +2494,18 @@ bcResistanceManage ( MatrixType& matrix,
     bcResistanceManageVector ( rightHandSide, mesh, dof, boundaryCond, currentBdFE, time, offset );
 } //bcResistanceManage
 
-
 template <typename VectorType, typename DataType, typename MeshType>
 void
 bcResistanceManageVector ( VectorType& rightHandSide,
                            const MeshType& mesh,
                            const DOF& dof,
                            const BCBase& boundaryCond,
-                           CurrentBoundaryFE& currentBdFE,
+                           CurrentFEManifold& currentBdFE,
                            const DataType& /*time*/,
                            UInt offset )
 {
     // Number of local DOF in this face
-    UInt nDofF = currentBdFE.nbNode();
+    UInt nDofF = currentBdFE.nbFEDof();
 
     // Number of total scalar Dof
     UInt totalDof = dof.numTotalDof();
@@ -2568,7 +2533,7 @@ bcResistanceManageVector ( VectorType& rightHandSide,
             // Number of the current boundary face
             ibF = pId->id();
 
-            currentBdFE.updateMeasNormal ( mesh.boundaryFacet ( ibF ) );
+            currentBdFE.update ( mesh.boundaryFacet ( ibF ), UPDATE_W_ROOT_DET_METRIC | UPDATE_NORMALS );
 
             // Loop on total DOF per Face
             for ( ID idofF = 0; idofF < nDofF; ++idofF )
@@ -2581,7 +2546,7 @@ bcResistanceManageVector ( VectorType& rightHandSide,
                     idDof = pId->boundaryLocalToGlobalMap ( idofF ) + boundaryCond.component ( j ) * totalDof + offset;
 
                     // Loop on quadrature points
-                    for ( int l = 0; l < (int) currentBdFE.nbQuadPt(); ++l )
+                    for ( UInt iq = 0; iq < currentBdFE.nbQuadPt(); ++iq )
                     {
                         mbcb = 0;
 
@@ -2589,11 +2554,11 @@ bcResistanceManageVector ( VectorType& rightHandSide,
                         for ( ID n = 0; n < nDofF; ++n)
                         {
                             kdDof = pId->boundaryLocalToGlobalMap ( n );
-                            mbcb += boundaryCond ( kdDof, boundaryCond.component ( j ) ) * currentBdFE.phi ( int ( n ), l ) ;
+                            mbcb += boundaryCond ( kdDof, boundaryCond.component ( j ) ) * currentBdFE.phi ( n, iq ) ;
                         }
 
-                        rhsRepeated[ idDof ] +=  mbcb * currentBdFE.phi ( int ( idofF ), l ) *  currentBdFE.normal ( int ( j ), l ) *
-                                                 currentBdFE.weightMeas ( l );
+                        rhsRepeated[ idDof ] +=  mbcb * currentBdFE.phi ( idofF, iq ) *  currentBdFE.normal ( j , iq ) *
+                                                 currentBdFE.wRootDetMetric ( iq );
 
                     }
                 }
@@ -2609,14 +2574,13 @@ bcResistanceManageVector ( VectorType& rightHandSide,
     }
 } //bcResistanceManageVector
 
-
 template <typename MatrixType, typename DataType, typename MeshType>
 void
 bcResistanceManageMatrix ( MatrixType& matrix,
                            const MeshType& mesh,
                            const DOF& dof,
                            const BCBase& boundaryCond,
-                           CurrentBoundaryFE& currentBdFE,
+                           CurrentFEManifold& currentBdFE,
                            const DataType& /*time*/,
                            UInt offset )
 {
@@ -2627,7 +2591,7 @@ bcResistanceManageMatrix ( MatrixType& matrix,
     }
 
     // Number of local DOF in this face
-    UInt nDofF = currentBdFE.nbNode();
+    UInt nDofF = currentBdFE.nbFEDof();
 
     // Number of total scalar Dof
     UInt totalDof = dof.numTotalDof();
@@ -2655,7 +2619,7 @@ bcResistanceManageMatrix ( MatrixType& matrix,
             // Number of the current boundary face
             ibF = pId->id();
 
-            currentBdFE.updateMeasNormal ( mesh.boundaryFacet ( ibF ) );
+            currentBdFE.update ( mesh.boundaryFacet ( ibF ), UPDATE_W_ROOT_DET_METRIC | UPDATE_NORMALS );
 
             // Loop on total DOF per Face
             for ( ID idofF = 0; idofF < nDofF; ++idofF )
@@ -2670,9 +2634,9 @@ bcResistanceManageMatrix ( MatrixType& matrix,
                     // std::cout << "\nDOF " << idDof << " is involved in Resistance BC" << std::endl;
 
                     // Loop on quadrature points
-                    for ( int l = 0; l < (int) currentBdFE.nbQuadPt(); ++l )
+                    for ( UInt iq = 0; iq < currentBdFE.nbQuadPt(); ++iq )
                     {
-                        vv[idDof] += currentBdFE.phi ( int ( idofF), l ) *  currentBdFE.normal ( int ( j ), l ) * currentBdFE.weightMeas ( l );
+                        vv[idDof] += currentBdFE.phi ( idofF, iq ) *  currentBdFE.normal ( j , iq ) * currentBdFE.wRootDetMetric ( iq );
                     }
                 }
             }

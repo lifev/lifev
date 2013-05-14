@@ -47,9 +47,10 @@ ZeroDimensionalData::ZeroDimensionalData() :
     M_time(), M_outPutFormat ( OutPutFormat ( "20",
                                               "12",
                                               "   ",
-                                              5000 ) ), M_circuitData ( new ZeroDimensionalCircuitData )
+                                              5000 ) ), M_circuitData ( new ZeroDimensionalCircuitData ), M_venousPressure ( 0. )
 {
 }
+
 ZeroDimensionalData::~ZeroDimensionalData()
 {
     M_voltageFileStream.close();
