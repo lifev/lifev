@@ -44,7 +44,6 @@
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-pedantic"
 
 #include <Epetra_Map.h>
 #include <Epetra_Export.h>
@@ -58,10 +57,10 @@
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
-#pragma GCC diagnostic warning "-pedantic"
 
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/array/EnumMapEpetra.hpp>
+#include <lifev/core/array/MapEpetraData.hpp>
 #include <lifev/core/array/MapVector.hpp>
 
 namespace LifeV
@@ -87,6 +86,8 @@ public:
 
     typedef Epetra_Map                                            map_type;
     typedef boost::shared_ptr<map_type>                           map_ptrtype;
+
+    typedef MapEpetraData                                         mapData_Type;
 
     /* Double shared_ptr are used here to ensure that all the similar MapEpetra
        point to the same exporter/importer. If double shared_ptr were not used, a
@@ -123,6 +124,8 @@ public:
 
     MapEpetra ( std::pair<std::vector<Int>, std::vector<Int> > myGlobalElements,
                 const comm_ptrtype& commPtr );
+
+    MapEpetra ( MapEpetraData const & mapData, comm_ptrtype const& commPtr );
 
     //! Constructor
     /*

@@ -41,7 +41,6 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-pedantic"
 
 #include <Epetra_ConfigDefs.h>
 #include <EpetraExt_DistArray.h>
@@ -55,7 +54,6 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
-#pragma GCC diagnostic warning "-pedantic"
 
 #ifndef HAVE_HDF5
 
@@ -1030,13 +1028,13 @@ void ExporterHDF5<MeshType>::writeGeometry()
     UInt numberOfPoints = MeshType::elementShape_Type::S_numPoints;
 
     std::vector<Int> elementList;
-    UInt ownedElements = this->M_mesh->elementList().countElementsWithFlag ( EntityFlags::OWNED, &Flag::testOneSet );
+    UInt ownedElements = this->M_mesh->elementList().countElementsWithFlag ( EntityFlags::GHOST, &Flag::testOneNotSet );
     elementList.reserve ( ownedElements * numberOfPoints );
     UInt elementCount = 0;
     for ( ID i = 0; i < this->M_mesh->numElements(); ++i )
     {
         typename MeshType::element_Type const& element (this->M_mesh->element (i) );
-        if ( Flag::testOneSet ( element.flag(), EntityFlags::OWNED ) )
+        if ( element.isOwned() )
         {
             UInt lid = elementCount * numberOfPoints;
             for (ID j = 0; j < numberOfPoints; ++j, ++lid)
@@ -1057,7 +1055,7 @@ void ExporterHDF5<MeshType>::writeGeometry()
     for (ID i = 0; i < this->M_mesh->numElements(); ++i)
     {
         typename MeshType::element_Type const& element (this->M_mesh->element (i) );
-        if ( Flag::testOneSet ( element.flag(), EntityFlags::OWNED ) )
+        if ( element.isOwned() )
         {
             UInt lid = elementCount * numberOfPoints;
             for (ID j = 0; j < numberOfPoints; ++j, ++lid)
@@ -1144,7 +1142,7 @@ void ExporterHDF5<MeshType>::writeGeometry()
             point = this->M_mesh->meshTransformer().pointInitial (i);
         }
 
-        if ( Flag::testOneSet ( point.flag(), EntityFlags::OWNED ) )
+        if ( point.isOwned() )
         {
 
             gid = point.id();

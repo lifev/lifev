@@ -196,7 +196,7 @@ public:
     ADRAssembler();
 
     //! Destructor
-    virtual ~ADRAssembler() {};
+    virtual ~ADRAssembler() {}
 
     //@}
 

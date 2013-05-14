@@ -67,18 +67,18 @@ int main ( int argc, char* argv[] )
 
     // Loading data
     GetPot command_line (argc, argv);
-    GetPot dataFile ( command_line.follow ("data", 2, "-f", "--file" ) );
+    GetPot dataFile ( command_line.follow ("data_neighborsRadius", 2, "-f", "--file" ) );
 
     // Loading mesh
     MeshData meshData;
     meshData.setup (dataFile, "space_discretization");
 
-    boost::shared_ptr<mesh_Type> fullMeshPtr ( new mesh_Type ( Comm ) );
+    meshPtr_Type fullMeshPtr ( new mesh_Type ( Comm ) );
     readMesh (*fullMeshPtr, meshData);
 
     // Mesh partitioning
     MeshPartitioner<mesh_Type> meshPart;
-    boost::shared_ptr<mesh_Type> localMeshPtr;
+    meshPtr_Type localMeshPtr;
 
     // Partitioning the mesh with a number of overlapping regions equal to leveloverlap
     int levelOverlap = 5;

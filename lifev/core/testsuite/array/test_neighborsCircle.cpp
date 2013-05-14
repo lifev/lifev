@@ -60,7 +60,7 @@ int main ( int argc, char* argv[] )
 #endif
 
     GetPot command_line (argc, argv);
-    GetPot dataFile ( command_line.follow ("data", 2, "-f", "--file" ) );
+    GetPot dataFile ( command_line.follow ("data_neighborsCircle", 2, "-f", "--file" ) );
 
     typedef LinearTriangle                     geoElement_Type;
     typedef RegionMesh < geoElement_Type >     mesh_Type;
@@ -71,11 +71,11 @@ int main ( int argc, char* argv[] )
     MeshData meshData;
     meshData.setup (dataFile, "space_discretization");
 
-    boost::shared_ptr<mesh_Type> fullMeshPtr ( new mesh_Type ( Comm ) );
+    meshPtr_Type fullMeshPtr ( new mesh_Type ( Comm ) );
     readMesh (*fullMeshPtr, meshData);
 
     MeshPartitioner<mesh_Type> meshPart;
-    boost::shared_ptr<mesh_Type> localMeshPtr;
+    meshPtr_Type localMeshPtr;
 
     // Partitioning the mesh with a number of overlapping regions equal to leveloverlap
     int levelOverlap = 0;

@@ -752,7 +752,6 @@ void PartitionIO<MeshType>::writeElements()
                             currentOffset, &M_uintBuffer[0]);
         }
     }
-
     M_HDF5IO.closeTable ("elements");
 }
 
