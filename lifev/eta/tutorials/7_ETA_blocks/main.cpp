@@ -140,7 +140,11 @@ int main ( int argc, char** argv )
                     2.0,   2.0,   2.0,
                     -1.0,  -1.0,  -1.0);
 
-    MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, Comm);
+    boost::shared_ptr< mesh_Type > meshPtr;
+    {
+        MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, Comm);
+        meshPtr = meshPart.meshPartition();
+    }
 
     fullMeshPtr.reset();
 
@@ -165,13 +169,13 @@ int main ( int argc, char** argv )
 
     std::string uOrder ("P2");
     boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > uSpace
-    ( new FESpace< mesh_Type, MapEpetra > (meshPart, uOrder, 1, Comm) );
+    ( new FESpace< mesh_Type, MapEpetra > (meshPtr, uOrder, 1, Comm) );
 
     boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 3 > > ETuSpace
-    ( new ETFESpace< mesh_Type, MapEpetra, 3, 3 > (meshPart, &feTetraP2, & (uSpace->fe().geoMap() ), Comm) );
+    ( new ETFESpace< mesh_Type, MapEpetra, 3, 3 > (meshPtr, &feTetraP2, & (uSpace->fe().geoMap() ), Comm) );
 
     boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 1 > > ETpSpace
-    ( new ETFESpace< mesh_Type, MapEpetra, 3, 1 > (meshPart, &feTetraP1, & (uSpace->fe().geoMap() ), Comm) );
+    ( new ETFESpace< mesh_Type, MapEpetra, 3, 1 > (meshPtr, &feTetraP1, & (uSpace->fe().geoMap() ), Comm) );
 
     if (verbose)
     {

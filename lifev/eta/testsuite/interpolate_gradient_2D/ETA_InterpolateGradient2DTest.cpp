@@ -114,8 +114,11 @@ ETA_InterpolateGradient2DTest::run()
                     2.0,   2.0,
                     -1.0,  -1.0);
 
-    MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, M_comm);
-    boost::shared_ptr< mesh_Type > meshPtr (meshPart.meshPartition() );
+    boost::shared_ptr< mesh_Type > meshPtr;
+    {
+        MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, M_comm);
+        meshPtr = meshPart.meshPartition();
+    }
 
     fullMeshPtr.reset();
 
@@ -155,7 +158,7 @@ ETA_InterpolateGradient2DTest::run()
     }
 
     boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 2, 2 > > ETuSpace
-    ( new ETFESpace< mesh_Type, MapEpetra, 2, 2 > (meshPart, & (uSpace->refFE() ), & (uSpace->fe().geoMap() ), M_comm) );
+    ( new ETFESpace< mesh_Type, MapEpetra, 2, 2 > (meshPtr, & (uSpace->refFE() ), & (uSpace->fe().geoMap() ), M_comm) );
 
     if (verbose)
     {
