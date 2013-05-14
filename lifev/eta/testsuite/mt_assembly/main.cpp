@@ -86,23 +86,25 @@ int main ( int argc, char** argv )
 
     const bool verbose (Comm->MyPID() == 0);
 
-    if (argc != 5) {
-    	if (verbose) {
-    		std::cout << "Please run program as " << argv[0]
-					  << " " << "<num_elements> " << "<num_threads>"
-					  << " " << "<scheduler> " << "<chunkSize>\n";
-    		return EXIT_FAILURE;
-    	}
+    if (argc != 5)
+    {
+        if (verbose)
+        {
+            std::cout << "Please run program as " << argv[0]
+                      << " " << "<num_elements> " << "<num_threads>"
+                      << " " << "<scheduler> " << "<chunkSize>\n";
+            return EXIT_FAILURE;
+        }
     }
 
     OpenMPParameters ompParams;
 
-    const UInt Nelements = std::atoi(argv[1]);
-    ompParams.numThreads = std::atoi(argv[2]);
+    const UInt Nelements = std::atoi (argv[1]);
+    ompParams.numThreads = std::atoi (argv[2]);
 #ifdef _OPENMP
-    ompParams.scheduler = static_cast<omp_sched_t>(std::atoi(argv[3]));
+    ompParams.scheduler = static_cast<omp_sched_t> (std::atoi (argv[3]) );
 #endif
-    ompParams.chunkSize = std::atoi(argv[4]);
+    ompParams.chunkSize = std::atoi (argv[4]);
 
     if (verbose)
     {
@@ -116,7 +118,7 @@ int main ( int argc, char** argv )
                     2.0,   2.0,   2.0,
                     -1.0,  -1.0,  -1.0);
 
-//    MeshPartitioner< mesh_Type >  meshPart (fullMeshPtr, Comm);
+    //    MeshPartitioner< mesh_Type >  meshPart (fullMeshPtr, Comm);
     MeshPartitioner< mesh_Type >   meshPart;
     meshPart.setPartitionOverlap ( 1 );
     meshPart.doPartition ( fullMeshPtr, Comm );
@@ -160,7 +162,7 @@ int main ( int argc, char** argv )
         using namespace ExpressionAssembly;
 
         // We first build a static graph for our problem matrix
-        matrixGraph.reset(new Epetra_FECrsGraph(Copy, *(uSpace->map().map(Unique)), 0, true));
+        matrixGraph.reset (new Epetra_FECrsGraph (Copy, * (uSpace->map().map (Unique) ), 0, true) );
 
         buildGraph ( elements (uSpace->mesh() ),
                      quadRuleTetra4pt,
@@ -187,7 +189,7 @@ int main ( int argc, char** argv )
         using namespace ExpressionAssembly;
 
         // We build the system matrix using the precomputed graph
-        closedSystemMatrix.reset(new matrix_Type ( uSpace->map(), *matrixGraph , true) );
+        closedSystemMatrix.reset (new matrix_Type ( uSpace->map(), *matrixGraph , true) );
         *closedSystemMatrix *= 0.0;
 
         // Finally, we perform the FE assembly, which should be faster with

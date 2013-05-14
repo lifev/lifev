@@ -104,7 +104,7 @@ integrate ( const RequestLoopElement<MeshType>& request,
 {
     return IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType>
            (request.mesh(), quadrature, testSpace, solutionSpace, expression,
-           	ompParams);
+            ompParams);
 }
 
 //! Integrate function for vectorial expressions

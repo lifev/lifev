@@ -121,21 +121,21 @@ public:
     }
 
     //! Assembly procedure for a matrix or a block of a matrix
-     /*!
-     This method puts the values stored in this elemental matrix into the global
-     matrix passed as argument, using the positions given in the global indices
-     stored.
-     The method is used when the global matrix is closed
-     */
-     // Method defined in class to allow compiler optimization
-     // as this class is used repeatedly during the assembly
-     template <typename MatrixType>
-     void pushToClosedGlobal (MatrixType& mat)
-     {
-         mat.sumIntoCoefficients ( M_nbRow, M_nbColumn,
-                                   rowIndices(), columnIndices(),
-                                   M_rawData, Epetra_FECrsMatrix::ROW_MAJOR);
-     }
+    /*!
+    This method puts the values stored in this elemental matrix into the global
+    matrix passed as argument, using the positions given in the global indices
+    stored.
+    The method is used when the global matrix is closed
+    */
+    // Method defined in class to allow compiler optimization
+    // as this class is used repeatedly during the assembly
+    template <typename MatrixType>
+    void pushToClosedGlobal (MatrixType& mat)
+    {
+        mat.sumIntoCoefficients ( M_nbRow, M_nbColumn,
+                                  rowIndices(), columnIndices(),
+                                  M_rawData, Epetra_FECrsMatrix::ROW_MAJOR);
+    }
 
     //! Assembly procedure for a matrix or a block of a matrix passed in a shared_ptr
     /*!

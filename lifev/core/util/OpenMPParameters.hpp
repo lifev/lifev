@@ -46,33 +46,33 @@ namespace LifeV
 //! OpenMP parameter class
 struct OpenMPParameters
 {
-	// Default constructor
-	OpenMPParameters();
+    // Default constructor
+    OpenMPParameters();
 
-	// Apply OpenMP parameters
-	void apply();
+    // Apply OpenMP parameters
+    void apply();
 
-	// Data
-	int numThreads;
+    // Data
+    int numThreads;
 #ifdef _OPENMP
-	omp_sched_t scheduler;
+    omp_sched_t scheduler;
 #endif
-	int chunkSize;
+    int chunkSize;
 };
 
 OpenMPParameters::OpenMPParameters()
-	: numThreads(1), chunkSize(0)
+    : numThreads (1), chunkSize (0)
 {
 #ifdef _OPENMP
-	scheduler = omp_sched_static;
+    scheduler = omp_sched_static;
 #endif
 }
 
 inline void OpenMPParameters::apply()
 {
 #ifdef _OPENMP
-	omp_set_num_threads(numThreads);
-	omp_set_schedule(scheduler, chunkSize);
+    omp_set_num_threads (numThreads);
+    omp_set_schedule (scheduler, chunkSize);
 #endif
 }
 

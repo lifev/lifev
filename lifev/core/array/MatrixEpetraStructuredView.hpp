@@ -169,7 +169,7 @@ public:
     //! Return the fill-complete status of the inner Epetra_FECrsMatrix
     bool filled() const
     {
-    	return M_matrix->matrixPtr()->Filled();
+        return M_matrix->matrixPtr()->Filled();
     }
 
     //! Return the pointer of the full matrix
