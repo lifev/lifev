@@ -193,16 +193,19 @@ Real bcNonZeroSecondOrderExponential (const Real& /*t*/, const Real&  /*X*/, con
 //----------------------------------------------Fibers Directions--------------
 Real Family1 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
 {
+    Real theta = ( PI / 6.0 );
+    Real thetaChangeOfVariable = std::atan( y / x );
+
     switch (i)
     {
         case 0:
-            return std::cos( PI / 2.0 );
+ 	    return - std::sin( thetaChangeOfVariable ) * std::sin( theta );
             break;
         case 1:
-            return std::sin( PI / 2.0 );
+            return   std::cos( thetaChangeOfVariable ) * std::sin( theta );
             break;
         case 2:
-            return 0.0;
+  	    return std::cos( theta );
             break;
         default:
             ERROR_MSG ("This entrie is not allowed: ud_functions.hpp");
@@ -213,17 +216,19 @@ Real Family1 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, c
 
 Real Family2 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
 {
+    Real theta = ( - PI / 6.0 );
+    Real thetaChangeOfVariable = std::atan( y / x );
 
     switch (i)
     {
         case 0:
-            return std::cos( - PI / 2.0 );
+            return - std::sin( thetaChangeOfVariable ) * std::sin( theta );
             break;
         case 1:
-            return std::sin( - PI / 2.0 );
+            return   std::cos( thetaChangeOfVariable ) * std::sin( theta );
             break;
         case 2:
-            return 0.0;
+            return   std::cos( theta );
             break;
         default:
             ERROR_MSG ("This entrie is not allowed: ud_functions.hpp");
