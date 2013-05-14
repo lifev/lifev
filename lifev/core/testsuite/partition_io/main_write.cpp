@@ -55,6 +55,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/filter/GetPot.hpp>
+#include <lifev/core/mesh/MeshPartitioner.hpp>
 #include <lifev/core/mesh/MeshPartitionTool.hpp>
 #include <lifev/core/mesh/GraphCutterParMETIS.hpp>
 #include <lifev/core/mesh/MeshPartBuilder.hpp>
@@ -123,23 +124,11 @@ int main (int argc, char** argv)
     fullMeshPtr.reset();
 
     // Write mesh parts to HDF5 container
-    if (! ioClass.compare ("old") )
-    {
-        ExporterHDF5Mesh3D<mesh_Type> HDF5Output (dataFile,
-                                                  meshPart.meshPartition(),
-                                                  partsFileName,
-                                                  comm->MyPID() );
-        HDF5Output.addPartitionGraph (meshPart.elementDomains(), comm);
-        HDF5Output.addMeshPartitionAll (meshPart.meshPartitions(), comm);
-        HDF5Output.postProcess (0);
-        HDF5Output.closeFile();
-    }
-    else
     {
         boost::shared_ptr<Epetra_MpiComm> mpiComm =
             boost::dynamic_pointer_cast<Epetra_MpiComm> (comm);
         PartitionIO<mesh_Type> partitionIO (partsFileName, mpiComm);
-        partitionIO.write (meshPart.meshPartitions() );
+        partitionIO.write (meshCutter.allMeshParts() );
     }
 
     MPI_Finalize();
