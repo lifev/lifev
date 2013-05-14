@@ -186,8 +186,8 @@ ETA_ADR2DTest::run()
 
 
     // ---------------------------------------------------------------
-    // We interpolate then the advection function of the mesh at hand.
-    // This is performed with the classical FESpace only.
+    // We then interpolate the advection function.
+    // This is can only be performed with the classical FESpace.
     // ---------------------------------------------------------------
 
     if (verbose)
@@ -228,6 +228,7 @@ ETA_ADR2DTest::run()
 
     // ---------------------------------------------------------------
     // Definition of the RHS
+    // ---------------------------------------------------------------
 
     if (verbose)
     {

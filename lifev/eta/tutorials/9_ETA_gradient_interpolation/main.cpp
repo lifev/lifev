@@ -23,25 +23,62 @@
 *******************************************************************************
 */
 //@HEADER
-/**
-   @file ETA_InterpolateGradient2DTest.cpp
-   @author L. Pasquale <luca.pasquale@mail.polimi.it>
-   @date 2012-11-20
+
+/*!
+    @file
+    @brief Tutorial for gradient interpolation.
+
+    @author Luca Pasquale <luca.pasquale@mail.polimi.it>
+    @date 2013-05
+
+    In this tutorial we use two expressions available when
+    integrating with Expression Templates:
+    - interpoaltion of the gradient of a given function
+    - multiplication by a MatrixSmall
+    We do this by multiplying the gradient by the identity matrix
+    (i.e. we're integrating the divergence)
+    
+    Tutorials that should be read before: 1,3
+
  */
 
-// ===================================================
-//! Includes
-// ===================================================
+// ---------------------------------------------------------------
+// We reuse the same files as in the previous tutorial. We add the
+// chrono to measure the timings.
+// ---------------------------------------------------------------
 
-#include "ETA_InterpolateGradient2DTest.hpp"
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+#include <Epetra_ConfigDefs.h>
+#ifdef EPETRA_MPI
+#include <mpi.h>
+#include <Epetra_MpiComm.h>
+#else
+#include <Epetra_SerialComm.h>
+#endif
+
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
+
+#include <lifev/core/LifeV.hpp>
+
+#include <lifev/core/mesh/MeshPartitioner.hpp>
+#include <lifev/core/mesh/RegionMesh3DStructured.hpp>
+#include <lifev/core/mesh/RegionMesh.hpp>
+
+#include <lifev/core/array/MatrixEpetra.hpp>
+#include <lifev/core/array/VectorEpetra.hpp>
 
 #include <lifev/eta/fem/ETFESpace.hpp>
 #include <lifev/eta/expression/Integrate.hpp>
 
+#include <lifev/core/fem/FESpace.hpp>
 
-// ===================================================
-//! Namespaces & define
-// ===================================================
+#include <lifev/core/util/LifeChrono.hpp>
+
+#include <boost/shared_ptr.hpp>
+
 
 // ---------------------------------------------------------------
 // We work in the LifeV namespace and define the mesh, matrix and
@@ -50,9 +87,10 @@
 
 using namespace LifeV;
 
-typedef RegionMesh<LinearTriangle> mesh_Type;
+typedef RegionMesh<LinearTetra> mesh_Type;
 typedef MatrixEpetra<Real> matrix_Type;
 typedef VectorEpetra vector_Type;
+
 
 // ===================================================
 //!                   Functions
@@ -60,46 +98,41 @@ typedef VectorEpetra vector_Type;
 
 // ---------------------------------------------------------------
 // We define a function whose gradient is
-// (1 0)
-// (0 2)
+// (1 0 0)
+// (0 5 0)
+// (0 0 2)
 // ---------------------------------------------------------------
 
-Real uFct ( const Real& /* t */, const Real&  x , const Real&  y , const Real& /* z */, const ID& i )
+Real uFct ( const Real& /* t */, const Real&  x , const Real&  y , const Real& z , const ID& i )
 {
     if (i == 0)
     {
         return x;
     }
-    return 2 * y;
+    else if (i == 1)
+    {
+        return 5 * y;
+    }
+    return 2 * z;
 }
 
-// ===================================================
-//!                  Constructors
-// ===================================================
+// ---------------------------------------------------------------
+// As usual, we start by the MPI communicator, the definition of
+// the mesh and its partitioning.
+// ---------------------------------------------------------------
 
-ETA_InterpolateGradient2DTest::ETA_InterpolateGradient2DTest ()
+int main ( int argc, char** argv )
 {
 
-#ifdef EPETRA_MPI
-    M_comm.reset ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
+#ifdef HAVE_MPI
+    MPI_Init (&argc, &argv);
+    boost::shared_ptr<Epetra_Comm> Comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
 #else
-    M_comm.reset ( new Epetra_SerialComm() );
+    boost::shared_ptr<Epetra_Comm> Comm (new Epetra_SerialComm);
 #endif
 
-}
+    const bool verbose (Comm->MyPID() == 0);
 
-// ===================================================
-//!                      Methods
-// ===================================================
-
-Real
-ETA_InterpolateGradient2DTest::run()
-{
-    bool verbose (M_comm->MyPID() == 0);
-    // ---------------------------------------------------------------
-    // We define the mesh and parition it. We use the domain
-    // (-1,1)x(-1,1) and a structured mesh.
-    // ---------------------------------------------------------------
 
     if (verbose)
     {
@@ -110,11 +143,11 @@ ETA_InterpolateGradient2DTest::run()
 
     boost::shared_ptr< mesh_Type > fullMeshPtr (new mesh_Type);
 
-    regularMesh2D ( *fullMeshPtr, 0, Nelements, Nelements, false,
-                    2.0,   2.0,
-                    -1.0,  -1.0);
+    regularMesh3D ( *fullMeshPtr, 1, Nelements, Nelements, Nelements, false,
+                    2.0,   2.0,   2.0,
+                    -1.0,  -1.0,  -1.0);
 
-    MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, M_comm);
+    MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, Comm);
     boost::shared_ptr< mesh_Type > meshPtr (meshPart.meshPartition() );
 
     fullMeshPtr.reset();
@@ -126,8 +159,9 @@ ETA_InterpolateGradient2DTest::run()
 
 
     // ---------------------------------------------------------------
-    // We start by defining the finite element spaces. We still need
-    // a FESpace because ETFESpace is still lacking some methods
+    // We define then the ETFESpace, that we suppose scalar in this
+    // case. We also need a standard FESpace to perform the
+    // interpolation.
     // ---------------------------------------------------------------
 
     if (verbose)
@@ -138,7 +172,7 @@ ETA_InterpolateGradient2DTest::run()
     std::string uOrder ("P1");
 
     boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > uSpace
-    ( new FESpace< mesh_Type, MapEpetra > (meshPtr, uOrder, 2, M_comm) );
+    ( new FESpace< mesh_Type, MapEpetra > (meshPtr, uOrder, 3, Comm) );
 
     if (verbose)
     {
@@ -154,8 +188,8 @@ ETA_InterpolateGradient2DTest::run()
         std::cout << " -- Building ETFESpaces ... " << std::flush;
     }
 
-    boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 2, 2 > > ETuSpace
-    ( new ETFESpace< mesh_Type, MapEpetra, 2, 2 > (meshPart, & (uSpace->refFE() ), & (uSpace->fe().geoMap() ), M_comm) );
+    boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 3 > > ETuSpace
+    ( new ETFESpace< mesh_Type, MapEpetra, 3, 3 > (meshPtr, & (uSpace->refFE() ), & (uSpace->fe().geoMap() ), Comm) );
 
     if (verbose)
     {
@@ -165,7 +199,6 @@ ETA_InterpolateGradient2DTest::run()
     {
         std::cout << " ---> Dofs: " << ETuSpace->dof().numTotalDof() << std::endl;
     }
-
 
     // ---------------------------------------------------------------
     // We interpolate then the function.
@@ -189,14 +222,15 @@ ETA_InterpolateGradient2DTest::run()
 
     // ---------------------------------------------------------------
     // We build the MatrixSmall used to extract the trace
-    // and a variable used to store the result of the integration
+    // and a variable used to store the result of the integration.
+    // We only need to specify the diagonal elements of the MatrixSmall
+    // because its default constructor sets all the components to 0
     // ---------------------------------------------------------------
 
-    MatrixSmall<2, 2> identityMatrix;
+    MatrixSmall<3, 3> identityMatrix;
     identityMatrix (0, 0) = 1;
-    identityMatrix (0, 1) = 0;
-    identityMatrix (1, 0) = 0;
     identityMatrix (1, 1) = 1;
+    identityMatrix (2, 2) = 1;
 
     Real ETintegral (0);
 
@@ -206,8 +240,8 @@ ETA_InterpolateGradient2DTest::run()
     }
 
     // ---------------------------------------------------------------
-    // We integrate on the domain the gradient trace (1+2 in this case)
-    //
+    // We integrate on the domain the trace of the gradient
+    // (1+5+2 in this case)
     // ---------------------------------------------------------------
 
     LifeChrono ETChrono;
@@ -254,8 +288,8 @@ ETA_InterpolateGradient2DTest::run()
 
     Real globalIntegral (0.0);
 
-    M_comm->Barrier();
-    M_comm->SumAll (&ETintegral, &globalIntegral, 1);
+    Comm->Barrier();
+    Comm->SumAll (&ETintegral, &globalIntegral, 1);
 
     if (verbose)
     {
@@ -264,7 +298,7 @@ ETA_InterpolateGradient2DTest::run()
 
     // ---------------------------------------------------------------
     // We now compute the error as the difference between the integral
-    // computed and the exact value expected ( (1+2)*4 = 12 )
+    // computed and the exact value expected ( (1+5+2)*8 = 64 )
     // ---------------------------------------------------------------
 
     if (verbose)
@@ -272,7 +306,7 @@ ETA_InterpolateGradient2DTest::run()
         std::cout << " -- Computing the error ... " << std::flush;
     }
 
-    Real error = std::abs (globalIntegral - 12.0);
+    Real error = std::abs (globalIntegral - 64.0);
 
     if (verbose)
     {
@@ -284,6 +318,18 @@ ETA_InterpolateGradient2DTest::run()
         std::cout << " done ! " << std::endl;
     }
 
-    return error;
 
-} // run
+#ifdef HAVE_MPI
+    MPI_Finalize();
+#endif
+
+    Real tolerance (1e-10);
+
+    if (error < tolerance)
+    {
+        return ( EXIT_SUCCESS );
+    }
+    return ( EXIT_FAILURE );
+}
+
+
