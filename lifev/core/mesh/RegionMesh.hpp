@@ -2946,7 +2946,7 @@ RegionMesh<GeoShapeType, MCType>::addVolume ( element_Type const& v )
 {
     volumeList.push_back ( v );
     volume_Type& thisVolume (volumeList.back() );
-    thisVolume.setFlag ( EntityFlags::OWNED );
+    thisVolume.setFlag ( EntityFlags::DEFAULT );
     thisVolume.setLocalId ( volumeList.size() - 1 );
     return thisVolume;
 }
@@ -3046,7 +3046,7 @@ RegionMesh<GeoShapeType, MCType>::addFace ( face_Type const& f )
 {
     faceList.push_back ( f );
     face_Type& thisFace = faceList.back();
-    thisFace.setFlag ( EntityFlags::OWNED );
+    thisFace.setFlag ( EntityFlags::DEFAULT );
     thisFace.setLocalId ( faceList.size() - 1 );
     return thisFace;
 }
@@ -3204,7 +3204,7 @@ RegionMesh<GeoShapeType, MCType>::addEdge ( edge_Type const& f)
 {
     edgeList.push_back ( f );
     edge_Type& thisEdge = edgeList.back();
-    thisEdge.setFlag ( EntityFlags::OWNED );
+    thisEdge.setFlag ( EntityFlags::DEFAULT );
     thisEdge.setLocalId ( edgeList.size() - 1 );
     return thisEdge;
 }
@@ -3386,7 +3386,7 @@ RegionMesh<GeoShapeType, MCType>::addPoint ( point_Type const& p)
 
     pointList.push_back ( p );
     point_Type& thisPoint ( pointList.back() );
-    thisPoint.setFlag ( EntityFlags::OWNED );
+    thisPoint.setFlag ( EntityFlags::DEFAULT );
     thisPoint.setLocalId ( pointList.size() - 1 );
     //todo This is bug prone!
     if ( thisPoint.boundary() )
