@@ -153,7 +153,11 @@ Real bcNonZero (const Real& t, const Real&  X, const Real& Y, const Real& Z, con
 {
   //Real pressure(200000);
 
-  return 500000;
+  Real top = 1000000;
+
+  return top * Y;
+
+
 	// Real highestPressure(6.666e+6);
 	// Real totalTime = 20.0;
 	// Real halfTime = totalTime / 2.0;
@@ -193,19 +197,28 @@ Real bcNonZeroSecondOrderExponential (const Real& /*t*/, const Real&  /*X*/, con
 //----------------------------------------------Fibers Directions--------------
 Real Family1 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
 {
-    Real theta = ( PI / 6.0 );
+    Real theta = ( PI / 2.0 );
     Real thetaChangeOfVariable = std::atan( y / x );
 
     switch (i)
     {
         case 0:
- 	    return - std::sin( thetaChangeOfVariable ) * std::sin( theta );
+	    // Tube 
+ 	    // return - std::sin( thetaChangeOfVariable ) * std::sin( theta );
+	    // Cube 
+  	    return 1.0;
             break;
         case 1:
-            return   std::cos( thetaChangeOfVariable ) * std::sin( theta );
+	    // Tube
+            // return   std::cos( thetaChangeOfVariable ) * std::sin( theta );
+	    // Cube 
+	    return  0.0;
             break;
         case 2:
-  	    return std::cos( theta );
+	    // Tube
+  	    //  return std::cos( theta );
+	    // Cube 
+	    return 0.0;
             break;
         default:
             ERROR_MSG ("This entrie is not allowed: ud_functions.hpp");
@@ -216,19 +229,28 @@ Real Family1 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, c
 
 Real Family2 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
 {
-    Real theta = ( - PI / 6.0 );
+    Real theta = ( - PI / 2.0 );
     Real thetaChangeOfVariable = std::atan( y / x );
 
     switch (i)
     {
         case 0:
-            return - std::sin( thetaChangeOfVariable ) * std::sin( theta );
+	    // Tube
+            // return - std::sin( thetaChangeOfVariable ) * std::sin( theta );
+	    // Cube 
+  	    return std::cos( theta );
             break;
         case 1:
-            return   std::cos( thetaChangeOfVariable ) * std::sin( theta );
+	    // Tube
+            // return   std::cos( thetaChangeOfVariable ) * std::sin( theta );
+	    // Cube
+	    return  std::sin( theta );
             break;
         case 2:
-            return   std::cos( theta );
+	    // Tube
+            // return   std::cos( theta );
+	    // Cube
+	    return 0.0;
             break;
         default:
             ERROR_MSG ("This entrie is not allowed: ud_functions.hpp");

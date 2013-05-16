@@ -316,27 +316,27 @@ Structure::run3d()
     //! =================================================================================
     //! BC for StructuredCube4_test_structuralsolver.mesh
     //! =================================================================================
-    // BCh->addBC ("EdgesIn",      20,  Natural,   Component, nonZero, compx);
-    // BCh->addBC ("EdgesIn",      40,  Essential, Component, zero,    compx);
-
-    // //! Symmetry BC
-    // BCh->addBC ("EdgesIn",      500,   EssentialVertices, Component, zero, compxz);
-    // BCh->addBC ("EdgesIn",      300,   EssentialVertices, Component, zero, compxy);
-    // BCh->addBC ("EdgesIn",      800,   EssentialVertices, Component, zero, compyz);
-    // BCh->addBC ("EdgesIn",      1000,  EssentialVertices,  Full, zero, 3);
-
-    // BCh->addBC ("EdgesIn",      7, Essential, Component , zero, compy);
-    // BCh->addBC ("EdgesIn",      3, Essential, Component , zero, compz);
-    //! =================================================================================
-
-    BCh->addBC ("EdgesIn",      60,  Essential,  Component, zero, compz);
-    BCh->addBC ("EdgesIn",      70,  Essential,  Component, zero, compz);
+    BCh->addBC ("EdgesIn",      20,  Natural,   Component, nonZero, compx);
+    BCh->addBC ("EdgesIn",      40,  Essential, Component, zero,    compx);
 
     //! Symmetry BC
-    BCh->addBC ("EdgesIn",      50,   Essential, Component, zero, compx);
-    BCh->addBC ("EdgesIn",      30,   Essential, Component, zero, compy);
-    BCh->addBC ("EdgesIn",      40,   Natural, Full, zero, 3);
-    BCh->addBC ("EdgesIn",      200,  Natural,  Full, nonZero, 3);
+    BCh->addBC ("EdgesIn",      500,   EssentialVertices, Component, zero, compxz);
+    BCh->addBC ("EdgesIn",      300,   EssentialVertices, Component, zero, compxy);
+    BCh->addBC ("EdgesIn",      800,   EssentialVertices, Component, zero, compyz);
+    BCh->addBC ("EdgesIn",      1000,  EssentialVertices,  Full, zero, 3);
+
+    BCh->addBC ("EdgesIn",      7, Essential, Component , zero, compy);
+    BCh->addBC ("EdgesIn",      3, Essential, Component , zero, compz);
+    //! =================================================================================
+
+    // BCh->addBC ("EdgesIn",      60,  Essential,  Component, zero, compz);
+    // BCh->addBC ("EdgesIn",      70,  Essential,  Component, zero, compz);
+
+    // //! Symmetry BC
+    // BCh->addBC ("EdgesIn",      50,   Essential, Component, zero, compx);
+    // BCh->addBC ("EdgesIn",      30,   Essential, Component, zero, compy);
+    // BCh->addBC ("EdgesIn",      40,   Natural, Full, zero, 3);
+    // BCh->addBC ("EdgesIn",      200,  Natural,  Full, nonZero, 3);
 
     //! 1. Constructor of the structuralSolver
     StructuralOperator< RegionMesh<LinearTetra> > solid;
@@ -481,10 +481,12 @@ Structure::run3d()
     vectorPtr_Type solidDisp ( new vector_Type (solid.displacement(),  exporter->mapType() ) );
     vectorPtr_Type solidVel  ( new vector_Type (solid.displacement(),  exporter->mapType() ) );
     vectorPtr_Type solidAcc  ( new vector_Type (solid.displacement(),  exporter->mapType() ) );
+    vectorPtr_Type rhsVector ( new vector_Type (solid.displacement(),  exporter->mapType() ) );
 
     exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "displacement", dFESpace, solidDisp, UInt (0) );
     exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "velocity",     dFESpace, solidVel,  UInt (0) );
     exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "acceleration", dFESpace, solidAcc,  UInt (0) );
+    exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "forcingTerm", dFESpace, rhsVector,  UInt (0) );
 
     // Adding the fibers vectors
     // Setting the vector of fibers functions
@@ -590,6 +592,7 @@ Structure::run3d()
         *solidDisp = solid.displacement();
         *solidVel  = timeAdvance->firstDerivative();
         *solidAcc  = timeAdvance->secondDerivative();
+	*rhsVector = solid.rhsCopy(); 
 
         exporter->postProcess ( dataStructure->dataTime()->time() );
 

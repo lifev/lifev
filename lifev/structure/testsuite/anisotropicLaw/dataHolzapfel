@@ -40,9 +40,9 @@ solidTypeIsotropic 	= neoHookean		# linearVenantKirchhoff / nonLinearVenantKirch
 solidTypeAnisotropic = holzapfel
 
 [./fibers]
-numberFamilies  = 2
-stiffness       = '2.684564e+6 2.684564e+6'
-nonlinearity    = '1.0 1.0'
+numberFamilies  = 1
+stiffness       = '2.684564e+6'
+nonlinearity    = '1.0'
 smoothness      = 1000
 [./]
 
