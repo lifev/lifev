@@ -239,7 +239,8 @@ void MeshPartitionTool < MeshType,
     if (! offlineMode)
     {
         // Online partitioning
-        M_meshPart.reset (new mesh_Type);
+        M_meshPart.reset (new mesh_Type(M_comm));
+        M_meshPart->setIsPartitioned(true);
         M_meshPartBuilder->run (M_meshPart, graph, M_myPID);
 
         // Mark the partition as successful
@@ -272,6 +273,7 @@ void MeshPartitionTool < MeshType,
                 // Backup the elements of the current graph part
                 std::vector<Int> backup ( (*graph) [curPart]);
                 M_allMeshParts->at (curPart).reset (new mesh_Type);
+                M_allMeshParts->at (curPart)->setIsPartitioned(true);
                 M_meshPartBuilder->run (M_allMeshParts->at (curPart),
                                         graph,
                                         curPart);

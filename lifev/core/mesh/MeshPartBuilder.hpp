@@ -133,7 +133,7 @@ private:
       Adds nodes to the partitioned mesh object. Updates M_nBoundaryVertices,
       M_meshPartition.
     */
-    void constructVertices();
+    void constructNodes();
     //! Construct volumes
     /*!
       Adds volumes to the partitioned mesh object.
@@ -226,15 +226,15 @@ void MeshPartBuilder<MeshType>::run (const meshPtr_Type& meshPart,
 
     const std::vector<Int>& elementList ( (*graph) [partIndex]);
 
+    GhostHandler<mesh_Type> gh ( M_originalMesh, M_comm );
+    gh.fillEntityPID ( graph, M_entityPID );
     if ( M_overlap != 0)
     {
-        GhostHandler<mesh_Type> gh ( M_originalMesh, M_comm );
-        gh.fillEntityPID ( graph, M_entityPID );
         gh.ghostMapOnElementsP1 ( graph, M_entityPID[ 3 ], 1, M_partIndex );
     }
 
     constructLocalMesh (elementList);
-    constructVertices();
+    constructNodes();
     constructElements();
     constructRidges();
     constructFacets();
@@ -268,7 +268,7 @@ void MeshPartBuilder<MeshType>::constructLocalMesh (
         // cycle on element's nodes
         for (UInt ii = 0; ii < M_elementVertices; ++ii)
         {
-            inode = M_originalMesh->volume (ielem).point (ii).id();
+            inode = M_originalMesh->element (ielem).point (ii).id();
             im    = M_globalToLocalVertex.find (inode);
 
             // if the node is not yet present in the list of local nodes,
@@ -279,7 +279,7 @@ void MeshPartBuilder<MeshType>::constructLocalMesh (
                 ++count;
                 // store here the global numbering of the node
                 M_localVertices.push_back (
-                    M_originalMesh->volume (ielem).point (ii).id() );
+                    M_originalMesh->element (ielem).point (ii).id() );
             }
         }
 
@@ -287,20 +287,20 @@ void MeshPartBuilder<MeshType>::constructLocalMesh (
         for (UInt ii = 0; ii < M_elementRidges; ++ii)
         {
             // store here the global numbering of the edge
-            M_localRidges.insert (M_originalMesh->localEdgeId (ielem, ii) );
+            M_localRidges.insert (M_originalMesh->localRidgeId (ielem, ii) );
         }
 
         // cycle on element's faces
         for (UInt ii = 0; ii < M_elementFacets; ++ii)
         {
             // store here the global numbering of the face
-            M_localFacets.insert (M_originalMesh->localFaceId (ielem, ii) );
+            M_localFacets.insert (M_originalMesh->localFacetId (ielem, ii) );
         }
     }
 }
 
 template<typename MeshType>
-void MeshPartBuilder<MeshType>::constructVertices()
+void MeshPartBuilder<MeshType>::constructNodes()
 {
     UInt inode;
     std::vector<Int>::iterator it;
@@ -345,7 +345,7 @@ void MeshPartBuilder<MeshType>::constructElements()
 
     typename MeshType::element_Type* pv = 0;
 
-    M_meshPart->volumeList.reserve (M_localElements.size() );
+    M_meshPart->elementList().reserve (M_localElements.size() );
 
     // loop in the list of local elements
     // CAREFUL! in this loop inode is the global numbering of the points
@@ -353,8 +353,8 @@ void MeshPartBuilder<MeshType>::constructElements()
     for (it = M_localElements.begin();
             it != M_localElements.end(); ++it, ++count)
     {
-        pv = & (M_meshPart->addVolume() );
-        *pv = M_originalMesh->volume ( *it );
+        pv = & (M_meshPart->addElement() );
+        *pv = M_originalMesh->element ( *it );
         pv->setLocalId ( count );
 
         M_globalToLocalElement.insert (std::make_pair (pv->id(),
@@ -362,12 +362,12 @@ void MeshPartBuilder<MeshType>::constructElements()
 
         for (ID id = 0; id < M_elementVertices; ++id)
         {
-            inode = M_originalMesh->volume (*it).point (id).id();
+            inode = M_originalMesh->element (*it).point (id).id();
             // im is an iterator to a map element
             // im->first is the key (i. e. the global ID "inode")
             // im->second is the value (i. e. the local ID "count")
             im = M_globalToLocalVertex.find (inode);
-            pv->setPoint (id, M_meshPart->pointList ( (*im).second ) );
+            pv->setPoint (id, M_meshPart->point ( (*im).second ) );
         }
     }
 }
@@ -384,27 +384,27 @@ void MeshPartBuilder<MeshType>::constructRidges()
     count = 0;
 
     M_nBoundaryRidges = 0;
-    M_meshPart->edgeList.reserve (M_localRidges.size() );
+    M_meshPart->ridgeList().reserve (M_localRidges.size() );
 
     // loop in the list of local edges
     for (is = M_localRidges.begin(); is != M_localRidges.end(); ++is, ++count)
     {
         // create a boundary edge in the local mesh, if needed
-        bool boundary = (M_originalMesh->isBoundaryEdge (*is) );
+        bool boundary = (M_originalMesh->isBoundaryRidge (*is) );
         if (boundary)
         {
             // create a boundary edge in the local mesh, if needed
             ++M_nBoundaryRidges;
         }
 
-        pe = & (M_meshPart->addEdge (boundary) );
-        *pe = M_originalMesh->edge ( *is );
+        pe = & (M_meshPart->addRidge (boundary) );
+        *pe = M_originalMesh->ridge ( *is );
 
         pe->setLocalId (count);
 
         for (ID id = 0; id < 2; ++id)
         {
-            inode = M_originalMesh->edge (*is).point (id).id();
+            inode = M_originalMesh->ridge (*is).point (id).id();
             // im is an iterator to a map element
             // im->first is the key (i. e. the global ID "inode")
             // im->second is the value (i. e. the local ID "count")
@@ -427,20 +427,20 @@ void MeshPartBuilder<MeshType>::constructFacets()
     count = 0;
 
     M_nBoundaryFacets = 0;
-    M_meshPart->faceList.reserve (M_localFacets.size() );
+    M_meshPart->facetList().reserve (M_localFacets.size() );
 
     // loop in the list of local faces
     for (is = M_localFacets.begin(); is != M_localFacets.end(); ++is, ++count)
     {
         // create a boundary face in the local mesh, if needed
-        bool boundary = (M_originalMesh->isBoundaryFace (*is) );
+        bool boundary = (M_originalMesh->isBoundaryFacet (*is) );
         if (boundary)
         {
             ++M_nBoundaryFacets;
         }
 
-        Int elem1 = M_originalMesh->face (*is).firstAdjacentElementIdentity();
-        Int elem2 = M_originalMesh->face (*is).secondAdjacentElementIdentity();
+        Int elem1 = M_originalMesh->facet (*is).firstAdjacentElementIdentity();
+        Int elem2 = M_originalMesh->facet (*is).secondAdjacentElementIdentity();
 
         // find the mesh elements adjacent to the face
         im =  M_globalToLocalElement.find (elem1);
@@ -468,8 +468,8 @@ void MeshPartBuilder<MeshType>::constructFacets()
             localElem2 = (*im).second;
         }
 
-        pf =  & (M_meshPart->addFace (boundary) );
-        *pf = M_originalMesh->face ( *is );
+        pf =  & (M_meshPart->addFacet (boundary) );
+        *pf = M_originalMesh->facet ( *is );
 
         pf->setLocalId ( count );
 
@@ -538,72 +538,69 @@ void MeshPartBuilder<MeshType>::finalSetup()
     M_meshPart->setMaxNumVolumes ( nVolumes, true);
 
     M_meshPart->setMaxNumGlobalPoints (M_originalMesh->numPoints() );
-    M_meshPart->setNumGlobalVertices  (M_originalMesh->numPoints() );
-    M_meshPart->setMaxNumGlobalEdges  (M_originalMesh->numEdges() );
-    M_meshPart->setMaxNumGlobalFaces  (M_originalMesh->numFaces() );
+    M_meshPart->setNumGlobalVertices  (M_originalMesh->numVertices() );
+    M_meshPart->setMaxNumGlobalRidges  (M_originalMesh->numRidges() );
+    M_meshPart->setMaxNumGlobalFacets  (M_originalMesh->numFacets() );
 
-    M_meshPart->setMaxNumGlobalVolumes (M_originalMesh->numVolumes() );
-    M_meshPart->setNumBFaces    (M_nBoundaryFacets);
+    M_meshPart->setMaxNumGlobalElements (M_originalMesh->numElements() );
+    M_meshPart->setNumBoundaryFacets    (M_nBoundaryFacets);
 
     M_meshPart->setNumBPoints   (M_nBoundaryVertices);
-    M_meshPart->setNumBEdges    (M_nBoundaryRidges);
+    M_meshPart->setNumBoundaryRidges    (M_nBoundaryRidges);
 
     M_meshPart->setNumVertices (nNodes );
     M_meshPart->setNumBVertices (M_nBoundaryVertices);
 
-    M_meshPart->updateElementEdges();
+    M_meshPart->updateElementRidges();
 
-    M_meshPart->updateElementFaces();
+    M_meshPart->updateElementFacets();
 }
 
 template<typename MeshType>
 void MeshPartBuilder<MeshType>::markEntityOwnership()
 {
-    if ( M_overlap != 0)
-    {
-        // mark owned entities by each partition as described in M_entityPID
-        //M_entityPID or flags should be exported and read back to make it work
-        for ( UInt e = 0; e < M_meshPart->numElements(); e++ )
-        {
-            typename MeshType::element_Type& element = M_meshPart->element (e);
-            if (M_entityPID[0][element.id()] != static_cast<UInt> (M_partIndex) )
-            {
-                element.unSetFlag ( EntityFlags::OWNED );
-            }
-        }
+	// mark owned entities by each partition as described in M_entityPID
+	//M_entityPID or flags should be exported and read back to make it work
+	for ( UInt e = 0; e < M_meshPart->numElements(); e++ )
+	{
+		typename MeshType::element_Type& element = M_meshPart->element (e);
+		if (M_entityPID[0][element.id()] != static_cast<UInt> (M_partIndex) )
+		{
+			element.setFlag ( EntityFlags::GHOST );
+		}
+	}
 
-        for ( UInt f = 0; f < M_meshPart->numFacets(); f++ )
-        {
-            typename MeshType::facet_Type& facet = M_meshPart->facet (f);
-            if (M_entityPID[1][facet.id()] != static_cast<UInt> (M_partIndex) )
-            {
-                facet.unSetFlag ( EntityFlags::OWNED );
-            }
-        }
+	for ( UInt f = 0; f < M_meshPart->numFacets(); f++ )
+	{
+		typename MeshType::facet_Type& facet = M_meshPart->facet (f);
+		if (M_entityPID[1][facet.id()] != static_cast<UInt> (M_partIndex) )
+		{
+			facet.setFlag ( EntityFlags::GHOST );
+		}
+	}
 
-        for ( UInt r = 0; r < M_meshPart->numRidges(); r++ )
-        {
-            typename MeshType::ridge_Type& ridge = M_meshPart->ridge (r);
-            if (M_entityPID[2][ridge.id()] != static_cast<UInt> (M_partIndex) )
-            {
-                ridge.unSetFlag ( EntityFlags::OWNED );
-            }
-        }
+	for ( UInt r = 0; r < M_meshPart->numRidges(); r++ )
+	{
+		typename MeshType::ridge_Type& ridge = M_meshPart->ridge (r);
+		if (M_entityPID[2][ridge.id()] != static_cast<UInt> (M_partIndex) )
+		{
+			ridge.setFlag ( EntityFlags::GHOST );
+		}
+	}
 
-        for ( UInt p = 0; p < M_meshPart->numPoints(); p++ )
-        {
-            typename MeshType::point_Type& point = M_meshPart->point (p);
-            if (M_entityPID[3][point.id()] != static_cast<UInt> (M_partIndex) )
-            {
-                point.unSetFlag ( EntityFlags::OWNED );
-            }
-        }
+	for ( UInt p = 0; p < M_meshPart->numPoints(); p++ )
+	{
+		typename MeshType::point_Type& point = M_meshPart->point (p);
+		if (M_entityPID[3][point.id()] != static_cast<UInt> (M_partIndex) )
+		{
+			point.setFlag ( EntityFlags::GHOST );
+		}
+	}
 
-        clearVector ( M_entityPID[ 0 ] );
-        clearVector ( M_entityPID[ 1 ] );
-        clearVector ( M_entityPID[ 2 ] );
-        clearVector ( M_entityPID[ 3 ] );
-    }
+	clearVector ( M_entityPID[ 0 ] );
+	clearVector ( M_entityPID[ 1 ] );
+	clearVector ( M_entityPID[ 2 ] );
+	clearVector ( M_entityPID[ 3 ] );
 }
 
 template<typename MeshType>
