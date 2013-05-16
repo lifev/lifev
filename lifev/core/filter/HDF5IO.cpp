@@ -103,7 +103,7 @@ void LifeV::HDF5IO::openTable (const std::string& tableName,
     tableHandle& currentTable = M_tableList[tableName];
 
 #ifdef H5_USE_16_API
-    currentTable.dataset = H5Dopen (M_fileId, tableName.c_str());
+    currentTable.dataset = H5Dopen (M_fileId, tableName.c_str() );
 #else
     currentTable.dataset = H5Dopen (M_fileId, tableName.c_str(), H5P_DEFAULT);
 #endif

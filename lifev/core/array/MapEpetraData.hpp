@@ -82,7 +82,7 @@ public:
     //! @name Get methods
     //@{
 
-    idList_Type const & idList( MapEpetraType listType ) const;
+    idList_Type const& idList ( MapEpetraType listType ) const;
 
     //@}
 
@@ -91,7 +91,7 @@ public:
 
     //! Set
     template <typename list_Type>
-    void set( list_Type const & list, MapEpetraType listType );
+    void set ( list_Type const& list, MapEpetraType listType );
 
     //! Show informations about the map data
     void showMe ( std::ostream& output = std::cout ) const;
@@ -105,39 +105,39 @@ private:
 
 }; // class MapEpetraData
 
-inline MapEpetraData::MapEpetraData ( const UInt& uniqueMapSize, const UInt& repeatedMapSize ):
-    M_uniqueList( uniqueMapSize ),
-    M_repeatedList( repeatedMapSize )
+inline MapEpetraData::MapEpetraData ( const UInt& uniqueMapSize, const UInt& repeatedMapSize ) :
+    M_uniqueList ( uniqueMapSize ),
+    M_repeatedList ( repeatedMapSize )
 {}
 
 template <typename list_Type>
-inline void MapEpetraData::set( list_Type const & list, MapEpetraType listType )
+inline void MapEpetraData::set ( list_Type const& list, MapEpetraType listType )
 {
-    switch( listType )
+    switch ( listType )
     {
-    case Unique:
-        std::copy ( list.begin(), list.end(), M_uniqueList.begin() );
-        break;
-    case Repeated:
-        std::copy ( list.begin(), list.end(), M_repeatedList.begin() );
-        break;
-    default:
-        ERROR_MSG( "wrong map type" );
+        case Unique:
+            std::copy ( list.begin(), list.end(), M_uniqueList.begin() );
+            break;
+        case Repeated:
+            std::copy ( list.begin(), list.end(), M_repeatedList.begin() );
+            break;
+        default:
+            ERROR_MSG ( "wrong map type" );
     }
 }
 
-inline MapEpetraData::idList_Type const & MapEpetraData::idList( MapEpetraType listType ) const
+inline MapEpetraData::idList_Type const& MapEpetraData::idList ( MapEpetraType listType ) const
 {
-    switch( listType )
+    switch ( listType )
     {
-    case Unique:
-        return M_uniqueList;
-        break;
-    case Repeated:
-        return M_repeatedList;
-        break;
-    default:
-        ERROR_MSG( "wrong map type" );
+        case Unique:
+            return M_uniqueList;
+            break;
+        case Repeated:
+            return M_repeatedList;
+            break;
+        default:
+            ERROR_MSG ( "wrong map type" );
     }
     return M_uniqueList;
 }

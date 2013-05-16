@@ -656,10 +656,10 @@ MapEpetraData DOF::createMapData ( MeshType& mesh )
         }
     }
 
-    MapEpetraData mapData( myGlobalElementsSetUnique.size(), myGlobalElementsSetRepeated.size() );
+    MapEpetraData mapData ( myGlobalElementsSetUnique.size(), myGlobalElementsSetRepeated.size() );
 
-    mapData.set( myGlobalElementsSetUnique, Unique );
-    mapData.set( myGlobalElementsSetRepeated, Repeated );
+    mapData.set ( myGlobalElementsSetUnique, Unique );
+    mapData.set ( myGlobalElementsSetRepeated, Repeated );
 
     return mapData;
 }
