@@ -27,7 +27,7 @@ save       = 1
 
 [./physics]
 density   	= 1.2
-material_flag   = 101
+material_flag   = 1
 
 [../model]
 constitutiveLaw = anisotropic
@@ -40,9 +40,9 @@ solidTypeIsotropic 	= neoHookean		# linearVenantKirchhoff / nonLinearVenantKirch
 solidTypeAnisotropic = holzapfel
 
 [./fibers]
-numberFamilies  = 1
-stiffness       = '2.684564e+6'
-nonlinearity    = '1.0'
+numberFamilies  = 2
+stiffness       = '2.684564e+6 2.684564e+6'
+nonlinearity    = '1.0 1.0'
 smoothness      = 1000
 [./]
 
@@ -50,14 +50,14 @@ smoothness      = 1000
 [../../time_discretization]
 method          = BDF
 initialtime 	= 0.
-endtime     	= 2.0
+endtime     	= 0.1
 timestep    	= 0.05
 BDF_order   	= 2
 
 [../space_discretization]
 mesh_type = .mesh
 mesh_dir  	= ./
-mesh_file 	= cubeHolzapfel.mesh
+mesh_file 	= cubeY4.mesh
 order     	= P1
 
 [../miscellaneous]

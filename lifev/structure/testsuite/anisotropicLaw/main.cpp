@@ -93,6 +93,7 @@
 #include <lifev/eta/fem/ETFESpace.hpp>
 
 #include <iostream>
+#include <fstream>
 
 #include "ud_functions.hpp"
 
@@ -169,7 +170,7 @@ public:
     {
         run3d();
     }
-    void CheckResultNH (const Real& dispNorm, const Real& time);
+    void CheckResultHolzapfelModel (const Real& dispNorm, const Real& time);
     void resultChanged (Real time);
     //@}
 
@@ -316,18 +317,20 @@ Structure::run3d()
     //! =================================================================================
     //! BC for StructuredCube4_test_structuralsolver.mesh
     //! =================================================================================
-    BCh->addBC ("EdgesIn",      20,  Natural,   Component, nonZero, compx);
-    BCh->addBC ("EdgesIn",      40,  Essential, Component, zero,    compx);
+    BCh->addBC ("EdgesIn",      20,  Natural,   Component, nonZero, compy);
+    BCh->addBC ("EdgesIn",      40,  Essential, Component, zero,    compy);
 
     //! Symmetry BC
-    BCh->addBC ("EdgesIn",      500,   EssentialVertices, Component, zero, compxz);
-    BCh->addBC ("EdgesIn",      300,   EssentialVertices, Component, zero, compxy);
-    BCh->addBC ("EdgesIn",      800,   EssentialVertices, Component, zero, compyz);
-    BCh->addBC ("EdgesIn",      1000,  EssentialVertices,  Full, zero, 3);
+    BCh->addBC ("EdgesIn",      50,   EssentialVertices, Component, zero, compxy);
+    BCh->addBC ("EdgesIn",      30,   EssentialVertices, Component, zero, compyz);
+    BCh->addBC ("EdgesIn",      80,   EssentialVertices, Component, zero, compxz);
+    BCh->addBC ("EdgesIn",      100,  EssentialVertices,  Full, zero, 3);
 
-    BCh->addBC ("EdgesIn",      7, Essential, Component , zero, compy);
+    BCh->addBC ("EdgesIn",      7, Essential, Component , zero, compx);
     BCh->addBC ("EdgesIn",      3, Essential, Component , zero, compz);
     //! =================================================================================
+
+    // Case of a tube
 
     // BCh->addBC ("EdgesIn",      60,  Essential,  Component, zero, compz);
     // BCh->addBC ("EdgesIn",      70,  Essential,  Component, zero, compz);
@@ -481,12 +484,12 @@ Structure::run3d()
     vectorPtr_Type solidDisp ( new vector_Type (solid.displacement(),  exporter->mapType() ) );
     vectorPtr_Type solidVel  ( new vector_Type (solid.displacement(),  exporter->mapType() ) );
     vectorPtr_Type solidAcc  ( new vector_Type (solid.displacement(),  exporter->mapType() ) );
-    vectorPtr_Type rhsVector ( new vector_Type (solid.displacement(),  exporter->mapType() ) );
+    //vectorPtr_Type rhsVector ( new vector_Type (solid.displacement(),  exporter->mapType() ) );
 
     exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "displacement", dFESpace, solidDisp, UInt (0) );
     exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "velocity",     dFESpace, solidVel,  UInt (0) );
     exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "acceleration", dFESpace, solidAcc,  UInt (0) );
-    exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "forcingTerm", dFESpace, rhsVector,  UInt (0) );
+    //exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "forcingTerm", dFESpace, rhsVector,  UInt (0) );
 
     // Adding the fibers vectors
     // Setting the vector of fibers functions
@@ -553,10 +556,13 @@ Structure::run3d()
     //solid.updateSystem();
     //! =================================================================================
 
-
     Real normVect;
     normVect =  solid.displacement().norm2();
-    std::cout << "The norm 2 of the displacement field is: " << normVect << std::endl;
+
+    if( verbose )
+    {
+        std::cout << "The norm 2 of the displacement field is: " << normVect << std::endl;
+    }
 
     //! =============================================================================
     //! Temporal loop
@@ -564,13 +570,7 @@ Structure::run3d()
     //    for (Real time = dt; time <= T; time += dt)
     for (dataStructure->dataTime()->setTime ( dt ) ; dataStructure->dataTime()->canAdvance( ); dataStructure->dataTime()->updateTime( ) )
     {
-        //      dataStructure->dataTime()->setTime(time);
-
-        if (verbose)
-        {
-            std::cout << std::endl;
-            std::cout << "S- Now we are at time " << dataStructure->dataTime()->time() << " s." << std::endl;
-        }
+        returnValue = EXIT_FAILURE;
 
         if (verbose)
         {
@@ -592,7 +592,9 @@ Structure::run3d()
         *solidDisp = solid.displacement();
         *solidVel  = timeAdvance->firstDerivative();
         *solidAcc  = timeAdvance->secondDerivative();
-	*rhsVector = solid.rhsCopy(); 
+
+        // This vector is to export the forcing term
+        //*rhsVector = solid.rhsCopy();
 
         exporter->postProcess ( dataStructure->dataTime()->time() );
 
@@ -611,45 +613,34 @@ Structure::run3d()
            cout <<"*********************************************************"<< std::endl;
            }
            file_comp<< endl;
+
+           cout <<"*********************************************************"<< std::endl;
+           cout <<" solid.disp()[ "<< IDPointX - 1  <<" ] = "<<  solid.displacement()[ IDPointX - 1 ]  << std::endl;
+           cout <<" solid.disp()[ "<< IDPointX - 1 + dFESpace->dof().numTotalDof() <<" ] = "<<  solid.displacement()[ IDPointX - 1 + dFESpace->dof().numTotalDof() ]  << std::endl;
+           cout <<"*********************************************************"<< std::endl;
         */
-
-	cout <<"*********************************************************"<< std::endl;
-	cout <<" solid.disp()[ "<< IDPointX - 1  <<" ] = "<<  solid.displacement()[ IDPointX - 1 ]  << std::endl;
-	cout <<" solid.disp()[ "<< IDPointX - 1 + dFESpace->dof().numTotalDof() <<" ] = "<<  solid.displacement()[ IDPointX - 1 + dFESpace->dof().numTotalDof() ]  << std::endl;
-	cout <<"*********************************************************"<< std::endl;
-
-
 
         Real normVect;
         normVect =  solid.displacement().norm2();
         std::cout << "The norm 2 of the displacement field is: " << normVect << std::endl;
 
-	// Check
-	CheckResultNH (normVect, dataStructure->dataTime()->time() );
-
+        CheckResultHolzapfelModel (normVect, dataStructure->dataTime()->time() );
 
 
         //!--------------------------------------------------------------------------------------------------
 
         MPI_Barrier (MPI_COMM_WORLD);
     }
+
 }
 
-void Structure::CheckResultNH (const Real& dispNorm, const Real& time)
+void Structure::CheckResultHolzapfelModel (const Real& dispNorm, const Real& time)
 {
-    if ( time == 0.1  && std::fabs (dispNorm - 0.286120) <= 1e-5 )
+    if ( time == 0.05  && std::fabs (dispNorm - 0.84960668) <= 1e-7 )
     {
         this->resultChanged (time);
     }
-    if ( time == 0.2  && std::fabs (dispNorm - 0.286129) <= 1e-5 )
-    {
-        this->resultChanged (time);
-    }
-    if ( time == 0.3  && std::fabs (dispNorm - 0.286122) <= 1e-5 )
-    {
-        this->resultChanged (time);
-    }
-    if ( time == 0.4  && std::fabs (dispNorm - 0.286123) <= 1e-5 )
+    if ( time == 0.1   && std::fabs (dispNorm - 0.84981715) <= 1e-7 )
     {
         this->resultChanged (time);
     }

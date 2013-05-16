@@ -5,9 +5,9 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
 
 TRIBITS_ADD_EXECUTABLE_AND_TEST(
   anisotropicLaw
-  NAME SVK
+  NAME Holzapfel
   SOURCES main.cpp ud_functions.cpp
-  ARGS "-f data"
+  ARGS "-f dataHolzapfel"
   NUM_MPI_PROCS 2
   COMM serial mpi
   )
@@ -19,8 +19,8 @@ TRIBITS_COPY_FILES_TO_BINARY_DIR(dataHolzapfel
 )
 
 
-TRIBITS_COPY_FILES_TO_BINARY_DIR(StructuredCube4_test_structuralsolver.mesh_anisotropicStructure
-  SOURCE_FILES StructuredCube4_test_structuralsolver.mesh
+TRIBITS_COPY_FILES_TO_BINARY_DIR(cubeY4.mesh_anisotropicStructure
+  SOURCE_FILES cubeY4.mesh
   SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/structure/data/mesh/inria/
 )
 
