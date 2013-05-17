@@ -37,7 +37,7 @@
     - multiplication by a MatrixSmall
     We do this by multiplying the gradient by the identity matrix
     (i.e. we're integrating the divergence)
-    
+
     Tutorials that should be read before: 1,3
 
  */

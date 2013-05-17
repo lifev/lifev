@@ -313,7 +313,7 @@ ETA_ADR1DTest::run()
     // and not a double: we use a dot product with a unitary VectorSmall<1>
     // to obtain its value as adouble
     VectorSmall<1> oneVector;
-    oneVector[0]=1.0;
+    oneVector[0] = 1.0;
 
 
     {
@@ -324,8 +324,8 @@ ETA_ADR1DTest::run()
                     ETuSpace,
                     ETuSpace,
 
-                    dot( grad (phi_i) , grad (phi_j) )
-                    + dot ( grad (phi_j) , value(oneVector) ) * value (ETbetaSpace, beta)*phi_i
+                    dot ( grad (phi_i) , grad (phi_j) )
+                    + dot ( grad (phi_j) , value (oneVector) ) * value (ETbetaSpace, beta) *phi_i
                     + 2.0 * phi_i * phi_j
 
                   )
