@@ -611,7 +611,7 @@ public:
 
     solver_Type& linearSolver()
     {
-        M_linearSolver;
+        return *M_linearSolver;
     }
 
 #ifdef EXPORTVECTORS

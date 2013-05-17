@@ -21,5 +21,6 @@ ENDIF()
 IF(ENABLE_ANISOTROPIC_LAW)
   ADD_SUBDIRECTORIES(
     example_bodyForces
+    example_anisotropicTraction
 )
 ENDIF()
