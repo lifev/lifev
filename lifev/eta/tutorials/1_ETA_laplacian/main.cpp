@@ -154,7 +154,11 @@ int main ( int argc, char** argv )
                     2.0,   2.0,   2.0,
                     -1.0,  -1.0,  -1.0);
 
-    MeshPartitioner< mesh_Type >  meshPart (fullMeshPtr, Comm);
+    boost::shared_ptr< mesh_Type > meshPtr;
+    {
+        MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, Comm);
+        meshPtr = meshPart.meshPartition();
+    }
 
     fullMeshPtr.reset();
 
@@ -183,7 +187,7 @@ int main ( int argc, char** argv )
     }
 
     boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 1 > > uSpace
-    ( new ETFESpace< mesh_Type, MapEpetra, 3, 1 > (meshPart, &feTetraP1, Comm) );
+    ( new ETFESpace< mesh_Type, MapEpetra, 3, 1 > (meshPtr, &feTetraP1, Comm) );
 
     if (verbose)
     {

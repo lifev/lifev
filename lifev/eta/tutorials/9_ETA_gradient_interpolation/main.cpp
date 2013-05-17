@@ -26,22 +26,25 @@
 
 /*!
     @file
-    @brief Tutorial for the assembly of the vectorial laplacian.
+    @brief Tutorial for gradient interpolation.
 
-    @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
-    @date 08-10-2010
+    @author Luca Pasquale <luca.pasquale@mail.polimi.it>
+    @date 2013-05
 
-    In this tutorial, we revisit the first tutorial and explain how
-    to transform it so that the vectorial laplacian is assembled. This
-    gives an example of how to deal with vectorial unknowns.
+    In this tutorial we use two expressions available when
+    integrating with Expression Templates:
+    - interpoaltion of the gradient of a given function
+    - multiplication by a MatrixSmall
+    We do this by multiplying the gradient by the identity matrix
+    (i.e. we're integrating the divergence)
 
-    Tutorials that should be read before: 1
+    Tutorials that should be read before: 1,3
+
  */
 
 // ---------------------------------------------------------------
-// We use the same structure as the tutorial number 2, so that we
-// can compare the results of the ETA framework with the classical
-// assembly.
+// We reuse the same files as in the previous tutorial. We add the
+// chrono to measure the timings.
 // ---------------------------------------------------------------
 
 #pragma GCC diagnostic ignored "-Wunused-variable"
@@ -70,10 +73,11 @@
 #include <lifev/eta/fem/ETFESpace.hpp>
 #include <lifev/eta/expression/Integrate.hpp>
 
-#include <boost/shared_ptr.hpp>
-
 #include <lifev/core/fem/FESpace.hpp>
-#include <lifev/core/solver/ADRAssembler.hpp>
+
+#include <lifev/core/util/LifeChrono.hpp>
+
+#include <boost/shared_ptr.hpp>
 
 
 // ---------------------------------------------------------------
@@ -88,9 +92,33 @@ typedef MatrixEpetra<Real> matrix_Type;
 typedef VectorEpetra vector_Type;
 
 
+// ===================================================
+//!                   Functions
+// ===================================================
+
 // ---------------------------------------------------------------
-// As usual, we start with the definition of the MPI communicator
-// and the boolean for the outputs.
+// We define a function whose gradient is
+// (1 0 0)
+// (0 5 0)
+// (0 0 2)
+// ---------------------------------------------------------------
+
+Real uFct ( const Real& /* t */, const Real&  x , const Real&  y , const Real& z , const ID& i )
+{
+    if (i == 0)
+    {
+        return x;
+    }
+    else if (i == 1)
+    {
+        return 5 * y;
+    }
+    return 2 * z;
+}
+
+// ---------------------------------------------------------------
+// As usual, we start by the MPI communicator, the definition of
+// the mesh and its partitioning.
 // ---------------------------------------------------------------
 
 int main ( int argc, char** argv )
@@ -106,11 +134,6 @@ int main ( int argc, char** argv )
     const bool verbose (Comm->MyPID() == 0);
 
 
-    // ---------------------------------------------------------------
-    // We define the mesh and parition it. We use again the domain
-    // (-1,1)x(-1,1)x(-1,1) and a structured mesh.
-    // ---------------------------------------------------------------
-
     if (verbose)
     {
         std::cout << " -- Building and partitioning the mesh ... " << std::flush;
@@ -118,17 +141,14 @@ int main ( int argc, char** argv )
 
     const UInt Nelements (10);
 
-    boost::shared_ptr< mesh_Type > fullMeshPtr (new mesh_Type ( Comm ) );
+    boost::shared_ptr< mesh_Type > fullMeshPtr (new mesh_Type);
 
     regularMesh3D ( *fullMeshPtr, 1, Nelements, Nelements, Nelements, false,
                     2.0,   2.0,   2.0,
                     -1.0,  -1.0,  -1.0);
 
-    boost::shared_ptr< mesh_Type > meshPtr;
-    {
-        MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, Comm);
-        meshPtr = meshPart.meshPartition();
-    }
+    MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, Comm);
+    boost::shared_ptr< mesh_Type > meshPtr (meshPart.meshPartition() );
 
     fullMeshPtr.reset();
 
@@ -139,20 +159,14 @@ int main ( int argc, char** argv )
 
 
     // ---------------------------------------------------------------
-    // To assemble a vectorial problem, the main difference is in the
-    // finite element space. To have a vectorial problem, we have to
-    // indicate that the dimension of the field is not 1, but 3 (at
-    // least in this example, but it could be 2 for a 2D problem).
-    //
-    // The field dimension appears as argument of the FESpace
-    // constructor and as template argument for the ETFESpace (it is
-    // the second 3, the first one indicates the dimension of the
-    // space).
+    // We define then the ETFESpace, that we suppose scalar in this
+    // case. We also need a standard FESpace to perform the
+    // interpolation.
     // ---------------------------------------------------------------
 
     if (verbose)
     {
-        std::cout << " -- Building the FESpace ... " << std::flush;
+        std::cout << " -- Building FESpaces ... " << std::flush;
     }
 
     std::string uOrder ("P1");
@@ -171,7 +185,7 @@ int main ( int argc, char** argv )
 
     if (verbose)
     {
-        std::cout << " -- Building the ETFESpace ... " << std::flush;
+        std::cout << " -- Building ETFESpaces ... " << std::flush;
     }
 
     boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 3 > > ETuSpace
@@ -186,25 +200,19 @@ int main ( int argc, char** argv )
         std::cout << " ---> Dofs: " << ETuSpace->dof().numTotalDof() << std::endl;
     }
 
-
     // ---------------------------------------------------------------
-    // We build now two matrices, one for each assembly procedure in
-    // order to compare them in the end. There is no difference in the
-    // construction of the matrices with respect to the scalar case,
-    // as the map of the finite element spaces is already aware of the
-    // field dimension.
+    // We interpolate then the function.
+    // This can only be performed with the classical FESpace.
     // ---------------------------------------------------------------
 
     if (verbose)
     {
-        std::cout << " -- Defining the matrices ... " << std::flush;
+        std::cout << " -- Interpolating the function ... " << std::flush;
     }
 
-    boost::shared_ptr<matrix_Type> systemMatrix (new matrix_Type ( uSpace->map() ) );
-    *systemMatrix *= 0.0;
-
-    boost::shared_ptr<matrix_Type> ETsystemMatrix (new matrix_Type ( ETuSpace->map() ) );
-    *ETsystemMatrix *= 0.0;
+    vector_Type uInterpolated (uSpace->map(), Unique);
+    uSpace->interpolate (static_cast<FESpace< mesh_Type, MapEpetra >::function_Type> (uFct), uInterpolated, 0.0);
+    vector_Type uInterpolatedRepeated (uInterpolated, Repeated);
 
     if (verbose)
     {
@@ -213,31 +221,31 @@ int main ( int argc, char** argv )
 
 
     // ---------------------------------------------------------------
-    // With the classical assembly, nothing changes with respect to
-    // a scalar laplacian.
+    // We build the MatrixSmall used to extract the trace
+    // and a variable used to store the result of the integration.
+    // We only need to specify the diagonal elements of the MatrixSmall
+    // because its default constructor sets all the components to 0
     // ---------------------------------------------------------------
+
+    MatrixSmall<3, 3> identityMatrix;
+    identityMatrix (0, 0) = 1;
+    identityMatrix (1, 1) = 1;
+    identityMatrix (2, 2) = 1;
+
+    Real ETintegral (0);
 
     if (verbose)
     {
-        std::cout << " -- Classical assembly ... " << std::flush;
+        std::cout << " done! " << std::endl;
     }
 
-    ADRAssembler<mesh_Type, matrix_Type, vector_Type> adrAssembler;
-
-    adrAssembler.setup (uSpace, uSpace);
-
-    adrAssembler.addDiffusion (systemMatrix, 1.0);
-
-    if (verbose)
-    {
-        std::cout << " done ! " << std::endl;
-    }
-
-
     // ---------------------------------------------------------------
-    // With the ETA framework, there is also no change with respect
-    // to the scalar case.
+    // We integrate on the domain the trace of the gradient
+    // (1+5+2 in this case)
     // ---------------------------------------------------------------
+
+    LifeChrono ETChrono;
+    ETChrono.start();
 
     if (verbose)
     {
@@ -250,43 +258,47 @@ int main ( int argc, char** argv )
 
         integrate ( elements (ETuSpace->mesh() ),
                     uSpace->qr(),
-                    ETuSpace,
-                    ETuSpace,
 
-                    dot ( grad (phi_i) , grad (phi_j) )
+                    dot ( grad (ETuSpace, uInterpolatedRepeated) , value (identityMatrix) )
 
                   )
-                >> ETsystemMatrix;
+                >> ETintegral;
+
     }
+
+    ETChrono.stop();
 
     if (verbose)
     {
         std::cout << " done! " << std::endl;
     }
+    if (verbose)
+    {
+        std::cout << " Time : " << ETChrono.diff() << std::endl;
+    }
 
     // ---------------------------------------------------------------
-    // We finally need to check that both yield the same matrix. In
-    // that aim, we need to finalize both matrices.
+    // Integrals computed on each processor must be summed together
     // ---------------------------------------------------------------
 
     if (verbose)
     {
-        std::cout << " -- Closing the matrices ... " << std::flush;
+        std::cout << " -- Broadcasting and summing integrals across processes ... " << std::flush;
     }
 
-    systemMatrix->globalAssemble();
-    ETsystemMatrix->globalAssemble();
+    Real globalIntegral (0.0);
+
+    Comm->Barrier();
+    Comm->SumAll (&ETintegral, &globalIntegral, 1);
 
     if (verbose)
     {
         std::cout << " done ! " << std::endl;
     }
 
-
     // ---------------------------------------------------------------
-    // We compute now the matrix of the difference and finally the
-    // norm of the difference. This should be very low if the two
-    // matrices are identical.
+    // We now compute the error as the difference between the integral
+    // computed and the exact value expected ( (1+5+2)*8 = 64 )
     // ---------------------------------------------------------------
 
     if (verbose)
@@ -294,15 +306,12 @@ int main ( int argc, char** argv )
         std::cout << " -- Computing the error ... " << std::flush;
     }
 
-    boost::shared_ptr<matrix_Type> checkMatrix (new matrix_Type ( ETuSpace->map() ) );
-    *checkMatrix *= 0.0;
+    Real error = std::abs (globalIntegral - 64.0);
 
-    *checkMatrix += *systemMatrix;
-    *checkMatrix += (*ETsystemMatrix) * (-1);
-
-    checkMatrix->globalAssemble();
-
-    Real errorNorm ( checkMatrix->normInf() );
+    if (verbose)
+    {
+        std::cout << "Error: " << error << std::endl;
+    }
 
     if (verbose)
     {
@@ -310,28 +319,13 @@ int main ( int argc, char** argv )
     }
 
 
-    // ---------------------------------------------------------------
-    // We finalize the MPI if needed.
-    // ---------------------------------------------------------------
-
 #ifdef HAVE_MPI
     MPI_Finalize();
 #endif
 
+    Real tolerance (1e-10);
 
-    // ---------------------------------------------------------------
-    // We finally display the error norm and compare with the
-    // tolerance of the test.
-    // ---------------------------------------------------------------
-
-    if (verbose)
-    {
-        std::cout << " Matrix Error : " << errorNorm << std::endl;
-    }
-
-    Real testTolerance (1e-10);
-
-    if (errorNorm < testTolerance)
+    if (error < tolerance)
     {
         return ( EXIT_SUCCESS );
     }

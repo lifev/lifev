@@ -182,8 +182,8 @@ ETA_ADR1DTest::run()
 
 
     // ---------------------------------------------------------------
-    // We interpolate then the advection function of the mesh at hand.
-    // This is performed with the classical FESpace only.
+    // We then interpolate the advection function.
+    // This is can only be performed with the classical FESpace.
     // ---------------------------------------------------------------
 
     if (verbose)
@@ -224,6 +224,7 @@ ETA_ADR1DTest::run()
 
     // ---------------------------------------------------------------
     // Definition of the RHS
+    // ---------------------------------------------------------------
 
     if (verbose)
     {
@@ -312,7 +313,7 @@ ETA_ADR1DTest::run()
     // and not a double: we use a dot product with a unitary VectorSmall<1>
     // to obtain its value as adouble
     VectorSmall<1> oneVector;
-    oneVector[0]=1.0;
+    oneVector[0] = 1.0;
 
 
     {
@@ -323,8 +324,8 @@ ETA_ADR1DTest::run()
                     ETuSpace,
                     ETuSpace,
 
-                    dot( grad (phi_i) , grad (phi_j) )
-                    + dot ( grad (phi_j) , value(oneVector) ) * value (ETbetaSpace, beta)*phi_i
+                    dot ( grad (phi_i) , grad (phi_j) )
+                    + dot ( grad (phi_j) , value (oneVector) ) * value (ETbetaSpace, beta) *phi_i
                     + 2.0 * phi_i * phi_j
 
                   )

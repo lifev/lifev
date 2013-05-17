@@ -121,8 +121,11 @@ ETA_ADR2DTest::run()
                     2.0,   2.0,
                     -0.0,  -0.0);
 
-    MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, M_comm);
-    boost::shared_ptr< mesh_Type > meshPtr (meshPart.meshPartition() );
+    boost::shared_ptr< mesh_Type > meshPtr;
+    {
+        MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, M_comm);
+        meshPtr = meshPart.meshPartition();
+    }
 
     fullMeshPtr.reset();
 
@@ -170,10 +173,10 @@ ETA_ADR2DTest::run()
     }
 
     boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 2, 1 > > ETuSpace
-    ( new ETFESpace< mesh_Type, MapEpetra, 2, 1 > (meshPart, & (uSpace->refFE() ), & (uSpace->fe().geoMap() ), M_comm) );
+    ( new ETFESpace< mesh_Type, MapEpetra, 2, 1 > (meshPtr, & (uSpace->refFE() ), & (uSpace->fe().geoMap() ), M_comm) );
 
     boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 2, 2 > > ETbetaSpace
-    ( new ETFESpace< mesh_Type, MapEpetra, 2, 2 > (meshPart, & (betaSpace->refFE() ), & (betaSpace->fe().geoMap() ), M_comm) );
+    ( new ETFESpace< mesh_Type, MapEpetra, 2, 2 > (meshPtr, & (betaSpace->refFE() ), & (betaSpace->fe().geoMap() ), M_comm) );
 
     if (verbose)
     {
@@ -186,8 +189,8 @@ ETA_ADR2DTest::run()
 
 
     // ---------------------------------------------------------------
-    // We interpolate then the advection function of the mesh at hand.
-    // This is performed with the classical FESpace only.
+    // We then interpolate the advection function.
+    // This is can only be performed with the classical FESpace.
     // ---------------------------------------------------------------
 
     if (verbose)
@@ -228,6 +231,7 @@ ETA_ADR2DTest::run()
 
     // ---------------------------------------------------------------
     // Definition of the RHS
+    // ---------------------------------------------------------------
 
     if (verbose)
     {

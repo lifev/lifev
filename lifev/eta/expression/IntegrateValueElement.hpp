@@ -171,6 +171,7 @@ IntegrateValueElement (const boost::shared_ptr<MeshType>& mesh,
     :   M_mesh (mesh),
         M_qrAdapter (qrAdapter),
         M_evaluation (expression)
+
 {
     switch (MeshType::geoShape_Type::BasRefSha::S_shape)
     {

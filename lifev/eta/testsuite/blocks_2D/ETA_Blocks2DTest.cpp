@@ -118,8 +118,11 @@ ETA_Blocks2DTest::run()
                     2.0,   2.0,
                     -0.0,  -0.0);
 
-    MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, M_comm);
-    boost::shared_ptr< mesh_Type > meshPtr (meshPart.meshPartition() );
+    boost::shared_ptr< mesh_Type > meshPtr;
+    {
+        MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, M_comm);
+        meshPtr = meshPart.meshPartition();
+    }
 
     fullMeshPtr.reset();
 
@@ -146,10 +149,10 @@ ETA_Blocks2DTest::run()
     ( new FESpace< mesh_Type, MapEpetra > (meshPtr, uOrder, 1, M_comm) );
 
     boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 2, 2 > > ETuSpace
-    ( new ETFESpace< mesh_Type, MapEpetra, 2, 2 > (meshPart, &feTriaP2, & (uSpace->fe().geoMap() ), M_comm) );
+    ( new ETFESpace< mesh_Type, MapEpetra, 2, 2 > (meshPtr, &feTriaP2, & (uSpace->fe().geoMap() ), M_comm) );
 
     boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 2, 1 > > ETpSpace
-    ( new ETFESpace< mesh_Type, MapEpetra, 2, 1 > (meshPart, &feTriaP1, & (uSpace->fe().geoMap() ), M_comm) );
+    ( new ETFESpace< mesh_Type, MapEpetra, 2, 1 > (meshPtr, &feTriaP1, & (uSpace->fe().geoMap() ), M_comm) );
 
     if (verbose)
     {

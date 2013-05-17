@@ -59,7 +59,7 @@ typedef VectorEpetra vector_Type;
 // ===================================================
 
 // ---------------------------------------------------------------
-// We define then a function whose gradient is
+// We define a function whose gradient is
 // (1 0)
 // (0 2)
 // ---------------------------------------------------------------
@@ -114,8 +114,11 @@ ETA_InterpolateGradient2DTest::run()
                     2.0,   2.0,
                     -1.0,  -1.0);
 
-    MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, M_comm);
-    boost::shared_ptr< mesh_Type > meshPtr (meshPart.meshPartition() );
+    boost::shared_ptr< mesh_Type > meshPtr;
+    {
+        MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, M_comm);
+        meshPtr = meshPart.meshPartition();
+    }
 
     fullMeshPtr.reset();
 
@@ -155,7 +158,7 @@ ETA_InterpolateGradient2DTest::run()
     }
 
     boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 2, 2 > > ETuSpace
-    ( new ETFESpace< mesh_Type, MapEpetra, 2, 2 > (meshPart, & (uSpace->refFE() ), & (uSpace->fe().geoMap() ), M_comm) );
+    ( new ETFESpace< mesh_Type, MapEpetra, 2, 2 > (meshPtr, & (uSpace->refFE() ), & (uSpace->fe().geoMap() ), M_comm) );
 
     if (verbose)
     {
@@ -168,13 +171,13 @@ ETA_InterpolateGradient2DTest::run()
 
 
     // ---------------------------------------------------------------
-    // We interpolate then the advection function of the mesh at hand.
-    // This is performed with the classical FESpace only.
+    // We interpolate then the function.
+    // This can only be performed with the classical FESpace.
     // ---------------------------------------------------------------
 
     if (verbose)
     {
-        std::cout << " -- Interpolating the solution field ... " << std::flush;
+        std::cout << " -- Interpolating the function ... " << std::flush;
     }
 
     vector_Type uInterpolated (uSpace->map(), Unique);
@@ -188,8 +191,8 @@ ETA_InterpolateGradient2DTest::run()
 
 
     // ---------------------------------------------------------------
-    // We build define the SmallVector used to extract the trace
-    // and variable used to store the result of the integration
+    // We build the MatrixSmall used to extract the trace
+    // and a variable used to store the result of the integration
     // ---------------------------------------------------------------
 
     MatrixSmall<2, 2> identityMatrix;
@@ -243,10 +246,8 @@ ETA_InterpolateGradient2DTest::run()
         std::cout << " Time : " << ETChrono.diff() << std::endl;
     }
 
-
     // ---------------------------------------------------------------
-    // We finally need to check that both yield the same matrix. In
-    // that aim, we need to finalize both matrices.
+    // Integrals computed on each processor must be summed together
     // ---------------------------------------------------------------
 
     if (verbose)
@@ -265,8 +266,8 @@ ETA_InterpolateGradient2DTest::run()
     }
 
     // ---------------------------------------------------------------
-    // We now compute the error as the difference the integral
-    // computed and the exact value expected (3*4=12)
+    // We now compute the error as the difference between the integral
+    // computed and the exact value expected ( (1+2)*4 = 12 )
     // ---------------------------------------------------------------
 
     if (verbose)

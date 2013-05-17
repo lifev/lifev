@@ -195,6 +195,7 @@ IntegrateVectorElement (const boost::shared_ptr<MeshType>& mesh,
         M_testCFE_adapted (new ETCurrentFE<TestSpaceType::space_dim, TestSpaceType::field_dim> (testSpace->refFE(), testSpace->geoMap(), qrAdapter.standardQR() ) ),
 
         M_elementalVector (TestSpaceType::field_dim * testSpace->refFE().nbDof() )
+
 {
     switch (MeshType::geoShape_Type::BasRefSha::S_shape)
     {
