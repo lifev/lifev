@@ -76,6 +76,7 @@
 
 #include <lifev/eta/expression/EvaluationScalar.hpp>
 #include <lifev/eta/expression/EvaluationVector.hpp>
+#include <lifev/eta/expression/EvaluationMatrix.hpp>
 
 #include <lifev/eta/expression/EvaluationInterpolateValue.hpp>
 #include <lifev/eta/expression/EvaluationInterpolateGradient.hpp>
@@ -205,6 +206,17 @@ class ExpressionToEvaluation<ExpressionVector<VectorDim>, testDim, solutionDim, 
 {
 public:
     typedef EvaluationVector<VectorDim> evaluation_Type;
+private:
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
+};
+
+// Specialized for matrix
+template<UInt testDim, UInt solutionDim, UInt spaceDim, UInt MatrixDim1, UInt MatrixDim2>
+class ExpressionToEvaluation<ExpressionMatrix<MatrixDim1, MatrixDim2>, testDim, solutionDim, spaceDim>
+{
+public:
+    typedef EvaluationMatrix<MatrixDim1, MatrixDim2> evaluation_Type;
 private:
     ExpressionToEvaluation();
     ~ExpressionToEvaluation();
