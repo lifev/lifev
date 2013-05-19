@@ -736,7 +736,7 @@ void MatrixEpetra<DataType>::removeZeros()
 {
     if ( M_epetraCrs->Filled() )
     {
-        Int meanNumEntries = 1/*this->getMeanNumEntries()*/;
+        Int meanNumEntries = this->meanNumEntries();
         matrix_ptrtype tmp ( M_epetraCrs );
         M_epetraCrs.reset (new matrix_type ( Copy, M_epetraCrs->RowMap(), meanNumEntries ) );
 
