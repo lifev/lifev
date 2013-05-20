@@ -280,7 +280,7 @@ public:
 
     //! Operator []
     //const OpIndexReturnType operator[] ( UInt const & i ) const
-    OpIndexReturnConstType const& operator[] ( UInt const& i ) const
+    OpIndexReturnConstType const operator[] ( UInt const& i ) const
     {
         ASSERT ( i < Dim1, "trying to access an index that exceeds the first dimension of the matrix" );
         return (M_coords [ i ]);
