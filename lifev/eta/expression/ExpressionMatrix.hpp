@@ -50,25 +50,24 @@ namespace LifeV
 namespace ExpressionAssembly
 {
 
-//! class ExpressionMatrix  Class representing a matricial constant value in an expression
+//! class ExpressionVector  Class representing a constant matrix value in an expression
 /*!
   @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
 
   <b> Template parameters </b>
 
-  <i>iDim</i>: The i dimension (size) of the matrix to be represented.
-  <i>jDim</i>: The j dimension (size) of the matrix to be represented.
+  <i>MatrixDim1, MatrixDim2</i>: The dimensions (size) of the matrix to be represented.
 
 */
-template < UInt iDim, UInt jDim >
-class ExpressionMatrix : public ExpressionBase<ExpressionMatrix<iDim, jDim> >
+template < UInt MatrixDim1, UInt MatrixDim2 >
+class ExpressionMatrix : public ExpressionBase<ExpressionMatrix<MatrixDim1, MatrixDim2> >
 {
 public:
 
     //! @name Public Types
     //@{
 
-    typedef ExpressionBase<ExpressionMatrix<iDim, jDim> > base_Type;
+    typedef ExpressionBase<ExpressionMatrix<MatrixDim1, MatrixDim2> > base_Type;
 
     //@}
 
@@ -77,11 +76,11 @@ public:
     //@{
 
     //! Constructor using the vector of values
-    ExpressionMatrix (const MatrixSmall<iDim, jDim>& myValue)
+    ExpressionMatrix (const MatrixSmall<MatrixDim1, MatrixDim2>& myValue)
         : base_Type(), M_value (myValue) {}
 
     //! Copy constructor
-    ExpressionMatrix (const ExpressionMatrix<iDim, jDim>& expr)
+    ExpressionMatrix (const ExpressionMatrix<MatrixDim1, MatrixDim2>& expr)
         : base_Type(), M_value (expr.M_value) {}
 
     //! Destructor
@@ -96,7 +95,7 @@ public:
     //! Display method
     static void display (std::ostream& out = std::cout)
     {
-        out << "matrix[" << iDim << "][" << jDim << "] ";
+        out << "matrix[" << MatrixDim1 << "][" << MatrixDim2 << "] ";
     }
 
     //@}
@@ -106,7 +105,7 @@ public:
     //@{
 
     //! Getter for the vector of values
-    const MatrixSmall<iDim, jDim>& value() const
+    const MatrixSmall<MatrixDim1, MatrixDim2>& value() const
     {
         return M_value;
     }
@@ -121,8 +120,7 @@ private:
     ExpressionMatrix();
 
     //@}
-
-    MatrixSmall<iDim, jDim> M_value;
+    MatrixSmall<MatrixDim1, MatrixDim2> M_value;
 };
 
 //! Simple function to be used in the construction of an expression
@@ -131,13 +129,13 @@ private:
 
   <b> Template parameters </b>
 
-  <i>VectorDim</i>: The dimension (size) of the vector to be represented.
+  <i>MatrixDim1, MatrixDim2</i>: The dimensions (size) of the matrix to be represented.
 */
-template<UInt iDim, UInt jDim>
-inline ExpressionMatrix<iDim, jDim>
-value (const MatrixSmall<iDim, jDim>& myValue)
+template<UInt MatrixDim1, UInt MatrixDim2>
+inline ExpressionMatrix<MatrixDim1, MatrixDim2>
+value (const MatrixSmall<MatrixDim1, MatrixDim2>& myValue)
 {
-    return ExpressionMatrix<iDim, jDim> (myValue);
+    return ExpressionMatrix<MatrixDim1, MatrixDim2> (myValue);
 }
 
 

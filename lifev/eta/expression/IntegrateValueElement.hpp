@@ -76,7 +76,7 @@ public:
     typedef typename ExpressionToEvaluation < ExpressionType,
             0,
             0,
-            3 >::evaluation_Type evaluation_Type;
+            MeshType::S_geoDimensions >::evaluation_Type evaluation_Type;
 
     //@}
 
@@ -147,10 +147,11 @@ private:
     evaluation_Type M_evaluation;
 
     // CurrentFE for the unadapted quadrature
-    ETCurrentFE<3, 1>* M_globalCFE_std;
+    ETCurrentFE<MeshType::S_geoDimensions, 1>* M_globalCFE_std;
 
     // CurrentFE for the adapted quadrature
-    ETCurrentFE<3, 1>* M_globalCFE_adapted;
+    ETCurrentFE<MeshType::S_geoDimensions, 1>* M_globalCFE_adapted;
+
 };
 
 
@@ -169,12 +170,34 @@ IntegrateValueElement (const boost::shared_ptr<MeshType>& mesh,
                        const ExpressionType& expression)
     :   M_mesh (mesh),
         M_qrAdapter (qrAdapter),
-        M_evaluation (expression),
-
-        M_globalCFE_std (new ETCurrentFE<3, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), qrAdapter.standardQR() ) ),
-        M_globalCFE_adapted (new ETCurrentFE<3, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), qrAdapter.standardQR() ) )
+        M_evaluation (expression)
 
 {
+    switch (MeshType::geoShape_Type::BasRefSha::S_shape)
+    {
+        case LINE:
+            M_globalCFE_std = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feSegP0, geometricMapFromMesh<MeshType>(), qrAdapter.standardQR() );
+            M_globalCFE_adapted = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feSegP0, geometricMapFromMesh<MeshType>(), qrAdapter.standardQR() );
+            break;
+        case TRIANGLE:
+            M_globalCFE_std = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feTriaP0, geometricMapFromMesh<MeshType>(), qrAdapter.standardQR());
+            M_globalCFE_adapted = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feTriaP0, geometricMapFromMesh<MeshType>(), qrAdapter.standardQR());
+            break;
+        case QUAD:
+            M_globalCFE_std = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feQuadQ0, geometricMapFromMesh<MeshType>(), qrAdapter.standardQR());
+            M_globalCFE_adapted = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feQuadQ0, geometricMapFromMesh<MeshType>(), qrAdapter.standardQR());
+            break;
+        case TETRA:
+            M_globalCFE_std = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), qrAdapter.standardQR());
+            M_globalCFE_adapted = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), qrAdapter.standardQR());
+            break;
+        case HEXA:
+            M_globalCFE_std = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feHexaQ0, geometricMapFromMesh<MeshType>(), qrAdapter.standardQR());
+            M_globalCFE_adapted = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feHexaQ0, geometricMapFromMesh<MeshType>(), qrAdapter.standardQR());
+            break;
+        default:
+            ERROR_MSG ("Unrecognized element shape");
+    }
     M_evaluation.setQuadrature (qrAdapter.standardQR() );
     M_evaluation.setGlobalCFE (M_globalCFE_std);
 }
@@ -185,12 +208,33 @@ IntegrateValueElement < MeshType, ExpressionType, QRAdapterType>::
 IntegrateValueElement ( const IntegrateValueElement < MeshType, ExpressionType, QRAdapterType>& integrator)
     :   M_mesh (integrator.M_mesh),
         M_qrAdapter (integrator.M_qrAdapter),
-        M_evaluation (integrator.M_evaluation),
-
-        M_globalCFE_std (new ETCurrentFE<3, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), M_qrAdapter.standardQR() ) ),
-        M_globalCFE_adapted (new ETCurrentFE<3, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), M_qrAdapter.standardQR() ) )
-
+        M_evaluation (integrator.M_evaluation)
 {
+    switch (MeshType::geoShape_Type::BasRefSha::S_shape)
+    {
+        case LINE:
+            M_globalCFE_std = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feSegP0, geometricMapFromMesh<MeshType>(), M_qrAdapter.standardQR() );
+            M_globalCFE_adapted = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feSegP0, geometricMapFromMesh<MeshType>(), M_qrAdapter.standardQR() );
+            break;
+        case TRIANGLE:
+            M_globalCFE_std = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feTriaP0, geometricMapFromMesh<MeshType>(), M_qrAdapter.standardQR() );
+            M_globalCFE_adapted = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feTriaP0, geometricMapFromMesh<MeshType>(), M_qrAdapter.standardQR() );
+            break;
+        case QUAD:
+            M_globalCFE_std = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feQuadQ0, geometricMapFromMesh<MeshType>(), M_qrAdapter.standardQR() );
+            M_globalCFE_adapted = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feQuadQ0, geometricMapFromMesh<MeshType>(), M_qrAdapter.standardQR() );
+            break;
+        case TETRA:
+            M_globalCFE_std = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), M_qrAdapter.standardQR() );
+            M_globalCFE_adapted = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), M_qrAdapter.standardQR() );
+            break;
+        case HEXA:
+            M_globalCFE_std = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feHexaQ0, geometricMapFromMesh<MeshType>(), M_qrAdapter.standardQR() );
+            M_globalCFE_adapted = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feHexaQ0, geometricMapFromMesh<MeshType>(), M_qrAdapter.standardQR() );
+            break;
+        default:
+            ERROR_MSG ("Unrecognized element shape");
+    }
     M_evaluation.setQuadrature (M_qrAdapter.standardQR() );
     M_evaluation.setGlobalCFE (M_globalCFE_std);
 }
