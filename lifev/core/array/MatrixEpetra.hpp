@@ -754,7 +754,7 @@ void MatrixEpetra<DataType>::removeZeros()
 {
     if ( M_epetraCrs->Filled() )
     {
-        Int meanNumEntries = this->getMeanNumEntries();
+        Int meanNumEntries = this->meanNumEntries();
         matrix_ptrtype tmp ( M_epetraCrs );
         M_epetraCrs.reset (new matrix_type ( Copy, M_epetraCrs->RowMap(), meanNumEntries ) );
 
@@ -767,6 +767,11 @@ void MatrixEpetra<DataType>::removeZeros()
         for ( Int i (0); i < tmp->NumGlobalRows(); ++i )
         {
             row = tmp->LRID ( i );
+            // Check if the row belong to this process
+            if (row == -1)
+            {
+                continue;
+            }
             tmp->ExtractMyRowView ( row, NumEntries, Values, Indices );
 
             std::vector<Int> Indices2 ( NumEntries );
@@ -782,7 +787,7 @@ void MatrixEpetra<DataType>::removeZeros()
                     NumEntries2++;
                 }
             }
-            M_epetraCrs->InsertGlobalValues ( row, NumEntries2, &Values2[0], &Indices2[0] );
+            M_epetraCrs->InsertGlobalValues ( i, NumEntries2, &Values2[0], &Indices2[0] );
         }
         insertZeroDiagonal();
         M_epetraCrs->GlobalAssemble();
