@@ -33,33 +33,25 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
   @maintainer Radu Popescu <radu.popescu@epfl.ch>
 */
 
-#ifndef OPENMP_PARAMETERS_H
-#define OPENMP_PARAMETERS_H 1
-
-#ifdef _OPENMP
-#include <omp.h>
-#endif
+#include <lifev/core/util/OpenMPParameters.hpp>
 
 namespace LifeV
 {
 
-//! OpenMP parameter class
-struct OpenMPParameters
+OpenMPParameters::OpenMPParameters()
+    : numThreads (1), chunkSize (0)
 {
-    // Default constructor
-    OpenMPParameters();
-
-    // Apply OpenMP parameters
-    void apply();
-
-    // Data
-    int numThreads;
 #ifdef _OPENMP
-    omp_sched_t scheduler;
+    scheduler = omp_sched_static;
 #endif
-    int chunkSize;
-};
+}
+
+void OpenMPParameters::apply()
+{
+#ifdef _OPENMP
+    omp_set_num_threads (numThreads);
+    omp_set_schedule (scheduler, chunkSize);
+#endif
+}
 
 } // namespace LifeV
-
-#endif // OPENMP_PARAMETERS_H

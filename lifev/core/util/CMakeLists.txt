@@ -31,6 +31,7 @@ SET(util_SOURCES
   util/FactoryTypeInfo.cpp
   util/Displayer.cpp
   util/WallClock.cpp
+  util/OpenMPParameters.cpp
 CACHE INTERNAL "")
 
 
