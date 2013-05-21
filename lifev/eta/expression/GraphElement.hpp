@@ -98,7 +98,9 @@ public:
                   const boost::shared_ptr<TestSpaceType>& testSpace,
                   const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
                   const ExpressionType& expression,
-                  const OpenMPParameters& ompParams);
+                  const OpenMPParameters& ompParams,
+                  const UInt offsetUp = 0,
+                  const UInt offsetLeft = 0);
 
     //! Copy constructor
     GraphElement (const GraphElement < MeshType,
@@ -177,6 +179,10 @@ private:
 
     // For multi-threading
     OpenMPParameters M_ompParams;
+
+    // Offsets
+    UInt M_offsetUp;
+    UInt M_offsetLeft;
 };
 
 
@@ -195,12 +201,16 @@ GraphElement (const boost::shared_ptr<MeshType>& mesh,
               const boost::shared_ptr<TestSpaceType>& testSpace,
               const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
               const ExpressionType& /*expression*/,
-              const OpenMPParameters& ompParams)
+              const OpenMPParameters& ompParams,
+              const UInt offsetUp,
+              const UInt offsetLeft)
     :   M_mesh (mesh),
         M_quadrature (quadrature),
         M_testSpace (testSpace),
         M_solutionSpace (solutionSpace),
-        M_ompParams (ompParams)
+        M_ompParams (ompParams),
+        M_offsetUp (offsetUp),
+        M_offsetLeft (offsetLeft)
 {
 }
 
@@ -211,7 +221,9 @@ GraphElement (const GraphElement<MeshType, TestSpaceType, SolutionSpaceType, Exp
         M_quadrature (integrator.M_quadrature),
         M_testSpace (integrator.M_testSpace),
         M_solutionSpace (integrator.M_solutionSpace),
-        M_ompParams (integrator.M_ompParams)
+        M_ompParams (integrator.M_ompParams),
+        M_offsetUp (integrator.M_offsetUp),
+        M_offsetLeft (integrator.M_offsetLeft)
 {
 }
 
@@ -268,7 +280,7 @@ addTo (GraphType& graph)
                     {
                         elementalMatrix.setRowIndex
                         (i + iblock * nbTestDof,
-                         M_testSpace->dof().localToGlobalMap (iElement, i) + iblock * M_testSpace->dof().numTotalDof() );
+                         M_testSpace->dof().localToGlobalMap (iElement, i) + iblock * M_testSpace->dof().numTotalDof() + M_offsetUp);
                     }
 
                     // Set the column global indices in the local matrix
@@ -276,7 +288,7 @@ addTo (GraphType& graph)
                     {
                         elementalMatrix.setColumnIndex
                         (j + jblock * nbSolutionDof,
-                         M_solutionSpace->dof().localToGlobalMap (iElement, j) + jblock * M_solutionSpace->dof().numTotalDof() );
+                         M_solutionSpace->dof().localToGlobalMap (iElement, j) + jblock * M_solutionSpace->dof().numTotalDof() + M_offsetLeft);
                     }
                 }
             }

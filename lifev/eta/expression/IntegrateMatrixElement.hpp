@@ -97,7 +97,9 @@ public:
                             const QuadratureRule& quadrature,
                             const boost::shared_ptr<TestSpaceType>& testSpace,
                             const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
-                            const ExpressionType& expression);
+                            const ExpressionType& expression,
+                            const UInt offsetUp = 0,
+                            const UInt offsetLeft = 0);
 
     //! Full data constructor
     IntegrateMatrixElement (const boost::shared_ptr<MeshType>& mesh,
@@ -105,7 +107,9 @@ public:
                             const boost::shared_ptr<TestSpaceType>& testSpace,
                             const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
                             const ExpressionType& expression,
-                            const OpenMPParameters& ompParams);
+                            const OpenMPParameters& ompParams,
+                            const UInt offsetUp = 0,
+                            const UInt offsetLeft = 0 );
 
     //! Copy constructor
     IntegrateMatrixElement (const IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType>& integrator);
@@ -256,6 +260,9 @@ private:
     // Tree to compute the values for the assembly
     evaluation_Type M_evaluation;
 
+    UInt M_offsetUp;
+    UInt M_offsetLeft;
+
     // Data for multi-threaded assembly
     OpenMPParameters M_ompParams;
 };
@@ -275,7 +282,9 @@ IntegrateMatrixElement (const boost::shared_ptr<MeshType>& mesh,
                         const QuadratureRule& quadrature,
                         const boost::shared_ptr<TestSpaceType>& testSpace,
                         const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
-                        const ExpressionType& expression)
+                        const ExpressionType& expression,
+                        const UInt offsetUp,
+                        const UInt offsetLeft)
     :   M_mesh (mesh),
         M_quadrature (quadrature),
         M_testSpace (testSpace),
@@ -284,6 +293,8 @@ IntegrateMatrixElement (const boost::shared_ptr<MeshType>& mesh,
         M_testCFE (new ETCurrentFE<3, TestSpaceType::S_fieldDim> (testSpace->refFE(), testSpace->geoMap(), quadrature) ),
         M_solutionCFE (new ETCurrentFE<3, SolutionSpaceType::S_fieldDim> (solutionSpace->refFE(), testSpace->geoMap(), quadrature) ),
         M_evaluation (expression),
+        M_offsetUp (offsetUp),
+        M_offsetLeft (offsetLeft),
         M_ompParams()
 {
     M_evaluation.setQuadrature (quadrature);
@@ -299,7 +310,9 @@ IntegrateMatrixElement (const boost::shared_ptr<MeshType>& mesh,
                         const boost::shared_ptr<TestSpaceType>& testSpace,
                         const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
                         const ExpressionType& expression,
-                        const OpenMPParameters& ompParams)
+                        const OpenMPParameters& ompParams,
+                        const UInt offsetUp,
+                        const UInt offsetLeft )
     :   M_mesh (mesh),
         M_quadrature (quadrature),
         M_testSpace (testSpace),
@@ -308,6 +321,8 @@ IntegrateMatrixElement (const boost::shared_ptr<MeshType>& mesh,
         M_testCFE (new ETCurrentFE<3, TestSpaceType::S_fieldDim> (testSpace->refFE(), testSpace->geoMap(), quadrature) ),
         M_solutionCFE (new ETCurrentFE<3, SolutionSpaceType::S_fieldDim> (solutionSpace->refFE(), testSpace->geoMap(), quadrature) ),
         M_evaluation (expression),
+        M_offsetUp (offsetUp),
+        M_offsetLeft (offsetLeft),
         M_ompParams (ompParams)
 {
     M_evaluation.setQuadrature (quadrature);
@@ -327,6 +342,8 @@ IntegrateMatrixElement (const IntegrateMatrixElement<MeshType, TestSpaceType, So
         M_testCFE (new ETCurrentFE<3, TestSpaceType::S_fieldDim> (M_testSpace->refFE(), M_testSpace->geoMap(), M_quadrature) ),
         M_solutionCFE (new ETCurrentFE<3, SolutionSpaceType::S_fieldDim> (M_solutionSpace->refFE(), M_solutionSpace->geoMap(), M_quadrature) ),
         M_evaluation (integrator.M_evaluation),
+        M_offsetUp (integrator.M_offsetUp),
+        M_offsetLeft (integrator.M_offsetLeft),
         M_ompParams (integrator.M_ompParams)
 {
     M_evaluation.setQuadrature (M_quadrature);
@@ -390,7 +407,7 @@ integrateElement (const UInt iElement, const UInt nbQuadPt,
             {
                 elementalMatrix.setRowIndex
                 (i + iblock * nbTestDof,
-                 M_testSpace->dof().localToGlobalMap (iElement, i) + iblock * M_testSpace->dof().numTotalDof() );
+                 M_testSpace->dof().localToGlobalMap (iElement, i) + iblock * M_testSpace->dof().numTotalDof() + M_offsetUp);
             }
 
             // Set the column global indices in the local matrix
@@ -398,7 +415,7 @@ integrateElement (const UInt iElement, const UInt nbQuadPt,
             {
                 elementalMatrix.setColumnIndex
                 (j + jblock * nbSolutionDof,
-                 M_solutionSpace->dof().localToGlobalMap (iElement, j) + jblock * M_solutionSpace->dof().numTotalDof() );
+                 M_solutionSpace->dof().localToGlobalMap (iElement, j) + jblock * M_solutionSpace->dof().numTotalDof() + M_offsetLeft);
             }
 
             for (UInt iQuadPt (0); iQuadPt < nbQuadPt; ++iQuadPt)
