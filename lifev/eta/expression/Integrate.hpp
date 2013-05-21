@@ -111,11 +111,23 @@ integrate ( const RequestLoopElement<MeshType>& request,
             const boost::shared_ptr<TestSpaceType>& testSpace,
             const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
             const ExpressionType& expression,
-            const OpenMPParameters& ompParams)
+            const OpenMPParameters& ompParams,
+            const UInt offsetUp = 0,
+            const UInt offsetLeft = 0);
+template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
+IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType>
+integrate ( const RequestLoopElement<MeshType>& request,
+            const QuadratureRule& quadrature,
+            const boost::shared_ptr<TestSpaceType>& testSpace,
+            const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
+            const ExpressionType& expression,
+            const OpenMPParameters& ompParamsm
+            const UInt offsetUp,
+            const UInt offsetLeft)
 {
     return IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType>
            (request.mesh(), quadrature, testSpace, solutionSpace, expression,
-            ompParams);
+            ompParams, offsetUp, offsetLeft);
 }
 
 //! Integrate function for vectorial expressions
