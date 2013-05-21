@@ -62,8 +62,8 @@ namespace ExpressionAssembly
   This class is an Evaluation class, and therefore, has all the methods
   required to work within the Evaluation trees.
  */
-template <UInt spaceDim>
-class EvaluationDphiI<3, spaceDim>
+template <UInt fieldDim, UInt spaceDim>
+class EvaluationDphiI
 {
 public:
 
@@ -71,7 +71,7 @@ public:
     //@{
 
     //! Type of the values returned by this class
-    typedef MatrixSmall<3, spaceDim> return_Type;
+    typedef MatrixSmall<fieldDim, spaceDim> return_Type;
 
     //@}
 
@@ -178,14 +178,14 @@ private:
 };
 
 
-template<UInt spaceDim>
-const flag_Type EvaluationDphiI<3, spaceDim>::S_globalUpdateFlag = ET_UPDATE_NONE;
+template<UInt fieldDim, UInt spaceDim>
+const flag_Type EvaluationDphiI<fieldDim, spaceDim>::S_globalUpdateFlag = ET_UPDATE_NONE;
 
-template<UInt spaceDim>
-const flag_Type EvaluationDphiI<3, spaceDim>::S_testUpdateFlag = ET_UPDATE_DPHI;
+template<UInt fieldDim, UInt spaceDim>
+const flag_Type EvaluationDphiI<fieldDim, spaceDim>::S_testUpdateFlag = ET_UPDATE_DPHI;
 
-template<UInt spaceDim>
-const flag_Type EvaluationDphiI<3, spaceDim>::S_solutionUpdateFlag = ET_UPDATE_NONE;
+template<UInt fieldDim, UInt spaceDim>
+const flag_Type EvaluationDphiI<fieldDim, spaceDim>::S_solutionUpdateFlag = ET_UPDATE_NONE;
 
 
 //! Evaluation of the basis function dphi_i in the case of a scalar FE.

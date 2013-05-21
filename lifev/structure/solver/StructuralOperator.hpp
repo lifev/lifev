@@ -1698,6 +1698,13 @@ void StructuralOperator<Mesh>::updateJacobian ( const vector_Type& sol, matrixPt
     jacobian.reset (new matrix_Type (*M_localMap) );
     *jacobian += * (M_material->jacobian() );
 
+    //Spying the static part of the Jacobian to check if it is symmetric
+    // M_material->jacobian()->spy("staticJacobianMatrix");
+
+    // std::cout << "spyed" << std::endl;
+    // int n;
+    // std::cin >> n ;
+
     *jacobian += *M_massMatrix;
 
     jacobian->globalAssemble();
