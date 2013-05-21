@@ -121,7 +121,7 @@ integrate ( const RequestLoopElement<MeshType>& request,
             const boost::shared_ptr<TestSpaceType>& testSpace,
             const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
             const ExpressionType& expression,
-            const OpenMPParameters& ompParamsm
+            const OpenMPParameters& ompParams,
             const UInt offsetUp,
             const UInt offsetLeft)
 {
