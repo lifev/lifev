@@ -91,7 +91,9 @@ public:
                             const QuadratureRule& quadrature,
                             const boost::shared_ptr<TestSpaceType>& testSpace,
                             const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
-                            const ExpressionType& expression);
+                            const ExpressionType& expression,
+                            const UInt offsetUp = 0,
+                            const UInt offsetLeft = 0);
 
     //! Copy constructor
     IntegrateMatrixElement (const IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType>& integrator);
@@ -214,12 +216,15 @@ private:
      * This method computes the elemental matrix for a given element
      * index
      */
-    void integrateElement (const UInt iElement,
-                           const UInt nbElements,
-                           const UInt nbQuadPt,
-                           const UInt nbTestDof,
-                           const UInt nbSolutionDof);
-
+    void integrateElement  (const UInt iElement,
+                            const UInt nbQuadPt,
+                            const UInt nbTestDof,
+                            const UInt nbSolutionDof,
+                            ETMatrixElemental& elementalMatrix,
+                            evaluation_Type& evaluation,
+                            ETCurrentFE<3, 1>& globalCFE,
+                            ETCurrentFE<3, TestSpaceType::S_fieldDim>& testCFE,
+                            ETCurrentFE<3, SolutionSpaceType::S_fieldDim>& solutionCFE);
     //@}
 
     // Pointer on the mesh
@@ -232,15 +237,15 @@ private:
     boost::shared_ptr<TestSpaceType> M_testSpace;
     boost::shared_ptr<SolutionSpaceType> M_solutionSpace;
 
-    // Tree to compute the values for the assembly
-    evaluation_Type M_evaluation;
-
-
     ETCurrentFE<3, 1>* M_globalCFE;
     ETCurrentFE<3, TestSpaceType::S_fieldDim>* M_testCFE;
     ETCurrentFE<3, SolutionSpaceType::S_fieldDim>* M_solutionCFE;
 
-    ETMatrixElemental M_elementalMatrix;
+    // Tree to compute the values for the assembly
+    evaluation_Type M_evaluation;
+
+    UInt M_offsetUp;
+    UInt M_offsetLeft;
 };
 
 
@@ -258,19 +263,19 @@ IntegrateMatrixElement (const boost::shared_ptr<MeshType>& mesh,
                         const QuadratureRule& quadrature,
                         const boost::shared_ptr<TestSpaceType>& testSpace,
                         const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
-                        const ExpressionType& expression)
+                        const ExpressionType& expression,
+                        const UInt offsetUp,
+                        const UInt offsetLeft)
     :   M_mesh (mesh),
         M_quadrature (quadrature),
         M_testSpace (testSpace),
         M_solutionSpace (solutionSpace),
-        M_evaluation (expression),
-
         M_globalCFE (new ETCurrentFE<3, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), quadrature) ),
         M_testCFE (new ETCurrentFE<3, TestSpaceType::S_fieldDim> (testSpace->refFE(), testSpace->geoMap(), quadrature) ),
         M_solutionCFE (new ETCurrentFE<3, SolutionSpaceType::S_fieldDim> (solutionSpace->refFE(), testSpace->geoMap(), quadrature) ),
-
-        M_elementalMatrix (TestSpaceType::S_fieldDim * testSpace->refFE().nbDof(),
-                           SolutionSpaceType::S_fieldDim * solutionSpace->refFE().nbDof() )
+        M_evaluation (expression),
+        M_offsetUp (offsetUp),
+        M_offsetLeft (offsetLeft)
 {
     M_evaluation.setQuadrature (quadrature);
     M_evaluation.setGlobalCFE (M_globalCFE);
@@ -285,13 +290,13 @@ IntegrateMatrixElement (const IntegrateMatrixElement<MeshType, TestSpaceType, So
         M_quadrature (integrator.M_quadrature),
         M_testSpace (integrator.M_testSpace),
         M_solutionSpace (integrator.M_solutionSpace),
-        M_evaluation (integrator.M_evaluation),
-
         M_globalCFE (new ETCurrentFE<3, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), M_quadrature) ),
         M_testCFE (new ETCurrentFE<3, TestSpaceType::S_fieldDim> (M_testSpace->refFE(), M_testSpace->geoMap(), M_quadrature) ),
         M_solutionCFE (new ETCurrentFE<3, SolutionSpaceType::S_fieldDim> (M_solutionSpace->refFE(), M_solutionSpace->geoMap(), M_quadrature) ),
-
-        M_elementalMatrix (integrator.M_elementalMatrix)
+        M_evaluation (integrator.M_evaluation),
+        M_offsetUp (integrator.M_offsetUp),
+        M_offsetLeft (integrator.M_offsetLeft),
+        M_ompParams (integrator.M_ompParams)
 {
     M_evaluation.setQuadrature (M_quadrature);
     M_evaluation.setGlobalCFE (M_globalCFE);
@@ -320,28 +325,27 @@ check (std::ostream& out)
     out << " Checking the integration : " << std::endl;
     M_evaluation.display (out);
     out << std::endl;
-    out << " Elemental matrix : " << std::endl;
-    M_elementalMatrix.showMe (out);
-    out << std::endl;
 }
 
 template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
 void
 IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType>::
-integrateElement (const UInt iElement, const UInt nbElements,
-                  const UInt nbQuadPt, const UInt nbTestDof,
-                  const UInt nbSolutionDof)
+integrateElement (const UInt iElement, const UInt nbQuadPt,
+                  const UInt nbTestDof, const UInt nbSolutionDof,
+                  ETMatrixElemental& elementalMatrix,
+                  evaluation_Type& evaluation,
+                  ETCurrentFE<3, 1>& globalCFE,
+                  ETCurrentFE<3, TestSpaceType::S_fieldDim>& testCFE,
+                  ETCurrentFE<3, SolutionSpaceType::S_fieldDim>& solutionCFE)
 {
     // Zeros out the matrix
-    M_elementalMatrix.zero();
+    elementalMatrix.zero();
 
-    // Update the currentFEs
-    M_globalCFE->update (M_mesh->element (iElement), evaluation_Type::S_globalUpdateFlag | ET_UPDATE_WDET);
-    M_testCFE->update (M_mesh->element (iElement), evaluation_Type::S_testUpdateFlag);
-    M_solutionCFE->update (M_mesh->element (iElement), evaluation_Type::S_solutionUpdateFlag);
+    globalCFE.update (M_mesh->element (iElement), evaluation_Type::S_globalUpdateFlag | ET_UPDATE_WDET);
+    testCFE.update (M_mesh->element (iElement), evaluation_Type::S_testUpdateFlag);
+    solutionCFE.update (M_mesh->element (iElement), evaluation_Type::S_solutionUpdateFlag);
 
-    // Update the evaluation
-    M_evaluation.update (iElement);
+    evaluation.update (iElement);
 
     // Loop on the blocks
 
@@ -353,17 +357,17 @@ integrateElement (const UInt iElement, const UInt nbElements,
             // Set the row global indices in the local matrix
             for (UInt i (0); i < nbTestDof; ++i)
             {
-                M_elementalMatrix.setRowIndex
+                elementalMatrix.setRowIndex
                 (i + iblock * nbTestDof,
-                 M_testSpace->dof().localToGlobalMap (iElement, i) + iblock * M_testSpace->dof().numTotalDof() );
+                 M_testSpace->dof().localToGlobalMap (iElement, i) + iblock * M_testSpace->dof().numTotalDof() + M_offsetUp);
             }
 
             // Set the column global indices in the local matrix
             for (UInt j (0); j < nbSolutionDof; ++j)
             {
-                M_elementalMatrix.setColumnIndex
+                elementalMatrix.setColumnIndex
                 (j + jblock * nbSolutionDof,
-                 M_solutionSpace->dof().localToGlobalMap (iElement, j) + jblock * M_solutionSpace->dof().numTotalDof() );
+                 M_solutionSpace->dof().localToGlobalMap (iElement, j) + jblock * M_solutionSpace->dof().numTotalDof() + M_offsetLeft);
             }
 
             for (UInt iQuadPt (0); iQuadPt < nbQuadPt; ++iQuadPt)
@@ -372,9 +376,9 @@ integrateElement (const UInt iElement, const UInt nbElements,
                 {
                     for (UInt j (0); j < nbSolutionDof; ++j)
                     {
-                        M_elementalMatrix.element (i + iblock * nbTestDof, j + jblock * nbSolutionDof) +=
-                            M_evaluation.value_qij (iQuadPt, i + iblock * nbTestDof, j + jblock * nbSolutionDof)
-                            * M_globalCFE->wDet (iQuadPt);
+                        elementalMatrix.element (i + iblock * nbTestDof, j + jblock * nbSolutionDof) +=
+                            evaluation.value_qij (iQuadPt, i + iblock * nbTestDof, j + jblock * nbSolutionDof)
+                            * globalCFE.wDet (iQuadPt);
 
                     }
                 }
@@ -394,12 +398,33 @@ addTo (MatrixType& mat)
     UInt nbTestDof (M_testSpace->refFE().nbDof() );
     UInt nbSolutionDof (M_solutionSpace->refFE().nbDof() );
 
-    for (UInt iElement (0); iElement < nbElements; ++iElement)
-    {
-        integrateElement (iElement, nbElements, nbQuadPt, nbTestDof,
-                          nbSolutionDof);
+    // Update the currentFEs
+    ETCurrentFE<3, 1>
+    globalCFE (feTetraP0, geometricMapFromMesh<MeshType>(), M_quadrature);
+    ETCurrentFE<3, TestSpaceType::S_fieldDim>
+    testCFE (M_testSpace->refFE(), M_testSpace->geoMap(), M_quadrature);
 
-        M_elementalMatrix.pushToGlobal (mat);
+    ETCurrentFE<3, SolutionSpaceType::S_fieldDim>
+    solutionCFE (M_solutionSpace->refFE(), M_testSpace->geoMap(),
+                 M_quadrature);
+
+    evaluation_Type evaluation (M_evaluation);
+    // Update the evaluation
+    evaluation.setQuadrature (M_quadrature);
+    evaluation.setGlobalCFE (&globalCFE);
+    evaluation.setTestCFE (&testCFE);
+    evaluation.setSolutionCFE (&solutionCFE);
+
+    ETMatrixElemental elementalMatrix (TestSpaceType::S_fieldDim * M_testSpace->refFE().nbDof(),
+                                       SolutionSpaceType::S_fieldDim * M_solutionSpace->refFE().nbDof() );
+
+    for (UInt iElement = 0; iElement < nbElements; ++iElement)
+    {
+        integrateElement (iElement, nbQuadPt, nbTestDof, nbSolutionDof,
+                          elementalMatrix, evaluation, globalCFE,
+                          testCFE, solutionCFE);
+
+        elementalMatrix.pushToGlobal (mat);
     }
 }
 
@@ -414,12 +439,33 @@ addToClosed (MatrixType& mat)
     UInt nbTestDof (M_testSpace->refFE().nbDof() );
     UInt nbSolutionDof (M_solutionSpace->refFE().nbDof() );
 
-    for (UInt iElement (0); iElement < nbElements; ++iElement)
-    {
-        integrateElement (iElement, nbElements, nbQuadPt, nbTestDof,
-                          nbSolutionDof);
+    // Update the currentFEs
+    ETCurrentFE<3, 1>
+    globalCFE (feTetraP0, geometricMapFromMesh<MeshType>(), M_quadrature);
+    ETCurrentFE<3, TestSpaceType::S_fieldDim>
+    testCFE (M_testSpace->refFE(), M_testSpace->geoMap(), M_quadrature);
 
-        M_elementalMatrix.pushToClosedGlobal (mat);
+    ETCurrentFE<3, SolutionSpaceType::S_fieldDim>
+    solutionCFE (M_solutionSpace->refFE(), M_testSpace->geoMap(),
+                 M_quadrature);
+
+    evaluation_Type evaluation (M_evaluation);
+    // Update the evaluation
+    evaluation.setQuadrature (M_quadrature);
+    evaluation.setGlobalCFE (&globalCFE);
+    evaluation.setTestCFE (&testCFE);
+    evaluation.setSolutionCFE (&solutionCFE);
+
+    ETMatrixElemental elementalMatrix (TestSpaceType::S_fieldDim * M_testSpace->refFE().nbDof(),
+                                       SolutionSpaceType::S_fieldDim * M_solutionSpace->refFE().nbDof() );
+
+    for (UInt iElement = 0; iElement < nbElements; ++iElement)
+    {
+        integrateElement (iElement, nbQuadPt, nbTestDof, nbSolutionDof,
+                          elementalMatrix, evaluation, globalCFE,
+                          testCFE, solutionCFE);
+
+        elementalMatrix.pushToClosedGlobal (mat);
     }
 }
 
