@@ -56,27 +56,31 @@ namespace LifeV
 // ===================================================
 // Constructors & Destructor
 // ===================================================
-VectorEpetra::VectorEpetra ( const MapEpetraType& mapType ) :
+VectorEpetra::VectorEpetra ( const MapEpetraType& mapType, const combineMode_Type combineMode ) :
     M_epetraMap   (),
     M_mapType     ( mapType ),
     M_epetraVector(),
-    M_combineMode ( Add )
+    M_combineMode ( combineMode )
 {
 }
 
-VectorEpetra::VectorEpetra ( const MapEpetra& map, const MapEpetraType& mapType ) :
+VectorEpetra::VectorEpetra ( const MapEpetra& map,
+                             const MapEpetraType& mapType,
+                             const combineMode_Type combineMode ) :
     M_epetraMap   ( new MapEpetra ( map ) ),
     M_mapType     ( mapType ),
     M_epetraVector ( new vector_type ( *M_epetraMap->map (M_mapType) ) ),
-    M_combineMode ( Add )
+    M_combineMode ( combineMode )
 {
 }
 
-VectorEpetra::VectorEpetra ( const boost::shared_ptr<MapEpetra>& map, const MapEpetraType& mapType ) :
+VectorEpetra::VectorEpetra ( const boost::shared_ptr<MapEpetra>& map,
+                             const MapEpetraType& mapType,
+                             const combineMode_Type combineMode ) :
     M_epetraMap   ( map ),
     M_mapType     ( mapType ),
     M_epetraVector ( new vector_type ( *M_epetraMap->map (M_mapType) ) ),
-    M_combineMode ( Add )
+    M_combineMode ( combineMode )
 {
 }
 
@@ -92,7 +96,7 @@ VectorEpetra::VectorEpetra ( const VectorEpetra& vector, const MapEpetraType& ma
     M_epetraMap   ( vector.M_epetraMap ),
     M_mapType     ( mapType ),
     M_epetraVector ( new vector_type ( *M_epetraMap->map ( M_mapType ) ) ),
-    M_combineMode ( Add )
+    M_combineMode ( vector.M_combineMode )
 {
     operator = (vector);
 }
@@ -102,7 +106,7 @@ VectorEpetra::VectorEpetra ( const VectorEpetra& vector, const MapEpetraType& ma
     M_epetraMap   ( vector.M_epetraMap ),
     M_mapType     ( mapType ),
     M_epetraVector ( new vector_type ( *M_epetraMap->map ( M_mapType ) ) ),
-    M_combineMode ( Add )
+    M_combineMode ( vector.M_combineMode )
 {
     if (mapType == vector.M_mapType)
     {
@@ -125,11 +129,12 @@ VectorEpetra::VectorEpetra ( const VectorEpetra& vector, const MapEpetraType& ma
 
 VectorEpetra::VectorEpetra ( const Epetra_MultiVector&          vector,
                              const boost::shared_ptr<MapEpetra> map,
-                             const MapEpetraType&               mapType ) :
+                             const MapEpetraType&               mapType,
+                             const combineMode_Type             combineMode ) :
     M_epetraMap   ( map ),
     M_mapType     ( mapType ),
     M_epetraVector ( new vector_type ( *map->map ( mapType ) ) ),
-    M_combineMode ( Add )
+    M_combineMode ( combineMode )
 {
     assert ( this->blockMap().SameAs (vector.Map() ) );
     M_epetraVector->Update (1., vector, 0.);
@@ -139,7 +144,7 @@ VectorEpetra::VectorEpetra ( const VectorEpetra& vector, const Int& reduceToProc
     M_epetraMap   ( vector.M_epetraMap->createRootMap ( reduceToProc ) ),
     M_mapType     ( Unique ),
     M_epetraVector ( new vector_type ( *M_epetraMap->map ( M_mapType ) ) ),
-    M_combineMode ( Add )
+    M_combineMode ( vector.M_combineMode )
 {
     operator = ( vector );
 }
