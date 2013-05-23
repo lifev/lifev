@@ -1,6 +1,7 @@
 SET(solverAnisotropic_HEADERS
   solver/anisotropic/StructuralAnisotropicConstitutiveLaw.hpp
   solver/anisotropic/HolzapfelMaterialNonLinear.hpp
+  solver/anisotropic/DistributedHolzapfelMaterialNonLinear.hpp
 CACHE INTERNAL "")
 
 SET(solverAnisotropic_SOURCES

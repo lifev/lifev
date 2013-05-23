@@ -72,6 +72,7 @@ StructuralConstitutiveLawData::StructuralConstitutiveLawData() :
     M_numberFibers                     ( 0 ),
     M_stiffnessParametersFibers        ( ),
     M_nonlinearityParametersFibers     ( ),
+    M_distributionParametersFibers     ( ),
     M_epsilon                          ( 0 ),
 #endif
     M_lawType                          ( ),
@@ -106,6 +107,7 @@ StructuralConstitutiveLawData::StructuralConstitutiveLawData ( const StructuralC
     M_numberFibers                     ( structuralConstitutiveLawData.M_numberFibers ),
     M_stiffnessParametersFibers        ( structuralConstitutiveLawData.M_stiffnessParametersFibers ),
     M_nonlinearityParametersFibers     ( structuralConstitutiveLawData.M_nonlinearityParametersFibers ),
+    M_distributionParametersFibers     ( structuralConstitutiveLawData.M_distributionParametersFibers ),
     M_epsilon                          ( structuralConstitutiveLawData.M_epsilon ),
 #endif
     M_lawType                          ( structuralConstitutiveLawData.M_lawType ),
@@ -148,6 +150,7 @@ StructuralConstitutiveLawData::operator= ( const StructuralConstitutiveLawData& 
         M_numberFibers                     = structuralConstitutiveLawData.M_numberFibers;
         M_stiffnessParametersFibers        = structuralConstitutiveLawData.M_stiffnessParametersFibers;
         M_nonlinearityParametersFibers     = structuralConstitutiveLawData.M_nonlinearityParametersFibers;
+        M_distributionParametersFibers     = structuralConstitutiveLawData.M_distributionParametersFibers;
         M_epsilon                          = structuralConstitutiveLawData.M_epsilon;
 #endif
         M_lawType                          = structuralConstitutiveLawData.M_lawType;
@@ -222,11 +225,13 @@ StructuralConstitutiveLawData::setup ( const GetPot& dataFile, const std::string
 #ifdef ENABLE_ANISOTROPIC_LAW
     if( !M_constitutiveLaw.compare("anisotropic") )
       {
-	UInt numberOfStiffnesses = dataFile.vector_variable_size ( ( section + "/model/fibers/stiffness" ).data() );
+	UInt numberOfStiffnesses    = dataFile.vector_variable_size ( ( section + "/model/fibers/stiffness" ).data() );
 	UInt numberOfNonlinearities = dataFile.vector_variable_size ( ( section + "/model/fibers/nonlinearity" ).data() );
+	UInt numberOfDistribution   = dataFile.vector_variable_size ( ( section + "/model/fibers/distribution" ).data() );
 
 	ASSERT( M_numberFibers  , " The number of fiber families is equal to zero, change the variable constitutiveLaw from anisotropic to isotropic " );
-	ASSERT( ( M_numberFibers == numberOfStiffnesses ) && ( M_numberFibers == numberOfNonlinearities ), " Inconsistency in the set up of the fiber parameters" );
+	ASSERT( ( M_numberFibers == numberOfStiffnesses ) && ( M_numberFibers == numberOfNonlinearities )
+            && ( M_numberFibers == numberOfDistribution ), " Inconsistency in the set up of the fiber parameters" );
       }
 #endif
 
@@ -281,9 +286,11 @@ StructuralConstitutiveLawData::setup ( const GetPot& dataFile, const std::string
 	  {
 	    M_stiffnessParametersFibers .resize ( M_numberFibers  );
 	    M_nonlinearityParametersFibers .resize ( M_numberFibers  );
+	    M_distributionParametersFibers .resize ( M_numberFibers  );
 
 	    M_stiffnessParametersFibers[ i ]      = dataFile ( ( section + "/model/fibers/stiffness"    ).data(), 0., i );
 	    M_nonlinearityParametersFibers[ i ]   = dataFile ( ( section + "/model/fibers/nonlinearity" ).data(), 0., i );
+	    M_distributionParametersFibers[ i ]   = dataFile ( ( section + "/model/fibers/distribution" ).data(), 0., i );
 	  }
 	M_epsilon = dataFile ( ( section + "/model/fibers/smoothness"   ).data(), 0. );
       }
@@ -370,8 +377,8 @@ StructuralConstitutiveLawData::showMe ( std::ostream& output ) const
 
 	for ( UInt i (0) ; i < M_numberFibers ; ++i )
 	  {
-	    std::cout << i + 1 << "-th coupled of parameters ( stiffness, nonlinearity ) : ( " << M_stiffnessParametersFibers[ i ]
-		      << ", " << M_nonlinearityParametersFibers[ i ] << " ); " << std::endl;
+	    std::cout << i + 1 << "-th coupled of parameters ( stiffness, nonlinearity, distribution ) : ( " << M_stiffnessParametersFibers[ i ]
+                  << ", " << M_nonlinearityParametersFibers[ i ] << M_distributionParametersFibers[ i ] << " ); " << std::endl;
 	  }
       }
 #endif
