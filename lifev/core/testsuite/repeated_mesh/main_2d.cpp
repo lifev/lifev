@@ -328,13 +328,13 @@ main ( int argc, char** argv )
         }
 
         vector_Type rhs ( uFESpace->map(), Unique );
-        vector_Type rhsR ( uFESpaceR->map(), Unique );
+        vector_Type rhsR ( uFESpaceR->map(), Unique, Zero );
 
         adrAssembler.addMassRhs ( rhs, fRhs, 0. );
         rhs.globalAssemble();
 
         adrAssemblerR.addMassRhs ( rhsR, fRhs, 0. );
-        rhsR.globalAssemble ( Zero );
+        rhsR.globalAssemble ();
 
         vector_Type vectorDiff ( rhs );
         vectorDiff -= rhsR;
@@ -379,7 +379,7 @@ main ( int argc, char** argv )
 #endif
 
         vector_Type rhsCopy ( rhs, Repeated );
-        vector_Type rhsCopyR ( rhsR, Repeated );
+        vector_Type rhsCopyR ( rhsR, Repeated, Add );
         Real l2Error  = uFESpace->l2Error ( fRhs, rhsCopy, 0.0 );
         Real l2ErrorR = uFESpaceR->l2Error ( fRhs, rhsCopyR, 0.0 );
         Real diffL2Error = std::fabs ( l2Error - l2ErrorR );
