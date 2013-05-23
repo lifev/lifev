@@ -663,13 +663,6 @@ namespace
 static bool registerNH = StructuralIsotropicConstitutiveLaw<LifeV::RegionMesh<LinearTetra> >::StructureIsotropicMaterialFactory::instance().registerProduct ( "neoHookean", &createNeoHookeanMaterialNonLinear<LifeV::RegionMesh<LinearTetra> > );
 }
 
-#undef deformationGradientTensor
-#undef detDeformationGradientTensor
-#undef deformationGradientTensor_T
-#undef RIGHTCAUCHYGREEN
-#undef firstInvariantC
-#undef firstInvariantCbar
-
 } //Namespace LifeV
 
 #endif /* __NEOHOOKENANMATERIAL_H */

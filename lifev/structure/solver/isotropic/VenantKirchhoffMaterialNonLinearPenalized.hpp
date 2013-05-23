@@ -1016,15 +1016,6 @@ namespace
 static bool registerVKP = StructuralIsotropicConstitutiveLaw<LifeV::RegionMesh<LinearTetra> >::StructureIsotropicMaterialFactory::instance().registerProduct ( "nonLinearVenantKirchhoffPenalized", &createVenantKirchhoffMaterialNonLinearPenalized<LifeV::RegionMesh<LinearTetra> > );
 }
 
-#undef deformationGradientTensor
-#undef detDeformationGradientTensor
-#undef deformationGradientTensor_T
-#undef RIGHTCAUCHYGREEN
-#undef firstInvariantC
-#undef firstInvariantCsquared
-#undef firstInvariantCbar
-
-
 } //Namespace LifeV
 
 #endif /* __VENANTKIRCHHOFFPENALIZED_H */
