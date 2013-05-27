@@ -8,5 +8,5 @@ ADD_SUBDIRECTORIES(
   vectorial_ADR_2D
   interpolate_gradient_2D
   blocks_2D
-
+  repeated_mesh_2D
 )
