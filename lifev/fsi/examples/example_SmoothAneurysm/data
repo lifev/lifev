@@ -120,15 +120,15 @@ conservativeFormulation       = false  # tells if the conservative or non conser
     [../time_discretization]
     method          = BDF
     initialtime        = 0.
-    endtime            = 0.004
-    timestep        = 0.001
+    endtime            = 0.05
+    timestep        = 0.005
     BDF_order        = 2   # can go up to 5
 
 ** #space discretization
     [../space_discretization]
     mesh_type = .mesh
-    mesh_dir  = ./FSI-TestWorkstation/
-    mesh_file = tube20.mesh # bypass_fluid_coarse_BL_2vols.mesh
+    mesh_dir  = ./Mesh/
+    mesh_file = ACA-coarseFluid.mesh
     mesh_order     = P1                  # order for the geometry problem, P1 or P2
     vel_order       = P1Bubble                 # order for the fluid velocity FE space: P1, P1Bubble, P2
     press_order     = P1                 # P1, P2
@@ -155,7 +155,7 @@ conservativeFormulation       = false  # tells if the conservative or non conser
 * #interface data
 [interface]
 fluid_flag      =  1        # default: 1, the mesh flag of the interface
-structure_flag      =  1        # default: fluid_flag
+solid_flag      =  1        # default: fluid_flag
 tolerance       =  0         # how far points are to be considered the same on the interface
 fluid_vertex_flag = 20       # tells wether the in/out ring curves on the interface
                             # is considered in the coupling (fluid_vertex_flag=0) or not (fluid_vertex_flag=1)
@@ -173,9 +173,8 @@ rescaleFactor    = 1.    # this factor can be used to rescale the structure bloc
 
     solidType = exponential
     lawType   = nonlinear
-## available choices: exponential, neoHookean, nonLinearVenantKirchhoff, linearVenantKirchhoff
     material_flag = 1                #the mesh flag of the structure volume
-    thickness    = 0.05
+    thickness    = 0.01
     density   = 1.2
     young     = 4.0E6
     poisson   = 0.45
@@ -187,15 +186,15 @@ rescaleFactor    = 1.    # this factor can be used to rescale the structure bloc
     [../time_discretization]
     method          = BDF
     initialtime        = 0.
-    endtime            = 0.004
-    timestep        = 0.001
+    endtime            = 0.05
+    timestep        = 0.005
     BDF_order        = 2
 
 ** #space discretization
     [../space_discretization]
     mesh_type = .mesh
-    mesh_dir  = ./FSI-TestWorkstation/ #test_tubes/  # the directory where the mesh file is
-    mesh_file = vessel20.mesh # mesh file
+    mesh_dir  = ./Mesh/
+    mesh_file = ACA-coarseSolid.mesh
     order     = P1 #P1 or P2
     mesh_faces      = all                   # update all faces elements
     mesh_edges      = all                   # update all faces elements
@@ -211,9 +210,9 @@ rescaleFactor    = 1.    # this factor can be used to rescale the structure bloc
 ** #linear solver
     [./solver]
     output          = all            # none
-    max_iter        = 200         # max number of iterations
+    max_iter        = 800         # max number of iterations
     poly_ord        = 5
-    kspace          = 200         # Krylov space maximum dimension
+    kspace          = 800         # Krylov space maximum dimension
     tol             = 1.e-6         # Tolerance for the linear system
 
 *** #aztecoo linear solver section
@@ -471,8 +470,8 @@ rescaleFactor    = 1.    # this factor can be used to rescale the structure bloc
     [./time_discretization]
     method          = BDF
     initialtime        = 0.
-    endtime            = 0.004
-    timestep        = 0.001
+    endtime            = 0.05
+    timestep        = 0.005
     BDF_order        = 2
 
 * #eigensolver section, used when we want to compute the singular values of the preconditioned FSI system (see in FSIMonolithic.cpp)

@@ -90,6 +90,10 @@ FSIOperator::fluidBchandlerPtr_Type BCh_harmonicExtension (FSIOperator& /*_oper*
     BCh_he->addBC ("in", INLET, Essential, Full, bcf,   3);
     BCh_he->addBC ("in", OUTLET, Essential, Full, bcf,   3);
 
+    // Rings of the fluid domain
+    BCh_he->addBC ("inRing", INLETRING,  EssentialVertices, Full, bcf,   3);
+    BCh_he->addBC ("inRing", OUTLETRING, EssentialVertices, Full, bcf,   3);
+
     return BCh_he;
 }
 
@@ -134,7 +138,7 @@ FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFluid (FSIOperator& _oper, boo
     //BCFunctionBase bcfw0 (w0);
 
     //Inlets
-    BCh_fluid->addBC ("InFlow" , INLET,  Essential, Full, InletVect, 3);
+    BCh_fluid->addBC ("InFlow" , INLET,  EssentialVertices, Full, InletVect, 3);
 
     //Outlets
 
