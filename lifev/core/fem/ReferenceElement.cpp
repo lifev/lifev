@@ -44,7 +44,7 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 
-ReferenceElement::ReferenceElement ( std::string name, ReferenceShapes shape, UInt nbDof, UInt nbCoor, UInt feDim,
+ReferenceElement::ReferenceElement ( std::string name, ReferenceShapes shape, UInt nbDof, UInt nbLocalCoor, UInt feDim,
                                      const function_Type* phi, const function_Type* dPhi, const function_Type* d2Phi,
                                      const function_Type* divPhi, const Real* refCoor ) :
     M_phi ( phi ),
@@ -56,7 +56,7 @@ ReferenceElement::ReferenceElement ( std::string name, ReferenceShapes shape, UI
     M_name ( name ),
     M_shape ( shape ),
     M_nbDof ( nbDof ),
-    M_nbCoor ( nbCoor ),
+    M_nbLocalCoor ( nbLocalCoor ),
     M_feDim ( feDim )
 {
 }

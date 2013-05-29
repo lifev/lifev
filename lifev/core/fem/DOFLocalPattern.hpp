@@ -113,7 +113,7 @@ public:
 
     //! Full constructor
     DOFLocalPattern ( const UInt& nbLocalDof, const UInt& nbDofPerVertex, const UInt& nbDofPerEdge,
-                      const UInt& nbDofPerFace, const UInt& nbDofPerVolume, const DofPatternType& patternType, UInt nbCoor );
+                      const UInt& nbDofPerFace, const UInt& nbDofPerVolume, const DofPatternType& patternType, UInt nbLocalCoor );
 
     //! Simple copy constructor
     DOFLocalPattern ( const DOFLocalPattern& localDofPattern);

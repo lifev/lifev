@@ -111,14 +111,17 @@ public:
 #ifdef HAVE_NS_PREC
     typedef MatrixEpetraStructured<Real>                matrix_Type;
 #else
-    typedef typename linearSolver_Type::matrix_type       matrix_Type;
+    typedef typename linearSolver_Type::matrix_type     matrix_Type;
 #endif
     typedef boost::shared_ptr<matrix_Type>              matrixPtr_Type;
     typedef typename linearSolver_Type::vector_type     vector_Type;
     typedef boost::shared_ptr<vector_Type>              vectorPtr_Type;
 
-    typedef typename linearSolver_Type::prec_raw_type preconditioner_Type;
-    typedef typename linearSolver_Type::prec_type     preconditionerPtr_Type;
+    typedef vector_Type                                 solution_Type;
+    typedef boost::shared_ptr<solution_Type>            solutionPtr_Type;
+
+    typedef typename linearSolver_Type::prec_raw_type   preconditioner_Type;
+    typedef typename linearSolver_Type::prec_type       preconditionerPtr_Type;
 
     //@}
 
