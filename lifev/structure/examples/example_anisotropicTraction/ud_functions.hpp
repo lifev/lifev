@@ -59,6 +59,7 @@ Real a0 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*
 //Boundary Conditions
 Real bcZero (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/);
 Real bcNonZero (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/);
+Real smoothPressure(const Real& t, const Real&  x, const Real& y, const Real& /*Z*/, const ID& i);
 Real bcNonZeroSecondOrderExponential (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/);
 
 //Fiber Directions

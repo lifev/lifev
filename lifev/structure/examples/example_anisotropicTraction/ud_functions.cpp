@@ -188,6 +188,39 @@ Real bcNonZero (const Real& t, const Real&  X, const Real& Y, const Real& Z, con
     //         break;
     // }
 }
+ Real smoothPressure(const Real& t, const Real&  x, const Real& y, const Real& /*Z*/, const ID& i)
+    {
+        Real radius = std::sqrt( x*x + y*y);
+        Real pressure(0);
+
+        Real highestPressure(200000);
+        Real totalTime = 4.5;
+        Real halfTime = totalTime / 2.0;
+
+        Real a = ( highestPressure / 2 ) * ( 1/ ( halfTime*halfTime ) );
+
+        if ( t <= halfTime )
+            pressure = a * t*t;
+
+        if ( t > halfTime )
+            pressure = - a * (t - totalTime)*(t - totalTime) + highestPressure;
+
+        switch (i)
+        {
+        case 0:
+            return  pressure *  ( x / radius ) ;
+            break;
+        case 1:
+            return  pressure *  ( y / radius ) ;
+            break;
+        case 2:
+            return 0.0;
+            break;
+
+        }
+        return 0;
+
+    }
 
 Real bcNonZeroSecondOrderExponential (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
 {
@@ -198,28 +231,28 @@ Real bcNonZeroSecondOrderExponential (const Real& /*t*/, const Real&  /*X*/, con
 //----------------------------------------------Fibers Directions--------------
 Real Family1 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
 {
-    Real theta = ( PI / 6.0 );
+    Real theta = 0.8426; // value for anisotropic characterization taken from Robertson // ( PI / 6.0 );
     Real thetaChangeOfVariable = std::atan( y / x );
 
     switch (i)
     {
         case 0:
 	    // Tube
- 	    // return - std::sin( thetaChangeOfVariable ) * std::sin( theta );
+            return - std::sin( thetaChangeOfVariable ) * std::cos( theta );
 	    // Cube
-            return std::sin( theta );
+            // return std::sin( theta );
             break;
         case 1:
 	    // Tube
-            // return   std::cos( thetaChangeOfVariable ) * std::sin( theta );
+            return   std::cos( thetaChangeOfVariable ) * std::cos( theta );
 	    // Cube
-            return std::cos( theta );
+            // return std::cos( theta );
             break;
         case 2:
 	    // Tube
-  	    //  return std::cos( theta );
+            return std::sin( theta );
 	    // Cube
-            return 0.0;
+            // return 0.0;
             break;
         default:
             ERROR_MSG ("This entrie is not allowed: ud_functions.hpp");
@@ -230,28 +263,28 @@ Real Family1 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, c
 
 Real Family2 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
 {
-    Real theta = ( - PI / 6.0 );
+    Real theta = - 0.8426; //( - PI / 6.0 );
     Real thetaChangeOfVariable = std::atan( y / x );
 
     switch (i)
     {
         case 0:
 	    // Tube
-            // return - std::sin( thetaChangeOfVariable ) * std::sin( theta );
+            return - std::sin( thetaChangeOfVariable ) * std::cos( theta );
 	    // Cube
-            return std::sin( theta );
+            // return std::sin( theta );
             break;
         case 1:
 	    // Tube
-            // return   std::cos( thetaChangeOfVariable ) * std::sin( theta );
+            return   std::cos( thetaChangeOfVariable ) * std::cos( theta );
 	    // Cube
-            return std::cos( theta );
+            //return std::cos( theta );
             break;
         case 2:
 	    // Tube
-            // return   std::cos( theta );
+            return   std::sin( theta );
 	    // Cube
-	    return 0.0;
+	    // return 0.0;
             break;
         default:
             ERROR_MSG ("This entrie is not allowed: ud_functions.hpp");

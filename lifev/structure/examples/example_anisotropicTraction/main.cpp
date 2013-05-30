@@ -252,7 +252,7 @@ Structure::run3d()
     boost::shared_ptr<StructuralConstitutiveLawData> dataStructure (new StructuralConstitutiveLawData( ) );
     dataStructure->setup (dataFile);
 
-    dataStructure->showMe();
+    //dataStructure->showMe();
 
     //Loading a partitoned mesh or reading a new one
     const std::string partitioningMesh = dataFile ( "partitioningOffline/loadMesh", "no");
@@ -300,7 +300,8 @@ Structure::run3d()
     listOfFiberDirections_Type fiberDirections;
     fiberDirections.resize( dataStructure->numberFibersFamilies( ) );
 
-    std::cout << "Size of the number of families: " << (*pointerToVectorOfFamilies).size() << std::endl;
+    if( verbose )
+        std::cout << "Size of the number of families: " << (*pointerToVectorOfFamilies).size() << std::endl;
 
     fibersDirectionList setOfFiberFunctions;
     setOfFiberFunctions.setupFiberDefinitions( dataStructure->numberFibersFamilies( ) );
@@ -336,35 +337,33 @@ Structure::run3d()
 
     BCFunctionBase zero (bcZero);
     BCFunctionBase nonZero;
+    BCFunctionBase pressure;
 
     nonZero.setFunction (bcNonZero);
+    pressure.setFunction (smoothPressure);
 
     //! =================================================================================
     //! BC for StructuredCube4_test_structuralsolver.mesh
     //! =================================================================================
-    BCh->addBC ("EdgesIn",      20,  Natural,   Component, nonZero, compy);
-    BCh->addBC ("EdgesIn",      40,  Essential, Component, zero,    compy);
+    // BCh->addBC ("EdgesIn",      20,  Natural,   Component, nonZero, compy);
+    // BCh->addBC ("EdgesIn",      40,  Essential, Component, zero,    compy);
 
-    //! Symmetry BC
-    BCh->addBC ("EdgesIn",      50,   EssentialVertices, Component, zero, compxy);
-    BCh->addBC ("EdgesIn",      30,   EssentialVertices, Component, zero, compyz);
-    BCh->addBC ("EdgesIn",      80,   EssentialVertices, Component, zero, compxz);
-    BCh->addBC ("EdgesIn",      100,  EssentialVertices,  Full, zero, 3);
+    // //! Symmetry BC
+    // BCh->addBC ("EdgesIn",      50,   EssentialVertices, Component, zero, compxy);
+    // BCh->addBC ("EdgesIn",      30,   EssentialVertices, Component, zero, compyz);
+    // BCh->addBC ("EdgesIn",      80,   EssentialVertices, Component, zero, compxz);
+    // BCh->addBC ("EdgesIn",      100,  EssentialVertices,  Full, zero, 3);
 
-    BCh->addBC ("EdgesIn",      7, Essential, Component , zero, compx);
-    BCh->addBC ("EdgesIn",      3, Essential, Component , zero, compz);
+    // BCh->addBC ("EdgesIn",      7, Essential, Component , zero, compx);
+    // BCh->addBC ("EdgesIn",      3, Essential, Component , zero, compz);
     //! =================================================================================
 
     // Case of a tube
-
-    // BCh->addBC ("EdgesIn",      60,  Essential,  Component, zero, compz);
-    // BCh->addBC ("EdgesIn",      70,  Essential,  Component, zero, compz);
-
-    // //! Symmetry BC
-    // BCh->addBC ("EdgesIn",      50,   Essential, Component, zero, compx);
-    // BCh->addBC ("EdgesIn",      30,   Essential, Component, zero, compy);
-    // BCh->addBC ("EdgesIn",      40,   Natural, Full, zero, 3);
-    // BCh->addBC ("EdgesIn",      200,  Natural,  Full, nonZero, 3);
+    //Condition for Inflation
+    BCh->addBC ("EdgesIn",      200, Natural,   Full, pressure, 3);
+    BCh->addBC ("EdgesIn",      40,  Natural,   Full, zero, 3);
+    BCh->addBC ("EdgesIn",      70,  Essential, Full, zero, 3);
+    BCh->addBC ("EdgesIn",      60,  Essential, Full, zero, 3);
 
     //! 1. Constructor of the structuralSolver
     StructuralOperator< RegionMesh<LinearTetra> > solid;
@@ -440,7 +439,10 @@ Structure::run3d()
         for ( UInt previousPass = 0; previousPass < timeAdvance->size() ; previousPass++)
         {
             Real previousTimeStep = tZero - previousPass * dt;
-            std::cout << "BDF " << previousTimeStep << "\n";
+
+            if( verbose )
+                std::cout << "BDF " << previousTimeStep << "\n";
+
             if ( !dataStructure->solidTypeIsotropic().compare ("secondOrderExponential") )
             {
                 uv0.push_back (initialDisplacement);
