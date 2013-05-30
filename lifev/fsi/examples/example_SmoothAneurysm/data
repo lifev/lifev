@@ -15,7 +15,7 @@ blockOper   = AdditiveSchwarzGI
 #AdditiveSchwarzGI: standard operator for the monolithicGI, the three fields (fluid, structure and geometry) are assembled in one single matrix
 #AdditiveSchwarzRNGI: Robin-Neumann operator for the GI
 
-DDBlockPrec = ComposedDN2GI
+DDBlockPrec = AdditiveSchwarzGI
 # OPTIONS:
 #AdditiveSchwarz: monolithic A-S preconditioner,
 #AdditiveSchwarzGI: monolithic A-S preconditioner,
@@ -98,13 +98,29 @@ type       = hdf5    # format of the exported solution (ensight, hdf5, vtk)
 
 ** #exporter for the fluid
     [./fluid]
-    filename   = fluidGI # name of the postprocessed file
+    filename   = fluidRstGI # name of the postprocessed file
 
 ** #exporter for the solid
     [../solid]
-    filename   = solidGI  # name of the postprocessed file
+    filename   = solidRstGI  # name of the postprocessed file
     [../] # solid
 [../] # exporter
+
+* #importer details
+[importer]
+restartFSI = true
+initSol = 00010           # label of the solution from which we want to start (5 digits by convention)
+type       = hdf5         # format of the imported solution
+
+
+** #importer for the fluid
+   [./fluid]
+   filename   = fluidGI     # name of the imported solution
+
+** #importer for the solid
+   [../solid]
+   filename   = solidGI     # name of the imported solution
+
 
 * #Fluid data
 [fluid]
@@ -119,9 +135,9 @@ conservativeFormulation       = false  # tells if the conservative or non conser
 ** #time discretization
     [../time_discretization]
     method          = BDF
-    initialtime        = 0.
-    endtime            = 0.05
-    timestep        = 0.005
+    initialtime        = 0.01
+    endtime            = 0.013
+    timestep        = 0.001
     BDF_order        = 2   # can go up to 5
 
 ** #space discretization
@@ -154,8 +170,8 @@ conservativeFormulation       = false  # tells if the conservative or non conser
 
 * #interface data
 [interface]
-fluid_flag      =  1        # default: 1, the mesh flag of the interface
-solid_flag      =  1        # default: fluid_flag
+fluid_flag      =  100        # default: 1, the mesh flag of the interface
+solid_flag      =  100        # default: fluid_flag
 tolerance       =  0         # how far points are to be considered the same on the interface
 fluid_vertex_flag = 20       # tells wether the in/out ring curves on the interface
                             # is considered in the coupling (fluid_vertex_flag=0) or not (fluid_vertex_flag=1)
@@ -185,9 +201,9 @@ rescaleFactor    = 1.    # this factor can be used to rescale the structure bloc
 ** #time discretization
     [../time_discretization]
     method          = BDF
-    initialtime        = 0.
-    endtime            = 0.05
-    timestep        = 0.005
+    initialtime        = 0.01
+    endtime            = 0.013
+    timestep        = 0.001
     BDF_order        = 2
 
 ** #space discretization
@@ -469,9 +485,9 @@ rescaleFactor    = 1.    # this factor can be used to rescale the structure bloc
 ** #time discretization (used only for the calculation/extrapolation of the domain velocity)
     [./time_discretization]
     method          = BDF
-    initialtime        = 0.
-    endtime            = 0.05
-    timestep        = 0.005
+    initialtime        = 0.01
+    endtime            = 0.013
+    timestep        = 0.001
     BDF_order        = 2
 
 * #eigensolver section, used when we want to compute the singular values of the preconditioned FSI system (see in FSIMonolithic.cpp)
