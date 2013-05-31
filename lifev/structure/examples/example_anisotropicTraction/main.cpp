@@ -421,9 +421,6 @@ Structure::run3d()
     //! Temporal data and initial conditions
     //! =================================================================================
 
-    //! 5. Initial data
-    Real dt = dataStructure->dataTime()->timeStep();
-
     vectorPtr_Type rhs (new vector_Type (solid.displacement(), Unique) );
     vectorPtr_Type disp (new vector_Type (solid.displacement(), Unique) );
     vectorPtr_Type vel (new vector_Type (solid.displacement(), Unique) );
@@ -433,27 +430,6 @@ Structure::run3d()
     {
         std::cout << "S- initialization ... ";
     }
-
-    std::vector<vectorPtr_Type> uv0;
-
-    vectorPtr_Type initialDisplacement (new vector_Type (solid.displacement(), Unique) );
-
-    if (timeAdvanceMethod == "BDF")
-    {
-        Real tZero = dataStructure->dataTime()->initialTime();
-
-        for ( UInt previousPass = 0; previousPass < timeAdvance->size() ; previousPass++)
-        {
-            Real previousTimeStep = tZero - previousPass * dt;
-
-            if( verbose )
-                std::cout << "BDF " << previousTimeStep << "\n";
-
-                uv0.push_back (disp);
-        }
-    }
-
-    timeAdvance->setInitialCondition (uv0);
 
     // Initialization
     //Initialization of TimeAdvance
@@ -506,13 +482,15 @@ Structure::run3d()
 
         std::string iterationString;
 
-        std::cout << "size TimeAdvance:" << timeAdvance->size() << std::endl;
+        // if( verbose )
+        //     std::cout << "size TimeAdvance:" << timeAdvance->size() << std::endl;
 
         //Loading the stencil
         iterationString = initialLoaded;
         for (UInt iterInit = 0; iterInit < timeAdvance->size(); iterInit++ )
         {
-            std::cout << "new iterationString" << iterationString << std::endl;
+            // if( verbose )
+            //     std::cout << "new iterationString" << iterationString << std::endl;
 
             solidDisp.reset ( new vector_Type (solid.displacement(),  Unique ) );
             *solidDisp *= 0.0;
@@ -521,7 +499,8 @@ Structure::run3d()
 
             importerSolid->readVariable (solidDataReader);
 
-            std::cout << "Norm of the " << iterInit + 1 << "-th solution : " << solidDisp->norm2() << std::endl;
+            // if( verbose )
+            //     std::cout << "Norm of the " << iterInit + 1 << "-th solution : " << solidDisp->norm2() << std::endl;
 
             //Exporting the just loaded solution (debug purposes)
             // Real currentLoading(iterInit + 1.0);
@@ -556,8 +535,8 @@ Structure::run3d()
     else //Initialize with zero vectors
     {
 
-        if( verbose )
-            std::cout << "Starting from scratch" << std::endl;
+        // if( verbose )
+        //     std::cout << "Starting from scratch" << std::endl;
 
         vectorPtr_Type disp (new vector_Type (solid.displacement(), Unique) );
 
@@ -573,18 +552,18 @@ Structure::run3d()
     }
 
 
-    timeAdvance->setTimeStep ( dt );
+    timeAdvance->setTimeStep ( dataStructure->dataTime()->timeStep() );
 
-    timeAdvance->updateRHSContribution ( dt );
+    timeAdvance->updateRHSContribution ( dataStructure->dataTime()->timeStep() );
 
     solid.initialize ( disp );
 
     MPI_Barrier (MPI_COMM_WORLD);
 
-    if (verbose )
-    {
-        std::cout << "ok." << std::endl;
-    }
+    // if (verbose )
+    // {
+    //     std::cout << "ok." << std::endl;
+    // }
 
     boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporter;
 
@@ -646,6 +625,11 @@ Structure::run3d()
     exporter->postProcess ( 0 );
     cout.precision(16);
 
+    //! 5. Initial data
+    Real initialTime = dataStructure->dataTime()->initialTime();
+    Real dt = dataStructure->dataTime()->timeStep();
+    Real T  = dataStructure->dataTime()->endTime();
+
     //! 6. Setting the pillow saving for restart
     UInt tol = dataStructure->dataTimeAdvance()->orderBDF() + 1;
     UInt saveEvery = dataFile( "exporter/saveEvery", 1);
@@ -657,9 +641,9 @@ Structure::run3d()
     //! Temporal loop
     //! =============================================================================
     //    for (Real time = dt; time <= T; time += dt)
-    for (dataStructure->dataTime()->setTime ( dt ) ; dataStructure->dataTime()->canAdvance( ); dataStructure->dataTime()->updateTime( ) )
+    for (Real time = initialTime + dt; time <= T; time += dt)
     {
-        returnValue = EXIT_FAILURE;
+        dataStructure->dataTime()->setTime( time );
 
         if (verbose)
         {
@@ -692,7 +676,7 @@ Structure::run3d()
 
         if ( (iter - d) <= tol || ( (std::floor(d/saveEvery) + 1)*saveEvery - iter ) <= tol )
         {
-            exporter->postProcess( dataStructure->dataTime()->time() );
+            exporter->postProcess( time );
         }
 	}
 
