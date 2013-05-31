@@ -589,22 +589,23 @@ Structure::run3d()
     boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporter;
 
     std::string const exporterType =  dataFile ( "exporter/type", "ensight");
+    std::string const exportFileName = dataFile ( "exporter/nameFile", "structure");
 #ifdef HAVE_HDF5
     if (exporterType.compare ("hdf5") == 0)
     {
-        exporter.reset ( new ExporterHDF5<RegionMesh<LinearTetra> > ( dataFile, "structure" ) );
+        exporter.reset ( new ExporterHDF5<RegionMesh<LinearTetra> > ( dataFile, exportFileName ) );
     }
     else
 #endif
     {
         if (exporterType.compare ("none") == 0)
         {
-            exporter.reset ( new ExporterEmpty<RegionMesh<LinearTetra> > ( dataFile, pointerToMesh, "structure", parameters->comm->MyPID() ) );
+            exporter.reset ( new ExporterEmpty<RegionMesh<LinearTetra> > ( dataFile, pointerToMesh, exportFileName, parameters->comm->MyPID() ) );
         }
 
         else
         {
-            exporter.reset ( new ExporterEnsight<RegionMesh<LinearTetra> > ( dataFile, pointerToMesh, "structure", parameters->comm->MyPID() ) );
+            exporter.reset ( new ExporterEnsight<RegionMesh<LinearTetra> > ( dataFile, pointerToMesh, exportFileName, parameters->comm->MyPID() ) );
         }
     }
 
@@ -645,6 +646,13 @@ Structure::run3d()
     exporter->postProcess ( 0 );
     cout.precision(16);
 
+    //! 6. Setting the pillow saving for restart
+    UInt tol = dataStructure->dataTimeAdvance()->orderBDF() + 1;
+    UInt saveEvery = dataFile( "exporter/saveEvery", 1);
+    UInt r(0);
+    UInt d(0);
+    UInt iter(0);
+
     //! =============================================================================
     //! Temporal loop
     //! =============================================================================
@@ -677,14 +685,22 @@ Structure::run3d()
         // This vector is to export the forcing term
         *rhsVector = solid.rhsCopy();
 
-        exporter->postProcess ( dataStructure->dataTime()->time() );
+        iter = iter + 1;
+
+        r = iter % saveEvery;
+        d = iter - r;
+
+        if ( (iter - d) <= tol || ( (std::floor(d/saveEvery) + 1)*saveEvery - iter ) <= tol )
+        {
+            exporter->postProcess( dataStructure->dataTime()->time() );
+        }
+	}
 
         //!--------------------------------------------------------------------------------------------------
 
         MPI_Barrier (MPI_COMM_WORLD);
-    }
-
 }
+
 
 int
 main ( int argc, char** argv )
