@@ -156,6 +156,17 @@ public:
 
     typedef std::vector<vectorPtr_Type>                                 listOfFiberDirections_Type;
 
+    typedef LifeV::ExporterEmpty<mesh_Type >                      emptyExporter_Type;
+    typedef boost::shared_ptr<emptyExporter_Type>                 emptyExporterPtr_Type;
+
+    typedef LifeV::ExporterEnsight<mesh_Type >                    ensightFilter_Type;
+    typedef boost::shared_ptr<ensightFilter_Type>                 ensightFilterPtr_Type;
+
+#ifdef HAVE_HDF5
+    typedef LifeV::ExporterHDF5<mesh_Type >                       hdf5Filter_Type;
+    typedef boost::shared_ptr<hdf5Filter_Type>                    hdf5FilterPtr_Type;
+#endif
+
     /** @name Constructors, destructor
      */
     //@{
@@ -427,11 +438,6 @@ Structure::run3d()
 
     vectorPtr_Type initialDisplacement (new vector_Type (solid.displacement(), Unique) );
 
-    if ( !dataStructure->solidTypeIsotropic().compare ("secondOrderExponential") )
-    {
-        dFESpace->interpolate ( static_cast<solidFESpace_Type::function_Type> ( d0 ), *initialDisplacement, 0.0 );
-    }
-
     if (timeAdvanceMethod == "BDF")
     {
         Real tZero = dataStructure->dataTime()->initialTime();
@@ -443,31 +449,135 @@ Structure::run3d()
             if( verbose )
                 std::cout << "BDF " << previousTimeStep << "\n";
 
-            if ( !dataStructure->solidTypeIsotropic().compare ("secondOrderExponential") )
-            {
-                uv0.push_back (initialDisplacement);
-            }
-            else
-            {
                 uv0.push_back (disp);
-            }
         }
     }
 
     timeAdvance->setInitialCondition (uv0);
 
+    // Initialization
+    //Initialization of TimeAdvance
+    std::string const restart =  dataFile ( "importer/restart", "none");
+    std::vector<vectorPtr_Type> solutionStencil;
+    solutionStencil.resize ( timeAdvance->size() );
+
+    boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > importerSolid;
+
+    if ( restart.compare ( "none" ) )
+    {
+        //Reading fileNames - setting data for reading
+        std::string const importerType =  dataFile ( "importer/type", "ensight");
+        std::string const fileName     =  dataFile ( "importer/filename", "structure");
+        std::string const initialLoaded     =  dataFile ( "importer/initialSol", "NO_DEFAULT_VALUE");
+        //LifeV::Real initialTime        =  dataFile ( "importer/initialTime", 0.0);
+
+        //Creating the importer
+#ifdef HAVE_HDF5
+        if ( !importerType.compare ("hdf5") )
+        {
+            importerSolid.reset ( new  hdf5Filter_Type ( dataFile, fileName) );
+        }
+        else
+#endif
+        {
+            if ( !importerType.compare ("none") )
+            {
+                importerSolid.reset ( new emptyExporter_Type ( dataFile, dFESpace->mesh(), "solid", dFESpace->map().comm().MyPID() ) );
+            }
+            else
+            {
+                importerSolid.reset ( new  ensightFilter_Type ( dataFile, fileName) );
+            }
+        }
+
+        importerSolid->setMeshProcId (dFESpace->mesh(), dFESpace->map().comm().MyPID() );
+
+        //Creation of Exporter to check the loaded solution (working only for HDF5)
+        // std::string expVerFile = "verificationDisplExporter";
+        // LifeV::ExporterHDF5<RegionMesh<LinearTetra> > exporter( dataFile, pointerToMesh, expVerFile, parameters->comm->MyPID());
+        // vectorPtr_Type vectVer ( new vector_Type(solid.displacement(),  LifeV::Unique ) );
+
+        // exporter.addVariable( ExporterData<mesh_Type >::VectorField, "displVer", dFESpace, vectVer, UInt(0) );
+
+        // exporter.postProcess(0.0);
+
+        //Reading the displacement field and the timesteps need by the TimeAdvance class
+        vectorPtr_Type solidDisp (new vector_Type (dFESpace->map(), importerSolid->mapType() ) );
+
+        std::string iterationString;
+
+        std::cout << "size TimeAdvance:" << timeAdvance->size() << std::endl;
+
+        //Loading the stencil
+        iterationString = initialLoaded;
+        for (UInt iterInit = 0; iterInit < timeAdvance->size(); iterInit++ )
+        {
+            std::cout << "new iterationString" << iterationString << std::endl;
+
+            solidDisp.reset ( new vector_Type (solid.displacement(),  Unique ) );
+            *solidDisp *= 0.0;
+
+            LifeV::ExporterData<mesh_Type> solidDataReader (LifeV::ExporterData<mesh_Type>::VectorField, std::string ("displacement." + iterationString), dFESpace, solidDisp, UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
+
+            importerSolid->readVariable (solidDataReader);
+
+            std::cout << "Norm of the " << iterInit + 1 << "-th solution : " << solidDisp->norm2() << std::endl;
+
+            //Exporting the just loaded solution (debug purposes)
+            // Real currentLoading(iterInit + 1.0);
+            // *vectVer = *solidDisp;
+            // exporter.postProcess( currentLoading );
+
+            solutionStencil[ iterInit ] = solidDisp;
+
+            //initializing the displacement field in the StructuralSolver class with the first solution
+            if ( !iterInit )
+            {
+                solid.initialize ( solidDisp );
+            }
+
+            //Updating string name
+            int iterations = std::atoi (iterationString.c_str() );
+            iterations--;
+
+            std::ostringstream iter;
+            iter.fill ( '0' );
+            iter << std::setw (5) << ( iterations );
+            iterationString = iter.str();
+
+        }
+
+        importerSolid->closeFile();
+
+        //Putting the vector in the TimeAdvance Stencil
+        timeAdvance->setInitialCondition (solutionStencil);
+
+    }
+    else //Initialize with zero vectors
+    {
+
+        if( verbose )
+            std::cout << "Starting from scratch" << std::endl;
+
+        vectorPtr_Type disp (new vector_Type (solid.displacement(), Unique) );
+
+        for ( UInt previousPass = 0; previousPass < timeAdvance->size() ; previousPass++)
+        {
+            solutionStencil[ previousPass ] = disp;
+        }
+
+        timeAdvance->setInitialCondition (solutionStencil);
+
+        //It is automatically done actually. It's clearer if specified.
+        solid.initialize ( disp );
+    }
+
+
     timeAdvance->setTimeStep ( dt );
 
     timeAdvance->updateRHSContribution ( dt );
 
-    if ( !dataStructure->solidTypeIsotropic().compare ("secondOrderExponential") )
-    {
-        solid.initialize ( initialDisplacement );
-    }
-    else
-    {
-        solid.initialize ( disp );
-    }
+    solid.initialize ( disp );
 
     MPI_Barrier (MPI_COMM_WORLD);
 
