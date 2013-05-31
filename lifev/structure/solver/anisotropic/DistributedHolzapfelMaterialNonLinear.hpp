@@ -575,11 +575,11 @@ void DistributedHolzapfelMaterialNonLinear<MeshType>::updateNonLinearJacobianTer
 
 template <typename MeshType>
 void DistributedHolzapfelMaterialNonLinear<MeshType>::computeStiffness ( const vector_Type& disp,
-                                                                Real /*factor*/,
-                                                                const dataPtr_Type& dataMaterial,
-                                                                const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
-                                                                const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
-                                                                const displayerPtr_Type& displayer )
+                                                                         Real /*factor*/,
+                                                                         const dataPtr_Type& dataMaterial,
+                                                                         const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
+                                                                         const mapMarkerIndexesPtr_Type /*mapsMarkerIndexes*/,
+                                                                         const displayerPtr_Type& displayer )
 {
 
     using namespace ExpressionAssembly;
@@ -691,17 +691,42 @@ void DistributedHolzapfelMaterialNonLinear<MeshType>::computeStiffness ( const v
               >
               IVithBar( Jel, IVith );
 
+          Real kappa  = this->M_dataMaterial->ithDistributionFibers( i );
+          Real alphaI = this->M_dataMaterial->ithStiffnessFibers( i );
+          Real gammaI = this->M_dataMaterial->ithNonlinearityFibers( i );
+
+          // For this model, the activation in front of the stress tensor is of the form
+          // atan( k * \bar{I_C} + ( 1 - 3*k ) * \bar(I_4) - 1 )
+
           // First term:
-          // 2 alpha_i J^(-2.0/3.0) ( k \bar{I_1}  + ( 1 - 3*k) \bar{I_4} - 1 ) ( 1 - 2*k )
+          // 2 alpha_i J^(-2.0/3.0) ( k \bar{I_1}  + ( 1 - 3*k) \bar{I_4} - 1 ) ( k )
           // exp( gamma_i * ( k \bar{I_1} + ( 1 - 3*k) \bar{I_4} - 1)^2 ) * ( F  - 1.3 * I_1 * F^-T) : \grad phi_i
           // where alpha_i and gamma_i are the fiber parameters and M is the 2nd order tensor of type f_i \otimes \ f_i
           integrate ( elements ( this->M_dispETFESpace->mesh() ),
                       this->M_dispFESpace->qr(),
                       this->M_dispETFESpace,
-                      atan( IVithBar - value(1.0) , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  ) *
-                      value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * Jel * ( IVithBar - value(1.0) ) *
-                      exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value(1.0) ) * ( IVithBar- value(1.0) )  ) *
-                      dot( F * Mith, grad( phi_i ) )
+                      atan(  value( kappa ) * trCbar + ( 1.0 - 3.0 * value( kappa ) ) * IVithBar - value(1.0) , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  ) *
+                      value( 2.0 * alphaI ) * Jel * ( value( kappa ) * trCbar + ( 1.0 - 3.0 * value( kappa ) ) * IVithBar - value(1.0) ) *
+                      exp( value( gammaI  ) * ( value( kappa ) * trCbar + ( 1.0 - 3.0 * value( kappa ) ) * IVithBar - value(1.0) ) *
+                           ( value( kappa ) * trCbar + ( 1.0 - 3.0 * value( kappa ) ) * IVithBar - value(1.0) )  ) *
+                      value( kappa ) *
+                      dot( F - value( 1.0 / 3.0 ) * I_C * F_T, grad( phi_i ) )
+                      ) >> this->M_stiff;
+
+
+          // Second term:
+          // 2 alpha_i J^(-2.0/3.0) ( k \bar{I_1}  + ( 1 - 3*k) \bar{I_4} - 1 ) ( 1 - 3k )
+          // exp( gamma_i * ( k \bar{I_1} + ( 1 - 3*k) \bar{I_4} - 1)^2 ) * ( FM  - 1.3 * I_4 * F^-T) : \grad phi_i
+          // where alpha_i and gamma_i are the fiber parameters and M is the 2nd order tensor of type f_i \otimes \ f_i
+          integrate ( elements ( this->M_dispETFESpace->mesh() ),
+                      this->M_dispFESpace->qr(),
+                      this->M_dispETFESpace,
+                      atan(  value( kappa ) * trCbar + ( 1.0 - 3.0 * value( kappa ) ) * IVithBar - value(1.0) , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  ) *
+                      value( 2.0 * alphaI ) * Jel * ( value( kappa ) * trCbar + ( 1.0 - 3.0 * value( kappa ) ) * IVithBar - value(1.0) ) *
+                      exp( value( gammaI  ) * ( value( kappa ) * trCbar + ( 1.0 - 3.0 * value( kappa ) ) * IVithBar - value(1.0) ) *
+                           ( value( kappa ) * trCbar + ( 1.0 - 3.0 * value( kappa ) ) * IVithBar - value(1.0) )  ) *
+                      value(  1.0 - 3.0 * kappa ) *
+                      dot( F * Mith - value( 1.0 / 3.0 ) * IVith * F_T, grad( phi_i ) )
                       ) >> this->M_stiff;
 
 
