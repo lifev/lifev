@@ -15,7 +15,7 @@ blockOper   = AdditiveSchwarzGI
 #AdditiveSchwarzGI: standard operator for the monolithicGI, the three fields (fluid, structure and geometry) are assembled in one single matrix
 #AdditiveSchwarzRNGI: Robin-Neumann operator for the GI
 
-DDBlockPrec = AdditiveSchwarzGI
+DDBlockPrec = ComposedDN2GI
 # OPTIONS:
 #AdditiveSchwarz: monolithic A-S preconditioner,
 #AdditiveSchwarzGI: monolithic A-S preconditioner,

@@ -157,7 +157,6 @@ public:
         // Building the communicator for output purposes
         //M_comm.reset( new Epetra_Comm( MPI_COMM_WORLD ) );
 
-        bool verbose = ( M_comm->MyPID() == 0 );
         M_data = dataPtr_Type ( new data_Type() );
         M_data->setup ( data_file );
 
@@ -201,8 +200,7 @@ public:
             M_fsi->FSIOper( )->setupDOF( );
         }
 
-        if( verbose )
-            std::cout << "register MonolithicGI : " << FSIMonolithicGI::S_register << std::endl;
+        std::cout << "register MonolithicGI : " << FSIMonolithicGI::S_register << std::endl;
 
         debugStream ( 10000 ) << "Setting up the FESpace and DOF \n";
 
@@ -255,8 +253,6 @@ public:
 
         // load using ensight/hdf5
         std::string restartType (data_file ("importer/restartFSI", "false") );
-        if( verbose )
-            std::cout << "The load state is: " << restartType << std::endl;
 
         if (!restartType.compare ("true") )
         {
@@ -324,7 +320,6 @@ public:
     run()
     {
         boost::timer _overall_timer;
-        bool verbose = ( M_comm->MyPID() == 0 );
 
         LifeV::UInt iter = 0;
         //LifeV::UInt offset=dynamic_cast<LifeV::FSIMonolithic*>(M_fsi->FSIOper().get())->offset();
@@ -387,18 +382,8 @@ public:
                 M_exporterSolid->postProcess ( M_data->dataFluid()->dataTime()->time() );
                 M_exporterFluid->postProcess ( M_data->dataFluid()->dataTime()->time() );
             }
-
-            if( verbose )
-            {
-                std::cout << "[fsi_run] Iteration " << iter << " was done in : "
-                          << _timer.elapsed() << "\n";
-                std::cout << "solution norm " << iter << " : "
-                          << M_fsi->displacement().norm2() << "\n";
-            }
         }
-        if( verbose )
-            std::cout << "Total computation time = "
-                      << _overall_timer.elapsed() << "s" << "\n";
+
     }
 
 private:
