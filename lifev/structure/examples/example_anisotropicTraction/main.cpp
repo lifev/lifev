@@ -556,8 +556,6 @@ Structure::run3d()
 
     timeAdvance->updateRHSContribution ( dataStructure->dataTime()->timeStep() );
 
-    solid.initialize ( disp );
-
     MPI_Barrier (MPI_COMM_WORLD);
 
     // if (verbose )
