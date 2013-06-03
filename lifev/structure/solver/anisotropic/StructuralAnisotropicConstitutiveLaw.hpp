@@ -134,6 +134,21 @@ public:
 
     // Vector to store the interpolated fiber direction
     typedef std::vector<vectorPtr_Type>                    vectorInterpolatedFibers_Type;
+
+
+    // Typedefs for tensors
+    typedef ExpressionDefinitions::deformationGradient_Type     tensorF_Type;
+    typedef ExpressionDefinitions::determinantTensorF_Type      determinantF_Type;
+    typedef ExpressionDefinitions::rightCauchyGreenTensor_Type  tensorC_Type;
+    typedef ExpressionDefinitions::minusTransposedTensor_Type   minusT_Type;
+    typedef ExpressionDefinitions::traceTensor_Type             traceTensor_Type;
+    typedef ExpressionDefinitions::powerExpression_Type         powerExpression_Type;
+
+    // Anisotropic typedefs
+    typedef ExpressionDefinitions::interpolatedValue_Type       interpolatedValue_Type;
+    typedef ExpressionDefinitions::outerProduct_Type            outerProduct_Type;
+    typedef ExpressionDefinitions::stretch_Type                 stretch_Type;
+    typedef ExpressionDefinitions::isochoricStretch_Type        isochoricStretch_Type;
     //@}
 
 

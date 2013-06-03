@@ -96,6 +96,21 @@ public:
 
     typedef typename super::vectorFiberFunction_Type          vectorFiberFunction_Type;
     typedef typename super::vectorFiberFunctionPtr_Type          vectorFiberFunctionPtr_Type;
+
+    // Typedefs for expression definitions
+    typedef typename super::tensorF_Type               tensorF_Type;
+    typedef typename super::determinantF_Type          determinantF_Type;
+    typedef typename super::tensorC_Type               tensorC_Type;
+    typedef typename super::minusT_Type                minusT_Type;
+    typedef typename super::traceTensor_Type           traceTensor_Type;
+    typedef typename super::powerExpression_Type       powerExpression_Type;
+
+    // Anisotropic typedefs
+    // Anisotropic typedefs
+    typedef typename super::interpolatedValue_Type       interpolatedValue_Type;
+    typedef typename super::outerProduct_Type            outerProduct_Type;
+    typedef typename super::stretch_Type                 stretch_Type;
+    typedef typename super::isochoricStretch_Type        isochoricStretch_Type;
     //@}
 
 
@@ -454,36 +469,19 @@ void HolzapfelMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( matrix
     // should have as template the MeshType and the MapType.
 
     // Definition of F
-    ExpressionAddition<
-        ExpressionInterpolateGradient<MeshType, MapEpetra, 3, 3>, ExpressionMatrix<3,3> >
-        F( grad( this->M_dispETFESpace,  disp, this->M_offset), value(this->M_identity));
+    tensorF_Type F = ExpressionDefinitions::deformationGradient( this->M_dispETFESpace,  disp, this->M_offset, this->M_identity );
 
     // Definition of J
-    ExpressionDeterminant<ExpressionAddition<
-        ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >
-        J( F );
+    determinantF_Type J = ExpressionDefinitions::determinantF( F );
 
-    // Definition of tensor C
-    ExpressionProduct<
-        ExpressionTranspose<
-            ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
-            ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> >
-        >
-        C( transpose(F), F );
+    //Definition of C
+    tensorC_Type C = ExpressionDefinitions::tensorC( transpose(F), F );
 
     // Definition of J^-(2/3) = det( C ) using the isochoric/volumetric decomposition
-    ExpressionPower<
-        ExpressionDeterminant<
-            ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> >
-            >
-        >
-        Jel( J, (-2.0/3.0) );
+    powerExpression_Type  Jel = ExpressionDefinitions::powerExpression( J , (-2.0/3.0) );
 
     // Definition of F^-T
-    ExpressionMinusTransposed<
-        ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >
-        F_T( F );
-
+    minusT_Type  F_T = ExpressionDefinitions::minusT( F );
 
     // Update the heaviside function for the stretch of the fibers
     * (jacobian) *= 0.0;
@@ -493,45 +491,21 @@ void HolzapfelMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( matrix
     for( UInt i(0); i < this->M_vectorInterpolated.size(); i++ )
     {
 
-      displayer->leaderPrint ("                ", i + 1,"-th fiber family \n" );
+        displayer->leaderPrint ("                ", i + 1,"-th fiber family \n" );
         // Defining the expression for the i-th fiber
         // Definitions of the quantities which depend on the fiber directions e.g. I_4^i
-        ExpressionInterpolateValue<MeshType, MapEpetra, 3, 3>
-            fiberIth( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) );
-
-        // Definition of the tensor fiberIth \otimes fiberIth
-        ExpressionOuterProduct<
-            ExpressionInterpolateValue<MeshType, MapEpetra, 3, 3>,
-            ExpressionInterpolateValue<MeshType, MapEpetra, 3, 3>
-            >
-            Mith( fiberIth, fiberIth );
+        interpolatedValue_Type fiberIth = ExpressionDefinitions::interpolateFiber( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ] ) );
+	
+	// Definition of the tensor M = ithFiber \otimes ithFiber
+	// At the moment, it's automatic that the method constructs the expression M = ithFiber \otimes ithFiber
+	// For a more general case, the file ExpressionDefinitions.hpp should be changed
+	outerProduct_Type Mith = ExpressionDefinitions::fiberTensor( fiberIth );
 
         // Definition of the fourth invariant : I_4^i = C:Mith
-        ExpressionDot<
-            ExpressionProduct<
-                ExpressionTranspose<
-                    ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
-                ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
-                    ExpressionOuterProduct<
-                        ExpressionInterpolateValue<MeshType, MapEpetra, 3, 3 >, ExpressionInterpolateValue<MeshType, MapEpetra, 3, 3 > >
-                    >
-            IVith( C, Mith );
+	stretch_Type IVith = ExpressionDefinitions::fiberStretch( C, Mith );
 
         // Definition of the fouth isochoric invariant : J^(-2.0/3.0) * I_4^i
-        ExpressionProduct<
-            ExpressionPower<
-                ExpressionDeterminant<
-                    ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > > >,
-
-            ExpressionDot<
-                ExpressionProduct<
-                    ExpressionTranspose<
-                        ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
-                    ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
-                ExpressionOuterProduct<
-                    ExpressionInterpolateValue<MeshType, MapEpetra, 3, 3 >, ExpressionInterpolateValue<MeshType, MapEpetra, 3, 3 > > >
-            >
-            IVithBar( Jel, IVith );
+	isochoricStretch_Type IVithBar = ExpressionDefinitions::isochoricFourthInvariant( Jel, IVith );
 
         // first term:
         // (-4.0/3.0) * aplha_i * J^(-2.0/3.0) * \bar{I_4} * ( \bar{I_4} - 1 ) * exp( gamma_i * ( \bar{I_4} - 1 )^2 ) *
@@ -720,80 +694,39 @@ void HolzapfelMaterialNonLinear<MeshType>::computeStiffness ( const vector_Type&
     // Defining quantities which depend of the displacement field and not on the fiber direction
 
     // Definition of F
-    ExpressionAddition<
-        ExpressionInterpolateGradient<MeshType, MapEpetra, 3, 3>, ExpressionMatrix<3,3> >
-        F( grad( this->M_dispETFESpace,  disp, this->M_offset), value(this->M_identity));
+    tensorF_Type F = ExpressionDefinitions::deformationGradient( this->M_dispETFESpace,  disp, this->M_offset, this->M_identity );
 
     // Definition of J
-    ExpressionDeterminant<ExpressionAddition<
-        ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >
-        J( F );
+    determinantF_Type J = ExpressionDefinitions::determinantF( F );
 
-    // Definition of tensor C
-    ExpressionProduct<
-        ExpressionTranspose<
-            ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
-            ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> >
-        >
-        C( transpose(F), F );
+    //Definition of C
+    tensorC_Type C = ExpressionDefinitions::tensorC( transpose(F), F );
 
     // Definition of J^-(2/3) = det( C ) using the isochoric/volumetric decomposition
-    ExpressionPower<
-        ExpressionDeterminant<
-            ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> >
-            >
-        >
-        Jel( J, (-2.0/3.0) );
+    powerExpression_Type  Jel = ExpressionDefinitions::powerExpression( J , (-2.0/3.0) );
 
     // Definition of F^-T
-    ExpressionMinusTransposed<
-        ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >
-        F_T( F );
-
+    minusT_Type  F_T = ExpressionDefinitions::minusT( F );
 
     for( UInt i(0); i < this->M_vectorInterpolated.size() ; i++ )
       {
           // As in other classes, the specialization of the MapType = MapEpetra makes this expression
           // not always usable. When other maps will be available in LifeV, the class should be re-templated.
 
+          // Defining the expression for the i-th fiber
           // Definitions of the quantities which depend on the fiber directions e.g. I_4^i
-          ExpressionInterpolateValue<MeshType, MapEpetra, 3, 3>
-              fiberIth( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) );
-
-          // Definition of the tensor fiberIth \otimes fiberIth
-          ExpressionOuterProduct<
-              ExpressionInterpolateValue<MeshType, MapEpetra, 3, 3>,
-              ExpressionInterpolateValue<MeshType, MapEpetra, 3, 3>
-              >
-              Mith( fiberIth, fiberIth );
+          interpolatedValue_Type fiberIth = ExpressionDefinitions::interpolateFiber( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ] ) );
+	
+  	  // Definition of the tensor M = ithFiber \otimes ithFiber
+	  // At the moment, it's automatic that the method constructs the expression M = ithFiber \otimes ithFiber
+	  // For a more general case, the file ExpressionDefinitions.hpp should be changed
+	  outerProduct_Type Mith = ExpressionDefinitions::fiberTensor( fiberIth );
 
           // Definition of the fourth invariant : I_4^i = C:Mith
-          ExpressionDot<
-              ExpressionProduct<
-                  ExpressionTranspose<
-                      ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
-                  ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
-              ExpressionOuterProduct<
-                  ExpressionInterpolateValue<MeshType, MapEpetra, 3, 3 >, ExpressionInterpolateValue<MeshType, MapEpetra, 3, 3 > >
-              >
-              IVith( C, Mith );
+	  stretch_Type IVith = ExpressionDefinitions::fiberStretch( C, Mith );
 
           // Definition of the fouth isochoric invariant : J^(-2.0/3.0) * I_4^i
-          ExpressionProduct<
-              ExpressionPower<
-                  ExpressionDeterminant<
-                      ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > > >,
-
-              ExpressionDot<
-                  ExpressionProduct<
-                      ExpressionTranspose<
-                          ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
-                      ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
-                  ExpressionOuterProduct<
-                      ExpressionInterpolateValue<MeshType, MapEpetra, 3, 3 >, ExpressionInterpolateValue<MeshType, MapEpetra, 3, 3 > > >
-              >
-              IVithBar( Jel, IVith );
-
+	  isochoricStretch_Type IVithBar = ExpressionDefinitions::isochoricFourthInvariant( Jel, IVith );
 
           // First term:
           // 2 alpha_i J^(-2.0/3.0) ( \bar{I_4} - 1 ) exp( gamma_i * (\bar{I_4} - 1)^2 ) * F M : \grad phi_i
