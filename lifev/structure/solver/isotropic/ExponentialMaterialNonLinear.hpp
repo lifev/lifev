@@ -94,6 +94,8 @@ public:
     typedef typename super::tensorF_Type               tensorF_Type;
     typedef typename super::determinantF_Type          determinantF_Type;
     typedef typename super::tensorC_Type               tensorC_Type;
+    typedef typename super::minusT_Type                minusT_Type;
+    typedef typename super::traceTensor_Type           traceTensor_Type;
     //@}
 
 
@@ -450,20 +452,14 @@ void ExponentialMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( matr
     // Definition of J
     determinantF_Type J = ExpressionDefinitions::determinantF( F );
 
+    //Definition of C
     tensorC_Type C = ExpressionDefinitions::tensorC( transpose(F), F );
 
     // Definition of F^-T
-    ExpressionMinusTransposed<
-        ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >
-        F_T( F );
+    minusT_Type  F_T = ExpressionDefinitions::minusT( F );
 
-    ExpressionTrace<
-        ExpressionProduct<ExpressionTranspose<ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
-                          ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >
-        >
-        I_C( C );
-
-
+    // Definition I_C
+    traceTensor_Type I_C = ExpressionDefinitions::traceTensor( C );
 
     //Assembling Volumetric Part
     integrate ( elements ( this->M_dispETFESpace->mesh() ),
@@ -606,33 +602,19 @@ void ExponentialMaterialNonLinear<MeshType>::computeStiffness ( const vector_Typ
     // StructuralConstitutiveLaw both on the MeshType and MapType.
 
     // Definition of F
-    ExpressionAddition<
-        ExpressionInterpolateGradient<MeshType, MapEpetra, 3, 3>, ExpressionMatrix<3,3> >
-        F( grad( this->M_dispETFESpace,  disp, this->M_offset), value(this->M_identity));
+    tensorF_Type F = ExpressionDefinitions::deformationGradient( this->M_dispETFESpace,  disp, this->M_offset, this->M_identity );
 
     // Definition of J
-    ExpressionDeterminant<ExpressionAddition<
-        ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >
-        J( F );
+    determinantF_Type J = ExpressionDefinitions::determinantF( F );
 
-    // Definition of tensor C
-    ExpressionProduct<
-        ExpressionTranspose<
-            ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
-            ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> >
-        >
-        C( transpose(F), F );
+    //Definition of C
+    tensorC_Type C = ExpressionDefinitions::tensorC( transpose(F), F );
 
     // Definition of F^-T
-    ExpressionMinusTransposed<
-        ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >
-        F_T( F );
+    minusT_Type  F_T = ExpressionDefinitions::minusT( F );
 
-    ExpressionTrace<
-        ExpressionProduct<ExpressionTranspose<ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
-                          ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >
-        >
-        I_C( C );
+    // Definition I_C
+    traceTensor_Type I_C = ExpressionDefinitions::traceTensor( C );
 
     //Computation of the volumetric part
     integrate ( elements ( this->M_dispETFESpace->mesh() ) ,

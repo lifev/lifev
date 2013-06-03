@@ -130,6 +130,8 @@ public:
     typedef ExpressionDefinitions::deformationGradient_Type     tensorF_Type;
     typedef ExpressionDefinitions::determinantTensorF_Type      determinantF_Type;
     typedef ExpressionDefinitions::rightCauchyGreenTensor_Type  tensorC_Type;
+    typedef ExpressionDefinitions::minusTransposedTensor_Type   minusT_Type;
+    typedef ExpressionDefinitions::traceTensor_Type             traceTensor_Type;
     //@}
 
 

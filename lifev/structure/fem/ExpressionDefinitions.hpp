@@ -96,6 +96,13 @@ typedef ExpressionProduct<
     ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> >
     > rightCauchyGreenTensor_Type;
 
+typedef ExpressionMinusTransposed<
+    ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > > minusTransposedTensor_Type;
+
+typedef ExpressionTrace<
+    ExpressionProduct<ExpressionTranspose<ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
+                          ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >
+    > traceTensor_Type;
 
 //@}
 
@@ -113,6 +120,16 @@ determinantTensorF_Type determinantF( const deformationGradient_Type F )
 rightCauchyGreenTensor_Type tensorC( const ExpressionTranspose<deformationGradient_Type> tF, const deformationGradient_Type F )
 {
     return rightCauchyGreenTensor_Type( tF, F );
+}
+
+minusTransposedTensor_Type minusT( const deformationGradient_Type F )
+{
+    return minusTransposedTensor_Type( F );
+}
+
+traceTensor_Type traceTensor( const rightCauchyGreenTensor_Type C )
+{
+    return traceTensor_Type( C );
 }
 
 } //! End namespace ExpressionDefinitions
