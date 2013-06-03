@@ -87,6 +87,14 @@ public:
     typedef typename super::vectorsParametersPtr_Type    vectorsParametersPtr_Type;
 
     typedef MatrixSmall<3, 3>                          matrixSmall_Type;
+
+    // Typedefs for expression definitions
+    typedef typename super::tensorF_Type                    tensorF_Type;
+    typedef typename super::determinantF_Type               determinantF_Type;
+    typedef typename super::tensorC_Type                    tensorC_Type;
+    typedef typename super::minusT_Type                     minusT_Type;
+    typedef typename super::traceTensor_Type                traceTensor_Type;
+    typedef ExpressionDefinitions::traceSquaredTensor_Type  traceSquaredTensor_Type;
     //@}
 
 
@@ -431,47 +439,22 @@ void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::updateNonLinearJacobia
     //     Real lambda = dataMaterial->lambda(marker);
 
     // Definition of F
-    ExpressionAddition<
-        ExpressionInterpolateGradient<MeshType, MapEpetra, 3, 3>, ExpressionMatrix<3,3> >
-        F( grad( this->M_dispETFESpace,  sol, this->M_offset), value(this->M_identity));
+    tensorF_Type F = ExpressionDefinitions::deformationGradient( this->M_dispETFESpace,  sol, this->M_offset, this->M_identity );
 
     // Definition of J
-    ExpressionDeterminant<ExpressionAddition<
-        ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >
-        J( F );
+    determinantF_Type J = ExpressionDefinitions::determinantF( F );
 
     // Definition of tensor C
-    ExpressionProduct<
-        ExpressionTranspose<
-            ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
-        ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> >
-        >
-    C( transpose(F), F );
+    tensorC_Type C = ExpressionDefinitions::tensorC( transpose(F), F );
 
     // Definition of F^-T
-    ExpressionMinusTransposed<
-        ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> >
-        >
-    F_T( F );
+    minusT_Type  F_T = ExpressionDefinitions::minusT( F );
 
     // Definition of tr( C )
-    ExpressionTrace<
-        ExpressionProduct<ExpressionTranspose<ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
-                          ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >
-        >
-    I_C( C );
+    traceTensor_Type I_C = ExpressionDefinitions::traceTensor( C );
 
     // Definition of C:C
-    ExpressionDot<
-        ExpressionProduct<
-            ExpressionTranspose<
-                ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
-            ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
-        ExpressionProduct<
-            ExpressionTranspose<
-                ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
-            ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > > >
-    I_Csq( C, C );
+    traceSquaredTensor_Type I_Csq = ExpressionDefinitions::traceSquared( C );
 
     //! Stiffness for non-linear terms of the VK-Penalized model
     /*!
@@ -694,48 +677,22 @@ void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::computeStiffness ( con
     //     Real lambda = dataMaterial->lambda(marker);
 
     // Definition of F
-    ExpressionAddition<
-        ExpressionInterpolateGradient<MeshType, MapEpetra, 3, 3>, ExpressionMatrix<3,3> >
-        F( grad( this->M_dispETFESpace,  sol, this->M_offset), value(this->M_identity));
+    tensorF_Type F = ExpressionDefinitions::deformationGradient( this->M_dispETFESpace,  sol, this->M_offset, this->M_identity );
 
     // Definition of J
-    ExpressionDeterminant<ExpressionAddition<
-        ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >
-        J( F );
+    determinantF_Type J = ExpressionDefinitions::determinantF( F );
 
     // Definition of tensor C
-    ExpressionProduct<
-        ExpressionTranspose<
-            ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
-        ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> >
-        >
-    C( transpose(F), F );
+    tensorC_Type C = ExpressionDefinitions::tensorC( transpose(F), F );
 
     // Definition of F^-T
-    ExpressionMinusTransposed<
-        ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> >
-        >
-    F_T( F );
+    minusT_Type  F_T = ExpressionDefinitions::minusT( F );
 
     // Definition of tr( C )
-    ExpressionTrace<
-        ExpressionProduct<ExpressionTranspose<ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
-                          ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >
-        >
-    I_C( C );
+    traceTensor_Type I_C = ExpressionDefinitions::traceTensor( C );
 
     // Definition of C:C
-    ExpressionDot<
-        ExpressionProduct<
-            ExpressionTranspose<
-                ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
-            ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
-        ExpressionProduct<
-            ExpressionTranspose<
-                ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
-            ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > > >
-    I_Csq( C, C );
-
+    traceSquaredTensor_Type I_Csq = ExpressionDefinitions::traceSquared( C );
 
     //! Stiffness for non-linear terms of the Neo-Hookean model
     //! Volumetric part : int { bulk /2* (J1^2 - J1  + log(J1) ) * 1/J1 * (CofF1 : \nabla v) }

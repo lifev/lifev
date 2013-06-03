@@ -104,6 +104,17 @@ typedef ExpressionTrace<
                           ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >
     > traceTensor_Type;
 
+typedef ExpressionDot<
+  ExpressionProduct<
+    ExpressionTranspose<
+      ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
+    ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
+  ExpressionProduct<
+    ExpressionTranspose<
+      ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
+    ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > > > traceSquaredTensor_Type;
+
+
 //@}
 
 deformationGradient_Type deformationGradient( const boost::shared_ptr< ETFESpace_Type > dispETFESpace,
@@ -130,6 +141,11 @@ minusTransposedTensor_Type minusT( const deformationGradient_Type F )
 traceTensor_Type traceTensor( const rightCauchyGreenTensor_Type C )
 {
     return traceTensor_Type( C );
+}
+
+traceSquaredTensor_Type traceSquared( const rightCauchyGreenTensor_Type C )
+{
+  return traceSquaredTensor_Type( C , C );
 }
 
 } //! End namespace ExpressionDefinitions
