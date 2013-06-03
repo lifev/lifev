@@ -91,8 +91,9 @@ public:
     typedef MatrixSmall<3, 3>                          matrixSmall_Type;
 
     // Typedefs for expression definitions
-    typedef typename super::tensorF_Type                        tensorF_Type;
-
+    typedef typename super::tensorF_Type               tensorF_Type;
+    typedef typename super::determinantF_Type          determinantF_Type;
+    typedef typename super::tensorC_Type               tensorC_Type;
     //@}
 
 
@@ -445,22 +446,11 @@ void ExponentialMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( matr
 
     // Definition of F
     tensorF_Type F = ExpressionDefinitions::deformationGradient( this->M_dispETFESpace,  disp, this->M_offset, this->M_identity );
-    // ExpressionAddition<
-    //     ExpressionInterpolateGradient<MeshType, MapEpetra, 3, 3>, ExpressionMatrix<3,3> >
-    //     F( grad( this->M_dispETFESpace,  disp, this->M_offset), value(this->M_identity));
 
     // Definition of J
-    ExpressionDeterminant<ExpressionAddition<
-        ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >
-        J( F );
+    determinantF_Type J = ExpressionDefinitions::determinantF( F );
 
-    // Definition of tensor C
-    ExpressionProduct<
-        ExpressionTranspose<
-            ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
-            ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> >
-        >
-        C( transpose(F), F );
+    tensorC_Type C = ExpressionDefinitions::tensorC( transpose(F), F );
 
     // Definition of F^-T
     ExpressionMinusTransposed<

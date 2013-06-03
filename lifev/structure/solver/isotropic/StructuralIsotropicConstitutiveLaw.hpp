@@ -127,7 +127,9 @@ public:
 
 
     // Typedefs for tensors
-    typedef ExpressionDefinitions::deformationGradient_Type tensorF_Type;
+    typedef ExpressionDefinitions::deformationGradient_Type     tensorF_Type;
+    typedef ExpressionDefinitions::determinantTensorF_Type      determinantF_Type;
+    typedef ExpressionDefinitions::rightCauchyGreenTensor_Type  tensorC_Type;
     //@}
 
 

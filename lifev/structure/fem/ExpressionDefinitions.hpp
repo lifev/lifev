@@ -84,7 +84,17 @@ using namespace ExpressionAssembly;
 //! @name Public typedefs
 //@{
 
-typedef ExpressionAddition< ExpressionInterpolateGradient<MeshType, MapEpetra, 3, 3>, ExpressionMatrix<3,3> >  deformationGradient_Type;
+typedef ExpressionAddition<
+    ExpressionInterpolateGradient<MeshType, MapEpetra, 3, 3>, ExpressionMatrix<3,3> >  deformationGradient_Type;
+
+typedef ExpressionDeterminant<
+    ExpressionAddition< ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > > determinantTensorF_Type;
+
+typedef ExpressionProduct<
+    ExpressionTranspose<
+        ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
+    ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> >
+    > rightCauchyGreenTensor_Type;
 
 
 //@}
@@ -95,7 +105,15 @@ deformationGradient_Type deformationGradient( const boost::shared_ptr< ETFESpace
     return deformationGradient_Type( grad( dispETFESpace,  disp, offset), value(identity) );
 }
 
+determinantTensorF_Type determinantF( const deformationGradient_Type F )
+{
+    return determinantTensorF_Type( F );
+}
 
+rightCauchyGreenTensor_Type tensorC( const ExpressionTranspose<deformationGradient_Type> tF, const deformationGradient_Type F )
+{
+    return rightCauchyGreenTensor_Type( tF, F );
+}
 
 } //! End namespace ExpressionDefinitions
 
