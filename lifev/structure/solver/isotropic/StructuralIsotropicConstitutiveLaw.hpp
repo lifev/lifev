@@ -63,6 +63,7 @@
 #include <lifev/core/fem/Assembly.hpp>
 #include <lifev/core/fem/AssemblyElemental.hpp>
 #include <lifev/structure/fem/AssemblyElementalStructure.hpp>
+#include <lifev/structure/fem/ExpressionDefinitions.hpp>
 #include <lifev/core/fem/FESpace.hpp>
 
 #include <lifev/core/LifeV.hpp>
@@ -123,6 +124,10 @@ public:
     //Vector for vector parameters
     typedef std::vector<std::vector<Real> >           vectorsParameters_Type;
     typedef boost::shared_ptr<vectorsParameters_Type> vectorsParametersPtr_Type;
+
+
+    // Typedefs for tensors
+    typedef ExpressionDefinitions::deformationGradient_Type tensorF_Type;
     //@}
 
 

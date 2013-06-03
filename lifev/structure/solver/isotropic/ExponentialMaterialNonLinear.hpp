@@ -89,6 +89,10 @@ public:
     typedef typename super::vectorsParametersPtr_Type    vectorsParametersPtr_Type;
 
     typedef MatrixSmall<3, 3>                          matrixSmall_Type;
+
+    // Typedefs for expression definitions
+    typedef typename super::tensorF_Type                        tensorF_Type;
+
     //@}
 
 
@@ -440,9 +444,10 @@ void ExponentialMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( matr
     // Real gamma = dataMaterial->gamma(marker);
 
     // Definition of F
-    ExpressionAddition<
-        ExpressionInterpolateGradient<MeshType, MapEpetra, 3, 3>, ExpressionMatrix<3,3> >
-        F( grad( this->M_dispETFESpace,  disp, this->M_offset), value(this->M_identity));
+    tensorF_Type F = ExpressionDefinitions::deformationGradient( this->M_dispETFESpace,  disp, this->M_offset, this->M_identity );
+    // ExpressionAddition<
+    //     ExpressionInterpolateGradient<MeshType, MapEpetra, 3, 3>, ExpressionMatrix<3,3> >
+    //     F( grad( this->M_dispETFESpace,  disp, this->M_offset), value(this->M_identity));
 
     // Definition of J
     ExpressionDeterminant<ExpressionAddition<
