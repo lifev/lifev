@@ -118,6 +118,15 @@ typedef ExpressionPower<
   ExpressionDeterminant<
     ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > > > powerExpression_Type;
 
+typedef ExpressionProduct<
+  ExpressionPower<
+    ExpressionDeterminant< ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > > >,
+  ExpressionTrace<
+    ExpressionProduct<
+      ExpressionTranspose<ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
+      ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > > > > isochoricTrace_Type;
+
+
   // Typedefs for anisotropic laws
 #ifdef ENABLE_ANISOTROPIC_LAW
   typedef  ExpressionInterpolateValue<MeshType, MapEpetra, 3, 3>   interpolatedValue_Type;
@@ -146,6 +155,22 @@ typedef ExpressionPower<
 	ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
       ExpressionOuterProduct<
 	ExpressionInterpolateValue<MeshType, MapEpetra, 3, 3 >, ExpressionInterpolateValue<MeshType, MapEpetra, 3, 3 > > > > isochoricStretch_Type;
+
+  // This typedef describes \kappa * trCBar
+  typedef ExpressionProduct< ExpressionScalar, isochoricTrace_Type > distributedIsochoricTrace_Type;
+
+  // This typedef describes ( 1 - 3 \kappa) * IVithBar 
+  typedef ExpressionProduct< ExpressionScalar, isochoricStretch_Type > distributedIsochoricStretch_Type;
+
+  // This typedef describes \kappa * trCBar + ( 1 - 3 \kappa) * IVithBar 
+  typedef ExpressionAddition< 
+    distributedIsochoricTrace_Type, 
+    distributedIsochoricStretch_Type > distributedInvariants_Type;
+
+  // This typedef describes \kappa * trCBar + ( 1 - 3 \kappa) * IVithBar - 1.0
+  typedef ExpressionAddition<
+    distributedInvariants_Type,
+    ExpressionScalar>                                              distributedStretch_Type;
 
 #endif
 
@@ -187,6 +212,13 @@ powerExpression_Type powerExpression( const determinantTensorF_Type J, const Rea
   return powerExpression_Type( J , exponent );
 }
 
+isochoricTrace_Type isochoricTrace( const powerExpression_Type Jel, const traceTensor_Type I )
+{
+  return isochoricTrace_Type( Jel , I );
+}
+
+
+
 // Constructors for anisotropic laws
 #ifdef ENABLE_ANISOTROPIC_LAW
 interpolatedValue_Type interpolateFiber( const boost::shared_ptr< ETFESpace_Type > dispETFESpace,
@@ -209,6 +241,17 @@ isochoricStretch_Type isochoricFourthInvariant( const powerExpression_Type Jel, 
 {
   return isochoricStretch_Type( Jel, I_4ith );
 }
+
+distributedStretch_Type distributedStretch( const isochoricTrace_Type trCBar, const isochoricStretch_Type I_4ith, const Real kappa )
+{
+  distributedIsochoricTrace_Type dIC_bar( value(kappa), trCBar ) ;
+  distributedIsochoricStretch_Type dI4_bar( value( 1.0 - 3.0 * kappa), I_4ith ) ;
+
+  distributedInvariants_Type dInvariants( dIC_bar, dI4_bar );
+
+  return distributedStretch_Type( dInvariants, value( -1.0 ) );
+}
+
 #endif
 
 

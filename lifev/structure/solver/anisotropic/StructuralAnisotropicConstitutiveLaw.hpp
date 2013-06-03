@@ -143,6 +143,7 @@ public:
     typedef ExpressionDefinitions::minusTransposedTensor_Type   minusT_Type;
     typedef ExpressionDefinitions::traceTensor_Type             traceTensor_Type;
     typedef ExpressionDefinitions::powerExpression_Type         powerExpression_Type;
+    typedef ExpressionDefinitions::isochoricTrace_Type          isochoricTrace_Type;
 
     // Anisotropic typedefs
     typedef ExpressionDefinitions::interpolatedValue_Type       interpolatedValue_Type;

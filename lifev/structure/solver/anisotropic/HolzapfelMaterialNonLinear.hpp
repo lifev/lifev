@@ -106,7 +106,6 @@ public:
     typedef typename super::powerExpression_Type       powerExpression_Type;
 
     // Anisotropic typedefs
-    // Anisotropic typedefs
     typedef typename super::interpolatedValue_Type       interpolatedValue_Type;
     typedef typename super::outerProduct_Type            outerProduct_Type;
     typedef typename super::stretch_Type                 stretch_Type;
