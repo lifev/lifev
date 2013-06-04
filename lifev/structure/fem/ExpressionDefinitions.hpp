@@ -512,10 +512,10 @@ tensorialPart_distrType tensorialPartPiola( const Real kappa,
     */
 
     scaledTensorF_Type scF = scaleF( kappa, F );
-    scaledTraceTimesMinusTF_Type scTrF_T = scaleTraceMinuTF( kappa, tr, F_T );
+    scaledTraceTimesMinusTF_Type scTrF_T = scaleTraceMinuTF( - kappa / 3.0, tr, F_T );
 
-    scaledFtimesM_Type scFM = scaleFtimesM( kappa, F, M );
-    scaledFourthInvariantTimesMinusTF_Type scI4F_T = scaleI4timesMinutTF( kappa, I4, F_T );
+    scaledFtimesM_Type scFM = scaleFtimesM( ( 1 - 3.0 * kappa ), F, M );
+    scaledFourthInvariantTimesMinusTF_Type scI4F_T = scaleI4timesMinutTF( - ( 1.0 - 3.0 * kappa ) / 3.0, I4, F_T );
 
     return tensorialPart_distrType( ( scF + scTrF_T ), ( scFM + scI4F_T ) );
 }
