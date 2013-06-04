@@ -253,9 +253,54 @@ distributedStretch_Type distributedStretch( const isochoricTrace_Type trCBar, co
 }
 
 #endif
-
-
 } //! End namespace ExpressionDefinitions
+
+
+//! The namespace ExpressionDistributedModel is specific for the Dstributed Holzapfel model
+//! the definitions have been inserted here in order to avoid huge declarations of expressions
+//! in the header file of the model
+
+//! The goal of the current namespace is just to define the expressions (final and intermediate)
+//! that are needed for the distributed model making use of the previous namespaces already
+//! defined.
+
+#ifdef ENABLE_ANISOTROPIC_LAW
+namespace ExpressionDistributedModel
+{
+  using namespace ExpressionAssembly;
+
+  //! @name Public typedefs
+  //@{
+
+  // Definition of the expression which represents
+  // the derivative with respect to F of the distributed
+  // stretch of the fibers.
+
+  // Term that represents F^-T : dF
+  typedef 
+
+  // Term that represents F : dF
+
+  // Term that represents dF^T F : M
+
+  // Term that represents F^T dF : M
+
+  //====================================================
+  
+
+  // Definition of the expression that is the tensorial part 
+  // of the first Piola-Kirchhoff tensor for this model
+
+
+
+
+  //====================================================
+  //@}
+
+  
+
+}
+#endif
 
 } //! End namespace LifeV
 #endif
