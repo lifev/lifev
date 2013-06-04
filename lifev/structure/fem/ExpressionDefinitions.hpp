@@ -84,26 +84,32 @@ using namespace ExpressionAssembly;
 //! @name Public typedefs
 //@{
 
+// Definition of F = \grad(displacement) + I
 typedef ExpressionAddition<
     ExpressionInterpolateGradient<MeshType, MapEpetra, 3, 3>, ExpressionMatrix<3,3> >  deformationGradient_Type;
 
+// Definition of J = det(F)
 typedef ExpressionDeterminant<
     ExpressionAddition< ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > > determinantTensorF_Type;
 
+// Definition of the right Cauchy-Green tensor C = F^{T} * F
 typedef ExpressionProduct<
     ExpressionTranspose<
         ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
     ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> >
     > rightCauchyGreenTensor_Type;
 
+// Definition of the tensor F^{-T}
 typedef ExpressionMinusTransposed<
     ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > > minusTransposedTensor_Type;
 
+// Definition of the trace of the tensor C
 typedef ExpressionTrace<
     ExpressionProduct<ExpressionTranspose<ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
                           ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >
     > traceTensor_Type;
 
+// Definition of the trace of the tensor C^2 = C:C = tr(C^2)
 typedef ExpressionDot<
   ExpressionProduct<
     ExpressionTranspose<
@@ -114,10 +120,12 @@ typedef ExpressionDot<
       ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
     ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > > > traceSquaredTensor_Type;
 
+// Definition of the power of J ( specifically J^(-2.0/3.0) )
 typedef ExpressionPower<
   ExpressionDeterminant<
     ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > > > powerExpression_Type;
 
+// Definition of the isochoric trace \bar{I_C} = J^( -2.0/3.0)*tr(C))
 typedef ExpressionProduct<
   ExpressionPower<
     ExpressionDeterminant< ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > > >,
@@ -159,12 +167,12 @@ typedef ExpressionProduct<
   // This typedef describes \kappa * trCBar
   typedef ExpressionProduct< ExpressionScalar, isochoricTrace_Type > distributedIsochoricTrace_Type;
 
-  // This typedef describes ( 1 - 3 \kappa) * IVithBar 
+  // This typedef describes ( 1 - 3 \kappa) * IVithBar
   typedef ExpressionProduct< ExpressionScalar, isochoricStretch_Type > distributedIsochoricStretch_Type;
 
-  // This typedef describes \kappa * trCBar + ( 1 - 3 \kappa) * IVithBar 
-  typedef ExpressionAddition< 
-    distributedIsochoricTrace_Type, 
+  // This typedef describes \kappa * trCBar + ( 1 - 3 \kappa) * IVithBar
+  typedef ExpressionAddition<
+    distributedIsochoricTrace_Type,
     distributedIsochoricStretch_Type > distributedInvariants_Type;
 
   // This typedef describes \kappa * trCBar + ( 1 - 3 \kappa) * IVithBar - 1.0
@@ -267,39 +275,91 @@ distributedStretch_Type distributedStretch( const isochoricTrace_Type trCBar, co
 #ifdef ENABLE_ANISOTROPIC_LAW
 namespace ExpressionDistributedModel
 {
-  using namespace ExpressionAssembly;
+using namespace ExpressionAssembly;
 
-  //! @name Public typedefs
-  //@{
+//! @name Public typedefs
+//@{
 
-  // Definition of the expression which represents
-  // the derivative with respect to F of the distributed
-  // stretch of the fibers.
+// Definition of the expression which represents
+// the derivative with respect to F of the distributed
+// stretch of the fibers.
 
-  // Term that represents F^-T : dF
-  typedef 
+// Term that represents F^-T : dF
+typedef ExpressionDot<
+    ExpressionDefinitions::minusTransposedTensor_Type, ExpressionDphiJ > minusTFscalarDF_distrType;
 
-  // Term that represents F : dF
+// Term that represents F : dF
+typedef ExpressionDot<
+    ExpressionDefinitions::deformationGradient_Type, ExpressionDphiJ > FscalarDF_distrType;
 
-  // Term that represents dF^T F : M
+// Term that represents dF^T F : M
+typedef ExpressionDot<
+    ExpressionProduct< ExpressionTranspose<ExpressionDphiJ>, ExpressionDefinitions::deformationGradient_Type >,
+    ExpressionDefinitions::outerProduct_Type  >                        dFTtimesFscalarM_distrType;
 
-  // Term that represents F^T dF : M
+// Term that represents F^T dF : M
+typedef ExpressionDot<
+    ExpressionProduct< ExpressionTranspose<ExpressionDefinitions::deformationGradient_Type>, ExpressionDphiJ >,
+    ExpressionDefinitions::outerProduct_Type  >                        FTtimesDFscalarM_distrType;
 
-  //====================================================
-  
+/*
+  Term that represents the first derivative of the isochoric trace with respect to F
+  In formula:
 
-  // Definition of the expression that is the tensorial part 
-  // of the first Piola-Kirchhoff tensor for this model
+  D_F( \bar(I_C) ) : dF = D_F( J^(-2.0/3.0) * I_C ) : dF =
+  ( -2.0/3.0 ) * \bar(I_C) F^{-T}:dF + 2 J^(-2.0/3.0) F:dF
+*/
+
+typedef ExpressionProduct< ExpressionScalar, ExpressionDefinitions::traceTensor_Type>           scaledTrace_Type;
+typedef ExpressionProduct< ExpressionScalar, ExpressionDefinitions::isochoricTrace_Type>        scaledIsochoricTrace_Type;
+typedef ExpressionProduct< ExpressionScalar, ExpressionDefinitions::determinantTensorF_Type>    scaledDeterminant_Type;
+
+typedef ExpressionProduct< ExpressionScalar, ExpressionDefinitions::stretch_Type>               scaledFourthInvariant_Type;
+typedef ExpressionProduct< ExpressionScalar, ExpressionDefinitions::isochoricStretch_Type>      scaledIsochoricFourthInvariant_Type;
+
+typedef ExpressionAddition<
+    ExpressionProduct< scaledIsochoricTrace_Type, minusTFscalarDF_distrType>,
+    ExpressionProduct< scaledDeterminant_Type,    FscalarDF_distrType>
+    > linearizationFisochoricTrace_Type;
+
+/*
+  Term that represents the first derivative of the isochoric fourth invariant
+  In formula:
+
+  D_F( \bar(I4^i) ) : dF = D_F( J^(-2.0/3.0) * I4^i ) : dF =
+  ( -2.0/3.0 ) * \bar(I4^i) F^{-T}:dF + J^(-2.0/3.0) ( dF^T F + F^T dF ): M
+*/
+typedef ExpressionAddition<
+    ExpressionProduct< scaledIsochoricFourthInvariant_Type, minusTFscalarDF_distrType>,
+    ExpressionProduct< ExpressionDefinitions::determinantTensorF_Type,
+                       ExpressionAddition<dFTtimesFscalarM_distrType, FTtimesDFscalarM_distrType > >
+    > linearizationFisochoricFourthInvariant_Type;
+//====================================================
+
+/*
+  Definition of the expression that is the tensorial part
+  of the first Piola-Kirchhoff tensor for this model
+
+  In the derivation of the Piola-Kirchhoff tensor,
+  the tensorial part is of the form
+
+  \kappa F - ( 1/3 )\kappa I_C F^{-T} +
+  + ( 1 - 3\kappa ) FM - ( (1-3\kappa) / 3 ) * I_4 * F^{-T}
+*/
+typedef ExpressionProduct< ExpressionScalar, ExpressionDefinitions::deformationGradient_Type>    scaledTensorF_Type;
+typedef ExpressionProduct< scaledTrace_Type, ExpressionDefinitions::minusTransposedTensor_Type>  scaledTraceTimesMinusTF_Type;
+typedef ExpressionProduct< ExpressionScalar,
+                           ExpressionProduct<
+                               ExpressionDefinitions::deformationGradient_Type,
+                               ExpressionDefinitions::outerProduct_Type> >                       scaledFtimesM_Type;
+typedef ExpressionProduct< scaledFourthInvariant_Type,
+                           ExpressionDefinitions::minusTransposedTensor_Type>                    scaledFourthInvariantTimesMinusTF_Type;
+//====================================================
+//@}
 
 
 
-
-  //====================================================
-  //@}
-
-  
-
-}
+} // end namespace ExpressionDistributedModel
 #endif
 
 } //! End namespace LifeV
