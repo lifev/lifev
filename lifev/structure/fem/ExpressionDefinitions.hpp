@@ -392,6 +392,11 @@ FTtimesDFscalarM_distrType FTtimesDFscalarM( const ExpressionDefinitions::deform
     return FTtimesDFscalarM_distrType( transpose( F ) * grad( phi_j ), M );
 }
 
+scaledTrace_Type scaleTrace( const Real coeff, const  ExpressionDefinitions::traceTensor_Type tr )
+{
+    return scaledTrace_Type( coeff, tr );
+}
+
 scaledIsochoricTrace_Type scaleIsochoricTrace( const Real coeff, const  ExpressionDefinitions::isochoricTrace_Type isoTr )
 {
     return scaledIsochoricTrace_Type( coeff, isoTr );
@@ -461,9 +466,31 @@ scaledTensorF_Type scaleF( const Real coeff, const ExpressionDefinitions::deform
     return scaledTensorF_Type( coeff, F);
 }
 
+scaledTraceTimesMinusTF_Type scaleTraceMinuTF( const Real coeff,
+                                               const ExpressionDefinitions::traceTensor_Type Ic,
+                                               const ExpressionDefinitions::minusTransposedTensor_Type F_T )
+{
+    scaledTrace_Type scIc = scaleTrace( coeff, Ic );
 
+    return scaledTraceTimesMinusTF_Type( scIc, F_T );
+}
 
+scaledFtimesM_Type scaleFtimesM( const Real coeff,
+                                 const ExpressionDefinitions::deformationGradient_Type F,
+                                 const ExpressionDefinitions::outerProduct_Type M)
+{
 
+    return scaledFtimesM_Type( coeff, F*M );
+}
+
+scaledFourthInvariantTimesMinusTF_Type scaleI4timesMinutTF( const Real coeff,
+                                                            const ExpressionDefinitions::stretch_Type I4,
+                                                            const ExpressionDefinitions::minusTransposedTensor_Type F_T )
+{
+    scaledFourthInvariant_Type scI4 = scaleFourthInvariant( coeff, I4 );
+
+    return scaledFourthInvariantTimesMinusTF_Type( scI4, F_T );
+}
 
 //@}
 
