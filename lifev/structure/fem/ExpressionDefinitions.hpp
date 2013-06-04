@@ -453,7 +453,7 @@ linearizationDistributedStretch_Type derivativeDistributedStretch( const Real ka
     linearizationFisochoricTrace_Type firstTerm = derivativeIsochoricTrace( isoTr, Jel, F, F_T );
     linearizationFisochoricFourthInvariant_Type secondTerm = derivativeIsochoricFourthInvariant( isoI4, Jel, F, F_T, M);
 
-    return linearizationDistributedStretch_Type( kappa * firstTerm, ( 1 - 3.0 * kappa) * secondTerm );
+    return linearizationDistributedStretch_Type( value(kappa) * firstTerm, value( 1 - 3.0 * kappa) * secondTerm );
 }
 
 scaledTensorF_Type scaleF( const Real coeff, const ExpressionDefinitions::deformationGradient_Type F )
