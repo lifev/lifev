@@ -113,7 +113,11 @@ public:
     typedef typename super::stretch_Type                 stretch_Type;
     typedef typename super::isochoricStretch_Type        isochoricStretch_Type;
 
-    typedef ExpressionDefinitions::distributedStretch_Type        distributedStretch_Type;
+    typedef ExpressionDefinitions::distributedStretch_Type      distributedStretch_Type;
+
+    // typedefs specific for this model that are defined in ExpressionDefinitions.hpp
+    typedef ExpressionDistributedModel::tensorialPart_distrType tensorialPart_distrType;
+    typedef ExpressionDistributedModel::linearizationDistributedStretch_Type derivativeDistrStretch_Type;
     //@}
 
 
@@ -472,115 +476,126 @@ void DistributedHolzapfelMaterialNonLinear<MeshType>::updateNonLinearJacobianTer
     // should have as template the MeshType and the MapType.
 
     // Definition of F
-    ExpressionAddition<
-        ExpressionInterpolateGradient<MeshType, MapEpetra, 3, 3>, ExpressionMatrix<3,3> >
-        F( grad( this->M_dispETFESpace,  disp, this->M_offset), value(this->M_identity));
+    tensorF_Type F = ExpressionDefinitions::deformationGradient( this->M_dispETFESpace,  disp, this->M_offset, this->M_identity );
 
     // Definition of J
-    ExpressionDeterminant<ExpressionAddition<
-        ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >
-        J( F );
-
-    // Definition of tensor C
-    ExpressionProduct<
-        ExpressionTranspose<
-            ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
-            ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> >
-        >
-        C( transpose(F), F );
-
-    // Definition of tr(C)
-    ExpressionTrace<
-        ExpressionProduct<ExpressionTranspose<ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
-                          ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >
-        >
-        I_C( C );
+    determinantF_Type J = ExpressionDefinitions::determinantF( F );
 
     // Definition of J^-(2/3) = det( C ) using the isochoric/volumetric decomposition
-    ExpressionPower<
-        ExpressionDeterminant<
-            ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> >
-            >
-        >
-        Jel( J, (-2.0/3.0) );
-
-    // Definition of I_Cbar
-    ExpressionProduct<
-        ExpressionPower<
-            ExpressionDeterminant< ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > > >,
-        ExpressionTrace<
-            ExpressionProduct<ExpressionTranspose<ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
-                              ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > > > >
-        trCbar( Jel, I_C);
+    powerExpression_Type  Jel = ExpressionDefinitions::powerExpression( J , (-2.0/3.0) );
 
     // Definition of F^-T
-    ExpressionMinusTransposed<
-        ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >
-        F_T( F );
+    minusT_Type  F_T = ExpressionDefinitions::minusT( F );
 
+    //Definition of C
+    tensorC_Type C = ExpressionDefinitions::tensorC( transpose(F), F );
+
+    // Definition of tr( C )
+    traceTensor_Type I_C = ExpressionDefinitions::traceTensor( C );
+
+    // Definition of J^( -2.0/3.0 ) * tr( C )
+    isochoricTrace_Type trCbar = ExpressionDefinitions::isochoricTrace( Jel, I_C );
 
     // Update the heaviside function for the stretch of the fibers
     * (jacobian) *= 0.0;
 
-    displayer->leaderPrint ("   Non-Linear S - updating non linear terms in the Jacobian Matrix (Holzapfel): \n");
+    displayer->leaderPrint ("   Non-Linear S - updating non linear terms in the Jacobian Matrix (Distributed Holzapfel): \n");
 
     for( UInt i(0); i < this->M_vectorInterpolated.size(); i++ )
     {
 
-      displayer->leaderPrint ("                ", i + 1,"-th fiber family \n" );
+        displayer->leaderPrint ("                ", i + 1,"-th fiber family \n" );
+
+        // Material parameters
+        Real kappaI  = this->M_dataMaterial->ithDistributionFibers( i );
+        Real alphaI = this->M_dataMaterial->ithStiffnessFibers( i );
+        Real gammaI = this->M_dataMaterial->ithNonlinearityFibers( i );
+
         // Defining the expression for the i-th fiber
         // Definitions of the quantities which depend on the fiber directions e.g. I_4^i
-        ExpressionInterpolateValue<MeshType, MapEpetra, 3, 3>
-            fiberIth( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ]) );
+        interpolatedValue_Type fiberIth = ExpressionDefinitions::interpolateFiber( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ] ) );
 
-        // Definition of the tensor fiberIth \otimes fiberIth
-        ExpressionOuterProduct<
-            ExpressionInterpolateValue<MeshType, MapEpetra, 3, 3>,
-            ExpressionInterpolateValue<MeshType, MapEpetra, 3, 3>
-            >
-            Mith( fiberIth, fiberIth );
+        // Definition of the tensor M = ithFiber \otimes ithFiber
+        // At the moment, it's automatic that the method constructs the expression M = ithFiber \otimes ithFiber
+        // For a more general case, the file ExpressionDefinitions.hpp should be changed
+        outerProduct_Type Mith = ExpressionDefinitions::fiberTensor( fiberIth );
 
         // Definition of the fourth invariant : I_4^i = C:Mith
-        ExpressionDot<
-            ExpressionProduct<
-                ExpressionTranspose<
-                    ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
-                ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
-                    ExpressionOuterProduct<
-                        ExpressionInterpolateValue<MeshType, MapEpetra, 3, 3 >, ExpressionInterpolateValue<MeshType, MapEpetra, 3, 3 > >
-                    >
-            IVith( C, Mith );
+        stretch_Type IVith = ExpressionDefinitions::fiberStretch( C, Mith );
 
         // Definition of the fouth isochoric invariant : J^(-2.0/3.0) * I_4^i
-        ExpressionProduct<
-            ExpressionPower<
-                ExpressionDeterminant<
-                    ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > > >,
+        isochoricStretch_Type IVithBar = ExpressionDefinitions::isochoricFourthInvariant( Jel, IVith );
 
-            ExpressionDot<
-                ExpressionProduct<
-                    ExpressionTranspose<
-                        ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
-                    ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
-                ExpressionOuterProduct<
-                    ExpressionInterpolateValue<MeshType, MapEpetra, 3, 3 >, ExpressionInterpolateValue<MeshType, MapEpetra, 3, 3 > > >
-            >
-            IVithBar( Jel, IVith );
+        // Definition of the quantity to measure stretch in the distributed case
+        // \kappaI * \bar{I_C} + ( 1 - 3\kappaI ) * \bar{I_4^i} - 1.0
+        distributedStretch_Type distrStretch = ExpressionDefinitions::distributedStretch( trCbar, IVithBar, kappaI );
+
+        // Definition of the matricial ( i.e. tensorial part ) of the Piola - Kirchhoff )
+        tensorialPart_distrType tensorialPart = ExpressionDistributedModel::tensorialPartPiola( kappaI, I_C, IVith, F, F_T, Mith );
+
+        // Definition of the derivative w.r.t to F of the distributed stretch
+        derivativeDistrStretch_Type derivativeStretch = ExpressionDistributedModel::derivativeDistributedStretch( kappaI, trCbar, IVithBar,
+                                                                                                                  Jel, F, F_T, Mith);
 
         // first term:
-        // (-4.0/3.0) * aplha_i * J^(-2.0/3.0) * \bar{I_4} * ( \bar{I_4} - 1 ) * exp( gamma_i * ( \bar{I_4} - 1 )^2 ) *
-        // (epsilon / PI) * ( 1/ (1 + epsilon^2 * ( \bar{I_4} - 1 )^2 ) ) * ( F^-T : dF ) ( ( F * M - (1.0/3.0) * I_4 * F^-T ) : d\phi )
         integrate( elements ( this->M_dispETFESpace->mesh() ),
                    this->M_dispFESpace->qr(),
                    this->M_dispETFESpace,
                    this->M_dispETFESpace,
-                   value( -4.0/3.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * Jel *
-                   IVithBar * ( IVithBar - value(1.0) ) *
-                   exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value(1.0) ) * ( IVithBar- value(1.0) ) ) *
-                   derAtan( IVithBar - value(1.0), this->M_epsilon, ( 1.0 / PI ) ) *
-                   dot( F_T, grad(phi_j) ) *
-                   dot( F * Mith - value(1.0/3.0) * IVith * F_T, grad(phi_i) )
+                   value( 2.0 * alphaI ) * exp( value( gammaI  ) * ( distrStretch ) * ( distrStretch ) ) *
+                   Jel * distrStretch * derAtan( distrStretch , this->M_epsilon, ( 1.0 / PI ) ) *
+                   derivativeStretch * dot( tensorialPart , grad(phi_i) )
                    ) >> jacobian;
+
+        // second term:
+        integrate( elements ( this->M_dispETFESpace->mesh() ),
+                   this->M_dispFESpace->qr(),
+                   this->M_dispETFESpace,
+                   this->M_dispETFESpace,
+                   atan(  distrStretch , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  ) *
+                   value( 2.0 * alphaI ) * exp( value( gammaI  ) * ( distrStretch ) * ( distrStretch ) ) *
+                   Jel * derivativeStretch * dot( tensorialPart , grad(phi_i) )
+                   ) >> jacobian;
+
+        // third term:
+        integrate( elements ( this->M_dispETFESpace->mesh() ),
+                   this->M_dispFESpace->qr(),
+                   this->M_dispETFESpace,
+                   this->M_dispETFESpace,
+                   atan(  distrStretch , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  ) *
+                   value( 2.0 * alphaI ) * Jel * distrStretch *
+                   exp( value( gammaI  ) * ( distrStretch ) * ( distrStretch ) ) *
+                   value( 2.0 * gammaI ) * distrStretch * derivativeStretch * dot( tensorialPart , grad(phi_i) )
+                   ) >> jacobian;
+
+        // fourth term:
+        integrate( elements ( this->M_dispETFESpace->mesh() ),
+                   this->M_dispFESpace->qr(),
+                   this->M_dispETFESpace,
+                   this->M_dispETFESpace,
+                   atan(  distrStretch , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  ) *
+                   value( 2.0 * alphaI ) *  distrStretch *
+                   exp( value( gammaI  ) * ( distrStretch ) * ( distrStretch ) ) *
+                   value( -2.0/3.0 ) * Jel * dot( F_T, grad(phi_j) ) * dot( tensorialPart , grad(phi_i) )
+                   ) >> jacobian;
+
+        // fifth term:
+        integrate( elements ( this->M_dispETFESpace->mesh() ),
+                   this->M_dispFESpace->qr(),
+                   this->M_dispETFESpace,
+                   this->M_dispETFESpace,
+                   atan(  distrStretch , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  ) *
+                   value( 2.0 * alphaI ) *  distrStretch *
+                   exp( value( gammaI ) * ( distrStretch ) * ( distrStretch ) ) * Jel *
+                   dot( value( kappaI ) * grad(phi_j) +
+                        value( - ( 2.0 * kappaI )/ 3.0 ) * dot( F, grad(phi_j) ) * F_T  +
+                        value( kappaI / 3.0 ) * I_C * F_T * transpose( grad(phi_j) ) * F_T +
+                        value( 1.0 - 3.0 * kappaI ) * grad(phi_j) * Mith +
+                        value( ( 1.0 - 3.0*kappaI ) / 3.0 ) * IVith *  F_T * transpose( grad(phi_j) ) * F_T +
+                        value(-( 1.0 - 3.0*kappaI ) / 3.0 ) * ( dot( transpose(grad(phi_j)) * F , Mith ) + dot( transpose(F)*grad(phi_j), Mith ) ) * F_T , grad(phi_i) )
+                   ) >> jacobian;
+
+
 
     } // closing loop on fibers
 
@@ -606,7 +621,7 @@ void DistributedHolzapfelMaterialNonLinear<MeshType>::computeStiffness ( const v
     * (M_stiff) *= 0.0;
 
     displayer->leaderPrint (" \n*********************************\n  ");
-    displayer->leaderPrint (" Non-Linear S-  Computing the Distributed Holzapfel nonlinear stiffness vector ");
+    displayer->leaderPrint (" Non-Linear S-  Computing the Distributed Holzapfel nonlinear stiffness vector (Distributed Holzapfel) ");
     displayer->leaderPrint (" \n*********************************\n  ");
 
     // For anisotropic part of the Piola-Kirchhoff is assemble summing up the parts of the
@@ -646,25 +661,25 @@ void DistributedHolzapfelMaterialNonLinear<MeshType>::computeStiffness ( const v
           // Defining the expression for the i-th fiber
           // Definitions of the quantities which depend on the fiber directions e.g. I_4^i
           interpolatedValue_Type fiberIth = ExpressionDefinitions::interpolateFiber( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ] ) );
-	
-  	  // Definition of the tensor M = ithFiber \otimes ithFiber
-	  // At the moment, it's automatic that the method constructs the expression M = ithFiber \otimes ithFiber
-	  // For a more general case, the file ExpressionDefinitions.hpp should be changed
-	  outerProduct_Type Mith = ExpressionDefinitions::fiberTensor( fiberIth );
+
+          // Definition of the tensor M = ithFiber \otimes ithFiber
+          // At the moment, it's automatic that the method constructs the expression M = ithFiber \otimes ithFiber
+          // For a more general case, the file ExpressionDefinitions.hpp should be changed
+          outerProduct_Type Mith = ExpressionDefinitions::fiberTensor( fiberIth );
 
           // Definition of the fourth invariant : I_4^i = C:Mith
-	  stretch_Type IVith = ExpressionDefinitions::fiberStretch( C, Mith );
+          stretch_Type IVith = ExpressionDefinitions::fiberStretch( C, Mith );
 
           // Definition of the fouth isochoric invariant : J^(-2.0/3.0) * I_4^i
-	  isochoricStretch_Type IVithBar = ExpressionDefinitions::isochoricFourthInvariant( Jel, IVith );
+          isochoricStretch_Type IVithBar = ExpressionDefinitions::isochoricFourthInvariant( Jel, IVith );
 
-	  // Material parameters
-          Real kappa  = this->M_dataMaterial->ithDistributionFibers( i );
+          // Material parameters
+          Real kappaI  = this->M_dataMaterial->ithDistributionFibers( i );
           Real alphaI = this->M_dataMaterial->ithStiffnessFibers( i );
           Real gammaI = this->M_dataMaterial->ithNonlinearityFibers( i );
 
-	  // Definition of the activation for distributed model
-	  distributedStretch_Type distrStretch = ExpressionDefinitions::distributedStretch( trCbar, IVithBar, kappa );
+          // Definition of the activation for distributed model
+          distributedStretch_Type distrStretch = ExpressionDefinitions::distributedStretch( trCbar, IVithBar, kappaI );
 
           // For this model, the activation in front of the stress tensor is of the form
           // atan( k * \bar{I_C} + ( 1 - 3*k ) * \bar(I_4) - 1 )
@@ -679,7 +694,7 @@ void DistributedHolzapfelMaterialNonLinear<MeshType>::computeStiffness ( const v
                       atan(  distrStretch , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  ) *
                       value( 2.0 * alphaI ) * Jel * ( distrStretch ) *
                       exp( value( gammaI  ) * ( distrStretch ) * ( distrStretch ) ) *
-                      value( kappa ) *
+                      value( kappaI ) *
                       dot( F - value( 1.0 / 3.0 ) * I_C * F_T, grad( phi_i ) )
                       ) >> this->M_stiff;
 
@@ -694,7 +709,7 @@ void DistributedHolzapfelMaterialNonLinear<MeshType>::computeStiffness ( const v
                       atan(  distrStretch , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  ) *
                       value( 2.0 * alphaI ) * Jel * ( distrStretch ) *
                       exp( value( gammaI  ) * ( distrStretch ) * ( distrStretch ) ) *
-                      value(  1.0 - 3.0 * kappa ) *
+                      value(  1.0 - 3.0 * kappaI ) *
                       dot( F * Mith - value( 1.0 / 3.0 ) * IVith * F_T, grad( phi_i ) )
                       ) >> this->M_stiff;
 

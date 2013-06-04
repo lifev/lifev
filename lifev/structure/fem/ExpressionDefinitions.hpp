@@ -365,6 +365,10 @@ typedef ExpressionProduct< ExpressionScalar,
                                ExpressionDefinitions::outerProduct_Type> >                       scaledFtimesM_Type;
 typedef ExpressionProduct< scaledFourthInvariant_Type,
                            ExpressionDefinitions::minusTransposedTensor_Type>                    scaledFourthInvariantTimesMinusTF_Type;
+
+typedef ExpressionAddition<
+    ExpressionAddition< scaledTensorF_Type, scaledTraceTimesMinusTF_Type >,
+    ExpressionAddition< scaledFtimesM_Type, scaledFourthInvariantTimesMinusTF_Type> > tensorialPart_distrType;
 //====================================================
 //@}
 
@@ -492,6 +496,29 @@ scaledFourthInvariantTimesMinusTF_Type scaleI4timesMinutTF( const Real coeff,
     return scaledFourthInvariantTimesMinusTF_Type( scI4, F_T );
 }
 
+tensorialPart_distrType tensorialPartPiola( const Real kappa,
+                                            const ExpressionDefinitions::traceTensor_Type tr,
+                                            const ExpressionDefinitions::stretch_Type I4,
+                                            const ExpressionDefinitions::deformationGradient_Type F,
+                                            const ExpressionDefinitions::minusTransposedTensor_Type F_T,
+                                            const ExpressionDefinitions::outerProduct_Type M)
+{
+    /*
+      First the terms of the expression are built term by term
+      The tensorial part of the Piola tensor corresponding to one fiber
+      reads:
+
+      kappa * F - ( kappa / 3.0 ) * I_C * F_T + ( 1 - 3*kappa) FM - ( 1 - 3*kappa )/3.0 * I4 * F_T
+    */
+
+    scaledTensorF_Type scF = scaleF( kappa, F );
+    scaledTraceTimesMinusTF_Type scTrF_T = scaleTraceMinuTF( kappa, tr, F_T );
+
+    scaledFtimesM_Type scFM = scaleFtimesM( kappa, F, M );
+    scaledFourthInvariantTimesMinusTF_Type scI4F_T = scaleI4timesMinutTF( kappa, I4, F_T );
+
+    return tensorialPart_distrType( ( scF + scTrF_T ), ( scFM + scI4F_T ) );
+}
 //@}
 
 } // end namespace ExpressionDistributedModel

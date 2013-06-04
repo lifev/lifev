@@ -485,7 +485,7 @@ void HolzapfelMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( matrix
     // Update the heaviside function for the stretch of the fibers
     * (jacobian) *= 0.0;
 
-    displayer->leaderPrint ("   Non-Linear S - updating non linear terms in the Jacobian Matrix (Holzapfel): \n");
+    displayer->leaderPrint ("   Non-Linear S - updating non linear terms in the Jacobian Matrix (N fibers Holzapfel): \n");
 
     for( UInt i(0); i < this->M_vectorInterpolated.size(); i++ )
     {
@@ -494,17 +494,17 @@ void HolzapfelMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( matrix
         // Defining the expression for the i-th fiber
         // Definitions of the quantities which depend on the fiber directions e.g. I_4^i
         interpolatedValue_Type fiberIth = ExpressionDefinitions::interpolateFiber( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ] ) );
-	
-	// Definition of the tensor M = ithFiber \otimes ithFiber
-	// At the moment, it's automatic that the method constructs the expression M = ithFiber \otimes ithFiber
-	// For a more general case, the file ExpressionDefinitions.hpp should be changed
-	outerProduct_Type Mith = ExpressionDefinitions::fiberTensor( fiberIth );
+
+        // Definition of the tensor M = ithFiber \otimes ithFiber
+        // At the moment, it's automatic that the method constructs the expression M = ithFiber \otimes ithFiber
+        // For a more general case, the file ExpressionDefinitions.hpp should be changed
+        outerProduct_Type Mith = ExpressionDefinitions::fiberTensor( fiberIth );
 
         // Definition of the fourth invariant : I_4^i = C:Mith
-	stretch_Type IVith = ExpressionDefinitions::fiberStretch( C, Mith );
+        stretch_Type IVith = ExpressionDefinitions::fiberStretch( C, Mith );
 
         // Definition of the fouth isochoric invariant : J^(-2.0/3.0) * I_4^i
-	isochoricStretch_Type IVithBar = ExpressionDefinitions::isochoricFourthInvariant( Jel, IVith );
+        isochoricStretch_Type IVithBar = ExpressionDefinitions::isochoricFourthInvariant( Jel, IVith );
 
         // first term:
         // (-4.0/3.0) * aplha_i * J^(-2.0/3.0) * \bar{I_4} * ( \bar{I_4} - 1 ) * exp( gamma_i * ( \bar{I_4} - 1 )^2 ) *
@@ -681,7 +681,7 @@ void HolzapfelMaterialNonLinear<MeshType>::computeStiffness ( const vector_Type&
     * (M_stiff) *= 0.0;
 
     displayer->leaderPrint (" \n*********************************\n  ");
-    displayer->leaderPrint (" Non-Linear S-  Computing the Holzapfel nonlinear stiffness vector ");
+    displayer->leaderPrint (" Non-Linear S-  Computing the Holzapfel nonlinear stiffness vector (N fibers Holzapfel)");
     displayer->leaderPrint (" \n*********************************\n  ");
 
     // For anisotropic part of the Piola-Kirchhoff is assemble summing up the parts of the
@@ -715,7 +715,7 @@ void HolzapfelMaterialNonLinear<MeshType>::computeStiffness ( const vector_Type&
           // Defining the expression for the i-th fiber
           // Definitions of the quantities which depend on the fiber directions e.g. I_4^i
           interpolatedValue_Type fiberIth = ExpressionDefinitions::interpolateFiber( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ] ) );
-	
+
   	  // Definition of the tensor M = ithFiber \otimes ithFiber
 	  // At the moment, it's automatic that the method constructs the expression M = ithFiber \otimes ithFiber
 	  // For a more general case, the file ExpressionDefinitions.hpp should be changed
