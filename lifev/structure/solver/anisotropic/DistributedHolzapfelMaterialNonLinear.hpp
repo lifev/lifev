@@ -113,9 +113,8 @@ public:
     typedef typename super::stretch_Type                 stretch_Type;
     typedef typename super::isochoricStretch_Type        isochoricStretch_Type;
 
-    typedef ExpressionDefinitions::distributedStretch_Type      distributedStretch_Type;
-
     // typedefs specific for this model that are defined in ExpressionDefinitions.hpp
+    typedef ExpressionDistributedModel::distributedStretch_Type      distributedStretch_Type;
     typedef ExpressionDistributedModel::tensorialPart_distrType tensorialPart_distrType;
     typedef ExpressionDistributedModel::linearizationDistributedStretch_Type derivativeDistrStretch_Type;
     //@}
@@ -528,7 +527,7 @@ void DistributedHolzapfelMaterialNonLinear<MeshType>::updateNonLinearJacobianTer
 
         // Definition of the quantity to measure stretch in the distributed case
         // \kappaI * \bar{I_C} + ( 1 - 3\kappaI ) * \bar{I_4^i} - 1.0
-         distributedStretch_Type distrStretch = ExpressionDefinitions::distributedStretch( trCbar, IVithBar, kappaI );
+        distributedStretch_Type distrStretch = ExpressionDistributedModel::distributedStretch( trCbar, IVithBar, kappaI );
 
         // Definition of the matricial ( i.e. tensorial part ) of the Piola - Kirchhoff )
         tensorialPart_distrType tensorialPart = ExpressionDistributedModel::tensorialPartPiola( kappaI, I_C, IVith, F, F_T, Mith );
@@ -679,7 +678,7 @@ void DistributedHolzapfelMaterialNonLinear<MeshType>::computeStiffness ( const v
           Real gammaI = this->M_dataMaterial->ithNonlinearityFibers( i );
 
           // Definition of the activation for distributed model
-          distributedStretch_Type distrStretch = ExpressionDefinitions::distributedStretch( trCbar, IVithBar, kappaI );
+          distributedStretch_Type distrStretch = ExpressionDistributedModel::distributedStretch( trCbar, IVithBar, kappaI );
 
           // For this model, the activation in front of the stress tensor is of the form
           // atan( k * \bar{I_C} + ( 1 - 3*k ) * \bar(I_4) - 1 )

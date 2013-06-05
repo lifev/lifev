@@ -164,22 +164,6 @@ typedef ExpressionProduct<
       ExpressionOuterProduct<
 	ExpressionInterpolateValue<MeshType, MapEpetra, 3, 3 >, ExpressionInterpolateValue<MeshType, MapEpetra, 3, 3 > > > > isochoricStretch_Type;
 
-  // This typedef describes \kappa * trCBar
-  typedef ExpressionProduct< ExpressionScalar, isochoricTrace_Type > distributedIsochoricTrace_Type;
-
-  // This typedef describes ( 1 - 3 \kappa) * IVithBar
-  typedef ExpressionProduct< ExpressionScalar, isochoricStretch_Type > distributedIsochoricStretch_Type;
-
-  // This typedef describes \kappa * trCBar + ( 1 - 3 \kappa) * IVithBar
-  typedef ExpressionAddition<
-    distributedIsochoricTrace_Type,
-    distributedIsochoricStretch_Type > distributedInvariants_Type;
-
-  // This typedef describes \kappa * trCBar + ( 1 - 3 \kappa) * IVithBar - 1.0
-  typedef ExpressionAddition<
-    distributedInvariants_Type,
-    ExpressionScalar>                                              distributedStretch_Type;
-
 #endif
 
 //@}
@@ -250,16 +234,6 @@ isochoricStretch_Type isochoricFourthInvariant( const powerExpression_Type Jel, 
   return isochoricStretch_Type( Jel, I_4ith );
 }
 
-distributedStretch_Type distributedStretch( const isochoricTrace_Type trCBar, const isochoricStretch_Type I_4ith, const Real kappa )
-{
-  distributedIsochoricTrace_Type dIC_bar( value(kappa), trCBar ) ;
-  distributedIsochoricStretch_Type dI4_bar( value( 1.0 - 3.0 * kappa), I_4ith ) ;
-
-  distributedInvariants_Type dInvariants( dIC_bar, dI4_bar );
-
-  return distributedStretch_Type( dInvariants, value( -1.0 ) );
-}
-
 #endif
 } //! End namespace ExpressionDefinitions
 
@@ -283,6 +257,22 @@ using namespace ExpressionAssembly;
 // Definition of the expression which represents
 // the derivative with respect to F of the distributed
 // stretch of the fibers.
+
+// This typedef describes \kappa * trCBar
+typedef ExpressionProduct< ExpressionScalar, ExpressionDefinitions::isochoricTrace_Type > distributedIsochoricTrace_Type;
+
+// This typedef describes ( 1 - 3 \kappa) * IVithBar
+typedef ExpressionProduct< ExpressionScalar, ExpressionDefinitions::isochoricStretch_Type > distributedIsochoricStretch_Type;
+
+// This typedef describes \kappa * trCBar + ( 1 - 3 \kappa) * IVithBar
+typedef ExpressionAddition<
+    distributedIsochoricTrace_Type,
+    distributedIsochoricStretch_Type > distributedInvariants_Type;
+
+// This typedef describes \kappa * trCBar + ( 1 - 3 \kappa) * IVithBar - 1.0
+typedef ExpressionAddition<
+    distributedInvariants_Type,
+    ExpressionScalar>                                              distributedStretch_Type;
 
 // Term that represents F^-T : dF
 typedef ExpressionDot<
@@ -374,6 +364,34 @@ typedef ExpressionAddition<
 
 // Constructors for the expressions defined by the typedefs
 //@{
+
+distributedIsochoricTrace_Type distributedIsochoricTrace( const Real coeff, const ExpressionDefinitions::isochoricTrace_Type ICbar )
+{
+    return distributedIsochoricTrace_Type( value( coeff ), ICbar);
+}
+
+distributedIsochoricStretch_Type distributedIsochoricFourthInvariant( const Real coeff, const ExpressionDefinitions::isochoricStretch_Type I4bar)
+{
+    return distributedIsochoricStretch_Type( value( coeff ), I4bar );
+}
+
+distributedInvariants_Type distributeInvariants( const distributedIsochoricTrace_Type distrIC,
+                                                 const distributedIsochoricStretch_Type distrI4 )
+{
+    return distributedInvariants_Type( distrIC,distrI4 );
+}
+
+distributedStretch_Type distributedStretch( const ExpressionDefinitions::isochoricTrace_Type trCBar,
+                                            const ExpressionDefinitions::isochoricStretch_Type I_4ith, const Real kappa )
+{
+  distributedIsochoricTrace_Type dIC_bar = distributedIsochoricTrace( kappa, trCBar ) ;
+  distributedIsochoricStretch_Type dI4_bar = distributedIsochoricFourthInvariant( 1.0 - 3.0 * kappa, I_4ith ) ;
+
+  distributedInvariants_Type dInvariants = distributeInvariants( dIC_bar, dI4_bar );
+
+  return distributedStretch_Type( dInvariants, value( -1.0 ) );
+}
+
 minusTFscalarDF_distrType minusTFscalarDF( const ExpressionDefinitions::minusTransposedTensor_Type minusFT)
 {
     return minusTFscalarDF_distrType( minusFT, grad( phi_j ) );
