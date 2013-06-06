@@ -673,7 +673,7 @@ void DistributedHolzapfelMaterialNonLinear<MeshType>::computeStiffness ( const v
           isochoricStretch_Type IVithBar = ExpressionDefinitions::isochoricFourthInvariant( Jel, IVith );
 
           // Material parameters
-          Real kappaI  = this->M_dataMaterial->ithDistributionFibers( i );
+          Real kappaI = this->M_dataMaterial->ithDistributionFibers( i );
           Real alphaI = this->M_dataMaterial->ithStiffnessFibers( i );
           Real gammaI = this->M_dataMaterial->ithNonlinearityFibers( i );
 
@@ -683,34 +683,15 @@ void DistributedHolzapfelMaterialNonLinear<MeshType>::computeStiffness ( const v
           // For this model, the activation in front of the stress tensor is of the form
           // atan( k * \bar{I_C} + ( 1 - 3*k ) * \bar(I_4) - 1 )
 
-          // // First term:
-          // // 2 alpha_i J^(-2.0/3.0) ( k \bar{I_1}  + ( 1 - 3*k) \bar{I_4} - 1 ) ( k )
-          // // exp( gamma_i * ( k \bar{I_1} + ( 1 - 3*k) \bar{I_4} - 1)^2 ) * ( F  - 1.3 * I_1 * F^-T) : \grad phi_i
-          // // where alpha_i and gamma_i are the fiber parameters and M is the 2nd order tensor of type f_i \otimes \ f_i
-          // integrate ( elements ( this->M_dispETFESpace->mesh() ),
-          //             this->M_dispFESpace->qr(),
-          //             this->M_dispETFESpace,
-          //             atan(  distrStretch , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  ) *
-          //             value( 2.0 * alphaI ) * Jel * ( distrStretch ) *
-          //             exp( value( gammaI  ) * ( distrStretch ) * ( distrStretch ) ) *
-          //             value( kappaI ) *
-          //             dot( F - value( 1.0 / 3.0 ) * I_C * F_T, grad( phi_i ) )
-          //             ) >> this->M_stiff;
+          // First term:
+          // 2 alpha_i J^(-2.0/3.0) ( k \bar{I_1}  + ( 1 - 3*k) \bar{I_4} - 1 ) ( k )
+          // exp( gamma_i * ( k \bar{I_1} + ( 1 - 3*k) \bar{I_4} - 1)^2 ) * ( F  - 1.3 * I_1 * F^-T) : \grad phi_i
+          // where alpha_i and gamma_i are the fiber parameters and M is the 2nd order tensor of type f_i \otimes \ f_i
 
-
-          // // Second term:
-          // // 2 alpha_i J^(-2.0/3.0) ( k \bar{I_1}  + ( 1 - 3*k) \bar{I_4} - 1 ) ( 1 - 3k )
-          // // exp( gamma_i * ( k \bar{I_1} + ( 1 - 3*k) \bar{I_4} - 1)^2 ) * ( FM  - 1.3 * I_4 * F^-T) : \grad phi_i
-          // // where alpha_i and gamma_i are the fiber parameters and M is the 2nd order tensor of type f_i \otimes \ f_i
-          // integrate ( elements ( this->M_dispETFESpace->mesh() ),
-          //             this->M_dispFESpace->qr(),
-          //             this->M_dispETFESpace,
-          //             atan(  distrStretch , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  ) *
-          //             value( 2.0 *x alphaI ) * Jel * ( distrStretch ) *
-          //             exp( value( gammaI  ) * ( distrStretch ) * ( distrStretch ) ) *
-          //             value(  1.0 - 3.0 * kappaI ) *
-          //             dot( F * Mith - value( 1.0 / 3.0 ) * IVith * F_T, grad( phi_i ) )
-          //             ) >> this->M_stiff;
+          // Second term:
+          // 2 alpha_i J^(-2.0/3.0) ( k \bar{I_1}  + ( 1 - 3*k) \bar{I_4} - 1 ) ( 1 - 3k )
+          // exp( gamma_i * ( k \bar{I_1} + ( 1 - 3*k) \bar{I_4} - 1)^2 ) * ( FM  - 1.3 * I_4 * F^-T) : \grad phi_i
+          // where alpha_i and gamma_i are the fiber parameters and M is the 2nd order tensor of type f_i \otimes \ f_i
 
           // Definition of the matricial ( i.e. tensorial part ) of the Piola - Kirchhoff )
           tensorialPart_distrType tensorialPart = ExpressionDistributedModel::tensorialPartPiola( kappaI, I_C, IVith, F, F_T, Mith );
