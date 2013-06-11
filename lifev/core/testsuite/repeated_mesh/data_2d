@@ -22,7 +22,7 @@ verbose = 0
 
 [mesh]
 mesh_dir   = ./  # the directory where the mesh file is
-mesh_file  = square20x20.msh      # mesh file
+mesh_file  = unstructured_square.msh      # mesh file
 mesh_type  = .msh
 mesh_edges = 'all'
 verbose    = 0

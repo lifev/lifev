@@ -344,7 +344,7 @@ main ( int argc, char** argv )
 
         // test exporting of a repeated mesh
 #ifdef HAVE_HDF5
-        ExporterHDF5<mesh_Type> exporter ( dataFile, localMeshR, "pid", comm->MyPID() );
+        ExporterHDF5<mesh_Type> exporter ( dataFile, localMeshR, "pid_3d", comm->MyPID() );
         exporter.exportPID ( localMeshR, comm, true );
         exporter.postProcess ( 0. );
 #endif
