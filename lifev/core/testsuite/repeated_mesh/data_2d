@@ -14,6 +14,7 @@
 
 [fe]
 type = P1
+[../]
 
 [miscellaneous]
 verbose = 0
@@ -54,21 +55,19 @@ displayList             = false
         relax_value                   = 0
         [../]
 
-        [../amesos]
+        [./amesos]
         solvertype =  Amesos_Umfpack # Amesos_KLU or Amesos_Umfpack
         [../]
 
-        [../partitioner]
+        [./partitioner]
         overlap = 2
         [../]
 
-        [../schwarz]
+        [./schwarz]
         reordering_type = none #metis, rcm, none
         filter_singletons = true
         [../]
-
     [../]
-
 [../]
 
 [solver]
