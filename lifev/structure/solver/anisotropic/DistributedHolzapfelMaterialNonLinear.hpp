@@ -115,7 +115,7 @@ public:
 
     // typedefs specific for this model that are defined in ExpressionDefinitions.hpp
     typedef ExpressionDistributedModel::distributedStretch_Type      distributedStretch_Type;
-    typedef ExpressionDistributedModel::tensorialPart_distrType tensorialPart_distrType;
+    typedef ExpressionDistributedModel::tensorialPart_distrType      tensorialPart_distrType;
     typedef ExpressionDistributedModel::linearizationDistributedStretch_Type derivativeDistrStretch_Type;
     //@}
 
