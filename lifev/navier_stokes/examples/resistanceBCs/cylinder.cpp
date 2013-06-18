@@ -62,52 +62,7 @@
 #include "cylinder.hpp"
 #include <iostream>
 
-
-
 using namespace LifeV;
-
-typedef RegionMesh<LinearTetra>                             mesh_Type;
-
-const int INLET       = 2;
-const int WALL        = 1;
-const int OUTLET      = 3;
-const int RINGIN      = 20;
-const int RINGOUT     = 30;
-
-
-Real zero_scalar ( const Real& /* t */,
-                   const Real& /* x */,
-                   const Real& /* y */,
-                   const Real& /* z */,
-                   const ID& /* i */ )
-{
-    return 0.;
-}
-
-Real u2 (const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
-{
-    switch (i)
-    {
-        case 0:
-            return 0.0;
-            break;
-        case 2:
-            if ( t <= 0.003 )
-            {
-                return 1.3332e4;
-            }
-            //      return 0.01;
-            return 0.0;
-            break;
-        case 1:
-            return 0.0;
-            //      return 1.3332e4;
-            //    else
-            //      return 0.0;
-            break;
-    }
-    return 0;
-}
 
 void
 postProcessFluxesPressures ( OseenSolver< mesh_Type >& nssolver,
@@ -154,12 +109,8 @@ postProcessFluxesPressures ( OseenSolver< mesh_Type >& nssolver,
 struct Cylinder::Private
 {
     Private() :
-        //check(false),
         nu (1),
-        //rho(1),
         H (1), D (1)
-        //H(20), D(1)
-        //H(0.41), D(0.1)
     {}
     typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > fct_Type;
 
@@ -176,157 +127,128 @@ struct Cylinder::Private
     std::string initial_sol;
 
     boost::shared_ptr<Epetra_Comm>   comm;
-    /**
-     * get the characteristic velocity
-     *
-     * @return the characteristic velocity
-     */
-    double Ubar() const
-    {
-        return nu * Re / D;
-    }
 
-    /**
-     * get the magnitude of the profile velocity
-     *
-     *
-     * @return the magnitude of the profile velocity
-     */
-    double Um_3d() const
+    // Static boost functions to impose boundary conditions
+    // Inlet BCs (for this test Poiseuille)
+    Real fluxFunctionAneurysm (const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
     {
-        return 9 * Ubar() / 4;
-    }
 
-    double Um_2d() const
-    {
-        return 3 * Ubar() / 2;
-    }
+        Real fluxFinal;
+        Real rampAmpl (0.4);
+        Real dt (0.005);
 
-
-    /**
-     * u3d 3D velocity profile.
-     *
-     * Define the velocity profile at the inlet for the 3D cylinder
-     */
-    Real u3d ( const Real& /* t */,
-               const Real& /* x */,
-               const Real& y,
-               const Real& z,
-               const ID&   id ) const
-    {
-        if ( id == 0 )
+        if ( t <= rampAmpl )
         {
-            if ( centered )
-            {
-                return Um_3d() * (H + y) * (H - y) * (H + z) * (H - z) / std::pow (H, 4);
-            }
-            else
-            {
-                return 16 * Um_3d() * y * z * (H - y) * (H - z) / std::pow (H, 4);
-            }
+            fluxFinal = ( 0.04 / rampAmpl) * t;
         }
         else
         {
+
+
+            // We change the flux for our geometry
+            const Real pi   = 3.141592653589793;
+            const Real area = 0.0034212; // BigMesh
+
+            const Real areaFactor = area / ( (0.6 / 2) * (0.6 / 2) * pi);
+            //const Real Average = (48.21 * pow (area, 1.84) ) * 60; //Mean Cebral's Flux per minut
+
+            // Unit conversion from ml/min to cm^3/s
+            const Real unitFactor = 1. / 60.;
+
+            // T is the period of the cardiac cycle
+            const Real T          = 0.8;
+
+            // a0 is the average VFR (the value is taken from Karniadakis p970)
+            const Real a0         = 255;
+            //const Real volumetric = Average / a0; //VolumetricFactor per minut
+
+            // Fourrier
+            const Int M (7);
+            const Real a[M] = { -0.152001, -0.111619, 0.043304, 0.028871, 0.002098, -0.027237, -0.000557};
+            const Real b[M] = { 0.129013, -0.031435, -0.086106, 0.028263, 0.010177, 0.012160, -0.026303};
+
+            Real flux (0);
+            //      const Real xi(2*pi*t/T);
+            const Real xi (2 * pi * (t - rampAmpl + dt) / T);
+
+            flux = a0;
+            Int k (1);
+            for (; k <= M ; ++k)
+            {
+                flux += a0 * (a[k - 1] * cos (k * xi) + b[k - 1] * sin (k * xi) );
+            }
+
+            //return - (flux * areaFactor * unitFactor);
+            fluxFinal =  (flux * areaFactor * unitFactor);
+
+        }
+
+        return fluxFinal;
+
+    }
+
+    Real aneurismFluxInVectorial (const Real&  t, const Real& x, const Real& y, const Real& z, const ID& i)
+    {
+        Real n1 (0.0);
+        Real n2 (0.0);
+        Real n3 (1.0);
+
+        Real x0 (0.0);
+        Real y0 (0.0);
+
+
+        Real flux (fluxFunctionAneurysm (t, x, y, z, i) );
+
+        Real area (0.0034212);
+
+        //Parabolic profile
+        Real radius(0.033);
+        Real radiusSquared = radius * radius;
+        Real peak(0);
+        peak = ( 2.0 * flux ) / ( area );
+
+        switch (i)
+        {
+        case 0:
+            // Flat profile: flux / area;
+            // return n1 * flux / area;
+            return n1 * std::max(0.0,( peak * ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) )) ;
+        case 1:
+            // Flat profile: flux / area;
+            //return n2 * flux / area;
+            return n2 * std::max(0.0,( peak * ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) )) ;
+        case 2:
+            // Flat profile: flux / area;
+            // return n3 * flux / area;
+            return n3 * std::max(0.0,( peak * ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) )) ;
+        default:
+            return 0.0;
+        }
+    }
+
+    // External BCs ( u = 0 )
+    Real zeroBCF (const Real&  /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+    {
+        switch (i)
+        {
+        case 0:
+            //Flat profile: flux / area;
+            //return n1 * flux / area;
             return 0;
+        case 1:
+            //Flat profile: flux / area;
+            //return n2 * flux / area;
+            return 0;
+        case 2:
+            // Flat profile: flux / area;
+            // return n3 * flux / area;
+            return 0;
+        default:
+            return 0.0;
         }
     }
 
-    fct_Type getU_3d()
-    {
-        fct_Type f;
-        f = boost::bind (&Cylinder::Private::u3d, this, _1, _2, _3, _4, _5);
-        return f;
-    }
-
-    /**
-     * u2d flat 2D velocity profile.
-     *
-     * Define the velocity profile at the inlet for the 2D cylinder
-     */
-    Real u2d ( const Real& t,
-               const Real& /*x*/,
-               const Real& /*y*/,
-               const Real& /*z*/,
-               const ID&   id ) const
-    {
-
-        switch (id)
-        {
-            case 0: // x component
-                return 0.0;
-                break;
-            case 2: // z component
-                if ( t <= 0.003 )
-                {
-                    return 1.3332e4;
-                }
-                //      return 0.01;
-                return 0.0;
-                break;
-            case 1: // y component
-                return 0.0;
-                //      return 1.3332e4;
-                //    else
-                //      return 0.0;
-                break;
-        }
-        return 0;
-    }
-
-    fct_Type getU_2d()
-    {
-        fct_Type f;
-        f = boost::bind (&Cylinder::Private::u2d, this, _1, _2, _3, _4, _5);
-        return f;
-    }
-
-    /**
-     * one flat (1,1,1)
-     *
-     * Define the velocity profile at the inlet for the 2D cylinder
-     */
-    Real poiseuille ( const Real& /*t*/,
-                      const Real& x,
-                      const Real& y,
-                      const Real& /*z*/,
-                      const ID&   id ) const
-    {
-        double r = std::sqrt (x * x + y * y);
-
-        if (id == 2)
-        {
-            return Um_2d() * 2 * ( (D / 2.) * (D / 2.) - r * r);
-        }
-
-        return 0.;
-    }
-
-    fct_Type getU_pois()
-    {
-        fct_Type f;
-        f = boost::bind (&Cylinder::Private::poiseuille, this, _1, _2, _3, _4, _5);
-        return f;
-    }
-
-
-    Real oneU ( const Real& /*t*/,
-                const Real& /*x*/,
-                const Real& /*y*/,
-                const Real& /*z*/,
-                const ID&   /*id*/ ) const
-    {
-        //            if (id == 3)
-        return 10.;
-
-        return -1.;
-    }
-
-    fct_Type getU_one()
-    {
-        fct_Type f;
-        f = boost::bind (&Cylinder::Private::oneU, this, _1, _2, _3, _4, _5);
-        return f;
-    }
+    // Outflow BC (resistance BC)
 
 
 };
@@ -334,21 +256,21 @@ struct Cylinder::Private
 Cylinder::Cylinder ( int argc,
                      char** argv )
     :
-    d ( new Private )
+    parameters ( new Private )
 {
     GetPot command_line (argc, argv);
     string data_file_name = command_line.follow ("data", 2, "-f", "--file");
     GetPot dataFile ( data_file_name );
-    d->data_file_name = data_file_name;
+    parameters->data_file_name = data_file_name;
 
-    d->Re          = dataFile ( "fluid/problem/Re", 1. );
-    d->nu          = dataFile ( "fluid/physics/viscosity", 1. ) /
-                     dataFile ( "fluid/physics/density", 1. );
-    d->H           = 20.;//dataFile( "fluid/problem/H", 20. );
-    d->D           =               dataFile ( "fluid/problem/D", 1. );
-    d->centered    = (bool)        dataFile ( "fluid/problem/centered", 0 );
-    d->initial_sol = (std::string) dataFile ( "fluid/problem/initial_sol", "stokes");
-    std::cout << d->initial_sol << std::endl;
+    parameters->Re          = dataFile ( "fluid/problem/Re", 1. );
+    parameters->nu          = dataFile ( "fluid/physics/viscosity", 1. ) /
+                              dataFile ( "fluid/physics/density", 1. );
+    parameters->H           = 20.;//dataFile( "fluid/problem/H", 20. );
+    parameters->D           =               dataFile ( "fluid/problem/D", 1. );
+    parameters->centered    = (bool)        dataFile ( "fluid/problem/centered", 0 );
+    parameters->initial_sol = (std::string) dataFile ( "fluid/problem/initial_sol", "stokes");
+    std::cout << parameters->initial_sol << std::endl;
 
 
 #ifdef EPETRA_MPI
@@ -357,18 +279,10 @@ Cylinder::Cylinder ( int argc,
     //    MPI_Init(&argc,&argv);
 
     int ntasks = 0;
-    d->comm.reset ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
-    if (!d->comm->MyPID() )
-    {
-        std::cout << "My PID = " << d->comm->MyPID() << " out of " << ntasks << " running." << std::endl;
-        std::cout << "Re = " << d->Re << std::endl
-                  << "nu = " << d->nu << std::endl
-                  << "H  = " << d->H  << std::endl
-                  << "D  = " << d->D  << std::endl;
-    }
-    //    int err = MPI_Comm_size(MPI_COMM_WORLD, &ntasks);
+    parameters->comm.reset ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
+
 #else
-    d->comm.reset ( new Epetra_SerialComm() );
+    parameters->comm.reset ( new Epetra_SerialComm() );
 #endif
 
 }
@@ -377,17 +291,18 @@ void
 Cylinder::run()
 
 {
+    typedef RegionMesh<LinearTetra>               mesh_Type;
     typedef FESpace< mesh_Type, MapEpetra >       feSpace_Type;
     typedef boost::shared_ptr<feSpace_Type>       feSpacePtr_Type;
     typedef OseenSolver< mesh_Type >::vector_Type vector_Type;
     typedef boost::shared_ptr<vector_Type>        vectorPtr_Type;
     // Reading from data file
     //
-    GetPot dataFile ( d->data_file_name );
+    GetPot dataFile ( parameters->data_file_name );
 
     //    int save = dataFile("fluid/miscellaneous/save", 1);
 
-    bool verbose = (d->comm->MyPID() == 0);
+    bool verbose = (parameters->comm->MyPID() == 0);
 
     // Boundary conditions
     BCHandler bcH;
@@ -395,12 +310,12 @@ Cylinder::run()
     std::vector<ID> zComp (1);
     zComp[0] = 3;
 
-    BCFunctionBase uIn  (  d->getU_2d() );
-    BCFunctionBase uOne (  d->getU_one() );
-    BCFunctionBase uPois (  d->getU_pois() );
+    BCFunctionBase uIn  (  parameters->getU_2d() );
+    BCFunctionBase uOne (  parameters->getU_one() );
+    BCFunctionBase uPois (  parameters->getU_pois() );
 
 
-    //BCFunctionBase unormal(  d->get_normal() );
+    //BCFunctionBase unormal(  parameters->get_normal() );
 
     //cylinder
 
@@ -418,12 +333,12 @@ Cylinder::run()
     MeshData meshData;
     meshData.setup (dataFile, "fluid/space_discretization");
 
-    boost::shared_ptr<mesh_Type> fullMeshPtr ( new mesh_Type ( d->comm ) );
+    boost::shared_ptr<mesh_Type> fullMeshPtr ( new mesh_Type ( parameters->comm ) );
     readMesh (*fullMeshPtr, meshData);
 
     boost::shared_ptr<mesh_Type> meshPtr;
     {
-        MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, d->comm);
+        MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, parameters->comm);
         meshPtr = meshPart.meshPartition();
     }
     if (verbose)
@@ -443,7 +358,7 @@ Cylinder::run()
         std::cout << "Building the velocity FE space ... " << std::flush;
     }
 
-    feSpacePtr_Type uFESpacePtr ( new feSpace_Type (meshPtr, uOrder, 3, d->comm) );
+    feSpacePtr_Type uFESpacePtr ( new feSpace_Type (meshPtr, uOrder, 3, parameters->comm) );
 
     if (verbose)
     {
@@ -458,7 +373,7 @@ Cylinder::run()
         std::cout << "Building the pressure FE space ... " << std::flush;
     }
 
-    feSpacePtr_Type pFESpacePtr ( new feSpace_Type (meshPtr, pOrder, 1, d->comm) );
+    feSpacePtr_Type pFESpacePtr ( new feSpace_Type (meshPtr, pOrder, 1, parameters->comm) );
 
     if (verbose)
     {
@@ -489,7 +404,7 @@ Cylinder::run()
     OseenSolver< mesh_Type > fluid (oseenData,
                                     *uFESpacePtr,
                                     *pFESpacePtr,
-                                    d->comm, numLM);
+                                    parameters->comm, numLM);
     MapEpetra fullMap (fluid.getMap() );
 
     if (verbose)
@@ -518,9 +433,9 @@ Cylinder::run()
     vector_Type rhs ( fullMap );
 
 #ifdef HAVE_HDF5
-    ExporterHDF5<mesh_Type > ensight ( dataFile, meshPtr, "cylinder", d->comm->MyPID() );
+    ExporterHDF5<mesh_Type > ensight ( dataFile, meshPtr, "cylinder", parameters->comm->MyPID() );
 #else
-    ExporterEnsight<mesh_Type > ensight ( dataFile, meshPtr, "cylinder", d->comm->MyPID() );
+    ExporterEnsight<mesh_Type > ensight ( dataFile, meshPtr, "cylinder", parameters->comm->MyPID() );
 #endif
 
     vectorPtr_Type velAndPressure ( new vector_Type (*fluid.solution(), ensight.mapType() ) );
@@ -533,7 +448,7 @@ Cylinder::run()
 
     // initialization with stokes solution
 
-    if (d->initial_sol == "stokes")
+    if (parameters->initial_sol == "stokes")
     {
         if (verbose)
         {
