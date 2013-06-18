@@ -28,20 +28,18 @@
    \date 2005-04-19
  */
 
-#ifndef __Cylinder_H
-#define __Cylinder_H 1
+#ifndef __RESISTANCE_H
+#define __RESISTANCE_H 1
 
-
-enum TimeScheme { BDF_ORDER_ONE = 1, BDF_ORDER_TWO, BDF_ORDER_THREE };
 
 /*!
- * \class Cylinder
+ * \class Resistance
  * \brief 2D/3D Cylinder Simulation class
  *
  *  @author Christophe Prud'homme
  *  @see
  */
-class Cylinder
+class Resistance
     //     :
     //     public LifeV::Application
 {
@@ -60,10 +58,10 @@ public:
      */
     //@{
 
-    Cylinder ( int argc,
+    Resistance ( int argc,
                char** argv );
 
-    ~Cylinder()
+    ~Resistance()
     {}
 
     //@}
@@ -102,5 +100,4 @@ private:
     struct Private;
     boost::shared_ptr<Private> parameters;
 };
-
-#endif /* __Cylinder_H */
+#endif /* __RESISTANCE_H */

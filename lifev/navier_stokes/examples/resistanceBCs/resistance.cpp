@@ -59,13 +59,22 @@
 
 #include <lifev/navier_stokes/solver/OseenSolver.hpp>
 
-#include "cylinder.hpp"
+#include "flowConditions.hpp"
+#include "resistance.hpp"
 #include <iostream>
+
 
 using namespace LifeV;
 
+const int INLET       = 2;
+const int WALL        = 1;
+const int OUTLET      = 3;
+const int RINGIN      = 20;
+const int RINGOUT     = 30;
+
+
 void
-postProcessFluxesPressures ( OseenSolver< mesh_Type >& nssolver,
+postProcessFluxesPressures ( OseenSolver< RegionMesh<LinearTetra> >& nssolver,
                              BCHandler& bcHandler,
                              const LifeV::Real& t, bool _verbose )
 {
@@ -106,7 +115,7 @@ postProcessFluxesPressures ( OseenSolver< mesh_Type >& nssolver,
 }
 
 
-struct Cylinder::Private
+struct Resistance::Private
 {
     Private() :
         nu (1),
@@ -130,7 +139,7 @@ struct Cylinder::Private
 
     // Static boost functions to impose boundary conditions
     // Inlet BCs (for this test Poiseuille)
-    Real fluxFunctionAneurysm (const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
+    static Real fluxFunctionAneurysm (const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
     {
 
         Real fluxFinal;
@@ -187,7 +196,7 @@ struct Cylinder::Private
 
     }
 
-    Real aneurismFluxInVectorial (const Real&  t, const Real& x, const Real& y, const Real& z, const ID& i)
+    static Real aneurismFluxInVectorial (const Real&  t, const Real& x, const Real& y, const Real& z, const ID& i)
     {
         Real n1 (0.0);
         Real n2 (0.0);
@@ -227,7 +236,7 @@ struct Cylinder::Private
     }
 
     // External BCs ( u = 0 )
-    Real zeroBCF (const Real&  /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+    static Real zeroBCF (const Real&  /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
     {
         switch (i)
         {
@@ -248,12 +257,13 @@ struct Cylinder::Private
         }
     }
 
-    // Outflow BC (resistance BC)
+    // Outflow BC ( resistance BC - applied explicitly )
+    // Defined by the class FlowConditions
 
 
 };
 
-Cylinder::Cylinder ( int argc,
+Resistance::Resistance ( int argc,
                      char** argv )
     :
     parameters ( new Private )
@@ -288,7 +298,7 @@ Cylinder::Cylinder ( int argc,
 }
 
 void
-Cylinder::run()
+Resistance::run()
 
 {
     typedef RegionMesh<LinearTetra>               mesh_Type;
@@ -306,25 +316,28 @@ Cylinder::run()
 
     // Boundary conditions
     BCHandler bcH;
-    BCFunctionBase uZero ( zero_scalar );
-    std::vector<ID> zComp (1);
-    zComp[0] = 3;
+    BCFunctionBase uIn   (  Private::aneurismFluxInVectorial );
+    BCFunctionBase uZero (  Private::zeroBCF );
 
-    BCFunctionBase uIn  (  parameters->getU_2d() );
-    BCFunctionBase uOne (  parameters->getU_one() );
-    BCFunctionBase uPois (  parameters->getU_pois() );
+    FlowConditions outFlowBC;
 
+    // Read the resistance and hydrostatic pressure from data file
+    Real resistance = dataFile ( "fluid/physics/resistance", 0.0 );
+    Real hydrostatic = dataFile ( "fluid/physics/hydrostatic", 0.0 );
 
-    //BCFunctionBase unormal(  parameters->get_normal() );
+    outFlowBC.initParameters( OUTLET, resistance, hydrostatic, "outlet-3" );
 
+    BCFunctionBase resistanceBC( FlowConditions::outPressure0 );
     //cylinder
 
-    bcH.addBC ( "Inlet",    INLET,    Essential,     Full,     uPois  , 3 );
-    bcH.addBC ( "Ringin",   RINGIN,   Essential,     Full,     uZero  , 3 );
-    bcH.addBC ( "Ringout",  RINGOUT,  Essential,     Full,     uZero  , 3 );
-    bcH.addBC ( "Outlet",   OUTLET,   Natural,     Full,     uZero, 3 );
-    bcH.addBC ( "Wall",     WALL,     Essential,   Full,     uZero, 3 );
+    bcH.addBC ( "Inlet",    INLET,    Essential,   Full,  uIn  , 3 );
+    bcH.addBC ( "Ringin",   RINGIN,   Essential,   Full,  uZero, 3 );
+    bcH.addBC ( "Ringout",  RINGOUT,  Essential,   Full,  uZero, 3 );
+    bcH.addBC ( "Wall",     WALL,     Essential,   Full,  uZero, 3 );
 
+    bcH.addBC ( "Outlet",   OUTLET,   Natural,     Normal, resistanceBC, 3 );
+
+    // Lagrange multiplier for flux BCs
     int numLM = 0;
 
     boost::shared_ptr<OseenData> oseenData (new OseenData() );
@@ -399,8 +412,6 @@ Cylinder::run()
         std::cout << "Calling the fluid constructor ... ";
     }
 
-    bcH.setOffset ( "Inlet", totalVelDof + totalPressDof - 1 );
-
     OseenSolver< mesh_Type > fluid (oseenData,
                                     *uFESpacePtr,
                                     *pFESpacePtr,
@@ -413,6 +424,10 @@ Cylinder::run()
     }
 
     fluid.setUp (dataFile);
+
+    // Setting up the utility for post-processing
+    fluid.setupPostProc( );
+
     fluid.buildSystem();
 
     MPI_Barrier (MPI_COMM_WORLD);
@@ -433,49 +448,20 @@ Cylinder::run()
     vector_Type rhs ( fullMap );
 
 #ifdef HAVE_HDF5
-    ExporterHDF5<mesh_Type > ensight ( dataFile, meshPtr, "cylinder", parameters->comm->MyPID() );
+    ExporterHDF5<mesh_Type > exporter ( dataFile, meshPtr, "resistance", parameters->comm->MyPID() );
 #else
-    ExporterEnsight<mesh_Type > ensight ( dataFile, meshPtr, "cylinder", parameters->comm->MyPID() );
+    ExporterEnsight<mesh_Type > exporter ( dataFile, meshPtr, "resistance", parameters->comm->MyPID() );
 #endif
 
-    vectorPtr_Type velAndPressure ( new vector_Type (*fluid.solution(), ensight.mapType() ) );
+    vectorPtr_Type velAndPressure ( new vector_Type (*fluid.solution(), exporter.mapType() ) );
 
-    ensight.addVariable ( ExporterData<mesh_Type>::VectorField, "velocity", uFESpacePtr,
+    exporter.addVariable ( ExporterData<mesh_Type>::VectorField, "velocity", uFESpacePtr,
                           velAndPressure, UInt (0) );
 
-    ensight.addVariable ( ExporterData<mesh_Type>::ScalarField, "pressure", pFESpacePtr,
-                          velAndPressure, UInt (3 * uFESpacePtr->dof().numTotalDof() ) );
+    exporter.addVariable ( ExporterData<mesh_Type>::ScalarField, "pressure", pFESpacePtr,
+                           velAndPressure, UInt (3 * uFESpacePtr->dof().numTotalDof() ) );
 
-    // initialization with stokes solution
-
-    if (parameters->initial_sol == "stokes")
-    {
-        if (verbose)
-        {
-            std::cout << std::endl;
-        }
-        if (verbose)
-        {
-            std::cout << "Computing the stokes solution ... " << std::endl << std::endl;
-        }
-
-        oseenData->dataTime()->setTime (t0);
-
-        MPI_Barrier (MPI_COMM_WORLD);
-
-        beta *= 0.;
-        rhs  *= 0.;
-
-        fluid.updateSystem (0, beta, rhs );
-        fluid.iterate ( bcH );
-
-        //    fluid.postProcess();
-
-        *velAndPressure = *fluid.solution();
-        ensight.postProcess ( 0 );
-        fluid.resetPreconditioner();
-    }
-
+    // Setting up the initial condition
     bdf.bdfVelocity().setInitialCondition ( *fluid.solution() );
 
     // Temporal loop
@@ -486,19 +472,23 @@ Cylinder::run()
     for ( Real time = t0 + dt ; time <= tFinal + dt / 2.; time += dt, iter++)
     {
 
-        oseenData->dataTime()->setTime (time);
-
-        if (verbose)
+        // Updating the Neumann BC for resistance
+        outFlowBC.renewParameters( fluid, *velAndPressure );
+        if ( verbose )
         {
             std::cout << std::endl;
-            std::cout << "We are now at time " << oseenData->dataTime()->time() << " s. " << std::endl;
+            std::cout << "Name: " << outFlowBC.name() << std::endl;
+            std::cout << "Resistance: " << outFlowBC.resistance() << std::endl;
+            std::cout << "Hydrostatic: " << outFlowBC.hydrostatic() << std::endl;
+            std::cout << "Total Pressure: " << outFlowBC.outP() << std::endl;
             std::cout << std::endl;
         }
+
+        oseenData->dataTime()->setTime (time);
 
         chrono.start();
 
         double alpha = bdf.bdfVelocity().coefficientFirstDerivative ( 0 ) / oseenData->dataTime()->timeStep();
-        //beta = bdf.bdfVelocity().extrapolation(  beta);
         bdf.bdfVelocity().extrapolation (beta);
         bdf.bdfVelocity().updateRHSContribution ( oseenData->dataTime()->timeStep() );
         rhs  = fluid.matrixMass() * bdf.bdfVelocity().rhsContributionFirstDerivative();
@@ -508,13 +498,8 @@ Cylinder::run()
 
         bdf.bdfVelocity().shiftRight ( *fluid.solution() );
 
-        //         if (((iter % save == 0) || (iter == 1 )))
-        //         {
         *velAndPressure = *fluid.solution();
-        ensight.postProcess ( time );
-        //         }
-        //         postProcessFluxesPressures(fluid, bcH, time, verbose);
-
+        exporter.postProcess ( time );
 
         MPI_Barrier (MPI_COMM_WORLD);
 

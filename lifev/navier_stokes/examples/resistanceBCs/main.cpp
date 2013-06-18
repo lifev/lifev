@@ -29,7 +29,7 @@
  */
 
 #ifdef TWODIM
-#error test_cylinder cannot be compiled in 2D
+#error example_resistance cannot be compiled in 2D
 #endif
 
 // Tell the compiler to ignore specific kind of warnings:
@@ -52,7 +52,7 @@
 #include <lifev/core/algorithm/PreconditionerIfpack.hpp>
 #include <lifev/core/algorithm/PreconditionerML.hpp>
 
-#include "cylinder.hpp"
+#include "resistance.hpp"
 
 
 using namespace LifeV;
@@ -86,8 +86,8 @@ main ( int argc, char** argv )
     //**************** cylinder
     //    MPI_Init(&argc,&argv);
 
-    Cylinder cyl ( argc, argv );
-    cyl.run();
+    Resistance res ( argc, argv );
+    res.run();
 
 #ifdef HAVE_MPI
     MPI_Finalize();

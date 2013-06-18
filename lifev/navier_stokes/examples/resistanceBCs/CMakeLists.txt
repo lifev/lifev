@@ -5,7 +5,7 @@ INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
 
 TRIBITS_ADD_EXECUTABLE(
   ResistanceBCs
-  SOURCES main.cpp cylinder.cpp
+  SOURCES main.cpp resistance.cpp flowConditions.cpp
   COMM serial mpi
 )
 
