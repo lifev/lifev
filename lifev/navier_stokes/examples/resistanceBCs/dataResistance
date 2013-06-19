@@ -6,7 +6,8 @@
 [exporter]
 multimesh  = false
 start      = 0
-save       = 10
+save       = 1
+nameFile   = resistance80-scaledAndTranslated
 
 [fluid]
 
@@ -20,18 +21,20 @@ save       = 10
 
 
     [../physics]
-    density         = 1.0           # density   [kg/m^3]
-    viscosity       = 0.03          # viscosity [kg/m/s]
+    density         = 1.0           # density   [ g / cm^3 ]
+    viscosity       = 0.03          # viscosity [ Poise ]
+    resistance      = 106640        # resistance  ( 80 mmHg * s / ml ) [ dyn * s / cm^5 ]
+    hydrostatic     = 113305        # hydrostatic pressure [ dyn / cm^2 ]
 
     [../time_discretization]
     initialtime     = 0.
-    endtime         = 0.001
-    timestep        = 0.0001
+    endtime         = 1.2
+    timestep        = 0.001
     BDF_order       = 1
 
     [../space_discretization]
     mesh_dir        = ./
-    mesh_file       = tube20.mesh
+    mesh_file       = tube_fluid.mesh
     mesh_type       = .mesh
 
     verbose         = 0             # verbose during mesh-reading
@@ -40,6 +43,7 @@ save       = 10
     div_beta_u_v    = 1             # 1=on, 0=off
     vel_order       = P1Bubble          # P1, P1Bubble, P2
     press_order     = P1            # P1, P2
+    stiff_strain    = true            # P1, P2
 
     [../miscellaneous]
     verbose         = 1
@@ -110,11 +114,11 @@ save       = 10
     scaling         = none
     output          = all # none
     conv            = rhs
-    max_iter        = 100
+    max_iter        = 1000
     reuse           = true
     max_iter_reuse  = 80
-    kspace          = 100
-    tol             = 1.e-10    # AztecOO tolerance
+    kspace          = 800
+    tol             = 1.e-6    # AztecOO tolerance
 
     [../ipstab]
     gammaBeta       = 0.125
@@ -122,50 +126,4 @@ save       = 10
     gammaPress      = 0.03125
     reuse           = true
     max_iter_reuse  = 20
-
-
-    [../boundary_conditions]
-    list = 'Inlet Outlet Wall Ring' # use apex to create the list; use spaces to separe members
-    #list = 'InletXY InletZ Outlet Wall Ring' # use apex to create the list; use spaces to separe members
-
-        [./Inlet]
-        type       = Essential
-        flag       = 2
-        mode       = Full
-        component  = 3
-        function   = '(0., 0., 3*0.03*(1/4-(x^2+y^2)))' # Poiseuille - viscosity = 0.03
-
-        [../InletXY]
-        type       = Essential
-        flag       = 2
-        mode       = Component
-        component  = '1 2' # use apex to create the list; use spaces to separe members
-        function   = '(0., 0., 0.)'
-
-        [../InletZ]
-        type       = Essential
-        flag       = 2
-        mode       = Component
-        component  = 3
-        function   = '(0., 0., 3*0.03*(1/4-(x^2+y^2)))' # Poiseuille - viscosity = 0.03
-
-        [../Outlet]
-        type       = Natural
-        flag       = 3
-        mode       = Full
-        component  = 3
-        function   = '(0., 0., 0.)'
-
-        [../Wall]
-        type       = Essential
-        flag       = 1
-        mode       = Full
-        component  = 3
-        function   = '(0., 0., 0.)'
-
-        [../Ring]
-        type       = Essential
-        flag       = 20
-        mode       = Full
-        component  = 3
-        function   = '(0., 0., 0.)'
+[../]

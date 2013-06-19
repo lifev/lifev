@@ -80,6 +80,11 @@ public:
         return M_resistance;
     }
 
+    inline Real flow( )
+    {
+        return M_outflux;
+    }
+
     inline std::string name( )
     {
         return M_name;

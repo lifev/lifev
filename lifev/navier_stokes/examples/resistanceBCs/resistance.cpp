@@ -67,7 +67,7 @@
 using namespace LifeV;
 
 const int INLET       = 2;
-const int WALL        = 1;
+const int WALL        = 100;
 const int OUTLET      = 3;
 const int RINGIN      = 20;
 const int RINGOUT     = 30;
@@ -144,11 +144,11 @@ struct Resistance::Private
 
         Real fluxFinal;
         Real rampAmpl (0.4);
-        Real dt (0.005);
+        Real dt (0.001);
 
         if ( t <= rampAmpl )
         {
-            fluxFinal = ( 0.04 / rampAmpl) * t;
+            fluxFinal = ( 0.09543 / rampAmpl) * t;
         }
         else
         {
@@ -158,7 +158,7 @@ struct Resistance::Private
             const Real pi   = 3.141592653589793;
             const Real area = 0.0034212; // BigMesh
 
-            const Real areaFactor = area / ( (0.6 / 2) * (0.6 / 2) * pi);
+            const Real areaFactor = area / ( 0.1486 * 0.1486 * pi);
             //const Real Average = (48.21 * pow (area, 1.84) ) * 60; //Mean Cebral's Flux per minut
 
             // Unit conversion from ml/min to cm^3/s
@@ -189,7 +189,7 @@ struct Resistance::Private
 
             //return - (flux * areaFactor * unitFactor);
             fluxFinal =  (flux * areaFactor * unitFactor);
-
+            fluxFinal = fluxFinal - 20 * area;
         }
 
         return fluxFinal;
@@ -335,7 +335,7 @@ Resistance::run()
     bcH.addBC ( "Ringout",  RINGOUT,  Essential,   Full,  uZero, 3 );
     bcH.addBC ( "Wall",     WALL,     Essential,   Full,  uZero, 3 );
 
-    bcH.addBC ( "Outlet",   OUTLET,   Natural,     Normal, resistanceBC, 3 );
+    bcH.addBC ( "Outlet",   OUTLET,   Natural,     Normal, resistanceBC );
 
     // Lagrange multiplier for flux BCs
     int numLM = 0;
@@ -447,10 +447,12 @@ Resistance::run()
     vector_Type beta ( fullMap );
     vector_Type rhs ( fullMap );
 
+    std::string const exportFileName = dataFile ( "exporter/nameFile", "resistance");
+
 #ifdef HAVE_HDF5
-    ExporterHDF5<mesh_Type > exporter ( dataFile, meshPtr, "resistance", parameters->comm->MyPID() );
+    ExporterHDF5<mesh_Type > exporter ( dataFile, meshPtr, exportFileName, parameters->comm->MyPID() );
 #else
-    ExporterEnsight<mesh_Type > exporter ( dataFile, meshPtr, "resistance", parameters->comm->MyPID() );
+    ExporterEnsight<mesh_Type > exporter ( dataFile, meshPtr, exportFileName, parameters->comm->MyPID() );
 #endif
 
     vectorPtr_Type velAndPressure ( new vector_Type (*fluid.solution(), exporter.mapType() ) );
@@ -477,8 +479,9 @@ Resistance::run()
         if ( verbose )
         {
             std::cout << std::endl;
-            std::cout << "Name: " << outFlowBC.name() << std::endl;
+            std::cout << "Name: "       << outFlowBC.name() << std::endl;
             std::cout << "Resistance: " << outFlowBC.resistance() << std::endl;
+            std::cout << "Flow: "       << outFlowBC.flow() << std::endl;
             std::cout << "Hydrostatic: " << outFlowBC.hydrostatic() << std::endl;
             std::cout << "Total Pressure: " << outFlowBC.outP() << std::endl;
             std::cout << std::endl;
@@ -499,6 +502,11 @@ Resistance::run()
         bdf.bdfVelocity().shiftRight ( *fluid.solution() );
 
         *velAndPressure = *fluid.solution();
+
+        if ( verbose )
+        {
+            std::cout << "Post-processing!" << std::endl;
+        }
         exporter.postProcess ( time );
 
         MPI_Barrier (MPI_COMM_WORLD);

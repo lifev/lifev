@@ -79,7 +79,7 @@ void FlowConditions::renewParameters ( OseenSolver<RegionMesh<LinearTetra> > &  
     // Compute the flux using the solution on the desired flag
     M_outflux = solver.flux( M_flag, solution);
 
-    M_outP = M_resistance * M_outflux + M_hydrostaticP;
+    M_outP = 1.0 * ( M_resistance * M_outflux + M_hydrostaticP );
 
     FlowConditions::outputVector[conditionNumber] = M_outP;
 }
