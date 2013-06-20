@@ -214,7 +214,7 @@ struct Resistance::Private
         Real radius(0.033);
         Real radiusSquared = radius * radius;
         Real peak(0);
-        peak = ( 2.0 * flux ) / ( area );
+        peak = ( flux ) / ( area );
 
         switch (i)
         {
