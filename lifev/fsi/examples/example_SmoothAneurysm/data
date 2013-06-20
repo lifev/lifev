@@ -131,6 +131,8 @@ conservativeFormulation       = false  # tells if the conservative or non conser
     [./physics]
     density   = 1.0               # density
     viscosity = 0.03              # viscosity
+    resistance      = 106640        # resistance  ( 80 mmHg * s / ml ) [ dyn * s / cm^5 ]
+    hydrostatic     = 113305        # hydrostatic pressure [ dyn / cm^2 ]
 
 ** #time discretization
     [../time_discretization]
