@@ -661,7 +661,7 @@ Real fluxFunctionAneurysm (const Real& t, const Real& /*x*/, const Real& /*y*/, 
 
     Real fluxFinal;
     Real rampAmpl (0.4);
-    Real dt (0.005);
+    Real dt (0.002);
 
     if ( t <= rampAmpl )
     {

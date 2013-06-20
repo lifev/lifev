@@ -92,8 +92,8 @@ FSIOperator::fluidBchandlerPtr_Type BCh_harmonicExtension (FSIOperator& /*_oper*
     BCh_he->addBC ("in", OUTLET, Essential, Full, bcf,   3);
 
     // Rings of the fluid domain
-    BCh_he->addBC ("inRing", INLETRING,  EssentialVertices, Full, bcf,   3);
-    BCh_he->addBC ("inRing", OUTLETRING, EssentialVertices, Full, bcf,   3);
+    // BCh_he->addBC ("inRing", INLETRING,  EssentialVertices, Full, bcf,   3);
+    // BCh_he->addBC ("inRing", OUTLETRING, EssentialVertices, Full, bcf,   3);
 
     return BCh_he;
 }
@@ -139,7 +139,7 @@ FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFluid (FSIOperator& _oper, boo
     //BCFunctionBase bcfw0 (w0);
 
     //Inlets
-    BCh_fluid->addBC ("InFlow" , INLET,  EssentialVertices, Full, InletVect, 3);
+    BCh_fluid->addBC ("InFlow" , INLET,  Essential, Full, InletVect, 3);
 
     //Outlets
 
@@ -167,9 +167,9 @@ FSIOperator::solidBchandlerPtr_Type BCh_monolithicSolid (FSIOperator& _oper)
 
     //Inlets & Outlets
     BCh_solid->addBC ("BORDERS",   INLETWALL, Essential, Full, bcf,  3);
-    BCh_solid->addBC ("BORDERS-RIN",   INLETWALL_INTRING, EssentialVertices, Full, bcf,  3);
+    //BCh_solid->addBC ("BORDERS-RIN",   INLETWALL_INTRING, EssentialVertices, Full, bcf,  3);
     BCh_solid->addBC ("BORDERS",   OUTLETWALL, Essential, Full, bcf,  3);
-    BCh_solid->addBC ("BORDERS-rin",   OUTLETWALL_INTRING, EssentialVertices, Full, bcf,  3);
+    //BCh_solid->addBC ("BORDERS-rin",   OUTLETWALL_INTRING, EssentialVertices, Full, bcf,  3);
 
     //Robin BC
     BCFunctionBase hyd (fZero);
@@ -180,10 +180,10 @@ FSIOperator::solidBchandlerPtr_Type BCh_monolithicSolid (FSIOperator& _oper)
 
 
     //First try: Homogeneous Neumann
-    //    BCh_solid->addBC ("OuterWall", OUTERWALL, Natural, Normal, bcf);
+    BCh_solid->addBC ("OuterWall", OUTERWALL, Natural, Normal, bcf);
 
     //Constant pressure  Neumann
-    BCh_solid->addBC ("OuterWall", OUTERWALL, Natural, Normal, externalPressure);
+    //BCh_solid->addBC ("OuterWall", OUTERWALL, Natural, Normal, externalPressure);
 
     return BCh_solid;
 }

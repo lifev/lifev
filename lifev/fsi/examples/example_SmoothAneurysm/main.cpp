@@ -298,8 +298,9 @@ public:
         // At the moment, the resistance BCs are applied explicitly in order to limit the ill-conditioning
         // of the linear system
         Real resistance = data_file ("fluid/physics/resistance", 0.0);
-        Real hydrostatic = data_file ("fluid/physics/hydrostatic", 0.0);;
-        //        R1.initParameters( OUTLET, resistance, hydrostatic, "outlet-3" );
+        Real hydrostatic = data_file ("fluid/physics/hydrostatic", 0.0);
+
+        R1.initParameters( OUTLET, resistance, hydrostatic, "outlet-3" );
         //FC2.initParameters ( *M_fsi->FSIOper(),  OUTLET);
 
         M_data->dataFluid()->dataTime()->setInitialTime (  M_data->dataFluid()->dataTime()->initialTime() );
@@ -364,7 +365,7 @@ public:
 
             fluidSolution = *M_velAndPressure;
 
-            //R1.renewParameters( M_fsi->FSIOper()->fluid(), fluidSolution );
+            R1.renewParameters( M_fsi->FSIOper()->fluid(), fluidSolution );
             //FC2.renewParameters ( *M_fsi, OUTLET, fluidSolution );
 
             boost::timer _timer;

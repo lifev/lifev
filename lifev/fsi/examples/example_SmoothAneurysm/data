@@ -98,17 +98,17 @@ type       = hdf5    # format of the exported solution (ensight, hdf5, vtk)
 
 ** #exporter for the fluid
     [./fluid]
-    filename   = fluidRstGI # name of the postprocessed file
+    filename   = fluidGI-withPV # name of the postprocessed file
 
 ** #exporter for the solid
     [../solid]
-    filename   = solidRstGI  # name of the postprocessed file
+    filename   = solidGI-withPV  # name of the postprocessed file
     [../] # solid
 [../] # exporter
 
 * #importer details
 [importer]
-restartFSI = true
+restartFSI = false
 initSol = 00010           # label of the solution from which we want to start (5 digits by convention)
 type       = hdf5         # format of the imported solution
 
@@ -132,14 +132,14 @@ conservativeFormulation       = false  # tells if the conservative or non conser
     density   = 1.0               # density
     viscosity = 0.03              # viscosity
     resistance      = 106640        # resistance  ( 80 mmHg * s / ml ) [ dyn * s / cm^5 ]
-    hydrostatic     = 113305        # hydrostatic pressure [ dyn / cm^2 ]
+    hydrostatic     = 0.0        # hydrostatic pressure [ dyn / cm^2 ]
 
 ** #time discretization
     [../time_discretization]
     method          = BDF
-    initialtime        = 0.01
-    endtime            = 0.013
-    timestep        = 0.001
+    initialtime        = 0.0
+    endtime            = 0.015
+    timestep        = 0.002
     BDF_order        = 2   # can go up to 5
 
 ** #space discretization
@@ -196,16 +196,16 @@ rescaleFactor    = 1.    # this factor can be used to rescale the structure bloc
     density   = 1.2
     young     = 4.0E6
     poisson   = 0.45
-    bulk      = 1e7
-    alpha     = 2.5e6            # the parameter at the exponent for the exponential model
-    gamma     = 1                # parameter for the exponential model
+    bulk      = 9e6
+    alpha     = 76350            # the parameter at the exponent for the exponential model
+    gamma     = 0.7411                # parameter for the exponential model
 
 ** #time discretization
     [../time_discretization]
     method          = BDF
-    initialtime        = 0.01
-    endtime            = 0.013
-    timestep        = 0.001
+    initialtime        = 0.0
+    endtime            = 0.015
+    timestep        = 0.002
     BDF_order        = 2
 
 ** #space discretization
@@ -487,9 +487,9 @@ rescaleFactor    = 1.    # this factor can be used to rescale the structure bloc
 ** #time discretization (used only for the calculation/extrapolation of the domain velocity)
     [./time_discretization]
     method          = BDF
-    initialtime        = 0.01
-    endtime            = 0.013
-    timestep        = 0.001
+    initialtime        = 0.0
+    endtime            = 0.015
+    timestep        = 0.002
     BDF_order        = 2
 
 * #eigensolver section, used when we want to compute the singular values of the preconditioned FSI system (see in FSIMonolithic.cpp)
