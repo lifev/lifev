@@ -398,8 +398,6 @@ void ExponentialMaterialNonLinear<MeshType>::updateJacobianMatrix ( const vector
     displayer->leaderPrint (" \n*********************************\n  ");
     updateNonLinearJacobianTerms (this->M_jacobian, disp, dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
     displayer->leaderPrint (" \n*********************************\n  ");
-    std::cout << std::endl;
-
 }
 
 template <typename MeshType>
