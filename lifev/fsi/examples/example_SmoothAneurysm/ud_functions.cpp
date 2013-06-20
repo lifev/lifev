@@ -546,6 +546,11 @@ Real fZero (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real&
     return 0.0;
 }
 
+Real outerWallPressure (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
+{
+    return -13330;
+}
+
 // Initial velocity
 Real u0 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
@@ -660,7 +665,7 @@ Real fluxFunctionAneurysm (const Real& t, const Real& /*x*/, const Real& /*y*/, 
 
     if ( t <= rampAmpl )
     {
-        fluxFinal = ( 0.04 / rampAmpl) * t;
+        fluxFinal = ( 0.09543 / rampAmpl) * t;
     }
     else
     {
@@ -670,7 +675,7 @@ Real fluxFunctionAneurysm (const Real& t, const Real& /*x*/, const Real& /*y*/, 
         const Real pi   = 3.141592653589793;
         const Real area = 0.0034212; // BigMesh
 
-        const Real areaFactor = area / ( (0.6 / 2) * (0.6 / 2) * pi);
+        const Real areaFactor = area / ( 0.1486 * 0.1486 * pi);
         //const Real Average = (48.21 * pow (area, 1.84) ) * 60; //Mean Cebral's Flux per minut
 
         // Unit conversion from ml/min to cm^3/s
@@ -701,7 +706,7 @@ Real fluxFunctionAneurysm (const Real& t, const Real& /*x*/, const Real& /*y*/, 
 
         //return - (flux * areaFactor * unitFactor);
         fluxFinal =  (flux * areaFactor * unitFactor);
-
+        fluxFinal = fluxFinal - 20 * area;
     }
 
     return fluxFinal;
@@ -722,31 +727,30 @@ Real aneurismFluxInVectorial (const Real&  t, const Real& x, const Real& y, cons
 
     Real area (0.0034212);
 
-    // Parabolic profile
-    // Real radius(0.5);
-    // Real radiusSquared = radius * radius;
-    // Real peak(0);
-    // peak = ( 2.0 * flux ) / ( 3.1415962 * radiusSquared );
+    //Parabolic profile
+    Real radius(0.033);
+    Real radiusSquared = radius * radius;
+    Real peak(0);
+    peak = ( flux ) / ( area );
 
     switch (i)
     {
-        case 0:
-            return n1 * flux / area;
-            //return n1 * std::max(0.0,( peak * ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) )) ;
-            // Flat profile: flux / area;
-        case 1:
-            return n2 * flux / area;
-            // return n2 * std::max(0.0,( peak * ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) )) ;
-            // Flat profile: flux / area;
-        case 2:
-            return n3 * flux / area;
-            // return n3 * std::max(0.0,( peak * ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) )) ;
-            // Flat profile: flux / area;
-        default:
-            return 0.0;
+    case 0:
+        // Flat profile: flux / area;
+        // return n1 * flux / area;
+        return n1 * std::max(0.0,( peak * ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) )) ;
+    case 1:
+        // Flat profile: flux / area;
+        //return n2 * flux / area;
+        return n2 * std::max(0.0,( peak * ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) )) ;
+    case 2:
+        // Flat profile: flux / area;
+        // return n3 * flux / area;
+        return n3 * std::max(0.0,( peak * ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) )) ;
+    default:
+        return 0.0;
     }
 }
-
 
 
 Real squareSinusoidalFluxFunction (const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)

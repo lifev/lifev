@@ -108,9 +108,10 @@
 #include <lifev/core/filter/ExporterHDF5.hpp>
 #endif
 
-#include "ud_functions.hpp"
-#include "boundaryConditions.hpp"
-#include "flowConditions.hpp"
+#include <lifev/fsi/examples/example_SmoothAneurysm/ud_functions.hpp>
+#include <lifev/fsi/examples/example_SmoothAneurysm/flowConditions.hpp>
+#include <lifev/fsi/examples/example_SmoothAneurysm/resistance.hpp>
+#include <lifev/fsi/examples/example_SmoothAneurysm/boundaryConditions.hpp>
 
 #define OUTLET 3
 
@@ -135,6 +136,8 @@ public:
     typedef boost::shared_ptr<hdf5Filter_Type>                  hdf5FilterPtr_Type;
 #endif
     typedef LifeV::FactorySingleton<LifeV::Factory<LifeV::FSIOperator,  std::string> > FSIFactory_Type;
+
+    typedef LifeV::ResistanceBCs                                resistanceBCs_Type;
 
 
     /*!
@@ -291,7 +294,13 @@ public:
 
         M_fsi->FSIOper()->fluid().setupPostProc(); //this has to be called if we want to initialize the postProcess
 
-        FC2.initParameters ( *M_fsi->FSIOper(),  OUTLET);
+        // Initializing either resistance of absorbing BCs
+        // At the moment, the resistance BCs are applied explicitly in order to limit the ill-conditioning
+        // of the linear system
+        Real resistance = data_file ("fluid/physics/resistance", 0.0);
+        Real hydrostatic = data_file ("fluid/physics/hydrostatic", 0.0);;
+        //        R1.initParameters( OUTLET, resistance, hydrostatic, "outlet-3" );
+        //FC2.initParameters ( *M_fsi->FSIOper(),  OUTLET);
 
         M_data->dataFluid()->dataTime()->setInitialTime (  M_data->dataFluid()->dataTime()->initialTime() );
         M_data->dataFluid()->dataTime()->setTime ( M_data->dataFluid()->dataTime()->initialTime() );
@@ -355,7 +364,8 @@ public:
 
             fluidSolution = *M_velAndPressure;
 
-            FC2.renewParameters ( *M_fsi, OUTLET, fluidSolution );
+            //R1.renewParameters( M_fsi->FSIOper()->fluid(), fluidSolution );
+            //FC2.renewParameters ( *M_fsi, OUTLET, fluidSolution );
 
             boost::timer _timer;
 
@@ -409,7 +419,8 @@ private:
     std::vector<vectorPtr_Type> M_fluidStencil;
     std::vector<vectorPtr_Type> M_ALEStencil;
 
-    LifeV::FlowConditions FC2;
+    //    LifeV::FlowConditions FC2;
+    resistanceBCs_Type R1;
 
     LifeV::Real    M_Tstart;
 

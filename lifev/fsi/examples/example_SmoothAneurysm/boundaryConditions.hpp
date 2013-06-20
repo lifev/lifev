@@ -50,6 +50,7 @@
 #include <lifev/fsi/solver/FSIMonolithicGI.hpp>
 
 #include "flowConditions.hpp"
+#include "resistance.hpp"
 #include "ud_functions.hpp"
 
 
@@ -132,7 +133,7 @@ FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFluid (FSIOperator& _oper, boo
     BCFunctionBase in_flow  (uInterpolated);
     //    BCFunctionBase out_flow (fZero);
 
-    BCFunctionBase out_press3 (FlowConditions::outPressure0);
+    BCFunctionBase out_press3 (ResistanceBCs::outPressure0);
 
     BCFunctionBase InletVect (aneurismFluxInVectorial);
     //BCFunctionBase bcfw0 (w0);
@@ -173,12 +174,16 @@ FSIOperator::solidBchandlerPtr_Type BCh_monolithicSolid (FSIOperator& _oper)
     //Robin BC
     BCFunctionBase hyd (fZero);
     BCFunctionBase young (E);
+    BCFunctionBase externalPressure (outerWallPressure);
     //robin condition on the outer wall
     _oper.setRobinOuterWall (hyd, young);
 
 
     //First try: Homogeneous Neumann
-    BCh_solid->addBC ("OuterWall", OUTERWALL, Natural, Normal, bcf);
+    //    BCh_solid->addBC ("OuterWall", OUTERWALL, Natural, Normal, bcf);
+
+    //Constant pressure  Neumann
+    BCh_solid->addBC ("OuterWall", OUTERWALL, Natural, Normal, externalPressure);
 
     return BCh_solid;
 }
