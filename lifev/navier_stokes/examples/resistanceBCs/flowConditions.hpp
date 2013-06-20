@@ -53,7 +53,8 @@
  *  @see
  */
 
-using namespace LifeV;
+namespace LifeV
+{
 
 class FlowConditions
 {
@@ -114,5 +115,5 @@ private:
 
     static    std::vector<Real> outputVector;
 };
-
+}
 #endif /* __FLOWCONDITION_H */
