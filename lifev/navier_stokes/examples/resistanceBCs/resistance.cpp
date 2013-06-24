@@ -148,7 +148,7 @@ struct Resistance::Private
 
         if ( t <= rampAmpl )
         {
-            fluxFinal = ( 0.09543 / rampAmpl) * t;
+            fluxFinal = ( 0.09503 / rampAmpl) * t;
         }
         else
         {
@@ -158,7 +158,7 @@ struct Resistance::Private
             const Real pi   = 3.141592653589793;
             const Real area = 0.0034212; // BigMesh
 
-            const Real areaFactor = area / ( 0.1486 * 0.1486 * pi);
+            const Real areaFactor = area / ( 0.195 * 0.195 * pi);
             //const Real Average = (48.21 * pow (area, 1.84) ) * 60; //Mean Cebral's Flux per minut
 
             // Unit conversion from ml/min to cm^3/s

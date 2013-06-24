@@ -23,7 +23,7 @@ nameFile   = resistance80-scaledAndTranslated
     [../physics]
     density         = 1.0           # density   [ g / cm^3 ]
     viscosity       = 0.03          # viscosity [ Poise ]
-    resistance      = 106640        # resistance  ( 80 mmHg * s / ml ) [ dyn * s / cm^5 ]
+    resistance      = 423557.0176   # resistance  ( 80 mmHg * s / ml ) [ dyn * s / cm^5 ]
     hydrostatic     = 113305        # hydrostatic pressure [ dyn / cm^2 ]
 
     [../time_discretization]
