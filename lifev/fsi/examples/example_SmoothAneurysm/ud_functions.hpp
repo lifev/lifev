@@ -60,11 +60,12 @@ Real u1 (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i
 
 Real fZero (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
 Real outerWallPressure (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
+Real pressureInitial (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
 
 // Initial velocity
 Real u0 (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
 Real p0 (const Real& t, const Real& x, const Real& y, const Real& z, const ID& i);
-Real E (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
+Real E  (const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
 Real hydrostatic (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
 
 Real hydro (const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);

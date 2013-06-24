@@ -261,6 +261,17 @@ public:
         {
             restartFSI (data_file);
         }
+        else if( !restartType.compare ("vectors") )
+        {
+            initializeWithVectors( );
+
+            M_velAndPressure.reset ( new vector_Type ( M_fsi->FSIOper()->fluid().getMap(), LifeV::Unique ) );
+            M_fluidDisp.reset     ( new vector_Type ( M_fsi->FSIOper()->mmFESpace().map(), LifeV::Unique ) );
+            M_solidDisp.reset ( new vector_Type ( M_fsi->FSIOper()->dFESpace().map(), LifeV::Unique ) );
+            //        M_solidVel.reset ( new vector_Type( M_fsi->FSIOper()->dFESpace().map(), M_exporterSolid->mapType() ));
+            M_WS.reset ( new vector_Type(  M_fsi->FSIOper()->dFESpace().map(), LifeV::Unique ));
+
+        }
         else
         {
             M_fsi->initializeMonolithicOperator();
@@ -400,6 +411,7 @@ public:
 private:
 
     void restartFSI ( GetPot const& data_file );
+    void initializeWithVectors ( void );
     //Methods to conclude the reading for restart
     void readLastVectorSolidTimeAdvance ( vectorPtr_Type fluidDisp, const LifeV::UInt iterInit, std::string iterationString);
     void readLastVectorALETimeAdvance ( vectorPtr_Type fluidDisp, const std::string loadInitSol);
@@ -627,8 +639,8 @@ void Problem::restartFSI (  GetPot const& data_file )
         // std::cout << "Norm of the solid " << solidDisp->norm2() << std::endl;
 
         //We send the vectors to the FSIMonolithic class using the interface of FSIOper
-        M_fsi->FSIOper()->setVectorInStencils (vel, pressure, solidDisp, iterInit )
-        ;
+        M_fsi->FSIOper()->setVectorInStencils (vel, pressure, solidDisp, iterInit );
+
         //Updating string name
         int iterations = std::atoi (iterationString.c_str() );
         iterations--;
@@ -761,3 +773,59 @@ void Problem::readLastVectorALETimeAdvance ( vectorPtr_Type fluidDisp,
     M_fsi->FSIOper()->ALETimeAdvance()->shiftRight ( *fluidDisp );
 }
 
+void Problem::initializeWithVectors ( void )
+{
+
+    using namespace LifeV;
+    // vectors to store the solutions we want.
+    vectorPtr_Type vel;
+    vectorPtr_Type pressure;
+    vectorPtr_Type solidDisp;
+    vectorPtr_Type fluidDisp;
+
+    vel.reset (new vector_Type (M_fsi->FSIOper()->uFESpace().map(), LifeV::Unique) );
+    pressure.reset (new vector_Type (M_fsi->FSIOper()->pFESpace().map(), LifeV::Unique) );
+    solidDisp.reset (new vector_Type (M_fsi->FSIOper()->dFESpace().map(), LifeV::Unique) );
+    fluidDisp.reset (new vector_Type (M_fsi->FSIOper()->mmFESpace().map(), LifeV::Unique) );
+
+    // In this case we want to initialize only the pressure
+    M_fsi->FSIOper()->pFESpacePtr()->interpolate ( static_cast<FESpace<RegionMesh<LinearTetra>, MapEpetra> ::function_Type> ( pressureInitial ), *pressure, 0.0 );
+
+    *vel *= 0.0;
+    *solidDisp *= 0.0;
+    *fluidDisp *= 0.0;
+
+    UInt iterInit;
+
+    // Filling the stencils
+    for (iterInit = 0; iterInit < M_fsi->FSIOper()->fluidTimeAdvance()->size(); iterInit++ )
+    {
+        //We send the vectors to the FSIMonolithic class using the interface of FSIOper
+        M_fsi->FSIOper()->setVectorInStencils (vel, pressure, solidDisp, iterInit );
+    }
+
+    // This was in readLastVectorSolidStencil
+    M_fsi->FSIOper()->setSolidVectorInStencil ( solidDisp, iterInit );
+
+    // Ale part
+    for (iterInit = 0; iterInit < M_fsi->FSIOper()->ALETimeAdvance()->size(); iterInit++ )
+    {
+        //Setting the vector in the stencil
+        M_fsi->FSIOper()->setALEVectorInStencil ( fluidDisp, iterInit, false );
+    }
+
+    //Initializing the vector for the RHS terms of the formulas
+    M_fsi->FSIOper()->finalizeRestart();
+
+    // This was read the last vector from ALE
+    //This is ugly but it's the only way I have figured out at the moment
+    if ( M_data->method().compare ("monolithicGI") == 0 )
+    {
+        //Don't be scared by the ten. The goal of 10 is just to make the first if fail
+        M_fsi->FSIOper()->setALEVectorInStencil ( fluidDisp, 10, true );
+    }
+
+    //Setting the vector in the stencil
+    M_fsi->FSIOper()->ALETimeAdvance()->shiftRight ( *fluidDisp );
+
+}

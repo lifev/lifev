@@ -81,7 +81,7 @@ DDBlockPrec = ComposedDN2GI
         | 0 | -C | 0 | H |
 * #Newton tolerance
 # NonLinearRichardson: stop_tol  = abstol + reltol*normRes;
-abstol     =  0. # tolerance in nonLinearRichardson
+abstol     =  1.e-5 # tolerance in nonLinearRichardson
 reltol     =  1.e-5 # tolerance in nonLinearRichardson
 * #offline partitioner
 # these options tell wether the mesh is partitioned online or offline (saved in hdf5). Options are none or hdf5.
@@ -98,28 +98,28 @@ type       = hdf5    # format of the exported solution (ensight, hdf5, vtk)
 
 ** #exporter for the fluid
     [./fluid]
-    filename   = fluidGI-withPV # name of the postprocessed file
+    filename   = fluidGI-variableEandHydroSecondRestart # name of the postprocessed file
 
 ** #exporter for the solid
     [../solid]
-    filename   = solidGI-withPV  # name of the postprocessed file
+    filename   = solidGI-variableEandHydroSecondRestart  # name of the postprocessed file
     [../] # solid
 [../] # exporter
 
 * #importer details
 [importer]
-restartFSI = false
-initSol = 00010           # label of the solution from which we want to start (5 digits by convention)
+restartFSI = true
+initSol = 00085          # label of the solution from which we want to start (5 digits by convention)
 type       = hdf5         # format of the imported solution
 
 
 ** #importer for the fluid
    [./fluid]
-   filename   = fluidGI     # name of the imported solution
+   filename   = fluidGI-variableEandHydroRestart     # name of the imported solution
 
 ** #importer for the solid
    [../solid]
-   filename   = solidGI     # name of the imported solution
+   filename   = solidGI-variableEandHydroRestart     # name of the imported solution
 
 
 * #Fluid data
@@ -137,9 +137,9 @@ conservativeFormulation       = false  # tells if the conservative or non conser
 ** #time discretization
     [../time_discretization]
     method          = BDF
-    initialtime        = 0.0
-    endtime            = 0.015
-    timestep        = 0.002
+    initialtime        = 0.1
+    endtime            = 0.2
+    timestep        = 0.001
     BDF_order        = 2   # can go up to 5
 
 ** #space discretization
@@ -203,9 +203,9 @@ rescaleFactor    = 1.    # this factor can be used to rescale the structure bloc
 ** #time discretization
     [../time_discretization]
     method          = BDF
-    initialtime        = 0.0
-    endtime            = 0.015
-    timestep        = 0.002
+    initialtime        = 0.1
+    endtime            = 0.2
+    timestep        = 0.001
     BDF_order        = 2
 
 ** #space discretization
@@ -487,9 +487,9 @@ rescaleFactor    = 1.    # this factor can be used to rescale the structure bloc
 ** #time discretization (used only for the calculation/extrapolation of the domain velocity)
     [./time_discretization]
     method          = BDF
-    initialtime        = 0.0
-    endtime            = 0.015
-    timestep        = 0.002
+    initialtime        = 0.1
+    endtime            = 0.2
+    timestep        = 0.001
     BDF_order        = 2
 
 * #eigensolver section, used when we want to compute the singular values of the preconditioned FSI system (see in FSIMonolithic.cpp)

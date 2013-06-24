@@ -176,14 +176,14 @@ FSIOperator::solidBchandlerPtr_Type BCh_monolithicSolid (FSIOperator& _oper)
     BCFunctionBase young (E);
     BCFunctionBase externalPressure (outerWallPressure);
     //robin condition on the outer wall
-    _oper.setRobinOuterWall (hyd, young);
+    _oper.setRobinOuterWall (externalPressure, young);
 
-
+    //BCh_solid->addBC ("OuterWall", OUTERWALL, Robin, Normal, _oper.bcfRobinOuterWall() );
     //First try: Homogeneous Neumann
-    BCh_solid->addBC ("OuterWall", OUTERWALL, Natural, Normal, bcf);
+    //BCh_solid->addBC ("OuterWall", OUTERWALL, Natural, Normal, bcf);
 
     //Constant pressure  Neumann
-    //BCh_solid->addBC ("OuterWall", OUTERWALL, Natural, Normal, externalPressure);
+    BCh_solid->addBC ("OuterWall", OUTERWALL, Natural, Normal, externalPressure);
 
     return BCh_solid;
 }

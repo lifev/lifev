@@ -546,9 +546,19 @@ Real fZero (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real&
     return 0.0;
 }
 
-Real outerWallPressure (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
+Real outerWallPressure (const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
-    return -13330;
+    if ( t <= 0.4 )
+        return - ( 13330 / ( 0.4 *0.4 *0.4 ) ) * t * t *t ;
+    else
+        return - 13330;
+
+    return 0.0;
+}
+
+Real pressureInitial (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
+{
+    return 113305;
 }
 
 // Initial velocity
@@ -563,9 +573,15 @@ Real p0 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*
 }
 
 
-Real E (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
+Real E (const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
-    return -10000;  // (see paper by Liu, Dang, etc.. about the sourrounding tissue effect on arteries)
+    if( t <= 0.2 )
+        return -1000000 * ( t - 0.2 );
+    else
+        return 0.0;
+
+    return 0.0;
+
 }
 
 
