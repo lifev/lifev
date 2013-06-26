@@ -131,6 +131,7 @@ FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFluid (FSIOperator& _oper, boo
 
     BCFunctionBase bcf      (fZero);
     BCFunctionBase in_flow  (uInterpolated);
+    BCFunctionBase pressureEpsilon  (epsilon);
     //    BCFunctionBase out_flow (fZero);
 
     BCFunctionBase out_press3 (ResistanceBCs::outPressure0);
@@ -140,6 +141,7 @@ FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFluid (FSIOperator& _oper, boo
 
     //Inlets
     BCh_fluid->addBC ("InFlow" , INLET,  Essential, Full, InletVect, 3);
+    //BCh_fluid->addBC ("InFlow" , INLET,  Natural, Full, pressureEpsilon, 3);
 
     //Outlets
 
@@ -176,7 +178,7 @@ FSIOperator::solidBchandlerPtr_Type BCh_monolithicSolid (FSIOperator& _oper)
     BCFunctionBase young (E);
     BCFunctionBase externalPressure (outerWallPressure);
     //robin condition on the outer wall
-    _oper.setRobinOuterWall (externalPressure, young);
+    //_oper.setRobinOuterWall (externalPressure, young);
 
     //BCh_solid->addBC ("OuterWall", OUTERWALL, Robin, Normal, _oper.bcfRobinOuterWall() );
     //First try: Homogeneous Neumann
