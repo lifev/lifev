@@ -309,10 +309,10 @@ Int GraphCutterParMETIS<MeshType>::partitionHierarchical()
     Int numVertices = M_mesh->numElements();
 
     // The vector contains the global IDs of the vertices in the graph
-    std::vector<Int> vertexMap (numVertices);
+    biMap_Type vertexMap;
     for (Int i = 0; i < numVertices; ++i)
     {
-        vertexMap[i] = i;
+        vertexMap.insert(biMapValue_Type(i, i));
     }
 
     vertexPartition_Type tempVertexPartition (numSubdomains);
@@ -321,7 +321,7 @@ Int GraphCutterParMETIS<MeshType>::partitionHierarchical()
      * After calling partitionSubGraph, tempVertexPartition will contain
      * numSubdomains vectors with the graph vertices of each subdomain
      */
-    //partitionSubGraph(vertexMap, numSubdomains, tempVertexPartition);
+    partitionSubGraph(vertexMap, numSubdomains, tempVertexPartition);
 
     /*
      * Step two is to partition each subdomain into the number of sub parts
@@ -331,9 +331,13 @@ Int GraphCutterParMETIS<MeshType>::partitionHierarchical()
     Int currentPart = 0;
     for (Int i = 0; i < numSubdomains; ++i)
     {
+        biMap_Type subdomainVertexMap;
+        for (Int k = 0; k < tempVertexPartition[i]->size(); ++k) {
+            subdomainVertexMap.insert(biMapValue_Type(k, (*tempVertexPartition[i])[k]));
+        }
         vertexPartition_Type subdomainParts;
-        //      partitionSubGraph(*(tempVertexPartition[i]), M_topology,
-        //                        subdomainParts);
+              partitionSubGraph(subdomainVertexMap, M_topology,
+                                subdomainParts);
         for (Int j = 0; j < M_topology; ++j)
         {
             M_vertexPartition[currentPart++] = subdomainParts[j];
