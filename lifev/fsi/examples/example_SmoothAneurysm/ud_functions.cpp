@@ -549,9 +549,9 @@ Real fZero (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real&
 Real outerWallPressure (const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& z, const ID& /*i*/)
 {
     Real value( - ( 13330 - 113305 ) );
-    if ( t <= 0.4 )
+    if ( t <= 0.8 )
     {
-        return ( value / ( 0.4 * 0.4 * 0.4 * 0.4 ) ) * ( t * t *t *t );
+        return ( value / ( 0.8 * 0.8 * 0.8 * 0.8 ) ) * ( t * t *t *t );
     }
     else
     {
@@ -701,7 +701,7 @@ Real fluxFunctionAneurysm (const Real& t, const Real& /*x*/, const Real& /*y*/, 
 {
 
     Real fluxFinal;
-    Real rampAmpl (0.4);
+    Real rampAmpl (0.8);
     Real dt (0.001);
 
     if ( t <= rampAmpl )
@@ -747,7 +747,6 @@ Real fluxFunctionAneurysm (const Real& t, const Real& /*x*/, const Real& /*y*/, 
             flux += a0 * (a[k - 1] * cos (k * xi) + b[k - 1] * sin (k * xi) );
         }
 
-        //return - (flux * areaFactor * unitFactor);
         fluxFinal =  (flux * areaFactor * unitFactor);
     }
 
@@ -773,7 +772,7 @@ Real aneurismFluxInVectorial (const Real&  t, const Real& x, const Real& y, cons
     Real radius(0.033);
     Real radiusSquared = radius * radius;
     Real peak(0);
-    peak = ( flux ) / ( area );
+    peak = ( 2 * flux ) / ( area );
 
     switch (i)
     {

@@ -141,14 +141,9 @@ FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFluid (FSIOperator& _oper, boo
 
     //Inlets
     BCh_fluid->addBC ("InFlow" , INLET,  Essential, Full, InletVect, 3);
-    //BCh_fluid->addBC ("InFlow" , INLET,  Natural, Full, pressureEpsilon, 3);
 
-    //Outlets
-
-    //Absorbing BC seemed not to work
     //Absorbing BC on outlet 2and3 caused instabilities
     BCh_fluid->addBC ("out3", OUTLET, Natural,  Normal, out_press3);
-    //BCh_fluid->addBC("out3", OUTLET, Natural,  Normal, bcf);
 
     return BCh_fluid;
 }
@@ -182,10 +177,10 @@ FSIOperator::solidBchandlerPtr_Type BCh_monolithicSolid (FSIOperator& _oper)
 
     //BCh_solid->addBC ("OuterWall", OUTERWALL, Robin, Normal, _oper.bcfRobinOuterWall() );
     //First try: Homogeneous Neumann
-    //BCh_solid->addBC ("OuterWall", OUTERWALL, Natural, Normal, bcf);
+    BCh_solid->addBC ("OuterWall", OUTERWALL, Natural, Normal, bcf);
 
     //Constant pressure  Neumann
-    BCh_solid->addBC ("OuterWall", OUTERWALL, Natural, Normal, externalPressure);
+    //BCh_solid->addBC ("OuterWall", OUTERWALL, Natural, Normal, externalPressure);
 
     return BCh_solid;
 }

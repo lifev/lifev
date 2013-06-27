@@ -74,13 +74,24 @@ void ResistanceBCs::initParameters ( const int flag,
 }
 
 void ResistanceBCs::renewParameters ( OseenSolverShapeDerivative<RegionMesh<LinearTetra> > &  solver,
-                                   const VectorEpetra& solution)
+                                      const VectorEpetra& solution)
 {
 
     // Compute the flux using the solution on the desired flag
     M_outflux = solver.flux( M_flag, solution);
 
     M_outP = 1.0 * ( M_resistance * M_outflux + M_hydrostaticP );
+
+    solver->displayer().leaderPrint ( " ****************** Resistance BCs infos ***************************x\n" );
+    solver->displayer().leaderPrint ( " Flow rate = " , M_outflux );
+    solver->displayer().leaderPrint ( " \n" );
+    solver->displayer().leaderPrint ( " Hydrostatic pressure   = " , M_hydrostaticP );
+    solver->displayer().leaderPrint ( " \n" );
+    solver->displayer().leaderPrint ( " Resistance   = " , M_resistance );
+    solver->displayer().leaderPrint ( " \n" );
+    solver->displayer().leaderPrint ( " Outflow pressure   = " , M_outP );
+    solver->displayer().leaderPrint ( " \n" );
+    solver->displayer().leaderPrint ( " ****************** Resistance BCs infos ***************************" );
 
     ResistanceBCs::outputVector[conditionNumber] = M_outP;
 }
