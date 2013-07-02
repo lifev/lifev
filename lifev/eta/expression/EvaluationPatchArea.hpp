@@ -118,7 +118,7 @@ public:
     }
 
     //! Expression-based constructor
-    explicit EvaluationPatchArea (const ExpressionInterpolateValue<MeshType, MapType, SpaceDim, FieldDim>& expression)
+    explicit EvaluationPatchArea (const ExpressionPatchArea<MeshType, MapType, SpaceDim, FieldDim>& expression)
         :
         M_fespace ( expression.fespace() ),
         M_quadrature (0),

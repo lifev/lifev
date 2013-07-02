@@ -79,6 +79,7 @@
 #include <lifev/eta/expression/ExpressionNormal.hpp>
 
 #include <lifev/eta/expression/ExpressionIfCrossed.hpp>
+#include <lifev/eta/expression/ExpressionVectorFromNonConstantScalar.hpp>
 #include <lifev/eta/expression/ExpressionPatchArea.hpp>
 
 #include <lifev/eta/expression/EvaluationPhiI.hpp>
@@ -125,6 +126,7 @@
 
 #include <lifev/eta/expression/EvaluationIfCrossed.hpp>
 #include <lifev/eta/expression/EvaluationPatchArea.hpp>
+#include <lifev/eta/expression/EvaluationVectorFromNonConstantScalar.hpp>
 
 namespace LifeV
 {
@@ -346,6 +348,24 @@ class ExpressionToEvaluation <
 {
 public:
     typedef EvaluationTrace <
+    typename ExpressionToEvaluation<Expression, testDim, solutionDim, spaceDim>::evaluation_Type
+    > evaluation_Type;
+private:
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
+};
+
+
+// Specialized for vector from non constant scalar fields
+template<typename Expression, UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation <
+    ExpressionVectorFromNonConstantScalar<Expression>
+    , testDim
+    , solutionDim
+    , spaceDim >
+{
+public:
+    typedef EvaluationVectorFromNonConstantScalar <
     typename ExpressionToEvaluation<Expression, testDim, solutionDim, spaceDim>::evaluation_Type
     > evaluation_Type;
 private:

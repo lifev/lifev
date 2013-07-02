@@ -76,7 +76,7 @@ evaluateNode ( const RequestLoopElement<MeshType>& request,
             const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
             const ExpressionType& expression)
 {
-    return IntegrateVectorElement<MeshType, SolutionSpaceType, ExpressionType, QRAdapterType>
+    return EvaluateNodalExpressionVectorElement<MeshType, SolutionSpaceType, ExpressionType, QRAdapterType>
            (request.mesh(), qrAdapterBase.implementation(), solutionSpace, expression);
 }
 
@@ -87,7 +87,7 @@ evaluateNode ( const RequestLoopElement<MeshType>& request,
             const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
             const ExpressionType& expression)
 {
-    return IntegrateVectorElement<MeshType, SolutionSpaceType, ExpressionType, QRAdapterNeverAdapt>
+    return EvaluateNodalExpressionVectorElement<MeshType, SolutionSpaceType, ExpressionType, QRAdapterNeverAdapt>
            (request.mesh(), QRAdapterNeverAdapt (quadrature), solutionSpace, expression);
 }
 

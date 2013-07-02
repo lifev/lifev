@@ -404,7 +404,7 @@ addTo (VectorType& vec)
                     for (UInt i (0); i < nbSolDof; ++i)
                     {
                         M_elementalVector.element (i + iblock * nbSolDof) +=
-                            M_evaluation.value_qi (iQuadPt, i + iblock * nbSolDof) ;
+                            M_evaluation.value_qi (iQuadPt, i + iblock * nbSolDof);
 
                     }
                 }

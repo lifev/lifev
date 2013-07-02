@@ -5,7 +5,6 @@ INCLUDE(AddSubdirectories)
 ADD_SUBDIRECTORIES(
   example_InflationExtension
   example_CookMembrane
-  example_creatingDamagedZone
   example_tractionWithSymmetry
   example_principalTensionsInflationExtensions
   example_partitionMesh
@@ -17,6 +16,20 @@ IF(EXPORTVECTORS_DEBUG)
   example_checkigForceTerm
 )
 ENDIF()
+
+IF(COLORING_MESH)
+  ADD_SUBDIRECTORIES(
+  example_creatingDamagedZone
+)
+ENDIF()
+
+IF(COMPUTATION_JACOBIAN)
+  ADD_SUBDIRECTORIES(
+    example_computingJacobian
+    example_computingJacobianWithETA
+)
+ENDIF()
+
 
 IF(ENABLE_ANISOTROPIC_LAW)
   ADD_SUBDIRECTORIES(

@@ -60,6 +60,12 @@
 #include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
 #include <lifev/structure/solver/StructuralOperator.hpp>
 
+#include <lifev/structure/solver/isotropic/ExponentialMaterialNonLinear.hpp>
+
+// Evaluation operations
+#include <lifev/core/array/MatrixSmall.hpp>
+#include <lifev/eta/expression/Evaluate.hpp>
+
 #include <lifev/core/filter/ExporterEnsight.hpp>
 #ifdef HAVE_HDF5
 #include <lifev/core/filter/ExporterHDF5.hpp>
@@ -305,6 +311,7 @@ Structure::run3d()
 
     // The vector where the solution will be stored
     vectorPtr_Type solidDisp (new vector_Type (dFESpace->map(), LifeV::Unique ) );
+    *solidDisp *= 0.0;
 
     //! 6. Post-processing setting
     boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporter;
@@ -334,10 +341,10 @@ Structure::run3d()
     M_exporter->setMeshProcId (dFESpace->mesh(), dFESpace->map().comm().MyPID() );
 
     vectorPtr_Type jacobianVector ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
-    vectorPtr_Type meshColors ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
+    vectorPtr_Type patchAreaVector ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
 
     M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "determinantF", dFESpace, jacobianVector, UInt (0) );
-    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "colors", dFESpace, meshColors, UInt (0) );
+    //    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "colors", dFESpace, meshColors, UInt (0) );
     M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "displacementField", dFESpace, solidDisp, UInt (0) );
 
     M_exporter->postProcess ( 0.0 );
@@ -348,32 +355,68 @@ Structure::run3d()
 
     MPI_Barrier (MPI_COMM_WORLD);
 
-    //! 5. For each interval, the analysis is performed
-    LifeV::Real dt =  dataFile ( "solid/time_discretization/timestep", 0.0);
-    std::string const nameField =  dataFile ( "importer/nameField", "displacement");
+    // Trying to compute the Jacobian using ET
+    MatrixSmall<3,3> identity;
+    identity (0, 0) = 1.0;
+    identity (0, 1) = 0.0;
+    identity (0, 2) = 0.0;
+    identity (1, 0) = 0.0;
+    identity (1, 1) = 1.0;
+    identity (1, 2) = 0.0;
+    identity (2, 0) = 0.0;
+    identity (2, 1) = 0.0;
+    identity (2, 2) = 1.0;
 
-    //Get the iteration number
-    iterationString = dataFile ("importer/iteration", "00000");
-    LifeV::Real time = dataFile ("importer/time", 1.0);
 
-    /*!Definition of the ExporterData, used to load the solution inside the previously defined vectors*/
-    LifeV::ExporterData<mesh_Type> solutionDispl  (LifeV::ExporterData<mesh_Type>::VectorField, nameField + "." + iterationString, dFESpace, solidDisp, UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
+    // Definition of F
+    ExpressionAddition<
+        ExpressionInterpolateGradient<mesh_Type, MapEpetra, 3, 3>, ExpressionMatrix<3,3> >
+        F( grad( dETFESpace,  *solidDisp, 0), value( identity ));
 
-    //Read the variable
-    M_importer->readVariable (solutionDispl);
-    M_importer->closeFile();
+    // Definition of J
+    ExpressionDeterminant<ExpressionAddition<
+        ExpressionInterpolateGradient<mesh_Type, MapEpetra,3,3>, ExpressionMatrix<3,3> > >
+        J( F );
 
-    //Set the current solution as the displacement vector to use
-    solid.jacobianDistribution ( solidDisp, *jacobianVector);
+    // Setup the new quadrature rule
+    Real refElemArea (0);
 
-    //color the mesh according to the marker of the volume
-    solid.colorMesh ( *meshColors );
+    //compute the area of reference element
+    for (UInt iq = 0; iq < dFESpace->fe().nbQuadPt(); iq++)
+    {
+        refElemArea += dFESpace->qr().weight (iq);
+    }
+
+    QuadratureRule interpQuad;
+    interpQuad.setDimensionShape (shapeDimension (dFESpace->refFE().shape() ), dFESpace->refFE().shape() );
+    Real wQuad (refElemArea / dFESpace->refFE().nbDof() );
+
+         for (UInt i (0); i < dFESpace->refFE().nbDof(); ++i)
+    {
+        interpQuad.addPoint (QuadraturePoint (dFESpace->refFE().xi (i), dFESpace->refFE().eta (i), dFESpace->refFE().eta (i), wQuad) );
+    }
+
+             using namespace ExpressionAssembly;
+
+    evaluateNode( elements ( dETFESpace->mesh() ),
+                  interpQuad,
+                  dETFESpace,
+                  dot( vectorFromScalar( J ) , phi_i )
+                  ) >> jacobianVector;
+
+    evaluateNode( elements ( dETFESpace->mesh() ),
+                  interpQuad,
+                  dETFESpace,
+                  dot( patchArea( dETFESpace ) , phi_i )
+                  ) >> patchAreaVector;
+
 
     //Extracting the tensions
     std::cout << std::endl;
     std::cout << "Norm of the J = det(F) : " << jacobianVector->norm2() << std::endl;
+    std::cout << "Norm of the patch vector : " << patchAreaVector->norm2() << std::endl;
 
-    M_exporter->postProcess ( time );
+    M_exporter->postProcess ( 1.0 );
 
     if (verbose )
     {
