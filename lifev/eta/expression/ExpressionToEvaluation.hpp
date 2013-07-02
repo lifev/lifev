@@ -79,6 +79,7 @@
 #include <lifev/eta/expression/ExpressionNormal.hpp>
 
 #include <lifev/eta/expression/ExpressionIfCrossed.hpp>
+#include <lifev/eta/expression/ExpressionPatchArea.hpp>
 
 #include <lifev/eta/expression/EvaluationPhiI.hpp>
 #include <lifev/eta/expression/EvaluationPhiJ.hpp>
@@ -123,6 +124,7 @@
 #include <lifev/eta/expression/EvaluationNormal.hpp>
 
 #include <lifev/eta/expression/EvaluationIfCrossed.hpp>
+#include <lifev/eta/expression/EvaluationPatchArea.hpp>
 
 namespace LifeV
 {
@@ -404,6 +406,19 @@ class ExpressionToEvaluation <
 {
 public:
     typedef EvaluationInterpolateValue<MeshType, MapType, FESpaceDim, FEFieldDim> evaluation_Type;
+private:
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
+};
+
+
+// Specialized for a patch area expression
+template<typename MeshType, typename MapType, UInt FESpaceDim, UInt FEFieldDim, UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation <
+    ExpressionPatchArea<MeshType, MapType, FESpaceDim, FEFieldDim>, testDim, solutionDim, spaceDim >
+{
+public:
+    typedef EvaluationPatchArea<MeshType, MapType, FESpaceDim, FEFieldDim> evaluation_Type;
 private:
     ExpressionToEvaluation();
     ~ExpressionToEvaluation();
