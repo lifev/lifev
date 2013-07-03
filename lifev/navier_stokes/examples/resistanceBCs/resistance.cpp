@@ -473,6 +473,11 @@ Resistance::run()
 
     for ( Real time = t0 + dt ; time <= tFinal + dt / 2.; time += dt, iter++)
     {
+        if( verbose )
+        {
+            std::cout << "Inlet flux:"  << fluid.flux( 2, *fluid.solution() ) << std::endl;
+            std::cout << "Outlet flux:" << fluid.flux( 3, *fluid.solution() ) << std::endl;
+        }
 
         // Updating the Neumann BC for resistance
         outFlowBC.renewParameters( fluid, *velAndPressure );
