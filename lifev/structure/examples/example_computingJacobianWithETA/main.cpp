@@ -341,10 +341,12 @@ Structure::run3d()
     M_exporter->setMeshProcId (dFESpace->mesh(), dFESpace->map().comm().MyPID() );
 
     vectorPtr_Type jacobianVector ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
+    vectorPtr_Type jacobianReference ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
     vectorPtr_Type patchAreaVector ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
+    vectorPtr_Type result ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
 
-    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "determinantF", dFESpace, jacobianVector, UInt (0) );
-    //    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "colors", dFESpace, meshColors, UInt (0) );
+    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "determinantF", dFESpace, result, UInt (0) );
+    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "colors", dFESpace, jacobianReference, UInt (0) );
     M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "displacementField", dFESpace, solidDisp, UInt (0) );
 
     M_exporter->postProcess ( 0.0 );
@@ -354,6 +356,11 @@ Structure::run3d()
     //! =================================================================================
 
     MPI_Barrier (MPI_COMM_WORLD);
+
+    solid.constructPatchAreaVector( *patchAreaVector, solid.displacement() );
+
+    //Set the current solution as the displacement vector to use
+    solid.jacobianDistribution ( solidDisp, *jacobianReference);
 
     // Trying to compute the Jacobian using ET
     MatrixSmall<3,3> identity;
@@ -391,30 +398,24 @@ Structure::run3d()
     interpQuad.setDimensionShape (shapeDimension (dFESpace->refFE().shape() ), dFESpace->refFE().shape() );
     Real wQuad (refElemArea / dFESpace->refFE().nbDof() );
 
-         for (UInt i (0); i < dFESpace->refFE().nbDof(); ++i)
+    for (UInt i (0); i < dFESpace->refFE().nbDof(); ++i)
     {
         interpQuad.addPoint (QuadraturePoint (dFESpace->refFE().xi (i), dFESpace->refFE().eta (i), dFESpace->refFE().eta (i), wQuad) );
     }
 
-             using namespace ExpressionAssembly;
+    using namespace ExpressionAssembly;
 
-    evaluateNode( elements ( dETFESpace->mesh() ),
-                  interpQuad,
-                  dETFESpace,
-                  dot( vectorFromScalar( J ) , phi_i )
-                  ) >> jacobianVector;
+    integrate( elements ( dETFESpace->mesh() ),
+               interpQuad,
+               dETFESpace,
+               meas_K * dot( vectorFromScalar( J ) , phi_i )
+               ) >> jacobianVector;
 
-    evaluateNode( elements ( dETFESpace->mesh() ),
-                  interpQuad,
-                  dETFESpace,
-                  dot( patchArea( dETFESpace ) , phi_i )
-                  ) >> patchAreaVector;
-
-
+    *result = *jacobianVector / *patchAreaVector;
     //Extracting the tensions
     std::cout << std::endl;
-    std::cout << "Norm of the J = det(F) : " << jacobianVector->norm2() << std::endl;
-    std::cout << "Norm of the patch vector : " << patchAreaVector->norm2() << std::endl;
+    std::cout << "Norm of the J = det(F) : " << result->norm2() << std::endl;
+    std::cout << "Norm of the J_reference = det(F) : " << jacobianReference->norm2() << std::endl;
 
     M_exporter->postProcess ( 1.0 );
 

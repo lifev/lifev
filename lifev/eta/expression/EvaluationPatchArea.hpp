@@ -146,7 +146,11 @@ public:
     {
         zero();
 
-        M_currentFE.update (M_fespace->mesh()->element (iElement), ET_UPDATE_PHI | ET_UPDATE_WDET );
+        M_currentFE.update (M_fespace->mesh()->element (iElement), ET_UPDATE_DPHI | ET_UPDATE_WDET );
+
+        std::cout << "Measure! "<< M_currentFE.measure() << std::endl;
+        int n;
+        std::cin >> n;
 
         for (UInt q (0); q < M_quadrature->nbQuadPt(); ++q)
         {

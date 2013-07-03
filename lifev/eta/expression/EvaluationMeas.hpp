@@ -125,6 +125,10 @@ public:
     {
         ASSERT (globalCFE != 0, "Nul pointer to the globalCFE cannot be set");
         M_valuePtr = & (globalCFE->M_measure);
+
+        std::cout << "ciao ciao:" << *M_valuePtr << std::endl;
+        int n;
+        std::cin >> n;
     }
 
     //! Setter for the test current FE
@@ -148,18 +152,33 @@ public:
     return_Type value_q (const UInt& /*q*/) const
     {
         return *M_valuePtr;
+
+        std::cout << "ciao ciao:" << *M_valuePtr << std::endl;
+        int n;
+        std::cin >> n;
+
     }
 
     //! Getter for the value for a vector
     return_Type value_qi (const UInt& /*q*/, const UInt& /*i*/) const
     {
         return *M_valuePtr;
+
+        std::cout << "ciao ciao:" << *M_valuePtr << std::endl;
+        int n;
+        std::cin >> n;
+
     }
 
     //! Getter for the value for a matrix
     return_Type value_qij (const UInt& /*q*/, const UInt& /*i*/, const UInt& /*j*/) const
     {
         return *M_valuePtr;
+
+        std::cout << "ciao ciao:" << *M_valuePtr << std::endl;
+        int n;
+        std::cin >> n;
+
     }
 
     //@}
