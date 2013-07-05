@@ -358,7 +358,21 @@ Structure::run3d()
 
     MPI_Barrier (MPI_COMM_WORLD);
 
-    solid.constructPatchAreaVector( *patchAreaVector, solid.displacement() );
+    //! 5. For each interval, the analysis is performed
+    LifeV::Real dt =  dataFile ( "solid/time_discretization/timestep", 0.0);
+    std::string const nameField =  dataFile ( "importer/nameField", "displacement");
+
+    //Get the iteration number
+    iterationString = dataFile ("importer/iteration", "00000");
+    LifeV::Real time = dataFile ("importer/time", 1.0);
+
+    /*!Definition of the ExporterData, used to load the solution inside the previously defined vectors*/
+    LifeV::ExporterData<mesh_Type> solutionDispl  (LifeV::ExporterData<mesh_Type>::VectorField, nameField + "." + iterationString, dFESpace, solidDisp, UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
+
+    //Read the variable
+    M_importer->readVariable (solutionDispl);
+    M_importer->closeFile();
+
 
     QuadratureRule fakeQuadratureRule;
 
@@ -431,6 +445,13 @@ Structure::run3d()
     evaluateNode( elements ( dETFESpace->mesh() ),
                   fakeQuadratureRule,
                   dETFESpace,
+                  dot( vectorFromScalar( meas_K ) , phi_i )
+                  ) >> patchAreaVector;
+
+
+    evaluateNode( elements ( dETFESpace->mesh() ),
+                  fakeQuadratureRule,
+                  dETFESpace,
                   meas_K * dot( vectorFromScalar( J ) , phi_i )
                   ) >> jacobianVector;
 
@@ -438,6 +459,7 @@ Structure::run3d()
 
     chrono.stop();
     std::cout << "done in... " << chrono.diff() << std::endl;
+
     // trace of C
     evaluateNode( elements ( dETFESpace->mesh() ),
                   fakeQuadratureRule,
@@ -454,7 +476,7 @@ Structure::run3d()
     std::cout << "Norm of the J_reference = det(F) : " << jacobianReference->normInf() << std::endl;
     std::cout << "Norm of the I_C = tr(C) : " << traceVector->normInf() << std::endl;
 
-    M_exporter->postProcess ( 1.0 );
+    M_exporter->postProcess ( time );
 
     if (verbose )
     {

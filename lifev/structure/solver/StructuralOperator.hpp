@@ -1425,9 +1425,6 @@ void StructuralOperator<Mesh >::constructPatchAreaVector ( vector_Type& patchAre
     vector_Type final (patchAreaR, Unique, Add);
 
     patchArea.add (final);
-
-    patchArea.spy("insideTheClass");
-
 }
 
 template <typename Mesh>
