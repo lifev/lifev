@@ -343,10 +343,11 @@ Structure::run3d()
     vectorPtr_Type jacobianVector ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
     vectorPtr_Type jacobianReference ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
     vectorPtr_Type patchAreaVector ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
-    vectorPtr_Type result ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
+    vectorPtr_Type traceVector ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
 
-    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "determinantF", dFESpace, result, UInt (0) );
-    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "colors", dFESpace, jacobianReference, UInt (0) );
+    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "DeterminantF", dFESpace, jacobianVector, UInt (0) );
+    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "tr(C)", dFESpace, traceVector, UInt (0) );
+    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "Reference", dFESpace, jacobianReference, UInt (0) );
     M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "displacementField", dFESpace, solidDisp, UInt (0) );
 
     M_exporter->postProcess ( 0.0 );
@@ -359,8 +360,29 @@ Structure::run3d()
 
     solid.constructPatchAreaVector( *patchAreaVector, solid.displacement() );
 
+    QuadratureRule fakeQuadratureRule;
+
+    Real refElemArea (0); //area of reference element
+    //compute the area of reference element
+    for (UInt iq = 0; iq < dFESpace->qr().nbQuadPt(); iq++)
+    {
+        refElemArea += dFESpace->qr().weight (iq);
+    }
+
+    Real wQuad (refElemArea / dFESpace->refFE().nbDof() );
+
+    //Setting the quadrature Points = DOFs of the element and weight = 1
+    std::vector<GeoVector> coords = dFESpace->refFE().refCoor();
+    std::vector<Real> weights (dFESpace->fe().nbFEDof(), wQuad);
+    fakeQuadratureRule.setDimensionShape ( shapeDimension (dFESpace->refFE().shape() ), dFESpace->refFE().shape() );
+    fakeQuadratureRule.setPoints (coords, weights);
+
+    //fakeQuadratureRule.showMe();
+
     //Set the current solution as the displacement vector to use
     solid.jacobianDistribution ( solidDisp, *jacobianReference);
+
+    using namespace ExpressionAssembly;
 
     // Trying to compute the Jacobian using ET
     MatrixSmall<3,3> identity;
@@ -385,37 +407,52 @@ Structure::run3d()
         ExpressionInterpolateGradient<mesh_Type, MapEpetra,3,3>, ExpressionMatrix<3,3> > >
         J( F );
 
-    // Setup the new quadrature rule
-    Real refElemArea (0);
 
-    //compute the area of reference element
-    for (UInt iq = 0; iq < dFESpace->fe().nbQuadPt(); iq++)
-    {
-        refElemArea += dFESpace->qr().weight (iq);
-    }
+    // Definition of tensor C
+    ExpressionProduct<
+        ExpressionTranspose<
+            ExpressionAddition<ExpressionInterpolateGradient<mesh_Type, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
+            ExpressionAddition<ExpressionInterpolateGradient<mesh_Type, MapEpetra,3,3>, ExpressionMatrix<3,3> >
+        >
+        C( transpose(F), F );
 
-    QuadratureRule interpQuad;
-    interpQuad.setDimensionShape (shapeDimension (dFESpace->refFE().shape() ), dFESpace->refFE().shape() );
-    Real wQuad (refElemArea / dFESpace->refFE().nbDof() );
+    ExpressionTrace<
+        ExpressionProduct<ExpressionTranspose<ExpressionAddition<ExpressionInterpolateGradient<mesh_Type, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
+                          ExpressionAddition<ExpressionInterpolateGradient<mesh_Type, MapEpetra,3,3>, ExpressionMatrix<3,3> > >
+        >
+        I_C( C );
 
-    for (UInt i (0); i < dFESpace->refFE().nbDof(); ++i)
-    {
-        interpQuad.addPoint (QuadraturePoint (dFESpace->refFE().xi (i), dFESpace->refFE().eta (i), dFESpace->refFE().eta (i), wQuad) );
-    }
+    std::cout << " ETA assembly.. " << std::endl;
 
-    using namespace ExpressionAssembly;
+    LifeChrono chrono;
+    chrono.start();
 
-    integrate( elements ( dETFESpace->mesh() ),
-               interpQuad,
-               dETFESpace,
-               meas_K * dot( vectorFromScalar( J ) , phi_i )
-               ) >> jacobianVector;
+    // Determinant of F
+    evaluateNode( elements ( dETFESpace->mesh() ),
+                  fakeQuadratureRule,
+                  dETFESpace,
+                  meas_K * dot( vectorFromScalar( J ) , phi_i )
+                  ) >> jacobianVector;
 
-    *result = *jacobianVector / *patchAreaVector;
+    *jacobianVector = *jacobianVector / *patchAreaVector;
+
+    chrono.stop();
+    std::cout << "done in... " << chrono.diff() << std::endl;
+    // trace of C
+    evaluateNode( elements ( dETFESpace->mesh() ),
+                  fakeQuadratureRule,
+                  dETFESpace,
+                  meas_K * dot( vectorFromScalar( I_C ) , phi_i )
+                  ) >> traceVector;
+
+    *traceVector = *traceVector / *patchAreaVector;
+
+
     //Extracting the tensions
     std::cout << std::endl;
-    std::cout << "Norm of the J = det(F) : " << result->norm2() << std::endl;
-    std::cout << "Norm of the J_reference = det(F) : " << jacobianReference->norm2() << std::endl;
+    std::cout << "Norm of the J = det(F) : " << jacobianVector->normInf() << std::endl;
+    std::cout << "Norm of the J_reference = det(F) : " << jacobianReference->normInf() << std::endl;
+    std::cout << "Norm of the I_C = tr(C) : " << traceVector->normInf() << std::endl;
 
     M_exporter->postProcess ( 1.0 );
 

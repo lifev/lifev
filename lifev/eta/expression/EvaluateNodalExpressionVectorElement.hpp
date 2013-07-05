@@ -382,7 +382,7 @@ addTo (VectorType& vec)
 
             // Update the currentFEs
             M_globalCFE_std->update (M_mesh->element (iElement), evaluation_Type::S_globalUpdateFlag | ET_UPDATE_WDET);
-            M_testCFE_std->update (M_mesh->element (iElement), evaluation_Type::S_testUpdateFlag);
+            M_testCFE_std->update (M_mesh->element (iElement), evaluation_Type::S_testUpdateFlag );
 
             // Update the evaluation
             M_evaluation.update (iElement);
