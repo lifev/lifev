@@ -294,8 +294,8 @@ Structure::run3d()
     }
 
     //Geometrical Infos on the sphere
-    Vector3D center (0.0, 0.0335, 1.0);
-    Real     radius (0.05);
+    Vector3D center (0.0, 0.09, 1.0);
+    Real     radius (0.095);
 
     //Count how many volumes are in the sphere
     //Create the Predicate
