@@ -406,6 +406,7 @@ Structure::run3d()
 
     timeAdvance->setTimeStep (dataStructure->dataTime()->timeStep() );
     timeAdvance->showMe();
+    dataStructure->showMe();
 
     //! #################################################################################
     //! BOUNDARY CONDITIONS
@@ -579,6 +580,9 @@ Structure::run3d()
 
     timeAdvance->updateRHSContribution (dataStructure->dataTime()->timeStep() );
 
+    // timeAdvance->spyStateVector();
+    // timeAdvance->spyRHS();
+
     MPI_Barrier (MPI_COMM_WORLD);
 
     if (verbose )
@@ -619,17 +623,18 @@ Structure::run3d()
     exporterSolid->setMeshProcId ( pointerToMesh, parameters->comm->MyPID() );
     //exporterCheck->setMeshProcId ( pointerToMesh, parameters->comm->MyPID() );
 
+    //vectorPtr_Type rhsVector ( new vector_Type (solid.rhsCopy(),  Unique ) );
+
     vectorPtr_Type solidDisp ( new vector_Type (solid.displacement(),  Unique ) );
     vectorPtr_Type solidVel  ( new vector_Type (solid.displacement(),  Unique ) );
     vectorPtr_Type solidAcc  ( new vector_Type (solid.displacement(),  Unique ) );
-
-    //vectorPtr_Type rhsVector ( new vector_Type (solid.rhsCopy(),  Unique ) );
 
     exporterSolid->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "displacement", dFESpace, solidDisp, UInt (0) );
     exporterSolid->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "velocity",     dFESpace, solidVel,  UInt (0) );
     exporterSolid->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "acceleration", dFESpace, solidAcc,  UInt (0) );
 
     //exporterCheck->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "rhs", dFESpace, rhsVector,  UInt (0) );
+
     * solidDisp = solid.displacement();
     *solidVel = timeAdvance->firstDerivative();
     *solidAcc = timeAdvance->secondDerivative();
@@ -686,6 +691,14 @@ Structure::run3d()
         *solidDisp = solid.displacement();
         *solidVel  = timeAdvance->firstDerivative();
         *solidAcc  = timeAdvance->secondDerivative();
+
+        std::cout << "vel Inf: " << solidVel->normInf() << std::endl;
+        std::cout << "vel 2: "   << solidVel->norm2() << std::endl;
+
+        std::cout << "acc Inf: " << solidAcc->normInf() << std::endl;
+        std::cout << "acc 2: "   << solidAcc->norm2() << std::endl;
+
+        //timeAdvance->spyStateVector();
 
         // Real normVect;
         // normVect =  solid.displacement().norm2();
