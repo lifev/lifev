@@ -382,6 +382,16 @@ Structure::run3d()
     solidFESpacePtr_Type dFESpace ( new solidFESpace_Type (pointerToMesh, dOrder, 3, parameters->comm) );
     solidETFESpacePtr_Type dETFESpace ( new solidETFESpace_Type (pointerToMesh, & (dFESpace->refFE() ), & (dFESpace->fe().geoMap() ), parameters->comm) );
 
+
+    //Setting a more complex quadrature rule
+    const QuadratureRule fineQuadRule = quadRuleTetra15pt;
+    QuadratureRule fineBdQuadRule = quadRuleTria7pt;
+
+    dFESpace->setQuadRule ( fineQuadRule );
+    dFESpace->setBdQuadRule ( fineBdQuadRule );
+    dFESpace->qr().showMe();
+
+
     if (verbose)
     {
         std::cout << std::endl;
@@ -441,8 +451,8 @@ Structure::run3d()
 
     // BCh->addBC ("EdgesIn",      200, Natural,   Full, pressure, 3);
     // BCh->addBC ("EdgesIn",      40,  Natural,   Full, zero, 3);
-    // BCh->addBC ("EdgesIn",      7,  Essential, Full, zero, 3);
-    // BCh->addBC ("EdgesIn",      6,  Essential, Full, zero, 3);
+    // BCh->addBC ("EdgesIn",      70,  Essential, Full, zero, 3);
+    // BCh->addBC ("EdgesIn",      60,  Essential, Full, zero, 3);
 
     //! 1. Constructor of the structuralSolver
     StructuralOperator< RegionMesh<LinearTetra> > solid;

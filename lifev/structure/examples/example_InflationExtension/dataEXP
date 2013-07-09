@@ -23,7 +23,7 @@ hdf5_file_name = cube.h5
 [exporter]
 type       = hdf5 #ensight 			# hdf5 (if library compiled with hdf5 support) or ensight
 multimesh  = false
-nameFile   = testUsingMeshClusterAddingBCsInvertingAxis
+nameFile   = ACA-rosa
 start      = 0
 save       = 1
 saveEvery  = 1
@@ -58,7 +58,7 @@ timestep    	= 0.01
 [../space_discretization]
 mesh_type   = .mesh
 mesh_dir  	= ./
-mesh_file 	= fineACA.mesh #newSolid.mesh ##WulandandaGeometry.mesh  ##ACA-1cmLongFineSolid.mesh
+mesh_file 	= ACA-1cmLongFineSolid.mesh ###first.mesh ###200LayersACA-solid.mesh #newSolid.mesh ##WulandandaGeometry.mesh  ##ACA-1cmLongFineSolid.mesh
 order     	= P1
 
 

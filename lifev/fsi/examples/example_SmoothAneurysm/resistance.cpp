@@ -82,16 +82,16 @@ void ResistanceBCs::renewParameters ( OseenSolverShapeDerivative<RegionMesh<Line
 
     M_outP = 1.0 * ( M_resistance * M_outflux + M_hydrostaticP );
 
-    solver->displayer().leaderPrint ( " ****************** Resistance BCs infos ***************************x\n" );
-    solver->displayer().leaderPrint ( " Flow rate = " , M_outflux );
-    solver->displayer().leaderPrint ( " \n" );
-    solver->displayer().leaderPrint ( " Hydrostatic pressure   = " , M_hydrostaticP );
-    solver->displayer().leaderPrint ( " \n" );
-    solver->displayer().leaderPrint ( " Resistance   = " , M_resistance );
-    solver->displayer().leaderPrint ( " \n" );
-    solver->displayer().leaderPrint ( " Outflow pressure   = " , M_outP );
-    solver->displayer().leaderPrint ( " \n" );
-    solver->displayer().leaderPrint ( " ****************** Resistance BCs infos ***************************" );
+    solver.getDisplayer().leaderPrint ( " ****************** Resistance BCs infos ***************************x\n" );
+    solver.getDisplayer().leaderPrint ( " Flow rate = " , M_outflux );
+    solver.getDisplayer().leaderPrint ( " \n" );
+    solver.getDisplayer().leaderPrint ( " Hydrostatic pressure   = " , M_hydrostaticP );
+    solver.getDisplayer().leaderPrint ( " \n" );
+    solver.getDisplayer().leaderPrint ( " Resistance   = " , M_resistance );
+    solver.getDisplayer().leaderPrint ( " \n" );
+    solver.getDisplayer().leaderPrint ( " Outflow pressure   = " , M_outP );
+    solver.getDisplayer().leaderPrint ( " \n" );
+    solver.getDisplayer().leaderPrint ( " ****************** Resistance BCs infos ***************************" );
 
     ResistanceBCs::outputVector[conditionNumber] = M_outP;
 }
