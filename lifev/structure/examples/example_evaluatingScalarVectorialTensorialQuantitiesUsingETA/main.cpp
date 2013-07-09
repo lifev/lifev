@@ -200,13 +200,6 @@ Structure::Structure ( int                                   argc,
     parameters->alpha   = dataFile ( "solid/physics/alpha",   1. );
     parameters->gamma   = dataFile ( "solid/physics/gamma",   1. );
 
-    std::cout << "density = " << parameters->rho     << std::endl
-              << "young   = " << parameters->young   << std::endl
-              << "poisson = " << parameters->poisson << std::endl
-              << "bulk    = " << parameters->bulk    << std::endl
-              << "alpha   = " << parameters->alpha   << std::endl
-              << "gamma   = " << parameters->gamma   << std::endl;
-
     parameters->comm = structComm;
     int ntasks = parameters->comm->NumProc();
 
@@ -238,6 +231,10 @@ Structure::run3d()
     typedef ETFESpace< RegionMesh<LinearTetra>, MapEpetra, 3, 3 >       solidETFESpace_Type;
     typedef boost::shared_ptr<solidETFESpace_Type>                      solidETFESpacePtr_Type;
 
+    typedef ETFESpace< RegionMesh<LinearTetra>, MapEpetra, 3, 1 >       scalarETFESpace_Type;
+    typedef boost::shared_ptr<scalarETFESpace_Type>                     scalarETFESpacePtr_Type;
+
+
     bool verbose = (parameters->comm->MyPID() == 0);
 
     //! dataElasticStructure for parameters
@@ -258,6 +255,10 @@ Structure::run3d()
     std::string dOrder =  dataFile ( "solid/space_discretization/order", "P1");
     solidFESpacePtr_Type dFESpace ( new solidFESpace_Type (meshPart, dOrder, 3, parameters->comm) );
     solidETFESpacePtr_Type dETFESpace ( new solidETFESpace_Type (meshPart, & (dFESpace->refFE() ), & (dFESpace->fe().geoMap() ), parameters->comm) );
+
+    //! Scalar ETFEspace to evaluate scalar quantities
+    solidFESpacePtr_Type dScalarFESpace ( new solidFESpace_Type (meshPart, dOrder, 1, parameters->comm) );
+    scalarETFESpacePtr_Type dScalarETFESpace ( new scalarETFESpace_Type (meshPart, & (dFESpace->refFE() ), & (dFESpace->fe().geoMap() ), parameters->comm) );
 
 
     if (verbose)
@@ -340,14 +341,19 @@ Structure::run3d()
 
     M_exporter->setMeshProcId (dFESpace->mesh(), dFESpace->map().comm().MyPID() );
 
+    // Scalar vector to have scalar quantities
+    vectorPtr_Type scalarJacobian( new vector_Type( dScalarETFESpace->map(), Unique ) );
+
     vectorPtr_Type jacobianVector ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
     vectorPtr_Type jacobianReference ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
     vectorPtr_Type patchAreaVector ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
+    vectorPtr_Type patchAreaVectorScalar ( new vector_Type ( *scalarJacobian,  LifeV::Unique ) );
     vectorPtr_Type traceVector ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
 
     M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "DeterminantF", dFESpace, jacobianVector, UInt (0) );
     M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "tr(C)", dFESpace, traceVector, UInt (0) );
     M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "Reference", dFESpace, jacobianReference, UInt (0) );
+    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::ScalarField, "ScalarJacobian", dScalarFESpace, scalarJacobian, UInt (0) );
     M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "displacementField", dFESpace, solidDisp, UInt (0) );
 
     M_exporter->postProcess ( 0.0 );
@@ -436,8 +442,6 @@ Structure::run3d()
         >
         I_C( C );
 
-    std::cout << " ETA assembly.. " << std::endl;
-
     LifeChrono chrono;
     chrono.start();
 
@@ -448,6 +452,12 @@ Structure::run3d()
                   dot( vectorFromScalar( meas_K ) , phi_i )
                   ) >> patchAreaVector;
 
+    evaluateNode( elements ( dScalarETFESpace->mesh() ),
+                  fakeQuadratureRule,
+                  dScalarETFESpace,
+                  meas_K * phi_i
+                  ) >> patchAreaVectorScalar;
+
 
     evaluateNode( elements ( dETFESpace->mesh() ),
                   fakeQuadratureRule,
@@ -457,8 +467,15 @@ Structure::run3d()
 
     *jacobianVector = *jacobianVector / *patchAreaVector;
 
+    evaluateNode( elements ( dScalarETFESpace->mesh() ),
+                  fakeQuadratureRule,
+                  dScalarETFESpace,
+                  meas_K * J  * phi_i
+                  ) >> scalarJacobian;
+
+    *scalarJacobian = *scalarJacobian / *patchAreaVectorScalar;
+
     chrono.stop();
-    std::cout << "done in... " << chrono.diff() << std::endl;
 
     // trace of C
     evaluateNode( elements ( dETFESpace->mesh() ),
@@ -471,7 +488,7 @@ Structure::run3d()
 
 
     //Extracting the tensions
-    std::cout << std::endl;
+    std::cout << "Norm of the scalarJ = det(F) : " << scalarJacobian->normInf() << std::endl;
     std::cout << "Norm of the J = det(F) : " << jacobianVector->normInf() << std::endl;
     std::cout << "Norm of the J_reference = det(F) : " << jacobianReference->normInf() << std::endl;
     std::cout << "Norm of the I_C = tr(C) : " << traceVector->normInf() << std::endl;
