@@ -23,13 +23,13 @@ hdf5_file_name = cube.h5
 [exporter]
 type       = hdf5 #ensight 			# hdf5 (if library compiled with hdf5 support) or ensight
 multimesh  = false
-nameFile   = soleInflation02
+nameFile   = testUsingMeshClusterAddingBCsInvertingAxis
 start      = 0
 save       = 1
 saveEvery  = 1
 
 [importer]
-restart      = yes
+restart      = none
 type         = hdf5 #ensight 			# hdf5 (if library compiled with hdf5 support) or ensight
 filename     = soleInflation
 initialSol   = 00004
@@ -51,14 +51,14 @@ lawType     = nonlinear
 [../time_discretization]
 method          = BDF
 BDF_order   	= 2
-initialtime 	= 0.04
-endtime     	= 0.07
+initialtime 	= 0.0
+endtime     	= 0.05
 timestep    	= 0.01
 
 [../space_discretization]
 mesh_type   = .mesh
 mesh_dir  	= ./
-mesh_file 	= coarseVulanda.mesh
+mesh_file 	= fineACA.mesh #newSolid.mesh ##WulandandaGeometry.mesh  ##ACA-1cmLongFineSolid.mesh
 order     	= P1
 
 
