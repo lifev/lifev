@@ -26,7 +26,7 @@ ENDIF()
 IF(COMPUTATION_JACOBIAN)
   ADD_SUBDIRECTORIES(
     example_computingJacobian
-    example_computingJacobianWithETA
+    example_evaluatingScalarVectorialTensorialQuantitiesUsingETA
 )
 ENDIF()
 
