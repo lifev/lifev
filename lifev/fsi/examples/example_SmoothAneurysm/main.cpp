@@ -376,7 +376,7 @@ public:
 
             fluidSolution = *M_velAndPressure;
 
-            R1.renewParameters( M_fsi->FSIOper()->fluid(), fluidSolution );
+            R1.renewParameters( M_fsi->FSIOper()->fluid(), fluidSolution, M_data->dataFluid()->dataTime()->time() );
             //FC2.renewParameters ( *M_fsi, OUTLET, fluidSolution );
 
             boost::timer _timer;

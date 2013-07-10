@@ -74,8 +74,12 @@ void ResistanceBCs::initParameters ( const int flag,
 }
 
 void ResistanceBCs::renewParameters ( OseenSolverShapeDerivative<RegionMesh<LinearTetra> > &  solver,
-                                      const VectorEpetra& solution)
+                                      const VectorEpetra& solution,
+                                      const Real time)
 {
+
+    M_resistance = 0.0;
+    M_resistance = computeResistance( time );
 
     // Compute the flux using the solution on the desired flag
     M_outflux = solver.flux( M_flag, solution);
@@ -94,6 +98,26 @@ void ResistanceBCs::renewParameters ( OseenSolverShapeDerivative<RegionMesh<Line
     solver.getDisplayer().leaderPrint ( " ****************** Resistance BCs infos ***************************" );
 
     ResistanceBCs::outputVector[conditionNumber] = M_outP;
+}
+
+Real ResistanceBCs::computeResistance (const Real time )
+{
+    Real resistance(0);
+
+    Real highestResistance( 422561 );
+    Real totalTime = 0.8;
+    Real halfTime = totalTime / 2.0;
+
+    Real a = ( highestResistance / 2 ) * ( 1/ ( halfTime * halfTime ) );
+
+    // linear function
+    if ( time <= totalTime )
+        resistance = ( highestResistance / totalTime ) * time;
+    else
+        resistance = highestResistance;
+
+
+    return resistance;
 }
 
 

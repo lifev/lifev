@@ -548,15 +548,28 @@ Real fZero (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real&
 
 Real outerWallPressure (const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& z, const ID& /*i*/)
 {
-    Real value( - ( 13330 - 113305 ) );
-    if ( t <= 0.8 )
-    {
-        return ( value / ( 0.8 * 0.8 * 0.8 * 0.8 ) ) * ( t * t *t *t );
-    }
+    Real highestPressure( - ( 13330 - 113305 ) );
+    Real pressure(0);
+    Real totalTime = 0.8;
+    Real halfTime = totalTime / 2.0;
+
+    Real a = ( highestPressure / 2 ) * ( 1/ ( halfTime * halfTime ) );
+
+    if ( t <= totalTime )
+        pressure = ( highestPressure / totalTime ) * t;
     else
-    {
-        return value;
-    }
+        pressure = highestPressure;
+
+    // if ( t <= 0.8 )
+    // {
+    //     return ( value / ( 0.8 * 0.8 * 0.8 * 0.8 ) ) * ( t * t *t *t );
+    // }
+    // else
+    // {
+    //     return value;
+    // }
+
+    return -pressure;
 
 }
 
@@ -778,16 +791,16 @@ Real aneurismFluxInVectorial (const Real&  t, const Real& x, const Real& y, cons
     {
     case 0:
         // Flat profile: flux / area;
-        return n1 * flux / area;
-        //return n1 * std::max(0.0,( peak * ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) )) ;
+        // return n1 * flux / area;
+        return n1 * std::max(0.0,( peak * ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) )) ;
     case 1:
         // Flat profile: flux / area;
-        return n2 * flux / area;
-        //return n2 * std::max(0.0,( peak * ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) )) ;
+        //return n2 * flux / area;
+        return n2 * std::max(0.0,( peak * ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) )) ;
     case 2:
         // Flat profile: flux / area;
-        return n3 * flux / area;
-        //return n3 * std::max(0.0,( peak * ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) )) ;
+        //return n3 * flux / area;
+        return n3 * std::max(0.0,( peak * ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) )) ;
     default:
         return 0.0;
     }

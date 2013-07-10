@@ -98,11 +98,11 @@ type       = hdf5    # format of the exported solution (ensight, hdf5, vtk)
 
 ** #exporter for the fluid
     [./fluid]
-    filename   = fluidGI-alpha152700 # name of the postprocessed file
+    filename   = fluidGI-unstructured # name of the postprocessed file
 
 ** #exporter for the solid
     [../solid]
-    filename   = solidGI-alpha152700  # name of the postprocessed file
+    filename   = solidGI-unstructured  # name of the postprocessed file
     [../] # solid
 [../] # exporter
 
@@ -131,22 +131,22 @@ conservativeFormulation       = false  # tells if the conservative or non conser
     [./physics]
     density     = 1.0                # density
     viscosity   = 0.035              # viscosity
-    resistance  = 423507  # resistance  ( 80 mmHg * s / ml ) [ dyn * s / cm^5 ]
+    resistance  = 0.0  # resistance  ( 80 mmHg * s / ml ) [ dyn * s / cm^5 ]
     hydrostatic = 0.0          # hydrostatic pressure [ dyn / cm^2 ]
 
 ** #time discretization
     [../time_discretization]
     method          = BDF
     initialtime        = 0.0
-    endtime            = 0.1
+    endtime            = 0.005
     timestep        = 0.001
     BDF_order        = 2   # can go up to 5
 
 ** #space discretization
     [../space_discretization]
     mesh_type = .mesh
-    mesh_dir  = ../Mesh/
-    mesh_file = ACA-1cmLongFluid.mesh
+    mesh_dir  = ./Mesh/
+    mesh_file = UnstructuredACA-fluid.mesh
     mesh_order     = P1                  # order for the geometry problem, P1 or P2
     vel_order       = P1Bubble                 # order for the fluid velocity FE space: P1, P1Bubble, P2
     press_order     = P1                 # P1, P2
@@ -172,8 +172,8 @@ conservativeFormulation       = false  # tells if the conservative or non conser
 
 * #interface data
 [interface]
-fluid_flag      =  100        # default: 1, the mesh flag of the interface
-solid_flag      =  100        # default: fluid_flag
+fluid_flag      =  200        # default: 1, the mesh flag of the interface
+solid_flag      =  200        # default: fluid_flag
 tolerance       =  0         # how far points are to be considered the same on the interface
 fluid_vertex_flag = 20       # tells wether the in/out ring curves on the interface
                             # is considered in the coupling (fluid_vertex_flag=0) or not (fluid_vertex_flag=1)
@@ -197,22 +197,22 @@ rescaleFactor    = 1.    # this factor can be used to rescale the structure bloc
     young     = 4.0E6
     poisson   = 0.45
     bulk      = 9e6
-    alpha     = 152700            # the parameter at the exponent for the exponential model
+    alpha     = 76350            # the parameter at the exponent for the exponential model
     gamma     = 0.7411                # parameter for the exponential model
 
 ** #time discretization
     [../time_discretization]
     method          = BDF
     initialtime        = 0.0
-    endtime            = 0.1
+    endtime            = 0.005
     timestep        = 0.001
     BDF_order        = 2
 
 ** #space discretization
     [../space_discretization]
     mesh_type = .mesh
-    mesh_dir  = ../Mesh/
-    mesh_file = ACA-1cmLongFluid.mesh
+    mesh_dir  = ./Mesh/
+    mesh_file = UnstructuredACA-solid.mesh
     order     = P1 #P1 or P2
     mesh_faces      = all                   # update all faces elements
     mesh_edges      = all                   # update all faces elements
@@ -488,7 +488,7 @@ rescaleFactor    = 1.    # this factor can be used to rescale the structure bloc
     [./time_discretization]
     method          = BDF
     initialtime        = 0.0
-    endtime            = 0.1
+    endtime            = 0.005
     timestep        = 0.001
     BDF_order        = 2
 

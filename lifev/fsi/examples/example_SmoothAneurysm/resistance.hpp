@@ -62,7 +62,9 @@ public:
 
     void initParameters      ( const int outflowFlag, const Real resistance, const Real hydrostatic, const std::string name );
 
-    void renewParameters     ( OseenSolverShapeDerivative<RegionMesh<LinearTetra> >&  solver, const VectorEpetra& solution );
+    void renewParameters     ( OseenSolverShapeDerivative<RegionMesh<LinearTetra> >&  solver, const VectorEpetra& solution, const Real time );
+
+    Real computeResistance   ( const Real time );
 
     Real fZero               ( const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/ );
 
