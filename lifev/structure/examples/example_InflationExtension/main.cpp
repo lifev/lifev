@@ -441,8 +441,8 @@ Structure::run3d()
     //! BC for StructuredCube4_test_structuralsolver.mesh
     //! =================================================================================
     //Condition for Inflation
-    BCh->addBC ("EdgesIn",      100, Natural,   Full, pressure, 3);
-    BCh->addBC ("EdgesIn",      1000,  Natural,   Full, zero, 3);
+    BCh->addBC ("EdgesIn",      200, Natural,   Full, pressure, 3);
+    BCh->addBC ("EdgesIn",      210,  Natural,   Full, zero, 3);
     BCh->addBC ("EdgesIn",      20,  EssentialVertices, Full, zero, 3);
     BCh->addBC ("EdgesIn",      30,  EssentialVertices, Full, zero, 3);
     BCh->addBC ("EdgesIn",      2,  Essential, Full, zero, 3);
