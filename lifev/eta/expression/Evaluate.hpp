@@ -45,7 +45,6 @@
 #include <lifev/eta/fem/QRAdapterNeverAdapt.hpp>
 
 #include <lifev/eta/expression/EvaluateNodalExpressionVectorElement.hpp>
-#include <lifev/eta/expression/EvaluateNodalExpressionMatrixElement.hpp>
 
 #include <boost/shared_ptr.hpp>
 
@@ -60,39 +59,6 @@ namespace LifeV
  */
 namespace ExpressionAssembly
 {
-
-
-//! Integrate function for matricial expressions
-/*!
-  @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
-
-  This class is an helper function to instantiate the class
-  for performing an integration, here to assemble a matrix
-  with a loop on the elements.
- */
-template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType, typename QRAdapterType>
-EvaluateNodalExpressionMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, QRAdapterType>
-evaluateNode ( const RequestLoopElement<MeshType>& request,
-               const QRAdapterBase<QRAdapterType>& qrAdapterBase,
-               const boost::shared_ptr<TestSpaceType>& testSpace,
-               const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
-               const ExpressionType& expression)
-{
-    return EvaluateNodalExpressionMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, QRAdapterType>
-           (request.mesh(), qrAdapterBase.implementation(), testSpace, solutionSpace, expression);
-}
-
-template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
-EvaluateNodalExpressionMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, QRAdapterNeverAdapt>
-evaluateNode ( const RequestLoopElement<MeshType>& request,
-               const QuadratureRule& quadrature,
-               const boost::shared_ptr<TestSpaceType>& testSpace,
-               const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
-               const ExpressionType& expression)
-{
-    return EvaluateNodalExpressionMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, QRAdapterNeverAdapt>
-           (request.mesh(), QRAdapterNeverAdapt (quadrature), testSpace, solutionSpace, expression);
-}
 
 
 //! Integrate function for vectorial expressions
