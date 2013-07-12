@@ -60,7 +60,7 @@ namespace ExpressionAssembly
   This class is an Evaluation class, and therefore, has all the methods
   required to work within the Evaluation trees.
  */
-template <typename EvaluationType>
+template <typename EvaluationType, UInt FieldDim>
 class EvaluationVectorFromNonConstantScalar
 {
 public:
@@ -74,7 +74,7 @@ public:
 
     //! Type of the value returned by this class
     // NOTE: specialized for 3d problems
-    typedef VectorSmall<3> return_Type;
+    typedef VectorSmall<FieldDim> return_Type;
 
     //@}
 
@@ -104,7 +104,7 @@ public:
 
     //! Constructor from the corresponding expression
     template< typename Expression>
-    explicit EvaluationVectorFromNonConstantScalar (const ExpressionVectorFromNonConstantScalar<Expression>& expression)
+    explicit EvaluationVectorFromNonConstantScalar (const ExpressionVectorFromNonConstantScalar<Expression, FieldDim>& expression)
         : M_evaluation (expression.exprEx() )
     {}
 
@@ -125,6 +125,8 @@ public:
         M_evaluation.update (iElement);
 
         // Update value in the vector
+	// At the moment, the evaluation has to return a scalar
+	// For this reason the getter has parameters 0,0,0
         Real evalValue = M_evaluation.value_qij (0, 0, 0);
 
         setValue( evalValue );
@@ -228,20 +230,20 @@ private:
 
     // Internal storage
     EvaluationType M_evaluation;
-    VectorSmall<3> M_vector;
+    return_Type    M_vector;
 };
 
-
-template< typename EvaluationType >
-const flag_Type EvaluationVectorFromNonConstantScalar<EvaluationType>::S_globalUpdateFlag
+  
+template< typename EvaluationType, UInt FieldDim >
+const flag_Type EvaluationVectorFromNonConstantScalar<EvaluationType, FieldDim>::S_globalUpdateFlag
     = EvaluationType::S_globalUpdateFlag;
 
-template< typename EvaluationType >
-const flag_Type EvaluationVectorFromNonConstantScalar<EvaluationType>::S_testUpdateFlag
+template< typename EvaluationType, UInt FieldDim >
+const flag_Type EvaluationVectorFromNonConstantScalar<EvaluationType, FieldDim>::S_testUpdateFlag
     = EvaluationType::S_testUpdateFlag;
 
-template< typename EvaluationType >
-const flag_Type EvaluationVectorFromNonConstantScalar<EvaluationType>::S_solutionUpdateFlag
+template< typename EvaluationType, UInt FieldDim >
+const flag_Type EvaluationVectorFromNonConstantScalar<EvaluationType, FieldDim>::S_solutionUpdateFlag
     = EvaluationType::S_solutionUpdateFlag;
 
 } // Namespace ExpressionAssembly

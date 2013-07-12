@@ -91,6 +91,8 @@ SET(expression_HEADERS
 	expression/EvaluateNodalExpressionVectorElement.hpp
 	expression/ExpressionVectorFromNonConstantScalar.hpp
 	expression/EvaluationVectorFromNonConstantScalar.hpp
+	expression/ExpressionVectorFromNonConstantMatrix.hpp
+	expression/EvaluationVectorFromNonConstantMatrix.hpp
 	expression/ExpressionPatchArea.hpp
 	expression/EvaluationPatchArea.hpp
 CACHE INTERNAL "")

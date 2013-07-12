@@ -38,9 +38,6 @@
 
 #include <lifev/core/LifeV.hpp>
 
-#include <lifev/core/array/VectorSmall.hpp>
-#include <lifev/core/array/MatrixSmall.hpp>
-
 #include <lifev/eta/expression/ExpressionBase.hpp>
 
 #include <iostream>
@@ -60,15 +57,15 @@ namespace ExpressionAssembly
   <i>VectorDim</i>: The dimension (size) of the vector to be represented.
 
 */
-template <typename ExpressionType, UInt FieldDim >
-class ExpressionVectorFromNonConstantMatrix : public ExpressionBase<ExpressionVectorFromNonConstantMatrix<ExpressionType, FieldDim> >
+template <typename ExpressionType, UInt SpaceDim,  UInt FieldDim >
+class ExpressionVectorFromNonConstantMatrix : public ExpressionBase<ExpressionVectorFromNonConstantMatrix<ExpressionType, SpaceDim, FieldDim> >
 {
 public:
 
     //! @name Public Types
     //@{
 
-    typedef ExpressionBase<ExpressionVectorFromNonConstantMatrix<ExpressionType> > base_Type;
+  typedef ExpressionBase<ExpressionVectorFromNonConstantMatrix<ExpressionType, SpaceDim, FieldDim> > base_Type;
 
     //@}
 
@@ -81,7 +78,7 @@ public:
         : base_Type(), M_expr (expression), M_column(column) {}
 
     //! Copy constructor
-    ExpressionVectorFromNonConstantMatrix (const ExpressionVectorFromNonConstantMatrix<ExpressionType>& expr)
+  ExpressionVectorFromNonConstantMatrix (const ExpressionVectorFromNonConstantMatrix<ExpressionType, SpaceDim, FieldDim>& expr)
         : base_Type(), M_expr (expr.M_expr), M_column(expr.M_column) {}
 
     //! Destructor
@@ -141,11 +138,11 @@ private:
   <i>VectorDim</i>: The dimension (size) of the vector to be represented.
 */
 
-template< typename ExpressionType, UInt FieldDim >
-ExpressionVectorFromNonConstantMatrix<ExpressionType, FieldDim >
-Evector (const ExpressionBase<ExpressionType, FieldDim>& expr)
+template< typename ExpressionType, UInt SpaceDim, UInt FieldDim >
+ExpressionVectorFromNonConstantMatrix<ExpressionType, SpaceDim, FieldDim >
+vectorFromMatrix (const ExpressionBase<ExpressionType>& expr, const UInt column)
 {
-    return ExpressionVectorFromNonConstantMatrix<ExpressionType, FieldDim> (expr.cast() );
+  return ExpressionVectorFromNonConstantMatrix<ExpressionType, SpaceDim, FieldDim> (expr.cast(), column );
 }
 
 

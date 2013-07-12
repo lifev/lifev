@@ -57,7 +57,7 @@ BDF_order   	= 2
 [../space_discretization]
 mesh_type   = .mesh
 mesh_dir  	= ./
-mesh_file 	= WulandandaGeometry.mesh
+mesh_file 	= tubeSolid.mesh
 order     	= P1
 
 [../miscellaneous]

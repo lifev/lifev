@@ -80,6 +80,7 @@
 
 #include <lifev/eta/expression/ExpressionIfCrossed.hpp>
 #include <lifev/eta/expression/ExpressionVectorFromNonConstantScalar.hpp>
+#include <lifev/eta/expression/ExpressionVectorFromNonConstantMatrix.hpp>
 #include <lifev/eta/expression/ExpressionPatchArea.hpp>
 
 #include <lifev/eta/expression/EvaluationPhiI.hpp>
@@ -127,6 +128,7 @@
 #include <lifev/eta/expression/EvaluationIfCrossed.hpp>
 #include <lifev/eta/expression/EvaluationPatchArea.hpp>
 #include <lifev/eta/expression/EvaluationVectorFromNonConstantScalar.hpp>
+#include <lifev/eta/expression/EvaluationVectorFromNonConstantMatrix.hpp>
 
 namespace LifeV
 {
@@ -357,16 +359,37 @@ private:
 
 
 // Specialized for vector from non constant scalar fields
-template<typename Expression, UInt testDim, UInt solutionDim, UInt spaceDim>
+template<typename Expression, UInt FEFieldDim, UInt testDim, UInt solutionDim, UInt spaceDim>
 class ExpressionToEvaluation <
-    ExpressionVectorFromNonConstantScalar<Expression>
+  ExpressionVectorFromNonConstantScalar<Expression, FEFieldDim>
     , testDim
     , solutionDim
     , spaceDim >
 {
 public:
     typedef EvaluationVectorFromNonConstantScalar <
-    typename ExpressionToEvaluation<Expression, testDim, solutionDim, spaceDim>::evaluation_Type
+  typename ExpressionToEvaluation<Expression, testDim, solutionDim, spaceDim>::evaluation_Type,
+  FEFieldDim
+    > evaluation_Type;
+private:
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
+};
+
+
+// Specialized for vector from non constant scalar fields
+template<typename Expression, UInt FESpaceDim, UInt FEFieldDim, UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation <
+  ExpressionVectorFromNonConstantMatrix<Expression, FESpaceDim, FEFieldDim>
+    , testDim
+    , solutionDim
+    , spaceDim >
+{
+public:
+    typedef EvaluationVectorFromNonConstantMatrix<
+  typename ExpressionToEvaluation<Expression, testDim, solutionDim, spaceDim>::evaluation_Type,
+  FESpaceDim,
+  FEFieldDim
     > evaluation_Type;
 private:
     ExpressionToEvaluation();

@@ -62,8 +62,8 @@ namespace ExpressionAssembly
 
 
 */
-template <typename ExpressionType>
-class ExpressionVectorFromNonConstantScalar : public ExpressionBase< ExpressionVectorFromNonConstantScalar<ExpressionType> >
+  template <typename ExpressionType, UInt FieldDim>
+  class ExpressionVectorFromNonConstantScalar : public ExpressionBase< ExpressionVectorFromNonConstantScalar<ExpressionType, FieldDim> >
 {
 public:
 
@@ -71,7 +71,7 @@ public:
     //@{
 
     // No real need, just for ease of coding
-    typedef ExpressionBase< ExpressionVectorFromNonConstantScalar <ExpressionType> > base_Type;
+  typedef ExpressionBase< ExpressionVectorFromNonConstantScalar <ExpressionType, FieldDim> > base_Type;
 
     //@}
 
@@ -84,7 +84,7 @@ public:
         : base_Type(), M_expr (expr) {}
 
     //! Copy constructor
-    ExpressionVectorFromNonConstantScalar (const ExpressionVectorFromNonConstantScalar<ExpressionType>& expression)
+  ExpressionVectorFromNonConstantScalar (const ExpressionVectorFromNonConstantScalar<ExpressionType, FieldDim>& expression)
         : base_Type(), M_expr (expression.M_expr) {}
 
     //! Destructor
@@ -151,11 +151,11 @@ private:
   <i>ExpressionType</i>: Same as in LifeV::ExpressionVectorFromNonConstantScalar
 
 */
-template< typename ExpressionType >
-ExpressionVectorFromNonConstantScalar<ExpressionType>
+template< typename ExpressionType, UInt FieldDim >
+ExpressionVectorFromNonConstantScalar<ExpressionType, FieldDim>
 vectorFromScalar (const ExpressionBase<ExpressionType>& expr)
 {
-    return ExpressionVectorFromNonConstantScalar<ExpressionType> (expr.cast() );
+  return ExpressionVectorFromNonConstantScalar<ExpressionType, FieldDim> (expr.cast() );
 }
 
 } // Namespace ExpressionAssembly

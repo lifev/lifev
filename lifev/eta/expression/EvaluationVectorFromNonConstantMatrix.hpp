@@ -62,7 +62,7 @@ namespace ExpressionAssembly
   This class is an Evaluation class, and therefore, has all the methods
   required to work within the Evaluation trees.
  */
-template <typename EvaluationType, UInt FieldDim>
+template <typename EvaluationType, UInt SpaceDim, UInt FieldDim>
 class EvaluationVectorFromNonConstantMatrix
 {
 public:
@@ -73,7 +73,7 @@ public:
     //! Type of the value returned by this class
     typedef VectorSmall<FieldDim>                 return_Type;
     typedef std::vector<return_Type >             vector_Type;
-    typedef MatrixSmall<FieldDim, FieldDim>       matrix_Type;
+    typedef MatrixSmall<FieldDim, SpaceDim>       matrix_Type;
 
     //@}
 
@@ -96,12 +96,8 @@ public:
     //! @name Constructors, destructor
     //@{
 
-    //! Empty constructor
-    EvaluationVectorFromNonConstantMatrix()
-    {}
-
     //! Copy constructor
-    EvaluationVectorFromNonConstantMatrix (const EvaluationVectorFromNonConstantMatrix<EvaluationType, FieldDim >& evaluation)
+    EvaluationVectorFromNonConstantMatrix (const EvaluationVectorFromNonConstantMatrix<EvaluationType, SpaceDim, FieldDim >& evaluation)
         : M_evaluation( evaluation.M_evaluation ), M_value (evaluation.M_value), M_column( evaluation.M_column)
     {
         if (evaluation.M_quadrature != 0)
@@ -112,7 +108,8 @@ public:
     }
 
     //! Expression-based constructor
-    explicit EvaluationVectorFromNonConstantMatrix (const ExpressionVector<EvaluationType, FieldDim>& expression)
+    template< typename Expression>
+    explicit EvaluationVectorFromNonConstantMatrix (const ExpressionVectorFromNonConstantMatrix<Expression, SpaceDim, FieldDim>& expression)
         : M_evaluation( expression.expr() ), M_value(0) , M_column( expression.column() ), M_quadrature(0)
     {}
 
@@ -140,25 +137,35 @@ public:
 
         M_evaluation.update ( iElement );
 
-        // Loop on each qud point
+        // Loop on each quad point
         matrix_Type matrixDOF;
 
-        matrixDOF
+	for( UInt q(0); M_quadrature->nbQuadPt(); ++q )
+	{
+	    // Getting the small matrix from the inner expression
+	    matrixDOF = M_evaluation.value_qij( q, 0, 0 );
+
+	    // Extracting the wanted column
+	    M_value[q] = matrixDOF.extractColumn( M_column );
+	}
     }
 
     //! Re-initiliaze method
     void zero ( )
     {
-        for( UInt i(0); i < 3; i++ )
-        {
-            M_vector[ i ] = 0.0;
-        }
+      for( UInt q(0); M_quadrature->nbQuadPt(); ++q )
+       {
+	 for( UInt i(0); i < FieldDim; i++ )
+	   {
+	       M_value[ q ][ i ] = 0.0;
+	   }
+       }
     }
 
     //! Display method
     static void display (ostream& out = std::cout)
     {
-        out << "vector from a non constant matrix[" << VectorDim << "]";
+        out << "vector from a non constant matrix[" << FieldDim << "]";
     }
 
     //@}
@@ -237,14 +244,14 @@ private:
 };
 
 
-template<typename ExpressionType, UInt FieldDim>
-const flag_Type EvaluationVectorFromNonConstantMatrix<EvaluationType,FieldDim>::S_globalUpdateFlag = EvaluationType::S_globalUpdateFlag;
+template<typename EvaluationType,UInt SpaceDim , UInt FieldDim>
+const flag_Type EvaluationVectorFromNonConstantMatrix<EvaluationType,SpaceDim, FieldDim>::S_globalUpdateFlag = EvaluationType::S_globalUpdateFlag;
 
-template<typename ExpressionType, UInt FieldDim>
-const flag_Type EvaluationVectorFromNonConstantMatrix<EvaluationType,FieldDim>::S_testUpdateFlag = EvaluationType::S_testUpdateFlag;
+template<typename EvaluationType,UInt SpaceDim , UInt FieldDim>
+const flag_Type EvaluationVectorFromNonConstantMatrix<EvaluationType,SpaceDim, FieldDim>::S_testUpdateFlag = EvaluationType::S_testUpdateFlag;
 
-template<typename ExpressionType, UInt FieldDim>
-const flag_Type EvaluationVectorFromNonConstantMatrix<EvaluationType,FieldDim>::S_solutionUpdateFlag = EvaluationType::S_solutionUpdateFlag;
+template<typename EvaluationType,UInt SpaceDim , UInt FieldDim>
+const flag_Type EvaluationVectorFromNonConstantMatrix<EvaluationType,SpaceDim, FieldDim>::S_solutionUpdateFlag = EvaluationType::S_solutionUpdateFlag;
 
 
 } // Namespace ExpressionAssembly

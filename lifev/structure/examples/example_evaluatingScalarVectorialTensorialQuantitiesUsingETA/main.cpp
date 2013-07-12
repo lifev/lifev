@@ -279,36 +279,36 @@ Structure::run3d()
                  BCh,
                  parameters->comm);
 
-    //! 3. Creation of the importers to read the displacement field
-    std::string const filename    = dataFile ( "importer/filename", "structure");
-    std::string const importerType = dataFile ( "importer/type", "hdf5");
+//     //! 3. Creation of the importers to read the displacement field
+//     std::string const filename    = dataFile ( "importer/filename", "structure");
+//     std::string const importerType = dataFile ( "importer/type", "hdf5");
 
-    std::string iterationString; //useful to iterate over the strings
+//     std::string iterationString; //useful to iterate over the strings
 
-    if (verbose)
-    {
-        std::cout << "The filename is    : " << filename << std::endl;
-        std::cout << "The importerType is: " << importerType << std::endl;
-    }
+//     if (verbose)
+//     {
+//         std::cout << "The filename is    : " << filename << std::endl;
+//         std::cout << "The importerType is: " << importerType << std::endl;
+//     }
 
-#ifdef HAVE_HDF5
-    if (importerType.compare ("hdf5") == 0)
-    {
-        M_importer.reset ( new hdf5Filter_Type (dataFile, filename) );
-    }
-    else
-#endif
-    {
-        if (importerType.compare ("none") == 0)
-        {
-            M_importer.reset ( new emptyFilter_Type ( dataFile, dFESpace->mesh(), "solid", dFESpace->map().comm().MyPID() ) );
-        }
-        else
-        {
-            M_importer.reset ( new ensightFilter_Type ( dataFile, filename ) );
-        }
-    }
-    M_importer->setMeshProcId (dFESpace->mesh(), dFESpace->map().comm().MyPID() );
+// #ifdef HAVE_HDF5
+//     if (importerType.compare ("hdf5") == 0)
+//     {
+//         M_importer.reset ( new hdf5Filter_Type (dataFile, filename) );
+//     }
+//     else
+// #endif
+//     {
+//         if (importerType.compare ("none") == 0)
+//         {
+//             M_importer.reset ( new emptyFilter_Type ( dataFile, dFESpace->mesh(), "solid", dFESpace->map().comm().MyPID() ) );
+//         }
+//         else
+//         {
+//             M_importer.reset ( new ensightFilter_Type ( dataFile, filename ) );
+//         }
+//     }
+//     M_importer->setMeshProcId (dFESpace->mesh(), dFESpace->map().comm().MyPID() );
 
     // The vector where the solution will be stored
     vectorPtr_Type solidDisp (new vector_Type (dFESpace->map(), LifeV::Unique ) );
@@ -348,10 +348,12 @@ Structure::run3d()
     vectorPtr_Type jacobianReference ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
     vectorPtr_Type patchAreaVector ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
     vectorPtr_Type patchAreaVectorScalar ( new vector_Type ( *scalarJacobian,  LifeV::Unique ) );
-    vectorPtr_Type traceVector ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
+    vectorPtr_Type traceVector ( new vector_Type (solid.displacement(),  LifeV::Unique ) );    
+    vectorPtr_Type F_i1Vector ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
 
     M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "DeterminantF", dFESpace, jacobianVector, UInt (0) );
     M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "tr(C)", dFESpace, traceVector, UInt (0) );
+    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "F11", dFESpace, F_i1Vector, UInt (0) );
     M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "Reference", dFESpace, jacobianReference, UInt (0) );
     M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::ScalarField, "ScalarJacobian", dScalarFESpace, scalarJacobian, UInt (0) );
     M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "displacementField", dFESpace, solidDisp, UInt (0) );
@@ -368,17 +370,19 @@ Structure::run3d()
     LifeV::Real dt =  dataFile ( "solid/time_discretization/timestep", 0.0);
     std::string const nameField =  dataFile ( "importer/nameField", "displacement");
 
-    //Get the iteration number
-    iterationString = dataFile ("importer/iteration", "00000");
-    LifeV::Real time = dataFile ("importer/time", 1.0);
+    // //Get the iteration number
+    // iterationString = dataFile ("importer/iteration", "00000");
+    // LifeV::Real time = dataFile ("importer/time", 1.0);
 
-    /*!Definition of the ExporterData, used to load the solution inside the previously defined vectors*/
-    LifeV::ExporterData<mesh_Type> solutionDispl  (LifeV::ExporterData<mesh_Type>::VectorField, nameField + "." + iterationString, dFESpace, solidDisp, UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
+    // /*!Definition of the ExporterData, used to load the solution inside the previously defined vectors*/
+    // LifeV::ExporterData<mesh_Type> solutionDispl  (LifeV::ExporterData<mesh_Type>::VectorField, nameField + "." + iterationString, dFESpace, solidDisp, UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
 
-    //Read the variable
-    M_importer->readVariable (solutionDispl);
-    M_importer->closeFile();
+    // //Read the variable
+    // M_importer->readVariable (solutionDispl);
+    // M_importer->closeFile();
 
+    // First check 
+    *solidDisp *= 0.0;
 
     QuadratureRule fakeQuadratureRule;
 
@@ -442,6 +446,20 @@ Structure::run3d()
         >
         I_C( C );
 
+    ExpressionVectorFromNonConstantScalar<ExpressionMeas, 3  > vMeas( meas_K );
+
+    ExpressionVectorFromNonConstantScalar<
+      ExpressionDeterminant<ExpressionAddition<
+        ExpressionInterpolateGradient<mesh_Type, MapEpetra,3,3>, ExpressionMatrix<3,3> > > , 3  > vJ( J );
+
+    ExpressionVectorFromNonConstantScalar<
+      ExpressionTrace<
+	ExpressionProduct<ExpressionTranspose<ExpressionAddition<ExpressionInterpolateGradient<mesh_Type, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
+                          ExpressionAddition<ExpressionInterpolateGradient<mesh_Type, MapEpetra,3,3>, ExpressionMatrix<3,3> > > > , 3  > vI_C( I_C );
+
+    // 0 to extract first column
+    ExpressionVectorFromNonConstantMatrix< ExpressionAddition< ExpressionInterpolateGradient<mesh_Type, MapEpetra, 3, 3>, ExpressionMatrix<3,3> >, 3, 3 > F_i1( F, 0);
+
     LifeChrono chrono;
     chrono.start();
 
@@ -449,7 +467,7 @@ Structure::run3d()
     evaluateNode( elements ( dETFESpace->mesh() ),
                   fakeQuadratureRule,
                   dETFESpace,
-                  dot( vectorFromScalar( meas_K ) , phi_i )
+                  dot( vMeas , phi_i )
                   ) >> patchAreaVector;
 
     evaluateNode( elements ( dScalarETFESpace->mesh() ),
@@ -462,7 +480,7 @@ Structure::run3d()
     evaluateNode( elements ( dETFESpace->mesh() ),
                   fakeQuadratureRule,
                   dETFESpace,
-                  meas_K * dot( vectorFromScalar( J ) , phi_i )
+                  meas_K * dot( vJ  , phi_i )
                   ) >> jacobianVector;
 
     *jacobianVector = *jacobianVector / *patchAreaVector;
@@ -481,11 +499,19 @@ Structure::run3d()
     evaluateNode( elements ( dETFESpace->mesh() ),
                   fakeQuadratureRule,
                   dETFESpace,
-                  meas_K * dot( vectorFromScalar( I_C ) , phi_i )
+                  meas_K * dot( vI_C , phi_i )
                   ) >> traceVector;
 
     *traceVector = *traceVector / *patchAreaVector;
 
+    // F_i1
+    evaluateNode( elements ( dETFESpace->mesh() ),
+                  fakeQuadratureRule,
+                  dETFESpace,
+                  meas_K * dot( F_i1, phi_i )
+                  ) >> F_i1Vector;
+
+    *F_i1Vector = *F_i1Vector / *patchAreaVector;
 
     //Extracting the tensions
     std::cout << "Norm of the scalarJ = det(F) : " << scalarJacobian->normInf() << std::endl;
@@ -493,7 +519,7 @@ Structure::run3d()
     std::cout << "Norm of the J_reference = det(F) : " << jacobianReference->normInf() << std::endl;
     std::cout << "Norm of the I_C = tr(C) : " << traceVector->normInf() << std::endl;
 
-    M_exporter->postProcess ( time );
+    M_exporter->postProcess ( 1.0 );
 
     if (verbose )
     {
