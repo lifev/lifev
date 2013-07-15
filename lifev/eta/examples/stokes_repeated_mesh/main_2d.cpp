@@ -290,80 +290,80 @@ int main ( int argc, char** argv )
         chronoMgr.add( "Assembly Time", &assemblyTime );
         assemblyTime.start();
         matrixPtr_Type systemMatrix ( new matrix_Type ( uSpace->map() | pSpace->map() ) );
-//        {
-//            using namespace ExpressionAssembly;
+        {
+            using namespace ExpressionAssembly;
 
-//            integrate ( elements ( localMesh ),
-//                        quadRuleTria3pt,
-//                        uSpace,
-//                        uSpace,
+            integrate ( elements ( localMesh ),
+                        quadRuleTria3pt,
+                        uSpace,
+                        uSpace,
 
-//                        dot ( grad (phi_i) , grad (phi_j) )
+                        dot ( grad (phi_i) , grad (phi_j) )
 
-//                      )
-//                    >> systemMatrix->block (0, 0);
+                      )
+                    >> systemMatrix->block (0, 0);
 
-//            integrate ( elements ( localMesh ),
-//                        quadRuleTria3pt,
-//                        uSpace,
-//                        pSpace,
+            integrate ( elements ( localMesh ),
+                        quadRuleTria3pt,
+                        uSpace,
+                        pSpace,
 
-//                        phi_j * div (phi_i)
+                        phi_j * div (phi_i)
 
-//                      )
-//                    >> systemMatrix->block (0, 1);
+                      )
+                    >> systemMatrix->block (0, 1);
 
-//            integrate ( elements ( localMesh ),
-//                        quadRuleTria3pt,
-//                        pSpace,
-//                        uSpace,
+            integrate ( elements ( localMesh ),
+                        quadRuleTria3pt,
+                        pSpace,
+                        uSpace,
 
-//                        phi_i * div (phi_j)
+                        phi_i * div (phi_j)
 
-//                      )
-//                    >> systemMatrix->block (1, 0);
-//        }
-//        systemMatrix->globalAssemble();
+                      )
+                    >> systemMatrix->block (1, 0);
+        }
+        systemMatrix->globalAssemble();
         assemblyTime.stop();
 
         LifeChrono assemblyTimeR;
         chronoMgr.add( "Assembly Time (R)", &assemblyTimeR );
         assemblyTimeR.start();
         matrixPtr_Type systemMatrixR ( new matrix_Type ( uSpaceR->map() | pSpaceR->map(), 50, true ) );
-//        {
-//            using namespace ExpressionAssembly;
+        {
+            using namespace ExpressionAssembly;
 
-//            integrate ( elements ( localMeshR ),
-//                        quadRuleTria3pt,
-//                        uSpaceR,
-//                        uSpaceR,
+            integrate ( elements ( localMeshR ),
+                        quadRuleTria3pt,
+                        uSpaceR,
+                        uSpaceR,
 
-//                        dot ( grad (phi_i) , grad (phi_j) )
+                        dot ( grad (phi_i) , grad (phi_j) )
 
-//                      )
-//                    >> systemMatrixR->block (0, 0);
+                      )
+                    >> systemMatrixR->block (0, 0);
 
-//            integrate ( elements ( localMeshR ),
-//                        quadRuleTria3pt,
-//                        uSpaceR,
-//                        pSpaceR,
+            integrate ( elements ( localMeshR ),
+                        quadRuleTria3pt,
+                        uSpaceR,
+                        pSpaceR,
 
-//                        phi_j * div (phi_i)
+                        phi_j * div (phi_i)
 
-//                      )
-//                    >> systemMatrixR->block (0, 1);
+                      )
+                    >> systemMatrixR->block (0, 1);
 
-//            integrate ( elements ( localMeshR ),
-//                        quadRuleTria3pt,
-//                        pSpaceR,
-//                        uSpaceR,
+            integrate ( elements ( localMeshR ),
+                        quadRuleTria3pt,
+                        pSpaceR,
+                        uSpaceR,
 
-//                        phi_i * div (phi_j)
+                        phi_i * div (phi_j)
 
-//                      )
-//                    >> systemMatrixR->block (1, 0);
-//        }
-//        systemMatrixR->fillComplete();
+                      )
+                    >> systemMatrixR->block (1, 0);
+        }
+        systemMatrixR->fillComplete();
         assemblyTime.stop();
 
         if ( verbose )
