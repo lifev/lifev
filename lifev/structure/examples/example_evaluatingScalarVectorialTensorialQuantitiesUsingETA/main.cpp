@@ -352,12 +352,18 @@ Structure::run3d()
     vectorPtr_Type F_i1Vector ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
     vectorPtr_Type F_i2Vector ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
     vectorPtr_Type F_i3Vector ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
+    // vectorPtr_Type grDisplX ( new vector_Type (*dFESpace->mapPtr() ) );
+    // vectorPtr_Type grDisplY ( new vector_Type (*dFESpace->mapPtr() ) );
+    // vectorPtr_Type grDisplZ ( new vector_Type (*dFESpace->mapPtr() ) );
 
     M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "DeterminantF", dFESpace, jacobianVector, UInt (0) );
     M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "tr(C)", dFESpace, traceVector, UInt (0) );
     M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "Fi1", dFESpace, F_i1Vector, UInt (0) );
     M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "Fi2", dFESpace, F_i2Vector, UInt (0) );
     M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "Fi3", dFESpace, F_i3Vector, UInt (0) );
+    // M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "refDerX", dFESpace, grDisplX, UInt (0) );
+    // M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "refDerY", dFESpace, grDisplY, UInt (0) );
+    // M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "refDerZ", dFESpace, grDisplZ, UInt (0) );
     M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "Reference", dFESpace, jacobianReference, UInt (0) );
     M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::ScalarField, "ScalarJacobian", dScalarFESpace, scalarJacobian, UInt (0) );
     M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "displacementField", dFESpace, solidDisp, UInt (0) );
@@ -404,6 +410,15 @@ Structure::run3d()
 
     //fakeQuadratureRule.showMe();
 
+    // //Compute the gradient along X of the displacement field
+    // *grDisplX = dFESpace->gradientRecovery (*solidDisp, 0);
+
+    // //Compute the gradient along Y of the displacement field
+    // *grDisplY = dFESpace->gradientRecovery (*solidDisp, 1);
+
+    // //Compute the gradient along Z of the displacement field
+    // *grDisplZ = dFESpace->gradientRecovery (*solidDisp, 2);
+ 
     //Set the current solution as the displacement vector to use
     solid.jacobianDistribution ( solidDisp, *jacobianReference);
 
