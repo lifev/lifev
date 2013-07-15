@@ -350,10 +350,14 @@ Structure::run3d()
     vectorPtr_Type patchAreaVectorScalar ( new vector_Type ( *scalarJacobian,  LifeV::Unique ) );
     vectorPtr_Type traceVector ( new vector_Type (solid.displacement(),  LifeV::Unique ) );    
     vectorPtr_Type F_i1Vector ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
+    vectorPtr_Type F_i2Vector ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
+    vectorPtr_Type F_i3Vector ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
 
     M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "DeterminantF", dFESpace, jacobianVector, UInt (0) );
     M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "tr(C)", dFESpace, traceVector, UInt (0) );
-    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "F11", dFESpace, F_i1Vector, UInt (0) );
+    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "Fi1", dFESpace, F_i1Vector, UInt (0) );
+    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "Fi2", dFESpace, F_i2Vector, UInt (0) );
+    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "Fi3", dFESpace, F_i3Vector, UInt (0) );
     M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "Reference", dFESpace, jacobianReference, UInt (0) );
     M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::ScalarField, "ScalarJacobian", dScalarFESpace, scalarJacobian, UInt (0) );
     M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "displacementField", dFESpace, solidDisp, UInt (0) );
@@ -458,7 +462,11 @@ Structure::run3d()
                           ExpressionAddition<ExpressionInterpolateGradient<mesh_Type, MapEpetra,3,3>, ExpressionMatrix<3,3> > > > , 3  > vI_C( I_C );
 
     // 0 to extract first column
-    ExpressionVectorFromNonConstantMatrix< ExpressionAddition< ExpressionInterpolateGradient<mesh_Type, MapEpetra, 3, 3>, ExpressionMatrix<3,3> >, 3, 3 > F_i1( F, 0);
+    ExpressionVectorFromNonConstantMatrix< ExpressionAddition< ExpressionInterpolateGradient<mesh_Type, MapEpetra, 3, 3>, ExpressionMatrix<3,3> >,  3, 3 > F_i1( F, 0);
+
+    ExpressionVectorFromNonConstantMatrix< ExpressionAddition< ExpressionInterpolateGradient<mesh_Type, MapEpetra, 3, 3>, ExpressionMatrix<3,3> >,  3, 3 > F_i2( F, 1);
+
+    ExpressionVectorFromNonConstantMatrix< ExpressionAddition< ExpressionInterpolateGradient<mesh_Type, MapEpetra, 3, 3>, ExpressionMatrix<3,3> >,  3, 3 > F_i3( F, 2);
 
     LifeChrono chrono;
     chrono.start();
@@ -512,6 +520,24 @@ Structure::run3d()
                   ) >> F_i1Vector;
 
     *F_i1Vector = *F_i1Vector / *patchAreaVector;
+
+    // F_i2
+    evaluateNode( elements ( dETFESpace->mesh() ),
+                  fakeQuadratureRule,
+                  dETFESpace,
+                  meas_K * dot( F_i2, phi_i )
+                  ) >> F_i2Vector;
+
+    *F_i2Vector = *F_i2Vector / *patchAreaVector;
+
+    // F_i1
+    evaluateNode( elements ( dETFESpace->mesh() ),
+                  fakeQuadratureRule,
+                  dETFESpace,
+                  meas_K * dot( F_i3, phi_i )
+                  ) >> F_i3Vector;
+
+    *F_i3Vector = *F_i3Vector / *patchAreaVector;
 
     //Extracting the tensions
     std::cout << "Norm of the scalarJ = det(F) : " << scalarJacobian->normInf() << std::endl;
