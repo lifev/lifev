@@ -51,6 +51,10 @@
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
+#ifdef HAVE_LIFEV_DEBUG
+//#define LIFEV_GHOSTHANDLER_DEBUG 1
+#endif
+
 namespace LifeV
 {
 
@@ -263,8 +267,9 @@ protected:
     neighborList_Type M_nodeElementNeighborsList;
 
     bool M_verbose;
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
     std::ofstream M_debugOut;
-
+#endif
     //@}
 };
 
@@ -278,11 +283,9 @@ GhostHandler<Mesh>::GhostHandler ( commPtr_Type const& comm ) :
     M_nodeNodeNeighborsList(),
     M_nodeEdgeNeighborsList(),
     M_nodeElementNeighborsList(),
-    M_verbose ( 0 ),
-#ifdef HAVE_LIFEV_DEBUG
-    M_debugOut ( ( "gh." + ( comm->NumProc() > 1 ? boost::lexical_cast<std::string> ( M_me ) : "s" ) + ".out" ).c_str() )
-#else
-    M_debugOut()
+    M_verbose ( 0 )
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+    ,M_debugOut ( ( "gh." + ( comm->NumProc() > 1 ? boost::lexical_cast<std::string> ( M_me ) : "s" ) + ".out" ).c_str() )
 #endif
 {
 }
@@ -300,11 +303,9 @@ GhostHandler<Mesh>::GhostHandler ( meshPtr_Type fullMesh,
     M_nodeNodeNeighborsList(),
     M_nodeEdgeNeighborsList(),
     M_nodeElementNeighborsList(),
-    M_verbose ( 0 ),
-#ifdef HAVE_LIFEV_DEBUG
-    M_debugOut ( ( "gh." + ( comm->NumProc() > 1 ? boost::lexical_cast<std::string> ( M_me ) : "s" ) + ".out" ).c_str() )
-#else
-    M_debugOut()
+    M_verbose ( 0 )
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+    ,M_debugOut ( ( "gh." + ( comm->NumProc() > 1 ? boost::lexical_cast<std::string> ( M_me ) : "s" ) + ".out" ).c_str() )
 #endif
 {
 }
@@ -318,11 +319,9 @@ GhostHandler<Mesh>::GhostHandler ( meshPtr_Type fullMesh,
     M_nodeNodeNeighborsList(),
     M_nodeEdgeNeighborsList(),
     M_nodeElementNeighborsList(),
-    M_verbose ( 0 ),
-#ifdef HAVE_LIFEV_DEBUG
-    M_debugOut ( ( "gh." + ( comm->NumProc() > 1 ? boost::lexical_cast<std::string> ( M_me ) : "s" ) + ".out" ).c_str() )
-#else
-    M_debugOut()
+    M_verbose ( 0 )
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+    ,M_debugOut ( ( "gh." + ( comm->NumProc() > 1 ? boost::lexical_cast<std::string> ( M_me ) : "s" ) + ".out" ).c_str() )
 #endif
 {
 }
@@ -384,7 +383,7 @@ void writeNeighborMap ( EpetraExt::HDF5& file, neighborList_Type& list, std::str
     file.Write ( name, "valueSize", static_cast<Int> ( values.size() ) );
     file.Write ( name, "values", H5T_NATIVE_INT, values.size(), &values[ 0 ] );
 
-    //#ifdef HAVE_LIFEV_DEBUG
+    //#ifdef LIFEV_GHOSTHANDLER_DEBUG
     //    std::cerr << name << std::endl;
     //    for ( UInt i ( 0 ); i < map.size(); i++ )
     //    {
@@ -420,7 +419,7 @@ void readNeighborMap ( EpetraExt::HDF5& file, neighborList_Type& list, std::stri
         }
     }
 
-    //#ifdef HAVE_LIFEV_DEBUG
+    //#ifdef LIFEV_GHOSTHANDLER_DEBUG
     //    std::cerr << name << std::endl;
     //    for ( UInt i ( 0 ); i < map.size(); i++ )
     //    {
@@ -545,7 +544,7 @@ void GhostHandler<Mesh>::createNodeNodeNeighborsMap()
         M_nodeNodeNeighborsList[ id1 ].insert ( id0 );
     }
 
-#ifdef HAVE_LIFEV_DEBUG
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
     M_debugOut << "M_nodeNodeNeighborsList on proc " << M_me << std::endl;
     for ( UInt i = 0; i < M_nodeNodeNeighborsList.size(); i++ )
     {
@@ -693,7 +692,7 @@ void GhostHandler<Mesh>::createNodeEdgeNeighborsMap()
         M_nodeEdgeNeighborsList[ id1 ].insert ( ie );
     }
 
-#ifdef HAVE_LIFEV_DEBUG
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
     M_debugOut << "M_nodeEdgeNeighborsList on proc " << M_me << std::endl;
     for ( UInt i = 0; i < M_nodeEdgeNeighborsList.size(); i++ )
     {
@@ -706,7 +705,6 @@ void GhostHandler<Mesh>::createNodeEdgeNeighborsMap()
         M_debugOut << std::endl;
     }
 #endif
-
 }
 
 template <typename Mesh>
@@ -1191,7 +1189,8 @@ void GhostHandler<Mesh>::ghostMapOnElementsP1 ( graphPtr_Type elemGraph,
     }
 
     std::vector<int>& myElems = (*elemGraph) [M_me];
-#ifdef HAVE_LIFEV_DEBUG
+
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
     // show own elements
     M_debugOut << "own elements on proc " << M_me << std::endl;
     for ( UInt i = 0; i < myElems.size(); i++ )
@@ -1220,7 +1219,8 @@ void GhostHandler<Mesh>::ghostMapOnElementsP1 ( graphPtr_Type elemGraph,
     }
 
     std::vector<int> const& myPoints = pointGraph[ M_me ];
-#ifdef HAVE_LIFEV_DEBUG
+
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
     M_debugOut << "own points on proc " << M_me << std::endl;
     for ( UInt i = 0; i < myPoints.size(); i++ )
     {
@@ -1257,7 +1257,8 @@ void GhostHandler<Mesh>::ghostMapOnElementsP1 ( graphPtr_Type elemGraph,
             }
         }
     }
-#ifdef HAVE_LIFEV_DEBUG
+
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
     M_debugOut << "own SUBDOMAIN_INTERFACE points on proc " << M_me << std::endl;
     for ( std::set<Int>::const_iterator i = mySubdIntPoints.begin(); i != mySubdIntPoints.end(); ++i )
     {
@@ -1271,14 +1272,14 @@ void GhostHandler<Mesh>::ghostMapOnElementsP1 ( graphPtr_Type elemGraph,
 
     for ( UInt o = 0; o < overlap; o++ )
     {
-#ifdef HAVE_LIFEV_DEBUG
+
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
         M_debugOut << "workingPoints" << std::endl;
         for ( UInt i = 0; i < workingPoints.size(); i++ )
         {
             M_debugOut << workingPoints[ i ] << std::endl;
         }
 #endif
-
         for ( UInt k = 0; k < workingPoints.size(); k++ )
         {
             const int& currentPoint = workingPoints[ k ];
@@ -1299,27 +1300,26 @@ void GhostHandler<Mesh>::ghostMapOnElementsP1 ( graphPtr_Type elemGraph,
             }
         }
 
-#ifdef HAVE_LIFEV_DEBUG
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
         M_debugOut << "augmentedElemsSet" << std::endl;
         for ( std::set<Int>::const_iterator i = augmentedElemsSet.begin(); i != augmentedElemsSet.end(); ++i )
         {
             M_debugOut << *i << std::endl;
         }
 #endif
-
         // clean up newPoints from already analized points
         for ( UInt k = 0; k < workingPoints.size(); k++ )
         {
             newPoints.erase ( newPoints.find ( workingPoints[ k ] ) );
         }
-#ifdef HAVE_LIFEV_DEBUG
+
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
         M_debugOut << "newPoints" << std::endl;
         for ( std::set<int>::const_iterator i = newPoints.begin(); i != newPoints.end(); ++i )
         {
             M_debugOut << *i << std::endl;
         }
 #endif
-
         // set up workingPoints if we are not exiting
         if ( o + 1 < overlap  )
         {
