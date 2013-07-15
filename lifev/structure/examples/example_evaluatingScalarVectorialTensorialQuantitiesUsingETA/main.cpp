@@ -279,36 +279,36 @@ Structure::run3d()
                  BCh,
                  parameters->comm);
 
-//     //! 3. Creation of the importers to read the displacement field
-//     std::string const filename    = dataFile ( "importer/filename", "structure");
-//     std::string const importerType = dataFile ( "importer/type", "hdf5");
+    //! 3. Creation of the importers to read the displacement field
+    std::string const filename    = dataFile ( "importer/filename", "structure");
+    std::string const importerType = dataFile ( "importer/type", "hdf5");
 
-//     std::string iterationString; //useful to iterate over the strings
+    std::string iterationString; //useful to iterate over the strings
 
-//     if (verbose)
-//     {
-//         std::cout << "The filename is    : " << filename << std::endl;
-//         std::cout << "The importerType is: " << importerType << std::endl;
-//     }
+    if (verbose)
+    {
+        std::cout << "The filename is    : " << filename << std::endl;
+        std::cout << "The importerType is: " << importerType << std::endl;
+    }
 
-// #ifdef HAVE_HDF5
-//     if (importerType.compare ("hdf5") == 0)
-//     {
-//         M_importer.reset ( new hdf5Filter_Type (dataFile, filename) );
-//     }
-//     else
-// #endif
-//     {
-//         if (importerType.compare ("none") == 0)
-//         {
-//             M_importer.reset ( new emptyFilter_Type ( dataFile, dFESpace->mesh(), "solid", dFESpace->map().comm().MyPID() ) );
-//         }
-//         else
-//         {
-//             M_importer.reset ( new ensightFilter_Type ( dataFile, filename ) );
-//         }
-//     }
-//     M_importer->setMeshProcId (dFESpace->mesh(), dFESpace->map().comm().MyPID() );
+#ifdef HAVE_HDF5
+    if (importerType.compare ("hdf5") == 0)
+    {
+        M_importer.reset ( new hdf5Filter_Type (dataFile, filename) );
+    }
+    else
+#endif
+    {
+        if (importerType.compare ("none") == 0)
+        {
+            M_importer.reset ( new emptyFilter_Type ( dataFile, dFESpace->mesh(), "solid", dFESpace->map().comm().MyPID() ) );
+        }
+        else
+        {
+            M_importer.reset ( new ensightFilter_Type ( dataFile, filename ) );
+        }
+    }
+    M_importer->setMeshProcId (dFESpace->mesh(), dFESpace->map().comm().MyPID() );
 
     // The vector where the solution will be stored
     vectorPtr_Type solidDisp (new vector_Type (dFESpace->map(), LifeV::Unique ) );
@@ -375,18 +375,15 @@ Structure::run3d()
     std::string const nameField =  dataFile ( "importer/nameField", "displacement");
 
     // //Get the iteration number
-    // iterationString = dataFile ("importer/iteration", "00000");
-    // LifeV::Real time = dataFile ("importer/time", 1.0);
+    iterationString = dataFile ("importer/iteration", "00000");
+    LifeV::Real time = dataFile ("importer/time", 1.0);
 
-    // /*!Definition of the ExporterData, used to load the solution inside the previously defined vectors*/
-    // LifeV::ExporterData<mesh_Type> solutionDispl  (LifeV::ExporterData<mesh_Type>::VectorField, nameField + "." + iterationString, dFESpace, solidDisp, UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
+    /*!Definition of the ExporterData, used to load the solution inside the previously defined vectors*/
+    LifeV::ExporterData<mesh_Type> solutionDispl  (LifeV::ExporterData<mesh_Type>::VectorField, nameField + "." + iterationString, dFESpace, solidDisp, UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
 
-    // //Read the variable
-    // M_importer->readVariable (solutionDispl);
-    // M_importer->closeFile();
-
-    // First check 
-    *solidDisp *= 0.0;
+    //Read the variable
+    M_importer->readVariable (solutionDispl);
+    M_importer->closeFile();
 
     QuadratureRule fakeQuadratureRule;
 

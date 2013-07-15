@@ -25,7 +25,7 @@ save       = 1
 
 [importer]
 type         = hdf5 #ensight 			# hdf5 (if library compiled with hdf5 support) or ensight
-filename     = ReferenceMeshExp-001/inflationCharacterizationHighLoadsThick
+filename     = middleMesh-80400/inflationCharacterizationHighLoadsThick
 nameField    = displacement
 iteration   = 00064
 time        = 4.55
@@ -57,7 +57,7 @@ BDF_order   	= 2
 [../space_discretization]
 mesh_type   = .mesh
 mesh_dir  	= ./
-mesh_file 	= tubeSolid.mesh
+mesh_file 	= WulandandaGeometry.mesh
 order     	= P1
 
 [../miscellaneous]
