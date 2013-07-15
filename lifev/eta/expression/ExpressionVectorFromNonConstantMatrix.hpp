@@ -78,7 +78,7 @@ public:
         : base_Type(), M_expr (expression), M_column(column) {}
 
     //! Copy constructor
-  ExpressionVectorFromNonConstantMatrix (const ExpressionVectorFromNonConstantMatrix<ExpressionType, SpaceDim, FieldDim>& expr)
+    ExpressionVectorFromNonConstantMatrix (const ExpressionVectorFromNonConstantMatrix<ExpressionType, SpaceDim, FieldDim>& expr)
         : base_Type(), M_expr (expr.M_expr), M_column(expr.M_column) {}
 
     //! Destructor

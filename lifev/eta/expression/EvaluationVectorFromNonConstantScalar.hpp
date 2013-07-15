@@ -136,7 +136,7 @@ public:
     //! Re-initiliaze method
     void zero ( )
     {
-        for( UInt i(0); i < 3; i++ )
+        for( UInt i(0); i < FieldDim; i++ )
         {
             M_vector[ i ] = 0.0;
         }
@@ -145,7 +145,7 @@ public:
     //! Set value in the vector
     void setValue ( const Real p )
     {
-        for( UInt i(0); i < 3; i++ )
+        for( UInt i(0); i < FieldDim; i++ )
         {
             M_vector[ i ] = p;
         }

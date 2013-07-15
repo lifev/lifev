@@ -40,12 +40,9 @@
 #include <lifev/core/array/VectorSmall.hpp>
 #include <lifev/core/array/MatrixSmall.hpp>
 
-#include <lifev/eta/fem/ETCurrentFE.hpp>
-#include <lifev/eta/fem/ETCurrentFlag.hpp>
-#include <lifev/core/fem/QuadratureRule.hpp>
-
 #include <lifev/eta/expression/ExpressionVectorFromNonConstantMatrix.hpp>
 
+#include <lifev/core/fem/QuadratureRule.hpp>
 
 namespace LifeV
 {
@@ -72,7 +69,7 @@ public:
 
     //! Type of the value returned by this class
     typedef VectorSmall<FieldDim>                 return_Type;
-    typedef std::vector<return_Type >             vector_Type;
+    typedef std::vector<return_Type>              vector_Type;
     typedef MatrixSmall<FieldDim, SpaceDim>       matrix_Type;
 
     //@}
@@ -140,7 +137,7 @@ public:
         // Loop on each quad point
         matrix_Type matrixDOF;
 
-	for( UInt q(0); M_quadrature->nbQuadPt(); ++q )
+	for( UInt q(0); q < M_quadrature->nbQuadPt(); ++q )
 	{
 	    // Getting the small matrix from the inner expression
 	    matrixDOF = M_evaluation.value_qij( q, 0, 0 );
@@ -153,9 +150,9 @@ public:
     //! Re-initiliaze method
     void zero ( )
     {
-      for( UInt q(0); M_quadrature->nbQuadPt(); ++q )
+      for( UInt q(0); q < M_quadrature->nbQuadPt(); ++q )
        {
-	 for( UInt i(0); i < FieldDim; i++ )
+	 for( UInt i(0); i < FieldDim; ++i )
 	   {
 	       M_value[ q ][ i ] = 0.0;
 	   }
@@ -202,8 +199,8 @@ public:
         {
             delete M_quadrature;
         }
-        M_quadrature = new QuadratureRule (qr);
-        M_value.resize (qr.nbQuadPt() );
+        M_quadrature = new QuadratureRule (qr);	
+        M_value.resize ( qr.nbQuadPt() );
 
         M_evaluation.setQuadrature (qr);
     }
