@@ -121,36 +121,8 @@ public:
     //! Internal update method
     void update (const UInt& iElement)
     {
-        zero();
         M_evaluation.update (iElement);
-
-        // Update value in the vector
-	// At the moment, the evaluation has to return a scalar
-	// For this reason the getter has parameters 0,0,0
-        Real evalValue = M_evaluation.value_qij (0, 0, 0);
-
-        setValue( evalValue );
-
     }
-
-    //! Re-initiliaze method
-    void zero ( )
-    {
-        for( UInt i(0); i < FieldDim; i++ )
-        {
-            M_vector[ i ] = 0.0;
-        }
-    }
-
-    //! Set value in the vector
-    void setValue ( const Real p )
-    {
-        for( UInt i(0); i < FieldDim; i++ )
-        {
-            M_vector[ i ] = p;
-        }
-    }
-
 
     //! Display method
     static void display (std::ostream& out = std::cout)
@@ -201,19 +173,19 @@ public:
     //! Getter for a value
     return_Type value_q (const UInt& q) const
     {
-        return M_vector;
+        return VectorSmall<FieldDim> ( M_evaluation.value_q( q ) );
     }
 
     //! Getter for the value for a vector
     return_Type value_qi (const UInt& q, const UInt& i) const
     {
-        return M_vector;
+        return VectorSmall<FieldDim> ( M_evaluation.value_qi( q,i ) );
     }
 
     //! Getter for the value for a matrix
     return_Type value_qij (const UInt& q, const UInt& i, const UInt& j) const
     {
-        return M_vector;
+      return VectorSmall<FieldDim> ( M_evaluation.value_qij( q,i,j ) );
     }
 
     //@}
@@ -230,7 +202,6 @@ private:
 
     // Internal storage
     EvaluationType M_evaluation;
-    return_Type    M_vector;
 };
 
   
