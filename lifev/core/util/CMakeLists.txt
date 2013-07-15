@@ -13,6 +13,7 @@ SET(util_HEADERS
   util/Factory.hpp
   util/LifeAssert.hpp
   util/LifeChrono.hpp
+  util/LifeChronoManager.hpp
   util/Displayer.hpp
   util/ParserDefinitions.hpp
   util/FactoryPolicy.hpp
