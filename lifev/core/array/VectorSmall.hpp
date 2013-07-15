@@ -85,6 +85,15 @@ public:
         }
     }
 
+    //! Non Empty constructor
+    VectorSmall(const Real value)
+    {
+        for ( UInt i = 0; i < Dim; i++ )
+        {
+            M_coords[ i ] = value;
+        }
+    }
+
     //! Assignment operator
     VectorSmall<Dim>& operator= ( VectorSmall<Dim> const& vector )
     {
@@ -368,6 +377,12 @@ public:
     VectorSmall()
     {
         M_coords[ 0 ] = M_coords[ 1 ] = M_coords[ 2 ] = 0.;
+    }
+
+    //! Non Empty constructor
+    VectorSmall(const Real value)
+    {
+        M_coords[ 0 ] = M_coords[ 1 ] = M_coords[ 2 ] = value;
     }
 
     //! Full constructor with all components explicitly initialized
