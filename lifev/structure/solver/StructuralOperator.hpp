@@ -1006,7 +1006,7 @@ void StructuralOperator<Mesh>::updateSourceTerm ( source_Type const& source )
         for ( UInt ic = 0; ic < nc; ++ic )
         {
             //compute_vec( source, M_elvec, M_dispFESpace->fe(),  M_data->dataTime()->time(), ic ); // compute local vector
-            assembleVector ( *rhs, M_elvec, M_dispFESpace->fe(), M_dispFESpace->dof(), ic, ic * M_dispFESpace->fieldDim() ); // assemble local vector into global one
+            assembleVector ( rhs, M_elvec, M_dispFESpace->fe(), M_dispFESpace->dof(), ic, ic * M_dispFESpace->fieldDim() ); // assemble local vector into global one
         }
     }
     M_rhsNoBC += rhs;
