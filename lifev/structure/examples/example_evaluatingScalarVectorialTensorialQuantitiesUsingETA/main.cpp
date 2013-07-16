@@ -98,6 +98,37 @@ std::set<UInt> parseList ( const std::string& list )
     return setList;
 }
 
+class SelectionFunctor
+{
+public:
+    typedef VectorEpetra                  vector_Type;
+    typedef boost::shared_ptr<vector_Type>    vectorPtr_Type;
+
+    SelectionFunctor ( const vectorPtr_Type selectionVector )
+    : M_selectionVector ( selectionVector )
+    {}
+
+    bool operator() ( const UInt i ) const
+    {
+        // The i has to be a Local ID!
+        UInt index = M_selectionVector->blockMap().GID( i );
+
+        if( ( *M_selectionVector )( index ) > 0.99999 )
+            return true;
+        else
+            return false;
+
+
+        return false;
+
+    }
+
+private:
+    const vectorPtr_Type M_selectionVector;
+
+}; // Marker selector
+
+
 
 class Structure
 {
@@ -348,13 +379,18 @@ Structure::run3d()
     vectorPtr_Type jacobianReference ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
     vectorPtr_Type patchAreaVector ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
     vectorPtr_Type patchAreaVectorScalar ( new vector_Type ( *scalarJacobian,  LifeV::Unique ) );
-    vectorPtr_Type traceVector ( new vector_Type (solid.displacement(),  LifeV::Unique ) );    
+    vectorPtr_Type traceVector ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
     vectorPtr_Type F_i1Vector ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
     vectorPtr_Type F_i2Vector ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
     vectorPtr_Type F_i3Vector ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
     // vectorPtr_Type grDisplX ( new vector_Type (*dFESpace->mapPtr() ) );
     // vectorPtr_Type grDisplY ( new vector_Type (*dFESpace->mapPtr() ) );
     // vectorPtr_Type grDisplZ ( new vector_Type (*dFESpace->mapPtr() ) );
+    vectorPtr_Type savedDisplacementTrace ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
+    vectorPtr_Type savedDisplacementJac ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
+    vectorPtr_Type statusVector ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
+
+    *statusVector *= 0.0;
 
     M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "DeterminantF", dFESpace, jacobianVector, UInt (0) );
     M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "tr(C)", dFESpace, traceVector, UInt (0) );
@@ -367,6 +403,8 @@ Structure::run3d()
     M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "Reference", dFESpace, jacobianReference, UInt (0) );
     M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::ScalarField, "ScalarJacobian", dScalarFESpace, scalarJacobian, UInt (0) );
     M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "displacementField", dFESpace, solidDisp, UInt (0) );
+    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "Fi3", dFESpace, savedDisplacementTrace, UInt (0) );
+    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "Fi3", dFESpace, savedDisplacementJac, UInt (0) );
 
     M_exporter->postProcess ( 0.0 );
 
@@ -418,7 +456,7 @@ Structure::run3d()
 
     // //Compute the gradient along Z of the displacement field
     // *grDisplZ = dFESpace->gradientRecovery (*solidDisp, 2);
- 
+
     //Set the current solution as the displacement vector to use
     solid.jacobianDistribution ( solidDisp, *jacobianReference);
 
@@ -542,7 +580,7 @@ Structure::run3d()
 
     *F_i2Vector = *F_i2Vector / *patchAreaVector;
 
-    // F_i1
+    // F_i3
     evaluateNode( elements ( dETFESpace->mesh() ),
                   fakeQuadratureRule,
                   dETFESpace,
@@ -550,6 +588,18 @@ Structure::run3d()
                   ) >> F_i3Vector;
 
     *F_i3Vector = *F_i3Vector / *patchAreaVector;
+
+    // Setting up the saving of the displacement
+    SelectionFunctor selectorTr( traceVector );
+    SelectionFunctor selectorJac( scalarJacobian );
+
+    AssemblyElementalStructure::saveVectorAccordingToFunctor( dFESpace, selectorTr,
+                                                              solidDisp, statusVector,
+                                                              savedDisplacementTrace, 0);
+
+    AssemblyElementalStructure::saveVectorAccordingToFunctor( dFESpace, selectorJac,
+                                                              solidDisp, statusVector,
+                                                              savedDisplacementJac, 0);
 
     //Extracting the tensions
     std::cout << "Norm of the scalarJ = det(F) : " << scalarJacobian->normInf() << std::endl;
