@@ -116,7 +116,7 @@ public:
         // The i has to be a Local ID!
         UInt index = M_selectionVector->blockMap().GID( i );
 
-        if( ( *M_selectionVector )( index ) > 0.99999 )
+        if( ( *M_selectionVector )( index ) > 0.999999 )
             return true;
         else
             return false;
@@ -434,6 +434,7 @@ Structure::run3d()
     M_importer->readVariable (solutionDispl);
     M_importer->closeFile();
 
+
     QuadratureRule fakeQuadratureRule;
 
     Real refElemArea (0); //area of reference element
@@ -596,7 +597,7 @@ Structure::run3d()
 
     // Setting up the saving of the displacement
     SelectionFunctor selectorTr( traceVector );
-    SelectionFunctor selectorJac( jacobianVector );
+    SelectionFunctor selectorJac( scalarJacobian );
 
     AssemblyElementalStructure::saveVectorAccordingToFunctor( dFESpace, selectorTr,
                                                               solidDisp, statusVectorTr,
