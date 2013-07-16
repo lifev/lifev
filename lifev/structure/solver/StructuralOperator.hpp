@@ -990,7 +990,7 @@ void StructuralOperator<Mesh>::updateSystem ( matrixPtr_Type& mat_stiff)
 template <typename Mesh>
 void StructuralOperator<Mesh>::updateSourceTerm ( source_Type const& source )
 {
-    vector_Type rhs (vector_Type (*M_localMap) );
+    vector_Type rhs ( *M_localMap );
 
     VectorElemental M_elvec (M_dispFESpace->fe().nbFEDof(), nDimensions);
     UInt nc = nDimensions;

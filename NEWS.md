@@ -1,3 +1,19 @@
+LifeV 3.6.2:
+============
+
+Merged the following branches:
+
+* 201211_ETA_OtherDimensions https://cmcsforge.epfl.ch/issues/75
+
+* 201303_MultiscaleDependenciesFix https://cmcsforge.epfl.ch/issues/79
+
+* 20121114_HDF5IO https://cmcsforge.epfl.ch/issues/16
+
+* 201209_CurrentBoundaryFE https://cmcsforge.epfl.ch/issues/15
+
+* 20130213_InstallScriptsUpdate https://cmcsforge.epfl.ch/issues/41
+
+
 LifeV 3.6.1:
 ============
 
