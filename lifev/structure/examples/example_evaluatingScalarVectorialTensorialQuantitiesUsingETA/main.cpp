@@ -108,6 +108,9 @@ public:
     : M_selectionVector ( selectionVector )
     {}
 
+    ~SelectionFunctor()
+    {}
+
     bool operator() ( const UInt i ) const
     {
         // The i has to be a Local ID!
@@ -388,9 +391,11 @@ Structure::run3d()
     // vectorPtr_Type grDisplZ ( new vector_Type (*dFESpace->mapPtr() ) );
     vectorPtr_Type savedDisplacementTrace ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
     vectorPtr_Type savedDisplacementJac ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
-    vectorPtr_Type statusVector ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
+    vectorPtr_Type statusVectorTr ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
+    vectorPtr_Type statusVectorJac ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
 
-    *statusVector *= 0.0;
+    *statusVectorTr *= 0.0;
+    *statusVectorJac *= 0.0;
 
     M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "DeterminantF", dFESpace, jacobianVector, UInt (0) );
     M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "tr(C)", dFESpace, traceVector, UInt (0) );
@@ -403,8 +408,8 @@ Structure::run3d()
     M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "Reference", dFESpace, jacobianReference, UInt (0) );
     M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::ScalarField, "ScalarJacobian", dScalarFESpace, scalarJacobian, UInt (0) );
     M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "displacementField", dFESpace, solidDisp, UInt (0) );
-    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "Fi3", dFESpace, savedDisplacementTrace, UInt (0) );
-    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "Fi3", dFESpace, savedDisplacementJac, UInt (0) );
+    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "savedFromTrace", dFESpace, savedDisplacementTrace, UInt (0) );
+    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "savedFromJacobian", dFESpace, savedDisplacementJac, UInt (0) );
 
     M_exporter->postProcess ( 0.0 );
 
@@ -414,7 +419,7 @@ Structure::run3d()
 
     MPI_Barrier (MPI_COMM_WORLD);
 
-    //! 5. For each interval, the analysis is performed
+    // //! 5. For each interval, the analysis is performed
     LifeV::Real dt =  dataFile ( "solid/time_discretization/timestep", 0.0);
     std::string const nameField =  dataFile ( "importer/nameField", "displacement");
 
@@ -591,14 +596,16 @@ Structure::run3d()
 
     // Setting up the saving of the displacement
     SelectionFunctor selectorTr( traceVector );
-    SelectionFunctor selectorJac( scalarJacobian );
+    SelectionFunctor selectorJac( jacobianVector );
 
     AssemblyElementalStructure::saveVectorAccordingToFunctor( dFESpace, selectorTr,
-                                                              solidDisp, statusVector,
+                                                              solidDisp, statusVectorTr,
                                                               savedDisplacementTrace, 0);
 
+    // This method works with scalar expression assembled in a vectorial vector
+    // Like a vector for the pressure, assembled in a vector for the velocity
     AssemblyElementalStructure::saveVectorAccordingToFunctor( dFESpace, selectorJac,
-                                                              solidDisp, statusVector,
+                                                              solidDisp, statusVectorJac,
                                                               savedDisplacementJac, 0);
 
     //Extracting the tensions

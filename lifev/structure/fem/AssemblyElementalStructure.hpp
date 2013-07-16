@@ -125,7 +125,7 @@ void saveVectorAccordingToFunctor ( const boost::shared_ptr<FESpace<MeshType, Ma
                 // At the first time we insert the value and then we "close" the cell
                 for ( UInt iComp = 0; iComp < dispFESpace->fieldDim(); ++iComp )
                 {
-                    Int index = originVector->blockMap().GID( i + iComp * dispFESpace->dim() + offset );
+                    Int index = originVector->blockMap().GID( i + iComp * dispFESpace->dof().numTotalDof() + offset );
                     (*saveVector) ( index ) = (*originVector)( index );
 
                     (*statusVector) ( index ) = 1.0;
