@@ -93,8 +93,6 @@ SET(expression_HEADERS
 	expression/EvaluationVectorFromNonConstantScalar.hpp
 	expression/ExpressionVectorFromNonConstantMatrix.hpp
 	expression/EvaluationVectorFromNonConstantMatrix.hpp
-	expression/ExpressionSaveVectorAccordingToFunctor.hpp
-	expression/EvaluationSaveVectorAccordingToFunctor.hpp
 	expression/ExpressionPatchArea.hpp
 	expression/EvaluationPatchArea.hpp
 CACHE INTERNAL "")
