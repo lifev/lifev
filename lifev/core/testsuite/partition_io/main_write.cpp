@@ -57,8 +57,6 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/core/filter/GetPot.hpp>
 #include <lifev/core/mesh/MeshPartitioner.hpp>
 #include <lifev/core/mesh/MeshPartitionTool.hpp>
-#include <lifev/core/mesh/GraphCutterParMETIS.hpp>
-#include <lifev/core/mesh/MeshPartBuilder.hpp>
 #include <lifev/core/filter/PartitionIO.hpp>
 #include <lifev/core/mesh/RegionMesh3DStructured.hpp>
 
@@ -67,9 +65,7 @@ using namespace LifeV;
 #endif /* HAVE_MPI */
 #endif /* LIFEV_HAS_HDF5 */
 
-typedef MeshPartitionTool < RegionMesh<LinearTetra>,
-        GraphCutterParMETIS,
-        MeshPartBuilder > meshCutterParMETIS_Type;
+typedef MeshPartitionTool < RegionMesh<LinearTetra> > meshCutter_Type;
 
 int main (int argc, char** argv)
 {
@@ -113,7 +109,7 @@ int main (int argc, char** argv)
     meshParameters.set ("offline_mode", true, "");
     meshParameters.set ("hierarchical", hierarchical, "");
     meshParameters.set ("topology", topology, "");
-    meshCutterParMETIS_Type meshCutter (fullMeshPtr, comm, meshParameters);
+    meshCutter_Type meshCutter (fullMeshPtr, comm, meshParameters);
     if (! meshCutter.success() )
     {
         std::cout << "Mesh partition failed.";

@@ -57,6 +57,10 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/fem/DOF.hpp>
 #include <lifev/core/mesh/RegionMesh.hpp>
+#include <lifev/core/mesh/GraphCutterParMETIS.hpp>
+#include <lifev/core/mesh/GraphCutterZoltan.hpp>
+#include <lifev/core/mesh/MeshPartBuilder.hpp>
+
 //#include <lifev/core/mesh/GhostEntityData.hpp>
 
 namespace LifeV
@@ -73,9 +77,7 @@ namespace LifeV
   and the mesh part builder. The last two parameters are also class templates,
   parameterized on the mesh type.
 */
-template < typename MeshType,
-         template <typename> class GraphCutterType,
-         template <typename> class MeshPartBuilderType >
+template < typename MeshType>
 class MeshPartitionTool
 {
 public:
@@ -83,9 +85,9 @@ public:
     //@{
     typedef MeshType                             mesh_Type;
     typedef boost::shared_ptr <
-    std::vector<std::vector<Int> > >     graph_Type;
-    typedef GraphCutterType<MeshType>            graphCutter_Type;
-    typedef MeshPartBuilderType<MeshType>        meshPartBuilder_Type;
+    std::vector<std::vector<Int> > >             graph_Type;
+    typedef GraphCutterBase<mesh_Type>           graphCutter_Type;
+    typedef MeshPartBuilder<mesh_Type>           meshPartBuilder_Type;
     typedef boost::shared_ptr<mesh_Type>         meshPtr_Type;
     typedef std::vector<meshPtr_Type>            partMesh_Type;
     typedef boost::shared_ptr<partMesh_Type>     partMeshPtr_Type;
@@ -167,6 +169,7 @@ private:
     meshPtr_Type                               M_originalMesh;
     meshPtr_Type                               M_meshPart;
     partMeshPtr_Type                           M_allMeshParts;
+    std::string                                M_graphLib;
     boost::shared_ptr<graphCutter_Type>        M_graphCutter;
     boost::shared_ptr<meshPartBuilder_Type>    M_meshPartBuilder;
     bool                                       M_success;
@@ -181,12 +184,8 @@ private:
 // Constructors and destructor
 // =================================
 
-template < typename MeshType,
-         template <typename> class GraphCutterType,
-         template <typename> class MeshPartBuilderType >
-MeshPartitionTool < MeshType,
-                  GraphCutterType,
-                  MeshPartBuilderType >::MeshPartitionTool (
+template < typename MeshType>
+MeshPartitionTool < MeshType >::MeshPartitionTool (
                       const meshPtr_Type& mesh,
                       const boost::shared_ptr<Epetra_Comm>& comm,
                       const Teuchos::ParameterList parameters) :
@@ -196,11 +195,19 @@ MeshPartitionTool < MeshType,
                       M_originalMesh (mesh),
                       M_meshPart(),
                       M_allMeshParts(),
-                      M_graphCutter (new graphCutter_Type (M_originalMesh, M_comm, M_parameters) ),
+                      M_graphLib(M_parameters.get<std::string>("graph-lib", "parmetis")),
                       M_meshPartBuilder (new meshPartBuilder_Type (M_originalMesh,
                                                                    M_parameters.get<UInt> ("overlap", 0), M_comm) ),
                       M_success (false)
 {
+    if (! M_graphLib.compare("parmetis")) {
+        M_graphCutter.reset(new GraphCutterParMETIS<mesh_Type>(M_originalMesh, M_comm, M_parameters));
+    } else if (! M_graphLib.compare("zoltan")) {
+        M_graphCutter.reset(new GraphCutterZoltan<mesh_Type>(M_originalMesh, M_comm, M_parameters));
+    } else {
+        std::cout << "Graph partitioner type not defined.\n";
+    }
+
     run();
 }
 
@@ -208,12 +215,8 @@ MeshPartitionTool < MeshType,
 // Public methods
 // =================================
 
-template < typename MeshType,
-         template <typename> class GraphCutterType,
-         template <typename> class MeshPartBuilderType >
-void MeshPartitionTool < MeshType,
-     GraphCutterType,
-     MeshPartBuilderType >::run()
+template < typename MeshType>
+void MeshPartitionTool < MeshType >::run()
 {
     if (!M_myPID)
     {
@@ -297,15 +300,11 @@ void MeshPartitionTool < MeshType,
     M_originalMesh.reset();
 }
 
-template < typename MeshType,
-template <typename> class GraphCutterType,
-template <typename> class MeshPartBuilderType >
+template < typename MeshType>
 void
-MeshPartitionTool < MeshType,
-                  GraphCutterType,
-                  MeshPartBuilderType >::showMe (std::ostream& output) const
+MeshPartitionTool < MeshType >::showMe (std::ostream& output) const
 {
-    std::cout << "Sorry, this method is not implemented, yet." << std::endl
+    output << "Sorry, this method is not implemented, yet." << std::endl
     << "We appreciate your interest." << std::endl
     << "Check back in a bit!" << std::endl;
 }
