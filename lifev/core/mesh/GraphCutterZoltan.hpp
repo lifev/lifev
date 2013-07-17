@@ -140,12 +140,10 @@ public:
     {
         boost::shared_ptr<std::vector<std::vector<Int> > >
         graph (new std::vector<std::vector<Int> > (numParts() ) );
-
         for (UInt i = 0; i < numParts(); ++i)
         {
             (*graph) [i] = getPart (i);
         }
-
         return graph;
     }
 
@@ -676,6 +674,17 @@ void GraphCutterZoltan<MeshType>::buildPartitionTable()
             it != M_partitionTable.end(); ++it)
     {
         std::sort (it->second.begin(), it->second.end() );
+    }
+
+    // Distribute the graph parts to all the processes
+    M_comm->Barrier();
+    if (numProcessors() > 1) {
+        for (UInt i = 0; i < numProcessors(); ++i) {
+            int currentSize = M_partitionTable[i].size();
+            M_comm->Broadcast(&currentSize, 1, i);
+            M_partitionTable[i].resize(currentSize);
+            M_comm->Broadcast(&(M_partitionTable[i][0]), currentSize, i);
+        }
     }
 }
 
