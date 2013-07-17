@@ -91,6 +91,9 @@ Real fRhs ( const Real& /* t */, const Real& /* x */, const Real& /* y */, const
 
 
 typedef RegionMesh<LinearTriangle> mesh_Type;
+typedef boost::shared_ptr<mesh_Type> meshPtr_Type;
+
+typedef boost::shared_ptr<Epetra_Comm> commPtr_Type;
 
 typedef MatrixEpetraStructured<Real> matrix_Type;
 typedef boost::shared_ptr<matrix_Type> matrixPtr_Type;
@@ -117,9 +120,9 @@ int main ( int argc, char** argv )
     // before calling MPI_Finalize()
     {
 #ifdef HAVE_MPI
-        boost::shared_ptr<Epetra_Comm> comm ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
+        commPtr_Type comm ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
 #else
-        boost::shared_ptr<Epetra_Comm> comm ( new Epetra_SerialComm );
+        commPtr_Type comm ( new Epetra_SerialComm );
 #endif
         LifeChronoManager<> chronoMgr( comm );
 
@@ -152,7 +155,7 @@ int main ( int argc, char** argv )
         {
             std::cout << " -- Reading the mesh ... " << std::flush;
         }
-        boost::shared_ptr< mesh_Type > fullMeshPtr (new mesh_Type() );
+        meshPtr_Type fullMeshPtr (new mesh_Type() );
         if ( dataFile ( "mesh/mesh_type", "structured" ) == "structured" )
         {
             regularMesh2D ( *fullMeshPtr, 0,
@@ -185,7 +188,7 @@ int main ( int argc, char** argv )
         LifeChrono partTime;
         chronoMgr.add( "Partition Time", &partTime );
         partTime.start();
-        boost::shared_ptr< mesh_Type > localMesh;
+        meshPtr_Type localMesh;
         {
             MeshPartitioner< mesh_Type >   meshPart;
             meshPart.doPartition ( fullMeshPtr, comm );
@@ -208,7 +211,7 @@ int main ( int argc, char** argv )
         LifeChrono partTimeR;
         chronoMgr.add( "Partition Time (R)", &partTimeR );
         partTimeR.start();
-        boost::shared_ptr< mesh_Type > localMeshR;
+        meshPtr_Type localMeshR;
         {
             MeshPartitioner< mesh_Type >   meshPartR;
             meshPartR.setPartitionOverlap ( 1 );
@@ -286,10 +289,15 @@ int main ( int argc, char** argv )
             std::cout << " -- Defining and filling the matrix ... " << std::flush;
         }
 
+        LifeChrono matTime;
+        chronoMgr.add( "Matrix creation Time", &matTime );
+        matTime.start();
+        matrixPtr_Type systemMatrix ( new matrix_Type ( uSpace->map() | pSpace->map() ) );
+        matTime.stop();
+
         LifeChrono assemblyTime;
         chronoMgr.add( "Assembly Time", &assemblyTime );
         assemblyTime.start();
-        matrixPtr_Type systemMatrix ( new matrix_Type ( uSpace->map() | pSpace->map() ) );
         {
             using namespace ExpressionAssembly;
 
@@ -326,10 +334,15 @@ int main ( int argc, char** argv )
         systemMatrix->globalAssemble();
         assemblyTime.stop();
 
+        LifeChrono matTimeR;
+        chronoMgr.add( "Matrix creation Time (R)", &matTimeR );
+        matTimeR.start();
+        matrixPtr_Type systemMatrixR ( new matrix_Type ( uSpaceR->map() | pSpaceR->map(), 50, true ) );
+        matTimeR.stop();
+
         LifeChrono assemblyTimeR;
         chronoMgr.add( "Assembly Time (R)", &assemblyTimeR );
         assemblyTimeR.start();
-        matrixPtr_Type systemMatrixR ( new matrix_Type ( uSpaceR->map() | pSpaceR->map(), 50, true ) );
         {
             using namespace ExpressionAssembly;
 
@@ -372,15 +385,15 @@ int main ( int argc, char** argv )
         }
 
         // check that the assembled matrices are the same
-/*
-        LifeChrono checkTime;
-        chronoMgr.add( "Check Time", &checkTime );
-        checkTime.start();
+
+        LifeChrono checkMatTime;
+        chronoMgr.add( "Check (Matrix) Time", &checkMatTime );
+        checkMatTime.start();
         matrix_Type matrixDiff ( *systemMatrix );
         matrixDiff -= *systemMatrixR;
 
         Real diff = matrixDiff.normInf();
-        checkTime.stop();
+        checkMatTime.stop();
 
         if ( isLeader )
         {
@@ -434,11 +447,14 @@ int main ( int argc, char** argv )
         rhsR.globalAssemble();
         rhsTimeR.stop();
 
-        checkTime.start();
+        LifeChrono checkVecTime;
+        chronoMgr.add( "Check (Vector) Time", &checkVecTime );
+        checkVecTime.start();
         vector_Type vectorDiff ( rhs );
         vectorDiff -= rhsR;
 
         Real diffNormV = vectorDiff.normInf();
+        checkVecTime.stop();
 
         if ( isLeader )
         {
@@ -459,8 +475,7 @@ int main ( int argc, char** argv )
         {
             returnValue = EXIT_FAILURE;
         }
-        checkTime.stop();
-*/
+
         // print out times
         chronoMgr.print();
     }
