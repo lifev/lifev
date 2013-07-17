@@ -77,6 +77,7 @@ each time step and with the BDF method!!
 #include <lifev/structure/solver/VenantKirchhoffMaterialNonLinear.hpp>
 #include <lifev/structure/solver/NeoHookeanMaterialNonLinear.hpp>
 #include <lifev/structure/solver/ExponentialMaterialNonLinear.hpp>
+#include <lifev/structure/solver/SecondOrderExponentialMaterialNonLinear.hpp>
 #include <lifev/structure/solver/VenantKirchhoffMaterialNonLinearPenalized.hpp>
 
 #include <lifev/core/filter/Exporter.hpp>
@@ -245,20 +246,19 @@ struct Structure::Private
 
     static Real smoothPressure(const Real& t, const Real&  x, const Real& y, const Real& /*Z*/, const ID& i)
     {
-        Real radius = 0.1;
-        Real pressure( 14663 );
+        Real radius = std::sqrt( x*x + y*y );
+	Real pressure( 0 );
+        Real highestPressure( 199950 );
+        Real totalTime = 4.55;
+        Real halfTime = totalTime / 2.0;
 
-        //Real highestPressure(146630);
-        // Real totalTime = 3.0;
-        // Real halfTime = totalTime / 2.0;
+        Real a = ( highestPressure / 2 ) * ( 1/ ( halfTime * halfTime ) );
 
-        // Real a = ( highestPressure / 2 ) * ( 1/ ((totalTime/2)*(totalTime/2)) );
+        if ( t <= halfTime )
+            pressure = a * t*t;
 
-        // if ( t <= halfTime )
-        //     pressure = a * t*t;
-
-        // if ( t > halfTime )
-        //     pressure = - a * (t - totalTime)*(t - totalTime) + highestPressure;
+        if ( t > halfTime )
+            pressure = - a * (t - totalTime)*(t - totalTime) + highestPressure;
 
         switch (i)
         {
@@ -441,18 +441,11 @@ Structure::run3d()
     //! BC for StructuredCube4_test_structuralsolver.mesh
     //! =================================================================================
     //Condition for Inflation
+
     BCh->addBC ("EdgesIn",      200, Natural,   Full, pressure, 3);
-    BCh->addBC ("EdgesIn",      210,  Natural,   Full, zero, 3);
-    BCh->addBC ("EdgesIn",      20,  EssentialVertices, Full, zero, 3);
-    BCh->addBC ("EdgesIn",      30,  EssentialVertices, Full, zero, 3);
-    BCh->addBC ("EdgesIn",      2,  Essential, Full, zero, 3);
-    BCh->addBC ("EdgesIn",      3,  Essential, Full, zero, 3);
-
-
-    // BCh->addBC ("EdgesIn",      200, Natural,   Full, pressure, 3);
-    // BCh->addBC ("EdgesIn",      40,  Natural,   Full, zero, 3);
-    // BCh->addBC ("EdgesIn",      70,  Essential, Full, zero, 3);
-    // BCh->addBC ("EdgesIn",      60,  Essential, Full, zero, 3);
+    BCh->addBC ("EdgesIn",      40,  Natural,   Full, zero, 3);
+    BCh->addBC ("EdgesIn",      70,  Essential, Full, zero, 3);
+    BCh->addBC ("EdgesIn",      60,  Essential, Full, zero, 3);
 
     //! 1. Constructor of the structuralSolver
     StructuralOperator< RegionMesh<LinearTetra> > solid;
