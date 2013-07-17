@@ -61,6 +61,8 @@
 
 #include <lifev/core/solver/ADRAssembler.hpp>
 
+#include <lifev/core/util/LifeChronoManager.hpp>
+
 #ifdef HAVE_HDF5
 #include <lifev/core/filter/ExporterHDF5.hpp>
 #endif
@@ -82,28 +84,37 @@ Real fRhs ( const Real& /* t */, const Real& x, const Real& /* y */, const Real&
 
 
 typedef RegionMesh<LinearTriangle> mesh_Type;
+typedef boost::shared_ptr<Epetra_Comm> commPtr_Type;
+typedef boost::shared_ptr<mesh_Type> meshPtr_Type;
 typedef MatrixEpetra<Real> matrix_Type;
+typedef boost::shared_ptr<matrix_Type> matrixPtr_Type;
 typedef VectorEpetra vector_Type;
 typedef FESpace<mesh_Type, MapEpetra> feSpace_Type;
 typedef boost::shared_ptr<feSpace_Type> feSpacePtr_Type;
 
-int
-main ( int argc, char** argv )
+int main ( int argc, char** argv )
 {
 
 #ifdef HAVE_MPI
     MPI_Init (&argc, &argv);
 #endif
 
+    int returnValue = 0;
+
     // introducing a local scope in order to properly destroy all objects
     // before calling MPI_Finalize()
     {
 
 #ifdef HAVE_MPI
-        boost::shared_ptr<Epetra_Comm> comm ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
+        commPtr_Type comm ( new Epetra_MpiComm ( MPI_COMM_WORLD ) );
 #else
-        boost::shared_ptr<Epetra_Comm> comm ( new Epetra_SerialComm );
+        commPtr_Type comm ( new Epetra_SerialComm );
 #endif
+        LifeChronoManager<> chronoMgr( comm );
+
+        LifeChrono initTime;
+        chronoMgr.add( "Initialization Time", &initTime );
+        initTime.start();
 
         GetPot dataFile ( "data_2d" );
         const bool isLeader ( comm->MyPID() == 0 );
@@ -118,13 +129,19 @@ main ( int argc, char** argv )
         std::ofstream debugOut ( "/dev/null" );
 #endif
 
+        initTime.stop();
+
         // Build and partition the mesh
+
+        LifeChrono meshTime;
+        chronoMgr.add( "Mesh reading/creation Time", &initTime );
+        meshTime.start();
 
         if ( verbose )
         {
             std::cout << " -- Reading the mesh ... " << std::flush;
         }
-        boost::shared_ptr< mesh_Type > fullMeshPtr (new mesh_Type() );
+        meshPtr_Type fullMeshPtr (new mesh_Type() );
         if ( dataFile ( "mesh/mesh_type", "structured" ) == "structured" )
         {
             regularMesh2D ( *fullMeshPtr, 0,
@@ -147,35 +164,44 @@ main ( int argc, char** argv )
                       << "mesh points   = " << fullMeshPtr->numPoints() << std::endl;
         }
 
+        meshTime.stop();
+
         if ( verbose )
         {
             std::cout << " -- Partitioning the mesh ... " << std::flush;
         }
 
         LifeChrono partTime;
+        chronoMgr.add( "Partition Time", &partTime );
         partTime.start();
-        boost::shared_ptr< mesh_Type > localMesh;
+        meshPtr_Type localMesh;
         {
             MeshPartitioner< mesh_Type >   meshPart;
             meshPart.doPartition ( fullMeshPtr, comm );
             localMesh = meshPart.meshPartition();
         }
         partTime.stop();
-        if ( isLeader )
-        {
-            std::cout << "partitioning time  = " << partTime.diff() << std::endl;
-        }
-        if ( isLeader )
-        {
-            std::cout << "part mesh elements = " << localMesh->numElements() << "\n"
-                      << "part mesh points   = " << localMesh->numPoints() << std::endl;
-        }
+        //if ( isLeader )
+        //{
+        //    std::cout << "partitioning time  = " << partTime.diff() << std::endl;
+        //}
 
-        // localMesh->mesh_Type::showMe( true, debugOut );
+        Int localMeshNum[ 2 ];
+        localMeshNum[ 0 ] = localMesh->numElements();
+        localMeshNum[ 1 ] = localMesh->numPoints();
+        Int maxMeshNum[ 2 ] = { 0, 0 };
+        comm->MaxAll( localMeshNum, maxMeshNum, 2 );
+
+        if ( isLeader )
+        {
+            std::cout << "part mesh elements = " << maxMeshNum[ 0 ] << "\n"
+                      << "part mesh points   = " << maxMeshNum[ 1 ] << std::endl;
+        }
 
         LifeChrono partTimeR;
+        chronoMgr.add( "Partition Time (R)", &partTimeR );
         partTimeR.start();
-        boost::shared_ptr< mesh_Type > localMeshR;
+        meshPtr_Type localMeshR;
         {
             MeshPartitioner< mesh_Type >   meshPartR;
             meshPartR.setPartitionOverlap ( 1 );
@@ -183,13 +209,23 @@ main ( int argc, char** argv )
             localMeshR = meshPartR.meshPartition();
         }
         partTimeR.stop();
+        //if ( isLeader )
+        //{
+        //    std::cout << "partitioningR time = " << partTimeR.diff() << std::endl;
+        //}
+
+        localMeshNum[ 0 ] = localMeshR->numElements();
+        localMeshNum[ 1 ] = localMeshR->numPoints();
+        maxMeshNum[ 0 ] = 0;
+        maxMeshNum[ 1 ] = 0;
+        comm->MaxAll( localMeshNum, maxMeshNum, 2 );
+
         if ( isLeader )
         {
-            std::cout << "partitioningR time = " << partTimeR.diff() << std::endl;
+            std::cout << "part mesh elements (R) = " << maxMeshNum[ 0 ] << "\n"
+                      << "part mesh points   (R) = " << maxMeshNum[ 1 ] << std::endl;
         }
 
-        // debugOut << "============================" << std::endl;
-        // localMeshR->mesh_Type::showMe( true, debugOut );
         if ( verbose )
         {
             std::cout << " done ! " << std::endl;
@@ -200,6 +236,9 @@ main ( int argc, char** argv )
             std::cout << " -- Freeing the global mesh ... " << std::flush;
         }
         fullMeshPtr.reset();
+#ifdef HAVE_LIFEV_DEBUG
+        ASSERT( fullMeshPtr.use_count() == 0, "full mesh not properly freed." );
+#endif
         if ( verbose )
         {
             std::cout << " done ! " << std::endl;
@@ -212,8 +251,18 @@ main ( int argc, char** argv )
             std::cout << " -- Building FESpaces ... " << std::flush;
         }
         std::string uOrder ( dataFile ( "fe/type", "P1" ) );
+        LifeChrono feSpaceTime;
+        chronoMgr.add( "FESpace creation Time", &feSpaceTime );
+        feSpaceTime.start();
         feSpacePtr_Type uFESpace ( new feSpace_Type ( localMesh, uOrder, 1, comm ) );
+        feSpaceTime.stop();
+
+        LifeChrono feSpaceTimeR;
+        chronoMgr.add( "FESpace creation Time (R)", &feSpaceTimeR );
+        feSpaceTimeR.start();
         feSpacePtr_Type uFESpaceR ( new feSpace_Type ( localMeshR, uOrder, 1, comm ) );
+        feSpaceTimeR.stop();
+
         if ( verbose )
         {
             std::cout << " done ! " << std::endl;
@@ -229,30 +278,23 @@ main ( int argc, char** argv )
         {
             std::cout << " -- Building assembler ... " << std::flush;
         }
+
+        LifeChrono matTime;
+        chronoMgr.add( "Matrix initialization Time", &matTime );
+        matTime.start();
         ADRAssembler<mesh_Type, matrix_Type, vector_Type> adrAssembler;
-        ADRAssembler<mesh_Type, matrix_Type, vector_Type> adrAssemblerR;
-        if ( verbose )
-        {
-            std::cout << " done! " << std::endl;
-        }
-
-        if ( verbose )
-        {
-            std::cout << " -- Setting up assembler ... " << std::flush;
-        }
         adrAssembler.setFespace ( uFESpace );
-        adrAssemblerR.setFespace ( uFESpaceR );
-        if ( verbose )
-        {
-            std::cout << " done! " << std::endl;
-        }
+        matrixPtr_Type systemMatrix ( new matrix_Type ( uFESpace->map() ) );
+        matTime.stop();
 
-        if ( verbose )
-        {
-            std::cout << " -- Defining the matrix ... " << std::flush;
-        }
-        boost::shared_ptr<matrix_Type> systemMatrix ( new matrix_Type ( uFESpace->map() ) );
-        boost::shared_ptr<matrix_Type> systemMatrixR ( new matrix_Type ( uFESpaceR->map(), 50, true ) );
+        LifeChrono matTimeR;
+        chronoMgr.add( "Matrix initialization Time (R)", &matTimeR );
+        matTimeR.start();
+        ADRAssembler<mesh_Type, matrix_Type, vector_Type> adrAssemblerR;
+        adrAssemblerR.setFespace ( uFESpaceR );
+        matrixPtr_Type systemMatrixR ( new matrix_Type ( uFESpaceR->map(), 50, true ) );
+        matTimeR.stop();
+
         if ( verbose )
         {
             std::cout << " done! " << std::endl;
@@ -264,30 +306,25 @@ main ( int argc, char** argv )
         {
             std::cout << " -- Adding the diffusion ... " << std::flush;
         }
+
         if ( verbose )
         {
             std::cout << " done! " << std::endl;
         }
 
         LifeChrono assemblyTime;
+        chronoMgr.add( "Assembly Time", &assemblyTime );
         assemblyTime.start();
         adrAssembler.addDiffusion ( systemMatrix, epsilon );
-
-        if ( verbose )
-        {
-            std::cout << " -- Closing the matrix ... " << std::flush;
-        }
         systemMatrix->globalAssemble();
-        if ( verbose )
-        {
-            std::cout << " done ! " << std::endl;
-        }
         assemblyTime.stop();
         if ( isLeader )
         {
             std::cout << "assembly time  = " << assemblyTime.diff() << std::endl;
         }
+
         LifeChrono assemblyTimeR;
+        chronoMgr.add( "Assembly Time (R)", &assemblyTimeR );
         assemblyTimeR.start();
         adrAssemblerR.addDiffusion ( systemMatrixR, epsilon );
         systemMatrixR->fillComplete();
@@ -297,14 +334,14 @@ main ( int argc, char** argv )
             std::cout << "assemblyR time = " << assemblyTimeR.diff() << std::endl;
         }
 
-        if ( verbose )
-        {
-            std::cout << " Time needed : " << adrAssembler.diffusionAssemblyChrono().diffCumul() << std::endl;
-        }
-        if ( verbose )
-        {
-            std::cout << " Time needed : " << adrAssemblerR.diffusionAssemblyChrono().diffCumul() << std::endl;
-        }
+        //if ( verbose )
+        //{
+        //    std::cout << " Time needed : " << adrAssembler.diffusionAssemblyChrono().diffCumul() << std::endl;
+        //}
+        //if ( verbose )
+        //{
+        //    std::cout << " Time needed : " << adrAssemblerR.diffusionAssemblyChrono().diffCumul() << std::endl;
+        //}
 
         // SPY
         //systemMatrix->spy("matrixNoBC");
@@ -312,10 +349,14 @@ main ( int argc, char** argv )
 
         // check that the assembled matrices are the same
 
+        LifeChrono checkMatTime;
+        chronoMgr.add( "Check (Matrix) Time", &checkMatTime );
+        checkMatTime.start();
         matrix_Type matrixDiff ( *systemMatrix );
         matrixDiff -= *systemMatrixR;
 
         Real diff = matrixDiff.normInf();
+        checkMatTime.stop();
 
         if ( isLeader )
         {
@@ -327,19 +368,30 @@ main ( int argc, char** argv )
             std::cout << " -- Building the RHS ... " << std::flush;
         }
 
+        LifeChrono rhsTime;
+        chronoMgr.add( "Rhs build Time", &rhsTime );
+        rhsTime.start();
         vector_Type rhs ( uFESpace->map(), Unique );
-        vector_Type rhsR ( uFESpaceR->map(), Unique, Zero );
-
         adrAssembler.addMassRhs ( rhs, fRhs, 0. );
         rhs.globalAssemble();
+        rhsTime.stop();
 
+        LifeChrono rhsTimeR;
+        chronoMgr.add( "Rhs build Time (R)", &rhsTimeR );
+        rhsTimeR.start();
+        vector_Type rhsR ( uFESpaceR->map(), Unique, Zero );
         adrAssemblerR.addMassRhs ( rhsR, fRhs, 0. );
         rhsR.globalAssemble ();
+        rhsTimeR.stop();
 
+        LifeChrono checkVecTime;
+        chronoMgr.add( "Check (Vector) Time", &checkVecTime );
+        checkVecTime.start();
         vector_Type vectorDiff ( rhs );
         vectorDiff -= rhsR;
 
         Real diffNormV = vectorDiff.normInf();
+        checkVecTime.stop();
 
         if ( isLeader )
         {
@@ -349,11 +401,12 @@ main ( int argc, char** argv )
         diff += diffNormV;
 
         vector_Type rhs2 ( uFESpace->map(), Unique );
-        vector_Type rhs2R ( uFESpaceR->map(), Unique );
         vector_Type f ( uFESpace->map(), Repeated );
         uFESpace->interpolate ( static_cast<feSpace_Type::function_Type> ( fRhs ), f, 0.0 );
         adrAssembler.addMassRhs ( rhs2, f );
         rhs2.globalAssemble();
+
+        vector_Type rhs2R ( uFESpaceR->map(), Unique );
         vector_Type fR ( uFESpaceR->map(), Repeated );
         uFESpaceR->interpolate ( static_cast<feSpace_Type::function_Type> ( fRhs ), fR, 0.0 );
         adrAssemblerR.addMassRhs ( rhs2R, fR );
@@ -393,6 +446,7 @@ main ( int argc, char** argv )
 
         if ( diff < 1.e-14 )
         {
+            returnValue = EXIT_SUCCESS;
             if ( isLeader )
             {
                 std::cout << "End Result: TEST PASSED" << std::endl;
@@ -400,13 +454,16 @@ main ( int argc, char** argv )
         }
         else
         {
-            return EXIT_FAILURE;
+            returnValue = EXIT_FAILURE;
         }
+
+        // print out times
+        chronoMgr.print();
     }
 
 #ifdef HAVE_MPI
     MPI_Finalize();
 #endif
 
-    return EXIT_SUCCESS;
+    return returnValue;
 }
