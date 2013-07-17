@@ -100,21 +100,32 @@ void ResistanceBCs::renewParameters ( OseenSolverShapeDerivative<RegionMesh<Line
     ResistanceBCs::outputVector[conditionNumber] = M_outP;
 }
 
-Real ResistanceBCs::computeResistance (const Real time )
+Real ResistanceBCs::computeResistance (const Real t )
 {
     Real resistance(0);
 
-    Real highestResistance( 422561 );
-    Real totalTime = 0.8;
-    Real halfTime = totalTime / 2.0;
+    Real highestResistance( 501950 );
+    Real totalTime = 1.012;
+    Real halfTime = totalTime / 3.0;
 
-    Real a = ( highestResistance / 2 ) * ( 1/ ( halfTime * halfTime ) );
+    Real m = ( 0.8 * highestResistance ) / ( totalTime - halfTime );
 
-    // linear function
-    if ( time <= totalTime )
-        resistance = ( highestResistance / totalTime ) * time;
-    else
-        resistance = highestResistance;
+    if ( t <= halfTime )
+      resistance =   ( ( highestResistance / 5 ) / ( halfTime ) ) * t ;
+
+    if ( t > halfTime && t <= totalTime)
+      resistance = m * (t - halfTime ) + highestResistance / 5 ;
+
+    if ( t > totalTime )
+      resistance = highestResistance;
+
+    // Real a = ( highestResistance / 2 ) * ( 1/ ( halfTime * halfTime ) );
+
+    // if ( t <= halfTime )
+    //     resistance = a * t*t;
+
+    // if ( t > halfTime )
+    //     resistance = - a * (t - totalTime)*(t - totalTime) + highestResistance;
 
 
     return resistance;

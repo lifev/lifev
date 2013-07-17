@@ -166,9 +166,7 @@ FSIOperator::solidBchandlerPtr_Type BCh_monolithicSolid (FSIOperator& _oper)
 
     //Inlets & Outlets
     BCh_solid->addBC ("BORDERS",   INLETWALL, Essential, Full, bcf,  3);
-    //BCh_solid->addBC ("BORDERS-RIN",   INLETWALL_INTRING, EssentialVertices, Full, bcf,  3);
     BCh_solid->addBC ("BORDERS",   OUTLETWALL, Essential, Full, bcf,  3);
-    //BCh_solid->addBC ("BORDERS-rin",   OUTLETWALL_INTRING, EssentialVertices, Full, bcf,  3);
 
     //Robin BC
     BCFunctionBase hyd (fZero);

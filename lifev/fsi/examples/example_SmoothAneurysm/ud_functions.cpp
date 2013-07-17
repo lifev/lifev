@@ -714,16 +714,20 @@ Real fluxFunctionAneurysm (const Real& t, const Real& /*x*/, const Real& /*y*/, 
 {
 
     Real fluxFinal;
-    Real rampAmpl (0.8);
+    Real rampAmpl (1.012);
+    Real activeRamp ( rampAmpl / 3.0 );
     Real dt (0.001);
 
-    if ( t <= rampAmpl )
-    {
-        fluxFinal = ( 0.09503 / rampAmpl) * t; // 0.033 cm
-        //        fluxFinal = ( 0.381 / rampAmpl) * t; // 0.066 cm
-    }
+    if ( t <= activeRamp )
+      {
+        fluxFinal = ( 0.1747 / activeRamp ) * t; // 0.033 cm
+      }
+    if ( t > activeRamp  && t <= rampAmpl )
+      {
+    	fluxFinal = ( 0.1747 );
+      }
     else
-    {
+      {
 
 
         // We change the flux for our geometry
@@ -750,8 +754,7 @@ Real fluxFunctionAneurysm (const Real& t, const Real& /*x*/, const Real& /*y*/, 
         const Real b[M] = { 0.129013, -0.031435, -0.086106, 0.028263, 0.010177, 0.012160, -0.026303};
 
         Real flux (0);
-        //      const Real xi(2*pi*t/T);
-        const Real xi (2 * pi * (t - rampAmpl + dt) / T);
+        const Real xi (2 * pi * (t - 0.8 + dt) / T);
 
         flux = a0;
         Int k (1);
@@ -761,7 +764,7 @@ Real fluxFunctionAneurysm (const Real& t, const Real& /*x*/, const Real& /*y*/, 
         }
 
         fluxFinal =  (flux * areaFactor * unitFactor);
-    }
+      }
 
     return fluxFinal;
 
@@ -792,15 +795,15 @@ Real aneurismFluxInVectorial (const Real&  t, const Real& x, const Real& y, cons
     case 0:
         // Flat profile: flux / area;
         // return n1 * flux / area;
-        return n1 * std::max(0.0,( peak * ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) )) ;
+        return n1 * ( peak * ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) ) ;
     case 1:
         // Flat profile: flux / area;
         //return n2 * flux / area;
-        return n2 * std::max(0.0,( peak * ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) )) ;
+        return n2 * ( peak * ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) ) ;
     case 2:
         // Flat profile: flux / area;
         //return n3 * flux / area;
-        return n3 * std::max(0.0,( peak * ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) )) ;
+        return n3 * ( peak * ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) ) ;
     default:
         return 0.0;
     }
