@@ -116,7 +116,7 @@ public:
         // The i has to be a Local ID!
         UInt index = M_selectionVector->blockMap().GID( i );
 
-        if( ( *M_selectionVector )( index ) > 0.999999 )
+        if( ( *M_selectionVector )( index ) > 1.06 )
             return true;
         else
             return false;
