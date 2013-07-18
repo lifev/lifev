@@ -37,6 +37,7 @@ ly = 1.
 [../]
 
 [exporter]
+enable     = true
 type       = hdf5 # hdf5 (if library compiled with hdf5 support) or ensight
 multimesh  = false
 start      = 0

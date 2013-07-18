@@ -118,7 +118,7 @@ int main ( int argc, char** argv )
 
         GetPot dataFile ( "data_2d" );
         const bool isLeader ( comm->MyPID() == 0 );
-        const bool verbose ( dataFile ( "miscellaneous/verbose", 0 ) && isLeader );
+        const bool verbose = dataFile ( "miscellaneous/verbose", 0 ) && isLeader;
 
 #ifdef HAVE_LIFEV_DEBUG
         std::ofstream debugOut (
@@ -250,7 +250,7 @@ int main ( int argc, char** argv )
         {
             std::cout << " -- Building FESpaces ... " << std::flush;
         }
-        std::string uOrder ( dataFile ( "fe/type", "P1" ) );
+        std::string uOrder = dataFile ( "fe/type", "P1" );
         LifeChrono feSpaceTime;
         chronoMgr.add( "FESpace creation Time", &feSpaceTime );
         feSpaceTime.start();
@@ -438,9 +438,12 @@ int main ( int argc, char** argv )
 
         // test exporting of a repeated mesh
 #ifdef HAVE_HDF5
-        ExporterHDF5<mesh_Type> exporter ( dataFile, localMeshR, "pid_2d", comm->MyPID() );
-        exporter.exportPID ( localMeshR, comm, true );
-        exporter.postProcess ( 0. );
+        if( dataFile ( "exporter/enable", false ) )
+        {
+                ExporterHDF5<mesh_Type> exporter ( dataFile, localMeshR, "pid_2d", comm->MyPID() );
+                exporter.exportPID ( localMeshR, comm, true );
+                exporter.postProcess ( 0. );
+        }
 #endif
 
         vector_Type rhsCopy ( rhs, Repeated );
