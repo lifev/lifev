@@ -3,12 +3,9 @@ INCLUDE(TribitsCopyFilesToBinaryDir)
 
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
 
-TRIBITS_ADD_EXECUTABLE_AND_TEST(
-  usingETAtoPostProcess
+TRIBITS_ADD_EXECUTABLE(
   usingETAtoPostProcess
   SOURCES main.cpp
-  ARGS "-f data"
-  NUM_MPI_PROCS 2
   COMM serial mpi
   )
 
