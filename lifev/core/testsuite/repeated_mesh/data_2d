@@ -18,19 +18,20 @@ type = P1
 
 [miscellaneous]
 verbose = 0
+timesteps = 1
 [../]
 
 [mesh]
 mesh_dir   = ./  # the directory where the mesh file is
 mesh_file  = unstructured_square.msh      # mesh file
-mesh_type  = .msh
+mesh_type  = structured #.msh
 mesh_edges = 'all'
 verbose    = 0
 element_shape = 0    # 0 -> tetra, 1 -> hexa
 
 # structured mesh
-nx = 15
-ny = 15
+nx = 20
+ny = 20
 lx = 1.
 ly = 1.
 [../]

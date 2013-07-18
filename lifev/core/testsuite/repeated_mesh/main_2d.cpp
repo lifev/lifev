@@ -312,11 +312,18 @@ int main ( int argc, char** argv )
             std::cout << " done! " << std::endl;
         }
 
+        UInt timeSteps = dataFile ( "miscellaneous/timesteps", 1 );
+
         LifeChrono assemblyTime;
         chronoMgr.add( "Assembly Time", &assemblyTime );
         assemblyTime.start();
-        adrAssembler.addDiffusion ( systemMatrix, epsilon );
-        systemMatrix->globalAssemble();
+        for( UInt n = 0; n < timeSteps; n++ )
+        {
+            systemMatrix->zero();
+            adrAssembler.addDiffusion ( systemMatrix, epsilon );
+            adrAssembler.addMass ( systemMatrix, epsilon );
+            systemMatrix->globalAssemble();
+        }
         assemblyTime.stop();
         if ( isLeader )
         {
@@ -326,8 +333,13 @@ int main ( int argc, char** argv )
         LifeChrono assemblyTimeR;
         chronoMgr.add( "Assembly Time (R)", &assemblyTimeR );
         assemblyTimeR.start();
-        adrAssemblerR.addDiffusion ( systemMatrixR, epsilon );
-        systemMatrixR->fillComplete();
+        for( UInt n = 0; n < timeSteps; n++ )
+        {
+            systemMatrixR->zero();
+            adrAssemblerR.addDiffusion ( systemMatrixR, epsilon );
+            adrAssemblerR.addMass ( systemMatrixR, epsilon );
+            systemMatrixR->fillComplete();
+        }
         assemblyTimeR.stop();
         if ( isLeader )
         {
