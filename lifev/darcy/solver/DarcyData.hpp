@@ -39,14 +39,10 @@
 #ifndef _DATADARCY_HPP_
 #define _DATADARCY_HPP_ 1
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <Teuchos_XMLParameterListHelpers.hpp>
 #include <Teuchos_RCP.hpp>
 
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/mesh/MeshData.hpp>
 

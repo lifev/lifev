@@ -44,13 +44,9 @@
 #ifndef _MONOLITHIC_HPP
 #define _MONOLITHIC_HPP
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <EpetraExt_MatrixMatrix.h>
 //#include <EpetraExt_Reindex_MultiVector.h>
 //#include <EpetraExt_Reindex_CrsMatrix.h>
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/util/LifeChrono.hpp>
 #include <lifev/core/fem/FESpace.hpp>

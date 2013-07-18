@@ -36,17 +36,7 @@
 
 #include <lifev/core/operator/SolverOperator.hpp>
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wextra"
-
 #include <Teuchos_RCPBoostSharedPtrConversions.hpp>
-
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
-#pragma GCC diagnostic warning "-Wextra"
 
 namespace LifeV
 {

@@ -71,9 +71,6 @@
  * This test loads an FSI simulation (done using the FSIMonolithic) and it restarts it.
  */
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <cassert>
 #include <cstdlib>
@@ -88,9 +85,6 @@
 #include <Epetra_SerialComm.h>
 #endif
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 // LifeV includes
 #include <lifev/core/LifeV.hpp>

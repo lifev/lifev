@@ -35,11 +35,6 @@
 
 #include<lifev/core/operator/BelosOperator.hpp>
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wextra"
-#pragma GCC diagnostic ignored "-Wunused-but-set-variable"
-
 #include <BelosBlockCGSolMgr.hpp>
 #include <BelosBlockGmresSolMgr.hpp>
 #include <BelosGCRODRSolMgr.hpp>
@@ -53,12 +48,6 @@
 #include <BelosRCGSolMgr.hpp>
 #include <BelosTFQMRSolMgr.hpp>
 #include "Teuchos_RCPBoostSharedPtrConversions.hpp"
-
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
-#pragma GCC diagnostic warning "-Wextra"
-#pragma GCC diagnostic warning "-Wunused-but-set-variable"
 
 namespace LifeV
 {
