@@ -540,6 +540,41 @@ tensorialPart_distrType tensorialPartPiola( const Real kappa,
 //@}
 
 } // end namespace ExpressionDistributedModel
+
+namespace ExpressionMultimechanism
+{
+using namespace ExpressionAssembly;
+
+typedef ExpressionSubstraction<
+    ExpressionDefinitions::isochoricStretch_Type,
+    ExpressionScalar> difference_Type;
+
+typedef  ExpressionArcTan<difference_Type> activation_Type;
+
+typedef ExpressionVectorFromNonConstantScalar< activation_Type, 3>  expressionVectorFromActivation_Type;
+
+difference_Type absoluteStretch( const ExpressionDefinitions::isochoricStretch_Type IVbar,
+                                 const Real valueToSubtract)
+{
+    return difference_Type ( IVbar, value( valueToSubtract ) );
+
+}
+
+activation_Type activationConstructor( const ExpressionMultimechanism::difference_Type absoluteStretch,
+                                       const Real intCoeff,
+                                       const Real extCoeff,
+                                       const Real translation)
+{
+    return activation_Type( absoluteStretch, intCoeff, extCoeff, translation );
+}
+
+expressionVectorFromActivation_Type vectorFromActivation( const ExpressionMultimechanism::activation_Type activation)
+{
+    return expressionVectorFromActivation_Type( activation );
+}
+
+
+}// end namespace ExpressionDistributedModel
 #endif
 
 } //! End namespace LifeV
