@@ -247,9 +247,9 @@ struct Structure::Private
     static Real smoothPressure(const Real& t, const Real&  x, const Real& y, const Real& /*Z*/, const ID& i)
     {
         Real radius = std::sqrt( x*x + y*y );
-	Real pressure( 0 );
+        Real pressure( 0 );
         Real highestPressure( 199950 );
-        Real totalTime = 4.55;
+        Real totalTime = 4.5;
         Real halfTime = totalTime / 2.0;
 
         Real a = ( highestPressure / 2 ) * ( 1/ ( halfTime * halfTime ) );
@@ -259,6 +259,49 @@ struct Structure::Private
 
         if ( t > halfTime )
             pressure = - a * (t - totalTime)*(t - totalTime) + highestPressure;
+
+        switch (i)
+        {
+        case 0:
+            return  pressure *  ( x / radius ) ;
+            break;
+        case 1:
+            return  pressure *  ( y / radius ) ;
+            break;
+        case 2:
+            return 0.0;
+            break;
+
+        }
+        return 0;
+
+    }
+
+    static Real mergingPressures(const Real& t, const Real&  x, const Real& y, const Real& /*Z*/, const ID& i)
+    {
+        Real radius = std::sqrt( x*x + y*y );
+        Real pressure( 0 );
+
+        Real highestPressure( 199950 );
+
+        Real totalTime = 9.0;
+        Real halfTime = totalTime / 2.0;
+        Real quarterTime = halfTime / 2.0;
+
+        Real aA = ( highestPressure / 2 ) * ( 1/ ( quarterTime * quarterTime ) );
+        Real aD = ( 2 * highestPressure ) * ( 1/ ( halfTime * halfTime ) );
+
+        if ( t <= quarterTime )
+            pressure = aA * t*t;
+
+        if ( t > quarterTime && t <= halfTime )
+            pressure = - aA * (t - halfTime)*(t - halfTime) + highestPressure;
+
+        if ( t > halfTime && t <= 3 * quarterTime )
+            pressure = - aD * (t - halfTime)*(t - halfTime) + highestPressure;
+
+        if ( t > 3 * quarterTime && t <= 4 * quarterTime )
+            pressure = aD * (t - totalTime)*(t - totalTime);
 
         switch (i)
         {
