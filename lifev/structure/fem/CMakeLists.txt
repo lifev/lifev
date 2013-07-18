@@ -1,5 +1,6 @@
 SET(fem_HEADERS
   fem/AssemblyElementalStructure.hpp
+  fem/ExpressionDefinitions.hpp
 CACHE INTERNAL "")
 
 SET(fem_SOURCES

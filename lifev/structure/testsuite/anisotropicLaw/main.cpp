@@ -81,6 +81,7 @@
 
 #include <lifev/structure/solver/anisotropic/StructuralAnisotropicConstitutiveLaw.hpp>
 #include <lifev/structure/solver/anisotropic/HolzapfelMaterialNonLinear.hpp>
+#include <lifev/structure/solver/anisotropic/DistributedHolzapfelMaterialNonLinear.hpp>
 
 
 #include <lifev/core/filter/ExporterEnsight.hpp>

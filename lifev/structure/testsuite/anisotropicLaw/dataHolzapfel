@@ -43,6 +43,7 @@ solidTypeAnisotropic = holzapfel
 numberFamilies  = 2
 stiffness       = '2.684564e+6 2.684564e+6'
 nonlinearity    = '1.0 1.0'
+distribution    = '0.33 0.33'
 smoothness      = 1000
 [./]
 
