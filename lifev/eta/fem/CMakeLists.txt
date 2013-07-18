@@ -6,7 +6,8 @@ SET(fem_HEADERS
   fem/MeshGeometricMap.hpp
 CACHE INTERNAL "")
 
-SET(fem_SOURCES ""
+SET(fem_SOURCES
+  fem/ETCurrentFE.cpp
 CACHE INTERNAL "")
 
 

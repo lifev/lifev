@@ -75,7 +75,7 @@ public:
     typedef typename ExpressionToEvaluation < ExpressionType,
             0,
             0,
-            3 >::evaluation_Type evaluation_Type;
+            MeshType::S_geoDimensions >::evaluation_Type evaluation_Type;
 
     //@}
 
@@ -145,7 +145,7 @@ private:
     // Tree to compute the values for the assembly
     evaluation_Type M_evaluation;
 
-    ETCurrentFE<3, 1>* M_globalCFE;
+    ETCurrentFE<MeshType::S_geoDimensions, 1>* M_globalCFE;
 };
 
 
@@ -164,11 +164,29 @@ IntegrateValueElement (const boost::shared_ptr<MeshType>& mesh,
                        const ExpressionType& expression)
     :   M_mesh (mesh),
         M_quadrature (quadrature),
-        M_evaluation (expression),
-
-        M_globalCFE (new ETCurrentFE<3, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), quadrature) )
+        M_evaluation (expression)
 
 {
+    switch (MeshType::geoShape_Type::BasRefSha::S_shape)
+    {
+        case LINE:
+            M_globalCFE = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feSegP0, geometricMapFromMesh<MeshType>(), quadrature);
+            break;
+        case TRIANGLE:
+            M_globalCFE = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feTriaP0, geometricMapFromMesh<MeshType>(), quadrature);
+            break;
+        case QUAD:
+            M_globalCFE = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feQuadQ0, geometricMapFromMesh<MeshType>(), quadrature);
+            break;
+        case TETRA:
+            M_globalCFE = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), quadrature);
+            break;
+        case HEXA:
+            M_globalCFE = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feHexaQ0, geometricMapFromMesh<MeshType>(), quadrature);
+            break;
+        default:
+            ERROR_MSG ("Unrecognized element shape");
+    }
     M_evaluation.setQuadrature (quadrature);
     M_evaluation.setGlobalCFE (M_globalCFE);
 }
@@ -179,11 +197,29 @@ IntegrateValueElement < MeshType, ExpressionType>::
 IntegrateValueElement ( const IntegrateValueElement < MeshType, ExpressionType>& integrator)
     :   M_mesh (integrator.M_mesh),
         M_quadrature (integrator.M_quadrature),
-        M_evaluation (integrator.M_evaluation),
-
-        M_globalCFE (new ETCurrentFE<3, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), M_quadrature) )
+        M_evaluation (integrator.M_evaluation)
 
 {
+    switch (MeshType::geoShape_Type::BasRefSha::S_shape)
+    {
+        case LINE:
+            M_globalCFE = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feSegP0, geometricMapFromMesh<MeshType>(), M_quadrature);
+            break;
+        case TRIANGLE:
+            M_globalCFE = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feTriaP0, geometricMapFromMesh<MeshType>(), M_quadrature);
+            break;
+        case QUAD:
+            M_globalCFE = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feQuadQ0, geometricMapFromMesh<MeshType>(), M_quadrature);
+            break;
+        case TETRA:
+            M_globalCFE = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), M_quadrature);
+            break;
+        case HEXA:
+            M_globalCFE = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feHexaQ0, geometricMapFromMesh<MeshType>(), M_quadrature);
+            break;
+        default:
+            ERROR_MSG ("Unrecognized element shape");
+    }
     M_evaluation.setQuadrature (M_quadrature);
     M_evaluation.setGlobalCFE (M_globalCFE);
 }

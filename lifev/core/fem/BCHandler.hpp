@@ -107,6 +107,8 @@ public:
     typedef std::vector<BCBase>::iterator       bcBaseIterator_Type;
     typedef std::vector<BCBase>::const_iterator bcBaseConstIterator_Type;
 
+    typedef BCFunctionBase                      bcFunction_Type;
+
     //@}
 
     //! @name Constructor & Destructor

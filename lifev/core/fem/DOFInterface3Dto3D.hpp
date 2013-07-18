@@ -580,7 +580,7 @@ void DOFInterface3Dto3D::updateDofConnections ( const Mesh& mesh1, const DOF& do
 
         for (ID lDof1 = 0; lDof1 < localToGlobalMapOnBFacet1.size(); lDof1++)
         {
-            if ( flag3 != 0 && mesh1.boundaryFacet (i->first).point (lDof1).markerID() == *flag3)
+            if ( flag3 != 0 && static_cast < Int > ( mesh1.boundaryFacet ( i->first ).point ( lDof1 ).markerID () ) == *flag3 )
             {
                 continue;
             }

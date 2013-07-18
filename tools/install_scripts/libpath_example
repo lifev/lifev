@@ -62,9 +62,9 @@ trilinos_lib=${INSTALL_DIR}/lib/trilinos/lib
 # LIFEV
 # this is for LifeV developers
 lifev=INSTALL
-lifev_src=${HOME}/lifev/src
-lifev_build=${HOME}/lifev/build
-lifev_install=${HOME}/lifev/install
+lifev_src=${HOME}/lifev-env/lifev
+lifev_build=${HOME}/lifev-env/build
+lifev_install=${HOME}/lifev-env/install
 # additional flags for linking
 lifev_flags=
 
