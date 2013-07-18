@@ -39,14 +39,10 @@
 #ifndef _HEARTFUNCTORS_H_
 #define _HEARTFUNCTORS_H_
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <boost/shared_ptr.hpp>
 #include <boost/bind.hpp>
 
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 
 #include <lifev/core/filter/GetPot.hpp>

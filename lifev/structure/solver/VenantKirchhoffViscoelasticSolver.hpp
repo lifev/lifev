@@ -40,18 +40,12 @@
 #ifndef  VENANTKIRCHHOFFVISCOELASTICSOLVER_H_
 #define  VENANTKIRCHHOFFVISCOELASTICSOLVER_H_ 1
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <Epetra_Vector.h>
 #include <EpetraExt_MatrixMatrix.h>
 
 #include<boost/scoped_ptr.hpp>
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <lifev/core/array/MatrixElemental.hpp>
 #include <lifev/core/array/VectorElemental.hpp>

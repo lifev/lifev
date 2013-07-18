@@ -39,17 +39,11 @@
 #include <lifev/core/mesh/NeighborMarker.hpp>
 #include <lifev/core/array/MapEpetra.hpp>
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #ifdef HAVE_HDF5
 #include <EpetraExt_HDF5.h>
 #endif
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #ifdef HAVE_LIFEV_DEBUG
 //#define LIFEV_GHOSTHANDLER_DEBUG 1

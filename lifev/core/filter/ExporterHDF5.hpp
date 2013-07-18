@@ -39,8 +39,6 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <sstream>
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <Epetra_ConfigDefs.h>
 #include <EpetraExt_DistArray.h>
@@ -52,8 +50,6 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/algorithm/string.hpp>
 #include <boost/shared_array.hpp>
 
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #ifndef HAVE_HDF5
 

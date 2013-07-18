@@ -44,9 +44,6 @@
 
 #if ( defined(HAVE_NOX_THYRA) && defined(HAVE_TRILINOS_RYTHMOS) )
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <NOX.H>
 #include <NOX_Epetra.H>
@@ -55,9 +52,6 @@
 #include <NOX_Epetra_Interface_Preconditioner.H> // base class
 #include <NOX_Thyra.H>
 
-// Tell the compiler to restore the warning previously silented
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 // LIFEV
 #include <lifev/zero_dimensional/solver/ZeroDimensionalCircuitData.hpp>
