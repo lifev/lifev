@@ -60,6 +60,12 @@
 #include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
 #include <lifev/structure/solver/StructuralOperator.hpp>
 
+#include <lifev/structure/solver/isotropic/ExponentialMaterialNonLinear.hpp>
+
+// Evaluation operations
+#include <lifev/core/array/MatrixSmall.hpp>
+#include <lifev/eta/expression/Evaluate.hpp>
+
 #include <lifev/core/filter/ExporterEnsight.hpp>
 #ifdef HAVE_HDF5
 #include <lifev/core/filter/ExporterHDF5.hpp>
@@ -91,6 +97,40 @@ std::set<UInt> parseList ( const std::string& list )
     setList.insert ( atoi ( stringList.c_str() ) );
     return setList;
 }
+
+class SelectionFunctor
+{
+public:
+    typedef VectorEpetra                  vector_Type;
+    typedef boost::shared_ptr<vector_Type>    vectorPtr_Type;
+
+    SelectionFunctor ( const vectorPtr_Type selectionVector )
+    : M_selectionVector ( selectionVector )
+    {}
+
+    ~SelectionFunctor()
+    {}
+
+    bool operator() ( const UInt i ) const
+    {
+        // The i has to be a Local ID!
+        UInt index = M_selectionVector->blockMap().GID( i );
+
+        if( ( *M_selectionVector )( index ) > 1.06 )
+            return true;
+        else
+            return false;
+
+
+        return false;
+
+    }
+
+private:
+    const vectorPtr_Type M_selectionVector;
+
+}; // Marker selector
+
 
 
 class Structure
@@ -194,13 +234,6 @@ Structure::Structure ( int                                   argc,
     parameters->alpha   = dataFile ( "solid/physics/alpha",   1. );
     parameters->gamma   = dataFile ( "solid/physics/gamma",   1. );
 
-    std::cout << "density = " << parameters->rho     << std::endl
-              << "young   = " << parameters->young   << std::endl
-              << "poisson = " << parameters->poisson << std::endl
-              << "bulk    = " << parameters->bulk    << std::endl
-              << "alpha   = " << parameters->alpha   << std::endl
-              << "gamma   = " << parameters->gamma   << std::endl;
-
     parameters->comm = structComm;
     int ntasks = parameters->comm->NumProc();
 
@@ -232,6 +265,10 @@ Structure::run3d()
     typedef ETFESpace< RegionMesh<LinearTetra>, MapEpetra, 3, 3 >       solidETFESpace_Type;
     typedef boost::shared_ptr<solidETFESpace_Type>                      solidETFESpacePtr_Type;
 
+    typedef ETFESpace< RegionMesh<LinearTetra>, MapEpetra, 3, 1 >       scalarETFESpace_Type;
+    typedef boost::shared_ptr<scalarETFESpace_Type>                     scalarETFESpacePtr_Type;
+
+
     bool verbose = (parameters->comm->MyPID() == 0);
 
     //! dataElasticStructure for parameters
@@ -252,6 +289,10 @@ Structure::run3d()
     std::string dOrder =  dataFile ( "solid/space_discretization/order", "P1");
     solidFESpacePtr_Type dFESpace ( new solidFESpace_Type (meshPart, dOrder, 3, parameters->comm) );
     solidETFESpacePtr_Type dETFESpace ( new solidETFESpace_Type (meshPart, & (dFESpace->refFE() ), & (dFESpace->fe().geoMap() ), parameters->comm) );
+
+    //! Scalar ETFEspace to evaluate scalar quantities
+    solidFESpacePtr_Type dScalarFESpace ( new solidFESpace_Type (meshPart, dOrder, 1, parameters->comm) );
+    scalarETFESpacePtr_Type dScalarETFESpace ( new scalarETFESpace_Type (meshPart, & (dFESpace->refFE() ), & (dFESpace->fe().geoMap() ), parameters->comm) );
 
 
     if (verbose)
@@ -305,6 +346,7 @@ Structure::run3d()
 
     // The vector where the solution will be stored
     vectorPtr_Type solidDisp (new vector_Type (dFESpace->map(), LifeV::Unique ) );
+    *solidDisp *= 0.0;
 
     //! 6. Post-processing setting
     boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporter;
@@ -333,12 +375,41 @@ Structure::run3d()
 
     M_exporter->setMeshProcId (dFESpace->mesh(), dFESpace->map().comm().MyPID() );
 
-    vectorPtr_Type jacobianVector ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
-    vectorPtr_Type meshColors ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
+    // Scalar vector to have scalar quantities
+    vectorPtr_Type scalarJacobian( new vector_Type( dScalarETFESpace->map(), Unique ) );
 
-    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "determinantF", dFESpace, jacobianVector, UInt (0) );
-    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "colors", dFESpace, meshColors, UInt (0) );
+    vectorPtr_Type jacobianVector ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
+    vectorPtr_Type jacobianReference ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
+    vectorPtr_Type patchAreaVector ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
+    vectorPtr_Type patchAreaVectorScalar ( new vector_Type ( *scalarJacobian,  LifeV::Unique ) );
+    vectorPtr_Type traceVector ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
+    vectorPtr_Type F_i1Vector ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
+    vectorPtr_Type F_i2Vector ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
+    vectorPtr_Type F_i3Vector ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
+    // vectorPtr_Type grDisplX ( new vector_Type (*dFESpace->mapPtr() ) );
+    // vectorPtr_Type grDisplY ( new vector_Type (*dFESpace->mapPtr() ) );
+    // vectorPtr_Type grDisplZ ( new vector_Type (*dFESpace->mapPtr() ) );
+    vectorPtr_Type savedDisplacementTrace ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
+    vectorPtr_Type savedDisplacementJac ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
+    vectorPtr_Type statusVectorTr ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
+    vectorPtr_Type statusVectorJac ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
+
+    *statusVectorTr *= 0.0;
+    *statusVectorJac *= 0.0;
+
+    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "DeterminantF", dFESpace, jacobianVector, UInt (0) );
+    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "tr(C)", dFESpace, traceVector, UInt (0) );
+    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "Fi1", dFESpace, F_i1Vector, UInt (0) );
+    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "Fi2", dFESpace, F_i2Vector, UInt (0) );
+    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "Fi3", dFESpace, F_i3Vector, UInt (0) );
+    // M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "refDerX", dFESpace, grDisplX, UInt (0) );
+    // M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "refDerY", dFESpace, grDisplY, UInt (0) );
+    // M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "refDerZ", dFESpace, grDisplZ, UInt (0) );
+    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "Reference", dFESpace, jacobianReference, UInt (0) );
+    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::ScalarField, "ScalarJacobian", dScalarFESpace, scalarJacobian, UInt (0) );
     M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "displacementField", dFESpace, solidDisp, UInt (0) );
+    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "savedFromTrace", dFESpace, savedDisplacementTrace, UInt (0) );
+    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "savedFromJacobian", dFESpace, savedDisplacementJac, UInt (0) );
 
     M_exporter->postProcess ( 0.0 );
 
@@ -348,11 +419,11 @@ Structure::run3d()
 
     MPI_Barrier (MPI_COMM_WORLD);
 
-    //! 5. For each interval, the analysis is performed
+    // //! 5. For each interval, the analysis is performed
     LifeV::Real dt =  dataFile ( "solid/time_discretization/timestep", 0.0);
     std::string const nameField =  dataFile ( "importer/nameField", "displacement");
 
-    //Get the iteration number
+    // //Get the iteration number
     iterationString = dataFile ("importer/iteration", "00000");
     LifeV::Real time = dataFile ("importer/time", 1.0);
 
@@ -363,17 +434,188 @@ Structure::run3d()
     M_importer->readVariable (solutionDispl);
     M_importer->closeFile();
 
-    //Set the current solution as the displacement vector to use
-    solid.jacobianDistribution ( solidDisp, *jacobianVector);
 
-    //color the mesh according to the marker of the volume
-    solid.colorMesh ( *meshColors );
+    QuadratureRule fakeQuadratureRule;
+
+    Real refElemArea (0); //area of reference element
+    //compute the area of reference element
+    for (UInt iq = 0; iq < dFESpace->qr().nbQuadPt(); iq++)
+    {
+        refElemArea += dFESpace->qr().weight (iq);
+    }
+
+    Real wQuad (refElemArea / dFESpace->refFE().nbDof() );
+
+    //Setting the quadrature Points = DOFs of the element and weight = 1
+    std::vector<GeoVector> coords = dFESpace->refFE().refCoor();
+    std::vector<Real> weights (dFESpace->fe().nbFEDof(), wQuad);
+    fakeQuadratureRule.setDimensionShape ( shapeDimension (dFESpace->refFE().shape() ), dFESpace->refFE().shape() );
+    fakeQuadratureRule.setPoints (coords, weights);
+
+    //fakeQuadratureRule.showMe();
+
+    // //Compute the gradient along X of the displacement field
+    // *grDisplX = dFESpace->gradientRecovery (*solidDisp, 0);
+
+    // //Compute the gradient along Y of the displacement field
+    // *grDisplY = dFESpace->gradientRecovery (*solidDisp, 1);
+
+    // //Compute the gradient along Z of the displacement field
+    // *grDisplZ = dFESpace->gradientRecovery (*solidDisp, 2);
+
+    //Set the current solution as the displacement vector to use
+    solid.jacobianDistribution ( solidDisp, *jacobianReference);
+
+    using namespace ExpressionAssembly;
+
+    // Trying to compute the Jacobian using ET
+    MatrixSmall<3,3> identity;
+    identity (0, 0) = 1.0;
+    identity (0, 1) = 0.0;
+    identity (0, 2) = 0.0;
+    identity (1, 0) = 0.0;
+    identity (1, 1) = 1.0;
+    identity (1, 2) = 0.0;
+    identity (2, 0) = 0.0;
+    identity (2, 1) = 0.0;
+    identity (2, 2) = 1.0;
+
+
+    // Definition of F
+    ExpressionAddition<
+        ExpressionInterpolateGradient<mesh_Type, MapEpetra, 3, 3>, ExpressionMatrix<3,3> >
+        F( grad( dETFESpace,  *solidDisp, 0), value( identity ));
+
+    // Definition of J
+    ExpressionDeterminant<ExpressionAddition<
+        ExpressionInterpolateGradient<mesh_Type, MapEpetra,3,3>, ExpressionMatrix<3,3> > >
+        J( F );
+
+
+    // Definition of tensor C
+    ExpressionProduct<
+        ExpressionTranspose<
+            ExpressionAddition<ExpressionInterpolateGradient<mesh_Type, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
+            ExpressionAddition<ExpressionInterpolateGradient<mesh_Type, MapEpetra,3,3>, ExpressionMatrix<3,3> >
+        >
+        C( transpose(F), F );
+
+    ExpressionTrace<
+        ExpressionProduct<ExpressionTranspose<ExpressionAddition<ExpressionInterpolateGradient<mesh_Type, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
+                          ExpressionAddition<ExpressionInterpolateGradient<mesh_Type, MapEpetra,3,3>, ExpressionMatrix<3,3> > >
+        >
+        I_C( C );
+
+    ExpressionVectorFromNonConstantScalar<ExpressionMeas, 3  > vMeas( meas_K );
+
+    ExpressionVectorFromNonConstantScalar<
+      ExpressionDeterminant<ExpressionAddition<
+        ExpressionInterpolateGradient<mesh_Type, MapEpetra,3,3>, ExpressionMatrix<3,3> > > , 3  > vJ( J );
+
+    ExpressionVectorFromNonConstantScalar<
+      ExpressionTrace<
+	ExpressionProduct<ExpressionTranspose<ExpressionAddition<ExpressionInterpolateGradient<mesh_Type, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
+                          ExpressionAddition<ExpressionInterpolateGradient<mesh_Type, MapEpetra,3,3>, ExpressionMatrix<3,3> > > > , 3  > vI_C( I_C );
+
+    // 0 to extract first column
+    ExpressionVectorFromNonConstantMatrix< ExpressionAddition< ExpressionInterpolateGradient<mesh_Type, MapEpetra, 3, 3>, ExpressionMatrix<3,3> >,  3, 3 > F_i1( F, 0);
+
+    ExpressionVectorFromNonConstantMatrix< ExpressionAddition< ExpressionInterpolateGradient<mesh_Type, MapEpetra, 3, 3>, ExpressionMatrix<3,3> >,  3, 3 > F_i2( F, 1);
+
+    ExpressionVectorFromNonConstantMatrix< ExpressionAddition< ExpressionInterpolateGradient<mesh_Type, MapEpetra, 3, 3>, ExpressionMatrix<3,3> >,  3, 3 > F_i3( F, 2);
+
+    LifeChrono chrono;
+    chrono.start();
+
+    // Determinant of F
+    evaluateNode( elements ( dETFESpace->mesh() ),
+                  fakeQuadratureRule,
+                  dETFESpace,
+                  dot( vMeas , phi_i )
+                  ) >> patchAreaVector;
+
+    evaluateNode( elements ( dScalarETFESpace->mesh() ),
+                  fakeQuadratureRule,
+                  dScalarETFESpace,
+                  meas_K * phi_i
+                  ) >> patchAreaVectorScalar;
+
+
+    evaluateNode( elements ( dETFESpace->mesh() ),
+                  fakeQuadratureRule,
+                  dETFESpace,
+                  meas_K * dot( vJ  , phi_i )
+                  ) >> jacobianVector;
+
+    *jacobianVector = *jacobianVector / *patchAreaVector;
+
+    evaluateNode( elements ( dScalarETFESpace->mesh() ),
+                  fakeQuadratureRule,
+                  dScalarETFESpace,
+                  meas_K * J  * phi_i
+                  ) >> scalarJacobian;
+
+    *scalarJacobian = *scalarJacobian / *patchAreaVectorScalar;
+
+    chrono.stop();
+
+    // trace of C
+    evaluateNode( elements ( dETFESpace->mesh() ),
+                  fakeQuadratureRule,
+                  dETFESpace,
+                  meas_K * dot( vI_C , phi_i )
+                  ) >> traceVector;
+
+    *traceVector = *traceVector / *patchAreaVector;
+
+    // F_i1
+    evaluateNode( elements ( dETFESpace->mesh() ),
+                  fakeQuadratureRule,
+                  dETFESpace,
+                  meas_K * dot( F_i1, phi_i )
+                  ) >> F_i1Vector;
+
+    *F_i1Vector = *F_i1Vector / *patchAreaVector;
+
+    // F_i2
+    evaluateNode( elements ( dETFESpace->mesh() ),
+                  fakeQuadratureRule,
+                  dETFESpace,
+                  meas_K * dot( F_i2, phi_i )
+                  ) >> F_i2Vector;
+
+    *F_i2Vector = *F_i2Vector / *patchAreaVector;
+
+    // F_i3
+    evaluateNode( elements ( dETFESpace->mesh() ),
+                  fakeQuadratureRule,
+                  dETFESpace,
+                  meas_K * dot( F_i3, phi_i )
+                  ) >> F_i3Vector;
+
+    *F_i3Vector = *F_i3Vector / *patchAreaVector;
+
+    // Setting up the saving of the displacement
+    SelectionFunctor selectorTr( traceVector );
+    SelectionFunctor selectorJac( scalarJacobian );
+
+    AssemblyElementalStructure::saveVectorAccordingToFunctor( dFESpace, selectorTr,
+                                                              solidDisp, statusVectorTr,
+                                                              savedDisplacementTrace, 0);
+
+    // This method works with scalar expression assembled in a vectorial vector
+    // Like a vector for the pressure, assembled in a vector for the velocity
+    AssemblyElementalStructure::saveVectorAccordingToFunctor( dFESpace, selectorJac,
+                                                              solidDisp, statusVectorJac,
+                                                              savedDisplacementJac, 0);
 
     //Extracting the tensions
-    std::cout << std::endl;
-    std::cout << "Norm of the J = det(F) : " << jacobianVector->norm2() << std::endl;
+    std::cout << "Norm of the scalarJ = det(F) : " << scalarJacobian->normInf() << std::endl;
+    std::cout << "Norm of the J = det(F) : " << jacobianVector->normInf() << std::endl;
+    std::cout << "Norm of the J_reference = det(F) : " << jacobianReference->normInf() << std::endl;
+    std::cout << "Norm of the I_C = tr(C) : " << traceVector->normInf() << std::endl;
 
-    M_exporter->postProcess ( time );
+    M_exporter->postProcess ( 1.0 );
 
     if (verbose )
     {

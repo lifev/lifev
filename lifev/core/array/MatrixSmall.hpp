@@ -367,7 +367,7 @@ public:
       @param index of the row to be extracted
       @return extracted row
     */
-    VectorSmall<Dim2> extract ( UInt const& i ) const
+    VectorSmall<Dim2> extractRow ( UInt const& i ) const
     {
         VectorSmall<Dim2> row;
         for ( UInt j = 0; j < Dim2; j++ )
@@ -375,6 +375,21 @@ public:
             row[j] = M_coords[i][j];
         }
         return ( row );
+    }
+
+    //! Extraction of a column
+    /*!
+      @param index of the column to be extracted
+      @return extracted column
+    */
+    VectorSmall<Dim1> extractColumn ( UInt const& j ) const
+    {
+        VectorSmall<Dim1> column;
+        for ( UInt i = 0; i < Dim1; i++ )
+        {
+            column[i] = M_coords[i][j];
+        }
+        return ( column );
     }
 
     //! Extraction of a component

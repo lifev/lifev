@@ -528,6 +528,22 @@ public:
     {
         M_timeAdvance = timeAdvancePtr;
     }
+
+#ifdef COMPUTATION_JACOBIAN
+    //! constructPatchAreaVector: This method build the patch area vector used in the reconstruction process
+    /*!
+      \param NONE
+    */
+    void constructPatchAreaVector ( vector_Type& patchArea, const vector_Type& solution );
+
+
+    //! reconstructElementaryVector: This method applies a reconstruction procedure on the elvec that is passed
+    /*!
+      \param elvecTens VectorElemental over which the reconstruction is applied
+    */
+    void reconstructElementaryVector ( VectorElemental& elVecSigma, vector_Type& patchArea, UInt nVol );
+#endif
+
     //@}
 
 
@@ -748,22 +764,6 @@ protected:
     void setupMapMarkersVolumes ( void );
 
     //!Protected Members
-
-#ifdef COMPUTATION_JACOBIAN
-    //! constructPatchAreaVector: This method build the patch area vector used in the reconstruction process
-    /*!
-      \param NONE
-    */
-    void constructPatchAreaVector ( vector_Type& patchArea, const vector_Type& solution );
-
-
-    //! reconstructElementaryVector: This method applies a reconstruction procedure on the elvec that is passed
-    /*!
-      \param elvecTens VectorElemental over which the reconstruction is applied
-    */
-    void reconstructElementaryVector ( VectorElemental& elVecSigma, vector_Type& patchArea, UInt nVol );
-#endif
-
 
     boost::shared_ptr<data_Type>         M_data;
 
@@ -1425,7 +1425,6 @@ void StructuralOperator<Mesh >::constructPatchAreaVector ( vector_Type& patchAre
     vector_Type final (patchAreaR, Unique, Add);
 
     patchArea.add (final);
-
 }
 
 template <typename Mesh>
@@ -1447,7 +1446,6 @@ StructuralOperator<Mesh >::reconstructElementaryVector ( VectorElemental& elVecD
         for ( UInt icoor = 0;  icoor < M_dispFESpace->fieldDim(); icoor++ )
         {
             ID globalDofID (M_dispFESpace->dof().localToGlobalMap (eleID, iDof) + icoor * M_dispFESpace->dof().numTotalDof() );
-
             elVecDet[iloc + icoor * M_dispFESpace->fe().nbFEDof()] *= ( measure / patchArea[globalDofID] );
         }
 

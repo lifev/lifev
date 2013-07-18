@@ -87,6 +87,14 @@ SET(expression_HEADERS
 	expression/RequestLoopElement.hpp
 	expression/RequestLoopVolumeID.hpp
 	expression/RequestLoopFaceID.hpp
+	expression/Evaluate.hpp
+	expression/EvaluateNodalExpressionVectorElement.hpp
+	expression/ExpressionVectorFromNonConstantScalar.hpp
+	expression/EvaluationVectorFromNonConstantScalar.hpp
+	expression/ExpressionVectorFromNonConstantMatrix.hpp
+	expression/EvaluationVectorFromNonConstantMatrix.hpp
+	expression/ExpressionPatchArea.hpp
+	expression/EvaluationPatchArea.hpp
 CACHE INTERNAL "")
 
 SET(expression_SOURCES ""
