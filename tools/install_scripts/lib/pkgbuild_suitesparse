@@ -58,9 +58,12 @@ EOF
 
   make clean
   make library
+  cd -
 }
 
 install_suitesparse() {
+  cd ${src_dir}/SuiteSparse
+  
   # Installing
   install -m 775 -d ${install_dir}/{lib,include}
   install -m 664 {CAMD,COLAMD,LDL,CHOLMOD,SPQR,CXSparse,KLU,BTF,UMFPACK,CCOLAMD,AMD}/Include/*.h \
@@ -68,5 +71,7 @@ install_suitesparse() {
   install -m 664 {CAMD,COLAMD,LDL,CHOLMOD,SPQR,CXSparse,KLU,BTF,UMFPACK,CCOLAMD,AMD}/Lib/*.a \
     "${install_dir}/lib";
   install -m 664 UFconfig/UFconfig.h ${install_dir}/include;
+
+  cd -
 }
 
