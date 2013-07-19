@@ -51,6 +51,7 @@
 #include <lifev/core/util/Switch.hpp>
 #include <lifev/core/mesh/MeshElementMarked.hpp>
 #include <lifev/core/util/LifeDebug.hpp>
+#include <lifev/core/util/LifeChrono.hpp>
 #include <lifev/core/array/GhostHandler.hpp>
 
 namespace LifeV
@@ -1532,12 +1533,17 @@ void MeshPartitioner<MeshType>::execute()
     debugStream (4000) << M_me << " has " << (*M_elementDomains) [M_me].size() << " elements.\n";
 #endif
 
+    LifeChrono timeGH;
+    timeGH.start();
     GhostHandler<mesh_Type> gh ( M_originalMesh, M_comm );
     gh.fillEntityPID ( M_elementDomains, M_entityPID );
     if ( M_partitionOverlap > 0 )
     {
         gh.ghostMapOnElementsP1 ( M_elementDomains, M_entityPID[ 3 ], M_partitionOverlap );
     }
+    timeGH.stop();
+    double timeDiff = timeGH.globalDiff( *M_comm );
+    if( !M_me ) std::cerr << "timeGH = " << timeDiff << std::endl;
 
     doPartitionMesh();
 
