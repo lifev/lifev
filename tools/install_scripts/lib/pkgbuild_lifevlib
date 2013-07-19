@@ -4,7 +4,7 @@
 # date:   13-02-2013
 #
 
-ver='3.4.4'
+ver='3.6.4'
 
 download_lifevlib() {
   cp ${lifevlib_src}/lifev{,-cmake}.zip $src_dir
@@ -24,6 +24,7 @@ build_lifevlib() {
       -D CMAKE_SYSTEM_PREFIX_PATH:PATH=$REPO "
   fi
 
+  lib_extra=""
   echo_dbg "checking hdf5 (set to ${hdf5})"
   if [ "${hdf5}" != "NO" ]; then
     lib_extra+=" -D TPL_ENABLE_HDF5:BOOL=ON \
@@ -31,14 +32,16 @@ build_lifevlib() {
                  -D HDF5_LIBRARY_DIRS:PATH=${hdf5_lib} "
   fi
 
-  echo_dbg "checking blas (blas_name = ${blas_name})"
-  if [ "${blas_name}" != "" ]; then
-    lib_extra+=" -D TPL_BLAS_LIBRARIES:FILEPATH=${blas_lib}/${blas_name} "
+  echo_dbg "checking blas (blas_names = ${blas_names})"
+  if [ "${blas_names}" != "" ]; then
+    lib_extra+=" -D BLAS_LIBRARY_DIRS:PATH=${blas_lib} "
+    lib_extra+=" -D BLAS_LIBRARY_NAMES:STRING=${blas_names} "
   fi
 
-  echo_dbg "checking lapack (lapack_name = ${lapack_name})"
-  if [ "${lapack_name}" != "" ]; then
-    lib_extra+=" -D TPL_LAPACK_LIBRARIES:FILEPATH=${lapack_lib}/${lapack_name} "
+  echo_dbg "checking lapack (lapack_names = ${lapack_names})"
+  if [ "${lapack_names}" != "" ]; then
+    lib_extra+=" -D LAPACK_LIBRARY_DIRS:PATH=${palack_lib} "
+    lib_extra+=" -D LAPACK_LIBRARY_NAMES:STRING=${lapack_names} "
   fi
 
   echo_dbg "checking mpi (mpi_base = ${mpi_base})"
@@ -46,7 +49,7 @@ build_lifevlib() {
     lib_extra+=" -D MPI_BASE_DIR:PATH=${mpi_base} "
   fi
 
-  echo_dbg "final lib_extra = $lib_extra"
+  echo_dbg "final lib_extra = ${lib_extra}"
 
   rm -f CMakeCache.txt
   rm -rf CMakeFiles
