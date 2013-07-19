@@ -89,7 +89,7 @@ public:
         // The i has to be a Local ID!
         UInt index = M_selectionVector->blockMap().GID( i );
 
-        if( ( *M_selectionVector )( index ) > M_value )
+        if( ( *M_selectionVector )( index ) >= M_value )
             return true;
         else
             return false;
@@ -419,17 +419,17 @@ AnisotropicMultimechanismMaterialNonLinear<MeshType>::setup ( const FESpacePtr_T
 
     Real refElemArea (0); //area of reference element
     //compute the area of reference element
-    for (UInt iq = 0; iq < dFESpace->qr().nbQuadPt(); iq++)
+    for (UInt iq = 0; iq < this->M_dispFESpace->qr().nbQuadPt(); iq++)
     {
-        refElemArea += dFESpace->qr().weight (iq);
+        refElemArea += M_dispFESpace->qr().weight (iq);
     }
 
-    Real wQuad (refElemArea / dFESpace->refFE().nbDof() );
+    Real wQuad (refElemArea / M_dispFESpace->refFE().nbDof() );
 
     //Setting the quadrature Points = DOFs of the element and weight = 1
-    std::vector<GeoVector> coords = dFESpace->refFE().refCoor();
-    std::vector<Real> weights (dFESpace->fe().nbFEDof(), wQuad);
-    fakeQuadratureRule.setDimensionShape ( shapeDimension (dFESpace->refFE().shape() ), dFESpace->refFE().shape() );
+    std::vector<GeoVector> coords = this->M_dispFESpace->refFE().refCoor();
+    std::vector<Real> weights (this->M_dispFESpace->fe().nbFEDof(), wQuad);
+    fakeQuadratureRule.setDimensionShape ( shapeDimension (this->M_dispFESpace->refFE().shape() ), this->M_dispFESpace->refFE().shape() );
     fakeQuadratureRule.setPoints (coords, weights);
 
     M_quadrature.reset( new QuadratureRule( fakeQuadratureRule ) );
@@ -641,11 +641,14 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeStiffness ( co
     // Definition of F^-T
     minusT_Type  F_T = ExpressionDefinitions::minusT( F );
 
+    displayer->leaderPrint (" Non-Linear S-  Computing reference configurations... ");
 
     // 1. Evaluating fiber stretch
     for( UInt i(0); i < this->M_vectorInterpolated.size() ; i++ )
     {
-        // Note: M_vectorInterpolated.size() == numberOfFibers which has to be equal,
+
+        displayer->leaderPrint ("                ", i + 1,"-th fiber family \n" );
+       // Note: M_vectorInterpolated.size() == numberOfFibers which has to be equal,
         // given a certain assert in the data class to the number of characteristic stretches
         // and therefore to the size of the vector that are used to measure the activation.
 
@@ -675,12 +678,8 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeStiffness ( co
         ExpressionMultimechanism::difference_Type absStretch =
             ExpressionMultimechanism::absoluteStretch( IVithBar, this->M_dataMaterial->ithCharacteristicStretch(i) );
 
-        ExpressionMultimechanism::activation_Type activationFunction =
-            ExpressionMultimechanism::activationConstructor( absStretch, this->M_epsilon,
-                                                             ( 1 / PI ), ( 1.0 / 2.0 ) );
-
-        ExpressionMultimechanism::expressionVectorFromActivation_Type vActivation =
-            ExpressionMultimechanism::vectorFromActivation( activationFunction );
+        ExpressionMultimechanism::expressionVectorFromDifference_Type vActivation =
+            ExpressionMultimechanism::vectorFromActivation( absStretch );
 
         // Computing expression that determines activation
         evaluateNode( elements ( this->M_dispETFESpace->mesh() ),
@@ -701,9 +700,11 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeStiffness ( co
 
     }
 
+    displayer->leaderPrint (" Non-Linear S-  Computing contributions to the stiffness vector... ");
 
     for( UInt i(0); i < this->M_vectorInterpolated.size() ; i++ )
       {
+          displayer->leaderPrint ("                ", i + 1,"-th fiber family \n" );
 
           // As in other classes, the specialization of the MapType = MapEpetra makes this expression
           // not always usable. When other maps will be available in LifeV, the class should be re-templated.

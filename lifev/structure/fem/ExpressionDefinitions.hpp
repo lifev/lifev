@@ -551,7 +551,7 @@ typedef ExpressionSubstraction<
 
 typedef  ExpressionArcTan<difference_Type> activation_Type;
 
-typedef ExpressionVectorFromNonConstantScalar< activation_Type, 3>  expressionVectorFromActivation_Type;
+typedef ExpressionVectorFromNonConstantScalar< difference_Type, 3>  expressionVectorFromDifference_Type;
 
 difference_Type absoluteStretch( const ExpressionDefinitions::isochoricStretch_Type IVbar,
                                  const Real valueToSubtract)
@@ -568,9 +568,9 @@ activation_Type activationConstructor( const ExpressionMultimechanism::differenc
     return activation_Type( absoluteStretch, intCoeff, extCoeff, translation );
 }
 
-expressionVectorFromActivation_Type vectorFromActivation( const ExpressionMultimechanism::activation_Type activation)
+expressionVectorFromDifference_Type vectorFromActivation( const ExpressionMultimechanism::difference_Type activation )
 {
-    return expressionVectorFromActivation_Type( activation );
+    return expressionVectorFromDifference_Type( activation );
 }
 
 
