@@ -57,17 +57,17 @@ namespace LifeV
 */
 
 template <typename Operand >
-class OperationInverse
+class OperationSmallInverse
 {
 private:
     //! @name Constructors and destructors
     //@{
 
     //! No default constructor
-    OperationInverse();
+    OperationSmallInverse();
 
     //! No destructor
-    ~OperationInverse();
+    ~OperationSmallInverse();
 
     //@}
 };
@@ -75,7 +75,7 @@ private:
 //! \cond
 
 template <UInt Dim1, UInt Dim2>
-class OperationInverse< MatrixSmall<Dim1, Dim2> >
+class OperationSmallInverse< MatrixSmall<Dim1, Dim2> >
 {
 public:
 
@@ -91,10 +91,10 @@ private:
     //@{
 
     //! No default constructor
-    OperationInverse();
+    OperationSmallInverse();
 
     //! No destructor
-    ~OperationInverse();
+    ~OperationSmallInverse();
 
     //@}
 };

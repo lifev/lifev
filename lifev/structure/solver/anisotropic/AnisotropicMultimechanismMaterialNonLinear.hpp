@@ -172,6 +172,14 @@ public:
     typedef typename super::stretch_Type                 stretch_Type;
     typedef typename super::isochoricStretch_Type        isochoricStretch_Type;
 
+    typedef ExpressionDefinitions::inverseTensor_Type                         invTensor_Type;
+    typedef ExpressionMultimechanism::rightCauchyGreenMultiMechanism_Type     tensorCmultiMech_Type;
+    typedef ExpressionMultimechanism::activatedFiber_Type                     activateFiber_Type;
+    typedef ExpressionMultimechanism::activatedDeterminantF_Type              activatedDeterminantF_Type;
+    typedef ExpressionMultimechanism::activePowerExpression_Type              activePowerExpression_Type;
+    typedef ExpressionMultimechanism::activeOuterProduct_Type                 activeOuterProduct_Type;
+    typedef ExpressionMultimechanism::activeStretch_Type                      activeStretch_Type;
+    typedef ExpressionMultimechanism::activeIsochoricStretch_Type             activeIsochoricStretch_Type;
     //@}
 
 
@@ -421,10 +429,10 @@ AnisotropicMultimechanismMaterialNonLinear<MeshType>::setup ( const FESpacePtr_T
     //compute the area of reference element
     for (UInt iq = 0; iq < this->M_dispFESpace->qr().nbQuadPt(); iq++)
     {
-        refElemArea += M_dispFESpace->qr().weight (iq);
+        refElemArea += this->M_dispFESpace->qr().weight (iq);
     }
 
-    Real wQuad (refElemArea / M_dispFESpace->refFE().nbDof() );
+    Real wQuad (refElemArea / this->M_dispFESpace->refFE().nbDof() );
 
     //Setting the quadrature Points = DOFs of the element and weight = 1
     std::vector<GeoVector> coords = this->M_dispFESpace->refFE().refCoor();
@@ -709,22 +717,73 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeStiffness ( co
           // As in other classes, the specialization of the MapType = MapEpetra makes this expression
           // not always usable. When other maps will be available in LifeV, the class should be re-templated.
 
+          // Definition of F_0(ta)
+          tensorF_Type ithFzeroA = ExpressionDefinitions::deformationGradient( this->M_dispETFESpace,  *(M_activationDisplacement[ i ]),
+                                                                               this->M_offset, this->M_identity );
+
+          // Definition of J_0(ta)
+          determinantF_Type ithJzeroA = ExpressionDefinitions::determinantF( ithFzeroA );
+
+          // Definition of J_a
+          activatedDeterminantF_Type Ja = ExpressionMultimechanism::activateDeterminantF( J, ithJzeroA );
+
+          // Definition of J_a^{-2.0/3.0}
+          activePowerExpression_Type  JactiveEl = ExpressionMultimechanism::activePowerExpression( Ja , (-2.0/3.0) );
+
+          // Definition of F_0^{-1}(ta)
+          invTensor_Type FzeroAminus1 = ExpressionDefinitions::inv( ithFzeroA );
+
+          // Definition of F_0^{-T}(ta)
+          minusT_Type FzeroAminusT = ExpressionDefinitions::minusT( ithFzeroA );
+
+          // Definition of C_a = F_0^{-T}(ta) * C_0 * F_0^{-1}(ta)
+          tensorCmultiMech_Type Ca = ExpressionMultimechanism::activationRightCauchyGreen( FzeroAminusT, C, FzeroAminus1 );
+
           // Defining the expression for the i-th fiber
           // Definitions of the quantities which depend on the fiber directions e.g. I_4^i
           interpolatedValue_Type fiberIth = ExpressionDefinitions::interpolateFiber( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ] ) );
 
+          // Definition of the direction of the fiber at the activation moment = F_0(ta) * f_0
+          activateFiber_Type activeIthFiber = ExpressionMultimechanism::activateFiberDirection( ithFzeroA, fiberIth );
+
           // Definition of the tensor M = ithFiber \otimes ithFiber
           // At the moment, it's automatic that the method constructs the expression M = ithFiber \otimes ithFiber
           // For a more general case, the file ExpressionDefinitions.hpp should be changed
-          outerProduct_Type Mith = ExpressionDefinitions::fiberTensor( fiberIth );
+          activeOuterProduct_Type Mith = ExpressionMultimechanism::activeOuterProduct( activeIthFiber );
 
           // Definition of the fourth invariant : I_4^i = C:Mith
-          stretch_Type IVith = ExpressionDefinitions::fiberStretch( C, Mith );
+          activeStretch_Type IVith = ExpressionMultimechanism::activeFiberStretch( Ca, Mith );
 
           // Definition of the fouth isochoric invariant : J^(-2.0/3.0) * I_4^i
-          isochoricStretch_Type IVithBar = ExpressionDefinitions::isochoricFourthInvariant( Jel, IVith );
+          activeIsochoricStretch_Type IVithBar = ExpressionMultimechanism::activeIsochoricFourthInvariant( JactiveEl, IVith );
 
+          Real stretch = this->M_dataMaterial->ithCharacteristicStretch(i);
+          // The terms for the piola kirchhoff tensor come from the holzapfel model. Then they are rescaled
+          // according to the change of variable given by the multi-mechanism model.
 
+          // First term:
+          // 2 alpha_i J^(-2.0/3.0) ( \bar{I_4} - 1 ) exp( gamma_i * (\bar{I_4} - 1)^2 ) * F M : \grad phi_i
+          // where alpha_i and gamma_i are the fiber parameters and M is the 2nd order tensor of type f_i \otimes \ f_i
+          integrate ( elements ( this->M_dispETFESpace->mesh() ),
+                      this->M_dispFESpace->qr(),
+                      this->M_dispETFESpace,
+                      atan( IVithBar - value( stretch ) , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  ) *  ithJzeroA * (
+                      value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * JactiveEl * ( IVithBar - value( stretch ) ) *
+                      exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value( 1.0 ) ) * ( IVithBar- value( stretch ) )  ) *
+                      dot( ( ithFzeroA  * Mith ) * FzeroAminus1, grad( phi_i ) ) )
+                      ) >> this->M_stiff;
+
+          // Second term:
+          // 2 alpha_i J^(-2.0/3.0) ( \bar{I_4} - 1 ) exp( gamma_i * (\bar{I_4} - 1)^2 ) * ( 1.0/3.0 * I_4 ) F^-T : \grad phi_i
+          // where alpha_i and gamma_i are the fiber parameters and M is the 2nd order tensor of type f_i \otimes \ f_i
+          integrate ( elements ( this->M_dispETFESpace->mesh() ),
+                      this->M_dispFESpace->qr(),
+                      this->M_dispETFESpace,
+                      atan( IVithBar - value( stretch ) , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  ) * ithJzeroA *
+                      ( value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * JactiveEl * ( IVithBar - value( stretch ) ) *
+                      exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value( stretch ) ) * ( IVithBar- value( stretch ) )  ) *
+                      value( -1.0/3.0 ) * IVith * dot( FzeroAminusT *  FzeroAminus1 , grad( phi_i ) ) )
+		    ) >> this->M_stiff;
 
 
       }

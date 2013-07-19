@@ -103,6 +103,12 @@ typedef ExpressionProduct<
 typedef ExpressionMinusTransposed<
     ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > > minusTransposedTensor_Type;
 
+// Used later specially in the multi-mechanism
+// Definition of the tensor F^{-1}
+typedef ExpressionInverse<
+    ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > > inverseTensor_Type;
+
+
 // Definition of the trace of the tensor C
 typedef ExpressionTrace<
     ExpressionProduct<ExpressionTranspose<ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
@@ -187,6 +193,11 @@ rightCauchyGreenTensor_Type tensorC( const ExpressionTranspose<deformationGradie
 minusTransposedTensor_Type minusT( const deformationGradient_Type F )
 {
     return minusTransposedTensor_Type( F );
+}
+
+inverseTensor_Type inv( const deformationGradient_Type F )
+{
+    return inverseTensor_Type( F );
 }
 
 traceTensor_Type traceTensor( const rightCauchyGreenTensor_Type C )
@@ -553,6 +564,30 @@ typedef  ExpressionArcTan<difference_Type> activation_Type;
 
 typedef ExpressionVectorFromNonConstantScalar< difference_Type, 3>  expressionVectorFromDifference_Type;
 
+typedef ExpressionProduct< ExpressionDefinitions::deformationGradient_Type,
+                           ExpressionDefinitions::inverseTensor_Type >   deformationActivatedTensor_Type;
+
+
+typedef ExpressionProduct<
+    ExpressionDefinitions::minusTransposedTensor_Type,
+    ExpressionProduct< ExpressionDefinitions::rightCauchyGreenTensor_Type,
+                       ExpressionDefinitions::inverseTensor_Type > > rightCauchyGreenMultiMechanism_Type;
+
+typedef ExpressionProduct< ExpressionDefinitions::deformationGradient_Type,
+                           ExpressionDefinitions::interpolatedValue_Type> activatedFiber_Type;
+
+
+typedef ExpressionProduct< ExpressionDefinitions::determinantTensorF_Type,
+                           ExpressionDefinitions::determinantTensorF_Type> activatedDeterminantF_Type;
+
+typedef ExpressionPower<activatedDeterminantF_Type >  activePowerExpression_Type;
+
+typedef ExpressionOuterProduct< activatedFiber_Type, activatedFiber_Type>  activeOuterProduct_Type;
+
+typedef ExpressionDot< rightCauchyGreenMultiMechanism_Type, activeOuterProduct_Type>  activeStretch_Type;
+
+typedef ExpressionProduct< activePowerExpression_Type, activeStretch_Type>         activeIsochoricStretch_Type;
+
 difference_Type absoluteStretch( const ExpressionDefinitions::isochoricStretch_Type IVbar,
                                  const Real valueToSubtract)
 {
@@ -573,6 +608,55 @@ expressionVectorFromDifference_Type vectorFromActivation( const ExpressionMultim
     return expressionVectorFromDifference_Type( activation );
 }
 
+deformationActivatedTensor_Type createDeformationActivationTensor( const ExpressionDefinitions::deformationGradient_Type Ft,
+                                                                   const ExpressionDefinitions::inverseTensor_Type       F0_ta)
+{
+    return deformationActivatedTensor_Type( Ft, F0_ta );
+}
+
+rightCauchyGreenMultiMechanism_Type activationRightCauchyGreen( const ExpressionDefinitions::minusTransposedTensor_Type FzeroAminusT,
+                                                                const ExpressionDefinitions::rightCauchyGreenTensor_Type C,
+                                                                const ExpressionDefinitions::inverseTensor_Type FzeroAminus1 )
+{
+    ExpressionProduct< ExpressionDefinitions::rightCauchyGreenTensor_Type,
+                       ExpressionDefinitions::inverseTensor_Type > rightTerm( C, FzeroAminus1 );
+    return rightCauchyGreenMultiMechanism_Type( FzeroAminusT, rightTerm );
+}
+
+activatedFiber_Type activateFiberDirection( const ExpressionDefinitions::deformationGradient_Type F,
+                                            const ExpressionDefinitions::interpolatedValue_Type ithFiber)
+{
+    return activatedFiber_Type( F, ithFiber );
+}
+
+activatedDeterminantF_Type activateDeterminantF( const ExpressionDefinitions::determinantTensorF_Type Jzero,
+                                                 const ExpressionDefinitions::determinantTensorF_Type JzeroA )
+{
+    return activatedDeterminantF_Type( Jzero, JzeroA );
+}
+
+activePowerExpression_Type activePowerExpression( activatedDeterminantF_Type Ja,
+                                                  const Real exp)
+{
+    return activePowerExpression_Type ( Ja, exp );
+}
+
+activeOuterProduct_Type activeOuterProduct( const activatedFiber_Type activatedFiber )
+{
+    return activeOuterProduct_Type( activatedFiber, activatedFiber );
+}
+
+activeStretch_Type activeFiberStretch( const rightCauchyGreenMultiMechanism_Type activeC,
+                                         const activeOuterProduct_Type activeM)
+{
+    return activeStretch_Type( activeC, activeM );
+}
+
+activeIsochoricStretch_Type activeIsochoricFourthInvariant( const activePowerExpression_Type activeJ,
+                                                            const activeStretch_Type activeI4)
+{
+    return activeIsochoricStretch_Type( activeJ, activeI4 );
+}
 
 }// end namespace ExpressionDistributedModel
 #endif
