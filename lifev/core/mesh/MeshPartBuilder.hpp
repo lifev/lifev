@@ -551,7 +551,10 @@ void MeshPartBuilder<MeshType>::finalSetup()
     M_meshPart->setNumVertices (nNodes );
     M_meshPart->setNumBVertices (M_nBoundaryVertices);
 
-    M_meshPart->updateElementRidges();
+    if (MeshType::S_geoDimensions == 3)
+    {
+        M_meshPart->updateElementRidges();
+    }
 
     M_meshPart->updateElementFacets();
 }

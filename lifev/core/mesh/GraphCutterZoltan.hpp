@@ -609,7 +609,7 @@ void GraphCutterZoltan<MeshType>::buildGraph()
             break;
     }
 
-    UInt numElementFaces = MeshType::elementShape_Type::S_numFaces;
+    UInt numElementFacets = MeshType::elementShape_Type::S_numFacets;
 
     for (UInt i = 0; i < numStoredElements(); ++i)
     {
@@ -618,13 +618,13 @@ void GraphCutterZoltan<MeshType>::buildGraph()
                         (ie, std::vector<Int>() )
                        );
         M_graph[ie].reserve (numNeighbours);
-        for (UInt iface = 0; iface < numElementFaces; ++iface)
+        for (UInt ifacet = 0; ifacet < numElementFacets; ++ifacet)
         {
-            UInt face = M_mesh->localFaceId (ie, iface);
-            UInt elem = M_mesh->face (face).firstAdjacentElementIdentity();
+            UInt facet = M_mesh->localFacetId (ie, ifacet);
+            UInt elem = M_mesh->facet (facet).firstAdjacentElementIdentity();
             if (elem == ie)
             {
-                elem = M_mesh->face (face).secondAdjacentElementIdentity();
+                elem = M_mesh->facet (facet).secondAdjacentElementIdentity();
             }
             if (elem != NotAnId)
             {
