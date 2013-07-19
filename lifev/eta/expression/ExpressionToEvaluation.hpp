@@ -43,6 +43,7 @@
 #include <lifev/eta/expression/ExpressionDivI.hpp>
 #include <lifev/eta/expression/ExpressionDivJ.hpp>
 #include <lifev/eta/expression/ExpressionMinusTransposed.hpp>
+#include <lifev/eta/expression/ExpressionInverse.hpp>
 #include <lifev/eta/expression/ExpressionDeterminant.hpp>
 #include <lifev/eta/expression/ExpressionTrace.hpp>
 
@@ -90,6 +91,7 @@
 #include <lifev/eta/expression/EvaluationDivI.hpp>
 #include <lifev/eta/expression/EvaluationDivJ.hpp>
 #include <lifev/eta/expression/EvaluationMinusTransposed.hpp>
+#include <lifev/eta/expression/EvaluationInverse.hpp>
 #include <lifev/eta/expression/EvaluationDeterminant.hpp>
 #include <lifev/eta/expression/EvaluationTrace.hpp>
 
@@ -314,6 +316,23 @@ class ExpressionToEvaluation <
 {
 public:
     typedef EvaluationMinusTransposed <
+    typename ExpressionToEvaluation<Expression, testDim, solutionDim, spaceDim>::evaluation_Type
+    > evaluation_Type;
+private:
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
+};
+
+// Specialized for the inverse
+template<typename Expression, UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation <
+    ExpressionInverse<Expression>
+    , testDim
+    , solutionDim
+    , spaceDim >
+{
+public:
+    typedef EvaluationInverse <
     typename ExpressionToEvaluation<Expression, testDim, solutionDim, spaceDim>::evaluation_Type
     > evaluation_Type;
 private:
