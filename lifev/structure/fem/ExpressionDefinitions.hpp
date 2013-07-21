@@ -567,6 +567,9 @@ typedef ExpressionVectorFromNonConstantScalar< difference_Type, 3>  expressionVe
 typedef ExpressionProduct< ExpressionDefinitions::deformationGradient_Type,
                            ExpressionDefinitions::inverseTensor_Type >   deformationActivatedTensor_Type;
 
+typedef ExpressionProduct< ExpressionDefinitions::deformationGradient_Type,
+                           ExpressionDefinitions::minusTransposedTensor_Type >   activeMinusTtensor_Type;
+
 
 typedef ExpressionProduct<
     ExpressionDefinitions::minusTransposedTensor_Type,
@@ -578,7 +581,7 @@ typedef ExpressionProduct< ExpressionDefinitions::deformationGradient_Type,
 
 
 typedef ExpressionProduct< ExpressionDefinitions::determinantTensorF_Type,
-                           ExpressionDefinitions::determinantTensorF_Type> activatedDeterminantF_Type;
+                           ExpressionDefinitions::powerExpression_Type> activatedDeterminantF_Type;
 
 typedef ExpressionPower<activatedDeterminantF_Type >  activePowerExpression_Type;
 
@@ -587,6 +590,10 @@ typedef ExpressionOuterProduct< activatedFiber_Type, activatedFiber_Type>  activ
 typedef ExpressionDot< rightCauchyGreenMultiMechanism_Type, activeOuterProduct_Type>  activeStretch_Type;
 
 typedef ExpressionProduct< activePowerExpression_Type, activeStretch_Type>         activeIsochoricStretch_Type;
+
+typedef ExpressionProduct< ExpressionDefinitions::deformationGradient_Type,
+                           ExpressionDefinitions::interpolatedValue_Type> activatedFiber_Type;
+
 
 difference_Type absoluteStretch( const ExpressionDefinitions::isochoricStretch_Type IVbar,
                                  const Real valueToSubtract)
@@ -630,7 +637,7 @@ activatedFiber_Type activateFiberDirection( const ExpressionDefinitions::deforma
 }
 
 activatedDeterminantF_Type activateDeterminantF( const ExpressionDefinitions::determinantTensorF_Type Jzero,
-                                                 const ExpressionDefinitions::determinantTensorF_Type JzeroA )
+                                                 const ExpressionDefinitions::powerExpression_Type JzeroA )
 {
     return activatedDeterminantF_Type( Jzero, JzeroA );
 }
@@ -656,6 +663,12 @@ activeIsochoricStretch_Type activeIsochoricFourthInvariant( const activePowerExp
                                                             const activeStretch_Type activeI4)
 {
     return activeIsochoricStretch_Type( activeJ, activeI4 );
+}
+
+activeMinusTtensor_Type createActiveMinusTtensor( const ExpressionDefinitions::deformationGradient_Type FzeroA,
+						  const ExpressionDefinitions::minusTransposedTensor_Type FminusT)
+{
+  return activeMinusTtensor_Type ( FzeroA, FminusT );
 }
 
 }// end namespace ExpressionDistributedModel

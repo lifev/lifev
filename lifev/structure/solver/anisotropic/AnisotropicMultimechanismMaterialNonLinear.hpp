@@ -180,6 +180,9 @@ public:
     typedef ExpressionMultimechanism::activeOuterProduct_Type                 activeOuterProduct_Type;
     typedef ExpressionMultimechanism::activeStretch_Type                      activeStretch_Type;
     typedef ExpressionMultimechanism::activeIsochoricStretch_Type             activeIsochoricStretch_Type;
+
+    typedef ExpressionMultimechanism::deformationActivatedTensor_Type         deformationActivatedTensor_Type;
+    typedef ExpressionMultimechanism::activeMinusTtensor_Type                 activeMinusTtensor_Type;
     //@}
 
 
@@ -721,11 +724,15 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeStiffness ( co
           tensorF_Type ithFzeroA = ExpressionDefinitions::deformationGradient( this->M_dispETFESpace,  *(M_activationDisplacement[ i ]),
                                                                                this->M_offset, this->M_identity );
 
+
           // Definition of J_0(ta)
           determinantF_Type ithJzeroA = ExpressionDefinitions::determinantF( ithFzeroA );
 
+	  // Definition of J^-(2/3) = det( C ) using the isochoric/volumetric decomposition
+	  powerExpression_Type  JAel = ExpressionDefinitions::powerExpression( ithJzeroA , (-1.0) );
+
           // Definition of J_a
-          activatedDeterminantF_Type Ja = ExpressionMultimechanism::activateDeterminantF( J, ithJzeroA );
+          activatedDeterminantF_Type Ja = ExpressionMultimechanism::activateDeterminantF( J, JAel );
 
           // Definition of J_a^{-2.0/3.0}
           activePowerExpression_Type  JactiveEl = ExpressionMultimechanism::activePowerExpression( Ja , (-2.0/3.0) );
@@ -733,9 +740,13 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeStiffness ( co
           // Definition of F_0^{-1}(ta)
           invTensor_Type FzeroAminus1 = ExpressionDefinitions::inv( ithFzeroA );
 
+	  // Definition of Fa = F_0 * F_0(ta)^{-1}
+	  deformationActivatedTensor_Type Fa = ExpressionMultimechanism::createDeformationActivationTensor( F , FzeroAminus1);
+
           // Definition of F_0^{-T}(ta)
           minusT_Type FzeroAminusT = ExpressionDefinitions::minusT( ithFzeroA );
 
+	  activeMinusTtensor_Type FAminusT = ExpressionMultimechanism::createActiveMinusTtensor( ithFzeroA, F_T);
           // Definition of C_a = F_0^{-T}(ta) * C_0 * F_0^{-1}(ta)
           tensorCmultiMech_Type Ca = ExpressionMultimechanism::activationRightCauchyGreen( FzeroAminusT, C, FzeroAminus1 );
 
@@ -770,7 +781,7 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeStiffness ( co
                       atan( IVithBar - value( stretch ) , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  ) *  ithJzeroA * (
                       value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * JactiveEl * ( IVithBar - value( stretch ) ) *
                       exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value( 1.0 ) ) * ( IVithBar- value( stretch ) )  ) *
-                      dot( ( ithFzeroA  * Mith ) * FzeroAminus1, grad( phi_i ) ) )
+                      dot( ( Fa  * Mith ) * FzeroAminus1, grad( phi_i ) ) )
                       ) >> this->M_stiff;
 
           // Second term:
@@ -782,7 +793,7 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeStiffness ( co
                       atan( IVithBar - value( stretch ) , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  ) * ithJzeroA *
                       ( value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * JactiveEl * ( IVithBar - value( stretch ) ) *
                       exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value( stretch ) ) * ( IVithBar- value( stretch ) )  ) *
-                      value( -1.0/3.0 ) * IVith * dot( FzeroAminusT *  FzeroAminus1 , grad( phi_i ) ) )
+                      value( -1.0/3.0 ) * IVith * dot( FAminusT *  FzeroAminus1 , grad( phi_i ) ) )
 		    ) >> this->M_stiff;
 
 
