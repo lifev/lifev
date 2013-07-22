@@ -1173,14 +1173,6 @@ void GhostHandler<Mesh>::ghostMapOnElementsP1 ( graphPtr_Type elemGraph,
         }
         this->createNodeElementNeighborsMap();
     }
-    if ( M_nodeNodeNeighborsList.empty()  )
-    {
-        if ( M_verbose )
-        {
-            std::cerr << "the nodeElementNeighborsMap is empty, will be generated now" << std::endl;
-        }
-        this->createNodeNodeNeighborsMap();
-    }
 
     std::vector<int>& myElems = (*elemGraph) [M_me];
 
