@@ -1533,17 +1533,22 @@ void MeshPartitioner<MeshType>::execute()
     debugStream (4000) << M_me << " has " << (*M_elementDomains) [M_me].size() << " elements.\n";
 #endif
 
-    LifeChrono timeGH;
-    timeGH.start();
+    LifeChrono timeEP;
+    timeEP.start();
     GhostHandler<mesh_Type> gh ( M_originalMesh, M_comm );
     gh.fillEntityPID ( M_elementDomains, M_entityPID );
+    timeEP.stop();
+    double timeDiff = timeEP.globalDiff( *M_comm );
+    if( !M_me ) std::cout << "timeEP = " << timeDiff << std::endl;
+    LifeChrono timeGM;
+    timeGM.start();
     if ( M_partitionOverlap > 0 )
     {
         gh.ghostMapOnElementsP1 ( M_elementDomains, M_entityPID[ 3 ], M_partitionOverlap );
     }
-    timeGH.stop();
-    double timeDiff = timeGH.globalDiff( *M_comm );
-    if( !M_me ) std::cerr << "timeGH = " << timeDiff << std::endl;
+    timeGM.stop();
+    timeDiff = timeGM.globalDiff( *M_comm );
+    if( !M_me ) std::cout << "timeGM = " << timeDiff << std::endl;
 
     doPartitionMesh();
 
