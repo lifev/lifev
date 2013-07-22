@@ -1214,6 +1214,37 @@ void GhostHandler<Mesh>::ghostMapOnElementsP1 ( graphPtr_Type elemGraph,
     timePG.stop();
 
 
+    LifeChrono timePGP;
+    timeMgr.add( "point graph parallel", &timePGP );
+    timePGP.start();
+    // generate graph of points
+    graph_Type pointGraphP ( M_comm->NumProc() );
+
+    std::set<int> localPointsSet;
+    for ( UInt e = 0; e < (*elemGraph) [ M_me ].size(); e++ )
+    {
+        // point block
+        for ( UInt k = 0; k < mesh_Type::element_Type::S_numPoints; k++ )
+        {
+            const ID& pointID = M_fullMesh->element ( (*elemGraph) [ M_me ][ e ] ).point ( k ).id();
+            localPointsSet.insert ( pointID );
+        }
+    }
+    pointGraphP[ M_me ].assign ( localPointsSet.begin(), localPointsSet.end() );
+
+    std::vector<Int> pointGraphSize( M_comm->NumProc(), -1 );
+    pointGraphSize[ M_me ] = pointGraphP[ M_me ].size();
+    for ( UInt p = 0; p < static_cast<UInt> ( M_comm->NumProc() ); p++ )
+        M_comm->Broadcast( &pointGraphSize[ p ], 1, p );
+
+    for ( UInt p = 0; p < static_cast<UInt> ( M_comm->NumProc() ); p++ )
+        pointGraphP[ p ].resize( pointGraphSize[ p ] );
+
+    // communicate other proc point graphs
+    for ( UInt p = 0; p < static_cast<UInt> ( M_comm->NumProc() ); p++ )
+        M_comm->Broadcast( &pointGraphP[p][0], pointGraphP[p].size(), p );
+
+    timePGP.stop();
 
     std::vector<int> const& myPoints = pointGraph[ M_me ];
 
