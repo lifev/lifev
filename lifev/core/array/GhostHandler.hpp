@@ -36,14 +36,14 @@
 #ifndef _GHOSTHANDLER_HPP_
 #define _GHOSTHANDLER_HPP_
 
-#include <lifev/core/mesh/NeighborMarker.hpp>
-#include <lifev/core/array/MapEpetra.hpp>
-
-
 #ifdef HAVE_HDF5
 #include <EpetraExt_HDF5.h>
 #endif
 
+#include <lifev/core/LifeV.hpp>
+#include <lifev/core/util/LifeChronoManager.hpp>
+#include <lifev/core/array/MapEpetra.hpp>
+#include <lifev/core/mesh/NeighborMarker.hpp>
 
 #ifdef HAVE_LIFEV_DEBUG
 //#define LIFEV_GHOSTHANDLER_DEBUG 1
@@ -1164,6 +1164,10 @@ void GhostHandler<Mesh>::ghostMapOnElementsP1 ( graphPtr_Type elemGraph,
         std::cout << " GH- ghostMapOnElementsP1( graph )" << std::endl;
     }
 
+    LifeChronoManager<> timeMgr( M_comm );
+    LifeChrono timeNL;
+    timeMgr.add( "node-element ngbr list", &timeNL );
+    timeNL.start();
     // check that the nodeElementNeighborsMap has been created
     if ( M_nodeElementNeighborsList.empty()  )
     {
@@ -1173,6 +1177,7 @@ void GhostHandler<Mesh>::ghostMapOnElementsP1 ( graphPtr_Type elemGraph,
         }
         this->createNodeElementNeighborsMap();
     }
+    timeNL.stop();
 
     std::vector<int>& myElems = (*elemGraph) [M_me];
 
@@ -1185,6 +1190,9 @@ void GhostHandler<Mesh>::ghostMapOnElementsP1 ( graphPtr_Type elemGraph,
     }
 #endif
 
+    LifeChrono timePG;
+    timeMgr.add( "point graph", &timePG );
+    timePG.start();
     // generate graph of points
     graph_Type pointGraph ( M_comm->NumProc() );
 
@@ -1203,6 +1211,9 @@ void GhostHandler<Mesh>::ghostMapOnElementsP1 ( graphPtr_Type elemGraph,
         }
         pointGraph[ p ].assign ( localPointsSet.begin(), localPointsSet.end() );
     }
+    timePG.stop();
+
+
 
     std::vector<int> const& myPoints = pointGraph[ M_me ];
 
@@ -1214,6 +1225,9 @@ void GhostHandler<Mesh>::ghostMapOnElementsP1 ( graphPtr_Type elemGraph,
     }
 #endif
 
+    LifeChrono timeSI;
+    timeMgr.add( "find SUBD_INT", &timeSI );
+    timeSI.start();
     // initialize a bool vector that tells if an element is in the current partition
     std::vector<bool> isInPartition ( M_fullMesh->numElements(), false );
     for ( UInt e = 0; e < myElems.size(); e++ )
@@ -1243,6 +1257,7 @@ void GhostHandler<Mesh>::ghostMapOnElementsP1 ( graphPtr_Type elemGraph,
             }
         }
     }
+    timeSI.stop();
 
 #ifdef LIFEV_GHOSTHANDLER_DEBUG
     M_debugOut << "own SUBDOMAIN_INTERFACE points on proc " << M_me << std::endl;
@@ -1251,6 +1266,10 @@ void GhostHandler<Mesh>::ghostMapOnElementsP1 ( graphPtr_Type elemGraph,
         M_debugOut << *i << std::endl;
     }
 #endif
+
+    LifeChrono timeOP;
+    timeMgr.add( "overlapping points", &timeOP );
+    timeOP.start();
 
     std::vector<int> workingPoints ( mySubdIntPoints.begin(), mySubdIntPoints.end() );
     std::set<int> newPoints;
@@ -1312,9 +1331,12 @@ void GhostHandler<Mesh>::ghostMapOnElementsP1 ( graphPtr_Type elemGraph,
             workingPoints.assign ( newPoints.begin(), newPoints.end() );
         }
     }
+    timeOP.stop();
 
     // assign the augmentedElems to the element graph
     myElems.assign ( augmentedElemsSet.begin(), augmentedElemsSet.end() );
+
+    timeMgr.print();
 }
 
 template <typename Mesh>
