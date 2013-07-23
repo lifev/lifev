@@ -667,7 +667,7 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::updateNonLinearJacobi
       // Definition of F_0^{-T}(ta)
       minusT_Type FzeroAminusT = ExpressionDefinitions::minusT( ithFzeroA );
 
-      activeMinusTtensor_Type FAminusT = ExpressionMultimechanism::createActiveMinusTtensor( transpose( ithFzeroA ) , F_T);
+      activeMinusTtensor_Type FAminusT = ExpressionMultimechanism::createActiveMinusTtensor( F_T,transpose( ithFzeroA ));
       // Definition of C_a = F_0^{-T}(ta) * C_0 * F_0^{-1}(ta)
       tensorCmultiMech_Type Ca = ExpressionMultimechanism::activationRightCauchyGreen( FzeroAminusT, C, FzeroAminus1 );
 
@@ -876,7 +876,7 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeStiffness ( co
     * (M_stiff) *= 0.0;
 
     displayer->leaderPrint (" \n*********************************\n  ");
-    displayer->leaderPrint (" Non-Linear S-  Computing the Multi-mechanism nonlinear stiffness vector ");
+    displayer->leaderPrint (" Non-Linear S-  Computing the Multi-mechanism nonlinear stiffness vector \n");
     displayer->leaderPrint (" \n*********************************\n  ");
 
     // For anisotropic part of the Piola-Kirchhoff is assemble summing up the parts of the
@@ -900,7 +900,7 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeStiffness ( co
     // Definition of F^-T
     minusT_Type  F_T = ExpressionDefinitions::minusT( F );
 
-    displayer->leaderPrint (" Non-Linear S-  Computing reference configurations... ");
+    displayer->leaderPrint (" Non-Linear S-  Computing reference configurations... \n");
 
     // 1. Evaluating fiber stretch
     for( UInt i(0); i < this->M_vectorInterpolated.size() ; i++ )
@@ -968,6 +968,9 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeStiffness ( co
           // As in other classes, the specialization of the MapType = MapEpetra makes this expression
           // not always usable. When other maps will be available in LifeV, the class should be re-templated.
 
+          std::cout << "Norm inf of the vector: " << M_activationDisplacement[ i ]->normInf() << std::endl;
+          std::cout << "Norm 2 of the vector: " << M_activationDisplacement[ i ]->norm2() << std::endl;
+
           // Definition of F_0(ta)
           tensorF_Type ithFzeroA = ExpressionDefinitions::deformationGradient( this->M_dispETFESpace,  *(M_activationDisplacement[ i ]),
                                                                                this->M_offset, this->M_identity );
@@ -994,7 +997,7 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeStiffness ( co
           // Definition of F_0^{-T}(ta)
           minusT_Type FzeroAminusT = ExpressionDefinitions::minusT( ithFzeroA );
 
-          activeMinusTtensor_Type FAminusT = ExpressionMultimechanism::createActiveMinusTtensor( transpose( ithFzeroA ) , F_T);
+          activeMinusTtensor_Type FAminusT = ExpressionMultimechanism::createActiveMinusTtensor( F_T, transpose( ithFzeroA ) );
           // Definition of C_a = F_0^{-T}(ta) * C_0 * F_0^{-1}(ta)
           tensorCmultiMech_Type Ca = ExpressionMultimechanism::activationRightCauchyGreen( FzeroAminusT, C, FzeroAminus1 );
 
@@ -1020,21 +1023,32 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeStiffness ( co
           // The terms for the piola kirchhoff tensor come from the holzapfel model. Then they are rescaled
           // according to the change of variable given by the multi-mechanism model.
 
-          // First term:
-          // 2 alpha_i J^(-2.0/3.0) ( \bar{I_4} - 1 ) exp( gamma_i * (\bar{I_4} - 1)^2 ) * F M : \grad phi_i
-          // where alpha_i and gamma_i are the fiber parameters and M is the 2nd order tensor of type f_i \otimes \ f_i
+
+
           integrate ( elements ( this->M_dispETFESpace->mesh() ),
                       this->M_dispFESpace->qr(),
                       this->M_dispETFESpace,
-                      atan( IVithBar - value( stretch ) , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  )  * JactiveEl *
-                      (value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * JactiveEl * ( IVithBar - value( stretch ) ) *
-                       exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value( stretch ) ) * ( IVithBar- value( stretch ) )  ) *
-                       dot( ( F  * Mith ) * F_T, grad( phi_i ) ) )
+                      J *
+                       dot(  F, grad( phi_i ) )
                       ) >> this->M_stiff;
 
-          // Second term:
-          // 2 alpha_i J^(-2.0/3.0) ( \bar{I_4} - 1 ) exp( gamma_i * (\bar{I_4} - 1)^2 ) * ( 1.0/3.0 * I_4 ) F^-T : \grad phi_i
-          // where alpha_i and gamma_i are the fiber parameters and M is the 2nd order tensor of type f_i \otimes \ f_i
+
+          // // First term:
+          // // 2 alpha_i J^(-2.0/3.0) ( \bar{I_4} - 1 ) exp( gamma_i * (\bar{I_4} - 1)^2 ) * F M : \grad phi_i
+          // // where alpha_i and gamma_i are the fiber parameters and M is the 2nd order tensor of type f_i \otimes \ f_i
+          // integrate ( elements ( this->M_dispETFESpace->mesh() ),
+          //             this->M_dispFESpace->qr(),
+          //             this->M_dispETFESpace,
+          //             atan( IVithBar - value( stretch ) , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  )  * JactiveEl *
+          //             (value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * JactiveEl * ( IVithBar - value( stretch ) ) *
+          //              exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value( stretch ) ) * ( IVithBar- value( stretch ) )  ) *
+          //              dot( ( Fa  * Mith ) * FzeroAminusT, grad( phi_i ) ) )
+          //             ) >> this->M_stiff;
+
+
+          // // Second term:
+          // // 2 alpha_i J^(-2.0/3.0) ( \bar{I_4} - 1 ) exp( gamma_i * (\bar{I_4} - 1)^2 ) * ( 1.0/3.0 * I_4 ) F^-T : \grad phi_i
+          // // where alpha_i and gamma_i are the fiber parameters and M is the 2nd order tensor of type f_i \otimes \ f_i
           // integrate ( elements ( this->M_dispETFESpace->mesh() ),
           //             this->M_dispFESpace->qr(),
           //             this->M_dispETFESpace,

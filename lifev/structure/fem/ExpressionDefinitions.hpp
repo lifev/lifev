@@ -568,8 +568,8 @@ typedef ExpressionVectorFromNonConstantScalar< difference_Type, 3>  expressionVe
 typedef ExpressionProduct< ExpressionDefinitions::deformationGradient_Type,
                            ExpressionDefinitions::inverseTensor_Type >   deformationActivatedTensor_Type;
 
-typedef ExpressionProduct< ExpressionTranspose<ExpressionDefinitions::deformationGradient_Type> ,
-                           ExpressionDefinitions::minusTransposedTensor_Type >   activeMinusTtensor_Type;
+typedef ExpressionProduct< ExpressionDefinitions::minusTransposedTensor_Type,
+                           ExpressionTranspose<ExpressionDefinitions::deformationGradient_Type> >   activeMinusTtensor_Type;
 
 
 typedef ExpressionProduct<
@@ -673,10 +673,10 @@ activeIsochoricStretch_Type activeIsochoricFourthInvariant( const activePowerExp
     return activeIsochoricStretch_Type( activeJ, activeI4 );
 }
 
-activeMinusTtensor_Type createActiveMinusTtensor( const ExpressionTranspose<ExpressionDefinitions::deformationGradient_Type> FzeroA,
-						  const ExpressionDefinitions::minusTransposedTensor_Type FminusT)
+activeMinusTtensor_Type createActiveMinusTtensor( const ExpressionDefinitions::minusTransposedTensor_Type FminusT,
+                                                  const ExpressionTranspose<ExpressionDefinitions::deformationGradient_Type> FzeroA)
 {
-  return activeMinusTtensor_Type ( FzeroA, FminusT );
+    return activeMinusTtensor_Type ( FminusT, FzeroA );
 }
 
 activeLinearization_Type activatedLinearization( const ExpressionDphiJ der,
