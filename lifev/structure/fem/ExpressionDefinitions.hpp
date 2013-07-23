@@ -552,6 +552,7 @@ tensorialPart_distrType tensorialPartPiola( const Real kappa,
 
 } // end namespace ExpressionDistributedModel
 
+// name space that is specific for the Anisotropic Multi-mechanism class.
 namespace ExpressionMultimechanism
 {
 using namespace ExpressionAssembly;
@@ -593,6 +594,13 @@ typedef ExpressionProduct< activePowerExpression_Type, activeStretch_Type>      
 
 typedef ExpressionProduct< ExpressionDefinitions::deformationGradient_Type,
                            ExpressionDefinitions::interpolatedValue_Type> activatedFiber_Type;
+
+typedef ExpressionProduct< ExpressionDphiJ,
+                           ExpressionDefinitions::inverseTensor_Type>     activeLinearization_Type;
+
+
+typedef ExpressionProduct< ExpressionDefinitions::minusTransposedTensor_Type,
+                           ExpressionDphiI>                               activeTestGradient_Type;
 
 
 difference_Type absoluteStretch( const ExpressionDefinitions::isochoricStretch_Type IVbar,
@@ -671,6 +679,16 @@ activeMinusTtensor_Type createActiveMinusTtensor( const ExpressionTranspose<Expr
   return activeMinusTtensor_Type ( FzeroA, FminusT );
 }
 
+activeLinearization_Type activatedLinearization( const ExpressionDphiJ der,
+                                                 const ExpressionDefinitions::inverseTensor_Type inverse)
+{
+    return activeLinearization_Type( der , inverse);
+}
+activeTestGradient_Type activatedTestGradient( const ExpressionDefinitions::minusTransposedTensor_Type FAminusT,
+                                               const ExpressionDphiI gradTest)
+{
+    return activeTestGradient_Type ( FAminusT, gradTest );
+}
 }// end namespace ExpressionDistributedModel
 #endif
 
