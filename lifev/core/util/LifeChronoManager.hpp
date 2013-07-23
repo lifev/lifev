@@ -56,54 +56,57 @@ public:
     typedef std::map<std::string const, timer_Type*> timerList_Type;
     typedef boost::shared_ptr<Epetra_Comm const> commPtr_Type;
 
-    LifeChronoManager( commPtr_Type comm ):
-        M_stringMaxSize( 16 ),
-        M_comm( comm )
+    LifeChronoManager ( commPtr_Type comm ) :
+        M_stringMaxSize ( 16 ),
+        M_comm ( comm )
     {}
 
-    void add( std::string const & name, timer_Type* timer )
+    void add ( std::string const& name, timer_Type* timer )
     {
         UInt const nameSize = name.size();
-        if( nameSize > M_stringMaxSize ) M_stringMaxSize = nameSize;
-        M_timerList.insert( std::make_pair( name, timer) );
+        if ( nameSize > M_stringMaxSize )
+        {
+            M_stringMaxSize = nameSize;
+        }
+        M_timerList.insert ( std::make_pair ( name, timer) );
     }
 
-    void print( std::ostream & out = std::cout )
+    void print ( std::ostream& out = std::cout )
     {
         UInt const printSize = 80;
         bool isLeader = M_comm->MyPID() == 0;
 
-        std::vector<Real> times( M_timerList.size() );
+        std::vector<Real> times ( M_timerList.size() );
         Real globalTime = 0;
         UInt count = 0;
-        for( typename timerList_Type::const_iterator it = M_timerList.begin();
-             it != M_timerList.end(); ++it, count++ )
+        for ( typename timerList_Type::const_iterator it = M_timerList.begin();
+                it != M_timerList.end(); ++it, count++ )
         {
-            times[ count ] = it->second->globalDiff( *M_comm );
+            times[ count ] = it->second->globalDiff ( *M_comm );
             globalTime += times[ count ];
         }
 
-        if( isLeader )
+        if ( isLeader )
         {
-            out << std::string(printSize, '=') << std::endl;
-            out << std::setw( M_stringMaxSize ) << "Name";
-            out << std::setw( 16 ) << "Time (s)";
-            out << std::setw( 16 ) << "Perc (%)" << std::endl;
-            out << std::string(printSize, '=') << std::endl;
+            out << std::string (printSize, '=') << std::endl;
+            out << std::setw ( M_stringMaxSize ) << "Name";
+            out << std::setw ( 16 ) << "Time (s)";
+            out << std::setw ( 16 ) << "Perc (%)" << std::endl;
+            out << std::string (printSize, '=') << std::endl;
 
             count = 0;
-            for( typename timerList_Type::const_iterator it = M_timerList.begin();
-                 it != M_timerList.end(); ++it, count++ )
+            for ( typename timerList_Type::const_iterator it = M_timerList.begin();
+                    it != M_timerList.end(); ++it, count++ )
             {
-                out << std::setw( M_stringMaxSize ) << it->first;
-                out << std::setw( 16 ) << std::fixed << std::setprecision(2) << times[ count ];
-                out << std::setw( 16 ) << std::fixed << std::setprecision(2) << 100.* times[ count ] / globalTime << std::endl;
+                out << std::setw ( M_stringMaxSize ) << it->first;
+                out << std::setw ( 16 ) << std::fixed << std::setprecision (2) << times[ count ];
+                out << std::setw ( 16 ) << std::fixed << std::setprecision (2) << 100.* times[ count ] / globalTime << std::endl;
             }
-            out << std::string(printSize, '=') << std::endl;
-            out << std::setw( M_stringMaxSize ) << "Total Time";
-            out << std::setw( 16 ) << std::fixed << std::setprecision(2) << globalTime;
-            out << std::setw( 16 ) << std::fixed << std::setprecision(2) << 100. << std::endl;
-            out << std::string(printSize, '=') << std::endl;
+            out << std::string (printSize, '=') << std::endl;
+            out << std::setw ( M_stringMaxSize ) << "Total Time";
+            out << std::setw ( 16 ) << std::fixed << std::setprecision (2) << globalTime;
+            out << std::setw ( 16 ) << std::fixed << std::setprecision (2) << 100. << std::endl;
+            out << std::string (printSize, '=') << std::endl;
         }
     }
 
