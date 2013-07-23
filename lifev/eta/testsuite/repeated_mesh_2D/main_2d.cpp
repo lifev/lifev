@@ -68,16 +68,16 @@ Real exactSolution ( const Real& /* t */, const Real& x, const Real& y, const Re
 
 Real fRhs ( const Real& /* t */, const Real& /* x */, const Real& /* y */, const Real& /* z */ , const ID& i )
 {
-    switch( i )
+    switch ( i )
     {
-    case 0:
-        return 0.;
-        break;
-    case 1:
-        return 1.;
-        break;
-    default:
-        ERROR_MSG( "component not available!" );
+        case 0:
+            return 0.;
+            break;
+        case 1:
+            return 1.;
+            break;
+        default:
+            ERROR_MSG ( "component not available!" );
     }
 
     return 0.;
