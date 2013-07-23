@@ -1017,7 +1017,7 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeStiffness ( co
                       atan( IVithBar - value( stretch ) , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  ) *  ithJzeroA * (
                       value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * JactiveEl * ( IVithBar - value( stretch ) ) *
                       exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value( 1.0 ) ) * ( IVithBar- value( stretch ) )  ) *
-                      dot( ( Fa  * Mith ) * FzeroAminus1, grad( phi_i ) ) )
+                      dot( ( Fa  * Mith ) * FzeroAminusT, grad( phi_i ) ) )
                       ) >> this->M_stiff;
 
           // Second term:
@@ -1029,7 +1029,7 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeStiffness ( co
                       atan( IVithBar - value( stretch ) , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  ) * ithJzeroA *
                       ( value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * JactiveEl * ( IVithBar - value( stretch ) ) *
                       exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value( stretch ) ) * ( IVithBar- value( stretch ) )  ) *
-                      value( -1.0/3.0 ) * IVith * dot( FAminusT *  FzeroAminus1 , grad( phi_i ) ) )
+                      value( -1.0/3.0 ) * IVith * dot( FAminusT *  FzeroAminusT , grad( phi_i ) ) )
 		    ) >> this->M_stiff;
 
 
