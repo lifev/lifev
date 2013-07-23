@@ -68,16 +68,16 @@ Real exactSolution ( const Real& /* t */, const Real& x, const Real& y, const Re
 
 Real fRhs ( const Real& /* t */, const Real& /* x */, const Real& /* y */, const Real& /* z */ , const ID& i )
 {
-    switch( i )
+    switch ( i )
     {
-    case 0:
-        return 0.;
-        break;
-    case 1:
-        return 1.;
-        break;
-    default:
-        ERROR_MSG( "component not available!" );
+        case 0:
+            return 0.;
+            break;
+        case 1:
+            return 1.;
+            break;
+        default:
+            ERROR_MSG ( "component not available!" );
     }
 
     return 0.;
@@ -118,10 +118,10 @@ int main ( int argc, char** argv )
 #else
         commPtr_Type comm ( new Epetra_SerialComm );
 #endif
-        LifeChronoManager<> chronoMgr( comm );
+        LifeChronoManager<> chronoMgr ( comm );
 
         LifeChrono initTime;
-        chronoMgr.add( "Initialization Time", &initTime );
+        chronoMgr.add ( "Initialization Time", &initTime );
         initTime.start();
 
         GetPot dataFile ( "data_2d" );
@@ -142,7 +142,7 @@ int main ( int argc, char** argv )
         // Build and partition the mesh
 
         LifeChrono meshTime;
-        chronoMgr.add( "Mesh reading/creation Time", &initTime );
+        chronoMgr.add ( "Mesh reading/creation Time", &initTime );
         meshTime.start();
 
         if ( verbose )
@@ -180,7 +180,7 @@ int main ( int argc, char** argv )
         }
 
         LifeChrono partTime;
-        chronoMgr.add( "Partition Time", &partTime );
+        chronoMgr.add ( "Partition Time", &partTime );
         partTime.start();
         meshPtr_Type localMesh;
         {
@@ -194,7 +194,7 @@ int main ( int argc, char** argv )
         localMeshNum[ 0 ] = localMesh->numElements();
         localMeshNum[ 1 ] = localMesh->numPoints();
         Int maxMeshNum[ 2 ] = { 0, 0 };
-        comm->MaxAll( localMeshNum, maxMeshNum, 2 );
+        comm->MaxAll ( localMeshNum, maxMeshNum, 2 );
 
         if ( isLeader )
         {
@@ -203,7 +203,7 @@ int main ( int argc, char** argv )
         }
 
         LifeChrono partTimeR;
-        chronoMgr.add( "Partition Time (R)", &partTimeR );
+        chronoMgr.add ( "Partition Time (R)", &partTimeR );
         partTimeR.start();
         meshPtr_Type localMeshR;
         {
@@ -218,7 +218,7 @@ int main ( int argc, char** argv )
         localMeshNum[ 1 ] = localMeshR->numPoints();
         maxMeshNum[ 0 ] = 0;
         maxMeshNum[ 1 ] = 0;
-        comm->MaxAll( localMeshNum, maxMeshNum, 2 );
+        comm->MaxAll ( localMeshNum, maxMeshNum, 2 );
 
         if ( isLeader )
         {
@@ -238,7 +238,7 @@ int main ( int argc, char** argv )
 
         fullMeshPtr.reset();
 #ifdef HAVE_LIFEV_DEBUG
-        ASSERT( fullMeshPtr.use_count() == 0, "full mesh not properly freed." );
+        ASSERT ( fullMeshPtr.use_count() == 0, "full mesh not properly freed." );
 #endif
         if ( verbose )
         {
@@ -252,7 +252,7 @@ int main ( int argc, char** argv )
             std::cout << " -- Building FESpaces ... " << std::flush;
         }
         LifeChrono feSpaceTime;
-        chronoMgr.add( "FESpace creation Time", &feSpaceTime );
+        chronoMgr.add ( "FESpace creation Time", &feSpaceTime );
         feSpaceTime.start();
         uSpaceStdPtr_Type uSpaceStd ( new uSpaceStd_Type ( localMesh, "P2", 2, comm ) );
         uSpacePtr_Type uSpace ( new uSpace_Type ( localMesh, &feTriaP2, & (uSpaceStd->fe().geoMap() ), comm) );
@@ -260,7 +260,7 @@ int main ( int argc, char** argv )
         feSpaceTime.stop();
 
         LifeChrono feSpaceTimeR;
-        chronoMgr.add( "FESpace creation Time (R)", &feSpaceTimeR );
+        chronoMgr.add ( "FESpace creation Time (R)", &feSpaceTimeR );
         feSpaceTimeR.start();
         uSpaceStdPtr_Type uSpaceStdR ( new uSpaceStd_Type ( localMeshR, "P2", 2, comm ) );
         uSpacePtr_Type uSpaceR ( new uSpace_Type ( localMeshR, &feTriaP2, & (uSpaceStdR->fe().geoMap() ), comm) );
@@ -284,13 +284,13 @@ int main ( int argc, char** argv )
         }
 
         LifeChrono matTime;
-        chronoMgr.add( "Matrix creation Time", &matTime );
+        chronoMgr.add ( "Matrix creation Time", &matTime );
         matTime.start();
         matrixPtr_Type systemMatrix ( new matrix_Type ( uSpace->map() | pSpace->map() ) );
         matTime.stop();
 
         LifeChrono assemblyTime;
-        chronoMgr.add( "Assembly Time", &assemblyTime );
+        chronoMgr.add ( "Assembly Time", &assemblyTime );
         assemblyTime.start();
         {
             using namespace ExpressionAssembly;
@@ -329,13 +329,13 @@ int main ( int argc, char** argv )
         assemblyTime.stop();
 
         LifeChrono matTimeR;
-        chronoMgr.add( "Matrix creation Time (R)", &matTimeR );
+        chronoMgr.add ( "Matrix creation Time (R)", &matTimeR );
         matTimeR.start();
         matrixPtr_Type systemMatrixR ( new matrix_Type ( uSpaceR->map() | pSpaceR->map(), 50, true ) );
         matTimeR.stop();
 
         LifeChrono assemblyTimeR;
-        chronoMgr.add( "Assembly Time (R)", &assemblyTimeR );
+        chronoMgr.add ( "Assembly Time (R)", &assemblyTimeR );
         assemblyTimeR.start();
         {
             using namespace ExpressionAssembly;
@@ -381,7 +381,7 @@ int main ( int argc, char** argv )
         // check that the assembled matrices are the same
 
         LifeChrono checkMatTime;
-        chronoMgr.add( "Check (Matrix) Time", &checkMatTime );
+        chronoMgr.add ( "Check (Matrix) Time", &checkMatTime );
         checkMatTime.start();
         matrix_Type matrixDiff ( *systemMatrix );
         matrixDiff -= *systemMatrixR;
@@ -400,7 +400,7 @@ int main ( int argc, char** argv )
         }
 
         LifeChrono rhsTime;
-        chronoMgr.add( "Rhs build Time", &rhsTime );
+        chronoMgr.add ( "Rhs build Time", &rhsTime );
         rhsTime.start();
         vector_Type rhs ( uSpaceStd->map() | pSpace->map(), Unique );
 
@@ -421,7 +421,7 @@ int main ( int argc, char** argv )
         rhsTime.stop();
 
         LifeChrono rhsTimeR;
-        chronoMgr.add( "Rhs build Time (R)", &rhsTimeR );
+        chronoMgr.add ( "Rhs build Time (R)", &rhsTimeR );
         rhsTimeR.start();
         vector_Type rhsR ( uSpaceStdR->map() | pSpaceR->map(), Unique, Zero );
 
@@ -442,7 +442,7 @@ int main ( int argc, char** argv )
         rhsTimeR.stop();
 
         LifeChrono checkVecTime;
-        chronoMgr.add( "Check (Vector) Time", &checkVecTime );
+        chronoMgr.add ( "Check (Vector) Time", &checkVecTime );
         checkVecTime.start();
         vector_Type vectorDiff ( rhs );
         vectorDiff -= rhsR;
