@@ -36,5 +36,6 @@ IF(ENABLE_ANISOTROPIC_LAW)
     example_bodyForces
     example_anisotropicTraction
     example_multimechanismTraction
+    example_debugExpressionMultimechanism
 )
 ENDIF()
