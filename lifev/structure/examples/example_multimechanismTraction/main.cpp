@@ -356,25 +356,25 @@ Structure::run3d()
     //! =================================================================================
     //! BC for StructuredCube4_test_structuralsolver.mesh
     //! =================================================================================
-    // BCh->addBC ("EdgesIn",      20,  Natural,   Component, nonZero, compy);
-    // BCh->addBC ("EdgesIn",      40,  Essential, Component, zero,    compy);
+    BCh->addBC ("EdgesIn",      20,  Natural,   Component, nonZero, compy);
+    BCh->addBC ("EdgesIn",      40,  Essential, Component, zero,    compy);
 
-    // //! Symmetry BC
-    // BCh->addBC ("EdgesIn",      50,   EssentialVertices, Component, zero, compxy);
-    // BCh->addBC ("EdgesIn",      30,   EssentialVertices, Component, zero, compyz);
-    // BCh->addBC ("EdgesIn",      80,   EssentialVertices, Component, zero, compxz);
-    // BCh->addBC ("EdgesIn",      100,  EssentialVertices,  Full, zero, 3);
+    //! Symmetry BC
+    BCh->addBC ("EdgesIn",      50,   EssentialVertices, Component, zero, compxy);
+    BCh->addBC ("EdgesIn",      30,   EssentialVertices, Component, zero, compyz);
+    BCh->addBC ("EdgesIn",      80,   EssentialVertices, Component, zero, compxz);
+    BCh->addBC ("EdgesIn",      100,  EssentialVertices,  Full, zero, 3);
 
-    // BCh->addBC ("EdgesIn",      7, Essential, Component , zero, compx);
-    // BCh->addBC ("EdgesIn",      3, Essential, Component , zero, compz);
+    BCh->addBC ("EdgesIn",      7, Essential, Component , zero, compx);
+    BCh->addBC ("EdgesIn",      3, Essential, Component , zero, compz);
     //! =================================================================================
 
     // Case of a tube
     //Condition for Inflation
-    BCh->addBC ("EdgesIn",      200, Natural,   Full, pressure, 3);
-    BCh->addBC ("EdgesIn",      40,  Natural,   Full, zero, 3);
-    BCh->addBC ("EdgesIn",      70,  Essential, Full, zero, 3);
-    BCh->addBC ("EdgesIn",      60,  Essential, Full, zero, 3);
+    // BCh->addBC ("EdgesIn",      200, Natural,   Full, pressure, 3);
+    // BCh->addBC ("EdgesIn",      40,  Natural,   Full, zero, 3);
+    // BCh->addBC ("EdgesIn",      70,  Essential, Full, zero, 3);
+    // BCh->addBC ("EdgesIn",      60,  Essential, Full, zero, 3);
 
     //! 1. Constructor of the structuralSolver
     StructuralOperator< RegionMesh<LinearTetra> > solid;
