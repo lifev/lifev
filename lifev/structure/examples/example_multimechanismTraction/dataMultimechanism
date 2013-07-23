@@ -40,10 +40,10 @@ solidTypeIsotropic 	= neoHookean		# linearVenantKirchhoff / nonLinearVenantKirch
 solidTypeAnisotropic = multimechanism
 
 [./fibers]
-numberFamilies  = 2
-stiffness       = '2.684564e+6 2.684564e+6'
-nonlinearity    = '1.0 1.0'
-stretch         = '1.05 1.05'
+numberFamilies  = 1
+stiffness       = '2.684564e+6'
+nonlinearity    = '1.0'
+stretch         = '1.20'
 smoothness      = 1000
 [./]
 

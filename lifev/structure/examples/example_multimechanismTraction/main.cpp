@@ -351,7 +351,7 @@ Structure::run3d()
     BCFunctionBase pressure;
 
     nonZero.setFunction (bcNonZero);
-    pressure.setFunction (smoothPressure);
+    pressure.setFunction (traction);
 
     //! =================================================================================
     //! BC for StructuredCube4_test_structuralsolver.mesh

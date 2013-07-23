@@ -222,43 +222,43 @@ Real bcNonZero (const Real& t, const Real&  X, const Real& Y, const Real& Z, con
 
     }
 
-Real bcNonZeroSecondOrderExponential (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
+Real traction (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
 {
-    return  19180.;
+    return  10000.;
 }
 
 
 //----------------------------------------------Fibers Directions--------------
 Real Family1 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
 {
-    Real theta =  0.8426; // value for anisotropic characterization taken from Robertson // ( PI / 6.0 );
-    Real thetaChangeOfVariable = std::atan(  y / x );
+    Real theta =  0.0; // value for anisotropic characterization taken from Robertson // ( PI / 6.0 );
+    //Real thetaChangeOfVariable = std::atan(  y / x );
 
-    if( x < 0 )
-    {
-        // This is due to the periodicity of std::atan ( ref. official documentation )
-        thetaChangeOfVariable += PI;
-    }
+    // if( x < 0 )
+    // {
+    //     // This is due to the periodicity of std::atan ( ref. official documentation )
+    //     thetaChangeOfVariable += PI;
+    // }
 
     switch (i)
     {
         case 0:
 	    // Tube
-            return - std::sin( thetaChangeOfVariable ) * std::cos( theta );
+        //    return - std::sin( thetaChangeOfVariable ) * std::cos( theta );
 	    // Cube
-            // return std::sin( theta );
+            return std::sin( theta );
             break;
         case 1:
 	    // Tube
-            return   std::cos( thetaChangeOfVariable ) * std::cos( theta );
+            //return   std::cos( thetaChangeOfVariable ) * std::cos( theta );
 	    // Cube
-            // return std::cos( theta );
+            return std::cos( theta );
             break;
         case 2:
 	    // Tube
-            return std::sin( theta );
+            //return std::sin( theta );
 	    // Cube
-            // return 0.0;
+             return 0.0;
             break;
         default:
             ERROR_MSG ("This entrie is not allowed: ud_functions.hpp");
