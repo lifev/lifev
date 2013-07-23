@@ -340,6 +340,9 @@ private:
     */
     void finalSetup();
 
+    //! Initialize M_entityPID
+    void fillEntityPID();
+
     //! Mark ghost entities
     /*!
       Mark all ghost entities that have been added for overlapping partitions
@@ -1535,20 +1538,26 @@ void MeshPartitioner<MeshType>::execute()
 
     LifeChrono timeEP;
     timeEP.start();
-    GhostHandler<mesh_Type> gh ( M_originalMesh, M_comm );
-    gh.fillEntityPID ( M_elementDomains, M_entityPID );
+    fillEntityPID ();
     timeEP.stop();
-    double timeDiff = timeEP.globalDiff( *M_comm );
-    if( !M_me ) std::cout << "timeEP = " << timeDiff << std::endl;
+    double timeDiff = timeEP.globalDiff ( *M_comm );
+    if ( !M_me )
+    {
+        std::cout << "timeEP = " << timeDiff << std::endl;
+    }
     LifeChrono timeGM;
     timeGM.start();
     if ( M_partitionOverlap > 0 )
     {
-        gh.ghostMapOnElementsP1 ( M_elementDomains, M_entityPID[ 3 ], M_partitionOverlap );
+        GhostHandler<mesh_Type> gh ( M_originalMesh, M_comm );
+        gh.extendGraphFE ( M_elementDomains, M_entityPID[ 3 ], M_partitionOverlap );
     }
     timeGM.stop();
-    timeDiff = timeGM.globalDiff( *M_comm );
-    if( !M_me ) std::cout << "timeGM = " << timeDiff << std::endl;
+    timeDiff = timeGM.globalDiff ( *M_comm );
+    if ( !M_me )
+    {
+        std::cout << "timeGM = " << timeDiff << std::endl;
+    }
 
     doPartitionMesh();
 
@@ -1563,6 +1572,68 @@ void MeshPartitioner<MeshType>::execute()
     // not needed anymore
     // ***************************************
     cleanUp();
+}
+
+template<typename MeshType>
+void MeshPartitioner<MeshType>::fillEntityPID ()
+{
+    // initialize pointPID to NumProc
+    std::vector<UInt>& pointPID = M_entityPID[ 3 ];
+    std::vector<UInt>& elemPID = M_entityPID[ 0 ];
+    std::vector<UInt>& facetPID = M_entityPID[ 1 ];
+    std::vector<UInt>& ridgePID = M_entityPID[ 2 ];
+    pointPID.resize ( M_originalMesh->numPoints(), M_comm->NumProc() );
+    elemPID.resize ( M_originalMesh->numElements(), M_comm->NumProc() );
+    facetPID.resize ( M_originalMesh->numFacets(), M_comm->NumProc() );
+    ridgePID.resize ( M_originalMesh->numRidges(), M_comm->NumProc() );
+
+    // @todo: check if parallel building + comm is faster
+    for ( UInt p = 0; p < static_cast<UInt> ( M_comm->NumProc() ); p++ )
+    {
+        for ( UInt e = 0; e < (*M_elementDomains) [ p ].size(); e++ )
+        {
+            // point block
+            for ( UInt k = 0; k < mesh_Type::element_Type::S_numPoints; k++ )
+            {
+                const ID& pointID = M_originalMesh->element ( (*M_elementDomains) [ p ][ e ] ).point ( k ).id();
+                const UInt& pointCurrentPID = pointPID[ pointID ];
+                // pointPID should be the minimum between the proc that own it
+                if ( p < pointCurrentPID )
+                {
+                    pointPID[ pointID ] = p;
+                }
+            }
+
+            // elem block
+            const ID& elemID = M_originalMesh->element ( (*M_elementDomains) [ p ][ e ] ).id();
+            // elemPID is always at its initialization value
+            elemPID[ elemID ] = p;
+
+            // facet block
+            for ( UInt k = 0; k < mesh_Type::element_Type::S_numFacets; k++ )
+            {
+                const ID& facetID = M_originalMesh->facet ( M_originalMesh->localFacetId ( elemID, k ) ).id();
+                const UInt& facetCurrentPID = facetPID[ facetID ];
+                // facetPID should be the minimum between the proc that own it
+                if ( p < facetCurrentPID )
+                {
+                    facetPID[ facetID ] = p;
+                }
+            }
+
+            // ridge block
+            for ( UInt k = 0; k < mesh_Type::element_Type::S_numRidges; k++ )
+            {
+                const ID& ridgeID = M_originalMesh->ridge ( M_originalMesh->localRidgeId ( elemID, k ) ).id();
+                const UInt& ridgeCurrentPID = ridgePID[ ridgeID ];
+                // ridgePID should be the minimum between the proc that own it
+                if ( p < ridgeCurrentPID )
+                {
+                    ridgePID[ ridgeID ] = p;
+                }
+            }
+        }
+    }
 }
 
 template<typename MeshType>
