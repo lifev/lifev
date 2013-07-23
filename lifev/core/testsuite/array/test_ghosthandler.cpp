@@ -237,8 +237,8 @@ int main ( int argc, char* argv[] )
         ghostP0.setUp();
 
         MapEpetra mapP0 ( feSpaceP0->map() );
-        MapEpetra mapP0P0 ( ghostP0.ghostMapOnElementsP0() );
-        MapEpetra mapP0P1 ( ghostP0.ghostMapOnElementsP1 ( dataFile ( "ghost/overlap", 2 ) ) );
+        MapEpetra mapP0P0 ( ghostP0.ghostMapOnElementsFV() );
+        MapEpetra mapP0P1 ( ghostP0.ghostMapOnElementsFE ( dataFile ( "ghost/overlap", 2 ) ) );
 
         fileOut << "=================== mapP0 Unique" << std::endl;
         fileOut << "+---+---+---+---+   +---+---+---+---+" << std::endl;
