@@ -272,11 +272,11 @@ Real Family2 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, c
     Real theta = ( - PI / 6.0 );
     Real thetaChangeOfVariable = std::atan( y / x );
 
-    if( x < 0 )
-    {
-        // This is due to the periodicity of std::atan ( ref. official documentation )
-        thetaChangeOfVariable += PI;
-    }
+    // if( x < 0 )
+    // {
+    //     // This is due to the periodicity of std::atan ( ref. official documentation )
+    //     thetaChangeOfVariable += PI;
+    // }
 
     switch (i)
     {

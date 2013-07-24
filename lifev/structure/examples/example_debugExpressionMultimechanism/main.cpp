@@ -624,6 +624,14 @@ Structure::run3d()
     std::cout << "Norm of the J_0(ta) : " << JacobianZeroA->normInf() << std::endl;
     std::cout << "Norm of the J_a     : " << JacobianA->normInf() << std::endl;
 
+    // The patch area in vectorial form
+    ExpressionVectorFromNonConstantScalar<ExpressionMeas, 3  > vMeas( meas_K );
+    evaluateNode( elements ( dETFESpace->mesh() ),
+		  fakeQuadratureRule,
+		  dETFESpace,
+		  dot( vMeas , phi_i )
+		  ) >> patchAreaVector;
+
 
     for( UInt i(0); i < pointerToVectorOfFamilies->size( ); i++ )
     {
@@ -692,9 +700,6 @@ Structure::run3d()
                       (value( 2.0 ) * value( dataStructure->ithStiffnessFibers( i ) ) * JactiveEl * ( IVithBar - value( stretch ) ) *
                        exp( value( dataStructure->ithNonlinearityFibers( i ) ) * ( IVithBar- value( stretch ) ) * ( IVithBar- value( stretch ) )  ) )  * phi_i
                       ) >> scalarExpressionMultimechanism[ i ];
-
-
-
         *( scalarExpressionMultimechanism[ i ] ) = *( scalarExpressionMultimechanism[ i ] ) / *patchAreaVectorScalar;
 
 	// exporting the components of the Piola-Kirchhoff tensor
@@ -728,14 +733,6 @@ Structure::run3d()
 	ExpressionVectorFromNonConstantMatrix< firstPartPiolaMultimech_Type,3 ,3  > P_i1( firstPartPiola, 0 );
 	ExpressionVectorFromNonConstantMatrix< firstPartPiolaMultimech_Type,3 ,3 > P_i2( firstPartPiola, 1 );
 	ExpressionVectorFromNonConstantMatrix< firstPartPiolaMultimech_Type,3 ,3 > P_i3( firstPartPiola, 2 );
-
-	// The patch area in vectorial form
-	ExpressionVectorFromNonConstantScalar<ExpressionMeas, 3  > vMeas( meas_K );
-	evaluateNode( elements ( dETFESpace->mesh() ),
-		      fakeQuadratureRule,
-		      dETFESpace,
-		      dot( vMeas , phi_i )
-		      ) >> patchAreaVector;
 
         evaluateNode( elements ( dETFESpace->mesh() ),
                       fakeQuadratureRule,
