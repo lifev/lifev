@@ -925,20 +925,20 @@ typename GhostHandler<MeshType>::map_Type& GhostHandler<MeshType>::ghostMapOnEdg
     }
 
     // set up Unique (first) and Repeated edges based on the GHOST flag
-    std::pair< std::vector<Int>, std::vector<Int> > myGlobalElements;
-    myGlobalElements.first.reserve ( M_localMesh->numEdges() );
-    myGlobalElements.second.reserve ( M_localMesh->numEdges() );
+    MapEpetraData mapData;
+    mapData.unique.reserve   ( M_localMesh->numEdges() );
+    mapData.repeated.reserve ( M_localMesh->numEdges() );
     // loop on local mesh edges
     for ( ID ie = 0; ie < M_localMesh->numEdges(); ie++ )
     {
-        myGlobalElements.second.push_back ( M_localMesh->edge ( ie ).id() );
+        mapData.repeated.push_back ( M_localMesh->edge ( ie ).id() );
         if ( M_localMesh->edge ( ie ).isOwned() )
         {
-            myGlobalElements.first.push_back ( M_localMesh->edge ( ie ).id() );
+            mapData.unique.push_back ( M_localMesh->edge ( ie ).id() );
         }
     }
 
-    M_ghostMapOnEdges.reset ( new map_Type ( myGlobalElements, M_comm ) );
+    M_ghostMapOnEdges.reset ( new map_Type ( mapData, M_comm ) );
 
     if ( overlap > 0 )
     {
@@ -947,15 +947,15 @@ typename GhostHandler<MeshType>::map_Type& GhostHandler<MeshType>::ghostMapOnEdg
         std::set<Int> myGlobalElementsSet;
         std::set<Int> addedElementsSet;
 
-        for (  UInt k ( 0 ); k < myGlobalElements.second.size(); k++ )
+        for (  UInt k ( 0 ); k < mapData.repeated.size(); k++ )
         {
-            typename mesh_Type::edge_Type const& edge = M_fullMesh->edge ( myGlobalElements.second[ k ] );
+            typename mesh_Type::edge_Type const& edge = M_fullMesh->edge ( mapData.repeated[ k ] );
             for ( UInt edgePoint = 0; edgePoint < mesh_Type::edge_Type::S_numPoints; edgePoint++ )
             {
                 addedElementsSet.insert ( edge.point ( edgePoint ).id() );
             }
         }
-        ( myGlobalElements.second.begin(), myGlobalElements.second.end() );
+        ( mapData.repeated.begin(), mapData.repeated.end() );
 
 
         // @todo: optimize this!!
@@ -987,9 +987,13 @@ typename GhostHandler<MeshType>::map_Type& GhostHandler<MeshType>::ghostMapOnEdg
             }
         }
 
-        myGlobalElements.second.assign ( myGlobalElementsSet.begin(), myGlobalElementsSet.end() );
+        mapData.repeated.assign ( myGlobalElementsSet.begin(), myGlobalElementsSet.end() );
 
-        map_Type::map_ptrtype repeatedMap ( new Epetra_Map ( -1, myGlobalElements.second.size(), &myGlobalElements.second[0], 0, *M_comm ) );
+        map_Type::map_ptrtype repeatedMap ( new Epetra_Map ( -1,
+                                                             mapData.repeated.size(),
+                                                             &mapData.repeated[0],
+                                                             0,
+                                                             *M_comm ) );
         ghostMap.setMap ( repeatedMap, Repeated );
     }
 

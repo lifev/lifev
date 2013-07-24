@@ -60,7 +60,6 @@
 namespace LifeV
 {
 
-
 //! MapEpetra - Wrapper for Epetra_Map
 /*!
   @author Gilles Fourestey <gilles.fourestey@epfl.ch>
@@ -116,10 +115,13 @@ public:
                 Int* myGlobalElements,
                 const comm_ptrtype& commPtr );
 
-    MapEpetra ( std::pair<std::vector<Int>, std::vector<Int> > myGlobalElements,
-                const comm_ptrtype& commPtr );
-
-    MapEpetra ( MapEpetraData const& mapData, comm_ptrtype const& commPtr );
+    //! Constructor
+    /*!
+      To define a linear map, set MyGlobalElements = 0
+      @param mapData Structure containing Ids for the local Unique and Repeated map
+      @param commPtr Pointer to the communicator
+    */
+    MapEpetra ( mapData_Type const& mapData, comm_ptrtype const& commPtr );
 
     //! Constructor
     /*
