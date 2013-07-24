@@ -23,8 +23,8 @@ nameFile   = resistance80-scaledAndTranslated
     [../physics]
     density         = 1.0           # density   [ g / cm^3 ]
     viscosity       = 0.03          # viscosity [ Poise ]
-    resistance      = 423557.0176   # resistance  ( 80 mmHg * s / ml ) [ dyn * s / cm^5 ]
-    hydrostatic     = 113305        # hydrostatic pressure [ dyn / cm^2 ]
+    resistance      = 0.00   # resistance  ( 80 mmHg * s / ml ) [ dyn * s / cm^5 ]
+    hydrostatic     = 0.0        # hydrostatic pressure [ dyn / cm^2 ]
 
     [../time_discretization]
     initialtime     = 0.
@@ -34,7 +34,7 @@ nameFile   = resistance80-scaledAndTranslated
 
     [../space_discretization]
     mesh_dir        = ./
-    mesh_file       = tubeFluid.mesh
+    mesh_file       = unstructuredACAveryFine-fluidNOBL.mesh
     mesh_type       = .mesh
 
     verbose         = 0             # verbose during mesh-reading

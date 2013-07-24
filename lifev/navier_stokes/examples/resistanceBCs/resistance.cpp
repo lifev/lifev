@@ -67,7 +67,7 @@
 using namespace LifeV;
 
 const int INLET       = 2;
-const int WALL        = 100;
+const int WALL        = 200;
 const int OUTLET      = 3;
 const int RINGIN      = 20;
 const int RINGOUT     = 30;
@@ -142,55 +142,55 @@ struct Resistance::Private
     static Real fluxFunctionAneurysm (const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
     {
 
-        Real fluxFinal;
+        Real fluxFinal(0.17);
         Real rampAmpl (0.4);
         Real dt (0.001);
 
-        if ( t <= rampAmpl )
-        {
-            fluxFinal = ( 0.09503 / rampAmpl) * t;
-        }
-        else
-        {
+        // if ( t <= rampAmpl )
+        // {
+        //     fluxFinal = ( 0.09503 / rampAmpl) * t;
+        // }
+        // else
+        // {
 
 
-            // We change the flux for our geometry
-            const Real pi   = 3.141592653589793;
-            const Real area = 0.0034212; // BigMesh
+        //     // We change the flux for our geometry
+        //     const Real pi   = 3.141592653589793;
+        //     const Real area = 0.0034212; // BigMesh
 
-            const Real areaFactor = area / ( 0.195 * 0.195 * pi);
-            //const Real Average = (48.21 * pow (area, 1.84) ) * 60; //Mean Cebral's Flux per minut
+        //     const Real areaFactor = area / ( 0.195 * 0.195 * pi);
+        //     //const Real Average = (48.21 * pow (area, 1.84) ) * 60; //Mean Cebral's Flux per minut
 
-            // Unit conversion from ml/min to cm^3/s
-            const Real unitFactor = 1. / 60.;
+        //     // Unit conversion from ml/min to cm^3/s
+        //     const Real unitFactor = 1. / 60.;
 
-            // T is the period of the cardiac cycle
-            const Real T          = 0.8;
+        //     // T is the period of the cardiac cycle
+        //     const Real T          = 0.8;
 
-            // a0 is the average VFR (the value is taken from Karniadakis p970)
-            const Real a0         = 255;
-            //const Real volumetric = Average / a0; //VolumetricFactor per minut
+        //     // a0 is the average VFR (the value is taken from Karniadakis p970)
+        //     const Real a0         = 255;
+        //     //const Real volumetric = Average / a0; //VolumetricFactor per minut
 
-            // Fourrier
-            const Int M (7);
-            const Real a[M] = { -0.152001, -0.111619, 0.043304, 0.028871, 0.002098, -0.027237, -0.000557};
-            const Real b[M] = { 0.129013, -0.031435, -0.086106, 0.028263, 0.010177, 0.012160, -0.026303};
+        //     // Fourrier
+        //     const Int M (7);
+        //     const Real a[M] = { -0.152001, -0.111619, 0.043304, 0.028871, 0.002098, -0.027237, -0.000557};
+        //     const Real b[M] = { 0.129013, -0.031435, -0.086106, 0.028263, 0.010177, 0.012160, -0.026303};
 
-            Real flux (0);
-            //      const Real xi(2*pi*t/T);
-            const Real xi (2 * pi * (t - rampAmpl + dt) / T);
+        //     Real flux (0);
+        //     //      const Real xi(2*pi*t/T);
+        //     const Real xi (2 * pi * (t - rampAmpl + dt) / T);
 
-            flux = a0;
-            Int k (1);
-            for (; k <= M ; ++k)
-            {
-                flux += a0 * (a[k - 1] * cos (k * xi) + b[k - 1] * sin (k * xi) );
-            }
+        //     flux = a0;
+        //     Int k (1);
+        //     for (; k <= M ; ++k)
+        //     {
+        //         flux += a0 * (a[k - 1] * cos (k * xi) + b[k - 1] * sin (k * xi) );
+        //     }
 
-            //return - (flux * areaFactor * unitFactor);
-            fluxFinal =  (flux * areaFactor * unitFactor);
-            fluxFinal = fluxFinal - 20 * area;
-        }
+        //     //return - (flux * areaFactor * unitFactor);
+        //     fluxFinal =  (flux * areaFactor * unitFactor);
+        //     fluxFinal = fluxFinal - 20 * area;
+        // }
 
         return fluxFinal;
 
@@ -208,28 +208,28 @@ struct Resistance::Private
 
         Real flux (fluxFunctionAneurysm (t, x, y, z, i) );
 
-        Real area (0.0034212);
+        Real area (0.0033);
 
         //Parabolic profile
-        Real radius(0.033);
+        Real radius( std::sqrt( area / 3.14159265359 ) );
         Real radiusSquared = radius * radius;
         Real peak(0);
-        peak = ( flux ) / ( area );
+        peak = ( 2 * flux ) / ( area );
 
         switch (i)
         {
         case 0:
             // Flat profile: flux / area;
             // return n1 * flux / area;
-            return n1 * std::max(0.0,( peak * ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) )) ;
+            return n1 * std::max( 0.0, peak * ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) );
         case 1:
             // Flat profile: flux / area;
             //return n2 * flux / area;
-            return n2 * std::max(0.0,( peak * ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) )) ;
+            return n2 * std::max( 0.0 , peak * ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) );
         case 2:
             // Flat profile: flux / area;
             // return n3 * flux / area;
-            return n3 * std::max(0.0,( peak * ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) )) ;
+            return n3 * std::max( 0.0, peak * ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) );
         default:
             return 0.0;
         }
@@ -331,8 +331,6 @@ Resistance::run()
     //cylinder
 
     bcH.addBC ( "Inlet",    INLET,    Essential,   Full,  uIn  , 3 );
-    bcH.addBC ( "Ringin",   RINGIN,   Essential,   Full,  uZero, 3 );
-    bcH.addBC ( "Ringout",  RINGOUT,  Essential,   Full,  uZero, 3 );
     bcH.addBC ( "Wall",     WALL,     Essential,   Full,  uZero, 3 );
 
     bcH.addBC ( "Outlet",   OUTLET,   Natural,     Normal, resistanceBC );
@@ -353,14 +351,6 @@ Resistance::run()
     {
         MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, parameters->comm);
         meshPtr = meshPart.meshPartition();
-    }
-    if (verbose)
-    {
-        std::cout << std::endl;
-    }
-    if (verbose)
-    {
-        std::cout << "Time discretization order " << oseenData->dataTimeAdvance()->orderBDF() << std::endl;
     }
 
     //oseenData.meshData()->setMesh(meshPtr);
@@ -473,24 +463,21 @@ Resistance::run()
 
     for ( Real time = t0 + dt ; time <= tFinal + dt / 2.; time += dt, iter++)
     {
-        if( verbose )
-        {
-            std::cout << "Inlet flux:"  << fluid.flux( 2, *fluid.solution() ) << std::endl;
-            std::cout << "Outlet flux:" << fluid.flux( 3, *fluid.solution() ) << std::endl;
-        }
+
+        std::cout << "Inlet area: " << fluid.area( INLET ) << std::endl;
 
         // Updating the Neumann BC for resistance
         outFlowBC.renewParameters( fluid, *velAndPressure );
-        if ( verbose )
-        {
-            std::cout << std::endl;
-            std::cout << "Name: "       << outFlowBC.name() << std::endl;
-            std::cout << "Resistance: " << outFlowBC.resistance() << std::endl;
-            std::cout << "Flow: "       << outFlowBC.flow() << std::endl;
-            std::cout << "Hydrostatic: " << outFlowBC.hydrostatic() << std::endl;
-            std::cout << "Total Pressure: " << outFlowBC.outP() << std::endl;
-            std::cout << std::endl;
-        }
+        // if ( verbose )
+        // {
+        //     std::cout << std::endl;
+        //     std::cout << "Name: "       << outFlowBC.name() << std::endl;
+        //     std::cout << "Resistance: " << outFlowBC.resistance() << std::endl;
+        //     std::cout << "Flow: "       << outFlowBC.flow() << std::endl;
+        //     std::cout << "Hydrostatic: " << outFlowBC.hydrostatic() << std::endl;
+        //     std::cout << "Total Pressure: " << outFlowBC.outP() << std::endl;
+        //     std::cout << std::endl;
+        // }
 
         oseenData->dataTime()->setTime (time);
 
@@ -508,10 +495,10 @@ Resistance::run()
 
         *velAndPressure = *fluid.solution();
 
-        if ( verbose )
-        {
-            std::cout << "Post-processing!" << std::endl;
-        }
+        // if ( verbose )
+        // {
+        //     std::cout << "Post-processing!" << std::endl;
+        // }
         exporter.postProcess ( time );
 
         MPI_Barrier (MPI_COMM_WORLD);
