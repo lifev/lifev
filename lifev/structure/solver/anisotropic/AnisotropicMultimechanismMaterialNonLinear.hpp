@@ -850,11 +850,6 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::updateNonLinearJacobi
     } // closing loop on fibers
 
     jacobian->globalAssemble();
-
-    jacobian->spy("matrix");
-    int n;
-    std::cout << "Ciau" << std::endl;
-    std::cin >> n;
 }
 
 
@@ -968,9 +963,6 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeStiffness ( co
           // As in other classes, the specialization of the MapType = MapEpetra makes this expression
           // not always usable. When other maps will be available in LifeV, the class should be re-templated.
 
-          std::cout << "Norm inf of the vector: " << M_activationDisplacement[ i ]->normInf() << std::endl;
-          std::cout << "Norm 2 of the vector: " << M_activationDisplacement[ i ]->norm2() << std::endl;
-
           // Definition of F_0(ta)
           tensorF_Type ithFzeroA = ExpressionDefinitions::deformationGradient( this->M_dispETFESpace,  *(M_activationDisplacement[ i ]),
                                                                                this->M_offset, this->M_identity );
@@ -1027,37 +1019,32 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeStiffness ( co
           // // First term:
           // // 2 alpha_i J^(-2.0/3.0) ( \bar{I_4} - 1 ) exp( gamma_i * (\bar{I_4} - 1)^2 ) * F M : \grad phi_i
           // // where alpha_i and gamma_i are the fiber parameters and M is the 2nd order tensor of type f_i \otimes \ f_i
-          // integrate ( elements ( this->M_dispETFESpace->mesh() ),
-          //             this->M_dispFESpace->qr(),
-          //             this->M_dispETFESpace,
-          //             atan( IVithBar - value( stretch ) , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  )  * JactiveEl *
-          //             (value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * JactiveEl * ( IVithBar - value( stretch ) ) *
-          //              exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value( stretch ) ) * ( IVithBar- value( stretch ) )  ) *
-          //              dot( ( Fa  * Mith ) * FzeroAminusT, grad( phi_i ) ) )
-          //             ) >> this->M_stiff;
+          integrate ( elements ( this->M_dispETFESpace->mesh() ),
+                      this->M_dispFESpace->qr(),
+                      this->M_dispETFESpace,
+                      atan( IVithBar - value( stretch ) , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  )  * JactiveEl *
+                      (value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * JactiveEl * ( IVithBar - value( stretch ) ) *
+                       exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value( stretch ) ) * ( IVithBar- value( stretch ) )  ) *
+                       dot( ( Fa  * Mith ) * FzeroAminusT, grad( phi_i ) ) )
+                      ) >> this->M_stiff;
 
 
           // // Second term:
           // // 2 alpha_i J^(-2.0/3.0) ( \bar{I_4} - 1 ) exp( gamma_i * (\bar{I_4} - 1)^2 ) * ( 1.0/3.0 * I_4 ) F^-T : \grad phi_i
           // // where alpha_i and gamma_i are the fiber parameters and M is the 2nd order tensor of type f_i \otimes \ f_i
-          // integrate ( elements ( this->M_dispETFESpace->mesh() ),
-          //             this->M_dispFESpace->qr(),
-          //             this->M_dispETFESpace,
-          //             atan( IVithBar - value( stretch ) , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  ) * ithJzeroA *
-          //             ( value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * JactiveEl * ( IVithBar - value( stretch ) ) *
-          //               exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value( stretch ) ) * ( IVithBar- value( stretch ) )  ) *
-          //               value( -1.0/3.0 ) * IVith * dot( FAminusT *  FzeroAminusT , grad( phi_i ) ) )
-          //             ) >> this->M_stiff;
+          integrate ( elements ( this->M_dispETFESpace->mesh() ),
+                      this->M_dispFESpace->qr(),
+                      this->M_dispETFESpace,
+                      atan( IVithBar - value( stretch ) , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  ) * ithJzeroA *
+                      ( value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * JactiveEl * ( IVithBar - value( stretch ) ) *
+                        exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value( stretch ) ) * ( IVithBar- value( stretch ) )  ) *
+                        value( -1.0/3.0 ) * IVith * dot( FAminusT *  FzeroAminusT , grad( phi_i ) ) )
+                      ) >> this->M_stiff;
 
 
       }
 
     this->M_stiff->globalAssemble();
-
-    this->M_stiff->spy("stiffness");
-    std::cout << "Ciao" << std::endl;
-    int n;
-    std::cin >> n;
 }
 
 
