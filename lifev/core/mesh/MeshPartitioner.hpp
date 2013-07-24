@@ -1581,11 +1581,11 @@ void MeshPartitioner<MeshType>::execute()
 template<typename MeshType>
 void MeshPartitioner<MeshType>::fillEntityPID ()
 {
-    // initialize pointPID to NumProc
-    M_entityPID.points.resize ( M_originalMesh->numPoints(), M_comm->NumProc() );
-    M_entityPID.elements.resize ( M_originalMesh->numElements(), M_comm->NumProc() );
-    M_entityPID.facets.resize ( M_originalMesh->numFacets(), M_comm->NumProc() );
-    M_entityPID.ridges.resize ( M_originalMesh->numRidges(), M_comm->NumProc() );
+    // initialize pointPID to 0
+    M_entityPID.points.resize   ( M_originalMesh->numPoints(),   0 );
+    M_entityPID.elements.resize ( M_originalMesh->numElements(), 0 );
+    M_entityPID.facets.resize   ( M_originalMesh->numFacets(),   0 );
+    M_entityPID.ridges.resize   ( M_originalMesh->numRidges(),   0 );
 
     // @todo: check if parallel building + comm is faster
     for ( UInt p = 0; p < static_cast<UInt> ( M_comm->NumProc() ); p++ )
@@ -1596,27 +1596,21 @@ void MeshPartitioner<MeshType>::fillEntityPID ()
             for ( UInt k = 0; k < mesh_Type::element_Type::S_numPoints; k++ )
             {
                 const ID& pointID = M_originalMesh->element ( (*M_elementDomains) [ p ][ e ] ).point ( k ).id();
-                // pointPID should be the minimum between the procs that own it
-                if ( p < M_entityPID.points[ pointID ] )
-                {
-                    M_entityPID.points[ pointID ] = p;
-                }
+                // pointPID should be the maximum between the procs that own it
+                M_entityPID.points[ pointID ] = std::max ( M_entityPID.points[ pointID ], p );
             }
 
             // elem block
             const ID& elemID = M_originalMesh->element ( (*M_elementDomains) [ p ][ e ] ).id();
-            // elemPID is always at its initialization value
+            // at his stage each element belongs to a single partition, overlap is not yet done.
             M_entityPID.elements[ elemID ] = p;
 
             // facet block
             for ( UInt k = 0; k < mesh_Type::element_Type::S_numFacets; k++ )
             {
                 const ID& facetID = M_originalMesh->facet ( M_originalMesh->localFacetId ( elemID, k ) ).id();
-                // facetPID should be the minimum between the proc that own it
-                if ( p < M_entityPID.facets[ facetID ] )
-                {
-                    M_entityPID.facets[ facetID ] = p;
-                }
+                // facetPID should be the maximum between the proc that own it
+                M_entityPID.facets[ facetID ] = std::max ( M_entityPID.facets[ facetID ], p );
             }
 
             // ridge block
@@ -1624,10 +1618,7 @@ void MeshPartitioner<MeshType>::fillEntityPID ()
             {
                 const ID& ridgeID = M_originalMesh->ridge ( M_originalMesh->localRidgeId ( elemID, k ) ).id();
                 // ridgePID should be the minimum between the proc that own it
-                if ( p < M_entityPID.ridges[ ridgeID ] )
-                {
-                    M_entityPID.ridges[ ridgeID ] = p;
-                }
+                M_entityPID.ridges[ ridgeID ] = std::max ( M_entityPID.ridges[ ridgeID ], p );
             }
         }
     }
