@@ -1,5 +1,7 @@
 #cmakedefine LIFEV_HAS_CORE
 #cmakedefine LIFEV_HAS_BCINTERFACE
+#cmakedefine LIFEV_HAS_ONEDFSI
+#cmakedefine LIFEV_HAS_ZERODIMENSIONAL
 #cmakedefine LIFEV_HAS_LEVELSET
 #cmakedefine LIFEV_HAS_DARCY
 #cmakedefine LIFEV_HAS_NAVIERSTOKES
@@ -7,10 +9,8 @@
 #cmakedefine LIFEV_HAS_STRUCTURE
 #cmakedefine LIFEV_HAS_HEART
 #cmakedefine LIFEV_HAS_FSI
-#cmakedefine LIFEV_HAS_ONEDFSI
-#cmakedefine LIFEV_HAS_ZERODIMENSIONAL
-#cmakedefine LIFEV_HAS_DUMMY
 #cmakedefine LIFEV_HAS_MULTISCALE
+#cmakedefine LIFEV_HAS_DUMMY
 #cmakedefine H5_USE_16_API
 //#cmakedefine LIFEV_HAS_REDUCEDBASIS
 

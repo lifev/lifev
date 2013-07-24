@@ -61,7 +61,7 @@ namespace ExpressionAssembly
   This class is an Evaluation class, and therefore, has all the methods
   required to work within the Evaluation trees.
  */
-template <UInt iDim, UInt jDim>
+template <UInt MatrixDim1, UInt MatrixDim2>
 class EvaluationMatrix
 {
 public:
@@ -70,7 +70,7 @@ public:
     //@{
 
     //! Type of the value returned by this class
-    typedef MatrixSmall<iDim, jDim> return_Type;
+    typedef MatrixSmall<MatrixDim1, MatrixDim2> return_Type;
 
     //@}
 
@@ -98,12 +98,12 @@ public:
     {}
 
     //! Copy constructor
-    EvaluationMatrix (const EvaluationMatrix<iDim, jDim>& evaluation)
+    EvaluationMatrix (const EvaluationMatrix<MatrixDim1, MatrixDim2>& evaluation)
         : M_value (evaluation.M_value)
     {}
 
     //! Expression-based constructor
-    explicit EvaluationMatrix (const ExpressionMatrix<iDim, jDim>& expression)
+    explicit EvaluationMatrix (const ExpressionMatrix<MatrixDim1, MatrixDim2>& expression)
         : M_value (expression.value() )
     {}
 
@@ -124,7 +124,7 @@ public:
     //! Display method
     static void display (ostream& out = std::cout)
     {
-        out << "matrix[" << iDim << "][" << jDim << "] ";
+        out << "matrix[" << MatrixDim1 << "][" << MatrixDim2 << "]";
     }
 
     //@}
@@ -181,18 +181,18 @@ public:
 private:
 
     // Storage
-    MatrixSmall<iDim, jDim> M_value;
+    MatrixSmall<MatrixDim1, MatrixDim2> M_value;
 };
 
 
-template<UInt iDim, UInt jDim>
-const flag_Type EvaluationMatrix<iDim, jDim>::S_globalUpdateFlag = ET_UPDATE_NONE;
+template<UInt MatrixDim1, UInt MatrixDim2>
+const flag_Type EvaluationMatrix<MatrixDim1, MatrixDim2>::S_globalUpdateFlag = ET_UPDATE_NONE;
 
-template<UInt iDim, UInt jDim>
-const flag_Type EvaluationMatrix<iDim, jDim>::S_testUpdateFlag = ET_UPDATE_NONE;
+template<UInt MatrixDim1, UInt MatrixDim2>
+const flag_Type EvaluationMatrix<MatrixDim1, MatrixDim2>::S_testUpdateFlag = ET_UPDATE_NONE;
 
-template<UInt iDim, UInt jDim>
-const flag_Type EvaluationMatrix<iDim, jDim>::S_solutionUpdateFlag = ET_UPDATE_NONE;
+template<UInt MatrixDim1, UInt MatrixDim2>
+const flag_Type EvaluationMatrix<MatrixDim1, MatrixDim2>::S_solutionUpdateFlag = ET_UPDATE_NONE;
 
 
 } // Namespace ExpressionAssembly

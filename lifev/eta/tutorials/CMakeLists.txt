@@ -13,4 +13,5 @@ ADD_SUBDIRECTORIES(
   8_ETA_block_manip
   9_ETA_QRProvider
   10_ETA_QR_Advanced
+  9_ETA_gradient_interpolation
 )
