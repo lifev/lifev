@@ -77,7 +77,8 @@ public:
     // Make the template's type available to the outside
     typedef MeshType mesh_Type;
     typedef boost::shared_ptr<MeshType> meshPtr_Type;
-    typedef std::vector<std::vector<Int> > graph_Type;
+    typedef std::vector<Int> idList_Type;
+    typedef std::vector<idList_Type> graph_Type;
     typedef boost::shared_ptr<graph_Type> graphPtr_Type;
     typedef std::vector<meshPtr_Type> partMesh_Type;
     typedef boost::shared_ptr<partMesh_Type> partMeshPtr_Type;
@@ -389,12 +390,12 @@ private:
     UInt                                 M_partitionOverlap;
 
     //! Store ownership for each entity, subdivided by entity type
-    struct entityPIDList
+    struct EntityPIDList
     {
-        std::vector<UInt> elements;
-        std::vector<UInt> facets;
-        std::vector<UInt> ridges;
-        std::vector<UInt> points;
+        idList_Type elements;
+        idList_Type facets;
+        idList_Type ridges;
+        idList_Type points;
     } M_entityPID;
 
     //@}
@@ -1581,14 +1582,19 @@ void MeshPartitioner<MeshType>::execute()
 template<typename MeshType>
 void MeshPartitioner<MeshType>::fillEntityPID ()
 {
-    // initialize pointPID to 0
+    LifeChronoManager<> timeMgr ( M_comm );
+
+    LifeChrono timeStd;
+    timeMgr.add ( "fill entity PID standard", &timeStd );
+    timeStd.start();
+    // initialize entity PIDs to 0
     M_entityPID.points.resize   ( M_originalMesh->numPoints(),   0 );
     M_entityPID.elements.resize ( M_originalMesh->numElements(), 0 );
     M_entityPID.facets.resize   ( M_originalMesh->numFacets(),   0 );
     M_entityPID.ridges.resize   ( M_originalMesh->numRidges(),   0 );
 
     // @todo: check if parallel building + comm is faster
-    for ( UInt p = 0; p < static_cast<UInt> ( M_comm->NumProc() ); p++ )
+    for ( Int p = 0; p < M_comm->NumProc(); p++ )
     {
         for ( UInt e = 0; e < (*M_elementDomains) [ p ].size(); e++ )
         {
@@ -1622,6 +1628,69 @@ void MeshPartitioner<MeshType>::fillEntityPID ()
             }
         }
     }
+    timeStd.stop();
+
+    LifeChrono timePar;
+    timeMgr.add ( "fill entity PID parallel", &timePar );
+    timePar.start();
+    EntityPIDList parEntityPID;
+    // initialize entity PIDs to 0
+    parEntityPID.points.resize   ( M_originalMesh->numPoints(),   0 );
+    parEntityPID.elements.resize ( M_originalMesh->numElements(), 0 );
+    parEntityPID.facets.resize   ( M_originalMesh->numFacets(),   0 );
+    parEntityPID.ridges.resize   ( M_originalMesh->numRidges(),   0 );
+
+    for ( UInt e = 0; e < (*M_elementDomains) [ M_me ].size(); e++ )
+    {
+        // point block
+        for ( UInt k = 0; k < mesh_Type::element_Type::S_numPoints; k++ )
+        {
+            const ID& pointID = M_originalMesh->element ( (*M_elementDomains) [ M_me ][ e ] ).point ( k ).id();
+            // pointPID should be the maximum between the procs that own it
+            parEntityPID.points[ pointID ] = M_me;
+        }
+
+        // elem block
+        const ID& elemID = M_originalMesh->element ( (*M_elementDomains) [ M_me ][ e ] ).id();
+        // at his stage each element belongs to a single partition, overlap is not yet done.
+        parEntityPID.elements[ elemID ] = M_me;
+
+        // facet block
+        for ( UInt k = 0; k < mesh_Type::element_Type::S_numFacets; k++ )
+        {
+            const ID& facetID = M_originalMesh->facet ( M_originalMesh->localFacetId ( elemID, k ) ).id();
+            // facetPID should be the maximum between the proc that own it
+            parEntityPID.facets[ facetID ] = M_me;
+        }
+
+        // ridge block
+        for ( UInt k = 0; k < mesh_Type::element_Type::S_numRidges; k++ )
+        {
+            const ID& ridgeID = M_originalMesh->ridge ( M_originalMesh->localRidgeId ( elemID, k ) ).id();
+            // ridgePID should be the minimum between the proc that own it
+            parEntityPID.ridges[ ridgeID ] = M_me;
+        }
+    }
+
+    EntityPIDList totalEntityPID;
+    totalEntityPID.points.resize   ( M_originalMesh->numPoints() );
+    totalEntityPID.elements.resize ( M_originalMesh->numElements() );
+    totalEntityPID.facets.resize   ( M_originalMesh->numFacets() );
+    totalEntityPID.ridges.resize   ( M_originalMesh->numRidges() );
+    M_comm->MaxAll ( &parEntityPID.points[0],   &totalEntityPID.points[0],   parEntityPID.points.size() );
+    M_comm->MaxAll ( &parEntityPID.elements[0], &totalEntityPID.elements[0], parEntityPID.elements.size() );
+    M_comm->MaxAll ( &parEntityPID.facets[0],   &totalEntityPID.facets[0],   parEntityPID.facets.size() );
+    M_comm->MaxAll ( &parEntityPID.ridges[0],   &totalEntityPID.ridges[0],   parEntityPID.ridges.size() );
+
+    timePar.stop();
+
+    for ( UInt i = 0; i < M_entityPID.points.size(); i++ )
+    {
+        ASSERT ( M_entityPID.points[i] == totalEntityPID.points[i], "parallel PID failure" );
+    }
+
+
+    timeMgr.print();
 }
 
 template<typename MeshType>

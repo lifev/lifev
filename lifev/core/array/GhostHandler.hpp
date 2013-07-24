@@ -69,7 +69,8 @@ public:
     typedef MapEpetra map_Type;
     typedef boost::shared_ptr<map_Type> mapPtr_Type;
     typedef std::map< UInt, mapPtr_Type > mapList_Type;
-    typedef std::vector<std::vector<Int> > graph_Type;
+    typedef std::vector<Int> idList_Type;
+    typedef std::vector<idList_Type> graph_Type;
     typedef boost::shared_ptr<graph_Type> graphPtr_Type;
     typedef std::vector<markerID_Type> markerIDList_Type;
 
@@ -277,7 +278,7 @@ public:
      * \param entityPID. Info about proc ownership of each mesh entity.
      * \param overlap. Level of overlap between partitions.
      */
-    void extendGraphFE ( graphPtr_Type elemGraph, const std::vector<UInt>& entityPID, UInt overlap );
+    void extendGraphFE ( graphPtr_Type elemGraph, idList_Type const& pointPID, UInt overlap );
 
     //! showMe method
     void showMe ( bool const verbose = false, std::ostream& out = std::cout );
@@ -1148,7 +1149,7 @@ typename GhostHandler<MeshType>::map_Type& GhostHandler<MeshType>::ghostMapOnEle
 
 template <typename MeshType>
 void GhostHandler<MeshType>::extendGraphFE ( graphPtr_Type elemGraph,
-                                             const std::vector<UInt>& pointPID,
+                                             idList_Type const& pointPID,
                                              UInt overlap )
 {
     if ( M_verbose )
