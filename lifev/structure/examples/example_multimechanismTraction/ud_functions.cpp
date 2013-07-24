@@ -157,7 +157,7 @@ Real bcNonZero (const Real& t, const Real&  X, const Real& Y, const Real& Z, con
 
   // return top * Y;
 
-    return 700000;
+    return 70000;
 
 	// Real highestPressure(6.666e+6);
 	// Real totalTime = 20.0;
