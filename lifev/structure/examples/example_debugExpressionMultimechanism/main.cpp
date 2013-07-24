@@ -345,6 +345,7 @@ Structure::run3d()
     exporter->setMeshProcId (dFESpace->mesh(), dFESpace->map().comm().MyPID() );
 
     // Scalar vector to have scalar quantities
+    vectorPtr_Type patchAreaVector ( new vector_Type ( dETFESpace->map(),  LifeV::Unique ) );
     vectorPtr_Type patchAreaVectorScalar ( new vector_Type ( dScalarETFESpace->map(), Unique ) );
     vectorPtr_Type JacobianZero( new vector_Type( dScalarETFESpace->map(), Unique ) );
     vectorPtr_Type JacobianZeroA( new vector_Type( dScalarETFESpace->map(), Unique ) );
@@ -364,6 +365,49 @@ Structure::run3d()
     vectorInterpolatedFibers_Type atanStretchesVector(0);
     atanStretchesVector.resize( (*pointerToVectorOfFamilies).size() );
 
+    vectorInterpolatedFibers_Type scalarExpressionMultimechanism(0);
+    scalarExpressionMultimechanism.resize( (*pointerToVectorOfFamilies).size() );
+
+    // Deformation Gradient Fa
+    vectorInterpolatedFibers_Type Fa_col1(0);
+    Fa_col1.resize( (*pointerToVectorOfFamilies).size() );
+
+    vectorInterpolatedFibers_Type Fa_col2(0);
+    Fa_col2.resize( (*pointerToVectorOfFamilies).size() );
+
+    vectorInterpolatedFibers_Type Fa_col3(0);
+    Fa_col3.resize( (*pointerToVectorOfFamilies).size() );
+
+    // Outer product Tensor
+    vectorInterpolatedFibers_Type Mith_col1(0);
+    Mith_col1.resize( (*pointerToVectorOfFamilies).size() );
+
+    vectorInterpolatedFibers_Type Mith_col2(0);
+    Mith_col2.resize( (*pointerToVectorOfFamilies).size() );
+
+    vectorInterpolatedFibers_Type Mith_col3(0);
+    Mith_col3.resize( (*pointerToVectorOfFamilies).size() );
+
+    // FzeroAminusT
+    vectorInterpolatedFibers_Type FzeroAminusT_col1(0);
+    FzeroAminusT_col1.resize( (*pointerToVectorOfFamilies).size() );
+
+    vectorInterpolatedFibers_Type FzeroAminusT_col2(0);
+    FzeroAminusT_col2.resize( (*pointerToVectorOfFamilies).size() );
+
+    vectorInterpolatedFibers_Type FzeroAminusT_col3(0);
+    FzeroAminusT_col3.resize( (*pointerToVectorOfFamilies).size() );
+
+    // Piola Kirchhoff
+    vectorInterpolatedFibers_Type P_col1(0);
+    P_col1.resize( (*pointerToVectorOfFamilies).size() );
+
+    vectorInterpolatedFibers_Type P_col2(0);
+    P_col2.resize( (*pointerToVectorOfFamilies).size() );
+
+    vectorInterpolatedFibers_Type P_col3(0);
+    P_col3.resize( (*pointerToVectorOfFamilies).size() );
+
 
     // Adding the fibers vectors
     // Setting the vector of fibers functions
@@ -371,10 +415,47 @@ Structure::run3d()
     {
         stretchesVector[ k - 1 ].reset( new vector_Type( dScalarFESpace->map() ) );
         atanStretchesVector[ k - 1 ].reset( new vector_Type( dScalarFESpace->map() ) );
+        scalarExpressionMultimechanism[ k - 1 ].reset( new vector_Type( dScalarFESpace->map() ) );
+
+	Fa_col1[ k - 1 ].reset( new vector_Type( dFESpace->map() ) );
+        Fa_col2[ k - 1 ].reset( new vector_Type( dFESpace->map() ) );
+        Fa_col3[ k - 1 ].reset( new vector_Type( dFESpace->map() ) );
+
+	Mith_col1[ k - 1 ].reset( new vector_Type( dFESpace->map() ) );
+        Mith_col2[ k - 1 ].reset( new vector_Type( dFESpace->map() ) );
+        Mith_col3[ k - 1 ].reset( new vector_Type( dFESpace->map() ) );
+
+	FzeroAminusT_col1[ k - 1 ].reset( new vector_Type( dFESpace->map() ) );
+        FzeroAminusT_col2[ k - 1 ].reset( new vector_Type( dFESpace->map() ) );
+        FzeroAminusT_col3[ k - 1 ].reset( new vector_Type( dFESpace->map() ) );
+
+        P_col1[ k - 1 ].reset( new vector_Type( dFESpace->map() ) );
+        P_col2[ k - 1 ].reset( new vector_Type( dFESpace->map() ) );
+        P_col3[ k - 1 ].reset( new vector_Type( dFESpace->map() ) );
+
 
         // Setting up the name of the function to define the family
         std::string stretchfamily="stretchFamily-";
         std::string familyAtan="atanStretchFamily-";
+        std::string familyScalar="scalarQuantityFamily-";
+
+        std::string Fa1="Fa1-";
+        std::string Fa2="Fa2-";
+        std::string Fa3="Fa3-";
+
+        std::string Mith1="Mith1-";
+        std::string Mith2="Mith2-";
+        std::string Mith3="Mith3-";
+
+        std::string FzeroAminusT1="FzeroAminusT1-";
+        std::string FzeroAminusT2="FzeroAminusT2-";
+        std::string FzeroAminusT3="FzeroAminusT3-";
+
+        std::string P1="P1-";
+        std::string P2="P2-";
+        std::string P3="P3-";
+
+
         // adding the number of the family
         std::string familyNumber;
         std::ostringstream number;
@@ -384,8 +465,44 @@ Structure::run3d()
         // Name of the function to create
         std::string creationString = stretchfamily + familyNumber;
         std::string creationStringAtan = familyAtan + familyNumber;
+        std::string creationStringScalar = familyScalar + familyNumber;
+
+        std::string creationStringFa1 = Fa1 + familyNumber;
+        std::string creationStringFa2 = Fa2 + familyNumber;
+        std::string creationStringFa3 = Fa3 + familyNumber;
+
+        std::string creationStringFzeroAminusT1 = FzeroAminusT1 + familyNumber;
+        std::string creationStringFzeroAminusT2 = FzeroAminusT2 + familyNumber;
+        std::string creationStringFzeroAminusT3 = FzeroAminusT3 + familyNumber;
+
+        std::string creationStringMith1 = Mith1 + familyNumber;
+        std::string creationStringMith2 = Mith2 + familyNumber;
+        std::string creationStringMith3 = Mith3 + familyNumber;
+
+        std::string creationStringP1 = P1 + familyNumber;
+        std::string creationStringP2 = P2 + familyNumber;
+        std::string creationStringP3 = P3 + familyNumber;
+
         exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::ScalarField, creationString, dScalarFESpace, stretchesVector[ k-1 ], UInt (0) );
         exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::ScalarField, creationStringAtan, dScalarFESpace, atanStretchesVector[ k-1 ], UInt (0) );
+        exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::ScalarField, creationStringScalar, dScalarFESpace, scalarExpressionMultimechanism[ k-1 ], UInt (0) );
+
+        exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, creationStringFa1, dFESpace, Fa_col1[ k-1 ], UInt (0) );
+        exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, creationStringFa2, dFESpace, Fa_col2[ k-1 ], UInt (0) );
+        exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, creationStringFa3, dFESpace, Fa_col3[ k-1 ], UInt (0) );
+
+        exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, creationStringFzeroAminusT1, dFESpace, FzeroAminusT_col1[ k-1 ], UInt (0) );
+        exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, creationStringFzeroAminusT2, dFESpace, FzeroAminusT_col2[ k-1 ], UInt (0) );
+        exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, creationStringFzeroAminusT3, dFESpace, FzeroAminusT_col3[ k-1 ], UInt (0) );
+
+        exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, creationStringMith1, dFESpace, Mith_col1[ k-1 ], UInt (0) );
+        exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, creationStringMith2, dFESpace, Mith_col2[ k-1 ], UInt (0) );
+        exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, creationStringMith3, dFESpace, Mith_col3[ k-1 ], UInt (0) );
+
+        exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, creationStringP1, dFESpace, P_col1[ k-1 ], UInt (0) );
+        exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, creationStringP2, dFESpace, P_col2[ k-1 ], UInt (0) );
+        exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, creationStringP3, dFESpace, P_col3[ k-1 ], UInt (0) );
+
     }
 
 
@@ -564,8 +681,154 @@ Structure::run3d()
 
         *( atanStretchesVector[ i ] ) = *( atanStretchesVector[ i ] ) / *patchAreaVectorScalar;
 
-    }
+	Real stretch = dataStructure->ithCharacteristicStretch( i );
+	Real pi = 3.14159265359;
 
+        evaluateNode( elements ( dScalarETFESpace->mesh() ),
+                      fakeQuadratureRule,
+                      dScalarETFESpace,
+                      meas_K * 
+		      JzeroA * atan( IVithBar - value( stretch ) , dataStructure->smoothness(), ( 1 / pi ), ( 1.0/2.0 )  )  * JactiveEl *
+                      (value( 2.0 ) * value( dataStructure->ithStiffnessFibers( i ) ) * JactiveEl * ( IVithBar - value( stretch ) ) *
+                       exp( value( dataStructure->ithNonlinearityFibers( i ) ) * ( IVithBar- value( stretch ) ) * ( IVithBar- value( stretch ) )  ) )  * phi_i
+                      ) >> scalarExpressionMultimechanism[ i ];
+
+
+
+        *( scalarExpressionMultimechanism[ i ] ) = *( scalarExpressionMultimechanism[ i ] ) / *patchAreaVectorScalar;
+
+	// exporting the components of the Piola-Kirchhoff tensor
+	// Definition of the expression definition the portion of the Piola-Kirchhoff 
+
+	ExpressionMultimechanism::deformationActivatedTensor_Type Fa = 
+	  ExpressionMultimechanism::createDeformationActivationTensor( F , FzeroAminus1);
+
+	typedef ExpressionProduct<ExpressionMultimechanism::deformationActivatedTensor_Type,
+				  ExpressionMultimechanism::activeOuterProduct_Type>  productFaMith_Type;
+
+	typedef ExpressionProduct< productFaMith_Type,
+				   ExpressionDefinitions::minusTransposedTensor_Type> firstPartPiolaMultimech_Type;
+
+	productFaMith_Type FaMith( Fa, Mith );
+	firstPartPiolaMultimech_Type firstPartPiola( FaMith, FzeroAminusT );
+
+	//Extract columns
+	ExpressionVectorFromNonConstantMatrix< ExpressionMultimechanism::deformationActivatedTensor_Type,3 ,3 > Fa_i1( Fa, 0 );
+	ExpressionVectorFromNonConstantMatrix< ExpressionMultimechanism::deformationActivatedTensor_Type,3 ,3 > Fa_i2( Fa, 1 );
+	ExpressionVectorFromNonConstantMatrix< ExpressionMultimechanism::deformationActivatedTensor_Type,3 ,3 > Fa_i3( Fa, 2 );
+
+	ExpressionVectorFromNonConstantMatrix< ExpressionMultimechanism::activeOuterProduct_Type,3 ,3 > Mith_i1( Mith, 0 );
+	ExpressionVectorFromNonConstantMatrix< ExpressionMultimechanism::activeOuterProduct_Type,3 ,3 > Mith_i2( Mith, 1 );
+	ExpressionVectorFromNonConstantMatrix< ExpressionMultimechanism::activeOuterProduct_Type,3 ,3 > Mith_i3( Mith, 2 );
+
+	ExpressionVectorFromNonConstantMatrix< ExpressionDefinitions::minusTransposedTensor_Type,3 ,3 > FzeroAminusT_i1( FzeroAminusT, 0 );
+	ExpressionVectorFromNonConstantMatrix< ExpressionDefinitions::minusTransposedTensor_Type,3 ,3 > FzeroAminusT_i2( FzeroAminusT, 1 );
+	ExpressionVectorFromNonConstantMatrix< ExpressionDefinitions::minusTransposedTensor_Type,3 ,3 > FzeroAminusT_i3( FzeroAminusT, 2 );
+
+	ExpressionVectorFromNonConstantMatrix< firstPartPiolaMultimech_Type,3 ,3  > P_i1( firstPartPiola, 0 );
+	ExpressionVectorFromNonConstantMatrix< firstPartPiolaMultimech_Type,3 ,3 > P_i2( firstPartPiola, 1 );
+	ExpressionVectorFromNonConstantMatrix< firstPartPiolaMultimech_Type,3 ,3 > P_i3( firstPartPiola, 2 );
+
+	// The patch area in vectorial form
+	ExpressionVectorFromNonConstantScalar<ExpressionMeas, 3  > vMeas( meas_K );
+	evaluateNode( elements ( dETFESpace->mesh() ),
+		      fakeQuadratureRule,
+		      dETFESpace,
+		      dot( vMeas , phi_i )
+		      ) >> patchAreaVector;
+
+        evaluateNode( elements ( dETFESpace->mesh() ),
+                      fakeQuadratureRule,
+                      dETFESpace,
+                      meas_K *  dot ( Fa_i1, phi_i) 
+                      ) >> Fa_col1[ i ];
+	*(Fa_col1[i]) = *(Fa_col1[i]) / *patchAreaVector;
+
+
+        evaluateNode( elements ( dETFESpace->mesh() ),
+                      fakeQuadratureRule,
+                      dETFESpace,
+                      meas_K *  dot ( Fa_i2, phi_i) 
+                      ) >> Fa_col2[ i ];
+	*(Fa_col2[i]) = *(Fa_col2[i]) / *patchAreaVector;
+
+        evaluateNode( elements ( dETFESpace->mesh() ),
+                      fakeQuadratureRule,
+                      dETFESpace,
+                      meas_K *  dot ( Fa_i3, phi_i) 
+                      ) >> Fa_col3[ i ];
+	*(Fa_col3[i]) = *(Fa_col3[i]) / *patchAreaVector;
+
+
+        evaluateNode( elements ( dETFESpace->mesh() ),
+                      fakeQuadratureRule,
+                      dETFESpace,
+                      meas_K *  dot ( Mith_i1, phi_i) 
+                      ) >> Mith_col1[ i ];
+	*(Mith_col1[i]) = *(Mith_col1[i]) / *patchAreaVector;
+
+
+        evaluateNode( elements ( dETFESpace->mesh() ),
+                      fakeQuadratureRule,
+                      dETFESpace,
+                      meas_K *  dot ( Mith_i2, phi_i) 
+                      ) >> Mith_col2[ i ];
+	*(Mith_col2[i]) = *(Mith_col2[i]) / *patchAreaVector;
+
+        evaluateNode( elements ( dETFESpace->mesh() ),
+                      fakeQuadratureRule,
+                      dETFESpace,
+                      meas_K *  dot ( Mith_i3, phi_i) 
+                      ) >> Mith_col3[ i ];
+	*(Mith_col3[i]) = *(Mith_col3[i]) / *patchAreaVector;
+
+
+        evaluateNode( elements ( dETFESpace->mesh() ),
+                      fakeQuadratureRule,
+                      dETFESpace,
+                      meas_K *  dot ( FzeroAminusT_i1, phi_i) 
+                      ) >> FzeroAminusT_col1[ i ];
+	*(FzeroAminusT_col1[i]) = *(FzeroAminusT_col1[i]) / *patchAreaVector;
+
+
+        evaluateNode( elements ( dETFESpace->mesh() ),
+                      fakeQuadratureRule,
+                      dETFESpace,
+                      meas_K *  dot ( FzeroAminusT_i2, phi_i) 
+                      ) >> FzeroAminusT_col2[ i ];
+	*(FzeroAminusT_col2[i]) = *(FzeroAminusT_col2[i]) / *patchAreaVector;
+
+        evaluateNode( elements ( dETFESpace->mesh() ),
+                      fakeQuadratureRule,
+                      dETFESpace,
+                      meas_K *  dot ( FzeroAminusT_i3, phi_i) 
+                      ) >> FzeroAminusT_col3[ i ];
+	*(FzeroAminusT_col3[i]) = *(FzeroAminusT_col3[i]) / *patchAreaVector;
+
+
+        evaluateNode( elements ( dETFESpace->mesh() ),
+                      fakeQuadratureRule,
+                      dETFESpace,
+                      meas_K *  dot ( P_i1, phi_i) 
+                      ) >> P_col1[ i ];
+	*(P_col1[i]) = *(P_col1[i]) / *patchAreaVector;
+
+
+        evaluateNode( elements ( dETFESpace->mesh() ),
+                      fakeQuadratureRule,
+                      dETFESpace,
+                      meas_K *  dot ( P_i2, phi_i) 
+                      ) >> P_col2[ i ];
+	*(P_col2[i]) = *(P_col2[i]) / *patchAreaVector;
+
+        evaluateNode( elements ( dETFESpace->mesh() ),
+                      fakeQuadratureRule,
+                      dETFESpace,
+                      meas_K *  dot ( P_i3, phi_i) 
+                      ) >> P_col3[ i ];
+	*(P_col3[i]) = *(P_col3[i]) / *patchAreaVector;
+		
+    }
 
     exporter->postProcess ( 1.0 );
 

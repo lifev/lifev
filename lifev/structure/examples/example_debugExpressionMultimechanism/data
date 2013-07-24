@@ -44,7 +44,7 @@ numberFamilies  = 2
 stiffness       = '2.684564e+6 2.684564e+6'
 nonlinearity    = '1.0 1.0'
 stretch         = '2.0 2.0'
-smoothness      = 3000
+smoothness      = 10000
 [./]
 
 
