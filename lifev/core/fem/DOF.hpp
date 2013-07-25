@@ -657,8 +657,8 @@ MapEpetraData DOF::createMapData ( MeshType& mesh )
     }
 
     MapEpetraData mapData;
-    std::copy ( mapDataSetUnique.begin(), mapDataSetUnique.end(), mapData.unique.begin() );
-    std::copy ( mapDataSetRepeated.begin(), mapDataSetRepeated.end(), mapData.repeated.begin() );
+    mapData.unique.assign( mapDataSetUnique.begin(), mapDataSetUnique.end() );
+    mapData.repeated.assign( mapDataSetRepeated.begin(), mapDataSetRepeated.end() );
 
     return mapData;
 }
