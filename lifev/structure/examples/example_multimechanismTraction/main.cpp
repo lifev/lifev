@@ -305,6 +305,14 @@ Structure::run3d()
     solidFESpacePtr_Type dFESpace ( new solidFESpace_Type (pointerToMesh, dOrder, 3, parameters->comm) );
     solidETFESpacePtr_Type dETFESpace ( new solidETFESpace_Type (pointerToMesh, & (dFESpace->refFE() ), & (dFESpace->fe().geoMap() ), parameters->comm) );
 
+    // // setting precise quadrature rule for fine meshes
+    // const QuadratureRule fineQuadRule = quadRuleTetra15pt;
+    // QuadratureRule fineBdQuadRule = quadRuleTria4pt;
+
+    // dFESpace->setQuadRule ( fineQuadRule );
+    // dFESpace->setBdQuadRule ( fineBdQuadRule );
+
+
     // Setting the fibers
     vectorFiberFunctionPtr_Type pointerToVectorOfFamilies( new vectorFiberFunction_Type( ) );
     (*pointerToVectorOfFamilies).resize( dataStructure->numberFibersFamilies( ) );
