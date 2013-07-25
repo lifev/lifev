@@ -1594,7 +1594,8 @@ void MeshPartitioner<MeshType>::fillEntityPID ()
     M_entityPID.ridges.resize   ( M_originalMesh->numRidges(),   0 );
 
     // @todo: check if parallel building + comm is faster
-    for ( Int p = 0; p < M_comm->NumProc(); p++ )
+    // p = 0 can be skipped since M_entityPID is already initialized at that value
+    for ( Int p = 1; p < M_comm->NumProc(); p++ )
     {
         for ( UInt e = 0; e < (*M_elementDomains) [ p ].size(); e++ )
         {
