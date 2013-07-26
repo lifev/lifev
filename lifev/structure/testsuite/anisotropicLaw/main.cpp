@@ -82,6 +82,7 @@
 #include <lifev/structure/solver/anisotropic/StructuralAnisotropicConstitutiveLaw.hpp>
 #include <lifev/structure/solver/anisotropic/HolzapfelMaterialNonLinear.hpp>
 #include <lifev/structure/solver/anisotropic/DistributedHolzapfelMaterialNonLinear.hpp>
+#include <lifev/structure/solver/anisotropic/AnisotropicMultimechanismMaterialNonLinear.hpp>
 
 
 #include <lifev/core/filter/ExporterEnsight.hpp>
@@ -172,6 +173,8 @@ public:
         run3d();
     }
     void CheckResultHolzapfelModel (const Real& dispNorm, const Real& time);
+    void CheckResultDistributedModel (const Real& dispNorm, const Real& time);
+    void CheckResultMultimechanismModel (const Real& dispNorm, const Real& time);
     void resultChanged (Real time);
     //@}
 
@@ -330,17 +333,6 @@ Structure::run3d()
     BCh->addBC ("EdgesIn",      7, Essential, Component , zero, compx);
     BCh->addBC ("EdgesIn",      3, Essential, Component , zero, compz);
     //! =================================================================================
-
-    // Case of a tube
-
-    // BCh->addBC ("EdgesIn",      60,  Essential,  Component, zero, compz);
-    // BCh->addBC ("EdgesIn",      70,  Essential,  Component, zero, compz);
-
-    // //! Symmetry BC
-    // BCh->addBC ("EdgesIn",      50,   Essential, Component, zero, compx);
-    // BCh->addBC ("EdgesIn",      30,   Essential, Component, zero, compy);
-    // BCh->addBC ("EdgesIn",      40,   Natural, Full, zero, 3);
-    // BCh->addBC ("EdgesIn",      200,  Natural,  Full, nonZero, 3);
 
     //! 1. Constructor of the structuralSolver
     StructuralOperator< RegionMesh<LinearTetra> > solid;
@@ -516,8 +508,8 @@ Structure::run3d()
     exporter->postProcess ( 0 );
     cout.precision(16);
 
-    int IDPointX = 618;
-    int IDPointY = 331;
+    // int IDPointX = 618;
+    // int IDPointY = 331;
 
     /*
     //!--------------------------------------------------------------------------------------------
@@ -625,7 +617,13 @@ Structure::run3d()
         normVect =  solid.displacement().norm2();
         std::cout << "The norm 2 of the displacement field is: " << normVect << std::endl;
 
-        CheckResultHolzapfelModel (normVect, dataStructure->dataTime()->time() );
+        // Check results
+        if ( !dataStructure->solidTypeAnisotropic().compare ("holzapfel") )
+            CheckResultHolzapfelModel (normVect, dataStructure->dataTime()->time() );
+        else if ( !dataStructure->solidTypeAnisotropic().compare ("distributedHolzapfel") )
+            CheckResultDistributedModel (normVect, dataStructure->dataTime()->time() );
+        else
+            CheckResultMultimechanismModel (normVect, dataStructure->dataTime()->time() );
 
 
         //!--------------------------------------------------------------------------------------------------
@@ -642,6 +640,30 @@ void Structure::CheckResultHolzapfelModel (const Real& dispNorm, const Real& tim
         this->resultChanged (time);
     }
     if ( time == 0.1   && std::fabs (dispNorm - 0.84981715) <= 1e-7 )
+    {
+        this->resultChanged (time);
+    }
+}
+
+void Structure::CheckResultDistributedModel (const Real& dispNorm, const Real& time)
+{
+    if ( time == 0.05  && std::fabs (dispNorm - 1.7747561302) <= 1e-7 )
+    {
+        this->resultChanged (time);
+    }
+    if ( time == 0.1   && std::fabs (dispNorm - 1.7757263996) <= 1e-7 )
+    {
+        this->resultChanged (time);
+    }
+}
+
+void Structure::CheckResultMultimechanismModel (const Real& dispNorm, const Real& time)
+{
+    if ( time == 0.05  && std::fabs (dispNorm - 0.8496066842) <= 1e-10 )
+    {
+        this->resultChanged (time);
+    }
+    if ( time == 0.1   && std::fabs (dispNorm - 0.8498171549) <= 1e-10 )
     {
         this->resultChanged (time);
     }
