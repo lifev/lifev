@@ -61,6 +61,7 @@
 #include <lifev/structure/solver/StructuralOperator.hpp>
 
 #include <lifev/structure/solver/isotropic/ExponentialMaterialNonLinear.hpp>
+#include <lifev/structure/solver/anisotropic/AnisotropicMultimechanismMaterialNonLinear.hpp>
 
 // Evaluation operations
 #include <lifev/core/array/MatrixSmall.hpp>
@@ -98,17 +99,17 @@ std::set<UInt> parseList ( const std::string& list )
     return setList;
 }
 
-class SelectionFunctor
+class SelectFunctor
 {
 public:
     typedef VectorEpetra                  vector_Type;
     typedef boost::shared_ptr<vector_Type>    vectorPtr_Type;
 
-    SelectionFunctor ( const vectorPtr_Type selectionVector )
+    SelectFunctor ( const vectorPtr_Type selectionVector )
     : M_selectionVector ( selectionVector )
     {}
 
-    ~SelectionFunctor()
+    ~SelectFunctor()
     {}
 
     bool operator() ( const UInt i ) const
@@ -596,8 +597,8 @@ Structure::run3d()
     *F_i3Vector = *F_i3Vector / *patchAreaVector;
 
     // Setting up the saving of the displacement
-    SelectionFunctor selectorTr( traceVector );
-    SelectionFunctor selectorJac( scalarJacobian );
+    SelectFunctor selectorTr( traceVector );
+    SelectFunctor selectorJac( scalarJacobian );
 
     AssemblyElementalStructure::saveVectorAccordingToFunctor( dFESpace, selectorTr,
                                                               solidDisp, statusVectorTr,

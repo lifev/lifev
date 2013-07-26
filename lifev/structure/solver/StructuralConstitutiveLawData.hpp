@@ -424,6 +424,16 @@ public:
         return M_nonlinearityParametersFibers[ i ];
     }
 
+    const Real ithCharacteristicStretch( const UInt i )
+    {
+        return M_characteristicStretch[ i ];
+    }
+
+    const Real ithDistributionFibers( const UInt i )
+    {
+        return M_distributionParametersFibers[ i ];
+    }
+
     const Real smoothness( void )
     {
         return M_epsilon;
@@ -497,6 +507,8 @@ private:
     UInt                   M_numberFibers;
     vectorParameters_Type  M_stiffnessParametersFibers;
     vectorParameters_Type  M_nonlinearityParametersFibers;
+    vectorParameters_Type  M_characteristicStretch;
+    vectorParameters_Type  M_distributionParametersFibers;
     Real                   M_epsilon;
 #endif
     std::string            M_lawType;

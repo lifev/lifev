@@ -37,13 +37,13 @@ bulk		= 1.33e+8
 alpha 		= 2.684564e+6
 gamma		= 1.0
 solidTypeIsotropic 	= neoHookean		# linearVenantKirchhoff / nonLinearVenantKirchhoff / neoHookean / expoenential
-solidTypeAnisotropic = holzapfel
+solidTypeAnisotropic = multimechanism
 
 [./fibers]
 numberFamilies  = 2
 stiffness       = '2.684564e+6 2.684564e+6'
 nonlinearity    = '1.0 1.0'
-distribution    = '0.33 0.33'
+stretch         = '1.0 1.0'
 smoothness      = 1000
 [./]
 

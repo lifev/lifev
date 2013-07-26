@@ -35,5 +35,7 @@ IF(ENABLE_ANISOTROPIC_LAW)
   ADD_SUBDIRECTORIES(
     example_bodyForces
     example_anisotropicTraction
+    example_multimechanismTraction
+    example_debugExpressionMultimechanism
 )
 ENDIF()

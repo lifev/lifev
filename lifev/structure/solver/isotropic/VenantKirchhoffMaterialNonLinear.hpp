@@ -83,6 +83,13 @@ public:
     typedef typename super::vectorsParametersPtr_Type    vectorsParametersPtr_Type;
 
     typedef MatrixSmall<3, 3>                          matrixSmall_Type;
+
+    // Typedefs for expression definitions
+    typedef typename super::tensorF_Type               tensorF_Type;
+    typedef typename super::determinantF_Type          determinantF_Type;
+    typedef typename super::tensorC_Type               tensorC_Type;
+    typedef typename super::minusT_Type                minusT_Type;
+    typedef typename super::traceTensor_Type           traceTensor_Type;
     //@}
 
 
@@ -420,24 +427,13 @@ void VenantKirchhoffMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( 
     //     Real mu = dataMaterial->mu(marker);
 
     // Definition of F
-    ExpressionAddition<
-        ExpressionInterpolateGradient<MeshType, MapEpetra, 3, 3>, ExpressionMatrix<3,3> >
-        F( grad( this->M_dispETFESpace,  disp, this->M_offset), value(this->M_identity));
+    tensorF_Type F = ExpressionDefinitions::deformationGradient( this->M_dispETFESpace,  disp, this->M_offset, this->M_identity );
 
     // Definition of tensor C
-    ExpressionProduct<
-        ExpressionTranspose<
-            ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
-        ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> >
-        >
-    C( transpose(F), F );
+    tensorC_Type C = ExpressionDefinitions::tensorC( transpose(F), F );
 
     // Definition of tr( C )
-    ExpressionTrace<
-        ExpressionProduct<ExpressionTranspose<ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
-                          ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >
-        >
-    I_C( C );
+    traceTensor_Type I_C = ExpressionDefinitions::traceTensor( C );
 
     // //Assembling the Isochoric Part
     // //! 1. Stiffness matrix : int { (lambda/2.0) * ( 2* F:dF) * ( F : \nabla \v ) }
@@ -536,25 +532,13 @@ void VenantKirchhoffMaterialNonLinear<MeshType>::computeStiffness ( const vector
     //     Real mu = dataMaterial->mu(marker);
 
     // Definition of F
-    ExpressionAddition<
-        ExpressionInterpolateGradient<MeshType, MapEpetra, 3, 3>, ExpressionMatrix<3,3> >
-        F( grad( this->M_dispETFESpace,  disp, this->M_offset), value(this->M_identity));
+    tensorF_Type F = ExpressionDefinitions::deformationGradient( this->M_dispETFESpace,  disp, this->M_offset, this->M_identity );
 
     // Definition of tensor C
-    ExpressionProduct<
-        ExpressionTranspose<
-            ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
-        ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> >
-        >
-    C( transpose(F), F );
+    tensorC_Type C = ExpressionDefinitions::tensorC( transpose(F), F );
 
     // Definition of tr( C )
-    ExpressionTrace<
-        ExpressionProduct<ExpressionTranspose<ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
-                          ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >
-        >
-    I_C( C );
-
+    traceTensor_Type I_C = ExpressionDefinitions::traceTensor( C );
 
     //Computation of the isochoric part
     // // ! Stiffness matrix : int { ( lambda / 2.0 ) * ( Ic - 3.0 ) * ( F : \nabla \v )}
@@ -653,10 +637,6 @@ namespace
 {
 static bool registerVKNL = StructuralIsotropicConstitutiveLaw<LifeV::RegionMesh<LinearTetra> >::StructureIsotropicMaterialFactory::instance().registerProduct ( "nonLinearVenantKirchhoff", &createVenantKirchhoffNonLinear<LifeV::RegionMesh<LinearTetra> > );
 }
-
-#undef deformationGradientTensor
-#undef RIGHTCAUCHYGREEN
-#undef firstInvariantC
 
 } //Namespace LifeV
 

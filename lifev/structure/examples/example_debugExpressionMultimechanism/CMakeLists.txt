@@ -4,12 +4,12 @@ INCLUDE(TribitsCopyFilesToBinaryDir)
 INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
 
 TRIBITS_ADD_EXECUTABLE(
-  usingETAtoPostProcess
-  SOURCES main.cpp
+  debugMultimechanism
+  SOURCES main.cpp ud_functions.cpp
   COMM serial mpi
   )
 
-TRIBITS_COPY_FILES_TO_BINARY_DIR(dataJacobianETA
+TRIBITS_COPY_FILES_TO_BINARY_DIR(dataDebugMultimech
   SOURCE_FILES data
   SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
   CREATE_SYMLINK

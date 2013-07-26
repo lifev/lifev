@@ -66,6 +66,7 @@
 
 #include <lifev/core/mesh/MeshData.hpp>
 #include <lifev/core/mesh/MeshPartitioner.hpp>
+#include <lifev/core/filter/PartitionIO.hpp>
 
 #include <lifev/structure/solver/StructuralConstitutiveLawData.hpp>
 
@@ -81,7 +82,6 @@
 
 #include <lifev/structure/solver/anisotropic/StructuralAnisotropicConstitutiveLaw.hpp>
 #include <lifev/structure/solver/anisotropic/HolzapfelMaterialNonLinear.hpp>
-#include <lifev/structure/solver/anisotropic/DistributedHolzapfelMaterialNonLinear.hpp>
 #include <lifev/structure/solver/anisotropic/AnisotropicMultimechanismMaterialNonLinear.hpp>
 
 
@@ -137,6 +137,7 @@ class Structure
 public:
 
     // Public typedefs
+    typedef RegionMesh<LinearTetra>                                     mesh_Type;
     typedef StructuralOperator< RegionMesh<LinearTetra> >::vector_Type  vector_Type;
     typedef boost::shared_ptr<vector_Type>                              vectorPtr_Type;
     typedef boost::shared_ptr< TimeAdvance< vector_Type > >             timeAdvance_Type;
@@ -156,6 +157,17 @@ public:
 
     typedef std::vector<vectorPtr_Type>                                 listOfFiberDirections_Type;
 
+    typedef LifeV::ExporterEmpty<mesh_Type >                      emptyExporter_Type;
+    typedef boost::shared_ptr<emptyExporter_Type>                 emptyExporterPtr_Type;
+
+    typedef LifeV::ExporterEnsight<mesh_Type >                    ensightFilter_Type;
+    typedef boost::shared_ptr<ensightFilter_Type>                 ensightFilterPtr_Type;
+
+#ifdef HAVE_HDF5
+    typedef LifeV::ExporterHDF5<mesh_Type >                       hdf5Filter_Type;
+    typedef boost::shared_ptr<hdf5Filter_Type>                    hdf5FilterPtr_Type;
+#endif
+
     /** @name Constructors, destructor
      */
     //@{
@@ -172,10 +184,6 @@ public:
     {
         run3d();
     }
-    void CheckResultHolzapfelModel (const Real& dispNorm, const Real& time);
-    void CheckResultDistributedModel (const Real& dispNorm, const Real& time);
-    void CheckResultMultimechanismModel (const Real& dispNorm, const Real& time);
-    void resultChanged (Real time);
     //@}
 
 protected:
@@ -256,21 +264,54 @@ Structure::run3d()
     boost::shared_ptr<StructuralConstitutiveLawData> dataStructure (new StructuralConstitutiveLawData( ) );
     dataStructure->setup (dataFile);
 
-    dataStructure->showMe();
+    //dataStructure->showMe();
 
-    MeshData             meshData;
-    meshData.setup (dataFile, "solid/space_discretization");
+    //Loading a partitoned mesh or reading a new one
+    const std::string partitioningMesh = dataFile ( "partitioningOffline/loadMesh", "no");
 
-    boost::shared_ptr<RegionMesh<LinearTetra> > fullMeshPtr (new RegionMesh<LinearTetra> (  parameters->comm  ) );
-    readMesh (*fullMeshPtr, meshData);
+    //Creation of pointers
+    boost::shared_ptr<MeshPartitioner<mesh_Type> > meshPart;
+    boost::shared_ptr<mesh_Type> pointerToMesh;
 
-    MeshPartitioner< RegionMesh<LinearTetra> > meshPart ( fullMeshPtr, parameters->comm );
+    if ( ! (partitioningMesh.compare ("no") ) )
+    {
+        boost::shared_ptr<mesh_Type > fullMeshPtr (new mesh_Type ( ( parameters->comm ) ) );
+        //Creating a new mesh from scratch
+        MeshData             meshData;
+        meshData.setup (dataFile, "solid/space_discretization");
+        readMesh (*fullMeshPtr, meshData);
+
+        meshPart.reset ( new MeshPartitioner<mesh_Type> (fullMeshPtr, parameters->comm ) );
+
+        pointerToMesh = meshPart->meshPartition();
+    }
+    else
+    {
+        //Creating a mesh object from a partitioned mesh
+        const std::string partsFileName (dataFile ("partitioningOffline/hdf5_file_name", "NO_DEFAULT_VALUE.h5") );
+
+        boost::shared_ptr<Epetra_MpiComm> mpiComm =
+            boost::dynamic_pointer_cast<Epetra_MpiComm>(parameters->comm);
+        PartitionIO<mesh_Type> partitionIO (partsFileName, mpiComm);
+
+
+        partitionIO.read (pointerToMesh);
+
+    }
 
     std::string dOrder =  dataFile ( "solid/space_discretization/order", "P1");
 
     //Mainly used for BCs assembling (Neumann type)
-    solidFESpacePtr_Type dFESpace ( new solidFESpace_Type (meshPart, dOrder, 3, parameters->comm) );
-    solidETFESpacePtr_Type dETFESpace ( new solidETFESpace_Type (meshPart, & (dFESpace->refFE() ), & (dFESpace->fe().geoMap() ), parameters->comm) );
+    solidFESpacePtr_Type dFESpace ( new solidFESpace_Type (pointerToMesh, dOrder, 3, parameters->comm) );
+    solidETFESpacePtr_Type dETFESpace ( new solidETFESpace_Type (pointerToMesh, & (dFESpace->refFE() ), & (dFESpace->fe().geoMap() ), parameters->comm) );
+
+    // // setting precise quadrature rule for fine meshes
+    // const QuadratureRule fineQuadRule = quadRuleTetra15pt;
+    // QuadratureRule fineBdQuadRule = quadRuleTria4pt;
+
+    // dFESpace->setQuadRule ( fineQuadRule );
+    // dFESpace->setBdQuadRule ( fineBdQuadRule );
+
 
     // Setting the fibers
     vectorFiberFunctionPtr_Type pointerToVectorOfFamilies( new vectorFiberFunction_Type( ) );
@@ -279,7 +320,8 @@ Structure::run3d()
     listOfFiberDirections_Type fiberDirections;
     fiberDirections.resize( dataStructure->numberFibersFamilies( ) );
 
-    std::cout << "Size of the number of families: " << (*pointerToVectorOfFamilies).size() << std::endl;
+    if( verbose )
+        std::cout << "Size of the number of families: " << (*pointerToVectorOfFamilies).size() << std::endl;
 
     fibersDirectionList setOfFiberFunctions;
     setOfFiberFunctions.setupFiberDefinitions( dataStructure->numberFibersFamilies( ) );
@@ -315,8 +357,10 @@ Structure::run3d()
 
     BCFunctionBase zero (bcZero);
     BCFunctionBase nonZero;
+    BCFunctionBase pressure;
 
     nonZero.setFunction (bcNonZero);
+    pressure.setFunction (traction);
 
     //! =================================================================================
     //! BC for StructuredCube4_test_structuralsolver.mesh
@@ -333,6 +377,13 @@ Structure::run3d()
     BCh->addBC ("EdgesIn",      7, Essential, Component , zero, compx);
     BCh->addBC ("EdgesIn",      3, Essential, Component , zero, compz);
     //! =================================================================================
+
+    // Case of a tube
+    //Condition for Inflation
+    // BCh->addBC ("EdgesIn",      200, Natural,   Full, pressure, 3);
+    // BCh->addBC ("EdgesIn",      40,  Natural,   Full, zero, 3);
+    // BCh->addBC ("EdgesIn",      70,  Essential, Full, zero, 3);
+    // BCh->addBC ("EdgesIn",      60,  Essential, Full, zero, 3);
 
     //! 1. Constructor of the structuralSolver
     StructuralOperator< RegionMesh<LinearTetra> > solid;
@@ -379,9 +430,6 @@ Structure::run3d()
     //! Temporal data and initial conditions
     //! =================================================================================
 
-    //! 5. Initial data
-    Real dt = dataStructure->dataTime()->timeStep();
-
     vectorPtr_Type rhs (new vector_Type (solid.displacement(), Unique) );
     vectorPtr_Type disp (new vector_Type (solid.displacement(), Unique) );
     vectorPtr_Type vel (new vector_Type (solid.displacement(), Unique) );
@@ -392,97 +440,173 @@ Structure::run3d()
         std::cout << "S- initialization ... ";
     }
 
-    std::vector<vectorPtr_Type> uv0;
+    // Initialization
+    //Initialization of TimeAdvance
+    std::string const restart =  dataFile ( "importer/restart", "none");
+    std::vector<vectorPtr_Type> solutionStencil;
+    solutionStencil.resize ( timeAdvance->size() );
 
-    if (timeAdvanceMethod == "Newmark")
+    boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > importerSolid;
+
+    if ( restart.compare ( "none" ) )
     {
-        uv0.push_back (disp);
-        uv0.push_back (vel);
-        uv0.push_back (acc);
-    }
+        //Reading fileNames - setting data for reading
+        std::string const importerType =  dataFile ( "importer/type", "ensight");
+        std::string const fileName     =  dataFile ( "importer/filename", "structure");
+        std::string const initialLoaded     =  dataFile ( "importer/initialSol", "NO_DEFAULT_VALUE");
+        //LifeV::Real initialTime        =  dataFile ( "importer/initialTime", 0.0);
 
-    vectorPtr_Type initialDisplacement (new vector_Type (solid.displacement(), Unique) );
-
-    if ( !dataStructure->solidTypeIsotropic().compare ("secondOrderExponential") )
-    {
-        dFESpace->interpolate ( static_cast<solidFESpace_Type::function_Type> ( d0 ), *initialDisplacement, 0.0 );
-    }
-
-    if (timeAdvanceMethod == "BDF")
-    {
-        Real tZero = dataStructure->dataTime()->initialTime();
-
-        for ( UInt previousPass = 0; previousPass < timeAdvance->size() ; previousPass++)
+        //Creating the importer
+#ifdef HAVE_HDF5
+        if ( !importerType.compare ("hdf5") )
         {
-            Real previousTimeStep = tZero - previousPass * dt;
-            std::cout << "BDF " << previousTimeStep << "\n";
-            if ( !dataStructure->solidTypeIsotropic().compare ("secondOrderExponential") )
+            importerSolid.reset ( new  hdf5Filter_Type ( dataFile, fileName) );
+        }
+        else
+#endif
+        {
+            if ( !importerType.compare ("none") )
             {
-                uv0.push_back (initialDisplacement);
+                importerSolid.reset ( new emptyExporter_Type ( dataFile, dFESpace->mesh(), "solid", dFESpace->map().comm().MyPID() ) );
             }
             else
             {
-                uv0.push_back (disp);
+                importerSolid.reset ( new  ensightFilter_Type ( dataFile, fileName) );
             }
         }
+
+        importerSolid->setMeshProcId (dFESpace->mesh(), dFESpace->map().comm().MyPID() );
+
+        //Creation of Exporter to check the loaded solution (working only for HDF5)
+        // std::string expVerFile = "verificationDisplExporter";
+        // LifeV::ExporterHDF5<RegionMesh<LinearTetra> > exporter( dataFile, pointerToMesh, expVerFile, parameters->comm->MyPID());
+        // vectorPtr_Type vectVer ( new vector_Type(solid.displacement(),  LifeV::Unique ) );
+
+        // exporter.addVariable( ExporterData<mesh_Type >::VectorField, "displVer", dFESpace, vectVer, UInt(0) );
+
+        // exporter.postProcess(0.0);
+
+        //Reading the displacement field and the timesteps need by the TimeAdvance class
+        vectorPtr_Type solidDisp (new vector_Type (dFESpace->map(), importerSolid->mapType() ) );
+
+        std::string iterationString;
+
+        // if( verbose )
+        //     std::cout << "size TimeAdvance:" << timeAdvance->size() << std::endl;
+
+        //Loading the stencil
+        iterationString = initialLoaded;
+        for (UInt iterInit = 0; iterInit < timeAdvance->size(); iterInit++ )
+        {
+            // if( verbose )
+            //     std::cout << "new iterationString" << iterationString << std::endl;
+
+            solidDisp.reset ( new vector_Type (solid.displacement(),  Unique ) );
+            *solidDisp *= 0.0;
+
+            LifeV::ExporterData<mesh_Type> solidDataReader (LifeV::ExporterData<mesh_Type>::VectorField, std::string ("displacement." + iterationString), dFESpace, solidDisp, UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
+
+            importerSolid->readVariable (solidDataReader);
+
+            // if( verbose )
+            //     std::cout << "Norm of the " << iterInit + 1 << "-th solution : " << solidDisp->norm2() << std::endl;
+
+            //Exporting the just loaded solution (debug purposes)
+            // Real currentLoading(iterInit + 1.0);
+            // *vectVer = *solidDisp;
+            // exporter.postProcess( currentLoading );
+
+            solutionStencil[ iterInit ] = solidDisp;
+
+            //initializing the displacement field in the StructuralSolver class with the first solution
+            if ( !iterInit )
+            {
+                solid.initialize ( solidDisp );
+            }
+
+            //Updating string name
+            int iterations = std::atoi (iterationString.c_str() );
+            iterations--;
+
+            std::ostringstream iter;
+            iter.fill ( '0' );
+            iter << std::setw (5) << ( iterations );
+            iterationString = iter.str();
+
+        }
+
+        importerSolid->closeFile();
+
+        //Putting the vector in the TimeAdvance Stencil
+        timeAdvance->setInitialCondition (solutionStencil);
+
     }
-
-    timeAdvance->setInitialCondition (uv0);
-
-    timeAdvance->setTimeStep ( dt );
-
-    timeAdvance->updateRHSContribution ( dt );
-
-    if ( !dataStructure->solidTypeIsotropic().compare ("secondOrderExponential") )
+    else //Initialize with zero vectors
     {
-        solid.initialize ( initialDisplacement );
-    }
-    else
-    {
+
+        // if( verbose )
+        //     std::cout << "Starting from scratch" << std::endl;
+
+        vectorPtr_Type disp (new vector_Type (solid.displacement(), Unique) );
+
+        for ( UInt previousPass = 0; previousPass < timeAdvance->size() ; previousPass++)
+        {
+            solutionStencil[ previousPass ] = disp;
+        }
+
+        timeAdvance->setInitialCondition (solutionStencil);
+
+        //It is automatically done actually. It's clearer if specified.
         solid.initialize ( disp );
     }
 
+
+    timeAdvance->setTimeStep ( dataStructure->dataTime()->timeStep() );
+
+    timeAdvance->updateRHSContribution ( dataStructure->dataTime()->timeStep() );
+
     MPI_Barrier (MPI_COMM_WORLD);
 
-    if (verbose )
-    {
-        std::cout << "ok." << std::endl;
-    }
+    // if (verbose )
+    // {
+    //     std::cout << "ok." << std::endl;
+    // }
 
     boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporter;
 
     std::string const exporterType =  dataFile ( "exporter/type", "ensight");
+    std::string const exportFileName = dataFile ( "exporter/nameFile", "structure");
 #ifdef HAVE_HDF5
     if (exporterType.compare ("hdf5") == 0)
     {
-        exporter.reset ( new ExporterHDF5<RegionMesh<LinearTetra> > ( dataFile, "structure" ) );
+        exporter.reset ( new ExporterHDF5<RegionMesh<LinearTetra> > ( dataFile, exportFileName ) );
     }
     else
 #endif
     {
         if (exporterType.compare ("none") == 0)
         {
-            exporter.reset ( new ExporterEmpty<RegionMesh<LinearTetra> > ( dataFile, meshPart.meshPartition(), "structure", parameters->comm->MyPID() ) );
+            exporter.reset ( new ExporterEmpty<RegionMesh<LinearTetra> > ( dataFile, pointerToMesh, exportFileName, parameters->comm->MyPID() ) );
         }
 
         else
         {
-            exporter.reset ( new ExporterEnsight<RegionMesh<LinearTetra> > ( dataFile, meshPart.meshPartition(), "structure", parameters->comm->MyPID() ) );
+            exporter.reset ( new ExporterEnsight<RegionMesh<LinearTetra> > ( dataFile, pointerToMesh, exportFileName, parameters->comm->MyPID() ) );
         }
     }
 
     exporter->setPostDir ( "./" );
-    exporter->setMeshProcId ( meshPart.meshPartition(), parameters->comm->MyPID() );
+    exporter->setMeshProcId ( pointerToMesh, parameters->comm->MyPID() );
 
     vectorPtr_Type solidDisp ( new vector_Type (solid.displacement(),  exporter->mapType() ) );
     vectorPtr_Type solidVel  ( new vector_Type (solid.displacement(),  exporter->mapType() ) );
     vectorPtr_Type solidAcc  ( new vector_Type (solid.displacement(),  exporter->mapType() ) );
-    //vectorPtr_Type rhsVector ( new vector_Type (solid.displacement(),  exporter->mapType() ) );
+    vectorPtr_Type rhsVector ( new vector_Type (solid.displacement(),  exporter->mapType() ) );
 
     exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "displacement", dFESpace, solidDisp, UInt (0) );
     exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "velocity",     dFESpace, solidVel,  UInt (0) );
     exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "acceleration", dFESpace, solidAcc,  UInt (0) );
-    //exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "forcingTerm", dFESpace, rhsVector,  UInt (0) );
+    exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "forcingTerm", dFESpace, rhsVector,  UInt (0) );
 
     // Adding the fibers vectors
     // Setting the vector of fibers functions
@@ -508,62 +632,25 @@ Structure::run3d()
     exporter->postProcess ( 0 );
     cout.precision(16);
 
-    // int IDPointX = 618;
-    // int IDPointY = 331;
+    //! 5. Initial data
+    Real initialTime = dataStructure->dataTime()->initialTime();
+    Real dt = dataStructure->dataTime()->timeStep();
+    Real T  = dataStructure->dataTime()->endTime();
 
-    /*
-    //!--------------------------------------------------------------------------------------------
-    //! MATLAB FILE WITH DISPLACEMENT OF A CHOSEN POINT
-    //!--------------------------------------------------------------------------------------------
-
-    ofstream file_comp( "Displacement_components_NL.m" );
-    if ( !file_comp )
-    {
-      std::cout <<" Unable to open file! You need to specify the output folder in the data file " << std::endl;
-    }
-
-
-    //int IDPoint = 401; // StructuredCube8
-    //int IDPoint = 2593; // StructuredCube16
-
-    //int IDPoint = 74;// cube4x4.mesh
-    //int IDPoint = 315;// cube8x8.mesh
-    //int IDPoint = 1526;// cube16x16.mesh
-
-    file_comp << " % TEST NONLINEAR ELASTICITY" << endl;
-    file_comp << " % Displacement components of ID node  " << IDPoint << " :" << endl;
-    file_comp << " % Each row is a time step" << endl;
-    file_comp << " % First column = comp x, second = comp y and third = comp z. " << endl;
-    file_comp <<  endl;
-    file_comp << " SolidDisp_NL = [ " ;
-
-    for ( UInt k = IDPoint - 1; k <= solid.displacement().size() - 1; k = k + solid.displacement().size()/nDimensions )
-    {
-    file_comp<< solid.displacement()[ k ] << " ";
-    }
-
-    file_comp<< endl;
-    */
-    //!--------------------------------------------------------------------------------------------
-    //!The update of the RHS is done by the TimeAdvance class
-    //solid.updateSystem();
-    //! =================================================================================
-
-    Real normVect;
-    normVect =  solid.displacement().norm2();
-
-    if( verbose )
-    {
-        std::cout << "The norm 2 of the displacement field is: " << normVect << std::endl;
-    }
+    //! 6. Setting the pillow saving for restart
+    UInt tol = dataStructure->dataTimeAdvance()->orderBDF() + 1;
+    UInt saveEvery = dataFile( "exporter/saveEvery", 1);
+    UInt r(0);
+    UInt d(0);
+    UInt iter(0);
 
     //! =============================================================================
     //! Temporal loop
     //! =============================================================================
     //    for (Real time = dt; time <= T; time += dt)
-    for (dataStructure->dataTime()->setTime ( dt ) ; dataStructure->dataTime()->canAdvance( ); dataStructure->dataTime()->updateTime( ) )
+    for (Real time = initialTime + dt; time <= T; time += dt)
     {
-        returnValue = EXIT_FAILURE;
+        dataStructure->dataTime()->setTime( time );
 
         if (verbose)
         {
@@ -587,96 +674,23 @@ Structure::run3d()
         *solidAcc  = timeAdvance->secondDerivative();
 
         // This vector is to export the forcing term
-        //*rhsVector = solid.rhsCopy();
+        *rhsVector = solid.rhsCopy();
 
-        exporter->postProcess ( dataStructure->dataTime()->time() );
+        iter = iter + 1;
 
-        /* This part lets to save the displacement at one point of the mesh and to check the result
-           w.r.t. manufactured solution.
-           //!--------------------------------------------------------------------------------------------------
-           //! MATLAB FILE WITH DISPLACEMENT OF A CHOOSEN POINT
-           //!--------------------------------------------------------------------------------------------------
-           cout <<"*******  DISPLACEMENT COMPONENTS of ID node "<< IDPoint << " *******"<< std::endl;
-           for ( UInt k = IDPoint - 1 ; k <= solid.displacement().size() - 1; k = k + solid.displacement().size()/nDimensions )
-           {
-           file_comp<< solid.displacement()[ k ] << " ";
-           cout.precision(16);
-           cout <<"*********************************************************"<< std::endl;
-           cout <<" solid.disp()[ "<< k <<" ] = "<<  solid.displacement()[ k ]  << std::endl;
-           cout <<"*********************************************************"<< std::endl;
-           }
-           file_comp<< endl;
+        r = iter % saveEvery;
+        d = iter - r;
 
-           cout <<"*********************************************************"<< std::endl;
-           cout <<" solid.disp()[ "<< IDPointX - 1  <<" ] = "<<  solid.displacement()[ IDPointX - 1 ]  << std::endl;
-           cout <<" solid.disp()[ "<< IDPointX - 1 + dFESpace->dof().numTotalDof() <<" ] = "<<  solid.displacement()[ IDPointX - 1 + dFESpace->dof().numTotalDof() ]  << std::endl;
-           cout <<"*********************************************************"<< std::endl;
-        */
-
-        Real normVect;
-        normVect =  solid.displacement().norm2();
-        std::cout << "The norm 2 of the displacement field is: " << normVect << std::endl;
-
-        // Check results
-        if ( !dataStructure->solidTypeAnisotropic().compare ("holzapfel") )
-            CheckResultHolzapfelModel (normVect, dataStructure->dataTime()->time() );
-        else if ( !dataStructure->solidTypeAnisotropic().compare ("distributedHolzapfel") )
-            CheckResultDistributedModel (normVect, dataStructure->dataTime()->time() );
-        else
-            CheckResultMultimechanismModel (normVect, dataStructure->dataTime()->time() );
-
+        if ( (iter - d) <= tol || ( (std::floor(d/saveEvery) + 1)*saveEvery - iter ) <= tol )
+        {
+            exporter->postProcess( time );
+        }
+	}
 
         //!--------------------------------------------------------------------------------------------------
 
         MPI_Barrier (MPI_COMM_WORLD);
-    }
-
 }
-
-void Structure::CheckResultHolzapfelModel (const Real& dispNorm, const Real& time)
-{
-    if ( time == 0.05  && std::fabs (dispNorm - 0.84960668) <= 1e-7 )
-    {
-        this->resultChanged (time);
-    }
-    if ( time == 0.1   && std::fabs (dispNorm - 0.84981715) <= 1e-7 )
-    {
-        this->resultChanged (time);
-    }
-}
-
-void Structure::CheckResultDistributedModel (const Real& dispNorm, const Real& time)
-{
-    if ( time == 0.05  && std::fabs (dispNorm - 1.7747561302) <= 1e-7 )
-    {
-        this->resultChanged (time);
-    }
-    if ( time == 0.1   && std::fabs (dispNorm - 1.7757263996) <= 1e-7 )
-    {
-        this->resultChanged (time);
-    }
-}
-
-void Structure::CheckResultMultimechanismModel (const Real& dispNorm, const Real& time)
-{
-    if ( time == 0.05  && std::fabs (dispNorm - 0.8496066842) <= 1e-10 )
-    {
-        this->resultChanged (time);
-    }
-    if ( time == 0.1   && std::fabs (dispNorm - 0.8498171549) <= 1e-10 )
-    {
-        this->resultChanged (time);
-    }
-}
-
-
-
-void Structure::resultChanged (Real time)
-{
-    std::cout << "Correct value at time: " << time << std::endl;
-    returnValue = EXIT_SUCCESS;
-}
-
 
 
 int

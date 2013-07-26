@@ -539,6 +539,28 @@ public:
     }
 
 
+    //! This method
+    //! In this method, which is based on cofactor and determinant,
+    //! given a matrix, its inverse is computed explicitly
+    //! for matrices of dimensions 1 2 3
+    //! This method is mainly used for structural problems.
+    /*!
+      @return a small matrix containing the inverse
+    */
+    MatrixSmall<Dim1, Dim2> inverse() const
+    {
+        ASSERT ( Dim2 == Dim1, "This method is based on the cofactor and determinant methods which are defined only for squared matrices!");
+
+        //Create the matrix to store the cofactor
+        //In this case it is a copy of the current matrix
+        MatrixSmall<Dim1, Dim2> minusT (*this);
+
+        minusT = this->minusTransposed();
+
+        return minusT.transpose( );
+    }
+
+
     Real trace() const
     {
         ASSERT ( Dim2 == Dim1, "The trace is defined only for squared matrices!");

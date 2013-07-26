@@ -90,6 +90,13 @@ public:
     typedef typename super::vectorsParametersPtr_Type    vectorsParametersPtr_Type;
 
     typedef MatrixSmall<3, 3>                          matrixSmall_Type;
+
+    // Typedefs for expression definitions
+    typedef typename super::tensorF_Type               tensorF_Type;
+    typedef typename super::determinantF_Type          determinantF_Type;
+    typedef typename super::tensorC_Type               tensorC_Type;
+    typedef typename super::minusT_Type                minusT_Type;
+    typedef typename super::traceTensor_Type           traceTensor_Type;
     //@}
 
 
@@ -407,35 +414,19 @@ void NeoHookeanMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( matri
     //     Real bulk   = dataMaterial->bulk(marker);
 
     // Definition of F
-    ExpressionAddition<
-        ExpressionInterpolateGradient<MeshType, MapEpetra, 3, 3>, ExpressionMatrix<3,3> >
-        F( grad( this->M_dispETFESpace,  disp, this->M_offset), value(this->M_identity));
+    tensorF_Type F = ExpressionDefinitions::deformationGradient( this->M_dispETFESpace,  disp, this->M_offset, this->M_identity );
 
     // Definition of J
-    ExpressionDeterminant<ExpressionAddition<
-        ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >
-        J( F );
+    determinantF_Type J = ExpressionDefinitions::determinantF( F );
 
     // Definition of tensor C
-    ExpressionProduct<
-        ExpressionTranspose<
-            ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
-        ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> >
-        >
-    C( transpose(F), F );
+    tensorC_Type C = ExpressionDefinitions::tensorC( transpose(F), F );
 
     // Definition of F^-T
-    ExpressionMinusTransposed<
-        ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> >
-        >
-    F_T( F );
+    minusT_Type  F_T = ExpressionDefinitions::minusT( F );
 
     // Definition of tr( C )
-    ExpressionTrace<
-        ExpressionProduct<ExpressionTranspose<ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
-                          ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >
-        >
-    I_C( C );
+    traceTensor_Type I_C = ExpressionDefinitions::traceTensor( C );
 
     //Assembling Volumetric Part
     integrate ( elements ( this->M_dispETFESpace->mesh() ) ,
@@ -559,36 +550,19 @@ void NeoHookeanMaterialNonLinear<MeshType>::computeStiffness ( const vector_Type
     //     Real bulk   = dataMaterial->bulk(marker);
 
     // Definition of F
-    ExpressionAddition<
-        ExpressionInterpolateGradient<MeshType, MapEpetra, 3, 3>, ExpressionMatrix<3,3> >
-        F( grad( this->M_dispETFESpace,  disp, this->M_offset), value(this->M_identity));
+    tensorF_Type F = ExpressionDefinitions::deformationGradient( this->M_dispETFESpace,  disp, this->M_offset, this->M_identity );
 
     // Definition of J
-    ExpressionDeterminant<ExpressionAddition<
-        ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >
-        J( F );
+    determinantF_Type J = ExpressionDefinitions::determinantF( F );
 
     // Definition of tensor C
-    ExpressionProduct<
-        ExpressionTranspose<
-            ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
-        ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> >
-        >
-    C( transpose(F), F );
+    tensorC_Type C = ExpressionDefinitions::tensorC( transpose(F), F );
 
     // Definition of F^-T
-    ExpressionMinusTransposed<
-        ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> >
-        >
-    F_T( F );
+    minusT_Type  F_T = ExpressionDefinitions::minusT( F );
 
     // Definition of tr( C )
-    ExpressionTrace<
-        ExpressionProduct<ExpressionTranspose<ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
-                          ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > >
-        >
-    I_C( C );
-
+    traceTensor_Type I_C = ExpressionDefinitions::traceTensor( C );
 
     //Computation of the volumetric part
     //
@@ -662,13 +636,6 @@ namespace
 {
 static bool registerNH = StructuralIsotropicConstitutiveLaw<LifeV::RegionMesh<LinearTetra> >::StructureIsotropicMaterialFactory::instance().registerProduct ( "neoHookean", &createNeoHookeanMaterialNonLinear<LifeV::RegionMesh<LinearTetra> > );
 }
-
-#undef deformationGradientTensor
-#undef detDeformationGradientTensor
-#undef deformationGradientTensor_T
-#undef RIGHTCAUCHYGREEN
-#undef firstInvariantC
-#undef firstInvariantCbar
 
 } //Namespace LifeV
 
