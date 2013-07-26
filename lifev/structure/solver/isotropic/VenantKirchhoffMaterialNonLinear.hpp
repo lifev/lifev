@@ -381,7 +381,6 @@ void VenantKirchhoffMaterialNonLinear<MeshType>::updateJacobianMatrix ( const ve
     displayer->leaderPrint (" \n*********************************\n  ");
 
     // this->M_jacobian->spy("jacobian");
-    // std::cout << "Ciao";
     // int n;
     // std::cin >> n;
 

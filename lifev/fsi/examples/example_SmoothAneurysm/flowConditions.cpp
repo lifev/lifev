@@ -132,7 +132,7 @@ void FlowConditions::renewParameters ( FSISolver&  oper_,
 
     qn   = fluidQuantities (0);
     area = fluidQuantities (1);
-    area0 = 0.7854;
+    area0 = 0.0034212;
     // Fluid density
     // Real density = 1.0;
     UInt flag   = 1;

@@ -18,13 +18,13 @@
 
 
 [exporter]
-modifiedMesh = tubeSolidDamaged.mesh
+modifiedMesh = WulandandaGeometryUnhealthy.mesh
 
 [solid]
 [./space_discretization]
 mesh_dir  	= ./
 mesh_type   = .mesh
-mesh_file 	= tubeSolidDamagedExperiments.mesh
+mesh_file 	= WulandandaGeometry.mesh
 order     	= P1
 
 

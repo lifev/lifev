@@ -1057,6 +1057,9 @@ void StructuralOperator<Mesh>::updateRightHandSideWithBodyForce ( const Real cur
 {
     using namespace ExpressionAssembly;
 
+    vector_Type rhs ( *M_localMap );
+
+
     M_source->setCurrentTime( currentTime );
 
     vectorPtr_Type rhs ( new vector_Type (*M_localMap) );
@@ -1072,6 +1075,7 @@ void StructuralOperator<Mesh>::updateRightHandSideWithBodyForce ( const Real cur
     *rhs += rhsTimeAdvance;
 
     *M_rhsNoBC += *rhs;
+
 }
 
 template <typename Mesh>

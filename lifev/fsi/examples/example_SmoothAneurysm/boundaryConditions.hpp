@@ -50,6 +50,7 @@
 #include <lifev/fsi/solver/FSIMonolithicGI.hpp>
 
 #include "flowConditions.hpp"
+#include "resistance.hpp"
 #include "ud_functions.hpp"
 
 
@@ -58,16 +59,18 @@
 #define INLETRING 20
 #define OUTLET 3
 #define OUTLETRING 30
-#define FLUIDINTERFACE 100
+#define FLUIDINTERFACE 200
 
-#define SOLIDINTERFACE 100
+#define SOLIDINTERFACE 200
 #define INLETWALL 2
 #define INLETWALL_INTRING 20
+#define INLETWALL_OUTRING 21
 
 #define OUTLETWALL 3
 #define OUTLETWALL_INTRING 30
+#define OUTLETWALL_OUTRING 31
 
-#define OUTERWALL 1000
+#define OUTERWALL 210
 
 
 
@@ -89,6 +92,10 @@ FSIOperator::fluidBchandlerPtr_Type BCh_harmonicExtension (FSIOperator& /*_oper*
 
     BCh_he->addBC ("in", INLET, Essential, Full, bcf,   3);
     BCh_he->addBC ("in", OUTLET, Essential, Full, bcf,   3);
+
+    // Rings of the fluid domain
+    // BCh_he->addBC ("inRing", INLETRING,  EssentialVertices, Full, bcf,   3);
+    // BCh_he->addBC ("inRing", OUTLETRING, EssentialVertices, Full, bcf,   3);
 
     return BCh_he;
 }
@@ -126,9 +133,10 @@ FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFluid (FSIOperator& _oper, boo
 
     BCFunctionBase bcf      (fZero);
     BCFunctionBase in_flow  (uInterpolated);
+    BCFunctionBase pressureEpsilon  (epsilon);
     //    BCFunctionBase out_flow (fZero);
 
-    BCFunctionBase out_press3 (FlowConditions::outPressure0);
+    BCFunctionBase out_press3 (ResistanceBCs::outPressure0);
 
     BCFunctionBase InletVect (aneurismFluxInVectorial);
     //BCFunctionBase bcfw0 (w0);
@@ -136,12 +144,8 @@ FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFluid (FSIOperator& _oper, boo
     //Inlets
     BCh_fluid->addBC ("InFlow" , INLET,  Essential, Full, InletVect, 3);
 
-    //Outlets
-
-    //Absorbing BC seemed not to work
     //Absorbing BC on outlet 2and3 caused instabilities
     BCh_fluid->addBC ("out3", OUTLET, Natural,  Normal, out_press3);
-    //BCh_fluid->addBC("out3", OUTLET, Natural,  Normal, bcf);
 
     return BCh_fluid;
 }
@@ -162,19 +166,21 @@ FSIOperator::solidBchandlerPtr_Type BCh_monolithicSolid (FSIOperator& _oper)
 
     //Inlets & Outlets
     BCh_solid->addBC ("BORDERS",   INLETWALL, Essential, Full, bcf,  3);
-    BCh_solid->addBC ("BORDERS-RIN",   INLETWALL_INTRING, EssentialVertices, Full, bcf,  3);
     BCh_solid->addBC ("BORDERS",   OUTLETWALL, Essential, Full, bcf,  3);
-    BCh_solid->addBC ("BORDERS-rin",   OUTLETWALL_INTRING, EssentialVertices, Full, bcf,  3);
 
     //Robin BC
     BCFunctionBase hyd (fZero);
     BCFunctionBase young (E);
+    BCFunctionBase externalPressure (outerWallPressure);
     //robin condition on the outer wall
-    _oper.setRobinOuterWall (hyd, young);
+    //_oper.setRobinOuterWall (externalPressure, young);
 
-
+    //BCh_solid->addBC ("OuterWall", OUTERWALL, Robin, Normal, _oper.bcfRobinOuterWall() );
     //First try: Homogeneous Neumann
     BCh_solid->addBC ("OuterWall", OUTERWALL, Natural, Normal, bcf);
+
+    //Constant pressure  Neumann
+    //BCh_solid->addBC ("OuterWall", OUTERWALL, Natural, Normal, externalPressure);
 
     return BCh_solid;
 }

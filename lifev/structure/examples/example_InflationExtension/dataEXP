@@ -23,16 +23,17 @@ hdf5_file_name = cube.h5
 [exporter]
 type       = hdf5 #ensight 			# hdf5 (if library compiled with hdf5 support) or ensight
 multimesh  = false
-nameFile   = soleInflation
+nameFile   = unstructuredMeshPythonScript
 start      = 0
 save       = 1
+saveEvery  = 1
 
 [importer]
 restart      = none
 type         = hdf5 #ensight 			# hdf5 (if library compiled with hdf5 support) or ensight
-filename     = extension
-initialSol   = 00029
-initialTime  = 2.9
+filename     = soleInflation
+initialSol   = 00004
+initialTime  = 0.04
 
 [solid]
 
@@ -45,18 +46,19 @@ bulk		= 1.3333e+8
 alpha 		= 2.684564e+6
 gamma		= 1.0
 solidType 	= exponential		# linearVenantKirchhoff / nonLinearVenantKirchhoff / neoHookean / expoenential
+lawType     = nonlinear
 
 [../time_discretization]
 method          = BDF
-initialtime 	= 0.0
-endtime     	= 6.0
-timestep    	= 0.1
 BDF_order   	= 2
+initialtime 	= 0.0
+endtime     	= 0.05
+timestep    	= 0.01
 
 [../space_discretization]
 mesh_type   = .mesh
 mesh_dir  	= ./
-mesh_file 	= validationWTEC.mesh
+mesh_file 	= UnstructuredACA-solid.mesh
 order     	= P1
 
 
@@ -83,6 +85,7 @@ tol             = 1.e-10    		# AztecOO tolerance
 
 [../prec]
 prectype        = Ifpack	 		# Ifpack or ML
+xmlName         = xmlParameters.xml
 displayList     = true
 
 [./ifpack]
