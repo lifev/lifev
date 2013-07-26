@@ -599,8 +599,8 @@ typedef ExpressionProduct< ExpressionDphiJ,
                            ExpressionDefinitions::inverseTensor_Type>     activeLinearization_Type;
 
 
-typedef ExpressionProduct< ExpressionDefinitions::minusTransposedTensor_Type,
-                           ExpressionDphiI>                               activeTestGradient_Type;
+typedef ExpressionProduct< ExpressionDphiI,
+                           ExpressionDefinitions::inverseTensor_Type>    activeTestGradient_Type;
 
 
 difference_Type absoluteStretch( const ExpressionDefinitions::isochoricStretch_Type IVbar,
@@ -684,10 +684,10 @@ activeLinearization_Type activatedLinearization( const ExpressionDphiJ der,
 {
     return activeLinearization_Type( der , inverse);
 }
-activeTestGradient_Type activatedTestGradient( const ExpressionDefinitions::minusTransposedTensor_Type FAminusT,
-                                               const ExpressionDphiI gradTest)
+activeTestGradient_Type activatedTestGradient(const ExpressionDphiI gradTest,
+                                              const ExpressionDefinitions::inverseTensor_Type FAminus1)
 {
-    return activeTestGradient_Type ( FAminusT, gradTest );
+    return activeTestGradient_Type ( gradTest, FAminus1 );
 }
 }// end namespace ExpressionDistributedModel
 #endif

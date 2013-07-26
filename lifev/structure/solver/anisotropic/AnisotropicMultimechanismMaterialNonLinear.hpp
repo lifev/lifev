@@ -89,10 +89,16 @@ public:
         // The i has to be a Local ID!
         UInt index = M_selectionVector->blockMap().GID( i );
 
-        if( ( *M_selectionVector )( index ) >= M_value )
+        if( std::fabs( ( *M_selectionVector )( index ) ) <= ( M_value - 1.0e-5) )
+        {
             return true;
+        }
+
         else
+        {
             return false;
+        }
+
 
 
         return false;
@@ -692,7 +698,7 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::updateNonLinearJacobi
       // Linearization with respect to activation configuration
       activeLinearization_Type dFa = ExpressionMultimechanism::activatedLinearization( grad(phi_j), FzeroAminus1 );
 
-      activeTestGradient_Type grPhiI = ExpressionMultimechanism::activatedTestGradient( FzeroAminusT, grad(phi_i) );
+      activeTestGradient_Type grPhiI = ExpressionMultimechanism::activatedTestGradient( grad(phi_i), FzeroAminus1);
 
       Real stretch = this->M_dataMaterial->ithCharacteristicStretch(i);
 
@@ -951,7 +957,6 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeStiffness ( co
         AssemblyElementalStructure::saveVectorAccordingToFunctor( this->M_dispFESpace, M_selector[ i ],
                                                                   disp, this->M_firstActivation[i],
                                                                   M_activationDisplacement[i], this->M_offset);
-
     }
 
     displayer->leaderPrint (" Non-Linear S-  Computing contributions to the stiffness vector... ");
@@ -1022,7 +1027,7 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeStiffness ( co
           integrate ( elements ( this->M_dispETFESpace->mesh() ),
                       this->M_dispFESpace->qr(),
                       this->M_dispETFESpace,
-                      atan( IVithBar - value( stretch ) , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  )  * JactiveEl *
+                      atan( IVithBar - value( stretch ) , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  )  * ithJzeroA *
                       (value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * JactiveEl * ( IVithBar - value( stretch ) ) *
                        exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value( stretch ) ) * ( IVithBar- value( stretch ) )  ) *
                        dot( ( Fa  * Mith ) * FzeroAminusT, grad( phi_i ) ) )
