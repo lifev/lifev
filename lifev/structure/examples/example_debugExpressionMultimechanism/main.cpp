@@ -152,6 +152,13 @@ private:
      */
     void run3d();
 
+    void checkResults( const Real a, const Real b, const Real c,
+		       const Real d, const Real e, const Real f,
+		       const Real g, const Real h, const Real i,
+		       const Real l, const Real m, const Real n,
+		       const Real o);
+
+
 private:
     struct Private;
     boost::shared_ptr<Private> parameters;
@@ -592,7 +599,6 @@ Structure::run3d()
                   meas_K * phi_i
                   ) >> patchAreaVectorScalar;
 
-
     evaluateNode( elements ( dScalarETFESpace->mesh() ),
                   fakeQuadratureRule,
                   dScalarETFESpace,
@@ -620,9 +626,6 @@ Structure::run3d()
     *JacobianA = *JacobianA / *patchAreaVectorScalar;
 
     //Extracting the tensions
-    std::cout << "Norm of the J       : " << JacobianZero->normInf() << std::endl;
-    std::cout << "Norm of the J_0(ta) : " << JacobianZeroA->normInf() << std::endl;
-    std::cout << "Norm of the J_a     : " << JacobianA->normInf() << std::endl;
 
     // The patch area in vectorial form
     ExpressionVectorFromNonConstantScalar<ExpressionMeas, 3  > vMeas( meas_K );
@@ -631,7 +634,6 @@ Structure::run3d()
 		  dETFESpace,
 		  dot( vMeas , phi_i )
 		  ) >> patchAreaVector;
-
 
     for( UInt i(0); i < pointerToVectorOfFamilies->size( ); i++ )
     {
@@ -702,6 +704,7 @@ Structure::run3d()
                       ) >> scalarExpressionMultimechanism[ i ];
         *( scalarExpressionMultimechanism[ i ] ) = *( scalarExpressionMultimechanism[ i ] ) / *patchAreaVectorScalar;
 
+
 	// exporting the components of the Piola-Kirchhoff tensor
 	// Definition of the expression definition the portion of the Piola-Kirchhoff 
 
@@ -741,7 +744,6 @@ Structure::run3d()
                       ) >> Fa_col1[ i ];
 	*(Fa_col1[i]) = *(Fa_col1[i]) / *patchAreaVector;
 
-
         evaluateNode( elements ( dETFESpace->mesh() ),
                       fakeQuadratureRule,
                       dETFESpace,
@@ -763,7 +765,6 @@ Structure::run3d()
                       meas_K *  dot ( Mith_i1, phi_i) 
                       ) >> Mith_col1[ i ];
 	*(Mith_col1[i]) = *(Mith_col1[i]) / *patchAreaVector;
-
 
         evaluateNode( elements ( dETFESpace->mesh() ),
                       fakeQuadratureRule,
@@ -787,7 +788,6 @@ Structure::run3d()
                       ) >> FzeroAminusT_col1[ i ];
 	*(FzeroAminusT_col1[i]) = *(FzeroAminusT_col1[i]) / *patchAreaVector;
 
-
         evaluateNode( elements ( dETFESpace->mesh() ),
                       fakeQuadratureRule,
                       dETFESpace,
@@ -809,7 +809,6 @@ Structure::run3d()
                       meas_K *  dot ( P_i1, phi_i) 
                       ) >> P_col1[ i ];
 	*(P_col1[i]) = *(P_col1[i]) / *patchAreaVector;
-
 
         evaluateNode( elements ( dETFESpace->mesh() ),
                       fakeQuadratureRule,
@@ -842,8 +841,43 @@ Structure::run3d()
         std::cout << "finished" << std::endl;
     }
 
+    checkResults( patchAreaVectorScalar->normInf(), patchAreaVectorScalar->norm2(),
+		  patchAreaVector->normInf(), patchAreaVector->norm2(),
+		  JacobianZero->normInf(), JacobianZeroA->normInf(), JacobianA->normInf(),
+		  atanStretchesVector[0]->normInf(),atanStretchesVector[1]->normInf(),
+		  scalarExpressionMultimechanism[0]->norm2(), scalarExpressionMultimechanism[1]->norm2(),
+		  Mith_col1[0]->normInf(), Mith_col1[1]->normInf());
+
     MPI_Barrier (MPI_COMM_WORLD);
     //!---------------------------------------------.-----------------------------------------------------
+}
+
+void
+Structure::checkResults(const Real a, const Real b, const Real c,
+			const Real d, const Real e, const Real f,
+			const Real g, const Real h, const Real i,
+			const Real l, const Real m, const Real n,
+			const Real o)
+{
+
+  if( std::fabs( a - 0.072916) < 1e-6 &&  
+      std::fabs( b - 0.601692) < 1e-6  && 
+      std::fabs( c - 0.072916) < 1e-6  && 
+      std::fabs( d - 1.042161) < 1e-6  && 
+      std::fabs( e - 1 ) < 1e-6 && 
+      std::fabs( f - 1 ) < 1e-6 && 
+      std::fabs( g - 1 ) < 1e-6 &&
+      std::fabs( h - 3.18309e-05 ) < 1e-9 &&
+      std::fabs( i - 3.18309e-05 ) < 1e-9 &&
+      std::fabs( l - 6968.505143 ) < 1e-6 &&
+      std::fabs( m - 6968.505143 ) < 1e-6 &&
+      std::fabs( n - 0.433012 ) < 1e-6 &&
+      std::fabs( o - 0.433012 ) < 1e-6 )
+    {
+      std::cout << "Correct result! "<< std::endl;
+      returnValue = EXIT_SUCCESS;
+    }
+
 }
 
 int

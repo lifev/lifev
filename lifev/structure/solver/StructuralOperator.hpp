@@ -1055,10 +1055,7 @@ void StructuralOperator<Mesh>::updateSystem ( matrixPtr_Type& mat_stiff)
 template <typename Mesh>
 void StructuralOperator<Mesh>::updateRightHandSideWithBodyForce ( const Real currentTime, const vector_Type& rhsTimeAdvance )
 {
-    using namespace ExpressionAssembly;
-
-    vector_Type rhs ( *M_localMap );
-
+  using namespace ExpressionAssembly;
 
     M_source->setCurrentTime( currentTime );
 
