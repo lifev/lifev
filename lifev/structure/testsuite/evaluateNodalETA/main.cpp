@@ -863,9 +863,6 @@ Structure::run3d()
         std::cout << "finished" << std::endl;
     }
 
-    std::cout << "norm2 " << patchAreaVectorScalar->norm2() << std::endl;
-    std::cout << "norm2 " << patchAreaVector->norm2() << std::endl;
-
     MPI_Barrier (MPI_COMM_WORLD);
 
     checkResults( patchAreaVectorScalar->normInf(),

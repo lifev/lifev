@@ -493,7 +493,7 @@ AnisotropicMultimechanismMaterialNonLinear<MeshType>::setup ( const FESpacePtr_T
                   this->M_dispETFESpace,
                   dot( vMeas , phi_i )
                   ) >> M_patchAreaVector;
-
+    M_patchAreaVector->globalAssemble();
     //this->setupVectorsParameters( );
 }
 
@@ -947,6 +947,7 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeStiffness ( co
                       this->M_dispETFESpace,
                       dot( vActivation , phi_i )
                       ) >> M_selectionCriterion[ i ];
+	M_selectionCriterion[ i ]->globalAssemble();
         *( M_selectionCriterion[ i ] ) = *( M_selectionCriterion[ i ] ) / *M_patchAreaVector;
 
         // Setting values in the selector
