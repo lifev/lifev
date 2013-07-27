@@ -13,5 +13,6 @@ ADD_SUBDIRECTORIES(
 IF(ENABLE_ANISOTROPIC_LAW)
   ADD_SUBDIRECTORIES(
     anisotropicLaw
+    evaluateNodalETA
     )
 ENDIF()

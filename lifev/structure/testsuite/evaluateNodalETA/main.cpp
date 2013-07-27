@@ -152,8 +152,8 @@ private:
      */
     void run3d();
 
-    void checkResults( const Real a, const Real b, const Real c,
-		       const Real d, const Real e, const Real f,
+    void checkResults( const Real a, const Real c,
+		       const Real e, const Real f,
 		       const Real g, const Real h, const Real i,
 		       const Real l, const Real m, const Real n,
 		       const Real o);
@@ -841,29 +841,28 @@ Structure::run3d()
         std::cout << "finished" << std::endl;
     }
 
-    checkResults( patchAreaVectorScalar->normInf(), patchAreaVectorScalar->norm2(),
-		  patchAreaVector->normInf(), patchAreaVector->norm2(),
+    MPI_Barrier (MPI_COMM_WORLD);
+
+    checkResults( patchAreaVectorScalar->normInf(),
+		  patchAreaVector->normInf(),
 		  JacobianZero->normInf(), JacobianZeroA->normInf(), JacobianA->normInf(),
 		  atanStretchesVector[0]->normInf(),atanStretchesVector[1]->normInf(),
 		  scalarExpressionMultimechanism[0]->norm2(), scalarExpressionMultimechanism[1]->norm2(),
 		  Mith_col1[0]->normInf(), Mith_col1[1]->normInf());
 
-    MPI_Barrier (MPI_COMM_WORLD);
     //!---------------------------------------------.-----------------------------------------------------
 }
 
 void
-Structure::checkResults(const Real a, const Real b, const Real c,
-			const Real d, const Real e, const Real f,
+Structure::checkResults(const Real a, const Real c,
+			const Real e, const Real f,
 			const Real g, const Real h, const Real i,
 			const Real l, const Real m, const Real n,
 			const Real o)
 {
 
   if( std::fabs( a - 0.072916) < 1e-6 &&  
-      std::fabs( b - 0.601692) < 1e-6  && 
       std::fabs( c - 0.072916) < 1e-6  && 
-      std::fabs( d - 1.042161) < 1e-6  && 
       std::fabs( e - 1 ) < 1e-6 && 
       std::fabs( f - 1 ) < 1e-6 && 
       std::fabs( g - 1 ) < 1e-6 &&
