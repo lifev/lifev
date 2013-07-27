@@ -598,12 +598,14 @@ Structure::run3d()
                   dScalarETFESpace,
                   meas_K * phi_i
                   ) >> patchAreaVectorScalar;
+    patchAreaVectorScalar->globalAssemble();
 
     evaluateNode( elements ( dScalarETFESpace->mesh() ),
                   fakeQuadratureRule,
                   dScalarETFESpace,
                   meas_K * J  * phi_i
                   ) >> JacobianZero;
+    JacobianZero->globalAssemble();
 
     *JacobianZero = *JacobianZero / *patchAreaVectorScalar;
 
@@ -613,6 +615,7 @@ Structure::run3d()
                   dScalarETFESpace,
                   meas_K * JzeroA  * phi_i
                   ) >> JacobianZeroA;
+    JacobianZeroA->globalAssemble();
 
     *JacobianZeroA = *JacobianZeroA / *patchAreaVectorScalar;
 
@@ -622,6 +625,7 @@ Structure::run3d()
                   dScalarETFESpace,
                   meas_K * JactiveEl  * phi_i
                   ) >> JacobianA;
+    JacobianA->globalAssemble();
 
     *JacobianA = *JacobianA / *patchAreaVectorScalar;
 
@@ -634,6 +638,7 @@ Structure::run3d()
 		  dETFESpace,
 		  dot( vMeas , phi_i )
 		  ) >> patchAreaVector;
+    patchAreaVector->globalAssemble();
 
     for( UInt i(0); i < pointerToVectorOfFamilies->size( ); i++ )
     {
@@ -679,6 +684,7 @@ Structure::run3d()
                       dScalarETFESpace,
                       meas_K * IVithBar  * phi_i
                       ) >> stretchesVector[ i ];
+	stretchesVector[ i ]->globalAssemble();
 
         *( stretchesVector[ i ] ) = *( stretchesVector[ i ] ) / *patchAreaVectorScalar;
 
@@ -688,6 +694,7 @@ Structure::run3d()
                       meas_K * atan( IVithBar - value( dataStructure->ithCharacteristicStretch( i ) ),
                                      dataStructure->smoothness() , ( 1.0 / 3.14159265359 ), (1.0/2.0) ) * phi_i
                       ) >> atanStretchesVector[ i ];
+	atanStretchesVector[ i ]->globalAssemble();
 
         *( atanStretchesVector[ i ] ) = *( atanStretchesVector[ i ] ) / *patchAreaVectorScalar;
 
@@ -702,6 +709,8 @@ Structure::run3d()
                       (value( 2.0 ) * value( dataStructure->ithStiffnessFibers( i ) ) * JactiveEl * ( IVithBar - value( stretch ) ) *
                        exp( value( dataStructure->ithNonlinearityFibers( i ) ) * ( IVithBar- value( stretch ) ) * ( IVithBar- value( stretch ) )  ) )  * phi_i
                       ) >> scalarExpressionMultimechanism[ i ];
+	scalarExpressionMultimechanism[ i ]->globalAssemble();
+
         *( scalarExpressionMultimechanism[ i ] ) = *( scalarExpressionMultimechanism[ i ] ) / *patchAreaVectorScalar;
 
 
@@ -742,6 +751,8 @@ Structure::run3d()
                       dETFESpace,
                       meas_K *  dot ( Fa_i1, phi_i) 
                       ) >> Fa_col1[ i ];
+	Fa_col1[ i ]->globalAssemble();
+
 	*(Fa_col1[i]) = *(Fa_col1[i]) / *patchAreaVector;
 
         evaluateNode( elements ( dETFESpace->mesh() ),
@@ -749,6 +760,7 @@ Structure::run3d()
                       dETFESpace,
                       meas_K *  dot ( Fa_i2, phi_i) 
                       ) >> Fa_col2[ i ];
+	Fa_col2[ i ]->globalAssemble();
 	*(Fa_col2[i]) = *(Fa_col2[i]) / *patchAreaVector;
 
         evaluateNode( elements ( dETFESpace->mesh() ),
@@ -756,6 +768,7 @@ Structure::run3d()
                       dETFESpace,
                       meas_K *  dot ( Fa_i3, phi_i) 
                       ) >> Fa_col3[ i ];
+	Fa_col3[ i ]->globalAssemble();
 	*(Fa_col3[i]) = *(Fa_col3[i]) / *patchAreaVector;
 
 
@@ -764,6 +777,7 @@ Structure::run3d()
                       dETFESpace,
                       meas_K *  dot ( Mith_i1, phi_i) 
                       ) >> Mith_col1[ i ];
+	Mith_col1[ i ]->globalAssemble();
 	*(Mith_col1[i]) = *(Mith_col1[i]) / *patchAreaVector;
 
         evaluateNode( elements ( dETFESpace->mesh() ),
@@ -771,6 +785,7 @@ Structure::run3d()
                       dETFESpace,
                       meas_K *  dot ( Mith_i2, phi_i) 
                       ) >> Mith_col2[ i ];
+	Mith_col2[ i ]->globalAssemble();
 	*(Mith_col2[i]) = *(Mith_col2[i]) / *patchAreaVector;
 
         evaluateNode( elements ( dETFESpace->mesh() ),
@@ -778,6 +793,7 @@ Structure::run3d()
                       dETFESpace,
                       meas_K *  dot ( Mith_i3, phi_i) 
                       ) >> Mith_col3[ i ];
+	Mith_col3[ i ]->globalAssemble();
 	*(Mith_col3[i]) = *(Mith_col3[i]) / *patchAreaVector;
 
 
@@ -786,6 +802,7 @@ Structure::run3d()
                       dETFESpace,
                       meas_K *  dot ( FzeroAminusT_i1, phi_i) 
                       ) >> FzeroAminusT_col1[ i ];
+	FzeroAminusT_col1[ i ]->globalAssemble();
 	*(FzeroAminusT_col1[i]) = *(FzeroAminusT_col1[i]) / *patchAreaVector;
 
         evaluateNode( elements ( dETFESpace->mesh() ),
@@ -793,6 +810,7 @@ Structure::run3d()
                       dETFESpace,
                       meas_K *  dot ( FzeroAminusT_i2, phi_i) 
                       ) >> FzeroAminusT_col2[ i ];
+	FzeroAminusT_col2[ i ]->globalAssemble();
 	*(FzeroAminusT_col2[i]) = *(FzeroAminusT_col2[i]) / *patchAreaVector;
 
         evaluateNode( elements ( dETFESpace->mesh() ),
@@ -800,6 +818,7 @@ Structure::run3d()
                       dETFESpace,
                       meas_K *  dot ( FzeroAminusT_i3, phi_i) 
                       ) >> FzeroAminusT_col3[ i ];
+	FzeroAminusT_col3[ i ]->globalAssemble();
 	*(FzeroAminusT_col3[i]) = *(FzeroAminusT_col3[i]) / *patchAreaVector;
 
 
@@ -808,6 +827,7 @@ Structure::run3d()
                       dETFESpace,
                       meas_K *  dot ( P_i1, phi_i) 
                       ) >> P_col1[ i ];
+	P_col1[ i ]->globalAssemble();
 	*(P_col1[i]) = *(P_col1[i]) / *patchAreaVector;
 
         evaluateNode( elements ( dETFESpace->mesh() ),
@@ -815,6 +835,7 @@ Structure::run3d()
                       dETFESpace,
                       meas_K *  dot ( P_i2, phi_i) 
                       ) >> P_col2[ i ];
+	P_col2[ i ]->globalAssemble();
 	*(P_col2[i]) = *(P_col2[i]) / *patchAreaVector;
 
         evaluateNode( elements ( dETFESpace->mesh() ),
@@ -822,6 +843,7 @@ Structure::run3d()
                       dETFESpace,
                       meas_K *  dot ( P_i3, phi_i) 
                       ) >> P_col3[ i ];
+	P_col3[ i ]->globalAssemble();
 	*(P_col3[i]) = *(P_col3[i]) / *patchAreaVector;
 		
     }
@@ -840,6 +862,9 @@ Structure::run3d()
     {
         std::cout << "finished" << std::endl;
     }
+
+    std::cout << "norm2 " << patchAreaVectorScalar->norm2() << std::endl;
+    std::cout << "norm2 " << patchAreaVector->norm2() << std::endl;
 
     MPI_Barrier (MPI_COMM_WORLD);
 
