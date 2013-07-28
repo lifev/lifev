@@ -534,19 +534,21 @@ Structure::run3d()
                   dETFESpace,
                   dot( vMeas , phi_i )
                   ) >> patchAreaVector;
+    patchAreaVector->globalAssemble();
 
     evaluateNode( elements ( dScalarETFESpace->mesh() ),
                   fakeQuadratureRule,
                   dScalarETFESpace,
                   meas_K * phi_i
                   ) >> patchAreaVectorScalar;
-
+    patchAreaVectorScalar->globalAssemble();
 
     evaluateNode( elements ( dETFESpace->mesh() ),
                   fakeQuadratureRule,
                   dETFESpace,
                   meas_K * dot( vJ  , phi_i )
                   ) >> jacobianVector;
+    jacobianVector->globalAssemble();
 
     *jacobianVector = *jacobianVector / *patchAreaVector;
 
@@ -555,6 +557,7 @@ Structure::run3d()
                   dScalarETFESpace,
                   meas_K * J  * phi_i
                   ) >> scalarJacobian;
+    scalarJacobian->globalAssemble();
 
     *scalarJacobian = *scalarJacobian / *patchAreaVectorScalar;
 
@@ -566,7 +569,8 @@ Structure::run3d()
                   dETFESpace,
                   meas_K * dot( vI_C , phi_i )
                   ) >> traceVector;
-
+    traceVector->globalAssemble();
+  
     *traceVector = *traceVector / *patchAreaVector;
 
     // F_i1
@@ -575,6 +579,7 @@ Structure::run3d()
                   dETFESpace,
                   meas_K * dot( F_i1, phi_i )
                   ) >> F_i1Vector;
+    F_i1Vector->globalAssemble();
 
     *F_i1Vector = *F_i1Vector / *patchAreaVector;
 
@@ -584,6 +589,7 @@ Structure::run3d()
                   dETFESpace,
                   meas_K * dot( F_i2, phi_i )
                   ) >> F_i2Vector;
+    F_i2Vector->globalAssemble();
 
     *F_i2Vector = *F_i2Vector / *patchAreaVector;
 
@@ -593,6 +599,7 @@ Structure::run3d()
                   dETFESpace,
                   meas_K * dot( F_i3, phi_i )
                   ) >> F_i3Vector;
+    F_i3Vector->globalAssemble();
 
     *F_i3Vector = *F_i3Vector / *patchAreaVector;
 
