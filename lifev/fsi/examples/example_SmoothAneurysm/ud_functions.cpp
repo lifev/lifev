@@ -732,7 +732,7 @@ Real fluxFunctionAneurysm (const Real& t, const Real& /*x*/, const Real& /*y*/, 
 
         // We change the flux for our geometry
         const Real pi   = 3.141592653589793;
-        const Real area = 0.00336273;  // radius = 0.033 cm
+        const Real area = 0.0033853;  // radius = 0.033 cm
         // const Real area = 0.013684; // radius = 0.066 cm
 
         const Real areaFactor = area / ( 0.195 * 0.195  * pi);
@@ -783,7 +783,7 @@ Real aneurismFluxInVectorial (const Real&  t, const Real& x, const Real& y, cons
 
 
     Real flux (fluxFunctionAneurysm (t, x, y, z, i) );
-    Real area (0.00336273); // 0.033 cm
+    Real area (0.0033853); // 0.033 cm
     //Real area (0.013684);   // 0.066 cm
 
     //Parabolic profile

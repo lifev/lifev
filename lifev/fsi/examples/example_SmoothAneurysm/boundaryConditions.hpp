@@ -142,9 +142,9 @@ FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFluid (FSIOperator& _oper, boo
     //BCFunctionBase bcfw0 (w0);
 
     //Inlets
-    BCh_fluid->addBC ("InFlow" , INLET,  Essential, Full, InletVect, 3);
+    BCh_fluid->addBC ("InFlow" , INLET,  EssentialVertices, Full, InletVect, 3);
+    BCh_fluid->addBC ("InFlow" , 20,  EssentialVertices, Full, bcf, 3);
 
-    //Absorbing BC on outlet 2and3 caused instabilities
     BCh_fluid->addBC ("out3", OUTLET, Natural,  Normal, out_press3);
 
     return BCh_fluid;
