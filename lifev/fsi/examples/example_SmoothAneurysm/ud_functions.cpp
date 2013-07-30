@@ -715,14 +715,14 @@ Real fluxFunctionAneurysm (const Real& t, const Real& /*x*/, const Real& /*y*/, 
 
     Real fluxFinal;
     Real rampAmpl (1.012);
-    Real activeRamp ( rampAmpl / 3.0 );
+    Real activeRamp ( rampAmpl / 1.0 );
     Real dt (0.001);
 
     if ( t <= activeRamp )
       {
         fluxFinal = ( 0.1747 / activeRamp ) * t; // 0.033 cm
       }
-    if ( t > activeRamp  && t <= rampAmpl )
+    else if ( t > activeRamp  && t <= rampAmpl )
       {
     	fluxFinal = ( 0.1747 );
       }
@@ -732,7 +732,7 @@ Real fluxFunctionAneurysm (const Real& t, const Real& /*x*/, const Real& /*y*/, 
 
         // We change the flux for our geometry
         const Real pi   = 3.141592653589793;
-        const Real area = 0.00342119;  // radius = 0.033 cm
+        const Real area = 0.00336273;  // radius = 0.033 cm
         // const Real area = 0.013684; // radius = 0.066 cm
 
         const Real areaFactor = area / ( 0.195 * 0.195  * pi);
@@ -766,6 +766,8 @@ Real fluxFunctionAneurysm (const Real& t, const Real& /*x*/, const Real& /*y*/, 
         fluxFinal =  (flux * areaFactor * unitFactor);
       }
 
+    std::cout << "Flux that is imposed" << fluxFinal << std::endl;
+
     return fluxFinal;
 
 }
@@ -781,7 +783,7 @@ Real aneurismFluxInVectorial (const Real&  t, const Real& x, const Real& y, cons
 
 
     Real flux (fluxFunctionAneurysm (t, x, y, z, i) );
-    Real area (0.00342119); // 0.033 cm
+    Real area (0.00336273); // 0.033 cm
     //Real area (0.013684);   // 0.066 cm
 
     //Parabolic profile

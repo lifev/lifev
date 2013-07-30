@@ -86,7 +86,7 @@ Real u2normal (const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& 
 
 Real fluxFunction (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
 
-Real fluxFunctionAneurysm (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
+Real fluxFunctionAneurysm (const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
 
 Real aneurismFluxInVectorial (const Real&  t, const Real& x, const Real& y, const Real& z, const ID& i);
 
