@@ -59,6 +59,7 @@
 #include <lifev/structure/solver/StructuralConstitutiveLawData.hpp>
 #include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
 #include <lifev/structure/solver/StructuralOperator.hpp>
+#include <lifev/structure/fem/ExpressionDefinitions.hpp>
 
 #include <lifev/structure/solver/isotropic/ExponentialMaterialNonLinear.hpp>
 #include <lifev/structure/solver/anisotropic/AnisotropicMultimechanismMaterialNonLinear.hpp>
@@ -232,13 +233,6 @@ Structure::Structure ( int                                   argc,
     GetPot dataFile ( data_file_name );
     parameters->data_file_name = data_file_name;
 
-    parameters->rho     = dataFile ( "solid/physics/density", 1. );
-    parameters->young   = dataFile ( "solid/physics/young",   1. );
-    parameters->poisson = dataFile ( "solid/physics/poisson", 1. );
-    parameters->bulk    = dataFile ( "solid/physics/bulk",    1. );
-    parameters->alpha   = dataFile ( "solid/physics/alpha",   1. );
-    parameters->gamma   = dataFile ( "solid/physics/gamma",   1. );
-
     parameters->comm = structComm;
     int ntasks = parameters->comm->NumProc();
 
@@ -261,6 +255,18 @@ Structure::run2d()
 void
 Structure::run3d()
 {
+    typedef boost:shared_ptr<VectorEpetra>                              vectorPtr_Type;
+
+    // typedefs for fibers
+    // Boost function for fiber direction
+    typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > fiberFunction_Type;
+    typedef boost::shared_ptr<fiberFunction_Type> fiberFunctionPtr_Type;
+
+    typedef std::vector<fiberFunctionPtr_Type>                          vectorFiberFunction_Type;
+    typedef boost::shared_ptr<vectorFiberFunction_Type>                 vectorFiberFunctionPtr_Type;
+
+    typedef std::vector<vectorPtr_Type>                                 listOfFiberDirections_Type;
+
     // General typedefs
     typedef typename StructuralOperator<mesh_Type >::vector_Type vector_Type;
     typedef boost::shared_ptr<vector_Type>                        vectorPtr_Type;
@@ -298,8 +304,47 @@ Structure::run3d()
     solidFESpacePtr_Type dScalarFESpace ( new solidFESpace_Type (meshPart, dOrder, 1, parameters->comm) );
     scalarETFESpacePtr_Type dScalarETFESpace ( new scalarETFESpace_Type (meshPart, & (dFESpace->refFE() ), & (dFESpace->fe().geoMap() ), parameters->comm) );
 
-    //! face BChandler object
-    boost::shared_ptr<BCHandler> BCh ( new BCHandler() );
+    // Setting the fibers
+    vectorFiberFunctionPtr_Type pointerToVectorOfFamilies( new vectorFiberFunction_Type( ) );
+    (*pointerToVectorOfFamilies).resize( dataStructure->numberFibersFamilies( ) );
+
+    if( verbose )
+        std::cout << "Number of families: " << (*pointerToVectorOfFamilies).size() << std::endl;
+
+    fibersDirectionList setOfFiberFunctions;
+    setOfFiberFunctions.setupFiberDefinitions( dataStructure->numberFibersFamilies( ) );
+
+    // Setting the vector of fibers functions
+    for( UInt k(1); k <= pointerToVectorOfFamilies->size( ); k++ )
+    {
+        // Setting up the name of the function to define the family
+        std::string family="Family";
+        // adding the number of the family
+        std::string familyNumber;
+        std::ostringstream number;
+        number << ( k );
+        familyNumber = number.str();
+
+        // Name of the function to create
+        std::string creationString = family + familyNumber;
+        (*pointerToVectorOfFamilies)[ k-1 ].reset( new fiberFunction_Type() );
+        (*pointerToVectorOfFamilies)[ k-1 ] = setOfFiberFunctions.fiberDefinition( creationString );
+    }
+
+    // Interpolate fibers
+    std::vector<vectorPtr_Type> vectorInterpolated(0);
+
+    // Interpolating fiber fields
+    vectorInterpolated.resize( (*pointerToVectorOfFamilies).size() );
+
+    for( UInt k(0); k < (*pointerToVectorOfFamilies).size(); k++ )
+    {
+        vectorInterpolated[ k ].reset( new vector_Type( dFESpace->map() ) );
+        dFESpace->interpolate ( *( ( *(pointerToVectorOfFamilies) )[ k ] ) ,
+                                * ( ( vectorInterpolated )[ k ] ),
+                                0.0 );
+    }
+
 
     //! 3. Creation of the importers to read the displacement field
     std::string const filename    = dataFile ( "importer/filename", "structure");
@@ -363,8 +408,11 @@ Structure::run3d()
             M_exporter.reset ( new ensightFilter_Type ( dataFile, meshPart.meshPartition(), nameExporter, parameters->comm->MyPID() ) ) ;
         }
     }
-
     M_exporter->setMeshProcId (dFESpace->mesh(), dFESpace->map().comm().MyPID() );
+
+    // Scalar vector to have scalar quantities
+    vectorPtr_Type patchAreaVector; 
+    vectorPtr_Type patchAreaVectorScalar;
 
     vectorPtr_Type deformationGradient_1;
     vectorPtr_Type deformationGradient_2;
@@ -378,6 +426,9 @@ Structure::run3d()
     std::vector< vectorPtr_Type > activationFunction(0); activationFunction.resize( numberOfSol );
     std::vector< vectorPtr_Type > stretch(0); stretch.resize( numberOfSol );
 
+    patchAreaVector.reset ( new vector_Type ( dETFESpace->map() ) );
+    patchAreaVectorScalar.reset ( new vector_Type ( dScalarETFESpace->map() ) ) );
+
     deformationGradient_1.reset( new vector_Type( dFESpace.map() ) );
     deformationGradient_2.reset( new vector_Type( dFESpace.map() ) );
     deformationGradient_3.reset( new vector_Type( dFESpace.map() ) );
@@ -386,22 +437,22 @@ Structure::run3d()
     reconstructed_2.reset( new vector_Type( dFESpace.map() ) );
     reconstructed_3.reset( new vector_Type( dFESpace.map() ) );
 
-    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "deformationGradient_1" + "-" + familyNumber,
+    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "deformationGradient_1",
                               dFESpace, deformationGradien_1, UInt (0) );
 
-    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "deformationGradient_2" + "-" + familyNumber,
+    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "deformationGradient_2",
                               dFESpace, deformationGradien_2, UInt (0) );
 
-    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "deformationGradient_3" + "-" + familyNumber,
+    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "deformationGradient_3",
                               dFESpace, deformationGradien_3, UInt (0) );
 
-    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "reconstructed_1" ,
+    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "reconstructed_1",
                               dFESpace, reconstructed_1, UInt (0) );
 
-    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "reconstructed_2" ,
+    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "reconstructed_2",
                               dFESpace, reconstructed_2, UInt (0) );
 
-    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "reconstructed_3" ,
+    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "reconstructed_3",
                               dFESpace, reconstructed_3, UInt (0) );
 
 
@@ -420,8 +471,9 @@ Structure::run3d()
 
         M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::ScalarField, "stretch" + "-" + familyNumber,
                                   dFESpace, stretch[ i ], UInt (0) );
-
-        M_exporter->postProcess ( 0.0 );
+    }
+    
+    M_exporter->postProcess ( 0.0 );
 
     //! =================================================================================
     //! Analysis - Istant or Interval
@@ -449,16 +501,6 @@ Structure::run3d()
     fakeQuadratureRule.setPoints (coords, weights);
 
     //fakeQuadratureRule.showMe();
-
-    // //Compute the gradient along X of the displacement field
-    // *grDisplX = dFESpace->gradientRecovery (*solidDisp, 0);
-
-    // //Compute the gradient along Y of the displacement field
-    // *grDisplY = dFESpace->gradientRecovery (*solidDisp, 1);
-
-    // //Compute the gradient along Z of the displacement field
-    // *grDisplZ = dFESpace->gradientRecovery (*solidDisp, 2);
-
     using namespace ExpressionAssembly;
 
     // Trying to compute the Jacobian using ET
@@ -473,61 +515,7 @@ Structure::run3d()
     identity (2, 1) = 0.0;
     identity (2, 2) = 1.0;
 
-
-    // Definition of F
-    ExpressionAddition<
-        ExpressionInterpolateGradient<mesh_Type, MapEpetra, 3, 3>, ExpressionMatrix<3,3> >
-        F( grad( dETFESpace,  *solidDisp, 0), value( identity ));
-
-    // Definition of J
-    ExpressionDeterminant<ExpressionAddition<
-        ExpressionInterpolateGradient<mesh_Type, MapEpetra,3,3>, ExpressionMatrix<3,3> > >
-        J( F );
-
-
-    // Definition of tensor C
-    ExpressionProduct<
-        ExpressionTranspose<
-            ExpressionAddition<ExpressionInterpolateGradient<mesh_Type, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
-            ExpressionAddition<ExpressionInterpolateGradient<mesh_Type, MapEpetra,3,3>, ExpressionMatrix<3,3> >
-        >
-        C( transpose(F), F );
-
-    ExpressionTrace<
-        ExpressionProduct<ExpressionTranspose<ExpressionAddition<ExpressionInterpolateGradient<mesh_Type, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
-                          ExpressionAddition<ExpressionInterpolateGradient<mesh_Type, MapEpetra,3,3>, ExpressionMatrix<3,3> > >
-        >
-        I_C( C );
-
-    ExpressionVectorFromNonConstantScalar<ExpressionMeas, 3  > vMeas( meas_K );
-
-    ExpressionVectorFromNonConstantScalar<
-      ExpressionDeterminant<ExpressionAddition<
-        ExpressionInterpolateGradient<mesh_Type, MapEpetra,3,3>, ExpressionMatrix<3,3> > > , 3  > vJ( J );
-
-    ExpressionVectorFromNonConstantScalar<
-      ExpressionTrace<
-	ExpressionProduct<ExpressionTranspose<ExpressionAddition<ExpressionInterpolateGradient<mesh_Type, MapEpetra,3,3>, ExpressionMatrix<3,3> > >,
-                          ExpressionAddition<ExpressionInterpolateGradient<mesh_Type, MapEpetra,3,3>, ExpressionMatrix<3,3> > > > , 3  > vI_C( I_C );
-
-    // 0 to extract first column
-    ExpressionVectorFromNonConstantMatrix< ExpressionAddition< ExpressionInterpolateGradient<mesh_Type, MapEpetra, 3, 3>, ExpressionMatrix<3,3> >,  3, 3 > F_i1( F, 0);
-
-    ExpressionVectorFromNonConstantMatrix< ExpressionAddition< ExpressionInterpolateGradient<mesh_Type, MapEpetra, 3, 3>, ExpressionMatrix<3,3> >,  3, 3 > F_i2( F, 1);
-
-    ExpressionVectorFromNonConstantMatrix< ExpressionAddition< ExpressionInterpolateGradient<mesh_Type, MapEpetra, 3, 3>, ExpressionMatrix<3,3> >,  3, 3 > F_i3( F, 2);
-
-    LifeChrono chrono;
-    chrono.start();
-
-    // Determinant of F
-    evaluateNode( elements ( dETFESpace->mesh() ),
-                  fakeQuadratureRule,
-                  dETFESpace,
-                  dot( vMeas , phi_i )
-                  ) >> patchAreaVector;
-    patchAreaVector->globalAssemble();
-
+    // Computing areas
     evaluateNode( elements ( dScalarETFESpace->mesh() ),
                   fakeQuadratureRule,
                   dScalarETFESpace,
@@ -535,87 +523,98 @@ Structure::run3d()
                   ) >> patchAreaVectorScalar;
     patchAreaVectorScalar->globalAssemble();
 
+
+    ExpressionVectorFromNonConstantScalar<ExpressionMeas, 3  > vMeas( meas_K );
     evaluateNode( elements ( dETFESpace->mesh() ),
-                  fakeQuadratureRule,
-                  dETFESpace,
-                  meas_K * dot( vJ  , phi_i )
-                  ) >> jacobianVector;
-    jacobianVector->globalAssemble();
+		  fakeQuadratureRule,
+		  dETFESpace,
+		  dot( vMeas , phi_i )
+		  ) >> patchAreaVector;
+    patchAreaVector->globalAssemble();
 
-    *jacobianVector = *jacobianVector / *patchAreaVector;
 
-    evaluateNode( elements ( dScalarETFESpace->mesh() ),
-                  fakeQuadratureRule,
-                  dScalarETFESpace,
-                  meas_K * J  * phi_i
-                  ) >> scalarJacobian;
-    scalarJacobian->globalAssemble();
+    for( UInt i(0); i < solutionssize(); i++ )
+    {
+      // Computing references
+      *grDisplX = dFESpace->gradientRecovery (*( solution[ i ]), 0);
+      *grDisplY = dFESpace->gradientRecovery (*( solution[ i ]), 1);
+      *grDisplZ = dFESpace->gradientRecovery (*( solution[ i ]), 2);
 
-    *scalarJacobian = *scalarJacobian / *patchAreaVectorScalar;
+      // Defining expressions
+      ExpressionDefinitions::deformationGradient_Type  F =
+	ExpressionDefinitions::deformationGradient ( dETFESpace,  *( solution[ i ]), 0, identity );
 
-    chrono.stop();
+      // Definition of C = F^T F
+      ExpressionDefinitions::rightCauchyGreenTensor_Type C =
+        ExpressionDefinitions::tensorC( transpose(F), F );
 
-    // trace of C
-    evaluateNode( elements ( dETFESpace->mesh() ),
-                  fakeQuadratureRule,
-                  dETFESpace,
-                  meas_K * dot( vI_C , phi_i )
-                  ) >> traceVector;
-    traceVector->globalAssemble();
+      // Definition of J
+      ExpressionDefinitions::determinantTensorF_Type J = 
+	ExpressionDefinitions::determinantF( F );
 
-    *traceVector = *traceVector / *patchAreaVector;
+      // Definition of J^-(2/3) = det( C ) using the isochoric/volumetric decomposition
+      ExpressionDefinitions::powerExpression_Type  Jel = 
+	ExpressionDefinitions::powerExpression( J , (-2.0/3.0) );
+      
+      ExpressionVectorFromNonConstantMatrix< ExpressionDefinitions::deformationGradientTensor_Type,3 ,3 > Fi1( F, 0 );
+      ExpressionVectorFromNonConstantMatrix< ExpressionDefinitions::deformationGradientTensor_Type,3 ,3 > Fi2( F, 1 );
+      ExpressionVectorFromNonConstantMatrix< ExpressionDefintiions::deformationGradientTensor_Type,3 ,3 > Fi3( F, 2 );
 
-    // F_i1
-    evaluateNode( elements ( dETFESpace->mesh() ),
-                  fakeQuadratureRule,
-                  dETFESpace,
-                  meas_K * dot( F_i1, phi_i )
-                  ) >> F_i1Vector;
-    F_i1Vector->globalAssemble();
+      // Deformation gradient
+      evaluateNode( elements ( dETFESpace->mesh() ),
+		    fakeQuadratureRule,
+		    dETFESpace,
+		    meas_K *  dot ( Fi1, phi_i) 
+		    ) >> deformationGradient1;
+      deformationGradient1->globalAssemble();
+      *deformationGradient1 = *deformationGradient1 / *patchAreaVector;
 
-    *F_i1Vector = *F_i1Vector / *patchAreaVector;
+      evaluateNode( elements ( dETFESpace->mesh() ),
+		    fakeQuadratureRule,
+		    dETFESpace,
+		    meas_K *  dot ( Fi2, phi_i) 
+		    ) >> deformationGradient2;
+      deformationGradient2->globalAssemble();
+      *deformationGradient2 = *deformationGradient2 / *patchAreaVector;
 
-    // F_i2
-    evaluateNode( elements ( dETFESpace->mesh() ),
-                  fakeQuadratureRule,
-                  dETFESpace,
-                  meas_K * dot( F_i2, phi_i )
-                  ) >> F_i2Vector;
-    F_i2Vector->globalAssemble();
+      evaluateNode( elements ( dETFESpace->mesh() ),
+		    fakeQuadratureRule,
+		    dETFESpace,
+		    meas_K *  dot ( Fi3, phi_i)
+		    ) >> deformationGradient3;
+      deformationGradient3->globalAssemble();
+      *deformationGradient3 = *deformationGradient3 / *patchAreaVector;
 
-    *F_i2Vector = *F_i2Vector / *patchAreaVector;
+      // Evaluating quantities that are related to fibers
+      for( UInt j(0); j < pointerToVectorOfFamilies->size( ); i++ )
+	{
+	  // Fibers definitions
+	  ExpressionDefinitions::interpolatedValue_Type fiberIth =
+            ExpressionDefinitions::interpolateFiber( dETFESpace, *(vectorInterpolated[ j ] ) );
 
-    // F_i3
-    evaluateNode( elements ( dETFESpace->mesh() ),
-                  fakeQuadratureRule,
-                  dETFESpace,
-                  meas_K * dot( F_i3, phi_i )
-                  ) >> F_i3Vector;
-    F_i3Vector->globalAssemble();
+	  // f /otimes f
+	  ExpressionDefinitions::outerProduct_Type Mith = ExpressionDefinitions::fiberTensor( fiberIth );
 
-    *F_i3Vector = *F_i3Vector / *patchAreaVector;
+	  // Definition of the fourth invariant : I_4^i = C:Mith
+	  ExpressionDefinitions::stretch_Type IVith = ExpressionDefinitions::fiberStretch( C, Mith );
 
-    // Setting up the saving of the displacement
-    SelectFunctor selectorTr( traceVector );
-    SelectFunctor selectorJac( scalarJacobian );
+	  // Definition of the fouth isochoric invariant : J^(-2.0/3.0) * I_4^i
+	  ExpressionDefinitions::isochoricStretch_Type IVithBar = 
+	    ExpressionDefinitions::isochoricFourthInvariant( Jel, IVith );
 
-    AssemblyElementalStructure::saveVectorAccordingToFunctor( dFESpace, selectorTr,
-                                                              solidDisp, statusVectorTr,
-                                                              savedDisplacementTrace, 0);
 
-    // This method works with scalar expression assembled in a vectorial vector
-    // Like a vector for the pressure, assembled in a vector for the velocity
-    AssemblyElementalStructure::saveVectorAccordingToFunctor( dFESpace, selectorJac,
-                                                              solidDisp, statusVectorJac,
-                                                              savedDisplacementJac, 0);
+	  evaluateNode( elements ( dScalarETFESpace->mesh() ),
+                      fakeQuadratureRule,
+                      dScalarETFESpace,
+                      meas_K * IVithBar  * phi_i
+                      ) >> stretchesVector[ i ];
+	stretchesVector[ i ]->globalAssemble();
 
-    //Extracting the tensions
-    std::cout << "Norm of the scalarJ = det(F) : " << scalarJacobian->normInf() << std::endl;
-    std::cout << "Norm of the J = det(F) : " << jacobianVector->normInf() << std::endl;
-    std::cout << "Norm of the J_reference = det(F) : " << jacobianReference->normInf() << std::endl;
-    std::cout << "Norm of the I_C = tr(C) : " << traceVector->normInf() << std::endl;
 
-    M_exporter->postProcess ( 1.0 );
+	}
+      
+      M_exporter->postProcess( i );
+    }
 
     if (verbose )
     {
@@ -625,10 +624,6 @@ Structure::run3d()
     //Closing files
     M_exporter->closeFile();
 
-    if (verbose )
-    {
-        std::cout << "finished" << std::endl;
-    }
 
     MPI_Barrier (MPI_COMM_WORLD);
     //!---------------------------------------------.-----------------------------------------------------

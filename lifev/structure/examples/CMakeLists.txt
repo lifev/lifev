@@ -26,7 +26,6 @@ ENDIF()
 IF(COMPUTATION_JACOBIAN)
   ADD_SUBDIRECTORIES(
     example_computingJacobian
-    example_evaluatingScalarVectorialTensorialQuantitiesUsingETA
 )
 ENDIF()
 
@@ -36,5 +35,6 @@ IF(ENABLE_ANISOTROPIC_LAW)
     example_bodyForces
     example_anisotropicTraction
     example_multimechanismTraction
+    example_evaluatingScalarVectorialTensorialQuantitiesUsingETA
 )
 ENDIF()
