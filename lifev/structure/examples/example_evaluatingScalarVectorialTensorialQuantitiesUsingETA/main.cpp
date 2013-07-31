@@ -174,6 +174,10 @@ public:
     }
     //@}
 
+    void readSetSolution( const filterPtr_Type importer,
+                          const boost::shared_ptr<FESpace< mesh_Type, MapEpetra> > dFESpace,
+                          std::vector<boost::shared_ptr<VectorEpetra> > solutions );
+
 protected:
 
 private:
@@ -269,7 +273,6 @@ Structure::run3d()
     typedef ETFESpace< RegionMesh<LinearTetra>, MapEpetra, 3, 1 >       scalarETFESpace_Type;
     typedef boost::shared_ptr<scalarETFESpace_Type>                     scalarETFESpacePtr_Type;
 
-
     bool verbose = (parameters->comm->MyPID() == 0);
 
     //! dataElasticStructure for parameters
@@ -295,30 +298,18 @@ Structure::run3d()
     solidFESpacePtr_Type dScalarFESpace ( new solidFESpace_Type (meshPart, dOrder, 1, parameters->comm) );
     scalarETFESpacePtr_Type dScalarETFESpace ( new scalarETFESpace_Type (meshPart, & (dFESpace->refFE() ), & (dFESpace->fe().geoMap() ), parameters->comm) );
 
-
-    if (verbose)
-    {
-        std::cout << std::endl;
-    }
-
-    //! 1. Constructor of the class to compute the tensions
-    StructuralOperator<RegionMesh<LinearTetra> >  solid;
-
     //! face BChandler object
     boost::shared_ptr<BCHandler> BCh ( new BCHandler() );
-
-    //! 2. Its setup
-    solid.setup (dataStructure,
-                 dFESpace,
-                 dETFESpace,
-                 BCh,
-                 parameters->comm);
 
     //! 3. Creation of the importers to read the displacement field
     std::string const filename    = dataFile ( "importer/filename", "structure");
     std::string const importerType = dataFile ( "importer/type", "hdf5");
 
-    std::string iterationString; //useful to iterate over the strings
+    // How many solution do we have to read?
+    UInt numberOfSol(0);
+    numberOfSol = dataFile.vector_variable_size( "importer/iteration" );
+
+    ASSERT( numberOfSol, "You did not set any solution to read!! ");
 
     if (verbose)
     {
@@ -345,9 +336,8 @@ Structure::run3d()
     }
     M_importer->setMeshProcId (dFESpace->mesh(), dFESpace->map().comm().MyPID() );
 
-    // The vector where the solution will be stored
-    vectorPtr_Type solidDisp (new vector_Type (dFESpace->map(), LifeV::Unique ) );
-    *solidDisp *= 0.0;
+    std::vector< vectorPtr_Type > solutions(0);
+    solutions.resize( numberOfSol );
 
     //! 6. Post-processing setting
     boost::shared_ptr< Exporter<RegionMesh<LinearTetra> > > exporter;
@@ -376,43 +366,62 @@ Structure::run3d()
 
     M_exporter->setMeshProcId (dFESpace->mesh(), dFESpace->map().comm().MyPID() );
 
-    // Scalar vector to have scalar quantities
-    vectorPtr_Type scalarJacobian( new vector_Type( dScalarETFESpace->map(), Unique ) );
+    vectorPtr_Type deformationGradient_1;
+    vectorPtr_Type deformationGradient_2;
+    vectorPtr_Type deformationGradient_3;
 
-    vectorPtr_Type jacobianVector ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
-    vectorPtr_Type jacobianReference ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
-    vectorPtr_Type patchAreaVector ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
-    vectorPtr_Type patchAreaVectorScalar ( new vector_Type ( *scalarJacobian,  LifeV::Unique ) );
-    vectorPtr_Type traceVector ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
-    vectorPtr_Type F_i1Vector ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
-    vectorPtr_Type F_i2Vector ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
-    vectorPtr_Type F_i3Vector ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
-    // vectorPtr_Type grDisplX ( new vector_Type (*dFESpace->mapPtr() ) );
-    // vectorPtr_Type grDisplY ( new vector_Type (*dFESpace->mapPtr() ) );
-    // vectorPtr_Type grDisplZ ( new vector_Type (*dFESpace->mapPtr() ) );
-    vectorPtr_Type savedDisplacementTrace ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
-    vectorPtr_Type savedDisplacementJac ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
-    vectorPtr_Type statusVectorTr ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
-    vectorPtr_Type statusVectorJac ( new vector_Type (solid.displacement(),  LifeV::Unique ) );
+    // To check
+    vectorPtr_Type reconstructed_1;
+    vectorPtr_Type reconstructed_2;
+    vectorPtr_Type reconstructed_3;
 
-    *statusVectorTr *= 0.0;
-    *statusVectorJac *= 0.0;
+    std::vector< vectorPtr_Type > activationFunction(0); activationFunction.resize( numberOfSol );
+    std::vector< vectorPtr_Type > stretch(0); stretch.resize( numberOfSol );
 
-    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "DeterminantF", dFESpace, jacobianVector, UInt (0) );
-    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "tr(C)", dFESpace, traceVector, UInt (0) );
-    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "Fi1", dFESpace, F_i1Vector, UInt (0) );
-    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "Fi2", dFESpace, F_i2Vector, UInt (0) );
-    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "Fi3", dFESpace, F_i3Vector, UInt (0) );
-    // M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "refDerX", dFESpace, grDisplX, UInt (0) );
-    // M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "refDerY", dFESpace, grDisplY, UInt (0) );
-    // M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "refDerZ", dFESpace, grDisplZ, UInt (0) );
-    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "Reference", dFESpace, jacobianReference, UInt (0) );
-    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::ScalarField, "ScalarJacobian", dScalarFESpace, scalarJacobian, UInt (0) );
-    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "displacementField", dFESpace, solidDisp, UInt (0) );
-    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "savedFromTrace", dFESpace, savedDisplacementTrace, UInt (0) );
-    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "savedFromJacobian", dFESpace, savedDisplacementJac, UInt (0) );
+    deformationGradient_1.reset( new vector_Type( dFESpace.map() ) );
+    deformationGradient_2.reset( new vector_Type( dFESpace.map() ) );
+    deformationGradient_3.reset( new vector_Type( dFESpace.map() ) );
 
-    M_exporter->postProcess ( 0.0 );
+    reconstructed_1.reset( new vector_Type( dFESpace.map() ) );
+    reconstructed_2.reset( new vector_Type( dFESpace.map() ) );
+    reconstructed_3.reset( new vector_Type( dFESpace.map() ) );
+
+    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "deformationGradient_1" + "-" + familyNumber,
+                              dFESpace, deformationGradien_1, UInt (0) );
+
+    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "deformationGradient_2" + "-" + familyNumber,
+                              dFESpace, deformationGradien_2, UInt (0) );
+
+    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "deformationGradient_3" + "-" + familyNumber,
+                              dFESpace, deformationGradien_3, UInt (0) );
+
+    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "reconstructed_1" ,
+                              dFESpace, reconstructed_1, UInt (0) );
+
+    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "reconstructed_2" ,
+                              dFESpace, reconstructed_2, UInt (0) );
+
+    M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "reconstructed_3" ,
+                              dFESpace, reconstructed_3, UInt (0) );
+
+
+    for( UInt i(0); i < numberOfFamilies; i++ )
+    {
+        std::string familyNumber;
+        std::ostringstream number;
+        number << ( i );
+        familyNumber = number.str();
+
+        activationFunction[ i ].reset( new vector_Type( dScalarFESpace.map() ) );
+        stretch[ i ].reset( new vector_Type( dScalarFESpace.map() ) );
+
+        M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::ScalarField, "activation" + "-" + familyNumber,
+                                  dFESpace, activationFunction[ i ], UInt (0) );
+
+        M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::ScalarField, "stretch" + "-" + familyNumber,
+                                  dFESpace, stretch[ i ], UInt (0) );
+
+        M_exporter->postProcess ( 0.0 );
 
     //! =================================================================================
     //! Analysis - Istant or Interval
@@ -420,21 +429,7 @@ Structure::run3d()
 
     MPI_Barrier (MPI_COMM_WORLD);
 
-    // //! 5. For each interval, the analysis is performed
-    LifeV::Real dt =  dataFile ( "solid/time_discretization/timestep", 0.0);
-    std::string const nameField =  dataFile ( "importer/nameField", "displacement");
-
-    // //Get the iteration number
-    iterationString = dataFile ("importer/iteration", "00000");
-    LifeV::Real time = dataFile ("importer/time", 1.0);
-
-    /*!Definition of the ExporterData, used to load the solution inside the previously defined vectors*/
-    LifeV::ExporterData<mesh_Type> solutionDispl  (LifeV::ExporterData<mesh_Type>::VectorField, nameField + "." + iterationString, dFESpace, solidDisp, UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
-
-    //Read the variable
-    M_importer->readVariable (solutionDispl);
-    M_importer->closeFile();
-
+    readSetSolution( M_importer, dFESpace, solutions );
 
     QuadratureRule fakeQuadratureRule;
 
@@ -463,9 +458,6 @@ Structure::run3d()
 
     // //Compute the gradient along Z of the displacement field
     // *grDisplZ = dFESpace->gradientRecovery (*solidDisp, 2);
-
-    //Set the current solution as the displacement vector to use
-    solid.jacobianDistribution ( solidDisp, *jacobianReference);
 
     using namespace ExpressionAssembly;
 
@@ -570,7 +562,7 @@ Structure::run3d()
                   meas_K * dot( vI_C , phi_i )
                   ) >> traceVector;
     traceVector->globalAssemble();
-  
+
     *traceVector = *traceVector / *patchAreaVector;
 
     // F_i1
@@ -640,6 +632,35 @@ Structure::run3d()
 
     MPI_Barrier (MPI_COMM_WORLD);
     //!---------------------------------------------.-----------------------------------------------------
+}
+
+void
+Structure::readSetSolution( const Structure::filterPtr_Type importer,
+                            const boost::shared_ptr<FESpace< Structure::mesh_Type, MapEpetra > > dFESpace,
+                            std::vector< boost::shared_ptr<VectorEpetra> > solution )
+{
+    std::string iterationString;
+    std::string const nameField =  dataFile ( "importer/nameField", "displacement");
+
+    // Loop on the set of solutions that have to be read
+    for( UInt i(0); i < solution.size(); i++ )
+    {
+        // resetting the element of the vector
+        solution[ i ].reset ( new VectorEpetra( dFESpace->map() ) );
+        *(solution[ i ]) *= 0.0;
+
+        iterationString = dataFile ( "importer/iteration", "NO_DEFAULT_VALUE", i );
+
+        /*!Definition of the ExporterData, used to load the solution inside the previously defined vectors*/
+        LifeV::ExporterData<mesh_Type> solutionDispl  (LifeV::ExporterData<mesh_Type>::VectorField,
+                                                       nameField + "." + iterationString, dFESpace,
+                                                       solution[ i ], UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
+
+        //Read the variable
+        M_importer->readVariable (solutionDispl);
+    }
+
+    M_importer->closeFile();
 }
 
 int
