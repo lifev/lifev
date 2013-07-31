@@ -424,7 +424,12 @@ StructuralConstitutiveLawData::showMe ( std::ostream& output ) const
 
           if( !M_solidTypeAnisotropic.compare("distributedHolzapfel") )
           {
-              std::cout << i + 1 << "-th distribution: " << M_distributionParametersFibers[ i ] << std::endl;
+              for ( UInt i (0) ; i < M_numberFibers ; ++i )
+              {
+                  std::cout << i + 1
+                            << "-th distribution: " << M_distributionParametersFibers[ i ]
+                            << std::endl;
+              }
           }
       }
 #endif
