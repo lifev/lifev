@@ -418,7 +418,7 @@ Structure::run3d()
     }
 
     //! 3.b Setting the fibers in the abstract class of Anisotropic materials
-    solid.material()->anisotropicLaw()->setupFiberDirections( pointerToVectorOfFamilies );
+    //solid.material()->anisotropicLaw()->setupFiberDirections( pointerToVectorOfFamilies );
 
     //! 4. Building system using TimeAdvance class
     double timeAdvanceCoefficient = timeAdvance->coefficientSecondDerivative ( 0 ) / (dataStructure->dataTime()->timeStep() * dataStructure->dataTime()->timeStep() );
