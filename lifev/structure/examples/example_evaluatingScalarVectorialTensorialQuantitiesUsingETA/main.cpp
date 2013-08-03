@@ -372,8 +372,11 @@ Structure::run3d()
     // Scalar vector to have scalar quantities
     vectorPtr_Type patchAreaVector;
     vectorPtr_Type patchAreaVectorScalar;
+    vectorPtr_Type jacobianF;
 
     vectorPtr_Type disp;
+    vectorPtr_Type dispRead;
+
     vectorPtr_Type deformationGradient_1;
     vectorPtr_Type deformationGradient_2;
     vectorPtr_Type deformationGradient_3;
@@ -391,8 +394,10 @@ Structure::run3d()
 
     patchAreaVector.reset ( new vector_Type ( dETFESpace->map() ) );
     patchAreaVectorScalar.reset ( new vector_Type ( dScalarETFESpace->map() ) );
+    jacobianF.reset ( new vector_Type ( dScalarETFESpace->map() ) );
 
     disp.reset( new vector_Type( dFESpace->map() ) );
+    dispRead.reset( new vector_Type( dFESpace->map() ) );
 
     deformationGradient_1.reset( new vector_Type( dFESpace->map() ) );
     deformationGradient_2.reset( new vector_Type( dFESpace->map() ) );
@@ -401,6 +406,9 @@ Structure::run3d()
     reconstructed_1.reset( new vector_Type( dFESpace->map() ) );
     reconstructed_2.reset( new vector_Type( dFESpace->map() ) );
     reconstructed_3.reset( new vector_Type( dFESpace->map() ) );
+
+    exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "displacement",
+                              dFESpace, dispRead, UInt (0) );
 
     exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "deformationGradient_1",
                               dFESpace, deformationGradient_1, UInt (0) );
@@ -420,6 +428,8 @@ Structure::run3d()
     exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "reconstructed_3",
                               dFESpace, reconstructed_3, UInt (0) );
 
+    exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::ScalarField, "jacobianF",
+				dScalarFESpace, jacobianF, UInt (0) );
 
     for( UInt i(0); i < dataStructure->numberFibersFamilies( ); i++ )
     {
@@ -507,10 +517,12 @@ Structure::run3d()
 
         *reconstructed_1 *=0.0; *reconstructed_2 *=0.0; *reconstructed_3 *=0.0;
         *deformationGradient_1 *=0.0; *deformationGradient_2 *=0.0; *deformationGradient_3 *=0.0;
+	*jacobianF *= 0.0;
 
         // Reading the solution
         // resetting the element of the vector
-        disp.reset ( new vector_Type( dFESpace->map() ) );
+	*disp *= 0.0;
+	*dispRead *= 0.0;
 
 	UInt current = dataFile ( "importer/iteration" , 100000, i );
         // Transform current ingot a string
@@ -526,6 +538,8 @@ Structure::run3d()
 
         //Read the variable
         M_importer->readVariable (solutionDispl);
+
+	*dispRead = *disp;
 
         // Computing references
         *reconstructed_1 = dFESpace->gradientRecovery (*disp, 0);
@@ -577,6 +591,15 @@ Structure::run3d()
         deformationGradient_3->globalAssemble();
         *deformationGradient_3 = *deformationGradient_3 / *patchAreaVector;
 
+        evaluateNode( elements ( dETFESpace->mesh() ),
+                      fakeQuadratureRule,
+                      dScalarETFESpace,
+                      meas_K *  J * phi_i
+                      ) >> jacobianF;
+        jacobianF->globalAssemble();
+        *jacobianF = *jacobianF / *patchAreaVectorScalar;
+
+
         // Evaluating quantities that are related to fibers
         for( UInt j(0); j < dataStructure->numberFibersFamilies( ); j++ )
         {
@@ -593,7 +616,9 @@ Structure::run3d()
             // Definition of the fouth isochoric invariant : J^(-2.0/3.0) * I_4^i
             ExpressionDefinitions::isochoricStretch_Type IVithBar =
                 ExpressionDefinitions::isochoricFourthInvariant( Jel, IVith );
-
+	    
+	    *stretch[ j ] *= 0.0;
+	    *activationFunction[ j ] *= 0.0;
 
             evaluateNode( elements ( dScalarETFESpace->mesh() ),
                           fakeQuadratureRule,

@@ -27,7 +27,7 @@ save       = 1
 type        = hdf5 #ensight 			# hdf5 (if library compiled with hdf5 support) or ensight
 filename    = multiMech-weak/steadyStairs-multimech
 nameField   = displacement
-iteration   = '0 11'
+iteration   = '10 11'
 
 [solid]
 
