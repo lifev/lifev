@@ -303,6 +303,7 @@ Structure::run3d()
 
     //Mainly used for BCs assembling (Neumann type)
     solidFESpacePtr_Type dFESpace ( new solidFESpace_Type (pointerToMesh, dOrder, 3, parameters->comm) );
+    solidFESpacePtr_Type dScalarFESpace ( new solidFESpace_Type (pointerToMesh, dOrder, 1, parameters->comm) );
     solidETFESpacePtr_Type dETFESpace ( new solidETFESpace_Type (pointerToMesh, & (dFESpace->refFE() ), & (dFESpace->fe().geoMap() ), parameters->comm) );
 
     // // setting precise quadrature rule for fine meshes
@@ -319,6 +320,12 @@ Structure::run3d()
 
     listOfFiberDirections_Type fiberDirections;
     fiberDirections.resize( dataStructure->numberFibersFamilies( ) );
+
+    listOfFiberDirections_Type selectionExport;
+    listOfFiberDirections_Type activationDispl;
+
+    selectionExport.resize( dataStructure->numberFibersFamilies( ) );
+    activationDispl.resize( dataStructure->numberFibersFamilies( ) );
 
     if( verbose )
         std::cout << "Size of the number of families: " << (*pointerToVectorOfFamilies).size() << std::endl;
@@ -415,10 +422,13 @@ Structure::run3d()
         (*pointerToVectorOfFamilies)[ k-1 ] = setOfFiberFunctions.fiberDefinition( creationString );
 
         fiberDirections[ k-1 ].reset( new vector_Type(solid.displacement(), Unique) );
+	
+	selectionExport[ k-1 ].reset( new vector_Type( dFESpace->map() ) );
+	activationDispl[ k-1 ].reset( new vector_Type( dFESpace->map() ) );
     }
 
     //! 3.b Setting the fibers in the abstract class of Anisotropic materials
-    //solid.material()->anisotropicLaw()->setupFiberDirections( pointerToVectorOfFamilies );
+    solid.material()->anisotropicLaw()->setupFiberDirections( pointerToVectorOfFamilies );
 
     //! 4. Building system using TimeAdvance class
     double timeAdvanceCoefficient = timeAdvance->coefficientSecondDerivative ( 0 ) / (dataStructure->dataTime()->timeStep() * dataStructure->dataTime()->timeStep() );
@@ -601,12 +611,12 @@ Structure::run3d()
     vectorPtr_Type solidDisp ( new vector_Type (solid.displacement(),  exporter->mapType() ) );
     vectorPtr_Type solidVel  ( new vector_Type (solid.displacement(),  exporter->mapType() ) );
     vectorPtr_Type solidAcc  ( new vector_Type (solid.displacement(),  exporter->mapType() ) );
-    vectorPtr_Type rhsVector ( new vector_Type (solid.displacement(),  exporter->mapType() ) );
+    //    vectorPtr_Type rhsVector ( new vector_Type (solid.displacement(),  exporter->mapType() ) );
 
     exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "displacement", dFESpace, solidDisp, UInt (0) );
     exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "velocity",     dFESpace, solidVel,  UInt (0) );
     exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "acceleration", dFESpace, solidAcc,  UInt (0) );
-    exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "forcingTerm", dFESpace, rhsVector,  UInt (0) );
+    //    exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "forcingTerm", dFESpace, rhsVector,  UInt (0) );
 
     // Adding the fibers vectors
     // Setting the vector of fibers functions
@@ -614,6 +624,8 @@ Structure::run3d()
     {
         // Setting up the name of the function to define the family
         std::string family="Family-";
+        std::string familySel="FamilySel-";
+        std::string familyAct="FamilyAct-";
         // adding the number of the family
         std::string familyNumber;
         std::ostringstream number;
@@ -622,10 +634,18 @@ Structure::run3d()
 
         // Name of the function to create
         std::string creationString = family + familyNumber;
+        std::string creationStringSel = familySel + familyNumber;
+        std::string creationStringAct = familyAct + familyNumber;
         exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, creationString, dFESpace, fiberDirections[ k-1 ], UInt (0) );
+
+        exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, creationStringSel, dFESpace, selectionExport[ k-1 ], UInt (0) );
+        exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, creationStringAct, dFESpace, activationDispl[ k-1 ], UInt (0) );
 
         // Extracting the fibers vectors
         *(fiberDirections[ k-1 ]) = solid.material()->anisotropicLaw()->ithFiberVector( k );
+
+        *(selectionExport[ k-1 ]) = *(solid.material()->anisotropicLaw()->selectionCriterion( k ));
+        *(activationDispl[ k-1 ]) = *(solid.material()->anisotropicLaw()->activationDisplacement( k ));
     }
 
 
@@ -674,7 +694,14 @@ Structure::run3d()
         *solidAcc  = timeAdvance->secondDerivative();
 
         // This vector is to export the forcing term
-        *rhsVector = solid.rhsCopy();
+        //*rhsVector = solid.rhsCopy();
+
+	for( UInt k(1); k <= pointerToVectorOfFamilies->size( ); k++ )
+	  {	    
+	    *(selectionExport[ k-1 ]) = *(solid.material()->anisotropicLaw()->selectionCriterion( k ));
+	    *(activationDispl[ k-1 ]) = *(solid.material()->anisotropicLaw()->activationDisplacement( k ));
+	  }
+
 
         iter = iter + 1;
 

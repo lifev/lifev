@@ -151,42 +151,9 @@ Real bcZero (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Rea
 
 Real bcNonZero (const Real& t, const Real&  X, const Real& Y, const Real& Z, const ID& i)
 {
-  //Real pressure(200000);
 
-  // Real top = 1000000;
+  return ( 1000000/ 5.0 ) *t;
 
-  // return top * Y;
-
-    return 10000;
-
-	// Real highestPressure(6.666e+6);
-	// Real totalTime = 20.0;
-	// Real halfTime = totalTime / 2.0;
-
-	// Real a = ( highestPressure / 2 ) * ( 1/ ((totalTime/2)*(totalTime/2)) );
-
-	// if ( t <= halfTime )
-	//     pressure = a * t*t;
-
-	// if ( t > halfTime )
-	//     pressure = - a * (t - totalTime)*(t - totalTime) + highestPressure;
-
-    // switch (i)
-    // {
-    //     case 0:
-    //         return 0.0;
-    //         break;
-    //     case 1:
-    //         return pressure;
-    //         break;
-    //     case 2:
-    //         return 0.0;
-    //         break;
-    //     default:
-    //         ERROR_MSG ("This entrie is not allowed: ud_functions.hpp");
-    //         return 0.;
-    //         break;
-    // }
 }
  Real smoothPressure(const Real& t, const Real&  x, const Real& y, const Real& /*Z*/, const ID& i)
     {
@@ -231,7 +198,7 @@ Real traction (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const R
 //----------------------------------------------Fibers Directions--------------
 Real Family1 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
 {
-    Real theta =  PI/6.0; // value for anisotropic characterization taken from Robertson // ( PI / 6.0 );
+    Real theta =  0.0; // value for anisotropic characterization taken from Robertson // ( PI / 6.0 );
     //Real thetaChangeOfVariable = std::atan(  y / x );
 
     // if( x < 0 )
