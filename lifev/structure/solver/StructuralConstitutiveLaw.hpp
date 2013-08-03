@@ -196,7 +196,7 @@ public:
                            material coefficients (e.g. Young modulus, Poisson ratio..)
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
-    void computeStiffness ( const vector_Type& sol, Real factor, const dataPtr_Type& dataMaterial,
+    void computeStiffness ( const vector_Type& sol, const UInt iter, Real factor, const dataPtr_Type& dataMaterial,
                             const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
                             const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
                             const displayerPtr_Type& displayer );
@@ -422,7 +422,7 @@ void StructuralConstitutiveLaw<MeshType>::updateJacobianMatrix (const vector_Typ
 }
 
 template <typename MeshType>
-void StructuralConstitutiveLaw<MeshType>::computeStiffness ( const vector_Type& sol, Real factor, const dataPtr_Type& dataMaterial,
+void StructuralConstitutiveLaw<MeshType>::computeStiffness ( const vector_Type& sol, const UInt iter, Real factor, const dataPtr_Type& dataMaterial,
                                                              const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
                                                              const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
                                                              const displayerPtr_Type& displayer )
@@ -447,7 +447,14 @@ void StructuralConstitutiveLaw<MeshType>::computeStiffness ( const vector_Type& 
 	// Anisotropic part
 	displayer->leaderPrint ("\n  S-  Updating the VectorStiffness ( anisotropic part )\n");
 
-	M_anisotropicLaw->computeStiffness (sol, factor, dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
+	if( !M_dataMaterial->solidTypeAnisotropic().compare("multimechanism") && 
+	    !M_dataMaterial->fiberActivation().compare("explicit") && 
+	    !iter)
+	  {
+	    M_anisotropicLaw->computeReferenceConfigurations( sol, dataMaterial, displayer );
+	  }
+
+	M_anisotropicLaw->computeStiffness (sol, iter, factor, dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
 
 	*M_vectorStiffness += *M_anisotropicLaw->stiffVector();
       }

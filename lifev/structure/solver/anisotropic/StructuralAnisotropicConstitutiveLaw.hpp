@@ -212,11 +212,14 @@ public:
                            material coefficients (e.g. Young modulus, Poisson ratio..)
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
-    virtual  void computeStiffness ( const vector_Type& sol, Real factor, const dataPtr_Type& dataMaterial,
+    virtual  void computeStiffness ( const vector_Type& sol, const UInt iter, Real factor, const dataPtr_Type& dataMaterial,
                                      const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
                                      const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
                                      const displayerPtr_Type& displayer ) = 0;
 
+    virtual  void computeReferenceConfigurations ( const vector_Type& sol, 
+						   const dataPtr_Type& dataMaterial,
+						   const displayerPtr_Type& displayer ) = 0;
 
     //! Computes the deformation Gradient F, the cofactor of F Cof(F),
     //! the determinant of F J = det(F), the trace of C Tr(C).

@@ -438,6 +438,11 @@ public:
     {
         return M_epsilon;
     }
+
+    const std::string fiberActivation( void )
+    {
+        return M_fiberActivation;
+    }
 #endif
 
 
@@ -510,6 +515,7 @@ private:
     vectorParameters_Type  M_characteristicStretch;
     vectorParameters_Type  M_distributionParametersFibers;
     Real                   M_epsilon;
+    std::string            M_fiberActivation;
 #endif
     std::string            M_lawType;
     bool                   M_useExactJacobian;

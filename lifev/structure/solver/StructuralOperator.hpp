@@ -450,7 +450,7 @@ public:
       \param sol the current solution
       \param factor the rescaleFactor
     */
-    void computeMatrix ( matrixPtr_Type& stiff, const vector_Type& sol, Real const& factor );
+  void computeMatrix ( matrixPtr_Type& stiff, const vector_Type& sol, Real const& factor, const UInt iter );
 
 
 #ifdef COMPUTATION_JACOBIAN
@@ -1232,7 +1232,8 @@ StructuralOperator<Mesh>::showMe ( std::ostream& c  ) const
 }
 
 template <typename Mesh>
-void StructuralOperator<Mesh>::computeMatrix ( matrixPtr_Type& stiff, const vector_Type& sol,  Real const& /*factor*/)
+void StructuralOperator<Mesh>::computeMatrix ( matrixPtr_Type& stiff, const vector_Type& sol,  
+					       Real const& /*factor*/, const UInt iter)
 {
     M_Displayer->leaderPrint ( " Computing residual ... \t\t\t");
 
@@ -1249,7 +1250,7 @@ void StructuralOperator<Mesh>::computeMatrix ( matrixPtr_Type& stiff, const vect
     {
         //! It is right to do globalAssemble() inside the M_material class
         // The method computeStiffness is done inside the nonlinear case. In the linear case it is empty
-        M_material->computeStiffness ( sol, 1., M_data, M_mapMarkersVolumes, M_mapMarkersIndexes, M_Displayer);
+      M_material->computeStiffness ( sol, iter, 1., M_data, M_mapMarkersVolumes, M_mapMarkersIndexes, M_Displayer);
     }
     chrono.stop();
     M_Displayer->leaderPrintMax ("done in ", chrono.diff() );
@@ -1505,7 +1506,7 @@ StructuralOperator<Mesh>::evalResidual ( vector_Type& residual, const vector_Typ
 {
 
     //This method call the M_material computeStiffness
-    computeMatrix (M_systemMatrix, solution, 1.);
+    computeMatrix (M_systemMatrix, solution, 1., iter);
 
 
     M_Displayer->leaderPrint ("    S- Updating the boundary conditions ... \t");

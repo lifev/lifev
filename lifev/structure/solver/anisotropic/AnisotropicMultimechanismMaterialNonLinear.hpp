@@ -271,11 +271,16 @@ public:
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
     void computeStiffness ( const vector_Type& disp,
+			    const UInt iter,
                             Real factor,
                             const dataPtr_Type& dataMaterial,
                             const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
                             const mapMarkerIndexesPtr_Type /*mapsMarkerIndexes*/,
                             const displayerPtr_Type& displayer );
+
+    void computeReferenceConfigurations ( const vector_Type& disp,
+					  const dataPtr_Type& dataMaterial,
+					  const displayerPtr_Type& displayer );
 
 
     //! Computes the new Stiffness vector for Neo-Hookean and Holzapfel materials in StructuralSolver
@@ -880,6 +885,7 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::updateNonLinearJacobi
 
 template <typename MeshType>
 void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeStiffness ( const vector_Type& disp,
+									      const UInt iter,
                                                                               Real /*factor*/,
                                                                               const dataPtr_Type& dataMaterial,
                                                                               const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
@@ -917,65 +923,11 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeStiffness ( co
     // Definition of F^-T
     minusT_Type  F_T = ExpressionDefinitions::minusT( F );
 
-    displayer->leaderPrint (" Non-Linear S-  Computing reference configurations... \n");
-
-    // 1. Evaluating fiber stretch
-    for( UInt i(0); i < this->M_vectorInterpolated.size() ; i++ )
-    {
-
-        displayer->leaderPrint ("                ", i + 1,"-th fiber family \n" );
-       // Note: M_vectorInterpolated.size() == numberOfFibers which has to be equal,
-        // given a certain assert in the data class to the number of characteristic stretches
-        // and therefore to the size of the vector that are used to measure the activation.
-
-        // Initializing vectors
-        (M_selectionCriterion[i]).reset(new vector_Type (*this->M_localMap) );
-        *(M_selectionCriterion[i]) *= 0.0;
-
-        // As in other classes, the specialization of the MapType = MapEpetra makes this expression
-        // not always usable. When other maps will be available in LifeV, the class should be re-templated.
-
-        // Defining the expression for the i-th fiber
-        // Definitions of the quantities which depend on the fiber directions e.g. I_4^i
-        interpolatedValue_Type fiberIth =
-            ExpressionDefinitions::interpolateFiber( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ] ) );
-
-        // Definition of the tensor M = ithFiber \otimes ithFiber
-        // At the moment, it's automatic that the method constructs the expression M = ithFiber \otimes ithFiber
-        // For a more general case, the file ExpressionDefinitions.hpp should be changed
-        outerProduct_Type Mith = ExpressionDefinitions::fiberTensor( fiberIth );
-
-        // Definition of the fourth invariant : I_4^i = C:Mith
-        stretch_Type IVith = ExpressionDefinitions::fiberStretch( C, Mith );
-
-        // Definition of the fouth isochoric invariant : J^(-2.0/3.0) * I_4^i
-        isochoricStretch_Type IVithBar = ExpressionDefinitions::isochoricFourthInvariant( Jel, IVith );
-
-        ExpressionMultimechanism::difference_Type absStretch =
-            ExpressionMultimechanism::absoluteStretch( IVithBar, this->M_dataMaterial->ithCharacteristicStretch(i) );
-
-        ExpressionMultimechanism::expressionVectorFromDifference_Type vActivation =
-            ExpressionMultimechanism::vectorFromActivation( absStretch );
-
-        // Computing expression that determines activation
-        evaluateNode( elements ( this->M_dispETFESpace->mesh() ),
-                      *M_quadrature,
-                      this->M_dispETFESpace,
-                      meas_K * dot( vActivation , phi_i )
-                      ) >> M_selectionCriterion[ i ];
-        M_selectionCriterion[ i ]->globalAssemble();
-        *( M_selectionCriterion[ i ] ) = *( M_selectionCriterion[ i ] ) / *M_patchAreaVector;
-
-        // Setting values in the selector
-        M_selector[i].setSelectionVector( M_selectionCriterion[i] );
-        M_selector[i].setValue( this->M_dataMaterial->ithCharacteristicStretch(i) );
-
-        // Saving the vector;
-        AssemblyElementalStructure::saveVectorAccordingToFunctor( this->M_dispFESpace, M_selector[ i ],
-                                                                  disp, this->M_firstActivation[i],
-                                                                  M_activationDisplacement[i], this->M_offset);
-    }
-
+    if( !this->M_dataMaterial->fiberActivation().compare("implicit") )
+      {
+	this->computeReferenceConfigurations( disp, this->M_dataMaterial, displayer );
+      }
+    	
     displayer->leaderPrint (" Non-Linear S-  Computing contributions to the stiffness vector... ");
 
     for( UInt i(0); i < this->M_vectorInterpolated.size() ; i++ )
@@ -1081,13 +1033,98 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::showMe ( std::string 
 
 template <typename MeshType>
 void AnisotropicMultimechanismMaterialNonLinear<MeshType>::apply ( const vector_Type& sol,
-                                                   vector_Type& res, const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
-                                                   const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
-                                                   const displayerPtr_Type displayer)
+								   vector_Type& res, const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+								   const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
+								   const displayerPtr_Type displayer)
 {
-    computeStiffness (sol, 0, this->M_dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
+    computeStiffness (sol, 0, 0, this->M_dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
     res += *M_stiff;
 }
+
+
+template <typename MeshType>
+void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeReferenceConfigurations ( const vector_Type& disp,
+											    const dataPtr_Type& dataMaterial,
+											    const displayerPtr_Type& displayer )
+{
+
+  displayer->leaderPrint (" Non-Linear S-  Computing reference configurations... \n");
+
+  // Definition of F
+  tensorF_Type F = ExpressionDefinitions::deformationGradient( this->M_dispETFESpace,  disp, this->M_offset, this->M_identity );
+
+  // Definition of J
+  determinantF_Type J = ExpressionDefinitions::determinantF( F );
+
+  //Definition of C
+  tensorC_Type C = ExpressionDefinitions::tensorC( transpose(F), F );
+
+  // Definition of J^-(2/3) = det( C ) using the isochoric/volumetric decomposition
+  powerExpression_Type  Jel = ExpressionDefinitions::powerExpression( J , (-2.0/3.0) );
+
+  // Definition of F^-T
+  minusT_Type  F_T = ExpressionDefinitions::minusT( F );
+
+  // 1. Evaluating fiber stretch
+  for( UInt i(0); i < this->M_vectorInterpolated.size() ; i++ )
+    {
+
+      displayer->leaderPrint ("                ", i + 1,"-th fiber family \n" );
+      // Note: M_vectorInterpolated.size() == numberOfFibers which has to be equal,
+      // given a certain assert in the data class to the number of characteristic stretches
+      // and therefore to the size of the vector that are used to measure the activation.
+
+      // Initializing vectors
+      (M_selectionCriterion[i]).reset(new vector_Type (*this->M_localMap) );
+      *(M_selectionCriterion[i]) *= 0.0;
+
+      // As in other classes, the specialization of the MapType = MapEpetra makes this expression
+      // not always usable. When other maps will be available in LifeV, the class should be re-templated.
+
+      // Defining the expression for the i-th fiber
+      // Definitions of the quantities which depend on the fiber directions e.g. I_4^i
+      interpolatedValue_Type fiberIth =
+	ExpressionDefinitions::interpolateFiber( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ] ) );
+
+      // Definition of the tensor M = ithFiber \otimes ithFiber
+      // At the moment, it's automatic that the method constructs the expression M = ithFiber \otimes ithFiber
+      // For a more general case, the file ExpressionDefinitions.hpp should be changed
+      outerProduct_Type Mith = ExpressionDefinitions::fiberTensor( fiberIth );
+
+      // Definition of the fourth invariant : I_4^i = C:Mith
+      stretch_Type IVith = ExpressionDefinitions::fiberStretch( C, Mith );
+
+      // Definition of the fouth isochoric invariant : J^(-2.0/3.0) * I_4^i
+      isochoricStretch_Type IVithBar = ExpressionDefinitions::isochoricFourthInvariant( Jel, IVith );
+	    
+      ExpressionMultimechanism::difference_Type absStretch =
+	ExpressionMultimechanism::absoluteStretch( IVithBar, this->M_dataMaterial->ithCharacteristicStretch(i) );
+
+      ExpressionMultimechanism::expressionVectorFromDifference_Type vActivation =
+	ExpressionMultimechanism::vectorFromActivation( absStretch );
+
+      // Computing expression that determines activation
+      evaluateNode( elements ( this->M_dispETFESpace->mesh() ),
+		    *M_quadrature,
+		    this->M_dispETFESpace,
+		    meas_K * dot( vActivation , phi_i )
+		    ) >> M_selectionCriterion[ i ];
+      M_selectionCriterion[ i ]->globalAssemble();
+      *( M_selectionCriterion[ i ] ) = *( M_selectionCriterion[ i ] ) / *M_patchAreaVector;
+	    
+      // Setting values in the selector
+      M_selector[i].setSelectionVector( M_selectionCriterion[i] );
+      M_selector[i].setValue( this->M_dataMaterial->ithCharacteristicStretch(i) );
+	
+      // Saving the vector;
+      AssemblyElementalStructure::saveVectorAccordingToFunctor( this->M_dispFESpace, M_selector[ i ],
+								disp, this->M_firstActivation[i],
+								M_activationDisplacement[i], this->M_offset);
+    }
+    
+
+}
+
 
 
 template <typename MeshType>
@@ -1098,7 +1135,7 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeLocalFirstPiol
                                                                                                    const UInt marker)
 {
 
-  // Still Need to Define P
+  // It can be done using the evaluatNodal framework
 
 }
 

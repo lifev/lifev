@@ -196,12 +196,16 @@ public:
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
     void computeStiffness ( const vector_Type& disp,
+			    const UInt iter, 
                             Real factor,
                             const dataPtr_Type& dataMaterial,
                             const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
                             const mapMarkerIndexesPtr_Type /*mapsMarkerIndexes*/,
                             const displayerPtr_Type& displayer );
 
+    void computeReferenceConfigurations ( const vector_Type& disp,
+					  const dataPtr_Type& dataMaterial,
+					  const displayerPtr_Type& displayer ){};
 
     //! Computes the new Stiffness vector for Neo-Hookean and Holzapfel materials in StructuralSolver
     //! given a certain displacement field.
@@ -622,6 +626,7 @@ void DistributedHolzapfelMaterialNonLinear<MeshType>::updateNonLinearJacobianTer
 
 template <typename MeshType>
 void DistributedHolzapfelMaterialNonLinear<MeshType>::computeStiffness ( const vector_Type& disp,
+									 const UInt /*iter*/,
                                                                          Real /*factor*/,
                                                                          const dataPtr_Type& dataMaterial,
                                                                          const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
@@ -741,7 +746,7 @@ void DistributedHolzapfelMaterialNonLinear<MeshType>::apply ( const vector_Type&
                                                    const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
                                                    const displayerPtr_Type displayer)
 {
-    computeStiffness (sol, 0, this->M_dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
+    computeStiffness (sol, 0, 0, this->M_dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
     res += *M_stiff;
 }
 

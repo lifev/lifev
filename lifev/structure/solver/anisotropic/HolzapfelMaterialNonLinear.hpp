@@ -189,12 +189,17 @@ public:
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
     void computeStiffness ( const vector_Type& disp,
+			    const UInt iter, 
                             Real factor,
                             const dataPtr_Type& dataMaterial,
                             const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
                             const mapMarkerIndexesPtr_Type /*mapsMarkerIndexes*/,
                             const displayerPtr_Type& displayer );
 
+
+    void computeReferenceConfigurations ( const vector_Type& disp,
+					  const dataPtr_Type& dataMaterial,
+					  const displayerPtr_Type& displayer ){};
 
     //! Computes the new Stiffness vector for Neo-Hookean and Holzapfel materials in StructuralSolver
     //! given a certain displacement field.
@@ -684,11 +689,12 @@ void HolzapfelMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( matrix
 
 template <typename MeshType>
 void HolzapfelMaterialNonLinear<MeshType>::computeStiffness ( const vector_Type& disp,
-                                                                Real /*factor*/,
-                                                                const dataPtr_Type& dataMaterial,
-                                                                const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
-                                                                const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
-                                                                const displayerPtr_Type& displayer )
+							      const UInt /*iter*/, 
+							      Real /*factor*/,
+							      const dataPtr_Type& dataMaterial,
+							      const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+							      const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
+							      const displayerPtr_Type& displayer )
 {
 
     using namespace ExpressionAssembly;
@@ -790,7 +796,7 @@ void HolzapfelMaterialNonLinear<MeshType>::apply ( const vector_Type& sol,
                                                    const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
                                                    const displayerPtr_Type displayer)
 {
-    computeStiffness (sol, 0, this->M_dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
+    computeStiffness (sol, 0, 0, this->M_dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
     res += *M_stiff;
 }
 
