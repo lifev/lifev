@@ -301,6 +301,14 @@ public:
     //! Get the Stiffness matrix
     virtual vectorPtr_Type const stiffVector() const = 0;
 
+    //! Getters specific for the multi-mechanism model
+    //! Get the selction vector (the one that measures if the activation criterion is met)
+    virtual vectorPtr_Type const selectionCriterion( const UInt i ) const = 0;
+
+    //! Get the activation displacement
+    //! Get the Stiffness matrix
+    virtual vectorPtr_Type const activationDisplacement( const UInt i ) const = 0;
+
     virtual void apply ( const vector_Type& sol, vector_Type& res,
                          const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
                          const mapMarkerIndexesPtr_Type mapsMarkerIndexes,

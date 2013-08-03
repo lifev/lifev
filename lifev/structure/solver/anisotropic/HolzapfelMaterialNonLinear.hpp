@@ -266,6 +266,22 @@ public:
         return M_stiff;
     }
 
+    //! Specific for multimechanism
+    vectorPtr_Type  const selectionCriterion( const UInt /*i*/ ) const
+    {
+      vectorPtr_Type empty( new vector_Type( this->M_dispFESpace->map() ) );
+      return empty;
+    }
+
+
+    vectorPtr_Type  const activationDisplacement( const UInt /*i*/ ) const
+    {
+      vectorPtr_Type empty( new vector_Type( this->M_dispFESpace->map() ) );
+      return empty;
+    }
+
+
+
     void apply ( const vector_Type& sol, vector_Type& res,
                  const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
                  const mapMarkerIndexesPtr_Type mapsMarkerIndexes,

@@ -86,10 +86,11 @@ public:
 
     bool operator() ( const UInt i ) const
     {
+        // The 1e-5 is a tolerance on the criterium 
         // The i has to be a Local ID!
         UInt index = M_selectionVector->blockMap().GID( i );
 
-        if( std::fabs( ( *M_selectionVector )( index ) ) <= ( M_value - 1.0e-5) )
+        if(( *M_selectionVector )( index ) > 0 )
         {
             return true;
         }
@@ -346,6 +347,21 @@ public:
     {
         return M_stiff;
     }
+
+    //! Specific for multimechanism
+    vectorPtr_Type  const selectionCriterion( const UInt i ) const
+    {
+      ASSERT( i <= this->M_vectorInterpolated.size(), " No such fiber family in the class" );
+      return M_selectionCriterion[ i - 1 ];
+    }
+
+
+    vectorPtr_Type  const activationDisplacement( const UInt i ) const
+    {
+      ASSERT( i <= this->M_vectorInterpolated.size(), " No such fiber family in the class" );
+      return M_activationDisplacement[ i - 1 ];
+    }
+
 
     void apply ( const vector_Type& sol, vector_Type& res,
                  const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
@@ -945,7 +961,7 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeStiffness ( co
         evaluateNode( elements ( this->M_dispETFESpace->mesh() ),
                       *M_quadrature,
                       this->M_dispETFESpace,
-                      dot( vActivation , phi_i )
+                      meas_K * dot( vActivation , phi_i )
                       ) >> M_selectionCriterion[ i ];
         M_selectionCriterion[ i ]->globalAssemble();
         *( M_selectionCriterion[ i ] ) = *( M_selectionCriterion[ i ] ) / *M_patchAreaVector;
