@@ -151,8 +151,8 @@ Real bcZero (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Rea
 
 Real bcNonZero (const Real& t, const Real&  X, const Real& Y, const Real& Z, const ID& i)
 {
-
-  return ( 1000000/ 5.0 ) *t;
+  return 50000;
+  //  return ( 1000000/ 5.0 ) *t;
 
 }
  Real smoothPressure(const Real& t, const Real&  x, const Real& y, const Real& /*Z*/, const ID& i)
