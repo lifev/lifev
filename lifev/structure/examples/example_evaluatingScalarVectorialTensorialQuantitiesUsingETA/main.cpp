@@ -532,6 +532,8 @@ Structure::run3d()
         number << std::setw (5) << ( current );
         iterationString = number.str();
 
+	std::cout << "Current reading: " << iterationString << std::endl;
+
         /*!Definition of the ExporterData, used to load the solution inside the previously defined vectors*/
         LifeV::ExporterData<mesh_Type> solutionDispl  (LifeV::ExporterData<mesh_Type>::VectorField,nameField + "." + iterationString, 
 						       dFESpace, disp, UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );

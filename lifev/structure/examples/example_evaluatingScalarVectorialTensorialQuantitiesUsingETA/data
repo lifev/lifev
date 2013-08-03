@@ -25,9 +25,9 @@ save       = 1
 
 [importer]
 type        = hdf5 #ensight 			# hdf5 (if library compiled with hdf5 support) or ensight
-filename    = multiMech-weak/steadyStairs-multimech
+filename    = smallTime/steadyStairs-MM-Weak
 nameField   = displacement
-iteration   = '10 11'
+iteration   = '0 19 39 60 80 100 120 140 160 180 199 219'
 
 [solid]
 
@@ -47,10 +47,10 @@ solidTypeIsotropic 	= exponential		# linearVenantKirchhoff / nonLinearVenantKirc
 solidTypeAnisotropic 	= multimechanism		# linearVenantKirchhoff / nonLinearVenantKirchhoff / neoHookean / expoenential
 
 [./fibers]
-numberFamilies = 1
-stiffness      = '1e+5'
-nonlinearity   = '1.0'
-stretch        = '1.2'
+numberFamilies = 2
+stiffness      = '1e+5 1e+5'
+nonlinearity   = '1.0 1.0'
+stretch        = '1.2 1.2'
 smoothness     = 100000000
 [./]
 
