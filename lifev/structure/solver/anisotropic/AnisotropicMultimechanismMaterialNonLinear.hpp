@@ -86,11 +86,11 @@ public:
 
     bool operator() ( const UInt i ) const
     {
-        // The 1e-5 is a tolerance on the criterium 
+        // The 1e-5 is a tolerance on the criterium
         // The i has to be a Local ID!
         UInt index = M_selectionVector->blockMap().GID( i );
 
-        if(( *M_selectionVector )( index ) > 0 )
+        if(( *M_selectionVector )( index ) >= 0 )
         {
             return true;
         }
@@ -927,7 +927,7 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeStiffness ( co
       {
 	this->computeReferenceConfigurations( disp, this->M_dataMaterial, displayer );
       }
-    	
+
     displayer->leaderPrint (" Non-Linear S-  Computing contributions to the stiffness vector... ");
 
     for( UInt i(0); i < this->M_vectorInterpolated.size() ; i++ )
@@ -1096,7 +1096,7 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeReferenceConfi
 
       // Definition of the fouth isochoric invariant : J^(-2.0/3.0) * I_4^i
       isochoricStretch_Type IVithBar = ExpressionDefinitions::isochoricFourthInvariant( Jel, IVith );
-	    
+
       ExpressionMultimechanism::difference_Type absStretch =
 	ExpressionMultimechanism::absoluteStretch( IVithBar, this->M_dataMaterial->ithCharacteristicStretch(i) );
 
@@ -1111,17 +1111,17 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeReferenceConfi
 		    ) >> M_selectionCriterion[ i ];
       M_selectionCriterion[ i ]->globalAssemble();
       *( M_selectionCriterion[ i ] ) = *( M_selectionCriterion[ i ] ) / *M_patchAreaVector;
-	    
+
       // Setting values in the selector
       M_selector[i].setSelectionVector( M_selectionCriterion[i] );
       M_selector[i].setValue( this->M_dataMaterial->ithCharacteristicStretch(i) );
-	
+
       // Saving the vector;
       AssemblyElementalStructure::saveVectorAccordingToFunctor( this->M_dispFESpace, M_selector[ i ],
 								disp, this->M_firstActivation[i],
 								M_activationDisplacement[i], this->M_offset);
     }
-    
+
 
 }
 
