@@ -151,7 +151,7 @@ Real bcZero (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Rea
 
 Real bcNonZero (const Real& t, const Real&  X, const Real& Y, const Real& Z, const ID& i)
 {
-  return 50000;
+  return 27000;
   //  return ( 1000000/ 5.0 ) *t;
 
 }

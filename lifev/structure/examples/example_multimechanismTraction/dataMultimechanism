@@ -20,7 +20,7 @@
 [exporter]
 type       = hdf5 			# hdf5 (if library compiled with hdf5 support) or ensight
 multimesh  = false
-nameFile   = exponential
+nameFile   = multimechanism-1fiber-noActivated
 start      = 0
 save       = 1
 

@@ -443,6 +443,11 @@ public:
     {
         return M_fiberActivation;
     }
+
+    const Real toleranceActivation( void )
+    {
+        return M_toleranceActivation;
+    }
 #endif
 
 
@@ -516,6 +521,7 @@ private:
     vectorParameters_Type  M_distributionParametersFibers;
     Real                   M_epsilon;
     std::string            M_fiberActivation;
+    Real                   M_toleranceActivation;
 #endif
     std::string            M_lawType;
     bool                   M_useExactJacobian;

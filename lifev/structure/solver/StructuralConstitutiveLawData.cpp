@@ -76,6 +76,7 @@ StructuralConstitutiveLawData::StructuralConstitutiveLawData() :
     M_distributionParametersFibers     ( ),
     M_epsilon                          ( 0 ),
     M_fiberActivation                  ( ),
+    M_toleranceActivation              ( ),
 #endif
     M_lawType                          ( ),
     M_useExactJacobian                 ( false ),
@@ -113,6 +114,7 @@ StructuralConstitutiveLawData::StructuralConstitutiveLawData ( const StructuralC
     M_distributionParametersFibers     ( structuralConstitutiveLawData.M_distributionParametersFibers ),
     M_epsilon                          ( structuralConstitutiveLawData.M_epsilon ),
     M_fiberActivation                  ( structuralConstitutiveLawData.M_fiberActivation ),
+    M_toleranceActivation              ( structuralConstitutiveLawData.M_toleranceActivation ),
 #endif
     M_lawType                          ( structuralConstitutiveLawData.M_lawType ),
     M_useExactJacobian                 ( structuralConstitutiveLawData.M_useExactJacobian ),
@@ -158,6 +160,7 @@ StructuralConstitutiveLawData::operator= ( const StructuralConstitutiveLawData& 
         M_distributionParametersFibers     = structuralConstitutiveLawData.M_distributionParametersFibers;
         M_epsilon                          = structuralConstitutiveLawData.M_epsilon;
         M_fiberActivation                  = structuralConstitutiveLawData.M_fiberActivation;
+        M_toleranceActivation              = structuralConstitutiveLawData.M_toleranceActivation;
 #endif
         M_lawType                          = structuralConstitutiveLawData.M_lawType;
         M_useExactJacobian                 = structuralConstitutiveLawData.M_useExactJacobian;
@@ -327,7 +330,8 @@ StructuralConstitutiveLawData::setup ( const GetPot& dataFile, const std::string
               }
           }
           M_epsilon = dataFile ( ( section + "/model/fibers/smoothness"   ).data(), 0. );
-	  M_fiberActivation = dataFile ( ( section + "/model/fiberActivation" ).data(), "implicit" );
+          M_fiberActivation = dataFile ( ( section + "/model/fiberActivation" ).data(), "implicit" );
+          M_toleranceActivation = dataFile ( ( section + "/model/fibers/tolActivation"   ).data(), 0.001 );
       }
 #endif
 

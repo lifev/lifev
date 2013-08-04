@@ -90,7 +90,7 @@ public:
         // The i has to be a Local ID!
         UInt index = M_selectionVector->blockMap().GID( i );
 
-        if(( *M_selectionVector )( index ) >= 0 )
+        if(( *M_selectionVector )( index ) >= -M_value )
         {
             return true;
         }
@@ -1114,7 +1114,7 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeReferenceConfi
 
       // Setting values in the selector
       M_selector[i].setSelectionVector( M_selectionCriterion[i] );
-      M_selector[i].setValue( this->M_dataMaterial->ithCharacteristicStretch(i) );
+      M_selector[i].setValue( this->M_dataMaterial->toleranceActivation() );
 
       // Saving the vector;
       AssemblyElementalStructure::saveVectorAccordingToFunctor( this->M_dispFESpace, M_selector[ i ],
