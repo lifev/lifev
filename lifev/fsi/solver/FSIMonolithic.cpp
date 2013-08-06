@@ -578,8 +578,8 @@ void FSIMonolithic::initializeMonolithicOperator ( std::vector< vectorPtr_Type> 
             }
             for (i = 0; i < M_ALETimeAdvance->size(); ++i)
             {
-                vectorPtr_Type vec (new vector_Type ( meshMotion().getMap() ) );
-                df0.push_back (vec); // couplingVariableMap()
+	        vectorPtr_Type vec (new vector_Type ( M_mmFESpace->map() ) );
+	        df0.push_back (vec); // couplingVariableMap()
             }
         }
         if ( this->isSolid() )
