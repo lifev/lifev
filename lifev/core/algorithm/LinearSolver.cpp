@@ -38,6 +38,7 @@
 #include <lifev/core/algorithm/LinearSolver.hpp>
 #include <lifev/core/algorithm/PreconditionerIfpack.hpp>
 #include <lifev/core/algorithm/PreconditionerML.hpp>
+#include <lifev/core/util/WallClock.hpp>
 
 namespace LifeV
 {
@@ -132,7 +133,7 @@ LinearSolver::solve ( vectorPtr_Type solutionPtr )
     M_solverOperator->resetStatus();
 
     // Solve the linear system
-    LifeChrono chrono;
+    WallClock chrono;
     chrono.start();
 
     M_solverOperator->ApplyInverse ( M_rhs->epetraVector(), solutionPtr->epetraVector() );
@@ -276,7 +277,7 @@ LinearSolver::setPreconditionerFromGetPot ( const GetPot& dataFile, const std::s
 void
 LinearSolver::buildPreconditioner()
 {
-    LifeChrono chrono;
+    WallClock chrono;
     Real condest ( -1 );
 
     if ( M_preconditioner )
