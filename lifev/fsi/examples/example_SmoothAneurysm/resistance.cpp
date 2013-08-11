@@ -89,6 +89,10 @@ void ResistanceBCs::renewParameters ( OseenSolverShapeDerivative<RegionMesh<Line
     solver.getDisplayer().leaderPrint ( " ****************** Resistance BCs infos ***************************x\n" );
     solver.getDisplayer().leaderPrint ( " Flow rate = " , M_outflux );
     solver.getDisplayer().leaderPrint ( " \n" );
+    solver.getDisplayer().leaderPrint ( " Area Inlet = " , solver.area(2)  );
+    solver.getDisplayer().leaderPrint ( " \n" );
+    solver.getDisplayer().leaderPrint ( " Area Outlet = ", solver.area(3) );
+    solver.getDisplayer().leaderPrint ( " \n" );
     solver.getDisplayer().leaderPrint ( " Hydrostatic pressure   = " , M_hydrostaticP );
     solver.getDisplayer().leaderPrint ( " \n" );
     solver.getDisplayer().leaderPrint ( " Resistance   = " , M_resistance );
