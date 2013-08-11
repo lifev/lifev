@@ -70,6 +70,7 @@
 #include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
 #include <lifev/structure/solver/VenantKirchhoffMaterialNonLinear.hpp>
 #include <lifev/structure/solver/VenantKirchhoffMaterialNonLinearPenalized.hpp>
+#include <lifev/structure/solver/SecondOrderExponentialMaterialNonLinear.hpp>
 #include <lifev/structure/solver/VenantKirchhoffMaterialLinear.hpp>
 #include <lifev/structure/solver/ExponentialMaterialNonLinear.hpp>
 #include <lifev/structure/solver/NeoHookeanMaterialNonLinear.hpp>
@@ -348,6 +349,11 @@ public:
     static StructuralConstitutiveLaw< FSIOperator::mesh_Type >*    createVenantKirchhoffNonLinearPenalized()
     {
         return new VenantKirchhoffMaterialNonLinearPenalized< FSIOperator::mesh_Type >();
+    }
+
+    static StructuralConstitutiveLaw< FSIOperator::mesh_Type >*    createSecondOrderExponentialMaterialNonLinear()
+    {
+        return new SecondOrderExponentialMaterialNonLinear< FSIOperator::mesh_Type >();
     }
 
 
