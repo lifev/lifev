@@ -73,6 +73,8 @@
 #include <lifev/structure/solver/isotropic/ExponentialMaterialNonLinear.hpp>
 #include <lifev/structure/solver/isotropic/NeoHookeanMaterialNonLinear.hpp>
 #include <lifev/structure/solver/isotropic/VenantKirchhoffMaterialNonLinearPenalized.hpp>
+#include <lifev/structure/solver/isotropic/SecondOrderExponentialMaterialNonLinear.hpp>
+#include <lifev/structure/solver/anisotropic/HolzapfelMaterialNonLinear.hpp>
 
 #include <lifev/core/fem/DOFInterface3Dto3D.hpp>
 #include <lifev/core/fem/DOFInterface3Dto2D.hpp>
@@ -348,6 +350,16 @@ public:
     static StructuralIsotropicConstitutiveLaw< FSIOperator::mesh_Type >*    createVenantKirchhoffNonLinearPenalized()
     {
         return new VenantKirchhoffMaterialNonLinearPenalized< FSIOperator::mesh_Type >();
+    }
+
+    static StructuralIsotropicConstitutiveLaw< FSIOperator::mesh_Type >*    createSecondOrderExponentialMaterialNonLinear()
+    {
+        return new SecondOrderExponentialMaterialNonLinear< FSIOperator::mesh_Type >();
+    }
+
+    static StructuralAnisotropicConstitutiveLaw< FSIOperator::mesh_Type >*  createHolzapfelMaterialNonLinear()
+    {
+        return new HolzapfelMaterialNonLinear<MeshType >();
     }
 
 
