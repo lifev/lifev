@@ -964,7 +964,10 @@ StructuralOperator<Mesh>::setup (boost::shared_ptr<data_Type>        data,
     }
     M_mapMarkersVolumes.reset ( new mapMarkerVolumes_Type() );
     M_mapMarkersIndexes.reset ( new mapMarkerIndexes_Type() );
-    //this->setupMapMarkersVolumes();
+
+#ifdef COLORING_MESH
+    this->setupMapMarkersVolumes();
+#endif
 }
 
 
@@ -1232,7 +1235,7 @@ StructuralOperator<Mesh>::showMe ( std::ostream& c  ) const
 }
 
 template <typename Mesh>
-void StructuralOperator<Mesh>::computeMatrix ( matrixPtr_Type& stiff, const vector_Type& sol,  
+void StructuralOperator<Mesh>::computeMatrix ( matrixPtr_Type& stiff, const vector_Type& sol,
 					       Real const& /*factor*/, const UInt iter)
 {
     M_Displayer->leaderPrint ( " Computing residual ... \t\t\t");
