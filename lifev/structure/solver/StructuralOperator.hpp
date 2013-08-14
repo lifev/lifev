@@ -1047,7 +1047,8 @@ void StructuralOperator<Mesh>::updateSystem ( matrixPtr_Type& mat_stiff)
     {
         //Compute the new Stiffness Matrix
         // The method computeStiffness is done inside the nonlinear case. In the linear case it is empty
-        M_material->computeStiffness (*M_disp, M_rescaleFactor, M_data, M_mapMarkersVolumes, M_mapMarkersIndexes, M_Displayer);
+        // The int parameter iter is equal to zero to let the user treat implicitly the multi-mechanism
+        M_material->computeStiffness (*M_disp, 0 ,  M_rescaleFactor, M_data, M_mapMarkersVolumes, M_mapMarkersIndexes, M_Displayer);
     }
 
     chrono.stop();
