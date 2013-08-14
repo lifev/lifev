@@ -34,7 +34,7 @@ nameFile   = resistance80-scaledAndTranslated
 
     [../space_discretization]
     mesh_dir        = ./
-    mesh_file       = unstructuredACAveryFine-fluidNOBL.mesh
+    mesh_file       = fSupercoarse.mesh
     mesh_type       = .mesh
 
     verbose         = 0             # verbose during mesh-reading
