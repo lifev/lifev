@@ -132,7 +132,6 @@ FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFluid (FSIOperator& _oper, boo
     FSIOperator::fluidBchandlerPtr_Type BCh_fluid ( new FSIOperator::fluidBchandler_Type );
 
     BCFunctionBase bcf      (fZero);
-    BCFunctionBase in_flow  (uInterpolated);
     BCFunctionBase pressureEpsilon  (epsilon);
     //    BCFunctionBase out_flow (fZero);
 

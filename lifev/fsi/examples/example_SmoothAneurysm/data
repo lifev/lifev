@@ -99,11 +99,11 @@ type       = hdf5    # format of the exported solution (ensight, hdf5, vtk)
 
 ** #exporter for the fluid
     [./fluid]
-    filename   = fluidGI-unstructuredVertices01 # name of the postprocessed file
+    filename   = fluidGI-tryingAnisotropic # name of the postprocessed file
 
 ** #exporter for the solid
     [../solid]
-    filename   = solidGI-unstructuredVertices01  # name of the postprocessed file
+    filename   = solidGI-tryingAnisotropic  # name of the postprocessed file
     [../] # solid
 [../] # exporter
 
@@ -147,7 +147,7 @@ conservativeFormulation       = false  # tells if the conservative or non conser
     [../space_discretization]
     mesh_type = .mesh
     mesh_dir  = ./Mesh/
-    mesh_file = fluidShort.mesh
+    mesh_file = fSupercoarse.mesh
     mesh_order     = P1                  # order for the geometry problem, P1 or P2
     vel_order       = P1Bubble                 # order for the fluid velocity FE space: P1, P1Bubble, P2
     press_order     = P1                 # P1, P2
@@ -189,20 +189,30 @@ rescaleFactor    = 1.    # this factor can be used to rescale the structure bloc
 
 ** # physical data for the solid
     [./physics]
-
-    solidType = exponential
-    lawType   = nonlinear
     material_flag = 1                #the mesh flag of the structure volume
-    thickness    = 0.01
     density   = 1.2
+    thickness    = 0.01
+
+    [../model]
+    constitutiveLaw = anisotropic
+    solidTypeIsotropic = exponential
+    solidTypeAnisotropic = holzapfel
     young     = 4.0E6
     poisson   = 0.45
     bulk      = 9e6
     alpha     = 76350            # the parameter at the exponent for the exponential model
     gamma     = 0.7411                # parameter for the exponential model
 
+    [./fibers]
+    numberFamilies  = 2
+    stiffness       = '140000.0 140000.0'
+    nonlinearity    = '0.5736 0.5736'
+    distribution    = '0.33 0.33'
+    smoothness      = 500
+    [./]
+
 ** #time discretization
-    [../time_discretization]
+    [../../time_discretization]
     method          = BDF
     initialtime        = 0.00
     endtime            = 0.005
@@ -213,7 +223,7 @@ rescaleFactor    = 1.    # this factor can be used to rescale the structure bloc
     [../space_discretization]
     mesh_type = .mesh
     mesh_dir  = ./Mesh/
-    mesh_file = solidShort.mesh
+    mesh_file = sSupercoarse.mesh
     order     = P1 #P1 or P2
     mesh_faces      = all                   # update all faces elements
     mesh_edges      = all                   # update all faces elements

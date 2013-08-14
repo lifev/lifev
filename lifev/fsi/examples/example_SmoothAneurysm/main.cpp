@@ -108,8 +108,8 @@
 #include <lifev/core/filter/ExporterHDF5.hpp>
 #endif
 
-#include <lifev/fsi/examples/example_SmoothAneurysm/ud_functions.hpp>
 #include <lifev/fsi/examples/example_SmoothAneurysm/flowConditions.hpp>
+#include <lifev/fsi/examples/example_SmoothAneurysm/ud_functions.hpp>
 #include <lifev/fsi/examples/example_SmoothAneurysm/resistance.hpp>
 #include <lifev/fsi/examples/example_SmoothAneurysm/boundaryConditions.hpp>
 
@@ -139,6 +139,17 @@ public:
 
     typedef LifeV::ResistanceBCs                                resistanceBCs_Type;
 
+#ifdef ENABLE_ANISOTROPIC_LAW
+    // typedefs for fibers
+    // Boost function for fiber direction
+    typedef boost::function<LifeV::Real ( LifeV::Real const&, LifeV::Real const&, LifeV::Real const&, LifeV::Real const&, LifeV::ID const& ) > fiberFunction_Type;
+    typedef boost::shared_ptr<fiberFunction_Type> fiberFunctionPtr_Type;
+
+    typedef std::vector<fiberFunctionPtr_Type>                          vectorFiberFunction_Type;
+    typedef boost::shared_ptr<vectorFiberFunction_Type>                 vectorFiberFunctionPtr_Type;
+
+    typedef std::vector<vectorPtr_Type>                                 listOfFiberDirections_Type;
+#endif
 
     /*!
       This routine sets up the problem:
@@ -250,6 +261,24 @@ public:
             }
         }
 
+#ifdef ENABLE_ANISOTROPIC_LAW
+        vectorFiberFunctionPtr_Type pointerToVectorOfFamilies;
+        listOfFiberDirections_Type fiberDirections;
+        fibersDirectionList setOfFiberFunctions;
+
+        if( !M_fsi->FSIOper()->dataSolid()->constitutiveLaw().compare("anisotropic") )
+        {
+            // Setting the fibers
+            pointerToVectorOfFamilies.reset( new vectorFiberFunction_Type( ) );
+            (*pointerToVectorOfFamilies).resize( M_fsi->FSIOper()->dataSolid()->numberFibersFamilies( ) );
+
+            fiberDirections.resize( M_fsi->FSIOper()->dataSolid()->numberFibersFamilies( ) );
+
+            setOfFiberFunctions.setupFiberDefinitions( M_fsi->FSIOper()->dataSolid()->numberFibersFamilies( ) );
+        }
+#endif
+
+
         //reading the saveEvery
         M_saveEvery = data_file ("exporter/saveEvery", 1);
         M_tolSave = data_file ("exporter/tolSave", 1);
@@ -298,6 +327,55 @@ public:
 
         M_exporterSolid->addVariable ( ExporterData<FSIOperator::mesh_Type>::VectorField, "s-displacement",
                                        M_fsi->FSIOper()->dFESpacePtr(), M_solidDisp, UInt (0) );
+
+#ifdef ENABLE_ANISOTROPIC_LAW
+        if( !M_fsi->FSIOper()->dataSolid()->constitutiveLaw().compare("anisotropic") )
+        {
+
+            // Initializing fibers
+            // Setting the vector of fibers functions
+            for( UInt k(1); k <= pointerToVectorOfFamilies->size( ); k++ )
+            {
+                // Setting up the name of the function to define the family
+                std::string family="Family";
+                // adding the number of the family
+                std::string familyNumber;
+                std::ostringstream number;
+                number << ( k );
+                familyNumber = number.str();
+
+                // Name of the function to create
+                std::string creationString = family + familyNumber;
+                (*pointerToVectorOfFamilies)[ k-1 ].reset( new fiberFunction_Type() );
+                (*pointerToVectorOfFamilies)[ k-1 ] = setOfFiberFunctions.fiberDefinition( creationString );
+
+                fiberDirections[ k-1 ].reset( new vector_Type( M_fsi->FSIOper()->dFESpacePtr()->map() , Unique) );
+            }
+
+            //! 3.b Setting the fibers in the abstract class of Anisotropic materials
+            M_fsi->FSIOper()->solid().material()->anisotropicLaw()->setupFiberDirections( pointerToVectorOfFamilies );
+
+            // Adding the fibers vectors
+            // Setting the vector of fibers functions
+            for( UInt k(1); k <= pointerToVectorOfFamilies->size( ); k++ )
+            {
+                // Setting up the name of the function to define the family
+                std::string family="Family-";
+                // adding the number of the family
+                std::string familyNumber;
+                std::ostringstream number;
+                number << ( k );
+                familyNumber = number.str();
+
+                // Name of the function to create
+                std::string creationString = family + familyNumber;
+                M_exporterSolid->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, creationString, M_fsi->FSIOper()->dFESpacePtr(), fiberDirections[ k-1 ], UInt (0) );
+
+                // Extracting the fibers vectors
+                *(fiberDirections[ k-1 ]) = M_fsi->FSIOper()->solid().material()->anisotropicLaw()->ithFiberVector( k );
+            }
+        }
+#endif
         // M_exporterSolid->addVariable( ExporterData<FSIOperator::mesh_Type>::VectorField, "s-velocity",
         //                   M_fsi->FSIOper()->dFESpacePtr(), M_solidVel, UInt(0) );
         // M_exporterSolid->addVariable( ExporterData<FSIOperator::mesh_Type>::VectorField, "s-ws",
