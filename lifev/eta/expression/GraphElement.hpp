@@ -301,6 +301,7 @@ addTo (GraphType& graph)
             }
         }
     }
+    M_ompParams.restorePreviousNumThreads();
 }
 
 

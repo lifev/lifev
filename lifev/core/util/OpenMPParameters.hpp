@@ -51,9 +51,12 @@ struct OpenMPParameters
 
     // Apply OpenMP parameters
     void apply();
+    // Apply OpenMP parameters
+    void restorePreviousNumThreads();
 
     // Data
     int numThreads;
+    int numThreads_backup;
 #ifdef _OPENMP
     omp_sched_t scheduler;
 #endif

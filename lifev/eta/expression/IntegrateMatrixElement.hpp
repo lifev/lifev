@@ -522,6 +522,8 @@ addToClosed (MatrixType& mat)
             elementalMatrix.pushToClosedGlobal (mat);
         }
     }
+
+    M_ompParams.restorePreviousNumThreads();
 }
 
 } // Namespace ExpressionAssembly

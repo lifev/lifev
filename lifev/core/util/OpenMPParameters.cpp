@@ -49,8 +49,16 @@ OpenMPParameters::OpenMPParameters()
 void OpenMPParameters::apply()
 {
 #ifdef _OPENMP
+	numThreads_backup = omp_get_max_threads();
     omp_set_num_threads (numThreads);
     omp_set_schedule (scheduler, chunkSize);
+#endif
+}
+
+void OpenMPParameters::restorePreviousNumThreads()
+{
+#ifdef _OPENMP
+    omp_set_num_threads (numThreads_backup);
 #endif
 }
 
