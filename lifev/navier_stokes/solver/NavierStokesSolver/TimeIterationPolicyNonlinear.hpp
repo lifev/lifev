@@ -189,7 +189,7 @@ iterate ( vectorPtr_Type solution,
 
         if ( nonLinearResidual > M_nonLinearTolerance * normRhs )
         {
-            displayer.leaderPrint ( "---\nSubiteration [", ++subiter, "]\n" );
+            displayer().leaderPrint ( "---\nSubiteration [", ++subiter, "]\n" );
 
             // Extra information if we want to know the exact residual
             if ( M_computeResidual )
@@ -215,7 +215,7 @@ iterate ( vectorPtr_Type solution,
                 Real residual;
                 res.norm2 ( &residual );
                 residual /= rhsIterNorm;
-                displayer.leaderPrint ( "Scaled residual: ", residual, "\n" );
+                displayer().leaderPrint ( "Scaled residual: ", residual, "\n" );
             }
         }
     }
