@@ -227,7 +227,7 @@ void fillWithPartitionedMesh ( boost::shared_ptr< RegionMeshType >& meshLocal,
     PartitionIO< RegionMeshType > partitionIO ( ( resourcesPath + meshName ).data(), Comm);
     partitionIO.read (meshLocal);
 #else
-    ASSERT(false,"You must compile LifeV with HDF5 to load partitioned meshes");
+    ASSERT (false, "You must compile LifeV with HDF5 to load partitioned meshes");
 #endif
     meshReadChrono.stop();
     displayer.leaderPrint ("Loading time: ", meshReadChrono.diff(), " s.\n");

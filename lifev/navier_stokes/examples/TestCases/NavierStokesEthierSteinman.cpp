@@ -145,9 +145,9 @@ NavierStokesEthierSteinman::mesh ( boost::shared_ptr< RegionMesh<LinearTetra> >&
         std::cout << "ERROR: The mesh refinement requested is not valid." << std::endl;
         exit ( 0 );
     }
-    std::vector<Real> width(3,-1.0);
-    std::vector<Real> shift(3,-1.0);
-    std::vector<UInt> numMeshElem(3,M_refinement);
+    std::vector<Real> width (3, -1.0);
+    std::vector<Real> shift (3, -1.0);
+    std::vector<UInt> numMeshElem (3, M_refinement);
     MeshUtility::fillWithStructuredMesh ( mesh, 1, numMeshElem, false, width, shift );
 
 }

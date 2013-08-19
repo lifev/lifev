@@ -92,8 +92,8 @@ struct InitPolicyProjection : public virtual SolverPolicy, public AssemblyPolicy
     typedef boost::shared_ptr<bcContainer_Type>      bcContainerPtr_Type;
     typedef boost::shared_ptr< NavierStokesProblem > NSProblemPtr_Type;
 
-    InitPolicyProjection(){}
-    virtual ~InitPolicyProjection(){}
+    InitPolicyProjection() {}
+    virtual ~InitPolicyProjection() {}
 
     void setupInit ( Teuchos::ParameterList& list );
 
@@ -188,13 +188,13 @@ initSimulation ( bcContainerPtr_Type bchandler,
         // We deal as in the semi-implicit way
         AssemblyPolicyStokes::M_assembler->addConvection ( *systemMatrix, 1.0, *solution );
 
-//        if ( SolverPolicy::preconditioner()->preconditionerType() == "PCD" )
-//        {
-//            vector_Type beta ( systemMatrix->map(), Repeated );
-//            beta += *solution;
-//            PreconditionerPCD* pcdPtr = dynamic_cast<PreconditionerPCD*> ( SolverPolicy::preconditioner().get() );
-//            pcdPtr->updateBeta ( beta );
-//        }
+        //        if ( SolverPolicy::preconditioner()->preconditionerType() == "PCD" )
+        //        {
+        //            vector_Type beta ( systemMatrix->map(), Repeated );
+        //            beta += *solution;
+        //            PreconditionerPCD* pcdPtr = dynamic_cast<PreconditionerPCD*> ( SolverPolicy::preconditioner().get() );
+        //            pcdPtr->updateBeta ( beta );
+        //        }
 
         displayer().leaderPrint ( "done\n" );
 

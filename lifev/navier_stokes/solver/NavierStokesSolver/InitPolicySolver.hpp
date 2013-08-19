@@ -83,8 +83,8 @@ struct InitPolicySolver : public virtual TimeIterationPolicy
     typedef boost::shared_ptr<bcContainer_Type>      bcContainerPtr_Type;
     typedef boost::shared_ptr< NavierStokesProblem > NSProblemPtr_Type;
 
-    InitPolicySolver(){}
-	virtual ~InitPolicySolver(){}
+    InitPolicySolver() {}
+    virtual ~InitPolicySolver() {}
 
     void setupInit ( Teuchos::ParameterList& list );
 
