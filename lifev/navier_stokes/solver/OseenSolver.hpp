@@ -1633,7 +1633,7 @@ OseenSolver<MeshType, SolverType>::updateStabilization ( matrix_Type& matrixFull
 template <typename Mesh, typename SolverType>
 void OseenSolver<Mesh, SolverType>::updateSourceTerm ( source_Type const& source )
 {
-    vector_Type rhs (vector_Type (*M_localMap) );
+    vector_Type rhs ( M_localMap );
 
     VectorElemental M_elvec (M_velocityFESpace->fe().nbFEDof(), nDimensions);
     UInt nc = nDimensions;
