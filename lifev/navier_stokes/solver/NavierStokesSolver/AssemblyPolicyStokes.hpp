@@ -106,6 +106,7 @@ struct AssemblyPolicyStokes
     assemblerPtr_Type M_assembler;
 
     virtual Displayer displayer() = 0;
+    virtual Real currentTime() const = 0;
     virtual fespacePtr_Type uFESpace() const = 0;
     virtual fespacePtr_Type pFESpace() const = 0;
     virtual NSProblemPtr_Type problem() const = 0;

@@ -111,11 +111,13 @@ AssemblyPolicyStokes::initAssembly ( Teuchos::ParameterList& list )
 
 void
 AssemblyPolicyStokes::assembleSystem ( matrixPtr_Type systemMatrix,
-                                       vectorPtr_Type /*rhs*/,
+                                       vectorPtr_Type rhs,
                                        vectorPtr_Type /*solution*/,
                                        preconditionerPtr_Type /*preconditioner*/ )
 {
     *systemMatrix += *M_stokesMatrix;
+
+    M_assembler->addMassRhs ( *rhs, problem()->force(), currentTime() );
 }
 
 } // namespace LifeV

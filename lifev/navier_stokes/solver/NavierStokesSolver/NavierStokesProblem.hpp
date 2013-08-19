@@ -53,6 +53,9 @@ public:
     typedef Real (*function_Type) ( const Real&, const Real&, const Real&,
                                     const Real&, const ID& );
 
+    static Real nullFunction( const Real&, const Real&, const Real&,
+                              const Real&, const ID& );
+
     //! @name  Constructors, destructor
     //@{
 
@@ -129,6 +132,9 @@ public:
 
     //! Returns the density
     Real density() const;
+
+    //! Returns the value of the forces
+    virtual function_Type force();
 
     //@}
 

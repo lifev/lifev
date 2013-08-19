@@ -37,6 +37,13 @@
 namespace LifeV
 {
 
+Real
+NavierStokesProblem::nullFunction( const Real&, const Real&, const Real&,
+                                   const Real&, const ID& )
+{
+	return 0.0;
+}
+
 NavierStokesProblem::NavierStokesProblem()
     : M_refinement ( 0 ), M_resourcesPath ( "" ), M_viscosity ( 1.0 ), M_density ( 1.0 )
 {
@@ -108,6 +115,12 @@ Real
 NavierStokesProblem::density() const
 {
     return M_density;
+}
+
+NavierStokesProblem::function_Type
+NavierStokesProblem::force()
+{
+    return nullFunction;
 }
 
 } // namespace LifeV
