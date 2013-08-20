@@ -72,7 +72,7 @@ const Int NavierStokesCavity::TOPCORNER3    = 25;
 const Int NavierStokesCavity::TOPCORNER4    = 26;
 
 NavierStokesCavity::NavierStokesCavity()
-    : NavierStokesProblem()
+    : NavierStokesProblem< RegionMesh< LinearTetra > >()
 {
 
 }

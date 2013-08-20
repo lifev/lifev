@@ -35,12 +35,13 @@
 #ifndef NAVIERSTOKESCAVITY_HPP
 #define NAVIERSTOKESCAVITY_HPP
 
+#include <lifev/core/mesh/RegionMesh.hpp>
 #include <lifev/navier_stokes/solver/NavierStokesSolver/NavierStokesProblem.hpp>
 
 namespace LifeV
 {
 
-class NavierStokesCavity : public NavierStokesProblem
+class NavierStokesCavity : public NavierStokesProblem< RegionMesh< LinearTetra > >
 {
 
 private:

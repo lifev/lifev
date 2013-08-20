@@ -37,88 +37,102 @@
 namespace LifeV
 {
 
+template< class mesh_Type >
 Real
-NavierStokesProblem::nullFunction( const Real&, const Real&, const Real&,
+NavierStokesProblem< mesh_Type >::nullFunction( const Real&, const Real&, const Real&,
                                    const Real&, const ID& )
 {
 	return 0.0;
 }
 
-NavierStokesProblem::NavierStokesProblem()
+template< class mesh_Type >
+NavierStokesProblem< mesh_Type >::NavierStokesProblem()
     : M_refinement ( 0 ), M_resourcesPath ( "" ), M_viscosity ( 1.0 ), M_density ( 1.0 )
 {
 
 }
 
-NavierStokesProblem::~NavierStokesProblem()
+template< class mesh_Type >
+NavierStokesProblem< mesh_Type >::~NavierStokesProblem()
 {
 
 }
 
+template< class mesh_Type >
 bool
-NavierStokesProblem::hasExactSolution() const
+NavierStokesProblem< mesh_Type >::hasExactSolution() const
 {
     return false;
 }
 
-NavierStokesProblem::function_Type
-NavierStokesProblem::xexact()
+template< class mesh_Type >
+NavierStokesProblem< mesh_Type >::function_Type
+NavierStokesProblem< mesh_Type >::xexact()
 {
     return 0;
 }
 
-NavierStokesProblem::function_Type
-NavierStokesProblem::uexact()
+template< class mesh_Type >
+NavierStokesProblem< mesh_Type >::function_Type
+NavierStokesProblem< mesh_Type >::uexact()
 {
     return 0;
 }
 
-NavierStokesProblem::function_Type
-NavierStokesProblem::uderexact()
+template< class mesh_Type >
+NavierStokesProblem< mesh_Type >::function_Type
+NavierStokesProblem< mesh_Type >::uderexact()
 {
     return 0;
 }
 
-NavierStokesProblem::function_Type
-NavierStokesProblem::pexact()
+template< class mesh_Type >
+NavierStokesProblem< mesh_Type >::function_Type
+NavierStokesProblem< mesh_Type >::pexact()
 {
     return 0;
 }
 
+template< class mesh_Type >
 void
-NavierStokesProblem::setMesh ( const UInt& refinement,
+NavierStokesProblem< mesh_Type >::setMesh ( const UInt& refinement,
                                const std::string& resourcesPath )
 {
     M_refinement    = refinement;
     M_resourcesPath = resourcesPath;
 }
 
+template< class mesh_Type >
 void
-NavierStokesProblem::setViscosity ( const Real& viscosity )
+NavierStokesProblem< mesh_Type >::setViscosity ( const Real& viscosity )
 {
     M_viscosity = viscosity;
 }
 
+template< class mesh_Type >
 void
-NavierStokesProblem::setDensity ( const Real& density )
+NavierStokesProblem< mesh_Type >::setDensity ( const Real& density )
 {
     M_density = density;
 }
 
+template< class mesh_Type >
 Real
-NavierStokesProblem::viscosity() const
+NavierStokesProblem< mesh_Type >::viscosity() const
 {
     return M_viscosity;
 }
 
+template< class mesh_Type >
 Real
-NavierStokesProblem::density() const
+NavierStokesProblem< mesh_Type >::density() const
 {
     return M_density;
 }
 
-NavierStokesProblem::function_Type
-NavierStokesProblem::force()
+template< class mesh_Type >
+NavierStokesProblem< mesh_Type >::function_Type
+NavierStokesProblem< mesh_Type >::force()
 {
     return nullFunction;
 }

@@ -39,13 +39,13 @@
 #include <iostream>
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/fem/BCHandler.hpp>
-#include <lifev/core/mesh/RegionMesh.hpp>
 #include <lifev/core/mesh/MeshPartitioner.hpp>
 #include <lifev/core/fem/BCBase.hpp>
 
 namespace LifeV
 {
 
+template< class mesh_Type >
 class NavierStokesProblem
 {
 public:
@@ -116,7 +116,7 @@ public:
     //@{
 
     //! Getter for the problem mesh
-    virtual void mesh ( boost::shared_ptr< RegionMesh<LinearTetra> >& mesh ) const = 0;
+    virtual void mesh ( boost::shared_ptr<mesh_Type>& mesh ) const = 0;
 
     //! Getter for the boundary conditions in the provided BCHandler
     /*!

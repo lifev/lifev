@@ -74,7 +74,7 @@ const Int NavierStokesEthierSteinman::TOPCORNER3    = 25;
 const Int NavierStokesEthierSteinman::TOPCORNER4    = 26;
 
 NavierStokesEthierSteinman::NavierStokesEthierSteinman()
-    : NavierStokesProblem()
+    : NavierStokesProblem< RegionMesh< LinearTetra > >()
 {
     RossEthierSteinmanUnsteadyDec::setA ( 1.0 );
     RossEthierSteinmanUnsteadyDec::setD ( 1.0 );

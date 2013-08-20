@@ -35,12 +35,13 @@
 #ifndef NAVIERSTOKESETHIERSTEINMAN_HPP
 #define NAVIERSTOKESETHIERSTEINMAN_HPP
 
+#include <lifev/core/mesh/RegionMesh.hpp>
 #include <lifev/navier_stokes/solver/NavierStokesSolver/NavierStokesProblem.hpp>
 
 namespace LifeV
 {
 
-class NavierStokesEthierSteinman : public NavierStokesProblem
+class NavierStokesEthierSteinman : public NavierStokesProblem< RegionMesh< LinearTetra > >
 {
 
 private:
