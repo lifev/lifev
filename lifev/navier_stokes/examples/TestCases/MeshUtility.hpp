@@ -83,7 +83,7 @@ getMeshData ( const std::string& meshName,
               const std::string& meshOrder = "P1");
 
 //! Print informations about the mesh
-template< typename RegionMeshType>
+template< typename RegionMeshType >
 void printMeshInfos ( boost::shared_ptr< RegionMeshType > mesh )
 {
 #ifdef HAVE_MPI
@@ -110,7 +110,7 @@ void printMeshInfos ( boost::shared_ptr< RegionMeshType > mesh )
 /*!
     @author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
  */
-template< typename RegionMeshType>
+template< typename RegionMeshType >
 void fillWithMesh ( boost::shared_ptr< RegionMeshType >& meshLocal,
                     boost::shared_ptr< RegionMeshType >& meshFull ,
                     bool isPartitioned,
@@ -139,7 +139,7 @@ void fillWithMesh ( boost::shared_ptr< RegionMeshType >& meshLocal,
 /*!
     @author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
  */
-template< typename RegionMeshType>
+template< typename RegionMeshType >
 void fillWithMesh ( boost::shared_ptr< RegionMeshType >& meshLocal,
                     bool isPartitioned,
                     const std::string& meshName,
@@ -162,7 +162,7 @@ void fillWithMesh ( boost::shared_ptr< RegionMeshType >& meshLocal,
 /*!
     @author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
  */
-template< typename RegionMeshType>
+template< typename RegionMeshType >
 void fillWithFullMesh (  boost::shared_ptr< RegionMeshType >& meshLocal,
                          boost::shared_ptr< RegionMeshType >& meshFull,
                          const std::string& meshName,
@@ -209,7 +209,7 @@ void fillWithFullMesh (  boost::shared_ptr< RegionMeshType >& meshLocal,
 /*!
     @author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
  */
-template< typename RegionMeshType>
+template< typename RegionMeshType >
 void fillWithPartitionedMesh ( boost::shared_ptr< RegionMeshType >& meshLocal,
                                const std::string& meshName,
                                const std::string& resourcesPath = "./" )
@@ -245,7 +245,7 @@ void fillWithPartitionedMesh ( boost::shared_ptr< RegionMeshType >& meshLocal,
 /*!
     @author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
  */
-template< typename RegionMeshType>
+template< typename RegionMeshType >
 void fillWithStructuredMesh ( boost::shared_ptr< RegionMeshType >& mesh,
                               boost::shared_ptr< RegionMeshType >& meshFull,
                               markerID_Type regionFlag,
@@ -313,7 +313,7 @@ void fillWithStructuredMesh ( boost::shared_ptr< RegionMeshType >& mesh,
 /*!
     @author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
  */
-template< typename RegionMeshType>
+template< typename RegionMeshType >
 void fillWithStructuredMesh ( boost::shared_ptr< RegionMeshType >& mesh,
                               markerID_Type regionFlag,
                               const std::vector<UInt>& m,
