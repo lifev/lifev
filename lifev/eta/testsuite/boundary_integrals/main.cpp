@@ -551,21 +551,46 @@ int main ( int argc, char** argv )
     }
  
     exporter.closeFile();
-   
+
+    Real tolerance (1e-5);
+    bool success( false );
+
+    if ( (  abs ( sqrt(errorL2Squared) - 0.0768669 ) < tolerance )
+	&& (  abs ( sqrt(errorH1Squared) - 1.76249  ) < tolerance )
+	    && ( abs ( sqrt(errorH1BoundarySquared) - 2.35064 ) < tolerance )
+	 )
+    {
+        success = true ;
+    }
+
+    if (!success)
+    {
+        if (verbose)
+        {
+            std::cout << "End Result: TEST NOT PASSED" << std::endl;
+        }
+    }
+    else
+    {
+        if (verbose)
+        {
+            std::cout << "End Result: TEST PASSED" << std::endl;
+        }
+    }
+    
 #ifdef HAVE_MPI
     MPI_Finalize();
 #endif
 
-    Real tolerance (1e-6);
-
-    if ( (  abs ( sqrt(errorL2Squared) - 0.285305 ) < tolerance )
-	&& (  abs ( sqrt(errorH1Squared) - 3.42681 ) < tolerance )
-	    && ( abs ( sqrt(errorH1BoundarySquared) - 4.5798 ) < tolerance )
-	 )
+    if ( !success )
+    {
+        return ( EXIT_FAILURE );
+    }
+    else
     {
         return ( EXIT_SUCCESS );
     }
-    return ( EXIT_FAILURE );
+
 
 }
 

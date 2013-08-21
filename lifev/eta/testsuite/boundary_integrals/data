@@ -8,13 +8,13 @@
 multimesh  = false
 start      = 0000
 save       = 1
-filename   = cube2
+filename   = cube
 each       = 1
 
 [mesh] 	
 
 mesh_dir = ./
-mesh_file = cubeS_10.mesh
+mesh_file = cube.mesh
 mesh_type = .mesh
 
 
