@@ -78,7 +78,7 @@ Real inletCylinder(Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*
 Real linearInletCylinder( Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
 Real linearVelInletCylinder( Real  t, const Real& x, const Real& y, const Real& z, const ID& i);
 Real oneVelInletCylinder( Real  t, const Real& x, const Real& y, const Real& z, const ID& i);
-
+Real flatNormalVelInlet( Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
 Real linearPopliteal( Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
 Real linearPontdist( Real  t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
 Real popliteal( const Real  t, const Real& x=0, const Real& y=0, const Real& z=0, const ID& i=0);

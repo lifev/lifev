@@ -8,18 +8,18 @@
 multimesh  = false
 start      = 0000
 save       = 1
-filename   = cylinderP1BP1_BDF2
+filename   = cylinderP1BP1
 each       = 5
 
 
 [importer]
-##type	   = hdf5
-##filename   = Aorta_P1b_Coarse_3
-##start      = 00800
+type	   = hdf5
+filename   = cylinderP1BP1
+###start      = 00800
 
 [membrane]
     [./physics]
-        density_sol     = 1.
+        density_sol     = 1.06
         young           = 4.07E6
         poisson         = 0.45
         wall_thickness  = 0.05
@@ -52,10 +52,10 @@ each       = 5
 
     [../time_discretization]
 	  initialtime           = 0.0
- 	  endtime               = 0.02
+ 	  endtime               = 0.4
 	  timestep              = 0.001
 	   method                = BDF   #BDF o Newmark (theta methodo)
-  	  BDF_order                 = 2
+  	  BDF_order                 = 1
  
         # Newmark parameters:
   	theta                   = 0.5  #0.5

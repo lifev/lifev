@@ -883,7 +883,7 @@ Real u0(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z
 
 Real p0(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
 {
-    return 0.0;
+    return 100.0;
 }
 
 
@@ -1528,7 +1528,7 @@ Real oneVelInletCylinder( Real  t, const Real& x, const Real& y, const Real& z, 
   Real n2(0.0);
   Real n3(-1.0);
 
-    Real flux(1.0);
+  Real flux( -1.0 /*linearInletCylinder(t,x,y,z,i)*/);
     //Center for the aneurym with one IO
     Real x0(0);
     Real y0(0);
@@ -1547,6 +1547,28 @@ Real oneVelInletCylinder( Real  t, const Real& x, const Real& y, const Real& z, 
       return n2*( peak * std::max( 0.0, ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) ));
     case 2:
       return n3*( peak * std::max( 0.0, ( (radiusSquared - ( (x-x0)*(x-x0) + (y-y0)*(y-y0)) )/radiusSquared) ));
+    default:
+        return 0.0;
+    }
+}
+
+
+Real flatNormalVelInlet( Real t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+{
+  //Components for Simone's mesh
+
+  Real n1(0.0);
+  Real n2(0.0);
+  Real n3(-1.0);
+  Real vBar( -15.0 * std::sin( t * 2 * 3.14 / 0.1  ) );
+
+    switch(i) {
+    case 0:
+        return n1 * vBar;
+    case 1:
+        return n2 * vBar;
+    case 2:
+        return n3 * vBar;
     default:
         return 0.0;
     }

@@ -100,14 +100,13 @@ struct ETRobinMembraneSolver::Private
     Real ni;
     Real E;
 
+    //Discretization choices
     UInt transpirationOrder;
-
     std::string stabilization;
-
-
-    //Data of the specific problem
     std::string initial_sol;
     Real numLM;
+    bool useFlowRate;
+
     boost::shared_ptr<Epetra_Comm>   comm;
 
 };
@@ -137,8 +136,9 @@ ETRobinMembraneSolver::ETRobinMembraneSolver ( int argc, char** argv )
 
     M_d->initial_sol = (std::string) dataFile ( "fluid/problem/initial_sol", "none");
     M_d->stabilization = (std::string) dataFile ( "fluid/problem/stabilization", "none");
-
     M_d->numLM       = dataFile ( "fluid/problem/numLM"      , 0    );
+    M_d->useFlowRate = 0;
+    if ( M_d->numLM > 0 )  M_d->useFlowRate = 1 ;
     M_d->transpirationOrder       = dataFile ( "fluid/problem/transpiration_order"      , 0     );
 
 #ifdef EPETRA_MPI
@@ -168,7 +168,6 @@ void
 ETRobinMembraneSolver::run()
 
 {
-
     bool verbose = (M_d->comm->MyPID() == 0);
 
     //------------Creating file to store data------------------------------
@@ -191,8 +190,8 @@ ETRobinMembraneSolver::run()
     MeshData meshData;
     meshData.setup (dataFile, "fluid/space_discretization");
 
-    Real LameI = (M_d->Hs * M_d->E * M_d->ni ) / ( ( 1 - M_d->ni * M_d->ni ) );
-    Real LameII = M_d->Hs * M_d->E / ( 2 * ( 1 + M_d->ni ) );
+    Real LameI = (/*M_d->Hs * */M_d->E * M_d->ni ) / ( ( 1 - M_d->ni * M_d->ni ) );
+    Real LameII = /*M_d->Hs * */M_d->E / ( 2 * ( 1 + M_d->ni ) );
 
     if (verbose)
     {
@@ -252,12 +251,7 @@ ETRobinMembraneSolver::run()
 
     MapEpetra fluidMap ( M_uFESpace->map() );
     MapEpetra fluxMap ( M_d->numLM, M_d->comm );
-
-#ifdef FLUX
     MapEpetra fullMap ( M_uFESpace->map() + M_pFESpace->map() + fluxMap );
-#else
-    MapEpetra fullMap ( M_uFESpace->map() + M_pFESpace->map() );
-#endif
 
     DOFInterface3Dto3D interfaceDOF( M_uFESpace->refFE() , M_uFESpace->dof() );
     interfaceDOF.update( *M_uFESpace->mesh() , WALL , *M_uFESpace->mesh() , WALL , 0);
@@ -331,30 +325,32 @@ ETRobinMembraneSolver::run()
 
     //creating BCHandler objects
     BCHandler bcHFluid;
-    BCFunctionBase flow_in (linearVelInletCylinder);
-    //BCFunctionBase flux_in (linearPontdist);
+    BCFunctionBase vel_in (flatNormalVelInlet /*linearVelInletCylinder*/);
     BCFunctionBase flux_in (linearInletCylinder);
-    //BCFunctionBase flow_out (linearPopliteal);
     BCFunctionBase uZero ( fZero );
+    BCFunctionBase press_out( p0 );
 
-#ifdef FLUX
-    bcHFluid.addBC ("InFlow" ,   INLET,    Flux,                Normal, flux_in    );
-    bcHFluid.addBC ("InFlow_2" , OUTLET,   Natural,             Full,   uZero,   3 );
-    bcHFluid.addBC ("Old" ,   OLDARTERY,    Essential,           Full,   uZero, 3 );
-    //In order to have a well defined problem you need to set conditions on boundaries of boundaries
-    bcHFluid.addBC ("Ring" ,     RING,     EssentialEdges,   Full,   uZero,   3 );
-    bcHFluid.addBC ("Ring" ,     OLDRING,     EssentialEdges,   Full,   uZero,   3 );
-    bcHFluid.addBC ("Ring3" ,    RING2,    EssentialEdges,   Full,   uZero,   3 );
-    bcHFluid.setOffset ("InFlow", totalVelDof + totalPressDof);
+    if (M_d->useFlowRate == true )
+    {    
+	bcHFluid.addBC ("InFlow" ,   INLET,    Flux,                Normal, flux_in    );
+	bcHFluid.addBC ("InFlow_2" , OUTLET,   Natural,             Full,   uZero,   3 );
 
-#else
-    bcHFluid.addBC ("InFlow" ,   INLET,    Essential,           Full,   flow_in, 3 );
-    bcHFluid.addBC ("InFlow_2" , OUTLET,   Natural,             Full,   uZero,   3 );
-    //In order to have a well defined problem you need to set conditions on boundaries of boundaries
-    //bcHFluid.addBC ("Wall" ,     WALL,     Essential,   Full,   uZero,   3 );
-    bcHFluid.addBC ("Ring" ,     RING,     EssentialEdges,   Full,   uZero,   3 );
-    bcHFluid.addBC ("Ring3" ,    RING2,    EssentialEdges,   Full,   uZero,   3 );
-#endif
+	//In order to have a well defined problem you need to set conditions on boundaries of boundaries
+	bcHFluid.addBC ("Ring" ,     RING,     EssentialEdges,   Full,   uZero,   3 );
+	bcHFluid.addBC ("Ring3" ,    RING2,    EssentialEdges,   Full,   uZero,   3 );
+
+	bcHFluid.setOffset ("InFlow", totalVelDof + totalPressDof);
+
+    } else {
+
+	bcHFluid.addBC ("InFlow" ,   INLET,    Essential,           Full,   vel_in, 3 );
+	bcHFluid.addBC ("InFlow_2" , OUTLET,   Natural,             Normal,   press_out );
+
+	//In order to have a well defined problem you need to set conditions on boundaries of boundaries
+	bcHFluid.addBC ("Ring" ,     RING,     EssentialEdges,   Full,   uZero,   3 );
+	bcHFluid.addBC ("Ring3" ,    RING2,    EssentialEdges,   Full,   uZero,   3 );
+
+    }
 
     if (verbose)
     {
@@ -363,12 +359,7 @@ ETRobinMembraneSolver::run()
 
     //----------------------------------------------------------------------------
 
-#ifdef FLUX
     vector_block_type NSSolution (M_ETuFESpace->map() | M_ETpFESpace->map() | fluxMap, Unique);
-#else
-    vector_block_type NSSolution (M_ETuFESpace->map() | M_ETpFESpace->map(), Unique);
-#endif
-
     vector_type velocitySolution (M_ETuFESpace->map(), Repeated);
     vector_type dispSolution (M_ETuFESpace->map(), Repeated);
 
@@ -423,30 +414,35 @@ ETRobinMembraneSolver::run()
 
         std::string filename = dataFile ("importer/filename", "cylinder");
 
-        LifeV::ExporterHDF5<mesh_type> importer ( dataFile, filename);
-        importer.setMeshProcId (M_uFESpace->mesh(), M_d->comm->MyPID() );
+        LifeV::ExporterHDF5<mesh_type> importer ( dataFile, filename );
+        importer.setMeshProcId ( M_uFESpace->mesh(), M_d->comm->MyPID() );
+	
+	vectorPtr_type velAndPressureImporter ( new vector_type (NSSolution, importer.mapType() ) );
+	vectorPtr_type dispImporter (new vector_type (dispSolution, importer.mapType() ) );
 
         importer.addVariable ( ExporterData<mesh_type>::VectorField,
                                "f-velocity",
                                M_uFESpace,
-                               velAndPressureExporter,
+                               velAndPressureImporter,
                                UInt ( 0 ) );
 
         importer.addVariable ( ExporterData<mesh_type>::ScalarField,
                                "f-pressure",
                                M_pFESpace,
-                               velAndPressureExporter,
+                               velAndPressureImporter,
                                3 * M_uFESpace->dof().numTotalDof() );
 
         importer.addVariable ( ExporterData<mesh_type>::VectorField,
                                "s-displacement",
                                M_uFESpace,
-                               dispExporter,
+                               dispImporter,
                                UInt ( 0 ) );
 
-        exporter.setTimeIndex (importer.importFromTime (t0) );
+        exporter.setTimeIndex ( importer.importFromTime (t0) );
 
-        Real norm = velAndPressureExporter->norm2();
+        Real norm = velAndPressureImporter->norm2();
+	*velAndPressureExporter = *velAndPressureImporter;
+	*dispExporter = *dispImporter;
         if (verbose)
         {
             std::cout << "   f- restart solution norm = " << norm << std::endl;
@@ -455,11 +451,11 @@ ETRobinMembraneSolver::run()
 
     }
 
+    velocitySolution.subset ( *velAndPressureExporter );
+    dispSolution = *dispExporter;
+
     fluidTimeAdvance.bdfVelocity().setInitialCondition ( * (velAndPressureExporter) );
     dispTimeAdvance.setInitialCondition ( dispSolution );
-
-    velocitySolution = *velAndPressureExporter;
-    dispSolution = *dispExporter;
 
     fluidTimeAdvance.bdfVelocity().updateRHSContribution ( oseenData->dataTime()->timeStep() );
     dispTimeAdvance.updateRHSContribution (oseenData->dataTime()->timeStep() );
@@ -472,19 +468,10 @@ ETRobinMembraneSolver::run()
     
     //-------------------------------------------------------------------------------------
 
-#ifdef FLUX
     boost::shared_ptr<matrix_block_type> NSMatrixConstant (new matrix_block_type ( M_ETuFESpace->map() | M_ETpFESpace->map() | fluxMap ) );
     *NSMatrixConstant *= 0.0;
     boost::shared_ptr<matrix_block_type> NSMatrixSteadyStokes (new matrix_block_type ( M_ETuFESpace->map() | M_ETpFESpace->map() | fluxMap ) );
     *NSMatrixSteadyStokes *= 0.0;
-
-#else
-    boost::shared_ptr<matrix_block_type> NSMatrixConstant (new matrix_block_type ( M_ETuFESpace->map() | M_ETpFESpace->map() ) );
-    *NSMatrixConstant *= 0.0;
-        boost::shared_ptr<matrix_block_type> NSMatrixSteadyStokes (new matrix_block_type ( M_ETuFESpace->map() | M_ETpFESpace->map() ) );
-    *NSMatrixSteadyStokes *= 0.0;
-#endif
-
 
     //----------------------Temporal Loop----------------------------------
 
@@ -515,8 +502,11 @@ ETRobinMembraneSolver::run()
     *NSMatrixConstant *= 0.0;
 
     QuadratureBoundary myBDQR (buildTetraBDQR (quadRuleTria4pt) );
-    vector_type robinExt (fluidMap, Unique);
-    M_pFESpace->interpolate ( E , robinExt, 0);
+    vector_type robinExt ( M_pFESpace->map(), Unique);
+    M_pFESpace->interpolate ( uZero , robinExt, 0);
+    vector_type hSolid (M_pFESpace->map(), Unique);
+    hSolid += M_d->Hs; // * robinExt;
+    //robinExt *= 0.0;
 
     {
 
@@ -590,7 +580,7 @@ ETRobinMembraneSolver::run()
                      M_ETuFESpace,
 
                      //Boundary Mass
-                     ( value (M_d->rhos * M_d->Hs * alpha / dt) +  value( M_ETpFESpace, robinExt ) * ( 0.1 + dt ) ) * dot ( phi_j, phi_i )
+                     ( value (M_d->rhos /*M_d->Hs*/  * alpha / dt) * value( M_ETpFESpace, hSolid ) +  value( M_ETpFESpace, robinExt ) * ( 0.1 + dt ) ) * dot ( phi_j, phi_i )
 
                    )
                  >> NSMatrixConstant->block (0, 0);
@@ -616,12 +606,12 @@ ETRobinMembraneSolver::run()
 
                      //Boundary Stiffness
                      ( dt / alpha ) *
-                     2  * LameII  *
+                     2  * LameII * value( M_ETpFESpace, hSolid )   *
                      0.5 * dot ( ( grad (phi_j) + (-1) * grad (phi_j) * outerProduct ( Nface, Nface ) )
                                  + transpose (grad (phi_j) + (-1) * grad (phi_j) * outerProduct ( Nface, Nface ) ),
                                  ( grad (phi_i) + ( (-1) * grad (phi_i) * outerProduct ( Nface, Nface ) ) ) ) +
 
-                     ( dt / alpha ) *
+                     ( dt / alpha ) * value( M_ETpFESpace, hSolid )*
                      LameI  * dot ( value ( Eye ) , ( grad (phi_j) + (-1) *  grad (phi_j) * outerProduct ( Nface, Nface ) ) )
                      * dot ( value ( Eye ) ,  ( grad (phi_i) + (-1) * grad (phi_i) * outerProduct ( Nface, Nface ) )  )
 
@@ -632,8 +622,6 @@ ETRobinMembraneSolver::run()
      
      *NSMatrixConstant += *NSMatrixSteadyStokes;
      NSMatrixConstant->globalAssemble();
-
-
 
     details::StabilizationIP<mesh_type, DOF> M_ipStabilization;
     M_ipStabilization.setFeSpaceVelocity ( *M_uFESpace );
@@ -646,119 +634,119 @@ ETRobinMembraneSolver::run()
 
     vector_type steadyResidual ( fullMap, Unique );
 
-     if (M_d->initial_sol == "steady")
-     {
+ //     if (M_d->initial_sol == "steady")
+ //     {
 
- #ifdef FLUX
-         boost::shared_ptr<matrix_block_type> NSMatrix (new matrix_block_type ( M_ETuFESpace->map() | M_ETpFESpace->map() | fluxMap ) );
-         *NSMatrix *= 0.0;
+ // #ifdef FLUX
+ //         boost::shared_ptr<matrix_block_type> NSMatrix (new matrix_block_type ( M_ETuFESpace->map() | M_ETpFESpace->map() | fluxMap ) );
+ //         *NSMatrix *= 0.0;
 
- #else
+ // #else
 
-         boost::shared_ptr<matrix_block_type> NSMatrix (new matrix_block_type ( M_ETuFESpace->map() | M_ETpFESpace->map() ) );
-         *NSMatrix *= 0.0;
- #endif
+ //         boost::shared_ptr<matrix_block_type> NSMatrix (new matrix_block_type ( M_ETuFESpace->map() | M_ETpFESpace->map() ) );
+ //         *NSMatrix *= 0.0;
+ // #endif
 
- 	vector_type NSRhsUnique ( fullMap, Unique );
+ // 	vector_type NSRhsUnique ( fullMap, Unique );
 
- 	boost::shared_ptr<matrix_type> stabMatrix (new matrix_type ( fullMap ));
- 	M_ipStabilization.apply ( *stabMatrix, velocitySolution, false );
- 	stabMatrix->globalAssemble();
- 	*NSMatrix += *NSMatrixSteadyStokes;
- 	*NSMatrix += *stabMatrix;
+ // 	boost::shared_ptr<matrix_type> stabMatrix (new matrix_type ( fullMap ));
+ // 	M_ipStabilization.apply ( *stabMatrix, velocitySolution, false );
+ // 	stabMatrix->globalAssemble();
+ // 	*NSMatrix += *NSMatrixSteadyStokes;
+ // 	*NSMatrix += *stabMatrix;
 
- 	NSMatrix->globalAssemble();
+ // 	NSMatrix->globalAssemble();
 
-      	bcHFluid.bcUpdate ( *meshPart.meshPartition(), M_uFESpace->feBd(), M_uFESpace->dof() );
-        // bcManage (*NSMatrix, NSRhsUnique,
-        //            *M_uFESpace->mesh(), M_uFESpace->dof(),
-        //            bcHFluid, M_uFESpace->feBd(), 1.0, currentTime);
+ //      	bcHFluid.bcUpdate ( *meshPart.meshPartition(), M_uFESpace->feBd(), M_uFESpace->dof() );
+ //        // bcManage (*NSMatrix, NSRhsUnique,
+ //        //            *M_uFESpace->mesh(), M_uFESpace->dof(),
+ //        //            bcHFluid, M_uFESpace->feBd(), 1.0, currentTime);
 
- 	boost::shared_ptr<matrix_type> NSMatrixDiri( new matrix_type( fullMap ) );
- 	*NSMatrixDiri += *NSMatrix;
- 	NSMatrixDiri->globalAssemble();
+ // 	boost::shared_ptr<matrix_type> NSMatrixDiri( new matrix_type( fullMap ) );
+ // 	*NSMatrixDiri += *NSMatrix;
+ // 	NSMatrixDiri->globalAssemble();
 	
- 	BCHandler bcHInit;
- 	bcHInit.addBC ("Wall" ,   WALL,    Essential,           Full,   uZero, 3 );
- 	bcHInit.bcUpdate ( *meshPart.meshPartition(), M_uFESpace->feBd(), M_uFESpace->dof() );
-         // bcManage (*NSMatrixDiri, NSRhsUnique,
-         //           *M_uFESpace->mesh(), M_uFESpace->dof(),
-         //           bcHInit, M_uFESpace->feBd(), 1.0, currentTime);
+ // 	BCHandler bcHInit;
+ // 	bcHInit.addBC ("Wall" ,   WALL,    Essential,           Full,   uZero, 3 );
+ // 	bcHInit.bcUpdate ( *meshPart.meshPartition(), M_uFESpace->feBd(), M_uFESpace->dof() );
+ //         // bcManage (*NSMatrixDiri, NSRhsUnique,
+ //         //           *M_uFESpace->mesh(), M_uFESpace->dof(),
+ //         //           bcHInit, M_uFESpace->feBd(), 1.0, currentTime);
 
-         NSSolver.setMatrix (*NSMatrixDiri);
-         NSSolver.solveSystem (NSRhsUnique, NSSolution, NSMatrixDiri);
+ //         NSSolver.setMatrix (*NSMatrixDiri);
+ //         NSSolver.solveSystem (NSRhsUnique, NSSolution, NSMatrixDiri);
 	 
- 	*velAndPressureExporter = NSSolution;
+ // 	*velAndPressureExporter = NSSolution;
 
-	steadyResidual = (-1) * (*NSMatrix * NSSolution); 
+ // 	steadyResidual = (-1) * (*NSMatrix * NSSolution); 
 
-	vector_type dispRhsInit( M_ETuFESpace->map(), Unique );
-	dispRhsInit.subset( steadyResidual );
+ // 	vector_type dispRhsInit( M_ETuFESpace->map(), Unique );
+ // 	dispRhsInit.subset( steadyResidual );
 	
-	vector_type dispSolutionInit( M_ETuFESpace->map(), Unique );
-         boost::shared_ptr<matrix_type> DispMatrixInit (new matrix_type ( M_ETuFESpace->map() ) );
-         *DispMatrixInit *= 0.0;
-	 DispMatrixInit->insertOneDiagonal();
-	 DispMatrixInit->insertValueDiagonal( -1 , (*M_interfaceMap) );
+ // 	vector_type dispSolutionInit( M_ETuFESpace->map(), Unique );
+ //         boost::shared_ptr<matrix_type> DispMatrixInit (new matrix_type ( M_ETuFESpace->map() ) );
+ //         *DispMatrixInit *= 0.0;
+ // 	 DispMatrixInit->insertOneDiagonal();
+ // 	 DispMatrixInit->insertValueDiagonal( -1 , (*M_interfaceMap) );
 
-	 {
-	     using namespace ::LifeV::ExpressionAssembly;
+ // 	 {
+ // 	     using namespace ::LifeV::ExpressionAssembly;
 
 
-	     integrate ( boundary (M_ETuFESpace->mesh(), WALL),
-			 myBDQR,
+ // 	     integrate ( boundary (M_ETuFESpace->mesh(), WALL),
+ // 			 myBDQR,
 
-			 M_ETuFESpace,
-			 M_ETuFESpace,
+ // 			 M_ETuFESpace,
+ // 			 M_ETuFESpace,
 
-			 //Boundary Stiffness
-			 //Boundary Mass
-			 value( M_ETpFESpace, robinExt ) * dot ( phi_j, phi_i )
+ // 			 //Boundary Stiffness
+ // 			 //Boundary Mass
+ // 			 value( M_ETpFESpace, robinExt ) * dot ( phi_j, phi_i )
  
-			 + 2  * LameII  *
-			 0.5 * dot ( ( grad (phi_j) + (-1) * grad (phi_j) * outerProduct ( Nface, Nface ) )
-				     + transpose (grad (phi_j) + (-1) * grad (phi_j) * outerProduct ( Nface, Nface ) ),
-				     ( grad (phi_i) + ( (-1) * grad (phi_i) * outerProduct ( Nface, Nface ) ) ) ) +
+ // 			 + 2  * LameII  *
+ // 			 0.5 * dot ( ( grad (phi_j) + (-1) * grad (phi_j) * outerProduct ( Nface, Nface ) )
+ // 				     + transpose (grad (phi_j) + (-1) * grad (phi_j) * outerProduct ( Nface, Nface ) ),
+ // 				     ( grad (phi_i) + ( (-1) * grad (phi_i) * outerProduct ( Nface, Nface ) ) ) ) +
 
-			 LameI  * dot ( value ( Eye ) , ( grad (phi_j) + (-1) *  grad (phi_j) * outerProduct ( Nface, Nface ) ) )
-			 * dot ( value ( Eye ) ,  ( grad (phi_i) + (-1) * grad (phi_i) * outerProduct ( Nface, Nface ) )  )
+ // 			 LameI  * dot ( value ( Eye ) , ( grad (phi_j) + (-1) *  grad (phi_j) * outerProduct ( Nface, Nface ) ) )
+ // 			 * dot ( value ( Eye ) ,  ( grad (phi_i) + (-1) * grad (phi_i) * outerProduct ( Nface, Nface ) )  )
 
-			 )
-                 >> *DispMatrixInit;
+ // 			 )
+ //                 >> *DispMatrixInit;
 
-	 }
+ // 	 }
 
-	DispMatrixInit->globalAssemble();
+ // 	DispMatrixInit->globalAssemble();
 
-	DispMatrixInit->spy("dispMatrix");
+ // 	DispMatrixInit->spy("dispMatrix");
 
-	BCHandler bcHDiri;
- 	bcHDiri.addBC ("Inlet" ,   INLET,    Essential,           Full,   uZero, 3 );
-	bcHDiri.addBC ("Outlet" ,   OUTLET,    Essential,           Full,   uZero, 3 );
- 	bcHDiri.addBC ("Ring" ,   RING2,    EssentialEdges,           Full,   uZero, 3 );
-	bcHDiri.addBC ("Ring" ,   RING,    EssentialEdges,           Full,   uZero, 3 );
- 	bcHDiri.bcUpdate ( *meshPart.meshPartition(), M_uFESpace->feBd(), M_uFESpace->dof() );
-        // bcManage (*DispMatrixInit, dispRhsInit,
-        //            *M_uFESpace->mesh(), M_uFESpace->dof(),
-        //            bcHDiri, M_uFESpace->feBd(), 1.0, currentTime);
+ // 	BCHandler bcHDiri;
+ // 	bcHDiri.addBC ("Inlet" ,   INLET,    Essential,           Full,   uZero, 3 );
+ // 	bcHDiri.addBC ("Outlet" ,   OUTLET,    Essential,           Full,   uZero, 3 );
+ // 	bcHDiri.addBC ("Ring" ,   RING2,    EssentialEdges,           Full,   uZero, 3 );
+ // 	bcHDiri.addBC ("Ring" ,   RING,    EssentialEdges,           Full,   uZero, 3 );
+ // 	bcHDiri.bcUpdate ( *meshPart.meshPartition(), M_uFESpace->feBd(), M_uFESpace->dof() );
+ //        // bcManage (*DispMatrixInit, dispRhsInit,
+ //        //            *M_uFESpace->mesh(), M_uFESpace->dof(),
+ //        //            bcHDiri, M_uFESpace->feBd(), 1.0, currentTime);
 	
-	NSSolver.setMatrix (*DispMatrixInit);
-	NSSolver.solveSystem (dispRhsInit, dispSolutionInit , DispMatrixInit);     
+ // 	NSSolver.setMatrix (*DispMatrixInit);
+ // 	NSSolver.solveSystem (dispRhsInit, dispSolutionInit , DispMatrixInit);     
 
-	*dispExporter = dispSolutionInit;
+ // 	*dispExporter = dispSolutionInit;
 
-	dispSolution = dispSolutionInit;
+ // 	dispSolution = dispSolutionInit;
 
-	dispTimeAdvance.shiftRight ( dispSolution );
+ // 	dispTimeAdvance.shiftRight ( dispSolution );
 
-        dispTimeAdvance.updateRHSContribution (oseenData->dataTime()->timeStep() );
+ //        dispTimeAdvance.updateRHSContribution (oseenData->dataTime()->timeStep() );
 	
- 	velocitySolution.subset (NSSolution);
+ // 	velocitySolution.subset (NSSolution);
 
- 	fluidTimeAdvance.bdfVelocity().shiftRight ( NSSolution );
+ // 	fluidTimeAdvance.bdfVelocity().shiftRight ( NSSolution );
 
- 	fluidTimeAdvance.bdfVelocity().updateRHSContribution ( oseenData->dataTime()->timeStep() );
-     }
+ // 	fluidTimeAdvance.bdfVelocity().updateRHSContribution ( oseenData->dataTime()->timeStep() );
+ //     }
 
      exporter.postProcess(t0);
 
@@ -808,19 +796,8 @@ ETRobinMembraneSolver::run()
 	vector_type dtDisp (fluidMap, Repeated);
 	dtDisp = ( alpha /dt ) * dispSolution - dispTimeAdvance.rhsContributionFirstDerivative();
 
-	//vector_type dtDeltaU(fluidMap, Repeated);
-	//dtDeltaU = ( alpha /dt ) * deltaU - deltaUTimeAdvance.rhsContributionFirstDerivative();
-
-#ifdef FLUX
         boost::shared_ptr<matrix_block_type> NSMatrix (new matrix_block_type ( M_ETuFESpace->map() | M_ETpFESpace->map() | fluxMap ) );
         *NSMatrix *= 0.0;
-
-#else
-
-        boost::shared_ptr<matrix_block_type> NSMatrix (new matrix_block_type ( M_ETuFESpace->map() | M_ETpFESpace->map() ) );
-        *NSMatrix *= 0.0;
-
-#endif
 
 #define DIVDIV_TEST value(NSdivdiv) * h_K * div(phi_i)
 
@@ -831,9 +808,9 @@ ETRobinMembraneSolver::run()
 #define TRANSP_GRADGRAD grad(phi_j) * ( grad(M_ETuFESpace, dispExtrapolated) ) * ( Eye + (-1) * outerProduct(Nface, Nface) )
 
         if (verbose)
-	    {
+	{
 		std::cout << "[Navier-Stokes] Assembling the matrix ... " << std::flush;
-	    }
+	}
 
         LifeChrono ChronoItem;
         ChronoItem.start();
@@ -945,13 +922,13 @@ ETRobinMembraneSolver::run()
 
 			    //Boundary Stiffness
 			    ( dt / alpha ) *
-			    2  * LameII  *
+			    2  * LameII * value( M_ETpFESpace, hSolid ) *
 			    0.5 * dot ( TRANSP_GRADGRAD
 					+ transpose ( TRANSP_GRADGRAD ),
 					( grad (phi_i) + ( (-1) * grad (phi_i) * outerProduct ( Nface, Nface ) ) ) ) +
 
 			    ( dt / alpha ) *
-			    LameI  * dot ( value ( Eye ) , TRANSP_GRADGRAD )
+			    LameI * value( M_ETpFESpace, hSolid ) * dot ( value ( Eye ) , TRANSP_GRADGRAD )
 			    * dot ( value ( Eye ) ,  ( grad (phi_i) + (-1) * grad (phi_i) * outerProduct ( Nface, Nface ) )  )
 
 			    )
@@ -965,7 +942,7 @@ ETRobinMembraneSolver::run()
 		 	    M_ETuFESpace,
 
 		 	    //Boundary Mass
-			    value (M_d->rhos * M_d->Hs * alpha / dt)  * dot ( grad(phi_j) * value( M_ETuFESpace, dispExtrapolated) , phi_i )
+			    value (M_d->rhos * /*M_d->Hs*/ alpha / dt) * value( M_ETpFESpace, hSolid) * dot ( grad(phi_j) * value( M_ETuFESpace, dispExtrapolated) , phi_i )
                                 + dot ( grad(phi_j) * value( M_ETuFESpace, dtDisp ) , phi_i )
                                 + value( M_ETpFESpace, robinExt ) * ( 0.1 + dt / alpha )  * dot ( grad(phi_j) * value( M_ETuFESpace, dispExtrapolated) , phi_i )
 			    
@@ -1018,11 +995,7 @@ ETRobinMembraneSolver::run()
         }
         ChronoItem.start();
 
-#ifdef FLUX
         vector_block_type NSRhs ( M_ETuFESpace->map() | M_ETpFESpace->map() | fluxMap, Repeated );
-#else
-        vector_block_type NSRhs ( M_ETuFESpace->map() | M_ETpFESpace->map(), Repeated );
-#endif
         NSRhs *= 0.0;
 
         {
@@ -1103,13 +1076,13 @@ ETRobinMembraneSolver::run()
 
                          //BOUNDARY STIFFNESS
                          value (-1) * ( dt / alpha ) *
-                         2  * LameII  *
+                         2  * LameII * value( M_ETpFESpace, hSolid ) *
                          0.5 * dot ( ( grad (M_ETuFESpace, dispBdfRHS ) + (-1) * grad (M_ETuFESpace, dispBdfRHS ) * outerProduct ( Nface, Nface ) )
                                      + transpose (grad (M_ETuFESpace, dispBdfRHS  ) + (-1) * grad (M_ETuFESpace, dispBdfRHS  ) * outerProduct ( Nface, Nface ) ),
                                      ( grad (phi_i) + ( (-1) * grad (phi_i) * outerProduct ( Nface, Nface ) ) ) ) +
 
                          value (-1) * ( dt / alpha ) *
-                         LameI  * dot ( value ( Eye ) , ( grad (M_ETuFESpace, dispBdfRHS ) + (-1) *  grad (M_ETuFESpace, dispBdfRHS ) * outerProduct ( Nface, Nface ) ) )
+                         LameI * value( M_ETpFESpace, hSolid ) * dot ( value ( Eye ) , ( grad (M_ETuFESpace, dispBdfRHS ) + (-1) *  grad (M_ETuFESpace, dispBdfRHS ) * outerProduct ( Nface, Nface ) ) )
                          * dot ( value ( Eye ) ,  ( grad (phi_i) + (-1) * grad (phi_i) * outerProduct ( Nface, Nface ) )  )
                        ) >> NSRhs.block (0);
 
@@ -1121,7 +1094,7 @@ ETRobinMembraneSolver::run()
                  M_ETuFESpace,
 
                  //BOUNDARY MASS
-                 ( M_d->Hs * M_d->rhos * alpha) * dot (value (M_ETuFESpace, velocityBdfRHS), phi_i )
+                 ( /*M_d->Hs*/value ( M_ETpFESpace, hSolid ) * M_d->rhos * alpha) * dot (value (M_ETuFESpace, velocityBdfRHS), phi_i )
 						    - dt * dot( value ( M_ETpFESpace, robinExt) * value(M_ETuFESpace, dispBdfRHS ) , phi_i )
 
              )
@@ -1142,7 +1115,7 @@ ETRobinMembraneSolver::run()
 			   M_ETuFESpace,
 
 			   //BOUNDARY MASS
-			   ( M_d->Hs * M_d->rhos * alpha) *  dot (grad (M_ETuFESpace, velocityBdfRHS) * value( M_ETuFESpace, dispExtrapolated ), phi_i )
+			   ( /*M_d->Hs*/value ( M_ETpFESpace, hSolid) * M_d->rhos * alpha) *  dot (grad (M_ETuFESpace, velocityBdfRHS) * value( M_ETuFESpace, dispExtrapolated ), phi_i )
 		       
 
 			   )
