@@ -138,7 +138,7 @@ ETRobinMembraneSolver::ETRobinMembraneSolver ( int argc, char** argv )
     M_d->initial_sol = (std::string) dataFile ( "fluid/problem/initial_sol", "none");
     M_d->stabilization = (std::string) dataFile ( "fluid/problem/stabilization", "none");
 
-    M_d->numLM       = dataFile ( "fluid/problem/numLM"      , 1     );
+    M_d->numLM       = dataFile ( "fluid/problem/numLM"      , 0    );
     M_d->transpirationOrder       = dataFile ( "fluid/problem/transpiration_order"      , 0     );
 
 #ifdef EPETRA_MPI
@@ -646,7 +646,7 @@ ETRobinMembraneSolver::run()
 
     vector_type steadyResidual ( fullMap, Unique );
 
-     if (M_d->initial_sol == "none")
+     if (M_d->initial_sol == "steady")
      {
 
  #ifdef FLUX
@@ -669,10 +669,10 @@ ETRobinMembraneSolver::run()
 
  	NSMatrix->globalAssemble();
 
- 	bcHFluid.bcUpdate ( *meshPart.meshPartition(), M_uFESpace->feBd(), M_uFESpace->dof() );
-         bcManage (*NSMatrix, NSRhsUnique,
-                   *M_uFESpace->mesh(), M_uFESpace->dof(),
-                   bcHFluid, M_uFESpace->feBd(), 1.0, currentTime);
+      	bcHFluid.bcUpdate ( *meshPart.meshPartition(), M_uFESpace->feBd(), M_uFESpace->dof() );
+        // bcManage (*NSMatrix, NSRhsUnique,
+        //            *M_uFESpace->mesh(), M_uFESpace->dof(),
+        //            bcHFluid, M_uFESpace->feBd(), 1.0, currentTime);
 
  	boost::shared_ptr<matrix_type> NSMatrixDiri( new matrix_type( fullMap ) );
  	*NSMatrixDiri += *NSMatrix;
@@ -681,9 +681,9 @@ ETRobinMembraneSolver::run()
  	BCHandler bcHInit;
  	bcHInit.addBC ("Wall" ,   WALL,    Essential,           Full,   uZero, 3 );
  	bcHInit.bcUpdate ( *meshPart.meshPartition(), M_uFESpace->feBd(), M_uFESpace->dof() );
-         bcManage (*NSMatrixDiri, NSRhsUnique,
-                   *M_uFESpace->mesh(), M_uFESpace->dof(),
-                   bcHInit, M_uFESpace->feBd(), 1.0, currentTime);
+         // bcManage (*NSMatrixDiri, NSRhsUnique,
+         //           *M_uFESpace->mesh(), M_uFESpace->dof(),
+         //           bcHInit, M_uFESpace->feBd(), 1.0, currentTime);
 
          NSSolver.setMatrix (*NSMatrixDiri);
          NSSolver.solveSystem (NSRhsUnique, NSSolution, NSMatrixDiri);
@@ -738,9 +738,9 @@ ETRobinMembraneSolver::run()
  	bcHDiri.addBC ("Ring" ,   RING2,    EssentialEdges,           Full,   uZero, 3 );
 	bcHDiri.addBC ("Ring" ,   RING,    EssentialEdges,           Full,   uZero, 3 );
  	bcHDiri.bcUpdate ( *meshPart.meshPartition(), M_uFESpace->feBd(), M_uFESpace->dof() );
-        bcManage (*DispMatrixInit, dispRhsInit,
-                   *M_uFESpace->mesh(), M_uFESpace->dof(),
-                   bcHDiri, M_uFESpace->feBd(), 1.0, currentTime);
+        // bcManage (*DispMatrixInit, dispRhsInit,
+        //            *M_uFESpace->mesh(), M_uFESpace->dof(),
+        //            bcHDiri, M_uFESpace->feBd(), 1.0, currentTime);
 	
 	NSSolver.setMatrix (*DispMatrixInit);
 	NSSolver.solveSystem (dispRhsInit, dispSolutionInit , DispMatrixInit);     
@@ -1183,7 +1183,11 @@ ETRobinMembraneSolver::run()
         }
 
         bcHFluid.bcUpdate ( *meshPart.meshPartition(), M_uFESpace->feBd(), M_uFESpace->dof() );
-        bcManage (*NSMatrix, NSRhsUnique,
+
+	boost::shared_ptr<matrix_type> NSMatrixNoBlock (new matrix_type ( fullMap ) );
+	*NSMatrixNoBlock += *NSMatrix;
+	NSMatrixNoBlock->globalAssemble();
+        bcManage (*NSMatrixNoBlock, NSRhsUnique,
                   *M_uFESpace->mesh(), M_uFESpace->dof(),
                   bcHFluid, M_uFESpace->feBd(), 1.0, currentTime);
 
@@ -1198,9 +1202,8 @@ ETRobinMembraneSolver::run()
             std::cout << "[Navier-Stokes] Solving the system " << std::endl;
         }
 
-        NSSolver.setMatrix (*NSMatrix);
+        NSSolver.setMatrix (*NSMatrixNoBlock);
 
-        boost::shared_ptr<matrix_type> NSMatrixNoBlock (new matrix_type ( NSMatrix->matrixPtr() ) );
         NSSolver.solveSystem (NSRhsUnique, NSSolution, NSMatrixNoBlock);
 
         fluidTimeAdvance.bdfVelocity().shiftRight ( NSSolution );

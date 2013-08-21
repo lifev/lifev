@@ -37,8 +37,10 @@
 
 #include <lifev/core/algorithm/SolverAztecOO.hpp>
 
-#include <lifev/core/array/MatrixBlockMonolithicEpetra.hpp>
-#include <lifev/core/array/VectorBlockMonolithicEpetra.hpp>
+//#include <lifev/core/array/MatrixBlockMonolithicEpetra.hpp>
+//#include <lifev/core/array/VectorBlockMonolithicEpetra.hpp>
+#include <lifev/core/array/MatrixEpetraStructured.hpp>
+#include <lifev/core/array/VectorEpetraStructured.hpp>
 
 #include <lifev/core/util/LifeChrono.hpp>
 
@@ -85,8 +87,10 @@ public:
     //@{
 
     typedef RegionMesh<LinearTetra>                                mesh_type;
-    typedef MatrixBlockMonolithicEpetra<Real>                      matrix_block_type;
-    typedef VectorBlockMonolithicEpetra                            vector_block_type;
+    //typedef MatrixBlockMonolithicEpetra<Real>                      matrix_block_type;
+    //typedef VectorBlockMonolithicEpetra                            vector_block_type;
+    typedef MatrixEpetraStructured<Real>                      matrix_block_type;
+    typedef VectorEpetraStructured                          vector_block_type;
     typedef MatrixEpetra<Real>                                     matrix_type;
     typedef VectorEpetra                                           vector_type;
     typedef boost::shared_ptr<matrix_type>                         matrixPtr_type;

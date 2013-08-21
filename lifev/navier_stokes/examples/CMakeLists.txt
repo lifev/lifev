@@ -7,4 +7,6 @@ ADD_SUBDIRECTORIES(
   cavity_ns
   cavity_stokes
   cylinder
+  ETpseudo_fsi
+  generalizedRobin
 )

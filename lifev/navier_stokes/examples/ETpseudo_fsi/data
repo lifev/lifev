@@ -8,7 +8,7 @@
 multimesh  = false
 start      = 0000
 save       = 1
-filename   = cylinderP1P1_SUP
+filename   = cylinderP1BP1_BDF2
 each       = 5
 
 
@@ -19,10 +19,10 @@ each       = 5
 
 [membrane]
     [./physics]
-        density_sol     = 1.0
+        density_sol     = 1.
         young           = 4.07E6
-        poisson         = 0.5
-        wall_thickness  = 0.03
+        poisson         = 0.45
+        wall_thickness  = 0.05
 
 
 [fluid]
@@ -32,7 +32,7 @@ each       = 5
     centered            = 1
     initial_sol         = none        # stokes, none
     transpiration_order = 0
-    stabilization       = sup
+    stabilization       = none
     
 	[./boundary_flags]
 	outlet   = 3
@@ -46,16 +46,16 @@ each       = 5
 	Re              = 1
     	D               = 0.6
     	H               = 12
-	density         = 1.06           # density   [kg/m^3]
+	density         = 1.0           # density   [kg/m^3]
 	viscosity       = 0.035			# viscosity [kg/m/s]
 
 
     [../time_discretization]
 	  initialtime           = 0.0
- 	  endtime               = 1.1
+ 	  endtime               = 0.02
 	  timestep              = 0.001
 	   method                = BDF   #BDF o Newmark (theta methodo)
-  	  BDF_order                 = 1
+  	  BDF_order                 = 2
  
         # Newmark parameters:
   	theta                   = 0.5  #0.5
@@ -63,8 +63,8 @@ each       = 5
  	
     [../space_discretization]
 	#mesh_dir        = ../../../../../../cmcs-mesh-2/AortaFSI_Claudia/
-	mesh_dir = ./ ##../cylinder/ #../pseudo_fsi/
-	mesh_file = tubeLong2.mesh
+	mesh_dir = ../cylinder/ #../pseudo_fsi/
+	mesh_file = tube20.mesh ##fluidCoarse.mesh
 	#mesh_file       = Aorta_fluid_30K_NE.mesh 
 	#mesh_file       = tube008_fluid.mesh   #tube008_fluid.mesh #tube_curve20.mesh  
 	mesh_type       = .mesh
@@ -73,11 +73,11 @@ each       = 5
         linearized      = 0
         diagonalize     = 0 # weight, 0=off. for P2P1 better to be on=1
 	div_beta_u_v    = 1             # 1=on, 0=off
-	vel_order       = P1 	# P1, P1Bubble, P2
+	vel_order       = P1Bubble 	# P1, P1Bubble, P2
 	press_order     = P1		    # P1, P2
-	supg_coeff      = 0.001
-	pspg_coeff      = 0.001
-	divdiv_coeff    = 0.05
+	supg_coeff      = 0.5
+	pspg_coeff      = 0.5
+	divdiv_coeff    = 1.0
 
     [../miscellaneous]
         verbose         = 1
@@ -125,7 +125,7 @@ each       = 5
 
         # ifpack
         [../ifpack]
-        overlap		= 4
+        overlap		= 2
 
            	[./fact]
 		level-of-fill                 = 10
@@ -156,12 +156,12 @@ each       = 5
     reuse           = false
     max_iter_reuse  = 20
     kspace          = 100
-    tol             = 1.e-7   # AztecOO tolerance
+    tol             = 1.e-6   # AztecOO tolerance
 
 [ipstab]
-    gammaBeta       = 0.5 ##.125 ##1#0.125
-    gammaDiv        = 0.2 ##.2
-    gammaPress      = 0.1 ##.05 #0.03125
+    gammaBeta       = 0.1 ##.125 ##1#0.125
+    gammaDiv        = 0.1 ##.2
+    gammaPress      = 0.05 ##.05 #0.03125
     reuse           = false
     max_iter_reuse  = 10
     		    

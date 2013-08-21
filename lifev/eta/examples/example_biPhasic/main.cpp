@@ -1249,7 +1249,8 @@ int main ( int argc, char** argv )
 
         NSBCHandler.bcUpdate ( *meshPart.meshPartition(), uFESpace->feBd(), uFESpace->dof() );
 
-        bcManage (*NSMatrix, NSRhsUnique,
+        boost::shared_ptr<matrix_type> NSMatrixNoBlock (new matrix_type ( NSMatrix->matrixPtr() ) );
+        bcManage (*NSMatrixNoBlock, NSRhsUnique,
                   *uFESpace->mesh(), uFESpace->dof(),
                   NSBCHandler, uFESpace->feBd(), 1.0, currentTime);
 
@@ -1268,9 +1269,7 @@ int main ( int argc, char** argv )
         }
 
 
-        NSSolver.setMatrix (*NSMatrix);
-
-        boost::shared_ptr<matrix_type> NSMatrixNoBlock (new matrix_type ( NSMatrix->matrixPtr() ) );
+        NSSolver.setMatrix (*NSMatrixNoBlock);
 
         NSSolver.solveSystem (NSRhsUnique, NSSolution, NSMatrixNoBlock);
 
