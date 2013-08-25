@@ -145,6 +145,13 @@ vectorFromMatrix (const ExpressionBase<ExpressionType>& expr, const UInt column)
   return ExpressionVectorFromNonConstantMatrix<ExpressionType, SpaceDim, FieldDim> (expr.cast(), column );
 }
 
+template< typename ExpressionType >
+ExpressionVectorFromNonConstantMatrix<ExpressionType, 3, 3 >
+vectorFromMatrix (const ExpressionBase<ExpressionType>& expr, const UInt column)
+{
+  return ExpressionVectorFromNonConstantMatrix<ExpressionType, 3, 3> (expr.cast(), column );
+}
+
 
 } // Namespace ExpressionAssembly
 
