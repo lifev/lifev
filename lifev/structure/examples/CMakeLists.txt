@@ -7,6 +7,7 @@ ADD_SUBDIRECTORIES(
   example_CookMembrane
   example_tractionWithSymmetry
   example_principalTensionsInflationExtensions
+  example_computePrincipalTensions
   example_partitionMesh
   example_computationNorm
 )
