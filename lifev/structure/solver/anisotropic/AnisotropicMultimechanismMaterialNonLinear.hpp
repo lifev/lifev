@@ -329,6 +329,19 @@ public:
                                                  const std::vector<Real>& invariants,
                                                  const UInt marker);
 
+    //! Compute the First Piola Kirchhoff Tensor
+    /*!
+       \param disp the displacement field from which we compute the fisrt piola-Kirchhoff tensor
+       \param sigma_1 the first column of the Cauchy stress tensor
+       \param sigma_2 the second column of the Cauchy stress tensor
+       \param sigma_3 the third column of the Cauchy stress tensor
+    */
+    void computeCauchyStressTensor ( const vectorPtr_Type disp,
+				     const QuadratureRule& evalQuad,
+				     vectorPtr_Type sigma_1,
+				     vectorPtr_Type sigma_2,
+				     vectorPtr_Type sigma_3);
+
 
     void setupFiberDirections( vectorFiberFunctionPtr_Type vectorOfFibers );
 
@@ -1138,6 +1151,19 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeLocalFirstPiol
   // It can be done using the evaluatNodal framework
 
 }
+
+template <typename MeshType>
+void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeCauchyStressTensor ( const vectorPtr_Type disp,
+										       const QuadratureRule& evalQuad,
+										       vectorPtr_Type sigma_1,
+										       vectorPtr_Type sigma_2,
+										       vectorPtr_Type sigma_3)
+{
+
+  ASSERT( 2 < 0 , "For the multimechanism law the computation of the Cauchy stress has to be defined." );
+
+}
+
 
 
 template <typename MeshType>
