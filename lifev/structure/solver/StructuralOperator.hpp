@@ -88,11 +88,15 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 //ET includes
 #include <lifev/eta/fem/ETFESpace.hpp>
 #include <lifev/eta/expression/Integrate.hpp>
+#include <lifev/eta/expression/Evaluate.hpp>
 
 // Time Advance includes
 #include <lifev/core/fem/TimeAdvance.hpp>
 #include <lifev/core/fem/TimeAdvanceNewmark.hpp>
 #include <lifev/core/fem/TimeAdvanceBDF.hpp>
+
+// To sort vectors 
+#include <algorithm>
 
 namespace LifeV
 {
@@ -471,6 +475,23 @@ public:
     */
     void colorMesh ( vector_Type& meshColors );
 #endif
+
+    //! Compute the three columns of the Cauchy stress tensor
+    /*!
+      \param displacement at a certain time
+      \return fills the three columns
+    */
+  void computeCauchyStressTensor ( const vectorPtr_Type disp, const QuadratureRule& evalQuad,
+				   vectorPtr_Type sigma_1, vectorPtr_Type sigma_2, vectorPtr_Type sigma_3);
+
+
+    //! Compute the nodal principal tensions given the cauchy stress tensor
+    /*!
+      \param The three vectors of the three columns of the Cauchy stress tensor
+      \return fills the vector of the eigenvalues
+    */
+  void computePrincipalTensions ( vectorPtr_Type sigma_1, vectorPtr_Type sigma_2,
+				   vectorPtr_Type sigma_3, vectorPtr_Type vectorEigenvalue);
 
     //void updateMatrix(matrix_Type & bigMatrixStokes);// used for monolithic
     //void updateCoupling(matrix_Type couplingMatrix);// used for monolithic
@@ -1502,6 +1523,113 @@ void StructuralOperator<Mesh>::colorMesh ( vector_Type& meshColors )
 }
 
 #endif
+
+template <typename Mesh>
+void StructuralOperator<Mesh>::computeCauchyStressTensor( const vectorPtr_Type disp, 
+							  const QuadratureRule& evalQuad,
+							  vectorPtr_Type sigma_1,
+							  vectorPtr_Type sigma_2,
+							  vectorPtr_Type sigma_3)
+{
+  /*
+    The method uses the definition of the Cauchy stress tensor for the constitutive law.
+    The tensor is computed using the material models classes where all the informations
+    that are needed are stored (e.g. material parameters)
+   */
+
+  M_material->computeCauchyStressTensor ( disp, evalQuad, sigma_1, sigma_2, sigma_3 );
+}
+
+template <typename Mesh>
+void StructuralOperator<Mesh>::computePrincipalTensions( vectorPtr_Type sigma_1, vectorPtr_Type sigma_2,
+							 vectorPtr_Type sigma_3, vectorPtr_Type vectorEigenvalues)
+{
+
+  /*
+    In order to compute the nodal eigenvalues, for each DOF the cauchy stress tensor is extracted from the
+    vectors of the columns. Then the nodal matrix is composed and the eigenvalues computed.
+    The following method is a partial repetition of the code in AssemblyElementalStructure. Nevertheless it is
+    consistent with the ETA approach to post-process structural dynamic simulations.
+   */
+
+  /* 
+     We loop over the local ID on the processors of the originVector
+     The cut of the vector sigma_1 sigma_2 and sigma_3 should be done in the same way
+     so for the for loop I consider only the sigma_1
+  */
+
+  for( UInt i( sigma_1->blockMap().MinLID() ); i < sigma_1->blockMap().MaxLID(); i++ )
+    {
+      // Given the local ID we get the GID of the vector.
+      Int GIDnode = sigma_1->blockMap().GID( i );
+      
+      // LAPACK wrapper of Epetra
+      Epetra_LAPACK lapack;
+
+      //List of flags for Lapack Function
+      //For documentation, have a look at http://www.netlib.org/lapack/double/dgeev.f
+
+      char JOBVL = 'N';
+      char JOBVR = 'N';
+
+      //Size of the matrix
+      Int Dim = nDimensions;
+
+      //Arrays to store eigenvalues (their number = nDimensions)
+      double WR[nDimensions];
+      double WI[nDimensions];
+
+      //Number of eigenvectors
+      Int LDVR = nDimensions;
+      Int LDVL = nDimensions;
+
+      //Arrays to store eigenvectors
+      Int length = nDimensions * 3;
+
+      double VR[length];
+      double VL[length];
+
+      Int LWORK = 9;
+      Int INFO = 0;
+
+      double WORK[LWORK];
+
+      double A[length];
+
+      // Filling the matrix
+      for (UInt i (0); i < nDimensions; i++)
+	{
+	  A[ nDimensions * i ]     = (*sigma_1)( GIDnode + i * M_dispFESpace->dof().numTotalDof() + M_offset);
+	  A[ nDimensions * i + 1 ] = (*sigma_2)( GIDnode + i * M_dispFESpace->dof().numTotalDof() + M_offset);
+	  A[ nDimensions * i + 2 ] = (*sigma_3)( GIDnode + i * M_dispFESpace->dof().numTotalDof() + M_offset);
+	}
+
+      lapack.GEEV (JOBVL, JOBVR, Dim, A /*cauchy*/, Dim, &WR[0], &WI[0], VL, LDVL, VR, LDVR, WORK, LWORK, &INFO);
+      ASSERT ( !INFO, "Calculation of the Eigenvalues failed!!!" );
+
+      /* 
+	 The Cauchy stress tensor is symmetric and positive definite therefore the 
+	 eigenvalues have to be real and positive
+      */
+      Real sum(0);
+      for( UInt k(0); k < nDimensions; k++ )
+	sum += WI[ k ];
+
+      ASSERT( sum < 1e-6, "The eigenvalues are not real!");
+
+      std::vector<Real> eigenvalues(nDimensions,0);
+      for( UInt k(0); k < nDimensions; k++ )
+	eigenvalues[ k ] = WR[ k ];
+
+      std::sort( eigenvalues.begin(), eigenvalues.end() );
+
+      // Putting the real eigenvalues in the right place
+      for( UInt k(0); k < nDimensions; k++ )
+	{
+	  (*vectorEigenvalues)( GIDnode + k * M_dispFESpace->dof().numTotalDof() + M_offset) = eigenvalues[ k ];
+	}
+    }
+}
 
 template <typename Mesh>
 void
