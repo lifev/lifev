@@ -331,6 +331,11 @@ Structure::run3d()
                  BCh,
                  parameters->comm);
 
+    if( !dataStructure->constitutiveLaw().compare("anisotropic") )
+      {
+	//! 3.b Setting the fibers in the abstract class of Anisotropic materials
+	solid.material()->anisotropicLaw()->setupFiberDirections( pointerToVectorOfFamilies );
+      }
 
 
     //! 3. Creation of the importers to read the displacement field
@@ -395,6 +400,7 @@ Structure::run3d()
     exporter->setMeshProcId (dFESpace->mesh(), dFESpace->map().comm().MyPID() );
 
     // Patch area vector for the reconstruction
+    vectorPtr_Type patchAreaVectorScalar;
     vectorPtr_Type patchAreaVector;
 
     /* 
@@ -416,7 +422,8 @@ Structure::run3d()
     std::vector< vectorPtr_Type > stretch(0);
     stretch.resize( dataStructure->numberFibersFamilies( ) );
 
-    patchAreaVector.reset ( new vector_Type ( dScalarETFESpace->map() ) );
+    patchAreaVector.reset ( new vector_Type ( dETFESpace->map() ) );
+    patchAreaVectorScalar.reset ( new vector_Type ( dScalarETFESpace->map() ) );
 
     disp.reset( new vector_Type( dFESpace->map() ) );
     dispRead.reset( new vector_Type( dFESpace->map() ) );
@@ -442,22 +449,25 @@ Structure::run3d()
     exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "vectorEigenvalues",
                               dFESpace, vectorEigenvalues, UInt (0) );
 
-    for( UInt i(0); i < dataStructure->numberFibersFamilies( ); i++ )
-    {
-        std::string familyNumber;
-        std::ostringstream number;
-        number << ( i + 1 );
-        familyNumber = number.str();
+    if( !dataStructure->constitutiveLaw().compare("anisotropic") )
+      {
+	for( UInt i(0); i < dataStructure->numberFibersFamilies( ); i++ )
+	  {
+	    std::string familyNumber;
+	    std::ostringstream number;
+	    number << ( i + 1 );
+	    familyNumber = number.str();
 
-        stretch[ i ].reset( new vector_Type( dScalarFESpace->map() ) );
+	    stretch[ i ].reset( new vector_Type( dScalarFESpace->map() ) );
 
-        std::string stringNameS("stretch");
-
-        stringNameS += "-"; stringNameS += familyNumber;
-
-        exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::ScalarField, stringNameS,
-                                  dScalarFESpace, stretch[ i ], UInt (0) );
-    }
+	    std::string stringNameS("stretch");
+	    
+	    stringNameS += "-"; stringNameS += familyNumber;
+	    
+	    exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::ScalarField, stringNameS,
+				    dScalarFESpace, stretch[ i ], UInt (0) );
+	  }
+      }
 
     exporter->postProcess ( 0.0 );
 
@@ -501,9 +511,17 @@ Structure::run3d()
 
     // Computing areas
     evaluateNode( elements ( dScalarETFESpace->mesh() ),
+                  fakeQuadratureRule,
+                  dScalarETFESpace,
+                  meas_K * phi_i
+                  ) >> patchAreaVectorScalar;
+    patchAreaVectorScalar->globalAssemble();
+
+    ExpressionVectorFromNonConstantScalar<ExpressionMeas, 3  > vMeas( meas_K );
+    evaluateNode( elements ( dETFESpace->mesh() ),
 		  fakeQuadratureRule,
-		  dScalarETFESpace,
-		  meas_K * phi_i
+		  dETFESpace,
+		  dot( vMeas , phi_i )
 		  ) >> patchAreaVector;
     patchAreaVector->globalAssemble();
 
@@ -550,50 +568,53 @@ Structure::run3d()
 	// Computing eigenvalues
 	solid.computePrincipalTensions( sigma_1, sigma_2, sigma_3, vectorEigenvalues );
 
-        // Defining expressions
-        ExpressionDefinitions::deformationGradient_Type  F =
-            ExpressionDefinitions::deformationGradient ( dETFESpace,  *disp, 0, identity );
+	if( !dataStructure->constitutiveLaw().compare("anisotropic") )
+	  {
+	    // Defining expressions
+	    ExpressionDefinitions::deformationGradient_Type  F =
+	      ExpressionDefinitions::deformationGradient ( dETFESpace,  *disp, 0, identity );
 
-        // Definition of C = F^T F
-        ExpressionDefinitions::rightCauchyGreenTensor_Type C =
-            ExpressionDefinitions::tensorC( transpose(F), F );
+	    // Definition of C = F^T F
+	    ExpressionDefinitions::rightCauchyGreenTensor_Type C =
+	      ExpressionDefinitions::tensorC( transpose(F), F );
 
-        // Definition of J
-        ExpressionDefinitions::determinantTensorF_Type J =
-            ExpressionDefinitions::determinantF( F );
+	    // Definition of J
+	    ExpressionDefinitions::determinantTensorF_Type J =
+	      ExpressionDefinitions::determinantF( F );
 
-        // Definition of J^-(2/3) = det( C ) using the isochoric/volumetric decomposition
-        ExpressionDefinitions::powerExpression_Type  Jel =
-            ExpressionDefinitions::powerExpression( J , (-2.0/3.0) );
+	    // Definition of J^-(2/3) = det( C ) using the isochoric/volumetric decomposition
+	    ExpressionDefinitions::powerExpression_Type  Jel =
+	      ExpressionDefinitions::powerExpression( J , (-2.0/3.0) );
 
-        // Evaluating quantities that are related to fibers
-        for( UInt j(0); j < dataStructure->numberFibersFamilies( ); j++ )
-        {
-            // Fibers definitions
-            ExpressionDefinitions::interpolatedValue_Type fiberIth =
-                ExpressionDefinitions::interpolateFiber( dETFESpace, *(vectorInterpolated[ j ] ) );
+	    // Evaluating quantities that are related to fibers
+	    for( UInt j(0); j < dataStructure->numberFibersFamilies( ); j++ )
+	      {
+		// Fibers definitions
+		ExpressionDefinitions::interpolatedValue_Type fiberIth =
+		  ExpressionDefinitions::interpolateFiber( dETFESpace, *(vectorInterpolated[ j ] ) );
 
-            // f /otimes f
-            ExpressionDefinitions::outerProduct_Type Mith = ExpressionDefinitions::fiberTensor( fiberIth );
+		// f /otimes f
+		ExpressionDefinitions::outerProduct_Type Mith = ExpressionDefinitions::fiberTensor( fiberIth );
 
-            // Definition of the fourth invariant : I_4^i = C:Mith
-            ExpressionDefinitions::stretch_Type IVith = ExpressionDefinitions::fiberStretch( C, Mith );
+		// Definition of the fourth invariant : I_4^i = C:Mith
+		ExpressionDefinitions::stretch_Type IVith = ExpressionDefinitions::fiberStretch( C, Mith );
 
-            // Definition of the fouth isochoric invariant : J^(-2.0/3.0) * I_4^i
-            ExpressionDefinitions::isochoricStretch_Type IVithBar =
-                ExpressionDefinitions::isochoricFourthInvariant( Jel, IVith );
+		// Definition of the fouth isochoric invariant : J^(-2.0/3.0) * I_4^i
+		ExpressionDefinitions::isochoricStretch_Type IVithBar =
+		  ExpressionDefinitions::isochoricFourthInvariant( Jel, IVith );
 	    
-	    *stretch[ j ] *= 0.0;
+		*stretch[ j ] *= 0.0;
 
-            evaluateNode( elements ( dScalarETFESpace->mesh() ),
-                          fakeQuadratureRule,
-                          dScalarETFESpace,
-                          meas_K * IVithBar  * phi_i
-                          ) >> stretch[ j ];
-            stretch[ j ]->globalAssemble();
-            *(stretch[ j ]) = *(stretch[ j ]) / *patchAreaVector;
+		evaluateNode( elements ( dScalarETFESpace->mesh() ),
+			      fakeQuadratureRule,
+			      dScalarETFESpace,
+			      meas_K * IVithBar  * phi_i
+			      ) >> stretch[ j ];
+		stretch[ j ]->globalAssemble();
+		*(stretch[ j ]) = *(stretch[ j ]) / *patchAreaVectorScalar;
 
-        }
+	      }
+	  }
         exporter->postProcess( 1.0 * ( i + 1 ) );
     }
 
