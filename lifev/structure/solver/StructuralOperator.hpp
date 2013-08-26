@@ -1544,7 +1544,6 @@ template <typename Mesh>
 void StructuralOperator<Mesh>::computePrincipalTensions( vectorPtr_Type sigma_1, vectorPtr_Type sigma_2,
 							 vectorPtr_Type sigma_3, vectorPtr_Type vectorEigenvalues)
 {
-  std::cout << "norm2: " << sigma_2->norm2() << std::endl;
   /*
     In order to compute the nodal eigenvalues, for each DOF the cauchy stress tensor is extracted from the
     vectors of the columns. Then the nodal matrix is composed and the eigenvalues computed.
@@ -1600,9 +1599,12 @@ void StructuralOperator<Mesh>::computePrincipalTensions( vectorPtr_Type sigma_1,
 	  // Filling the matrix
 	  for (UInt j (0); j < nDimensions; j++)
 	    {
-	      A[ nDimensions * j ]     = (*sigma_1)( GIDnode + j * M_dispFESpace->dof().numTotalDof() + M_offset);
-	      A[ nDimensions * j + 1 ] = (*sigma_2)( GIDnode + j * M_dispFESpace->dof().numTotalDof() + M_offset);
-	      A[ nDimensions * j + 2 ] = (*sigma_3)( GIDnode + j * M_dispFESpace->dof().numTotalDof() + M_offset);
+	      Int LIDid = sigma_1->blockMap().LID (iDOF + j * M_dispFESpace->dof().numTotalDof() + M_offset);
+	      Int GIDid = sigma_1->blockMap().GID (LIDid);
+
+	      A[ nDimensions * j ]     = (*sigma_1)( GIDid );
+	      A[ nDimensions * j + 1 ] = (*sigma_2)( GIDid );
+	      A[ nDimensions * j + 2 ] = (*sigma_3)( GIDid );
 	    }
 
 	  lapack.GEEV (JOBVL, JOBVR, Dim, A /*cauchy*/, Dim, &WR[0], &WI[0], VL, LDVL, VR, LDVR, WORK, LWORK, &INFO);
@@ -1629,7 +1631,10 @@ void StructuralOperator<Mesh>::computePrincipalTensions( vectorPtr_Type sigma_1,
 	  // Putting the real eigenvalues in the right place
 	  for( UInt m(0); m < nDimensions; m++ )
 	    {
-	      (*vectorEigenvalues)( GIDnode + m * M_dispFESpace->dof().numTotalDof() + M_offset) = eigenvalues[ m ];
+	      Int LIDid = vectorEigenvalues->blockMap().LID (iDOF + m * M_dispFESpace->dof().numTotalDof() + M_offset);
+	      Int GIDid = vectorEigenvalues->blockMap().GID (LIDid);
+
+	      (*vectorEigenvalues)( GIDid ) = eigenvalues[ m ];
 	    }
 	}
     }
