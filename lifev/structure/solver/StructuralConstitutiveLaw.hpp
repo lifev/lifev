@@ -614,16 +614,36 @@ StructuralConstitutiveLaw<MeshType>::computeCauchyStressTensor ( const vectorPtr
      In this method we use the same vector we pass to it. We could make copies of them and then
      sum them in the right places.
   */
-  sigma_1.reset(new vector_Type( *M_localMap ) );
-  sigma_2.reset(new vector_Type( *M_localMap ) );
-  sigma_3.reset(new vector_Type( *M_localMap ) );
+  vectorPtr_Type sigma1CopyIso;
+  vectorPtr_Type sigma2CopyIso;
+  vectorPtr_Type sigma3CopyIso;
 
-  M_isotropicLaw->computeCauchyStressTensor( disp, evalQuad, sigma_1, sigma_2, sigma_3 );
+  sigma1CopyIso.reset( new vector_Type(*M_localMap) );
+  sigma2CopyIso.reset( new vector_Type(*M_localMap) );
+  sigma3CopyIso.reset( new vector_Type(*M_localMap) );
+
+  vectorPtr_Type sigma1CopyAniso;
+  vectorPtr_Type sigma2CopyAniso;
+  vectorPtr_Type sigma3CopyAniso;
+
+  sigma1CopyAniso.reset( new vector_Type(*M_localMap) );
+  sigma2CopyAniso.reset( new vector_Type(*M_localMap) );
+  sigma3CopyAniso.reset( new vector_Type(*M_localMap) );
+
+  M_isotropicLaw->computeCauchyStressTensor( disp, evalQuad, sigma1CopyIso, sigma2CopyIso, sigma3CopyIso );
+
+  *sigma_1 += *sigma1CopyIso;
+  *sigma_2 += *sigma2CopyIso;
+  *sigma_3 += *sigma3CopyIso;
 
 #ifdef ENABLE_ANISOTROPIC_LAW
   if( !M_dataMaterial->constitutiveLaw().compare("anisotropic") )
     {     
-      M_anisotropicLaw->computeCauchyStressTensor( disp, evalQuad, sigma_1, sigma_2, sigma_3 );
+      M_anisotropicLaw->computeCauchyStressTensor( disp, evalQuad, sigma1CopyAniso, sigma2CopyAniso,sigma3CopyAniso );
+
+      *sigma_1 += *sigma1CopyAniso;
+      *sigma_2 += *sigma2CopyAniso;
+      *sigma_3 += *sigma3CopyAniso;
     }
 #endif
 

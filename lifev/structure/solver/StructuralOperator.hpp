@@ -1544,7 +1544,7 @@ template <typename Mesh>
 void StructuralOperator<Mesh>::computePrincipalTensions( vectorPtr_Type sigma_1, vectorPtr_Type sigma_2,
 							 vectorPtr_Type sigma_3, vectorPtr_Type vectorEigenvalues)
 {
-
+  std::cout << "norm2: " << sigma_2->norm2() << std::endl;
   /*
     In order to compute the nodal eigenvalues, for each DOF the cauchy stress tensor is extracted from the
     vectors of the columns. Then the nodal matrix is composed and the eigenvalues computed.
@@ -1557,78 +1557,83 @@ void StructuralOperator<Mesh>::computePrincipalTensions( vectorPtr_Type sigma_1,
      The cut of the vector sigma_1 sigma_2 and sigma_3 should be done in the same way
      so for the for loop I consider only the sigma_1
   */
-
-  for( UInt i( sigma_1->blockMap().MinLID() ); i < sigma_1->blockMap().MaxLID(); i++ )
+  for ( UInt iDOF = 0; iDOF < ( UInt ) M_dispFESpace->dof().numTotalDof(); ++iDOF )
     {
-      // Given the local ID we get the GID of the vector.
-      Int GIDnode = sigma_1->blockMap().GID( i );
+      if( sigma_1->blockMap().LID( iDOF ) != -1 )
+	{
+	  // Given the local ID we get the GID of the vector.
+	  Int GIDnode = sigma_1->blockMap().GID( iDOF );
       
-      // LAPACK wrapper of Epetra
-      Epetra_LAPACK lapack;
+	  // LAPACK wrapper of Epetra
+	  Epetra_LAPACK lapack;
 
-      //List of flags for Lapack Function
-      //For documentation, have a look at http://www.netlib.org/lapack/double/dgeev.f
+	  //List of flags for Lapack Function
+	  //For documentation, have a look at http://www.netlib.org/lapack/double/dgeev.f
+	  
+	  char JOBVL = 'N';
+	  char JOBVR = 'N';
 
-      char JOBVL = 'N';
-      char JOBVR = 'N';
+	  //Size of the matrix
+	  Int Dim = nDimensions;
 
-      //Size of the matrix
-      Int Dim = nDimensions;
+	  //Arrays to store eigenvalues (their number = nDimensions)
+	  double WR[nDimensions];
+	  double WI[nDimensions];
 
-      //Arrays to store eigenvalues (their number = nDimensions)
-      double WR[nDimensions];
-      double WI[nDimensions];
+	  //Number of eigenvectors
+	  Int LDVR = nDimensions;
+	  Int LDVL = nDimensions;
 
-      //Number of eigenvectors
-      Int LDVR = nDimensions;
-      Int LDVL = nDimensions;
+	  //Arrays to store eigenvectors
+	  Int length = nDimensions * 3;
 
-      //Arrays to store eigenvectors
-      Int length = nDimensions * 3;
+	  double VR[length];
+	  double VL[length];
 
-      double VR[length];
-      double VL[length];
+	  Int LWORK = 9;
+	  Int INFO = 0;
 
-      Int LWORK = 9;
-      Int INFO = 0;
+	  double WORK[LWORK];
 
-      double WORK[LWORK];
+	  double A[length];
 
-      double A[length];
+	  // Filling the matrix
+	  for (UInt j (0); j < nDimensions; j++)
+	    {
+	      A[ nDimensions * j ]     = (*sigma_1)( GIDnode + j * M_dispFESpace->dof().numTotalDof() + M_offset);
+	      A[ nDimensions * j + 1 ] = (*sigma_2)( GIDnode + j * M_dispFESpace->dof().numTotalDof() + M_offset);
+	      A[ nDimensions * j + 2 ] = (*sigma_3)( GIDnode + j * M_dispFESpace->dof().numTotalDof() + M_offset);
+	    }
 
-      // Filling the matrix
-      for (UInt i (0); i < nDimensions; i++)
-	{
-	  A[ nDimensions * i ]     = (*sigma_1)( GIDnode + i * M_dispFESpace->dof().numTotalDof() + M_offset);
-	  A[ nDimensions * i + 1 ] = (*sigma_2)( GIDnode + i * M_dispFESpace->dof().numTotalDof() + M_offset);
-	  A[ nDimensions * i + 2 ] = (*sigma_3)( GIDnode + i * M_dispFESpace->dof().numTotalDof() + M_offset);
-	}
+	  lapack.GEEV (JOBVL, JOBVR, Dim, A /*cauchy*/, Dim, &WR[0], &WI[0], VL, LDVL, VR, LDVR, WORK, LWORK, &INFO);
+	  ASSERT ( !INFO, "Calculation of the Eigenvalues failed!!!" );
 
-      lapack.GEEV (JOBVL, JOBVR, Dim, A /*cauchy*/, Dim, &WR[0], &WI[0], VL, LDVL, VR, LDVR, WORK, LWORK, &INFO);
-      ASSERT ( !INFO, "Calculation of the Eigenvalues failed!!!" );
+	  /* 
+	     The Cauchy stress tensor is symmetric and positive definite therefore the 
+	     eigenvalues have to be real and positive
+	  */
+	  Real sum(0);
+	  for( UInt k(0); k < nDimensions; k++ )
+	    sum += WI[ k ];
 
-      /* 
-	 The Cauchy stress tensor is symmetric and positive definite therefore the 
-	 eigenvalues have to be real and positive
-      */
-      Real sum(0);
-      for( UInt k(0); k < nDimensions; k++ )
-	sum += WI[ k ];
+	  ASSERT( sum < 1e-6, "The eigenvalues are not real!");
 
-      ASSERT( sum < 1e-6, "The eigenvalues are not real!");
+	  std::vector<double> eigenvalues(nDimensions);
+	  for( UInt l(0); l < nDimensions; l++ )
+	    {
+	      eigenvalues[ l ] = WR[ l ];
+	    }
 
-      std::vector<Real> eigenvalues(nDimensions,0);
-      for( UInt k(0); k < nDimensions; k++ )
-	eigenvalues[ k ] = WR[ k ];
-
-      std::sort( eigenvalues.begin(), eigenvalues.end() );
-
-      // Putting the real eigenvalues in the right place
-      for( UInt k(0); k < nDimensions; k++ )
-	{
-	  (*vectorEigenvalues)( GIDnode + k * M_dispFESpace->dof().numTotalDof() + M_offset) = eigenvalues[ k ];
+	  std::sort( eigenvalues.begin(), eigenvalues.end() );
+      
+	  // Putting the real eigenvalues in the right place
+	  for( UInt m(0); m < nDimensions; m++ )
+	    {
+	      (*vectorEigenvalues)( GIDnode + m * M_dispFESpace->dof().numTotalDof() + M_offset) = eigenvalues[ m ];
+	    }
 	}
     }
+
 }
 
 template <typename Mesh>
