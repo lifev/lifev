@@ -72,6 +72,8 @@
 #include <lifev/structure/fem/ExpressionDefinitions.hpp>
 
 #include <lifev/structure/solver/isotropic/ExponentialMaterialNonLinear.hpp>
+#include <lifev/structure/solver/isotropic/VenantKirchhoffMaterialNonLinearPenalized.hpp>
+#include <lifev/structure/solver/anisotropic/HolzapfelMaterialNonLinear.hpp>
 
 // Evaluation operations
 #include <lifev/core/array/MatrixSmall.hpp>
@@ -550,11 +552,16 @@ Structure::run3d()
 	std::cout << "Current reading: " << iterationString << std::endl;
 
         /*!Definition of the ExporterData, used to load the solution inside the previously defined vectors*/
-        LifeV::ExporterData<mesh_Type> solutionDispl  (LifeV::ExporterData<mesh_Type>::VectorField,nameField + "." + iterationString, 
-						       dFESpace, disp, UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
+        // LifeV::ExporterData<mesh_Type> solutionDispl  (LifeV::ExporterData<mesh_Type>::VectorField,nameField + "." + iterationString, 
+	// 					       dFESpace, disp, UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
+
+	// test to debug!
+	dFESpace->interpolate( static_cast<solidFESpace_Type::function_Type> ( displacementVenantKirchhoffPenalized ),
+			       *disp, 0.0 );
+
 
         //Read the variable
-        M_importer->readVariable (solutionDispl);
+        //M_importer->readVariable (solutionDispl);
 
 	*dispRead = *disp;
 

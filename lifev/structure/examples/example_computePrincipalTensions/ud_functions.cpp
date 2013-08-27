@@ -142,6 +142,26 @@ Real a0 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*
     }
 }
 
+Real displacementVenantKirchhoffPenalized (const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
+{
+  switch (i)
+    {
+    case 0:
+      return - 0.01649141 * ( x - 0.5 );
+      break;
+    case 1:
+      return  0.069238236 / 2.0  * ( y );
+      break;
+    case 2:
+      return - 0.01649141  * ( z + 0.5  );
+      break;
+    default:
+      ERROR_MSG ("This entry is not allowed: ud_functions.hpp");
+      return 0.;
+      break;
+    }
+}
+
 
 //----------------------------------------------Boundary Conditions--------------
 Real bcZero (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)

@@ -55,6 +55,7 @@ Real fzero_scalar (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, cons
 Real d0 (const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i);
 Real w0 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
 Real a0 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
+Real displacementVenantKirchhoffPenalized (const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i);
 
 //Boundary Conditions
 Real bcZero (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/);
