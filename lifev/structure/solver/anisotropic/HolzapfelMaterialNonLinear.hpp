@@ -883,9 +883,9 @@ void HolzapfelMaterialNonLinear<MeshType>::computeCauchyStressTensor ( const vec
 							  value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * Jel * ( IVithBar - value(1.0) ) *
 							  exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value(1.0) ) * ( IVithBar- value(1.0) )  ) *
 							  F * Mith ) *
-							transpose(F) , (UInt) 0 ), phi_i )
+							transpose(F) , 0 ), phi_i )
                       ) >> sigma_1;
-
+	  
           // Second term:
           // 2 alpha_i J^(-2.0/3.0) ( \bar{I_4} - 1 ) exp( gamma_i * (\bar{I_4} - 1)^2 ) * ( 1.0/3.0 * I_4 ) F^-T : \grad phi_i
           // where alpha_i and gamma_i are the fiber parameters and M is the 2nd order tensor of type f_i \otimes \ f_i
@@ -898,9 +898,9 @@ void HolzapfelMaterialNonLinear<MeshType>::computeCauchyStressTensor ( const vec
 							  exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value(1.0) ) * ( IVithBar- value(1.0) )  ) *
 							  value( -1.0/3.0 ) * IVith *
 							  F_T ) *
-							transpose(F) , (UInt) 0 ), phi_i )
+							transpose(F) , 0 ), phi_i )
                       ) >> sigma_1;
-
+	  sigma_1->globalAssemble();
 
 	  evaluateNode( elements( this->M_dispETFESpace->mesh() ),
 			evalQuad,
@@ -910,7 +910,7 @@ void HolzapfelMaterialNonLinear<MeshType>::computeCauchyStressTensor ( const vec
 							  value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * Jel * ( IVithBar - value(1.0) ) *
 							  exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value(1.0) ) * ( IVithBar- value(1.0) )  ) *
 							  F * Mith ) *
-							transpose(F) , (UInt) 1 ), phi_i )
+							transpose(F) , 1 ), phi_i )
                       ) >> sigma_2;
 
 	  evaluateNode( elements( this->M_dispETFESpace->mesh() ),
@@ -922,8 +922,9 @@ void HolzapfelMaterialNonLinear<MeshType>::computeCauchyStressTensor ( const vec
 							  exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value(1.0) ) * ( IVithBar- value(1.0) )  ) *
 							  value( -1.0/3.0 ) * IVith *
 							  F_T ) *
-							transpose(F) , (UInt) 1 ), phi_i )
+							transpose(F) , 1 ), phi_i )
                       ) >> sigma_2;
+	  sigma_2->globalAssemble();
 
 	  evaluateNode( elements( this->M_dispETFESpace->mesh() ),
 			evalQuad,
@@ -933,7 +934,7 @@ void HolzapfelMaterialNonLinear<MeshType>::computeCauchyStressTensor ( const vec
 							  value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * Jel * ( IVithBar - value(1.0) ) *
 							  exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value(1.0) ) * ( IVithBar- value(1.0) )  ) *
 							  F * Mith ) *
-							transpose(F) , (UInt) 2 ), phi_i )
+							transpose(F) ,  2 ), phi_i )
                       ) >> sigma_3;
 
 	  evaluateNode( elements( this->M_dispETFESpace->mesh() ),
@@ -945,8 +946,9 @@ void HolzapfelMaterialNonLinear<MeshType>::computeCauchyStressTensor ( const vec
 							  exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value(1.0) ) * ( IVithBar- value(1.0) )  ) *
 							  value( -1.0/3.0 ) * IVith *
 							  F_T ) *
-							transpose(F) , (UInt) 2 ), phi_i )
+							transpose(F) , 2 ), phi_i )
                       ) >> sigma_3;
+	  sigma_3->globalAssemble();
       }
 
 

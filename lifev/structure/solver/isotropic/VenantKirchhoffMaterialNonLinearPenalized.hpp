@@ -1011,9 +1011,9 @@ void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::computeCauchyStressTen
 										   value (3.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [0]) - parameter ( (* (this->M_vectorsParameters) ) [1]  ) ) * ( F - value(1.0/3.0) * I_C *  F_T ) + 
 						      parameter ( (* (this->M_vectorsParameters) ) [1]  ) * pow ( J , (-4.0 / 3.0) ) * ( F * C + value ( (-1.0 / 3.0) ) * I_Csq * F_T )
 						      ) * 
-						    transpose( F ), (UInt) 0 ), phi_i)
+						    transpose( F ),  0 ), phi_i)
 		  ) >> sigma_1;
-
+    sigma_1->globalAssemble();
 
     evaluateNode( elements ( this->M_dispETFESpace->mesh() ),
 		  evalQuad,
@@ -1024,9 +1024,9 @@ void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::computeCauchyStressTen
 										   value (3.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [0]) - parameter ( (* (this->M_vectorsParameters) ) [1]  ) ) * ( F - value(1.0/3.0) * I_C *  F_T ) + 
 						      parameter ( (* (this->M_vectorsParameters) ) [1]  ) * pow ( J , (-4.0 / 3.0) ) * ( F * C + value ( (-1.0 / 3.0) ) * I_Csq * F_T )
 						      ) *
-						    transpose( F ) , (UInt) 1 ), phi_i)
+						    transpose( F ) , 1 ), phi_i)
 		  ) >> sigma_2;
-    
+    sigma_2->globalAssemble();
 
     evaluateNode( elements ( this->M_dispETFESpace->mesh() ),
 		  evalQuad,
@@ -1037,9 +1037,9 @@ void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::computeCauchyStressTen
 										   value (3.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [0]) - parameter ( (* (this->M_vectorsParameters) ) [1]  ) ) * ( F - value(1.0/3.0) * I_C *  F_T ) + 
 						      parameter ( (* (this->M_vectorsParameters) ) [1]  ) * pow ( J , (-4.0 / 3.0) ) * ( F * C + value ( (-1.0 / 3.0) ) * I_Csq * F_T )
 						      ) * 
-						    transpose( F ) , (UInt) 2 ), phi_i)
+						    transpose( F ) , 2 ), phi_i)
 		  ) >> sigma_3;
-    
+    sigma_3->globalAssemble();
   
 }
 
