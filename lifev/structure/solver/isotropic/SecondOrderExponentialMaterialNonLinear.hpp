@@ -640,7 +640,7 @@ void SecondOrderExponentialMaterialNonLinear<MeshType>::computeStiffness ( const
                 this->M_dispETFESpace,
                 value ( 2.0 ) * parameter ( (* (this->M_vectorsParameters) ) [0] ) * ( pow( J, -2.0/3.0) * I_C - value (3.0) ) *
                 exp ( parameter ( (* (this->M_vectorsParameters) ) [1] ) * ( pow( J, -2.0/3.0 ) * I_C - value (3.0) ) * ( pow( J, -2.0/3.0 ) * I_C - value (3.0) ) ) *
-                pow ( J, (-2.0 / 3.0) ) * dot ( F - value (1.0 / 3.0) * pow( J, -2.0/3.0 ) * I_C * F_T , grad (phi_i) )
+                pow ( J, (-2.0 / 3.0) ) * dot ( F - value (1.0 / 3.0) * I_C * F_T , grad (phi_i) )
               ) >> M_stiff;
 
 
@@ -767,10 +767,10 @@ void SecondOrderExponentialMaterialNonLinear<MeshType>::apply ( const vector_Typ
 
 template <typename MeshType>
 void SecondOrderExponentialMaterialNonLinear<MeshType>::computeLocalFirstPiolaKirchhoffTensor ( Epetra_SerialDenseMatrix& firstPiola,
-        const Epetra_SerialDenseMatrix& tensorF,
-        const Epetra_SerialDenseMatrix& cofactorF,
-        const std::vector<Real>& invariants,
-        const UInt marker)
+												const Epetra_SerialDenseMatrix& tensorF,
+												const Epetra_SerialDenseMatrix& cofactorF,
+												const std::vector<Real>& invariants,
+												const UInt marker)
 {
     //Get the material parameters
     Real alpha    = this->M_dataMaterial->alpha (marker);
@@ -815,7 +815,64 @@ void SecondOrderExponentialMaterialNonLinear<MeshType>::computeCauchyStressTenso
 										    vectorPtr_Type sigma_3) 
 
 {
-  ASSERT( 2 < 0, "This method has to be implemented for the 2nd Exponential law");
+
+    using namespace ExpressionAssembly;
+
+    // Definition of F
+    tensorF_Type F = ExpressionDefinitions::deformationGradient( this->M_dispETFESpace,  *disp, this->M_offset, this->M_identity );
+
+    // Definition of J
+    determinantF_Type J = ExpressionDefinitions::determinantF( F );
+
+    // Definition of tensor C
+    tensorC_Type C = ExpressionDefinitions::tensorC( transpose(F), F );
+
+    // Definition of F^-T
+    minusT_Type  F_T = ExpressionDefinitions::minusT( F );
+
+    // Definition of tr( C )
+    traceTensor_Type I_C = ExpressionDefinitions::traceTensor( C );
+
+  
+    evaluateNode( elements ( this->M_dispETFESpace->mesh() ),
+		  evalQuad,
+		  this->M_dispETFESpace,
+		  meas_K *  dot ( vectorFromMatrix( ( 1 / J )*
+						    ( value (1.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [2] ) * ( pow ( J , 2.0) - J + log (J) ) * F_T + //vol
+						      value ( 2.0 ) * parameter ( (* (this->M_vectorsParameters) ) [0] ) * ( pow( J, -2.0/3.0) * I_C - value (3.0) ) *
+						      exp ( parameter ( (* (this->M_vectorsParameters) ) [1] ) * ( pow( J, -2.0/3.0 ) * I_C - value (3.0) ) * ( pow( J, -2.0/3.0 ) * I_C - value (3.0) ) ) *
+						      pow ( J, (-2.0 / 3.0) ) * ( F - value (1.0 / 3.0) *  I_C * F_T )
+						      ) * 
+						    transpose( F ),  0 ), phi_i)
+		  ) >> sigma_1;
+    sigma_1->globalAssemble();
+
+    evaluateNode( elements ( this->M_dispETFESpace->mesh() ),
+		  evalQuad,
+		  this->M_dispETFESpace,
+		  meas_K *  dot ( vectorFromMatrix( ( 1 / J )*
+						    ( value (1.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [2] ) * ( pow ( J , 2.0) - J + log (J) ) * F_T + //vol
+						      value ( 2.0 ) * parameter ( (* (this->M_vectorsParameters) ) [0] ) * ( pow( J, -2.0/3.0) * I_C - value (3.0) ) *
+						      exp ( parameter ( (* (this->M_vectorsParameters) ) [1] ) * ( pow( J, -2.0/3.0 ) * I_C - value (3.0) ) * ( pow( J, -2.0/3.0 ) * I_C - value (3.0) ) ) *
+						      pow ( J, (-2.0 / 3.0) ) * ( F - value (1.0 / 3.0) * I_C * F_T )
+						      ) *
+						    transpose( F ) , 1 ), phi_i)
+		  ) >> sigma_2;
+    sigma_2->globalAssemble();
+
+    evaluateNode( elements ( this->M_dispETFESpace->mesh() ),
+		  evalQuad,
+		  this->M_dispETFESpace,
+		  meas_K *  dot ( vectorFromMatrix( ( 1 / J )*
+						    ( value (1.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [2] ) * ( pow ( J , 2.0) - J + log (J) ) * F_T + //vol
+						      value ( 2.0 ) * parameter ( (* (this->M_vectorsParameters) ) [0] ) * ( pow( J, -2.0/3.0) * I_C - value (3.0) ) *
+						      exp ( parameter ( (* (this->M_vectorsParameters) ) [1] ) * ( pow( J, -2.0/3.0 ) * I_C - value (3.0) ) * ( pow( J, -2.0/3.0 ) * I_C - value (3.0) ) ) *
+						      pow ( J, (-2.0 / 3.0) ) * ( F - value (1.0 / 3.0)  * I_C * F_T )
+						      ) * 
+						    transpose( F ) , 2 ), phi_i)
+		  ) >> sigma_3;
+    sigma_3->globalAssemble();
+
 }
 
 template <typename MeshType>
