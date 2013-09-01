@@ -69,6 +69,9 @@
 #include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
 #include <lifev/structure/solver/StructuralOperator.hpp>
 
+#include <lifev/structure/solver/WallTensionEstimatorData.hpp>
+#include <lifev/structure/solver/WallTensionEstimator.hpp>
+
 #include <lifev/structure/fem/ExpressionDefinitions.hpp>
 
 #include <lifev/structure/solver/isotropic/ExponentialMaterialNonLinear.hpp>
@@ -263,6 +266,10 @@ Structure::run3d()
 
     dataStructure->showMe();
 
+    //! Parameters for the analysis
+    boost::shared_ptr<WallTensionEstimatorData> tensionData (new WallTensionEstimatorData( ) );
+    tensionData->setup (dataFile);
+
     //! Read and partition mesh
     MeshData             meshData;
     meshData.setup (dataFile, "solid/space_discretization");
@@ -416,7 +423,8 @@ Structure::run3d()
     vectorPtr_Type sigma_1;
     vectorPtr_Type sigma_2;
     vectorPtr_Type sigma_3;
-    
+    vectorPtr_Type solidTensions;    
+
     // Vector for the eigenvalues
     vectorPtr_Type vectorEigenvalues;
 
@@ -429,6 +437,7 @@ Structure::run3d()
 
     disp.reset( new vector_Type( dFESpace->map() ) );
     dispRead.reset( new vector_Type( dFESpace->map() ) );
+    solidTensions.reset( new vector_Type ( dFESpace->map() ) );
 
     sigma_1.reset( new vector_Type( dFESpace->map() ) );
     sigma_2.reset( new vector_Type( dFESpace->map() ) );
@@ -450,6 +459,10 @@ Structure::run3d()
 
     exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "vectorEigenvalues",
                               dFESpace, vectorEigenvalues, UInt (0) );
+
+    exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "vonMises", 
+			    dFESpace, solidTensions, UInt (0) );
+
 
     if( !dataStructure->constitutiveLaw().compare("anisotropic") )
       {
@@ -495,6 +508,19 @@ Structure::run3d()
     std::vector<Real> weights (dFESpace->fe().nbFEDof(), wQuad);
     fakeQuadratureRule.setDimensionShape ( shapeDimension (dFESpace->refFE().shape() ), dFESpace->refFE().shape() );
     fakeQuadratureRule.setPoints (coords, weights);
+
+    // Creation of the original class
+    //! 1. Constructor of the class to compute the tensions
+    WallTensionEstimator< mesh_Type > tensionsClass;
+
+    //! 2. Its setup
+    tensionsClass.setup (dataStructure,
+			 tensionData,
+			 dFESpace,
+			 dETFESpace,
+			 parameters->comm,
+			 1);
+
 
     //fakeQuadratureRule.showMe();
     using namespace ExpressionAssembly;
@@ -552,16 +578,21 @@ Structure::run3d()
 	std::cout << "Current reading: " << iterationString << std::endl;
 
         /*!Definition of the ExporterData, used to load the solution inside the previously defined vectors*/
-        // LifeV::ExporterData<mesh_Type> solutionDispl  (LifeV::ExporterData<mesh_Type>::VectorField,nameField + "." + iterationString, 
-	// 					       dFESpace, disp, UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
+	LifeV::ExporterData<mesh_Type> solutionDispl  (LifeV::ExporterData<mesh_Type>::VectorField,nameField + "." + iterationString, 
+						       dFESpace, disp, UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
 
-	// test to debug!
-	dFESpace->interpolate( static_cast<solidFESpace_Type::function_Type> ( displacementVenantKirchhoffPenalized ),
-			       *disp, 0.0 );
-
+	// Computing the tensions with the old technique.
 
         //Read the variable
-        //M_importer->readVariable (solutionDispl);
+        M_importer->readVariable (solutionDispl);
+
+        tensionsClass.setDisplacement (*disp);
+
+        //Perform the analysis
+        tensionsClass.analyzeTensions();
+
+        *solidTensions = tensionsClass.principalStresses();
+
 
 	*dispRead = *disp;
 
