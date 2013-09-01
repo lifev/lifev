@@ -85,6 +85,8 @@ public:
 
     typedef MatrixSmall<3, 3>                         matrixSmall_Type;
 
+    typedef typename super::tensorF_Type               tensorF_Type;
+
     //@}
 
     //! @name Constructor &  Destructor
@@ -461,7 +463,58 @@ void VenantKirchhoffMaterialLinear<MeshType>::computeCauchyStressTensor ( const 
 									  vectorPtr_Type sigma_3) 
   
 {
-  ASSERT( 2 < 0, "This method has to be implemented for the linear elastic law");
+
+    using namespace ExpressionAssembly;
+
+    MatrixSmall<3, 3> identityZero;
+
+    // Defining the div of u
+    identityZero (0, 0) = 0.0; identityZero (0, 1) = 0.0; identityZero (0, 2) = 0.0;
+    identityZero (1, 0) = 0.0; identityZero (1, 1) = 0.0; identityZero (1, 2) = 0.0;
+    identityZero (2, 0) = 0.0; identityZero (2, 1) = 0.0; identityZero (2, 2) = 0.0;
+
+
+    MatrixSmall<3, 3> identity;
+
+    // Defining the div of u
+    identity (0, 0) = 1.0; identity (0, 1) = 0.0; identity (0, 2) = 0.0;
+    identity (1, 0) = 0.0; identity (1, 1) = 1.0; identity (1, 2) = 0.0;
+    identity (2, 0) = 0.0; identity (2, 1) = 0.0; identity (2, 2) = 1.0;
+
+    // Definition of F
+    tensorF_Type F = ExpressionDefinitions::deformationGradient( this->M_dispETFESpace,  *disp, this->M_offset, identityZero );
+
+    ExpressionTrace<tensorF_Type> Div( F );
+
+    evaluateNode( elements ( this->M_dispETFESpace->mesh() ),
+		  evalQuad,
+		  this->M_dispETFESpace,
+		  meas_K *  dot ( vectorFromMatrix(  parameter ( (* (this->M_vectorsParameters) ) [0]) * Div * identity +
+						     value ( 2.0 ) * parameter ( (* (this->M_vectorsParameters) ) [1]) * sym (grad ( this->M_dispETFESpace,  *disp, this->M_offset ) )
+						    ,  0 ), phi_i)
+		  ) >> sigma_1;
+    sigma_1->globalAssemble();
+
+    evaluateNode( elements ( this->M_dispETFESpace->mesh() ),
+		  evalQuad,
+		  this->M_dispETFESpace,
+		  meas_K *  dot ( vectorFromMatrix(  parameter ( (* (this->M_vectorsParameters) ) [0]) * Div * identity +
+						     value ( 2.0 ) * parameter ( (* (this->M_vectorsParameters) ) [1]) * sym (grad ( this->M_dispETFESpace,  *disp, this->M_offset ) )
+						   , 1 ), phi_i)
+		  ) >> sigma_2;
+    sigma_2->globalAssemble();
+
+    evaluateNode( elements ( this->M_dispETFESpace->mesh() ),
+		  evalQuad,
+		  this->M_dispETFESpace,
+		  meas_K *  dot ( vectorFromMatrix(  parameter ( (* (this->M_vectorsParameters) ) [0]) * Div * identity +
+						     value ( 2.0 ) * parameter ( (* (this->M_vectorsParameters) ) [1]) * sym (grad ( this->M_dispETFESpace,  *disp, this->M_offset ) )
+						   , 2 ), phi_i)
+		  ) >> sigma_3;
+    sigma_3->globalAssemble();
+
+    //+
+    //				     
 }
 
 
