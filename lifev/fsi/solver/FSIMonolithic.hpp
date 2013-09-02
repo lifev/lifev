@@ -227,26 +227,7 @@ public:
     {
         if (M_BCh_u.get() )
         {
-            std::cout << "Printing before" << std::endl;
-            for ( ID i = 0; i < ( *M_BCh_u ).size(); ++i )
-            {
-                if ( ( ( *M_BCh_u )[i]).isDataAVector() )
-                {
-                    std::cout << "Size:" <<  ( ( *M_BCh_u )[i]).pointerToBCVector()->rhsVector().map().mapSize() << std::endl;
-                }
-            }
-
             M_BCh_u->merge (*M_BCh_flux);
-
-            std::cout << "Printing after" << std::endl;
-            for ( ID i = 0; i < ( *M_BCh_u ).size(); ++i )
-            {
-                if ( ( ( *M_BCh_u )[i]).isDataAVector() )
-                {
-                    std::cout << "Size:" <<  ( ( *M_BCh_u )[i]).pointerToBCVector()->rhsVector().map().mapSize() << std::endl;
-                }
-            }
-
         }
         else // in this case only fluxes are imposed on the fluid
         {
@@ -364,25 +345,7 @@ public:
 
     void setFluidBC     ( const fluidBchandlerPtr_Type& bc_fluid )
     {
-        std::cout << "Entrance" << std::endl;
-        for ( ID i = 0; i < ( *bc_fluid ).size(); ++i )
-        {
-            if ( ( ( *bc_fluid )[i]).isDataAVector() )
-            {
-                std::cout << "Size:" <<  ( ( *bc_fluid )[i]).pointerToBCVector()->rhsVector().map().mapSize() << std::endl;
-            }
-        }
-
         super_Type::setFluidBC (bc_fluid);
-
-        std::cout << "After FSIOperator" << std::endl;
-        for ( ID i = 0; i < ( *M_BCh_u ).size(); ++i )
-        {
-            if ( ( ( *M_BCh_u )[i]).isDataAVector() )
-            {
-                std::cout << "Size:" <<  ( ( *M_BCh_u )[i]).pointerToBCVector()->rhsVector().map().mapSize() << std::endl;
-            }
-        }
 
         if (M_BChs.size() )
         {
@@ -399,8 +362,6 @@ public:
             M_monolithicMatrix->setConditions (M_BChs);
             M_precPtr->setConditions (M_BChs);
         }
-
-        std::cout << "This method works! " << std::endl;
 
     }
 

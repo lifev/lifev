@@ -238,16 +238,6 @@ public:
             // resistanceBC.vector() gives back the vector we are considering.
             BCh_fluidM->addBC ("out3", OUTLET, Resistance, Full, IR1.vector() , 3);
 
-        std::cout << "Entrance" << std::endl;
-        for ( ID i = 0; i < ( *BCh_fluidM ).size(); ++i )
-        {
-            if ( ( ( *BCh_fluidM )[i]).isDataAVector() )
-            {
-                std::cout << "Size:" <<  ( ( *BCh_fluidM )[i]).pointerToBCVector()->rhsVector().map().mapSize() << std::endl;
-            }
-        }
-
-
         M_fsi->setFluidBC ( BCh_fluidM );
         M_fsi->setHarmonicExtensionBC ( BCh_harmonicExtension ( *M_fsi->FSIOper( ) ) );
 

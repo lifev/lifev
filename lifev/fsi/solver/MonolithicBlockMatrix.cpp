@@ -232,17 +232,6 @@ void MonolithicBlockMatrix::applyBoundaryConditions (const Real& time, vectorPtr
 void MonolithicBlockMatrix::applyBoundaryConditions (const Real& time, vectorPtr_Type& rhs, const UInt block)
 {
 
-    std::cout << "Block: " <<  block << std::endl;
-    ( *super_Type::M_bch[block] ).showMe();
-
-    for ( ID i = 0; i < ( *super_Type::M_bch[block] ).size(); ++i )
-    {
-        if ( ( ( *super_Type::M_bch[block] )[i]).isDataAVector() )
-        {
-            std::cout << "Size:" <<  ( ( *super_Type::M_bch[block] )[i]).pointerToBCVector()->rhsVector().map().mapSize() << std::endl;
-        }
-    }
-
     bcManage ( *M_globalMatrix , *rhs, *super_Type::M_FESpace[block]->mesh(), super_Type::M_FESpace[block]->dof(), *super_Type::M_bch[block], super_Type::M_FESpace[block]->feBd(), 1., time);
 }
 

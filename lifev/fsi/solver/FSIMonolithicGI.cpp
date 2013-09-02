@@ -147,17 +147,12 @@ FSIMonolithicGI::evalResidual ( vector_Type&       res,
 
     *M_rhsFull = *M_rhs;
 
-    std::cout << "Printing!" << std::endl;
-
     M_monolithicMatrix->setRobin ( M_robinCoupling, M_rhsFull );
     M_precPtr->setRobin (M_robinCoupling, M_rhsFull);
 
     if (!M_monolithicMatrix->set() )
     {
         M_BChs.push_back (M_BCh_d);
-
-        std::cout << "Here the class has something wrong!" << std::endl;
-
         M_BChs.push_back (M_BCh_u);
 
         M_FESpaces.push_back (M_dFESpace);
@@ -185,8 +180,6 @@ FSIMonolithicGI::evalResidual ( vector_Type&       res,
     M_monolithicMatrix->blockAssembling();
     super_Type::checkIfChangedFluxBC ( M_monolithicMatrix );
 
-    int n;
-    std::cin>>n;
     // formulation matrix * vector (i.e. linear elastic )
     // todo: pass to boolean for nonlinear structures
     if ( ! (M_data->dataSolid()->lawType().compare ("linear") ) )
