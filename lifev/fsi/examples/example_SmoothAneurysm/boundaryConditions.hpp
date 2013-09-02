@@ -119,7 +119,8 @@ FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFlux (bool /*isOpen=true*/)
     return BCh_fluid;
 }
 
-FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFluid (FSIOperator& _oper, bool const& /*isOpen=true*/)
+FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFluid ( FSIOperator& _oper, bool const& /*isOpen=true*/,
+                                                          ImplicitResistance& resistanceBC )
 {
     // Boundary conditions for the fluid velocity
     debugStream ( 10000 ) << "Boundary condition for the fluid\n";
@@ -138,14 +139,6 @@ FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFluid (FSIOperator& _oper, boo
 
     BCFunctionBase out_press3 (ResistanceBCs::outPressure0);
 
-    // Imposing resistance BCs
-    FSIOperator::vectorPtr_Type implicitResistance( new FSIOperator::vector_Type( _oper.uFESpacePtr()->map(), Repeated ) );
-    implicitResistance->epetraVector().PutScalar(0.0);
-
-    BCVector bcVectorResistance;
-    bcVectorResistance.setRhsVector( *implicitResistance,_oper.uFESpacePtr()->dof().numTotalDof(),1);
-    bcVectorResistance.setResistanceCoeff( 100000 );
-
     BCFunctionBase InletVect (aneurismFluxInVectorial);
     //BCFunctionBase bcfw0 (w0);
 
@@ -154,7 +147,9 @@ FSIOperator::fluidBchandlerPtr_Type BCh_monolithicFluid (FSIOperator& _oper, boo
     BCh_fluid->addBC ("InFlow" , 20,  EssentialVertices, Full, bcf, 3);
 
     //    BCh_fluid->addBC ("out3", OUTLET, Natural,  Normal, out_press3);
-    BCh_fluid->addBC ("out3", OUTLET, Resistance, Full, bcVectorResistance, 3);
+
+    // resistanceBC.vector() gives back the vector we are considering.
+    BCh_fluid->addBC ("out3", OUTLET, Resistance, Full, resistanceBC.vector() , 3);
 
 
     return BCh_fluid;

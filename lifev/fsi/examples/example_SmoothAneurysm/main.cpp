@@ -138,6 +138,7 @@ public:
     typedef LifeV::FactorySingleton<LifeV::Factory<LifeV::FSIOperator,  std::string> > FSIFactory_Type;
 
     typedef LifeV::ResistanceBCs                                resistanceBCs_Type;
+    typedef LifeV::ImplicitResistance                        implicitResistance_Type;
 
 
     /*!
@@ -153,6 +154,7 @@ public:
         M_Tstart (0.),
         M_tolSave (1),
         M_saveEvery (1),
+        IR1( ),
         M_comm( comm )
     {
         using namespace LifeV;
@@ -209,6 +211,9 @@ public:
 
         MPI_Barrier ( MPI_COMM_WORLD );
 
+        Real resistance = data_file ("fluid/physics/resistance", 0.0);
+        IR1.setQuantities( *(M_fsi->FSIOper()), resistance );
+
 #ifdef DEBUG
         debugStream ( 10000 ) << "Setting up the BC \n";
 #endif
@@ -216,7 +221,34 @@ public:
         M_fsi->setSolidBC ( BCh_monolithicSolid ( *M_fsi->FSIOper( ) ) );
 
         M_fsi->setup (/*data_file*/);
-        M_fsi->setFluidBC ( BCh_monolithicFluid ( *M_fsi->FSIOper( ), true ) );
+
+
+            FSIOperator::fluidBchandlerPtr_Type BCh_fluidM ( new FSIOperator::fluidBchandler_Type );
+
+            BCFunctionBase bcf      (fZero);
+            BCFunctionBase in_flow  (uInterpolated);
+            BCFunctionBase pressureEpsilon  (epsilon);
+
+            BCFunctionBase InletVect (aneurismFluxInVectorial);
+
+            //Inlets
+            BCh_fluidM->addBC ("InFlow" , INLET,  EssentialVertices, Full, InletVect, 3);
+            BCh_fluidM->addBC ("InFlow" , 20,  EssentialVertices, Full, bcf, 3);
+
+            // resistanceBC.vector() gives back the vector we are considering.
+            BCh_fluidM->addBC ("out3", OUTLET, Resistance, Full, IR1.vector() , 3);
+
+        std::cout << "Entrance" << std::endl;
+        for ( ID i = 0; i < ( *BCh_fluidM ).size(); ++i )
+        {
+            if ( ( ( *BCh_fluidM )[i]).isDataAVector() )
+            {
+                std::cout << "Size:" <<  ( ( *BCh_fluidM )[i]).pointerToBCVector()->rhsVector().map().mapSize() << std::endl;
+            }
+        }
+
+
+        M_fsi->setFluidBC ( BCh_fluidM );
         M_fsi->setHarmonicExtensionBC ( BCh_harmonicExtension ( *M_fsi->FSIOper( ) ) );
 
         dynamic_cast<LifeV::FSIMonolithic*> (M_fsi->FSIOper().get() )->mergeBCHandlers();
@@ -308,10 +340,9 @@ public:
         // Initializing either resistance of absorbing BCs
         // At the moment, the resistance BCs are applied explicitly in order to limit the ill-conditioning
         // of the linear system
-        Real resistance = data_file ("fluid/physics/resistance", 0.0);
         Real hydrostatic = data_file ("fluid/physics/hydrostatic", 0.0);
 
-        R1.initParameters( OUTLET, resistance, hydrostatic, "outlet-3" );
+        //R1.initParameters( OUTLET, resistance, hydrostatic, "outlet-3" );
         //FC2.initParameters ( *M_fsi->FSIOper(),  OUTLET);
 
         M_data->dataFluid()->dataTime()->setInitialTime (  M_data->dataFluid()->dataTime()->initialTime() );
@@ -376,7 +407,7 @@ public:
 
             fluidSolution = *M_velAndPressure;
 
-            R1.renewParameters( M_fsi->FSIOper()->fluid(), fluidSolution, M_data->dataFluid()->dataTime()->time() );
+            //R1.renewParameters( M_fsi->FSIOper()->fluid(), fluidSolution, M_data->dataFluid()->dataTime()->time() );
             //FC2.renewParameters ( *M_fsi, OUTLET, fluidSolution );
 
             boost::timer _timer;
@@ -434,6 +465,7 @@ private:
 
     //    LifeV::FlowConditions FC2;
     resistanceBCs_Type R1;
+    implicitResistance_Type IR1;
 
     LifeV::Real    M_Tstart;
 

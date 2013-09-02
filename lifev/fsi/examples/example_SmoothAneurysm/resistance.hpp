@@ -43,6 +43,8 @@
 #include <lifev/navier_stokes/solver/OseenSolverShapeDerivative.hpp>
 #include <lifev/core/mesh/RegionMesh.hpp>
 #include <lifev/core/array/VectorEpetra.hpp>
+#include <lifev/core/fem/FESpace.hpp>
+#include <lifev/fsi/solver/FSIOperator.hpp>
 /*!
  * \class Outflow
  * \brief 2D/3D Cylinder Simulation class
@@ -115,5 +117,29 @@ private:
 
     static std::vector<Real> outputVector;
 };
+
+class ImplicitResistance
+{
+public:
+
+    ImplicitResistance();
+
+    void setQuantities ( FSIOperator&  _oper, const Real resistance );
+
+    BCVector& vector()
+    {
+        return bcVectorResistance;
+    }
+
+private:
+
+    BCVector bcVectorResistance;
+
+    Real coefficient;
+    boost::shared_ptr<VectorEpetra> fluidVector;
+};
+
+
+
 }
 #endif /* __RESISTANCE_H */
