@@ -189,7 +189,7 @@ public:
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
     void computeStiffness ( const vector_Type& disp,
-			    const UInt iter, 
+                            const UInt iter,
                             Real factor,
                             const dataPtr_Type& dataMaterial,
                             const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
@@ -702,7 +702,7 @@ void HolzapfelMaterialNonLinear<MeshType>::updateNonLinearJacobianTerms ( matrix
 
 template <typename MeshType>
 void HolzapfelMaterialNonLinear<MeshType>::computeStiffness ( const vector_Type& disp,
-							      const UInt /*iter*/, 
+							      const UInt /*iter*/,
 							      Real /*factor*/,
 							      const dataPtr_Type& dataMaterial,
 							      const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
@@ -828,13 +828,13 @@ void HolzapfelMaterialNonLinear<MeshType>::computeLocalFirstPiolaKirchhoffTensor
 
 template <typename MeshType>
 void HolzapfelMaterialNonLinear<MeshType>::computeCauchyStressTensor ( const vectorPtr_Type disp,
-								       const QuadratureRule& evalQuad,
-								       vectorPtr_Type sigma_1,
-								       vectorPtr_Type sigma_2,
-								       vectorPtr_Type sigma_3)
+                                                                       const QuadratureRule& evalQuad,
+                                                                       vectorPtr_Type sigma_1,
+                                                                       vectorPtr_Type sigma_2,
+                                                                       vectorPtr_Type sigma_3)
 {
 
-  using namespace ExpressionAssembly;
+    using namespace ExpressionAssembly;
 
     // Definition of F
     tensorF_Type F = ExpressionDefinitions::deformationGradient( this->M_dispETFESpace,  *disp, this->M_offset, this->M_identity );
@@ -852,7 +852,7 @@ void HolzapfelMaterialNonLinear<MeshType>::computeCauchyStressTensor ( const vec
     minusT_Type  F_T = ExpressionDefinitions::minusT( F );
 
     for( UInt i(0); i < this->M_vectorInterpolated.size() ; i++ )
-      {
+    {
           // As in other classes, the specialization of the MapType = MapEpetra makes this expression
           // not always usable. When other maps will be available in LifeV, the class should be re-templated.
 
@@ -860,97 +860,96 @@ void HolzapfelMaterialNonLinear<MeshType>::computeCauchyStressTensor ( const vec
           // Definitions of the quantities which depend on the fiber directions e.g. I_4^i
           interpolatedValue_Type fiberIth = ExpressionDefinitions::interpolateFiber( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ] ) );
 
-  	  // Definition of the tensor M = ithFiber \otimes ithFiber
-	  // At the moment, it's automatic that the method constructs the expression M = ithFiber \otimes ithFiber
-	  // For a more general case, the file ExpressionDefinitions.hpp should be changed
-	  outerProduct_Type Mith = ExpressionDefinitions::fiberTensor( fiberIth );
+          // Definition of the tensor M = ithFiber \otimes ithFiber
+          // At the moment, it's automatic that the method constructs the expression M = ithFiber \otimes ithFiber
+          // For a more general case, the file ExpressionDefinitions.hpp should be changed
+          outerProduct_Type Mith = ExpressionDefinitions::fiberTensor( fiberIth );
 
           // Definition of the fourth invariant : I_4^i = C:Mith
-	  stretch_Type IVith = ExpressionDefinitions::fiberStretch( C, Mith );
+          stretch_Type IVith = ExpressionDefinitions::fiberStretch( C, Mith );
 
           // Definition of the fouth isochoric invariant : J^(-2.0/3.0) * I_4^i
-	  isochoricStretch_Type IVithBar = ExpressionDefinitions::isochoricFourthInvariant( Jel, IVith );
+          isochoricStretch_Type IVithBar = ExpressionDefinitions::isochoricFourthInvariant( Jel, IVith );
 
           // First term:
           // 2 alpha_i J^(-2.0/3.0) ( \bar{I_4} - 1 ) exp( gamma_i * (\bar{I_4} - 1)^2 ) * F M : \grad phi_i
           // where alpha_i and gamma_i are the fiber parameters and M is the 2nd order tensor of type f_i \otimes \ f_i
 
-	  evaluateNode( elements( this->M_dispETFESpace->mesh() ),
-			evalQuad,
-			this->M_dispETFESpace,
-			meas_K * dot( vectorFromMatrix( ( 1 / J ) *
-							( atan( IVithBar - value(1.0) , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  ) *
-							  value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * Jel * ( IVithBar - value(1.0) ) *
-							  exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value(1.0) ) * ( IVithBar- value(1.0) )  ) *
-							  F * Mith ) *
-							transpose(F) , 0 ), phi_i )
-                      ) >> sigma_1;
-	  
+          evaluateNode( elements( this->M_dispETFESpace->mesh() ),
+                        evalQuad,
+                        this->M_dispETFESpace,
+                        meas_K * dot( vectorFromMatrix( ( 1 / J ) *
+                                                        ( atan( IVithBar - value(1.0) , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  ) *
+                                                          value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * Jel * ( IVithBar - value(1.0) ) *
+                                                          exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value(1.0) ) * ( IVithBar- value(1.0) )  ) *
+                                                          F * Mith ) *
+                                                        transpose(F) , 0 ), phi_i )
+                        ) >> sigma_1;
+
           // Second term:
           // 2 alpha_i J^(-2.0/3.0) ( \bar{I_4} - 1 ) exp( gamma_i * (\bar{I_4} - 1)^2 ) * ( 1.0/3.0 * I_4 ) F^-T : \grad phi_i
           // where alpha_i and gamma_i are the fiber parameters and M is the 2nd order tensor of type f_i \otimes \ f_i
-	  evaluateNode( elements( this->M_dispETFESpace->mesh() ),
-			evalQuad,
-			this->M_dispETFESpace,
-			meas_K * dot( vectorFromMatrix( ( 1 / J ) *
-							( atan( IVithBar - value(1.0) , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  ) *
-							  value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * Jel * ( IVithBar - value(1.0) ) *
-							  exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value(1.0) ) * ( IVithBar- value(1.0) )  ) *
-							  value( -1.0/3.0 ) * IVith *
-							  F_T ) *
-							transpose(F) , 0 ), phi_i )
-                      ) >> sigma_1;
-	  sigma_1->globalAssemble();
+          evaluateNode( elements( this->M_dispETFESpace->mesh() ),
+                        evalQuad,
+                        this->M_dispETFESpace,
+                        meas_K * dot( vectorFromMatrix( ( 1 / J ) *
+                                                        ( atan( IVithBar - value(1.0) , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  ) *
+                                                          value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * Jel * ( IVithBar - value(1.0) ) *
+                                                          exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value(1.0) ) * ( IVithBar- value(1.0) )  ) *
+                                                          value( -1.0/3.0 ) * IVith *
+                                                          F_T ) *
+                                                        transpose(F) , 0 ), phi_i )
+                        ) >> sigma_1;
+          sigma_1->globalAssemble();
 
-	  evaluateNode( elements( this->M_dispETFESpace->mesh() ),
-			evalQuad,
-			this->M_dispETFESpace,
-			meas_K * dot( vectorFromMatrix( ( 1 / J ) *
-							( atan( IVithBar - value(1.0) , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  ) *
-							  value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * Jel * ( IVithBar - value(1.0) ) *
-							  exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value(1.0) ) * ( IVithBar- value(1.0) )  ) *
-							  F * Mith ) *
-							transpose(F) , 1 ), phi_i )
-                      ) >> sigma_2;
+          evaluateNode( elements( this->M_dispETFESpace->mesh() ),
+                        evalQuad,
+                        this->M_dispETFESpace,
+                        meas_K * dot( vectorFromMatrix( ( 1 / J ) *
+                                                        ( atan( IVithBar - value(1.0) , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  ) *
+                                                          value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * Jel * ( IVithBar - value(1.0) ) *
+                                                          exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value(1.0) ) * ( IVithBar- value(1.0) )  ) *
+                                                          F * Mith ) *
+                                                        transpose(F) , 1 ), phi_i )
+                        ) >> sigma_2;
 
-	  evaluateNode( elements( this->M_dispETFESpace->mesh() ),
-			evalQuad,
-			this->M_dispETFESpace,
-			meas_K * dot( vectorFromMatrix( ( 1 / J ) *
-							( atan( IVithBar - value(1.0) , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  ) *
-							  value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * Jel * ( IVithBar - value(1.0) ) *
-							  exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value(1.0) ) * ( IVithBar- value(1.0) )  ) *
-							  value( -1.0/3.0 ) * IVith *
-							  F_T ) *
-							transpose(F) , 1 ), phi_i )
-                      ) >> sigma_2;
-	  sigma_2->globalAssemble();
+          evaluateNode( elements( this->M_dispETFESpace->mesh() ),
+                        evalQuad,
+                        this->M_dispETFESpace,
+                        meas_K * dot( vectorFromMatrix( ( 1 / J ) *
+                                                        ( atan( IVithBar - value(1.0) , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  ) *
+                                                          value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * Jel * ( IVithBar - value(1.0) ) *
+                                                          exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value(1.0) ) * ( IVithBar- value(1.0) )  ) *
+                                                          value( -1.0/3.0 ) * IVith *
+                                                          F_T ) *
+                                                        transpose(F) , 1 ), phi_i )
+                        ) >> sigma_2;
+          sigma_2->globalAssemble();
 
-	  evaluateNode( elements( this->M_dispETFESpace->mesh() ),
-			evalQuad,
-			this->M_dispETFESpace,
-			meas_K * dot( vectorFromMatrix( ( 1 / J ) *
-							( atan( IVithBar - value(1.0) , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  ) *
-							  value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * Jel * ( IVithBar - value(1.0) ) *
-							  exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value(1.0) ) * ( IVithBar- value(1.0) )  ) *
-							  F * Mith ) *
-							transpose(F) ,  2 ), phi_i )
-                      ) >> sigma_3;
+          evaluateNode( elements( this->M_dispETFESpace->mesh() ),
+                        evalQuad,
+                        this->M_dispETFESpace,
+                        meas_K * dot( vectorFromMatrix( ( 1 / J ) *
+                                                        ( atan( IVithBar - value(1.0) , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  ) *
+                                                          value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * Jel * ( IVithBar - value(1.0) ) *
+                                                          exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value(1.0) ) * ( IVithBar- value(1.0) )  ) *
+                                                          F * Mith ) *
+                                                        transpose(F) ,  2 ), phi_i )
+                        ) >> sigma_3;
 
-	  evaluateNode( elements( this->M_dispETFESpace->mesh() ),
-			evalQuad,
-			this->M_dispETFESpace,
-			meas_K * dot( vectorFromMatrix( ( 1 / J ) *
-							( atan( IVithBar - value(1.0) , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  ) *
-							  value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * Jel * ( IVithBar - value(1.0) ) *
-							  exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value(1.0) ) * ( IVithBar- value(1.0) )  ) *
-							  value( -1.0/3.0 ) * IVith *
-							  F_T ) *
-							transpose(F) , 2 ), phi_i )
-                      ) >> sigma_3;
-	  sigma_3->globalAssemble();
-      }
-
+          evaluateNode( elements( this->M_dispETFESpace->mesh() ),
+                        evalQuad,
+                        this->M_dispETFESpace,
+                        meas_K * dot( vectorFromMatrix( ( 1 / J ) *
+                                                        ( atan( IVithBar - value(1.0) , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  ) *
+                                                          value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * Jel * ( IVithBar - value(1.0) ) *
+                                                          exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value(1.0) ) * ( IVithBar- value(1.0) )  ) *
+                                                          value( -1.0/3.0 ) * IVith *
+                                                          F_T ) *
+                                                        transpose(F) , 2 ), phi_i )
+                        ) >> sigma_3;
+          sigma_3->globalAssemble();
+    }
 
 }
 

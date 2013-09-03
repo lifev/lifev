@@ -1148,7 +1148,8 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeLocalFirstPiol
                                                                                                    const UInt marker)
 {
 
-  // It can be done using the evaluatNodal framework
+    // It can be done using the evaluateNodal framework that has been shown to work
+    // for the isotropic laws!
 
 }
 

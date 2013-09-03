@@ -196,7 +196,7 @@ public:
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
     void computeStiffness ( const vector_Type& disp,
-			    const UInt iter, 
+			    const UInt iter,
                             Real factor,
                             const dataPtr_Type& dataMaterial,
                             const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
@@ -771,9 +771,8 @@ void DistributedHolzapfelMaterialNonLinear<MeshType>::computeLocalFirstPiolaKirc
                                                                                      const std::vector<Real>& invariants,
                                                                                      const UInt marker)
 {
-
-  // Still Need to Define P
-
+    // It can be done using the evaluateNodal framework that has been shown to work
+    // for the isotropic laws!
 }
 
 template <typename MeshType>
