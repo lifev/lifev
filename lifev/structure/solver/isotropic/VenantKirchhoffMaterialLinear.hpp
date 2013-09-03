@@ -418,8 +418,8 @@ template <typename MeshType>
 void
 VenantKirchhoffMaterialLinear<MeshType>::computeLocalFirstPiolaKirchhoffTensor ( Epetra_SerialDenseMatrix& firstPiola,
 										 const Epetra_SerialDenseMatrix& tensorF,
-										 const Epetra_SerialDenseMatrix& /*cofactorF*/,
-										 const std::vector<Real>& /*invariants*/,
+										 const Epetra_SerialDenseMatrix& cofactorF,
+										 const std::vector<Real>& invariants,
 										 const UInt marker)
 {
 
@@ -430,12 +430,13 @@ VenantKirchhoffMaterialLinear<MeshType>::computeLocalFirstPiolaKirchhoffTensor (
     Epetra_SerialDenseMatrix copyF (tensorF);
     Epetra_SerialDenseMatrix identity (nDimensions, nDimensions);
 
-    //Computation gradient of u and setting the identity tensor
-    for ( UInt icoor = 0; icoor < nDimensions; icoor++ )
-    {
-        copyF (icoor, icoor) -= 1.0;
-        identity (icoor, icoor) = 1;
-    }
+    copyF (0,0) += -1.0;
+    copyF (1,1) += -1.0;
+    copyF (2,2) += -1.0;
+
+    identity (0,0) = 1.0;
+    identity (1,1) = 1.0;
+    identity (2,2) = 1.0;
 
     Real divergenceU ( copyF (0, 0) + copyF (1, 1) + copyF (2, 2) ); //DivU = tr(copyF)
     Real coefIdentity (0.0);
@@ -453,26 +454,30 @@ VenantKirchhoffMaterialLinear<MeshType>::computeLocalFirstPiolaKirchhoffTensor (
 
     firstPiola = identity;
     firstPiola += secondTerm;
+
+    // Here we multiply the Piola tensor for J and F^-T because in the WallTensionEstimator class
+    // the transformation from the Piola to the Cauchy stress tensor is always done while for this model
+    // the two tensors coincide
+    firstPiola.Scale( invariants[3] );
+
+    Epetra_SerialDenseMatrix tensorP (nDimensions, nDimensions);
+
+    tensorP.Multiply ('N', 'N', 1.0, firstPiola, cofactorF, 0.0); //see Epetra_SerialDenseMatrix
+
+    firstPiola.Scale(0.0);
+    firstPiola += tensorP;
 }
 
 template <typename MeshType>
 void VenantKirchhoffMaterialLinear<MeshType>::computeCauchyStressTensor ( const vectorPtr_Type disp,
-									  const QuadratureRule& evalQuad,
-									  vectorPtr_Type sigma_1,
-									  vectorPtr_Type sigma_2,
-									  vectorPtr_Type sigma_3) 
-  
+                                                                          const QuadratureRule& evalQuad,
+                                                                          vectorPtr_Type sigma_1,
+                                                                          vectorPtr_Type sigma_2,
+                                                                          vectorPtr_Type sigma_3)
+
 {
 
     using namespace ExpressionAssembly;
-
-    MatrixSmall<3, 3> identityZero;
-
-    // Defining the div of u
-    identityZero (0, 0) = 0.0; identityZero (0, 1) = 0.0; identityZero (0, 2) = 0.0;
-    identityZero (1, 0) = 0.0; identityZero (1, 1) = 0.0; identityZero (1, 2) = 0.0;
-    identityZero (2, 0) = 0.0; identityZero (2, 1) = 0.0; identityZero (2, 2) = 0.0;
-
 
     MatrixSmall<3, 3> identity;
 
@@ -481,40 +486,46 @@ void VenantKirchhoffMaterialLinear<MeshType>::computeCauchyStressTensor ( const 
     identity (1, 0) = 0.0; identity (1, 1) = 1.0; identity (1, 2) = 0.0;
     identity (2, 0) = 0.0; identity (2, 1) = 0.0; identity (2, 2) = 1.0;
 
-    // Definition of F
-    tensorF_Type F = ExpressionDefinitions::deformationGradient( this->M_dispETFESpace,  *disp, this->M_offset, identityZero );
-
-    ExpressionTrace<tensorF_Type> Div( F );
+    ExpressionTrace<ExpressionInterpolateGradient<MeshType, MapEpetra, 3, 3> > Div( grad( this->M_dispETFESpace,  *disp, this->M_offset ) );
 
     evaluateNode( elements ( this->M_dispETFESpace->mesh() ),
-		  evalQuad,
-		  this->M_dispETFESpace,
-		  meas_K *  dot ( vectorFromMatrix(  parameter ( (* (this->M_vectorsParameters) ) [0]) * Div * identity +
-						     value ( 2.0 ) * parameter ( (* (this->M_vectorsParameters) ) [1]) * sym (grad ( this->M_dispETFESpace,  *disp, this->M_offset ) )
-						    ,  0 ), phi_i)
-		  ) >> sigma_1;
+                  evalQuad,
+                  this->M_dispETFESpace,
+                  meas_K *  dot ( vectorFromMatrix(  parameter ( (* (this->M_vectorsParameters) ) [0]) * Div * identity +
+                                                     parameter ( (* (this->M_vectorsParameters) ) [1]) *
+                                                     ( grad ( this->M_dispETFESpace,  *disp, this->M_offset )  +
+                                                       transpose ( grad ( this->M_dispETFESpace,  *disp, this->M_offset ) )
+                                                       )
+                                                     ,  0 ), phi_i)
+                  ) >> sigma_1;
     sigma_1->globalAssemble();
 
+
+
     evaluateNode( elements ( this->M_dispETFESpace->mesh() ),
-		  evalQuad,
-		  this->M_dispETFESpace,
-		  meas_K *  dot ( vectorFromMatrix(  parameter ( (* (this->M_vectorsParameters) ) [0]) * Div * identity +
-						     value ( 2.0 ) * parameter ( (* (this->M_vectorsParameters) ) [1]) * sym (grad ( this->M_dispETFESpace,  *disp, this->M_offset ) )
-						   , 1 ), phi_i)
-		  ) >> sigma_2;
+                  evalQuad,
+                  this->M_dispETFESpace,
+                  meas_K *  dot ( vectorFromMatrix(  parameter ( (* (this->M_vectorsParameters) ) [0]) * Div * identity +
+                                                     parameter ( (* (this->M_vectorsParameters) ) [1]) *
+                                                     ( grad ( this->M_dispETFESpace,  *disp, this->M_offset )  +
+                                                       transpose ( grad ( this->M_dispETFESpace,  *disp, this->M_offset ) )
+                                                       )
+                                                     ,  1 ), phi_i)
+                  ) >> sigma_2;
     sigma_2->globalAssemble();
 
     evaluateNode( elements ( this->M_dispETFESpace->mesh() ),
-		  evalQuad,
-		  this->M_dispETFESpace,
-		  meas_K *  dot ( vectorFromMatrix(  parameter ( (* (this->M_vectorsParameters) ) [0]) * Div * identity +
-						     value ( 2.0 ) * parameter ( (* (this->M_vectorsParameters) ) [1]) * sym (grad ( this->M_dispETFESpace,  *disp, this->M_offset ) )
-						   , 2 ), phi_i)
-		  ) >> sigma_3;
+                  evalQuad,
+                  this->M_dispETFESpace,
+                  meas_K *  dot ( vectorFromMatrix(  parameter ( (* (this->M_vectorsParameters) ) [0]) * Div * identity  +
+                                                     parameter ( (* (this->M_vectorsParameters) ) [1]) *
+                                                     ( grad ( this->M_dispETFESpace,  *disp, this->M_offset )  +
+                                                       transpose ( grad ( this->M_dispETFESpace,  *disp, this->M_offset ) )
+                                                      )
+                                                     ,  2 ), phi_i)
+                  ) >> sigma_3;
     sigma_3->globalAssemble();
 
-    //+
-    //				     
 }
 
 

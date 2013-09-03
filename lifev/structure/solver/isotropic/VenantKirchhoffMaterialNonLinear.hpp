@@ -641,8 +641,8 @@ void VenantKirchhoffMaterialNonLinear<MeshType>::computeCauchyStressTensor ( con
 									     const QuadratureRule& evalQuad,
 									     vectorPtr_Type sigma_1,
 									     vectorPtr_Type sigma_2,
-									     vectorPtr_Type sigma_3) 
-  
+									     vectorPtr_Type sigma_3)
+
 {
 
     using namespace ExpressionAssembly;
@@ -662,15 +662,15 @@ void VenantKirchhoffMaterialNonLinear<MeshType>::computeCauchyStressTensor ( con
     // Definition of tr( C )
     traceTensor_Type I_C = ExpressionDefinitions::traceTensor( C );
 
-  
+
     evaluateNode( elements ( this->M_dispETFESpace->mesh() ),
 		  evalQuad,
 		  this->M_dispETFESpace,
 		  meas_K *  dot ( vectorFromMatrix( ( 1 / J )*
 						    (  value ( 1.0 / 2.0 ) * parameter ( (* (this->M_vectorsParameters) ) [0] ) * ( I_C - 3.0 ) *  F +
 						       value (-1.0) * parameter ( (* (this->M_vectorsParameters) ) [1] ) * F +
-						       parameter ( (* (this->M_vectorsParameters) ) [1] ) *  F * C 
-						      ) * 
+						       parameter ( (* (this->M_vectorsParameters) ) [1] ) *  F * C
+						      ) *
 						    transpose( F ),  0 ), phi_i)
 		  ) >> sigma_1;
     sigma_1->globalAssemble();
@@ -681,7 +681,7 @@ void VenantKirchhoffMaterialNonLinear<MeshType>::computeCauchyStressTensor ( con
 		  meas_K *  dot ( vectorFromMatrix( ( 1 / J )*
 						    ( value ( 1.0 / 2.0 ) * parameter ( (* (this->M_vectorsParameters) ) [0] ) * ( I_C - 3.0 ) *  F +
 						      value (-1.0) * parameter ( (* (this->M_vectorsParameters) ) [1] ) * F +
-						      parameter ( (* (this->M_vectorsParameters) ) [1] ) *  F * C 
+						      parameter ( (* (this->M_vectorsParameters) ) [1] ) *  F * C
 						      ) *
 						    transpose( F ) , 1 ), phi_i)
 		  ) >> sigma_2;
@@ -693,8 +693,8 @@ void VenantKirchhoffMaterialNonLinear<MeshType>::computeCauchyStressTensor ( con
 		  meas_K *  dot ( vectorFromMatrix( ( 1 / J )*
 						    ( value ( 1.0 / 2.0 ) * parameter ( (* (this->M_vectorsParameters) ) [0] ) * ( I_C - 3.0 ) *  F +
 						      value (-1.0) * parameter ( (* (this->M_vectorsParameters) ) [1] ) * F +
-						      parameter ( (* (this->M_vectorsParameters) ) [1] ) *  F * C 
-						      ) * 
+						      parameter ( (* (this->M_vectorsParameters) ) [1] ) *  F * C
+						      ) *
 						    transpose( F ) , 2 ), phi_i)
 		  ) >> sigma_3;
     sigma_3->globalAssemble();

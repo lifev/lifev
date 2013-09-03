@@ -643,8 +643,8 @@ void NeoHookeanMaterialNonLinear<MeshType>::computeCauchyStressTensor ( const ve
 									const QuadratureRule& evalQuad,
 									vectorPtr_Type sigma_1,
 									vectorPtr_Type sigma_2,
-									vectorPtr_Type sigma_3) 
-  
+									vectorPtr_Type sigma_3)
+
 {
 
   using namespace ExpressionAssembly;
@@ -671,7 +671,7 @@ void NeoHookeanMaterialNonLinear<MeshType>::computeCauchyStressTensor ( const ve
 		meas_K *  dot ( vectorFromMatrix( ( 1 / J )*
 						  ( value (1.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [1] ) * ( pow ( J , 2.0) - J + log (J) ) * F_T + // volumetric
 						    parameter ( (* (this->M_vectorsParameters) ) [0] ) * pow (J, -2.0 / 3.0) * ( F - value (1.0 / 3.0) * I_C * F_T )
-						    ) * 
+						    ) *
 						  transpose(F), 0 ), phi_i)
 		) >> sigma_1;
   sigma_1->globalAssemble();
@@ -693,12 +693,11 @@ void NeoHookeanMaterialNonLinear<MeshType>::computeCauchyStressTensor ( const ve
 		meas_K *  dot ( vectorFromMatrix( ( 1 / J )*
 						  ( value (1.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [1] ) * ( pow ( J , 2.0) - J + log (J) ) * F_T + // volumetric
 						    parameter ( (* (this->M_vectorsParameters) ) [0] ) * pow (J, -2.0 / 3.0) * ( F - value (1.0 / 3.0) * I_C * F_T )
-						    ) * 
+						    ) *
 						  transpose( F ) , 2 ), phi_i)
 		) >> sigma_3;
-  sigma_3->globalAssemble();  
+  sigma_3->globalAssemble();
 
-  std::cout << "ere" << std::endl;
 }
 
 

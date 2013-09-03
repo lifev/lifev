@@ -715,8 +715,8 @@ void ExponentialMaterialNonLinear<MeshType>::computeCauchyStressTensor ( const v
 									 const QuadratureRule& evalQuad,
 									 vectorPtr_Type sigma_1,
 									 vectorPtr_Type sigma_2,
-									 vectorPtr_Type sigma_3) 
-  
+									 vectorPtr_Type sigma_3)
+
 {
   using namespace ExpressionAssembly;
 
@@ -742,7 +742,7 @@ void ExponentialMaterialNonLinear<MeshType>::computeCauchyStressTensor ( const v
 		meas_K *  dot ( vectorFromMatrix( ( 1 / J )*
 						  ( value (1.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [2] ) * ( pow ( J , 2.0) - J + log (J) ) * F_T + // volumetric
 						    parameter ( (* (this->M_vectorsParameters) ) [0] ) * pow (J, -2.0 / 3.0) *
-						    exp ( parameter ( (* (this->M_vectorsParameters) ) [1] ) * ( pow (J, -2.0 / 3.0) * I_C  - value (3.0) ) ) * ( F - value(1.0/3.0)* I_C* F_T ) ) * 
+						    exp ( parameter ( (* (this->M_vectorsParameters) ) [1] ) * ( pow (J, -2.0 / 3.0) * I_C  - value (3.0) ) ) * ( F - value(1.0/3.0)* I_C* F_T ) ) *
 						  transpose(F), 0 ), phi_i)
 		) >> sigma_1;
 
@@ -765,11 +765,11 @@ void ExponentialMaterialNonLinear<MeshType>::computeCauchyStressTensor ( const v
 		meas_K *  dot ( vectorFromMatrix( ( 1 / J )*
 						  ( value (1.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [2] ) * ( pow ( J , 2.0) - J + log (J) ) * F_T + // volumetric
 						    parameter ( (* (this->M_vectorsParameters) ) [0] ) * pow (J, -2.0 / 3.0) *
-						    exp ( parameter ( (* (this->M_vectorsParameters) ) [1] ) * ( pow (J, -2.0 / 3.0) * I_C  - value (3.0) ) ) * ( F - value(1.0/3.0)* I_C* F_T ) ) * 
+						    exp ( parameter ( (* (this->M_vectorsParameters) ) [1] ) * ( pow (J, -2.0 / 3.0) * I_C  - value (3.0) ) ) * ( F - value(1.0/3.0)* I_C* F_T ) ) *
 						  transpose( F ) , 2 ), phi_i)
 		) >> sigma_3;
 
-  sigma_3->globalAssemble();  
+  sigma_3->globalAssemble();
 
 }
 

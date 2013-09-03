@@ -812,7 +812,7 @@ void SecondOrderExponentialMaterialNonLinear<MeshType>::computeCauchyStressTenso
 										    const QuadratureRule& evalQuad,
 										    vectorPtr_Type sigma_1,
 										    vectorPtr_Type sigma_2,
-										    vectorPtr_Type sigma_3) 
+										    vectorPtr_Type sigma_3)
 
 {
 
@@ -833,7 +833,7 @@ void SecondOrderExponentialMaterialNonLinear<MeshType>::computeCauchyStressTenso
     // Definition of tr( C )
     traceTensor_Type I_C = ExpressionDefinitions::traceTensor( C );
 
-  
+
     evaluateNode( elements ( this->M_dispETFESpace->mesh() ),
 		  evalQuad,
 		  this->M_dispETFESpace,
@@ -842,7 +842,7 @@ void SecondOrderExponentialMaterialNonLinear<MeshType>::computeCauchyStressTenso
 						      value ( 2.0 ) * parameter ( (* (this->M_vectorsParameters) ) [0] ) * ( pow( J, -2.0/3.0) * I_C - value (3.0) ) *
 						      exp ( parameter ( (* (this->M_vectorsParameters) ) [1] ) * ( pow( J, -2.0/3.0 ) * I_C - value (3.0) ) * ( pow( J, -2.0/3.0 ) * I_C - value (3.0) ) ) *
 						      pow ( J, (-2.0 / 3.0) ) * ( F - value (1.0 / 3.0) *  I_C * F_T )
-						      ) * 
+						      ) *
 						    transpose( F ),  0 ), phi_i)
 		  ) >> sigma_1;
     sigma_1->globalAssemble();
@@ -868,7 +868,7 @@ void SecondOrderExponentialMaterialNonLinear<MeshType>::computeCauchyStressTenso
 						      value ( 2.0 ) * parameter ( (* (this->M_vectorsParameters) ) [0] ) * ( pow( J, -2.0/3.0) * I_C - value (3.0) ) *
 						      exp ( parameter ( (* (this->M_vectorsParameters) ) [1] ) * ( pow( J, -2.0/3.0 ) * I_C - value (3.0) ) * ( pow( J, -2.0/3.0 ) * I_C - value (3.0) ) ) *
 						      pow ( J, (-2.0 / 3.0) ) * ( F - value (1.0 / 3.0)  * I_C * F_T )
-						      ) * 
+						      ) *
 						    transpose( F ) , 2 ), phi_i)
 		  ) >> sigma_3;
     sigma_3->globalAssemble();
