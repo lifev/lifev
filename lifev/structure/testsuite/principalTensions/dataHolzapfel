@@ -67,17 +67,6 @@ mesh_dir  	= ./
 mesh_file 	= cubeY4.mesh
 order     	= P1
 
-[../analysis]
-nameFile                = structure
-nameField               = displacement
-recoveryVariable        = tensions
-typeFile                = hdf5
-analysisType            = istant
-start                   = 3.8
-end                     = 3.8
-iterationStart          = 00038 #Number of iteration
-iterationEnd            = 00038
-
 [../miscellaneous]
 factor    	= 1
 verbose   	= 1
