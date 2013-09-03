@@ -40,6 +40,8 @@
 
 #include "ud_functions.hpp"
 
+#define PI 3.14159265359
+
 namespace LifeV
 {
 
@@ -76,24 +78,26 @@ Real InternalPressure (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, 
 }
 
 // Initial displacement and velocity
-Real d0 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+Real d0 (const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
 {
+
     switch (i)
     {
-        case 0:
-            return 0.;
-            break;
-        case 1:
-            return 0.;
-            break;
-        case 2:
-            return 0.;
-            break;
-        default:
-            ERROR_MSG ("This entrie is not allowed: ud_functions.hpp");
-            return 0.;
-            break;
+    case 0:
+        return  0.088002 * ( x + 0.5 );
+        break;
+    case 1:
+        return - ( 0.02068 * 2.0 ) * ( y );
+        break;
+    case 2:
+        return - ( 0.02068 * 2.0 ) * ( z );
+        break;
+    default:
+        ERROR_MSG ("This entry is not allowed: ud_functions.hpp");
+        return 0.;
+        break;
     }
+
 }
 
 Real w0 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
@@ -138,21 +142,143 @@ Real a0 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*
     }
 }
 
+Real displacementVenantKirchhoffPenalized (const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
+{
+  switch (i)
+    {
+    case 0:
+      return - 0.01649141 * ( x - 0.5 );
+      break;
+    case 1:
+      return  0.069238236 / 2.0  * ( y );
+      break;
+    case 2:
+      return - 0.01649141  * ( z + 0.5  );
+      break;
+    default:
+      ERROR_MSG ("This entry is not allowed: ud_functions.hpp");
+      return 0.;
+      break;
+    }
+}
+
 
 //----------------------------------------------Boundary Conditions--------------
-
-Real g1 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+Real bcZero (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
 {
+    return  0.;
+}
+
+Real bcNonZero (const Real& t, const Real&  X, const Real& Y, const Real& Z, const ID& i)
+{
+  //Real pressure(200000);
+
+  // Real top = 1000000;
+
+  // return top * Y;
+
+    return 10000;
+
+	// Real highestPressure(6.666e+6);
+	// Real totalTime = 20.0;
+	// Real halfTime = totalTime / 2.0;
+
+	// Real a = ( highestPressure / 2 ) * ( 1/ ((totalTime/2)*(totalTime/2)) );
+
+	// if ( t <= halfTime )
+	//     pressure = a * t*t;
+
+	// if ( t > halfTime )
+	//     pressure = - a * (t - totalTime)*(t - totalTime) + highestPressure;
+
+    // switch (i)
+    // {
+    //     case 0:
+    //         return 0.0;
+    //         break;
+    //     case 1:
+    //         return pressure;
+    //         break;
+    //     case 2:
+    //         return 0.0;
+    //         break;
+    //     default:
+    //         ERROR_MSG ("This entrie is not allowed: ud_functions.hpp");
+    //         return 0.;
+    //         break;
+    // }
+}
+ Real smoothPressure(const Real& t, const Real&  x, const Real& y, const Real& /*Z*/, const ID& i)
+    {
+        Real radius = std::sqrt( x*x + y*y);
+        Real pressure(0);
+
+        Real highestPressure(200000);
+        Real totalTime = 4.5;
+        Real halfTime = totalTime / 2.0;
+
+        Real a = ( highestPressure / 2 ) * ( 1/ ( halfTime*halfTime ) );
+
+        if ( t <= halfTime )
+            pressure = a * t*t;
+
+        if ( t > halfTime )
+            pressure = - a * (t - totalTime)*(t - totalTime) + highestPressure;
+
+        switch (i)
+        {
+        case 0:
+            return  pressure *  ( x / radius ) ;
+            break;
+        case 1:
+            return  pressure *  ( y / radius ) ;
+            break;
+        case 2:
+            return 0.0;
+            break;
+
+        }
+        return 0;
+
+    }
+
+Real traction (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
+{
+    return  10000.;
+}
+
+
+//----------------------------------------------Fibers Directions--------------
+Real Family1 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
+{
+    Real theta =  PI/6.0; // value for anisotropic characterization taken from Robertson // ( PI / 6.0 );
+    //Real thetaChangeOfVariable = std::atan(  y / x );
+
+    // if( x < 0 )
+    // {
+    //     // This is due to the periodicity of std::atan ( ref. official documentation )
+    //     thetaChangeOfVariable += PI;
+    // }
+
     switch (i)
     {
         case 0:
-            return 0.;
+	    // Tube
+        //    return - std::sin( thetaChangeOfVariable ) * std::cos( theta );
+	    // Cube
+            return std::sin( theta );
             break;
         case 1:
-            return 0.;
+	    // Tube
+            //return   std::cos( thetaChangeOfVariable ) * std::cos( theta );
+	    // Cube
+            return std::cos( theta );
             break;
         case 2:
-            return 0.;
+	    // Tube
+            //return std::sin( theta );
+	    // Cube
+             return 0.0;
             break;
         default:
             ERROR_MSG ("This entrie is not allowed: ud_functions.hpp");
@@ -161,18 +287,36 @@ Real g1 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*
     }
 }
 
-Real g2 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+Real Family2 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
 {
+    Real theta = ( - PI / 6.0 );
+    //    Real thetaChangeOfVariable = std::atan( y / x );
+
+    // if( x < 0 )
+    // {
+    //     // This is due to the periodicity of std::atan ( ref. official documentation )
+    //     thetaChangeOfVariable += PI;
+    // }
+
     switch (i)
     {
         case 0:
-            return 0.;
+	    // Tube
+            //      return - std::sin( thetaChangeOfVariable ) * std::cos( theta );
+	    // Cube
+            return std::sin( theta );
             break;
         case 1:
-            return 0.;
+	    // Tube
+            //return   std::cos( thetaChangeOfVariable ) * std::cos( theta );
+	    // Cube
+            return std::cos( theta );
             break;
         case 2:
-            return 1.e+5;
+	    // Tube
+            //return   std::sin( theta );
+	    // Cube
+            return 0.0;
             break;
         default:
             ERROR_MSG ("This entrie is not allowed: ud_functions.hpp");
@@ -181,18 +325,19 @@ Real g2 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*
     }
 }
 
-Real g3 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
+Real Family3 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
 {
+
     switch (i)
     {
         case 0:
-            return 0.;
+            return 0.0;
             break;
         case 1:
-            return 0.;
+            return 0.0;
             break;
         case 2:
-            return 0.;
+            return -1.0;
             break;
         default:
             ERROR_MSG ("This entrie is not allowed: ud_functions.hpp");
@@ -201,5 +346,133 @@ Real g3 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*
     }
 }
 
+
+Real Family4 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
+{
+
+    switch (i)
+    {
+        case 0:
+            return 0.0;
+            break;
+        case 1:
+            return 0.0;
+            break;
+        case 2:
+            return 0.0;
+            break;
+        default:
+            ERROR_MSG ("This entrie is not allowed: ud_functions.hpp");
+            return 0.;
+            break;
+    }
 }
 
+
+Real Family5 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
+{
+
+    switch (i)
+    {
+        case 0:
+            return 0.0;
+            break;
+        case 1:
+            return 0.0;
+            break;
+        case 2:
+            return 0.0;
+            break;
+        default:
+            ERROR_MSG ("This entrie is not allowed: ud_functions.hpp");
+            return 0.;
+            break;
+    }
+}
+
+Real Family6 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
+{
+
+    switch (i)
+    {
+        case 0:
+            return 0.0;
+            break;
+        case 1:
+            return 0.0;
+            break;
+        case 2:
+            return 0.0;
+            break;
+        default:
+            ERROR_MSG ("This entrie is not allowed: ud_functions.hpp");
+            return 0.;
+            break;
+    }
+}
+
+// Method for the definition of the fibers
+fibersDirectionList::fibersDirectionList() :
+    M_mapNameDefinition( )
+{}
+
+fibersDirectionList::~fibersDirectionList()
+{}
+
+void fibersDirectionList::setupFiberDefinitions( const UInt nbFamilies )
+{
+    // At the moment the creation of the table of fiber functions is done
+    // manually. There should be a way to make it automatically. Btw, only
+    // the first nbFamilies that are set in the data file are taken into account
+
+    ASSERT( nbFamilies < 6, "At the moment, a maximum number = 6 of families can be used! If you want more \n modifiy the file ud_functions.hpp in the application folder." );
+
+    // Creation of the database of functions
+    fiberFunctionPtr_Type pointerToFunction( new fiberFunction_Type( Family1 ) );
+    M_mapNameDefinition.insert( std::pair<std::string, fiberFunctionPtr_Type>
+                                  ( "Family1", pointerToFunction ) );
+
+    pointerToFunction.reset( new fiberFunction_Type( Family2 ) );
+    M_mapNameDefinition.insert( std::pair<std::string, fiberFunctionPtr_Type>
+                                  ( "Family2", pointerToFunction ) );
+
+    pointerToFunction.reset( new fiberFunction_Type( Family3 ) );
+    M_mapNameDefinition.insert( std::pair<std::string, fiberFunctionPtr_Type>
+                                  ( "Family3", pointerToFunction ) );
+
+    pointerToFunction.reset( new fiberFunction_Type( Family4 ) );
+    M_mapNameDefinition.insert( std::pair<std::string, fiberFunctionPtr_Type>
+                                  ( "Family4", pointerToFunction ) );
+
+    pointerToFunction.reset( new fiberFunction_Type( Family5 ) );
+    M_mapNameDefinition.insert( std::pair<std::string, fiberFunctionPtr_Type>
+                                  ( "Family5", pointerToFunction ) );
+
+    pointerToFunction.reset( new fiberFunction_Type( Family6 ) );
+    M_mapNameDefinition.insert( std::pair<std::string, fiberFunctionPtr_Type>
+                                  ( "Family6", pointerToFunction ) );
+
+
+}
+
+fibersDirectionList::fiberFunctionPtr_Type fibersDirectionList::fiberDefinition( const std::string nameFamily )
+{
+
+    mapNameDefinitionFiberFunction_Type::const_iterator IT;
+
+    IT = M_mapNameDefinition.find ( nameFamily );
+
+    if ( IT != M_mapNameDefinition.end() )
+    {
+        return IT->second;
+    }
+    else
+    {
+        std::cout << " Wrong identification of the fiber function! " << std::endl;
+        fiberFunctionPtr_Type pointerToFunction( new fiberFunction_Type() );
+
+        return pointerToFunction;
+    }
+}
+
+}

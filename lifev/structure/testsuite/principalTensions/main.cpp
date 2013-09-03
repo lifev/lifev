@@ -42,7 +42,7 @@
 #include <mpi.h>
 #include <Epetra_MpiComm.h>
 #else
-c#include <Epetra_SerialComm.h>
+#include <Epetra_SerialComm.h>
 #endif
 
 //Tell the compiler to restore the warning previously silented
@@ -190,13 +190,13 @@ struct Structure::Private
         switch (i)
         {
             case 0:
-                return - 0.01837 * ( x - 0.5 );
+                return - 0.018374999999251 * ( x - 0.5 );
                 break;
             case 1:
-                return  0.0749999 / 2.0  * ( y );
+                return  0.074999999996944 / 2.0  * ( y );
                 break;
             case 2:
-                return - 0.01837  * ( z + 0.5  );
+                return - 0.018374999999251  * ( z + 0.5  );
                 break;
             default:
                 ERROR_MSG ("This entry is not allowed: ud_functions.hpp");
@@ -285,7 +285,6 @@ struct Structure::Private
                 break;
         }
     }
-
 
     std::string data_file_name;
 
@@ -485,6 +484,12 @@ Structure::run3d()
     vectorPtr_Type sigma_1;
     vectorPtr_Type sigma_2;
     vectorPtr_Type sigma_3;
+
+    // Debug vectors
+    // vectorPtr_Type dX_1;
+    // vectorPtr_Type dX_2;
+    // vectorPtr_Type dX_3;
+
     vectorPtr_Type patchAreaVector;
     vectorPtr_Type vectorEigenvalues;
 
@@ -492,6 +497,11 @@ Structure::run3d()
     sigma_1.reset( new vector_Type( dFESpace->map() ) );
     sigma_2.reset( new vector_Type( dFESpace->map() ) );
     sigma_3.reset( new vector_Type( dFESpace->map() ) );
+
+    // dX_1.reset( new vector_Type( dFESpace->map() ) );
+    // dX_2.reset( new vector_Type( dFESpace->map() ) );
+    // dX_3.reset( new vector_Type( dFESpace->map() ) );
+
     patchAreaVector.reset ( new vector_Type ( dETFESpace->map() ) );
     vectorEigenvalues.reset( new vector_Type( dFESpace->map() ) );
 
@@ -506,6 +516,14 @@ Structure::run3d()
 		    ) >> patchAreaVector;
       patchAreaVector->globalAssemble();
     }
+
+    // M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "sigma1", dFESpace, sigma_1, UInt (0) );
+    // M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "sigma2", dFESpace, sigma_2, UInt (0) );
+    // M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "sigma3", dFESpace, sigma_3, UInt (0) );
+
+    // M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "dX1", dFESpace, dX_1, UInt (0) );
+    // M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "dX2", dFESpace, dX_2, UInt (0) );
+    // M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "dX3", dFESpace, dX_3, UInt (0) );
 
     M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "eigenvalues", dFESpace, vectorEigenvalues, UInt (0) );
     M_exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "vonMises", dFESpace, solidTensions, UInt (0) );
@@ -596,14 +614,14 @@ Structure::run3d()
                                    *solidDisp, 0.0 );
         }
 
-	solidOperator.computeCauchyStressTensor( solidDisp, fakeQuadratureRule, sigma_1, sigma_2, sigma_3 );
-	// Concluding reconstruction
-	*sigma_1 = *sigma_1 / *patchAreaVector;
-	*sigma_2 = *sigma_2 / *patchAreaVector;
-	*sigma_3 = *sigma_3 / *patchAreaVector;
+        solidOperator.computeCauchyStressTensor( solidDisp, fakeQuadratureRule, sigma_1, sigma_2, sigma_3 );
+        // Concluding reconstruction
+        *sigma_1 = *sigma_1 / *patchAreaVector;
+        *sigma_2 = *sigma_2 / *patchAreaVector;
+        *sigma_3 = *sigma_3 / *patchAreaVector;
 
-	// Computing eigenvalues
-	solidOperator.computePrincipalTensions( sigma_1, sigma_2, sigma_3, vectorEigenvalues );
+        // Computing eigenvalues
+        solidOperator.computePrincipalTensions( sigma_1, sigma_2, sigma_3, vectorEigenvalues );
 
         // //Create and exporter to check importing
         // std::string expVerFile = "verificationDisplExporter";
@@ -616,7 +634,6 @@ Structure::run3d()
         // exporter.postProcess (0.0);
         // *vectVer = *solidDisp;
         // exporter.postProcess (startTime);
-
 
         //Set the current solution as the displacement vector to use
         solid->setDisplacement (*solidDisp);
@@ -640,7 +657,11 @@ Structure::run3d()
         std::cout << "Norm of the tension vector: " << solid->principalStresses().norm2() << std::endl;
         std::cout << "Norm of the vector eigenvalues: " << vectorEigenvalues->norm2() << std::endl;
 
-        *solidTensions = solid->principalStresses();
+        // *dX_1 = solid->gradientX();
+        // *dX_2 = solid->gradientY();
+        // *dX_3 = solid->gradientZ();
+
+
         M_exporter->postProcess ( startTime );
 
         if (verbose )
@@ -655,7 +676,7 @@ Structure::run3d()
             ///////// CHECKING THE RESULTS OF THE TEST AT EVERY TIMESTEP
             if ( !tensionData->recoveryVariable().compare ("displacement")  )
             {
-	      CheckResultDisplacement ( solid->principalStresses().norm2()  );
+                CheckResultDisplacement ( solid->principalStresses().norm2()  );
             }
             else if ( !tensionData->recoveryVariable().compare ("eigenvalues") )
             {
@@ -668,7 +689,7 @@ Structure::run3d()
         }
         else if ( !dataStructure->solidTypeIsotropic().compare("linearVenantKirchhoff") ) // LE
         {
-	  checkLinearElastic( solid->principalStresses().norm2(), vectorEigenvalues->norm2() );
+            checkLinearElastic( solid->principalStresses().norm2(), vectorEigenvalues->norm2() );
         }
         else if ( !dataStructure->solidTypeIsotropic().compare("nonLinearVenantKirchhoff") ) // SVK
         {
@@ -686,8 +707,6 @@ Structure::run3d()
         {
             check2ndOrderExponential( solid->principalStresses().norm2(), vectorEigenvalues->norm2() );
         }
-
-
         ///////// END OF CHECK
 
         //Closing files
@@ -740,7 +759,7 @@ void Structure::CheckResultTensions (const Real tensNorm, const Real testETA)
 
 void Structure::checkLinearElastic (const Real tensNorm, const Real testETA)
 {
-  if ( ( ( std::fabs (tensNorm - 4.69045e+6) / 4.69045e+6) <= 1e-5 ) && ( ( std::fabs (testETA - 4.69045e+6) / 4.69045e+6) <= 1e-5 ) )
+  if ( ( ( std::fabs (tensNorm - 4.5e+6) / 4.5e+6) <= 1e-5 ) && ( ( std::fabs (testETA - 4.5e+6) / 4.5e+6) <= 1e-5 ) )
     {
         this->resultCorrect( );
     }
@@ -781,7 +800,6 @@ void Structure::check2ndOrderExponential (const Real tensNorm, const Real testET
         this->resultCorrect( );
     }
 }
-
 
 void Structure::resultCorrect ( void )
 {

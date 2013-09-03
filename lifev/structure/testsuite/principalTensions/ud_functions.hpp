@@ -38,8 +38,8 @@
  *  if the functions to assign is vectorial and the boundary condition is of type \c Full \c.
  */
 
-#ifndef UDF_HPP
-#define UDF_HPP
+#ifndef UDF_POSTPROC_HPP
+#define UDF_POSTPROC_HPP
 
 #include <lifev/core/LifeV.hpp>
 
@@ -52,14 +52,44 @@ Real InternalPressure (const Real& t, const Real& /*x*/, const Real& /*y*/, cons
 Real fzero_scalar (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
 
 // Initial displacement and velocity
-Real d0 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
+Real d0 (const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i);
 Real w0 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
 Real a0 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
+Real displacementVenantKirchhoffPenalized (const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i);
 
 //Boundary Conditions
-Real g1 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i);
-Real g2 (const Real& t, const Real& /*x*/, const Real& y, const Real& /*z*/, const ID& /*i*/);
-Real g3 (const Real& t, const Real& /*x*/, const Real& y, const Real& /*z*/, const ID& /*i*/);
+Real bcZero (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/);
+Real bcNonZero (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/);
+Real smoothPressure(const Real& t, const Real&  x, const Real& y, const Real& /*Z*/, const ID& i);
+Real traction (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/);
+
+//Fiber Directions
+Real Family1 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i);
+Real Family2 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i);
+Real Family3 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i);
+Real Family4 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i);
+Real Family5 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i);
+Real Family6 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i);
+
+class fibersDirectionList
+{
+public:
+
+    typedef boost::function<Real (  Real const&, Real const&, Real const&, Real const&, ID const& ) > fiberFunction_Type;
+    typedef boost::shared_ptr<fiberFunction_Type>                                       fiberFunctionPtr_Type;
+    typedef std::map< std::string, fiberFunctionPtr_Type>                               mapNameDefinitionFiberFunction_Type;
+
+    fibersDirectionList();
+
+    ~fibersDirectionList();
+
+    fiberFunctionPtr_Type fiberDefinition( const std::string nameFamily );
+    void setupFiberDefinitions( const UInt nbFamilies );
+
+private:
+    mapNameDefinitionFiberFunction_Type     M_mapNameDefinition;
+};
+
 
 }
 
