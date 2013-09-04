@@ -80,6 +80,7 @@
 //ET include for assemblings
 #include <lifev/eta/fem/ETFESpace.hpp>
 #include <lifev/eta/expression/Integrate.hpp>
+#include <lifev/eta/expression/Evaluate.hpp>
 
 namespace LifeV
 {
@@ -222,6 +223,20 @@ public:
                                                  const Epetra_SerialDenseMatrix& cofactorF,
                                                  const std::vector<Real>& invariants,
                                                  const UInt material);
+
+    //! Compute the First Piola Kirchhoff Tensor
+    /*!
+       \param disp the displacement field from which we compute the fisrt piola-Kirchhoff tensor
+       \param sigma_1 the first column of the Cauchy stress tensor
+       \param sigma_2 the second column of the Cauchy stress tensor
+       \param sigma_3 the third column of the Cauchy stress tensor
+    */
+    void computeCauchyStressTensor ( const vectorPtr_Type disp,
+				     const QuadratureRule& evalQuad,
+				     vectorPtr_Type sigma_1,
+				     vectorPtr_Type sigma_2,
+				     vectorPtr_Type sigma_3);
+
 
 
     //! @name Set Methods
@@ -587,6 +602,57 @@ void StructuralConstitutiveLaw<MeshType>::apply ( const vector_Type& sol, vector
 #endif
 
 }
+
+template <typename MeshType>
+void
+StructuralConstitutiveLaw<MeshType>::computeCauchyStressTensor ( const vectorPtr_Type disp, 
+								 const QuadratureRule& evalQuad,
+								 vectorPtr_Type sigma_1,
+								 vectorPtr_Type sigma_2, vectorPtr_Type sigma_3 )
+{
+  /* Resetting pointers
+     In this method we use the same vector we pass to it. We could make copies of them and then
+     sum them in the right places.
+  */
+  vectorPtr_Type sigma1CopyIso;
+  vectorPtr_Type sigma2CopyIso;
+  vectorPtr_Type sigma3CopyIso;
+
+  sigma1CopyIso.reset( new vector_Type(*M_localMap) );
+  sigma2CopyIso.reset( new vector_Type(*M_localMap) );
+  sigma3CopyIso.reset( new vector_Type(*M_localMap) );
+
+  vectorPtr_Type sigma1CopyAniso;
+  vectorPtr_Type sigma2CopyAniso;
+  vectorPtr_Type sigma3CopyAniso;
+
+  sigma1CopyAniso.reset( new vector_Type(*M_localMap) );
+  sigma2CopyAniso.reset( new vector_Type(*M_localMap) );
+  sigma3CopyAniso.reset( new vector_Type(*M_localMap) );
+
+  M_isotropicLaw->computeCauchyStressTensor( disp, evalQuad, sigma1CopyIso, sigma2CopyIso, sigma3CopyIso );
+
+  *sigma_1 += *sigma1CopyIso;
+  *sigma_2 += *sigma2CopyIso;
+  *sigma_3 += *sigma3CopyIso;
+
+#ifdef ENABLE_ANISOTROPIC_LAW
+  if( !M_dataMaterial->constitutiveLaw().compare("anisotropic") )
+    {     
+      M_anisotropicLaw->computeCauchyStressTensor( disp, evalQuad, sigma1CopyAniso, sigma2CopyAniso,sigma3CopyAniso );
+
+      *sigma_1 += *sigma1CopyAniso;
+      *sigma_2 += *sigma2CopyAniso;
+      *sigma_3 += *sigma3CopyAniso;
+    }
+#endif
+
+  // Closing the vectors
+  sigma_1->globalAssemble();
+  sigma_2->globalAssemble();
+  sigma_3->globalAssemble();
+}
+
 
 }
 #endif /*_STRUCTURALMATERIAL_H*/

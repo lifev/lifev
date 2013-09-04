@@ -222,6 +222,18 @@ public:
                                                  const Epetra_SerialDenseMatrix& cofactorF,
                                                  const std::vector<Real>& invariants,
                                                  const UInt marker);
+    //! Compute the First Piola Kirchhoff Tensor
+    /*!
+       \param disp the displacement field from which we compute the fisrt piola-Kirchhoff tensor
+       \param sigma_1 the first column of the Cauchy stress tensor
+       \param sigma_2 the second column of the Cauchy stress tensor
+       \param sigma_3 the third column of the Cauchy stress tensor
+    */
+    void computeCauchyStressTensor ( const vectorPtr_Type disp,
+				     const QuadratureRule& evalQuad,
+				     vectorPtr_Type sigma_1,
+				     vectorPtr_Type sigma_2,
+				     vectorPtr_Type sigma_3);
 
 
     //@}
@@ -961,6 +973,76 @@ void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::computeLocalFirstPiola
     firstPiola += thirdTerm;
 
 }
+
+template <typename MeshType>
+void VenantKirchhoffMaterialNonLinearPenalized<MeshType>::computeCauchyStressTensor ( const vectorPtr_Type disp,
+										      const QuadratureRule& evalQuad,
+										      vectorPtr_Type sigma_1,
+										      vectorPtr_Type sigma_2,
+										      vectorPtr_Type sigma_3) 
+  
+{
+    using namespace ExpressionAssembly;
+
+    // Definition of F
+    tensorF_Type F = ExpressionDefinitions::deformationGradient( this->M_dispETFESpace,  *disp, this->M_offset, this->M_identity );
+
+    // Definition of J
+    determinantF_Type J = ExpressionDefinitions::determinantF( F );
+
+    // Definition of tensor C
+    tensorC_Type C = ExpressionDefinitions::tensorC( transpose(F), F );
+
+    // Definition of F^-T
+    minusT_Type  F_T = ExpressionDefinitions::minusT( F );
+
+    // Definition of tr( C )
+    traceTensor_Type I_C = ExpressionDefinitions::traceTensor( C );
+
+    // Definition of C:C
+    traceSquaredTensor_Type I_Csq = ExpressionDefinitions::traceSquared( C );
+  
+    evaluateNode( elements ( this->M_dispETFESpace->mesh() ),
+		  evalQuad,
+		  this->M_dispETFESpace,
+		  meas_K *  dot ( vectorFromMatrix( ( 1 / J )*
+						    ( value (1.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [2] ) * ( pow ( J , 2.0) - J + log (J) ) * F_T + //vol
+						      pow ( J , (-2.0 / 3.0) ) * ( value (1.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [0] ) * pow( J, -2.0/3.0 ) * I_C -
+										   value (3.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [0]) - parameter ( (* (this->M_vectorsParameters) ) [1]  ) ) * ( F - value(1.0/3.0) * I_C *  F_T ) + 
+						      parameter ( (* (this->M_vectorsParameters) ) [1]  ) * pow ( J , (-4.0 / 3.0) ) * ( F * C + value ( (-1.0 / 3.0) ) * I_Csq * F_T )
+						      ) * 
+						    transpose( F ),  0 ), phi_i)
+		  ) >> sigma_1;
+    sigma_1->globalAssemble();
+
+    evaluateNode( elements ( this->M_dispETFESpace->mesh() ),
+		  evalQuad,
+		  this->M_dispETFESpace,
+		  meas_K *  dot ( vectorFromMatrix( ( 1 / J )*
+						    ( value (1.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [2] ) * ( pow ( J , 2.0) - J + log (J) ) * F_T + //vol
+						      pow ( J , (-2.0 / 3.0) ) * ( value (1.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [0] ) * pow( J, -2.0/3.0 ) * I_C -
+										   value (3.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [0]) - parameter ( (* (this->M_vectorsParameters) ) [1]  ) ) * ( F - value(1.0/3.0) * I_C *  F_T ) + 
+						      parameter ( (* (this->M_vectorsParameters) ) [1]  ) * pow ( J , (-4.0 / 3.0) ) * ( F * C + value ( (-1.0 / 3.0) ) * I_Csq * F_T )
+						      ) *
+						    transpose( F ) , 1 ), phi_i)
+		  ) >> sigma_2;
+    sigma_2->globalAssemble();
+
+    evaluateNode( elements ( this->M_dispETFESpace->mesh() ),
+		  evalQuad,
+		  this->M_dispETFESpace,
+		  meas_K *  dot ( vectorFromMatrix( ( 1 / J )*
+						    ( value (1.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [2] ) * ( pow ( J , 2.0) - J + log (J) ) * F_T + //vol
+						      pow ( J , (-2.0 / 3.0) ) * ( value (1.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [0] ) * pow( J, -2.0/3.0 ) * I_C -
+										   value (3.0 / 2.0) * parameter ( (* (this->M_vectorsParameters) ) [0]) - parameter ( (* (this->M_vectorsParameters) ) [1]  ) ) * ( F - value(1.0/3.0) * I_C *  F_T ) + 
+						      parameter ( (* (this->M_vectorsParameters) ) [1]  ) * pow ( J , (-4.0 / 3.0) ) * ( F * C + value ( (-1.0 / 3.0) ) * I_Csq * F_T )
+						      ) * 
+						    transpose( F ) , 2 ), phi_i)
+		  ) >> sigma_3;
+    sigma_3->globalAssemble();
+  
+}
+
 
 template <typename MeshType>
 inline StructuralIsotropicConstitutiveLaw<MeshType>* createVenantKirchhoffMaterialNonLinearPenalized()

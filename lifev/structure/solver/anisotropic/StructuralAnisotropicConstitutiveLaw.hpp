@@ -251,6 +251,19 @@ public:
                                                          const std::vector<Real>& invariants,
                                                          const UInt material) = 0;
 
+    //! Compute the First Piola Kirchhoff Tensor
+    /*!
+       \param disp the displacement field from which we compute the fisrt piola-Kirchhoff tensor
+       \param sigma_1 the first column of the Cauchy stress tensor
+       \param sigma_2 the second column of the Cauchy stress tensor
+       \param sigma_3 the third column of the Cauchy stress tensor
+    */
+    virtual void computeCauchyStressTensor ( const vectorPtr_Type disp,
+					     const QuadratureRule& evalQuad,
+					     vectorPtr_Type sigma_1,
+					     vectorPtr_Type sigma_2,
+					     vectorPtr_Type sigma_3) = 0;
+
 
     virtual void setupFiberDirections( vectorFiberFunctionPtr_Type vectorOfFibers ) = 0;
 

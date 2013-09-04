@@ -196,7 +196,7 @@ public:
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
     void computeStiffness ( const vector_Type& disp,
-			    const UInt iter, 
+			    const UInt iter,
                             Real factor,
                             const dataPtr_Type& dataMaterial,
                             const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
@@ -252,6 +252,19 @@ public:
                                                  const Epetra_SerialDenseMatrix& cofactorF,
                                                  const std::vector<Real>& invariants,
                                                  const UInt marker);
+
+    //! Compute the First Piola Kirchhoff Tensor
+    /*!
+       \param disp the displacement field from which we compute the fisrt piola-Kirchhoff tensor
+       \param sigma_1 the first column of the Cauchy stress tensor
+       \param sigma_2 the second column of the Cauchy stress tensor
+       \param sigma_3 the third column of the Cauchy stress tensor
+    */
+    void computeCauchyStressTensor ( const vectorPtr_Type disp,
+				     const QuadratureRule& evalQuad,
+				     vectorPtr_Type sigma_1,
+				     vectorPtr_Type sigma_2,
+				     vectorPtr_Type sigma_3);
 
 
     void setupFiberDirections( vectorFiberFunctionPtr_Type vectorOfFibers );
@@ -758,10 +771,22 @@ void DistributedHolzapfelMaterialNonLinear<MeshType>::computeLocalFirstPiolaKirc
                                                                                      const std::vector<Real>& invariants,
                                                                                      const UInt marker)
 {
+    // It can be done using the evaluateNodal framework that has been shown to work
+    // for the isotropic laws!
+}
 
-  // Still Need to Define P
+template <typename MeshType>
+void DistributedHolzapfelMaterialNonLinear<MeshType>::computeCauchyStressTensor ( const vectorPtr_Type disp,
+										  const QuadratureRule& evalQuad,
+										  vectorPtr_Type sigma_1,
+										  vectorPtr_Type sigma_2,
+										  vectorPtr_Type sigma_3)
+{
+
+  ASSERT( 2 < 0 , "For the distributed anisotropic law the computation of the Cauchy stress has to be defined." );
 
 }
+
 
 template <typename MeshType>
 inline StructuralAnisotropicConstitutiveLaw<MeshType>* createDistributedHolzapfelMaterialNonLinear()

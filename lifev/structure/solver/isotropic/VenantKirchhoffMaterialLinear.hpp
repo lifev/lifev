@@ -85,6 +85,8 @@ public:
 
     typedef MatrixSmall<3, 3>                         matrixSmall_Type;
 
+    typedef typename super::tensorF_Type               tensorF_Type;
+
     //@}
 
     //! @name Constructor &  Destructor
@@ -181,6 +183,18 @@ public:
                                                  const Epetra_SerialDenseMatrix& cofactorF,
                                                  const std::vector<Real>& invariants,
                                                  const UInt marker);
+    //! Compute the First Piola Kirchhoff Tensor
+    /*!
+       \param disp the displacement field from which we compute the fisrt piola-Kirchhoff tensor
+       \param sigma_1 the first column of the Cauchy stress tensor
+       \param sigma_2 the second column of the Cauchy stress tensor
+       \param sigma_3 the third column of the Cauchy stress tensor
+    */
+    void computeCauchyStressTensor ( const vectorPtr_Type disp,
+				     const QuadratureRule& evalQuad,
+				     vectorPtr_Type sigma_1,
+				     vectorPtr_Type sigma_2,
+				     vectorPtr_Type sigma_3);
 
     //@}
 
@@ -404,8 +418,8 @@ template <typename MeshType>
 void
 VenantKirchhoffMaterialLinear<MeshType>::computeLocalFirstPiolaKirchhoffTensor ( Epetra_SerialDenseMatrix& firstPiola,
 										 const Epetra_SerialDenseMatrix& tensorF,
-										 const Epetra_SerialDenseMatrix& /*cofactorF*/,
-										 const std::vector<Real>& /*invariants*/,
+										 const Epetra_SerialDenseMatrix& cofactorF,
+										 const std::vector<Real>& invariants,
 										 const UInt marker)
 {
 
@@ -416,12 +430,13 @@ VenantKirchhoffMaterialLinear<MeshType>::computeLocalFirstPiolaKirchhoffTensor (
     Epetra_SerialDenseMatrix copyF (tensorF);
     Epetra_SerialDenseMatrix identity (nDimensions, nDimensions);
 
-    //Computation gradient of u and setting the identity tensor
-    for ( UInt icoor = 0; icoor < nDimensions; icoor++ )
-    {
-        copyF (icoor, icoor) -= 1.0;
-        identity (icoor, icoor) = 1;
-    }
+    copyF (0,0) += -1.0;
+    copyF (1,1) += -1.0;
+    copyF (2,2) += -1.0;
+
+    identity (0,0) = 1.0;
+    identity (1,1) = 1.0;
+    identity (2,2) = 1.0;
 
     Real divergenceU ( copyF (0, 0) + copyF (1, 1) + copyF (2, 2) ); //DivU = tr(copyF)
     Real coefIdentity (0.0);
@@ -439,7 +454,80 @@ VenantKirchhoffMaterialLinear<MeshType>::computeLocalFirstPiolaKirchhoffTensor (
 
     firstPiola = identity;
     firstPiola += secondTerm;
+
+    // Here we multiply the Piola tensor for J and F^-T because in the WallTensionEstimator class
+    // the transformation from the Piola to the Cauchy stress tensor is always done while for this model
+    // the two tensors coincide
+    firstPiola.Scale( invariants[3] );
+
+    Epetra_SerialDenseMatrix tensorP (nDimensions, nDimensions);
+
+    tensorP.Multiply ('N', 'N', 1.0, firstPiola, cofactorF, 0.0); //see Epetra_SerialDenseMatrix
+
+    firstPiola.Scale(0.0);
+    firstPiola += tensorP;
 }
+
+template <typename MeshType>
+void VenantKirchhoffMaterialLinear<MeshType>::computeCauchyStressTensor ( const vectorPtr_Type disp,
+                                                                          const QuadratureRule& evalQuad,
+                                                                          vectorPtr_Type sigma_1,
+                                                                          vectorPtr_Type sigma_2,
+                                                                          vectorPtr_Type sigma_3)
+
+{
+
+    using namespace ExpressionAssembly;
+
+    MatrixSmall<3, 3> identity;
+
+    // Defining the div of u
+    identity (0, 0) = 1.0; identity (0, 1) = 0.0; identity (0, 2) = 0.0;
+    identity (1, 0) = 0.0; identity (1, 1) = 1.0; identity (1, 2) = 0.0;
+    identity (2, 0) = 0.0; identity (2, 1) = 0.0; identity (2, 2) = 1.0;
+
+    ExpressionTrace<ExpressionInterpolateGradient<MeshType, MapEpetra, 3, 3> > Div( grad( this->M_dispETFESpace,  *disp, this->M_offset ) );
+
+    evaluateNode( elements ( this->M_dispETFESpace->mesh() ),
+                  evalQuad,
+                  this->M_dispETFESpace,
+                  meas_K *  dot ( vectorFromMatrix(  parameter ( (* (this->M_vectorsParameters) ) [0]) * Div * identity +
+                                                     parameter ( (* (this->M_vectorsParameters) ) [1]) *
+                                                     ( grad ( this->M_dispETFESpace,  *disp, this->M_offset )  +
+                                                       transpose ( grad ( this->M_dispETFESpace,  *disp, this->M_offset ) )
+                                                       )
+                                                     ,  0 ), phi_i)
+                  ) >> sigma_1;
+    sigma_1->globalAssemble();
+
+
+
+    evaluateNode( elements ( this->M_dispETFESpace->mesh() ),
+                  evalQuad,
+                  this->M_dispETFESpace,
+                  meas_K *  dot ( vectorFromMatrix(  parameter ( (* (this->M_vectorsParameters) ) [0]) * Div * identity +
+                                                     parameter ( (* (this->M_vectorsParameters) ) [1]) *
+                                                     ( grad ( this->M_dispETFESpace,  *disp, this->M_offset )  +
+                                                       transpose ( grad ( this->M_dispETFESpace,  *disp, this->M_offset ) )
+                                                       )
+                                                     ,  1 ), phi_i)
+                  ) >> sigma_2;
+    sigma_2->globalAssemble();
+
+    evaluateNode( elements ( this->M_dispETFESpace->mesh() ),
+                  evalQuad,
+                  this->M_dispETFESpace,
+                  meas_K *  dot ( vectorFromMatrix(  parameter ( (* (this->M_vectorsParameters) ) [0]) * Div * identity  +
+                                                     parameter ( (* (this->M_vectorsParameters) ) [1]) *
+                                                     ( grad ( this->M_dispETFESpace,  *disp, this->M_offset )  +
+                                                       transpose ( grad ( this->M_dispETFESpace,  *disp, this->M_offset ) )
+                                                      )
+                                                     ,  2 ), phi_i)
+                  ) >> sigma_3;
+    sigma_3->globalAssemble();
+
+}
+
 
 template <typename MeshType>
 inline StructuralIsotropicConstitutiveLaw<MeshType>* createVenantKirchhoffLinear()
