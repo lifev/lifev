@@ -31,7 +31,7 @@
 
    The general procedure to use this example is the following:
     - read the set of solutions from the hdf5 file
-    - compute the sigma tensor using the reconstruction procedure 
+    - compute the sigma tensor using the reconstruction procedure
       shown in testsuite/evaluateNodalETA/
     - use the method StructuralOperator::computeEigenvalue to,
       given a certain dof to compute the set of eigenvalues.
@@ -261,7 +261,7 @@ Structure::run3d()
     //! dataElasticStructure for parameters
     GetPot dataFile ( parameters->data_file_name.c_str() );
     boost::shared_ptr<StructuralConstitutiveLawData> dataStructure (new StructuralConstitutiveLawData( ) );
-    
+
     dataStructure->setup (dataFile);
 
     dataStructure->showMe();
@@ -342,8 +342,8 @@ Structure::run3d()
 
     if( !dataStructure->constitutiveLaw().compare("anisotropic") )
       {
-	//! 3.b Setting the fibers in the abstract class of Anisotropic materials
-	solid.material()->anisotropicLaw()->setupFiberDirections( pointerToVectorOfFamilies );
+          //! 3.b Setting the fibers in the abstract class of Anisotropic materials
+          solid.material()->anisotropicLaw()->setupFiberDirections( pointerToVectorOfFamilies );
       }
 
 
@@ -412,8 +412,8 @@ Structure::run3d()
     vectorPtr_Type patchAreaVectorScalar;
     vectorPtr_Type patchAreaVector;
 
-    /* 
-       Vector to pass to the StructuralOperator and to export 
+    /*
+       Vector to pass to the StructuralOperator and to export
        what is read.
     */
     vectorPtr_Type disp;
@@ -423,7 +423,6 @@ Structure::run3d()
     vectorPtr_Type sigma_1;
     vectorPtr_Type sigma_2;
     vectorPtr_Type sigma_3;
-    vectorPtr_Type solidTensions;    
 
     // Vector for the eigenvalues
     vectorPtr_Type vectorEigenvalues;
@@ -437,7 +436,6 @@ Structure::run3d()
 
     disp.reset( new vector_Type( dFESpace->map() ) );
     dispRead.reset( new vector_Type( dFESpace->map() ) );
-    solidTensions.reset( new vector_Type ( dFESpace->map() ) );
 
     sigma_1.reset( new vector_Type( dFESpace->map() ) );
     sigma_2.reset( new vector_Type( dFESpace->map() ) );
@@ -460,29 +458,26 @@ Structure::run3d()
     exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "vectorEigenvalues",
                               dFESpace, vectorEigenvalues, UInt (0) );
 
-    exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "vonMises", 
-			    dFESpace, solidTensions, UInt (0) );
-
 
     if( !dataStructure->constitutiveLaw().compare("anisotropic") )
-      {
-	for( UInt i(0); i < dataStructure->numberFibersFamilies( ); i++ )
-	  {
-	    std::string familyNumber;
-	    std::ostringstream number;
-	    number << ( i + 1 );
-	    familyNumber = number.str();
+    {
+        for( UInt i(0); i < dataStructure->numberFibersFamilies( ); i++ )
+        {
+            std::string familyNumber;
+            std::ostringstream number;
+            number << ( i + 1 );
+            familyNumber = number.str();
 
-	    stretch[ i ].reset( new vector_Type( dScalarFESpace->map() ) );
+            stretch[ i ].reset( new vector_Type( dScalarFESpace->map() ) );
 
-	    std::string stringNameS("stretch");
-	    
-	    stringNameS += "-"; stringNameS += familyNumber;
-	    
-	    exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::ScalarField, stringNameS,
-				    dScalarFESpace, stretch[ i ], UInt (0) );
-	  }
-      }
+            std::string stringNameS("stretch");
+
+            stringNameS += "-"; stringNameS += familyNumber;
+
+            exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::ScalarField, stringNameS,
+                                    dScalarFESpace, stretch[ i ], UInt (0) );
+        }
+    }
 
     exporter->postProcess ( 0.0 );
 
@@ -558,16 +553,16 @@ Structure::run3d()
     for( UInt i(0); i < numberOfSol; i++ )
     {
         *sigma_1 *=0.0;
-	*sigma_2 *=0.0;
-	*sigma_3 *=0.0;
+        *sigma_2 *=0.0;
+        *sigma_3 *=0.0;
         *vectorEigenvalues *=0.0;
 
         // Reading the solution
         // resetting the element of the vector
-	*disp *= 0.0;
-	*dispRead *= 0.0;
+        *disp *= 0.0;
+        *dispRead *= 0.0;
 
-	UInt current = dataFile ( "importer/iteration" , 100000, i );
+        UInt current = dataFile ( "importer/iteration" , 100000, i );
         // Transform current ingot a string
         std::string iterationString;
         std::ostringstream number;
@@ -575,84 +570,74 @@ Structure::run3d()
         number << std::setw (5) << ( current );
         iterationString = number.str();
 
-	std::cout << "Current reading: " << iterationString << std::endl;
+        std::cout << "Current reading: " << iterationString << std::endl;
 
         /*!Definition of the ExporterData, used to load the solution inside the previously defined vectors*/
-	LifeV::ExporterData<mesh_Type> solutionDispl  (LifeV::ExporterData<mesh_Type>::VectorField,nameField + "." + iterationString, 
-						       dFESpace, disp, UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
-
-	// Computing the tensions with the old technique.
+        LifeV::ExporterData<mesh_Type> solutionDispl  (LifeV::ExporterData<mesh_Type>::VectorField,nameField + "." + iterationString,
+                                                       dFESpace, disp, UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
 
         //Read the variable
         M_importer->readVariable (solutionDispl);
 
-        tensionsClass.setDisplacement (*disp);
+        *dispRead = *disp;
 
-        //Perform the analysis
-        tensionsClass.analyzeTensions();
+        solid.computeCauchyStressTensor( disp, fakeQuadratureRule, sigma_1, sigma_2, sigma_3 );
 
-        *solidTensions = tensionsClass.principalStresses();
+        // Concluding reconstruction
+        *sigma_1 = *sigma_1 / *patchAreaVector;
+        *sigma_2 = *sigma_2 / *patchAreaVector;
+        *sigma_3 = *sigma_3 / *patchAreaVector;
 
+        // Computing eigenvalues
+        solid.computePrincipalTensions( sigma_1, sigma_2, sigma_3, vectorEigenvalues );
 
-	*dispRead = *disp;
+        if( !dataStructure->constitutiveLaw().compare("anisotropic") )
+        {
+            // Defining expressions
+            ExpressionDefinitions::deformationGradient_Type  F =
+                ExpressionDefinitions::deformationGradient ( dETFESpace,  *disp, 0, identity );
 
-	solid.computeCauchyStressTensor( disp, fakeQuadratureRule, sigma_1, sigma_2, sigma_3 );
+            // Definition of C = F^T F
+            ExpressionDefinitions::rightCauchyGreenTensor_Type C =
+                ExpressionDefinitions::tensorC( transpose(F), F );
 
-	// Concluding reconstruction
-	*sigma_1 = *sigma_1 / *patchAreaVector;
-	*sigma_2 = *sigma_2 / *patchAreaVector;
-	*sigma_3 = *sigma_3 / *patchAreaVector;
+            // Definition of J
+            ExpressionDefinitions::determinantTensorF_Type J =
+                ExpressionDefinitions::determinantF( F );
 
-	// Computing eigenvalues
-	solid.computePrincipalTensions( sigma_1, sigma_2, sigma_3, vectorEigenvalues );
+            // Definition of J^-(2/3) = det( C ) using the isochoric/volumetric decomposition
+            ExpressionDefinitions::powerExpression_Type  Jel =
+                ExpressionDefinitions::powerExpression( J , (-2.0/3.0) );
 
-	if( !dataStructure->constitutiveLaw().compare("anisotropic") )
-	  {
-	    // Defining expressions
-	    ExpressionDefinitions::deformationGradient_Type  F =
-	      ExpressionDefinitions::deformationGradient ( dETFESpace,  *disp, 0, identity );
+            // Evaluating quantities that are related to fibers
+            for( UInt j(0); j < dataStructure->numberFibersFamilies( ); j++ )
+            {
+                // Fibers definitions
+                ExpressionDefinitions::interpolatedValue_Type fiberIth =
+                    ExpressionDefinitions::interpolateFiber( dETFESpace, *(vectorInterpolated[ j ] ) );
 
-	    // Definition of C = F^T F
-	    ExpressionDefinitions::rightCauchyGreenTensor_Type C =
-	      ExpressionDefinitions::tensorC( transpose(F), F );
+                // f /otimes f
+                ExpressionDefinitions::outerProduct_Type Mith = ExpressionDefinitions::fiberTensor( fiberIth );
 
-	    // Definition of J
-	    ExpressionDefinitions::determinantTensorF_Type J =
-	      ExpressionDefinitions::determinantF( F );
+                // Definition of the fourth invariant : I_4^i = C:Mith
+                ExpressionDefinitions::stretch_Type IVith = ExpressionDefinitions::fiberStretch( C, Mith );
 
-	    // Definition of J^-(2/3) = det( C ) using the isochoric/volumetric decomposition
-	    ExpressionDefinitions::powerExpression_Type  Jel =
-	      ExpressionDefinitions::powerExpression( J , (-2.0/3.0) );
+                // Definition of the fouth isochoric invariant : J^(-2.0/3.0) * I_4^i
+                ExpressionDefinitions::isochoricStretch_Type IVithBar =
+                    ExpressionDefinitions::isochoricFourthInvariant( Jel, IVith );
 
-	    // Evaluating quantities that are related to fibers
-	    for( UInt j(0); j < dataStructure->numberFibersFamilies( ); j++ )
-	      {
-		// Fibers definitions
-		ExpressionDefinitions::interpolatedValue_Type fiberIth =
-		  ExpressionDefinitions::interpolateFiber( dETFESpace, *(vectorInterpolated[ j ] ) );
+                *stretch[ j ] *= 0.0;
 
-		// f /otimes f
-		ExpressionDefinitions::outerProduct_Type Mith = ExpressionDefinitions::fiberTensor( fiberIth );
+                evaluateNode( elements ( dScalarETFESpace->mesh() ),
+                              fakeQuadratureRule,
+                              dScalarETFESpace,
+                              meas_K * IVithBar  * phi_i
+                              ) >> stretch[ j ];
+                stretch[ j ]->globalAssemble();
+                *(stretch[ j ]) = *(stretch[ j ]) / *patchAreaVectorScalar;
 
-		// Definition of the fourth invariant : I_4^i = C:Mith
-		ExpressionDefinitions::stretch_Type IVith = ExpressionDefinitions::fiberStretch( C, Mith );
-
-		// Definition of the fouth isochoric invariant : J^(-2.0/3.0) * I_4^i
-		ExpressionDefinitions::isochoricStretch_Type IVithBar =
-		  ExpressionDefinitions::isochoricFourthInvariant( Jel, IVith );
-	    
-		*stretch[ j ] *= 0.0;
-
-		evaluateNode( elements ( dScalarETFESpace->mesh() ),
-			      fakeQuadratureRule,
-			      dScalarETFESpace,
-			      meas_K * IVithBar  * phi_i
-			      ) >> stretch[ j ];
-		stretch[ j ]->globalAssemble();
-		*(stretch[ j ]) = *(stretch[ j ]) / *patchAreaVectorScalar;
-
-	      }
-	  }
+            }
+        }
         exporter->postProcess( 1.0 * ( i + 1 ) );
     }
 
