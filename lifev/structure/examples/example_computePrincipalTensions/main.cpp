@@ -436,7 +436,6 @@ Structure::run3d()
 
     disp.reset( new vector_Type( dFESpace->map() ) );
     dispRead.reset( new vector_Type( dFESpace->map() ) );
-
     sigma_1.reset( new vector_Type( dFESpace->map() ) );
     sigma_2.reset( new vector_Type( dFESpace->map() ) );
     sigma_3.reset( new vector_Type( dFESpace->map() ) );
