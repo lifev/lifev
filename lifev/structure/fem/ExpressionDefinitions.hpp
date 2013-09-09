@@ -174,76 +174,35 @@ typedef ExpressionProduct<
 
 //@}
 
-inline deformationGradient_Type deformationGradient( const boost::shared_ptr< ETFESpace_Type > dispETFESpace,
-                                              const vector_Type& disp, UInt offset, const matrixSmall_Type identity)
-{
-    return deformationGradient_Type( grad( dispETFESpace,  disp, offset), value(identity) );
-}
+ deformationGradient_Type deformationGradient( const boost::shared_ptr< ETFESpace_Type > dispETFESpace,
+					       const vector_Type& disp, UInt offset, const matrixSmall_Type identity);
 
-inline determinantTensorF_Type determinantF( const deformationGradient_Type F )
-{
-    return determinantTensorF_Type( F );
-}
+  determinantTensorF_Type determinantF( const deformationGradient_Type F );
 
-inline rightCauchyGreenTensor_Type tensorC( const ExpressionTranspose<deformationGradient_Type> tF, const deformationGradient_Type F )
-{
-    return rightCauchyGreenTensor_Type( tF, F );
-}
+  rightCauchyGreenTensor_Type tensorC( const ExpressionTranspose<deformationGradient_Type> tF, const deformationGradient_Type F );
 
-inline minusTransposedTensor_Type minusT( const deformationGradient_Type F )
-{
-    return minusTransposedTensor_Type( F );
-}
+  minusTransposedTensor_Type minusT( const deformationGradient_Type F );
 
-inline inverseTensor_Type inv( const deformationGradient_Type F )
-{
-    return inverseTensor_Type( F );
-}
+  inverseTensor_Type inv( const deformationGradient_Type F );
 
-inline traceTensor_Type traceTensor( const rightCauchyGreenTensor_Type C )
-{
-    return traceTensor_Type( C );
-}
+  traceTensor_Type traceTensor( const rightCauchyGreenTensor_Type C );
 
-inline traceSquaredTensor_Type traceSquared( const rightCauchyGreenTensor_Type C )
-{
-  return traceSquaredTensor_Type( C , C );
-}
+  traceSquaredTensor_Type traceSquared( const rightCauchyGreenTensor_Type C );
 
-inline powerExpression_Type powerExpression( const determinantTensorF_Type J, const Real exponent )
-{
-  return powerExpression_Type( J , exponent );
-}
+  powerExpression_Type powerExpression( const determinantTensorF_Type J, const Real exponent );
 
-inline isochoricTrace_Type isochoricTrace( const powerExpression_Type Jel, const traceTensor_Type I )
-{
-  return isochoricTrace_Type( Jel , I );
-}
-
-
+  isochoricTrace_Type isochoricTrace( const powerExpression_Type Jel, const traceTensor_Type I );
 
 // Constructors for anisotropic laws
 #ifdef ENABLE_ANISOTROPIC_LAW
-inline interpolatedValue_Type interpolateFiber( const boost::shared_ptr< ETFESpace_Type > dispETFESpace,
-					 const vector_Type& fiberVector)
-{
-  return interpolatedValue_Type( dispETFESpace, fiberVector ) ;
-}
+ interpolatedValue_Type interpolateFiber( const boost::shared_ptr< ETFESpace_Type > dispETFESpace,
+					  const vector_Type& fiberVector);
 
-inline outerProduct_Type fiberTensor( const interpolatedValue_Type ithFiber )
-{
-  return outerProduct_Type( ithFiber, ithFiber );
-}
+  outerProduct_Type fiberTensor( const interpolatedValue_Type ithFiber );
 
-inline stretch_Type fiberStretch( const rightCauchyGreenTensor_Type C, const outerProduct_Type M)
-{
-  return stretch_Type( C, M );
-}
+  stretch_Type fiberStretch( const rightCauchyGreenTensor_Type C, const outerProduct_Type M);
 
-inline isochoricStretch_Type isochoricFourthInvariant( const powerExpression_Type Jel, const stretch_Type I_4ith)
-{
-  return isochoricStretch_Type( Jel, I_4ith );
-}
+  isochoricStretch_Type isochoricFourthInvariant( const powerExpression_Type Jel, const stretch_Type I_4ith);
 
 #endif
 } //! End namespace ExpressionDefinitions
@@ -376,178 +335,75 @@ typedef ExpressionAddition<
 // Constructors for the expressions defined by the typedefs
 //@{
 
-inline distributedIsochoricTrace_Type distributedIsochoricTrace( const Real coeff, const ExpressionDefinitions::isochoricTrace_Type ICbar )
-{
-    return distributedIsochoricTrace_Type( value( coeff ), ICbar);
-}
+  distributedIsochoricTrace_Type distributedIsochoricTrace( const Real coeff, const ExpressionDefinitions::isochoricTrace_Type ICbar );
 
-inline distributedIsochoricStretch_Type distributedIsochoricFourthInvariant( const Real coeff, const ExpressionDefinitions::isochoricStretch_Type I4bar)
-{
-    return distributedIsochoricStretch_Type( value( coeff ), I4bar );
-}
+  distributedIsochoricStretch_Type distributedIsochoricFourthInvariant( const Real coeff, const ExpressionDefinitions::isochoricStretch_Type I4bar);
 
-inline distributedInvariants_Type distributeInvariants( const distributedIsochoricTrace_Type distrIC,
-                                                 const distributedIsochoricStretch_Type distrI4 )
-{
-    return distributedInvariants_Type( distrIC,distrI4 );
-}
+ distributedInvariants_Type distributeInvariants( const distributedIsochoricTrace_Type distrIC,
+						  const distributedIsochoricStretch_Type distrI4 );
 
-inline distributedStretch_Type distributedStretch( const ExpressionDefinitions::isochoricTrace_Type trCBar,
-                                            const ExpressionDefinitions::isochoricStretch_Type I_4ith, const Real kappa )
-{
-  distributedIsochoricTrace_Type dIC_bar = distributedIsochoricTrace( kappa, trCBar ) ;
-  distributedIsochoricStretch_Type dI4_bar = distributedIsochoricFourthInvariant( 1.0 - 3.0 * kappa, I_4ith ) ;
+ distributedStretch_Type distributedStretch( const ExpressionDefinitions::isochoricTrace_Type trCBar,
+					     const ExpressionDefinitions::isochoricStretch_Type I_4ith, const Real kappa );
 
-  distributedInvariants_Type dInvariants = distributeInvariants( dIC_bar, dI4_bar );
+  minusTFscalarDF_distrType minusTFscalarDF( const ExpressionDefinitions::minusTransposedTensor_Type minusFT);
 
-  return distributedStretch_Type( dInvariants, value( -1.0 ) );
-}
+  FscalarDF_distrType FscalarDF( const ExpressionDefinitions::deformationGradient_Type F );
 
-inline minusTFscalarDF_distrType minusTFscalarDF( const ExpressionDefinitions::minusTransposedTensor_Type minusFT)
-{
-    return minusTFscalarDF_distrType( minusFT, grad( phi_j ) );
-}
+ dFTtimesFscalarM_distrType dFTtimesFscalarM( const ExpressionDefinitions::deformationGradient_Type F,
+					      const ExpressionDefinitions::outerProduct_Type M);
 
-inline FscalarDF_distrType FscalarDF( const ExpressionDefinitions::deformationGradient_Type F )
-{
-    return FscalarDF_distrType( F, grad(phi_j) );
-}
+ FTtimesDFscalarM_distrType FTtimesDFscalarM( const ExpressionDefinitions::deformationGradient_Type F,
+					      const ExpressionDefinitions::outerProduct_Type M);
 
-inline dFTtimesFscalarM_distrType dFTtimesFscalarM( const ExpressionDefinitions::deformationGradient_Type F,
-                                             const ExpressionDefinitions::outerProduct_Type M)
-{
-    return dFTtimesFscalarM_distrType( transpose( grad(phi_j) ) * F, M );
-}
+  scaledTrace_Type scaleTrace( const Real coeff, const  ExpressionDefinitions::traceTensor_Type tr );
 
-inline FTtimesDFscalarM_distrType FTtimesDFscalarM( const ExpressionDefinitions::deformationGradient_Type F,
-                                             const ExpressionDefinitions::outerProduct_Type M)
-{
-    return FTtimesDFscalarM_distrType( transpose( F ) * grad( phi_j ), M );
-}
+  scaledIsochoricTrace_Type scaleIsochoricTrace( const Real coeff, const  ExpressionDefinitions::isochoricTrace_Type isoTr );
 
-inline scaledTrace_Type scaleTrace( const Real coeff, const  ExpressionDefinitions::traceTensor_Type tr )
-{
-    return scaledTrace_Type( value( coeff ), tr );
-}
+  scaledDeterminant_Type scaleDeterminant( const Real coeff, const ExpressionDefinitions::powerExpression_Type Jel );
 
-inline scaledIsochoricTrace_Type scaleIsochoricTrace( const Real coeff, const  ExpressionDefinitions::isochoricTrace_Type isoTr )
-{
-    return scaledIsochoricTrace_Type( value( coeff ), isoTr );
-}
+  scaledFourthInvariant_Type scaleFourthInvariant( const Real coeff, const ExpressionDefinitions::stretch_Type I4 );
 
-inline scaledDeterminant_Type scaleDeterminant( const Real coeff, const ExpressionDefinitions::powerExpression_Type Jel )
-{
-    return scaledDeterminant_Type( value( coeff ), Jel );
-}
+  scaledIsochoricFourthInvariant_Type scaleIsochoricFourthInvariant( const Real coeff, const ExpressionDefinitions::isochoricStretch_Type isoI4 );
 
-inline scaledFourthInvariant_Type scaleFourthInvariant( const Real coeff, const ExpressionDefinitions::stretch_Type I4 )
-{
-    return scaledFourthInvariant_Type( value( coeff ), I4 );
-}
+ linearizationFisochoricTrace_Type derivativeIsochoricTrace( const ExpressionDefinitions::isochoricTrace_Type isoTr,
+							     const ExpressionDefinitions::powerExpression_Type Jel,
+							     const ExpressionDefinitions::deformationGradient_Type F,
+							     const ExpressionDefinitions::minusTransposedTensor_Type F_T);
 
-inline scaledIsochoricFourthInvariant_Type scaleIsochoricFourthInvariant( const Real coeff, const ExpressionDefinitions::isochoricStretch_Type isoI4 )
-{
-    return scaledIsochoricFourthInvariant_Type( value( coeff ) , isoI4 );
-}
+ linearizationFisochoricFourthInvariant_Type derivativeIsochoricFourthInvariant( const ExpressionDefinitions::isochoricStretch_Type isoI4,
+										 const ExpressionDefinitions::powerExpression_Type Jel,
+										 const ExpressionDefinitions::deformationGradient_Type F,
+										 const ExpressionDefinitions::minusTransposedTensor_Type F_T,
+										 const ExpressionDefinitions::outerProduct_Type M);
 
-inline linearizationFisochoricTrace_Type derivativeIsochoricTrace( const ExpressionDefinitions::isochoricTrace_Type isoTr,
-                                                                   const ExpressionDefinitions::powerExpression_Type Jel,
-                                                                   const ExpressionDefinitions::deformationGradient_Type F,
-                                                                   const ExpressionDefinitions::minusTransposedTensor_Type F_T)
-{
-    scaledIsochoricTrace_Type scIsoTr = scaleIsochoricTrace(  ( -2.0/3.0 ), isoTr );
-    scaledDeterminant_Type    scJ = scaleDeterminant( 2.0, Jel );
+  linearizationDistributedStretch_Type derivativeDistributedStretch( const Real kappa,
+								     const ExpressionDefinitions::isochoricTrace_Type isoTr,
+								     const ExpressionDefinitions::isochoricStretch_Type isoI4,
+								     const ExpressionDefinitions::powerExpression_Type Jel,
+								     const ExpressionDefinitions::deformationGradient_Type F,
+								     const ExpressionDefinitions::minusTransposedTensor_Type F_T,
+								     const ExpressionDefinitions::outerProduct_Type M);
 
-    minusTFscalarDF_distrType FTdotDF = minusTFscalarDF( F_T );
-    FscalarDF_distrType       FdotDF = FscalarDF( F );
+  scaledTensorF_Type scaleF( const Real coeff, const ExpressionDefinitions::deformationGradient_Type F );
 
-    return linearizationFisochoricTrace_Type( scIsoTr * FTdotDF , scJ * FdotDF );
-}
+ scaledTraceTimesMinusTF_Type scaleTraceMinuTF( const Real coeff,
+						const ExpressionDefinitions::traceTensor_Type Ic,
+						const ExpressionDefinitions::minusTransposedTensor_Type F_T );
 
-inline linearizationFisochoricFourthInvariant_Type derivativeIsochoricFourthInvariant( const ExpressionDefinitions::isochoricStretch_Type isoI4,
-                                                                                       const ExpressionDefinitions::powerExpression_Type Jel,
-                                                                                       const ExpressionDefinitions::deformationGradient_Type F,
-                                                                                       const ExpressionDefinitions::minusTransposedTensor_Type F_T,
-                                                                                       const ExpressionDefinitions::outerProduct_Type M)
-{
-    scaledIsochoricFourthInvariant_Type scIsoI4 = scaleIsochoricFourthInvariant( ( -2.0/3.0 ), isoI4 );
-
-    minusTFscalarDF_distrType FTdotDF = minusTFscalarDF( F_T );
-
-    dFTtimesFscalarM_distrType firstTerm = dFTtimesFscalarM( F, M );
-    FTtimesDFscalarM_distrType secondTerm = FTtimesDFscalarM( F, M );
-
-    return linearizationFisochoricFourthInvariant_Type( scIsoI4 * FTdotDF , Jel * ( firstTerm + secondTerm ) );
-}
-
-inline  linearizationDistributedStretch_Type derivativeDistributedStretch( const Real kappa,
-                                                                           const ExpressionDefinitions::isochoricTrace_Type isoTr,
-                                                                           const ExpressionDefinitions::isochoricStretch_Type isoI4,
-                                                                           const ExpressionDefinitions::powerExpression_Type Jel,
-                                                                           const ExpressionDefinitions::deformationGradient_Type F,
-                                                                           const ExpressionDefinitions::minusTransposedTensor_Type F_T,
-                                                                           const ExpressionDefinitions::outerProduct_Type M)
-{
-    linearizationFisochoricTrace_Type firstTerm = derivativeIsochoricTrace( isoTr, Jel, F, F_T );
-    linearizationFisochoricFourthInvariant_Type secondTerm = derivativeIsochoricFourthInvariant( isoI4, Jel, F, F_T, M);
-
-    return linearizationDistributedStretch_Type( value(kappa) * firstTerm, value( 1.0 - 3.0 * kappa) * secondTerm );
-}
-
-inline scaledTensorF_Type scaleF( const Real coeff, const ExpressionDefinitions::deformationGradient_Type F )
-{
-    return scaledTensorF_Type( coeff, F);
-}
-
-inline scaledTraceTimesMinusTF_Type scaleTraceMinuTF( const Real coeff,
-                                               const ExpressionDefinitions::traceTensor_Type Ic,
-                                               const ExpressionDefinitions::minusTransposedTensor_Type F_T )
-{
-    scaledTrace_Type scIc = scaleTrace( coeff, Ic );
-
-    return scaledTraceTimesMinusTF_Type( scIc, F_T );
-}
-
-inline scaledFtimesM_Type scaleFtimesM( const Real coeff,
+ scaledFtimesM_Type scaleFtimesM( const Real coeff,
                                  const ExpressionDefinitions::deformationGradient_Type F,
-                                 const ExpressionDefinitions::outerProduct_Type M)
-{
+				  const ExpressionDefinitions::outerProduct_Type M);
 
-    return scaledFtimesM_Type( coeff, F*M );
-}
-
-inline scaledFourthInvariantTimesMinusTF_Type scaleI4timesMinutTF( const Real coeff,
+ scaledFourthInvariantTimesMinusTF_Type scaleI4timesMinutTF( const Real coeff,
                                                             const ExpressionDefinitions::stretch_Type I4,
-                                                            const ExpressionDefinitions::minusTransposedTensor_Type F_T )
-{
-    scaledFourthInvariant_Type scI4 = scaleFourthInvariant( coeff , I4 );
+							     const ExpressionDefinitions::minusTransposedTensor_Type F_T );
 
-    return scaledFourthInvariantTimesMinusTF_Type( scI4, F_T );
-}
-
-inline tensorialPart_distrType tensorialPartPiola( const Real kappa,
+ tensorialPart_distrType tensorialPartPiola( const Real kappa,
                                             const ExpressionDefinitions::traceTensor_Type tr,
                                             const ExpressionDefinitions::stretch_Type I4,
                                             const ExpressionDefinitions::deformationGradient_Type F,
                                             const ExpressionDefinitions::minusTransposedTensor_Type F_T,
-                                            const ExpressionDefinitions::outerProduct_Type M)
-{
-    /*
-      First the terms of the expression are built term by term
-      The tensorial part of the Piola tensor corresponding to one fiber
-      reads:
-
-      kappa * F - ( kappa / 3.0 ) * I_C * F_T + ( 1 - 3*kappa) FM - ( 1 - 3*kappa )/3.0 * I4 * F_T
-    */
-
-    scaledTensorF_Type scF = scaleF( kappa, F );
-    scaledTraceTimesMinusTF_Type scTrF_T = scaleTraceMinuTF( - kappa / 3.0, tr, F_T );
-
-    scaledFtimesM_Type scFM = scaleFtimesM( ( 1 - 3.0 * kappa ), F, M );
-    scaledFourthInvariantTimesMinusTF_Type scI4F_T = scaleI4timesMinutTF( - ( 1.0 - 3.0 * kappa ) / 3.0, I4, F_T );
-
-    return tensorialPart_distrType( ( scF + scTrF_T ), ( scFM + scI4F_T ) );
-}
+					     const ExpressionDefinitions::outerProduct_Type M);
 //@}
 
 } // end namespace ExpressionDistributedModel
@@ -603,92 +459,48 @@ typedef ExpressionProduct< ExpressionDphiI,
                            ExpressionDefinitions::inverseTensor_Type>    activeTestGradient_Type;
 
 
-inline difference_Type absoluteStretch( const ExpressionDefinitions::isochoricStretch_Type IVbar,
-                                 const Real valueToSubtract)
-{
-    return difference_Type ( IVbar, value( valueToSubtract ) );
+ difference_Type absoluteStretch( const ExpressionDefinitions::isochoricStretch_Type IVbar,
+					const Real valueToSubtract);
 
-}
-
-inline activation_Type activationConstructor( const ExpressionMultimechanism::difference_Type absoluteStretch,
+ activation_Type activationConstructor( const ExpressionMultimechanism::difference_Type absoluteStretch,
                                        const Real intCoeff,
                                        const Real extCoeff,
-                                       const Real translation)
-{
-    return activation_Type( absoluteStretch, intCoeff, extCoeff, translation );
-}
+					const Real translation);
 
-inline expressionVectorFromDifference_Type vectorFromActivation( const ExpressionMultimechanism::difference_Type activation )
-{
-    return expressionVectorFromDifference_Type( activation );
-}
+  expressionVectorFromDifference_Type vectorFromActivation( const ExpressionMultimechanism::difference_Type activation );
 
-inline deformationActivatedTensor_Type createDeformationActivationTensor( const ExpressionDefinitions::deformationGradient_Type Ft,
-                                                                   const ExpressionDefinitions::inverseTensor_Type       F0_ta)
-{
-    return deformationActivatedTensor_Type( Ft, F0_ta );
-}
+ deformationActivatedTensor_Type createDeformationActivationTensor( const ExpressionDefinitions::deformationGradient_Type Ft,
+								    const ExpressionDefinitions::inverseTensor_Type       F0_ta);
 
-inline rightCauchyGreenMultiMechanism_Type activationRightCauchyGreen( const ExpressionDefinitions::minusTransposedTensor_Type FzeroAminusT,
+ rightCauchyGreenMultiMechanism_Type activationRightCauchyGreen( const ExpressionDefinitions::minusTransposedTensor_Type FzeroAminusT,
                                                                 const ExpressionDefinitions::rightCauchyGreenTensor_Type C,
-                                                                const ExpressionDefinitions::inverseTensor_Type FzeroAminus1 )
-{
-    ExpressionProduct< ExpressionDefinitions::rightCauchyGreenTensor_Type,
-                       ExpressionDefinitions::inverseTensor_Type > rightTerm( C, FzeroAminus1 );
-    return rightCauchyGreenMultiMechanism_Type( FzeroAminusT, rightTerm );
-}
+								 const ExpressionDefinitions::inverseTensor_Type FzeroAminus1 );
 
-inline activatedFiber_Type activateFiberDirection( const ExpressionDefinitions::deformationGradient_Type F,
-                                            const ExpressionDefinitions::interpolatedValue_Type ithFiber)
-{
-    return activatedFiber_Type( F, ithFiber );
-}
+ activatedFiber_Type activateFiberDirection( const ExpressionDefinitions::deformationGradient_Type F,
+					     const ExpressionDefinitions::interpolatedValue_Type ithFiber);
 
-inline activatedDeterminantF_Type activateDeterminantF( const ExpressionDefinitions::determinantTensorF_Type Jzero,
-                                                 const ExpressionDefinitions::powerExpression_Type JzeroA )
-{
-    return activatedDeterminantF_Type( Jzero, JzeroA );
-}
+ activatedDeterminantF_Type activateDeterminantF( const ExpressionDefinitions::determinantTensorF_Type Jzero,
+						  const ExpressionDefinitions::powerExpression_Type JzeroA );
 
-inline activePowerExpression_Type activePowerExpression( activatedDeterminantF_Type Ja,
-                                                  const Real exp)
-{
-    return activePowerExpression_Type ( Ja, exp );
-}
+ activePowerExpression_Type activePowerExpression( activatedDeterminantF_Type Ja,
+						   const Real exp);
 
-inline activeOuterProduct_Type activeOuterProduct( const activatedFiber_Type activatedFiber )
-{
-    return activeOuterProduct_Type( activatedFiber, activatedFiber );
-}
+  activeOuterProduct_Type activeOuterProduct( const activatedFiber_Type activatedFiber );
 
-inline activeStretch_Type activeFiberStretch( const rightCauchyGreenMultiMechanism_Type activeC,
-                                         const activeOuterProduct_Type activeM)
-{
-    return activeStretch_Type( activeC, activeM );
-}
+ activeStretch_Type activeFiberStretch( const rightCauchyGreenMultiMechanism_Type activeC,
+					const activeOuterProduct_Type activeM);
 
-inline activeIsochoricStretch_Type activeIsochoricFourthInvariant( const activePowerExpression_Type activeJ,
-                                                            const activeStretch_Type activeI4)
-{
-    return activeIsochoricStretch_Type( activeJ, activeI4 );
-}
+ activeIsochoricStretch_Type activeIsochoricFourthInvariant( const activePowerExpression_Type activeJ,
+							     const activeStretch_Type activeI4);
 
-inline activeMinusTtensor_Type createActiveMinusTtensor( const ExpressionDefinitions::minusTransposedTensor_Type FminusT,
-                                                  const ExpressionTranspose<ExpressionDefinitions::deformationGradient_Type> FzeroA)
-{
-    return activeMinusTtensor_Type ( FminusT, FzeroA );
-}
+ activeMinusTtensor_Type createActiveMinusTtensor( const ExpressionDefinitions::minusTransposedTensor_Type FminusT,
+						   const ExpressionTranspose<ExpressionDefinitions::deformationGradient_Type> FzeroA);
 
-inline activeLinearization_Type activatedLinearization( const ExpressionDphiJ der,
-                                                 const ExpressionDefinitions::inverseTensor_Type inverse)
-{
-    return activeLinearization_Type( der , inverse);
-}
-inline activeTestGradient_Type activatedTestGradient(const ExpressionDphiI gradTest,
-                                              const ExpressionDefinitions::inverseTensor_Type FAminus1)
-{
-    return activeTestGradient_Type ( gradTest, FAminus1 );
-}
+ activeLinearization_Type activatedLinearization( const ExpressionDphiJ der,
+						  const ExpressionDefinitions::inverseTensor_Type inverse);
+
+ activeTestGradient_Type activatedTestGradient(const ExpressionDphiI gradTest,
+					       const ExpressionDefinitions::inverseTensor_Type FAminus1);
 }// end namespace ExpressionDistributedModel
 #endif
 

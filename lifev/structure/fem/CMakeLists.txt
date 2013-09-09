@@ -5,6 +5,7 @@ CACHE INTERNAL "")
 
 SET(fem_SOURCES
   fem/AssemblyElementalStructure.cpp
+  fem/ExpressionDefinitions.cpp
 CACHE INTERNAL "")
 
 SET(LOCAL_HEADERS)
