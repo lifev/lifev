@@ -14,6 +14,7 @@
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedefs"
 #pragma GCC diagnostic ignored "-Wextra"
 
 #include <Epetra_Comm.h>
@@ -24,6 +25,7 @@
 // Tell the compiler to ignore specific kind of warnings:
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
+#pragma GCC diagnostic warning "-Wunused-local-typedefs"
 #pragma GCC diagnostic warning "-Wextra"
 
 #include <boost/shared_ptr.hpp>
@@ -64,8 +66,8 @@ public:
 
     //! @name Public Types
     //@{
-	typedef Epetra_Comm comm_Type;
-	typedef boost::shared_ptr<comm_Type> commPtr_Type;
+    typedef Epetra_Comm comm_Type;
+    typedef boost::shared_ptr<comm_Type> commPtr_Type;
     typedef Epetra_Map map_Type;
     typedef boost::shared_ptr<map_Type> mapPtr_Type;
     typedef boost::shared_ptr<const map_Type> constMapPtr_Type;

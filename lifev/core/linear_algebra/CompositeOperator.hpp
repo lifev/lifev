@@ -19,12 +19,12 @@ namespace Operators
 class CompositeOperator : public LinearOperator
 {
 public:
-	CompositeOperator();
+    CompositeOperator();
 
-	virtual ~CompositeOperator();
+    virtual ~CompositeOperator();
 
-	//! \warning Transpose is not supported yet.
-    virtual int SetUseTranspose(bool UseTranspose) { return -1; }
+    //! \warning Transpose is not supported yet.
+    virtual int SetUseTranspose(bool /*UseTranspose*/) { return -1; }
 
     //! The first operator we push is the first to be applied
     int pushBack( const operatorPtr_Type & op, const bool inverted);

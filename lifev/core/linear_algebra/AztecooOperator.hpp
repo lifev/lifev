@@ -36,8 +36,6 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 #pragma GCC diagnostic warning "-Wextra"
 
-#include <lifev/core/array/VectorEpetra.hpp>
-
 namespace LifeV
 {
 namespace Operators
@@ -53,10 +51,10 @@ namespace Operators
 class AztecooOperator : public InvertibleOperator
 {
 public:
-	typedef AztecOO SolverType;
-	typedef boost::shared_ptr<SolverType> SolverType_ptr;
+    typedef AztecOO SolverType;
+    typedef boost::shared_ptr<SolverType> SolverType_ptr;
 
-	AztecooOperator();
+    AztecooOperator();
 
     int numberOfIterations()
     {
@@ -65,18 +63,18 @@ public:
 
 protected:
 
-	virtual int doApplyInverse(const vector_Type& X, vector_Type& Y) const;
-	virtual void doSetOperator(){};
-	virtual void doSetPreconditioner(){};
-	virtual void doSetParameterList(){};
+    virtual int doApplyInverse(const vector_Type& X, vector_Type& Y) const;
+    virtual void doSetOperator(){};
+    virtual void doSetPreconditioner(){};
+    virtual void doSetParameterList(){};
 
-	SolverType_ptr								M_linSolver;
+    SolverType_ptr                              M_linSolver;
 };
 
 inline InvertibleOperator* createAztecooOperator() { return new AztecooOperator(); }
 namespace
 {
-	static bool registerAztecoo = InvertibleOperatorFactory::instance().registerProduct( "AztecOO", &createAztecooOperator );
+    static bool registerAztecoo = InvertibleOperatorFactory::instance().registerProduct( "AztecOO", &createAztecooOperator );
 }
 
 

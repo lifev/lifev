@@ -20,6 +20,7 @@
 
 #pragma GCC diagnostic ignored "-Wunused-variable"
 #pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedefs"
 #pragma GCC diagnostic ignored "-Wextra"
 
 #include <Epetra_CrsMatrix.h>
@@ -27,6 +28,7 @@
 
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
+#pragma GCC diagnostic warning "-Wunused-local-typedefs"
 #pragma GCC diagnostic warning "-Wextra"
 
 namespace LifeV
@@ -54,15 +56,15 @@ class RowMatrixPreconditioner : public LinearOperator
 {
 public:
 
-	//@name Typdefs
-	//@{
-	typedef Epetra_CrsMatrix rowMatrix_Type;
-	typedef boost::shared_ptr<rowMatrix_Type> rowMatrixPtr_Type;
-	typedef Teuchos::ParameterList pList_Type;
-	//@}
+    //@name Typdefs
+    //@{
+    typedef Epetra_CrsMatrix rowMatrix_Type;
+    typedef boost::shared_ptr<rowMatrix_Type> rowMatrixPtr_Type;
+    typedef Teuchos::ParameterList pList_Type;
+    //@}
 
-	//! Empty constructor
-	RowMatrixPreconditioner(): LinearOperator() {};
+    //! Empty constructor
+    RowMatrixPreconditioner(): LinearOperator() {};
 
 
     //! Destructor
@@ -73,20 +75,20 @@ public:
     //! Set the row matrix
     void SetRowMatrix(const rowMatrixPtr_Type & rowMatrix)
     {
-    	ASSERT_PRE(rowMatrix.get() != 0, "RowMatrixPreconditioner::SetRowMatrix(): rowMatrix can not be a null Pointer");
-    	M_rowMatrix = rowMatrix;
+        ASSERT_PRE(rowMatrix.get() != 0, "RowMatrixPreconditioner::SetRowMatrix(): rowMatrix can not be a null Pointer");
+        M_rowMatrix = rowMatrix;
     }
 
     //! Set the list of paramenters
     void SetParameterList(const pList_Type pList)
     {
-    	M_pList = pList;
+        M_pList = pList;
     }
 
     //! Transposition
     virtual int SetUseTranspose(bool UseTranspose)
     {
-    	return M_prec->SetUseTranspose(UseTranspose);
+        return M_prec->SetUseTranspose(UseTranspose);
     }
     //@}
 
@@ -97,25 +99,25 @@ public:
      */
     int Compute()
     {
-    	ASSERT_PRE(M_rowMatrix.get()!= 0, "RowMatrixPreconditioner::Compute(): You need to SetRowMatrix first \n");
-    	return myCompute();
+        ASSERT_PRE(M_rowMatrix.get()!= 0, "RowMatrixPreconditioner::Compute(): You need to SetRowMatrix first \n");
+        return myCompute();
     }
 
     //! @name Mathematical functions
     //@{
     virtual int Apply(const vector_Type& X, vector_Type& Y) const
     {
-    	return M_prec->Apply(X,Y);
+        return M_prec->Apply(X,Y);
     }
 
     virtual int ApplyInverse(const vector_Type& X, vector_Type& Y) const
     {
-    	return M_prec->ApplyInverse(X,Y);
+        return M_prec->ApplyInverse(X,Y);
     }
 
     virtual double NormInf() const
     {
-    	return M_prec->NormInf();
+        return M_prec->NormInf();
     }
     //@}
 
@@ -125,37 +127,37 @@ public:
     //! Returns a character string describing the operator
     virtual const char * Label() const
     {
-    	return M_prec->Label();
+        return M_prec->Label();
     }
 
     //! Returns the current UseTranspose setting.
     virtual bool UseTranspose() const
     {
-    	return M_prec->UseTranspose();
+        return M_prec->UseTranspose();
     }
 
     //! Returns true if the \e this object can provide an approximate Inf-norm, false otherwise.
     virtual bool HasNormInf() const
     {
-    	return M_prec->HasNormInf();
+        return M_prec->HasNormInf();
     }
 
     //! Returns a pointer to the Epetra_Comm communicator associated with this operator.
     virtual const comm_Type & Comm() const
     {
-    	return M_prec->Comm();
+        return M_prec->Comm();
     }
 
     //! Returns the raw_map object associated with the domain of this operator.
     virtual const map_Type & OperatorDomainMap() const
     {
-    	return M_prec->OperatorDomainMap();
+        return M_prec->OperatorDomainMap();
     }
 
     //! Returns the raw_map object associated with the range of this operator.
     virtual const map_Type & OperatorRangeMap() const
     {
-    	return M_prec->OperatorRangeMap();
+        return M_prec->OperatorRangeMap();
     }
     //@}
 
