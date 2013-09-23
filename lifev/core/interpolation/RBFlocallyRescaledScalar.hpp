@@ -136,6 +136,14 @@ private:
     neighborsPtr_Type   M_neighbors;
     vectorPtr_Type      M_unknownField_rbf;
     double              M_radius;
+
+    std::vector<double> M_kx;
+    std::vector<double> M_ky;
+    std::vector<double> M_kz;
+
+    std::vector<double> M_ukx;
+    std::vector<double> M_uky;
+    std::vector<double> M_ukz;
 };
 
 template <typename mesh_Type>
@@ -154,6 +162,29 @@ void RBFlocallyRescaledScalar<mesh_Type>::setup ( meshPtr_Type fullMeshKnown, me
     M_fullMeshUnknown = fullMeshUnknown;
     M_localMeshUnknown = localMeshUnknown;
     M_flags = flags;
+
+    M_kx.resize(M_fullMeshKnown->numVertices());
+    M_ky.resize(M_fullMeshKnown->numVertices());
+    M_kz.resize(M_fullMeshKnown->numVertices());
+
+    for (int j = 0; j <  M_fullMeshKnown->numVertices(); ++j)
+    {
+    	M_kx[j] =  M_fullMeshKnown->point(j).x();
+    	M_ky[j] =  M_fullMeshKnown->point(j).y();
+    	M_kz[j] =  M_fullMeshKnown->point(j).z();
+    }
+
+    M_ukx.resize(M_fullMeshUnknown->numVertices());
+    M_uky.resize(M_fullMeshUnknown->numVertices());
+    M_ukz.resize(M_fullMeshUnknown->numVertices());
+
+    for (int j = 0; j <  M_fullMeshUnknown->numVertices(); ++j)
+    {
+        M_ukx[j] =  M_fullMeshUnknown->point(j).x();
+        M_uky[j] =  M_fullMeshUnknown->point(j).y();
+        M_ukz[j] =  M_fullMeshUnknown->point(j).z();
+    }
+
 }
 
 template <typename mesh_Type>
@@ -235,13 +266,9 @@ void RBFlocallyRescaledScalar<Mesh>::interpolationOperator()
         for ( std::set<ID>::iterator it = MatrixGraph[i].begin(); it != MatrixGraph[i].end(); ++it)
         {
             Indices[k] = *it;
-            Values[k]  = rbf ( M_fullMeshKnown->point (GlobalID[i]).x(),
-                               M_fullMeshKnown->point (GlobalID[i]).y(),
-                               M_fullMeshKnown->point (GlobalID[i]).z(),
-                               M_fullMeshKnown->point (*it).x(),
-                               M_fullMeshKnown->point (*it).y(),
-                               M_fullMeshKnown->point (*it).z(),
-                               RBF_radius[i]);
+            Values[k]  = rbf ( M_kx[GlobalID[i]], M_ky[GlobalID[i]], M_kz[GlobalID[i]],
+                                               M_kx[*it], M_ky[*it], M_kz[*it],
+                                               RBF_radius[i]);
             ++k;
         }
         M_interpolationOperator->matrixPtr()->InsertGlobalValues (GlobalID[i], k, Values, Indices);
@@ -280,9 +307,9 @@ void RBFlocallyRescaledScalar<mesh_Type>::projectionOperator()
         {
             if ( M_flags[0] == -1 || this->isInside (M_fullMeshKnown->point (j).markerID(), M_flags) )
             {
-                d = std::sqrt ( pow (M_fullMeshKnown->point (j).x() - M_fullMeshUnknown->point (GlobalID[k]).x(), 2)
-                                + pow (M_fullMeshKnown->point (j).y() - M_fullMeshUnknown->point (GlobalID[k]).y(), 2)
-                                + pow (M_fullMeshKnown->point (j).z() - M_fullMeshUnknown->point (GlobalID[k]).z(), 2) );
+                d = std::sqrt ( pow (M_kx[j] - M_ukx[GlobalID[k]], 2)
+                                + pow (M_ky[j] - M_uky[GlobalID[k]], 2)
+                                + pow (M_kz[j] - M_ukz[GlobalID[k]], 2) );
                 if (d < d_min)
                 {
                     d_min = d;
@@ -313,13 +340,8 @@ void RBFlocallyRescaledScalar<mesh_Type>::projectionOperator()
         for ( std::set<ID>::iterator it = MatrixGraph[i].begin(); it != MatrixGraph[i].end(); ++it)
         {
             Indices[k] = *it;
-            Values[k]  = rbf ( M_fullMeshUnknown->point (GlobalID[i]).x(),
-                               M_fullMeshUnknown->point (GlobalID[i]).y(),
-                               M_fullMeshUnknown->point (GlobalID[i]).z(),
-                               M_fullMeshKnown->point (*it).x(),
-                               M_fullMeshKnown->point (*it).y(),
-                               M_fullMeshKnown->point (*it).z(),
-                               RBF_radius[i]);
+            Values[k]  = rbf ( M_ukx[GlobalID[i]], M_uky[GlobalID[i]], M_ukz[GlobalID[i]],
+            				   M_kx[*it], M_ky[*it], M_kz[*it], RBF_radius[i]);
             ++k;
         }
         M_projectionOperator->matrixPtr()->InsertGlobalValues (GlobalID[i], k, Values, Indices);
