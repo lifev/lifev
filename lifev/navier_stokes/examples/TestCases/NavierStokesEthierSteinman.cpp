@@ -93,25 +93,25 @@ NavierStokesEthierSteinman::hasExactSolution() const
     return true;
 }
 
-NavierStokesProblem::function_Type
+NavierStokesProblem<mesh_Type>::function_Type
 NavierStokesEthierSteinman::xexact()
 {
     return RossEthierSteinmanUnsteadyDec::xexact;
 }
 
-NavierStokesProblem::function_Type
+NavierStokesProblem<mesh_Type>::function_Type
 NavierStokesEthierSteinman::uexact()
 {
     return RossEthierSteinmanUnsteadyDec::uexact;
 }
 
-NavierStokesProblem::function_Type
+NavierStokesProblem<mesh_Type>::function_Type
 NavierStokesEthierSteinman::uderexact()
 {
     return RossEthierSteinmanUnsteadyDec::uderexact;
 }
 
-NavierStokesProblem::function_Type
+NavierStokesProblem<mesh_Type>::function_Type
 NavierStokesEthierSteinman::pexact()
 {
     return RossEthierSteinmanUnsteadyDec::pexact;

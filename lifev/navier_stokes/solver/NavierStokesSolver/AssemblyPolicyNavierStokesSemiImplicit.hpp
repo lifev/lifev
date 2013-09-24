@@ -76,12 +76,12 @@ namespace LifeV
 
 struct AssemblyPolicyNavierStokesSemiImplicit: public AssemblyPolicyStokes
 {
-    typedef boost::shared_ptr< NavierStokesProblem > NSProblemPtr_Type;
+	typedef RegionMesh<LinearTetra>                  mesh_Type;
+    typedef boost::shared_ptr< NavierStokesProblem<mesh_Type> > NSProblemPtr_Type;
     typedef MatrixEpetra<Real>                       matrix_Type;
     typedef boost::shared_ptr<matrix_Type>           matrixPtr_Type;
     typedef VectorEpetra                             vector_Type;
     typedef boost::shared_ptr<VectorEpetra>          vectorPtr_Type;
-    typedef RegionMesh<LinearTetra>                  mesh_Type;
     typedef MeshPartitioner< mesh_Type >             meshPartitioner_Type;
     typedef MapEpetra                                map_Type;
     typedef boost::shared_ptr<map_Type>              mapPtr_Type;

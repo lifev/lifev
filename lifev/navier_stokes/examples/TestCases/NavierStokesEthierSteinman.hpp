@@ -41,7 +41,12 @@
 namespace LifeV
 {
 
-class NavierStokesEthierSteinman : public NavierStokesProblem< RegionMesh< LinearTetra > >
+namespace
+{
+typedef RegionMesh< LinearTetra > mesh_Type;
+}
+
+class NavierStokesEthierSteinman : public NavierStokesProblem< mesh_Type >
 {
 
 private:
@@ -96,16 +101,16 @@ public:
     bool hasExactSolution() const;
 
     //! Returns the value of the exact solution
-    NavierStokesProblem::function_Type xexact();
+    NavierStokesProblem<mesh_Type>::function_Type xexact();
 
     //! Returns the value of the exact solution (velocity components only)
-    NavierStokesProblem::function_Type uexact();
+    NavierStokesProblem<mesh_Type>::function_Type uexact();
 
     //! Returns the value of the derivative of the exact solution with respect to the time (velocity components only)
-    NavierStokesProblem::function_Type uderexact();
+    NavierStokesProblem<mesh_Type>::function_Type uderexact();
 
     //! Returns the value of the exact solution (pressure component only)
-    NavierStokesProblem::function_Type pexact();
+    NavierStokesProblem<mesh_Type>::function_Type pexact();
 
     //! Display general information about the problem
     /*!
@@ -142,7 +147,7 @@ public:
     //@{
 
     //! Getter for the problem mesh
-    void mesh ( boost::shared_ptr< RegionMesh<LinearTetra> >& meshPart ) const;
+    void mesh ( boost::shared_ptr< mesh_Type >& meshPart ) const;
 
     //! Getter for the boundary conditions in the provided BCHandler
     /*!

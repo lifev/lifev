@@ -80,7 +80,7 @@ struct InitPolicyInterpolation
     typedef boost::shared_ptr< bdf_Type >            bdfPtr_Type;
     typedef BCHandler                                bcContainer_Type;
     typedef boost::shared_ptr<bcContainer_Type>      bcContainerPtr_Type;
-    typedef boost::shared_ptr< NavierStokesProblem > NSProblemPtr_Type;
+    typedef boost::shared_ptr< NavierStokesProblem<mesh_Type> > NSProblemPtr_Type;
 
     void setupInit ( Teuchos::ParameterList& list );
 

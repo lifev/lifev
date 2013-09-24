@@ -115,7 +115,7 @@ typedef NavierStokesSolver< mesh_Type, InitStokes, SemiImplicit, HDF5Exporter > 
 void setPreconditioner ( basePrecPtr_Type& precPtr,
                          const std::string& preconditionerName,
                          const std::string& precSection,
-                         boost::shared_ptr<NavierStokesProblem> /*nsProblem*/,
+                         boost::shared_ptr<NavierStokesProblem<mesh_Type> > /*nsProblem*/,
                          const nsSolver_Type& /*nsSolver*/,
                          const GetPot& dataFile,
                          boost::shared_ptr<Epetra_Comm> /*Comm*/,
@@ -200,7 +200,7 @@ main ( int argc, char** argv )
         std::string meshPath                  = problemList.get ( "Resources path", "./Resources" );
         meshPath.append ("/");
 
-        boost::shared_ptr<NavierStokesProblem> nsProblem;
+        boost::shared_ptr<NavierStokesProblem<mesh_Type> > nsProblem;
         if ( benchmark == "Cavity" )
         {
             nsProblem.reset ( new NavierStokesCavity );

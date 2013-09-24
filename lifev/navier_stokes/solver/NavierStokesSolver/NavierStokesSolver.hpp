@@ -78,22 +78,21 @@
 namespace LifeV
 {
 
-template< class mesh_Type, class InitPolicy, class TimeIterationPolicy, class ExporterPolicy = ExporterPolicyNoExporter >
+template< class Mesh, class InitPolicy, class TimeIterationPolicy, class ExporterPolicy = ExporterPolicyNoExporter >
 class NavierStokesSolver : private InitPolicy, public virtual TimeIterationPolicy, private ExporterPolicy
 {
 
 public:
 
-    typedef boost::shared_ptr< NavierStokesProblem > NSProblemPtr_Type;
+    typedef boost::shared_ptr< NavierStokesProblem<Mesh> > NSProblemPtr_Type;
     typedef MatrixEpetra<Real>                       matrix_Type;
     typedef boost::shared_ptr<matrix_Type>           matrixPtr_Type;
     typedef VectorEpetra                             vector_Type;
     typedef boost::shared_ptr<VectorEpetra>          vectorPtr_Type;
     typedef MapEpetra                                map_Type;
     typedef boost::shared_ptr<map_Type>              mapPtr_Type;
-    // typedef RegionMesh<LinearTetra>                  mesh_Type;
-    typedef boost::shared_ptr<mesh_Type>             meshPtr_Type;
-    typedef FESpace< mesh_Type, map_Type >           fespace_Type;
+    typedef boost::shared_ptr<Mesh>                  meshPtr_Type;
+    typedef FESpace< Mesh, map_Type >                fespace_Type;
     typedef boost::shared_ptr< fespace_Type >        fespacePtr_Type;
     typedef BCHandler                                bcContainer_Type;
     typedef boost::shared_ptr<bcContainer_Type>      bcContainerPtr_Type;
@@ -101,7 +100,7 @@ public:
     //typedef boost::shared_ptr<basePrec_Type>       basePrecPtr_Type;
     typedef Epetra_Comm                              comm_Type;
     typedef boost::shared_ptr<comm_Type>             commPtr_Type;
-    typedef OseenAssembler< mesh_Type, matrix_Type, vector_Type > assembler_Type;
+    typedef OseenAssembler< Mesh, matrix_Type, vector_Type > assembler_Type;
     typedef boost::shared_ptr< assembler_Type >      assemblerPtr_Type;
     typedef TimeAdvanceBDF<vector_Type>              bdf_Type;
     typedef boost::shared_ptr< bdf_Type >            bdfPtr_Type;
@@ -221,22 +220,22 @@ private:
 };
 
 
-template< class mesh_Type, class InitPolicy, class TimeIterationPolicy, class ExporterPolicy >
-NavierStokesSolver<mesh_Type, InitPolicy, TimeIterationPolicy, ExporterPolicy>::NavierStokesSolver ( commPtr_Type comm ) :
+template< class Mesh, class InitPolicy, class TimeIterationPolicy, class ExporterPolicy >
+NavierStokesSolver<Mesh, InitPolicy, TimeIterationPolicy, ExporterPolicy>::NavierStokesSolver ( commPtr_Type comm ) :
     M_comm ( comm ), M_displayer ( comm )
 {
 
 }
 
-template< class mesh_Type, class InitPolicy, class TimeIterationPolicy, class ExporterPolicy >
-NavierStokesSolver<mesh_Type, InitPolicy, TimeIterationPolicy, ExporterPolicy>::~NavierStokesSolver()
+template< class Mesh, class InitPolicy, class TimeIterationPolicy, class ExporterPolicy >
+NavierStokesSolver<Mesh, InitPolicy, TimeIterationPolicy, ExporterPolicy>::~NavierStokesSolver()
 {
 
 }
 
-template< class mesh_Type, class InitPolicy, class TimeIterationPolicy, class ExporterPolicy >
+template< class Mesh, class InitPolicy, class TimeIterationPolicy, class ExporterPolicy >
 void
-NavierStokesSolver<mesh_Type, InitPolicy, TimeIterationPolicy, ExporterPolicy>::printErrors()
+NavierStokesSolver<Mesh, InitPolicy, TimeIterationPolicy, ExporterPolicy>::printErrors()
 {
     ASSERT ( M_nsProblem->hasExactSolution(), "The problem does not have an exact solution" );
 
@@ -256,16 +255,16 @@ NavierStokesSolver<mesh_Type, InitPolicy, TimeIterationPolicy, ExporterPolicy>::
     M_displayer.leaderPrint ( "  Relative error: ", pRelativeError, "\n" );
 }
 
-template< class mesh_Type, class InitPolicy, class TimeIterationPolicy, class ExporterPolicy >
+template< class Mesh, class InitPolicy, class TimeIterationPolicy, class ExporterPolicy >
 void
-NavierStokesSolver<mesh_Type, InitPolicy, TimeIterationPolicy, ExporterPolicy>::setProblem ( NSProblemPtr_Type nsProblem )
+NavierStokesSolver<Mesh, InitPolicy, TimeIterationPolicy, ExporterPolicy>::setProblem ( NSProblemPtr_Type nsProblem )
 {
     M_nsProblem = nsProblem;
 }
 
-template< class mesh_Type, class InitPolicy, class TimeIterationPolicy, class ExporterPolicy >
+template< class Mesh, class InitPolicy, class TimeIterationPolicy, class ExporterPolicy >
 void
-NavierStokesSolver<mesh_Type, InitPolicy, TimeIterationPolicy, ExporterPolicy>::setup ( Teuchos::ParameterList& list )
+NavierStokesSolver<Mesh, InitPolicy, TimeIterationPolicy, ExporterPolicy>::setup ( Teuchos::ParameterList& list )
 {
     ASSERT ( M_nsProblem.get() != 0, "NavierStokesSolver::init : Error: You must set a Navier-Stokes problem first." );
 
@@ -362,9 +361,9 @@ NavierStokesSolver<mesh_Type, InitPolicy, TimeIterationPolicy, ExporterPolicy>::
 
 }
 
-template< class mesh_Type, class InitPolicy, class TimeIterationPolicy, class ExporterPolicy >
+template< class Mesh, class InitPolicy, class TimeIterationPolicy, class ExporterPolicy >
 void
-NavierStokesSolver<mesh_Type, InitPolicy, TimeIterationPolicy, ExporterPolicy>::init()
+NavierStokesSolver<Mesh, InitPolicy, TimeIterationPolicy, ExporterPolicy>::init()
 {
     // Find an initial solution
     InitPolicy::initSimulation ( M_bcHandler,
@@ -381,9 +380,9 @@ NavierStokesSolver<mesh_Type, InitPolicy, TimeIterationPolicy, ExporterPolicy>::
     ExporterPolicy::exportSolution ();
 }
 
-template< class mesh_Type, class InitPolicy, class TimeIterationPolicy, class ExporterPolicy >
+template< class Mesh, class InitPolicy, class TimeIterationPolicy, class ExporterPolicy >
 void
-NavierStokesSolver<mesh_Type, InitPolicy, TimeIterationPolicy, ExporterPolicy>::solve()
+NavierStokesSolver<Mesh, InitPolicy, TimeIterationPolicy, ExporterPolicy>::solve()
 {
     // Solving the problem
     M_displayer.leaderPrint ( "\n[Solving the problem]\n" );
@@ -436,58 +435,58 @@ NavierStokesSolver<mesh_Type, InitPolicy, TimeIterationPolicy, ExporterPolicy>::
     ExporterPolicy::finalizeExporter();
 }
 
-template< class mesh_Type, class InitPolicy, class TimeIterationPolicy, class ExporterPolicy >
-typename NavierStokesSolver< mesh_Type, InitPolicy, TimeIterationPolicy, ExporterPolicy>::NSProblemPtr_Type
-NavierStokesSolver<mesh_Type, InitPolicy, TimeIterationPolicy, ExporterPolicy>::problem() const
+template< class Mesh, class InitPolicy, class TimeIterationPolicy, class ExporterPolicy >
+typename NavierStokesSolver< Mesh, InitPolicy, TimeIterationPolicy, ExporterPolicy>::NSProblemPtr_Type
+NavierStokesSolver<Mesh, InitPolicy, TimeIterationPolicy, ExporterPolicy>::problem() const
 {
     return M_nsProblem;
 }
 
-template< class mesh_Type, class InitPolicy, class TimeIterationPolicy, class ExporterPolicy >
-typename NavierStokesSolver< mesh_Type, InitPolicy, TimeIterationPolicy, ExporterPolicy>::bcContainerPtr_Type
-NavierStokesSolver<mesh_Type, InitPolicy, TimeIterationPolicy, ExporterPolicy>::bcHandler() const
+template< class Mesh, class InitPolicy, class TimeIterationPolicy, class ExporterPolicy >
+typename NavierStokesSolver< Mesh, InitPolicy, TimeIterationPolicy, ExporterPolicy>::bcContainerPtr_Type
+NavierStokesSolver<Mesh, InitPolicy, TimeIterationPolicy, ExporterPolicy>::bcHandler() const
 {
     return M_bcHandler;
 }
 
-template< class mesh_Type, class InitPolicy, class TimeIterationPolicy, class ExporterPolicy >
-typename NavierStokesSolver< mesh_Type, InitPolicy, TimeIterationPolicy, ExporterPolicy>::fespacePtr_Type
-NavierStokesSolver<mesh_Type, InitPolicy, TimeIterationPolicy, ExporterPolicy>::uFESpace() const
+template< class Mesh, class InitPolicy, class TimeIterationPolicy, class ExporterPolicy >
+typename NavierStokesSolver< Mesh, InitPolicy, TimeIterationPolicy, ExporterPolicy>::fespacePtr_Type
+NavierStokesSolver<Mesh, InitPolicy, TimeIterationPolicy, ExporterPolicy>::uFESpace() const
 {
     return M_uFESpace;
 }
 
-template< class mesh_Type, class InitPolicy, class TimeIterationPolicy, class ExporterPolicy >
-typename NavierStokesSolver< mesh_Type, InitPolicy, TimeIterationPolicy, ExporterPolicy>::fespacePtr_Type
-NavierStokesSolver<mesh_Type, InitPolicy, TimeIterationPolicy, ExporterPolicy>::pFESpace() const
+template< class Mesh, class InitPolicy, class TimeIterationPolicy, class ExporterPolicy >
+typename NavierStokesSolver< Mesh, InitPolicy, TimeIterationPolicy, ExporterPolicy>::fespacePtr_Type
+NavierStokesSolver<Mesh, InitPolicy, TimeIterationPolicy, ExporterPolicy>::pFESpace() const
 {
     return M_pFESpace;
 }
 
-template< class mesh_Type, class InitPolicy, class TimeIterationPolicy, class ExporterPolicy >
+template< class Mesh, class InitPolicy, class TimeIterationPolicy, class ExporterPolicy >
 Real
-NavierStokesSolver<mesh_Type, InitPolicy, TimeIterationPolicy, ExporterPolicy>::initialTime() const
+NavierStokesSolver<Mesh, InitPolicy, TimeIterationPolicy, ExporterPolicy>::initialTime() const
 {
     return M_initialTime;
 }
 
-template< class mesh_Type, class InitPolicy, class TimeIterationPolicy, class ExporterPolicy >
+template< class Mesh, class InitPolicy, class TimeIterationPolicy, class ExporterPolicy >
 Real
-NavierStokesSolver<mesh_Type, InitPolicy, TimeIterationPolicy, ExporterPolicy>::endTime() const
+NavierStokesSolver<Mesh, InitPolicy, TimeIterationPolicy, ExporterPolicy>::endTime() const
 {
     return M_endTime;
 }
 
-template< class mesh_Type, class InitPolicy, class TimeIterationPolicy, class ExporterPolicy >
+template< class Mesh, class InitPolicy, class TimeIterationPolicy, class ExporterPolicy >
 Real
-NavierStokesSolver<mesh_Type, InitPolicy, TimeIterationPolicy, ExporterPolicy>::timestep() const
+NavierStokesSolver<Mesh, InitPolicy, TimeIterationPolicy, ExporterPolicy>::timestep() const
 {
     return M_timestep;
 }
 
-template< class mesh_Type, class InitPolicy, class TimeIterationPolicy, class ExporterPolicy >
+template< class Mesh, class InitPolicy, class TimeIterationPolicy, class ExporterPolicy >
 Real
-NavierStokesSolver<mesh_Type, InitPolicy, TimeIterationPolicy, ExporterPolicy>::currentTime() const
+NavierStokesSolver<Mesh, InitPolicy, TimeIterationPolicy, ExporterPolicy>::currentTime() const
 {
     return M_currentTime;
 }

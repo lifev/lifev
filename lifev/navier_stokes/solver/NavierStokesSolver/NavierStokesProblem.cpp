@@ -66,28 +66,28 @@ NavierStokesProblem< mesh_Type >::hasExactSolution() const
 }
 
 template< class mesh_Type >
-NavierStokesProblem< mesh_Type >::function_Type
+typename NavierStokesProblem< mesh_Type >::function_Type
 NavierStokesProblem< mesh_Type >::xexact()
 {
     return 0;
 }
 
 template< class mesh_Type >
-NavierStokesProblem< mesh_Type >::function_Type
+typename NavierStokesProblem< mesh_Type >::function_Type
 NavierStokesProblem< mesh_Type >::uexact()
 {
     return 0;
 }
 
 template< class mesh_Type >
-NavierStokesProblem< mesh_Type >::function_Type
+typename NavierStokesProblem< mesh_Type >::function_Type
 NavierStokesProblem< mesh_Type >::uderexact()
 {
     return 0;
 }
 
 template< class mesh_Type >
-NavierStokesProblem< mesh_Type >::function_Type
+typename NavierStokesProblem< mesh_Type >::function_Type
 NavierStokesProblem< mesh_Type >::pexact()
 {
     return 0;
@@ -131,7 +131,7 @@ NavierStokesProblem< mesh_Type >::density() const
 }
 
 template< class mesh_Type >
-NavierStokesProblem< mesh_Type >::function_Type
+typename NavierStokesProblem< mesh_Type >::function_Type
 NavierStokesProblem< mesh_Type >::force()
 {
     return nullFunction;
