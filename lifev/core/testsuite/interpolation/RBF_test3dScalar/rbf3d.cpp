@@ -110,13 +110,13 @@ int main (int argc, char** argv )
     // PARTITIONING MESHES
     MeshPartitioner<mesh_Type>   Solid_mesh_part;
     boost::shared_ptr<mesh_Type> Solid_localMesh;
-    Solid_mesh_part.setPartitionOverlap (2);
+    Solid_mesh_part.setPartitionOverlap (0);
     Solid_mesh_part.doPartition (Solid_mesh_ptr, Comm);
     Solid_localMesh = Solid_mesh_part.meshPartition();
 
     MeshPartitioner<mesh_Type>   Fluid_mesh_part;
     boost::shared_ptr<mesh_Type> Fluid_localMesh;
-    Fluid_mesh_part.setPartitionOverlap (2);
+    Fluid_mesh_part.setPartitionOverlap (0);
     Fluid_mesh_part.doPartition (Fluid_mesh_ptr, Comm);
     Fluid_localMesh = Fluid_mesh_part.meshPartition();
 
@@ -124,6 +124,7 @@ int main (int argc, char** argv )
     boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > Fluid_fieldFESpace (new FESpace<mesh_Type, MapEpetra> (Fluid_localMesh, "P1", 1, Comm) );
     vectorPtr_Type Fluid_vector (new vector_Type (Fluid_fieldFESpace->map(), Unique) );
     vectorPtr_Type Fluid_vector_one (new vector_Type (Fluid_fieldFESpace->map(), Unique) );
+
 
     for ( UInt i = 0; i < Fluid_vector->epetraVector().MyLength(); ++i )
         if (Fluid_vector->blockMap().LID (Fluid_vector->blockMap().GID (i) ) != -1)
@@ -143,26 +144,23 @@ int main (int argc, char** argv )
     vectorPtr_Type Solid_solution (new vector_Type (Solid_fieldFESpace->map(), Unique) );
     vectorPtr_Type Solid_solution_rbf (new vector_Type (Solid_fieldFESpace->map(), Unique) );
 
-    int nFlags = 2;
+    int nFlags = 1;
     std::vector<int> flags (nFlags);
-    flags[0] = 1;
-    flags[1] = 20;
+    flags[0] = -1;
 
     interpolationPtr_Type RBFinterpolant;
     RBFinterpolant.reset ( interpolation_Type::InterpolationFactory::instance().createObject (dataFile("interpolation/interpolation_Type","none")));
 
     RBFinterpolant->setup(Fluid_mesh_ptr, Fluid_localMesh, Solid_mesh_ptr, Solid_localMesh, flags);
 
-    if(dataFile("interpolation/interpolation_Type","none")!="RBFlocallyRescaledScalar")
-        RBFinterpolant->setRadius((double) MeshUtility::MeshStatistics::computeSize (*Fluid_mesh_ptr).maxH);
+    //if(dataFile("interpolation/interpolation_Type","none")!="RBFlocallyRescaledScalar")
+    //    RBFinterpolant->setRadius((double) MeshUtility::MeshStatistics::computeSize (*Fluid_mesh_ptr).maxH);
 
     RBFinterpolant->setupRBFData (Fluid_vector, Solid_solution, dataFile, belosList);
 
-    if(dataFile("interpolation/interpolation_Type","none")=="RBFscalar")
-        RBFinterpolant->setBasis(dataFile("interpolation/basis","none"));
-
     RBFinterpolant->buildOperators();
 
+    /*
     RBFinterpolant->interpolate();
 
     RBFinterpolant->solution (Solid_solution);
@@ -212,6 +210,7 @@ int main (int argc, char** argv )
         std::cout << "Error, norm_Inf = " <<  err_Inf  << std::endl;
         std::cout << "Error, normL2   = " <<  err_L2   << std::endl;
     }
+	*/
 
 #ifdef HAVE_MPI
     MPI_Finalize();
