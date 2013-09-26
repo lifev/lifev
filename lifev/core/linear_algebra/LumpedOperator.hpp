@@ -11,18 +11,16 @@
 #ifndef LUMPEDOPERATOR_HPP_
 #define LUMPEDOPERATOR_HPP_
 
+#include <lifev/core/LifeV.hpp>
 #include<lifev/operator/linear_algebra/LinearOperator.hpp>
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wextra"
+
+// Tell the compiler to ignore specific kind of warnings
+LIFEV_SUPPRESS_WARNINGS
 
 #include<Epetra_CrsMatrix.h>
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
-#pragma GCC diagnostic warning "-Wextra"
+// Tell the compiler to restore the warnings
+LIFEV_RESTORE_WARNINGS
 
 namespace LifeV
 {
@@ -46,21 +44,21 @@ class LumpedOperator: public LinearOperator
 {
 public:
 
-	typedef Epetra_CrsMatrix rowMatrix_Type;
-	typedef boost::shared_ptr<rowMatrix_Type> rowMatrixPtr_Type;
-	typedef Epetra_Vector lumpedMatrix_Type;
-	typedef boost::shared_ptr<lumpedMatrix_Type> lumpedMatrixPtr_Type;
+    typedef Epetra_CrsMatrix rowMatrix_Type;
+    typedef boost::shared_ptr<rowMatrix_Type> rowMatrixPtr_Type;
+    typedef Epetra_Vector lumpedMatrix_Type;
+    typedef boost::shared_ptr<lumpedMatrix_Type> lumpedMatrixPtr_Type;
 
-	//! Constructor
-	LumpedOperator();
-	//! SetUp
-	void setUp(const rowMatrixPtr_Type & _matrix);
-	//! set the scaling constant when applying the operator
-	void setAlpha(const Real & _alpha){ M_alpha = _alpha;}
-	//! compute the lumpded operator
-	int compute();
+    //! Constructor
+    LumpedOperator();
+    //! SetUp
+    void setUp(const rowMatrixPtr_Type & _matrix);
+    //! set the scaling constant when applying the operator
+    void setAlpha(const Real & _alpha){ M_alpha = _alpha;}
+    //! compute the lumpded operator
+    int compute();
 
-	//! if true apply the traspose of the operator
+    //! if true apply the traspose of the operator
     int SetUseTranspose(bool UseTranspose) {M_useTranspose = UseTranspose; return 0;};
     //! Apply the Operator
     int Apply(const vector_Type& X, vector_Type& Y) const;

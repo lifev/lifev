@@ -5,18 +5,16 @@
  *      Author: uvilla
  */
 
-#include<lifev/operator/linear_algebra/LumpedOperator.hpp>
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wextra"
+#include <lifev/core/LifeV.hpp>
+#include <lifev/operator/linear_algebra/LumpedOperator.hpp>
 
-#include<Epetra_Vector.h>
+// Tell the compiler to ignore specific kind of warnings
+LIFEV_SUPPRESS_WARNINGS
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
-#pragma GCC diagnostic warning "-Wextra"
+#include <Epetra_Vector.h>
+
+// Tell the compiler to restore the warnings
+LIFEV_RESTORE_WARNINGS
 
 namespace LifeV
 {

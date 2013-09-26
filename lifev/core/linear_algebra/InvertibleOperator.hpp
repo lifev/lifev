@@ -8,26 +8,20 @@
 #ifndef INVERTIBLEOPERATOR_HPP_
 #define INVERTIBLEOPERATOR_HPP_
 
-
 #include <lifev/operator/linear_algebra/LinearOperator.hpp>
 #include <lifev/core/util/FactorySingleton.hpp>
 #include <lifev/core/util/Factory.hpp>
 
+#include <lifev/core/LifeV.hpp>
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wunused-local-typedefs"
-#pragma GCC diagnostic ignored "-Wextra"
+// Tell the compiler to ignore specific kind of warnings
+LIFEV_SUPPRESS_WARNINGS
 
 #include <Teuchos_ParameterList.hpp>
 #include <Teuchos_RCPDecl.hpp>
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
-#pragma GCC diagnostic warning "-Wunused-local-typedefs"
-#pragma GCC diagnostic warning "-Wextra"
+// Tell the compiler to restore the warnings
+LIFEV_RESTORE_WARNINGS
 
 #include <lifev/core/array/VectorEpetra.hpp>
 

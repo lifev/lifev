@@ -18,18 +18,16 @@
 #include <lifev/core/util/FactorySingleton.hpp>
 #include <lifev/core/util/Factory.hpp>
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wunused-local-typedefs"
-#pragma GCC diagnostic ignored "-Wextra"
+#include <lifev/core/LifeV.hpp>
+
+// Tell the compiler to ignore specific kind of warnings
+LIFEV_SUPPRESS_WARNINGS
 
 #include <Epetra_CrsMatrix.h>
 #include <Teuchos_ParameterList.hpp>
 
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
-#pragma GCC diagnostic warning "-Wunused-local-typedefs"
-#pragma GCC diagnostic warning "-Wextra"
+// Tell the compiler to restore the warnings
+LIFEV_RESTORE_WARNINGS
 
 namespace LifeV
 {
