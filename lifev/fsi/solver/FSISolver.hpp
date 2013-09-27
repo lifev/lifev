@@ -102,8 +102,8 @@ public:
 
     typedef FSIOperator::mesh_Type                                     mesh_Type;
 
-    typedef FSIOperator::fluidPtr_Type::value_type                     fluid_Type;
-    typedef FSIOperator::solidPtr_Type::value_type                     solid_Type;
+    typedef FSIOperator::fluid_Type                                    fluid_Type;
+    typedef FSIOperator::solid_Type                                    solid_Type;
 
     typedef fluid_Type::function_Type                                  fluidFunction_Type;
     typedef solid_Type::function                                       solidFunction_Type;

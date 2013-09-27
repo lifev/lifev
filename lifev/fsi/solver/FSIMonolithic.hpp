@@ -99,7 +99,7 @@ public:
     //@{
 
     typedef FSIOperator                                               super_Type;
-    typedef FSIOperator::fluidPtr_Type::value_type::matrix_Type       matrix_Type;
+    typedef FSIOperator::fluid_Type::matrix_Type                      matrix_Type;
     typedef boost::shared_ptr<matrix_Type>                            matrixPtr_Type;
     typedef super_Type::solution_Type                                 solution_Type;
     typedef super_Type::solutionPtr_Type                              solutionPtr_Type;
@@ -578,7 +578,7 @@ protected:
     BCFunctionRobin                                   M_bcfWs;
     UInt                                              M_offset;
     UInt                                              M_solidAndFluidDim;
-    FSIOperator::fluidPtr_Type::value_type::matrixPtr_Type M_fluidBlock;
+    FSIOperator::fluid_Type::matrixPtr_Type           M_fluidBlock;
     matrixPtr_Type                                    M_solidBlockPrec;
     matrixPtr_Type                                    M_robinCoupling; //uninitialized if not needed
     matrixPtr_Type                                    M_boundaryMass;
