@@ -43,12 +43,8 @@
 
 // ---------------------------------------------------------------
 // We include here the MPI headers for the parallel computations.
-// The specific "pragma" instructions are used to avoid warning
-// coming from the MPI library, that are not useful to us.
 // ---------------------------------------------------------------
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
@@ -58,8 +54,6 @@
 #include <Epetra_SerialComm.h>
 #endif
 
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 
 // ---------------------------------------------------------------

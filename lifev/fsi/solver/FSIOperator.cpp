@@ -654,11 +654,11 @@ FSIOperator::imposedFluxes ( void )
 }
 
 void
-FSIOperator::initialize ( fluidPtr_Type::value_type::function_Type const& u0,
-                          fluidPtr_Type::value_type::function_Type const& p0,
-                          solidPtr_Type::value_type::function const& d0,
-                          solidPtr_Type::value_type::function const& /*w0*/,
-                          fluidPtr_Type::value_type::function_Type const& /*df0*/ )
+FSIOperator::initialize ( fluid_Type::function_Type const& u0,
+                          fluid_Type::function_Type const& p0,
+                          solid_Type::function const& d0,
+                          solid_Type::function const& w0,
+                          fluid_Type::function_Type const& /*df0*/ )
 {
     debugStream ( 6220 ) << "FSI:: solid init \n";
     if (this->isSolid() )

@@ -1,8 +1,6 @@
 
 INCLUDE(TribitsAddExecutable)
 
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
-
 TRIBITS_ADD_EXECUTABLE(
   SmoothAneurysm
   SOURCES ud_functions.cpp flowConditions.cpp resistance.cpp main.cpp
