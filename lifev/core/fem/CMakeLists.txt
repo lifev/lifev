@@ -1,7 +1,6 @@
 SET(fem_HEADERS
   fem/Assembly.hpp
   fem/AssemblyElemental.hpp
-  fem/AssemblyElementalBoundary.hpp
   fem/BCBase.hpp
   fem/BCDataInterpolator.hpp
   fem/BCFunction.hpp
