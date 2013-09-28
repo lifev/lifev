@@ -85,7 +85,7 @@ SET( LifeV_PACKAGES_AND_DIRS_AND_CLASSIFICATIONS
   Heart                 lifev/heart                       PS
   FSI                   lifev/fsi                         PS
   Multiscale            lifev/multiscale                  PS
-  Dummy                 lifev/dummy                       EX
+  Dummy                 lifev/dummy                       EX 
 )
 
 

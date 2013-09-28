@@ -655,6 +655,7 @@ int main ( int argc, char** argv )
     }
 
     vector_type LSSolution (ETlsFESpace->map(), Unique);
+
     lsFESpace->interpolate (static_cast<FESpace< mesh_Type, MapEpetra >::function_Type> (initLSFct), LSSolution, 0.0);
 
     vector_type LSSolutionOld (LSSolution, Repeated);
@@ -662,6 +663,7 @@ int main ( int argc, char** argv )
     vector_type HJProjSolution (LSSolution, Repeated);
 
     vector_type velocitySolution (ETuFESpace->map(), Unique);
+
     uFESpace->interpolate (static_cast<FESpace< mesh_Type, MapEpetra >::function_Type> (initVelocity), velocitySolution, 0.0);
 
     vector_type velocitySolutionOld (velocitySolution, Repeated);
@@ -1031,6 +1033,7 @@ int main ( int argc, char** argv )
             vector_type N2 (GradientRecovery::ZZGradient (ETlsFESpace, LSSolutionOld, 2), Repeated);
 
             vector_type f0 (ETlsFESpace->map(), Unique);
+
             lsFESpace->interpolate (static_cast<FESpace< mesh_Type, MapEpetra >::function_Type> (volumeForce0), f0, currentTime);
             vector_type f1 (ETlsFESpace->map(), Unique);
             lsFESpace->interpolate (static_cast<FESpace< mesh_Type, MapEpetra >::function_Type> (volumeForce1), f1, currentTime);
@@ -1096,8 +1099,8 @@ int main ( int argc, char** argv )
         ChronoItem.start();
 
         vector_type forceRhs (ETuFESpace->map(), Unique);
-        uFESpace->interpolate (static_cast<FESpace< mesh_Type, MapEpetra >::function_Type> (volumeForce), forceRhs, currentTime);
 
+        uFESpace->interpolate (static_cast<FESpace< mesh_Type, MapEpetra >::function_Type> (volumeForce), forceRhs, currentTime);
 
         vector_block_type NSRhs ( ETuFESpace->map() | ETpFESpace->map() , Repeated );
         NSRhs *= 0.0;
@@ -1260,7 +1263,6 @@ int main ( int argc, char** argv )
         {
             std::cout << ChronoItem.diff() << " s" << std::endl;
         }
-
 
         if (verbose)
         {

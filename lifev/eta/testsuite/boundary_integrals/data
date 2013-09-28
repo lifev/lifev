@@ -1,0 +1,93 @@
+# -*- getpot -*- (GetPot mode activation for emacs)
+#----------------------------------------------------------------
+#      Data file for cylinder test with Navier-Stokes
+#----------------------------------------------------------------
+
+[exporter]
+#type       = hdf5 (if library compiled with hdf5 support) or ensight
+multimesh  = false
+start      = 0000
+save       = 1
+filename   = cube
+each       = 1
+
+[mesh] 	
+
+mesh_dir = ./
+mesh_file = cube.mesh
+mesh_type = .mesh
+
+
+[prec]
+	prectype                = Ifpack # Ifpack or ML
+	displayList             = true
+
+		[./ML]
+		analyze_smoother        = false
+		default_parameter_list 	= DD-ML    # for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
+
+			[./smoother]
+			# smoother type
+			# Aztec, IFPACK, Jacobi, ML symmetric Gauss-Seidel, symmetric Gauss-Seidel,
+			# ML Gauss-Seidel, Gauss-Seidel, Chebyshev, MLS, Hiptmair, Amesos-KLU,
+			# Amesos-Superlu, Amesos-UMFPACK, Amesos-Superludist, Amesos-MUMPS,
+			# user-defined, SuperLU, IFPACK-Chebyshev, self, do-nothing,
+			# IC, ICT, ILU, ILUT
+			type                    = IFPACK
+			pre_or_post             = pre
+			sweeps                  = 3
+			damping_factor          = 1
+
+			[../coarse]
+			type                    = Amesos-UMFPACK
+			#type                    = Amesos-KLU
+			sweeps                  = 1
+			pre_or_post             = both
+			max_size                = 200
+
+			[../repartition]
+			enable                  = 1
+			partitioner             = ParMETIS
+			max_min_ration          = 1.3
+			min_per_proc            = 500
+
+			[../energy_minimization]
+			enable			= true
+			type			= 3
+			[../]
+
+        # ifpack
+        [../ifpack]
+        overlap		= 2
+
+           	[./fact]
+		level-of-fill                 = 10
+		ilut_level-of-fill            = 4
+		drop_tolerance                = 1.e-10
+		relax_value                   = 0
+
+           	[../amesos]
+           	solvertype =  Amesos_Umfpack # Amesos_KLU or Amesos_Umfpack
+
+           	[../partitioner]
+           	overlap = 2
+
+           	[../schwarz]
+           	reordering_type = none #metis, rcm, none
+           	filter_singletons = true
+
+			[../]
+		[../]
+[solver]
+    solver          = gmres
+    scaling         = none
+    output          = all # none
+    conv            = rhs
+    max_iter        = 100
+    reuse           = false
+    max_iter_reuse  = 20
+    kspace          = 100
+    tol             = 1.e-8   # AztecOO tolerance
+
+    		    
+

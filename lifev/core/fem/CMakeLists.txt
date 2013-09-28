@@ -25,6 +25,7 @@ SET(fem_HEADERS
   fem/HyperbolicFluxNumerical.hpp
   fem/QRKeast.hpp
   fem/PostProcessingBoundary.hpp
+  fem/QRKeast.hpp
   fem/QuadraturePoint.hpp
   fem/QuadratureRule.hpp
   fem/QuadratureRuleProvider.hpp

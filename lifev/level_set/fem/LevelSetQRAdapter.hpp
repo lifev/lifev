@@ -169,6 +169,7 @@ private:
     QuadratureRule M_qr;
 
     // CurrentFE for the level set
+
     ETCurrentFE<FESpaceType::space_dim, 1> M_currentFE;
 
     // Boolean indicating if the element is crossed by the interface

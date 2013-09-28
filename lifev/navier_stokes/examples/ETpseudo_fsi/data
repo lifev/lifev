@@ -1,0 +1,168 @@
+# -*- getpot -*- (GetPot mode activation for emacs)
+#----------------------------------------------------------------
+#      Data file for cylinder test with Navier-Stokes
+#----------------------------------------------------------------
+
+[exporter]
+#type       = hdf5 (if library compiled with hdf5 support) or ensight
+multimesh  = false
+start      = 0000
+save       = 1
+filename   = cylinderP1BP1
+each       = 5
+
+
+[importer]
+type	   = hdf5
+filename   = cylinderP1BP1
+###start      = 00800
+
+[membrane]
+    [./physics]
+        density_sol     = 1.06
+        young           = 4.07E6
+        poisson         = 0.45
+        wall_thickness  = 0.05
+
+
+[fluid]
+
+    [./problem]
+    numLM               = 0
+    centered            = 1
+    initial_sol         = none        # stokes, none
+    transpiration_order = 0
+    stabilization       = none
+    
+	[./boundary_flags]
+	outlet   = 3
+	inlet    = 2
+	wall     = 1
+	ring_in  = 20
+	ring_out = 30
+	[../]
+
+    [../physics]
+	Re              = 1
+    	D               = 0.6
+    	H               = 12
+	density         = 1.0           # density   [kg/m^3]
+	viscosity       = 0.035			# viscosity [kg/m/s]
+
+
+    [../time_discretization]
+	  initialtime           = 0.0
+ 	  endtime               = 0.4
+	  timestep              = 0.001
+	   method                = BDF   #BDF o Newmark (theta methodo)
+  	  BDF_order                 = 1
+ 
+        # Newmark parameters:
+  	theta                   = 0.5  #0.5
+  	zeta                    = 1 #1
+ 	
+    [../space_discretization]
+	#mesh_dir        = ../../../../../../cmcs-mesh-2/AortaFSI_Claudia/
+	mesh_dir = ../cylinder/ #../pseudo_fsi/
+	mesh_file = tube20.mesh ##fluidCoarse.mesh
+	#mesh_file       = Aorta_fluid_30K_NE.mesh 
+	#mesh_file       = tube008_fluid.mesh   #tube008_fluid.mesh #tube_curve20.mesh  
+	mesh_type       = .mesh
+	stiff_strain    =  true
+	verbose         = 0             # verbose during mesh-reading
+        linearized      = 0
+        diagonalize     = 0 # weight, 0=off. for P2P1 better to be on=1
+	div_beta_u_v    = 1             # 1=on, 0=off
+	vel_order       = P1Bubble 	# P1, P1Bubble, P2
+	press_order     = P1		    # P1, P2
+	supg_coeff      = 0.5
+	pspg_coeff      = 0.5
+	divdiv_coeff    = 1.0
+
+    [../miscellaneous]
+        verbose         = 1
+    	steady          = 0
+    	aleNonConservative = false
+    	#aleStabilitation   = true		
+
+[prec]
+	prectype                = Ifpack # Ifpack or ML
+	displayList             = true
+
+		[./ML]
+		analyze_smoother        = false
+		default_parameter_list 	= DD-ML    # for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
+
+			[./smoother]
+			# smoother type
+			# Aztec, IFPACK, Jacobi, ML symmetric Gauss-Seidel, symmetric Gauss-Seidel,
+			# ML Gauss-Seidel, Gauss-Seidel, Chebyshev, MLS, Hiptmair, Amesos-KLU,
+			# Amesos-Superlu, Amesos-UMFPACK, Amesos-Superludist, Amesos-MUMPS,
+			# user-defined, SuperLU, IFPACK-Chebyshev, self, do-nothing,
+			# IC, ICT, ILU, ILUT
+			type                    = IFPACK
+			pre_or_post             = pre
+			sweeps                  = 3
+			damping_factor          = 1
+
+			[../coarse]
+			type                    = Amesos-UMFPACK
+			#type                    = Amesos-KLU
+			sweeps                  = 1
+			pre_or_post             = both
+			max_size                = 200
+
+			[../repartition]
+			enable                  = 1
+			partitioner             = ParMETIS
+			max_min_ration          = 1.3
+			min_per_proc            = 500
+
+			[../energy_minimization]
+			enable			= true
+			type			= 3
+			[../]
+
+        # ifpack
+        [../ifpack]
+        overlap		= 2
+
+           	[./fact]
+		level-of-fill                 = 10
+		ilut_level-of-fill            = 4
+		drop_tolerance                = 1.e-10
+		relax_value                   = 0
+
+           	[../amesos]
+           	solvertype =  Amesos_Umfpack # Amesos_KLU or Amesos_Umfpack
+
+           	[../partitioner]
+           	overlap = 2
+
+           	[../schwarz]
+           	reordering_type = none #metis, rcm, none
+           	filter_singletons = true
+
+		[../]
+	[../]
+
+
+[solver]
+    solver          = gmres
+    scaling         = none
+    output          = all # none
+    conv            = rhs
+    max_iter        = 100
+    reuse           = false
+    max_iter_reuse  = 20
+    kspace          = 100
+    tol             = 1.e-6   # AztecOO tolerance
+
+[ipstab]
+    gammaBeta       = 0.1 ##.125 ##1#0.125
+    gammaDiv        = 0.1 ##.2
+    gammaPress      = 0.05 ##.05 #0.03125
+    reuse           = false
+    max_iter_reuse  = 10
+    		    
+

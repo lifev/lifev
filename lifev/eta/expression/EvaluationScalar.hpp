@@ -330,7 +330,6 @@ const flag_Type EvaluationExtractScalar<VectorType>::S_testUpdateFlag = ET_UPDAT
 template< typename VectorType>
 const flag_Type EvaluationExtractScalar<VectorType>::S_solutionUpdateFlag = ET_UPDATE_NONE;
 
-
 } // Namespace ExpressionAssembly
 
 } // Namespace LifeV

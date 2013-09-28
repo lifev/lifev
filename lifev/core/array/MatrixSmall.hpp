@@ -538,7 +538,6 @@ public:
         return trace;
     }
 
-
     //! Norm value
     /*!
       @return norm value
@@ -614,7 +613,6 @@ public:
             }
         return (tmp);
     }
-
     //@}
     //
 private:

@@ -234,6 +234,7 @@ IntegrateValueElement ( const IntegrateValueElement < MeshType, ExpressionType, 
             break;
         default:
             ERROR_MSG ("Unrecognized element shape");
+        
     }
     M_evaluation.setQuadrature (M_qrAdapter.standardQR() );
     M_evaluation.setGlobalCFE (M_globalCFE_std);
