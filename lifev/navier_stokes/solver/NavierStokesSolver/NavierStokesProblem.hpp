@@ -116,7 +116,7 @@ public:
     //@{
 
     //! Getter for the problem mesh
-    virtual void mesh ( boost::shared_ptr<mesh_Type>& mesh ) const = 0;
+    virtual void mesh ( boost::shared_ptr< mesh_Type >& mesh ) const = 0;
 
     //! Getter for the boundary conditions in the provided BCHandler
     /*!

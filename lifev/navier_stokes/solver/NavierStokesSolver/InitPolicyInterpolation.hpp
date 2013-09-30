@@ -36,6 +36,7 @@
 #define INITPOLICYINTERPOLATION_HPP
 
 #include <iostream>
+#include <string>
 #include <boost/shared_ptr.hpp>
 
 // Tell the compiler to ignore specific kind of warnings:
@@ -57,6 +58,7 @@
 #pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/LifeV.hpp>
+#include <lifev/core/util/LifeChrono.hpp>
 #include <lifev/core/array/VectorEpetra.hpp>
 #include <lifev/core/mesh/RegionMesh.hpp>
 #include <lifev/core/fem/FESpace.hpp>
@@ -67,13 +69,13 @@
 namespace LifeV
 {
 
+template< class mesh_Type >
 struct InitPolicyInterpolation
 {
     typedef VectorEpetra                             vector_Type;
     typedef boost::shared_ptr<VectorEpetra>          vectorPtr_Type;
     typedef MapEpetra                                map_Type;
     typedef boost::shared_ptr<map_Type>              mapPtr_Type;
-    typedef RegionMesh<LinearTetra>                  mesh_Type;
     typedef FESpace< mesh_Type, map_Type >           fespace_Type;
     typedef boost::shared_ptr< fespace_Type >        fespacePtr_Type;
     typedef TimeAdvanceBDF<vector_Type>              bdf_Type;
@@ -94,6 +96,55 @@ struct InitPolicyInterpolation
     virtual bdfPtr_Type bdf() const = 0;
     virtual NSProblemPtr_Type problem() const = 0;
 };
+
+template< class mesh_Type >
+void
+InitPolicyInterpolation< mesh_Type >::
+setupInit ( Teuchos::ParameterList& /*list*/ )
+{
+
+}
+
+template< class mesh_Type >
+void
+InitPolicyInterpolation< mesh_Type >::
+initSimulation ( bcContainerPtr_Type /*bchandler*/,
+                 vectorPtr_Type solution )
+{
+    ASSERT ( problem()->hasExactSolution(), "Error: You cannot use the interpolation method if the problem has not an analytical solution." );
+
+    Real currentTime = initialTime() - timestep() * bdf()->order();
+    UInt pressureOffset = uFESpace()->fieldDim() * uFESpace()->dof().numTotalDof();
+
+    vectorPtr_Type velocity;
+    velocity.reset ( new vector_Type ( uFESpace()->map(), Unique ) );
+
+    vectorPtr_Type pressure;
+    pressure.reset ( new vector_Type ( pFESpace()->map(), Unique ) );
+
+    *solution = 0.0;
+    uFESpace()->interpolate ( problem()->uexact(), *velocity, currentTime );
+    pFESpace()->interpolate ( problem()->pexact(), *pressure, currentTime );
+    solution->add ( *velocity );
+    solution->add ( *pressure, pressureOffset );
+    bdf()->setInitialCondition ( *solution );
+
+    currentTime += timestep();
+    for ( ; currentTime <=  initialTime() + timestep() / 2.0; currentTime += timestep() )
+    {
+        *solution = 0.0;
+        *velocity = 0.0;
+        *pressure = 0.0;
+
+        uFESpace()->interpolate ( problem()->uexact(), *velocity, currentTime );
+        pFESpace()->interpolate ( problem()->pexact(), *pressure, currentTime );
+        solution->add ( *velocity );
+        solution->add ( *pressure, pressureOffset );
+
+        // Updating bdf
+        bdf()->shiftRight ( *solution );
+    }
+}
 
 } // namespace LifeV
 

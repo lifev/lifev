@@ -68,12 +68,11 @@
 namespace LifeV
 {
 
-template<  class TimeIterationPolicy >
+template< class mesh_Type, class TimeIterationPolicy >
 struct InitPolicySolver : public virtual TimeIterationPolicy
 {
     typedef VectorEpetra                             vector_Type;
     typedef boost::shared_ptr<VectorEpetra>          vectorPtr_Type;
-    typedef RegionMesh<LinearTetra>                  mesh_Type;
     typedef MeshPartitioner< mesh_Type >             meshPartitioner_Type;
     typedef MapEpetra                                map_Type;
     typedef boost::shared_ptr<map_Type>              mapPtr_Type;
@@ -97,17 +96,17 @@ struct InitPolicySolver : public virtual TimeIterationPolicy
     virtual bdfPtr_Type bdf() const = 0;
 };
 
-template< class TimeIterationPolicy >
+template< class mesh_Type, class TimeIterationPolicy >
 void
-InitPolicySolver< TimeIterationPolicy >::
+InitPolicySolver< mesh_Type, TimeIterationPolicy >::
 setupInit ( Teuchos::ParameterList& list )
 {
     TimeIterationPolicy::initTimeIteration ( list );
 }
 
-template< class TimeIterationPolicy >
+template< class mesh_Type, class TimeIterationPolicy >
 void
-InitPolicySolver< TimeIterationPolicy >::
+InitPolicySolver< mesh_Type, TimeIterationPolicy >::
 initSimulation ( bcContainerPtr_Type bchandler,
                  vectorPtr_Type solution )
 {

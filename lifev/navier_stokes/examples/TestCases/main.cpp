@@ -88,7 +88,8 @@ using namespace LifeV;
 namespace
 {
 
-typedef RegionMesh<LinearTetra>           mesh_Type;
+//typedef RegionMesh<LinearTetra>           mesh_Type;
+typedef RegionMesh<QuadraticTetra>        mesh_Type;
 typedef MatrixEpetra<Real>                matrix_Type;
 typedef VectorEpetra                      vector_Type;
 typedef boost::shared_ptr<VectorEpetra>   vectorPtr_Type;
@@ -104,9 +105,9 @@ typedef TimeIterationPolicyLinear< AssemblyPolicyNavierStokesSemiImplicit > Semi
 typedef TimeIterationPolicyNonlinearIncremental< AssemblyPolicyNavierStokesNewton > Newton;
 typedef TimeIterationPolicyNonlinearIncremental< AssemblyPolicyNavierStokesPicard > Picard;
 typedef TimeIterationPolicyNonlinear< AssemblyPolicyNavierStokesPicard > PicardOseen;
-typedef InitPolicySolver<Stokes>          InitStokes;
-typedef InitPolicySolver<GStokes>         InitGStokes;
-typedef InitPolicyInterpolation           InitInter;
+typedef InitPolicySolver< mesh_Type, Stokes > InitStokes;
+typedef InitPolicySolver< mesh_Type, GStokes > InitGStokes;
+typedef InitPolicyInterpolation< mesh_Type > InitInter;
 typedef InitPolicyProjection<SolverPolicyLinearSolver> InitProj;
 typedef ExporterPolicyNoExporter          NoExporter;
 typedef ExporterPolicyHDF5                HDF5Exporter;
@@ -200,7 +201,7 @@ main ( int argc, char** argv )
         std::string meshPath                  = problemList.get ( "Resources path", "./Resources" );
         meshPath.append ("/");
 
-        boost::shared_ptr<NavierStokesProblem<mesh_Type> > nsProblem;
+        boost::shared_ptr< NavierStokesProblem< mesh_Type > > nsProblem;
         if ( benchmark == "Cavity" )
         {
             nsProblem.reset ( new NavierStokesCavity );
