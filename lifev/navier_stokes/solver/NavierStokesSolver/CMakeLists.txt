@@ -23,7 +23,6 @@ SET(NavierStokesSolver_SOURCES
     solver/NavierStokesSolver/AssemblyPolicyNavierStokesSemiImplicit.cpp
     solver/NavierStokesSolver/AssemblyPolicyNavierStokesNewton.cpp
     solver/NavierStokesSolver/AssemblyPolicyNavierStokesPicard.cpp
-    solver/NavierStokesSolver/ExporterPolicyHDF5.cpp
     solver/NavierStokesSolver/SolverPolicyLinearSolver.cpp
     CACHE INTERNAL "")
 

@@ -88,8 +88,8 @@ using namespace LifeV;
 namespace
 {
 
-//typedef RegionMesh<LinearTetra>           mesh_Type;
-typedef RegionMesh<QuadraticTetra>        mesh_Type;
+typedef RegionMesh<LinearTetra>           mesh_Type;
+//typedef RegionMesh<QuadraticTetra>        mesh_Type;
 typedef MatrixEpetra<Real>                matrix_Type;
 typedef VectorEpetra                      vector_Type;
 typedef boost::shared_ptr<VectorEpetra>   vectorPtr_Type;
@@ -110,7 +110,7 @@ typedef InitPolicySolver< mesh_Type, GStokes > InitGStokes;
 typedef InitPolicyInterpolation< mesh_Type > InitInter;
 typedef InitPolicyProjection<SolverPolicyLinearSolver> InitProj;
 typedef ExporterPolicyNoExporter          NoExporter;
-typedef ExporterPolicyHDF5                HDF5Exporter;
+typedef ExporterPolicyHDF5< mesh_Type >   HDF5Exporter;
 typedef NavierStokesSolver< mesh_Type, InitStokes, SemiImplicit, HDF5Exporter > nsSolver_Type;
 
 void setPreconditioner ( basePrecPtr_Type& precPtr,

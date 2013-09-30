@@ -36,6 +36,7 @@
 #define EXPORTERPOLICYHDF5_HPP
 
 #include <iostream>
+#include <string>
 #include <boost/shared_ptr.hpp>
 
 // Tell the compiler to ignore specific kind of warnings:
@@ -62,17 +63,18 @@
 #include <lifev/core/mesh/RegionMesh.hpp>
 #include <lifev/core/fem/FESpace.hpp>
 #include <lifev/core/filter/ExporterHDF5.hpp>
+#include <lifev/core/util/LifeChrono.hpp>
 
 
 namespace LifeV
 {
 
+template< class mesh_Type >
 struct ExporterPolicyHDF5
 {
 
     typedef VectorEpetra                             vector_Type;
     typedef boost::shared_ptr<VectorEpetra>          vectorPtr_Type;
-    typedef RegionMesh<LinearTetra>                  mesh_Type;
     typedef boost::shared_ptr<mesh_Type>             meshPtr_Type;
     typedef MapEpetra                                map_Type;
     typedef boost::shared_ptr<map_Type>              mapPtr_Type;
@@ -95,6 +97,74 @@ struct ExporterPolicyHDF5
     virtual Real currentTime() const = 0;
 
 };
+
+template< class mesh_Type >
+void
+ExporterPolicyHDF5< mesh_Type >::initExporter ( Teuchos::ParameterList& list,
+                                   vectorPtr_Type solution )
+{
+    // Loading the parameters
+    std::string outputPath = list.get ( "Output path", "." );
+    outputPath.append ("/");
+    std::string outputFilename = list.get ( "Output filename", "solution" );
+
+    GetPot datafile;
+    bool multipleMesh = list.get ( "Multiple mesh", false );
+    if ( multipleMesh )
+    {
+        datafile.set ( "exporter/multimesh", "true" );
+    }
+    else
+    {
+        datafile.set ( "exporter/multimesh", "false" );
+    }
+    int start = list.get ( "Start", 0 );
+    datafile.set ( "exporter/start", start );
+    int save = list.get ( "Save", 1 );
+    datafile.set ( "exporter/save", save );
+
+    LifeChrono exporterSetupChrono;
+    exporterSetupChrono.start();
+
+    displayer().leaderPrint ( "Defining the exporter... " );
+    M_exporter.reset ( new exporter_Type ( datafile, outputFilename ) );
+    M_exporter->setPostDir ( outputPath ); // This is a test to see if M_post_dir is working
+    M_exporter->setMeshProcId ( mesh(), mesh()->comm()->MyPID() );
+    displayer().leaderPrint ( "done\n" );
+
+    displayer().leaderPrint ( "Updating the exporter... " );
+
+    // Pressure offset in the vector
+    UInt pressureOffset = uFESpace()->fieldDim() * uFESpace()->dof().numTotalDof();
+
+    M_exporter->addVariable ( ExporterData<mesh_Type>::VectorField, "velocity", uFESpace(),
+                              solution, UInt ( 0 ) );
+    M_exporter->addVariable ( ExporterData<mesh_Type>::ScalarField, "pressure", pFESpace(),
+                              solution, pressureOffset );
+    displayer().leaderPrint ( "done\n" );
+
+    exporterSetupChrono.stop();
+    displayer().leaderPrintMax ("Exporter setup time: ", exporterSetupChrono.diff(), " s.\n");
+}
+
+template< class mesh_Type >
+void
+ExporterPolicyHDF5< mesh_Type >::exportSolution ()
+{
+    displayer().leaderPrint ( "Exporting solution at time t =  ", currentTime(), "... \n" );
+    M_exporter->postProcess ( currentTime() );
+}
+
+template< class mesh_Type >
+void
+ExporterPolicyHDF5< mesh_Type >::finalizeExporter()
+{
+    LifeChrono finalizeChrono;
+    finalizeChrono.start();
+    M_exporter->closeFile();
+    finalizeChrono.stop();
+    displayer().leaderPrintMax ("Exporter finalization time: ", finalizeChrono.diff(), " s.\n");
+}
 
 } // namespace LifeV
 
