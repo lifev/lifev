@@ -1,8 +1,6 @@
 
 INCLUDE(TribitsAddExecutableAndTest)
 
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
-
 TRIBITS_ADD_EXECUTABLE(
   BasicExample
   SOURCES main.cpp heart.cpp

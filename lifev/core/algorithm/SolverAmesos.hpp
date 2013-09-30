@@ -38,18 +38,12 @@
 #ifndef _SolverAmesos_H
 #define _SolverAmesos_H
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <Amesos.h>
 #include <Amesos_BaseSolver.h>
 #include <Amesos_ConfigDefs.h>
 #include <Teuchos_ParameterList.hpp>
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/array/VectorEpetra.hpp>
 #include <lifev/core/array/MatrixEpetra.hpp>

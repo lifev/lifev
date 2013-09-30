@@ -36,23 +36,12 @@
 #ifndef _CONFINEDOPERATOR_HPP_
 #define _CONFINEDOPERATOR_HPP_
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wextra"
-
 #include <Epetra_Comm.h>
 #include <Epetra_MpiComm.h>
 #include <Epetra_Map.h>
 #include <Epetra_MultiVector.h>
 #include <Epetra_Operator.h>
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
-#pragma GCC diagnostic warning "-Wextra"
-
-#include <boost/shared_ptr.hpp>
 #include <lifev/core/array/VectorBlockStructure.hpp>
 #include <lifev/core/array/MapEpetra.hpp>
 #include <lifev/core/operator/LinearOperator.hpp>

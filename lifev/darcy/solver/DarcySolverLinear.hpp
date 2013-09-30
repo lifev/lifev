@@ -39,14 +39,10 @@
 #ifndef _DARCYSOLVERLINEAR_HPP_
 #define _DARCYSOLVERLINEAR_HPP_ 1
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <Epetra_LAPACK.h>
 #include <Epetra_BLAS.h>
 
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/algorithm/LinearSolver.hpp>
 
