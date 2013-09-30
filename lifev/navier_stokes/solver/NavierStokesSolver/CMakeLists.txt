@@ -18,11 +18,6 @@ SET(NavierStokesSolver_HEADERS
     CACHE INTERNAL "")
 
 SET(NavierStokesSolver_SOURCES
-    solver/NavierStokesSolver/AssemblyPolicyGeneralizedStokes.cpp
-    solver/NavierStokesSolver/AssemblyPolicyStokes.cpp
-    solver/NavierStokesSolver/AssemblyPolicyNavierStokesSemiImplicit.cpp
-    solver/NavierStokesSolver/AssemblyPolicyNavierStokesNewton.cpp
-    solver/NavierStokesSolver/AssemblyPolicyNavierStokesPicard.cpp
     solver/NavierStokesSolver/SolverPolicyLinearSolver.cpp
     CACHE INTERNAL "")
 

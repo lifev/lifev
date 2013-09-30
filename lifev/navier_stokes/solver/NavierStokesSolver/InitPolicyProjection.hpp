@@ -74,7 +74,7 @@ namespace LifeV
 {
 
 template< class mesh_Type, class SolverPolicy = SolverPolicyLinearSolver >
-struct InitPolicyProjection : public virtual SolverPolicy, public AssemblyPolicyStokes
+struct InitPolicyProjection : public virtual SolverPolicy, public AssemblyPolicyStokes< mesh_Type >
 {
     typedef VectorEpetra                             vector_Type;
     typedef boost::shared_ptr<vector_Type>           vectorPtr_Type;
@@ -150,14 +150,14 @@ initSimulation ( bcContainerPtr_Type bchandler,
     bdf()->setInitialCondition ( *solution );
     currentTime += timestep(); // we just added a first solution with interpolation
 
-    AssemblyPolicyStokes::initAssembly ( M_list );
+    AssemblyPolicyStokes< mesh_Type >::initAssembly ( M_list );
 
     displayer().leaderPrint ( "Creating the mass matrix... " );
     map_Type solutionMap ( uFESpace()->map() + pFESpace()->map() );
     matrixPtr_Type massMatrix;
     massMatrix.reset ( new matrix_Type ( solutionMap ) );
     massMatrix->zero();
-    AssemblyPolicyStokes::M_assembler->addMass ( *massMatrix, 1.0 );
+    AssemblyPolicyStokes< mesh_Type >::M_assembler->addMass ( *massMatrix, 1.0 );
     massMatrix->globalAssemble();
     displayer().leaderPrint ( "done\n" );
 
@@ -182,10 +182,10 @@ initSimulation ( bcContainerPtr_Type bchandler,
 
         displayer().leaderPrint ( "Updating the system... " );
         systemMatrix.reset ( new matrix_Type ( solutionMap ) );
-        AssemblyPolicyStokes::assembleSystem ( systemMatrix, rhs, solution, SolverPolicy::preconditioner() );
+        AssemblyPolicyStokes< mesh_Type >::assembleSystem ( systemMatrix, rhs, solution, SolverPolicy::preconditioner() );
 
         // We deal as in the semi-implicit way
-        AssemblyPolicyStokes::M_assembler->addConvection ( *systemMatrix, 1.0, *solution );
+        AssemblyPolicyStokes< mesh_Type >::M_assembler->addConvection ( *systemMatrix, 1.0, *solution );
 
         //        if ( SolverPolicy::preconditioner()->preconditionerType() == "PCD" )
         //        {

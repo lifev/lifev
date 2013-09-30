@@ -38,6 +38,7 @@
 #define ASSEMBLYPOLICYNAVIERSTOKESPICARD_HPP
 
 #include <iostream>
+#include <string>
 #include <boost/shared_ptr.hpp>
 
 // Tell the compiler to ignore specific kind of warnings:
@@ -66,7 +67,9 @@
 #include <lifev/core/fem/FESpace.hpp>
 #include <lifev/core/fem/TimeAdvanceBDF.hpp>
 #include <lifev/core/algorithm/Preconditioner.hpp>
+#include <lifev/core/util/LifeChrono.hpp>
 
+// #include <lifev/navier_stokes/algorithm/PreconditionerPCD.hpp>
 #include <lifev/navier_stokes/solver/NavierStokesSolver/AssemblyPolicyStokes.hpp>
 #include <lifev/navier_stokes/solver/NavierStokesSolver/NavierStokesProblem.hpp>
 
@@ -74,9 +77,9 @@
 namespace LifeV
 {
 
-struct AssemblyPolicyNavierStokesPicard: public AssemblyPolicyStokes
+template< class mesh_Type >
+struct AssemblyPolicyNavierStokesPicard: public AssemblyPolicyStokes< mesh_Type >
 {
-    typedef RegionMesh<LinearTetra>                  mesh_Type;
     typedef boost::shared_ptr< NavierStokesProblem<mesh_Type> > NSProblemPtr_Type;
     typedef MatrixEpetra<Real>                       matrix_Type;
     typedef boost::shared_ptr<matrix_Type>           matrixPtr_Type;
@@ -110,6 +113,53 @@ struct AssemblyPolicyNavierStokesPicard: public AssemblyPolicyStokes
     virtual Real timestep() const = 0;
     virtual bdfPtr_Type bdf() const = 0;
 };
+
+template< class mesh_Type >
+void
+AssemblyPolicyNavierStokesPicard< mesh_Type >::initAssembly ( Teuchos::ParameterList& list )
+{
+    AssemblyPolicyStokes< mesh_Type >::initAssembly ( list );
+
+    LifeChrono assemblyChrono;
+    assemblyChrono.start();
+
+    displayer().leaderPrint ( "Creating the mass matrix... " );
+    map_Type solutionMap ( uFESpace()->map() + pFESpace()->map() );
+    M_massMatrix.reset ( new matrix_Type ( solutionMap ) );
+    M_massMatrix->zero();
+    AssemblyPolicyStokes< mesh_Type >::M_assembler->addMass ( *M_massMatrix, 1.0 );
+    M_massMatrix->globalAssemble();
+    displayer().leaderPrint ( "done\n" );
+
+    assemblyChrono.stop();
+    displayer().leaderPrintMax ("Matrices assembly time: ", assemblyChrono.diff(), " s.\n");
+}
+
+template< class mesh_Type >
+void
+AssemblyPolicyNavierStokesPicard< mesh_Type >::assembleSystem ( matrixPtr_Type systemMatrix,
+                                                                vectorPtr_Type rhs,
+                                                                vectorPtr_Type solution,
+                                                                preconditionerPtr_Type preconditioner )
+{
+    AssemblyPolicyStokes< mesh_Type >::assembleSystem ( systemMatrix, rhs, solution, preconditioner );
+
+    bdf()->updateRHSContribution ( timestep() );
+    *rhs += *M_massMatrix * bdf()->rhsContributionFirstDerivative();
+
+    double alpha = bdf()->coefficientFirstDerivative ( 0 ) / timestep();
+    *systemMatrix += *M_massMatrix * alpha;
+
+    vector_Type beta ( systemMatrix->map(), Repeated );
+    beta += *solution;
+    AssemblyPolicyStokes< mesh_Type >::M_assembler->addConvection ( *systemMatrix, 1.0, beta );
+
+    //    if ( preconditioner->preconditionerType() == "PCD" )
+    //    {
+    //        PreconditionerPCD* pcdPtr = dynamic_cast<PreconditionerPCD*> ( preconditioner.get() );
+    //        pcdPtr->updateBeta ( beta );
+    //    }
+}
 
 } // namespace LifeV
 
