@@ -99,12 +99,12 @@ typedef boost::shared_ptr< fespace_Type > fespacePtr_Type;
 typedef Preconditioner                    basePrec_Type;
 typedef boost::shared_ptr<basePrec_Type>  basePrecPtr_Type;
 
-typedef TimeIterationPolicyLinear< AssemblyPolicyStokes< mesh_Type > > Stokes;
-typedef TimeIterationPolicyLinear< AssemblyPolicyGeneralizedStokes< mesh_Type > > GStokes;
-typedef TimeIterationPolicyLinear< AssemblyPolicyNavierStokesSemiImplicit< mesh_Type > > SemiImplicit;
-typedef TimeIterationPolicyNonlinearIncremental< AssemblyPolicyNavierStokesNewton< mesh_Type > > Newton;
-typedef TimeIterationPolicyNonlinearIncremental< AssemblyPolicyNavierStokesPicard< mesh_Type > > Picard;
-typedef TimeIterationPolicyNonlinear< AssemblyPolicyNavierStokesPicard< mesh_Type > > PicardOseen;
+typedef TimeIterationPolicyLinear< mesh_Type, AssemblyPolicyStokes< mesh_Type > > Stokes;
+typedef TimeIterationPolicyLinear< mesh_Type, AssemblyPolicyGeneralizedStokes< mesh_Type > > GStokes;
+typedef TimeIterationPolicyLinear< mesh_Type, AssemblyPolicyNavierStokesSemiImplicit< mesh_Type > > SemiImplicit;
+typedef TimeIterationPolicyNonlinearIncremental< mesh_Type, AssemblyPolicyNavierStokesNewton< mesh_Type > > Newton;
+typedef TimeIterationPolicyNonlinearIncremental< mesh_Type, AssemblyPolicyNavierStokesPicard< mesh_Type > > Picard;
+typedef TimeIterationPolicyNonlinear< mesh_Type, AssemblyPolicyNavierStokesPicard< mesh_Type > > PicardOseen;
 typedef InitPolicySolver< mesh_Type, Stokes > InitStokes;
 typedef InitPolicySolver< mesh_Type, GStokes > InitGStokes;
 typedef InitPolicyInterpolation< mesh_Type > InitInter;

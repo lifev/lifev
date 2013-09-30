@@ -73,7 +73,7 @@
 namespace LifeV
 {
 
-template< class AssemblyPolicy, class SolverPolicy = SolverPolicyLinearSolver >
+template< class mesh_Type, class AssemblyPolicy, class SolverPolicy = SolverPolicyLinearSolver >
 struct TimeIterationPolicyNonlinear : private AssemblyPolicy, public virtual SolverPolicy
 {
 protected:
@@ -81,7 +81,6 @@ protected:
     typedef boost::shared_ptr<matrix_Type>           matrixPtr_Type;
     typedef VectorEpetra                             vector_Type;
     typedef boost::shared_ptr<VectorEpetra>          vectorPtr_Type;
-    typedef RegionMesh<LinearTetra>                  mesh_Type;
     typedef MeshPartitioner< mesh_Type >             meshPartitioner_Type;
     typedef MapEpetra                                map_Type;
     typedef boost::shared_ptr<map_Type>              mapPtr_Type;
@@ -113,9 +112,9 @@ protected:
     virtual fespacePtr_Type pFESpace() const = 0;
 };
 
-template< class AssemblyPolicy, class SolverPolicy >
+template< class mesh_Type, class AssemblyPolicy, class SolverPolicy >
 void
-TimeIterationPolicyNonlinear<AssemblyPolicy, SolverPolicy>::
+TimeIterationPolicyNonlinear<mesh_Type, AssemblyPolicy, SolverPolicy>::
 initTimeIteration ( Teuchos::ParameterList& list )
 {
     // Parameters
@@ -135,9 +134,9 @@ initTimeIteration ( Teuchos::ParameterList& list )
     M_rhs.reset ( new vector_Type ( *M_solutionMap, Unique ) );
 }
 
-template< class AssemblyPolicy, class SolverPolicy >
+template< class mesh_Type, class AssemblyPolicy, class SolverPolicy >
 void
-TimeIterationPolicyNonlinear<AssemblyPolicy, SolverPolicy>::
+TimeIterationPolicyNonlinear<mesh_Type, AssemblyPolicy, SolverPolicy>::
 iterate ( vectorPtr_Type solution,
           bcContainerPtr_Type bchandler,
           const Real& currentTime )

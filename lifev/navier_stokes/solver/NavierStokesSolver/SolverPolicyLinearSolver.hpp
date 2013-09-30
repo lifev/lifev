@@ -61,7 +61,6 @@
 #include <lifev/core/array/MatrixEpetra.hpp>
 #include <lifev/core/array/VectorEpetra.hpp>
 #include <lifev/core/util/Displayer.hpp>
-#include <lifev/core/fem/FESpace.hpp>
 #include <lifev/core/algorithm/LinearSolver.hpp>
 #include <lifev/core/algorithm/Preconditioner.hpp>
 
