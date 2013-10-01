@@ -54,17 +54,14 @@
 
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/mesh/RegionMesh.hpp>
-#include <lifev/core/mesh/MeshPartitioner.hpp>
-#include <lifev/core/fem/FESpace.hpp>
-#include <lifev/core/array/MatrixEpetra.hpp>
 #include <lifev/core/util/Displayer.hpp>
-#include <lifev/core/filter/ExporterHDF5.hpp>
-#include <lifev/core/algorithm/LinearSolver.hpp>
 #include <lifev/core/algorithm/Preconditioner.hpp>
 #include <lifev/core/algorithm/PreconditionerIfpack.hpp>
 #include <lifev/core/algorithm/PreconditionerML.hpp>
 #include <lifev/core/algorithm/PreconditionerLinearSolver.hpp>
 
+// Includes the policies that I need to use
+// (Here the list is quite exhaustive)
 #include <lifev/navier_stokes/solver/NavierStokesSolver/NavierStokesProblem.hpp>
 #include <lifev/navier_stokes/solver/NavierStokesSolver/NavierStokesSolver.hpp>
 #include <lifev/navier_stokes/solver/NavierStokesSolver/AssemblyPolicyStokes.hpp>
@@ -80,6 +77,7 @@
 #include <lifev/navier_stokes/solver/NavierStokesSolver/InitPolicySolver.hpp>
 #include <lifev/navier_stokes/solver/NavierStokesSolver/ExporterPolicyHDF5.hpp>
 
+// Includes different test cases
 #include <lifev/navier_stokes/examples/TestCases/NavierStokesCavity.hpp>
 #include <lifev/navier_stokes/examples/TestCases/NavierStokesEthierSteinman.hpp>
 
@@ -89,13 +87,6 @@ namespace
 {
 
 typedef RegionMesh<LinearTetra>           mesh_Type;
-//typedef RegionMesh<QuadraticTetra>        mesh_Type;
-typedef MatrixEpetra<Real>                matrix_Type;
-typedef VectorEpetra                      vector_Type;
-typedef boost::shared_ptr<VectorEpetra>   vectorPtr_Type;
-typedef MapEpetra                         map_Type;
-typedef FESpace< mesh_Type, map_Type >    fespace_Type;
-typedef boost::shared_ptr< fespace_Type > fespacePtr_Type;
 typedef Preconditioner                    basePrec_Type;
 typedef boost::shared_ptr<basePrec_Type>  basePrecPtr_Type;
 
@@ -113,6 +104,10 @@ typedef ExporterPolicyNoExporter          NoExporter;
 typedef ExporterPolicyHDF5< mesh_Type >   HDF5Exporter;
 typedef NavierStokesSolver< mesh_Type, InitStokes, SemiImplicit, HDF5Exporter > nsSolver_Type;
 
+// This function is just there to create a preconditioner for the problem
+// Note that for now some arguments are commented.
+// This is because they will be used for more advanced preconditioners
+// that should be merged soon.
 void setPreconditioner ( basePrecPtr_Type& precPtr,
                          const std::string& preconditionerName,
                          const std::string& precSection,
@@ -178,6 +173,9 @@ main ( int argc, char** argv )
         displayer.leaderPrint ( "\n[Loading the data]\n" );
 
         // **** Stupid GetPot stuff ****
+        // In principle it would be better to rely only on
+        // teuchos lists but for now the preconditioners
+        // still read data from GetPot.
         GetPot command_line ( argc, argv );
         const std::string datafileName = command_line.follow ( "data", 2, "-f", "--data" );
         GetPot dataFile ( datafileName );
@@ -201,6 +199,7 @@ main ( int argc, char** argv )
         std::string meshPath                  = problemList.get ( "Resources path", "./Resources" );
         meshPath.append ("/");
 
+        // Here we create a Navier-Stokes problem object.
         boost::shared_ptr< NavierStokesProblem< mesh_Type > > nsProblem;
         if ( benchmark == "Cavity" )
         {
@@ -236,6 +235,9 @@ main ( int argc, char** argv )
         bool useMinusDiv = nsSolverList.sublist ( "Time iteration: Parameter list" )
                            .sublist ( "Assembly: Parameter list" )
                            .get ( "Use minus divergence" , true );
+
+        // We create the solver, set the problem, set the preconditioner
+        // and set the parameters.
         nsSolver_Type nsSolver;
         nsSolver.setProblem ( nsProblem );
         nsSolver.setup ( nsSolverList );
@@ -244,15 +246,20 @@ main ( int argc, char** argv )
                             "initprec", nsProblem, nsSolver, dataFile,
                             Comm, useMinusDiv );
         nsSolver.setPreconditioner ( precPtr );
+
+        // We compute the initial condition
         nsSolver.init();
 
         // +-----------------------------------------------+
         // |             Solving the problem               |
         // +-----------------------------------------------+
+        // We set the preconditioner
         setPreconditioner ( precPtr, preconditionerName,
                             "prec", nsProblem, nsSolver, dataFile,
                             Comm, useMinusDiv );
         nsSolver.setPreconditioner ( precPtr );
+
+        // We solve the Navier-Stokes equations timestep after timestep
         nsSolver.solve();
 
         globalChrono.stop();

@@ -53,8 +53,8 @@ public:
     typedef Real (*function_Type) ( const Real&, const Real&, const Real&,
                                     const Real&, const ID& );
 
-    static Real nullFunction( const Real&, const Real&, const Real&,
-                              const Real&, const ID& );
+    static Real nullFunction ( const Real&, const Real&, const Real&,
+                               const Real&, const ID& );
 
     //! @name  Constructors, destructor
     //@{
@@ -149,10 +149,10 @@ protected:
 
 template< class mesh_Type >
 Real
-NavierStokesProblem< mesh_Type >::nullFunction( const Real&, const Real&, const Real&,
-                                   const Real&, const ID& )
+NavierStokesProblem< mesh_Type >::nullFunction ( const Real&, const Real&, const Real&,
+                                                 const Real&, const ID& )
 {
-	return 0.0;
+    return 0.0;
 }
 
 template< class mesh_Type >
@@ -206,7 +206,7 @@ NavierStokesProblem< mesh_Type >::pexact()
 template< class mesh_Type >
 void
 NavierStokesProblem< mesh_Type >::setMesh ( const UInt& refinement,
-                               const std::string& resourcesPath )
+                                            const std::string& resourcesPath )
 {
     M_refinement    = refinement;
     M_resourcesPath = resourcesPath;

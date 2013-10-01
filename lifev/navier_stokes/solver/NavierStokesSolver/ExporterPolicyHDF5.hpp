@@ -101,7 +101,7 @@ struct ExporterPolicyHDF5
 template< class mesh_Type >
 void
 ExporterPolicyHDF5< mesh_Type >::initExporter ( Teuchos::ParameterList& list,
-                                   vectorPtr_Type solution )
+                                                vectorPtr_Type solution )
 {
     // Loading the parameters
     std::string outputPath = list.get ( "Output path", "." );
