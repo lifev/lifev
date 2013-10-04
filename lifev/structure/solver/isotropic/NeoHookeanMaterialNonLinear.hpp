@@ -40,8 +40,6 @@
 #ifndef _NEOHOOKEANMATERIAL_H_
 #define _NEOHOOKEANMATERIAL_H_
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <lifev/structure/solver/isotropic/StructuralIsotropicConstitutiveLaw.hpp>
 

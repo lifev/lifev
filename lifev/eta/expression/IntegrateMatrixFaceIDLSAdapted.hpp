@@ -84,9 +84,9 @@ public:
 
     //! Type of the Evaluation
     typedef typename ExpressionToEvaluation < ExpressionType,
-            TestSpaceType::field_dim,
-            SolutionSpaceType::field_dim,
-            3 >::evaluation_Type evaluation_Type;
+					      TestSpaceType::field_dim,
+					      SolutionSpaceType::field_dim,
+					      3 >::evaluation_Type evaluation_Type;
 
     typedef LevelSetBDQRAdapter<LSFESpaceType, LSVectorType> BDQRAdapter_Type;
 
@@ -187,6 +187,7 @@ private:
     evaluation_Type M_evaluation;
 
     std::vector<ETCurrentBDFE<3>*> M_globalCFE;
+
     std::vector<ETCurrentFE<3, TestSpaceType::field_dim>*> M_testCFE;
     std::vector<ETCurrentFE<3, SolutionSpaceType::field_dim>*> M_solutionCFE;
 

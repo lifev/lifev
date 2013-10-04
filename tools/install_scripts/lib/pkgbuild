@@ -42,7 +42,7 @@ for(( i=0; i < $package_number; i++ )); do
   echo "   $i: installing $package package"
   echo "====================================="
 
-  build_package $package || exit
+  build_package $package
 
   # set the package as already installed
   sed -i "s/^$package=INSTALL$/$package=YES/" ../libpath

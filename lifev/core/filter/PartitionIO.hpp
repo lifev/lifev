@@ -38,9 +38,6 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <algorithm>
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <Epetra_config.h>
 
@@ -49,9 +46,6 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <Epetra_MpiComm.h>
 
-//Tell the compiler to restore the warning previously silented
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include<lifev/core/LifeV.hpp>
 #include <lifev/core/filter/HDF5IO.hpp>

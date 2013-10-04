@@ -287,7 +287,6 @@ private:
     ~ExpressionToEvaluation();
 };
 
-
 // Specialized for symmetric expression
 template<typename Expression, UInt testDim, UInt solutionDim, UInt spaceDim>
 class ExpressionToEvaluation <
@@ -376,7 +375,6 @@ private:
     ~ExpressionToEvaluation();
 };
 
-
 // Specialized for vector from non constant scalar fields
 template<typename Expression, UInt FEFieldDim, UInt testDim, UInt solutionDim, UInt spaceDim>
 class ExpressionToEvaluation <
@@ -414,7 +412,6 @@ private:
     ExpressionToEvaluation();
     ~ExpressionToEvaluation();
 };
-
 
 // Specialized for scalar
 template<UInt testDim, UInt solutionDim, UInt spaceDim>

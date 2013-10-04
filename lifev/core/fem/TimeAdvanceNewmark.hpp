@@ -40,9 +40,6 @@
 #ifndef TimeAdvanceNewmark_H
 #define TimeAdvanceNewmark_H 1
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <string>
 #include <iostream>
@@ -50,9 +47,6 @@
 #include <sstream>
 #include <cmath>
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <lifev/core/fem/TimeAdvance.hpp>
 #include <lifev/core/array/VectorEpetra.hpp>

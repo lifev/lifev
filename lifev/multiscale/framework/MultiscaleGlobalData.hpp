@@ -37,16 +37,10 @@
 #ifndef MultiscaleGlobalData_H
 #define MultiscaleGlobalData_H 1
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 // Boost classes
 #include <boost/shared_ptr.hpp>
 
-// Tell the compiler to restore the warning previously silented
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/filter/GetPot.hpp>

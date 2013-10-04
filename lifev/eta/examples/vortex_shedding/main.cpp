@@ -733,6 +733,7 @@ main ( int argc, char** argv )
         if (convectionTerm == SemiImplicit)
         {
             bdf.extrapolation ( *velocityExtrapolated ); // Extrapolation for the convective term
+
             convMatrix.reset (new matrix_block_type ( solutionMap ) );
 
             // Perform the assembly of the convection matrix with ETA

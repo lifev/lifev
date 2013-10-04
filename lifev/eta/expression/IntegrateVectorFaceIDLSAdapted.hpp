@@ -83,9 +83,9 @@ public:
 
     //! Type of the Evaluation
     typedef typename ExpressionToEvaluation < ExpressionType,
-            TestSpaceType::field_dim,
-            0,
-            3 >::evaluation_Type evaluation_Type;
+					      TestSpaceType::field_dim,
+					      0,
+					      3 >::evaluation_Type evaluation_Type;
 
     typedef LevelSetBDQRAdapter<LSFESpaceType, LSVectorType> BDQRAdapter_Type;
 
@@ -184,6 +184,7 @@ private:
     evaluation_Type M_evaluation;
 
     std::vector<ETCurrentBDFE<3>*> M_globalCFE;
+
     std::vector<ETCurrentFE<3, TestSpaceType::field_dim>*> M_testCFE;
 
     ETVectorElemental M_elementalVector;
@@ -219,11 +220,13 @@ IntegrateVectorFaceIDLSAdapted (const boost::shared_ptr<MeshType>& mesh,
         M_testCFE (4),
 
         M_elementalVector (TestSpaceType::field_dim * testSpace->refFE().nbDof() )
+
 {
     for (UInt i (0); i < 4; ++i)
     {
         M_globalCFE[i] = new ETCurrentBDFE<3> (geometricMapFromMesh<MeshType>()
                                                , M_qrAdapter.adaptedBdQR (i) );
+
         M_testCFE[i] = new ETCurrentFE<3, TestSpaceType::field_dim> (testSpace->refFE()
                                                                      , testSpace->geoMap()
                                                                      , M_qrAdapter.adaptedBdQR (i) );
@@ -295,6 +298,7 @@ IntegrateVectorFaceIDLSAdapted ( const IntegrateVectorFaceIDLSAdapted < MeshType
     {
         M_globalCFE[i] = new ETCurrentBDFE<3> (geometricMapFromMesh<MeshType>()
                                                , M_qrAdapter.adaptedBdQR (i) );
+
         M_testCFE[i] = new ETCurrentFE<3, TestSpaceType::field_dim> (M_testSpace->refFE()
                                                                      , M_testSpace->geoMap()
                                                                      , M_qrAdapter.adaptedBdQR (i) );

@@ -27,7 +27,6 @@
 
 /*!
  *   @file
-
      @brief This file contains the complete specialization of the ETCurrentFE methods updateDetJacobian and updateInverseJacobian.
 
      @date 12/2012
@@ -95,7 +94,6 @@ updateDetJacobian (const UInt& iQuadPt)
         - M_jacobian[iQuadPt][0][2] * M_jacobian[iQuadPt][1][1] * M_jacobian[iQuadPt][2][0];
 }
 
-// Full specialization for the computation of the inverse jacobian
 template<>
 void
 ETCurrentFE<1, 1>::

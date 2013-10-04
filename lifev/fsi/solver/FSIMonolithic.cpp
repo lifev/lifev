@@ -24,13 +24,9 @@
 */
 //@HEADER
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <EpetraExt_Reindex_MultiVector.h>
 
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/LifeV.hpp>
 #include <lifev/fsi/solver/FSIMonolithic.hpp>
@@ -757,7 +753,7 @@ FSIMonolithic::assembleSolidBlock ( UInt iter, const vector_Type& solution )
 void
 FSIMonolithic::assembleFluidBlock (UInt iter, const vector_Type& solution)
 {
-    M_fluidBlock.reset (new  FSIOperator::fluidPtr_Type::value_type::matrix_Type (*M_monolithicMap) );
+    M_fluidBlock.reset (new  FSIOperator::fluid_Type::matrix_Type (*M_monolithicMap) );
 
     Real alpha = M_fluidTimeAdvance->coefficientFirstDerivative ( 0 ) / M_data->dataFluid()->dataTime()->timeStep(); //mesh velocity w
 

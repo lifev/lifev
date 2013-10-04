@@ -1,7 +1,6 @@
 SET(fem_HEADERS
   fem/Assembly.hpp
   fem/AssemblyElemental.hpp
-  fem/AssemblyElementalBoundary.hpp
   fem/BCBase.hpp
   fem/BCDataInterpolator.hpp
   fem/BCFunction.hpp
@@ -25,6 +24,7 @@ SET(fem_HEADERS
   fem/HyperbolicFluxNumerical.hpp
   fem/QRKeast.hpp
   fem/PostProcessingBoundary.hpp
+  fem/QRKeast.hpp
   fem/QuadraturePoint.hpp
   fem/QuadratureRule.hpp
   fem/QuadratureRuleProvider.hpp
