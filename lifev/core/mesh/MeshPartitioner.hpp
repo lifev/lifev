@@ -184,7 +184,7 @@ public:
 
     // Next method should be renamed and become a regular method
     //! Return a pointer to the mesh partition with rank k
-    const meshPtr_Type&      getPartition (Int k)    const
+    const meshPtr_Type& LIFEV_DEPRECATED( getPartition (Int k) const )
     {
         return (*M_meshPartitions) [k];
     }
