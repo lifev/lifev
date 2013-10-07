@@ -1582,18 +1582,13 @@ void MeshPartitioner<MeshType>::execute()
 template<typename MeshType>
 void MeshPartitioner<MeshType>::fillEntityPID ()
 {
-    LifeChronoManager<> timeMgr ( M_comm );
-
-    LifeChrono timeStd;
-    timeMgr.add ( "fill entity PID standard", &timeStd );
-    timeStd.start();
     // initialize entity PIDs to 0
     M_entityPID.points.resize   ( M_originalMesh->numPoints(),   0 );
     M_entityPID.elements.resize ( M_originalMesh->numElements(), 0 );
     M_entityPID.facets.resize   ( M_originalMesh->numFacets(),   0 );
     M_entityPID.ridges.resize   ( M_originalMesh->numRidges(),   0 );
 
-    // @todo: check if parallel building + comm is faster
+    // check: parallel algorithm seems to be slower for this
     // p = 0 can be skipped since M_entityPID is already initialized at that value
     for ( Int p = 1; p < M_comm->NumProc(); p++ )
     {
@@ -1629,69 +1624,6 @@ void MeshPartitioner<MeshType>::fillEntityPID ()
             }
         }
     }
-    timeStd.stop();
-
-    LifeChrono timePar;
-    timeMgr.add ( "fill entity PID parallel", &timePar );
-    timePar.start();
-    EntityPIDList parEntityPID;
-    // initialize entity PIDs to 0
-    parEntityPID.points.resize   ( M_originalMesh->numPoints(),   0 );
-    parEntityPID.elements.resize ( M_originalMesh->numElements(), 0 );
-    parEntityPID.facets.resize   ( M_originalMesh->numFacets(),   0 );
-    parEntityPID.ridges.resize   ( M_originalMesh->numRidges(),   0 );
-
-    for ( UInt e = 0; e < (*M_elementDomains) [ M_me ].size(); e++ )
-    {
-        // point block
-        for ( UInt k = 0; k < mesh_Type::element_Type::S_numPoints; k++ )
-        {
-            const ID& pointID = M_originalMesh->element ( (*M_elementDomains) [ M_me ][ e ] ).point ( k ).id();
-            // pointPID should be the maximum between the procs that own it
-            parEntityPID.points[ pointID ] = M_me;
-        }
-
-        // elem block
-        const ID& elemID = M_originalMesh->element ( (*M_elementDomains) [ M_me ][ e ] ).id();
-        // at his stage each element belongs to a single partition, overlap is not yet done.
-        parEntityPID.elements[ elemID ] = M_me;
-
-        // facet block
-        for ( UInt k = 0; k < mesh_Type::element_Type::S_numFacets; k++ )
-        {
-            const ID& facetID = M_originalMesh->facet ( M_originalMesh->localFacetId ( elemID, k ) ).id();
-            // facetPID should be the maximum between the proc that own it
-            parEntityPID.facets[ facetID ] = M_me;
-        }
-
-        // ridge block
-        for ( UInt k = 0; k < mesh_Type::element_Type::S_numRidges; k++ )
-        {
-            const ID& ridgeID = M_originalMesh->ridge ( M_originalMesh->localRidgeId ( elemID, k ) ).id();
-            // ridgePID should be the minimum between the proc that own it
-            parEntityPID.ridges[ ridgeID ] = M_me;
-        }
-    }
-
-    EntityPIDList totalEntityPID;
-    totalEntityPID.points.resize   ( M_originalMesh->numPoints() );
-    totalEntityPID.elements.resize ( M_originalMesh->numElements() );
-    totalEntityPID.facets.resize   ( M_originalMesh->numFacets() );
-    totalEntityPID.ridges.resize   ( M_originalMesh->numRidges() );
-    M_comm->MaxAll ( &parEntityPID.points[0],   &totalEntityPID.points[0],   parEntityPID.points.size() );
-    M_comm->MaxAll ( &parEntityPID.elements[0], &totalEntityPID.elements[0], parEntityPID.elements.size() );
-    M_comm->MaxAll ( &parEntityPID.facets[0],   &totalEntityPID.facets[0],   parEntityPID.facets.size() );
-    M_comm->MaxAll ( &parEntityPID.ridges[0],   &totalEntityPID.ridges[0],   parEntityPID.ridges.size() );
-
-    timePar.stop();
-
-    for ( UInt i = 0; i < M_entityPID.points.size(); i++ )
-    {
-        ASSERT ( M_entityPID.points[i] == totalEntityPID.points[i], "parallel PID failure" );
-    }
-
-
-    timeMgr.print();
 }
 
 template<typename MeshType>
