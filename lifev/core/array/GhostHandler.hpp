@@ -1157,10 +1157,12 @@ void GhostHandler<MeshType>::extendGraphFE ( graphPtr_Type elemGraph,
         std::cout << " GH- ghostMapOnElementsP1( graph )" << std::endl;
     }
 
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
     LifeChronoManager<> timeMgr ( M_comm );
     LifeChrono timeNL;
     timeMgr.add ( "node-element ngbr list", &timeNL );
     timeNL.start();
+#endif
     // check that the nodeElementNeighborsMap has been created
     if ( M_nodeElementNeighborsList.empty()  )
     {
@@ -1170,7 +1172,9 @@ void GhostHandler<MeshType>::extendGraphFE ( graphPtr_Type elemGraph,
         }
         this->createNodeElementNeighborsList();
     }
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
     timeNL.stop();
+#endif
 
     std::vector<int>& myElems = (*elemGraph) [M_me];
 
@@ -1183,9 +1187,11 @@ void GhostHandler<MeshType>::extendGraphFE ( graphPtr_Type elemGraph,
     }
 #endif
 
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
     LifeChrono timePG;
     timeMgr.add ( "point graph", &timePG );
     timePG.start();
+#endif
     // generate graph of points
     // check: parallel algorithm seems to be faster for this
     graph_Type pointGraph ( M_comm->NumProc() );
@@ -1220,7 +1226,9 @@ void GhostHandler<MeshType>::extendGraphFE ( graphPtr_Type elemGraph,
         M_comm->Broadcast ( &pointGraph[p][0], pointGraph[p].size(), p );
     }
 
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
     timePG.stop();
+#endif
 
     std::vector<int> const& myPoints = pointGraph[ M_me ];
 
@@ -1232,9 +1240,11 @@ void GhostHandler<MeshType>::extendGraphFE ( graphPtr_Type elemGraph,
     }
 #endif
 
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
     LifeChrono timeSI;
     timeMgr.add ( "find SUBD_INT", &timeSI );
     timeSI.start();
+#endif
     // initialize a bool vector that tells if an element is in the current partition
     std::vector<bool> isInPartition ( M_fullMesh->numElements(), false );
     for ( UInt e = 0; e < myElems.size(); e++ )
@@ -1250,7 +1260,6 @@ void GhostHandler<MeshType>::extendGraphFE ( graphPtr_Type elemGraph,
         // mark as SUBD_INT point only if the point is owned by current process
         if ( pointPID[ currentPoint ] == M_me )
         {
-
             // check if all element neighbors are on this proc
             for ( neighbors_Type::const_iterator neighborIt = M_nodeElementNeighborsList[ currentPoint ].begin();
                     neighborIt != M_nodeElementNeighborsList[ currentPoint ].end(); ++neighborIt )
@@ -1264,7 +1273,9 @@ void GhostHandler<MeshType>::extendGraphFE ( graphPtr_Type elemGraph,
             }
         }
     }
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
     timeSI.stop();
+#endif
 
 #ifdef LIFEV_GHOSTHANDLER_DEBUG
     M_debugOut << "own SUBDOMAIN_INTERFACE points on proc " << M_me << std::endl;
@@ -1274,9 +1285,11 @@ void GhostHandler<MeshType>::extendGraphFE ( graphPtr_Type elemGraph,
     }
 #endif
 
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
     LifeChrono timeOP;
     timeMgr.add ( "overlapping points", &timeOP );
     timeOP.start();
+#endif
 
     std::vector<int> workingPoints ( mySubdIntPoints.begin(), mySubdIntPoints.end() );
     std::set<int> newPoints;
@@ -1338,12 +1351,16 @@ void GhostHandler<MeshType>::extendGraphFE ( graphPtr_Type elemGraph,
             workingPoints.assign ( newPoints.begin(), newPoints.end() );
         }
     }
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
     timeOP.stop();
+#endif
 
     // assign the augmentedElems to the element graph
     myElems.assign ( augmentedElemsSet.begin(), augmentedElemsSet.end() );
 
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
     timeMgr.print();
+#endif
 }
 
 template <typename MeshType>
