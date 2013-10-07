@@ -348,7 +348,7 @@ int main ( int argc, char** argv )
         vector_Type rhs ( uSpaceStd->map() | pSpace->map(), Unique );
 
         vectorStd_Type fInterpolated ( uSpace->map(), Repeated );
-        uSpaceStd->interpolate ( fRhs, fInterpolated, 0.0 );
+        uSpaceStd->interpolate ( static_cast<uSpaceStd_Type::function_Type>(fRhs), fInterpolated, 0.0 );
 
         {
             using namespace ExpressionAssembly;
@@ -370,7 +370,7 @@ int main ( int argc, char** argv )
         vector_Type rhsR ( uSpaceStdR->map() | pSpaceR->map(), Unique, Zero );
 
         vectorStd_Type fInterpolatedR ( uSpaceR->map(), Repeated );
-        uSpaceStdR->interpolate ( fRhs, fInterpolatedR, 0.0 );
+        uSpaceStdR->interpolate ( static_cast<uSpaceStd_Type::function_Type>(fRhs), fInterpolatedR, 0.0 );
 
         {
             using namespace ExpressionAssembly;
