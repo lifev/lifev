@@ -1582,6 +1582,8 @@ void MeshPartitioner<MeshType>::execute()
 template<typename MeshType>
 void MeshPartitioner<MeshType>::fillEntityPID ()
 {
+     Int numParts = (M_numPartitions > 1)? M_numPartitions : M_comm->NumProc();
+
     // initialize entity PIDs to 0
     M_entityPID.points.resize   ( M_originalMesh->numPoints(),   0 );
     M_entityPID.elements.resize ( M_originalMesh->numElements(), 0 );
@@ -1590,7 +1592,7 @@ void MeshPartitioner<MeshType>::fillEntityPID ()
 
     // check: parallel algorithm seems to be slower for this
     // p = 0 can be skipped since M_entityPID is already initialized at that value
-    for ( Int p = 1; p < M_comm->NumProc(); p++ )
+    for ( Int p = 1; p < numParts; p++ )
     {
         for ( UInt e = 0; e < (*M_elementDomains) [ p ].size(); e++ )
         {
@@ -1619,7 +1621,7 @@ void MeshPartitioner<MeshType>::fillEntityPID ()
             for ( UInt k = 0; k < mesh_Type::element_Type::S_numRidges; k++ )
             {
                 const ID& ridgeID = M_originalMesh->ridge ( M_originalMesh->localRidgeId ( elemID, k ) ).id();
-                // ridgePID should be the minimum between the proc that own it
+                // ridgePID should be the maximum between the proc that own it
                 M_entityPID.ridges[ ridgeID ] = std::max ( M_entityPID.ridges[ ridgeID ], p );
             }
         }
