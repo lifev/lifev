@@ -179,6 +179,9 @@ public:
     */
     void doPartitionMesh();
 
+    //! Initialize M_entityPID
+    void fillEntityPID();
+
     // Next method should be renamed and become a regular method
     //! Return a pointer to the mesh partition with rank k
     const meshPtr_Type&      getPartition (Int k)    const
@@ -340,9 +343,6 @@ private:
       Updates M_meshPartitions.
     */
     void finalSetup();
-
-    //! Initialize M_entityPID
-    void fillEntityPID();
 
     //! Mark ghost entities
     /*!
