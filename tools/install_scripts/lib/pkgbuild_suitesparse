@@ -56,7 +56,7 @@ CLEAN = *.o *.obj *.ln *.bb *.bbg *.da *.tcov *.gcov gmon.out *.bak *.d *.gcda *
 XERBLA =
 EOF
 
-  make clean || true # avoid crashing when there is nothing to clean
+  make clean || true
   make library
   cd -
 }

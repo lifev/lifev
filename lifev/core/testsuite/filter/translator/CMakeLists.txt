@@ -1,8 +1,6 @@
 INCLUDE(TribitsAddExecutableAndTest)
 INCLUDE(TribitsCopyFilesToBinaryDir)
 
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
-
 TRIBITS_ADD_EXECUTABLE(
   ensightToVTK
   SOURCES ensightToVTK.cpp ../importExport/RossEthierSteinmanDec.cpp
