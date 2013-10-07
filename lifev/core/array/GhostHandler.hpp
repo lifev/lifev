@@ -1187,31 +1187,8 @@ void GhostHandler<MeshType>::extendGraphFE ( graphPtr_Type elemGraph,
     timeMgr.add ( "point graph", &timePG );
     timePG.start();
     // generate graph of points
+    // check: parallel algorithm seems to be faster for this
     graph_Type pointGraph ( M_comm->NumProc() );
-
-    // @todo: check if parallel building + comm is faster
-    for ( UInt p = 0; p < static_cast<UInt> ( M_comm->NumProc() ); p++ )
-    {
-        std::set<int> localPointsSet;
-        for ( UInt e = 0; e < (*elemGraph) [ p ].size(); e++ )
-        {
-            // point block
-            for ( UInt k = 0; k < mesh_Type::element_Type::S_numPoints; k++ )
-            {
-                const ID& pointID = M_fullMesh->element ( (*elemGraph) [ p ][ e ] ).point ( k ).id();
-                localPointsSet.insert ( pointID );
-            }
-        }
-        pointGraph[ p ].assign ( localPointsSet.begin(), localPointsSet.end() );
-    }
-    timePG.stop();
-
-
-    LifeChrono timePGP;
-    timeMgr.add ( "point graph parallel", &timePGP );
-    timePGP.start();
-    // generate graph of points
-    graph_Type pointGraphP ( M_comm->NumProc() );
 
     std::set<int> localPointsSet;
     for ( UInt e = 0; e < (*elemGraph) [ M_me ].size(); e++ )
@@ -1223,10 +1200,10 @@ void GhostHandler<MeshType>::extendGraphFE ( graphPtr_Type elemGraph,
             localPointsSet.insert ( pointID );
         }
     }
-    pointGraphP[ M_me ].assign ( localPointsSet.begin(), localPointsSet.end() );
+    pointGraph[ M_me ].assign ( localPointsSet.begin(), localPointsSet.end() );
 
     std::vector<Int> pointGraphSize ( M_comm->NumProc(), -1 );
-    pointGraphSize[ M_me ] = pointGraphP[ M_me ].size();
+    pointGraphSize[ M_me ] = pointGraph[ M_me ].size();
     for ( UInt p = 0; p < static_cast<UInt> ( M_comm->NumProc() ); p++ )
     {
         M_comm->Broadcast ( &pointGraphSize[ p ], 1, p );
@@ -1234,16 +1211,16 @@ void GhostHandler<MeshType>::extendGraphFE ( graphPtr_Type elemGraph,
 
     for ( UInt p = 0; p < static_cast<UInt> ( M_comm->NumProc() ); p++ )
     {
-        pointGraphP[ p ].resize ( pointGraphSize[ p ] );
+        pointGraph[ p ].resize ( pointGraphSize[ p ] );
     }
 
     // communicate other proc point graphs
     for ( UInt p = 0; p < static_cast<UInt> ( M_comm->NumProc() ); p++ )
     {
-        M_comm->Broadcast ( &pointGraphP[p][0], pointGraphP[p].size(), p );
+        M_comm->Broadcast ( &pointGraph[p][0], pointGraph[p].size(), p );
     }
 
-    timePGP.stop();
+    timePG.stop();
 
     std::vector<int> const& myPoints = pointGraph[ M_me ];
 
