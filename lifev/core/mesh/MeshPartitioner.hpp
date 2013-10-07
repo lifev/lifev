@@ -1377,48 +1377,8 @@ void MeshPartitioner<MeshType>::constructFacets()
             // This can lead to a wrong treatment of the dofPerFace (in 2D of the dofPerRidge, as occurred
             // with P2)
 
-            // NEW CODE
             ASSERT ( (localElem1 != NotAnId) || (localElem2 != NotAnId), "A hanging facet in mesh partitioner!");
 
-            // todo: move this to a switch ( if...else ) on the EntityFlag
-            //            switch ( pf->flag() )
-            //            {
-            //                case ( EntityFlags::DEFAULT ):
-            //                {
-            //                    pf->firstAdjacentElementIdentity()  = localElem1;
-            //                    pf->firstAdjacentElementPosition()  = M_originalMesh->face(*is).firstAdjacentElementPosition();
-            //                    pf->secondAdjacentElementIdentity() = localElem2;
-            //                    pf->secondAdjacentElementPosition() = M_originalMesh->face(*is).secondAdjacentElementPosition();
-            //                    break;
-            //                }
-            //                case ( EntityFlags::PHYSICAL_BOUNDARY ):
-            //                {
-            //                    pf->firstAdjacentElementIdentity()  = localElem1;
-            //                    pf->firstAdjacentElementPosition()  = M_originalMesh->face(*is).firstAdjacentElementPosition();
-            //                    pf->secondAdjacentElementIdentity() = localElem2;
-            //                    pf->secondAdjacentElementPosition() = M_originalMesh->face(*is).secondAdjacentElementPosition();
-            //                    break;
-            //                }
-            //                case ( EntityFlags::SUBDOMAIN_INTERFACE ):
-            //                {
-            //                    if ( localElem2 != NotAnId )
-            //                    {
-            //                        pf->firstAdjacentElementIdentity()  = localElem2;
-            //                        pf->firstAdjacentElementPosition()  = M_originalMesh->face(*is).secondAdjacentElementPosition();
-            //                        pf->secondAdjacentElementIdentity() = ghostElem;
-            //                        pf->secondAdjacentElementPosition() = M_originalMesh->face(*is).firstAdjacentElementPosition();
-            //                    }
-            //                    else
-            //                    {
-            //                        pf->firstAdjacentElementIdentity()  = localElem1;
-            //                        pf->firstAdjacentElementPosition()  = M_originalMesh->face(*is).firstAdjacentElementPosition();
-            //                        pf->secondAdjacentElementIdentity() = ghostElem;
-            //                        pf->secondAdjacentElementPosition() = M_originalMesh->face(*is).secondAdjacentElementPosition();
-            //                    }
-            //                    break;
-            //                }
-            //
-            //            }
             if ( localElem1 == NotAnId )
             {
                 pf->firstAdjacentElementIdentity()  = localElem2;
@@ -1541,27 +1501,11 @@ void MeshPartitioner<MeshType>::execute()
     debugStream (4000) << M_me << " has " << (*M_elementDomains) [M_me].size() << " elements.\n";
 #endif
 
-    LifeChrono timeEP;
-    timeEP.start();
     fillEntityPID ();
-    timeEP.stop();
-    double timeDiff = timeEP.globalDiff ( *M_comm );
-    if ( !M_me )
-    {
-        std::cout << "timeEP = " << timeDiff << std::endl;
-    }
-    LifeChrono timeGM;
-    timeGM.start();
     if ( M_partitionOverlap > 0 )
     {
         GhostHandler<mesh_Type> gh ( M_originalMesh, M_comm );
         gh.extendGraphFE ( M_elementDomains, M_entityPID.points, M_partitionOverlap );
-    }
-    timeGM.stop();
-    timeDiff = timeGM.globalDiff ( *M_comm );
-    if ( !M_me )
-    {
-        std::cout << "timeGM = " << timeDiff << std::endl;
     }
 
     doPartitionMesh();
