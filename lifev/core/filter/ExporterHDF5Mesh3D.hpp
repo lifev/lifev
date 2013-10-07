@@ -804,6 +804,8 @@ void ExporterHDF5Mesh3D<MeshType>::writePartition (meshPtr_Type mesh, std::strin
         case TETRA:
             elementNodes = 4;
             faceNodes    = 3;
+        default:
+            ERROR_MSG("element type not supported");
     }
 
     std::vector<Int> counters;
