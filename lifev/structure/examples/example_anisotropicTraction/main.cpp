@@ -354,7 +354,7 @@ Structure::run3d()
     pressure.setFunction (smoothPressure);
 
     //! =================================================================================
-    //! BC for StructuredCube4_test_structuralsolver.mesh
+    //! BC - traction -
     //! =================================================================================
     // BCh->addBC ("EdgesIn",      20,  Natural,   Component, nonZero, compy);
     // BCh->addBC ("EdgesIn",      40,  Essential, Component, zero,    compy);
@@ -369,12 +369,27 @@ Structure::run3d()
     // BCh->addBC ("EdgesIn",      3, Essential, Component , zero, compz);
     //! =================================================================================
 
+    //! =================================================================================
+    //! BC  - shear -
+    //! =================================================================================
+    BCh->addBC ("EdgesIn",      20,  Natural,   Component, nonZero, compz);
+    BCh->addBC ("EdgesIn",      20,  Essential,   Component, zero, compxy);
+
+    //! Symmetry BC
+    // BCh->addBC ("EdgesIn",      50,   EssentialVertices, Component, zero, compxz);
+    // BCh->addBC ("EdgesIn",      30,   EssentialVertices, Component, zero, compxz);
+    // BCh->addBC ("EdgesIn",      80,   EssentialVertices, Component, zero, compxz);
+
+    BCh->addBC ("EdgesIn",      40, Essential, Full , zero, 3);
+    //! =================================================================================
+
+
     // Case of a tube
     //Condition for Inflation
-    BCh->addBC ("EdgesIn",      200, Natural,   Full, pressure, 3);
-    BCh->addBC ("EdgesIn",      40,  Natural,   Full, zero, 3);
-    BCh->addBC ("EdgesIn",      70,  Essential, Full, zero, 3);
-    BCh->addBC ("EdgesIn",      60,  Essential, Full, zero, 3);
+    // BCh->addBC ("EdgesIn",      200, Natural,   Full, pressure, 3);
+    // BCh->addBC ("EdgesIn",      40,  Natural,   Full, zero, 3);
+    // BCh->addBC ("EdgesIn",      70,  Essential, Full, zero, 3);
+    // BCh->addBC ("EdgesIn",      60,  Essential, Full, zero, 3);
 
     //! 1. Constructor of the structuralSolver
     StructuralOperator< RegionMesh<LinearTetra> > solid;
@@ -409,7 +424,8 @@ Structure::run3d()
     }
 
     //! 3.b Setting the fibers in the abstract class of Anisotropic materials
-    solid.material()->anisotropicLaw()->setupFiberDirections( pointerToVectorOfFamilies );
+    if( !dataStructure->constitutiveLaw().compare("anisotropic") )
+        solid.material()->anisotropicLaw()->setupFiberDirections( pointerToVectorOfFamilies );
 
     //! 4. Building system using TimeAdvance class
     double timeAdvanceCoefficient = timeAdvance->coefficientSecondDerivative ( 0 ) / (dataStructure->dataTime()->timeStep() * dataStructure->dataTime()->timeStep() );
@@ -599,26 +615,28 @@ Structure::run3d()
     exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "acceleration", dFESpace, solidAcc,  UInt (0) );
     exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "forcingTerm", dFESpace, rhsVector,  UInt (0) );
 
-    // Adding the fibers vectors
-    // Setting the vector of fibers functions
-    for( UInt k(1); k <= pointerToVectorOfFamilies->size( ); k++ )
+    if( !dataStructure->constitutiveLaw().compare("anisotropic") )
     {
-        // Setting up the name of the function to define the family
-        std::string family="Family-";
-        // adding the number of the family
-        std::string familyNumber;
-        std::ostringstream number;
-        number << ( k );
-        familyNumber = number.str();
+        // Adding the fibers vectors
+        // Setting the vector of fibers functions
+        for( UInt k(1); k <= pointerToVectorOfFamilies->size( ); k++ )
+        {
+            // Setting up the name of the function to define the family
+            std::string family="Family-";
+            // adding the number of the family
+            std::string familyNumber;
+            std::ostringstream number;
+            number << ( k );
+            familyNumber = number.str();
 
-        // Name of the function to create
-        std::string creationString = family + familyNumber;
-        exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, creationString, dFESpace, fiberDirections[ k-1 ], UInt (0) );
+            // Name of the function to create
+            std::string creationString = family + familyNumber;
+            exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, creationString, dFESpace, fiberDirections[ k-1 ], UInt (0) );
 
-        // Extracting the fibers vectors
-        *(fiberDirections[ k-1 ]) = solid.material()->anisotropicLaw()->ithFiberVector( k );
+            // Extracting the fibers vectors
+            *(fiberDirections[ k-1 ]) = solid.material()->anisotropicLaw()->ithFiberVector( k );
+        }
     }
-
 
     exporter->postProcess ( 0 );
     cout.precision(16);
