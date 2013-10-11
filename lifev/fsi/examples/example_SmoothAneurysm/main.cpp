@@ -232,7 +232,6 @@ public:
             FSIOperator::fluidBchandlerPtr_Type BCh_fluidM ( new FSIOperator::fluidBchandler_Type );
 
             BCFunctionBase bcf      (fZero);
-            BCFunctionBase in_flow  (uInterpolated);
             BCFunctionBase pressureEpsilon  (epsilon);
 
             BCFunctionBase InletVect (aneurismFluxInVectorial);
