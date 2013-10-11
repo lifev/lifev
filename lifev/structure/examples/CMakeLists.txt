@@ -6,7 +6,6 @@ ADD_SUBDIRECTORIES(
   example_InflationExtension
   example_CookMembrane
   example_tractionWithSymmetry
-  example_computePrincipalTensions
   example_partitionMesh
   example_computationNorm
 )
@@ -32,6 +31,7 @@ ENDIF()
 
 IF(ENABLE_ANISOTROPIC_LAW)
   ADD_SUBDIRECTORIES(
+    example_computePrincipalTensions
     example_bodyForces
     example_anisotropicTraction
     example_multimechanismTraction
