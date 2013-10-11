@@ -154,6 +154,7 @@ FSIMonolithicGI::evalResidual ( vector_Type&       res,
     {
         M_BChs.push_back (M_BCh_d);
         M_BChs.push_back (M_BCh_u);
+
         M_FESpaces.push_back (M_dFESpace);
         M_FESpaces.push_back (M_uFESpace);
 

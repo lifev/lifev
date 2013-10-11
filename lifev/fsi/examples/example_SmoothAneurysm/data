@@ -99,11 +99,11 @@ type       = hdf5    # format of the exported solution (ensight, hdf5, vtk)
 
 ** #exporter for the fluid
     [./fluid]
-    filename   = fluidGI-tryingAnisotropic # name of the postprocessed file
+    filename   = fluidGI-200000Exp # name of the postprocessed file
 
 ** #exporter for the solid
     [../solid]
-    filename   = solidGI-tryingAnisotropic  # name of the postprocessed file
+    filename   = solidGI-200000Exp  # name of the postprocessed file
     [../] # solid
 [../] # exporter
 
@@ -132,7 +132,7 @@ conservativeFormulation       = false  # tells if the conservative or non conser
     [./physics]
     density     = 1.0                # density
     viscosity   = 0.035              # viscosity
-    resistance  = 0.0  # resistance  ( 80 mmHg * s / ml ) [ dyn * s / cm^5 ]
+    resistance  = 200000.0  # resistance  ( 80 mmHg * s / ml ) [ dyn * s / cm^5 ]
     hydrostatic = 0.0          # hydrostatic pressure [ dyn / cm^2 ]
 
 ** #time discretization
@@ -163,7 +163,7 @@ conservativeFormulation       = false  # tells if the conservative or non conser
 
 ** # stabilization parameters
     [../ipstab]
-    use        = 0                       # boolean telling if the stabilization is added
+    use        = 1                       # boolean telling if the stabilization is added
     gammaBeta  = 0.1             # parameter stabilizing the velocity gradient jump
     gammaDiv   = 0.2             # parameter stabilizing the velocity divergence jump
     gammaPress = 0.05             # parameter stabilizing the pressure gradient jump (compressibility)
@@ -222,7 +222,7 @@ rescaleFactor    = 1.    # this factor can be used to rescale the structure bloc
 ** #space discretization
     [../space_discretization]
     mesh_type = .mesh
-    mesh_dir  = ./Mesh/
+    mesh_dir  = ./
     mesh_file = sSupercoarse.mesh
     order     = P1 #P1 or P2
     mesh_faces      = all                   # update all faces elements

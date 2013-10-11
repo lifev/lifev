@@ -86,7 +86,7 @@ main ( int argc, char** argv )
     //**************** cylinder
     //    MPI_Init(&argc,&argv);
 
-    Resistance res ( argc, argv );
+    ResistanceTest res ( argc, argv );
     res.run();
 
 #ifdef HAVE_MPI

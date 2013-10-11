@@ -553,6 +553,34 @@ bcRobinManageResidual ( VectorType& residual,
                         UInt offset );
 
 
+  ////////////////////// Paolo Tricerri/////////////////////
+//! Prescribe Robin boundary conditions. Case in which only the residual is available
+/*
+
+The residual and the right hand side are modified to take into account the boundary conditions
+@param res residual vector
+@param rhs right hand side
+@param sol the solution vector used to compute the residual. It must be a Unique VectorEpetra
+@param dof the DOF instance
+@param currentBdFE the current boundary finite element
+@param boundaryCond the specific boundary condition (BCBase)
+@param time the current time level
+@param diagonalizeCoef the coefficient put in the diagonal entry (of a matrix) when applying Dirichlet boundary conditions
+@param offset the UInt offset for the boundary condition
+ */
+template <typename VectorType, typename DataType, typename MeshType>
+void
+bcResistanceManageResidual ( VectorType& residual,
+			     VectorType& rightHandSide,
+			     const VectorType& solution,
+			     const MeshType& mesh,
+			     const DOF& dof,
+			     const BCBase& boundaryCond,
+			     CurrentFEManifold& currentBdFE,
+			     const DataType& time,
+			     UInt offset );
+  ////////////////////// Paolo Tricerri/////////////////////
+
 //! Prescribe Robin boundary condition only on the rightHandSide
 /*!
  * The matrix is modified to take into account the Robin boundary condition
@@ -1089,6 +1117,9 @@ bcManageResidual ( VectorType&                     res,
                 break;
             case Robin:  // Robin boundary conditions (Robin) to be implemented
                 bcRobinManageResidual ( res,   rhs, sol, mesh, dof, bcHandler[ i ], currentBdFE, time, bcHandler.offset() );
+                break;
+            case Resistance:  // Resistance boundary conditions
+                bcResistanceManageResidual ( res,   rhs, sol, mesh, dof, bcHandler[ i ], currentBdFE, time, bcHandler.offset() );
                 break;
             case Flux:  // Flux boundary conditions to be implemented
                 bcFluxManageResidual ( res, rhs, sol,  mesh, dof, bcHandler[ i ], currentBdFE, time, bcHandler.offset() + bcHandler[i].offset() );
@@ -2328,6 +2359,41 @@ void bcRobinManageResidual ( VectorType& residual,
 
     MatrixEpetra<Real> matrix (solution.map() );
     bcRobinManage ( matrix, rightHandSide, mesh, dof, boundaryCond, currentBdFE, time, offset );
+    matrix.globalAssemble();
+    residual += matrix * solution;
+}   //bcRobinManageResidual
+
+
+template <typename VectorType, typename DataType, typename MeshType>
+void bcResistanceManageResidual ( VectorType& residual,
+				  VectorType& rightHandSide,
+				  const VectorType& solution, //solution must not be repeated
+				  const MeshType& mesh,
+				  const DOF& dof,
+				  const BCBase& boundaryCond,
+				  CurrentFEManifold& currentBdFE,
+				  const DataType& time,
+				  UInt offset )
+{
+
+    if (solution.mapType() == Repeated)
+    {
+        std::cout << "pass me a non-repeated solution" << std::endl;
+        VectorType uniqueSolution (solution, Unique, Zero);
+        bcResistanceManageResidual (  residual,
+				      rightHandSide,
+				      uniqueSolution,
+				      mesh,
+				      dof,
+				      boundaryCond,
+				      currentBdFE,
+				      time,
+				      offset );
+        return;
+    }
+
+    MatrixEpetra<Real> matrix (solution.map() );
+    bcResistanceManage ( matrix, rightHandSide, mesh, dof, boundaryCond, currentBdFE, time, offset );
     matrix.globalAssemble();
     residual += matrix * solution;
 }   //bcRobinManageResidual

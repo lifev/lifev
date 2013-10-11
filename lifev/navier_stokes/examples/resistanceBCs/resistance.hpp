@@ -33,13 +33,13 @@
 
 
 /*!
- * \class Resistance
+ * \class ResistanceTest
  * \brief 2D/3D Cylinder Simulation class
  *
  *  @author Christophe Prud'homme
  *  @see
  */
-class Resistance
+class ResistanceTest
     //     :
     //     public LifeV::Application
 {
@@ -58,10 +58,10 @@ public:
      */
     //@{
 
-    Resistance ( int argc,
+    ResistanceTest ( int argc,
                char** argv );
 
-    ~Resistance()
+    ~ResistanceTest()
     {}
 
     //@}
