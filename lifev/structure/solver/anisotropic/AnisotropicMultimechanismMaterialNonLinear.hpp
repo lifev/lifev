@@ -271,7 +271,7 @@ public:
       \param displayer: a pointer to the Dysplaier member in the StructuralSolver class
     */
     void computeStiffness ( const vector_Type& disp,
-			    const UInt iter,
+                            const UInt iter,
                             Real factor,
                             const dataPtr_Type& dataMaterial,
                             const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
@@ -279,8 +279,8 @@ public:
                             const displayerPtr_Type& displayer );
 
     void computeReferenceConfigurations ( const vector_Type& disp,
-					  const dataPtr_Type& dataMaterial,
-					  const displayerPtr_Type& displayer );
+                                          const dataPtr_Type& dataMaterial,
+                                          const displayerPtr_Type& displayer );
 
 
     //! Computes the new Stiffness vector for Neo-Hookean and Holzapfel materials in StructuralSolver
@@ -898,7 +898,7 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::updateNonLinearJacobi
 
 template <typename MeshType>
 void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeStiffness ( const vector_Type& disp,
-									      const UInt iter,
+                                                                              const UInt iter,
                                                                               Real /*factor*/,
                                                                               const dataPtr_Type& dataMaterial,
                                                                               const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
@@ -938,7 +938,7 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeStiffness ( co
 
     if( !this->M_dataMaterial->fiberActivation().compare("implicit") )
       {
-	this->computeReferenceConfigurations( disp, this->M_dataMaterial, displayer );
+          this->computeReferenceConfigurations( disp, this->M_dataMaterial, displayer );
       }
 
     displayer->leaderPrint (" Non-Linear S-  Computing contributions to the stiffness vector... ");
@@ -958,7 +958,6 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeStiffness ( co
           // Definition of J_0(ta)
           determinantF_Type ithJzeroA = ExpressionDefinitions::determinantF( ithFzeroA );
 
-          // Definition of J^-(2/3) = det( C ) using the isochoric/volumetric decomposition
           powerExpression_Type  JAel = ExpressionDefinitions::powerExpression( ithJzeroA , (-1.0) );
 
           // Definition of J_a
@@ -1057,8 +1056,8 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::apply ( const vector_
 
 template <typename MeshType>
 void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeReferenceConfigurations ( const vector_Type& disp,
-											    const dataPtr_Type& dataMaterial,
-											    const displayerPtr_Type& displayer )
+                                                                                            const dataPtr_Type& dataMaterial,
+                                                                                            const displayerPtr_Type& displayer )
 {
 
   displayer->leaderPrint (" Non-Linear S-  Computing reference configurations... \n");
@@ -1118,10 +1117,10 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeReferenceConfi
 
       // Computing expression that determines activation
       evaluateNode( elements ( this->M_dispETFESpace->mesh() ),
-		    *M_quadrature,
-		    this->M_dispETFESpace,
-		    meas_K * dot( vActivation , phi_i )
-		    ) >> M_selectionCriterion[ i ];
+                    *M_quadrature,
+                    this->M_dispETFESpace,
+                    meas_K * dot( vActivation , phi_i )
+                    ) >> M_selectionCriterion[ i ];
       M_selectionCriterion[ i ]->globalAssemble();
       *( M_selectionCriterion[ i ] ) = *( M_selectionCriterion[ i ] ) / *M_patchAreaVector;
 
@@ -1131,8 +1130,8 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeReferenceConfi
 
       // Saving the vector;
       AssemblyElementalStructure::saveVectorAccordingToFunctor( this->M_dispFESpace, M_selector[ i ],
-								disp, this->M_firstActivation[i],
-								M_activationDisplacement[i], this->M_offset);
+                                                                disp, this->M_firstActivation[i],
+                                                                M_activationDisplacement[i], this->M_offset);
     }
 
 

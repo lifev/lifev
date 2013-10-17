@@ -460,12 +460,12 @@ typedef ExpressionProduct< ExpressionDphiI,
 
 
  difference_Type absoluteStretch( const ExpressionDefinitions::isochoricStretch_Type IVbar,
-					const Real valueToSubtract);
+                                  const Real valueToSubtract);
 
  activation_Type activationConstructor( const ExpressionMultimechanism::difference_Type absoluteStretch,
-                                       const Real intCoeff,
-                                       const Real extCoeff,
-					const Real translation);
+                                        const Real intCoeff,
+                                        const Real extCoeff,
+                                        const Real translation);
 
   expressionVectorFromDifference_Type vectorFromActivation( const ExpressionMultimechanism::difference_Type activation );
 
