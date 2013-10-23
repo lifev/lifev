@@ -417,9 +417,14 @@ typedef ExpressionSubstraction<
     ExpressionDefinitions::isochoricStretch_Type,
     ExpressionScalar> difference_Type;
 
+typedef ExpressionSubstraction<
+    ExpressionDefinitions::stretch_Type,
+    ExpressionScalar> incompressibleDifference_Type;
+
 typedef  ExpressionArcTan<difference_Type> activation_Type;
 
 typedef ExpressionVectorFromNonConstantScalar< difference_Type, 3>  expressionVectorFromDifference_Type;
+typedef ExpressionVectorFromNonConstantScalar< incompressibleDifference_Type, 3>  expressionVectorFromIncompressibleDifference_Type;
 
 typedef ExpressionProduct< ExpressionDefinitions::deformationGradient_Type,
                            ExpressionDefinitions::inverseTensor_Type >   deformationActivatedTensor_Type;
@@ -459,22 +464,28 @@ typedef ExpressionProduct< ExpressionDphiI,
                            ExpressionDefinitions::inverseTensor_Type>    activeTestGradient_Type;
 
 
- difference_Type absoluteStretch( const ExpressionDefinitions::isochoricStretch_Type IVbar,
-                                  const Real valueToSubtract);
+difference_Type absoluteStretch( const ExpressionDefinitions::isochoricStretch_Type IVbar,
+                                 const Real valueToSubtract);
 
- activation_Type activationConstructor( const ExpressionMultimechanism::difference_Type absoluteStretch,
-                                        const Real intCoeff,
-                                        const Real extCoeff,
-                                        const Real translation);
+incompressibleDifference_Type incompressibleAbsoluteStretch(const ExpressionDefinitions::stretch_Type IV,
+                                                            const Real valueToSubtract );
 
-  expressionVectorFromDifference_Type vectorFromActivation( const ExpressionMultimechanism::difference_Type activation );
+activation_Type activationConstructor( const ExpressionMultimechanism::difference_Type absoluteStretch,
+                                       const Real intCoeff,
+                                       const Real extCoeff,
+                                       const Real translation);
 
- deformationActivatedTensor_Type createDeformationActivationTensor( const ExpressionDefinitions::deformationGradient_Type Ft,
-								    const ExpressionDefinitions::inverseTensor_Type       F0_ta);
+expressionVectorFromDifference_Type vectorFromActivation( const ExpressionMultimechanism::difference_Type activation );
 
- rightCauchyGreenMultiMechanism_Type activationRightCauchyGreen( const ExpressionDefinitions::minusTransposedTensor_Type FzeroAminusT,
+expressionVectorFromIncompressibleDifference_Type vectorFromIncompressibleActivation(const
+                                                                                     ExpressionMultimechanism::incompressibleDifference_Type activation );
+
+deformationActivatedTensor_Type createDeformationActivationTensor( const ExpressionDefinitions::deformationGradient_Type Ft,
+                                                                   const ExpressionDefinitions::inverseTensor_Type       F0_ta);
+
+rightCauchyGreenMultiMechanism_Type activationRightCauchyGreen( const ExpressionDefinitions::minusTransposedTensor_Type FzeroAminusT,
                                                                 const ExpressionDefinitions::rightCauchyGreenTensor_Type C,
-								 const ExpressionDefinitions::inverseTensor_Type FzeroAminus1 );
+                                                                const ExpressionDefinitions::inverseTensor_Type FzeroAminus1 );
 
  activatedFiber_Type activateFiberDirection( const ExpressionDefinitions::deformationGradient_Type F,
 					     const ExpressionDefinitions::interpolatedValue_Type ithFiber);
