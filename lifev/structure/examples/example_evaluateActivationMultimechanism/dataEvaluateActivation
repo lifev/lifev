@@ -57,6 +57,7 @@ stiffness       = '1.0e+5 1.0e+5'
 nonlinearity    = '1.0 1.0'
 stretch         = '1.1521 1.1521'
 smoothness      = 1000
+tolActivation   = 0.06
 [./]
 
 
