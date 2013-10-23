@@ -90,7 +90,8 @@ public:
         // The i has to be a Local ID!
         UInt index = M_selectionVector->blockMap().GID( i );
 
-        if(( *M_selectionVector )( index ) >= -M_value )
+        if( std::fabs(( *M_selectionVector )( index )) <= M_value || 
+	    ( *M_selectionVector )( index ) > 0 )
         {
             return true;
         }
@@ -99,8 +100,6 @@ public:
         {
             return false;
         }
-
-
 
         return false;
 
@@ -985,6 +984,9 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeStiffness ( co
 
           // Definition of the direction of the fiber at the activation moment = F_0(ta) * f_0
           activateFiber_Type activeIthFiber = ExpressionMultimechanism::activateFiberDirection( ithFzeroA, fiberIth );
+
+	  // Normalize the fiber vectors such that in the reference configuration their norm is 
+	  // normVector_Type normIthActiveFiber
 
           // Definition of the tensor M = ithFiber \otimes ithFiber
           // At the moment, it's automatic that the method constructs the expression M = ithFiber \otimes ithFiber
