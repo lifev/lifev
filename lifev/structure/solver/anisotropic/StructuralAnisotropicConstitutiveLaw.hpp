@@ -217,9 +217,9 @@ public:
                                      const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
                                      const displayerPtr_Type& displayer ) = 0;
 
-    virtual  void computeReferenceConfigurations ( const vector_Type& sol, 
-						   const dataPtr_Type& dataMaterial,
-						   const displayerPtr_Type& displayer ) = 0;
+    virtual  void computeReferenceConfigurations ( const vector_Type& sol,
+                                                   const dataPtr_Type& dataMaterial,
+                                                   const displayerPtr_Type& displayer ) = 0;
 
     //! Computes the deformation Gradient F, the cofactor of F Cof(F),
     //! the determinant of F J = det(F), the trace of C Tr(C).
@@ -274,7 +274,21 @@ public:
     //! @name Set Methods
     //@{
 
-    //No set Methods
+    // Used to set the fibers families
+    void setIthFiberVector( const vector_Type& fiberInterpolated, const UInt i )
+    {
+        ASSERT( i <= M_vectorInterpolated.size(), " No such fiber family in the class" );
+        this->M_vectorInterpolated[ i-1 ].reset( new vector_Type(*this->M_localMap) );
+
+        // The minus one is becase std::vector numbering starts from 0
+        // while the user starts counting from 1
+        *( M_vectorInterpolated[ i - 1 ] ) = fiberInterpolated;
+    }
+
+    void setNumberOfFamilies( const UInt n )
+    {
+        this->M_vectorInterpolated.resize( n );
+    }
 
     //@}
 

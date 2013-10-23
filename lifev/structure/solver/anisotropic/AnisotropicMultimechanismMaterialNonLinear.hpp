@@ -1096,7 +1096,7 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeReferenceConfi
       // Defining the expression for the i-th fiber
       // Definitions of the quantities which depend on the fiber directions e.g. I_4^i
       interpolatedValue_Type fiberIth =
-	ExpressionDefinitions::interpolateFiber( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ] ) );
+          ExpressionDefinitions::interpolateFiber( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ] ) );
 
       // Definition of the tensor M = ithFiber \otimes ithFiber
       // At the moment, it's automatic that the method constructs the expression M = ithFiber \otimes ithFiber
@@ -1106,14 +1106,13 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeReferenceConfi
       // Definition of the fourth invariant : I_4^i = C:Mith
       stretch_Type IVith = ExpressionDefinitions::fiberStretch( C, Mith );
 
-      // Definition of the fouth isochoric invariant : J^(-2.0/3.0) * I_4^i
-      isochoricStretch_Type IVithBar = ExpressionDefinitions::isochoricFourthInvariant( Jel, IVith );
+      // Difference between IVith - IVth(t_A)
+      ExpressionMultimechanism::incompressibleDifference_Type absStretch =
+          ExpressionMultimechanism::incompressibleAbsoluteStretch( IVith, this->M_dataMaterial->ithCharacteristicStretch(i) );
 
-      ExpressionMultimechanism::difference_Type absStretch =
-	ExpressionMultimechanism::absoluteStretch( IVithBar, this->M_dataMaterial->ithCharacteristicStretch(i) );
-
-      ExpressionMultimechanism::expressionVectorFromDifference_Type vActivation =
-	ExpressionMultimechanism::vectorFromActivation( absStretch );
+      // Trick to have vector with the scalar expression
+      ExpressionMultimechanism::expressionVectorFromIncompressibleDifference_Type vActivation =
+          ExpressionMultimechanism::vectorFromIncompressibleActivation( absStretch );
 
       // Computing expression that determines activation
       evaluateNode( elements ( this->M_dispETFESpace->mesh() ),
@@ -1136,7 +1135,6 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeReferenceConfi
 
 
 }
-
 
 
 template <typename MeshType>
