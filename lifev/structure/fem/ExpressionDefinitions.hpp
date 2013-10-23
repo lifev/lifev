@@ -414,17 +414,22 @@ namespace ExpressionMultimechanism
 using namespace ExpressionAssembly;
 
 typedef ExpressionSubstraction<
-    ExpressionDefinitions::isochoricStretch_Type,
-    ExpressionScalar> difference_Type;
+  ExpressionDefinitions::isochoricStretch_Type,
+  ExpressionScalar> difference_Type;
 
 typedef ExpressionSubstraction<
     ExpressionDefinitions::stretch_Type,
     ExpressionScalar> incompressibleDifference_Type;
 
+typedef ExpressionDivision<
+  incompressibleDifference_Type,
+  ExpressionScalar> relativeDifference_Type;
+
 typedef  ExpressionArcTan<difference_Type> activation_Type;
 
 typedef ExpressionVectorFromNonConstantScalar< difference_Type, 3>  expressionVectorFromDifference_Type;
 typedef ExpressionVectorFromNonConstantScalar< incompressibleDifference_Type, 3>  expressionVectorFromIncompressibleDifference_Type;
+typedef ExpressionVectorFromNonConstantScalar< relativeDifference_Type, 3>  expressionVectorFromRelativeDifference_Type;
 
 typedef ExpressionProduct< ExpressionDefinitions::deformationGradient_Type,
                            ExpressionDefinitions::inverseTensor_Type >   deformationActivatedTensor_Type;
@@ -470,6 +475,10 @@ difference_Type absoluteStretch( const ExpressionDefinitions::isochoricStretch_T
 incompressibleDifference_Type incompressibleAbsoluteStretch(const ExpressionDefinitions::stretch_Type IV,
                                                             const Real valueToSubtract );
 
+relativeDifference_Type relativeDifference(const  incompressibleDifference_Type difference,
+					   const Real refFourthInvariant );
+
+
 activation_Type activationConstructor( const ExpressionMultimechanism::difference_Type absoluteStretch,
                                        const Real intCoeff,
                                        const Real extCoeff,
@@ -477,8 +486,11 @@ activation_Type activationConstructor( const ExpressionMultimechanism::differenc
 
 expressionVectorFromDifference_Type vectorFromActivation( const ExpressionMultimechanism::difference_Type activation );
 
-expressionVectorFromIncompressibleDifference_Type vectorFromIncompressibleActivation(const
+expressionVectorFromIncompressibleDifference_Type vectorFromIncompressibleDifference(const
                                                                                      ExpressionMultimechanism::incompressibleDifference_Type activation );
+
+expressionVectorFromRelativeDifference_Type vectorFromRelativeDifference(const
+									 ExpressionMultimechanism::relativeDifference_Type relDifference );
 
 deformationActivatedTensor_Type createDeformationActivationTensor( const ExpressionDefinitions::deformationGradient_Type Ft,
                                                                    const ExpressionDefinitions::inverseTensor_Type       F0_ta);

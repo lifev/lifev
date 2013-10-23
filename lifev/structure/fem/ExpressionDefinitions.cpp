@@ -336,6 +336,14 @@ namespace LifeV
 
     }
 
+    relativeDifference_Type relativeDifference( const  incompressibleDifference_Type difference,
+						const Real refFourthInvariant)
+    {
+      return relativeDifference_Type ( difference, value( refFourthInvariant ) );
+
+    }
+
+
     activation_Type activationConstructor( const ExpressionMultimechanism::difference_Type absoluteStretch,
 					   const Real intCoeff,
 					   const Real extCoeff,
@@ -349,9 +357,14 @@ namespace LifeV
       return expressionVectorFromDifference_Type( activation );
     }
 
-    expressionVectorFromIncompressibleDifference_Type vectorFromIncompressibleActivation( const ExpressionMultimechanism::incompressibleDifference_Type activation )
+    expressionVectorFromIncompressibleDifference_Type vectorFromIncompressibleDifference( const ExpressionMultimechanism::incompressibleDifference_Type activation )
     {
       return expressionVectorFromIncompressibleDifference_Type( activation );
+    }
+
+    expressionVectorFromRelativeDifference_Type vectorFromRelativeDifference( const ExpressionMultimechanism::relativeDifference_Type activation )
+    {
+      return expressionVectorFromRelativeDifference_Type( activation );
     }
 
     deformationActivatedTensor_Type createDeformationActivationTensor( const ExpressionDefinitions::deformationGradient_Type Ft,
