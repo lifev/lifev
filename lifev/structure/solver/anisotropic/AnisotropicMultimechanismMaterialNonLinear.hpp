@@ -1110,9 +1110,18 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeReferenceConfi
       ExpressionMultimechanism::incompressibleDifference_Type absStretch =
           ExpressionMultimechanism::incompressibleAbsoluteStretch( IVith, this->M_dataMaterial->ithCharacteristicStretch(i) );
 
+      // Difference between IVith - IVth(t_A) / IVth(t_A)
+      ExpressionMultimechanism::relativeDifference_Type relStretch =
+          ExpressionMultimechanism::relativeDifference( absStretch, this->M_dataMaterial->ithCharacteristicStretch(i) );
+
+      // // Trick to have vector with the scalar expression
+      // ExpressionMultimechanism::expressionVectorFromIncompressibleDifference_Type vActivation =
+      //     ExpressionMultimechanism::vectorFromIncompressibleDifference( absStretch );
+
       // Trick to have vector with the scalar expression
-      ExpressionMultimechanism::expressionVectorFromIncompressibleDifference_Type vActivation =
-          ExpressionMultimechanism::vectorFromIncompressibleActivation( absStretch );
+      ExpressionMultimechanism::expressionVectorFromRelativeDifference_Type vActivation =
+          ExpressionMultimechanism::vectorFromRelativeDifference( relStretch );
+
 
       // Computing expression that determines activation
       evaluateNode( elements ( this->M_dispETFESpace->mesh() ),
