@@ -388,10 +388,16 @@ namespace LifeV
       return activatedFiber_Type( F, ithFiber );
     }
 
-    normActivatedFiber_Type normActivatedFiber( const ExpressionTranspose<activatedFiber_Type> fT,
-					      const activatedFiber_Type f)
+    squaredNormActivatedFiber_Type squaredNormActivatedFiber( const activatedFiber_Type f)
     {
-      return normActivatedFiber_Type( fT, f );
+      return squaredNormActivatedFiber_Type( f, f );
+    }
+
+    normActivatedFiber_Type normActivatedFiber( const activatedFiber_Type f)
+    {
+      squaredNormActivatedFiber_Type squaredNorm = squaredNormActivatedFiber_Type( f, f );
+
+      return normActivatedFiber_Type( squaredNorm , (1.0/2.0) );
     }
 
     normalizedFiber_Type normalizedFiberDirection( const activatedFiber_Type fiber,

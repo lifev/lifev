@@ -446,7 +446,9 @@ typedef ExpressionProduct<
 typedef ExpressionProduct< ExpressionDefinitions::deformationGradient_Type,
                            ExpressionDefinitions::interpolatedValue_Type> activatedFiber_Type;
 
-typedef ExpressionDot< ExpressionTranspose<activatedFiber_Type>, activatedFiber_Type > normActivatedFiber_Type;
+typedef ExpressionDot< activatedFiber_Type, activatedFiber_Type > squaredNormActivatedFiber_Type;
+
+typedef ExpressionPower< squaredNormActivatedFiber_Type> normActivatedFiber_Type;
 
 typedef ExpressionDivision< activatedFiber_Type, normActivatedFiber_Type> normalizedFiber_Type;
 
@@ -505,10 +507,11 @@ rightCauchyGreenMultiMechanism_Type activationRightCauchyGreen( const Expression
  activatedFiber_Type activateFiberDirection( const ExpressionDefinitions::deformationGradient_Type F,
 					     const ExpressionDefinitions::interpolatedValue_Type ithFiber);
 
-  normActivatedFiber_Type normActivatedFiber( const ExpressionTranspose<activatedFiber_Type> fT,
-					      const activatedFiber_Type f);
+ squaredNormActivatedFiber_Type squaredNormActivatedFiber( const activatedFiber_Type f);
 
-  normalizedFiber_Type normalizedFiberDirection( const activatedFiber_Type fiber,
+ normActivatedFiber_Type normActivatedFiber( const activatedFiber_Type f);
+
+ normalizedFiber_Type normalizedFiberDirection( const activatedFiber_Type fiber,
 						 const normActivatedFiber_Type normFiber);
 
  activatedDeterminantF_Type activateDeterminantF( const ExpressionDefinitions::determinantTensorF_Type Jzero,
