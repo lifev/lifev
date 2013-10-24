@@ -22,6 +22,7 @@ SET(expression_HEADERS
 	expression/EvaluationPosition.hpp
 	expression/EvaluationProduct.hpp
 	expression/EvaluationPower.hpp
+	expression/EvaluationSquareRoot.hpp
 	expression/EvaluationArcTan.hpp
 	expression/EvaluationDerivativeArcTan.hpp
 	expression/EvaluationLogarithm.hpp
@@ -30,6 +31,7 @@ SET(expression_HEADERS
 	expression/EvaluationScalar.hpp
 	expression/EvaluationSubstraction.hpp
 	expression/EvaluationTranspose.hpp
+	expression/EvaluationNormalize.hpp
 	expression/EvaluationMinusTransposed.hpp
 	expression/EvaluationInverse.hpp
 	expression/EvaluationSymmetricTensor.hpp
@@ -61,6 +63,7 @@ SET(expression_HEADERS
 	expression/ExpressionNormal.hpp
 	expression/ExpressionProduct.hpp
 	expression/ExpressionPower.hpp
+	expression/ExpressionSquareRoot.hpp
 	expression/ExpressionArcTan.hpp
 	expression/ExpressionDerivativeArcTan.hpp
 	expression/ExpressionLogarithm.hpp
@@ -68,6 +71,7 @@ SET(expression_HEADERS
 	expression/ExpressionScalar.hpp
 	expression/ExpressionSubstraction.hpp
 	expression/ExpressionTranspose.hpp
+	expression/ExpressionNormalize.hpp
 	expression/ExpressionMinusTransposed.hpp
 	expression/ExpressionInverse.hpp
 	expression/ExpressionSymmetricTensor.hpp
