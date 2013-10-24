@@ -90,7 +90,7 @@ public:
         // The i has to be a Local ID!
         UInt index = M_selectionVector->blockMap().GID( i );
 
-        if( std::fabs(( *M_selectionVector )( index )) <= M_value || 
+        if( std::fabs(( *M_selectionVector )( index )) <= M_value ||
 	    ( *M_selectionVector )( index ) > 0 )
         {
             return true;
@@ -183,10 +183,9 @@ public:
     typedef ExpressionMultimechanism::activatedFiber_Type                     activateFiber_Type;
     typedef ExpressionMultimechanism::normActivatedFiber_Type                 normActivateFiber_Type;
     typedef ExpressionMultimechanism::normalizedFiber_Type                    normalizedFiber_Type;
-    typedef ExpressionMultimechanism::activatedFiber_Type                     activateFiber_Type;
     typedef ExpressionMultimechanism::activatedDeterminantF_Type              activatedDeterminantF_Type;
     typedef ExpressionMultimechanism::activePowerExpression_Type              activePowerExpression_Type;
-    typedef ExpressionMultimechanism::activeOuterProduct_Type                 activeOuterProduct_Type;
+    typedef ExpressionMultimechanism::activeNormalizedOuterProduct_Type       activeNormalizedOuterProduct_Type;
     typedef ExpressionMultimechanism::activeStretch_Type                      activeStretch_Type;
     typedef ExpressionMultimechanism::activeIsochoricStretch_Type             activeIsochoricStretch_Type;
 
@@ -720,10 +719,16 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::updateNonLinearJacobi
       // Definition of the direction of the fiber at the activation moment = F_0(ta) * f_0
       activateFiber_Type activeIthFiber = ExpressionMultimechanism::activateFiberDirection( ithFzeroA, fiberIth );
 
+      // Definition of the norm of a transformed fiber
+      normActivateFiber_Type normFiber = ExpressionMultimechanism::normActivatedFiber( activeIthFiber );
+
+      // Normalized fiber
+      normalizedFiber_Type normalizedFiber = ExpressionMultimechanism::normalizedFiberDirection( activeIthFiber, normFiber );
+
       // Definition of the tensor M = ithFiber \otimes ithFiber
       // At the moment, it's automatic that the method constructs the expression M = ithFiber \otimes ithFiber
       // For a more general case, the file ExpressionDefinitions.hpp should be changed
-      activeOuterProduct_Type Mith = ExpressionMultimechanism::activeOuterProduct( activeIthFiber );
+      activeNormalizedOuterProduct_Type Mith = ExpressionMultimechanism::activeNormalizedOuterProduct( normalizedFiber );
 
       // Definition of the fourth invariant : I_4^i = C:Mith
       activeStretch_Type IVith = ExpressionMultimechanism::activeFiberStretch( Ca, Mith );
@@ -736,7 +741,7 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::updateNonLinearJacobi
 
       activeTestGradient_Type grPhiI = ExpressionMultimechanism::activatedTestGradient( grad(phi_i), FzeroAminus1);
 
-      Real stretch = this->M_dataMaterial->ithCharacteristicStretch(i);
+      //Real stretch = this->M_dataMaterial->ithCharacteristicStretch(i);
 
         // first term:
         // (-4.0/3.0) * aplha_i * J^(-2.0/3.0) * \bar{I_4} * ( \bar{I_4} - 1 ) * exp( gamma_i * ( \bar{I_4} - 1 )^2 ) *
@@ -746,9 +751,9 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::updateNonLinearJacobi
                    this->M_dispETFESpace,
                    this->M_dispETFESpace,
                    ithJzeroA * value( -4.0/3.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * JactiveEl *
-                   IVithBar * ( IVithBar - value( stretch ) ) *
-                   exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value( stretch ) ) * ( IVithBar- value( stretch ) ) ) *
-                   derAtan( IVithBar - value( stretch ), this->M_epsilon, ( 1.0 / PI ) ) *
+                   IVithBar * ( IVithBar - value( 1.0 ) ) *
+                   exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value( 1.0 ) ) * ( IVithBar- value( 1.0 ) ) ) *
+                   derAtan( IVithBar - value( 1.0 ), this->M_epsilon, ( 1.0 / PI ) ) *
                    dot( FAminusT, dFa ) *
                    dot( Fa * Mith - value(1.0/3.0) * IVith * FAminusT, grPhiI )
                    ) >> jacobian;
@@ -762,9 +767,9 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::updateNonLinearJacobi
                    this->M_dispETFESpace,
                    this->M_dispETFESpace,
                    ithJzeroA * value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) *
-                   ( IVithBar - value(stretch) ) * JactiveEl * JactiveEl *
-                   exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value(stretch) ) * ( IVithBar- value(stretch) ) ) *
-                   derAtan( IVithBar - value(stretch), this->M_epsilon, ( 1.0 / PI ) ) *
+                   ( IVithBar - value(1.0) ) * JactiveEl * JactiveEl *
+                   exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value(1.0) ) * ( IVithBar- value(1.0) ) ) *
+                   derAtan( IVithBar - value(1.0), this->M_epsilon, ( 1.0 / PI ) ) *
                    dot( transpose( dFa ) * Fa + transpose(Fa) * dFa , Mith ) *
                    dot( Fa * Mith - value(1.0/3.0) * IVith * FAminusT, grPhiI )
                    ) >> jacobian;
@@ -778,9 +783,9 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::updateNonLinearJacobi
                    this->M_dispETFESpace,
                    this->M_dispETFESpace,
                    ithJzeroA * value( -4.0/3.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) *
-                   JactiveEl * ( IVithBar - value(stretch) ) *
-                   exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value(stretch) ) * ( IVithBar- value(stretch) ) ) *
-                   atan( IVithBar - value(stretch), this->M_epsilon, ( 1 / PI ), (1.0/2.0) ) *
+                   JactiveEl * ( IVithBar - value(1.0) ) *
+                   exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value(1.0) ) * ( IVithBar- value(1.0) ) ) *
+                   atan( IVithBar - value(1.0), this->M_epsilon, ( 1 / PI ), (1.0/2.0) ) *
                    dot( FAminusT , dFa ) *
                    dot( Fa * Mith - value(1.0/3.0) * IVith * FAminusT, grPhiI )
                    ) >> jacobian;
@@ -794,8 +799,8 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::updateNonLinearJacobi
                    this->M_dispETFESpace,
                    ithJzeroA * value( -4.0/3.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) *
                    JactiveEl * IVithBar *
-                   exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value(stretch) ) * ( IVithBar- value(stretch) ) ) *
-                   atan( IVithBar - value(stretch), this->M_epsilon, ( 1 / PI ), (1.0/2.0) ) *
+                   exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value(1.0) ) * ( IVithBar- value(1.0) ) ) *
+                   atan( IVithBar - value(1.0), this->M_epsilon, ( 1 / PI ), (1.0/2.0) ) *
                    dot( FAminusT , dFa ) *
                    dot( Fa * Mith - value(1.0/3.0) * IVith * FAminusT, grPhiI )
                    ) >> jacobian;
@@ -809,8 +814,8 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::updateNonLinearJacobi
                    this->M_dispETFESpace,
                    this->M_dispETFESpace,
                    ithJzeroA * value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * JactiveEl * JactiveEl *
-                   exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value(stretch) ) * ( IVithBar- value(stretch) ) ) *
-                   atan( IVithBar - value(stretch), this->M_epsilon, ( 1 / PI ), (1.0/2.0) ) *
+                   exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value(1.0) ) * ( IVithBar- value(1.0) ) ) *
+                   atan( IVithBar - value(1.0), this->M_epsilon, ( 1 / PI ), (1.0/2.0) ) *
                    dot( transpose( dFa ) * Fa + transpose(Fa) * dFa , Mith ) *
                    dot( Fa * Mith - value(1.0/3.0) * IVith * FAminusT, grPhiI )
                    ) >> jacobian;
@@ -823,9 +828,9 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::updateNonLinearJacobi
                    this->M_dispETFESpace,
                    this->M_dispETFESpace,
                    ithJzeroA * value( -8.0/3.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) *
-                   JactiveEl * IVithBar * ( IVithBar - value(stretch) ) * ( IVithBar - value(stretch) ) *
-                   exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value(stretch) ) * ( IVithBar- value(stretch) ) ) *
-                   atan( IVithBar - value(stretch), this->M_epsilon, ( 1 / PI ), (1.0/2.0) ) *
+                   JactiveEl * IVithBar * ( IVithBar - value(1.0) ) * ( IVithBar - value(1.0) ) *
+                   exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value(1.0) ) * ( IVithBar- value(1.0) ) ) *
+                   atan( IVithBar - value(1.0), this->M_epsilon, ( 1 / PI ), (1.0/2.0) ) *
                    dot( FAminusT , dFa ) *
                    dot( Fa * Mith - value(1.0/3.0) * IVith * FAminusT, grPhiI )
                    ) >> jacobian;
@@ -839,9 +844,9 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::updateNonLinearJacobi
                    this->M_dispETFESpace,
                    this->M_dispETFESpace,
                    ithJzeroA * value( 4.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) *
-                   JactiveEl * JactiveEl *  ( IVithBar - value(stretch) ) * ( IVithBar - value(stretch) ) *
-                   exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value(stretch) ) * ( IVithBar- value(stretch) ) ) *
-                   atan( IVithBar - value(stretch), this->M_epsilon, ( 1 / PI ), (1.0/2.0) ) *
+                   JactiveEl * JactiveEl *  ( IVithBar - value(1.0) ) * ( IVithBar - value(1.0) ) *
+                   exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value(1.0) ) * ( IVithBar- value(1.0) ) ) *
+                   atan( IVithBar - value(1.0), this->M_epsilon, ( 1 / PI ), (1.0/2.0) ) *
                    dot( transpose( dFa ) * Fa + transpose(Fa) * dFa , Mith ) *
                    dot( Fa * Mith - value(1.0/3.0) * IVith * FAminusT, grPhiI )
                    ) >> jacobian;
@@ -853,9 +858,9 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::updateNonLinearJacobi
                    this->M_dispFESpace->qr(),
                    this->M_dispETFESpace,
                    this->M_dispETFESpace,
-                   ithJzeroA * value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * JactiveEl *  ( IVithBar - value(stretch) ) *
-                   exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value(stretch) ) * ( IVithBar- value(stretch) ) ) *
-                   atan( IVithBar - value(stretch), this->M_epsilon, ( 1 / PI ), (1.0/2.0) ) *
+                   ithJzeroA * value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * JactiveEl *  ( IVithBar - value(1.0) ) *
+                   exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value(1.0) ) * ( IVithBar- value(1.0) ) ) *
+                   atan( IVithBar - value(1.0), this->M_epsilon, ( 1 / PI ), (1.0/2.0) ) *
                    dot( dFa * Mith, grPhiI )
                    ) >> jacobian;
 
@@ -866,9 +871,9 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::updateNonLinearJacobi
                    this->M_dispFESpace->qr(),
                    this->M_dispETFESpace,
                    this->M_dispETFESpace,
-                   ithJzeroA * value( 2.0/3.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * IVithBar *  ( IVithBar - value(stretch) ) *
-                   exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value(stretch) ) * ( IVithBar- value(stretch) ) ) *
-                   atan( IVithBar - value(stretch), this->M_epsilon, ( 1 / PI ), (1.0/2.0) ) *
+                   ithJzeroA * value( 2.0/3.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * IVithBar *  ( IVithBar - value(1.0) ) *
+                   exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value(1.0) ) * ( IVithBar- value(1.0) ) ) *
+                   atan( IVithBar - value(1.0), this->M_epsilon, ( 1 / PI ), (1.0/2.0) ) *
                    dot( FAminusT * transpose( dFa ) * FAminusT, grPhiI )
                    ) >> jacobian;
 
@@ -880,9 +885,9 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::updateNonLinearJacobi
                    this->M_dispFESpace->qr(),
                    this->M_dispETFESpace,
                    this->M_dispETFESpace,
-                   ithJzeroA * value( -2.0/3.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * JactiveEl *  ( IVithBar - value(stretch) ) *
-                   exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value(stretch) ) * ( IVithBar- value(stretch) ) ) *
-                   atan( IVithBar - value(stretch), this->M_epsilon, ( 1 / PI ), (1.0/2.0) ) *
+                   ithJzeroA * value( -2.0/3.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * JactiveEl *  ( IVithBar - value(1.0) ) *
+                   exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value(1.0) ) * ( IVithBar- value(1.0) ) ) *
+                   atan( IVithBar - value(1.0), this->M_epsilon, ( 1 / PI ), (1.0/2.0) ) *
                    dot( transpose( dFa ) * Fa + transpose(Fa) * dFa , Mith ) *
                    dot( FAminusT , grPhiI )
                    ) >> jacobian;
@@ -988,13 +993,16 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeStiffness ( co
           // Definition of the direction of the fiber at the activation moment = F_0(ta) * f_0
           activateFiber_Type activeIthFiber = ExpressionMultimechanism::activateFiberDirection( ithFzeroA, fiberIth );
 
-	  // Normalize the fiber vectors such that in the reference configuration their norm is 
-	  // normVector_Type normIthActiveFiber
+          // Definition of the norm of a transformed fiber
+          normActivateFiber_Type normFiber = ExpressionMultimechanism::normActivatedFiber( activeIthFiber );
+
+          // Normalized fiber
+          normalizedFiber_Type normalizedFiber = ExpressionMultimechanism::normalizedFiberDirection( activeIthFiber, normFiber );
 
           // Definition of the tensor M = ithFiber \otimes ithFiber
           // At the moment, it's automatic that the method constructs the expression M = ithFiber \otimes ithFiber
           // For a more general case, the file ExpressionDefinitions.hpp should be changed
-          activeOuterProduct_Type Mith = ExpressionMultimechanism::activeOuterProduct( activeIthFiber );
+          activeNormalizedOuterProduct_Type Mith = ExpressionMultimechanism::activeNormalizedOuterProduct( normalizedFiber );
 
           // Definition of the fourth invariant : I_4^i = C:Mith
           activeStretch_Type IVith = ExpressionMultimechanism::activeFiberStretch( Ca, Mith );
@@ -1002,10 +1010,8 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeStiffness ( co
           // Definition of the fouth isochoric invariant : J^(-2.0/3.0) * I_4^i
           activeIsochoricStretch_Type IVithBar = ExpressionMultimechanism::activeIsochoricFourthInvariant( JactiveEl, IVith );
 
-          Real stretch = this->M_dataMaterial->ithCharacteristicStretch(i);
           // The terms for the piola kirchhoff tensor come from the holzapfel model. Then they are rescaled
           // according to the change of variable given by the multi-mechanism model.
-
 
           // // First term:
           // // 2 alpha_i J^(-2.0/3.0) ( \bar{I_4} - 1 ) exp( gamma_i * (\bar{I_4} - 1)^2 ) * F M : \grad phi_i
@@ -1013,9 +1019,9 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeStiffness ( co
           integrate ( elements ( this->M_dispETFESpace->mesh() ),
                       this->M_dispFESpace->qr(),
                       this->M_dispETFESpace,
-                      atan( IVithBar - value( stretch ) , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  )  * ithJzeroA *
-                      (value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * JactiveEl * ( IVithBar - value( stretch ) ) *
-                       exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value( stretch ) ) * ( IVithBar- value( stretch ) )  ) *
+                      atan( IVithBar - value( 1.0 ) , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  )  * ithJzeroA *
+                      (value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * JactiveEl * ( IVithBar - value( 1.0 ) ) *
+                       exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value( 1.0 ) ) * ( IVithBar- value( 1.0 ) )  ) *
                        dot( ( Fa  * Mith ) * FzeroAminusT, grad( phi_i ) ) )
                       ) >> this->M_stiff;
 
@@ -1026,9 +1032,9 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeStiffness ( co
           integrate ( elements ( this->M_dispETFESpace->mesh() ),
                       this->M_dispFESpace->qr(),
                       this->M_dispETFESpace,
-                      atan( IVithBar - value( stretch ) , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  ) * ithJzeroA *
-                      ( value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * JactiveEl * ( IVithBar - value( stretch ) ) *
-                        exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value( stretch ) ) * ( IVithBar- value( stretch ) )  ) *
+                      atan( IVithBar - value( 1.0 ) , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  ) * ithJzeroA *
+                      ( value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * JactiveEl * ( IVithBar - value( 1.0 ) ) *
+                        exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value( 1.0 ) ) * ( IVithBar- value( 1.0 ) )  ) *
                         value( -1.0/3.0 ) * IVith * dot( FAminusT *  FzeroAminusT , grad( phi_i ) ) )
                       ) >> this->M_stiff;
 
