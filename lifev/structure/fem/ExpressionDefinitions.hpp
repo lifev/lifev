@@ -459,7 +459,9 @@ typedef ExpressionPower<activatedDeterminantF_Type >  activePowerExpression_Type
 
 typedef ExpressionOuterProduct< activatedFiber_Type, activatedFiber_Type>  activeOuterProduct_Type;
 
-typedef ExpressionDot< rightCauchyGreenMultiMechanism_Type, activeOuterProduct_Type>  activeStretch_Type;
+typedef ExpressionOuterProduct< normalizedFiber_Type, normalizedFiber_Type>  activeNormalizedOuterProduct_Type;
+
+typedef ExpressionDot< rightCauchyGreenMultiMechanism_Type, activeNormalizedOuterProduct_Type>  activeStretch_Type;
 
 typedef ExpressionProduct< activePowerExpression_Type, activeStretch_Type>         activeIsochoricStretch_Type;
 
@@ -520,10 +522,12 @@ rightCauchyGreenMultiMechanism_Type activationRightCauchyGreen( const Expression
  activePowerExpression_Type activePowerExpression( activatedDeterminantF_Type Ja,
 						   const Real exp);
 
-  activeOuterProduct_Type activeOuterProduct( const activatedFiber_Type activatedFiber );
+ activeOuterProduct_Type activeOuterProduct( const activatedFiber_Type activatedFiber );
+
+ activeNormalizedOuterProduct_Type activeNormalizedOuterProduct( const normalizedFiber_Type activatedFiber );
 
  activeStretch_Type activeFiberStretch( const rightCauchyGreenMultiMechanism_Type activeC,
-					const activeOuterProduct_Type activeM);
+                                        const activeNormalizedOuterProduct_Type activeM);
 
  activeIsochoricStretch_Type activeIsochoricFourthInvariant( const activePowerExpression_Type activeJ,
 							     const activeStretch_Type activeI4);

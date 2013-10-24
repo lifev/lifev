@@ -423,8 +423,13 @@ namespace LifeV
       return activeOuterProduct_Type( activatedFiber, activatedFiber );
     }
 
+    activeNormalizedOuterProduct_Type activeNormalizedOuterProduct( const normalizedFiber_Type normalizedActiveFiber )
+    {
+      return activeNormalizedOuterProduct_Type( normalizedActiveFiber, normalizedActiveFiber );
+    }
+
     activeStretch_Type activeFiberStretch( const rightCauchyGreenMultiMechanism_Type activeC,
-					   const activeOuterProduct_Type activeM)
+                                           const activeNormalizedOuterProduct_Type activeM)
     {
       return activeStretch_Type( activeC, activeM );
     }
