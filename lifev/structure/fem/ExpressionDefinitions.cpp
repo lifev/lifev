@@ -397,7 +397,7 @@ namespace LifeV
     {
       squaredNormActivatedFiber_Type squaredNorm = squaredNormActivatedFiber_Type( f, f );
 
-      return normActivatedFiber_Type( squaredNorm , (1.0/2.0) );
+      return normActivatedFiber_Type( squaredNorm );
     }
 
     normalizedFiber_Type normalizedFiberDirection( const activatedFiber_Type fiber,

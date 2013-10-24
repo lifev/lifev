@@ -448,7 +448,7 @@ typedef ExpressionProduct< ExpressionDefinitions::deformationGradient_Type,
 
 typedef ExpressionDot< activatedFiber_Type, activatedFiber_Type > squaredNormActivatedFiber_Type;
 
-typedef ExpressionPower< squaredNormActivatedFiber_Type> normActivatedFiber_Type;
+typedef ExpressionSquareRoot< squaredNormActivatedFiber_Type> normActivatedFiber_Type;
 
 typedef ExpressionDivision< activatedFiber_Type, normActivatedFiber_Type> normalizedFiber_Type;
 
