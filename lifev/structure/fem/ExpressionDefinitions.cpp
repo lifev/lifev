@@ -388,6 +388,18 @@ namespace LifeV
       return activatedFiber_Type( F, ithFiber );
     }
 
+    normActivatedFiber_Type normActivatedFiber( const ExpressionTranspose<activatedFiber_Type> fT,
+					      const activatedFiber_Type f)
+    {
+      return normActivatedFiber_Type( fT, f );
+    }
+
+    normalizedFiber_Type normalizedFiberDirection( const activatedFiber_Type fiber,
+						   const normActivatedFiber_Type normFiber)
+    {
+      return normalizedFiber_Type( fiber, normFiber );
+    }
+
     activatedDeterminantF_Type activateDeterminantF( const ExpressionDefinitions::determinantTensorF_Type Jzero,
 						     const ExpressionDefinitions::powerExpression_Type JzeroA )
     {
