@@ -306,7 +306,7 @@ Structure::run3d()
 
     // How many solution do we have to read?
     std::string readType = dataFile ( "importer/analysis", "instant");
-    UInt numberOfSol(0);    
+    UInt numberOfSol(0);
     UInt start(0);
     UInt end(0);
 
@@ -548,7 +548,7 @@ Structure::run3d()
 	std::cout << "Current reading: " << iterationString << std::endl;
 
         /*!Definition of the ExporterData, used to load the solution inside the previously defined vectors*/
-        LifeV::ExporterData<mesh_Type> solutionDispl  (LifeV::ExporterData<mesh_Type>::VectorField,nameField + "." + iterationString, 
+        LifeV::ExporterData<mesh_Type> solutionDispl  (LifeV::ExporterData<mesh_Type>::VectorField,nameField + "." + iterationString,
 						       dFESpace, disp, UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
 
         //Read the variable
@@ -631,7 +631,7 @@ Structure::run3d()
         //     // Definition of the fouth isochoric invariant : J^(-2.0/3.0) * I_4^i
         //     ExpressionDefinitions::isochoricStretch_Type IVithBar =
         //         ExpressionDefinitions::isochoricFourthInvariant( Jel, IVith );
-	    
+
 	//     *stretch[ j ] *= 0.0;
 	//     *activationFunction[ j ] *= 0.0;
 
