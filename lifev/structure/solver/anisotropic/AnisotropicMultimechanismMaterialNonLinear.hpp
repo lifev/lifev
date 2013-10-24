@@ -181,6 +181,9 @@ public:
     typedef ExpressionDefinitions::inverseTensor_Type                         invTensor_Type;
     typedef ExpressionMultimechanism::rightCauchyGreenMultiMechanism_Type     tensorCmultiMech_Type;
     typedef ExpressionMultimechanism::activatedFiber_Type                     activateFiber_Type;
+    typedef ExpressionMultimechanism::normActivatedFiber_Type                 normActivateFiber_Type;
+    typedef ExpressionMultimechanism::normalizedFiber_Type                    normalizedFiber_Type;
+    typedef ExpressionMultimechanism::activatedFiber_Type                     activateFiber_Type;
     typedef ExpressionMultimechanism::activatedDeterminantF_Type              activatedDeterminantF_Type;
     typedef ExpressionMultimechanism::activePowerExpression_Type              activePowerExpression_Type;
     typedef ExpressionMultimechanism::activeOuterProduct_Type                 activeOuterProduct_Type;
