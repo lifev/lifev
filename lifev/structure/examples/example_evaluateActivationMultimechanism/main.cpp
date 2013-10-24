@@ -289,6 +289,7 @@ Structure::run3d()
     scalarETFESpacePtr_Type dScalarETFESpace ( new scalarETFESpace_Type (pointerToMesh, & (dScalarFESpace->refFE() ),
                                                                          & (dScalarFESpace->fe().geoMap() ), parameters->comm) );
 
+    vectorPtr_Type patchAreaVector( new vector_Type( dETFESpace->map() ) );
     vectorPtr_Type patchAreaVectorScalar( new vector_Type( dScalarETFESpace->map() ) );
     QuadratureRule fakeQuadratureRule;
 
@@ -330,18 +331,29 @@ Structure::run3d()
                   ) >> patchAreaVectorScalar;
     patchAreaVectorScalar->globalAssemble();
 
+    ExpressionVectorFromNonConstantScalar<ExpressionMeas, 3  > vMeas( meas_K );
+    evaluateNode( elements ( dETFESpace->mesh() ),
+                  fakeQuadratureRule,
+                  dETFESpace,
+                  dot( vMeas , phi_i )
+                  ) >> patchAreaVector;
+    patchAreaVector->globalAssemble();
 
     // Setting the fibers
     // vectorFiberFunctionPtr_Type pointerToVectorOfFamilies( new vectorFiberFunction_Type( ) );
     // (*pointerToVectorOfFamilies).resize( dataStructure->numberFibersFamilies( ) );
 
     listOfFiberDirections_Type fiberDirections; // store vector of fibers
+    listOfFiberDirections_Type deformedFiberDirections; // store vector of fibers
+    listOfFiberDirections_Type normalizedDefFibers; // store vector of fibers
     listOfFiberDirections_Type selectionExport; // vector of the nodal satisfaction of the activation condition
     listOfFiberDirections_Type activationDispl; // active displacement for each fiber
     listOfFiberDirections_Type stretchFibers;   // stretch of the fiber at a certain displacement
     //listOfFiberDirections_Type activationFibers;// corresponding activation function
 
     fiberDirections.resize( dataStructure->numberFibersFamilies( ) );
+    deformedFiberDirections.resize( dataStructure->numberFibersFamilies( ) );
+    normalizedDefFibers.resize( dataStructure->numberFibersFamilies( ) );
     selectionExport.resize( dataStructure->numberFibersFamilies( ) );
     activationDispl.resize( dataStructure->numberFibersFamilies( ) );
     stretchFibers.resize( dataStructure->numberFibersFamilies( ) );
@@ -381,6 +393,8 @@ Structure::run3d()
         // (*pointerToVectorOfFamilies)[ k-1 ] = setOfFiberFunctions.fiberDefinition( creationString );
 
         fiberDirections[ k-1 ].reset( new vector_Type( dFESpace->map() ) );
+        deformedFiberDirections[ k-1 ].reset( new vector_Type( dFESpace->map() ) );
+        normalizedDefFibers[ k-1 ].reset( new vector_Type( dFESpace->map() ) );
         selectionExport[ k-1 ].reset( new vector_Type( dFESpace->map() ) );
         activationDispl[ k-1 ].reset( new vector_Type( dFESpace->map() ) );
         stretchFibers[ k-1 ].reset( new vector_Type( dFESpace->map() ) );
@@ -467,6 +481,8 @@ Structure::run3d()
     {
         // Setting up the name of the function to define the family
         std::string family="Family-";
+        std::string familyDef="FamilyDef-";
+        std::string familyNorm="FamilyNorm-";
         std::string familySel="FamilySel-";
         std::string familyAct="FamilyAct-";
         std::string familyStretch="FamilyStretch-";
@@ -479,6 +495,8 @@ Structure::run3d()
 
         // Name of the function to create
         std::string creationString = family + familyNumber;
+        std::string creationStringDef = familyDef + familyNumber;
+        std::string creationStringNorm = familyNorm + familyNumber;
         std::string creationStringSel = familySel + familyNumber;
         std::string creationStringAct = familyAct + familyNumber;
         std::string creationStringStretch = familyStretch + familyNumber;
@@ -486,6 +504,8 @@ Structure::run3d()
 
         // Setting the vectors with the maps
         (fiberDirections[ k-1 ]).reset( new vector_Type( dFESpace->map() ) );
+        (deformedFiberDirections[ k-1 ]).reset( new vector_Type( dFESpace->map() ) );
+        (normalizedDefFibers[ k-1 ]).reset( new vector_Type( dFESpace->map() ) );
         (selectionExport[ k-1 ]).reset( new vector_Type( dFESpace->map() ) );
         (activationDispl[ k-1 ]).reset( new vector_Type( dFESpace->map() ) );
         (stretchFibers[ k-1 ]).reset( new vector_Type( dScalarFESpace->map() ) );
@@ -493,6 +513,8 @@ Structure::run3d()
 
         // Adding them to the exporter
         exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, creationString, dFESpace, fiberDirections[ k-1 ], UInt (0) );
+        exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, creationStringDef, dFESpace, deformedFiberDirections[ k-1 ], UInt (0) );
+        exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, creationStringNorm, dFESpace, normalizedDefFibers[ k-1 ], UInt (0) );
         exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, creationStringSel, dFESpace, selectionExport[ k-1 ], UInt (0) );
         exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, creationStringAct, dFESpace, activationDispl[ k-1 ], UInt (0) );
         exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::ScalarField, creationStringStretch, dScalarFESpace, stretchFibers[ k-1 ], UInt (0) );
@@ -578,6 +600,15 @@ Structure::run3d()
                 ExpressionDefinitions::interpolateFiber( dETFESpace,
                                                          solid.material()->anisotropicLaw()->ithFiberVector( k ) );
 
+            ExpressionMultimechanism::activatedFiber_Type defFiberIth =
+                ExpressionMultimechanism::activateFiberDirection( F, fiberIth);
+
+            ExpressionMultimechanism::normActivatedFiber_Type normDef =
+                ExpressionMultimechanism::normActivatedFiber( defFiberIth );
+
+            ExpressionMultimechanism::normalizedFiber_Type normalizedFiber =
+                ExpressionMultimechanism::normalizedFiberDirection( defFiberIth, normDef );
+
             // f /otimes f
             ExpressionDefinitions::outerProduct_Type Mith = ExpressionDefinitions::fiberTensor( fiberIth );
 
@@ -592,6 +623,24 @@ Structure::run3d()
                           ) >> stretchFibers[ k-1 ];
             stretchFibers[ k-1 ]->globalAssemble();
             *(stretchFibers[ k-1 ]) = *(stretchFibers[ k-1 ]) / *patchAreaVectorScalar;
+
+            *deformedFiberDirections[ k-1 ] *= 0.0;
+            evaluateNode( elements ( dETFESpace->mesh() ),
+                          fakeQuadratureRule,
+                          dETFESpace,
+                          meas_K * dot( defFiberIth ,phi_i )
+                          ) >> deformedFiberDirections[ k-1 ];
+            deformedFiberDirections[ k-1 ]->globalAssemble();
+            *(deformedFiberDirections[ k-1 ]) = *(deformedFiberDirections[ k-1 ]) / *patchAreaVector;
+
+            *normalizedDefFibers[ k-1 ] *= 0.0;
+            evaluateNode( elements ( dETFESpace->mesh() ),
+                          fakeQuadratureRule,
+                          dETFESpace,
+                          meas_K * dot ( normalizedFiber , phi_i )
+                          ) >> normalizedDefFibers[ k-1 ];
+            normalizedDefFibers[ k-1 ]->globalAssemble();
+            *(normalizedDefFibers[ k-1 ]) = *(normalizedDefFibers[ k-1 ]) / *patchAreaVector;
 
             // Savint to Export
             *(fiberDirections[ k-1 ]) = solid.material()->anisotropicLaw()->ithFiberVector( k );
