@@ -8,16 +8,20 @@
 #ifndef BLOCKOPERATOR_HPP_
 #define BLOCKOPERATOR_HPP_
 
-#include <lifev/core/LifeV.hpp>
-
-// Tell the compiler to ignore specific kind of warnings
-LIFEV_SUPPRESS_WARNINGS
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wunused-local-typedefs"
+#pragma GCC diagnostic ignored "-Wextra"
 
 #include <Epetra_Import.h>
 #include <boost/numeric/ublas/matrix.hpp>
 
-// Tell the compiler to restore the warnings
-LIFEV_RESTORE_WARNINGS
+// Restoring the previously ignored warnings:
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
+#pragma GCC diagnostic warning "-Wunused-local-typedefs"
+#pragma GCC diagnostic warning "-Wextra"
 
 #include <lifev/operator/linear_algebra/BlockEpetra_Map.hpp>
 #include <lifev/operator/linear_algebra/BlockEpetra_MultiVector.hpp>

@@ -5,11 +5,11 @@
  *      Author: uvilla
  */
 
-#include <lifev/core/LifeV.hpp>
-#include <lifev/operator/linear_algebra/BelosOperator.hpp>
+#include<lifev/operator/linear_algebra/BelosOperator.hpp>
 
-// Tell the compiler to ignore specific kind of warnings
-LIFEV_SUPPRESS_WARNINGS
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+#pragma GCC diagnostic ignored "-Wextra"
 
 #include <BelosBlockCGSolMgr.hpp>
 #include <BelosBlockGmresSolMgr.hpp>
@@ -21,8 +21,10 @@ LIFEV_SUPPRESS_WARNINGS
 #include <BelosRCGSolMgr.hpp>
 #include <BelosTFQMRSolMgr.hpp>
 
-// Tell the compiler to restore the warnings
-LIFEV_RESTORE_WARNINGS
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
+#pragma GCC diagnostic warning "-Wextra"
 
 namespace LifeV
 {
@@ -33,73 +35,73 @@ std::auto_ptr<BelosOperator::solverManagerMap_Type> BelosOperator::S_solverManag
 std::auto_ptr<BelosOperator::precSideMap_Type> BelosOperator::S_precSideMap(BelosOperator::singletonPrecSideMap());
 
 BelosOperator::BelosOperator():
-        InvertibleOperator(),
-        M_linProblem(Teuchos::rcp(new LinearProblem))
+		InvertibleOperator(),
+		M_linProblem(Teuchos::rcp(new LinearProblem))
 {
-    M_name = "BelosOperator";
+	M_name = "BelosOperator";
 }
 
 int BelosOperator::doApplyInverse(const vector_Type& X, vector_Type& Y) const
 {
 
-    Teuchos::RCP<vector_Type> Xcopy(new vector_Type(X) );
-    Y.PutScalar(0.0);
-    bool set = M_linProblem->setProblem(Teuchos::rcp(&Y, false), Xcopy);
-    if (set == false)
-    {
-        std::cout << std::endl << "ERROR:  Belos::LinearProblem failed to set up correctly!" << std::endl;
-        return -12;
-    }
+	Teuchos::RCP<vector_Type> Xcopy(new vector_Type(X) );
+	Y.PutScalar(0.0);
+	bool set = M_linProblem->setProblem(Teuchos::rcp(&Y, false), Xcopy);
+	if (set == false)
+	{
+		std::cout << std::endl << "ERROR:  Belos::LinearProblem failed to set up correctly!" << std::endl;
+		return -12;
+	}
 
-    Belos::ReturnType ret = M_solverManager->solve();
+	Belos::ReturnType ret = M_solverManager->solve();
 
-    if(ret == Belos::Converged)
-        return 0;
-    else
-        return -1;
+	if(ret == Belos::Converged)
+		return 0;
+	else
+		return -1;
 
 }
 
 void BelosOperator::doSetOperator()
 {
-    M_linProblem->setOperator(M_oper);
+	M_linProblem->setOperator(M_oper);
 }
 
 void BelosOperator::doSetPreconditioner()
 {
-    M_belosPrec = Teuchos::rcp( new Belos::EpetraPrecOp( M_prec ) );
+	M_belosPrec = Teuchos::rcp( new Belos::EpetraPrecOp( M_prec ) );
 }
 
 void BelosOperator::doSetParameterList()
 {
-    if(! M_pList->sublist("options").isParameter("Verbosity"))
-        M_pList->sublist("options").set( "Verbosity", Belos::Errors + Belos::Warnings +
-                Belos::TimingDetails + Belos::StatusTestDetails );
+	if(! M_pList->sublist("options").isParameter("Verbosity"))
+		M_pList->sublist("options").set( "Verbosity", Belos::Errors + Belos::Warnings +
+				Belos::TimingDetails + Belos::StatusTestDetails );
 
-    std::string solverType(M_pList->get<std::string>("Solver Type"));
-    allocateSolver( (*S_solverManagerMap)[solverType]);
-    M_solverManager->setParameters(sublist(M_pList, "options", true));
+	std::string solverType(M_pList->get<std::string>("Solver Type"));
+	allocateSolver( (*S_solverManagerMap)[solverType]);
+	M_solverManager->setParameters(sublist(M_pList, "options", true));
 
-    std::string precSideStr( M_pList->get<std::string>("Preconditioner Side"));
-    PreconditionerSide precSide((*S_precSideMap)[precSideStr]);
+	std::string precSideStr( M_pList->get<std::string>("Preconditioner Side"));
+	PreconditionerSide precSide((*S_precSideMap)[precSideStr]);
 
-    switch(precSide)
-    {
-    case None:
-        break;
-    case Left:
-        M_linProblem->setLeftPrec(M_belosPrec);
-        break;
-    case Right:
-        M_linProblem->setRightPrec(M_belosPrec);
-        break;
-    default:
-        exit(1);
-    }
+	switch(precSide)
+	{
+	case None:
+		break;
+	case Left:
+		M_linProblem->setLeftPrec(M_belosPrec);
+		break;
+	case Right:
+		M_linProblem->setRightPrec(M_belosPrec);
+		break;
+	default:
+		exit(1);
+	}
 
 
 
-    M_solverManager->setProblem(M_linProblem);
+	M_solverManager->setProblem(M_linProblem);
 
 }
 
@@ -108,55 +110,55 @@ void BelosOperator::doSetParameterList()
 //============================================================================//
 void BelosOperator::allocateSolver(const SolverManagerType & solverManagerType)
 {
-       // If a SolverManager already exists we simply clean it!
-        if ( !M_solverManager.is_null() )
-        {
-            M_solverManager.reset();
-        }
+	   // If a SolverManager already exists we simply clean it!
+	    if ( !M_solverManager.is_null() )
+	    {
+	        M_solverManager.reset();
+	    }
 
-        switch ( solverManagerType )
-        {
-            case NotAValidSolverManager:
-                std::cout<<"Not a Valid Solver Manager \n";
-                exit(1);
-                break;
-            case BlockCG:
-                // Create the block CG iteration
-                M_solverManager = Teuchos::rcp( new Belos::BlockCGSolMgr<Real,vector_Type,operator_Type>() );
-                break;
-            case PseudoBlockCG:
-                // Create the pseudo block CG iteration
-                M_solverManager = Teuchos::rcp( new Belos::PseudoBlockCGSolMgr<Real,vector_Type,operator_Type>() );
-                break;
-            case RCG:
-                M_solverManager = Teuchos::rcp( new Belos::RCGSolMgr<Real,vector_Type,operator_Type>() );
-                break;
-            case BlockGmres:
-                M_solverManager = Teuchos::rcp( new Belos::BlockGmresSolMgr<Real,vector_Type,operator_Type>() );
-                break;
-            case PseudoBlockGmres:
-                M_solverManager = Teuchos::rcp( new Belos::PseudoBlockGmresSolMgr<Real,vector_Type,operator_Type>() );
-                break;
-            case GmresPoly:
-                M_solverManager = Teuchos::rcp( new Belos::GmresPolySolMgr<Real,vector_Type,operator_Type>() );
-                 break;
-             case GCRODR:
-                 M_solverManager = Teuchos::rcp( new Belos::GCRODRSolMgr<Real,vector_Type,operator_Type>() );
-                 break;
-             case PCPG:
-                 M_solverManager = Teuchos::rcp( new Belos::PCPGSolMgr<Real,vector_Type,operator_Type>() );
-                 break;
-             case TFQMR:
-                 // Create TFQMR iteration
-                 M_solverManager = Teuchos::rcp( new Belos::TFQMRSolMgr<Real,vector_Type,operator_Type>() );
-                 break;
-         }
+	    switch ( solverManagerType )
+	    {
+	    	case NotAValidSolverManager:
+	    		std::cout<<"Not a Valid Solver Manager \n";
+	    		exit(1);
+	    		break;
+	        case BlockCG:
+	            // Create the block CG iteration
+	            M_solverManager = Teuchos::rcp( new Belos::BlockCGSolMgr<Real,vector_Type,operator_Type>() );
+	            break;
+	        case PseudoBlockCG:
+	            // Create the pseudo block CG iteration
+	            M_solverManager = Teuchos::rcp( new Belos::PseudoBlockCGSolMgr<Real,vector_Type,operator_Type>() );
+	            break;
+	        case RCG:
+	            M_solverManager = Teuchos::rcp( new Belos::RCGSolMgr<Real,vector_Type,operator_Type>() );
+	            break;
+	        case BlockGmres:
+	            M_solverManager = Teuchos::rcp( new Belos::BlockGmresSolMgr<Real,vector_Type,operator_Type>() );
+	            break;
+	        case PseudoBlockGmres:
+	            M_solverManager = Teuchos::rcp( new Belos::PseudoBlockGmresSolMgr<Real,vector_Type,operator_Type>() );
+	            break;
+	        case GmresPoly:
+	            M_solverManager = Teuchos::rcp( new Belos::GmresPolySolMgr<Real,vector_Type,operator_Type>() );
+	             break;
+	         case GCRODR:
+	             M_solverManager = Teuchos::rcp( new Belos::GCRODRSolMgr<Real,vector_Type,operator_Type>() );
+	             break;
+	         case PCPG:
+	             M_solverManager = Teuchos::rcp( new Belos::PCPGSolMgr<Real,vector_Type,operator_Type>() );
+	             break;
+	         case TFQMR:
+	             // Create TFQMR iteration
+	             M_solverManager = Teuchos::rcp( new Belos::TFQMRSolMgr<Real,vector_Type,operator_Type>() );
+	             break;
+	     }
 
 }
 
 BelosOperator::solverManagerMap_Type * BelosOperator::singletonSolverManagerMap()
 {
-    solverManagerMap_Type * map(new solverManagerMap_Type);
+	solverManagerMap_Type * map(new solverManagerMap_Type);
     (*map)["BlockCG"] = BlockCG;
     (*map)["PseudoBlockCG"] = PseudoBlockCG;
     (*map)["RCG"] = RCG;
@@ -172,7 +174,7 @@ BelosOperator::solverManagerMap_Type * BelosOperator::singletonSolverManagerMap(
 
 BelosOperator::precSideMap_Type * BelosOperator::singletonPrecSideMap()
 {
-    precSideMap_Type * map(new precSideMap_Type);
+	precSideMap_Type * map(new precSideMap_Type);
     (*map)["None"] = None;
     (*map)["Right"] = Right;
     (*map)["Left"] = Left;
