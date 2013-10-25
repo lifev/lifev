@@ -91,7 +91,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/core/fem/TimeAdvanceNewmark.hpp>
 #include <lifev/core/fem/TimeAdvanceBDF.hpp>
 
-// To sort vectors 
+// To sort vectors
 #include <algorithm>
 
 namespace LifeV
@@ -1522,7 +1522,7 @@ void StructuralOperator<Mesh>::colorMesh ( vector_Type& meshColors )
 #endif
 
 template <typename Mesh>
-void StructuralOperator<Mesh>::computeCauchyStressTensor( const vectorPtr_Type disp, 
+void StructuralOperator<Mesh>::computeCauchyStressTensor( const vectorPtr_Type disp,
 							  const QuadratureRule& evalQuad,
 							  vectorPtr_Type sigma_1,
 							  vectorPtr_Type sigma_2,
@@ -1548,7 +1548,7 @@ void StructuralOperator<Mesh>::computePrincipalTensions( vectorPtr_Type sigma_1,
     consistent with the ETA approach to post-process structural dynamic simulations.
    */
 
-  /* 
+  /*
      We loop over the local ID on the processors of the originVector
      The cut of the vector sigma_1 sigma_2 and sigma_3 should be done in the same way
      so for the for loop I consider only the sigma_1
@@ -1559,13 +1559,13 @@ void StructuralOperator<Mesh>::computePrincipalTensions( vectorPtr_Type sigma_1,
 	{
 	  // Given the local ID we get the GID of the vector.
 	  Int GIDnode = sigma_1->blockMap().GID( iDOF );
-      
+
 	  // LAPACK wrapper of Epetra
 	  Epetra_LAPACK lapack;
 
 	  //List of flags for Lapack Function
 	  //For documentation, have a look at http://www.netlib.org/lapack/double/dgeev.f
-	  
+
 	  char JOBVL = 'N';
 	  char JOBVR = 'N';
 
@@ -1607,8 +1607,8 @@ void StructuralOperator<Mesh>::computePrincipalTensions( vectorPtr_Type sigma_1,
 	  lapack.GEEV (JOBVL, JOBVR, Dim, A /*cauchy*/, Dim, &WR[0], &WI[0], VL, LDVL, VR, LDVR, WORK, LWORK, &INFO);
 	  ASSERT ( !INFO, "Calculation of the Eigenvalues failed!!!" );
 
-	  /* 
-	     The Cauchy stress tensor is symmetric and positive definite therefore the 
+	  /*
+	     The Cauchy stress tensor is symmetric and positive definite therefore the
 	     eigenvalues have to be real and positive
 	  */
 	  Real sum(0);
@@ -1624,7 +1624,7 @@ void StructuralOperator<Mesh>::computePrincipalTensions( vectorPtr_Type sigma_1,
 	    }
 
 	  std::sort( eigenvalues.begin(), eigenvalues.end() );
-      
+
 	  // Putting the real eigenvalues in the right place
 	  for( UInt m(0); m < nDimensions; m++ )
 	    {

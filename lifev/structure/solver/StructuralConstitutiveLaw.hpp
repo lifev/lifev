@@ -458,12 +458,12 @@ void StructuralConstitutiveLaw<MeshType>::computeStiffness ( const vector_Type& 
 	// Anisotropic part
 	displayer->leaderPrint ("\n  S-  Updating the VectorStiffness ( anisotropic part )\n");
 
-	if( !M_dataMaterial->solidTypeAnisotropic().compare("multimechanism") && 
-	    !M_dataMaterial->fiberActivation().compare("explicit") && 
-	    !iter)
-	  {
-	    M_anisotropicLaw->computeReferenceConfigurations( sol, dataMaterial, displayer );
-	  }
+	// if( !M_dataMaterial->solidTypeAnisotropic().compare("multimechanism") &&
+	//     !M_dataMaterial->fiberActivation().compare("explicit") &&
+	//     !iter)
+	//   {
+	//     M_anisotropicLaw->computeReferenceConfigurations( sol, dataMaterial, displayer );
+	//   }
 
 	M_anisotropicLaw->computeStiffness (sol, iter, factor, dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
 
@@ -590,7 +590,7 @@ void StructuralConstitutiveLaw<MeshType>::apply ( const vector_Type& sol, vector
 
 #ifdef ENABLE_ANISOTROPIC_LAW
   if( !M_dataMaterial->constitutiveLaw().compare("anisotropic") )
-    {     
+    {
       vector_Type copyResAnisotropic(res);
       M_anisotropicLaw->apply ( sol, copyResAnisotropic, mapsMarkerVolumes, mapsMarkerIndexes, M_displayer);
       res += copyResAnisotropic;
@@ -601,7 +601,7 @@ void StructuralConstitutiveLaw<MeshType>::apply ( const vector_Type& sol, vector
 
 template <typename MeshType>
 void
-StructuralConstitutiveLaw<MeshType>::computeCauchyStressTensor ( const vectorPtr_Type disp, 
+StructuralConstitutiveLaw<MeshType>::computeCauchyStressTensor ( const vectorPtr_Type disp,
 								 const QuadratureRule& evalQuad,
 								 vectorPtr_Type sigma_1,
 								 vectorPtr_Type sigma_2, vectorPtr_Type sigma_3 )
@@ -634,7 +634,7 @@ StructuralConstitutiveLaw<MeshType>::computeCauchyStressTensor ( const vectorPtr
 
 #ifdef ENABLE_ANISOTROPIC_LAW
   if( !M_dataMaterial->constitutiveLaw().compare("anisotropic") )
-    {     
+    {
       M_anisotropicLaw->computeCauchyStressTensor( disp, evalQuad, sigma1CopyAniso, sigma2CopyAniso,sigma3CopyAniso );
 
       *sigma_1 += *sigma1CopyAniso;
