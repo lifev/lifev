@@ -667,14 +667,8 @@ Structure::run3d()
         ExpressionMultimechanism::activatedFiber_Type activeIthFiber =
             ExpressionMultimechanism::activateFiberDirection( ithFzeroA, fiberIth );
 
-        // Definition of the norm of a transformed fiber
-        ExpressionMultimechanism::normActivatedFiber_Type normFiber =
-            ExpressionMultimechanism::normActivatedFiber( activeIthFiber );
-
-        // Normalized fiber
-        ExpressionMultimechanism::normalizedFiber_Type normalizedFiber =
-            ExpressionMultimechanism::normalizedFiberDirection( activeIthFiber, normFiber );
-
+	ExpressionMultimechanism::normalizedVector_Type normalizedFiber =
+	  ExpressionMultimechanism::unitVector( activeIthFiber );
         // Definition of the tensor M = ithFiber \otimes ithFiber
         // At the moment, it's automatic that the method constructs the expression M = ithFiber \otimes ithFiber
         // For a more general case, the file ExpressionDefinitions.hpp should be changed
