@@ -450,6 +450,8 @@ typedef ExpressionDot< activatedFiber_Type, activatedFiber_Type > squaredNormAct
 
 typedef ExpressionSquareRoot< squaredNormActivatedFiber_Type> normActivatedFiber_Type;
 
+typedef ExpressionNormalize<activatedFiber_Type> normalizedVector_Type;
+
 typedef ExpressionDivision< activatedFiber_Type, normActivatedFiber_Type> normalizedFiber_Type;
 
 typedef ExpressionProduct< ExpressionDefinitions::determinantTensorF_Type,
@@ -459,7 +461,7 @@ typedef ExpressionPower<activatedDeterminantF_Type >  activePowerExpression_Type
 
 typedef ExpressionOuterProduct< activatedFiber_Type, activatedFiber_Type>  activeOuterProduct_Type;
 
-typedef ExpressionOuterProduct< normalizedFiber_Type, normalizedFiber_Type>  activeNormalizedOuterProduct_Type;
+typedef ExpressionOuterProduct< normalizedVector_Type, normalizedVector_Type>  activeNormalizedOuterProduct_Type;
 
 typedef ExpressionDot< rightCauchyGreenMultiMechanism_Type, activeNormalizedOuterProduct_Type>  activeStretch_Type;
 
@@ -511,6 +513,8 @@ rightCauchyGreenMultiMechanism_Type activationRightCauchyGreen( const Expression
 
  squaredNormActivatedFiber_Type squaredNormActivatedFiber( const activatedFiber_Type f);
 
+ normalizedVector_Type unitVector( const activatedFiber_Type vector );
+
  normActivatedFiber_Type normActivatedFiber( const activatedFiber_Type f);
 
  normalizedFiber_Type normalizedFiberDirection( const activatedFiber_Type fiber,
@@ -524,7 +528,7 @@ rightCauchyGreenMultiMechanism_Type activationRightCauchyGreen( const Expression
 
  activeOuterProduct_Type activeOuterProduct( const activatedFiber_Type activatedFiber );
 
- activeNormalizedOuterProduct_Type activeNormalizedOuterProduct( const normalizedFiber_Type activatedFiber );
+ activeNormalizedOuterProduct_Type activeNormalizedOuterProduct( const normalizedVector_Type activatedFiber );
 
  activeStretch_Type activeFiberStretch( const rightCauchyGreenMultiMechanism_Type activeC,
                                         const activeNormalizedOuterProduct_Type activeM);

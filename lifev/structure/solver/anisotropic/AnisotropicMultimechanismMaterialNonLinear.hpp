@@ -182,6 +182,7 @@ public:
     typedef ExpressionMultimechanism::rightCauchyGreenMultiMechanism_Type     tensorCmultiMech_Type;
     typedef ExpressionMultimechanism::activatedFiber_Type                     activateFiber_Type;
     typedef ExpressionMultimechanism::normActivatedFiber_Type                 normActivateFiber_Type;
+    typedef ExpressionMultimechanism::normalizedVector_Type                   normalizedVector_Type;
     typedef ExpressionMultimechanism::normalizedFiber_Type                    normalizedFiber_Type;
     typedef ExpressionMultimechanism::activatedDeterminantF_Type              activatedDeterminantF_Type;
     typedef ExpressionMultimechanism::activePowerExpression_Type              activePowerExpression_Type;
@@ -719,11 +720,7 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::updateNonLinearJacobi
       // Definition of the direction of the fiber at the activation moment = F_0(ta) * f_0
       activateFiber_Type activeIthFiber = ExpressionMultimechanism::activateFiberDirection( ithFzeroA, fiberIth );
 
-      // Definition of the norm of a transformed fiber
-      normActivateFiber_Type normFiber = ExpressionMultimechanism::normActivatedFiber( activeIthFiber );
-
-      // Normalized fiber
-      normalizedFiber_Type normalizedFiber = ExpressionMultimechanism::normalizedFiberDirection( activeIthFiber, normFiber );
+      normalizedVector_Type normalizedFiber = ExpressionMultimechanism::unitVector( activeIthFiber );
 
       // Definition of the tensor M = ithFiber \otimes ithFiber
       // At the moment, it's automatic that the method constructs the expression M = ithFiber \otimes ithFiber
@@ -878,12 +875,7 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeStiffness ( co
         // Definition of the direction of the fiber at the activation moment = F_0(ta) * f_0
         activateFiber_Type activeIthFiber = ExpressionMultimechanism::activateFiberDirection( ithFzeroA, fiberIth );
 
-        // Definition of the norm of a transformed fiber
-        normActivateFiber_Type normFiber = ExpressionMultimechanism::normActivatedFiber( activeIthFiber );
-
-        // Normalized fiber
-        normalizedFiber_Type normalizedFiber = ExpressionMultimechanism::normalizedFiberDirection( activeIthFiber, normFiber );
-
+	normalizedVector_Type normalizedFiber = ExpressionMultimechanism::unitVector( activeIthFiber );
         // Definition of the tensor M = ithFiber \otimes ithFiber
         // At the moment, it's automatic that the method constructs the expression M = ithFiber \otimes ithFiber
         // For a more general case, the file ExpressionDefinitions.hpp should be changed

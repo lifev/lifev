@@ -177,13 +177,13 @@ public:
     //! Getter for the value for a vector
     return_Type value_qi (const UInt& q, const UInt& i) const
     {
-        return M_evaluation.value_qi (q, i).normalize();
+        return M_evaluation.value_qi (q, i).normalized();
     }
 
-    //! Getter for the value for a matrix
+    //! Getter for the value for a matrgix
     return_Type value_qij (const UInt& q, const UInt& i, const UInt& j) const
     {
-        return M_evaluation.value_qij (q, i, j).normalize();
+        return M_evaluation.value_qij (q, i, j).normalized();
     }
 
     //@}

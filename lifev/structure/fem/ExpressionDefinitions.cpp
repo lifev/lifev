@@ -388,6 +388,11 @@ namespace LifeV
       return activatedFiber_Type( F, ithFiber );
     }
 
+    normalizedVector_Type unitVector( const activatedFiber_Type vector)
+    {
+      return normalizedVector_Type( vector );
+    }
+
     squaredNormActivatedFiber_Type squaredNormActivatedFiber( const activatedFiber_Type f)
     {
       return squaredNormActivatedFiber_Type( f, f );
@@ -423,7 +428,7 @@ namespace LifeV
       return activeOuterProduct_Type( activatedFiber, activatedFiber );
     }
 
-    activeNormalizedOuterProduct_Type activeNormalizedOuterProduct( const normalizedFiber_Type normalizedActiveFiber )
+    activeNormalizedOuterProduct_Type activeNormalizedOuterProduct( const normalizedVector_Type normalizedActiveFiber )
     {
       return activeNormalizedOuterProduct_Type( normalizedActiveFiber, normalizedActiveFiber );
     }
