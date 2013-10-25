@@ -133,10 +133,9 @@ void regularMesh2D ( MeshType& mesh,
                      const Real& t_y = 0.0 )
 {
     typedef MeshType mesh_Type;
-    typedef typename mesh_Type::geoShape_Type geoShape_Type;
 
-    ASSERT ( ( geoShape_Type::S_shape == TRIANGLE )
-             || ( geoShape_Type::S_shape == QUAD ),
+    ASSERT ( ( mesh_Type::geoShape_Type::S_shape == TRIANGLE )
+             || ( mesh_Type::geoShape_Type::S_shape == QUAD ),
              "Type of 2d structured mesh not available." );
 
     // discretization
