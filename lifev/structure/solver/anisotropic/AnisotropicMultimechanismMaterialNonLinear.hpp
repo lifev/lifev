@@ -490,9 +490,8 @@ AnisotropicMultimechanismMaterialNonLinear<MeshType>::setup ( const FESpacePtr_T
     this->M_offset                      = offset;
 
 
-
-    this->M_scalarETFESpace.reset ( new scalarETFESpace_Type (dFESpace->mesh(), & (dScalarFESpace->refFE() ),
-                                                              & (dScalarFESpace->fe().geoMap() ), parameters->comm) );
+    this->M_scalarETFESpace.reset ( new scalarETFESpace_Type (dFESpace->mesh(), & (dFESpace->refFE() ),
+                                                              & (dFESpace->fe().geoMap() ), dFESpace->mapPtr()->commPtr() ) );
 
     // Setting the quadrature rule for the evaluation
     QuadratureRule fakeQuadratureRule;
@@ -515,7 +514,7 @@ AnisotropicMultimechanismMaterialNonLinear<MeshType>::setup ( const FESpacePtr_T
     M_quadrature.reset( new QuadratureRule( fakeQuadratureRule ) );
     M_patchAreaVector.reset(new vector_Type(*this->M_localMap) );
 
-    M_patchAreaVector.reset(new vector_Type(*this->M_localMap) );
+    M_patchAreaVectorScalar.reset(new vector_Type( this->M_scalarETFESpace->map() ) );
 
     // Sizing the std::vectors
     M_selectionCriterion.resize( this->M_dataMaterial->numberFibersFamilies() );
@@ -560,6 +559,14 @@ AnisotropicMultimechanismMaterialNonLinear<MeshType>::setup ( const FESpacePtr_T
                   dot( vMeas , phi_i )
                   ) >> M_patchAreaVector;
     M_patchAreaVector->globalAssemble();
+
+    evaluateNode( elements ( this->M_scalarETFESpace->mesh() ),
+                  *M_quadrature,
+                  this->M_scalarETFESpace,
+                  meas_K * phi_i
+                  ) >> M_patchAreaVectorScalar;
+    M_patchAreaVectorScalar->globalAssemble();
+
     //this->setupVectorsParameters( );
 }
 
@@ -1051,7 +1058,63 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeReferenceConfi
     }
 
     // Assemble kinematic quantities related to activation
+    for( UInt i(0); i < this->M_vectorInterpolated.size() ; i++ )
+    {
+      /*
+	For each of the fiber families the jacobian, the activation stretch 
+	normalized fiber are computed
+       */
+      
+      // Jacobian
+      tensorF_Type Fa = ExpressionDefinitions::deformationGradient( this->M_dispETFESpace, *(M_activationDisplacement[i]) , this->M_offset, this->M_identity );
+      // Definition of J
+      determinantF_Type Ja = ExpressionDefinitions::determinantF( Fa );
 
+      evaluateNode( elements ( M_scalarETFESpace->mesh() ),
+		    *M_quadrature,
+		    M_scalarETFESpace,
+		    meas_K * Ja  * phi_i
+		    ) >> M_jacobianActivation[ i ];
+      M_jacobianActivation[ i ]->globalAssemble();   
+      *( M_jacobianActivation[ i ] ) = *( M_jacobianActivation[ i ] ) / *M_patchAreaVectorScalar;
+
+      // Normalized fiber
+      // Definitions of the quantities which depend on the fiber directions e.g. I_4^i
+      interpolatedValue_Type fiberIth = ExpressionDefinitions::interpolateFiber( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ] ) );
+
+      // Definition of the direction of the fiber at the activation moment = F_0(ta) * f_0
+      activateFiber_Type activeIthFiber = ExpressionMultimechanism::activateFiberDirection( Fa, fiberIth );
+
+      normalizedVector_Type normalizedFiber = ExpressionMultimechanism::unitVector( activeIthFiber );
+      evaluateNode( elements ( this->M_dispETFESpace->mesh() ),
+		    *M_quadrature,
+		    this->M_dispETFESpace,
+		    meas_K * dot( normalizedFiber , phi_i )
+		    ) >> M_unitFiberActivation[ i ];
+      M_unitFiberActivation[ i ]->globalAssemble();
+      *( M_unitFiberActivation[ i ] ) = *( M_unitFiberActivation[ i ] ) / *M_patchAreaVector;
+      
+      // Definition of F_0^{-1}(ta)
+      invTensor_Type FzeroAminus1 = ExpressionDefinitions::inv( Fa );
+      // Definition of F_0^{-T}(ta)
+      minusT_Type FzeroAminusT = ExpressionDefinitions::minusT( Fa );
+      // Definition of C_a = F_0^{-T}(ta) * C_0 * F_0^{-1}(ta)
+      tensorCmultiMech_Type Ca = ExpressionMultimechanism::activationRightCauchyGreen( FzeroAminusT, C, FzeroAminus1 );
+
+      activeNormalizedOuterProduct_Type Mith = ExpressionMultimechanism::activeNormalizedOuterProduct( normalizedFiber );
+
+      // Definition of the fourth invariant : I_4^i = C:Mith
+      activeStretch_Type IVith = ExpressionMultimechanism::activeFiberStretch( Ca, Mith );
+
+      evaluateNode( elements ( M_scalarETFESpace->mesh() ),
+		    *M_quadrature,
+		    M_scalarETFESpace,
+		    meas_K * IVith  * phi_i
+		    ) >> M_stretchActivation[ i ];
+      M_stretchActivation[ i ]->globalAssemble();   
+      *( M_stretchActivation[ i ] ) = *( M_stretchActivation[ i ] ) / *M_patchAreaVectorScalar;
+    }
+    
 }
 
 

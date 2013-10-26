@@ -102,7 +102,7 @@ void saveVectorAccordingToFunctor ( const boost::shared_ptr<FESpace<MeshType, Ma
     // are consistent. This means that if one LID in on one processor for a vector
     // the same LID will be for the second vector.
 
-    bool changedAtLeatOne(false);
+    bool changedAtLeastOne(false);
 
     // We loop over the local ID on the processors of the originVector
     for( UInt i( originVector->blockMap().MinLID() ); i < originVector->blockMap().MaxLID(); i++ )
