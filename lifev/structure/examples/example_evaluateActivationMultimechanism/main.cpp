@@ -343,6 +343,9 @@ Structure::run3d()
     // vectorFiberFunctionPtr_Type pointerToVectorOfFamilies( new vectorFiberFunction_Type( ) );
     // (*pointerToVectorOfFamilies).resize( dataStructure->numberFibersFamilies( ) );
 
+    vectorPtr_Type jacobian;
+    vectorPtr_Type jacobianIsochoric;
+
     listOfFiberDirections_Type fiberDirections; // store vector of fibers
     listOfFiberDirections_Type deformedFiberDirections; // store vector of fibers
     listOfFiberDirections_Type normalizedDefFibers; // store vector of fibers
@@ -400,6 +403,8 @@ Structure::run3d()
         stretchFibers[ k-1 ].reset( new vector_Type( dFESpace->map() ) );
         //activationFibers[ k-1 ].reset( new vector_Type( dFESpace->map() ) );
     }
+    jacobian.reset( new vector_Type( dScalarFESpace->map() ) );
+    jacobianIsochoric.reset( new vector_Type( dScalarFESpace->map() ) );
 
     //! 3.b Setting the fibers in the abstract class of Anisotropic materials
     //! This example is made only for anisotropic laws that means that if an isotropic
@@ -474,6 +479,8 @@ Structure::run3d()
     // Setting exporter quantities
     vectorPtr_Type solidDisp ( new vector_Type ( dFESpace->map() ) );
     exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "displacement", dFESpace, solidDisp, UInt (0) );
+    exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::ScalarField, "jacobian", dScalarFESpace, jacobian, UInt (0) );
+    exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::ScalarField, "jacobianIsochoric", dScalarFESpace, jacobianIsochoric, UInt (0) );
 
     // Adding the fibers vectors
     // Setting the vector of fibers functions
@@ -576,7 +583,6 @@ Structure::run3d()
         importerSolid->readVariable (familyFirst);
         importerSolid->readVariable (familySecond);
 
-
         // Setting fibers in the material class
         solid.material()->anisotropicLaw()->setIthFiberVector( *stFamily, 1 );
         solid.material()->anisotropicLaw()->setIthFiberVector( *ndFamily, 2 );
@@ -589,6 +595,30 @@ Structure::run3d()
         ExpressionDefinitions::deformationGradient_Type  F =
             ExpressionDefinitions::deformationGradient ( dETFESpace,  *readDispl, 0, identity );
 
+	ExpressionDefinitions::determinantTensorF_Type J = 
+	  ExpressionDefinitions::determinantF( F );
+
+	ExpressionDefinitions::isochoricChangeOfVariable_Type isoJ =
+	  ExpressionDefinitions::isochoricDeterminant( J  );
+
+	*jacobian *= 0.0;
+	evaluateNode( elements ( dScalarETFESpace->mesh() ),
+		      fakeQuadratureRule,
+		      dScalarETFESpace,
+		      meas_K * J  * phi_i
+		      ) >> jacobian;
+	jacobian->globalAssemble();
+	*(jacobian) = *(jacobian) / *patchAreaVectorScalar;
+
+	*jacobianIsochoric *= 0.0;
+	evaluateNode( elements ( dScalarETFESpace->mesh() ),
+		      fakeQuadratureRule,
+		      dScalarETFESpace,
+		      meas_K * isoJ  * phi_i
+		      ) >> jacobianIsochoric;
+	jacobianIsochoric->globalAssemble();
+	*(jacobianIsochoric) = *(jacobianIsochoric) / *patchAreaVectorScalar;
+	
         // // Definition of C = F^T F
         ExpressionDefinitions::rightCauchyGreenTensor_Type C =
              ExpressionDefinitions::tensorC( transpose(F), F );
