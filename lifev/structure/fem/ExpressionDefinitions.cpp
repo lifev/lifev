@@ -91,6 +91,11 @@ namespace LifeV
       return powerExpression_Type( J , exponent );
     }
 
+    isochoricChangeOfVariable_Type isochoricDeterminant( const determinantTensorF_Type J )
+    {
+      return isochoricChangeOfVariable_Type( J );
+    }
+
     isochoricTrace_Type isochoricTrace( const powerExpression_Type Jel, const traceTensor_Type I )
     {
       return isochoricTrace_Type( Jel , I );
@@ -104,6 +109,18 @@ namespace LifeV
 					     const vector_Type& fiberVector)
     {
       return interpolatedValue_Type( dispETFESpace, fiberVector ) ;
+    }
+
+    interpolatedValue_Type interpolateValue( const boost::shared_ptr< ETFESpace_Type > dispETFESpace,
+					     const vector_Type& valueVector)
+    {
+      return interpolatedValue_Type( dispETFESpace, valueVector ) ;
+    }
+
+    interpolatedScalarValue_Type interpolateScalarValue( const boost::shared_ptr< scalarETFESpace_Type > dispETFESpace,
+							 const vector_Type& valueVector)
+    {
+      return interpolatedScalarValue_Type( dispETFESpace, valueVector ) ;
     }
 
     outerProduct_Type fiberTensor( const interpolatedValue_Type ithFiber )
@@ -412,15 +429,26 @@ namespace LifeV
     }
 
     activatedDeterminantF_Type activateDeterminantF( const ExpressionDefinitions::determinantTensorF_Type Jzero,
-						     const ExpressionDefinitions::powerExpression_Type JzeroA )
+						     const ExpressionDefinitions::interpolatedScalarValue_Type  JzeroA )
     {
       return activatedDeterminantF_Type( Jzero, JzeroA );
+    }
+
+    activatedJ_Type activateJ( const ExpressionDefinitions::determinantTensorF_Type Jzero,
+			       const ExpressionDefinitions::powerExpression_Type  JzeroA )
+    {
+      return activatedJ_Type( Jzero, JzeroA );
     }
 
     activePowerExpression_Type activePowerExpression( activatedDeterminantF_Type Ja,
 						      const Real exp)
     {
       return activePowerExpression_Type ( Ja, exp );
+    }
+
+    activeIsochoricDeterminant_Type activeIsochoricDeterminant( activatedDeterminantF_Type Ja )
+    {
+      return activeIsochoricDeterminant_Type ( Ja );
     }
 
     activeOuterProduct_Type activeOuterProduct( const activatedFiber_Type activatedFiber )
@@ -439,11 +467,30 @@ namespace LifeV
       return activeStretch_Type( activeC, activeM );
     }
 
-    activeIsochoricStretch_Type activeIsochoricFourthInvariant( const activePowerExpression_Type activeJ,
-								const activeStretch_Type activeI4)
+    activeInterpolatedFiberStretch_Type activeInterpolatedFiberStretch( const rightCauchyGreenMultiMechanism_Type activeC,
+									const ExpressionDefinitions::outerProduct_Type activeM)
+    {
+      return activeInterpolatedFiberStretch_Type( activeC, activeM );
+    }
+
+    activeIsochoricStretch_Type activeIsochoricFourthInvariant( const activeIsochoricDeterminant_Type activeJ,
+								const activeInterpolatedFiberStretch_Type activeI4)
     {
       return activeIsochoricStretch_Type( activeJ, activeI4 );
     }
+
+    activeNoInterpolationStretch_Type activeNoInterpolationFourthInvariant( const activeIsochoricDeterminant_Type activeJ,
+									    const activeStretch_Type activeI4)
+    {
+      return activeNoInterpolationStretch_Type( activeJ, activeI4 );
+    }
+
+    activePowerIsochoricStretch_Type activePowerIsochoricFourthInvariant( const activePowerExpression_Type activeJ,
+									   const activeStretch_Type activeI4)
+    {
+      return activePowerIsochoricStretch_Type( activeJ, activeI4 );
+    }
+
 
     activeMinusTtensor_Type createActiveMinusTtensor( const ExpressionDefinitions::minusTransposedTensor_Type FminusT,
 						      const ExpressionTranspose<ExpressionDefinitions::deformationGradient_Type> FzeroA)

@@ -575,16 +575,32 @@ Structure::run3d()
     // Definition of J
     ExpressionDefinitions::determinantTensorF_Type JzeroA = ExpressionDefinitions::determinantF( FzeroA );
 
-    // Definition of J_0(ta) ^ -1
-    ExpressionDefinitions::powerExpression_Type  JzeroAminus1 = ExpressionDefinitions::powerExpression( JzeroA , (-1.0) );
+    evaluateNode( elements ( dScalarETFESpace->mesh() ),
+                  fakeQuadratureRule,
+                  dScalarETFESpace,
+                  meas_K * phi_i
+                  ) >> patchAreaVectorScalar;
+    patchAreaVectorScalar->globalAssemble();
 
     // Definition of J_a
+    vectorPtr_Type jacobianActivation( new vector_Type( dScalarETFESpace->map() ) );
+    evaluateNode( elements ( dScalarETFESpace->mesh() ),
+		  fakeQuadratureRule,
+		  dScalarETFESpace,
+		  meas_K * JzeroA  * phi_i
+		  ) >> jacobianActivation;
+    jacobianActivation->globalAssemble();   
+    *( jacobianActivation ) = *( jacobianActivation ) / *patchAreaVectorScalar;
+
+    ExpressionDefinitions::interpolatedScalarValue_Type ithJzeroA = 
+      ExpressionDefinitions::interpolateScalarValue( dScalarETFESpace, *( jacobianActivation ) );
+
     ExpressionMultimechanism::activatedDeterminantF_Type Ja =
-        ExpressionMultimechanism::activateDeterminantF( J, JzeroAminus1 );
+        ExpressionMultimechanism::activateDeterminantF( J, ithJzeroA );
 
     // Definition of J_a^(-2.0/3.0)
-    ExpressionMultimechanism::activePowerExpression_Type  JactiveEl =
-        ExpressionMultimechanism::activePowerExpression( Ja , (-2.0/3.0) );
+    ExpressionMultimechanism::activeIsochoricDeterminant_Type  JactiveEl =
+        ExpressionMultimechanism::activeIsochoricDeterminant( Ja );
 
     // Definition of C = F^T F
     ExpressionDefinitions::rightCauchyGreenTensor_Type C =
@@ -592,13 +608,6 @@ Structure::run3d()
 
     LifeChrono chrono;
     chrono.start();
-
-    evaluateNode( elements ( dScalarETFESpace->mesh() ),
-                  fakeQuadratureRule,
-                  dScalarETFESpace,
-                  meas_K * phi_i
-                  ) >> patchAreaVectorScalar;
-    patchAreaVectorScalar->globalAssemble();
 
     evaluateNode( elements ( dScalarETFESpace->mesh() ),
                   fakeQuadratureRule,
@@ -680,8 +689,8 @@ Structure::run3d()
             ExpressionMultimechanism::activeFiberStretch( Ca, Mith );
 
         // Definition of the fouth isochoric invariant : J^(-2.0/3.0) * I_4^i
-        ExpressionMultimechanism::activeIsochoricStretch_Type IVithBar =
-            ExpressionMultimechanism::activeIsochoricFourthInvariant( JactiveEl, IVith );
+        ExpressionMultimechanism::activeNoInterpolationStretch_Type IVithBar =
+            ExpressionMultimechanism::activeNoInterpolationFourthInvariant( JactiveEl, IVith );
 
 
         evaluateNode( elements ( dScalarETFESpace->mesh() ),

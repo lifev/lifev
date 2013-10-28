@@ -20,6 +20,7 @@ SET(array_HEADERS
   array/OperationSmallTrace.hpp
   array/OperationSmallPower.hpp
   array/OperationSmallSquareRoot.hpp
+  array/OperationSmallCubicRoot.hpp
   array/OperationSmallArcTan.hpp
 CACHE INTERNAL "")
 

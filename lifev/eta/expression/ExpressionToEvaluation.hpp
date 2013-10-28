@@ -53,6 +53,7 @@
 #include <lifev/eta/expression/ExpressionProduct.hpp>
 #include <lifev/eta/expression/ExpressionPower.hpp>
 #include <lifev/eta/expression/ExpressionSquareRoot.hpp>
+#include <lifev/eta/expression/ExpressionCubicRoot.hpp>
 #include <lifev/eta/expression/ExpressionArcTan.hpp>
 #include <lifev/eta/expression/ExpressionDerivativeArcTan.hpp>
 #include <lifev/eta/expression/ExpressionLogarithm.hpp>
@@ -103,6 +104,7 @@
 #include <lifev/eta/expression/EvaluationProduct.hpp>
 #include <lifev/eta/expression/EvaluationPower.hpp>
 #include <lifev/eta/expression/EvaluationSquareRoot.hpp>
+#include <lifev/eta/expression/EvaluationCubicRoot.hpp>
 #include <lifev/eta/expression/EvaluationArcTan.hpp>
 #include <lifev/eta/expression/EvaluationDerivativeArcTan.hpp>
 #include <lifev/eta/expression/EvaluationLogarithm.hpp>
@@ -616,6 +618,33 @@ class ExpressionToEvaluation<ExpressionSquareRoot<ExpressionBase>, testDim, solu
 {
 public:
     typedef EvaluationSquareRoot <
+    typename ExpressionToEvaluation<ExpressionBase, testDim, solutionDim, spaceDim>::evaluation_Type
+    > evaluation_Type;
+private:
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
+};
+
+// Specialized for the cubic root
+template<typename ExpressionBase, UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation<ExpressionCubicRoot<ExpressionBase>, testDim, solutionDim, spaceDim>
+{
+public:
+    typedef EvaluationCubicRoot <
+    typename ExpressionToEvaluation<ExpressionBase, testDim, solutionDim, spaceDim>::evaluation_Type
+    > evaluation_Type;
+private:
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
+};
+
+
+// Specialized for the isochoric change of variable in the structure module
+template<typename ExpressionBase, UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation<ExpressionIsochoricChangeOfVariable<ExpressionBase>, testDim, solutionDim, spaceDim>
+{
+public:
+    typedef EvaluationIsochoricChangeOfVariable <
     typename ExpressionToEvaluation<ExpressionBase, testDim, solutionDim, spaceDim>::evaluation_Type
     > evaluation_Type;
 private:
