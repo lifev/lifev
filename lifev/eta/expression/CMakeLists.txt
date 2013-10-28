@@ -23,6 +23,7 @@ SET(expression_HEADERS
 	expression/EvaluationProduct.hpp
 	expression/EvaluationPower.hpp
 	expression/EvaluationSquareRoot.hpp
+	expression/EvaluationCubicRoot.hpp
 	expression/EvaluationArcTan.hpp
 	expression/EvaluationDerivativeArcTan.hpp
 	expression/EvaluationLogarithm.hpp
@@ -64,6 +65,7 @@ SET(expression_HEADERS
 	expression/ExpressionProduct.hpp
 	expression/ExpressionPower.hpp
 	expression/ExpressionSquareRoot.hpp
+	expression/ExpressionCubicRoot.hpp
 	expression/ExpressionArcTan.hpp
 	expression/ExpressionDerivativeArcTan.hpp
 	expression/ExpressionLogarithm.hpp
