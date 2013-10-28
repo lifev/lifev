@@ -179,8 +179,7 @@ public:
 
     // Anisotropic typedefs
     typedef typename super::interpolatedValue_Type       interpolatedValue_Type;
-    typedef typename
-    ExpressionDefinitions::interpolatedScalarValue_Type  interpolatedScalarValue_Type;
+    typedef typename ExpressionDefinitions::interpolatedScalarValue_Type  interpolatedScalarValue_Type;
     typedef typename super::outerProduct_Type            outerProduct_Type;
     typedef typename super::stretch_Type                 stretch_Type;
     typedef typename super::isochoricStretch_Type        isochoricStretch_Type;
@@ -870,12 +869,16 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeStiffness ( co
     for( UInt i(0); i < this->M_vectorInterpolated.size() ; i++ )
     {
         displayer->leaderPrint ("                ", i + 1,"-th fiber family \n" );
-
         // As in other classes, the specialization of the MapType = MapEpetra makes this expression
         // not always usable. When other maps will be available in LifeV, the class should be re-templated.
 
         // Definition of F_0(ta)
         tensorF_Type ithFzeroA = ExpressionDefinitions::deformationGradient( this->M_dispETFESpace,  *(M_activationDisplacement[ i ]),
+                                                                             this->M_offset, this->M_identity );
+
+        vector_Type trial(this->M_dispETFESpace->map());
+        trial *= 0.0;
+        tensorF_Type trialGrad = ExpressionDefinitions::deformationGradient( this->M_dispETFESpace,  trial,
                                                                              this->M_offset, this->M_identity );
 
         // Determinant of F_0(ta)
@@ -914,6 +917,22 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeStiffness ( co
         // Definition of the fouth isochoric invariant : J^(-2.0/3.0) * I_4^i
         activeIsochoricStretch_Type IVithBar = ExpressionMultimechanism::activeIsochoricFourthInvariant( JactiveEl, IVith );
 
+        // vectorPtr_Type checkIVithBar( new vector_Type( M_scalarETFESpace->map() ) );
+
+        // *checkIVithBar *= 0.0;
+        // evaluateNode ( elements ( this->M_scalarETFESpace->mesh() ),
+        //                *M_quadrature,
+        //                this->M_scalarETFESpace,
+        //                meas_K *  atan( IVithBar - value( 1.0 ) , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  )  * ithJzeroA *
+        //                (value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * JactiveEl * ( IVithBar - value( 1.0 ) ) *
+        //                 exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value( 1.0 ) ) * ( IVithBar- value( 1.0 ) )  ) ) * phi_i
+        //                ) >> checkIVithBar;
+        // checkIVithBar->globalAssemble();
+        // *checkIVithBar = *checkIVithBar / *M_patchAreaVectorScalar;
+        // std::cout << "norm of the vector"<< checkIVithBar->norm2()<< std::endl;
+        // std::cout << "normInf of the vector"<< checkIVithBar->normInf()<< std::endl;
+        // checkIVithBar->spy("checkVector");
+
         // The terms for the piola kirchhoff tensor come from the holzapfel model. Then they are rescaled
         // according to the change of variable given by the multi-mechanism model.
 
@@ -923,15 +942,16 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeStiffness ( co
         integrate ( elements ( this->M_dispETFESpace->mesh() ),
                     this->M_dispFESpace->qr(),
                     this->M_dispETFESpace,
-                    atan( IVithBar - value( 1.0 ) , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  )  * ithJzeroA *
+                    atan( IVithBar - value( 1.0 ) , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 ) ) * ithJzeroA *
                     (value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * JactiveEl * ( IVithBar - value( 1.0 ) ) *
-                     exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value( 1.0 ) ) * ( IVithBar- value( 1.0 ) )  ) *
-                     dot( ( Fa  * Mith  + value( -1.0/3.0 ) * IVith * FAminusT ) * FzeroAminusT, grad( phi_i ) ) )
+                     exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value( 1.0 ) ) * ( IVithBar- value( 1.0 ))))*
+                    dot( ( Fa * Mith - value(1.0/3.0) * IVith * FAminusT) * FzeroAminusT, grad(phi_i) )
                     ) >> this->M_stiff;
 
     }
-
     this->M_stiff->globalAssemble();
+    this->M_stiff->spy("vector");
+
 }
 
 
@@ -1048,7 +1068,8 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeReferenceConfi
         */
 
         // Jacobian
-        tensorF_Type Fa = ExpressionDefinitions::deformationGradient( this->M_dispETFESpace, *(M_activationDisplacement[i]) , this->M_offset, this->M_identity );
+        tensorF_Type Fa = ExpressionDefinitions::deformationGradient( this->M_dispETFESpace, *(M_activationDisplacement[i]),
+                                                                      this->M_offset, this->M_identity );
         // Definition of J
         determinantF_Type Ja = ExpressionDefinitions::determinantF( Fa );
 
@@ -1059,7 +1080,6 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeReferenceConfi
                       ) >> M_jacobianActivation[ i ];
         M_jacobianActivation[ i ]->globalAssemble();
         *( M_jacobianActivation[ i ] ) = *( M_jacobianActivation[ i ] ) / *M_patchAreaVectorScalar;
-
         // Normalized fiber
         // Definitions of the quantities which depend on the fiber directions e.g. I_4^i
         interpolatedValue_Type fiberIth = ExpressionDefinitions::interpolateFiber( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ] ) );
