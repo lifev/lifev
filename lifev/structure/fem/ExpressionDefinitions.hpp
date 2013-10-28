@@ -210,7 +210,7 @@ typedef ExpressionProduct<
 					   const vector_Type& valueVector);
 
   interpolatedScalarValue_Type interpolateScalarValue( const boost::shared_ptr< scalarETFESpace_Type > dispETFESpace,
-						       const vector_Type& valueVector);
+                                                       const vector_Type& valueVector);
 
   outerProduct_Type fiberTensor( const interpolatedValue_Type ithFiber );
 
@@ -485,10 +485,10 @@ typedef ExpressionDot< rightCauchyGreenMultiMechanism_Type, activeNormalizedOute
 
   typedef ExpressionDot< rightCauchyGreenMultiMechanism_Type, ExpressionDefinitions::outerProduct_Type>  activeInterpolatedFiberStretch_Type;
 
-typedef ExpressionProduct< activeIsochoricDeterminant_Type, 
+typedef ExpressionProduct< activeIsochoricDeterminant_Type,
 			   activeInterpolatedFiberStretch_Type>         activeIsochoricStretch_Type;
 
-typedef ExpressionProduct< activeIsochoricDeterminant_Type, 
+typedef ExpressionProduct< activeIsochoricDeterminant_Type,
 			   activeStretch_Type>                          activeNoInterpolationStretch_Type;
 
 typedef ExpressionProduct< activePowerExpression_Type, activeStretch_Type>         activePowerIsochoricStretch_Type;
