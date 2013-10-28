@@ -69,8 +69,6 @@ public:
 
     //! Type of the value returned by the left operand
     typedef typename EvaluationBaseType::return_Type BaseReturn_Type;
-    typedef Real exponentType;
-
 
     //! Type of the value returned by this class
     typedef typename OperationSmallSquareRoot<BaseReturn_Type>::result_Type return_Type;
