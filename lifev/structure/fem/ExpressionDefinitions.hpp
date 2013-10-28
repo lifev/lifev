@@ -66,6 +66,7 @@ namespace LifeV
 
 typedef RegionMesh<LinearTetra>                       MeshType;
 typedef ETFESpace<MeshType, MapEpetra, 3, 3 >         ETFESpace_Type;
+typedef ETFESpace<MeshType, MapEpetra, 3, 1 >         scalarETFESpace_Type;
 typedef VectorEpetra                                  vector_Type;
 typedef MatrixSmall<3,3>                              matrixSmall_Type;
 
@@ -131,6 +132,9 @@ typedef ExpressionPower<
   ExpressionDeterminant<
     ExpressionAddition<ExpressionInterpolateGradient<MeshType, MapEpetra,3,3>, ExpressionMatrix<3,3> > > > powerExpression_Type;
 
+// Definition of the power of J ( specifically J^(-2.0/3.0) )
+typedef ExpressionIsochoricChangeOfVariable< determinantTensorF_Type> isochoricChangeOfVariable_Type;
+
 // Definition of the isochoric trace \bar{I_C} = J^( -2.0/3.0)*tr(C))
 typedef ExpressionProduct<
   ExpressionPower<
@@ -144,6 +148,8 @@ typedef ExpressionProduct<
   // Typedefs for anisotropic laws
 #ifdef ENABLE_ANISOTROPIC_LAW
   typedef  ExpressionInterpolateValue<MeshType, MapEpetra, 3, 3>   interpolatedValue_Type;
+
+  typedef  ExpressionInterpolateValue<MeshType, MapEpetra, 3, 1>   interpolatedScalarValue_Type;
 
   typedef  ExpressionOuterProduct<
     ExpressionInterpolateValue<MeshType, MapEpetra, 3, 3>,
@@ -191,19 +197,26 @@ typedef ExpressionProduct<
 
   powerExpression_Type powerExpression( const determinantTensorF_Type J, const Real exponent );
 
+  isochoricChangeOfVariable_Type isochoricDeterminant( const determinantTensorF_Type J );
+
   isochoricTrace_Type isochoricTrace( const powerExpression_Type Jel, const traceTensor_Type I );
 
 // Constructors for anisotropic laws
 #ifdef ENABLE_ANISOTROPIC_LAW
- interpolatedValue_Type interpolateFiber( const boost::shared_ptr< ETFESpace_Type > dispETFESpace,
+  interpolatedValue_Type interpolateFiber( const boost::shared_ptr< ETFESpace_Type > dispETFESpace,
 					  const vector_Type& fiberVector);
+
+  interpolatedValue_Type interpolateValue( const boost::shared_ptr< ETFESpace_Type > dispETFESpace,
+					   const vector_Type& valueVector);
+
+  interpolatedScalarValue_Type interpolateScalarValue( const boost::shared_ptr< scalarETFESpace_Type > dispETFESpace,
+						       const vector_Type& valueVector);
 
   outerProduct_Type fiberTensor( const interpolatedValue_Type ithFiber );
 
   stretch_Type fiberStretch( const rightCauchyGreenTensor_Type C, const outerProduct_Type M);
 
   isochoricStretch_Type isochoricFourthInvariant( const powerExpression_Type Jel, const stretch_Type I_4ith);
-
 #endif
 } //! End namespace ExpressionDefinitions
 
@@ -454,10 +467,15 @@ typedef ExpressionNormalize<activatedFiber_Type> normalizedVector_Type;
 
 typedef ExpressionDivision< activatedFiber_Type, normActivatedFiber_Type> normalizedFiber_Type;
 
+typedef ExpressionDivision< ExpressionDefinitions::determinantTensorF_Type,
+			    ExpressionDefinitions::interpolatedScalarValue_Type> activatedDeterminantF_Type;
+
 typedef ExpressionProduct< ExpressionDefinitions::determinantTensorF_Type,
-                           ExpressionDefinitions::powerExpression_Type> activatedDeterminantF_Type;
+			   ExpressionDefinitions::powerExpression_Type> activatedJ_Type;
 
 typedef ExpressionPower<activatedDeterminantF_Type >  activePowerExpression_Type;
+
+typedef ExpressionIsochoricChangeOfVariable<activatedDeterminantF_Type >  activeIsochoricDeterminant_Type;
 
 typedef ExpressionOuterProduct< activatedFiber_Type, activatedFiber_Type>  activeOuterProduct_Type;
 
@@ -465,7 +483,15 @@ typedef ExpressionOuterProduct< normalizedVector_Type, normalizedVector_Type>  a
 
 typedef ExpressionDot< rightCauchyGreenMultiMechanism_Type, activeNormalizedOuterProduct_Type>  activeStretch_Type;
 
-typedef ExpressionProduct< activePowerExpression_Type, activeStretch_Type>         activeIsochoricStretch_Type;
+  typedef ExpressionDot< rightCauchyGreenMultiMechanism_Type, ExpressionDefinitions::outerProduct_Type>  activeInterpolatedFiberStretch_Type;
+
+typedef ExpressionProduct< activeIsochoricDeterminant_Type, 
+			   activeInterpolatedFiberStretch_Type>         activeIsochoricStretch_Type;
+
+typedef ExpressionProduct< activeIsochoricDeterminant_Type, 
+			   activeStretch_Type>                          activeNoInterpolationStretch_Type;
+
+typedef ExpressionProduct< activePowerExpression_Type, activeStretch_Type>         activePowerIsochoricStretch_Type;
 
 typedef ExpressionProduct< ExpressionDefinitions::deformationGradient_Type,
                            ExpressionDefinitions::interpolatedValue_Type> activatedFiber_Type;
@@ -521,10 +547,16 @@ rightCauchyGreenMultiMechanism_Type activationRightCauchyGreen( const Expression
 						 const normActivatedFiber_Type normFiber);
 
  activatedDeterminantF_Type activateDeterminantF( const ExpressionDefinitions::determinantTensorF_Type Jzero,
-						  const ExpressionDefinitions::powerExpression_Type JzeroA );
+						  const ExpressionDefinitions::interpolatedScalarValue_Type  JzeroA );
+
+ activatedJ_Type activateJ( const ExpressionDefinitions::determinantTensorF_Type Jzero,
+			    const ExpressionDefinitions::powerExpression_Type  JzeroA );
 
  activePowerExpression_Type activePowerExpression( activatedDeterminantF_Type Ja,
 						   const Real exp);
+
+ activeIsochoricDeterminant_Type activeIsochoricDeterminant( activatedDeterminantF_Type Ja );
+
 
  activeOuterProduct_Type activeOuterProduct( const activatedFiber_Type activatedFiber );
 
@@ -533,8 +565,17 @@ rightCauchyGreenMultiMechanism_Type activationRightCauchyGreen( const Expression
  activeStretch_Type activeFiberStretch( const rightCauchyGreenMultiMechanism_Type activeC,
                                         const activeNormalizedOuterProduct_Type activeM);
 
- activeIsochoricStretch_Type activeIsochoricFourthInvariant( const activePowerExpression_Type activeJ,
-							     const activeStretch_Type activeI4);
+ activeInterpolatedFiberStretch_Type activeInterpolatedFiberStretch( const rightCauchyGreenMultiMechanism_Type activeC,
+								const ExpressionDefinitions::outerProduct_Type activeM);
+
+ activeIsochoricStretch_Type activeIsochoricFourthInvariant( const activeIsochoricDeterminant_Type activeJ,
+							     const activeInterpolatedFiberStretch_Type activeI4);
+
+ activeNoInterpolationStretch_Type activeNoInterpolationFourthInvariant( const activeIsochoricDeterminant_Type activeJ,
+									 const activeStretch_Type activeI4);
+
+ activePowerIsochoricStretch_Type activePowerIsochoricFourthInvariant( const activePowerExpression_Type activeJ,
+								       const activeStretch_Type activeI4);
 
  activeMinusTtensor_Type createActiveMinusTtensor( const ExpressionDefinitions::minusTransposedTensor_Type FminusT,
 						   const ExpressionTranspose<ExpressionDefinitions::deformationGradient_Type> FzeroA);

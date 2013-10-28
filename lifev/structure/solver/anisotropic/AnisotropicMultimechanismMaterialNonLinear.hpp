@@ -174,9 +174,13 @@ public:
     typedef typename super::minusT_Type                minusT_Type;
     typedef typename super::traceTensor_Type           traceTensor_Type;
     typedef typename super::powerExpression_Type       powerExpression_Type;
+    typedef typename 
+    ExpressionDefinitions::isochoricChangeOfVariable_Type isochoricDet_Type;
 
     // Anisotropic typedefs
     typedef typename super::interpolatedValue_Type       interpolatedValue_Type;
+    typedef typename 
+    ExpressionDefinitions::interpolatedScalarValue_Type  interpolatedScalarValue_Type;
     typedef typename super::outerProduct_Type            outerProduct_Type;
     typedef typename super::stretch_Type                 stretch_Type;
     typedef typename super::isochoricStretch_Type        isochoricStretch_Type;
@@ -190,8 +194,10 @@ public:
     typedef ExpressionMultimechanism::activatedDeterminantF_Type              activatedDeterminantF_Type;
     typedef ExpressionMultimechanism::activePowerExpression_Type              activePowerExpression_Type;
     typedef ExpressionMultimechanism::activeNormalizedOuterProduct_Type       activeNormalizedOuterProduct_Type;
-    typedef ExpressionMultimechanism::activeStretch_Type                      activeStretch_Type;
+    typedef ExpressionMultimechanism::activeStretch_Type                      activeStretch_Type;     
+    typedef ExpressionMultimechanism::activeInterpolatedFiberStretch_Type     activeInterpolatedStretch_Type;
     typedef ExpressionMultimechanism::activeIsochoricStretch_Type             activeIsochoricStretch_Type;
+    typedef ExpressionMultimechanism::activeIsochoricDeterminant_Type         activeIsochoricDeterminant_Type;
 
     typedef ExpressionMultimechanism::deformationActivatedTensor_Type         deformationActivatedTensor_Type;
     typedef ExpressionMultimechanism::activeMinusTtensor_Type                 activeMinusTtensor_Type;
@@ -445,7 +451,7 @@ protected:
 template <typename MeshType>
 AnisotropicMultimechanismMaterialNonLinear<MeshType>::AnisotropicMultimechanismMaterialNonLinear() :
     super                     ( ),
-    M_completeActivation      ( true ),
+    M_completeActivation      ( false ),
     M_quadrature              ( ),
     M_patchAreaVector         ( ),
     M_patchAreaVectorScalar   ( ),
@@ -521,6 +527,10 @@ AnisotropicMultimechanismMaterialNonLinear<MeshType>::setup ( const FESpacePtr_T
     M_selector.resize( this->M_dataMaterial->numberFibersFamilies() );
     M_firstActivation.resize( this->M_dataMaterial->numberFibersFamilies() );
     M_activationDisplacement.resize( this->M_dataMaterial->numberFibersFamilies() );
+
+    M_jacobianActivation.resize( this->M_dataMaterial->numberFibersFamilies() );
+    M_stretchActivation.resize( this->M_dataMaterial->numberFibersFamilies() );
+    M_unitFiberActivation.resize( this->M_dataMaterial->numberFibersFamilies() );
 
     //Resetting pointers
     for( UInt i(0); i < this->M_dataMaterial->numberFibersFamilies(); i++ )
@@ -699,7 +709,7 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::updateNonLinearJacobi
     tensorC_Type C = ExpressionDefinitions::tensorC( transpose(F), F );
 
     // Definition of J^-(2/3) = det( C ) using the isochoric/volumetric decomposition
-    powerExpression_Type  Jel = ExpressionDefinitions::powerExpression( J , (-2.0/3.0) );
+    isochoricDet_Type  Jel = ExpressionDefinitions::isochoricDeterminant( J );
 
     // Definition of F^-T
     minusT_Type  F_T = ExpressionDefinitions::minusT( F );
@@ -724,18 +734,14 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::updateNonLinearJacobi
       tensorF_Type ithFzeroA = ExpressionDefinitions::deformationGradient( this->M_dispETFESpace,  *(M_activationDisplacement[ i ]),
 									   this->M_offset, this->M_identity );
 
-
-      // Definition of J_0(ta)
-      determinantF_Type ithJzeroA = ExpressionDefinitions::determinantF( ithFzeroA );
-
-      // Definition of J^-(2/3) = det( C ) using the isochoric/volumetric decomposition
-      powerExpression_Type  JAel = ExpressionDefinitions::powerExpression( ithJzeroA , (-1.0) );
+      // Determinant of F_0(ta)
+      interpolatedScalarValue_Type ithJzeroA = ExpressionDefinitions::interpolateScalarValue( this->M_scalarETFESpace, *( M_jacobianActivation[ i ] ) );
 
       // Definition of J_a
-      activatedDeterminantF_Type Ja = ExpressionMultimechanism::activateDeterminantF( J, JAel );
+      activatedDeterminantF_Type Ja = ExpressionMultimechanism::activateDeterminantF( J, ithJzeroA );
 
       // Definition of J_a^{-2.0/3.0}
-      activePowerExpression_Type  JactiveEl = ExpressionMultimechanism::activePowerExpression( Ja , (-2.0/3.0) );
+      activeIsochoricDeterminant_Type  JactiveEl = ExpressionMultimechanism::activeIsochoricDeterminant( Ja );
 
       // Definition of F_0^{-1}(ta)
       invTensor_Type FzeroAminus1 = ExpressionDefinitions::inv( ithFzeroA );
@@ -746,30 +752,23 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::updateNonLinearJacobi
       // Definition of F_0^{-T}(ta)
       minusT_Type FzeroAminusT = ExpressionDefinitions::minusT( ithFzeroA );
 
-      activeMinusTtensor_Type FAminusT = ExpressionMultimechanism::createActiveMinusTtensor( F_T,transpose( ithFzeroA ));
+      activeMinusTtensor_Type FAminusT = ExpressionMultimechanism::createActiveMinusTtensor( F_T, transpose( ithFzeroA ) );
       // Definition of C_a = F_0^{-T}(ta) * C_0 * F_0^{-1}(ta)
       tensorCmultiMech_Type Ca = ExpressionMultimechanism::activationRightCauchyGreen( FzeroAminusT, C, FzeroAminus1 );
 
-      // Defining the expression for the i-th fiber
-      // Definitions of the quantities which depend on the fiber directions e.g. I_4^i
-      interpolatedValue_Type fiberIth = ExpressionDefinitions::interpolateFiber( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ] ) );
-
-      // Definition of the direction of the fiber at the activation moment = F_0(ta) * f_0
-      activateFiber_Type activeIthFiber = ExpressionMultimechanism::activateFiberDirection( ithFzeroA, fiberIth );
-
-      normalizedVector_Type normalizedFiber = ExpressionMultimechanism::unitVector( activeIthFiber );
+      interpolatedValue_Type transformedFiber = ExpressionDefinitions::interpolateValue( this->M_dispETFESpace, *( M_unitFiberActivation[ i ] ) );
 
       // Definition of the tensor M = ithFiber \otimes ithFiber
       // At the moment, it's automatic that the method constructs the expression M = ithFiber \otimes ithFiber
       // For a more general case, the file ExpressionDefinitions.hpp should be changed
-      activeNormalizedOuterProduct_Type Mith = ExpressionMultimechanism::activeNormalizedOuterProduct( normalizedFiber );
-
+      outerProduct_Type Mith = ExpressionDefinitions::fiberTensor( transformedFiber );
+      
       // Definition of the fourth invariant : I_4^i = C:Mith
-      activeStretch_Type IVith = ExpressionMultimechanism::activeFiberStretch( Ca, Mith );
+      activeInterpolatedStretch_Type IVith = ExpressionMultimechanism::activeInterpolatedFiberStretch( Ca, Mith );
 
       // Definition of the fouth isochoric invariant : J^(-2.0/3.0) * I_4^i
       activeIsochoricStretch_Type IVithBar = ExpressionMultimechanism::activeIsochoricFourthInvariant( JactiveEl, IVith );
-
+      
       // Linearization with respect to activation configuration
       activeLinearization_Type dFa = ExpressionMultimechanism::activatedLinearization( grad(phi_j), FzeroAminus1 );
 
@@ -865,7 +864,7 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeStiffness ( co
     tensorC_Type C = ExpressionDefinitions::tensorC( transpose(F), F );
 
     // Definition of J^-(2/3) = det( C ) using the isochoric/volumetric decomposition
-    powerExpression_Type  Jel = ExpressionDefinitions::powerExpression( J , (-2.0/3.0) );
+    isochoricDet_Type  Jel = ExpressionDefinitions::isochoricDeterminant( J );
 
     // Definition of F^-T
     minusT_Type  F_T = ExpressionDefinitions::minusT( F );
@@ -883,16 +882,14 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeStiffness ( co
         tensorF_Type ithFzeroA = ExpressionDefinitions::deformationGradient( this->M_dispETFESpace,  *(M_activationDisplacement[ i ]),
                                                                              this->M_offset, this->M_identity );
 
-        // Definition of J_0(ta)
-        determinantF_Type ithJzeroA = ExpressionDefinitions::determinantF( ithFzeroA );
-
-        powerExpression_Type  JAel = ExpressionDefinitions::powerExpression( ithJzeroA , (-1.0) );
+	// Determinant of F_0(ta)
+	interpolatedScalarValue_Type ithJzeroA = ExpressionDefinitions::interpolateScalarValue( this->M_scalarETFESpace, *( M_jacobianActivation[ i ] ) );
 
         // Definition of J_a
-        activatedDeterminantF_Type Ja = ExpressionMultimechanism::activateDeterminantF( J, JAel );
+        activatedDeterminantF_Type Ja = ExpressionMultimechanism::activateDeterminantF( J, ithJzeroA );
 
           // Definition of J_a^{-2.0/3.0}
-        activePowerExpression_Type  JactiveEl = ExpressionMultimechanism::activePowerExpression( Ja , (-2.0/3.0) );
+        activeIsochoricDeterminant_Type  JactiveEl = ExpressionMultimechanism::activeIsochoricDeterminant( Ja );
 
         // Definition of F_0^{-1}(ta)
         invTensor_Type FzeroAminus1 = ExpressionDefinitions::inv( ithFzeroA );
@@ -907,21 +904,15 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeStiffness ( co
         // Definition of C_a = F_0^{-T}(ta) * C_0 * F_0^{-1}(ta)
         tensorCmultiMech_Type Ca = ExpressionMultimechanism::activationRightCauchyGreen( FzeroAminusT, C, FzeroAminus1 );
 
-        // Defining the expression for the i-th fiber
-        // Definitions of the quantities which depend on the fiber directions e.g. I_4^i
-        interpolatedValue_Type fiberIth = ExpressionDefinitions::interpolateFiber( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ] ) );
+	interpolatedValue_Type transformedFiber = ExpressionDefinitions::interpolateValue( this->M_dispETFESpace, *( M_unitFiberActivation[ i ] ) );
 
-        // Definition of the direction of the fiber at the activation moment = F_0(ta) * f_0
-        activateFiber_Type activeIthFiber = ExpressionMultimechanism::activateFiberDirection( ithFzeroA, fiberIth );
-
-	normalizedVector_Type normalizedFiber = ExpressionMultimechanism::unitVector( activeIthFiber );
         // Definition of the tensor M = ithFiber \otimes ithFiber
         // At the moment, it's automatic that the method constructs the expression M = ithFiber \otimes ithFiber
         // For a more general case, the file ExpressionDefinitions.hpp should be changed
-        activeNormalizedOuterProduct_Type Mith = ExpressionMultimechanism::activeNormalizedOuterProduct( normalizedFiber );
+        outerProduct_Type Mith = ExpressionDefinitions::fiberTensor( transformedFiber );
 
         // Definition of the fourth invariant : I_4^i = C:Mith
-        activeStretch_Type IVith = ExpressionMultimechanism::activeFiberStretch( Ca, Mith );
+        activeInterpolatedStretch_Type IVith = ExpressionMultimechanism::activeInterpolatedFiberStretch( Ca, Mith );
 
         // Definition of the fouth isochoric invariant : J^(-2.0/3.0) * I_4^i
         activeIsochoricStretch_Type IVithBar = ExpressionMultimechanism::activeIsochoricFourthInvariant( JactiveEl, IVith );
@@ -972,9 +963,6 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeReferenceConfi
                                                                                             const dataPtr_Type& dataMaterial,
                                                                                             const displayerPtr_Type& displayer )
 {
-
-    M_completeActivation = true;
-
     displayer->leaderPrint (" Non-Linear S-  Computing reference configurations... \n");
 
     // Definition of F
@@ -987,7 +975,7 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeReferenceConfi
     tensorC_Type C = ExpressionDefinitions::tensorC( transpose(F), F );
 
     // Definition of J^-(2/3) = det( C ) using the isochoric/volumetric decomposition
-    powerExpression_Type  Jel = ExpressionDefinitions::powerExpression( J , (-2.0/3.0) );
+    isochoricDet_Type  Jel = ExpressionDefinitions::isochoricDeterminant( J  );
 
     // Definition of F^-T
     minusT_Type  F_T = ExpressionDefinitions::minusT( F );
@@ -1029,14 +1017,9 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeReferenceConfi
         ExpressionMultimechanism::relativeDifference_Type relStretch =
             ExpressionMultimechanism::relativeDifference( absStretch, this->M_dataMaterial->ithCharacteristicStretch(i) );
 
-        // // Trick to have vector with the scalar expression
-        // ExpressionMultimechanism::expressionVectorFromIncompressibleDifference_Type vActivation =
-        //     ExpressionMultimechanism::vectorFromIncompressibleDifference( absStretch );
-
         // Trick to have vector with the scalar expression
         ExpressionMultimechanism::expressionVectorFromRelativeDifference_Type vActivation =
             ExpressionMultimechanism::vectorFromRelativeDifference( relStretch );
-
 
         // Computing expression that determines activation
         evaluateNode( elements ( this->M_dispETFESpace->mesh() ),

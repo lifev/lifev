@@ -138,6 +138,10 @@ void saveVectorAccordingToFunctor ( const boost::shared_ptr<FESpace<MeshType, Ma
     {
         completeSaving = false;
     }
+    else
+    {
+        completeSaving = true;
+    }  
 
 }
 
@@ -151,11 +155,13 @@ void saveVectorAccordingToFunctor ( const boost::shared_ptr<FESpace<MeshType, Ma
 template<typename FunctorType, typename MeshType, typename MapType>
 void saveVectorAccordingToFunctor ( const boost::shared_ptr<FESpace<MeshType, MapType> > dispFESpace,
                                     const FunctorType functor,
-                                    const VectorEpetra originVector,
+                                    const VectorEpetra& originVector,
                                     const boost::shared_ptr<VectorEpetra> statusVector,
                                     const boost::shared_ptr<VectorEpetra> saveVector,
-                                    const UInt offset)
+                                    const UInt offset,
+				    bool& completeSaving)
 {
+    bool changedAtLeastOne( false );
 
     // This method works because the maps of the different vectors that are used here
     // are consistent. This means that if one LID in on one processor for a vector
@@ -183,6 +189,8 @@ void saveVectorAccordingToFunctor ( const boost::shared_ptr<FESpace<MeshType, Ma
                     (*saveVector) ( index ) = originVector( index );
 
                     (*statusVector) ( index ) = 1.0;
+		    changedAtLeastOne = true;
+		    
                 }
             }
 
@@ -190,6 +198,14 @@ void saveVectorAccordingToFunctor ( const boost::shared_ptr<FESpace<MeshType, Ma
 
     }
 
+    if( changedAtLeastOne )
+    {
+        completeSaving = false;
+    }
+    else
+    {
+        completeSaving = true;
+    }  
 
 }
 
