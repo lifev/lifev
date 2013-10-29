@@ -141,7 +141,7 @@ void saveVectorAccordingToFunctor ( const boost::shared_ptr<FESpace<MeshType, Ma
     else
     {
         completeSaving = true;
-    }  
+    }
 
 }
 
@@ -190,7 +190,7 @@ void saveVectorAccordingToFunctor ( const boost::shared_ptr<FESpace<MeshType, Ma
 
                     (*statusVector) ( index ) = 1.0;
 		    changedAtLeastOne = true;
-		    
+
                 }
             }
 
@@ -205,7 +205,42 @@ void saveVectorAccordingToFunctor ( const boost::shared_ptr<FESpace<MeshType, Ma
     else
     {
         completeSaving = true;
-    }  
+    }
+
+}
+
+template<typename FunctorType, typename MeshType, typename MapType>
+void saveVectorAccordingToFunctor ( const boost::shared_ptr<FESpace<MeshType, MapType> > dispFESpace,
+                                    const FunctorType functor,
+                                    const boost::shared_ptr<VectorEpetra> originVector,
+                                    VectorEpetra& saveVector,
+                                    const UInt offset)
+{
+
+    // This method works because the maps of the different vectors that are used here
+    // are consistent. This means that if one LID in on one processor for a vector
+    // the same LID will be for the second vector.
+
+    // We loop over the local ID on the processors of the originVector
+    for( UInt i( originVector->blockMap().MinLID() ); i < originVector->blockMap().MaxLID(); i++ )
+    {
+        // We look at the functor to see if the condition is satified
+        bool variable = functor( i );
+
+        if ( variable )
+        {
+            // Transform the local ID into a global ID for the vector
+            Int GIDnode = originVector->blockMap().GID( i );
+
+            // At the first time we insert the value and then we "close" the cell
+            for ( UInt iComp = 0; iComp < dispFESpace->fieldDim(); ++iComp )
+            {
+                Int index = GIDnode + iComp * dispFESpace->dof().numTotalDof() + offset;
+                saveVector( index ) = 1.0;
+            }
+        }
+
+    }
 
 }
 

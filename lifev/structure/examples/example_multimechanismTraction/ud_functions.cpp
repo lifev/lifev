@@ -211,19 +211,19 @@ Real Family1 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, c
     {
     case 0:
         // Tube
-        return - std::sin( thetaChangeOfVariable ) * std::cos( theta );
+        return  ( - std::sin( thetaChangeOfVariable ) * std::cos( theta ) ) ;
         // Cube
         //return std::sin( theta );
         break;
     case 1:
 	    // Tube
-        return   std::cos( thetaChangeOfVariable ) * std::cos( theta );
+        return  (  std::cos( thetaChangeOfVariable ) * std::cos( theta ) );
 	    // Cube
         //return std::cos( theta );
         break;
     case 2:
 	    // Tube
-        return std::sin( theta );
+        return  ( std::sin( theta ) );
 	    // Cube
         // return 0.0;
             break;
@@ -249,19 +249,19 @@ Real Family2 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, c
     {
         case 0:
             // Tube
-            return - std::sin( thetaChangeOfVariable ) * std::cos( theta );
+            return  ( - std::sin( thetaChangeOfVariable ) * std::cos( theta ) );
             // Cube
             //return std::sin( theta );
             break;
         case 1:
             // Tube
-            return   std::cos( thetaChangeOfVariable ) * std::cos( theta );
+            return   ( std::cos( thetaChangeOfVariable ) * std::cos( theta ) );
             // Cube
             //return std::cos( theta );
             break;
         case 2:
             // Tube
-            return   std::sin( theta );
+            return   ( std::sin( theta ) );
             // Cube
             //return 0.0;
             break;

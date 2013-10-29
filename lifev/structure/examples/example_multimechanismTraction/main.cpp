@@ -75,6 +75,7 @@
 #include <lifev/structure/solver/isotropic/ExponentialMaterialNonLinear.hpp>
 #include <lifev/structure/solver/anisotropic/StructuralAnisotropicConstitutiveLaw.hpp>
 #include <lifev/structure/solver/anisotropic/AnisotropicMultimechanismMaterialNonLinear.hpp>
+#include <lifev/structure/solver/anisotropic/HolzapfelMaterialNonLinear.hpp>
 
 
 #include <lifev/core/filter/ExporterEnsight.hpp>

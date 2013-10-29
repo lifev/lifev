@@ -110,6 +110,49 @@ protected:
     Real           M_value;
 }; // selector functor
 
+class booleanSelector
+{
+public:
+    typedef VectorEpetra                    vector_Type;
+    typedef boost::shared_ptr<vector_Type>  vectorPtr_Type;
+
+    booleanSelector ( )
+    :
+    M_selectionVector ( )
+    {}
+
+    ~booleanSelector()
+    {}
+
+    void setSelectionVector( const vectorPtr_Type& selectionVector )
+    {
+        M_selectionVector = selectionVector;
+    }
+
+    bool operator() ( const UInt i ) const
+    {
+        // The 1e-5 is a tolerance on the criterium
+        // The i has to be a Local ID!
+        UInt index = M_selectionVector->blockMap().GID( i );
+
+        if( ( *M_selectionVector )( index ) )
+        {
+            return true;
+        }
+
+        else
+        {
+            return false;
+        }
+
+        return false;
+
+    }
+
+protected:
+    vectorPtr_Type M_selectionVector;
+}; // selector functor
+
 
 template <typename MeshType>
 class AnisotropicMultimechanismMaterialNonLinear : public StructuralAnisotropicConstitutiveLaw<MeshType>
@@ -718,98 +761,103 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::updateNonLinearJacobi
 
     for( UInt i(0); i < this->M_vectorInterpolated.size(); i++ )
     {
+        if( M_activationDisplacement[ i ]->norm2() )
+        {
+            displayer->leaderPrint ("                ", i + 1,"-th fiber family \n" );
 
-      displayer->leaderPrint ("                ", i + 1,"-th fiber family \n" );
+            // As in other classes, the specialization of the MapType = MapEpetra makes this expression
+            // not always usable. When other maps will be available in LifeV, the class should be re-templated.
 
-      // As in other classes, the specialization of the MapType = MapEpetra makes this expression
-      // not always usable. When other maps will be available in LifeV, the class should be re-templated.
+            // Definition of F_0(ta)
+            tensorF_Type ithFzeroA = ExpressionDefinitions::deformationGradient( this->M_dispETFESpace,  *(M_activationDisplacement[ i ]),
+                                                                                 this->M_offset, this->M_identity );
 
-      // Definition of F_0(ta)
-      tensorF_Type ithFzeroA = ExpressionDefinitions::deformationGradient( this->M_dispETFESpace,  *(M_activationDisplacement[ i ]),
-                                                                           this->M_offset, this->M_identity );
+            // Determinant of F_0(ta)
+            interpolatedScalarValue_Type ithJzeroA = ExpressionDefinitions::interpolateScalarValue( this->M_scalarETFESpace, *( M_jacobianActivation[ i ] ) );
 
-      // Determinant of F_0(ta)
-      interpolatedScalarValue_Type ithJzeroA = ExpressionDefinitions::interpolateScalarValue( this->M_scalarETFESpace, *( M_jacobianActivation[ i ] ) );
+            // Definition of J_a
+            activatedDeterminantF_Type Ja = ExpressionMultimechanism::activateDeterminantF( J, ithJzeroA );
 
-      // Definition of J_a
-      activatedDeterminantF_Type Ja = ExpressionMultimechanism::activateDeterminantF( J, ithJzeroA );
+            // Definition of J_a^{-2.0/3.0}
+            activeIsochoricDeterminant_Type  JactiveEl = ExpressionMultimechanism::activeIsochoricDeterminant( Ja );
 
-      // Definition of J_a^{-2.0/3.0}
-      activeIsochoricDeterminant_Type  JactiveEl = ExpressionMultimechanism::activeIsochoricDeterminant( Ja );
+            // Definition of F_0^{-1}(ta)
+            invTensor_Type FzeroAminus1 = ExpressionDefinitions::inv( ithFzeroA );
 
-      // Definition of F_0^{-1}(ta)
-      invTensor_Type FzeroAminus1 = ExpressionDefinitions::inv( ithFzeroA );
+            // Definition of Fa = F_0 * F_0(ta)^{-1}
+            deformationActivatedTensor_Type Fa = ExpressionMultimechanism::createDeformationActivationTensor( F , FzeroAminus1);
 
-      // Definition of Fa = F_0 * F_0(ta)^{-1}
-      deformationActivatedTensor_Type Fa = ExpressionMultimechanism::createDeformationActivationTensor( F , FzeroAminus1);
+            // Definition of F_0^{-T}(ta)
+            minusT_Type FzeroAminusT = ExpressionDefinitions::minusT( ithFzeroA );
 
-      // Definition of F_0^{-T}(ta)
-      minusT_Type FzeroAminusT = ExpressionDefinitions::minusT( ithFzeroA );
+            activeMinusTtensor_Type FAminusT = ExpressionMultimechanism::createActiveMinusTtensor( F_T, transpose( ithFzeroA ) );
+            // Definition of C_a = F_0^{-T}(ta) * C_0 * F_0^{-1}(ta)
+            tensorCmultiMech_Type Ca = ExpressionMultimechanism::activationRightCauchyGreen( FzeroAminusT, C, FzeroAminus1 );
 
-      activeMinusTtensor_Type FAminusT = ExpressionMultimechanism::createActiveMinusTtensor( F_T, transpose( ithFzeroA ) );
-      // Definition of C_a = F_0^{-T}(ta) * C_0 * F_0^{-1}(ta)
-      tensorCmultiMech_Type Ca = ExpressionMultimechanism::activationRightCauchyGreen( FzeroAminusT, C, FzeroAminus1 );
+            // Interpolating the unit fiber computed before
+            interpolatedValue_Type transformedFiber = ExpressionDefinitions::interpolateValue( this->M_dispETFESpace, *( M_unitFiberActivation[ i ] ) );
 
-      // Interpolating the unit fiber computed before
-      interpolatedValue_Type transformedFiber = ExpressionDefinitions::interpolateValue( this->M_dispETFESpace, *( M_unitFiberActivation[ i ] ) );
+            // Definition of the tensor M = ithFiber \otimes ithFiber
+            // At the moment, it's automatic that the method constructs the expression M = ithFiber \otimes ithFiber
+            // For a more general case, the file ExpressionDefinitions.hpp should be changed
+            outerProduct_Type Mith = ExpressionDefinitions::fiberTensor( transformedFiber );
 
-      // Definition of the tensor M = ithFiber \otimes ithFiber
-      // At the moment, it's automatic that the method constructs the expression M = ithFiber \otimes ithFiber
-      // For a more general case, the file ExpressionDefinitions.hpp should be changed
-      outerProduct_Type Mith = ExpressionDefinitions::fiberTensor( transformedFiber );
+            // Definition of the fourth invariant : I_4^i = C:Mith
+            activeInterpolatedStretch_Type IVith = ExpressionMultimechanism::activeInterpolatedFiberStretch( Ca, Mith );
 
-      // Definition of the fourth invariant : I_4^i = C:Mith
-      activeInterpolatedStretch_Type IVith = ExpressionMultimechanism::activeInterpolatedFiberStretch( Ca, Mith );
+            // Definition of the fouth isochoric invariant : J^(-2.0/3.0) * I_4^i
+            activeIsochoricStretch_Type IVithBar = ExpressionMultimechanism::activeIsochoricFourthInvariant( JactiveEl, IVith );
 
-      // Definition of the fouth isochoric invariant : J^(-2.0/3.0) * I_4^i
-      activeIsochoricStretch_Type IVithBar = ExpressionMultimechanism::activeIsochoricFourthInvariant( JactiveEl, IVith );
+            // Linearization with respect to activation configuration
+            activeLinearization_Type dFa = ExpressionMultimechanism::activatedLinearization( grad(phi_j), FzeroAminus1 );
 
-      // Linearization with respect to activation configuration
-      activeLinearization_Type dFa = ExpressionMultimechanism::activatedLinearization( grad(phi_j), FzeroAminus1 );
+            activeTestGradient_Type grPhiI = ExpressionMultimechanism::activatedTestGradient( grad(phi_i), FzeroAminus1);
 
-      activeTestGradient_Type grPhiI = ExpressionMultimechanism::activatedTestGradient( grad(phi_i), FzeroAminus1);
+            integrate( elements ( this->M_dispETFESpace->mesh() ),
+                       this->M_dispFESpace->qr(),
+                       this->M_dispETFESpace,
+                       this->M_dispETFESpace,
+                       ithJzeroA * value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * JactiveEl *
+                       exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value( 1.0 ) ) * ( IVithBar- value( 1.0 ) ) ) *
+                       (
+                        derAtan( IVithBar - value( 1.0 ), this->M_epsilon, ( 1.0 / PI ) ) * ( IVithBar - value(1.0) ) +
+                        atan( IVithBar - value(1.0), this->M_epsilon, ( 1 / PI ), (1.0/2.0) ) +
+                        atan( IVithBar - value(1.0), this->M_epsilon, ( 1 / PI ), (1.0/2.0) ) *
+                        value( 2.0 ) * value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) *
+                        ( IVithBar- value( 1.0 ) ) * ( IVithBar- value( 1.0 ) )
+                        ) *
+                       ( dot( value(-2.0/3.0) * IVithBar * FAminusT, dFa ) + JactiveEl * dot( transpose(dFa)*Fa + transpose(Fa) * dFa , Mith ) ) *
+                       dot( Fa * Mith - value(1.0/3.0) * IVith * FAminusT, grPhiI )
+                       ) >> jacobian;
 
-      integrate( elements ( this->M_dispETFESpace->mesh() ),
-                 this->M_dispFESpace->qr(),
-                 this->M_dispETFESpace,
-                 this->M_dispETFESpace,
-                 ithJzeroA * value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * JactiveEl *
-                 exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value( 1.0 ) ) * ( IVithBar- value( 1.0 ) ) ) *
-                 (
-                  derAtan( IVithBar - value( 1.0 ), this->M_epsilon, ( 1.0 / PI ) ) * ( IVithBar - value(1.0) ) +
-                  atan( IVithBar - value(1.0), this->M_epsilon, ( 1 / PI ), (1.0/2.0) ) +
-                  atan( IVithBar - value(1.0), this->M_epsilon, ( 1 / PI ), (1.0/2.0) ) *
-                  value( 2.0 ) * value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) *
-                  ( IVithBar- value( 1.0 ) ) * ( IVithBar- value( 1.0 ) )
-                 ) *
-                 ( dot( value(-2.0/3.0) * IVithBar * FAminusT, dFa ) + JactiveEl * dot( transpose(dFa)*Fa + transpose(Fa) * dFa , Mith ) ) *
-                 dot( Fa * Mith - value(1.0/3.0) * IVith * FAminusT, grPhiI )
-                 ) >> jacobian;
+            integrate( elements ( this->M_dispETFESpace->mesh() ),
+                       this->M_dispFESpace->qr(),
+                       this->M_dispETFESpace,
+                       this->M_dispETFESpace,
+                       ithJzeroA * value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) *
+                       exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value( 1.0 ) ) * ( IVithBar- value( 1.0 ) ) ) *
+                       atan( IVithBar - value(1.0), this->M_epsilon, ( 1 / PI ), (1.0/2.0) ) * ( IVithBar - value(1.0) ) *
+                       dot( value(-2.0/3.0) * JactiveEl * FAminusT , dFa ) *
+                       dot( Fa * Mith - value(1.0/3.0) * IVith * FAminusT, grPhiI )
+                       ) >> jacobian;
 
-      integrate( elements ( this->M_dispETFESpace->mesh() ),
-                 this->M_dispFESpace->qr(),
-                 this->M_dispETFESpace,
-                 this->M_dispETFESpace,
-                 ithJzeroA * value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) *
-                 exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value( 1.0 ) ) * ( IVithBar- value( 1.0 ) ) ) *
-                 atan( IVithBar - value(1.0), this->M_epsilon, ( 1 / PI ), (1.0/2.0) ) * ( IVithBar - value(1.0) ) *
-                 dot( value(-2.0/3.0) * JactiveEl * FAminusT , dFa ) *
-                 dot( Fa * Mith - value(1.0/3.0) * IVith * FAminusT, grPhiI )
-                 ) >> jacobian;
+            integrate( elements ( this->M_dispETFESpace->mesh() ),
+                       this->M_dispFESpace->qr(),
+                       this->M_dispETFESpace,
+                       this->M_dispETFESpace,
+                       ithJzeroA * value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) *
+                       JactiveEl * ( IVithBar - value( 1.0 ) ) * atan( IVithBar - value(1.0), this->M_epsilon, ( 1 / PI ), (1.0/2.0) ) *
+                       exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value( 1.0 ) ) * ( IVithBar- value( 1.0 ) ) ) *
+                       dot( dFa * Mith - value(1.0/3.0) * ( dot( transpose(dFa)*Fa + transpose(Fa) * dFa , Mith ) ) * FAminusT +
+                            value(1.0/3.0) * IVith * FAminusT * transpose(dFa) * FAminusT, grPhiI )
+                       ) >> jacobian;
 
-      integrate( elements ( this->M_dispETFESpace->mesh() ),
-                 this->M_dispFESpace->qr(),
-                 this->M_dispETFESpace,
-                 this->M_dispETFESpace,
-                 ithJzeroA * value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) *
-                 JactiveEl * ( IVithBar - value( 1.0 ) ) * atan( IVithBar - value(1.0), this->M_epsilon, ( 1 / PI ), (1.0/2.0) ) *
-                 exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value( 1.0 ) ) * ( IVithBar- value( 1.0 ) ) ) *
-                 dot( dFa * Mith - value(1.0/3.0) * ( dot( transpose(dFa)*Fa + transpose(Fa) * dFa , Mith ) ) * FAminusT +
-                      value(1.0/3.0) * IVith * FAminusT * transpose(dFa) * FAminusT, grPhiI )
-                 ) >> jacobian;
-
+        }
+        else
+        {
+            displayer->leaderPrint ("The activation displacement of the ", i + 1,"-th fiber family is null. No Jacobian! \n" );
+        }
     } // closing loop on fibers
-
     jacobian->globalAssemble();
 }
 
@@ -842,7 +890,6 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeStiffness ( co
         this->computeReferenceConfigurations( disp, this->M_dataMaterial, displayer );
     }
 
-
     // For anisotropic part of the Piola-Kirchhoff is assemble summing up the parts of the
     // Piola-Kirchhoff using the fiber index
 
@@ -868,89 +915,93 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeStiffness ( co
 
     for( UInt i(0); i < this->M_vectorInterpolated.size() ; i++ )
     {
-        displayer->leaderPrint ("                ", i + 1,"-th fiber family \n" );
-        // As in other classes, the specialization of the MapType = MapEpetra makes this expression
-        // not always usable. When other maps will be available in LifeV, the class should be re-templated.
+        if( M_activationDisplacement[ i ]->norm2() )
+        {
 
-        // Definition of F_0(ta)
-        tensorF_Type ithFzeroA = ExpressionDefinitions::deformationGradient( this->M_dispETFESpace,  *(M_activationDisplacement[ i ]),
-                                                                             this->M_offset, this->M_identity );
+            displayer->leaderPrint ("                ", i + 1,"-th fiber family \n" );
+            // As in other classes, the specialization of the MapType = MapEpetra makes this expression
+            // not always usable. When other maps will be available in LifeV, the class should be re-templated.
 
-        vector_Type trial(this->M_dispETFESpace->map());
-        trial *= 0.0;
-        tensorF_Type trialGrad = ExpressionDefinitions::deformationGradient( this->M_dispETFESpace,  trial,
-                                                                             this->M_offset, this->M_identity );
+            // Definition of F_0(ta)
+            tensorF_Type ithFzeroA = ExpressionDefinitions::deformationGradient( this->M_dispETFESpace,  *(M_activationDisplacement[ i ]),
+                                                                                 this->M_offset, this->M_identity );
 
-        // Determinant of F_0(ta)
-        interpolatedScalarValue_Type ithJzeroA = ExpressionDefinitions::interpolateScalarValue( this->M_scalarETFESpace, *( M_jacobianActivation[ i ] ) );
+            // Determinant of F_0(ta)
+            interpolatedScalarValue_Type ithJzeroA = ExpressionDefinitions::interpolateScalarValue( this->M_scalarETFESpace, *( M_jacobianActivation[ i ] ) );
 
-        // Definition of J_a
-        activatedDeterminantF_Type Ja = ExpressionMultimechanism::activateDeterminantF( J, ithJzeroA );
+            // Definition of J_a
+            activatedDeterminantF_Type Ja = ExpressionMultimechanism::activateDeterminantF( J, ithJzeroA );
 
-          // Definition of J_a^{-2.0/3.0}
-        activeIsochoricDeterminant_Type  JactiveEl = ExpressionMultimechanism::activeIsochoricDeterminant( Ja );
+            // Definition of J_a^{-2.0/3.0}
+            activeIsochoricDeterminant_Type  JactiveEl = ExpressionMultimechanism::activeIsochoricDeterminant( Ja );
 
-        // Definition of F_0^{-1}(ta)
-        invTensor_Type FzeroAminus1 = ExpressionDefinitions::inv( ithFzeroA );
+            // Definition of F_0^{-1}(ta)
+            invTensor_Type FzeroAminus1 = ExpressionDefinitions::inv( ithFzeroA );
 
-          // Definition of Fa = F_0 * F_0(ta)^{-1}
-        deformationActivatedTensor_Type Fa = ExpressionMultimechanism::createDeformationActivationTensor( F , FzeroAminus1);
+            // Definition of Fa = F_0 * F_0(ta)^{-1}
+            deformationActivatedTensor_Type Fa = ExpressionMultimechanism::createDeformationActivationTensor( F , FzeroAminus1);
 
-        // Definition of F_0^{-T}(ta)
-        minusT_Type FzeroAminusT = ExpressionDefinitions::minusT( ithFzeroA );
+            // Definition of F_0^{-T}(ta)
+            minusT_Type FzeroAminusT = ExpressionDefinitions::minusT( ithFzeroA );
 
-        activeMinusTtensor_Type FAminusT = ExpressionMultimechanism::createActiveMinusTtensor( F_T, transpose( ithFzeroA ) );
-        // Definition of C_a = F_0^{-T}(ta) * C_0 * F_0^{-1}(ta)
-        tensorCmultiMech_Type Ca = ExpressionMultimechanism::activationRightCauchyGreen( FzeroAminusT, C, FzeroAminus1 );
+            activeMinusTtensor_Type FAminusT = ExpressionMultimechanism::createActiveMinusTtensor( F_T, transpose( ithFzeroA ) );
+            // Definition of C_a = F_0^{-T}(ta) * C_0 * F_0^{-1}(ta)
+            tensorCmultiMech_Type Ca = ExpressionMultimechanism::activationRightCauchyGreen( FzeroAminusT, C, FzeroAminus1 );
 
-        // Interpolating the unit fiber computed before
-        interpolatedValue_Type transformedFiber = ExpressionDefinitions::interpolateValue( this->M_dispETFESpace, *( M_unitFiberActivation[ i ] ) );
+            interpolatedValue_Type fiberIth =
+                ExpressionDefinitions::interpolateFiber( this->M_dispETFESpace, *(this->M_unitFiberActivation[ i ] ) );
 
-        // Definition of the tensor M = ithFiber \otimes ithFiber
-        // At the moment, it's automatic that the method constructs the expression M = ithFiber \otimes ithFiber
-        // For a more general case, the file ExpressionDefinitions.hpp should be changed
-        outerProduct_Type Mith = ExpressionDefinitions::fiberTensor( transformedFiber );
+            // Definition of the tensor M = ithFiber \otimes ithFiber
+            // At the moment, it's automatic that the method constructs the expression M = ithFiber \otimes ithFiber
+            // For a more general case, the file ExpressionDefinitions.hpp should be changed
+            outerProduct_Type Mith = ExpressionDefinitions::fiberTensor( fiberIth );
 
-        // Definition of the fourth invariant : I_4^i = C:Mith
-        activeInterpolatedStretch_Type IVith = ExpressionMultimechanism::activeInterpolatedFiberStretch( Ca, Mith );
+            // Definition of the fourth invariant : I_4^i = C:Mith
+            activeInterpolatedStretch_Type IVith = ExpressionMultimechanism::activeInterpolatedFiberStretch( Ca, Mith );
 
-        // Definition of the fouth isochoric invariant : J^(-2.0/3.0) * I_4^i
-        activeIsochoricStretch_Type IVithBar = ExpressionMultimechanism::activeIsochoricFourthInvariant( JactiveEl, IVith );
+            // Definition of the fouth isochoric invariant : J^(-2.0/3.0) * I_4^i
+            activeIsochoricStretch_Type IVithBar = ExpressionMultimechanism::activeIsochoricFourthInvariant( JactiveEl, IVith );
 
-        // vectorPtr_Type checkIVithBar( new vector_Type( M_scalarETFESpace->map() ) );
+            // vectorPtr_Type checkIVithBar( new vector_Type( M_scalarETFESpace->map() ) );
 
-        // *checkIVithBar *= 0.0;
-        // evaluateNode ( elements ( this->M_scalarETFESpace->mesh() ),
-        //                *M_quadrature,
-        //                this->M_scalarETFESpace,
-        //                meas_K *  atan( IVithBar - value( 1.0 ) , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  )  * ithJzeroA *
-        //                (value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * JactiveEl * ( IVithBar - value( 1.0 ) ) *
-        //                 exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value( 1.0 ) ) * ( IVithBar- value( 1.0 ) )  ) ) * phi_i
-        //                ) >> checkIVithBar;
-        // checkIVithBar->globalAssemble();
-        // *checkIVithBar = *checkIVithBar / *M_patchAreaVectorScalar;
-        // std::cout << "norm of the vector"<< checkIVithBar->norm2()<< std::endl;
-        // std::cout << "normInf of the vector"<< checkIVithBar->normInf()<< std::endl;
-        // checkIVithBar->spy("checkVector");
+            // *checkIVithBar *= 0.0;
+            // evaluateNode ( elements ( this->M_scalarETFESpace->mesh() ),
+            //                *M_quadrature,
+            //                this->M_scalarETFESpace,
+            //                meas_K *  atan( IVithBar - value( 1.0 ) , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  )  * ithJzeroA *
+            //                (value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * JactiveEl * ( IVithBar - value( 1.0 ) ) *
+            //                 exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value( 1.0 ) ) * ( IVithBar- value( 1.0 ) )  ) ) * phi_i
+            //                ) >> checkIVithBar;
+            // checkIVithBar->globalAssemble();
+            // *checkIVithBar = *checkIVithBar / *M_patchAreaVectorScalar;
+            // std::cout << "norm of the vector"<< checkIVithBar->norm2()<< std::endl;
+            // std::cout << "normInf of the vector"<< checkIVithBar->normInf()<< std::endl;
+            // checkIVithBar->spy("checkVector");
 
-        // The terms for the piola kirchhoff tensor come from the holzapfel model. Then they are rescaled
-        // according to the change of variable given by the multi-mechanism model.
+            // The terms for the piola kirchhoff tensor come from the holzapfel model. Then they are rescaled
+            // according to the change of variable given by the multi-mechanism model.
 
-        // // First term:
-        // // 2 alpha_i J^(-2.0/3.0) ( \bar{I_4} - 1 ) exp( gamma_i * (\bar{I_4} - 1)^2 ) * F M : \grad phi_i
-        // // where alpha_i and gamma_i are the fiber parameters and M is the 2nd order tensor of type f_i \otimes \ f_i
-        integrate ( elements ( this->M_dispETFESpace->mesh() ),
-                    this->M_dispFESpace->qr(),
-                    this->M_dispETFESpace,
-                    atan( IVithBar - value( 1.0 ) , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 ) ) * ithJzeroA *
-                    (value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * JactiveEl * ( IVithBar - value( 1.0 ) ) *
-                     exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value( 1.0 ) ) * ( IVithBar- value( 1.0 ))))*
-                    dot( ( Fa * Mith - value(1.0/3.0) * IVith * FAminusT) * FzeroAminusT, grad(phi_i) )
-                    ) >> this->M_stiff;
+            // // First term:
+            // // 2 alpha_i J^(-2.0/3.0) ( \bar{I_4} - 1 ) exp( gamma_i * (\bar{I_4} - 1)^2 ) * F M : \grad phi_i
+            // // where alpha_i and gamma_i are the fiber parameters and M is the 2nd order tensor of type f_i \otimes \ f_i
 
+            integrate ( elements ( this->M_dispETFESpace->mesh() ),
+                        this->M_dispFESpace->qr(),
+                        this->M_dispETFESpace,
+                        atan( IVithBar - value( 1.0 ) , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 ) ) * ithJzeroA *
+                        (value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * JactiveEl * ( IVithBar - value( 1.0 ) ) *
+                         exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) *
+                              ( IVithBar - value( 1.0 ) ) * ( IVithBar - value( 1.0 ))))*
+                        dot( ( Fa * Mith - value(1.0/3.0) * IVithBar * FAminusT) * FzeroAminusT, grad(phi_i) )
+                        ) >> this->M_stiff;
+        }
+        else
+        {
+            displayer->leaderPrint ("The activation displacement of the ", i + 1,"-th fiber family is null. No contribution to stiffness! \n" );
+        }
     }
     this->M_stiff->globalAssemble();
-    this->M_stiff->spy("vector");
+
 
 }
 
@@ -981,6 +1032,8 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeReferenceConfi
                                                                                             const displayerPtr_Type& displayer )
 {
     displayer->leaderPrint (" Non-Linear S-  Computing reference configurations... \n");
+    vectorPtr_Type booleanVector( new vector_Type( *this->M_localMap ) );
+    *booleanVector *= 0.0;
 
     // Definition of F
     tensorF_Type F = ExpressionDefinitions::deformationGradient( this->M_dispETFESpace,  disp, this->M_offset, this->M_identity );
@@ -1026,13 +1079,15 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeReferenceConfi
         // Definition of the fourth invariant : I_4^i = C:Mith
         stretch_Type IVith = ExpressionDefinitions::fiberStretch( C, Mith );
 
+
+        Real referenceStretch = this->M_dataMaterial->ithCharacteristicStretch(i) * this->M_dataMaterial->ithCharacteristicStretch(i);
         // Difference between IVith - IVth(t_A)
         ExpressionMultimechanism::incompressibleDifference_Type absStretch =
-            ExpressionMultimechanism::incompressibleAbsoluteStretch( IVith, this->M_dataMaterial->ithCharacteristicStretch(i) );
+            ExpressionMultimechanism::incompressibleAbsoluteStretch( IVith, referenceStretch );
 
         // Difference between IVith - IVth(t_A) / IVth(t_A)
         ExpressionMultimechanism::relativeDifference_Type relStretch =
-            ExpressionMultimechanism::relativeDifference( absStretch, this->M_dataMaterial->ithCharacteristicStretch(i) );
+            ExpressionMultimechanism::relativeDifference( absStretch, referenceStretch );
 
         // Trick to have vector with the scalar expression
         ExpressionMultimechanism::expressionVectorFromRelativeDifference_Type vActivation =
@@ -1055,6 +1110,11 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeReferenceConfi
         AssemblyElementalStructure::saveVectorAccordingToFunctor( this->M_dispFESpace, M_selector[ i ],
                                                                   disp, this->M_firstActivation[i],
                                                                   M_activationDisplacement[i], this->M_offset, M_completeActivation);
+
+        booleanSelector boolSelector;
+        boolSelector.setSelectionVector( M_activationDisplacement[i] );
+        AssemblyElementalStructure::saveVectorAccordingToFunctor( this->M_dispFESpace, boolSelector, M_activationDisplacement[i],
+                                                                  *booleanVector, this->M_offset);
     }
 
     // Assemble kinematic quantities related to activation
@@ -1062,59 +1122,66 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeReferenceConfi
     {
         *( M_jacobianActivation[ i ] ) *= 0.0;
         *( M_unitFiberActivation[ i ]) *= 0.0;
-        /*
-          For each of the fiber families the jacobian, the activation stretch
-          normalized fiber are computed
-        */
 
-        // Jacobian
-        tensorF_Type Fa = ExpressionDefinitions::deformationGradient( this->M_dispETFESpace, *(M_activationDisplacement[i]),
-                                                                      this->M_offset, this->M_identity );
-        // Definition of J
-        determinantF_Type Ja = ExpressionDefinitions::determinantF( Fa );
+        if( M_activationDisplacement[i]->norm2() )
+        {
+            /*
+              For each of the fiber families the jacobian, the activation stretch
+              normalized fiber are computed
+            */
 
-        evaluateNode( elements ( M_scalarETFESpace->mesh() ),
-                      *M_quadrature,
-                      M_scalarETFESpace,
-                      meas_K * Ja  * phi_i
-                      ) >> M_jacobianActivation[ i ];
-        M_jacobianActivation[ i ]->globalAssemble();
-        *( M_jacobianActivation[ i ] ) = *( M_jacobianActivation[ i ] ) / *M_patchAreaVectorScalar;
-        // Normalized fiber
-        // Definitions of the quantities which depend on the fiber directions e.g. I_4^i
-        interpolatedValue_Type fiberIth = ExpressionDefinitions::interpolateFiber( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ] ) );
+            // Jacobian
+            tensorF_Type Fa = ExpressionDefinitions::deformationGradient( this->M_dispETFESpace, *(M_activationDisplacement[i]),
+                                                                          this->M_offset, this->M_identity );
+            // Definition of J
+            determinantF_Type Ja = ExpressionDefinitions::determinantF( Fa );
 
-        // Definition of the direction of the fiber at the activation moment = F_0(ta) * f_0
-        activateFiber_Type activeIthFiber = ExpressionMultimechanism::activateFiberDirection( Fa, fiberIth );
+            evaluateNode( elements ( M_scalarETFESpace->mesh() ),
+                          *M_quadrature,
+                          M_scalarETFESpace,
+                          meas_K * Ja  * phi_i
+                          ) >> M_jacobianActivation[ i ];
+            M_jacobianActivation[ i ]->globalAssemble();
+            *( M_jacobianActivation[ i ] ) = *( M_jacobianActivation[ i ] ) / *M_patchAreaVectorScalar;
+            // Normalized fiber
+            // Definitions of the quantities which depend on the fiber directions e.g. I_4^i
+            interpolatedValue_Type fiberIth = ExpressionDefinitions::interpolateFiber( this->M_dispETFESpace, *(this->M_vectorInterpolated[ i ] ) );
 
-        normalizedVector_Type normalizedFiber = ExpressionMultimechanism::unitVector( activeIthFiber );
-        evaluateNode( elements ( this->M_dispETFESpace->mesh() ),
-                      *M_quadrature,
-                      this->M_dispETFESpace,
-                      meas_K * dot( normalizedFiber , phi_i )
-                      ) >> M_unitFiberActivation[ i ];
-        M_unitFiberActivation[ i ]->globalAssemble();
-        *( M_unitFiberActivation[ i ] ) = *( M_unitFiberActivation[ i ] ) / *M_patchAreaVector;
+            // Definition of the direction of the fiber at the activation moment = F_0(ta) * f_0
+            activateFiber_Type activeIthFiber = ExpressionMultimechanism::activateFiberDirection( Fa, fiberIth );
 
-        // // Definition of F_0^{-1}(ta)
-        // invTensor_Type FzeroAminus1 = ExpressionDefinitions::inv( Fa );
-        // // Definition of F_0^{-T}(ta)
-        // minusT_Type FzeroAminusT = ExpressionDefinitions::minusT( Fa );
-        // // Definition of C_a = F_0^{-T}(ta) * C_0 * F_0^{-1}(ta)
-        // tensorCmultiMech_Type Ca = ExpressionMultimechanism::activationRightCauchyGreen( FzeroAminusT, C, FzeroAminus1 );
+            normalizedVector_Type normalizedFiber = ExpressionMultimechanism::unitVector( activeIthFiber );
+            evaluateNode( elements ( this->M_dispETFESpace->mesh() ),
+                          *M_quadrature,
+                          this->M_dispETFESpace,
+                          meas_K * dot( normalizedFiber , phi_i )
+                          ) >> M_unitFiberActivation[ i ];
+            M_unitFiberActivation[ i ]->globalAssemble();
+            *( M_unitFiberActivation[ i ] ) = *( M_unitFiberActivation[ i ] ) / *M_patchAreaVector;
 
-        // activeNormalizedOuterProduct_Type Mith = ExpressionMultimechanism::activeNormalizedOuterProduct( normalizedFiber );
+            // Resetting the vector of the fiber to zero when the element of the displacement are zero.
+            *( M_unitFiberActivation[ i ] ) *= *booleanVector;
 
-        // // Definition of the fourth invariant : I_4^i = C:Mith
-        // activeStretch_Type IVith = ExpressionMultimechanism::activeFiberStretch( Ca, Mith );
+            // // Definition of F_0^{-1}(ta)
+            // invTensor_Type FzeroAminus1 = ExpressionDefinitions::inv( Fa );
+            // // Definition of F_0^{-T}(ta)
+            // minusT_Type FzeroAminusT = ExpressionDefinitions::minusT( Fa );
+            // // Definition of C_a = F_0^{-T}(ta) * C_0 * F_0^{-1}(ta)
+            // tensorCmultiMech_Type Ca = ExpressionMultimechanism::activationRightCauchyGreen( FzeroAminusT, C, FzeroAminus1 );
 
-        // evaluateNode( elements ( M_scalarETFESpace->mesh() ),
-        //       *M_quadrature,
-        //       M_scalarETFESpace,
-        //       meas_K * IVith  * phi_i
-        //       ) >> M_stretchActivation[ i ];
-        // M_stretchActivation[ i ]->globalAssemble();
-        // *( M_stretchActivation[ i ] ) = *( M_stretchActivation[ i ] ) / *M_patchAreaVectorScalar;
+            // activeNormalizedOuterProduct_Type Mith = ExpressionMultimechanism::activeNormalizedOuterProduct( normalizedFiber );
+
+            // // Definition of the fourth invariant : I_4^i = C:Mith
+            // activeStretch_Type IVith = ExpressionMultimechanism::activeFiberStretch( Ca, Mith );
+
+            // evaluateNode( elements ( M_scalarETFESpace->mesh() ),
+            //       *M_quadrature,
+            //       M_scalarETFESpace,
+            //       meas_K * IVith  * phi_i
+            //       ) >> M_stretchActivation[ i ];
+            // M_stretchActivation[ i ]->globalAssemble();
+            // *( M_stretchActivation[ i ] ) = *( M_stretchActivation[ i ] ) / *M_patchAreaVectorScalar;
+        }
     }
 
 }
