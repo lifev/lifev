@@ -1153,6 +1153,19 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeReferenceConfi
                                                                   disp, this->M_firstActivation[i],
                                                                   M_activationDisplacement[i], this->M_offset);
 
+        vectorPtr_Type regularizationVector(new vector_Type( *this->M_localMap ) );
+        *regularizationVector *= 0.0;
+
+        evaluateNode( elements ( this->M_dispETFESpace->mesh() ),
+                      *M_quadrature,
+                      this->M_dispETFESpace,
+                      meas_K * dot( value( this->M_dispETFESpace, *(M_activationDisplacement[i]) ) , phi_i )
+                      ) >> regularizationVector;
+        regularizationVector->globalAssemble();
+        *(regularizationVector ) = *( regularizationVector ) / *M_patchAreaVector;
+
+        *M_activationDisplacement[i] = *regularizationVector;
+
         booleanVector.reset(new vector_Type( *this->M_localMap ) );
         *booleanVector *= 0.0;
 
