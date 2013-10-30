@@ -287,9 +287,7 @@ Structure::run3d()
             boost::dynamic_pointer_cast<Epetra_MpiComm>(parameters->comm);
         PartitionIO<mesh_Type> partitionIO (partsFileName, mpiComm);
 
-
         partitionIO.read (pointerToMesh);
-
     }
 
     std::string dOrder =  dataFile ( "solid/space_discretization/order", "P1");
@@ -360,30 +358,30 @@ Structure::run3d()
     BCFunctionBase pressure;
 
     nonZero.setFunction (bcNonZero);
-    pressure.setFunction (smoothPressure);
+    pressure.setFunction (traction);
 
     //! =================================================================================
     //! BC for StructuredCube4_test_structuralsolver.mesh
     //! =================================================================================
-    // BCh->addBC ("EdgesIn",      20,  Natural,   Component, nonZero, compy);
-    // BCh->addBC ("EdgesIn",      40,  Essential, Component, zero,    compy);
+    BCh->addBC ("EdgesIn",      20,  Natural,   Component, pressure, compy);
+    BCh->addBC ("EdgesIn",      40,  Essential, Component, zero,    compy);
 
-    // //! Symmetry BC
-    // BCh->addBC ("EdgesIn",      50,   EssentialVertices, Component, zero, compxy);
-    // BCh->addBC ("EdgesIn",      30,   EssentialVertices, Component, zero, compyz);
-    // BCh->addBC ("EdgesIn",      80,   EssentialVertices, Component, zero, compxz);
-    // BCh->addBC ("EdgesIn",      100,  EssentialVertices,  Full, zero, 3);
+    //! Symmetry BC
+    BCh->addBC ("EdgesIn",      50,   EssentialVertices, Component, zero, compxy);
+    BCh->addBC ("EdgesIn",      30,   EssentialVertices, Component, zero, compyz);
+    BCh->addBC ("EdgesIn",      80,   EssentialVertices, Component, zero, compxz);
+    BCh->addBC ("EdgesIn",      100,  EssentialVertices,  Full, zero, 3);
 
-    // BCh->addBC ("EdgesIn",      7, Essential, Component , zero, compx);
-    // BCh->addBC ("EdgesIn",      3, Essential, Component , zero, compz);
+    BCh->addBC ("EdgesIn",      7, Essential, Component , zero, compx);
+    BCh->addBC ("EdgesIn",      3, Essential, Component , zero, compz);
     //! =================================================================================
 
     // Case of a tube
     //Condition for Inflation
-    BCh->addBC ("EdgesIn",      200, Natural,   Full, pressure, 3);
-    BCh->addBC ("EdgesIn",      40,  Natural,   Full, zero, 3);
-    BCh->addBC ("EdgesIn",      70,  Essential, Full, zero, 3);
-    BCh->addBC ("EdgesIn",      60,  Essential, Full, zero, 3);
+    // BCh->addBC ("EdgesIn",      200, Natural,   Full, pressure, 3);
+    // BCh->addBC ("EdgesIn",      40,  Natural,   Full, zero, 3);
+    // BCh->addBC ("EdgesIn",      70,  Essential, Full, zero, 3);
+    // BCh->addBC ("EdgesIn",      60,  Essential, Full, zero, 3);
 
     //! 1. Constructor of the structuralSolver
     StructuralOperator< RegionMesh<LinearTetra> > solid;

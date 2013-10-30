@@ -95,14 +95,12 @@ void saveVectorAccordingToFunctor ( const boost::shared_ptr<FESpace<MeshType, Ma
                                     const boost::shared_ptr<VectorEpetra> originVector,
                                     const boost::shared_ptr<VectorEpetra> statusVector,
                                     const boost::shared_ptr<VectorEpetra> saveVector,
-                                    const UInt offset, bool& completeSaving)
+                                    const UInt offset)
 {
 
     // This method works because the maps of the different vectors that are used here
     // are consistent. This means that if one LID in on one processor for a vector
     // the same LID will be for the second vector.
-
-    bool changedAtLeastOne(false);
 
     // We loop over the local ID on the processors of the originVector
     for( UInt i( originVector->blockMap().MinLID() ); i < originVector->blockMap().MaxLID(); i++ )
@@ -126,21 +124,11 @@ void saveVectorAccordingToFunctor ( const boost::shared_ptr<FESpace<MeshType, Ma
                     (*saveVector) ( index ) = (*originVector)( index );
 
                     (*statusVector) ( index ) = 1.0;
-                    changedAtLeastOne = true;
                 }
             }
 
         }
 
-    }
-
-    if( changedAtLeastOne )
-    {
-        completeSaving = false;
-    }
-    else
-    {
-        completeSaving = true;
     }
 
 }
@@ -158,10 +146,8 @@ void saveVectorAccordingToFunctor ( const boost::shared_ptr<FESpace<MeshType, Ma
                                     const VectorEpetra& originVector,
                                     const boost::shared_ptr<VectorEpetra> statusVector,
                                     const boost::shared_ptr<VectorEpetra> saveVector,
-                                    const UInt offset,
-				    bool& completeSaving)
+                                    const UInt offset)
 {
-    bool changedAtLeastOne( false );
 
     // This method works because the maps of the different vectors that are used here
     // are consistent. This means that if one LID in on one processor for a vector
@@ -189,8 +175,6 @@ void saveVectorAccordingToFunctor ( const boost::shared_ptr<FESpace<MeshType, Ma
                     (*saveVector) ( index ) = originVector( index );
 
                     (*statusVector) ( index ) = 1.0;
-		    changedAtLeastOne = true;
-
                 }
             }
 
@@ -198,20 +182,11 @@ void saveVectorAccordingToFunctor ( const boost::shared_ptr<FESpace<MeshType, Ma
 
     }
 
-    if( changedAtLeastOne )
-    {
-        completeSaving = false;
-    }
-    else
-    {
-        completeSaving = true;
-    }
-
 }
 
 template<typename FunctorType, typename MeshType, typename MapType>
 void saveVectorAccordingToFunctor ( const boost::shared_ptr<FESpace<MeshType, MapType> > dispFESpace,
-                                    const FunctorType functor,
+                                    const FunctorType& functor,
                                     const boost::shared_ptr<VectorEpetra> originVector,
                                     VectorEpetra& saveVector,
                                     const UInt offset)
@@ -231,6 +206,41 @@ void saveVectorAccordingToFunctor ( const boost::shared_ptr<FESpace<MeshType, Ma
         {
             // Transform the local ID into a global ID for the vector
             Int GIDnode = originVector->blockMap().GID( i );
+
+            // At the first time we insert the value and then we "close" the cell
+            for ( UInt iComp = 0; iComp < dispFESpace->fieldDim(); ++iComp )
+            {
+                Int index = GIDnode + iComp * dispFESpace->dof().numTotalDof() + offset;
+                saveVector( index ) = 1.0;
+            }
+        }
+
+    }
+
+}
+
+template<typename FunctorType, typename MeshType, typename MapType>
+void saveVectorAccordingToFunctor ( const boost::shared_ptr<FESpace<MeshType, MapType> > dispFESpace,
+                                    const FunctorType& functor,
+                                    const VectorEpetra& originVector,
+                                    VectorEpetra& saveVector,
+                                    const UInt offset)
+{
+
+    // This method works because the maps of the different vectors that are used here
+    // are consistent. This means that if one LID in on one processor for a vector
+    // the same LID will be for the second vector.
+
+    // We loop over the local ID on the processors of the originVector
+    for( UInt i( originVector.blockMap().MinLID() ); i < originVector.blockMap().MaxLID(); i++ )
+    {
+        // We look at the functor to see if the condition is satified
+        bool variable = functor( i );
+
+        if ( variable )
+        {
+            // Transform the local ID into a global ID for the vector
+            Int GIDnode = originVector.blockMap().GID( i );
 
             // At the first time we insert the value and then we "close" the cell
             for ( UInt iComp = 0; iComp < dispFESpace->fieldDim(); ++iComp )

@@ -116,30 +116,24 @@ public:
     typedef VectorEpetra                    vector_Type;
     typedef boost::shared_ptr<vector_Type>  vectorPtr_Type;
 
-    booleanSelector ( )
+    booleanSelector ( const vector_Type& selectionVector )
     :
-    M_selectionVector ( )
+    M_selectionVector ( selectionVector )
     {}
 
     ~booleanSelector()
     {}
 
-    void setSelectionVector( const vectorPtr_Type& selectionVector )
-    {
-        M_selectionVector = selectionVector;
-    }
-
     bool operator() ( const UInt i ) const
     {
         // The 1e-5 is a tolerance on the criterium
         // The i has to be a Local ID!
-        UInt index = M_selectionVector->blockMap().GID( i );
+        UInt index = M_selectionVector.blockMap().GID( i );
 
-        if( ( *M_selectionVector )( index ) )
+        if( ( M_selectionVector )( index ) )
         {
             return true;
         }
-
         else
         {
             return false;
@@ -150,7 +144,7 @@ public:
     }
 
 protected:
-    vectorPtr_Type M_selectionVector;
+    vector_Type M_selectionVector;
 }; // selector functor
 
 
@@ -451,8 +445,6 @@ protected:
     */
     // void setupVectorsParameters ( void );
 
-    bool                                  M_completeActivation;
-
     quadratureRulePtr_Type                M_quadrature;
     vectorPtr_Type                        M_patchAreaVector;
     vectorPtr_Type                        M_patchAreaVectorScalar;
@@ -491,7 +483,6 @@ protected:
 template <typename MeshType>
 AnisotropicMultimechanismMaterialNonLinear<MeshType>::AnisotropicMultimechanismMaterialNonLinear() :
     super                     ( ),
-    M_completeActivation      ( false ),
     M_quadrature              ( ),
     M_patchAreaVector         ( ),
     M_patchAreaVectorScalar   ( ),
@@ -757,8 +748,6 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::updateNonLinearJacobi
     displayer->leaderPrint ("   Non-Linear S - updating non linear terms in the Jacobian Matrix (Multi-mechanism model): \n");
     displayer->leaderPrint ("   Non-Linear S - the computation of the activation configuration has been carried out in computeStiffness: \n");
 
-
-
     for( UInt i(0); i < this->M_vectorInterpolated.size(); i++ )
     {
         if( M_activationDisplacement[ i ]->norm2() )
@@ -885,7 +874,7 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeStiffness ( co
     displayer->leaderPrint (" \n*********************************\n  ");
 
     if( ( !this->M_dataMaterial->fiberActivation().compare("implicit") ||
-          !iter /* iter == 0 means explicit approach */ ) && !M_completeActivation )
+          !iter /* iter == 0 means explicit approach */ ) )
     {
         this->computeReferenceConfigurations( disp, this->M_dataMaterial, displayer );
     }
@@ -1032,8 +1021,7 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeReferenceConfi
                                                                                             const displayerPtr_Type& displayer )
 {
     displayer->leaderPrint (" Non-Linear S-  Computing reference configurations... \n");
-    vectorPtr_Type booleanVector( new vector_Type( *this->M_localMap ) );
-    *booleanVector *= 0.0;
+    vectorPtr_Type booleanVector;
 
     // Definition of F
     tensorF_Type F = ExpressionDefinitions::deformationGradient( this->M_dispETFESpace,  disp, this->M_offset, this->M_identity );
@@ -1109,17 +1097,17 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeReferenceConfi
         // Saving the vector;
         AssemblyElementalStructure::saveVectorAccordingToFunctor( this->M_dispFESpace, M_selector[ i ],
                                                                   disp, this->M_firstActivation[i],
-                                                                  M_activationDisplacement[i], this->M_offset, M_completeActivation);
+                                                                  M_activationDisplacement[i], this->M_offset);
 
-        booleanSelector boolSelector;
-        boolSelector.setSelectionVector( M_activationDisplacement[i] );
-        AssemblyElementalStructure::saveVectorAccordingToFunctor( this->M_dispFESpace, boolSelector, M_activationDisplacement[i],
-                                                                  *booleanVector, this->M_offset);
-    }
+	booleanVector.reset(new vector_Type( *this->M_localMap ) );
+	*booleanVector *= 0.0;
 
-    // Assemble kinematic quantities related to activation
-    for( UInt i(0); i < this->M_vectorInterpolated.size() ; i++ )
-    {
+	vector_Type vectorReference( *(M_activationDisplacement[i]) );
+
+	booleanSelector boolSelector(vectorReference);
+	AssemblyElementalStructure::saveVectorAccordingToFunctor( this->M_dispFESpace, boolSelector, vectorReference,
+								  *booleanVector, this->M_offset);
+
         *( M_jacobianActivation[ i ] ) *= 0.0;
         *( M_unitFiberActivation[ i ]) *= 0.0;
 
@@ -1160,7 +1148,7 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeReferenceConfi
             *( M_unitFiberActivation[ i ] ) = *( M_unitFiberActivation[ i ] ) / *M_patchAreaVector;
 
             // Resetting the vector of the fiber to zero when the element of the displacement are zero.
-            *( M_unitFiberActivation[ i ] ) *= *booleanVector;
+            *( M_unitFiberActivation[ i ] ) = *( M_unitFiberActivation[ i ] ) * ( *booleanVector );
 
             // // Definition of F_0^{-1}(ta)
             // invTensor_Type FzeroAminus1 = ExpressionDefinitions::inv( Fa );
@@ -1181,11 +1169,10 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeReferenceConfi
             //       ) >> M_stretchActivation[ i ];
             // M_stretchActivation[ i ]->globalAssemble();
             // *( M_stretchActivation[ i ] ) = *( M_stretchActivation[ i ] ) / *M_patchAreaVectorScalar;
-        }
+	}
+	std::cout << "Here!!" << std::endl;
     }
-
 }
-
 
 template <typename MeshType>
 void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeLocalFirstPiolaKirchhoffTensor ( Epetra_SerialDenseMatrix& firstPiola,
