@@ -20,9 +20,16 @@
 [exporter]
 type       = hdf5 			# hdf5 (if library compiled with hdf5 support) or ensight
 multimesh  = false
-nameFile   = multimechanism-2fibercCylinder
+nameFile   = multimechanism-2fibercCylinderRstNewCondition
 start      = 0
 save       = 1
+
+[importer]
+restart    = yes
+type       = hdf5
+filename   = multimechanism-2fibercCylinder
+initialSol = 00010
+
 
 [solid]
 
@@ -53,7 +60,7 @@ tolActivation   = 0.05
 
 [../../time_discretization]
 method          = BDF
-initialtime 	= 0.
+initialtime 	= 0.5
 endtime     	= 20.0
 timestep    	= 0.05
 BDF_order   	= 2

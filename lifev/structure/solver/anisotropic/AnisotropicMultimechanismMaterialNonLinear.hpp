@@ -62,7 +62,7 @@ public:
     SelectionFunctor ( )
     :
     M_selectionVector ( ),
-    M_value( 0 )
+    M_value( )
     {}
 
     SelectionFunctor ( const Real value )
@@ -74,9 +74,9 @@ public:
     ~SelectionFunctor()
     {}
 
-    void setSelectionVector( const vectorPtr_Type& selectionVector )
+    void setSelectionVector( const vector_Type& selectionVector )
     {
-        M_selectionVector = selectionVector;
+        M_selectionVector.reset( new vector_Type( selectionVector ) );
     }
 
     void setValue( const Real value )
@@ -84,14 +84,36 @@ public:
         M_value = value;
     }
 
-    bool operator() ( const UInt i ) const
+    bool operator() ( const UInt i,
+                      const UInt nTotDof,
+                      const UInt offset) const
     {
-        // The 1e-5 is a tolerance on the criterium
-        // The i has to be a Local ID!
-        UInt index = M_selectionVector->blockMap().GID( i );
+        Int LIDx = M_selectionVector->blockMap().LID( i );
+        Int LIDy = M_selectionVector->blockMap().LID( i + nTotDof + offset );
+        Int LIDz = M_selectionVector->blockMap().LID( i + 2 * nTotDof + offset );
 
-        if( std::fabs(( *M_selectionVector )( index )) <= M_value ||
-	    ( *M_selectionVector )( index ) > 0 )
+        /*
+           Note: the selectionVector of this functor has the same map the
+           origin vector in the AssemblyElementalStructure namespace.
+           Therefore, once the i-th Dof is verified to be part of the
+           blockMap in the origin vector the following assert should never fail.
+        */
+        ASSERT( ( LIDx >= 0 ) &&
+                ( LIDy >= 0 ) &&
+                ( LIDz >= 0 ) , "Problem in the epetra maps cut!" );
+        /*
+          Since the quantity that we are checking it's scalar, we only
+          check one component.
+         */
+
+        Int GIDx = M_selectionVector->blockMap().GID( LIDx );
+        Int GIDy = M_selectionVector->blockMap().GID( LIDy );
+        Int GIDz = M_selectionVector->blockMap().GID( LIDz );
+
+        // if( std::fabs(( *M_selectionVector )( GIDx )) <= M_value ||
+	    // ( *M_selectionVector )( GIDx ) > 0 )
+
+        if( ( *M_selectionVector )( GIDx ) > M_value )
         {
             return true;
         }
@@ -124,13 +146,31 @@ public:
     ~booleanSelector()
     {}
 
-    bool operator() ( const UInt i ) const
+    bool operator() ( const UInt i,
+                      const UInt nTotDof,
+                      const UInt offset ) const
     {
-        // The 1e-5 is a tolerance on the criterium
-        // The i has to be a Local ID!
-        UInt index = M_selectionVector.blockMap().GID( i );
+        Int LIDx = M_selectionVector.blockMap().LID( i );
+        Int LIDy = M_selectionVector.blockMap().LID( i + nTotDof + offset );
+        Int LIDz = M_selectionVector.blockMap().LID( i + 2 * nTotDof + offset );
 
-        if( ( M_selectionVector )( index ) )
+        /*
+           Note: the selectionVector of this functor is the same as the
+           origin vector in the AssemblyElementalStructure namespace.
+           Therefore, once the i-th Dof is verified to be part of the
+           blockMap in the origin vector the following assert should never fail.
+        */
+        ASSERT( ( LIDx >= 0 ) &&
+                ( LIDy >= 0 ) &&
+                ( LIDz >= 0 ) , "Problem in the epetra maps cut!" );
+
+        Int GIDx = M_selectionVector.blockMap().GID( LIDx );
+        Int GIDy = M_selectionVector.blockMap().GID( LIDy );
+        Int GIDz = M_selectionVector.blockMap().GID( LIDz );
+
+        if( ( M_selectionVector )( GIDx ) == 1.0 ||
+            ( M_selectionVector )( GIDy ) == 1.0 ||
+            ( M_selectionVector )( GIDz ) == 1.0 )
         {
             return true;
         }
@@ -426,6 +466,18 @@ public:
       return M_activationDisplacement[ i - 1 ];
     }
 
+    vectorPtr_Type  const activatedUnitFiber( const UInt i ) const
+    {
+      ASSERT( i <= this->M_vectorInterpolated.size(), " No such fiber family in the class" );
+      return M_unitFiberActivation[ i - 1 ];
+    }
+
+    vectorPtr_Type  const activatedDeterminant( const UInt i ) const
+    {
+      ASSERT( i <= this->M_vectorInterpolated.size(), " No such fiber family in the class" );
+      return M_jacobianActivation[ i - 1 ];
+    }
+
 
     void apply ( const vector_Type& sol, vector_Type& res,
                  const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
@@ -566,6 +618,8 @@ AnisotropicMultimechanismMaterialNonLinear<MeshType>::setup ( const FESpacePtr_T
     {
         (M_selectionCriterion[i]).reset(new vector_Type (*this->M_localMap) );
         (M_firstActivation[i]).reset(new vector_Type (*this->M_localMap) );
+        *(M_firstActivation[i]) *= 0.0;
+
         (M_activationDisplacement[i]).reset(new vector_Type (*this->M_localMap) );
 
         (M_jacobianActivation[i]).reset(new vector_Type ( M_scalarETFESpace->map() ) );
@@ -1091,7 +1145,7 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeReferenceConfi
         *( M_selectionCriterion[ i ] ) = *( M_selectionCriterion[ i ] ) / *M_patchAreaVector;
 
         // Setting values in the selector
-        M_selector[i].setSelectionVector( M_selectionCriterion[i] );
+        M_selector[i].setSelectionVector( *(M_selectionCriterion[i]) );
         M_selector[i].setValue( this->M_dataMaterial->toleranceActivation() );
 
         // Saving the vector;
@@ -1099,14 +1153,18 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeReferenceConfi
                                                                   disp, this->M_firstActivation[i],
                                                                   M_activationDisplacement[i], this->M_offset);
 
-	booleanVector.reset(new vector_Type( *this->M_localMap ) );
-	*booleanVector *= 0.0;
+        booleanVector.reset(new vector_Type( *this->M_localMap ) );
+        *booleanVector *= 0.0;
 
-	vector_Type vectorReference( *(M_activationDisplacement[i]) );
+        //vector_Type vectorReference( *(M_activationDisplacement[i]) );
+        vector_Type vectorReference( *(M_firstActivation[i]) );
 
-	booleanSelector boolSelector(vectorReference);
-	AssemblyElementalStructure::saveVectorAccordingToFunctor( this->M_dispFESpace, boolSelector, vectorReference,
-								  *booleanVector, this->M_offset);
+        std::cout << "Activation: " << M_firstActivation[i]->norm2() << std::endl;
+        std::cout << "Activation: " << M_activationDisplacement[i]->norm2() << std::endl;
+
+        booleanSelector boolSelector(vectorReference);
+        AssemblyElementalStructure::saveBooleanVectorAccordingToFunctor( this->M_dispFESpace, boolSelector, (M_activationDisplacement[i]),
+                                                                         booleanVector, this->M_offset);
 
         *( M_jacobianActivation[ i ] ) *= 0.0;
         *( M_unitFiberActivation[ i ]) *= 0.0;
@@ -1169,8 +1227,8 @@ void AnisotropicMultimechanismMaterialNonLinear<MeshType>::computeReferenceConfi
             //       ) >> M_stretchActivation[ i ];
             // M_stretchActivation[ i ]->globalAssemble();
             // *( M_stretchActivation[ i ] ) = *( M_stretchActivation[ i ] ) / *M_patchAreaVectorScalar;
-	}
-	std::cout << "Here!!" << std::endl;
+        }
+        //( M_unitFiberActivation[ i ] )->spy("interpolatedFiberActivation");
     }
 }
 

@@ -383,6 +383,7 @@ Structure::run3d()
     // BCh->addBC ("EdgesIn",      70,  Essential, Full, zero, 3);
     // BCh->addBC ("EdgesIn",      60,  Essential, Full, zero, 3);
 
+
     //! 1. Constructor of the structuralSolver
     StructuralOperator< RegionMesh<LinearTetra> > solid;
 

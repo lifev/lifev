@@ -20,18 +20,18 @@
 [exporter]
 type       = hdf5 			# hdf5 (if library compiled with hdf5 support) or ensight
 multimesh  = false
-nameFile   = activation
+nameFile   = stretchCylinderInterval
 start      = 0
 save       = 1
 
 [importer]
 analysis    = interval
-iterationStart = 0
-iterationEnd   = 7
+iterationStart = '6'
+iterationEnd   = '15'
 type        = hdf5 #ensight 			# hdf5 (if library compiled with hdf5 support) or ensight
 filename    = inflationAnisotropicNewParameters-1-2
 nameField   = displacement
-iteration   = '0'
+iteration   = '12'
 
 
 [solid]
@@ -54,10 +54,10 @@ solidTypeAnisotropic 	= multimechanism
 [./fibers]
 numberFamilies  = 2
 stiffness       = '1.0e+5 1.0e+5'
-nonlinearity    = '1.0 1.0'
-stretch         = '1.1521 1.1521'
+nonlinearity    = '1.0 1.0 '
+stretch         = '1.2663 1.2663'
 smoothness      = 1000
-tolActivation   = 0.06
+tolActivation   = 0.05
 [./]
 
 

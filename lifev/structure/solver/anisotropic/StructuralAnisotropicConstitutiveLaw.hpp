@@ -339,6 +339,14 @@ public:
     //! Get the Stiffness matrix
     virtual vectorPtr_Type const activationDisplacement( const UInt i ) const = 0;
 
+    //! Get the activation displacement
+    //! Get the Stiffness matrix
+    virtual vectorPtr_Type const activatedUnitFiber( const UInt i ) const = 0;
+
+    //! Get the activation displacement
+    //! Get the Stiffness matrix
+    virtual vectorPtr_Type const activatedDeterminant( const UInt i ) const = 0;
+
     virtual void apply ( const vector_Type& sol, vector_Type& res,
                          const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
                          const mapMarkerIndexesPtr_Type mapsMarkerIndexes,

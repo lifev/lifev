@@ -288,7 +288,6 @@ Structure::run3d()
     solidETFESpacePtr_Type dETFESpace ( new solidETFESpace_Type (pointerToMesh, & (dFESpace->refFE() ), & (dFESpace->fe().geoMap() ), parameters->comm) );
     scalarETFESpacePtr_Type dScalarETFESpace ( new scalarETFESpace_Type (pointerToMesh, & (dScalarFESpace->refFE() ),
                                                                          & (dScalarFESpace->fe().geoMap() ), parameters->comm) );
-
     vectorPtr_Type patchAreaVector( new vector_Type( dETFESpace->map() ) );
     vectorPtr_Type patchAreaVectorScalar( new vector_Type( dScalarETFESpace->map() ) );
     QuadratureRule fakeQuadratureRule;
@@ -353,6 +352,8 @@ Structure::run3d()
     listOfFiberDirections_Type selectionExport; // vector of the nodal satisfaction of the activation condition
     listOfFiberDirections_Type activationDispl; // active displacement for each fiber
     listOfFiberDirections_Type stretchFibers;   // stretch of the fiber at a certain displacement
+    listOfFiberDirections_Type activeJac;   // stretch of the fiber at a certain displacement
+    listOfFiberDirections_Type activeUnitFiber;   // stretch of the fiber at a certain displacement
     //listOfFiberDirections_Type activationFibers;// corresponding activation function
 
     fiberDirections.resize( dataStructure->numberFibersFamilies( ) );
@@ -361,6 +362,8 @@ Structure::run3d()
     selectionExport.resize( dataStructure->numberFibersFamilies( ) );
     activationDispl.resize( dataStructure->numberFibersFamilies( ) );
     stretchFibers.resize( dataStructure->numberFibersFamilies( ) );
+    activeJac.resize( dataStructure->numberFibersFamilies( ) );
+    activeUnitFiber.resize( dataStructure->numberFibersFamilies( ) );
     //activationFibers.resize( dataStructure->numberFibersFamilies( ) );
 
     std::cout << "Size of the number of families: " << dataStructure->numberFibersFamilies( ) << std::endl;
@@ -402,6 +405,8 @@ Structure::run3d()
         selectionExport[ k-1 ].reset( new vector_Type( dFESpace->map() ) );
         activationDispl[ k-1 ].reset( new vector_Type( dFESpace->map() ) );
         stretchFibers[ k-1 ].reset( new vector_Type( dFESpace->map() ) );
+        activeJac[ k-1 ].reset( new vector_Type( dScalarFESpace->map() ) );
+        activeUnitFiber[ k-1 ].reset( new vector_Type( dFESpace->map() ) );
         //activationFibers[ k-1 ].reset( new vector_Type( dFESpace->map() ) );
     }
     jacobian.reset( new vector_Type( dScalarFESpace->map() ) );
@@ -496,6 +501,9 @@ Structure::run3d()
         std::string familySel="FamilySel-";
         std::string familyAct="FamilyAct-";
         std::string familyStretch="FamilyStretch-";
+
+        std::string familyUnitFiber="FamilyUnitFiber-";
+        std::string familyActiveJac="FamilyJacActiv-";
         //std::string familyAtan="FamilyAtan-";
         // adding the number of the family
         std::string familyNumber;
@@ -510,6 +518,8 @@ Structure::run3d()
         std::string creationStringSel = familySel + familyNumber;
         std::string creationStringAct = familyAct + familyNumber;
         std::string creationStringStretch = familyStretch + familyNumber;
+        std::string creationStringUnitFiber = familyUnitFiber + familyNumber;
+        std::string creationStringActiveJac = familyActiveJac + familyNumber;
         //std::string creationStringAtan = familyAtan + familyNumber;
 
         // Setting the vectors with the maps
@@ -519,6 +529,8 @@ Structure::run3d()
         (selectionExport[ k-1 ]).reset( new vector_Type( dFESpace->map() ) );
         (activationDispl[ k-1 ]).reset( new vector_Type( dFESpace->map() ) );
         (stretchFibers[ k-1 ]).reset( new vector_Type( dScalarFESpace->map() ) );
+        (activeJac[ k-1 ]).reset( new vector_Type( dScalarFESpace->map() ) );
+        (activeUnitFiber[ k-1 ]).reset( new vector_Type( dFESpace->map() ) );
         //(activationFibers[ k-1 ]).reset( new vector_Type( dScalarFESpace->map() ) );
 
         // Adding them to the exporter
@@ -528,6 +540,8 @@ Structure::run3d()
         exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, creationStringSel, dFESpace, selectionExport[ k-1 ], UInt (0) );
         exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, creationStringAct, dFESpace, activationDispl[ k-1 ], UInt (0) );
         exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::ScalarField, creationStringStretch, dScalarFESpace, stretchFibers[ k-1 ], UInt (0) );
+        exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::ScalarField, creationStringActiveJac, dScalarFESpace, activeJac[ k-1 ], UInt (0) );
+        exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, creationStringUnitFiber, dFESpace, activeUnitFiber[ k-1 ], UInt (0) );
         //exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::ScalarField, creationStringAtan, dScalarFESpace, activationFibers[ k-1 ], UInt (0) );
     }
 
@@ -549,14 +563,14 @@ Structure::run3d()
 
 
     // Loop on the solutions
-    for ( UInt i(start); i < numberOfSol; i++ )
+    for ( UInt i(0); i < numberOfSol; i++ )
     {
         time = i * dt + initialTime;
         *readDispl *= 0.0;
 
         UInt current(0);
         if( !readType.compare("interval") )
-            current = i ;
+            current = i + start;
         else
             current = dataFile ( "importer/iteration" , 100000, i );
 
@@ -577,7 +591,7 @@ Structure::run3d()
         LifeV::ExporterData<mesh_Type> familyFirst  (LifeV::ExporterData<mesh_Type>::VectorField,"Family-1." + iterationString,
                                                      dFESpace, stFamily, UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
 
-        /*!Definition of the ExporterData, used to load the solution inside the previously defined vectors*/
+        // /*!Definition of the ExporterData, used to load the solution inside the previously defined vectors*/
         LifeV::ExporterData<mesh_Type> familySecond  (LifeV::ExporterData<mesh_Type>::VectorField,"Family-2." + iterationString,
                                                       dFESpace,ndFamily, UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
 
@@ -692,6 +706,9 @@ Structure::run3d()
             *(fiberDirections[ k-1 ]) = solid.material()->anisotropicLaw()->ithFiberVector( k );
             *(selectionExport[ k-1 ]) = *(solid.material()->anisotropicLaw()->selectionCriterion( k ));
             *(activationDispl[ k-1 ]) = *(solid.material()->anisotropicLaw()->activationDisplacement( k ));
+
+            *(activeJac[ k-1 ]) = *(solid.material()->anisotropicLaw()->activatedDeterminant( k ));
+            *(activeUnitFiber[ k-1 ]) = *(solid.material()->anisotropicLaw()->activatedUnitFiber( k ));
         }
         exporter->postProcess( time );
 
