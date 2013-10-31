@@ -76,6 +76,7 @@
 #include <lifev/structure/solver/anisotropic/StructuralAnisotropicConstitutiveLaw.hpp>
 #include <lifev/structure/solver/anisotropic/AnisotropicMultimechanismMaterialNonLinear.hpp>
 #include <lifev/structure/solver/anisotropic/HolzapfelMaterialNonLinear.hpp>
+#include <lifev/structure/solver/anisotropic/HolzapfelGeneralizedMaterialNonLinear.hpp>
 
 
 #include <lifev/core/filter/ExporterEnsight.hpp>
@@ -647,7 +648,7 @@ Structure::run3d()
     }
 
 
-    exporter->postProcess ( 0 );
+    exporter->postProcess ( dataStructure->dataTime()->initialTime() );
     cout.precision(16);
 
     //! 5. Initial data

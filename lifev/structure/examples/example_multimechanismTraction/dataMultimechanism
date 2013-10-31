@@ -20,12 +20,12 @@
 [exporter]
 type       = hdf5 			# hdf5 (if library compiled with hdf5 support) or ensight
 multimesh  = false
-nameFile   = multimechanism-2fibercCylinderRstNewCondition
+nameFile   = cubeGeneralized
 start      = 0
 save       = 1
 
 [importer]
-restart    = yes
+restart    = none
 type       = hdf5
 filename   = multimechanism-2fibercCylinder
 initialSol = 00010
@@ -46,15 +46,14 @@ bulk		= 9000000
 alpha 		= 76350
 gamma		= 0.7411
 solidTypeIsotropic 	= exponential		# linearVenantKirchhoff / nonLinearVenantKirchhoff / neoHookean / expoenential
-solidTypeAnisotropic 	= multimechanism
+solidTypeAnisotropic 	= holzapfelGeneralized
 
 [./fibers]
 numberFamilies  = 1
 stiffness       = '1.0e+5'
-nonlinearity    = '1.0'
-stretch         = '1.3'
+nonlinearity    = '0.0'
+stretch         = '1.1402'
 smoothness      = 10000
-tolActivation   = 0.05
 [./]
 
 
