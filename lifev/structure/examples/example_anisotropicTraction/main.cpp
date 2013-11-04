@@ -72,16 +72,13 @@
 
 #include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
 #include <lifev/structure/solver/StructuralOperator.hpp>
-#include <lifev/structure/solver/isotropic/VenantKirchhoffMaterialLinear.hpp>
-#include <lifev/structure/solver/isotropic/VenantKirchhoffMaterialNonLinear.hpp>
 #include <lifev/structure/solver/isotropic/ExponentialMaterialNonLinear.hpp>
-#include <lifev/structure/solver/isotropic/VenantKirchhoffMaterialNonLinearPenalized.hpp>
-#include <lifev/structure/solver/isotropic/SecondOrderExponentialMaterialNonLinear.hpp>
 #include <lifev/structure/solver/isotropic/NeoHookeanMaterialNonLinear.hpp>
-
+#include <lifev/structure/solver/isotropic/SecondOrderExponentialMaterialNonLinear.hpp>
 
 #include <lifev/structure/solver/anisotropic/StructuralAnisotropicConstitutiveLaw.hpp>
 #include <lifev/structure/solver/anisotropic/HolzapfelMaterialNonLinear.hpp>
+#include <lifev/structure/solver/anisotropic/HolzapfelGeneralizedMaterialNonLinear.hpp>
 
 
 #include <lifev/core/filter/ExporterEnsight.hpp>
@@ -372,24 +369,24 @@ Structure::run3d()
     //! =================================================================================
     //! BC  - shear -
     //! =================================================================================
-    BCh->addBC ("EdgesIn",      20,  Natural,   Component, nonZero, compz);
-    BCh->addBC ("EdgesIn",      20,  Essential,   Component, zero, compxy);
+    // BCh->addBC ("EdgesIn",      20,  Natural,   Component, nonZero, compz);
+    // BCh->addBC ("EdgesIn",      20,  Essential,   Component, zero, compxy);
 
     //! Symmetry BC
     // BCh->addBC ("EdgesIn",      50,   EssentialVertices, Component, zero, compxz);
     // BCh->addBC ("EdgesIn",      30,   EssentialVertices, Component, zero, compxz);
     // BCh->addBC ("EdgesIn",      80,   EssentialVertices, Component, zero, compxz);
 
-    BCh->addBC ("EdgesIn",      40, Essential, Full , zero, 3);
+    // BCh->addBC ("EdgesIn",      40, Essential, Full , zero, 3);
     //! =================================================================================
 
 
     // Case of a tube
     //Condition for Inflation
-    // BCh->addBC ("EdgesIn",      200, Natural,   Full, pressure, 3);
-    // BCh->addBC ("EdgesIn",      40,  Natural,   Full, zero, 3);
-    // BCh->addBC ("EdgesIn",      70,  Essential, Full, zero, 3);
-    // BCh->addBC ("EdgesIn",      60,  Essential, Full, zero, 3);
+    BCh->addBC ("EdgesIn",      200, Natural,   Full, pressure, 3);
+    BCh->addBC ("EdgesIn",      40,  Natural,   Full, zero, 3);
+    BCh->addBC ("EdgesIn",      70,  Essential, Full, zero, 3);
+    BCh->addBC ("EdgesIn",      60,  Essential, Full, zero, 3);
 
     //! 1. Constructor of the structuralSolver
     StructuralOperator< RegionMesh<LinearTetra> > solid;
@@ -638,8 +635,10 @@ Structure::run3d()
         }
     }
 
-    exporter->postProcess ( 0 );
+    exporter->postProcess (  dataStructure->dataTime()->initialTime() );
     cout.precision(16);
+
+    int IDPoint = 157;// cube8x8.mesh
 
     //! 5. Initial data
     Real initialTime = dataStructure->dataTime()->initialTime();
@@ -689,6 +688,13 @@ Structure::run3d()
 
         r = iter % saveEvery;
         d = iter - r;
+
+        std::cout << "First component displacement at ID = "<< IDPoint << ": " << solid.displacement()[ IDPoint - 1 ] << std::endl;
+        std::cout << "Second component displacement at ID = "<< IDPoint << ": " <<
+            solid.displacement()[ IDPoint - 1 + dFESpace->dof().numTotalDof() ] << std::endl;
+        std::cout << "Third component displacement at ID = "<< IDPoint << ": " <<
+            solid.displacement()[ IDPoint - 1 + 2 * dFESpace->dof().numTotalDof() ] << std::endl;
+
 
         if ( (iter - d) <= tol || ( (std::floor(d/saveEvery) + 1)*saveEvery - iter ) <= tol )
         {
