@@ -125,7 +125,6 @@ test_bdf::test_bdf (int argc, char** argv) :
 // ===================================================
 void test_bdf::run()
 {
-
     //Useful typedef
     typedef VectorEpetra vector_type;
 
