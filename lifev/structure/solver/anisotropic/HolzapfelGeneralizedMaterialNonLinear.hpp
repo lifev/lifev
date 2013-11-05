@@ -563,7 +563,7 @@ void HolzapfelGeneralizedMaterialNonLinear<MeshType>::updateNonLinearJacobianTer
                    value( 2.0 ) * value( alpha ) *
                    ( derAtan( IVithBar - value( IVact ), this->M_epsilon, ( 1.0 / PI ) ) * ( IVithBar - value( IVact ) ) +
                      atan( IVithBar - value( IVact ), this->M_epsilon, ( 1 / PI ), (1.0/2.0) ) *
-                     ( value( 1.0 ) + value(2.0)*value(gamma)*( IVithBar - value( IVact ) ) ) ) *
+                     ( value( 1.0 ) + value(2.0)*value(gamma)*( IVithBar - value( IVact ) ) * ( IVithBar - value( IVact ) ) ) ) *
                    exp( value( gamma ) * ( IVithBar - value( IVact) ) * ( IVithBar - value( IVact) ) ) * Jel *
                    ( value(-2.0/3.0) * IVithBar * dot( F_T, grad(phi_j) ) + Jel * dot( transpose(grad(phi_j)) * F + transpose(F) * grad(phi_j), Mith) ) *
                    dot( F * Mith - value(1.0/3.0) * IVith * F_T, grad(phi_i) )
@@ -673,7 +673,7 @@ void HolzapfelGeneralizedMaterialNonLinear<MeshType>::computeStiffness ( const v
                       this->M_dispETFESpace,
                       atan( IVithBar - value( IVact ) , this->M_epsilon, ( 1 / PI ), ( 1.0/2.0 )  ) *
                       value( 2.0 ) * value( this->M_dataMaterial->ithStiffnessFibers( i ) ) * Jel * ( IVithBar - value( IVact ) ) *
-                      exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value( IVact ) ) * ( IVithBar- value( IVact ) )  ) *
+                      exp( value( this->M_dataMaterial->ithNonlinearityFibers( i ) ) * ( IVithBar- value( IVact ) ) * ( IVithBar- value( IVact ) ) ) *
                       dot( F * Mith + value(-1.0/3.0) * IVith * F_T , grad( phi_i ) )
                       ) >> this->M_stiff;
       }
