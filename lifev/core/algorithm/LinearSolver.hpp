@@ -381,6 +381,17 @@ LinearSolver::setParameter ( const std::string& name, T value )
     M_parameterList.set ( name, value );
 }
 
+namespace defaultParameterLists
+{
+//! Returns a default parameter list to initialize the LinearSolver class with Belos.
+Teuchos::ParameterList
+belosParameterList();
+
+//! Returns a default parameter list to initialize the LinearSolver class with Belos.
+Teuchos::ParameterList
+aztecOOParameterList();
+}
+
 } // namespace LifeV
 
 #endif /* LINEARSOLVER_HPP */
