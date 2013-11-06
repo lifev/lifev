@@ -49,7 +49,7 @@ ENDIF()
 
 # Optional Packages (to be moved outside with COMPONENTS ...)
 list (APPEND LifeV_OPTIONAL_Trilinos_PKGS
-  "NOX" "Thyra" "Rythmos", "Teko", "Stratimikos", "Isorropia")
+  "NOX" "Thyra" "Rythmos" "Teko" "Stratimikos" "Isorropia")
 
 # Required packages (to be moved outside, like REQUIRED COMPONENTS ...)
 list (APPEND LifeV_REQUIRED_Trilinos_PKGS
