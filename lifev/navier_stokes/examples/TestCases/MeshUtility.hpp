@@ -35,8 +35,6 @@
 #ifndef NSMESHUTILITY_HPP
 #define NSMESHUTILITY_HPP
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <string>
 #include <iostream>
@@ -46,8 +44,6 @@
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/io.hpp>
 
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 
 #include <lifev/core/util/LifeChrono.hpp>
