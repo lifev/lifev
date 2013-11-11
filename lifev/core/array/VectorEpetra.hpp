@@ -144,7 +144,7 @@ public:
     VectorEpetra ( const VectorEpetra& vector, const Int& reduceToProc );
 
     //! Destructor
-    ~VectorEpetra() {}
+    virtual ~VectorEpetra() {}
 
     //@}
 
