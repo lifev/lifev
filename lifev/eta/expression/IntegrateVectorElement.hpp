@@ -265,7 +265,7 @@ IntegrateVectorElement ( const IntegrateVectorElement < MeshType, TestSpaceType,
             M_globalCFE_adapted = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feHexaQ0, geometricMapFromMesh<MeshType>(), integrator.M_qrAdapter.standardQR());
             break;
         default:
-            ERROR_MSG ("Unrecognized element shape");        
+            ERROR_MSG ("Unrecognized element shape");
     }
     M_evaluation.setQuadrature (integrator.M_qrAdapter.standardQR() );
     M_evaluation.setGlobalCFE (M_globalCFE_std);

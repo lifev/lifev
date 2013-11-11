@@ -30,20 +30,6 @@ TRIBITS_COPY_FILES_TO_BINARY_DIR(dataParametersHolzapfel
 
 TRIBITS_ADD_TEST(
   anisotropicLaw
-  NAME Multimechanism
-  ARGS "-f dataMultimechanism"
-  NUM_MPI_PROCS 2
-  COMM serial mpi
-  )
-
-TRIBITS_COPY_FILES_TO_BINARY_DIR(dataMultimechanismTest
-  SOURCE_FILES dataMultimechanism
-  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
-  CREATE_SYMLINK
-)
-
-TRIBITS_ADD_TEST(
-  anisotropicLaw
   NAME DistributedAnisotropic
   ARGS "-f dataDistributed"
   NUM_MPI_PROCS 2

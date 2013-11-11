@@ -91,6 +91,11 @@ namespace LifeV
       return powerExpression_Type( J , exponent );
     }
 
+    isochoricChangeOfVariable_Type isochoricDeterminant( const determinantTensorF_Type J )
+    {
+      return isochoricChangeOfVariable_Type( J );
+    }
+
     isochoricTrace_Type isochoricTrace( const powerExpression_Type Jel, const traceTensor_Type I )
     {
       return isochoricTrace_Type( Jel , I );
@@ -104,6 +109,18 @@ namespace LifeV
 					     const vector_Type& fiberVector)
     {
       return interpolatedValue_Type( dispETFESpace, fiberVector ) ;
+    }
+
+    interpolatedValue_Type interpolateValue( const boost::shared_ptr< ETFESpace_Type > dispETFESpace,
+					     const vector_Type& valueVector)
+    {
+      return interpolatedValue_Type( dispETFESpace, valueVector ) ;
+    }
+
+    interpolatedScalarValue_Type interpolateScalarValue( const boost::shared_ptr< scalarETFESpace_Type > dispETFESpace,
+							 const vector_Type& valueVector)
+    {
+      return interpolatedScalarValue_Type( dispETFESpace, valueVector ) ;
     }
 
     outerProduct_Type fiberTensor( const interpolatedValue_Type ithFiber )
@@ -329,6 +346,21 @@ namespace LifeV
 
     }
 
+    incompressibleDifference_Type incompressibleAbsoluteStretch( const ExpressionDefinitions::stretch_Type IV,
+                                                                 const Real valueToSubtract)
+    {
+      return incompressibleDifference_Type ( IV, value( valueToSubtract ) );
+
+    }
+
+    relativeDifference_Type relativeDifference( const  incompressibleDifference_Type difference,
+						const Real refFourthInvariant)
+    {
+      return relativeDifference_Type ( difference, value( refFourthInvariant ) );
+
+    }
+
+
     activation_Type activationConstructor( const ExpressionMultimechanism::difference_Type absoluteStretch,
 					   const Real intCoeff,
 					   const Real extCoeff,
@@ -340,6 +372,16 @@ namespace LifeV
     expressionVectorFromDifference_Type vectorFromActivation( const ExpressionMultimechanism::difference_Type activation )
     {
       return expressionVectorFromDifference_Type( activation );
+    }
+
+    expressionVectorFromIncompressibleDifference_Type vectorFromIncompressibleDifference( const ExpressionMultimechanism::incompressibleDifference_Type activation )
+    {
+      return expressionVectorFromIncompressibleDifference_Type( activation );
+    }
+
+    expressionVectorFromRelativeDifference_Type vectorFromRelativeDifference( const ExpressionMultimechanism::relativeDifference_Type activation )
+    {
+      return expressionVectorFromRelativeDifference_Type( activation );
     }
 
     deformationActivatedTensor_Type createDeformationActivationTensor( const ExpressionDefinitions::deformationGradient_Type Ft,
@@ -363,10 +405,39 @@ namespace LifeV
       return activatedFiber_Type( F, ithFiber );
     }
 
+    normalizedVector_Type unitVector( const activatedFiber_Type vector)
+    {
+      return normalizedVector_Type( vector );
+    }
+
+    squaredNormActivatedFiber_Type squaredNormActivatedFiber( const activatedFiber_Type f)
+    {
+      return squaredNormActivatedFiber_Type( f, f );
+    }
+
+    normActivatedFiber_Type normActivatedFiber( const activatedFiber_Type f)
+    {
+      squaredNormActivatedFiber_Type squaredNorm = squaredNormActivatedFiber_Type( f, f );
+
+      return normActivatedFiber_Type( squaredNorm );
+    }
+
+    normalizedFiber_Type normalizedFiberDirection( const activatedFiber_Type fiber,
+						   const normActivatedFiber_Type normFiber)
+    {
+      return normalizedFiber_Type( fiber, normFiber );
+    }
+
     activatedDeterminantF_Type activateDeterminantF( const ExpressionDefinitions::determinantTensorF_Type Jzero,
-						     const ExpressionDefinitions::powerExpression_Type JzeroA )
+						     const ExpressionDefinitions::interpolatedScalarValue_Type  JzeroA )
     {
       return activatedDeterminantF_Type( Jzero, JzeroA );
+    }
+
+    activatedJ_Type activateJ( const ExpressionDefinitions::determinantTensorF_Type Jzero,
+			       const ExpressionDefinitions::powerExpression_Type  JzeroA )
+    {
+      return activatedJ_Type( Jzero, JzeroA );
     }
 
     activePowerExpression_Type activePowerExpression( activatedDeterminantF_Type Ja,
@@ -375,22 +446,51 @@ namespace LifeV
       return activePowerExpression_Type ( Ja, exp );
     }
 
+    activeIsochoricDeterminant_Type activeIsochoricDeterminant( activatedDeterminantF_Type Ja )
+    {
+      return activeIsochoricDeterminant_Type ( Ja );
+    }
+
     activeOuterProduct_Type activeOuterProduct( const activatedFiber_Type activatedFiber )
     {
       return activeOuterProduct_Type( activatedFiber, activatedFiber );
     }
 
+    activeNormalizedOuterProduct_Type activeNormalizedOuterProduct( const normalizedVector_Type normalizedActiveFiber )
+    {
+      return activeNormalizedOuterProduct_Type( normalizedActiveFiber, normalizedActiveFiber );
+    }
+
     activeStretch_Type activeFiberStretch( const rightCauchyGreenMultiMechanism_Type activeC,
-					   const activeOuterProduct_Type activeM)
+                                           const activeNormalizedOuterProduct_Type activeM)
     {
       return activeStretch_Type( activeC, activeM );
     }
 
-    activeIsochoricStretch_Type activeIsochoricFourthInvariant( const activePowerExpression_Type activeJ,
-								const activeStretch_Type activeI4)
+    activeInterpolatedFiberStretch_Type activeInterpolatedFiberStretch( const rightCauchyGreenMultiMechanism_Type activeC,
+									const ExpressionDefinitions::outerProduct_Type activeM)
+    {
+      return activeInterpolatedFiberStretch_Type( activeC, activeM );
+    }
+
+    activeIsochoricStretch_Type activeIsochoricFourthInvariant( const activeIsochoricDeterminant_Type activeJ,
+								const activeInterpolatedFiberStretch_Type activeI4)
     {
       return activeIsochoricStretch_Type( activeJ, activeI4 );
     }
+
+    activeNoInterpolationStretch_Type activeNoInterpolationFourthInvariant( const activeIsochoricDeterminant_Type activeJ,
+									    const activeStretch_Type activeI4)
+    {
+      return activeNoInterpolationStretch_Type( activeJ, activeI4 );
+    }
+
+    activePowerIsochoricStretch_Type activePowerIsochoricFourthInvariant( const activePowerExpression_Type activeJ,
+									   const activeStretch_Type activeI4)
+    {
+      return activePowerIsochoricStretch_Type( activeJ, activeI4 );
+    }
+
 
     activeMinusTtensor_Type createActiveMinusTtensor( const ExpressionDefinitions::minusTransposedTensor_Type FminusT,
 						      const ExpressionTranspose<ExpressionDefinitions::deformationGradient_Type> FzeroA)

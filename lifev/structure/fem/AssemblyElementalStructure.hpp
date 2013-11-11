@@ -92,98 +92,75 @@ namespace AssemblyElementalStructure
 template<typename FunctorType, typename MeshType, typename MapType>
 void saveVectorAccordingToFunctor ( const boost::shared_ptr<FESpace<MeshType, MapType> > dispFESpace,
                                     const FunctorType functor,
-                                    const boost::shared_ptr<VectorEpetra> originVector,
+                                    const VectorEpetra& originVector,
                                     const boost::shared_ptr<VectorEpetra> statusVector,
                                     const boost::shared_ptr<VectorEpetra> saveVector,
                                     const UInt offset)
 {
-
-    // This method works because the maps of the different vectors that are used here
-    // are consistent. This means that if one LID in on one processor for a vector
-    // the same LID will be for the second vector.
+    UInt dim = dispFESpace->dim();
+    UInt nTotDof = dispFESpace->dof().numTotalDof();
 
     // We loop over the local ID on the processors of the originVector
-    for( UInt i( originVector->blockMap().MinLID() ); i < originVector->blockMap().MaxLID(); i++ )
+    for( UInt i(0); i < nTotDof; ++i )
     {
-        // We look at the functor to see if the condition is satified
-        bool variable = functor( i );
-
-        if ( variable )
+        if( originVector.blockMap().LID( i ) != -1 ) // The i-th dof is on the processor
         {
-            // Transform the local ID into a global ID for the vector
-            Int GIDnode = statusVector->blockMap().GID( i );
+            // We look at the functor to see if the condition is satified
+            bool variable = functor( i, nTotDof, offset );
 
-            Real updated = (*statusVector)( GIDnode );
-
-            if( !updated )
+            if ( variable )
             {
                 // At the first time we insert the value and then we "close" the cell
                 for ( UInt iComp = 0; iComp < dispFESpace->fieldDim(); ++iComp )
                 {
-                    Int index = GIDnode + iComp * dispFESpace->dof().numTotalDof() + offset;
-                    (*saveVector) ( index ) = (*originVector)( index );
+                    Int LIDid = originVector.blockMap().LID (i + iComp * dim + offset);
+                    Int GIDid = originVector.blockMap().GID (LIDid);
 
-                    (*statusVector) ( index ) = 1.0;
+                    if( (*statusVector)( GIDid ) != 1.0 )
+                    {
+                        // Saving the value
+                        (*saveVector)( GIDid ) = originVector( GIDid );
+
+                        // Saying it has been saved at that point
+                        (*statusVector) ( GIDid ) = 1.0;
+                    }
                 }
             }
-
         }
-
     }
-
-
 }
 
-//! Save displacement according to a functor
-/*!
-  @param FE  the finite element space
-  @param fct the functor for the saving
-  @param originVector the vector from which the values are taken
-  @param saveVector the vector from which the values are saved
-*/
 template<typename FunctorType, typename MeshType, typename MapType>
-void saveVectorAccordingToFunctor ( const boost::shared_ptr<FESpace<MeshType, MapType> > dispFESpace,
-                                    const FunctorType functor,
-                                    const VectorEpetra originVector,
-                                    const boost::shared_ptr<VectorEpetra> statusVector,
-                                    const boost::shared_ptr<VectorEpetra> saveVector,
-                                    const UInt offset)
+void saveBooleanVectorAccordingToFunctor ( const boost::shared_ptr<FESpace<MeshType, MapType> > dispFESpace,
+                                           const FunctorType& functor,
+                                           const boost::shared_ptr<VectorEpetra> originVector,
+                                           boost::shared_ptr<VectorEpetra> saveVector,
+                                           const UInt offset)
 {
-
-    // This method works because the maps of the different vectors that are used here
-    // are consistent. This means that if one LID in on one processor for a vector
-    // the same LID will be for the second vector.
+    UInt dim = dispFESpace->dim();
+    UInt nTotDof = dispFESpace->dof().numTotalDof();
 
     // We loop over the local ID on the processors of the originVector
-    for( UInt i( originVector.blockMap().MinLID() ); i < originVector.blockMap().MaxLID(); i++ )
+    for( UInt i(0); i < nTotDof; ++i )
     {
-        // We look at the functor to see if the condition is satified
-        bool variable = functor( i );
-
-        if ( variable )
+        if( originVector->blockMap().LID( i ) != -1 ) // The i-th dof is on the processor
         {
-            // Transform the local ID into a global ID for the vector
-            Int GIDnode = statusVector->blockMap().GID( i );
+            // We look at the functor to see if the condition is satified
+            bool variable = functor( i, nTotDof, offset );
 
-            Real updated = (*statusVector)( GIDnode );
-
-            if( !updated )
+            if ( variable )
             {
                 // At the first time we insert the value and then we "close" the cell
                 for ( UInt iComp = 0; iComp < dispFESpace->fieldDim(); ++iComp )
                 {
-                    Int index = GIDnode + iComp * dispFESpace->dof().numTotalDof() + offset;
-                    (*saveVector) ( index ) = originVector( index );
+                    Int LIDid = originVector->blockMap().LID (i + iComp * dim + offset);
+                    Int GIDid = originVector->blockMap().GID (LIDid);
 
-                    (*statusVector) ( index ) = 1.0;
+                    (*saveVector)( GIDid ) = 1.0;
                 }
             }
-
         }
-
     }
-
-
 }
 
 //! Gradient of the displacement on the local element

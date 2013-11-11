@@ -1,7 +1,7 @@
 SET(solverAnisotropic_HEADERS
   solver/anisotropic/StructuralAnisotropicConstitutiveLaw.hpp
   solver/anisotropic/HolzapfelMaterialNonLinear.hpp
-  solver/anisotropic/AnisotropicMultimechanismMaterialNonLinear.hpp
+  solver/anisotropic/HolzapfelGeneralizedMaterialNonLinear.hpp
   solver/anisotropic/DistributedHolzapfelMaterialNonLinear.hpp
 CACHE INTERNAL "")
 
@@ -10,7 +10,7 @@ CACHE INTERNAL "")
 
 SET(LOCAL_HEADERS)
 FOREACH(INC ${solverAnisotropic_HEADERS})
-  STRING(REPLACE "solver/anisotropic" "" LOCAL_INC ${INC})
+  STRING(REPLACE "solver/anisotropic/" "" LOCAL_INC ${INC})
   SET(LOCAL_HEADERS ${LOCAL_HEADERS} ${LOCAL_INC})
 ENDFOREACH()
 

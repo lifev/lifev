@@ -241,7 +241,8 @@ StructuralConstitutiveLawData::setup ( const GetPot& dataFile, const std::string
           ASSERT( M_numberFibers  , " The number of fiber families is equal to zero, change the variable constitutiveLaw from anisotropic to isotropic " );
           ASSERT( ( M_numberFibers == numberOfStiffnesses ) && ( M_numberFibers == numberOfNonlinearities ), " Inconsistency in the set up of the fiber parameters" );
 
-          if( !M_solidTypeAnisotropic.compare("multimechanism") )
+          if( !M_solidTypeAnisotropic.compare("multimechanism") ||
+              !M_solidTypeAnisotropic.compare("holzapfelGeneralized") )
           {
               UInt numberStretches = dataFile.vector_variable_size ( ( section + "/model/fibers/stretch" ).data() );
               ASSERT( ( M_numberFibers == numberOfStiffnesses ) &&
@@ -309,7 +310,8 @@ StructuralConstitutiveLawData::setup ( const GetPot& dataFile, const std::string
           M_nonlinearityParametersFibers .resize ( M_numberFibers  );
           M_distributionParametersFibers .resize ( M_numberFibers  );
 
-          if( !M_solidTypeAnisotropic.compare("multimechanism") )
+          if( !M_solidTypeAnisotropic.compare("multimechanism") ||
+              !M_solidTypeAnisotropic.compare("holzapfelGeneralized") )
           {
               M_characteristicStretch .resize ( M_numberFibers  );
           }
@@ -319,7 +321,8 @@ StructuralConstitutiveLawData::setup ( const GetPot& dataFile, const std::string
               M_stiffnessParametersFibers[ i ]      = dataFile ( ( section + "/model/fibers/stiffness"    ).data(), 0., i );
               M_nonlinearityParametersFibers[ i ]   = dataFile ( ( section + "/model/fibers/nonlinearity" ).data(), 0., i );
 
-              if( !M_solidTypeAnisotropic.compare("multimechanism") )
+              if( !M_solidTypeAnisotropic.compare("multimechanism") ||
+                  !M_solidTypeAnisotropic.compare("holzapfelGeneralized") )
               {
                   M_characteristicStretch[ i ]   = dataFile ( ( section + "/model/fibers/stretch" ).data(), 0., i );
               }
@@ -420,7 +423,8 @@ StructuralConstitutiveLawData::showMe ( std::ostream& output ) const
                         << ", " << M_nonlinearityParametersFibers[ i ] << " ); " << std::endl;
           }
 
-          if( !M_solidTypeAnisotropic.compare("multimechanism") )
+          if( !M_solidTypeAnisotropic.compare("multimechanism") ||
+              !M_solidTypeAnisotropic.compare("holzapfelGeneralized"))
           {
               for ( UInt i (0) ; i < M_numberFibers ; ++i )
               {

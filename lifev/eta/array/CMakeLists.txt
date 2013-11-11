@@ -10,6 +10,7 @@ SET(array_HEADERS
   array/OperationSmallProduct.hpp
   array/OperationSmallSubstraction.hpp
   array/OperationSmallTranspose.hpp
+  array/OperationSmallNormalize.hpp
   array/OperationSmallMinusTranspose.hpp
   array/OperationSmallInverse.hpp
   array/OperationSmallSymmetricTensor.hpp
@@ -18,6 +19,8 @@ SET(array_HEADERS
   array/OperationSmallDeterminant.hpp
   array/OperationSmallTrace.hpp
   array/OperationSmallPower.hpp
+  array/OperationSmallSquareRoot.hpp
+  array/OperationSmallCubicRoot.hpp
   array/OperationSmallArcTan.hpp
 CACHE INTERNAL "")
 

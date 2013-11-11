@@ -72,17 +72,11 @@
 
 #include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
 #include <lifev/structure/solver/StructuralOperator.hpp>
-#include <lifev/structure/solver/isotropic/VenantKirchhoffMaterialLinear.hpp>
-#include <lifev/structure/solver/isotropic/VenantKirchhoffMaterialNonLinear.hpp>
 #include <lifev/structure/solver/isotropic/ExponentialMaterialNonLinear.hpp>
-#include <lifev/structure/solver/isotropic/VenantKirchhoffMaterialNonLinearPenalized.hpp>
-#include <lifev/structure/solver/isotropic/SecondOrderExponentialMaterialNonLinear.hpp>
-#include <lifev/structure/solver/isotropic/NeoHookeanMaterialNonLinear.hpp>
-
-
 #include <lifev/structure/solver/anisotropic/StructuralAnisotropicConstitutiveLaw.hpp>
-#include <lifev/structure/solver/anisotropic/HolzapfelMaterialNonLinear.hpp>
 #include <lifev/structure/solver/anisotropic/AnisotropicMultimechanismMaterialNonLinear.hpp>
+#include <lifev/structure/solver/anisotropic/HolzapfelMaterialNonLinear.hpp>
+#include <lifev/structure/solver/anisotropic/HolzapfelGeneralizedMaterialNonLinear.hpp>
 
 
 #include <lifev/core/filter/ExporterEnsight.hpp>
@@ -294,9 +288,7 @@ Structure::run3d()
             boost::dynamic_pointer_cast<Epetra_MpiComm>(parameters->comm);
         PartitionIO<mesh_Type> partitionIO (partsFileName, mpiComm);
 
-
         partitionIO.read (pointerToMesh);
-
     }
 
     std::string dOrder =  dataFile ( "solid/space_discretization/order", "P1");
@@ -372,7 +364,7 @@ Structure::run3d()
     //! =================================================================================
     //! BC for StructuredCube4_test_structuralsolver.mesh
     //! =================================================================================
-    BCh->addBC ("EdgesIn",      20,  Natural,   Component, nonZero, compy);
+    BCh->addBC ("EdgesIn",      20,  Natural,   Component, pressure, compy);
     BCh->addBC ("EdgesIn",      40,  Essential, Component, zero,    compy);
 
     //! Symmetry BC
@@ -391,6 +383,7 @@ Structure::run3d()
     // BCh->addBC ("EdgesIn",      40,  Natural,   Full, zero, 3);
     // BCh->addBC ("EdgesIn",      70,  Essential, Full, zero, 3);
     // BCh->addBC ("EdgesIn",      60,  Essential, Full, zero, 3);
+
 
     //! 1. Constructor of the structuralSolver
     StructuralOperator< RegionMesh<LinearTetra> > solid;
@@ -422,13 +415,16 @@ Structure::run3d()
         (*pointerToVectorOfFamilies)[ k-1 ] = setOfFiberFunctions.fiberDefinition( creationString );
 
         fiberDirections[ k-1 ].reset( new vector_Type(solid.displacement(), Unique) );
-	
+
 	selectionExport[ k-1 ].reset( new vector_Type( dFESpace->map() ) );
 	activationDispl[ k-1 ].reset( new vector_Type( dFESpace->map() ) );
     }
 
-    //! 3.b Setting the fibers in the abstract class of Anisotropic materials
-    solid.material()->anisotropicLaw()->setupFiberDirections( pointerToVectorOfFamilies );
+    if( !dataStructure->constitutiveLaw().compare("anisotropic") )
+    {
+        //! 3.b Setting the fibers in the abstract class of Anisotropic materials
+        solid.material()->anisotropicLaw()->setupFiberDirections( pointerToVectorOfFamilies );
+    }
 
     //! 4. Building system using TimeAdvance class
     double timeAdvanceCoefficient = timeAdvance->coefficientSecondDerivative ( 0 ) / (dataStructure->dataTime()->timeStep() * dataStructure->dataTime()->timeStep() );
@@ -641,15 +637,18 @@ Structure::run3d()
         exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, creationStringSel, dFESpace, selectionExport[ k-1 ], UInt (0) );
         exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, creationStringAct, dFESpace, activationDispl[ k-1 ], UInt (0) );
 
-        // Extracting the fibers vectors
-        *(fiberDirections[ k-1 ]) = solid.material()->anisotropicLaw()->ithFiberVector( k );
+        if( !dataStructure->constitutiveLaw().compare("anisotropic") )
+        {
+            // Extracting the fibers vectors
+            *(fiberDirections[ k-1 ]) = solid.material()->anisotropicLaw()->ithFiberVector( k );
 
-        *(selectionExport[ k-1 ]) = *(solid.material()->anisotropicLaw()->selectionCriterion( k ));
-        *(activationDispl[ k-1 ]) = *(solid.material()->anisotropicLaw()->activationDisplacement( k ));
+            *(selectionExport[ k-1 ]) = *(solid.material()->anisotropicLaw()->selectionCriterion( k ));
+            *(activationDispl[ k-1 ]) = *(solid.material()->anisotropicLaw()->activationDisplacement( k ));
+        }
     }
 
 
-    exporter->postProcess ( 0 );
+    exporter->postProcess ( dataStructure->dataTime()->initialTime() );
     cout.precision(16);
 
     //! 5. Initial data
@@ -696,11 +695,14 @@ Structure::run3d()
         // This vector is to export the forcing term
         //*rhsVector = solid.rhsCopy();
 
-	for( UInt k(1); k <= pointerToVectorOfFamilies->size( ); k++ )
-	  {	    
-	    *(selectionExport[ k-1 ]) = *(solid.material()->anisotropicLaw()->selectionCriterion( k ));
-	    *(activationDispl[ k-1 ]) = *(solid.material()->anisotropicLaw()->activationDisplacement( k ));
-	  }
+        if( !dataStructure->constitutiveLaw().compare("anisotropic") )
+        {
+            for( UInt k(1); k <= pointerToVectorOfFamilies->size( ); k++ )
+            {
+                *(selectionExport[ k-1 ]) = *(solid.material()->anisotropicLaw()->selectionCriterion( k ));
+                *(activationDispl[ k-1 ]) = *(solid.material()->anisotropicLaw()->activationDisplacement( k ));
+            }
+        }
 
 
         iter = iter + 1;

@@ -151,42 +151,9 @@ Real bcZero (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Rea
 
 Real bcNonZero (const Real& t, const Real&  X, const Real& Y, const Real& Z, const ID& i)
 {
-  //Real pressure(200000);
+  return 27000;
+  //  return ( 1000000/ 5.0 ) *t;
 
-  // Real top = 1000000;
-
-  // return top * Y;
-
-    return 300000;
-
-	// Real highestPressure(6.666e+6);
-	// Real totalTime = 20.0;
-	// Real halfTime = totalTime / 2.0;
-
-	// Real a = ( highestPressure / 2 ) * ( 1/ ((totalTime/2)*(totalTime/2)) );
-
-	// if ( t <= halfTime )
-	//     pressure = a * t*t;
-
-	// if ( t > halfTime )
-	//     pressure = - a * (t - totalTime)*(t - totalTime) + highestPressure;
-
-    // switch (i)
-    // {
-    //     case 0:
-    //         return 0.0;
-    //         break;
-    //     case 1:
-    //         return pressure;
-    //         break;
-    //     case 2:
-    //         return 0.0;
-    //         break;
-    //     default:
-    //         ERROR_MSG ("This entrie is not allowed: ud_functions.hpp");
-    //         return 0.;
-    //         break;
-    // }
 }
  Real smoothPressure(const Real& t, const Real&  x, const Real& y, const Real& /*Z*/, const ID& i)
     {
@@ -197,15 +164,13 @@ Real bcNonZero (const Real& t, const Real&  X, const Real& Y, const Real& Z, con
         Real totalTime = 4.5;
         Real halfTime = totalTime / 2.0;
 
-        // Real a = ( highestPressure / 2 ) * ( 1/ ( halfTime*halfTime ) );
+        Real a = ( highestPressure / 2 ) * ( 1/ ( halfTime*halfTime ) );
 
-        // if ( t <= halfTime )
-        //     pressure = a * t*t;
+        if ( t <= halfTime )
+            pressure = a * t*t;
 
-        // if ( t > halfTime )
-        //     pressure = - a * (t - totalTime)*(t - totalTime) + highestPressure;
-
-        pressure = 5000 * t;
+        if ( t > halfTime )
+            pressure = - a * (t - totalTime)*(t - totalTime) + highestPressure;
 
         switch (i)
         {
@@ -224,43 +189,43 @@ Real bcNonZero (const Real& t, const Real&  X, const Real& Y, const Real& Z, con
 
     }
 
-Real bcNonZeroSecondOrderExponential (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
+Real traction (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
 {
-    return  19180.;
+    return  10000.;
 }
 
 
 //----------------------------------------------Fibers Directions--------------
 Real Family1 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
 {
-    Real theta =  0.8426; // value for anisotropic characterization taken from Robertson // ( PI / 6.0 );
-    Real thetaChangeOfVariable = std::atan(  y / x );
+    Real theta =  0.0; // value for anisotropic characterization taken from Robertson // ( PI / 6.0 );
+    //    Real thetaChangeOfVariable = std::atan(  y / x );
 
-    if( x < 0 )
-    {
-        // This is due to the periodicity of std::atan ( ref. official documentation )
-        thetaChangeOfVariable += PI;
-    }
+    // if( x < 0 )
+    // {
+    //     // This is due to the periodicity of std::atan ( ref. official documentation )
+    //     thetaChangeOfVariable += PI;
+    // }
 
     switch (i)
     {
         case 0:
 	    // Tube
-            return - std::sin( thetaChangeOfVariable ) * std::cos( theta );
+            //            return - std::sin( thetaChangeOfVariable ) * std::cos( theta );
 	    // Cube
-            //return std::sin( theta );
+            return std::sin( theta );
             break;
         case 1:
 	    // Tube
-            return   std::cos( thetaChangeOfVariable ) * std::cos( theta );
+            //return   std::cos( thetaChangeOfVariable ) * std::cos( theta );
 	    // Cube
-            //return std::cos( theta );
+            return std::cos( theta );
             break;
         case 2:
 	    // Tube
-            return std::sin( theta );
+            //return std::sin( theta );
 	    // Cube
-            //return 0.0;
+            return 0.0;
             break;
         default:
             ERROR_MSG ("This entrie is not allowed: ud_functions.hpp");
@@ -271,7 +236,7 @@ Real Family1 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, c
 
 Real Family2 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
 {
-    Real theta = - 0.8426;
+    Real theta = -0.9865;
     Real thetaChangeOfVariable = std::atan( y / x );
 
     if( x < 0 )
