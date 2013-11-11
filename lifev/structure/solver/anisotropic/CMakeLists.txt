@@ -10,7 +10,7 @@ CACHE INTERNAL "")
 
 SET(LOCAL_HEADERS)
 FOREACH(INC ${solverAnisotropic_HEADERS})
-  STRING(REPLACE "solver/anisotropic" "" LOCAL_INC ${INC})
+  STRING(REPLACE "solver/anisotropic/" "" LOCAL_INC ${INC})
   SET(LOCAL_HEADERS ${LOCAL_HEADERS} ${LOCAL_INC})
 ENDFOREACH()
 
