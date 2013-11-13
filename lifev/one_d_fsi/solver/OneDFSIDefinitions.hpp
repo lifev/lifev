@@ -38,8 +38,6 @@
 #ifndef OneDFSIDefinitions_H
 #define OneDFSIDefinitions_H
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 // STD
 #include <string>
@@ -54,8 +52,6 @@
 #include <boost/function.hpp>
 #include <boost/shared_ptr.hpp>
 
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 // LIFEV
 #include <lifev/core/LifeV.hpp>

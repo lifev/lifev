@@ -37,17 +37,11 @@
 #ifndef PRECONDITIONERSOLVERBELOS_HPP
 #define PRECONDITIONERSOLVERBELOS_HPP 1
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <Teuchos_ParameterList.hpp>
 #include "Teuchos_XMLParameterListHelpers.hpp"
 #include <Epetra_Operator.h>
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/array/MapEpetra.hpp>
 #include <lifev/core/array/VectorEpetra.hpp>

@@ -41,12 +41,8 @@
 #define COMPOSEDPRECONDITIONER_HPP
 
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <Epetra_Operator.h>
 #include <Epetra_MultiVector.h>
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/filter/GetPot.hpp>

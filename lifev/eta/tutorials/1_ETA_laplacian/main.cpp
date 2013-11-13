@@ -43,12 +43,8 @@
 
 // ---------------------------------------------------------------
 // We include here the MPI headers for the parallel computations.
-// The specific "pragma" instructions are used to avoid warning
-// coming from the MPI library, that are not useful to us.
 // ---------------------------------------------------------------
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
@@ -58,8 +54,6 @@
 #include <Epetra_SerialComm.h>
 #endif
 
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 
 // ---------------------------------------------------------------
@@ -154,7 +148,11 @@ int main ( int argc, char** argv )
                     2.0,   2.0,   2.0,
                     -1.0,  -1.0,  -1.0);
 
-    MeshPartitioner< mesh_Type >  meshPart (fullMeshPtr, Comm);
+    boost::shared_ptr< mesh_Type > meshPtr;
+    {
+        MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, Comm);
+        meshPtr = meshPart.meshPartition();
+    }
 
     fullMeshPtr.reset();
 
@@ -183,7 +181,7 @@ int main ( int argc, char** argv )
     }
 
     boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 1 > > uSpace
-    ( new ETFESpace< mesh_Type, MapEpetra, 3, 1 > (meshPart, &feTetraP1, Comm) );
+    ( new ETFESpace< mesh_Type, MapEpetra, 3, 1 > (meshPtr, &feTetraP1, Comm) );
 
     if (verbose)
     {
