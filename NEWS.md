@@ -1,3 +1,23 @@
+LifeV 3.8.0:
+============
+The cmake module has been merged into LifeV. It is not necessary any more
+to dowload it separately.
+Before pulling the new version you have to remove completely the cmake directory.
+
+
+Merged the following branches:
+
+* InstallScriptUpdate https://cmcsforge.epfl.ch/issues/107
+
+* static_graph
+
+* 201308_templateNSSolver
+
+Also:
+
+* removed a bunch of warnings: unused typedefs, deprecated methods, variables used only in debug (in which case we use the LIFEV_UNUSED macro)
+
+
 LifeV 3.6.2:
 ============
 
