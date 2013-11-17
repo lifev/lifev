@@ -1,3 +1,14 @@
+
+LifeV 3.8.1:
+============
+
+Bugfix in Version.cmake
+
+Replacing the value of LifeV_MAJOR_MINOR_VERSIION from
+030800 to 30800 to avoid it being interpreted as an octal value.
+This CMake variable is only used in Config_config.h.in
+
+
 LifeV 3.8.0:
 ============
 The cmake module has been merged into LifeV. It is not necessary any more
