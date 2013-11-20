@@ -45,15 +45,11 @@ quadRuleTetra.plt ==> Show the Convergence Rate of all the quadrature rules on T
                                using gnuplot
  */
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <fstream>
 
 #include <Epetra_SerialComm.h>
 
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/fem/QuadratureRule.hpp>

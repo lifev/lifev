@@ -4026,7 +4026,7 @@ RegionMesh<GeoShapeType, MCType>::updateElementRidges (threeD_Type, bool ce, boo
                     edg.setPoint ( k, elemIt->point ( inode ) );
                 }
                 MeshUtility::inheritPointsWeakerMarker ( edg );
-                edg.setBoundary ( true );
+                edg.setBoundary ( false );
                 edg.setId ( ridgeList().size() );
                 addRidge ( edg );
             }

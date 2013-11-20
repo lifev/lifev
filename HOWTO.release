@@ -12,13 +12,13 @@ git remote add github git@github.com:lifev/lifev.git
 
 1- update Version.cmake
 
-2- update NEWS
+2- update NEWS.md
 
-3- commit Version.cmake and NEWS 
-   X_Y_Z=3.4.2
+3- commit Version.cmake and NEWS.md
+   X_Y_Z=3.8.0
 
-   git commit -m"Releasing ${X_Y_Z}" Version.cmake NEWS.md 
-   
+   git commit -m"Releasing ${X_Y_Z}" Version.cmake NEWS.md HOWTO.release
+
 
 4- tag master with the tag LifeV-X.Y.Z
 

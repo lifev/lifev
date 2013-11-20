@@ -37,16 +37,12 @@
 #ifndef BCDATAINTERPOLATOR_H
 #define BCDATAINTERPOLATOR 1
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <boost/shared_array.hpp>
 #include "Epetra_SerialDenseMatrix.h"
 #include "Epetra_SerialDenseSolver.h"
 #include "Epetra_SerialDenseVector.h"
 
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/util/Displayer.hpp>

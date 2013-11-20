@@ -1,4 +1,5 @@
 SET(expression_HEADERS
+    expression/BuildGraph.hpp
 	expression/EvaluationAddition.hpp
 	expression/EvaluationDivI.hpp
 	expression/EvaluationDivision.hpp
@@ -10,6 +11,7 @@ SET(expression_HEADERS
 	expression/EvaluationHK.hpp
 	expression/EvaluationInterpolateGradient.hpp
 	expression/EvaluationInterpolateValue.hpp
+	expression/EvaluationMatrix.hpp
 	expression/EvaluationMeas.hpp
 	expression/EvaluationPhiI.hpp
 	expression/EvaluationPhiJ.hpp
@@ -30,6 +32,7 @@ SET(expression_HEADERS
 	expression/ExpressionHK.hpp
 	expression/ExpressionInterpolateGradient.hpp
 	expression/ExpressionInterpolateValue.hpp
+	expression/ExpressionMatrix.hpp
 	expression/ExpressionMeas.hpp
 	expression/ExpressionPhiI.hpp
 	expression/ExpressionPhiJ.hpp
@@ -39,6 +42,7 @@ SET(expression_HEADERS
 	expression/ExpressionSubstraction.hpp
 	expression/ExpressionToEvaluation.hpp
 	expression/ExpressionVector.hpp
+	expression/GraphElement.hpp
 	expression/Integrate.hpp
 	expression/IntegrateMatrixElement.hpp
 	expression/IntegrateValueElement.hpp
@@ -47,6 +51,9 @@ SET(expression_HEADERS
 CACHE INTERNAL "")
 
 SET(expression_SOURCES ""
+	expression/EvaluationPhiI.cpp
+	expression/EvaluationPhiJ.cpp
+	expression/EvaluationScalar.cpp
 	expression/ExpressionDivI.cpp
 	expression/ExpressionDivJ.cpp
 	expression/ExpressionDphiI.cpp

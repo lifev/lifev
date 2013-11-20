@@ -11,4 +11,5 @@ ADD_SUBDIRECTORIES(
   6_ETA_functor
   7_ETA_blocks
   8_ETA_block_manip
+  9_ETA_gradient_interpolation
 )
