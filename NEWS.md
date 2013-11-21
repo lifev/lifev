@@ -1,3 +1,50 @@
+
+LifeV 3.8.1:
+============
+
+Bugfix in Version.cmake
+
+Replacing the value of LifeV_MAJOR_MINOR_VERSIION from
+030800 to 30800 to avoid it being interpreted as an octal value.
+This CMake variable is only used in Config_config.h.in
+
+
+LifeV 3.8.0:
+============
+The cmake module has been merged into LifeV. It is not necessary any more
+to dowload it separately.
+Before pulling the new version you have to remove completely the cmake directory.
+
+
+Merged the following branches:
+
+* InstallScriptUpdate https://cmcsforge.epfl.ch/issues/107
+
+* static_graph
+
+* 201308_templateNSSolver
+
+Also:
+
+* removed a bunch of warnings: unused typedefs, deprecated methods, variables used only in debug (in which case we use the LIFEV_UNUSED macro)
+
+
+LifeV 3.6.2:
+============
+
+Merged the following branches:
+
+* 201211_ETA_OtherDimensions https://cmcsforge.epfl.ch/issues/75
+
+* 201303_MultiscaleDependenciesFix https://cmcsforge.epfl.ch/issues/79
+
+* 20121114_HDF5IO https://cmcsforge.epfl.ch/issues/16
+
+* 201209_CurrentBoundaryFE https://cmcsforge.epfl.ch/issues/15
+
+* 20130213_InstallScriptsUpdate https://cmcsforge.epfl.ch/issues/41
+
+
 LifeV 3.6.1:
 ============
 

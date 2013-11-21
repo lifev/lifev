@@ -41,13 +41,9 @@
 #ifndef TimeData_H
 #define TimeData_H 1
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <ostream>
 
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 
 #include <lifev/core/filter/GetPot.hpp>

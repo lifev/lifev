@@ -39,8 +39,6 @@
 #ifndef ZeroDimensionalSolver_H
 #define ZeroDimensionalSolver_H 1
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 // Include definitions
 #include <lifev/zero_dimensional/solver/ZeroDimensionalDefinitions.hpp>
@@ -80,8 +78,6 @@
 #include <Teuchos_XMLParameterListHelpers.hpp>
 #include <Teuchos_RCPBoostSharedPtrConversions.hpp>
 
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 // LIFEV includes
 #include <lifev/zero_dimensional/solver/ZeroDimensionalRythmosSolverInterface.hpp>

@@ -1,0 +1,16 @@
+SET(${PROJECT_NAME}_PACKAGES
+  CTeuchos
+  ForTeuchos
+  Coupler
+  STARCCM
+  DeCART
+  Panzer
+  Drekar
+  nemesis
+  denovo
+  CASLBOA
+  CASLRAVE
+  RELAP5
+  LIME
+  VRIPSS
+  )

@@ -40,15 +40,9 @@
 #include <lifev/multiscale/framework/MultiscaleDefinitions.hpp>
 #include <lifev/multiscale/models/MultiscaleModelMultiscale.hpp>
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <Teuchos_XMLParameterListHelpers.hpp>
 
-// Tell the compiler to restore the warning previously silented
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 namespace LifeV
 {

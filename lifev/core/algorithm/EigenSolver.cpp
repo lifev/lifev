@@ -29,16 +29,12 @@
 
 #ifdef HAVE_TRILINOS_ANASAZI
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <string>
 
 #include <Teuchos_RefCountPtrDecl.hpp>
 #include <Teuchos_RCPBoostSharedPtrConversions.hpp>
 
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 // ===================================================
 //! Constructors & Destructors

@@ -187,7 +187,7 @@ int main (int argc, char** argv)
     {
         std::cout << "Building the velocity FE space... " << std::flush;
     }
-    feSpacePtr_Type uFESpacePtr ( new feSpace_Type (meshPart, uOrder, 3, comm) );
+    feSpacePtr_Type uFESpacePtr ( new feSpace_Type (meshPart.meshPartition(), uOrder, 3, comm) );
     if (verbose)
     {
         std::cout << "ok." << std::endl;
@@ -197,7 +197,7 @@ int main (int argc, char** argv)
     {
         std::cout << "Building the pressure FE space... " << std::flush;
     }
-    feSpacePtr_Type pFESpacePtr ( new feSpace_Type (meshPart, pOrder, 1, comm) );
+    feSpacePtr_Type pFESpacePtr ( new feSpace_Type (meshPart.meshPartition(), pOrder, 1, comm) );
     if (verbose)
     {
         std::cout << "ok." << std::endl;

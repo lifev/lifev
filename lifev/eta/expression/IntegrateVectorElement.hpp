@@ -89,7 +89,8 @@ public:
     IntegrateVectorElement (const boost::shared_ptr<MeshType>& mesh,
                             const QuadratureRule& quadrature,
                             const boost::shared_ptr<TestSpaceType>& testSpace,
-                            const ExpressionType& expression);
+                            const ExpressionType& expression,
+                            const UInt offset = 0);
 
     //! Copy constructor
     IntegrateVectorElement ( const IntegrateVectorElement < MeshType, TestSpaceType, ExpressionType>& integrator);
@@ -166,6 +167,9 @@ private:
 
     //ETVectorElemental<1> M_elementalVector;
     ETVectorElemental M_elementalVector;
+
+    // Offset
+    UInt M_offset;
 };
 
 
@@ -182,7 +186,8 @@ IntegrateVectorElement < MeshType, TestSpaceType, ExpressionType>::
 IntegrateVectorElement (const boost::shared_ptr<MeshType>& mesh,
                         const QuadratureRule& quadrature,
                         const boost::shared_ptr<TestSpaceType>& testSpace,
-                        const ExpressionType& expression)
+                        const ExpressionType& expression,
+                        const UInt offset)
     :   M_mesh (mesh),
         M_quadrature (quadrature),
         M_testSpace (testSpace),
@@ -190,7 +195,8 @@ IntegrateVectorElement (const boost::shared_ptr<MeshType>& mesh,
 
         M_testCFE (new ETCurrentFE<TestSpaceType::S_spaceDim, TestSpaceType::S_fieldDim> (testSpace->refFE(), testSpace->geoMap(), quadrature) ),
 
-        M_elementalVector (TestSpaceType::S_fieldDim * testSpace->refFE().nbDof() )
+        M_elementalVector (TestSpaceType::S_fieldDim * testSpace->refFE().nbDof() ),
+        M_offset (offset)
 {
     switch (MeshType::geoShape_Type::BasRefSha::S_shape)
     {
@@ -228,7 +234,8 @@ IntegrateVectorElement ( const IntegrateVectorElement < MeshType, TestSpaceType,
 
         M_testCFE (new ETCurrentFE<TestSpaceType::S_spaceDim, TestSpaceType::S_fieldDim> (M_testSpace->refFE(), M_testSpace->geoMap(), M_quadrature) ),
 
-        M_elementalVector (integrator.M_elementalVector)
+        M_elementalVector (integrator.M_elementalVector),
+        M_offset (integrator.M_offset)
 {
     switch (MeshType::geoShape_Type::BasRefSha::S_shape)
     {
@@ -315,7 +322,7 @@ addTo (VectorType& vec)
                     M_testSpace->dof().localToGlobalMap(iElement,i)+ iblock*M_testSpace->dof().numTotalDof());*/
                 M_elementalVector.setRowIndex
                 (i + iblock * nbTestDof,
-                 M_testSpace->dof().localToGlobalMap (iElement, i) + iblock * M_testSpace->dof().numTotalDof() );
+                 M_testSpace->dof().localToGlobalMap (iElement, i) + iblock * M_testSpace->dof().numTotalDof() + M_offset);
             }
 
             // Make the assembly
