@@ -1,0 +1,68 @@
+# +-----------------------------------------------+
+# |            Navier-Stokes Framework            |
+# +-----------------------------------------------+
+#
+# +-----------------------------------------------+
+# |           Author: Gwenol Grandperrin          |
+# |             Date: 2013-05-06                  |
+# +-----------------------------------------------+
+
+[initprec]
+###################################################
+# Choice of the preconditioner (initialization)   #
+###################################################
+prectype    = SIMPLE # Ifpack, SIMPLE
+displayList = true
+
+###################################################
+# Additive Schwarz preconditioner parameters      #
+###################################################
+[initprec/ifpack]
+displayList = true
+overlap     = 2
+
+    [./fact]
+    ilut_level-of-fill            = 1
+    drop_tolerance                = 1.e-5
+    relax_value                   = 0
+
+    [../amesos]
+    solvertype =  Amesos_Umfpack # Amesos_KLU or Amesos_Umfpack
+
+    [../partitioner]
+    overlap = 2
+
+    [../schwarz]
+    reordering_type = none #metis, rcm, none
+    filter_singletons = true
+
+[prec]
+###################################################
+# Choice of the preconditioner                    #
+###################################################
+prectype    = Ifpack # Ifpack, LSC, ML, PCD, RDF, SIMPLE, or Yosida
+displayList = true
+
+###################################################
+# Additive Schwarz preconditioner parameters      #
+###################################################
+[prec/ifpack]
+displayList                 = true
+overlap                     = 2
+
+    [./fact]
+    ilut_level-of-fill      = 1
+    drop_tolerance          = 1.e-5 ### or 1.e-10 for RDF
+    relax_value             = 0
+
+    [../amesos]
+    solvertype =  Amesos_Umfpack # Amesos_KLU or Amesos_Umfpack
+
+    [../partitioner]
+    overlap = 2
+
+    [../schwarz]
+    reordering_type = none #metis, rcm, none
+    filter_singletons = true
+
+

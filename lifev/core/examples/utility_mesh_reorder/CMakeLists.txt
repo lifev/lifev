@@ -1,8 +1,6 @@
 INCLUDE(TribitsAddExecutable)
 INCLUDE(TribitsCopyFilesToBinaryDir)
 
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
-
 TRIBITS_ADD_EXECUTABLE(
   MeshReorder
   SOURCES main.cpp

@@ -38,8 +38,6 @@
 #ifndef ZeroDimensionalDefinitions_H
 #define ZeroDimensionalDefinitions_H
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 // STD
 #include <string>
@@ -56,8 +54,6 @@
 // BOOST
 #include <boost/shared_ptr.hpp>
 
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 // LIFEV
 #include <lifev/core/LifeV.hpp>

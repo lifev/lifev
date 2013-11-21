@@ -211,7 +211,7 @@ main ( int argc, char** argv )
         {
             std::cout << " -- Building FESpaces ... " << std::flush;
         }
-        std::string uOrder ( "P1" );
+        std::string uOrder ( dataFile ( "fe/type", "P1" ) );
         feSpacePtr_Type uFESpace ( new feSpace_Type ( localMesh, uOrder, 1, comm ) );
         feSpacePtr_Type uFESpaceR ( new feSpace_Type ( localMeshR, uOrder, 1, comm ) );
         if ( verbose )

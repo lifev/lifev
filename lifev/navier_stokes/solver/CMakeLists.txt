@@ -1,3 +1,4 @@
+
 SET(solver_HEADERS
   solver/OseenAssembler.hpp
   solver/OseenData.hpp
@@ -23,3 +24,18 @@ INSTALL(
   DESTINATION "${${PROJECT_NAME}_INSTALL_INCLUDE_DIR}/lifev/navier_stokes/solver"
   COMPONENT ${PACKAGE_NAME}
 )
+
+INCLUDE(AddSubdirectories)
+ADD_SUBDIRECTORIES(
+  NavierStokesSolver
+)
+
+SET(solver_HEADERS
+  ${solver_HEADERS}
+  ${NavierStokesSolver_HEADERS}
+CACHE INTERNAL "")
+
+SET(solver_SOURCES
+  ${solver_SOURCES}
+  ${NavierStokesSolver_SOURCES}
+CACHE INTERNAL "")

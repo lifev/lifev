@@ -130,6 +130,7 @@ int main ( int argc, char* argv[] )
 
     for (std::set<ID>::iterator ii = Neighbors.begin(); ii != Neighbors.end(); ++ii)
         if (TrialOutput->blockMap().LID (static_cast<int> (*ii) ) != -1)
+        {
             if (*ii == ID_trial)
             {
                 (*TrialOutput) [*ii] = -1;
@@ -138,6 +139,7 @@ int main ( int argc, char* argv[] )
             {
                 (*TrialOutput) [*ii] =  1;
             }
+        }
 
     ExporterHDF5<mesh_Type> exporter (dataFile, localMeshPtr, "Output_test_neighborsCircle", Comm->MyPID() );
     exporter.setMeshProcId (localMeshPtr, Comm->MyPID() );

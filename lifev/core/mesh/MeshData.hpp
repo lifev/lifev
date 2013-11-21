@@ -226,7 +226,7 @@ void readMesh ( RegionMesh<GEOSHAPE, MC>& mesh, const MeshData& data )
     {
         BareMesh<GEOSHAPE> bareMesh;
         MeshIO::ReadINRIAMeshFile ( bareMesh, data.meshDir() + data.meshFile(), 1, data.verbose() );
-        convertBareMesh ( bareMesh, mesh );
+        convertBareMesh ( bareMesh, mesh, data.verbose() );
         //  readINRIAMeshFile( mesh, data.meshDir() + data.meshFile(), 1, data.verbose() );
     }
     else if ( data.meshType() == ".m++" )

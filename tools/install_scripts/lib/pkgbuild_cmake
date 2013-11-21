@@ -1,10 +1,10 @@
 #! /bin/bash
 #
 # author: Antonio Cervone <ant.cervone@gmail.com>
-# date:   11-12-2012
+# date:   2013-07-12
 #
 
-ver="2.8.10"
+ver="2.8.11.2"
 
 download_cmake() {
   wget -c http://www.cmake.org/files/v2.8/cmake-${ver}.tar.gz
