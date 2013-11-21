@@ -374,7 +374,7 @@ void FSIMonolithicGI::setupBlockPrec()
     }
 }
 
-void FSIMonolithicGI::shapeDerivatives ( FSIOperator::fluidPtr_Type::value_type::matrixPtr_Type sdMatrix )
+void FSIMonolithicGI::shapeDerivatives ( FSIOperator::fluid_Type::matrixPtr_Type sdMatrix )
 {
     Real alpha = M_fluidTimeAdvance->coefficientFirstDerivative ( 0 ) / M_data->dataFluid()->dataTime()->timeStep();
     vectorPtr_Type rhsNew (new vector_Type (*M_monolithicMap) );

@@ -967,23 +967,26 @@ FESpace<MeshType, MapType>::l2Error ( const function_Type&    fexact,
 
     for ( UInt iVol  = 0; iVol < this->mesh()->numElements(); iVol++ )
     {
-        //this->fe().updateFirstDeriv( this->mesh()->element( iVol ) );
-
-        // CurrentFE newFE(this->fe().refFE(),this->fe().geoMap(),quadRuleTetra64pt);
-        this->fe().update (this->mesh()->element ( iVol ),  UPDATE_QUAD_NODES | UPDATE_PHI | UPDATE_WDET);
-
-        normU += elementaryDifferenceL2NormSquare ( vec, fexact,
-                                                    this->fe(),
-                                                    //newFE,
-                                                    this->dof(),
-                                                    time,
-                                                    M_fieldDim );
-        if (relError)
+        if ( this->mesh()->element ( iVol ).isOwned() )
         {
-            sumExact += elementaryFctL2NormSquare ( fexact,
-                                                    this->fe(),
-                                                    time,
-                                                    M_fieldDim );
+            //this->fe().updateFirstDeriv( this->mesh()->element( iVol ) );
+
+            // CurrentFE newFE(this->fe().refFE(),this->fe().geoMap(),quadRuleTetra64pt);
+            this->fe().update (this->mesh()->element ( iVol ),  UPDATE_QUAD_NODES | UPDATE_PHI | UPDATE_WDET);
+
+            normU += elementaryDifferenceL2NormSquare ( vec, fexact,
+                                                        this->fe(),
+                                                        //newFE,
+                                                        this->dof(),
+                                                        time,
+                                                        M_fieldDim );
+            if (relError)
+            {
+                sumExact += elementaryFctL2NormSquare ( fexact,
+                                                        this->fe(),
+                                                        time,
+                                                        M_fieldDim );
+            }
         }
     }
 
@@ -1813,10 +1816,12 @@ createMap (const commPtr_Type& commptr)
 {
     // Against dummies
     ASSERT_PRE (this->M_dof->numTotalDof() > 0, " Cannot create FeSpace with no degrees of freedom");
+
     // get globalElements list from DOF
-    std::vector<Int> myGlobalElements ( this->M_dof->globalElements ( *this->M_mesh ) );
+    typename MapType::mapData_Type mapData = this->M_dof->createMapData ( *this->M_mesh );
     // Create the map
-    MapType map ( -1, myGlobalElements.size(), &myGlobalElements[0], commptr );
+    MapType map ( mapData, commptr );
+
     // Store the map. If more than one field is present the map is
     // duplicated by offsetting the DOFs
     for ( UInt ii = 0; ii < M_fieldDim; ++ii )

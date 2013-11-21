@@ -84,7 +84,7 @@ public:
     typedef typename ExpressionToEvaluation < ExpressionType,
             TestSpaceType::S_fieldDim,
             SolutionSpaceType::S_fieldDim,
-            3 >::evaluation_Type  evaluation_Type;
+            MeshType::S_geoDimensions >::evaluation_Type  evaluation_Type;
 
     //@}
 
@@ -238,9 +238,9 @@ private:
                             const UInt nbSolutionDof,
                             ETMatrixElemental& elementalMatrix,
                             evaluation_Type& evaluation,
-                            ETCurrentFE<3, 1>& globalCFE,
-                            ETCurrentFE<3, TestSpaceType::S_fieldDim>& testCFE,
-                            ETCurrentFE<3, SolutionSpaceType::S_fieldDim>& solutionCFE);
+                            ETCurrentFE<MeshType::S_geoDimensions, 1>& globalCFE,
+                            ETCurrentFE<TestSpaceType::S_spaceDim, TestSpaceType::S_fieldDim>& testCFE,
+                            ETCurrentFE<SolutionSpaceType::S_spaceDim, SolutionSpaceType::S_fieldDim>& solutionCFE);
     //@}
 
     // Pointer on the mesh
@@ -253,9 +253,9 @@ private:
     boost::shared_ptr<TestSpaceType> M_testSpace;
     boost::shared_ptr<SolutionSpaceType> M_solutionSpace;
 
-    ETCurrentFE<3, 1>* M_globalCFE;
-    ETCurrentFE<3, TestSpaceType::S_fieldDim>* M_testCFE;
-    ETCurrentFE<3, SolutionSpaceType::S_fieldDim>* M_solutionCFE;
+    ETCurrentFE<MeshType::S_geoDimensions, 1>* M_globalCFE;
+    ETCurrentFE<TestSpaceType::S_spaceDim, TestSpaceType::S_fieldDim>* M_testCFE;
+    ETCurrentFE<SolutionSpaceType::S_spaceDim, SolutionSpaceType::S_fieldDim>* M_solutionCFE;
 
     // Tree to compute the values for the assembly
     evaluation_Type M_evaluation;
@@ -289,9 +289,9 @@ IntegrateMatrixElement (const boost::shared_ptr<MeshType>& mesh,
         M_quadrature (quadrature),
         M_testSpace (testSpace),
         M_solutionSpace (solutionSpace),
-        M_globalCFE (new ETCurrentFE<3, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), quadrature) ),
-        M_testCFE (new ETCurrentFE<3, TestSpaceType::S_fieldDim> (testSpace->refFE(), testSpace->geoMap(), quadrature) ),
-        M_solutionCFE (new ETCurrentFE<3, SolutionSpaceType::S_fieldDim> (solutionSpace->refFE(), testSpace->geoMap(), quadrature) ),
+        M_globalCFE (new ETCurrentFE<MeshType::S_geoDimensions, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), quadrature) ),
+        M_testCFE (new ETCurrentFE<TestSpaceType::S_spaceDim, TestSpaceType::S_fieldDim> (testSpace->refFE(), testSpace->geoMap(), quadrature) ),
+        M_solutionCFE (new ETCurrentFE<SolutionSpaceType::S_spaceDim, SolutionSpaceType::S_fieldDim> (solutionSpace->refFE(), testSpace->geoMap(), quadrature) ),
         M_evaluation (expression),
         M_offsetUp (offsetUp),
         M_offsetLeft (offsetLeft),
@@ -325,6 +325,26 @@ IntegrateMatrixElement (const boost::shared_ptr<MeshType>& mesh,
         M_offsetLeft (offsetLeft),
         M_ompParams (ompParams)
 {
+    switch (MeshType::geoShape_Type::BasRefSha::S_shape)
+    {
+        case LINE:
+            M_globalCFE = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feSegP0, geometricMapFromMesh<MeshType>(), quadrature);
+            break;
+        case TRIANGLE:
+            M_globalCFE = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feTriaP0, geometricMapFromMesh<MeshType>(), quadrature);
+            break;
+        case QUAD:
+            M_globalCFE = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feQuadQ0, geometricMapFromMesh<MeshType>(), quadrature);
+            break;
+        case TETRA:
+            M_globalCFE = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), quadrature);
+            break;
+        case HEXA:
+            M_globalCFE = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feHexaQ0, geometricMapFromMesh<MeshType>(), quadrature);
+            break;
+        default:
+            ERROR_MSG ("Unrecognized element shape");
+    }
     M_evaluation.setQuadrature (quadrature);
     M_evaluation.setGlobalCFE (M_globalCFE);
     M_evaluation.setTestCFE (M_testCFE);
@@ -338,14 +358,33 @@ IntegrateMatrixElement (const IntegrateMatrixElement<MeshType, TestSpaceType, So
         M_quadrature (integrator.M_quadrature),
         M_testSpace (integrator.M_testSpace),
         M_solutionSpace (integrator.M_solutionSpace),
-        M_globalCFE (new ETCurrentFE<3, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), M_quadrature) ),
-        M_testCFE (new ETCurrentFE<3, TestSpaceType::S_fieldDim> (M_testSpace->refFE(), M_testSpace->geoMap(), M_quadrature) ),
-        M_solutionCFE (new ETCurrentFE<3, SolutionSpaceType::S_fieldDim> (M_solutionSpace->refFE(), M_solutionSpace->geoMap(), M_quadrature) ),
+        M_globalCFE (new ETCurrentFE<MeshType::S_geoDimensions, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), M_quadrature) ),
+        M_testCFE (new ETCurrentFE<TestSpaceType::S_spaceDim, TestSpaceType::S_fieldDim> (M_testSpace->refFE(), M_testSpace->geoMap(), M_quadrature) ),
+        M_solutionCFE (new ETCurrentFE<SolutionSpaceType::S_spaceDim, SolutionSpaceType::S_fieldDim> (M_solutionSpace->refFE(), M_solutionSpace->geoMap(), M_quadrature) ),
         M_evaluation (integrator.M_evaluation),
         M_offsetUp (integrator.M_offsetUp),
-        M_offsetLeft (integrator.M_offsetLeft),
-        M_ompParams (integrator.M_ompParams)
+        M_offsetLeft (integrator.M_offsetLeft)
 {
+    switch (MeshType::geoShape_Type::BasRefSha::S_shape)
+    {
+        case LINE:
+            M_globalCFE = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feSegP0, geometricMapFromMesh<MeshType>(), M_quadrature);
+            break;
+        case TRIANGLE:
+            M_globalCFE = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feTriaP0, geometricMapFromMesh<MeshType>(), M_quadrature);
+            break;
+        case QUAD:
+            M_globalCFE = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feQuadQ0, geometricMapFromMesh<MeshType>(), M_quadrature);
+            break;
+        case TETRA:
+            M_globalCFE = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), M_quadrature);
+            break;
+        case HEXA:
+            M_globalCFE = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feHexaQ0, geometricMapFromMesh<MeshType>(), M_quadrature);
+            break;
+        default:
+            ERROR_MSG ("Unrecognized element shape");
+    }
     M_evaluation.setQuadrature (M_quadrature);
     M_evaluation.setGlobalCFE (M_globalCFE);
     M_evaluation.setTestCFE (M_testCFE);
@@ -382,9 +421,9 @@ integrateElement (const UInt iElement, const UInt nbQuadPt,
                   const UInt nbTestDof, const UInt nbSolutionDof,
                   ETMatrixElemental& elementalMatrix,
                   evaluation_Type& evaluation,
-                  ETCurrentFE<3, 1>& globalCFE,
-                  ETCurrentFE<3, TestSpaceType::S_fieldDim>& testCFE,
-                  ETCurrentFE<3, SolutionSpaceType::S_fieldDim>& solutionCFE)
+                  ETCurrentFE<MeshType::S_geoDimensions, 1>& globalCFE,
+                  ETCurrentFE<TestSpaceType::S_spaceDim, TestSpaceType::S_fieldDim>& testCFE,
+                  ETCurrentFE<SolutionSpaceType::S_spaceDim, SolutionSpaceType::S_fieldDim>& solutionCFE)
 {
     // Zeros out the matrix
     elementalMatrix.zero();
@@ -447,19 +486,38 @@ addTo (MatrixType& mat)
     UInt nbSolutionDof (M_solutionSpace->refFE().nbDof() );
 
     // Update the currentFEs
-    ETCurrentFE<3, 1>
-    globalCFE (feTetraP0, geometricMapFromMesh<MeshType>(), M_quadrature);
-    ETCurrentFE<3, TestSpaceType::S_fieldDim>
+    boost::shared_ptr<ETCurrentFE<MeshType::S_geoDimensions, 1> > globalCFE;
+    switch (MeshType::geoShape_Type::BasRefSha::S_shape)
+    {
+        case LINE:
+            globalCFE.reset(new ETCurrentFE<MeshType::S_geoDimensions, 1> (feSegP0, geometricMapFromMesh<MeshType>(), M_quadrature));
+            break;
+        case TRIANGLE:
+            globalCFE.reset(new ETCurrentFE<MeshType::S_geoDimensions, 1> (feTriaP0, geometricMapFromMesh<MeshType>(), M_quadrature));
+            break;
+        case QUAD:
+            globalCFE.reset(new ETCurrentFE<MeshType::S_geoDimensions, 1> (feQuadQ0, geometricMapFromMesh<MeshType>(), M_quadrature));
+            break;
+        case TETRA:
+            globalCFE.reset(new ETCurrentFE<MeshType::S_geoDimensions, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), M_quadrature));
+            break;
+        case HEXA:
+            globalCFE.reset(new ETCurrentFE<MeshType::S_geoDimensions, 1> (feHexaQ0, geometricMapFromMesh<MeshType>(), M_quadrature));
+            break;
+        default:
+            ERROR_MSG ("Unrecognized element shape");
+    }
+    ETCurrentFE<TestSpaceType::S_spaceDim, TestSpaceType::S_fieldDim>
     testCFE (M_testSpace->refFE(), M_testSpace->geoMap(), M_quadrature);
 
-    ETCurrentFE<3, SolutionSpaceType::S_fieldDim>
+    ETCurrentFE<SolutionSpaceType::S_spaceDim, SolutionSpaceType::S_fieldDim>
     solutionCFE (M_solutionSpace->refFE(), M_testSpace->geoMap(),
                  M_quadrature);
 
     evaluation_Type evaluation (M_evaluation);
     // Update the evaluation
     evaluation.setQuadrature (M_quadrature);
-    evaluation.setGlobalCFE (&globalCFE);
+    evaluation.setGlobalCFE (&(*globalCFE));
     evaluation.setTestCFE (&testCFE);
     evaluation.setSolutionCFE (&solutionCFE);
 
@@ -469,7 +527,7 @@ addTo (MatrixType& mat)
     for (UInt iElement = 0; iElement < nbElements; ++iElement)
     {
         integrateElement (iElement, nbQuadPt, nbTestDof, nbSolutionDof,
-                          elementalMatrix, evaluation, globalCFE,
+                          elementalMatrix, evaluation, *globalCFE,
                           testCFE, solutionCFE);
 
         elementalMatrix.pushToGlobal (mat);
@@ -493,19 +551,38 @@ addToClosed (MatrixType& mat)
     #pragma omp parallel
     {
         // Update the currentFEs
-        ETCurrentFE<3, 1>
-        globalCFE (feTetraP0, geometricMapFromMesh<MeshType>(), M_quadrature);
-        ETCurrentFE<3, TestSpaceType::S_fieldDim>
+        boost::shared_ptr<ETCurrentFE<MeshType::S_geoDimensions, 1> > globalCFE;
+        switch (MeshType::geoShape_Type::BasRefSha::S_shape)
+        {
+            case LINE:
+                globalCFE.reset(new ETCurrentFE<MeshType::S_geoDimensions, 1> (feSegP0, geometricMapFromMesh<MeshType>(), M_quadrature));
+                break;
+            case TRIANGLE:
+                globalCFE.reset(new ETCurrentFE<MeshType::S_geoDimensions, 1> (feTriaP0, geometricMapFromMesh<MeshType>(), M_quadrature));
+                break;
+            case QUAD:
+                globalCFE.reset(new ETCurrentFE<MeshType::S_geoDimensions, 1> (feQuadQ0, geometricMapFromMesh<MeshType>(), M_quadrature));
+                break;
+            case TETRA:
+                globalCFE.reset(new ETCurrentFE<MeshType::S_geoDimensions, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), M_quadrature));
+                break;
+            case HEXA:
+                globalCFE.reset(new ETCurrentFE<MeshType::S_geoDimensions, 1> (feHexaQ0, geometricMapFromMesh<MeshType>(), M_quadrature));
+                break;
+            default:
+                ERROR_MSG ("Unrecognized element shape");
+        }
+        ETCurrentFE<TestSpaceType::S_spaceDim, TestSpaceType::S_fieldDim>
         testCFE (M_testSpace->refFE(), M_testSpace->geoMap(), M_quadrature);
 
-        ETCurrentFE<3, SolutionSpaceType::S_fieldDim>
+        ETCurrentFE<SolutionSpaceType::S_spaceDim, SolutionSpaceType::S_fieldDim>
         solutionCFE (M_solutionSpace->refFE(), M_testSpace->geoMap(),
                      M_quadrature);
 
         evaluation_Type evaluation (M_evaluation);
         // Update the evaluation
         evaluation.setQuadrature (M_quadrature);
-        evaluation.setGlobalCFE (&globalCFE);
+        evaluation.setGlobalCFE (&(*globalCFE));
         evaluation.setTestCFE (&testCFE);
         evaluation.setSolutionCFE (&solutionCFE);
 
@@ -516,7 +593,7 @@ addToClosed (MatrixType& mat)
         for (UInt iElement = 0; iElement < nbElements; ++iElement)
         {
             integrateElement (iElement, nbQuadPt, nbTestDof, nbSolutionDof,
-                              elementalMatrix, evaluation, globalCFE,
+                              elementalMatrix, evaluation, *globalCFE,
                               testCFE, solutionCFE);
 
             elementalMatrix.pushToClosedGlobal (mat);

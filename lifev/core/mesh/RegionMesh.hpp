@@ -40,9 +40,23 @@
 #ifndef _REGIONMESH_HH_
 #define _REGIONMESH_HH_
 
-#include <cstdlib>
-#include <iomanip>
 #include <fstream>
+
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
+
+#include <Epetra_ConfigDefs.h>
+#ifdef EPETRA_MPI
+#include <mpi.h>
+#include <Epetra_MpiComm.h>
+#else
+#include <Epetra_SerialComm.h>
+#endif
+
+//Tell the compiler to restore the warning previously silented
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/util/LifeDebug.hpp>
@@ -54,7 +68,6 @@
 #include <lifev/core/array/ArraySimple.hpp>
 #include <lifev/core/mesh/ElementShapes.hpp>
 #include <lifev/core/mesh/MeshUtility.hpp>
-#include <boost/numeric/ublas/matrix.hpp>
 
 namespace LifeV
 {
@@ -3502,7 +3515,49 @@ RegionMesh<GeoShapeType, MCType>::showMe ( bool verbose, std::ostream& out ) con
     out << "**************************************************" << std::endl;
     if ( verbose )
     {
-        std::cout << "Verbose version not implemented yet";
+        out << "list of points " << this->numPoints() << std::endl;
+        for ( UInt i = 0; i < this->numPoints(); i++ )
+        {
+            out << "p " << i << " (" << this->point ( i ).id() << "): "
+                << this->point ( i ).coordinate ( 0 ) << " "
+                << this->point ( i ).coordinate ( 1 ) << " "
+                << this->point ( i ).coordinate ( 2 ) << std::endl;
+        }
+
+        out << "list of elements " << this->numElements() << std::endl;
+        for ( UInt i = 0; i < this->numElements(); i++ )
+        {
+            out << "e " << i << " (" << this->element ( i ).id() << "): ";
+            for ( UInt j = 0; j < element_Type::S_numPoints; j++ )
+            {
+                out << this->element ( i ).point ( j ).localId() << " ";
+            }
+            out << std::endl;
+        }
+
+        out << "list of facets " << this->numFacets() << std::endl;
+        for ( UInt i = 0; i < this->numFacets(); i++ )
+        {
+            out << "f " << i << " (" << this->facet ( i ).id() << "): ";
+            for ( UInt j = 0; j < facet_Type::S_numPoints; j++ )
+            {
+                out << this->facet ( i ).point ( j ).localId() << " ";
+            }
+            out << std::endl;
+        }
+
+        // @todo the ridge part cannot be printed since in 2d ridges
+        // do not have S_numPoints
+        /*
+                out << "list of ridges " << this->numRidges() << std::endl;
+                for( UInt i = 0; i < this->numRidges(); i++ )
+                {
+                    out << "r " << i << " (" << this->ridge( i ).id() << "): ";
+                    for ( UInt j = 0; j < ridge_Type::S_numPoints; j++ )
+                        out << this->ridge( i ).point( j ).localId() << " ";
+                    out << std::endl;
+                }
+        */
     }
     return out;
 
@@ -4026,7 +4081,7 @@ RegionMesh<GeoShapeType, MCType>::updateElementRidges (threeD_Type, bool ce, boo
                     edg.setPoint ( k, elemIt->point ( inode ) );
                 }
                 MeshUtility::inheritPointsWeakerMarker ( edg );
-                edg.setBoundary ( true );
+                edg.setBoundary ( false );
                 edg.setId ( ridgeList().size() );
                 addRidge ( edg );
             }

@@ -494,6 +494,8 @@ impes::run()
                                                                           *saturation_hyperbolic_qR,
                                                                           *saturation_hyperbolic_bdQr, 1, Members->comm ) );
 
+    GhostHandler<RegionMesh> ghost ( fullMeshPtr, meshPart.meshPartition(), saturation_hyperbolic_FESpacePtr->mapPtr(), Members->comm );
+
     // Non-linear and transient Darcy parameters.
 
     // Primal solution parameters.
@@ -573,7 +575,10 @@ impes::run()
     // Instantiation of the saturation equation solver.
 
     // Instantiation of the hyperbolic solver.
-    hyper saturationHyperbolicSolver ( dataSaturationHyperbolic, *saturation_hyperbolic_FESpacePtr, Members->comm );
+    hyper saturationHyperbolicSolver ( dataSaturationHyperbolic,
+                                       *saturation_hyperbolic_FESpacePtr,
+                                       ghost.ghostMapOnElementsP0(),
+                                       Members->comm );
 
     // Instantiation of the non-linear and transient Darcy solver.
     dstnl saturationDarcySolver ( dataSaturationDarcyNonLinear, saturation_darcy_p_FESpace,

@@ -41,9 +41,6 @@
 
 #include <lifev/core/LifeV.hpp>
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <Epetra_MpiComm.h>
 #include <Epetra_FECrsMatrix.h>
@@ -57,9 +54,6 @@
 #include <EpetraExt_HDF5.h>
 #endif
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/array/VectorEpetra.hpp>
 
@@ -117,7 +111,7 @@ public:
       @param map Row map. The column map will be defined in MatrixEpetra<DataType>::GlobalAssemble(...,...)
       @param numEntries The average number of entries for each row.
      */
-    MatrixEpetra ( const MapEpetra& map, Int numEntries = 50 );
+    MatrixEpetra ( const MapEpetra& map, Int numEntries = 50, bool ignoreNonLocalValues = false );
 
     //! Copy Constructor
     /*!
@@ -150,7 +144,7 @@ public:
     MatrixEpetra ( const MapEpetra& map, matrix_ptrtype crsMatrixPtr);
 
     //! Destructor
-    ~MatrixEpetra() {};
+    virtual ~MatrixEpetra() {};
 
     //@}
 
@@ -163,6 +157,12 @@ public:
       @param matrix matrix to be added to the current matrix
      */
     MatrixEpetra& operator += ( const MatrixEpetra& matrix );
+
+    //! Subtraction operator
+    /*!
+      @param matrix matrix to be subtracted to the current matrix
+     */
+    MatrixEpetra& operator -= ( const MatrixEpetra& matrix );
 
     //! Assignment operator
     /*!
@@ -362,6 +362,9 @@ public:
      */
     Int globalAssemble ( const boost::shared_ptr<const MapEpetra>& domainMap,
                          const boost::shared_ptr<const MapEpetra>& rangeMap );
+
+    //! Fill complete of a square matrix with default domain and range map
+    Int fillComplete();
 
     //! insert the given value into the diagonal
     /*!
@@ -639,7 +642,7 @@ MatrixEpetra<DataType>::MatrixEpetra ( const MapEpetra& map, const Epetra_FECrsG
 template <typename DataType>
 MatrixEpetra<DataType>::MatrixEpetra ( const MapEpetra& map, Int numEntries, bool ignoreNonLocalValues ) :
     M_map       ( new MapEpetra ( map ) ),
-    M_epetraCrs ( new matrix_type ( Copy, *M_map->map ( Unique ), numEntries, false) )
+    M_epetraCrs ( new matrix_type ( Copy, *M_map->map ( Unique ), numEntries, ignoreNonLocalValues) )
 {
 
 }
@@ -699,6 +702,15 @@ MatrixEpetra<DataType>&
 MatrixEpetra<DataType>::operator += ( const MatrixEpetra& matrix )
 {
     EpetraExt::MatrixMatrix::Add ( *matrix.matrixPtr(), false, 1., *this->matrixPtr(), 1. );
+
+    return *this;
+}
+
+template <typename DataType>
+MatrixEpetra<DataType>&
+MatrixEpetra<DataType>::operator -= ( const MatrixEpetra& matrix )
+{
+    EpetraExt::MatrixMatrix::Add ( *matrix.matrixPtr(), false, -1., *this->matrixPtr(), 1. );
 
     return *this;
 }
@@ -773,7 +785,7 @@ void MatrixEpetra<DataType>::removeZeros()
 {
     if ( M_epetraCrs->Filled() )
     {
-        Int meanNumEntries = this->getMeanNumEntries();
+        Int meanNumEntries = this->meanNumEntries();
         matrix_ptrtype tmp ( M_epetraCrs );
         M_epetraCrs.reset (new matrix_type ( Copy, M_epetraCrs->RowMap(), meanNumEntries ) );
 
@@ -786,6 +798,11 @@ void MatrixEpetra<DataType>::removeZeros()
         for ( Int i (0); i < tmp->NumGlobalRows(); ++i )
         {
             row = tmp->LRID ( i );
+            // Check if the row belong to this process
+            if (row == -1)
+            {
+                continue;
+            }
             tmp->ExtractMyRowView ( row, NumEntries, Values, Indices );
 
             std::vector<Int> Indices2 ( NumEntries );
@@ -801,7 +818,7 @@ void MatrixEpetra<DataType>::removeZeros()
                     NumEntries2++;
                 }
             }
-            M_epetraCrs->InsertGlobalValues ( row, NumEntries2, &Values2[0], &Indices2[0] );
+            M_epetraCrs->InsertGlobalValues ( i, NumEntries2, &Values2[0], &Indices2[0] );
         }
         insertZeroDiagonal();
         M_epetraCrs->GlobalAssemble();
@@ -1381,6 +1398,18 @@ Int MatrixEpetra<DataType>::globalAssemble()
     M_domainMap = M_map;
     M_rangeMap  = M_map;
     return  M_epetraCrs->GlobalAssemble();
+}
+
+template <typename DataType>
+Int MatrixEpetra<DataType>::fillComplete()
+{
+    if ( !M_epetraCrs->Filled() )
+    {
+        insertZeroDiagonal();
+    }
+    M_domainMap = M_map;
+    M_rangeMap  = M_map;
+    return  M_epetraCrs->FillComplete();
 }
 
 template <typename DataType>

@@ -61,6 +61,7 @@ public:
     typedef MeshType                          mesh_Type;
     typedef Exporter<mesh_Type>               super;
     typedef typename super::meshPtr_Type      meshPtr_Type;
+    typedef typename super::commPtr_Type      commPtr_Type;
     typedef typename super::vectorPtr_Type    vectorPtr_Type;
     typedef typename super::exporterData_Type exporterData_Type;
     //@}
@@ -141,9 +142,12 @@ public:
     void setMeshProcId ( const meshPtr_Type mesh, const Int& procId );
 
     //! temporary: the method should work form the Exporter class
-    void exportPID ( boost::shared_ptr<MeshType> /*mesh*/, boost::shared_ptr<Epetra_Comm> /*comm*/ )
+    void exportPID (  meshPtr_Type /*meshPart*/, commPtr_Type comm, const bool /*binaryFormat*/ = false )
     {
-        std::cerr << "  X-  exportPID is not working with Ensight (missing P0 element support)" << std::endl;
+        if ( !comm->MyPID() )
+        {
+            std::cerr << "  X-  exportPID is not working with Ensight" << std::endl;
+        }
     }
     //@}
 

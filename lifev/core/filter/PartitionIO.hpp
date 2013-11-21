@@ -38,22 +38,19 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <algorithm>
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-
 #include <Epetra_config.h>
 
 #ifdef LIFEV_HAS_HDF5
 #ifdef HAVE_MPI
 
+#include <mpi.h>
+
 #include <Epetra_MpiComm.h>
 
-//Tell the compiler to restore the warning previously silented
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include<lifev/core/LifeV.hpp>
+#include <lifev/core/filter/HDF5IO.hpp>
+
 #include <lifev/core/filter/HDF5IO.hpp>
 
 namespace LifeV
@@ -282,6 +279,7 @@ inline PartitionIO<MeshType>::PartitionIO (const std::string& fileName,
     M_faceNodes = MeshType::elementShape_Type::GeoBShape::S_numPoints;
 
     M_myRank = M_comm->MyPID();
+    M_numProc = M_comm->NumProc();
 }
 
 template<typename MeshType>
@@ -750,7 +748,6 @@ void PartitionIO<MeshType>::writeElements()
                             currentOffset, &M_uintBuffer[0]);
         }
     }
-
     M_HDF5IO.closeTable ("elements");
 }
 
@@ -868,7 +865,7 @@ void PartitionIO<MeshType>::readPoints()
     {
         for (UInt j = 0; j < M_numPoints; ++j)
         {
-            pp = & ( M_meshPartIn->addPoint ( false, false ) );
+            pp = & (M_meshPartIn->addPoint (false, false) );
             pp->replaceFlag (
                 static_cast<flag_Type> (M_uintBuffer[2 * stride + j]) );
             pp->setMarkerID (M_uintBuffer[j]);
@@ -882,7 +879,7 @@ void PartitionIO<MeshType>::readPoints()
     {
         for (UInt j = 0; j < M_numPoints; ++j)
         {
-            pp = & ( M_meshPartIn->addPoint ( false, false ) );
+            pp = & (M_meshPartIn->addPoint (false, false) );
             pp->replaceFlag (
                 static_cast<flag_Type> (M_uintBuffer[stride * j + 2]) );
             pp->setMarkerID (M_uintBuffer[stride * j]);
@@ -1129,7 +1126,6 @@ void PartitionIO<MeshType>::readElements()
 }
 
 } /* namespace LifeV */
-
 #endif /* HAVE_MPI */
 #endif /* LIFEV_HAS_HDF5 */
 #endif /* PARTITION_IO_H_ */

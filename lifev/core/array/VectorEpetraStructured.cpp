@@ -42,14 +42,18 @@ namespace LifeV
 // ===================================================
 
 VectorEpetraStructured::
-VectorEpetraStructured ( const map_type& map, const mapType_type& mapType )
-    : VectorEpetra ( map, mapType ),
+VectorEpetraStructured ( const map_type& map,
+                         const mapType_type& mapType,
+                         const combineMode_Type combineMode )
+    : VectorEpetra ( map, mapType, combineMode ),
       M_blockStructure ( map )
 {}
 
 VectorEpetraStructured::
-VectorEpetraStructured ( const mapVector_type& mapVector, const mapType_type& mapType )
-    : VectorEpetra ( mapType ),
+VectorEpetraStructured ( const mapVector_type& mapVector,
+                         const mapType_type& mapType,
+                         const combineMode_Type combineMode )
+    : VectorEpetra ( mapType, combineMode ),
       M_blockStructure ( mapVector )
 {
     ASSERT ( mapVector.nbMap() > 0 , "Map vector empty, impossible to construct a VectorBlockMonolithicEpetra!" );
