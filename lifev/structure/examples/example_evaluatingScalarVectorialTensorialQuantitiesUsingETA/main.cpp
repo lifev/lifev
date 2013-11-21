@@ -53,7 +53,7 @@
 #include <lifev/structure/solver/StructuralOperator.hpp>
 #include <lifev/structure/fem/ExpressionDefinitions.hpp>
 
-// #include <lifev/structure/solver/isotropic/ExponentialMaterialNonLinear.hpp>
+ #include <lifev/structure/solver/isotropic/ExponentialMaterialNonLinear.hpp>
 // #include <lifev/structure/solver/anisotropic/AnisotropicMultimechanismMaterialNonLinear.hpp>
 
 // Evaluation operations
@@ -517,27 +517,27 @@ Structure::run3d()
 
     std::string const nameField =  dataFile ( "importer/nameField", "displacement");
 
-    for( UInt i(start); i <= numberOfSol; i++ )
+    for( UInt i(start); i < numberOfSol; i++ )
     {
 
         // *reconstructed_1 *=0.0; *reconstructed_2 *=0.0; *reconstructed_3 *=0.0;
         // *deformationGradient_1 *=0.0; *deformationGradient_2 *=0.0; *deformationGradient_3 *=0.0;
-	*jacobianF *= 0.0;
+        *jacobianF *= 0.0;
 
         // Reading the solution
         // resetting the element of the vector
-	*disp *= 0.0;
-	*dispRead *= 0.0;
+        *disp *= 0.0;
+        *dispRead *= 0.0;
 
-	UInt current(0);
-	if( !readType.compare("interval") )
-	  {
-	    current = i ;
-	  }
-	else
-	  {
-	    current = dataFile ( "importer/iteration" , 100000, i );
-	  }
+        UInt current(0);
+        if( !readType.compare("interval") )
+        {
+            current = i ;
+        }
+        else
+        {
+            current = dataFile ( "importer/iteration" , 100000, i );
+        }
         // Transform current ingot a string
         std::string iterationString;
         std::ostringstream number;
@@ -545,16 +545,16 @@ Structure::run3d()
         number << std::setw (5) << ( current );
         iterationString = number.str();
 
-	std::cout << "Current reading: " << iterationString << std::endl;
+        std::cout << "Current reading: " << iterationString << std::endl;
 
         /*!Definition of the ExporterData, used to load the solution inside the previously defined vectors*/
         LifeV::ExporterData<mesh_Type> solutionDispl  (LifeV::ExporterData<mesh_Type>::VectorField,nameField + "." + iterationString,
-						       dFESpace, disp, UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
+                                                       dFESpace, disp, UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
 
         //Read the variable
         M_importer->readVariable (solutionDispl);
 
-	*dispRead = *disp;
+        *dispRead = *disp;
 
         // Computing references
         // *reconstructed_1 = dFESpace->gradientRecovery (*disp, 0);

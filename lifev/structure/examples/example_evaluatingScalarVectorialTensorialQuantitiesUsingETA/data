@@ -25,9 +25,10 @@ save       = 1
 
 [importer]
 type        = hdf5 #ensight 			# hdf5 (if library compiled with hdf5 support) or ensight
-filename    = smallTime/steadyStairs-MM-Weak
+filename    = generalizedHolzapfelAnisotropicBulk-9
 nameField   = displacement
-iteration   = '0 19 39 60 80 100 120 140 160 180 199 219'
+analysis    = instant
+iteration   = '21'
 
 [solid]
 
@@ -37,7 +38,7 @@ material_flag   = 1
 thickness       =  0.1
 
 [../model]
-constitutiveLaw = anisotropic   #isotropic, anisotropic
+constitutiveLaw = isotropic   #isotropic, anisotropic
 young     	= 8.e+6
 poisson   	= 0.49
 bulk		= 1.3333e+8
@@ -56,7 +57,7 @@ smoothness     = 100000000
 
 [../../time_discretization]
 method          = BDF
-initialtime 	= 0.
+initialtime 	= 0.1
 endtime     	= 0.4
 timestep    	= 0.1
 BDF_order   	= 2
@@ -64,7 +65,7 @@ BDF_order   	= 2
 [../space_discretization]
 mesh_type   = .mesh
 mesh_dir  	= ./
-mesh_file 	= cubeY4.mesh
+mesh_file 	= WulandandaGeometry.mesh
 order     	= P1
 
 [../miscellaneous]
