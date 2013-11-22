@@ -1435,7 +1435,7 @@ public:
 
     void writeDataFormat (const Real& number, std::ofstream& stream, const EndLine& flag);
     void writeDataFormat (const Int& number, std::ofstream& stream, const EndLine& flag);
-    void writeDataFormat (const string& text, std::ofstream& stream, const EndLine& flag);
+    void writeDataFormat (const std::string& text, std::ofstream& stream, const EndLine& flag);
     void writeNewLine (std::ofstream& stream);
 
 private:

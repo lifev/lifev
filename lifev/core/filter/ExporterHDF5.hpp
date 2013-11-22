@@ -308,7 +308,7 @@ void ExporterHDF5<MeshType>::postProcess (const Real& time)
     this->computePostfix();
 
     std::size_t found ( this->M_postfix.find ( "*" ) );
-    if ( found == string::npos )
+    if ( found == std::string::npos )
     {
         if (!this->M_procId)
         {
@@ -874,7 +874,7 @@ void ExporterHDF5<MeshType>::writeVectorDatastructure  ( std::ofstream& xdmf, co
 {
 
 
-    string coord[3] = {"X", "Y", "Z"}; // see also wr_vector
+    std::string coord[3] = {"X", "Y", "Z"}; // see also wr_vector
 
     xdmf << "         <DataStructure ItemType=\"Function\"\n"
          << "                        Dimensions=\""
