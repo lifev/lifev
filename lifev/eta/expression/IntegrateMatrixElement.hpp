@@ -296,6 +296,26 @@ IntegrateMatrixElement (const boost::shared_ptr<MeshType>& mesh,
         M_offsetLeft (offsetLeft),
         M_ompParams()
 {
+    switch (MeshType::geoShape_Type::BasRefSha::S_shape)
+    {
+        case LINE:
+            M_globalCFE = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feSegP0, geometricMapFromMesh<MeshType>(), quadrature);
+            break;
+        case TRIANGLE:
+            M_globalCFE = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feTriaP0, geometricMapFromMesh<MeshType>(), quadrature);
+            break;
+        case QUAD:
+            M_globalCFE = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feQuadQ0, geometricMapFromMesh<MeshType>(), quadrature);
+            break;
+        case TETRA:
+            M_globalCFE = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), quadrature);
+            break;
+        case HEXA:
+            M_globalCFE = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feHexaQ0, geometricMapFromMesh<MeshType>(), quadrature);
+            break;
+        default:
+            ERROR_MSG ("Unrecognized element shape");
+    }
     M_evaluation.setQuadrature (quadrature);
     M_evaluation.setGlobalCFE (M_globalCFE);
     M_evaluation.setTestCFE (M_testCFE);
