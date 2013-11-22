@@ -74,7 +74,7 @@ int main (int argc, char** argv)
 #endif
 
     GetPot command_line (argc, argv);
-    const string data_file_name = command_line.follow ( "data_getPot", 2, "-f", "--file" );
+    const std::string data_file_name = command_line.follow ( "data_getPot", 2, "-f", "--file" );
 
     GetPot dataFile ( data_file_name );
 
