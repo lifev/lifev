@@ -108,7 +108,7 @@ void bcExportTriadToParaview (std::map< ID, std::vector< Real > >& triad, std::s
     //Is the file open?
     if (file.fail() )
     {
-        cerr << "Error: The file is not opened " << std::endl;
+        std::cerr << "Error: The file is not opened " << std::endl;
     }
     else
     {

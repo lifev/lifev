@@ -182,7 +182,7 @@ OneDFSIData::setup ( const GetPot& dataFile, const std::string& section )
     resetContainers();
 
     // Select a law for the coefficients
-    std::map< string, OneD_distributionLaw > distributionLawMap;
+    std::map< std::string, OneD_distributionLaw > distributionLawMap;
     distributionLawMap["uniform"]   = uniform;
     distributionLawMap["linear"]    = linear;
     distributionLawMap["pointwise"] = pointwise;
