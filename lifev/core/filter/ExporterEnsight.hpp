@@ -361,7 +361,7 @@ void ExporterEnsight<MeshType>::postProcess (const Real& time)
 
     // the postfix will be full of stars, if this time step is not going to generate a snapshot
     std::size_t found ( this->M_postfix.find ( "*" ) );
-    if ( found == string::npos )
+    if ( found == std::string::npos )
     {
         if (!this->M_procId)
         {
@@ -429,7 +429,7 @@ void ExporterEnsight<MeshType>::import (const Real& time)
 
     this->computePostfix();
 
-    assert ( this->M_postfix.find ( "*" ) == string::npos );
+    assert ( this->M_postfix.find ( "*" ) == std::string::npos );
 
     if (!this->M_procId)
     {
