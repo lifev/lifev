@@ -46,9 +46,9 @@ namespace LifeV
 // ===================================================
 void ZeroDimensionalElement::showMe ( const Int& /*flag*/)
 {
-    cout << "Id = " << id();
-    cout << "\t type = ";
-    cout << enum2string ( type() );
+    std::cout << "Id = " << id();
+    std::cout << "\t type = ";
+    std::cout << enum2string ( type() );
 }
 
 const std::string ZeroDimensionalElement::enum2string ( const ZeroDimensionalElementType& type )
@@ -102,7 +102,7 @@ ZeroDimensionalElementPassive::ZeroDimensionalElementPassive() :
 void ZeroDimensionalElementPassive::showMe ( const Int& flag )
 {
     ZeroDimensionalElement::showMe ( flag );
-    cout << "\t Node1= " << nodeIndex ( 0 ) << "\t Node2= " << nodeIndex ( 1 );
+    std::cout << "\t Node1= " << nodeIndex ( 0 ) << "\t Node2= " << nodeIndex ( 1 );
 }
 
 void ZeroDimensionalElementPassive::connectElement ( zeroDimensionalNodeSPtr_Type& Nodes )
@@ -144,7 +144,7 @@ ZeroDimensionalElementPassiveResistor::ZeroDimensionalElementPassiveResistor()
 void ZeroDimensionalElementPassiveResistor::showMe ( const Int& flag )
 {
     ZeroDimensionalElementPassive::showMe ( flag );
-    cout << "\t parameter = " << parameter() << std::endl;
+    std::cout << "\t parameter = " << parameter() << std::endl;
 }
 
 void ZeroDimensionalElementPassiveResistor::buildABC ( matrix_Type& /*A*/,
@@ -200,7 +200,7 @@ ZeroDimensionalElementPassiveDiode::ZeroDimensionalElementPassiveDiode() :
 void ZeroDimensionalElementPassiveDiode::showMe ( const Int& flag )
 {
     ZeroDimensionalElementPassiveResistor::showMe ( flag );
-    cout << "\t FB = " << forwardBias() << "\t alpha = " << alpha() << "\t beta = " << beta() << std::endl;
+    std::cout << "\t FB = " << forwardBias() << "\t alpha = " << alpha() << "\t beta = " << beta() << std::endl;
 }
 void ZeroDimensionalElementPassiveDiode::calculateEffectiveResistance ( const Real& voltage )
 {
@@ -252,7 +252,7 @@ ZeroDimensionalElementPassiveCapacitor::ZeroDimensionalElementPassiveCapacitor()
 void ZeroDimensionalElementPassiveCapacitor::showMe ( const Int& flag )
 {
     ZeroDimensionalElementPassive::showMe ( flag );
-    cout << "\t parameter = " << parameter() << std::endl;
+    std::cout << "\t parameter = " << parameter() << std::endl;
 }
 
 void ZeroDimensionalElementPassiveCapacitor::extractSolution ( const ZeroDimensionalNodeS& Nodes )
@@ -307,11 +307,11 @@ void ZeroDimensionalElementPassiveInductor::showMe ( const Int& flag )
     ZeroDimensionalElementPassive::showMe ( flag );
     if ( flag == 0 )
     {
-        cout << "\t parameter = " << parameter() << std::endl;
+        std::cout << "\t parameter = " << parameter() << std::endl;
     }
     else
     {
-        cout << "\t EquationRow= " << M_equationRow << "\t VariableIndex= " << M_variableIndex;
+        std::cout << "\t EquationRow= " << M_equationRow << "\t VariableIndex= " << M_variableIndex;
     }
 }
 
@@ -390,7 +390,7 @@ ZeroDimensionalElementSource::ZeroDimensionalElementSource() :
 void ZeroDimensionalElementSource::showMe ( const Int& flag )
 {
     ZeroDimensionalElement::showMe ( flag );
-    cout << "\t Node1= " << nodeIndex() << std::endl;
+    std::cout << "\t Node1= " << nodeIndex() << std::endl;
 }
 
 // ===================================================
@@ -474,16 +474,16 @@ ZeroDimensionalNode::ZeroDimensionalNode() :
 
 void ZeroDimensionalNode::showMe ( const Int& flag )
 {
-    cout << "Id = " << id();
-    cout << "\t type = ";
-    cout << enum2string ( type() ) << "\t";
+    std::cout << "Id = " << id();
+    std::cout << "\t type = ";
+    std::cout << enum2string ( type() ) << "\t";
     if ( flag == 0 )
     {
         for ( UInt i = 0; i < M_elementListIndex.size(); i++ )
         {
-            cout << "{" << M_elementListIndex.at ( i ) << "," << M_nodeListIndex.at ( i ) << "}  ";
+            std::cout << "{" << M_elementListIndex.at ( i ) << "," << M_nodeListIndex.at ( i ) << "}  ";
         }
-        cout << std::endl;
+        std::cout << std::endl;
     }
 }
 
@@ -539,7 +539,7 @@ void ZeroDimensionalNodeUnknown::showMe ( const Int& flag )
     ZeroDimensionalNode::showMe ( flag );
     if ( flag == 1 )
     {
-        cout << "\t EquationRow= " << M_equationRow << "\t VariableIndex= " << M_variableIndex;
+        std::cout << "\t EquationRow= " << M_equationRow << "\t VariableIndex= " << M_variableIndex;
     }
 }
 
@@ -571,7 +571,7 @@ ZeroDimensionalElementS::ZeroDimensionalElementS() :
 
 void ZeroDimensionalElementS::showMe ( const Int& flag )
 {
-    cout << "=============== Show all ZeroDimensional Elements ===========" << std::endl;
+    std::cout << "=============== Show all ZeroDimensional Elements ===========" << std::endl;
     for ( iterZeroDimensionalElement_Type theElement = M_elementList->begin(); theElement != M_elementList->end(); theElement++ )
     {
         ( *theElement )->showMe ( flag );
@@ -590,7 +590,7 @@ ZeroDimensionalNodeS::ZeroDimensionalNodeS() :
 
 void ZeroDimensionalNodeS::showMe ( const Int& flag )
 {
-    cout << "=============== Show all ZeroDimensional Nodes    ===========" << std::endl;
+    std::cout << "=============== Show all ZeroDimensional Nodes    ===========" << std::endl;
     for ( iterZeroDimensionalNode_Type theNode = M_nodeList->begin(); theNode != M_nodeList->end(); theNode++ )
     {
         ( *theNode )->showMe ( flag );
@@ -785,14 +785,14 @@ void ZeroDimensionalCircuitData::createElementResistor ( Int ID,
     theElement->setId ( ID );
     if ( M_Elements->elementCounter() != ID )
     {
-        cerr << "Error: Element Id error at  " << ID;
+        std::cerr << "Error: Element Id error at  " << ID;
         exit ( -1 );
     }
     theElement->setNodeIndex ( node1 );
     theElement->setNodeIndex ( node2 );
     if ( parameter <= 0 )
     {
-        cerr << "Error: Resistance value <=0, ID =  " << ID;
+        std::cerr << "Error: Resistance value <=0, ID =  " << ID;
         exit ( -1 );
     }
     theElement->setParameter ( 1.0 / parameter );
@@ -808,7 +808,7 @@ void ZeroDimensionalCircuitData::createElementCapacitor ( Int ID,
     theElement->setId ( ID );
     if ( M_Elements->elementCounter() != ID )
     {
-        cerr << "Error: Element Id error at  " << ID;
+        std::cerr << "Error: Element Id error at  " << ID;
         exit ( -1 );
     }
     theElement->setNodeIndex ( node1 );
@@ -827,7 +827,7 @@ void ZeroDimensionalCircuitData::createElementInductor ( Int ID,
 
     if ( M_Elements->elementCounter() != ID )
     {
-        cerr << "Error: Element Id error at  " << ID;
+        std::cerr << "Error: Element Id error at  " << ID;
         exit ( -1 );
     }
     theElement->setNodeIndex ( node1 );
@@ -847,7 +847,7 @@ void ZeroDimensionalCircuitData::createElementDiode ( Int ID,
     theElement->setId ( ID );
     if ( M_Elements->elementCounter() != ID )
     {
-        cerr << "Error: Element Id error at  " << ID;
+        std::cerr << "Error: Element Id error at  " << ID;
         exit ( -1 );
     }
     theElement->setNodeIndex ( node1 );
@@ -1088,7 +1088,7 @@ void OutPutFormat::writeDataFormat ( const Int& number,
     }
 }
 
-void OutPutFormat::writeDataFormat ( const string& text,
+void OutPutFormat::writeDataFormat ( const std::string& text,
                                      std::ofstream& stream,
                                      const EndLine& flag )
 {

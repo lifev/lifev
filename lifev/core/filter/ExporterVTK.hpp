@@ -488,7 +488,7 @@ void ExporterVTK<MeshType>::postProcess (const Real& time)
     this->computePostfix();
 
     std::size_t found ( this->M_postfix.find ( "*" ) );
-    if ( found == string::npos )
+    if ( found == std::string::npos )
     {
         if (this->M_procId == 0)
         {
