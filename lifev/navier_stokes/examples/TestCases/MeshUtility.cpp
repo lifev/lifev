@@ -35,13 +35,9 @@
 #ifndef NSMESHUTILITY_HPP
 #define NSMESHUTILITY_HPP
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <string>
 
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/mesh/MeshData.hpp>
 #include <lifev/navier_stokes/examples/TestCases/MeshUtility.hpp>

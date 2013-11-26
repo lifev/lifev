@@ -32,9 +32,6 @@
     @date 2012-03-19
  */
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-
 #include <cstdlib>
 
 #include <Epetra_ConfigDefs.h>
@@ -46,9 +43,6 @@
 #endif
 
 #include <Epetra_FECrsGraph.h>
-
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/util/LifeChrono.hpp>

@@ -65,7 +65,7 @@ template<typename MeshType, typename MapType, typename Fct>
 bool check_interpolate ( std::vector< boost::shared_ptr < FESpace<MeshType, MapType> > >& originalFeSpaceVecPtr,
                          std::vector< boost::shared_ptr < FESpace<MeshType, MapType> > >& finalFeSpaceVecPtr,
                          const MapEpetraType& outputMapType,  Fct& function,
-                         const Real errorArray [], const string stringArray [], Real eps, Real time, UInt verbose)
+                         const Real errorArray [], const std::string stringArray [], Real eps, Real time, UInt verbose)
 {
     std::vector< boost::shared_ptr <VectorEpetra> > interpVecPtr (originalFeSpaceVecPtr.size() );
     bool check (true);
@@ -88,7 +88,7 @@ bool check_interpolate ( std::vector< boost::shared_ptr < FESpace<MeshType, MapT
             if (verbose)
             {
                 UInt index = finalFeSpaceVecPtr.size() * i + j;
-                cout.precision (7);
+                std::cout.precision (7);
                 std::cout << stringArray[index] << ": " << std::setw (15) << std::setprecision (10) << err_rel << " (expected " << errorArray[index] << ")\t";
                 std::cout << "\n";
             }

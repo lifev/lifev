@@ -7,14 +7,14 @@
 # this script takes care of just the headers, no library is compiled
 
 ver="1.48.0"
+_ver="1_48_0"
 
 download_boost() {
-  wget -c http://gitorious.org/boost/cmake/archive-tarball/cmake-${ver}
+  wget -c http://downloads.sourceforge.net/project/boost/boost/${ver}/boost_${_ver}.tar.gz
 }
 
 unpack_boost() {
-  mv cmake-${ver} boost-cmake-${ver}.tar.gz
-  tar xzf boost-cmake-${ver}.tar.gz
+  tar xzf boost_${_ver}.tar.gz
 }
 
 build_boost() {
@@ -24,6 +24,6 @@ build_boost() {
 install_boost() {
   install -m 755 -d $install_dir
   install -m 755 -d $install_dir/include
-  cp -r $src_dir/boost-cmake/boost $install_dir/include
+  cp -r $src_dir/boost_${_ver}/boost $install_dir/include
 }
 
