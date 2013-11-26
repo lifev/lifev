@@ -8,20 +8,8 @@
 #ifndef BLOCKOPERATOR_HPP_
 #define BLOCKOPERATOR_HPP_
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wunused-local-typedefs"
-#pragma GCC diagnostic ignored "-Wextra"
-
 #include <Epetra_Import.h>
 #include <boost/numeric/ublas/matrix.hpp>
-
-// Restoring the previously ignored warnings:
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
-#pragma GCC diagnostic warning "-Wunused-local-typedefs"
-#pragma GCC diagnostic warning "-Wextra"
 
 #include <lifev/operator/linear_algebra/BlockEpetra_Map.hpp>
 #include <lifev/operator/linear_algebra/BlockEpetra_MultiVector.hpp>
@@ -59,7 +47,17 @@ public:
     typedef std::vector<vectorPtr_Type> vectorPtrContainer_Type;
     typedef std::vector<mapPtr_Type > mapPtrContainer_Type;
 
-    enum Structure{Diagonal, LowerTriangular, UpperTriangular, NoStructure, Rectangular};
+    enum Structure
+    {
+        Diagonal = 1,
+        LowerTriangular,
+        UpperTriangular,
+        AntiDiagonal,
+        LowerAntiTriangular,
+        UpperAntiTriangular,
+        NoStructure,
+        Rectangular
+    };
     //@}
 
     //! Empty Constructor
@@ -141,6 +139,9 @@ public:
     //! Returns a pointer to the Epetra_Comm communicator associated with this operator.
     const comm_Type & Comm() const {return *M_comm;}
 
+    //! Returns a const pointer to the (i,j) block
+    const operatorPtr_Type& block (UInt iblock, UInt jblock) const;
+
     //! Returns the Epetra_Map object associated with the domain of this operator.
     const map_Type & OperatorDomainMap() const {return *(M_domainMap->monolithicMap());}
     //! Returns the Epetra_Map object associated with the domain of this operator as a pointer
@@ -192,7 +193,7 @@ private:
     //! whenever transpose should be used
     bool M_useTranspose;
 
-    //! structure of the block operator (Diagonal, LowerDiagonal, UpperDiagonal, NoStructure)
+    //! structure of the block operator
     Structure M_structure;
 };
 
