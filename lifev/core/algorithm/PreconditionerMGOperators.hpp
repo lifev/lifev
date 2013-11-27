@@ -88,7 +88,6 @@ buildRestrictionP2ToP1 ( FESpacePtr_Type uFESpace,
     int lowerBoundX3 = 2 * numPressureDofs, upperBoundX3 = 3 * numPressureDofs - 1;
 
     // Creating the row and column map
-    int indexBase = 0;
     Epetra_Map colMap ( * ( ( uFESpace->map() + pFESpace->map() ).map (Unique) ) );
     Epetra_Map rowMap ( * ( ( pFESpace->map() + pFESpace->map() + pFESpace->map() + pFESpace->map() ).map (Unique) ) ); // Only P1 elements
     //Epetra_Map rowMap( *( ( uFESpace->map() + pFESpace->map() ).map(Unique) ) );
@@ -177,7 +176,6 @@ buildProlongationP1ToP2 ( FESpacePtr_Type uFESpace,
     const UInt numTotalDof ( numUTotalDof * fieldDim + numPTotalDof );
 
     // Creating the row and column map
-    int indexBase = 0;
     Epetra_Map colMap ( * ( ( pFESpace->map() + pFESpace->map() + pFESpace->map() + pFESpace->map() ).map (Unique) ) );
     //Epetra_Map colMap( *( ( uFESpace->map() + pFESpace->map() ).map(Unique) ) );
     //Epetra_Map colMap( 4*numPTotalDof, indexBase, *Comm );
