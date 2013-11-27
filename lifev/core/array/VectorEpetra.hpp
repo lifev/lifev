@@ -40,16 +40,10 @@
 #ifndef _EPETRAVECTOR_HPP_
 #define _EPETRAVECTOR_HPP_
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <Epetra_FEVector.h>
 #include <Epetra_Export.h>
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/array/MapEpetra.hpp>
@@ -150,7 +144,7 @@ public:
     VectorEpetra ( const VectorEpetra& vector, const Int& reduceToProc );
 
     //! Destructor
-    ~VectorEpetra() {}
+    virtual ~VectorEpetra() {}
 
     //@}
 

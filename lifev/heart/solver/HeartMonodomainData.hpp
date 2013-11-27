@@ -153,7 +153,7 @@ public:
     }
 
     //! fiber File
-    string             fibersFile()                     const
+    std::string             fibersFile()                     const
     {
         return M_fibersFile;
     }

@@ -37,9 +37,6 @@
 #ifndef VENANTKIRCHHOFFVISCOELASTICDATA_H
 #define VENANTKIRCHHOFFVISCOELASTICDATA_H 1
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <string>
 #include <iostream>
@@ -47,9 +44,6 @@
 #include <list>
 #include <boost/shared_ptr.hpp>
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <lifev/core/filter/GetPot.hpp>
 #include <lifev/core/LifeV.hpp>

@@ -45,8 +45,6 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <sstream>
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <EpetraExt_DistArray.h>
 #include <EpetraExt_HDF5.h>
@@ -56,8 +54,6 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <boost/algorithm/string.hpp>
 #include <boost/shared_array.hpp>
 
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/LifeV.hpp>
 
@@ -310,7 +306,7 @@ void ExporterHDF5<MeshType>::postProcess (const Real& time)
     this->computePostfix();
 
     std::size_t found ( this->M_postfix.find ( "*" ) );
-    if ( found == string::npos )
+    if ( found == std::string::npos )
     {
         if (!this->M_procId)
         {
@@ -876,7 +872,7 @@ void ExporterHDF5<MeshType>::writeVectorDatastructure  ( std::ofstream& xdmf, co
 {
 
 
-    string coord[3] = {"X", "Y", "Z"}; // see also wr_vector
+    std::string coord[3] = {"X", "Y", "Z"}; // see also wr_vector
 
     xdmf << "         <DataStructure ItemType=\"Function\"\n"
          << "                        Dimensions=\""
