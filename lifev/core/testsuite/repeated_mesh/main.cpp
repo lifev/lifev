@@ -32,9 +32,6 @@
     @date 2013-04-17
  */
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
@@ -44,9 +41,6 @@
 #include <Epetra_SerialComm.h>
 #endif
 
-//Tell the compiler to restore the warning previously silented
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/LifeV.hpp>
 
@@ -344,7 +338,7 @@ main ( int argc, char** argv )
 
         // test exporting of a repeated mesh
 #ifdef HAVE_HDF5
-        ExporterHDF5<mesh_Type> exporter ( dataFile, localMeshR, "pid", comm->MyPID() );
+        ExporterHDF5<mesh_Type> exporter ( dataFile, localMeshR, "pid_3d", comm->MyPID() );
         exporter.exportPID ( localMeshR, comm, true );
         exporter.postProcess ( 0. );
 #endif

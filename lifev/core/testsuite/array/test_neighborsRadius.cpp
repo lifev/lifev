@@ -91,16 +91,16 @@ int main ( int argc, char* argv[] )
     GhostHandler<mesh_Type> ghostObj ( fullMeshPtr, localMeshPtr, FESpaceP1->mapPtr(), Comm );
 
     // Creating node-node map over the interface
-    std::vector<int> interface_flags (2);
-    interface_flags[0] = 20;
-    interface_flags[1] = 1;
-    ghostObj.setUp (interface_flags);
+    std::vector<markerID_Type> interfaceMarkers (2);
+    interfaceMarkers[0] = 20;
+    interfaceMarkers[1] = 1;
+    ghostObj.setUp ( interfaceMarkers );
 
     UInt ID_trial = 1277;
     std::set<ID> Neighbors;
     double radius = 4 * (double) MeshUtility::MeshStatistics::computeSize (*fullMeshPtr).maxH;
 
-    Neighbors = ghostObj.createNodeNodeNeighborsMapWithinRadius (radius, fullMeshPtr->point (ID_trial).id() );
+    Neighbors = ghostObj.neighborsWithinRadius ( fullMeshPtr->point (ID_trial).id(), radius );
     Neighbors.insert (fullMeshPtr->point (ID_trial).id() );
 
     // Exporting the solution

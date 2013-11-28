@@ -229,7 +229,7 @@ main ( int argc, char** argv )
         {
             std::cout << "Building the velocity FE space ... " << std::flush;
         }
-        fespacePtr_Type uFESpace ( new fespace_Type ( meshPart.meshPartition(), uOrder, geoDim, Comm ) );
+        fespacePtr_Type uFESpace ( new fespace_Type ( meshPtr, uOrder, geoDim, Comm ) );
         if ( verbose )
         {
             std::cout << "ok." << std::endl;

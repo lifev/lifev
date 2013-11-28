@@ -40,14 +40,12 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <Epetra_config.h>
 
+#include<lifev/core/LifeV.hpp>
+
 #ifdef LIFEV_HAS_HDF5
 #ifdef HAVE_MPI
 
 #include <Epetra_MpiComm.h>
-
-
-#include<lifev/core/LifeV.hpp>
-#include <lifev/core/filter/HDF5IO.hpp>
 
 #include <lifev/core/filter/HDF5IO.hpp>
 
@@ -745,6 +743,7 @@ void PartitionIO<MeshType>::writeElements()
                             currentOffset, &M_uintBuffer[0]);
         }
     }
+
     M_HDF5IO.closeTable ("elements");
 }
 
@@ -862,7 +861,7 @@ void PartitionIO<MeshType>::readPoints()
     {
         for (UInt j = 0; j < M_numPoints; ++j)
         {
-            pp = & (M_meshPartIn->addPoint (false, false) );
+            pp = & ( M_meshPartIn->addPoint ( false, false ) );
             pp->replaceFlag (
                 static_cast<flag_Type> (M_uintBuffer[2 * stride + j]) );
             pp->setMarkerID (M_uintBuffer[j]);
@@ -876,7 +875,7 @@ void PartitionIO<MeshType>::readPoints()
     {
         for (UInt j = 0; j < M_numPoints; ++j)
         {
-            pp = & (M_meshPartIn->addPoint (false, false) );
+            pp = & ( M_meshPartIn->addPoint ( false, false ) );
             pp->replaceFlag (
                 static_cast<flag_Type> (M_uintBuffer[stride * j + 2]) );
             pp->setMarkerID (M_uintBuffer[stride * j]);
