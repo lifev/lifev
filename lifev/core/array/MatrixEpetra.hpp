@@ -136,7 +136,7 @@ public:
     MatrixEpetra ( const MapEpetra& map, matrix_ptrtype crsMatrixPtr);
 
     //! Destructor
-    virtual ~MatrixEpetra() {};
+    virtual ~MatrixEpetra() {}
 
     //@}
 

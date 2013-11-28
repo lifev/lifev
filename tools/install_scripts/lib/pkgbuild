@@ -87,12 +87,16 @@ build_package() {
     # build
     mkdir -p $build_dir
     pushd $build_dir >/dev/null
-      echo_dbg "building $package package"
-      build_$package
+      if [ $BUILD ]; then
+        echo_dbg "building $package package"
+        build_$package
+      fi
 
       # install
-      echo_dbg "installing $package package to $install_dir"
-      install_$package
+      if [ $INSTALL ]; then
+        echo_dbg "installing $package package to $install_dir"
+        install_$package
+      fi
     popd >/dev/null # $build_dir
 
   popd >/dev/null # $BUILD_DIR/scratch/$package

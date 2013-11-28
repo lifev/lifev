@@ -118,7 +118,7 @@ int main ( int argc, char* argv[] )
     std::set<ID> Neighbors;
     UInt nc = 2;
 
-    Neighbors = ghostObj.createCircleNodeNodeNeighborsMap (nc, fullMeshPtr->point (ID_trial).id() );
+    Neighbors = ghostObj.circleNeighbors ( fullMeshPtr->point (ID_trial).id(), nc );
     Neighbors.insert (fullMeshPtr->point (ID_trial).id() );
 
     // createCircleNodeNodeNeighborsMap takes both the number of circles (nc) where to find the neighbors, and the
