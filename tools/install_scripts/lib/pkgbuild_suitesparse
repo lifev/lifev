@@ -20,13 +20,13 @@ build_suitesparse() {
   sed -e 's/(METIS_PATH)\/Lib/(METIS_PATH)/g' -i CHOLMOD/Lib/Makefile
   sed -e 's/(METIS_PATH)\/Lib/(METIS_PATH)/g' -i CHOLMOD/Tcov/Makefile
   _blas="-lblas"
-  if [ "${blas_name}" != "" ]; then
-    _blas="${blas_lib}/${blas_name}"
+  if [ "${blas_names}" != "" ]; then
+    _blas="${blas_libs}"
   fi
 
   _lapack="-llapack"
-  if [ "${lapack_name}" != "" ]; then
-    _lapack="${lapack_lib}/${lapack_name}"
+  if [ "${lapack_names}" != "" ]; then
+    _lapack="${lapack_libs}"
   fi
 
   # Configure
@@ -58,9 +58,12 @@ EOF
 
   make clean || true
   make library
+  cd -
 }
 
 install_suitesparse() {
+  cd ${src_dir}/SuiteSparse
+  
   # Installing
   install -m 775 -d ${install_dir}/{lib,include}
   install -m 664 {CAMD,COLAMD,LDL,CHOLMOD,SPQR,CXSparse,KLU,BTF,UMFPACK,CCOLAMD,AMD}/Include/*.h \
@@ -68,5 +71,7 @@ install_suitesparse() {
   install -m 664 {CAMD,COLAMD,LDL,CHOLMOD,SPQR,CXSparse,KLU,BTF,UMFPACK,CCOLAMD,AMD}/Lib/*.a \
     "${install_dir}/lib";
   install -m 664 UFconfig/UFconfig.h ${install_dir}/include;
+
+  cd -
 }
 

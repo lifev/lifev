@@ -98,6 +98,7 @@ int main (int argc, char** argv)
 
     meshPart.attachUnpartitionedMesh (fullMeshPtr);
     meshPart.doPartitionGraph();
+    meshPart.fillEntityPID();
     meshPart.doPartitionMesh();
 
     // Release the original mesh from the MeshPartitioner object and

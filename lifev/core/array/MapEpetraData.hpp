@@ -45,102 +45,16 @@
 namespace LifeV
 {
 
-
-//! MapEpetraData - todo
+//! MapEpetraData
 /*!
-  The MapEpetra class provides a general interface for the Epetra_Map class of Trilinos.
+  The MapEpetraData class stores local list of IDs to build Unique and Repeated maps.
  */
-class MapEpetraData
+struct MapEpetraData
 {
-public:
-
-    //! @name Public Types
-    //@{
-
-    typedef std::vector<int> idList_Type;
-
-    //@}
-
-    //! @name Constructors & Destructor
-    //@{
-
-    //! Empty Constructor
-    MapEpetraData ();
-
-    //! Constructor
-    /*!
-      @param uniqueMapSize size of the Unique map
-      @param repeatedMapSize size of the Repeated map
-    */
-    MapEpetraData ( const UInt& uniqueMapSize, const UInt& repeatedMapSize );
-
-    //! Destructor
-    ~MapEpetraData() {}
-
-    //@}
-
-    //! @name Get methods
-    //@{
-
-    idList_Type const& idList ( MapEpetraType listType ) const;
-
-    //@}
-
-    //! @name Methods
-    //@{
-
-    //! Set
-    template <typename list_Type>
-    void set ( list_Type const& list, MapEpetraType listType );
-
-    //! Show informations about the map data
-    void showMe ( std::ostream& output = std::cout ) const;
-
-    //@}
-
-private:
-
-    idList_Type M_uniqueList;
-    idList_Type M_repeatedList;
-
-}; // class MapEpetraData
-
-inline MapEpetraData::MapEpetraData ( const UInt& uniqueMapSize, const UInt& repeatedMapSize ) :
-    M_uniqueList ( uniqueMapSize ),
-    M_repeatedList ( repeatedMapSize )
-{}
-
-template <typename list_Type>
-inline void MapEpetraData::set ( list_Type const& list, MapEpetraType listType )
-{
-    switch ( listType )
-    {
-        case Unique:
-            std::copy ( list.begin(), list.end(), M_uniqueList.begin() );
-            break;
-        case Repeated:
-            std::copy ( list.begin(), list.end(), M_repeatedList.begin() );
-            break;
-        default:
-            ERROR_MSG ( "wrong map type" );
-    }
-}
-
-inline MapEpetraData::idList_Type const& MapEpetraData::idList ( MapEpetraType listType ) const
-{
-    switch ( listType )
-    {
-        case Unique:
-            return M_uniqueList;
-            break;
-        case Repeated:
-            return M_repeatedList;
-            break;
-        default:
-            ERROR_MSG ( "wrong map type" );
-    }
-    return M_uniqueList;
-}
+    typedef std::vector<Int> idList_Type;
+    idList_Type unique;
+    idList_Type repeated;
+};
 
 } // namespace LifeV
 
