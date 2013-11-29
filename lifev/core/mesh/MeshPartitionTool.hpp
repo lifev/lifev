@@ -84,8 +84,8 @@ public:
     //! @name Public Types
     //@{
     typedef MeshType                             mesh_Type;
-    typedef boost::shared_ptr <
-    std::vector<std::vector<Int> > >             graph_Type;
+    typedef std::vector<Int> idList_Type;
+    typedef boost::shared_ptr <std::vector<idList_Type > > graph_Type;
     typedef GraphCutterBase<mesh_Type>           graphCutter_Type;
     typedef MeshPartBuilder<mesh_Type>           meshPartBuilder_Type;
     typedef boost::shared_ptr<mesh_Type>         meshPtr_Type;
@@ -143,11 +143,6 @@ public:
     {
         return M_allMeshParts;
     }
-    //! Return a reference to M_ghostDataMap
-    //const GhostEntityDataMap_Type&  ghostDataMap() const
-    //{
-    //  return M_ghostDataMap;
-    //}
     //@}
 
 private:
@@ -155,6 +150,9 @@ private:
     //@{
     //! This method performs all the steps for the mesh and graph partitioning
     void run();
+
+    //! Initialize M_entityPID
+    void fillEntityPID(graph_Type graph);
     //@}
 
     // Private copy constructor and assignment operator are disabled
@@ -173,6 +171,10 @@ private:
     boost::shared_ptr<graphCutter_Type>        M_graphCutter;
     boost::shared_ptr<meshPartBuilder_Type>    M_meshPartBuilder;
     bool                                       M_success;
+
+    //! Store ownership for each entity, subdivided by entity type
+    typename meshPartBuilder_Type::entityPID_Type M_entityPID;
+
     //@}
 }; // class MeshPartitionToolOnline
 
@@ -233,18 +235,27 @@ void MeshPartitionTool < MeshType >::run()
     graph_Type graph = M_graphCutter->getGraph();
     M_graphCutter.reset();
 
+    // Get the current operation mode and number of parts
+    bool offlineMode = M_parameters.get<bool> ("offline_mode", false);
+
+    // Fill entity PID
+    if (!M_myPID)
+    {
+        std::cout << "Filling entity PID lists ..." << std::endl;
+    }
+    fillEntityPID(graph);
+
     if (!M_myPID)
     {
         std::cout << "Building mesh parts ..." << std::endl;
     }
 
-    bool offlineMode = M_parameters.get<bool> ("offline_mode", false);
     if (! offlineMode)
     {
         // Online partitioning
         M_meshPart.reset (new mesh_Type(M_comm));
         M_meshPart->setIsPartitioned(true);
-        M_meshPartBuilder->run (M_meshPart, graph, M_myPID);
+        M_meshPartBuilder->run (M_meshPart, graph, M_entityPID, M_myPID);
 
         // Mark the partition as successful
         M_success = true;
@@ -262,7 +273,6 @@ void MeshPartitionTool < MeshType >::run()
         }
         else
         {
-            Int numParts = M_parameters.get<Int> ("num_parts");
             /*
              * In offline partitioning mode, with overlap, we must make sure
              * that each time the M_meshPartBuilder is run, which modifies the
@@ -270,6 +280,7 @@ void MeshPartitionTool < MeshType >::run()
              * augmented graph from the previous part.
              */
 
+            Int numParts = M_parameters.get<Int> ("num_parts");
             M_allMeshParts.reset (new partMesh_Type (numParts) );
             for (Int curPart = 0; curPart < numParts; ++curPart)
             {
@@ -278,7 +289,7 @@ void MeshPartitionTool < MeshType >::run()
                 M_allMeshParts->at (curPart).reset (new mesh_Type);
                 M_allMeshParts->at (curPart)->setIsPartitioned(true);
                 M_meshPartBuilder->run (M_allMeshParts->at (curPart),
-                                        graph,
+                                        graph, M_entityPID,
                                         curPart);
 
                 // At this point (*graph)[curPart] has been modified. Restore
@@ -298,6 +309,56 @@ void MeshPartitionTool < MeshType >::run()
     M_meshPartBuilder.reset();
     // Release the pointer to the original uncut mesh
     M_originalMesh.reset();
+}
+
+template<typename MeshType>
+void
+MeshPartitionTool<MeshType>::fillEntityPID (graph_Type graph)
+{
+    Int numParts = graph->size();
+
+    // initialize entity PIDs to 0
+    M_entityPID.points.resize   ( M_originalMesh->numPoints(),   0 );
+    M_entityPID.elements.resize ( M_originalMesh->numElements(), 0 );
+    M_entityPID.facets.resize   ( M_originalMesh->numFacets(),   0 );
+    M_entityPID.ridges.resize   ( M_originalMesh->numRidges(),   0 );
+
+    // check: parallel algorithm seems to be slower for this
+    // p = 0 can be skipped since M_entityPID is already initialized at that value
+    for ( Int p = 1; p < numParts; p++ )
+    {
+        for ( UInt e = 0; e < (*graph) [ p ].size(); e++ )
+        {
+            // point block
+            for ( UInt k = 0; k < mesh_Type::element_Type::S_numPoints; k++ )
+            {
+                const ID& pointID = M_originalMesh->element ( (*graph) [ p ][ e ] ).point ( k ).id();
+                // pointPID should be the maximum between the procs that own it
+                M_entityPID.points[ pointID ] = std::max ( M_entityPID.points[ pointID ], p );
+            }
+
+            // elem block
+            const ID& elemID = M_originalMesh->element ( (*graph) [ p ][ e ] ).id();
+            // at his stage each element belongs to a single partition, overlap is not yet done.
+            M_entityPID.elements[ elemID ] = p;
+
+            // facet block
+            for ( UInt k = 0; k < mesh_Type::element_Type::S_numFacets; k++ )
+            {
+                const ID& facetID = M_originalMesh->facet ( M_originalMesh->localFacetId ( elemID, k ) ).id();
+                // facetPID should be the maximum between the proc that own it
+                M_entityPID.facets[ facetID ] = std::max ( M_entityPID.facets[ facetID ], p );
+            }
+
+            // ridge block
+            for ( UInt k = 0; k < mesh_Type::element_Type::S_numRidges; k++ )
+            {
+                const ID& ridgeID = M_originalMesh->ridge ( M_originalMesh->localRidgeId ( elemID, k ) ).id();
+                // ridgePID should be the maximum between the proc that own it
+                M_entityPID.ridges[ ridgeID ] = std::max ( M_entityPID.ridges[ ridgeID ], p );
+            }
+        }
+    }
 }
 
 template < typename MeshType>

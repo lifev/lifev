@@ -74,10 +74,18 @@ public:
     //! @name Public Types
     //@{
     typedef MeshType mesh_Type;
+    typedef std::vector<Int> idList_Type;
     typedef boost::shared_ptr<mesh_Type> meshPtr_Type;
     typedef boost::shared_ptr<Epetra_Comm>       commPtr_Type;
     typedef boost::shared_ptr <
     std::vector<std::vector<Int> > > graph_Type;
+    typedef struct
+    {
+        idList_Type elements;
+        idList_Type facets;
+        idList_Type ridges;
+        idList_Type points;
+    } entityPID_Type;
     //@}
 
     //! \name Constructors & Destructors
@@ -111,6 +119,7 @@ public:
      */
     void run (const meshPtr_Type& meshPart,
               const graph_Type& graph,
+              const entityPID_Type& entityPIDList,
               const UInt partIndex);
     //@}
 
@@ -169,7 +178,7 @@ private:
       Mark all owned entities in the partition with EntityFlag::OWNED
       to properly build map members in DOF::GlobalElements().
     */
-    void markEntityOwnership();
+    void markEntityOwnership(const entityPID_Type& entityPID);
 
     //! Private Data Members
     //@{
@@ -190,7 +199,6 @@ private:
     meshPtr_Type                               M_meshPart;
     UInt                                       M_partIndex;
     UInt                                       M_overlap;
-    std::vector<std::vector<UInt> >            M_entityPID;
     commPtr_Type                               M_comm;
     //@}
 }; // class MeshPartBuilder
@@ -212,13 +220,13 @@ MeshPartBuilder<MeshType>::MeshPartBuilder (const meshPtr_Type& mesh,
       M_meshPart(),
       M_partIndex (0),
       M_overlap (overlap),
-      M_entityPID (4),
       M_comm (comm)
 {}
 
 template<typename MeshType>
 void MeshPartBuilder<MeshType>::run (const meshPtr_Type& meshPart,
                                      const graph_Type& graph,
+                                     const entityPID_Type& entityPIDList,
                                      const UInt partIndex)
 {
     M_meshPart = meshPart;
@@ -227,10 +235,12 @@ void MeshPartBuilder<MeshType>::run (const meshPtr_Type& meshPart,
     const std::vector<Int>& elementList ( (*graph) [partIndex]);
 
     GhostHandler<mesh_Type> gh ( M_originalMesh, M_comm );
-    gh.fillEntityPID ( graph, M_entityPID );
     if ( M_overlap != 0)
     {
-        gh.ghostMapOnElementsP1 ( graph, M_entityPID[ 3 ], 1, M_partIndex );
+        gh.extendGraphFE ( graph,
+                           entityPIDList.points,
+                           M_overlap,
+                           M_partIndex );
     }
 
     constructLocalMesh (elementList);
@@ -241,7 +251,7 @@ void MeshPartBuilder<MeshType>::run (const meshPtr_Type& meshPart,
 
     finalSetup();
 
-    markEntityOwnership();
+    markEntityOwnership(entityPIDList);
 
     reset();
 }
@@ -560,14 +570,15 @@ void MeshPartBuilder<MeshType>::finalSetup()
 }
 
 template<typename MeshType>
-void MeshPartBuilder<MeshType>::markEntityOwnership()
+void
+MeshPartBuilder<MeshType>::markEntityOwnership(const entityPID_Type& entityPID)
 {
 	// mark owned entities by each partition as described in M_entityPID
 	//M_entityPID or flags should be exported and read back to make it work
 	for ( UInt e = 0; e < M_meshPart->numElements(); e++ )
 	{
 		typename MeshType::element_Type& element = M_meshPart->element (e);
-		if (M_entityPID[0][element.id()] != static_cast<UInt> (M_partIndex) )
+        if (entityPID.elements[element.id()] != static_cast<UInt> (M_partIndex) )
 		{
 			element.setFlag ( EntityFlags::GHOST );
 		}
@@ -576,7 +587,7 @@ void MeshPartBuilder<MeshType>::markEntityOwnership()
 	for ( UInt f = 0; f < M_meshPart->numFacets(); f++ )
 	{
 		typename MeshType::facet_Type& facet = M_meshPart->facet (f);
-		if (M_entityPID[1][facet.id()] != static_cast<UInt> (M_partIndex) )
+        if (entityPID.facets[facet.id()] != static_cast<UInt> (M_partIndex) )
 		{
 			facet.setFlag ( EntityFlags::GHOST );
 		}
@@ -585,7 +596,7 @@ void MeshPartBuilder<MeshType>::markEntityOwnership()
 	for ( UInt r = 0; r < M_meshPart->numRidges(); r++ )
 	{
 		typename MeshType::ridge_Type& ridge = M_meshPart->ridge (r);
-		if (M_entityPID[2][ridge.id()] != static_cast<UInt> (M_partIndex) )
+        if (entityPID.ridges[ridge.id()] != static_cast<UInt> (M_partIndex) )
 		{
 			ridge.setFlag ( EntityFlags::GHOST );
 		}
@@ -594,16 +605,11 @@ void MeshPartBuilder<MeshType>::markEntityOwnership()
 	for ( UInt p = 0; p < M_meshPart->numPoints(); p++ )
 	{
 		typename MeshType::point_Type& point = M_meshPart->point (p);
-		if (M_entityPID[3][point.id()] != static_cast<UInt> (M_partIndex) )
+        if (entityPID.points[point.id()] != static_cast<UInt> (M_partIndex) )
 		{
 			point.setFlag ( EntityFlags::GHOST );
 		}
 	}
-
-	clearVector ( M_entityPID[ 0 ] );
-	clearVector ( M_entityPID[ 1 ] );
-	clearVector ( M_entityPID[ 2 ] );
-	clearVector ( M_entityPID[ 3 ] );
 }
 
 template<typename MeshType>
@@ -621,10 +627,6 @@ void MeshPartBuilder<MeshType>::reset()
     M_globalToLocalElement.clear();
 
     M_partIndex = 0;
-
-    // Maybe also reset M_entityPID
-    M_entityPID.clear();
-    M_entityPID.resize (4);
 }
 
 }// namespace LifeV
