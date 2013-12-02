@@ -63,7 +63,7 @@
 #include <lifev/core/algorithm/Preconditioner.hpp>
 #include <lifev/core/util/LifeChrono.hpp>
 
-// #include <lifev/navier_stokes/algorithm/PreconditionerPCD.hpp>
+#include <lifev/navier_stokes/algorithm/PreconditionerPCD.hpp>
 #include <lifev/navier_stokes/solver/NavierStokesSolver/AssemblyPolicyStokes.hpp>
 #include <lifev/navier_stokes/solver/NavierStokesSolver/NavierStokesProblem.hpp>
 
@@ -148,11 +148,11 @@ AssemblyPolicyNavierStokesPicard< mesh_Type >::assembleSystem ( matrixPtr_Type s
     beta += *solution;
     AssemblyPolicyStokes< mesh_Type >::M_assembler->addConvection ( *systemMatrix, 1.0, beta );
 
-    //    if ( preconditioner->preconditionerType() == "PCD" )
-    //    {
-    //        PreconditionerPCD* pcdPtr = dynamic_cast<PreconditionerPCD*> ( preconditioner.get() );
-    //        pcdPtr->updateBeta ( beta );
-    //    }
+    if ( preconditioner->preconditionerType() == "PCD" )
+    {
+    	PreconditionerPCD* pcdPtr = dynamic_cast<PreconditionerPCD*> ( preconditioner.get() );
+    	pcdPtr->updateBeta ( beta );
+    }
 }
 
 } // namespace LifeV

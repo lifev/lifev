@@ -38,7 +38,7 @@
 #include "PreconditionerYosida.hpp"
 #include <lifev/core/algorithm/PreconditionerIfpack.hpp>
 #include <lifev/core/algorithm/PreconditionerML.hpp>
-#include <lifev/core/algorithm/PreconditionerML2.hpp>
+// #include <lifev/core/algorithm/PreconditionerML2.hpp>
 #include <lifev/core/util/LifeChrono.hpp>
 #include <lifev/core/array/MatrixEpetraStructured.hpp>
 #include <lifev/core/array/MatrixEpetraStructuredView.hpp>
@@ -190,11 +190,11 @@ PreconditionerYosida::buildPreconditioner ( matrixPtr_Type& oper )
     boost::shared_ptr<matrix_Type> p1a = P1a;
     superPtr_Type precForBlock1 ( PRECFactory::instance().createObject ( M_fluidPrec ) );
     precForBlock1->setDataFromGetPot ( M_dataFile, M_fluidDataSection );
-    if ( M_fluidPrec == "ML2" )
-    {
-        PreconditionerML2* tmpPrecPtr = dynamic_cast<PreconditionerML2*> ( precForBlock1.get() );
-        tmpPrecPtr->setFESpace ( M_uFESpace, M_pFESpace );
-    }
+//    if ( M_fluidPrec == "ML2" )
+//    {
+//        PreconditionerML2* tmpPrecPtr = dynamic_cast<PreconditionerML2*> ( precForBlock1.get() );
+//        tmpPrecPtr->setFESpace ( M_uFESpace, M_pFESpace );
+//    }
     this->pushBack ( p1a, precForBlock1, notInversed, notTransposed );
     if ( verbose )
     {
