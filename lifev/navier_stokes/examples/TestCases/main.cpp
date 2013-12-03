@@ -29,9 +29,12 @@
     @brief Application to solve different Navier-Stokes problem
 
     @author Gwenol Grandperrin <gwenol.grandperrin@epfl.ch>
-    @date 06-05-2013
+    @date 03-12-2013
  */
 
+// Tell the compiler to ignore specific kind of warnings:
+#pragma GCC diagnostic ignored "-Wunused-variable"
+#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
@@ -45,6 +48,9 @@
 #include <Teuchos_XMLParameterListHelpers.hpp>
 #include <Teuchos_RCP.hpp>
 
+//Tell the compiler to restore the warning previously silented
+#pragma GCC diagnostic warning "-Wunused-variable"
+#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/mesh/RegionMesh.hpp>
@@ -74,6 +80,12 @@
 // Includes different test cases
 #include <lifev/navier_stokes/examples/TestCases/NavierStokesCavity.hpp>
 #include <lifev/navier_stokes/examples/TestCases/NavierStokesEthierSteinman.hpp>
+
+// Preconditioners for the Navier-Stokes equations
+#include <lifev/navier_stokes/algorithm/PreconditionerLSC.hpp>
+#include <lifev/navier_stokes/algorithm/PreconditionerPCD.hpp>
+#include <lifev/navier_stokes/algorithm/PreconditionerSIMPLE.hpp>
+#include <lifev/navier_stokes/algorithm/PreconditionerYosida.hpp>
 
 using namespace LifeV;
 
@@ -105,11 +117,11 @@ typedef NavierStokesSolver< mesh_Type, InitStokes, SemiImplicit, HDF5Exporter > 
 void setPreconditioner ( basePrecPtr_Type& precPtr,
                          const std::string& preconditionerName,
                          const std::string& precSection,
-                         boost::shared_ptr<NavierStokesProblem<mesh_Type> > /*nsProblem*/,
-                         const nsSolver_Type& /*nsSolver*/,
+                         boost::shared_ptr<NavierStokesProblem<mesh_Type> > nsProblem,
+                         const nsSolver_Type& nsSolver,
                          const GetPot& dataFile,
-                         boost::shared_ptr<Epetra_Comm> /*Comm*/,
-                         const bool /*useMinusDiv*/ )
+                         boost::shared_ptr<Epetra_Comm> Comm,
+                         const bool useMinusDiv )
 {
     if ( preconditionerName == "FromFile" )
     {
@@ -117,6 +129,48 @@ void setPreconditioner ( basePrecPtr_Type& precPtr,
         precPtr.reset ( PRECFactory::instance().createObject ( precName ) );
         ASSERT ( precPtr.get() != 0, " Preconditioner not set" );
         precPtr->setDataFromGetPot ( dataFile, precSection );
+    }
+    else if ( preconditionerName == "LSC" )
+    {
+        PreconditionerLSC* precLSCRawPtr ( 0 );
+        precLSCRawPtr = new PreconditionerLSC;
+        precLSCRawPtr->setFESpace ( nsSolver.uFESpace(), nsSolver.pFESpace() );
+        precLSCRawPtr->setDataFromGetPot ( dataFile, precSection );
+        precPtr.reset ( precLSCRawPtr );
+    }
+    else if ( preconditionerName == "PCD" )
+    {
+        PreconditionerPCD* precPCDRawPtr ( 0 );
+        precPCDRawPtr = new PreconditionerPCD;
+        precPCDRawPtr->setFESpace ( nsSolver.uFESpace(), nsSolver.pFESpace() );
+        precPCDRawPtr->setBCHandler ( nsSolver.bcHandler() );
+        precPCDRawPtr->setTimestep ( nsSolver.timestep() );
+        precPCDRawPtr->setViscosity ( nsProblem->viscosity() );
+        precPCDRawPtr->setDensity ( nsProblem->density() );
+        precPCDRawPtr->setComm ( Comm );
+        precPCDRawPtr->setDataFromGetPot ( dataFile, precSection );
+        precPCDRawPtr->setUseMinusDivergence ( useMinusDiv );
+        precPtr.reset ( precPCDRawPtr );
+    }
+    else if ( preconditionerName == "SIMPLE" )
+    {
+        PreconditionerSIMPLE* precSIMPLERawPtr ( 0 );
+        precSIMPLERawPtr = new PreconditionerSIMPLE;
+        precSIMPLERawPtr->setFESpace ( nsSolver.uFESpace(), nsSolver.pFESpace() );
+        precSIMPLERawPtr->setDampingFactor ( 1.0 );
+        precSIMPLERawPtr->setComm ( Comm );
+        precSIMPLERawPtr->setDataFromGetPot ( dataFile, precSection );
+        precPtr.reset ( precSIMPLERawPtr );
+    }
+    else if ( preconditionerName == "Yosida" )
+    {
+        PreconditionerYosida* precYosidaRawPtr ( 0 );
+        precYosidaRawPtr = new PreconditionerYosida;
+        precYosidaRawPtr->setFESpace ( nsSolver.uFESpace(), nsSolver.pFESpace() );
+        precYosidaRawPtr->setTimestep ( nsSolver.timestep() );
+        precYosidaRawPtr->setComm ( Comm );
+        precYosidaRawPtr->setDataFromGetPot ( dataFile, precSection );
+        precPtr.reset ( precYosidaRawPtr );
     }
     else
     {
@@ -148,7 +202,7 @@ main ( int argc, char** argv )
         displayer.leaderPrint ( " +-----------------------------------------------+\n\n" );
         displayer.leaderPrint ( " +-----------------------------------------------+\n" );
         displayer.leaderPrint ( " |           Author: Gwenol Grandperrin          |\n" );
-        displayer.leaderPrint ( " |             Date: 2013-05-06                  |\n" );
+        displayer.leaderPrint ( " |             Date: 2013-12-03                  |\n" );
         displayer.leaderPrint ( " +-----------------------------------------------+\n" );
 
         displayer.leaderPrint ( "\n[Initilization of MPI]\n" );
@@ -193,7 +247,7 @@ main ( int argc, char** argv )
         std::string meshPath                  = problemList.get ( "Resources path", "./Resources" );
         meshPath.append ("/");
 
-        // Here we create a Navier-Stokes problem object.
+        // Here we create a Navier-Stokes problem object
         boost::shared_ptr< NavierStokesProblem< mesh_Type > > nsProblem;
         if ( benchmark == "Cavity" )
         {
