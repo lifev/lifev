@@ -22,6 +22,7 @@ SET(mesh_HEADERS
   mesh/GraphCutterBase.hpp
   mesh/GraphCutterZoltan.hpp
   mesh/GraphCutterParMETIS.hpp
+  mesh/GraphUtil.hpp
   mesh/MeshPartitionTool.hpp
   mesh/MeshPartBuilder.hpp
   mesh/NeighborMarker.hpp

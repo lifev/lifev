@@ -59,6 +59,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/core/mesh/RegionMesh.hpp>
 #include <lifev/core/mesh/GraphCutterParMETIS.hpp>
 #include <lifev/core/mesh/GraphCutterZoltan.hpp>
+#include <lifev/core/mesh/GraphUtil.hpp>
 #include <lifev/core/mesh/MeshPartBuilder.hpp>
 
 //#include <lifev/core/mesh/GhostEntityData.hpp>
@@ -171,6 +172,10 @@ private:
     boost::shared_ptr<graphCutter_Type>        M_graphCutter;
     boost::shared_ptr<meshPartBuilder_Type>    M_meshPartBuilder;
     bool                                       M_success;
+    // TODO: this is temporary, may be changed later
+    bool                                       M_secondStage;
+    Int                                        M_secondStageNumParts;
+    std::vector<typename GraphUtil::graphPartitionPtr_Type> M_secondStageParts;
 
     //! Store ownership for each entity, subdivided by entity type
     typename meshPartBuilder_Type::entityPID_Type M_entityPID;
@@ -200,7 +205,10 @@ MeshPartitionTool < MeshType >::MeshPartitionTool (
                       M_graphLib(M_parameters.get<std::string>("graph-lib", "parmetis")),
                       M_meshPartBuilder (new meshPartBuilder_Type (M_originalMesh,
                                                                    M_parameters.get<UInt> ("overlap", 0), M_comm) ),
-                      M_success (false)
+                      M_success (false),
+                      M_secondStage (M_parameters.get<bool>("second-stage", false)),
+                      M_secondStageNumParts (M_parameters.get<Int>("second-stage-num-parts", 1)),
+                      M_secondStageParts(0)
 {
     if (! M_graphLib.compare("parmetis")) {
         M_graphCutter.reset(new GraphCutterParMETIS<mesh_Type>(M_originalMesh, M_comm, M_parameters));
@@ -231,12 +239,39 @@ void MeshPartitionTool < MeshType >::run()
         return;
     }
 
-    // Extract the graph from the graphCutter and dispose of the cutter
+    // Extract the graph from the graphCutter
     graph_Type graph = M_graphCutter->getGraph();
+
+    // Dispose of the graph partitioner object
     M_graphCutter.reset();
 
     // Get the current operation mode and number of parts
     bool offlineMode = M_parameters.get<bool> ("offline_mode", false);
+
+    // Do a second stage graph partitioning for ShyLU-MT
+    if (M_secondStage) {
+    	if (!M_myPID) {
+    		std::cout << "Performing second stage partitioning ..."
+    				  << std::endl;
+    	}
+    	if (offlineMode) {
+			M_secondStageParts.resize(graph->size());
+			// For each set of elements in graph perform a second stage partitioning
+			for (Int i = 0; i < graph->size(); ++i) {
+				const idList_Type& currentIds = graph->at(i);
+				GraphUtil::partitionGraph(currentIds, *M_originalMesh,
+										  M_secondStageNumParts,
+										  M_secondStageParts[i]);
+			}
+    	} else {
+			M_secondStageParts.resize(1);
+			// For each set of elements in graph perform a second stage partitioning
+			const idList_Type& currentIds = graph->at(M_myPID);
+			GraphUtil::partitionGraph(currentIds, *M_originalMesh,
+									  M_secondStageNumParts,
+									  M_secondStageParts[0]);
+    	}
+    }
 
     // Fill entity PID
     if (!M_myPID)
