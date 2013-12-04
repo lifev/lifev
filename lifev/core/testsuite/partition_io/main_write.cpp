@@ -99,8 +99,8 @@ int main (int argc, char** argv)
                    false, 2.0, 2.0, 2.0, -1.0, -1.0, -1.0);
 
     Teuchos::ParameterList meshParameters;
-    meshParameters.set ("num_parts", numParts, "");
-    meshParameters.set ("offline_mode", true, "");
+    meshParameters.set ("num-parts", numParts, "");
+    meshParameters.set ("offline-mode", true, "");
     meshParameters.set ("hierarchical", hierarchical, "");
     meshParameters.set ("topology", topology, "");
     meshCutter_Type meshCutter (fullMeshPtr, comm, meshParameters);

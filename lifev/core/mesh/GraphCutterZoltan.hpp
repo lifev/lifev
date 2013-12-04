@@ -329,7 +329,7 @@ void GraphCutterZoltan<MeshType>::setParameters (pList_Type& parameters)
 {
     // Here put some default values for the parameters and then import
     // the user supplied list, overwriting the corresponding parameters
-    M_parameters.set ("num_parts", static_cast<Int> (M_comm->NumProc() ),
+    M_parameters.set ("num-parts", static_cast<Int> (M_comm->NumProc() ),
                       "The desired number of parts");
     M_parameters.set ("topology", "1",
                       "The topology of the mesh partition process.");
@@ -342,7 +342,7 @@ void GraphCutterZoltan<MeshType>::setParameters (pList_Type& parameters)
 
     M_parameters.setParameters (parameters);
 
-    M_numParts = M_parameters.get<Int> ("num_parts");
+    M_numParts = M_parameters.get<Int> ("num-parts");
     M_numPartsPerProcessor = M_numParts / M_numProcessors;
 }
 

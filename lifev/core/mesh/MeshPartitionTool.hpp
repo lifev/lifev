@@ -85,13 +85,17 @@ public:
     //! @name Public Types
     //@{
     typedef MeshType                             mesh_Type;
-    typedef std::vector<Int> idList_Type;
-    typedef boost::shared_ptr <std::vector<idList_Type > > graph_Type;
     typedef GraphCutterBase<mesh_Type>           graphCutter_Type;
     typedef MeshPartBuilder<mesh_Type>           meshPartBuilder_Type;
     typedef boost::shared_ptr<mesh_Type>         meshPtr_Type;
     typedef std::vector<meshPtr_Type>            partMesh_Type;
     typedef boost::shared_ptr<partMesh_Type>     partMeshPtr_Type;
+    typedef typename GraphUtil::idList_Type      idList_Type;
+    typedef typename GraphUtil::graphPartition_Type graphPartition_Type;
+    typedef typename GraphUtil::graphPartitionPtr_Type graphPartitionPtr_Type;
+    typedef std::vector<
+    		typename GraphUtil::graphPartitionPtr_Type> graphPartitionTable_Type;
+    typedef boost::shared_ptr<graphPartitionTable_Type> graphPartitionTablePtr_Type;
     //@}
 
     //! \name Constructors & Destructors
@@ -144,6 +148,26 @@ public:
     {
         return M_allMeshParts;
     }
+
+    //! Return a shared pointer to the second stage graph parts (for ShyLU-MT)
+    /*!
+     * Return a shared pointer to the second stage graph parts (for ShyLU-MT)
+     * Offline mode
+     */
+    const graphPartitionTablePtr_Type& secondStageParts() const
+    {
+    	return M_secondStageParts;
+    }
+
+    //! Return a shared pointer to the second stage graph parts (for ShyLU-MT)
+    /*!
+     * Return a shared pointer to the second stage graph parts (for ShyLU-MT)
+     * Online mode
+     */
+    const graphPartitionPtr_Type& mySecondStageParts() const
+    {
+    	return M_secondStageParts->at(0);
+    }
     //@}
 
 private:
@@ -153,7 +177,7 @@ private:
     void run();
 
     //! Initialize M_entityPID
-    void fillEntityPID(graph_Type graph);
+    void fillEntityPID(typename GraphUtil::graphPartitionPtr_Type graph);
     //@}
 
     // Private copy constructor and assignment operator are disabled
@@ -175,7 +199,7 @@ private:
     // TODO: this is temporary, may be changed later
     bool                                       M_secondStage;
     Int                                        M_secondStageNumParts;
-    std::vector<typename GraphUtil::graphPartitionPtr_Type> M_secondStageParts;
+    graphPartitionTablePtr_Type                M_secondStageParts;
 
     //! Store ownership for each entity, subdivided by entity type
     typename meshPartBuilder_Type::entityPID_Type M_entityPID;
@@ -208,7 +232,7 @@ MeshPartitionTool < MeshType >::MeshPartitionTool (
                       M_success (false),
                       M_secondStage (M_parameters.get<bool>("second-stage", false)),
                       M_secondStageNumParts (M_parameters.get<Int>("second-stage-num-parts", 1)),
-                      M_secondStageParts(0)
+                      M_secondStageParts(new graphPartitionTable_Type)
 {
     if (! M_graphLib.compare("parmetis")) {
         M_graphCutter.reset(new GraphCutterParMETIS<mesh_Type>(M_originalMesh, M_comm, M_parameters));
@@ -240,13 +264,13 @@ void MeshPartitionTool < MeshType >::run()
     }
 
     // Extract the graph from the graphCutter
-    graph_Type graph = M_graphCutter->getGraph();
+    typename GraphUtil::graphPartitionPtr_Type graph = M_graphCutter->getGraph();
 
     // Dispose of the graph partitioner object
     M_graphCutter.reset();
 
     // Get the current operation mode and number of parts
-    bool offlineMode = M_parameters.get<bool> ("offline_mode", false);
+    bool offlineMode = M_parameters.get<bool> ("offline-mode", false);
 
     // Do a second stage graph partitioning for ShyLU-MT
     if (M_secondStage) {
@@ -254,22 +278,26 @@ void MeshPartitionTool < MeshType >::run()
     		std::cout << "Performing second stage partitioning ..."
     				  << std::endl;
     	}
+		Teuchos::ParameterList secondStageParams;
+		secondStageParams.set<Int>("num-parts", M_secondStageNumParts);
+		secondStageParams.set<Int>("my-pid", M_myPID);
+		secondStageParams.set<bool>("verbose", false);
     	if (offlineMode) {
-			M_secondStageParts.resize(graph->size());
+			M_secondStageParts->resize(graph->size());
 			// For each set of elements in graph perform a second stage partitioning
 			for (Int i = 0; i < graph->size(); ++i) {
 				const idList_Type& currentIds = graph->at(i);
-				GraphUtil::partitionGraph(currentIds, *M_originalMesh,
-										  M_secondStageNumParts,
-										  M_secondStageParts[i]);
+				GraphUtil::partitionGraphIsorropia(currentIds, *M_originalMesh,
+										  	  	   secondStageParams,
+										  	  	   M_secondStageParts->at(i));
 			}
     	} else {
-			M_secondStageParts.resize(1);
+			M_secondStageParts->resize(1);
 			// For each set of elements in graph perform a second stage partitioning
 			const idList_Type& currentIds = graph->at(M_myPID);
-			GraphUtil::partitionGraph(currentIds, *M_originalMesh,
-									  M_secondStageNumParts,
-									  M_secondStageParts[0]);
+			GraphUtil::partitionGraphIsorropia(currentIds, *M_originalMesh,
+									  	  	   secondStageParams,
+									  	  	   M_secondStageParts->at(0));
     	}
     }
 
@@ -315,7 +343,7 @@ void MeshPartitionTool < MeshType >::run()
              * augmented graph from the previous part.
              */
 
-            Int numParts = M_parameters.get<Int> ("num_parts");
+            Int numParts = M_parameters.get<Int> ("num-parts");
             M_allMeshParts.reset (new partMesh_Type (numParts) );
             for (Int curPart = 0; curPart < numParts; ++curPart)
             {
@@ -348,7 +376,7 @@ void MeshPartitionTool < MeshType >::run()
 
 template<typename MeshType>
 void
-MeshPartitionTool<MeshType>::fillEntityPID (graph_Type graph)
+MeshPartitionTool<MeshType>::fillEntityPID (graphPartitionPtr_Type graph)
 {
     Int numParts = graph->size();
 

@@ -216,7 +216,7 @@ void GraphCutterParMETIS<MeshType>::setParameters (pList_Type& parameters)
 {
     // Here put some default values for the parameters and then import
     // the user supplied list, overwriting the corresponding parameters
-    M_parameters.set ("num_parts", static_cast<Int> (M_comm->NumProc() ),
+    M_parameters.set ("num-parts", static_cast<Int> (M_comm->NumProc() ),
                       "The desired number of parts");
     M_parameters.set<bool> ("hierarchical", false);
     M_parameters.set ("topology", "1",
@@ -227,7 +227,7 @@ void GraphCutterParMETIS<MeshType>::setParameters (pList_Type& parameters)
     M_hierarchical = M_parameters.get<bool> ("hierarchical");
     M_topology = boost::lexical_cast<Int> (
                      M_parameters.get<std::string> ("topology") );
-    M_numParts = M_parameters.get<Int> ("num_parts");
+    M_numParts = M_parameters.get<Int> ("num-parts");
 }
 
 template<typename MeshType>
