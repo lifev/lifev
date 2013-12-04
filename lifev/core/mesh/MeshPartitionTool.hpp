@@ -178,6 +178,9 @@ private:
 
     //! Initialize M_entityPID
     void fillEntityPID(typename GraphUtil::graphPartitionPtr_Type graph);
+
+    //! Global to local element ID conversion for second stage
+    void globalToLocal(const Int curPart);
     //@}
 
     // Private copy constructor and assignment operator are disabled
@@ -282,7 +285,14 @@ void MeshPartitionTool < MeshType >::run()
 		secondStageParams.set<Int>("num-parts", M_secondStageNumParts);
 		secondStageParams.set<Int>("my-pid", M_myPID);
 		secondStageParams.set<bool>("verbose", false);
-    	if (offlineMode) {
+    	if (! offlineMode) {
+			M_secondStageParts->resize(1);
+			// For each set of elements in graph perform a second stage partitioning
+			const idList_Type& currentIds = graph->at(M_myPID);
+			GraphUtil::partitionGraphIsorropia(currentIds, *M_originalMesh,
+									  	  	   secondStageParams,
+									  	  	   M_secondStageParts->at(0));
+    	} else {
 			M_secondStageParts->resize(graph->size());
 			// For each set of elements in graph perform a second stage partitioning
 			for (Int i = 0; i < graph->size(); ++i) {
@@ -291,13 +301,6 @@ void MeshPartitionTool < MeshType >::run()
 										  	  	   secondStageParams,
 										  	  	   M_secondStageParts->at(i));
 			}
-    	} else {
-			M_secondStageParts->resize(1);
-			// For each set of elements in graph perform a second stage partitioning
-			const idList_Type& currentIds = graph->at(M_myPID);
-			GraphUtil::partitionGraphIsorropia(currentIds, *M_originalMesh,
-									  	  	   secondStageParams,
-									  	  	   M_secondStageParts->at(0));
     	}
     }
 
@@ -319,6 +322,14 @@ void MeshPartitionTool < MeshType >::run()
         M_meshPart.reset (new mesh_Type(M_comm));
         M_meshPart->setIsPartitioned(true);
         M_meshPartBuilder->run (M_meshPart, graph, M_entityPID, M_myPID);
+
+        // Make the global to local element ID conversion for the second stage
+        if (M_secondStage) {
+        	globalToLocal(0);
+        }
+
+        // Reset the mesh part builder
+        M_meshPartBuilder->reset();
 
         // Mark the partition as successful
         M_success = true;
@@ -358,6 +369,15 @@ void MeshPartitionTool < MeshType >::run()
                 // At this point (*graph)[curPart] has been modified. Restore
                 // to the original state
                 (*graph) [curPart] = backup;
+
+                // Make the global to local element ID conversion for the second stage
+                if (M_secondStage) {
+                	globalToLocal(curPart);
+                }
+
+                // Reset the mesh part builder
+                M_meshPartBuilder->reset();
+
                 // Mark the partition as successful
                 M_success = true;
             }
@@ -422,6 +442,23 @@ MeshPartitionTool<MeshType>::fillEntityPID (graphPartitionPtr_Type graph)
             }
         }
     }
+}
+
+template < typename MeshType>
+void
+MeshPartitionTool < MeshType >::globalToLocal(const Int curPart)
+{
+	const std::map<Int, Int>& globalToLocalMap =
+	M_meshPartBuilder->globalToLocalElement();
+	graphPartition_Type& currentGraph = *(M_secondStageParts->at(curPart));
+
+	for (Int i = 0; i < currentGraph.size(); ++i) {
+		int currentSize = currentGraph[i].size();
+		idList_Type& currentElements = currentGraph[i];
+		for (Int j = 0; j < currentSize; ++j) {
+			currentElements[j] = globalToLocalMap.find(currentElements[j])->second;
+		}
+	}
 }
 
 template < typename MeshType>

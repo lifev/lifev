@@ -90,9 +90,6 @@ void LifeV::GraphUtil::partitionGraphIsorropia (const idList_Type& vertexList,
 	Epetra_SerialComm comm();
 #endif
 
-	bool verbose = (! params.get<Int>("my-pid")) &&
-				   params.get<bool>("verbose");
-
 	// We build a bidirectional map of vertex Id, for local-to-global and
 	// global-to-local lookups
 	UInt numVertices = vertexList.size();
@@ -146,16 +143,6 @@ void LifeV::GraphUtil::partitionGraphIsorropia (const idList_Type& vertexList,
     														partitionParams,
     														true));
 
-    // Debug
-    if (verbose) {
-    	std::cout << "Size of graph: " << graph.NumGlobalRows() << std::endl;
-    	std::cout << "Number of parts:" << numParts << std::endl;
-    	for (int i = 0; i < numParts; ++i) {
-    		std::cout << "Number of vertices in part " << i << " : "
-    				  << partitioner->numElemsInPart(i) << std::endl;
-    	}
-    }
-
 	// Build a list of elements in each graph part
     graphPartitionPtr_Type vertexIds(new graphPartition_Type);
     vertexIds->resize(numParts);
@@ -170,6 +157,7 @@ void LifeV::GraphUtil::partitionGraphIsorropia (const idList_Type& vertexList,
 		currentIdList.resize(currentSize);
     	for (int j = 0; j < currentSize; ++j) {
     		currentIdList[j] = vertexIdMap.left.at(currentElements[j]);
+//    		currentIdList[j] = currentElements[j];
     	}
     }
 

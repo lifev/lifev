@@ -121,10 +121,17 @@ public:
               const graph_Type& graph,
               const entityPID_Type& entityPIDList,
               const UInt partIndex);
+
+    //! Resets the MeshPartBuilder object to the initial state
+    void reset();
     //@}
 
     //! \name Get Methods
     //@{
+    const std::map<Int, Int>& globalToLocalElement() const
+	{
+    	return M_globalToLocalElement;
+	}
     //@}
 
 private:
@@ -168,9 +175,6 @@ private:
       Updates M_meshPartition.
     */
     void finalSetup();
-
-    //! Resets the MeshPartBuilder object to the initial state
-    void reset();
     //@}
 
     //! Mark entity ownership
@@ -253,7 +257,6 @@ void MeshPartBuilder<MeshType>::run (const meshPtr_Type& meshPart,
 
     markEntityOwnership(entityPIDList);
 
-    reset();
 }
 
 template<typename MeshType>
