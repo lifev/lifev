@@ -28,13 +28,13 @@ save       = 1
 [./physics]
 density   	= 1.2
 material_flag   = 101
-bodyForce   = true
+bodyForce   = false
 
 [../model]
-constitutiveLaw = anisotropic
+constitutiveLaw = isotropic
 young     	= 226144
 poisson   	= 0.48
-bulk		= 9e+6
+bulk		= 5e+7
 alpha 		= 2.684564e+6
 gamma		= 1.0
 solidTypeIsotropic 	= neoHookean		# linearVenantKirchhoff / nonLinearVenantKirchhoff / neoHookean / expoenential
@@ -51,14 +51,14 @@ smoothness      = 1000
 [../../time_discretization]
 method          = BDF
 initialtime 	= 0.
-endtime     	= 0.05
+endtime     	= 5.0
 timestep    	= 0.05
 BDF_order   	= 2
 
 [../space_discretization]
 mesh_type = .mesh
 mesh_dir  	= ./
-mesh_file 	= cubeHolzapfel.mesh
+mesh_file 	= cubeY8.mesh
 order     	= P1
 
 [../miscellaneous]

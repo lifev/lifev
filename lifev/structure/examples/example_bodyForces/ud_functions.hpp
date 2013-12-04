@@ -51,6 +51,7 @@ namespace LifeV
 VectorSmall<3> f (const Real& t, const Real& x, const Real& y, const Real& z);
 Real InternalPressure (const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
 Real fzero_scalar (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
+Real analyticalDisplacement (const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i);
 
 // Initial displacement and velocity
 Real d0 (const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i);

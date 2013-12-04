@@ -143,37 +143,63 @@ Real bcZero (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Rea
 
 Real bcNonZero (const Real& t, const Real&  X, const Real& Y, const Real& Z, const ID& i)
 {
-    Real pressure(0);
+    return 5.313710193277322e+03;
 
-	Real highestPressure(6.666e+6);
-	Real totalTime = 20.0;
-	Real halfTime = totalTime / 2.0;
+    // Real pressure(0);
 
-	Real a = ( highestPressure / 2 ) * ( 1/ ((totalTime/2)*(totalTime/2)) );
+	// Real highestPressure(6.666e+6);
+	// Real totalTime = 20.0;
+	// Real halfTime = totalTime / 2.0;
 
-	if ( t <= halfTime )
-	    pressure = a * t*t;
+	// Real a = ( highestPressure / 2 ) * ( 1/ ((totalTime/2)*(totalTime/2)) );
 
-	if ( t > halfTime )
-	    pressure = - a * (t - totalTime)*(t - totalTime) + highestPressure;
+	// if ( t <= halfTime )
+	//     pressure = a * t*t;
+
+	// if ( t > halfTime )
+	//     pressure = - a * (t - totalTime)*(t - totalTime) + highestPressure;
+
+    // switch (i)
+    // {
+    //     case 0:
+    //         return 0.0;
+    //         break;
+    //     case 1:
+    //         return pressure;
+    //         break;
+    //     case 2:
+    //         return 0.0;
+    //         break;
+    //     default:
+    //         ERROR_MSG ("This entrie is not allowed: ud_functions.hpp");
+    //         return 0.;
+    //         break;
+    // }
+}
+
+Real analyticalDisplacement (const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
+{
 
     switch (i)
     {
         case 0:
-            return 0.0;
+            return -0.046537410754408 * ( x + 0.5 );
             break;
         case 1:
-            return pressure;
+            return 0.1 * y;
             break;
         case 2:
-            return 0.0;
+            return -0.046537410754408 * ( z + 0.5 );
             break;
         default:
             ERROR_MSG ("This entrie is not allowed: ud_functions.hpp");
             return 0.;
             break;
     }
+
+    return 0.0;
 }
+
 
 Real bcNonZeroSecondOrderExponential (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/)
 {
