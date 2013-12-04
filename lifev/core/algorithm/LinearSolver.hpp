@@ -384,10 +384,22 @@ LinearSolver::setParameter ( const std::string& name, T value )
 namespace defaultParameterLists
 {
 //! Returns a default parameter list to initialize the LinearSolver class with Belos.
+/*!
+  Belos uses the right preconditioned GMRES method with a tolerance of 1e-6.
+  The maximum number of iterations and Krylov vectors are set to 200.
+  The preconditioner is automatically recomputed if more than 80 iterations are
+  necessary to converge.
+ */
 Teuchos::ParameterList
 belosParameterList();
 
-//! Returns a default parameter list to initialize the LinearSolver class with Belos.
+//! Returns a default parameter list to initialize the LinearSolver class with AztecOO.
+/*!
+  AztecOO uses the right preconditioned GMRES method with a tolerance of 1e-6.
+  The maximum number of iterations and Krylov vectors are set to 200.
+  The preconditioner is automatically recomputed if more than 80 iterations are
+  necessary to converge.
+ */
 Teuchos::ParameterList
 aztecOOParameterList();
 }

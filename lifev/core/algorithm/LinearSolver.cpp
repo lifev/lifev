@@ -636,14 +636,14 @@ belosParameterList()
 
     Teuchos::ParameterList& defaultBelos = operatorList.sublist ( "Trilinos: Belos List" );
     defaultBelos.set ( "Flexible Gmres"       , false );
-    defaultBelos.set ( "Convergence Tolerance", 1e-10 );
+    defaultBelos.set ( "Convergence Tolerance", 1e-6 );
     defaultBelos.set ( "Maximum Iterations"   , 200 );
     defaultBelos.set ( "Output Frequency"     , 1 );
     defaultBelos.set ( "Block Size"           , 1 );
     defaultBelos.set ( "Num Blocks"           , 200 );
-    defaultBelos.set ( "Maximum Restarts"     , 1 );
+    defaultBelos.set ( "Maximum Restarts"     , 0 );
     defaultBelos.set ( "Output Style"         , 1 );
-    defaultBelos.set ( "Verbosity"            , 1e-10 );
+    defaultBelos.set ( "Verbosity"            , 35 );
 
     return defaultList;
 }
@@ -665,7 +665,7 @@ aztecOOParameterList()
     defaultAztecOO.set ( "conv"    , "rhs" );
     defaultAztecOO.set ( "scaling" , "none" );
     defaultAztecOO.set ( "output"  , "all" );
-    defaultAztecOO.set ( "tol"     , 1e-10 );
+    defaultAztecOO.set ( "tol"     , 1e-6 );
     defaultAztecOO.set ( "max_iter", 200 );
     defaultAztecOO.set ( "kspace"  , 200 );
     defaultAztecOO.set ( "orthog"  , 0 );
