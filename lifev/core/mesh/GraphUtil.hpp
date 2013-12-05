@@ -157,7 +157,6 @@ void LifeV::GraphUtil::partitionGraphIsorropia (const idList_Type& vertexList,
 		currentIdList.resize(currentSize);
     	for (int j = 0; j < currentSize; ++j) {
     		currentIdList[j] = vertexIdMap.left.at(currentElements[j]);
-//    		currentIdList[j] = currentElements[j];
     	}
     }
 
