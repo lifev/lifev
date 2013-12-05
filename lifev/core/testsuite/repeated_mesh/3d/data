@@ -12,11 +12,30 @@
 ### DATA FILE #####################################################################################
 ###################################################################################################
 
+[fe]
+type = P1
+[../]
+
+[miscellaneous]
+verbose = 0
+timesteps = 1
+[../]
+
 [mesh]
-nelements = 19
+mesh_dir   = ./  # the directory where the mesh file is
+mesh_file  = cube4x4.mesh # mesh file
+mesh_type  = .mesh #structured
+mesh_edges = 'all'
+verbose    = 0
+element_shape = 0    # 0 -> tetra, 1 -> hexa
+
+# structured mesh
+nelem = 8
+length = 1.
 [../]
 
 [exporter]
+enable     = true
 type       = hdf5 # hdf5 (if library compiled with hdf5 support) or ensight
 multimesh  = false
 start      = 0
@@ -27,39 +46,39 @@ save       = 1
 prectype                = Ifpack # Ifpack or ML
 displayList             = false
 
-  [./ifpack]
-  overlap     = 2
-
-    [./fact]
-    ilut_level-of-fill            = 1
-    drop_tolerance                = 1.e-5
-    relax_value                   = 0
-    [../]
-
-    [./amesos]
-    solvertype =  Amesos_Umfpack # Amesos_KLU or Amesos_Umfpack
-    [../]
-
-    [./partitioner]
+    [./ifpack]
     overlap = 2
-    [../]
 
-    [./schwarz]
-    reordering_type = none #metis, rcm, none
-    filter_singletons = true
+        [./fact]
+        ilut_level-of-fill            = 1
+        drop_tolerance                = 1.e-5
+        relax_value                   = 0
+        [../]
+
+        [./amesos]
+        solvertype =  Amesos_Umfpack # Amesos_KLU or Amesos_Umfpack
+        [../]
+
+        [./partitioner]
+        overlap = 2
+        [../]
+
+        [./schwarz]
+        reordering_type = none #metis, rcm, none
+        filter_singletons = true
+        [../]
     [../]
-  [../]
 [../]
 
 [solver]
-  solver          = gmres
-  scaling         = none
-  output          = all # none
-  conv            = rhs
-  max_iter        = 200
-  reuse           = true
-  max_iter_reuse  = 80
-  kspace          = 100
-  tol             = 1.e-10    # AztecOO tolerance
+solver          = gmres
+scaling         = none
+output          = all # none
+conv            = rhs
+max_iter        = 200
+reuse           = true
+max_iter_reuse  = 80
+kspace          = 100
+tol             = 1.e-10    # AztecOO tolerance
 [../]
 

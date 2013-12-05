@@ -76,9 +76,8 @@ Real fRhs ( const Real& /* t */, const Real& x, const Real& /* y */, const Real&
     return  sin ( x ) - 1.;
 }
 
-
-typedef RegionMesh<LinearTriangle> mesh_Type;
 typedef boost::shared_ptr<Epetra_Comm> commPtr_Type;
+typedef RegionMesh<LinearTriangle> mesh_Type;
 typedef boost::shared_ptr<mesh_Type> meshPtr_Type;
 typedef MatrixEpetra<Real> matrix_Type;
 typedef boost::shared_ptr<matrix_Type> matrixPtr_Type;
@@ -110,13 +109,13 @@ int main ( int argc, char** argv )
         chronoMgr.add ( "Initialization Time", &initTime );
         initTime.start();
 
-        GetPot dataFile ( "data_2d" );
+        GetPot dataFile ( "data" );
         const bool isLeader ( comm->MyPID() == 0 );
         const bool verbose = dataFile ( "miscellaneous/verbose", 0 ) && isLeader;
 
 #ifdef HAVE_LIFEV_DEBUG
         std::ofstream debugOut (
-            ( "rm." +
+            ( "repeated_mesh2d." +
               ( comm->NumProc() > 1 ? boost::lexical_cast<std::string> ( comm->MyPID() ) : "s" ) +
               ".out" ).c_str() );
 #else
