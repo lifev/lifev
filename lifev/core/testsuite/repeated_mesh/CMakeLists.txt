@@ -7,7 +7,7 @@ TRIBITS_ADD_EXECUTABLE_AND_TEST(
   RepeatedMesh2D
   SOURCES main_2d.cpp
   ARGS -c
-  NUM_MPI_PROCS 4
+  NUM_MPI_PROCS 3
   COMM serial mpi
   STANDARD_PASS_OUTPUT
   )
@@ -18,7 +18,7 @@ TRIBITS_COPY_FILES_TO_BINARY_DIR(data_RepeatedMesh
 )
 
 TRIBITS_COPY_FILES_TO_BINARY_DIR(mesh_RepeatedMesh
-  SOURCE_FILES unstructured_square.msh
+  SOURCE_FILES square_unstructured.msh
   SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/core/data/mesh/freefem/
 )
 

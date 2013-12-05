@@ -23,8 +23,8 @@ timesteps = 1
 
 [mesh]
 mesh_dir   = ./  # the directory where the mesh file is
-mesh_file  = unstructured_square.msh      # mesh file
-mesh_type  = structured #.msh
+mesh_file  = square_unstructured.msh      # mesh file
+mesh_type  = .msh #structured
 mesh_edges = 'all'
 verbose    = 0
 element_shape = 0    # 0 -> tetra, 1 -> hexa

@@ -114,7 +114,7 @@ int main ( int argc, char* argv[] )
     // a user-defined number of circles. Regarding the example above, if one chooses as number of circles equal to 1,
     // we identify as additional neighbors the nodes n6, n7, n8, n9, n10, n11, n12 and n13.
 
-    UInt ID_trial = 89;
+    UInt ID_trial = 40;
     std::set<ID> Neighbors;
     UInt nc = 2;
 

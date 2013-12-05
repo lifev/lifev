@@ -96,7 +96,7 @@ int main ( int argc, char* argv[] )
     interfaceMarkers[1] = 1;
     ghostObj.setUp ( interfaceMarkers );
 
-    UInt ID_trial = 1277;
+    UInt ID_trial = 314;
     std::set<ID> Neighbors;
     double radius = 4 * (double) MeshUtility::MeshStatistics::computeSize (*fullMeshPtr).maxH;
 
