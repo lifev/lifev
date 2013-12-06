@@ -77,7 +77,7 @@ struct DimSelector
     typedef RegionMesh<elem_Type> mesh_Type;
     typedef boost::shared_ptr<mesh_Type> meshPtr_Type;
 
-    static meshPtr_Type generateRegularMesh( GetPot const & dataFile );
+    static meshPtr_Type generateRegularMesh ( GetPot const& dataFile );
 };
 
 template <>
@@ -87,13 +87,13 @@ struct DimSelector<2>
     typedef RegionMesh<elem_Type> mesh_Type;
     typedef boost::shared_ptr<mesh_Type> meshPtr_Type;
 
-    static meshPtr_Type generateRegularMesh( GetPot const & dataFile )
+    static meshPtr_Type generateRegularMesh ( GetPot const& dataFile )
     {
         meshPtr_Type fullMeshPtr;
-        regularMesh2D( *fullMeshPtr, 0,
-                       dataFile ( "mesh/nx", 20 ), dataFile ( "mesh/ny", 20 ),
-                       dataFile ( "mesh/verbose", false ),
-                       dataFile ( "mesh/lx", 1. ), dataFile ( "mesh/ly", 1. ) );
+        regularMesh2D ( *fullMeshPtr, 0,
+                        dataFile ( "mesh/nx", 20 ), dataFile ( "mesh/ny", 20 ),
+                        dataFile ( "mesh/verbose", false ),
+                        dataFile ( "mesh/lx", 1. ), dataFile ( "mesh/ly", 1. ) );
         return fullMeshPtr;
     }
 };
@@ -105,13 +105,13 @@ struct DimSelector<3>
     typedef RegionMesh<elem_Type> mesh_Type;
     typedef boost::shared_ptr<mesh_Type> meshPtr_Type;
 
-    static meshPtr_Type generateRegularMesh( GetPot const & dataFile )
+    static meshPtr_Type generateRegularMesh ( GetPot const& dataFile )
     {
         meshPtr_Type fullMeshPtr;
-        regularMesh3D( *fullMeshPtr, 0,
-                       dataFile ( "mesh/nelem", 8 ), dataFile ( "mesh/nelem", 8 ), dataFile ( "mesh/nelem", 8 ),
-                       dataFile ( "mesh/verbose", false ),
-                       dataFile ( "mesh/length", 1. ), dataFile ( "mesh/length", 1. ), dataFile ( "mesh/length", 1. ) );
+        regularMesh3D ( *fullMeshPtr, 0,
+                        dataFile ( "mesh/nelem", 8 ), dataFile ( "mesh/nelem", 8 ), dataFile ( "mesh/nelem", 8 ),
+                        dataFile ( "mesh/verbose", false ),
+                        dataFile ( "mesh/length", 1. ), dataFile ( "mesh/length", 1. ), dataFile ( "mesh/length", 1. ) );
         return fullMeshPtr;
     }
 };
@@ -129,7 +129,7 @@ struct TestRepeatedMesh
     typedef FESpace<mesh_Type, MapEpetra> feSpace_Type;
     typedef boost::shared_ptr<feSpace_Type> feSpacePtr_Type;
 
-    TestRepeatedMesh(){}
+    TestRepeatedMesh() {}
 
     void init();
 
@@ -148,7 +148,7 @@ inline void TestRepeatedMesh<Dim>::init()
 #else
     M_comm.reset ( new Epetra_SerialComm );
 #endif
-    M_chronoMgr.reset( new LifeChronoManager<> ( M_comm ) );
+    M_chronoMgr.reset ( new LifeChronoManager<> ( M_comm ) );
 }
 
 template <uint Dim>
@@ -188,10 +188,6 @@ int TestRepeatedMesh<Dim>::run()
     if ( dataFile ( "mesh/mesh_type", "structured" ) == "structured" )
     {
         fullMeshPtr = DimSelector<Dim>::generateRegularMesh ( dataFile );
-//            regularMesh2D ( *fullMeshPtr, 0,
-//                            dataFile ( "mesh/nx", 20 ), dataFile ( "mesh/ny", 20 ),
-//                            dataFile ( "mesh/verbose", false ),
-//                            dataFile ( "mesh/lx", 1. ), dataFile ( "mesh/ly", 1. ) );
     }
     else
     {
