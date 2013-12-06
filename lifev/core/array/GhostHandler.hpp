@@ -186,13 +186,13 @@ public:
     //@{
 
     //! Initialize neighbors list
-    void setUpNeighbors( NeighborType const neighborType = ALL_NEIGHBORS );
+    void setUpNeighbors ( NeighborType const neighborType = ALL_NEIGHBORS );
 
     //! Release pointers to full and local mesh
     void release();
 
     //! Clean up neighbor lists
-    void clean( NeighborType const neighborType = ALL_NEIGHBORS );
+    void clean ( NeighborType const neighborType = ALL_NEIGHBORS );
 
 #ifdef HAVE_HDF5
     //! Export neighbor lists to an hdf5 file
@@ -386,15 +386,15 @@ GhostHandler<MeshType>::GhostHandler ( meshPtr_Type fullMesh,
 template <typename MeshType>
 void GhostHandler<MeshType>::setUpNeighbors ( NeighborType const neighborType )
 {
-    if( neighborType & POINT_NEIGHBORS )
+    if ( neighborType & POINT_NEIGHBORS )
     {
         this->createPointPointNeighborsList();
     }
-    if( neighborType & RIDGE_NEIGHBORS )
+    if ( neighborType & RIDGE_NEIGHBORS )
     {
         this->createPointEdgeNeighborsList();
     }
-    if( neighborType & ELEMENT_NEIGHBORS )
+    if ( neighborType & ELEMENT_NEIGHBORS )
     {
         this->createPointElementNeighborsList();
     }
@@ -408,17 +408,17 @@ void GhostHandler<MeshType>::release()
 }
 
 template <typename MeshType>
-void GhostHandler<MeshType>::clean( NeighborType const neighborType )
+void GhostHandler<MeshType>::clean ( NeighborType const neighborType )
 {
-    if( neighborType & POINT_NEIGHBORS )
+    if ( neighborType & POINT_NEIGHBORS )
     {
         clearVector ( M_pointPointNeighborsList );
     }
-    if( neighborType & RIDGE_NEIGHBORS )
+    if ( neighborType & RIDGE_NEIGHBORS )
     {
         clearVector ( M_pointEdgeNeighborsList );
     }
-    if( neighborType & ELEMENT_NEIGHBORS )
+    if ( neighborType & ELEMENT_NEIGHBORS )
     {
         clearVector ( M_pointElementNeighborsList );
     }
