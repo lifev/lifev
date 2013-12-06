@@ -25,7 +25,7 @@
 //@HEADER
 
 /*!
-    @file GhostHandler.hpp
+    @file
     @brief class to manage ghost data across procs
 
     @author Antonio Cervone <ant.cervone@gmail.com>
@@ -62,6 +62,15 @@ NeighborType const   FACET_NEIGHBORS = 0x4;
 NeighborType const ELEMENT_NEIGHBORS = 0x8;
 NeighborType const     ALL_NEIGHBORS = POINT_NEIGHBORS | RIDGE_NEIGHBORS | FACET_NEIGHBORS | ELEMENT_NEIGHBORS;
 
+//! GhostHandler
+/*!
+  This class manages neighborhood information across processes.
+  The aim is to have the possibility to build overlapping maps
+  in order to ease the retrieving of ghosted values. The class
+  offers also the possibility to build phisically overlapped
+  meshes that do not require communication to retrieve mesh
+  information from adjacent elements.
+ */
 template <typename MeshType>
 class GhostHandler
 {
