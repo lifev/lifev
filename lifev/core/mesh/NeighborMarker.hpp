@@ -36,6 +36,8 @@
 #ifndef _NEIGHBORMARKER_H_
 #define _NEIGHBORMARKER_H_ 1
 
+#include <boost/unordered_set.hpp>
+
 #include <lifev/core/LifeV.hpp>
 
 #include <lifev/core/mesh/Marker.hpp>
@@ -44,6 +46,10 @@
 // LifeV namespace
 namespace LifeV
 {
+
+typedef boost::unordered_set<ID> neighbors_Type;
+typedef std::vector<neighbors_Type> neighborList_Type;
+
 
 //! @class NeighborMarker
 /*! This class extends the default marker adding containers to store all adjacency informations.
@@ -140,9 +146,6 @@ void createNodeNeighbors ( MeshType& mesh )
         mesh.point ( id1 ).nodeNeighbors().insert ( id0 );
     }
 }
-
-typedef std::set<ID> neighbors_Type;
-typedef std::vector<neighbors_Type> neighborList_Type;
 
 template <typename MeshType>
 void createNodeNeighbors ( MeshType const& mesh, neighborList_Type& neighborList )

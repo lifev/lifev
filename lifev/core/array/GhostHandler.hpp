@@ -83,11 +83,8 @@ public:
     typedef boost::shared_ptr<mesh_Type> meshPtr_Type;
     typedef Epetra_Comm comm_Type;
     typedef boost::shared_ptr<comm_Type> commPtr_Type;
-    typedef std::set<ID> neighbors_Type;
-    typedef std::vector<neighbors_Type> neighborList_Type;
     typedef MapEpetra map_Type;
     typedef boost::shared_ptr<map_Type> mapPtr_Type;
-    typedef std::map< UInt, mapPtr_Type > mapList_Type;
     typedef std::vector<Int> idList_Type;
     typedef std::vector<idList_Type> graph_Type;
     typedef boost::shared_ptr<graph_Type> graphPtr_Type;
