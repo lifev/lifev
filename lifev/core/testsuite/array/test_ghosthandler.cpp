@@ -124,9 +124,6 @@ int main ( int argc, char* argv[] )
         // Set up the mesh
         readMesh ( *fullMeshPtr, meshData );
 
-        // create node neighbors
-        //    createNodeNeighbors ( *fullMeshPtr );
-
         // Partition the mesh using ParMetis
         boost::shared_ptr<mesh_Type> meshPtr ( new mesh_Type ( comm ) );
         {
@@ -162,7 +159,7 @@ int main ( int argc, char* argv[] )
 
         GhostHandler<mesh_Type> ghostP1 ( fullMeshPtr, meshPtr, feSpaceP1->mapPtr(), comm );
 
-        ghostP1.setUp();
+        ghostP1.setUpNeighbors();
 
         MapEpetra mapP1 ( feSpaceP1->map() );
         MapEpetra mapP1Overlap ( ghostP1.ghostMapOnNodes ( dataFile ( "ghost/overlap", 2 ) ) );
@@ -234,7 +231,7 @@ int main ( int argc, char* argv[] )
 
         GhostHandler<mesh_Type> ghostP0 ( fullMeshPtr, meshPtr, feSpaceP0->mapPtr(), comm );
 
-        ghostP0.setUp();
+        ghostP0.setUpNeighbors();
 
         MapEpetra mapP0 ( feSpaceP0->map() );
         MapEpetra mapP0P0 ( ghostP0.ghostMapOnElementsFV() );

@@ -94,7 +94,7 @@ int main ( int argc, char* argv[] )
     std::vector<markerID_Type> interfaceMarkers (2);
     interfaceMarkers[0] = 20;
     interfaceMarkers[1] = 1;
-    ghostObj.setUp ( interfaceMarkers );
+    ghostObj.createPointPointNeighborsList ( interfaceMarkers );
 
     UInt ID_trial = 314;
     std::set<ID> Neighbors;

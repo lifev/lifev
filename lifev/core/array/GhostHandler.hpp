@@ -36,6 +36,8 @@
 #ifndef _GHOSTHANDLER_HPP_
 #define _GHOSTHANDLER_HPP_
 
+#include <bitset>
+
 #ifdef HAVE_HDF5
 #include <EpetraExt_HDF5.h>
 #endif
@@ -51,6 +53,14 @@
 
 namespace LifeV
 {
+
+typedef std::bitset<4> NeighborType;
+
+NeighborType const   POINT_NEIGHBORS = 0x1;
+NeighborType const   RIDGE_NEIGHBORS = 0x2;
+NeighborType const   FACET_NEIGHBORS = 0x4;
+NeighborType const ELEMENT_NEIGHBORS = 0x8;
+NeighborType const     ALL_NEIGHBORS = POINT_NEIGHBORS | RIDGE_NEIGHBORS | FACET_NEIGHBORS | ELEMENT_NEIGHBORS;
 
 template <typename MeshType>
 class GhostHandler
@@ -169,17 +179,14 @@ public:
     //! @name General Methods
     //@{
 
-    //! Initialize all neighbors list
-    void setUp();
-
-    //! Initialize node neighbors list on the subset identified by the given list of MarkerIDs
-    void setUp (markerIDList_Type const& flags);
+    //! Initialize neighbors list
+    void setUpNeighbors( NeighborType const neighborType = ALL_NEIGHBORS );
 
     //! Release pointers to full and local mesh
     void release();
 
     //! Clean up neighbor lists
-    void clean();
+    void clean( NeighborType const neighborType = ALL_NEIGHBORS );
 
 #ifdef HAVE_HDF5
     //! Export neighbor lists to an hdf5 file
@@ -371,17 +378,14 @@ GhostHandler<MeshType>::GhostHandler ( meshPtr_Type fullMesh,
 }
 
 template <typename MeshType>
-void GhostHandler<MeshType>::setUp()
+void GhostHandler<MeshType>::setUpNeighbors ( NeighborType const neighborType )
 {
+    if( neighborType & POINT_NEIGHBORS )
     this->createNodeNodeNeighborsList();
     this->createNodeEdgeNeighborsList();
     this->createNodeElementNeighborsList();
-}
-
-template <typename MeshType>
-void GhostHandler<MeshType>::setUp (markerIDList_Type const& flags)
-{
-    this->createNodeNodeNeighborsList (flags);
+    if( neighborType & RIDGE_NEIGHBORS )
+    if( neighborType & ELEMENT_NEIGHBORS )
 }
 
 template <typename MeshType>
@@ -392,11 +396,14 @@ void GhostHandler<MeshType>::release()
 }
 
 template <typename MeshType>
-void GhostHandler<MeshType>::clean()
+void GhostHandler<MeshType>::clean( NeighborType const neighborType )
 {
+    if( neighborType & POINT_NEIGHBORS )
     clearVector ( M_nodeNodeNeighborsList );
     clearVector ( M_nodeEdgeNeighborsList );
     clearVector ( M_nodeElementNeighborsList );
+    if( neighborType & RIDGE_NEIGHBORS )
+    if( neighborType & ELEMENT_NEIGHBORS )
 }
 
 #ifdef HAVE_HDF5

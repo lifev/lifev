@@ -86,7 +86,7 @@ int main ( int argc, char* argv[] )
     // Creating and setting up a GhostHandler object
     boost::shared_ptr<FESpace<mesh_Type, MapEpetra> > FESpaceP1 (new FESpace<mesh_Type, MapEpetra> (localMeshPtr, "P1", 1, Comm) );
     GhostHandler<mesh_Type> ghostObj ( fullMeshPtr, localMeshPtr, FESpaceP1->mapPtr(), Comm );
-    ghostObj.setUp();
+    ghostObj.setUpNeighbors();
 
     // Remark: by calling the setup method, such a class identifies the closest neighbors of grid each node, as it is shown below:
     //
