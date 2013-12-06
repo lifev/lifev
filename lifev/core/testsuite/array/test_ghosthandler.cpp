@@ -162,7 +162,7 @@ int main ( int argc, char* argv[] )
         ghostP1.setUpNeighbors();
 
         MapEpetra mapP1 ( feSpaceP1->map() );
-        MapEpetra mapP1Overlap ( ghostP1.ghostMapOnNodes ( dataFile ( "ghost/overlap", 2 ) ) );
+        MapEpetra mapP1Overlap ( ghostP1.ghostMapOnPoints ( dataFile ( "ghost/overlap", 2 ) ) );
 
         fileOut << "=================== mapP1 Unique" << std::endl;
         fileOut << "9---8---7---+---+    +---+---+---6---5" << std::endl;
@@ -209,7 +209,7 @@ int main ( int argc, char* argv[] )
 
         vP1->globalAssemble();
 
-        // check that the overlapping map has all the nodes in the mesh
+        // check that the overlapping map has all the points in the mesh
         if ( mapP1Overlap.map ( Repeated )->NumMyElements() != 10 )
         {
             return 1;
@@ -261,7 +261,7 @@ int main ( int argc, char* argv[] )
         fileOut << "+---+---+---+---+   +---+---+---+---+" << std::endl;
         fileOut << *mapP0P0.map ( Repeated );
 
-        fileOut << "=================== mapP0 Repeated node neighbors overlap 2" << std::endl;
+        fileOut << "=================== mapP0 Repeated point neighbors overlap 2" << std::endl;
         fileOut << "+---+---+---+---+   +---+---+---+---+" << std::endl;
         fileOut << "|1 /|3 /|5 /|7 /|   |1 /|3 /|5 /|7 /|" << std::endl;
         fileOut << "| / | / | / | / |   | / | / | / | / |" << std::endl;

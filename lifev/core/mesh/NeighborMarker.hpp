@@ -68,24 +68,24 @@ public:
 
     explicit NeighborMarker ( markerID_Type& p ) : Marker<FlagPolicy> ( p ) {}
 
-    neighbors_Type& nodeNeighbors ()
+    neighbors_Type& pointNeighbors ()
     {
-        return M_nodeNeighbors;
+        return M_pointNeighbors;
     }
     //    neighbors_Type & edgeNeighbors () { return M_edgeNeighbors; }
     //    neighbors_Type & faceNeighbors () { return M_faceNeighbors; }
     //    neighbors_Type & elementNeighbors () { return M_elementNeighbors; }
 
-    void setNodeNeighbors ( neighbors_Type const& nodeNeighbors )
+    void setPointNeighbors ( neighbors_Type const& pointNeighbors )
     {
-        M_nodeNeighbors = nodeNeighbors;
+        M_pointNeighbors = pointNeighbors;
     }
     //    void setEdgeNeighbors ( neighbors_Type const & edgeNeighbors ) { M_edgeNeighbors = edgeNeighbors; }
     //    void setFaceNeighbors ( neighbors_Type const & faceNeighbors ) { M_faceNeighbors = faceNeighbors; }
     //    void setElementNeighbors ( neighbors_Type const & elementNeighbors ) { M_elementNeighbors = elementNeighbors; }
 
 protected:
-    neighbors_Type M_nodeNeighbors;
+    neighbors_Type M_pointNeighbors;
     //    neighbors_Type M_edgeNeighbors;
     //    neighbors_Type M_faceNeighbors;
     //    neighbors_Type M_elementNeighbors;
@@ -119,7 +119,7 @@ public:
 //! The NeighborMarkerCommon: uses all defaults except for Points
 typedef NeighborMarkerCommon<MarkerIDStandardPolicy> neighborMarkerCommon_Type;
 
-//! this routine generates node neighbors for the given mesh
+//! this routine generates point neighbors for the given mesh
 /*! the routine assumes that the mesh is not yet partitioned or reordered
  *  (i.e. the local id and the global id are the same).
  *  if this is not true the method should be changed to use a more
@@ -127,12 +127,12 @@ typedef NeighborMarkerCommon<MarkerIDStandardPolicy> neighborMarkerCommon_Type;
  *  the given global id or construct a globalToLocal map beforehand.
  */
 template <typename MeshType>
-void createNodeNeighbors ( MeshType& mesh )
+void createPointNeighbors ( MeshType& mesh )
 {
     // TODO: ASSERT_COMPILE_TIME that MeshType::pointMarker == NeighborMarker
-    // this guarantees that the nodeNeighbors structure is available.
+    // this guarantees that the pointNeighbors structure is available.
 
-    // generate node neighbors by watching edges
+    // generate point neighbors by watching edges
     // note: this can be based also on faces or volumes
     for ( UInt ie = 0; ie < mesh.numEdges(); ie++ )
     {
@@ -142,16 +142,16 @@ void createNodeNeighbors ( MeshType& mesh )
         ASSERT ( mesh.point ( id0 ).id() == id0 , "the mesh has been reordered, the point must be found" );
         ASSERT ( mesh.point ( id1 ).id() == id1 , "the mesh has been reordered, the point must be found" );
 
-        mesh.point ( id0 ).nodeNeighbors().insert ( id1 );
-        mesh.point ( id1 ).nodeNeighbors().insert ( id0 );
+        mesh.point ( id0 ).pointNeighbors().insert ( id1 );
+        mesh.point ( id1 ).pointNeighbors().insert ( id0 );
     }
 }
 
 template <typename MeshType>
-void createNodeNeighbors ( MeshType const& mesh, neighborList_Type& neighborList )
+void createPointNeighbors ( MeshType const& mesh, neighborList_Type& neighborList )
 {
     neighborList.resize ( mesh.numGlobalPoints() );
-    // generate node neighbors by watching edges
+    // generate point neighbors by watching edges
     // note: this can be based also on faces or volumes
     for ( UInt ie = 0; ie < mesh.numEdges(); ie++ )
     {
