@@ -151,7 +151,7 @@ PreconditionerComposition::setComm ( boost::shared_ptr<Epetra_Comm> comm )
 bool
 PreconditionerComposition::isPreconditionerSet() const
 {
-    return M_prec;
+    return M_prec != 0 ? true : false;
 }
 
 PreconditionerComposition::operator_Type*
