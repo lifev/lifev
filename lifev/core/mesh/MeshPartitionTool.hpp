@@ -281,6 +281,15 @@ void MeshPartitionTool < MeshType >::run()
     		std::cout << "Performing second stage partitioning ..."
     				  << std::endl;
     	}
+    	// MPI comm object for second stage is always MPI_COMM_SELF
+#ifdef EPETRA_MPI
+    	boost::shared_ptr<Epetra_Comm>
+    			secondStageComm(new Epetra_MpiComm(MPI_COMM_SELF));
+#else
+    	boost::shared_ptr<Epetra_Comm>
+    			secondStageComm(new Epetra_SerialComm);
+#endif
+
 		Teuchos::ParameterList secondStageParams;
 		secondStageParams.set<Int>("num-parts", M_secondStageNumParts);
 		secondStageParams.set<Int>("my-pid", M_myPID);
@@ -291,7 +300,8 @@ void MeshPartitionTool < MeshType >::run()
 			const idList_Type& currentIds = graph->at(M_myPID);
 			GraphUtil::partitionGraphParMETIS(currentIds, *M_originalMesh,
 									  	   secondStageParams,
-									  	   M_secondStageParts->at(0));
+									  	   M_secondStageParts->at(0),
+									  	   secondStageComm);
     	} else {
 			M_secondStageParts->resize(graph->size());
 			// For each set of elements in graph perform a second stage partitioning
@@ -299,7 +309,8 @@ void MeshPartitionTool < MeshType >::run()
 				const idList_Type& currentIds = graph->at(i);
 				GraphUtil::partitionGraphParMETIS(currentIds, *M_originalMesh,
 										  	   secondStageParams,
-										  	   M_secondStageParts->at(i));
+										  	   M_secondStageParts->at(i),
+										  	   secondStageComm);
 			}
     	}
     }

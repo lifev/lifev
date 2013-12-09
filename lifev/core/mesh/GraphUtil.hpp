@@ -56,6 +56,7 @@ namespace GraphUtil
 {
 
 // Public typedefs
+typedef boost::shared_ptr<Epetra_Comm>          commPtr_Type;
 typedef std::vector <LifeV::Int>                idList_Type;
 typedef std::vector <idList_Type>               graphPartition_Type;
 typedef boost::shared_ptr<graphPartition_Type>  graphPartitionPtr_Type;
@@ -72,7 +73,8 @@ template <typename MeshType>
 void partitionGraphParMETIS (const idList_Type& vertexList,
 						  	 const MeshType& mesh,
 						  	 const Teuchos::ParameterList& params,
-						  	 graphPartitionPtr_Type& vertexPartition);
+						  	 graphPartitionPtr_Type& vertexPartition,
+						  	 commPtr_Type& comm);
 }
 };
 
@@ -80,8 +82,12 @@ template <typename MeshType>
 void LifeV::GraphUtil::partitionGraphParMETIS (const idList_Type& vertexList,
 											   const MeshType& mesh,
 											   const Teuchos::ParameterList& params,
-											   graphPartitionPtr_Type& vertexPartition)
+											   graphPartitionPtr_Type& vertexPartition,
+											   commPtr_Type& comm)
 {
+	Int numProc = comm->NumProc();
+	Int myPID = comm->MyPID();
+
 	// We build a bidirectional map of vertex Id, for local-to-global and
 	// global-to-local lookups
 	UInt numVertices = vertexList.size();
@@ -90,24 +96,19 @@ void LifeV::GraphUtil::partitionGraphParMETIS (const idList_Type& vertexList,
 		vertexIdMap.insert(biMapValue_Type(i, vertexList[i]));
 	}
 
-    // Distribute elements
-    UInt k = vertexIdMap.size();
-
-    // CAREFUL: ParMetis works on a graph abstraction.
     // A graph is built over the data structure to be split, each vertex being
     // a mesh element so hereby a "vertex" is actually a _graph_ vertex,
     // i. e. a mesh element
-    std::vector<Int> vertexDistribution (2);
+    std::vector<Int> vertexDistribution (numProc + 1);
     vertexDistribution[0] = 0;
+    UInt k = numVertices;
     // Evenly distributed graph vertices
-    for (Int i = 0; i < 1; ++i)
+    for (Int i = 0; i < numProc; ++i)
     {
-        UInt l = k / (1 - i);
+        UInt l = k / (numProc - i);
         vertexDistribution[i + 1] = vertexDistribution[i] + l;
         k -= l;
     }
-    ASSERT (k == 0, "At this point we should have 0 volumes left") ;
-
 
     /*
      * Partition Graph
@@ -117,19 +118,11 @@ void LifeV::GraphUtil::partitionGraphParMETIS (const idList_Type& vertexList,
      * M_graphVertexLocations[m] = n; means that graph vertex m belongs to
      * subdomain n
      */
-    std::vector<Int> graphVertexLocations (
-        vertexDistribution[1] - vertexDistribution[0], 1);
+    std::vector<Int> vertexLocations (vertexDistribution[numProc]
+									  - vertexDistribution[0], numProc);
+    UInt localStart = vertexDistribution[myPID];
+    UInt localEnd   = vertexDistribution[myPID + 1];
 
-    /*
-     * Now each processor will take care of its own graph vertices
-     * (i. e. mesh elements).
-     * Nothing guarantees about the neighbor elements distribution across
-     * the processors, since as of now we just split the set of volumes based
-     * on IDs.
-     * Here we building up the neighbor arrays.
-     */
-    UInt localStart = vertexDistribution[0];
-    UInt localEnd   = vertexDistribution[1];
 
     // this vector contains the weights for the edges of the graph,
     // it is set to null if it is not used.
@@ -141,7 +134,7 @@ void LifeV::GraphUtil::partitionGraphParMETIS (const idList_Type& vertexList,
 
     UInt elementFacets = MeshType::elementShape_Type::S_numFacets;
 
-    for (UInt lid = localStart; lid < localEnd; ++lid)
+    for (UInt lid = 0; lid < numVertices; ++lid)
     {
         for (UInt ifacet = 0; ifacet < elementFacets; ++ifacet)
         {
@@ -175,24 +168,14 @@ void LifeV::GraphUtil::partitionGraphParMETIS (const idList_Type& vertexList,
     // **************
     // parMetis part
 
-    // this array is to be used for weighted vertices on the graph:
-    // usually we will set it to NULL
-
     Int* weightVector = 0;
-
     Int weightFlag = 0;
-
     Int ncon = 1;
     Int numflag = 0;
-
-    Int cutGraphEdges; // here will be stored the number of edges cut in the
-    // partitioning process
+    Int cutGraphEdges;
 
     // additional options
-    std::vector<Int>  options (3, 0);
-    options[0] = 1; // means that additional options are actually passed
-    options[1] = 3; // level of information to be returned during execution
-    options[2] = 1; // random number seed for the ParMETIS routine
+    Int options[3] = {1, 3, 1};
 
     // fraction of vertex weight to be distributed to each subdomain.
     // here we want the subdomains to be of the same size
@@ -201,16 +184,10 @@ void LifeV::GraphUtil::partitionGraphParMETIS (const idList_Type& vertexList,
     // imbalance tolerance for each vertex weight
     std::vector<float> ubvec (ncon, 1.05);
 
-    MPI_Comm MPIcomm = MPI_COMM_SELF;
+    boost::shared_ptr<Epetra_MpiComm> mpiComm
+        = boost::dynamic_pointer_cast <Epetra_MpiComm> (comm);
+    MPI_Comm MPIcomm = mpiComm->Comm();
 
-    /*
-      (from ParMETIS v 3.1 manual)
-      This routine is used to compute a k-way partitioning of a graph
-      on p processors using the multilevel k-way multi-constraint
-      partitioning algorithm.
-    */
-
-    Int nParts = numParts;
     Int* adjwgtPtr (0);
     if (graphEdgeWeights.size() > 0)
     {
@@ -220,11 +197,24 @@ void LifeV::GraphUtil::partitionGraphParMETIS (const idList_Type& vertexList,
                           static_cast<Int*> (&adjacencyGraphKeys[0]),
                           static_cast<Int*> (&adjacencyGraphValues[0]),
                           weightVector, adjwgtPtr, &weightFlag, &numflag,
-                          &ncon, &nParts, &tpwgts[0], &ubvec[0],
+                          &ncon, &numParts, &tpwgts[0], &ubvec[0],
                           &options[0], &cutGraphEdges,
-                          &graphVertexLocations[localStart],
+                          &vertexLocations[0],
                           &MPIcomm);
 
+    // distribute the resulting partitioning stored in M_graphVertexLocations
+    // to all processors
+    if (numProc != 1)
+    {
+        comm->Barrier();
+        for (Int proc = 0; proc < numProc; proc++)
+        {
+            UInt procStart  = vertexDistribution[proc];
+            UInt procLength = vertexDistribution[proc + 1]
+                              - vertexDistribution[proc];
+            comm->Broadcast (&vertexLocations[procStart], procLength, proc);
+        }
+    }
 
     graphPartitionPtr_Type vertexIds(new graphPartition_Type);
     vertexIds->resize(numParts);
@@ -232,11 +222,12 @@ void LifeV::GraphUtil::partitionGraphParMETIS (const idList_Type& vertexList,
     for (UInt i = 0; i < numParts; ++i)
     {
         vertexIds->at(i).resize(0);
+        vertexIds->at(i).reserve(vertexLocations.size() / numParts);
     }
-    for (UInt ii = 0; ii < graphVertexLocations.size(); ++ii)
+    for (UInt ii = 0; ii < vertexLocations.size(); ++ii)
     {
         // here we are associating the vertex global ID to the subdomain ID
-        vertexIds->at(graphVertexLocations[ii]).push_back (vertexIdMap.left.at (ii) );
+        vertexIds->at(vertexLocations[ii]).push_back(vertexIdMap.left.at(ii));
     }
 
     vertexPartition = vertexIds;
