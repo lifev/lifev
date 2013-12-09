@@ -74,7 +74,7 @@ const Int NavierStokesEthierSteinman::TOPCORNER3    = 25;
 const Int NavierStokesEthierSteinman::TOPCORNER4    = 26;
 
 NavierStokesEthierSteinman::NavierStokesEthierSteinman()
-    : NavierStokesProblem< RegionMesh< LinearTetra > >()
+    : NavierStokesProblem< esMesh_Type >()
 {
     RossEthierSteinmanUnsteadyDec::setA ( 1.0 );
     RossEthierSteinmanUnsteadyDec::setD ( 1.0 );
@@ -93,25 +93,25 @@ NavierStokesEthierSteinman::hasExactSolution() const
     return true;
 }
 
-NavierStokesProblem<esMesh_Type>::function_Type
+NavierStokesProblem< esMesh_Type >::function_Type
 NavierStokesEthierSteinman::xexact()
 {
     return RossEthierSteinmanUnsteadyDec::xexact;
 }
 
-NavierStokesProblem<esMesh_Type>::function_Type
+NavierStokesProblem< esMesh_Type >::function_Type
 NavierStokesEthierSteinman::uexact()
 {
     return RossEthierSteinmanUnsteadyDec::uexact;
 }
 
-NavierStokesProblem<esMesh_Type>::function_Type
+NavierStokesProblem< esMesh_Type >::function_Type
 NavierStokesEthierSteinman::uderexact()
 {
     return RossEthierSteinmanUnsteadyDec::uderexact;
 }
 
-NavierStokesProblem<esMesh_Type>::function_Type
+NavierStokesProblem< esMesh_Type >::function_Type
 NavierStokesEthierSteinman::pexact()
 {
     return RossEthierSteinmanUnsteadyDec::pexact;
@@ -126,14 +126,14 @@ NavierStokesEthierSteinman::showMe ( std::ostream& output ) const
 void
 NavierStokesEthierSteinman::setViscosity ( const Real& viscosity )
 {
-    NavierStokesProblem::setViscosity ( viscosity );
+    NavierStokesProblem< esMesh_Type >::setViscosity ( viscosity );
     RossEthierSteinmanUnsteadyDec::setViscosity ( viscosity );
 }
 
 void
 NavierStokesEthierSteinman::setDensity ( const Real& density )
 {
-    NavierStokesProblem::setDensity ( density );
+    NavierStokesProblem< esMesh_Type >::setDensity ( density );
     RossEthierSteinmanUnsteadyDec::setDensity ( density );
 }
 

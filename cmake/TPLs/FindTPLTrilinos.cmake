@@ -49,7 +49,7 @@ ENDIF()
 
 # Optional Packages (to be moved outside with COMPONENTS ...)
 list (APPEND LifeV_OPTIONAL_Trilinos_PKGS
-  "NOX" "Thyra" "Rythmos", "Teko", "Stratimikos", "Isorropia")
+  "NOX" "Thyra" "Rythmos" "Teko" "Stratimikos" "Isorropia")
 
 # Required packages (to be moved outside, like REQUIRED COMPONENTS ...)
 list (APPEND LifeV_REQUIRED_Trilinos_PKGS
@@ -105,7 +105,7 @@ endforeach (LIB)
 set (LifeV_Trilinos_LIBS ${LifeV_Trilinos_LIBS} ${LifeV_Trilinos_TPL_LIBRARIES})
 
 # TPLs
-foreach (TPL IN ITEMS "ParMETIS" "Boost" "LAPACK" "BLAS" "UMFPACK" "SuperLU" "SuperLUDist""HDF5")
+foreach (TPL IN ITEMS "ParMETIS" "Boost" "LAPACK" "BLAS" "UMFPACK" "SuperLU" "SuperLUDist" "HDF5")
     list (FIND LifeV_Trilinos_TPL_LIST ${TPL} TPL_FOUND)
   if (TPL_FOUND GREATER -1)
     string (TOUPPER ${TPL} UTPL)

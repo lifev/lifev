@@ -101,16 +101,16 @@ public:
     bool hasExactSolution() const;
 
     //! Returns the value of the exact solution
-    NavierStokesProblem<esMesh_Type>::function_Type xexact();
+    NavierStokesProblem< esMesh_Type >::function_Type xexact();
 
     //! Returns the value of the exact solution (velocity components only)
-    NavierStokesProblem<esMesh_Type>::function_Type uexact();
+    NavierStokesProblem< esMesh_Type >::function_Type uexact();
 
     //! Returns the value of the derivative of the exact solution with respect to the time (velocity components only)
-    NavierStokesProblem<esMesh_Type>::function_Type uderexact();
+    NavierStokesProblem< esMesh_Type >::function_Type uderexact();
 
     //! Returns the value of the exact solution (pressure component only)
-    NavierStokesProblem<esMesh_Type>::function_Type pexact();
+    NavierStokesProblem< esMesh_Type >::function_Type pexact();
 
     //! Display general information about the problem
     /*!
