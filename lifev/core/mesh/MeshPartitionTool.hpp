@@ -289,17 +289,17 @@ void MeshPartitionTool < MeshType >::run()
 			M_secondStageParts->resize(1);
 			// For each set of elements in graph perform a second stage partitioning
 			const idList_Type& currentIds = graph->at(M_myPID);
-			GraphUtil::partitionGraphIsorropia(currentIds, *M_originalMesh,
-									  	  	   secondStageParams,
-									  	  	   M_secondStageParts->at(0));
+			GraphUtil::partitionGraphParMETIS(currentIds, *M_originalMesh,
+									  	   secondStageParams,
+									  	   M_secondStageParts->at(0));
     	} else {
 			M_secondStageParts->resize(graph->size());
 			// For each set of elements in graph perform a second stage partitioning
 			for (Int i = 0; i < graph->size(); ++i) {
 				const idList_Type& currentIds = graph->at(i);
-				GraphUtil::partitionGraphIsorropia(currentIds, *M_originalMesh,
-										  	  	   secondStageParams,
-										  	  	   M_secondStageParts->at(i));
+				GraphUtil::partitionGraphParMETIS(currentIds, *M_originalMesh,
+										  	   secondStageParams,
+										  	   M_secondStageParts->at(i));
 			}
     	}
     }
