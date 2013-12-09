@@ -151,13 +151,8 @@ Real bcZero (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Rea
 
 Real bcNonZero (const Real& t, const Real&  X, const Real& Y, const Real& Z, const ID& i)
 {
-  //Real pressure(200000);
 
-  // Real top = 1000000;
-
-  // return top * Y;
-
-    return 300000;
+    return 19995;
 
 	// Real highestPressure(6.666e+6);
 	// Real totalTime = 20.0;
