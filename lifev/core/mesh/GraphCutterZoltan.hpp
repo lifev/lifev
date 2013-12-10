@@ -93,8 +93,13 @@ public:
     typedef boost::shared_ptr<Epetra_Comm>                  commPtr_Type;
     typedef MeshType                                        mesh_Type;
     typedef boost::shared_ptr<mesh_Type>                    meshPtr_Type;
-    typedef boost::shared_ptr<std::vector<std::vector<Int> > > graph_Type;
-    typedef std::map<Int, std::vector<Int> >                table_Type;
+
+    typedef std::vector<Int>                       idList_Type;
+    typedef boost::shared_ptr<idList_Type>         idListPtr_Type;
+    typedef std::vector<idListPtr_Type>            vertexPartition_Type;
+    typedef boost::shared_ptr<vertexPartition_Type> vertexPartitionPtr_Type;
+
+    typedef std::map<Int, idListPtr_Type >                table_Type;
     //@}
 
     //! @name Constructor & Destructor
@@ -126,23 +131,22 @@ public:
     //! @name Get Methods
     //@{
     //! Get a pointer to one of the parts
-    virtual const std::vector<Int>& getPart (const UInt i) const
+    virtual const idListPtr_Type& getPart (const UInt i) const
     {
         return M_partitionTable.find (i)->second;
     }
-    virtual std::vector<Int>& getPart (const UInt i)
+    virtual idListPtr_Type& getPart (const UInt i)
     {
         return M_partitionTable.find (i)->second;
     }
 
     //! Get the entire partitioned graph, wrapped in a smart pointer
-    virtual graph_Type getGraph()
+    virtual const vertexPartitionPtr_Type getGraph() const
     {
-        boost::shared_ptr<std::vector<std::vector<Int> > >
-        graph (new std::vector<std::vector<Int> > (numParts() ) );
+        vertexPartitionPtr_Type graph (new vertexPartition_Type(numParts()));
         for (UInt i = 0; i < numParts(); ++i)
         {
-            (*graph) [i] = getPart (i);
+            graph->at(i) = getPart (i);
         }
         return graph;
     }
@@ -407,7 +411,7 @@ void GraphCutterZoltan<MeshType>::getNumNeighboursList (void* data,
     for (int element = 0; element < num_obj; ++element)
     {
         numEdges[element]
-            = object->graph().find (globalID[element])->second.size();
+            = object->graph().find (globalID[element])->second->size();
     }
 
     *ierr = ZOLTAN_OK;
@@ -433,7 +437,7 @@ void GraphCutterZoltan<MeshType>::getNeighbourList (void* data,
     int pos = 0;
     for (int element = 0; element < num_obj; ++element)
     {
-        iter = object->graph().find (globalID[element])->second.begin();
+        iter = object->graph().find (globalID[element])->second->begin();
         for (int k = 0; k < num_edges[element]; ++k)
         {
             nborGID[pos] = *iter;
@@ -543,7 +547,7 @@ void GraphCutterZoltan<MeshType>::distributePartitions()
 
     for (Int i = M_myFirstPart; i <= M_myLastPart; ++i)
     {
-        M_partitionTable[i].resize (0);
+        M_partitionTable[i].reset(new idList_Type(0));
     }
 }
 
@@ -614,10 +618,11 @@ void GraphCutterZoltan<MeshType>::buildGraph()
     for (UInt i = 0; i < numStoredElements(); ++i)
     {
         UInt ie = M_elementList[i];
-        M_graph.insert (std::pair<Int, std::vector<Int> >
-                        (ie, std::vector<Int>() )
+        M_graph.insert (std::pair<Int, idListPtr_Type >
+                        (ie, idListPtr_Type() )
                        );
-        M_graph[ie].reserve (numNeighbours);
+        M_graph[ie].reset(new idList_Type(0));
+        M_graph[ie]->reserve(numNeighbours);
         for (UInt ifacet = 0; ifacet < numElementFacets; ++ifacet)
         {
             UInt facet = M_mesh->localFacetId (ie, ifacet);
@@ -628,7 +633,7 @@ void GraphCutterZoltan<MeshType>::buildGraph()
             }
             if (elem != NotAnId)
             {
-                M_graph[ie].push_back (elem);
+                M_graph[ie]->push_back (elem);
             }
         }
     }
@@ -659,7 +664,8 @@ void GraphCutterZoltan<MeshType>::buildPartitionTable()
     for (table_Type::iterator it = M_partitionTable.begin();
             it != M_partitionTable.end(); ++it)
     {
-        it->second.reserve (numStoredElements() / M_numPartsPerProcessor);
+    	it->second.reset(new idList_Type(0));
+        it->second->reserve (numStoredElements() / M_numPartsPerProcessor);
     }
 
     for (UInt i = 0; i < numStoredElements(); ++i)
@@ -667,23 +673,23 @@ void GraphCutterZoltan<MeshType>::buildPartitionTable()
         // We marked elements that were moved to a different processor with -1
         if (static_cast<Int> (M_elementList[i]) != -1)
         {
-            M_partitionTable[M_elementParts[i]].push_back (M_elementList[i]);
+            M_partitionTable[M_elementParts[i]]->push_back (M_elementList[i]);
         }
     }
     for (table_Type::iterator it = M_partitionTable.begin();
             it != M_partitionTable.end(); ++it)
     {
-        std::sort (it->second.begin(), it->second.end() );
+        std::sort (it->second->begin(), it->second->end() );
     }
 
     // Distribute the graph parts to all the processes
     M_comm->Barrier();
     if (numProcessors() > 1) {
         for (UInt i = 0; i < numProcessors(); ++i) {
-            int currentSize = M_partitionTable[i].size();
+            int currentSize = M_partitionTable[i]->size();
             M_comm->Broadcast(&currentSize, 1, i);
-            M_partitionTable[i].resize(currentSize);
-            M_comm->Broadcast(&(M_partitionTable[i][0]), currentSize, i);
+            M_partitionTable[i]->resize(currentSize);
+            M_comm->Broadcast(&(M_partitionTable[i]->at(0)), currentSize, i);
         }
     }
 }

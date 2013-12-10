@@ -91,11 +91,12 @@ public:
     typedef std::vector<meshPtr_Type>            partMesh_Type;
     typedef boost::shared_ptr<partMesh_Type>     partMeshPtr_Type;
     typedef typename GraphUtil::idList_Type      idList_Type;
-    typedef typename GraphUtil::graphPartition_Type graphPartition_Type;
-    typedef typename GraphUtil::graphPartitionPtr_Type graphPartitionPtr_Type;
+    typedef typename GraphUtil::idListPtr_Type   idListPtr_Type;
+    typedef typename GraphUtil::vertexPartition_Type vertexPartition_Type;
+    typedef typename GraphUtil::vertexPartitionPtr_Type vertexPartitionPtr_Type;
     typedef std::vector<
-    		typename GraphUtil::graphPartitionPtr_Type> graphPartitionTable_Type;
-    typedef boost::shared_ptr<graphPartitionTable_Type> graphPartitionTablePtr_Type;
+    		typename GraphUtil::vertexPartitionPtr_Type> vertexPartitionTable_Type;
+    typedef boost::shared_ptr<vertexPartitionTable_Type> vertexPartitionTablePtr_Type;
     //@}
 
     //! \name Constructors & Destructors
@@ -154,7 +155,7 @@ public:
      * Return a shared pointer to the second stage graph parts (for ShyLU-MT)
      * Offline mode
      */
-    const graphPartitionTablePtr_Type& secondStageParts() const
+    const vertexPartitionTablePtr_Type& secondStageParts() const
     {
     	return M_secondStageParts;
     }
@@ -164,7 +165,7 @@ public:
      * Return a shared pointer to the second stage graph parts (for ShyLU-MT)
      * Online mode
      */
-    const graphPartitionPtr_Type& mySecondStageParts() const
+    const vertexPartitionPtr_Type& mySecondStageParts() const
     {
     	return M_secondStageParts->at(0);
     }
@@ -177,7 +178,7 @@ private:
     void run();
 
     //! Initialize M_entityPID
-    void fillEntityPID(typename GraphUtil::graphPartitionPtr_Type graph);
+    void fillEntityPID(typename GraphUtil::vertexPartitionPtr_Type graph);
 
     //! Global to local element ID conversion for second stage
     void globalToLocal(const Int curPart);
@@ -202,7 +203,7 @@ private:
     // TODO: this is temporary, may be changed later
     bool                                       M_secondStage;
     Int                                        M_secondStageNumParts;
-    graphPartitionTablePtr_Type                M_secondStageParts;
+    vertexPartitionTablePtr_Type                M_secondStageParts;
 
     //! Store ownership for each entity, subdivided by entity type
     typename meshPartBuilder_Type::entityPID_Type M_entityPID;
@@ -235,7 +236,7 @@ MeshPartitionTool < MeshType >::MeshPartitionTool (
                       M_success (false),
                       M_secondStage (M_parameters.get<bool>("second-stage", false)),
                       M_secondStageNumParts (M_parameters.get<Int>("second-stage-num-parts", 1)),
-                      M_secondStageParts(new graphPartitionTable_Type)
+                      M_secondStageParts(new vertexPartitionTable_Type)
 {
     if (! M_graphLib.compare("parmetis")) {
         M_graphCutter.reset(new GraphCutterParMETIS<mesh_Type>(M_originalMesh, M_comm, M_parameters));
@@ -267,7 +268,7 @@ void MeshPartitionTool < MeshType >::run()
     }
 
     // Extract the graph from the graphCutter
-    typename GraphUtil::graphPartitionPtr_Type graph = M_graphCutter->getGraph();
+    typename GraphUtil::vertexPartitionPtr_Type graph = M_graphCutter->getGraph();
 
     // Dispose of the graph partitioner object
     M_graphCutter.reset();
@@ -297,7 +298,7 @@ void MeshPartitionTool < MeshType >::run()
     	if (! offlineMode) {
 			M_secondStageParts->resize(1);
 			// For each set of elements in graph perform a second stage partitioning
-			const idList_Type& currentIds = graph->at(M_myPID);
+			const idListPtr_Type currentIds = graph->at(M_myPID);
 			GraphUtil::partitionGraphParMETIS(currentIds, *M_originalMesh,
 									  	   secondStageParams,
 									  	   M_secondStageParts->at(0),
@@ -306,7 +307,7 @@ void MeshPartitionTool < MeshType >::run()
 			M_secondStageParts->resize(graph->size());
 			// For each set of elements in graph perform a second stage partitioning
 			for (Int i = 0; i < graph->size(); ++i) {
-				const idList_Type& currentIds = graph->at(i);
+				const idListPtr_Type& currentIds = graph->at(i);
 				GraphUtil::partitionGraphParMETIS(currentIds, *M_originalMesh,
 										  	   secondStageParams,
 										  	   M_secondStageParts->at(i),
@@ -370,7 +371,7 @@ void MeshPartitionTool < MeshType >::run()
             for (Int curPart = 0; curPart < numParts; ++curPart)
             {
                 // Backup the elements of the current graph part
-                std::vector<Int> backup ( (*graph) [curPart]);
+                idList_Type backup ( *(graph->at(curPart)));
                 M_allMeshParts->at (curPart).reset (new mesh_Type);
                 M_allMeshParts->at (curPart)->setIsPartitioned(true);
                 M_meshPartBuilder->run (M_allMeshParts->at (curPart),
@@ -379,7 +380,7 @@ void MeshPartitionTool < MeshType >::run()
 
                 // At this point (*graph)[curPart] has been modified. Restore
                 // to the original state
-                (*graph) [curPart] = backup;
+                *(graph->at(curPart)) = backup;
 
                 // Make the global to local element ID conversion for the second stage
                 if (M_secondStage) {
@@ -407,7 +408,7 @@ void MeshPartitionTool < MeshType >::run()
 
 template<typename MeshType>
 void
-MeshPartitionTool<MeshType>::fillEntityPID (graphPartitionPtr_Type graph)
+MeshPartitionTool<MeshType>::fillEntityPID (vertexPartitionPtr_Type graph)
 {
     Int numParts = graph->size();
 
@@ -421,18 +422,18 @@ MeshPartitionTool<MeshType>::fillEntityPID (graphPartitionPtr_Type graph)
     // p = 0 can be skipped since M_entityPID is already initialized at that value
     for ( Int p = 1; p < numParts; p++ )
     {
-        for ( UInt e = 0; e < (*graph) [ p ].size(); e++ )
+        for ( UInt e = 0; e < graph->at(p)->size(); e++ )
         {
             // point block
             for ( UInt k = 0; k < mesh_Type::element_Type::S_numPoints; k++ )
             {
-                const ID& pointID = M_originalMesh->element ( (*graph) [ p ][ e ] ).point ( k ).id();
+                const ID& pointID = M_originalMesh->element ( graph->at(p)->at(e) ).point ( k ).id();
                 // pointPID should be the maximum between the procs that own it
                 M_entityPID.points[ pointID ] = std::max ( M_entityPID.points[ pointID ], p );
             }
 
             // elem block
-            const ID& elemID = M_originalMesh->element ( (*graph) [ p ][ e ] ).id();
+            const ID& elemID = M_originalMesh->element ( graph->at(p)->at(e) ).id();
             // at his stage each element belongs to a single partition, overlap is not yet done.
             M_entityPID.elements[ elemID ] = p;
 
@@ -461,11 +462,11 @@ MeshPartitionTool < MeshType >::globalToLocal(const Int curPart)
 {
 	const std::map<Int, Int>& globalToLocalMap =
 	M_meshPartBuilder->globalToLocalElement();
-	graphPartition_Type& currentGraph = *(M_secondStageParts->at(curPart));
+	vertexPartition_Type& currentGraph = *(M_secondStageParts->at(curPart));
 
 	for (Int i = 0; i < currentGraph.size(); ++i) {
-		int currentSize = currentGraph[i].size();
-		idList_Type& currentElements = currentGraph[i];
+		int currentSize = currentGraph[i]->size();
+		idList_Type& currentElements = *(currentGraph[i]);
 		for (Int j = 0; j < currentSize; ++j) {
 			currentElements[j] = globalToLocalMap.find(currentElements[j])->second;
 		}

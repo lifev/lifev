@@ -62,7 +62,10 @@ public:
     //! @name Public Types
     //@{
     typedef Teuchos::ParameterList pList_Type;
-    typedef boost::shared_ptr<std::vector<std::vector<Int> > > graph_Type;
+    typedef std::vector<Int>                       idList_Type;
+    typedef boost::shared_ptr<idList_Type>         idListPtr_Type;
+    typedef std::vector<idListPtr_Type>            vertexPartition_Type;
+    typedef boost::shared_ptr<vertexPartition_Type> vertexPartitionPtr_Type;
     //@}
 
     //! @name Constructor & Destructor
@@ -87,11 +90,11 @@ public:
     //! @name Get Methods
     //@{
     //! Get a pointer to one of the partitions
-    virtual const std::vector<Int>& getPart (const UInt i) const = 0;
-    virtual std::vector<Int>& getPart (const UInt i) = 0;
+    virtual const idListPtr_Type& getPart (const UInt i) const = 0;
+    virtual idListPtr_Type& getPart (const UInt i) = 0;
 
     //! Get the entire partitioned graph, wrapped in a smart pointer
-    virtual graph_Type getGraph() = 0;
+    virtual const vertexPartitionPtr_Type getGraph() const = 0;
 
     //! Return the number of parts
     virtual const UInt numParts() const = 0;

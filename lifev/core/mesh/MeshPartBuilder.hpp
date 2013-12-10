@@ -51,6 +51,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <lifev/core/array/GhostHandler.hpp>
 #include <lifev/core/mesh/GraphCutterBase.hpp>
+#include <lifev/core/mesh/GraphUtil.hpp>
 
 namespace LifeV
 {
@@ -77,8 +78,7 @@ public:
     typedef std::vector<Int> idList_Type;
     typedef boost::shared_ptr<mesh_Type> meshPtr_Type;
     typedef boost::shared_ptr<Epetra_Comm>       commPtr_Type;
-    typedef boost::shared_ptr <
-    std::vector<std::vector<Int> > > graph_Type;
+    typedef typename GraphUtil::vertexPartitionPtr_Type vertexPartitionPtr_Type;
     typedef struct
     {
         idList_Type elements;
@@ -118,7 +118,7 @@ public:
      *                      element IDs associated with this mesh part
      */
     void run (const meshPtr_Type& meshPart,
-              const graph_Type& graph,
+              const vertexPartitionPtr_Type& graph,
               const entityPID_Type& entityPIDList,
               const UInt partIndex);
 
@@ -229,14 +229,14 @@ MeshPartBuilder<MeshType>::MeshPartBuilder (const meshPtr_Type& mesh,
 
 template<typename MeshType>
 void MeshPartBuilder<MeshType>::run (const meshPtr_Type& meshPart,
-                                     const graph_Type& graph,
+                                     const vertexPartitionPtr_Type& graph,
                                      const entityPID_Type& entityPIDList,
                                      const UInt partIndex)
 {
     M_meshPart = meshPart;
     M_partIndex = partIndex;
 
-    const std::vector<Int>& elementList ( (*graph) [partIndex]);
+    const std::vector<Int>& elementList = *(graph->at(partIndex));
 
     GhostHandler<mesh_Type> gh ( M_originalMesh, M_comm );
     if ( M_overlap != 0)

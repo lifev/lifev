@@ -53,6 +53,7 @@
 
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/mesh/GraphCutterBase.hpp>
+#include <lifev/core/mesh/GraphUtil.hpp>
 
 namespace LifeV
 {
@@ -81,9 +82,12 @@ public:
     typedef boost::shared_ptr<Epetra_Comm>         commPtr_Type;
     typedef MeshType                               mesh_Type;
     typedef boost::shared_ptr<mesh_Type>           meshPtr_Type;
-    typedef std::vector <
-    boost::shared_ptr<std::vector<Int> > > vertexPartition_Type;
-    typedef boost::shared_ptr<std::vector<std::vector<Int> > > graph_Type;
+
+    typedef std::vector<Int>                       idList_Type;
+    typedef boost::shared_ptr<idList_Type>         idListPtr_Type;
+    typedef std::vector<idListPtr_Type>            vertexPartition_Type;
+    typedef boost::shared_ptr<vertexPartition_Type> vertexPartitionPtr_Type;
+
     typedef boost::bimap<UInt, UInt>               biMap_Type;
     typedef biMap_Type::value_type                 biMapValue_Type;
     //@}
@@ -117,30 +121,29 @@ public:
     //! @name Get Methods
     //@{
     //! Get a pointer to one of the partitions
-    virtual const std::vector<Int>& getPart (const UInt i) const
+    virtual const idListPtr_Type& getPart (const UInt i) const
     {
-        return * (M_vertexPartition[i]);
+        return M_vertexPartition->at(i);
     }
-    virtual std::vector<Int>& getPart (const UInt i)
+    virtual idListPtr_Type& getPart (const UInt i)
     {
-        return * (M_vertexPartition[i]);
+        return M_vertexPartition->at(i);
     }
 
     //! Return the number of parts
     virtual const UInt numParts() const
     {
-        return M_vertexPartition.size();
+        return M_vertexPartition->size();
     }
 
     //! Get the entire partitioned graph, wrapped in a smart pointer
-    virtual graph_Type getGraph()
+    virtual const vertexPartitionPtr_Type getGraph() const
     {
-        boost::shared_ptr<std::vector<std::vector<Int> > >
-        graph (new std::vector<std::vector<Int> > (M_vertexPartition.size() ) );
+        vertexPartitionPtr_Type graph (new vertexPartition_Type(M_vertexPartition->size()));
 
-        for (UInt i = 0; i < M_vertexPartition.size(); ++i)
+        for (UInt i = 0; i < M_vertexPartition->size(); ++i)
         {
-            (*graph) [i] = getPart (i);
+            graph->at(i) = getPart (i);
         }
 
         return graph;
@@ -163,7 +166,7 @@ private:
     //! Perform a partitioning on a given subset of elements
     Int partitionSubGraph (const biMap_Type& vertexMap,
                            const Int numParts,
-                           vertexPartition_Type& vertexPartition);
+                           vertexPartitionPtr_Type& vertexPartition);
     //@}
 
     // Private copy constructor and assignment operator are disabled
@@ -186,7 +189,7 @@ private:
     UInt                                               M_elementFacets;
     UInt                                               M_elementRidges;
     UInt                                               M_facetVertices;
-    vertexPartition_Type                               M_vertexPartition;
+    vertexPartitionPtr_Type                            M_vertexPartition;
 };
 
 //
@@ -206,7 +209,8 @@ GraphCutterParMETIS<MeshType>::GraphCutterParMETIS (meshPtr_Type& mesh,
     M_numProcessors (M_comm->NumProc() ),
     M_numParts (0),
     M_parameters(),
-    M_mesh (mesh)
+    M_mesh (mesh),
+    M_vertexPartition(new vertexPartition_Type(0))
 {
     setParameters (parameters);
 }
@@ -315,7 +319,7 @@ Int GraphCutterParMETIS<MeshType>::partitionHierarchical()
         vertexMap.insert(biMapValue_Type(i, i));
     }
 
-    vertexPartition_Type tempVertexPartition (numSubdomains);
+    vertexPartitionPtr_Type tempVertexPartition(new vertexPartition_Type(numSubdomains));
 
     /*
      * After calling partitionSubGraph, tempVertexPartition will contain
@@ -327,20 +331,20 @@ Int GraphCutterParMETIS<MeshType>::partitionHierarchical()
      * Step two is to partition each subdomain into the number of sub parts
      * denoted by the M_topology parameter
      */
-    M_vertexPartition.resize (M_numParts);
+    M_vertexPartition->resize (M_numParts);
     Int currentPart = 0;
     for (Int i = 0; i < numSubdomains; ++i)
     {
         biMap_Type subdomainVertexMap;
-        for (Int k = 0; k < tempVertexPartition[i]->size(); ++k) {
-            subdomainVertexMap.insert(biMapValue_Type(k, (*tempVertexPartition[i])[k]));
+        for (Int k = 0; k < tempVertexPartition->at(i)->size(); ++k) {
+            subdomainVertexMap.insert(biMapValue_Type(k, tempVertexPartition->at(i)->at(k)));
         }
-        vertexPartition_Type subdomainParts;
+        vertexPartitionPtr_Type subdomainParts(new vertexPartition_Type(M_numParts));
               partitionSubGraph(subdomainVertexMap, M_topology,
                                 subdomainParts);
         for (Int j = 0; j < M_topology; ++j)
         {
-            M_vertexPartition[currentPart++] = subdomainParts[j];
+            M_vertexPartition->at(currentPart++) = subdomainParts->at(j);
         }
     }
 
@@ -351,7 +355,7 @@ template<typename MeshType>
 Int GraphCutterParMETIS<MeshType>::partitionSubGraph (
     const biMap_Type& vertexMap,
     const Int numParts,
-    vertexPartition_Type& vertexPartition)
+    vertexPartitionPtr_Type& vertexPartition)
 {
     // Distribute elements
     UInt k = vertexMap.size();
@@ -504,15 +508,15 @@ Int GraphCutterParMETIS<MeshType>::partitionSubGraph (
     }
 
     // cycling on locally stored vertices
-    vertexPartition.resize (numParts);
+    vertexPartition->resize (numParts);
     for (UInt i = 0; i < numParts; ++i)
     {
-        vertexPartition[i].reset (new std::vector<Int> (0) );
+        vertexPartition->at(i).reset(new idList_Type(0));
     }
     for (UInt ii = 0; ii < graphVertexLocations.size(); ++ii)
     {
         // here we are associating the vertex global ID to the subdomain ID
-        vertexPartition[graphVertexLocations[ii]]->push_back (vertexMap.left.at (ii) );
+        vertexPartition->at(graphVertexLocations[ii])->push_back (vertexMap.left.at (ii) );
     }
 
     return 0;

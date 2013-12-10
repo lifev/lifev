@@ -58,8 +58,9 @@ namespace GraphUtil
 // Public typedefs
 typedef boost::shared_ptr<Epetra_Comm>          commPtr_Type;
 typedef std::vector <LifeV::Int>                idList_Type;
-typedef std::vector <idList_Type>               graphPartition_Type;
-typedef boost::shared_ptr<graphPartition_Type>  graphPartitionPtr_Type;
+typedef boost::shared_ptr<idList_Type>          idListPtr_Type;
+typedef std::vector <idListPtr_Type>            vertexPartition_Type;
+typedef boost::shared_ptr<vertexPartition_Type> vertexPartitionPtr_Type;
 typedef boost::bimap<LifeV::UInt, LifeV::UInt>  biMap_Type;
 typedef biMap_Type::value_type                  biMapValue_Type;
 
@@ -70,19 +71,19 @@ typedef biMap_Type::value_type                  biMapValue_Type;
     TODO: add full description
  */
 template <typename MeshType>
-void partitionGraphParMETIS (const idList_Type& vertexList,
+void partitionGraphParMETIS (const idListPtr_Type& vertexList,
 						  	 const MeshType& mesh,
 						  	 const Teuchos::ParameterList& params,
-						  	 graphPartitionPtr_Type& vertexPartition,
+						  	 vertexPartitionPtr_Type& vertexPartition,
 						  	 commPtr_Type& comm);
 }
 };
 
 template <typename MeshType>
-void LifeV::GraphUtil::partitionGraphParMETIS (const idList_Type& vertexList,
+void LifeV::GraphUtil::partitionGraphParMETIS (const idListPtr_Type& vertexList,
 											   const MeshType& mesh,
 											   const Teuchos::ParameterList& params,
-											   graphPartitionPtr_Type& vertexPartition,
+											   vertexPartitionPtr_Type& vertexPartition,
 											   commPtr_Type& comm)
 {
 	Int numProc = comm->NumProc();
@@ -90,10 +91,10 @@ void LifeV::GraphUtil::partitionGraphParMETIS (const idList_Type& vertexList,
 
 	// We build a bidirectional map of vertex Id, for local-to-global and
 	// global-to-local lookups
-	UInt numVertices = vertexList.size();
+	UInt numVertices = vertexList->size();
 	biMap_Type vertexIdMap;
 	for (UInt i = 0; i < numVertices; ++i) {
-		vertexIdMap.insert(biMapValue_Type(i, vertexList[i]));
+		vertexIdMap.insert(biMapValue_Type(i, vertexList->at(i)));
 	}
 
     // A graph is built over the data structure to be split, each vertex being
@@ -134,7 +135,7 @@ void LifeV::GraphUtil::partitionGraphParMETIS (const idList_Type& vertexList,
 
     UInt elementFacets = MeshType::elementShape_Type::S_numFacets;
 
-    for (UInt lid = 0; lid < numVertices; ++lid)
+    for (UInt lid = localStart; lid < localEnd; ++lid)
     {
         for (UInt ifacet = 0; ifacet < elementFacets; ++ifacet)
         {
@@ -199,7 +200,7 @@ void LifeV::GraphUtil::partitionGraphParMETIS (const idList_Type& vertexList,
                           weightVector, adjwgtPtr, &weightFlag, &numflag,
                           &ncon, &numParts, &tpwgts[0], &ubvec[0],
                           &options[0], &cutGraphEdges,
-                          &vertexLocations[0],
+                          &vertexLocations[localStart],
                           &MPIcomm);
 
     // distribute the resulting partitioning stored in M_graphVertexLocations
@@ -216,18 +217,17 @@ void LifeV::GraphUtil::partitionGraphParMETIS (const idList_Type& vertexList,
         }
     }
 
-    graphPartitionPtr_Type vertexIds(new graphPartition_Type);
-    vertexIds->resize(numParts);
+    vertexPartitionPtr_Type vertexIds(new vertexPartition_Type(numParts));
     // cycling on locally stored vertices
     for (UInt i = 0; i < numParts; ++i)
     {
-        vertexIds->at(i).resize(0);
-        vertexIds->at(i).reserve(vertexLocations.size() / numParts);
+        vertexIds->at(i).reset(new idList_Type(0));
+        vertexIds->at(i)->reserve(vertexLocations.size() / numParts);
     }
     for (UInt ii = 0; ii < vertexLocations.size(); ++ii)
     {
         // here we are associating the vertex global ID to the subdomain ID
-        vertexIds->at(vertexLocations[ii]).push_back(vertexIdMap.left.at(ii));
+        vertexIds->at(vertexLocations[ii])->push_back(vertexIdMap.left.at(ii));
     }
 
     vertexPartition = vertexIds;

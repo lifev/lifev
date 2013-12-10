@@ -86,8 +86,11 @@ public:
     typedef MapEpetra map_Type;
     typedef boost::shared_ptr<map_Type> mapPtr_Type;
     typedef std::vector<Int> idList_Type;
+    typedef boost::shared_ptr<idList_Type> idListPtr_Type;
     typedef std::vector<idList_Type> graph_Type;
     typedef boost::shared_ptr<graph_Type> graphPtr_Type;
+    typedef std::vector<idListPtr_Type> vertexPartition_Type;
+    typedef boost::shared_ptr<vertexPartition_Type> vertexPartitionPtr_Type;
     typedef std::vector<markerID_Type> markerIDList_Type;
 
     //@}
@@ -301,7 +304,7 @@ public:
      * \param entityPID. Info about proc ownership of each mesh entity.
      * \param overlap. Level of overlap between partitions.
      */
-    void extendGraphFE ( const boost::shared_ptr<std::vector<std::vector<Int > > >& elemGraph,
+    void extendGraphFE ( const vertexPartitionPtr_Type& elemGraph,
                          idList_Type const& pointPID,
                          UInt overlap,
                          UInt partIndex);
@@ -1402,7 +1405,7 @@ void GhostHandler<MeshType>::extendGraphFE ( graphPtr_Type elemGraph,
 }
 
 template <typename MeshType>
-void GhostHandler<MeshType>::extendGraphFE ( const boost::shared_ptr<std::vector<std::vector<Int> > >& elemGraph,
+void GhostHandler<MeshType>::extendGraphFE ( const vertexPartitionPtr_Type& elemGraph,
                                              idList_Type const& pointPID,
                                              UInt overlap,
                                              UInt partIndex)
@@ -1431,7 +1434,7 @@ void GhostHandler<MeshType>::extendGraphFE ( const boost::shared_ptr<std::vector
     timeNL.stop();
 #endif
 
-    std::vector<int>& myElems = (*elemGraph) [partIndex];
+    std::vector<int>& myElems = *(elemGraph->at(partIndex));
 
 #ifdef LIFEV_GHOSTHANDLER_DEBUG
     // show own elements
@@ -1453,12 +1456,12 @@ void GhostHandler<MeshType>::extendGraphFE ( const boost::shared_ptr<std::vector
     graph_Type pointGraph ( numParts );
 
     std::set<int> localPointsSet;
-    for ( UInt e = 0; e < (*elemGraph) [ partIndex ].size(); e++ )
+    for ( UInt e = 0; e < elemGraph->at(partIndex)->size(); e++ )
     {
         // point block
         for ( UInt k = 0; k < mesh_Type::element_Type::S_numPoints; k++ )
         {
-            const ID& pointID = M_fullMesh->element ( (*elemGraph) [ partIndex ][ e ] ).point ( k ).id();
+            const ID& pointID = M_fullMesh->element ( elemGraph->at(partIndex)->at(e) ).point ( k ).id();
             localPointsSet.insert ( pointID );
         }
     }
