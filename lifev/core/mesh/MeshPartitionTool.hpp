@@ -67,6 +67,8 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 namespace LifeV
 {
 
+using namespace GraphUtil;
+
 /*!
   @brief Class that does flexible mesh partitioning
   @author Radu Popescu radu.popescu@epfl.ch
@@ -90,13 +92,9 @@ public:
     typedef boost::shared_ptr<mesh_Type>         meshPtr_Type;
     typedef std::vector<meshPtr_Type>            partMesh_Type;
     typedef boost::shared_ptr<partMesh_Type>     partMeshPtr_Type;
-    typedef typename GraphUtil::idList_Type      idList_Type;
-    typedef typename GraphUtil::idListPtr_Type   idListPtr_Type;
-    typedef typename GraphUtil::vertexPartition_Type vertexPartition_Type;
-    typedef typename GraphUtil::vertexPartitionPtr_Type vertexPartitionPtr_Type;
-    typedef std::vector<
-    		typename GraphUtil::vertexPartitionPtr_Type> vertexPartitionTable_Type;
-    typedef boost::shared_ptr<vertexPartitionTable_Type> vertexPartitionTablePtr_Type;
+    typedef std::vector<idTablePtr_Type>         vertexPartitionTable_Type;
+    typedef boost::shared_ptr<vertexPartitionTable_Type>
+    											 vertexPartitionTablePtr_Type;
     //@}
 
     //! \name Constructors & Destructors
@@ -165,7 +163,7 @@ public:
      * Return a shared pointer to the second stage graph parts (for ShyLU-MT)
      * Online mode
      */
-    const vertexPartitionPtr_Type& mySecondStageParts() const
+    const idTablePtr_Type& mySecondStageParts() const
     {
     	return M_secondStageParts->at(0);
     }
@@ -178,7 +176,7 @@ private:
     void run();
 
     //! Initialize M_entityPID
-    void fillEntityPID(typename GraphUtil::vertexPartitionPtr_Type graph);
+    void fillEntityPID(idTablePtr_Type graph);
 
     //! Global to local element ID conversion for second stage
     void globalToLocal(const Int curPart);
@@ -268,7 +266,7 @@ void MeshPartitionTool < MeshType >::run()
     }
 
     // Extract the graph from the graphCutter
-    typename GraphUtil::vertexPartitionPtr_Type graph = M_graphCutter->getGraph();
+    idTablePtr_Type graph = M_graphCutter->getGraph();
 
     // Dispose of the graph partitioner object
     M_graphCutter.reset();
@@ -299,19 +297,19 @@ void MeshPartitionTool < MeshType >::run()
 			M_secondStageParts->resize(1);
 			// For each set of elements in graph perform a second stage partitioning
 			const idListPtr_Type currentIds = graph->at(M_myPID);
-			GraphUtil::partitionGraphParMETIS(currentIds, *M_originalMesh,
-									  	   secondStageParams,
-									  	   M_secondStageParts->at(0),
-									  	   secondStageComm);
+			partitionGraphParMETIS(currentIds, *M_originalMesh,
+								   secondStageParams,
+								   M_secondStageParts->at(0),
+								   secondStageComm);
     	} else {
 			M_secondStageParts->resize(graph->size());
 			// For each set of elements in graph perform a second stage partitioning
 			for (Int i = 0; i < graph->size(); ++i) {
 				const idListPtr_Type& currentIds = graph->at(i);
-				GraphUtil::partitionGraphParMETIS(currentIds, *M_originalMesh,
-										  	   secondStageParams,
-										  	   M_secondStageParts->at(i),
-										  	   secondStageComm);
+				partitionGraphParMETIS(currentIds, *M_originalMesh,
+									   secondStageParams,
+									   M_secondStageParts->at(i),
+									   secondStageComm);
 			}
     	}
     }
@@ -408,7 +406,7 @@ void MeshPartitionTool < MeshType >::run()
 
 template<typename MeshType>
 void
-MeshPartitionTool<MeshType>::fillEntityPID (vertexPartitionPtr_Type graph)
+MeshPartitionTool<MeshType>::fillEntityPID (idTablePtr_Type graph)
 {
     Int numParts = graph->size();
 
@@ -462,7 +460,7 @@ MeshPartitionTool < MeshType >::globalToLocal(const Int curPart)
 {
 	const std::map<Int, Int>& globalToLocalMap =
 	M_meshPartBuilder->globalToLocalElement();
-	vertexPartition_Type& currentGraph = *(M_secondStageParts->at(curPart));
+	idTable_Type& currentGraph = *(M_secondStageParts->at(curPart));
 
 	for (Int i = 0; i < currentGraph.size(); ++i) {
 		int currentSize = currentGraph[i]->size();

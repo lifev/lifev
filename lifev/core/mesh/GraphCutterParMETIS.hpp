@@ -56,6 +56,8 @@
 namespace LifeV
 {
 
+using namespace GraphUtil;
+
 //! Class that partitions the graph associated with a mesh (ParMETIS version)
 /*!
     @author Radu Popescu <radu.popescu@epfl.ch>
@@ -80,11 +82,6 @@ public:
     typedef boost::shared_ptr<Epetra_Comm>         commPtr_Type;
     typedef MeshType                               mesh_Type;
     typedef boost::shared_ptr<mesh_Type>           meshPtr_Type;
-
-    typedef std::vector<Int>                       idList_Type;
-    typedef boost::shared_ptr<idList_Type>         idListPtr_Type;
-    typedef std::vector<idListPtr_Type>            vertexPartition_Type;
-    typedef boost::shared_ptr<vertexPartition_Type> vertexPartitionPtr_Type;
 
     typedef boost::bimap<UInt, UInt>               biMap_Type;
     typedef biMap_Type::value_type                 biMapValue_Type;
@@ -135,9 +132,9 @@ public:
     }
 
     //! Get the entire partitioned graph, wrapped in a smart pointer
-    virtual const vertexPartitionPtr_Type getGraph() const
+    virtual const idTablePtr_Type getGraph() const
     {
-        vertexPartitionPtr_Type graph (new vertexPartition_Type(M_vertexPartition->size()));
+        idTablePtr_Type graph (new idTable_Type(M_vertexPartition->size()));
 
         for (UInt i = 0; i < M_vertexPartition->size(); ++i)
         {
@@ -182,7 +179,7 @@ private:
     UInt                                               M_elementFacets;
     UInt                                               M_elementRidges;
     UInt                                               M_facetVertices;
-    vertexPartitionPtr_Type                            M_vertexPartition;
+    idTablePtr_Type                                    M_vertexPartition;
 };
 
 //
@@ -271,8 +268,8 @@ Int GraphCutterParMETIS<MeshType>::partitionFlat()
     // prepared
     Teuchos::ParameterList pList;
     pList.set<Int>("num-parts", M_numParts);
-    GraphUtil::partitionGraphParMETIS(vertexList, *(M_mesh), pList,
-    								  M_vertexPartition, M_comm);
+    partitionGraphParMETIS(vertexList, *(M_mesh), pList,
+    					   M_vertexPartition, M_comm);
 
     return 0;
 }
@@ -311,7 +308,7 @@ Int GraphCutterParMETIS<MeshType>::partitionHierarchical()
         vertexList->at(i) = i;
     }
 
-    vertexPartitionPtr_Type tempVertexPartition;
+    idTablePtr_Type tempVertexPartition;
 
     /*
      * After calling partitionSubGraph, tempVertexPartition will contain
@@ -319,8 +316,8 @@ Int GraphCutterParMETIS<MeshType>::partitionHierarchical()
      */
     Teuchos::ParameterList pList;
     pList.set<Int>("num-parts", numSubdomains);
-    GraphUtil::partitionGraphParMETIS(vertexList, *(M_mesh), pList,
-    								  tempVertexPartition, M_comm);
+    partitionGraphParMETIS(vertexList, *(M_mesh), pList,
+    					   tempVertexPartition, M_comm);
 
     /*
      * Step two is to partition each subdomain into the number of sub parts
@@ -337,10 +334,10 @@ Int GraphCutterParMETIS<MeshType>::partitionHierarchical()
             subdomainVertexMap->at(k) = currentVertices[k];
         }
 
-        vertexPartitionPtr_Type subdomainParts;
+        idTablePtr_Type subdomainParts;
 
-		GraphUtil::partitionGraphParMETIS(subdomainVertexMap, *(M_mesh),
-										  pList, subdomainParts, M_comm);
+		partitionGraphParMETIS(subdomainVertexMap, *(M_mesh),
+							   pList, subdomainParts, M_comm);
 
         for (Int j = 0; j < M_topology; ++j)
         {

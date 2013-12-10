@@ -51,9 +51,12 @@
 
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/mesh/GraphCutterBase.hpp>
+#include <lifev/core/mesh/GraphUtil.hpp>
 
 namespace LifeV
 {
+
+using namespace GraphUtil;
 
 //! This structure is used to pack objects in the Zoltan migration phase
 /*!
@@ -93,11 +96,6 @@ public:
     typedef boost::shared_ptr<Epetra_Comm>                  commPtr_Type;
     typedef MeshType                                        mesh_Type;
     typedef boost::shared_ptr<mesh_Type>                    meshPtr_Type;
-
-    typedef std::vector<Int>                       idList_Type;
-    typedef boost::shared_ptr<idList_Type>         idListPtr_Type;
-    typedef std::vector<idListPtr_Type>            vertexPartition_Type;
-    typedef boost::shared_ptr<vertexPartition_Type> vertexPartitionPtr_Type;
 
     typedef std::map<Int, idListPtr_Type >                table_Type;
     //@}
@@ -141,9 +139,9 @@ public:
     }
 
     //! Get the entire partitioned graph, wrapped in a smart pointer
-    virtual const vertexPartitionPtr_Type getGraph() const
+    virtual const idTablePtr_Type getGraph() const
     {
-        vertexPartitionPtr_Type graph (new vertexPartition_Type(numParts()));
+        idTablePtr_Type graph (new idTable_Type(numParts()));
         for (UInt i = 0; i < numParts(); ++i)
         {
             graph->at(i) = getPart (i);

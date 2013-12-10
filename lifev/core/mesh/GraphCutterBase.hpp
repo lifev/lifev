@@ -34,20 +34,17 @@
 #ifndef GRAPH_CUTTER_BASE_H
 #define GRAPH_CUTTER_BASE_H 1
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-
 #include <boost/shared_ptr.hpp>
 #include <Epetra_Comm.h>
 #include <Teuchos_ParameterList.hpp>
 
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
-
 #include <lifev/core/LifeV.hpp>
+#include <lifev/core/mesh/GraphUtil.hpp>
 
 namespace LifeV
 {
+
+using namespace GraphUtil;
 
 //! Graph cutter base class (abstract)
 /*!
@@ -62,10 +59,6 @@ public:
     //! @name Public Types
     //@{
     typedef Teuchos::ParameterList pList_Type;
-    typedef std::vector<Int>                       idList_Type;
-    typedef boost::shared_ptr<idList_Type>         idListPtr_Type;
-    typedef std::vector<idListPtr_Type>            vertexPartition_Type;
-    typedef boost::shared_ptr<vertexPartition_Type> vertexPartitionPtr_Type;
     //@}
 
     //! @name Constructor & Destructor
@@ -94,7 +87,7 @@ public:
     virtual idListPtr_Type& getPart (const UInt i) = 0;
 
     //! Get the entire partitioned graph, wrapped in a smart pointer
-    virtual const vertexPartitionPtr_Type getGraph() const = 0;
+    virtual const idTablePtr_Type getGraph() const = 0;
 
     //! Return the number of parts
     virtual const UInt numParts() const = 0;

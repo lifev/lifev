@@ -59,8 +59,8 @@ namespace GraphUtil
 typedef boost::shared_ptr<Epetra_Comm>          commPtr_Type;
 typedef std::vector <LifeV::Int>                idList_Type;
 typedef boost::shared_ptr<idList_Type>          idListPtr_Type;
-typedef std::vector <idListPtr_Type>            vertexPartition_Type;
-typedef boost::shared_ptr<vertexPartition_Type> vertexPartitionPtr_Type;
+typedef std::vector <idListPtr_Type>            idTable_Type;
+typedef boost::shared_ptr<idTable_Type>         idTablePtr_Type;
 typedef boost::bimap<LifeV::UInt, LifeV::UInt>  biMap_Type;
 typedef biMap_Type::value_type                  biMapValue_Type;
 
@@ -74,7 +74,7 @@ template <typename MeshType>
 void partitionGraphParMETIS (const idListPtr_Type& vertexList,
 						  	 const MeshType& mesh,
 						  	 const Teuchos::ParameterList& params,
-						  	 vertexPartitionPtr_Type& vertexPartition,
+						  	 idTablePtr_Type& vertexPartition,
 						  	 commPtr_Type& comm);
 }
 };
@@ -83,7 +83,7 @@ template <typename MeshType>
 void LifeV::GraphUtil::partitionGraphParMETIS (const idListPtr_Type& vertexList,
 											   const MeshType& mesh,
 											   const Teuchos::ParameterList& params,
-											   vertexPartitionPtr_Type& vertexPartition,
+											   idTablePtr_Type& vertexPartition,
 											   commPtr_Type& comm)
 {
 	Int numProc = comm->NumProc();
@@ -217,7 +217,7 @@ void LifeV::GraphUtil::partitionGraphParMETIS (const idListPtr_Type& vertexList,
         }
     }
 
-    vertexPartitionPtr_Type vertexIds(new vertexPartition_Type(numParts));
+    idTablePtr_Type vertexIds(new idTable_Type(numParts));
     // cycling on locally stored vertices
     for (UInt i = 0; i < numParts; ++i)
     {
