@@ -11,14 +11,13 @@
 ###################################################
 # Choice of the preconditioner (initialization)   #
 ###################################################
-prectype    = SIMPLE # Ifpack, SIMPLE
-displayList = true
+prectype    = Ifpack # Only used if FromFile is specified in data.xml
+displayList = false
 
 ###################################################
 # Additive Schwarz preconditioner parameters      #
 ###################################################
 [initprec/ifpack]
-displayList = true
 overlap     = 2
 
     [./fact]
@@ -36,33 +35,141 @@ overlap     = 2
     reordering_type = none #metis, rcm, none
     filter_singletons = true
 
+###################################################
+# SIMPLE preconditioner parameters                #
+###################################################
+[initprec/SIMPLE]
+SIMPLE_type = SIMPLE   
+                 
+[initprec/SIMPLE/subprecs]
+fluid_prec                           = ML
+fluid_prec_data_section              = DD2Levels2
+schur_prec                           = ML
+schur_prec_data_section              = Laplacian
+
 [prec]
 ###################################################
 # Choice of the preconditioner                    #
 ###################################################
-prectype    = Ifpack # Ifpack, LSC, ML, PCD, RDF, SIMPLE, or Yosida
-displayList = true
+prectype    = Ifpack # Only used if FromFile is specified in data.xml
+displayList = false
 
 ###################################################
 # Additive Schwarz preconditioner parameters      #
 ###################################################
 [prec/ifpack]
-displayList                 = true
-overlap                     = 2
+    overlap                          = 2
 
-    [./fact]
-    ilut_level-of-fill      = 1
-    drop_tolerance          = 1.e-5 ### or 1.e-10 for RDF
-    relax_value             = 0
+        [./fact]
+        ilut_level-of-fill           = 1
+        drop_tolerance               = 1.e-5
+        relax_value                  = 0
 
-    [../amesos]
-    solvertype =  Amesos_Umfpack # Amesos_KLU or Amesos_Umfpack
+        [../amesos]
+        solvertype                   =  Amesos_Umfpack # Amesos_KLU or Amesos_Umfpack
 
-    [../partitioner]
-    overlap = 2
+        [../partitioner]
+        overlap                      = 2
 
-    [../schwarz]
-    reordering_type = none #metis, rcm, none
-    filter_singletons = true
+        [../schwarz]
+        reordering_type              = none #metis, rcm, none
+        filter_singletons            = true
+
+###################################################
+# Preconditioner for Laplace operator             #
+###################################################
+[Laplacian]
+displayList                          = false
+  [./ML]
+  default_parameter_list             = SA
+  inc_or_dec                         = increasing
+    [./smoother]
+    type                             = 'symmetric Gauss-Seidel'
+    pre_or_post                      = pre
+    ifpack_overlap                   = 0
+    [../coarse]
+    type                             = Amesos-KLU
+    max_size                         = 500
+    [../aggregation]
+    # Uncoupled-MIS (Default)
+    threshold                        = 0.01
+
+###################################################
+# Preconditioner for ADR                          #
+###################################################
+[DD2Levels2]
+displayList                          = false
+
+[./ML]
+    default_parameter_list           = DD
+    max_levels                       = 2
+    inc_or_dec                       = increasing
+
+    [./smoother]
+    type                             = IFPACK
+    pre_or_post                      = pre
+    ifpack_overlap                   = 0
+
+    [../coarse]
+    type                             = Gauss-Seidel
+    sweeps                           = 1
+    pre_or_post                      = both
+    #max_size                        = 64
+
+    [../aggregation]
+    type                             = METIS
+    nodes_per_aggregate              = 200
+
+###################################################
+# PCD preconditioner parameters                   #
+###################################################
+[prec/PCD]
+set_Ap_boundary_conditions           = false
+set_Fp_boundary_conditions           = true
+set_Mp_boundary_conditions           = false
+inflow_boundary_type                 = Robin
+characteristic_boundary_type         = Neumann
+outflow_boundary_type                = Neumann
+recompute_boundary_types             = true
+
+pressure_laplacian_operator          = BinvDBt  # standard, BBt, BinvDBt or symmetric
+pressure_mass_operator               = diagonal # standard, lumped, or diagonal
+full_factorization                   = false
+use_StiffStrain                      = false
+enable_transient                     = true
+use_minus_divergence                 = true
+Schur_operator_reverse_order         = true
+use_newton_convection                = false
+
+[prec/PCD/subprecs]
+fluid_prec                           = ML
+fluid_prec_data_section              = DD2Levels2
+pressure_laplacian_prec              = ML
+pressure_laplacian_prec_data_section = Laplacian
+pressure_mass_prec                   = ML
+pressure_mass_prec_data_section      = Laplacian
+
+###################################################
+# SIMPLE preconditioner parameters                #
+###################################################
+[prec/SIMPLE]
+SIMPLE_type                          = SIMPLE   
+                 
+[prec/SIMPLE/subprecs]
+fluid_prec                           = ML
+fluid_prec_data_section              = DD2Levels2
+schur_prec                           = ML
+schur_prec_data_section              = Laplacian
+
+###################################################
+# Yosida preconditioner parameters                #
+###################################################
+[prec/Yosida]
+
+[prec/Yosida/subprecs]
+fluid_prec                           = ML
+fluid_prec_data_section              = DD2Levels2
+schur_prec                           = ML
+schur_prec_data_section              = DD2Levels2
 
 

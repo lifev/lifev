@@ -275,6 +275,12 @@ public:
                  const bcMode_Type& mode,
                  BCFunctionUDepBase&  bcFunctionFEVectorDependent );
 
+    //! Add new BC to the list using a BCBase object
+    /*!
+      @param bcBase a BCBase object
+    */
+    void addBC ( const BCBase& bcBase );
+
 
     //! Modify the boundary condition @c name, assigning the function @c bcFunction
     /*!

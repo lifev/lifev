@@ -181,13 +181,13 @@ initSimulation ( bcContainerPtr_Type bchandler,
         // We deal as in the semi-implicit way
         AssemblyPolicyStokes< mesh_Type >::M_assembler->addConvection ( *systemMatrix, 1.0, *solution );
 
-        //        if ( SolverPolicy::preconditioner()->preconditionerType() == "PCD" )
-        //        {
-        //            vector_Type beta ( systemMatrix->map(), Repeated );
-        //            beta += *solution;
-        //            PreconditionerPCD* pcdPtr = dynamic_cast<PreconditionerPCD*> ( SolverPolicy::preconditioner().get() );
-        //            pcdPtr->updateBeta ( beta );
-        //        }
+        if ( SolverPolicy::preconditioner()->preconditionerType() == "PCD" )
+        {
+        	vector_Type beta ( systemMatrix->map(), Repeated );
+        	beta += *solution;
+        	PreconditionerPCD* pcdPtr = dynamic_cast<PreconditionerPCD*> ( SolverPolicy::preconditioner().get() );
+        	pcdPtr->updateBeta ( beta );
+        }
 
         displayer().leaderPrint ( "done\n" );
 
