@@ -45,8 +45,6 @@
 #include <boost/bimap.hpp>
 #include <Epetra_Comm.h>
 #include <Teuchos_ParameterList.hpp>
-#include <parmetis.h>
-
 
 #pragma GCC diagnostic warning "-Wunused-variable"
 #pragma GCC diagnostic warning "-Wunused-parameter"
@@ -162,11 +160,6 @@ private:
 
     //! Perform a hierarchical (2-level) partition
     Int partitionHierarchical();
-
-    //! Perform a partitioning on a given subset of elements
-    Int partitionSubGraph (const biMap_Type& vertexMap,
-                           const Int numParts,
-                           vertexPartitionPtr_Type& vertexPartition);
     //@}
 
     // Private copy constructor and assignment operator are disabled
@@ -210,7 +203,7 @@ GraphCutterParMETIS<MeshType>::GraphCutterParMETIS (meshPtr_Type& mesh,
     M_numParts (0),
     M_parameters(),
     M_mesh (mesh),
-    M_vertexPartition(new vertexPartition_Type(0))
+    M_vertexPartition()
 {
     setParameters (parameters);
 }
@@ -269,18 +262,17 @@ Int GraphCutterParMETIS<MeshType>::partitionFlat()
     // In this case we want to partition the entire graph
     Int numVertices = M_mesh->numElements();
 
-    // We need to build a bidirectional map between local and global IDs
-    // vertexMap.left is the local-to-global map and vertexMap.right is
-    // the global-to-local map
-    biMap_Type vertexMap;
-    for (UInt i = 0; i < numVertices; ++i)
-    {
-        vertexMap.insert (biMapValue_Type (i, i) );
+    idListPtr_Type vertexList(new idList_Type(numVertices));
+    for (Int i = 0; i < numVertices; ++i) {
+    	vertexList->at(i) = i;
     }
 
     // Call the partitionSubGraph method on the vertexList that was
     // prepared
-    partitionSubGraph (vertexMap, M_numParts, M_vertexPartition);
+    Teuchos::ParameterList pList;
+    pList.set<Int>("num-parts", M_numParts);
+    GraphUtil::partitionGraphParMETIS(vertexList, *(M_mesh), pList,
+    								  M_vertexPartition, M_comm);
 
     return 0;
 }
@@ -313,210 +305,47 @@ Int GraphCutterParMETIS<MeshType>::partitionHierarchical()
     Int numVertices = M_mesh->numElements();
 
     // The vector contains the global IDs of the vertices in the graph
-    biMap_Type vertexMap;
+    idListPtr_Type vertexList(new idList_Type(numVertices));
     for (Int i = 0; i < numVertices; ++i)
     {
-        vertexMap.insert(biMapValue_Type(i, i));
+        vertexList->at(i) = i;
     }
 
-    vertexPartitionPtr_Type tempVertexPartition(new vertexPartition_Type(numSubdomains));
+    vertexPartitionPtr_Type tempVertexPartition;
 
     /*
      * After calling partitionSubGraph, tempVertexPartition will contain
      * numSubdomains vectors with the graph vertices of each subdomain
      */
-    partitionSubGraph(vertexMap, numSubdomains, tempVertexPartition);
+    Teuchos::ParameterList pList;
+    pList.set<Int>("num-parts", numSubdomains);
+    GraphUtil::partitionGraphParMETIS(vertexList, *(M_mesh), pList,
+    								  tempVertexPartition, M_comm);
 
     /*
      * Step two is to partition each subdomain into the number of sub parts
      * denoted by the M_topology parameter
      */
+    pList.set<Int>("num-parts", M_topology);
     M_vertexPartition->resize (M_numParts);
     Int currentPart = 0;
     for (Int i = 0; i < numSubdomains; ++i)
     {
-        biMap_Type subdomainVertexMap;
-        for (Int k = 0; k < tempVertexPartition->at(i)->size(); ++k) {
-            subdomainVertexMap.insert(biMapValue_Type(k, tempVertexPartition->at(i)->at(k)));
+    	const idList_Type& currentVertices = *(tempVertexPartition->at(i));
+        idListPtr_Type subdomainVertexMap(new idList_Type(currentVertices.size()));
+        for (Int k = 0; k < currentVertices.size(); ++k) {
+            subdomainVertexMap->at(k) = currentVertices[k];
         }
-        vertexPartitionPtr_Type subdomainParts(new vertexPartition_Type(M_numParts));
-              partitionSubGraph(subdomainVertexMap, M_topology,
-                                subdomainParts);
+
+        vertexPartitionPtr_Type subdomainParts;
+
+		GraphUtil::partitionGraphParMETIS(subdomainVertexMap, *(M_mesh),
+										  pList, subdomainParts, M_comm);
+
         for (Int j = 0; j < M_topology; ++j)
         {
             M_vertexPartition->at(currentPart++) = subdomainParts->at(j);
         }
-    }
-
-    return 0;
-}
-
-template<typename MeshType>
-Int GraphCutterParMETIS<MeshType>::partitionSubGraph (
-    const biMap_Type& vertexMap,
-    const Int numParts,
-    vertexPartitionPtr_Type& vertexPartition)
-{
-    // Distribute elements
-    UInt k = vertexMap.size();
-
-    // CAREFUL: ParMetis works on a graph abstraction.
-    // A graph is built over the data structure to be split, each vertex being
-    // a mesh element so hereby a "vertex" is actually a _graph_ vertex,
-    // i. e. a mesh element
-    std::vector<Int> vertexDistribution (M_numProcessors + 1);
-    vertexDistribution[0] = 0;
-    // Evenly distributed graph vertices
-    for (Int i = 0; i < M_numProcessors; ++i)
-    {
-        UInt l = k / (M_numProcessors - i);
-        vertexDistribution[i + 1] = vertexDistribution[i] + l;
-        k -= l;
-    }
-    ASSERT (k == 0, "At this point we should have 0 volumes left") ;
-
-
-    /*
-     * Partition Graph
-     * This array's size is equal to the number of locally-stored vertices:
-     * at the end of the partitioning process, "M_graphVertexLocations" will
-     * contain the partitioning array:
-     * M_graphVertexLocations[m] = n; means that graph vertex m belongs to
-     * subdomain n
-     */
-    std::vector<Int> graphVertexLocations (
-        vertexDistribution[M_numProcessors]
-        - vertexDistribution[0], M_numProcessors);
-
-    /*
-     * Now each processor will take care of its own graph vertices
-     * (i. e. mesh elements).
-     * Nothing guarantees about the neighbor elements distribution across
-     * the processors, since as of now we just split the set of volumes based
-     * on IDs.
-     * Here we building up the neighbor arrays.
-     */
-    UInt localStart = vertexDistribution[M_myPID];
-    UInt localEnd   = vertexDistribution[M_myPID + 1];
-
-    // this vector contains the weights for the edges of the graph,
-    // it is set to null if it is not used.
-    std::vector<Int> graphEdgeWeights;
-    std::vector<Int> adjacencyGraphKeys (1, 0);
-    std::vector<Int> adjacencyGraphValues (0);
-
-    UInt sum = 0;
-
-    for (UInt lid = localStart; lid < localEnd; ++lid)
-    {
-        for (UInt ifacet = 0; ifacet < M_elementFacets; ++ifacet)
-        {
-            UInt gid = vertexMap.left.at (lid);
-            // global ID of the ifacet-th facet in element ie
-            UInt facet = M_mesh->localFacetId (gid, ifacet);
-            // first adjacent element to face "facet"
-            UInt elem = M_mesh->facet (facet).firstAdjacentElementIdentity();
-            if (elem == gid)
-            {
-                elem = M_mesh->facet (facet).secondAdjacentElementIdentity();
-            }
-            biMap_Type::right_const_iterator it = vertexMap.right.find (elem);
-
-            bool inSubGraph = (vertexMap.right.end() != it);
-            if ( (elem != NotAnId) && (inSubGraph) )
-            {
-                // this is the list of adjacency
-                // for each graph vertex, push back the ID of its neighbors
-                //adjacencyGraphValues.push_back(it - vertexMap.right.begin());
-                adjacencyGraphValues.push_back (it->second);
-                ++sum;
-            }
-        }
-        // this is the list of "keys" to access M_adjacencyGraphValues
-        // graph element i has neighbors M_adjacencyGraphValues[ k ],
-        // with M_adjacencyGraphKeys[i] <= k < M_adjacencyGraphKeys[i+1]
-        adjacencyGraphKeys.push_back (sum);
-    }
-
-    // **************
-    // parMetis part
-
-    // this array is to be used for weighted vertices on the graph:
-    // usually we will set it to NULL
-
-    Int* weightVector = 0;
-
-    Int weightFlag = 0;
-
-    Int ncon = 1;
-    Int numflag = 0;
-
-    Int cutGraphEdges; // here will be stored the number of edges cut in the
-    // partitioning process
-
-    // additional options
-    std::vector<Int>  options (3, 0);
-    options[0] = 1; // means that additional options are actually passed
-    options[1] = 3; // level of information to be returned during execution
-    options[2] = 1; // random number seed for the ParMETIS routine
-
-    // fraction of vertex weight to be distributed to each subdomain.
-    // here we want the subdomains to be of the same size
-    std::vector<float> tpwgts (ncon * numParts, 1. / numParts);
-    // imbalance tolerance for each vertex weight
-    std::vector<float> ubvec (ncon, 1.05);
-
-    boost::shared_ptr<Epetra_MpiComm> mpiComm
-        = boost::dynamic_pointer_cast <Epetra_MpiComm> (M_comm);
-    MPI_Comm MPIcomm = mpiComm->Comm();
-
-    /*
-      (from ParMETIS v 3.1 manual)
-      This routine is used to compute a k-way partitioning of a graph
-      on p processors using the multilevel k-way multi-constraint
-      partitioning algorithm.
-    */
-
-    Int nParts = numParts;
-    Int* adjwgtPtr (0);
-    if (graphEdgeWeights.size() > 0)
-    {
-        adjwgtPtr = static_cast<Int*> (&graphEdgeWeights[0]);
-    }
-    ParMETIS_V3_PartKway (static_cast<Int*> (&vertexDistribution[0]),
-                          static_cast<Int*> (&adjacencyGraphKeys[0]),
-                          static_cast<Int*> (&adjacencyGraphValues[0]),
-                          weightVector, adjwgtPtr, &weightFlag, &numflag,
-                          &ncon, &nParts, &tpwgts[0], &ubvec[0],
-                          &options[0], &cutGraphEdges,
-                          &graphVertexLocations[localStart],
-                          &MPIcomm);
-
-    // distribute the resulting partitioning stored in M_graphVertexLocations
-    // to all processors
-    if (M_numProcessors != 1)
-    {
-        M_comm->Barrier();
-        for (Int proc = 0; proc < M_numProcessors; proc++)
-        {
-            UInt procStart  = vertexDistribution[proc];
-            UInt procLength = vertexDistribution[proc + 1]
-                              - vertexDistribution[proc];
-            M_comm->Broadcast (&graphVertexLocations[procStart],
-                               procLength, proc);
-        }
-    }
-
-    // cycling on locally stored vertices
-    vertexPartition->resize (numParts);
-    for (UInt i = 0; i < numParts; ++i)
-    {
-        vertexPartition->at(i).reset(new idList_Type(0));
-    }
-    for (UInt ii = 0; ii < graphVertexLocations.size(); ++ii)
-    {
-        // here we are associating the vertex global ID to the subdomain ID
-        vertexPartition->at(graphVertexLocations[ii])->push_back (vertexMap.left.at (ii) );
     }
 
     return 0;
