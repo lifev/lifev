@@ -183,7 +183,7 @@ private:
     // Shared pointer on the Spaces
     boost::shared_ptr<TestSpaceType> M_testSpace;
     boost::shared_ptr<SolutionSpaceType> M_solutionSpace;
- 
+
     // Tree to compute the values for the assembly
     evaluation_Type M_evaluation;
 

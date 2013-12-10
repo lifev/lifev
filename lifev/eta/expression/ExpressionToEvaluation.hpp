@@ -52,6 +52,8 @@
 #include <lifev/eta/expression/ExpressionSubstraction.hpp>
 #include <lifev/eta/expression/ExpressionProduct.hpp>
 #include <lifev/eta/expression/ExpressionPower.hpp>
+#include <lifev/eta/expression/ExpressionSquareRoot.hpp>
+#include <lifev/eta/expression/ExpressionCubicRoot.hpp>
 #include <lifev/eta/expression/ExpressionArcTan.hpp>
 #include <lifev/eta/expression/ExpressionDerivativeArcTan.hpp>
 #include <lifev/eta/expression/ExpressionLogarithm.hpp>
@@ -62,6 +64,7 @@
 #include <lifev/eta/expression/ExpressionExtract1.hpp>
 #include <lifev/eta/expression/ExpressionExtract2.hpp>
 #include <lifev/eta/expression/ExpressionTranspose.hpp>
+#include <lifev/eta/expression/ExpressionNormalize.hpp>
 #include <lifev/eta/expression/ExpressionSymmetricTensor.hpp>
 #include <lifev/eta/expression/ExpressionOuterProduct.hpp>
 
@@ -100,6 +103,8 @@
 #include <lifev/eta/expression/EvaluationSubstraction.hpp>
 #include <lifev/eta/expression/EvaluationProduct.hpp>
 #include <lifev/eta/expression/EvaluationPower.hpp>
+#include <lifev/eta/expression/EvaluationSquareRoot.hpp>
+#include <lifev/eta/expression/EvaluationCubicRoot.hpp>
 #include <lifev/eta/expression/EvaluationArcTan.hpp>
 #include <lifev/eta/expression/EvaluationDerivativeArcTan.hpp>
 #include <lifev/eta/expression/EvaluationLogarithm.hpp>
@@ -110,6 +115,7 @@
 #include <lifev/eta/expression/EvaluationExtract1.hpp>
 #include <lifev/eta/expression/EvaluationExtract2.hpp>
 #include <lifev/eta/expression/EvaluationTranspose.hpp>
+#include <lifev/eta/expression/EvaluationNormalize.hpp>
 #include <lifev/eta/expression/EvaluationSymmetricTensor.hpp>
 #include <lifev/eta/expression/EvaluationOuterProduct.hpp>
 
@@ -280,6 +286,23 @@ class ExpressionToEvaluation <
 {
 public:
     typedef EvaluationTranspose <
+    typename ExpressionToEvaluation<Expression, testDim, solutionDim, spaceDim>::evaluation_Type
+    > evaluation_Type;
+private:
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
+};
+
+// Specialized for normalization
+template<typename Expression, UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation <
+    ExpressionNormalize<Expression>
+    , testDim
+    , solutionDim
+    , spaceDim >
+{
+public:
+    typedef EvaluationNormalize <
     typename ExpressionToEvaluation<Expression, testDim, solutionDim, spaceDim>::evaluation_Type
     > evaluation_Type;
 private:
@@ -582,6 +605,46 @@ class ExpressionToEvaluation<ExpressionPower<ExpressionBase>, testDim, solutionD
 {
 public:
     typedef EvaluationPower <
+    typename ExpressionToEvaluation<ExpressionBase, testDim, solutionDim, spaceDim>::evaluation_Type
+    > evaluation_Type;
+private:
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
+};
+
+// Specialized for the square root
+template<typename ExpressionBase, UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation<ExpressionSquareRoot<ExpressionBase>, testDim, solutionDim, spaceDim>
+{
+public:
+    typedef EvaluationSquareRoot <
+    typename ExpressionToEvaluation<ExpressionBase, testDim, solutionDim, spaceDim>::evaluation_Type
+    > evaluation_Type;
+private:
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
+};
+
+// Specialized for the cubic root
+template<typename ExpressionBase, UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation<ExpressionCubicRoot<ExpressionBase>, testDim, solutionDim, spaceDim>
+{
+public:
+    typedef EvaluationCubicRoot <
+    typename ExpressionToEvaluation<ExpressionBase, testDim, solutionDim, spaceDim>::evaluation_Type
+    > evaluation_Type;
+private:
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
+};
+
+
+// Specialized for the isochoric change of variable in the structure module
+template<typename ExpressionBase, UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation<ExpressionIsochoricChangeOfVariable<ExpressionBase>, testDim, solutionDim, spaceDim>
+{
+public:
+    typedef EvaluationIsochoricChangeOfVariable <
     typename ExpressionToEvaluation<ExpressionBase, testDim, solutionDim, spaceDim>::evaluation_Type
     > evaluation_Type;
 private:

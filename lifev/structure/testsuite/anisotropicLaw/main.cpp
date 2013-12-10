@@ -82,7 +82,6 @@
 #include <lifev/structure/solver/anisotropic/StructuralAnisotropicConstitutiveLaw.hpp>
 #include <lifev/structure/solver/anisotropic/HolzapfelMaterialNonLinear.hpp>
 #include <lifev/structure/solver/anisotropic/DistributedHolzapfelMaterialNonLinear.hpp>
-#include <lifev/structure/solver/anisotropic/AnisotropicMultimechanismMaterialNonLinear.hpp>
 
 
 #include <lifev/core/filter/ExporterEnsight.hpp>
@@ -174,7 +173,6 @@ public:
     }
     void CheckResultHolzapfelModel (const Real& dispNorm, const Real& time);
     void CheckResultDistributedModel (const Real& dispNorm, const Real& time);
-    void CheckResultMultimechanismModel (const Real& dispNorm, const Real& time);
     void resultChanged (Real time);
     //@}
 
@@ -620,11 +618,8 @@ Structure::run3d()
         // Check results
         if ( !dataStructure->solidTypeAnisotropic().compare ("holzapfel") )
             CheckResultHolzapfelModel (normVect, dataStructure->dataTime()->time() );
-        else if ( !dataStructure->solidTypeAnisotropic().compare ("distributedHolzapfel") )
-            CheckResultDistributedModel (normVect, dataStructure->dataTime()->time() );
         else
-            CheckResultMultimechanismModel (normVect, dataStructure->dataTime()->time() );
-
+            CheckResultDistributedModel (normVect, dataStructure->dataTime()->time() );
 
         //!--------------------------------------------------------------------------------------------------
 
@@ -656,20 +651,6 @@ void Structure::CheckResultDistributedModel (const Real& dispNorm, const Real& t
         this->resultChanged (time);
     }
 }
-
-void Structure::CheckResultMultimechanismModel (const Real& dispNorm, const Real& time)
-{
-    if ( time == 0.05  && std::fabs (dispNorm - 0.8496066842) <= 1e-10 )
-    {
-        this->resultChanged (time);
-    }
-    if ( time == 0.1   && std::fabs (dispNorm - 0.8498171549) <= 1e-10 )
-    {
-        this->resultChanged (time);
-    }
-}
-
-
 
 void Structure::resultChanged (Real time)
 {

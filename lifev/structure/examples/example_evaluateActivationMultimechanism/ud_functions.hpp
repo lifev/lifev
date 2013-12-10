@@ -38,20 +38,18 @@
  *  if the functions to assign is vectorial and the boundary condition is of type \c Full \c.
  */
 
-#ifndef UDF_ANISOTROPICEXAMPLE_HPP
-#define UDF_ANISOTROPICEXAMPLE_HPP
+#ifndef UDF_ANISOTROPIC_HPP
+#define UDF_ANISOTROPIC_HPP
 
 #include <lifev/core/LifeV.hpp>
-#include <lifev/core/array/VectorSmall.hpp>
 
 namespace LifeV
 {
 
 //Body Forces
-VectorSmall<3> f (const Real& t, const Real& x, const Real& y, const Real& z);
+Real f (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
 Real InternalPressure (const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
 Real fzero_scalar (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/);
-Real analyticalDisplacement (const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i);
 
 // Initial displacement and velocity
 Real d0 (const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i);
@@ -61,7 +59,8 @@ Real a0 (const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*
 //Boundary Conditions
 Real bcZero (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/);
 Real bcNonZero (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/);
-Real bcNonZeroSecondOrderExponential (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/);
+Real smoothPressure(const Real& t, const Real&  x, const Real& y, const Real& /*Z*/, const ID& i);
+Real traction (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/);
 
 //Fiber Directions
 Real Family1 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i);

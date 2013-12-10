@@ -575,16 +575,32 @@ Structure::run3d()
     // Definition of J
     ExpressionDefinitions::determinantTensorF_Type JzeroA = ExpressionDefinitions::determinantF( FzeroA );
 
-    // Definition of J_0(ta) ^ -1
-    ExpressionDefinitions::powerExpression_Type  JzeroAminus1 = ExpressionDefinitions::powerExpression( JzeroA , (-1.0) );
+    evaluateNode( elements ( dScalarETFESpace->mesh() ),
+                  fakeQuadratureRule,
+                  dScalarETFESpace,
+                  meas_K * phi_i
+                  ) >> patchAreaVectorScalar;
+    patchAreaVectorScalar->globalAssemble();
 
     // Definition of J_a
+    vectorPtr_Type jacobianActivation( new vector_Type( dScalarETFESpace->map() ) );
+    evaluateNode( elements ( dScalarETFESpace->mesh() ),
+		  fakeQuadratureRule,
+		  dScalarETFESpace,
+		  meas_K * JzeroA  * phi_i
+		  ) >> jacobianActivation;
+    jacobianActivation->globalAssemble();   
+    *( jacobianActivation ) = *( jacobianActivation ) / *patchAreaVectorScalar;
+
+    ExpressionDefinitions::interpolatedScalarValue_Type ithJzeroA = 
+      ExpressionDefinitions::interpolateScalarValue( dScalarETFESpace, *( jacobianActivation ) );
+
     ExpressionMultimechanism::activatedDeterminantF_Type Ja =
-        ExpressionMultimechanism::activateDeterminantF( J, JzeroAminus1 );
+        ExpressionMultimechanism::activateDeterminantF( J, ithJzeroA );
 
     // Definition of J_a^(-2.0/3.0)
-    ExpressionMultimechanism::activePowerExpression_Type  JactiveEl =
-        ExpressionMultimechanism::activePowerExpression( Ja , (-2.0/3.0) );
+    ExpressionMultimechanism::activeIsochoricDeterminant_Type  JactiveEl =
+        ExpressionMultimechanism::activeIsochoricDeterminant( Ja );
 
     // Definition of C = F^T F
     ExpressionDefinitions::rightCauchyGreenTensor_Type C =
@@ -592,13 +608,6 @@ Structure::run3d()
 
     LifeChrono chrono;
     chrono.start();
-
-    evaluateNode( elements ( dScalarETFESpace->mesh() ),
-                  fakeQuadratureRule,
-                  dScalarETFESpace,
-                  meas_K * phi_i
-                  ) >> patchAreaVectorScalar;
-    patchAreaVectorScalar->globalAssemble();
 
     evaluateNode( elements ( dScalarETFESpace->mesh() ),
                   fakeQuadratureRule,
@@ -663,21 +672,26 @@ Structure::run3d()
         ExpressionMultimechanism::rightCauchyGreenMultiMechanism_Type Ca =
             ExpressionMultimechanism::activationRightCauchyGreen( FzeroAminusT, C, FzeroAminus1 );
 
-        // Definition of F_0(ta) * f_0
+        // Definition of the direction of the fiber at the activation moment = F_0(ta) * f_0
         ExpressionMultimechanism::activatedFiber_Type activeIthFiber =
             ExpressionMultimechanism::activateFiberDirection( ithFzeroA, fiberIth );
 
-        // Definition of M = f_a \otimes f_a
-        ExpressionMultimechanism::activeOuterProduct_Type Mith =
-            ExpressionMultimechanism::activeOuterProduct( activeIthFiber );
+	ExpressionMultimechanism::normalizedVector_Type normalizedFiber =
+	  ExpressionMultimechanism::unitVector( activeIthFiber );
+        // Definition of the tensor M = ithFiber \otimes ithFiber
+        // At the moment, it's automatic that the method constructs the expression M = ithFiber \otimes ithFiber
+        // For a more general case, the file ExpressionDefinitions.hpp should be changed
+        ExpressionMultimechanism::activeNormalizedOuterProduct_Type Mith =
+            ExpressionMultimechanism::activeNormalizedOuterProduct( normalizedFiber );
 
-        // Definition of the stretch with respect the activation configuration
+        // Definition of the fourth invariant : I_4^i = C:Mith
         ExpressionMultimechanism::activeStretch_Type IVith =
             ExpressionMultimechanism::activeFiberStretch( Ca, Mith );
 
         // Definition of the fouth isochoric invariant : J^(-2.0/3.0) * I_4^i
-        ExpressionMultimechanism::activeIsochoricStretch_Type IVithBar =
-            ExpressionMultimechanism::activeIsochoricFourthInvariant( JactiveEl, IVith );
+        ExpressionMultimechanism::activeNoInterpolationStretch_Type IVithBar =
+            ExpressionMultimechanism::activeNoInterpolationFourthInvariant( JactiveEl, IVith );
+
 
         evaluateNode( elements ( dScalarETFESpace->mesh() ),
                       fakeQuadratureRule,
@@ -704,7 +718,7 @@ Structure::run3d()
         evaluateNode( elements ( dScalarETFESpace->mesh() ),
                       fakeQuadratureRule,
                       dScalarETFESpace,
-                      meas_K * 
+                      meas_K *
 		      JzeroA * atan( IVithBar - value( stretch ) , dataStructure->smoothness(), ( 1 / pi ), ( 1.0/2.0 )  )  * JactiveEl *
                       (value( 2.0 ) * value( dataStructure->ithStiffnessFibers( i ) ) * JactiveEl * ( IVithBar - value( stretch ) ) *
                        exp( value( dataStructure->ithNonlinearityFibers( i ) ) * ( IVithBar- value( stretch ) ) * ( IVithBar- value( stretch ) )  ) )  * phi_i
@@ -715,13 +729,13 @@ Structure::run3d()
 
 
 	// exporting the components of the Piola-Kirchhoff tensor
-	// Definition of the expression definition the portion of the Piola-Kirchhoff 
+	// Definition of the expression definition the portion of the Piola-Kirchhoff
 
-	ExpressionMultimechanism::deformationActivatedTensor_Type Fa = 
+	ExpressionMultimechanism::deformationActivatedTensor_Type Fa =
 	  ExpressionMultimechanism::createDeformationActivationTensor( F , FzeroAminus1);
 
 	typedef ExpressionProduct<ExpressionMultimechanism::deformationActivatedTensor_Type,
-				  ExpressionMultimechanism::activeOuterProduct_Type>  productFaMith_Type;
+				  ExpressionMultimechanism::activeNormalizedOuterProduct_Type>  productFaMith_Type;
 
 	typedef ExpressionProduct< productFaMith_Type,
 				   ExpressionDefinitions::minusTransposedTensor_Type> firstPartPiolaMultimech_Type;
@@ -734,9 +748,9 @@ Structure::run3d()
 	ExpressionVectorFromNonConstantMatrix< ExpressionMultimechanism::deformationActivatedTensor_Type,3 ,3 > Fa_i2( Fa, 1 );
 	ExpressionVectorFromNonConstantMatrix< ExpressionMultimechanism::deformationActivatedTensor_Type,3 ,3 > Fa_i3( Fa, 2 );
 
-	ExpressionVectorFromNonConstantMatrix< ExpressionMultimechanism::activeOuterProduct_Type,3 ,3 > Mith_i1( Mith, 0 );
-	ExpressionVectorFromNonConstantMatrix< ExpressionMultimechanism::activeOuterProduct_Type,3 ,3 > Mith_i2( Mith, 1 );
-	ExpressionVectorFromNonConstantMatrix< ExpressionMultimechanism::activeOuterProduct_Type,3 ,3 > Mith_i3( Mith, 2 );
+	ExpressionVectorFromNonConstantMatrix< ExpressionMultimechanism::activeNormalizedOuterProduct_Type,3 ,3 > Mith_i1( Mith, 0 );
+	ExpressionVectorFromNonConstantMatrix< ExpressionMultimechanism::activeNormalizedOuterProduct_Type,3 ,3 > Mith_i2( Mith, 1 );
+	ExpressionVectorFromNonConstantMatrix< ExpressionMultimechanism::activeNormalizedOuterProduct_Type,3 ,3 > Mith_i3( Mith, 2 );
 
 	ExpressionVectorFromNonConstantMatrix< ExpressionDefinitions::minusTransposedTensor_Type,3 ,3 > FzeroAminusT_i1( FzeroAminusT, 0 );
 	ExpressionVectorFromNonConstantMatrix< ExpressionDefinitions::minusTransposedTensor_Type,3 ,3 > FzeroAminusT_i2( FzeroAminusT, 1 );
@@ -749,7 +763,7 @@ Structure::run3d()
         evaluateNode( elements ( dETFESpace->mesh() ),
                       fakeQuadratureRule,
                       dETFESpace,
-                      meas_K *  dot ( Fa_i1, phi_i) 
+                      meas_K *  dot ( Fa_i1, phi_i)
                       ) >> Fa_col1[ i ];
 	Fa_col1[ i ]->globalAssemble();
 
@@ -758,7 +772,7 @@ Structure::run3d()
         evaluateNode( elements ( dETFESpace->mesh() ),
                       fakeQuadratureRule,
                       dETFESpace,
-                      meas_K *  dot ( Fa_i2, phi_i) 
+                      meas_K *  dot ( Fa_i2, phi_i)
                       ) >> Fa_col2[ i ];
 	Fa_col2[ i ]->globalAssemble();
 	*(Fa_col2[i]) = *(Fa_col2[i]) / *patchAreaVector;
@@ -766,7 +780,7 @@ Structure::run3d()
         evaluateNode( elements ( dETFESpace->mesh() ),
                       fakeQuadratureRule,
                       dETFESpace,
-                      meas_K *  dot ( Fa_i3, phi_i) 
+                      meas_K *  dot ( Fa_i3, phi_i)
                       ) >> Fa_col3[ i ];
 	Fa_col3[ i ]->globalAssemble();
 	*(Fa_col3[i]) = *(Fa_col3[i]) / *patchAreaVector;
@@ -775,7 +789,7 @@ Structure::run3d()
         evaluateNode( elements ( dETFESpace->mesh() ),
                       fakeQuadratureRule,
                       dETFESpace,
-                      meas_K *  dot ( Mith_i1, phi_i) 
+                      meas_K *  dot ( Mith_i1, phi_i)
                       ) >> Mith_col1[ i ];
 	Mith_col1[ i ]->globalAssemble();
 	*(Mith_col1[i]) = *(Mith_col1[i]) / *patchAreaVector;
@@ -783,7 +797,7 @@ Structure::run3d()
         evaluateNode( elements ( dETFESpace->mesh() ),
                       fakeQuadratureRule,
                       dETFESpace,
-                      meas_K *  dot ( Mith_i2, phi_i) 
+                      meas_K *  dot ( Mith_i2, phi_i)
                       ) >> Mith_col2[ i ];
 	Mith_col2[ i ]->globalAssemble();
 	*(Mith_col2[i]) = *(Mith_col2[i]) / *patchAreaVector;
@@ -791,7 +805,7 @@ Structure::run3d()
         evaluateNode( elements ( dETFESpace->mesh() ),
                       fakeQuadratureRule,
                       dETFESpace,
-                      meas_K *  dot ( Mith_i3, phi_i) 
+                      meas_K *  dot ( Mith_i3, phi_i)
                       ) >> Mith_col3[ i ];
 	Mith_col3[ i ]->globalAssemble();
 	*(Mith_col3[i]) = *(Mith_col3[i]) / *patchAreaVector;
@@ -800,7 +814,7 @@ Structure::run3d()
         evaluateNode( elements ( dETFESpace->mesh() ),
                       fakeQuadratureRule,
                       dETFESpace,
-                      meas_K *  dot ( FzeroAminusT_i1, phi_i) 
+                      meas_K *  dot ( FzeroAminusT_i1, phi_i)
                       ) >> FzeroAminusT_col1[ i ];
 	FzeroAminusT_col1[ i ]->globalAssemble();
 	*(FzeroAminusT_col1[i]) = *(FzeroAminusT_col1[i]) / *patchAreaVector;
@@ -808,7 +822,7 @@ Structure::run3d()
         evaluateNode( elements ( dETFESpace->mesh() ),
                       fakeQuadratureRule,
                       dETFESpace,
-                      meas_K *  dot ( FzeroAminusT_i2, phi_i) 
+                      meas_K *  dot ( FzeroAminusT_i2, phi_i)
                       ) >> FzeroAminusT_col2[ i ];
 	FzeroAminusT_col2[ i ]->globalAssemble();
 	*(FzeroAminusT_col2[i]) = *(FzeroAminusT_col2[i]) / *patchAreaVector;
@@ -816,7 +830,7 @@ Structure::run3d()
         evaluateNode( elements ( dETFESpace->mesh() ),
                       fakeQuadratureRule,
                       dETFESpace,
-                      meas_K *  dot ( FzeroAminusT_i3, phi_i) 
+                      meas_K *  dot ( FzeroAminusT_i3, phi_i)
                       ) >> FzeroAminusT_col3[ i ];
 	FzeroAminusT_col3[ i ]->globalAssemble();
 	*(FzeroAminusT_col3[i]) = *(FzeroAminusT_col3[i]) / *patchAreaVector;
@@ -825,7 +839,7 @@ Structure::run3d()
         evaluateNode( elements ( dETFESpace->mesh() ),
                       fakeQuadratureRule,
                       dETFESpace,
-                      meas_K *  dot ( P_i1, phi_i) 
+                      meas_K *  dot ( P_i1, phi_i)
                       ) >> P_col1[ i ];
 	P_col1[ i ]->globalAssemble();
 	*(P_col1[i]) = *(P_col1[i]) / *patchAreaVector;
@@ -833,7 +847,7 @@ Structure::run3d()
         evaluateNode( elements ( dETFESpace->mesh() ),
                       fakeQuadratureRule,
                       dETFESpace,
-                      meas_K *  dot ( P_i2, phi_i) 
+                      meas_K *  dot ( P_i2, phi_i)
                       ) >> P_col2[ i ];
 	P_col2[ i ]->globalAssemble();
 	*(P_col2[i]) = *(P_col2[i]) / *patchAreaVector;
@@ -841,11 +855,11 @@ Structure::run3d()
         evaluateNode( elements ( dETFESpace->mesh() ),
                       fakeQuadratureRule,
                       dETFESpace,
-                      meas_K *  dot ( P_i3, phi_i) 
+                      meas_K *  dot ( P_i3, phi_i)
                       ) >> P_col3[ i ];
 	P_col3[ i ]->globalAssemble();
 	*(P_col3[i]) = *(P_col3[i]) / *patchAreaVector;
-		
+
     }
 
     exporter->postProcess ( 1.0 );
@@ -883,10 +897,10 @@ Structure::checkResults(const Real a, const Real c,
 			const Real o)
 {
 
-  if( std::fabs( a - 0.072916) < 1e-6 &&  
-      std::fabs( c - 0.072916) < 1e-6  && 
-      std::fabs( e - 1 ) < 1e-6 && 
-      std::fabs( f - 1 ) < 1e-6 && 
+  if( std::fabs( a - 0.072916) < 1e-6 &&
+      std::fabs( c - 0.072916) < 1e-6  &&
+      std::fabs( e - 1 ) < 1e-6 &&
+      std::fabs( f - 1 ) < 1e-6 &&
       std::fabs( g - 1 ) < 1e-6 &&
       std::fabs( h - 3.18309e-05 ) < 1e-9 &&
       std::fabs( i - 3.18309e-05 ) < 1e-9 &&

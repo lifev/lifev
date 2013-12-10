@@ -71,14 +71,7 @@
 
 #include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
 #include <lifev/structure/solver/StructuralOperator.hpp>
-#include <lifev/structure/solver/isotropic/VenantKirchhoffMaterialLinear.hpp>
-#include <lifev/structure/solver/isotropic/VenantKirchhoffMaterialNonLinear.hpp>
-#include <lifev/structure/solver/isotropic/ExponentialMaterialNonLinear.hpp>
-#include <lifev/structure/solver/isotropic/VenantKirchhoffMaterialNonLinearPenalized.hpp>
-#include <lifev/structure/solver/isotropic/SecondOrderExponentialMaterialNonLinear.hpp>
 #include <lifev/structure/solver/isotropic/NeoHookeanMaterialNonLinear.hpp>
-
-
 #include <lifev/structure/solver/anisotropic/StructuralAnisotropicConstitutiveLaw.hpp>
 #include <lifev/structure/solver/anisotropic/HolzapfelMaterialNonLinear.hpp>
 
@@ -269,21 +262,26 @@ Structure::run3d()
     solidFESpacePtr_Type dFESpace ( new solidFESpace_Type (meshPart, dOrder, 3, parameters->comm) );
     solidETFESpacePtr_Type dETFESpace ( new solidETFESpace_Type (meshPart, & (dFESpace->refFE() ), & (dFESpace->fe().geoMap() ), parameters->comm) );
 
-#ifdef ENABLE_ANISOTROPIC_LAW
-    // Setting the fibers
-    vectorFiberFunctionPtr_Type pointerToVectorOfFamilies( new vectorFiberFunction_Type( ) );
-    (*pointerToVectorOfFamilies).resize( dataStructure->numberFibersFamilies( ) );
-
+    vectorFiberFunctionPtr_Type pointerToVectorOfFamilies;
     listOfFiberDirections_Type fiberDirections;
-    fiberDirections.resize( dataStructure->numberFibersFamilies( ) );
-
-    if ( verbose )
-    {
-        std::cout << "Size of the number of families: " << (*pointerToVectorOfFamilies).size() << std::endl;
-    }
-
     fibersDirectionList setOfFiberFunctions;
-    setOfFiberFunctions.setupFiberDefinitions( dataStructure->numberFibersFamilies( ) );
+
+#ifdef ENABLE_ANISOTROPIC_LAW
+    if( !dataStructure->constitutiveLaw().compare("anisotropic") )
+    {
+        // Setting the fibers
+        pointerToVectorOfFamilies.reset( new vectorFiberFunction_Type( ) );
+        (*pointerToVectorOfFamilies).resize( dataStructure->numberFibersFamilies( ) );
+
+        fiberDirections.resize( dataStructure->numberFibersFamilies( ) );
+
+        // if ( verbose )
+        // {
+        //     std::cout << "Size of the number of families: " << (*pointerToVectorOfFamilies).size() << std::endl;
+        // }
+
+        setOfFiberFunctions.setupFiberDefinitions( dataStructure->numberFibersFamilies( ) );
+    }
 #endif
 
     std::string timeAdvanceMethod =  dataFile ( "solid/time_discretization/method", "BDF");
@@ -312,24 +310,25 @@ Structure::run3d()
 
     BCFunctionBase zero (bcZero);
     BCFunctionBase nonZero;
+    BCFunctionBase displacementImposed;
 
     nonZero.setFunction (bcNonZero);
+    displacementImposed.setFunction( analyticalDisplacement );
 
     //! =================================================================================
     //! BC for StructuredCube4_test_structuralsolver.mesh
     //! =================================================================================
-    BCh->addBC ("EdgesIn",      20,  Natural,   Component, nonZero, compy);
-    BCh->addBC ("EdgesIn",      20,  Essential, Component, zero,    compxz);
-    BCh->addBC ("EdgesIn",      40,  Essential, Component, zero,    compy);
+    BCh->addBC ("EdgesIn",      20,  Natural, Component, nonZero, compy);
+    BCh->addBC ("EdgesIn",      40,  Essential, Component, zero, compy);
 
     //! Symmetry BC
-    BCh->addBC ("EdgesIn",      50,   EssentialVertices, Component, zero, compyz);
+    BCh->addBC ("EdgesIn",      50,   EssentialVertices, Component, zero, compxy);
     BCh->addBC ("EdgesIn",      30,   EssentialVertices, Component, zero, compyz);
     BCh->addBC ("EdgesIn",      80,   EssentialVertices, Component, zero, compxz);
     BCh->addBC ("EdgesIn",      100,  EssentialVertices,  Full, zero, 3);
 
-    BCh->addBC ("EdgesIn",      7, Essential, Component , zero, compx);
-    BCh->addBC ("EdgesIn",      3, Essential, Component , zero, compz);
+    BCh->addBC ("EdgesIn",      7, Essential, Component, zero, compx);
+    BCh->addBC ("EdgesIn",      3, Essential, Component, zero, compz);
 
     //! =================================================================================
 
@@ -358,32 +357,40 @@ Structure::run3d()
 
 
 #ifdef ENABLE_ANISOTROPIC_LAW
-    // Setting the vector of fibers functions
-    for( UInt k(1); k <= pointerToVectorOfFamilies->size( ); k++ )
+    if( !dataStructure->constitutiveLaw().compare("anisotropic") )
     {
-        // Setting up the name of the function to define the family
-        std::string family="Family";
-        // adding the number of the family
-        std::string familyNumber;
-        std::ostringstream number;
-        number << ( k );
-        familyNumber = number.str();
+        // Setting the vector of fibers functions
+        for( UInt k(1); k <= pointerToVectorOfFamilies->size( ); k++ )
+        {
+            // Setting up the name of the function to define the family
+            std::string family="Family";
+            // adding the number of the family
+            std::string familyNumber;
+            std::ostringstream number;
+            number << ( k );
+            familyNumber = number.str();
 
-        // Name of the function to create
-        std::string creationString = family + familyNumber;
-        (*pointerToVectorOfFamilies)[ k-1 ].reset( new analyticalFunction_Type() );
-        (*pointerToVectorOfFamilies)[ k-1 ] = setOfFiberFunctions.fiberDefinition( creationString );
+            // Name of the function to create
+            std::string creationString = family + familyNumber;
+            (*pointerToVectorOfFamilies)[ k-1 ].reset( new analyticalFunction_Type() );
+            (*pointerToVectorOfFamilies)[ k-1 ] = setOfFiberFunctions.fiberDefinition( creationString );
 
-        fiberDirections[ k-1 ].reset( new vector_Type(solid.displacement(), Unique) );
+            fiberDirections[ k-1 ].reset( new vector_Type(solid.displacement(), Unique) );
+        }
+
+        //! 3.b Setting the fibers in the abstract class of Anisotropic materials
+        solid.material()->anisotropicLaw()->setupFiberDirections( pointerToVectorOfFamilies );
     }
-
-    //! 3.b Setting the fibers in the abstract class of Anisotropic materials
-    solid.material()->anisotropicLaw()->setupFiberDirections( pointerToVectorOfFamilies );
 #endif
 
     //! 4. Building system using TimeAdvance class
     double timeAdvanceCoefficient = timeAdvance->coefficientSecondDerivative ( 0 ) / (dataStructure->dataTime()->timeStep() * dataStructure->dataTime()->timeStep() );
     solid.buildSystem (timeAdvanceCoefficient);
+
+    vectorPtr_Type analyticDispl (new vector_Type ( dFESpace->map() ) );
+    // Interpolating the solution on the mesh
+    dFESpace->interpolate ( static_cast<solidFESpace_Type::function_Type> ( analyticalDisplacement ), *analyticDispl, 0.0 );
+
 
     //! =================================================================================
     //! Temporal data and initial conditions
@@ -392,10 +399,10 @@ Structure::run3d()
     //! 5. Initial data
     Real dt = dataStructure->dataTime()->timeStep();
 
-    vectorPtr_Type rhs (new vector_Type (solid.displacement(), Unique) );
-    vectorPtr_Type disp (new vector_Type (solid.displacement(), Unique) );
-    vectorPtr_Type vel (new vector_Type (solid.displacement(), Unique) );
-    vectorPtr_Type acc (new vector_Type (solid.displacement(), Unique) );
+    vectorPtr_Type rhs (new vector_Type ( dFESpace->map() ) );
+    vectorPtr_Type disp (new vector_Type ( dFESpace->map() ) );
+    vectorPtr_Type vel (new vector_Type ( dFESpace->map() ) );
+    vectorPtr_Type acc (new vector_Type ( dFESpace->map() ) );
 
     std::vector<vectorPtr_Type> uv0;
 
@@ -455,37 +462,44 @@ Structure::run3d()
     exporterCheck->setPostDir ( "./" );
     exporterCheck->setMeshProcId ( meshPart.meshPartition(), parameters->comm->MyPID() );
 
-    vectorPtr_Type bodyForceVector ( new vector_Type (solid.displacement(),  exporterCheck->mapType() ) );
+    vectorPtr_Type imposedSolution ( new vector_Type ( dFESpace->map() ) );
+    // vectorPtr_Type bodyForceVector ( new vector_Type ( dFESpace->map() ) );
 
-    vectorPtr_Type solidDisp ( new vector_Type (solid.displacement(),  exporter->mapType() ) );
-    vectorPtr_Type solidVel  ( new vector_Type (solid.displacement(),  exporter->mapType() ) );
-    vectorPtr_Type solidAcc  ( new vector_Type (solid.displacement(),  exporter->mapType() ) );
+    vectorPtr_Type solidDisp ( new vector_Type ( dFESpace->map() ) );
+    vectorPtr_Type solidVel  ( new vector_Type ( dFESpace->map() ) );
+    vectorPtr_Type solidAcc  ( new vector_Type ( dFESpace->map() ) );
 
     exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "displacement", dFESpace, solidDisp, UInt (0) );
     exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "velocity",     dFESpace, solidVel,  UInt (0) );
     exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "acceleration", dFESpace, solidAcc,  UInt (0) );
 
-    exporterCheck->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "bodyForce", dFESpace, bodyForceVector,  UInt (0) );
+    //exporterCheck->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "forcingTerm", dFESpace, bodyForceVector,  UInt (0) );
+    exporterCheck->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "imposedSolution", dFESpace, imposedSolution,  UInt (0) );
+
+    *imposedSolution = *analyticDispl;
 
 #ifdef ENABLE_ANISOTROPIC_LAW
-    // Adding the fibers vectors
-    // Setting the vector of fibers functions
-    for( UInt k(1); k <= pointerToVectorOfFamilies->size( ); k++ )
+    if( !dataStructure->constitutiveLaw().compare("anisotropic") )
     {
-        // Setting up the name of the function to define the family
-        std::string family="Family-";
-        // adding the number of the family
-        std::string familyNumber;
-        std::ostringstream number;
-        number << ( k );
-        familyNumber = number.str();
+        // Adding the fibers vectors
+        // Setting the vector of fibers functions
+        for( UInt k(1); k <= pointerToVectorOfFamilies->size( ); k++ )
+        {
+            // Setting up the name of the function to define the family
+            std::string family="Family-";
+            // adding the number of the family
+            std::string familyNumber;
+            std::ostringstream number;
+            number << ( k );
+            familyNumber = number.str();
 
-        // Name of the function to create
-        std::string creationString = family + familyNumber;
-        exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, creationString, dFESpace, fiberDirections[ k-1 ], UInt (0) );
+            // Name of the function to create
+            std::string creationString = family + familyNumber;
+            exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, creationString, dFESpace, fiberDirections[ k-1 ], UInt (0) );
 
-        // Extracting the fibers vectors
-        *(fiberDirections[ k-1 ]) = solid.material()->anisotropicLaw()->ithFiberVector( k );
+            // Extracting the fibers vectors
+            *(fiberDirections[ k-1 ]) = solid.material()->anisotropicLaw()->ithFiberVector( k );
+        }
     }
 #endif
 
@@ -493,8 +507,20 @@ Structure::run3d()
     exporterCheck->postProcess ( 0 );
     cout.precision(16);
 
+    // Saving the analyitical displacement
+    exporterCheck->postProcess ( 1.0 );
+
     Real normVect;
 
+    // Computing the stiffness vector to set as RHS
+    // solid.material()->computeStiffness( *analyticDispl, 0, 1.0, dataStructure,
+    //                                     solid.mapMarkersVolumes(), solid.mapMarkersIndexes(),
+    //                                     solid.displayerPtr() );
+
+    // vectorPtr_Type stiffnessVector;
+    // stiffnessVector.reset( new vector_Type( dFESpace->map() ) );
+
+    // *stiffnessVector = *( solid.material()->stiffVector() );
     //! =============================================================================
     //! Temporal loop
     //! =============================================================================
@@ -507,6 +533,9 @@ Structure::run3d()
         timeAdvance->updateRHSContribution ( dt );
         *rhs += *solid.massMatrix() * timeAdvance->rhsContributionSecondDerivative() / timeAdvanceCoefficient;
 
+        // Summing the term coming from the imposed solution
+        //*rhs += *stiffnessVector;
+
         if( !solid.havingSourceTerm() )
         {
             solid.setRightHandSide ( *rhs );
@@ -518,12 +547,6 @@ Structure::run3d()
 
         //debug
         //*bodyForceVector = solid.bodyForce();
-
-        exporterCheck->postProcess ( dataStructure->dataTime()->time() );
-        if( verbose )
-        {
-            std::cout << "Just exported!" << std::endl;
-        }
 
         //! 7. Iterate --> Calling Newton
         solid.iterate ( BCh );
@@ -539,6 +562,14 @@ Structure::run3d()
 
         MPI_Barrier (MPI_COMM_WORLD);
     }
+    Real errorAbs, error;
+
+    // Computing the L2 error of the solution
+    errorAbs = dFESpace->l2Error( static_cast<solidFESpace_Type::function_Type> ( analyticalDisplacement ),
+                                  solid.displacement(), 0.0, &error);
+
+    std::cout << "L2 relative error: " << error << std::endl;
+    std::cout << "L2 abs error: " << errorAbs << std::endl;
 }
 
 int

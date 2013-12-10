@@ -304,6 +304,19 @@ public:
       return empty;
     }
 
+    vectorPtr_Type  const activatedUnitFiber( const UInt /*i*/ ) const
+    {
+      vectorPtr_Type empty( new vector_Type( this->M_dispFESpace->map() ) );
+      return empty;
+    }
+
+    vectorPtr_Type  const activatedDeterminant( const UInt /*i*/ ) const
+    {
+      vectorPtr_Type empty( new vector_Type( this->M_dispFESpace->map() ) );
+      return empty;
+    }
+
+
 
     void apply ( const vector_Type& sol, vector_Type& res,
                  const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
