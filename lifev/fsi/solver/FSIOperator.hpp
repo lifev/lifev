@@ -73,6 +73,7 @@
 
 #ifdef ENABLE_ANISOTROPIC_LAW
 #include <lifev/structure/solver/anisotropic/HolzapfelMaterialNonLinear.hpp>
+#include <lifev/structure/solver/anisotropic/HolzapfelGeneralizedMaterialNonLinear.hpp>
 #endif
 
 #include <lifev/core/fem/DOFInterface3Dto3D.hpp>
@@ -361,6 +362,12 @@ public:
     {
         return new HolzapfelMaterialNonLinear<MeshType >();
     }
+    static StructuralAnisotropicConstitutiveLaw< FSIOperator::mesh_Type >*  createHolzapfelGeneralizedMaterialNonLinear()
+    {
+        return new HolzapfelGeneralizedMaterialNonLinear<MeshType >();
+    }
+
+
 #endif
 
 

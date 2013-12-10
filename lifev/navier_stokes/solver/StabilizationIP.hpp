@@ -350,7 +350,7 @@ void StabilizationIP<MeshType, DofType>::apply ( MatrixType& matrix,  const Vect
             //Real coeffPress = M_gammaPress * sqrt( hK2 ); // P1 p nonsmooth (code)
 #else
             Real coeffPress = M_gammaPress * hK2 / // Pk (paper)
-                              std::max<Real> ( bmax, M_viscosity / sqrt ( hK2 ) );
+                std::max<Real> ( bmax, M_viscosity / std::sqrt ( hK2 ) );
 #endif
 
             elMatP.zero();
