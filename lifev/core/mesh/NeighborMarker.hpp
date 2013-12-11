@@ -60,7 +60,6 @@ class NeighborMarker: public Marker<FlagPolicy>
 {
 public:
 
-    typedef std::set<ID>                   neighbors_Type;
     typedef neighbors_Type::iterator       neighborIterator_Type;
     typedef neighbors_Type::const_iterator neighborConstIterator_Type;
 
