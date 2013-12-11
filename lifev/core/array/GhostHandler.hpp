@@ -386,15 +386,15 @@ GhostHandler<MeshType>::GhostHandler ( meshPtr_Type fullMesh,
 template <typename MeshType>
 void GhostHandler<MeshType>::setUpNeighbors ( NeighborType const neighborType )
 {
-    if ( neighborType & POINT_NEIGHBORS )
+    if ( (neighborType & POINT_NEIGHBORS) != 0 )
     {
         this->createPointPointNeighborsList();
     }
-    if ( neighborType & RIDGE_NEIGHBORS )
+    if ( (neighborType & RIDGE_NEIGHBORS) != 0 )
     {
         this->createPointEdgeNeighborsList();
     }
-    if ( neighborType & ELEMENT_NEIGHBORS )
+    if ( (neighborType & ELEMENT_NEIGHBORS) != 0 )
     {
         this->createPointElementNeighborsList();
     }
@@ -410,15 +410,15 @@ void GhostHandler<MeshType>::release()
 template <typename MeshType>
 void GhostHandler<MeshType>::clean ( NeighborType const neighborType )
 {
-    if ( neighborType & POINT_NEIGHBORS )
+    if ( (neighborType & POINT_NEIGHBORS) != 0 )
     {
         clearVector ( M_pointPointNeighborsList );
     }
-    if ( neighborType & RIDGE_NEIGHBORS )
+    if ( (neighborType & RIDGE_NEIGHBORS) != 0 )
     {
         clearVector ( M_pointEdgeNeighborsList );
     }
-    if ( neighborType & ELEMENT_NEIGHBORS )
+    if ( (neighborType & ELEMENT_NEIGHBORS) != 0 )
     {
         clearVector ( M_pointElementNeighborsList );
     }
