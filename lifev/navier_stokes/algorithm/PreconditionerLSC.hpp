@@ -43,10 +43,6 @@
 #include <lifev/core/algorithm/PreconditionerTeko.hpp>
 #include <lifev/core/mesh/RegionMesh.hpp>
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-
 // Teuchos includes
 #include <Teuchos_RCP.hpp>
 #include <Teuchos_ParameterList.hpp>
@@ -58,10 +54,6 @@
 #include <Teko_BlockPreconditionerFactory.hpp>
 #include <Teko_InvLSCStrategy.hpp>
 #include <Teko_LSCPreconditionerFactory.hpp>
-
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 // for simplicity
 using Teuchos::RCP;

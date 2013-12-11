@@ -38,10 +38,6 @@
 #include <lifev/core/algorithm/PreconditionerComposition.hpp>
 #include <lifev/core/operator/ConfinedOperator.hpp>
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-
 // <--Check for necessity
 #include <Ifpack_config.h>
 #include <Ifpack.h>
@@ -50,11 +46,6 @@
 #include <Ifpack_AdditiveSchwarz.h>
 #include <Ifpack_Amesos.h>
 #include <Ifpack_ILU.h>
-// -->
-
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 namespace LifeV
 {

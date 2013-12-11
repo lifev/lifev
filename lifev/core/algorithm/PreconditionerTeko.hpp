@@ -43,11 +43,6 @@
 #include <lifev/core/algorithm/Preconditioner.hpp>
 #include <lifev/core/algorithm/PreconditionerBlock.hpp>
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-#pragma GCC diagnostic ignored "-Wextra"
-
 // Teuchos includes
 #include "Teuchos_RCP.hpp"
 
@@ -59,11 +54,6 @@
 #include "Teko_EpetraBlockPreconditioner.hpp"
 #include "Teko_BlockPreconditionerFactory.hpp"
 #include "Teuchos_RCPBoostSharedPtrConversions.hpp"
-
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
-#pragma GCC diagnostic warning "-Wextra"
 
 // for simplicity
 using Teuchos::RCP;

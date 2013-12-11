@@ -39,15 +39,7 @@
 
 #include <boost/shared_ptr.hpp>
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-
 #include <Teuchos_ParameterList.hpp>
-
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/filter/GetPot.hpp>
 #include <lifev/core/array/MatrixEpetra.hpp>
