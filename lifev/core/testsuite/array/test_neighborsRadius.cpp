@@ -97,7 +97,7 @@ int main ( int argc, char* argv[] )
     ghostObj.createPointPointNeighborsList ( interfaceMarkers );
 
     UInt ID_trial = 314;
-    std::set<ID> Neighbors;
+    neighbors_Type Neighbors;
     double radius = 4 * (double) MeshUtility::MeshStatistics::computeSize (*fullMeshPtr).maxH;
 
     Neighbors = ghostObj.neighborsWithinRadius ( fullMeshPtr->point (ID_trial).id(), radius );
@@ -106,7 +106,7 @@ int main ( int argc, char* argv[] )
     // Exporting the solution
     vectorPtr_Type TrialOutput (new vector_Type (FESpaceP1->map(), Unique) );
 
-    for (std::set<ID>::iterator ii = Neighbors.begin(); ii != Neighbors.end(); ++ii)
+    for (neighbors_Type::iterator ii = Neighbors.begin(); ii != Neighbors.end(); ++ii)
         if (TrialOutput->blockMap().LID (*ii) != -1)
         {
             if (*ii == ID_trial)

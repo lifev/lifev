@@ -115,7 +115,7 @@ int main ( int argc, char* argv[] )
     // we identify as additional neighbors the nodes n6, n7, n8, n9, n10, n11, n12 and n13.
 
     UInt ID_trial = 40;
-    std::set<ID> Neighbors;
+    neighbors_Type Neighbors;
     UInt nc = 2;
 
     Neighbors = ghostObj.circleNeighbors ( fullMeshPtr->point (ID_trial).id(), nc );
@@ -128,7 +128,7 @@ int main ( int argc, char* argv[] )
     // EXPORTING THE RESULT FOR ONE NODE (with globalID: ID_trial), IN ORDER TO VISUALIZE THE RESULT WITH PARAVIEW
     vectorPtr_Type TrialOutput (new vector_Type (FESpaceP1->map(), Unique) );
 
-    for (std::set<ID>::iterator ii = Neighbors.begin(); ii != Neighbors.end(); ++ii)
+    for (neighbors_Type::iterator ii = Neighbors.begin(); ii != Neighbors.end(); ++ii)
         if (TrialOutput->blockMap().LID (*ii) != -1)
         {
             if (*ii == ID_trial)

@@ -227,7 +227,7 @@ public:
      * @param nCircles. Number of circles (generations) to consider.
      * @return the set of neighbors global IDs
      */
-    std::set<ID> circleNeighbors ( UInt globalID, UInt nCircles = 1 );
+    neighbors_Type circleNeighbors ( UInt globalID, UInt nCircles = 1 );
 
     //! Create neighbors to a given point within a specified radius
     /*!
@@ -235,7 +235,7 @@ public:
      * @param radius. The value of the circle radius within which neighbors are included
      * @return the set of neighbors global IDs
      */
-    std::set<ID> neighborsWithinRadius ( UInt globalID, Real radius );
+    neighbors_Type neighborsWithinRadius ( UInt globalID, Real radius );
 
     //! Create the list of edge neighbors to the points
     void createPointEdgeNeighborsList();
@@ -676,20 +676,20 @@ void GhostHandler<MeshType>::createPointPointNeighborsList (markerIDList_Type co
 }
 
 template <typename MeshType>
-std::set<ID> GhostHandler<MeshType>::circleNeighbors ( UInt globalID, UInt nCircles )
+neighbors_Type GhostHandler<MeshType>::circleNeighbors ( UInt globalID, UInt nCircles )
 {
-    std::set<ID> neighbors;
-    std::set<ID> newEntries;
-    std::set<ID> newNeighbors;
+    neighbors_Type neighbors;
+    neighbors_Type newEntries;
+    neighbors_Type newNeighbors;
 
     neighbors = this->pointPointNeighborsList() [ globalID ];
 
     for (UInt i = 0; i < nCircles - 1; ++i)
     {
-        for (std::set<ID>::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
+        for (neighbors_Type::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
         {
             newEntries = this->pointPointNeighborsList() [*it];
-            for (std::set<ID>::iterator ii = newEntries.begin(); ii != newEntries.end(); ++ii)
+            for (neighbors_Type::iterator ii = newEntries.begin(); ii != newEntries.end(); ++ii)
             {
                 newNeighbors.insert (*ii);
             }
@@ -702,11 +702,11 @@ std::set<ID> GhostHandler<MeshType>::circleNeighbors ( UInt globalID, UInt nCirc
 
 
 template <typename MeshType>
-std::set<ID> GhostHandler<MeshType>::neighborsWithinRadius ( UInt globalID, Real radius )
+neighbors_Type GhostHandler<MeshType>::neighborsWithinRadius ( UInt globalID, Real radius )
 {
-    std::set<ID> neighbors;
-    std::set<ID> newEntries;
-    std::set<ID> newNeighbors;
+    neighbors_Type neighbors;
+    neighbors_Type newEntries;
+    neighbors_Type newNeighbors;
     bool isInside = true;
     Real d = 0;
     UInt mysize = 0;
@@ -717,10 +717,10 @@ std::set<ID> GhostHandler<MeshType>::neighborsWithinRadius ( UInt globalID, Real
 
     while (isInside)
     {
-        for (std::set<ID>::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
+        for (neighbors_Type::iterator it = neighbors.begin(); it != neighbors.end(); ++it)
         {
             newEntries = this->pointPointNeighborsList() [*it];
-            for (std::set<ID>::iterator ii = newEntries.begin(); ii != newEntries.end(); ++ii)
+            for (neighbors_Type::iterator ii = newEntries.begin(); ii != newEntries.end(); ++ii)
             {
                 typename mesh_Type::point_Type const& n = M_fullMesh->point (*ii);
                 d = std::sqrt ( ( n.x() - p.x() ) * ( n.x() - p.x() ) +
