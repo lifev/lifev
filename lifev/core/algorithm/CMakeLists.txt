@@ -13,6 +13,9 @@ SET(algorithm_HEADERS
   algorithm/EigenSolver.hpp
   algorithm/LinearSolver.hpp
   algorithm/PreconditionerML.hpp
+  algorithm/PreconditionerBlock.hpp
+  algorithm/PreconditionerComposition.hpp
+  algorithm/PreconditionerTeko.hpp
   algorithm/PreconditionerLinearSolver.hpp
 CACHE INTERNAL "")
 
@@ -22,10 +25,13 @@ SET(algorithm_SOURCES
   algorithm/Preconditioner.cpp
   algorithm/PreconditionerAztecOO.cpp
   algorithm/PreconditionerComposed.cpp
+  algorithm/PreconditionerComposition.cpp
   algorithm/PreconditionerIfpack.cpp
+  algorithm/PreconditionerBlock.cpp
   algorithm/SolverAztecOO.cpp
   algorithm/EigenSolver.cpp
   algorithm/LinearSolver.cpp
+  algorithm/PreconditionerTeko.cpp
   algorithm/PreconditionerLinearSolver.cpp
 CACHE INTERNAL "")
 

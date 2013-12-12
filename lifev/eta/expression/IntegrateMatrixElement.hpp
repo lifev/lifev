@@ -441,19 +441,19 @@ addTo (MatrixType& mat)
     switch (MeshType::geoShape_Type::BasRefSha::S_shape)
     {
         case LINE:
-            globalCFE.reset(new ETCurrentFE<MeshType::S_geoDimensions, 1> (feSegP0, geometricMapFromMesh<MeshType>(), M_quadrature));
+            globalCFE.reset (new ETCurrentFE<MeshType::S_geoDimensions, 1> (feSegP0, geometricMapFromMesh<MeshType>(), M_quadrature) );
             break;
         case TRIANGLE:
-            globalCFE.reset(new ETCurrentFE<MeshType::S_geoDimensions, 1> (feTriaP0, geometricMapFromMesh<MeshType>(), M_quadrature));
+            globalCFE.reset (new ETCurrentFE<MeshType::S_geoDimensions, 1> (feTriaP0, geometricMapFromMesh<MeshType>(), M_quadrature) );
             break;
         case QUAD:
-            globalCFE.reset(new ETCurrentFE<MeshType::S_geoDimensions, 1> (feQuadQ0, geometricMapFromMesh<MeshType>(), M_quadrature));
+            globalCFE.reset (new ETCurrentFE<MeshType::S_geoDimensions, 1> (feQuadQ0, geometricMapFromMesh<MeshType>(), M_quadrature) );
             break;
         case TETRA:
-            globalCFE.reset(new ETCurrentFE<MeshType::S_geoDimensions, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), M_quadrature));
+            globalCFE.reset (new ETCurrentFE<MeshType::S_geoDimensions, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), M_quadrature) );
             break;
         case HEXA:
-            globalCFE.reset(new ETCurrentFE<MeshType::S_geoDimensions, 1> (feHexaQ0, geometricMapFromMesh<MeshType>(), M_quadrature));
+            globalCFE.reset (new ETCurrentFE<MeshType::S_geoDimensions, 1> (feHexaQ0, geometricMapFromMesh<MeshType>(), M_quadrature) );
             break;
         default:
             ERROR_MSG ("Unrecognized element shape");
@@ -468,7 +468,7 @@ addTo (MatrixType& mat)
     evaluation_Type evaluation (M_evaluation);
     // Update the evaluation
     evaluation.setQuadrature (M_quadrature);
-    evaluation.setGlobalCFE (&(*globalCFE));
+    evaluation.setGlobalCFE (& (*globalCFE) );
     evaluation.setTestCFE (&testCFE);
     evaluation.setSolutionCFE (&solutionCFE);
 
@@ -501,19 +501,19 @@ addToClosed (MatrixType& mat)
     switch (MeshType::geoShape_Type::BasRefSha::S_shape)
     {
         case LINE:
-            globalCFE.reset(new ETCurrentFE<MeshType::S_geoDimensions, 1> (feSegP0, geometricMapFromMesh<MeshType>(), M_quadrature));
+            globalCFE.reset (new ETCurrentFE<MeshType::S_geoDimensions, 1> (feSegP0, geometricMapFromMesh<MeshType>(), M_quadrature) );
             break;
         case TRIANGLE:
-            globalCFE.reset(new ETCurrentFE<MeshType::S_geoDimensions, 1> (feTriaP0, geometricMapFromMesh<MeshType>(), M_quadrature));
+            globalCFE.reset (new ETCurrentFE<MeshType::S_geoDimensions, 1> (feTriaP0, geometricMapFromMesh<MeshType>(), M_quadrature) );
             break;
         case QUAD:
-            globalCFE.reset(new ETCurrentFE<MeshType::S_geoDimensions, 1> (feQuadQ0, geometricMapFromMesh<MeshType>(), M_quadrature));
+            globalCFE.reset (new ETCurrentFE<MeshType::S_geoDimensions, 1> (feQuadQ0, geometricMapFromMesh<MeshType>(), M_quadrature) );
             break;
         case TETRA:
-            globalCFE.reset(new ETCurrentFE<MeshType::S_geoDimensions, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), M_quadrature));
+            globalCFE.reset (new ETCurrentFE<MeshType::S_geoDimensions, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), M_quadrature) );
             break;
         case HEXA:
-            globalCFE.reset(new ETCurrentFE<MeshType::S_geoDimensions, 1> (feHexaQ0, geometricMapFromMesh<MeshType>(), M_quadrature));
+            globalCFE.reset (new ETCurrentFE<MeshType::S_geoDimensions, 1> (feHexaQ0, geometricMapFromMesh<MeshType>(), M_quadrature) );
             break;
         default:
             ERROR_MSG ("Unrecognized element shape");
@@ -528,7 +528,7 @@ addToClosed (MatrixType& mat)
     evaluation_Type evaluation (M_evaluation);
     // Update the evaluation
     evaluation.setQuadrature (M_quadrature);
-    evaluation.setGlobalCFE (&(*globalCFE));
+    evaluation.setGlobalCFE (& (*globalCFE) );
     evaluation.setTestCFE (&testCFE);
     evaluation.setSolutionCFE (&solutionCFE);
 

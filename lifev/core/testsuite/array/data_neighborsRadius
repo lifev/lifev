@@ -14,7 +14,7 @@
 
 [space_discretization]
 mesh_dir      = ./                    # the directory where the mesh file is
-mesh_file     = tube20_long.mesh
+mesh_file     = tube20.mesh
 mesh_type     = .mesh
 mesh_faces    = all
 verbose       = 0                     # verbose during mesh-reading

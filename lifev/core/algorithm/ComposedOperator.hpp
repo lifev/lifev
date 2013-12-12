@@ -406,8 +406,8 @@ push_back ( operatorPtr_Type  P,
         return (M_set);
     }
 
-    //     M_displayer.leaderPrint(" CP-  Previous number of call:                 ", M_numCalled, "\n");
-    //     M_displayer.leaderPrint(" CP-  Mean iters:                              ", M_meanIter, "\n" );
+    // M_displayer.leaderPrint(" CP-  Previous number of call:                 ", M_numCalled, "\n");
+    // M_displayer.leaderPrint(" CP-  Mean iters:                              ", M_meanIter, "\n" );
 
     M_meanIter = 0;
     M_numCalled = 0;
