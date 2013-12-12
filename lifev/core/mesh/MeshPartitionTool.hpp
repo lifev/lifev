@@ -34,8 +34,8 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
   @maintainer Radu Popescu <radu.popescu@epfl.ch>
 */
 
-#ifndef MESH_PARTITION_TOOL_ONLINE_H
-#define MESH_PARTITION_TOOL_ONLINE_H 1
+#ifndef MESH_PARTITION_TOOL_H
+#define MESH_PARTITION_TOOL_H 1
 
 #include <fstream>
 #include <iostream>
@@ -44,15 +44,9 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <string>
 #include <vector>
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-
 #include <boost/shared_ptr.hpp>
 #include <Epetra_MpiComm.h>
 #include <Teuchos_ParameterList.hpp>
-
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/fem/DOF.hpp>
@@ -61,8 +55,6 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/core/mesh/GraphCutterZoltan.hpp>
 #include <lifev/core/mesh/GraphUtil.hpp>
 #include <lifev/core/mesh/MeshPartBuilder.hpp>
-
-//#include <lifev/core/mesh/GhostEntityData.hpp>
 
 namespace LifeV
 {
@@ -76,9 +68,7 @@ using namespace GraphUtil;
   This class implements the partitioning of a global mesh and allows choosing
   the graph partitioning tool and the method to build the mesh parts.
 
-  The class template has three parameters: the mesh type, the graph partitioner
-  and the mesh part builder. The last two parameters are also class templates,
-  parameterized on the mesh type.
+  The class is templated on the mesh type.
 */
 template < typename MeshType>
 class MeshPartitionTool
@@ -198,10 +188,9 @@ private:
     boost::shared_ptr<graphCutter_Type>        M_graphCutter;
     boost::shared_ptr<meshPartBuilder_Type>    M_meshPartBuilder;
     bool                                       M_success;
-    // TODO: this is temporary, may be changed later
     bool                                       M_secondStage;
     Int                                        M_secondStageNumParts;
-    vertexPartitionTablePtr_Type                M_secondStageParts;
+    vertexPartitionTablePtr_Type               M_secondStageParts;
 
     //! Store ownership for each entity, subdivided by entity type
     typename meshPartBuilder_Type::entityPID_Type M_entityPID;
@@ -482,4 +471,4 @@ MeshPartitionTool < MeshType >::showMe (std::ostream& output) const
 
 } // namespace LifeV
 
-#endif // MESH_PARTITION_TOOL_ONLINE_H
+#endif // MESH_PARTITION_TOOL_H

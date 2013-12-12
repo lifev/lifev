@@ -37,15 +37,9 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef MESH_PART_BUILDER_H
 #define MESH_PART_BUILDER_H 1
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
-
 #include <boost/shared_ptr.hpp>
 
 #include <Epetra_Comm.h>
-
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include<lifev/core/LifeV.hpp>
 

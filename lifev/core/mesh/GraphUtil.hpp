@@ -26,7 +26,7 @@
 
 /*!
     @file
-    @brief Utilitary functions for graph partitioning
+    @brief Utilitary functions and type definitions for graph partitioning
 
     @date 2013-12-03
     @author Radu Popescu <radu.popescu@epfl.ch>
@@ -72,7 +72,20 @@ typedef biMap_Type::value_type                  biMapValue_Type;
 /*!
     @author Radu Popescu <radu.popescu@epfl.ch>
 
-    TODO: add full description
+    This function partitions a graph (described by a list of mesh element IDs
+    and a mesh object) into a given number of parts, using ParMETIS.
+
+    Serial or parallel operation is imposed by passing a pointer to an
+    Epetra_Comm object.
+
+    \param vertexList - list (as an idListPtr_Type) of mesh element GIDs representing
+				        the graph vertices of the graph which is partitioned
+    \param mesh - mesh object which is used for computing the connectivity of the
+    	          graph
+    \param params - Teuchos::ParameterList with the configuration parameters. Currently
+    		        only "num-parts" (Int) is used, but the parameter list container
+    		 	 	allows for introducing new configuration parameters
+    \param vertexPartition - table with the vertex ids in each graph part
  */
 template <typename MeshType>
 void partitionGraphParMETIS (const idListPtr_Type& vertexList,

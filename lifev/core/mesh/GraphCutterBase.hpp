@@ -49,8 +49,6 @@ using namespace GraphUtil;
 //! Graph cutter base class (abstract)
 /*!
  @author Radu Popescu <radu.popescu@epfl.ch>
-
- TODO: detailed class decription
  */
 template<typename MeshType>
 class GraphCutterBase
