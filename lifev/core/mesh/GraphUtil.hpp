@@ -61,6 +61,10 @@ typedef std::vector <LifeV::Int>                idList_Type;
 typedef boost::shared_ptr<idList_Type>          idListPtr_Type;
 typedef std::vector <idListPtr_Type>            idTable_Type;
 typedef boost::shared_ptr<idTable_Type>         idTablePtr_Type;
+typedef std::set<Int> 					        idSet_Type;
+typedef boost::shared_ptr<idSet_Type>	        idSetPtr_Type;
+typedef std::vector<idSetPtr_Type>              idSetGroup_Type;
+typedef boost::shared_ptr<idSetGroup_Type>      idSetGroupPtr_Type;
 typedef boost::bimap<LifeV::UInt, LifeV::UInt>  biMap_Type;
 typedef biMap_Type::value_type                  biMapValue_Type;
 
