@@ -184,7 +184,7 @@ public:
 
     // Next method should be renamed and become a regular method
     //! Return a pointer to the mesh partition with rank k
-    const meshPtr_Type& LIFEV_DEPRECATED( getPartition (Int k) const )
+    const meshPtr_Type& LIFEV_DEPRECATED ( getPartition (Int k) const )
     {
         return (*M_meshPartitions) [k];
     }
@@ -1526,7 +1526,7 @@ void MeshPartitioner<MeshType>::execute()
 template<typename MeshType>
 void MeshPartitioner<MeshType>::fillEntityPID ()
 {
-     Int numParts = (M_numPartitions > 1)? M_numPartitions : M_comm->NumProc();
+    Int numParts = (M_numPartitions > 1) ? M_numPartitions : M_comm->NumProc();
 
     // initialize entity PIDs to 0
     M_entityPID.points.resize   ( M_originalMesh->numPoints(),   0 );
@@ -1580,7 +1580,7 @@ void MeshPartitioner<MeshType>::markGhostEntities()
     //M_entityPID or flags should be exported and read back to make it work
     for (UInt i = 0; i < M_numPartitions; ++i)
     {
-        Int const procId = (M_numPartitions > 1)? i : M_me;
+        Int const procId = (M_numPartitions > 1) ? i : M_me;
         for ( UInt e = 0; e < (*M_meshPartitions) [ i ]->numElements(); e++ )
         {
             typename MeshType::element_Type& element = (*M_meshPartitions) [ i ]->element ( e );

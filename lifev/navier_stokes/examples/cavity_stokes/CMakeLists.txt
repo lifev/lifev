@@ -21,5 +21,5 @@ TRIBITS_COPY_FILES_TO_BINARY_DIR(
 TRIBITS_COPY_FILES_TO_BINARY_DIR(
   meshes_cavity_stokes_test
   SOURCE_FILES cube4x4.mesh
-  SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/core/data/mesh/freefem/
+  SOURCE_DIR ${CMAKE_SOURCE_DIR}/lifev/core/data/mesh/inria/
 )
