@@ -1418,14 +1418,14 @@ void GhostHandler<MeshType>::extendGraphFE ( const boost::shared_ptr<std::vector
     timeMgr.add ( "node-element ngbr list", &timeNL );
     timeNL.start();
 #endif
-    // check that the nodeElementNeighborsMap has been created
-    if ( M_nodeElementNeighborsList.empty()  )
+    // check that the pointElementNeighborsMap has been created
+    if ( M_pointElementNeighborsList.empty()  )
     {
         if ( M_verbose )
         {
-            std::cerr << "the nodeElementNeighborsList is empty, will be generated now" << std::endl;
+            std::cerr << "the pointElementNeighborsList is empty, will be generated now" << std::endl;
         }
-        this->createNodeElementNeighborsList();
+        this->createPointElementNeighborsList();
     }
 #ifdef LIFEV_GHOSTHANDLER_DEBUG
     timeNL.stop();
@@ -1510,7 +1510,7 @@ void GhostHandler<MeshType>::extendGraphFE ( const boost::shared_ptr<std::vector
         isInPartition[ myElems[ e ] ] = true;
     }
 
-    // find subdomain interface nodes
+    // find subdomain interface points
     std::set<Int> mySubdIntPoints;
     for ( UInt k = 0; k < myPoints.size(); k++ )
     {
@@ -1519,8 +1519,8 @@ void GhostHandler<MeshType>::extendGraphFE ( const boost::shared_ptr<std::vector
         if ( pointPID[ currentPoint ] == partIndex )
         {
             // check if all element neighbors are on this proc
-            for ( neighbors_Type::const_iterator neighborIt = M_nodeElementNeighborsList[ currentPoint ].begin();
-                    neighborIt != M_nodeElementNeighborsList[ currentPoint ].end(); ++neighborIt )
+            for ( neighbors_Type::const_iterator neighborIt = M_pointElementNeighborsList[ currentPoint ].begin();
+                    neighborIt != M_pointElementNeighborsList[ currentPoint ].end(); ++neighborIt )
             {
                 // add the point if a neighbor is missing
                 if ( !isInPartition[ *neighborIt ] )
@@ -1567,8 +1567,8 @@ void GhostHandler<MeshType>::extendGraphFE ( const boost::shared_ptr<std::vector
         {
             const int& currentPoint = workingPoints[ k ];
             // iterate on point neighborhood
-            for ( neighbors_Type::const_iterator neighborIt = M_nodeElementNeighborsList[ currentPoint ].begin();
-                    neighborIt != M_nodeElementNeighborsList[ currentPoint ].end(); ++neighborIt )
+            for ( neighbors_Type::const_iterator neighborIt = M_pointElementNeighborsList[ currentPoint ].begin();
+                    neighborIt != M_pointElementNeighborsList[ currentPoint ].end(); ++neighborIt )
             {
                 std::pair<std::set<Int>::iterator, bool> isInserted = augmentedElemsSet.insert ( *neighborIt );
                 if ( isInserted.second )
