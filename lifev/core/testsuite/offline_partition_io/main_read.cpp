@@ -42,7 +42,6 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifdef LIFEV_HAS_HDF5
 
-
 #include "Epetra_config.h"
 
 #ifdef HAVE_MPI
@@ -51,12 +50,9 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <Epetra_MpiComm.h>
 
-
-#include <lifev/core/algorithm/PreconditionerIfpack.hpp>
-#include <lifev/core/algorithm/SolverAztecOO.hpp>
+#include <lifev/core/filter/GetPot.hpp>
 #include <lifev/core/array/MatrixEpetra.hpp>
 #include <lifev/core/array/VectorEpetra.hpp>
-#include <lifev/core/fem/BCManage.hpp>
 #include <lifev/core/fem/FESpace.hpp>
 #include <lifev/core/filter/PartitionIO.hpp>
 #include <lifev/core/mesh/RegionMesh.hpp>

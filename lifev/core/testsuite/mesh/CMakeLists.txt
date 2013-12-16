@@ -77,4 +77,4 @@ TRIBITS_ADD_EXECUTABLE_AND_TEST(
   COMM serial mpi
 )
 
-#ADD_SUBDIRECTORY(mesh_partition_tool)
+ADD_SUBDIRECTORY(mesh_partition_tool)

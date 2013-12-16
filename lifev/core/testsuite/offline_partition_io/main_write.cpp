@@ -83,8 +83,8 @@ int main (int argc, char** argv)
     }
 
     GetPot cl (argc, argv);
-    const UInt numElements = cl.follow(11, "--num-elem");
-    const Int numParts = cl.follow(2, "--num-parts");
+    const UInt numElements = cl.follow(9, "--num-elem");
+    const Int numParts = cl.follow(3, "--num-parts");
     // partitionerType should be MeshPartitioner, MeshPartitionTool_ParMETIS or
     // MeshPartitionTool_Zoltan
     const std::string partitionerType = cl.follow("MeshPartitioner",
