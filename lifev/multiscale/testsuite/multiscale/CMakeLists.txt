@@ -51,8 +51,8 @@ ENDIF ()
 IF (LifeV_ENABLE_FSI)
 TRIBITS_ADD_TEST(
   Framework
-  POSTFIX_AND_ARGS_0 1D-FSI3D-1D_MNSA   -s 1 -f MultiscaleDatabase/Test_FSI1D-FSI3D-FSI1D.dat         -c 1278.3958233134831 -o Test_4
-  POSTFIX_AND_ARGS_1 Restart            -s 1 -f MultiscaleDatabase/Test_FSI1D-FSI3D-FSI1D_Restart.dat -c 506.64046128381432 -o Test_4
+  POSTFIX_AND_ARGS_0 1D-FSI3D-1D_MNSA   -s 1 -f MultiscaleDatabase/Test_FSI1D-FSI3D-FSI1D.dat         -c 1278.3957585148125 -o Test_4
+  POSTFIX_AND_ARGS_1 Restart            -s 1 -f MultiscaleDatabase/Test_FSI1D-FSI3D-FSI1D_Restart.dat -c 506.64044790302341 -o Test_4
   NUM_MPI_PROCS 4
   COMM mpi
   )
