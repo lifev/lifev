@@ -40,6 +40,7 @@
 #pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <vector>
+#include <map>
 #include <boost/shared_ptr.hpp>
 #include <boost/lexical_cast.hpp>
 #include <Epetra_Comm.h>
@@ -662,7 +663,7 @@ void GraphCutterZoltan<MeshType>::buildPartitionTable()
     for (table_Type::iterator it = M_partitionTable.begin();
             it != M_partitionTable.end(); ++it)
     {
-    	it->second.reset(new idList_Type(0));
+//    	it->second.reset(new idList_Type(0));
         it->second->reserve (numStoredElements() / M_numPartsPerProcessor);
     }
 
@@ -684,13 +685,14 @@ void GraphCutterZoltan<MeshType>::buildPartitionTable()
     M_comm->Barrier();
     if (numProcessors() > 1) {
         for (UInt i = 0; i < numProcessors(); ++i) {
-        	table_Type::iterator it = M_partitionTable.find(i);
-        	if (it == M_partitionTable.end()) {
-        		it->second.reset(new idList_Type(0));
+        	int currentSize = 0;
+        	if (i == M_myPID) {
+        		currentSize = M_partitionTable[i]->size();
         	}
-            int currentSize = M_partitionTable[i]->size();
             M_comm->Broadcast(&currentSize, 1, i);
-            M_partitionTable[i]->resize(currentSize);
+            if (i != M_myPID) {
+            	M_partitionTable[i].reset(new idList_Type(currentSize));
+            }
             M_comm->Broadcast(&(M_partitionTable[i]->at(0)), currentSize, i);
         }
     }
