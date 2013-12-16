@@ -55,40 +55,18 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/core/algorithm/PreconditionerIfpack.hpp>
 #include <lifev/core/algorithm/SolverAztecOO.hpp>
 #include <lifev/core/array/MatrixEpetra.hpp>
+#include <lifev/core/array/VectorEpetra.hpp>
 #include <lifev/core/fem/BCManage.hpp>
 #include <lifev/core/fem/FESpace.hpp>
-#include <lifev/core/filter/ExporterHDF5Mesh3D.hpp>
 #include <lifev/core/filter/PartitionIO.hpp>
 #include <lifev/core/mesh/RegionMesh.hpp>
 #include <lifev/core/solver/ADRAssembler.hpp>
 
 using namespace LifeV;
 
-Real exactSolution (const Real& /* t */,
-                    const Real& x,
-                    const Real& y,
-                    const Real& z,
-                    const ID& /* i */)
-{
-    return sin (x + y) + z * z / 2;
-}
-Real fRhs (const Real& /* t */,
-           const Real& x,
-           const Real& y,
-           const Real& /* z */,
-           const ID& /* i */ )
-{
-    return 2 * sin (x + y) - 1;
-}
-
 typedef RegionMesh<LinearTetra> mesh_Type;
 typedef MatrixEpetra<Real> matrix_Type;
 typedef VectorEpetra vector_Type;
-typedef boost::function < Real ( Real const&,
-                                 Real const&,
-                                 Real const&,
-                                 Real const&,
-                                 UInt const& ) > function_Type;
 
 #endif /* HAVE_MPI */
 #endif /* LIFEV_HAS_HDF5 */
@@ -110,31 +88,26 @@ main ( int argc, char** argv )
     {
         std::cout << " -- Reading the data ... " << std::flush;
     }
-    GetPot dataFile ( "data" );
+//    GetPot dataFile ( "data" );
     if (verbose)
     {
         std::cout << " done ! " << std::endl;
     }
 
-    const UInt Nelements (dataFile ("mesh/nelements", 10) );
-    if (verbose) std::cout << " ---> Number of elements : "
-                               << Nelements << std::endl;
-
-    // Load mesh part from HDF5
-    const std::string partsFileName (dataFile ("test/hdf5_file_name", "cube.h5") );
-    const std::string ioClass (dataFile ("test/io_class", "new") );
+    GetPot cl (argc, argv);
+    // partitionerType should be MeshPartitioner, MeshPartitionTool_ParMETIS or
+    // MeshPartitionTool_Zoltan
+    const std::string partitionerType = cl.follow("MeshPartitioner",
+    											  "--partitioner-type");
+    std::string partsFile;
+    partsFile.reserve(50);
+    partsFile += "cube_";
+    partsFile += partitionerType;
+    partsFile += ".h5";
 
     boost::shared_ptr<mesh_Type> mesh;
-    if (! ioClass.compare ("old") )
     {
-        ExporterHDF5Mesh3D<mesh_Type> HDF5Input (dataFile, partsFileName);
-        HDF5Input.setComm (comm);
-        mesh = HDF5Input.getMeshPartition();
-        HDF5Input.closeFile();
-    }
-    else
-    {
-        PartitionIO<RegionMesh<LinearTetra> > partitionIO (partsFileName, comm);
+        PartitionIO<RegionMesh<LinearTetra> > partitionIO (partsFile, comm);
         partitionIO.read (mesh);
     }
 
@@ -216,219 +189,15 @@ main ( int argc, char** argv )
         std::cout << " done ! " << std::endl;
     }
 
-    Real matrixNorm (systemMatrix->norm1() );
+    Real matrixNorm (systemMatrix->normFrobenius());
     if (verbose)
     {
-        std::cout << " ---> Norm 1 : " << matrixNorm << std::endl;
+        std::cout << " ---> Norm 2 : " << matrixNorm << std::endl;
     }
-    if (std::fabs (matrixNorm - 1.68421) > 1e-3)
+    if (std::fabs (matrixNorm - 35.908) > 1e-3)
     {
         std::cout << " <!> Matrix has changed !!! <!> " << std::endl;
         return EXIT_FAILURE;
-    }
-
-    // Definition and assembly of the RHS
-
-    if (verbose)
-    {
-        std::cout << " -- Building the RHS ... " << std::flush;
-    }
-    vector_Type rhs (uFESpace->map(), Repeated);
-    rhs *= 0.0;
-
-    vector_Type fInterpolated (uFESpace->map(), Repeated);
-    fInterpolated *= 0.0;
-    uFESpace->interpolate ( static_cast<function_Type> ( fRhs ), fInterpolated, 0.0);
-    adrAssembler.addMassRhs (rhs, fInterpolated);
-    rhs.globalAssemble();
-
-    if (verbose)
-    {
-        std::cout << " done ! " << std::endl;
-    }
-
-    // Definition and application of the BCs
-
-    if (verbose)
-    {
-        std::cout << " -- Building the BCHandler ... " << std::flush;
-    }
-    BCHandler bchandler;
-    BCFunctionBase BCu (exactSolution);
-    bchandler.addBC ("Dirichlet", 1, Essential, Full, BCu, 1);
-    for (UInt i (2); i <= 6; ++i)
-    {
-        bchandler.addBC ("Dirichlet", i, Essential, Full, BCu, 1);
-    }
-    if (verbose)
-    {
-        std::cout << " done ! " << std::endl;
-    }
-
-    if (verbose)
-    {
-        std::cout << " -- Updating the BCs ... " << std::flush;
-    }
-    bchandler.bcUpdate (*uFESpace->mesh(), uFESpace->feBd(), uFESpace->dof() );
-    if (verbose)
-    {
-        std::cout << " done ! " << std::endl;
-    }
-
-    if (verbose)
-    {
-        std::cout << " -- Applying the BCs ... " << std::flush;
-    }
-    vector_Type rhsBC (rhs, Unique);
-    bcManage (*systemMatrix, rhsBC, *uFESpace->mesh(),
-              uFESpace->dof(), bchandler, uFESpace->feBd(), 1.0, 0.0);
-    rhs = rhsBC;
-    if (verbose)
-    {
-        std::cout << " done ! " << std::endl;
-    }
-
-    // Definition of the solver
-
-    if (verbose)
-    {
-        std::cout << " -- Building the solver ... " << std::flush;
-    }
-    SolverAztecOO linearSolver;
-    if (verbose)
-    {
-        std::cout << " done ! " << std::endl;
-    }
-
-    if (verbose)
-    {
-        std::cout << " -- Setting up the solver ... " << std::flush;
-    }
-    linearSolver.setDataFromGetPot (dataFile, "solver");
-    linearSolver.setupPreconditioner (dataFile, "prec");
-    if (verbose)
-    {
-        std::cout << " done ! " << std::endl;
-    }
-
-    if (verbose) std::cout << " -- Setting matrix in the solver ... "
-                               << std::flush;
-    linearSolver.setMatrix (*systemMatrix);
-    if (verbose)
-    {
-        std::cout << " done ! " << std::endl;
-    }
-
-    linearSolver.setCommunicator (comm);
-
-    // Definition of the solution
-
-    if (verbose)
-    {
-        std::cout << " -- Defining the solution ... " << std::flush;
-    }
-    vector_Type solution (uFESpace->map(), Unique);
-    solution *= 0.0;
-    if (verbose)
-    {
-        std::cout << " done ! " << std::endl;
-    }
-
-    // Solve the solution
-
-    if (verbose)
-    {
-        std::cout << " -- Solving the system ... " << std::flush;
-    }
-    linearSolver.solveSystem (rhsBC, solution, systemMatrix);
-    if (verbose)
-    {
-        std::cout << " done ! " << std::endl;
-    }
-
-    // Error computation
-
-    if (verbose)
-    {
-        std::cout << " -- Computing the error ... " << std::flush;
-    }
-    vector_Type solutionErr (solution);
-    solutionErr *= 0.0;
-    uFESpace->interpolate ( static_cast<function_Type> ( exactSolution ), solutionErr, 0.0);
-    solutionErr -= solution;
-    solutionErr.abs();
-    Real l2error (uFESpace->l2Error (exactSolution,
-                                     vector_Type (solution, Repeated), 0.0) );
-    if (verbose)
-    {
-        std::cout << " -- done ! " << std::endl;
-    }
-    if (verbose)
-    {
-        std::cout << " ---> Norm L2  : " << l2error << std::endl;
-    }
-    Real linferror (solutionErr.normInf() );
-    if (verbose)
-    {
-        std::cout << " ---> Norm Inf : " << linferror << std::endl;
-    }
-
-
-    if (l2error > 0.0055)
-    {
-        std::cout << " <!> Solution has changed !!! <!> " << std::endl;
-        return EXIT_FAILURE;
-    }
-    if (linferror > 0.0046)
-    {
-        std::cout << " <!> Solution has changed !!! <!> " << std::endl;
-        return EXIT_FAILURE;
-    }
-
-    // Exporter definition and use
-
-    if (verbose)
-    {
-        std::cout << " -- Defining the exporter ... " << std::flush;
-    }
-    ExporterHDF5<mesh_Type> exporter (dataFile, mesh,
-                                      "solution", comm->MyPID() ) ;
-    if (verbose)
-    {
-        std::cout << " done ! " << std::endl;
-    }
-
-    if (verbose) std::cout << " -- Defining the exported quantities ... "
-                               << std::flush;
-    boost::shared_ptr<vector_Type>
-    solutionPtr (new vector_Type (solution, Repeated) );
-    boost::shared_ptr<vector_Type>
-    solutionErrPtr (new vector_Type (solutionErr, Repeated) );
-    if (verbose)
-    {
-        std::cout << " done ! " << std::endl;
-    }
-
-    if (verbose) std::cout << " -- Updating the exporter ... "
-                               << std::flush;
-    exporter.addVariable ( ExporterData<mesh_Type>::ScalarField,
-                           "solution", uFESpace, solutionPtr, UInt (0) );
-    exporter.addVariable ( ExporterData<mesh_Type>::ScalarField,
-                           "error", uFESpace, solutionErrPtr, UInt (0) );
-    if (verbose)
-    {
-        std::cout << " done ! " << std::endl;
-    }
-
-    if (verbose)
-    {
-        std::cout << " -- Exporting ... " << std::flush;
-    }
-    exporter.postProcess (0);
-    exporter.closeFile();
-    if (verbose)
-    {
-        std::cout << " done ! " << std::endl;
     }
 
     if (verbose)

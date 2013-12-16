@@ -66,7 +66,10 @@ int main (int argc, char** argv)
 #ifdef LIFEV_HAS_HDF5
 #ifdef HAVE_MPI
 
-    typedef RegionMesh<LinearTetra> mesh_Type;
+    typedef RegionMesh<LinearTetra>           mesh_Type;
+    typedef boost::shared_ptr<mesh_Type>      meshPtr_Type;
+    typedef std::vector<meshPtr_Type>         meshParts_Type;
+    typedef boost::shared_ptr<meshParts_Type> meshPartsPtr_Type;
 
     MPI_Init (&argc, &argv);
     boost::shared_ptr<Epetra_Comm> comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
@@ -79,35 +82,65 @@ int main (int argc, char** argv)
         return EXIT_FAILURE;
     }
 
-    GetPot commandLine (argc, argv);
-    std::string dataFileName = commandLine.follow ("data", 2, "-f", "--file");
-    GetPot dataFile (dataFileName);
-
-    const UInt numElements (dataFile ("mesh/nelements", 10) );
-    const Int numParts (dataFile ("test/num_parts", 3) );
-    const bool hierarchical (dataFile ("test/hierarchical", false) );
-    const std::string topology (dataFile ("test/topology", "1") );
-
-    const std::string partsFileName (dataFile ("test/hdf5_file_name", "cube.h5") );
+    GetPot cl (argc, argv);
+    const UInt numElements = cl.follow(11, "--num-elem");
+    const Int numParts = cl.follow(2, "--num-parts");
+    // partitionerType should be MeshPartitioner, MeshPartitionTool_ParMETIS or
+    // MeshPartitionTool_Zoltan
+    const std::string partitionerType = cl.follow("MeshPartitioner",
+    											  "--partitioner-type");
+    std::string partsFile;
+    partsFile.reserve(50);
+    partsFile += "cube_";
+    partsFile += partitionerType;
+    partsFile += ".h5";
 
     std::cout << "Number of elements in mesh: " << numElements << std::endl;
     std::cout << "Number of parts: " << numParts << std::endl;
-    std::cout << "Name of HDF5 container: " << partsFileName << std::endl;
+    std::cout << "Mesh partitioner type: " << partitionerType << std::endl;
+    std::cout << "Name of HDF5 container: " << partsFile << std::endl;
 
-    boost::shared_ptr<mesh_Type> fullMeshPtr (new mesh_Type ( comm ) );
+    meshPtr_Type fullMeshPtr (new mesh_Type ( comm ) );
+    meshPartsPtr_Type meshPartPtr;
     regularMesh3D (*fullMeshPtr, 1, numElements, numElements, numElements,
                    false, 2.0, 2.0, 2.0, -1.0, -1.0, -1.0);
 
-    Teuchos::ParameterList meshParameters;
-    meshParameters.set ("num-parts", numParts, "");
-    meshParameters.set ("offline-mode", true, "");
-    meshParameters.set ("hierarchical", hierarchical, "");
-    meshParameters.set ("topology", topology, "");
-    meshCutter_Type meshCutter (fullMeshPtr, comm, meshParameters);
-    if (! meshCutter.success() )
-    {
-        std::cout << "Mesh partition failed.";
-        return EXIT_FAILURE;
+    if (partitionerType == "MeshPartitioner") {
+    	// Using old MeshPartitioner class
+        MeshPartitioner<mesh_Type> meshCutter;
+        meshCutter.setup (numParts, comm);
+        meshCutter.attachUnpartitionedMesh (fullMeshPtr);
+        meshCutter.doPartitionGraph();
+        meshCutter.fillEntityPID();
+        meshCutter.doPartitionMesh();
+        meshCutter.releaseUnpartitionedMesh();
+        meshPartPtr = meshCutter.meshPartitions();
+    } else if (partitionerType == "MeshPartitionTool_ParMETIS") {
+    	// Using new MeshPartitionTool class with ParMETIS
+        Teuchos::ParameterList meshParameters;
+        meshParameters.set ("num-parts", numParts, "");
+        meshParameters.set ("offline-mode", true, "");
+        meshParameters.set ("graph-lib", "parmetis", "");
+        meshCutter_Type meshCutter (fullMeshPtr, comm, meshParameters);
+        if (! meshCutter.success() )
+        {
+            std::cout << "Mesh partition failed.";
+            return EXIT_FAILURE;
+        }
+        meshPartPtr = meshCutter.allMeshParts();
+    } else if (partitionerType == "MeshPartitionTool_Zoltan") {
+    	// Using new MeshPartitionTool class with Zoltan
+        Teuchos::ParameterList meshParameters;
+        meshParameters.set ("num-parts", numParts, "");
+        meshParameters.set ("offline-mode", true, "");
+        meshParameters.set ("graph-lib", "zoltan", "");
+        meshCutter_Type meshCutter (fullMeshPtr, comm, meshParameters);
+        if (! meshCutter.success() )
+        {
+            std::cout << "Mesh partition failed.";
+            return EXIT_FAILURE;
+        }
+        meshPartPtr = meshCutter.allMeshParts();
     }
 
     // delete the RegionMesh object
@@ -117,8 +150,8 @@ int main (int argc, char** argv)
     {
         boost::shared_ptr<Epetra_MpiComm> mpiComm =
             boost::dynamic_pointer_cast<Epetra_MpiComm> (comm);
-        PartitionIO<mesh_Type> partitionIO (partsFileName, mpiComm);
-        partitionIO.write (meshCutter.allMeshParts() );
+        PartitionIO<mesh_Type> partitionIO (partsFile, mpiComm);
+        partitionIO.write (meshPartPtr);
     }
 
     MPI_Finalize();
