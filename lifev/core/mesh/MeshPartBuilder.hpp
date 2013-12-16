@@ -123,9 +123,9 @@ public:
     //! \name Get Methods
     //@{
     const std::map<Int, Int>& globalToLocalElement() const
-	{
-    	return M_globalToLocalElement;
-	}
+    {
+        return M_globalToLocalElement;
+    }
     //@}
 
 private:
@@ -176,7 +176,7 @@ private:
       Mark all owned entities in the partition with EntityFlag::OWNED
       to properly build map members in DOF::GlobalElements().
     */
-    void markEntityOwnership(const entityPID_Type& entityPID);
+    void markEntityOwnership (const entityPID_Type& entityPID);
 
     //! Private Data Members
     //@{
@@ -230,7 +230,7 @@ void MeshPartBuilder<MeshType>::run (const meshPtr_Type& meshPart,
     M_meshPart = meshPart;
     M_partIndex = partIndex;
 
-    const idList_Type& elementList = *(graph->at(partIndex));
+    const idList_Type& elementList = * (graph->at (partIndex) );
 
     GhostHandler<mesh_Type> gh ( M_originalMesh, M_comm );
     if ( M_overlap != 0)
@@ -249,7 +249,7 @@ void MeshPartBuilder<MeshType>::run (const meshPtr_Type& meshPart,
 
     finalSetup();
 
-    markEntityOwnership(entityPIDList);
+    markEntityOwnership (entityPIDList);
 
 }
 
@@ -568,45 +568,45 @@ void MeshPartBuilder<MeshType>::finalSetup()
 
 template<typename MeshType>
 void
-MeshPartBuilder<MeshType>::markEntityOwnership(const entityPID_Type& entityPID)
+MeshPartBuilder<MeshType>::markEntityOwnership (const entityPID_Type& entityPID)
 {
-	// mark owned entities by each partition as described in M_entityPID
-	//M_entityPID or flags should be exported and read back to make it work
-	for ( UInt e = 0; e < M_meshPart->numElements(); e++ )
-	{
-		typename MeshType::element_Type& element = M_meshPart->element (e);
+    // mark owned entities by each partition as described in M_entityPID
+    //M_entityPID or flags should be exported and read back to make it work
+    for ( UInt e = 0; e < M_meshPart->numElements(); e++ )
+    {
+        typename MeshType::element_Type& element = M_meshPart->element (e);
         if (entityPID.elements[element.id()] != static_cast<UInt> (M_partIndex) )
-		{
-			element.setFlag ( EntityFlags::GHOST );
-		}
-	}
+        {
+            element.setFlag ( EntityFlags::GHOST );
+        }
+    }
 
-	for ( UInt f = 0; f < M_meshPart->numFacets(); f++ )
-	{
-		typename MeshType::facet_Type& facet = M_meshPart->facet (f);
+    for ( UInt f = 0; f < M_meshPart->numFacets(); f++ )
+    {
+        typename MeshType::facet_Type& facet = M_meshPart->facet (f);
         if (entityPID.facets[facet.id()] != static_cast<UInt> (M_partIndex) )
-		{
-			facet.setFlag ( EntityFlags::GHOST );
-		}
-	}
+        {
+            facet.setFlag ( EntityFlags::GHOST );
+        }
+    }
 
-	for ( UInt r = 0; r < M_meshPart->numRidges(); r++ )
-	{
-		typename MeshType::ridge_Type& ridge = M_meshPart->ridge (r);
+    for ( UInt r = 0; r < M_meshPart->numRidges(); r++ )
+    {
+        typename MeshType::ridge_Type& ridge = M_meshPart->ridge (r);
         if (entityPID.ridges[ridge.id()] != static_cast<UInt> (M_partIndex) )
-		{
-			ridge.setFlag ( EntityFlags::GHOST );
-		}
-	}
+        {
+            ridge.setFlag ( EntityFlags::GHOST );
+        }
+    }
 
-	for ( UInt p = 0; p < M_meshPart->numPoints(); p++ )
-	{
-		typename MeshType::point_Type& point = M_meshPart->point (p);
+    for ( UInt p = 0; p < M_meshPart->numPoints(); p++ )
+    {
+        typename MeshType::point_Type& point = M_meshPart->point (p);
         if (entityPID.points[point.id()] != static_cast<UInt> (M_partIndex) )
-		{
-			point.setFlag ( EntityFlags::GHOST );
-		}
-	}
+        {
+            point.setFlag ( EntityFlags::GHOST );
+        }
+    }
 }
 
 template<typename MeshType>

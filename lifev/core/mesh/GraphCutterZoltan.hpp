@@ -142,10 +142,10 @@ public:
     //! Get the entire partitioned graph, wrapped in a smart pointer
     virtual const idTablePtr_Type getGraph() const
     {
-        idTablePtr_Type graph (new idTable_Type(numParts()));
+        idTablePtr_Type graph (new idTable_Type (numParts() ) );
         for (UInt i = 0; i < numParts(); ++i)
         {
-            graph->at(i) = getPart (i);
+            graph->at (i) = getPart (i);
         }
         return graph;
     }
@@ -546,7 +546,7 @@ void GraphCutterZoltan<MeshType>::distributePartitions()
 
     for (Int i = M_myFirstPart; i <= M_myLastPart; ++i)
     {
-        M_partitionTable[i].reset(new idList_Type(0));
+        M_partitionTable[i].reset (new idList_Type (0) );
     }
 }
 
@@ -620,8 +620,8 @@ void GraphCutterZoltan<MeshType>::buildGraph()
         M_graph.insert (std::pair<Int, idListPtr_Type >
                         (ie, idListPtr_Type() )
                        );
-        M_graph[ie].reset(new idList_Type(0));
-        M_graph[ie]->reserve(numNeighbours);
+        M_graph[ie].reset (new idList_Type (0) );
+        M_graph[ie]->reserve (numNeighbours);
         for (UInt ifacet = 0; ifacet < numElementFacets; ++ifacet)
         {
             UInt facet = M_mesh->localFacetId (ie, ifacet);
@@ -663,7 +663,7 @@ void GraphCutterZoltan<MeshType>::buildPartitionTable()
     for (table_Type::iterator it = M_partitionTable.begin();
             it != M_partitionTable.end(); ++it)
     {
-//    	it->second.reset(new idList_Type(0));
+        //      it->second.reset(new idList_Type(0));
         it->second->reserve (numStoredElements() / M_numPartsPerProcessor);
     }
 
@@ -683,17 +683,21 @@ void GraphCutterZoltan<MeshType>::buildPartitionTable()
 
     // Distribute the graph parts to all the processes
     M_comm->Barrier();
-    if (numProcessors() > 1) {
-        for (UInt i = 0; i < numProcessors(); ++i) {
-        	int currentSize = 0;
-        	if (i == M_myPID) {
-        		currentSize = M_partitionTable[i]->size();
-        	}
-            M_comm->Broadcast(&currentSize, 1, i);
-            if (i != M_myPID) {
-            	M_partitionTable[i].reset(new idList_Type(currentSize));
+    if (numProcessors() > 1)
+    {
+        for (UInt i = 0; i < numProcessors(); ++i)
+        {
+            int currentSize = 0;
+            if (i == M_myPID)
+            {
+                currentSize = M_partitionTable[i]->size();
             }
-            M_comm->Broadcast(&(M_partitionTable[i]->at(0)), currentSize, i);
+            M_comm->Broadcast (&currentSize, 1, i);
+            if (i != M_myPID)
+            {
+                M_partitionTable[i].reset (new idList_Type (currentSize) );
+            }
+            M_comm->Broadcast (& (M_partitionTable[i]->at (0) ), currentSize, i);
         }
     }
 }

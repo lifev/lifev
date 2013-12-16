@@ -80,10 +80,10 @@ int main ( int argc, char** argv )
     // Read first the data needed
 
     GetPot cl (argc, argv);
-    const UInt numElements = cl.follow(9, "--num-elem");
+    const UInt numElements = cl.follow (9, "--num-elem");
     // partitionerType should be MeshPartitioner, MeshPartitionTool_ParMETIS or
     // MeshPartitionTool_Zoltan
-    const std::string graphLib = cl.follow("parmetis", "--graph-lib");
+    const std::string graphLib = cl.follow ("parmetis", "--graph-lib");
 
     if (verbose) std::cout << " ---> Number of elements : "
                                << numElements << std::endl;
@@ -109,19 +109,19 @@ int main ( int argc, char** argv )
         std::cout << " -- Partitioning the mesh ... " << std::flush;
     }
     {
-		Teuchos::ParameterList meshParameters;
-		meshParameters.set ("num-parts", Comm->NumProc(), "");
-		meshParameters.set ("graph-lib", graphLib, "");
-		meshCutter_Type meshCutter (fullMeshPtr, Comm, meshParameters);
-		if (! meshCutter.success() )
-		{
-			if (verbose)
-			{
-				std::cout << "Partitioning failed." << std::endl;
-			}
-			return EXIT_FAILURE;
-		}
-		meshPart = meshCutter.meshPart();
+        Teuchos::ParameterList meshParameters;
+        meshParameters.set ("num-parts", Comm->NumProc(), "");
+        meshParameters.set ("graph-lib", graphLib, "");
+        meshCutter_Type meshCutter (fullMeshPtr, Comm, meshParameters);
+        if (! meshCutter.success() )
+        {
+            if (verbose)
+            {
+                std::cout << "Partitioning failed." << std::endl;
+            }
+            return EXIT_FAILURE;
+        }
+        meshPart = meshCutter.meshPart();
     }
     if (verbose)
     {
@@ -139,107 +139,107 @@ int main ( int argc, char** argv )
     }
 
     // Build the FESpaces
-	if (verbose)
-	{
-		std::cout << " -- Building FESpaces ... " << std::flush;
-	}
-	std::string uOrder ("P1");
-	std::string bOrder ("P1");
-	boost::shared_ptr < FESpace < mesh_Type,
-		  MapEpetra > >
-		  uFESpace (new FESpace < mesh_Type,
-					MapEpetra > (meshPart,
-								 uOrder,
-								 1,
-								 Comm) );
+    if (verbose)
+    {
+        std::cout << " -- Building FESpaces ... " << std::flush;
+    }
+    std::string uOrder ("P1");
+    std::string bOrder ("P1");
+    boost::shared_ptr < FESpace < mesh_Type,
+          MapEpetra > >
+          uFESpace (new FESpace < mesh_Type,
+                    MapEpetra > (meshPart,
+                                 uOrder,
+                                 1,
+                                 Comm) );
 
-	boost::shared_ptr < FESpace < mesh_Type,
-		  MapEpetra > >
-		  betaFESpace (new FESpace < mesh_Type,
-					   MapEpetra > (meshPart,
-									bOrder,
-									3,
-									Comm) );
+    boost::shared_ptr < FESpace < mesh_Type,
+          MapEpetra > >
+          betaFESpace (new FESpace < mesh_Type,
+                       MapEpetra > (meshPart,
+                                    bOrder,
+                                    3,
+                                    Comm) );
 
-	if (verbose)
-	{
-		std::cout << " done ! " << std::endl;
-	}
-	if (verbose) std::cout << " ---> Dofs: "
-							   << uFESpace->dof().numTotalDof() << std::endl;
+    if (verbose)
+    {
+        std::cout << " done ! " << std::endl;
+    }
+    if (verbose) std::cout << " ---> Dofs: "
+                               << uFESpace->dof().numTotalDof() << std::endl;
 
-	// Build the assembler and the matrices
+    // Build the assembler and the matrices
 
-	if (verbose)
-	{
-		std::cout << " -- Building assembler ... " << std::flush;
-	}
-	ADRAssembler<mesh_Type, matrix_Type, vector_Type> adrAssembler;
-	if (verbose)
-	{
-		std::cout << " done! " << std::endl;
-	}
+    if (verbose)
+    {
+        std::cout << " -- Building assembler ... " << std::flush;
+    }
+    ADRAssembler<mesh_Type, matrix_Type, vector_Type> adrAssembler;
+    if (verbose)
+    {
+        std::cout << " done! " << std::endl;
+    }
 
-	if (verbose)
-	{
-		std::cout << " -- Setting up assembler ... " << std::flush;
-	}
-	adrAssembler.setup (uFESpace, betaFESpace);
-	if (verbose)
-	{
-		std::cout << " done! " << std::endl;
-	}
+    if (verbose)
+    {
+        std::cout << " -- Setting up assembler ... " << std::flush;
+    }
+    adrAssembler.setup (uFESpace, betaFESpace);
+    if (verbose)
+    {
+        std::cout << " done! " << std::endl;
+    }
 
-	if (verbose)
-	{
-		std::cout << " -- Defining the matrix ... " << std::flush;
-	}
-	boost::shared_ptr<matrix_Type>
-	systemMatrix (new matrix_Type (uFESpace->map() ) );
-	*systemMatrix *= 0.0;
-	if (verbose)
-	{
-		std::cout << " done! " << std::endl;
-	}
+    if (verbose)
+    {
+        std::cout << " -- Defining the matrix ... " << std::flush;
+    }
+    boost::shared_ptr<matrix_Type>
+    systemMatrix (new matrix_Type (uFESpace->map() ) );
+    *systemMatrix *= 0.0;
+    if (verbose)
+    {
+        std::cout << " done! " << std::endl;
+    }
 
-	// Perform the assembly of the matrix
+    // Perform the assembly of the matrix
 
-	if (verbose)
-	{
-		std::cout << " -- Adding the diffusion ... " << std::flush;
-	}
-	adrAssembler.addDiffusion (systemMatrix, 1.0);
-	if (verbose)
-	{
-		std::cout << " done! " << std::endl;
-	}
-	if (verbose)
-	{
-		std::cout << " Time needed : "
-				  << adrAssembler.diffusionAssemblyChrono().diffCumul()
-				  << std::endl;
-	}
+    if (verbose)
+    {
+        std::cout << " -- Adding the diffusion ... " << std::flush;
+    }
+    adrAssembler.addDiffusion (systemMatrix, 1.0);
+    if (verbose)
+    {
+        std::cout << " done! " << std::endl;
+    }
+    if (verbose)
+    {
+        std::cout << " Time needed : "
+                  << adrAssembler.diffusionAssemblyChrono().diffCumul()
+                  << std::endl;
+    }
 
-	if (verbose)
-	{
-		std::cout << " -- Closing the matrix ... " << std::flush;
-	}
-	systemMatrix->globalAssemble();
-	if (verbose)
-	{
-		std::cout << " done ! " << std::endl;
-	}
+    if (verbose)
+    {
+        std::cout << " -- Closing the matrix ... " << std::flush;
+    }
+    systemMatrix->globalAssemble();
+    if (verbose)
+    {
+        std::cout << " done ! " << std::endl;
+    }
 
-	Real matrixNorm (systemMatrix->normFrobenius() );
-	if (verbose)
-	{
-		std::cout << " ---> Norm 1 : " << matrixNorm << std::endl;
-	}
-	if ( std::fabs (matrixNorm - 35.908 ) > 1e-3)
-	{
-		std::cout << " <!> Matrix has changed !!! <!> " << std::endl;
-		return EXIT_FAILURE;
-	}
+    Real matrixNorm (systemMatrix->normFrobenius() );
+    if (verbose)
+    {
+        std::cout << " ---> Norm 1 : " << matrixNorm << std::endl;
+    }
+    if ( std::fabs (matrixNorm - 35.908 ) > 1e-3)
+    {
+        std::cout << " <!> Matrix has changed !!! <!> " << std::endl;
+        return EXIT_FAILURE;
+    }
 
     if (verbose)
     {

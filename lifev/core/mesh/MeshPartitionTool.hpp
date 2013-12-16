@@ -72,12 +72,12 @@ using namespace GraphUtil;
   constructor. The following parameters are used:
 
    graph-lib - std::string - "parmetis" or "zoltan" selects the graph partition
-   	   	   	   	   	   	   	 library to be used (default "parmetis")
+                             library to be used (default "parmetis")
    overlap - UInt - level of overlap for the mesh partition process (default 0)
    offline-mode - bool - mode of operation; offline mode can
-   	   	   	   	   	     only be used in serial (default false == online)
+                         only be used in serial (default false == online)
    num-parts - Int - (for offline-mode only) sets the number of parts for the
-    				 mesh partition process (no default value)
+                     mesh partition process (no default value)
    hierarchical - bool - enable hierarchical partitioning mode (default false)
    topology - std::string - value which represents the number of mesh parts per
                             compute node
@@ -107,7 +107,7 @@ public:
     typedef boost::shared_ptr<partMesh_Type>     partMeshPtr_Type;
     typedef std::vector<idTablePtr_Type>         vertexPartitionTable_Type;
     typedef boost::shared_ptr<vertexPartitionTable_Type>
-    											 vertexPartitionTablePtr_Type;
+    vertexPartitionTablePtr_Type;
     //@}
 
     //! \name Constructors & Destructors
@@ -168,7 +168,7 @@ public:
      */
     const vertexPartitionTablePtr_Type& secondStageParts() const
     {
-    	return M_secondStageParts;
+        return M_secondStageParts;
     }
 
     //! Return a shared pointer to the second stage graph parts (for ShyLU-MT)
@@ -178,7 +178,7 @@ public:
      */
     const idTablePtr_Type& mySecondStageParts() const
     {
-    	return M_secondStageParts->at(0);
+        return M_secondStageParts->at (0);
     }
     //@}
 
@@ -189,10 +189,10 @@ private:
     void run();
 
     //! Initialize M_entityPID
-    void fillEntityPID(idTablePtr_Type graph);
+    void fillEntityPID (idTablePtr_Type graph);
 
     //! Global to local element ID conversion for second stage
-    void globalToLocal(const Int curPart);
+    void globalToLocal (const Int curPart);
     //@}
 
     // Private copy constructor and assignment operator are disabled
@@ -231,28 +231,33 @@ private:
 
 template < typename MeshType>
 MeshPartitionTool < MeshType >::MeshPartitionTool (
-                      const meshPtr_Type& mesh,
-                      const boost::shared_ptr<Epetra_Comm>& comm,
-                      const Teuchos::ParameterList parameters) :
-                      M_comm (comm),
-                      M_myPID (M_comm->MyPID() ),
-                      M_parameters (parameters),
-                      M_originalMesh (mesh),
-                      M_meshPart(),
-                      M_allMeshParts(),
-                      M_graphLib(M_parameters.get<std::string>("graph-lib", "parmetis")),
-                      M_meshPartBuilder (new meshPartBuilder_Type (M_originalMesh,
-                                                                   M_parameters.get<UInt> ("overlap", 0), M_comm) ),
-                      M_success (false),
-                      M_secondStage (M_parameters.get<bool>("second-stage", false)),
-                      M_secondStageNumParts (M_parameters.get<Int>("second-stage-num-parts", 1)),
-                      M_secondStageParts(new vertexPartitionTable_Type)
+    const meshPtr_Type& mesh,
+    const boost::shared_ptr<Epetra_Comm>& comm,
+    const Teuchos::ParameterList parameters) :
+    M_comm (comm),
+    M_myPID (M_comm->MyPID() ),
+    M_parameters (parameters),
+    M_originalMesh (mesh),
+    M_meshPart(),
+    M_allMeshParts(),
+    M_graphLib (M_parameters.get<std::string> ("graph-lib", "parmetis") ),
+    M_meshPartBuilder (new meshPartBuilder_Type (M_originalMesh,
+                                                 M_parameters.get<UInt> ("overlap", 0), M_comm) ),
+    M_success (false),
+    M_secondStage (M_parameters.get<bool> ("second-stage", false) ),
+    M_secondStageNumParts (M_parameters.get<Int> ("second-stage-num-parts", 1) ),
+    M_secondStageParts (new vertexPartitionTable_Type)
 {
-    if (! M_graphLib.compare("parmetis")) {
-        M_graphCutter.reset(new GraphCutterParMETIS<mesh_Type>(M_originalMesh, M_comm, M_parameters));
-    } else if (! M_graphLib.compare("zoltan")) {
-        M_graphCutter.reset(new GraphCutterZoltan<mesh_Type>(M_originalMesh, M_comm, M_parameters));
-    } else {
+    if (! M_graphLib.compare ("parmetis") )
+    {
+        M_graphCutter.reset (new GraphCutterParMETIS<mesh_Type> (M_originalMesh, M_comm, M_parameters) );
+    }
+    else if (! M_graphLib.compare ("zoltan") )
+    {
+        M_graphCutter.reset (new GraphCutterZoltan<mesh_Type> (M_originalMesh, M_comm, M_parameters) );
+    }
+    else
+    {
         std::cout << "Graph partitioner type not defined.\n";
     }
 
@@ -287,43 +292,49 @@ void MeshPartitionTool < MeshType >::run()
     bool offlineMode = M_parameters.get<bool> ("offline-mode", false);
 
     // Do a second stage graph partitioning for ShyLU-MT
-    if (M_secondStage) {
-    	if (!M_myPID) {
-    		std::cout << "Performing second stage partitioning ..."
-    				  << std::endl;
-    	}
-    	// MPI comm object for second stage is always MPI_COMM_SELF
+    if (M_secondStage)
+    {
+        if (!M_myPID)
+        {
+            std::cout << "Performing second stage partitioning ..."
+                      << std::endl;
+        }
+        // MPI comm object for second stage is always MPI_COMM_SELF
 #ifdef EPETRA_MPI
-    	boost::shared_ptr<Epetra_Comm>
-    			secondStageComm(new Epetra_MpiComm(MPI_COMM_SELF));
+        boost::shared_ptr<Epetra_Comm>
+        secondStageComm (new Epetra_MpiComm (MPI_COMM_SELF) );
 #else
-    	boost::shared_ptr<Epetra_Comm>
-    			secondStageComm(new Epetra_SerialComm);
+        boost::shared_ptr<Epetra_Comm>
+        secondStageComm (new Epetra_SerialComm);
 #endif
 
-		Teuchos::ParameterList secondStageParams;
-		secondStageParams.set<Int>("num-parts", M_secondStageNumParts);
-		secondStageParams.set<Int>("my-pid", M_myPID);
-		secondStageParams.set<bool>("verbose", false);
-    	if (! offlineMode) {
-			M_secondStageParts->resize(1);
-			// For each set of elements in graph perform a second stage partitioning
-			const idListPtr_Type currentIds = graph->at(M_myPID);
-			partitionGraphParMETIS(currentIds, *M_originalMesh,
-								   secondStageParams,
-								   M_secondStageParts->at(0),
-								   secondStageComm);
-    	} else {
-			M_secondStageParts->resize(graph->size());
-			// For each set of elements in graph perform a second stage partitioning
-			for (Int i = 0; i < graph->size(); ++i) {
-				const idListPtr_Type& currentIds = graph->at(i);
-				partitionGraphParMETIS(currentIds, *M_originalMesh,
-									   secondStageParams,
-									   M_secondStageParts->at(i),
-									   secondStageComm);
-			}
-    	}
+        Teuchos::ParameterList secondStageParams;
+        secondStageParams.set<Int> ("num-parts", M_secondStageNumParts);
+        secondStageParams.set<Int> ("my-pid", M_myPID);
+        secondStageParams.set<bool> ("verbose", false);
+        if (! offlineMode)
+        {
+            M_secondStageParts->resize (1);
+            // For each set of elements in graph perform a second stage partitioning
+            const idListPtr_Type currentIds = graph->at (M_myPID);
+            partitionGraphParMETIS (currentIds, *M_originalMesh,
+                                    secondStageParams,
+                                    M_secondStageParts->at (0),
+                                    secondStageComm);
+        }
+        else
+        {
+            M_secondStageParts->resize (graph->size() );
+            // For each set of elements in graph perform a second stage partitioning
+            for (Int i = 0; i < graph->size(); ++i)
+            {
+                const idListPtr_Type& currentIds = graph->at (i);
+                partitionGraphParMETIS (currentIds, *M_originalMesh,
+                                        secondStageParams,
+                                        M_secondStageParts->at (i),
+                                        secondStageComm);
+            }
+        }
     }
 
     // Fill entity PID
@@ -331,7 +342,7 @@ void MeshPartitionTool < MeshType >::run()
     {
         std::cout << "Filling entity PID lists ..." << std::endl;
     }
-    fillEntityPID(graph);
+    fillEntityPID (graph);
 
     if (!M_myPID)
     {
@@ -341,13 +352,14 @@ void MeshPartitionTool < MeshType >::run()
     if (! offlineMode)
     {
         // Online partitioning
-        M_meshPart.reset (new mesh_Type(M_comm));
-        M_meshPart->setIsPartitioned(true);
+        M_meshPart.reset (new mesh_Type (M_comm) );
+        M_meshPart->setIsPartitioned (true);
         M_meshPartBuilder->run (M_meshPart, graph, M_entityPID, M_myPID);
 
         // Make the global to local element ID conversion for the second stage
-        if (M_secondStage) {
-        	globalToLocal(0);
+        if (M_secondStage)
+        {
+            globalToLocal (0);
         }
 
         // Reset the mesh part builder
@@ -364,7 +376,7 @@ void MeshPartitionTool < MeshType >::run()
             if (!M_myPID)
             {
                 std::cout << "Offline partition must be done in serial."
-                << std::endl;
+                          << std::endl;
             }
         }
         else
@@ -381,20 +393,21 @@ void MeshPartitionTool < MeshType >::run()
             for (Int curPart = 0; curPart < numParts; ++curPart)
             {
                 // Backup the elements of the current graph part
-                idList_Type backup ( *(graph->at(curPart)));
+                idList_Type backup ( * (graph->at (curPart) ) );
                 M_allMeshParts->at (curPart).reset (new mesh_Type);
-                M_allMeshParts->at (curPart)->setIsPartitioned(true);
+                M_allMeshParts->at (curPart)->setIsPartitioned (true);
                 M_meshPartBuilder->run (M_allMeshParts->at (curPart),
                                         graph, M_entityPID,
                                         curPart);
 
                 // At this point (*graph)[curPart] has been modified. Restore
                 // to the original state
-                *(graph->at(curPart)) = backup;
+                * (graph->at (curPart) ) = backup;
 
                 // Make the global to local element ID conversion for the second stage
-                if (M_secondStage) {
-                	globalToLocal(curPart);
+                if (M_secondStage)
+                {
+                    globalToLocal (curPart);
                 }
 
                 // Reset the mesh part builder
@@ -432,18 +445,18 @@ MeshPartitionTool<MeshType>::fillEntityPID (idTablePtr_Type graph)
     // p = 0 can be skipped since M_entityPID is already initialized at that value
     for ( Int p = 1; p < numParts; p++ )
     {
-        for ( UInt e = 0; e < graph->at(p)->size(); e++ )
+        for ( UInt e = 0; e < graph->at (p)->size(); e++ )
         {
             // point block
             for ( UInt k = 0; k < mesh_Type::element_Type::S_numPoints; k++ )
             {
-                const ID& pointID = M_originalMesh->element ( graph->at(p)->at(e) ).point ( k ).id();
+                const ID& pointID = M_originalMesh->element ( graph->at (p)->at (e) ).point ( k ).id();
                 // pointPID should be the maximum between the procs that own it
                 M_entityPID.points[ pointID ] = std::max ( M_entityPID.points[ pointID ], p );
             }
 
             // elem block
-            const ID& elemID = M_originalMesh->element ( graph->at(p)->at(e) ).id();
+            const ID& elemID = M_originalMesh->element ( graph->at (p)->at (e) ).id();
             // at his stage each element belongs to a single partition, overlap is not yet done.
             M_entityPID.elements[ elemID ] = p;
 
@@ -468,19 +481,21 @@ MeshPartitionTool<MeshType>::fillEntityPID (idTablePtr_Type graph)
 
 template < typename MeshType>
 void
-MeshPartitionTool < MeshType >::globalToLocal(const Int curPart)
+MeshPartitionTool < MeshType >::globalToLocal (const Int curPart)
 {
-	const std::map<Int, Int>& globalToLocalMap =
-	M_meshPartBuilder->globalToLocalElement();
-	idTable_Type& currentGraph = *(M_secondStageParts->at(curPart));
+    const std::map<Int, Int>& globalToLocalMap =
+        M_meshPartBuilder->globalToLocalElement();
+    idTable_Type& currentGraph = * (M_secondStageParts->at (curPart) );
 
-	for (Int i = 0; i < currentGraph.size(); ++i) {
-		int currentSize = currentGraph[i]->size();
-		idList_Type& currentElements = *(currentGraph[i]);
-		for (Int j = 0; j < currentSize; ++j) {
-			currentElements[j] = globalToLocalMap.find(currentElements[j])->second;
-		}
-	}
+    for (Int i = 0; i < currentGraph.size(); ++i)
+    {
+        int currentSize = currentGraph[i]->size();
+        idList_Type& currentElements = * (currentGraph[i]);
+        for (Int j = 0; j < currentSize; ++j)
+        {
+            currentElements[j] = globalToLocalMap.find (currentElements[j])->second;
+        }
+    }
 }
 
 template < typename MeshType>
@@ -488,8 +503,8 @@ void
 MeshPartitionTool < MeshType >::showMe (std::ostream& output) const
 {
     output << "Sorry, this method is not implemented, yet." << std::endl
-    << "We appreciate your interest." << std::endl
-    << "Check back in a bit!" << std::endl;
+           << "We appreciate your interest." << std::endl
+           << "Check back in a bit!" << std::endl;
 }
 
 } // namespace LifeV

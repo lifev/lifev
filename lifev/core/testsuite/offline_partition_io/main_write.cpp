@@ -83,14 +83,14 @@ int main (int argc, char** argv)
     }
 
     GetPot cl (argc, argv);
-    const UInt numElements = cl.follow(9, "--num-elem");
-    const Int numParts = cl.follow(3, "--num-parts");
+    const UInt numElements = cl.follow (9, "--num-elem");
+    const Int numParts = cl.follow (3, "--num-parts");
     // partitionerType should be MeshPartitioner, MeshPartitionTool_ParMETIS or
     // MeshPartitionTool_Zoltan
-    const std::string partitionerType = cl.follow("MeshPartitioner",
-    											  "--partitioner-type");
+    const std::string partitionerType = cl.follow ("MeshPartitioner",
+                                                   "--partitioner-type");
     std::string partsFile;
-    partsFile.reserve(50);
+    partsFile.reserve (50);
     partsFile += "cube_";
     partsFile += partitionerType;
     partsFile += ".h5";
@@ -105,8 +105,9 @@ int main (int argc, char** argv)
     regularMesh3D (*fullMeshPtr, 1, numElements, numElements, numElements,
                    false, 2.0, 2.0, 2.0, -1.0, -1.0, -1.0);
 
-    if (partitionerType == "MeshPartitioner") {
-    	// Using old MeshPartitioner class
+    if (partitionerType == "MeshPartitioner")
+    {
+        // Using old MeshPartitioner class
         MeshPartitioner<mesh_Type> meshCutter;
         meshCutter.setup (numParts, comm);
         meshCutter.attachUnpartitionedMesh (fullMeshPtr);
@@ -115,8 +116,10 @@ int main (int argc, char** argv)
         meshCutter.doPartitionMesh();
         meshCutter.releaseUnpartitionedMesh();
         meshPartPtr = meshCutter.meshPartitions();
-    } else if (partitionerType == "MeshPartitionTool_ParMETIS") {
-    	// Using new MeshPartitionTool class with ParMETIS
+    }
+    else if (partitionerType == "MeshPartitionTool_ParMETIS")
+    {
+        // Using new MeshPartitionTool class with ParMETIS
         Teuchos::ParameterList meshParameters;
         meshParameters.set ("num-parts", numParts, "");
         meshParameters.set ("offline-mode", true, "");
@@ -128,8 +131,10 @@ int main (int argc, char** argv)
             return EXIT_FAILURE;
         }
         meshPartPtr = meshCutter.allMeshParts();
-    } else if (partitionerType == "MeshPartitionTool_Zoltan") {
-    	// Using new MeshPartitionTool class with Zoltan
+    }
+    else if (partitionerType == "MeshPartitionTool_Zoltan")
+    {
+        // Using new MeshPartitionTool class with Zoltan
         Teuchos::ParameterList meshParameters;
         meshParameters.set ("num-parts", numParts, "");
         meshParameters.set ("offline-mode", true, "");

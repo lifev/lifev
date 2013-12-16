@@ -112,11 +112,11 @@ public:
     //! Get a pointer to one of the partitions
     virtual const idListPtr_Type& getPart (const UInt i) const
     {
-        return M_vertexPartition->at(i);
+        return M_vertexPartition->at (i);
     }
     virtual idListPtr_Type& getPart (const UInt i)
     {
-        return M_vertexPartition->at(i);
+        return M_vertexPartition->at (i);
     }
 
     //! Return the number of parts
@@ -128,11 +128,11 @@ public:
     //! Get the entire partitioned graph, wrapped in a smart pointer
     virtual const idTablePtr_Type getGraph() const
     {
-        idTablePtr_Type graph (new idTable_Type(M_vertexPartition->size()));
+        idTablePtr_Type graph (new idTable_Type (M_vertexPartition->size() ) );
 
         for (UInt i = 0; i < M_vertexPartition->size(); ++i)
         {
-            graph->at(i) = getPart (i);
+            graph->at (i) = getPart (i);
         }
 
         return graph;
@@ -253,17 +253,18 @@ Int GraphCutterParMETIS<MeshType>::partitionFlat()
     // In this case we want to partition the entire graph
     Int numVertices = M_mesh->numElements();
 
-    idListPtr_Type vertexList(new idList_Type(numVertices));
-    for (Int i = 0; i < numVertices; ++i) {
-    	vertexList->at(i) = i;
+    idListPtr_Type vertexList (new idList_Type (numVertices) );
+    for (Int i = 0; i < numVertices; ++i)
+    {
+        vertexList->at (i) = i;
     }
 
     // Call the partitionSubGraph method on the vertexList that was
     // prepared
     Teuchos::ParameterList pList;
-    pList.set<Int>("num-parts", M_numParts);
-    partitionGraphParMETIS(vertexList, *(M_mesh), pList,
-    					   M_vertexPartition, M_comm);
+    pList.set<Int> ("num-parts", M_numParts);
+    partitionGraphParMETIS (vertexList, * (M_mesh), pList,
+                            M_vertexPartition, M_comm);
 
     return 0;
 }
@@ -296,10 +297,10 @@ Int GraphCutterParMETIS<MeshType>::partitionHierarchical()
     Int numVertices = M_mesh->numElements();
 
     // The vector contains the global IDs of the vertices in the graph
-    idListPtr_Type vertexList(new idList_Type(numVertices));
+    idListPtr_Type vertexList (new idList_Type (numVertices) );
     for (Int i = 0; i < numVertices; ++i)
     {
-        vertexList->at(i) = i;
+        vertexList->at (i) = i;
     }
 
     idTablePtr_Type tempVertexPartition;
@@ -309,33 +310,34 @@ Int GraphCutterParMETIS<MeshType>::partitionHierarchical()
      * numSubdomains vectors with the graph vertices of each subdomain
      */
     Teuchos::ParameterList pList;
-    pList.set<Int>("num-parts", numSubdomains);
-    partitionGraphParMETIS(vertexList, *(M_mesh), pList,
-    					   tempVertexPartition, M_comm);
+    pList.set<Int> ("num-parts", numSubdomains);
+    partitionGraphParMETIS (vertexList, * (M_mesh), pList,
+                            tempVertexPartition, M_comm);
 
     /*
      * Step two is to partition each subdomain into the number of sub parts
      * denoted by the M_topology parameter
      */
-    pList.set<Int>("num-parts", M_topology);
+    pList.set<Int> ("num-parts", M_topology);
     M_vertexPartition->resize (M_numParts);
     Int currentPart = 0;
     for (Int i = 0; i < numSubdomains; ++i)
     {
-    	const idList_Type& currentVertices = *(tempVertexPartition->at(i));
-        idListPtr_Type subdomainVertexMap(new idList_Type(currentVertices.size()));
-        for (Int k = 0; k < currentVertices.size(); ++k) {
-            subdomainVertexMap->at(k) = currentVertices[k];
+        const idList_Type& currentVertices = * (tempVertexPartition->at (i) );
+        idListPtr_Type subdomainVertexMap (new idList_Type (currentVertices.size() ) );
+        for (Int k = 0; k < currentVertices.size(); ++k)
+        {
+            subdomainVertexMap->at (k) = currentVertices[k];
         }
 
         idTablePtr_Type subdomainParts;
 
-		partitionGraphParMETIS(subdomainVertexMap, *(M_mesh),
-							   pList, subdomainParts, M_comm);
+        partitionGraphParMETIS (subdomainVertexMap, * (M_mesh),
+                                pList, subdomainParts, M_comm);
 
         for (Int j = 0; j < M_topology; ++j)
         {
-            M_vertexPartition->at(currentPart++) = subdomainParts->at(j);
+            M_vertexPartition->at (currentPart++) = subdomainParts->at (j);
         }
     }
 

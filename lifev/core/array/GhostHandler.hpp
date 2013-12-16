@@ -1434,7 +1434,7 @@ void GhostHandler<MeshType>::extendGraphFE ( const vertexPartitionPtr_Type& elem
     timeNL.stop();
 #endif
 
-    std::vector<int>& myElems = *(elemGraph->at(partIndex));
+    std::vector<int>& myElems = * (elemGraph->at (partIndex) );
 
 #ifdef LIFEV_GHOSTHANDLER_DEBUG
     // show own elements
@@ -1456,12 +1456,12 @@ void GhostHandler<MeshType>::extendGraphFE ( const vertexPartitionPtr_Type& elem
     graph_Type pointGraph ( numParts );
 
     std::set<int> localPointsSet;
-    for ( UInt e = 0; e < elemGraph->at(partIndex)->size(); e++ )
+    for ( UInt e = 0; e < elemGraph->at (partIndex)->size(); e++ )
     {
         // point block
         for ( UInt k = 0; k < mesh_Type::element_Type::S_numPoints; k++ )
         {
-            const ID& pointID = M_fullMesh->element ( elemGraph->at(partIndex)->at(e) ).point ( k ).id();
+            const ID& pointID = M_fullMesh->element ( elemGraph->at (partIndex)->at (e) ).point ( k ).id();
             localPointsSet.insert ( pointID );
         }
     }
@@ -1469,7 +1469,8 @@ void GhostHandler<MeshType>::extendGraphFE ( const vertexPartitionPtr_Type& elem
 
     std::vector<Int> pointGraphSize ( numParts, -1 );
     pointGraphSize[ partIndex ] = pointGraph[ partIndex ].size();
-    if (M_comm->NumProc() > 1) {
+    if (M_comm->NumProc() > 1)
+    {
         for ( UInt p = 0; p < static_cast<UInt> ( M_comm->NumProc() ); p++ )
         {
             M_comm->Broadcast ( &pointGraphSize[ p ], 1, p );

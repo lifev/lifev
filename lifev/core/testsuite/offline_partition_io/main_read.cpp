@@ -84,7 +84,7 @@ main ( int argc, char** argv )
     {
         std::cout << " -- Reading the data ... " << std::flush;
     }
-//    GetPot dataFile ( "data" );
+    //    GetPot dataFile ( "data" );
     if (verbose)
     {
         std::cout << " done ! " << std::endl;
@@ -93,10 +93,10 @@ main ( int argc, char** argv )
     GetPot cl (argc, argv);
     // partitionerType should be MeshPartitioner, MeshPartitionTool_ParMETIS or
     // MeshPartitionTool_Zoltan
-    const std::string partitionerType = cl.follow("MeshPartitioner",
-    											  "--partitioner-type");
+    const std::string partitionerType = cl.follow ("MeshPartitioner",
+                                                   "--partitioner-type");
     std::string partsFile;
-    partsFile.reserve(50);
+    partsFile.reserve (50);
     partsFile += "cube_";
     partsFile += partitionerType;
     partsFile += ".h5";
@@ -185,7 +185,7 @@ main ( int argc, char** argv )
         std::cout << " done ! " << std::endl;
     }
 
-    Real matrixNorm (systemMatrix->normFrobenius());
+    Real matrixNorm (systemMatrix->normFrobenius() );
     if (verbose)
     {
         std::cout << " ---> Norm 2 : " << matrixNorm << std::endl;
