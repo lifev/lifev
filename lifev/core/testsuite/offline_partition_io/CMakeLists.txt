@@ -26,11 +26,6 @@ TRIBITS_ADD_TEST(
   COMM mpi
 )
 
-TRIBITS_COPY_FILES_TO_BINARY_DIR(data_partition_io
-  SOURCE_FILES data
-  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}
-)
-
 TRIBITS_ADD_EXECUTABLE_AND_TEST(
   OfflinePartitionIO_Read
   NAME OfflinePartitionIO_Read_MeshPartitioner
