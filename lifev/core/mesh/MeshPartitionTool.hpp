@@ -68,7 +68,30 @@ using namespace GraphUtil;
   This class implements the partitioning of a global mesh and allows choosing
   the graph partitioning tool and the method to build the mesh parts.
 
-  The class is templated on the mesh type.
+  The class is configured through the Teuchos::Parameter list passed to the
+  constructor. The following parameters are used:
+
+   graph-lib - std::string - "parmetis" or "zoltan" selects the graph partition
+   	   	   	   	   	   	   	 library to be used (default "parmetis")
+   overlap - UInt - level of overlap for the mesh partition process (default 0)
+   offline-mode - bool - mode of operation; offline mode can
+   	   	   	   	   	     only be used in serial (default false == online)
+   num-parts - Int - (for offline-mode only) sets the number of parts for the
+    				 mesh partition process (no default value)
+   hierarchical - bool - enable hierarchical partitioning mode (default false)
+   topology - std::string - value which represents the number of mesh parts per
+                            compute node
+                            (N == num-parts; topology="m"; N % m == 0)
+                            (default "1")
+
+   Notes:
+
+   * the value of the "topology" parameter is given as a string due to a
+     requirement of the Zoltan interface
+   * When using Zoltan as a graph partition library, additional advanced
+     parameters are available. See GraphCutterZoltan.hpp for more information.
+
+
 */
 template < typename MeshType>
 class MeshPartitionTool
