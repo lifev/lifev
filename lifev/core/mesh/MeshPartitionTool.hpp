@@ -86,10 +86,12 @@ using namespace GraphUtil;
 
    Notes:
 
-   * the value of the "topology" parameter is given as a string due to a
+   * The value of the "topology" parameter is given as a string due to a
      requirement of the Zoltan interface
    * When using Zoltan as a graph partition library, additional advanced
      parameters are available. See GraphCutterZoltan.hpp for more information.
+   * Hierarchical partitioning is available in online mode ONLY when using
+     Zoltan and in offline mode ONLY when using ParMETIS.
 
 
 */
