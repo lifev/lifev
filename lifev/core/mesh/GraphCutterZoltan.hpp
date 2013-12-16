@@ -684,6 +684,10 @@ void GraphCutterZoltan<MeshType>::buildPartitionTable()
     M_comm->Barrier();
     if (numProcessors() > 1) {
         for (UInt i = 0; i < numProcessors(); ++i) {
+        	table_Type::iterator it = M_partitionTable.find(i);
+        	if (it == M_partitionTable.end()) {
+        		it->second.reset(new idList_Type(0));
+        	}
             int currentSize = M_partitionTable[i]->size();
             M_comm->Broadcast(&currentSize, 1, i);
             M_partitionTable[i]->resize(currentSize);
