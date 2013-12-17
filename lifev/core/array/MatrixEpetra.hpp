@@ -434,6 +434,12 @@ public:
      */
     Real normInf() const;
 
+    //! Compute the frobenius norm of the global matrix
+    /*!
+      @return norm Frobenius
+     */
+    Real normFrobenius() const;
+
     //@}
 
 
@@ -1488,6 +1494,11 @@ Real MatrixEpetra<DataType>::normInf() const
     return M_epetraCrs->NormInf();
 }
 
+template <typename DataType>
+Real MatrixEpetra<DataType>::normFrobenius() const
+{
+    return M_epetraCrs->NormFrobenius();
+}
 
 // ===================================================
 // Set Methods
