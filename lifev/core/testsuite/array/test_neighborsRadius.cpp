@@ -107,7 +107,7 @@ int main ( int argc, char* argv[] )
     vectorPtr_Type TrialOutput (new vector_Type (FESpaceP1->map(), Unique) );
 
     for (neighbors_Type::iterator ii = Neighbors.begin(); ii != Neighbors.end(); ++ii)
-        if (TrialOutput->blockMap().LID (*ii) != -1)
+        if (TrialOutput->blockMap().LID (static_cast<int> (*ii) ) != -1)
         {
             if (*ii == ID_trial)
             {

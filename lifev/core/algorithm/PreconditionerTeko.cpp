@@ -80,7 +80,7 @@ PreconditionerTeko::resetPreconditioner()
 bool
 PreconditionerTeko::isPreconditionerSet() const
 {
-    return M_prec;
+    return M_prec != 0 ? true : false;
 }
 
 int

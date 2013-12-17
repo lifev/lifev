@@ -12,6 +12,7 @@ SET(fem_HEADERS
   fem/CurrentFE.hpp
   fem/CurrentFEManifold.hpp
   fem/DOF.hpp
+  fem/DOFGatherer.hpp
   fem/DOFInterface.hpp
   fem/DOFInterface3Dto2D.hpp
   fem/DOFInterface3Dto3D.hpp

@@ -86,8 +86,11 @@ public:
     typedef MapEpetra map_Type;
     typedef boost::shared_ptr<map_Type> mapPtr_Type;
     typedef std::vector<Int> idList_Type;
+    typedef boost::shared_ptr<idList_Type> idListPtr_Type;
     typedef std::vector<idList_Type> graph_Type;
     typedef boost::shared_ptr<graph_Type> graphPtr_Type;
+    typedef std::vector<idListPtr_Type> vertexPartition_Type;
+    typedef boost::shared_ptr<vertexPartition_Type> vertexPartitionPtr_Type;
     typedef std::vector<markerID_Type> markerIDList_Type;
 
     //@}
@@ -292,6 +295,19 @@ public:
      * \param overlap. Level of overlap between partitions.
      */
     void extendGraphFE ( graphPtr_Type elemGraph, idList_Type const& pointPID, UInt overlap );
+
+    //! Extend the subdomains graph of the given overlap.
+    /*!
+     * This method enriches each subdomain with the closest elements such that
+     * the partitions have the required overlap.
+     * \param elemGraph. The list of subdomain elements
+     * \param entityPID. Info about proc ownership of each mesh entity.
+     * \param overlap. Level of overlap between partitions.
+     */
+    void extendGraphFE ( const vertexPartitionPtr_Type& elemGraph,
+                         idList_Type const& pointPID,
+                         UInt overlap,
+                         UInt partIndex);
 
     //! showMe method
     void showMe ( bool const verbose = false, std::ostream& out = std::cout );
@@ -1304,6 +1320,227 @@ void GhostHandler<MeshType>::extendGraphFE ( graphPtr_Type elemGraph,
 
 #ifdef LIFEV_GHOSTHANDLER_DEBUG
     M_debugOut << "own SUBDOMAIN_INTERFACE points on proc " << M_me << std::endl;
+    for ( std::set<Int>::const_iterator i = mySubdIntPoints.begin(); i != mySubdIntPoints.end(); ++i )
+    {
+        M_debugOut << *i << std::endl;
+    }
+#endif
+
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+    LifeChrono timeOP;
+    timeMgr.add ( "overlapping points", &timeOP );
+    timeOP.start();
+#endif
+
+    std::vector<int> workingPoints ( mySubdIntPoints.begin(), mySubdIntPoints.end() );
+    std::set<int> newPoints;
+    std::set<int> augmentedElemsSet ( myElems.begin(), myElems.end() );
+
+    for ( UInt o = 0; o < overlap; o++ )
+    {
+
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+        M_debugOut << "workingPoints" << std::endl;
+        for ( UInt i = 0; i < workingPoints.size(); i++ )
+        {
+            M_debugOut << workingPoints[ i ] << std::endl;
+        }
+#endif
+        for ( UInt k = 0; k < workingPoints.size(); k++ )
+        {
+            const int& currentPoint = workingPoints[ k ];
+            // iterate on point neighborhood
+            for ( neighbors_Type::const_iterator neighborIt = M_pointElementNeighborsList[ currentPoint ].begin();
+                    neighborIt != M_pointElementNeighborsList[ currentPoint ].end(); ++neighborIt )
+            {
+                std::pair<std::set<Int>::iterator, bool> isInserted = augmentedElemsSet.insert ( *neighborIt );
+                if ( isInserted.second )
+                {
+                    // if the element is inserted in the list, we add its points to the ones
+                    // to be checked for next overlap value
+                    for ( UInt j = 0; j < mesh_Type::element_Type::S_numPoints; j++ )
+                    {
+                        newPoints.insert ( M_fullMesh->element ( *neighborIt ).point ( j ).id() );
+                    }
+                }
+            }
+        }
+
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+        M_debugOut << "augmentedElemsSet" << std::endl;
+        for ( std::set<Int>::const_iterator i = augmentedElemsSet.begin(); i != augmentedElemsSet.end(); ++i )
+        {
+            M_debugOut << *i << std::endl;
+        }
+#endif
+        // clean up newPoints from already analized points
+        for ( UInt k = 0; k < workingPoints.size(); k++ )
+        {
+            newPoints.erase ( newPoints.find ( workingPoints[ k ] ) );
+        }
+
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+        M_debugOut << "newPoints" << std::endl;
+        for ( std::set<int>::const_iterator i = newPoints.begin(); i != newPoints.end(); ++i )
+        {
+            M_debugOut << *i << std::endl;
+        }
+#endif
+        // set up workingPoints if we are not exiting
+        if ( o + 1 < overlap  )
+        {
+            workingPoints.assign ( newPoints.begin(), newPoints.end() );
+        }
+    }
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+    timeOP.stop();
+#endif
+
+    // assign the augmentedElems to the element graph
+    myElems.assign ( augmentedElemsSet.begin(), augmentedElemsSet.end() );
+
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+    timeMgr.print();
+#endif
+}
+
+template <typename MeshType>
+void GhostHandler<MeshType>::extendGraphFE ( const vertexPartitionPtr_Type& elemGraph,
+                                             idList_Type const& pointPID,
+                                             UInt overlap,
+                                             UInt partIndex)
+{
+    if ( M_verbose )
+    {
+        std::cout << " GH- ghostMapOnElementsP1( graph )" << std::endl;
+    }
+
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+    LifeChronoManager<> timeMgr ( M_comm );
+    LifeChrono timeNL;
+    timeMgr.add ( "node-element ngbr list", &timeNL );
+    timeNL.start();
+#endif
+    // check that the pointElementNeighborsMap has been created
+    if ( M_pointElementNeighborsList.empty()  )
+    {
+        if ( M_verbose )
+        {
+            std::cerr << "the pointElementNeighborsList is empty, will be generated now" << std::endl;
+        }
+        this->createPointElementNeighborsList();
+    }
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+    timeNL.stop();
+#endif
+
+    std::vector<int>& myElems = * (elemGraph->at (partIndex) );
+
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+    // show own elements
+    M_debugOut << "own elements on proc " << partIndex << std::endl;
+    for ( UInt i = 0; i < myElems.size(); i++ )
+    {
+        M_debugOut << myElems[ i ] << std::endl;
+    }
+#endif
+
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+    LifeChrono timePG;
+    timeMgr.add ( "point graph", &timePG );
+    timePG.start();
+#endif
+    // generate graph of points
+    // check: parallel algorithm seems to be faster for this
+    Int numParts = elemGraph->size();
+    graph_Type pointGraph ( numParts );
+
+    std::set<int> localPointsSet;
+    for ( UInt e = 0; e < elemGraph->at (partIndex)->size(); e++ )
+    {
+        // point block
+        for ( UInt k = 0; k < mesh_Type::element_Type::S_numPoints; k++ )
+        {
+            const ID& pointID = M_fullMesh->element ( elemGraph->at (partIndex)->at (e) ).point ( k ).id();
+            localPointsSet.insert ( pointID );
+        }
+    }
+    pointGraph[ partIndex ].assign ( localPointsSet.begin(), localPointsSet.end() );
+
+    std::vector<Int> pointGraphSize ( numParts, -1 );
+    pointGraphSize[ partIndex ] = pointGraph[ partIndex ].size();
+    if (M_comm->NumProc() > 1)
+    {
+        for ( UInt p = 0; p < static_cast<UInt> ( M_comm->NumProc() ); p++ )
+        {
+            M_comm->Broadcast ( &pointGraphSize[ p ], 1, p );
+        }
+
+        for ( UInt p = 0; p < static_cast<UInt> ( M_comm->NumProc() ); p++ )
+        {
+            pointGraph[ p ].resize ( pointGraphSize[ p ] );
+        }
+
+        // communicate other proc point graphs
+        for ( UInt p = 0; p < static_cast<UInt> ( M_comm->NumProc() ); p++ )
+        {
+            M_comm->Broadcast ( &pointGraph[p][0], pointGraph[p].size(), p );
+        }
+    }
+
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+    timePG.stop();
+#endif
+
+    std::vector<int> const& myPoints = pointGraph[ partIndex ];
+
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+    M_debugOut << "own points on proc " << partIndex << std::endl;
+    for ( UInt i = 0; i < myPoints.size(); i++ )
+    {
+        M_debugOut << myPoints[ i ] << std::endl;
+    }
+#endif
+
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+    LifeChrono timeSI;
+    timeMgr.add ( "find SUBD_INT", &timeSI );
+    timeSI.start();
+#endif
+    // initialize a bool vector that tells if an element is in the current partition
+    std::vector<bool> isInPartition ( M_fullMesh->numElements(), false );
+    for ( UInt e = 0; e < myElems.size(); e++ )
+    {
+        isInPartition[ myElems[ e ] ] = true;
+    }
+
+    // find subdomain interface points
+    std::set<Int> mySubdIntPoints;
+    for ( UInt k = 0; k < myPoints.size(); k++ )
+    {
+        int const& currentPoint = myPoints[ k ];
+        // mark as SUBD_INT point only if the point is owned by current process
+        if ( pointPID[ currentPoint ] == partIndex )
+        {
+            // check if all element neighbors are on this proc
+            for ( neighbors_Type::const_iterator neighborIt = M_pointElementNeighborsList[ currentPoint ].begin();
+                    neighborIt != M_pointElementNeighborsList[ currentPoint ].end(); ++neighborIt )
+            {
+                // add the point if a neighbor is missing
+                if ( !isInPartition[ *neighborIt ] )
+                {
+                    mySubdIntPoints.insert ( currentPoint );
+                    break;
+                }
+            }
+        }
+    }
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+    timeSI.stop();
+#endif
+
+#ifdef LIFEV_GHOSTHANDLER_DEBUG
+    M_debugOut << "own SUBDOMAIN_INTERFACE points on proc " << partIndex << std::endl;
     for ( std::set<Int>::const_iterator i = mySubdIntPoints.begin(); i != mySubdIntPoints.end(); ++i )
     {
         M_debugOut << *i << std::endl;
