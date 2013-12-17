@@ -44,6 +44,7 @@
 
 #include <Epetra_MpiComm.h>
 #include <Epetra_FECrsMatrix.h>
+#include <Epetra_FECrsGraph.h>
 #include <EpetraExt_MatrixMatrix.h>
 #include <EpetraExt_Transpose_RowMatrix.h>
 #include <EpetraExt_RowMatrixOut.h>
@@ -97,6 +98,13 @@ public:
       @param graph A sparse compressed row graph.
      */
     MatrixEpetra ( const MapEpetra& map, const Epetra_CrsGraph& graph, bool ignoreNonLocalValues = false );
+
+    //! Constructor from a FE graph
+    /*!
+      @param map Row map. The column map will be defined in MatrixEpetra<DataType>::GlobalAssemble(...,...)
+      @param graph A sparse compressed row FE graph.
+     */
+    MatrixEpetra ( const MapEpetra& map, const Epetra_FECrsGraph& graph, bool ignoreNonLocalValues = false);
 
     //! Constructor for square and rectangular matrices
     /*!
@@ -619,6 +627,14 @@ template <typename DataType>
 MatrixEpetra<DataType>::MatrixEpetra ( const MapEpetra& map, const Epetra_CrsGraph& graph, bool ignoreNonLocalValues ) :
     M_map       ( new MapEpetra ( map ) ),
     M_epetraCrs ( new matrix_type ( Copy, graph, ignoreNonLocalValues ) )
+{
+
+}
+
+template <typename DataType>
+MatrixEpetra<DataType>::MatrixEpetra ( const MapEpetra& map, const Epetra_FECrsGraph& graph, bool ignoreNonLocalValues) :
+    M_map       ( new MapEpetra ( map ) ),
+    M_epetraCrs ( new matrix_type ( Copy, graph, ignoreNonLocalValues) )
 {
 
 }
@@ -1571,8 +1587,14 @@ sumIntoCoefficients ( Int const numRows, Int const numColumns,
                       DataType* const* const localValues,
                       Int format )
 {
-    Int ierr = M_epetraCrs->SumIntoGlobalValues ( numRows, &rowIndices[0], numColumns,
+    Int ierr;
+#ifdef LIFEV_MT_CRITICAL_UPDATES
+    #pragma omp critical
+#endif
+    {
+        ierr = M_epetraCrs->SumIntoGlobalValues ( numRows, &rowIndices[0], numColumns,
                                                   &columnIndices[0], localValues, format );
+    }
 
     std::stringstream errorMessage;
     errorMessage << " error in matrix insertion [addToCoefficients] " << ierr

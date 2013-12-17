@@ -36,7 +36,13 @@
 #ifndef INTEGRATE_MATRIX_ELEMENT_HPP
 #define INTEGRATE_MATRIX_ELEMENT_HPP
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 #include <lifev/core/LifeV.hpp>
+
+#include <lifev/core/util/OpenMPParameters.hpp>
 
 #include <lifev/core/fem/QuadratureRule.hpp>
 #include <lifev/eta/fem/ETCurrentFE.hpp>
@@ -94,6 +100,16 @@ public:
                             const ExpressionType& expression,
                             const UInt offsetUp = 0,
                             const UInt offsetLeft = 0);
+
+    //! Full data constructor
+    IntegrateMatrixElement (const boost::shared_ptr<MeshType>& mesh,
+                            const QuadratureRule& quadrature,
+                            const boost::shared_ptr<TestSpaceType>& testSpace,
+                            const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
+                            const ExpressionType& expression,
+                            const OpenMPParameters& ompParams,
+                            const UInt offsetUp = 0,
+                            const UInt offsetLeft = 0 );
 
     //! Copy constructor
     IntegrateMatrixElement (const IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType>& integrator);
@@ -246,6 +262,9 @@ private:
 
     UInt M_offsetUp;
     UInt M_offsetLeft;
+
+    // Data for multi-threaded assembly
+    OpenMPParameters M_ompParams;
 };
 
 
@@ -274,8 +293,55 @@ IntegrateMatrixElement (const boost::shared_ptr<MeshType>& mesh,
         M_solutionCFE (new ETCurrentFE<SolutionSpaceType::S_spaceDim, SolutionSpaceType::S_fieldDim> (solutionSpace->refFE(), testSpace->geoMap(), quadrature) ),
         M_evaluation (expression),
         M_offsetUp (offsetUp),
-        M_offsetLeft (offsetLeft)
+        M_offsetLeft (offsetLeft),
+        M_ompParams()
+{
+    switch (MeshType::geoShape_Type::BasRefSha::S_shape)
+    {
+        case LINE:
+            M_globalCFE = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feSegP0, geometricMapFromMesh<MeshType>(), quadrature);
+            break;
+        case TRIANGLE:
+            M_globalCFE = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feTriaP0, geometricMapFromMesh<MeshType>(), quadrature);
+            break;
+        case QUAD:
+            M_globalCFE = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feQuadQ0, geometricMapFromMesh<MeshType>(), quadrature);
+            break;
+        case TETRA:
+            M_globalCFE = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), quadrature);
+            break;
+        case HEXA:
+            M_globalCFE = new ETCurrentFE<MeshType::S_geoDimensions, 1> (feHexaQ0, geometricMapFromMesh<MeshType>(), quadrature);
+            break;
+        default:
+            ERROR_MSG ("Unrecognized element shape");
+    }
+    M_evaluation.setQuadrature (quadrature);
+    M_evaluation.setGlobalCFE (M_globalCFE);
+    M_evaluation.setTestCFE (M_testCFE);
+    M_evaluation.setSolutionCFE (M_solutionCFE);
+}
 
+template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
+IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType>::
+IntegrateMatrixElement (const boost::shared_ptr<MeshType>& mesh,
+                        const QuadratureRule& quadrature,
+                        const boost::shared_ptr<TestSpaceType>& testSpace,
+                        const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
+                        const ExpressionType& expression,
+                        const OpenMPParameters& ompParams,
+                        const UInt offsetUp,
+                        const UInt offsetLeft )
+    :   M_mesh (mesh),
+        M_quadrature (quadrature),
+        M_testSpace (testSpace),
+        M_solutionSpace (solutionSpace),
+        M_testCFE (new ETCurrentFE<3, TestSpaceType::S_fieldDim> (testSpace->refFE(), testSpace->geoMap(), quadrature) ),
+        M_solutionCFE (new ETCurrentFE<3, SolutionSpaceType::S_fieldDim> (solutionSpace->refFE(), testSpace->geoMap(), quadrature) ),
+        M_evaluation (expression),
+        M_offsetUp (offsetUp),
+        M_offsetLeft (offsetLeft),
+        M_ompParams (ompParams)
 {
     switch (MeshType::geoShape_Type::BasRefSha::S_shape)
     {
@@ -496,53 +562,61 @@ addToClosed (MatrixType& mat)
     UInt nbTestDof (M_testSpace->refFE().nbDof() );
     UInt nbSolutionDof (M_solutionSpace->refFE().nbDof() );
 
-    // Update the currentFEs
-    boost::shared_ptr<ETCurrentFE<MeshType::S_geoDimensions, 1> > globalCFE;
-    switch (MeshType::geoShape_Type::BasRefSha::S_shape)
+    // OpenMP setup and pragmas around the loop
+    M_ompParams.apply();
+
+    #pragma omp parallel
     {
-        case LINE:
-            globalCFE.reset (new ETCurrentFE<MeshType::S_geoDimensions, 1> (feSegP0, geometricMapFromMesh<MeshType>(), M_quadrature) );
-            break;
-        case TRIANGLE:
-            globalCFE.reset (new ETCurrentFE<MeshType::S_geoDimensions, 1> (feTriaP0, geometricMapFromMesh<MeshType>(), M_quadrature) );
-            break;
-        case QUAD:
-            globalCFE.reset (new ETCurrentFE<MeshType::S_geoDimensions, 1> (feQuadQ0, geometricMapFromMesh<MeshType>(), M_quadrature) );
-            break;
-        case TETRA:
-            globalCFE.reset (new ETCurrentFE<MeshType::S_geoDimensions, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), M_quadrature) );
-            break;
-        case HEXA:
-            globalCFE.reset (new ETCurrentFE<MeshType::S_geoDimensions, 1> (feHexaQ0, geometricMapFromMesh<MeshType>(), M_quadrature) );
-            break;
-        default:
-            ERROR_MSG ("Unrecognized element shape");
+        // Update the currentFEs
+        boost::shared_ptr<ETCurrentFE<MeshType::S_geoDimensions, 1> > globalCFE;
+        switch (MeshType::geoShape_Type::BasRefSha::S_shape)
+        {
+            case LINE:
+                globalCFE.reset(new ETCurrentFE<MeshType::S_geoDimensions, 1> (feSegP0, geometricMapFromMesh<MeshType>(), M_quadrature));
+                break;
+            case TRIANGLE:
+                globalCFE.reset(new ETCurrentFE<MeshType::S_geoDimensions, 1> (feTriaP0, geometricMapFromMesh<MeshType>(), M_quadrature));
+                break;
+            case QUAD:
+                globalCFE.reset(new ETCurrentFE<MeshType::S_geoDimensions, 1> (feQuadQ0, geometricMapFromMesh<MeshType>(), M_quadrature));
+                break;
+            case TETRA:
+                globalCFE.reset(new ETCurrentFE<MeshType::S_geoDimensions, 1> (feTetraP0, geometricMapFromMesh<MeshType>(), M_quadrature));
+                break;
+            case HEXA:
+                globalCFE.reset(new ETCurrentFE<MeshType::S_geoDimensions, 1> (feHexaQ0, geometricMapFromMesh<MeshType>(), M_quadrature));
+                break;
+            default:
+                ERROR_MSG ("Unrecognized element shape");
+        }
+        ETCurrentFE<TestSpaceType::S_spaceDim, TestSpaceType::S_fieldDim>
+        testCFE (M_testSpace->refFE(), M_testSpace->geoMap(), M_quadrature);
+        ETCurrentFE<SolutionSpaceType::S_spaceDim, SolutionSpaceType::S_fieldDim>
+        solutionCFE (M_solutionSpace->refFE(), M_testSpace->geoMap(),
+                     M_quadrature);
+
+        evaluation_Type evaluation (M_evaluation);
+        // Update the evaluation
+        evaluation.setQuadrature (M_quadrature);
+        evaluation.setGlobalCFE (&(*globalCFE));
+        evaluation.setTestCFE (&testCFE);
+        evaluation.setSolutionCFE (&solutionCFE);
+
+        ETMatrixElemental elementalMatrix (TestSpaceType::S_fieldDim * M_testSpace->refFE().nbDof(),
+                                           SolutionSpaceType::S_fieldDim * M_solutionSpace->refFE().nbDof() );
+
+        #pragma omp for schedule(runtime)
+        for (UInt iElement = 0; iElement < nbElements; ++iElement)
+        {
+            integrateElement (iElement, nbQuadPt, nbTestDof, nbSolutionDof,
+                              elementalMatrix, evaluation, *globalCFE,
+                              testCFE, solutionCFE);
+
+            elementalMatrix.pushToClosedGlobal (mat);
+        }
     }
-    ETCurrentFE<TestSpaceType::S_spaceDim, TestSpaceType::S_fieldDim>
-    testCFE (M_testSpace->refFE(), M_testSpace->geoMap(), M_quadrature);
 
-    ETCurrentFE<SolutionSpaceType::S_spaceDim, SolutionSpaceType::S_fieldDim>
-    solutionCFE (M_solutionSpace->refFE(), M_testSpace->geoMap(),
-                 M_quadrature);
-
-    evaluation_Type evaluation (M_evaluation);
-    // Update the evaluation
-    evaluation.setQuadrature (M_quadrature);
-    evaluation.setGlobalCFE (& (*globalCFE) );
-    evaluation.setTestCFE (&testCFE);
-    evaluation.setSolutionCFE (&solutionCFE);
-
-    ETMatrixElemental elementalMatrix (TestSpaceType::S_fieldDim * M_testSpace->refFE().nbDof(),
-                                       SolutionSpaceType::S_fieldDim * M_solutionSpace->refFE().nbDof() );
-
-    for (UInt iElement = 0; iElement < nbElements; ++iElement)
-    {
-        integrateElement (iElement, nbQuadPt, nbTestDof, nbSolutionDof,
-                          elementalMatrix, evaluation, *globalCFE,
-                          testCFE, solutionCFE);
-
-        elementalMatrix.pushToClosedGlobal (mat);
-    }
+    M_ompParams.restorePreviousNumThreads();
 }
 
 } // Namespace ExpressionAssembly

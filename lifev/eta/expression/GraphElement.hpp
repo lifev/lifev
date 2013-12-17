@@ -36,7 +36,12 @@
 #ifndef GRAPH_ELEMENT_HPP
 #define GRAPH_ELEMENT_HPP
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 #include <lifev/core/LifeV.hpp>
+#include <lifev/core/util/OpenMPParameters.hpp>
 
 #include <lifev/core/fem/QuadratureRule.hpp>
 #include <lifev/eta/fem/ETCurrentFE.hpp>
@@ -93,6 +98,7 @@ public:
                   const boost::shared_ptr<TestSpaceType>& testSpace,
                   const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
                   const ExpressionType& expression,
+                  const OpenMPParameters& ompParams,
                   const UInt offsetUp = 0,
                   const UInt offsetLeft = 0);
 
@@ -171,6 +177,9 @@ private:
     boost::shared_ptr<TestSpaceType> M_testSpace;
     boost::shared_ptr<SolutionSpaceType> M_solutionSpace;
 
+    // For multi-threading
+    OpenMPParameters M_ompParams;
+
     // Offsets
     UInt M_offsetUp;
     UInt M_offsetLeft;
@@ -192,12 +201,14 @@ GraphElement (const boost::shared_ptr<MeshType>& mesh,
               const boost::shared_ptr<TestSpaceType>& testSpace,
               const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
               const ExpressionType& /*expression*/,
+              const OpenMPParameters& ompParams,
               const UInt offsetUp,
               const UInt offsetLeft)
     :   M_mesh (mesh),
         M_quadrature (quadrature),
         M_testSpace (testSpace),
         M_solutionSpace (solutionSpace),
+        M_ompParams (ompParams),
         M_offsetUp (offsetUp),
         M_offsetLeft (offsetLeft)
 {
@@ -210,6 +221,7 @@ GraphElement (const GraphElement<MeshType, TestSpaceType, SolutionSpaceType, Exp
         M_quadrature (integrator.M_quadrature),
         M_testSpace (integrator.M_testSpace),
         M_solutionSpace (integrator.M_solutionSpace),
+        M_ompParams (integrator.M_ompParams),
         M_offsetUp (integrator.M_offsetUp),
         M_offsetLeft (integrator.M_offsetLeft)
 {
@@ -243,43 +255,53 @@ addTo (GraphType& graph)
     UInt nbTestDof (M_testSpace->refFE().nbDof() );
     UInt nbSolutionDof (M_solutionSpace->refFE().nbDof() );
 
-    ETMatrixElemental elementalMatrix (TestSpaceType::S_fieldDim * M_testSpace->refFE().nbDof(),
-                                       SolutionSpaceType::S_fieldDim * M_solutionSpace->refFE().nbDof() );
+    // OpenMP setup and pragmas around the loop
+    M_ompParams.apply();
 
-    for (UInt iElement = 0; iElement < nbElements; ++iElement)
+    #pragma omp parallel
     {
-        // Zeros out the matrix
-        elementalMatrix.zero();
+        ETMatrixElemental elementalMatrix (TestSpaceType::S_fieldDim * M_testSpace->refFE().nbDof(),
+                                           SolutionSpaceType::S_fieldDim * M_solutionSpace->refFE().nbDof() );
 
-        // Loop on the blocks
-        for (UInt iblock (0); iblock < TestSpaceType::S_fieldDim; ++iblock)
+        #pragma omp for schedule(runtime)
+        for (UInt iElement = 0; iElement < nbElements; ++iElement)
         {
-            for (UInt jblock (0); jblock < SolutionSpaceType::S_fieldDim; ++jblock)
+            // Zeros out the matrix
+            elementalMatrix.zero();
+
+            // Loop on the blocks
+            for (UInt iblock (0); iblock < TestSpaceType::S_fieldDim; ++iblock)
             {
-
-                // Set the row global indices in the local matrix
-                for (UInt i (0); i < nbTestDof; ++i)
+                for (UInt jblock (0); jblock < SolutionSpaceType::S_fieldDim; ++jblock)
                 {
-                    elementalMatrix.setRowIndex
-                    (i + iblock * nbTestDof,
-                     M_testSpace->dof().localToGlobalMap (iElement, i) + iblock * M_testSpace->dof().numTotalDof() + M_offsetUp);
-                }
 
-                // Set the column global indices in the local matrix
-                for (UInt j (0); j < nbSolutionDof; ++j)
-                {
-                    elementalMatrix.setColumnIndex
-                    (j + jblock * nbSolutionDof,
-                     M_solutionSpace->dof().localToGlobalMap (iElement, j) + jblock * M_solutionSpace->dof().numTotalDof() + M_offsetLeft);
+                    // Set the row global indices in the local matrix
+                    for (UInt i (0); i < nbTestDof; ++i)
+                    {
+                        elementalMatrix.setRowIndex
+                        (i + iblock * nbTestDof,
+                         M_testSpace->dof().localToGlobalMap (iElement, i) + iblock * M_testSpace->dof().numTotalDof() + M_offsetUp);
+                    }
+
+                    // Set the column global indices in the local matrix
+                    for (UInt j (0); j < nbSolutionDof; ++j)
+                    {
+                        elementalMatrix.setColumnIndex
+                        (j + jblock * nbSolutionDof,
+                         M_solutionSpace->dof().localToGlobalMap (iElement, j) + jblock * M_solutionSpace->dof().numTotalDof() + M_offsetLeft);
+                    }
                 }
             }
+            const std::vector<Int>& rowIdx = elementalMatrix.rowIndices();
+            const std::vector<Int>& colIdx = elementalMatrix.columnIndices();
+            #pragma omp critical
+            {
+                graph.InsertGlobalIndices (rowIdx.size(), &rowIdx[0],
+                                           colIdx.size(), &colIdx[0]);
+            }
         }
-        const std::vector<Int>& rowIdx = elementalMatrix.rowIndices();
-        const std::vector<Int>& colIdx = elementalMatrix.columnIndices();
-
-        graph.InsertGlobalIndices (rowIdx.size(), &rowIdx[0],
-                                   colIdx.size(), &colIdx[0]);
     }
+    M_ompParams.restorePreviousNumThreads();
 }
 
 
