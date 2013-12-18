@@ -67,7 +67,12 @@ public:
 
     explicit NeighborMarker ( markerID_Type& p ) : Marker<FlagPolicy> ( p ) {}
 
-    neighbors_Type& pointNeighbors ()
+    neighbors_Type & pointNeighbors ()
+    {
+        return M_pointNeighbors;
+    }
+
+    neighbors_Type const & pointNeighbors () const
     {
         return M_pointNeighbors;
     }
