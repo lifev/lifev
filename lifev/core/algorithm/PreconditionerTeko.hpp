@@ -37,8 +37,11 @@
 #ifndef PRECONDITIONERTEKO_HPP
 #define PRECONDITIONERTEKO_HPP 1
 
+#include <lifev/core/LifeV.hpp>
+
+#ifdef LIFEV_HAVE_TEKO
+
 #include <vector>
-#include <boost/shared_ptr.hpp>
 #include <lifev/core/array/MapEpetra.hpp>
 #include <lifev/core/algorithm/Preconditioner.hpp>
 #include <lifev/core/algorithm/PreconditionerBlock.hpp>
@@ -144,5 +147,7 @@ private:
 };
 
 } // namespace LifeV
+
+#endif // HAVE_LIFEV_TEKO
 
 #endif /* PRECONDITIONERTEKO_HPP */

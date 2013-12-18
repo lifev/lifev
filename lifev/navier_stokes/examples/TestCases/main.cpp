@@ -122,6 +122,7 @@ void setPreconditioner ( basePrecPtr_Type& precPtr,
         ASSERT ( precPtr.get() != 0, " Preconditioner not set" );
         precPtr->setDataFromGetPot ( dataFile, precSection );
     }
+#ifdef LIFEV_HAVE_TEKO
     else if ( preconditionerName == "LSC" )
     {
         PreconditionerLSC* precLSCRawPtr ( 0 );
@@ -130,6 +131,7 @@ void setPreconditioner ( basePrecPtr_Type& precPtr,
         precLSCRawPtr->setDataFromGetPot ( dataFile, precSection );
         precPtr.reset ( precLSCRawPtr );
     }
+#endif // LIFEV_HAVE_TEKO
     else if ( preconditionerName == "PCD" )
     {
         PreconditionerPCD* precPCDRawPtr ( 0 );

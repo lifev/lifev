@@ -36,6 +36,8 @@
 
 #include "PreconditionerTeko.hpp"
 
+#ifdef LIFEV_HAVE_TEKO
+
 namespace LifeV
 {
 
@@ -181,3 +183,6 @@ PreconditionerTeko::buildPreconditionerTeko ( RCP<Teko::BlockPreconditionerFacto
 
 
 } // namespace LifeV
+
+#endif // LIFEV_HAVE_TEKO
+

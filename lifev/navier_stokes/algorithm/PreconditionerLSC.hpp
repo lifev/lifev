@@ -35,6 +35,10 @@
 #ifndef PRECONDITIONERLSC_HPP
 #define PRECONDITIONERLSC_HPP 1
 
+#include <lifev/core/LifeV.hpp>
+
+#ifdef LIFEV_HAVE_TEKO
+
 #include <boost/shared_ptr.hpp>
 
 #include <lifev/core/filter/GetPot.hpp>
@@ -171,5 +175,7 @@ static bool registerLSC = PRECFactory::instance().registerProduct ( "LSC", &crea
 }
 
 } // namespace LifeV
+
+#endif // LIFEV_HAVE_TEKO
 
 #endif /* PRECONDITIONERLSC_HPP */

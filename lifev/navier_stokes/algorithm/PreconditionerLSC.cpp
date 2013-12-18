@@ -34,6 +34,8 @@
 
 #include "PreconditionerLSC.hpp"
 
+#ifdef LIFEV_HAVE_TEKO
+
 namespace LifeV
 {
 
@@ -151,3 +153,6 @@ PreconditionerLSC::numBlocksCols() const
 }
 
 } // namespace LifeV
+
+#endif // LIFEV_HAVE_TEKO
+
