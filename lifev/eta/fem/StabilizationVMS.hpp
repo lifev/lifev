@@ -466,9 +466,6 @@ template <typename MatrixBlockType, typename VectorBlockType>
 void StabilizationVMS<MeshType, MapType, SpaceDim>::applyVMS( MatrixBlockType& matrix,
                                                               const VectorBlockType& velocityExtrapolation )
 {
-    if ( M_tauM == 0 && M_tauC == 0 )
-        return;
-
     checkFESpaces();
 
     etaUspacePtr_Type ETuFESpace( new etaUspace_Type( M_uFESpace->mesh(), &(M_uFESpace->refFE()), M_comm ) );
@@ -526,10 +523,7 @@ void StabilizationVMS<MeshType, MapType, SpaceDim>::applyVMS_semi_implicit( Matr
                                                                             const VectorBlockType& velocityExtrapolation, 
                                                                             const VectorType& velocityPreviousStep,
                 							    const VectorType& pressurePreviousStep )
-{ 
-    if ( M_tauM == 0 && M_tauC == 0 )
-        return;
-
+{
     checkFESpaces();
 
     etaUspacePtr_Type ETuFESpace( new etaUspace_Type( M_uFESpace->mesh(), &(M_uFESpace->refFE()), M_comm ) );
@@ -587,9 +581,6 @@ void StabilizationVMS<MeshType, MapType, SpaceDim>::applyRHS( VectorType& rhs,
                                                               const VectorType& velocityExtrapolation,
                                                               const VectorType& velocityPreviousStep )
 {
-    if ( M_tauM == 0 && M_tauC == 0 )
-            return;
-
     checkFESpaces();
     boost::shared_ptr<SquareRoot> squareroot(new SquareRoot());
     boost::shared_ptr<Maximum> maximum(new Maximum());
@@ -632,9 +623,6 @@ void StabilizationVMS<MeshType, MapType, SpaceDim>::applyRHS( VectorType& rhs,
                                                               const VectorType& velocityPreviousStep,
 							      const VectorType& pressurePreviousStep  )
 {
-    if ( M_tauM == 0 && M_tauC == 0 )
-            return;
-
     checkFESpaces();
 
     etaUspacePtr_Type ETuFESpace( new etaUspace_Type( M_uFESpace->mesh(), &(M_uFESpace->refFE()), M_comm ) );
@@ -680,9 +668,6 @@ void StabilizationVMS<MeshType, MapType, SpaceDim>::applyRHS_semi_implicit( Vect
                                                                             const VectorType& velocityPreviousStep,
 				                 			    const VectorType& pressurePreviousStep  )
 {
-    if ( M_tauM == 0 && M_tauC == 0 )
-            return;
-
     checkFESpaces();
 
     etaUspacePtr_Type ETuFESpace( new etaUspace_Type( M_uFESpace->mesh(), &(M_uFESpace->refFE()), M_comm ) );
@@ -727,9 +712,6 @@ void StabilizationVMS<MeshType, MapType, SpaceDim>::applyRHS_residual( VectorTyp
                                                                        const VectorType& velocityExtrapolation,
                                                                        const VectorType& momentumResidual )
 {
-    if ( M_tauM == 0 && M_tauC == 0 )
-            return;
-
     checkFESpaces();
 
     etaUspacePtr_Type ETuFESpace( new etaUspace_Type( M_uFESpace->mesh(), &(M_uFESpace->refFE()), M_comm ) );
