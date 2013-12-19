@@ -52,6 +52,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #include <lifev/core/filter/PartitionIO.hpp>
 #include <lifev/core/filter/ExporterHDF5Mesh3D.hpp>
 #include <lifev/core/mesh/RegionMesh3DStructured.hpp>
+#include <lifev/core/mesh/MeshData.hpp>
 
 using namespace LifeV;
 
@@ -64,7 +65,8 @@ int main (int argc, char** argv)
 #ifdef HAVE_MPI
 
     typedef RegionMesh<LinearTetra> mesh_Type;
-
+    typedef boost::shared_ptr<mesh_Type> meshPtr_Type;
+    
     MPI_Init (&argc, &argv);
     boost::shared_ptr<Epetra_Comm> comm (new Epetra_MpiComm (MPI_COMM_WORLD) );
 
@@ -80,19 +82,22 @@ int main (int argc, char** argv)
     string dataFileName = commandLine.follow ("data", 2, "-f", "--file");
     GetPot dataFile (dataFileName);
 
-    const UInt numElements (dataFile ("mesh/nelements", 10) );
     const UInt numParts (dataFile ("test/num_parts", 4) );
     const std::string partsFileName (dataFile ("test/hdf5_file_name", "cube.h5") );
     const std::string ioClass (dataFile ("test/io_class", "new") );
 
-    std::cout << "Number of elements in mesh: " << numElements << std::endl;
     std::cout << "Number of parts: " << numParts << std::endl;
     std::cout << "Name of HDF5 container: " << partsFileName << std::endl;
 
-    boost::shared_ptr<mesh_Type> fullMeshPtr (new mesh_Type ( comm ) );
-    regularMesh3D (*fullMeshPtr, 1, numElements, numElements, numElements,
-                   false, 2.0, 2.0, 2.0, -1.0, -1.0, -1.0);
+    boost::shared_ptr<mesh_Type> fullMeshPtr (new mesh_Type );
+    //regularMesh3D (*fullMeshPtr, 1, numElements, numElements, numElements,
+    //               false, 2.0, 2.0, 2.0, -1.0, -1.0, -1.0);
 
+    // New part to partition the new mesh
+    MeshData meshData;
+	meshData.setup(dataFile, "mesh");
+	readMesh(*fullMeshPtr, meshData);
+    
     MeshPartitioner<mesh_Type> meshPart;
     meshPart.setup (numParts, comm);
 
