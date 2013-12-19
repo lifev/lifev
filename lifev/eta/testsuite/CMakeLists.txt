@@ -10,4 +10,5 @@ ADD_SUBDIRECTORIES(
   blocks_2D
   boundary_integrals
   VMS
+  VMS_Cylinder
 )
