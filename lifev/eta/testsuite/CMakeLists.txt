@@ -11,5 +11,4 @@ ADD_SUBDIRECTORIES(
   boundary_integrals
   VMS
   VMS_Cylinder
-  VMS_restart
 )

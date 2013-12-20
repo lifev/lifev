@@ -91,7 +91,7 @@ public:
     //! Destructor
     ~ETVectorElemental()
     {
-        delete M_rawData;
+        delete [] M_rawData;
     }
 
     //@}
