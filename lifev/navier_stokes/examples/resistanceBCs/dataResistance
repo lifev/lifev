@@ -7,7 +7,7 @@
 multimesh  = false
 start      = 0
 save       = 1
-nameFile   = resistance80-scaledAndTranslated
+nameFile   = try
 
 [fluid]
 
@@ -34,14 +34,14 @@ nameFile   = resistance80-scaledAndTranslated
 
     [../space_discretization]
     mesh_dir        = ./
-    mesh_file       = fSupercoarse.mesh
+    mesh_file       = fluidAneurysmExtended.mesh
     mesh_type       = .mesh
 
     verbose         = 0             # verbose during mesh-reading
     linearized      = 0
     diagonalize     = 0 # weight, 0=off. for P2P1 better to be on=1
     div_beta_u_v    = 1             # 1=on, 0=off
-    vel_order       = P1Bubble          # P1, P1Bubble, P2
+    vel_order       = P1          # P1, P1Bubble, P2
     press_order     = P1            # P1, P2
     stiff_strain    = true            # P1, P2
 

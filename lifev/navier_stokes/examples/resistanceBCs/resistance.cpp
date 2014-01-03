@@ -143,12 +143,12 @@ struct ResistanceTest::Private
     {
 
         Real fluxFinal(0.0);
-        Real rampAmpl (0.0);
+        Real rampAmpl (0.2);
         Real dt (0.001);
 
         if ( t <= rampAmpl )
         {
-            fluxFinal = ( 0.09503 / rampAmpl) * t;
+            fluxFinal = ( 0.09403 / rampAmpl) * t;
         }
         else
         {
@@ -156,7 +156,7 @@ struct ResistanceTest::Private
 
             // We change the flux for our geometry
             const Real pi   = 3.141592653589793;
-            const Real area = 0.0034212; // BigMesh
+            const Real area = 0.1950; // BigMesh
 
             const Real areaFactor = area / ( 0.195 * 0.195 * pi);
             //const Real Average = (48.21 * pow (area, 1.84) ) * 60; //Mean Cebral's Flux per minut
@@ -197,17 +197,17 @@ struct ResistanceTest::Private
 
     static Real aneurismFluxInVectorial (const Real&  t, const Real& x, const Real& y, const Real& z, const ID& i)
     {
-        Real n1 (0.0);
-        Real n2 (0.0);
-        Real n3 (1.0);
+        Real n1 (-0.67463);
+        Real n2 (-0.19861);
+        Real n3 (-0.71094);
 
-        Real x0 (0.0);
-        Real y0 (0.0);
-
+        Real x0 (6.772674);
+        Real y0 (9.428988);
+        Real z0 (18.308519);
 
         Real flux (fluxFunctionAneurysm (t, x, y, z, i) );
 
-        Real area (0.0033);
+        Real area (0.195);
 
         //Parabolic profile
         Real radius( std::sqrt( area / 3.14159265359 ) );
@@ -428,6 +428,7 @@ ResistanceTest::run()
     // Setting up the utility for post-processing
     fluid.setupPostProc( );
 
+    std::cout << "Inlet area: " << fluid.area( INLET ) << std::endl;
     fluid.buildSystem();
 
     MPI_Barrier (MPI_COMM_WORLD);
@@ -473,8 +474,6 @@ ResistanceTest::run()
 
     for ( Real time = t0 + dt ; time <= tFinal + dt / 2.; time += dt, iter++)
     {
-
-        std::cout << "Inlet area: " << fluid.area( INLET ) << std::endl;
 
         // Updating the Neumann BC for resistance
         outFlowBC.renewParameters( fluid, *velAndPressure );
