@@ -31,6 +31,7 @@ ENDIF()
 
 IF(ENABLE_ANISOTROPIC_LAW)
   ADD_SUBDIRECTORIES(
+    example_checkingFibersDirection
     example_computePrincipalTensions
     example_bodyForces
     example_anisotropicTraction
