@@ -301,6 +301,7 @@ Structure::run3d()
 
     //Mainly used for BCs assembling (Neumann type)
     solidFESpacePtr_Type dFESpace ( new solidFESpace_Type (pointerToMesh, dOrder, 3, parameters->comm) );
+    solidFESpacePtr_Type dScalarFESpace ( new solidFESpace_Type (pointerToMesh, dOrder, 1, parameters->comm) );
     solidETFESpacePtr_Type dETFESpace ( new solidETFESpace_Type (pointerToMesh, & (dFESpace->refFE() ), & (dFESpace->fe().geoMap() ), parameters->comm) );
 
     // Setting the fibers
@@ -421,6 +422,16 @@ Structure::run3d()
 
         fiberDirections[ k-1 ].reset( new vector_Type(solid.displacement(), Unique) );
     }
+    vectorPtr_Type thetaSection;
+    thetaSection.reset( new vector_Type( dScalarFESpace->map() ) );
+    vectorPtr_Type thetaRotation;
+    thetaRotation.reset( new vector_Type( dScalarFESpace->map() ) );
+
+    vectorPtr_Type positionCenterVector;
+    positionCenterVector.reset( new vector_Type( dFESpace->map() ) );
+
+    vectorPtr_Type localPositionVector;
+    localPositionVector.reset( new vector_Type( dFESpace->map() ) );
 
     //! 3.b Setting the fibers in the abstract class of Anisotropic materials
     if( !dataStructure->constitutiveLaw().compare("anisotropic") )
@@ -636,6 +647,27 @@ Structure::run3d()
             *(fiberDirections[ k-1 ]) = solid.material()->anisotropicLaw()->ithFiberVector( k );
         }
     }
+
+    exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::ScalarField, "thetaSection", dScalarFESpace, thetaSection, UInt (0) );
+    exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::ScalarField, "thetaRotation", dScalarFESpace, thetaRotation, UInt (0) );
+    exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "positionCenter", dFESpace, positionCenterVector, UInt (0) );
+    exporter->addVariable ( ExporterData<RegionMesh<LinearTetra> >::VectorField, "localPosition", dFESpace, localPositionVector, UInt (0) );
+
+    dScalarFESpace->interpolate ( static_cast<solidFESpace_Type::function_Type>( thetaFunction ),
+				  *thetaSection,
+				  0.0 );
+
+    dScalarFESpace->interpolate ( static_cast<solidFESpace_Type::function_Type>( thetaRotationFunction ),
+				  *thetaRotation,
+				  0.0 );
+
+    dFESpace->interpolate ( static_cast<solidFESpace_Type::function_Type>( positionCenter ),
+				  *positionCenterVector,
+				  0.0 );
+
+    dFESpace->interpolate ( static_cast<solidFESpace_Type::function_Type>( localPosition ),
+				  *localPositionVector,
+				  0.0 );
 
     exporter->postProcess (  dataStructure->dataTime()->initialTime() );
     cout.precision(16);

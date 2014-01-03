@@ -62,6 +62,11 @@ Real bcNonZero (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const 
 Real smoothPressure(const Real& t, const Real&  x, const Real& y, const Real& /*Z*/, const ID& i);
 Real bcNonZeroSecondOrderExponential (const Real& /*t*/, const Real&  /*X*/, const Real& /*Y*/, const Real& /*Z*/, const ID& /*i*/);
 
+Real thetaFunction ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i);
+Real thetaRotationFunction ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i);
+Real positionCenter ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i);
+Real localPosition ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i);
+
 //Fiber Directions
 Real Family1 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i);
 Real Family2 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i);
