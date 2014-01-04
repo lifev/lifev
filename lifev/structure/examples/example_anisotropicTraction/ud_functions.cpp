@@ -291,7 +291,7 @@ Real Family1 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, c
     // }
 
   // Half thorus
-  Real thetaFiber ( 0.0 );
+  Real thetaFiber ( 0.9865 );
   Real xT (0.138);
   Real rT ( xT );
   Real thetaFree(0);
@@ -529,7 +529,7 @@ Real Family2 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, c
     // }
 
   // Half thorus
-  Real thetaFiber (  - PI / 2.0 );
+  Real thetaFiber (  - 0.9865 );
   Real xT (0.138);
   Real rT ( xT );
   Real thetaFree(0);

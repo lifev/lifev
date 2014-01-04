@@ -391,7 +391,7 @@ Real Family1 ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, c
 Real Family1Spherical ( const Real& /*t*/, const Real& x, const Real& y, const Real& z, const ID& i)
 {
   // Half thorus
-  Real thetaFiber ( 0.0 );
+  Real thetaFiber ( PI / 2.0 );
   Real xT (0.138);
   Real rT ( xT );
   Real thetaFree(0);

@@ -19,9 +19,11 @@
 
 [exporter]
 type       = hdf5 			# hdf5 (if library compiled with hdf5 support) or ensight
+name       = variable
 multimesh  = false
 start      = 0
 save       = 1
+name       = variable
 
 [solid]
 
@@ -35,7 +37,7 @@ numberFamilies  = 2
 [../../space_discretization]
 mesh_type = .mesh
 mesh_dir  	= ./
-mesh_file 	= solidBLConstantThicknessDiffMarkers.mesh
+mesh_file 	= variableThicknessDifferentMarkers.mesh
 order     	= P1
 [../]
 

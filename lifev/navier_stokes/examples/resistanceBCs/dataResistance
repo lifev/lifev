@@ -34,7 +34,7 @@ nameFile   = try
 
     [../space_discretization]
     mesh_dir        = ./
-    mesh_file       = fluidAneurysmExtended.mesh
+    mesh_file       = fluidCoarseToDebugInlet.mesh
     mesh_type       = .mesh
 
     verbose         = 0             # verbose during mesh-reading

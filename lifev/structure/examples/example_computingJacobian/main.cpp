@@ -60,6 +60,8 @@
 #include <lifev/structure/solver/StructuralConstitutiveLaw.hpp>
 #include <lifev/structure/solver/StructuralOperator.hpp>
 
+#include <lifev/structure/solver/isotropic/ExponentialMaterialNonLinear.hpp>
+
 #include <lifev/core/filter/ExporterEnsight.hpp>
 #ifdef HAVE_HDF5
 #include <lifev/core/filter/ExporterHDF5.hpp>
@@ -348,23 +350,23 @@ Structure::run3d()
 
     MPI_Barrier (MPI_COMM_WORLD);
 
-    //! 5. For each interval, the analysis is performed
-    LifeV::Real dt =  dataFile ( "solid/time_discretization/timestep", 0.0);
-    std::string const nameField =  dataFile ( "importer/nameField", "displacement");
+    // //! 5. For each interval, the analysis is performed
+    // LifeV::Real dt =  dataFile ( "solid/time_discretization/timestep", 0.0);
+    // std::string const nameField =  dataFile ( "importer/nameField", "displacement");
 
-    //Get the iteration number
-    iterationString = dataFile ("importer/iteration", "00000");
-    LifeV::Real time = dataFile ("importer/time", 1.0);
+    // //Get the iteration number
+    // iterationString = dataFile ("importer/iteration", "00000");
+    // LifeV::Real time = dataFile ("importer/time", 1.0);
 
-    /*!Definition of the ExporterData, used to load the solution inside the previously defined vectors*/
-    LifeV::ExporterData<mesh_Type> solutionDispl  (LifeV::ExporterData<mesh_Type>::VectorField, nameField + "." + iterationString, dFESpace, solidDisp, UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
+    // /*!Definition of the ExporterData, used to load the solution inside the previously defined vectors*/
+    // LifeV::ExporterData<mesh_Type> solutionDispl  (LifeV::ExporterData<mesh_Type>::VectorField, nameField + "." + iterationString, dFESpace, solidDisp, UInt (0), LifeV::ExporterData<mesh_Type>::UnsteadyRegime );
 
-    //Read the variable
-    M_importer->readVariable (solutionDispl);
-    M_importer->closeFile();
+    // //Read the variable
+    // M_importer->readVariable (solutionDispl);
+    // M_importer->closeFile();
 
     //Set the current solution as the displacement vector to use
-    solid.jacobianDistribution ( solidDisp, *jacobianVector);
+    //solid.jacobianDistribution ( solidDisp, *jacobianVector);
 
     //color the mesh according to the marker of the volume
     solid.colorMesh ( *meshColors );
@@ -373,7 +375,7 @@ Structure::run3d()
     std::cout << std::endl;
     std::cout << "Norm of the J = det(F) : " << jacobianVector->norm2() << std::endl;
 
-    M_exporter->postProcess ( time );
+    M_exporter->postProcess ( 1000.0 );
 
     if (verbose )
     {

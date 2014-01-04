@@ -66,11 +66,11 @@
 
 using namespace LifeV;
 
-const int INLET       = 2;
+const int INLET       = 3;
 const int WALL        = 200;
-const int OUTLET      = 3;
-const int RINGIN      = 20;
-const int RINGOUT     = 30;
+const int OUTLET      = 2;
+const int RINGIN      = 30;
+const int RINGOUT     = 20;
 
 
 void
@@ -201,16 +201,17 @@ struct ResistanceTest::Private
         Real n2 (-0.19861);
         Real n3 (-0.71094);
 
-        Real x0 (6.772674);
-        Real y0 (9.428988);
-        Real z0 (18.308519);
+        Real x0 (6.752113);
+        Real y0 (9.398349);
+        Real z0 (18.336601);
 
         Real flux (fluxFunctionAneurysm (t, x, y, z, i) );
 
         Real area (0.195);
 
         //Parabolic profile
-        Real radius( std::sqrt( area / 3.14159265359 ) );
+	Real radius( std::sqrt( area / 3.14159265359 ) );
+
         Real radiusSquared = radius * radius;
         Real peak(0);
         peak = ( 2 * flux ) / ( area );
