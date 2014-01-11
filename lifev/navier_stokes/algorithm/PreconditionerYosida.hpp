@@ -172,10 +172,10 @@ protected:
 
     // todo: Remove the member dataFile (bad programmation)
     GetPot          M_dataFile;
-    string          M_fluidPrec;
-    string          M_fluidDataSection;
-    string          M_schurPrec;
-    string          M_schurDataSection;
+    std::string          M_fluidPrec;
+    std::string          M_fluidDataSection;
+    std::string          M_schurPrec;
+    std::string          M_schurDataSection;
 
 private:
     PreconditionerYosida ( const PreconditionerYosida& P ) :
