@@ -45,14 +45,10 @@
 #include <stdexcept>
 #include <boost/scoped_ptr.hpp>
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <Epetra_Vector.h>
 #include <EpetraExt_MatrixMatrix.h>
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <lifev/core/array/MatrixElemental.hpp>
 #include <lifev/core/array/VectorElemental.hpp>

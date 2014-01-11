@@ -17,8 +17,8 @@ unpack_superlu_dist() {
 build_superlu_dist() {
 
   _blas="-lblas"
-  if [ "${blas_name}" != "" ]; then
-    _blas="${blas_lib}/${blas_name}"
+  if [ "${blas_names}" != "" ]; then
+    _blas="${blas_libs}"
   fi
 
   ln -s ${src_dir}/SuperLU_DIST_${ver}/MAKE_INC/make.i386_linux make.inc

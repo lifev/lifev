@@ -42,14 +42,10 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 #ifndef _STRUCTURALOPERATOR_H_
 #define _STRUCTURALOPERATOR_H_ 1
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <Epetra_Vector.h>
 #include <EpetraExt_MatrixMatrix.h>
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <lifev/core/util/LifeChrono.hpp>
 #include <lifev/core/util/Displayer.hpp>
@@ -859,7 +855,7 @@ void StructuralOperator<Mesh, SolverType>::updateSystem ( matrixPtr_Type& mat_st
 template <typename Mesh, typename SolverType>
 void StructuralOperator<Mesh, SolverType>::updateSourceTerm ( source_Type const& source )
 {
-    vector_Type rhs (vector_Type (*M_localMap) );
+    vector_Type rhs ( *M_localMap );
 
     VectorElemental M_elvec (M_FESpace->fe().nbFEDof(), nDimensions);
     UInt nc = nDimensions;

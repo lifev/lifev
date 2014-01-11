@@ -36,9 +36,6 @@
 // ===================================================
 //! Includes
 // ===================================================
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
@@ -48,9 +45,6 @@
 #include <Epetra_SerialComm.h>
 #endif
 
-//Tell the compiler to restore the warning previously silented
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/array/MapEpetra.hpp>
 #include <lifev/core/mesh/MeshData.hpp>
@@ -131,9 +125,7 @@ void test_bdf::run()
 {
 
     //Useful typedef
-    typedef SolverAztecOO solver_type;
     typedef VectorEpetra vector_type;
-    typedef boost::shared_ptr<vector_type> vector_ptrtype;
 
     // Reading from data file
     GetPot dataFile (Members->data_file_name.c_str() );

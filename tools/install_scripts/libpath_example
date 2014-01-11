@@ -29,17 +29,23 @@ mpi_bin=${mpi_base}/bin
 
 # BLAS
 # this package cannot be installed!
-# If the installation is standard the blas_name can be left empty
+# Typical installation do not require to set the blas_names variable
+# If needed, blas_names must be a list of ;-separated library names
+# enclosed in double quotes,
+# e.g. "liba.a;libb.a"
 blas=YES
 blas_lib=/usr/lib
-blas_name=
+blas_names=
 
 # LAPACK
 # this package cannot be installed!
-# If the installation is standard the lapack_name can be left empty
+# Typical installation do not require to set the lapack_names variable
+# If needed, lapack_names must be a list of ;-separated library names
+# enclosed in double quotes,
+# e.g. "liba.a;libb.a"
 lapack=YES
 lapack_lib=/usr/lib
-lapack_name=
+lapack_names=
 
 # CMAKE
 cmake=INSTALL
@@ -62,9 +68,9 @@ trilinos_lib=${INSTALL_DIR}/lib/trilinos/lib
 # LIFEV
 # this is for LifeV developers
 lifev=INSTALL
-lifev_src=${HOME}/lifev/src
-lifev_build=${HOME}/lifev/build
-lifev_install=${HOME}/lifev/install
+lifev_src=${HOME}/lifev-env/lifev
+lifev_build=${HOME}/lifev-env/build
+lifev_install=${HOME}/lifev-env/install
 # additional flags for linking
 lifev_flags=
 
@@ -123,10 +129,32 @@ clang_bin=${INSTALL_DIR}/lib/clang/bin
 openmpi=NO
 openmpi_bin=${INSTALL_DIR}/lib/openmpi/bin
 
+#####################################
+# INTERNAL DEFINITIONS - DO NOT EDIT
+#####################################
+
 package_array=( clang openmpi mpi dummy blas lapack cmake boost parmetis hdf5
                 suitesparse superlu superlu_dist qhull trilinos lifev lifevlib )
 
 package_install=()
 package_yes=()
 package_no=()
+
+if [ $blas_names != "" ]; then
+  IFS=';' read -a blas_array <<< "$blas_names"
+  blas_libs=""
+  for lib in "${blas_array[@]}"; do
+    blas_libs+=$(echo "$blas_lib/$lib ")
+  done
+  echo_bdg "blas_libs = $blas_libs"
+fi
+
+if [ $lapack_names != "" ]; then
+  IFS=';' read -a lapack_array <<< "$lapack_names"
+  lapack_libs=""
+  for lib in "${lapack_array[@]}"; do
+    lapack_libs+=$(echo "$lapack_lib/$lib ")
+  done
+  echo_bdg "lapack_libs = $lapack_libs"
+fi
 

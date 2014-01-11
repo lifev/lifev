@@ -214,7 +214,7 @@ private:
      (not in a right hand side representing the matrix-vector multiplication)
      \param sdMatrix: output. Shape derivatives block to be summed to the Jacobian matrix.
      */
-    void shapeDerivatives ( FSIOperator::fluidPtr_Type::element_type::matrixPtr_Type sdMatrix );
+    void shapeDerivatives ( FSIOperator::fluid_Type::matrixPtr_Type sdMatrix );
 
     //! assembles the mesh motion matrix.
     /*!In Particular it diagonalize the part of the matrix corresponding to the
@@ -235,7 +235,7 @@ private:
     vectorPtr_Type                       M_uk;
     UInt                                 M_interface;
     matrixPtr_Type                       M_meshBlock;
-    FSIOperator::fluidPtr_Type::element_type::matrixPtr_Type M_shapeDerivativesBlock;
+    FSIOperator::fluid_Type::matrixPtr_Type M_shapeDerivativesBlock;
     matrixPtr_Type                       M_solidDerBlock;
     //std::vector<fluidBchandlerPtr_Type>    M_BChsLin;
     //@}

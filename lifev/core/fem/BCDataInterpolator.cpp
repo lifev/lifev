@@ -36,8 +36,6 @@
 
 #include <lifev/core/fem/BCDataInterpolator.hpp>
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <boost/shared_array.hpp>
 #include <boost/bind.hpp>
@@ -48,8 +46,6 @@
 #include <iostream>
 #include <cmath>
 
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 namespace LifeV
 {

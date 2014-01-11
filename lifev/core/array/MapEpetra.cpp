@@ -38,15 +38,9 @@
     This class manages the distribution of elements of matrices or vectors on a parallel machine
  */
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <Epetra_Util.h>
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/array/MapEpetra.hpp>
@@ -75,16 +69,30 @@ MapEpetra::MapEpetra ( Int  numGlobalElements,
     M_importer(),
     M_commPtr ( commPtr )
 {
-
-    //Sort MyGlobalElements to avoid a bug in Trilinos (9?) when multiplying two matrices (A * B^T)
-    std::sort ( myGlobalElements, myGlobalElements + numMyElements );
-
     createMap ( numGlobalElements,
                 numMyElements,
                 myGlobalElements,
                 *commPtr );
 }
 
+MapEpetra::MapEpetra ( mapData_Type const& mapData, comm_ptrtype const& commPtr ) :
+    M_repeatedMapEpetra(),
+    M_uniqueMapEpetra(),
+    M_exporter(),
+    M_importer(),
+    M_commPtr ( commPtr )
+{
+    M_uniqueMapEpetra.reset ( new Epetra_Map ( -1,
+                                               mapData.unique.size(),
+                                               &mapData.unique[ 0 ],
+                                               0,
+                                               *M_commPtr ) );
+    M_repeatedMapEpetra.reset ( new Epetra_Map ( -1,
+                                                 mapData.repeated.size(),
+                                                 &mapData.repeated[ 0 ],
+                                                 0,
+                                                 *M_commPtr ) );
+}
 
 MapEpetra::MapEpetra ( const Int numGlobalElements,
                        const Int /*notUsed*/,
@@ -284,7 +292,6 @@ MapEpetra::operator +  ( Int const size )
     return map;
 }
 
-
 // ===================================================
 // Methods
 // ===================================================
@@ -307,10 +314,80 @@ MapEpetra::mapsAreSimilar ( MapEpetra const& epetraMap ) const
              getRepeatedMap()->SameAs ( *epetraMap.getRepeatedMap() ) );
 }
 
+#ifdef HAVE_HDF5
+
+void MapEpetra::exportToHDF5 ( std::string const& fileName, std::string const& mapName, bool const& truncate )
+{
+    EpetraExt::HDF5 HDF5 ( *M_commPtr );
+
+    if ( truncate )
+    {
+        // Create and open the file / Truncate and open the file
+        HDF5.Create ( ( fileName + ".h5" ).data() );
+    }
+    else
+    {
+        // Open an existing file without truncating it
+        HDF5.Open ( ( fileName + ".h5" ).data() );
+    }
+
+    // Check if the file is created
+    if ( !HDF5.IsOpen () )
+    {
+        std::cerr << "Unable to create " + fileName + ".h5";
+        abort();
+    }
+
+    // Save the maps into the file
+    HDF5.Write ( ( mapName + "Unique" ).c_str(), *M_uniqueMapEpetra );
+    HDF5.Write ( ( mapName + "Repeated" ).c_str(), *M_repeatedMapEpetra );
+
+    // Close the file
+    HDF5.Close();
+
+} // exportToHDF5
+
+void MapEpetra::importFromHDF5 ( std::string const& fileName, std::string const& mapName )
+{
+    EpetraExt::HDF5 HDF5 ( *M_commPtr );
+
+    // Open an existing file
+    HDF5.Open ( ( fileName + ".h5" ).data() );
+
+    // Check if the file is created
+    if ( !HDF5.IsOpen () )
+    {
+        std::cerr << "Unable to open " + fileName + ".h5";
+        abort();
+    }
+
+    // Read the unique map from the file
+    Epetra_Map* importedMap ( 0 );
+    HDF5.Read ( ( mapName + "Unique" ).c_str(), importedMap );
+
+    // Copy the loaded map to the member object
+    M_uniqueMapEpetra.reset ( new map_type ( *importedMap ) );
+
+    // Read the repeated map from the file
+    HDF5.Read ( ( mapName + "Repeated" ).c_str(), importedMap );
+
+    // Copy the loaded matrix to the member object
+    M_repeatedMapEpetra.reset ( new map_type ( *importedMap ) );
+
+    // Close the file
+    HDF5.Close();
+
+} // importFromHDF5
+
+#endif // HAVE_HDF5
+
 void
 MapEpetra::showMe ( std::ostream& output ) const
 {
-    output << "showMe must be implemented for the MapEpetra class" << std::endl;
+    output << "unique map:" << std::endl;
+    output << *getUniqueMap();
+    output << "repeated map:" << std::endl;
+    output << *getRepeatedMap();
 }
 
 // ===================================================
@@ -343,6 +420,19 @@ MapEpetra::importer()
     return **M_importer;
 }
 
+// ===================================================
+// Set Methods
+// ===================================================
+void MapEpetra::setMap ( map_ptrtype map, MapEpetraType mapType )
+{
+    switch ( mapType )
+    {
+        case Unique:
+            M_uniqueMapEpetra = map;
+        case Repeated:
+            M_repeatedMapEpetra = map;
+    }
+}
 
 // ===================================================
 // Private Methods

@@ -40,9 +40,6 @@
 #include <iomanip>
 
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
@@ -69,9 +66,6 @@
 
 #include <Teuchos_ParameterList.hpp>
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/LifeV.hpp>
 
@@ -385,6 +379,29 @@ void
 LinearSolver::setParameter ( const std::string& name, T value )
 {
     M_parameterList.set ( name, value );
+}
+
+namespace defaultParameterLists
+{
+//! Returns a default parameter list to initialize the LinearSolver class with Belos.
+/*!
+  Belos uses the right preconditioned GMRES method with a tolerance of 1e-6.
+  The maximum number of iterations and Krylov vectors are set to 200.
+  The preconditioner is automatically recomputed if more than 80 iterations are
+  necessary to converge.
+ */
+Teuchos::ParameterList
+belosParameterList();
+
+//! Returns a default parameter list to initialize the LinearSolver class with AztecOO.
+/*!
+  AztecOO uses the right preconditioned GMRES method with a tolerance of 1e-6.
+  The maximum number of iterations and Krylov vectors are set to 200.
+  The preconditioner is automatically recomputed if more than 80 iterations are
+  necessary to converge.
+ */
+Teuchos::ParameterList
+aztecOOParameterList();
 }
 
 } // namespace LifeV

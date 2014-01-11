@@ -967,23 +967,26 @@ FESpace<MeshType, MapType>::l2Error ( const function_Type&    fexact,
 
     for ( UInt iVol  = 0; iVol < this->mesh()->numElements(); iVol++ )
     {
-        //this->fe().updateFirstDeriv( this->mesh()->element( iVol ) );
-
-        // CurrentFE newFE(this->fe().refFE(),this->fe().geoMap(),quadRuleTetra64pt);
-        this->fe().update (this->mesh()->element ( iVol ),  UPDATE_QUAD_NODES | UPDATE_PHI | UPDATE_WDET);
-
-        normU += elementaryDifferenceL2NormSquare ( vec, fexact,
-                                                    this->fe(),
-                                                    //newFE,
-                                                    this->dof(),
-                                                    time,
-                                                    M_fieldDim );
-        if (relError)
+        if ( this->mesh()->element ( iVol ).isOwned() )
         {
-            sumExact += elementaryFctL2NormSquare ( fexact,
-                                                    this->fe(),
-                                                    time,
-                                                    M_fieldDim );
+            //this->fe().updateFirstDeriv( this->mesh()->element( iVol ) );
+
+            // CurrentFE newFE(this->fe().refFE(),this->fe().geoMap(),quadRuleTetra64pt);
+            this->fe().update (this->mesh()->element ( iVol ),  UPDATE_QUAD_NODES | UPDATE_PHI | UPDATE_WDET);
+
+            normU += elementaryDifferenceL2NormSquare ( vec, fexact,
+                                                        this->fe(),
+                                                        //newFE,
+                                                        this->dof(),
+                                                        time,
+                                                        M_fieldDim );
+            if (relError)
+            {
+                sumExact += elementaryFctL2NormSquare ( fexact,
+                                                        this->fe(),
+                                                        time,
+                                                        M_fieldDim );
+            }
         }
     }
 
@@ -1635,138 +1638,147 @@ template <typename MeshType, typename MapType>
 inline void
 FESpace<MeshType, MapType>::setSpace ( const std::string& space, UInt dimension )
 {
-    if (dimension == 1)
+    switch (dimension)
     {
-        switch ( M_spaceMap[space] )
-        {
-            case P0 :
-                M_refFE = &feSegP0;
-                M_Qr    = &quadRuleSeg1pt;
-                M_bdQr  = &quadRuleNode1pt;
-            case P1 :
-                M_refFE = &feSegP1;
-                M_Qr    = &quadRuleSeg2pt;
-                M_bdQr  = &quadRuleNode1pt;
-                break;
+            // 1D case
+        case 1:
+            switch ( M_spaceMap[space] )
+            {
+                case P0 :
+                    M_refFE = &feSegP0;
+                    M_Qr    = &quadRuleSeg1pt;
+                    M_bdQr  = &quadRuleNode1pt;
+                case P1 :
+                    M_refFE = &feSegP1;
+                    M_Qr    = &quadRuleSeg2pt;
+                    M_bdQr  = &quadRuleNode1pt;
+                    break;
 
-            case P1_HIGH :
-                M_refFE = &feSegP1;
-                M_Qr    = &quadRuleSeg3pt;
-                M_bdQr  = &quadRuleNode1pt;
-                break;
+                case P1_HIGH :
+                    M_refFE = &feSegP1;
+                    M_Qr    = &quadRuleSeg3pt;
+                    M_bdQr  = &quadRuleNode1pt;
+                    break;
 
-            case P1Bubble :
-            case P2 :
-                M_refFE = &feSegP2;
-                M_Qr    = &quadRuleSeg3pt;
-                M_bdQr  = &quadRuleNode1pt;
-                break;
+                    // In 1D, P1Bubble are "somehow" equivalent to P2, so just use those (same pattern, same dimension of the system).
+                case P1Bubble :
+                case P2 :
+                    M_refFE = &feSegP2;
+                    M_Qr    = &quadRuleSeg3pt;
+                    M_bdQr  = &quadRuleNode1pt;
+                    break;
 
-            case P2_HIGH :
-                M_refFE = &feSegP2;
-                M_Qr    = &quadRuleSeg4pt;
-                M_bdQr  = &quadRuleNode1pt;
-                break;
+                case P2_HIGH :
+                    M_refFE = &feSegP2;
+                    M_Qr    = &quadRuleSeg4pt;
+                    M_bdQr  = &quadRuleNode1pt;
+                    break;
 
-            default :
-                std::cout << "!!! WARNING: Space " << space << "not implemented for " << dimension << "D FESpaces!" << std::endl;
-                break;
-        }
-    }
-    else if (dimension == 2)
-    {
-        switch ( M_spaceMap[space] )
-        {
-            case P0 :
-                M_refFE = &feTriaP0;
-                M_Qr    = &quadRuleTria3pt;
-                M_bdQr  = &quadRuleSeg2pt;
-            case P1 :
-                M_refFE = &feTriaP1;
-                M_Qr    = &quadRuleTria3pt;
-                M_bdQr  = &quadRuleSeg2pt;
-                break;
+                default :
+                    std::cout << "!!! WARNING: Space " << space << "not implemented for " << dimension << "D FESpaces!" << std::endl;
+                    break;
+            }
+            break;
 
-            case P1_HIGH :
-                M_refFE = &feTriaP1;
-                M_Qr    = &quadRuleTria6pt;
-                M_bdQr  = &quadRuleSeg3pt;
-                break;
+            // 2D case
+        case 2:
+            switch ( M_spaceMap[space] )
+            {
+                case P0 :
+                    M_refFE = &feTriaP0;
+                    M_Qr    = &quadRuleTria3pt;
+                    M_bdQr  = &quadRuleSeg2pt;
+                case P1 :
+                    M_refFE = &feTriaP1;
+                    M_Qr    = &quadRuleTria3pt;
+                    M_bdQr  = &quadRuleSeg2pt;
+                    break;
 
-            case P1Bubble :
-                M_refFE = &feTriaP1bubble;
-                M_Qr    = &quadRuleTria6pt;
-                M_bdQr  = &quadRuleSeg2pt;
-                break;
+                case P1_HIGH :
+                    M_refFE = &feTriaP1;
+                    M_Qr    = &quadRuleTria6pt;
+                    M_bdQr  = &quadRuleSeg3pt;
+                    break;
 
-            case P2 :
-                M_refFE = &feTriaP2;
-                M_Qr    = &quadRuleTria6pt;
-                M_bdQr  = &quadRuleSeg3pt;
-                break;
+                case P1Bubble :
+                    M_refFE = &feTriaP1bubble;
+                    M_Qr    = &quadRuleTria6pt;
+                    M_bdQr  = &quadRuleSeg2pt;
+                    break;
 
-            case P2_HIGH :
-                M_refFE = &feTriaP2;
-                M_Qr    = &quadRuleTria7pt;
-                M_bdQr  = &quadRuleSeg3pt;
-                break;
+                case P2 :
+                    M_refFE = &feTriaP2;
+                    M_Qr    = &quadRuleTria6pt;
+                    M_bdQr  = &quadRuleSeg3pt;
+                    break;
 
-            default :
-                std::cout << "!!! WARNING: Space " << space << "not implemented for " << dimension << "D FESpaces!" << std::endl;
-                break;
-        }
-    }
-    else
-    {
-        switch ( M_spaceMap[space] )
-        {
-            case P0 :
-                M_refFE = &feTetraP0;
-                M_Qr    = &quadRuleTetra4pt;
-                M_bdQr  = &quadRuleTria3pt;
-                break;
+                case P2_HIGH :
+                    M_refFE = &feTriaP2;
+                    M_Qr    = &quadRuleTria7pt;
+                    M_bdQr  = &quadRuleSeg3pt;
+                    break;
 
-            case P1 :
-                M_refFE = &feTetraP1;
-                M_Qr    = &quadRuleTetra4pt;
-                M_bdQr  = &quadRuleTria3pt;
-                break;
+                default :
+                    std::cout << "!!! WARNING: Space " << space << "not implemented for " << dimension << "D FESpaces!" << std::endl;
+                    break;
+            }
+            break;
 
-            case P1_HIGH :
-                M_refFE = &feTetraP1;
-                M_Qr    = &quadRuleTetra15pt;
-                M_bdQr  = &quadRuleTria4pt;
-                break;
+            // 3D case
+        case 3:
+            switch ( M_spaceMap[space] )
+            {
+                case P0 :
+                    M_refFE = &feTetraP0;
+                    M_Qr    = &quadRuleTetra4pt;
+                    M_bdQr  = &quadRuleTria3pt;
+                    break;
 
-            case P1Bubble :
-                M_refFE = &feTetraP1bubble;
-                M_Qr    = &quadRuleTetra64pt;
-                M_bdQr  = &quadRuleTria3pt;
-                break;
+                case P1 :
+                    M_refFE = &feTetraP1;
+                    M_Qr    = &quadRuleTetra4pt;
+                    M_bdQr  = &quadRuleTria3pt;
+                    break;
 
-            case P2 :
-                M_refFE = &feTetraP2;
-                M_Qr    = &quadRuleTetra15pt;
-                M_bdQr  = &quadRuleTria4pt;
-                break;
+                case P1_HIGH :
+                    M_refFE = &feTetraP1;
+                    M_Qr    = &quadRuleTetra15pt;
+                    M_bdQr  = &quadRuleTria4pt;
+                    break;
 
-            case P2_HIGH :
-                M_refFE = &feTetraP2;
-                M_Qr    = &quadRuleTetra64pt;
-                M_bdQr  = &quadRuleTria4pt;
-                break;
+                case P1Bubble :
+                    M_refFE = &feTetraP1bubble;
+                    M_Qr    = &quadRuleTetra64pt;
+                    M_bdQr  = &quadRuleTria3pt;
+                    break;
 
-            case P2Bubble :
-                M_refFE = &feTetraP2tilde;
-                M_Qr    = &quadRuleTetra64pt;
-                M_bdQr  = &quadRuleTria4pt;
-                break;
+                case P2 :
+                    M_refFE = &feTetraP2;
+                    M_Qr    = &quadRuleTetra15pt;
+                    M_bdQr  = &quadRuleTria4pt;
+                    break;
 
+                case P2_HIGH :
+                    M_refFE = &feTetraP2;
+                    M_Qr    = &quadRuleTetra64pt;
+                    M_bdQr  = &quadRuleTria4pt;
+                    break;
 
-            default :
-                std::cout << "!!! WARNING: Space " << space << "not implemented for " << dimension << "D FESpaces!" << std::endl;
-                break;
-        }
+                case P2Bubble :
+                    M_refFE = &feTetraP2tilde;
+                    M_Qr    = &quadRuleTetra64pt;
+                    M_bdQr  = &quadRuleTria4pt;
+                    break;
+
+                default :
+                    std::cout << "!!! WARNING: Space " << space << "not implemented for " << dimension << "D FESpaces!" << std::endl;
+                    break;
+            }
+            break;
+
+            // Other dimensions not supported
+        default:
+            ERROR_MSG ("Error! This dimension is not supported by LifeV.\n");
     }
 }
 
@@ -1804,10 +1816,12 @@ createMap (const commPtr_Type& commptr)
 {
     // Against dummies
     ASSERT_PRE (this->M_dof->numTotalDof() > 0, " Cannot create FeSpace with no degrees of freedom");
+
     // get globalElements list from DOF
-    std::vector<Int> myGlobalElements ( this->M_dof->globalElements ( *this->M_mesh ) );
+    typename MapType::mapData_Type mapData = this->M_dof->createMapData ( *this->M_mesh );
     // Create the map
-    MapType map ( -1, myGlobalElements.size(), &myGlobalElements[0], commptr );
+    MapType map ( mapData, commptr );
+
     // Store the map. If more than one field is present the map is
     // duplicated by offsetting the DOFs
     for ( UInt ii = 0; ii < M_fieldDim; ++ii )

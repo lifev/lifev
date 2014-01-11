@@ -41,12 +41,8 @@
 #define COMPOSEDPRECONDITIONER_HPP
 
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 #include <Epetra_Operator.h>
 #include <Epetra_MultiVector.h>
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/filter/GetPot.hpp>
@@ -410,8 +406,8 @@ push_back ( operatorPtr_Type  P,
         return (M_set);
     }
 
-    //     M_displayer.leaderPrint(" CP-  Previous number of call:                 ", M_numCalled, "\n");
-    //     M_displayer.leaderPrint(" CP-  Mean iters:                              ", M_meanIter, "\n" );
+    // M_displayer.leaderPrint(" CP-  Previous number of call:                 ", M_numCalled, "\n");
+    // M_displayer.leaderPrint(" CP-  Mean iters:                              ", M_meanIter, "\n" );
 
     M_meanIter = 0;
     M_numCalled = 0;

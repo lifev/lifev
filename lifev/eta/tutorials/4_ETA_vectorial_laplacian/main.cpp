@@ -44,8 +44,6 @@
 // assembly.
 // ---------------------------------------------------------------
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
@@ -55,8 +53,6 @@
 #include <Epetra_SerialComm.h>
 #endif
 
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/LifeV.hpp>
 
@@ -124,7 +120,11 @@ int main ( int argc, char** argv )
                     2.0,   2.0,   2.0,
                     -1.0,  -1.0,  -1.0);
 
-    MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, Comm);
+    boost::shared_ptr< mesh_Type > meshPtr;
+    {
+        MeshPartitioner< mesh_Type >   meshPart (fullMeshPtr, Comm);
+        meshPtr = meshPart.meshPartition();
+    }
 
     fullMeshPtr.reset();
 
@@ -154,7 +154,7 @@ int main ( int argc, char** argv )
     std::string uOrder ("P1");
 
     boost::shared_ptr<FESpace< mesh_Type, MapEpetra > > uSpace
-    ( new FESpace< mesh_Type, MapEpetra > (meshPart, uOrder, 3, Comm) );
+    ( new FESpace< mesh_Type, MapEpetra > (meshPtr, uOrder, 3, Comm) );
 
     if (verbose)
     {
@@ -171,7 +171,7 @@ int main ( int argc, char** argv )
     }
 
     boost::shared_ptr<ETFESpace< mesh_Type, MapEpetra, 3, 3 > > ETuSpace
-    ( new ETFESpace< mesh_Type, MapEpetra, 3, 3 > (meshPart, & (uSpace->refFE() ), & (uSpace->fe().geoMap() ), Comm) );
+    ( new ETFESpace< mesh_Type, MapEpetra, 3, 3 > (meshPtr, & (uSpace->refFE() ), & (uSpace->fe().geoMap() ), Comm) );
 
     if (verbose)
     {

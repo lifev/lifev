@@ -24,13 +24,9 @@
 */
 //@HEADER
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <EpetraExt_Reindex_MultiVector.h>
 
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/LifeV.hpp>
 #include <lifev/fsi/solver/FSIMonolithic.hpp>
@@ -376,7 +372,7 @@ FSIMonolithic::couplingRhs (vectorPtr_Type rhs) // not working with non-matching
     std::map<ID, ID> const& localDofMap = M_dofStructureToFluid->localDofMap();
     std::map<ID, ID>::const_iterator ITrow;
 
-    vector_Type rhsStructureVelocity (M_solidTimeAdvance->rhsContributionFirstDerivative() *M_solid->rescaleFactor(), Unique);
+    vector_Type rhsStructureVelocity (M_solidTimeAdvance->rhsContributionFirstDerivative() *M_solid->rescaleFactor(), Unique, Add);
     vector_Type lambda (*M_interfaceMap, Unique);
 
     this->monolithicToInterface (lambda, rhsStructureVelocity);
@@ -616,7 +612,7 @@ FSIMonolithic::assembleSolidBlock ( UInt iter, const vector_Type& solution )
 void
 FSIMonolithic::assembleFluidBlock (UInt iter, const vector_Type& solution)
 {
-    M_fluidBlock.reset (new  FSIOperator::fluidPtr_Type::element_type::matrix_Type (*M_monolithicMap) );
+    M_fluidBlock.reset (new  FSIOperator::fluid_Type::matrix_Type (*M_monolithicMap) );
 
     Real alpha = M_fluidTimeAdvance->coefficientFirstDerivative ( 0 ) / M_data->dataFluid()->dataTime()->timeStep(); //mesh velocity w
 

@@ -48,8 +48,6 @@
 #ifndef __FSISolver_H
 #define __FSISolver_H 1
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
@@ -58,8 +56,6 @@
 #include <Epetra_SerialComm.h>
 #endif
 
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/LifeV.hpp>
 
@@ -106,8 +102,8 @@ public:
 
     typedef FSIOperator::mesh_Type                                     mesh_Type;
 
-    typedef FSIOperator::fluidPtr_Type::element_type                     fluid_Type;
-    typedef FSIOperator::solidPtr_Type::element_type                     solid_Type;
+    typedef FSIOperator::fluid_Type                                    fluid_Type;
+    typedef FSIOperator::solid_Type                                    solid_Type;
 
     typedef fluid_Type::function_Type                                  fluidFunction_Type;
     typedef solid_Type::function                                       solidFunction_Type;

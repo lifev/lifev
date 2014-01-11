@@ -85,9 +85,14 @@ void LifeV::HDF5IO::createTable (const std::string& tableName,
 
     currentTable.filespace = H5Screate_simple (2, tableDimensions,
                                                tableDimensions);
+#ifdef H5_USE_16_API
+    currentTable.dataset = H5Dcreate (M_fileId, tableName.c_str(), fileDataType,
+                                      currentTable.filespace, H5P_DEFAULT);
+#else
     currentTable.dataset = H5Dcreate (M_fileId, tableName.c_str(), fileDataType,
                                       currentTable.filespace, H5P_DEFAULT,
                                       H5P_DEFAULT, H5P_DEFAULT);
+#endif
     currentTable.plist = H5Pcreate (H5P_DATASET_XFER);
     H5Pset_dxpl_mpio (currentTable.plist, H5FD_MPIO_COLLECTIVE);
 }
@@ -97,7 +102,11 @@ void LifeV::HDF5IO::openTable (const std::string& tableName,
 {
     tableHandle& currentTable = M_tableList[tableName];
 
+#ifdef H5_USE_16_API
+    currentTable.dataset = H5Dopen (M_fileId, tableName.c_str() );
+#else
     currentTable.dataset = H5Dopen (M_fileId, tableName.c_str(), H5P_DEFAULT);
+#endif
     currentTable.filespace = H5Dget_space (currentTable.dataset);
     H5Sget_simple_extent_dims (currentTable.filespace, tableDimensions, NULL);
     currentTable.plist = H5Pcreate (H5P_DATASET_XFER);
