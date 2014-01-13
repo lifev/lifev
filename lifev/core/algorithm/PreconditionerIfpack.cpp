@@ -228,7 +228,7 @@ PreconditionerIfpack::createIfpackList ( list_Type&         list,
     shyluList.set ("Schur Complement Solver", schurComplementSolver);
     std::string schurAmesosSolver = dataFile ( (section + "/" + subSection + "/shylu/schur_amesos_solver").data(), "Amesos_Klu");
     shyluList.set ("Schur Amesos Solver", schurAmesosSolver);
-    std::string schurPrec = dataFile ( (section + "/" + subSection + "/shylu/schur_prec").data(), "Amesos_Klu");
+    std::string schurPrec = dataFile ( (section + "/" + subSection + "/shylu/schur_prec").data(), "ILU stand-alone");
     shyluList.set ("Schur Preconditioner", schurPrec);
     Int shyluSymmetry = dataFile ( (section + "/" + subSection + "/shylu/symmetry").data(), 1);
     shyluList.set ("Symmetry", 1);
