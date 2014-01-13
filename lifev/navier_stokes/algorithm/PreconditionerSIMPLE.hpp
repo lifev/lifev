@@ -37,6 +37,8 @@
 #ifndef PRECONDITIONERSIMPLE_HPP
 #define PRECONDITIONERSIMPLE_HPP 1
 
+#include <string>
+
 #include <boost/shared_ptr.hpp>
 
 #include <Teuchos_ParameterList.hpp>
@@ -172,14 +174,14 @@ protected:
 
     Real            M_dampingFactor;
 
-    string          M_SIMPLEType;
+    std::string          M_SIMPLEType;
 
     // todo: Remove the member dataFile (bad programmation)
     GetPot          M_dataFile;
-    string          M_fluidPrec;
-    string          M_fluidDataSection;
-    string          M_schurPrec;
-    string          M_schurDataSection;
+    std::string          M_fluidPrec;
+    std::string          M_fluidDataSection;
+    std::string          M_schurPrec;
+    std::string          M_schurDataSection;
 
 private:
     PreconditionerSIMPLE ( const PreconditionerSIMPLE& P ) :
