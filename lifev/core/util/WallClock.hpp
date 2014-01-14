@@ -72,6 +72,10 @@ public:
     {
         return M_elapsedTime;
     }
+    const double& diff() const
+    {
+        return M_elapsedTime;
+    }
     //@}
 
 private:
