@@ -481,7 +481,7 @@ check (std::ostream& out)
     out << std::endl;
 }
 
-template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
+template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType, typename QRAdapterType>
 void
 IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType>::
 integrateElement (const UInt iElement, const UInt nbQuadPt,
@@ -620,7 +620,7 @@ addTo (MatrixType& mat)
     }
 }
 
-template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType>
+template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType, typename QRAdapterType>
 template <typename MatrixType>
 void
 IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType>::
@@ -636,6 +636,9 @@ addToClosed (MatrixType& mat)
 
     #pragma omp parallel
     {
+      QRAdapterType qrAdapter(M_qrAdapter);
+
+
         // Update the currentFEs
         boost::shared_ptr<ETCurrentFE<MeshType::S_geoDimensions, 1> > globalCFE_std;
         boost::shared_ptr<ETCurrentFE<MeshType::S_geoDimensions, 1> > globalCFE_adapted;
@@ -691,15 +694,59 @@ addToClosed (MatrixType& mat)
         ETMatrixElemental elementalMatrix (TestSpaceType::S_fieldDim * M_testSpace->refFE().nbDof(),
                                            SolutionSpaceType::S_fieldDim * M_solutionSpace->refFE().nbDof() );
 
-        #pragma omp for schedule(runtime)
-        for (UInt iElement = 0; iElement < nbElements; ++iElement)
-        {
-            integrateElement (iElement, nbQuadPt, nbTestDof, nbSolutionDof,
-                              elementalMatrix, evaluation, *globalCFE,
-                              testCFE, solutionCFE);
+	// Defaulted to true for security
+	bool isPreviousAdapted (true);
 
-            elementalMatrix.pushToClosedGlobal (mat);
+       #pragma omp for schedule(runtime)
+	for (UInt iElement (0); iElement < nbElements; ++iElement)
+	{
+        // Update the quadrature rule adapter
+        qrAdapter.update (iElement);
+
+	// TODO: move QRule choice inside a common method for AddTo and AddToClosed
+	// TODO: Remove the members repeated here
+	// TODO: use a policy to say if: 1) matrix open/closed (with graph) 2) with or without QR adapter
+ 
+        if (qrAdapter.isAdaptedElement() )
+        {
+            // Set the quadrature rule everywhere
+            evaluation.setQuadrature ( qrAdapter.adaptedQR() );
+            globalCFE_adapted -> setQuadratureRule ( qrAdapter.adaptedQR() );
+            testCFE_adapted -> setQuadratureRule ( qrAdapter.adaptedQR() );
+            solutionCFE_adapted -> setQuadratureRule ( qrAdapter.adaptedQR() );
+
+            // Reset the CurrentFEs in the evaluation
+            evaluation.setGlobalCFE ( globalCFE_adapted );
+            evaluation.setTestCFE ( testCFE_adapted );
+            evaluation.setSolutionCFE ( solutionCFE_adapted );
+
+	    integrateElement (iElement, qrAdapter.adaptedQR().nbQuadPt(), nbTestDof, nbSolutionDof,
+                          elementalMatrix, evaluation, *globalCFE_adapted ,
+                          testCFE_adapted, solutionCFE_adapted);
+
+            isPreviousAdapted = true;
+
         }
+        else
+        {
+            // Change in the evaluation if needed
+            if (isPreviousAdapted)
+            {
+                evaluation.setQuadrature ( qrAdapter.standardQR() );
+                evaluation.setGlobalCFE ( globalCFE_std );
+                evaluation.setTestCFE ( testCFE_std );
+                evaluation.setSolutionCFE ( solutionCFE_std );
+
+                isPreviousAdapted = false;
+            }
+
+	    integrateElement (iElement, qrAdapter.adaptedQR().nbQuadPt(), nbTestDof, nbSolutionDof,
+                          elementalMatrix, evaluation, *globalCFE_std , 
+                          testCFE_std, solutionCFE_std);
+
+        }
+
+        elementalMatrix.pushToGlobal (mat);
     }
 
     M_ompParams.restorePreviousNumThreads();
