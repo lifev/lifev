@@ -16,6 +16,8 @@ SET(util_HEADERS
   util/Displayer.hpp
   util/ParserDefinitions.hpp
   util/FactoryPolicy.hpp
+  util/WallClock.hpp
+  util/OpenMPParameters.hpp
 CACHE INTERNAL "")
 
 SET(util_SOURCES
@@ -28,6 +30,8 @@ SET(util_SOURCES
   util/Parser.cpp
   util/FactoryTypeInfo.cpp
   util/Displayer.cpp
+  util/WallClock.cpp
+  util/OpenMPParameters.cpp
 CACHE INTERNAL "")
 
 

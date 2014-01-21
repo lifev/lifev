@@ -90,7 +90,8 @@ public:
     IntegrateVectorElement (const boost::shared_ptr<MeshType>& mesh,
                             const QRAdapterType& qrAdapter,
                             const boost::shared_ptr<TestSpaceType>& testSpace,
-                            const ExpressionType& expression);
+                            const ExpressionType& expression,
+                            const UInt offset = 0);
 
     //! Copy constructor
     IntegrateVectorElement ( const IntegrateVectorElement < MeshType, TestSpaceType, ExpressionType, QRAdapterType>& integrator);
@@ -169,6 +170,9 @@ private:
     ETCurrentFE<TestSpaceType::S_spaceDim, TestSpaceType::S_fieldDim>* M_testCFE_adapted;
 
     ETVectorElemental M_elementalVector;
+
+    // Offset
+    UInt M_offset;
 };
 
 
@@ -185,7 +189,8 @@ IntegrateVectorElement < MeshType, TestSpaceType, ExpressionType, QRAdapterType>
 IntegrateVectorElement (const boost::shared_ptr<MeshType>& mesh,
                         const QRAdapterType& qrAdapter,
                         const boost::shared_ptr<TestSpaceType>& testSpace,
-                        const ExpressionType& expression)
+                        const ExpressionType& expression,
+                        const UInt offset)
     :   M_mesh (mesh),
         M_qrAdapter (qrAdapter),
         M_testSpace (testSpace),
@@ -194,7 +199,8 @@ IntegrateVectorElement (const boost::shared_ptr<MeshType>& mesh,
         M_testCFE_std (new ETCurrentFE<TestSpaceType::S_spaceDim, TestSpaceType::S_fieldDim> (testSpace->refFE(), testSpace->geoMap(), qrAdapter.standardQR() ) ),
         M_testCFE_adapted (new ETCurrentFE<TestSpaceType::S_spaceDim, TestSpaceType::S_fieldDim> (testSpace->refFE(), testSpace->geoMap(), qrAdapter.standardQR() ) ),
 
-        M_elementalVector (TestSpaceType::S_fieldDim * testSpace->refFE().nbDof() )
+        M_elementalVector (TestSpaceType::S_fieldDim * testSpace->refFE().nbDof() ),
+        M_offset (offset)
 {
     switch (MeshType::geoShape_Type::BasRefSha::S_shape)
     {
@@ -238,7 +244,8 @@ IntegrateVectorElement ( const IntegrateVectorElement < MeshType, TestSpaceType,
         M_testCFE_std (new ETCurrentFE<TestSpaceType::S_spaceDim, TestSpaceType::S_fieldDim> (M_testSpace->refFE(), M_testSpace->geoMap(), integrator.M_qrAdapter.standardQR() ) ),
         M_testCFE_adapted (new ETCurrentFE<TestSpaceType::S_spaceDim, TestSpaceType::S_fieldDim> (M_testSpace->refFE(), M_testSpace->geoMap(), integrator.M_qrAdapter.standardQR() ) ),
 
-        M_elementalVector (integrator.M_elementalVector)
+        M_elementalVector (integrator.M_elementalVector),
+        M_offset (integrator.M_offset)
 {
     switch (MeshType::geoShape_Type::BasRefSha::S_shape)
     {
@@ -392,9 +399,9 @@ addTo (VectorType& vec)
                 // Set the row global indices in the local vector
                 for (UInt i (0); i < nbTestDof; ++i)
                 {
-                    M_elementalVector.setRowIndex
-                    (i + iblock * nbTestDof,
-                     M_testSpace->dof().localToGlobalMap (iElement, i) + iblock * M_testSpace->dof().numTotalDof() );
+		  M_elementalVector.setRowIndex
+		    (i + iblock * nbTestDof,
+		     M_testSpace->dof().localToGlobalMap (iElement, i) + iblock * M_testSpace->dof().numTotalDof() + M_offset);
                 }
 
                 // Make the assembly

@@ -42,13 +42,9 @@
 #ifndef _IMPORTERMESH2D_HH_
 #define _IMPORTERMESH2D_HH_ 1
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <boost/lambda/lambda.hpp>
 
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/util/FortranWrapper.hpp>
 #include <lifev/core/util/StringUtility.hpp>

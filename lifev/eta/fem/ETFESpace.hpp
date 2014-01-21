@@ -387,9 +387,10 @@ void
 ETFESpace<MeshType, MapType, SpaceDim, FieldDim>::
 createMap (const commPtr_Type& commptr)
 {
-    std::vector<Int> myGlobalElements ( this->M_dof->globalElements ( *this->M_mesh ) );
-
-    MapType map ( -1, myGlobalElements.size(), &myGlobalElements[0], commptr );
+    // get globalElements list from DOF
+    typename MapType::mapData_Type mapData = this->M_dof->createMapData ( *this->M_mesh );
+    // Create the map
+    MapType map ( mapData, commptr );
 
     for ( UInt ii (0); ii < FieldDim; ++ii )
     {

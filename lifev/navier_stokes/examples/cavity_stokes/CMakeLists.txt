@@ -2,9 +2,6 @@
 INCLUDE(TribitsAddExecutable)
 INCLUDE(TribitsCopyFilesToBinaryDir)
 
-# Make sure the compiler can find include files
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
-
 # Add executable called "cavity_stokes_test" that is built from the source files
 # "cavity_stokes.cpp". (Note that the name of the executable has to be uniquely chosen.) 
 TRIBITS_ADD_EXECUTABLE(

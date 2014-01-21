@@ -32,9 +32,6 @@
     @date
  */
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
@@ -44,9 +41,6 @@
 #include <Epetra_SerialComm.h>
 #endif
 
-//Tell the compiler to restore the warning previously silented
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/LifeV.hpp>
 
@@ -135,7 +129,7 @@ main ( int argc, char* argv[] )
         {
             std::cout << " -- Reading the mesh ... " << std::flush;
         }
-        MeshData meshData (dataFile, "mesh");
+        // MeshData meshData(dataFile, "mesh");
         boost::shared_ptr< mesh_Type > meshPtr ( new mesh_Type ( Comm ) );
 
         // Set up the structured mesh

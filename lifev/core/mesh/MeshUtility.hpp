@@ -38,8 +38,6 @@
 #ifndef MESHUTILITY_H
 #define MESHUTILITY_H 1
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <algorithm>
 #include <iterator>
@@ -47,17 +45,15 @@
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/io.hpp>
 
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/util/Switch.hpp>
+#include <lifev/core/array/VectorSmall.hpp>
 #include <lifev/core/mesh/MeshElementBare.hpp>
 #include <lifev/core/mesh/MarkerDefinitions.hpp>
 #include <lifev/core/mesh/MeshEntity.hpp>
 #include <lifev/core/mesh/MeshEntityContainer.hpp>
-#include <lifev/core/array/MapEpetra.hpp>
-#include <lifev/core/array/VectorSmall.hpp>
+#include <lifev/core/array/EnumMapEpetra.hpp>
 
 namespace LifeV
 {
@@ -1113,7 +1109,6 @@ fixBoundaryPoints ( MeshType& mesh, std::ostream& logStream = std::cout,
     ASSERT_PRE ( mesh.numBFaces() > 0,
                  "The boundary faces list should not be empty" );
 
-    typedef typename MeshType::faces_Type     faceContainer_Type;
     typedef typename MeshType::facetShape_Type faceShape_Type;
 
     if ( verbose )
@@ -1215,7 +1210,6 @@ bool rearrangeFaces ( MeshType& mesh,
 {
     verbose = verbose && ( mesh.comm()->MyPID() == 0 );
     typedef typename MeshType::faces_Type faceContainer_Type;
-    typedef typename MeshType::face_Type face_Type;
 
     UInt                                  point1Id, point2Id, point3Id, point4Id;
     BareFace                              bareFace;
@@ -1371,7 +1365,6 @@ bool fixBoundaryFaces ( MeshType& mesh,
                         temporaryFaceContainer_Type* externalFaceContainer = 0 )
 {
     verbose = verbose && ( mesh.comm()->MyPID() == 0 );
-    typedef typename MeshType::volumes_Type volumeContainer_Type;
     typedef typename MeshType::volume_Type volume_Type;
     typedef typename MeshType::faces_Type faceContainer_Type;
     typedef typename MeshType::face_Type face_Type;
@@ -1607,7 +1600,6 @@ bool buildFaces ( MeshType& mesh,
     typename MeshType::elementShape_Type   volumeShape;
     typedef typename MeshType::volumes_Type    volumeContainer_Type;
     typedef typename MeshType::volume_Type volume_Type;
-    typedef typename MeshType::faces_Type      faceContainer_Type;
     typedef typename MeshType::face_Type   face_Type;
     volume_Type*                          volumePtr;
     temporaryFaceContainer_Type*          boundaryFaceContainerPtr;
@@ -1972,13 +1964,9 @@ bool buildEdges ( MeshType& mesh,
                   temporaryEdgeContainer_Type* externalEdgeContainer = 0 )
 {
     verbose = verbose && ( mesh.comm()->MyPID() == 0 );
-    typedef typename MeshType::volumes_Type volumeContainer_Type;
-    typedef typename MeshType::faces_Type faceContainer_Type;
     typedef typename MeshType::volume_Type volume_Type;
     typedef typename MeshType::elementShape_Type volumeShape_Type;
-    typedef typename MeshType::edges_Type edges_Type;
     typedef typename MeshType::edge_Type edge_Type;
-    typedef typename MeshType::face_Type face_Type;
     typedef typename MeshType::facetShape_Type faceShape_Type;
     typedef typename MeshType::edges_Type::iterator Edges_Iterator;
     typename MeshType::face_Type* facePtr;
@@ -2222,8 +2210,6 @@ p2MeshFromP1Data ( MeshType& mesh, std::ostream& logStream = std::cout )
     typename MeshType::edge_Type*         edgePtr = 0;
     typename MeshType::volume_Type*      elementPtr = 0;
     typename MeshType::face_Type*       facePtr = 0;
-    typedef typename MeshType::volumes_Type  elementContainer_Type;
-    typedef typename MeshType::faces_Type faceContainer_Type;
 
     MeshElementBareHandler<BareEdge>           bareEdgeHandler;
     std::pair<UInt, bool>                edgeIdToBoolPair;

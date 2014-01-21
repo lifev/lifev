@@ -19,6 +19,7 @@ SET(mesh_HEADERS
   mesh/RegionMesh1DStructured.hpp
   mesh/MeshChecks.hpp
   mesh/MeshElementMarked.hpp
+  mesh/NeighborMarker.hpp
   mesh/RegionMesh2DStructured.hpp
 CACHE INTERNAL "")
 

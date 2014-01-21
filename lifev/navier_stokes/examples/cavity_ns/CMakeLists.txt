@@ -1,9 +1,6 @@
 
 INCLUDE(TribitsAddExecutable)
 
-# Make sure the compiler can find include files
-INCLUDE_DIRECTORIES(${CMAKE_SOURCE_DIR})
-
 # Add executable called "cavity_ns_test" that is built from the source files
 # "cavity_ns.cpp".
 TRIBITS_ADD_EXECUTABLE(

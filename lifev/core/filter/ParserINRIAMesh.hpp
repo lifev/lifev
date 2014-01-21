@@ -276,6 +276,7 @@ readINRIAMeshFileHead ( std::ifstream&           myStream,
         }
     }
 
+    LIFEV_UNUSED (idummy);
     return true ;
 }// Function readINRIAMeshFileHead
 

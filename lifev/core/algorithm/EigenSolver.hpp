@@ -44,8 +44,6 @@
 #ifndef EIGENSOLVER_HPP
 #define EIGENSOLVER_HPP
 
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <Epetra_MultiVector.h>
 #include <Epetra_SerialDenseVector.h>
@@ -64,8 +62,6 @@
 #include <AnasaziLOBPCGSolMgr.hpp>
 #include <AnasaziEpetraAdapter.hpp>
 
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/LifeV.hpp>
 

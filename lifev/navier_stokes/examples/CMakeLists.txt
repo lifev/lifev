@@ -8,4 +8,5 @@ ADD_SUBDIRECTORIES(
   cavity_stokes
   cylinder
   ETpseudo_fsi
+  TestCases
 )
