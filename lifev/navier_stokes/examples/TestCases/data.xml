@@ -1,13 +1,13 @@
 <ParameterList>
     <!-- Preconditioner for solving the problem -->
-    <Parameter name="Preconditioner for init" type="string" value="FromFile"/>
-    <Parameter name="Preconditioner" type="string" value="FromFile"/>
+    <Parameter name="Preconditioner for init" type="string" value="SIMPLE"/>
+    <Parameter name="Preconditioner" type="string" value="SIMPLE"/>
 
     <!-- NS problem parameters -->
     <ParameterList name="Navier-Stokes problem: Parameter list">
         <Parameter name="Test case name" type="string" value="Cavity"/>
         <Parameter name="Viscosity" type="double" value="0.035"/>
-        <Parameter name="Density" type="double" value="1."/>
+        <Parameter name="Density" type="double" value="1.0"/>
         <Parameter name="Mesh refinement" type="int" value="10"/>
         <Parameter name="Resources path" type="string" value="./Resources"/>
     </ParameterList>
@@ -21,7 +21,7 @@
         <!-- Time parameters -->
         <ParameterList name="Time: Parameter list">
             <Parameter name="Initial time" type="double" value="0.0"/>
-            <Parameter name="Final time" type="double" value="1e-3"/>
+            <Parameter name="Final time" type="double" value="1e-2"/>
             <Parameter name="Timestep" type="double" value="1e-3"/>
         </ParameterList>
 

@@ -51,6 +51,9 @@
 #include <lifev/core/util/Switch.hpp>
 #include <lifev/core/mesh/MeshElementMarked.hpp>
 #include <lifev/core/util/LifeDebug.hpp>
+#include <lifev/core/fem/DOF.hpp>
+#include <lifev/core/mesh/MeshEntity.hpp>
+#include <lifev/core/util/LifeChrono.hpp>
 #include <lifev/core/array/GhostHandler.hpp>
 
 namespace LifeV
@@ -76,7 +79,8 @@ public:
     // Make the template's type available to the outside
     typedef MeshType mesh_Type;
     typedef boost::shared_ptr<MeshType> meshPtr_Type;
-    typedef std::vector<std::vector<Int> > graph_Type;
+    typedef std::vector<Int> idList_Type;
+    typedef std::vector<idList_Type> graph_Type;
     typedef boost::shared_ptr<graph_Type> graphPtr_Type;
     typedef std::vector<meshPtr_Type> partMesh_Type;
     typedef boost::shared_ptr<partMesh_Type> partMeshPtr_Type;
@@ -177,9 +181,12 @@ public:
     */
     void doPartitionMesh();
 
+    //! Initialize M_entityPID
+    void fillEntityPID();
+
     // Next method should be renamed and become a regular method
     //! Return a pointer to the mesh partition with rank k
-    const meshPtr_Type&      getPartition (Int k)    const
+    const meshPtr_Type& LIFEV_DEPRECATED ( getPartition (Int k) const )
     {
         return (*M_meshPartitions) [k];
     }
@@ -385,8 +392,13 @@ private:
     UInt                                 M_partitionOverlap;
 
     //! Store ownership for each entity, subdivided by entity type
-    //! 0: elements, 1: facets, 2: ridges, 3: points
-    std::vector<std::vector<UInt> >      M_entityPID;
+    struct EntityPIDList
+    {
+        idList_Type elements;
+        idList_Type facets;
+        idList_Type ridges;
+        idList_Type points;
+    } M_entityPID;
 
     //@}
 }; // class MeshPartitioner
@@ -432,7 +444,6 @@ init ()
     M_nBoundaryRidges.resize ( M_numPartitions );
     M_nBoundaryFacets.resize ( M_numPartitions );
     M_elementDomains.reset ( new graph_Type );
-    M_entityPID.resize ( 4 );
     M_serialMode = false;
     M_partitionOverlap = 0;
 
@@ -1368,48 +1379,8 @@ void MeshPartitioner<MeshType>::constructFacets()
             // This can lead to a wrong treatment of the dofPerFace (in 2D of the dofPerRidge, as occurred
             // with P2)
 
-            // NEW CODE
             ASSERT ( (localElem1 != NotAnId) || (localElem2 != NotAnId), "A hanging facet in mesh partitioner!");
 
-            // todo: move this to a switch ( if...else ) on the EntityFlag
-            //            switch ( pf->flag() )
-            //            {
-            //                case ( EntityFlags::DEFAULT ):
-            //                {
-            //                    pf->firstAdjacentElementIdentity()  = localElem1;
-            //                    pf->firstAdjacentElementPosition()  = M_originalMesh->face(*is).firstAdjacentElementPosition();
-            //                    pf->secondAdjacentElementIdentity() = localElem2;
-            //                    pf->secondAdjacentElementPosition() = M_originalMesh->face(*is).secondAdjacentElementPosition();
-            //                    break;
-            //                }
-            //                case ( EntityFlags::PHYSICAL_BOUNDARY ):
-            //                {
-            //                    pf->firstAdjacentElementIdentity()  = localElem1;
-            //                    pf->firstAdjacentElementPosition()  = M_originalMesh->face(*is).firstAdjacentElementPosition();
-            //                    pf->secondAdjacentElementIdentity() = localElem2;
-            //                    pf->secondAdjacentElementPosition() = M_originalMesh->face(*is).secondAdjacentElementPosition();
-            //                    break;
-            //                }
-            //                case ( EntityFlags::SUBDOMAIN_INTERFACE ):
-            //                {
-            //                    if ( localElem2 != NotAnId )
-            //                    {
-            //                        pf->firstAdjacentElementIdentity()  = localElem2;
-            //                        pf->firstAdjacentElementPosition()  = M_originalMesh->face(*is).secondAdjacentElementPosition();
-            //                        pf->secondAdjacentElementIdentity() = ghostElem;
-            //                        pf->secondAdjacentElementPosition() = M_originalMesh->face(*is).firstAdjacentElementPosition();
-            //                    }
-            //                    else
-            //                    {
-            //                        pf->firstAdjacentElementIdentity()  = localElem1;
-            //                        pf->firstAdjacentElementPosition()  = M_originalMesh->face(*is).firstAdjacentElementPosition();
-            //                        pf->secondAdjacentElementIdentity() = ghostElem;
-            //                        pf->secondAdjacentElementPosition() = M_originalMesh->face(*is).secondAdjacentElementPosition();
-            //                    }
-            //                    break;
-            //                }
-            //
-            //            }
             if ( localElem1 == NotAnId )
             {
                 pf->firstAdjacentElementIdentity()  = localElem2;
@@ -1532,11 +1503,11 @@ void MeshPartitioner<MeshType>::execute()
     debugStream (4000) << M_me << " has " << (*M_elementDomains) [M_me].size() << " elements.\n";
 #endif
 
-    GhostHandler<mesh_Type> gh ( M_originalMesh, M_comm );
-    gh.fillEntityPID ( M_elementDomains, M_entityPID );
+    fillEntityPID ();
     if ( M_partitionOverlap > 0 )
     {
-        gh.ghostMapOnElementsP1 ( M_elementDomains, M_entityPID[ 3 ], M_partitionOverlap );
+        GhostHandler<mesh_Type> gh ( M_originalMesh, M_comm );
+        gh.extendGraphFE ( M_elementDomains, M_entityPID.points, M_partitionOverlap );
     }
 
     doPartitionMesh();
@@ -1555,6 +1526,55 @@ void MeshPartitioner<MeshType>::execute()
 }
 
 template<typename MeshType>
+void MeshPartitioner<MeshType>::fillEntityPID ()
+{
+    Int numParts = (M_numPartitions > 1) ? M_numPartitions : M_comm->NumProc();
+
+    // initialize entity PIDs to 0
+    M_entityPID.points.resize   ( M_originalMesh->numPoints(),   0 );
+    M_entityPID.elements.resize ( M_originalMesh->numElements(), 0 );
+    M_entityPID.facets.resize   ( M_originalMesh->numFacets(),   0 );
+    M_entityPID.ridges.resize   ( M_originalMesh->numRidges(),   0 );
+
+    // check: parallel algorithm seems to be slower for this
+    // p = 0 can be skipped since M_entityPID is already initialized at that value
+    for ( Int p = 1; p < numParts; p++ )
+    {
+        for ( UInt e = 0; e < (*M_elementDomains) [ p ].size(); e++ )
+        {
+            // point block
+            for ( UInt k = 0; k < mesh_Type::element_Type::S_numPoints; k++ )
+            {
+                const ID& pointID = M_originalMesh->element ( (*M_elementDomains) [ p ][ e ] ).point ( k ).id();
+                // pointPID should be the maximum between the procs that own it
+                M_entityPID.points[ pointID ] = std::max ( M_entityPID.points[ pointID ], p );
+            }
+
+            // elem block
+            const ID& elemID = M_originalMesh->element ( (*M_elementDomains) [ p ][ e ] ).id();
+            // at his stage each element belongs to a single partition, overlap is not yet done.
+            M_entityPID.elements[ elemID ] = p;
+
+            // facet block
+            for ( UInt k = 0; k < mesh_Type::element_Type::S_numFacets; k++ )
+            {
+                const ID& facetID = M_originalMesh->facet ( M_originalMesh->localFacetId ( elemID, k ) ).id();
+                // facetPID should be the maximum between the proc that own it
+                M_entityPID.facets[ facetID ] = std::max ( M_entityPID.facets[ facetID ], p );
+            }
+
+            // ridge block
+            for ( UInt k = 0; k < mesh_Type::element_Type::S_numRidges; k++ )
+            {
+                const ID& ridgeID = M_originalMesh->ridge ( M_originalMesh->localRidgeId ( elemID, k ) ).id();
+                // ridgePID should be the maximum between the proc that own it
+                M_entityPID.ridges[ ridgeID ] = std::max ( M_entityPID.ridges[ ridgeID ], p );
+            }
+        }
+    }
+}
+
+template<typename MeshType>
 void MeshPartitioner<MeshType>::markGhostEntities()
 {
     // mark ghost entities by each partition as described in M_entityPID
@@ -1562,10 +1582,11 @@ void MeshPartitioner<MeshType>::markGhostEntities()
     //M_entityPID or flags should be exported and read back to make it work
     for (UInt i = 0; i < M_numPartitions; ++i)
     {
+        Int const procId = (M_numPartitions > 1) ? i : M_me;
         for ( UInt e = 0; e < (*M_meshPartitions) [ i ]->numElements(); e++ )
         {
             typename MeshType::element_Type& element = (*M_meshPartitions) [ i ]->element ( e );
-            if ( M_entityPID[ 0 ][ element.id() ] != static_cast<UInt> ( M_me ) )
+            if ( M_entityPID.elements[ element.id() ] != static_cast<UInt> ( procId ) )
             {
                 element.setFlag ( EntityFlags::GHOST );
             }
@@ -1574,7 +1595,7 @@ void MeshPartitioner<MeshType>::markGhostEntities()
         for ( UInt f = 0; f < (*M_meshPartitions) [ i ]->numFacets(); f++ )
         {
             typename MeshType::facet_Type& facet = (*M_meshPartitions) [ i ]->facet ( f );
-            if ( M_entityPID[ 1 ][ facet.id() ] != static_cast<UInt> ( M_me ) )
+            if ( M_entityPID.facets[ facet.id() ] != static_cast<UInt> ( procId ) )
             {
                 facet.setFlag ( EntityFlags::GHOST );
             }
@@ -1583,7 +1604,7 @@ void MeshPartitioner<MeshType>::markGhostEntities()
         for ( UInt r = 0; r < (*M_meshPartitions) [ i ]->numRidges(); r++ )
         {
             typename MeshType::ridge_Type& ridge = (*M_meshPartitions) [ i ]->ridge ( r );
-            if ( M_entityPID[ 2 ][ ridge.id() ] != static_cast<UInt> ( M_me ) )
+            if ( M_entityPID.ridges[ ridge.id() ] != static_cast<UInt> ( procId ) )
             {
                 ridge.setFlag ( EntityFlags::GHOST );
             }
@@ -1592,16 +1613,16 @@ void MeshPartitioner<MeshType>::markGhostEntities()
         for ( UInt p = 0; p < (*M_meshPartitions) [ i ]->numPoints(); p++ )
         {
             typename MeshType::point_Type& point = (*M_meshPartitions) [ i ]->point ( p );
-            if ( M_entityPID[ 3 ][ point.id() ] != static_cast<UInt> ( M_me ) )
+            if ( M_entityPID.points[ point.id() ] != static_cast<UInt> ( procId ) )
             {
                 point.setFlag ( EntityFlags::GHOST );
             }
         }
     }
-    clearVector ( M_entityPID[ 0 ] );
-    clearVector ( M_entityPID[ 1 ] );
-    clearVector ( M_entityPID[ 2 ] );
-    clearVector ( M_entityPID[ 3 ] );
+    clearVector ( M_entityPID.elements );
+    clearVector ( M_entityPID.facets );
+    clearVector ( M_entityPID.ridges );
+    clearVector ( M_entityPID.points );
 }
 
 template<typename MeshType>

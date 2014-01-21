@@ -11,4 +11,5 @@ ADD_SUBDIRECTORIES(
   interpolate_gradient_2D
   blocks_2D
   boundary_integrals
+  repeated_mesh_2D
 )

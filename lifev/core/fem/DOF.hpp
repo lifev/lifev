@@ -590,8 +590,8 @@ std::vector<Int> DOF::globalElements ( MeshType& mesh )
 template <typename MeshType>
 MapEpetraData DOF::createMapData ( MeshType& mesh )
 {
-    std::set<Int> myGlobalElementsSetUnique;
-    std::set<Int> myGlobalElementsSetRepeated;
+    std::set<Int> mapDataSetUnique;
+    std::set<Int> mapDataSetRepeated;
 
     // insert dof associated to geometric entities owned by current proc
     const UInt pointOffset = 0;
@@ -611,9 +611,9 @@ MapEpetraData DOF::createMapData ( MeshType& mesh )
             {
                 if ( point.isOwned() )
                 {
-                    myGlobalElementsSetUnique.insert ( pointOffset + point.id() + d * mesh.numGlobalPoints() );
+                    mapDataSetUnique.insert ( pointOffset + point.id() + d * mesh.numGlobalPoints() );
                 }
-                myGlobalElementsSetRepeated.insert ( pointOffset + point.id() + d * mesh.numGlobalPoints() );
+                mapDataSetRepeated.insert ( pointOffset + point.id() + d * mesh.numGlobalPoints() );
             }
         }
 
@@ -625,9 +625,9 @@ MapEpetraData DOF::createMapData ( MeshType& mesh )
             {
                 if ( ridge.isOwned() )
                 {
-                    myGlobalElementsSetUnique.insert ( ridgeOffset + ridge.id() + d * mesh.numGlobalRidges() );
+                    mapDataSetUnique.insert ( ridgeOffset + ridge.id() + d * mesh.numGlobalRidges() );
                 }
-                myGlobalElementsSetRepeated.insert ( ridgeOffset + ridge.id() + d * mesh.numGlobalRidges() );
+                mapDataSetRepeated.insert ( ridgeOffset + ridge.id() + d * mesh.numGlobalRidges() );
             }
         }
 
@@ -639,9 +639,9 @@ MapEpetraData DOF::createMapData ( MeshType& mesh )
             {
                 if ( facet.isOwned() )
                 {
-                    myGlobalElementsSetUnique.insert ( facetOffset + facet.id() + d * mesh.numGlobalFacets() );
+                    mapDataSetUnique.insert ( facetOffset + facet.id() + d * mesh.numGlobalFacets() );
                 }
-                myGlobalElementsSetRepeated.insert ( facetOffset + facet.id() + d * mesh.numGlobalFacets() );
+                mapDataSetRepeated.insert ( facetOffset + facet.id() + d * mesh.numGlobalFacets() );
             }
         }
 
@@ -650,16 +650,15 @@ MapEpetraData DOF::createMapData ( MeshType& mesh )
         {
             if ( element.isOwned() )
             {
-                myGlobalElementsSetUnique.insert ( elementOffset + element.id() + d * mesh.numGlobalFacets() );
+                mapDataSetUnique.insert ( elementOffset + element.id() + d * mesh.numGlobalFacets() );
             }
-            myGlobalElementsSetRepeated.insert ( elementOffset + element.id() + d * mesh.numGlobalFacets() );
+            mapDataSetRepeated.insert ( elementOffset + element.id() + d * mesh.numGlobalFacets() );
         }
     }
 
-    MapEpetraData mapData ( myGlobalElementsSetUnique.size(), myGlobalElementsSetRepeated.size() );
-
-    mapData.set ( myGlobalElementsSetUnique, Unique );
-    mapData.set ( myGlobalElementsSetRepeated, Repeated );
+    MapEpetraData mapData;
+    mapData.unique.assign ( mapDataSetUnique.begin(), mapDataSetUnique.end() );
+    mapData.repeated.assign ( mapDataSetRepeated.begin(), mapDataSetRepeated.end() );
 
     return mapData;
 }

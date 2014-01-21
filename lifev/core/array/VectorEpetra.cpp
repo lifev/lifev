@@ -288,7 +288,7 @@ VectorEpetra::operator+= ( const VectorEpetra& vector )
     }
     else
     {
-        VectorEpetra vCopy ( vector, M_mapType );
+        VectorEpetra vCopy ( vector, M_mapType, M_combineMode );
         M_epetraVector->Update ( 1., vCopy.epetraVector(), 1. );
     }
 

@@ -45,11 +45,12 @@
 
 #include <string>
 #include <ostream>
-#include <lifev/core/filter/GetPot.hpp>
+
+#include <Teuchos_ParameterList.hpp>
+
 #include <lifev/core/LifeV.hpp>
-
+#include <lifev/core/filter/GetPot.hpp>
 #include <lifev/core/filter/ImporterMesh2D.hpp>
-
 #include <lifev/core/mesh/RegionMesh.hpp>
 #include <lifev/core/filter/ImporterMesh3D.hpp>
 #include <lifev/core/mesh/RegionMesh3DStructured.hpp>
@@ -104,6 +105,16 @@ public:
      @param section file section
      */
     void setup ( const GetPot& dataFile, const std::string& section );
+
+    //! Set all members using a Teuchos ParameterList
+    /*!
+      @param meshParameters Teuchos ParameterList containing:
+             - meshDir [string] location of mesh file
+             - meshFile [string] the name of the mesh file
+             - order [string] the order of the mesh (P1, P2)
+             - verbose [bool] verbosity level
+     */
+    void setup ( const Teuchos::ParameterList& meshParameters);
 
     //! Display the values
     virtual void showMe ( std::ostream& output = std::cout ) const;

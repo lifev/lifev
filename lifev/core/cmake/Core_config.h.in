@@ -49,5 +49,8 @@
 /* Define if the Trilinos Nox-thyra library is used. */
 #cmakedefine HAVE_NOX_THYRA
 
+/* Define if the Trilinos Teko library is used. */
+#cmakedefine LIFEV_HAVE_TEKO
+
 /* Define if the Trilinos version is greater than 10.6 */
 #cmakedefine HAVE_TRILINOS_GT_10_6

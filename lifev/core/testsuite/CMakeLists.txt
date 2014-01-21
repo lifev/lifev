@@ -22,7 +22,7 @@ ADD_SUBDIRECTORIES(
 
 IF(TPL_ENABLE_HDF5)
     ADD_SUBDIRECTORIES(
-        partition_io
+        offline_partition_io
         )
 ENDIF()
 

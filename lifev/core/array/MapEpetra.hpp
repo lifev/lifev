@@ -51,10 +51,6 @@
 #include <EpetraExt_HDF5.h>
 #endif
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
-
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/array/EnumMapEpetra.hpp>
 #include <lifev/core/array/MapEpetraData.hpp>
@@ -62,7 +58,6 @@
 
 namespace LifeV
 {
-
 
 //! MapEpetra - Wrapper for Epetra_Map
 /*!
@@ -119,10 +114,13 @@ public:
                 Int* myGlobalElements,
                 const comm_ptrtype& commPtr );
 
-    MapEpetra ( std::pair<std::vector<Int>, std::vector<Int> > myGlobalElements,
-                const comm_ptrtype& commPtr );
-
-    MapEpetra ( MapEpetraData const& mapData, comm_ptrtype const& commPtr );
+    //! Constructor
+    /*!
+      To define a linear map, set MyGlobalElements = 0
+      @param mapData Structure containing Ids for the local Unique and Repeated map
+      @param commPtr Pointer to the communicator
+    */
+    MapEpetra ( mapData_Type const& mapData, comm_ptrtype const& commPtr );
 
     //! Constructor
     /*
@@ -280,7 +278,7 @@ public:
     //! check if a global id is owned by the current partition
     bool isOwned ( const UInt globalId ) const
     {
-        return ( M_uniqueMapEpetra->LID ( globalId ) > -1 );
+        return ( M_uniqueMapEpetra->LID ( static_cast<int> (globalId) ) > -1 );
     }
 
     //@}

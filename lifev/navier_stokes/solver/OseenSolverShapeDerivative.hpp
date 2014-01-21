@@ -582,7 +582,7 @@ template<typename MeshType, typename SolverType>
 Real
 OseenSolverShapeDerivative<MeshType, SolverType>::linearKineticNormalStress ( const markerID_Type& flag, const vector_Type& solution, const vector_Type& linearSolution )
 {
-    vector_Type velocityAndPressure ( solution, Repeated );
+    vector_Type velocityAndPressure ( solution, Repeated, Add );
     vector_Type velocity ( this->M_velocityFESpace.map(), Repeated );
     velocity.subset ( velocityAndPressure );
 

@@ -487,7 +487,7 @@ hyperbolic::run()
     // Instantiation of the HyperbolicSolver class
     hyper hyperbolicSolver ( dataHyperbolic,
                              *feSpacePtr,
-                             ghost.ghostMapOnElementsP0(),
+                             ghost.ghostMapOnElementsFV(),
                              Members->comm );
 
     // Stop chronoProblem

@@ -144,7 +144,7 @@ public:
     MatrixEpetra ( const MapEpetra& map, matrix_ptrtype crsMatrixPtr);
 
     //! Destructor
-    virtual ~MatrixEpetra() {};
+    virtual ~MatrixEpetra() {}
 
     //@}
 
@@ -442,6 +442,12 @@ public:
      */
     Real normInf() const;
 
+    //! Compute the frobenius norm of the global matrix
+    /*!
+      @return norm Frobenius
+     */
+    Real normFrobenius() const;
+
     //@}
 
 
@@ -710,7 +716,7 @@ template <typename DataType>
 MatrixEpetra<DataType>&
 MatrixEpetra<DataType>::operator -= ( const MatrixEpetra& matrix )
 {
-    EpetraExt::MatrixMatrix::Add ( *matrix.matrixPtr(), false, -1., *this->matrixPtr(), 1. );
+    EpetraExt::MatrixMatrix::Add ( *matrix.matrixPtr(), false, 1., *this->matrixPtr(), -1. );
 
     return *this;
 }
@@ -1504,6 +1510,11 @@ Real MatrixEpetra<DataType>::normInf() const
     return M_epetraCrs->NormInf();
 }
 
+template <typename DataType>
+Real MatrixEpetra<DataType>::normFrobenius() const
+{
+    return M_epetraCrs->NormFrobenius();
+}
 
 // ===================================================
 // Set Methods

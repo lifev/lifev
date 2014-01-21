@@ -1474,7 +1474,7 @@ updateSystem ( const Real         alpha,
         // vector with repeated nodes over the processors
 
         vector_Type betaVectorRepeated ( betaVector, Repeated );
-        vector_Type unRepeated ( un, Repeated );
+        vector_Type unRepeated ( un, Repeated, Add );
 
         chrono.stop();
 
@@ -1803,7 +1803,7 @@ Real
 OseenSolver<MeshType, SolverType>::flux ( const markerID_Type& flag,
                                           const vector_Type& solution )
 {
-    vector_Type velocityAndPressure ( solution, Repeated );
+    vector_Type velocityAndPressure ( solution, Repeated, Add );
     vector_Type velocity ( this->M_velocityFESpace.map(), Repeated );
     velocity.subset ( velocityAndPressure );
 
@@ -1822,7 +1822,7 @@ Real
 OseenSolver<MeshType, SolverType>::kineticNormalStress ( const markerID_Type& flag,
                                                          const vector_Type& solution )
 {
-    vector_Type velocityAndPressure ( solution, Repeated );
+    vector_Type velocityAndPressure ( solution, Repeated, Add );
     vector_Type velocity ( this->M_velocityFESpace.map(), Repeated );
     velocity.subset ( velocityAndPressure );
 
@@ -1862,7 +1862,7 @@ Real
 OseenSolver<MeshType, SolverType>::pressure (const markerID_Type& flag,
                                              const vector_Type& solution)
 {
-    vector_Type velocityAndPressure ( solution, Repeated );
+    vector_Type velocityAndPressure ( solution, Repeated, Add );
     vector_Type pressure ( this->M_pressureFESpace.map(), Repeated );
     pressure.subset ( velocityAndPressure,
                       this->M_velocityFESpace.dim() *this->M_velocityFESpace.fieldDim() );
@@ -1929,7 +1929,7 @@ OseenSolver<MeshType, SolverType>::lagrangeMultiplier ( const markerID_Type&  fl
     bcName_Type fluxbcName_Type = bcHandler.findBCWithFlag ( flag ).name();
 
     // Create a Repeated vector for looking to the lambda
-    vector_Type velocityPressureLambda ( solution, Repeated );
+    vector_Type velocityPressureLambda ( solution, Repeated, Add );
 
     // Find the index associated to the correct Lagrange multiplier
     for ( UInt lmIndex = 0; lmIndex < static_cast <UInt> ( fluxBCVector.size() ); ++lmIndex )

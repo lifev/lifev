@@ -250,8 +250,8 @@ private:
 
     //!@name Private Members
     //@{
-    precPtr_Type                  M_prec;
     std::vector<operatorPtr_Type> M_operVector; // we need to keep track of all the operators.
+    precPtr_Type                  M_prec;
     static bool registerComposed;
     //@}
 };

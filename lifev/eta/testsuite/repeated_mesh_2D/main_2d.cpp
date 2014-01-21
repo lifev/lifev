@@ -32,9 +32,6 @@
     @date 05-2012
  */
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #include <Epetra_ConfigDefs.h>
 #ifdef EPETRA_MPI
@@ -44,9 +41,6 @@
 #include <Epetra_SerialComm.h>
 #endif
 
-//Tell the compiler to restore the warning previously silented
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/LifeV.hpp>
 
@@ -74,16 +68,16 @@ Real exactSolution ( const Real& /* t */, const Real& x, const Real& y, const Re
 
 Real fRhs ( const Real& /* t */, const Real& /* x */, const Real& /* y */, const Real& /* z */ , const ID& i )
 {
-    switch( i )
+    switch ( i )
     {
-    case 0:
-        return 0.;
-        break;
-    case 1:
-        return 1.;
-        break;
-    default:
-        ERROR_MSG( "component not available!" );
+        case 0:
+            return 0.;
+            break;
+        case 1:
+            return 1.;
+            break;
+        default:
+            ERROR_MSG ( "component not available!" );
     }
 
     return 0.;
@@ -354,7 +348,7 @@ int main ( int argc, char** argv )
         vector_Type rhs ( uSpaceStd->map() | pSpace->map(), Unique );
 
         vectorStd_Type fInterpolated ( uSpace->map(), Repeated );
-        uSpaceStd->interpolate ( fRhs, fInterpolated, 0.0 );
+        uSpaceStd->interpolate ( static_cast<uSpaceStd_Type::function_Type> (fRhs), fInterpolated, 0.0 );
 
         {
             using namespace ExpressionAssembly;
@@ -376,7 +370,7 @@ int main ( int argc, char** argv )
         vector_Type rhsR ( uSpaceStdR->map() | pSpaceR->map(), Unique, Zero );
 
         vectorStd_Type fInterpolatedR ( uSpaceR->map(), Repeated );
-        uSpaceStdR->interpolate ( fRhs, fInterpolatedR, 0.0 );
+        uSpaceStdR->interpolate ( static_cast<uSpaceStd_Type::function_Type> (fRhs), fInterpolatedR, 0.0 );
 
         {
             using namespace ExpressionAssembly;

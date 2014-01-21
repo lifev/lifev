@@ -49,7 +49,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 #include <boost/algorithm/string.hpp>
 #include <boost/shared_array.hpp>
-
+#include <boost/shared_ptr.hpp>
 
 #ifndef HAVE_HDF5
 
@@ -308,7 +308,7 @@ void ExporterHDF5<MeshType>::postProcess (const Real& time)
     this->computePostfix();
 
     std::size_t found ( this->M_postfix.find ( "*" ) );
-    if ( found == string::npos )
+    if ( found == std::string::npos )
     {
         if (!this->M_procId)
         {
@@ -874,7 +874,7 @@ void ExporterHDF5<MeshType>::writeVectorDatastructure  ( std::ofstream& xdmf, co
 {
 
 
-    string coord[3] = {"X", "Y", "Z"}; // see also wr_vector
+    std::string coord[3] = {"X", "Y", "Z"}; // see also wr_vector
 
     xdmf << "         <DataStructure ItemType=\"Function\"\n"
          << "                        Dimensions=\""
@@ -949,12 +949,11 @@ void ExporterHDF5<MeshType>::writeVector (const exporterData_Type& dvar)
     UInt size  = dvar.numDOF();
     UInt start = dvar.start();
 
-    using namespace boost;
-
     // solution array has to be reordered and stored in a Multivector.
     // Using auxiliary arrays:
     Real**                                  ArrayOfPointers (new Real*[nDimensions]);
-    shared_array< shared_ptr<vector_Type> > ArrayOfVectors (new shared_ptr<vector_Type>[nDimensions]);
+    boost::shared_array< boost::shared_ptr<vector_Type> >
+    		ArrayOfVectors (new boost::shared_ptr<vector_Type>[nDimensions]);
 
     Int MyLDA;
 

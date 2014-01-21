@@ -12,24 +12,22 @@
 ### DATA FILE #####################################################################################
 ###################################################################################################
 
-[test]
-    num_parts = 3
-    hdf5_file_name = cube.h5
-    io_class = new # old or new
-
 [mesh]
 
 nelements = 19
+zoltan_lb_method = GRAPH # GRAPH or HIER
+zoltan_debug_level = 0
+zoltan_hier_debug_level = 0
 
 [../exporter]
 
-type       = hdf5
+type       = hdf5 # hdf5 (if library compiled with hdf5 support) or ensight
 multimesh  = false
 start      = 0
 save       = 1
 
 [../prec]
-	prectype                = Ifpack
+	prectype                = Ifpack # Ifpack or ML
 	displayList             = false
 
         [../ifpack]
@@ -41,13 +39,13 @@ save       = 1
            	relax_value                   = 0
 
            	[../amesos]
-           	solvertype =  Amesos_Klu
+           	solvertype =  Amesos_Umfpack # Amesos_KLU or Amesos_Umfpack
 
            	[../partitioner]
            	overlap = 2
 
            	[../schwarz]
-           	reordering_type = none
+           	reordering_type = none #metis, rcm, none
            	filter_singletons = true
 
 		[../]
@@ -56,10 +54,12 @@ save       = 1
 [../solver]
     solver          = gmres
     scaling         = none
-    output          = all
+    output          = all # none
     conv            = rhs
     max_iter        = 200
     reuse           = true
     max_iter_reuse  = 80
     kspace          = 100
     tol             = 1.e-10    # AztecOO tolerance
+
+

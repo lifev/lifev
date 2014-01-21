@@ -209,7 +209,7 @@ PreconditionerLinearSolver::setSolver ( SolverAztecOO& /*solver*/ )
 bool
 PreconditionerLinearSolver::isPreconditionerSet() const
 {
-    return M_solver;
+    return M_solver != 0 ? true : false;
 }
 
 PreconditionerLinearSolver::prec_raw_type*

@@ -41,9 +41,6 @@
 #include <string>
 #include <boost/shared_ptr.hpp>
 
-// Tell the compiler to ignore specific kind of warnings:
-#pragma GCC diagnostic ignored "-Wunused-variable"
-#pragma GCC diagnostic ignored "-Wunused-parameter"
 
 #ifdef HAVE_MPI
 #include <Epetra_MpiComm.h>
@@ -55,9 +52,6 @@
 #include <Teuchos_XMLParameterListHelpers.hpp>
 #include <Teuchos_RCP.hpp>
 
-//Tell the compiler to restore the warning previously silented
-#pragma GCC diagnostic warning "-Wunused-variable"
-#pragma GCC diagnostic warning "-Wunused-parameter"
 
 #include <lifev/core/LifeV.hpp>
 #include <lifev/core/array/MatrixEpetra.hpp>
@@ -69,7 +63,7 @@
 #include <lifev/core/algorithm/Preconditioner.hpp>
 #include <lifev/core/util/LifeChrono.hpp>
 
-// #include <lifev/navier_stokes/algorithm/PreconditionerPCD.hpp>
+#include <lifev/navier_stokes/algorithm/PreconditionerPCD.hpp>
 #include <lifev/navier_stokes/solver/NavierStokesSolver/AssemblyPolicyStokes.hpp>
 #include <lifev/navier_stokes/solver/NavierStokesSolver/NavierStokesProblem.hpp>
 
@@ -154,11 +148,11 @@ AssemblyPolicyNavierStokesPicard< mesh_Type >::assembleSystem ( matrixPtr_Type s
     beta += *solution;
     AssemblyPolicyStokes< mesh_Type >::M_assembler->addConvection ( *systemMatrix, 1.0, beta );
 
-    //    if ( preconditioner->preconditionerType() == "PCD" )
-    //    {
-    //        PreconditionerPCD* pcdPtr = dynamic_cast<PreconditionerPCD*> ( preconditioner.get() );
-    //        pcdPtr->updateBeta ( beta );
-    //    }
+    if ( preconditioner->preconditionerType() == "PCD" )
+    {
+    	PreconditionerPCD* pcdPtr = dynamic_cast<PreconditionerPCD*> ( preconditioner.get() );
+    	pcdPtr->updateBeta ( beta );
+    }
 }
 
 } // namespace LifeV

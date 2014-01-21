@@ -160,13 +160,13 @@ int main (int argc, char** argv)
 
     std::cout << "  ****************** BUILDING ALL EDGES" << std::endl;
     UInt bedges_found, iedges_found;
-    MeshUtility::buildEdges ( aMesh, ofile, cerr, bedges_found,
+    MeshUtility::buildEdges ( aMesh, ofile, std::cerr, bedges_found,
                               iedges_found, true, true, true );
     std::cout << " **********************************************************" << std::endl;
 
     std::cout << "  ****************** BUILDING ALL FACES" << std::endl;
     UInt bfaces_found, ifaces_found;
-    MeshUtility::buildFaces ( aMesh, ofile, cerr, bfaces_found,
+    MeshUtility::buildFaces ( aMesh, ofile, std::cerr, bfaces_found,
                               ifaces_found, true, true, true );
 
     aMesh.showMe();
@@ -177,7 +177,7 @@ int main (int argc, char** argv)
     aMesh.showMe();
     checkMesh3D (aMesh, sw,
                  true, true,
-                 cerr, cout, ofile);
+                 std::cerr, std::cout, ofile);
     ofile.close();
 
     ///THIS PART IS ONLY TO VERIFY IF THESE ROUTINES COMPILE PROPERLY
