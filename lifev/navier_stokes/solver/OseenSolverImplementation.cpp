@@ -1215,4 +1215,32 @@ OseenSolver<MeshType, SolverType>::setTolMaxIteration ( const Real& tolerance, c
     M_linearSolver->setMaxNumIterations ( maxIteration );
 }
 
+template<typename MeshType, typename SolverType>
+void
+OseenSolver<MeshType, SolverType>::setUspaceDim( const UInt& uSpaceDim)
+{
+	M_uSpaceDim = uSpaceDim;
+}
+
+template<typename MeshType, typename SolverType>
+void
+OseenSolver<MeshType, SolverType>::setPspaceDim( const UInt& pSpaceDim)
+{
+	M_pSpaceDim = pSpaceDim;
+}
+
+template<typename MeshType, typename SolverType>
+void
+OseenSolver<MeshType, SolverType>::setUfieldDim( const UInt& uFieldDim)
+{
+	M_uFieldDim = uFieldDim;
+}
+
+template<typename MeshType, typename SolverType>
+void
+OseenSolver<MeshType, SolverType>::setPfieldDim( const UInt& pFieldDim)
+{
+	M_pFieldDim = pFieldDim;
+}
+
 } //end namespace LifeV
