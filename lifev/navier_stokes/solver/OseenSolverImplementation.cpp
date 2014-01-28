@@ -43,8 +43,8 @@ namespace LifeV
 // Constructors & Destructor
 // ===================================================
 
-template<typename MeshType, typename SolverType>
-OseenSolver<MeshType, SolverType>::
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::
 OseenSolver ( boost::shared_ptr<data_Type>    dataType,
               FESpace<mesh_Type, MapEpetra>&  velocityFESpace,
               FESpace<mesh_Type, MapEpetra>&  pressureFESpace,
@@ -100,10 +100,8 @@ OseenSolver ( boost::shared_ptr<data_Type>    dataType,
     M_wLoc                   ( M_velocityFESpace.fe().nbFEDof(), velocityFESpace.fieldDim() ),
     M_uLoc                   ( M_velocityFESpace.fe().nbFEDof(), velocityFESpace.fieldDim() ),
     M_un                     ( new vector_Type (M_localMap) ),
-    M_uSpaceDim				 (3),
-    M_pSpaceDim				 (3),
-    M_uFieldDim				 (3),
-    M_pFieldDim              (1)
+    M_fespaceUETA            (M_velocityFESpace.mesh(), &(M_velocityFESpace.refFE()), communicator),
+    M_fespacePETA            (M_pressureFESpace.mesh(), &(M_pressureFESpace.refFE()), communicator)
 {
     // if(M_stabilization = ( &M_velocityFESpace.refFE() == &M_pressureFESpace.refFE() ))
     {
@@ -112,8 +110,8 @@ OseenSolver ( boost::shared_ptr<data_Type>    dataType,
     }
 }
 
-template<typename MeshType, typename SolverType>
-OseenSolver<MeshType, SolverType>::
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::
 OseenSolver ( boost::shared_ptr<data_Type>    dataType,
               FESpace<mesh_Type, MapEpetra>&  velocityFESpace,
               FESpace<mesh_Type, MapEpetra>&  pressureFESpace,
@@ -161,10 +159,8 @@ OseenSolver ( boost::shared_ptr<data_Type>    dataType,
     M_wLoc                   ( M_velocityFESpace.fe().nbFEDof(), M_velocityFESpace.fieldDim() ),
     M_uLoc                   ( M_velocityFESpace.fe().nbFEDof(), M_velocityFESpace.fieldDim() ),
     M_un                     ( /*new vector_Type(M_localMap)*/ ),
-    M_uSpaceDim				 (3),
-    M_pSpaceDim				 (3),
-    M_uFieldDim				 (3),
-    M_pFieldDim              (1)
+    M_fespaceUETA            (M_velocityFESpace.mesh(), &(M_velocityFESpace.refFE()), communicator),
+    M_fespacePETA            (M_pressureFESpace.mesh(), &(M_pressureFESpace.refFE()), communicator)
 {
     // if(M_stabilization = ( &M_velocityFESpace.refFE() == &M_pressureFESpace.refFE() ))
     {
@@ -173,8 +169,8 @@ OseenSolver ( boost::shared_ptr<data_Type>    dataType,
     }
 }
 
-template<typename MeshType, typename SolverType>
-OseenSolver<MeshType, SolverType>::
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::
 OseenSolver ( boost::shared_ptr<data_Type>    dataType,
               FESpace<mesh_Type, MapEpetra>&  velocityFESpace,
               FESpace<mesh_Type, MapEpetra>&  pressureFESpace,
@@ -221,10 +217,8 @@ OseenSolver ( boost::shared_ptr<data_Type>    dataType,
     M_wLoc                   ( M_velocityFESpace.fe().nbFEDof(), velocityFESpace.fieldDim() ),
     M_uLoc                   ( M_velocityFESpace.fe().nbFEDof(), velocityFESpace.fieldDim() ),
     M_un                     ( new vector_Type (M_localMap) ),
-    M_uSpaceDim				 (3),
-    M_pSpaceDim				 (3),
-    M_uFieldDim				 (3),
-    M_pFieldDim              (1)
+    M_fespaceUETA            (M_velocityFESpace.mesh(), &(M_velocityFESpace.refFE()), communicator),
+    M_fespacePETA            (M_pressureFESpace.mesh(), &(M_pressureFESpace.refFE()), communicator)
 {
     // if(M_stabilization = ( &M_velocityFESpace.refFE() == &M_pressureFESpace.refFE() ))
     {
@@ -233,8 +227,8 @@ OseenSolver ( boost::shared_ptr<data_Type>    dataType,
     }
 }
 
-template<typename MeshType, typename SolverType>
-OseenSolver<MeshType, SolverType>::
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::
 ~OseenSolver()
 {
 
@@ -245,9 +239,9 @@ OseenSolver<MeshType, SolverType>::
 // Methods
 // ===================================================
 
-template<typename MeshType, typename SolverType>
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 void
-OseenSolver<MeshType, SolverType>::setUp ( const GetPot& dataFile )
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::setUp ( const GetPot& dataFile )
 {
     if (M_linearSolver.get() )
     {
@@ -282,9 +276,9 @@ OseenSolver<MeshType, SolverType>::setUp ( const GetPot& dataFile )
 }
 
 
-template<typename MeshType, typename SolverType>
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 void
-OseenSolver<MeshType, SolverType>::
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::
 initialize ( const function_Type& velocityFunction, const function_Type& pressureFunction )
 {
     vector_Type velocityInitialGuess ( M_velocityFESpace.map() );
@@ -301,9 +295,9 @@ initialize ( const function_Type& velocityFunction, const function_Type& pressur
 }
 
 
-template<typename MeshType, typename SolverType>
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 void
-OseenSolver<MeshType, SolverType>::
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::
 initialize ( const vector_Type& velocityInitialGuess, const vector_Type& pressureInitialGuess )
 {
 
@@ -314,9 +308,9 @@ initialize ( const vector_Type& velocityInitialGuess, const vector_Type& pressur
 
 }
 
-template<typename MeshType, typename SolverType>
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 void
-OseenSolver<MeshType, SolverType>::
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::
 initialize ( const vector_Type& velocityAndPressure )
 {
 
@@ -328,9 +322,9 @@ initialize ( const vector_Type& velocityAndPressure )
 
 }
 
-template<typename MeshType, typename SolverType>
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 void
-OseenSolver<MeshType, SolverType>::buildSystem()
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::buildSystem()
 {
     M_velocityMatrixMass.reset  ( new matrix_Type ( M_localMap ) );
     M_matrixStokes.reset ( new matrix_Type ( M_localMap ) );
@@ -541,9 +535,9 @@ OseenSolver<MeshType, SolverType>::buildSystem()
 
 }
 
-template<typename MeshType, typename SolverType>
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 void
-OseenSolver<MeshType, SolverType>::
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::
 updateSystem ( const Real         alpha,
                const vector_Type& betaVector,
                const vector_Type& sourceVector )
@@ -565,9 +559,9 @@ updateSystem ( const Real         alpha,
 
 }
 
-template<typename MeshType, typename SolverType>
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 void
-OseenSolver<MeshType, SolverType>::
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::
 updateSystem ( const Real         alpha,
                const vector_Type& betaVector,
                const vector_Type& sourceVector,
@@ -779,9 +773,9 @@ updateSystem ( const Real         alpha,
 }
 
 
-template<typename MeshType, typename SolverType>
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 void
-OseenSolver<MeshType, SolverType>::updateStabilization ( matrix_Type& matrixFull )
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::updateStabilization ( matrix_Type& matrixFull )
 {
 
     if ( M_stabilization )
@@ -791,8 +785,8 @@ OseenSolver<MeshType, SolverType>::updateStabilization ( matrix_Type& matrixFull
 
 }
 
-template <typename Mesh, typename SolverType>
-void OseenSolver<Mesh, SolverType>::updateSourceTerm ( source_Type const& source )
+template <typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
+void OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::updateSourceTerm ( source_Type const& source )
 {
     vector_Type rhs ( M_localMap );
 
@@ -819,9 +813,9 @@ void OseenSolver<Mesh, SolverType>::updateSourceTerm ( source_Type const& source
 
 
 
-template<typename MeshType, typename SolverType>
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 void
-OseenSolver<MeshType, SolverType>::iterate ( bcHandler_Type& bcHandler )
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::iterate ( bcHandler_Type& bcHandler )
 {
 
     LifeChrono chrono;
@@ -878,9 +872,9 @@ OseenSolver<MeshType, SolverType>::iterate ( bcHandler_Type& bcHandler )
 } // iterate()
 
 
-template<typename MeshType, typename SolverType>
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 void
-OseenSolver<MeshType, SolverType>::reduceSolution ( Vector& velocityVector, Vector& pressureVector )
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::reduceSolution ( Vector& velocityVector, Vector& pressureVector )
 {
     vector_Type solution ( *M_solution, 0 );
 
@@ -899,9 +893,9 @@ OseenSolver<MeshType, SolverType>::reduceSolution ( Vector& velocityVector, Vect
 
 }
 
-template<typename MeshType, typename SolverType>
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 void
-OseenSolver<MeshType, SolverType>::reduceResidual ( Vector& residualVector )
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::reduceResidual ( Vector& residualVector )
 {
     vector_Type residual ( *M_residual, 0 );
 
@@ -915,53 +909,53 @@ OseenSolver<MeshType, SolverType>::reduceResidual ( Vector& residualVector )
     }
 }
 
-template<typename MeshType, typename SolverType>
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 void
-OseenSolver<MeshType, SolverType>::setBlockPreconditioner ( matrixPtr_Type blockPreconditioner )
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::setBlockPreconditioner ( matrixPtr_Type blockPreconditioner )
 {
     // blockPreconditioner.reset(new matrix_Type(M_monolithicMap, M_solid->getMatrixPtr()->getMeanNumEntries()));
     *blockPreconditioner += *M_blockPreconditioner;
 }
 
-template<typename MeshType, typename SolverType>
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 void
-OseenSolver<MeshType, SolverType>::getFluidMatrix ( matrix_Type& matrixFull )
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::getFluidMatrix ( matrix_Type& matrixFull )
 {
     M_matrixNoBC->globalAssemble();
     matrixFull += *M_matrixNoBC;
 }
 
-template<typename MeshType, typename SolverType>
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 void
-OseenSolver<MeshType, SolverType>::postProcessingSetArea()
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::postProcessingSetArea()
 {
     M_postProcessing->set_area();
 }
 
-template<typename MeshType, typename SolverType>
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 void
-OseenSolver<MeshType, SolverType>::postProcessingSetNormal()
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::postProcessingSetNormal()
 {
     M_postProcessing->set_normal();
 }
 
-template<typename MeshType, typename SolverType>
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 void
-OseenSolver<MeshType, SolverType>::postProcessingSetPhi()
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::postProcessingSetPhi()
 {
     M_postProcessing->set_phi();
 }
 
-template<typename MeshType, typename SolverType>
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 Real
-OseenSolver<MeshType, SolverType>::flux ( const markerID_Type& flag )
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::flux ( const markerID_Type& flag )
 {
     return flux ( flag, *M_solution );
 }
 
-template<typename MeshType, typename SolverType>
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 Real
-OseenSolver<MeshType, SolverType>::flux ( const markerID_Type& flag,
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::flux ( const markerID_Type& flag,
                                           const vector_Type& solution )
 {
     vector_Type velocityAndPressure ( solution, Repeated );
@@ -971,16 +965,16 @@ OseenSolver<MeshType, SolverType>::flux ( const markerID_Type& flag,
     return M_postProcessing->flux ( velocity, flag );
 }
 
-template<typename MeshType, typename SolverType>
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 Real
-OseenSolver<MeshType, SolverType>::kineticNormalStress ( const markerID_Type& flag )
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::kineticNormalStress ( const markerID_Type& flag )
 {
     return kineticNormalStress ( flag, *M_solution );
 }
 
-template<typename MeshType, typename SolverType>
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 Real
-OseenSolver<MeshType, SolverType>::kineticNormalStress ( const markerID_Type& flag,
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::kineticNormalStress ( const markerID_Type& flag,
                                                          const vector_Type& solution )
 {
     vector_Type velocityAndPressure ( solution, Repeated );
@@ -990,37 +984,37 @@ OseenSolver<MeshType, SolverType>::kineticNormalStress ( const markerID_Type& fl
     return M_postProcessing->kineticNormalStress ( velocity, M_oseenData->density(), flag );
 }
 
-template<typename MeshType, typename SolverType>
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 Real
-OseenSolver<MeshType, SolverType>::area ( const markerID_Type& flag )
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::area ( const markerID_Type& flag )
 {
     return M_postProcessing->measure ( flag );
 }
 
-template<typename MeshType, typename SolverType>
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 Vector
-OseenSolver<MeshType, SolverType>::normal ( const markerID_Type& flag )
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::normal ( const markerID_Type& flag )
 {
     return M_postProcessing->normal ( flag );
 }
 
-template<typename MeshType, typename SolverType>
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 Vector
-OseenSolver<MeshType, SolverType>::geometricCenter ( const markerID_Type& flag )
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::geometricCenter ( const markerID_Type& flag )
 {
     return M_postProcessing->geometricCenter ( flag );
 }
 
-template<typename MeshType, typename SolverType>
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 Real
-OseenSolver<MeshType, SolverType>::pressure ( const markerID_Type& flag )
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::pressure ( const markerID_Type& flag )
 {
     return pressure ( flag, *M_solution );
 }
 
-template<typename MeshType, typename SolverType>
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 Real
-OseenSolver<MeshType, SolverType>::pressure (const markerID_Type& flag,
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::pressure (const markerID_Type& flag,
                                              const vector_Type& solution)
 {
     vector_Type velocityAndPressure ( solution, Repeated );
@@ -1032,16 +1026,16 @@ OseenSolver<MeshType, SolverType>::pressure (const markerID_Type& flag,
     return M_postProcessing->average ( pressure, flag, 1 ) [0];
 }
 
-template<typename MeshType, typename SolverType>
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 Real
-OseenSolver<MeshType, SolverType>::meanNormalStress ( const markerID_Type& flag, bcHandler_Type& bcHandler )
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::meanNormalStress ( const markerID_Type& flag, bcHandler_Type& bcHandler )
 {
     return meanNormalStress ( flag, bcHandler, *M_solution );
 }
 
-template<typename MeshType, typename SolverType>
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 Real
-OseenSolver<MeshType, SolverType>::meanNormalStress (const markerID_Type& flag, bcHandler_Type& bcHandler, const vector_Type& solution )
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::meanNormalStress (const markerID_Type& flag, bcHandler_Type& bcHandler, const vector_Type& solution )
 {
     if ( bcHandler.findBCWithFlag ( flag ).type() == Flux )
     {
@@ -1058,30 +1052,30 @@ OseenSolver<MeshType, SolverType>::meanNormalStress (const markerID_Type& flag, 
     }
 }
 
-template<typename MeshType, typename SolverType>
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 Real
-OseenSolver<MeshType, SolverType>::meanTotalNormalStress ( const markerID_Type& flag, bcHandler_Type& bcHandler )
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::meanTotalNormalStress ( const markerID_Type& flag, bcHandler_Type& bcHandler )
 {
     return meanTotalNormalStress ( flag, bcHandler, *M_solution );
 }
 
-template<typename MeshType, typename SolverType>
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 Real
-OseenSolver<MeshType, SolverType>::meanTotalNormalStress (const markerID_Type& flag, bcHandler_Type& bcHandler, const vector_Type& solution )
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::meanTotalNormalStress (const markerID_Type& flag, bcHandler_Type& bcHandler, const vector_Type& solution )
 {
     return meanNormalStress ( flag, bcHandler, solution ) - kineticNormalStress ( flag, solution );
 }
 
-template<typename MeshType, typename SolverType>
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 Real
-OseenSolver<MeshType, SolverType>::lagrangeMultiplier ( const markerID_Type& flag, bcHandler_Type& bcHandler )
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::lagrangeMultiplier ( const markerID_Type& flag, bcHandler_Type& bcHandler )
 {
     return lagrangeMultiplier ( flag, bcHandler, *M_solution );
 }
 
-template<typename MeshType, typename SolverType>
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 Real
-OseenSolver<MeshType, SolverType>::lagrangeMultiplier ( const markerID_Type&  flag,
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::lagrangeMultiplier ( const markerID_Type&  flag,
                                                         bcHandler_Type& bcHandler,
                                                         const vector_Type& solution )
 {
@@ -1103,9 +1097,9 @@ OseenSolver<MeshType, SolverType>::lagrangeMultiplier ( const markerID_Type&  fl
     return 0;
 }
 
-template<typename MeshType, typename SolverType>
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 Real
-OseenSolver<MeshType, SolverType>::removeMean ( vector_Type& x )
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::removeMean ( vector_Type& x )
 {
 
     LifeChrono chrono;
@@ -1161,9 +1155,9 @@ OseenSolver<MeshType, SolverType>::removeMean ( vector_Type& x )
 
 } // removeMean()
 
-template<typename MeshType, typename SolverType>
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 void
-OseenSolver<MeshType, SolverType>::applyBoundaryConditions ( matrix_Type&       matrix,
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::applyBoundaryConditions ( matrix_Type&       matrix,
                                                              vector_Type&       rightHandSide,
                                                              bcHandler_Type& bcHandler )
 {
@@ -1207,9 +1201,9 @@ OseenSolver<MeshType, SolverType>::applyBoundaryConditions ( matrix_Type&       
 // ===================================================
 
 
-template<typename MeshType, typename SolverType>
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 void
-OseenSolver<MeshType, SolverType>::setupPostProc( )
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::setupPostProc( )
 {
     M_postProcessing.reset ( new PostProcessingBoundary<mesh_Type> ( M_velocityFESpace.mesh(),
                                                                      &M_velocityFESpace.feBd(),
@@ -1219,40 +1213,12 @@ OseenSolver<MeshType, SolverType>::setupPostProc( )
                                                                      M_localMap ) );
 }
 
-template<typename MeshType, typename SolverType>
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 void
-OseenSolver<MeshType, SolverType>::setTolMaxIteration ( const Real& tolerance, const Int& maxIteration )
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::setTolMaxIteration ( const Real& tolerance, const Int& maxIteration )
 {
     M_linearSolver->setTolerance ( tolerance );
     M_linearSolver->setMaxNumIterations ( maxIteration );
-}
-
-template<typename MeshType, typename SolverType>
-void
-OseenSolver<MeshType, SolverType>::setUspaceDim( const UInt& uSpaceDim)
-{
-	M_uSpaceDim = uSpaceDim;
-}
-
-template<typename MeshType, typename SolverType>
-void
-OseenSolver<MeshType, SolverType>::setPspaceDim( const UInt& pSpaceDim)
-{
-	M_pSpaceDim = pSpaceDim;
-}
-
-template<typename MeshType, typename SolverType>
-void
-OseenSolver<MeshType, SolverType>::setUfieldDim( const UInt& uFieldDim)
-{
-	M_uFieldDim = uFieldDim;
-}
-
-template<typename MeshType, typename SolverType>
-void
-OseenSolver<MeshType, SolverType>::setPfieldDim( const UInt& pFieldDim)
-{
-	M_pFieldDim = pFieldDim;
 }
 
 } //end namespace LifeV

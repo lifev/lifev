@@ -70,6 +70,8 @@
 
 #include <boost/shared_ptr.hpp>
 
+#include <lifev/eta/fem/ETFESpace.hpp>
+
 #include <list>
 
 namespace LifeV
@@ -84,7 +86,7 @@ namespace LifeV
 
  */
 
-template< typename MeshType, typename SolverType = LifeV::SolverAztecOO >
+template< typename MeshType, typename SolverType = LifeV::SolverAztecOO, typename MapType = MapEpetra, UInt SpaceDim = 3, UInt FieldDim = 3>
 class OseenSolver
 {
 
@@ -93,6 +95,7 @@ public:
     //! @name Public Types
     //@{
 
+	typedef MapType 									map_Type;
     typedef MeshType                                    mesh_Type;
     typedef SolverType                                  linearSolver_Type;
     typedef boost::shared_ptr<linearSolver_Type>        linearSolverPtr_Type;
@@ -545,30 +548,6 @@ public:
      */
     void setTolMaxIteration ( const Real& tolerance, const Int& maxIteration = -1 );
 
-    //! set the space dimension for the fluid velocity
-    /*!
-        @param uSpaceDim (e.g., 3 for 3D or 2 for 2D)
-    */
-    void setUspaceDim( const UInt& uSpaceDim);
-
-    //! set the space dimension for the fluid pressure
-    /*!
-        @param pSpaceDim (e.g., 3 for 3D or 2 for 2D)
-    */
-    void setPspaceDim( const UInt& pSpaceDim);
-
-    //! set the field dimension for the fluid velocity
-    /*!
-        @param uFieldDim (e.g., 1 if scalar, uSpaceDim if it is vectorial)
-    */
-    void setUfieldDim( const UInt& uFieldDim);
-
-    //! set the field dimension for the fluid pressure
-    /*!
-        @param pFieldDim (e.g., 1 if scalar, pSpaceDim if it is vectorial)
-    */
-    void setPfieldDim( const UInt& pFieldDim);
-
     //@}
 
     //! @name Get Methods
@@ -912,10 +891,8 @@ protected:
 
     // Members added for the migration to ETA
 
-    UInt M_uSpaceDim; // space dimension for the velocity - By default in the constructor is set to 3. Use setUspaceDim() method to change it.
-    UInt M_pSpaceDim; // space dimension for the pressure - By default in the constructor is set to 3. Use setPspaceDim() method to change it.
-    UInt M_uFieldDim; // field dimension of the velocity  - By default in the constructor is set to 3. Use setUfieldDim() method to change it.
-    UInt M_pFieldDim; // field dimension of the pressure  - By default in the constructor is set to 1. Use setPfieldDim() method to change it.
+    ETFESpace<mesh_Type, map_Type, SpaceDim, SpaceDim >  M_fespaceUETA;
+    ETFESpace<mesh_Type, map_Type, SpaceDim, 1 >         M_fespacePETA;
 
 
 }; // class OseenSolver
