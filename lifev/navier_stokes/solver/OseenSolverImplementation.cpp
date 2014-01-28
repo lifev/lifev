@@ -99,7 +99,11 @@ OseenSolver ( boost::shared_ptr<data_Type>    dataType,
     M_blockPreconditioner    ( ),
     M_wLoc                   ( M_velocityFESpace.fe().nbFEDof(), velocityFESpace.fieldDim() ),
     M_uLoc                   ( M_velocityFESpace.fe().nbFEDof(), velocityFESpace.fieldDim() ),
-    M_un                     ( new vector_Type (M_localMap) )
+    M_un                     ( new vector_Type (M_localMap) ),
+    M_uSpaceDim				 (3),
+    M_pSpaceDim				 (3),
+    M_uFieldDim				 (3),
+    M_pFieldDim              (1)
 {
     // if(M_stabilization = ( &M_velocityFESpace.refFE() == &M_pressureFESpace.refFE() ))
     {
@@ -156,7 +160,11 @@ OseenSolver ( boost::shared_ptr<data_Type>    dataType,
     M_blockPreconditioner    ( ),
     M_wLoc                   ( M_velocityFESpace.fe().nbFEDof(), M_velocityFESpace.fieldDim() ),
     M_uLoc                   ( M_velocityFESpace.fe().nbFEDof(), M_velocityFESpace.fieldDim() ),
-    M_un                     ( /*new vector_Type(M_localMap)*/ )
+    M_un                     ( /*new vector_Type(M_localMap)*/ ),
+    M_uSpaceDim				 (3),
+    M_pSpaceDim				 (3),
+    M_uFieldDim				 (3),
+    M_pFieldDim              (1)
 {
     // if(M_stabilization = ( &M_velocityFESpace.refFE() == &M_pressureFESpace.refFE() ))
     {
@@ -212,7 +220,11 @@ OseenSolver ( boost::shared_ptr<data_Type>    dataType,
     M_blockPreconditioner    ( ),
     M_wLoc                   ( M_velocityFESpace.fe().nbFEDof(), velocityFESpace.fieldDim() ),
     M_uLoc                   ( M_velocityFESpace.fe().nbFEDof(), velocityFESpace.fieldDim() ),
-    M_un                     ( new vector_Type (M_localMap) )
+    M_un                     ( new vector_Type (M_localMap) ),
+    M_uSpaceDim				 (3),
+    M_pSpaceDim				 (3),
+    M_uFieldDim				 (3),
+    M_pFieldDim              (1)
 {
     // if(M_stabilization = ( &M_velocityFESpace.refFE() == &M_pressureFESpace.refFE() ))
     {
