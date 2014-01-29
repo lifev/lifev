@@ -100,8 +100,8 @@ OseenSolver ( boost::shared_ptr<data_Type>    dataType,
     M_wLoc                   ( M_velocityFESpace.fe().nbFEDof(), velocityFESpace.fieldDim() ),
     M_uLoc                   ( M_velocityFESpace.fe().nbFEDof(), velocityFESpace.fieldDim() ),
     M_un                     ( new vector_Type (M_localMap) ),
-    M_fespaceUETA            (M_velocityFESpace.mesh(), &(M_velocityFESpace.refFE()), communicator),
-    M_fespacePETA            (M_pressureFESpace.mesh(), &(M_pressureFESpace.refFE()), communicator)
+    M_fespaceUETA            ( new ETFESpace_velocity(M_velocityFESpace.mesh(), &(M_velocityFESpace.refFE()), communicator)),
+    M_fespacePETA            ( new ETFESpace_pressure(M_pressureFESpace.mesh(), &(M_pressureFESpace.refFE()), communicator))
 {
     // if(M_stabilization = ( &M_velocityFESpace.refFE() == &M_pressureFESpace.refFE() ))
     {
@@ -159,8 +159,8 @@ OseenSolver ( boost::shared_ptr<data_Type>    dataType,
     M_wLoc                   ( M_velocityFESpace.fe().nbFEDof(), M_velocityFESpace.fieldDim() ),
     M_uLoc                   ( M_velocityFESpace.fe().nbFEDof(), M_velocityFESpace.fieldDim() ),
     M_un                     ( /*new vector_Type(M_localMap)*/ ),
-    M_fespaceUETA            (M_velocityFESpace.mesh(), &(M_velocityFESpace.refFE()), communicator),
-    M_fespacePETA            (M_pressureFESpace.mesh(), &(M_pressureFESpace.refFE()), communicator)
+    M_fespaceUETA            ( new ETFESpace_velocity(M_velocityFESpace.mesh(), &(M_velocityFESpace.refFE()), communicator)),
+    M_fespacePETA            ( new ETFESpace_pressure(M_pressureFESpace.mesh(), &(M_pressureFESpace.refFE()), communicator))
 {
     // if(M_stabilization = ( &M_velocityFESpace.refFE() == &M_pressureFESpace.refFE() ))
     {
@@ -217,8 +217,8 @@ OseenSolver ( boost::shared_ptr<data_Type>    dataType,
     M_wLoc                   ( M_velocityFESpace.fe().nbFEDof(), velocityFESpace.fieldDim() ),
     M_uLoc                   ( M_velocityFESpace.fe().nbFEDof(), velocityFESpace.fieldDim() ),
     M_un                     ( new vector_Type (M_localMap) ),
-    M_fespaceUETA            (M_velocityFESpace.mesh(), &(M_velocityFESpace.refFE()), communicator),
-    M_fespacePETA            (M_pressureFESpace.mesh(), &(M_pressureFESpace.refFE()), communicator)
+    M_fespaceUETA            ( new ETFESpace_velocity(M_velocityFESpace.mesh(), &(M_velocityFESpace.refFE()), communicator)),
+    M_fespacePETA            ( new ETFESpace_pressure(M_pressureFESpace.mesh(), &(M_pressureFESpace.refFE()), communicator))
 {
     // if(M_stabilization = ( &M_velocityFESpace.refFE() == &M_pressureFESpace.refFE() ))
     {
@@ -326,12 +326,134 @@ template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceD
 void
 OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::buildSystem()
 {
-    M_velocityMatrixMass.reset  ( new matrix_Type ( M_localMap ) );
+	// New ETA PART
+	/*
+	 * TESTING THE ASSEMBLY USING ETA
+	 *
+	 */
+
+	M_Displayer.leaderPrint ( "  F-  Computing constant matrices ...          " );
+	LifeChrono chrono;
+	chrono.start();
+
+	M_velocityMatrixMass.reset  ( new matrix_Type ( M_localMap ) );
+	M_LinearTerms.reset(new matrix_block_Type( M_fespaceUETA->map() | M_fespacePETA->map() ));
+    if ( M_isDiagonalBlockPreconditioner == true )
+    {
+        M_blockPreconditioner.reset ( new matrix_Type ( M_localMap ) );
+        *M_blockPreconditioner *= 0;
+    }
+
+    Real density = M_oseenData->density();
+    *M_velocityMatrixMass *= 0;
+	*M_LinearTerms *= 0;
+
+	{
+		using namespace ExpressionAssembly;
+		if ( !M_steady )
+		{
+			//LifeChrono chronoM;
+			//chronoM.start();
+			integrate(
+					elements(M_fespaceUETA->mesh()),
+					M_velocityFESpace.qr(),
+					M_fespaceUETA,
+					M_fespaceUETA,
+					density * dot(phi_i, phi_j)
+			) >> M_velocityMatrixMass;
+			//chronoM.stop();
+			//M_Displayer.leaderPrintMax ( "Mass done in " , chronoM.diff() );
+			M_velocityMatrixMass->globalAssemble();
+		}
+
+		if ( M_isDiagonalBlockPreconditioner == true )
+		{
+			if ( M_stiffStrain )
+			{
+				integrate(
+						elements(M_fespaceUETA->mesh()),
+						M_velocityFESpace.qr(),
+						M_fespaceUETA,
+						M_fespaceUETA,
+						M_oseenData->viscosity() * dot( grad(phi_i) + transpose(grad(phi_i)) , grad(phi_j) + transpose(grad(phi_j)) )
+				) >> M_blockPreconditioner;
+			}
+			else
+			{
+				integrate(
+						elements(M_fespaceUETA->mesh()),
+						M_velocityFESpace.qr(),
+						M_fespaceUETA,
+						M_fespaceUETA,
+						M_oseenData->viscosity() * dot( grad(phi_i), grad(phi_j) )
+				) >> M_blockPreconditioner;
+			}
+		}
+		else
+		{
+			if ( M_stiffStrain )
+			{
+				integrate(
+						elements(M_fespaceUETA->mesh()),
+						M_velocityFESpace.qr(),
+						M_fespaceUETA,
+						M_fespaceUETA,
+						M_oseenData->viscosity() * dot( grad(phi_i) + transpose(grad(phi_i)) , grad(phi_j) + transpose(grad(phi_j)) )
+				) >> M_LinearTerms->block(0,0);
+			}
+			else
+			{
+				integrate(
+						elements(M_fespaceUETA->mesh()),
+						M_velocityFESpace.qr(),
+						M_fespaceUETA,
+						M_fespaceUETA,
+						M_oseenData->viscosity() * dot( grad(phi_i), grad(phi_j) )
+				) >> M_LinearTerms->block(0,0);
+			}
+		}
+
+		integrate(
+				elements(M_fespaceUETA->mesh()),
+				M_velocityFESpace.qr(),
+				M_fespaceUETA,
+				M_fespacePETA,
+				value(-1.0) * phi_j * div(phi_i)
+		) >> M_LinearTerms->block(0,1);
+
+		integrate(
+				elements(M_fespaceUETA->mesh()),
+				M_velocityFESpace.qr(),
+				M_fespacePETA,
+				M_fespaceUETA,
+				phi_i * div(phi_j)
+		) >> M_LinearTerms->block(1,0);
+	}
+
+	M_LinearTerms->globalAssemble();
+
+	chrono.stop();
+	M_Displayer.leaderPrintMax ( "done in " , chrono.diff() );
+
+	if ( M_isDiagonalBlockPreconditioner == true )
+	{
+		M_blockPreconditioner->globalAssemble();
+		*M_LinearTerms += *M_blockPreconditioner;
+	}
+
+	M_velocityMatrixMass->spy("ETA_m");
+	M_LinearTerms->spy("ETA_stokes");
+	//M_blockPreconditioner->spy("ETA_bp");
+
+	////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	/*
+	 * END OF THE TEST
+	 */
+	/*
     M_matrixStokes.reset ( new matrix_Type ( M_localMap ) );
+	M_velocityMatrixMass.reset  ( new matrix_Type ( M_localMap ) );
 
-    M_Displayer.leaderPrint ( "  F-  Computing constant matrices ...          " );
-
-    LifeChrono chrono;
+	LifeChrono chrono;
 
     LifeChrono chronoDer;
     LifeChrono chronoStiff;
@@ -507,9 +629,6 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::buildSystem()
     }
     comm()->Barrier();
 
-    chrono.stop();
-    M_Displayer.leaderPrintMax ( "done in " , chrono.diff() );
-
     M_Displayer.leaderPrint ( "  F-  Finalizing the matrices ...              " );
 
     chrono.start();
@@ -520,7 +639,7 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::buildSystem()
     chrono.stop();
     M_Displayer.leaderPrintMax ( "done in " , chrono.diff() );
 
-    if ( false )
+    //if ( false )
         std::cout << " partial times:  \n"
                   << " Der            " << chronoDer.diffCumul() << " s.\n"
                   << " Zero           " << chronoZero.diffCumul() << " s.\n"
@@ -533,6 +652,10 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::buildSystem()
                   << " Div Assemble   " << chronoDivAssemble.diffCumul() << " s.\n"
                   << std::endl;
 
+    //ASSERT(0!=0,"termini costanti assemblati");
+    M_velocityMatrixMass->spy("OLD_m");
+    M_matrixStokes->spy("OLD_stokes");
+    */
 }
 
 template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>

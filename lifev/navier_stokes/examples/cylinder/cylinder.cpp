@@ -494,6 +494,9 @@ Cylinder::run()
     fluid.setUp (dataFile);
     fluid.buildSystem();
 
+    ASSERT(0!=0,"Fine costruzione parte lineare");
+
+
     MPI_Barrier (MPI_COMM_WORLD);
 
     // Initialization

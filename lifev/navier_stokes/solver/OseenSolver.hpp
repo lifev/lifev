@@ -71,6 +71,8 @@
 #include <boost/shared_ptr.hpp>
 
 #include <lifev/eta/fem/ETFESpace.hpp>
+#include <lifev/core/array/MatrixBlockMonolithicEpetra.hpp>
+#include <lifev/eta/expression/Integrate.hpp>
 
 #include <list>
 
@@ -125,6 +127,14 @@ public:
 
     typedef typename linearSolver_Type::prec_raw_type   preconditioner_Type;
     typedef typename linearSolver_Type::prec_type       preconditionerPtr_Type;
+
+    // typedefs added to use block matrices
+
+    typedef ETFESpace<mesh_Type, map_Type, SpaceDim, SpaceDim > ETFESpace_velocity;
+    typedef ETFESpace<mesh_Type, map_Type, SpaceDim, 1 >        ETFESpace_pressure;
+
+    typedef MatrixBlockMonolithicEpetra<Real>           matrix_block_Type;
+    typedef boost::shared_ptr<matrix_block_Type>        matrixPtr_block_Type;
 
     //@}
 
@@ -891,8 +901,10 @@ protected:
 
     // Members added for the migration to ETA
 
-    ETFESpace<mesh_Type, map_Type, SpaceDim, SpaceDim >  M_fespaceUETA;
-    ETFESpace<mesh_Type, map_Type, SpaceDim, 1 >         M_fespacePETA;
+    boost::shared_ptr<ETFESpace_velocity > M_fespaceUETA;
+    boost::shared_ptr<ETFESpace_pressure > M_fespacePETA;
+
+    matrixPtr_block_Type M_LinearTerms;
 
 
 }; // class OseenSolver

@@ -6,7 +6,7 @@
 [exporter]
 multimesh  = false
 start      = 0
-save       = 10
+save       = 1
 
 [fluid]
 
@@ -16,7 +16,7 @@ save       = 10
     D               = 1.
     H               = 2.
     centered        = 1
-    initial_sol     = stokes          # stokes, none
+    initial_sol     = none         # stokes, none
 
 
     [../physics]
@@ -25,8 +25,8 @@ save       = 10
 
     [../time_discretization]
     initialtime     = 0.
-    endtime         = 0.001
-    timestep        = 0.0001
+    endtime         = 0.01
+    timestep        = 0.001
     BDF_order       = 1
 
     [../space_discretization]
@@ -36,7 +36,7 @@ save       = 10
 
     verbose         = 0             # verbose during mesh-reading
     linearized      = 0
-    diagonalize     = 0 # weight, 0=off. for P2P1 better to be on=1
+    diagonalize     = 0             # weight, 0=off. for P2P1 better to be on=1
     div_beta_u_v    = 1             # 1=on, 0=off
     vel_order       = P1Bubble          # P1, P1Bubble, P2
     press_order     = P1            # P1, P2
