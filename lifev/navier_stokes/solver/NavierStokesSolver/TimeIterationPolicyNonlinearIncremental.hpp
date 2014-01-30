@@ -210,7 +210,7 @@ iterate ( vectorPtr_Type solution,
                 Real residual;
                 res.norm2 ( &residual );
                 residual /= rhsIterNorm;
-                displayer.leaderPrint ( "Scaled residual: ", residual, "\n" );
+                displayer().leaderPrint ( "Scaled residual: ", residual, "\n" );
             }
 
             // Update the solution

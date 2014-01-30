@@ -475,7 +475,7 @@ void FSIMonolithicGI::assembleMeshBlock ( UInt /*iter*/ )
         globalRowIndex = globalEntries[i];
 
         // Get the data of the row
-        srcRow = diagFilter->matrixPtr()->LRID (globalRowIndex);
+        srcRow = diagFilter->matrixPtr()->LRID (static_cast<EpetraInt_Type> (globalRowIndex) );
         diagFilter->matrixPtr()->ExtractMyRowView (srcRow, controlValue, diagValue, indices);
 
         ASSERT ( controlValue == 1, "Error: The matrix should be diagonal.");
