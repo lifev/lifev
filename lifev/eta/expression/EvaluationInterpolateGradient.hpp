@@ -366,6 +366,7 @@ public:
         :
         M_fespace ( evaluation.M_fespace),
         M_vector ( evaluation.M_vector, Repeated),
+        M_offset ( evaluation.M_offset ),
         M_quadrature (0),
         M_currentFE (evaluation.M_currentFE),
         M_interpolatedGradients (evaluation.M_interpolatedGradients)
@@ -381,6 +382,7 @@ public:
         :
         M_fespace ( expression.fespace() ),
         M_vector ( expression.vector(), Repeated ),
+        M_offset ( expression.offset() ),
         M_quadrature (0),
         M_currentFE (M_fespace->refFE(), M_fespace->geoMap() ),
         M_interpolatedGradients (0)
@@ -412,7 +414,7 @@ public:
         {
             for (UInt q (0); q < M_quadrature->nbQuadPt(); ++q)
             {
-                UInt globalID (M_fespace->dof().localToGlobalMap (iElement, i) );
+                UInt globalID (M_fespace->dof().localToGlobalMap (iElement, i) + M_offset);
 
                 for (UInt iDim (0); iDim < SpaceDim; ++iDim)
                 {
@@ -525,6 +527,7 @@ private:
     //! Data storage
     fespacePtr_Type M_fespace;
     vector_Type M_vector;
+    UInt M_offset;
     QuadratureRule* M_quadrature;
 
     //! Structure for the computations
@@ -611,6 +614,7 @@ public:
         :
         M_fespace ( evaluation.M_fespace),
         M_vector ( evaluation.M_vector, Repeated),
+        M_offset ( evaluation.M_offset ),
         M_quadrature (0),
         M_currentFE (evaluation.M_currentFE),
         M_interpolatedGradients (evaluation.M_interpolatedGradients)
@@ -626,6 +630,7 @@ public:
         :
         M_fespace ( expression.fespace() ),
         M_vector ( expression.vector(), Repeated ),
+        M_offset ( expression.offset() ),
         M_quadrature (0),
         M_currentFE (M_fespace->refFE(), M_fespace->geoMap() ),
         M_interpolatedGradients (0)
@@ -661,7 +666,7 @@ public:
         {
             for (UInt iField (0); iField < 3; ++iField)
             {
-                UInt globalID (M_fespace->dof().localToGlobalMap (iElement, i) + iField * M_fespace->dof().numTotalDof() );
+                UInt globalID (M_fespace->dof().localToGlobalMap (iElement, i) + iField * M_fespace->dof().numTotalDof() + M_offset);
                 nodalValues[iField] = M_vector[globalID];
             }
 
@@ -784,6 +789,7 @@ private:
     //! Data storage
     fespacePtr_Type M_fespace;
     vector_Type M_vector;
+    UInt M_offset;
     QuadratureRule* M_quadrature;
 
     //! Structure for the computations

@@ -128,7 +128,7 @@ private:
 
     QuadratureBoundary M_qrBd;
 
-    ETCurrentFE<FESpaceType::S_spaceDim, 1> M_currentFE;
+    ETCurrentFE<FESpaceType::space_dim, 1> M_currentFE;
 
     bool M_isAdaptedElement;
 

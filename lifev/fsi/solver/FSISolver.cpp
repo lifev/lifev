@@ -279,6 +279,13 @@ FSISolver::initialize (std::vector< vectorPtr_Type> u0, std::vector< vectorPtr_T
 
 
 void
+FSISolver::initializeMonolithicOperator (std::vector< vectorPtr_Type> u0, std::vector< vectorPtr_Type> ds0, std::vector< vectorPtr_Type> df0)
+{
+    M_oper->initializeMonolithicOperator ( u0, ds0, df0);
+}
+
+
+void
 FSISolver::iterate()
 {
     debugStream ( 6220 ) << "============================================================\n";

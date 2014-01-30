@@ -26,11 +26,7 @@
 
 /*!
     @file
-<<<<<<< HEAD
     @brief File containing the expression to represent a matricial constant
-=======
-    @brief File containing the expression to represent a vectorial constant
->>>>>>> master
 
     @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
 
@@ -124,7 +120,6 @@ private:
     ExpressionMatrix();
 
     //@}
-
     MatrixSmall<MatrixDim1, MatrixDim2> M_value;
 };
 

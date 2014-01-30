@@ -318,6 +318,7 @@ private:
     localMatrixPtr_Type M_localDivergence;
 
     localMatrixPtr_Type M_localMass;
+
     localMatrixPtr_Type M_localMassPressure;
 
     localMatrixPtr_Type M_localConvection;
@@ -551,7 +552,6 @@ addStiffStrain (matrixType& matrix, const Real& viscosity, const UInt& offsetLef
         }
     }
 }
-
 
 template< typename meshType, typename matrixType, typename vectorType>
 void

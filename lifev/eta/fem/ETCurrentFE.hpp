@@ -1030,7 +1030,6 @@ updateJacobian (const UInt& iQuadPt)
     }
 }
 
-
 template< UInt spaceDim>
 void
 ETCurrentFE<spaceDim, 1>::

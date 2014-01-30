@@ -39,6 +39,9 @@
 #define _MONOLITHICGI_HPP
 
 #include <lifev/fsi/solver/FSIMonolithic.hpp>
+#include <lifev/core/array/MatrixBlockMonolithicEpetra.hpp>
+#include <lifev/core/array/VectorBlockMonolithicEpetra.hpp>
+
 
 namespace LifeV
 {
@@ -154,7 +157,6 @@ public:
     void setALEVectorInStencil (const vectorPtr_Type& fluidDisp,
                                 const UInt iter,
                                 const bool lastVector);
-
 
     //!@name Get Methods
     //@{

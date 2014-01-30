@@ -56,7 +56,7 @@
 #include <lifev/core/algorithm/PreconditionerML.hpp>
 #include <lifev/core/algorithm/SolverAztecOO.hpp>
 
-#include <lifev/core/array/MatrixBlockMonolithicEpetra.hpp>
+#include <lifev/core/array/MatrixEpetraStructured.hpp>
 #include <lifev/core/array/VectorBlockMonolithicEpetra.hpp>
 
 #include <lifev/core/util/LifeChrono.hpp>
@@ -484,7 +484,7 @@ static bool regML = (PRECFactory::instance().registerProduct ( "ML", &createML )
 
 /* Some typedef */
 typedef RegionMesh<LinearTetra> mesh_Type;
-typedef MatrixBlockMonolithicEpetra<Real> matrix_block_type;
+typedef MatrixEpetraStructured<Real> matrix_block_type;
 typedef VectorBlockMonolithicEpetra vector_block_type;
 typedef MatrixEpetra<Real> matrix_type;
 typedef VectorEpetra vector_type;
@@ -656,15 +656,16 @@ int main ( int argc, char** argv )
     }
 
     vector_type LSSolution (ETlsFESpace->map(), Unique);
-    lsFESpace->interpolate (static_cast<FESpace< mesh_Type, MapEpetra >::function_Type> (initLSFct),
-			    LSSolution, 0.0);
+
+    lsFESpace->interpolate (static_cast<FESpace< mesh_Type, MapEpetra >::function_Type> (initLSFct), LSSolution, 0.0);
 
     vector_type LSSolutionOld (LSSolution, Repeated);
     vector_type HJSolutionOld (LSSolution, Repeated);
     vector_type HJProjSolution (LSSolution, Repeated);
 
     vector_type velocitySolution (ETuFESpace->map(), Unique);
-    uFESpace->interpolate (initVelocity, velocitySolution, 0.0);
+
+    uFESpace->interpolate (static_cast<FESpace< mesh_Type, MapEpetra >::function_Type> (initVelocity), velocitySolution, 0.0);
 
     vector_type velocitySolutionOld (velocitySolution, Repeated);
 #ifdef BDF2_TIME
@@ -1033,11 +1034,12 @@ int main ( int argc, char** argv )
             vector_type N2 (GradientRecovery::ZZGradient (ETlsFESpace, LSSolutionOld, 2), Repeated);
 
             vector_type f0 (ETlsFESpace->map(), Unique);
-            lsFESpace->interpolate (volumeForce0, f0, currentTime);
+
+            lsFESpace->interpolate (static_cast<FESpace< mesh_Type, MapEpetra >::function_Type> (volumeForce0), f0, currentTime);
             vector_type f1 (ETlsFESpace->map(), Unique);
-            lsFESpace->interpolate (volumeForce1, f1, currentTime);
+            lsFESpace->interpolate (static_cast<FESpace< mesh_Type, MapEpetra >::function_Type> (volumeForce1), f1, currentTime);
             vector_type f2 (ETlsFESpace->map(), Unique);
-            lsFESpace->interpolate (volumeForce2, f2, currentTime);
+            lsFESpace->interpolate (static_cast<FESpace< mesh_Type, MapEpetra >::function_Type> (volumeForce2), f2, currentTime);
 
             vector_type gn ( (densityPlus - densityMinus) * ( N0 * f0 + N1 * f1 + N2 * f2 ), Repeated);
             vector_type nNorm ( ( N0 * N0 + N1 * N1 + N2 * N2 ), Repeated);
@@ -1098,8 +1100,8 @@ int main ( int argc, char** argv )
         ChronoItem.start();
 
         vector_type forceRhs (ETuFESpace->map(), Unique);
-        uFESpace->interpolate (volumeForce, forceRhs, currentTime);
 
+        uFESpace->interpolate (static_cast<FESpace< mesh_Type, MapEpetra >::function_Type> (volumeForce), forceRhs, currentTime);
 
         vector_block_type NSRhs ( ETuFESpace->map() | ETpFESpace->map() , Repeated );
         NSRhs *= 0.0;
@@ -1251,8 +1253,7 @@ int main ( int argc, char** argv )
 
         NSBCHandler.bcUpdate ( *meshPart.meshPartition(), uFESpace->feBd(), uFESpace->dof() );
 
-        boost::shared_ptr<matrix_type> NSMatrixNoBlock (new matrix_type ( NSMatrix->matrixPtr() ) );
-        bcManage (*NSMatrixNoBlock, NSRhsUnique,
+        bcManage (*NSMatrix, NSRhsUnique,
                   *uFESpace->mesh(), uFESpace->dof(),
                   NSBCHandler, uFESpace->feBd(), 1.0, currentTime);
 
@@ -1264,14 +1265,15 @@ int main ( int argc, char** argv )
             std::cout << ChronoItem.diff() << " s" << std::endl;
         }
 
-
         if (verbose)
         {
             std::cout << "[Navier-Stokes] Solving the system " << std::endl;
         }
 
 
-        NSSolver.setMatrix (*NSMatrixNoBlock);
+        NSSolver.setMatrix (*NSMatrix);
+
+        boost::shared_ptr<matrix_type> NSMatrixNoBlock (new matrix_type ( NSMatrix->matrixPtr() ) );
 
         NSSolver.solveSystem (NSRhsUnique, NSSolution, NSMatrixNoBlock);
 

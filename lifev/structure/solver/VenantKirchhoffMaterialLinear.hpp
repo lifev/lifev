@@ -43,15 +43,15 @@
 
 namespace LifeV
 {
-template <typename Mesh>
+template <typename MeshType>
 class VenantKirchhoffMaterialLinear :
-    public StructuralConstitutiveLaw<Mesh>
+    public StructuralConstitutiveLaw<MeshType>
 {
     //!@name Type definitions
     //@{
 
 public:
-    typedef StructuralConstitutiveLaw<Mesh>                 super;
+    typedef StructuralConstitutiveLaw<MeshType>                 super;
 
     typedef typename super::data_Type                         data_Type;
 
@@ -67,6 +67,23 @@ public:
     typedef typename super::mapMarkerVolumes_Type mapMarkerVolumes_Type;
     typedef typename mapMarkerVolumes_Type::const_iterator mapIterator_Type;
 
+    typedef typename super::vectorVolumes_Type       vectorVolumes_Type;
+    typedef boost::shared_ptr<vectorVolumes_Type>    vectorVolumesPtr_Type;
+
+    typedef std::vector<UInt>                             vectorIndexes_Type;
+    typedef boost::shared_ptr<vectorIndexes_Type>    vectorIndexesPtr_Type;
+    typedef std::map< UInt, vectorIndexes_Type>           mapMarkerIndexes_Type;
+    typedef boost::shared_ptr<mapMarkerIndexes_Type>      mapMarkerIndexesPtr_Type;
+    typedef typename mapMarkerIndexes_Type::const_iterator mapIteratorIndex_Type;
+
+    typedef typename super::FESpacePtr_Type          FESpacePtr_Type;
+    typedef typename super::ETFESpacePtr_Type        ETFESpacePtr_Type;
+
+    //Vector for vector parameters
+    typedef typename super::vectorsParameters_Type       vectorsParameters_Type;
+    typedef typename super::vectorsParametersPtr_Type    vectorsParametersPtr_Type;
+
+    typedef MatrixSmall<3, 3>                         matrixSmall_Type;
 
     //@}
 
@@ -76,6 +93,7 @@ public:
     VenantKirchhoffMaterialLinear();
 
     virtual  ~VenantKirchhoffMaterialLinear();
+
     //@}
 
     //!@name Methods
@@ -83,11 +101,12 @@ public:
 
     //! Setup the created object of the class StructuralConstitutiveLaw
     /*!
-      \param dFespace: the FiniteElement Space
-      \param monolithicMap: the MapEpetra
-      \param offset: the offset parameter used assembling the matrices
+    \param dFespace: the FiniteElement Space
+    \param monolithicMap: the MapEpetra
+    \param offset: the offset parameter used assembling the matrices
     */
-    void setup (const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
+    void setup (const FESpacePtr_Type& dFESpace,
+                const ETFESpacePtr_Type& ETFESpace,
                 const boost::shared_ptr<const MapEpetra>&  monolithicMap,
                 const UInt offset, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer
                );
@@ -97,7 +116,9 @@ public:
     /*!
       \param dataMaterial the class with Material properties data
     */
-    void computeLinearStiff ( dataPtr_Type& dataMaterial, const mapMarkerVolumesPtr_Type mapsMarkerVolumes );
+    void computeLinearStiff ( dataPtr_Type& dataMaterial,
+                              const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                              const mapMarkerIndexesPtr_Type mapsMarkerIndexes  );
 
     //! Updates the Jacobian matrix in StructualSolver::updateJacobian
     /*!
@@ -109,6 +130,7 @@ public:
     void updateJacobianMatrix ( const vector_Type& disp,
                                 const dataPtr_Type& dataMaterial,
                                 const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                                const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
                                 const displayerPtr_Type& displayer);
 
     //! Updates the nonlinear terms in the Jacobian matrix in StructualSolver::updateJacobian
@@ -123,6 +145,7 @@ public:
                                          const vector_Type& /*disp*/,
                                          const dataPtr_Type& /*dataMaterial*/,
                                          const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
+                                         const mapMarkerIndexesPtr_Type /*mapsMarkerIndexes*/,
                                          const displayerPtr_Type& /*displayer*/);
 
     //! Interface method to compute the new Stiffness matrix in StructuralSolver::evalResidual and in
@@ -137,6 +160,7 @@ public:
 
     void computeStiffness ( const vector_Type& sol, Real factor, const dataPtr_Type& dataMaterial,
                             const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                            const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
                             const displayerPtr_Type& displayer );
 
     void computeKinematicsVariables ( const VectorElemental& /*dk_loc*/ ) {}
@@ -144,6 +168,20 @@ public:
     //! ShowMe method of the class (saved on a file the two matrices)
     void showMe ( std::string const& fileNameStiff,
                   std::string const& fileNameJacobian);
+
+    //! Compute the First Piola Kirchhoff Tensor
+    /*!
+       \param firstPiola Epetra_SerialDenseMatrix that has to be filled
+       \param tensorF Epetra_SerialDenseMatrix the deformation gradient
+       \param cofactorF Epetra_SerialDenseMatrix cofactor of F
+       \param invariants std::vector with the invariants of C and the detF
+       \param material UInt number to get the material parameteres form the VenantElasticData class
+    */
+    void computeLocalFirstPiolaKirchhoffTensor ( Epetra_SerialDenseMatrix& firstPiola,
+                                                 const Epetra_SerialDenseMatrix& tensorF,
+                                                 const Epetra_SerialDenseMatrix& cofactorF,
+                                                 const std::vector<Real>& invariants,
+                                                 const UInt marker);
 
     //@}
 
@@ -170,7 +208,8 @@ public:
     }
 
     void apply ( const vector_Type& sol, vector_Type& res,
-                 const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/)
+                 const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
+                 const mapMarkerIndexesPtr_Type /*mapsMarkerIndexes*/)
     {
         res += *M_stiff * sol;
     }
@@ -178,10 +217,15 @@ public:
     //@}
 
 protected:
-    //! Protected members
 
-    //! Elementary matrices
-    boost::scoped_ptr<MatrixElemental>             M_elmatK;
+    //! construct the vectors for the parameters
+    /*!
+      \param VOID
+      \return VOID
+    */
+    void setupVectorsParameters ( void );
+
+    //! Protected members
 
     //! Matrix Kl: stiffness linear
     matrixPtr_Type                                 M_linearStiff;
@@ -191,154 +235,173 @@ protected:
 
 };
 
-template <typename Mesh>
-VenantKirchhoffMaterialLinear<Mesh>::VenantKirchhoffMaterialLinear() :
+template <typename MeshType>
+VenantKirchhoffMaterialLinear<MeshType>::VenantKirchhoffMaterialLinear() :
     super             ( ),
-    M_elmatK                     ( ),
     M_linearStiff                ( ),
     M_stiff                      ( )
 {
 }
 
-template <typename Mesh>
-VenantKirchhoffMaterialLinear<Mesh>::~VenantKirchhoffMaterialLinear()
+template <typename MeshType>
+VenantKirchhoffMaterialLinear<MeshType>::~VenantKirchhoffMaterialLinear()
 {}
 
 
-template <typename Mesh>
+template <typename MeshType>
 void
-VenantKirchhoffMaterialLinear<Mesh>::setup (const boost::shared_ptr< FESpace<Mesh, MapEpetra> >& dFESpace,
-                                            const boost::shared_ptr<const MapEpetra>&  monolithicMap,
-                                            const UInt offset, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer
-                                           )
+VenantKirchhoffMaterialLinear<MeshType>::setup (const FESpacePtr_Type& dFESpace,
+                                                const ETFESpacePtr_Type& dETFESpace,
+                                                const boost::shared_ptr<const MapEpetra>&  monolithicMap,
+                                                const UInt offset, const dataPtr_Type& dataMaterial, const displayerPtr_Type& displayer
+                                               )
 {
     this->M_displayer = displayer;
     this->M_dataMaterial  = dataMaterial;
 
     //    std::cout<<"I am setting up the Material "<<std::endl;
 
-    this->M_FESpace                       = dFESpace;
-    this->M_elmatK.reset                  (new MatrixElemental ( this->M_FESpace->fe().nbFEDof(), nDimensions, nDimensions ) );
+    this->M_dispFESpace                   = dFESpace;
+    this->M_dispETFESpace                 = dETFESpace;
     this->M_localMap                      = monolithicMap;
     this->M_linearStiff.reset             (new matrix_Type (*this->M_localMap) );
     this->M_offset                        = offset;
+
+    // The 2 is because the law uses two parameters.
+    // another way would be to set up the number of constitutive parameters of the law
+    // in the data file to get the right size. Note the comment below.
+    this->M_vectorsParameters.reset ( new vectorsParameters_Type ( 2 ) );
+
+    this->setupVectorsParameters();
+
 }
 
-template <typename Mesh>
-void VenantKirchhoffMaterialLinear<Mesh>::computeLinearStiff (dataPtr_Type& dataMaterial,
-                                                              const mapMarkerVolumesPtr_Type mapsMarkerVolumes)
-{
-    //  std::cout<<"compute LinearStiff Matrix start\n";
 
-    UInt totalDof = this->M_FESpace->dof().numTotalDof();
-    // Number of displacement components
-    UInt nc = nDimensions;
+template <typename MeshType>
+void
+VenantKirchhoffMaterialLinear<MeshType>::setupVectorsParameters ( void )
+{
+    // Paolo Tricerri: February, 20th
+    // In each class, the name of the parameters has to inserted in the law
+    // TODO: move the saving of the material parameters to more abstract objects
+    //       such that in the class of the material we do not need to call explicitly
+    //       the name of the parameter.
+
+    // Number of volume on the local part of the mesh
+    UInt nbElements = this->M_dispFESpace->mesh()->numVolumes();
+
+    // Parameter lambda
+    // 1. resize the vector in the first element of the vector.
+    (* (this->M_vectorsParameters) ) [0].resize ( nbElements );
+
+    // Parameter mu
+    (* (this->M_vectorsParameters) ) [1].resize ( nbElements );
+
+    for (UInt i (0); i < nbElements; i++ )
+    {
+        // Extracting the marker
+        UInt markerID = this->M_dispFESpace->mesh()->element ( i ).markerID();
+
+        Real lambda = this->M_dataMaterial->lambda ( markerID );
+        Real mu = this->M_dataMaterial->mu ( markerID );
+
+        ( (* (this->M_vectorsParameters) ) [0]) [ i ] = lambda;
+        ( (* (this->M_vectorsParameters) ) [1]) [ i ] = mu;
+    }
+}
+
+
+template <typename MeshType>
+void VenantKirchhoffMaterialLinear<MeshType>::computeLinearStiff (dataPtr_Type& /*dataMaterial*/,
+                                                                  const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
+                                                                  const mapMarkerIndexesPtr_Type /*mapsMarkerIndexes*/)
+{
+    using namespace ExpressionAssembly;
+
+    * (this->M_linearStiff) *= 0.0;
 
     //Compute the linear part of the Stiffness Matrix.
     //In the case of Linear Material it is the Stiffness Matrix.
     //In the case of NonLinear Materials it must be added of the non linear part.
 
-    mapIterator_Type it;
+    integrate ( elements ( this->M_dispETFESpace->mesh() ),
+                this->M_dispFESpace->qr(),
+                this->M_dispETFESpace,
+                this->M_dispETFESpace,
+                parameter ( (* (this->M_vectorsParameters) ) [0]) * div ( phi_i ) * div ( phi_j )
+              ) >> M_linearStiff;
 
-    for ( it = (*mapsMarkerVolumes).begin(); it != (*mapsMarkerVolumes).end(); it++ )
-    {
-
-        //Given the marker pointed by the iterator, let's extract the material parameters
-        UInt marker = it->first;
-
-        Real mu = dataMaterial->mu (marker);
-        Real lambda = dataMaterial->lambda (marker);
-
-        //Given the parameters I loop over the volumes with that marker
-        for ( UInt j (0); j < it->second.size(); j++ )
-        {
-            this->M_FESpace->fe().updateFirstDerivQuadPt ( * (it->second[j]) );
-
-            this->M_elmatK->zero();
-
-            //These methods are implemented in AssemblyElemental.cpp
-            //They have been kept in AssemblyElemental in order to avoid repetitions
-            stiff_strain ( 2 * mu, *this->M_elmatK, this->M_FESpace->fe() ); // here in the previous version was 1. (instead of 2.)
-            stiff_div   ( lambda, *this->M_elmatK, this->M_FESpace->fe() );// here in the previous version was 0.5 (instead of 1.)
-
-            //this->M_elmatK->showMe();
-
-            // assembling
-            for ( UInt ic = 0; ic < nc; ic++ )
-            {
-                for ( UInt jc = 0; jc < nc; jc++ )
-                {
-                    assembleMatrix ( *this->M_linearStiff,
-                                     *this->M_elmatK,
-                                     this->M_FESpace->fe(),
-                                     this->M_FESpace->fe(),
-                                     this->M_FESpace->dof(),
-                                     this->M_FESpace->dof(),
-                                     ic,  jc,
-                                     this->M_offset + ic * totalDof, this->M_offset + jc * totalDof );
-
-                }
-            }
-
-
-        }
-
-    }
+    integrate ( elements ( this->M_dispETFESpace->mesh() ),
+                this->M_dispFESpace->qr(),
+                this->M_dispETFESpace,
+                this->M_dispETFESpace,
+                value ( 2.0 ) * parameter ( (* (this->M_vectorsParameters) ) [1]) * dot ( sym (grad (phi_j) ) , grad (phi_i) )
+              ) >> M_linearStiff;
 
     this->M_linearStiff->globalAssemble();
 
     //Initialization of the pointer M_stiff to what is pointed by M_linearStiff
     this->M_stiff = this->M_linearStiff;
-    //   std::cout<<"compute LinearStiff Matrix end\n";
     this->M_jacobian = this->M_linearStiff;
+
+
+    // std::cout << "Done!" << std::endl;
+    // int n;
+    // std::cin >> n;
+
+    // this->M_jacobian->spy("matrixJacobianLE");
 }
 
 
-template <typename Mesh>
-void VenantKirchhoffMaterialLinear<Mesh>::updateJacobianMatrix (const vector_Type& disp,
-                                                                const dataPtr_Type& dataMaterial,
-                                                                const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
-                                                                const displayerPtr_Type& displayer)
+template <typename MeshType>
+void VenantKirchhoffMaterialLinear<MeshType>::updateJacobianMatrix (const vector_Type& disp,
+                                                                    const dataPtr_Type& dataMaterial,
+                                                                    const mapMarkerVolumesPtr_Type mapsMarkerVolumes,
+                                                                    const mapMarkerIndexesPtr_Type mapsMarkerIndexes,
+                                                                    const displayerPtr_Type& displayer)
 {
     //displayer->leaderPrint(" \n*********************************\n  ");
     displayer->leaderPrint ("  S-  Updating the Jacobian Matrix (constant, Linear Elastic)\n");
     //displayer->leaderPrint(" \n*********************************\n  ");
 
     //displayer->leaderPrint(" \n*********************************\n  ");
-    updateNonLinearJacobianTerms (this->M_jacobian, disp, dataMaterial, mapsMarkerVolumes, displayer);
+    updateNonLinearJacobianTerms (this->M_jacobian, disp, dataMaterial, mapsMarkerVolumes, mapsMarkerIndexes, displayer);
     //displayer->leaderPrint(" \n*********************************\n  ");
 
 }
 
-template <typename Mesh>
-void VenantKirchhoffMaterialLinear<Mesh>::updateNonLinearJacobianTerms ( matrixPtr_Type& /*jacobian*/,
-                                                                         const  vector_Type& /*disp*/,
-                                                                         const dataPtr_Type& /*dataMaterial*/,
-                                                                         const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
-                                                                         const displayerPtr_Type& /*displayer*/ )
+template <typename MeshType>
+void VenantKirchhoffMaterialLinear<MeshType>::updateNonLinearJacobianTerms ( matrixPtr_Type& /*jacobian*/,
+                                                                             const  vector_Type& /*disp*/,
+                                                                             const dataPtr_Type& /*dataMaterial*/,
+                                                                             const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
+                                                                             const mapMarkerIndexesPtr_Type /*mapsMarkerIndexes*/,
+                                                                             const displayerPtr_Type& /*displayer*/ )
 {
     //    this->M_stiff->globalAssemble();
     //  displayer->leaderPrint("  S- Doing nothing - Updating non linear terms in Jacobian Matrix (constant, Linear Elastic)\n");
 }
 
-template <typename Mesh>
-void VenantKirchhoffMaterialLinear<Mesh>::computeStiffness ( const vector_Type& /*disp*/,
-                                                             Real /*factor*/,
-                                                             const dataPtr_Type& /*dataMaterial*/,
-                                                             const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
-                                                             const displayerPtr_Type& /*displayer*/ )
+template <typename MeshType>
+void VenantKirchhoffMaterialLinear<MeshType>::computeStiffness ( const vector_Type& /*disp*/,
+                                                                 Real /*factor*/,
+                                                                 const dataPtr_Type& /*dataMaterial*/,
+                                                                 const mapMarkerVolumesPtr_Type /*mapsMarkerVolumes*/,
+                                                                 const mapMarkerIndexesPtr_Type /*mapsMarkerIndexes*/,
+                                                                 const displayerPtr_Type& displayer )
+
 {
-    //displayer->leaderPrint(" \n*********************************\n  ");
-    //displayer->leaderPrint("  S- Using the the Stiffness Matrix (constant, Linear Elastic)");
-    //displayer->leaderPrint(" \n*********************************\n  ");
+    displayer->leaderPrint (" \n*********************************\n  ");
+    displayer->leaderPrint ("  S- Using the the Stiffness Matrix (constant, Linear Elastic)");
+    displayer->leaderPrint (" \n*********************************\n  ");
 }
 
 
-template <typename Mesh>
+template <typename MeshType>
 void
-VenantKirchhoffMaterialLinear<Mesh>::showMe ( std::string const& fileNameStiff,
-                                              std::string const& fileNameJacobian
-                                            )
+VenantKirchhoffMaterialLinear<MeshType>::showMe ( std::string const& fileNameStiff,
+                                                  std::string const& fileNameJacobian
+                                                )
 {
     //This string is to save the linear part
     std::string fileNamelinearStiff =  fileNameStiff;
@@ -349,10 +412,51 @@ VenantKirchhoffMaterialLinear<Mesh>::showMe ( std::string const& fileNameStiff,
     this->M_jacobian->spy (fileNameJacobian);
 }
 
-template <typename Mesh>
-inline StructuralConstitutiveLaw<Mesh>* createVenantKirchhoffLinear()
+template <typename MeshType>
+void
+VenantKirchhoffMaterialLinear<MeshType>::computeLocalFirstPiolaKirchhoffTensor ( Epetra_SerialDenseMatrix& firstPiola,
+        const Epetra_SerialDenseMatrix& tensorF,
+        const Epetra_SerialDenseMatrix& /*cofactorF*/,
+        const std::vector<Real>& /*invariants*/,
+        const UInt marker)
 {
-    return new VenantKirchhoffMaterialLinear<Mesh >();
+
+    //Get the material parameters
+    Real lambda   = this->M_dataMaterial->lambda (marker);
+    Real mu       = this->M_dataMaterial->mu (marker);
+
+    Epetra_SerialDenseMatrix copyF (tensorF);
+    Epetra_SerialDenseMatrix identity (nDimensions, nDimensions);
+
+    //Computation gradient of u and setting the identity tensor
+    for ( UInt icoor = 0; icoor < nDimensions; icoor++ )
+    {
+        copyF (icoor, icoor) -= 1.0;
+        identity (icoor, icoor) = 1;
+    }
+
+    Real divergenceU ( copyF (0, 0) + copyF (1, 1) + copyF (2, 2) ); //DivU = tr(copyF)
+    Real coefIdentity (0.0);
+    coefIdentity = divergenceU * lambda;
+    identity.Scale ( coefIdentity );
+
+    Epetra_SerialDenseMatrix transposed (copyF);
+    transposed.SetUseTranspose (true);
+
+    Epetra_SerialDenseMatrix secondTerm (nDimensions, nDimensions);
+
+    secondTerm = copyF;
+    secondTerm += transposed;
+    secondTerm.Scale (mu);
+
+    firstPiola = identity;
+    firstPiola += secondTerm;
+}
+
+template <typename MeshType>
+inline StructuralConstitutiveLaw<MeshType>* createVenantKirchhoffLinear()
+{
+    return new VenantKirchhoffMaterialLinear<MeshType >();
 }
 namespace
 {

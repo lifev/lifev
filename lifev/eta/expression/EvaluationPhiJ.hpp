@@ -299,7 +299,6 @@ private:
 
 };
 
-
 } // Namespace ExpressionAssembly
 
 } // Namespace LifeV

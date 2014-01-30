@@ -22,10 +22,16 @@ SET(expression_HEADERS
 	expression/EvaluationPhiJ.hpp
 	expression/EvaluationPosition.hpp
 	expression/EvaluationProduct.hpp
+	expression/EvaluationPower.hpp
+	expression/EvaluationLogarithm.hpp
+	expression/EvaluationExponential.hpp
 	expression/EvaluationNormal.hpp
 	expression/EvaluationScalar.hpp
 	expression/EvaluationSubstraction.hpp
 	expression/EvaluationTranspose.hpp
+	expression/EvaluationSymmetricTensor.hpp
+	expression/EvaluationDeterminant.hpp
+	expression/EvaluationTrace.hpp
 	expression/EvaluationVector.hpp
 	expression/ExpressionAddition.hpp
 	expression/ExpressionBase.hpp
@@ -51,24 +57,33 @@ SET(expression_HEADERS
 	expression/ExpressionPosition.hpp
 	expression/ExpressionNormal.hpp
 	expression/ExpressionProduct.hpp
+	expression/ExpressionPower.hpp
+	expression/ExpressionLogarithm.hpp
+	expression/ExpressionExponential.hpp
 	expression/ExpressionScalar.hpp
-	expression/ExpressionSubstraction.hpp	
+	expression/ExpressionSubstraction.hpp
 	expression/ExpressionTranspose.hpp
+	expression/ExpressionSymmetricTensor.hpp
+	expression/ExpressionDeterminant.hpp
+	expression/ExpressionTrace.hpp
 	expression/ExpressionToEvaluation.hpp
 	expression/ExpressionVector.hpp
 	expression/GraphElement.hpp
 	expression/Integrate.hpp
 	expression/IntegrateMatrixElement.hpp
+	expression/IntegrateMatrixVolumeID.hpp
 	expression/IntegrateMatrixElementLSAdapted.hpp
 	expression/IntegrateMatrixFaceID.hpp
 	expression/IntegrateMatrixFaceIDLSAdapted.hpp
 	expression/IntegrateValueElement.hpp
 	expression/IntegrateValueElementLSAdapted.hpp
 	expression/IntegrateVectorElement.hpp
+	expression/IntegrateVectorVolumeID.hpp
 	expression/IntegrateVectorElementLSAdapted.hpp
 	expression/IntegrateVectorFaceID.hpp
 	expression/IntegrateVectorFaceIDLSAdapted.hpp
 	expression/RequestLoopElement.hpp
+	expression/RequestLoopVolumeID.hpp
 	expression/RequestLoopFaceID.hpp
 CACHE INTERNAL "")
 

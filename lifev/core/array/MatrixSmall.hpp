@@ -27,9 +27,9 @@ License along with this library; if not, see <http://www.gnu.org/licenses/>
 
 /*!
  *      @file
- @brief This file contains a simple matrix class
+        @brief This file contains a simple matrix class
 
- @contributor Ivan Kuraj <ivan.kuraj@epfl.ch>
+        @contributor Ivan Kuraj <ivan.kuraj@epfl.ch>
 */
 
 #ifndef _MATRIXSMALL_H_
@@ -253,7 +253,7 @@ public:
             resultVector[i] = 0;
             for ( UInt j = 0; j < Dim2; j++ )
             {
-                resultVector[i] += vector[j] * M_coords[i][j];
+                resultVector[i] += vector[j] * (*this) [i][j];
             }
         }
         return (resultVector);
@@ -280,7 +280,7 @@ public:
 
     //! Operator []
     //const OpIndexReturnType operator[] ( UInt const & i ) const
-    OpIndexReturnConstType const& operator[] ( UInt const& i ) const
+    OpIndexReturnConstType const operator[] ( UInt const& i ) const
     {
         ASSERT ( i < Dim1, "trying to access an index that exceeds the first dimension of the matrix" );
         return (M_coords [ i ]);
@@ -401,6 +401,141 @@ public:
             }
 
         return (resultantMatrix);
+    }
+
+    //! Determinant of a matrix
+    //! In this class the determinant is computed explicitly
+    //! for matrices of dimensions 1 2 3
+    /*!
+      @return determinant of the matrix
+    */
+    Real determinant() const
+    {
+        ASSERT ( Dim2 == Dim1, "The determinat is defined only for squared matrices!");
+
+        Real det (0);
+
+        switch ( Dim1 )
+        {
+            case 1:
+                det = M_coords[ 0 ][ 0 ];
+                break;
+            case 2:
+                det = M_coords[ 0 ][ 0 ] * M_coords[ 1 ][ 1 ] - M_coords[ 0 ][ 1 ] * M_coords[ 1 ][ 0 ];
+                break;
+            case 3:
+                det = M_coords[ 0 ][ 0 ] * ( M_coords[ 1 ][ 1 ] * M_coords[ 2 ][ 2 ] - M_coords[ 1 ][ 2 ] * M_coords[ 2 ][ 1 ] )
+                      - M_coords[ 0 ][ 1 ] * ( M_coords[ 1 ][ 0 ] * M_coords[ 2 ][ 2 ] - M_coords[ 1 ][ 2 ] * M_coords[ 2 ][ 0 ] )
+                      + M_coords[ 0 ][ 2 ] * ( M_coords[ 1 ][ 0 ] * M_coords[ 2 ][ 1 ] - M_coords[ 1 ][ 1 ] * M_coords[ 2 ][ 0 ] );
+
+                break;
+            default:
+                ERROR_MSG ("The determinat for matrices is implemented for Dim1 = Dim2 < 3!");
+                break;
+        }
+
+        return det;
+    }
+
+    //! Cofactor of a matrix
+    //! In this class the cofactor is computed explicitly
+    //! for matrices of dimensions 1 2 3
+    /*!
+      @return determinant of the matrix
+    */
+    MatrixSmall<Dim1, Dim2> cofactor() const
+    {
+        ASSERT ( Dim2 == Dim1, "The cofactor is defined only for squared matrices!");
+
+        //Create the matrix to store the cofactor
+        //In this case it is a copy of the current matrix
+        MatrixSmall<Dim1, Dim2> cofactor (*this);
+
+        switch ( Dim1 )
+        {
+            case 1:
+                cofactor[ 0][0 ] = 1.0;
+                break;
+            case 2:
+                cofactor[0][0] =   M_coords[1][1];
+                cofactor[0][1] = - M_coords[0][1];
+                cofactor[1][0] = - M_coords[1][0];
+                cofactor[1][1] =   M_coords[0][0];
+                break;
+            case 3:
+                cofactor[ 0][0 ] =   M_coords[1][1] * M_coords[2][2] - M_coords[1][2] * M_coords[2][1];
+                cofactor[ 0][1 ] = - (M_coords[1][0] * M_coords[2][2] - M_coords[1][2] * M_coords[2][0]);
+                cofactor[ 0][2 ] =   M_coords[1][0] * M_coords[2][1] - M_coords[1][1] * M_coords[2][0];
+                cofactor[ 1][0 ] = - (M_coords[0][1] * M_coords[2][2] - M_coords[0][2] * M_coords[2][1]);
+                cofactor[ 1][1 ] =   M_coords[0][0] * M_coords[2][2] - M_coords[0][2] * M_coords[2][0];
+                cofactor[ 1][2 ] = - (M_coords[0][0] * M_coords[2][1] - M_coords[2][0] * M_coords[0][1]);
+                cofactor[ 2][0 ] =   M_coords[0][1] * M_coords[1][2] - M_coords[0][2] * M_coords[1][1];
+                cofactor[ 2][1 ] = - (M_coords[0][0] * M_coords[1][2] - M_coords[0][2] * M_coords[1][0]);
+                cofactor[ 2][2 ] =   M_coords[0][0] * M_coords[1][1] - M_coords[1][0] * M_coords[0][1];
+                break;
+            default:
+                ERROR_MSG ("The cofactor for matrices is implemented for Dim1 = Dim2 < 3!");
+                break;
+        }
+
+        return cofactor;
+    }
+
+    //! Plot the Matrix
+    /*!
+      @return void
+    */
+    void showMe() const
+    {
+        for ( Int i = 0; i < Dim1; i++ )
+        {
+            for ( Int j = 0; j < Dim2; j++ )
+            {
+                std::cout << "M_coords[ " << i << " ][ " << j << " ]= " << M_coords[i][j] << std::endl;
+            }
+        }
+    }
+
+
+    //! This method
+    //! In this method, which is based on cofactor and determinant,
+    //! given a matrix, its inverse transposed is computed explicitly
+    //! for matrices of dimensions 1 2 3
+    //! This method is mainly used for structural problems.
+    /*!
+      @return determinant of the matrix
+    */
+    MatrixSmall<Dim1, Dim2> minusTransposed() const
+    {
+        ASSERT ( Dim2 == Dim1, "This method is based on the cofactor and determinant methods which are defined only for squared matrices!");
+
+        //Create the matrix to store the cofactor
+        //In this case it is a copy of the current matrix
+        MatrixSmall<Dim1, Dim2> minusT (*this);
+
+        Real det (0);
+
+        minusT = this->cofactor();
+        det = this->determinant();
+
+        minusT *= 1.0 / det;
+
+        return minusT;
+    }
+
+
+    Real trace() const
+    {
+        ASSERT ( Dim2 == Dim1, "The trace is defined only for squared matrices!");
+
+        Real trace (0);
+
+        for ( UInt i (0); i < Dim1; i++ )
+        {
+            trace += M_coords[ i ][ i ];
+        }
+
+        return trace;
     }
 
     //! Norm value

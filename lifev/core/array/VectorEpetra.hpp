@@ -628,6 +628,9 @@ public:
      */
     void abs ( VectorEpetra& vector );
 
+    //! Apply the square root to of each element in the vector
+    void sqrt ();
+
     //! Compute the scalar product of two vectors
     /*!
       @param vector Second vector for the scalar product

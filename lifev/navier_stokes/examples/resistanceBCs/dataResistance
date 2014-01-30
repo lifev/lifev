@@ -1,0 +1,129 @@
+# -*- getpot -*- (GetPot mode activation for emacs)
+#----------------------------------------------------------------
+#      Data file for cylinder test with Navier-Stokes
+#----------------------------------------------------------------
+
+[exporter]
+multimesh  = false
+start      = 0
+save       = 1
+nameFile   = resistance80-scaledAndTranslated
+
+[fluid]
+
+    [./problem]
+    # for  cyl3D.2.2.00.mesh
+    Re              = 1
+    D               = 1.
+    H               = 2.
+    centered        = 1
+    initial_sol     = stokes          # stokes, none
+
+
+    [../physics]
+    density         = 1.0           # density   [ g / cm^3 ]
+    viscosity       = 0.03          # viscosity [ Poise ]
+    resistance      = 0.00   # resistance  ( 80 mmHg * s / ml ) [ dyn * s / cm^5 ]
+    hydrostatic     = 0.0        # hydrostatic pressure [ dyn / cm^2 ]
+
+    [../time_discretization]
+    initialtime     = 0.
+    endtime         = 1.2
+    timestep        = 0.001
+    BDF_order       = 1
+
+    [../space_discretization]
+    mesh_dir        = ./
+    mesh_file       = unstructuredACAveryFine-fluidNOBL.mesh
+    mesh_type       = .mesh
+
+    verbose         = 0             # verbose during mesh-reading
+    linearized      = 0
+    diagonalize     = 0 # weight, 0=off. for P2P1 better to be on=1
+    div_beta_u_v    = 1             # 1=on, 0=off
+    vel_order       = P1Bubble          # P1, P1Bubble, P2
+    press_order     = P1            # P1, P2
+    stiff_strain    = true            # P1, P2
+
+    [../miscellaneous]
+    verbose         = 1
+    steady          = 0
+
+    [../prec]
+    prectype                = Ifpack # Ifpack or ML
+    displayList             = true
+
+        [./ML]
+        analyze_smoother        = false
+        default_parameter_list  = DD-ML    # for ML precond, SA, DD, DD-ML, maxwell, NSSA, DD-ML-LU, DD-LU
+
+            [./smoother]
+            # smoother type
+            # Aztec, IFPACK, Jacobi, ML symmetric Gauss-Seidel, symmetric Gauss-Seidel,
+            # ML Gauss-Seidel, Gauss-Seidel, Chebyshev, MLS, Hiptmair, Amesos-KLU,
+            # Amesos-Superlu, Amesos-UMFPACK, Amesos-Superludist, Amesos-MUMPS,
+            # user-defined, SuperLU, IFPACK-Chebyshev, self, do-nothing,
+            # IC, ICT, ILU, ILUT
+            type                    = IFPACK
+            pre_or_post             = pre
+            sweeps                  = 3
+            damping_factor          = 1
+
+            [../coarse]
+            type                    = Amesos-UMFPACK
+            #type                    = Amesos-KLU
+            sweeps                  = 1
+            pre_or_post             = both
+            max_size                = 200
+
+            [../repartition]
+            enable                  = 1
+            partitioner             = ParMETIS
+            max_min_ration          = 1.3
+            min_per_proc            = 500
+
+            [../energy_minimization]
+            enable          = true
+            type            = 3
+            [../]
+
+        # ifpack
+        [../ifpack]
+        overlap     = 2
+
+            [./fact]
+            ilut_level-of-fill            = 1
+            drop_tolerance                = 1.e-5
+            relax_value                   = 0
+
+            [../amesos]
+            solvertype =  Amesos_KLU # Amesos_KLU or Amesos_Umfpack
+
+            [../partitioner]
+            overlap = 2
+
+            [../schwarz]
+            reordering_type = none #metis, rcm, none
+            filter_singletons = true
+
+            [../]
+        [../]
+
+    [../solver]
+    solver          = gmres
+    scaling         = none
+    output          = all # none
+    conv            = rhs
+    max_iter        = 1000
+    reuse           = true
+    max_iter_reuse  = 80
+    kspace          = 800
+    tol             = 1.e-6    # AztecOO tolerance
+
+    [../ipstab]
+    gammaBeta       = 0.125
+    gammaDiv        = 0.125
+    gammaPress      = 0.03125
+    reuse           = true
+    max_iter_reuse  = 20
+[../]

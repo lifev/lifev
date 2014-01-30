@@ -362,7 +362,7 @@ public:
 
         //StructuralSolver< FSIOperator::mesh_Type, SolverAztecOO >::material_Type::StructureMaterialFactory::instance().registerProduct( "linearVenantKirchhoff", &createVenantKirchhoffLinear );
 
-        StructuralOperator< FSIOperator::mesh_Type, SolverAztecOO >();
+        StructuralOperator< FSIOperator::mesh_Type>();
 
         //StructuralSolver< FSIOperator::mesh_Type, SolverAztecOO >::material_Type::StructureMaterialFactory::instance().registerProduct( "linearVenantKirchhoff", &createVenantKirchhoffLinear );
 

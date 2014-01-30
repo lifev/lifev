@@ -23,6 +23,7 @@ SET(fem_HEADERS
   fem/GeometricMap.hpp
   fem/GradientRecovery.hpp
   fem/HyperbolicFluxNumerical.hpp
+  fem/QRKeast.hpp
   fem/PostProcessingBoundary.hpp
   fem/QRKeast.hpp
   fem/QuadraturePoint.hpp
