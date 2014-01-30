@@ -54,7 +54,6 @@
 #include <lifev/core/fem/CurrentFEManifold.hpp>
 #include <lifev/core/fem/DOF.hpp>
 #include <lifev/core/fem/SobolevNorms.hpp>
-//#include <lifev/core/fem/FEFunction.hpp>
 
 #include <lifev/core/mesh/MeshPartitioner.hpp>
 
