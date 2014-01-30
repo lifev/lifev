@@ -54,12 +54,17 @@
 #include <lifev/core/fem/CurrentFEManifold.hpp>
 #include <lifev/core/fem/DOF.hpp>
 #include <lifev/core/fem/SobolevNorms.hpp>
+//#include <lifev/core/fem/FEFunction.hpp>
 
 #include <lifev/core/mesh/MeshPartitioner.hpp>
 
 
 namespace LifeV
 {
+
+template < typename MeshType, typename MapType, typename ReturnType >
+class FEFunction;
+
 
 
 //! FESpace - Short description here please!
@@ -155,8 +160,9 @@ public:
       @param vector Interpolated function
       @param time Time in the interpolation
     */
-    template < typename FEFunctionType, typename vector_Type >
-    void interpolate ( const FEFunctionType* fEFunction, vector_Type& vector, const Real time = 0. );
+    template < typename ReturnType, typename vector_type >
+    void interpolate ( const FEFunction<MeshType, MapType, ReturnType>* fEFunction,
+		       vector_type& vector, const Real time = 0. );
 
     //! calculate L2 velocity error for given exact velocity function
     //! \param pexact the exact velocity as a function
@@ -747,9 +753,10 @@ FESpace<MeshType, MapType>::interpolate ( const function_Type& fct,
 }
 
 template < typename MeshType, typename MapType>
-template < typename FEFunctionType, typename vector_Type >
+template < typename ReturnType, typename vector_type>
 void FESpace<MeshType, MapType>::
-interpolate ( const FEFunctionType* fEFunction, vector_Type& vector, const Real time )
+interpolate ( const FEFunction<MeshType, MapType, ReturnType>* fEFunction,
+	      vector_type& vector, const Real time )
 {
 
     // First, we build a "quadrature" that consists in the nodes (0 weight)
@@ -765,7 +772,7 @@ interpolate ( const FEFunctionType* fEFunction, vector_Type& vector, const Real 
     const UInt numberLocalDof ( M_dof->numLocalDof() );
 
     // Storage for the values
-    typename FEFunctionType::point_Type point;
+    typename FEFunction<MeshType, MapType, ReturnType>::point_Type point;
     std::vector<Real> nodalValues (numberLocalDof, 0);
     std::vector<Real> FEValues (numberLocalDof, 0);
 
