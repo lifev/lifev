@@ -82,11 +82,11 @@ namespace ExpressionAssembly
   This class is an helper function to instantiate the class
   for performing an integration, here to assemble a matrix
   with a loop on the elements.
-  
+
   This function is repeated 4 times:
   versions with and without QR adapter
   versions with and without Offset
-  
+
  */
 template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType, typename QRAdapterType>
 IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, QRAdapterType>
@@ -96,7 +96,7 @@ integrate ( const RequestLoopElement<MeshType>& request,
             const boost::shared_ptr<SolutionSpaceType>& solutionSpace,
             const ExpressionType& expression,
             const UInt offsetUp = 0,
-            const UInt offsetLeft = 0)
+            const UInt offsetLeft = 0);
 template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType, typename QRAdapterType>
 IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, QRAdapterType>
 integrate ( const RequestLoopElement<MeshType>& request,
@@ -144,11 +144,11 @@ integrate ( const RequestLoopElement<MeshType>& request,
 
   This is an overload of the integrate function for matrices, which
   uses multiple threads to do assembly
-  
+
   This function is repeated 4 times:
   versions with and without QR adapter
   versions with and without Offset
-  
+
  */
 template < typename MeshType, typename TestSpaceType, typename SolutionSpaceType, typename ExpressionType, typename QRAdapterType>
 IntegrateMatrixElement<MeshType, TestSpaceType, SolutionSpaceType, ExpressionType, QRAdapterType>
@@ -210,11 +210,11 @@ integrate ( const RequestLoopElement<MeshType>& request,
   This class is an helper function to instantiate the class
   for performing an integration, here to assemble a vector
   with a loop on the elements.
-  
+
   This function is repeated 4 times:
   versions with and without QR adapter
   versions with and without Offset
-  
+
  */
 template < typename MeshType, typename TestSpaceType, typename ExpressionType, typename QRAdapterType>
 IntegrateVectorElement<MeshType, TestSpaceType, ExpressionType, QRAdapterType>
@@ -263,7 +263,7 @@ integrate ( const RequestLoopElement<MeshType>& request,
   with a loop on the elements.
 
   This function is repeated 2 times:
-  versions with and without QR adapter  
+  versions with and without QR adapter
 
  */
 template < typename MeshType, typename ExpressionType, typename QRAdapterType>
