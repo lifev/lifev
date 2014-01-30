@@ -25,7 +25,7 @@
 //@HEADER
 /**
 
-/*!
+ *!
  *  @file
  *  @brief File containing the Monolithic Geometry--Implicit FSI Solver
  *
