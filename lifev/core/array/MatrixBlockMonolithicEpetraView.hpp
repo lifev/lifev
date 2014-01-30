@@ -100,11 +100,21 @@ public:
     //! Print the informations about the MatrixBlockMonolithicEpetraView
     void showMe (std::ostream& output = std::cout) const;
 
+    //! Tells if the viewed matrix is already filled
+    bool filled() const;
+
     //! Function to assemble an elemental matrix in a block
     void addToCoefficients ( UInt const numRows, UInt const numColumns,
                              std::vector<Int> const& blockRowIndices, std::vector<Int> const& blockColumnIndices,
                              DataType* const* const localValues,
                              Int format = Epetra_FECrsMatrix::COLUMN_MAJOR ) const;
+
+    //! Function to sum an elemental matrix in a block which is already closed
+    void sumIntoCoefficients ( UInt const numRows, UInt const numColumns,
+                             std::vector<Int> const& blockRowIndices, std::vector<Int> const& blockColumnIndices,
+                             DataType* const* const localValues,
+                             Int format = Epetra_FECrsMatrix::COLUMN_MAJOR ) const;
+
     //@}
 
     //! @name  Set Methods
@@ -242,6 +252,16 @@ MatrixBlockMonolithicEpetraView<DataType>::showMe ( std::ostream& output ) const
            << "lastColumn = " << M_lastColumnIndex << std::endl;
 }
 
+
+template<typename DataType>
+bool
+MatrixBlockMonolithicEpetraView<DataType>::
+filled() const
+{
+  return M_matrix->filled();
+}
+
+
 template<typename DataType>
 void
 MatrixBlockMonolithicEpetraView<DataType>::
@@ -266,6 +286,35 @@ addToCoefficients ( UInt const numRows, UInt const numColumns,
                                  rowIndices, columnIndices,
                                  localValues, format);
 }
+
+
+template<typename DataType>
+void
+MatrixBlockMonolithicEpetraView<DataType>::
+sumIntoCoefficients( UInt const numRows, UInt const numColumns,
+                    std::vector<Int> const& blockRowIndices, std::vector<Int> const& blockColumnIndices,
+                    DataType* const* const localValues,
+                    Int format) const
+{
+    std::vector<Int> rowIndices (blockRowIndices);
+    std::vector<Int> columnIndices (blockColumnIndices);
+
+    for (UInt i (0); i < numRows; ++i)
+    {
+        rowIndices[i] += M_firstRowIndex;
+    }
+    for (UInt i (0); i < numColumns; ++i)
+    {
+        columnIndices[i] += M_firstColumnIndex;
+    }
+
+    M_matrix->sumIntoCoefficients (numRows, numColumns,
+                                 rowIndices, columnIndices,
+                                 localValues, format);
+}
+
+
+
 
 
 // ===================================================
@@ -296,4 +345,3 @@ MatrixBlockMonolithicEpetraView<DataType>::setup ( const UInt& firstRow,
 } // namespace LifeV
 
 #endif /* MATRIXBLOCKVIEW_HPP */
-
