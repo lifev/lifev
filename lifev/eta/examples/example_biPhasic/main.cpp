@@ -65,6 +65,7 @@
 
 #include <lifev/core/fem/BCHandler.hpp>
 #include <lifev/core/fem/BCManage.hpp>
+#include <lifev/core/fem/FESpace.hpp>
 #include <lifev/eta/fem/ETFESpace.hpp>
 
 #include <lifev/core/fem/GradientRecovery.hpp>
@@ -655,7 +656,8 @@ int main ( int argc, char** argv )
     }
 
     vector_type LSSolution (ETlsFESpace->map(), Unique);
-    lsFESpace->interpolate (initLSFct, LSSolution, 0.0);
+    lsFESpace->interpolate (static_cast<FESpace< mesh_Type, MapEpetra >::function_Type> (initLSFct),
+			    LSSolution, 0.0);
 
     vector_type LSSolutionOld (LSSolution, Repeated);
     vector_type HJSolutionOld (LSSolution, Repeated);
@@ -1755,5 +1757,3 @@ int main ( int argc, char** argv )
 
     return ( EXIT_SUCCESS );
 }
-
-
