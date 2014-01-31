@@ -199,7 +199,7 @@ IntegrateVectorElement (const boost::shared_ptr<MeshType>& mesh,
         M_testCFE_std (new ETCurrentFE<TestSpaceType::space_dim, TestSpaceType::field_dim> (testSpace->refFE(), testSpace->geoMap(), qrAdapter.standardQR() ) ),
         M_testCFE_adapted (new ETCurrentFE<TestSpaceType::space_dim, TestSpaceType::field_dim> (testSpace->refFE(), testSpace->geoMap(), qrAdapter.standardQR() ) ),
 
-        M_elementalVector (TestSpaceType::field_dim * testSpace->refFE().nbDof() )
+        M_elementalVector (TestSpaceType::field_dim * testSpace->refFE().nbDof() ),
 
         M_offset (offset)
 {
