@@ -71,7 +71,8 @@
 #include <boost/shared_ptr.hpp>
 
 #include <lifev/eta/fem/ETFESpace.hpp>
-#include <lifev/core/array/MatrixBlockMonolithicEpetra.hpp>
+#include <lifev/core/array/VectorEpetraStructured.hpp>
+#include <lifev/core/array/MatrixEpetraStructured.hpp>
 #include <lifev/eta/expression/Integrate.hpp>
 
 #include <list>
@@ -133,8 +134,11 @@ public:
     typedef ETFESpace<mesh_Type, map_Type, SpaceDim, SpaceDim > ETFESpace_velocity;
     typedef ETFESpace<mesh_Type, map_Type, SpaceDim, 1 >        ETFESpace_pressure;
 
-    typedef MatrixBlockMonolithicEpetra<Real>           matrix_block_Type;
-    typedef boost::shared_ptr<matrix_block_Type>        matrixPtr_block_Type;
+    typedef MatrixEpetraStructured<Real>           matrix_block_Type;
+    typedef boost::shared_ptr<matrix_block_Type>   matrixPtr_block_Type;
+    
+    typedef VectorEpetraStructured                 vector_block_Type;
+    typedef boost::shared_ptr<vector_block_Type>   vectorPtr_block_Type;
 
     //@}
 
@@ -290,12 +294,6 @@ public:
         @param residual
      */
     void reduceResidual ( Vector& residual );
-
-    //! Set a block preconditioner
-    /*!
-        @blockPrecconditioner Block preconditioner
-     */
-    void setBlockPreconditioner ( matrixPtr_Type blockPreconditioner );
 
     //! Update and return the coefficient matrix
     /*!
@@ -715,17 +713,17 @@ public:
      */
     matrix_Type& matrixMass()
     {
-        return *M_velocityMatrixMass;
+        return *M_matrixMass;
     }
 
     const matrix_Type& matrixMass() const
     {
-        return *M_velocityMatrixMass;
+        return *M_matrixMass;
     }
 
     const matrixPtr_Type matrixMassPtr() const
     {
-        return M_velocityMatrixMass;
+        return M_matrixMass;
     }
 
     //@}
@@ -740,17 +738,6 @@ public:
 
     //! Set up post processing
     void postProcessingSetPhi();
-
-    //! Return a bool value if using diagonal block preconditioner
-    bool getIsDiagonalBlockPreconditioner()
-    {
-        return M_isDiagonalBlockPreconditioner;
-    }
-
-    const bool& getIsDiagonalBlockPreconditioner() const
-    {
-        return M_isDiagonalBlockPreconditioner;
-    }
 
     //@}
 
@@ -819,29 +806,43 @@ protected:
     FESpace<mesh_Type, MapEpetra>& M_velocityFESpace;
     FESpace<mesh_Type, MapEpetra>& M_pressureFESpace;
 
-    //! MPI communicator
+    // ET FE Spaces
+    boost::shared_ptr<ETFESpace_velocity > M_fespaceUETA;
+    boost::shared_ptr<ETFESpace_pressure > M_fespacePETA;
+    
+    //! Displayer to print in parallel (only PID 0 will print)
     Displayer                      M_Displayer;
 
+    //! Map of the whole system (velocity+pressure+fluxes)
     MapEpetra                      M_localMap;
+    
+    //! Map used for fluxes (when used)
+    MapEpetra                      M_fluxMap;
 
-    //! mass matrix
-    matrixPtr_Type                 M_velocityMatrixMass;
+    //! Mass matrix
+    matrixPtr_block_Type          M_velocityMatrixMass;
 
-    //! mass matrix
-    matrixPtr_Type                 M_pressureMatrixMass;
+    //! Mass matrix built in the pressure space
+    matrixPtr_Type                M_pressureMatrixMass;
+    
+    //! Mass matrix built in the pressure space
+    matrixPtr_Type                M_matrixMass;
+    
+    //! Convective term
+    matrixPtr_block_Type          M_convectiveMatrix;
+    
+    //! Convective term
+    matrixPtr_block_Type          M_matrixNoBC_block;
 
-    //! Stokes matrix: nu*stiff
-    matrixPtr_Type                 M_matrixStokes;
-
-    //! matrix to be solved
-    //    matrixPtr_Type               M_matrixFull;
-
-    //! matrix without boundary conditions
-    matrixPtr_Type                 M_matrixNoBC;
+    //! Full matrix without boundary conditions
+    matrixPtr_Type                M_matrixNoBC;
 
     //! stabilization matrix
-    matrixPtr_Type                 M_matrixStabilization;
+    matrixPtr_Type                M_matrixStabilization;
 
+    //! Constant terms
+    matrixPtr_block_Type          M_matrixStokes;
+    
     //! source term for Navier-Stokes equations
     source_Type                    M_source;
 
@@ -852,10 +853,12 @@ protected:
     vectorPtr_Type                 M_solution;
 
     //! residual
-    vectorPtr_Type                    M_residual;
+    vectorPtr_Type                 M_residual;
 
-    linearSolverPtr_Type              M_linearSolver;
+    //! Linear solver
+    linearSolverPtr_Type           M_linearSolver;
 
+    //! True for steady simulations
     bool                           M_steady;
 
     //! Postprocessing class
@@ -872,10 +875,11 @@ protected:
     Real                           M_gammaDiv;
     Real                           M_gammaPress;
 
-    const function_Type*                M_betaFunction;
+    const function_Type*           M_betaFunction;
 
     bool                           M_divBetaUv;
 
+    //! Use stiff-strain formulation
     bool                           M_stiffStrain;
 
     //
@@ -885,27 +889,16 @@ protected:
 
     bool                           M_recomputeMatrix;
 
-    bool                           M_isDiagonalBlockPreconditioner;
-
     //! Elementary matrices and vectors
-    MatrixElemental                        M_elementMatrixStiff;      // velocity Stokes
-    MatrixElemental                        M_elementMatrixMass;       // velocity mass
-    MatrixElemental                        M_elementMatrixPreconditioner;          // (p,q) bloc for preconditioners
+    MatrixElemental                        M_elementMatrixStiff;            // velocity Stokes
+    MatrixElemental                        M_elementMatrixMass;             // velocity mass
+    MatrixElemental                        M_elementMatrixPreconditioner;   // (p,q) bloc for preconditioners
     MatrixElemental                        M_elementMatrixDivergence;
     MatrixElemental                        M_elementMatrixGradient;
-    VectorElemental                        M_elementRightHandSide;           // Elementary right hand side
-    matrixPtr_Type                         M_blockPreconditioner;
+    VectorElemental                        M_elementRightHandSide;          // Elementary right hand side
     VectorElemental                        M_wLoc;
     VectorElemental                        M_uLoc;
     boost::shared_ptr<vector_Type> M_un;
-
-    // Members added for the migration to ETA
-
-    boost::shared_ptr<ETFESpace_velocity > M_fespaceUETA;
-    boost::shared_ptr<ETFESpace_pressure > M_fespacePETA;
-
-    matrixPtr_block_Type M_LinearTerms;
-
 
 }; // class OseenSolver
 

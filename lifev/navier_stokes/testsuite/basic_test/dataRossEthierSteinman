@@ -16,17 +16,19 @@ export_norms           = false
 export_exact_solutions = true
 test                   = accuracy
 accuracy_tolerance     = 0.09
-mesh_source            = file
+mesh_source            = regular_mesh
 
 [fluid]
 
+    conservativeFormulation = false
+    
     [./physics]
     density         = 1.0          # density
-    viscosity       = .01       # viscosity
+    viscosity       = .01          # viscosity
 
     [../time_discretization]
     initialtime     = 0.0
-    endtime         = 8e-5
+    endtime         = 16e-5
     timestep        = 4e-5
 
     BDF_order       = 1
@@ -35,14 +37,15 @@ mesh_source            = file
     mesh_dir        = ./
     mesh_file       = cube4x4.mesh
     mesh_type       = .mesh
+    mesh_size       = 2
 
     verbose         = 0
     linearized      = 0
     diagonalize     = 1 # weight, 0=off
     div_beta_u_v    = 0 # 1=on, 0=off
-    FE_number         = 3
-    vel_order         = 'P1Bubble P1Bubble P2'
-    press_order       = 'P1 P1 P1'
+    FE_number         = 1
+    vel_order         = P2 
+    press_order       = P1
 
     [../miscellaneous]
     verbose         = 1
@@ -124,10 +127,11 @@ mesh_source            = file
     gammaDiv   = 0.7
     gammaPress = 0.7
     max_iter_reuse  = 60
+    use             = false
 
     [../problem]
     #a = 1.57
     #d = 0.78
     sigma = 0
-    neumannList = 2
-    dirichletList = 1,2,3,4,5,6
+    neumannList = 1
+    dirichletList = 2,3,4,5,6

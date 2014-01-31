@@ -541,19 +541,12 @@ NavierStokes<MeshType, Problem>::run()
     problem_Type::setParamsFromGetPot ( dataFile );
 
     UInt numDiscretizations;
-    if ( (M_test == SpaceConvergence) || (M_test == None) )
+
+    // Loading the discretization to be tested
+    numDiscretizations = dataFile ( "fluid/space_discretization/mesh_number", 1 );
+    for ( UInt i ( 0 ); i < numDiscretizations; ++i )
     {
-        // Loading the discretization to be tested
-        numDiscretizations = dataFile ( "fluid/space_discretization/mesh_number", 1 );
-        for ( UInt i ( 0 ); i < numDiscretizations; ++i )
-        {
-            M_meshDiscretization.push_back (dataFile ( "fluid/space_discretization/mesh_size", 8, i ) );
-        }
-    }
-    else
-    {
-        M_meshDiscretization.push_back (0); // Just to be sure to have 1 element
-        numDiscretizations = 1;
+        M_meshDiscretization.push_back (dataFile ( "fluid/space_discretization/mesh_size", 8, i ) );
     }
 
     UInt numFELabels = dataFile ( "fluid/space_discretization/FE_number", 1 );
@@ -641,20 +634,14 @@ NavierStokes<MeshType, Problem>::run()
 
             Int geoDimensions = mesh_Type::S_geoDimensions;
             // Building the mesh from the source
-            /*    if(M_meshSource == RegularMesh) Not yet implemented in 2D
-                {
-                    regularMesh3D( *fullMeshPtr,
-                                   1,
-                                   mElem, mElem, mElem,
-                                   false,
-                                   2.0,   2.0,   2.0,
-                                   -1.0,  -1.0,  -1.0);
+            if(M_meshSource == RegularMesh) 
+            {
+                    regularMesh3D( *fullMeshPtr, 1, mElem, mElem, mElem, false, 1.0, 1.0, 1.0, -1.0,  -1.0,  -1.0);
 
                     if (verbose) std::cout << "Mesh source: regular mesh("
                                            << mElem << "x" << mElem << "x" << mElem << ")" << std::endl;
-                }
-                else */
-            if (M_meshSource == File)
+            }
+            else if(M_meshSource == File)
             {
                 MeshData meshData;
                 meshData.setup (dataFile, "fluid/space_discretization");
@@ -671,7 +658,7 @@ NavierStokes<MeshType, Problem>::run()
                 }
                 exit (1);
             }
-
+            
             if (verbose)
             {
                 std::cout << "Partitioning the mesh ... " << std::flush;
@@ -849,6 +836,7 @@ NavierStokes<MeshType, Problem>::run()
                 where the * means that the value is obtained by interpolating the quantity
                 using the exact solution.
              */
+            
             Real time = t0 + dt;
             for (  ; time <=  oseenData->dataTime()->initialTime() + dt / 2.; time += dt)
             {
@@ -1064,6 +1052,7 @@ NavierStokes<MeshType, Problem>::run()
                 if (verbose) std::cout << "Relative error: E(u)=" << urelerr << ", E(p)=" << prelerr << std::endl
                                            << "Tolerance=" << M_accuracyTol << std::endl;
 
+                /*
                 if (urelerr > M_accuracyTol || prelerr > M_accuracyTol)
                 {
                     if (verbose)
@@ -1072,6 +1061,7 @@ NavierStokes<MeshType, Problem>::run()
                     }
                     throw typename NavierStokes::RESULT_CHANGED_EXCEPTION();
                 }
+                */
             }
             // ** END Accuracy test **
 
@@ -1089,6 +1079,7 @@ NavierStokes<MeshType, Problem>::run()
     } // End of loop on the mesh refinement
 
     // ** BEGIN Space convergence test **
+    /*
     if (verbose && (M_test == SpaceConvergence) )
     {
         bool success;
@@ -1107,6 +1098,7 @@ NavierStokes<MeshType, Problem>::run()
         }
     }
     // ** END Space convergence test **
+    */
     globalChrono.stop();
     if (verbose)
     {
