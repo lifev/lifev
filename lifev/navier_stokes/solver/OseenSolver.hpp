@@ -75,6 +75,10 @@
 #include <lifev/core/array/MatrixEpetraStructured.hpp>
 #include <lifev/eta/expression/Integrate.hpp>
 
+#include <lifev/navier_stokes/testsuite/basic_test/uExactFunctor.hpp>
+#include <lifev/navier_stokes/testsuite/basic_test/gradUExactFunctor.hpp>
+#include <lifev/navier_stokes/testsuite/basic_test/pExactFunctor.hpp>
+
 #include <list>
 
 namespace LifeV
@@ -507,7 +511,7 @@ public:
     {
         M_resetStabilization = true;
     }
-
+    
     //! Update
     void updateUn()
     {
@@ -530,11 +534,12 @@ public:
 
     //! @name Set Methods
     //@{
-
+    
     //! Set
     /*!
-        @param recomputeMatrix
-     */
+     @param recomputeMatrix
+    */
+    
     void setRecomputeMatrix ( const bool& recomputeMatrix )
     {
         M_recomputeMatrix = recomputeMatrix;

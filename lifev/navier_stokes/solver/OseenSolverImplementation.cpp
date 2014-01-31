@@ -462,6 +462,9 @@ updateSystem ( const Real         alpha,
     Eye[1][1] = 1;
     Eye[2][2] = 1;
     
+    vector_Type conservativeTerm(un);
+    conservativeTerm -= betaVector;
+    
     M_convectiveMatrix.reset  ( new matrix_block_Type ( M_fespaceUETA->map() | M_fespacePETA->map() | M_fluxMap ) );
     *M_convectiveMatrix *= 0;
     
@@ -469,27 +472,33 @@ updateSystem ( const Real         alpha,
     {
         M_convectiveMatrix.reset  ( new matrix_block_Type ( M_fespaceUETA->map() | M_fespacePETA->map() | M_fluxMap ) );
         *M_convectiveMatrix *= 0;
+        
+        if(M_oseenData->conservativeFormulation())
         {
             using namespace ExpressionAssembly;
             integrate(
-                      elements(M_fespaceUETA->mesh()), // Mesh
-                      M_velocityFESpace.qr(), // QR
-                      M_fespaceUETA,
-                      M_fespaceUETA,
-                      dot(grad(phi_j) * M_oseenData->density() * value(M_fespaceUETA, betaVector), phi_i) +
-                      0.5 * M_oseenData->density() * dot ( value ( Eye ) , grad(M_fespaceUETA, betaVector) ) * dot( phi_j , phi_i )
+                elements(M_fespaceUETA->mesh()), // Mesh
+                M_velocityFESpace.qr(), // QR
+                M_fespaceUETA,
+                M_fespaceUETA,
+                dot(grad(phi_j) * M_oseenData->density() * value(M_fespaceUETA, betaVector), phi_i) +                          // semi-implicit convective term
+                0.5 * M_oseenData->density() * dot ( value ( Eye ) , grad(M_fespaceUETA, betaVector) ) * dot( phi_j , phi_i )- // consistency term
+                M_oseenData->density() * dot ( value ( Eye ) , grad(M_fespaceUETA, conservativeTerm) ) * dot( phi_j , phi_i )  // conservative formulation
                       )
             >> M_convectiveMatrix->block(0,0);
         }
-        
-        // ALE term: - rho div(w) u v
-        if (M_oseenData->conservativeFormulation() )
+        else
         {
-            ASSERT(0!=0,"To be coded using ET");
-            // mass_divw ( - M_oseenData->density(),
-            //           M_wLoc,
-            //           M_elementMatrixStiff,
-            //           M_velocityFESpace.fe(), 0, 0, numVelocityComponent );
+            using namespace ExpressionAssembly;
+            integrate(
+                elements(M_fespaceUETA->mesh()), // Mesh
+                M_velocityFESpace.qr(), // QR
+                M_fespaceUETA,
+                M_fespaceUETA,
+                dot(grad(phi_j) * M_oseenData->density() * value(M_fespaceUETA, betaVector), phi_i) +                           // semi-implicit convective term
+                0.5 * M_oseenData->density() * dot ( value ( Eye ) , grad(M_fespaceUETA, betaVector) ) * dot( phi_j , phi_i )   // consistency term
+                      )
+            >> M_convectiveMatrix->block(0,0);
         }
         
         // Stabilising term: -rho div(u^n) u v
@@ -641,6 +650,67 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::iterate ( bcHan
 
     Int numIter = M_linearSolver->solveSystem ( rightHandSideFull, *M_solution, staticCast );
 
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
+    /*
+     *   Computing the following norms: L2 and H1 for the velocity, L2 for the pressure
+     *
+     */
+    
+    // L2 for the velocity
+    
+    boost::shared_ptr<uExactFunctor> uExactFct( new uExactFunctor );
+    boost::shared_ptr<vector_Type> uExactVec(new vector_Type(M_velocityFESpace.map(),Unique));
+    M_velocityFESpace.interpolate(RossEthierSteinmanUnsteadyDec::uexact, *uExactVec, 0.0);
+    
+    vector_Type uComputed ( M_fespaceUETA->map() , Unique );
+    uComputed.subset( *M_solution );
+    
+    Real errorL2SquaredLocal( 0.0 );
+    Real errorL2Squared( 0.0 );
+    
+    {
+        using namespace ExpressionAssembly;
+        integrate (
+                   elements (M_fespaceUETA->mesh() ), // Mesh
+                   M_velocityFESpace.qr(), // QR
+                   dot ( ( eval ( uExactFct, value(M_oseenData->dataTime()->time()),X) - value( M_fespaceUETA , uComputed ) ),
+                        (  eval ( uExactFct, value(M_oseenData->dataTime()->time()),X) - value( M_fespaceUETA , uComputed ) ) )
+                   )
+        >> errorL2SquaredLocal;
+    }
+    
+    M_fespaceUETA->mesh()->comm()->Barrier();
+    M_fespaceUETA->mesh()->comm()->SumAll (&errorL2SquaredLocal, &errorL2Squared, 1);
+    
+    M_Displayer.leaderPrintMax ( "\nL2 squared norm of the velocity error = " , std::sqrt (errorL2Squared), "\n" );
+    
+    // H1 for the velocity
+    
+    Real errorH1SquaredLocal( 0.0 );
+    Real errorH1Squared( 0.0 );
+    
+    boost::shared_ptr<gradUExactFunctor> gradUExactFct( new gradUExactFunctor );
+    
+    {
+        using namespace ExpressionAssembly;
+        integrate (
+                   elements (M_fespaceUETA->mesh() ), // Mesh
+                   M_velocityFESpace.qr(), // QR
+                   dot ( ( eval ( gradUExactFct, value(M_oseenData->dataTime()->time()), X) + (-1) * grad( M_fespaceUETA , uComputed ) ) ,
+                        ( eval ( gradUExactFct, value(M_oseenData->dataTime()->time()), X) + (-1) * grad( M_fespaceUETA , uComputed ) ) )
+                   )
+        >> errorH1SquaredLocal;
+    
+    }
+    
+    M_fespaceUETA->mesh()->comm()->Barrier();
+    M_fespaceUETA->mesh()->comm()->SumAll (&errorH1SquaredLocal, &errorH1Squared, 1);
+    
+    M_Displayer.leaderPrintMax ( "\nH1 squared norm of the velocity error = " , std::sqrt (errorH1Squared), "\n" );
+        
+    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+    
     // if the preconditioner has been rese the stab terms are to be updated
     if ( numIter < 0 || numIter > M_iterReuseStabilization )
     {
