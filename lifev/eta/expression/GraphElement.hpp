@@ -82,8 +82,8 @@ public:
 
     //! Type of the Evaluation
     typedef typename ExpressionToEvaluation < ExpressionType,
-            TestSpaceType::S_fieldDim,
-            SolutionSpaceType::S_fieldDim,
+            TestSpaceType::field_dim,
+            SolutionSpaceType::field_dim,
             3 >::evaluation_Type  evaluation_Type;
 
     //@}
@@ -260,8 +260,8 @@ addTo (GraphType& graph)
 
     #pragma omp parallel
     {
-        ETMatrixElemental elementalMatrix (TestSpaceType::S_fieldDim * M_testSpace->refFE().nbDof(),
-                                           SolutionSpaceType::S_fieldDim * M_solutionSpace->refFE().nbDof() );
+        ETMatrixElemental elementalMatrix (TestSpaceType::field_dim * M_testSpace->refFE().nbDof(),
+                                           SolutionSpaceType::field_dim * M_solutionSpace->refFE().nbDof() );
 
         #pragma omp for schedule(runtime)
         for (UInt iElement = 0; iElement < nbElements; ++iElement)
@@ -270,9 +270,9 @@ addTo (GraphType& graph)
             elementalMatrix.zero();
 
             // Loop on the blocks
-            for (UInt iblock (0); iblock < TestSpaceType::S_fieldDim; ++iblock)
+            for (UInt iblock (0); iblock < TestSpaceType::field_dim; ++iblock)
             {
-                for (UInt jblock (0); jblock < SolutionSpaceType::S_fieldDim; ++jblock)
+                for (UInt jblock (0); jblock < SolutionSpaceType::field_dim; ++jblock)
                 {
 
                     // Set the row global indices in the local matrix

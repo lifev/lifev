@@ -246,8 +246,8 @@ private:
                             ETMatrixElemental& elementalMatrix,
                             evaluation_Type& evaluation,
                             ETCurrentFE<MeshType::S_geoDimensions, 1>& globalCFE,
-                            ETCurrentFE<TestSpaceType::S_spaceDim, TestSpaceType::S_fieldDim>& testCFE,
-                            ETCurrentFE<SolutionSpaceType::S_spaceDim, SolutionSpaceType::S_fieldDim>& solutionCFE);
+                            ETCurrentFE<TestSpaceType::space_dim, TestSpaceType::field_dim>& testCFE,
+                            ETCurrentFE<SolutionSpaceType::space_dim, SolutionSpaceType::field_dim>& solutionCFE);
     //@}
 
     // Pointer on the mesh
@@ -303,11 +303,11 @@ IntegrateMatrixElement (const boost::shared_ptr<MeshType>& mesh,
         M_solutionSpace (solutionSpace),
         M_evaluation (expression),
 
-        M_testCFE_std (new ETCurrentFE<TestSpaceType::S_spaceDim, TestSpaceType::S_fieldDim> (testSpace->refFE(), testSpace->geoMap(), qrAdapter.standardQR() ) ),
-        M_testCFE_adapted (new ETCurrentFE<TestSpaceType::S_spaceDim, TestSpaceType::S_fieldDim> (testSpace->refFE(), testSpace->geoMap(), qrAdapter.standardQR() ) ),
+        M_testCFE_std (new ETCurrentFE<TestSpaceType::space_dim, TestSpaceType::field_dim> (testSpace->refFE(), testSpace->geoMap(), qrAdapter.standardQR() ) ),
+        M_testCFE_adapted (new ETCurrentFE<TestSpaceType::space_dim, TestSpaceType::field_dim> (testSpace->refFE(), testSpace->geoMap(), qrAdapter.standardQR() ) ),
 
-        M_solutionCFE_std (new ETCurrentFE<SolutionSpaceType::S_spaceDim, SolutionSpaceType::S_fieldDim> (solutionSpace->refFE(), testSpace->geoMap(), qrAdapter.standardQR() ) ),
-        M_solutionCFE_adapted (new ETCurrentFE<SolutionSpaceType::S_spaceDim, SolutionSpaceType::S_fieldDim> (solutionSpace->refFE(), testSpace->geoMap(), qrAdapter.standardQR() ) ),
+        M_solutionCFE_std (new ETCurrentFE<SolutionSpaceType::space_dim, SolutionSpaceType::field_dim> (solutionSpace->refFE(), testSpace->geoMap(), qrAdapter.standardQR() ) ),
+        M_solutionCFE_adapted (new ETCurrentFE<SolutionSpaceType::space_dim, SolutionSpaceType::field_dim> (solutionSpace->refFE(), testSpace->geoMap(), qrAdapter.standardQR() ) ),
 
         M_offsetUp (offsetUp),
         M_offsetLeft (offsetLeft),
@@ -489,8 +489,8 @@ integrateElement (const UInt iElement, const UInt nbQuadPt,
                   ETMatrixElemental& elementalMatrix,
                   evaluation_Type& evaluation,
                   ETCurrentFE<MeshType::S_geoDimensions, 1>& globalCFE,
-                  ETCurrentFE<TestSpaceType::S_spaceDim, TestSpaceType::S_fieldDim>& testCFE,
-                  ETCurrentFE<SolutionSpaceType::S_spaceDim, SolutionSpaceType::S_fieldDim>& solutionCFE)
+                  ETCurrentFE<TestSpaceType::space_dim, TestSpaceType::field_dim>& testCFE,
+                  ETCurrentFE<SolutionSpaceType::space_dim, SolutionSpaceType::field_dim>& solutionCFE)
 {
     // Zeros out the matrix
     elementalMatrix.zero();
@@ -560,8 +560,8 @@ addTo (MatrixType& mat)
     // elementalMatrix => if no, add back the member and remove the variable
     // Including a copy of evaluation: if no, use the member
 
-    ETMatrixElemental elementalMatrix (TestSpaceType::S_fieldDim * M_testSpace->refFE().nbDof(),
-                                       SolutionSpaceType::S_fieldDim * M_solutionSpace->refFE().nbDof() );
+    ETMatrixElemental elementalMatrix (TestSpaceType::field_dim * M_testSpace->refFE().nbDof(),
+                                       SolutionSpaceType::field_dim * M_solutionSpace->refFE().nbDof() );
 
     evaluation_Type evaluation (M_evaluation);
 
@@ -665,18 +665,18 @@ addToClosed (MatrixType& mat)
             ERROR_MSG ("Unrecognized element shape");
         }
 
-        ETCurrentFE<TestSpaceType::S_spaceDim, TestSpaceType::S_fieldDim>
+        ETCurrentFE<TestSpaceType::space_dim, TestSpaceType::field_dim>
         testCFE_std (M_testSpace->refFE(), M_testSpace->geoMap(), M_qrAdapter.standardQR());
 
-        ETCurrentFE<TestSpaceType::S_spaceDim, TestSpaceType::S_fieldDim>
+        ETCurrentFE<TestSpaceType::space_dim, TestSpaceType::field_dim>
         testCFE_adapted (M_testSpace->refFE(), M_testSpace->geoMap(), M_qrAdapter.standardQR());
 
 
-        ETCurrentFE<SolutionSpaceType::S_spaceDim, SolutionSpaceType::S_fieldDim>
+        ETCurrentFE<SolutionSpaceType::space_dim, SolutionSpaceType::field_dim>
         solutionCFE_std (M_solutionSpace->refFE(), M_testSpace->geoMap(),
                       M_qrAdapter.standardQR());
 
-        ETCurrentFE<SolutionSpaceType::S_spaceDim, SolutionSpaceType::S_fieldDim>
+        ETCurrentFE<SolutionSpaceType::space_dim, SolutionSpaceType::field_dim>
         solutionCFE_adapted (M_solutionSpace->refFE(), M_testSpace->geoMap(),
                       M_qrAdapter.standardQR());
 
@@ -689,8 +689,8 @@ addToClosed (MatrixType& mat)
 	  evaluation.setSolutionCFE (&solutionCFE);
 	*/
 
-        ETMatrixElemental elementalMatrix (TestSpaceType::S_fieldDim * M_testSpace->refFE().nbDof(),
-                                           SolutionSpaceType::S_fieldDim * M_solutionSpace->refFE().nbDof() );
+        ETMatrixElemental elementalMatrix (TestSpaceType::field_dim * M_testSpace->refFE().nbDof(),
+                                           SolutionSpaceType::field_dim * M_solutionSpace->refFE().nbDof() );
 
 	// Defaulted to true for security
 	bool isPreviousAdapted (true);
