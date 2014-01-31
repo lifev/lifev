@@ -122,7 +122,7 @@ public:
     {}
 
     //! Display method
-    static void display (ostream& out = std::cout)
+    static void display (std::ostream& out = std::cout)
     {
         out << "matrix[" << MatrixDim1 << "][" << MatrixDim2 << "]";
     }
