@@ -780,7 +780,7 @@ OseenSolverShapeDerivative<MeshType, SolverType>::updateLinearSystem ( const mat
             //commented the code to print out the elementary data. Useful for debugging.
 
             //  - \rho ( \grad( u^n-w^iNode ):[I\div d - (\grad d)^T] u^iNode + ( u^n-w^iNode )^T[I\div d - (\grad d)^T] (\grad u^iNode)^T , v  )
-            source_mass1 ( - this->M_oseenData->density(),
+            AssemblyElemental::source_mass1 ( - this->M_oseenData->density(),
                            M_elementVelocity,
                            M_elementMeshVelocity,
                            M_elementConvectionVelocity,
@@ -792,7 +792,7 @@ OseenSolverShapeDerivative<MeshType, SolverType>::updateLinearSystem ( const mat
             M_elementVectorVelocity.showMe(std::cout);
             */
             //  + \rho * ( \grad u^iNode dw, v  )
-            source_mass2 ( this->M_oseenData->density(),
+            AssemblyElemental::source_mass2 ( this->M_oseenData->density(),
                            M_elementVelocity,
                            M_elementVelocityRightHandSide,
                            M_elementVectorVelocity,
@@ -802,7 +802,7 @@ OseenSolverShapeDerivative<MeshType, SolverType>::updateLinearSystem ( const mat
             M_elementVectorVelocity.showMe(std::cout);
             */
             //  - \rho/2 ( \nabla u^n:[2 * I\div d - (\grad d)^T]  u^iNode , v  )
-            source_mass3 ( - 0.5 * this->M_oseenData->density(),
+            AssemblyElemental::source_mass3 ( - 0.5 * this->M_oseenData->density(),
                            M_u_loc,
                            M_elementVelocity,
                            M_elementDisplacement,
@@ -813,7 +813,7 @@ OseenSolverShapeDerivative<MeshType, SolverType>::updateLinearSystem ( const mat
             M_elementVectorVelocity.showMe(std::cout);
             */
             //  - ( [-p^iNode I + 2*mu e(u^iNode)] [I\div d - (\grad d)^T] , \grad v  )
-            source_stress ( - 1.0,
+            AssemblyElemental::source_stress ( - 1.0,
                             this->M_oseenData->viscosity(),
                             M_elementVelocity,
                             M_elementPressure,
@@ -826,7 +826,7 @@ OseenSolverShapeDerivative<MeshType, SolverType>::updateLinearSystem ( const mat
             M_elementVectorVelocity.showMe(std::cout);
             */
             // + \mu ( \grad u^iNode \grad d + [\grad d]^T[\grad u^iNode]^T : \grad v )
-            source_stress2 ( this->M_oseenData->viscosity(),
+            AssemblyElemental::source_stress2 ( this->M_oseenData->viscosity(),
                              M_elementVelocity,
                              M_elementDisplacement,
                              M_elementVectorVelocity,
@@ -836,7 +836,7 @@ OseenSolverShapeDerivative<MeshType, SolverType>::updateLinearSystem ( const mat
             M_elementVectorVelocity.showMe(std::cout);
             */
             //  + ( (\grad u^iNode):[I\div d - (\grad d)^T] , q  )
-            source_press ( -1.0,
+            AssemblyElemental::source_press ( -1.0,
                            M_elementVelocity,
                            M_elementDisplacement,
                            M_elementVectorPressure,
@@ -1020,7 +1020,7 @@ updateShapeDerivatives ( matrix_Type&                   matrix,
                 M_elementPressure[ iLocal ] = ukRepeated[ iGlobal ];
             }
 
-            shape_terms ( //M_elementDisplacement,
+            AssemblyElemental::shape_terms ( //M_elementDisplacement,
                 this->M_oseenData->density(),
                 this->M_oseenData->viscosity(),
                 M_u_loc,
@@ -1049,7 +1049,7 @@ updateShapeDerivatives ( matrix_Type&                   matrix,
                           alpha );
             */
 
-            source_press ( 1.0,
+            AssemblyElemental::source_press ( 1.0,
                            M_elementVelocity,
                            *elementMatrixPressure,
                            mmFESpace.fe(),
@@ -1058,7 +1058,7 @@ updateShapeDerivatives ( matrix_Type&                   matrix,
 
             //derivative of the convective term
             if ( convectiveTermDerivative )
-                mass_gradu ( this->M_oseenData->density(),
+                AssemblyElemental::mass_gradu ( this->M_oseenData->density(),
                              M_elementVelocity,
                              *elementMatrixConvective,
                              this->M_velocityFESpace.fe() );

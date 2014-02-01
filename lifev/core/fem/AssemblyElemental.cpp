@@ -347,8 +347,6 @@ void bodyForces (VectorElemental& localForce,
 
 }
 
-} // Namespace AssemblyElemental
-
 //
 //----------------------------------------------------------------------
 //                      Element matrix operator
@@ -5339,6 +5337,8 @@ void source_Hdiv ( const Vector& source, VectorElemental& elvec, const CurrentFE
         }
     }
 }
+
+} // Namespace AssemblyElemental
 
 } // namespace LifeV
 

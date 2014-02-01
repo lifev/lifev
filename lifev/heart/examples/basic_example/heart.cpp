@@ -464,12 +464,12 @@ void Heart::computeRhs ( vector_Type& rhs,
         ionicModel->computeIonicCurrent (data.membraneCapacitance(), elvec_Iion, elvec_u, electricModel.potentialFESpace() );
 
         //! Computing the current source of the righthand side, repeated
-        source (M_heart_fct->stimulus(),
+        AssemblyElemental::source (M_heart_fct->stimulus(),
                 elvec_Iapp,
                 electricModel.potentialFESpace().fe(),
                 data.time(),
                 0);
-        source (M_heart_fct->stimulus(),
+        AssemblyElemental::source (M_heart_fct->stimulus(),
                 elvec_Iapp,
                 electricModel.potentialFESpace().fe(),
                 data.time(),
@@ -537,11 +537,11 @@ void Heart::computeRhs ( vector_Type& rhs,
         ionicModel->computeIonicCurrent (data.membraneCapacitance(), elvec_Iion, elvec_u, electricModel.potentialFESpace() );
 
         //! Computing Iapp
-        source (M_heart_fct->stimulus(),
+        AssemblyElemental::source (M_heart_fct->stimulus(),
                 elvec_Iapp,
                 electricModel.potentialFESpace().fe(),
                 data.time(), 0);
-        source (M_heart_fct->stimulus(),
+        AssemblyElemental::source (M_heart_fct->stimulus(),
                 elvec_Iapp,
                 electricModel.potentialFESpace().fe(),
                 data.time(),

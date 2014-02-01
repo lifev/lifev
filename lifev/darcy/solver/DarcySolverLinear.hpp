@@ -1133,7 +1133,7 @@ computeConstantMatrices ( MatrixElemental& elmatMix )
 
     /* Update the divergence matrix, it is independent of the current element
        thanks to the Piola transform. */
-    grad_Hdiv ( static_cast<Real> (1.), elmatMix, M_dualField->getFESpace().fe(),
+    AssemblyElemental::grad_Hdiv ( static_cast<Real> (1.), elmatMix, M_dualField->getFESpace().fe(),
                 M_primalField->getFESpace().fe(), 0, 1 );
 
     // Select the correct element which represent ( RT0 \cdot N ) * Hybrid.
@@ -1161,7 +1161,7 @@ computeConstantMatrices ( MatrixElemental& elmatMix )
        a FESpace object. In fact the method refFE return a const ReferenceFE&, but the function
        TP_VdotN_Hdiv takes two const RefHybridFE& so we must cast a const ReferenceFE&
        to a const RefHybridFE&. The cast of type is static and uses pointers. */
-    TP_VdotN_Hdiv ( 1., elmatMix,
+    AssemblyElemental::TP_VdotN_Hdiv ( 1., elmatMix,
                     *static_cast < const ReferenceFEHybrid* > (& ( M_hybridField->getFESpace().refFE() ) ),
                     *feRT0VdotNHyb, 0, 2 );
 
@@ -1199,7 +1199,7 @@ localMatrixComputation ( const UInt& iElem, MatrixElemental& elmatMix,
     /* Compute the Hdiv mass matrix. We pass the time at the inverse of the permeability
        because the DarcySolverTransient needs the permeability time dependent. In this case
        we do not have a time evolution. */
-    mass_Hdiv ( permeabilityValue, elmatMix, M_dualField->getFESpace().fe(), 0, 0 );
+    AssemblyElemental::mass_Hdiv ( permeabilityValue, elmatMix, M_dualField->getFESpace().fe(), 0, 0 );
 
     // Check if the reaction term is set or not.
     ASSERT ( M_reactionTermFct.get(), "DarcySolverLinear : reaction term not set." );
@@ -1214,7 +1214,7 @@ localMatrixComputation ( const UInt& iElem, MatrixElemental& elmatMix,
     M_primalField->getFESpace().fe().update ( element, UPDATE_PHI | UPDATE_WDET );
 
     // Compute the reaction matrix.
-    mass ( reactionValue, elmatReactionTerm, M_primalField->getFESpace().fe(), 0, 0 );
+    AssemblyElemental::mass ( reactionValue, elmatReactionTerm, M_primalField->getFESpace().fe(), 0, 0 );
 
 } // localMatrixComputation
 
@@ -1244,7 +1244,7 @@ localVectorComputation ( const UInt& iElem, VectorElemental& elvecMix )
     const Vector vectorSourceValue = M_vectorSourceFct->eval ( iElem, barycenter, M_data->dataTimePtr()->time() );
 
     // Compute the vector source term.
-    source_Hdiv ( vectorSourceValue, elvecMix, M_dualField->getFESpace().fe(), 0 );
+    AssemblyElemental::source_Hdiv ( vectorSourceValue, elvecMix, M_dualField->getFESpace().fe(), 0 );
 
     // Check if the scalar source term is set or not.
     ASSERT ( M_scalarSourceFct.get(), "DarcySolverLinear : scalar source term not set." );
@@ -1257,7 +1257,7 @@ localVectorComputation ( const UInt& iElem, VectorElemental& elvecMix )
     M_primalField->getFESpace().fe().update ( element, UPDATE_PHI | UPDATE_WDET );
 
     // Compute the scalar source term.
-    source ( scalarSourceValue, elvecMix, M_primalField->getFESpace().fe(), 1 );
+    AssemblyElemental::source ( scalarSourceValue, elvecMix, M_primalField->getFESpace().fe(), 1 );
 
 } // localVectorComputation
 

@@ -939,7 +939,7 @@ addConvectionRhs (vectorType& rhs, const Real& coefficient, const vectorType& ve
             }
         }
 
-        source_advection (coefficient, localVelocity, localVelocity, *M_localConvectionRhs, *M_convectionRhsUCFE);
+        AssemblyElemental::source_advection (coefficient, localVelocity, localVelocity, *M_localConvectionRhs, *M_convectionRhsUCFE);
 
         // Here add in the global rhs
         for (UInt iterFDim (0); iterFDim < fieldDim; ++iterFDim)

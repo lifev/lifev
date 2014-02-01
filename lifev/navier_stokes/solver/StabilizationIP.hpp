@@ -356,7 +356,7 @@ void StabilizationIP<MeshType, DofType>::apply ( MatrixType& matrix,  const Vect
             elMatP.zero();
             chronoElemComp.start();
             // coef*\int_{facet} grad u1 . grad v1
-            ipstab_grad ( coeffPress, elMatP, *M_feOnSide1, *M_feOnSide1, *M_feBd,
+            AssemblyElemental::ipstab_grad ( coeffPress, elMatP, *M_feOnSide1, *M_feOnSide1, *M_feBd,
                           geoDimensions, geoDimensions);
             chronoElemComp.stop();
             chronoAssembly1.start();
@@ -368,7 +368,7 @@ void StabilizationIP<MeshType, DofType>::apply ( MatrixType& matrix,  const Vect
             elMatP.zero();
             chronoElemComp.start();
             // coef*\int_{face} grad u2 . grad v2
-            ipstab_grad ( coeffPress, elMatP, *M_feOnSide2, *M_feOnSide2, *M_feBd,
+            AssemblyElemental::ipstab_grad ( coeffPress, elMatP, *M_feOnSide2, *M_feOnSide2, *M_feBd,
                           geoDimensions, geoDimensions);
             chronoElemComp.stop();
             chronoAssembly2.start();
@@ -380,7 +380,7 @@ void StabilizationIP<MeshType, DofType>::apply ( MatrixType& matrix,  const Vect
             elMatP.zero();
             chronoElemComp.start();
             // - coef*\int_{facet} grad u1 . grad v2
-            ipstab_grad (- coeffPress, elMatP, *M_feOnSide1, *M_feOnSide2, *M_feBd,
+            AssemblyElemental::ipstab_grad (- coeffPress, elMatP, *M_feOnSide1, *M_feOnSide2, *M_feBd,
                          geoDimensions, geoDimensions);
             chronoElemComp.stop();
             chronoAssembly3.start();
@@ -392,7 +392,7 @@ void StabilizationIP<MeshType, DofType>::apply ( MatrixType& matrix,  const Vect
             elMatP.zero();
             chronoElemComp.start();
             // - coef*\int_{facet} grad u2 . grad v1
-            ipstab_grad (- coeffPress, elMatP, *M_feOnSide2, *M_feOnSide1, *M_feBd,
+            AssemblyElemental::ipstab_grad (- coeffPress, elMatP, *M_feOnSide2, *M_feOnSide1, *M_feBd,
                          geoDimensions, geoDimensions);
             chronoElemComp.stop();
             chronoAssembly4.start();
@@ -444,13 +444,13 @@ void StabilizationIP<MeshType, DofType>::apply ( MatrixType& matrix,  const Vect
             chronoElemComp.start();
 #if WITH_DIVERGENCE
             // coef*\int_{facet} (\beta1 . grad u1) (\beta2 . grad v2)
-            ipstab_bgrad ( coeffBeta, elMatU, *M_feOnSide1, *M_feOnSide1, beta,
+            AssemblyElemental::ipstab_bgrad ( coeffBeta, elMatU, *M_feOnSide1, *M_feOnSide1, beta,
                            *M_feBd, 0, 0, geoDimensions );
             // coef*\int_{facet} div u1 . div v1
-            ipstab_div ( coeffDiv, elMatU, *M_feOnSide1, *M_feOnSide1, *M_feBd );
+            AssemblyElemental::ipstab_div ( coeffDiv, elMatU, *M_feOnSide1, *M_feOnSide1, *M_feBd );
 #else
             // coef*\int_{facet} grad u1 . grad v1
-            ipstab_grad ( coeffGrad, elMatU, *M_feOnSide1, *M_feOnSide1, *M_feBd, 0, 0,
+            AssemblyElemental::ipstab_grad ( coeffGrad, elMatU, *M_feOnSide1, *M_feOnSide1, *M_feBd, 0, 0,
                           geoDimensions );
 #endif
             chronoElemComp.stop();
@@ -467,13 +467,13 @@ void StabilizationIP<MeshType, DofType>::apply ( MatrixType& matrix,  const Vect
             chronoElemComp.start();
 #if WITH_DIVERGENCE
             // coef*\int_{facet} (\beta2 . grad u2) (\beta2 . grad v2)
-            ipstab_bgrad ( coeffBeta, elMatU, *M_feOnSide2, *M_feOnSide2, beta,
+            AssemblyElemental::ipstab_bgrad ( coeffBeta, elMatU, *M_feOnSide2, *M_feOnSide2, beta,
                            *M_feBd, 0, 0, geoDimensions );
             // coef*\int_{facet} div u2 . div v2
-            ipstab_div ( coeffDiv, elMatU, *M_feOnSide2, *M_feOnSide2, *M_feBd );
+            AssemblyElemental::ipstab_div ( coeffDiv, elMatU, *M_feOnSide2, *M_feOnSide2, *M_feBd );
 #else
             // coef*\int_{facet} grad u2 . grad v2
-            ipstab_grad ( coeffGrad, elMatU, *M_feOnSide2, *M_feOnSide2, *M_feBd, 0, 0,
+            AssemblyElemental::ipstab_grad ( coeffGrad, elMatU, *M_feOnSide2, *M_feOnSide2, *M_feBd, 0, 0,
                           geoDimensions );
 #endif
             chronoElemComp.stop();
@@ -490,13 +490,13 @@ void StabilizationIP<MeshType, DofType>::apply ( MatrixType& matrix,  const Vect
             chronoElemComp.start();
 #if WITH_DIVERGENCE
             // - coef*\int_{facet} (\beta1 . grad u1) (\beta2 . grad v2)
-            ipstab_bgrad ( -coeffBeta, elMatU, *M_feOnSide1, *M_feOnSide2, beta,
+            AssemblyElemental::ipstab_bgrad ( -coeffBeta, elMatU, *M_feOnSide1, *M_feOnSide2, beta,
                            *M_feBd, 0, 0, geoDimensions );
             // - coef*\int_{facet} div u1 . div v2
-            ipstab_div ( -coeffDiv, elMatU, *M_feOnSide1, *M_feOnSide2, *M_feBd );
+            AssemblyElemental::ipstab_div ( -coeffDiv, elMatU, *M_feOnSide1, *M_feOnSide2, *M_feBd );
 #else
             // - coef*\int_{facet} grad u1 . grad v2
-            ipstab_grad ( -coeffGrad, elMatU, *M_feOnSide1, *M_feOnSide2, *M_feBd, 0, 0,
+            AssemblyElemental::ipstab_grad ( -coeffGrad, elMatU, *M_feOnSide1, *M_feOnSide2, *M_feBd, 0, 0,
                           geoDimensions );
 #endif
             chronoElemComp.stop();
@@ -513,13 +513,13 @@ void StabilizationIP<MeshType, DofType>::apply ( MatrixType& matrix,  const Vect
             chronoElemComp.start();
 #if WITH_DIVERGENCE
             // - coef*\int_{facet} (\beta2 . grad u2) (\beta1 . grad v1)
-            ipstab_bgrad ( -coeffBeta, elMatU, *M_feOnSide2, *M_feOnSide1, beta,
+            AssemblyElemental::ipstab_bgrad ( -coeffBeta, elMatU, *M_feOnSide2, *M_feOnSide1, beta,
                            *M_feBd, 0, 0, geoDimensions );
             // - coef*\int_{facet} div u2 . div v1
-            ipstab_div ( -coeffDiv, elMatU, *M_feOnSide2, *M_feOnSide1, *M_feBd );
+            AssemblyElemental::ipstab_div ( -coeffDiv, elMatU, *M_feOnSide2, *M_feOnSide1, *M_feBd );
 #else
             // - coef*\int_{facet} grad u2 . grad v1
-            ipstab_grad ( -coeffGrad, elMatU, *M_feOnSide2, *M_feOnSide1, *M_feBd, 0, 0,
+            AssemblyElemental::ipstab_grad ( -coeffGrad, elMatU, *M_feOnSide2, *M_feOnSide1, *M_feBd, 0, 0,
                           geoDimensions );
 #endif
             chronoElemComp.stop();
