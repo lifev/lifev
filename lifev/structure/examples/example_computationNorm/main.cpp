@@ -33,7 +33,6 @@ each time step and with the BDF method!!
 
 \date 2005-04-16
 */
-#undef HAVE_HDF5
 #ifdef TWODIM
 #error test_structure cannot be compiled in 2D
 #endif
@@ -288,7 +287,9 @@ Structure::run3d()
     boost::shared_ptr<MeshPartitioner<mesh_Type> > meshPart;
     boost::shared_ptr<mesh_Type> pointerToMesh;
 
+#ifdef LIFEV_HAS_HDF5
     if ( ! (partitioningMesh.compare ("no") ) )
+#endif
     {
         boost::shared_ptr<mesh_Type > fullMeshPtr (new mesh_Type ( ( parameters->comm ) ) );
         //Creating a new mesh from scratch
@@ -300,6 +301,7 @@ Structure::run3d()
 
         pointerToMesh = meshPart->meshPartition();
     }
+#ifdef LIFEV_HAS_HDF5
     else
     {
         //Creating a mesh object from a partitioned mesh
@@ -312,7 +314,7 @@ Structure::run3d()
         partitionIO.read (pointerToMesh);
 
     }
-
+#endif
 
     std::string dOrder =  dataFile ( "solid/space_discretization/order", "P1");
 

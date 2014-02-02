@@ -33,7 +33,6 @@ each time step and with the BDF method!!
 
 \date 2005-04-16
 */
-#undef HAVE_HDF5
 #ifdef TWODIM
 #error test_structure cannot be compiled in 2D
 #endif
@@ -82,9 +81,7 @@ each time step and with the BDF method!!
 
 #include <lifev/core/filter/Exporter.hpp>
 #include <lifev/core/filter/ExporterEnsight.hpp>
-#ifdef HAVE_HDF5
 #include <lifev/core/filter/ExporterHDF5.hpp>
-#endif
 #include <lifev/core/filter/ExporterEmpty.hpp>
 
 #include <iostream>
@@ -133,7 +130,7 @@ public:
 
     typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > fct_type;
     //Exporters Typedefs
-    typedef typename LifeV::Exporter<mesh_Type >                  filter_Type;
+    typedef LifeV::Exporter<mesh_Type >                           filter_Type;
     typedef boost::shared_ptr<filter_Type >                       filterPtr_Type;
 
     typedef LifeV::ExporterEmpty<mesh_Type >                      emptyExporter_Type;
@@ -393,7 +390,9 @@ Structure::run3d()
     boost::shared_ptr<MeshPartitioner<mesh_Type> > meshPart;
     boost::shared_ptr<mesh_Type> pointerToMesh;
 
+#ifdef LIFEV_HAS_HDF5
     if ( ! (partitioningMesh.compare ("no") ) )
+#endif
     {
         boost::shared_ptr<mesh_Type > fullMeshPtr (new mesh_Type ( ( parameters->comm ) ) );
         //Creating a new mesh from scratch
@@ -405,6 +404,7 @@ Structure::run3d()
 
         pointerToMesh = meshPart->meshPartition();
     }
+#ifdef LIFEV_HAS_HDF5
     else
     {
         //Creating a mesh object from a partitioned mesh
@@ -412,13 +412,13 @@ Structure::run3d()
 
         boost::shared_ptr<Epetra_MpiComm> mpiComm =
             boost::dynamic_pointer_cast<Epetra_MpiComm>(parameters->comm);
-        PartitionIO<mesh_Type> partitionIO (partsFileName, mpiComm);
+	PartitionIO<mesh_Type> partitionIO (partsFileName, mpiComm);
 
 
         partitionIO.read (pointerToMesh);
 
     }
-
+#endif
 
     std::string dOrder =  dataFile ( "solid/space_discretization/order", "P1");
 
