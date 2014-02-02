@@ -53,7 +53,7 @@ along with LifeV.  If not, see <http://www.gnu.org/licenses/>.
 
 #ifndef HAVE_HDF5
 
-#warning warning you should reconfigure with --with-hdf5=... flag
+#warning warning you should reconfigure Trilinos with  -D TPL_ENABLE_HDF5:BOOL=ON
 
 #else
 
