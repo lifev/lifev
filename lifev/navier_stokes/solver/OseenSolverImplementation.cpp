@@ -683,7 +683,7 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::iterate ( bcHan
     M_fespaceUETA->mesh()->comm()->Barrier();
     M_fespaceUETA->mesh()->comm()->SumAll (&errorL2SquaredLocal, &errorL2Squared, 1);
     
-    M_Displayer.leaderPrintMax ( "\nL2 squared norm of the velocity error = " , std::sqrt (errorL2Squared), "\n" );
+    M_Displayer.leaderPrintMax ( "\nL2 norm of the velocity error = " , std::sqrt (errorL2Squared), "\n" );
     
     // H1 for the velocity
     
@@ -707,8 +707,36 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::iterate ( bcHan
     M_fespaceUETA->mesh()->comm()->Barrier();
     M_fespaceUETA->mesh()->comm()->SumAll (&errorH1SquaredLocal, &errorH1Squared, 1);
     
-    M_Displayer.leaderPrintMax ( "\nH1 squared norm of the velocity error = " , std::sqrt (errorH1Squared), "\n" );
-        
+    M_Displayer.leaderPrintMax ( "\nH1 norm of the velocity error = " , std::sqrt (errorH1Squared), "\n" );
+    
+    // L2 for the pressure
+    
+    boost::shared_ptr<pExactFunctor> pExactFct( new pExactFunctor );
+    boost::shared_ptr<vector_Type> pExactVec(new vector_Type(M_pressureFESpace.map(),Unique));
+    M_pressureFESpace.interpolate(RossEthierSteinmanUnsteadyDec::pexact, *pExactVec, 0.0);
+    
+    vector_Type pComputed ( M_fespacePETA->map() , Unique );
+    pComputed.subset( *M_solution, M_fespacePETA->map(), M_velocityFESpace.dof().numTotalDof(), 0 );
+
+    Real errorL2SquaredLocalPressure( 0.0 );
+    Real errorL2SquaredPressure( 0.0 );
+    
+    {
+        using namespace ExpressionAssembly;
+        integrate (
+                   elements (M_fespacePETA->mesh() ), // Mesh
+                   M_velocityFESpace.qr(), // QR
+                     ( eval ( pExactFct, value(M_oseenData->dataTime()->time()),X) - value( M_fespacePETA , pComputed ) ) *
+                        ( eval ( pExactFct, value(M_oseenData->dataTime()->time()),X) - value( M_fespacePETA , pComputed ) )
+                   )
+        >> errorL2SquaredLocalPressure;
+    }
+    
+    M_fespacePETA->mesh()->comm()->Barrier();
+    M_fespacePETA->mesh()->comm()->SumAll (&errorL2SquaredLocalPressure, &errorL2SquaredPressure, 1);
+    
+    M_Displayer.leaderPrintMax ( "\nL2 norm of the pressure error = " , std::sqrt (errorL2SquaredPressure), "\n" );
+    
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
     // if the preconditioner has been rese the stab terms are to be updated

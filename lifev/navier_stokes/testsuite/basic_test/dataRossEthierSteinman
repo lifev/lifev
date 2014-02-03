@@ -20,7 +20,7 @@ mesh_source            = regular_mesh
 
 [fluid]
 
-    conservativeFormulation = false
+    conservativeFormulation = true
     
     [./physics]
     density         = 1.0          # density
@@ -28,8 +28,8 @@ mesh_source            = regular_mesh
 
     [../time_discretization]
     initialtime     = 0.0
-    endtime         = 16e-5
-    timestep        = 4e-5
+    endtime         = 5e-3
+    timestep        = 1e-3
 
     BDF_order       = 1
 
@@ -37,14 +37,14 @@ mesh_source            = regular_mesh
     mesh_dir        = ./
     mesh_file       = cube4x4.mesh
     mesh_type       = .mesh
-    mesh_size       = 2
+    mesh_size       = 8
 
     verbose         = 0
     linearized      = 0
     diagonalize     = 1 # weight, 0=off
     div_beta_u_v    = 0 # 1=on, 0=off
     FE_number         = 1
-    vel_order         = P2 
+    vel_order         = P1Bubble 
     press_order       = P1
 
     [../miscellaneous]
@@ -120,7 +120,7 @@ mesh_source            = regular_mesh
     reuse           = true
     max_iter_reuse  = 80
     kspace          = 100
-    tol             = 1.e-10    # AztecOO tolerance
+    tol             = 1.e-12    # AztecOO tolerance
 
     [../ipstab]
     gammaBeta  = 0.7
