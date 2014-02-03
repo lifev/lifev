@@ -494,6 +494,12 @@ public:
                               bcHandler_Type& bcHandler,
                               const vector_Type& solution );
 
+    //! Get the Lagrange multiplier related to a flux imposed on a given part of the boundary
+    /*!
+     *  @param uh1error value of the h1 norm of the velocity error
+     */
+    void h1normVelocity(Real& uh1error );
+
     //! Reset the preconditioner.
     /*!
         @param reset Reset preconditioner.

@@ -658,7 +658,7 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::iterate ( bcHan
      */
     
     // L2 for the velocity
-    
+    /*
     boost::shared_ptr<uExactFunctor> uExactFct( new uExactFunctor );
     boost::shared_ptr<vector_Type> uExactVec(new vector_Type(M_velocityFESpace.map(),Unique));
     M_velocityFESpace.interpolate(RossEthierSteinmanUnsteadyDec::uexact, *uExactVec, 0.0);
@@ -725,9 +725,9 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::iterate ( bcHan
         using namespace ExpressionAssembly;
         integrate (
                    elements (M_fespacePETA->mesh() ), // Mesh
-                   M_velocityFESpace.qr(), // QR
+                   M_pressureFESpace.qr(), // QR
                      ( eval ( pExactFct, value(M_oseenData->dataTime()->time()),X) - value( M_fespacePETA , pComputed ) ) *
-                        ( eval ( pExactFct, value(M_oseenData->dataTime()->time()),X) - value( M_fespacePETA , pComputed ) )
+                     ( eval ( pExactFct, value(M_oseenData->dataTime()->time()),X) - value( M_fespacePETA , pComputed ) )
                    )
         >> errorL2SquaredLocalPressure;
     }
@@ -736,7 +736,7 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::iterate ( bcHan
     M_fespacePETA->mesh()->comm()->SumAll (&errorL2SquaredLocalPressure, &errorL2SquaredPressure, 1);
     
     M_Displayer.leaderPrintMax ( "\nL2 norm of the pressure error = " , std::sqrt (errorL2SquaredPressure), "\n" );
-    
+    */
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
     
     // if the preconditioner has been rese the stab terms are to be updated
@@ -751,6 +751,38 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::iterate ( bcHan
     //M_residual.spy("residual");
 } // iterate()
 
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
+void
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::h1normVelocity(Real& uh1error )
+{
+	boost::shared_ptr<uExactFunctor> uExactFct( new uExactFunctor );
+	boost::shared_ptr<vector_Type> uExactVec(new vector_Type(M_velocityFESpace.map(),Unique));
+	M_velocityFESpace.interpolate(RossEthierSteinmanUnsteadyDec::uexact, *uExactVec, 0.0);
+
+	vector_Type uComputed ( M_fespaceUETA->map() , Unique );
+	uComputed.subset( *M_solution );
+
+	Real errorH1SquaredLocal( 0.0 );
+	Real errorH1Squared( 0.0 );
+
+	boost::shared_ptr<gradUExactFunctor> gradUExactFct( new gradUExactFunctor );
+
+	{
+		using namespace ExpressionAssembly;
+		integrate (
+				elements (M_fespaceUETA->mesh() ), // Mesh
+				M_velocityFESpace.qr(), // QR
+				dot ( ( eval ( gradUExactFct, value(M_oseenData->dataTime()->time()), X) + (-1) * grad( M_fespaceUETA , uComputed ) ) ,
+					  ( eval ( gradUExactFct, value(M_oseenData->dataTime()->time()), X) + (-1) * grad( M_fespaceUETA , uComputed ) ) )
+		)
+		>> errorH1SquaredLocal;
+
+	}
+
+	M_fespaceUETA->mesh()->comm()->Barrier();
+	M_fespaceUETA->mesh()->comm()->SumAll (&errorH1SquaredLocal, &errorH1Squared, 1);
+	uh1error= std::sqrt(errorH1Squared);
+}
 
 template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 void

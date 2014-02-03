@@ -12,7 +12,7 @@ save       = 1
 
 [NavierStokes]
 initialization         = projection #projection   # initialization (L2 projection) or interpolation
-export_norms           = false
+export_norms           = true
 export_exact_solutions = true
 test                   = accuracy
 accuracy_tolerance     = 0.09
@@ -20,6 +20,8 @@ mesh_source            = regular_mesh
 
 [fluid]
 
+	writeErrors             = true
+	filenameErrors          = errors.txt 
     conservativeFormulation = true
     
     [./physics]
@@ -28,8 +30,8 @@ mesh_source            = regular_mesh
 
     [../time_discretization]
     initialtime     = 0.0
-    endtime         = 5e-3
-    timestep        = 1e-3
+    endtime         = 1e-3
+    timestep        = 1e-5
 
     BDF_order       = 1
 
@@ -37,14 +39,14 @@ mesh_source            = regular_mesh
     mesh_dir        = ./
     mesh_file       = cube4x4.mesh
     mesh_type       = .mesh
-    mesh_size       = 8
+    mesh_size       = 16
 
     verbose         = 0
     linearized      = 0
     diagonalize     = 1 # weight, 0=off
     div_beta_u_v    = 0 # 1=on, 0=off
     FE_number         = 1
-    vel_order         = P1Bubble 
+    vel_order         = P2 
     press_order       = P1
 
     [../miscellaneous]

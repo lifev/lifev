@@ -619,7 +619,7 @@ NavierStokes<MeshType, Problem>::run()
                 fileName.append (M_pFELabels[iFELabel]);
                 fileName.append (".txt");
                 M_outNorm.open (fileName.c_str() );
-                M_outNorm << "% time / u L2 error / L2 rel error   p L2 error / L2 rel error \n" << std::flush;
+                M_outNorm << "% time / u L2 error / u H1 error / p L2 error \n" << std::flush;
             }
 
             // +-----------------------------------------------+
@@ -862,20 +862,30 @@ NavierStokes<MeshType, Problem>::run()
                 // Computation of the error
                 LifeV::Real urelerr, prelerr, ul2error, pl2error;
 
+                Real uh1error = 0.0;
+                fluid.h1normVelocity(uh1error);
+
                 computeErrors (*fluid.solution(),
                                ul2error, urelerr, uFESpace,
                                pl2error, prelerr, pFESpace,
                                time);
 
+                if (verbose)
+                {
+                	std::cout << "\n[ERRORS]:\n";
+                	std::cout << "Time: " << time  << ", "
+                			<< "L2 velocity error: " << ul2error << ", "
+                			<< "H1 velocity error: " << uh1error << ", "
+                			<< "L2 pressure error: " << pl2error << "\n" << std::flush;
+                }
+
                 if (verbose && M_exportNorms)
                 {
                     M_outNorm << time  << " "
                               << ul2error << " "
-                              << urelerr << " "
-                              << pl2error << " "
-                              << prelerr << "\n" << std::flush;
+                              << uh1error << " "
+                              << pl2error << "\n" << std::flush;
                 }
-
 
                 // Updating bdf
                 bdf.bdfVelocity().shiftRight ( *fluid.solution() );
@@ -991,6 +1001,9 @@ NavierStokes<MeshType, Problem>::run()
 
                 fluid.iterate ( bcH );
 
+                Real uh1error = 0.0;
+                fluid.h1normVelocity(uh1error);
+
                 bdf.bdfVelocity().shiftRight ( *fluid.solution() );
 
                 // Computation of the error
@@ -1000,14 +1013,21 @@ NavierStokes<MeshType, Problem>::run()
                                ul2error, urelerr, uFESpace,
                                pl2error, prelerr, pFESpace,
                                time);
+                if (verbose)
+                {
+                	std::cout << "\n[ERRORS]:\n";
+                	std::cout << "Time: " << time  << ", "
+                			<< "L2 velocity error: " << ul2error << ", "
+                			<< "H1 velocity error: " << uh1error << ", "
+                			<< "L2 velocity error: " << pl2error << "\n" << std::flush;
+                }
 
                 if (verbose && M_exportNorms)
                 {
-                    M_outNorm << time  << " "
-                              << ul2error << " "
-                              << urelerr << " "
-                              << pl2error << " "
-                              << prelerr << "\n" << std::flush;
+                	 M_outNorm << time  << " "
+                			 << ul2error << " "
+                			 << uh1error << " "
+                			 << pl2error << "\n" << std::flush;
                 }
 
                 // Saving the errors for the final test
