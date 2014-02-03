@@ -109,7 +109,7 @@ public:
 
     typedef boost::function<Real ( Real const&, Real const&, Real const&, Real const&, ID const& ) > fct_type;
     //Exporters Typedefs
-    typedef typename LifeV::Exporter<mesh_Type >                  filter_Type;
+    typedef LifeV::Exporter<mesh_Type >                           filter_Type;
     typedef boost::shared_ptr<filter_Type >                       filterPtr_Type;
 
     typedef LifeV::ExporterEmpty<mesh_Type >                      emptyExporter_Type;
