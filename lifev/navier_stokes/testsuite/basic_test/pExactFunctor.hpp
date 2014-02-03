@@ -34,6 +34,7 @@
 #define PEXACTFUNCTOR_H 1
 
 #include <lifev/core/LifeV.hpp>
+#include <lifev/navier_stokes/function/RossEthierSteinmanDec.hpp>
 
 namespace LifeV
 {
