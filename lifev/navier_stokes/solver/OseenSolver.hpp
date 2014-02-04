@@ -79,6 +79,8 @@
 #include <lifev/navier_stokes/testsuite/basic_test/gradUExactFunctor.hpp>
 #include <lifev/navier_stokes/testsuite/basic_test/pExactFunctor.hpp>
 
+#include <lifev/navier_stokes/solver/StabilizationSUPG.hpp>
+
 #include <list>
 
 namespace LifeV
@@ -503,8 +505,9 @@ public:
     //! compute the stabilization contributions that will be added to the system through the method updateStabilization()
     /*!
      *  @param betaVector
+     *  @param alpha
      */
-    void computeStabilization ( const vector_Type& betaVector );
+    void computeStabilization ( const vector_Type& betaVector, const Real& alpha );
 
     //! Reset the preconditioner.
     /*!
@@ -547,6 +550,17 @@ public:
     //! @name Set Methods
     //@{
     
+    //! Set the velocity to be used by the stabilizations
+    /*!
+         @param velocityRHS
+     */
+    void setVelocityRhs( const vector_Type& velocityRHS )
+    {
+    	M_velocityRhs.reset(new vector_Type(velocityRHS.map(), Unique));
+    	*M_velocityRhs *= 0;
+    	*M_velocityRhs += velocityRHS;
+    }
+
     //! Set
     /*!
      @param recomputeMatrix
@@ -857,6 +871,9 @@ protected:
     //! stabilization matrix
     matrixPtr_Type                M_matrixStabilization;
 
+    //! stabilization matrix
+    matrixPtr_block_Type          M_matrixStabilizationET;
+
     //! Constant terms
     matrixPtr_block_Type          M_matrixStokes;
     
@@ -871,6 +888,9 @@ protected:
 
     //! residual
     vectorPtr_Type                 M_residual;
+
+
+    vectorPtr_Type                 M_velocityRhs;
 
     //! Linear solver
     linearSolverPtr_Type           M_linearSolver;
@@ -905,6 +925,9 @@ protected:
     UInt                           M_count;
 
     bool                           M_recomputeMatrix;
+
+    // SUPG stabilization
+    boost::shared_ptr<StabilizationSUPG<mesh_Type, map_Type, SpaceDim > > M_supgStabilization;
 
     //! Elementary matrices and vectors
     MatrixElemental                        M_elementMatrixStiff;            // velocity Stokes

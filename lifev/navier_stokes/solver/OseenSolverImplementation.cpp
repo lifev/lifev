@@ -99,8 +99,9 @@ OseenSolver ( boost::shared_ptr<data_Type>    dataType,
     M_wLoc                   ( M_velocityFESpace.fe().nbFEDof(), velocityFESpace.fieldDim() ),
     M_uLoc                   ( M_velocityFESpace.fe().nbFEDof(), velocityFESpace.fieldDim() ),
     M_un                     ( new vector_Type (M_localMap) ),
-    M_fespaceUETA            ( new ETFESpace_velocity(M_velocityFESpace.mesh(), &(M_velocityFESpace.refFE()), communicator)),
-    M_fespacePETA            ( new ETFESpace_pressure(M_pressureFESpace.mesh(), &(M_pressureFESpace.refFE()), communicator))
+    M_fespaceUETA            ( new ETFESpace_velocity(velocityFESpace.mesh(), &(velocityFESpace.refFE()), communicator)),
+    M_fespacePETA            ( new ETFESpace_pressure(pressureFESpace.mesh(), &(pressureFESpace.refFE()), communicator)),
+    M_supgStabilization       (new StabilizationSUPG<mesh_Type, MapEpetra, SpaceDim>(velocityFESpace, pressureFESpace))
 {
     // if(M_stabilization = ( &M_velocityFESpace.refFE() == &M_pressureFESpace.refFE() ))
     {
@@ -157,8 +158,9 @@ OseenSolver ( boost::shared_ptr<data_Type>    dataType,
     M_wLoc                   ( M_velocityFESpace.fe().nbFEDof(), M_velocityFESpace.fieldDim() ),
     M_uLoc                   ( M_velocityFESpace.fe().nbFEDof(), M_velocityFESpace.fieldDim() ),
     M_un                     ( /*new vector_Type(M_localMap)*/ ),
-    M_fespaceUETA            ( new ETFESpace_velocity(M_velocityFESpace.mesh(), &(M_velocityFESpace.refFE()), communicator)),
-    M_fespacePETA            ( new ETFESpace_pressure(M_pressureFESpace.mesh(), &(M_pressureFESpace.refFE()), communicator))
+    M_fespaceUETA            ( new ETFESpace_velocity(velocityFESpace.mesh(), &(velocityFESpace.refFE()), communicator)),
+    M_fespacePETA            ( new ETFESpace_pressure(pressureFESpace.mesh(), &(pressureFESpace.refFE()), communicator)),
+    M_supgStabilization       (new StabilizationSUPG<mesh_Type, MapEpetra, SpaceDim>(velocityFESpace, pressureFESpace))
 {
     // if(M_stabilization = ( &M_velocityFESpace.refFE() == &M_pressureFESpace.refFE() ))
     {
@@ -214,8 +216,9 @@ OseenSolver ( boost::shared_ptr<data_Type>    dataType,
     M_wLoc                   ( M_velocityFESpace.fe().nbFEDof(), velocityFESpace.fieldDim() ),
     M_uLoc                   ( M_velocityFESpace.fe().nbFEDof(), velocityFESpace.fieldDim() ),
     M_un                     ( new vector_Type (M_localMap) ),
-    M_fespaceUETA            ( new ETFESpace_velocity(M_velocityFESpace.mesh(), &(M_velocityFESpace.refFE()), communicator)),
-    M_fespacePETA            ( new ETFESpace_pressure(M_pressureFESpace.mesh(), &(M_pressureFESpace.refFE()), communicator))
+    M_fespaceUETA            ( new ETFESpace_velocity(velocityFESpace.mesh(), &(velocityFESpace.refFE()), communicator)),
+    M_fespacePETA            ( new ETFESpace_pressure(pressureFESpace.mesh(), &(pressureFESpace.refFE()), communicator)),
+    M_supgStabilization       (new StabilizationSUPG<mesh_Type, MapEpetra, SpaceDim>(velocityFESpace, pressureFESpace))
 {
     // if(M_stabilization = ( &M_velocityFESpace.refFE() == &M_pressureFESpace.refFE() ))
     {
@@ -253,16 +256,32 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::setUp ( const G
     	M_stabilization = true;
 
     M_steady        = dataFile ( "fluid/miscellaneous/steady", 0 );
-    if (M_stabilization && M_oseenData->stabilizationType() == "IP")
+    if (M_stabilization)
     {
-        M_gammaBeta     = dataFile ( "fluid/ipstab/gammaBeta",  0. );
-        M_gammaDiv      = dataFile ( "fluid/ipstab/gammaDiv",   0. );
-        M_gammaPress    = dataFile ( "fluid/ipstab/gammaPress", 0. );
-        M_reuseStabilization     = dataFile ( "fluid/ipstab/reuse", false );
-        if (M_linearSolver.get() )
-            M_iterReuseStabilization = dataFile ( "fluid/ipstab/max_iter_reuse",
-                                                  static_cast<Int> ( M_linearSolver->maxNumIterations() * 8. / 10. ) );
-    }
+    	if(M_oseenData->stabilizationType() == "IP")
+    	{
+    		M_gammaBeta     = dataFile ( "fluid/ipstab/gammaBeta",  0. );
+    		M_gammaDiv      = dataFile ( "fluid/ipstab/gammaDiv",   0. );
+    		M_gammaPress    = dataFile ( "fluid/ipstab/gammaPress", 0. );
+    		M_reuseStabilization     = dataFile ( "fluid/ipstab/reuse", false );
+
+    		M_ipStabilization.setGammaBeta ( M_gammaBeta );
+    		M_ipStabilization.setGammaDiv  ( M_gammaDiv );
+    		M_ipStabilization.setGammaPress ( M_gammaPress );
+
+    		if (M_linearSolver.get() )
+    			M_iterReuseStabilization = dataFile ( "fluid/ipstab/max_iter_reuse", static_cast<Int> ( M_linearSolver->maxNumIterations() * 8. / 10. ) );
+    	}
+    	else if (M_oseenData->stabilizationType() == "SUPG")
+    	{
+    		M_supgStabilization->setETvelocitySpace(M_fespaceUETA);
+    		M_supgStabilization->setETpressureSpace(M_fespacePETA);
+    		M_supgStabilization->setCommunicator(M_velocityFESpace.map().commPtr());
+    		M_supgStabilization->setDensity(M_oseenData->density());
+    		M_supgStabilization->setViscosity(M_oseenData->viscosity());
+    		M_supgStabilization->setTimeStep(M_oseenData->dataTime()->timeStep());
+    	}
+	}
     // Energetic stabilization term
     M_divBetaUv   = dataFile ( "fluid/space_discretization/div_beta_u_v", false);
     // Enable grad( u )^T in stress tensor
@@ -271,9 +290,6 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::setUp ( const G
 
     //    M_linearSolver.setAztecooPreconditioner( dataFile, "fluid/solver" );
 
-    M_ipStabilization.setGammaBeta ( M_gammaBeta );
-    M_ipStabilization.setGammaDiv  ( M_gammaDiv );
-    M_ipStabilization.setGammaPress ( M_gammaPress );
 }
 
 
@@ -329,7 +345,7 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::buildSystem()
 {
 	// New ETA PART
 	/*
-	 * TESTING THE ASSEMBLY USING ETA
+	 *  TESTING THE ASSEMBLY USING ETA
 	 *
 	 */
 
@@ -436,11 +452,11 @@ updateSystem ( const Real         alpha,
 template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 void
 OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::
-updateSystem ( const Real         alpha,
-		       const vector_Type& betaVector,
-               const vector_Type& sourceVector,
-               matrixPtr_Type     matrixNoBC,
-               const vector_Type&     un )
+updateSystem ( const Real          alpha,
+		       const vector_Type&  betaVector,
+               const vector_Type&  sourceVector,
+               matrixPtr_Type      matrixNoBC,
+               const vector_Type&  un )
 {
     M_Displayer.leaderPrint ( "  F-  Updating mass term on right hand side... " );
     LifeChrono chrono;
@@ -517,7 +533,7 @@ updateSystem ( const Real         alpha,
         }
     }
     
-    computeStabilization(betaVector);
+    computeStabilization(betaVector, alpha);
 
     if ( alpha != 0. )
     {
@@ -538,9 +554,8 @@ updateSystem ( const Real         alpha,
 
 template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 void
-OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::computeStabilization ( const vector_Type& betaVector )
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::computeStabilization ( const vector_Type& betaVector, const Real& alpha )
 {
-
 	Real normInf;
 	betaVector.normInf ( &normInf );
 
@@ -559,6 +574,14 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::computeStabiliz
 			M_resetStabilization = false;
 			chrono.stop();
 			M_Displayer.leaderPrintMax ( "done in " , chrono.diff() );
+		}
+		else if(M_oseenData->stabilizationType() == "SUPG")
+		{
+			// TIpically here alpha is already divided by the timestep, but I want to use the actual alfa, so I multiply
+			Real alfa = alpha*M_oseenData->dataTime()->timeStep();
+			M_matrixStabilizationET.reset( new matrix_block_Type ( M_fespaceUETA->map() | M_fespacePETA->map() | M_fluxMap ) );
+			*M_matrixStabilizationET *= 0;
+			M_supgStabilization->applySUPG_Matrix_semi_implicit(M_matrixStabilizationET, betaVector, M_velocityRhs, alpha);
 		}
 	}
 	else
@@ -582,6 +605,12 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::computeStabiliz
 				M_Displayer.leaderPrint ( "reusing\n" );
 			}
 		}
+		else if(M_oseenData->stabilizationType() == "SUPG")
+		{
+			M_matrixStabilizationET.reset( new matrix_block_Type ( M_fespaceUETA->map() | M_fespacePETA->map() | M_fluxMap ) );
+			*M_matrixStabilizationET *= 0;
+			//M_supgStabilization->applySUPG_Matrix_semi_implicit(M_matrixStabilizationET);
+		}
 	}
 }
 
@@ -590,7 +619,7 @@ template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceD
 void
 OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::updateStabilization ( matrix_Type& matrixFull )
 {
-
+	// ATTENTO A CONVERTIRE IL FORMATO MATRICE PER SUPG CHE E' A BLOCCHI
     if ( M_stabilization )
     {
         matrixFull += *M_matrixStabilization;
@@ -637,8 +666,6 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::iterate ( bcHan
     M_Displayer.leaderPrint ( "  F-  Updating the boundary conditions ...     " );
 
     // HERE I SHOULD APPLY THE STABILIZATION ON THE RHS
-
-
 
     chrono.start();
 

@@ -856,6 +856,7 @@ NavierStokes<MeshType, Problem>::run()
                     uFESpace->interpolate ( static_cast<typename feSpace_Type::function_Type> ( problem_Type::uderexact ), rhs, time);
                     rhs *= -1.;
                     rhs = fluid.matrixMass() * rhs;
+                    fluid.setVelocityRhs(bdf.bdfVelocity().rhsContributionFirstDerivative());
                     fluid.updateSystem ( 0., beta, rhs );
                     fluid.iterate (bcH);
                 }
@@ -980,6 +981,8 @@ NavierStokes<MeshType, Problem>::run()
 
                 bdf.bdfVelocity().extrapolation (beta); // Extrapolation for the convective term
                 bdf.bdfVelocity().updateRHSContribution ( oseenData->dataTime()->timeStep() );
+
+                fluid.setVelocityRhs(bdf.bdfVelocity().rhsContributionFirstDerivative());
 
                 fluid.getDisplayer().leaderPrint ("alpha ", alpha);
                 fluid.getDisplayer().leaderPrint ("\n");
