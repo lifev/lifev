@@ -89,6 +89,7 @@
 #define RES_MOMENTUM_1_STEP_N   M_density * ( grad(ETuFESpace, velocityPreviousStep) * value(ETuFESpace, velocityPreviousStep) ) + ( M_density / M_timestep ) * ( value(ETuFESpace, velocityExtrapolation) - value(ETuFESpace, velocityPreviousStep) )
 #define RES_MOMENTUM_2_STEP_N   grad(ETpFESpace,pressurePreviousStep)
 #define RES_MOMENTUM_STEP_N     RES_MOMENTUM_1_STEP_N + RES_MOMENTUM_2_STEP_N // Momentum residual for explicit VMS-LES for Momentum residual, previous time step
+#define DVDT_COMPATIBILITY      ( M_density / M_timestep ) * value(ETuFESpace, velocityRhs)   // Velocity from rhs.
 #define DVDT_COMPATIBILITY_N    ( M_density / M_timestep ) * value(ETuFESpace, velocityPreviousStep)   // With velocity at the previous time-step.
 #define DVDT_COMPATIBILITY_EX   ( M_density / M_timestep ) * value(ETuFESpace, velocityExtrapolation)  // Extrapolated velocity is used.
 
@@ -342,6 +343,7 @@ public:
      *  where: @f$\mathbf{r}_M(\mathbf{u}^*;\mathbf{u}^n,p^n) := \rho \frac{1}{\Delta t} (\mathbf{u}^*-\mathbf{u}^n) + \rho (\mathbf{u}^n \cdot \nabla) \mathbf{u}^n + \nabla p^n@f$ (force term f set equal to zero)
      *
      *  @param rhs    VectorBlockType the rhs @f$\sum_{j=1}^m \frac{\alpha_j}{\Delta t}\mathbf{u}^{n+1-i} + \mathbf{f}@f$ of the N-S equations before imposition of the essential b.c.
+     *  @param velocityRhs           VectorType used to compute consistency term. It does not depend on the BDF order. 
      *  @param velocityExtrapolation VectorBlockType velocity field @f$\mathbf{u}^*@f$ for the linearization of the stabilization and consistency terms
      *  @param velocityPreviousStep  VectorType velocity field @f$\mathbf{u}^n@f$ computed at the previous time step
      *  @param pressurePreviousStep  VectorType pressure field @f$p^n@f$ computed at the previous time step
@@ -350,7 +352,8 @@ public:
      */
     template <typename VectorType, typename VectorBlockType >
     void applyRHS_semi_implicit( VectorType& rhs,
-	                         const VectorType& velocityExtrapolation,
+                                 const VectorType& velocityRhs,
+	                             const VectorType& velocityExtrapolation,
                                  const VectorType& velocityPreviousStep,
                                  const VectorType& pressurePreviousStep );
 
@@ -664,9 +667,10 @@ void StabilizationVMS<MeshType, MapType, SpaceDim>::applyRHS( VectorType& rhs,
 template<typename MeshType, typename MapType, UInt SpaceDim>
 template <typename VectorType, typename VectorBlockType >
 void StabilizationVMS<MeshType, MapType, SpaceDim>::applyRHS_semi_implicit( VectorType& rhs,
+                                                                            const VectorType& velocityRhs,
                                                                             const VectorType& velocityExtrapolation,
                                                                             const VectorType& velocityPreviousStep,
-				                 			    const VectorType& pressurePreviousStep  )
+                                                                            const VectorType& pressurePreviousStep  )
 {
     checkFESpaces();
 
@@ -683,17 +687,18 @@ void StabilizationVMS<MeshType, MapType, SpaceDim>::applyRHS_semi_implicit( Vect
     boost::shared_ptr<FlagTime> flagTime(new FlagTime(M_flag_timestep));
 
     // Consistency terms: SUPG + VMS-LES
+    // Changed by Davide: use DVDT_COMPATIBILITY instead of DVDT_COMPATIBILITY_N
     integrate(
                     elements(ETuFESpace->mesh()), M_uFESpace->qr(), ETuFESpace, 
-                    dot(DVDT_COMPATIBILITY_N, SUPG_TEST) + dot(DVDT_COMPATIBILITY_N, VMS_TEST)
-                    + dot(outerProduct( value( -1.0 ) * DVDT_COMPATIBILITY_N, RES_MOMENTUM_STEP_N ), LES_TEST) // Turbulence model, semi_implicit VMS-LES, Momentum residual
+                    dot(DVDT_COMPATIBILITY, SUPG_TEST) + dot(DVDT_COMPATIBILITY, VMS_TEST)
+                    + dot(outerProduct( value( -1.0 ) * DVDT_COMPATIBILITY, RES_MOMENTUM_STEP_N ), LES_TEST) // Turbulence model, semi_implicit VMS-LES, Momentum residual
     )
     >> NSRhs.block(0);
 
     // Consistency term: PSPG
     integrate(
                     elements(ETuFESpace->mesh()), M_pFESpace->qr(), ETpFESpace,
-                    dot(DVDT_COMPATIBILITY_N, PSPG_TEST)
+                    dot(DVDT_COMPATIBILITY, PSPG_TEST)
     )
     >> NSRhs.block(1);
 
