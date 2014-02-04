@@ -606,7 +606,7 @@ addTo (MatrixType& mat)
                 isPreviousAdapted = false;
             }
 
-	    integrateElement (iElement, M_qrAdapter.adaptedQR().nbQuadPt(), nbTestDof, nbSolutionDof,
+	    integrateElement (iElement, M_qrAdapter.standardQR().nbQuadPt(), nbTestDof, nbSolutionDof,
                           elementalMatrix, evaluation, *M_globalCFE_std , //*globalCFE,
                           *M_testCFE_std, *M_solutionCFE_std);
 
@@ -738,7 +738,7 @@ addToClosed (MatrixType& mat)
                 isPreviousAdapted = false;
             }
 
-	    integrateElement (iElement, qrAdapter.adaptedQR().nbQuadPt(), nbTestDof, nbSolutionDof,
+	    integrateElement (iElement, M_qrAdapter.standardQR().nbQuadPt(), nbTestDof, nbSolutionDof,
                           elementalMatrix, evaluation, *globalCFE_std ,
                           testCFE_std, solutionCFE_std);
 
