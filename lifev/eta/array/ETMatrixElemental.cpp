@@ -80,9 +80,9 @@ ETMatrixElemental::
 {
     for (UInt iRow (0); iRow < M_nbRow; ++iRow)
     {
-        delete M_rawData[iRow];
+        delete [] M_rawData[iRow];
     }
-    delete M_rawData;
+    delete [] M_rawData;
 }
 
 // ===================================================
