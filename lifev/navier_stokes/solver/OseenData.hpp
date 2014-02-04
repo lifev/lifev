@@ -537,6 +537,9 @@ protected:
     //! stabilization method
     NSStabilization     M_stabMethod;
 
+    //! stabilization type
+    std::string         M_stabilizationType;
+
     //@}
 
 private:

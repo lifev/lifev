@@ -74,7 +74,8 @@ OseenData::OseenData( ) :
     M_ZSectionFinal                    ( ),
     M_NbPolygonEdges                   ( ),
     M_stabilizationList                ( "fluid/space_discretization/stabilization" ),
-    M_conservativeFormulation          (true)
+    M_conservativeFormulation          (true),
+    M_stabilizationType                ("none")
 {
 }
 
@@ -105,7 +106,8 @@ OseenData::OseenData ( const OseenData& oseenData ) :
     M_ZSectionFinal                    ( oseenData.M_ZSectionFinal ),
     M_NbPolygonEdges                   ( oseenData.M_NbPolygonEdges ),
     M_stabilizationList                ( oseenData.M_stabilizationList ),
-    M_conservativeFormulation          ( false )
+    M_conservativeFormulation          ( false ),
+    M_stabilizationType                ( oseenData.M_stabilizationType)
 {
 }
 
@@ -149,6 +151,7 @@ OseenData::operator= ( const OseenData& oseenData )
         M_NbPolygonEdges                   = oseenData.M_NbPolygonEdges;
         M_stabilizationList                = oseenData.M_stabilizationList;
         M_conservativeFormulation          = oseenData.M_conservativeFormulation;
+        M_stabilizationType                = oseenData.M_stabilizationType;
     }
 
     return *this;
@@ -229,6 +232,11 @@ OseenData::setup ( const GetPot& dataFile, const std::string& section )
     M_ZSectionInit     = dataFile ( ( section + "/valuespersection/z_section_init" ).data(), -1. );
     M_ZSectionFinal    = dataFile ( ( section + "/valuespersection/z_section_final" ).data(), 0. );
     M_NbPolygonEdges   = dataFile ( ( section + "/valuespersection/nb_polygon_edges" ).data(), 10 );
+
+    // Stabilization type
+    M_stabilizationType = dataFile ( ( section + "/stabilization/method" ).data(), "none");
+
+    std::cout << "\n\n" << M_stabilizationType << "\n\n";
 }
 
 
