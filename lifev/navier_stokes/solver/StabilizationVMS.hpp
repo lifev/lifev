@@ -522,7 +522,7 @@ template <typename MatrixBlockType, typename VectorBlockType, typename VectorTyp
 void StabilizationVMS<MeshType, MapType, SpaceDim>::applyVMS_semi_implicit( MatrixBlockType& matrix,
                                                                             const VectorBlockType& velocityExtrapolation, 
                                                                             const VectorType& velocityPreviousStep,
-                							    const VectorType& pressurePreviousStep )
+                                                                            const VectorType& pressurePreviousStep )
 {
     checkFESpaces();
 
