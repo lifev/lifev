@@ -246,9 +246,14 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::setUp ( const G
         M_linearSolver->setDataFromGetPot ( dataFile, "fluid/solver" );
     }
 
-    M_stabilization = dataFile ( "fluid/ipstab/use",  (&M_velocityFESpace.refFE() == &M_pressureFESpace.refFE() ) , false);
+    M_stabilization = dataFile ( "fluid/stabilization/use",  (&M_velocityFESpace.refFE() == &M_pressureFESpace.refFE() ) , false);
+
+    // If using P1-P1 the use of the stabilization is necessary
+    if(&M_velocityFESpace.refFE() == &M_pressureFESpace.refFE())
+    	M_stabilization = true;
+
     M_steady        = dataFile ( "fluid/miscellaneous/steady", 0 );
-    if (M_stabilization)
+    if (M_stabilization && M_oseenData->stabilizationType() == "IP")
     {
         M_gammaBeta     = dataFile ( "fluid/ipstab/gammaBeta",  0. );
         M_gammaDiv      = dataFile ( "fluid/ipstab/gammaDiv",   0. );
@@ -432,7 +437,7 @@ template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceD
 void
 OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::
 updateSystem ( const Real         alpha,
-               const vector_Type& betaVector,
+		       const vector_Type& betaVector,
                const vector_Type& sourceVector,
                matrixPtr_Type     matrixNoBC,
                const vector_Type&     un )
@@ -510,43 +515,10 @@ updateSystem ( const Real         alpha,
             //           M_elementMatrixStiff,
             //           M_velocityFESpace.fe(), 0, 0, numVelocityComponent );
         }
-        
-        if ( M_stabilization && ( M_resetStabilization || !M_reuseStabilization || ( M_matrixStabilization.get() == 0 ) ) )
-        {
-            vector_Type betaVectorRepeated ( betaVector, Repeated );
-            M_Displayer.leaderPrint ( "  F-  Updating the stabilization terms ...     " );
-            chrono.start();
-            M_matrixStabilization.reset ( new matrix_Type ( M_localMap ) );
-            M_ipStabilization.apply ( *M_matrixStabilization, betaVectorRepeated, false );
-            M_matrixStabilization->globalAssemble();
-            M_resetStabilization = false;
-            chrono.stop();
-            M_Displayer.leaderPrintMax ( "done in " , chrono.diff() );
-        }
-    }
-    else
-    {
-        if ( M_stabilization )
-        {
-            M_Displayer.leaderPrint ( "  F-  Updating the stabilization terms ...     " );
-            chrono.start();
-            
-            if ( M_resetStabilization || !M_reuseStabilization || ( M_matrixStabilization.get() == 0 ) )
-            {
-                M_matrixStabilization.reset ( new matrix_Type ( M_localMap ) );
-                M_ipStabilization.apply ( *M_matrixStabilization, betaVector, false );
-                M_matrixStabilization->globalAssemble();
-                M_resetStabilization = false;
-                chrono.stop();
-                M_Displayer.leaderPrintMax ( "done in " , chrono.diff() );
-            }
-            else
-            {
-                M_Displayer.leaderPrint ( "reusing\n" );
-            }
-        }
     }
     
+    computeStabilization(betaVector);
+
     if ( alpha != 0. )
     {
         *M_matrixNoBC_block += (*M_velocityMatrixMass) * alpha;
@@ -562,6 +534,55 @@ updateSystem ( const Real         alpha,
     *M_matrixNoBC += *M_matrixNoBC_block;
     M_matrixNoBC->globalAssemble();
     
+}
+
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
+void
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::computeStabilization ( const vector_Type& betaVector )
+{
+
+	Real normInf;
+	betaVector.normInf ( &normInf );
+
+	LifeChrono chrono;
+
+	if ( normInf != 0. )
+	{
+		if( M_oseenData->stabilizationType() == "IP" && ( M_resetStabilization || !M_reuseStabilization || ( M_matrixStabilization.get() == 0 ) ) )
+		{
+			vector_Type betaVectorRepeated ( betaVector, Repeated );
+			M_Displayer.leaderPrint ( "  F-  Updating the stabilization terms ...     " );
+			chrono.start();
+			M_matrixStabilization.reset ( new matrix_Type ( M_localMap ) );
+			M_ipStabilization.apply ( *M_matrixStabilization, betaVectorRepeated, false );
+			M_matrixStabilization->globalAssemble();
+			M_resetStabilization = false;
+			chrono.stop();
+			M_Displayer.leaderPrintMax ( "done in " , chrono.diff() );
+		}
+	}
+	else
+	{
+		if (M_oseenData->stabilizationType() == "IP")
+		{
+			M_Displayer.leaderPrint ( "  F-  Updating the stabilization terms ...     " );
+			chrono.start();
+
+			if ( M_resetStabilization || !M_reuseStabilization || ( M_matrixStabilization.get() == 0 ) )
+			{
+				M_matrixStabilization.reset ( new matrix_Type ( M_localMap ) );
+				M_ipStabilization.apply ( *M_matrixStabilization, betaVector, false );
+				M_matrixStabilization->globalAssemble();
+				M_resetStabilization = false;
+				chrono.stop();
+				M_Displayer.leaderPrintMax ( "done in " , chrono.diff() );
+			}
+			else
+			{
+				M_Displayer.leaderPrint ( "reusing\n" );
+			}
+		}
+	}
 }
 
 
@@ -614,6 +635,10 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::iterate ( bcHan
 
     // matrix and vector assembling communication
     M_Displayer.leaderPrint ( "  F-  Updating the boundary conditions ...     " );
+
+    // HERE I SHOULD APPLY THE STABILIZATION ON THE RHS
+
+
 
     chrono.start();
 

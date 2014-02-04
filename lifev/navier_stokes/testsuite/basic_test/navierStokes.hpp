@@ -773,6 +773,7 @@ NavierStokes<MeshType, Problem>::run()
             MapEpetra fullMap (fluid.getMap() );
 
             fluid.setUp (dataFile);
+
             fluid.buildSystem();
 
             MPI_Barrier (MPI_COMM_WORLD);

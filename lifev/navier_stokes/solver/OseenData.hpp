@@ -363,6 +363,15 @@ public:
         return M_stokes;
     }
 
+    //!
+    /*! return a string related to the type of stabilization that is used
+     * @return M_stabilizationType string related to the type of stabilization that is used
+     */
+    std::string stabilizationType() const
+    {
+    	return M_stabilizationType;
+    }
+
     //! Find out if a semi-implicit scheme is used
     /*!
      * @return M_semiImplicit "true" if a semi-implicit scheme is used, "false" otherwise

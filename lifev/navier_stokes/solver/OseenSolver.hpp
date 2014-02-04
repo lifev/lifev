@@ -500,6 +500,12 @@ public:
      */
     void h1normVelocity(Real& uh1error );
 
+    //! compute the stabilization contributions that will be added to the system through the method updateStabilization()
+    /*!
+     *  @param betaVector
+     */
+    void computeStabilization ( const vector_Type& betaVector );
+
     //! Reset the preconditioner.
     /*!
         @param reset Reset preconditioner.

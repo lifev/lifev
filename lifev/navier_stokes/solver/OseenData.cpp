@@ -235,8 +235,6 @@ OseenData::setup ( const GetPot& dataFile, const std::string& section )
 
     // Stabilization type
     M_stabilizationType = dataFile ( ( section + "/stabilization/method" ).data(), "none");
-
-    std::cout << "\n\n" << M_stabilizationType << "\n\n";
 }
 
 
