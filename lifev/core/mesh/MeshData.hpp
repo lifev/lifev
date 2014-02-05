@@ -55,6 +55,7 @@
 #include <lifev/core/filter/ImporterMesh3D.hpp>
 #include <lifev/core/mesh/RegionMesh3DStructured.hpp>
 #include <lifev/core/filter/ParserINRIAMesh.hpp>
+#include <lifev/core/filter/ParserGmsh.hpp>
 #include <lifev/core/mesh/ConvertBareMesh.hpp>
 
 namespace LifeV
@@ -196,7 +197,25 @@ void readMesh ( RegionMesh<LinearTriangle, MC>& mesh, const MeshData& data )
 
     if ( data.meshType() == ".msh" )
     {
-        readFreeFemFile ( mesh, data.meshDir() + data.meshFile(), 1, data.verbose() );
+        std::ifstream ifile;
+        ifile.open ( ( data.meshDir() + data.meshFile()).c_str() );
+        ASSERT (ifile.is_open(), "Error! Unable to read mesh file.\n");
+
+        // Checking whether it is Gmsh or FreeFem mesh format
+        if (ifile.get()=='$')
+        {
+            // Gmsh files start with '$MeshFormat'
+            ifile.close();
+            BareMesh<LinearTriangle> bareMesh;
+            MeshIO::ReadGmshFile (data.meshDir() + data.meshFile(),bareMesh,0,data.verbose());
+            convertBareMesh ( bareMesh, mesh, data.verbose() );
+        }
+        else
+        {
+            // If not Gmsh format, it must be FreeFem
+            ifile.close();
+            readFreeFemFile ( mesh, data.meshDir() + data.meshFile(), 1, data.verbose() );
+        }
     }
     else
     {
