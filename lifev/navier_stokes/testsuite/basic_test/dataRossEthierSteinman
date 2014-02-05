@@ -11,7 +11,7 @@ start      = 0
 save       = 1
 
 [NavierStokes]
-initialization         = projection #projection   # initialization (L2 projection) or interpolation
+initialization         = interpolation #projection   # initialization (L2 projection) or interpolation
 export_norms           = true
 export_exact_solutions = true
 test                   = accuracy
@@ -20,8 +20,6 @@ mesh_source            = regular_mesh
 
 [fluid]
 
-	writeErrors             = true
-	filenameErrors          = errors.txt 
     conservativeFormulation = true
     
     [./physics]
@@ -30,24 +28,29 @@ mesh_source            = regular_mesh
 
     [../time_discretization]
     initialtime     = 0.0
-    endtime         = 1e-3
-    timestep        = 1e-5
+    endtime         = 80e-1
+    timestep        = 1e-1
 
-    BDF_order       = 1
+    BDF_order       = 4
 
     [../space_discretization]
     mesh_dir        = ./
     mesh_file       = cube4x4.mesh
     mesh_type       = .mesh
-    mesh_size       = 16
+    mesh_size       = 8
 
     verbose         = 0
     linearized      = 0
     diagonalize     = 1 # weight, 0=off
     div_beta_u_v    = 0 # 1=on, 0=off
-    FE_number         = 1
-    vel_order         = P2 
-    press_order       = P1
+    FE_number       = 1
+    vel_order       = P1
+    press_order     = P1
+    stiff_strain    = true
+    
+	[../stabilization]
+	use             = true
+	method          = SUPG	  # other possible choices: IP, VMS
 
     [../miscellaneous]
     verbose         = 1
@@ -118,7 +121,7 @@ mesh_source            = regular_mesh
     scaling         = none
     output          = all # none
     conv            = rhs
-    max_iter        = 200
+    max_iter        = 1800
     reuse           = true
     max_iter_reuse  = 80
     kspace          = 100
@@ -129,7 +132,6 @@ mesh_source            = regular_mesh
     gammaDiv   = 0.7
     gammaPress = 0.7
     max_iter_reuse  = 60
-    use             = false
 
     [../problem]
     #a = 1.57

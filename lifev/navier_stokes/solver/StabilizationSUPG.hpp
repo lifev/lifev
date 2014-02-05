@@ -31,6 +31,12 @@
    @date 04-02-2014
 
    This file contains an ETA implementation of SUPG.
+
+   TODO add more comments, in particular describe the formulation adopted. Paper Y. Bazilevs, V.M. Calo, J.A. Cottrell, T.J.R. Hughes, A. Reali, and G. Scovazzi. <i>Variational multiscale
+   residual-based turbulence modeling for large eddy simulation of incompressible flows</i>. Comput. Methods Appl. Mech. Engr. 197(1):173–201, 2007.
+
+   TODO check the parallel execution
+
 */
 
 #ifndef _SUPGSTABILIZATION_HPP_
@@ -153,18 +159,11 @@ public:
     ~StabilizationSUPG() {};
     //@}
 
-    template <typename MatrixBlockType, typename VectorBlockType, typename VectorType>
-    void applySUPG_Matrix_semi_implicit( MatrixBlockType& matrix,
-    		const VectorBlockType& velocityExtrapolation,
-    		const VectorType& velocityPreviousStep,
-    		const Real& alpha );
+    template <typename MatrixBlockType, typename VectorType>
+    void applySUPG_Matrix_semi_implicit( MatrixBlockType& matrix, const VectorType& velocityExtrapolation, const Real& alpha );
 
     template <typename VectorType, typename VectorBlockType >
-    void applySUPG_RHS_semi_implicit( VectorType& rhs,
-    		const VectorType& velocityRhs,
-    		const VectorType& velocityExtrapolation,
-    		const VectorType& velocityPreviousStep,
-    		const VectorType& pressurePreviousStep  );
+    void applySUPG_RHS_semi_implicit( VectorBlockType& rhs, const VectorType& velocityExtrapolated, const VectorType& velocityRhs);
 
     //! Set the fluid density
     void setDensity (const Real & density) { M_density = density;}
@@ -174,12 +173,6 @@ public:
 
     //! Set the Epetra communicator
     void setCommunicator (boost::shared_ptr<Epetra_Comm> comm) { M_comm = comm;}
-
-    //! Set the FE space for velocity
-    void setVelocitySpace(fespace_Type & uFESpace) { M_uFESpace = uFESpace; };
-
-    //! Set the FE space for pressure
-    void setPressureSpace(fespace_Type & pFESpace) { M_pFESpace = pFESpace; }
 
     //! Set the time step size
     void setTimeStep  (const Real & timestep)  { M_timestep = timestep;}
@@ -238,11 +231,66 @@ M_pFESpace (pressureFESpace)
 
 // applyVMS_semi_implicit
 template<typename MeshType, typename MapType, UInt SpaceDim>
-template <typename MatrixBlockType, typename VectorBlockType, typename VectorType>
+template <typename MatrixBlockType, typename VectorType>
 void StabilizationSUPG<MeshType, MapType, SpaceDim>::applySUPG_Matrix_semi_implicit( MatrixBlockType& matrix,
-                                                                            const VectorBlockType& velocityExtrapolated,
-                                                                            const VectorType& velocityRhs,
+                                                                            const VectorType& velocityExtrapolated,
                                                                             const Real& alpha )
+{
+
+	// TODO for the moment it is missing the laplacian term in the residual, hence SUPG can be used for P1-P1 FE
+	boost::shared_ptr<SquareRoot> squareroot(new SquareRoot());
+
+	Real alfa = alpha*M_timestep;
+
+	using namespace ExpressionAssembly;
+
+	integrate(
+			elements(M_fespaceUETA->mesh()),
+			M_uFESpace.qr(),
+			M_fespaceUETA, // test  w -> phi_i
+			M_fespaceUETA, // trial u -> phi_j
+			value(M_density*M_density)*TAU_M*value(alfa/M_timestep) * dot( phi_j, grad(phi_i)*value(M_fespaceUETA, velocityExtrapolated) )+
+			value(M_density*M_density) * TAU_M* dot( value(M_fespaceUETA, velocityExtrapolated)*grad(phi_j), grad(phi_i)*value(M_fespaceUETA, velocityExtrapolated))
+			+ TAU_C  * div(phi_j) * div(phi_i)
+	) >> matrix->block(0,0);
+
+	integrate(
+			elements(M_fespaceUETA->mesh()),
+			M_uFESpace.qr(),
+			M_fespaceUETA, // test  w -> phi_j
+			M_fespacePETA, // trial p -> phi_i
+			TAU_M*value(M_density)*dot( grad(phi_j), grad(phi_i)*value(M_fespaceUETA, velocityExtrapolated) )
+	) >> matrix->block(0,1);
+
+	//std::cout << "\n\n" << alpha << "\n\n";
+
+	integrate(
+			elements(M_fespaceUETA->mesh()),
+			M_pFESpace.qr(),
+			M_fespacePETA, // test  q -> phi_i
+			M_fespaceUETA, // trial u -> phi_j
+			TAU_M*value(M_density*alfa/M_timestep)*dot( phi_j,  grad(phi_i) ) +
+			TAU_M*value(M_density)*dot( value(M_fespaceUETA, velocityExtrapolated)*grad(phi_j), grad(phi_i) )
+	) >> matrix->block(1,0);
+
+	integrate(
+			elements(M_fespacePETA->mesh()),
+			M_pFESpace.qr(),
+			M_fespacePETA, // test   q -> phi_i
+			M_fespacePETA, // trial  p -> phi_j
+			TAU_M*dot(  grad(phi_j), grad(phi_i) )
+	) >> matrix->block(1,1);
+
+	matrix->globalAssemble();
+
+} // applyVMS_semi_implicit(...)
+
+// RHS, semi-implicit, VMS-LES based on Residual Momentum
+template<typename MeshType, typename MapType, UInt SpaceDim>
+template <typename VectorType, typename VectorBlockType >
+void StabilizationSUPG<MeshType, MapType, SpaceDim>::applySUPG_RHS_semi_implicit( VectorBlockType& rhs,
+																			const VectorType& velocityExtrapolated,
+                                                                            const VectorType& velocityRhs)
 {
 
 	boost::shared_ptr<SquareRoot> squareroot(new SquareRoot());
@@ -252,81 +300,19 @@ void StabilizationSUPG<MeshType, MapType, SpaceDim>::applySUPG_Matrix_semi_impli
 	integrate(
 			elements(M_fespaceUETA->mesh()),
 			M_uFESpace.qr(),
-			M_fespaceUETA, // trial u -> phi_i
-			M_fespaceUETA, // test  w -> phi_j
-			value(M_density*M_density)*TAU_M*value(alpha/M_timestep) * dot( value(M_fespaceUETA, velocityExtrapolated)*grad(phi_j) , phi_i )
-			+ value(M_density*M_density) * TAU_M* dot( value(M_fespaceUETA, velocityExtrapolated)*grad(phi_j), value(M_fespaceUETA, velocityExtrapolated)*grad(phi_i))
-			+ TAU_C * div(phi_j) * div(phi_i)
-	) >> matrix->block(0,0);
+			M_fespaceUETA,
+			TAU_M*value(M_density*M_density)*dot( grad(phi_i)*value(M_fespaceUETA, velocityExtrapolated), value(M_fespaceUETA, velocityRhs))
+	)
+	>> rhs->block(0);
 
 	integrate(
-			elements(M_fespaceUETA->mesh()),
-			M_uFESpace.qr(),
-			M_fespacePETA, // trial p -> phi_i
-			M_fespaceUETA, // test  w -> phi_j
-			TAU_M*value(M_density)*dot( value(M_fespaceUETA, velocityExtrapolated)*grad(phi_j), grad(phi_i) )
-		) >> matrix->block(0,1);
+			elements(M_fespacePETA->mesh()),
+			M_pFESpace.qr(),
+			M_fespacePETA,
+			TAU_M*value(M_density)*dot( grad(phi_i), value(M_fespaceUETA, velocityRhs))
+	)
+	>> rhs->block(1);
 
-	/*
-    checkFESpaces();
-
-    etaUspacePtr_Type ETuFESpace( new etaUspace_Type( M_uFESpace->mesh(), &(M_uFESpace->refFE()), M_comm ) );
-    etaPspacePtr_Type ETpFESpace( new etaPspace_Type( M_pFESpace->mesh(), &(M_pFESpace->refFE()), M_comm ) );
-
-    boost::shared_ptr<MatrixBlockType> stabMatrix( new MatrixBlockType( ETuFESpace->map() | ETpFESpace->map() ) );
-    *stabMatrix     *= 0;
-
-    boost::shared_ptr<SquareRoot> squareroot(new SquareRoot());
-    boost::shared_ptr<Maximum> maximum(new Maximum());
-    boost::shared_ptr<FlagTime> flagTime(new FlagTime(M_flag_timestep));
-
-    using namespace ExpressionAssembly;
-
-    // Stabilization terms: DIV/DIV + SUPG + VMS
-    integrate(
-                    elements(ETuFESpace->mesh()), M_uFESpace->qr(), ETuFESpace, ETuFESpace,
-                    RES_CONTINUITY * DIVDIV_TEST + dot(RES_MOMENTUM_1, SUPG_TEST) + dot(RES_MOMENTUM_1, VMS_TEST)
-                    + dot(outerProduct( value( -1.0 ) * RES_MOMENTUM_1, RES_MOMENTUM_STEP_N ), LES_TEST) // Turbulence model, semi_implicit VMS-LES, Momentum residual
-    )
-    >> stabMatrix->block(0,0);
-
-    // Stabilization terms: SUPG + VMS
-    integrate(
-                    elements(ETuFESpace->mesh()), M_uFESpace->qr(), ETuFESpace, ETpFESpace,
-                    dot(RES_MOMENTUM_2, SUPG_TEST) + dot(RES_MOMENTUM_2, VMS_TEST)
-                    + dot(outerProduct( value( -1.0 ) * RES_MOMENTUM_2, RES_MOMENTUM_STEP_N ), LES_TEST) // Turbulence model, semi_implicit VMS-LES, Momentum residual
-    )
-    >> stabMatrix->block(0,1);
-
-
-    // Stabilization terms: PSPG
-    integrate(
-                    elements(ETuFESpace->mesh()), M_uFESpace->qr(), ETpFESpace, ETuFESpace,
-                    dot(RES_MOMENTUM_1, PSPG_TEST)
-    )
-    >> stabMatrix->block(1,0);
-
-    // Stabilization terms: PSPG
-    integrate(
-                    elements(ETuFESpace->mesh()), M_uFESpace->qr(), ETpFESpace, ETpFESpace,
-                    dot(RES_MOMENTUM_2, PSPG_TEST)
-    )
-    >> stabMatrix->block(1,1);
-
-    stabMatrix->globalAssemble();
-    matrix += *stabMatrix;
-	*/
-} // applyVMS_semi_implicit(...)
-
-// RHS, semi-implicit, VMS-LES based on Residual Momentum
-template<typename MeshType, typename MapType, UInt SpaceDim>
-template <typename VectorType, typename VectorBlockType >
-void StabilizationSUPG<MeshType, MapType, SpaceDim>::applySUPG_RHS_semi_implicit( VectorType& rhs,
-                                                                            const VectorType& velocityRhs,
-                                                                            const VectorType& velocityExtrapolation,
-                                                                            const VectorType& velocityPreviousStep,
-                                                                            const VectorType& pressurePreviousStep  )
-{
     /*
     checkFESpaces();
 

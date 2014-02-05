@@ -895,6 +895,8 @@ protected:
     //! Linear solver
     linearSolverPtr_Type           M_linearSolver;
 
+    vectorPtr_block_Type           M_rhsStabilization;
+
     //! True for steady simulations
     bool                           M_steady;
 

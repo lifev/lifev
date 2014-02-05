@@ -956,6 +956,10 @@ NavierStokes<MeshType, Problem>::run()
                 std::cout << "Initialization time: " << initChrono.diff() << " s." << std::endl;
             }
 
+            //vector_Type oldVel(uFESpace->map(), Unique);
+            //oldVel.subset(*velAndPressure, uFESpace->map(),0,0);
+
+
             // +-----------------------------------------------+
             // |             Solving the problem               |
             // +-----------------------------------------------+
@@ -980,6 +984,7 @@ NavierStokes<MeshType, Problem>::run()
                 double alpha = bdf.bdfVelocity().coefficientFirstDerivative ( 0 ) / oseenData->dataTime()->timeStep();
 
                 bdf.bdfVelocity().extrapolation (beta); // Extrapolation for the convective term
+
                 bdf.bdfVelocity().updateRHSContribution ( oseenData->dataTime()->timeStep() );
 
                 fluid.setVelocityRhs(bdf.bdfVelocity().rhsContributionFirstDerivative());
@@ -1040,6 +1045,10 @@ NavierStokes<MeshType, Problem>::run()
 
                 // Exporting the solution
                 *velAndPressure = *fluid.solution();
+
+                //oldVel *= 0;
+                //oldVel.subset(*velAndPressure, uFESpace->map(),0,0);
+
                 if (M_exportExactSolutions)
                 {
                     pFESpace->interpolate ( static_cast<typename feSpace_Type::function_Type> ( problem_Type::pexact ), *exactPressPtr, time );

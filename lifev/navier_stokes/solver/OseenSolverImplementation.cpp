@@ -50,58 +50,59 @@ OseenSolver ( boost::shared_ptr<data_Type>    dataType,
               FESpace<mesh_Type, MapEpetra>&  pressureFESpace,
               boost::shared_ptr<Epetra_Comm>& communicator,
               const Int                       lagrangeMultiplier ) :
-    M_oseenData              ( dataType ),
-    M_velocityFESpace        ( velocityFESpace ),
-    M_pressureFESpace        ( pressureFESpace ),
-    M_Displayer              ( communicator ),
-    M_fluxMap                ( lagrangeMultiplier, communicator),
-    M_localMap               ( M_velocityFESpace.map() + M_pressureFESpace.map() + M_fluxMap),
-    M_velocityMatrixMass     ( ),
-    M_pressureMatrixMass     ( ),
-    M_matrixNoBC             ( ),
-    M_matrixStabilization    ( ),
-    M_rightHandSideNoBC      ( ),
-    M_solution               ( new vector_Type ( M_localMap ) ),
-    M_residual               ( new vector_Type (M_localMap ) ),
-    M_linearSolver           ( new linearSolver_Type (communicator) ),
-    M_steady                 ( ),
-    M_postProcessing         ( new PostProcessingBoundary<mesh_Type> ( M_velocityFESpace.mesh(),
-                                                                       &M_velocityFESpace.feBd(),
-                                                                       &M_velocityFESpace.dof(),
-                                                                       &M_pressureFESpace.feBd(),
-                                                                       &M_pressureFESpace.dof(),
-                                                                       M_localMap ) ),
-    M_stabilization          ( false ),
-    M_reuseStabilization     ( false ),
-    M_resetStabilization     ( false ),
-    M_iterReuseStabilization ( -1 ),
-    //        M_ipStabilization        ( M_velocityFESpace.mesh(),
-    //                                   M_velocityFESpace.dof(),
-    //                                   M_velocityFESpace.refFE(),
-    //                                   M_velocityFESpace.feBd(),
-    //                                   M_velocityFESpace.qr(),
-    //                                   0., 0., 0.,
-    //                                   M_oseenData->viscosity() ),
-    M_betaFunction           ( 0 ),
-    M_divBetaUv              ( false ),
-    M_stiffStrain            ( false ),
-    M_diagonalize            ( false ),
-    M_count                  ( 0 ),
-    M_recomputeMatrix        ( false ),
-    M_elementMatrixStiff     ( M_velocityFESpace.fe().nbFEDof(), velocityFESpace.fieldDim(), velocityFESpace.fieldDim() ),
-    M_elementMatrixMass      ( M_velocityFESpace.fe().nbFEDof(), velocityFESpace.fieldDim(), velocityFESpace.fieldDim() ),
-    M_elementMatrixPreconditioner ( M_pressureFESpace.fe().nbFEDof(), 1, 1 ),
-    M_elementMatrixDivergence ( M_pressureFESpace.fe().nbFEDof(), 1, 0,
-                                M_velocityFESpace.fe().nbFEDof(), 0, velocityFESpace.fieldDim() ),
-    M_elementMatrixGradient  ( M_velocityFESpace.fe().nbFEDof(), velocityFESpace.fieldDim(), 0,
-                               M_pressureFESpace.fe().nbFEDof(), 0, 1 ),
-    M_elementRightHandSide   ( M_velocityFESpace.fe().nbFEDof(), velocityFESpace.fieldDim() ),
-    M_wLoc                   ( M_velocityFESpace.fe().nbFEDof(), velocityFESpace.fieldDim() ),
-    M_uLoc                   ( M_velocityFESpace.fe().nbFEDof(), velocityFESpace.fieldDim() ),
-    M_un                     ( new vector_Type (M_localMap) ),
-    M_fespaceUETA            ( new ETFESpace_velocity(velocityFESpace.mesh(), &(velocityFESpace.refFE()), communicator)),
-    M_fespacePETA            ( new ETFESpace_pressure(pressureFESpace.mesh(), &(pressureFESpace.refFE()), communicator)),
-    M_supgStabilization       (new StabilizationSUPG<mesh_Type, MapEpetra, SpaceDim>(velocityFESpace, pressureFESpace))
+	  M_oseenData       ( dataType ),
+	  M_velocityFESpace        ( velocityFESpace ),
+	  M_pressureFESpace        ( pressureFESpace ),
+	  M_Displayer              ( communicator ),
+	  M_fluxMap                ( lagrangeMultiplier, communicator),
+	  M_localMap               ( M_velocityFESpace.map() + M_pressureFESpace.map() + lagrangeMultiplier),
+	  M_velocityMatrixMass     ( ),
+	  M_pressureMatrixMass     ( ),
+	  M_matrixStokes           ( ),
+	  M_matrixNoBC             ( ),
+	  M_matrixStabilization    ( ),
+	  M_rightHandSideNoBC      ( ),
+	  M_solution               ( new vector_Type ( M_localMap ) ),
+	  M_residual               ( new vector_Type (M_localMap ) ),
+	  M_linearSolver           ( new linearSolver_Type (communicator) ),
+	  M_steady                 ( ),
+	  M_postProcessing         ( new PostProcessingBoundary<mesh_Type> ( M_velocityFESpace.mesh(),
+			  	  	  	  	  	  	  	  	  	  	  	  	  	  	  	 &M_velocityFESpace.feBd(),
+			  	  	  	  	  	  	  	  	  	  	  	  	  	  	  	 &M_velocityFESpace.dof(),
+			  	  	  	  	  	  	  	  	  	  	  	  	  	  	  	 &M_pressureFESpace.feBd(),
+			  	  	  	  	  	  	  	  	  	  	  	  	  	  	  	 &M_pressureFESpace.dof(),
+			  	  	  	  	  	  	  	  	  	  	  	  	  	  	  	 M_localMap ) ),
+	  M_stabilization          ( false ),
+	  M_reuseStabilization     ( false ),
+	  M_resetStabilization     ( false ),
+	  M_iterReuseStabilization ( -1 ),
+	  //        M_ipStabilization        ( M_velocityFESpace.mesh(),
+	  //                                   M_velocityFESpace.dof(),
+	  //                                   M_velocityFESpace.refFE(),
+	  //                                   M_velocityFESpace.feBd(),
+	  //                                   M_velocityFESpace.qr(),
+	  //                                   0., 0., 0.,
+	  //                                   M_oseenData->viscosity() ),
+	  M_betaFunction           ( 0 ),
+	  M_divBetaUv              ( false ),
+	  M_stiffStrain            ( false ),
+	  M_diagonalize            ( false ),
+	  M_count                  ( 0 ),
+	  M_recomputeMatrix        ( false ),
+	  M_elementMatrixStiff     ( M_velocityFESpace.fe().nbFEDof(), velocityFESpace.fieldDim(), velocityFESpace.fieldDim() ),
+	  M_elementMatrixMass      ( M_velocityFESpace.fe().nbFEDof(), velocityFESpace.fieldDim(), velocityFESpace.fieldDim() ),
+	  M_elementMatrixPreconditioner ( M_pressureFESpace.fe().nbFEDof(), 1, 1 ),
+	  M_elementMatrixDivergence ( M_pressureFESpace.fe().nbFEDof(), 1, 0,
+			  	  	  	  	  	  M_velocityFESpace.fe().nbFEDof(), 0, velocityFESpace.fieldDim() ),
+	  M_elementMatrixGradient  ( M_velocityFESpace.fe().nbFEDof(), velocityFESpace.fieldDim(), 0,
+	  M_pressureFESpace.fe().nbFEDof(), 0, 1 ),
+	  M_elementRightHandSide   ( M_velocityFESpace.fe().nbFEDof(), velocityFESpace.fieldDim() ),
+	  M_wLoc                   ( M_velocityFESpace.fe().nbFEDof(), velocityFESpace.fieldDim() ),
+	  M_uLoc                   ( M_velocityFESpace.fe().nbFEDof(), velocityFESpace.fieldDim() ),
+	  M_un                     ( new vector_Type (M_localMap) ),
+      M_fespaceUETA            ( new ETFESpace_velocity(M_velocityFESpace.mesh(), &(M_velocityFESpace.refFE()), communicator)),
+      M_fespacePETA            ( new ETFESpace_pressure(M_pressureFESpace.mesh(), &(M_pressureFESpace.refFE()), communicator)),
+      M_supgStabilization       (new StabilizationSUPG<mesh_Type, MapEpetra, SpaceDim>(velocityFESpace, pressureFESpace))
 {
     // if(M_stabilization = ( &M_velocityFESpace.refFE() == &M_pressureFESpace.refFE() ))
     {
@@ -118,49 +119,49 @@ OseenSolver ( boost::shared_ptr<data_Type>    dataType,
               boost::shared_ptr<Epetra_Comm>& communicator,
               MapEpetra                       monolithicMap,
               UInt                            /*offset*/ ) :
-    M_oseenData              ( dataType ),
-    M_velocityFESpace        ( velocityFESpace ),
-    M_pressureFESpace        ( pressureFESpace ),
-    M_Displayer              ( communicator ),
-    M_fluxMap                ( 0, communicator),
-    M_localMap               ( monolithicMap ),
-    M_velocityMatrixMass     ( ),
-    M_matrixNoBC             ( ),
-    M_matrixStabilization    ( ),
-    M_rightHandSideNoBC      ( ),
-    M_solution               ( ),
-    M_residual               (  ),
-    M_linearSolver           ( ),
-    M_postProcessing         ( new PostProcessingBoundary<mesh_Type> (M_velocityFESpace.mesh(),
-                                                                      &M_velocityFESpace.feBd(),
-                                                                      &M_velocityFESpace.dof(),
-                                                                      &M_pressureFESpace.feBd(),
-                                                                      &M_pressureFESpace.dof(),
-                                                                      M_localMap ) ),
-    M_stabilization          ( false ),
-    M_reuseStabilization     ( false ),
-    M_resetStabilization     ( false ),
-    M_iterReuseStabilization ( -1 ),
-    M_betaFunction           ( 0 ),
-    M_divBetaUv              ( false ),
-    M_stiffStrain            ( false ),
-    M_diagonalize            ( false ),
-    M_count                  ( 0 ),
-    M_recomputeMatrix        ( false ),
-    M_elementMatrixStiff     ( M_velocityFESpace.fe().nbFEDof(), M_velocityFESpace.fieldDim(), M_velocityFESpace.fieldDim() ),
-    M_elementMatrixMass      ( M_velocityFESpace.fe().nbFEDof(), M_velocityFESpace.fieldDim(), M_velocityFESpace.fieldDim() ),
-    M_elementMatrixPreconditioner                 ( M_pressureFESpace.fe().nbFEDof(), 1, 1 ),
-    M_elementMatrixDivergence ( M_pressureFESpace.fe().nbFEDof(), 1, 0,
-                                M_velocityFESpace.fe().nbFEDof(), 0, M_velocityFESpace.fieldDim() ),
-    M_elementMatrixGradient  ( M_velocityFESpace.fe().nbFEDof(), M_velocityFESpace.fieldDim(), 0,
-                               M_pressureFESpace.fe().nbFEDof(), 0, 1 ),
-    M_elementRightHandSide   ( M_velocityFESpace.fe().nbFEDof(), M_velocityFESpace.fieldDim() ),
-    M_wLoc                   ( M_velocityFESpace.fe().nbFEDof(), M_velocityFESpace.fieldDim() ),
-    M_uLoc                   ( M_velocityFESpace.fe().nbFEDof(), M_velocityFESpace.fieldDim() ),
-    M_un                     ( /*new vector_Type(M_localMap)*/ ),
-    M_fespaceUETA            ( new ETFESpace_velocity(velocityFESpace.mesh(), &(velocityFESpace.refFE()), communicator)),
-    M_fespacePETA            ( new ETFESpace_pressure(pressureFESpace.mesh(), &(pressureFESpace.refFE()), communicator)),
-    M_supgStabilization       (new StabilizationSUPG<mesh_Type, MapEpetra, SpaceDim>(velocityFESpace, pressureFESpace))
+	  M_oseenData              ( dataType ),
+	  M_velocityFESpace        ( velocityFESpace ),
+	  M_pressureFESpace        ( pressureFESpace ),
+	  M_Displayer              ( communicator ),
+	  M_localMap               ( monolithicMap ),
+	  M_velocityMatrixMass     ( ),
+	  M_matrixStokes           ( ),
+	  M_matrixNoBC             ( ),
+	  M_matrixStabilization    ( ),
+	  M_rightHandSideNoBC      ( ),
+	  M_solution               ( ),
+	  M_residual               (  ),
+	  M_linearSolver           ( ),
+	  M_postProcessing         ( new PostProcessingBoundary<mesh_Type> (M_velocityFESpace.mesh(),
+																		&M_velocityFESpace.feBd(),
+																		&M_velocityFESpace.dof(),
+																		&M_pressureFESpace.feBd(),
+																		&M_pressureFESpace.dof(),
+																		M_localMap ) ),
+	  M_stabilization          ( false ),
+	  M_reuseStabilization     ( false ),
+	  M_resetStabilization     ( false ),
+	  M_iterReuseStabilization ( -1 ),
+	  M_betaFunction           ( 0 ),
+	  M_divBetaUv              ( false ),
+	  M_stiffStrain            ( false ),
+	  M_diagonalize            ( false ),
+	  M_count                  ( 0 ),
+	  M_recomputeMatrix        ( false ),
+	  M_elementMatrixStiff     ( M_velocityFESpace.fe().nbFEDof(), M_velocityFESpace.fieldDim(), M_velocityFESpace.fieldDim() ),
+	  M_elementMatrixMass      ( M_velocityFESpace.fe().nbFEDof(), M_velocityFESpace.fieldDim(), M_velocityFESpace.fieldDim() ),
+	  M_elementMatrixPreconditioner                 ( M_pressureFESpace.fe().nbFEDof(), 1, 1 ),
+	  M_elementMatrixDivergence ( M_pressureFESpace.fe().nbFEDof(), 1, 0,
+								  M_velocityFESpace.fe().nbFEDof(), 0, M_velocityFESpace.fieldDim() ),
+	  M_elementMatrixGradient  ( M_velocityFESpace.fe().nbFEDof(), M_velocityFESpace.fieldDim(), 0,
+								 M_pressureFESpace.fe().nbFEDof(), 0, 1 ),
+	  M_elementRightHandSide   ( M_velocityFESpace.fe().nbFEDof(), M_velocityFESpace.fieldDim() ),
+	  M_wLoc                   ( M_velocityFESpace.fe().nbFEDof(), M_velocityFESpace.fieldDim() ),
+	  M_uLoc                   ( M_velocityFESpace.fe().nbFEDof(), M_velocityFESpace.fieldDim() ),
+	  M_un                     ( /*new vector_Type(M_localMap)*/ ),
+      M_fespaceUETA            ( new ETFESpace_velocity(M_velocityFESpace.mesh(), &(M_velocityFESpace.refFE()), communicator)),
+      M_fespacePETA            ( new ETFESpace_pressure(M_pressureFESpace.mesh(), &(M_pressureFESpace.refFE()), communicator)),
+      M_supgStabilization       (new StabilizationSUPG<mesh_Type, MapEpetra, SpaceDim>(velocityFESpace, pressureFESpace))
 {
     // if(M_stabilization = ( &M_velocityFESpace.refFE() == &M_pressureFESpace.refFE() ))
     {
@@ -176,49 +177,50 @@ OseenSolver ( boost::shared_ptr<data_Type>    dataType,
               FESpace<mesh_Type, MapEpetra>&  pressureFESpace,
               const std::vector<Int>&         lagrangeMultipliers,
               boost::shared_ptr<Epetra_Comm>& communicator ) :
-    M_oseenData       ( dataType ),
-    M_velocityFESpace        ( velocityFESpace ),
-    M_pressureFESpace        ( pressureFESpace ),
-    M_Displayer              ( communicator ),
-    M_fluxMap                ( lagrangeMultiplier, communicator),
-    M_localMap               ( M_velocityFESpace.map() + M_pressureFESpace.map() + M_fluxMap),
-    M_velocityMatrixMass     ( ),
-    M_matrixNoBC             ( ),
-    M_matrixStabilization    ( ),
-    M_rightHandSideNoBC      ( ),
-    M_solution               ( new vector_Type ( M_localMap ) ),
-    M_residual               (  ),
-    M_linearSolver           ( new linearSolver_Type (communicator) ),
-    M_postProcessing         ( new PostProcessingBoundary<mesh_Type> (M_velocityFESpace.mesh(),
-                                                                      &M_velocityFESpace.feBd(),
-                                                                      &M_velocityFESpace.dof(),
-                                                                      &M_pressureFESpace.feBd(),
-                                                                      &M_pressureFESpace.dof(),
-                                                                      M_localMap ) ),
-    M_stabilization          ( false ),
-    M_reuseStabilization     ( false ),
-    M_resetStabilization     ( false ),
-    M_iterReuseStabilization ( -1 ),
-    M_betaFunction           ( 0 ),
-    M_divBetaUv              ( false ),
-    M_stiffStrain            ( false ),
-    M_diagonalize            ( false ),
-    M_count                  ( 0 ),
-    M_recomputeMatrix        ( false ),
-    M_elementMatrixStiff     ( M_velocityFESpace.fe().nbFEDof(), M_velocityFESpace.fieldDim(), M_velocityFESpace.fieldDim() ),
-    M_elementMatrixMass      ( M_velocityFESpace.fe().nbFEDof(), M_velocityFESpace.fieldDim(), M_velocityFESpace.fieldDim() ),
-    M_elementMatrixPreconditioner ( M_pressureFESpace.fe().nbFEDof(), 1, 1 ),
-    M_elementMatrixDivergence ( M_pressureFESpace.fe().nbFEDof(), 1, 0,
-                                M_velocityFESpace.fe().nbFEDof(), 0, M_velocityFESpace.fieldDim() ),
-    M_elementMatrixGradient  ( M_velocityFESpace.fe().nbFEDof(), M_velocityFESpace.fieldDim(), 0,
-                               M_pressureFESpace.fe().nbFEDof(), 0, 1 ),
-    M_elementRightHandSide   ( M_velocityFESpace.fe().nbFEDof(), velocityFESpace.fieldDim() ),
-    M_wLoc                   ( M_velocityFESpace.fe().nbFEDof(), velocityFESpace.fieldDim() ),
-    M_uLoc                   ( M_velocityFESpace.fe().nbFEDof(), velocityFESpace.fieldDim() ),
-    M_un                     ( new vector_Type (M_localMap) ),
-    M_fespaceUETA            ( new ETFESpace_velocity(velocityFESpace.mesh(), &(velocityFESpace.refFE()), communicator)),
-    M_fespacePETA            ( new ETFESpace_pressure(pressureFESpace.mesh(), &(pressureFESpace.refFE()), communicator)),
-    M_supgStabilization       (new StabilizationSUPG<mesh_Type, MapEpetra, SpaceDim>(velocityFESpace, pressureFESpace))
+	  M_oseenData              ( dataType ),
+	  M_velocityFESpace        ( velocityFESpace ),
+	  M_pressureFESpace        ( pressureFESpace ),
+	  M_Displayer              ( communicator ),
+	  M_fluxMap                ( lagrangeMultipliers, communicator),
+	  M_localMap               ( M_velocityFESpace.map() + M_pressureFESpace.map() + lagrangeMultiplier),
+	  M_velocityMatrixMass     ( ),
+	  M_matrixStokes           ( ),
+	  M_matrixNoBC             ( ),
+	  M_matrixStabilization    ( ),
+	  M_rightHandSideNoBC      ( ),
+	  M_solution               ( new vector_Type ( M_localMap ) ),
+	  M_residual               (  ),
+	  M_linearSolver           ( new linearSolver_Type (communicator) ),
+	  M_postProcessing         ( new PostProcessingBoundary<mesh_Type> (M_velocityFESpace.mesh(),
+																		&M_velocityFESpace.feBd(),
+																		&M_velocityFESpace.dof(),
+																		&M_pressureFESpace.feBd(),
+																		&M_pressureFESpace.dof(),
+																		M_localMap ) ),
+	  M_stabilization          ( false ),
+	  M_reuseStabilization     ( false ),
+	  M_resetStabilization     ( false ),
+	  M_iterReuseStabilization ( -1 ),
+	  M_betaFunction           ( 0 ),
+	  M_divBetaUv              ( false ),
+	  M_stiffStrain            ( false ),
+	  M_diagonalize            ( false ),
+	  M_count                  ( 0 ),
+	  M_recomputeMatrix        ( false ),
+	  M_elementMatrixStiff     ( M_velocityFESpace.fe().nbFEDof(), M_velocityFESpace.fieldDim(), M_velocityFESpace.fieldDim() ),
+	  M_elementMatrixMass      ( M_velocityFESpace.fe().nbFEDof(), M_velocityFESpace.fieldDim(), M_velocityFESpace.fieldDim() ),
+	  M_elementMatrixPreconditioner ( M_pressureFESpace.fe().nbFEDof(), 1, 1 ),
+	  M_elementMatrixDivergence ( M_pressureFESpace.fe().nbFEDof(), 1, 0,
+								  M_velocityFESpace.fe().nbFEDof(), 0, M_velocityFESpace.fieldDim() ),
+	  M_elementMatrixGradient  ( M_velocityFESpace.fe().nbFEDof(), M_velocityFESpace.fieldDim(), 0,
+								 M_pressureFESpace.fe().nbFEDof(), 0, 1 ),
+	  M_elementRightHandSide   ( M_velocityFESpace.fe().nbFEDof(), velocityFESpace.fieldDim() ),
+	  M_wLoc                   ( M_velocityFESpace.fe().nbFEDof(), velocityFESpace.fieldDim() ),
+	  M_uLoc                   ( M_velocityFESpace.fe().nbFEDof(), velocityFESpace.fieldDim() ),
+	  M_un                     ( new vector_Type (M_localMap) ),
+      M_fespaceUETA            ( new ETFESpace_velocity(M_velocityFESpace.mesh(), &(M_velocityFESpace.refFE()), communicator)),
+      M_fespacePETA            ( new ETFESpace_pressure(M_pressureFESpace.mesh(), &(M_pressureFESpace.refFE()), communicator)),
+      M_supgStabilization       (new StabilizationSUPG<mesh_Type, MapEpetra, SpaceDim>(velocityFESpace, pressureFESpace))
 {
     // if(M_stabilization = ( &M_velocityFESpace.refFE() == &M_pressureFESpace.refFE() ))
     {
@@ -274,12 +276,14 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::setUp ( const G
     	}
     	else if (M_oseenData->stabilizationType() == "SUPG")
     	{
+
     		M_supgStabilization->setETvelocitySpace(M_fespaceUETA);
     		M_supgStabilization->setETpressureSpace(M_fespacePETA);
     		M_supgStabilization->setCommunicator(M_velocityFESpace.map().commPtr());
     		M_supgStabilization->setDensity(M_oseenData->density());
     		M_supgStabilization->setViscosity(M_oseenData->viscosity());
     		M_supgStabilization->setTimeStep(M_oseenData->dataTime()->timeStep());
+
     	}
 	}
     // Energetic stabilization term
@@ -566,7 +570,7 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::computeStabiliz
 		if( M_oseenData->stabilizationType() == "IP" && ( M_resetStabilization || !M_reuseStabilization || ( M_matrixStabilization.get() == 0 ) ) )
 		{
 			vector_Type betaVectorRepeated ( betaVector, Repeated );
-			M_Displayer.leaderPrint ( "  F-  Updating the stabilization terms ...     " );
+			M_Displayer.leaderPrint ( "  F-  Updating the IP stabilization terms ...     " );
 			chrono.start();
 			M_matrixStabilization.reset ( new matrix_Type ( M_localMap ) );
 			M_ipStabilization.apply ( *M_matrixStabilization, betaVectorRepeated, false );
@@ -577,25 +581,39 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::computeStabiliz
 		}
 		else if(M_oseenData->stabilizationType() == "SUPG")
 		{
+
+			M_Displayer.leaderPrint ( "  F-  Updating the SUPG stabilization terms ...     " );
+			chrono.start();
+
 			// TIpically here alpha is already divided by the timestep, but I want to use the actual alfa, so I multiply
 			Real alfa = alpha*M_oseenData->dataTime()->timeStep();
 			M_matrixStabilizationET.reset( new matrix_block_Type ( M_fespaceUETA->map() | M_fespacePETA->map() | M_fluxMap ) );
 			*M_matrixStabilizationET *= 0;
-			M_supgStabilization->applySUPG_Matrix_semi_implicit(M_matrixStabilizationET, betaVector, M_velocityRhs, alpha);
+			M_supgStabilization->applySUPG_Matrix_semi_implicit(M_matrixStabilizationET, betaVector, alpha);
+			M_matrixStabilization.reset ( new matrix_Type ( M_localMap ) );
+			*M_matrixStabilization += *M_matrixStabilizationET;
+			M_matrixStabilization->globalAssemble();
+
+			M_rhsStabilization.reset(new vector_block_Type( M_velocityFESpace.map() | M_pressureFESpace.map() | M_fluxMap ));
+			*M_rhsStabilization *= 0;
+			M_supgStabilization->applySUPG_RHS_semi_implicit(M_rhsStabilization, betaVector, *M_velocityRhs);
+
+			chrono.stop();
+			M_Displayer.leaderPrintMax ( "done in " , chrono.diff() );
+
 		}
 	}
 	else
 	{
 		if (M_oseenData->stabilizationType() == "IP")
 		{
-			M_Displayer.leaderPrint ( "  F-  Updating the stabilization terms ...     " );
+			M_Displayer.leaderPrint ( "  F-  Updating the IP stabilization terms ...     " );
 			chrono.start();
 
 			if ( M_resetStabilization || !M_reuseStabilization || ( M_matrixStabilization.get() == 0 ) )
 			{
 				M_matrixStabilization.reset ( new matrix_Type ( M_localMap ) );
 				M_ipStabilization.apply ( *M_matrixStabilization, betaVector, false );
-				M_matrixStabilization->globalAssemble();
 				M_resetStabilization = false;
 				chrono.stop();
 				M_Displayer.leaderPrintMax ( "done in " , chrono.diff() );
@@ -607,9 +625,27 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::computeStabiliz
 		}
 		else if(M_oseenData->stabilizationType() == "SUPG")
 		{
+
+			M_Displayer.leaderPrint ( "  F-  Updating the SUPG stabilization terms ...     " );
+			chrono.start();
+
+			// TIpically here alpha is already divided by the timestep, but I want to use the actual alfa, so I multiply
+			Real alfa = alpha*M_oseenData->dataTime()->timeStep();
 			M_matrixStabilizationET.reset( new matrix_block_Type ( M_fespaceUETA->map() | M_fespacePETA->map() | M_fluxMap ) );
 			*M_matrixStabilizationET *= 0;
-			//M_supgStabilization->applySUPG_Matrix_semi_implicit(M_matrixStabilizationET);
+			M_supgStabilization->applySUPG_Matrix_semi_implicit(M_matrixStabilizationET, betaVector, alpha);
+
+			M_matrixStabilization.reset ( new matrix_Type ( M_localMap ) );
+			*M_matrixStabilization += *M_matrixStabilizationET;
+			M_matrixStabilization->globalAssemble();
+
+			M_rhsStabilization.reset(new vector_block_Type( M_velocityFESpace.map() | M_pressureFESpace.map() | M_fluxMap ));
+			*M_rhsStabilization *= 0;
+			M_supgStabilization->applySUPG_RHS_semi_implicit(M_rhsStabilization, betaVector, *M_velocityRhs);
+
+			chrono.stop();
+			M_Displayer.leaderPrintMax ( "done in " , chrono.diff() );
+
 		}
 	}
 }
@@ -649,6 +685,7 @@ void OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::updateSour
             assembleVector ( *rhs, M_elvec, M_velocityFESpace->fe(), M_velocityFESpace->dof(), ic, ic * M_velocityFESpace->getDim() ); // assemble local vector into global one
         }
     }
+    M_rightHandSideNoBC *= 0;
     M_rightHandSideNoBC += rhs;
 }
 
@@ -677,6 +714,11 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::iterate ( bcHan
     getFluidMatrix ( *matrixFull );
 
     vector_Type rightHandSideFull ( *M_rightHandSideNoBC );
+
+    if(M_stabilization && M_oseenData->stabilizationType() == "SUPG")
+    {
+    	rightHandSideFull += *M_rhsStabilization;
+    }
 
     chrono.stop();
 
