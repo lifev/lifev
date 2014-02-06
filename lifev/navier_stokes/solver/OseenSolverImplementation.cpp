@@ -104,6 +104,7 @@ OseenSolver ( boost::shared_ptr<data_Type>    dataType,
       M_fespacePETA            ( new ETFESpace_pressure(M_pressureFESpace.mesh(), &(M_pressureFESpace.refFE()), communicator)),
       M_supgStabilization       (new StabilizationSUPG<mesh_Type, MapEpetra, SpaceDim>(velocityFESpace, pressureFESpace))
 {
+    *M_solution *= 0;
     // if(M_stabilization = ( &M_velocityFESpace.refFE() == &M_pressureFESpace.refFE() ))
     {
         M_ipStabilization.setFeSpaceVelocity (M_velocityFESpace);
@@ -222,6 +223,7 @@ OseenSolver ( boost::shared_ptr<data_Type>    dataType,
       M_fespacePETA            ( new ETFESpace_pressure(M_pressureFESpace.mesh(), &(M_pressureFESpace.refFE()), communicator)),
       M_supgStabilization       (new StabilizationSUPG<mesh_Type, MapEpetra, SpaceDim>(velocityFESpace, pressureFESpace))
 {
+    *M_solution *= 0;
     // if(M_stabilization = ( &M_velocityFESpace.refFE() == &M_pressureFESpace.refFE() ))
     {
         M_ipStabilization.setFeSpaceVelocity (M_velocityFESpace);
