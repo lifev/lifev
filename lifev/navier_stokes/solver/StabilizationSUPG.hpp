@@ -245,7 +245,7 @@ void StabilizationSUPG<MeshType, MapType, SpaceDim>::applySUPG_Matrix_semi_impli
 	using namespace ExpressionAssembly;
 
 	integrate(
-			elements(M_fespaceUETA->mesh()),
+			elements(M_uFESpace.mesh()),
 			M_uFESpace.qr(),
 			M_fespaceUETA, // test  w -> phi_i
 			M_fespaceUETA, // trial u -> phi_j
@@ -255,7 +255,7 @@ void StabilizationSUPG<MeshType, MapType, SpaceDim>::applySUPG_Matrix_semi_impli
 	) >> matrix->block(0,0);
 
 	integrate(
-			elements(M_fespaceUETA->mesh()),
+			elements(M_uFESpace.mesh()),
 			M_uFESpace.qr(),
 			M_fespaceUETA, // test  w -> phi_j
 			M_fespacePETA, // trial p -> phi_i
@@ -265,7 +265,7 @@ void StabilizationSUPG<MeshType, MapType, SpaceDim>::applySUPG_Matrix_semi_impli
 	//std::cout << "\n\n" << alpha << "\n\n";
 
 	integrate(
-			elements(M_fespaceUETA->mesh()),
+			elements(M_uFESpace.mesh()),
 			M_pFESpace.qr(),
 			M_fespacePETA, // test  q -> phi_i
 			M_fespaceUETA, // trial u -> phi_j
@@ -274,7 +274,7 @@ void StabilizationSUPG<MeshType, MapType, SpaceDim>::applySUPG_Matrix_semi_impli
 	) >> matrix->block(1,0);
 
 	integrate(
-			elements(M_fespacePETA->mesh()),
+			elements(M_uFESpace.mesh()),
 			M_pFESpace.qr(),
 			M_fespacePETA, // test   q -> phi_i
 			M_fespacePETA, // trial  p -> phi_j
@@ -298,7 +298,7 @@ void StabilizationSUPG<MeshType, MapType, SpaceDim>::applySUPG_RHS_semi_implicit
 	using namespace ExpressionAssembly;
 
 	integrate(
-			elements(M_fespaceUETA->mesh()),
+			elements(M_uFESpace.mesh()),
 			M_uFESpace.qr(),
 			M_fespaceUETA,
 			TAU_M*value(M_density*M_density)*dot( grad(phi_i)*value(M_fespaceUETA, velocityExtrapolated), value(M_fespaceUETA, velocityRhs))
@@ -306,48 +306,14 @@ void StabilizationSUPG<MeshType, MapType, SpaceDim>::applySUPG_RHS_semi_implicit
 	>> rhs->block(0);
 
 	integrate(
-			elements(M_fespacePETA->mesh()),
+			elements(M_uFESpace.mesh()),
 			M_pFESpace.qr(),
 			M_fespacePETA,
 			TAU_M*value(M_density)*dot( grad(phi_i), value(M_fespaceUETA, velocityRhs))
 	)
 	>> rhs->block(1);
 
-    /*
-    checkFESpaces();
-
-    etaUspacePtr_Type ETuFESpace( new etaUspace_Type( M_uFESpace->mesh(), &(M_uFESpace->refFE()), M_comm ) );
-    etaPspacePtr_Type ETpFESpace( new etaPspace_Type( M_pFESpace->mesh(), &(M_pFESpace->refFE()), M_comm ) );
-
-    VectorBlockType NSRhs( ETuFESpace->map() | ETpFESpace->map(), Repeated );
-    NSRhs *= 0.0;
-
-    using namespace ExpressionAssembly;
-
-    boost::shared_ptr<SquareRoot> squareroot(new SquareRoot());
-    boost::shared_ptr<Maximum> maximum(new Maximum());
-    boost::shared_ptr<FlagTime> flagTime(new FlagTime(M_flag_timestep));
-
-    // Consistency terms: SUPG + VMS-LES
-    // Changed by Davide: use DVDT_COMPATIBILITY instead of DVDT_COMPATIBILITY_N
-    integrate(
-                    elements(ETuFESpace->mesh()), M_uFESpace->qr(), ETuFESpace,
-                    dot(DVDT_COMPATIBILITY, SUPG_TEST) + dot(DVDT_COMPATIBILITY, VMS_TEST)
-                    + dot(outerProduct( value( -1.0 ) * DVDT_COMPATIBILITY, RES_MOMENTUM_STEP_N ), LES_TEST) // Turbulence model, semi_implicit VMS-LES, Momentum residual
-    )
-    >> NSRhs.block(0);
-
-    // Consistency term: PSPG
-    integrate(
-                    elements(ETuFESpace->mesh()), M_pFESpace->qr(), ETpFESpace,
-                    dot(DVDT_COMPATIBILITY, PSPG_TEST)
-    )
-    >> NSRhs.block(1);
-
-
-    VectorBlockType NSRhsUnique( NSRhs, Unique );
-    rhs += NSRhsUnique;
-	*/
+	rhs->globalAssemble();
 
 } // applyRHS_semi_implicit(...)
 

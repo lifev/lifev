@@ -28,16 +28,16 @@ mesh_source            = regular_mesh
 
     [../time_discretization]
     initialtime     = 0.0
-    endtime         = 80e-1
-    timestep        = 1e-1
+    endtime         = 80e-2
+    timestep        = 5e-2
 
-    BDF_order       = 4
+    BDF_order       = 1
 
     [../space_discretization]
     mesh_dir        = ./
     mesh_file       = cube4x4.mesh
     mesh_type       = .mesh
-    mesh_size       = 8
+    mesh_size       = 32
 
     verbose         = 0
     linearized      = 0
@@ -50,7 +50,7 @@ mesh_source            = regular_mesh
     
 	[../stabilization]
 	use             = true
-	method          = SUPG	  # other possible choices: IP, VMS
+	method          = IP	  # other possible choices: IP, VMS
 
     [../miscellaneous]
     verbose         = 1

@@ -487,6 +487,8 @@ updateSystem ( const Real          alpha,
     Eye[1][1] = 1;
     Eye[2][2] = 1;
     
+    vector_Type betaVectorRepeated ( betaVector, Repeated );
+
     vector_Type conservativeTerm(un);
     conservativeTerm -= betaVector;
     
@@ -537,7 +539,7 @@ updateSystem ( const Real          alpha,
         }
     }
     
-    computeStabilization(betaVector, alpha);
+    computeStabilization(betaVectorRepeated, alpha);
 
     if ( alpha != 0. )
     {
