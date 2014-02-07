@@ -375,6 +375,9 @@ private:
 
     //Private typedefs for the 3D array (array of 2D array)
     typedef std::vector< array2D_Type > array3D_Type;
+    
+    //Private typedefs for the 4D array (array of 3D array)
+    typedef std::vector< array3D_Type > array4D_Type;
 
     //Private typedefs for the 1D array of vector
     typedef std::vector< VectorSmall<spaceDim> > array1D_vector_Type;
