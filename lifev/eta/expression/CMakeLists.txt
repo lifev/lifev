@@ -95,6 +95,7 @@ SET(expression_SOURCES ""
 	expression/ExpressionDivJ.cpp
 	expression/ExpressionDphiI.cpp
 	expression/ExpressionDphiJ.cpp
+    expression/ExpressionLaplacianPhiJ.cpp
 	expression/ExpressionHK.cpp
 	expression/ExpressionMeas.cpp
 	expression/ExpressionPhiI.cpp
