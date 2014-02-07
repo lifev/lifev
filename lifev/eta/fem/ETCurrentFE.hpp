@@ -437,6 +437,9 @@ private:
 
     //! Update Dphi
     void updateDphi (const UInt& iQuadPt);
+    
+    //! Update D2phi
+    void updateD2phi (const UInt& iQuadPt);
 
     //@}
 
@@ -776,6 +779,10 @@ update (const elementType& element, const flag_Type& flag)
         {
             updateDphi (i);
         }
+        if ( flag & ET_UPDATE_ONLY_D2PHI )
+        {
+            updateD2phi (i);
+        }
     }
 
     if ( flag & ET_UPDATE_ONLY_MEASURE )
@@ -849,6 +856,24 @@ showMe (std::ostream& out) const
             for (UInt iCoor (0); iCoor < S_spaceDimension; ++iCoor)
             {
                 out << M_dphi[iQuad][iDof][iCoor] << " ";
+            }
+            out << std::endl;
+        }
+        out << std::endl;
+    }
+    
+    out << " D2Phi : " << std::endl;
+    for (UInt iQuad (0); iQuad < M_nbQuadPt; ++iQuad)
+    {
+        for (UInt iDof (0); iDof < M_nbFEDof; ++iDof)
+        {
+            for (UInt iCoor (0); iCoor < S_spaceDimension; ++iCoor)
+            {
+                for (UInt jCoor (0); jCoor < S_spaceDimension; ++jCoor)
+                {
+                    out << M_d2phi[iQuad][iDof][iCoor][jCoor] << " ";
+                }
+                out << std::endl;
             }
             out << std::endl;
         }
@@ -936,6 +961,25 @@ setupInternalConstants()
             for (UInt j (0); j < spaceDim; ++j)
             {
                 M_dphiGeometricMap[q][i][j] = M_geometricMap->dPhi (i, j, M_quadratureRule->quadPointCoor (q) );
+            }
+        }
+    }
+    
+    // DPHI2REFERENCEFE
+    M_d2phiReferenceFE.resize (M_nbQuadPt);
+    for (UInt q (0); q < M_nbQuadPt; ++q)
+    {
+        M_d2phiReferenceFE[q].resize (M_nbFEDof);
+        for (UInt i (0); i < M_nbFEDof; ++i)
+        {
+            M_d2phiReferenceFE[q][i].resize (spaceDim);
+            for (UInt j (0); j < spaceDim; ++j)
+            {
+                M_d2phiReferenceFE[q][i][j].resize (spaceDim);
+                for (UInt k (0); k < spaceDim; ++k)
+                {
+                    M_d2phiReferenceFE[q][i][j][k] = M_referenceFE->d2Phi (i, j, k, M_quadratureRule->quadPointCoor (q) );
+                }
             }
         }
     }
@@ -1091,6 +1135,36 @@ updateDphi (const UInt& iQuadPt)
             M_dphi[iQuadPt][iDof][iCoor] = partialSum;
         }
     }
+}
+    
+template< UInt spaceDim>
+void
+ETCurrentFE<spaceDim, 1>::
+updateD2phi (const UInt& iQuadPt)
+{
+    ASSERT (M_isInverseJacobianUpdated,
+            "Inverse jacobian must be updated to compute the derivative of the basis functions");
+    
+#ifndef NDEBUG
+    M_isD2phiUpdated = true;
+#endif
+ 
+    /*
+    Real partialSum (0.0);
+    
+    for (UInt iDof (0); iDof < M_nbFEDof; ++iDof)
+    {
+        for (UInt iCoor (0); iCoor < S_spaceDimension; ++iCoor)
+        {
+            partialSum = 0.0;
+            for (UInt jCoor (0); jCoor < S_spaceDimension; ++jCoor)
+            {
+                partialSum += M_tInverseJacobian[iQuadPt][iCoor][jCoor] * M_dphiReferenceFE[iQuadPt][iDof][jCoor];
+            }
+            M_dphi[iQuadPt][iDof][iCoor] = partialSum;
+        }
+    }
+     */
 }
 
 
