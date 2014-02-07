@@ -1036,6 +1036,13 @@ setupInternalConstants()
     {
         M_dphi[i].resize (M_nbFEDof);
     }
+    
+    // d2phi
+    M_d2phi.resize (M_nbQuadPt);
+    for (UInt i (0); i < M_nbQuadPt; ++i)
+    {
+        M_d2phi[i].resize (M_nbFEDof);
+    }
 
 }
 
