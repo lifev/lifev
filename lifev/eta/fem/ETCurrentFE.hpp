@@ -1171,8 +1171,9 @@ updateD2phi (const UInt& iQuadPt)
                     {
                         partialSum += M_tInverseJacobian[iQuadPt][iCoor][k1] * M_d2phiReferenceFE[iQuadPt][iDof][k1][k2] * M_tInverseJacobian[iQuadPt][jCoor][k2];
                     }
-                }           
-            M_d2phi[iQuadPt][iDof][iCoor][jCoor] = partialSum;
+                }
+                M_d2phi[iQuadPt][iDof][iCoor][jCoor] = partialSum;
+            }
         }
     }
 }
