@@ -208,7 +208,7 @@ private:
     Real         M_timestep;
     bool         M_flag_timestep;
 
-    Real         M_C_I = 30;
+    Real         M_C_I;
 
     //@}
 }; // class StabilizationVMS
@@ -221,7 +221,8 @@ template<typename MeshType, typename MapType, UInt SpaceDim>
 StabilizationSUPG<MeshType, MapType, SpaceDim>::StabilizationSUPG(FESpace<mesh_Type, MapEpetra>&  velocityFESpace,
 																  FESpace<mesh_Type, MapEpetra>&  pressureFESpace):
 M_uFESpace (velocityFESpace),
-M_pFESpace (pressureFESpace)
+M_pFESpace (pressureFESpace),
+M_C_I (30)
 {
 }
 
@@ -236,8 +237,6 @@ void StabilizationSUPG<MeshType, MapType, SpaceDim>::applySUPG_Matrix_semi_impli
                                                                             const VectorType& velocityExtrapolated,
                                                                             const Real& alpha )
 {
-
-	// TODO for the moment it is missing the laplacian term in the residual, hence SUPG can be used for P1-P1 FE
 	boost::shared_ptr<SquareRoot> squareroot(new SquareRoot());
 
 	Real alfa = alpha*M_timestep;
@@ -250,8 +249,9 @@ void StabilizationSUPG<MeshType, MapType, SpaceDim>::applySUPG_Matrix_semi_impli
 			M_fespaceUETA, // test  w -> phi_i
 			M_fespaceUETA, // trial u -> phi_j
 			value(M_density*M_density)*TAU_M*value(alfa/M_timestep) * dot( phi_j, grad(phi_i)*value(M_fespaceUETA, velocityExtrapolated) )+
-			value(M_density*M_density) * TAU_M* dot( value(M_fespaceUETA, velocityExtrapolated)*grad(phi_j), grad(phi_i)*value(M_fespaceUETA, velocityExtrapolated))
-			+ TAU_C  * div(phi_j) * div(phi_i)
+			value(M_density*M_density)*TAU_M*dot( value(M_fespaceUETA, velocityExtrapolated)*grad(phi_j), grad(phi_i)*value(M_fespaceUETA, velocityExtrapolated))
+			+ TAU_C*div(phi_j)*div(phi_i)
+            //- value(M_density*M_viscosity)*TAU_M*
 	) >> matrix->block(0,0);
 
 	integrate(
