@@ -376,6 +376,9 @@ private:
     //Private typedefs for the 3D array (array of 2D array)
     typedef std::vector< array2D_Type > array3D_Type;
     
+    //Private typedefs for the 3D array (array of 2D array)
+    typedef std::vector< array3D_Type > array4D_Type;
+    
     //Private typedefs for the 1D array of vector
     typedef std::vector< VectorSmall<spaceDim> > array1D_vector_Type;
 
@@ -479,6 +482,9 @@ private:
 
     // Storage for the derivatives of the geometric map
     array3D_Type M_dphiGeometricMap;
+    
+    // Storage for the second derivatives of the basis functions (note: the geometric map used for the 2nd derivative is M_dphiGeometricMap, no support for isoparametric elements)
+    array4D_Type M_d2phiReferenceFE;
 
     // Storage for the coordinates of the nodes of the current element
     array2D_Type M_cellNode;
@@ -500,6 +506,9 @@ private:
 
     // Storage for the derivative of the basis functions
     array2D_vector_Type M_dphi;
+    
+    // Storage for the second derivative of the basis functions
+    array3D_vector_Type M_d2phi;
 
 #ifndef NDEBUG
     // Debug informations, defined only if the code
@@ -516,6 +525,7 @@ private:
     bool M_isInverseJacobianUpdated;
     bool M_isWDetUpdated;
     bool M_isDphiUpdated;
+    bool M_isD2phiUpdated;
 
 #endif
 
@@ -569,7 +579,8 @@ ETCurrentFE (const ReferenceFE& refFE, const GeometricMap& geoMap, const Quadrat
     M_detJacobian(),
     M_wDet(),
     M_tInverseJacobian(),
-    M_dphi()
+    M_dphi(),
+    M_d2phi()
 
 #ifndef NDEBUG
     , M_isCellNodeUpdated (false),
@@ -580,7 +591,8 @@ ETCurrentFE (const ReferenceFE& refFE, const GeometricMap& geoMap, const Quadrat
     M_isDetJacobianUpdated (false),
     M_isInverseJacobianUpdated (false),
     M_isWDetUpdated (false),
-    M_isDphiUpdated (false)
+    M_isDphiUpdated (false),
+    M_isD2phiUpdated (false)
 #endif
 
 
@@ -618,7 +630,8 @@ ETCurrentFE (const ReferenceFE& refFE, const GeometricMap& geoMap)
     M_detJacobian(),
     M_wDet(),
     M_tInverseJacobian(),
-    M_dphi()
+    M_dphi(),
+    M_d2phi()
 
 #ifndef NDEBUG
     , M_isCellNodeUpdated (false),
@@ -629,7 +642,8 @@ ETCurrentFE (const ReferenceFE& refFE, const GeometricMap& geoMap)
     M_isDetJacobianUpdated (false),
     M_isInverseJacobianUpdated (false),
     M_isWDetUpdated (false),
-    M_isDphiUpdated (false)
+    M_isDphiUpdated (false),
+    M_isD2phiUpdated (false)
 #endif
 
 {
@@ -664,7 +678,8 @@ ETCurrentFE (const ETCurrentFE<spaceDim, 1>& otherFE)
     M_detJacobian (otherFE.M_detJacobian),
     M_wDet (otherFE.M_wDet),
     M_tInverseJacobian (otherFE.M_tInverseJacobian),
-    M_dphi (otherFE.M_dphi)
+    M_dphi (otherFE.M_dphi),
+    M_d2phi(otherFE.M_d2phi)
 
 #ifndef NDEBUG
     //Beware for the comma at the begining of this line!
@@ -676,7 +691,8 @@ ETCurrentFE (const ETCurrentFE<spaceDim, 1>& otherFE)
     M_isDetJacobianUpdated ( otherFE.M_isDetJacobianUpdated ),
     M_isInverseJacobianUpdated ( otherFE.M_isInverseJacobianUpdated ),
     M_isWDetUpdated ( otherFE.M_isWDetUpdated ),
-    M_isDphiUpdated ( otherFE.M_isDphiUpdated )
+    M_isDphiUpdated ( otherFE.M_isDphiUpdated ),
+    M_isD2phiUpdated ( otherFE.M_isD2phiUpdated )
 #endif
 
 {}
@@ -719,6 +735,7 @@ update (const elementType& element, const flag_Type& flag)
     M_isInverseJacobianUpdated = false;
     M_isWDetUpdated = false;
     M_isDphiUpdated = false;
+    M_isD2phiUpdated = false;
 #endif
 
     // update the cell informations if required
