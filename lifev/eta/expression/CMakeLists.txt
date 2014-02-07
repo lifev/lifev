@@ -83,6 +83,8 @@ SET(expression_HEADERS
 	expression/RequestLoopElement.hpp
 	expression/RequestLoopVolumeID.hpp
 	expression/RequestLoopFaceID.hpp
+    expression/EvaluationScalarToVector.hpp
+    expression/ExpressionScalarToVector.hpp
 CACHE INTERNAL "")
 
 SET(expression_SOURCES ""

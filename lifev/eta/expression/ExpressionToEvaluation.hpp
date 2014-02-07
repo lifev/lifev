@@ -78,6 +78,8 @@
 
 #include <lifev/eta/expression/ExpressionIfCrossed.hpp>
 
+#include <lifev/eta/expression/ExpressionScalarToVector.hpp>
+
 #include <lifev/eta/expression/EvaluationPhiI.hpp>
 #include <lifev/eta/expression/EvaluationPhiJ.hpp>
 #include <lifev/eta/expression/EvaluationDphiI.hpp>
@@ -119,6 +121,8 @@
 #include <lifev/eta/expression/EvaluationNormal.hpp>
 
 #include <lifev/eta/expression/EvaluationIfCrossed.hpp>
+
+#include <lifev/eta/expression/EvaluationScalarToVector.hpp>
 
 namespace LifeV
 {
@@ -305,6 +309,23 @@ public:
     typedef EvaluationMinusTransposed <
     typename ExpressionToEvaluation<Expression, testDim, solutionDim, spaceDim>::evaluation_Type
     > evaluation_Type;
+private:
+    ExpressionToEvaluation();
+    ~ExpressionToEvaluation();
+};
+    
+// 
+template<typename Expression, UInt testDim, UInt solutionDim, UInt spaceDim>
+class ExpressionToEvaluation <
+ExpressionScalarToVector<Expression, spaceDim>
+, testDim
+, solutionDim
+, spaceDim >
+{
+public:
+    typedef ExpressionScalarToVector <
+    typename ExpressionToEvaluation<Expression, testDim, solutionDim, spaceDim>::evaluation_Type
+    , spaceDim > evaluation_Type;
 private:
     ExpressionToEvaluation();
     ~ExpressionToEvaluation();
