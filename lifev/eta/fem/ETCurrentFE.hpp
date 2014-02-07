@@ -1155,23 +1155,26 @@ updateD2phi (const UInt& iQuadPt)
 #ifndef NDEBUG
     M_isD2phiUpdated = true;
 #endif
- 
-    /*
+    
     Real partialSum (0.0);
     
     for (UInt iDof (0); iDof < M_nbFEDof; ++iDof)
     {
         for (UInt iCoor (0); iCoor < S_spaceDimension; ++iCoor)
         {
-            partialSum = 0.0;
             for (UInt jCoor (0); jCoor < S_spaceDimension; ++jCoor)
             {
-                partialSum += M_tInverseJacobian[iQuadPt][iCoor][jCoor] * M_dphiReferenceFE[iQuadPt][iDof][jCoor];
-            }
-            M_dphi[iQuadPt][iDof][iCoor] = partialSum;
+                partialSum = 0.0;
+                for ( UInt k1 (0); k1 < S_spaceDimension; ++k1 )
+                {
+                    for ( UInt k2 (0) ; k2 < S_spaceDimension; ++k2 )
+                    {
+                        partialSum += M_tInverseJacobian[iQuadPt][iCoor][k1] * M_d2phiReferenceFE[iQuadPt][iDof][k1][k2] * M_tInverseJacobian[iQuadPt][jCoor][k2];
+                    }
+                }           
+            M_d2phi[iQuadPt][iDof][iCoor][jCoor] = partialSum;
         }
     }
-     */
 }
 
 
