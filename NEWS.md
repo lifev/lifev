@@ -1,4 +1,18 @@
 
+LifeV 3.8.3:
+============
+
+Merged the following branches:
+
+* PrecomputedGraphETA https://cmcsforge.epfl.ch/issues/82
+
+* defaultParamList https://cmcsforge.epfl.ch/issues/112
+
+* NSM_preconditioners https://cmcsforge.epfl.ch/issues/111
+
+* 20111024_GhostMapEpetra https://cmcsforge.epfl.ch/issues/18
+
+
 LifeV 3.8.1:
 ============
 
