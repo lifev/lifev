@@ -143,7 +143,7 @@ public:
     template< typename CFEType >
     void setSolutionCFE (const CFEType* solutionCFE)
     {
-        M_valuesPtr = & (solutionCFE->M_dphi); // ATTENZIONE TO DO
+        M_valuesPtr = & (solutionCFE->M_laplacian); 
     }
     
     //! Do nothing setter for the quadrature rule
@@ -269,7 +269,7 @@ public:
     template< typename CFEType >
     void setSolutionCFE (const CFEType* solutionCFE)
     {
-        M_valuesPtr = & (solutionCFE->M_dphi);
+        M_valuesPtr = & (solutionCFE->M_laplacian);
     }
     
     //! Do nothing setter for the quadrature rule
@@ -292,7 +292,7 @@ public:
 private:
     
     //! Pointer to the data
-    std::vector< std::vector < VectorSmall<spaceDim> > > const* M_valuesPtr;
+    std::vector< std::vector < return_Type > > const* M_valuesPtr;
     
 };
 
@@ -304,7 +304,7 @@ template<UInt spaceDim>
 const flag_Type EvaluationLaplacianPhiJ<1, spaceDim>::S_testUpdateFlag = ET_UPDATE_NONE;
 
 template<UInt spaceDim>
-const flag_Type EvaluationLaplacianPhiJ<1, spaceDim>::S_solutionUpdateFlag = ET_UPDATE_D2PHI;
+const flag_Type EvaluationLaplacianPhiJ<1, spaceDim>::S_solutionUpdateFlag = ET_UPDATE_LAPLACIAN;
 
 } // Namespace ExpressionAssembly
     

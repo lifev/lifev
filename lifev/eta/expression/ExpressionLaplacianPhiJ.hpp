@@ -39,7 +39,7 @@
 #include <lifev/core/LifeV.hpp>
 
 #include <lifev/eta/expression/ExpressionBase.hpp>
-#include <lifev/eta/expression/ExpressionLaplacianPhiJ.hpp>
+#include <lifev/eta/expression/ExpressionPhiJ.hpp>
 
 #include <iostream>
 
@@ -94,7 +94,7 @@ public:
  @author Samuel Quinodoz <samuel.quinodoz@epfl.ch>
  */
 inline ExpressionLaplacianPhiJ
-laplacian (const ExpressionLaplacianPhiJ&)
+laplacian (const ExpressionPhiJ&)
 {
     return ExpressionLaplacianPhiJ();
 }

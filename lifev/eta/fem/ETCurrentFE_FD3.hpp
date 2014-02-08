@@ -898,6 +898,8 @@ void ETCurrentFE< spaceDim, fieldDim >::updateDphi ( const UInt& iQuadPt )
 
     Real partialSum ( 0.0 );
 
+    std::cout << "\n-------- DPHI BEGIN -------\n";
+    
     for ( UInt iDof ( 0 ); iDof < M_nbFEDof; ++iDof )
     {
         for ( UInt iCoor ( 0 ); iCoor < S_spaceDimension; ++iCoor )
@@ -911,13 +913,20 @@ void ETCurrentFE< spaceDim, fieldDim >::updateDphi ( const UInt& iQuadPt )
             // set only appropriate values, other are initialized to 0 by default constructor (of VectorSmall)
             M_dphi[iQuadPt][iDof][0][iCoor] = partialSum;
 
+            std::cout << "Matrix of dof " << iDof << " equal to " <<  M_dphi[iQuadPt][iDof];
+            std::cout << "\n";
+            
             // copy other values according to the vectorial basis functions
             for ( UInt k ( 1 ); k < fieldDim; ++k)
             {
+                std::cout << "Matrix of dof " << iDof + k * M_nbFEDof << " equal to ";
                 M_dphi[iQuadPt][k * M_nbFEDof + iDof][k][iCoor] = partialSum;
+                std::cout << M_dphi[iQuadPt][k * M_nbFEDof + iDof];
             }
         }
+        std::cout << "\n---------------\n";
     }
+    std::cout << "\n-------- DPHI END -------\n";
 }
 
 template< UInt spaceDim, UInt fieldDim >
@@ -932,15 +941,23 @@ void ETCurrentFE< spaceDim, fieldDim >::updateDivergence ( const UInt& iQuadPt )
 
     Real partialSum ( 0.0 );
 
+    std::cout << "\n-------- DIVERGENCE BEGIN -------\n";
+    
     for ( UInt iDof ( 0 ); iDof < fieldDim * M_nbFEDof; ++iDof )
     {
         partialSum = 0.0;
-        for ( UInt iCoor ( 0 ); iCoor < S_spaceDimension; ++iCoor )
+        for ( UInt iCoor ( 0 ); iCoor < S_spaceDimension; ++iCoor ) // for me here it is possible to improve performances, this for is not needed 
         {
             partialSum += M_dphi[iQuadPt][iDof][iCoor][iCoor];
         }
         M_divergence[iQuadPt][iDof] = partialSum;
+        std::cout << "Divergence of dof " << iDof << " equal to ";
+        std::cout << M_divergence[iQuadPt][iDof];
+        std::cout << "\n---------------\n";
+        
     }
+    
+    std::cout << "\n-------- DIVERGENCE END -------\n";
 }
 
 
