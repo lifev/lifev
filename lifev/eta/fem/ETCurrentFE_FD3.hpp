@@ -34,6 +34,10 @@ class ETCurrentFE
     //!Friend to allow direct access to the raw data
     template< UInt dim, UInt FSpaceDim >
     friend class ExpressionAssembly::EvaluationDivJ;
+    
+    //!Friend to allow direct access to the raw data
+    template< UInt dim, UInt FSpaceDim >
+    friend class ExpressionAssembly::EvaluationLaplacianPhiJ;
 
     //@}
 
@@ -50,6 +54,9 @@ private:
 
     //Private typedefs for the 3D array of vector
     typedef std::vector< std::vector< matrix_Return_Type > > array2D_matrix_Type;
+    
+    //Private typedefs for the laplacian
+    typedef std::vector< std::vector< std::vector <matrix_Return_Type > > > array_3D_matrix_Type;
 
 public:
 
@@ -239,7 +246,22 @@ public:
 
         return ( M_divergence[q][i] );
     }
-
+    
+    
+    //! Getter for the laplacian of the basis functions in the quadrature nodes in the current element
+    /*!
+     @param i The index of the basis function
+     @param q The index of the quadrature node
+     @return The divergence of the ith basis function in the qth quadrature node
+     */
+    const VectorSmall<fieldDim>& laplacian (const UInt& i, const UInt& q) const
+    {
+        ASSERT ( M_isLaplacianUpdated, "Divergence of the basis functions have not been updated");
+        ASSERT ( i < fieldDim * M_nbFEDof, "No basis function with this index" );
+        ASSERT ( q < M_nbQuadPt, "No quadrature point with this index" );
+        
+        return ( M_laplacian[q][i] );
+    }
 
     //! Getter for the identifier of the current element
     /*!
@@ -263,6 +285,9 @@ private:
 
     //Private typedefs for the 3D array (array of 2D array)
     typedef std::vector< array2D_Type > array3D_Type;
+    
+    //Private typedefs for the 4D array (array of 3D array)
+    typedef std::vector< array3D_Type > array4D_Type;
 
     //! @name Private Methods
     //@{
@@ -300,6 +325,12 @@ private:
 
     //! Update Divergence
     void updateDivergence (const UInt& iQuadPt);
+    
+    //! Update D2phi
+    void updateD2phi ( const UInt& iQuadPt);
+    
+    //! Update Laplacian
+    void updateLaplacian ( const UInt& iQuadPt);
 
     //@}
 
@@ -350,6 +381,15 @@ private:
 
     // Storage for the divergence of the basis functions
     array2D_Type M_divergence;
+    
+    // Storage for the second derivatives of the basis functions (note: the geometric map used for the 2nd derivative is M_dphiGeometricMap, no support for isoparametric elements)
+    array4D_Type M_d2phiReferenceFE;
+    
+    // Storage for the second derivatives of the basis functions
+    array_3D_matrix_Type M_d2phi;
+    
+    // Storage for the laplacian of the basis functions
+    array2D_vector_Type M_laplacian;
 
 #ifndef NDEBUG
     // Debug informations, defined only if the code
@@ -364,6 +404,8 @@ private:
     bool M_isWDetUpdated;
     bool M_isDphiUpdated;
     bool M_isDivergenceUpdated;
+    bool M_isD2phiUpdated;
+    bool M_isLaplacianUpdated;
 #endif
 
 };
@@ -409,8 +451,10 @@ ETCurrentFE (const ReferenceFE& refFE, const GeometricMap& geoMap, const Quadrat
     M_wDet(),
     M_tInverseJacobian(),
     M_dphi(),
-    M_divergence()
-
+    M_divergence(),
+    M_d2phiReferenceFE(),
+    M_d2phi(),
+    M_laplacian()
 #ifndef NDEBUG
     , M_isCellNodeUpdated (false),
     M_isQuadNodeUpdated (false),
@@ -419,7 +463,9 @@ ETCurrentFE (const ReferenceFE& refFE, const GeometricMap& geoMap, const Quadrat
     M_isInverseJacobianUpdated (false),
     M_isWDetUpdated (false),
     M_isDphiUpdated (false),
-    M_isDivergenceUpdated (false)
+    M_isDivergenceUpdated (false),
+    M_isD2phiUpdated (false),
+    M_isLaplacianUpdated (false)
 #endif
 
 {
@@ -454,7 +500,10 @@ ETCurrentFE (const ReferenceFE& refFE, const GeometricMap& geoMap)
     M_wDet(),
     M_tInverseJacobian(),
     M_dphi(),
-    M_divergence()
+    M_divergence(),
+    M_d2phiReferenceFE(),
+    M_d2phi(),
+    M_laplacian()
 
 #ifndef NDEBUG
     , M_isCellNodeUpdated (false),
@@ -464,7 +513,9 @@ ETCurrentFE (const ReferenceFE& refFE, const GeometricMap& geoMap)
     M_isInverseJacobianUpdated (false),
     M_isWDetUpdated (false),
     M_isDphiUpdated (false),
-    M_isDivergenceUpdated (false)
+    M_isDivergenceUpdated (false),
+    M_isD2phiUpdated (false),
+    M_isLaplacianUpdated (false)
 #endif
 
 {
@@ -498,7 +549,10 @@ ETCurrentFE (const ETCurrentFE<spaceDim, fieldDim>& otherFE)
     M_wDet (otherFE.M_wDet),
     M_tInverseJacobian (otherFE.M_tInverseJacobian),
     M_dphi (otherFE.M_dphi),
-    M_divergence (otherFE.M_divergence)
+    M_divergence (otherFE.M_divergence),
+    M_d2phiReferenceFE(otherFE.M_d2phiReferenceFE),
+    M_d2phi (otherFE.M_d2phi),
+    M_laplacian (otherFE.M_laplacian)
 
 #ifndef NDEBUG
     //Beware for the comma at the begining of this line!
@@ -509,7 +563,9 @@ ETCurrentFE (const ETCurrentFE<spaceDim, fieldDim>& otherFE)
     M_isInverseJacobianUpdated ( otherFE.M_isInverseJacobianUpdated ),
     M_isWDetUpdated ( otherFE.M_isWDetUpdated ),
     M_isDphiUpdated ( otherFE.M_isDphiUpdated ),
-    M_isDivergenceUpdated ( otherFE.M_isDivergenceUpdated )
+    M_isDivergenceUpdated ( otherFE.M_isDivergenceUpdated ),
+    M_isD2phiUpdated ( otherFE.M_isD2phiUpdated ),
+    M_isLaplacianUpdated ( otherFE.M_isLaplacianUpdated )
 #endif
 
 {}
@@ -543,6 +599,8 @@ update (const elementType& element, const flag_Type& flag)
     M_isWDetUpdated = false;
     M_isDphiUpdated = false;
     M_isDivergenceUpdated = false;
+    M_isD2phiUpdated = false;
+    M_isLaplacianUpdated = false;
 #endif
 
     // update the cell informations if required
@@ -583,6 +641,15 @@ update (const elementType& element, const flag_Type& flag)
         {
             updateDivergence (i);
         }
+        if ( flag & ET_UPDATE_ONLY_D2PHI )
+        {
+            updateD2phi (i);
+        }
+        if ( flag & ET_UPDATE_ONLY_LAPLACIAN )
+        {
+            updateLaplacian (i);
+        }
+
     }
 }
 
@@ -665,6 +732,42 @@ showMe (std::ostream& out) const
         for (UInt iDof (0); iDof < fieldDim * M_nbFEDof; ++iDof)
         {
             out << M_divergence[iQuad][iDof] << " ";
+        }
+        out << std::endl;
+    }
+    
+    out << " D2Phi : " << std::endl;
+    for (UInt iQuad (0); iQuad < M_nbQuadPt; ++iQuad)
+    {
+        for (UInt iDof (0); iDof < M_nbFEDof; ++iDof)
+        {
+            for (UInt iFieldDim (0); iFieldDim < fieldDim; ++iFieldDim)
+            {
+                for (UInt iCoor (0); iCoor < S_spaceDimension; ++iCoor)
+                {
+                    for (UInt jCoor (0); jCoor < S_spaceDimension; ++jCoor)
+                    {
+                        out << M_d2phi[iQuad][iDof][iFieldDim][iCoor][jCoor] << " ";
+                    }
+                    out << std::endl;
+                }
+                out << std::endl;
+            }
+            out << std::endl;
+        }
+        out << std::endl;
+    }
+    
+    out << " Laplacian : " << std::endl;
+    for (UInt iQuad (0); iQuad < M_nbQuadPt; ++iQuad)
+    {
+        for (UInt iDof (0); iDof < M_nbFEDof; ++iDof)
+        {
+            for (UInt iFieldDim (0); iFieldDim < fieldDim; ++iFieldDim)
+            {
+                out << M_laplacian[iQuad][iDof][iFieldDim] << " ";
+            }
+            out << std::endl;
         }
         out << std::endl;
     }
@@ -758,6 +861,25 @@ setupInternalConstants()
         }
     }
 
+    // DPHI2REFERENCEFE
+    M_d2phiReferenceFE.resize (M_nbQuadPt);
+    for (UInt q (0); q < M_nbQuadPt; ++q)
+    {
+        M_d2phiReferenceFE[q].resize (M_nbFEDof);
+        for (UInt i (0); i < M_nbFEDof; ++i)
+        {
+            M_d2phiReferenceFE[q][i].resize (spaceDim);
+            for (UInt j (0); j < spaceDim; ++j)
+            {
+                M_d2phiReferenceFE[q][i][j].resize (spaceDim);
+                for (UInt k (0); k < spaceDim; ++k)
+                {
+                    M_d2phiReferenceFE[q][i][j][k] = M_referenceFE->d2Phi (i, j, k, M_quadratureRule->quadPointCoor (q) );
+                }
+            }
+        }
+    }
+    
     // The second group of values cannot be computed
     // now because it depends on the current element.
     // So, we just make space for it.
@@ -771,7 +893,7 @@ setupInternalConstants()
     // Quad nodes
     M_quadNode.resize (M_nbQuadPt);
     for (UInt i (0); i < M_nbQuadPt; ++i)
-    {
+    {  
         M_quadNode[i].resize (spaceDim);
     }
 
@@ -818,6 +940,27 @@ setupInternalConstants()
         // we have fieldDim * DoF basis functions
         M_divergence[i].resize ( fieldDim * M_nbFEDof );
     }
+    
+    // d2phi
+    M_d2phi.resize (M_nbQuadPt);
+    for (UInt i (0); i < M_nbQuadPt; ++i)
+    {
+        // we have fieldDim * DoF basis functions
+        M_d2phi[i].resize ( fieldDim * M_nbFEDof );
+        for (UInt iDOF (0); iDOF < fieldDim * M_nbFEDof; ++iDOF)
+        {
+            M_d2phi[i][iDOF].resize(fieldDim);
+        }
+    }
+    
+    // laplacian
+    M_laplacian.resize (M_nbQuadPt);
+    for (UInt i (0); i < M_nbQuadPt; ++i)
+    {
+        // we have fieldDim * DoF basis functions
+        M_laplacian[i].resize ( fieldDim * M_nbFEDof );
+    }
+    
 }
 
 template <UInt spaceDim, UInt fieldDim >
@@ -960,6 +1103,84 @@ void ETCurrentFE< spaceDim, fieldDim >::updateDivergence ( const UInt& iQuadPt )
     std::cout << "\n-------- DIVERGENCE END -------\n";
 }
 
+
+template< UInt spaceDim, UInt fieldDim >
+void ETCurrentFE<spaceDim, fieldDim>::updateD2phi (const UInt& iQuadPt)
+{
+    ASSERT (M_isInverseJacobianUpdated,
+            "Inverse jacobian must be updated to compute the derivative of the basis functions" );
+    
+#ifndef NDEBUG
+    M_isD2phiUpdated = true;
+#endif
+    
+    Real partialSum (0.0);
+    
+    std::cout << "\n---------- BEGIN D2PHI ---------\n";
+    
+    for (UInt iDof (0); iDof < M_nbFEDof; ++iDof)
+    {
+        std::cout << "\n begin Dof " << iDof << ":\n";
+        
+        for (UInt iFieldDim (0); iFieldDim < fieldDim; ++iFieldDim)
+        {
+            std::cout << "\n field direction " << iFieldDim << ":\n";
+            
+            for (UInt iCoor (0); iCoor < S_spaceDimension; ++iCoor)
+            {
+                for (UInt jCoor (0); jCoor < S_spaceDimension; ++jCoor)
+                {
+                    partialSum = 0.0;
+                    for ( UInt k1 (0); k1 < S_spaceDimension; ++k1 )
+                    {
+                        for ( UInt k2 (0) ; k2 < S_spaceDimension; ++k2 )
+                        {
+                            partialSum += M_tInverseJacobian[iQuadPt][iCoor][k1] * M_d2phiReferenceFE[iQuadPt][iDof][k1][k2] * M_tInverseJacobian[iQuadPt][jCoor][k2];
+                        }
+                    }
+                    M_d2phi[iQuadPt][iDof][iFieldDim][iCoor][jCoor] = partialSum;
+                }
+            }
+            std::cout << M_d2phi[iQuadPt][iDof][iFieldDim];
+            std::cout << "\n\n";
+            std::cout << "End field direction ---------------------\n";
+        }
+    }
+    std::cout << "End dof ---------------------\n";
+    std::cout << "\n---------- END D2PHI ---------\n";
+}
+
+template< UInt spaceDim, UInt fieldDim >
+void ETCurrentFE<spaceDim, fieldDim>::updateLaplacian (const UInt& iQuadPt)
+{
+    ASSERT ( M_isD2phiUpdated,
+            "Basis function second derivatives must be updated to compute the laplacian" );
+    
+#ifndef NDEBUG
+    M_isLaplacianUpdated = true;
+#endif
+    
+    Real partialSum ( 0.0 );
+    
+    std::cout << "\n-------- LAPLACIAN BEGIN -------\n";
+    
+    for ( UInt iDof ( 0 ); iDof < M_nbFEDof; ++iDof )
+    {
+        for (UInt iFieldDim (0); iFieldDim < fieldDim; ++iFieldDim)
+        {
+            std::cout << "\n field direction " << iFieldDim << ":\n";
+            partialSum = 0.0;
+            for ( UInt iCoor ( 0 ); iCoor < S_spaceDimension; ++iCoor )
+            {
+                partialSum += M_d2phi[iQuadPt][iDof][iFieldDim][iCoor][iCoor];
+            }
+            M_laplacian[iQuadPt][iDof][iFieldDim] = partialSum;
+            std::cout << "Laplacian of dof " << iDof << " equal to ";
+            std::cout << M_laplacian[iQuadPt][iDof][iFieldDim];
+            std::cout << "\n---------------\n";
+        }
+    }
+}
 
 template< UInt spaceDim, UInt fieldDim >
 template< typename ElementType >

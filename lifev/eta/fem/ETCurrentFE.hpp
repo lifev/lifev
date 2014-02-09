@@ -349,6 +349,7 @@ public:
      @param q The index of the quadrature node
      @return The laplacian of the ith basis function in the qth quadrature node
      */
+    
     const VectorSmall<spaceDim> laplacian (const UInt& i, const UInt& q) const
     {
         ASSERT ( M_isLaplacianUpdated, "Divergence of the basis functions have not been updated");
@@ -403,7 +404,7 @@ private:
     //Private typedefs for the 3D array (array of 2D array)
     typedef std::vector< array2D_Type > array3D_Type;
     
-    //Private typedefs for the 3D array (array of 3D array)
+    //Private typedefs for the 4D array (array of 3D array)
     typedef std::vector< array3D_Type > array4D_Type;
     
     //Private typedefs for the 1D array of vector
@@ -1221,8 +1222,12 @@ updateD2phi (const UInt& iQuadPt)
     
     Real partialSum (0.0);
     
+    std::cout << "\n---------- BEGIN D2PHI ---------\n";
+    
     for (UInt iDof (0); iDof < M_nbFEDof; ++iDof)
     {
+        std::cout << "\n begin Dof " << iDof << ":\n";
+        
         for (UInt iCoor (0); iCoor < S_spaceDimension; ++iCoor)
         {
             for (UInt jCoor (0); jCoor < S_spaceDimension; ++jCoor)
@@ -1238,7 +1243,12 @@ updateD2phi (const UInt& iQuadPt)
                 M_d2phi[iQuadPt][iDof][iCoor][jCoor] = partialSum;
             }
         }
+        std::cout << M_d2phi[iQuadPt][iDof];
+        std::cout << "\n\n";
+        std::cout << "End dof ---------------------\n";
     }
+    
+    std::cout << "\n---------- END D2PHI ---------\n";
 }
     
 template< UInt spaceDim>
