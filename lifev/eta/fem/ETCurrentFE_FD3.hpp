@@ -386,7 +386,7 @@ private:
     array4D_Type M_d2phiReferenceFE;
     
     // Storage for the second derivatives of the basis functions
-    array_3D_matrix_Type M_d2phi;
+    array2D_matrix_Type M_d2phi;
     
     // Storage for the laplacian of the basis functions
     array2D_vector_Type M_laplacian;
@@ -747,7 +747,7 @@ showMe (std::ostream& out) const
                 {
                     for (UInt jCoor (0); jCoor < S_spaceDimension; ++jCoor)
                     {
-                        out << M_d2phi[iQuad][iDof][iFieldDim][iCoor][jCoor] << " ";
+                        out << M_d2phi[iQuad][iDof][iCoor][jCoor] << " ";
                     }
                     out << std::endl;
                 }
@@ -947,10 +947,6 @@ setupInternalConstants()
     {
         // we have fieldDim * DoF basis functions
         M_d2phi[i].resize ( fieldDim * M_nbFEDof );
-        for (UInt iDOF (0); iDOF < fieldDim * M_nbFEDof; ++iDOF)
-        {
-            M_d2phi[i][iDOF].resize(fieldDim);
-        }
     }
     
     // laplacian
@@ -1041,7 +1037,7 @@ void ETCurrentFE< spaceDim, fieldDim >::updateDphi ( const UInt& iQuadPt )
 
     Real partialSum ( 0.0 );
 
-    std::cout << "\n-------- DPHI BEGIN -------\n";
+//    std::cout << "\n-------- DPHI BEGIN -------\n";
     
     for ( UInt iDof ( 0 ); iDof < M_nbFEDof; ++iDof )
     {
@@ -1056,20 +1052,20 @@ void ETCurrentFE< spaceDim, fieldDim >::updateDphi ( const UInt& iQuadPt )
             // set only appropriate values, other are initialized to 0 by default constructor (of VectorSmall)
             M_dphi[iQuadPt][iDof][0][iCoor] = partialSum;
 
-            std::cout << "Matrix of dof " << iDof << " equal to " <<  M_dphi[iQuadPt][iDof];
-            std::cout << "\n";
+//            std::cout << "Matrix of dof " << iDof << " equal to " <<  M_dphi[iQuadPt][iDof];
+//            std::cout << "\n";
             
             // copy other values according to the vectorial basis functions
             for ( UInt k ( 1 ); k < fieldDim; ++k)
             {
-                std::cout << "Matrix of dof " << iDof + k * M_nbFEDof << " equal to ";
+//                std::cout << "Matrix of dof " << iDof + k * M_nbFEDof << " equal to ";
                 M_dphi[iQuadPt][k * M_nbFEDof + iDof][k][iCoor] = partialSum;
-                std::cout << M_dphi[iQuadPt][k * M_nbFEDof + iDof];
+//                std::cout << M_dphi[iQuadPt][k * M_nbFEDof + iDof];
             }
         }
-        std::cout << "\n---------------\n";
+//        std::cout << "\n---------------\n";
     }
-    std::cout << "\n-------- DPHI END -------\n";
+//    std::cout << "\n-------- DPHI END -------\n";
 }
 
 template< UInt spaceDim, UInt fieldDim >
@@ -1084,7 +1080,7 @@ void ETCurrentFE< spaceDim, fieldDim >::updateDivergence ( const UInt& iQuadPt )
 
     Real partialSum ( 0.0 );
 
-    std::cout << "\n-------- DIVERGENCE BEGIN -------\n";
+//    std::cout << "\n-------- DIVERGENCE BEGIN -------\n";
     
     for ( UInt iDof ( 0 ); iDof < fieldDim * M_nbFEDof; ++iDof )
     {
@@ -1094,13 +1090,13 @@ void ETCurrentFE< spaceDim, fieldDim >::updateDivergence ( const UInt& iQuadPt )
             partialSum += M_dphi[iQuadPt][iDof][iCoor][iCoor];
         }
         M_divergence[iQuadPt][iDof] = partialSum;
-        std::cout << "Divergence of dof " << iDof << " equal to ";
-        std::cout << M_divergence[iQuadPt][iDof];
-        std::cout << "\n---------------\n";
+//        std::cout << "Divergence of dof " << iDof << " equal to ";
+//        std::cout << M_divergence[iQuadPt][iDof];
+//        std::cout << "\n---------------\n";
         
     }
     
-    std::cout << "\n-------- DIVERGENCE END -------\n";
+//    std::cout << "\n-------- DIVERGENCE END -------\n";
 }
 
 
@@ -1116,38 +1112,32 @@ void ETCurrentFE<spaceDim, fieldDim>::updateD2phi (const UInt& iQuadPt)
     
     Real partialSum (0.0);
     
-    std::cout << "\n---------- BEGIN D2PHI ---------\n";
+//    std::cout << "\n---------- BEGIN D2PHI ---------\n";
     
     for (UInt iDof (0); iDof < M_nbFEDof; ++iDof)
     {
-        std::cout << "\n begin Dof " << iDof << ":\n";
-        
-        for (UInt iFieldDim (0); iFieldDim < fieldDim; ++iFieldDim)
+//        std::cout << "\n begin Dof " << iDof << ":\n";
+        for (UInt iCoor (0); iCoor < S_spaceDimension; ++iCoor)
         {
-            std::cout << "\n field direction " << iFieldDim << ":\n";
-            
-            for (UInt iCoor (0); iCoor < S_spaceDimension; ++iCoor)
+            for (UInt jCoor (0); jCoor < S_spaceDimension; ++jCoor)
             {
-                for (UInt jCoor (0); jCoor < S_spaceDimension; ++jCoor)
+                partialSum = 0.0;
+                for ( UInt k1 (0); k1 < S_spaceDimension; ++k1 )
                 {
-                    partialSum = 0.0;
-                    for ( UInt k1 (0); k1 < S_spaceDimension; ++k1 )
+                    for ( UInt k2 (0) ; k2 < S_spaceDimension; ++k2 )
                     {
-                        for ( UInt k2 (0) ; k2 < S_spaceDimension; ++k2 )
-                        {
-                            partialSum += M_tInverseJacobian[iQuadPt][iCoor][k1] * M_d2phiReferenceFE[iQuadPt][iDof][k1][k2] * M_tInverseJacobian[iQuadPt][jCoor][k2];
-                        }
+                        partialSum += M_tInverseJacobian[iQuadPt][iCoor][k1] * M_d2phiReferenceFE[iQuadPt][iDof][k1][k2] * M_tInverseJacobian[iQuadPt][jCoor][k2];
                     }
-                    M_d2phi[iQuadPt][iDof][iFieldDim][iCoor][jCoor] = partialSum;
                 }
+                M_d2phi[iQuadPt][iDof][iCoor][jCoor] = partialSum;
             }
-            std::cout << M_d2phi[iQuadPt][iDof][iFieldDim];
-            std::cout << "\n\n";
-            std::cout << "End field direction ---------------------\n";
         }
+//        std::cout << M_d2phi[iQuadPt][iDof];
+//        std::cout << "\n\n";
+//        std::cout << "End field direction ---------------------\n";
     }
-    std::cout << "End dof ---------------------\n";
-    std::cout << "\n---------- END D2PHI ---------\n";
+//    std::cout << "End dof ---------------------\n";
+//    std::cout << "\n---------- END D2PHI ---------\n";
 }
 
 template< UInt spaceDim, UInt fieldDim >
@@ -1162,23 +1152,30 @@ void ETCurrentFE<spaceDim, fieldDim>::updateLaplacian (const UInt& iQuadPt)
     
     Real partialSum ( 0.0 );
     
-    std::cout << "\n-------- LAPLACIAN BEGIN -------\n";
+    //std::cout << "\n-------- LAPLACIAN BEGIN -------\n";
     
     for ( UInt iDof ( 0 ); iDof < M_nbFEDof; ++iDof )
     {
-        for (UInt iFieldDim (0); iFieldDim < fieldDim; ++iFieldDim)
+        partialSum = 0.0;
+
+        for ( UInt iCoor ( 0 ); iCoor < S_spaceDimension; ++iCoor )
         {
-            std::cout << "\n field direction " << iFieldDim << ":\n";
-            partialSum = 0.0;
-            for ( UInt iCoor ( 0 ); iCoor < S_spaceDimension; ++iCoor )
-            {
-                partialSum += M_d2phi[iQuadPt][iDof][iFieldDim][iCoor][iCoor];
-            }
-            M_laplacian[iQuadPt][iDof][iFieldDim] = partialSum;
-            std::cout << "Laplacian of dof " << iDof << " equal to ";
-            std::cout << M_laplacian[iQuadPt][iDof][iFieldDim];
-            std::cout << "\n---------------\n";
+            partialSum += M_d2phi[iQuadPt][iDof][iCoor][iCoor];
         }
+        
+        for ( UInt iCoor ( 0 ); iCoor < S_spaceDimension; ++iCoor )
+        {
+            M_laplacian[iQuadPt][iDof][iCoor] = partialSum;
+    //        std::cout << "Laplacian of dof " << iDof << " equal to ";
+            
+            // copy other values according to the vectorial basis functions
+            for ( UInt k ( 1 ); k < fieldDim; ++k)
+            {
+                M_laplacian[iQuadPt][k * M_nbFEDof + iDof][iCoor] = partialSum;
+            }
+        }
+    //    std::cout << M_laplacian[iQuadPt][iDof];
+    //    std::cout << "\n---------------\n";
     }
 }
 

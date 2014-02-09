@@ -43,8 +43,8 @@ mesh_source            = regular_mesh
     diagonalize     = 1 # weight, 0=off
     div_beta_u_v    = 0 # 1=on, 0=off
     FE_number       = 1
-    vel_order       = P1
-    press_order     = P1
+    vel_order       = P2
+    press_order     = P2 
     stiff_strain    = true
     
 	[../stabilization]

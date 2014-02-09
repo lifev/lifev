@@ -178,7 +178,7 @@ template<UInt fieldDim, UInt spaceDim>
 const flag_Type EvaluationLaplacianPhiJ<fieldDim, spaceDim>::S_testUpdateFlag = ET_UPDATE_NONE;
 
 template<UInt fieldDim, UInt spaceDim>
-const flag_Type EvaluationLaplacianPhiJ<fieldDim, spaceDim>::S_solutionUpdateFlag = ET_UPDATE_D2PHI;
+const flag_Type EvaluationLaplacianPhiJ<fieldDim, spaceDim>::S_solutionUpdateFlag = ET_UPDATE_LAPLACIAN;
 
 
 //! Evaluation of the basis function dphi_j in the case of a scalar FE.
