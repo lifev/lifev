@@ -119,11 +119,12 @@ OseenSolver ( boost::shared_ptr<data_Type>    dataType,
               FESpace<mesh_Type, MapEpetra>&  pressureFESpace,
               boost::shared_ptr<Epetra_Comm>& communicator,
               MapEpetra                       monolithicMap,
-              UInt                            /*offset*/ ) :
+              UInt                            offset ) :
 	  M_oseenData              ( dataType ),
 	  M_velocityFESpace        ( velocityFESpace ),
 	  M_pressureFESpace        ( pressureFESpace ),
 	  M_Displayer              ( communicator ),
+      M_fluxMap                ( offset, communicator),
 	  M_localMap               ( monolithicMap ),
 	  M_velocityMatrixMass     ( ),
 	  M_matrixStokes           ( ),
@@ -253,13 +254,14 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::setUp ( const G
         M_linearSolver->setDataFromGetPot ( dataFile, "fluid/solver" );
     }
 
-    M_stabilization = dataFile ( "fluid/stabilization/use",  (&M_velocityFESpace.refFE() == &M_pressureFESpace.refFE() ) , false);
+    M_stabilization = dataFile ( "fluid/stabilization/use",  /*(&M_velocityFESpace.refFE() == &M_pressureFESpace.refFE() ) ,*/ false);
 
     // If using P1-P1 the use of the stabilization is necessary
-    if(&M_velocityFESpace.refFE() == &M_pressureFESpace.refFE())
-    	M_stabilization = true;
+    //if(&M_velocityFESpace.refFE() == &M_pressureFESpace.refFE())
+    //	M_stabilization = true;
 
     M_steady        = dataFile ( "fluid/miscellaneous/steady", 0 );
+    
     if (M_stabilization)
     {
     	if(M_oseenData->stabilizationType() == "IP")
@@ -541,7 +543,8 @@ updateSystem ( const Real          alpha,
         }
     }
     
-    computeStabilization(betaVectorRepeated, alpha);
+    if(M_stabilization)
+        computeStabilization(betaVectorRepeated, alpha);
 
     if ( alpha != 0. )
     {

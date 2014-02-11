@@ -44,6 +44,7 @@
 #include <lifev/core/fem/FESpace.hpp>
 #include <lifev/navier_stokes/fem/TimeAdvanceBDFNavierStokes.hpp>
 #include <lifev/core/filter/ExporterEnsight.hpp>
+#include <lifev/core/filter/ExporterVTK.hpp>
 #include <lifev/core/filter/ExporterHDF5.hpp>
 #include <lifev/core/filter/ExporterEmpty.hpp>
 
@@ -915,8 +916,14 @@ NavierStokes<MeshType, Problem>::run()
                 exporter->setPostDir ( "./" ); // This is a test to see if M_post_dir is working
                 exporter->setMeshProcId ( localMeshPtr, M_data->comm->MyPID() );
             }
-            else
 #endif
+            else if(exporterType.compare ("vtk") == 0)
+            {
+                exporter.reset ( new ExporterVTK<mesh_Type > ( dataFile, M_outputName ) );
+                exporter->setPostDir ( "./" ); // This is a test to see if M_post_dir is working
+                exporter->setMeshProcId ( localMeshPtr, M_data->comm->MyPID() );
+            }
+            else
             {
                 if (exporterType.compare ("none") == 0)
                 {
@@ -1028,7 +1035,7 @@ NavierStokes<MeshType, Problem>::run()
                 	std::cout << "Time: " << time  << ", "
                 			<< "L2 velocity error: " << ul2error << ", "
                 			<< "H1 velocity error: " << uh1error << ", "
-                			<< "L2 velocity error: " << pl2error << "\n" << std::flush;
+                			<< "L2 pressure error: " << pl2error << "\n" << std::flush;
                 }
 
                 if (verbose && M_exportNorms)

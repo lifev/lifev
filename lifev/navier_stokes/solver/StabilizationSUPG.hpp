@@ -254,14 +254,10 @@ void StabilizationSUPG<MeshType, MapType, SpaceDim>::applySUPG_Matrix_semi_impli
 			M_uFESpace.qr(),
 			M_fespaceUETA, // test  w -> phi_i
 			M_fespaceUETA, // trial u -> phi_j
-			value(M_density*M_density)*TAU_M*value(alfa/M_timestep) * dot( phi_i, grad(phi_j)*value(M_fespaceUETA, velocityExtrapolated) )+
-			value(M_density*M_density)*TAU_M*dot( value(M_fespaceUETA, velocityExtrapolated)*grad(phi_i), grad(phi_j)*value(M_fespaceUETA, velocityExtrapolated))
+			value(M_density*M_density)*TAU_M*value(alfa/M_timestep) * dot( value(M_fespaceUETA, velocityExtrapolated)*grad(phi_i), phi_j )+
+			value(M_density*M_density)*TAU_M*dot( value(M_fespaceUETA, velocityExtrapolated)*grad(phi_i), value(M_fespaceUETA, velocityExtrapolated)*grad(phi_j) )
 			+ TAU_C*div(phi_i)*div(phi_j)
             - value(M_density*M_viscosity)*TAU_M*dot( value(M_fespaceUETA, velocityExtrapolated)*grad(phi_i), laplacian(phi_j))
-            /*
-            - value(M_density*M_viscosity)*TAU_M*scalarToVector( dot( value ( Eye ), value( grad( value(M_fespaceUETA, dot ( value(Eye), grad(phi_i) ) ) ) ) ),
-                                                                 dot( value ( Eye ), value( grad( value(M_fespaceUETA, dot ( value(Eye), grad(phi_i) ) ) ) ) ),
-                                                                 dot( value ( Eye ), value( grad( value(M_fespaceUETA, dot ( value(Eye), grad(phi_i) ) ) ) ) ) ) */
 	) >> matrix->block(0,0);
 
 	integrate(
@@ -269,10 +265,8 @@ void StabilizationSUPG<MeshType, MapType, SpaceDim>::applySUPG_Matrix_semi_impli
 			M_uFESpace.qr(),
 			M_fespaceUETA, // test  w -> phi_j
 			M_fespacePETA, // trial p -> phi_i
-			TAU_M*value(M_density)*dot( grad(phi_j), grad(phi_i)*value(M_fespaceUETA, velocityExtrapolated) )
+			TAU_M*value(M_density)*dot( value(M_fespaceUETA, velocityExtrapolated)*grad(phi_i), grad(phi_j) )
 	) >> matrix->block(0,1);
-
-	//std::cout << "\n\n" << alpha << "\n\n";
 
 	integrate(
 			elements(M_uFESpace.mesh()),
