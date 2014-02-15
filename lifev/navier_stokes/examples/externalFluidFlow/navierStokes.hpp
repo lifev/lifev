@@ -39,7 +39,9 @@
 #include <lifev/navier_stokes/fem/TimeAdvanceBDFNavierStokes.hpp>
 #include <lifev/core/filter/ExporterEnsight.hpp>
 #include <lifev/core/filter/ExporterHDF5.hpp>
+#include <lifev/core/filter/ExporterVTK.hpp>
 #include <lifev/core/filter/ExporterEmpty.hpp>
+#include <lifev/core/mesh/MeshUtility.hpp>
 
 using namespace LifeV;
 
@@ -107,6 +109,10 @@ private:
 
     // output file name
     std::string                M_outputName;
+    
+    std::ofstream              M_out;
+    
+    bool                       M_exportCoeff;
 };
 
 
@@ -117,13 +123,18 @@ Real zeroFunction(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const
     return 0;
 }
 
+Real oneFunction(const Real& /*t*/, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& /*i*/)
+{
+    return 1;
+}
+
 Real inflowFunction(const Real& t, const Real& /*x*/, const Real& /*y*/, const Real& /*z*/, const ID& i)
 {
     if (i == 0)
     {
         Real ux = 22.0;              // flat velocity profile
-        Real perturb = 0.1 * ux * ( 2.0 * ( ( double( rand( ) ) / RAND_MAX ) - 0.5 ) );
-        ux += perturb;
+        //Real perturb = 0.1 * ux * ( 2.0 * ( ( double( rand( ) ) / RAND_MAX ) - 0.5 ) );
+        //ux += perturb;
         return (1 * ux * t/0.15 * (t < 0.15) + 1 * ux * (t >= 0.15));
     }
     else
@@ -227,6 +238,8 @@ NavierStokes::run()
     if (verbose)
         std::cout << std::endl << "[[BEGIN_RUN]]" << std::endl;
     
+    M_exportCoeff = dataFile ("fluid/export_coefficients", false);
+    
     runChrono.reset();
     runChrono.start();
     initChrono.reset();
@@ -244,6 +257,22 @@ NavierStokes::run()
     
     if (verbose) std::cout << "Mesh source: file("
         << meshData.meshDir() << meshData.meshFile() << ")" << std::endl;
+    
+    if ( verbose )
+    {
+        std::cout << "Mesh size max : " << MeshUtility::MeshStatistics::computeSize ( *fullMeshPtr ).maxH << std::endl;
+    }
+    
+    if ( verbose )
+    {
+        std::cout << "Mesh size mean : " << MeshUtility::MeshStatistics::computeSize ( *fullMeshPtr ).meanH << std::endl;
+    }
+
+
+    if ( verbose )
+    {
+        std::cout << "Mesh size min : " << MeshUtility::MeshStatistics::computeSize ( *fullMeshPtr ).minH << std::endl;
+    }
     
     if (verbose)
         std::cout << "Partitioning the mesh ... " << std::flush;
@@ -308,19 +337,30 @@ NavierStokes::run()
     BCFunctionBase uZero( zeroFunction );
 	BCFunctionBase uInflow( inflowFunction );
     
-	std::vector<LifeV::ID> zComp(1), yComp(1);
+	std::vector<LifeV::ID> zComp(1), yComp(1), xComp(1);
+    xComp[0] = 0;
 	yComp[0] = 1;
 	zComp[0] = 2;
     
     BCHandler bcH;
     bcH.addBC( "Outflow",        3, Natural,   Full,      uZero,   3 );
-    bcH.addBC( "Inflow",         2, Essential, Full,      uInflow, 3 );
-    bcH.addBC( "WallUpDown",     4, Essential, Component, uZero,   yComp );
-    bcH.addBC( "Cylinder",       6, Essential, Full,      uZero,   3 );
+    bcH.addBC( "Inflow",         1, Essential, Full,      uInflow, 3 );
+    bcH.addBC( "WallUpDown",     2, Essential, Component, uZero,   yComp );
+    bcH.addBC( "Cylinder",       4, Essential, Full,      uZero,   3 );
     bcH.addBC( "WallLeftRight",  5, Essential, Component, uZero,   zComp );
     
     // If we change the FE we have to update the BCHandler (internal data)
     bcH.bcUpdate ( *localMeshPtr, uFESpace->feBd(), uFESpace->dof() );
+    
+    BCFunctionBase uOne( oneFunction );
+    
+    BCHandler bcHDrag;
+    bcHDrag.addBC( "Cylinderr",   4, Essential, Component, uOne,   xComp );
+    bcHDrag.bcUpdate ( *localMeshPtr, uFESpace->feBd(), uFESpace->dof() );
+    
+    BCHandler bcHLift;
+    bcHLift.addBC( "Cylinderr",   4, Essential, Component, uOne,   yComp );
+    bcHLift.bcUpdate ( *localMeshPtr, uFESpace->feBd(), uFESpace->dof() );
     
     // +-----------------------------------------------+
     // |             Creating the problem              |
@@ -388,8 +428,14 @@ NavierStokes::run()
         exporter->setPostDir ( "./" ); // This is a test to see if M_post_dir is working
         exporter->setMeshProcId ( localMeshPtr, M_data->comm->MyPID() );
     }
-    else
 #endif
+    else if(exporterType.compare ("vtk") == 0)
+    {
+        exporter.reset ( new ExporterVTK<mesh_Type > ( dataFile, M_outputName ) );
+        exporter->setPostDir ( "./" ); // This is a test to see if M_post_dir is working
+        exporter->setMeshProcId ( localMeshPtr, M_data->comm->MyPID() );
+    }
+    else
     {
         if (exporterType.compare ("none") == 0)
         {
@@ -421,9 +467,18 @@ NavierStokes::run()
     
     int iter = 1;
     Real time = t0 + dt;
+    Real drag(0.0);
+    VectorSmall<2> AerodynamicCoefficients;
+    
+    if(verbose && M_exportCoeff)
+    {
+        M_out.open ("Coefficients.txt" );
+        M_out << "% time / drag / lift \n" << std::flush;
+    }
     
     for ( ; time <= tFinal + dt / 2.; time += dt, iter++)
     {
+        
         iterChrono.reset();
         iterChrono.start();
         
@@ -450,6 +505,17 @@ NavierStokes::run()
         
         fluid.iterate ( bcH );
         
+        Real velInfty = (1 * 22 * time/0.15 * (time < 0.15) + 1 * 22 * (time >= 0.15));
+        
+        AerodynamicCoefficients = fluid.computeDrag(1, bcHDrag, bcHLift, 22, fluid.area(4) );
+        
+        if ( verbose && M_exportCoeff )
+        {
+            M_out << time  << " "
+            << AerodynamicCoefficients[0] << " "
+            << AerodynamicCoefficients[1] << "\n" << std::flush;
+        }
+        
         bdf.bdfVelocity().shiftRight ( *fluid.solution() );
         
         // Exporting the solution
@@ -471,6 +537,10 @@ NavierStokes::run()
     if (verbose)
         std::cout << "[[END_RUN]]" << std::endl;
     
+    if (verbose && M_exportCoeff)
+    {
+        M_out.close();
+    }
     
     globalChrono.stop();
     

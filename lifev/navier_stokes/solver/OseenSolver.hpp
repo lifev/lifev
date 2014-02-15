@@ -496,6 +496,21 @@ public:
                               bcHandler_Type& bcHandler,
                               const vector_Type& solution );
 
+    
+    //! Compute the drag
+    /*!
+     @param flag      Flag of the boundary face associated
+     with the boundary of the body.
+     @param bcHandler BChandler containing the boundary conditions of the problem.
+
+     @return          Drag
+     */
+    VectorSmall<2> computeDrag(const markerID_Type&  flag,
+                     bcHandler_Type& bcHandlerDrag,
+                     bcHandler_Type& bcHandlerLift,
+                     const Real& velocityInfty,
+                     const Real& Area);
+    
     //! Get the Lagrange multiplier related to a flux imposed on a given part of the boundary
     /*!
      *  @param uh1error value of the h1 norm of the velocity error
@@ -885,6 +900,12 @@ protected:
 
     //! Global solution
     vectorPtr_Type                 M_solution;
+    
+    //! Global solution
+    vectorPtr_Type                 M_conservativeTerm;
+    
+    //! Global solution
+    vectorPtr_Type                 M_betaVector;
 
     //! residual
     vectorPtr_Type                 M_residual;

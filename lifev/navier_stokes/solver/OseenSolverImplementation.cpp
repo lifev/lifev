@@ -38,7 +38,26 @@
 
 namespace LifeV
 {
-
+    
+class buildVector
+{
+public:
+    typedef VectorSmall<3> return_Type;
+    
+    inline return_Type operator() (Real a, Real b, Real c)
+    {
+        VectorSmall<3> o;
+        o[0] = a;
+        o[1] = b;
+        o[2] = c;
+        return o;
+    }
+    
+    buildVector() {}
+    buildVector (const buildVector&) {}
+    ~buildVector() {}
+};
+    
 // ===================================================
 // Constructors & Destructor
 // ===================================================
@@ -496,6 +515,16 @@ updateSystem ( const Real          alpha,
     vector_Type conservativeTerm(un);
     conservativeTerm -= betaVector;
     
+    M_betaVector.reset(new vector_Type(betaVector.map(), Repeated));
+    *M_betaVector *= 0;
+    *M_betaVector += betaVector;
+    
+    M_conservativeTerm.reset(new vector_Type(un.map(), Repeated));
+    *M_conservativeTerm *= 0;
+    *M_conservativeTerm += un;
+    *M_betaVector -= betaVector;
+    
+    
     M_convectiveMatrix.reset  ( new matrix_block_Type ( M_fespaceUETA->map() | M_fespacePETA->map() | M_fluxMap ) );
     *M_convectiveMatrix *= 0;
     
@@ -509,12 +538,12 @@ updateSystem ( const Real          alpha,
             using namespace ExpressionAssembly;
             integrate(
                 elements(M_fespaceUETA->mesh()), // Mesh
-                M_velocityFESpace.qr(), // QR
+                M_velocityFESpace.qr(),          // QR
                 M_fespaceUETA,
                 M_fespaceUETA,
-                dot(grad(phi_j) * M_oseenData->density() * value(M_fespaceUETA, betaVector), phi_i) +                          // semi-implicit convective term
-                0.5 * M_oseenData->density() * dot ( value ( Eye ) , grad(M_fespaceUETA, betaVector) ) * dot( phi_j , phi_i )- // consistency term
-                M_oseenData->density() * dot ( value ( Eye ) , grad(M_fespaceUETA, conservativeTerm) ) * dot( phi_j , phi_i )  // conservative formulation
+                dot(grad(phi_j) * M_oseenData->density() * value(M_fespaceUETA, betaVector), phi_i)                              // semi-implicit convective term
+                //0.5 * M_oseenData->density() * dot ( value ( Eye ) , grad(M_fespaceUETA, betaVector) ) * dot( phi_j , phi_i )- // consistency term
+                //M_oseenData->density() * dot ( value ( Eye ) , grad(M_fespaceUETA, conservativeTerm) ) * dot( phi_j , phi_i )  // conservative formulation
                       )
             >> M_convectiveMatrix->block(0,0);
         }
@@ -523,7 +552,7 @@ updateSystem ( const Real          alpha,
             using namespace ExpressionAssembly;
             integrate(
                 elements(M_fespaceUETA->mesh()), // Mesh
-                M_velocityFESpace.qr(), // QR
+                M_velocityFESpace.qr(),          // QR
                 M_fespaceUETA,
                 M_fespaceUETA,
                 dot(grad(phi_j) * M_oseenData->density() * value(M_fespaceUETA, betaVector), phi_i) +                           // semi-implicit convective term
@@ -751,95 +780,6 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::iterate ( bcHan
 
     Int numIter = M_linearSolver->solveSystem ( rightHandSideFull, *M_solution, staticCast );
 
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    
-    /*
-     *   Computing the following norms: L2 and H1 for the velocity, L2 for the pressure
-     *
-     */
-    
-    // L2 for the velocity
-    /*
-    boost::shared_ptr<uExactFunctor> uExactFct( new uExactFunctor );
-    boost::shared_ptr<vector_Type> uExactVec(new vector_Type(M_velocityFESpace.map(),Unique));
-    M_velocityFESpace.interpolate(RossEthierSteinmanUnsteadyDec::uexact, *uExactVec, 0.0);
-    
-    vector_Type uComputed ( M_fespaceUETA->map() , Unique );
-    uComputed.subset( *M_solution );
-    
-    Real errorL2SquaredLocal( 0.0 );
-    Real errorL2Squared( 0.0 );
-    
-    {
-        using namespace ExpressionAssembly;
-        integrate (
-                   elements (M_fespaceUETA->mesh() ), // Mesh
-                   M_velocityFESpace.qr(), // QR
-                   dot ( ( eval ( uExactFct, value(M_oseenData->dataTime()->time()),X) - value( M_fespaceUETA , uComputed ) ),
-                        (  eval ( uExactFct, value(M_oseenData->dataTime()->time()),X) - value( M_fespaceUETA , uComputed ) ) )
-                   )
-        >> errorL2SquaredLocal;
-    }
-    
-    M_fespaceUETA->mesh()->comm()->Barrier();
-    M_fespaceUETA->mesh()->comm()->SumAll (&errorL2SquaredLocal, &errorL2Squared, 1);
-    
-    M_Displayer.leaderPrintMax ( "\nL2 norm of the velocity error = " , std::sqrt (errorL2Squared), "\n" );
-    
-    // H1 for the velocity
-    
-    Real errorH1SquaredLocal( 0.0 );
-    Real errorH1Squared( 0.0 );
-    
-    boost::shared_ptr<gradUExactFunctor> gradUExactFct( new gradUExactFunctor );
-    
-    {
-        using namespace ExpressionAssembly;
-        integrate (
-                   elements (M_fespaceUETA->mesh() ), // Mesh
-                   M_velocityFESpace.qr(), // QR
-                   dot ( ( eval ( gradUExactFct, value(M_oseenData->dataTime()->time()), X) + (-1) * grad( M_fespaceUETA , uComputed ) ) ,
-                        ( eval ( gradUExactFct, value(M_oseenData->dataTime()->time()), X) + (-1) * grad( M_fespaceUETA , uComputed ) ) )
-                   )
-        >> errorH1SquaredLocal;
-    
-    }
-    
-    M_fespaceUETA->mesh()->comm()->Barrier();
-    M_fespaceUETA->mesh()->comm()->SumAll (&errorH1SquaredLocal, &errorH1Squared, 1);
-    
-    M_Displayer.leaderPrintMax ( "\nH1 norm of the velocity error = " , std::sqrt (errorH1Squared), "\n" );
-    
-    // L2 for the pressure
-    
-    boost::shared_ptr<pExactFunctor> pExactFct( new pExactFunctor );
-    boost::shared_ptr<vector_Type> pExactVec(new vector_Type(M_pressureFESpace.map(),Unique));
-    M_pressureFESpace.interpolate(RossEthierSteinmanUnsteadyDec::pexact, *pExactVec, 0.0);
-    
-    vector_Type pComputed ( M_fespacePETA->map() , Unique );
-    pComputed.subset( *M_solution, M_fespacePETA->map(), M_velocityFESpace.dof().numTotalDof(), 0 );
-
-    Real errorL2SquaredLocalPressure( 0.0 );
-    Real errorL2SquaredPressure( 0.0 );
-    
-    {
-        using namespace ExpressionAssembly;
-        integrate (
-                   elements (M_fespacePETA->mesh() ), // Mesh
-                   M_pressureFESpace.qr(), // QR
-                     ( eval ( pExactFct, value(M_oseenData->dataTime()->time()),X) - value( M_fespacePETA , pComputed ) ) *
-                     ( eval ( pExactFct, value(M_oseenData->dataTime()->time()),X) - value( M_fespacePETA , pComputed ) )
-                   )
-        >> errorL2SquaredLocalPressure;
-    }
-    
-    M_fespacePETA->mesh()->comm()->Barrier();
-    M_fespacePETA->mesh()->comm()->SumAll (&errorL2SquaredLocalPressure, &errorL2SquaredPressure, 1);
-    
-    M_Displayer.leaderPrintMax ( "\nL2 norm of the pressure error = " , std::sqrt (errorL2SquaredPressure), "\n" );
-    */
-    //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-    
     // if the preconditioner has been rese the stab terms are to be updated
     if ( numIter < 0 || numIter > M_iterReuseStabilization )
     {
@@ -1102,6 +1042,49 @@ OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::lagrangeMultipl
     return 0;
 }
 
+template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
+VectorSmall<2> 
+OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::computeDrag ( const markerID_Type&  flag,
+                                                                               bcHandler_Type& bcHandlerDrag,
+                                                                               bcHandler_Type& bcHandlerLift,
+                                                                               const Real& velocityInfty,
+                                                                               const Real& Area)
+{
+    // 1) flag che dice in quale componente calcolare la resistenza (0 in x, 1 in y, 2 in z)
+    // 2) creare vettore pieno di zeri lungo quanto il vettore soluzione -> vettore soluzione u organizzato come ( ux | uy | uz | p)
+    // 3) mettere degli 1 nei nodi corrispondenti al bordo nel blocco del vettore, ovvero:
+    //      se la resistenza é in direzione x: vettore da creare ( 1suBody | 0 | 0 | 0 )
+    // 4) prodotto scalare del vettore del residuo con questo vettore definito al punto 3)
+    
+    
+    vector_Type onesOnBodyDrag(M_localMap, Unique);
+    onesOnBodyDrag *= 0;
+    
+    vector_Type onesOnBodyLift(M_localMap, Unique);
+    onesOnBodyLift *= 0;
+    
+    bcManageRhs ( onesOnBodyDrag, *M_velocityFESpace.mesh(), M_velocityFESpace.dof(),  bcHandlerDrag, M_velocityFESpace.feBd(), 1., 0.);
+    bcManageRhs ( onesOnBodyLift, *M_velocityFESpace.mesh(), M_velocityFESpace.dof(),  bcHandlerLift, M_velocityFESpace.feBd(), 1., 0.);
+    
+    Real drag (0.0);
+    Real lift (0.0);
+    
+    drag = M_residual->dot(onesOnBodyDrag);
+    lift = M_residual->dot(onesOnBodyLift);
+    
+    drag /= (0.5*M_oseenData->density()*velocityInfty*velocityInfty*Area);
+    lift /= (0.5*M_oseenData->density()*velocityInfty*velocityInfty*Area);
+    
+    M_Displayer.leaderPrint ( "  F-  Value of the drag:          ", drag );
+    M_Displayer.leaderPrint ( "  F-  Value of the lift:          ", lift );
+                             
+    VectorSmall<2> Coefficients;
+    Coefficients[0] = drag;
+    Coefficients[1] = lift;
+    
+    return Coefficients;
+}
+    
 template<typename MeshType, typename SolverType, typename  MapType , UInt SpaceDim, UInt FieldDim>
 Real
 OseenSolver<MeshType, SolverType, MapType , SpaceDim, FieldDim>::removeMean ( vector_Type& x )

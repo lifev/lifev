@@ -20,6 +20,7 @@ mesh_source            = regular_mesh
 
 [fluid]
 
+    export_coefficients = true
     conservativeFormulation = true
     
     [./physics]
@@ -29,13 +30,13 @@ mesh_source            = regular_mesh
     [../time_discretization]
     initialtime     = 0.0
     endtime         = 14.945
-    timestep        = 0.0025
+    timestep        = 0.01
 
-    BDF_order       = 1
+    BDF_order       = 2
 
     [../space_discretization]
     mesh_dir        = ./
-    mesh_file       = cylinder.mesh
+    mesh_file       = flow_square_coarse.mesh
     mesh_type       = .mesh
 
     verbose         = 0
@@ -44,7 +45,7 @@ mesh_source            = regular_mesh
     div_beta_u_v    = 0 # 1=on, 0=off
     FE_number       = 1
     vel_order       = P2
-    press_order     = P2 
+    pres_order      = P2 
     stiff_strain    = true
     
 	[../stabilization]
